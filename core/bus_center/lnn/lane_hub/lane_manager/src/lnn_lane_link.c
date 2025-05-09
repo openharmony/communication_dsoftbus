@@ -63,6 +63,7 @@
 static bool g_enabledLowPower = false;
 
 typedef int32_t (*LaneLinkByType)(uint32_t reqId, const LinkRequest *reqInfo, const LaneLinkCb *callback);
+typedef bool (*CompareLinkAddr)(const LaneLinkInfo *sourceLink, const LaneLinkInfo *linkInfoItem);
 
 static SoftBusList g_laneResource;
 
@@ -124,57 +125,29 @@ uint64_t GenerateLaneId(const char *localUdid, const char *remoteUdid, LaneLinkT
     return INVALID_LANE_ID;
 }
 
-static bool IsVaildSleAndWlanLinkAddr(const LaneLinkInfo *sourceLink, const LaneLinkInfo *linkInfoItem)
+static bool LaneLinkAddrOfBr(const LaneLinkInfo *sourceLink, const LaneLinkInfo *linkInfoItem)
 {
-    switch (sourceLink->type) {
-        case LANE_SLE:
-            if (strncmp(sourceLink->linkInfo.sle.sleMac, linkInfoItem->linkInfo.sle.sleMac, BT_MAC_LEN) != 0) {
-                break;
-            }
-            return true;
-        case LANE_SLE_DIRECT:
-            if (strncmp(sourceLink->linkInfo.sleDirect.networkId, linkInfoItem->linkInfo.sleDirect.networkId,
-                NETWORK_ID_BUF_LEN) != 0) {
-                break;
-            }
-            return true;
-        case LANE_WLAN_5G:
-        case LANE_WLAN_2P4G:
-        case LANE_ETH:
-            if (strncmp(sourceLink->linkInfo.wlan.connInfo.addr,
-                linkInfoItem->linkInfo.wlan.connInfo.addr, MAX_SOCKET_ADDR_LEN) != 0) {
-                break;
-            }
-            return true;
-        default:
-            LNN_LOGE(LNN_LANE, "invalid linkType=%{public}d", sourceLink->type);
-            return false;
+    if (sourceLink == NULL || linkInfoItem == NULL) {
+        LNN_LOGE(LNN_LANE, "invalid param");
+        return false;
     }
-    LNN_LOGE(LNN_LANE, "lane resource is different form input link addr, linkType=%{public}d", sourceLink->type);
-    return false;
+    if (strncmp(sourceLink->linkInfo.br.brMac, linkInfoItem->linkInfo.br.brMac, BT_MAC_LEN) != 0) {
+        LNN_LOGE(LNN_LANE, "lane resource is different form input link addr, linkType=%{public}d", sourceLink->type);
+        return false;
+    }
+    return true;
 }
 
-static bool IsValidLinkAddr(const LaneLinkInfo *sourceLink, const LaneLinkInfo *linkInfoItem)
+static bool LaneLinkAddrOfBle(const LaneLinkInfo *sourceLink, const LaneLinkInfo *linkInfoItem)
 {
+    if (sourceLink == NULL || linkInfoItem == NULL) {
+        LNN_LOGE(LNN_LANE, "invalid param");
+        return false;
+    }
     switch (sourceLink->type) {
-        case LANE_BR:
-            if (strncmp(sourceLink->linkInfo.br.brMac, linkInfoItem->linkInfo.br.brMac, BT_MAC_LEN) != 0) {
-                break;
-            }
-            return true;
         case LANE_BLE:
         case LANE_COC:
             if (strncmp(sourceLink->linkInfo.ble.bleMac, linkInfoItem->linkInfo.ble.bleMac, BT_MAC_LEN) != 0) {
-                break;
-            }
-            return true;
-        case LANE_SLE:
-        case LANE_SLE_DIRECT:
-            return IsVaildSleAndWlanLinkAddr(sourceLink, linkInfoItem);
-        case LANE_P2P:
-        case LANE_HML:
-            if (strncmp(sourceLink->linkInfo.p2p.connInfo.peerIp,
-                linkInfoItem->linkInfo.p2p.connInfo.peerIp, IP_LEN) != 0) {
                 break;
             }
             return true;
@@ -185,13 +158,29 @@ static bool IsValidLinkAddr(const LaneLinkInfo *sourceLink, const LaneLinkInfo *
                 break;
             }
             return true;
-        case LANE_WLAN_5G:
-        case LANE_WLAN_2P4G:
-        case LANE_ETH:
-            return IsVaildSleAndWlanLinkAddr(sourceLink, linkInfoItem);
-        case LANE_USB:
-            if (strncmp(sourceLink->linkInfo.usb.connInfo.addr,
-                linkInfoItem->linkInfo.usb.connInfo.addr, MAX_SOCKET_ADDR_LEN) != 0) {
+        default:
+            LNN_LOGE(LNN_LANE, "invalid linkType=%{public}d", sourceLink->type);
+            return false;
+    }
+    LNN_LOGE(LNN_LANE, "lane resource is different form input link addr, linkType=%{public}d", sourceLink->type);
+    return false;
+}
+
+static bool LaneLinkAddrOfSle(const LaneLinkInfo *sourceLink, const LaneLinkInfo *linkInfoItem)
+{
+    if (sourceLink == NULL || linkInfoItem == NULL) {
+        LNN_LOGE(LNN_LANE, "invalid param");
+        return false;
+    }
+    switch (sourceLink->type) {
+        case LANE_SLE:
+            if (strncmp(sourceLink->linkInfo.sle.sleMac, linkInfoItem->linkInfo.sle.sleMac, SLE_MAC_LEN) != 0) {
+                break;
+            }
+            return true;
+        case LANE_SLE_DIRECT:
+            if (strncmp(sourceLink->linkInfo.sleDirect.networkId, linkInfoItem->linkInfo.sleDirect.networkId,
+                NETWORK_ID_BUF_LEN) != 0) {
                 break;
             }
             return true;
@@ -203,6 +192,64 @@ static bool IsValidLinkAddr(const LaneLinkInfo *sourceLink, const LaneLinkInfo *
     return false;
 }
 
+static bool LaneLinkAddrOfWlan(const LaneLinkInfo *sourceLink, const LaneLinkInfo *linkInfoItem)
+{
+    if (sourceLink == NULL || linkInfoItem == NULL) {
+        LNN_LOGE(LNN_LANE, "invalid param");
+        return false;
+    }
+    if (strncmp(sourceLink->linkInfo.wlan.connInfo.addr,
+        linkInfoItem->linkInfo.wlan.connInfo.addr, MAX_SOCKET_ADDR_LEN) != 0) {
+        LNN_LOGE(LNN_LANE, "lane resource is different form input link addr, linkType=%{public}d", sourceLink->type);
+        return false;
+    }
+    return true;
+}
+
+static bool LaneLinkAddrOfWifiDirect(const LaneLinkInfo *sourceLink, const LaneLinkInfo *linkInfoItem)
+{
+    if (sourceLink == NULL || linkInfoItem == NULL) {
+        LNN_LOGE(LNN_LANE, "invalid param");
+        return false;
+    }
+    if (strncmp(sourceLink->linkInfo.p2p.connInfo.peerIp,
+        linkInfoItem->linkInfo.p2p.connInfo.peerIp, IP_LEN) != 0) {
+        LNN_LOGE(LNN_LANE, "lane resource is different form input link addr, linkType=%{public}d", sourceLink->type);
+        return false;
+    }
+    return true;
+}
+
+static bool LaneLinkAddrOfUsb(const LaneLinkInfo *sourceLink, const LaneLinkInfo *linkInfoItem)
+{
+    if (sourceLink == NULL || linkInfoItem == NULL) {
+        LNN_LOGE(LNN_LANE, "invalid param");
+        return false;
+    }
+    if (strncmp(sourceLink->linkInfo.usb.connInfo.addr,
+        linkInfoItem->linkInfo.usb.connInfo.addr, MAX_SOCKET_ADDR_LEN) != 0) {
+        LNN_LOGE(LNN_LANE, "lane resource is different form input link addr, linkType=%{public}d", sourceLink->type);
+        return false;
+    }
+    return true;
+}
+
+static CompareLinkAddr g_linkAddrCheck[LANE_LINK_TYPE_BUTT] = {
+    [LANE_BR] = LaneLinkAddrOfBr,
+    [LANE_BLE] = LaneLinkAddrOfBle,
+    [LANE_P2P] = LaneLinkAddrOfWifiDirect,
+    [LANE_ETH] = LaneLinkAddrOfWlan,
+    [LANE_WLAN_2P4G] = LaneLinkAddrOfWlan,
+    [LANE_WLAN_5G] = LaneLinkAddrOfWlan,
+    [LANE_BLE_DIRECT] = LaneLinkAddrOfBle,
+    [LANE_COC] = LaneLinkAddrOfBle,
+    [LANE_COC_DIRECT] = LaneLinkAddrOfBle,
+    [LANE_HML] = LaneLinkAddrOfWifiDirect,
+    [LANE_USB] = LaneLinkAddrOfUsb,
+    [LANE_SLE] = LaneLinkAddrOfSle,
+    [LANE_SLE_DIRECT] = LaneLinkAddrOfSle,
+};
+
 static LaneResource* GetValidLaneResource(const LaneLinkInfo *linkInfoItem)
 {
     LaneResource *item = NULL;
@@ -210,7 +257,7 @@ static LaneResource* GetValidLaneResource(const LaneLinkInfo *linkInfoItem)
     LIST_FOR_EACH_ENTRY_SAFE(item, next, &g_laneResource.list, LaneResource, node) {
         if (linkInfoItem->type == item->link.type &&
             strncmp(item->link.peerUdid, linkInfoItem->peerUdid, UDID_BUF_LEN) == 0 &&
-            IsValidLinkAddr(&(item->link), linkInfoItem)) {
+            g_linkAddrCheck[item->link.type](&(item->link), linkInfoItem)) {
             return item;
         }
     }
@@ -1738,7 +1785,6 @@ static int32_t LaneLinkOfSleDirect(uint32_t reqId, const LinkRequest *reqInfo, c
     }
     linkInfo.type = LANE_SLE_DIRECT;
     linkInfo.linkInfo.sleDirect.protoType = SLE_SSAP;
-
     callback->onLaneLinkSuccess(reqId, linkInfo.type, &linkInfo);
     return SOFTBUS_OK;
 }

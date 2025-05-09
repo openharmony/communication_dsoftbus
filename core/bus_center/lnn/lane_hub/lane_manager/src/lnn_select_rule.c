@@ -486,7 +486,7 @@ static int32_t CheckLinkWithTransType(LaneTransType transType, LaneLinkType link
 static int32_t CheckSleLinkWithTransType(LaneTransType transType, LaneLinkType linkType)
 {
     bool isStreamOrFile = (transType == LANE_T_RAW_STREAM || transType == LANE_T_COMMON_VIDEO ||
-                    transType == LANE_T_COMMON_VOICE || transType == LANE_T_FILE);
+        transType == LANE_T_COMMON_VOICE || transType == LANE_T_FILE);
     bool IsSle = (linkType == LANE_SLE || linkType == LANE_SLE_DIRECT);
     if (isStreamOrFile && IsSle) {
         LNN_LOGE(LNN_LANE, "sle not support stream and file datatype, transType=%{public}d, link=%{public}d",

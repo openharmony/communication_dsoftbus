@@ -36,7 +36,7 @@ static SoftBusSleStateListener g_softbusLnnSleStateListener = {
 
 static void LnnOnSleStateChanged(int32_t sleState)
 {
-    SoftBusSleState *notifyState = (SoftBusSleState *)SoftBusMalloc(sizeof(SoftBusSleState));
+    SoftBusSleState *notifyState = (SoftBusSleState *)SoftBusCalloc(sizeof(SoftBusSleState));
     if (notifyState == NULL) {
         LNN_LOGE(LNN_STATE, "sle monitor malloc err");
         return;

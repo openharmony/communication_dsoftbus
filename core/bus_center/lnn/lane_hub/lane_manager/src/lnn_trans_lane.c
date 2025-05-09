@@ -616,48 +616,12 @@ static int32_t AllocTargetLane(uint32_t laneHandle, const LaneAllocInfoExt *allo
     return BuildTargetLink(laneHandle, allocInfo, listener);
 }
 
-static void SelectSpecifiedLink(LaneSpecifiedLink link, uint32_t *linkNum, LaneLinkType *optionalLink)
+static int32_t SpecifiedLinkCheck(const char *networkId, uint32_t linkNum,
+    LaneLinkType *optionalLink, LanePreferredLinkList *preferLink)
 {
-    switch (link) {
-        case LANE_LINK_TYPE_WIFI_WLAN:
-            optionalLink[(*linkNum)++] = LANE_WLAN_5G;
-            optionalLink[(*linkNum)++] = LANE_WLAN_2P4G;
-            break;
-        case LANE_LINK_TYPE_WIFI_P2P:
-            optionalLink[(*linkNum)++] = LANE_P2P;
-            break;
-        case LANE_LINK_TYPE_BR:
-            optionalLink[(*linkNum)++] = LANE_BR;
-            break;
-        case LANE_LINK_TYPE_COC_DIRECT:
-            optionalLink[(*linkNum)++] = LANE_COC_DIRECT;
-            break;
-        case LANE_LINK_TYPE_BLE_DIRECT:
-            optionalLink[(*linkNum)++] = LANE_BLE_DIRECT;
-            break;
-        case LANE_LINK_TYPE_HML:
-            optionalLink[(*linkNum)++] = LANE_HML;
-            break;
-        case LANE_LINK_TYPE_USB:
-            optionalLink[(*linkNum)++] = LANE_USB;
-            break;
-        case LANE_LINK_TYPE_SLE_DIRECT:
-            optionalLink[(*linkNum)++] = LANE_SLE_DIRECT;
-            break;
-        default:
-            LNN_LOGE(LNN_LANE, "unexpected link=%{public}d", link);
-            break;
-    }
-}
-
-static int32_t SpecifiedLinkConvert(const char *networkId, LaneSpecifiedLink link, LanePreferredLinkList *preferLink)
-{
-    LaneLinkType optionalLink[LANE_LINK_TYPE_BUTT];
-    (void)memset_s(optionalLink, sizeof(optionalLink), 0, sizeof(optionalLink));
-    uint32_t linkNum = 0;
-    SelectSpecifiedLink(link, &linkNum, optionalLink);
-    if (linkNum == 0) {
-        return SOFTBUS_LANE_NO_AVAILABLE_LINK;
+    if (linkNum <= 0 || linkNum >= LANE_LINK_TYPE_BUTT || optionalLink == NULL || preferLink == NULL) {
+        LNN_LOGE(LNN_LANE, "invalid link num");
+        return SOFTBUS_INVALID_PARAM;
     }
     uint32_t resNum = 0;
     for (uint32_t i = 0; i < linkNum; i++) {
@@ -673,6 +637,51 @@ static int32_t SpecifiedLinkConvert(const char *networkId, LaneSpecifiedLink lin
     }
     preferLink->linkTypeNum = resNum;
     return SOFTBUS_OK;
+}
+
+static int32_t SpecifiedLinkConvert(const char *networkId, LaneSpecifiedLink link, LanePreferredLinkList *preferLink)
+{
+    LaneLinkType optionalLink[LANE_LINK_TYPE_BUTT];
+    (void)memset_s(optionalLink, sizeof(optionalLink), 0, sizeof(optionalLink));
+    uint32_t linkNum = 0;
+    switch (link) {
+        case LANE_LINK_TYPE_WIFI_WLAN:
+            optionalLink[linkNum++] = LANE_WLAN_5G;
+            optionalLink[linkNum++] = LANE_WLAN_2P4G;
+            break;
+        case LANE_LINK_TYPE_WIFI_P2P:
+            optionalLink[linkNum++] = LANE_P2P;
+            break;
+        case LANE_LINK_TYPE_BR:
+            optionalLink[linkNum++] = LANE_BR;
+            break;
+        case LANE_LINK_TYPE_COC_DIRECT:
+            optionalLink[linkNum++] = LANE_COC_DIRECT;
+            break;
+        case LANE_LINK_TYPE_BLE_DIRECT:
+            optionalLink[linkNum++] = LANE_BLE_DIRECT;
+            break;
+        case LANE_LINK_TYPE_HML:
+            optionalLink[linkNum++] = LANE_HML;
+            break;
+        case LANE_LINK_TYPE_USB:
+            optionalLink[linkNum++] = LANE_USB;
+            break;
+        case LANE_LINK_TYPE_SLE_DIRECT:
+            optionalLink[linkNum++] = LANE_SLE_DIRECT;
+            break;
+        default:
+            LNN_LOGE(LNN_LANE, "unexpected link=%{public}d", link);
+            break;
+    }
+    if (linkNum == 0) {
+        return SOFTBUS_LANE_NO_AVAILABLE_LINK;
+    }
+    int32_t ret = SpecifiedLinkCheck(networkId, linkNum, optionalLink, preferLink);
+    if (ret != SOFTBUS_OK) {
+        LNN_LOGE(LNN_LANE, "specofied link check failed");
+    }
+    return ret;
 }
 
 static int32_t ProcessSpecifiedLink(uint32_t laneHandle, const LaneAllocInfo *allocInfo,

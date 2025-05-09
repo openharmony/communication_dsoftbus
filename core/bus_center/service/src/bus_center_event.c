@@ -666,6 +666,10 @@ void LnnNotifyBtStateChangeEvent(void *state)
 
 void LnnNotifySleStateChangeEvent(void *state)
 {
+    if (state  == NULL) {
+        LNN_LOGE(LNN_EVENT, "invaild state param");
+        return;
+    }
     SoftBusSleState *sleState = (SoftBusSleState *)state;
     if (*sleState < SOFTBUS_SLE_TURN_ON || *sleState >= SOFTBUS_SLE_UNKNOWN) {
         LNN_LOGE(LNN_EVENT, "bad sleState=%{public}d", *sleState);
