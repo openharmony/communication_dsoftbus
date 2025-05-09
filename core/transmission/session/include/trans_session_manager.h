@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021-2025 Huawei Device Co., Ltd.
+ * Copyright (c) 2021 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -75,7 +75,7 @@ int32_t TransGetPidAndPkgName(const char *sessionName, const int32_t uid, int32_
 
 int32_t TransGetTokenIdBySessionName(const char *sessionName, uint64_t *tokenId);
 
-int32_t AddAccessInfoBySessionName(const char *sessionName, const AccessInfo *accessInfo, pid_t callingPid);
+int32_t AddAccessInfoBySessionName(const char *sessionName, const AccessInfo *accessInfo);
 
 int32_t GetAccessInfoBySessionName(const char *sessionName, int32_t *userId);
 

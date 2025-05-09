@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021-2025 Huawei Device Co., Ltd.
+ * Copyright (c) 2021 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -74,11 +74,10 @@ void TransAsyncUdpChannelTask(int32_t channelId)
     (void)channelId;
 }
 
-int32_t TransSetTos(int32_t channelId, uint8_t tos, pid_t callingPid)
+int32_t TransSetTos(int32_t channelId, uint8_t tos)
 {
     (void)channelId;
     (void)tos;
-    (void)callingPid;
     return SOFTBUS_FUNC_NOT_SUPPORT;
 }
 
