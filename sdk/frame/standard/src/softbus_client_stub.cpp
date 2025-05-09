@@ -973,7 +973,7 @@ int32_t SoftBusClientStub::OnDataReceivedInner(MessageParcel &data, MessageParce
         COMM_LOGE(COMM_SDK, "OnDataReceivedInner read len failed!");
         return SOFTBUS_IPC_ERR;
     }
-    const uint8_t *dataPtr = (const uint8_t *)data.ReadRawData(len);
+    const uint8_t *dataPtr = (const uint8_t *)data.ReadBuffer(len);
     if (dataPtr == nullptr) {
         COMM_LOGE(COMM_SDK, "OnDataReceivedInner read data failed!");
         return SOFTBUS_IPC_ERR;

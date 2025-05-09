@@ -127,6 +127,8 @@ int SoftBusRemoveBtStateListener(int listenerId);
 
 void SoftBusComputeWaitBleSendDataTime(uint32_t waitMillis, SoftBusSysTime *outtime);
 
+int SoftBusGetRandomAddress(const char *addr, char *out, int tokenId);
+
 int SoftBusBtInit(void);
 
 #ifdef __cplusplus

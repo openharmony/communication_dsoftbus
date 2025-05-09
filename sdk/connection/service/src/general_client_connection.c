@@ -26,7 +26,7 @@
 
 static IGeneralListener *g_connectionListener = NULL;
 static SoftBusMutex g_connectionListenerLock;
-const char *g_limitPkgName = "dms";
+const char *g_limitPkgName = "ohos.distributedschedule.dms";
 
 static bool IsValidListener(IGeneralListener *listener)
 {
