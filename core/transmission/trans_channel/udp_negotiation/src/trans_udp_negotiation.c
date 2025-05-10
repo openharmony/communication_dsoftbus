@@ -1608,19 +1608,19 @@ static void TransProcessAsyncOpenUdpChannelFailed(
     }
 }
 
-int32_t TransDealUdpChannelOpenResult(int32_t channelId, int32_t openResult, int32_t udpPort, pid_t callingPid)
+int32_t TransDealUdpChannelOpenResult(int32_t channelId, int32_t openResult, int32_t udpPort)
 {
     int32_t ret = TransUdpUpdateUdpPort(channelId, udpPort);
-    TRANS_CHECK_AND_RETURN_RET_LOGE(
-        ret == SOFTBUS_OK, ret, TRANS_CTRL, "get udpPort failed, channelId=%{public}d, ret=%{public}d", channelId, ret);
+    if (ret != SOFTBUS_OK) {
+        TRANS_LOGE(TRANS_CTRL, "get udpPort failed, channelId=%{public}d, ret=%{public}d", channelId, ret);
+        return ret;
+    }
     UdpChannelInfo channel;
     (void)memset_s(&channel, sizeof(UdpChannelInfo), 0, sizeof(UdpChannelInfo));
     ret = TransGetUdpChannelById(channelId, &channel);
-    TRANS_CHECK_AND_RETURN_RET_LOGE(ret == SOFTBUS_OK, ret, TRANS_CTRL,
-        "get udpChannel failed, channelId=%{public}d, ret=%{public}d", channelId, ret);
-    if (channel.info.myData.pid != callingPid) {
-        TRANS_LOGE(TRANS_CTRL, "callingPid does not match");
-        return SOFTBUS_TRANS_CHECK_PID_ERROR;
+    if (ret != SOFTBUS_OK) {
+        TRANS_LOGE(TRANS_CTRL, "get udpChannel failed, channelId=%{public}d, ret=%{public}d", channelId, ret);
+        return ret;
     }
     ret = TransUdpUpdateReplyCnt(channelId);
     if (ret != SOFTBUS_OK) {
@@ -1659,7 +1659,7 @@ ERR_EXIT:
     return ret;
 }
 
-int32_t TransDealUdpCheckCollabResult(int32_t channelId, int32_t checkResult, pid_t callingPid)
+int32_t TransDealUdpCheckCollabResult(int32_t channelId, int32_t checkResult)
 {
     char *errDesc = NULL;
     UdpChannelInfo channel = { 0 };
@@ -1667,10 +1667,6 @@ int32_t TransDealUdpCheckCollabResult(int32_t channelId, int32_t checkResult, pi
     if (ret != SOFTBUS_OK) {
         TRANS_LOGE(TRANS_CTRL, "get udp channel failed, channelId=%{public}d", channelId);
         return ret;
-    }
-    if (channel.info.myData.pid != callingPid) {
-        TRANS_LOGE(TRANS_CTRL, "callingPid does not match");
-        return SOFTBUS_TRANS_CHECK_PID_ERROR;
     }
     ret = TransUdpUpdateReplyCnt(channelId);
     if (ret != SOFTBUS_OK) {
