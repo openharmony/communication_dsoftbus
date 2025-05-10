@@ -365,11 +365,6 @@ uint64_t TransACLGetCallingTokenID(void)
     return OHOS::IPCSkeleton::GetCallingFullTokenID();
 }
 
-pid_t TransGetCallingPid(void)
-{
-    return OHOS::IPCSkeleton::GetCallingPid();
-}
-
 #ifdef SUPPORT_ABILITY_RUNTIME
 static sptr<AppExecFwk::IAppMgr> g_appMgrProxy = nullptr;
 
