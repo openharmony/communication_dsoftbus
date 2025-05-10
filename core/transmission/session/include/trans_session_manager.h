@@ -75,7 +75,7 @@ int32_t TransGetPidAndPkgName(const char *sessionName, const int32_t uid, int32_
 
 int32_t TransGetTokenIdBySessionName(const char *sessionName, uint64_t *tokenId);
 
-int32_t AddAccessInfoBySessionName(const char *sessionName, const AccessInfo *accessInfo, pid_t callingPid);
+int32_t AddAccessInfoBySessionName(const char *sessionName, const AccessInfo *accessInfo);
 
 int32_t GetAccessInfoBySessionName(const char *sessionName, int32_t *userId);
 

@@ -36,7 +36,6 @@
 #include "wifi_direct_manager.h"
 
 #define TEST_CHANNEL_ID 1027
-#define TEST_CALLING_PID 1111
 
 using namespace testing::ext;
 
@@ -891,18 +890,18 @@ HWTEST_F(TransTcpDirectMessageStaticTest, TransDealTdcChannelOpenResultTest001, 
     int32_t openResult = 1;
     int32_t channelId = 1;
     int32_t fd = 1;
-    int32_t ret = TransDealTdcChannelOpenResult(channelId, openResult, TEST_CALLING_PID);
+    int32_t ret = TransDealTdcChannelOpenResult(channelId, openResult);
     EXPECT_EQ(ret, SOFTBUS_TRANS_GET_SESSION_CONN_FAILED);
     SessionConn *conn = TestSetSessionConn();
     ASSERT_TRUE(conn != nullptr);
     ret = TransTdcAddSessionConn(conn);
     EXPECT_EQ(ret, SOFTBUS_OK);
-    ret = TransDealTdcChannelOpenResult(channelId, openResult, TEST_CALLING_PID);
-    EXPECT_EQ(ret, SOFTBUS_TRANS_CHECK_PID_ERROR);
+    ret = TransDealTdcChannelOpenResult(channelId, openResult);
+    EXPECT_EQ(ret, SOFTBUS_TRANS_NODE_IS_NULL);
     ret = TransSrvAddDataBufNode(channelId, fd);
     EXPECT_EQ(ret, SOFTBUS_OK);
-    ret = TransDealTdcChannelOpenResult(channelId, openResult, TEST_CALLING_PID);
-    EXPECT_EQ(ret, SOFTBUS_TRANS_CHECK_PID_ERROR);
+    ret = TransDealTdcChannelOpenResult(channelId, openResult);
+    EXPECT_EQ(ret, SOFTBUS_OK);
     TransDelSessionConnById(channelId);
 }
 
