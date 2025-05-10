@@ -340,8 +340,10 @@ int AddLocalIface(const char *ifname, const char *serviceData, uint8_t af, const
             return NSTACKX_EOK;
         }
     } else {
-        if (iface->af == af || InetEqual(af, &(iface->addr), addr)) {
+        if (iface->af == af && InetEqual(af, &(iface->addr), addr)) {
             DFINDER_LOGI(TAG, "iface %s already existed and in correct state", ifname);
+            (void)memcpy_s(iface->serviceData, NSTACKX_MAX_SERVICE_DATA_LEN,
+                serviceData, NSTACKX_MAX_SERVICE_DATA_LEN);
             return NSTACKX_EOK;
         }
         AddToDestroyList(iface);

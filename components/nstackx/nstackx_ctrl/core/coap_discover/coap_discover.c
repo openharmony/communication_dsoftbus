@@ -166,12 +166,7 @@ static int32_t coapServerParameterInit(CoapServerParameter *coapServerParameter,
     if (dst->addr.sa.sa_family == AF_INET) {
         dst->addr.sin.sin_port = htons(COAP_DEFAULT_PORT);
     } else {
-        // ipv6 need set multicast addr
         dst->addr.sin6.sin6_port = htons(COAP_DEFAULT_PORT);
-        if (inet_pton(AF_INET6, MULTICAST_ADDR, &dst->addr.sin6.sin6_addr) <= 0) {
-            DFINDER_LOGE(TAG, "inet_pton failed");
-            return NSTACKX_EFAILED;
-        }
     }
     coapServerParameter->proto = COAP_PROTO_UDP;
     coapServerParameter->dst = dst;

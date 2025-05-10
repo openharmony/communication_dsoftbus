@@ -1284,6 +1284,7 @@ int32_t NSTACKX_ScreenStatusChange(bool isScreenOn)
 {
 #ifdef DFINDER_SUPPORT_SET_SCREEN_STATUS
     SetScreenStatus(isScreenOn);
+    DFINDER_LOGI(TAG, "set isScreenOn status %d", isScreenOn);
 #else
     (void)isScreenOn;
     DFINDER_LOGI(TAG, "do not support set screen status");
