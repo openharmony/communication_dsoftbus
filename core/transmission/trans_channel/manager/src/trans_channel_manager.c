@@ -1022,7 +1022,7 @@ static int32_t GetLimitChangeInfoFromBuf(
     return ret;
 }
 
-static int32_t TransReportChannelOpenedInfo(uint8_t *buf, uint32_t len, pid_t callingPid)
+static int32_t TransReportChannelOpenedInfo(uint8_t *buf, uint32_t len)
 {
     int32_t channelId = 0;
     int32_t channelType = 0;
@@ -1039,16 +1039,16 @@ static int32_t TransReportChannelOpenedInfo(uint8_t *buf, uint32_t len, pid_t ca
     }
     switch (channelType) {
         case CHANNEL_TYPE_PROXY:
-            ret = TransDealProxyChannelOpenResult(channelId, openResult, callingPid);
+            ret = TransDealProxyChannelOpenResult(channelId, openResult);
             break;
         case CHANNEL_TYPE_TCP_DIRECT:
-            ret = TransDealTdcChannelOpenResult(channelId, openResult, callingPid);
+            ret = TransDealTdcChannelOpenResult(channelId, openResult);
             break;
         case CHANNEL_TYPE_UDP:
-            ret = TransDealUdpChannelOpenResult(channelId, openResult, udpPort, callingPid);
+            ret = TransDealUdpChannelOpenResult(channelId, openResult, udpPort);
             break;
         case CHANNEL_TYPE_AUTH:
-            ret = TransDealAuthChannelOpenResult(channelId, openResult, callingPid);
+            ret = TransDealAuthChannelOpenResult(channelId, openResult);
             break;
         default:
             TRANS_LOGE(TRANS_CTRL, "channelType=%{public}d is error", channelType);
@@ -1060,7 +1060,7 @@ static int32_t TransReportChannelOpenedInfo(uint8_t *buf, uint32_t len, pid_t ca
     return ret;
 }
 
-static void TransReportLimitChangeInfo(uint8_t *buf, uint32_t len, pid_t callingPid)
+static void TransReportLimitChangeInfo(uint8_t *buf, uint32_t len)
 {
     int32_t channelId = 0;
     uint8_t tos = 0;
@@ -1073,7 +1073,7 @@ static void TransReportLimitChangeInfo(uint8_t *buf, uint32_t len, pid_t calling
     if (limitChangeResult != SOFTBUS_OK) {
         TRANS_LOGE(TRANS_CTRL, "limitChangeResult is failed, limitChangeResult=%{public}d", limitChangeResult);
     }
-    ret = TransSetTos(channelId, tos, callingPid);
+    ret = TransSetTos(channelId, tos);
     if (ret != SOFTBUS_OK) {
         TRANS_LOGE(TRANS_CTRL, "Set limit change event failed, ret=%{public}d", ret);
     }
@@ -1101,7 +1101,7 @@ static int32_t GetCollabCheckResultFromBuf(uint8_t *buf,
     return ret;
 }
 
-static int32_t TransReportCheckCollabInfo(uint8_t *buf, uint32_t len, pid_t callingPid)
+static int32_t TransReportCheckCollabInfo(uint8_t *buf, uint32_t len)
 {
     int32_t channelId = 0;
     int32_t channelType = 0;
@@ -1112,13 +1112,13 @@ static int32_t TransReportCheckCollabInfo(uint8_t *buf, uint32_t len, pid_t call
     }
     switch (channelType) {
         case CHANNEL_TYPE_PROXY:
-            ret = TransDealProxyCheckCollabResult(channelId, checkResult, callingPid);
+            ret = TransDealProxyCheckCollabResult(channelId, checkResult);
             break;
         case CHANNEL_TYPE_TCP_DIRECT:
-            ret = TransDealTdcCheckCollabResult(channelId, checkResult, callingPid);
+            ret = TransDealTdcCheckCollabResult(channelId, checkResult);
             break;
         case CHANNEL_TYPE_UDP:
-            ret = TransDealUdpCheckCollabResult(channelId, checkResult, callingPid);
+            ret = TransDealUdpCheckCollabResult(channelId, checkResult);
             break;
         default:
             TRANS_LOGE(TRANS_CTRL, "channelType=%{public}d is error.", channelType);
@@ -1127,7 +1127,7 @@ static int32_t TransReportCheckCollabInfo(uint8_t *buf, uint32_t len, pid_t call
     return ret;
 }
 
-static int32_t TransSetAccessInfo(uint8_t *buf, uint32_t len, pid_t callingPid)
+static int32_t TransSetAccessInfo(uint8_t *buf, uint32_t len)
 {
     char sessionName[SESSION_NAME_SIZE_MAX] = { 0 };
     int32_t offset = 0;
@@ -1145,7 +1145,7 @@ static int32_t TransSetAccessInfo(uint8_t *buf, uint32_t len, pid_t callingPid)
         return ret;
     }
 
-    ret = AddAccessInfoBySessionName(sessionName, &accessInfo, callingPid);
+    ret = AddAccessInfoBySessionName(sessionName, &accessInfo);
     if (ret != SOFTBUS_OK) {
         TRANS_LOGE(TRANS_CTRL, "add accessInfo by sessionName failed.");
     }
@@ -1160,20 +1160,19 @@ int32_t TransProcessInnerEvent(int32_t eventType, uint8_t *buf, uint32_t len)
         SoftBusHitraceChainEnd();
         return SOFTBUS_INVALID_PARAM;
     }
-    pid_t callingPid = TransGetCallingPid();
     int32_t ret = SOFTBUS_OK;
     switch (eventType) {
         case EVENT_TYPE_CHANNEL_OPENED:
-            ret = TransReportChannelOpenedInfo(buf, len, callingPid);
+            ret = TransReportChannelOpenedInfo(buf, len);
             break;
         case EVENT_TYPE_TRANS_LIMIT_CHANGE:
-            TransReportLimitChangeInfo(buf, len, callingPid);
+            TransReportLimitChangeInfo(buf, len);
             break;
         case EVENT_TYPE_COLLAB_CHECK:
-            ret = TransReportCheckCollabInfo(buf, len, callingPid);
+            ret = TransReportCheckCollabInfo(buf, len);
             break;
         case EVENT_TYPE_SET_ACCESS_INFO:
-            ret = TransSetAccessInfo(buf, len, callingPid);
+            ret = TransSetAccessInfo(buf, len);
             break;
         default:
             TRANS_LOGE(TRANS_CTRL, "eventType=%{public}d error", eventType);
