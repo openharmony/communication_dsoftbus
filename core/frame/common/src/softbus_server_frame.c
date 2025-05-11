@@ -160,4 +160,5 @@ void ClientDeathCallback(const char *pkgName, int32_t pid)
     TransServerDeathCallback(pkgName, pid);
     BusCenterServerDeathCallback(pkgName);
     AuthServerDeathCallback(pkgName, pid);
+    ConnDeathCallback(pkgName, pid);
 }

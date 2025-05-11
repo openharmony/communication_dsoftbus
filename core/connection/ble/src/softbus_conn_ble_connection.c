@@ -523,8 +523,22 @@ void ConnBleRefreshIdleTimeout(ConnBleConnection *connection)
 {
     ConnRemoveMsgFromLooper(
         &g_bleConnectionAsyncHandler, MSG_CONNECTION_IDLE_DISCONNECT_TIMEOUT, connection->connectionId, 0, NULL);
+    CONN_CHECK_AND_RETURN_LOGD(connection->isNeedDisconnect, CONN_BLE,
+        "no need refresh idle timeout, connId=%{public}u", connection->connectionId);
     ConnPostMsgToLooper(&g_bleConnectionAsyncHandler, MSG_CONNECTION_IDLE_DISCONNECT_TIMEOUT, connection->connectionId,
         0, NULL, CONNECTION_IDLE_DISCONNECT_TIMEOUT_MILLIS);
+}
+
+void ConnBleCancelIdleTimeout(ConnBleConnection *connection)
+{
+    ConnRemoveMsgFromLooper(
+        &g_bleConnectionAsyncHandler, MSG_CONNECTION_IDLE_DISCONNECT_TIMEOUT, connection->connectionId, 0, NULL);
+    int32_t status = SoftBusMutexLock(&connection->lock);
+    CONN_CHECK_AND_RETURN_LOGW(status == SOFTBUS_OK, CONN_BLE,
+        "lock faild, connId=%{public}u, err=%{public}d", connection->connectionId, status);
+    connection->isNeedDisconnect = false;
+    CONN_LOGI(CONN_BLE, "cancel idle timout, connId=%{public}u", connection->connectionId);
+    (void)SoftBusMutexUnlock(&connection->lock);
 }
 
 void ConnBleInnerComplementDeviceId(ConnBleConnection *connection)
