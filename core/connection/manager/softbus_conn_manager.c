@@ -34,6 +34,7 @@
 #include "softbus_socket.h"
 #include "softbus_tcp_connect_manager.h"
 #include "softbus_utils.h"
+#include "softbus_conn_ipc.h"
 
 ConnectFuncInterface *g_connManager[CONNECT_TYPE_MAX] = { 0 };
 static SoftBusList *g_listenerList = NULL;
@@ -51,7 +52,7 @@ static int32_t ModuleCheck(ConnModule moduleId)
     ConnModule id[] = { MODULE_TRUST_ENGINE, MODULE_HICHAIN, MODULE_AUTH_SDK, MODULE_AUTH_CONNECTION,
         MODULE_MESSAGE_SERVICE, MODULE_AUTH_CHANNEL, MODULE_AUTH_MSG, MODULE_BLUETOOTH_MANAGER, MODULE_CONNECTION,
         MODULE_DIRECT_CHANNEL, MODULE_PROXY_CHANNEL, MODULE_DEVICE_AUTH, MODULE_P2P_LINK, MODULE_UDP_INFO,
-        MODULE_PKG_VERIFY, MODULE_META_AUTH, MODULE_P2P_NEGO, MODULE_BLE_NET, MODULE_BLE_CONN };
+        MODULE_PKG_VERIFY, MODULE_META_AUTH, MODULE_P2P_NEGO, MODULE_BLE_NET, MODULE_BLE_CONN, MODULE_BLE_GENERAL };
     int32_t i;
     int32_t idNum = sizeof(id) / sizeof(ConnModule);
 
@@ -328,6 +329,11 @@ void ConnUnSetConnectCallback(ConnModule moduleId)
     return;
 }
 
+void ConnDeathCallback(const char *pkgName, int32_t pid)
+{
+    ClearGeneralConnection(pkgName, pid);
+}
+
 int32_t ConnTypeIsSupport(ConnectType type)
 {
     return ConnTypeCheck(type);
@@ -552,6 +558,9 @@ int32_t ConnServerInit(void)
             return SOFTBUS_CREATE_LIST_ERR;
         }
     }
+    CONN_CHECK_AND_RETURN_RET_LOGE(InitGeneralConnection() == SOFTBUS_OK,
+        SOFTBUS_CONN_INTERNAL_ERR, CONN_COMMON, "init failed.");
+
     CONN_CHECK_AND_RETURN_RET_LOGE(SoftBusMutexInit(&g_ReqLock, NULL) == SOFTBUS_OK,
         SOFTBUS_CONN_INTERNAL_ERR, CONN_COMMON, "g_ReqLock init lock failed.");
 
