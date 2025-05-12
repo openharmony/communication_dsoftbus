@@ -1477,6 +1477,11 @@ static int32_t PostDecryptFailAuthData(
 static void HandleUkConnectionData(
     uint64_t connId, const AuthConnInfo *connInfo, bool fromServer, const AuthDataHead *head, const uint8_t *data)
 {
+    if (IsHaveAuthIdByConnId(GenConnId(AUTH_LINK_TYPE_SESSION_KEY, GetFd(connId)))) {
+        AuthConnInfo *connInfoMut = (AuthConnInfo *)connInfo;
+        connInfoMut->type = AUTH_LINK_TYPE_SESSION_KEY;
+        connId = GenConnId(AUTH_LINK_TYPE_SESSION_KEY, GetFd(connId));
+    }
     if (AuthGetUkDecryptSize(head->len) <= UK_ENCRYPT_INDEX_LEN) {
         AUTH_LOGE(AUTH_CONN, "invalid param");
         return;
