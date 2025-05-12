@@ -112,12 +112,16 @@ int32_t AuthDeviceProfileListener::OnTrustDeviceProfileActive(const TrustDeviceP
     Anonymize(profile.GetDeviceId().c_str(), &anonyUdid);
     AUTH_LOGI(AUTH_INIT, "dp active callback enter! udid=%{public}s", AnonymizeWrapper(anonyUdid));
     AnonymizeFree(anonyUdid);
+    if (profile.GetBindType() != (uint32_t)OHOS::DistributedDeviceProfile::BindType::SAME_ACCOUNT) {
+        DelNotTrustDevice(profile.GetDeviceId().c_str());
+        LnnInsertSpecificTrustedDevInfo(profile.GetDeviceId().c_str());
+        LnnHbOnTrustedRelationIncreased(AUTH_PEER_TO_PEER_GROUP);
+    }
     if (GetScreenState() == SOFTBUS_SCREEN_OFF && !LnnIsLocalSupportBurstFeature()) {
         AUTH_LOGI(AUTH_INIT, "screen off and not support burst. no need online");
         return SOFTBUS_OK;
     }
     DelNotTrustDevice(profile.GetDeviceId().c_str());
-    LnnUpdateHeartbeatInfo(UPDATE_HB_NETWORK_INFO);
     if (IsHeartbeatEnable()) {
         if (LnnStartHbByTypeAndStrategy(
             HEARTBEAT_TYPE_BLE_V0 | HEARTBEAT_TYPE_BLE_V3, STRATEGY_HB_SEND_SINGLE, false) != SOFTBUS_OK) {
@@ -135,8 +139,11 @@ int32_t AuthDeviceProfileListener::OnTrustDeviceProfileInactive(const TrustDevic
     Anonymize(profile.GetDeviceId().c_str(), &anonyUdid);
     AUTH_LOGI(AUTH_INIT, "dp inactive callback enter! udid=%{public}s", AnonymizeWrapper(anonyUdid));
     AnonymizeFree(anonyUdid);
+    if (profile.GetBindType() != (uint32_t)OHOS::DistributedDeviceProfile::BindType::SAME_ACCOUNT) {
+        LnnDeleteSpecificTrustedDevInfo(profile.GetDeviceId().c_str(), profile.GetLocalUserId());
+        LnnHbOnTrustedRelationReduced();
+    }
     LnnUpdateOhosAccount(UPDATE_HEARTBEAT);
-    LnnUpdateHeartbeatInfo(UPDATE_HB_NETWORK_INFO);
     int32_t userId = profile.GetPeerUserId();
     AUTH_LOGI(AUTH_INIT, "userId:%{public}d", userId);
     NotifyRemoteDevOffLineByUserId(userId, profile.GetDeviceId().c_str());

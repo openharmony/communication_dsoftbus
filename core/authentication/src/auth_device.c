@@ -501,7 +501,16 @@ int32_t AuthRegisterToDpDelay(void)
         .onDeviceProfileAdd = OnDeviceBound,
         .onDeviceProfileDeleted = OnDeviceNotTrusted,
     };
-    return RegisterToDp(&deviceProfileChangeListener);
+    int32_t ret = RegisterToDp(&deviceProfileChangeListener);
+    if (ret != SOFTBUS_OK) {
+        AUTH_LOGE(AUTH_FSM, "register dp error");
+        return ret;
+    }
+    ret = InitDbListDelay();
+    if (ret != SOFTBUS_OK) {
+        AUTH_LOGE(AUTH_FSM, "init trusted list error");
+    }
+    return ret;
 }
 
 int32_t AuthDirectOnlineCreateAuthManager(int64_t authSeq, const AuthSessionInfo *info)

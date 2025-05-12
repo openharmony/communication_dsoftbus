@@ -37,6 +37,9 @@ public:
     virtual int32_t LnnDeleteSpecificTrustedDevInfo(const char *udid, int32_t localUserId) = 0;
     virtual SoftBusScreenState GetScreenState(void) = 0;
     virtual bool IsHeartbeatEnable(void) = 0;
+    virtual int32_t LnnInsertSpecificTrustedDevInfo(const char *udid) = 0;
+    virtual void LnnHbOnTrustedRelationIncreased(int32_t groupType) = 0;
+    virtual void LnnHbOnTrustedRelationReduced(void) = 0;
 };
 
 class AuthDeviceProfileListenerInterfaceMock : public AuthDeviceProfileListenerInterface {
@@ -51,6 +54,9 @@ public:
     MOCK_METHOD2(LnnDeleteSpecificTrustedDevInfo, int32_t(const char *, int32_t));
     MOCK_METHOD0(GetScreenState, SoftBusScreenState (void));
     MOCK_METHOD0(IsHeartbeatEnable, bool (void));
+    MOCK_METHOD1(LnnInsertSpecificTrustedDevInfo, int32_t (const char *));
+    MOCK_METHOD1(LnnHbOnTrustedRelationIncreased, void (int32_t));
+    MOCK_METHOD0(LnnHbOnTrustedRelationReduced, void (void));
 };
 
 extern "C" {
