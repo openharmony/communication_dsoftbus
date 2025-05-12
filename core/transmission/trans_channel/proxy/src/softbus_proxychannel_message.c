@@ -35,6 +35,7 @@
 #include "trans_log.h"
 #include "trans_proxy_process_data.h"
 #include "trans_session_account_adapter.h"
+#include "trans_uk_manager.h"
 
 
 static _Atomic int32_t g_proxyPktHeadSeq = 2048;
@@ -302,35 +303,6 @@ static int32_t TransProxyParseMessageNoDecrypt(ProxyMessage *msg)
     return SOFTBUS_OK;
 }
 
-static int32_t DecryptProxyMessage(ProxyMessage *msg, AuthHandle *auth, uint32_t *decDataLen, uint8_t *decData)
-{
-    if (msg->ukIdInfo.myId != 0) {
-        if (AuthDecryptByUkId(msg->ukIdInfo.myId, (uint8_t *)msg->data + sizeof(UkIdInfo),
-            (uint32_t)msg->dataLen - sizeof(UkIdInfo), decData, decDataLen) != SOFTBUS_OK) {
-            TRANS_LOGE(TRANS_CTRL, "parse msg decrypt by ukId fail, ukId=%{public}d", msg->ukIdInfo.myId);
-            return SOFTBUS_DECRYPT_ERR;
-        }
-    } else {
-        UkIdInfo ukIdInfo = { 0 };
-        (void)TransProxyGetUkInfoByChanId(msg->msgHead.myId, &ukIdInfo);
-        if (IsValidUkInfo(&ukIdInfo)) {
-            if (AuthDecryptByUkId(ukIdInfo.myId, (uint8_t *)msg->data, (uint32_t)msg->dataLen, decData, decDataLen) !=
-                SOFTBUS_OK) {
-                TRANS_LOGE(TRANS_CTRL, "parse msg decrypt by ukId fail, ukId=%{public}d", msg->ukIdInfo.myId);
-                return SOFTBUS_DECRYPT_ERR;
-            }
-        } else {
-            msg->keyIndex = (int32_t)SoftBusLtoHl(*(uint32_t *)msg->data);
-            if (AuthDecrypt(auth, (uint8_t *)msg->data, (uint32_t)msg->dataLen, decData, decDataLen) != SOFTBUS_OK &&
-                GetAuthIdReDecrypt(auth, msg, decData, decDataLen) != SOFTBUS_OK) {
-                TRANS_LOGE(TRANS_CTRL, "parse msg decrypt fail");
-                return SOFTBUS_DECRYPT_ERR;
-            }
-        }
-    }
-    return SOFTBUS_OK;
-}
-
 int32_t TransProxyParseMessage(char *data, int32_t len, ProxyMessage *msg, AuthHandle *auth)
 {
     TRANS_CHECK_AND_RETURN_RET_LOGE(len > PROXY_CHANNEL_HEAD_LEN,
@@ -343,18 +315,10 @@ int32_t TransProxyParseMessage(char *data, int32_t len, ProxyMessage *msg, AuthH
             TRANS_LOGE(TRANS_CTRL, "The data length of the ProxyMessage is abnormal!");
             return SOFTBUS_TRANS_INVALID_DATA_LENGTH;
         }
-        if (msg->msgHead.type == PROXYCHANNEL_MSG_TYPE_HANDSHAKE ||
-            msg->msgHead.type == PROXYCHANNEL_MSG_TYPE_HANDSHAKE_UK) {
+        if (msg->msgHead.type == PROXYCHANNEL_MSG_TYPE_HANDSHAKE) {
             TRANS_LOGD(TRANS_CTRL, "prxoy recv handshake cipher=0x%{public}02x", msg->msgHead.cipher);
             ret = GetAuthIdByHandshakeMsg(
                 msg->connId, msg->msgHead.cipher, auth, (int32_t)SoftBusLtoHl(*(uint32_t *)msg->data));
-        } else if (msg->msgHead.type == PROXYCHANNEL_MSG_TYPE_HANDSHAKE_WITHUKENCY) {
-            int32_t peerId = (int32_t)SoftBusLtoHl(*(uint32_t *)msg->data);
-            int32_t myId = (int32_t)SoftBusLtoHl(*(uint32_t *)(msg->data + sizeof(int32_t)));
-            msg->ukIdInfo.peerId = peerId;
-            msg->ukIdInfo.myId = myId;
-            msg->authHandle.authId = 0; // server side use uk
-            auth->authId = 0;
         } else {
             ret = TransProxyGetAuthId(msg->msgHead.myId, auth);
         }
@@ -362,15 +326,15 @@ int32_t TransProxyParseMessage(char *data, int32_t len, ProxyMessage *msg, AuthH
             TRANS_CTRL, "get authId fail, connId=%{public}d, myChannelId=%{public}d, type=%{public}d", msg->connId,
             msg->msgHead.myId, msg->msgHead.type);
         msg->authHandle = (*auth);
-        uint32_t datalen = msg->ukIdInfo.myId != 0 ? (uint32_t)msg->dataLen - sizeof(UkIdInfo) : (uint32_t)msg->dataLen;
-        uint32_t decDataLen =  AuthGetDecryptSize(datalen);
+        uint32_t decDataLen = AuthGetDecryptSize((uint32_t)msg->dataLen);
         uint8_t *decData = (uint8_t *)SoftBusCalloc(decDataLen);
         TRANS_CHECK_AND_RETURN_RET_LOGE(decData != NULL, SOFTBUS_MALLOC_ERR, TRANS_CTRL, "calloc fail.");
-        ret = DecryptProxyMessage(msg, auth, &decDataLen, decData);
-        if (ret != SOFTBUS_OK) {
-            TRANS_LOGE(TRANS_CTRL, "decrypt msg fail, ret=%{public}d", ret);
+        msg->keyIndex = (int32_t)SoftBusLtoHl(*(uint32_t *)msg->data);
+        if (AuthDecrypt(auth, (uint8_t *)msg->data, (uint32_t)msg->dataLen, decData, &decDataLen) != SOFTBUS_OK &&
+            GetAuthIdReDecrypt(auth, msg, decData, &decDataLen) != SOFTBUS_OK) {
+            TRANS_LOGE(TRANS_CTRL, "parse msg decrypt fail");
             SoftBusFree(decData);
-            return ret;
+            return SOFTBUS_DECRYPT_ERR;
         }
         msg->data = (char *)decData;
         msg->dataLen = (int32_t)decDataLen;
@@ -407,40 +371,15 @@ int32_t PackPlaintextMessage(ProxyMessageHead *msg, ProxyDataInfo *dataInfo)
     return SOFTBUS_OK;
 }
 
-static int32_t EncryptedMessageAddUk(uint8_t *encData, uint32_t *encDataLen, const UkIdInfo *ukIdInfo)
-{
-    if (*encDataLen < sizeof(uint32_t) || *encDataLen < sizeof(UkIdInfo)) {
-        TRANS_LOGE(TRANS_CTRL, "invalid encDataLen");
-        return SOFTBUS_INVALID_PARAM;
-    }
-    uint32_t tempUkId = SoftBusHtoLl((uint32_t)ukIdInfo->myId);
-    if (memcpy_s(encData, *encDataLen, &tempUkId, sizeof(tempUkId)) != EOK) {
-        TRANS_LOGE(TRANS_CTRL, "memcpy my ukid fail.");
-        return SOFTBUS_MEM_ERR;
-    }
-    tempUkId = SoftBusHtoLl((uint32_t)ukIdInfo->peerId);
-    if (memcpy_s(encData + sizeof(tempUkId), *encDataLen - sizeof(tempUkId), &tempUkId, sizeof(tempUkId)) !=
-        EOK) {
-        TRANS_LOGE(TRANS_CTRL, "memcpy peer ukid fail.");
-        return SOFTBUS_MEM_ERR;
-    }
-    *encDataLen -= sizeof(UkIdInfo);
-    return SOFTBUS_OK;
-}
-
 static int32_t PackEncryptedMessage(
-    ProxyMessageHead *msg, AuthHandle authHandle, ProxyDataInfo *dataInfo, bool isAddUk, const UkIdInfo *ukIdInfo)
+    ProxyMessageHead *msg, AuthHandle authHandle, ProxyDataInfo *dataInfo)
 {
     if (authHandle.authId == AUTH_INVALID_ID) {
         TRANS_LOGE(TRANS_CTRL, "invalid authId, myChannelId=%{public}d", msg->myId);
         return SOFTBUS_INVALID_PARAM;
     }
-    uint32_t size = (IsValidUkInfo(ukIdInfo) ? AuthGetUkEncryptSize(dataInfo->inLen) :
-                                               AuthGetEncryptSize(authHandle.authId, dataInfo->inLen)) +
-        ConnGetHeadSize() + PROXY_CHANNEL_HEAD_LEN;
-    if (isAddUk && IsValidUkInfo(ukIdInfo)) {
-        size += sizeof(UkIdInfo);
-    }
+    uint32_t size = ConnGetHeadSize() + PROXY_CHANNEL_HEAD_LEN +
+        AuthGetEncryptSize(authHandle.authId, dataInfo->inLen);
     uint8_t *buf = (uint8_t *)SoftBusCalloc(size);
     if (buf == NULL) {
         TRANS_LOGE(TRANS_CTRL, "malloc enc buf fail, myChannelId=%{public}d", msg->myId);
@@ -449,28 +388,10 @@ static int32_t PackEncryptedMessage(
     TransProxyPackMessageHead(msg, buf + ConnGetHeadSize(), PROXY_CHANNEL_HEAD_LEN);
     uint8_t *encData = buf + ConnGetHeadSize() + PROXY_CHANNEL_HEAD_LEN;
     uint32_t encDataLen = size - ConnGetHeadSize() - PROXY_CHANNEL_HEAD_LEN;
-    if (IsValidUkInfo(ukIdInfo)) {
-        if (isAddUk) {
-            if (EncryptedMessageAddUk(encData, &encDataLen, ukIdInfo) != SOFTBUS_OK) {
-                SoftBusFree(buf);
-                TRANS_LOGE(TRANS_CTRL, "pack msg encrypt add uk fail, myChannelId=%{public}d, ukId=%{public}d",
-                    msg->myId, ukIdInfo->myId);
-                return SOFTBUS_ENCRYPT_ERR;
-            }
-            encData += sizeof(UkIdInfo);
-        }
-        if (AuthEncryptByUkId(ukIdInfo->myId, dataInfo->inData, dataInfo->inLen, encData, &encDataLen) != SOFTBUS_OK) {
-            SoftBusFree(buf);
-            TRANS_LOGE(TRANS_CTRL, "pack msg encrypt fail, myChannelId=%{public}d, ukId=%{public}d", msg->myId,
-                ukIdInfo->myId);
-            return SOFTBUS_ENCRYPT_ERR;
-        }
-    } else {
-        if (AuthEncrypt(&authHandle, dataInfo->inData, dataInfo->inLen, encData, &encDataLen) != SOFTBUS_OK) {
-            SoftBusFree(buf);
-            TRANS_LOGE(TRANS_CTRL, "pack msg encrypt fail, myChannelId=%{public}d", msg->myId);
-            return SOFTBUS_ENCRYPT_ERR;
-        }
+    if (AuthEncrypt(&authHandle, dataInfo->inData, dataInfo->inLen, encData, &encDataLen) != SOFTBUS_OK) {
+        SoftBusFree(buf);
+        TRANS_LOGE(TRANS_CTRL, "pack msg encrypt fail, myChannelId=%{public}d", msg->myId);
+        return SOFTBUS_ENCRYPT_ERR;
     }
     dataInfo->outData = buf;
     dataInfo->outLen = size;
@@ -478,7 +399,7 @@ static int32_t PackEncryptedMessage(
 }
 
 int32_t TransProxyPackMessage(
-    ProxyMessageHead *msg, AuthHandle authHandle, ProxyDataInfo *dataInfo, bool isAddUk, const UkIdInfo *ukIdInfo)
+    ProxyMessageHead *msg, AuthHandle authHandle, ProxyDataInfo *dataInfo)
 {
     if (msg == NULL || dataInfo == NULL || dataInfo->inData == NULL || dataInfo->inLen == 0) {
         return SOFTBUS_INVALID_PARAM;
@@ -488,7 +409,7 @@ int32_t TransProxyPackMessage(
     if ((msg->cipher & ENCRYPTED) == 0) {
         ret = PackPlaintextMessage(msg, dataInfo);
     } else {
-        ret = PackEncryptedMessage(msg, authHandle, dataInfo, isAddUk, ukIdInfo);
+        ret = PackEncryptedMessage(msg, authHandle, dataInfo);
     }
     if (ret != SOFTBUS_OK) {
         TRANS_LOGE(TRANS_CTRL, "pack proxy msg fail, myChannelId=%{public}d", msg->myId);
@@ -570,6 +491,8 @@ static int32_t PackHandshakeMsgForNormal(SessionKeyBase64 *sessionBase64, AppInf
     }
     (void)AddNumberToJsonObject(root, JSON_KEY_USER_ID, appInfo->myData.userId);
     (void)AddStringToJsonObject(root, JSON_KEY_ACCOUNT_ID, appInfo->myData.accountId);
+    (void)AddNumber64ToJsonObject(root, JSON_KEY_SOURCE_ACL_TOKEN_ID, (int64_t)appInfo->myData.tokenId);
+    (void)AddStringToJsonObject(root, JSON_KEY_SOURCE_ACL_EXTRA_INFO, appInfo->extraAccessInfo);
     (void)AddNumberToJsonObject(root, JSON_KEY_BUSINESS_TYPE, appInfo->businessType);
     (void)AddNumberToJsonObject(root, JSON_KEY_TRANS_FLAGS, TRANS_FLAG_HAS_CHANNEL_AUTH);
     (void)AddNumberToJsonObject(root, JSON_KEY_MY_HANDLE_ID, appInfo->myHandleId);
@@ -668,15 +591,20 @@ EXIT:
     return buf;
 }
 
+static int32_t AddSinkSessionKeyToHandshakeAckMsg(cJSON *root, const AppInfo *appInfo)
+{
+    (void)AddStringToJsonObject(root, JSON_KEY_SINK_ACL_ACCOUNT_ID, appInfo->myData.accountId);
+    (void)AddNumberToJsonObject(root, JSON_KEY_SINK_ACL_USER_ID, appInfo->myData.userId);
+    (void)AddNumber64ToJsonObject(root, JSON_KEY_SINK_ACL_TOKEN_ID, (int64_t)appInfo->myData.tokenId);
+    return EncryptAndAddSinkSessionKey(root, appInfo);
+}
+
 char *TransProxyPackHandshakeAckMsg(ProxyChannelInfo *chan)
 {
     TRANS_CHECK_AND_RETURN_RET_LOGE(chan != NULL, NULL, TRANS_CTRL, "invalid param.");
     AppInfo *appInfo = &(chan->appInfo);
     TRANS_CHECK_AND_RETURN_RET_LOGE(appInfo != NULL, NULL, TRANS_CTRL, "invalid param.");
-    if (appInfo->appType == APP_TYPE_NOT_CARE) {
-        TRANS_LOGE(TRANS_CTRL, "invalid appType.");
-        return NULL;
-    }
+    TRANS_CHECK_AND_RETURN_RET_LOGE(appInfo->appType != APP_TYPE_NOT_CARE, NULL, TRANS_CTRL, "invalid appType.");
 
     cJSON *root = cJSON_CreateObject();
     TRANS_CHECK_AND_RETURN_RET_LOGE(root != NULL, NULL, TRANS_CTRL, "create json object failed.");
@@ -707,6 +635,10 @@ char *TransProxyPackHandshakeAckMsg(ProxyChannelInfo *chan)
             return NULL;
         }
         (void)AddNumberToJsonObject(root, JSON_KEY_MY_HANDLE_ID, appInfo->myHandleId);
+        if (AddSinkSessionKeyToHandshakeAckMsg(root, &chan->appInfo) != SOFTBUS_OK) {
+            cJSON_Delete(root);
+            return NULL;
+        }
     } else if (appInfo->appType == APP_TYPE_AUTH) {
         if (!AddStringToJsonObject(root, JSON_KEY_PKG_NAME, appInfo->myData.pkgName)) {
             cJSON_Delete(root);
@@ -765,6 +697,33 @@ int32_t TransProxyUnPackRestErrMsg(const char *msg, int32_t *errCode, int32_t le
     return SOFTBUS_OK;
 }
 
+static int32_t GetSinkSessionKeyFromHandshakeAckMsg(cJSON *root, AppInfo *appInfo)
+{
+    (void)GetJsonObjectStringItem(
+        root, JSON_KEY_SINK_ACL_ACCOUNT_ID, (appInfo->peerData.accountId), ACCOUNT_UID_LEN_MAX);
+    if (!GetJsonObjectNumberItem(root, JSON_KEY_SINK_ACL_USER_ID, &appInfo->peerData.userId)) {
+        appInfo->peerData.userId = INVALID_USER_ID;
+    }
+    (void)GetJsonObjectNumber64Item(root, JSON_KEY_SINK_ACL_TOKEN_ID, (int64_t *)&appInfo->peerData.tokenId);
+    return DecryptAndAddSinkSessionKey(root, appInfo);
+}
+
+static void GetNoramlInfoFromHandshakeAckMsg(cJSON *root, ProxyChannelInfo *chanInfo, uint16_t *fastDataSize)
+{
+    if (!GetJsonObjectNumberItem(root, JSON_KEY_UID, &chanInfo->appInfo.peerData.uid) ||
+        !GetJsonObjectNumberItem(root, JSON_KEY_PID, &chanInfo->appInfo.peerData.pid) ||
+        !GetJsonObjectNumberItem(root, JSON_KEY_ENCRYPT, &chanInfo->appInfo.encrypt) ||
+        !GetJsonObjectNumberItem(root, JSON_KEY_ALGORITHM, &chanInfo->appInfo.algorithm) ||
+        !GetJsonObjectNumberItem(root, JSON_KEY_CRC, &chanInfo->appInfo.crc) ||
+        !GetJsonObjectNumber16Item(root, JSON_KEY_FIRST_DATA_SIZE, fastDataSize) ||
+        !GetJsonObjectStringItem(root, JSON_KEY_SRC_BUS_NAME, chanInfo->appInfo.peerData.sessionName,
+            sizeof(chanInfo->appInfo.peerData.sessionName)) ||
+        !GetJsonObjectStringItem(root, JSON_KEY_DST_BUS_NAME, chanInfo->appInfo.myData.sessionName,
+            sizeof(chanInfo->appInfo.myData.sessionName))) {
+        TRANS_LOGW(TRANS_CTRL, "unpack handshake ack old version");
+    }
+}
+
 int32_t TransProxyUnpackHandshakeAckMsg(const char *msg, ProxyChannelInfo *chanInfo,
     int32_t len, uint16_t *fastDataSize)
 {
@@ -797,18 +756,7 @@ int32_t TransProxyUnpackHandshakeAckMsg(const char *msg, ProxyChannelInfo *chanI
         return SOFTBUS_TRANS_PROXY_ERROR_APP_TYPE;
     }
     if (chanInfo->appInfo.appType == APP_TYPE_NORMAL) {
-        if (!GetJsonObjectNumberItem(root, JSON_KEY_UID, &chanInfo->appInfo.peerData.uid) ||
-            !GetJsonObjectNumberItem(root, JSON_KEY_PID, &chanInfo->appInfo.peerData.pid) ||
-            !GetJsonObjectNumberItem(root, JSON_KEY_ENCRYPT, &chanInfo->appInfo.encrypt) ||
-            !GetJsonObjectNumberItem(root, JSON_KEY_ALGORITHM, &chanInfo->appInfo.algorithm) ||
-            !GetJsonObjectNumberItem(root, JSON_KEY_CRC, &chanInfo->appInfo.crc) ||
-            !GetJsonObjectNumber16Item(root, JSON_KEY_FIRST_DATA_SIZE, fastDataSize) ||
-            !GetJsonObjectStringItem(root, JSON_KEY_SRC_BUS_NAME, chanInfo->appInfo.peerData.sessionName,
-                                     sizeof(chanInfo->appInfo.peerData.sessionName)) ||
-            !GetJsonObjectStringItem(root, JSON_KEY_DST_BUS_NAME, chanInfo->appInfo.myData.sessionName,
-                                     sizeof(chanInfo->appInfo.myData.sessionName))) {
-            TRANS_LOGW(TRANS_CTRL, "unpack handshake ack old version");
-        }
+        GetNoramlInfoFromHandshakeAckMsg(root, chanInfo, fastDataSize);
         if (!GetJsonObjectInt32Item(root, JSON_KEY_MY_HANDLE_ID, &chanInfo->appInfo.peerHandleId)) {
             chanInfo->appInfo.peerHandleId = -1;
         }
@@ -820,6 +768,10 @@ int32_t TransProxyUnpackHandshakeAckMsg(const char *msg, ProxyChannelInfo *chanI
     }
     if (!GetJsonObjectNumberItem(root, TRANS_CAPABILITY, (int32_t *)&(chanInfo->appInfo.channelCapability))) {
         chanInfo->appInfo.channelCapability = 0;
+    }
+    if (GetSinkSessionKeyFromHandshakeAckMsg(root, &(chanInfo->appInfo)) != SOFTBUS_OK) {
+        cJSON_Delete(root);
+        return SOFTBUS_PARSE_JSON_ERR;
     }
     cJSON_Delete(root);
     return SOFTBUS_OK;
@@ -870,11 +822,10 @@ static int32_t UnpackPackHandshakeMsgForFastData(AppInfo *appInfo, cJSON *root)
 
 static int32_t TransProxyUnpackNormalHandshakeMsg(cJSON *root, AppInfo *appInfo, char *sessionKey, int32_t keyLen)
 {
+    (void)GetJsonObjectStringItem(root, JSON_KEY_SESSION_KEY, sessionKey, keyLen);
     if (!GetJsonObjectNumberItem(root, JSON_KEY_UID, &(appInfo->peerData.uid)) ||
         !GetJsonObjectNumberItem(root, JSON_KEY_PID, &(appInfo->peerData.pid)) ||
-        !GetJsonObjectStringItem(root, JSON_KEY_PKG_NAME, appInfo->peerData.pkgName,
-                                 sizeof(appInfo->peerData.pkgName)) ||
-        !GetJsonObjectStringItem(root, JSON_KEY_SESSION_KEY, sessionKey, keyLen)) {
+        !GetJsonObjectStringItem(root, JSON_KEY_PKG_NAME, appInfo->peerData.pkgName, PKG_NAME_SIZE_MAX)) {
         TRANS_LOGE(TRANS_CTRL, "Failed to get handshake msg APP_TYPE_NORMAL");
         return SOFTBUS_PARSE_JSON_ERR;
     }
@@ -886,7 +837,7 @@ static int32_t TransProxyUnpackNormalHandshakeMsg(cJSON *root, AppInfo *appInfo,
         appInfo->algorithm = APP_INFO_ALGORITHM_AES_GCM_256;
         appInfo->crc = APP_INFO_FILE_FEATURES_NO_SUPPORT;
     }
-    if (!GetJsonObjectNumberItem(root, JSON_KEY_BUSINESS_TYPE, (int*)&appInfo->businessType)) {
+    if (!GetJsonObjectNumberItem(root, JSON_KEY_BUSINESS_TYPE, (int *)&appInfo->businessType)) {
         appInfo->businessType = BUSINESS_TYPE_NOT_CARE;
     }
 
@@ -897,11 +848,13 @@ static int32_t TransProxyUnpackNormalHandshakeMsg(cJSON *root, AppInfo *appInfo,
             appInfo->peerHandleId = -1;
     }
     size_t len = 0;
-    int32_t ret = SoftBusBase64Decode((uint8_t *)appInfo->sessionKey, sizeof(appInfo->sessionKey),
-        &len, (uint8_t *)sessionKey, strlen(sessionKey));
-    if (len != sizeof(appInfo->sessionKey) || ret != SOFTBUS_OK) {
-        TRANS_LOGE(TRANS_CTRL, "decode session fail ret=%{public}d", ret);
-        return SOFTBUS_DECRYPT_ERR;
+    if (strlen(sessionKey) != 0) {
+        int32_t ret = SoftBusBase64Decode((uint8_t *)appInfo->sessionKey, sizeof(appInfo->sessionKey), &len,
+            (uint8_t *)sessionKey, strlen(sessionKey));
+        if (len != sizeof(appInfo->sessionKey) || ret != SOFTBUS_OK) {
+            TRANS_LOGE(TRANS_CTRL, "decode session fail ret=%{public}d", ret);
+            return SOFTBUS_DECRYPT_ERR;
+        }
     }
     if (UnpackPackHandshakeMsgForFastData(appInfo, root) != SOFTBUS_OK) {
         TRANS_LOGE(TRANS_CTRL, "unpack fast data failed");
@@ -914,6 +867,9 @@ static int32_t TransProxyUnpackNormalHandshakeMsg(cJSON *root, AppInfo *appInfo,
     if (!GetJsonObjectNumberItem(root, JSON_KEY_USER_ID, &(appInfo->peerData.userId))) {
         appInfo->peerData.userId = INVALID_USER_ID;
     }
+    (void)GetJsonObjectNumber64Item(root, JSON_KEY_SOURCE_ACL_TOKEN_ID, (int64_t *)&appInfo->peerData.tokenId);
+    (void)GetJsonObjectStringItem(
+        root, JSON_KEY_SOURCE_ACL_EXTRA_INFO, (appInfo->extraAccessInfo), EXTRA_ACCESS_INFO_LEN_MAX);
     return SOFTBUS_OK;
 }
 

@@ -399,30 +399,30 @@ HWTEST_F(SoftbusProxyChannelMessageTest, TransProxyPackMessageTest001, TestSize.
     ProxyMessageHead msg;
     ProxyDataInfo dataInfo;
     AuthHandle authHandle = { .authId = AUTH_INVALID_ID, .type = AUTH_LINK_TYPE_WIFI };
-    int32_t ret = TransProxyPackMessage(nullptr, authHandle, &dataInfo, false, nullptr);
+    int32_t ret = TransProxyPackMessage(nullptr, authHandle, &dataInfo);
     EXPECT_NE(SOFTBUS_OK, ret);
 
-    ret = TransProxyPackMessage(&msg, authHandle, nullptr, false, nullptr);
+    ret = TransProxyPackMessage(&msg, authHandle, nullptr);
     EXPECT_NE(SOFTBUS_OK, ret);
 
     dataInfo.inData = nullptr;
-    ret = TransProxyPackMessage(&msg, authHandle, &dataInfo, false, nullptr);
+    ret = TransProxyPackMessage(&msg, authHandle, &dataInfo);
     EXPECT_NE(SOFTBUS_OK, ret);
 
     dataInfo.inData = 0;
-    ret = TransProxyPackMessage(&msg, authHandle, &dataInfo, false, nullptr);
+    ret = TransProxyPackMessage(&msg, authHandle, &dataInfo);
     EXPECT_NE(SOFTBUS_OK, ret);
 
     msg.cipher = 0;
     msg.type = PROXYCHANNEL_MSG_TYPE_HANDSHAKE;
-    ret = TransProxyPackMessage(&msg, authHandle, &dataInfo, false, nullptr);
+    ret = TransProxyPackMessage(&msg, authHandle, &dataInfo);
     EXPECT_NE(SOFTBUS_OK, ret);
 
     dataInfo.inData = (uint8_t *)"1";
     dataInfo.inLen = strlen((const char*)dataInfo.inData);
     msg.cipher |= ENCRYPTED;
     msg.type = PROXYCHANNEL_MSG_TYPE_NORMAL;
-    ret = TransProxyPackMessage(&msg, authHandle, &dataInfo, false, nullptr);
+    ret = TransProxyPackMessage(&msg, authHandle, &dataInfo);
     EXPECT_NE(SOFTBUS_OK, ret);
 }
 
@@ -443,17 +443,17 @@ HWTEST_F(SoftbusProxyChannelMessageTest, TransProxyPackMessageTest002, TestSize.
     msg.cipher = 0;
     msg.type = PROXYCHANNEL_MSG_TYPE_HANDSHAKE;
     AuthHandle authHandle = { .authId = AUTH_INVALID_ID, .type = AUTH_LINK_TYPE_WIFI };
-    int32_t ret = TransProxyPackMessage(&msg, authHandle, &dataInfo, false, nullptr);
+    int32_t ret = TransProxyPackMessage(&msg, authHandle, &dataInfo);
     EXPECT_EQ(SOFTBUS_OK, ret);
 
     msg.cipher |= ENCRYPTED;
     msg.type = PROXYCHANNEL_MSG_TYPE_NORMAL;
-    ret = TransProxyPackMessage(&msg, authHandle, &dataInfo, false, nullptr);
+    ret = TransProxyPackMessage(&msg, authHandle, &dataInfo);
     EXPECT_NE(SOFTBUS_OK, ret);
     authHandle.authId = 1;
-    ret = TransProxyPackMessage(&msg, authHandle, &dataInfo, false, nullptr);
+    ret = TransProxyPackMessage(&msg, authHandle, &dataInfo);
     EXPECT_NE(SOFTBUS_OK, ret);
-    ret = TransProxyPackMessage(&msg, authHandle, &dataInfo, false, nullptr);
+    ret = TransProxyPackMessage(&msg, authHandle, &dataInfo);
     EXPECT_EQ(SOFTBUS_ENCRYPT_ERR, ret);
 }
 
@@ -497,18 +497,6 @@ HWTEST_F(SoftbusProxyChannelMessageTest, TransProxyParseMessageTest001, TestSize
     /* test normal message encrypte, and channel not exist */
     msg.msgHead.cipher = 1;
     msg.msgHead.peerId = -1;
-    ASSERT_TRUE(EOK == memcpy_s(buf, len, &msg, len));
-    ret = TransProxyParseMessage(buf, len, &msg, &authHandle);
-    EXPECT_NE(SOFTBUS_OK, ret);
-
-    msg.msgHead.type = (PROXYCHANNEL_MSG_TYPE_HANDSHAKE_UK & FOUR_BIT_MASK) | (1 << VERSION_SHIFT);
-    msg.msgHead.cipher = 0;
-    ASSERT_TRUE(EOK == memcpy_s(buf, len, &msg, len));
-    ret = TransProxyParseMessage(buf, len, &msg, &authHandle);
-    EXPECT_NE(SOFTBUS_OK, ret);
-
-    msg.msgHead.type = (PROXYCHANNEL_MSG_TYPE_HANDSHAKE_WITHUKENCY & FOUR_BIT_MASK) | (1 << VERSION_SHIFT);
-    msg.msgHead.cipher = 0;
     ASSERT_TRUE(EOK == memcpy_s(buf, len, &msg, len));
     ret = TransProxyParseMessage(buf, len, &msg, &authHandle);
     EXPECT_NE(SOFTBUS_OK, ret);
@@ -613,30 +601,30 @@ HWTEST_F(SoftbusProxyChannelMessageTest, TransProxyHandshakeTest001, TestSize.Le
     info.appInfo.appType = APP_TYPE_INNER;
 
     /* test info is null */
-    ret = TransProxyHandshake(nullptr, false, nullptr);
+    ret = TransProxyHandshake(nullptr);
     EXPECT_NE(SOFTBUS_OK, ret);
     /* test appType no auth and invalid channel */
-    ret = TransProxyHandshake(&info, false, nullptr);
+    ret = TransProxyHandshake(&info);
     EXPECT_NE(SOFTBUS_OK, ret);
 
     AuthConnInfo wifiInfo, bleInfo;
     wifiInfo.type = AUTH_LINK_TYPE_WIFI;
     bleInfo.type = AUTH_LINK_TYPE_BLE;
     info.channelId = TEST_PARSE_MESSAGE_CHANNEL;
-    ret = TransProxyHandshake(&info, false, nullptr);
+    ret = TransProxyHandshake(&info);
     EXPECT_NE(SOFTBUS_OK, ret);
-    ret = TransProxyHandshake(&info, false, nullptr);
+    ret = TransProxyHandshake(&info);
     EXPECT_NE(SOFTBUS_OK, ret);
-    ret = TransProxyHandshake(&info, false, nullptr);
+    ret = TransProxyHandshake(&info);
     EXPECT_NE(SOFTBUS_OK, ret);
     /* test pack message failed after pass packhandshakemsg */
-    ret = TransProxyHandshake(&info, false, nullptr);
+    ret = TransProxyHandshake(&info);
     EXPECT_NE(SOFTBUS_OK, ret);
     /* test pack message success and send msg fail */
-    ret = TransProxyHandshake(&info, false, nullptr);
+    ret = TransProxyHandshake(&info);
     EXPECT_NE(SOFTBUS_OK, ret);
     /* test send msg success */
-    ret = TransProxyHandshake(&info, false, nullptr);
+    ret = TransProxyHandshake(&info);
     EXPECT_NE(SOFTBUS_OK, ret);
 }
 
@@ -1163,7 +1151,7 @@ HWTEST_F(SoftbusProxyChannelMessageTest, TransProxyUnpackNormalHandshakeMsgTest0
     EXPECT_EQ(SOFTBUS_PARSE_JSON_ERR, ret);
     (void)AddStringToJsonObject(msg, "PKG_NAME", TEST_PKGNAME);
     ret = TransProxyUnpackNormalHandshakeMsg(msg, &appInfo, sessionKey, FAST_TRANS_DATASIZE);
-    EXPECT_EQ(SOFTBUS_PARSE_JSON_ERR, ret);
+    EXPECT_EQ(SOFTBUS_DECRYPT_ERR, ret);
     (void)AddStringToJsonObject(msg, "SESSION_KEY", TEST_SESSION_KEY);
     ret = TransProxyUnpackNormalHandshakeMsg(msg, &appInfo, sessionKey, FAST_TRANS_DATASIZE);
     EXPECT_EQ(SOFTBUS_DECRYPT_ERR, ret);
@@ -1232,72 +1220,5 @@ HWTEST_F(SoftbusProxyChannelMessageTest, TransProxyUnpackInnerHandshakeMsgTest00
     ret = TransProxyUnpackInnerHandshakeMsg(msg, &appInfo, sessionKey, FAST_TRANS_DATASIZE);
     EXPECT_EQ(SOFTBUS_DECRYPT_ERR, ret);
     cJSON_Delete(msg);
-}
-
-/**
- * @tc.name: PackEncryptedMessageTest001
- * @tc.desc: PackEncryptedMessageTest001
- * @tc.type: FUNC
- * @tc.require:
- */
-HWTEST_F(SoftbusProxyChannelMessageTest, PackEncryptedMessageTest001, TestSize.Level1)
-{
-    ProxyMessageHead msg;
-    (void)memset_s(&msg, sizeof(ProxyMessageHead), 0, sizeof(ProxyMessageHead));
-    ProxyDataInfo dataInfo;
-    (void)memset_s(&dataInfo, sizeof(ProxyDataInfo), 0, sizeof(ProxyDataInfo));
-    dataInfo.inLen = FAST_TRANS_DATASIZE;
-    dataInfo.inData = (uint8_t *)TEST_FAST_TRANS_DATA;
-    AuthHandle authHandle = {
-        .authId = -1,
-        .type = 0,
-    };
-
-    UkIdInfo ukIdInfo;
-    (void)memset_s(&ukIdInfo, sizeof(UkIdInfo), 0, sizeof(UkIdInfo));
-    int32_t ret = PackEncryptedMessage(&msg, authHandle, &dataInfo, true, &ukIdInfo);
-    EXPECT_EQ(SOFTBUS_INVALID_PARAM, ret);
-
-    authHandle.authId = 0;
-    ret = PackEncryptedMessage(&msg, authHandle, &dataInfo, false, nullptr);
-    EXPECT_EQ(SOFTBUS_ENCRYPT_ERR, ret);
-
-    ret = PackEncryptedMessage(&msg, authHandle, &dataInfo, false, &ukIdInfo);
-    EXPECT_EQ(SOFTBUS_ENCRYPT_ERR, ret);
-
-    ukIdInfo.myId = 1;
-    ukIdInfo.peerId = 1;
-    ret = PackEncryptedMessage(&msg, authHandle, &dataInfo, true, &ukIdInfo);
-    EXPECT_EQ(SOFTBUS_ENCRYPT_ERR, ret);
-
-    ret = PackEncryptedMessage(&msg, authHandle, &dataInfo, false, &ukIdInfo);
-    EXPECT_EQ(SOFTBUS_ENCRYPT_ERR, ret);
-}
-
-/**
- * @tc.name: DecryptProxyMessageTest001
- * @tc.desc: DecryptProxyMessageTest001
- * @tc.type: FUNC
- * @tc.require:
- */
-HWTEST_F(SoftbusProxyChannelMessageTest, DecryptProxyMessageTest001, TestSize.Level1)
-{
-    ProxyMessage msg;
-    (void)memset_s(&msg, sizeof(ProxyMessage), 0, sizeof(ProxyMessage));
-    ProxyDataInfo dataInfo;
-    (void)memset_s(&dataInfo, sizeof(ProxyDataInfo), 0, sizeof(ProxyDataInfo));
-    msg.data = reinterpret_cast<char *>(SoftBusCalloc(sizeof(int32_t)));
-    ASSERT_NE(msg.data, nullptr);
-    AuthHandle authHandle = {
-        .authId = -1,
-        .type = 0,
-    };
-    msg.ukIdInfo.myId = 1;
-    int32_t ret = DecryptProxyMessage(&msg, &authHandle, &dataInfo.outLen, dataInfo.outData);
-    EXPECT_EQ(SOFTBUS_DECRYPT_ERR, ret);
-    msg.ukIdInfo.myId = 0;
-    ret = DecryptProxyMessage(&msg, &authHandle, &dataInfo.outLen, nullptr);
-    EXPECT_EQ(SOFTBUS_DECRYPT_ERR, ret);
-    SoftBusFree(msg.data);
 }
 } // namespace OHOS

@@ -240,22 +240,7 @@ int32_t GetTokenTypeBySessionName(const char *sessionName, int32_t *tokenType)
 {
     return GetTransTcpDirectMessageInterface()->GetTokenTypeBySessionName(sessionName, tokenType);
 }
-char *PackUkRequest(const AppInfo *appInfo)
-{
-    return GetTransTcpDirectMessageInterface()->PackUkRequest(appInfo);
-}
-int32_t UnPackUkRequest(const cJSON *msg, AuthACLInfo *aclInfo, char *sessionName)
-{
-    return GetTransTcpDirectMessageInterface()->UnPackUkRequest(msg, aclInfo, sessionName);
-}
-int32_t FillSinkAclInfo(const char *sessionName, AuthACLInfo *aclInfo, int32_t *pid)
-{
-    return GetTransTcpDirectMessageInterface()->FillSinkAclInfo(sessionName, aclInfo, pid);
-}
-int32_t UnPackUkReply(const cJSON *msg, AuthACLInfo *aclInfo, int32_t *ukId)
-{
-    return GetTransTcpDirectMessageInterface()->UnPackUkReply(msg, aclInfo, ukId);
-}
+
 int32_t AuthDecryptByUkId(int32_t ukId, const uint8_t *inData, uint32_t inLen, uint8_t *outData, uint32_t *outLen)
 {
     return GetTransTcpDirectMessageInterface()->AuthDecryptByUkId(ukId, inData, inLen, outData, outLen);

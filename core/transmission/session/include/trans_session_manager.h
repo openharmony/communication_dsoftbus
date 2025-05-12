@@ -33,18 +33,13 @@ typedef enum {
 } CallerType;
 
 typedef struct {
-    int32_t userId;
-    char accountId[ACCOUNT_UID_LEN_MAX];
-    int32_t tokenType;
-} AccessInfo;
-
-typedef struct {
     ListNode node;
     SoftBusSecType type;
     char pkgName[PKG_NAME_SIZE_MAX];
     char sessionName[SESSION_NAME_SIZE_MAX];
     int32_t uid;
     int32_t pid;
+    int32_t tokenType;
     uint64_t tokenId;
     CallerType callerType;
     AccessInfo accessInfo;
@@ -77,7 +72,8 @@ int32_t TransGetTokenIdBySessionName(const char *sessionName, uint64_t *tokenId)
 
 int32_t AddAccessInfoBySessionName(const char *sessionName, const AccessInfo *accessInfo);
 
-int32_t GetAccessInfoBySessionName(const char *sessionName, int32_t *userId);
+int32_t GetAccessInfoBySessionName(
+    const char *sessionName, int32_t *userId, uint64_t *tokenId, char *businessAccountId, char *extraAccessInfo);
 
 int32_t GetTokenTypeBySessionName(const char *sessionName, int32_t *tokenType);
 

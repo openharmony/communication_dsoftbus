@@ -18,6 +18,8 @@
 #include <securec.h>
 
 #include "auth_interface.h"
+#include "lnn_ohos_account_adapter.h"
+#include "softbus_access_token_adapter.h"
 #include "softbus_adapter_mem.h"
 #include "softbus_adapter_thread.h"
 #include "softbus_base_listener.h"
@@ -212,6 +214,40 @@ int32_t SetAppInfoById(int32_t channelId, const AppInfo *appInfo)
     LIST_FOR_EACH_ENTRY(conn, &g_sessionConnList->list, SessionConn, node) {
         if (conn->channelId == channelId) {
             (void)memcpy_s(&conn->appInfo, sizeof(AppInfo), appInfo, sizeof(AppInfo));
+            ReleaseSessionConnLock();
+            return SOFTBUS_OK;
+        }
+    }
+    ReleaseSessionConnLock();
+    TRANS_LOGE(TRANS_CTRL, "can not get srv session conn info.");
+    return SOFTBUS_TRANS_SET_APP_INFO_FAILED;
+}
+
+int32_t UpdateAccessInfoById(int32_t channelId, const AccessInfo *accessInfo)
+{
+    if (accessInfo == NULL || accessInfo->localTokenId == 0) {
+        TRANS_LOGE(TRANS_CTRL, "invalid accessInfo.");
+        return SOFTBUS_INVALID_PARAM;
+    }
+    SessionConn *conn = NULL;
+    if (GetSessionConnLock() != SOFTBUS_OK) {
+        return SOFTBUS_LOCK_ERR;
+    }
+    uint32_t size = 0;
+    char accountId[ACCOUNT_UID_LEN_MAX];
+    int32_t ret = GetOsAccountUidByUserId(accountId, ACCOUNT_UID_LEN_MAX - 1, &size, accessInfo->userId);
+    if (ret != SOFTBUS_OK) {
+        TRANS_LOGE(TRANS_CTRL, "get current account failed. ret=%{public}d", ret);
+    }
+    LIST_FOR_EACH_ENTRY(conn, &g_sessionConnList->list, SessionConn, node) {
+        if (conn->channelId == channelId && conn->appInfo.myData.tokenType > ACCESS_TOKEN_TYPE_HAP) {
+            conn->appInfo.myData.userId = accessInfo->userId;
+            conn->appInfo.myData.tokenId = accessInfo->localTokenId;
+            if (memcpy_s(conn->appInfo.myData.accountId, ACCOUNT_UID_LEN_MAX, accountId, size) != EOK) {
+                TRANS_LOGE(TRANS_CTRL, "memcpy current account failed.");
+                ReleaseSessionConnLock();
+                return SOFTBUS_MEM_ERR;
+            }
             ReleaseSessionConnLock();
             return SOFTBUS_OK;
         }
@@ -791,50 +827,4 @@ int32_t TransTcpGetPrivilegeCloseList(ListNode *privilegeCloseList, uint64_t tok
     }
     (void)SoftBusMutexUnlock(&(g_tcpChannelInfoList->lock));
     return SOFTBUS_OK;
-}
-
-int32_t SetSessionConnUkIdById(int32_t channelId, const UkIdInfo *ukIdInfo)
-{
-    if (ukIdInfo == NULL) {
-        TRANS_LOGE(TRANS_CTRL, "ukId info is null.");
-        return SOFTBUS_INVALID_PARAM;
-    }
-    if (GetSessionConnLock() != SOFTBUS_OK) {
-        return SOFTBUS_LOCK_ERR;
-    }
-    SessionConn *connInfo = NULL;
-    LIST_FOR_EACH_ENTRY(connInfo, &g_sessionConnList->list, SessionConn, node) {
-        if (connInfo->channelId == channelId) {
-            connInfo->ukIdInfo.myId = ukIdInfo->myId;
-            connInfo->ukIdInfo.peerId = ukIdInfo->peerId;
-            ReleaseSessionConnLock();
-            return SOFTBUS_OK;
-        }
-    }
-    ReleaseSessionConnLock();
-    TRANS_LOGE(TRANS_SVC, "can not find by channelId=%{public}d", channelId);
-    return SOFTBUS_NOT_FIND;
-}
-
-int32_t GetSessionConnUkIdById(int32_t channelId, UkIdInfo *ukIdInfo)
-{
-    if (ukIdInfo == NULL) {
-        TRANS_LOGE(TRANS_CTRL, "ukId info is null.");
-        return SOFTBUS_INVALID_PARAM;
-    }
-    if (GetSessionConnLock() != SOFTBUS_OK) {
-        return SOFTBUS_LOCK_ERR;
-    }
-    SessionConn *connInfo = NULL;
-    LIST_FOR_EACH_ENTRY(connInfo, &g_sessionConnList->list, SessionConn, node) {
-        if (connInfo->channelId == channelId) {
-            ukIdInfo->myId = connInfo->ukIdInfo.myId;
-            ukIdInfo->peerId = connInfo->ukIdInfo.peerId;
-            ReleaseSessionConnLock();
-            return SOFTBUS_OK;
-        }
-    }
-    ReleaseSessionConnLock();
-    TRANS_LOGE(TRANS_SVC, "can not find by channelId=%{public}d", channelId);
-    return SOFTBUS_NOT_FIND;
 }

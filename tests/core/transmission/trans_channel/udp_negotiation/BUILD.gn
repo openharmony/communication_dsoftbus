@@ -186,6 +186,7 @@ ohos_unittest("TransUdpManagerTest") {
     "$dsoftbus_core_path/transmission/trans_channel/manager/include",
     "$dsoftbus_core_path/transmission/trans_channel/udp_negotiation/include",
     "$dsoftbus_core_path/transmission/trans_channel/udp_negotiation/src",
+    "$dsoftbus_root_path/core/adapter/bus_center/include",
   ]
 
   deps = [

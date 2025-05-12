@@ -64,9 +64,10 @@ static int32_t TestOnFileGetSessionId(int32_t channelId, int32_t *sessionId)
     return SOFTBUS_OK;
 }
 
-static int32_t TestOnUdpChannelOpened(int32_t channelId)
+static int32_t TestOnUdpChannelOpened(int32_t channelId, SocketAccessInfo *accessInfo)
 {
     (void)channelId;
+    (void)accessInfo;
     return SOFTBUS_OK;
 }
 
@@ -287,32 +288,32 @@ HWTEST_F(ClientTransStreamTest, TransOnstreamChannelOpened001, TestSize.Level1)
     ASSERT_TRUE(channel != nullptr);
 
     int32_t streamPort = 2;
-    ret = TransOnstreamChannelOpened(nullptr, &streamPort);
+    ret = TransOnstreamChannelOpened(nullptr, &streamPort, nullptr);
 
     EXPECT_EQ(SOFTBUS_INVALID_PARAM, ret);
-    ret = TransOnstreamChannelOpened(channel, nullptr);
+    ret = TransOnstreamChannelOpened(channel, nullptr, nullptr);
 
     EXPECT_EQ(SOFTBUS_INVALID_PARAM, ret);
-    ret = TransOnstreamChannelOpened(nullptr, nullptr);
+    ret = TransOnstreamChannelOpened(nullptr, nullptr, nullptr);
 
     EXPECT_EQ(SOFTBUS_INVALID_PARAM, ret);
 
     channel->streamType = INVALID;
-    ret = TransOnstreamChannelOpened(channel, &streamPort);
+    ret = TransOnstreamChannelOpened(channel, &streamPort, nullptr);
     EXPECT_EQ(SOFTBUS_INVALID_PARAM, ret);
 
     channel->streamType = VIDEO_SLICE_STREAM;
-    ret = TransOnstreamChannelOpened(channel, &streamPort);
+    ret = TransOnstreamChannelOpened(channel, &streamPort, nullptr);
     EXPECT_EQ(SOFTBUS_INVALID_PARAM, ret);
 
     channel->streamType = RAW_STREAM;
     channel->isServer = false;
     channel->channelId = -1;
-    ret = TransOnstreamChannelOpened(channel, &streamPort);
+    ret = TransOnstreamChannelOpened(channel, &streamPort, nullptr);
     EXPECT_EQ(SOFTBUS_NO_INIT, ret);
 
     channel->isServer = true;
-    ret = TransOnstreamChannelOpened(channel, &streamPort);
+    ret = TransOnstreamChannelOpened(channel, &streamPort, nullptr);
     EXPECT_EQ(SOFTBUS_NO_INIT, ret);
 
     if (channel != nullptr) {
@@ -338,7 +339,7 @@ HWTEST_F(ClientTransStreamTest, TransCloseStreamChannel001, TestSize.Level1)
     ret = TransCloseStreamChannel(channelId);
     EXPECT_EQ(SOFTBUS_TRANS_ADAPTOR_NOT_EXISTED, ret);
 
-    ret = OnStreamUdpChannelOpened(TEST_CHANNELID);
+    ret = OnStreamUdpChannelOpened(TEST_CHANNELID, nullptr);
     EXPECT_NE(SOFTBUS_OK, ret);
 
     channelId = -1;
@@ -369,7 +370,7 @@ HWTEST_F(ClientTransStreamTest, ClientTransStreamTest001, TestSize.Level1)
 {
     RegisterStreamCb(&g_testUdpChannelCb);
     OnQosEvent(TEST_CHANNELID, TEST_CHANNELID, TEST_CHANNELID, nullptr);
-    int32_t ret = OnStreamUdpChannelOpened(TEST_CHANNELID);
+    int32_t ret = OnStreamUdpChannelOpened(TEST_CHANNELID, nullptr);
     EXPECT_EQ(SOFTBUS_OK, ret);
     UnregisterStreamCb();
 }

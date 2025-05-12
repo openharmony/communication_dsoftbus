@@ -37,8 +37,10 @@ extern "C" {
 #define BT_MAC_NO_COLON_LEN 13
 #define TRANS_CAPABILITY_TLV_OFFSET 0
 #define TRANS_CHANNEL_INNER_ENCRYPT_OFFSET 1
+#define TRANS_CHANNEL_SINK_GENERATE_KEY_OFFSET 2
+#define TRANS_CHANNEL_SINK_KEY_ENCRYPT_OFFSET 3
 #define TRANS_CHANNEL_INNER_ENCRYPT (1u << TRANS_CHANNEL_INNER_ENCRYPT_OFFSET) /* bit1 */
-#define TRANS_CHANNEL_CAPABILITY 0x03 /* bit0 & bit1 */
+#define TRANS_CHANNEL_CAPABILITY 0x07 /* bit0 & bit1 & bit2 */
 
 #define MAC_DELIMITER ':'
 #define IP_DELIMITER '.'
@@ -110,13 +112,19 @@ int32_t WriteInt32ToBuf(uint8_t *buf, uint32_t dataLen, int32_t *offSet, int32_t
 
 int32_t WriteUint8ToBuf(uint8_t *buf, uint32_t dataLen, int32_t *offSet, uint8_t data);
 
+int32_t WriteUint64ToBuf(uint8_t *buf, uint32_t dataLen, int32_t *offSet, uint64_t data);
+
 int32_t WriteStringToBuf(uint8_t *buf, uint32_t bufLen, int32_t *offSet, char *data, uint32_t dataLen);
 
 int32_t ReadInt32FromBuf(uint8_t *buf, uint32_t dataLen, int32_t *offSet, int32_t *data);
 
 int32_t ReadUint8FromBuf(uint8_t *buf, uint32_t dataLen, int32_t *offSet, uint8_t *data);
 
-int32_t ReadStringFromBuf(uint8_t *buf, uint32_t bufLen, int32_t *offSet, char *data, uint32_t dataLen);
+int32_t ReadUint64FromBuf(uint8_t *buf, uint32_t dataLen, int32_t *offSet, uint64_t *data);
+
+int32_t ReadStringLenFormBuf(uint8_t *buf, uint32_t bufLen, int32_t *offSet, uint32_t *len);
+
+int32_t ReadStringFromBuf(uint8_t *buf, uint32_t bufLen, int32_t *offSet, char *data, uint32_t *dataLen);
 
 int32_t CalculateMbsTruncateSize(const char *multiByteStr, uint32_t capacity, uint32_t *truncatedSize);
 
@@ -139,7 +147,9 @@ int32_t GenerateStrHashAndConvertToHexString(const unsigned char *str, uint32_t 
 
 void EnableCapabilityBit(uint32_t *value, uint32_t offSet);
 
-bool GetCapabilityBit(uint32_t *value, uint32_t offSet);
+void DisableCapabilityBit(uint32_t *value, uint32_t offSet);
+
+bool GetCapabilityBit(uint32_t value, uint32_t offSet);
 #ifdef __cplusplus
 #if __cplusplus
 }

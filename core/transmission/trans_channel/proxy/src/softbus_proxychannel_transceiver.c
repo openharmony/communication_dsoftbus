@@ -917,8 +917,7 @@ static void TransProxyOnDataReceived(uint32_t connectionId, ConnModule moduleId,
     AuthHandle authHandle = { .authId = AUTH_INVALID_ID };
     int32_t ret = TransProxyParseMessage((char *)data, len, &msg, &authHandle);
     if (((ret == SOFTBUS_AUTH_NOT_FOUND) || (ret == SOFTBUS_DECRYPT_ERR)) &&
-        (msg.msgHead.type == PROXYCHANNEL_MSG_TYPE_HANDSHAKE ||
-            msg.msgHead.type == PROXYCHANNEL_MSG_TYPE_HANDSHAKE_UK)) {
+        (msg.msgHead.type == PROXYCHANNEL_MSG_TYPE_HANDSHAKE)) {
         TransReportBadKeyEvent(ret, connectionId, seq, len);
         if (TransProxySendBadKeyMessage(&msg, &authHandle) != SOFTBUS_OK) {
             TRANS_LOGE(TRANS_CTRL, "send bad key msg ret=%{public}d", ret);
@@ -1130,30 +1129,19 @@ void TransProxyNegoSessionKeySucc(int32_t channelId)
         return;
     }
     channelInfo->appInfo.connectedStart = GetSoftbusRecordTimeMillis();
-    int ret = SOFTBUS_OK;
-    int32_t ukPolicy = GetUkPolicy(&(channelInfo->appInfo));
-    if (channelInfo->appInfo.appType == APP_TYPE_AUTH || channelInfo->appInfo.appType == APP_TYPE_INNER) {
-        ukPolicy = NO_NEED_UK;
-    }
-    TRANS_LOGI(TRANS_CTRL, "uk policy=%{public}d", ukPolicy);
-    if (ukPolicy == USE_NEGO_UK) {
-        TRANS_LOGI(TRANS_CTRL, "negotiate uk, channelId=%{public}d", channelId);
-        ret = TransProxyHandshake(channelInfo, true, NULL);
-    } else {
-        ret = TransProxyHandshake(channelInfo, false, NULL);
-    }
-    TransEventExtra extra = {
-        .socketName = NULL,
-        .peerNetworkId = NULL,
-        .calleePkg = NULL,
-        .callerPkg = NULL,
-        .channelId = channelId,
-        .connectionId = channelInfo->connId,
-        .errcode = ret,
-        .result = (ret == SOFTBUS_OK) ? EVENT_STAGE_RESULT_OK : EVENT_STAGE_RESULT_FAILED
-    };
-    TRANS_EVENT(EVENT_SCENE_OPEN_CHANNEL, EVENT_STAGE_HANDSHAKE_START, extra);
+    int32_t ret = TransProxyHandshake(channelInfo);
     if (ret != SOFTBUS_OK) {
+        TransEventExtra extra = {
+            .socketName = NULL,
+            .peerNetworkId = NULL,
+            .calleePkg = NULL,
+            .callerPkg = NULL,
+            .channelId = channelId,
+            .connectionId = channelInfo->connId,
+            .errcode = ret,
+            .result = EVENT_STAGE_RESULT_FAILED
+        };
+        TRANS_EVENT(EVENT_SCENE_OPEN_CHANNEL, EVENT_STAGE_HANDSHAKE_START, extra);
         (void)TransProxyCloseConnChannel(channelInfo->connId, channelInfo->isServer);
         TRANS_LOGE(TRANS_CTRL, "channelId=%{public}d handshake err, ret=%{public}d", channelId, ret);
         TransProxyOpenProxyChannelFail(channelInfo->channelId, &(channelInfo->appInfo), ret);
