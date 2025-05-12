@@ -36,6 +36,11 @@ typedef enum {
     MATCH_ONE_ACL,
 } UpdateDpAclResult;
 
+typedef struct {
+    char udid[UDID_BUF_LEN];
+    int32_t userId;
+} TrustedInfo;
+
 bool IsPotentialTrustedDeviceDp(const char *deviceIdHash, bool isOnlyPointToPoint);
 bool DpHasAccessControlProfile(const char *udid, bool isNeedUserId, int32_t localUserId);
 void UpdateDpSameAccount(
@@ -50,6 +55,7 @@ int32_t GetAccessUkByUkId(int32_t sessionKeyId, uint8_t *uk, uint32_t ukLen);
 void UpdateAssetSessionKeyByAcl(
     AuthACLInfo *info, const uint8_t *sessionKey, uint32_t sessionKeyLen, int32_t *sessionKeyId, bool isSameAccount);
 bool IsSKIdInvalid(int32_t sessionKeyId, const char *accountHash, const char *udidShortHash, int32_t userId);
+int32_t SelectAllAcl(TrustedInfo **trustedInfoArray, uint32_t *num);
 
 #ifdef __cplusplus
 #if __cplusplus

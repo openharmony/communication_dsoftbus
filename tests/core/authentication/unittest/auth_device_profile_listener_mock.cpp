@@ -97,6 +97,21 @@ bool IsHeartbeatEnable(void)
     return GetInterface()->IsHeartbeatEnable();
 }
 
+int32_t LnnInsertSpecificTrustedDevInfo(const char *udid)
+{
+    return GetInterface()->LnnInsertSpecificTrustedDevInfo(udid);
+}
+
+void LnnHbOnTrustedRelationIncreased(int32_t groupType)
+{
+    return GetInterface()->LnnHbOnTrustedRelationIncreased(groupType);
+}
+
+void LnnHbOnTrustedRelationReduced(void)
+{
+    return GetInterface()->LnnHbOnTrustedRelationReduced();
+}
+
 void LnnUpdateHeartbeatInfo(LnnHeartbeatUpdateInfoType type)
 {
     (void)type;

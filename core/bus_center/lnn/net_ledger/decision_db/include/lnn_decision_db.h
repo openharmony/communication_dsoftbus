@@ -60,6 +60,7 @@ int32_t LnnGenerateCeParams(void);
 void LnnRemoveDb(void);
 int32_t LnnFindDeviceUdidTrustedInfoFromDb(const char *udid);
 int32_t UpdateKeyAndLocalInfo(void);
+int32_t InitDbListDelay(void);
 
 #ifdef __cplusplus
 }
