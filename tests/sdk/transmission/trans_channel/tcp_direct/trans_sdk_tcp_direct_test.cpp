@@ -89,8 +89,8 @@ static ISessionListener g_sessionlistener = {
     .OnMessageReceived = OnServerMessageReceived,
 };
 
-
-static int32_t OnSessionOpened(const char *sessionName, const ChannelInfo *channel, SessionType flag)
+static int32_t OnSessionOpened(
+    const char *sessionName, const ChannelInfo *channel, SessionType flag, SocketAccessInfo *accessInfo)
 {
     TRANS_LOGI(TRANS_TEST, "session opened, sesisonName=%{public}s", sessionName);
     return SOFTBUS_OK;
@@ -170,13 +170,13 @@ HWTEST_F(TransSdkTcpDirectTest, ClientTransTdcOnChannelOpenedTest001, TestSize.L
 {
     ChannelInfo *channel = TestGetChannelInfo();
     ASSERT_TRUE(channel != nullptr);
-    int32_t ret = ClientTransTdcOnChannelOpened(nullptr, channel);
+    int32_t ret = ClientTransTdcOnChannelOpened(nullptr, channel, nullptr);
     EXPECT_EQ(ret, SOFTBUS_INVALID_PARAM);
 
-    ret = ClientTransTdcOnChannelOpened(g_sessionName, nullptr);
+    ret = ClientTransTdcOnChannelOpened(g_sessionName, nullptr, nullptr);
     EXPECT_EQ(ret, SOFTBUS_INVALID_PARAM);
 
-    ret = ClientTransTdcOnChannelOpened(g_sessionName, channel);
+    ret = ClientTransTdcOnChannelOpened(g_sessionName, channel, nullptr);
     EXPECT_EQ(ret, SOFTBUS_MEM_ERR);
 
     SoftBusFree(channel);
@@ -198,7 +198,7 @@ HWTEST_F(TransSdkTcpDirectTest, TransTdcCloseChannelTest002, TestSize.Level1)
 
     TransTdcCloseChannel(channelId);
 
-    int32_t ret = ClientTransTdcOnChannelOpened(g_sessionName, channel);
+    int32_t ret = ClientTransTdcOnChannelOpened(g_sessionName, channel, nullptr);
     EXPECT_EQ(ret, SOFTBUS_MEM_ERR);
 
     TransTdcCloseChannel(channelId);
@@ -222,7 +222,7 @@ HWTEST_F(TransSdkTcpDirectTest, TransTdcGetSessionKeyTest003, TestSize.Level1)
     ChannelInfo *channel = TestGetChannelInfo();
     ASSERT_TRUE(channel != nullptr);
 
-    int32_t ret = ClientTransTdcOnChannelOpened(g_sessionName, channel);
+    int32_t ret = ClientTransTdcOnChannelOpened(g_sessionName, channel, nullptr);
     EXPECT_EQ(ret, SOFTBUS_MEM_ERR);
 
     ret = TransTdcGetSessionKey(channelId, nullptr, len);
@@ -251,7 +251,7 @@ HWTEST_F(TransSdkTcpDirectTest, TransTdcGetHandleTest004, TestSize.Level1)
     ChannelInfo *channel = TestGetChannelInfo();
     ASSERT_TRUE(channel != nullptr);
 
-    int32_t ret = ClientTransTdcOnChannelOpened(g_sessionName, channel);
+    int32_t ret = ClientTransTdcOnChannelOpened(g_sessionName, channel, nullptr);
     EXPECT_EQ(ret, SOFTBUS_MEM_ERR);
 
     ret = TransTdcGetHandle(channelId, nullptr);
@@ -287,7 +287,7 @@ HWTEST_F(TransSdkTcpDirectTest, TransDisableSessionListenerTest005, TestSize.Lev
     info->sessionKey = const_cast<char *>(g_sessionkey);
     info->fd = INVALID_VALUE;
 
-    int32_t ret = ClientTransTdcOnChannelOpened(g_sessionName, info);
+    int32_t ret = ClientTransTdcOnChannelOpened(g_sessionName, info, nullptr);
     EXPECT_EQ(ret, SOFTBUS_MEM_ERR);
 
     info->fd = g_fd;
@@ -319,7 +319,7 @@ HWTEST_F(TransSdkTcpDirectTest, TransTdcGetInfoByIdTest006, TestSize.Level1)
 
     ChannelInfo *channel = TestGetChannelInfo();
     ASSERT_TRUE(channel != nullptr);
-    int32_t ret = ClientTransTdcOnChannelOpened(g_sessionName, channel);
+    int32_t ret = ClientTransTdcOnChannelOpened(g_sessionName, channel, nullptr);
     EXPECT_EQ(ret, SOFTBUS_MEM_ERR);
 
     int32_t item = TransTdcGetInfoById(channelId, nullptr);
@@ -351,7 +351,7 @@ HWTEST_F(TransSdkTcpDirectTest, TransTdcGetInfoByFdTest007, TestSize.Level1)
 
     ChannelInfo *channel = TestGetChannelInfo();
     ASSERT_TRUE(channel != nullptr);
-    int32_t ret = ClientTransTdcOnChannelOpened(g_sessionName, channel);
+    int32_t ret = ClientTransTdcOnChannelOpened(g_sessionName, channel, nullptr);
     EXPECT_EQ(ret, SOFTBUS_MEM_ERR);
 
     int32_t item = TransTdcGetInfoByFd(fd, nullptr);
@@ -383,7 +383,7 @@ HWTEST_F(TransSdkTcpDirectTest, TransTdcGetInfoByIdWithIncSeqTest008, TestSize.L
 
     ChannelInfo *channel = TestGetChannelInfo();
     ASSERT_TRUE(channel != nullptr);
-    int32_t ret = ClientTransTdcOnChannelOpened(g_sessionName, channel);
+    int32_t ret = ClientTransTdcOnChannelOpened(g_sessionName, channel, nullptr);
     EXPECT_EQ(ret, SOFTBUS_MEM_ERR);
 
     TcpDirectChannelInfo *item = TransTdcGetInfoIncFdRefById(channelId, nullptr, true);
@@ -428,20 +428,20 @@ HWTEST_F(TransSdkTcpDirectTest, ClientTransTdcOnSessionOpenedTest0010, TestSize.
     (void)memset_s(info, sizeof(ChannelInfo), 0, sizeof(ChannelInfo));
 
     int32_t ret = ClientTransTdcSetCallBack(&g_sessionCb);
-    ret = ClientTransTdcOnSessionOpened(g_sessionName, nullptr);
+    ret = ClientTransTdcOnSessionOpened(g_sessionName, nullptr, nullptr);
     EXPECT_EQ(ret, SOFTBUS_INVALID_PARAM);
 
     info->isServer = true;
     info->channelType = CHANNEL_TYPE_AUTH;
-    ret = ClientTransTdcOnSessionOpened(nullptr, info);
+    ret = ClientTransTdcOnSessionOpened(nullptr, info, nullptr);
     EXPECT_EQ(ret, SOFTBUS_INVALID_PARAM);
 
-    ret = ClientTransTdcOnSessionOpened(g_sessionName, info);
+    ret = ClientTransTdcOnSessionOpened(g_sessionName, info, nullptr);
     EXPECT_EQ(ret, SOFTBUS_OK);
 
     info->isServer = false;
     info->channelType = CHANNEL_TYPE_UDP;
-    ret = ClientTransTdcOnSessionOpened(g_sessionName, info);
+    ret = ClientTransTdcOnSessionOpened(g_sessionName, info, nullptr);
     EXPECT_EQ(ret, SOFTBUS_OK);
     SoftBusFree(info);
 }
@@ -590,7 +590,7 @@ HWTEST_F(TransSdkTcpDirectTest, TransTdcSendBytesTest0017, TestSize.Level1)
 
     ChannelInfo *channel = TestGetChannelInfo();
     ASSERT_TRUE(channel != nullptr);
-    ret = ClientTransTdcOnChannelOpened(g_sessionName, channel);
+    ret = ClientTransTdcOnChannelOpened(g_sessionName, channel, nullptr);
     EXPECT_EQ(ret, SOFTBUS_MEM_ERR);
 
     ret = TransTdcSendBytes(channelId, data, len, false);
@@ -621,7 +621,7 @@ HWTEST_F(TransSdkTcpDirectTest, TransTdcSendMessageTest0018, TestSize.Level1)
 
     ChannelInfo *channel = TestGetChannelInfo();
     ASSERT_TRUE(channel != nullptr);
-    ret = ClientTransTdcOnChannelOpened(g_sessionName, channel);
+    ret = ClientTransTdcOnChannelOpened(g_sessionName, channel, nullptr);
     EXPECT_EQ(ret, SOFTBUS_MEM_ERR);
 
     ret = TransTdcSendMessage(channelId, data, len);

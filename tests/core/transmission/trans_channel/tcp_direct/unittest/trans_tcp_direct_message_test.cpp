@@ -335,11 +335,24 @@ HWTEST_F(TransTcpDirectMessageTest, SetAppInfoByIdTest009, TestSize.Level1)
     int32_t channelId = 1;
     AppInfo *appInfo = TestSetAppInfo();
 
+    AccessInfo accessInfo = {
+        .userId = 100,
+        .localTokenId = 0,
+    };
+    appInfo->myData.tokenType = 1;
     int32_t ret = SetAppInfoById(channelId, appInfo);
     EXPECT_EQ(ret, SOFTBUS_OK);
+
+    ret = UpdateAccessInfoById(channelId, &accessInfo);
+    EXPECT_EQ(ret, SOFTBUS_OK);
+
     channelId = 0;
     ret = SetAppInfoById(channelId, appInfo);
     EXPECT_EQ(ret, SOFTBUS_TRANS_SET_APP_INFO_FAILED);
+
+    ret = UpdateAccessInfoById(channelId, &accessInfo);
+    EXPECT_EQ(ret, SOFTBUS_TRANS_SET_APP_INFO_FAILED);
+
     SoftBusFree(appInfo);
     appInfo = nullptr;
 }

@@ -40,7 +40,8 @@ typedef struct {
 
 void RegisterFileCb(const UdpChannelMgrCb *fileCb);
 
-int32_t TransOnFileChannelOpened(const char *sessionName, const ChannelInfo *channel, int32_t *filePort);
+int32_t TransOnFileChannelOpened(
+    const char *sessionName, const ChannelInfo *channel, int32_t *filePort, SocketAccessInfo *accessInfo);
 
 void TransCloseFileChannel(int32_t dfileId);
 

@@ -472,14 +472,14 @@ HWTEST_F(TransServerTcpDirectTest, TransTdcPostBytes001, TestSize.Level1)
     };
     int32_t channelId = 0;
 
-    int32_t ret = TransTdcPostBytes(channelId, nullptr, bytes, nullptr);
+    int32_t ret = TransTdcPostBytes(channelId, nullptr, bytes);
     EXPECT_EQ(ret, SOFTBUS_INVALID_PARAM);
 
-    ret = TransTdcPostBytes(channelId, &packetHead, nullptr, nullptr);
+    ret = TransTdcPostBytes(channelId, &packetHead, nullptr);
     EXPECT_EQ(ret, SOFTBUS_INVALID_PARAM);
 
     packetHead.dataLen = 0;
-    ret = TransTdcPostBytes(channelId, &packetHead, bytes, nullptr);
+    ret = TransTdcPostBytes(channelId, &packetHead, bytes);
     EXPECT_EQ(ret, SOFTBUS_INVALID_PARAM);
 }
 

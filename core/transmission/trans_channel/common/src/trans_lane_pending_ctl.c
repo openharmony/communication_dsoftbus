@@ -40,6 +40,7 @@
 #include "trans_network_statistics.h"
 #include "trans_qos_info.h"
 #include "trans_session_manager.h"
+#include "trans_uk_manager.h"
 
 #define MIN(a, b) ((a) < (b) ? (a) : (b))
 
@@ -663,7 +664,10 @@ static int32_t TransProxyGetAppInfo(const char *sessionName, const char *peerNet
 
     GetRemoteUdidWithNetworkId(peerNetworkId, appInfo->peerUdid, sizeof(appInfo->peerUdid));
     TransGetRemoteDeviceVersion(peerNetworkId, CATEGORY_NETWORK_ID, appInfo->peerVersion, sizeof(appInfo->peerVersion));
-
+    if (GetUkPolicy(appInfo) == NO_NEED_UK) {
+        TRANS_LOGI(TRANS_CTRL, "No need sink generate key.");
+        DisableCapabilityBit(&(appInfo->channelCapability), TRANS_CHANNEL_SINK_GENERATE_KEY_OFFSET);
+    }
     return SOFTBUS_OK;
 }
 

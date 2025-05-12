@@ -64,6 +64,7 @@
 #define ID_USED 1UL
 #define BIT_NUM 8
 #define REPORT_UDP_INFO_SIZE 4
+#define ACCESS_INFO_PARAM_NUM 3
 
 static int32_t g_allocTdcChannelId = MAX_PROXY_CHANNEL_ID;
 static SoftBusMutex g_myIdLock;
@@ -78,6 +79,12 @@ typedef enum {
     LOOP_CHANNEL_OPEN_MSG,
     LOOP_LIMIT_CHANGE_MSG,
 } ChannelResultLoopMsg;
+
+typedef struct {
+    int32_t channelId;
+    int32_t channelType;
+    int32_t openResult;
+} OpenChannelResult;
 
 typedef struct {
     ListNode node;
@@ -429,8 +436,7 @@ int32_t TransOpenChannel(const SessionParam *param, TransInfo *transInfo)
     extra.sessionId = param->sessionId;
     TRANS_EVENT(EVENT_SCENE_OPEN_CHANNEL, EVENT_STAGE_OPEN_CHANNEL_START, extra);
     if (param->isQosLane) {
-        uint32_t callingTokenId = TransACLGetCallingTokenID();
-        ret = TransAsyncGetLaneInfo(param, &laneHandle, callingTokenId, appInfo->timeStart);
+        ret = TransAsyncGetLaneInfo(param, &laneHandle, appInfo->callingTokenId, appInfo->timeStart);
         if (ret != SOFTBUS_OK) {
             Anonymize(param->sessionName, &tmpName);
             TRANS_LOGE(TRANS_CTRL, "Async get Lane failed, sessionName=%{public}s, sessionId=%{public}d",
@@ -945,45 +951,67 @@ int32_t CheckAuthChannelIsExit(ConnectOption *connInfo)
     return ret;
 }
 
+static int32_t ReadAccessInfo(uint8_t *buf, uint32_t len, int32_t *offset, AccessInfo *accessInfo)
+{
+    int32_t ret = ReadInt32FromBuf(buf, len, offset, &accessInfo->userId);
+    if (ret != SOFTBUS_OK) {
+        TRANS_LOGE(TRANS_CTRL, "get userId from buf failed.");
+        return ret;
+    }
+    ret = ReadUint64FromBuf(buf, len, offset, &accessInfo->localTokenId);
+    if (ret != SOFTBUS_OK) {
+        TRANS_LOGE(TRANS_CTRL, "get tokenId from buf failed.");
+        return ret;
+    }
+    return SOFTBUS_OK;
+}
+
 static int32_t GetChannelInfoFromBuf(
-    uint8_t *buf, int32_t *channelId, int32_t *channelType, int32_t *openResult, uint32_t len)
+    uint8_t *buf, uint32_t len, OpenChannelResult *info, AccessInfo *accessInfo)
 {
     int32_t offSet = 0;
     int32_t ret = SOFTBUS_OK;
-    ret = ReadInt32FromBuf(buf, len, &offSet, channelId);
+    ret = ReadInt32FromBuf(buf, len, &offSet, &info->channelId);
     if (ret != SOFTBUS_OK) {
         TRANS_LOGE(TRANS_CTRL, "get channelId from buf failed!");
         return ret;
     }
-    ret = ReadInt32FromBuf(buf, len, &offSet, channelType);
+    ret = ReadInt32FromBuf(buf, len, &offSet, &info->channelType);
     if (ret != SOFTBUS_OK) {
         TRANS_LOGE(TRANS_CTRL, "get channelId from buf failed!");
         return ret;
     }
-    ret = ReadInt32FromBuf(buf, len, &offSet, openResult);
+    ret = ReadInt32FromBuf(buf, len, &offSet, &info->openResult);
     if (ret != SOFTBUS_OK) {
         TRANS_LOGE(TRANS_CTRL, "get openResult from buf failed!");
         return ret;
+    }
+    if (info->channelType != CHANNEL_TYPE_AUTH) {
+        ret = ReadAccessInfo(buf, len, &offSet, accessInfo);
+        if (ret != SOFTBUS_OK) {
+            TRANS_LOGE(TRANS_CTRL, "get access info from buf failed!");
+            return ret;
+        }
     }
     return ret;
 }
 
 static int32_t GetUdpChannelInfoFromBuf(
-    uint8_t *buf, int32_t *channelId, int32_t *channelType, int32_t *openResult, int32_t *udpPort, uint32_t len)
+    uint8_t *buf, uint32_t len, int32_t *udpPort, OpenChannelResult *info, AccessInfo *accessInfo)
 {
     int32_t offSet = 0;
     int32_t ret = SOFTBUS_OK;
-    ret = ReadInt32FromBuf(buf, len, &offSet, channelId);
+    ret = ReadInt32FromBuf(buf, len, &offSet, &info->channelId);
     if (ret != SOFTBUS_OK) {
         TRANS_LOGE(TRANS_CTRL, "get channelId from buf failed!");
         return ret;
     }
-    ret = ReadInt32FromBuf(buf, len, &offSet, channelType);
+    ret = ReadInt32FromBuf(buf, len, &offSet, &info->channelType);
     if (ret != SOFTBUS_OK) {
         TRANS_LOGE(TRANS_CTRL, "get channelId from buf failed!");
         return ret;
     }
-    ret = ReadInt32FromBuf(buf, len, &offSet, openResult);
+    ret = ReadInt32FromBuf(buf, len, &offSet, &info->openResult);
     if (ret != SOFTBUS_OK) {
         TRANS_LOGE(TRANS_CTRL, "get openResult from buf failed!");
         return ret;
@@ -992,6 +1020,13 @@ static int32_t GetUdpChannelInfoFromBuf(
     if (ret != SOFTBUS_OK) {
         TRANS_LOGE(TRANS_CTRL, "get udpPort from buf failed!");
         return ret;
+    }
+    if (info->channelType != CHANNEL_TYPE_AUTH) {
+        ret = ReadAccessInfo(buf, len, &offSet, accessInfo);
+        if (ret != SOFTBUS_OK) {
+            TRANS_LOGE(TRANS_CTRL, "get access info from buf failed!");
+            return ret;
+        }
     }
     return ret;
 }
@@ -1021,39 +1056,45 @@ static int32_t GetLimitChangeInfoFromBuf(
 
 static int32_t TransReportChannelOpenedInfo(uint8_t *buf, uint32_t len)
 {
-    int32_t channelId = 0;
-    int32_t channelType = 0;
-    int32_t openResult = 0;
+    OpenChannelResult info = { 0 };
+    AccessInfo accessInfo = { 0 };
+    accessInfo.businessAccountId = (char *)SoftBusCalloc(ACCOUNT_UID_LEN_MAX);
+    if (accessInfo.businessAccountId == NULL) {
+        return SOFTBUS_MALLOC_ERR;
+    }
     int32_t udpPort = 0;
     int32_t ret = SOFTBUS_OK;
-    if (len == sizeof(int32_t) * REPORT_UDP_INFO_SIZE) {
-        ret = GetUdpChannelInfoFromBuf(buf, &channelId, &channelType, &openResult, &udpPort, len);
+    if (len == sizeof(int32_t) * REPORT_UDP_INFO_SIZE ||
+        len == sizeof(int32_t) * (REPORT_UDP_INFO_SIZE + ACCESS_INFO_PARAM_NUM)) {
+        ret = GetUdpChannelInfoFromBuf(buf, len, &udpPort, &info, &accessInfo);
     } else {
-        ret = GetChannelInfoFromBuf(buf, &channelId, &channelType, &openResult, len);
+        ret = GetChannelInfoFromBuf(buf, len, &info, &accessInfo);
     }
     if (ret != SOFTBUS_OK) {
+        SoftBusFree(accessInfo.businessAccountId);
         return ret;
     }
-    switch (channelType) {
+    switch (info.channelType) {
         case CHANNEL_TYPE_PROXY:
-            ret = TransDealProxyChannelOpenResult(channelId, openResult);
+            ret = TransDealProxyChannelOpenResult(info.channelId, info.openResult, &accessInfo);
             break;
         case CHANNEL_TYPE_TCP_DIRECT:
-            ret = TransDealTdcChannelOpenResult(channelId, openResult);
+            ret = TransDealTdcChannelOpenResult(info.channelId, info.openResult, &accessInfo);
             break;
         case CHANNEL_TYPE_UDP:
-            ret = TransDealUdpChannelOpenResult(channelId, openResult, udpPort);
+            ret = TransDealUdpChannelOpenResult(info.channelId, info.openResult, udpPort, &accessInfo);
             break;
         case CHANNEL_TYPE_AUTH:
-            ret = TransDealAuthChannelOpenResult(channelId, openResult);
+            ret = TransDealAuthChannelOpenResult(info.channelId, info.openResult);
             break;
         default:
-            TRANS_LOGE(TRANS_CTRL, "channelType=%{public}d is error", channelType);
+            TRANS_LOGE(TRANS_CTRL, "channelType=%{public}d is error", info.channelType);
             ret = SOFTBUS_TRANS_INVALID_CHANNEL_TYPE;
     }
     if (ret != SOFTBUS_OK) {
         TRANS_LOGE(TRANS_CTRL, "report Event channel opened info failed");
     }
+    SoftBusFree(accessInfo.businessAccountId);
     return ret;
 }
 
@@ -1127,21 +1168,43 @@ static int32_t TransReportCheckCollabInfo(uint8_t *buf, uint32_t len)
 static int32_t TransSetAccessInfo(uint8_t *buf, uint32_t len)
 {
     char sessionName[SESSION_NAME_SIZE_MAX] = { 0 };
+    char businessAccountId[ACCOUNT_UID_LEN_MAX] = { 0 };
+    char extraAccessInfo[EXTRA_ACCESS_INFO_LEN_MAX] = { 0 };
     int32_t offset = 0;
-    AccessInfo accessInfo;
-    (void)memset_s(&accessInfo, sizeof(AccessInfo), 0, sizeof(AccessInfo));
-    int32_t ret = ReadInt32FromBuf(buf, len, &offset, &accessInfo.userId);
+    int32_t userId = -1;
+    uint64_t tokenId = 0;
+    int32_t ret = ReadInt32FromBuf(buf, len, &offset, &userId);
     if (ret != SOFTBUS_OK) {
         TRANS_LOGE(TRANS_CTRL, "get userId from buf failed.");
         return ret;
     }
-
-    ret = ReadStringFromBuf(buf, len, &offset, sessionName, SESSION_NAME_SIZE_MAX);
+    ret = ReadUint64FromBuf(buf, len, &offset, &tokenId);
     if (ret != SOFTBUS_OK) {
+        TRANS_LOGE(TRANS_CTRL, "get tokenId from buf failed.");
+        return ret;
+    }
+    uint32_t dataLen = 0;
+    ret = ReadStringFromBuf(buf, len, &offset, sessionName, &dataLen);
+    if (ret != SOFTBUS_OK || dataLen > SESSION_NAME_SIZE_MAX) {
         TRANS_LOGE(TRANS_CTRL, "get sessionName from buf failed.");
         return ret;
     }
-
+    ret = ReadStringFromBuf(buf, len, &offset, businessAccountId, &dataLen);
+    if (ret != SOFTBUS_OK || dataLen > ACCOUNT_UID_LEN_MAX) {
+        TRANS_LOGE(TRANS_CTRL, "get business accountId from buf failed.");
+        return ret;
+    }
+    ret = ReadStringFromBuf(buf, len, &offset, extraAccessInfo, &dataLen);
+    if (ret != SOFTBUS_OK || dataLen > EXTRA_ACCESS_INFO_LEN_MAX) {
+        TRANS_LOGE(TRANS_CTRL, "get extraInfo from buf failed.");
+        return ret;
+    }
+    AccessInfo accessInfo = {
+        .userId = userId,
+        .localTokenId = tokenId,
+        .businessAccountId = businessAccountId,
+        .extraAccessInfo = extraAccessInfo,
+    };
     ret = AddAccessInfoBySessionName(sessionName, &accessInfo);
     if (ret != SOFTBUS_OK) {
         TRANS_LOGE(TRANS_CTRL, "add accessInfo by sessionName failed.");

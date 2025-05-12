@@ -12,10 +12,10 @@
 # limitations under the License.
 
 import("//build/test.gni")
-import("../../../../../dsoftbus.gni")
+import("../../../../../../../dsoftbus.gni")
 
 module_output_path = "dsoftbus/soft_bus/transmission"
-trans_comm_mock_path = "$dsoftbus_test_path/core/transmission/common/mock"
+trans_comm_mock_path = "$dsoftbus_test_path/core/transmission/trans_channel/common/mock"
 
 ohos_unittest("SoftBusMessageOpenChannelTest") {
   module_out_path = module_output_path
@@ -24,7 +24,7 @@ ohos_unittest("SoftBusMessageOpenChannelTest") {
   include_dirs = [
     "unittest/common/",
 
-    "$dsoftbus_core_path/transmission/common/src",
+    "$dsoftbus_core_path/transmission/trans_channel/common/src",
     "$dsoftbus_core_path/transmission/trans_channel/auth/include",
   ]
 
@@ -47,16 +47,16 @@ ohos_unittest("SoftBusMessageOpenChannelTest") {
 ohos_unittest("SoftBusMessageOpenChannelMockTest") {
   module_out_path = module_output_path
   sources = [
-    "$trans_comm_mock_path/src/softbus_message_open_channel_mock.cpp",
+    "$trans_comm_mock_path/softbus_message_open_channel_mock.cpp",
     "softbus_message_open_channel_mock_test.cpp",
   ]
 
   include_dirs = [
     "unittest/common/",
-    "$dsoftbus_core_path/transmission/common/src",
-    "$dsoftbus_core_path/transmission/common/include",
+    "$dsoftbus_core_path/transmission/trans_channel/common/src",
+    "$dsoftbus_core_path/transmission/trans_channel/common/include",
     "$dsoftbus_core_path/transmission/trans_channel/auth/include",
-    "$trans_comm_mock_path/include",
+    "$trans_comm_mock_path",
   ]
 
   deps = [

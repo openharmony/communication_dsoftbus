@@ -68,7 +68,8 @@ char g_sessionKey[32] = "1234567812345678123456781234567";
 #define DEFAULT_NEW_BYTES_LEN   (4 * 1024 * 1024)
 #define DEFAULT_NEW_MESSAGE_LEN (4 * 1024)
 
-int32_t TransOnSessionOpened(const char *sessionName, const ChannelInfo *channel, SessionType flag)
+int32_t TransOnSessionOpened(
+    const char *sessionName, const ChannelInfo *channel, SessionType flag, SocketAccessInfo *accessInfo)
 {
     return SOFTBUS_OK;
 }
@@ -114,11 +115,13 @@ static IClientSessionCallBack g_clientSessionCb = {
     .OnQosEvent = TransOnQosEvent,
 };
 
-int32_t OnSessionOpened(const char *sessionName, const ChannelInfo *channel, SessionType flag)
+int32_t OnSessionOpened(
+    const char *sessionName, const ChannelInfo *channel, SessionType flag, SocketAccessInfo *accessInfo)
 {
     (void)sessionName;
     (void)channel;
     (void)flag;
+    (void)accessInfo;
     return SOFTBUS_INVALID_PARAM;
 }
 
@@ -199,11 +202,11 @@ HWTEST_F(ClientTransProxyManagerTest, ClientTransProxyInitTest, TestSize.Level1)
  */
 HWTEST_F(ClientTransProxyManagerTest, ClientTransProxyOnChannelOpenedTest, TestSize.Level1)
 {
-    int32_t ret = ClientTransProxyOnChannelOpened(g_proxySessionName, nullptr);
+    int32_t ret = ClientTransProxyOnChannelOpened(g_proxySessionName, nullptr, nullptr);
     EXPECT_EQ(SOFTBUS_INVALID_PARAM, ret);
 
     ChannelInfo channelInfo = {0};
-    ret = ClientTransProxyOnChannelOpened(g_proxySessionName, &channelInfo);
+    ret = ClientTransProxyOnChannelOpened(g_proxySessionName, &channelInfo, nullptr);
     EXPECT_EQ(SOFTBUS_MEM_ERR, ret);
 }
 
@@ -237,7 +240,7 @@ HWTEST_F(ClientTransProxyManagerTest, ClientTransProxyOnDataReceivedTest001, Tes
     channelInfo.sessionKey = g_sessionKey;
     channelInfo.isEncrypt = true;
     channelInfo.isSupportTlv = true;
-    int32_t ret = ClientTransProxyOnChannelOpened(g_proxySessionName, &channelInfo);
+    int32_t ret = ClientTransProxyOnChannelOpened(g_proxySessionName, &channelInfo, nullptr);
     EXPECT_EQ(SOFTBUS_OK, ret);
     ret = ClientTransProxyOnDataReceived(channelId, TEST_DATA, TEST_DATA_LENGTH, TRANS_SESSION_BYTES);
     EXPECT_EQ(SOFTBUS_INVALID_PARAM, ret);
@@ -357,7 +360,7 @@ HWTEST_F(ClientTransProxyManagerTest, TransProxyChannelSendBytesTest, TestSize.L
     channelInfo.sessionKey = g_sessionKey;
     channelInfo.isEncrypt = false;
     channelInfo.isSupportTlv = true;
-    int32_t ret = ClientTransProxyOnChannelOpened(g_proxySessionName, &channelInfo);
+    int32_t ret = ClientTransProxyOnChannelOpened(g_proxySessionName, &channelInfo, nullptr);
     EXPECT_EQ(SOFTBUS_OK, ret);
 
     ret = TransProxyChannelSendBytes(channelId, TEST_DATA, TEST_DATA_LENGTH, false);
@@ -365,7 +368,7 @@ HWTEST_F(ClientTransProxyManagerTest, TransProxyChannelSendBytesTest, TestSize.L
     ClientTransProxyCloseChannel(channelId);
 
     channelInfo.isEncrypt = true;
-    ret = ClientTransProxyOnChannelOpened(g_proxySessionName, &channelInfo);
+    ret = ClientTransProxyOnChannelOpened(g_proxySessionName, &channelInfo, nullptr);
     EXPECT_EQ(SOFTBUS_OK, ret);
 
     ret = TransProxyChannelSendBytes(channelId, TEST_DATA, TEST_DATA_LENGTH, false);
@@ -387,7 +390,7 @@ HWTEST_F(ClientTransProxyManagerTest, TransProxyChannelSendMessageTest, TestSize
     channelInfo.sessionKey = g_sessionKey;
     channelInfo.isEncrypt = false;
     channelInfo.isSupportTlv = false;
-    int32_t ret = ClientTransProxyOnChannelOpened(g_proxySessionName, &channelInfo);
+    int32_t ret = ClientTransProxyOnChannelOpened(g_proxySessionName, &channelInfo, nullptr);
     EXPECT_EQ(SOFTBUS_OK, ret);
 
     ret = TransProxyChannelSendMessage(channelId, TEST_DATA, TEST_DATA_LENGTH);
@@ -395,7 +398,7 @@ HWTEST_F(ClientTransProxyManagerTest, TransProxyChannelSendMessageTest, TestSize
     ClientTransProxyCloseChannel(channelId);
 
     channelInfo.isEncrypt = true;
-    ret = ClientTransProxyOnChannelOpened(g_proxySessionName, &channelInfo);
+    ret = ClientTransProxyOnChannelOpened(g_proxySessionName, &channelInfo, nullptr);
     EXPECT_EQ(SOFTBUS_OK, ret);
 
     ret = TransProxyChannelSendMessage(channelId, TEST_DATA, TEST_DATA_LENGTH);
@@ -417,7 +420,7 @@ HWTEST_F(ClientTransProxyManagerTest, ClientTransProxyErrorCallBackTest, TestSiz
     channelInfo.sessionKey = g_sessionKey;
     channelInfo.isEncrypt = false;
     channelInfo.isSupportTlv = true;
-    int32_t ret = ClientTransProxyOnChannelOpened(g_proxySessionName, &channelInfo);
+    int32_t ret = ClientTransProxyOnChannelOpened(g_proxySessionName, &channelInfo, nullptr);
     EXPECT_EQ(SOFTBUS_OK, ret);
 
     ret = ClientTransProxyOnDataReceived(channelId, TEST_DATA, TEST_DATA_LENGTH, TRANS_SESSION_BYTES);
@@ -427,7 +430,7 @@ HWTEST_F(ClientTransProxyManagerTest, ClientTransProxyErrorCallBackTest, TestSiz
     ret = ClientTransProxyInit(&g_sessionCb);
     EXPECT_EQ(SOFTBUS_OK, ret);
 
-    ret = ClientTransProxyOnChannelOpened(g_proxySessionName, &channelInfo);
+    ret = ClientTransProxyOnChannelOpened(g_proxySessionName, &channelInfo, nullptr);
     EXPECT_EQ(SOFTBUS_INVALID_PARAM, ret);
 
     ret = ClientTransProxyOnDataReceived(channelId, TEST_DATA, TEST_DATA_LENGTH, TRANS_SESSION_BYTES);
@@ -739,11 +742,11 @@ HWTEST_F(ClientTransProxyManagerTest, ClientTransProxyOnChannelOpened001, TestSi
     channelInfo.isEncrypt = false;
     channelInfo.isSupportTlv = false;
     channelInfo.businessType = BUSINESS_TYPE_BYTE;
-    int32_t ret = ClientTransProxyOnChannelOpened(g_proxySessionName, &channelInfo);
+    int32_t ret = ClientTransProxyOnChannelOpened(g_proxySessionName, &channelInfo, nullptr);
     EXPECT_EQ(SOFTBUS_INVALID_PARAM, ret);
 
     channelInfo.businessType = BUSINESS_TYPE_FILE;
-    ret = ClientTransProxyOnChannelOpened(g_proxySessionName, &channelInfo);
+    ret = ClientTransProxyOnChannelOpened(g_proxySessionName, &channelInfo, nullptr);
     EXPECT_EQ(SOFTBUS_INVALID_PARAM, ret);
 }
 
