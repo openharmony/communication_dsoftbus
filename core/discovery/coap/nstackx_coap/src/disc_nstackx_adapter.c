@@ -763,14 +763,17 @@ void DiscNstackxDeinit(void)
 
 static int32_t NstackxLocalDevInfoDump(int fd)
 {
-    char deviceId[NSTACKX_MAX_DEVICE_ID_LEN] = { 0 };
+    char *anonymizedInfo = NULL;
     DISC_CHECK_AND_RETURN_RET_LOGE(SoftBusMutexLock(&g_localDeviceInfoLock) == SOFTBUS_OK, SOFTBUS_LOCK_ERR,
         DISC_COAP, "lock failed");
     SOFTBUS_DPRINTF(fd, "\n-----------------NstackxLocalDevInfo-------------------\n");
     SOFTBUS_DPRINTF(fd, "name                                : %s\n", g_localDeviceInfo->name);
-    DataMasking(g_localDeviceInfo->deviceId, NSTACKX_MAX_DEVICE_ID_LEN, ID_DELIMITER, deviceId);
-    SOFTBUS_DPRINTF(fd, "deviceId                            : %s\n", deviceId);
-    SOFTBUS_DPRINTF(fd, "localIfInfo networkName             : %s\n", g_localDeviceInfo->localIfInfo->networkName);
+    Anonymize(g_localDeviceInfo->deviceId, &anonymizedInfo);
+    SOFTBUS_DPRINTF(fd, "deviceId                            : %s\n", AnonymizeWrapper(anonymizedInfo));
+    AnonymizeFree(anonymizedInfo);
+    Anonymize(g_localDeviceInfo->localIfInfo->networkName, &anonymizedInfo);
+    SOFTBUS_DPRINTF(fd, "localIfInfo networkName             : %s\n", AnonymizeWrapper(anonymizedInfo));
+    AnonymizeFree(anonymizedInfo);
     SOFTBUS_DPRINTF(fd, "ifNums                              : %d\n", g_localDeviceInfo->ifNums);
     SOFTBUS_DPRINTF(fd, "deviceType                          : %d\n", g_localDeviceInfo->deviceType);
     SOFTBUS_DPRINTF(fd, "businessType                        : %d\n", g_localDeviceInfo->businessType);
