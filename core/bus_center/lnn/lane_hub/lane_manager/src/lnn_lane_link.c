@@ -234,6 +234,16 @@ static bool LaneLinkAddrOfUsb(const LaneLinkInfo *sourceLink, const LaneLinkInfo
     return true;
 }
 
+static bool LaneLinkAddrOfDefault(const LaneLinkInfo *sourceLink, const LaneLinkInfo *linkInfoItem)
+{
+    if (sourceLink == NULL || linkInfoItem == NULL) {
+        LNN_LOGE(LNN_LANE, "invalid param");
+        return false;
+    }
+    LNN_LOGE(LNN_LANE, "invalid linkType=%{public}d", sourceLink->type);
+    return false;
+}
+
 static CompareLinkAddr g_linkAddrCheck[LANE_LINK_TYPE_BUTT] = {
     [LANE_BR] = LaneLinkAddrOfBr,
     [LANE_BLE] = LaneLinkAddrOfBle,
@@ -248,6 +258,9 @@ static CompareLinkAddr g_linkAddrCheck[LANE_LINK_TYPE_BUTT] = {
     [LANE_USB] = LaneLinkAddrOfUsb,
     [LANE_SLE] = LaneLinkAddrOfSle,
     [LANE_SLE_DIRECT] = LaneLinkAddrOfSle,
+    [LANE_HML_RAW] = LaneLinkAddrOfDefault,
+    [LANE_BLE_REUSE] = LaneLinkAddrOfDefault,
+    [LANE_P2P_REUSE] = LaneLinkAddrOfDefault,
 };
 
 static LaneResource* GetValidLaneResource(const LaneLinkInfo *linkInfoItem)
