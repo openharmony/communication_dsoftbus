@@ -779,9 +779,6 @@ int32_t TransCloseChannel(const char *sessionName, int32_t channelId, int32_t ch
 {
     SoftBusHitraceChainBegin("TransCloseChannel");
     int32_t ret = TransCommonCloseChannel(sessionName, channelId, channelType);
-    if (IsTdcRecoveryTransLimit() && IsUdpRecoveryTransLimit()) {
-        UdpChannelFileTransRecoveryLimit(FILE_PRIORITY_BE);
-    }
     SoftBusHitraceChainEnd();
     return ret;
 }

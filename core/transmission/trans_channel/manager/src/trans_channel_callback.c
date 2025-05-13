@@ -121,9 +121,6 @@ static int32_t TransServerOnChannelOpened(const char *pkgName, int32_t pid, cons
     if (channel->channelType == CHANNEL_TYPE_TCP_DIRECT && ret != SOFTBUS_OK) {
         (void)TransDelTcpChannelInfoByChannelId(channel->channelId);
     }
-    if (!IsTdcRecoveryTransLimit() || !IsUdpRecoveryTransLimit()) {
-        (void)UdpChannelFileTransLimit(channel, FILE_PRIORITY_BK);
-    }
     return ret;
 }
 
@@ -149,9 +146,6 @@ static int32_t TransServerOnChannelClosed(
     if (ClientIpcOnChannelClosed(&data) != SOFTBUS_OK) {
         TRANS_LOGE(TRANS_CTRL, "client ipc on channel close fail");
         return SOFTBUS_IPC_ERR;
-    }
-    if (IsTdcRecoveryTransLimit() && IsUdpRecoveryTransLimit()) {
-        UdpChannelFileTransRecoveryLimit(FILE_PRIORITY_BE);
     }
     return SOFTBUS_OK;
 }
