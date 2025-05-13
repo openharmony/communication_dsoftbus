@@ -16,6 +16,8 @@
 #ifndef LNN_SERVICE_TIMER_H
 #define LNN_SERVICE_TIMER_H
 
+#include <stdint.h>
+
 #ifdef __cplusplus
 extern "C" {
 #endif

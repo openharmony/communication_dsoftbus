@@ -65,8 +65,3 @@ int32_t LnnSyncBleOfflineMsg(void)
 {
     return SOFTBUS_OK;
 }
-
-void BleOfflineOnceEndTimerCallback(void)
-{
-    LNN_LOGI(LNN_BUILDER, "BleOfflineOnceEndTimerCallback virtual ok");
-}
