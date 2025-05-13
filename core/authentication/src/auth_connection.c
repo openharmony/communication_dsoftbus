@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2022 Huawei Device Co., Ltd.
+ * Copyright (c) 2022-2025 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -878,10 +878,16 @@ void DisconnectAuthDevice(uint64_t *connId)
             UpdateFd(connId, AUTH_INVALID_FD);
             break;
         case AUTH_LINK_TYPE_WIFI:
+            if (IsExistWifiConnItemByConnId(GetFd(*connId))) {
+                DeleteWifiConnItemByConnId(GetFd(*connId));
+            }
             SocketDisconnectDevice(AUTH, GetFd(*connId));
             UpdateFd(connId, AUTH_INVALID_FD);
             break;
         case AUTH_LINK_TYPE_USB:
+            if (IsExistWifiConnItemByConnId(GetFd(*connId))) {
+                DeleteWifiConnItemByConnId(GetFd(*connId));
+            }
             SocketDisconnectDevice(AUTH_USB, GetFd(*connId));
             UpdateFd(connId, AUTH_INVALID_FD);
             break;

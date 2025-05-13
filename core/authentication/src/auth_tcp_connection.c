@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2022 Huawei Device Co., Ltd.
+ * Copyright (c) 2022-2025 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -361,6 +361,10 @@ FAIL:
 
 static int32_t ProcessSocketInEvent(ListenerModule module, int32_t fd)
 {
+    if ((module == AUTH || module == AUTH_USB) && !IsExistWifiConnItemByConnId(fd)) {
+        AUTH_LOGI(AUTH_CONN, "fd=%{public}d not exist, ignore", fd);
+        return SOFTBUS_INVALID_FD;
+    }
     SocketPktHead head = { 0 };
     int32_t ret = RecvPacketHead(module, fd, &head);
     if (ret != SOFTBUS_OK) {
@@ -595,6 +599,26 @@ static ConnectOption GetConnectOptionByIfname(int32_t ifnameIdx, int32_t port)
     return option;
 }
 
+static int32_t SetTcpKeepaliveAndIpTos(bool isBlockMode, int32_t ifnameIdx, TriggerType triggerMode,
+    ListenerModule module, int32_t fd)
+{
+    if (ConnSetTcpKeepalive(fd, (int32_t)DEFAULT_FREQ_CYCLE, TCP_KEEPALIVE_INTERVAL, TCP_KEEPALIVE_DEFAULT_COUNT) !=
+        SOFTBUS_OK) {
+        AUTH_LOGE(AUTH_CONN, "set tcp keep alive fail.");
+        (void)DelTrigger(module, fd, triggerMode);
+        ConnShutdownSocket(fd);
+        return AUTH_INVALID_FD;
+    }
+    int32_t ipTos = TCP_KEEPALIVE_TOS_VAL;
+    if (SoftBusSocketSetOpt(fd, SOFTBUS_IPPROTO_IP_, SOFTBUS_IP_TOS_, &ipTos, sizeof(ipTos)) != SOFTBUS_ADAPTER_OK) {
+        AUTH_LOGE(AUTH_CONN, "set option fail.");
+        (void)DelTrigger(module, fd, triggerMode);
+        ConnShutdownSocket(fd);
+        return AUTH_INVALID_FD;
+    }
+    return fd;
+}
+
 int32_t SocketConnectDevice(const char *ip, int32_t port, bool isBlockMode, int32_t ifnameIdx)
 {
     CHECK_NULL_PTR_RETURN_VALUE(ip, AUTH_INVALID_FD);
@@ -622,26 +646,17 @@ int32_t SocketConnectDevice(const char *ip, int32_t port, bool isBlockMode, int3
     int32_t fd = ret;
     TriggerType triggerMode = isBlockMode ? READ_TRIGGER : WRITE_TRIGGER;
     ListenerModule module = (ifnameIdx == USB_IF) ? AUTH_USB : AUTH;
+    if (isBlockMode && AddWifiConnItem(fd) != SOFTBUS_OK) {
+        AUTH_LOGE(AUTH_CONN, "insert wifi conn item fail.");
+        ConnShutdownSocket(fd);
+        return AUTH_INVALID_FD;
+    }
     if (AddTrigger(module, fd, triggerMode) != SOFTBUS_OK) {
         AUTH_LOGE(AUTH_CONN, "AddTrigger fail.");
         ConnShutdownSocket(fd);
         return AUTH_INVALID_FD;
     }
-    if (ConnSetTcpKeepalive(fd, (int32_t)DEFAULT_FREQ_CYCLE, TCP_KEEPALIVE_INTERVAL, TCP_KEEPALIVE_DEFAULT_COUNT) !=
-        SOFTBUS_OK) {
-        AUTH_LOGE(AUTH_CONN, "set tcp keep alive fail.");
-        (void)DelTrigger(module, fd, triggerMode);
-        ConnShutdownSocket(fd);
-        return AUTH_INVALID_FD;
-    }
-    int32_t ipTos = TCP_KEEPALIVE_TOS_VAL;
-    if (SoftBusSocketSetOpt(fd, SOFTBUS_IPPROTO_IP_, SOFTBUS_IP_TOS_, &ipTos, sizeof(ipTos)) != SOFTBUS_ADAPTER_OK) {
-        AUTH_LOGE(AUTH_CONN, "set option fail.");
-        (void)DelTrigger(module, fd, triggerMode);
-        ConnShutdownSocket(fd);
-        return AUTH_INVALID_FD;
-    }
-    return fd;
+    return SetTcpKeepaliveAndIpTos(isBlockMode, ifnameIdx, triggerMode, module, fd);
 }
 
 int32_t NipSocketConnectDevice(ListenerModule module, const char *addr, int32_t port, bool isBlockMode)
