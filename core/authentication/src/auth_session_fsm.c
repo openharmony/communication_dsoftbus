@@ -1817,7 +1817,6 @@ int32_t AuthSessionStartAuth(const AuthParam *authParam, const AuthConnInfo *con
         ReleaseAuthLock();
         return SOFTBUS_MEM_ERR;
     }
-    DeleteWifiConnItemByConnId(GetConnId(authParam->connId));
     authFsm->info.isNeedFastAuth = authParam->isFastAuth;
     (void)UpdateLocalAuthState(authFsm->authSeq, &authFsm->info);
     AuthFsmStateIndex nextState = STATE_SYNC_DEVICE_ID;
