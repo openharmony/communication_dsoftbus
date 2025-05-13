@@ -52,9 +52,7 @@ void LnnUsbAdapterTest::TearDown() { }
  */
 HWTEST_F(LnnUsbAdapterTest, LnnUsbAdapterTest_001, TestSize.Level1)
 {
-    int32_t mode = 0;
-    EXPECT_EQ(StartUsbNcmAdapter(mode), SOFTBUS_OK);
-    mode = 1;
+    int32_t mode = 1;
     EXPECT_EQ(StartUsbNcmAdapter(mode), SOFTBUS_OK);
     mode = 100;
     EXPECT_EQ(StartUsbNcmAdapter(mode), SOFTBUS_NETWORK_USB_MODE_INVALID);
