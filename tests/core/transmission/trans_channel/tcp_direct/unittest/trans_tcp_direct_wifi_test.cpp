@@ -36,6 +36,7 @@
 #define NETWORK_ID_LEN 7
 #define NORMAL_CHANNEL 1011
 #define NORMAL_FD 155
+#define IP_LEN 46
 
 using namespace testing;
 using namespace testing::ext;
@@ -67,6 +68,8 @@ extern "C" {
         return;
     }
 }
+
+const char *Ipv6 = "::1%lo";
 
 class TransTcpDirectWifiTest : public testing::Test {
 public:
@@ -322,5 +325,45 @@ HWTEST_F(TransTcpDirectWifiTest, OpenTcpDirectChannelTest009, TestSize.Level1)
 
     SoftBusFree(appInfo);
     SoftBusFree(connInfo);
+}
+
+/**
+ * @tc.name: OpenTcpDirectChannelTest010
+ * @tc.desc: OpenTcpDirectChannel, test usb channel.
+ * @tc.type: FUNC
+ * @tc.require:
+ */
+HWTEST_F(TransTcpDirectWifiTest, OpenTcpDirectChannelTest010, TestSize.Level1)
+{
+    AppInfo *appInfo = (AppInfo *)SoftBusCalloc(sizeof(AppInfo));
+    ASSERT_TRUE(appInfo != nullptr);
+    ConnectOption *connInfo = (ConnectOption *)SoftBusCalloc(sizeof(ConnectOption));
+    if (connInfo == nullptr) {
+        SoftBusFree(appInfo);
+        ASSERT_TRUE(connInfo != nullptr);
+    }
+
+    SessionConn *conn = (SessionConn *)SoftBusCalloc(sizeof(SessionConn));
+    if (conn == nullptr) {
+        SoftBusFree(appInfo);
+        SoftBusFree(connInfo);
+        ASSERT_TRUE(conn != nullptr);
+    }
+
+    int32_t channelId = NORMAL_CHANNEL;
+    connInfo->type = CONNECT_TCP;
+    (void)memcpy_s(connInfo->socketOption.addr, IP_LEN, Ipv6, IP_LEN);
+    connInfo->socketOption.moduleId = DIRECT_CHANNEL_SERVER_USB;
+    connInfo->socketOption.protocol = LNN_PROTOCOL_USB;
+    NiceMock<TransTcpDirectWifiInterfaceMock> TcpWifiMock;
+    EXPECT_CALL(TcpWifiMock, CreateNewSessinConn).WillOnce(Return(conn));
+    EXPECT_CALL(TcpWifiMock, ConnOpenClientSocket).WillOnce(Return(NORMAL_FD));
+    EXPECT_CALL(TcpWifiMock, AddTrigger).WillOnce(Return(SOFTBUS_OK));
+    int32_t ret = OpenTcpDirectChannel(appInfo, connInfo, &channelId);
+    EXPECT_EQ(SOFTBUS_OK, ret);
+
+    SoftBusFree(appInfo);
+    SoftBusFree(connInfo);
+    SoftBusFree(conn);
 }
 }

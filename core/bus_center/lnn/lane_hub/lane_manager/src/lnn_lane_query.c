@@ -271,7 +271,7 @@ static int32_t UsbLinkState(const char *networkId)
         LNN_LOGE(LNN_LANE, "get remote node info fail");
         return SOFTBUS_LANE_GET_LEDGER_INFO_ERR;
     }
-    if (!LnnHasDiscoveryType(&node, DISCOVERY_TYPE_USB) && !LnnHasDiscoveryType(&node, DISCOVERY_TYPE_LSA)) {
+    if (!LnnHasDiscoveryType(&node, DISCOVERY_TYPE_USB)) {
         LNN_LOGE(LNN_LANE, "peer node not USB online");
         return SOFTBUS_NETWORK_NODE_OFFLINE;
     }
