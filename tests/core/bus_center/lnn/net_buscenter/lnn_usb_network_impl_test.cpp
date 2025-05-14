@@ -111,7 +111,7 @@ HWTEST_F(LNNUsbNetworkImplMockTest, LNN_USB_NETWORK_IMPL_TEST_002, TestSize.Leve
     res = LnnInitUsbProtocol(&self);
     EXPECT_NE(res, SOFTBUS_OK);
     res = LnnInitUsbProtocol(&self);
-    EXPECT_TRUE(res == SOFTBUS_OK);
+    EXPECT_EQ(res, SOFTBUS_OK);
 }
 
 /*
@@ -144,13 +144,13 @@ HWTEST_F(LNNUsbNetworkImplMockTest, LNN_USB_NETWORK_IMPL_TEST_004, TestSize.Leve
     EXPECT_CALL(usbMock, LnnNotifyPhysicalSubnetStatusChanged).WillRepeatedly(Return());
 
     VisitNextChoice visit = NotifyUsbAddressChanged(nullptr, nullptr);
-    EXPECT_TRUE(visit == CHOICE_VISIT_NEXT);
+    EXPECT_EQ(visit, CHOICE_VISIT_NEXT);
     netifMgr.type = LNN_NETIF_TYPE_WLAN;
     visit = NotifyUsbAddressChanged(&netifMgr, nullptr);
-    EXPECT_TRUE(visit == CHOICE_VISIT_NEXT);
+    EXPECT_EQ(visit, CHOICE_VISIT_NEXT);
     netifMgr.type = LNN_NETIF_TYPE_USB;
     visit = NotifyUsbAddressChanged(&netifMgr, nullptr);
-    EXPECT_TRUE(visit == CHOICE_VISIT_NEXT);
+    EXPECT_EQ(visit, CHOICE_VISIT_NEXT);
 }
 
 /*
@@ -331,7 +331,7 @@ HWTEST_F(LNNUsbNetworkImplMockTest, LNN_USB_NETWORK_IMPL_TEST_009, TestSize.Leve
     res = GetIpEventInOther(&subnet);
     EXPECT_EQ(res, USB_SUBNET_MANAGER_EVENT_IF_DOWN);
 
-    res = GetIpEventInOther(&subnet); 
+    res = GetIpEventInOther(&subnet);
     EXPECT_EQ(res, USB_SUBNET_MANAGER_EVENT_IF_READY);
 }
 
@@ -361,7 +361,7 @@ HWTEST_F(LNNUsbNetworkImplMockTest, LNN_USB_NETWORK_IMPL_TEST_010, TestSize.Leve
     ret = RequestMainPort("deviceName", "::2");
     EXPECT_NE(ret, SOFTBUS_OK);
     ret = RequestMainPort("deviceName", "::2");
-    EXPECT_TRUE(ret == SOFTBUS_OK);
+    EXPECT_EQ(ret, SOFTBUS_OK);
 }
 
 /*
@@ -415,9 +415,9 @@ HWTEST_F(LNNUsbNetworkImplMockTest, LNN_USB_NETWORK_IMPL_TEST_012, TestSize.Leve
     ret = OpenSessionPort();
     EXPECT_NE(ret, SOFTBUS_OK);
     ret = OpenSessionPort();
-    EXPECT_TRUE(ret == SOFTBUS_OK);
+    EXPECT_EQ(ret, SOFTBUS_OK);
     ret = OpenSessionPort();
-    EXPECT_TRUE(ret == SOFTBUS_OK);
+    EXPECT_EQ(ret, SOFTBUS_OK);
 }
 
 /*
@@ -527,7 +527,7 @@ HWTEST_F(LNNUsbNetworkImplMockTest, LNN_USB_NETWORK_IMPL_TEST_015, TestSize.Leve
     ret = ReleaseMainPort("deviceName1");
     EXPECT_NE(ret, SOFTBUS_OK);
     ret = ReleaseMainPort("deviceName");
-    EXPECT_TRUE(ret == SOFTBUS_OK);
+    EXPECT_EQ(ret, SOFTBUS_OK);
 
     EXPECT_CALL(usbMock, LnnGetAddrTypeByIfName)
         .WillOnce(Return(SOFTBUS_INVALID_PARAM))
@@ -614,11 +614,11 @@ HWTEST_F(LNNUsbNetworkImplMockTest, LNN_USB_NETWORK_IMPL_TEST_018, TestSize.Leve
     ret = strcpy_s(event.ifName, sizeof("ncm0"), "ncm0");
     ASSERT_EQ(ret, EOK);
     UsbNcmChangeHandler((const LnnEventBasicInfo *)&event);
-    EXPECT_EQ(event.status , SOFTBUS_NETMANAGER_IFNAME_REMOVED);
+    EXPECT_EQ(event.status, SOFTBUS_NETMANAGER_IFNAME_REMOVED);
 
     event.status = SOFTBUS_NETMANAGER_IFNAME_ADDED;
     UsbNcmChangeHandler((const LnnEventBasicInfo *)&event);
-    EXPECT_NE(event.status , SOFTBUS_NETMANAGER_IFNAME_REMOVED);
+    EXPECT_NE(event.status, SOFTBUS_NETMANAGER_IFNAME_REMOVED);
 }
 
 /*
@@ -635,4 +635,4 @@ HWTEST_F(LNNUsbNetworkImplMockTest, LNN_USB_NETWORK_IMPL_TEST_019, TestSize.Leve
     EXPECT_EQ(ret, SOFTBUS_OK);
 }
 
-} // namespace OHOS 
+} // namespace OHOS

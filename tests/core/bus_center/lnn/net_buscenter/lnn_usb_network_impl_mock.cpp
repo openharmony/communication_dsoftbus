@@ -44,12 +44,12 @@ static LnnUsbNetworkImplInterface *GetLnnUsbNetworkImplInterface()
 
 int32_t LnnUsbNetworkImplInterfaceMock::ActionOfGetNetworkIpv6ByIfName(const char *ifName, char *ip, uint32_t len)
 {
-    if (ifName == NULL || ip == NULL) {
-        LNN_LOGE(COMM_ADAPTER, "ifName or ip buffer is NULL!");
+    if (ifName == nullptr || ip == nullptr) {
+        LNN_LOGE(LNN_TEST, "ifName or ip buffer is NULL!");
         return SOFTBUS_INVALID_PARAM;
     }
     if (len < INET6_ADDRSTRLEN) {
-        LNN_LOGE(COMM_ADAPTER, "len value is not long enough !");
+        LNN_LOGE(LNN_TEST, "len value is not long enough !");
         return SOFTBUS_INVALID_PARAM;
     }
     if (memcpy_s(ip, strlen("::2") + 1, "::2", strlen("::2") + 1) != EOK) {
@@ -61,12 +61,12 @@ int32_t LnnUsbNetworkImplInterfaceMock::ActionOfGetNetworkIpv6ByIfName(const cha
 
 int32_t LnnUsbNetworkImplInterfaceMock::ActionOfGetNetworkIpv6ByIfName2(const char *ifName, char *ip, uint32_t len)
 {
-    if (ifName == NULL || ip == NULL) {
-        LNN_LOGE(COMM_ADAPTER, "ifName or ip buffer is NULL!");
+    if (ifName == nullptr || ip == nullptr) {
+        LNN_LOGE(LNN_TEST, "ifName or ip buffer is NULL!");
         return SOFTBUS_INVALID_PARAM;
     }
     if (len < INET6_ADDRSTRLEN) {
-        LNN_LOGE(COMM_ADAPTER, "len value is not long enough !");
+        LNN_LOGE(LNN_TEST, "len value is not long enough !");
         return SOFTBUS_INVALID_PARAM;
     }
     if (memcpy_s(ip, strlen("::3") + 1, "::3", strlen("::3") + 1) != EOK) {
@@ -80,6 +80,10 @@ int32_t LnnUsbNetworkImplInterfaceMock::ActionOfLnnGetLocalStrInfoByIfnameIdx(
     InfoKey key, char *info, uint32_t len, int32_t ifIdx)
 {
     (void)ifIdx;
+    if (info == nullptr) {
+        LNN_LOGE(LNN_TEST, "para error");
+        return SOFTBUS_INVALID_PARAM;
+    }
     if (key == STRING_KEY_NET_IF_NAME) {
         if (strcpy_s(info, len, "deviceName") != EOK) {
             return SOFTBUS_STRCPY_ERR;
