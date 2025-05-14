@@ -96,7 +96,7 @@ static int32_t GetRemoteUdidByBtMac(const char *peerMac, char *udid, int32_t len
     }
     ret = LnnGetRemoteStrInfo(networkId, STRING_KEY_DEV_UDID, udid, len);
     if (ret != SOFTBUS_OK) {
-        TRANS_LOGE(TRANS_CTRL, "LnnGetRemoteStrInfo UDID fail, peerMac=%{public}s", tmpMac);
+        TRANS_LOGE(TRANS_CTRL, "LnnGetRemoteStrInfo UDID fail, peerMac=%{public}s", AnonymizeWrapper(tmpMac));
     }
     AnonymizeFree(tmpMac);
     return ret;
