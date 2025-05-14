@@ -262,7 +262,6 @@ void LnnLedgerInfoStatusSet(void)
     LnnInitDeviceInfoStatusSet(LEDGER_INFO_UDID, udidStat);
     InitDepsStatus netStat = node->networkId[0] != '\0' ? DEPS_STATUS_SUCCESS : DEPS_STATUS_FAILED;
     LnnInitDeviceInfoStatusSet(LEDGER_INFO_NETWORKID, netStat);
-
     if ((netStat == DEPS_STATUS_SUCCESS) && (udidStat == DEPS_STATUS_SUCCESS) && (netStat == DEPS_STATUS_SUCCESS)) {
         LNN_LOGI(LNN_TEST, "Device info all ready.");
         g_isDeviceInfoSet = true;

@@ -877,6 +877,7 @@ int32_t LnnInitNetBuilderDelay(void)
         return ret;
     }
 #ifndef ENABLE_FEATURE_DATAMGR_SERVICE
+    LNN_LOGI(LNN_INIT, "no data manager, release datashare init monitor");
     LnnNotifyDataShareStateChangeEvent(SOFTBUS_DATA_SHARE_READY);
 #endif
     return SOFTBUS_OK;
