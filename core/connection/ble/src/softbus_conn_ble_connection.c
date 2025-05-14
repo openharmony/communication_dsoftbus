@@ -531,6 +531,7 @@ void ConnBleRefreshIdleTimeout(ConnBleConnection *connection)
 
 void ConnBleCancelIdleTimeout(ConnBleConnection *connection)
 {
+    CONN_CHECK_AND_RETURN_LOGE(connection != NULL, CONN_BLE, "cancel failed, connection is null");
     ConnRemoveMsgFromLooper(
         &g_bleConnectionAsyncHandler, MSG_CONNECTION_IDLE_DISCONNECT_TIMEOUT, connection->connectionId, 0, NULL);
     int32_t status = SoftBusMutexLock(&connection->lock);

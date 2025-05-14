@@ -26,7 +26,7 @@ extern "C" {
 
 void ClearGeneralConnection(const char *pkgName, int32_t pid);
 
-int32_t InitGeneralConnection();
+int32_t InitGeneralConnection(void);
 
 #ifdef __cplusplus
 #if __cplusplus

@@ -27,7 +27,6 @@
 #define BUNDLE_NAME         "bundle_name"
 #define UPDATE_HANDLE       "update_handle"
 
-
 static OutData *ConstructOutData(GeneralConnectionInfo *info, GeneralConnectionMsgType msgType, const char *payload)
 {
     OutData *outData = (OutData *)SoftBusCalloc(sizeof(OutData));

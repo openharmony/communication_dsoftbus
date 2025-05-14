@@ -40,11 +40,7 @@ typedef struct {
 typedef struct {
     ListNode node;
     GeneralConnectionParam info;
-} Name;
-
-typedef struct {
-    SoftBusList *names;
-} GeneralNames;
+} Server;
 
 struct GeneralConnection {
     ListNode node;
