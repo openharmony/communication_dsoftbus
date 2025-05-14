@@ -679,14 +679,14 @@ int32_t WriteInt32ToBuf(uint8_t *buf, uint32_t dataLen, int32_t *offSet, int32_t
     return SOFTBUS_OK;
 }
 
-int32_t WriteUint64ToBuf(uint8_t *buf, uint32_t dataLen, int32_t *offSet, uint64_t data)
+int32_t WriteUint64ToBuf(uint8_t *buf, uint32_t bufLen, int32_t *offSet, uint64_t data)
 {
     int32_t ret = CheckParamIsNull(buf, offSet);
     if (ret != SOFTBUS_OK) {
         return ret;
     }
-    if (dataLen < *offSet + sizeof(data)) {
-        COMM_LOGE(COMM_UTILS, "write data is long than dataLen!");
+    if (bufLen < *offSet + sizeof(data)) {
+        COMM_LOGE(COMM_UTILS, "write data is long than bufLen!");
         return SOFTBUS_TRANS_INVALID_DATA_LENGTH;
     }
     *((uint64_t *)(buf + *offSet)) = data;
@@ -803,14 +803,14 @@ int32_t ReadStringLenFormBuf(uint8_t *buf, uint32_t bufLen, int32_t *offSet, uin
         return SOFTBUS_INVALID_PARAM;
     }
     if (bufLen < *offSet + sizeof(uint32_t)) {
-        COMM_LOGE(COMM_UTILS, "Read string len is long than dataLen!");
+        COMM_LOGE(COMM_UTILS, "Read string len is long than bufLen!");
         return SOFTBUS_TRANS_INVALID_DATA_LENGTH;
     }
     *len = *((uint32_t *)(buf + *offSet));
     return SOFTBUS_OK;
 }
 
-int32_t ReadStringFromBuf(uint8_t *buf, uint32_t bufLen, int32_t *offSet, char *data, uint32_t *dataLen)
+int32_t ReadStringFromBuf(uint8_t *buf, uint32_t bufLen, int32_t *offSet, char *data, uint32_t dataLen)
 {
     int32_t ret = CheckParamIsNull(buf, offSet);
     if (ret != SOFTBUS_OK) {
@@ -821,20 +821,24 @@ int32_t ReadStringFromBuf(uint8_t *buf, uint32_t bufLen, int32_t *offSet, char *
         return SOFTBUS_INVALID_PARAM;
     }
     if (bufLen < *offSet + sizeof(uint32_t)) {
-        COMM_LOGE(COMM_UTILS, "Read data is long than dataLen!");
+        COMM_LOGE(COMM_UTILS, "Read data is long than bufLen!");
         return SOFTBUS_TRANS_INVALID_DATA_LENGTH;
     }
-    *dataLen = *((uint32_t *)(buf + *offSet));
+    uint32_t inDataLen = *((uint32_t *)(buf + *offSet));
     *offSet += sizeof(uint32_t);
-    if (bufLen < *offSet + *dataLen) {
-        COMM_LOGE(COMM_UTILS, "Read data is long than dataLen!");
+    if (bufLen < *offSet + inDataLen) {
+        COMM_LOGE(COMM_UTILS, "Read data is long than bufLen!");
         return SOFTBUS_TRANS_INVALID_DATA_LENGTH;
     }
-    if (memcpy_s(data, *dataLen, buf + *offSet, *dataLen) != EOK) {
+    if (inDataLen > dataLen) {
+        COMM_LOGE(COMM_UTILS, "string data is long than datalen!");
+        return SOFTBUS_TRANS_INVALID_DATA_LENGTH;
+    }
+    if (memcpy_s(data, dataLen, buf + *offSet, inDataLen) != EOK) {
         COMM_LOGE(COMM_UTILS, "data copy failed!");
         return SOFTBUS_MEM_ERR;
     }
-    *offSet += *dataLen;
+    *offSet += inDataLen;
     return SOFTBUS_OK;
 }
 

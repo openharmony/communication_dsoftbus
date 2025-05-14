@@ -28,6 +28,7 @@ extern "C" {
 #define NO_NEED_UK   0
 #define USE_NEGO_UK  1
 #define ENCRYPT_KEY_LENGTH 60 //User Key encrypt SessionKey length
+#define BASE64_SESSION_KEY_LEN 45
 #define BASE64_ENCRYPT_KEY_LENGTH 83
 
 typedef struct {

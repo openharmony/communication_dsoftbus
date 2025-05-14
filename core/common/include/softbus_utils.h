@@ -112,7 +112,7 @@ int32_t WriteInt32ToBuf(uint8_t *buf, uint32_t dataLen, int32_t *offSet, int32_t
 
 int32_t WriteUint8ToBuf(uint8_t *buf, uint32_t dataLen, int32_t *offSet, uint8_t data);
 
-int32_t WriteUint64ToBuf(uint8_t *buf, uint32_t dataLen, int32_t *offSet, uint64_t data);
+int32_t WriteUint64ToBuf(uint8_t *buf, uint32_t bufLen, int32_t *offSet, uint64_t data);
 
 int32_t WriteStringToBuf(uint8_t *buf, uint32_t bufLen, int32_t *offSet, char *data, uint32_t dataLen);
 
@@ -124,7 +124,7 @@ int32_t ReadUint64FromBuf(uint8_t *buf, uint32_t dataLen, int32_t *offSet, uint6
 
 int32_t ReadStringLenFormBuf(uint8_t *buf, uint32_t bufLen, int32_t *offSet, uint32_t *len);
 
-int32_t ReadStringFromBuf(uint8_t *buf, uint32_t bufLen, int32_t *offSet, char *data, uint32_t *dataLen);
+int32_t ReadStringFromBuf(uint8_t *buf, uint32_t bufLen, int32_t *offSet, char *data, uint32_t dataLen);
 
 int32_t CalculateMbsTruncateSize(const char *multiByteStr, uint32_t capacity, uint32_t *truncatedSize);
 

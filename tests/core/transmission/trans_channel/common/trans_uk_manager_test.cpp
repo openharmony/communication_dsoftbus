@@ -232,7 +232,7 @@ HWTEST_F(TransUkManagerTest, UkDecryptAndAddSinkSessionKeyTest001, TestSize.Leve
 
     appInfo.channelCapability = 0x7;
     ret = DecryptAndAddSinkSessionKey(json, &appInfo);
-    EXPECT_EQ(SOFTBUS_OK, ret);
+    EXPECT_EQ(SOFTBUS_PARSE_JSON_ERR, ret);
 
     appInfo.channelCapability = 0xF;
     ret = DecryptAndAddSinkSessionKey(json, &appInfo);

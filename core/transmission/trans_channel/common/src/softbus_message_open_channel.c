@@ -240,8 +240,7 @@ static int32_t ParseMessageToAppInfo(const cJSON *msg, AppInfo *appInfo)
         appInfo->peerData.userId = INVALID_USER_ID;
     }
     (void)GetJsonObjectNumber64Item(msg, SOURCE_ACL_TOKEN_ID, (int64_t *)&appInfo->peerData.tokenId);
-    (void)GetJsonObjectStringItem(
-        msg, SOURCE_ACL_EXTRA_INFO, (appInfo->extraAccessInfo), EXTRA_ACCESS_INFO_LEN_MAX);
+    (void)GetJsonObjectStringItem(msg, SOURCE_ACL_EXTRA_INFO, appInfo->extraAccessInfo, EXTRA_ACCESS_INFO_LEN_MAX);
     appInfo->myHandleId = -1;
     appInfo->peerHandleId = -1;
     if (!GetJsonObjectInt32Item(msg, MY_HANDLE_ID, &(appInfo->peerHandleId)) ||

@@ -512,6 +512,10 @@ int32_t TransGetTokenIdBySessionName(const char *sessionName, uint64_t *tokenId)
 
 static int32_t CheckAccessInfoAndCalloc(SessionServer *pos, uint32_t strLen)
 {
+    if (strLen > EXTRA_ACCESS_INFO_LEN_MAX) {
+        TRANS_LOGE(TRANS_CTRL, "extra access info length over limit.");
+        return SOFTBUS_INVALID_PARAM;
+    }
     if (pos->accessInfo.extraAccessInfo == NULL) {
         pos->accessInfo.extraAccessInfo = (char *)SoftBusCalloc(strLen);
         if (pos->accessInfo.extraAccessInfo == NULL) {
