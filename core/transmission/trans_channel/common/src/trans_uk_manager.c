@@ -359,7 +359,14 @@ int32_t EncryptAndAddSinkSessionKey(cJSON *msg, const AppInfo *appInfo)
             }
             return SOFTBUS_OK;
         } else {
-            if (!AddStringToJsonObject(msg, "SESSION_KEY", appInfo->sinkSessionKey)) {
+            char base64Encode[BASE64_SESSION_KEY_LEN] = { 0 };
+            size_t len = 0;
+            if (SoftBusBase64Encode((unsigned char *)base64Encode, BASE64_SESSION_KEY_LEN, &len,
+                    (unsigned char *)appInfo->sinkSessionKey, sizeof(appInfo->sinkSessionKey)) != SOFTBUS_OK) {
+                TRANS_LOGE(TRANS_CTRL, "Failed to encode sink session key");
+                return SOFTBUS_CREATE_JSON_ERR;
+            }
+            if (!AddStringToJsonObject(msg, "SESSION_KEY", base64Encode)) {
                 TRANS_LOGE(TRANS_CTRL, "Failed to add sink session key");
                 return SOFTBUS_CREATE_JSON_ERR;
             }
@@ -389,10 +396,7 @@ int32_t DecryptAndAddSinkSessionKey(const cJSON *msg, AppInfo *appInfo)
                 return ret;
             }
             ret = AuthFindUkIdByAclInfo(&aclInfo, &appInfo->myData.userKeyId);
-            if (ret != SOFTBUS_OK) {
-                TRANS_LOGE(TRANS_CTRL, "find uk failed, ret=%{public}d", ret);
-                return ret;
-            }
+            TRANS_CHECK_AND_RETURN_RET_LOGE(ret == SOFTBUS_OK, ret, TRANS_CTRL, "find uk failed, ret=%{public}d", ret);
             char decodeEncryptKey[ENCRYPT_KEY_LENGTH] = { 0 };
             size_t len = 0;
             if (SoftBusBase64Decode((unsigned char *)decodeEncryptKey, ENCRYPT_KEY_LENGTH, &len,
@@ -409,7 +413,15 @@ int32_t DecryptAndAddSinkSessionKey(const cJSON *msg, AppInfo *appInfo)
             }
             return SOFTBUS_OK;
         } else {
-            (void)GetJsonObjectStringItem(msg, "SESSION_KEY", appInfo->sinkSessionKey, SESSION_KEY_LENGTH);
+            char encodeEncryptKey[BASE64_SESSION_KEY_LEN] = { 0 };
+            (void)GetJsonObjectStringItem(msg, "SESSION_KEY", encodeEncryptKey, BASE64_SESSION_KEY_LEN);
+            size_t len = 0;
+            if (SoftBusBase64Decode((unsigned char *)appInfo->sinkSessionKey, sizeof(appInfo->sinkSessionKey), &len,
+                    (unsigned char *)encodeEncryptKey, strlen(encodeEncryptKey)) != SOFTBUS_OK) {
+                TRANS_LOGE(TRANS_CTRL, "Failed to decode sink session key");
+                return SOFTBUS_PARSE_JSON_ERR;
+            }
+            return SOFTBUS_OK;
         }
     }
     return SOFTBUS_OK;

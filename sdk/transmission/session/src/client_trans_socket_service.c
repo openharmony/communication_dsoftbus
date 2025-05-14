@@ -331,12 +331,6 @@ static int32_t WriteAcessInfoToBuf(uint8_t *buf, uint32_t bufLen, char *sessionN
         TRANS_LOGE(TRANS_CTRL, "write sessionName to buf failed! ret=%{public}d", ret);
         return ret;
     }
-    ret = WriteStringToBuf(
-        buf, bufLen, &offSet, accessInfo->businessAccountId, strlen(accessInfo->businessAccountId) + 1);
-    if (ret != SOFTBUS_OK) {
-        TRANS_LOGE(TRANS_CTRL, "write businessAccountId to buf failed! ret=%{public}d", ret);
-        return ret;
-    }
     ret = WriteStringToBuf(buf, bufLen, &offSet, accessInfo->extraAccessInfo, strlen(accessInfo->extraAccessInfo) + 1);
     if (ret != SOFTBUS_OK) {
         TRANS_LOGE(TRANS_CTRL, "write extraAccessInfo to buf failed! ret=%{public}d", ret);
@@ -347,22 +341,21 @@ static int32_t WriteAcessInfoToBuf(uint8_t *buf, uint32_t bufLen, char *sessionN
 
 int32_t SetAccessInfo(int32_t socket, SocketAccessInfo accessInfo)
 {
-#define WRITE_BUF_PARAM_NUM 6 // tokenId + userId + 3 * string info len
+#define WRITE_BUF_PARAM_NUM 5 // tokenId + userId + 2 * string info len
     TRANS_LOGI(TRANS_SDK, "SetAccessInfo: socket=%{public}d", socket);
-    if (accessInfo.extraAccessInfo == NULL || accessInfo.extraAccessInfo == NULL) {
+    if (accessInfo.extraAccessInfo == NULL) {
         TRANS_LOGE(TRANS_SDK, "accessInfo param invalid, socket=%{public}d.", socket);
         return SOFTBUS_INVALID_PARAM;
     }
-    uint32_t accountIdLen = strnlen(accessInfo.businessAccountId, ACCOUNT_UID_LEN_MAX) + 1;
     uint32_t extraInfoLen = strnlen(accessInfo.extraAccessInfo, EXTRA_ACCESS_INFO_LEN_MAX) + 1;
-    TRANS_CHECK_AND_RETURN_RET_LOGE(accountIdLen <= ACCOUNT_UID_LEN_MAX && extraInfoLen <= EXTRA_ACCESS_INFO_LEN_MAX,
-        SOFTBUS_INVALID_PARAM, TRANS_SDK, "account id or extra info len over limit");
+    TRANS_CHECK_AND_RETURN_RET_LOGE(extraInfoLen <= EXTRA_ACCESS_INFO_LEN_MAX,
+        SOFTBUS_INVALID_PARAM, TRANS_SDK, "extra info len over limit");
     char sessionName[SESSION_NAME_SIZE_MAX] = { 0 };
     int32_t ret = ClientGetSessionNameBySessionId(socket, sessionName);
     TRANS_CHECK_AND_RETURN_RET_LOGE(
         ret == SOFTBUS_OK, ret, TRANS_SDK, "get sessionName by socket=%{public}d failed, ret=%{public}d", socket, ret);
 
-    uint32_t bufLen = sizeof(int32_t) * WRITE_BUF_PARAM_NUM + accountIdLen + extraInfoLen + strlen(sessionName) + 1;
+    uint32_t bufLen = sizeof(int32_t) * WRITE_BUF_PARAM_NUM + extraInfoLen + strlen(sessionName) + 1;
     uint8_t *buf = (uint8_t *)SoftBusCalloc(bufLen);
     if (buf == NULL) {
         TRANS_LOGE(TRANS_SDK, "malloc buf failed, socket=%{public}d.", socket);

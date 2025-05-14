@@ -1168,7 +1168,6 @@ static int32_t TransReportCheckCollabInfo(uint8_t *buf, uint32_t len)
 static int32_t TransSetAccessInfo(uint8_t *buf, uint32_t len)
 {
     char sessionName[SESSION_NAME_SIZE_MAX] = { 0 };
-    char businessAccountId[ACCOUNT_UID_LEN_MAX] = { 0 };
     char extraAccessInfo[EXTRA_ACCESS_INFO_LEN_MAX] = { 0 };
     int32_t offset = 0;
     int32_t userId = -1;
@@ -1183,26 +1182,19 @@ static int32_t TransSetAccessInfo(uint8_t *buf, uint32_t len)
         TRANS_LOGE(TRANS_CTRL, "get tokenId from buf failed.");
         return ret;
     }
-    uint32_t dataLen = 0;
-    ret = ReadStringFromBuf(buf, len, &offset, sessionName, &dataLen);
-    if (ret != SOFTBUS_OK || dataLen > SESSION_NAME_SIZE_MAX) {
+    ret = ReadStringFromBuf(buf, len, &offset, sessionName, SESSION_NAME_SIZE_MAX);
+    if (ret != SOFTBUS_OK) {
         TRANS_LOGE(TRANS_CTRL, "get sessionName from buf failed.");
         return ret;
     }
-    ret = ReadStringFromBuf(buf, len, &offset, businessAccountId, &dataLen);
-    if (ret != SOFTBUS_OK || dataLen > ACCOUNT_UID_LEN_MAX) {
-        TRANS_LOGE(TRANS_CTRL, "get business accountId from buf failed.");
-        return ret;
-    }
-    ret = ReadStringFromBuf(buf, len, &offset, extraAccessInfo, &dataLen);
-    if (ret != SOFTBUS_OK || dataLen > EXTRA_ACCESS_INFO_LEN_MAX) {
+    ret = ReadStringFromBuf(buf, len, &offset, extraAccessInfo, EXTRA_ACCESS_INFO_LEN_MAX);
+    if (ret != SOFTBUS_OK) {
         TRANS_LOGE(TRANS_CTRL, "get extraInfo from buf failed.");
         return ret;
     }
     AccessInfo accessInfo = {
         .userId = userId,
         .localTokenId = tokenId,
-        .businessAccountId = businessAccountId,
         .extraAccessInfo = extraAccessInfo,
     };
     ret = AddAccessInfoBySessionName(sessionName, &accessInfo);
