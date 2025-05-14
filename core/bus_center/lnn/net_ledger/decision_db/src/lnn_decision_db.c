@@ -157,7 +157,7 @@ static void StartCheckHukKeyTimeProc(void *para)
     int32_t ret = SOFTBUS_ERR;
     int64_t diffTime = WAIT_ONE_HOUR_QUERY_INTERVAL;
     if ((IsNeedUpdateHukKey(&diffTime)) && (UpdateKeyAndLocalInfo() == SOFTBUS_OK)) {
-        LNN_LOGI(LNN_LEDGER, "update key and local info sucess");
+        LNN_LOGI(LNN_LEDGER, "update key and local info success");
         LnnAsyncCallbackDelayHelper(
             GetLooper(LOOP_TYPE_DEFAULT), StartCheckHukKeyTimeProc, NULL, WAIT_SEVEN_DAYS_QUERY_INTERVAL);
         return;
@@ -1061,7 +1061,7 @@ static int32_t LnnUpdateDecisionDbKey()
             LNN_LOGE(LNN_LEDGER, "update decision db ce key fail");
             break;
         }
-        int32_t ret = GetDecisionDbKey(dbKey, sizeof(dbKey), true);
+        ret = GetDecisionDbKey(dbKey, sizeof(dbKey), true);
         if (ret != SOFTBUS_OK) {
             LNN_LOGE(LNN_LEDGER, "get decision dbKey fail");
             break;
