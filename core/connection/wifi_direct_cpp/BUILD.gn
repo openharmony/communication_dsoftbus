@@ -140,6 +140,7 @@ ohos_static_library("wifi_direct") {
       "init:libbegetutil",
       "json:nlohmann_json_static",
       "netmanager_base:net_conn_manager_if",
+      "samgr:samgr_proxy",
       "wifi:wifi_sdk",
     ]
 
