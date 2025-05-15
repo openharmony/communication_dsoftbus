@@ -997,7 +997,7 @@ static int32_t OnCheckDevStatus(FsmStateMachine *fsm, int32_t msgType, void *par
             break;
         }
         if (info == NULL || infoNum == 0) {
-            LNN_LOGI(LNN_HEART_BEAT, "check dev status get none online node");
+            LNN_LOGD(LNN_HEART_BEAT, "check dev status get none online node");
             ret = SOFTBUS_OK;
             break;
         }
