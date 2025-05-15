@@ -15,9 +15,11 @@
 
 #include "lnn_event_monitor_impl.h"
 
+#include "lnn_init_monitor.h"
 #include "softbus_error_code.h"
 
 int32_t LnnInitCommonEventMonitorImpl(void)
 {
+    LnnInitModuleStatusSet(INIT_DEPS_SCREEN_STATUS, DEPS_STATUS_FAILED);
     return SOFTBUS_OK;
 }

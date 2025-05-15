@@ -15,6 +15,7 @@
 
 #include "lnn_event_monitor_impl.h"
 
+#include "lnn_init_monitor.h"
 #include "softbus_error_code.h"
 
 int32_t ConfigNetLinkUp(const char *ifName)
@@ -41,6 +42,7 @@ int32_t ConfigRoute(const int32_t id, const char *ifName, const char *destinatio
 
 int32_t LnnInitNetManagerMonitorImpl(void)
 {
+    LnnInitModuleStatusSet(INIT_DEPS_USB, DEPS_STATUS_FAILED);
     return SOFTBUS_OK;
 }
 
