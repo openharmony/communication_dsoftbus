@@ -80,7 +80,7 @@ HWTEST_F(P2pAdapterTest, IsWifiConnectedTest, TestSize.Level1)
 
 /*
 * @tc.name: P2pConnectGroupTest
-* @tc.desc: p2p connect group
+* @tc.desc: p2p connect group -- winpc
 * @tc.type: FUNC
 * @tc.require:
 */
@@ -91,6 +91,49 @@ HWTEST_F(P2pAdapterTest, P2pConnectGroupTest, TestSize.Level1)
     EXPECT_CALL(mock, Hid2dConnect(_)).WillOnce(Return(WIFI_SUCCESS));
     int32_t ret = P2pAdapter::P2pConnectGroup(param);
     EXPECT_EQ(ret, SOFTBUS_OK);
+}
+
+/*
+* @tc.name: P2pConnectGroupTest01
+* @tc.desc: p2p connect group -- Non-winpc
+* @tc.type: FUNC
+* @tc.require:
+*/
+HWTEST_F(P2pAdapterTest, P2pConnectGroupTest01, TestSize.Level1)
+{
+    WifiDirectInterfaceMock mock;
+    P2pConnectParam param{"123\n01:02:03:04:05:06\n555\n16", true, false};
+    EXPECT_CALL(mock, Hid2dConnect(_)).WillOnce(Return(WIFI_SUCCESS));
+    int32_t ret = P2pAdapter::P2pConnectGroup(param);
+    EXPECT_EQ(ret, SOFTBUS_OK);
+}
+
+/*
+* @tc.name: P2pConnectGroupTest02
+* @tc.desc: p2p connect group -- groupConfig is empty
+* @tc.type: FUNC
+* @tc.require:
+*/
+HWTEST_F(P2pAdapterTest, P2pConnectGroupTest02, TestSize.Level1)
+{
+    WifiDirectInterfaceMock mock;
+    P2pConnectParam param{"", true, false};
+    int32_t ret = P2pAdapter::P2pConnectGroup(param);
+    EXPECT_EQ(ret, SOFTBUS_CONN_REMOTE_CONFIG_NULL);
+}
+
+/*
+* @tc.name: P2pConnectGroupTest03
+* @tc.desc: p2p connect group -- only part of the groupConfig
+* @tc.type: FUNC
+* @tc.require:
+*/
+HWTEST_F(P2pAdapterTest, P2pConnectGroupTest03, TestSize.Level1)
+{
+    WifiDirectInterfaceMock mock;
+    P2pConnectParam param{"123\n01:02:03:04:05:06", true, false};
+    int32_t ret = P2pAdapter::P2pConnectGroup(param);
+    EXPECT_EQ(ret, SOFTBUS_CONN_REMOTE_CONFIG_NULL);
 }
 
 /*
