@@ -27,7 +27,8 @@
 #include "softbus_error_code.h"
 
 namespace OHOS {
-    int32_t TransOnSessionOpened(const char *sessionName, const ChannelInfo *channel, SessionType flag)
+    int32_t TransOnSessionOpened(
+        const char *sessionName, const ChannelInfo *channel, SessionType flag, SocketAccessInfo *accessInfo)
     {
         return 0;
     }
@@ -191,7 +192,7 @@ namespace OHOS {
         if (memcpy_s(tmp, sizeof(tmp) - 1, data, sizeof(tmp) - 1) != EOK) {
             return;
         }
-        ClientTransTdcOnChannelOpened(tmp, nullptr);
+        ClientTransTdcOnChannelOpened(tmp, nullptr, nullptr);
     }
 
     void TransDisableSessionListenerTest(const uint8_t* data, size_t size)
@@ -231,7 +232,7 @@ namespace OHOS {
         if (ClientTransTdcSetCallBack(&cb) != SOFTBUS_OK) {
             return;
         }
-        ClientTransTdcOnSessionOpened(tmp, &channel);
+        ClientTransTdcOnSessionOpened(tmp, &channel, nullptr);
     }
 
     void ClientTransTdcOnSessionClosedTest(const uint8_t* data, size_t size)

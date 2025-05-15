@@ -18,7 +18,7 @@
 
 #include "softbus_app_info.h"
 #include "softbus_base_listener.h"
-#include "trans_uk_manager.h"
+
 #ifdef __cplusplus
 #if __cplusplus
 extern "C" {
@@ -48,7 +48,6 @@ typedef struct {
     int64_t req;
     ListNode node;
     AuthHandle authHandle;
-    UkIdInfo ukIdInfo;
     AppInfo appInfo;
 } SessionConn;
 
@@ -142,9 +141,7 @@ int32_t TransTdcResetReplyCnt(int32_t channelId);
 
 int32_t TransGetPkgNameByChanId(int32_t channelId, char *pkgName);
 
-int32_t SetSessionConnUkIdById(int32_t channelId, const UkIdInfo *ukIdInfo);
-
-int32_t GetSessionConnUkIdById(int32_t channelId, UkIdInfo *ukIdInfo);
+int32_t UpdateAccessInfoById(int32_t channelId, const AccessInfo *accessInfo);
 #ifdef __cplusplus
 #if __cplusplus
 }

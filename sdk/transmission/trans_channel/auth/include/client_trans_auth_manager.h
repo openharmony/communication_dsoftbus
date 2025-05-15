@@ -24,7 +24,8 @@ extern "C" {
 
 int32_t ClientTransAuthInit(const IClientSessionCallBack *cb);
 
-int32_t ClientTransAuthOnChannelOpened(const char *sessionName, const ChannelInfo *channel);
+int32_t ClientTransAuthOnChannelOpened(
+    const char *sessionName, const ChannelInfo *channel, SocketAccessInfo *accessInfo);
 
 int32_t ClientTransAuthOnChannelClosed(int32_t channelId, ShutdownReason reason);
 

@@ -329,7 +329,7 @@ static int32_t ClientTransSetTcpOption(int32_t fd)
     return SOFTBUS_OK;
 }
 
-int32_t ClientTransTdcOnChannelOpened(const char *sessionName, const ChannelInfo *channel)
+int32_t ClientTransTdcOnChannelOpened(const char *sessionName, const ChannelInfo *channel, SocketAccessInfo *accessInfo)
 {
     TRANS_CHECK_AND_RETURN_RET_LOGE(sessionName != NULL && channel != NULL,
         SOFTBUS_INVALID_PARAM, TRANS_SDK, "param invalid");
@@ -360,7 +360,7 @@ int32_t ClientTransTdcOnChannelOpened(const char *sessionName, const ChannelInfo
     TRANS_LOGI(TRANS_SDK, "add channelId=%{public}d, fd=%{public}d", item->channelId, channel->fd);
     (void)SoftBusMutexUnlock(&g_tcpDirectChannelInfoList->lock);
 
-    ret = ClientTransTdcOnSessionOpened(sessionName, channel);
+    ret = ClientTransTdcOnSessionOpened(sessionName, channel, accessInfo);
     if (ret != SOFTBUS_OK) {
         TransDelDataBufNode(channel->channelId);
         TransTdcDelChannelInfo(channel->channelId, ret);

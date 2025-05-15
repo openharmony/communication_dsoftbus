@@ -363,10 +363,9 @@ HWTEST_F(TransTcpDirectMessageStaticTest, ProcessReceivedData0011, TestSize.Leve
 {
     int32_t channelId = 1;
     int32_t ret;
-    int32_t pktModule;
     ret = TransSrvDataListInit();
     EXPECT_EQ(ret, SOFTBUS_OK);
-    ret = ProcessReceivedData(channelId, 0, &pktModule);
+    ret = ProcessReceivedData(channelId, 0);
     EXPECT_EQ(ret, SOFTBUS_TRANS_NODE_IS_NULL);
     TransSrvDataListDeinit();
 }
@@ -381,10 +380,9 @@ HWTEST_F(TransTcpDirectMessageStaticTest, TransTdcSrvProcData0012, TestSize.Leve
 {
     int32_t channelId = 1;
     int32_t ret;
-    int32_t pktModule;
     ret = TransSrvDataListInit();
     EXPECT_EQ(ret, SOFTBUS_OK);
-    ret = TransTdcSrvProcData(DIRECT_CHANNEL_SERVER_P2P, channelId, 0, &pktModule);
+    ret = TransTdcSrvProcData(DIRECT_CHANNEL_SERVER_P2P, channelId, 0);
     EXPECT_EQ(ret, SOFTBUS_TRANS_TCP_GET_SRV_DATA_FAILED);
     TransSrvDataListDeinit();
 }
@@ -600,7 +598,7 @@ HWTEST_F(TransTcpDirectMessageStaticTest, TransTdcPostReplyMsgTest001, TestSize.
     uint32_t seq = 1;
     uint32_t flags = 1;
 
-    int32_t ret = TransTdcPostReplyMsg(channelId, MODULE_SESSION, seq, flags, nullptr);
+    int32_t ret = TransTdcPostReplyMsg(channelId, seq, flags, nullptr);
     EXPECT_EQ(ret, SOFTBUS_INVALID_PARAM);
 }
 
@@ -890,17 +888,47 @@ HWTEST_F(TransTcpDirectMessageStaticTest, TransDealTdcChannelOpenResultTest001, 
     int32_t openResult = 1;
     int32_t channelId = 1;
     int32_t fd = 1;
-    int32_t ret = TransDealTdcChannelOpenResult(channelId, openResult);
+    AccessInfo accessInfo = { 0 };
+    int32_t ret = TransDealTdcChannelOpenResult(channelId, openResult, &accessInfo);
     EXPECT_EQ(ret, SOFTBUS_TRANS_GET_SESSION_CONN_FAILED);
     SessionConn *conn = TestSetSessionConn();
     ASSERT_TRUE(conn != nullptr);
     ret = TransTdcAddSessionConn(conn);
     EXPECT_EQ(ret, SOFTBUS_OK);
-    ret = TransDealTdcChannelOpenResult(channelId, openResult);
+    ret = TransDealTdcChannelOpenResult(channelId, openResult, &accessInfo);
     EXPECT_EQ(ret, SOFTBUS_TRANS_NODE_IS_NULL);
     ret = TransSrvAddDataBufNode(channelId, fd);
     EXPECT_EQ(ret, SOFTBUS_OK);
-    ret = TransDealTdcChannelOpenResult(channelId, openResult);
+    ret = TransDealTdcChannelOpenResult(channelId, openResult, &accessInfo);
+    EXPECT_EQ(ret, SOFTBUS_OK);
+    TransDelSessionConnById(channelId);
+}
+
+/**
+ * @tc.name: TransDealTdcChannelOpenResultTest001
+ * @tc.desc: TransDealTdcChannelOpenResult
+ * @tc.type: FUNC
+ * @tc.require:
+ */
+HWTEST_F(TransTcpDirectMessageStaticTest, TransDealTdcChannelOpenResultTest002, TestSize.Level1)
+{
+    int32_t openResult = SOFTBUS_OK;
+    int32_t channelId = 1;
+    int32_t fd = 1;
+    AccessInfo accessInfo = { 0 };
+    int32_t ret = TransDealTdcChannelOpenResult(channelId, openResult, &accessInfo);
+    EXPECT_EQ(ret, SOFTBUS_TRANS_GET_SESSION_CONN_FAILED);
+    SessionConn *conn = TestSetSessionConn();
+    ASSERT_TRUE(conn != nullptr);
+    conn->appInfo.myData.tokenType = 1;
+    conn->appInfo.channelCapability = 0xF;
+    ret = TransTdcAddSessionConn(conn);
+    EXPECT_EQ(ret, SOFTBUS_OK);
+    ret = TransDealTdcChannelOpenResult(channelId, openResult, &accessInfo);
+    EXPECT_EQ(ret, SOFTBUS_TRANS_NODE_IS_NULL);
+    ret = TransSrvAddDataBufNode(channelId, fd);
+    EXPECT_EQ(ret, SOFTBUS_OK);
+    ret = TransDealTdcChannelOpenResult(channelId, openResult, &accessInfo);
     EXPECT_EQ(ret, SOFTBUS_OK);
     TransDelSessionConnById(channelId);
 }
@@ -927,120 +955,5 @@ HWTEST_F(TransTcpDirectMessageStaticTest, TransAsyncTcpDirectChannelTaskTest001,
     conn->appInfo.waitOpenReplyCnt = LOOPER_REPLY_CNT_MAX - 1;
     TransAsyncTcpDirectChannelTask(channelId);
     TransDelSessionConnById(channelId);
-}
-
-/**
- * @tc.name: TransPackBytesWithUkTest001
- * @tc.desc: TransPackBytesWithUkTest001
- * @tc.type: FUNC
- * @tc.require:
- */
-HWTEST_F(TransTcpDirectMessageStaticTest, TransPackBytesWithUkTest001, TestSize.Level1)
-{
-    TdcPacketHead dataHead;
-    const char *data = "test";
-    int32_t bufferLen = DC_MSG_PACKET_HEAD_SIZE + sizeof(UkIdInfo);
-    char *buffer = static_cast<char *>(SoftBusCalloc(bufferLen));
-    ASSERT_TRUE(buffer != nullptr);
-
-    UkIdInfo ukIdInfo = {
-        .myId = 0,
-        .peerId = 0,
-    };
-
-    int32_t ret = PackBytesWithUk(data, &dataHead, buffer, bufferLen, &ukIdInfo);
-    EXPECT_EQ(SOFTBUS_ENCRYPT_ERR, ret);
-
-    SoftBusFree(buffer);
-}
-
-/**
- * @tc.name: TransTcpGenUkTest001
- * @tc.desc: TransTcpGenUkTest001
- * @tc.type: FUNC
- * @tc.require:
- */
-HWTEST_F(TransTcpDirectMessageStaticTest, TransTcpGenUkTest001, TestSize.Level1)
-{
-    int32_t channelId = 1;
-    SessionConn *conn = TestSetSessionConn();
-    ASSERT_TRUE(conn != nullptr);
-    int32_t ret = TransTdcAddSessionConn(conn);
-    EXPECT_EQ(SOFTBUS_OK, ret);
-
-    AuthACLInfo aclInfo;
-    ret = TransTcpGenUk(channelId, &aclInfo);
-    EXPECT_NE(SOFTBUS_OK, ret);
-
-    ret = TransUkRequestMgrInit();
-    EXPECT_EQ(SOFTBUS_OK, ret);
-    int32_t requestId = 1;
-    ret = TransUkRequestAddItem(requestId, 0, 0, 0, &aclInfo);
-    EXPECT_EQ(SOFTBUS_OK, ret);
-
-    EXPECT_NO_FATAL_FAILURE(OnGenUkSuccess(0, 0));
-
-    EXPECT_NO_FATAL_FAILURE(OnGenUkFailed(0, 0));
-
-    EXPECT_NO_FATAL_FAILURE(OnGenUkSuccess(requestId, 0));
-
-    EXPECT_NO_FATAL_FAILURE(OnGenUkFailed(requestId, 0));
-
-    TransUkRequestMgrDeinit();
-
-    ret = HandUkReply(channelId, 0, &aclInfo, 0);
-    EXPECT_NE(SOFTBUS_OK, ret);
-
-    TransDelSessionConnById(channelId);
-}
-/**
- * @tc.name: TransOpenDataBusUkRequest001
- * @tc.desc: TransOpenDataBusUkRequest001
- * @tc.type: FUNC
- * @tc.require:
- */
-HWTEST_F(TransTcpDirectMessageStaticTest, TransOpenDataBusUkRequest001, TestSize.Level1)
-{
-    int32_t channelId = 1;
-    uint32_t flags = FLAG_REQUEST;
-    uint64_t seq = 0;
-    cJSON *json = cJSON_CreateObject();
-    ASSERT_TRUE(json != nullptr);
-
-    int32_t ret = OpenDataBusUkRequest(channelId, flags, seq, json);
-    EXPECT_EQ(SOFTBUS_PARSE_JSON_ERR, ret);
-
-    ret = OpenDataBusUkReply(0, seq, json);
-    EXPECT_EQ(SOFTBUS_TRANS_GET_SESSION_CONN_FAILED, ret);
-
-    SessionConn *conn = TestSetSessionConn();
-    ASSERT_TRUE(conn != nullptr);
-    ret = TransTdcAddSessionConn(conn);
-    EXPECT_EQ(SOFTBUS_OK, ret);
-
-    ret = OpenDataBusUkReply(channelId, seq, json);
-    EXPECT_EQ(SOFTBUS_PARSE_JSON_ERR, ret);
-
-    const char *data = "test\0";
-    ret = ProcessUkNegoMessage(channelId, flags, seq, data, strlen(data));
-    EXPECT_EQ(SOFTBUS_PARSE_JSON_ERR, ret);
-
-    const char *vaildData = "{\"ERR_CODE\":0}\0";
-    ret = ProcessUkNegoMessage(channelId, flags, seq, vaildData, strlen(vaildData));
-    EXPECT_NE(SOFTBUS_OK, ret);
-    flags = FLAG_REPLY;
-    ret = ProcessUkNegoMessage(channelId, flags, seq, vaildData, strlen(vaildData));
-    EXPECT_NE(SOFTBUS_OK, ret);
-
-    const char *errCodeData0 = "{\"ERR_CODE\":-426115007}\0";
-    ret = ProcessUkNegoMessage(channelId, flags, seq, errCodeData0, strlen(errCodeData0));
-    EXPECT_NE(SOFTBUS_OK, ret);
-
-    const char *errCodeData1 = "{\"ERR_CODE\":-425983866}\0";
-    ret = ProcessUkNegoMessage(channelId, flags, seq, errCodeData1, strlen(errCodeData1));
-    EXPECT_NE(SOFTBUS_OK, ret);
-
-    TransDelSessionConnById(channelId);
-    cJSON_Delete(json);
 }
 }

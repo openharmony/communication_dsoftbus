@@ -21,6 +21,7 @@
 #include "lnn_distributed_net_ledger.h"
 #include "lnn_ohos_account_adapter.h"
 #include "softbus_access_token_adapter.h"
+#include "softbus_adapter_crypto.h"
 #include "softbus_adapter_mem.h"
 #include "softbus_json_utils.h"
 #include "softbus_utils.h"
@@ -29,122 +30,6 @@
 #include "trans_session_manager.h"
 
 static SoftBusList *g_ukRequestManagerList = NULL;
-
-char *PackUkRequest(const AppInfo *appInfo)
-{
-    if (appInfo == NULL) {
-        TRANS_LOGE(TRANS_CTRL, "invalid param.");
-        return NULL;
-    }
-
-    cJSON *json = cJSON_CreateObject();
-    if (json == NULL) {
-        TRANS_LOGE(TRANS_CTRL, "Cannot create cJSON object");
-        return NULL;
-    }
-    char sourceUdid[UDID_BUF_LEN] = { 0 };
-    int32_t ret = LnnGetLocalStrInfo(STRING_KEY_DEV_UDID, sourceUdid, UDID_BUF_LEN);
-    if (ret != SOFTBUS_OK) {
-        TRANS_LOGE(TRANS_CTRL, "get local udid failed, ret=%{public}d", ret);
-        cJSON_Delete(json);
-        return NULL;
-    }
-    int32_t userId = appInfo->myData.userId;
-    uint32_t size = 0;
-    char accountId[ACCOUNT_UID_LEN_MAX] = { 0 };
-    ret = GetOsAccountUidByUserId(accountId, ACCOUNT_UID_LEN_MAX - 1, &size, userId);
-    if (ret != SOFTBUS_OK) {
-        TRANS_LOGW(TRANS_CTRL, "get accountId by userId=%{public}d failed, ret=%{public}d", userId, ret);
-    }
-    if (!AddStringToJsonObject(json, "SESSION_NAME", appInfo->peerData.sessionName) ||
-        !AddStringToJsonObject(json, "SOURCE_UDID", sourceUdid) ||
-        !AddNumberToJsonObject(json, "SOURCE_USER_ID", userId) ||
-        !AddNumber64ToJsonObject(json, "SOURCE_TOKEN_ID", (int64_t)appInfo->callingTokenId) ||
-        !AddStringToJsonObject(json, "SOURCE_ACCOUNT_ID", accountId)) {
-        TRANS_LOGE(TRANS_CTRL, "add data to json failed");
-        cJSON_Delete(json);
-        return NULL;
-    }
-    char *data = cJSON_PrintUnformatted(json);
-    if (data == NULL) {
-        TRANS_LOGE(TRANS_CTRL, "json formatted failed");
-    }
-    cJSON_Delete(json);
-    return data;
-}
-
-int32_t UnPackUkRequest(const cJSON *msg, AuthACLInfo *aclInfo, char *sessionName)
-{
-    if (msg == NULL || aclInfo == NULL || sessionName == NULL) {
-        TRANS_LOGE(TRANS_CTRL, "invalid param");
-        return SOFTBUS_INVALID_PARAM;
-    }
-
-    if (!GetJsonObjectStringItem(msg, "SESSION_NAME", sessionName, SESSION_NAME_SIZE_MAX) ||
-        !GetJsonObjectStringItem(msg, "SOURCE_UDID", aclInfo->sourceUdid, UDID_BUF_LEN) ||
-        !GetJsonObjectInt32Item(msg, "SOURCE_USER_ID", &(aclInfo->sourceUserId)) ||
-        !GetJsonObjectNumber64Item(msg, "SOURCE_TOKEN_ID", (int64_t *)&(aclInfo->sourceTokenId)) ||
-        !GetJsonObjectStringItem(msg, "SOURCE_ACCOUNT_ID", aclInfo->sourceAccountId, ACCOUNT_UID_LEN_MAX)) {
-        TRANS_LOGE(TRANS_CTRL, "parse json data failed");
-        return SOFTBUS_PARSE_JSON_ERR;
-    }
-    return SOFTBUS_OK;
-}
-
-char *PackUkReply(const AuthACLInfo *aclInfo, int32_t ukId)
-{
-    if (aclInfo == NULL) {
-        TRANS_LOGE(TRANS_CTRL, "invalid param");
-        return NULL;
-    }
-
-    cJSON *json = cJSON_CreateObject();
-    if (json == NULL) {
-        TRANS_LOGE(TRANS_CTRL, "Cannot create cJSON object");
-        return NULL;
-    }
-    if (!AddStringToJsonObject(json, "SOURCE_UDID", aclInfo->sourceUdid) ||
-        !AddNumberToJsonObject(json, "SOURCE_USER_ID", aclInfo->sourceUserId) ||
-        !AddNumber64ToJsonObject(json, "SOURCE_TOKEN_ID", (int64_t)aclInfo->sourceTokenId) ||
-        !AddStringToJsonObject(json, "SOURCE_ACCOUNT_ID", aclInfo->sourceAccountId) ||
-        !AddStringToJsonObject(json, "SINK_UDID", aclInfo->sinkUdid) ||
-        !AddNumberToJsonObject(json, "SINK_USER_ID", aclInfo->sinkUserId) ||
-        !AddNumber64ToJsonObject(json, "SINK_TOKEN_ID", (int64_t)aclInfo->sinkTokenId) ||
-        !AddStringToJsonObject(json, "SINK_ACCOUNT_ID", aclInfo->sinkAccountId) ||
-        !AddNumberToJsonObject(json, "SINK_UK_ID", ukId)) {
-        TRANS_LOGE(TRANS_CTRL, "add data to json failed");
-        cJSON_Delete(json);
-        return NULL;
-    }
-    char *data = cJSON_PrintUnformatted(json);
-    if (data == NULL) {
-        TRANS_LOGE(TRANS_CTRL, "json formatted failed");
-    }
-    cJSON_Delete(json);
-    return data;
-}
-
-int32_t UnPackUkReply(const cJSON *msg, AuthACLInfo *aclInfo, int32_t *ukId)
-{
-    if (msg == NULL || aclInfo == NULL || ukId == NULL) {
-        TRANS_LOGE(TRANS_CTRL, "invalid param");
-        return SOFTBUS_INVALID_PARAM;
-    }
-
-    if (!GetJsonObjectStringItem(msg, "SOURCE_UDID", aclInfo->sourceUdid, UDID_BUF_LEN)  ||
-        !GetJsonObjectStringItem(msg, "SOURCE_ACCOUNT_ID", aclInfo->sourceAccountId, ACCOUNT_UID_LEN_MAX) ||
-        !GetJsonObjectInt32Item(msg, "SOURCE_USER_ID", &(aclInfo->sourceUserId)) ||
-        !GetJsonObjectNumber64Item(msg, "SOURCE_TOKEN_ID", (int64_t *)&(aclInfo->sourceTokenId)) ||
-        !GetJsonObjectStringItem(msg, "SINK_UDID", aclInfo->sinkUdid, UDID_BUF_LEN) ||
-        !GetJsonObjectStringItem(msg, "SINK_ACCOUNT_ID", aclInfo->sinkAccountId, ACCOUNT_UID_LEN_MAX) ||
-        !GetJsonObjectInt32Item(msg, "SINK_USER_ID", &(aclInfo->sinkUserId)) ||
-        !GetJsonObjectNumber64Item(msg, "SINK_TOKEN_ID", (int64_t *)&(aclInfo->sinkTokenId)) ||
-        !GetJsonObjectNumberItem(msg, "SINK_UK_ID", ukId)) {
-        TRANS_LOGE(TRANS_CTRL, "parse json data failed");
-        return SOFTBUS_PARSE_JSON_ERR;
-    }
-    return SOFTBUS_OK;
-}
 
 int32_t TransUkRequestMgrInit(void)
 {
@@ -182,31 +67,10 @@ void TransUkRequestMgrDeinit(void)
     return;
 }
 
-static int32_t CopyACLInfo(AuthACLInfo *targetAclInfo, const AuthACLInfo *sourceAclInfo)
-{
-    targetAclInfo->sourceUserId = sourceAclInfo->sourceUserId;
-    targetAclInfo->sourceTokenId = sourceAclInfo->sourceTokenId;
-    targetAclInfo->sinkUserId = sourceAclInfo->sinkUserId;
-    targetAclInfo->sinkTokenId = sourceAclInfo->sinkTokenId;
-    if (strcpy_s(targetAclInfo->sourceUdid, UDID_BUF_LEN, sourceAclInfo->sourceUdid) != 0 ||
-        strcpy_s(targetAclInfo->sinkUdid, UDID_BUF_LEN, sourceAclInfo->sinkUdid) != 0) {
-        TRANS_LOGE(TRANS_CTRL, "strcpy udid failed");
-        return SOFTBUS_STRCPY_ERR;
-    }
-    if (strcpy_s(targetAclInfo->sourceAccountId, ACCOUNT_UID_LEN_MAX, sourceAclInfo->sourceAccountId) != 0 ||
-        strcpy_s(targetAclInfo->sinkAccountId, ACCOUNT_UID_LEN_MAX, sourceAclInfo->sinkAccountId) != 0) {
-        TRANS_LOGE(TRANS_CTRL, "strcpy accountid failed");
-        return SOFTBUS_STRCPY_ERR;
-    }
-    return SOFTBUS_OK;
-}
-
-int32_t TransUkRequestAddItem(
-    uint32_t requestId, int32_t channelId, int32_t connId, int32_t pid, const AuthACLInfo *aclInfo)
+int32_t TransUkRequestAddItem(uint32_t requestId, int32_t channelId, int32_t channelType)
 {
     TRANS_CHECK_AND_RETURN_RET_LOGE(
         g_ukRequestManagerList != NULL, SOFTBUS_NO_INIT, TRANS_INIT, "uk request manager list not init.");
-    TRANS_CHECK_AND_RETURN_RET_LOGE(aclInfo != NULL, SOFTBUS_INVALID_PARAM, TRANS_CTRL, "invalid param.");
     TRANS_CHECK_AND_RETURN_RET_LOGE(
         SoftBusMutexLock(&g_ukRequestManagerList->lock) == SOFTBUS_OK, SOFTBUS_LOCK_ERR, TRANS_INIT, "lock failed");
 
@@ -224,47 +88,14 @@ int32_t TransUkRequestAddItem(
         (void)SoftBusMutexUnlock(&g_ukRequestManagerList->lock);
         return SOFTBUS_MALLOC_ERR;
     }
-    if (CopyACLInfo(&newUkRequest->aclInfo, aclInfo) != SOFTBUS_OK) {
-        SoftBusFree(newUkRequest);
-        (void)SoftBusMutexUnlock(&g_ukRequestManagerList->lock);
-        return SOFTBUS_STRCPY_ERR;
-    }
-
     newUkRequest->channelId = channelId;
-    newUkRequest->connId = connId;
-    newUkRequest->pid = pid;
+    newUkRequest->channelType = channelType;
     newUkRequest->requestId = requestId;
     ListInit(&newUkRequest->node);
     ListAdd(&g_ukRequestManagerList->list, &newUkRequest->node);
     g_ukRequestManagerList->cnt++;
     (void)SoftBusMutexUnlock(&g_ukRequestManagerList->lock);
     return SOFTBUS_OK;
-}
-
-int32_t TransUkRequestGetTcpInfoByRequestId(uint32_t requestId, AuthACLInfo *aclInfo, int32_t *channelId)
-{
-    TRANS_CHECK_AND_RETURN_RET_LOGE(
-        g_ukRequestManagerList != NULL, SOFTBUS_NO_INIT, TRANS_INIT, "uk request manager list not init.");
-    TRANS_CHECK_AND_RETURN_RET_LOGE(aclInfo != NULL, SOFTBUS_INVALID_PARAM, TRANS_CTRL, "invalid param.");
-    TRANS_CHECK_AND_RETURN_RET_LOGE(
-        SoftBusMutexLock(&g_ukRequestManagerList->lock) == SOFTBUS_OK, SOFTBUS_LOCK_ERR, TRANS_INIT, "lock failed");
-
-    UkRequestNode *ukRequest = NULL;
-    LIST_FOR_EACH_ENTRY(ukRequest, &(g_ukRequestManagerList->list), UkRequestNode, node) {
-        if (ukRequest->requestId == requestId) {
-            if (CopyACLInfo(aclInfo, &ukRequest->aclInfo) != SOFTBUS_OK) {
-                (void)SoftBusMutexUnlock(&g_ukRequestManagerList->lock);
-                return SOFTBUS_STRCPY_ERR;
-            }
-            if (channelId != NULL) {
-                *channelId = ukRequest->channelId;
-            }
-            (void)SoftBusMutexUnlock(&g_ukRequestManagerList->lock);
-            return SOFTBUS_OK;
-        }
-    }
-    (void)SoftBusMutexUnlock(&g_ukRequestManagerList->lock);
-    return SOFTBUS_NOT_FIND;
 }
 
 int32_t TransUkRequestGetRequestInfoByRequestId(uint32_t requestId, UkRequestNode *ukRequest)
@@ -278,38 +109,9 @@ int32_t TransUkRequestGetRequestInfoByRequestId(uint32_t requestId, UkRequestNod
     UkRequestNode *ukRequestNode = NULL;
     LIST_FOR_EACH_ENTRY(ukRequestNode, &(g_ukRequestManagerList->list), UkRequestNode, node) {
         if (ukRequestNode->requestId == requestId) {
-            if (CopyACLInfo(&ukRequest->aclInfo, &ukRequestNode->aclInfo) != SOFTBUS_OK) {
-                (void)SoftBusMutexUnlock(&g_ukRequestManagerList->lock);
-                return SOFTBUS_STRCPY_ERR;
-            }
             ukRequest->requestId = ukRequestNode->requestId;
-            ukRequest->connId = ukRequestNode->connId;
-            ukRequest->pid = ukRequestNode->pid;
             ukRequest->channelId = ukRequestNode->channelId;
-            ukRequest->authHandle.authId = ukRequestNode->authHandle.authId;
-            ukRequest->authHandle.type = ukRequestNode->authHandle.type;
-            ukRequest->seq = ukRequestNode->seq;
-            (void)SoftBusMutexUnlock(&g_ukRequestManagerList->lock);
-            return SOFTBUS_OK;
-        }
-    }
-    (void)SoftBusMutexUnlock(&g_ukRequestManagerList->lock);
-    return SOFTBUS_NOT_FIND;
-}
-
-int32_t TransUkRequestSetAuthHandleAndSeq(uint32_t requestId, const AuthHandle *authHandle, uint64_t seq)
-{
-    TRANS_CHECK_AND_RETURN_RET_LOGE(
-        g_ukRequestManagerList != NULL, SOFTBUS_NO_INIT, TRANS_INIT, "uk request manager list not init.");
-    TRANS_CHECK_AND_RETURN_RET_LOGE(authHandle != NULL, SOFTBUS_INVALID_PARAM, TRANS_CTRL, "invalid param.");
-    TRANS_CHECK_AND_RETURN_RET_LOGE(
-        SoftBusMutexLock(&g_ukRequestManagerList->lock) == SOFTBUS_OK, SOFTBUS_LOCK_ERR, TRANS_INIT, "lock failed");
-    UkRequestNode *ukRequestNode = NULL;
-    LIST_FOR_EACH_ENTRY(ukRequestNode, &(g_ukRequestManagerList->list), UkRequestNode, node) {
-        if (ukRequestNode->requestId == requestId) {
-            ukRequestNode->authHandle.authId = authHandle->authId;
-            ukRequestNode->authHandle.type = authHandle->type;
-            ukRequestNode->seq = seq;
+            ukRequest->channelType = ukRequestNode->channelType;
             (void)SoftBusMutexUnlock(&g_ukRequestManagerList->lock);
             return SOFTBUS_OK;
         }
@@ -357,6 +159,9 @@ int32_t GetUkPolicy(const AppInfo *appInfo)
         // inner session not use uk
         return NO_NEED_UK;
     }
+    if (appInfo->appType == APP_TYPE_AUTH || appInfo->appType == APP_TYPE_INNER) {
+        return NO_NEED_UK;
+    }
     int32_t accessTokenType = SoftBusGetAccessTokenType(appInfo->callingTokenId);
     if (accessTokenType == ACCESS_TOKEN_TYPE_NATIVE) {
         if (appInfo->myData.userId == INVALID_USER_ID) {
@@ -380,49 +185,6 @@ int32_t GetUkPolicy(const AppInfo *appInfo)
 #endif
 }
 
-int32_t GetSourceAndSinkUdid(const char *peerNetWorkId, char *sourceUdid, char *sinkUdid)
-{
-    TRANS_CHECK_AND_RETURN_RET_LOGE(peerNetWorkId != NULL && sourceUdid != NULL && sinkUdid != NULL,
-        SOFTBUS_INVALID_PARAM, TRANS_CTRL, "invalid param.");
-
-    int32_t ret = LnnGetLocalStrInfo(STRING_KEY_DEV_UDID, sourceUdid, UDID_BUF_LEN);
-    if (ret != SOFTBUS_OK) {
-        TRANS_LOGE(TRANS_CTRL, "get source udid failed, ret=%{public}d", ret);
-        return ret;
-    }
-    ret = LnnGetRemoteStrInfo(peerNetWorkId, STRING_KEY_DEV_UDID, sinkUdid, UDID_BUF_LEN);
-    if (ret != SOFTBUS_OK) {
-        TRANS_LOGE(TRANS_CTRL, "get sink udid failed, ret=%{public}d", ret);
-        return ret;
-    }
-    return ret;
-}
-
-int32_t FillSinkAclInfo(const char *sessionName, AuthACLInfo *aclInfo, int32_t *pid)
-{
-    TRANS_CHECK_AND_RETURN_RET_LOGE(
-        sessionName != NULL && aclInfo != NULL, SOFTBUS_INVALID_PARAM, TRANS_CTRL, "invalid param.");
-    int32_t userId = INVALID_USER_ID;
-    int32_t ret = TransGetAclInfoBySessionName(sessionName, (uint64_t *)&aclInfo->sinkTokenId, pid, &userId);
-    if (ret != SOFTBUS_OK) {
-        TRANS_LOGE(TRANS_CTRL, "get tokenId and pid failed, ret=%{public}d", ret);
-        return ret;
-    }
-    uint32_t size = 0;
-    ret = GetOsAccountUidByUserId(aclInfo->sinkAccountId, ACCOUNT_UID_LEN_MAX - 1, &size, userId);
-    if (ret != SOFTBUS_OK) {
-        TRANS_LOGW(TRANS_CTRL, "get accountId by userId=%{public}d failed, ret=%{public}d", userId, ret);
-    }
-    aclInfo->sinkUserId = userId;
-    aclInfo->isServer = true;
-    ret = LnnGetLocalStrInfo(STRING_KEY_DEV_UDID, aclInfo->sinkUdid, UDID_BUF_LEN);
-    if (ret != SOFTBUS_OK) {
-        TRANS_LOGE(TRANS_CTRL, "get sink udid failed, ret=%{public}d", ret);
-        return ret;
-    }
-    return ret;
-}
-
 bool SpecialSaCanUseDeviceKey(uint64_t tokenId)
 {
     return SoftBusSaCanUseDeviceKey(tokenId);
@@ -431,4 +193,236 @@ bool SpecialSaCanUseDeviceKey(uint64_t tokenId)
 bool IsValidUkInfo(const UkIdInfo *ukIdInfo)
 {
     return (ukIdInfo != NULL && ukIdInfo->myId != 0 && ukIdInfo->peerId != 0);
+}
+
+static int32_t FillSinkAclInfoByAppInfo(const AppInfo *appInfo, AuthACLInfo *aclInfo)
+{
+    if (appInfo == NULL || aclInfo == NULL) {
+        TRANS_LOGE(TRANS_CTRL, "invalid param.");
+        return SOFTBUS_INVALID_PARAM;
+    }
+    aclInfo->isServer = true;
+    aclInfo->sourceTokenId = appInfo->peerData.tokenId;
+    aclInfo->sourceUserId = appInfo->peerData.userId;
+    aclInfo->sinkTokenId = appInfo->myData.tokenId;
+    aclInfo->sinkUserId = appInfo->myData.userId;
+    if (strcpy_s(aclInfo->sourceAccountId, ACCOUNT_UID_LEN_MAX, appInfo->peerData.accountId) != EOK ||
+        strcpy_s(aclInfo->sinkAccountId, ACCOUNT_UID_LEN_MAX, appInfo->myData.accountId) != EOK) {
+        TRANS_LOGE(TRANS_CTRL, "str copy accountid fail.");
+        return SOFTBUS_STRCPY_ERR;
+    }
+    char peerUdid[UDID_BUF_LEN] = { 0 };
+    int32_t ret = LnnGetRemoteStrInfo(appInfo->peerNetWorkId, STRING_KEY_DEV_UDID, peerUdid, UDID_BUF_LEN);
+    if (ret != SOFTBUS_OK) {
+        TRANS_LOGE(TRANS_CTRL, "get peer udid failed, ret=%{public}d", ret);
+        return ret;
+    }
+    if (strcpy_s(aclInfo->sourceUdid, UDID_BUF_LEN, peerUdid) != EOK) {
+        TRANS_LOGE(TRANS_CTRL, "str copy peer udid fail.");
+        return SOFTBUS_STRCPY_ERR;
+    }
+    ret = LnnGetLocalStrInfo(STRING_KEY_DEV_UDID, aclInfo->sinkUdid, UDID_BUF_LEN);
+    if (ret != SOFTBUS_OK) {
+        TRANS_LOGE(TRANS_CTRL, "get local udid failed, ret=%{public}d", ret);
+        return ret;
+    }
+    return SOFTBUS_OK;
+}
+
+static int32_t FillSourceAclInfoByAppInfo(const AppInfo *appInfo, AuthACLInfo *aclInfo)
+{
+    if (appInfo == NULL || aclInfo == NULL) {
+        TRANS_LOGE(TRANS_CTRL, "invalid param.");
+        return SOFTBUS_INVALID_PARAM;
+    }
+    aclInfo->isServer = false;
+    aclInfo->sourceTokenId = appInfo->myData.tokenId;
+    aclInfo->sourceUserId = appInfo->myData.userId;
+    aclInfo->sinkTokenId = appInfo->peerData.tokenId;
+    aclInfo->sinkUserId = appInfo->peerData.userId;
+    if (strcpy_s(aclInfo->sourceAccountId, ACCOUNT_UID_LEN_MAX, appInfo->myData.accountId) != EOK ||
+        strcpy_s(aclInfo->sinkAccountId, ACCOUNT_UID_LEN_MAX, appInfo->peerData.accountId) != EOK) {
+        TRANS_LOGE(TRANS_CTRL, "str copy accountid failed.");
+        return SOFTBUS_STRCPY_ERR;
+    }
+    char peerUdid[UDID_BUF_LEN] = { 0 };
+    int32_t ret = LnnGetRemoteStrInfo(appInfo->peerNetWorkId, STRING_KEY_DEV_UDID, peerUdid, UDID_BUF_LEN);
+    if (ret != SOFTBUS_OK) {
+        TRANS_LOGE(TRANS_CTRL, "get peer udid failed, ret=%{public}d", ret);
+        return ret;
+    }
+    if (strcpy_s(aclInfo->sinkUdid, UDID_BUF_LEN, peerUdid) != EOK) {
+        TRANS_LOGE(TRANS_CTRL, "str copy peer udid failed.");
+        return SOFTBUS_STRCPY_ERR;
+    }
+    ret = LnnGetLocalStrInfo(STRING_KEY_DEV_UDID, aclInfo->sourceUdid, UDID_BUF_LEN);
+    if (ret != SOFTBUS_OK) {
+        TRANS_LOGE(TRANS_CTRL, "get local udid failed, ret=%{public}d", ret);
+        return ret;
+    }
+    return SOFTBUS_OK;
+}
+
+static int32_t TransGenUserkey(
+    int32_t channelId, int32_t channelType, const AuthACLInfo *acl, AuthGenUkCallback *callback)
+{
+    uint32_t requestId = AuthGenRequestId();
+    int32_t ret = SOFTBUS_OK;
+    ret = TransUkRequestAddItem(requestId, channelId, channelType);
+    if (ret != SOFTBUS_OK) {
+        TRANS_LOGE(TRANS_CTRL, "add uk requset failed");
+        return ret;
+    }
+    ret = AuthGenUkIdByAclInfo(acl, requestId, callback);
+    if (ret != SOFTBUS_OK) {
+        TRANS_LOGE(TRANS_CTRL, "gen uk failed");
+        (void)TransUkRequestDeleteItem(requestId);
+        return ret;
+    }
+    return ret;
+}
+
+int32_t GetUserkeyIdByAClInfo(
+    const AppInfo *appInfo, int32_t channelId, int32_t channelType, int32_t *userKeyId, AuthGenUkCallback *callback)
+{
+    if (appInfo == NULL || userKeyId == NULL || callback == NULL) {
+        TRANS_LOGE(TRANS_CTRL, "invalid param.");
+        return SOFTBUS_INVALID_PARAM;
+    }
+    AuthACLInfo aclInfo = { 0 };
+    int32_t ret = FillSinkAclInfoByAppInfo(appInfo, &aclInfo);
+    if (ret != SOFTBUS_OK) {
+        TRANS_LOGE(TRANS_CTRL, "fill sink ack info failed, ret=%{public}d", ret);
+        return ret;
+    }
+    int32_t ukId = 0;
+    ret = AuthFindUkIdByAclInfo(&aclInfo, &ukId);
+    if (ret == SOFTBUS_AUTH_ACL_NOT_FOUND) {
+        TRANS_LOGE(TRANS_CTRL, "find uk failed no acl, ret=%{public}d", ret);
+        return ret;
+    }
+    if (ret != SOFTBUS_OK) {
+        ret = TransGenUserkey(channelId, channelType, &aclInfo, callback);
+        if (ret != SOFTBUS_OK) {
+            TRANS_LOGE(TRANS_CTRL, "gen uk failed, ret=%{public}d", ret);
+            return ret;
+        }
+        return SOFTBUS_TRANS_GEN_USER_KEY;
+    }
+    *userKeyId = ukId;
+    return SOFTBUS_OK;
+}
+
+void FillHapSinkAclInfoToAppInfo(AppInfo *appInfo)
+{
+    if (appInfo == NULL) {
+        TRANS_LOGE(TRANS_CTRL, "invalid param.");
+        return;
+    }
+    if (appInfo->myData.tokenType == ACCESS_TOKEN_TYPE_HAP) {
+        TransGetAclInfoBySessionName(
+            appInfo->myData.sessionName, &appInfo->myData.tokenId, NULL, &appInfo->myData.userId);
+        uint32_t size = 0;
+        int32_t ret =
+            GetOsAccountUidByUserId(appInfo->myData.accountId, ACCOUNT_UID_LEN_MAX - 1, &size, appInfo->myData.userId);
+        if (ret != SOFTBUS_OK) {
+            COMM_LOGE(COMM_SVC, "get current account failed. ret=%{public}d", ret);
+        }
+    }
+}
+
+int32_t EncryptAndAddSinkSessionKey(cJSON *msg, const AppInfo *appInfo)
+{
+    if (appInfo == NULL || msg == NULL) {
+        TRANS_LOGE(TRANS_CTRL, "invalid param.");
+        return SOFTBUS_INVALID_PARAM;
+    }
+    if (GetCapabilityBit(appInfo->channelCapability, TRANS_CHANNEL_SINK_GENERATE_KEY_OFFSET)) {
+        if (GetCapabilityBit(appInfo->channelCapability, TRANS_CHANNEL_SINK_KEY_ENCRYPT_OFFSET)) {
+            char encryptKey[ENCRYPT_KEY_LENGTH] = { 0 };
+            uint32_t encryptSessionKeyLen = ENCRYPT_KEY_LENGTH;
+            if (AuthEncryptByUkId(appInfo->myData.userKeyId, (uint8_t *)appInfo->sinkSessionKey, SESSION_KEY_LENGTH,
+                (uint8_t *)encryptKey, &encryptSessionKeyLen) != SOFTBUS_OK) {
+                TRANS_LOGE(TRANS_CTRL, "pack msg encrypt fail");
+                return SOFTBUS_ENCRYPT_ERR;
+            }
+            char base64Encode[BASE64_ENCRYPT_KEY_LENGTH] = { 0 };
+            size_t len = 0;
+            if (SoftBusBase64Encode((unsigned char *)base64Encode, BASE64_ENCRYPT_KEY_LENGTH, &len,
+                    (unsigned char *)encryptKey, sizeof(encryptKey)) != SOFTBUS_OK) {
+                TRANS_LOGE(TRANS_CTRL, "Failed to encode sink session key");
+                return SOFTBUS_CREATE_JSON_ERR;
+            }
+            if (!AddStringToJsonObject(msg, "SESSION_KEY", base64Encode)) {
+                TRANS_LOGE(TRANS_CTRL, "Failed to add sink session key");
+                return SOFTBUS_CREATE_JSON_ERR;
+            }
+            return SOFTBUS_OK;
+        } else {
+            char base64Encode[BASE64_SESSION_KEY_LEN] = { 0 };
+            size_t len = 0;
+            if (SoftBusBase64Encode((unsigned char *)base64Encode, BASE64_SESSION_KEY_LEN, &len,
+                    (unsigned char *)appInfo->sinkSessionKey, sizeof(appInfo->sinkSessionKey)) != SOFTBUS_OK) {
+                TRANS_LOGE(TRANS_CTRL, "Failed to encode sink session key");
+                return SOFTBUS_CREATE_JSON_ERR;
+            }
+            if (!AddStringToJsonObject(msg, "SESSION_KEY", base64Encode)) {
+                TRANS_LOGE(TRANS_CTRL, "Failed to add sink session key");
+                return SOFTBUS_CREATE_JSON_ERR;
+            }
+            return SOFTBUS_OK;
+        }
+    }
+    return SOFTBUS_OK;
+}
+
+int32_t DecryptAndAddSinkSessionKey(const cJSON *msg, AppInfo *appInfo)
+{
+    if (appInfo == NULL || msg == NULL) {
+        TRANS_LOGE(TRANS_CTRL, "invalid param.");
+        return SOFTBUS_INVALID_PARAM;
+    }
+    if (GetCapabilityBit(appInfo->channelCapability, TRANS_CHANNEL_SINK_GENERATE_KEY_OFFSET)) {
+        if (GetCapabilityBit(appInfo->channelCapability, TRANS_CHANNEL_SINK_KEY_ENCRYPT_OFFSET)) {
+            char encodeEncryptKey[BASE64_ENCRYPT_KEY_LENGTH] = { 0 };
+            if (!GetJsonObjectStringItem(msg, "SESSION_KEY", encodeEncryptKey, BASE64_ENCRYPT_KEY_LENGTH)) {
+                TRANS_LOGE(TRANS_CTRL, "Failed to get sink session key");
+                return SOFTBUS_PARSE_JSON_ERR;
+            }
+            AuthACLInfo aclInfo = { 0 };
+            int32_t ret = FillSourceAclInfoByAppInfo(appInfo, &aclInfo);
+            if (ret != SOFTBUS_OK) {
+                TRANS_LOGE(TRANS_CTRL, "fill source acl info failed, ret=%{public}d", ret);
+                return ret;
+            }
+            ret = AuthFindUkIdByAclInfo(&aclInfo, &appInfo->myData.userKeyId);
+            TRANS_CHECK_AND_RETURN_RET_LOGE(ret == SOFTBUS_OK, ret, TRANS_CTRL, "find uk failed, ret=%{public}d", ret);
+            char decodeEncryptKey[ENCRYPT_KEY_LENGTH] = { 0 };
+            size_t len = 0;
+            if (SoftBusBase64Decode((unsigned char *)decodeEncryptKey, ENCRYPT_KEY_LENGTH, &len,
+                    (unsigned char *)encodeEncryptKey, strlen(encodeEncryptKey)) != SOFTBUS_OK) {
+                TRANS_LOGE(TRANS_CTRL, "Failed to decode sink session key");
+                return SOFTBUS_PARSE_JSON_ERR;
+            }
+            uint32_t decDataLen = SESSION_KEY_LENGTH;
+            if (AuthDecryptByUkId(appInfo->myData.userKeyId, (uint8_t *)decodeEncryptKey, ENCRYPT_KEY_LENGTH,
+                (uint8_t *)appInfo->sinkSessionKey, &decDataLen) != SOFTBUS_OK) {
+                TRANS_LOGE(
+                    TRANS_CTRL, "srv process recv data: decrypt failed. ukid=%{public}d", appInfo->myData.userKeyId);
+                return SOFTBUS_DECRYPT_ERR;
+            }
+            return SOFTBUS_OK;
+        } else {
+            char encodeEncryptKey[BASE64_SESSION_KEY_LEN] = { 0 };
+            (void)GetJsonObjectStringItem(msg, "SESSION_KEY", encodeEncryptKey, BASE64_SESSION_KEY_LEN);
+            size_t len = 0;
+            if (SoftBusBase64Decode((unsigned char *)appInfo->sinkSessionKey, sizeof(appInfo->sinkSessionKey), &len,
+                    (unsigned char *)encodeEncryptKey, strlen(encodeEncryptKey)) != SOFTBUS_OK) {
+                TRANS_LOGE(TRANS_CTRL, "Failed to decode sink session key");
+                return SOFTBUS_PARSE_JSON_ERR;
+            }
+            return SOFTBUS_OK;
+        }
+    }
+    return SOFTBUS_OK;
 }

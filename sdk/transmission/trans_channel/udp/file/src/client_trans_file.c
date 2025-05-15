@@ -238,7 +238,8 @@ static void FileSendListener(int32_t dfileId, DFileMsgType msgType, const DFileM
         return;
     }
     if (msgType == DFILE_ON_CONNECT_SUCCESS) {
-        g_udpChannelMgrCb->OnUdpChannelOpened(udpChannel.channelId);
+        SocketAccessInfo accessInfo = { 0 };
+        g_udpChannelMgrCb->OnUdpChannelOpened(udpChannel.channelId, &accessInfo);
         TRANS_LOGE(TRANS_SDK, "msgType failed, dfileId=%{public}d, type=%{public}d", dfileId, msgType);
         return;
     }
@@ -466,7 +467,8 @@ static void RenameHook(DFileRenamePara *renamePara)
     TRANS_LOGD(TRANS_FILE, "default rename hook.");
 }
 
-int32_t TransOnFileChannelOpened(const char *sessionName, const ChannelInfo *channel, int32_t *filePort)
+int32_t TransOnFileChannelOpened(
+    const char *sessionName, const ChannelInfo *channel, int32_t *filePort, SocketAccessInfo *accessInfo)
 {
     if (channel == NULL || filePort == NULL) {
         TRANS_LOGW(TRANS_FILE, "invalid param.");
@@ -488,7 +490,7 @@ int32_t TransOnFileChannelOpened(const char *sessionName, const ChannelInfo *cha
             TRANS_LOGE(TRANS_FILE, "start file channel as server failed");
             return SOFTBUS_FILE_ERR;
         }
-        ret = g_udpChannelMgrCb->OnUdpChannelOpened(channel->channelId);
+        ret = g_udpChannelMgrCb->OnUdpChannelOpened(channel->channelId, accessInfo);
         if (ret != SOFTBUS_OK) {
             TRANS_LOGE(TRANS_FILE, "udp channel open failed.");
             NSTACKX_DFileClose(fileSession);

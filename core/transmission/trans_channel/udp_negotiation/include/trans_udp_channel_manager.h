@@ -18,7 +18,6 @@
 
 #include "softbus_app_info.h"
 #include "softbus_common.h"
-#include "trans_uk_manager.h"
 
 #ifdef __cplusplus
 extern "C" {
@@ -42,7 +41,6 @@ typedef struct {
     int64_t seq;
     ListNode node;
     AuthHandle authHandle;
-    UkIdInfo ukIdInfo;
     AppInfo info;
 } UdpChannelInfo;
 
@@ -107,7 +105,7 @@ bool CompareSessionName(const char *dstSessionName, const char *srcSessionName);
 
 void TransSetUdpChannelMsgType(uint32_t requestId);
 
-void TransUdpGetUkIdInfoBySeq(int64_t seq, UkIdInfo *ukIdInfo, bool isReply);
+int32_t TransUdpUpdateAccessInfo(int32_t channelId, const AccessInfo *accessInfo);
 #ifdef __cplusplus
 }
 #endif

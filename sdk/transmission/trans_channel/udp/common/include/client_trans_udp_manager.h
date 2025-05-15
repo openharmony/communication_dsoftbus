@@ -27,7 +27,7 @@ typedef struct {
         const StreamFrameInfo *param);
     int32_t (*OnFileGetSessionId)(int32_t channelId, int32_t *sessionId);
     void (*OnMessageReceived)(void);
-    int32_t (*OnUdpChannelOpened)(int32_t channelId);
+    int32_t (*OnUdpChannelOpened)(int32_t channelId, SocketAccessInfo *accessInfo);
     void (*OnUdpChannelClosed)(int32_t channelId, ShutdownReason reason);
     void (*OnQosEvent)(int channelId, int eventId, int tvCount, const QosTv *tvList);
     int32_t (*OnIdleTimeoutReset)(int32_t sessionId);
@@ -58,14 +58,17 @@ typedef struct {
     bool isEnable;
     bool isTosSet;
     int32_t peerUserId;
-    char peerAccountId[ACCOUNT_UID_LEN_MAX];
     int32_t tokenType;
+    uint64_t peerTokenId;
+    char peerAccountId[ACCOUNT_UID_LEN_MAX];
+    char extraAccessInfo[EXTRA_ACCESS_INFO_LEN_MAX];
 } UdpChannel;
 
 int32_t ClientTransUdpMgrInit(IClientSessionCallBack *callback);
 void ClientTransUdpMgrDeinit(void);
 
-int32_t TransOnUdpChannelOpened(const char *sessionName, const ChannelInfo *channel, int32_t *udpPort);
+int32_t TransOnUdpChannelOpened(
+    const char *sessionName, const ChannelInfo *channel, int32_t *udpPort, SocketAccessInfo *accessInfo);
 int32_t TransOnUdpChannelOpenFailed(int32_t channelId, int32_t errCode);
 int32_t TransOnUdpChannelClosed(int32_t channelId, ShutdownReason reason);
 int32_t TransOnUdpChannelQosEvent(int32_t channelId, int32_t eventId, int32_t tvCount, const QosTv *tvList);

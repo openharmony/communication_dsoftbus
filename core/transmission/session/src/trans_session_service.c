@@ -148,10 +148,11 @@ int32_t TransCreateSessionServer(const char *pkgName, const char *sessionName, i
         SoftBusFree(newNode);
         return ret;
     }
+    newNode->accessInfo.localTokenId = newNode->tokenId;
     int32_t tokenType = SoftBusGetAccessTokenType(newNode->tokenId);
     newNode->callerType = (SoftBusAccessTokenType)tokenType == ACCESS_TOKEN_TYPE_HAP ?
         CALLER_TYPE_FEATURE_ABILITY : CALLER_TYPE_SERVICE_ABILITY;
-    newNode->accessInfo.tokenType = tokenType;
+    newNode->tokenType = tokenType;
     TransSetUserId(newNode->callerType, newNode);
     ret = TransSessionServerAddItem(newNode);
     TransEventExtra extra = {

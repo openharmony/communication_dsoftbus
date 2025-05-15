@@ -124,7 +124,7 @@ HWTEST_F(ClientTransUdpManagerStaticTest, ClientTransUdpManagerStaticTest001, Te
     int32_t ret = OnFileGetSessionId(TEST_CHANNELID, &sessionId);
     EXPECT_EQ(SOFTBUS_INVALID_PARAM, ret);
 
-    OnUdpChannelOpened(TEST_CHANNELID);
+    OnUdpChannelOpened(TEST_CHANNELID, nullptr);
     OnUdpChannelClosed(TEST_CHANNELID, SHUTDOWN_REASON_UNKNOWN);
     OnQosEvent(TEST_CHANNELID, TEST_EVENT_ID, TEST_COUNT, &tvList);
 
@@ -209,7 +209,7 @@ HWTEST_F(ClientTransUdpManagerStaticTest, ClientTransAddUdpChannelTest001, TestS
     ret = TransGetUdpChannel(TEST_CHANNELID, &udpChannel);
     EXPECT_EQ(SOFTBUS_OK, ret);
 
-    OnUdpChannelOpened(TEST_CHANNELID);
+    OnUdpChannelOpened(TEST_CHANNELID, nullptr);
 
     ret = TransSetUdpChannelEnable(TEST_CHANNELID, false);
     EXPECT_EQ(SOFTBUS_OK, ret);
@@ -258,7 +258,7 @@ HWTEST_F(ClientTransUdpManagerStaticTest, TransSetdFileIdByChannelIdTest001, Tes
     int32_t ret = ClientTransChannelInit();
     ASSERT_EQ(SOFTBUS_OK, ret);
     ret = TransSetdFileIdByChannelId(TEST_CHANNELID, TEST_COUNT);
-    EXPECT_EQ(SOFTBUS_TRANS_UDP_CHANNEL_NOT_FOUND, ret);
+    EXPECT_EQ(SOFTBUS_OK, ret);
 
     UdpChannel udpChannel;
     (void)memset_s(&udpChannel, sizeof(UdpChannel), 0, sizeof(UdpChannel));

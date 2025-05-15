@@ -37,7 +37,7 @@ namespace OHOS {
         DataGenerator::Write(data, size);
         int32_t udpPort = 0;
         GenerateInt32(udpPort);
-        TransOnUdpChannelOpened((char *)data, &channel, &udpPort);
+        TransOnUdpChannelOpened((char *)data, &channel, &udpPort, nullptr);
         DataGenerator::Clear();
     }
 

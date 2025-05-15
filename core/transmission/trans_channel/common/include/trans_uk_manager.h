@@ -27,6 +27,9 @@ extern "C" {
 
 #define NO_NEED_UK   0
 #define USE_NEGO_UK  1
+#define ENCRYPT_KEY_LENGTH 60 //User Key encrypt SessionKey length
+#define BASE64_SESSION_KEY_LEN 45
+#define BASE64_ENCRYPT_KEY_LENGTH 83
 
 typedef struct {
     int32_t myId;
@@ -37,32 +40,25 @@ typedef struct {
     ListNode node;
     uint32_t requestId;
     int32_t channelId;
-    uint32_t connId;
-    int32_t pid;
-    uint64_t seq;
-    AuthHandle authHandle;
-    AuthACLInfo aclInfo;
+    int32_t channelType;
 } UkRequestNode;
-
-char *PackUkRequest(const AppInfo *appInfo);
-int32_t UnPackUkRequest(const cJSON *msg, AuthACLInfo *aclInfo, char *sessionName);
-char *PackUkReply(const AuthACLInfo *aclInfo, int32_t ukId);
-int32_t UnPackUkReply(const cJSON *msg, AuthACLInfo *aclInfo, int32_t *sinkUkId);
 
 int32_t TransUkRequestMgrInit(void);
 void TransUkRequestMgrDeinit(void);
-int32_t TransUkRequestAddItem(
-    uint32_t requestId, int32_t channelId, int32_t connId, int32_t pid, const AuthACLInfo *aclInfo);
-int32_t TransUkRequestSetAuthHandleAndSeq(uint32_t requestId, const AuthHandle *authHandle, uint64_t seq);
-int32_t TransUkRequestGetTcpInfoByRequestId(uint32_t requestId, AuthACLInfo *aclInfo, int32_t *channelId);
+int32_t TransUkRequestAddItem(uint32_t requestId, int32_t channelId, int32_t channelType);
 int32_t TransUkRequestGetRequestInfoByRequestId(uint32_t requestId, UkRequestNode *ukRequest);
 int32_t TransUkRequestDeleteItem(uint32_t requestId);
 
 int32_t GetUkPolicy(const AppInfo *appInfo);
-int32_t GetSourceAndSinkUdid(const char *peerNetWorkId, char *sourceUdid, char *sinkUdid);
-int32_t FillSinkAclInfo(const char *sessionName, AuthACLInfo *aclInfo, int32_t *pid);
+void FillHapSinkAclInfoToAppInfo(AppInfo *appInfo);
+
 bool SpecialSaCanUseDeviceKey(uint64_t tokenId);
 bool IsValidUkInfo(const UkIdInfo *ukIdInfo);
+
+int32_t EncryptAndAddSinkSessionKey(cJSON *msg, const AppInfo *appInfo);
+int32_t DecryptAndAddSinkSessionKey(const cJSON *msg, AppInfo *appInfo);
+int32_t GetUserkeyIdByAClInfo(
+    const AppInfo *appInfo, int32_t channelId, int32_t channelType, int32_t *userKeyId, AuthGenUkCallback *callback);
 #ifdef __cplusplus
 }
 #endif /* __cplusplus */

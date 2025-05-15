@@ -1196,7 +1196,7 @@ int32_t ServerSideSendAck(int32_t sessionId, int32_t result)
     TRANS_LOGI(TRANS_CTRL, "channelId=%{public}d, result=%{public}d, channelType=%{public}d",
         sessionId, result, channelType);
     if (channelType == CHANNEL_TYPE_TCP_DIRECT) {
-        return TransDealTdcChannelOpenResult(sessionId, result);
+        return TransDealTdcChannelOpenResult(sessionId, result, NULL);
     }
-    return TransDealProxyChannelOpenResult(sessionId, result);
+    return TransDealProxyChannelOpenResult(sessionId, result, NULL);
 }

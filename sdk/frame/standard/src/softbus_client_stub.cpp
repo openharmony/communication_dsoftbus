@@ -215,9 +215,8 @@ static int32_t MessageParcelRead(MessageParcel &data, ChannelInfo *channel)
     READ_PARCEL_WITH_RET(data, Int32, channel->tokenType, SOFTBUS_IPC_ERR);
     if (channel->tokenType > ACCESS_TOKEN_TYPE_HAP && channel->channelType != CHANNEL_TYPE_AUTH && channel->isServer) {
         READ_PARCEL_WITH_RET(data, Int32, channel->peerUserId, SOFTBUS_IPC_ERR);
-        channel->peerAccountId = (char *)data.ReadCString();
-        COMM_CHECK_AND_RETURN_RET_LOGE(
-            channel->peerAccountId != nullptr, SOFTBUS_IPC_ERR, COMM_SDK, "read channel.peerAccountId failed");
+        READ_PARCEL_WITH_RET(data, Uint64, channel->peerTokenId, SOFTBUS_IPC_ERR);
+        channel->peerExtraAccessInfo = (char *)data.ReadCString();
     }
     return SOFTBUS_OK;
 }

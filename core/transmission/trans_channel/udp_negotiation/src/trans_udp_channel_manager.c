@@ -18,6 +18,8 @@
 #include "common_list.h"
 #include "regex.h"
 #include "securec.h"
+#include "lnn_ohos_account_adapter.h"
+#include "softbus_access_token_adapter.h"
 #include "softbus_adapter_mem.h"
 #include "softbus_adapter_thread.h"
 #include "softbus_conn_interface.h"
@@ -462,36 +464,6 @@ void TransUpdateUdpChannelInfo(int64_t seq, const AppInfo *appInfo, bool isReply
     TRANS_LOGE(TRANS_CTRL, "udp channel not found. seq=%{public}" PRId64, seq);
 }
 
-void TransUdpGetUkIdInfoBySeq(int64_t seq, UkIdInfo *ukIdInfo, bool isReply)
-{
-    if (g_udpChannelMgr == NULL) {
-        TRANS_LOGE(TRANS_INIT, "udp channel manager hasn't init.");
-        return;
-    }
-
-    if (ukIdInfo == NULL) {
-        TRANS_LOGW(TRANS_CTRL, "invalid param.");
-        return;
-    }
-
-    if (SoftBusMutexLock(&(g_udpChannelMgr->lock)) != SOFTBUS_OK) {
-        TRANS_LOGE(TRANS_CTRL, "lock failed");
-        return;
-    }
-
-    UdpChannelInfo *udpChannelNode = NULL;
-    LIST_FOR_EACH_ENTRY(udpChannelNode, &(g_udpChannelMgr->list), UdpChannelInfo, node) {
-        if (udpChannelNode->seq == seq && udpChannelNode->isReply == isReply) {
-            ukIdInfo->myId = udpChannelNode->ukIdInfo.myId;
-            ukIdInfo->peerId = udpChannelNode->ukIdInfo.peerId;
-            (void)SoftBusMutexUnlock(&(g_udpChannelMgr->lock));
-            return;
-        }
-    }
-    (void)SoftBusMutexUnlock(&(g_udpChannelMgr->lock));
-    TRANS_LOGE(TRANS_CTRL, "udp channel not found. seq=%{public}" PRId64, seq);
-}
-
 void TransSetUdpChannelMsgType(uint32_t requestId)
 {
     if (g_udpChannelMgr == NULL) {
@@ -817,6 +789,46 @@ int32_t TransUdpUpdateUdpPort(int32_t channelId, int32_t udpPort)
     return SOFTBUS_TRANS_NODE_NOT_FOUND;
 }
 
+int32_t TransUdpUpdateAccessInfo(int32_t channelId, const AccessInfo *accessInfo)
+{
+    if (accessInfo == NULL || accessInfo->localTokenId == 0) {
+        TRANS_LOGE(TRANS_CTRL, "invalid accessInfo.");
+        return SOFTBUS_INVALID_PARAM;
+    }
+    if (g_udpChannelMgr == NULL) {
+        TRANS_LOGE(TRANS_CTRL, "udp channel manager not initialized.");
+        return SOFTBUS_NO_INIT;
+    }
+    if (SoftBusMutexLock(&(g_udpChannelMgr->lock)) != SOFTBUS_OK) {
+        TRANS_LOGE(TRANS_CTRL, "lock failed");
+        return SOFTBUS_LOCK_ERR;
+    }
+    uint32_t size = 0;
+    char accountId[ACCOUNT_UID_LEN_MAX];
+    int32_t ret = GetOsAccountUidByUserId(accountId, ACCOUNT_UID_LEN_MAX - 1, &size, accessInfo->userId);
+    if (ret != SOFTBUS_OK) {
+        TRANS_LOGE(TRANS_CTRL, "get current account failed. ret=%{public}d", ret);
+    }
+    UdpChannelInfo *udpChannelNode = NULL;
+    LIST_FOR_EACH_ENTRY(udpChannelNode, &(g_udpChannelMgr->list), UdpChannelInfo, node) {
+        if (udpChannelNode->info.myData.channelId == channelId &&
+            udpChannelNode->info.myData.tokenType > ACCESS_TOKEN_TYPE_HAP) {
+            udpChannelNode->info.myData.userId = accessInfo->userId;
+            udpChannelNode->info.myData.tokenId = accessInfo->localTokenId;
+            if (memcpy_s(udpChannelNode->info.myData.accountId, ACCOUNT_UID_LEN_MAX, accountId, size) != EOK) {
+                TRANS_LOGE(TRANS_CTRL, "memcpy current account failed.");
+                (void)SoftBusMutexUnlock(&g_udpChannelMgr->lock);
+                return SOFTBUS_MEM_ERR;
+            }
+            (void)SoftBusMutexUnlock(&(g_udpChannelMgr->lock));
+            return SOFTBUS_OK;
+        }
+    }
+    (void)SoftBusMutexUnlock(&(g_udpChannelMgr->lock));
+    TRANS_LOGE(TRANS_CTRL, "not found udpChannelNode by channelId=%{public}d", channelId);
+    return SOFTBUS_TRANS_NODE_NOT_FOUND;
+}
+
 static int32_t TransCheckUdpChannelOpenStatus(int32_t channelId, int32_t *curCount)
 {
     if (g_udpChannelMgr == NULL) {
@@ -866,8 +878,8 @@ void TransAsyncUdpChannelTask(int32_t channelId)
     if (curCount >= LOOPER_REPLY_CNT_MAX) {
         char *errDesc = (char *)"open udp channel timeout";
         TRANS_LOGE(TRANS_CTRL, "Open udp channel timeout, channelId=%{public}d", channelId);
-        if (SendReplyErrInfo(SOFTBUS_TRANS_OPEN_CHANNEL_NEGTIATE_TIMEOUT, errDesc, channel.authHandle, channel.seq,
-            false) != SOFTBUS_OK) {
+        if (SendReplyErrInfo(SOFTBUS_TRANS_OPEN_CHANNEL_NEGTIATE_TIMEOUT, errDesc, channel.authHandle, channel.seq) !=
+            SOFTBUS_OK) {
             TRANS_LOGE(TRANS_CTRL, "send reply error info failed.");
         }
         (void)NotifyUdpChannelOpenFailed(&channel.info, SOFTBUS_TRANS_OPEN_CHANNEL_NEGTIATE_TIMEOUT);
