@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2023-2024 Huawei Device Co., Ltd.
+ * Copyright (c) 2023-2025 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -450,15 +450,19 @@ static UpdateDpAclResult PutDpAclUkByUserId(
     return UPDATE_ACL_SUCC;
 }
 
-void UpdateDpSameAccount(
-    int64_t accountId, const char *deviceId, int32_t peerUserId, SessionKey sessionKey, bool isNeedUpdateDk)
+void UpdateDpSameAccount(UpdateDpAclParams *aclParams, SessionKey sessionKey, bool isNeedUpdateDk,
+    AclWriteState aclState)
 {
-    if (deviceId == nullptr) {
+    if (aclParams == nullptr || aclParams->deviceId == nullptr) {
         LNN_LOGE(LNN_STATE, "deviceId is null");
         return;
     }
+    if (aclState == ACL_NOT_WRITE) {
+        LNN_LOGE(LNN_STATE, "no need write acl");
+        return;
+    }
     int32_t sessionKeyId = DEFAULT_USER_KEY_INDEX;
-    std::string peerUdid(deviceId);
+    std::string peerUdid(aclParams->deviceId);
     UpdateDpAclResult ret = UPDATE_ACL_SUCC;
 
     if (isNeedUpdateDk) {
@@ -467,10 +471,10 @@ void UpdateDpSameAccount(
             LNN_LOGW(LNN_STATE, "not need update uk for acl");
         }
     }
-    if (isNeedUpdateDk || IsSameAccount(accountId)) {
-        ret = UpdateDpSameAccountAcl(peerUdid, peerUserId, sessionKeyId);
+    if (isNeedUpdateDk || IsSameAccount(aclParams->accountId)) {
+        ret = UpdateDpSameAccountAcl(peerUdid, aclParams->peerUserId, sessionKeyId);
         if (ret != UPDATE_ACL_SUCC) {
-            InsertDpSameAccountAcl(peerUdid, peerUserId, sessionKeyId);
+            InsertDpSameAccountAcl(peerUdid, aclParams->peerUserId, sessionKeyId);
         }
     }
 }

@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2022-2024 Huawei Device Co., Ltd.
+ * Copyright (c) 2022-2025 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -150,11 +150,12 @@ static void DfxRecordLnnEndHichainEnd(int64_t authSeq, int32_t reason)
 
 static void OnFinish(int64_t authSeq, int operationCode, const char *returnData)
 {
-    (void)operationCode;
     (void)returnData;
+    AclWriteState aclState = (operationCode == AUTH_FORM_IDENTICAL_ACCOUNT ? ACL_CAN_WRITE : ACL_NOT_WRITE);
     DfxRecordLnnEndHichainEnd(authSeq, SOFTBUS_OK);
-    AUTH_LOGI(AUTH_HICHAIN, "hichain OnFinish: authSeq=%{public}" PRId64, authSeq);
-    (void)AuthSessionHandleAuthFinish(authSeq);
+    AUTH_LOGI(AUTH_HICHAIN, "hichain OnFinish: operationCode=%{public}d, authSeq=%{public}" PRId64,
+        operationCode, authSeq);
+    (void)AuthSessionHandleAuthFinish(authSeq, aclState);
 }
 
 void GetSoftbusHichainAuthErrorCode(uint32_t hichainErrCode, uint32_t *softbusErrCode)

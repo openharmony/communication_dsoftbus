@@ -177,10 +177,10 @@ int32_t GetAuthRequest(uint32_t requestId, AuthRequest *request)
     return GetLnnConnInterface()->GetAuthRequest(requestId, request);
 }
 
-void UpdateDpSameAccount(
-    int64_t accountId, const char *deviceId, int32_t peerUserId, SessionKey sessionKey, bool isNeedUpdateDk)
+void UpdateDpSameAccount(UpdateDpAclParams *aclParams, SessionKey sessionKey, bool isNeedUpdateDk,
+    AclWriteState aclState)
 {
-    return GetLnnConnInterface()->UpdateDpSameAccount(accountId, deviceId, peerUserId, sessionKey, isNeedUpdateDk);
+    return GetLnnConnInterface()->UpdateDpSameAccount(aclParams, sessionKey, isNeedUpdateDk, aclState);
 }
 
 int32_t LnnGetAddrTypeByIfName(const char *ifName, ConnectionAddrType *type)
