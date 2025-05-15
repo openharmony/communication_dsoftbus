@@ -773,9 +773,9 @@ int32_t AuthConnInit(const AuthConnListener *listener)
         AUTH_LOGE(AUTH_CONN, "init br/ble/p2p conn fail");
         return SOFTBUS_AUTH_CONN_INIT_FAIL;
     }
-    if (WifiConnListLockInit() != SOFTBUS_OK) {
+    if (WifiAndUsbConnListLockInit() != SOFTBUS_OK) {
         (void)memset_s(&g_listener, sizeof(g_listener), 0, sizeof(AuthConnListener));
-        AUTH_LOGE(AUTH_CONN, "init WifiConnListLock fail");
+        AUTH_LOGE(AUTH_CONN, "init WifiAndUsbConnListLockInit fail");
         return SOFTBUS_LOCK_ERR;
     }
     if (InitWiFiConn() != SOFTBUS_OK) {
@@ -791,7 +791,7 @@ void AuthConnDeinit(void)
     UnsetSocketCallback();
     ConnUnSetConnectCallback(MODULE_DEVICE_AUTH);
     ClearConnRequest();
-    WifiConnListLockDeinit();
+    WifiAndUsbConnListLockDeinit();
     (void)memset_s(&g_listener, sizeof(g_listener), 0, sizeof(AuthConnListener));
 }
 

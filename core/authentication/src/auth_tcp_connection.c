@@ -60,8 +60,8 @@ static InnerChannelListener g_listener[] = {
 };
 
 static SocketCallback g_callback = { NULL, NULL, NULL };
-static ListNode g_wifiConnList = { &g_wifiConnList, &g_wifiConnList };
-static SoftBusMutex g_wifiConnListLock;
+static ListNode g_wifiAndUsbConnList  = { &g_wifiAndUsbConnList , &g_wifiAndUsbConnList  };
+static SoftBusMutex g_wifiAndUsbConnList Lock;
 
 static void NotifyChannelDisconnected(int32_t channelId);
 static void NotifyChannelDataReceived(int32_t channelId, const SocketPktHead *head, const uint8_t *data);
@@ -258,79 +258,79 @@ static uint8_t *RecvPacketData(int32_t fd, uint32_t len)
 typedef struct {
     ListNode node;
     int32_t fd;
-} WifiConnInstance;
+} WifiAndUsbConnInstance;
 
-static bool RequireWifiConnListLock(void)
+static bool RequireWifiAndUsbConnListLock(void)
 {
-    if (SoftBusMutexLock(&g_wifiConnListLock) != SOFTBUS_OK) {
-        AUTH_LOGE(AUTH_CONN, "wifiConnList lock fail");
+    if (SoftBusMutexLock(&g_wifiAndUsbConnList Lock) != SOFTBUS_OK) {
+        AUTH_LOGE(AUTH_CONN, "wifiAndUsbConnList lock fail");
         return false;
     }
     return true;
 }
 
-static void ReleaseWifiConnListLock(void)
+static void ReleaseWifiAndUsbConnListLock(void)
 {
-    if (SoftBusMutexUnlock(&g_wifiConnListLock) != SOFTBUS_OK) {
-        AUTH_LOGE(AUTH_CONN, "wifiConnList unlock fail");
+    if (SoftBusMutexUnlock(&g_wifiAndUsbConnList Lock) != SOFTBUS_OK) {
+        AUTH_LOGE(AUTH_CONN, "wifiAndUsbConnList unlock fail");
     }
 }
 
-static int32_t AddWifiConnItem(int32_t fd)
+static int32_t AddWifiAndUsbFdItem(int32_t fd)
 {
-    if (!RequireWifiConnListLock()) {
-        AUTH_LOGE(AUTH_CONN, "RequireWifiConnListLock fail");
+    if (!RequireWifiAndUsbConnListLock()) {
+        AUTH_LOGE(AUTH_CONN, "RequireWifiAndUsbConnListLock fail");
         return SOFTBUS_LOCK_ERR;
     }
-    WifiConnInstance *connItem = (WifiConnInstance *)SoftBusCalloc(sizeof(WifiConnInstance));
+    WifiAndUsbConnInstance *connItem = (WifiAndUsbConnInstance *)SoftBusCalloc(sizeof(WifiAndUsbConnInstance));
     if (connItem == NULL) {
         AUTH_LOGE(AUTH_CONN, "malloc connItem fail");
-        ReleaseWifiConnListLock();
+        ReleaseWifiAndUsbConnListLock();
         return SOFTBUS_MEM_ERR;
     }
     connItem->fd = fd;
-    ListNodeInsert(&g_wifiConnList, &connItem->node);
-    AUTH_LOGI(AUTH_CONN, "add wifi conn item. fd=%{public}d", fd);
-    ReleaseWifiConnListLock();
+    ListNodeInsert(&g_wifiAndUsbConnList , &connItem->node);
+    AUTH_LOGI(AUTH_CONN, "add wifi and usb conn item. fd=%{public}d", fd);
+    ReleaseWifiAndUsbConnListLock();
     return SOFTBUS_OK;
 }
 
-bool IsExistWifiConnItemByConnId(int32_t fd)
+bool IsExistWifiAndUsbFdByConnId(int32_t fd)
 {
-    if (!RequireWifiConnListLock()) {
-        AUTH_LOGE(AUTH_CONN, "RequireWifiConnListLock fail");
+    if (!RequireWifiAndUsbConnListLock()) {
+        AUTH_LOGE(AUTH_CONN, "RequireWifiAndUsbConnListLock fail");
         return false;
     }
-    WifiConnInstance *item = NULL;
-    LIST_FOR_EACH_ENTRY(item, &g_wifiConnList, WifiConnInstance, node) {
+    WifiAndUsbConnInstance *item = NULL;
+    LIST_FOR_EACH_ENTRY(item, &g_wifiAndUsbConnList , WifiAndUsbConnInstance, node) {
         if (item->fd != fd) {
             continue;
         }
-        ReleaseWifiConnListLock();
+        ReleaseWifiAndUsbConnListLock();
         return true;
     }
-    AUTH_LOGE(AUTH_CONN, "wifi conn item is not found. fd=%{public}d", fd);
-    ReleaseWifiConnListLock();
+    AUTH_LOGE(AUTH_CONN, "wifi and usb conn item is not found. fd=%{public}d", fd);
+    ReleaseWifiAndUsbConnListLock();
     return false;
 }
 
-void DeleteWifiConnItemByConnId(int32_t fd)
+void DeleteWifiAndUsbFdByConnId(int32_t fd)
 {
-    if (!RequireWifiConnListLock()) {
-        AUTH_LOGE(AUTH_CONN, "RequireWifiConnListLock fail");
+    if (!RequireWifiAndUsbConnListLock()) {
+        AUTH_LOGE(AUTH_CONN, "RequireWifiAndUsbConnListLock fail");
         return;
     }
-    WifiConnInstance *item = NULL;
-    LIST_FOR_EACH_ENTRY(item, &g_wifiConnList, WifiConnInstance, node) {
+    WifiAndUsbConnInstance *item = NULL;
+    LIST_FOR_EACH_ENTRY(item, &g_wifiAndUsbConnList , WifiAndUsbConnInstance, node) {
         if (item->fd != fd) {
             continue;
         }
-        AUTH_LOGI(AUTH_CONN, "delete wifi conn item. fd=%{public}d", fd);
+        AUTH_LOGI(AUTH_CONN, "delete wifi and usb conn item. fd=%{public}d", fd);
         ListDelete(&item->node);
         SoftBusFree(item);
         break;
     }
-    ReleaseWifiConnListLock();
+    ReleaseWifiAndUsbConnListLock();
 }
 
 static int32_t ProcessSocketOutEvent(ListenerModule module, int32_t fd)
@@ -345,8 +345,8 @@ static int32_t ProcessSocketOutEvent(ListenerModule module, int32_t fd)
         AUTH_LOGE(AUTH_CONN, "set none block mode fail.");
         goto FAIL;
     }
-    if (AddWifiConnItem(fd) != SOFTBUS_OK) {
-        AUTH_LOGE(AUTH_CONN, "insert wifi conn item fail.");
+    if (AddWifiAndUsbFdItem(fd) != SOFTBUS_OK) {
+        AUTH_LOGE(AUTH_CONN, "insert wifi and usb conn item fail.");
         goto FAIL;
     }
     NotifyConnected(module, fd, true);
@@ -361,9 +361,9 @@ FAIL:
 
 static int32_t ProcessSocketInEvent(ListenerModule module, int32_t fd)
 {
-    if ((module == AUTH || module == AUTH_USB) && !IsExistWifiConnItemByConnId(fd)) {
-        AUTH_LOGI(AUTH_CONN, "fd=%{public}d not exist, ignore", fd);
-        return SOFTBUS_INVALID_FD;
+    if ((module == AUTH || module == AUTH_USB) && !IsExistWifiAndUsbFdByConnId(fd)) {
+        AUTH_LOGE(AUTH_CONN, "fd=%{public}d not exist, ignore", fd);
+        return SOFTBUS_INVALID_PARAM;
     }
     SocketPktHead head = { 0 };
     int32_t ret = RecvPacketHead(module, fd, &head);
@@ -435,7 +435,7 @@ static int32_t OnConnectEvent(ListenerModule module, int32_t cfd, const ConnectO
         }
         return SOFTBUS_OK;
     }
-    if ((module == AUTH || module == AUTH_USB) && AddWifiConnItem(cfd) != SOFTBUS_OK) {
+    if ((module == AUTH || module == AUTH_USB) && AddWifiAndUsbFdItem(cfd) != SOFTBUS_OK) {
         AUTH_LOGE(AUTH_CONN, "insert wifi conn item fail.");
         return SOFTBUS_MEM_ERR;
     }
@@ -646,7 +646,7 @@ int32_t SocketConnectDevice(const char *ip, int32_t port, bool isBlockMode, int3
     int32_t fd = ret;
     TriggerType triggerMode = isBlockMode ? READ_TRIGGER : WRITE_TRIGGER;
     ListenerModule module = (ifnameIdx == USB_IF) ? AUTH_USB : AUTH;
-    if (isBlockMode && AddWifiConnItem(fd) != SOFTBUS_OK) {
+    if (isBlockMode && AddWifiAndUsbFdItem(fd) != SOFTBUS_OK) {
         AUTH_LOGE(AUTH_CONN, "insert wifi conn item fail.");
         ConnShutdownSocket(fd);
         return AUTH_INVALID_FD;
@@ -874,6 +874,9 @@ int32_t AuthOpenChannel(const char *ip, int32_t port, int32_t ifnameIdx)
 void AuthCloseChannel(int32_t channelId, int32_t moduleId)
 {
     AUTH_LOGI(AUTH_CONN, "close auth channel, moduleId=%{public}d, id=%{public}d.", moduleId, channelId);
+    if (moduleId == AUTH_USB || moduleId == AUTH) {
+        DeleteWifiAndUsbFdByConnId(authId);
+    }
     SocketDisconnectDevice((ListenerModule)moduleId, channelId);
 }
 
@@ -955,19 +958,19 @@ int32_t AuthSetTcpKeepaliveOption(int32_t fd, ModeCycle cycle)
     return SOFTBUS_OK;
 }
 
-int32_t WifiConnListLockInit(void)
+int32_t WifiAndUsbConnListLockInit(void)
 {
-    if (SoftBusMutexInit(&g_wifiConnListLock, NULL) != SOFTBUS_OK) {
-        AUTH_LOGE(AUTH_CONN, "wifiConnList mutex init fail");
+    if (SoftBusMutexInit(&g_wifiAndUsbConnList Lock, NULL) != SOFTBUS_OK) {
+        AUTH_LOGE(AUTH_CONN, "wifiAndUsbConnList mutex init fail");
         return SOFTBUS_LOCK_ERR;
     }
     return SOFTBUS_OK;
 }
 
-void WifiConnListLockDeinit(void)
+void WifiAndUsbConnListLockDeinit(void)
 {
-    if (SoftBusMutexDestroy(&g_wifiConnListLock) != SOFTBUS_OK) {
-        AUTH_LOGE(AUTH_CONN, "wifiConnList mutex destroy fail");
+    if (SoftBusMutexDestroy(&g_wifiAndUsbConnList Lock) != SOFTBUS_OK) {
+        AUTH_LOGE(AUTH_CONN, "wifiAndUsbConnList mutex destroy fail");
     }
 }
 

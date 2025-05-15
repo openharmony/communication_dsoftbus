@@ -2058,8 +2058,8 @@ int32_t AuthSessionHandleDeviceDisconnected(uint64_t connId, bool isNeedDisconne
     ReleaseAuthLock();
     if (isNeedDisconnect && !isDisconnected &&
         (GetConnType(connId) == AUTH_LINK_TYPE_WIFI || GetConnType(connId) == AUTH_LINK_TYPE_USB) &&
-        IsExistWifiConnItemByConnId(GetConnId(connId))) {
-        DeleteWifiConnItemByConnId(GetConnId(connId));
+        IsExistWifiAndUsbFdByConnId(GetConnId(connId))) {
+        DeleteWifiAndUsbFdByConnId(GetConnId(connId));
         DisconnectAuthDevice(&connId);
     }
     return SOFTBUS_OK;

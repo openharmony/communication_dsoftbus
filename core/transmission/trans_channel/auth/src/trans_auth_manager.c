@@ -390,10 +390,8 @@ static void TransAuthCloseChannel(int32_t authId, int32_t linkType, bool isClien
     } else if (linkType == LANE_HML_RAW && !isClient) {
         AuthCloseChannel(authId, AUTH_RAW_P2P_SERVER);
     } else if (linkType == LANE_USB) {
-        DeleteWifiConnItemByConnId(authId);
         AuthCloseChannel(authId, AUTH_USB);
     } else {
-        DeleteWifiConnItemByConnId(authId);
         AuthCloseChannel(authId, AUTH);
     }
 }
