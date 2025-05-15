@@ -878,15 +878,15 @@ void DisconnectAuthDevice(uint64_t *connId)
             UpdateFd(connId, AUTH_INVALID_FD);
             break;
         case AUTH_LINK_TYPE_WIFI:
-            if (IsExistWifiAndUsbFdByConnId(GetFd(*connId))) {
-                DeleteWifiAndUsbFdByConnId(GetFd(*connId));
+            if (IsExistWifiAndUsbConnByConnId(GetFd(*connId))) {
+                DeleteWifiAndUsbConnByConnId(GetFd(*connId));
             }
             SocketDisconnectDevice(AUTH, GetFd(*connId));
             UpdateFd(connId, AUTH_INVALID_FD);
             break;
         case AUTH_LINK_TYPE_USB:
-            if (IsExistWifiAndUsbFdByConnId(GetFd(*connId))) {
-                DeleteWifiAndUsbFdByConnId(GetFd(*connId));
+            if (IsExistWifiAndUsbConnByConnId(GetFd(*connId))) {
+                DeleteWifiAndUsbConnByConnId(GetFd(*connId));
             }
             SocketDisconnectDevice(AUTH_USB, GetFd(*connId));
             UpdateFd(connId, AUTH_INVALID_FD);

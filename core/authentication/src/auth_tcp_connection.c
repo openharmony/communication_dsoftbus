@@ -61,7 +61,7 @@ static InnerChannelListener g_listener[] = {
 
 static SocketCallback g_callback = { NULL, NULL, NULL };
 static ListNode g_wifiAndUsbConnList  = { &g_wifiAndUsbConnList , &g_wifiAndUsbConnList  };
-static SoftBusMutex g_wifiAndUsbConnList Lock;
+static SoftBusMutex g_wifiAndUsbConnListLock;
 
 static void NotifyChannelDisconnected(int32_t channelId);
 static void NotifyChannelDataReceived(int32_t channelId, const SocketPktHead *head, const uint8_t *data);
@@ -262,7 +262,7 @@ typedef struct {
 
 static bool RequireWifiAndUsbConnListLock(void)
 {
-    if (SoftBusMutexLock(&g_wifiAndUsbConnList Lock) != SOFTBUS_OK) {
+    if (SoftBusMutexLock(&g_wifiAndUsbConnListLock) != SOFTBUS_OK) {
         AUTH_LOGE(AUTH_CONN, "wifiAndUsbConnList lock fail");
         return false;
     }
@@ -271,7 +271,7 @@ static bool RequireWifiAndUsbConnListLock(void)
 
 static void ReleaseWifiAndUsbConnListLock(void)
 {
-    if (SoftBusMutexUnlock(&g_wifiAndUsbConnList Lock) != SOFTBUS_OK) {
+    if (SoftBusMutexUnlock(&g_wifiAndUsbConnListLock) != SOFTBUS_OK) {
         AUTH_LOGE(AUTH_CONN, "wifiAndUsbConnList unlock fail");
     }
 }
@@ -295,7 +295,7 @@ static int32_t AddWifiAndUsbFdItem(int32_t fd)
     return SOFTBUS_OK;
 }
 
-bool IsExistWifiAndUsbFdByConnId(int32_t fd)
+bool IsExistWifiAndUsbConnByConnId(int32_t fd)
 {
     if (!RequireWifiAndUsbConnListLock()) {
         AUTH_LOGE(AUTH_CONN, "RequireWifiAndUsbConnListLock fail");
@@ -314,7 +314,7 @@ bool IsExistWifiAndUsbFdByConnId(int32_t fd)
     return false;
 }
 
-void DeleteWifiAndUsbFdByConnId(int32_t fd)
+void DeleteWifiAndUsbConnByConnId(int32_t fd)
 {
     if (!RequireWifiAndUsbConnListLock()) {
         AUTH_LOGE(AUTH_CONN, "RequireWifiAndUsbConnListLock fail");
@@ -361,7 +361,7 @@ FAIL:
 
 static int32_t ProcessSocketInEvent(ListenerModule module, int32_t fd)
 {
-    if ((module == AUTH || module == AUTH_USB) && !IsExistWifiAndUsbFdByConnId(fd)) {
+    if ((module == AUTH || module == AUTH_USB) && !IsExistWifiAndUsbConnByConnId(fd)) {
         AUTH_LOGE(AUTH_CONN, "fd=%{public}d not exist, ignore", fd);
         return SOFTBUS_INVALID_PARAM;
     }
@@ -875,7 +875,7 @@ void AuthCloseChannel(int32_t channelId, int32_t moduleId)
 {
     AUTH_LOGI(AUTH_CONN, "close auth channel, moduleId=%{public}d, id=%{public}d.", moduleId, channelId);
     if (moduleId == AUTH_USB || moduleId == AUTH) {
-        DeleteWifiAndUsbFdByConnId(authId);
+        DeleteWifiAndUsbConnByConnId(channelId);
     }
     SocketDisconnectDevice((ListenerModule)moduleId, channelId);
 }
@@ -960,7 +960,7 @@ int32_t AuthSetTcpKeepaliveOption(int32_t fd, ModeCycle cycle)
 
 int32_t WifiAndUsbConnListLockInit(void)
 {
-    if (SoftBusMutexInit(&g_wifiAndUsbConnList Lock, NULL) != SOFTBUS_OK) {
+    if (SoftBusMutexInit(&g_wifiAndUsbConnListLock, NULL) != SOFTBUS_OK) {
         AUTH_LOGE(AUTH_CONN, "wifiAndUsbConnList mutex init fail");
         return SOFTBUS_LOCK_ERR;
     }
@@ -969,7 +969,7 @@ int32_t WifiAndUsbConnListLockInit(void)
 
 void WifiAndUsbConnListLockDeinit(void)
 {
-    if (SoftBusMutexDestroy(&g_wifiAndUsbConnList Lock) != SOFTBUS_OK) {
+    if (SoftBusMutexDestroy(&g_wifiAndUsbConnListLock) != SOFTBUS_OK) {
         AUTH_LOGE(AUTH_CONN, "wifiAndUsbConnList mutex destroy fail");
     }
 }
