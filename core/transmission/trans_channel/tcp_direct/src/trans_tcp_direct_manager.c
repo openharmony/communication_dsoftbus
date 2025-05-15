@@ -175,7 +175,6 @@ void TransTdcStopSessionProc(ListenerModule listenMod)
         item->appInfo.fd = -1;
         ListDelete(&item->node);
         sessionList->cnt--;
-        sessionList->cnt--;
         if (fd >= 0) {
             TRANS_LOGW(TRANS_CTRL, "session is shutdown. fd=%{public}d", fd);
             DelTrigger(item->listenMod, fd, RW_TRIGGER);
