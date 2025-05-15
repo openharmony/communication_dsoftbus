@@ -434,7 +434,12 @@ static void SetAssetSessionKeyByAuthInfo(NodeInfo *info, AuthHandle authHandle)
     }
     SessionKey sessionKey;
     (void)memset_s(&sessionKey, sizeof(SessionKey), 0, sizeof(SessionKey));
-    UpdateDpSameAccount(info->accountId, info->deviceInfo.deviceUdid, info->userId, sessionKey, false);
+    UpdateDpAclParams aclParams = {
+        .accountId = info->accountId,
+        .deviceId = info->deviceInfo.deviceUdid,
+        .peerUserId = info->userId
+    };
+    UpdateDpSameAccount(&aclParams, sessionKey, false, info->aclState);
 }
 
 static void SetLnnConnNodeInfo(
