@@ -26,10 +26,11 @@ void UnregisterStreamCb(void)
     return;
 }
 
-int32_t TransOnstreamChannelOpened(const ChannelInfo *channel, int32_t *streamPort)
+int32_t TransOnstreamChannelOpened(const ChannelInfo *channel, int32_t *streamPort, SocketAccessInfo *accessInfo)
 {
     (void)channel;
     (void)streamPort;
+    (void)accessInfo;
     return SOFTBUS_OK;
 }
 

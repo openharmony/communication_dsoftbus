@@ -31,14 +31,14 @@ int32_t ClientTransAuthInit(const IClientSessionCallBack *cb)
     return SOFTBUS_OK;
 }
 
-int32_t ClientTransAuthOnChannelOpened(const char *sessionName, const ChannelInfo *channel)
+int32_t ClientTransAuthOnChannelOpened(
+    const char *sessionName, const ChannelInfo *channel, SocketAccessInfo *accessInfo)
 {
     if (sessionName == NULL || channel == NULL) {
         TRANS_LOGE(TRANS_SDK, "param invalid.");
         return SOFTBUS_INVALID_PARAM;
     }
-
-    int32_t ret = g_sessionCb.OnSessionOpened(sessionName, channel, TYPE_MESSAGE);
+    int32_t ret = g_sessionCb.OnSessionOpened(sessionName, channel, TYPE_MESSAGE, accessInfo);
     if (ret != SOFTBUS_OK) {
         TRANS_LOGE(TRANS_SDK, "notify session open fail, ret=%{public}d", ret);
         return ret;

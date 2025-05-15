@@ -27,7 +27,7 @@ void RegisterStreamCb(const UdpChannelMgrCb *streamCb);
 
 void UnregisterStreamCb(void);
 
-int32_t TransOnstreamChannelOpened(const ChannelInfo *channel, int32_t *streamPort);
+int32_t TransOnstreamChannelOpened(const ChannelInfo *channel, int32_t *streamPort, SocketAccessInfo *accessInfo);
 
 int32_t TransCloseStreamChannel(int32_t channelId);
 

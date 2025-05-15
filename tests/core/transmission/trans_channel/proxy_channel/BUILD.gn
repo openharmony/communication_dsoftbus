@@ -676,7 +676,7 @@ ohos_unittest("SoftbusTransProxyChannelManagerTest") {
 
     "$dsoftbus_core_path/discovery/interface",
     "$dsoftbus_core_path/discovery/manager/include",
-
+    "$dsoftbus_root_path/core/adapter/bus_center/include",
     "$dsoftbus_root_path/core/transmission/session/cpp/include",
     "$dsoftbus_core_path/transmission/session/include",
     "$dsoftbus_core_path/transmission/trans_channel/common/include",

@@ -112,7 +112,8 @@ int32_t TransClientProxy::MessageParcelWrite(MessageParcel &data, const char *se
     WRITE_PARCEL_WITH_RET(data, Int32, channel->tokenType, SOFTBUS_IPC_ERR);
     if (channel->tokenType > ACCESS_TOKEN_TYPE_HAP && channel->channelType != CHANNEL_TYPE_AUTH && channel->isServer) {
         WRITE_PARCEL_WITH_RET(data, Int32, channel->peerUserId, SOFTBUS_IPC_ERR);
-        WRITE_PARCEL_WITH_RET(data, CString, channel->peerAccountId, SOFTBUS_IPC_ERR);
+        WRITE_PARCEL_WITH_RET(data, Uint64, channel->peerTokenId, SOFTBUS_IPC_ERR);
+        WRITE_PARCEL_WITH_RET(data, CString, channel->peerExtraAccessInfo, SOFTBUS_IPC_ERR);
     }
     return SOFTBUS_OK;
 }
@@ -188,7 +189,6 @@ int32_t TransClientProxy::OnChannelBind(int32_t channelId, int32_t channelType)
         SOFTBUS_TRANS_PROXY_WRITEINT_FAILED, TRANS_CTRL, "write channel id failed");
     TRANS_CHECK_AND_RETURN_RET_LOGE(data.WriteInt32(channelType),
         SOFTBUS_TRANS_PROXY_WRITEINT_FAILED, TRANS_CTRL, "write channel type failed");
-
     MessageParcel reply;
     MessageOption option = { MessageOption::TF_ASYNC };
     int32_t ret = remote->SendRequest(CLIENT_ON_CHANNEL_BIND, data, reply, option);

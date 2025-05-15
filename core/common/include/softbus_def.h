@@ -149,6 +149,13 @@ typedef enum {
 } BusinessType;
 
 typedef struct {
+    int32_t userId;
+    uint64_t localTokenId;
+    char *businessAccountId;
+    char *extraAccessInfo;
+} AccessInfo;
+
+typedef struct {
     bool isServer;
     bool isEnabled;
     bool isEncrypt;
@@ -188,7 +195,9 @@ typedef struct {
     char *reqId;
     int32_t tokenType;
     int32_t peerUserId;
-    char *peerAccountId;
+    uint64_t peerTokenId;
+    char *peerBusinessAccountId;
+    char *peerExtraAccessInfo;
 } ChannelInfo;
 
 #ifdef __cplusplus

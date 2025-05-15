@@ -651,7 +651,7 @@ int32_t GenerateStrHashAndConvertToHexString(const unsigned char *str, uint32_t 
     return SOFTBUS_OK;
 }
 
-static int32_t checkParamIsNull(uint8_t *buf, int32_t *offSet)
+static int32_t CheckParamIsNull(uint8_t *buf, int32_t *offSet)
 {
     if (buf == NULL) {
         COMM_LOGE(COMM_UTILS, "param buf is NULL");
@@ -666,7 +666,7 @@ static int32_t checkParamIsNull(uint8_t *buf, int32_t *offSet)
 
 int32_t WriteInt32ToBuf(uint8_t *buf, uint32_t dataLen, int32_t *offSet, int32_t data)
 {
-    int32_t ret = checkParamIsNull(buf, offSet);
+    int32_t ret = CheckParamIsNull(buf, offSet);
     if (ret != SOFTBUS_OK) {
         return ret;
     }
@@ -679,9 +679,24 @@ int32_t WriteInt32ToBuf(uint8_t *buf, uint32_t dataLen, int32_t *offSet, int32_t
     return SOFTBUS_OK;
 }
 
+int32_t WriteUint64ToBuf(uint8_t *buf, uint32_t bufLen, int32_t *offSet, uint64_t data)
+{
+    int32_t ret = CheckParamIsNull(buf, offSet);
+    if (ret != SOFTBUS_OK) {
+        return ret;
+    }
+    if (bufLen < *offSet + sizeof(data)) {
+        COMM_LOGE(COMM_UTILS, "write data is long than bufLen!");
+        return SOFTBUS_TRANS_INVALID_DATA_LENGTH;
+    }
+    *((uint64_t *)(buf + *offSet)) = data;
+    *offSet += sizeof(data);
+    return SOFTBUS_OK;
+}
+
 int32_t WriteUint8ToBuf(uint8_t *buf, uint32_t dataLen, int32_t *offSet, uint8_t data)
 {
-    int32_t ret = checkParamIsNull(buf, offSet);
+    int32_t ret = CheckParamIsNull(buf, offSet);
     if (ret != SOFTBUS_OK) {
         return ret;
     }
@@ -701,7 +716,7 @@ int32_t WriteStringToBuf(uint8_t *buf, uint32_t bufLen, int32_t *offSet, char *d
         return SOFTBUS_INVALID_PARAM;
     }
 
-    int32_t ret = checkParamIsNull(buf, offSet);
+    int32_t ret = CheckParamIsNull(buf, offSet);
     if (ret != SOFTBUS_OK) {
         return ret;
     }
@@ -710,7 +725,7 @@ int32_t WriteStringToBuf(uint8_t *buf, uint32_t bufLen, int32_t *offSet, char *d
         COMM_LOGE(COMM_UTILS, "write data is long than dataLen!");
         return SOFTBUS_TRANS_INVALID_DATA_LENGTH;
     }
-    *((int32_t *)(buf + *offSet)) = dataLen;
+    *((uint32_t *)(buf + *offSet)) = dataLen;
     *offSet += sizeof(dataLen);
     if (memcpy_s(buf + *offSet, bufLen - *offSet, data, dataLen) != EOK) {
         COMM_LOGE(COMM_UTILS, "data copy failed!");
@@ -722,7 +737,7 @@ int32_t WriteStringToBuf(uint8_t *buf, uint32_t bufLen, int32_t *offSet, char *d
 
 int32_t ReadInt32FromBuf(uint8_t *buf, uint32_t dataLen, int32_t *offSet, int32_t *data)
 {
-    int32_t ret = checkParamIsNull(buf, offSet);
+    int32_t ret = CheckParamIsNull(buf, offSet);
     if (ret != SOFTBUS_OK) {
         return ret;
     }
@@ -739,9 +754,28 @@ int32_t ReadInt32FromBuf(uint8_t *buf, uint32_t dataLen, int32_t *offSet, int32_
     return SOFTBUS_OK;
 }
 
+int32_t ReadUint64FromBuf(uint8_t *buf, uint32_t dataLen, int32_t *offSet, uint64_t *data)
+{
+    int32_t ret = CheckParamIsNull(buf, offSet);
+    if (ret != SOFTBUS_OK) {
+        return ret;
+    }
+    if (data == NULL) {
+        COMM_LOGE(COMM_UTILS, "param data is NULL");
+        return SOFTBUS_INVALID_PARAM;
+    }
+    if (dataLen < *offSet + sizeof(*data)) {
+        COMM_LOGE(COMM_UTILS, "Read data is long than dataLen!");
+        return SOFTBUS_TRANS_INVALID_DATA_LENGTH;
+    }
+    *data = *((uint64_t *)(buf + *offSet));
+    *offSet += sizeof(*data);
+    return SOFTBUS_OK;
+}
+
 int32_t ReadUint8FromBuf(uint8_t *buf, uint32_t dataLen, int32_t *offSet, uint8_t *data)
 {
-    int32_t ret = checkParamIsNull(buf, offSet);
+    int32_t ret = CheckParamIsNull(buf, offSet);
     if (ret != SOFTBUS_OK) {
         return ret;
     }
@@ -758,9 +792,27 @@ int32_t ReadUint8FromBuf(uint8_t *buf, uint32_t dataLen, int32_t *offSet, uint8_
     return SOFTBUS_OK;
 }
 
+int32_t ReadStringLenFormBuf(uint8_t *buf, uint32_t bufLen, int32_t *offSet, uint32_t *len)
+{
+    int32_t ret = CheckParamIsNull(buf, offSet);
+    if (ret != SOFTBUS_OK) {
+        return ret;
+    }
+    if (len == NULL) {
+        COMM_LOGE(COMM_UTILS, "param len is NULL");
+        return SOFTBUS_INVALID_PARAM;
+    }
+    if (bufLen < *offSet + sizeof(uint32_t)) {
+        COMM_LOGE(COMM_UTILS, "Read string len is long than bufLen!");
+        return SOFTBUS_TRANS_INVALID_DATA_LENGTH;
+    }
+    *len = *((uint32_t *)(buf + *offSet));
+    return SOFTBUS_OK;
+}
+
 int32_t ReadStringFromBuf(uint8_t *buf, uint32_t bufLen, int32_t *offSet, char *data, uint32_t dataLen)
 {
-    int32_t ret = checkParamIsNull(buf, offSet);
+    int32_t ret = CheckParamIsNull(buf, offSet);
     if (ret != SOFTBUS_OK) {
         return ret;
     }
@@ -768,23 +820,25 @@ int32_t ReadStringFromBuf(uint8_t *buf, uint32_t bufLen, int32_t *offSet, char *
         COMM_LOGE(COMM_UTILS, "param data is NULL");
         return SOFTBUS_INVALID_PARAM;
     }
-    if (bufLen < *offSet + sizeof(dataLen)) {
-        COMM_LOGE(COMM_UTILS, "Read data is long than dataLen!");
+    if (bufLen < *offSet + sizeof(uint32_t)) {
+        COMM_LOGE(COMM_UTILS, "Read data is long than bufLen!");
         return SOFTBUS_TRANS_INVALID_DATA_LENGTH;
     }
-
-    dataLen = *((int32_t *)(buf + *offSet));
-    *offSet += sizeof(dataLen);
-
-    if (bufLen < *offSet + dataLen) {
-        COMM_LOGE(COMM_UTILS, "Read data is long than dataLen!");
+    uint32_t inDataLen = *((uint32_t *)(buf + *offSet));
+    *offSet += sizeof(uint32_t);
+    if (bufLen < *offSet + inDataLen) {
+        COMM_LOGE(COMM_UTILS, "Read data is long than bufLen!");
         return SOFTBUS_TRANS_INVALID_DATA_LENGTH;
     }
-    if (memcpy_s(data, dataLen, buf + *offSet, dataLen) != EOK) {
+    if (inDataLen > dataLen) {
+        COMM_LOGE(COMM_UTILS, "string data is long than datalen!");
+        return SOFTBUS_TRANS_INVALID_DATA_LENGTH;
+    }
+    if (memcpy_s(data, dataLen, buf + *offSet, inDataLen) != EOK) {
         COMM_LOGE(COMM_UTILS, "data copy failed!");
         return SOFTBUS_MEM_ERR;
     }
-    *offSet += dataLen;
+    *offSet += inDataLen;
     return SOFTBUS_OK;
 }
 
@@ -797,13 +851,18 @@ void EnableCapabilityBit(uint32_t *value, uint32_t offSet)
     *value |= (1 << offSet);
 }
 
-bool GetCapabilityBit(uint32_t *value, uint32_t offSet)
+void DisableCapabilityBit(uint32_t *value, uint32_t offSet)
 {
     if (value == NULL) {
         COMM_LOGE(COMM_UTILS, "invalid param");
-        return false;
+        return;
     }
-    return (bool)((*value >> offSet) & 0x1);
+    *value &= ~(1 << offSet);
+}
+
+bool GetCapabilityBit(uint32_t value, uint32_t offSet)
+{
+    return (bool)((value >> offSet) & 0x1);
 }
 
 static int32_t SetLocale(char **localeBefore)

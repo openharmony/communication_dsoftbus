@@ -201,6 +201,7 @@ ohos_unittest("TransUkManagerTest") {
   module_out_path = module_output_path
   sources = [
     "mock/trans_lane_common_test_mock.cpp",
+    "mock/trans_uk_manager_test_mock.cpp",
     "trans_uk_manager_test.cpp",
   ]
 
@@ -252,6 +253,7 @@ group("unittest") {
     ":TransLaneCommonTest",
     ":TransLanePendingTest",
     ":TransUkManagerTest",
+    "mock/softbus_message_open_channel_test:unittest",
   ]
   if (dsoftbus_feature_lnn_lane_mgr) {
     deps += [ ":TransLaneTest" ]

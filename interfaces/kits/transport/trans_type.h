@@ -25,6 +25,7 @@ extern "C" {
 #define MAX_PATH_LEN 4096
 #define DEVICE_ID_LEN_MAX 65
 #define ACCOUNT_UID_LEN_MAX 65
+#define EXTRA_ACCESS_INFO_LEN_MAX 256
 
 /**
  * @brief Enumerates the data types.
@@ -73,8 +74,10 @@ typedef struct {
  * @version 2.0
  */
 typedef struct {
-    int32_t userId;        /**< User ID of the application that initiates link setup */
-    char *accountId;       /**< Account ID of the application that initiates link setup */
+    int32_t userId;          /**< User ID of the application that initiates link setup */
+    uint64_t localTokenId;   /**< Token ID of the application that initiates link setup */
+    char *businessAccountId; /**< Business account ID of the application that initiates link setup (reserved)*/
+    char *extraAccessInfo;   /**< Extra Info of the application that initiates link setup, maximum length 256 bytes */
 } SocketAccessInfo;
 
 /**
@@ -89,21 +92,6 @@ typedef struct {
     char *pkgName;           /**< Peer package name, maximum length 64 bytes */
     TransDataType dataType; /**< Data type of peer socket*/
 } PeerSocketInfo;
-
-/**
- * @brief Defines the socket access information.
- *
- * @since 2.0
- * @version 2.0
- */
-typedef struct {
-    char *name;              /**< Peer socket name, maximum length 255 bytes */
-    char *networkId;         /**< Peer network ID, maximum length 64 bytes */
-    char *pkgName;           /**< Peer package name, maximum length 64 bytes */
-    int32_t userId;          /**< Peer user ID of the application that initiates link setup */
-    char *accountId;         /**< Peer account ID of the application that initiates link setup */
-    TransDataType dataType; /**< Data type of peer socket*/
-} PeerSocketAccessInfo;
 
 /**
  * @brief Enumerates the reason of the shutdown event.

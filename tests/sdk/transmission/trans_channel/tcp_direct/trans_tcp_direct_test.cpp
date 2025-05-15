@@ -1073,7 +1073,7 @@ HWTEST_F(TransTcpDirectTest, ClientTransTdcOnChannelOpenedTest001, TestSize.Leve
     info->channelType = CHANNEL_TYPE_TCP_DIRECT;
     info->sessionKey = (char *)g_sessionkey;
     info->fd = g_fd;
-    int32_t ret = ClientTransTdcOnChannelOpened(g_sessionName, info);
+    int32_t ret = ClientTransTdcOnChannelOpened(g_sessionName, info, nullptr);
     EXPECT_EQ(ret, SOFTBUS_MEM_ERR);
     SoftBusFree(info);
 }
