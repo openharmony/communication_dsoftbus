@@ -899,7 +899,6 @@ static int32_t GetLocalUdidShortHash(char *localUdidHash)
 static void UnpackExternalAuthInfo(JsonObj *obj, AuthSessionInfo *info)
 {
     OptInt(obj, USERID, &info->userId, 0);
-    UnpackSKId(obj, info);
     if (info->authVersion < AUTH_VERSION_V2) {
         AUTH_LOGD(AUTH_FSM, "lower version dont need unpack auth info");
         return;
@@ -1407,6 +1406,7 @@ int32_t UnpackDeviceIdJson(const char *msg, uint32_t len, AuthSessionInfo *info,
         SetCompressFlag(compressParse, &info->isSupportCompress);
     }
     UnPackAuthPreLinkNode(obj, info);
+    UnpackSKId(obj, info);
     OptInt(obj, AUTH_MODULE, (int32_t *)&info->module, AUTH_MODULE_LNN);
     bool isSupportNormalizedKey = false;
     OptBool(obj, IS_NORMALIZED, &isSupportNormalizedKey, false);
