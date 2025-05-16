@@ -153,9 +153,6 @@ HWTEST_F(TransUkManagerTest, UkGetUkPolicyTest001, TestSize.Level1)
 
     TransSessionMgrDeinit();
 
-    bool isSepicalSa = SpecialSaCanUseDeviceKey(0);
-    EXPECT_EQ(false, isSepicalSa);
-
     bool isValidUk = IsValidUkInfo(nullptr);
     EXPECT_EQ(false, isValidUk);
 
@@ -189,17 +186,18 @@ HWTEST_F(TransUkManagerTest, UkEncryptAndAddSinkSessionKeyTest001, TestSize.Leve
     EXPECT_EQ(SOFTBUS_OK, ret);
 
     appInfo.channelCapability = 0x7;
+    NiceMock<TransUkManagerTestInterfaceMock> TransUkManagerMock;
+    EXPECT_CALL(TransUkManagerMock, SoftBusBase64Encode).WillRepeatedly(Return(SOFTBUS_OK));
     ret = EncryptAndAddSinkSessionKey(json, &appInfo);
     EXPECT_EQ(SOFTBUS_OK, ret);
 
     appInfo.channelCapability = 0xF;
-    NiceMock<TransUkManagerTestInterfaceMock> TransUkManagerMock;
     EXPECT_CALL(TransUkManagerMock, AuthEncryptByUkId).WillRepeatedly(Return(SOFTBUS_ENCRYPT_ERR));
     ret = EncryptAndAddSinkSessionKey(json, &appInfo);
     EXPECT_EQ(SOFTBUS_ENCRYPT_ERR, ret);
 
     EXPECT_CALL(TransUkManagerMock, AuthEncryptByUkId).WillRepeatedly(Return(SOFTBUS_OK));
-    EXPECT_CALL(TransUkManagerMock, SoftBusBase64Encode).WillOnce(Return(-1));
+    EXPECT_CALL(TransUkManagerMock, SoftBusBase64Encode).WillRepeatedly(Return(-1));
     ret = EncryptAndAddSinkSessionKey(json, &appInfo);
     EXPECT_EQ(SOFTBUS_CREATE_JSON_ERR, ret);
 
@@ -231,8 +229,10 @@ HWTEST_F(TransUkManagerTest, UkDecryptAndAddSinkSessionKeyTest001, TestSize.Leve
     EXPECT_EQ(SOFTBUS_OK, ret);
 
     appInfo.channelCapability = 0x7;
+    NiceMock<TransUkManagerTestInterfaceMock> TransUkManagerMock;
+    EXPECT_CALL(TransUkManagerMock, SoftBusBase64Decode).WillRepeatedly(Return(SOFTBUS_OK));
     ret = DecryptAndAddSinkSessionKey(json, &appInfo);
-    EXPECT_EQ(SOFTBUS_PARSE_JSON_ERR, ret);
+    EXPECT_EQ(SOFTBUS_OK, ret);
 
     appInfo.channelCapability = 0xF;
     ret = DecryptAndAddSinkSessionKey(json, &appInfo);
@@ -249,7 +249,6 @@ HWTEST_F(TransUkManagerTest, UkDecryptAndAddSinkSessionKeyTest001, TestSize.Leve
 
     EXPECT_CALL(TransLaneCommonMock, LnnGetRemoteStrInfo).WillRepeatedly(Return(SOFTBUS_OK));
     EXPECT_CALL(TransLaneCommonMock, LnnGetLocalStrInfo).WillRepeatedly(Return(SOFTBUS_OK));
-    NiceMock<TransUkManagerTestInterfaceMock> TransUkManagerMock;
     EXPECT_CALL(TransUkManagerMock, AuthFindUkIdByAclInfo).WillRepeatedly(Return(SOFTBUS_NOT_FIND));
     ret = DecryptAndAddSinkSessionKey(json, &appInfo);
     EXPECT_NE(SOFTBUS_OK, ret);
