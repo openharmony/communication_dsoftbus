@@ -130,7 +130,12 @@ HWTEST_F(AuthDeviceProfileTest, IS_POTENTIAL_DEVCIE_TEST_004, TestSize.Level1)
     SessionKey sessionKey;
     (void)memset_s(&sessionKey, sizeof(SessionKey), 0, sizeof(SessionKey));
     DelNotTrustDevice(nullptr);
-    UpdateDpSameAccount(accountId, nullptr, peerUserId, sessionKey, true);
+    UpdateDpAclParams aclParams = {
+        .accountId = accountId,
+        .deviceId = nullptr,
+        .peerUserId = peerUserId
+    };
+    UpdateDpSameAccount(&aclParams, sessionKey, true, ACL_WRITE_DEFAULT);
     bool ret = IsPotentialTrustedDeviceDp(deviceIdHash, true);
     EXPECT_EQ(ret, false);
 }

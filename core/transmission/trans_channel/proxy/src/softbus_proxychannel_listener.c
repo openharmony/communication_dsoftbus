@@ -63,7 +63,9 @@ static void GetProxyChannelInfo(int32_t channelId, const AppInfo *appInfo, bool 
     info->peerSessionName = (char *)appInfo->peerData.sessionName;
     info->peerPid = appInfo->peerData.pid;
     info->peerUid = appInfo->peerData.uid;
-    info->sessionKey = (char *)appInfo->sessionKey;
+    info->sessionKey = GetCapabilityBit(appInfo->channelCapability, TRANS_CHANNEL_SINK_GENERATE_KEY_OFFSET) ?
+        (char *)appInfo->sinkSessionKey :
+        (char *)appInfo->sessionKey;
     info->keyLen = SESSION_KEY_LENGTH;
     info->fileEncrypt = appInfo->encrypt;
     info->algorithm = appInfo->algorithm;
@@ -108,12 +110,13 @@ static int32_t NotifyNormalChannelOpened(int32_t channelId, const AppInfo *appIn
         info.tokenType = appInfo->myData.tokenType;
         if (isServer && appInfo->myData.tokenType > ACCESS_TOKEN_TYPE_HAP) {
             info.peerUserId = appInfo->peerData.userId;
-            info.peerAccountId = (char *)appInfo->peerData.accountId;
+            info.peerTokenId = appInfo->peerData.tokenId;
+            info.peerExtraAccessInfo = (char *)appInfo->extraAccessInfo;
         }
     } else {
         info.peerDeviceId = (char *)appInfo->peerData.deviceId;
     }
-    info.isSupportTlv = GetCapabilityBit((uint32_t *)&appInfo->channelCapability, TRANS_CAPABILITY_TLV_OFFSET);
+    info.isSupportTlv = GetCapabilityBit(appInfo->channelCapability, TRANS_CAPABILITY_TLV_OFFSET);
     GetOsTypeByNetworkId(info.peerDeviceId, &info.osType);
     ret = TransProxyOnChannelOpened(appInfo->myData.pkgName, appInfo->myData.pid, appInfo->myData.sessionName, &info);
     TRANS_LOGI(TRANS_CTRL, "proxy channel open, channelId=%{public}d, ret=%{public}d", channelId, ret);
@@ -229,7 +232,6 @@ int32_t OnProxyChannelBind(int32_t channelId, const AppInfo *appInfo)
         TRANS_LOGE(TRANS_CTRL, "proxy channel bind app info invalid channelId=%{public}d", channelId);
         return SOFTBUS_INVALID_PARAM;
     }
-
     switch (appInfo->appType) {
         case APP_TYPE_NORMAL:
         case APP_TYPE_AUTH:

@@ -59,10 +59,10 @@ int32_t StartSocketListening(ListenerModule module, const LocalListenerInfo *inf
 void StopSocketListening(ListenerModule moduleId);
 
 int32_t AuthSetTcpKeepaliveOption(int32_t fd, ModeCycle cycle);
-bool IsExistWifiConnItemByConnId(int32_t fd);
-void DeleteWifiConnItemByConnId(int32_t fd);
-int32_t WifiConnListLockInit(void);
-void WifiConnListLockDeinit(void);
+bool IsExistAuthTcpConnFdItemByConnId(int32_t fd);
+void DeleteAuthTcpConnFdItemByConnId(int32_t fd);
+int32_t AuthTcpConnFdLockInit(void);
+void AuthTcpConnFdLockDeinit(void);
 
 #ifdef __cplusplus
 #if __cplusplus

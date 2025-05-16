@@ -46,7 +46,8 @@ typedef struct {
     TcpDirectChannelDetail detail;
 } TcpDirectChannelInfo;
 
-int32_t ClientTransTdcOnChannelOpened(const char *sessionName, const ChannelInfo *channel);
+int32_t ClientTransTdcOnChannelOpened(
+    const char *sessionName, const ChannelInfo *channel, SocketAccessInfo *accessInfo);
 int32_t ClientTransTdcOnChannelOpenFailed(int32_t channelId, int32_t errCode);
 
 void TransTdcCloseChannel(int32_t channelId);
@@ -64,7 +65,6 @@ int32_t TransDisableSessionListener(int32_t channelId);
 int32_t TransTdcSetListenerStateById(int32_t channelId, bool needStopListener);
 
 void TransUpdateFdState(int32_t channelId);
-
 #ifdef __cplusplus
 }
 #endif

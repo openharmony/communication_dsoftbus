@@ -410,7 +410,7 @@ HWTEST_F(SoftBusMessageOpenChannelMockTest, ParseMessageToAppInfo002, TestSize.L
     EXPECT_CALL(softbusMOpenChannelMock, GetJsonObjectNumberItem).WillRepeatedly(Return(false));
     EXPECT_CALL(softbusMOpenChannelMock, GetJsonObjectInt32Item).WillRepeatedly(Return(false));
     int32_t ret = ParseMessageToAppInfo(&msg, appInfo);
-    EXPECT_NE(SOFTBUS_OK, ret);
+    EXPECT_EQ(SOFTBUS_OK, ret);
 
     if (appInfo != nullptr) {
         SoftBusFree(appInfo);

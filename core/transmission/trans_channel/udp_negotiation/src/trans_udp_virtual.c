@@ -81,11 +81,13 @@ int32_t NotifyUdpQosEvent(const AppInfo *info, int32_t eventId, int32_t tvCount,
     return SOFTBUS_FUNC_NOT_SUPPORT;
 }
 
-int32_t TransDealUdpChannelOpenResult(int32_t channelId, int32_t openResult, int32_t udpPort)
+int32_t TransDealUdpChannelOpenResult(
+    int32_t channelId, int32_t openResult, int32_t udpPort, const AccessInfo *accessInfo)
 {
     (void)channelId;
     (void)openResult;
     (void)udpPort;
+    (void)accessInfo;
     return SOFTBUS_FUNC_NOT_SUPPORT;
 }
 

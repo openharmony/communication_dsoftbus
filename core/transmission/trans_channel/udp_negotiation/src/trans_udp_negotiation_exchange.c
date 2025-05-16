@@ -28,6 +28,7 @@
 #include "trans_log.h"
 #include "trans_session_account_adapter.h"
 #include "trans_udp_channel_manager.h"
+#include "trans_uk_manager.h"
 
 #define BASE64_SESSION_KEY_LEN 45
 typedef enum {
@@ -76,21 +77,29 @@ int32_t TransUnpackReplyUdpInfo(const cJSON *msg, AppInfo *appInfo)
     if ((code == CODE_FILE_TRANS_UDP) && (getCodeType(appInfo) == CODE_FILE_TRANS_UDP)) {
         appInfo->fileProtocol = APP_INFO_UDP_FILE_PROTOCOL;
     }
-
+    if (!GetJsonObjectNumberItem(msg, "TRANS_CAPABILITY", (int32_t *)&(appInfo->channelCapability))) {
+        appInfo->channelCapability = 0;
+    }
     switch (appInfo->udpChannelOptType) {
         case TYPE_UDP_CHANNEL_OPEN:
             (void)GetJsonObjectNumber64Item(msg, "MY_CHANNEL_ID", &(appInfo->peerData.channelId));
             (void)GetJsonObjectNumberItem(msg, "MY_PORT", &(appInfo->peerData.port));
             (void)GetJsonObjectStringItem(msg, "MY_IP", appInfo->peerData.addr, sizeof(appInfo->peerData.addr));
+            (void)GetJsonObjectStringItem(
+                msg, "SINK_ACL_ACCOUNT_ID", (appInfo->peerData.accountId), ACCOUNT_UID_LEN_MAX);
+            if (!GetJsonObjectNumberItem(msg, "SINK_ACL_USER_ID", &appInfo->peerData.userId)) {
+                appInfo->peerData.userId = INVALID_USER_ID;
+            }
+            (void)GetJsonObjectNumber64Item(msg, "SINK_ACL_TOKEN_ID", (int64_t *)&appInfo->peerData.tokenId);
+            if (DecryptAndAddSinkSessionKey(msg, appInfo)!= SOFTBUS_OK) {
+                return SOFTBUS_PARSE_JSON_ERR;
+            }
             break;
         case TYPE_UDP_CHANNEL_CLOSE:
             break;
         default:
             TRANS_LOGE(TRANS_CTRL, "invalid udp channel type.");
             return SOFTBUS_TRANS_INVALID_CHANNEL_TYPE;
-    }
-    if (!GetJsonObjectNumberItem(msg, "TRANS_CAPABILITY", (int32_t *)&(appInfo->channelCapability))) {
-        appInfo->channelCapability = 0;
     }
     return SOFTBUS_OK;
 }
@@ -111,7 +120,7 @@ static void TransGetCommonUdpInfoFromJson(const cJSON *msg, AppInfo *appInfo)
     (void)GetJsonObjectNumberItem(msg, "UDP_CONN_TYPE", (int32_t *)&(appInfo->udpConnType));
 }
 
-static void TransGetUdpChannelOpenInfoFromJson(const cJSON *msg, AppInfo *appInfo, UkIdInfo *ukIdInfo)
+static void TransGetUdpChannelOpenInfoFromJson(const cJSON *msg, AppInfo *appInfo)
 {
     (void)GetJsonObjectNumber64Item(msg, "MY_CHANNEL_ID", &(appInfo->peerData.channelId));
     (void)GetJsonObjectStringItem(msg, "MY_IP", appInfo->peerData.addr, sizeof(appInfo->peerData.addr));
@@ -124,24 +133,27 @@ static void TransGetUdpChannelOpenInfoFromJson(const cJSON *msg, AppInfo *appInf
     }
     (void)GetJsonObjectStringItem(msg, "DEVICE_ID", appInfo->peerData.deviceId, UUID_BUF_LEN);
     (void)GetJsonObjectStringItem(msg, "ACCOUNT_ID", appInfo->peerData.accountId, ACCOUNT_UID_LEN_MAX);
-    (void)GetJsonObjectNumberItem(msg, "SOURCE_UK_ID", &ukIdInfo->peerId);
-    (void)GetJsonObjectNumberItem(msg, "SINK_UK_ID", &ukIdInfo->myId);
+    (void)GetJsonObjectNumber64Item(msg, "SOURCE_ACL_TOKEN_ID", (int64_t *)&appInfo->peerData.tokenId);
+    (void)GetJsonObjectStringItem(
+        msg, "SOURCE_ACL_EXTRA_INFO", (appInfo->extraAccessInfo), EXTRA_ACCESS_INFO_LEN_MAX);
 }
 
-int32_t TransUnpackRequestUdpInfo(const cJSON *msg, AppInfo *appInfo, UkIdInfo *ukIdInfo)
+int32_t TransUnpackRequestUdpInfo(const cJSON *msg, AppInfo *appInfo)
 {
     TRANS_LOGI(TRANS_CTRL, "unpack request udp info in negotiation.");
     TRANS_CHECK_AND_RETURN_RET_LOGW(msg != NULL, SOFTBUS_INVALID_PARAM, TRANS_CTRL, "Invalid param");
     TRANS_CHECK_AND_RETURN_RET_LOGW(appInfo != NULL, SOFTBUS_INVALID_PARAM, TRANS_CTRL, "Invalid param");
     unsigned char encodeSessionKey[BASE64_SESSION_KEY_LEN] = {0};
     size_t len = 0;
-    (void)GetJsonObjectStringItem(msg, "SESSION_KEY", (char*)encodeSessionKey, BASE64_SESSION_KEY_LEN);
-    int32_t ret = SoftBusBase64Decode((unsigned char*)appInfo->sessionKey, sizeof(appInfo->sessionKey), &len,
-        (unsigned char*)encodeSessionKey, strlen((char*)encodeSessionKey));
-    (void)memset_s(encodeSessionKey, sizeof(encodeSessionKey), 0, sizeof(encodeSessionKey));
-    TRANS_CHECK_AND_RETURN_RET_LOGE(len == sizeof(appInfo->sessionKey),
-        SOFTBUS_DECRYPT_ERR, TRANS_CTRL, "mbedtls decode failed.");
-    TRANS_CHECK_AND_RETURN_RET_LOGE(ret == 0, SOFTBUS_DECRYPT_ERR, TRANS_CTRL, "mbedtls decode failed.");
+    (void)GetJsonObjectStringItem(msg, "SESSION_KEY", (char *)encodeSessionKey, BASE64_SESSION_KEY_LEN);
+    if (strlen((char *)encodeSessionKey) != 0) {
+        int32_t ret = SoftBusBase64Decode((unsigned char *)appInfo->sessionKey, sizeof(appInfo->sessionKey), &len,
+            (unsigned char *)encodeSessionKey, strlen((char *)encodeSessionKey));
+        (void)memset_s(encodeSessionKey, sizeof(encodeSessionKey), 0, sizeof(encodeSessionKey));
+        TRANS_CHECK_AND_RETURN_RET_LOGE(
+            len == sizeof(appInfo->sessionKey), SOFTBUS_DECRYPT_ERR, TRANS_CTRL, "mbedtls decode failed.");
+        TRANS_CHECK_AND_RETURN_RET_LOGE(ret == 0, SOFTBUS_DECRYPT_ERR, TRANS_CTRL, "mbedtls decode failed.");
+    }
 
     TransGetCommonUdpInfoFromJson(msg, appInfo);
 
@@ -153,7 +165,7 @@ int32_t TransUnpackRequestUdpInfo(const cJSON *msg, AppInfo *appInfo, UkIdInfo *
 
     switch (appInfo->udpChannelOptType) {
         case TYPE_UDP_CHANNEL_OPEN:
-            TransGetUdpChannelOpenInfoFromJson(msg, appInfo, ukIdInfo);
+            TransGetUdpChannelOpenInfoFromJson(msg, appInfo);
             break;
         case TYPE_UDP_CHANNEL_CLOSE:
             (void)GetJsonObjectNumber64Item(msg, "PEER_CHANNEL_ID", &(appInfo->myData.channelId));
@@ -173,7 +185,7 @@ int32_t TransUnpackRequestUdpInfo(const cJSON *msg, AppInfo *appInfo, UkIdInfo *
     return SOFTBUS_OK;
 }
 
-static void TransAddInfoToUdpChannelOpenMsg(cJSON *msg, const AppInfo *appInfo, const UkIdInfo *ukIdInfo)
+static void TransAddInfoToUdpChannelOpenMsg(cJSON *msg, const AppInfo *appInfo)
 {
     (void)AddNumber64ToJsonObject(msg, "MY_CHANNEL_ID", appInfo->myData.channelId);
     (void)AddStringToJsonObject(msg, "MY_IP", appInfo->myData.addr);
@@ -182,11 +194,11 @@ static void TransAddInfoToUdpChannelOpenMsg(cJSON *msg, const AppInfo *appInfo, 
     (void)AddStringToJsonObject(msg, "DEVICE_ID", appInfo->myData.deviceId);
     (void)AddNumberToJsonObject(msg, "USER_ID", appInfo->myData.userId);
     (void)AddStringToJsonObject(msg, "ACCOUNT_ID", appInfo->myData.accountId);
-    (void)AddNumberToJsonObject(msg, "SOURCE_UK_ID", ukIdInfo->myId);
-    (void)AddNumberToJsonObject(msg, "SINK_UK_ID", ukIdInfo->peerId);
+    (void)AddNumber64ToJsonObject(msg, "SOURCE_ACL_TOKEN_ID", (int64_t)appInfo->myData.tokenId);
+    (void)AddStringToJsonObject(msg, "SOURCE_ACL_EXTRA_INFO", appInfo->extraAccessInfo);
 }
 
-int32_t TransPackRequestUdpInfo(cJSON *msg, const AppInfo *appInfo, const UkIdInfo *ukIdInfo)
+int32_t TransPackRequestUdpInfo(cJSON *msg, const AppInfo *appInfo)
 {
     TRANS_LOGI(TRANS_CTRL, "pack request udp info in negotiation.");
     if (msg == NULL || appInfo == NULL) {
@@ -196,7 +208,7 @@ int32_t TransPackRequestUdpInfo(cJSON *msg, const AppInfo *appInfo, const UkIdIn
 
     switch (appInfo->udpChannelOptType) {
         case TYPE_UDP_CHANNEL_OPEN:
-            TransAddInfoToUdpChannelOpenMsg(msg, appInfo, ukIdInfo);
+            TransAddInfoToUdpChannelOpenMsg(msg, appInfo);
             break;
         case TYPE_UDP_CHANNEL_CLOSE:
             (void)AddNumber64ToJsonObject(msg, "PEER_CHANNEL_ID", appInfo->peerData.channelId);
@@ -248,6 +260,13 @@ int32_t TransPackReplyUdpInfo(cJSON *msg, const AppInfo *appInfo)
             (void)AddNumber64ToJsonObject(msg, "MY_CHANNEL_ID", appInfo->myData.channelId);
             (void)AddNumberToJsonObject(msg, "MY_PORT", appInfo->myData.port);
             (void)AddStringToJsonObject(msg, "MY_IP", appInfo->myData.addr);
+            (void)AddStringToJsonObject(msg, "SINK_ACL_ACCOUNT_ID", appInfo->myData.accountId);
+            (void)AddNumberToJsonObject(msg, "SINK_ACL_USER_ID", appInfo->myData.userId);
+            (void)AddNumber64ToJsonObject(msg, "SINK_ACL_TOKEN_ID", (int64_t)appInfo->myData.tokenId);
+            if (EncryptAndAddSinkSessionKey(msg, appInfo) != SOFTBUS_OK) {
+                TRANS_LOGE(TRANS_CTRL, "Failed to encrypt sink session key.");
+                return SOFTBUS_ENCRYPT_ERR;
+            }
             break;
         case TYPE_UDP_CHANNEL_CLOSE:
             break;

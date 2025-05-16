@@ -72,13 +72,6 @@ static void OnSessionOpenFailProc(const SessionConn *node, int32_t errCode)
             TRANS_LOGW(TRANS_CTRL, "notify channel open fail err");
         }
     }
-
-    int32_t fd = node->appInfo.fd;
-    if (fd >= 0) {
-        TRANS_LOGW(TRANS_CTRL, "session is shutdown. fd=%{public}d", fd);
-        DelTrigger(node->listenMod, fd, RW_TRIGGER);
-        TransTdcSocketReleaseFd(node->listenMod, fd);
-    }
 }
 
 static void NotifyTdcChannelTimeOut(ListNode *tdcChannelList)
@@ -118,8 +111,15 @@ static void TransTdcTimerProc(void)
         item->timeout++;
         if (item->status < TCP_DIRECT_CHANNEL_STATUS_CONNECTED) {
             if (item->timeout >= HANDSHAKE_TIMEOUT) {
+                int32_t fd = item->appInfo.fd;
+                item->appInfo.fd = -1;
                 ListDelete(&item->node);
                 sessionList->cnt--;
+                if (fd >= 0) {
+                    TRANS_LOGW(TRANS_CTRL, "session is shutdown. fd=%{public}d", fd);
+                    DelTrigger(item->listenMod, fd, RW_TRIGGER);
+                    TransTdcSocketReleaseFd(item->listenMod, fd);
+                }
 
                 ListAdd(&tempTdcChannelList, &item->node);
             }
@@ -171,9 +171,16 @@ void TransTdcStopSessionProc(ListenerModule listenMod)
         if (listenMod != item->listenMod) {
             continue;
         }
+        int32_t fd = item->appInfo.fd;
+        item->appInfo.fd = -1;
         ListDelete(&item->node);
         sessionList->cnt--;
-
+        sessionList->cnt--;
+        if (fd >= 0) {
+            TRANS_LOGW(TRANS_CTRL, "session is shutdown. fd=%{public}d", fd);
+            DelTrigger(item->listenMod, fd, RW_TRIGGER);
+            TransTdcSocketReleaseFd(item->listenMod, fd);
+        }
         ListAdd(&tempTdcChannelList, &item->node);
     }
     ReleaseSessionConnLock();

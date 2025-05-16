@@ -372,8 +372,6 @@ void InnerLink::GenerateLink(uint32_t requestId, int pid, WifiDirectLink &link, 
     }
     
     link.remotePort = GetRemoteCustomPort();
-    CONN_CHECK_AND_RETURN_LOGI(link.remotePort > 0, CONN_WIFI_DIRECT, "remote custom port is zero");
-    // localIpv6 and remoteIpv6 is only used with remotePort
     std::string localIpv6 = GetLocalIpv6();
     std::string remoteIpv6 = GetRemoteIpv6();
     if (strcpy_s(link.localIpv6, IP_STR_MAX_LEN, localIpv6.c_str()) != EOK) {

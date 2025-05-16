@@ -13,13 +13,14 @@
 
 import("../dsoftbus.gni")
 import("bus_center/bus_center_sdk.gni")
+import("connection/connection_sdk.gni")
 import("frame/frame_sdk.gni")
 import("transmission/trans_sdk.gni")
 
 common_client_src = bus_center_sdk_src + softbus_client_frame_src +
-                    trans_session_manager_sdk_src
+                    trans_session_manager_sdk_src + connection_sdk_src
 common_client_inc = bus_center_sdk_inc + softbus_client_frame_inc +
-                    trans_session_manager_sdk_inc
+                    trans_session_manager_sdk_inc + connection_sdk_inc
 common_client_deps = bus_center_sdk_deps + trans_session_manager_sdk_deps
 
 common_client_ext_deps = []

@@ -781,4 +781,35 @@ HWTEST_F(AuthOtherMockTest, COMPARE_SESSION_CONN_INFO_TEST_001, TestSize.Level1)
     ret = CompareConnInfo(&connInfo1, &connInfo2, cmpShortHash);
     EXPECT_FALSE(ret);
 }
+
+/*
+ * @tc.name: AUTH_GET_USB_CONN_INFO_TEST_001
+ * @tc.desc: AuthGetUsbConnInfo test failed
+ * @tc.type: FUNC
+ * @tc.require:
+ */
+HWTEST_F(AuthOtherMockTest, AUTH_GET_USB_CONN_INFO_TEST_001, TestSize.Level1)
+{
+    AuthHandle authHandle = {
+        .authId = INDEX,
+        .type = AUTH_LINK_TYPE_MAX,
+    };
+    EXPECT_NO_FATAL_FAILURE(AuthRemoveAuthManagerByAuthHandle(authHandle));
+    authHandle.type = AUTH_LINK_TYPE_USB;
+    EXPECT_NO_FATAL_FAILURE(AuthRemoveAuthManagerByAuthHandle(authHandle));
+
+    AuthConnInfo connInfo = {
+        .info.ipInfo.ip = "::1%lo",
+        .type = AUTH_LINK_TYPE_USB,
+    };
+
+    bool isMetaAuth = false;
+    const char *uuid = "000";
+    int32_t ret = AuthGetUsbConnInfo(uuid, &connInfo, isMetaAuth);
+    EXPECT_EQ(ret, SOFTBUS_LOCK_ERR);
+
+    isMetaAuth = true;
+    ret = AuthGetUsbConnInfo(uuid, &connInfo, isMetaAuth);
+    EXPECT_EQ(ret, AUTH_INVALID_ID);
+}
 } // namespace OHOS

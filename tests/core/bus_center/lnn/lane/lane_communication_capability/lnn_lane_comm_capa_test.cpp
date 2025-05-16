@@ -546,4 +546,46 @@ HWTEST_F(LNNLaneCommCapaTest, SetRemoteDynamicNetCapTest001, TestSize.Level1)
         .WillRepeatedly(DoAll(SetArgPointee<2>(netCap), Return(SOFTBUS_OK)));
     EXPECT_NO_FATAL_FAILURE(SetRemoteDynamicNetCap("test_udid1", LANE_HML));
 }
+
+/*
+ * @tc.name: LNNLaneCommCapaTest
+ * @tc.desc: usb communication capability check test
+ * @tc.type: FUNC
+ * @tc.require:
+ */
+HWTEST_F(LNNLaneCommCapaTest, LNN_USB_COMM_CAPA_CHECK_001, TestSize.Level1)
+{
+    LaneLinkType type = LANE_USB;
+    NiceMock<LaneCommCapaDepsInterfaceMock> commCapaMock;
+    EXPECT_CALL(commCapaMock, LnnGetLocalNumU32Info)
+        .WillRepeatedly(DoAll(SetArgPointee<1>(0), Return(SOFTBUS_OK)));
+    int32_t ret = CheckStaticNetCap(NETWORK_ID, type);
+    EXPECT_EQ(ret, SOFTBUS_LANE_LOCAL_NO_USB_STATIC_CAP);
+    ret = CheckDynamicNetCap(NETWORK_ID, type);
+    EXPECT_EQ(ret, SOFTBUS_NETWORK_NODE_OFFLINE);
+
+    uint32_t staticCap = 1 << STATIC_CAP_BIT_USB;
+    EXPECT_CALL(commCapaMock, LnnGetLocalNumU32Info)
+        .WillRepeatedly(DoAll(SetArgPointee<1>(staticCap), Return(SOFTBUS_OK)));
+    EXPECT_CALL(commCapaMock, LnnGetRemoteNumU32Info)
+        .WillRepeatedly(DoAll(SetArgPointee<2>(0), Return(SOFTBUS_OK)));
+    ret = CheckStaticNetCap(NETWORK_ID, type);
+    EXPECT_EQ(ret, SOFTBUS_LANE_REMOTE_NO_USB_STATIC_CAP);
+
+    uint32_t dynamicCap = 1 << BIT_USB;
+    EXPECT_CALL(commCapaMock, LnnGetLocalNumU32Info)
+        .WillRepeatedly(DoAll(SetArgPointee<1>(dynamicCap), Return(SOFTBUS_OK)));
+    ret = CheckDynamicNetCap(NETWORK_ID, type);
+    EXPECT_EQ(ret, SOFTBUS_NETWORK_NODE_OFFLINE);
+
+    uint32_t allNetCap = (staticCap | dynamicCap);
+    EXPECT_CALL(commCapaMock, LnnGetLocalNumU32Info)
+        .WillRepeatedly(DoAll(SetArgPointee<1>(allNetCap), Return(SOFTBUS_OK)));
+    EXPECT_CALL(commCapaMock, LnnGetRemoteNumU32Info)
+        .WillRepeatedly(DoAll(SetArgPointee<2>(allNetCap), Return(SOFTBUS_OK)));
+    ret = CheckStaticNetCap(NETWORK_ID, type);
+    EXPECT_EQ(ret, SOFTBUS_OK);
+    ret = CheckDynamicNetCap(NETWORK_ID, type);
+    EXPECT_EQ(ret, SOFTBUS_NETWORK_NODE_OFFLINE);
+}
 } // namespace OHOS

@@ -202,6 +202,10 @@ int32_t TransSessionServerDelItem(const char *sessionName)
     }
     if (isFind) {
         ListDelete(&pos->node);
+        if (pos->accessInfo.extraAccessInfo != NULL) {
+            SoftBusFree(pos->accessInfo.extraAccessInfo);
+            pos->accessInfo.extraAccessInfo = NULL;
+        }
         SoftBusFree(pos);
         g_sessionServerList->cnt--;
         char *tmpName = NULL;
@@ -261,6 +265,10 @@ void TransDelItemByPackageName(const char *pkgName, int32_t pid)
             }
             ListDelete(&pos->node);
             g_sessionServerList->cnt--;
+            if (pos->accessInfo.extraAccessInfo != NULL) {
+                SoftBusFree(pos->accessInfo.extraAccessInfo);
+                pos->accessInfo.extraAccessInfo = NULL;
+            }
             SoftBusFree(pos);
             pos = NULL;
         }
@@ -502,6 +510,27 @@ int32_t TransGetTokenIdBySessionName(const char *sessionName, uint64_t *tokenId)
     return SOFTBUS_TRANS_SESSION_NAME_NO_EXIST;
 }
 
+static int32_t CheckAccessInfoAndCalloc(SessionServer *pos, uint32_t strLen)
+{
+    if (strLen > EXTRA_ACCESS_INFO_LEN_MAX) {
+        TRANS_LOGE(TRANS_CTRL, "extra access info length over limit.");
+        return SOFTBUS_INVALID_PARAM;
+    }
+    if (pos->accessInfo.extraAccessInfo == NULL) {
+        pos->accessInfo.extraAccessInfo = (char *)SoftBusCalloc(strLen);
+        if (pos->accessInfo.extraAccessInfo == NULL) {
+            return SOFTBUS_MALLOC_ERR;
+        }
+    } else {
+        SoftBusFree(pos->accessInfo.extraAccessInfo);
+        pos->accessInfo.extraAccessInfo = (char *)SoftBusCalloc(strLen);
+        if (pos->accessInfo.extraAccessInfo == NULL) {
+            return SOFTBUS_MALLOC_ERR;
+        }
+    }
+    return SOFTBUS_OK;
+}
+
 int32_t AddAccessInfoBySessionName(const char *sessionName, const AccessInfo *accessInfo)
 {
     if (sessionName == NULL || accessInfo == NULL) {
@@ -520,7 +549,22 @@ int32_t AddAccessInfoBySessionName(const char *sessionName, const AccessInfo *ac
     SessionServer *pos = NULL;
     LIST_FOR_EACH_ENTRY(pos, &g_sessionServerList->list, SessionServer, node) {
         if (strcmp(pos->sessionName, sessionName) == 0) {
+            uint32_t extraAccessInfoLen = strlen(accessInfo->extraAccessInfo) + 1;
+            if (CheckAccessInfoAndCalloc(pos, extraAccessInfoLen) != SOFTBUS_OK) {
+                TRANS_LOGE(TRANS_CTRL, "accountId or extra access info calloc failed.");
+                (void)SoftBusMutexUnlock(&g_sessionServerList->lock);
+                return SOFTBUS_MALLOC_ERR;
+            }
             pos->accessInfo.userId = accessInfo->userId;
+            pos->accessInfo.localTokenId = accessInfo->localTokenId;
+            if (strcpy_s(pos->accessInfo.extraAccessInfo, extraAccessInfoLen, accessInfo->extraAccessInfo) !=
+                EOK) {
+                TRANS_LOGE(TRANS_CTRL, "accountId or extra access info strcpy failed.");
+                SoftBusFree(pos->accessInfo.extraAccessInfo);
+                pos->accessInfo.extraAccessInfo = NULL;
+                (void)SoftBusMutexUnlock(&g_sessionServerList->lock);
+                return SOFTBUS_STRCPY_ERR;
+            }
             (void)SoftBusMutexUnlock(&g_sessionServerList->lock);
             return SOFTBUS_OK;
         }
@@ -533,9 +577,10 @@ int32_t AddAccessInfoBySessionName(const char *sessionName, const AccessInfo *ac
     return SOFTBUS_TRANS_SESSION_NAME_NO_EXIST;
 }
 
-int32_t GetAccessInfoBySessionName(const char *sessionName, int32_t *userId)
+int32_t GetAccessInfoBySessionName(
+    const char *sessionName, int32_t *userId, uint64_t *tokenId, char *businessAccountId, char *extraAccessInfo)
 {
-    if (sessionName == NULL || userId == NULL) {
+    if (sessionName == NULL || userId == NULL || tokenId == NULL) {
         TRANS_LOGE(TRANS_CTRL, "invalid param.");
         return SOFTBUS_INVALID_PARAM;
     }
@@ -552,6 +597,19 @@ int32_t GetAccessInfoBySessionName(const char *sessionName, int32_t *userId)
     LIST_FOR_EACH_ENTRY(pos, &g_sessionServerList->list, SessionServer, node) {
         if (strcmp(pos->sessionName, sessionName) == 0) {
             *userId = pos->accessInfo.userId;
+            *tokenId = pos->accessInfo.localTokenId;
+            if (businessAccountId != NULL && pos->accessInfo.businessAccountId !=  NULL &&
+                strcpy_s(businessAccountId, ACCOUNT_UID_LEN_MAX, pos->accessInfo.businessAccountId) != EOK) {
+                TRANS_LOGE(TRANS_CTRL, "accountId strcpy failed.");
+                (void)SoftBusMutexUnlock(&g_sessionServerList->lock);
+                return SOFTBUS_STRCPY_ERR;
+            }
+            if (extraAccessInfo != NULL && pos->accessInfo.extraAccessInfo != NULL &&
+                strcpy_s(extraAccessInfo, EXTRA_ACCESS_INFO_LEN_MAX, pos->accessInfo.extraAccessInfo) != EOK) {
+                TRANS_LOGE(TRANS_CTRL, "extra access info strcpy failed.");
+                (void)SoftBusMutexUnlock(&g_sessionServerList->lock);
+                return SOFTBUS_STRCPY_ERR;
+            }
             (void)SoftBusMutexUnlock(&g_sessionServerList->lock);
             return SOFTBUS_OK;
         }
@@ -582,7 +640,7 @@ int32_t GetTokenTypeBySessionName(const char *sessionName, int32_t *tokenType)
     SessionServer *pos = NULL;
     LIST_FOR_EACH_ENTRY(pos, &g_sessionServerList->list, SessionServer, node) {
         if (strcmp(pos->sessionName, sessionName) == 0) {
-            *tokenType = pos->accessInfo.tokenType;
+            *tokenType = pos->tokenType;
             (void)SoftBusMutexUnlock(&g_sessionServerList->lock);
             return SOFTBUS_OK;
         }
@@ -597,7 +655,7 @@ int32_t GetTokenTypeBySessionName(const char *sessionName, int32_t *tokenType)
 
 int32_t TransGetAclInfoBySessionName(const char *sessionName, uint64_t *tokenId, int32_t *pid, int32_t *userId)
 {
-    if (sessionName == NULL || tokenId == NULL || userId == NULL) {
+    if (sessionName == NULL || tokenId == NULL) {
         TRANS_LOGE(TRANS_CTRL, "invalid param.");
         return SOFTBUS_INVALID_PARAM;
     }
