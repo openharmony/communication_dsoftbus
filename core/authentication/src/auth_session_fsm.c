@@ -20,6 +20,7 @@
 #include "anonymizer.h"
 #include "auth_attest_interface.h"
 #include "auth_connection.h"
+#include "auth_deviceprofile.h"
 #include "auth_device_common_key.h"
 #include "auth_hichain.h"
 #include "auth_log.h"
@@ -517,6 +518,25 @@ static void ProcessTimeoutErrorCode(AuthFsm *authFsm, int32_t *result)
     }
 }
 
+static void UpdateDpAclSKId(AuthFsm *authFsm)
+{
+    SessionKey sessionKey;
+    (void)memset_s(&sessionKey, sizeof(SessionKey), 0, sizeof(SessionKey));
+    if (AuthManagerGetSessionKey(authFsm->authSeq, &authFsm->info, &sessionKey) != SOFTBUS_OK) {
+        AUTH_LOGE(AUTH_FSM, "get session key fail");
+        return;
+    }
+    AuthSessionInfo *info = &authFsm->info;
+    UpdateDpAclParams aclParams = {
+        .accountId = 0,
+        .deviceId = info->udid,
+        .peerUserId = info->userId
+    };
+    bool isNeedUpdateDk = info->nodeInfo.aclState == ACL_CAN_WRITE;
+    UpdateDpSameAccount(&aclParams, sessionKey, isNeedUpdateDk, info->nodeInfo.aclState);
+    (void)memset_s(&sessionKey, sizeof(SessionKey), 0, sizeof(SessionKey));
+}
+
 static void CompleteAuthSession(AuthFsm *authFsm, int32_t result)
 {
     SoftbusHitraceStart(SOFTBUS_HITRACE_ID_VALID, (uint64_t)authFsm->authSeq);
@@ -525,6 +545,7 @@ static void CompleteAuthSession(AuthFsm *authFsm, int32_t result)
     ReportAuthResultEvt(authFsm, result);
     if (result == SOFTBUS_OK) {
         AuthManagerSetAuthFinished(authFsm->authSeq, &authFsm->info);
+        UpdateDpAclSKId(authFsm);
         if (authFsm->info.normalizedType == NORMALIZED_KEY_ERROR) {
             AUTH_LOGI(AUTH_FSM, "only hichain verify, save the device key");
             SaveDeviceKey(authFsm, AUTH_LINK_TYPE_NORMALIZED, authFsm->info.connInfo.type);
@@ -745,7 +766,7 @@ static int32_t RecoveryNormalizedDeviceKey(AuthFsm *authFsm)
         AUTH_LOGE(AUTH_FSM, "post save sessionKey event fail");
         return ret;
     }
-    return AuthSessionHandleAuthFinish(authFsm->authSeq);
+    return AuthSessionHandleAuthFinish(authFsm->authSeq, ACL_WRITE_DEFAULT);
 }
 
 static int32_t RecoveryFastAuthKey(AuthFsm *authFsm)
@@ -781,7 +802,7 @@ static int32_t RecoveryFastAuthKey(AuthFsm *authFsm)
         return ret;
     }
     (void)memset_s(&key, sizeof(AuthDeviceKeyInfo), 0, sizeof(AuthDeviceKeyInfo));
-    return AuthSessionHandleAuthFinish(authFsm->authSeq);
+    return AuthSessionHandleAuthFinish(authFsm->authSeq, ACL_WRITE_DEFAULT);
 }
 
 static void AuditReportSetPeerDevInfo(LnnAuditExtra *lnnAuditExtra, AuthSessionInfo *info)
@@ -1226,12 +1247,14 @@ static void TryFinishAuthSession(AuthFsm *authFsm)
 
 static void HandleMsgAuthFinish(AuthFsm *authFsm, MessagePara *para)
 {
-    (void)para;
+    AclWriteState aclState = *((AclWriteState *)(para->data));
     AuthSessionInfo *info = &authFsm->info;
     AUTH_LOGI(AUTH_FSM,
-        "auth fsm hichain finished, authSeq=%{public}" PRId64", devInfo=%{public}d, closeAck=%{public}d",
-        authFsm->authSeq, info->isNodeInfoReceived, info->isCloseAckReceived);
+        "auth fsm hichain finished, authSeq=%{public}" PRId64", devInfo=%{public}d, closeAck=%{public}d, "
+        "aclState=%{public}d",
+        authFsm->authSeq, info->isNodeInfoReceived, info->isCloseAckReceived, aclState);
     info->isAuthFinished = true;
+    info->nodeInfo.aclState = aclState;
     TryFinishAuthSession(authFsm);
 }
 
@@ -1939,9 +1962,9 @@ int32_t AuthSessionSaveSessionKey(int64_t authSeq, const uint8_t *key, uint32_t 
     return PostMessageToAuthFsm(FSM_MSG_SAVE_SESSION_KEY, authSeq, key, len);
 }
 
-int32_t AuthSessionHandleAuthFinish(int64_t authSeq)
+int32_t AuthSessionHandleAuthFinish(int64_t authSeq, AclWriteState aclState)
 {
-    return PostMessageToAuthFsm(FSM_MSG_AUTH_FINISH, authSeq, NULL, 0);
+    return PostMessageToAuthFsm(FSM_MSG_AUTH_FINISH, authSeq, (uint8_t *)&aclState, sizeof(aclState));
 }
 
 int32_t AuthSessionHandleAuthError(int64_t authSeq, int32_t reason)

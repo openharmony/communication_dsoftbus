@@ -51,7 +51,7 @@ public:
     virtual AuthFsm *GetAuthFsmByAuthSeq(int64_t authSeq) = 0;
     virtual void ReleaseAuthLock(void) = 0;
     virtual int32_t AuthSessionSaveSessionKey(int64_t authSeq, const uint8_t *key, uint32_t len) = 0;
-    virtual int32_t AuthSessionHandleAuthFinish(int64_t authSeq) = 0;
+    virtual int32_t AuthSessionHandleAuthFinish(int64_t authSeq, AclWriteState aclState) = 0;
     virtual const char *GetAuthSideStr(bool isServer) = 0;
     virtual int32_t AuthFailNotifyProofInfo(int32_t errCode, const char *errorReturn, uint32_t errorReturnLen) = 0;
     virtual int32_t LnnAsyncCallbackDelayHelper(SoftBusLooper *looper, LnnAsyncCallbackFunc callback,
@@ -107,7 +107,7 @@ public:
     MOCK_METHOD1(GetAuthFsmByAuthSeq, AuthFsm *(int64_t));
     MOCK_METHOD0(ReleaseAuthLock, void (void));
     MOCK_METHOD3(AuthSessionSaveSessionKey, int32_t (int64_t, const uint8_t *, uint32_t));
-    MOCK_METHOD1(AuthSessionHandleAuthFinish, int32_t (int64_t));
+    MOCK_METHOD2(AuthSessionHandleAuthFinish, int32_t (int64_t, AclWriteState));
     MOCK_METHOD1(GetAuthSideStr, const char *(bool));
     MOCK_METHOD3(AuthFailNotifyProofInfo, int32_t (int32_t, const char *, uint32_t));
     MOCK_METHOD4(LnnAsyncCallbackDelayHelper, int32_t (SoftBusLooper *, LnnAsyncCallbackFunc, void *, uint64_t));
