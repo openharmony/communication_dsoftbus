@@ -19,6 +19,7 @@ declare_args() {
   dsoftbus_feature_deps_ability_runtime = true
   dsoftbus_feature_deps_access_token = true
   dsoftbus_feature_deps_bluetooth = true
+  dsoftbus_feature_deps_sle = true
   dsoftbus_feature_deps_bounds_checking_function = true
   dsoftbus_feature_deps_bundle_framework = true
   dsoftbus_feature_deps_common_event_service = true
@@ -74,6 +75,11 @@ if (defined(global_parts_info) &&
     !defined(global_parts_info.communication_bluetooth)) {
   dsoftbus_feature_deps_bluetooth = false
 }
+if (defined(global_parts_info) &&
+    !defined(global_parts_info.communication_nearlink_service)) {
+  dsoftbus_feature_deps_sle = false
+}
+
 if (defined(global_parts_info) &&
     !defined(global_parts_info.thirdparty_bounds_checking_function)) {
   dsoftbus_feature_deps_bounds_checking_function = false
