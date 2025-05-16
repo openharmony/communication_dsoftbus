@@ -60,7 +60,7 @@ static InnerChannelListener g_listener[] = {
 };
 
 static SocketCallback g_callback = { NULL, NULL, NULL };
-static ListNode g_wifiAndUsbConnList  = { &g_wifiAndUsbConnList , &g_wifiAndUsbConnList  };
+static ListNode g_wifiAndUsbConnList  = { &g_wifiAndUsbConnList, &g_wifiAndUsbConnList };
 static SoftBusMutex g_wifiAndUsbConnListLock;
 
 static void NotifyChannelDisconnected(int32_t channelId);
@@ -289,7 +289,7 @@ static int32_t AddWifiAndUsbFdItem(int32_t fd)
         return SOFTBUS_MEM_ERR;
     }
     connItem->fd = fd;
-    ListNodeInsert(&g_wifiAndUsbConnList , &connItem->node);
+    ListNodeInsert(&g_wifiAndUsbConnList, &connItem->node);
     AUTH_LOGI(AUTH_CONN, "add wifi and usb conn item. fd=%{public}d", fd);
     ReleaseWifiAndUsbConnListLock();
     return SOFTBUS_OK;
@@ -302,7 +302,7 @@ bool IsExistWifiAndUsbConnByConnId(int32_t fd)
         return false;
     }
     WifiAndUsbConnInstance *item = NULL;
-    LIST_FOR_EACH_ENTRY(item, &g_wifiAndUsbConnList , WifiAndUsbConnInstance, node) {
+    LIST_FOR_EACH_ENTRY(item, &g_wifiAndUsbConnList, WifiAndUsbConnInstance, node) {
         if (item->fd != fd) {
             continue;
         }
@@ -321,7 +321,7 @@ void DeleteWifiAndUsbConnByConnId(int32_t fd)
         return;
     }
     WifiAndUsbConnInstance *item = NULL;
-    LIST_FOR_EACH_ENTRY(item, &g_wifiAndUsbConnList , WifiAndUsbConnInstance, node) {
+    LIST_FOR_EACH_ENTRY(item, &g_wifiAndUsbConnList, WifiAndUsbConnInstance, node) {
         if (item->fd != fd) {
             continue;
         }
