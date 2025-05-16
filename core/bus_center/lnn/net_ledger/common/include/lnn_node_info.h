@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021-2024 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2025 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -80,6 +80,12 @@ typedef enum {
     DISCOVERY_TYPE_USB,
     DISCOVERY_TYPE_COUNT,
 } DiscoveryType;
+
+typedef enum {
+    ACL_WRITE_DEFAULT = 0,
+    ACL_CAN_WRITE,
+    ACL_NOT_WRITE,
+} AclWriteState;
 
 typedef struct {
     char ssid[WIFI_SSID_LEN + 1];
@@ -207,6 +213,7 @@ typedef struct {
     uint64_t huksKeyTime;
     ConnectInfo connectInfo;
     int32_t sleRangeCapacity;
+    AclWriteState aclState;
 } NodeInfo;
 
 const char *LnnGetDeviceUdid(const NodeInfo *info);
