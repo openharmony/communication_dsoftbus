@@ -369,7 +369,7 @@ static void ReportCurrentBroadcast(bool startBcResult)
             if (startBcResult) {
                 extra.currentNum = g_bcCurrentNum;
             }
-            DISC_LOGI(DISC_BROADCAST, "startTime=%{public}lld, advHandle=%{public}d, serverType=%{public}s, "
+            DISC_LOGI(DISC_BROADCAST, "startTime=%{public}" PRId64 ", advHandle=%{public}zu, serverType=%{public}s, "
                 "minInterval=%{public}d, maxInterval=%{public}d", extra.startTime,
                 extra.advHandle, extra.serverType, extra.minInterval, extra.maxInterval);
             DISC_EVENT(EVENT_SCENE_BLE, EVENT_STAGE_BROADCAST, extra);
