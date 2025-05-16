@@ -26,6 +26,7 @@ extern "C" {
 
 DiscoveryFuncInterface *DiscCoapInit(DiscInnerCallback *discInnerCb);
 void DiscCoapDeinit(void);
+uint32_t GetDiscCapability(void);
 
 #ifdef __cplusplus
 #if __cplusplus
