@@ -278,6 +278,16 @@ WifiErrorCode Hid2dRemoveGcGroup(const char gcIfName[IF_NAME_LEN])
     return OHOS::SoftBus::WifiDirectInterfaceMock::GetMock()->Hid2dRemoveGcGroup(gcIfName);
 }
 
+int IsHotspotActive()
+{
+    return OHOS::SoftBus::WifiDirectInterfaceMock::GetMock()->IsHotspotActive();
+}
+
+WifiErrorCode GetHotspotConfig(HotspotConfig *result)
+{
+    return OHOS::SoftBus::WifiDirectInterfaceMock::GetMock()->GetHotspotConfig(result);
+}
+
 int32_t TransProxyPipelineRegisterListener(TransProxyPipelineMsgType type, const ITransProxyPipelineListener *listener)
 {
     return OHOS::SoftBus::WifiDirectInterfaceMock::GetMock()->TransProxyPipelineRegisterListener(type, listener);

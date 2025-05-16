@@ -24,6 +24,7 @@
 #include "dfx/wifi_direct_hidumper.h"
 #include "kits/c/wifi_device.h"
 #include "kits/c/wifi_hid2d.h"
+#include "kits/c/wifi_hotspot_config.h"
 #include "kits/c/wifi_p2p.h"
 #include "lnn_distributed_net_ledger.h"
 #include "lnn_feature_capability.h"
@@ -96,6 +97,8 @@ public:
     virtual WifiErrorCode RemoveGroup() = 0;
     virtual WifiErrorCode Hid2dRemoveGcGroup(const char gcIfName[IF_NAME_LEN]) = 0;
     virtual int32_t Hid2dIsWideBandwidthSupported() = 0;
+    virtual int IsHotspotActive() = 0;
+    virtual WifiErrorCode GetHotspotConfig(HotspotConfig *result) = 0;
 
     virtual int32_t TransProxyPipelineRegisterListener(TransProxyPipelineMsgType type,
         const ITransProxyPipelineListener *listener) = 0;
@@ -187,6 +190,8 @@ public:
     MOCK_METHOD(WifiErrorCode, Hid2dRemoveGcGroup, (const char gcIfName[IF_NAME_LEN]), (override));
     MOCK_METHOD(WifiErrorCode, RemoveGroup, (), (override));
     MOCK_METHOD(int, Hid2dIsWideBandwidthSupported, (), (override));
+    MOCK_METHOD(int, IsHotspotActive, (), (override));
+    MOCK_METHOD(WifiErrorCode, GetHotspotConfig, (HotspotConfig *result), (override));
 
     MOCK_METHOD(int32_t, TransProxyPipelineRegisterListener,
         (TransProxyPipelineMsgType, const ITransProxyPipelineListener *), (override));
