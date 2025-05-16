@@ -290,12 +290,10 @@ std::vector<uint8_t> WifiDirectUtils::MacStringToArray(const std::string &macStr
         try {
             result = std::stoul(token, &idx, BASE_HEX);
         } catch (const std::out_of_range& e) {
-            // invalid mac address, which is printed for fault locating.
-            CONN_LOGE(CONN_NEARBY, "out of range, error mac string=%{public}s", macString.c_str());
+            CONN_LOGE(CONN_NEARBY, "out of range");
             return std::vector<uint8_t>();
         } catch (const std::invalid_argument& e) {
-            // invalid mac address, which is printed for fault locating.
-            CONN_LOGE(CONN_NEARBY, "invalid argument, error mac string=%{public}s", macString.c_str());
+            CONN_LOGE(CONN_NEARBY, "invalid argument");
             return std::vector<uint8_t>();
         }
         array.push_back(static_cast<uint8_t>(result));
