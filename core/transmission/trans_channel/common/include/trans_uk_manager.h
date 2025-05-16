@@ -27,7 +27,7 @@ extern "C" {
 
 #define NO_NEED_UK   0
 #define USE_NEGO_UK  1
-#define ENCRYPT_KEY_LENGTH 60 //User Key encrypt SessionKey length
+#define ENCRYPT_KEY_LENGTH 60 // User Key encrypt SessionKey length
 #define BASE64_SESSION_KEY_LEN 45
 #define BASE64_ENCRYPT_KEY_LENGTH 83
 
@@ -52,7 +52,6 @@ int32_t TransUkRequestDeleteItem(uint32_t requestId);
 int32_t GetUkPolicy(const AppInfo *appInfo);
 void FillHapSinkAclInfoToAppInfo(AppInfo *appInfo);
 
-bool SpecialSaCanUseDeviceKey(uint64_t tokenId);
 bool IsValidUkInfo(const UkIdInfo *ukIdInfo);
 
 int32_t EncryptAndAddSinkSessionKey(cJSON *msg, const AppInfo *appInfo);
