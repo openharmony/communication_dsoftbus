@@ -81,7 +81,7 @@ int32_t LnnGetDeviceDisplayName(const char *nickName, const char *defaultName, c
         return SOFTBUS_STRCPY_ERR;
     }
     char *anonyDeviceName = NULL;
-    Anonymize(deviceName, &anonyDeviceName);
+    AnonymizeDeviceName(deviceName, &anonyDeviceName);
     LNN_LOGD(LNN_STATE, "deviceName=%{public}s.", AnonymizeWrapper(anonyDeviceName));
     AnonymizeFree(anonyDeviceName);
     return SOFTBUS_OK;

@@ -706,14 +706,15 @@ int32_t SoftbusDumpPrintMac(int fd, NodeBasicInfo *nodeInfo)
     NodeDeviceInfoKey key;
     key = NODE_KEY_BR_MAC;
     unsigned char brMac[BT_MAC_LEN] = {0};
-    char newBrMac[BT_MAC_LEN] = {0};
+    char *anonyBrMac = NULL;
 
     if (LnnGetNodeKeyInfo(nodeInfo->networkId, key, brMac, BT_MAC_LEN) != SOFTBUS_OK) {
         LNN_LOGE(LNN_LEDGER, "LnnGetNodeKeyInfo brMac failed");
         return SOFTBUS_NOT_FIND;
     }
-    DataMasking((char *)brMac, BT_MAC_LEN, MAC_DELIMITER, newBrMac);
-    SOFTBUS_DPRINTF(fd, "  %-15s->%s\n", "BrMac", newBrMac);
+    Anonymize((char *)brMac, &anonyBrMac);
+    SOFTBUS_DPRINTF(fd, "  %-15s->%s\n", "BrMac", AnonymizeWrapper(anonyBrMac));
+    AnonymizeFree(anonyBrMac);
     return SOFTBUS_OK;
 }
 
@@ -726,14 +727,15 @@ int32_t SoftbusDumpPrintIp(int fd, NodeBasicInfo *nodeInfo)
     NodeDeviceInfoKey key;
     key = NODE_KEY_IP_ADDRESS;
     char ipAddr[IP_STR_MAX_LEN] = {0};
-    char newIpAddr[IP_STR_MAX_LEN] = {0};
+    char *anonyIpAddr = NULL;
 
     if (LnnGetNodeKeyInfo(nodeInfo->networkId, key, (uint8_t *)ipAddr, IP_STR_MAX_LEN) != SOFTBUS_OK) {
         LNN_LOGE(LNN_LEDGER, "LnnGetNodeKeyInfo ipAddr failed");
         return SOFTBUS_NOT_FIND;
     }
-    DataMasking((char *)ipAddr, IP_STR_MAX_LEN, IP_DELIMITER, newIpAddr);
-    SOFTBUS_DPRINTF(fd, "  %-15s->%s\n", "IpAddr", newIpAddr);
+    Anonymize((char *)ipAddr, &anonyIpAddr);
+    SOFTBUS_DPRINTF(fd, "  %-15s->%s\n", "IpAddr", AnonymizeWrapper(anonyIpAddr));
+    AnonymizeFree(anonyIpAddr);
     return SOFTBUS_OK;
 }
 
@@ -1044,7 +1046,7 @@ void SoftBusDumpBusCenterPrintInfo(int fd, NodeBasicInfo *nodeInfo)
         return;
     }
     char *anonyDeviceName = NULL;
-    Anonymize(nodeInfo->deviceName, &anonyDeviceName);
+    AnonymizeDeviceName(nodeInfo->deviceName, &anonyDeviceName);
     SOFTBUS_DPRINTF(fd, "DeviceName->%s\n", AnonymizeWrapper(anonyDeviceName));
     AnonymizeFree(anonyDeviceName);
     SoftbusDumpPrintAccountId(fd, nodeInfo);

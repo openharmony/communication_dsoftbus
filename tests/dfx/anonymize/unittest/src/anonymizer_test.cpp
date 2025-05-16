@@ -40,6 +40,7 @@ const char *TEST_PLAIN_IP_TWO = "10.11.12.13";
 const char *TEST_ANONYMIZED_IP_TWO = "10.11.12.**";
 const char *TEST_PLAIN_IP_THREE = "10.11.12.133";
 const char *TEST_ANONYMIZED_IP_THREE = "10.11.12.***";
+const uint32_t DEVICE_NAME_MAX_LEN = 128;
 } // namespace
 
 namespace OHOS {
@@ -334,6 +335,120 @@ HWTEST_F(AnonymizerTest, AnonymizeTest014, TestSize.Level0)
 
     Anonymize(invalidUTF8Str, &anonymizedStr);
     EXPECT_STREQ(invalidUTF8Str, anonymizedStr);
+    AnonymizeFree(anonymizedStr);
+}
+
+/**
+ * @tc.name: AnonymizeDeviceNameTest001
+ * @tc.desc: Test anonymize device name
+ * @tc.type: FUNC
+ * @tc.require:
+ */
+HWTEST_F(AnonymizerTest, AnonymizeDeviceNameTest001, TestSize.Level0)
+{
+    const char *plainStr = nullptr;
+    EXPECT_NO_FATAL_FAILURE(Anonymize(plainStr, nullptr));
+
+    char *anonymizedStr = nullptr;
+    AnonymizeDeviceName(plainStr, &anonymizedStr);
+    EXPECT_STREQ("NULL", anonymizedStr);
+    AnonymizeFree(anonymizedStr);
+
+    char emptyStr[DEVICE_NAME_MAX_LEN] = {0};
+    AnonymizeDeviceName(emptyStr, &anonymizedStr);
+    EXPECT_STREQ("EMPTY", anonymizedStr);
+    AnonymizeFree(anonymizedStr);
+}
+
+/**
+ * @tc.name: AnonymizeDeviceNameTest002
+ * @tc.desc: Test anonymize nick device name
+ * @tc.type: FUNC
+ * @tc.require:
+ */
+HWTEST_F(AnonymizerTest, AnonymizeDeviceNameTest002, TestSize.Level0)
+{
+    char *anonymizedStr = nullptr;
+
+    AnonymizeDeviceName("张的Mate 70 Pro", &anonymizedStr);
+    EXPECT_STREQ("张*********Pro", anonymizedStr);
+    AnonymizeFree(anonymizedStr);
+
+    AnonymizeDeviceName("张三-Mate 70 Pro", &anonymizedStr);
+    EXPECT_STREQ("张**********Pro", anonymizedStr);
+    AnonymizeFree(anonymizedStr);
+
+    AnonymizeDeviceName("张三的Mate 70 Pro+", &anonymizedStr);
+    EXPECT_STREQ("张***********ro+", anonymizedStr);
+    AnonymizeFree(anonymizedStr);
+
+    AnonymizeDeviceName("abcdefghijklmnopqrst的Mate 70 Pro+", &anonymizedStr);
+    EXPECT_STREQ("a*****************************ro+", anonymizedStr);
+    AnonymizeFree(anonymizedStr);
+
+    AnonymizeDeviceName("哈哈哈哈哈哈哈哈哈哈哈哈哈哈哈哈哈哈哈哈的Mate 70 Pro+", &anonymizedStr);
+    EXPECT_STREQ("哈*****************************ro+", anonymizedStr);
+    AnonymizeFree(anonymizedStr);
+
+    AnonymizeDeviceName("zhang-san-sanaaaaaaa-Mate 70 Pro+", &anonymizedStr);
+    EXPECT_STREQ("z*****************************ro+", anonymizedStr);
+    AnonymizeFree(anonymizedStr);
+
+    AnonymizeDeviceName("张的三的四的一二三四-1234-5678-Mate 70 Pro+", &anonymizedStr);
+    EXPECT_STREQ("张*****************************ro+", anonymizedStr);
+    AnonymizeFree(anonymizedStr);
+}
+
+/**
+ * @tc.name: AnonymizeDeviceNameTest003
+ * @tc.desc: Test anonymize user defined device name
+ * @tc.type: FUNC
+ * @tc.require:
+ */
+HWTEST_F(AnonymizerTest, AnonymizeDeviceNameTest003, TestSize.Level0)
+{
+    char *anonymizedStr = nullptr;
+
+    AnonymizeDeviceName("a",&anonymizedStr);
+    EXPECT_STREQ("*", anonymizedStr);
+    AnonymizeFree(anonymizedStr);
+
+    AnonymizeDeviceName("ab",&anonymizedStr);
+    EXPECT_STREQ("*b", anonymizedStr);
+    AnonymizeFree(anonymizedStr);
+
+    AnonymizeDeviceName("张三1",&anonymizedStr);
+    EXPECT_STREQ("**1", anonymizedStr);
+    AnonymizeFree(anonymizedStr);
+
+    AnonymizeDeviceName("张三李四",&anonymizedStr);
+    EXPECT_STREQ("张**四", anonymizedStr);
+    AnonymizeFree(anonymizedStr);
+
+    AnonymizeDeviceName("张三w李四王",&anonymizedStr);
+    EXPECT_STREQ("张***四王", anonymizedStr);
+    AnonymizeFree(anonymizedStr);
+
+    AnonymizeDeviceName("张三w李12四",&anonymizedStr);
+    EXPECT_STREQ("张****2四", anonymizedStr);
+    AnonymizeFree(anonymizedStr);
+
+    AnonymizeDeviceName("张三w李123四",&anonymizedStr);
+    EXPECT_STREQ("张****23四", anonymizedStr);
+    AnonymizeFree(anonymizedStr);
+
+    AnonymizeDeviceName("zhagnsan李si",&anonymizedStr);
+    EXPECT_STREQ("z*******李si", anonymizedStr);
+    AnonymizeFree(anonymizedStr);
+
+    AnonymizeDeviceName("aaaaaaaaaaaaaaaaaaaabbbbbbbbbbbbbbbbbbbbaaaaaaaaaaaaaaaaaaaabbbbbbbbbbbbbbbbbbbb"
+        "aaaaaaaaaaaaaaaaaaaa", &anonymizedStr);
+    EXPECT_STREQ("a**************************************************************************************"
+        "**********aaa", anonymizedStr);
+    AnonymizeFree(anonymizedStr);
+
+    AnonymizeDeviceName("一二三四五六七八九十一二三四五六七八九十一二三四五六七八九十一二三1", &anonymizedStr);
+    EXPECT_STREQ("一******************************二三1", anonymizedStr);
     AnonymizeFree(anonymizedStr);
 }
 } // namespace OHOS

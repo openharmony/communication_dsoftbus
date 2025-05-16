@@ -1194,7 +1194,7 @@ static int32_t UpdateLocalDeviceName(const void *name)
     char *anonyName = NULL;
     Anonymize((char *)name, &anonyName);
     char *anonyDeviceName = NULL;
-    Anonymize(localNodeInfo.deviceInfo.deviceName, &anonyDeviceName);
+    AnonymizeDeviceName(localNodeInfo.deviceInfo.deviceName, &anonyDeviceName);
     LNN_LOGI(LNN_LEDGER, "device name=%{public}s->%{public}s, cache=%{public}s",
         AnonymizeWrapper(anonyBeforeName), AnonymizeWrapper(anonyName), AnonymizeWrapper(anonyDeviceName));
     AnonymizeFree(anonyBeforeName);
