@@ -580,6 +580,11 @@ static void DfxRecordCoapInitEnd(int32_t reason)
     DISC_EVENT(EVENT_SCENE_INIT, EVENT_STAGE_INIT, extra);
 }
 
+uint32_t GetDiscCapability(void)
+{
+    return g_publishMgr->allCap[0];
+}
+
 DiscoveryFuncInterface *DiscCoapInit(DiscInnerCallback *discInnerCb)
 {
     int32_t ret = InitCoapManager();
