@@ -132,7 +132,8 @@
         "power_manager",
         "ffrt",
         "usb_manager",
-        "selinux_adapter"
+        "selinux_adapter",
+        "napi"
       ],
       "third_party": [
         "cJSON",
