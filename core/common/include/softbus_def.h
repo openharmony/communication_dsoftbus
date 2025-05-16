@@ -87,6 +87,8 @@ extern "C" {
 #define FILE_PRIORITY_BE 0x00
 #define FILE_PRIORITY_BK 0x08
 
+#define GENERAL_SEND_DATA_MAX_LEN 1024
+
 typedef struct {
     SoftBusMutex lock;
     unsigned int cnt;
