@@ -22,7 +22,7 @@
 extern "C" {
 #endif
 
-int32_t LnnBleFastOfflineTimer(void);
+int32_t LnnStartBleFastOfflineTimer(void);
 
 #ifdef __cplusplus
 }
