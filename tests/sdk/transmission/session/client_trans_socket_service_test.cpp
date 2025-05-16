@@ -492,10 +492,10 @@ HWTEST_F(TransClientSocketServiceTest, SetAccessInfo001, TestSize.Level1)
     int32_t socket = 1;
     SocketAccessInfo accessInfo = {
         .userId = 1,
-        .accountId = (char *)"accountId",
+        .businessAccountId = (char *)"accountId",
     };
 
     int32_t ret = SetAccessInfo(socket, accessInfo);
-    EXPECT_EQ(ret, SOFTBUS_NOT_FIND);
+    EXPECT_EQ(ret, SOFTBUS_INVALID_PARAM);
 }
 } // namespace OHOS

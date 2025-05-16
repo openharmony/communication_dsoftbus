@@ -375,27 +375,27 @@ HWTEST_F(TransSdkFileTest, TransFileTest002, TestSize.Level1)
     }
     UdpChannel *channel = TransAddChannelTest();
     int32_t filePort = 22;
-
+    SocketAccessInfo accessInfo = { 0 };
     ret = ClientTransAddUdpChannel(channel);
     EXPECT_EQ(ret, SOFTBUS_OK);
 
     ret = TransSetFileSendListener(sessionName, &g_fileSendListener);
     EXPECT_EQ(ret, SOFTBUS_OK);
 
-    ret = TransOnFileChannelOpened(sessionName, channelInfo, nullptr);
+    ret = TransOnFileChannelOpened(sessionName, channelInfo, nullptr, &accessInfo);
     EXPECT_EQ(ret, SOFTBUS_INVALID_PARAM);
 
-    ret = TransOnFileChannelOpened(sessionName, channelInfo, &filePort);
+    ret = TransOnFileChannelOpened(sessionName, channelInfo, &filePort, &accessInfo);
     EXPECT_EQ(ret, SOFTBUS_FILE_ERR);
 
     (void)strcpy_s(channelInfo->myIp, strlen("127.0.0.5") + 1, "127.0.0.5");
     (void)strcpy_s(channelInfo->sessionKey, strlen("session key") + 1, "session key");
 
-    ret = TransOnFileChannelOpened(sessionName, channelInfo, &filePort);
+    ret = TransOnFileChannelOpened(sessionName, channelInfo, &filePort, &accessInfo);
     EXPECT_EQ(ret, SOFTBUS_FILE_ERR);
 
     channelInfo->isServer = false;
-    ret = TransOnFileChannelOpened(sessionName, channelInfo, &filePort);
+    ret = TransOnFileChannelOpened(sessionName, channelInfo, &filePort, &accessInfo);
     EXPECT_EQ(ret, SOFTBUS_FILE_ERR);
     ClientTransUdpMgrDeinit();
 }
@@ -416,6 +416,7 @@ HWTEST_F(TransSdkFileTest, TransFileTest003, TestSize.Level1)
         return;
     }
     int32_t filePort = 22;
+    SocketAccessInfo accessInfo = { 0 };
     ChannelInfo *channelInfo = TransAddChannleInfoTest();
     UdpChannel *channel = TransAddChannelTest();
     DFileMsg *msgData = {};
@@ -427,7 +428,7 @@ HWTEST_F(TransSdkFileTest, TransFileTest003, TestSize.Level1)
     ret = TransSetFileSendListener(g_mySessionName, sendListener);
     EXPECT_EQ(ret, SOFTBUS_OK);
 
-    ret = TransOnFileChannelOpened(g_mySessionName, channelInfo, &filePort);
+    ret = TransOnFileChannelOpened(g_mySessionName, channelInfo, &filePort, &accessInfo);
     EXPECT_EQ(ret, SOFTBUS_FILE_ERR);
 
     TransDeleteFileListener(g_mySessionName);
@@ -563,27 +564,27 @@ HWTEST_F(TransSdkFileTest, TransFileTest006, TestSize.Level1)
     }
     UdpChannel *channel = TransAddChannelTest();
     int32_t filePort = 22;
-
+    SocketAccessInfo accessInfo = { 0 };
     ret = ClientTransAddUdpChannel(channel);
     EXPECT_EQ(ret, SOFTBUS_OK);
 
     ret = TransSetFileSendListener(sessionName, sendListener);
     EXPECT_EQ(ret, SOFTBUS_MEM_ERR);
 
-    ret = TransOnFileChannelOpened(sessionName, channelInfo, nullptr);
+    ret = TransOnFileChannelOpened(sessionName, channelInfo, nullptr, &accessInfo);
     EXPECT_EQ(ret, SOFTBUS_INVALID_PARAM);
 
-    ret = TransOnFileChannelOpened(sessionName, channelInfo, &filePort);
+    ret = TransOnFileChannelOpened(sessionName, channelInfo, &filePort, &accessInfo);
     EXPECT_EQ(ret, SOFTBUS_FILE_ERR);
 
     (void)strcpy_s(channelInfo->myIp, strlen("127.0.0.5") + 1, "127.0.0.5");
     (void)strcpy_s(channelInfo->sessionKey, strlen("session key") + 1, "session key");
 
-    ret = TransOnFileChannelOpened(sessionName, channelInfo, &filePort);
+    ret = TransOnFileChannelOpened(sessionName, channelInfo, &filePort, &accessInfo);
     EXPECT_EQ(ret, SOFTBUS_FILE_ERR);
 
     channelInfo->isServer = false;
-    ret = TransOnFileChannelOpened(sessionName, channelInfo, &filePort);
+    ret = TransOnFileChannelOpened(sessionName, channelInfo, &filePort, &accessInfo);
     EXPECT_EQ(ret, SOFTBUS_FILE_ERR);
     ClientTransUdpMgrDeinit();
 }
@@ -616,7 +617,7 @@ HWTEST_F(TransSdkFileTest, TransFileTest007, TestSize.Level1)
     ret = TransSetFileSendListener(g_mySessionName, sendListener);
     EXPECT_EQ(ret, SOFTBUS_OK);
     
-    ret = TransOnFileChannelOpened(g_mySessionName, channelInfo, &filePort);
+    ret = TransOnFileChannelOpened(g_mySessionName, channelInfo, &filePort, nullptr);
     EXPECT_EQ(ret, SOFTBUS_FILE_ERR);
     
     TransCloseFileChannel(channel->dfileId);

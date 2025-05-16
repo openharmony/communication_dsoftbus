@@ -152,7 +152,7 @@ static int32_t TransSetUdpChannelEnable(int32_t channelId, bool isEnable)
     return SOFTBUS_TRANS_UDP_CHANNEL_NOT_FOUND;
 }
 
-static int32_t OnUdpChannelOpened(int32_t channelId)
+static int32_t OnUdpChannelOpened(int32_t channelId, SocketAccessInfo *accessInfo)
 {
     UdpChannel channel;
     if (memset_s(&channel, sizeof(UdpChannel), 0, sizeof(UdpChannel)) != EOK) {
@@ -160,10 +160,8 @@ static int32_t OnUdpChannelOpened(int32_t channelId)
         return SOFTBUS_MEM_ERR;
     }
     int32_t ret = TransGetUdpChannel(channelId, &channel);
-    if (ret != SOFTBUS_OK) {
-        TRANS_LOGE(TRANS_SDK, "get udp failed. channelId=%{public}d, ret=%{public}d", channelId, ret);
-        return SOFTBUS_TRANS_UDP_GET_CHANNEL_FAILED;
-    }
+    TRANS_CHECK_AND_RETURN_RET_LOGE(ret == SOFTBUS_OK, SOFTBUS_TRANS_UDP_GET_CHANNEL_FAILED, TRANS_SDK,
+        "get udp failed. channelId=%{public}d, ret=%{public}d", channelId, ret);
     ret = TransSetUdpChannelEnable(channelId, true);
     if (ret != SOFTBUS_OK) {
         TRANS_LOGE(TRANS_SDK, "set udp enable failed. channelId=%{public}d, ret=%{public}d", channelId, ret);
@@ -181,7 +179,7 @@ static int32_t OnUdpChannelOpened(int32_t channelId)
             TRANS_LOGE(TRANS_SDK, "unsupport businessType=%{public}d.", channel.businessType);
             return SOFTBUS_TRANS_BUSINESS_TYPE_NOT_MATCH;
     }
-    ChannelInfo info = {0};
+    ChannelInfo info = { 0 };
     info.channelId = channel.channelId;
     info.channelType = CHANNEL_TYPE_UDP;
     info.isServer = channel.info.isServer;
@@ -195,10 +193,12 @@ static int32_t OnUdpChannelOpened(int32_t channelId)
     info.tokenType = channel.tokenType;
     if (channel.tokenType > ACCESS_TOKEN_TYPE_HAP && channel.info.isServer) {
         info.peerUserId = channel.peerUserId;
-        info.peerAccountId = channel.peerAccountId;
+        info.peerTokenId = channel.peerTokenId;
+        info.peerBusinessAccountId = channel.peerAccountId;
+        info.peerExtraAccessInfo = channel.extraAccessInfo;
     }
     if ((g_sessionCb != NULL) && (g_sessionCb->OnSessionOpened != NULL)) {
-        return g_sessionCb->OnSessionOpened(channel.info.mySessionName, &info, type);
+        return g_sessionCb->OnSessionOpened(channel.info.mySessionName, &info, type, accessInfo);
     }
     return SOFTBUS_NO_INIT;
 }
@@ -228,9 +228,17 @@ static UdpChannel *ConvertChannelInfoToUdpChannel(const char *sessionName, const
         SoftBusFree(newChannel);
         return NULL;
     }
-    if (channel->tokenType > ACCESS_TOKEN_TYPE_HAP && channel->isServer && channel->peerAccountId != NULL) {
+    if (channel->tokenType > ACCESS_TOKEN_TYPE_HAP && channel->isServer) {
         newChannel->peerUserId = channel->peerUserId;
-        if (strcpy_s(newChannel->peerAccountId, ACCOUNT_UID_LEN_MAX, channel->peerAccountId) != EOK) {
+        newChannel->peerTokenId = channel->peerTokenId;
+        if (channel->peerBusinessAccountId != NULL &&
+            strcpy_s(newChannel->peerAccountId, ACCOUNT_UID_LEN_MAX, channel->peerBusinessAccountId) != EOK) {
+            TRANS_LOGE(TRANS_SDK, "copy peerAccountId failed");
+            SoftBusFree(newChannel);
+            return NULL;
+        }
+        if (channel->peerExtraAccessInfo != NULL &&
+            strcpy_s(newChannel->extraAccessInfo, EXTRA_ACCESS_INFO_LEN_MAX, channel->peerExtraAccessInfo) != EOK) {
             TRANS_LOGE(TRANS_SDK, "copy peerAccountId failed");
             SoftBusFree(newChannel);
             return NULL;
@@ -264,10 +272,11 @@ static int32_t TransSetdFileIdByChannelId(int32_t channelId, int32_t value)
     return SOFTBUS_TRANS_UDP_CHANNEL_NOT_FOUND;
 }
 
-int32_t TransOnUdpChannelOpened(const char *sessionName, const ChannelInfo *channel, int32_t *udpPort)
+int32_t TransOnUdpChannelOpened(
+    const char *sessionName, const ChannelInfo *channel, int32_t *udpPort, SocketAccessInfo *accessInfo)
 {
     TRANS_LOGD(TRANS_SDK, "TransOnUdpChannelOpened enter");
-    if (channel == NULL || udpPort == NULL || sessionName == NULL) {
+    if (channel == NULL || udpPort == NULL || sessionName == NULL || accessInfo == NULL) {
         TRANS_LOGW(TRANS_SDK, "invalid param.");
         return SOFTBUS_INVALID_PARAM;
     }
@@ -287,14 +296,14 @@ int32_t TransOnUdpChannelOpened(const char *sessionName, const ChannelInfo *chan
     int32_t ret = SOFTBUS_TRANS_BUSINESS_TYPE_NOT_MATCH;
     switch (channel->businessType) {
         case BUSINESS_TYPE_STREAM:
-            ret = TransOnstreamChannelOpened(channel, udpPort);
+            ret = TransOnstreamChannelOpened(channel, udpPort, accessInfo);
             if (ret != SOFTBUS_OK) {
                 (void)TransDeleteUdpChannel(channel->channelId);
                 TRANS_LOGE(TRANS_SDK, "on stream channel opened failed.");
             }
             break;
         case BUSINESS_TYPE_FILE:
-            ret = TransOnFileChannelOpened(sessionName, channel, udpPort);
+            ret = TransOnFileChannelOpened(sessionName, channel, udpPort, accessInfo);
             if (ret < SOFTBUS_OK) {
                 (void)TransDeleteUdpChannel(channel->channelId);
                 TRANS_LOGE(TRANS_SDK, "on file channel open failed.");

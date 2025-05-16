@@ -396,4 +396,31 @@ HWTEST_F(TransUdpNegotiationTest, TransDealUdpCheckCollabResult003, TestSize.Lev
 
     ReleaseUdpChannelId(TEST_CHANNEL_ID);
 }
+
+/**
+ * @tc.name: TransUdpNegotiationTest13
+ * @tc.desc: Transmission open channel with usb.
+ * @tc.type: FUNC
+ * @tc.require:
+ */
+HWTEST_F(TransUdpNegotiationTest, TransUdpNegotiationTest13, TestSize.Level1)
+{
+    AppInfo* appInfo = (AppInfo *)SoftBusCalloc(sizeof(AppInfo));
+    ASSERT_TRUE(appInfo != nullptr);
+    appInfo->myData.channelId = TEST_CHANNEL_ID;
+    ConnectOption *connOpt = (ConnectOption *)SoftBusCalloc(sizeof(ConnectOption));
+    if (connOpt == nullptr) {
+        SoftBusFree(appInfo);
+        ASSERT_TRUE(connOpt != nullptr);
+    }
+    connOpt->type = CONNECT_TCP;
+    connOpt->socketOption.port = TEST_SOCKET_PORT;
+    connOpt->socketOption.moduleId = DIRECT_CHANNEL_SERVER_USB;
+    connOpt->socketOption.protocol = LNN_PROTOCOL_USB;
+    int32_t channelId = 0;
+    int32_t ret = TransOpenUdpChannel(appInfo, connOpt, &channelId);
+    EXPECT_NE(ret,  SOFTBUS_OK);
+    SoftBusFree(appInfo);
+    SoftBusFree(connOpt);
+}
 }

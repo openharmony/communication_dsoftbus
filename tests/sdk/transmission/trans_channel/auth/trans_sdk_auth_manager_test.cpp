@@ -62,7 +62,7 @@ HWTEST_F(TransClientSdkAuthManagerTest, TransClientSdkAuthManagerTest001, TestSi
 HWTEST_F(TransClientSdkAuthManagerTest, TransClientSdkAuthManagerTest002, TestSize.Level1)
 {
     ChannelInfo channel;
-    int32_t ret = ClientTransAuthOnChannelOpened(nullptr, &channel);
+    int32_t ret = ClientTransAuthOnChannelOpened(nullptr, &channel, nullptr);
     EXPECT_EQ(SOFTBUS_INVALID_PARAM, ret);
 }
 

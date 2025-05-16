@@ -16,18 +16,20 @@
 #include "gtest/gtest.h"
 #include <securec.h>
 
+#include "trans_uk_manager.h"
+#include "trans_uk_manager_test_mock.h"
+
 #include "softbus_adapter_mem.h"
+#include "softbus_json_utils.h"
 #include "trans_lane_common_test_mock.h"
 #include "trans_session_manager.h"
-#include "trans_uk_manager.h"
 
 using namespace testing;
 using namespace testing::ext;
 namespace OHOS {
 
-constexpr char UDID_TEST[UDID_BUF_LEN] = "testudid";
 constexpr int32_t USER_ID = 100;
-constexpr int32_t INVALID_USER_ID = 100;
+
 class TransUkManagerTest : public testing::Test {
 public:
     TransUkManagerTest() { }
@@ -41,6 +43,18 @@ public:
 void TransUkManagerTest::SetUpTestCase(void) { }
 
 void TransUkManagerTest::TearDownTestCase(void) { }
+
+static void GenUkSuccess(uint32_t requestId, int32_t ukId)
+{
+    (void)requestId;
+    (void)ukId;
+}
+
+static void GenUkFailed(uint32_t requestId, int32_t reason)
+{
+    (void)requestId;
+    (void)reason;
+}
 
 /**
  * @tc.name: UkManagerInit001
@@ -70,17 +84,10 @@ HWTEST_F(TransUkManagerTest, UkRequestManagerTest001, TestSize.Level1)
     (void)memset_s(&ukRequest, sizeof(UkRequestNode), 0, sizeof(UkRequestNode));
     AuthHandle authHandle;
     (void)memset_s(&authHandle, sizeof(AuthHandle), 0, sizeof(AuthHandle));
-    int32_t channelId = 0;
-    int32_t ret = TransUkRequestAddItem(0, 0, 0, 0, nullptr);
-    EXPECT_EQ(SOFTBUS_NO_INIT, ret);
-
-    ret = TransUkRequestGetTcpInfoByRequestId(0, &aclInfo, &channelId);
+    int32_t ret = TransUkRequestAddItem(0, 0, 0);
     EXPECT_EQ(SOFTBUS_NO_INIT, ret);
 
     ret = TransUkRequestGetRequestInfoByRequestId(0, &ukRequest);
-    EXPECT_EQ(SOFTBUS_NO_INIT, ret);
-
-    ret = TransUkRequestSetAuthHandleAndSeq(0, &authHandle, 0);
     EXPECT_EQ(SOFTBUS_NO_INIT, ret);
 
     ret = TransUkRequestDeleteItem(0);
@@ -89,43 +96,23 @@ HWTEST_F(TransUkManagerTest, UkRequestManagerTest001, TestSize.Level1)
     ret = TransUkRequestMgrInit();
     EXPECT_EQ(SOFTBUS_OK, ret);
 
-    ret = TransUkRequestGetTcpInfoByRequestId(0, nullptr, &channelId);
-    EXPECT_EQ(SOFTBUS_INVALID_PARAM, ret);
-
     ret = TransUkRequestGetRequestInfoByRequestId(0, nullptr);
     EXPECT_EQ(SOFTBUS_INVALID_PARAM, ret);
 
-    ret = TransUkRequestSetAuthHandleAndSeq(0, nullptr, 0);
-    EXPECT_EQ(SOFTBUS_INVALID_PARAM, ret);
-
-    ret = TransUkRequestGetTcpInfoByRequestId(0, &aclInfo, &channelId);
-    EXPECT_EQ(SOFTBUS_NOT_FIND, ret);
-
     ret = TransUkRequestGetRequestInfoByRequestId(0, &ukRequest);
-    EXPECT_EQ(SOFTBUS_NOT_FIND, ret);
-
-    ret = TransUkRequestSetAuthHandleAndSeq(0, &authHandle, 0);
     EXPECT_EQ(SOFTBUS_NOT_FIND, ret);
 
     ret = TransUkRequestDeleteItem(0);
     EXPECT_EQ(SOFTBUS_NOT_FIND, ret);
 
-    ret = TransUkRequestAddItem(0, 0, 0, 0, &aclInfo);
-    EXPECT_EQ(SOFTBUS_OK, ret);
-
-    ret = TransUkRequestGetTcpInfoByRequestId(0, &aclInfo, &channelId);
+    ret = TransUkRequestAddItem(0, 0, 0);
     EXPECT_EQ(SOFTBUS_OK, ret);
 
     ret = TransUkRequestGetRequestInfoByRequestId(0, &ukRequest);
     EXPECT_EQ(SOFTBUS_OK, ret);
 
-    ret = TransUkRequestSetAuthHandleAndSeq(0, &authHandle, 0);
-    EXPECT_EQ(SOFTBUS_OK, ret);
-
     ret = TransUkRequestDeleteItem(0);
     EXPECT_EQ(SOFTBUS_OK, ret);
-
-    TransUkRequestMgrDeinit();
 }
 
 /**
@@ -147,20 +134,6 @@ HWTEST_F(TransUkManagerTest, UkGetUkPolicyTest001, TestSize.Level1)
     int32_t ret = GetUkPolicy(&appInfo);
     EXPECT_EQ(NO_NEED_UK, ret);
 
-    char sourceUdid[UDID_BUF_LEN];
-    char sindUdid[UDID_BUF_LEN];
-    ret = GetSourceAndSinkUdid(nullptr, nullptr, nullptr);
-    EXPECT_EQ(SOFTBUS_INVALID_PARAM, ret);
-
-    ret = GetSourceAndSinkUdid(UDID_TEST, sourceUdid, sindUdid);
-    EXPECT_EQ(SOFTBUS_OK, ret);
-
-    ret = FillSinkAclInfo(nullptr, nullptr, nullptr);
-    EXPECT_EQ(SOFTBUS_INVALID_PARAM, ret);
-
-    ret = FillSinkAclInfo(sessionName, &aclInfo, nullptr);
-    EXPECT_EQ(SOFTBUS_NO_INIT, ret);
-
     SessionServer *sessionServer = reinterpret_cast<SessionServer *>(SoftBusCalloc(sizeof(SessionServer)));
     EXPECT_TRUE(sessionServer != nullptr);
     ret = TransSessionMgrInit();
@@ -175,17 +148,10 @@ HWTEST_F(TransUkManagerTest, UkGetUkPolicyTest001, TestSize.Level1)
     ret = TransSessionServerAddItem(sessionServer);
     EXPECT_EQ(SOFTBUS_OK, ret);
 
-    EXPECT_CALL(TransLaneCommonMock, LnnGetLocalStrInfo).WillRepeatedly(Return(SOFTBUS_OK));
-    ret = FillSinkAclInfo(sessionName, &aclInfo, nullptr);
-    EXPECT_EQ(SOFTBUS_OK, ret);
-
     ret = TransSessionServerDelItem(sessionName);
     EXPECT_EQ(SOFTBUS_OK, ret);
 
     TransSessionMgrDeinit();
-
-    bool isSepicalSa = SpecialSaCanUseDeviceKey(0);
-    EXPECT_EQ(false, isSepicalSa);
 
     bool isValidUk = IsValidUkInfo(nullptr);
     EXPECT_EQ(false, isValidUk);
@@ -196,103 +162,158 @@ HWTEST_F(TransUkManagerTest, UkGetUkPolicyTest001, TestSize.Level1)
     ukIdInfo.peerId = 1;
     isValidUk = IsValidUkInfo(&ukIdInfo);
     EXPECT_EQ(true, isValidUk);
+
+    FillHapSinkAclInfoToAppInfo(&appInfo);
 }
 
 /**
- * @tc.name: UkPackRequestTest001
- * @tc.desc: UkPackRequestTest001.
+ * @tc.name: UkEncryptAndAddSinkSessionKeyTest001
+ * @tc.desc: UkEncryptAndAddSinkSessionKeyTest001.
  * @tc.type: FUNC
  * @tc.require:
  */
-HWTEST_F(TransUkManagerTest, UkPackRequestTest001, TestSize.Level1)
+HWTEST_F(TransUkManagerTest, UkEncryptAndAddSinkSessionKeyTest001, TestSize.Level1)
 {
     AppInfo appInfo;
     (void)memset_s(&appInfo, sizeof(AppInfo), 0, sizeof(AppInfo));
 
-    NiceMock<TransLaneCommonTestInterfaceMock> TransLaneCommonMock;
-    EXPECT_CALL(TransLaneCommonMock, LnnGetLocalStrInfo).WillRepeatedly(Return(SOFTBUS_OK));
-    char *requestStr = PackUkRequest(nullptr);
-    EXPECT_EQ(nullptr, requestStr);
-
-    appInfo.myData.userId = INVALID_USER_ID;
-    requestStr = PackUkRequest(&appInfo);
-    EXPECT_TRUE(requestStr != nullptr);
-
-    appInfo.myData.userId = USER_ID;
-    requestStr = PackUkRequest(&appInfo);
-    EXPECT_TRUE(requestStr != nullptr);
-
-    cJSON *validJson = cJSON_Parse(requestStr);
-    ASSERT_NE(validJson, nullptr);
-
-    cJSON *errJson = cJSON_CreateObject();
-    ASSERT_NE(errJson, nullptr);
-
-    AuthACLInfo aclInfo;
-    (void)memset_s(&aclInfo, sizeof(AuthACLInfo), 0, sizeof(AuthACLInfo));
-
-    char sessionName[SESSION_NAME_SIZE_MAX];
-    int32_t ret = UnPackUkRequest(errJson, &aclInfo, nullptr);
+    cJSON *json = cJSON_CreateObject();
+    ASSERT_NE(json, nullptr);
+    int ret = EncryptAndAddSinkSessionKey(nullptr, &appInfo);
     EXPECT_EQ(SOFTBUS_INVALID_PARAM, ret);
 
-    ret = UnPackUkRequest(errJson, &aclInfo, sessionName);
-    EXPECT_EQ(SOFTBUS_PARSE_JSON_ERR, ret);
-
-    ret = UnPackUkRequest(validJson, &aclInfo, sessionName);
+    ret = EncryptAndAddSinkSessionKey(json, &appInfo);
     EXPECT_EQ(SOFTBUS_OK, ret);
 
-    if (requestStr != nullptr) {
-        cJSON_free(requestStr);
-    }
-    if (validJson != nullptr) {
-        cJSON_Delete(validJson);
-    }
-    if (errJson != nullptr) {
-        cJSON_Delete(errJson);
-    }
+    appInfo.channelCapability = 0x7;
+    NiceMock<TransUkManagerTestInterfaceMock> TransUkManagerMock;
+    EXPECT_CALL(TransUkManagerMock, SoftBusBase64Encode).WillRepeatedly(Return(SOFTBUS_OK));
+    ret = EncryptAndAddSinkSessionKey(json, &appInfo);
+    EXPECT_EQ(SOFTBUS_OK, ret);
+
+    appInfo.channelCapability = 0xF;
+    EXPECT_CALL(TransUkManagerMock, AuthEncryptByUkId).WillRepeatedly(Return(SOFTBUS_ENCRYPT_ERR));
+    ret = EncryptAndAddSinkSessionKey(json, &appInfo);
+    EXPECT_EQ(SOFTBUS_ENCRYPT_ERR, ret);
+
+    EXPECT_CALL(TransUkManagerMock, AuthEncryptByUkId).WillRepeatedly(Return(SOFTBUS_OK));
+    EXPECT_CALL(TransUkManagerMock, SoftBusBase64Encode).WillRepeatedly(Return(-1));
+    ret = EncryptAndAddSinkSessionKey(json, &appInfo);
+    EXPECT_EQ(SOFTBUS_CREATE_JSON_ERR, ret);
+
+    EXPECT_CALL(TransUkManagerMock, SoftBusBase64Encode).WillRepeatedly(Return(SOFTBUS_OK));
+    ret = EncryptAndAddSinkSessionKey(json, &appInfo);
+    EXPECT_EQ(SOFTBUS_OK, ret);
+
+    cJSON_Delete(json);
 }
 
 /**
- * @tc.name: UkPackReplyTest001
- * @tc.desc: UkPackReplyTest001.
+ * @tc.name: UkDecryptAndAddSinkSessionKeyTest001
+ * @tc.desc: UkDecryptAndAddSinkSessionKeyTest001.
  * @tc.type: FUNC
  * @tc.require:
  */
-HWTEST_F(TransUkManagerTest, UkPackReplytTest001, TestSize.Level1)
+HWTEST_F(TransUkManagerTest, UkDecryptAndAddSinkSessionKeyTest001, TestSize.Level1)
 {
-    AuthACLInfo aclInfo;
-    (void)memset_s(&aclInfo, sizeof(AuthACLInfo), 0, sizeof(AuthACLInfo));
+    AppInfo appInfo;
+    (void)memset_s(&appInfo, sizeof(AppInfo), 0, sizeof(AppInfo));
 
-    char *replyStr = PackUkReply(nullptr, 0);
-    EXPECT_EQ(nullptr, replyStr);
+    cJSON *json = cJSON_CreateObject();
+    ASSERT_NE(json, nullptr);
 
-    replyStr = PackUkReply(&aclInfo, 0);
-    EXPECT_TRUE(replyStr != nullptr);
-
-    int32_t ukId = 0;
-    cJSON *validJson = cJSON_Parse(replyStr);
-    ASSERT_NE(validJson, nullptr);
-
-    cJSON *errJson = cJSON_CreateObject();
-    ASSERT_NE(errJson, nullptr);
-
-    int32_t ret = UnPackUkReply(errJson, &aclInfo, nullptr);
+    int ret = DecryptAndAddSinkSessionKey(nullptr, &appInfo);
     EXPECT_EQ(SOFTBUS_INVALID_PARAM, ret);
 
-    ret = UnPackUkReply(errJson, &aclInfo, &ukId);
-    EXPECT_EQ(SOFTBUS_PARSE_JSON_ERR, ret);
-
-    ret = UnPackUkReply(validJson, &aclInfo, &ukId);
+    ret = DecryptAndAddSinkSessionKey(json, &appInfo);
     EXPECT_EQ(SOFTBUS_OK, ret);
 
-    if (replyStr != nullptr) {
-        cJSON_free(replyStr);
-    }
-    if (validJson != nullptr) {
-        cJSON_Delete(validJson);
-    }
-    if (errJson != nullptr) {
-        cJSON_Delete(errJson);
-    }
+    appInfo.channelCapability = 0x7;
+    NiceMock<TransUkManagerTestInterfaceMock> TransUkManagerMock;
+    EXPECT_CALL(TransUkManagerMock, SoftBusBase64Decode).WillRepeatedly(Return(SOFTBUS_OK));
+    ret = DecryptAndAddSinkSessionKey(json, &appInfo);
+    EXPECT_EQ(SOFTBUS_OK, ret);
+
+    appInfo.channelCapability = 0xF;
+    ret = DecryptAndAddSinkSessionKey(json, &appInfo);
+    EXPECT_EQ(SOFTBUS_PARSE_JSON_ERR, ret);
+
+    bool result = AddStringToJsonObject(json, "SESSION_KEY", (char *)"TestData");
+    EXPECT_EQ(true, result);
+
+    NiceMock<TransLaneCommonTestInterfaceMock> TransLaneCommonMock;
+    EXPECT_CALL(TransLaneCommonMock, LnnGetRemoteStrInfo).WillRepeatedly(Return(SOFTBUS_OK));
+    EXPECT_CALL(TransLaneCommonMock, LnnGetLocalStrInfo).WillRepeatedly(Return(SOFTBUS_NOT_FIND));
+    ret = DecryptAndAddSinkSessionKey(json, &appInfo);
+    EXPECT_NE(SOFTBUS_OK, ret);
+
+    EXPECT_CALL(TransLaneCommonMock, LnnGetRemoteStrInfo).WillRepeatedly(Return(SOFTBUS_OK));
+    EXPECT_CALL(TransLaneCommonMock, LnnGetLocalStrInfo).WillRepeatedly(Return(SOFTBUS_OK));
+    EXPECT_CALL(TransUkManagerMock, AuthFindUkIdByAclInfo).WillRepeatedly(Return(SOFTBUS_NOT_FIND));
+    ret = DecryptAndAddSinkSessionKey(json, &appInfo);
+    EXPECT_NE(SOFTBUS_OK, ret);
+
+    EXPECT_CALL(TransUkManagerMock, AuthFindUkIdByAclInfo).WillRepeatedly(Return(SOFTBUS_OK));
+    EXPECT_CALL(TransUkManagerMock, SoftBusBase64Decode).WillRepeatedly(Return(-1));
+    ret = DecryptAndAddSinkSessionKey(json, &appInfo);
+    EXPECT_EQ(SOFTBUS_PARSE_JSON_ERR, ret);
+
+    EXPECT_CALL(TransUkManagerMock, SoftBusBase64Decode).WillRepeatedly(Return(SOFTBUS_OK));
+    EXPECT_CALL(TransUkManagerMock, AuthDecryptByUkId).WillRepeatedly(Return(SOFTBUS_DECRYPT_ERR));
+    ret = DecryptAndAddSinkSessionKey(json, &appInfo);
+    EXPECT_EQ(SOFTBUS_DECRYPT_ERR, ret);
+
+    EXPECT_CALL(TransUkManagerMock, AuthDecryptByUkId).WillRepeatedly(Return(SOFTBUS_OK));
+    ret = DecryptAndAddSinkSessionKey(json, &appInfo);
+    EXPECT_EQ(SOFTBUS_OK, ret);
+    cJSON_Delete(json);
+}
+
+/**
+ * @tc.name: UkGetUserKeyIdByAclInfoTest001
+ * @tc.desc: UkGetUserKeyIdByAclInfoTest001.
+ * @tc.type: FUNC
+ * @tc.require:
+ */
+HWTEST_F(TransUkManagerTest, UkGetUserKeyIdByAclInfoTest001, TestSize.Level1)
+{
+    AppInfo appInfo;
+    (void)memset_s(&appInfo, sizeof(AppInfo), 0, sizeof(AppInfo));
+
+    int32_t userKeyId;
+
+    AuthGenUkCallback callBack = {
+        .onGenSuccess = GenUkSuccess,
+        .onGenFailed = GenUkFailed,
+    };
+
+    int ret = GetUserkeyIdByAClInfo(nullptr, 0, 0, &userKeyId, &callBack);
+    EXPECT_EQ(SOFTBUS_INVALID_PARAM, ret);
+
+    NiceMock<TransLaneCommonTestInterfaceMock> TransLaneCommonMock;
+    EXPECT_CALL(TransLaneCommonMock, LnnGetRemoteStrInfo).WillRepeatedly(Return(SOFTBUS_NOT_FIND));
+    ret = GetUserkeyIdByAClInfo(&appInfo, 0, 0, &userKeyId, &callBack);
+    EXPECT_NE(SOFTBUS_OK, ret);
+
+    EXPECT_CALL(TransLaneCommonMock, LnnGetRemoteStrInfo).WillRepeatedly(Return(SOFTBUS_OK));
+    EXPECT_CALL(TransLaneCommonMock, LnnGetLocalStrInfo).WillRepeatedly(Return(SOFTBUS_OK));
+    NiceMock<TransUkManagerTestInterfaceMock> TransUkManagerMock;
+    EXPECT_CALL(TransUkManagerMock, AuthFindUkIdByAclInfo).WillOnce(Return(SOFTBUS_AUTH_UK_NOT_FIND));
+    ret = GetUserkeyIdByAClInfo(&appInfo, 0, 0, &userKeyId, &callBack);
+    EXPECT_NE(SOFTBUS_OK, ret);
+
+    EXPECT_CALL(TransUkManagerMock, AuthFindUkIdByAclInfo).WillRepeatedly(Return(SOFTBUS_AUTH_UK_NOT_FIND));
+    ret = GetUserkeyIdByAClInfo(&appInfo, 0, 0, &userKeyId, &callBack);
+    EXPECT_EQ(SOFTBUS_ALREADY_EXISTED, ret);
+
+    EXPECT_CALL(TransUkManagerMock, AuthFindUkIdByAclInfo).WillRepeatedly(Return(SOFTBUS_AUTH_UK_NOT_FIND));
+    EXPECT_CALL(TransUkManagerMock, AuthGenUkIdByAclInfo).WillRepeatedly(Return(SOFTBUS_OK));
+    ret = GetUserkeyIdByAClInfo(&appInfo, 0, 0, &userKeyId, &callBack);
+    EXPECT_EQ(SOFTBUS_ALREADY_EXISTED, ret);
+
+    EXPECT_CALL(TransUkManagerMock, AuthFindUkIdByAclInfo).WillRepeatedly(Return(SOFTBUS_OK));
+    ret = GetUserkeyIdByAClInfo(&appInfo, 0, 0, &userKeyId, &callBack);
+    EXPECT_EQ(SOFTBUS_OK, ret);
+    TransUkRequestMgrDeinit();
 }
 } // namespace OHOS

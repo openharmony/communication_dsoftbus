@@ -515,4 +515,49 @@ HWTEST_F(LNNLaneQueryTest, LNN_QUERY_LANE_015, TestSize.Level1)
     bool isHighBand = false;
     EXPECT_TRUE(isHighRequire(&qosInfo, &isHighBand));
 }
+
+/*
+* @tc.name: LNN_QUERY_LANE_016
+* @tc.desc: QueryLane, usb link state
+* @tc.type: FUNC
+* @tc.require:
+*/
+HWTEST_F(LNNLaneQueryTest, LNN_QUERY_LANE_016, TestSize.Level1)
+{
+    NiceMock<LaneQueryDepsInterfaceMock> linkQueryMock;
+    EXPECT_CALL(linkQueryMock, LnnGetRemoteNodeInfoById)
+        .WillOnce(Return(SOFTBUS_NETWORK_GET_NODE_INFO_ERR))
+        .WillRepeatedly(Return(SOFTBUS_OK));
+    int32_t ret = UsbLinkState(NODE_NETWORK_ID);
+    EXPECT_EQ(ret, SOFTBUS_LANE_GET_LEDGER_INFO_ERR);
+
+    EXPECT_CALL(linkQueryMock, LnnHasDiscoveryType).WillOnce(Return(false)).WillRepeatedly(Return(true));
+    ret = UsbLinkState(NODE_NETWORK_ID);
+    EXPECT_EQ(ret, SOFTBUS_NETWORK_NODE_OFFLINE);
+
+    EXPECT_CALL(linkQueryMock, CheckStaticNetCap).WillOnce(Return(SOFTBUS_LANE_LOCAL_NO_USB_STATIC_CAP))
+        .WillOnce(Return(SOFTBUS_LANE_REMOTE_NO_USB_STATIC_CAP)).WillRepeatedly(Return(SOFTBUS_OK));
+    ret = UsbLinkState(NODE_NETWORK_ID);
+    EXPECT_EQ(ret, SOFTBUS_LANE_LOCAL_NO_USB_STATIC_CAP);
+    ret = UsbLinkState(NODE_NETWORK_ID);
+    EXPECT_EQ(ret, SOFTBUS_LANE_REMOTE_NO_USB_STATIC_CAP);
+
+    EXPECT_CALL(linkQueryMock, CheckDynamicNetCap).WillOnce(Return(SOFTBUS_NETWORK_NODE_OFFLINE))
+        .WillRepeatedly(Return(SOFTBUS_OK));
+    ret = UsbLinkState(NODE_NETWORK_ID);
+    EXPECT_EQ(ret, SOFTBUS_NETWORK_NODE_OFFLINE);
+    ret = UsbLinkState(NODE_NETWORK_ID);
+    EXPECT_EQ(ret, SOFTBUS_OK);
+
+    EXPECT_CALL(linkQueryMock, LnnHasDiscoveryType)
+        .WillOnce(Return(false)).WillOnce(Return(false)).WillOnce(Return(true)).WillRepeatedly(Return(true));
+    ret = UsbLinkState(NODE_NETWORK_ID);
+    EXPECT_NE(ret, SOFTBUS_OK);
+    ret = UsbLinkState(NODE_NETWORK_ID);
+    EXPECT_NE(ret, SOFTBUS_OK);
+    ret = UsbLinkState(NODE_NETWORK_ID);
+    EXPECT_EQ(ret, SOFTBUS_OK);
+    ret = UsbLinkState(NODE_NETWORK_ID);
+    EXPECT_EQ(ret, SOFTBUS_OK);
+}
 }

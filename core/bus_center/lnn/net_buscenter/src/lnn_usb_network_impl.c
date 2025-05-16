@@ -604,7 +604,7 @@ static ListenerModule LnnGetUsbListenerModule(ListenerMode mode)
 {
     if (mode == LNN_LISTENER_MODE_PROXY ||
         mode == LNN_LISTENER_MODE_DIRECT) {
-        return AUTH_USB;
+        return DIRECT_CHANNEL_SERVER_USB;
     } else {
         return UNUSE_BUTT;
     }

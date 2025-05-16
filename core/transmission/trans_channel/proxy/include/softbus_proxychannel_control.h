@@ -16,18 +16,16 @@
 #ifndef SOFTBUS_PROXYCHANNEL_CONTROL_H
 #define SOFTBUS_PROXYCHANNEL_CONTROL_H
 #include "softbus_proxychannel_message.h"
-#include "trans_uk_manager.h"
 #ifdef __cplusplus
 extern "C" {
 #endif
 
 int32_t TransProxySendInnerMessage(ProxyChannelInfo *info, const char *payLoad, uint32_t payLoadLen, int32_t priority);
-int32_t TransProxyHandshake(ProxyChannelInfo *info, bool isNegoUk, const UkIdInfo *ukIdInfo);
+int32_t TransProxyHandshake(ProxyChannelInfo *info);
 int32_t TransProxyAckHandshake(uint32_t connId, ProxyChannelInfo *chan, int32_t retCode);
 void TransProxyKeepalive(uint32_t connId, const ProxyChannelInfo *info);
 int32_t TransProxyAckKeepalive(ProxyChannelInfo *info);
 int32_t TransProxyResetPeer(ProxyChannelInfo *info);
-int32_t TransProxyAckHandshakeUk(const UkRequestNode *ukRequest, int32_t ukId, int32_t errcode);
 #ifdef __cplusplus
 }
 #endif

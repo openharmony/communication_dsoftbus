@@ -16,7 +16,6 @@
 #define SOFTBUS_SESSION_LISTENER
 
 #include "softbus_base_listener.h"
-#include "trans_tcp_direct_sessionconn.h"
 
 #ifdef __cplusplus
 extern "C" {
@@ -40,7 +39,6 @@ void TransTdcSocketReleaseFd(ListenerModule module, int32_t fd);
 
 void CloseTcpDirectFd(ListenerModule module, int32_t fd);
 
-int32_t StartVerifySession(SessionConn *conn, const UkIdInfo *ukIdInfo);
 #ifdef __cplusplus
 }
 #endif /* __cplusplus */

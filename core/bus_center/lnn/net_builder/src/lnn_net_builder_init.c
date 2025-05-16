@@ -128,14 +128,19 @@ static void GetSessionKeyByNodeInfo(const NodeInfo *info, AuthHandle authHandle)
     (void)memset_s(&sessionKey, sizeof(SessionKey), 0, sizeof(SessionKey));
     (void)memset_s(&nodeInfo, sizeof(NodeInfo), 0, sizeof(NodeInfo));
     (void)LnnGetRemoteNodeInfoById(info->deviceInfo.deviceUdid, CATEGORY_UDID, &nodeInfo);
-    UpdateDpSameAccount(nodeInfo.accountId, nodeInfo.deviceInfo.deviceUdid, nodeInfo.userId, sessionKey, false);
+    UpdateDpAclParams aclParams = {
+        .accountId = nodeInfo.accountId,
+        .deviceId = nodeInfo.deviceInfo.deviceUdid,
+        .peerUserId = nodeInfo.userId
+    };
+    UpdateDpSameAccount(&aclParams, sessionKey, false, info->aclState);
 }
 
 static void OnReAuthVerifyPassed(uint32_t requestId, AuthHandle authHandle, const NodeInfo *info)
 {
-    LNN_LOGI(LNN_BUILDER, "reAuth verify passed: requestId=%{public}u, authId=%{public}" PRId64,
-        requestId, authHandle.authId);
     LNN_CHECK_AND_RETURN_LOGE(info != NULL, LNN_BUILDER, "reAuth verify result error");
+    LNN_LOGI(LNN_BUILDER, "reAuth verify passed: requestId=%{public}u, aclState=%{public}d, authId=%{public}" PRId64,
+        requestId, info->aclState, authHandle.authId);
     AuthRequest authRequest = { 0 };
     if (GetAuthRequest(requestId, &authRequest) != SOFTBUS_OK) {
         LNN_LOGE(LNN_BUILDER, "auth request not found");

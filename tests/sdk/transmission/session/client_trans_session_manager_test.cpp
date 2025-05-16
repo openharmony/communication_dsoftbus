@@ -1880,7 +1880,7 @@ HWTEST_F(TransClientSessionManagerTest, TransClientSessionManagerTest62, TestSiz
 
 /**
  * @tc.name: TransClientSessionManagerTest63
- * @tc.desc: ClientGetPeerSocketAccessInfoById
+ * @tc.desc: ClientGetPeerSocketInfoById
  * @tc.type: FUNC
  * @tc.require:
  */
@@ -1889,7 +1889,6 @@ HWTEST_F(TransClientSessionManagerTest, TransClientSessionManagerTest63, TestSiz
     bool isServer = true;
     SessionListenerAdapter callbackAdapter;
     PeerSocketInfo peerSocketInfo;
-    PeerSocketAccessInfo peerAccessInfo;
     int32_t ret = ClientGetSessionCallbackAdapterById(TRANS_TEST_INVALID_SESSION_ID, &callbackAdapter, &isServer);
     EXPECT_EQ(ret, SOFTBUS_INVALID_PARAM);
     ret = ClientGetSessionCallbackAdapterById(TRANS_TEST_SESSION_ID, nullptr, &isServer);
@@ -1900,12 +1899,6 @@ HWTEST_F(TransClientSessionManagerTest, TransClientSessionManagerTest63, TestSiz
     EXPECT_EQ(ret, SOFTBUS_INVALID_PARAM);
     ret = ClientGetPeerSocketInfoById(TRANS_TEST_SESSION_ID, nullptr);
     EXPECT_EQ(ret, SOFTBUS_INVALID_PARAM);
-    ret = ClientGetPeerSocketAccessInfoById(TRANS_TEST_INVALID_SESSION_ID, &peerAccessInfo);
-    EXPECT_EQ(ret, SOFTBUS_INVALID_PARAM);
-    ret = ClientGetPeerSocketAccessInfoById(TRANS_TEST_SESSION_ID, nullptr);
-    EXPECT_EQ(ret, SOFTBUS_INVALID_PARAM);
-    ret = ClientGetPeerSocketAccessInfoById(TRANS_TEST_SESSION_ID, &peerAccessInfo);
-    EXPECT_EQ(ret, SOFTBUS_TRANS_SESSION_INFO_NOT_FOUND);
     SessionParam *sessionParam = (SessionParam*)SoftBusMalloc(sizeof(SessionParam));
     EXPECT_TRUE(sessionParam != nullptr);
     memset_s(sessionParam, sizeof(SessionParam), 0, sizeof(SessionParam));
@@ -1918,8 +1911,6 @@ HWTEST_F(TransClientSessionManagerTest, TransClientSessionManagerTest63, TestSiz
     ret = ClientAddNewSession(g_sessionName, session);
     EXPECT_EQ(ret,  SOFTBUS_OK);
     ret = ClientGetPeerSocketInfoById(TRANS_TEST_SESSION_ID, &peerSocketInfo);
-    EXPECT_EQ(ret, SOFTBUS_TRANS_SESSION_INFO_NOT_FOUND);
-    ret = ClientGetPeerSocketAccessInfoById(TRANS_TEST_SESSION_ID, &peerAccessInfo);
     EXPECT_EQ(ret, SOFTBUS_TRANS_SESSION_INFO_NOT_FOUND);
     ret = ClientDeleteSessionServer(SEC_TYPE_PLAINTEXT, g_sessionName);
     EXPECT_EQ(ret,  SOFTBUS_OK);

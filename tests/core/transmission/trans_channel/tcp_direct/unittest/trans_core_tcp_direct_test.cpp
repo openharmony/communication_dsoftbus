@@ -488,10 +488,10 @@ HWTEST_F(TransCoreTcpDirectTest, TransTdcPostBytes0016, TestSize.Level1)
     packetHead.flags = FLAG_REQUEST;
     packetHead.dataLen = strlen(bytes);
 
-    ret = TransTdcPostBytes(channelId, &packetHead, nullptr, nullptr);
+    ret = TransTdcPostBytes(channelId, &packetHead, nullptr);
     EXPECT_EQ(ret, SOFTBUS_INVALID_PARAM);
 
-    ret = TransTdcPostBytes(channelId, &packetHead, bytes, nullptr);
+    ret = TransTdcPostBytes(channelId, &packetHead, bytes);
     EXPECT_EQ(ret, SOFTBUS_ENCRYPT_ERR);
 }
 
@@ -505,14 +505,13 @@ HWTEST_F(TransCoreTcpDirectTest, TransTdcSrvRecvDataTest0017, TestSize.Level1)
 {
     int32_t channelId = 1;
     int32_t fd = 1;
-    int32_t pktModule = 0;
     int32_t ret = TransSrvDataListInit();
     EXPECT_EQ(ret, SOFTBUS_OK);
 
     ret = TransSrvAddDataBufNode(channelId, fd);
     EXPECT_EQ(ret, SOFTBUS_OK);
 
-    ret = TransTdcSrvRecvData((ListenerModule)ERRMOUDLE, channelId, 0, &pktModule);
+    ret = TransTdcSrvRecvData((ListenerModule)ERRMOUDLE, channelId, 0);
     EXPECT_EQ(ret, SOFTBUS_TRANS_TCP_GET_SRV_DATA_FAILED);
 
     TransSrvDataListDeinit();
@@ -686,42 +685,6 @@ HWTEST_F(TransCoreTcpDirectTest, TransTcpGetPrivilegeCloseList001, TestSize.Leve
     ret = TransTcpGetPrivilegeCloseList(&privilegeCloseList, tokenId, pid);
     EXPECT_EQ(SOFTBUS_OK, ret);
     ret = TransDelTcpChannelInfoByChannelId(info->channelId);
-    EXPECT_EQ(SOFTBUS_OK, ret);
-}
-
-/**
- * @tc.name: TransSessionConnUkTest001
- * @tc.desc: test TransSessionConnUkTest001.
- * @tc.type: FUNC
- * @tc.require:
- */
-HWTEST_F(TransCoreTcpDirectTest, TransSessionConnUkTest001, TestSize.Level1)
-{
-    SessionConn *conn = TestSetSessionConn();
-    int32_t ret = TransTdcAddSessionConn(conn);
-    EXPECT_EQ(SOFTBUS_OK, ret);
-
-    UkIdInfo ukIdInfo = {
-        .myId = 0,
-        .peerId = 0,
-    };
-
-    ret = SetSessionConnUkIdById(0, nullptr);
-    EXPECT_EQ(SOFTBUS_INVALID_PARAM, ret);
-
-    ret = GetSessionConnUkIdById(0, nullptr);
-    EXPECT_EQ(SOFTBUS_INVALID_PARAM, ret);
-
-    ret = SetSessionConnUkIdById(0, &ukIdInfo);
-    EXPECT_EQ(SOFTBUS_NOT_FIND, ret);
-
-    ret = SetSessionConnUkIdById(1, &ukIdInfo);
-    EXPECT_EQ(SOFTBUS_OK, ret);
-
-    ret = GetSessionConnUkIdById(0, &ukIdInfo);
-    EXPECT_EQ(SOFTBUS_NOT_FIND, ret);
-
-    ret = GetSessionConnUkIdById(1, &ukIdInfo);
     EXPECT_EQ(SOFTBUS_OK, ret);
 }
 }

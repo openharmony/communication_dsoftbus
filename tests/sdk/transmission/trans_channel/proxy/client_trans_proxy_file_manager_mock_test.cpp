@@ -716,7 +716,7 @@ HWTEST_F(ClientTransProxyFileManagerMockTest, ClientTransProxyOnChannelOpenedTes
     ASSERT_TRUE(channelInfo != nullptr);
     int32_t ret = ClientTransProxyAddChannelInfo(channelInfo);
     EXPECT_EQ(SOFTBUS_OK, ret);
-    ret = ClientTransProxyOnChannelOpened(TEST_SESSION_NAME, &channel);
+    ret = ClientTransProxyOnChannelOpened(TEST_SESSION_NAME, &channel, nullptr);
     EXPECT_EQ(SOFTBUS_ALREADY_EXISTED, ret);
     ret = ClientTransProxyDelChannelInfo(TEST_CHANNEL_ID);
     EXPECT_EQ(SOFTBUS_OK, ret);

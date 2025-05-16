@@ -15,6 +15,8 @@
 
 #include "trans_channel_common.h"
 
+#include <unistd.h>
+
 #include "access_control.h"
 #include "bus_center_manager.h"
 #include "lnn_distributed_net_ledger.h"
@@ -43,6 +45,7 @@
 #include "trans_tcp_direct_sessionconn.h"
 #include "trans_udp_channel_manager.h"
 #include "trans_udp_negotiation.h"
+#include "trans_uk_manager.h"
 #include "wifi_direct_manager.h"
 
 typedef struct {
@@ -164,9 +167,10 @@ static ChannelType TransGetChannelType(const SessionParam *param, const int32_t 
 
 static void TransGetAccessInfo(AppInfo *appInfo)
 {
-    int32_t ret = GetAccessInfoBySessionName(appInfo->myData.sessionName, &appInfo->myData.userId);
+    int32_t ret = GetAccessInfoBySessionName(appInfo->myData.sessionName, &appInfo->myData.userId,
+        &appInfo->myData.tokenId, NULL, appInfo->extraAccessInfo);
     if (ret != SOFTBUS_OK) {
-        TRANS_LOGE(TRANS_CTRL, "get userId fail, ret=%{public}d", ret);
+        TRANS_LOGE(TRANS_CTRL, "get access info fail, ret=%{public}d", ret);
         return;
     }
     uint32_t size = 0;
@@ -203,6 +207,10 @@ void FillAppInfo(AppInfo *appInfo, const SessionParam *param, TransInfo *transIn
         }
     }
     TransGetAccessInfo(appInfo);
+    if (GetUkPolicy(appInfo) == NO_NEED_UK) {
+        TRANS_LOGI(TRANS_CTRL, "No need sink generate key.");
+        DisableCapabilityBit(&(appInfo->channelCapability), TRANS_CHANNEL_SINK_GENERATE_KEY_OFFSET);
+    }
 }
 
 void GetOsTypeByNetworkId(const char *networkId, int32_t *osType)
@@ -337,7 +345,7 @@ int32_t TransCommonGetAppInfo(const SessionParam *param, AppInfo *appInfo)
     appInfo->myHandleId = -1;
     appInfo->peerHandleId = -1;
     appInfo->timeStart = GetSoftbusRecordTimeMillis();
-    appInfo->callingTokenId = TransACLGetCallingTokenID();
+    appInfo->callingTokenId = appInfo->myData.pid == getpid() ? 0 : TransACLGetCallingTokenID();
     appInfo->isClient = true;
     appInfo->channelCapability = TRANS_CHANNEL_CAPABILITY;
     TRANS_LOGD(TRANS_CTRL, "GetAppInfo ok");
