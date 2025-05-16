@@ -301,7 +301,9 @@ HWTEST_F(AuthDeviceProfileListenerTest, ON_TRUST_DEVICE_PROFILE_ACTIVE_TEST, Tes
  */
 HWTEST_F(AuthDeviceProfileListenerTest, ON_TRUST_DEVICE_PROFILE_INACTIVE_TEST, TestSize.Level1)
 {
+    AuthDeviceProfileListenerInterfaceMock mocker;
     DistributedDeviceProfile::TrustDeviceProfile profile;
+    EXPECT_CALL(mocker, LnnIsLocalSupportBurstFeature).WillRepeatedly(Return(SOFTBUS_OK));
     int32_t ret = listener->OnTrustDeviceProfileInactive(profile);
     EXPECT_EQ(ret, SOFTBUS_OK);
 }

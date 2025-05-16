@@ -1017,3 +1017,55 @@ bool IsSKIdInvalid(int32_t sessionKeyId, const char *accountHash, const char *ud
     LNN_LOGE(LNN_STATE, "key not found");
     return true;
 }
+
+int32_t SelectAllAcl(TrustedInfo **trustedInfoArray, uint32_t *num)
+{
+    if (num == nullptr || trustedInfoArray == nullptr) {
+        LNN_LOGE(LNN_LEDGER, "invalid param");
+        return SOFTBUS_INVALID_PARAM;
+    }
+    std::vector<OHOS::DistributedDeviceProfile::AccessControlProfile> aclProfiles;
+    int32_t ret = DpClient::GetInstance().GetAllAccessControlProfile(aclProfiles);
+    if (ret != OHOS::DistributedDeviceProfile::DP_SUCCESS) {
+        LNN_LOGE(LNN_STATE, "GetAllAccessControlProfile ret=%{public}d", ret);
+        return SOFTBUS_AUTH_ACL_NOT_FOUND;
+    }
+    if (aclProfiles.empty()) {
+        LNN_LOGI(LNN_STATE, "aclProfiles is empty");
+        return SOFTBUS_OK;
+    }
+    int32_t localUserId = GetActiveOsAccountIds();
+    std::unordered_set<std::string> matchAcl;
+    for (auto &aclProfile : aclProfiles) {
+        if (aclProfile.GetDeviceIdType() != (uint32_t)OHOS::DistributedDeviceProfile::DeviceIdType::UDID ||
+            aclProfile.GetTrustDeviceId().empty() || GetAclLocalUserId(aclProfile) != localUserId ||
+            aclProfile.GetBindType() == (uint32_t)OHOS::DistributedDeviceProfile::BindType::SAME_ACCOUNT) {
+            continue;
+        }
+        char *anonyUdid = nullptr;
+        Anonymize(aclProfile.GetTrustDeviceId().c_str(), &anonyUdid);
+        LNN_LOGI(LNN_STATE, "trusted dev info, udid=%{public}s, localUserId=%{public}d",
+            AnonymizeWrapper(anonyUdid), GetAclLocalUserId(aclProfile));
+        AnonymizeFree(anonyUdid);
+        matchAcl.insert(aclProfile.GetTrustDeviceId());
+    }
+    if (matchAcl.empty()) {
+        LNN_LOGI(LNN_STATE, "matchAcl is empty");
+        return SOFTBUS_OK;
+    }
+    *trustedInfoArray = (TrustedInfo *)SoftBusCalloc(matchAcl.size() * sizeof(TrustedInfo));
+    if (*trustedInfoArray == nullptr) {
+        LNN_LOGE(LNN_STATE, "malloc fail.");
+        return SOFTBUS_MALLOC_ERR;
+    }
+    for (auto item : matchAcl)  {
+        if (strcpy_s(((*trustedInfoArray) + (*num))->udid, UDID_BUF_LEN, item.c_str()) != EOK) {
+            LNN_LOGE(LNN_STATE, "udid str cpy fail");
+            SoftBusFree(*trustedInfoArray);
+            return SOFTBUS_STRCPY_ERR;
+        }
+        ((*trustedInfoArray) + (*num))->userId = localUserId;
+        (*num)++;
+    }
+    return SOFTBUS_OK;
+}

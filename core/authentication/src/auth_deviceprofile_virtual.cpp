@@ -107,3 +107,10 @@ bool IsSKIdInvalid(int32_t sessionKeyId, const char *accountHash, const char *ud
     (void)userId;
     return false;
 }
+
+int32_t SelectAllAcl(TrustedInfo **trustedInfoArray, uint32_t *num)
+{
+    (void)trustedInfoArray;
+    (void)num;
+    return SOFTBUS_NOT_IMPLEMENT;
+}
