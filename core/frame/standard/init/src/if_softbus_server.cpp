@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2025 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -145,5 +145,55 @@ int32_t ISoftBusServer::SetDisplayName(const char *pkgName, const char *nameData
     (void)len;
     COMM_LOGE(COMM_SVC, "ipc default impl");
     return SOFTBUS_FUNC_NOT_SUPPORT;
+}
+
+int32_t ISoftBusServer::CreateServer(const char *pkgName, const char *name)
+{
+    (void)pkgName;
+    (void)name;
+    COMM_LOGE(COMM_SVC, "CreateServer ipc default impl");
+    return SOFTBUS_IPC_ERR;
+}
+
+int32_t ISoftBusServer::RemoveServer(const char *pkgName, const char *name)
+{
+    (void)pkgName;
+    (void)name;
+    COMM_LOGE(COMM_SVC, "RemoveServer ipc default impl");
+    return SOFTBUS_IPC_ERR;
+}
+
+int32_t ISoftBusServer::Connect(const char *pkgName, const char *name, const Address *address)
+{
+    (void)pkgName;
+    (void)name;
+    (void)address;
+    COMM_LOGE(COMM_SVC, "Connect ipc default impl");
+    return SOFTBUS_IPC_ERR;
+}
+
+int32_t ISoftBusServer::Disconnect(uint32_t handle)
+{
+    (void)handle;
+    COMM_LOGE(COMM_SVC, "Disconnect ipc default impl");
+    return SOFTBUS_IPC_ERR;
+}
+
+int32_t ISoftBusServer::Send(uint32_t handle, const uint8_t *data, uint32_t len)
+{
+    (void)handle;
+    (void)data;
+    (void)len;
+    COMM_LOGE(COMM_SVC, "Send ipc default impl");
+    return SOFTBUS_IPC_ERR;
+}
+
+int32_t ISoftBusServer::ConnGetPeerDeviceId(uint32_t handle, char *deviceId, uint32_t len)
+{
+    (void)handle;
+    (void)deviceId;
+    (void)len;
+    COMM_LOGE(COMM_SVC, "GetPeerDeviceId ipc default impl");
+    return SOFTBUS_IPC_ERR;
 }
 } // namespace OHOS

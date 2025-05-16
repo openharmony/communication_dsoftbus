@@ -39,6 +39,9 @@ ohos_unittest("SoftBusFrameStandardTest") {
     "${dsoftbus_root_path}/sdk/transmission/ipc/include",
     "${dsoftbus_root_path}/sdk/transmission/trans_channel/manager/include",
     "${dsoftbus_root_path}/sdk/transmission/trans_channel/udp/common/include",
+    "${dsoftbus_root_path}/interfaces/kits/connection",
+    "${dsoftbus_root_path}/sdk/connection/service/include",
+    "${dsoftbus_root_path}/sdk/connection/ipc/include",
   ]
 
   deps = [

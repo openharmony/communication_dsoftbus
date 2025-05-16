@@ -18,6 +18,7 @@ if (defined(ohos_lite)) {
     softbus_client_frame_inc += [
       "$dsoftbus_root_path/sdk/frame/mini/include",
       "$dsoftbus_root_path/sdk/frame/common/include",
+      "$dsoftbus_root_path/interfaces/kits/connection",
     ]
     softbus_client_frame_src = [
       "$dsoftbus_root_path/sdk/frame/common/src/softbus_client_event_manager.c",
@@ -28,6 +29,7 @@ if (defined(ohos_lite)) {
     softbus_client_frame_inc += [
       "$dsoftbus_root_path/sdk/frame/common/include",
       "$dsoftbus_root_path/sdk/frame/small/include",
+      "$dsoftbus_root_path/interfaces/kits/connection",
     ]
 
     softbus_client_frame_src = [

@@ -1833,4 +1833,243 @@ HWTEST_F(SoftbusServerStubTest, SoftbusServerStubTest048, TestSize.Level1)
     ret = softBusServer->TriggerRangeForMsdpInner(datas, reply);
     EXPECT_EQ(SOFTBUS_OK, ret);
 }
+
+/**
+ * @tc.name: SoftbusServerStubTest049
+ * @tc.desc: Verify the CheckPkgName function.
+ * @tc.type: FUNC
+ * @tc.require:
+ */
+HWTEST_F(SoftbusServerStubTest, SoftbusServerStubTest049, TestSize.Level1)
+{
+    int32_t ret = CheckPkgName("mds");
+    EXPECT_EQ(SOFTBUS_INVALID_PARAM, ret);
+
+    ret = CheckPkgName("ohos.distributedschedule.dms");
+    EXPECT_EQ(SOFTBUS_OK, ret);
+}
+
+/**
+ * @tc.name: SoftbusServerStubTest050
+ * @tc.desc: Verify the CreateServerInner function.
+ * @tc.type: FUNC
+ * @tc.require:
+ */
+HWTEST_F(SoftbusServerStubTest, SoftbusServerStubTest050, TestSize.Level1)
+{
+    sptr<OHOS::SoftBusServerStub> softBusServer = new OHOS::SoftBusServer(SOFTBUS_SERVER_SA_ID, true);
+    ASSERT_NE(nullptr, softBusServer);
+
+    MessageParcel data;
+    MessageParcel reply;
+
+    int32_t ret = softBusServer->CreateServerInner(data, reply);
+    EXPECT_EQ(SOFTBUS_IPC_ERR, ret);
+
+    const char *pkgName = "1234567890123456789012345678901234567890123456789012345678901234567890123456789";
+    data.WriteCString(pkgName);
+    ret = softBusServer->CreateServerInner(data, reply);
+    EXPECT_EQ(SOFTBUS_IPC_ERR, ret);
+
+    pkgName = "ohos.distributedschedule.dms";
+    data.WriteCString(pkgName);
+    ret = softBusServer->CreateServerInner(data, reply);
+    EXPECT_EQ(SOFTBUS_IPC_ERR, ret);
+
+    pkgName = "ohos.distributedschedule.dms";
+    data.WriteCString(pkgName);
+    const char *name =
+        "12345678901234567890123456789012345678901234567890123456789012345678901234567891234567890123456789012"
+        "34567890123456789012345678901234567890123456789012345678912345678901234567890123456789012345678901234"
+        "56789012345678901234567890123456789123456789012345678901234567890123456789012345678901234567890123456"
+        "78901234567891234567890123456789012345678901234567890123456789012345678901234567890123456789";
+    data.WriteCString(name);
+    ret = softBusServer->CreateServerInner(data, reply);
+    EXPECT_EQ(SOFTBUS_IPC_ERR, ret);
+
+    name = "test";
+    data.WriteCString(pkgName);
+    data.WriteCString(name);
+    ret = softBusServer->CreateServerInner(data, reply);
+    EXPECT_EQ(SOFTBUS_OK, ret);
+}
+
+/**
+ * @tc.name: SoftbusServerStubTest051
+ * @tc.desc: Verify the RemoveServerInner function.
+ * @tc.type: FUNC
+ * @tc.require:
+ */
+HWTEST_F(SoftbusServerStubTest, SoftbusServerStubTest051, TestSize.Level1)
+{
+    sptr<OHOS::SoftBusServerStub> softBusServer = new OHOS::SoftBusServer(SOFTBUS_SERVER_SA_ID, true);
+    ASSERT_NE(nullptr, softBusServer);
+
+    MessageParcel data;
+    MessageParcel reply;
+
+    int32_t ret = softBusServer->RemoveServerInner(data, reply);
+    EXPECT_EQ(SOFTBUS_IPC_ERR, ret);
+
+    const char *pkgName = "1234567890123456789012345678901234567890123456789012345678901234567890123456789";
+    data.WriteCString(pkgName);
+    ret = softBusServer->RemoveServerInner(data, reply);
+    EXPECT_EQ(SOFTBUS_IPC_ERR, ret);
+
+    pkgName = "ohos.distributedschedule.dms";
+    data.WriteCString(pkgName);
+    ret = softBusServer->RemoveServerInner(data, reply);
+    EXPECT_EQ(SOFTBUS_IPC_ERR, ret);
+
+    pkgName = "ohos.distributedschedule.dms";
+    data.WriteCString(pkgName);
+    const char *name =
+        "12345678901234567890123456789012345678901234567890123456789012345678901234567891234567890123456789012"
+        "34567890123456789012345678901234567890123456789012345678912345678901234567890123456789012345678901234"
+        "56789012345678901234567890123456789123456789012345678901234567890123456789012345678901234567890123456"
+        "78901234567891234567890123456789012345678901234567890123456789012345678901234567890123456789";
+    data.WriteCString(name);
+    ret = softBusServer->RemoveServerInner(data, reply);
+    EXPECT_EQ(SOFTBUS_IPC_ERR, ret);
+
+    name = "test";
+    data.WriteCString(pkgName);
+    data.WriteCString(name);
+    ret = softBusServer->RemoveServerInner(data, reply);
+    EXPECT_EQ(SOFTBUS_OK, ret);
+}
+
+/**
+ * @tc.name: SoftbusServerStubTest052
+ * @tc.desc: Verify the ConnectInner function.
+ * @tc.type: FUNC
+ * @tc.require:
+ */
+HWTEST_F(SoftbusServerStubTest, SoftbusServerStubTest052, TestSize.Level1)
+{
+    sptr<OHOS::SoftBusServerStub> softBusServer = new OHOS::SoftBusServer(SOFTBUS_SERVER_SA_ID, true);
+    ASSERT_NE(nullptr, softBusServer);
+
+    MessageParcel data;
+    MessageParcel reply;
+
+    int32_t ret = softBusServer->ConnectInner(data, reply);
+    EXPECT_EQ(SOFTBUS_IPC_ERR, ret);
+
+    const char *pkgName = "1234567890123456789012345678901234567890123456789012345678901234567890123456789";
+    data.WriteCString(pkgName);
+    ret = softBusServer->ConnectInner(data, reply);
+    EXPECT_EQ(SOFTBUS_IPC_ERR, ret);
+
+    pkgName = "ohos.distributedschedule.dms";
+    data.WriteCString(pkgName);
+    ret = softBusServer->ConnectInner(data, reply);
+    EXPECT_EQ(SOFTBUS_IPC_ERR, ret);
+
+    pkgName = "ohos.distributedschedule.dms";
+    data.WriteCString(pkgName);
+    const char *name =
+        "12345678901234567890123456789012345678901234567890123456789012345678901234567891234567890123456789012"
+        "34567890123456789012345678901234567890123456789012345678912345678901234567890123456789012345678901234"
+        "56789012345678901234567890123456789123456789012345678901234567890123456789012345678901234567890123456"
+        "78901234567891234567890123456789012345678901234567890123456789012345678901234567890123456789";
+    data.WriteCString(name);
+    ret = softBusServer->ConnectInner(data, reply);
+    EXPECT_EQ(SOFTBUS_IPC_ERR, ret);
+
+    name = "test";
+    data.WriteCString(pkgName);
+    data.WriteCString(name);
+    ret = softBusServer->ConnectInner(data, reply);
+    EXPECT_EQ(SOFTBUS_IPC_ERR, ret);
+}
+
+/**
+ * @tc.name: SoftbusServerStubTest053
+ * @tc.desc: Verify the DisconnectInner function.
+ * @tc.type: FUNC
+ * @tc.require:
+ */
+HWTEST_F(SoftbusServerStubTest, SoftbusServerStubTest053, TestSize.Level1)
+{
+    sptr<OHOS::SoftBusServerStub> softBusServer = new OHOS::SoftBusServer(SOFTBUS_SERVER_SA_ID, true);
+    ASSERT_NE(nullptr, softBusServer);
+
+    MessageParcel data;
+    MessageParcel reply;
+
+    int32_t ret = softBusServer->DisconnectInner(data, reply);
+    EXPECT_EQ(SOFTBUS_IPC_ERR, ret);
+
+    int32_t handle = 0;
+    data.WriteInt32(handle);
+    ret = softBusServer->DisconnectInner(data, reply);
+    EXPECT_EQ(SOFTBUS_OK, ret);
+}
+
+/**
+ * @tc.name: SoftbusServerStubTest054
+ * @tc.desc: Verify the SendInner function.
+ * @tc.type: FUNC
+ * @tc.require:
+ */
+HWTEST_F(SoftbusServerStubTest, SoftbusServerStubTest054, TestSize.Level1)
+{
+    sptr<OHOS::SoftBusServerStub> softBusServer = new OHOS::SoftBusServer(SOFTBUS_SERVER_SA_ID, true);
+    ASSERT_NE(nullptr, softBusServer);
+
+    MessageParcel data;
+    MessageParcel reply;
+
+    int32_t ret = softBusServer->SendInner(data, reply);
+    EXPECT_EQ(SOFTBUS_IPC_ERR, ret);
+
+    int32_t handle = 0;
+    data.WriteInt32(handle);
+    ret = softBusServer->SendInner(data, reply);
+    EXPECT_EQ(SOFTBUS_IPC_ERR, ret);
+
+    uint32_t len = 0;
+    data.WriteInt32(handle);
+    data.WriteUint32(len);
+    ret = softBusServer->SendInner(data, reply);
+    EXPECT_EQ(SOFTBUS_IPC_ERR, ret);
+
+    const uint8_t *sendData = reinterpret_cast<const uint8_t *>("test");
+    len = strlen("test");
+    data.WriteInt32(handle);
+    data.WriteUint32(len);
+    data.WriteRawData(sendData, len);
+    ret = softBusServer->SendInner(data, reply);
+    EXPECT_EQ(SOFTBUS_OK, ret);
+}
+
+/**
+ * @tc.name: SoftbusServerStubTest055
+ * @tc.desc: Verify the GetPeerDeviceIdInner function.
+ * @tc.type: FUNC
+ * @tc.require:
+ */
+HWTEST_F(SoftbusServerStubTest, SoftbusServerStubTest055, TestSize.Level1)
+{
+    sptr<OHOS::SoftBusServerStub> softBusServer = new OHOS::SoftBusServer(SOFTBUS_SERVER_SA_ID, true);
+    ASSERT_NE(nullptr, softBusServer);
+
+    MessageParcel data;
+    MessageParcel reply;
+
+    int32_t ret = softBusServer->GetPeerDeviceIdInner(data, reply);
+    EXPECT_EQ(SOFTBUS_IPC_ERR, ret);
+
+    int32_t handle = 0;
+    data.WriteInt32(handle);
+    ret = softBusServer->GetPeerDeviceIdInner(data, reply);
+    EXPECT_EQ(SOFTBUS_IPC_ERR, ret);
+
+    uint32_t len = 10;
+    data.WriteInt32(handle);
+    data.WriteUint32(len);
+    ret = softBusServer->GetPeerDeviceIdInner(data, reply);
+    EXPECT_EQ(SOFTBUS_OK, ret);
+}
 }
