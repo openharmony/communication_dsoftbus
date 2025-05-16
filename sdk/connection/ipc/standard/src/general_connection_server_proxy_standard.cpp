@@ -317,8 +317,8 @@ int32_t ConnectionServerProxy::CreateServer(const char *pkgName, const char *nam
     MessageOption option;
     int32_t ret = remote->SendRequest(SERVER_GENERAL_CREATE_SERVER, data, reply, option);
     if (ret != SOFTBUS_OK) {
-        CONN_LOGE(CONN_COMMON, "send request failed");
-        return SOFTBUS_IPC_ERR;
+        CONN_LOGE(CONN_COMMON, "send request failed, err=%{public}d", ret);
+        return ret;
     }
     int32_t serverRet = 0;
     if (!reply.ReadInt32(serverRet)) {
@@ -356,8 +356,8 @@ int32_t ConnectionServerProxy::RemoveServer(const char *pkgName, const char *nam
     MessageOption option;
     int32_t ret = remote->SendRequest(SERVER_GENERAL_REMOVE_SERVER, data, reply, option);
     if (ret != SOFTBUS_OK) {
-        CONN_LOGE(CONN_COMMON, "send request failed");
-        return SOFTBUS_IPC_ERR;
+        CONN_LOGE(CONN_COMMON, "send request failed, err=%{public}d", ret);
+        return ret;
     }
     int32_t serverRet = 0;
     if (!reply.ReadInt32(serverRet)) {
@@ -403,8 +403,8 @@ int32_t ConnectionServerProxy::Connect(const char *pkgName, const char *name, co
     MessageOption option;
     int32_t ret = remote->SendRequest(SERVER_GENERAL_CONNECT, data, reply, option);
     if (ret != SOFTBUS_OK) {
-        CONN_LOGE(CONN_COMMON, "send request failed");
-        return SOFTBUS_IPC_ERR;
+        CONN_LOGE(CONN_COMMON, "send request failed, err=%{public}d", ret);
+        return ret;
     }
     int32_t handle = 0;
     if (!reply.ReadInt32(handle)) {
@@ -434,8 +434,8 @@ int32_t ConnectionServerProxy::Disconnect(uint32_t handle)
     MessageOption option;
     int32_t ret = remote->SendRequest(SERVER_GENERAL_DISCONNECT, data, reply, option);
     if (ret != SOFTBUS_OK) {
-        CONN_LOGE(CONN_COMMON, "send request failed");
-        return SOFTBUS_IPC_ERR;
+        CONN_LOGE(CONN_COMMON, "send request failed, err=%{public}d", ret);
+        return ret;
     }
     int32_t serverRet = 0;
     if (!reply.ReadInt32(serverRet)) {
@@ -477,8 +477,8 @@ int32_t ConnectionServerProxy::Send(uint32_t handle, const uint8_t *data, uint32
     MessageOption option;
     int32_t ret = remote->SendRequest(SERVER_GENERAL_SEND, dataParcel, reply, option);
     if (ret != SOFTBUS_OK) {
-        CONN_LOGE(CONN_COMMON, "send request failed");
-        return SOFTBUS_IPC_ERR;
+        CONN_LOGE(CONN_COMMON, "send request failed, err=%{public}d", ret);
+        return ret;
     }
     int32_t serverRet = 0;
     if (!reply.ReadInt32(serverRet)) {
@@ -516,8 +516,8 @@ int32_t ConnectionServerProxy::ConnGetPeerDeviceId(uint32_t handle, char *device
     MessageOption option;
     int32_t ret = remote->SendRequest(SERVER_GENERAL_GET_PEER_DEVICE_ID, dataParcel, reply, option);
     if (ret != SOFTBUS_OK) {
-        CONN_LOGE(CONN_COMMON, "send request failed");
-        return SOFTBUS_IPC_ERR;
+        CONN_LOGE(CONN_COMMON, "send request failed, err=%{public}d", ret);
+        return ret;
     }
     char *tmp = (char *)reply.ReadRawData(len);
     if (tmp == nullptr) {
