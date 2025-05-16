@@ -1840,7 +1840,6 @@ int32_t AuthSessionStartAuth(const AuthParam *authParam, const AuthConnInfo *con
         ReleaseAuthLock();
         return SOFTBUS_MEM_ERR;
     }
-    DeleteWifiConnItemByConnId(GetConnId(authParam->connId));
     authFsm->info.isNeedFastAuth = authParam->isFastAuth;
     (void)UpdateLocalAuthState(authFsm->authSeq, &authFsm->info);
     AuthFsmStateIndex nextState = STATE_SYNC_DEVICE_ID;
@@ -2082,8 +2081,8 @@ int32_t AuthSessionHandleDeviceDisconnected(uint64_t connId, bool isNeedDisconne
     ReleaseAuthLock();
     if (isNeedDisconnect && !isDisconnected &&
         (GetConnType(connId) == AUTH_LINK_TYPE_WIFI || GetConnType(connId) == AUTH_LINK_TYPE_USB) &&
-        IsExistWifiConnItemByConnId(GetConnId(connId))) {
-        DeleteWifiConnItemByConnId(GetConnId(connId));
+        IsExistAuthTcpConnFdItemByConnId(GetConnId(connId))) {
+        DeleteAuthTcpConnFdItemByConnId(GetConnId(connId));
         DisconnectAuthDevice(&connId);
     }
     return SOFTBUS_OK;
