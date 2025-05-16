@@ -17,6 +17,7 @@
 
 #include <string.h>
 #include "conn_log.h"
+#include "anonymizer.h"
 #include "general_connection_server_proxy.h"
 #include "softbus_adapter_thread.h"
 #include "softbus_client_stub_interface.h"
@@ -216,7 +217,10 @@ int32_t GeneraConnGetPeerDeviceId(uint32_t handle, char *deviceId, uint32_t len)
         CONN_LOGE(CONN_COMMON, "get peer device id failed, ret=%{public}d", ret);
         return ret;
     }
-    CONN_LOGI(CONN_COMMON, "get peer device id success, handle=%{public}u, deviceId=%{public}s", handle, deviceId);
+    char *anonyDevideId = NULL;
+    Anonymize(deviceId, &anonyDevideId);
+    CONN_LOGI(CONN_COMMON, "get peer device id success, handle=%{public}u, deviceId=%{public}s", handle, anonyDevideId);
+    AnonymizeFree(anonyDevideId);
     return SOFTBUS_OK;
 }
 

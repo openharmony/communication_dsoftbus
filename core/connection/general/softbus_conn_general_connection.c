@@ -42,6 +42,7 @@ enum GeneralFeatureCapability {
 
 typedef struct {
     SoftBusList *connections;
+    SoftBusList *servers;
 } GeneralManager;
 
 enum GeneralMgrLooperMsg {
@@ -50,9 +51,9 @@ enum GeneralMgrLooperMsg {
     GENERAL_MGR_MSG_DISCONNECT_DELAY,
 };
 
-static void ConnReturnGeneralConnection(struct GeneralConnection **connection);
+static void ConnReturnGeneralConnection(struct GeneralConnection **generalConnection);
 struct GeneralConnection *GetConnectionByGeneralId(uint32_t generalId);
-static void ConnRemoveGeneralConnection(struct GeneralConnection *connection);
+static void ConnRemoveGeneralConnection(struct GeneralConnection *generalConnection);
 static void GeneralManagerMsgHandler(SoftBusMessage *msg);
 static int GeneralCompareConnectionLooperEventFunc(const SoftBusMessage *msg, void *args);
 static void MergeConnection(uint32_t generalId);
@@ -64,7 +65,7 @@ static void OnCommConnectFail(uint32_t requestId, int32_t reason);
 
 static GeneralConnectionListener g_generalConnectionListener;
 static GeneralManager g_generalManager;
-static GeneralNames g_names;
+
 static SoftBusMutex g_requestIdLock;
 static uint32_t g_requestId = 1;
 
@@ -291,9 +292,43 @@ static int32_t GeneralSendResetMessage(struct GeneralConnection *generalConnecti
     return SOFTBUS_OK;
 }
 
+static Server *NewServerNode(const GeneralConnectionParam *param)
+{
+    Server *nameNode = (Server *)SoftBusCalloc(sizeof(Server));
+    CONN_CHECK_AND_RETURN_RET_LOGE(nameNode != NULL, NULL, CONN_BLE, "nameNode is null");
+    ListInit(&nameNode->node);
+    if ((strcpy_s(nameNode->info.bundleName, BUNDLE_NAME_MAX, param->bundleName) != EOK) ||
+        (strcpy_s(nameNode->info.name, GENERAL_NAME_LEN, param->name) != EOK) ||
+        (strcpy_s(nameNode->info.pkgName, PKG_NAME_SIZE_MAX, param->pkgName) != EOK)) {
+        CONN_LOGE(CONN_BLE, "strcpy failed");
+        SoftBusFree(nameNode);
+        return NULL;
+    }
+    nameNode->info.pid = param->pid;
+    return nameNode;
+}
+
+static void FreeServerNode(Server **nameNode)
+{
+    SoftBusFree(*nameNode);
+    *nameNode = NULL;
+}
+
 static void ClearAllGeneralConnection(const char *pkgName, int32_t pid)
 {
     CONN_LOGW(CONN_BLE, "clean up connections");
+    CONN_CHECK_AND_RETURN_LOGE((SoftBusMutexLock(&g_generalManager.servers->lock)) == SOFTBUS_OK, CONN_BLE,
+        "lock servers failed");
+    Server *serverIt = NULL;
+    Server *serverNext = NULL;
+    LIST_FOR_EACH_ENTRY_SAFE(serverIt, serverNext, &g_generalManager.servers->list, Server, node) {
+        if (StrCmpIgnoreCase(serverIt->info.pkgName, pkgName) == 0 && serverIt->info.pid == pid) {
+            ListDelete(&serverIt->node);
+            FreeServerNode(&serverIt);
+        }
+    }
+    (void)SoftBusMutexUnlock(&g_generalManager.servers->lock);
+
     ListNode waitNotifyDisconnect = {0};
     ListInit(&waitNotifyDisconnect);
     CONN_CHECK_AND_RETURN_LOGE(SoftBusMutexLock(&g_generalManager.connections->lock) == SOFTBUS_OK, CONN_BLE,
@@ -312,7 +347,7 @@ static void ClearAllGeneralConnection(const char *pkgName, int32_t pid)
     struct GeneralConnection *nextItem = NULL;
     LIST_FOR_EACH_ENTRY_SAFE(item, nextItem, &waitNotifyDisconnect, struct GeneralConnection, node) {
         ListDelete(&item->node);
-        GeneralSendResetMessage(it);
+        GeneralSendResetMessage(item);
         ConnReturnGeneralConnection(&item);
     }
 }
@@ -372,7 +407,7 @@ static int32_t StartConnConnectDevice(const char *addr,
         return SOFTBUS_STRCPY_ERR;
     }
     int32_t status = ConnConnectDevice(&option, requestId, result);
-    CONN_LOGI(CONN_BLE, "connect device, status=%{public}d, requestId=%{public}d", status, g_requestId);
+    CONN_LOGI(CONN_BLE, "connect device, status=%{public}d, requestId=%{public}u", status, requestId);
     return status;
 }
 
@@ -519,32 +554,41 @@ static uint32_t AllocateGeneralIdUnsafe(void)
 
 static bool FindInfoFromServer(GeneralConnectionInfo *info, struct GeneralConnection *generalConnection)
 {
-    int32_t status = SoftBusMutexLock(&g_names.names->lock);
+    int32_t status = SoftBusMutexLock(&g_generalManager.servers->lock);
     CONN_CHECK_AND_RETURN_RET_LOGE(status == SOFTBUS_OK, false, CONN_BLE, "lock failed");
 
-    Name *it = NULL;
+    Server *it = NULL;
     bool found = false;
-    LIST_FOR_EACH_ENTRY(it, &g_names.names->list, Name, node) {
+    GeneralConnectionParam infoTemp = {0};
+    LIST_FOR_EACH_ENTRY(it, &g_generalManager.servers->list, Server, node) {
         if (StrCmpIgnoreCase(it->info.name, info->name) == 0 &&
             StrCmpIgnoreCase(it->info.bundleName, info->bundleName) == 0) {
             found = true;
             break;
         }
     }
-    (void)SoftBusMutexUnlock(&g_names.names->lock);
+    if (strcpy_s(infoTemp.name, GENERAL_NAME_LEN, it->info.name) != EOK ||
+        strcpy_s(infoTemp.pkgName, PKG_NAME_SIZE_MAX, it->info.pkgName) != EOK ||
+        strcpy_s(infoTemp.bundleName, BUNDLE_NAME_MAX, it->info.bundleName) != EOK) {
+        CONN_LOGE(CONN_BLE, "copy info failed");
+        (void)SoftBusMutexUnlock(&g_generalManager.servers->lock);
+        return false;
+    }
+    infoTemp.pid = it->info.pid;
+    (void)SoftBusMutexUnlock(&g_generalManager.servers->lock);
     if (!found) {
         return false;
     }
     status = SoftBusMutexLock(&generalConnection->lock);
     CONN_CHECK_AND_RETURN_RET_LOGE(status == SOFTBUS_OK, false, CONN_BLE, "lock failed");
-    if (strcpy_s(generalConnection->info.name, GENERAL_NAME_LEN, it->info.name) != EOK ||
-        strcpy_s(generalConnection->info.pkgName, PKG_NAME_SIZE_MAX, it->info.pkgName) != EOK ||
-        strcpy_s(generalConnection->info.bundleName, BUNDLE_NAME_MAX, it->info.bundleName) != EOK) {
+    if (strcpy_s(generalConnection->info.name, GENERAL_NAME_LEN, infoTemp.name) != EOK ||
+        strcpy_s(generalConnection->info.pkgName, PKG_NAME_SIZE_MAX, infoTemp.pkgName) != EOK ||
+        strcpy_s(generalConnection->info.bundleName, BUNDLE_NAME_MAX, infoTemp.bundleName) != EOK) {
         CONN_LOGE(CONN_BLE, "copy failed");
         (void)SoftBusMutexUnlock(&generalConnection->lock);
         return false;
     }
-    generalConnection->info.pid = it->info.pid;
+    generalConnection->info.pid = infoTemp.pid;
     (void)SoftBusMutexUnlock(&generalConnection->lock);
     return true;
 }
@@ -694,15 +738,15 @@ static bool IsAllowSave(const char *pkgName, bool isFindServer)
         }
         (void)SoftBusMutexUnlock(&g_generalManager.connections->lock);
     } else {
-        CONN_CHECK_AND_RETURN_RET_LOGE(SoftBusMutexLock(&g_names.names->lock) == SOFTBUS_OK,
+        CONN_CHECK_AND_RETURN_RET_LOGE(SoftBusMutexLock(&g_generalManager.servers->lock) == SOFTBUS_OK,
             SOFTBUS_LOCK_ERR, CONN_BLE, "lock failed");
-        Name *item = NULL;
-        LIST_FOR_EACH_ENTRY(item, &g_names.names->list, Name, node) {
+        Server *item = NULL;
+        LIST_FOR_EACH_ENTRY(item, &g_generalManager.servers->list, Server, node) {
             if (StrCmpIgnoreCase(item->info.pkgName, pkgName) == 0) {
                 count += 1;
             }
         }
-        (void)SoftBusMutexUnlock(&g_names.names->lock);
+        (void)SoftBusMutexUnlock(&g_generalManager.servers->lock);
     }
     if (count > GENERAL_PKGNAME_MAX_COUNT) {
         CONN_LOGE(CONN_BLE, "create pkgName is max,not allowed");
@@ -738,7 +782,7 @@ static struct GeneralConnection *CreateConnection(const GeneralConnectionParam *
     connection->info.pid = param->pid;
     if (SoftBusMutexInit(&connection->lock, NULL) != SOFTBUS_OK) {
         CONN_LOGE(CONN_BLE, "init lock failed");
-        ConnFreeGeneralConnection(connection);
+        SoftBusFree(connection);
         *errorCode = SOFTBUS_LOCK_ERR;
         return NULL;
     }
@@ -751,7 +795,7 @@ static struct GeneralConnection *CreateConnection(const GeneralConnectionParam *
     return connection;
 }
 
-int32_t SaveConnection(struct GeneralConnection *connection)
+static int32_t SaveConnection(struct GeneralConnection *connection)
 {
     CONN_CHECK_AND_RETURN_RET_LOGW(
         connection != NULL, SOFTBUS_INVALID_PARAM, CONN_BLE, "invalid param, connection is null");
@@ -902,9 +946,9 @@ static int32_t ProcessHandShakeAck(GeneralConnectionInfo *info)
     if (info->ackStatus != SOFTBUS_OK) {
         CONN_LOGE(CONN_BLE, "hand shake failed, ackStatus=%{public}d, generalId=%{public}u",
             info->ackStatus, generalConnection->generalId);
-        ConnReturnGeneralConnection(&generalConnection);
         g_generalConnectionListener.onConnectFailed(&generalConnection->info,
             generalConnection->generalId, info->ackStatus);
+        ConnReturnGeneralConnection(&generalConnection);
         return info->ackStatus;
     }
     UpdateGeneralConnectionByInfo(generalConnection, info);
@@ -990,7 +1034,7 @@ static void OnCommDataReceived(uint32_t connectionId, ConnModule moduleId, int64
     info.localId = head->peerId;
     uint32_t recvDataLen = len - head->headLen;
     uint8_t *recvData = (uint8_t *)data + head->headLen;
-    CONN_LOGI(CONN_BLE, "handle=%{public}u"
+    CONN_LOGI(CONN_BLE, "handle=%{public}u,"
         "recv data len=%{public}d, seq=%{public}" PRId64 ", msgtype=%{public}u", info.localId, len, seq, msgType);
     if (msgType == GENERAL_CONNECTION_MSG_TYPE_NORMAL) {
         struct GeneralConnection *connection = GetConnectionByGeneralId(head->peerId);
@@ -1007,28 +1051,6 @@ static void OnCommDataReceived(uint32_t connectionId, ConnModule moduleId, int64
         info.localId, status);
     status = ProcessInnerMessageByType(connectionId, msgType, &info);
     CONN_LOGD(CONN_BLE, "process inner msg, handle=%{public}u, status=%{public}d", info.localId, status);
-}
-
-static Name *NewNameNode(const GeneralConnectionParam *param)
-{
-    Name *nameNode = (Name *)SoftBusCalloc(sizeof(Name));
-    CONN_CHECK_AND_RETURN_RET_LOGE(nameNode != NULL, NULL, CONN_BLE, "nameNode is null");
-    ListInit(&nameNode->node);
-    if ((strcpy_s(nameNode->info.bundleName, BUNDLE_NAME_MAX, param->bundleName) != EOK) ||
-        (strcpy_s(nameNode->info.name, GENERAL_NAME_LEN, param->name) != EOK) ||
-        (strcpy_s(nameNode->info.pkgName, PKG_NAME_SIZE_MAX, param->pkgName) != EOK)) {
-        CONN_LOGE(CONN_BLE, "memcpy failed");
-        SoftBusFree(nameNode);
-        return NULL;
-    }
-    nameNode->info.pid = param->pid;
-    return nameNode;
-}
-
-static void FreeNameNode(Name **nameNode)
-{
-    SoftBusFree(*nameNode);
-    *nameNode = NULL;
 }
 
 static int32_t RegisterListener(const GeneralConnectionListener *listener)
@@ -1147,12 +1169,12 @@ static int32_t CreateServer(const GeneralConnectionParam *param)
         CONN_LOGE(CONN_BLE, "add pkg name is max");
         return SOFTBUS_CONN_BLE_GENERAL_CREATE_SERVER_MAX;
     }
-    int32_t status = SoftBusMutexLock(&g_names.names->lock);
+    int32_t status = SoftBusMutexLock(&g_generalManager.servers->lock);
     CONN_CHECK_AND_RETURN_RET_LOGE(status == SOFTBUS_OK, SOFTBUS_LOCK_ERR,
-        CONN_BLE, "lock names failed");
-    Name *it = NULL;
+        CONN_BLE, "lock servers failed");
+    Server *it = NULL;
     bool exit = false;
-    LIST_FOR_EACH_ENTRY(it, &g_names.names->list, Name, node) {
+    LIST_FOR_EACH_ENTRY(it, &g_generalManager.servers->list, Server, node) {
         if (StrCmpIgnoreCase(it->info.name, param->name) == 0 &&
             StrCmpIgnoreCase(it->info.bundleName, param->bundleName) == 0) {
             exit = true;
@@ -1161,34 +1183,34 @@ static int32_t CreateServer(const GeneralConnectionParam *param)
     }
     if (exit) {
         CONN_LOGE(CONN_BLE, "server name already exit, not allowed");
-        (void)SoftBusMutexUnlock(&g_names.names->lock);
+        (void)SoftBusMutexUnlock(&g_generalManager.servers->lock);
         return SOFTBUS_CONN_BLE_GENERAL_DUPLICATE_SERVER;
     }
-    Name *nameNode = NewNameNode(param);
-    if (nameNode == NULL) {
-        CONN_LOGE(CONN_BLE, "nameNode is null");
-        (void)SoftBusMutexUnlock(&g_names.names->lock);
+    Server *serverNode = NewServerNode(param);
+    if (serverNode == NULL) {
+        CONN_LOGE(CONN_BLE, "new server is null");
+        (void)SoftBusMutexUnlock(&g_generalManager.servers->lock);
         return SOFTBUS_MALLOC_ERR;
     }
-    ListAdd(&g_names.names->list, &nameNode->node);
-    (void)SoftBusMutexUnlock(&g_names.names->lock);
+    ListAdd(&g_generalManager.servers->list, &serverNode->node);
+    (void)SoftBusMutexUnlock(&g_generalManager.servers->lock);
     return SOFTBUS_OK;
 }
 
 static void CloseServer(const GeneralConnectionParam *param)
 {
-    int32_t status = SoftBusMutexLock(&g_names.names->lock);
+    int32_t status = SoftBusMutexLock(&g_generalManager.servers->lock);
     CONN_CHECK_AND_RETURN_LOGE(status == SOFTBUS_OK, CONN_BLE, "lock names failed");
-    Name *it = NULL;
-    Name *next = NULL;
-    LIST_FOR_EACH_ENTRY_SAFE(it, next, &g_names.names->list, Name, node) {
+    Server *it = NULL;
+    Server *next = NULL;
+    LIST_FOR_EACH_ENTRY_SAFE(it, next, &g_generalManager.servers->list, Server, node) {
         if (StrCmpIgnoreCase(it->info.name, param->name) == 0 &&
             StrCmpIgnoreCase(it->info.bundleName, param->bundleName) == 0) {
             ListDelete(&it->node);
-            FreeNameNode(&it);
+            FreeServerNode(&it);
         }
     }
-    (void)SoftBusMutexUnlock(&g_names.names->lock);
+    (void)SoftBusMutexUnlock(&g_generalManager.servers->lock);
     return;
 }
 
@@ -1223,7 +1245,6 @@ int32_t InitGeneralConnectionManager(void)
         SoftBusMutexDestroy(&g_requestIdLock);
         return ret;
     }
-
     SoftBusList *connections = CreateSoftBusList();
     if (connections == NULL) {
         CONN_LOGE(CONN_INIT, "create connections list failed");
@@ -1231,21 +1252,20 @@ int32_t InitGeneralConnectionManager(void)
         return SOFTBUS_CREATE_LIST_ERR;
     }
     g_generalManager.connections = connections;
-    SoftBusList *names = CreateSoftBusList();
-    if (names == NULL) {
-        CONN_LOGE(CONN_INIT, "create names list failed");
+    SoftBusList *servers = CreateSoftBusList();
+    if (servers == NULL) {
+        CONN_LOGE(CONN_INIT, "create servers list failed");
         SoftBusMutexDestroy(&g_requestIdLock);
         DestroySoftBusList(g_generalManager.connections);
         return SOFTBUS_CREATE_LIST_ERR;
     }
-    g_names.names = names;
-
+    g_generalManager.servers = servers;
     g_generalManagerSyncHandler.handler.looper = GetLooper(LOOP_TYPE_CONN);
     if (g_generalManagerSyncHandler.handler.looper == NULL) {
         CONN_LOGE(CONN_INIT, "create names list failed");
         SoftBusMutexDestroy(&g_requestIdLock);
         DestroySoftBusList(g_generalManager.connections);
-        DestroySoftBusList(g_names.names);
+        DestroySoftBusList(g_generalManager.servers);
         return SOFTBUS_LOOPER_ERR;
     }
     CONN_LOGI(CONN_INIT, "init success");

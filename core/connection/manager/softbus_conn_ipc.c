@@ -38,7 +38,8 @@ static void GeneralAcceptConnect(GeneralConnectionParam *info, uint32_t generalH
 
 static void GeneralConnectFail(GeneralConnectionParam *info, uint32_t generalHandle, int32_t reason)
 {
-    ClientIpcOnConnectionStateChange(info->pkgName, info->pid, generalHandle, CONNECTION_STATE_CONNECTED_FAILED, reason);
+    ClientIpcOnConnectionStateChange(info->pkgName, info->pid, generalHandle,
+        CONNECTION_STATE_CONNECTED_FAILED, reason);
 }
 
 static void GeneralConnectSuccess(GeneralConnectionParam *info, uint32_t generalHandle)
@@ -64,7 +65,7 @@ void ClearGeneralConnection(const char *pkgName, int32_t pid)
     manager->cleanupGeneralConnection(pkgName, pid);
 }
 
-int32_t InitGeneralConnection()
+int32_t InitGeneralConnection(void)
 {
     int32_t ret = InitGeneralConnectionManager();
     if (ret != SOFTBUS_OK) {
