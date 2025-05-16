@@ -39,6 +39,8 @@
 #include "system_ability_definition.h"
 #endif
 
+const char *g_limitPkgName = "ohos.distributedschedule.dms";
+
 #define READ_PARCEL_WITH_RET(parcel, type, data, retVal)        \
     do {                                                        \
         if (!(parcel).Read##type(data)) {                       \
@@ -169,6 +171,12 @@ void SoftBusServerStub::InitMemberFuncMap()
     memberFuncMap_[SERVER_PROCESS_INNER_EVENT] = &SoftBusServerStub::ProcessInnerEventInner;
     memberFuncMap_[SERVER_PRIVILEGE_CLOSE_CHANNEL] = &SoftBusServerStub::PrivilegeCloseChannelInner;
     memberFuncMap_[SERVER_SET_DISPLAY_NAME] = &SoftBusServerStub::SetDisplayNameInner;
+    memberFuncMap_[SERVER_GENERAL_CREATE_SERVER] = &SoftBusServerStub::CreateServerInner;
+    memberFuncMap_[SERVER_GENERAL_REMOVE_SERVER] = &SoftBusServerStub::RemoveServerInner;
+    memberFuncMap_[SERVER_GENERAL_CONNECT] = &SoftBusServerStub::ConnectInner;
+    memberFuncMap_[SERVER_GENERAL_DISCONNECT] = &SoftBusServerStub::DisconnectInner;
+    memberFuncMap_[SERVER_GENERAL_SEND] = &SoftBusServerStub::SendInner;
+    memberFuncMap_[SERVER_GENERAL_GET_PEER_DEVICE_ID] = &SoftBusServerStub::GetPeerDeviceIdInner;
 }
 
 void SoftBusServerStub::InitMemberPermissionMap()
@@ -220,6 +228,12 @@ void SoftBusServerStub::InitMemberPermissionMap()
     memberPermissionMap_[SERVER_PROCESS_INNER_EVENT] = OHOS_PERMISSION_DISTRIBUTED_DATASYNC;
     memberPermissionMap_[SERVER_PRIVILEGE_CLOSE_CHANNEL] = OHOS_PERMISSION_DISTRIBUTED_DATASYNC;
     memberPermissionMap_[SERVER_SET_DISPLAY_NAME] = OHOS_PERMISSION_DISTRIBUTED_SOFTBUS_CENTER;
+    memberPermissionMap_[SERVER_GENERAL_CREATE_SERVER] = OHOS_PERMISSION_DISTRIBUTED_DATASYNC;
+    memberPermissionMap_[SERVER_GENERAL_REMOVE_SERVER] = OHOS_PERMISSION_DISTRIBUTED_DATASYNC;
+    memberPermissionMap_[SERVER_GENERAL_CONNECT] = OHOS_PERMISSION_DISTRIBUTED_DATASYNC;
+    memberPermissionMap_[SERVER_GENERAL_DISCONNECT] = OHOS_PERMISSION_DISTRIBUTED_DATASYNC;
+    memberPermissionMap_[SERVER_GENERAL_SEND] = OHOS_PERMISSION_DISTRIBUTED_DATASYNC;
+    memberPermissionMap_[SERVER_GENERAL_GET_PEER_DEVICE_ID] = OHOS_PERMISSION_DISTRIBUTED_DATASYNC;
 }
 
 int32_t SoftBusServerStub::OnRemoteRequest(
@@ -1848,4 +1862,173 @@ int32_t SoftBusServerStub::SetDisplayNameInner(MessageParcel &data, MessageParce
     return SOFTBUS_OK;
 }
 
+static int32_t CheckPkgName(const char *pkgName)
+{
+    if (strcmp(pkgName, g_limitPkgName) != 0) {
+        COMM_LOGE(COMM_SVC, "invalid package name");
+        return SOFTBUS_INVALID_PARAM;
+    }
+    return SOFTBUS_OK;
+}
+
+int32_t SoftBusServerStub::CreateServerInner(MessageParcel &data, MessageParcel &reply)
+{
+    const char *pkgName = data.ReadCString();
+    if (pkgName == nullptr || strnlen(pkgName, PKG_NAME_SIZE_MAX) >= PKG_NAME_SIZE_MAX) {
+        COMM_LOGE(COMM_SVC, "read pkgName failed!");
+        return SOFTBUS_IPC_ERR;
+    }
+    if (CheckPkgName(pkgName) != SOFTBUS_OK) {
+        return SOFTBUS_INVALID_PARAM;
+    }
+    const char *name = data.ReadCString();
+    if (name == nullptr || strnlen(name, SESSION_NAME_SIZE_MAX) >= SESSION_NAME_SIZE_MAX) {
+        COMM_LOGE(COMM_SVC, "read name failed!");
+        return SOFTBUS_IPC_ERR;
+    }
+    int32_t retReply = CreateServer(pkgName, name);
+    if (!reply.WriteInt32(retReply)) {
+        COMM_LOGE(COMM_SVC, "write reply failed");
+        return SOFTBUS_IPC_ERR;
+    }
+    return SOFTBUS_OK;
+}
+
+int32_t SoftBusServerStub::RemoveServerInner(MessageParcel &data, MessageParcel &reply)
+{
+    const char *pkgName = data.ReadCString();
+    if (pkgName == nullptr || strnlen(pkgName, PKG_NAME_SIZE_MAX) >= PKG_NAME_SIZE_MAX) {
+        COMM_LOGE(COMM_SVC, "read pkgName failed!");
+        return SOFTBUS_IPC_ERR;
+    }
+    if (CheckPkgName(pkgName) != SOFTBUS_OK) {
+        return SOFTBUS_INVALID_PARAM;
+    }
+    const char *name = data.ReadCString();
+    if (name == nullptr || strnlen(name, SESSION_NAME_SIZE_MAX) >= SESSION_NAME_SIZE_MAX) {
+        COMM_LOGE(COMM_SVC, "read name failed!");
+        return SOFTBUS_IPC_ERR;
+    }
+    int32_t retReply = RemoveServer(pkgName, name);
+    if (!reply.WriteInt32(retReply)) {
+        COMM_LOGE(COMM_SVC, "write reply failed");
+        return SOFTBUS_IPC_ERR;
+    }
+    return SOFTBUS_OK;
+}
+
+int32_t SoftBusServerStub::ConnectInner(MessageParcel &data, MessageParcel &reply)
+{
+    const char *pkgName = data.ReadCString();
+    if (pkgName == nullptr || strnlen(pkgName, PKG_NAME_SIZE_MAX) >= PKG_NAME_SIZE_MAX) {
+        COMM_LOGE(COMM_SVC, "read pkgName failed!");
+        return SOFTBUS_IPC_ERR;
+    }
+    if (CheckPkgName(pkgName) != SOFTBUS_OK) {
+        return SOFTBUS_INVALID_PARAM;
+    }
+    const char *name = data.ReadCString();
+    if (name == nullptr || strnlen(name, SESSION_NAME_SIZE_MAX) >= SESSION_NAME_SIZE_MAX) {
+        COMM_LOGE(COMM_SVC, "read name failed!");
+        return SOFTBUS_IPC_ERR;
+    }
+    Address connectAddress;
+    const char *address = data.ReadCString();
+    if (address == nullptr) {
+        COMM_LOGE(COMM_SVC, "read address fail, address is nullptr");
+        return SOFTBUS_IPC_ERR;
+    }
+    int32_t len = strnlen(address, BT_MAC_LEN);
+    if (len != (BT_MAC_LEN - 1) || strcpy_s(connectAddress.addr.ble.mac, BT_MAC_LEN, address) != EOK) {
+        COMM_LOGE(COMM_SVC, "read address fail, address is=%{public}s", address);
+        return SOFTBUS_IPC_ERR;
+    }
+    int32_t addrType = data.ReadInt32();
+    if (addrType < CONNECTION_ADDR_WLAN || addrType > CONNECTION_ADDR_MAX) {
+        COMM_LOGE(COMM_SVC, "read addrType fail, addrType= %{public}d", addrType);
+        return SOFTBUS_IPC_ERR;
+    }
+    connectAddress.addrType = static_cast<ConnectionAddrType>(addrType);
+    int32_t handle = Connect(pkgName, name, &connectAddress);
+    if (!reply.WriteInt32(handle)) {
+        COMM_LOGE(COMM_SVC, "write handle failed");
+        return SOFTBUS_IPC_ERR;
+    }
+    return SOFTBUS_OK;
+}
+
+int32_t SoftBusServerStub::DisconnectInner(MessageParcel &data, MessageParcel &reply)
+{
+    uint32_t handle;
+    if (!data.ReadUint32(handle)) {
+        COMM_LOGE(COMM_SVC, "read handle failed!");
+        return SOFTBUS_IPC_ERR;
+    }
+    int32_t retReply = Disconnect(handle);
+    if (!reply.WriteInt32(retReply)) {
+        COMM_LOGE(COMM_SVC, "write reply failed");
+        return SOFTBUS_IPC_ERR;
+    }
+    return SOFTBUS_OK;
+}
+
+int32_t SoftBusServerStub::SendInner(MessageParcel &data, MessageParcel &reply)
+{
+    uint32_t handle;
+    if (!data.ReadUint32(handle)) {
+        COMM_LOGE(COMM_SVC, "read handle failed!");
+        return SOFTBUS_IPC_ERR;
+    }
+    uint32_t len = 0;
+    if (!data.ReadUint32(len)) {
+        COMM_LOGE(COMM_SVC, "read len failed!");
+        return SOFTBUS_IPC_ERR;
+    }
+    if (len > GENERAL_SEND_DATA_MAX_LEN) {
+        COMM_LOGE(COMM_SVC, "len invalid!, len=%{public}u", len);
+        return SOFTBUS_INVALID_PARAM;
+    }
+    auto dataMsg = data.ReadRawData(len);
+    if (dataMsg == NULL) {
+        COMM_LOGE(COMM_SVC, "read data failed!");
+        return SOFTBUS_IPC_ERR;
+    }
+    uint8_t *buf = const_cast<uint8_t *>(reinterpret_cast<const uint8_t *>(dataMsg));
+    int32_t retReply = Send(handle, buf, len);
+    if (!reply.WriteInt32(retReply)) {
+        COMM_LOGE(COMM_SVC, "write reply failed");
+        return SOFTBUS_IPC_ERR;
+    }
+    return SOFTBUS_OK;
+}
+
+int32_t SoftBusServerStub::GetPeerDeviceIdInner(MessageParcel &data, MessageParcel &reply)
+{
+    uint32_t handle;
+    if (!data.ReadUint32(handle)) {
+        COMM_LOGE(COMM_SVC, "read handle failed!");
+        return SOFTBUS_IPC_ERR;
+    }
+    uint32_t len = 0;
+    if (!data.ReadUint32(len)) {
+        COMM_LOGE(COMM_SVC, "read len failed!");
+        return SOFTBUS_IPC_ERR;
+    }
+    if (len > BT_MAC_LEN) {
+        COMM_LOGE(COMM_SVC, "len invalid!, len=%{public}u", len);
+        return SOFTBUS_INVALID_PARAM;
+    }
+    char peerDeviceId[len];
+    (void)memset_s(peerDeviceId, len, '\0', len);
+    int32_t retReply = ConnGetPeerDeviceId(handle, peerDeviceId, len);
+    if (!reply.WriteRawData(peerDeviceId, len)) {
+        COMM_LOGE(COMM_SVC, "write peerDeviceId failed!");
+        return SOFTBUS_IPC_ERR;
+    }
+    if (!reply.WriteInt32(retReply)) {
+        COMM_LOGE(COMM_SVC, "write ret failed!");
+        return SOFTBUS_IPC_ERR;
+    }
+    return SOFTBUS_OK;
+}
 } // namespace OHOS
