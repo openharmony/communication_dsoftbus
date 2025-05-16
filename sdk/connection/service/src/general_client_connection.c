@@ -156,19 +156,20 @@ int32_t GeneralConnect(const char *pkgName, const char *name, const Address *add
     return handle;
 }
 
-void GeneralDisconnect(uint32_t handle)
+int32_t GeneralDisconnect(uint32_t handle)
 {
     CONN_LOGI(CONN_COMMON, "sdk disconnect, handle=%{public}u", handle);
     if (handle <= 0) {
         CONN_LOGE(CONN_COMMON, "invalid handle");
-        return;
+        return SOFTBUS_INVALID_PARAM;
     }
     int32_t ret = ServerIpcDisconnect(handle);
     if (ret != SOFTBUS_OK) {
         CONN_LOGE(CONN_COMMON, "disconnect failed, ret=%{public}d", ret);
-        return;
+        return ret;
     }
     CONN_LOGI(CONN_COMMON, "disconnect success, handle=%{public}u", handle);
+    return SOFTBUS_OK;
 }
 
 int32_t GeneralSend(uint32_t handle, const uint8_t *data, uint32_t len)
