@@ -88,6 +88,7 @@ extern "C" {
 #define FILE_PRIORITY_BK 0x08
 
 #define GENERAL_SEND_DATA_MAX_LEN 1024
+#define GENERAL_NAME_SIZE_MAX     256
 
 typedef struct {
     SoftBusMutex lock;

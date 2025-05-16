@@ -31,6 +31,13 @@
 #include "trans_spec_object.h"
 #include "lnn_lane_interface.h"
 #include "general_connection_client_proxy.h"
+#include "softbus_conn_general_connection.h"
+
+#ifdef SUPPORT_BUNDLENAME
+#include "bundle_mgr_proxy.h"
+#include "iservice_registry.h"
+#include "system_ability_definition.h"
+#endif
 
 #define SOFTBUS_IPC_THREAD_NUM 32
 #define OPEN_AUTH_BR_CONNECT_TIMEOUT_MILLIS (15 * 1000)
@@ -485,40 +492,169 @@ int32_t SoftBusServer::SetDisplayName(const char *pkgName, const char *nameData,
     return LnnIpcSetDisplayName(pkgName, nameData, len);
 }
 
+#ifdef SUPPORT_BUNDLENAME
+static int32_t FillBundleName(char *bundleNameStr, uint32_t size)
+{
+    pid_t callingUid = OHOS::IPCSkeleton::GetCallingUid();
+    std::string bundleName;
+    sptr<ISystemAbilityManager> systemAbilityManager =
+        SystemAbilityManagerClient::GetInstance().GetSystemAbilityManager();
+    if (systemAbilityManager == nullptr) {
+        COMM_LOGE(COMM_SVC, "Failed to get system ability manager.");
+        return SOFTBUS_TRANS_SYSTEM_ABILITY_MANAGER_FAILED;
+    }
+    sptr<IRemoteObject> remoteObject = systemAbilityManager->GetSystemAbility(BUNDLE_MGR_SERVICE_SYS_ABILITY_ID);
+    if (remoteObject == nullptr) {
+        COMM_LOGE(COMM_SVC, "Failed to get bundle manager service.");
+        return SOFTBUS_TRANS_GET_SYSTEM_ABILITY_FAILED;
+    }
+    sptr<AppExecFwk::IBundleMgr> bundleMgr = iface_cast<AppExecFwk::IBundleMgr>(remoteObject);
+    if (bundleMgr == nullptr) {
+        COMM_LOGE(COMM_SVC, "iface_cast failed");
+        return SOFTBUS_TRANS_GET_BUNDLE_MGR_FAILED;
+    }
+    if (bundleMgr->GetNameForUid(callingUid, bundleName) != SOFTBUS_OK) {
+        COMM_LOGE(COMM_SVC, "get bundleName failed");
+        return SOFTBUS_TRANS_GET_BUNDLENAME_FAILED;
+    }
+
+    if (strcpy_s(bundleNameStr, size, bundleName.c_str()) != EOK) {
+        COMM_LOGE(COMM_SVC, "copy name failed");
+        return SOFTBUS_STRCPY_ERR;
+    }
+    return SOFTBUS_OK;
+}
+#endif
+
 int32_t SoftBusServer::CreateServer(const char *pkgName, const char *name)
 {
-    COMM_LOGI(COMM_SVC, "CreateServer called! pkgName:%{public}s, name:%{public}s", pkgName, name);
-    return SOFTBUS_OK;
+    GeneralConnectionParam param = {0};
+    param.pid = OHOS::IPCSkeleton::GetCallingPid();
+    if (strcpy_s(param.name, GENERAL_NAME_LEN, name) != EOK) {
+        COMM_LOGE(COMM_SVC, "copy name failed");
+        return SOFTBUS_STRCPY_ERR;
+    }
+    if (strcpy_s(param.pkgName, PKG_NAME_SIZE_MAX, pkgName) != EOK) {
+        COMM_LOGE(COMM_SVC, "copy pkgName failed");
+        return SOFTBUS_STRCPY_ERR;
+    }
+    if (strcpy_s(param.name, GENERAL_NAME_LEN, name) != EOK) {
+        COMM_LOGE(COMM_SVC, "copy name failed");
+        return SOFTBUS_STRCPY_ERR;
+    }
+    int32_t ret = SOFTBUS_OK;
+#ifdef SUPPORT_BUNDLENAME
+    ret = FillBundleName(param.bundleName, BUNDLE_NAME_MAX);
+    if (ret != SOFTBUS_OK) {
+        COMM_LOGE(COMM_SVC, "get bundle name failed");
+        return ret;
+    }
+#endif
+    GeneralConnectionManager *manager = GetGeneralConnectionManager();
+    if (manager == nullptr || manager->createServer == nullptr) {
+        COMM_LOGE(COMM_SVC, "invalid param");
+        return SOFTBUS_NO_INIT;
+    }
+    ret = manager->createServer(&param);
+    if (ret != SOFTBUS_OK) {
+        COMM_LOGE(COMM_SVC, "createServer failed,ret=%{public}d", ret);
+    }
+    COMM_LOGI(COMM_SVC, "create server success");
+    return ret;
 }
 
 int32_t SoftBusServer::RemoveServer(const char *pkgName, const char *name)
 {
-    COMM_LOGE(COMM_SVC, "RemoveServer called! pkgName:%{public}s, name:%{public}s", pkgName, name);
-    return SOFTBUS_OK;
+    GeneralConnectionParam param = {0};
+    int32_t ret = SOFTBUS_OK;
+#ifdef SUPPORT_BUNDLENAME
+    ret = FillBundleName(param.bundleName, BUNDLE_NAME_MAX);
+    if (ret != SOFTBUS_OK) {
+        COMM_LOGE(COMM_SVC, "get bundle name failed!");
+        return ret;
+    }
+#endif
+    if (strcpy_s(param.name, GENERAL_NAME_LEN, name) != EOK) {
+        COMM_LOGE(COMM_SVC, "copy name failed");
+        return SOFTBUS_STRCPY_ERR;
+    }
+    GeneralConnectionManager *manager = GetGeneralConnectionManager();
+    if (manager == nullptr || manager->closeServer == nullptr) {
+        COMM_LOGE(COMM_SVC, "invalid param");
+        return SOFTBUS_NO_INIT;
+    }
+    manager->closeServer(&param);
+    COMM_LOGI(COMM_SVC, "remove server success");
+    return ret;
 }
 
 int32_t SoftBusServer::Connect(const char *pkgName, const char *name, const Address *address)
 {
-    COMM_LOGE(COMM_SVC, "Connect called! pkgName:%{public}s, name:%{public}s, address:%{public}s", pkgName, name,
-        address->addr.ble.mac);
-    return SOFTBUS_OK;
+    GeneralConnectionManager *manager = GetGeneralConnectionManager();
+    if (manager == nullptr || manager->connect == nullptr) {
+        COMM_LOGE(COMM_SVC, "invalid param");
+        return SOFTBUS_NO_INIT;
+    }
+    GeneralConnectionParam param = {0};
+    if (strcpy_s(param.name, GENERAL_NAME_LEN, name) != EOK) {
+        COMM_LOGE(COMM_SVC, "copy name failed");
+        return SOFTBUS_STRCPY_ERR;
+    }
+    if (strcpy_s(param.pkgName, PKG_NAME_SIZE_MAX, pkgName) != EOK) {
+        COMM_LOGE(COMM_SVC, "copy pkgName failed");
+        return SOFTBUS_STRCPY_ERR;
+    }
+#ifdef SUPPORT_BUNDLENAME
+    int32_t ret = FillBundleName(param.bundleName, BUNDLE_NAME_MAX);
+    if (ret != SOFTBUS_OK) {
+        COMM_LOGE(COMM_SVC, "get bundle name failed");
+        return ret;
+    }
+#endif
+    param.pid = OHOS::IPCSkeleton::GetCallingPid();
+    int32_t handle = manager->connect(&param, address->addr.ble.mac);
+    COMM_LOGI(COMM_SVC, "connect start, handle=%{public}d", handle);
+    return handle;
 }
 
 int32_t SoftBusServer::Disconnect(uint32_t handle)
 {
-    COMM_LOGE(COMM_SVC, "Disconnect called! handle:%{public}u", handle);
+    GeneralConnectionManager *manager = GetGeneralConnectionManager();
+    if (manager == nullptr || manager->disconnect == nullptr) {
+        COMM_LOGE(COMM_SVC, "invalid param");
+        return SOFTBUS_NO_INIT;
+    }
+    manager->disconnect(handle);
+    COMM_LOGI(COMM_SVC, "disconnect success, handle=%{public}d", handle);
     return SOFTBUS_OK;
 }
 
 int32_t SoftBusServer::Send(uint32_t handle, const uint8_t *data, uint32_t len)
 {
-    COMM_LOGE(COMM_SVC, "Send called! handle:%{public}u, data:%{public}s, len:%{public}u", handle, data, len);
-    return SOFTBUS_OK;
+    GeneralConnectionManager *manager = GetGeneralConnectionManager();
+    if (manager == nullptr || manager->send == nullptr) {
+        COMM_LOGE(COMM_SVC, "invalid param");
+        return SOFTBUS_NO_INIT;
+    }
+    int32_t ret = manager->send(handle, data, len, OHOS::IPCSkeleton::GetCallingPid());
+    if (ret != SOFTBUS_OK) {
+        COMM_LOGE(COMM_SVC, "send failed, handle=%{public}d", handle);
+    }
+    return ret;
 }
 
 int32_t SoftBusServer::ConnGetPeerDeviceId(uint32_t handle, char *deviceId, uint32_t len)
 {
-    COMM_LOGE(COMM_SVC, "GetPeerDeviceId called! handle:%{public}u, len:%{public}u", handle, len);
-    return SOFTBUS_OK;
+    GeneralConnectionManager *manager = GetGeneralConnectionManager();
+    if (manager == nullptr || manager->getPeerDeviceId == nullptr) {
+        COMM_LOGE(COMM_SVC, "invalid param");
+        return SOFTBUS_NO_INIT;
+    }
+    uint32_t callingTokenId = IPCSkeleton::GetCallingTokenID();
+    int32_t ret = manager->getPeerDeviceId(handle, deviceId, len, callingTokenId);
+    if (ret != SOFTBUS_OK) {
+        COMM_LOGE(COMM_SVC, "get peer deviceId failed, handle=%{public}d", handle);
+    }
+    return ret;
 }
 } // namespace OHOS
