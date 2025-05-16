@@ -558,7 +558,7 @@ int32_t SoftBusServer::RemoveServer(const char *pkgName, const char *name)
     int32_t ret = SOFTBUS_OK;
 #ifdef SUPPORT_BUNDLENAME
     ret = FillBundleName(param.bundleName, BUNDLE_NAME_MAX);
-    if (ret != SOFTBUS_OK) { 
+    if (ret != SOFTBUS_OK) {
         COMM_LOGE(COMM_SVC, "get bundle name failed!");
         return ret;
     }
