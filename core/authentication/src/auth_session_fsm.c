@@ -517,6 +517,14 @@ static void ProcessTimeoutErrorCode(AuthFsm *authFsm, int32_t *result)
     }
 }
 
+static void StopAuthFsm(AuthFsm *authFsm)
+{
+    authFsm->isDead = true;
+    DelAuthNormalizeRequest(authFsm->authSeq);
+    LnnFsmStop(&authFsm->fsm);
+    LnnFsmDeinit(&authFsm->fsm);
+}
+
 static void CompleteAuthSession(AuthFsm *authFsm, int32_t result)
 {
     SoftbusHitraceStart(SOFTBUS_HITRACE_ID_VALID, (uint64_t)authFsm->authSeq);
@@ -558,17 +566,8 @@ static void CompleteAuthSession(AuthFsm *authFsm, int32_t result)
         AuthManagerSetAuthFailed(authFsm->authSeq, &authFsm->info, result);
     }
 
-    authFsm->isDead = true;
-    LnnFsmStop(&authFsm->fsm);
-    LnnFsmDeinit(&authFsm->fsm);
+    StopAuthFsm(authFsm);
     SoftbusHitraceStop();
-}
-
-static void StopAuthFsm(AuthFsm *authFsm)
-{
-    authFsm->isDead = true;
-    LnnFsmStop(&authFsm->fsm);
-    LnnFsmDeinit(&authFsm->fsm);
 }
 
 static void HandleCommonMsg(AuthFsm *authFsm, int32_t msgType, MessagePara *msgPara)
@@ -619,7 +618,8 @@ static uint32_t AddConcurrentAuthRequest(AuthFsm *authFsm)
     NormalizeRequest normalizeRequest = {
         .authSeq = authFsm->authSeq,
         .connInfo = authFsm->info.connInfo,
-        .isConnectServer = authFsm->info.isConnectServer
+        .isConnectServer = authFsm->info.isConnectServer,
+        .isNeedNotifyVerify = false
     };
     if (strcpy_s(normalizeRequest.udidHash, sizeof(normalizeRequest.udidHash), authFsm->info.udidHash) != EOK) {
         AUTH_LOGE(AUTH_FSM, "strcpy udid hash fail. authSeq=%{public}" PRId64, authFsm->authSeq);
