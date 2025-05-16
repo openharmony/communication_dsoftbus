@@ -18,7 +18,7 @@
 #include "lnn_log.h"
 #include "softbus_error_code.h"
 
-int32_t LnnBleFastOfflineTimer(void)
+int32_t LnnStartBleFastOfflineTimer(void)
 {
     LNN_LOGI(LNN_BUILDER, "LnnBleFastOfflineTimer virtual ok");
     return SOFTBUS_OK;
