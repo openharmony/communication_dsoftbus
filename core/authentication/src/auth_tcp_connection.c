@@ -60,8 +60,8 @@ static InnerChannelListener g_listener[] = {
 };
 
 static SocketCallback g_callback = { NULL, NULL, NULL };
-static ListNode g_wifiAndUsbConnList  = { &g_wifiAndUsbConnList, &g_wifiAndUsbConnList };
-static SoftBusMutex g_wifiAndUsbConnListLock;
+static ListNode g_authTcpConnFdList  = { &g_authTcpConnFdList, &g_authTcpConnFdList };
+static SoftBusMutex g_authTcpConnFdListLock;
 
 static void NotifyChannelDisconnected(int32_t channelId);
 static void NotifyChannelDataReceived(int32_t channelId, const SocketPktHead *head, const uint8_t *data);
@@ -258,79 +258,79 @@ static uint8_t *RecvPacketData(int32_t fd, uint32_t len)
 typedef struct {
     ListNode node;
     int32_t fd;
-} WifiAndUsbConnInstance;
+} AuthTcpConnInstance;
 
-static bool RequireWifiAndUsbConnListLock(void)
+static bool RequireAuthTcpConnFdListLock(void)
 {
-    if (SoftBusMutexLock(&g_wifiAndUsbConnListLock) != SOFTBUS_OK) {
-        AUTH_LOGE(AUTH_CONN, "wifiAndUsbConnList lock fail");
+    if (SoftBusMutexLock(&g_authTcpConnFdListLock) != SOFTBUS_OK) {
+        AUTH_LOGE(AUTH_CONN, "authTcpConnFdList lock fail");
         return false;
     }
     return true;
 }
 
-static void ReleaseWifiAndUsbConnListLock(void)
+static void ReleaseAuthTcpConnFdListLock(void)
 {
-    if (SoftBusMutexUnlock(&g_wifiAndUsbConnListLock) != SOFTBUS_OK) {
-        AUTH_LOGE(AUTH_CONN, "wifiAndUsbConnList unlock fail");
+    if (SoftBusMutexUnlock(&g_authTcpConnFdListLock) != SOFTBUS_OK) {
+        AUTH_LOGE(AUTH_CONN, "authTcpConnFdList unlock fail");
     }
 }
 
-static int32_t AddWifiAndUsbFdItem(int32_t fd)
+static int32_t AddAuthTcpConnFdItem(int32_t fd)
 {
-    if (!RequireWifiAndUsbConnListLock()) {
-        AUTH_LOGE(AUTH_CONN, "RequireWifiAndUsbConnListLock fail");
+    if (!RequireAuthTcpConnFdListLock()) {
+        AUTH_LOGE(AUTH_CONN, "RequireAuthTcpConnFdListLock fail");
         return SOFTBUS_LOCK_ERR;
     }
-    WifiAndUsbConnInstance *connItem = (WifiAndUsbConnInstance *)SoftBusCalloc(sizeof(WifiAndUsbConnInstance));
+    AuthTcpConnInstance *connItem = (AuthTcpConnInstance *)SoftBusCalloc(sizeof(AuthTcpConnInstance));
     if (connItem == NULL) {
         AUTH_LOGE(AUTH_CONN, "malloc connItem fail");
-        ReleaseWifiAndUsbConnListLock();
+        ReleaseAuthTcpConnFdListLock();
         return SOFTBUS_MEM_ERR;
     }
     connItem->fd = fd;
-    ListNodeInsert(&g_wifiAndUsbConnList, &connItem->node);
-    AUTH_LOGI(AUTH_CONN, "add wifi and usb conn item. fd=%{public}d", fd);
-    ReleaseWifiAndUsbConnListLock();
+    ListNodeInsert(&g_authTcpConnFdList, &connItem->node);
+    AUTH_LOGI(AUTH_CONN, "add auth tcp conn fd item. fd=%{public}d", fd);
+    ReleaseAuthTcpConnFdListLock();
     return SOFTBUS_OK;
 }
 
-bool IsExistWifiAndUsbConnByConnId(int32_t fd)
+bool IsExistAuthTcpConnFdItemByConnId(int32_t fd)
 {
-    if (!RequireWifiAndUsbConnListLock()) {
-        AUTH_LOGE(AUTH_CONN, "RequireWifiAndUsbConnListLock fail");
+    if (!RequireAuthTcpConnFdListLock()) {
+        AUTH_LOGE(AUTH_CONN, "RequireAuthTcpConnFdListLock fail");
         return false;
     }
-    WifiAndUsbConnInstance *item = NULL;
-    LIST_FOR_EACH_ENTRY(item, &g_wifiAndUsbConnList, WifiAndUsbConnInstance, node) {
+    AuthTcpConnInstance *item = NULL;
+    LIST_FOR_EACH_ENTRY(item, &g_authTcpConnFdList, AuthTcpConnInstance, node) {
         if (item->fd != fd) {
             continue;
         }
-        ReleaseWifiAndUsbConnListLock();
+        ReleaseAuthTcpConnFdListLock();
         return true;
     }
-    AUTH_LOGE(AUTH_CONN, "wifi and usb conn item is not found. fd=%{public}d", fd);
-    ReleaseWifiAndUsbConnListLock();
+    AUTH_LOGE(AUTH_CONN, "auth tcp conn fd item is not found. fd=%{public}d", fd);
+    ReleaseAuthTcpConnFdListLock();
     return false;
 }
 
-void DeleteWifiAndUsbConnByConnId(int32_t fd)
+void DeleteAuthTcpConnFdItemByConnId(int32_t fd)
 {
-    if (!RequireWifiAndUsbConnListLock()) {
-        AUTH_LOGE(AUTH_CONN, "RequireWifiAndUsbConnListLock fail");
+    if (!RequireAuthTcpConnFdListLock()) {
+        AUTH_LOGE(AUTH_CONN, "RequireAuthTcpConnFdListLock fail");
         return;
     }
-    WifiAndUsbConnInstance *item = NULL;
-    LIST_FOR_EACH_ENTRY(item, &g_wifiAndUsbConnList, WifiAndUsbConnInstance, node) {
+    AuthTcpConnInstance *item = NULL;
+    LIST_FOR_EACH_ENTRY(item, &g_authTcpConnFdList, AuthTcpConnInstance, node) {
         if (item->fd != fd) {
             continue;
         }
-        AUTH_LOGI(AUTH_CONN, "delete wifi and usb conn item. fd=%{public}d", fd);
+        AUTH_LOGI(AUTH_CONN, "delete auth tcp conn fd item. fd=%{public}d", fd);
         ListDelete(&item->node);
         SoftBusFree(item);
         break;
     }
-    ReleaseWifiAndUsbConnListLock();
+    ReleaseAuthTcpConnFdListLock();
 }
 
 static int32_t ProcessSocketOutEvent(ListenerModule module, int32_t fd)
@@ -345,8 +345,8 @@ static int32_t ProcessSocketOutEvent(ListenerModule module, int32_t fd)
         AUTH_LOGE(AUTH_CONN, "set none block mode fail.");
         goto FAIL;
     }
-    if (AddWifiAndUsbFdItem(fd) != SOFTBUS_OK) {
-        AUTH_LOGE(AUTH_CONN, "insert wifi and usb conn item fail.");
+    if (AddAuthTcpConnFdItem(fd) != SOFTBUS_OK) {
+        AUTH_LOGE(AUTH_CONN, "insert auth tcp conn fd item fail.");
         goto FAIL;
     }
     NotifyConnected(module, fd, true);
@@ -361,7 +361,7 @@ FAIL:
 
 static int32_t ProcessSocketInEvent(ListenerModule module, int32_t fd)
 {
-    if ((module == AUTH || module == AUTH_USB) && !IsExistWifiAndUsbConnByConnId(fd)) {
+    if ((module == AUTH || module == AUTH_USB) && !IsExistAuthTcpConnFdItemByConnId(fd)) {
         AUTH_LOGE(AUTH_CONN, "fd=%{public}d not exist, ignore", fd);
         return SOFTBUS_INVALID_PARAM;
     }
@@ -435,8 +435,8 @@ static int32_t OnConnectEvent(ListenerModule module, int32_t cfd, const ConnectO
         }
         return SOFTBUS_OK;
     }
-    if ((module == AUTH || module == AUTH_USB) && AddWifiAndUsbFdItem(cfd) != SOFTBUS_OK) {
-        AUTH_LOGE(AUTH_CONN, "insert wifi conn item fail.");
+    if ((module == AUTH || module == AUTH_USB) && AddAuthTcpConnFdItem(cfd) != SOFTBUS_OK) {
+        AUTH_LOGE(AUTH_CONN, "insert auth tcp conn fd item fail.");
         return SOFTBUS_MEM_ERR;
     }
     NotifyConnected(module, cfd, false);
@@ -646,8 +646,8 @@ int32_t SocketConnectDevice(const char *ip, int32_t port, bool isBlockMode, int3
     int32_t fd = ret;
     TriggerType triggerMode = isBlockMode ? READ_TRIGGER : WRITE_TRIGGER;
     ListenerModule module = (ifnameIdx == USB_IF) ? AUTH_USB : AUTH;
-    if (isBlockMode && AddWifiAndUsbFdItem(fd) != SOFTBUS_OK) {
-        AUTH_LOGE(AUTH_CONN, "insert wifi conn item fail.");
+    if (isBlockMode && AddAuthTcpConnFdItem(fd) != SOFTBUS_OK) {
+        AUTH_LOGE(AUTH_CONN, "insert auth tcp conn fd item fail.");
         ConnShutdownSocket(fd);
         return AUTH_INVALID_FD;
     }
@@ -875,7 +875,7 @@ void AuthCloseChannel(int32_t channelId, int32_t moduleId)
 {
     AUTH_LOGI(AUTH_CONN, "close auth channel, moduleId=%{public}d, id=%{public}d.", moduleId, channelId);
     if (moduleId == AUTH_USB || moduleId == AUTH) {
-        DeleteWifiAndUsbConnByConnId(channelId);
+        DeleteAuthTcpConnFdItemByConnId(channelId);
     }
     SocketDisconnectDevice((ListenerModule)moduleId, channelId);
 }
@@ -958,19 +958,19 @@ int32_t AuthSetTcpKeepaliveOption(int32_t fd, ModeCycle cycle)
     return SOFTBUS_OK;
 }
 
-int32_t WifiAndUsbConnListLockInit(void)
+int32_t AuthTcpConnFdLockInit(void)
 {
-    if (SoftBusMutexInit(&g_wifiAndUsbConnListLock, NULL) != SOFTBUS_OK) {
-        AUTH_LOGE(AUTH_CONN, "wifiAndUsbConnList mutex init fail");
+    if (SoftBusMutexInit(&g_authTcpConnFdListLock, NULL) != SOFTBUS_OK) {
+        AUTH_LOGE(AUTH_CONN, "authTcpConnFdList mutex init fail");
         return SOFTBUS_LOCK_ERR;
     }
     return SOFTBUS_OK;
 }
 
-void WifiAndUsbConnListLockDeinit(void)
+void AuthTcpConnFdLockDeinit(void)
 {
-    if (SoftBusMutexDestroy(&g_wifiAndUsbConnListLock) != SOFTBUS_OK) {
-        AUTH_LOGE(AUTH_CONN, "wifiAndUsbConnList mutex destroy fail");
+    if (SoftBusMutexDestroy(&g_authTcpConnFdListLock) != SOFTBUS_OK) {
+        AUTH_LOGE(AUTH_CONN, "authTcpConnFdList mutex destroy fail");
     }
 }
 
