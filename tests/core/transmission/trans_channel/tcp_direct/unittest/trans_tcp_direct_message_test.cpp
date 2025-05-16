@@ -344,6 +344,10 @@ HWTEST_F(TransTcpDirectMessageTest, SetAppInfoByIdTest009, TestSize.Level1)
     EXPECT_EQ(ret, SOFTBUS_OK);
 
     ret = UpdateAccessInfoById(channelId, &accessInfo);
+    EXPECT_EQ(ret, SOFTBUS_INVALID_PARAM);
+
+    accessInfo.localTokenId = 100;
+    ret = UpdateAccessInfoById(channelId, &accessInfo);
     EXPECT_EQ(ret, SOFTBUS_OK);
 
     channelId = 0;
