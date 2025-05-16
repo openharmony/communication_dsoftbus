@@ -33,7 +33,6 @@ static TransUkManagerTestInterface *GetTransUkManagerTestInterface()
 }
 
 extern "C" {
-
 int32_t AuthEncryptByUkId(int32_t ukId, const uint8_t *inData, uint32_t inLen, uint8_t *outData, uint32_t *outLen)
 {
     return GetTransUkManagerTestInterface()->AuthEncryptByUkId(ukId, inData, inLen, outData, outLen);

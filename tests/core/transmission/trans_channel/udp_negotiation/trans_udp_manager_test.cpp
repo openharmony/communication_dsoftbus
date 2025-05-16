@@ -1273,6 +1273,10 @@ HWTEST_F(TransUdpManagerTest, TransUdpUpdateAccessInfo001, TestSize.Level1)
         .localTokenId = 0,
     };
     ret = TransUdpUpdateAccessInfo(0, &accessInfo);
+    EXPECT_EQ(SOFTBUS_INVALID_PARAM, ret);
+
+    accessInfo.localTokenId = 100;
+    ret = TransUdpUpdateAccessInfo(0, &accessInfo);
     EXPECT_EQ(SOFTBUS_TRANS_NODE_NOT_FOUND, ret);
 
     ret = TransUdpUpdateAccessInfo(TEST_CHANNEL_ID, &accessInfo);

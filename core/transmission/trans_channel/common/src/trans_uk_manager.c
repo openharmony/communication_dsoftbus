@@ -185,11 +185,6 @@ int32_t GetUkPolicy(const AppInfo *appInfo)
 #endif
 }
 
-bool SpecialSaCanUseDeviceKey(uint64_t tokenId)
-{
-    return SoftBusSaCanUseDeviceKey(tokenId);
-}
-
 bool IsValidUkInfo(const UkIdInfo *ukIdInfo)
 {
     return (ukIdInfo != NULL && ukIdInfo->myId != 0 && ukIdInfo->peerId != 0);
@@ -320,7 +315,7 @@ void FillHapSinkAclInfoToAppInfo(AppInfo *appInfo)
         return;
     }
     if (appInfo->myData.tokenType == ACCESS_TOKEN_TYPE_HAP) {
-        TransGetAclInfoBySessionName(
+        (void)TransGetAclInfoBySessionName(
             appInfo->myData.sessionName, &appInfo->myData.tokenId, NULL, &appInfo->myData.userId);
         uint32_t size = 0;
         int32_t ret =

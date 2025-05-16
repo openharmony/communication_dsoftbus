@@ -258,7 +258,7 @@ HWTEST_F(ClientTransUdpManagerStaticTest, TransSetdFileIdByChannelIdTest001, Tes
     int32_t ret = ClientTransChannelInit();
     ASSERT_EQ(SOFTBUS_OK, ret);
     ret = TransSetdFileIdByChannelId(TEST_CHANNELID, TEST_COUNT);
-    EXPECT_EQ(SOFTBUS_OK, ret);
+    EXPECT_EQ(SOFTBUS_TRANS_UDP_CHANNEL_NOT_FOUND, ret);
 
     UdpChannel udpChannel;
     (void)memset_s(&udpChannel, sizeof(UdpChannel), 0, sizeof(UdpChannel));
