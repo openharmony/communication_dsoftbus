@@ -203,4 +203,30 @@ int32_t ISoftBusClient::OnCheckCollabRelation(
     COMM_LOGI(COMM_EVENT, "ipc default impl");
     return SOFTBUS_OK;
 }
+
+int32_t ISoftBusClient::OnConnectionStateChange(uint32_t handle, int32_t state, int32_t reason)
+{
+    (void)handle;
+    (void)state;
+    (void)reason;
+    COMM_LOGI(COMM_EVENT, "ipc default impl");
+    return SOFTBUS_OK;
+}
+
+int32_t ISoftBusClient::OnAcceptConnect(const char *name, uint32_t handle)
+{
+    (void)name;
+    (void)handle;
+    COMM_LOGI(COMM_EVENT, "ipc default impl");
+    return SOFTBUS_OK;
+}
+
+int32_t ISoftBusClient::OnDataReceived(uint32_t handle, const uint8_t *data, uint32_t len)
+{
+    (void)handle;
+    (void)data;
+    (void)len;
+    COMM_LOGI(COMM_EVENT, "ipc default impl");
+    return SOFTBUS_OK;
+}
 } // namespace OHOS

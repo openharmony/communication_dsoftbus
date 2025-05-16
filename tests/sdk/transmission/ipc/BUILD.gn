@@ -36,6 +36,7 @@ ohos_unittest("TransIpcStandardTest") {
     "$dsoftbus_sdk_path/transmission/ipc/standard/include",
     "$dsoftbus_sdk_path/transmission/ipc/standard/src",
     "$dsoftbus_sdk_path/transmission/session/include",
+    "$dsoftbus_root_path/interfaces/kits/connection",
   ]
 
   deps = [
