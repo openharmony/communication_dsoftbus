@@ -55,7 +55,6 @@
 #define IS_USED 1
 #define IS_NOT_USED 0
 #define LANE_REQ_ID_BITMAP_COUNT ((MAX_LANE_REQ_ID_NUM + ID_CALC_MASK) >> ID_SHIFT_STEP)
-#define LANE_REQ_ID_TYPE_SHIFT 28
 #define LANE_REQ_RANDOM_ID_MASK 0xFFFFFFF
 
 #define LANE_SCORING_INTERVAL 300 /* 5min */
@@ -665,9 +664,10 @@ static int32_t InitLaneFirstStep(void)
     if (SoftBusMutexInit(&g_laneMutex, NULL) != SOFTBUS_OK) {
         return SOFTBUS_NO_INIT;
     }
-    if (InitLaneEvent() != SOFTBUS_OK) {
-        LNN_LOGE(LNN_LANE, "init laneEvent fail");
-        return SOFTBUS_NO_INIT;
+    ret = InitLaneEvent();
+    if (ret != SOFTBUS_OK) {
+        /* optional case, ignore result */
+        LNN_LOGW(LNN_LANE, "init laneEvent err, ret=%{public}d", ret);
     }
     return SOFTBUS_OK;
 }

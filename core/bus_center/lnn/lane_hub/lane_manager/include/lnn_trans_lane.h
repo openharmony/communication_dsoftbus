@@ -54,7 +54,7 @@ int32_t PostNotifyFreeLaneResult(uint32_t laneReqId, int32_t errCode, uint64_t d
 void RemoveDelayDestroyMessage(uint64_t laneId);
 void DelLogicAndLaneRelationship(uint64_t laneId);
 int32_t UpdateReqListLaneId(uint64_t oldLaneId, uint64_t newLaneId);
-TransReqInfo* UpdateRequestNotifyFreeBylaneReqId(uint32_t laneReqId, bool isNotifyFree);
+int32_t UpdateNotifyInfoBylaneReqId(uint32_t laneReqId, bool isNotifyFree);
 int32_t HandleLaneQosChange(const LaneLinkInfo *laneLinkInfo);
 int32_t UpdateFreeLaneStatus(uint32_t laneReqId);
 int32_t DeleteRequestNode(uint32_t laneReqId);

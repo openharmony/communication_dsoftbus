@@ -166,7 +166,6 @@ static SoftBusMutex g_rawLinkLock;
 
 #define INVAILD_AUTH_ID                (-1)
 #define INVALID_P2P_REQUEST_ID         (-1)
-#define LANE_REQ_ID_TYPE_SHIFT         28
 #define BLE_TRIGGER_TIMEOUT            5000
 #define RAW_LINK_CHECK_DELAY           (200)
 #define RAW_LINK_CHECK_NUM             (10)
