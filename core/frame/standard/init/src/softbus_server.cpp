@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021-2023 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2025 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -30,6 +30,7 @@
 #include "trans_session_service.h"
 #include "trans_spec_object.h"
 #include "lnn_lane_interface.h"
+#include "general_connection_client_proxy.h"
 
 #define SOFTBUS_IPC_THREAD_NUM 32
 #define OPEN_AUTH_BR_CONNECT_TIMEOUT_MILLIS (15 * 1000)
@@ -482,5 +483,42 @@ int32_t SoftBusServer::PrivilegeCloseChannel(uint64_t tokenId, int32_t pid, cons
 int32_t SoftBusServer::SetDisplayName(const char *pkgName, const char *nameData, uint32_t len)
 {
     return LnnIpcSetDisplayName(pkgName, nameData, len);
+}
+
+int32_t SoftBusServer::CreateServer(const char *pkgName, const char *name)
+{
+    COMM_LOGI(COMM_SVC, "CreateServer called! pkgName:%{public}s, name:%{public}s", pkgName, name);
+    return SOFTBUS_OK;
+}
+
+int32_t SoftBusServer::RemoveServer(const char *pkgName, const char *name)
+{
+    COMM_LOGE(COMM_SVC, "RemoveServer called! pkgName:%{public}s, name:%{public}s", pkgName, name);
+    return SOFTBUS_OK;
+}
+
+int32_t SoftBusServer::Connect(const char *pkgName, const char *name, const Address *address)
+{
+    COMM_LOGE(COMM_SVC, "Connect called! pkgName:%{public}s, name:%{public}s, address:%{public}s", pkgName, name,
+        address->addr.ble.mac);
+    return SOFTBUS_OK;
+}
+
+int32_t SoftBusServer::Disconnect(uint32_t handle)
+{
+    COMM_LOGE(COMM_SVC, "Disconnect called! handle:%{public}u", handle);
+    return SOFTBUS_OK;
+}
+
+int32_t SoftBusServer::Send(uint32_t handle, const uint8_t *data, uint32_t len)
+{
+    COMM_LOGE(COMM_SVC, "Send called! handle:%{public}u, data:%{public}s, len:%{public}u", handle, data, len);
+    return SOFTBUS_OK;
+}
+
+int32_t SoftBusServer::ConnGetPeerDeviceId(uint32_t handle, char *deviceId, uint32_t len)
+{
+    COMM_LOGE(COMM_SVC, "GetPeerDeviceId called! handle:%{public}u, len:%{public}u", handle, len);
+    return SOFTBUS_OK;
 }
 } // namespace OHOS

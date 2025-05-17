@@ -64,6 +64,9 @@ public:
         int32_t channelId, int32_t channelType, QoSEvent event, const QosTV *qos, uint32_t count) override;
     int32_t OnCheckCollabRelation(const CollabInfo *sourceInfo,
         bool isSinkSide, const CollabInfo *sinkInfo, int32_t channelId, int32_t channelType) override;
+    int32_t OnConnectionStateChange(uint32_t handle, int32_t state, int32_t reason) override;
+    int32_t OnAcceptConnect(const char *name, uint32_t handle) override;
+    int32_t OnDataReceived(uint32_t handle, const uint8_t *data, uint32_t len) override;
 
 private:
     int32_t OnChannelOpenedInner(MessageParcel &data, MessageParcel &reply);
@@ -92,6 +95,9 @@ private:
     int32_t OnChannelBindInner(MessageParcel &data, MessageParcel &reply);
     int32_t OnChannelOnQosInner(MessageParcel &data, MessageParcel &reply);
     int32_t OnCheckCollabRelationInner(MessageParcel &data, MessageParcel &reply);
+    int32_t OnConnectionStateChangeInner(MessageParcel &data, MessageParcel &reply);
+    int32_t OnAcceptConnectInner(MessageParcel &data, MessageParcel &reply);
+    int32_t OnDataReceivedInner(MessageParcel &data, MessageParcel &reply);
     using SoftBusClientStubFunc =
         int32_t (SoftBusClientStub::*)(MessageParcel &data, MessageParcel &reply);
     std::map<uint32_t, SoftBusClientStubFunc> memberFuncMap_;

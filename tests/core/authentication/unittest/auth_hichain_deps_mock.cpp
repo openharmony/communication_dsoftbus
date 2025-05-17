@@ -97,9 +97,9 @@ int32_t AuthSessionSaveSessionKey(int64_t authSeq, const uint8_t *key, uint32_t 
     return GetAuthHichainMockInterface()->AuthSessionSaveSessionKey(authSeq, key, len);
 }
 
-int32_t AuthSessionHandleAuthFinish(int64_t authSeq)
+int32_t AuthSessionHandleAuthFinish(int64_t authSeq, AclWriteState aclState)
 {
-    return GetAuthHichainMockInterface()->AuthSessionHandleAuthFinish(authSeq);
+    return GetAuthHichainMockInterface()->AuthSessionHandleAuthFinish(authSeq, aclState);
 }
 
 const char *GetAuthSideStr(bool isServer)

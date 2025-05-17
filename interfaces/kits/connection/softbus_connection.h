@@ -177,7 +177,7 @@ int32_t GeneralConnect(const char *pkgName, const char *name, const Address *add
  * @since 2.0
  * @version 2.0
  */
-void GeneralDisconnect(uint32_t handle);
+int32_t GeneralDisconnect(uint32_t handle);
 
 /**
  * @brief Sends data to a remote device.

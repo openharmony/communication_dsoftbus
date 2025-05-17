@@ -17,13 +17,14 @@
 
 #include "anonymizer.h"
 #include "client_bus_center_manager.h"
+#include "general_client_connection.h"
 #include "client_trans_channel_callback.h"
 #include "client_trans_socket_manager.h"
+#include "client_trans_udp_manager.h"
 #include "securec.h"
 #include "session_set_timer.h"
 #include "softbus_access_token_adapter.h"
 #include "softbus_server_ipc_interface_code.h"
-#include "client_trans_udp_manager.h"
 
 namespace OHOS {
 static constexpr uint32_t DFX_TIMERS_S = 15;
@@ -56,6 +57,9 @@ SoftBusClientStub::SoftBusClientStub()
     memberFuncMap_[CLIENT_ON_CHANNEL_BIND] = &SoftBusClientStub::OnChannelBindInner;
     memberFuncMap_[CLIENT_CHANNEL_ON_QOS] = &SoftBusClientStub::OnChannelOnQosInner;
     memberFuncMap_[CLIENT_CHECK_COLLAB_RELATION] = &SoftBusClientStub::OnCheckCollabRelationInner;
+    memberFuncMap_[CLIENT_GENERAL_CONNECTION_STATE_CHANGE] = &SoftBusClientStub::OnConnectionStateChangeInner;
+    memberFuncMap_[CLIENT_GENERAL_ACCEPT_CONNECT] = &SoftBusClientStub::OnAcceptConnectInner;
+    memberFuncMap_[CLIENT_GENERAL_DATA_RECEIVED] = &SoftBusClientStub::OnDataReceivedInner;
 }
 
 int32_t SoftBusClientStub::OnRemoteRequest(uint32_t code,
@@ -920,5 +924,92 @@ int32_t SoftBusClientStub::OnClientChannelOnQos(
         return SOFTBUS_INVALID_PARAM;
     }
     return TransOnChannelOnQos(channelId, channelType, event, qos, count);
+}
+
+int32_t SoftBusClientStub::OnConnectionStateChangeInner(MessageParcel &data, MessageParcel &reply)
+{
+    uint32_t handle;
+    if (!data.ReadUint32(handle)) {
+        COMM_LOGE(COMM_SDK, "OnConnectionStateChangeInner read handle failed!");
+        return SOFTBUS_IPC_ERR;
+    }
+    int32_t state;
+    if (!data.ReadInt32(state)) {
+        COMM_LOGE(COMM_SDK, "OnConnectionStateChangeInner read state failed!");
+        return SOFTBUS_IPC_ERR;
+    }
+    int32_t reason;
+    if (!data.ReadInt32(reason)) {
+        COMM_LOGE(COMM_SDK, "OnConnectionStateChangeInner read reason failed!");
+        return SOFTBUS_IPC_ERR;
+    }
+    int32_t ret = OnConnectionStateChange(handle, state, reason);
+    if (ret != SOFTBUS_OK) {
+        COMM_LOGE(COMM_SDK, "OnConnectionStateChangeInner failed! ret=%{public}d", ret);
+    }
+    return SOFTBUS_OK;
+}
+
+int32_t SoftBusClientStub::OnAcceptConnectInner(MessageParcel &data, MessageParcel &reply)
+{
+    char *name = (char *)data.ReadCString();
+    if (name == nullptr) {
+        COMM_LOGE(COMM_SDK, "OnAcceptConnectInner read name failed!");
+        return SOFTBUS_IPC_ERR;
+    }
+    uint32_t handle;
+    if (!data.ReadUint32(handle)) {
+        COMM_LOGE(COMM_SDK, "OnAcceptConnectInner read handle failed!");
+        return SOFTBUS_IPC_ERR;
+    }
+    int32_t ret = OnAcceptConnect(name, handle);
+    if (ret != SOFTBUS_OK) {
+        COMM_LOGE(COMM_SDK, "OnAcceptConnectInner failed! ret=%{public}d", ret);
+    }
+    return SOFTBUS_OK;
+}
+
+int32_t SoftBusClientStub::OnDataReceivedInner(MessageParcel &data, MessageParcel &reply)
+{
+    uint32_t handle;
+    if (!data.ReadUint32(handle)) {
+        COMM_LOGE(COMM_SDK, "OnDataReceivedInner read handle failed!");
+        return SOFTBUS_IPC_ERR;
+    }
+    uint32_t len;
+    if (!data.ReadUint32(len)) {
+        COMM_LOGE(COMM_SDK, "OnDataReceivedInner read len failed!");
+        return SOFTBUS_IPC_ERR;
+    }
+    const uint8_t *dataPtr = (const uint8_t *)data.ReadBuffer(len);
+    if (dataPtr == nullptr) {
+        COMM_LOGE(COMM_SDK, "OnDataReceivedInner read data failed!");
+        return SOFTBUS_IPC_ERR;
+    }
+    int32_t ret = OnDataReceived(handle, dataPtr, len);
+    if (ret != SOFTBUS_OK) {
+        COMM_LOGE(COMM_SDK, "OnDataReceivedInner failed! ret=%{public}d", ret);
+    }
+    return SOFTBUS_OK;
+}
+
+int32_t SoftBusClientStub::OnConnectionStateChange(uint32_t handle, int32_t state, int32_t reason)
+{
+    COMM_LOGI(COMM_SDK, "OnConnectionStateChange handle=%{public}d, state=%{public}d, reason=%{public}d", handle, state,
+        reason);
+    return ConnectionStateChange(handle, state, reason);
+}
+
+int32_t SoftBusClientStub::OnAcceptConnect(const char *name, uint32_t handle)
+{
+    COMM_LOGI(COMM_SDK, "OnAcceptConnect name=%{public}s, handle=%{public}d", name, handle);
+    return AcceptConnect(name, handle);
+}
+
+int32_t SoftBusClientStub::OnDataReceived(uint32_t handle, const uint8_t *data, uint32_t len)
+{
+    COMM_LOGI(COMM_SDK, "OnDataReceived handle=%{public}d, len=%{public}u", handle, len);
+    DataReceived(handle, data, len);
+    return SOFTBUS_OK;
 }
 } // namespace OHOS

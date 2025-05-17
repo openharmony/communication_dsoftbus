@@ -792,7 +792,6 @@ static int32_t AddAuthChannelInfo(AuthChannelInfo *info)
         TRANS_LOGE(TRANS_SVC, "invalid param");
         return SOFTBUS_INVALID_PARAM;
     }
-    DeleteWifiConnItemByConnId(info->authId);
     if (SoftBusMutexLock(&g_authChannelList->lock) != SOFTBUS_OK) {
         TRANS_LOGE(TRANS_SVC, "fail to lock authChannelList.");
         return SOFTBUS_LOCK_ERR;
