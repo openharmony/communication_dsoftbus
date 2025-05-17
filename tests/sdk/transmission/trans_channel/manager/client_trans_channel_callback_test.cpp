@@ -34,7 +34,8 @@ namespace OHOS {
 const char *g_sessionName = "ohos.distributedschedule.dms.test";
 const char *g_networkid = "ABCDEF00ABCDEF00ABCDEF00ABCDEF00ABCDEF00ABCDEF00ABCDEF00ABCDEF00";
 
-int32_t OnSessionOpened(const char *sessionName, const ChannelInfo *channel, SessionType flag)
+int32_t OnSessionOpened(
+    const char *sessionName, const ChannelInfo *channel, SessionType flag, SocketAccessInfo *accessInfo)
 {
     return SOFTBUS_OK;
 }

@@ -25,7 +25,8 @@ extern "C" {
 #endif
 
 typedef struct {
-    int32_t (*OnSessionOpened)(const char *sessionName, const ChannelInfo *channel, SessionType flag);
+    int32_t (*OnSessionOpened)(
+        const char *sessionName, const ChannelInfo *channel, SessionType flag, SocketAccessInfo *accessInfo);
     int32_t (*OnSessionClosed)(int32_t channelId, int32_t channelType, ShutdownReason reason);
     int32_t (*OnSessionOpenFailed)(int32_t channelId, int32_t channelType, int32_t errCode);
     int32_t (*OnDataReceived)(int32_t channelId, int32_t channelType,

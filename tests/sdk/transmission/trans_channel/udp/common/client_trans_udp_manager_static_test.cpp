@@ -124,7 +124,7 @@ HWTEST_F(ClientTransUdpManagerStaticTest, ClientTransUdpManagerStaticTest001, Te
     int32_t ret = OnFileGetSessionId(TEST_CHANNELID, &sessionId);
     EXPECT_EQ(SOFTBUS_INVALID_PARAM, ret);
 
-    OnUdpChannelOpened(TEST_CHANNELID);
+    OnUdpChannelOpened(TEST_CHANNELID, nullptr);
     OnUdpChannelClosed(TEST_CHANNELID, SHUTDOWN_REASON_UNKNOWN);
     OnQosEvent(TEST_CHANNELID, TEST_EVENT_ID, TEST_COUNT, &tvList);
 
@@ -209,7 +209,7 @@ HWTEST_F(ClientTransUdpManagerStaticTest, ClientTransAddUdpChannelTest001, TestS
     ret = TransGetUdpChannel(TEST_CHANNELID, &udpChannel);
     EXPECT_EQ(SOFTBUS_OK, ret);
 
-    OnUdpChannelOpened(TEST_CHANNELID);
+    OnUdpChannelOpened(TEST_CHANNELID, nullptr);
 
     ret = TransSetUdpChannelEnable(TEST_CHANNELID, false);
     EXPECT_EQ(SOFTBUS_OK, ret);

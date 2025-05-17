@@ -21,12 +21,14 @@
 #include "access_control.h"
 #include "anonymizer.h"
 #include "auth_interface.h"
+#include "auth_uk_manager.h"
 #include "bus_center_manager.h"
 #include "cJSON.h"
 #include "data_bus_native.h"
 #include "lnn_distributed_net_ledger.h"
 #include "lnn_lane_link.h"
 #include "lnn_net_builder.h"
+#include "lnn_ohos_account_adapter.h"
 #include "softbus_access_token_adapter.h"
 #include "softbus_adapter_crypto.h"
 #include "softbus_adapter_mem.h"
@@ -54,8 +56,8 @@
 #include "trans_tcp_direct_manager.h"
 #include "trans_tcp_direct_sessionconn.h"
 #include "trans_tcp_direct_listener.h"
-#include "trans_uk_manager.h"
 #include "wifi_direct_manager.h"
+#include "trans_uk_manager.h"
 
 #define MAX_PACKET_SIZE (64 * 1024)
 #define MIN_META_LEN 6
@@ -289,39 +291,6 @@ static int32_t TransSrvGetSeqAndFlagsByChannelId(uint64_t *seq, uint32_t *flags,
     return SOFTBUS_OK;
 }
 
-static int32_t PackBytesWithUk(
-    const char *data, TdcPacketHead *packetHead, char *buffer, uint32_t bufLen, const UkIdInfo *ukIdInfo)
-{
-    TRANS_LOGI(
-        TRANS_BYTES, "PackBytesWithUk: flag=%{public}u, seq=%{public}" PRIu64, packetHead->flags, packetHead->seq);
-    uint8_t *encData = (uint8_t *)buffer + DC_MSG_PACKET_HEAD_SIZE + sizeof(UkIdInfo);
-    uint32_t encDataLen = bufLen - DC_MSG_PACKET_HEAD_SIZE - sizeof(UkIdInfo);
-    uint32_t tempUkId = SoftBusHtoLl((uint32_t)ukIdInfo->myId);
-    if (memcpy_s(buffer + DC_MSG_PACKET_HEAD_SIZE, bufLen - DC_MSG_PACKET_HEAD_SIZE, &tempUkId, sizeof(tempUkId)) !=
-        EOK) {
-        TRANS_LOGE(TRANS_CTRL, "memcpy my ukid fail.");
-        return SOFTBUS_MEM_ERR;
-    }
-    tempUkId = SoftBusHtoLl((uint32_t)ukIdInfo->peerId);
-    if (memcpy_s(buffer + DC_MSG_PACKET_HEAD_SIZE + sizeof(int32_t), bufLen - DC_MSG_PACKET_HEAD_SIZE - sizeof(int32_t),
-        &tempUkId, sizeof(tempUkId)) != EOK) {
-        TRANS_LOGE(TRANS_CTRL, "memcpy peer ukid fail.");
-        return SOFTBUS_MEM_ERR;
-    }
-    if (AuthEncryptByUkId(ukIdInfo->myId, (const uint8_t *)data, packetHead->dataLen, encData,
-        &encDataLen) != SOFTBUS_OK) {
-        TRANS_LOGE(TRANS_BYTES, "PackBytes encrypt with uk fail");
-        return SOFTBUS_ENCRYPT_ERR;
-    }
-    packetHead->dataLen = encDataLen + sizeof(UkIdInfo);
-    PackTdcPacketHead(packetHead);
-    if (memcpy_s(buffer, bufLen, packetHead, sizeof(TdcPacketHead)) != EOK) {
-        TRANS_LOGE(TRANS_BYTES, "memcpy_s buffer fail");
-        return SOFTBUS_MEM_ERR;
-    }
-    return SOFTBUS_OK;
-}
-
 static void SendFailToFlushDevice(SessionConn *conn)
 {
     if (conn->appInfo.routeType == WIFI_STA || conn->appInfo.routeType == WIFI_USB) {
@@ -336,32 +305,8 @@ static void SendFailToFlushDevice(SessionConn *conn)
     }
 }
 
-static int32_t SendDataByChannelId(int32_t channelId, char *buffer, uint32_t bufferLen)
-{
-    SessionConn *conn = (SessionConn *)SoftBusCalloc(sizeof(SessionConn));
-    if (conn == NULL) {
-        TRANS_LOGE(TRANS_BYTES, "malloc conn fail");
-        return SOFTBUS_MALLOC_ERR;
-    }
-    if (GetSessionConnById(channelId, conn) != SOFTBUS_OK) {
-        TRANS_LOGE(TRANS_BYTES, "Get SessionConn fail");
-        SoftBusFree(conn);
-        return SOFTBUS_TRANS_GET_SESSION_CONN_FAILED;
-    }
-    (void)memset_s(conn->appInfo.sessionKey, sizeof(conn->appInfo.sessionKey), 0, sizeof(conn->appInfo.sessionKey));
-    int fd = conn->appInfo.fd;
-    SetIpTos(fd, FAST_MESSAGE_TOS);
-    if (ConnSendSocketData(fd, buffer, bufferLen, 0) != (int)bufferLen) {
-        SendFailToFlushDevice(conn);
-        SoftBusFree(conn);
-        return GetErrCodeBySocketErr(SOFTBUS_TCP_SOCKET_ERR);
-    }
-    SoftBusFree(conn);
-    return SOFTBUS_OK;
-}
-
 int32_t TransTdcPostBytes(
-    int32_t channelId, TdcPacketHead *packetHead, const char *data, const UkIdInfo *ukIdInfo)
+    int32_t channelId, TdcPacketHead *packetHead, const char *data)
 {
     if (data == NULL || packetHead == NULL || packetHead->dataLen == 0) {
         TRANS_LOGE(TRANS_BYTES, "Invalid para.");
@@ -372,33 +317,39 @@ int32_t TransTdcPostBytes(
         TRANS_LOGE(TRANS_BYTES, "get auth id fail, channelId=%{public}d", channelId);
         return SOFTBUS_TRANS_TCP_GET_AUTHID_FAILED;
     }
-    uint32_t bufferLen = (IsValidUkInfo(ukIdInfo) ? AuthGetUkEncryptSize(packetHead->dataLen) + sizeof(UkIdInfo) :
-                                                    AuthGetEncryptSize(authHandle.authId, packetHead->dataLen)) +
-        DC_MSG_PACKET_HEAD_SIZE;
+    uint32_t bufferLen = AuthGetEncryptSize(authHandle.authId, packetHead->dataLen) + DC_MSG_PACKET_HEAD_SIZE;
     char *buffer = (char *)SoftBusCalloc(bufferLen);
     if (buffer == NULL) {
         TRANS_LOGE(TRANS_BYTES, "buffer malloc error.");
         return SOFTBUS_MALLOC_ERR;
     }
-    if (IsValidUkInfo(ukIdInfo)) {
-        if (PackBytesWithUk(data, packetHead, buffer, bufferLen, ukIdInfo) != SOFTBUS_OK) {
-            TRANS_LOGE(TRANS_BYTES, "Pack Bytes with uk add error.");
-            SoftBusFree(buffer);
-            return SOFTBUS_ENCRYPT_ERR;
-        }
-    } else {
-        if (PackBytes(channelId, data, packetHead, buffer, bufferLen) != SOFTBUS_OK) {
-            TRANS_LOGE(TRANS_BYTES, "Pack Bytes error.");
-            SoftBusFree(buffer);
-            return SOFTBUS_ENCRYPT_ERR;
-        }
-    }
-    int32_t ret = SendDataByChannelId(channelId, buffer, bufferLen);
-    if (ret != SOFTBUS_OK) {
-        TRANS_LOGE(TRANS_BYTES, "send data failed ret=%{public}d", ret);
+    if (PackBytes(channelId, data, packetHead, buffer, bufferLen) != SOFTBUS_OK) {
+        TRANS_LOGE(TRANS_BYTES, "Pack Bytes error.");
         SoftBusFree(buffer);
-        return ret;
+        return SOFTBUS_ENCRYPT_ERR;
     }
+    SessionConn *conn = (SessionConn *)SoftBusCalloc(sizeof(SessionConn));
+    if (conn == NULL) {
+        TRANS_LOGE(TRANS_BYTES, "malloc conn fail");
+        SoftBusFree(buffer);
+        return SOFTBUS_MALLOC_ERR;
+    }
+    if (GetSessionConnById(channelId, conn) != SOFTBUS_OK) {
+        TRANS_LOGE(TRANS_BYTES, "Get SessionConn fail");
+        SoftBusFree(buffer);
+        SoftBusFree(conn);
+        return SOFTBUS_TRANS_GET_SESSION_CONN_FAILED;
+    }
+    (void)memset_s(conn->appInfo.sessionKey, sizeof(conn->appInfo.sessionKey), 0, sizeof(conn->appInfo.sessionKey));
+    int fd = conn->appInfo.fd;
+    SetIpTos(fd, FAST_MESSAGE_TOS);
+    if (ConnSendSocketData(fd, buffer, bufferLen, 0) != (int)bufferLen) {
+        SendFailToFlushDevice(conn);
+        SoftBusFree(buffer);
+        SoftBusFree(conn);
+        return GetErrCodeBySocketErr(SOFTBUS_TCP_SOCKET_ERR);
+    }
+    SoftBusFree(conn);
     SoftBusFree(buffer);
     return SOFTBUS_OK;
 }
@@ -410,7 +361,9 @@ static void GetChannelInfoFromConn(ChannelInfo *info, SessionConn *conn, int32_t
     info->isServer = conn->serverSide;
     info->isEnabled = true;
     info->fd = conn->appInfo.fd;
-    info->sessionKey = conn->appInfo.sessionKey;
+    info->sessionKey = GetCapabilityBit(conn->appInfo.channelCapability, TRANS_CHANNEL_SINK_GENERATE_KEY_OFFSET) ?
+        conn->appInfo.sinkSessionKey :
+        conn->appInfo.sessionKey;
     info->myHandleId = conn->appInfo.myHandleId;
     info->peerHandleId = conn->appInfo.peerHandleId;
     info->peerSessionName = conn->appInfo.peerData.sessionName;
@@ -433,7 +386,8 @@ static void GetChannelInfoFromConn(ChannelInfo *info, SessionConn *conn, int32_t
     info->tokenType = conn->appInfo.myData.tokenType;
     if (conn->appInfo.myData.tokenType > ACCESS_TOKEN_TYPE_HAP && conn->serverSide) {
         info->peerUserId = conn->appInfo.peerData.userId;
-        info->peerAccountId = conn->appInfo.peerData.accountId;
+        info->peerTokenId = conn->appInfo.peerData.tokenId;
+        info->peerExtraAccessInfo = conn->appInfo.extraAccessInfo;
     }
 }
 
@@ -502,6 +456,12 @@ static void SetByteChannelTos(const AppInfo *info)
     return;
 }
 
+static void ClearAppInfoSessionKey(AppInfo *appInfo)
+{
+    (void)memset_s(appInfo->sessionKey, sizeof(appInfo->sessionKey), 0, sizeof(appInfo->sessionKey));
+    (void)memset_s(appInfo->sinkSessionKey, sizeof(appInfo->sinkSessionKey), 0, sizeof(appInfo->sinkSessionKey));
+}
+
 static int32_t NotifyChannelOpened(int32_t channelId)
 {
     SessionConn conn;
@@ -514,7 +474,7 @@ static int32_t NotifyChannelOpened(int32_t channelId)
                                   : GetClientSideIpInfo(&conn.appInfo, myIp, IP_LEN);
     if (ret != SOFTBUS_OK) {
         TRANS_LOGE(TRANS_CTRL, "get ip failed, ret=%{public}d.", ret);
-        (void)memset_s(conn.appInfo.sessionKey, sizeof(conn.appInfo.sessionKey), 0, sizeof(conn.appInfo.sessionKey));
+        ClearAppInfoSessionKey(&conn.appInfo);
         return ret;
     }
     ChannelInfo info = { 0 };
@@ -525,7 +485,7 @@ static int32_t NotifyChannelOpened(int32_t channelId)
     ret = LnnGetNetworkIdByUuid(conn.appInfo.peerData.deviceId, buf, NETWORK_ID_BUF_LEN);
     if (ret != SOFTBUS_OK) {
         TRANS_LOGE(TRANS_CTRL, "get networkId failed, ret=%{public}d", ret);
-        (void)memset_s(conn.appInfo.sessionKey, sizeof(conn.appInfo.sessionKey), 0, sizeof(conn.appInfo.sessionKey));
+        ClearAppInfoSessionKey(&conn.appInfo);
         return ret;
     }
     info.peerDeviceId = buf;
@@ -537,17 +497,17 @@ static int32_t NotifyChannelOpened(int32_t channelId)
     int32_t pid = 0;
     if (TransTdcGetUidAndPid(conn.appInfo.myData.sessionName, &uid, &pid) != SOFTBUS_OK) {
         TRANS_LOGE(TRANS_CTRL, "get uid and pid fail.");
-        (void)memset_s(conn.appInfo.sessionKey, sizeof(conn.appInfo.sessionKey), 0, sizeof(conn.appInfo.sessionKey));
+        ClearAppInfoSessionKey(&conn.appInfo);
         return SOFTBUS_TRANS_GET_PID_FAILED;
     }
     if (conn.appInfo.fastTransDataSize > 0) {
         info.isFastData = true;
     }
     TransGetLaneIdByChannelId(channelId, &info.laneId);
-    info.isSupportTlv = GetCapabilityBit(&conn.appInfo.channelCapability, TRANS_CAPABILITY_TLV_OFFSET);
+    info.isSupportTlv = GetCapabilityBit(conn.appInfo.channelCapability, TRANS_CAPABILITY_TLV_OFFSET);
     GetOsTypeByNetworkId(info.peerDeviceId, &info.osType);
     ret = TransTdcOnChannelOpened(pkgName, pid, conn.appInfo.myData.sessionName, &info);
-    (void)memset_s(conn.appInfo.sessionKey, sizeof(conn.appInfo.sessionKey), 0, sizeof(conn.appInfo.sessionKey));
+    ClearAppInfoSessionKey(&conn.appInfo);
     conn.status = TCP_DIRECT_CHANNEL_STATUS_CONNECTED;
     SetSessionConnStatusById(channelId, conn.status);
     return ret;
@@ -784,20 +744,16 @@ static int32_t OpenDataBusReply(int32_t channelId, uint64_t seq, const cJSON *re
     return SOFTBUS_OK;
 }
 
-static int32_t TransTdcPostReplyMsg(int32_t channelId, int32_t module, uint64_t seq, uint32_t flags, char *reply)
+static int32_t TransTdcPostReplyMsg(int32_t channelId, uint64_t seq, uint32_t flags, char *reply)
 {
     TdcPacketHead packetHead = {
         .magicNumber = MAGIC_NUMBER,
-        .module = module,
+        .module = MODULE_SESSION,
         .seq = seq,
         .flags = (FLAG_REPLY | flags),
         .dataLen = strlen(reply),
     };
-    UkIdInfo UkIdInfo = { 0 };
-    if (GetSessionConnUkIdById(channelId, &UkIdInfo) == SOFTBUS_OK && UkIdInfo.myId != 0 && UkIdInfo.peerId != 0) {
-        packetHead.module = MODULE_UK_ENCYSESSION;
-    }
-    return TransTdcPostBytes(channelId, &packetHead, reply, &UkIdInfo);
+    return TransTdcPostBytes(channelId, &packetHead, reply);
 }
 
 static int32_t OpenDataBusRequestReply(const AppInfo *appInfo, int32_t channelId, uint64_t seq, uint32_t flags)
@@ -808,20 +764,7 @@ static int32_t OpenDataBusRequestReply(const AppInfo *appInfo, int32_t channelId
         return SOFTBUS_TRANS_GET_PACK_REPLY_FAILED;
     }
 
-    int32_t ret = TransTdcPostReplyMsg(channelId, MODULE_SESSION, seq, flags, reply);
-    cJSON_free(reply);
-    return ret;
-}
-
-static int32_t OpenDataBusUkRequestError(
-    int32_t channelId, uint64_t seq, char *errDesc, int32_t errCode, uint32_t flags)
-{
-    char *reply = PackError(errCode, errDesc);
-    if (reply == NULL) {
-        TRANS_LOGE(TRANS_CTRL, "get pack reply err");
-        return SOFTBUS_TRANS_GET_PACK_REPLY_FAILED;
-    }
-    int32_t ret = TransTdcPostReplyMsg(channelId, MODULE_UK_NEGOSESSION, seq, flags, reply);
+    int32_t ret = TransTdcPostReplyMsg(channelId, seq, flags, reply);
     cJSON_free(reply);
     return ret;
 }
@@ -833,7 +776,7 @@ static int32_t OpenDataBusRequestError(int32_t channelId, uint64_t seq, char *er
         TRANS_LOGE(TRANS_CTRL, "get pack reply err");
         return SOFTBUS_TRANS_GET_PACK_REPLY_FAILED;
     }
-    int32_t ret = TransTdcPostReplyMsg(channelId, MODULE_SESSION, seq, flags, reply);
+    int32_t ret = TransTdcPostReplyMsg(channelId, seq, flags, reply);
     cJSON_free(reply);
     return ret;
 }
@@ -877,6 +820,22 @@ static SessionConn* GetSessionConnFromDataBusRequest(int32_t channelId, const cJ
         SoftBusFree(conn);
         TRANS_LOGE(TRANS_CTRL, "UnpackRequest error");
         return NULL;
+    }
+    (void)LnnGetNetworkIdByUuid(conn->appInfo.peerData.deviceId, conn->appInfo.peerNetWorkId, NETWORK_ID_BUF_LEN);
+    int32_t osType = 0;
+    (void)GetOsTypeByNetworkId(conn->appInfo.peerNetWorkId, &osType);
+    if (osType != OH_OS_TYPE) {
+        DisableCapabilityBit(&conn->appInfo.channelCapability, TRANS_CHANNEL_SINK_GENERATE_KEY_OFFSET);
+    }
+    if (GetCapabilityBit(conn->appInfo.channelCapability, TRANS_CHANNEL_SINK_GENERATE_KEY_OFFSET)) {
+        if (SoftBusGenerateSessionKey(conn->appInfo.sinkSessionKey, SESSION_KEY_LENGTH) != SOFTBUS_OK) {
+            TRANS_LOGE(TRANS_CTRL,
+                "Generate sink SessionKey failed channelId=%{public}d, fd=%{public}d",
+                conn->channelId, conn->appInfo.fd);
+            SoftBusFree(conn);
+            return NULL;
+        }
+        EnableCapabilityBit(&conn->appInfo.channelCapability, TRANS_CHANNEL_SINK_KEY_ENCRYPT_OFFSET);
     }
     return conn;
 }
@@ -1022,6 +981,7 @@ static int32_t TransTdcFillAppInfoAndNotifyChannel(AppInfo *appInfo, int32_t cha
         TRANS_LOGE(TRANS_CTRL, "get tokenType failed.");
         goto ERR_EXIT;
     }
+    FillHapSinkAclInfoToAppInfo(appInfo);
     errCode = GetUuidByChanId(channelId, appInfo->peerData.deviceId, DEVICE_ID_SIZE_MAX);
     if (errCode != SOFTBUS_OK) {
         TRANS_LOGE(TRANS_CTRL, "Auth: Get Uuid By ChanId failed.");
@@ -1110,206 +1070,6 @@ static int32_t OpenDataBusRequest(int32_t channelId, uint32_t flags, uint64_t se
     }
     ReleaseSessionConn(conn);
     return errCode;
-}
-
-static int32_t HandUkReply(int32_t channelId, uint64_t seq, AuthACLInfo *aclInfo, int32_t ukId)
-{
-    char *reply = PackUkReply(aclInfo, ukId);
-    if (reply == NULL) {
-        TRANS_LOGE(TRANS_CTRL, "pack uk reply failed.");
-        return SOFTBUS_TRANS_GET_PACK_REPLY_FAILED;
-    }
-    int32_t ret = TransTdcPostReplyMsg(channelId, MODULE_UK_NEGOSESSION, seq, 0, reply);
-    if (ret != SOFTBUS_OK) {
-        TRANS_LOGE(TRANS_CTRL, "reply uk failed, channelId=%{public}d, ret=%{public}d", channelId, ret);
-    }
-    cJSON_free(reply);
-    return ret;
-}
-
-static void OnGenUkSuccess(uint32_t requestId, int32_t ukId)
-{
-    char *errDesc = NULL;
-    AuthACLInfo aclInfo = { 0 };
-    int32_t channelId = 0;
-    uint32_t flags = 0;
-    uint64_t seq = 0;
-    int32_t ret = TransUkRequestGetTcpInfoByRequestId(requestId, &aclInfo, &channelId);
-    if (ret != SOFTBUS_OK) {
-        TRANS_LOGE(TRANS_CTRL, "get uk acl info failed.");
-        (void)TransUkRequestDeleteItem(requestId);
-        return;
-    }
-    ret = TransSrvGetSeqAndFlagsByChannelId(&seq, &flags, channelId);
-    if (ret != SOFTBUS_OK) {
-        TRANS_LOGE(TRANS_CTRL, "get seqs and flags failed, channelId=%{public}d, ret=%{public}d", channelId, ret);
-        goto EXIT_ERR;
-    }
-    ret = HandUkReply(channelId, seq, &aclInfo, ukId);
-    if (ret != SOFTBUS_OK) {
-        errDesc = (char *)"uk gen process failed";
-        ret = OpenDataBusUkRequestError(channelId, seq, errDesc, ret, flags);
-        if (ret != SOFTBUS_OK) {
-            TRANS_LOGE(TRANS_CTRL, "reply uk err info failed, ret=%{public}d", ret);
-        }
-        goto EXIT_ERR;
-    }
-    (void)TransUkRequestDeleteItem(requestId);
-    return;
-EXIT_ERR:
-    (void)TransDelSessionConnById(channelId);
-    (void)TransUkRequestDeleteItem(requestId);
-}
-
-static void OnGenUkFailed(uint32_t requestId, int32_t reason)
-{
-    char *errDesc = NULL;
-    AuthACLInfo aclInfo = { 0 };
-    int32_t channelId = 0;
-    uint32_t flags = 0;
-    uint64_t seq = 0;
-    int32_t ret = TransUkRequestGetTcpInfoByRequestId(requestId, &aclInfo, &channelId);
-    if (ret != SOFTBUS_OK) {
-        TRANS_LOGE(TRANS_CTRL, "get uk acl info failed.");
-        (void)TransUkRequestDeleteItem(requestId);
-        return;
-    }
-    ret = TransSrvGetSeqAndFlagsByChannelId(&seq, &flags, channelId);
-    if (ret != SOFTBUS_OK) {
-        TRANS_LOGE(TRANS_CTRL, "get seqs and flags failed, channelId=%{public}d, ret=%{public}d", channelId, ret);
-        goto EXIT_ERR;
-    }
-    errDesc = (char *)"uk gen failed";
-    ret = OpenDataBusUkRequestError(channelId, seq, errDesc, ret, flags);
-    if (ret != SOFTBUS_OK) {
-        TRANS_LOGE(TRANS_CTRL, "reply uk err info failed.");
-    }
-EXIT_ERR:
-    (void)TransDelSessionConnById(channelId);
-    (void)TransUkRequestDeleteItem(requestId);
-}
-
-static AuthGenUkCallback tdcAuthGenUkCallback = {
-    .onGenSuccess = OnGenUkSuccess,
-    .onGenFailed = OnGenUkFailed,
-};
-
-static int32_t TransTcpGenUk(int32_t channelId, const AuthACLInfo *acl)
-{
-    uint32_t requestId = AuthGenRequestId();
-    int32_t ret = SOFTBUS_OK;
-    ret = TransUkRequestAddItem(requestId, channelId, 0, 0, acl);
-    if (ret != SOFTBUS_OK) {
-        TRANS_LOGE(TRANS_CTRL, "add uk requset failed");
-        return ret;
-    }
-    ret = AuthGenUkIdByAclInfo(acl, requestId, &tdcAuthGenUkCallback);
-    if (ret != SOFTBUS_OK) {
-        TRANS_LOGE(TRANS_CTRL, "gen uk failed");
-        (void)TransUkRequestDeleteItem(requestId);
-        return ret;
-    }
-    return ret;
-}
-
-static int32_t OpenDataBusUkRequest(int32_t channelId, uint32_t flags, uint64_t seq, const cJSON *request)
-{
-    TRANS_LOGI(TRANS_CTRL, "recv uk request msg channelId=%{public}d, seq=%{public}" PRId64, channelId, seq);
-    char *errDesc = NULL;
-    AuthACLInfo aclInfo = { 0 };
-    char sessionName[SESSION_NAME_SIZE_MAX] = { 0 };
-    int32_t ukId = 0;
-    int32_t ret = UnPackUkRequest(request, &aclInfo, sessionName);
-    if (ret != SOFTBUS_OK) {
-        goto EXIT_ERR;
-    }
-    ret = FillSinkAclInfo(sessionName, &aclInfo, NULL);
-    if (ret != SOFTBUS_OK) {
-        goto EXIT_ERR;
-    }
-    ret = AuthFindUkIdByAclInfo(&aclInfo, &ukId);
-    if (ret == SOFTBUS_AUTH_ACL_NOT_FOUND) {
-        TRANS_LOGE(TRANS_CTRL, "find uk fail, no acl, ret=%{public}d", ret);
-        goto EXIT_ERR;
-    }
-    if (ret != SOFTBUS_OK) {
-        ret = TransTcpGenUk(channelId, &aclInfo);
-        if (ret != SOFTBUS_OK) {
-            goto EXIT_ERR;
-        }
-        return ret;
-    }
-    ret = HandUkReply(channelId, seq, &aclInfo, ukId);
-    if (ret != SOFTBUS_OK) {
-        TRANS_LOGE(TRANS_CTRL, "gen uk failed");
-        goto EXIT_ERR;
-    }
-    return ret;
-EXIT_ERR:
-    errDesc = (char *)"process uk request failed";
-    if (OpenDataBusUkRequestError(channelId, seq, errDesc, ret, flags) != SOFTBUS_OK) {
-        TRANS_LOGE(TRANS_CTRL, "reply err info failed.");
-    }
-    (void)TransDelSessionConnById(channelId);
-    return ret;
-}
-
-static int32_t OpenDataBusUkReply(int32_t channelId, uint64_t seq, const cJSON *reply)
-{
-    TRANS_LOGI(TRANS_CTRL, "recv uk reply msg channelId=%{public}d, seq=%{public}" PRId64, channelId, seq);
-    SessionConn conn;
-    (void)memset_s(&conn, sizeof(SessionConn), 0, sizeof(SessionConn));
-    TRANS_CHECK_AND_RETURN_RET_LOGE(GetSessionConnById(channelId, &conn) == SOFTBUS_OK,
-        SOFTBUS_TRANS_GET_SESSION_CONN_FAILED, TRANS_CTRL, "notify channel open failed, get tdcInfo is null");
-    int32_t errCode = SOFTBUS_OK;
-    if (UnpackReplyErrCode(reply, &errCode) == SOFTBUS_OK) {
-        TRANS_LOGE(TRANS_CTRL,
-            "receive err reply msg channelId=%{public}d, errCode=%{public}d, seq=%{public}" PRIu64,
-            channelId, errCode, seq);
-        if (errCode == SOFTBUS_TRANS_PEER_SESSION_NOT_CREATED) {
-            (void)TransAddTimestampToList(
-                conn.appInfo.myData.sessionName, conn.appInfo.peerData.sessionName,
-                conn.appInfo.peerNetWorkId, SoftBusGetSysTimeMs());
-        }
-        if (errCode == SOFTBUS_AUTH_ACL_NOT_FOUND) {
-            if (SpecialSaCanUseDeviceKey(conn.appInfo.callingTokenId)) {
-                TRANS_LOGW(
-                    TRANS_CTRL, "retry with dk, channelId=%{public}d", channelId);
-                return StartVerifySession(&conn, NULL);
-            }
-        }
-        return errCode;
-    }
-    UkIdInfo ukIdInfo = { 0 };
-    AuthACLInfo aclInfo = { 0 };
-    int32_t ret = UnPackUkReply(reply, &aclInfo, &ukIdInfo.peerId);
-    if (ret != SOFTBUS_OK) {
-        return ret;
-    }
-    ret = AuthFindUkIdByAclInfo(&aclInfo, &ukIdInfo.myId);
-    if (ret != SOFTBUS_OK) {
-        TRANS_LOGE(TRANS_CTRL, "find uk fail, ret=%{public}d", ret);
-        return ret;
-    }
-    return StartVerifySession(&conn, &ukIdInfo);
-}
-
-static int32_t ProcessUkNegoMessage(int32_t channelId, uint32_t flags, uint64_t seq, const char *msg, uint32_t dataLen)
-{
-    int32_t ret = SOFTBUS_OK;
-    cJSON *json = cJSON_ParseWithLength(msg, dataLen);
-    if (json == NULL) {
-        TRANS_LOGE(TRANS_CTRL, "json parse failed");
-        return SOFTBUS_PARSE_JSON_ERR;
-    }
-    if (flags & FLAG_REPLY) {
-        ret = OpenDataBusUkReply(channelId, seq, json);
-    } else {
-        ret = OpenDataBusUkRequest(channelId, flags, seq, json);
-    }
-    cJSON_Delete(json);
-    TRANS_LOGI(TRANS_CTRL, "channelId=%{public}d, ret=%{public}d", channelId, ret);
-    return ret;
 }
 
 static int32_t ProcessMessage(int32_t channelId, uint32_t flags, uint64_t seq, const char *msg, uint32_t dataLen)
@@ -1406,44 +1166,23 @@ static int32_t DecryptMessage(int32_t channelId, const TdcPacketHead *pktHead, c
     }
     ret = SetAuthHandleByChanId(channelId, &authHandle);
     TRANS_CHECK_AND_RETURN_RET_LOGE(ret == SOFTBUS_OK, ret, TRANS_CTRL, "srv process recv data: set authId fail.");
-    if ((pktHead->module == MODULE_UK_ENCYSESSION) && (pktHead->dataLen <= sizeof(UkIdInfo))) {
-        return SOFTBUS_INVALID_PARAM;
-    }
-    uint32_t dataLen =
-        pktHead->module == MODULE_UK_ENCYSESSION ? pktHead->dataLen - sizeof(UkIdInfo) : pktHead->dataLen;
-    uint32_t decDataLen = AuthGetDecryptSize(dataLen) + 1;
+    uint32_t decDataLen = AuthGetDecryptSize(pktHead->dataLen) + 1;
     uint8_t *decData = (uint8_t *)SoftBusCalloc(decDataLen);
     if (decData == NULL) {
         TRANS_LOGE(TRANS_CTRL, "srv process recv data: malloc fail.");
         return SOFTBUS_MALLOC_ERR;
     }
-    if (pktHead->module == MODULE_UK_ENCYSESSION) {
-        int32_t peerId = (int32_t)SoftBusLtoHl(*(uint32_t*)pktData);
-        int32_t myId = (int32_t)SoftBusLtoHl(*(uint32_t*)(pktData + sizeof(int32_t)));
-        UkIdInfo ukIdInfo = {
-            .myId = myId,
-            .peerId = peerId,
-        };
-        if (AuthDecryptByUkId(myId, pktData + sizeof(UkIdInfo), pktHead->dataLen - sizeof(UkIdInfo), decData,
-            &decDataLen) != SOFTBUS_OK) {
-            TRANS_LOGE(TRANS_CTRL, "srv process recv data: decrypt fail. ukid=%{public}d", myId);
-            SoftBusFree(decData);
-            return SOFTBUS_DECRYPT_ERR;
-        }
-        (void)SetSessionConnUkIdById(channelId, &ukIdInfo);
-    } else {
-        if (AuthDecrypt(&authHandle, pktData, pktHead->dataLen, decData, &decDataLen) != SOFTBUS_OK) {
-            TRANS_LOGE(TRANS_CTRL, "srv process recv data: decrypt fail.");
-            SoftBusFree(decData);
-            return SOFTBUS_DECRYPT_ERR;
-        }
+    if (AuthDecrypt(&authHandle, pktData, pktHead->dataLen, decData, &decDataLen) != SOFTBUS_OK) {
+        TRANS_LOGE(TRANS_CTRL, "srv process recv data: decrypt fail.");
+        SoftBusFree(decData);
+        return SOFTBUS_DECRYPT_ERR;
     }
     *outData = decData;
     *outDataLen = decDataLen;
     return SOFTBUS_OK;
 }
 
-static int32_t ProcessReceivedData(int32_t channelId, int32_t type, int32_t *pktModule)
+static int32_t ProcessReceivedData(int32_t channelId, int32_t type)
 {
     uint64_t seq;
     uint32_t flags;
@@ -1460,9 +1199,8 @@ static int32_t ProcessReceivedData(int32_t channelId, int32_t type, int32_t *pkt
     }
     TdcPacketHead *pktHead = (TdcPacketHead *)(node->data);
     uint8_t *pktData = (uint8_t *)(node->data + sizeof(TdcPacketHead));
-    if (pktHead->module != MODULE_SESSION && pktHead->module != MODULE_UK_NEGOSESSION &&
-        pktHead->module != MODULE_UK_ENCYSESSION) {
-        TRANS_LOGE(TRANS_CTRL, "srv process recv data: illegal module. module=%{public}d", pktHead->module);
+    if (pktHead->module != MODULE_SESSION) {
+        TRANS_LOGE(TRANS_CTRL, "srv process recv data: illegal module.");
         SoftBusMutexUnlock(&g_tcpSrvDataList->lock);
         return SOFTBUS_TRANS_ILLEGAL_MODULE;
     }
@@ -1486,18 +1224,12 @@ static int32_t ProcessReceivedData(int32_t channelId, int32_t type, int32_t *pkt
     }
     node->w = node->w - sizeof(TdcPacketHead) - pktHead->dataLen;
     SoftBusMutexUnlock(&g_tcpSrvDataList->lock);
-    int32_t ret = SOFTBUS_OK;
-    *pktModule = pktHead->module;
-    if (pktHead->module == MODULE_UK_NEGOSESSION) {
-        ret = ProcessUkNegoMessage(channelId, flags, seq, (char *)data, dataLen);
-    } else {
-        ret = ProcessMessage(channelId, flags, seq, (char *)data, dataLen);
-    }
+    int32_t ret = ProcessMessage(channelId, flags, seq, (char *)data, dataLen);
     SoftBusFree(data);
     return ret;
 }
 
-static int32_t TransTdcSrvProcData(ListenerModule module, int32_t channelId, int32_t type, int32_t *pktModule)
+static int32_t TransTdcSrvProcData(ListenerModule module, int32_t channelId, int32_t type)
 {
     TRANS_CHECK_AND_RETURN_RET_LOGE(g_tcpSrvDataList != NULL, SOFTBUS_NO_INIT, TRANS_CTRL, "g_tcpSrvDataList is NULL");
     int32_t ret = SoftBusMutexLock(&g_tcpSrvDataList->lock);
@@ -1550,7 +1282,7 @@ static int32_t TransTdcSrvProcData(ListenerModule module, int32_t channelId, int
     }
     DelTrigger(module, node->fd, READ_TRIGGER);
     SoftBusMutexUnlock(&g_tcpSrvDataList->lock);
-    return ProcessReceivedData(channelId, type, pktModule);
+    return ProcessReceivedData(channelId, type);
 }
 
 static int32_t TransTdcGetDataBufInfoByChannelId(int32_t channelId, int32_t *fd, size_t *len)
@@ -1712,7 +1444,7 @@ static int32_t TransReadDataLen(int32_t channelId, int32_t *pktDataLen, int32_t 
     return SOFTBUS_OK;
 }
 
-int32_t TransTdcSrvRecvData(ListenerModule module, int32_t channelId, int32_t type, int32_t *pktModule)
+int32_t TransTdcSrvRecvData(ListenerModule module, int32_t channelId, int32_t type)
 {
     int32_t dataSize = 0;
     int32_t ret = TransReadDataLen(channelId, &dataSize, (int32_t)module, type);
@@ -1731,7 +1463,7 @@ int32_t TransTdcSrvRecvData(ListenerModule module, int32_t channelId, int32_t ty
     }
     SoftBusFree(dataBuffer);
 
-    return TransTdcSrvProcData(module, channelId, type, pktModule);
+    return TransTdcSrvProcData(module, channelId, type);
 }
 
 
@@ -1758,18 +1490,101 @@ static void TransProcessAsyncOpenTdcChannelFailed(
     CloseTcpDirectFd(conn->listenMod, conn->appInfo.fd);
 }
 
-int32_t TransDealTdcChannelOpenResult(int32_t channelId, int32_t openResult, pid_t callingPid)
+static int32_t HandChannelOpenedReply(
+    SessionConn *conn, int32_t channelId, TransEventExtra *extra, uint32_t flags, uint64_t seq)
 {
+    int32_t ret = HandleDataBusReply(conn, channelId, extra, flags, seq);
+    (void)memset_s(conn->appInfo.sessionKey, sizeof(conn->appInfo.sessionKey), 0, sizeof(conn->appInfo.sessionKey));
+    (void)memset_s(
+        conn->appInfo.sinkSessionKey, sizeof(conn->appInfo.sinkSessionKey), 0, sizeof(conn->appInfo.sinkSessionKey));
+    TransDelSessionConnById(channelId);
+    CloseTcpDirectFd(conn->listenMod, conn->appInfo.fd);
+    if (ret != SOFTBUS_OK) {
+        (void)TransDelTcpChannelInfoByChannelId(channelId);
+        TransSrvDelDataBufNode(channelId);
+        return ret;
+    }
+    ret = NotifyChannelBind(channelId, conn);
+    if (ret != SOFTBUS_OK) {
+        (void)TransDelTcpChannelInfoByChannelId(channelId);
+        TransSrvDelDataBufNode(channelId);
+        return ret;
+    }
+    TransSrvDelDataBufNode(channelId);
+    return SOFTBUS_OK;
+}
+
+static void HandleTdcGenUkResult(uint32_t requestId, int32_t ukId, int32_t reason)
+{
+    UkRequestNode requestNode;
+    int32_t ret = TransUkRequestGetRequestInfoByRequestId(requestId, &requestNode);
+    if (ret != SOFTBUS_OK) {
+        TRANS_LOGE(TRANS_CTRL, "get uk request info failed.");
+        (void)TransUkRequestDeleteItem(requestId);
+        return;
+    }
+    int32_t channelId = requestNode.channelId;
+    SessionConn conn;
+    (void)memset_s(&conn, sizeof(SessionConn), 0, sizeof(SessionConn));
+    ret = GetSessionConnById(channelId, &conn);
+    TRANS_CHECK_AND_RETURN_LOGE(ret == SOFTBUS_OK, TRANS_CTRL, "get sessionConn failed, ret=%{public}d", ret);
+    uint32_t flags = 0;
+    uint64_t seq = 0;
+    ret = TransSrvGetSeqAndFlagsByChannelId(&seq, &flags, channelId);
+    if (ret != SOFTBUS_OK) {
+        TRANS_LOGE(TRANS_CTRL, "get seqs and flags failed, channelId=%{public}d, ret=%{public}d", channelId, ret);
+        return;
+    }
+    if (reason != SOFTBUS_OK) {
+        TRANS_LOGE(
+            TRANS_CTRL, "gen uk failed, channelId=%{public}d, reason=%{public}d", requestNode.channelId, reason);
+        (void)memset_s(
+            conn.appInfo.sinkSessionKey, sizeof(conn.appInfo.sinkSessionKey), 0, sizeof(conn.appInfo.sinkSessionKey));
+        (void)memset_s(conn.appInfo.sessionKey, sizeof(conn.appInfo.sessionKey), 0, sizeof(conn.appInfo.sessionKey));
+        (void)NotifyChannelClosed(&conn.appInfo, channelId);
+        TransProcessAsyncOpenTdcChannelFailed(&conn, reason, seq, flags);
+        (void)TransUkRequestDeleteItem(requestId);
+        return;
+    }
+    conn.appInfo.myData.userKeyId = ukId;
+    TransEventExtra extra;
+    (void)memset_s(&extra, sizeof(TransEventExtra), 0, sizeof(TransEventExtra));
+    char peerUuid[DEVICE_ID_SIZE_MAX] = { 0 };
+    NodeInfo nodeInfo;
+    (void)memset_s(&nodeInfo, sizeof(NodeInfo), 0, sizeof(NodeInfo));
+    ReportTransEventExtra(&extra, channelId, &conn, &nodeInfo, peerUuid);
+    (void)HandChannelOpenedReply(&conn, channelId, &extra, flags, seq);
+    (void)TransUkRequestDeleteItem(requestId);
+    (void)memset_s(
+        conn.appInfo.sinkSessionKey, sizeof(conn.appInfo.sinkSessionKey), 0, sizeof(conn.appInfo.sinkSessionKey));
+    (void)memset_s(
+        conn.appInfo.sessionKey, sizeof(conn.appInfo.sessionKey), 0, sizeof(conn.appInfo.sessionKey));
+}
+
+static void OnTdcGenUkSuccess(uint32_t requestId, int32_t ukId)
+{
+    HandleTdcGenUkResult(requestId, ukId, SOFTBUS_OK);
+}
+
+static void OnTdcGenUkFailed(uint32_t requestId, int32_t reason)
+{
+    HandleTdcGenUkResult(requestId, 0, reason);
+}
+
+static AuthGenUkCallback tdcAuthGenUkCallback = {
+    .onGenSuccess = OnTdcGenUkSuccess,
+    .onGenFailed = OnTdcGenUkFailed,
+};
+
+int32_t TransDealTdcChannelOpenResult(int32_t channelId, int32_t openResult, const AccessInfo *accessInfo)
+{
+    (void)UpdateAccessInfoById(channelId, accessInfo);
     SessionConn conn;
     (void)memset_s(&conn, sizeof(SessionConn), 0, sizeof(SessionConn));
     int32_t ret = GetSessionConnById(channelId, &conn);
     TRANS_CHECK_AND_RETURN_RET_LOGE(ret == SOFTBUS_OK, ret, TRANS_CTRL, "get sessionConn failed, ret=%{public}d", ret);
-    if (conn.appInfo.myData.pid != callingPid) {
-        TRANS_LOGE(TRANS_CTRL, "callingPid does not match");
-        return SOFTBUS_TRANS_CHECK_PID_ERROR;
-    }
     ret = TransTdcUpdateReplyCnt(channelId);
-    TRANS_CHECK_AND_RETURN_RET_LOGE(ret == SOFTBUS_OK, ret, TRANS_CTRL, "update count failed.");
+    TRANS_CHECK_AND_RETURN_RET_LOGE(ret == SOFTBUS_OK, ret, TRANS_CTRL, "update reply cnt failed, ret=%{public}d", ret);
     uint32_t flags = 0;
     uint64_t seq = 0;
     ret = TransSrvGetSeqAndFlagsByChannelId(&seq, &flags, channelId);
@@ -1791,23 +1606,23 @@ int32_t TransDealTdcChannelOpenResult(int32_t channelId, int32_t openResult, pid
     if (conn.appInfo.fastTransDataSize > 0 && conn.appInfo.fastTransData != NULL) {
         NotifyFastDataRecv(&conn, channelId);
     }
-    ret = HandleDataBusReply(&conn, channelId, &extra, flags, seq);
-    (void)memset_s(conn.appInfo.sessionKey, sizeof(conn.appInfo.sessionKey), 0, sizeof(conn.appInfo.sessionKey));
-    TransDelSessionConnById(channelId);
-    CloseTcpDirectFd(conn.listenMod, conn.appInfo.fd);
-    if (ret != SOFTBUS_OK) {
-        (void)TransDelTcpChannelInfoByChannelId(channelId);
-        TransSrvDelDataBufNode(channelId);
-        return ret;
+    if (GetCapabilityBit(conn.appInfo.channelCapability, TRANS_CHANNEL_SINK_GENERATE_KEY_OFFSET)) {
+        ret = GetUserkeyIdByAClInfo(
+            &conn.appInfo, channelId, CHANNEL_TYPE_TCP_DIRECT, &conn.appInfo.myData.userKeyId, &tdcAuthGenUkCallback);
+        if (ret == SOFTBUS_TRANS_GEN_USER_KEY) {
+            return SOFTBUS_OK;
+        }
+        if (ret == SOFTBUS_AUTH_ACL_NOT_FOUND && SoftBusSaCanUseDeviceKey(conn.appInfo.myData.tokenId)) {
+            DisableCapabilityBit(&conn.appInfo.channelCapability, TRANS_CHANNEL_SINK_KEY_ENCRYPT_OFFSET);
+            return HandChannelOpenedReply(&conn, channelId, &extra, flags, seq);
+        }
+        if (ret != SOFTBUS_OK) {
+            (void)NotifyChannelClosed(&conn.appInfo, channelId);
+            TransProcessAsyncOpenTdcChannelFailed(&conn, ret, seq, flags);
+            return SOFTBUS_OK;
+        }
     }
-    ret = NotifyChannelBind(channelId, &conn);
-    if (ret != SOFTBUS_OK) {
-        (void)TransDelTcpChannelInfoByChannelId(channelId);
-        TransSrvDelDataBufNode(channelId);
-        return ret;
-    }
-    TransSrvDelDataBufNode(channelId);
-    return SOFTBUS_OK;
+    return HandChannelOpenedReply(&conn, channelId, &extra, flags, seq);
 }
 
 void TransAsyncTcpDirectChannelTask(int32_t channelId)
@@ -1874,7 +1689,7 @@ static int32_t TransTdcPostErrorMsg(uint64_t *seq, uint32_t *flags, int32_t chan
     return SOFTBUS_OK;
 }
 
-int32_t TransDealTdcCheckCollabResult(int32_t channelId, int32_t checkResult, pid_t callingPid)
+int32_t TransDealTdcCheckCollabResult(int32_t channelId, int32_t checkResult)
 {
     uint32_t tranFlags = 0;
     uint64_t seq = 0;
@@ -1883,10 +1698,6 @@ int32_t TransDealTdcCheckCollabResult(int32_t channelId, int32_t checkResult, pi
     if (ret != SOFTBUS_OK) {
         TRANS_LOGE(TRANS_CTRL, "get session conn by channelId=%{public}d failed.", channelId);
         return SOFTBUS_TRANS_GET_SESSION_CONN_FAILED;
-    }
-    if (conn.appInfo.myData.pid != callingPid) {
-        TRANS_LOGE(TRANS_CTRL, "callingPid does not match");
-        return SOFTBUS_TRANS_CHECK_PID_ERROR;
     }
     ret = TransTdcUpdateReplyCnt(channelId);
     if (ret != SOFTBUS_OK) {

@@ -259,7 +259,8 @@ static ClientProxyChannelInfo *ClientTransProxyCreateChannelInfo(const ChannelIn
     return info;
 }
 
-int32_t ClientTransProxyOnChannelOpened(const char *sessionName, const ChannelInfo *channel)
+int32_t ClientTransProxyOnChannelOpened(
+    const char *sessionName, const ChannelInfo *channel, SocketAccessInfo *accessInfo)
 {
     if (sessionName == NULL || channel == NULL) {
         TRANS_LOGW(TRANS_SDK, "invalid param.");
@@ -293,7 +294,7 @@ int32_t ClientTransProxyOnChannelOpened(const char *sessionName, const ChannelIn
             break;
     }
 
-    ret = g_sessionCb.OnSessionOpened(sessionName, channel, type);
+    ret = g_sessionCb.OnSessionOpened(sessionName, channel, type, accessInfo);
     if (ret != SOFTBUS_OK) {
         (void)ClientTransProxyDelChannelInfo(channel->channelId);
         char *tmpName = NULL;

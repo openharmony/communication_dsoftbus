@@ -792,7 +792,6 @@ static int32_t AddAuthChannelInfo(AuthChannelInfo *info)
         TRANS_LOGE(TRANS_SVC, "invalid param");
         return SOFTBUS_INVALID_PARAM;
     }
-    DeleteWifiConnItemByConnId(info->authId);
     if (SoftBusMutexLock(&g_authChannelList->lock) != SOFTBUS_OK) {
         TRANS_LOGE(TRANS_SVC, "fail to lock authChannelList.");
         return SOFTBUS_LOCK_ERR;
@@ -1432,7 +1431,7 @@ static int32_t TransSetAuthChannelReplyCnt(int32_t channelId)
     return SOFTBUS_TRANS_NODE_NOT_FOUND;
 }
 
-int32_t TransDealAuthChannelOpenResult(int32_t channelId, int32_t openResult, pid_t callingPid)
+int32_t TransDealAuthChannelOpenResult(int32_t channelId, int32_t openResult)
 {
     AuthChannelInfo info;
     (void)memset_s(&info, sizeof(AuthChannelInfo), 0, sizeof(AuthChannelInfo));
@@ -1440,10 +1439,6 @@ int32_t TransDealAuthChannelOpenResult(int32_t channelId, int32_t openResult, pi
     if (ret != SOFTBUS_OK) {
         TRANS_LOGE(TRANS_CTRL, "get auth channel failed, channelId=%{public}d, ret=%{public}d", channelId, ret);
         return ret;
-    }
-    if (info.appInfo.myData.pid != callingPid) {
-        TRANS_LOGE(TRANS_CTRL, "callingPid does not match");
-        return SOFTBUS_TRANS_CHECK_PID_ERROR;
     }
     ret = TransSetAuthChannelReplyCnt(channelId);
     if (ret != SOFTBUS_OK) {

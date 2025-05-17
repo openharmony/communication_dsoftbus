@@ -90,9 +90,6 @@ public:
     virtual int32_t LnnFreeLane(uint32_t laneReqId) = 0;
     virtual int32_t LnnGetNetworkIdByUdidHash(
         const uint8_t *udidHash, uint32_t udidHashLen, char *buf, uint32_t len, bool needOnline) = 0;
-    virtual int32_t UnPackUkRequest(const cJSON *msg, AuthACLInfo *aclInfo, char *sessionName) = 0;
-    virtual int32_t FillSinkAclInfo(const char *sessionName, AuthACLInfo *aclInfo, int32_t *pid) = 0;
-    virtual int32_t UnPackUkReply(const cJSON *msg, AuthACLInfo *aclInfo, int32_t *ukId) = 0;
     virtual int32_t AuthDecryptByUkId(
         int32_t ukId, const uint8_t *inData, uint32_t inLen, uint8_t *outData, uint32_t *outLen) = 0;
     virtual int32_t AuthFindUkIdByAclInfo(const AuthACLInfo *acl, int32_t *ukId) = 0;
@@ -157,9 +154,6 @@ public:
     MOCK_METHOD1(LnnFreeLane, int32_t (uint32_t laneReqId));
     MOCK_METHOD5(LnnGetNetworkIdByUdidHash, int32_t (const uint8_t *, uint32_t, char *, uint32_t, bool));
 
-    MOCK_METHOD3(UnPackUkRequest, int32_t (const cJSON *msg, AuthACLInfo *aclInfo, char *sessionName));
-    MOCK_METHOD3(FillSinkAclInfo, int32_t (const char *sessionName, AuthACLInfo *aclInfo, int32_t *pid));
-    MOCK_METHOD3(UnPackUkReply, int32_t (const cJSON *msg, AuthACLInfo *aclInfo, int32_t *ukId));
     MOCK_METHOD5(AuthDecryptByUkId,
         int32_t (int32_t ukId, const uint8_t *inData, uint32_t inLen, uint8_t *outData, uint32_t *outLen));
     MOCK_METHOD2(AuthFindUkIdByAclInfo, int32_t (const AuthACLInfo *acl, int32_t *ukId));

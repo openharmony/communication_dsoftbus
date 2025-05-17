@@ -55,7 +55,6 @@ namespace OHOS {
 #define TEST_SLEEP_TIME 5000
 #define TEST_ARR_INIT 0
 #define TEST_FAST_DATA_SIZE 10
-#define TEST_CALLING_PID 333
 
 static int32_t m_testProxyAuthChannelId = -1;
 static bool g_testProxyChannelOpenSuccessFlag = false;
@@ -702,9 +701,6 @@ HWTEST_F(SoftbusProxyChannelManagerTest, TransProxyOnMessageReceivedTest001, Tes
     EXPECT_FALSE(g_testProxyChannelOpenSuccessFlag);
 
     msg.msgHead.type = PROXYCHANNEL_MSG_TYPE_HANDSHAKE_AUTH;
-    TransProxyOnMessageReceived(&msg);
-
-    msg.msgHead.type = PROXYCHANNEL_MSG_TYPE_HANDSHAKE_UK_ACK;
     TransProxyOnMessageReceived(&msg);
 
     msg.msgHead.type = PROXYCHANNEL_MSG_TYPE_MAX;
@@ -2215,7 +2211,7 @@ HWTEST_F(SoftbusProxyChannelManagerTest, TransProxyGetPrivilegeCloseList001, Tes
 HWTEST_F(SoftbusProxyChannelManagerTest, TransDealProxyCheckCollabResult001, TestSize.Level1)
 {
     int32_t channelId = TEST_VALID_CHANNEL_ID;
-    int32_t ret = TransDealProxyCheckCollabResult(channelId, SOFTBUS_OK, TEST_CALLING_PID);
+    int32_t ret = TransDealProxyCheckCollabResult(channelId, SOFTBUS_OK);
     EXPECT_EQ(SOFTBUS_TRANS_NODE_NOT_FOUND, ret);
 
     ProxyChannelInfo *chan = reinterpret_cast<ProxyChannelInfo *>(SoftBusCalloc(sizeof(ProxyChannelInfo)));
@@ -2228,11 +2224,11 @@ HWTEST_F(SoftbusProxyChannelManagerTest, TransDealProxyCheckCollabResult001, Tes
     EXPECT_EQ(SOFTBUS_OK, ret);
 
     TransCheckChannelOpenToLooperDelay(channelId, CHANNEL_TYPE_PROXY, TEST_SLEEP_TIME);
-    ret = TransDealProxyCheckCollabResult(channelId, SOFTBUS_OK, TEST_CALLING_PID);
-    EXPECT_EQ(SOFTBUS_TRANS_CHECK_PID_ERROR, ret);
+    ret = TransDealProxyCheckCollabResult(channelId, SOFTBUS_OK);
+    EXPECT_EQ(SOFTBUS_TRANS_PROXY_ERROR_APP_TYPE, ret);
 
     ret = TransProxyDelByChannelId(channelId, chan);
-    EXPECT_EQ(SOFTBUS_OK, ret);
+    EXPECT_EQ(SOFTBUS_TRANS_NODE_NOT_FOUND, ret);
 }
 
 /**
@@ -2250,10 +2246,10 @@ HWTEST_F(SoftbusProxyChannelManagerTest, TransDealProxyCheckCollabResult002, Tes
     EXPECT_EQ(SOFTBUS_OK, ret);
 
     TransCheckChannelOpenToLooperDelay(TEST_VALID_CHANNEL_ID, CHANNEL_TYPE_PROXY, TEST_SLEEP_TIME);
-    ret = TransDealProxyCheckCollabResult(TEST_VALID_CHANNEL_ID, SOFTBUS_TRANS_NODE_NOT_FOUND, TEST_CALLING_PID);
-    EXPECT_EQ(SOFTBUS_TRANS_CHECK_PID_ERROR, ret);
+    ret = TransDealProxyCheckCollabResult(TEST_VALID_CHANNEL_ID, SOFTBUS_TRANS_NODE_NOT_FOUND);
+    EXPECT_EQ(SOFTBUS_TRANS_NODE_NOT_FOUND, ret);
     ret = TransProxyDelByChannelId(TEST_VALID_CHANNEL_ID, chan);
-    EXPECT_EQ(SOFTBUS_OK, ret);
+    EXPECT_EQ(SOFTBUS_TRANS_NODE_NOT_FOUND, ret);
 }
 
 /**
@@ -2295,111 +2291,6 @@ HWTEST_F(SoftbusProxyChannelManagerTest, TransProxyPostResetPeerMsgToLoop002, Te
 
     ret = TransProxyCloseProxyChannel(TEST_VALID_CHANNEL_ID);
     EXPECT_EQ(SOFTBUS_OK, ret);
-}
-
-/**@
- * @tc.name: TransProxyUkIdInfoTest001
- * @tc.desc: test proxy TransProxyGetOrSetUkIdInfo.
- * @tc.type: FUNC
- * @tc.require:
- */
-HWTEST_F(SoftbusProxyChannelManagerTest, TransProxyUkIdInfoTest001, TestSize.Level1)
-{
-    ProxyChannelInfo *chan = reinterpret_cast<ProxyChannelInfo *>(SoftBusCalloc(sizeof(ProxyChannelInfo)));
-    ASSERT_TRUE(chan != nullptr);
-    chan->channelId = TEST_VALID_CHANNEL_ID;
-    int32_t ret = TransProxyAddChanItem(chan);
-    EXPECT_EQ(SOFTBUS_OK, ret);
-
-    UkIdInfo ukIdInfo = {
-        .myId = 0,
-        .peerId = 0,
-    };
-
-    ret = TransProxySetUkInfoByChanId(TEST_VALID_CHANNEL_ID, nullptr);
-    EXPECT_EQ(SOFTBUS_INVALID_PARAM, ret);
-
-    ret = TransProxySetUkInfoByChanId(TEST_VALID_CHANNEL_ID, &ukIdInfo);
-    EXPECT_EQ(SOFTBUS_OK, ret);
-
-    ret = TransProxyGetUkInfoByChanId(TEST_VALID_CHANNEL_ID, nullptr);
-    EXPECT_EQ(SOFTBUS_INVALID_PARAM, ret);
-
-    ret = TransProxyGetUkInfoByChanId(TEST_VALID_CHANNEL_ID, &ukIdInfo);
-    EXPECT_EQ(SOFTBUS_OK, ret);
-
-    TransProxyDelChanByChanId(TEST_VALID_CHANNEL_ID);
-}
-
-/**
- * @tc.name: TransProxyProcessHandshakeUkMsg001
- * @tc.desc: test handshake uk msg.
- * @tc.type: FUNC
- * @tc.require:
- */
-HWTEST_F(SoftbusProxyChannelManagerTest, TransProxyProcessHandshakeUkMsg001, TestSize.Level1)
-{
-    ProxyMessage *msg = reinterpret_cast<ProxyMessage *>(SoftBusCalloc(sizeof(ProxyMessage)));
-    ASSERT_TRUE(msg != nullptr);
-
-    AuthACLInfo *aclInfo = reinterpret_cast<AuthACLInfo *>(SoftBusCalloc(sizeof(AuthACLInfo)));
-    ASSERT_TRUE(aclInfo != nullptr);
-    msg->msgHead.cipher = TEST_NUMBER_ONE;
-    msg->msgHead.peerId = TEST_PARSE_MESSAGE_CHANNEL;
-    msg->msgHead.type = (PROXYCHANNEL_MSG_TYPE_HANDSHAKE_UK & FOUR_BIT_MASK) | (1 << VERSION_SHIFT);
-    EXPECT_NO_FATAL_FAILURE(TransProxyProcessHandshakeUkMsg(nullptr));
-
-    EXPECT_NO_FATAL_FAILURE(TransProxyProcessHandshakeUkMsg(msg));
-
-    int32_t ret = TransProxyGenUk(msg, 0, aclInfo);
-    EXPECT_NE(SOFTBUS_OK, ret);
-
-    ret = TransUkRequestMgrInit();
-    EXPECT_EQ(SOFTBUS_OK, ret);
-    ret = TransProxyGenUk(msg, 0, aclInfo);
-    EXPECT_NE(SOFTBUS_OK, ret);
-
-    int32_t requestId = 1;
-    ret = TransUkRequestAddItem(requestId, msg->msgHead.peerId, msg->connId, 0, aclInfo);
-    EXPECT_NO_FATAL_FAILURE(OnProxyGenUkSuccess(requestId, 0));
-
-    EXPECT_NO_FATAL_FAILURE(OnProxyGenUkFailed(requestId, 0));
-
-    TransUkRequestMgrDeinit();
-
-    EXPECT_NO_FATAL_FAILURE(ReplyExistUkId(msg, aclInfo, 0, 0));
-    SoftBusFree(aclInfo);
-    SoftBusFree(msg);
-}
-
-/**
- * @tc.name: TransProxyProcessHandshakeUkaAckMsg001
- * @tc.desc: test handshake uk msg.
- * @tc.type: FUNC
- * @tc.require:
- */
-HWTEST_F(SoftbusProxyChannelManagerTest, TransProxyProcessHandshakeUkaAckMsg001, TestSize.Level1)
-{
-    ProxyMessage *msg = reinterpret_cast<ProxyMessage *>(SoftBusCalloc(sizeof(ProxyMessage)));
-    ASSERT_TRUE(msg != nullptr);
-    msg->msgHead.cipher = TEST_NUMBER_ONE;
-    msg->msgHead.peerId = TEST_PARSE_MESSAGE_CHANNEL;
-    msg->msgHead.type = (PROXYCHANNEL_MSG_TYPE_HANDSHAKE_UK & FOUR_BIT_MASK) | (1 << VERSION_SHIFT);
-    EXPECT_NO_FATAL_FAILURE(TransProxyProcessHandshakeUkAckMsg(nullptr));
-
-    EXPECT_NO_FATAL_FAILURE(TransProxyProcessHandshakeUkAckMsg(msg));
-
-    string vaildDataStr = "{\"ERR_CODE\":-425983866}";
-    msg->data = (char *)vaildDataStr.c_str();
-    msg->dataLen = strlen(msg->data);
-    EXPECT_NO_FATAL_FAILURE(TransProxyProcessHandshakeUkAckMsg(msg));
-
-    vaildDataStr = "{\"ERR_CODE\":0}\0";
-    msg->data = (char *)vaildDataStr.c_str();;
-    msg->dataLen = strlen(msg->data);
-    EXPECT_NO_FATAL_FAILURE(TransProxyProcessHandshakeUkAckMsg(msg));
-
-    SoftBusFree(msg);
 }
 
 /**

@@ -15,6 +15,8 @@
 
 #include "client_trans_channel_callback.h"
 
+#include "securec.h"
+
 #include "client_trans_auth_manager.h"
 #include "client_trans_proxy_manager.h"
 #include "client_trans_session_manager.h"
@@ -35,10 +37,28 @@
 #define RERORT_UDP_INFO_NUM 4
 #define REPORT_SYN_INFO_NUM 3
 #define SYN_INFO_LEN (sizeof(uint32_t) * REPORT_SYN_INFO_NUM)
+#define ACCESS_INFO_PARAM_NUM 3
 
-static int32_t TransSendChannelOpenedDataToCore(int32_t channelId, int32_t channelType, int32_t openResult)
+static int32_t WriteAcessInfoToBuf(uint8_t *buf, uint32_t bufLen, int32_t *offSet, const SocketAccessInfo *accessInfo)
 {
-    uint32_t len = sizeof(uint32_t) * REPORT_INFO_NUM;
+    int32_t ret = WriteInt32ToBuf(buf, bufLen, offSet, accessInfo->userId);
+    if (ret != SOFTBUS_OK) {
+        TRANS_LOGE(TRANS_CTRL, "write userId=%{public}d to buf failed! ret=%{public}d", accessInfo->userId, ret);
+        return ret;
+    }
+    ret = WriteUint64ToBuf(buf, bufLen, offSet, accessInfo->localTokenId);
+    if (ret != SOFTBUS_OK) {
+        TRANS_LOGE(TRANS_CTRL, "write tokenId to buf failed! ret=%{public}d", ret);
+        return ret;
+    }
+    return SOFTBUS_OK;
+}
+
+static int32_t TransSendChannelOpenedDataToCore(
+    int32_t channelId, int32_t channelType, int32_t openResult, const SocketAccessInfo *accessInfo)
+{
+    uint32_t len = sizeof(uint32_t) *
+        ((channelType == CHANNEL_TYPE_AUTH) ? REPORT_INFO_NUM : REPORT_INFO_NUM + ACCESS_INFO_PARAM_NUM);
     uint8_t *buf = (uint8_t *)SoftBusCalloc(len);
     if (buf == NULL) {
         TRANS_LOGE(TRANS_CTRL, "malloc buf failed, channelId=%{public}d", channelId);
@@ -63,15 +83,25 @@ static int32_t TransSendChannelOpenedDataToCore(int32_t channelId, int32_t chann
         SoftBusFree(buf);
         return ret;
     }
+    if (channelType != CHANNEL_TYPE_AUTH) {
+        ret = WriteAcessInfoToBuf(buf, len, &offSet, accessInfo);
+        if (ret != SOFTBUS_OK) {
+            TRANS_LOGE(TRANS_CTRL, "write accessinfo to buf failed! ret=%{public}d", ret);
+            SoftBusFree(buf);
+            return ret;
+        }
+    }
     ret = ServerIpcProcessInnerEvent(EVENT_TYPE_CHANNEL_OPENED, buf, len);
     SoftBusFree(buf);
     return ret;
 }
 
 static int32_t TransSendUdpChannelOpenedDataToCore(
-    int32_t channelId, int32_t channelType, int32_t openResult, int32_t udpPort)
+    int32_t channelId, int32_t channelType, int32_t openResult, int32_t udpPort, const SocketAccessInfo *accessInfo)
 {
-    uint32_t len = sizeof(uint32_t) * RERORT_UDP_INFO_NUM;
+    uint32_t len = sizeof(uint32_t) *
+        (channelType == CHANNEL_TYPE_AUTH ? RERORT_UDP_INFO_NUM : RERORT_UDP_INFO_NUM + ACCESS_INFO_PARAM_NUM);
+
     uint8_t *buf = (uint8_t *)SoftBusCalloc(len);
     int32_t offSet = 0;
     int32_t ret = SOFTBUS_OK;
@@ -99,6 +129,14 @@ static int32_t TransSendUdpChannelOpenedDataToCore(
         SoftBusFree(buf);
         return ret;
     }
+    if (channelType != CHANNEL_TYPE_AUTH) {
+        ret = WriteAcessInfoToBuf(buf, len, &offSet, accessInfo);
+        if (ret != SOFTBUS_OK) {
+            TRANS_LOGE(TRANS_CTRL, "write accessinfo to buf failed! ret=%{public}d", ret);
+            SoftBusFree(buf);
+            return ret;
+        }
+    }
     ret = ServerIpcProcessInnerEvent(EVENT_TYPE_CHANNEL_OPENED, buf, len);
     SoftBusFree(buf);
     return ret;
@@ -111,20 +149,21 @@ int32_t TransOnChannelOpened(const char *sessionName, const ChannelInfo *channel
         return SOFTBUS_INVALID_PARAM;
     }
 
+    SocketAccessInfo accessInfo = { 0 };
     int32_t ret = SOFTBUS_NO_INIT;
     int32_t udpPort = 0;
     switch (channel->channelType) {
         case CHANNEL_TYPE_AUTH:
-            ret = ClientTransAuthOnChannelOpened(sessionName, channel);
+            ret = ClientTransAuthOnChannelOpened(sessionName, channel, &accessInfo);
             break;
         case CHANNEL_TYPE_PROXY:
-            ret = ClientTransProxyOnChannelOpened(sessionName, channel);
+            ret = ClientTransProxyOnChannelOpened(sessionName, channel, &accessInfo);
             break;
         case CHANNEL_TYPE_TCP_DIRECT:
-            ret = ClientTransTdcOnChannelOpened(sessionName, channel);
+            ret = ClientTransTdcOnChannelOpened(sessionName, channel, &accessInfo);
             break;
         case CHANNEL_TYPE_UDP:
-            ret = TransOnUdpChannelOpened(sessionName, channel, &udpPort);
+            ret = TransOnUdpChannelOpened(sessionName, channel, &udpPort, &accessInfo);
             break;
         default:
             TRANS_LOGE(TRANS_SDK, "[client] invalid type.");
@@ -137,9 +176,9 @@ int32_t TransOnChannelOpened(const char *sessionName, const ChannelInfo *channel
 
     if (channel->isServer) {
         if (channelType == CHANNEL_TYPE_UDP && udpPort > 0) {
-            ret = TransSendUdpChannelOpenedDataToCore(channelId, channelType, openResult, udpPort);
+            ret = TransSendUdpChannelOpenedDataToCore(channelId, channelType, openResult, udpPort, &accessInfo);
         } else {
-            ret = TransSendChannelOpenedDataToCore(channelId, channelType, openResult);
+            ret = TransSendChannelOpenedDataToCore(channelId, channelType, openResult, &accessInfo);
         }
     }
     if (ret == SOFTBUS_OK) {

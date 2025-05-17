@@ -64,7 +64,8 @@ public:
     void TearDown() override {}
 };
 
-static int32_t OnSessionOpened(const char *sessionName, const ChannelInfo *channel, SessionType flag)
+static int32_t OnSessionOpened(
+    const char *sessionName, const ChannelInfo *channel, SessionType flag, SocketAccessInfo *accessInfo)
 {
     return SOFTBUS_OK;
 }
@@ -140,13 +141,13 @@ HWTEST_F(ClientTransUdpManagerTest, TransOnUdpChannelOpenedTest001, TestSize.Lev
     ChannelInfo channel = InitChannelInfo();
     int32_t udpPort;
 
-    ret = TransOnUdpChannelOpened(nullptr, &channel, &udpPort);
+    ret = TransOnUdpChannelOpened(nullptr, &channel, &udpPort, nullptr);
     EXPECT_EQ(SOFTBUS_INVALID_PARAM, ret);
 
-    ret = TransOnUdpChannelOpened(g_sessionName, nullptr, &udpPort);
+    ret = TransOnUdpChannelOpened(g_sessionName, nullptr, &udpPort, nullptr);
     EXPECT_EQ(SOFTBUS_INVALID_PARAM, ret);
 
-    ret = TransOnUdpChannelOpened(g_sessionName, &channel, nullptr);
+    ret = TransOnUdpChannelOpened(g_sessionName, &channel, nullptr, nullptr);
     EXPECT_EQ(SOFTBUS_INVALID_PARAM, ret);
 }
 
@@ -162,24 +163,24 @@ HWTEST_F(ClientTransUdpManagerTest, TransOnUdpChannelOpenedTest002, TestSize.Lev
     ChannelInfo channel = InitChannelInfo();
     int32_t udpPort;
     char strSessionName[] = "ohos.distributedschedule.dms.test";
-
-    ret = TransOnUdpChannelOpened(g_sessionName, &channel, &udpPort);
+    SocketAccessInfo accessInfo = { 0 };
+    ret = TransOnUdpChannelOpened(g_sessionName, &channel, &udpPort, &accessInfo);
     EXPECT_EQ(SOFTBUS_NO_INIT, ret);
 
     ret = TransOnUdpChannelClosed(channel.channelId, SHUTDOWN_REASON_UNKNOWN);
     EXPECT_EQ(SOFTBUS_TRANS_UDP_GET_CHANNEL_FAILED, ret);
 
     channel.businessType = BUSINESS_TYPE_FILE;
-    ret = TransOnUdpChannelOpened(strSessionName, &channel, &udpPort);
+    ret = TransOnUdpChannelOpened(strSessionName, &channel, &udpPort, &accessInfo);
     EXPECT_EQ(SOFTBUS_TRANS_NODE_NOT_FOUND, ret);
 
     channel.businessType = BUSINESS_TYPE_FILE;
     channel.channelId = TEST_CHANNELID + 1;
-    ret = TransOnUdpChannelOpened(g_sessionName, &channel, &udpPort);
+    ret = TransOnUdpChannelOpened(g_sessionName, &channel, &udpPort, &accessInfo);
     EXPECT_EQ(SOFTBUS_TRANS_NODE_NOT_FOUND, ret);
 
     channel.businessType = TEST_COUNT;
-    ret = TransOnUdpChannelOpened(g_sessionName, &channel, &udpPort);
+    ret = TransOnUdpChannelOpened(g_sessionName, &channel, &udpPort, &accessInfo);
     EXPECT_EQ(SOFTBUS_TRANS_BUSINESS_TYPE_NOT_MATCH, ret);
 }
 
@@ -195,8 +196,8 @@ HWTEST_F(ClientTransUdpManagerTest, TransOnUdpChannelOpenedTest003, TestSize.Lev
     ChannelInfo channel = InitChannelInfo();
     int32_t udpPort;
     QosTv tvList;
-
-    ret = TransOnUdpChannelOpened(g_sessionName, &channel, &udpPort);
+    SocketAccessInfo accessInfo = { 0 };
+    ret = TransOnUdpChannelOpened(g_sessionName, &channel, &udpPort, &accessInfo);
     EXPECT_EQ(SOFTBUS_NO_INIT, ret);
 
     ret = TransOnUdpChannelQosEvent(TEST_CHANNELID, TEST_EVENT_ID, TEST_COUNT, &tvList);
@@ -248,14 +249,14 @@ HWTEST_F(ClientTransUdpManagerTest, TransOnUdpChannelClosedTest002, TestSize.Lev
     ChannelInfo channel = InitChannelInfo();
     int32_t udpPort;
     channel.businessType = BUSINESS_TYPE_FILE;
-
-    ret = TransOnUdpChannelOpened(g_sessionName, &channel, &udpPort);
+    SocketAccessInfo accessInfo = { 0 };
+    ret = TransOnUdpChannelOpened(g_sessionName, &channel, &udpPort, &accessInfo);
     EXPECT_EQ(SOFTBUS_TRANS_NODE_NOT_FOUND, ret);
 
     ret = ClientTransUdpMgrInit(&g_sessionCb);
     EXPECT_EQ(SOFTBUS_OK, ret);
 
-    ret = TransOnUdpChannelOpened(g_sessionName, &channel, &udpPort);
+    ret = TransOnUdpChannelOpened(g_sessionName, &channel, &udpPort, &accessInfo);
     EXPECT_EQ(SOFTBUS_TRANS_NODE_NOT_FOUND, ret);
 
     ret = TransOnUdpChannelClosed(channel.channelId, SHUTDOWN_REASON_UNKNOWN);
@@ -322,10 +323,11 @@ HWTEST_F(ClientTransUdpManagerTest, TransUdpChannelSendStreamTest001, TestSize.L
     };
 
     StreamFrameInfo tmpf = {};
+    SocketAccessInfo accessInfo = { 0 };
     ret = TransUdpChannelSendStream(TEST_CHANNELID, &tmpData, &tmpData2, &tmpf);
     EXPECT_EQ(SOFTBUS_TRANS_UDP_GET_CHANNEL_FAILED, ret);
 
-    ret = TransOnUdpChannelOpened(g_sessionName, &channel, &udpPort);
+    ret = TransOnUdpChannelOpened(g_sessionName, &channel, &udpPort, &accessInfo);
     EXPECT_EQ(SOFTBUS_NO_INIT, ret);
 
     ret = TransUdpChannelSendStream(TEST_CHANNELID, &tmpData, &tmpData2, &tmpf);
@@ -390,15 +392,15 @@ HWTEST_F(ClientTransUdpManagerTest, ClientTransAddUdpChannelTest001, TestSize.Le
     int32_t ret;
     ChannelInfo channel = InitChannelInfo();
     int32_t udpPort;
-
-    ret = TransOnUdpChannelOpened(g_sessionName, &channel, &udpPort);
+    SocketAccessInfo accessInfo = { 0 };
+    ret = TransOnUdpChannelOpened(g_sessionName, &channel, &udpPort, &accessInfo);
     EXPECT_EQ(SOFTBUS_TRANS_UDP_CLIENT_ADD_CHANNEL_FAILED, ret);
 
-    ret = TransOnUdpChannelOpened(g_sessionName, &channel, &udpPort);
+    ret = TransOnUdpChannelOpened(g_sessionName, &channel, &udpPort, &accessInfo);
     EXPECT_EQ(SOFTBUS_TRANS_UDP_CLIENT_ADD_CHANNEL_FAILED, ret);
 
     ClientTransUdpMgrDeinit();
-    ret = TransOnUdpChannelOpened(g_sessionName, &channel, &udpPort);
+    ret = TransOnUdpChannelOpened(g_sessionName, &channel, &udpPort, &accessInfo);
     EXPECT_EQ(SOFTBUS_TRANS_UDP_CLIENT_ADD_CHANNEL_FAILED, ret);
 }
 

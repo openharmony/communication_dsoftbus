@@ -41,7 +41,8 @@ public:
     void TearDown() override {}
 };
 
-int32_t OnSessionOpened(const char *sessionName, const ChannelInfo *channel, SessionType flag)
+int32_t OnSessionOpened(
+    const char *sessionName, const ChannelInfo *channel, SessionType flag, SocketAccessInfo *accessInfo)
 {
     return SOFTBUS_OK;
 }

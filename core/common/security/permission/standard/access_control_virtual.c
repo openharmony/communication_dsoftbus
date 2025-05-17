@@ -46,11 +46,6 @@ uint64_t TransACLGetCallingTokenID(void)
     return TOKENID_NOT_SET;
 }
 
-pid_t TransGetCallingPid(void)
-{
-    return CALLINGPID_NOT_GET;
-}
-
 void TransGetTokenInfo(uint64_t callingId, char *tokenName, int32_t nameLen, int32_t *tokenType)
 {
     (void)callingId;

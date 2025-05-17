@@ -96,7 +96,9 @@ typedef struct {
     ApiVersion apiVersion;
     uint32_t dataConfig;
     int32_t userId;
+    int32_t userKeyId;
     int64_t channelId;
+    uint64_t tokenId; // identify first caller
     int32_t tokenType;
     int32_t sessionId;
 } AppInfoData;
@@ -104,11 +106,13 @@ typedef struct {
 typedef struct {
     char groupId[GROUP_ID_SIZE_MAX];
     char sessionKey[SESSION_KEY_LENGTH];
+    char sinkSessionKey[SESSION_KEY_LENGTH];
     char reqId[REQ_ID_SIZE_MAX];
     char peerNetWorkId[DEVICE_ID_SIZE_MAX];
     char peerUdid[DEVICE_ID_SIZE_MAX];
     char peerVersion[DEVICE_VERSION_SIZE_MAX];
     char tokenName[PKG_NAME_SIZE_MAX];
+    char extraAccessInfo[EXTRA_ACCESS_INFO_LEN_MAX];
     bool isClient;
     uint16_t fastTransDataSize;
     RouteType routeType;

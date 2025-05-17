@@ -18,7 +18,6 @@
 
 #include "trans_tcp_direct_manager.h"
 #include "trans_tcp_direct_sessionconn.h"
-#include "trans_uk_manager.h"
 
 #ifdef __cplusplus
 extern "C" {
@@ -30,16 +29,15 @@ int32_t TransSrvDataListInit(void);
 void TransSrvDataListDeinit(void);
 int32_t TransSrvAddDataBufNode(int32_t channelId, int32_t fd);
 void TransSrvDelDataBufNode(int channelId);
-int32_t TransTdcPostBytes(
-    int32_t channelId, TdcPacketHead *packetHead, const char *data, const UkIdInfo *ukIdInfo);
+int32_t TransTdcPostBytes(int32_t channelId, TdcPacketHead *packetHead, const char *data);
 int32_t TransTdcProcessPacket(int32_t channelId);
-int32_t TransTdcSrvRecvData(ListenerModule module, int32_t channelId, int32_t type, int32_t *pktModule);
+int32_t TransTdcSrvRecvData(ListenerModule module, int32_t channelId, int32_t type);
 
 int32_t NotifyChannelOpenFailedBySessionConn(const SessionConn *conn, int32_t errCode);
 int32_t NotifyChannelOpenFailed(int32_t channelId, int32_t errCode);
-int32_t TransDealTdcChannelOpenResult(int32_t channelId, int32_t openResult, pid_t callingPid);
+int32_t TransDealTdcChannelOpenResult(int32_t channelId, int32_t openResult, const AccessInfo *accessInfo);
 void TransAsyncTcpDirectChannelTask(int32_t channelId);
-int32_t TransDealTdcCheckCollabResult(int32_t channelId, int32_t checkResult, pid_t callingPid);
+int32_t TransDealTdcCheckCollabResult(int32_t channelId, int32_t checkResult);
 
 #ifdef __cplusplus
 }

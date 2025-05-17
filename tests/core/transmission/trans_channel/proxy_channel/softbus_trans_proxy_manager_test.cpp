@@ -517,37 +517,4 @@ HWTEST_F(TransProxyManagerTest, TransProxyDeathCallbackTest001, TestSize.Level1)
     EXPECT_NE(SOFTBUS_OK, ret);
     SoftBusFree(chan);
 }
-
-/*
- * @tc.name: TransProxyHandshakeUkMsgTest001
- * @tc.desc: test proxy uk msg.
- * @tc.type: FUNC
- * @tc.require:
-*/
-HWTEST_F(TransProxyManagerTest, TransProxyHandshakeUkMsgTest001, TestSize.Level1)
-{
-    ProxyMessage msg;
-    msg.msgHead.type = PROXYCHANNEL_MSG_TYPE_HANDSHAKE_UK;
-
-    string vaildDataStr = "{\"ERR_CODE\":0}\0";
-    msg.data = (char *)vaildDataStr.c_str();
-    msg.dataLen = strlen(msg.data);
-    TransConnInterfaceMock connMock;
-    EXPECT_CALL(connMock, ConnGetHeadSize).WillRepeatedly(Return(sizeof(ConnPktHead)));
-    OHOS::TransAuthInterfaceMock authMock;
-    EXPECT_CALL(authMock, UnPackUkRequest).WillOnce(Return(SOFTBUS_INVALID_PARAM)).WillRepeatedly(Return(SOFTBUS_OK));
-
-    EXPECT_NO_FATAL_FAILURE(TransProxyOnMessageReceived(&msg));
-
-    EXPECT_CALL(authMock, FillSinkAclInfo).WillOnce(Return(SOFTBUS_INVALID_PARAM)).WillRepeatedly(Return(SOFTBUS_OK));
-    EXPECT_NO_FATAL_FAILURE(TransProxyOnMessageReceived(&msg));
-
-    EXPECT_CALL(authMock, AuthFindUkIdByAclInfo)
-        .WillOnce(Return(SOFTBUS_AUTH_ACL_NOT_FOUND))
-        .WillOnce(Return(SOFTBUS_AUTH_UK_NOT_FIND))
-        .WillOnce(Return(SOFTBUS_OK));
-    EXPECT_NO_FATAL_FAILURE(TransProxyOnMessageReceived(&msg));
-    EXPECT_NO_FATAL_FAILURE(TransProxyOnMessageReceived(&msg));
-    EXPECT_NO_FATAL_FAILURE(TransProxyOnMessageReceived(&msg));
-}
 } // namespace OHOS

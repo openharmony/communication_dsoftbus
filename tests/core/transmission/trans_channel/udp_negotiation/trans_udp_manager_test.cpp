@@ -33,7 +33,6 @@ namespace OHOS {
 #define INVALID_CHAN_ID (-1)
 #define INVALID_CHANNEL_REQUETID (23456)
 #define INVALID_CHANNEL_NETWORK (1111)
-#define TEST_CALLING_PID 433
 static int64_t g_channelId = 0;
 
 class TransUdpManagerTest : public testing::Test {
@@ -1127,7 +1126,7 @@ HWTEST_F(TransUdpManagerTest, TransSetTosTest001, TestSize.Level1)
 {
     int32_t channelId = TEST_CHANNEL_ID;
     uint8_t tos = FILE_PRIORITY_BK;
-    int32_t ret = TransSetTos(channelId, tos, TEST_CALLING_PID);
+    int32_t ret = TransSetTos(channelId, tos);
     EXPECT_EQ(SOFTBUS_NO_INIT, ret);
 
     ret = TransUdpChannelMgrInit();
@@ -1137,11 +1136,11 @@ HWTEST_F(TransUdpManagerTest, TransSetTosTest001, TestSize.Level1)
     channel->info.myData.channelId = channelId;
     ret = TransAddUdpChannel(channel);
     EXPECT_EQ(SOFTBUS_OK, ret);
-    ret = TransSetTos(channelId, tos, TEST_CALLING_PID);
-    EXPECT_EQ(SOFTBUS_TRANS_NODE_NOT_FOUND, ret);
+    ret = TransSetTos(channelId, tos);
+    EXPECT_EQ(SOFTBUS_OK, ret);
 
     TransDelUdpChannel(channelId);
-    ret = TransSetTos(channelId, tos, TEST_CALLING_PID);
+    ret = TransSetTos(channelId, tos);
     EXPECT_EQ(SOFTBUS_TRANS_NODE_NOT_FOUND, ret);
     TransUdpChannelMgrDeinit();
 }
@@ -1252,41 +1251,35 @@ HWTEST_F(TransUdpManagerTest, CompareSessionNameTest001, TestSize.Level1)
 }
 
 /**
- * @tc.name: TransUdpGetUkIdInfoBySeqTest001
- * @tc.desc: TransUdpGetUkIdInfoBySeq Test
+ * @tc.name: TransUdpUpdateAccessInfo001
+ * @tc.desc: TransUdpUpdateAccessInfo
  * @tc.type: FUNC
  * @tc.require:
  */
-HWTEST_F(TransUdpManagerTest, TransUdpGetUkIdInfoBySeqTest001, TestSize.Level1)
+HWTEST_F(TransUdpManagerTest, TransUdpUpdateAccessInfo001, TestSize.Level1)
 {
-    uint64_t tokenId = 1;
-    int32_t ukId = 1;
-    ListNode privilegeCloseList;
-    ListInit(&privilegeCloseList);
     int32_t ret = TransUdpChannelMgrInit();
     EXPECT_EQ(SOFTBUS_OK, ret);
 
     UdpChannelInfo *channel = reinterpret_cast<UdpChannelInfo *>(SoftBusCalloc(sizeof(UdpChannelInfo)));
     ASSERT_TRUE(channel != nullptr);
     channel->info.myData.channelId = TEST_CHANNEL_ID;
-    channel->info.callingTokenId = tokenId;
-    channel->info.myData.pid = 0;
+    channel->info.myData.tokenType = 1;
     ret = TransAddUdpChannel(channel);
     EXPECT_EQ(SOFTBUS_OK, ret);
-    UkIdInfo ukIdInfo = {
-        .myId = ukId,
-        .peerId = ukId,
+
+    AccessInfo accessInfo = {
+        .userId = 100,
+        .localTokenId = 0,
     };
-    TransUdpGetUkIdInfoBySeq(channel->seq, nullptr, true);
-    EXPECT_EQ(ukId, ukIdInfo.myId);
+    ret = TransUdpUpdateAccessInfo(0, &accessInfo);
+    EXPECT_EQ(SOFTBUS_INVALID_PARAM, ret);
 
-    TransUdpGetUkIdInfoBySeq(channel->seq, &ukIdInfo, true);
-    EXPECT_EQ(ukId, ukIdInfo.myId);
+    accessInfo.localTokenId = 100;
+    ret = TransUdpUpdateAccessInfo(0, &accessInfo);
+    EXPECT_EQ(SOFTBUS_TRANS_NODE_NOT_FOUND, ret);
 
-    TransUdpGetUkIdInfoBySeq(channel->seq, &ukIdInfo, false);
-    EXPECT_EQ(0, ukIdInfo.myId);
-
-    ret = TransDelUdpChannel(TEST_CHANNEL_ID);
+    ret = TransUdpUpdateAccessInfo(TEST_CHANNEL_ID, &accessInfo);
     EXPECT_EQ(SOFTBUS_OK, ret);
     TransUdpChannelMgrDeinit();
 }

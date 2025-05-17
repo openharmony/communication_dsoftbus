@@ -215,13 +215,16 @@ typedef struct {
      * @brief Called when a socket needs to check the access.
      *
      * @param socket Indicates the unique socket fd.
-     * @param info Indicates the information of peer socket access.
+     * @param info Indicates the information of peer socket.
+     * @param peerInfo Indicates the access information of peer socket.
+     * @param localInfo Indicates the access information of local socket. server side should set userId and tokenId.
      * @return If true is returned, it indicates that the access is successful.
-     * if false is returned, the access fails and the app cannot establish a link.
+     * If this method is not implemented, the negotiation is successful by default.
+     * If false is returned, access check fails and the app cannot establish a link.
      * @since 2.0
      * @version 2.0
      */
-    bool (*OnCheckAccess)(int32_t socket, PeerSocketAccessInfo info);
+    bool (*OnNegotiate2)(int32_t socket, PeerSocketInfo info, SocketAccessInfo *peerInfo, SocketAccessInfo *localInfo);
 } ISocketListener;
 
 /**

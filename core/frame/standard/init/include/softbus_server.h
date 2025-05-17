@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021-2024 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2025 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -79,6 +79,12 @@ public:
     int32_t ProcessInnerEvent(int32_t eventType, uint8_t *buf, uint32_t len) override;
     int32_t PrivilegeCloseChannel(uint64_t tokenId, int32_t pid, const char *peerNetworkId) override;
     int32_t SetDisplayName(const char *pkgName, const char *nameData, uint32_t len) override;
+    int32_t CreateServer(const char *pkgName, const char *name) override;
+    int32_t RemoveServer(const char *pkgName, const char *name) override;
+    int32_t Connect(const char *pkgName, const char *name, const Address *address) override;
+    int32_t Disconnect(uint32_t handle) override;
+    int32_t Send(uint32_t handle, const uint8_t *data, uint32_t len) override;
+    int32_t ConnGetPeerDeviceId(uint32_t handle, char *deviceId, uint32_t len) override;
 
 protected:
     void OnStart() override;

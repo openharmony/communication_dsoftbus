@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021-2024 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2025 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -22,6 +22,7 @@
 #include "client_trans_session_manager.h"
 #include "client_trans_socket_manager.h"
 #include "comm_log.h"
+#include "general_connection_server_proxy.h"
 #include "softbus_adapter_mem.h"
 #include "softbus_adapter_thread.h"
 #include "softbus_base_listener.h"
@@ -148,6 +149,7 @@ static void ConnClientDeinit(void)
 {
     (void)DeinitBaseListener();
     (void)ConnDeinitSockets();
+    (void)ConnectionServerProxyDeInit();
 }
 
 static void ClientModuleDeinit(void)
@@ -171,6 +173,13 @@ static int32_t ConnClientInit(void)
         COMM_LOGE(COMM_EVENT, "InitBaseListener failed! ret=%{public}d", ret);
         return ret;
     }
+
+    ret = ConnectionServerProxyInit();
+    if (ret != SOFTBUS_OK) {
+        COMM_LOGE(COMM_EVENT, "ConnectionServerProxyInit failed! ret=%{public}d", ret);
+        return ret;
+    }
+
     COMM_LOGD(COMM_EVENT, "init conn client success");
     return ret;
 }

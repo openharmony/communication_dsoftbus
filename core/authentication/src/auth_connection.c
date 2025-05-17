@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2022 Huawei Device Co., Ltd.
+ * Copyright (c) 2022-2025 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -773,9 +773,9 @@ int32_t AuthConnInit(const AuthConnListener *listener)
         AUTH_LOGE(AUTH_CONN, "init br/ble/p2p conn fail");
         return SOFTBUS_AUTH_CONN_INIT_FAIL;
     }
-    if (WifiConnListLockInit() != SOFTBUS_OK) {
+    if (AuthTcpConnFdLockInit() != SOFTBUS_OK) {
         (void)memset_s(&g_listener, sizeof(g_listener), 0, sizeof(AuthConnListener));
-        AUTH_LOGE(AUTH_CONN, "init WifiConnListLock fail");
+        AUTH_LOGE(AUTH_CONN, "init AuthTcpConnFdLockInit fail");
         return SOFTBUS_LOCK_ERR;
     }
     if (InitWiFiConn() != SOFTBUS_OK) {
@@ -791,7 +791,7 @@ void AuthConnDeinit(void)
     UnsetSocketCallback();
     ConnUnSetConnectCallback(MODULE_DEVICE_AUTH);
     ClearConnRequest();
-    WifiConnListLockDeinit();
+    AuthTcpConnFdLockDeinit();
     (void)memset_s(&g_listener, sizeof(g_listener), 0, sizeof(AuthConnListener));
 }
 
@@ -878,10 +878,16 @@ void DisconnectAuthDevice(uint64_t *connId)
             UpdateFd(connId, AUTH_INVALID_FD);
             break;
         case AUTH_LINK_TYPE_WIFI:
+            if (IsExistAuthTcpConnFdItemByConnId(GetFd(*connId))) {
+                DeleteAuthTcpConnFdItemByConnId(GetFd(*connId));
+            }
             SocketDisconnectDevice(AUTH, GetFd(*connId));
             UpdateFd(connId, AUTH_INVALID_FD);
             break;
         case AUTH_LINK_TYPE_USB:
+            if (IsExistAuthTcpConnFdItemByConnId(GetFd(*connId))) {
+                DeleteAuthTcpConnFdItemByConnId(GetFd(*connId));
+            }
             SocketDisconnectDevice(AUTH_USB, GetFd(*connId));
             UpdateFd(connId, AUTH_INVALID_FD);
             break;

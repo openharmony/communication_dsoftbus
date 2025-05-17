@@ -99,27 +99,6 @@ HWTEST_F(NetLedgerTest, AUTH_TYPE_VALUE_SET_CLEAR_Test_001, TestSize.Level1)
 }
 
 /*
- * @tc.name: BUILD_TRUSTED_DEV_INFO_RECORD_Test_001
- * @tc.desc: build trusted dev info record test
- * @tc.type: FUNC
- * @tc.require:
- */
-HWTEST_F(NetLedgerTest, BUILD_TRUSTED_DEV_INFO_RECORD_Test_001, TestSize.Level1)
-{
-    int32_t ret;
-    const char *udid = "testdata";
-    TrustedDevInfoRecord record;
-
-    (void)memset_s(&record, sizeof(TrustedDevInfoRecord), 0, sizeof(TrustedDevInfoRecord));
-    ret = BuildTrustedDevInfoRecord(udid, &record);
-    EXPECT_EQ(ret, SOFTBUS_OK);
-
-    udid = nullptr;
-    ret = BuildTrustedDevInfoRecord(udid, &record);
-    EXPECT_EQ(ret, SOFTBUS_INVALID_PARAM);
-}
-
-/*
  * @tc.name: LNN_GET_TRUSTED_DEV_INFO_FROM_DB_Test_001
  * @tc.desc: lnn get trusted dev info from db test
  * @tc.type: FUNC

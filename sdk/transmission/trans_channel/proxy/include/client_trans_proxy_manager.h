@@ -51,7 +51,8 @@ int32_t ClientTransProxyAddChannelInfo(ClientProxyChannelInfo *info);
 
 int32_t ClientTransProxyDelChannelInfo(int32_t channelId);
 
-int32_t ClientTransProxyOnChannelOpened(const char *sessionName, const ChannelInfo *channel);
+int32_t ClientTransProxyOnChannelOpened(
+    const char *sessionName, const ChannelInfo *channel, SocketAccessInfo *accessInfo);
 
 int32_t ClientTransProxyOnChannelClosed(int32_t channelId, ShutdownReason reason);
 
@@ -79,7 +80,6 @@ int32_t TransProxyChannelSendFile(int32_t channelId, const char *sFileList[], co
 
 int32_t ProcessFileFrameData(int32_t sessionId, int32_t channelId, const char *data, uint32_t len, int32_t type);
 int32_t ClientTransProxyOnChannelBind(int32_t channelId, int32_t channelType);
-
 #ifdef __cplusplus
 }
 #endif

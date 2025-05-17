@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021-2024 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2025 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -374,8 +374,12 @@ static void GetSessionKeyByAuthHandle(const DeviceVerifyPassMsgPara *msgPara, Au
 {
     SessionKey sessionKey;
     (void)memset_s(&sessionKey, sizeof(SessionKey), 0, sizeof(SessionKey));
-    UpdateDpSameAccount(msgPara->nodeInfo->accountId, msgPara->nodeInfo->deviceInfo.deviceUdid,
-        msgPara->nodeInfo->userId, sessionKey, false);
+    UpdateDpAclParams aclParams = {
+        .accountId = msgPara->nodeInfo->accountId,
+        .deviceId = msgPara->nodeInfo->deviceInfo.deviceUdid,
+        .peerUserId = msgPara->nodeInfo->userId
+    };
+    UpdateDpSameAccount(&aclParams, sessionKey, false, msgPara->nodeInfo->aclState);
 }
 
 static int32_t CheckParamValid(const DeviceVerifyPassMsgPara *msgPara)
