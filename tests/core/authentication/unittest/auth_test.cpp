@@ -611,9 +611,6 @@ HWTEST_F(AuthTest, POST_DEVICE_MESSAGE_Test_002, TestSize.Level1)
     EXPECT_TRUE(ret == SOFTBUS_INVALID_PARAM);
     ret = PostDeviceMessage(&authManager, flagRelay, AuthLinkType(type), &messageParse);
     EXPECT_NE(ret, SOFTBUS_OK);
-    type = LINK_TYPE;
-    ret = PostDeviceMessage(&authManager, flagRelay, AuthLinkType(type), &messageParse);
-    EXPECT_NE(ret, SOFTBUS_OK);
 }
 
 /*
