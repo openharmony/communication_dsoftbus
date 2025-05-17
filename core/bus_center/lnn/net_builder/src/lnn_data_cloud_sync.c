@@ -91,7 +91,7 @@ static int32_t DBDeviceNameInfoSyncToCache(NodeInfo *cacheInfo, char *fieldName,
             return SOFTBUS_STRCPY_ERR;
         }
         char *anonyDeviceName = NULL;
-        Anonymize(cacheInfo->deviceInfo.deviceName, &anonyDeviceName);
+        AnonymizeDeviceName(cacheInfo->deviceInfo.deviceName, &anonyDeviceName);
         LNN_LOGI(LNN_BUILDER, "success. deviceName=%{public}s", AnonymizeWrapper(anonyDeviceName));
         AnonymizeFree(anonyDeviceName);
     } else if (strcmp(fieldName, DEVICE_INFO_UNIFIED_DEVICE_NAME) == 0 && valueLength < DEVICE_NAME_BUF_LEN) {
@@ -810,7 +810,11 @@ static void PrintSyncNodeInfo(const NodeInfo *cacheInfo)
     char *anonyDeviceVersion = NULL;
     Anonymize(cacheInfo->deviceInfo.deviceVersion, &anonyDeviceVersion);
     char *anonyDeviceName = NULL;
-    Anonymize(cacheInfo->deviceInfo.deviceName, &anonyDeviceName);
+    AnonymizeDeviceName(cacheInfo->deviceInfo.deviceName, &anonyDeviceName);
+    char *anonyProductId = NULL;
+    Anonymize(cacheInfo->deviceInfo.productId, &anonyProductId);
+    char *anonyModelName = NULL;
+    Anonymize(cacheInfo->deviceInfo.modelName, &anonyModelName);
     LNN_LOGI(LNN_BUILDER,
         "Sync NodeInfo: WIFI_VERSION=%{public}" PRId64 ", BLE_VERSION=%{public}" PRId64 ", ACCOUNT_ID=%{public}s, "
         "TRANSPORT_PROTOCOL=%{public}" PRIu64 ", FEATURE=%{public}" PRIu64 ", CONN_SUB_FEATURE=%{public}" PRIu64 ", "
@@ -828,8 +832,8 @@ static void PrintSyncNodeInfo(const NodeInfo *cacheInfo)
         cacheInfo->softBusVersion, AnonymizeWrapper(anonyUdid), AnonymizeWrapper(anonyUuid), cacheInfo->stateVersion,
         AnonymizeWrapper(anonyNetworkId), *cacheInfo->cipherInfo.key, *cacheInfo->cipherInfo.iv,
         *cacheInfo->rpaInfo.peerIrk, *cacheInfo->rpaInfo.publicAddress, *cacheInfo->remotePtk,
-        cacheInfo->isSupportUkNego, AnonymizeWrapper(anonyDeviceVersion), cacheInfo->deviceInfo.productId,
-        cacheInfo->deviceInfo.modelName, cacheInfo->sleRangeCapacity);
+        cacheInfo->isSupportUkNego, AnonymizeWrapper(anonyDeviceVersion), AnonymizeWrapper(anonyProductId),
+        AnonymizeWrapper(anonyModelName), cacheInfo->sleRangeCapacity);
     AnonymizeFree(anonyAccountId);
     AnonymizeFree(anonyP2pMac);
     AnonymizeFree(anonyMacAddr);
@@ -838,6 +842,8 @@ static void PrintSyncNodeInfo(const NodeInfo *cacheInfo)
     AnonymizeFree(anonyNetworkId);
     AnonymizeFree(anonyDeviceVersion);
     AnonymizeFree(anonyDeviceName);
+    AnonymizeFree(anonyProductId);
+    AnonymizeFree(anonyModelName);
 }
 
 static void UpdateDeviceNameToCache(const NodeInfo *newInfo, NodeInfo *oldInfo)

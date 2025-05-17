@@ -29,6 +29,15 @@ extern "C" {
 void Anonymize(const char *plainStr, char **anonymizedStr);
 
 /**
+ * Anonymize the sensitive plain deviceName.
+ *
+ * @note Need to call {@link AnonymizeFree} to release anonymizedStr.
+ * @param plainStr The plain string to be anonymized.
+ * @param anonymizedStr The anonymized string.
+ */
+void AnonymizeDeviceName(const char *plainStr, char **anonymizedStr);
+
+/**
  * Release the anonymized string.
  *
  * @param anonymizedStr The anonymized string.

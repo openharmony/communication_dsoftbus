@@ -142,7 +142,7 @@ HWTEST_F(BusCenterEventTest, BusCenterEventTest002, TestSize.Level1)
     };
     EXPECT_NE(&info2, nullptr);
     NiceMock<BusCenterEventDepsInterfaceMock> BusCenterEventMock;
-    EXPECT_CALL(BusCenterEventMock, Anonymize(_, _)).WillOnce(Return());
+    EXPECT_CALL(BusCenterEventMock, AnonymizeDeviceName(_, _)).WillOnce(Return());
     EXPECT_CALL(BusCenterEventMock, AnonymizeFree(_)).WillOnce(Return());
     LnnNotifyBasicInfoChanged(&info2, type);
     int32_t ret = LnnRegisterEventHandler(event, handler);
