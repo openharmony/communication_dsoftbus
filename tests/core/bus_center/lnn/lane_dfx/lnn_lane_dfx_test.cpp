@@ -140,9 +140,9 @@ HWTEST_F(LNNLaneDfxTest, UPDATE_LANE_EVENT_INFO_002, TestSize.Level1)
     int32_t ret = CreateLaneEventInfo(&processInfo);
     EXPECT_EQ(ret, SOFTBUS_OK);
     uint32_t laneHandle = processInfo.laneProcessList32Bit[EVENT_LANE_HANDLE];
-    ret = UpdateLaneEventInfo(laneHandle, EVENT_32_BIT_BUTT, LANE_PROCESS_TYPE_UINT32, (void *)(&ERR_CODE));
+    ret = UpdateLaneEventInfo(laneHandle, EVENT_32_BIT_MAX, LANE_PROCESS_TYPE_UINT32, (void *)(&ERR_CODE));
     EXPECT_EQ(ret, SOFTBUS_INVALID_PARAM);
-    ret = UpdateLaneEventInfo(laneHandle, EVENT_64_BIT_BUTT, LANE_PROCESS_TYPE_UINT64, (void *)(&ERR_CODE));
+    ret = UpdateLaneEventInfo(laneHandle, EVENT_64_BIT_MAX, LANE_PROCESS_TYPE_UINT64, (void *)(&ERR_CODE));
     EXPECT_EQ(ret, SOFTBUS_INVALID_PARAM);
     ret = ReportLaneEventInfo(laneHandle, ERR_CODE);
     EXPECT_EQ(ret, SOFTBUS_OK);

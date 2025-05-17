@@ -264,7 +264,7 @@ static void UpdateLaneEventWithDetectInfo(uint32_t laneReqId, uint64_t startTime
     WifiDetectState wifiDetectState;
     (void)memset_s(&laneProcess, sizeof(LaneProcess), 0, sizeof(LaneProcess));
     if (GetLaneEventInfo(laneReqId, &laneProcess) != SOFTBUS_OK) {
-        LNN_LOGE(LNN_LANE, "get laneProcess fail, laneHandle=%{public}u", laneReqId);
+        LNN_LOGE(LNN_LANE, "get laneProcess fail, laneReqId=%{public}u", laneReqId);
         return;
     }
     if (laneProcess.laneProcessList32Bit[EVENT_WIFI_DETECT_STATE] == WIFI_DETECT_BUTT) {

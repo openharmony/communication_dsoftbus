@@ -46,7 +46,6 @@
 #include "wifi_direct_error_code.h"
 #include "wifi_direct_manager.h"
 
-#define LANE_REQ_ID_TYPE_SHIFT 28
 #define DEFAULT_LINK_LATENCY 30000
 #define WIFI_DIRECET_NUM_LIMIT 4
 
@@ -930,11 +929,11 @@ int32_t UpdateReqListLaneId(uint64_t oldLaneId, uint64_t newLaneId)
     return SOFTBUS_NOT_FIND;
 }
 
-TransReqInfo* UpdateRequestNotifyFreeBylaneReqId(uint32_t laneReqId, bool isNotifyFree)
+int32_t UpdateNotifyInfoBylaneReqId(uint32_t laneReqId, bool isNotifyFree)
 {
     if (Lock() != SOFTBUS_OK) {
         LNN_LOGE(LNN_LANE, "get lock fail");
-        return NULL;
+        return SOFTBUS_LOCK_ERR;
     }
     TransReqInfo *item = NULL;
     TransReqInfo *next = NULL;
@@ -942,12 +941,12 @@ TransReqInfo* UpdateRequestNotifyFreeBylaneReqId(uint32_t laneReqId, bool isNoti
         if (item->laneReqId == laneReqId) {
             item->notifyFree = isNotifyFree;
             Unlock();
-            return item;
+            return SOFTBUS_OK;
         }
     }
     Unlock();
     LNN_LOGE(LNN_LANE, "not found lane need free, laneReqId=%{public}u", laneReqId);
-    return NULL;
+    return SOFTBUS_LANE_NOT_FOUND;
 }
 
 static void UpdateReqInfoWithLaneReqId(uint32_t laneReqId, uint64_t laneId)
@@ -1045,7 +1044,7 @@ static void NotifyLaneAllocSuccess(uint32_t laneReqId, uint64_t laneId, const La
         if (reqInfo.isCanceled) {
             LNN_LOGE(LNN_LANE, "lane has canceled only notify fail, laneReqId=%{public}u", laneReqId);
             reqInfo.listener.onLaneAllocFail(laneReqId, SOFTBUS_LANE_SUCC_AFTER_CANCELED);
-            (void)Free(laneReqId);
+            (void)FreeLane(laneReqId);
             return;
         }
         connInfo.laneId = laneId;
@@ -1751,7 +1750,7 @@ static LaneInterface g_transLaneObject = {
     .reallocLaneByQos = ReallocLaneByQos,
     .allocTargetLane = AllocTargetLane,
     .cancelLane = CancelLane,
-    .freeLane = Free,
+    .freeLane = FreeLane,
 };
 
 LaneInterface *TransLaneGetInstance(void)
