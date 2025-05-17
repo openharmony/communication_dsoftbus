@@ -19,9 +19,12 @@
 
 #include "c_header/ohos_bt_def.h"
 #include "c_header/ohos_bt_gap.h"
+#include "c_header/ohos_bt_socket.h"
 #include "comm_log.h"
 #include "securec.h"
 #include "softbus_def.h"
+#include "softbus_utils.h"
+#include "softbus_common.h"
 #include "softbus_error_code.h"
 
 #define STATE_LISTENER_MAX_NUM 20
@@ -286,6 +289,28 @@ int SoftBusSetBtName(const char *name)
         return SOFTBUS_OK;
     }
     return SOFTBUS_COMM_BLUETOOTH_UNDERLAY_SET_NAME_ERR;
+}
+
+int SoftBusGetRandomAddress(const char *addr, char *out, int tokenId)
+{
+    uint8_t binaryAddr[BT_ADDR_LEN] = { 0 };
+    int32_t status = ConvertBtMacToBinary(addr, BT_MAC_LEN, binaryAddr, BT_ADDR_LEN);
+    COMM_CHECK_AND_RETURN_RET_LOGE(status == SOFTBUS_OK, status,
+        COMM_ADAPTER, "covert mac failed, status=%{public}d", status);
+    BdAddr bdAddr = {0};
+    status = memcpy_s(bdAddr.addr, OHOS_BD_ADDR_LEN, (unsigned char*)binaryAddr, BT_ADDR_LEN);
+    COMM_CHECK_AND_RETURN_RET_LOGE(status == EOK, SOFTBUS_MEM_ERR,
+        COMM_ADAPTER, "memcpy failed, status=%{public}d", status);
+
+    BdAddr randomAddr = {0};
+    status = GetRandomAddress(&bdAddr, &randomAddr, tokenId);
+    COMM_CHECK_AND_RETURN_RET_LOGE(status == OHOS_BT_STATUS_SUCCESS, status,
+        COMM_ADAPTER, "get random address failed, status=%{public}d", status);
+
+    status = ConvertBtMacToStr(out, BT_MAC_LEN, randomAddr.addr, sizeof(randomAddr.addr));
+    COMM_CHECK_AND_RETURN_RET_LOGE(status == OHOS_BT_STATUS_SUCCESS, status,
+        COMM_ADAPTER, "covert mac to str failed, status=%{public}d", status);
+    return SOFTBUS_OK;
 }
 
 void SoftBusComputeWaitBleSendDataTime(uint32_t waitMillis, SoftBusSysTime *outtime)
