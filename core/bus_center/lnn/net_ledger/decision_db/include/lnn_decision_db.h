@@ -56,7 +56,7 @@ int32_t LnnCheckGenerateSoftBusKeyByHuks(void);
 int32_t LnnInitDecisionDbDelay(void);
 int32_t EncryptStorageData(LnnEncryptDataLevel level, uint8_t *dbKey, uint32_t len);
 int32_t DecryptStorageData(LnnEncryptDataLevel level, uint8_t *dbKey, uint32_t len);
-int32_t LnnGenerateCeParams(void);
+int32_t LnnGenerateCeParams(bool isUnlocked);
 void LnnRemoveDb(void);
 int32_t LnnFindDeviceUdidTrustedInfoFromDb(const char *udid);
 int32_t UpdateKeyAndLocalInfo(void);

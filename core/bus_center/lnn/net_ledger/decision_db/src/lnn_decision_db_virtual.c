@@ -63,8 +63,9 @@ int32_t LnnInitDecisionDbDelay(void)
     return SOFTBUS_OK;
 }
 
-int32_t LnnGenerateCeParams(void)
+int32_t LnnGenerateCeParams(bool isUnlocked)
 {
+    (void)isUnlocked;
     LNN_LOGI(LNN_INIT, "LnnGenerateCeParams not implemented");
     return SOFTBUS_OK;
 }
