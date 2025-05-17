@@ -712,7 +712,7 @@ static void HbScreenLockChangeEventHandler(const LnnEventBasicInfo *info)
     SoftBusScreenLockState lockState = (SoftBusScreenLockState)event->status;
     if (lockState == SOFTBUS_USER_UNLOCK) {
         LNN_LOGI(LNN_HEART_BEAT, "user unlocked");
-        (void)LnnGenerateCeParams();
+        (void)LnnGenerateCeParams(true);
         AuthLoadDeviceKey();
         LnnUpdateOhosAccount(UPDATE_ACCOUNT_ONLY);
         if (!LnnIsDefaultOhosAccount()) {

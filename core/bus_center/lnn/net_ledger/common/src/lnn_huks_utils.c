@@ -506,21 +506,33 @@ static int32_t DeleteCeKeyByHuks(struct HksBlob *keyAlias)
     return SOFTBUS_OK;
 }
 
-int32_t LnnGenerateCeKeyByHuks(struct HksBlob *keyAlias)
+int32_t LnnGenerateCeKeyByHuks(struct HksBlob *keyAlias, bool isUnlocked)
 {
     if (keyAlias == NULL) {
         LNN_LOGE(LNN_LEDGER, "gen ce invalid param");
         return SOFTBUS_INVALID_PARAM;
     }
+    if (!isUnlocked && !IsActiveOsAccountUnlocked()) {
+        LNN_LOGE(LNN_LEDGER, "user not unlocked");
+        return SOFTBUS_HUKS_GENERATE_KEY_ERR;
+    }
     if (pthread_mutex_lock(&g_ceParamsLock) != SOFTBUS_OK) {
         LNN_LOGE(LNN_LEDGER, "gen ce mutex fail");
         return SOFTBUS_LOCK_ERR;
     }
-    if (!g_isGenCeParams && (GenerateCeKeyByHuks(keyAlias) == SOFTBUS_OK)) {
-        LNN_LOGI(LNN_LEDGER, "gen ce param success");
-        g_isGenCeParams = true;
+    if (g_isGenCeParams) {
+        (void)pthread_mutex_unlock(&g_ceParamsLock);
+        LNN_LOGI(LNN_LEDGER, "huks ce key has generated");
+        return SOFTBUS_OK;
     }
+    if (GenerateCeKeyByHuks(keyAlias) != SOFTBUS_OK) {
+        (void)pthread_mutex_unlock(&g_ceParamsLock);
+        LNN_LOGE(LNN_LEDGER, "gen ce param fail");
+        return SOFTBUS_HUKS_GENERATE_KEY_ERR;
+    }
+    g_isGenCeParams = true;
     (void)pthread_mutex_unlock(&g_ceParamsLock);
+    LNN_LOGI(LNN_LEDGER, "gen ce param succ");
     return SOFTBUS_OK;
 }
 

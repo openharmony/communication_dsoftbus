@@ -355,6 +355,16 @@ int32_t LnnInitEventMoniterDelay(void)
     return SOFTBUS_OK;
 }
 
+int32_t LnnInitHuksCeParamsDelay(void)
+{
+    int32_t ret = LnnGenerateCeParams(false);
+    if (ret != SOFTBUS_OK) {
+        LNN_LOGE(LNN_LEDGER, "delay init huks ce key fail, ret=%{public}d", ret);
+        return ret;
+    }
+    return SOFTBUS_OK;
+}
+
 void LnnDeinitNetLedger(void)
 {
     LnnDeinitMetaNodeLedger();
