@@ -18,17 +18,16 @@
 
 #include "cJSON.h"
 #include "softbus_app_info.h"
-#include "trans_uk_manager.h"
 
 #ifdef __cplusplus
 extern "C" {
 #endif
 
 int32_t TransUnpackReplyUdpInfo(const cJSON *msg, AppInfo *appInfo);
-int32_t TransUnpackRequestUdpInfo(const cJSON *msg, AppInfo *appInfo, UkIdInfo *ukIdInfo);
+int32_t TransUnpackRequestUdpInfo(const cJSON *msg, AppInfo *appInfo);
 int32_t TransUnpackReplyErrInfo(const cJSON *msg, int32_t *errCode);
 
-int32_t TransPackRequestUdpInfo(cJSON *msg, const AppInfo *appInfo, const UkIdInfo *ukIdInfo);
+int32_t TransPackRequestUdpInfo(cJSON *msg, const AppInfo *appInfo);
 int32_t TransPackReplyUdpInfo(cJSON *msg, const AppInfo *appInfo);
 int32_t TransPackReplyErrInfo(cJSON *msg, int errCode, const char* errDesc);
 bool IsIShareSession(const char *sessionName);

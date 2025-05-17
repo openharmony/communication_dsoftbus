@@ -899,7 +899,6 @@ static int32_t GetLocalUdidShortHash(char *localUdidHash)
 static void UnpackExternalAuthInfo(JsonObj *obj, AuthSessionInfo *info)
 {
     OptInt(obj, USERID, &info->userId, 0);
-    UnpackSKId(obj, info);
     if (info->authVersion < AUTH_VERSION_V2) {
         AUTH_LOGD(AUTH_FSM, "lower version dont need unpack auth info");
         return;
@@ -1058,7 +1057,10 @@ static int32_t PackNormalizedData(const AuthSessionInfo *info, JsonObj *obj, con
         (info->connInfo.type == AUTH_LINK_TYPE_WIFI || info->connInfo.type == AUTH_LINK_TYPE_SESSION_KEY ||
         info->connInfo.type == AUTH_LINK_TYPE_USB)) {
         GenerateUdidShortHash(info->udid, (char *)info->connInfo.info.ipInfo.deviceIdHash, UDID_HASH_LEN);
-        AUTH_LOGI(AUTH_FSM, "deviceIdHash is %{public}s", (char *)info->connInfo.info.ipInfo.deviceIdHash);
+        char *anonyUdidHash = NULL;
+        Anonymize((char *)info->connInfo.info.ipInfo.deviceIdHash, &anonyUdidHash);
+        AUTH_LOGI(AUTH_FSM, "deviceIdHash is %{public}s", AnonymizeWrapper(anonyUdidHash));
+        AnonymizeFree(anonyUdidHash);
     }
     return SOFTBUS_OK;
 }
@@ -1404,6 +1406,7 @@ int32_t UnpackDeviceIdJson(const char *msg, uint32_t len, AuthSessionInfo *info,
         SetCompressFlag(compressParse, &info->isSupportCompress);
     }
     UnPackAuthPreLinkNode(obj, info);
+    UnpackSKId(obj, info);
     OptInt(obj, AUTH_MODULE, (int32_t *)&info->module, AUTH_MODULE_LNN);
     bool isSupportNormalizedKey = false;
     OptBool(obj, IS_NORMALIZED, &isSupportNormalizedKey, false);

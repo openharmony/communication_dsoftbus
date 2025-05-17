@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2022-2024 Huawei Device Co., Ltd.
+ * Copyright (c) 2022-2025 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -838,7 +838,6 @@ int32_t AuthManagerSetSessionKey(int64_t authSeq, AuthSessionInfo *info, const S
     AUTH_LOGI(AUTH_FSM, "authId=%{public}" PRId64 ", authSeq=%{public}" PRId64 ", index=%{public}d, "
         "lastVerifyTime=%{public}" PRId64, auth->authId, authSeq, TO_INT32(sessionKeyIndex), auth->lastVerifyTime);
     ReleaseAuthLock();
-    UpdateDpSameAccount(0, info->udid, info->userId, *sessionKey, info->isSameAccount);
     return ret;
 }
 
@@ -1477,6 +1476,11 @@ static int32_t PostDecryptFailAuthData(
 static void HandleUkConnectionData(
     uint64_t connId, const AuthConnInfo *connInfo, bool fromServer, const AuthDataHead *head, const uint8_t *data)
 {
+    if (IsHaveAuthIdByConnId(GenConnId(AUTH_LINK_TYPE_SESSION_KEY, GetFd(connId)))) {
+        AuthConnInfo *connInfoMut = (AuthConnInfo *)connInfo;
+        connInfoMut->type = AUTH_LINK_TYPE_SESSION_KEY;
+        connId = GenConnId(AUTH_LINK_TYPE_SESSION_KEY, GetFd(connId));
+    }
     if (AuthGetUkDecryptSize(head->len) <= UK_ENCRYPT_INDEX_LEN) {
         AUTH_LOGE(AUTH_CONN, "invalid param");
         return;

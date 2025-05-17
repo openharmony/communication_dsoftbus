@@ -16,7 +16,6 @@
 #include <securec.h>
 #include <unistd.h>
 
-#include "access_control.h"
 #include "message_handler.h"
 #include "softbus_adapter_crypto.h"
 #include "softbus_adapter_mem.h"
@@ -1196,9 +1195,8 @@ int32_t ServerSideSendAck(int32_t sessionId, int32_t result)
     }
     TRANS_LOGI(TRANS_CTRL, "channelId=%{public}d, result=%{public}d, channelType=%{public}d",
         sessionId, result, channelType);
-    pid_t callingPid = TransGetCallingPid();
     if (channelType == CHANNEL_TYPE_TCP_DIRECT) {
-        return TransDealTdcChannelOpenResult(sessionId, result, callingPid);
+        return TransDealTdcChannelOpenResult(sessionId, result, NULL);
     }
-    return TransDealProxyChannelOpenResult(sessionId, result, callingPid);
+    return TransDealProxyChannelOpenResult(sessionId, result, NULL);
 }

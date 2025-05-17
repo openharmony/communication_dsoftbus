@@ -98,7 +98,7 @@ HWTEST_F(TransTcpDirectListenerTest, StartVerifySessionTest001, TestSize.Level1)
     SessionConn *conn = (SessionConn *)SoftBusMalloc(sizeof(SessionConn));
     ASSERT_TRUE(conn != nullptr);
 
-    int32_t ret = StartVerifySession(conn, nullptr);
+    int32_t ret = StartVerifySession(conn);
     EXPECT_EQ(SOFTBUS_TRANS_GET_CIPHER_FAILED, ret);
 }
 

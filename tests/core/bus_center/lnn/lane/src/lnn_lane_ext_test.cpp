@@ -2180,4 +2180,32 @@ HWTEST_F(LNNLaneExtMockTest, LNN_LANE_ADJUST_LINK_PRIORITY_FOR_RTT_002, TestSize
     EXPECT_EQ(SOFTBUS_OK, SelectExpectLanesByQos(NODE_NETWORK_ID, &selectParam, &linkList));
     EXPECT_EQ(LANE_P2P, linkList.linkType[0]);
 }
+
+/*
+* @tc.name: LANE_INFO_006
+* @tc.desc: LaneInfoProcess fail
+* @tc.type: FAILUE
+* @tc.require:
+*/
+HWTEST_F(LNNLaneExtMockTest, LANE_INFO_006, TestSize.Level1)
+{
+    LaneLinkInfo info = {};
+    info.type = LANE_USB;
+    LaneConnInfo connInfo = {};
+    LaneProfile profile = {};
+    int32_t ret = LaneInfoProcess(&info, &connInfo, &profile);
+    EXPECT_EQ(ret, SOFTBUS_OK);
+
+    ret = LaneInfoProcess(nullptr, &connInfo, &profile);
+    EXPECT_EQ(ret, SOFTBUS_INVALID_PARAM);
+
+    ret = LaneInfoProcess(&info, nullptr, &profile);
+    EXPECT_EQ(ret, SOFTBUS_INVALID_PARAM);
+
+    ret = LaneInfoProcess(&info, &connInfo, nullptr);
+    EXPECT_EQ(ret, SOFTBUS_INVALID_PARAM);
+
+    ret = LaneInfoProcess(&info, nullptr, &profile);
+    EXPECT_EQ(ret, SOFTBUS_INVALID_PARAM);
+}
 } // namespace OHOS

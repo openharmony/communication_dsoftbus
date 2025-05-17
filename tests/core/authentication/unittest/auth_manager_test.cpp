@@ -612,6 +612,21 @@ HWTEST_F(AuthManagerTest, AUTH_DEVICE_GET_P2P_CONN_INFO_TEST_001, TestSize.Level
 }
 
 /*
+ * @tc.name: AUTH_DEVICE_GET_USB_CONN_INFO_TEST_001
+ * @tc.desc: AuthDeviceGetUsbConnInfo test
+ * @tc.type: FUNC
+ * @tc.require:
+ */
+HWTEST_F(AuthManagerTest, AUTH_DEVICE_GET_USB_CONN_INFO_TEST_001, TestSize.Level1)
+{
+    AuthConnInfo connInfo;
+    EXPECT_TRUE(AuthDeviceGetUsbConnInfo(nullptr, &connInfo) == SOFTBUS_INVALID_PARAM);
+    EXPECT_TRUE(AuthDeviceGetUsbConnInfo(UUID_TEST, nullptr) == SOFTBUS_INVALID_PARAM);
+    EXPECT_TRUE(AuthDeviceGetUsbConnInfo(nullptr, nullptr) == SOFTBUS_INVALID_PARAM);
+    EXPECT_TRUE(AuthDeviceGetUsbConnInfo(UUID_TEST, &connInfo) == SOFTBUS_AUTH_NOT_FOUND);
+}
+
+/*
  * @tc.name: AUTH_DEVICE_OPEN_CONN_TEST_001
  * @tc.desc: AuthDeviceOpenConn test
  * @tc.type: FUNC

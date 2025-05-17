@@ -344,15 +344,16 @@ HWTEST_F(TransClientSessionCallbackTest, TransClientSessionCallbackTest03, TestS
         .OnBytesReceived = OnBytesReceived,
         .OnMessageReceived = OnMessageReceived,
     };
+    SocketAccessInfo accessInfo = { 0 };
     ChannelInfo *channel = (ChannelInfo*)SoftBusCalloc(sizeof(ChannelInfo));
     ASSERT_TRUE(channel != nullptr);
     int32_t ret = TestGenerateChannInfo(channel);
     ASSERT_EQ(ret, SOFTBUS_OK);
-    ret = TransOnSessionOpened(nullptr, channel, TYPE_BUTT);
+    ret = TransOnSessionOpened(nullptr, channel, TYPE_BUTT, &accessInfo);
     EXPECT_EQ(ret, SOFTBUS_INVALID_PARAM);
-    ret = TransOnSessionOpened(g_sessionName, nullptr, TYPE_BUTT);
+    ret = TransOnSessionOpened(g_sessionName, nullptr, TYPE_BUTT, &accessInfo);
     EXPECT_EQ(ret, SOFTBUS_INVALID_PARAM);
-    ret = TransOnSessionOpened(g_sessionName, channel, TYPE_BUTT);
+    ret = TransOnSessionOpened(g_sessionName, channel, TYPE_BUTT, &accessInfo);
     EXPECT_EQ(ret, SOFTBUS_NOT_FIND);
     ret = ClientAddSessionServer(SEC_TYPE_PLAINTEXT, g_pkgName, g_sessionName, &sessionlistener);
     ASSERT_EQ(ret, SOFTBUS_OK);
@@ -363,7 +364,7 @@ HWTEST_F(TransClientSessionCallbackTest, TransClientSessionCallbackTest03, TestS
     ASSERT_TRUE(session != nullptr);
     ret = ClientAddNewSession(g_sessionName, session);
     ASSERT_EQ(ret, SOFTBUS_OK);
-    ret = TransOnSessionOpened(g_sessionName, channel, TYPE_BUTT);
+    ret = TransOnSessionOpened(g_sessionName, channel, TYPE_BUTT, &accessInfo);
     EXPECT_EQ(ret, SOFTBUS_TRANS_ON_SESSION_OPENED_FAILED);
     ret = ClientDeleteSessionServer(SEC_TYPE_PLAINTEXT, g_sessionName);
     EXPECT_EQ(ret, SOFTBUS_OK);
@@ -379,6 +380,7 @@ HWTEST_F(TransClientSessionCallbackTest, TransClientSessionCallbackTest03, TestS
  */
 HWTEST_F(TransClientSessionCallbackTest, TransClientSessionCallbackTest04, TestSize.Level1)
 {
+    SocketAccessInfo accessInfo = { 0 };
     ChannelInfo *channel = (ChannelInfo*)SoftBusCalloc(sizeof(ChannelInfo));
     ASSERT_TRUE(channel != nullptr);
     int32_t ret = TestGenerateChannInfo(channel);
@@ -393,10 +395,10 @@ HWTEST_F(TransClientSessionCallbackTest, TransClientSessionCallbackTest04, TestS
     ret = ClientAddNewSession(g_sessionName, session);
     ASSERT_EQ(ret, SOFTBUS_OK);
     channel->channelType = TYPE_BUTT;
-    ret = TransOnSessionOpened(g_sessionName, channel, TYPE_BYTES);
+    ret = TransOnSessionOpened(g_sessionName, channel, TYPE_BYTES, &accessInfo);
     EXPECT_EQ(ret, SOFTBUS_TRANS_SESSION_INFO_NOT_FOUND);
     channel->isServer = true;
-    ret = TransOnSessionOpened(g_sessionName, channel, TYPE_BYTES);
+    ret = TransOnSessionOpened(g_sessionName, channel, TYPE_BYTES, &accessInfo);
     EXPECT_EQ(ret, SOFTBUS_OK);
     ret = TransOnSessionOpenFailed(TRANS_TEST_CHANNEL_ID, TYPE_BYTES, SOFTBUS_NO_INIT);
     EXPECT_EQ(ret, SOFTBUS_TRANS_SESSION_INFO_NOT_FOUND);
@@ -900,7 +902,9 @@ HWTEST_F(TransClientSessionCallbackTest, TransClientSessionCallbackTest19, TestS
     ret = TransOnNegotiate(socketId, &g_socketlistener);
     EXPECT_EQ(ret, SOFTBUS_TRANS_SESSION_INFO_NOT_FOUND);
     int32_t tokenType = TEST_TOKEN_TYPE;
-    ret = HandleServerOnNegotiate(socketId, tokenType, &g_socketlistener);
+    ChannelInfo channel = { 0 };
+    SocketAccessInfo accessInfo = { 0 };
+    ret = HandleServerOnNegotiate(socketId, tokenType, &g_socketlistener, &channel, &accessInfo);
     EXPECT_EQ(ret, SOFTBUS_TRANS_SESSION_INFO_NOT_FOUND);
     ret = ClientDeleteSessionServer(SEC_TYPE_PLAINTEXT, g_sessionName);
     EXPECT_EQ(ret, SOFTBUS_OK);
@@ -925,7 +929,9 @@ HWTEST_F(TransClientSessionCallbackTest, TransClientSessionCallbackTest20, TestS
     isServer = false;
     ret = HandleCacheQosEvent(socketId, sessionCallback, isServer);
     EXPECT_EQ(ret, SOFTBUS_OK);
-    ret = HandleOnBindSuccess(socketId, sessionCallback, isServer);
+    ChannelInfo channel = { 0 };
+    SocketAccessInfo accessInfo = { 0 };
+    ret = HandleOnBindSuccess(socketId, sessionCallback, &channel, &accessInfo);
     EXPECT_EQ(ret, SOFTBUS_NOT_FIND);
 }
 

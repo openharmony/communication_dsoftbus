@@ -16,9 +16,11 @@
 #include "softbus_server_proxy_frame.h"
 
 #include <thread>
-#include "client_bus_center_manager.h"
-#include "client_trans_socket_manager.h"
 #include "bus_center_server_proxy.h"
+#include "client_bus_center_manager.h"
+#include "general_client_connection.h"
+#include "client_trans_socket_manager.h"
+#include "general_connection_server_proxy.h"
 #include "ipc_skeleton.h"
 #include "softbus_adapter_mem.h"
 #include "softbus_client_death_recipient.h"
@@ -165,6 +167,8 @@ void ClientDeathProcTask(void)
     }
     TransServerProxyClear();
     BusCenterServerProxyDeInit();
+    ConnectionServerProxyDeInit();
+    ConnectionDeathNotify();
 
     ListNode sessionServerInfoList;
     ListInit(&sessionServerInfoList);
@@ -183,6 +187,7 @@ void ClientDeathProcTask(void)
     }
     TransServerProxyInit();
     BusCenterServerProxyInit();
+    ConnectionServerProxyInit();
     InnerRegisterService(&sessionServerInfoList);
     RestartAuthParaNotify();
     DiscRecoveryPublish();

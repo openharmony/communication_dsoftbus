@@ -2039,37 +2039,6 @@ int32_t ClientGetPeerSocketInfoById(int32_t socket, PeerSocketInfo *peerSocketIn
     return SOFTBUS_OK;
 }
 
-int32_t ClientGetPeerSocketAccessInfoById(int32_t sessionId, PeerSocketAccessInfo *peerAccessInfo)
-{
-    if (sessionId < 0 || peerAccessInfo == NULL) {
-        TRANS_LOGE(TRANS_SDK, "Invalid param");
-        return SOFTBUS_INVALID_PARAM;
-    }
-
-    int32_t ret = LockClientSessionServerList();
-    if (ret != SOFTBUS_OK) {
-        TRANS_LOGE(TRANS_SDK, "lock failed");
-        return ret;
-    }
-
-    ClientSessionServer *serverNode = NULL;
-    SessionInfo *sessionNode = NULL;
-    if (GetSessionById(sessionId, &serverNode, &sessionNode) != SOFTBUS_OK) {
-        UnlockClientSessionServerList();
-        TRANS_LOGE(TRANS_SDK, "socket not found. socketFd=%{public}d", sessionId);
-        return SOFTBUS_TRANS_SESSION_INFO_NOT_FOUND;
-    }
-
-    peerAccessInfo->name = sessionNode->info.peerSessionName;
-    peerAccessInfo->networkId = sessionNode->info.peerDeviceId;
-    peerAccessInfo->pkgName = serverNode->pkgName;
-    peerAccessInfo->userId = sessionNode->peerUserId;
-    peerAccessInfo->accountId = sessionNode->peerAccountId;
-    peerAccessInfo->dataType = (TransDataType)sessionNode->info.flag;
-    UnlockClientSessionServerList();
-    return SOFTBUS_OK;
-}
-
 bool IsSessionExceedLimit(void)
 {
     if (LockClientSessionServerList() != SOFTBUS_OK) {

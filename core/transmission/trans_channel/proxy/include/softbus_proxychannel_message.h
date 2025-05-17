@@ -18,7 +18,6 @@
 #include "softbus_app_info.h"
 #include "softbus_conn_interface.h"
 #include "trans_proxy_process_data.h"
-#include "trans_uk_manager.h"
 
 #ifdef __cplusplus
 #if __cplusplus
@@ -34,10 +33,6 @@ typedef enum {
     PROXYCHANNEL_MSG_TYPE_KEEPALIVE,
     PROXYCHANNEL_MSG_TYPE_KEEPALIVE_ACK,
     PROXYCHANNEL_MSG_TYPE_HANDSHAKE_AUTH,
-    PROXYCHANNEL_MSG_TYPE_HANDSHAKE_UK,
-    PROXYCHANNEL_MSG_TYPE_HANDSHAKE_UK_ACK,
-    PROXYCHANNEL_MSG_TYPE_HANDSHAKE_WITHUKENCY,
-    PROXYCHANNEL_MSG_TYPE_HANDSHAKE_WITHUKENCY_ACK,
     PROXYCHANNEL_MSG_TYPE_MAX
 } MsgType;
 
@@ -69,6 +64,11 @@ typedef enum {
 #define JSON_KEY_CALLING_TOKEN_ID "CALLING_TOKEN_ID"
 #define JSON_KEY_ACCOUNT_ID "ACCOUNT_ID"
 #define JSON_KEY_USER_ID "USER_ID"
+#define JSON_KEY_SOURCE_ACL_TOKEN_ID "SOURCE_ACL_TOKEN_ID"
+#define JSON_KEY_SOURCE_ACL_EXTRA_INFO "SOURCE_ACL_EXTRA_INFO"
+#define JSON_KEY_SINK_ACL_ACCOUNT_ID "SINK_ACL_ACCOUNT_ID"
+#define JSON_KEY_SINK_ACL_USER_ID "SINK_ACL_USER_ID"
+#define JSON_KEY_SINK_ACL_TOKEN_ID "SINK_ACL_TOKEN_ID"
 #define TRANS_CAPABILITY "TRANS_CAPABILITY"
 
 typedef struct {
@@ -86,7 +86,6 @@ typedef struct {
     int32_t keyIndex;
     ProxyMessageHead msgHead;
     AuthHandle authHandle; /* for cipher */
-    UkIdInfo ukIdInfo;
 } ProxyMessage;
 
 #define VERSION 1
@@ -135,7 +134,6 @@ typedef struct {
     int32_t channelId;
     int32_t reqId;
     int32_t seq;
-    UkIdInfo ukIdInfo;
     ListNode node;
     AuthHandle authHandle; /* for cipher */
     AppInfo appInfo;
@@ -168,8 +166,7 @@ int32_t TransProxyUnpackHandshakeAckMsg(const char *msg, ProxyChannelInfo *chanI
 char* TransProxyPackHandshakeAckMsg(ProxyChannelInfo *chan);
 char* TransProxyPackHandshakeErrMsg(int32_t errCode);
 int32_t TransProxyParseMessage(char *data, int32_t len, ProxyMessage *msg, AuthHandle *auth);
-int32_t TransProxyPackMessage(
-    ProxyMessageHead *msg, AuthHandle authHandle, ProxyDataInfo *dataInfo, bool isAddUk, const UkIdInfo *ukIdInfo);
+int32_t TransProxyPackMessage(ProxyMessageHead *msg, AuthHandle authHandle, ProxyDataInfo *dataInfo);
 char* TransProxyPackHandshakeMsg(ProxyChannelInfo *info);
 int32_t TransProxyUnpackHandshakeMsg(const char *msg, ProxyChannelInfo *chan, int32_t len);
 char* TransProxyPackIdentity(const char *identity);

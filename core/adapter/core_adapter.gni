@@ -132,7 +132,7 @@ if (defined(ohos_lite)) {
       "openssl:libcrypto_shared",
     ]
   }
-  if (dsoftbus_feature_usb == 1 && dsoftbus_feature_deps_usb_manager) {
+  if (dsoftbus_feature_lnn_usb_ncm && dsoftbus_feature_deps_usb_manager) {
     bus_center_core_adapter_src += [
       "$dsoftbus_root_path/core/adapter/bus_center/src/lnn_usb_adapter.cpp",
     ]

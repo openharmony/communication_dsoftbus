@@ -34,7 +34,6 @@ namespace OHOS {
 
 #define TEST_SOCKET_PORT 60000
 #define TEST_CHANNEL_ID  12345
-#define TEST_CALLING_PID 1066
 
 #define INVALID_EVENT_ID (-1)
 #define INVALID_PID (-1)
@@ -345,7 +344,7 @@ HWTEST_F(TransUdpNegotiationTest, TransUdpNegotiationTest12, TestSize.Level1)
 HWTEST_F(TransUdpNegotiationTest, TransDealUdpCheckCollabResult001, TestSize.Level1)
 {
     int32_t checkResult = SOFTBUS_OK;
-    int32_t ret = TransDealUdpCheckCollabResult(TEST_CHANNEL_ID, checkResult, TEST_CALLING_PID);
+    int32_t ret = TransDealUdpCheckCollabResult(TEST_CHANNEL_ID, checkResult);
     EXPECT_EQ(ret, SOFTBUS_TRANS_UDP_CHANNEL_NOT_FOUND);
 }
 
@@ -368,8 +367,8 @@ HWTEST_F(TransUdpNegotiationTest, TransDealUdpCheckCollabResult002, TestSize.Lev
     int32_t checkResult = SOFTBUS_OK;
     int32_t ret = TransAddUdpChannel(newChannel);
     EXPECT_EQ(ret, SOFTBUS_OK);
-    ret = TransDealUdpCheckCollabResult(TEST_CHANNEL_ID, checkResult, TEST_CALLING_PID);
-    EXPECT_EQ(ret, SOFTBUS_TRANS_CHECK_PID_ERROR);
+    ret = TransDealUdpCheckCollabResult(TEST_CHANNEL_ID, checkResult);
+    EXPECT_EQ(ret, SOFTBUS_INVALID_PARAM);
 
     ReleaseUdpChannelId(TEST_CHANNEL_ID);
 }
@@ -391,10 +390,37 @@ HWTEST_F(TransUdpNegotiationTest, TransDealUdpCheckCollabResult003, TestSize.Lev
     EXPECT_EQ(ret, EOK);
     int32_t checkResult = SOFTBUS_COND_INIT_FAILED;
     ret = TransAddUdpChannel(newChannel);
-    EXPECT_EQ(ret, SOFTBUS_TRANS_UDP_CHANNEL_ALREADY_EXIST);
-    ret = TransDealUdpCheckCollabResult(TEST_CHANNEL_ID, checkResult, TEST_CALLING_PID);
-    EXPECT_EQ(ret, SOFTBUS_TRANS_CHECK_PID_ERROR);
+    EXPECT_EQ(ret, SOFTBUS_OK);
+    ret = TransDealUdpCheckCollabResult(TEST_CHANNEL_ID, checkResult);
+    EXPECT_EQ(ret, SOFTBUS_COND_INIT_FAILED);
 
     ReleaseUdpChannelId(TEST_CHANNEL_ID);
+}
+
+/**
+ * @tc.name: TransUdpNegotiationTest13
+ * @tc.desc: Transmission open channel with usb.
+ * @tc.type: FUNC
+ * @tc.require:
+ */
+HWTEST_F(TransUdpNegotiationTest, TransUdpNegotiationTest13, TestSize.Level1)
+{
+    AppInfo* appInfo = (AppInfo *)SoftBusCalloc(sizeof(AppInfo));
+    ASSERT_TRUE(appInfo != nullptr);
+    appInfo->myData.channelId = TEST_CHANNEL_ID;
+    ConnectOption *connOpt = (ConnectOption *)SoftBusCalloc(sizeof(ConnectOption));
+    if (connOpt == nullptr) {
+        SoftBusFree(appInfo);
+        ASSERT_TRUE(connOpt != nullptr);
+    }
+    connOpt->type = CONNECT_TCP;
+    connOpt->socketOption.port = TEST_SOCKET_PORT;
+    connOpt->socketOption.moduleId = DIRECT_CHANNEL_SERVER_USB;
+    connOpt->socketOption.protocol = LNN_PROTOCOL_USB;
+    int32_t channelId = 0;
+    int32_t ret = TransOpenUdpChannel(appInfo, connOpt, &channelId);
+    EXPECT_NE(ret,  SOFTBUS_OK);
+    SoftBusFree(appInfo);
+    SoftBusFree(connOpt);
 }
 }

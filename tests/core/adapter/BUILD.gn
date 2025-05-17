@@ -284,6 +284,35 @@ ohos_unittest("LnnSaStatusMonitorTest") {
   }
 }
 
+ohos_unittest("LnnUsbAdapterTest") {
+  module_out_path = module_output_path
+  sources = [
+    "$dsoftbus_root_path/tests/core/adapter/unittest/lnn_usb_adapter_test.cpp",
+  ]
+
+  include_dirs = [
+    "$dsoftbus_root_path/core/adapter/bus_center/include",
+    "$dsoftbus_root_path/core/adapter/bus_center/src",
+    "unittest",
+  ]
+
+  deps = [
+    "$dsoftbus_root_path/adapter:softbus_adapter",
+    "$dsoftbus_root_path/core/common:softbus_utils",
+    "$dsoftbus_root_path/core/frame:softbus_server",
+  ]
+
+  external_deps = [
+    "c_utils:utils",
+    "googletest:gmock_main",
+    "hilog:libhilog",
+  ]
+  
+  if (dsoftbus_feature_lnn_usb_ncm && dsoftbus_feature_deps_usb_manager) {
+    external_deps += [ "usb_manager:usbsrv_client" ]
+  }
+}
+
 group("unittest") {
   testonly = true
 
@@ -300,6 +329,9 @@ group("unittest") {
       ":LnnKVAdapterTest",
       ":LnnKVAdapterWrapperTest",
     ]
+  }
+  if (dsoftbus_feature_lnn_usb_ncm && dsoftbus_feature_deps_usb_manager) {
+    deps += [ ":LnnUsbAdapterTest" ]
   }
 }
 

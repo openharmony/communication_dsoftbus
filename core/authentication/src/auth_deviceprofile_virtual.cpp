@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2023-2024 Huawei Device Co., Ltd.
+ * Copyright (c) 2023-2025 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -30,14 +30,13 @@ bool DpHasAccessControlProfile(const char *udid, bool isNeedUserId, int32_t loca
     return false;
 }
 
-void UpdateDpSameAccount(
-    int64_t accountId, const char *deviceId, int32_t peerUserId, SessionKey sessionKey, bool isNeedUpdateDk)
+void UpdateDpSameAccount(UpdateDpAclParams *aclParams, SessionKey sessionKey, bool isNeedUpdateDk,
+    AclWriteState aclState)
 {
-    (void)accountId;
-    (void)deviceId;
-    (void)peerUserId;
+    (void)aclParams;
     (void)sessionKey;
     (void)isNeedUpdateDk;
+    (void)aclState;
 }
 
 void DelNotTrustDevice(const char *udid)
@@ -107,4 +106,11 @@ bool IsSKIdInvalid(int32_t sessionKeyId, const char *accountHash, const char *ud
     (void)udidShortHash;
     (void)userId;
     return false;
+}
+
+int32_t SelectAllAcl(TrustedInfo **trustedInfoArray, uint32_t *num)
+{
+    (void)trustedInfoArray;
+    (void)num;
+    return SOFTBUS_NOT_IMPLEMENT;
 }

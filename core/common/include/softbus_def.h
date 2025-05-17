@@ -87,6 +87,8 @@ extern "C" {
 #define FILE_PRIORITY_BE 0x00
 #define FILE_PRIORITY_BK 0x08
 
+#define GENERAL_SEND_DATA_MAX_LEN 1024
+
 typedef struct {
     SoftBusMutex lock;
     unsigned int cnt;
@@ -149,6 +151,13 @@ typedef enum {
 } BusinessType;
 
 typedef struct {
+    int32_t userId;
+    uint64_t localTokenId;
+    char *businessAccountId;
+    char *extraAccessInfo;
+} AccessInfo;
+
+typedef struct {
     bool isServer;
     bool isEnabled;
     bool isEncrypt;
@@ -188,7 +197,9 @@ typedef struct {
     char *reqId;
     int32_t tokenType;
     int32_t peerUserId;
-    char *peerAccountId;
+    uint64_t peerTokenId;
+    char *peerBusinessAccountId;
+    char *peerExtraAccessInfo;
 } ChannelInfo;
 
 #ifdef __cplusplus

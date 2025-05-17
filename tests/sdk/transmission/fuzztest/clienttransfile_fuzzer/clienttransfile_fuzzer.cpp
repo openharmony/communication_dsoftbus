@@ -60,7 +60,7 @@ namespace OHOS {
         }
         const char* sessionName = reinterpret_cast<const char*>(data);
         int32_t fileport = 0;
-        TransOnFileChannelOpened(sessionName, nullptr, &fileport);
+        TransOnFileChannelOpened(sessionName, nullptr, &fileport, nullptr);
     }
 
     void TransSetFileReceiveListenerTest(const uint8_t* data, size_t size)

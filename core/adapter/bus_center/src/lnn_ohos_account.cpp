@@ -160,9 +160,6 @@ void LnnUpdateOhosAccount(UpdateAccountReason reason)
     LnnSetLocalNum64Info(NUM_KEY_ACCOUNT_LONG, accountId);
     DiscDeviceInfoChanged(TYPE_ACCOUNT);
     LnnNotifyDeviceInfoChanged(SOFTBUS_LOCAL_DEVICE_INFO_ACOUNT_CHANGED);
-    if (UpdateRecoveryDeviceInfoFromDb() != SOFTBUS_OK) {
-        LNN_LOGE(LNN_STATE, "update db recovery fail");
-    }
     if (reason == UPDATE_HEARTBEAT || reason == UPDATE_USER_SWITCH) {
         LnnUpdateHeartbeatInfo(UPDATE_HB_ACCOUNT_INFO);
         DfxRecordTriggerTime(UPDATE_ACCOUNT, EVENT_STAGE_LNN_UPDATE_ACCOUNT);
@@ -184,9 +181,6 @@ void LnnOnOhosAccountLogout(void)
     LnnSetLocalByteInfo(BYTE_KEY_ACCOUNT_HASH, accountHash, SHA_256_HASH_LEN);
     DiscDeviceInfoChanged(TYPE_ACCOUNT);
     LnnNotifyDeviceInfoChanged(SOFTBUS_LOCAL_DEVICE_INFO_ACOUNT_CHANGED);
-    if (UpdateRecoveryDeviceInfoFromDb() != SOFTBUS_OK) {
-        LNN_LOGE(LNN_STATE, "update db recovery fail");
-    }
     LnnUpdateHeartbeatInfo(UPDATE_HB_ACCOUNT_INFO);
 }
 

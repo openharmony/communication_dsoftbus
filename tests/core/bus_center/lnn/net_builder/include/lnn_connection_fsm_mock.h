@@ -74,8 +74,8 @@ public:
         const char *proofInfo, uint32_t proofLen, uint16_t deviceTypeId, int32_t errCode) = 0;
     virtual void LnnNotifyDeviceTrustedChange(int32_t type, const char *msg, uint32_t msgLen) = 0;
     virtual int32_t GetAuthRequest(uint32_t requestId, AuthRequest *request) = 0;
-    virtual void UpdateDpSameAccount(
-        int64_t accountId, const char *deviceId, int32_t peerUserId, SessionKey sessionKey, bool isNeedUpdateDk);
+    virtual void UpdateDpSameAccount(UpdateDpAclParams *aclParams, SessionKey sessionKey, bool isNeedUpdateDk,
+    AclWriteState aclState) = 0;
     virtual int32_t LnnGetAddrTypeByIfName(const char *ifName, ConnectionAddrType *type) = 0;
     virtual bool LnnConvertAuthConnInfoToAddr(
         ConnectionAddr *addr, const AuthConnInfo *connInfo, ConnectionAddrType hintType) = 0;
@@ -125,7 +125,7 @@ public:
     MOCK_METHOD2(LnnNotifyStateForSession, void(char *, int32_t));
     MOCK_METHOD1(AuthRemoveAuthManagerByAuthHandle, void(AuthHandle));
     MOCK_METHOD2(GetAuthRequest, int32_t(uint32_t, AuthRequest *));
-    MOCK_METHOD5(UpdateDpSameAccount, void(int64_t, const char *, int32_t, SessionKey, bool));
+    MOCK_METHOD4(UpdateDpSameAccount, void(UpdateDpAclParams *, SessionKey, bool, AclWriteState));
     MOCK_METHOD2(LnnGetAddrTypeByIfName, int32_t(const char *, ConnectionAddrType *));
     MOCK_METHOD3(LnnConvertAuthConnInfoToAddr, bool(ConnectionAddr *, const AuthConnInfo *, ConnectionAddrType));
     MOCK_METHOD1(LnnUpdateAccountInfo, int32_t(const NodeInfo *));
