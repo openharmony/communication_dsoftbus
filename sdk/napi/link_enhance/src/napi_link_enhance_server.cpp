@@ -95,7 +95,13 @@ napi_value NapiLinkEnhanceServer::Constructor(napi_env env, napi_callback_info i
         COMM_LOGE(COMM_SDK, "Parse name failed ");
         return NapiGetUndefinedRet(env);
     }
-
+    {
+        std::lock_guard<std::mutex> guard(serverMapMutex_);
+        if (enhanceServerMap_.find(name) != enhanceServerMap_.end()) {
+            HandleSyncErr(env, LINK_ENHANCE_DUPLICATE_SERVER_NAME);
+            return NapiGetUndefinedRet(env);
+        }
+    }
     NapiLinkEnhanceServer* enhanceServer = new NapiLinkEnhanceServer(name);
     if (enhanceServer == nullptr) {
         COMM_LOGE(COMM_SDK, "new enhanceServer failed");
@@ -121,10 +127,6 @@ napi_value NapiLinkEnhanceServer::Constructor(napi_env env, napi_callback_info i
     enhanceServer->env_ = env;
     {
         std::lock_guard<std::mutex> guard(serverMapMutex_);
-        if (enhanceServerMap_.find(name) != enhanceServerMap_.end()) {
-            HandleSyncErr(env, LINK_ENHANCE_DUPLICATE_SERVER_NAME);
-            return NapiGetUndefinedRet(env);
-        }
         enhanceServerMap_[name] = enhanceServer;
     }
 
@@ -174,10 +176,16 @@ napi_value NapiLinkEnhanceServer::On(napi_env env, napi_callback_info info)
     }
     if (strcmp(type, "connectionAccepted") == 0) {
         COMM_LOGE(COMM_SDK, "register connectionAccepted");
+        if (enhanceServer->acceptConnectRef_ != nullptr) {
+            napi_delete_reference(env, enhanceServer->acceptConnectRef_);
+        }
         napi_create_reference(env, args[ARGS_SIZE_ONE], 1, &(enhanceServer->acceptConnectRef_));
         enhanceServer->SetAcceptedEnable(true);
     } else if (strcmp(type, "serverStopped") == 0) {
         COMM_LOGE(COMM_SDK, "register serverStopped");
+        if (enhanceServer->serverStopRef_ != nullptr) {
+            napi_delete_reference(env, enhanceServer->serverStopRef_);
+        }
         napi_create_reference(env, args[ARGS_SIZE_ONE], 1, &(enhanceServer->serverStopRef_));
         enhanceServer->SetStopEnable(true);
     } else {
@@ -280,6 +288,7 @@ napi_value NapiLinkEnhanceServer::Stop(napi_env env, napi_callback_info info)
 
 napi_value NapiLinkEnhanceServer::Close(napi_env env, napi_callback_info info)
 {
+    COMM_LOGI(COMM_SDK, "enter");
     size_t argc = 0;
     napi_status status = napi_get_cb_info(env, info, &argc, nullptr, nullptr, nullptr);
     if (status != napi_ok || argc > ARGS_SIZE_ZERO) {
@@ -311,14 +320,9 @@ napi_value NapiLinkEnhanceServer::Close(napi_env env, napi_callback_info info)
         enhanceServer->serverStopRef_ = nullptr;
     }
     {
-        std::lock_guard<std::mutex> guard(NapiLinkEnhanceServer::serverMapMutex_);
-        for (auto iter = NapiLinkEnhanceServer::enhanceServerMap_.begin();
-            iter != NapiLinkEnhanceServer::enhanceServerMap_.end(); ++iter) {
-            if (iter->first.compare(enhanceServer->name_) == 0) {
-                COMM_LOGI(COMM_SDK, "server close, server name =%{public}s", enhanceServer->name_.c_str());
-                NapiLinkEnhanceServer::enhanceServerMap_.erase(iter);
-                break;
-            }
+        std::lock_guard<std::mutex> guard(serverMapMutex_);
+        if (enhanceServerMap_.find(enhanceServer->name_) != enhanceServerMap_.end()) {
+            enhanceServerMap_.erase(enhanceServer->name_);
         }
     }
     return NapiGetUndefinedRet(env);

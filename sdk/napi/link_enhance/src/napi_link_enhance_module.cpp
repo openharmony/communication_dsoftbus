@@ -34,6 +34,7 @@ EXTERN_C_START
 static int32_t OnAcceptConnectAdapter(const char *name, uint32_t handle)
 {
     COMM_LOGI(COMM_SDK, "accept new connection, handle=%{public}u", handle);
+    CONN_CHECK_AND_RETURN_RET_LOGE(name != nullptr, SOFTBUS_INVALID_PARAM, COMM_SDK, "name is nullptr");
     std::string serverName = name;
     std::string deviceId = "";
     NapiLinkEnhanceServer *enhanceServer = nullptr;
@@ -98,9 +99,11 @@ static int32_t NotifyConnectResult(NapiLinkEnhanceConnection *connection, bool s
         COMM_LOGE(COMM_SDK, "not register connect result listener");
         return SOFTBUS_CONN_GENERAL_LISTENER_NOT_ENABLE;
     }
+    COMM_LOGI(COMM_SDK, "find connection object, handle=%{public}u, success=%{public}d", connection->handle_, success);
+    connection->state_ = success ? ConnectionState::STATE_CONNECTED : ConnectionState::STATE_DISCONNECTED;
     int32_t napiReason = ConvertToJsErrcode(reason);
     auto func = [connection, success, napiReason]() {
-        NapiConnectionChangeState *changeState = new NapiConnectionChangeState(connection->deviceId_,
+        auto changeState = std::make_shared<NapiConnectionChangeState>(connection->deviceId_,
             success, napiReason);
         napi_value argv[ARGS_SIZE_ONE] = { nullptr };
         argv[ARGS_SIZE_ZERO] = changeState->ToNapiValue(connection->env_);
@@ -109,61 +112,65 @@ static int32_t NotifyConnectResult(NapiLinkEnhanceConnection *connection, bool s
     return DoInJsMainThread(connection->env_, std::move(func));
 }
 
+static int32_t NotifyConnectionStateChange(NapiLinkEnhanceConnection *connection, int32_t status, int32_t reason)
+{
+    if (connection->state_ == ConnectionState::STATE_CONNECTING) {
+        bool success = (status == CONNECTION_STATE_CONNECTED_SUCCESS);
+        return NotifyConnectResult(connection, success, reason);
+    }
+    if (status == CONNECTION_STATE_DISCONNECTED) {
+        return NotifyDisconnected(connection, reason);
+    }
+    return LINK_ENHANCE_PARAMETER_INVALID;
+}
+
 static int32_t OnConnectionStateChangeAdapter(uint32_t handle, int32_t status, int32_t reason)
 {
     COMM_LOGI(COMM_SDK, "connection state change, handle=%{public}u, state=%{public}d, reason=%{public}d", handle,
         status, reason);
     std::lock_guard<std::mutex> guard(NapiLinkEnhanceConnection::connectionListMutex_);
+    int32_t ret = LINK_ENHANCE_PARAMETER_INVALID;
     for (auto iter = NapiLinkEnhanceConnection::connectionList_.begin();
-        iter != NapiLinkEnhanceConnection::connectionList_.end(); ++iter) {
+        iter != NapiLinkEnhanceConnection::connectionList_.end();) {
         NapiLinkEnhanceConnection *connection = *iter;
-        if (connection->handle_ == handle && (status == CONNECTION_STATE_CONNECTED_SUCCESS ||
-            status == CONNECTION_STATE_CONNECTED_FAILED)) {
-            bool success = (status == CONNECTION_STATE_CONNECTED_SUCCESS);
-            COMM_LOGI(COMM_SDK, "find connection object, handle=%{public}u, success=%{public}d", handle, success);
-            connection->state_ = success ? ConnectionState::STATE_CONNECTED : ConnectionState::STATE_DISCONNECTED;
-            int32_t ret = NotifyConnectResult(connection, success, reason);
-            if (!success) {
+        if (handle == 0) {
+            // indicates that server is died and clear all connections
+            ret = NotifyConnectionStateChange(connection, status, reason);
+            iter = NapiLinkEnhanceConnection::connectionList_.erase(iter);
+            continue;
+        }
+        if (connection->handle_ == handle) {
+            ret = NotifyConnectionStateChange(connection, status, reason);
+            if (status != CONNECTION_STATE_CONNECTED_SUCCESS) {
                 NapiLinkEnhanceConnection::connectionList_.erase(iter);
             }
             return ret;
-        }
-        if (connection->handle_ == handle && status == CONNECTION_STATE_DISCONNECTED) {
-            int32_t ret = NotifyDisconnected(connection, reason);
-            NapiLinkEnhanceConnection::connectionList_.erase(iter);
-            return ret;
-        }
-        if (handle == 0) {
-            if (connection->state_ == ConnectionState::STATE_CONNECTING) {
-                (void)NotifyConnectResult(connection, false, reason);
-            } else if (connection->state_ == ConnectionState::STATE_CONNECTED) {
-                (void)NotifyDisconnected(connection, reason);
-            }
-            NapiLinkEnhanceConnection::connectionList_.erase(iter);
+        } else {
+            iter++;
         }
     }
-    return LINK_ENHANCE_PARAMETER_INVALID;
+    return ret;
 }
 
-static void NotifyDataReceived(NapiLinkEnhanceConnection *connection, uint8_t *outData, uint32_t len)
+static void NotifyDataReceived(NapiLinkEnhanceConnection *connection, const uint8_t *data, uint32_t len)
 {
     if (!connection->IsDataReceiveEnable()) {
         COMM_LOGE(COMM_SDK, "not register data recv listener");
         return;
     }
+    auto outData = std::shared_ptr<uint8_t>(new uint8_t[len], std::default_delete<uint8_t[]>());
+    if (outData == nullptr || memcpy_s(outData.get(), len, data, len) != EOK) {
+        return;
+    }
     auto func = [connection, outData, len]() {
-        napi_value arrayBuffer;
-        void *dataBuffer;
+        napi_value arrayBuffer = nullptr;
+        void *dataBuffer = nullptr;
         int32_t status = napi_create_arraybuffer(connection->env_, len, &dataBuffer, &arrayBuffer);
         if (status != napi_ok) {
             COMM_LOGE(COMM_SDK, "create data array object failed");
-            delete[]outData;
             return;
         }
-        for (uint32_t i = 0; i < len; i++) {
-            ((uint8_t *)dataBuffer)[i] = outData[i];
-        }
-        delete[]outData;
+        (void)memcpy_s(dataBuffer, len, outData.get(), len);
         napi_value argv[ARGS_SIZE_ONE] = { nullptr };
         argv[ARGS_SIZE_ZERO] = arrayBuffer;
         NapiCallFunction(connection->env_, connection->dataReceivedRef_, argv, ARGS_SIZE_ONE);
@@ -173,19 +180,14 @@ static void NotifyDataReceived(NapiLinkEnhanceConnection *connection, uint8_t *o
 
 static void OnDataReceivedAdapter(uint32_t handle, const uint8_t *data, uint32_t len)
 {
+    CONN_CHECK_AND_RETURN_LOGE(data != nullptr, COMM_SDK, "data is nullptr");
     COMM_LOGI(COMM_SDK, "connection data received, handle=%{public}u, len=%{public}u", handle, len);
     std::lock_guard<std::mutex> guard(NapiLinkEnhanceConnection::connectionListMutex_);
     for (uint32_t i = 0; i < NapiLinkEnhanceConnection::connectionList_.size(); i++) {
         NapiLinkEnhanceConnection *connection = NapiLinkEnhanceConnection::connectionList_[i];
-        
         if (connection->handle_ == handle) {
             COMM_LOGI(COMM_SDK, "find connection object, handle=%{public}u", handle);
-            uint8_t *outData = new uint8_t[len];
-            if (outData == nullptr || memcpy_s(outData, len, data, len) != EOK) {
-                delete[]outData;
-                return;
-            }
-            NotifyDataReceived(connection, outData, len);
+            NotifyDataReceived(connection, data, len);
             return;
         }
     }
@@ -197,11 +199,11 @@ static void OnServiceDiedAdapter(void)
     COMM_LOGI(COMM_SDK, "service died");
     std::lock_guard<std::mutex> guard(NapiLinkEnhanceServer::serverMapMutex_);
     for (auto iter = NapiLinkEnhanceServer::enhanceServerMap_.begin();
-        iter != NapiLinkEnhanceServer::enhanceServerMap_.end(); ++iter) {
+        iter != NapiLinkEnhanceServer::enhanceServerMap_.end();) {
         NapiLinkEnhanceServer *server = iter->second;
         if (!server->IsStopEnable()) {
-            COMM_LOGI(COMM_SDK, "server close, server name =%{public}s", server->name_.c_str());
-            NapiLinkEnhanceServer::enhanceServerMap_.erase(iter);
+            COMM_LOGI(COMM_SDK, "server not enable stop listener");
+            iter = NapiLinkEnhanceServer::enhanceServerMap_.erase(iter);
             continue;
         }
         auto func = [server]() {
@@ -211,7 +213,7 @@ static void OnServiceDiedAdapter(void)
             NapiCallFunction(server->env_, server->serverStopRef_, argv, ARGS_SIZE_ONE);
         };
         (void)DoInJsMainThread(server->env_, std::move(func));
-        NapiLinkEnhanceServer::enhanceServerMap_.erase(iter);
+        iter = NapiLinkEnhanceServer::enhanceServerMap_.erase(iter);
     }
 }
 
@@ -225,10 +227,9 @@ static IGeneralListener g_listener = {
 /*
  * Module initialization function
  */
-
 static napi_value Init(napi_env env, napi_value exports)
 {
-    COMM_LOGI(COMM_SDK, "----enhance manager init start------");
+    COMM_LOGI(COMM_SDK, "enhance manager init start");
     NapiLinkEnhanceServer::DefineJSClass(env);
     NapiLinkEnhanceConnection::DefineJSClass(env);
     PropertyInit(env, exports);
@@ -240,10 +241,8 @@ static napi_value Init(napi_env env, napi_value exports)
 
     int32_t ret = GeneralRegisterListener(&g_listener);
     if (ret != 0) {
-        COMM_LOGE(COMM_SDK, "----enhance manager register listener failed------");
+        COMM_LOGE(COMM_SDK, "enhance manager register listener failed ret=%{public}d", ret);
     }
-
-    COMM_LOGI(COMM_SDK, "----enhance manager init end------");
     return exports;
 }
 EXTERN_C_END

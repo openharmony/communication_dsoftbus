@@ -80,7 +80,7 @@ bool ParseUInt32(napi_env env, uint32_t &param, napi_value args);
 napi_value NapiGetNull(napi_env env);
 napi_value NapiGetUndefinedRet(napi_env env);
 napi_value NapiGetStringRet(napi_env env, std::string string);
-napi_value NapiGetInt32Ret(napi_env, int32_t res);
+napi_value NapiGetInt32Ret(napi_env env, int32_t res);
 
 void SetNamedPropertyByInteger(napi_env env, napi_value dstObj, int32_t objName, const char *propName);
 void SetNamedPropertyByString(napi_env env, napi_value dstObj, const std::string &strValue, const char *propName);
