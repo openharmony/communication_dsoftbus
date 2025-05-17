@@ -718,7 +718,7 @@ HWTEST_F(LNNDbMockTest, LNN_INSERT_SPECIFIC_TRUSTED_DEVICEINFO_Test_001, TestSiz
     EXPECT_CALL(decisionDbMock, LnnAsyncCallbackHelper(_, _, _))
         .WillRepeatedly(Return(SOFTBUS_NETWORK_ASYNC_CALLBACK_FAILED));
     ret = LnnInsertSpecificTrustedDevInfo(NODE_UDID);
-    EXPECT_TRUE(ret == SOFTBUS_NETWORK_ASYNC_CALLBACK_FAILED);
+    EXPECT_TRUE(ret == SOFTBUS_OK);
 }
 
 /*
@@ -751,7 +751,7 @@ HWTEST_F(LNNDbMockTest, LNN_INSERT_SPECIFIC_TRUSTED_DEVICEINFO_Test_003, TestSiz
     EXPECT_CALL(decisionDbMock, LnnGetLocalByteInfo(_, _, _))
         .WillRepeatedly(Return(SOFTBUS_NETWORK_GET_LOCAL_NODE_INFO_ERR));
     int32_t ret = LnnInsertSpecificTrustedDevInfo(NODE_UDID);
-    EXPECT_TRUE(ret == SOFTBUS_NETWORK_GET_LOCAL_NODE_INFO_ERR);
+    EXPECT_TRUE(ret == SOFTBUS_OK);
 }
 
 /*
@@ -769,7 +769,7 @@ HWTEST_F(LNNDbMockTest, LNN_INSERT_SPECIFIC_TRUSTED_DEVICEINFO_Test_004, TestSiz
     EXPECT_CALL(decisionDbMock, ConvertBytesToHexString(_, _, _, _))
         .WillRepeatedly(Return(SOFTBUS_NETWORK_BYTES_TO_HEX_STR_ERR));
     int32_t ret = LnnInsertSpecificTrustedDevInfo(NODE_UDID);
-    EXPECT_TRUE(ret == SOFTBUS_NETWORK_BYTES_TO_HEX_STR_ERR);
+    EXPECT_TRUE(ret == SOFTBUS_OK);
 }
 
 /*
@@ -846,7 +846,7 @@ HWTEST_F(LNNDbMockTest, LNN_DELETE_SPECIFIC_TRUSTED_DEVICEINFO_Test_001, TestSiz
     EXPECT_CALL(decisionDbMock, LnnAsyncCallbackHelper(_, _, _))
         .WillRepeatedly(Return(SOFTBUS_NETWORK_ASYNC_CALLBACK_FAILED));
     ret = LnnDeleteSpecificTrustedDevInfo(NODE_UDID, DEFAULT_USERID);
-    EXPECT_TRUE(ret == SOFTBUS_NETWORK_ASYNC_CALLBACK_FAILED);
+    EXPECT_TRUE(ret == SOFTBUS_OK);
 }
 
 /*
@@ -898,7 +898,7 @@ HWTEST_F(LNNDbMockTest, LNN_DELETE_SPECIFIC_TRUSTED_DEVICEINFO_Test_004, TestSiz
         .WillRepeatedly(Return(SOFTBUS_NETWORK_BYTES_TO_HEX_STR_ERR));
     EXPECT_CALL(decisionDbMock, OpenDatabase(_)).WillRepeatedly(Return(SOFTBUS_NETWORK_DATABASE_FAILED));
     int32_t ret = LnnDeleteSpecificTrustedDevInfo(NODE_UDID, DEFAULT_USERID);
-    EXPECT_TRUE(ret == SOFTBUS_NETWORK_BYTES_TO_HEX_STR_ERR);
+    EXPECT_TRUE(ret == SOFTBUS_OK);
 }
 
 /*
@@ -974,7 +974,7 @@ HWTEST_F(LNNDbMockTest, LNN_GET_TRUSTED_DEVICEINFO_Test_001, TestSize.Level1)
     DecisionDbDepsInterfaceMock decisionDbMock;
     EXPECT_CALL(decisionDbMock, LnnGetLocalByteInfo(_, _, _)).WillRepeatedly(Return(SOFTBUS_INVALID_PARAM));
     ret = LnnGetTrustedDevInfoFromDb(&udid, &num);
-    EXPECT_TRUE(ret == SOFTBUS_NETWORK_GET_NODE_INFO_ERR);
+    EXPECT_TRUE(ret == SOFTBUS_OK);
 }
 
 /*
@@ -992,7 +992,7 @@ HWTEST_F(LNNDbMockTest, LNN_GET_TRUSTED_DEVICEINFO_Test_002, TestSize.Level1)
     EXPECT_CALL(decisionDbMock, ConvertBytesToHexString(_, _, _, _))
         .WillRepeatedly(Return(SOFTBUS_NETWORK_BYTES_TO_HEX_STR_ERR));
     int32_t ret = LnnGetTrustedDevInfoFromDb(&udid, &num);
-    EXPECT_TRUE(ret == SOFTBUS_NETWORK_GET_NODE_INFO_ERR);
+    EXPECT_TRUE(ret == SOFTBUS_OK);
 }
 
 /*

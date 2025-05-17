@@ -90,3 +90,8 @@ int32_t LnnFindDeviceUdidTrustedInfoFromDb(const char *udid)
     LNN_LOGI(LNN_INIT, "no find trusted");
     return SOFTBUS_NOT_IMPLEMENT;
 }
+
+int32_t InitDbListDelay(void)
+{
+    return SOFTBUS_OK;
+}

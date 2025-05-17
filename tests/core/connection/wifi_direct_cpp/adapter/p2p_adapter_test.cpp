@@ -138,7 +138,7 @@ HWTEST_F(P2pAdapterTest, P2pConnectGroupTest03, TestSize.Level1)
 
 /*
 * @tc.name: DestroyGroupTest
-* @tc.desc: p2p destroy group
+* @tc.desc: p2p destroy group -- INVALID
 * @tc.type: FUNC
 * @tc.require:
 */
@@ -152,6 +152,53 @@ HWTEST_F(P2pAdapterTest, DestroyGroupTest, TestSize.Level1)
     P2pDestroyGroupParam param;
     int32_t ret = P2pAdapter::DestroyGroup(param);
     EXPECT_EQ(ret, SOFTBUS_CONN_UNKNOWN_ROLE);
+}
+
+/*
+* @tc.name: DestroyGroupTest01
+* @tc.desc: p2p destroy group -- GO
+* @tc.type: FUNC
+* @tc.require:
+*/
+HWTEST_F(P2pAdapterTest, DestroyGroupTest01, TestSize.Level1)
+{
+    WifiDirectInterfaceMock mock;
+    InterfaceManager::GetInstance().UpdateInterface(
+            InterfaceInfo::InterfaceType::P2P, [](InterfaceInfo &info) {
+            info.SetRole(LinkInfo::LinkMode::GO);
+            return SOFTBUS_OK;
+    });
+    EXPECT_CALL(mock, RemoveGroup()).WillOnce(Return(WIFI_SUCCESS));
+    P2pDestroyGroupParam param;
+    int32_t ret = P2pAdapter::DestroyGroup(param);
+    EXPECT_EQ(ret, SOFTBUS_OK);
+}
+
+/*
+* @tc.name: DestroyGroupTest02
+* @tc.desc: p2p destroy group -- GC
+* @tc.type: FUNC
+* @tc.require:
+*/
+HWTEST_F(P2pAdapterTest, DestroyGroupTest02, TestSize.Level1)
+{
+    WifiDirectInterfaceMock mock;
+    InterfaceManager::GetInstance().UpdateInterface(
+            InterfaceInfo::InterfaceType::P2P, [](InterfaceInfo &info) {
+            info.SetRole(LinkInfo::LinkMode::GC);
+            return SOFTBUS_OK;
+    });
+    EXPECT_CALL(mock, Hid2dRemoveGcGroup(_)).WillOnce(Return(WIFI_SUCCESS));
+    P2pDestroyGroupParam param;
+    param.interface = IF_NAME_P2P;
+    int32_t ret = P2pAdapter::DestroyGroup(param);
+    EXPECT_EQ(ret, SOFTBUS_OK);
+    // Reset the role after the test is complete
+    InterfaceManager::GetInstance().UpdateInterface(
+            InterfaceInfo::InterfaceType::P2P, [](InterfaceInfo &info) {
+            info.SetRole(LinkInfo::LinkMode::INVALID);
+            return SOFTBUS_OK;
+    });
 }
 
 /*
@@ -409,12 +456,12 @@ HWTEST_F(P2pAdapterTest, GetDynamicMacAddressTest001, TestSize.Level1)
 }
 
 /*
-* @tc.name: DestroyGroupTest002
-* @tc.desc: check destroy group
+* @tc.name: RequestGcIpTest
+* @tc.desc: check request gc ip
 * @tc.type: FUNC
 * @tc.require:
 */
-HWTEST_F(P2pAdapterTest, DestroyGroupTest002, TestSize.Level1)
+HWTEST_F(P2pAdapterTest, RequestGcIpTest, TestSize.Level1)
 {
     WifiDirectInterfaceMock mock;
     std::string macString = "";
@@ -430,5 +477,108 @@ HWTEST_F(P2pAdapterTest, DestroyGroupTest002, TestSize.Level1)
 
     ret = P2pAdapter::RequestGcIp(macString, ipString);
     EXPECT_EQ(ret, WIFI_SUCCESS);
+}
+
+/*
+* @tc.name: P2pConfigGcIpTest01
+* @tc.desc: check p2p config gc ip -- ip is normal
+* @tc.type: FUNC
+* @tc.require:
+*/
+HWTEST_F(P2pAdapterTest, P2pConfigGcIpTest01, TestSize.Level1)
+{
+    WifiDirectInterfaceMock mock;
+    std::string interface = IF_NAME_P2P;
+    std::string ipString = "255.255.255.0";
+    EXPECT_CALL(mock, Hid2dConfigIPAddr).WillOnce(Return(WIFI_SUCCESS));
+    int32_t ret = P2pAdapter::P2pConfigGcIp(interface, ipString);
+    EXPECT_EQ(ret, SOFTBUS_OK);
+}
+
+/*
+* @tc.name: P2pConfigGcIpTest02
+* @tc.desc: check p2p config gc ip -- ip is error
+* @tc.type: FUNC
+* @tc.require:
+*/
+HWTEST_F(P2pAdapterTest, P2pConfigGcIpTest02, TestSize.Level1)
+{
+    WifiDirectInterfaceMock mock;
+    std::string interface = IF_NAME_P2P;
+    std::string ipString = "255.255.255";
+    int32_t ret = P2pAdapter::P2pConfigGcIp(interface, ipString);
+    EXPECT_EQ(ret, SOFTBUS_CONN_SCAN_IP_NUMBER_FAILED);
+}
+
+/*
+* @tc.name: GetApChannelTest01
+* @tc.desc: check get softap channel -- softap not active
+* @tc.type: FUNC
+* @tc.require:
+*/
+HWTEST_F(P2pAdapterTest, GetApChannelTest01, TestSize.Level1)
+{
+    WifiDirectInterfaceMock mock;
+    EXPECT_CALL(mock, IsHotspotActive).WillOnce(Return(WIFI_HOTSPOT_NOT_ACTIVE));
+    int ret = P2pAdapter::GetApChannel();
+    EXPECT_EQ(ret, CHANNEL_INVALID);
+}
+
+/*
+* @tc.name: GetApChannelTest02
+* @tc.desc: check get softap channel -- softap active but get softap channel fail
+* @tc.type: FUNC
+* @tc.require:
+*/
+HWTEST_F(P2pAdapterTest, GetApChannelTest02, TestSize.Level1)
+{
+    WifiDirectInterfaceMock mock;
+    EXPECT_CALL(mock, IsHotspotActive).WillOnce(Return(WIFI_HOTSPOT_ACTIVE));
+    EXPECT_CALL(mock, GetHotspotConfig).WillOnce(Return(ERROR_WIFI_UNKNOWN));
+    int ret = P2pAdapter::GetApChannel();
+    EXPECT_EQ(ret, CHANNEL_INVALID);
+}
+
+/*
+* @tc.name: GetApChannelTest03
+* @tc.desc: check get softap channel -- softap active and get softap channel success
+* @tc.type: FUNC
+* @tc.require:
+*/
+HWTEST_F(P2pAdapterTest, GetApChannelTest03, TestSize.Level1)
+{
+    WifiDirectInterfaceMock mock;
+    EXPECT_CALL(mock, IsHotspotActive).WillOnce(Return(WIFI_HOTSPOT_ACTIVE));
+    EXPECT_CALL(mock, GetHotspotConfig).WillOnce(Return(WIFI_SUCCESS));
+    int ret = P2pAdapter::GetApChannel();
+    EXPECT_GE(ret, 0);
+}
+
+/*
+* @tc.name: GetP2pGroupFrequencyTest01
+* @tc.desc: check get p2p group freq -- fail
+* @tc.type: FUNC
+* @tc.require:
+*/
+HWTEST_F(P2pAdapterTest, GetP2pGroupFrequencyTest01, TestSize.Level1)
+{
+    WifiDirectInterfaceMock mock;
+    EXPECT_CALL(mock, GetCurrentGroup).WillOnce(Return(ERROR_WIFI_UNKNOWN));
+    int32_t ret = P2pAdapter::GetP2pGroupFrequency();
+    EXPECT_EQ(ret, ToSoftBusErrorCode(ERROR_WIFI_UNKNOWN));
+}
+
+/*
+* @tc.name: GetP2pGroupFrequencyTest02
+* @tc.desc: check get p2p group freq -- success
+* @tc.type: FUNC
+* @tc.require:
+*/
+HWTEST_F(P2pAdapterTest, GetP2pGroupFrequencyTest02, TestSize.Level1)
+{
+    WifiDirectInterfaceMock mock;
+    EXPECT_CALL(mock, GetCurrentGroup).WillOnce(Return(WIFI_SUCCESS));
+    int32_t ret = P2pAdapter::GetP2pGroupFrequency();
+    EXPECT_GE(ret, 0);
 }
 }
