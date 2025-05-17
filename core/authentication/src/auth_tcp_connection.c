@@ -60,7 +60,7 @@ static InnerChannelListener g_listener[] = {
 };
 
 static SocketCallback g_callback = { NULL, NULL, NULL };
-static ListNode g_authTcpConnFdList  = { &g_authTcpConnFdList, &g_authTcpConnFdList };
+static ListNode g_authTcpConnFdList = { &g_authTcpConnFdList, &g_authTcpConnFdList };
 static SoftBusMutex g_authTcpConnFdListLock;
 
 static void NotifyChannelDisconnected(int32_t channelId);
