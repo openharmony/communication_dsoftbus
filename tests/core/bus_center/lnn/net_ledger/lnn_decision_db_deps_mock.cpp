@@ -250,9 +250,9 @@ int32_t LnnDeleteCeKeyByHuks(struct HksBlob *keyAlias)
     return GetDecisionDbDepsInterface()->LnnDeleteCeKeyByHuks(keyAlias);
 }
 
-int32_t LnnGenerateCeKeyByHuks(struct HksBlob *keyAlias)
+int32_t LnnGenerateCeKeyByHuks(struct HksBlob *keyAlias, bool isUnlocked)
 {
-    return GetDecisionDbDepsInterface()->LnnGenerateCeKeyByHuks(keyAlias);
+    return GetDecisionDbDepsInterface()->LnnGenerateCeKeyByHuks(keyAlias, isUnlocked);
 }
 
 int32_t LnnGetLocalDevInfo(NodeInfo *deviceInfo)

@@ -66,6 +66,7 @@ typedef enum {
     INIT_NETWORK_MANAGER_DELAY_TYPE,
     INIT_NETBUILDER_DELAY_TYPE,
     INIT_LANEHUB_DELAY_TYPE,
+    INIT_HUKS_CE_PARAMS_TYPE,
     INIT_DELAY_MAX_TYPE,
 } InitDelayType;
 
@@ -108,6 +109,10 @@ static LnnLocalConfigInit g_lnnLocalConfigInit = {
         },
         [INIT_LANEHUB_DELAY_TYPE] = {
             .implInit = LnnInitLaneHubDelay,
+            .isInit = false,
+        },
+        [INIT_HUKS_CE_PARAMS_TYPE] = {
+            .implInit = LnnInitHuksCeParamsDelay,
             .isInit = false,
         },
     },
