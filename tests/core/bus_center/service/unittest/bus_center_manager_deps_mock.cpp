@@ -138,6 +138,11 @@ int32_t LnnInitEventMoniterDelay(void)
     return GetBusCenterManagerDepsInterface()->LnnInitEventMoniterDelay();
 }
 
+int32_t LnnInitHuksCeParamsDelay(void)
+{
+    return GetBusCenterManagerDepsInterface()->LnnInitHuksCeParamsDelay();
+}
+
 int32_t LnnInitNetworkManagerDelay(void)
 {
     return GetBusCenterManagerDepsInterface()->LnnInitNetworkManagerDelay();
