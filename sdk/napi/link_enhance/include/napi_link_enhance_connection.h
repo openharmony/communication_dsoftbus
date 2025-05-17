@@ -52,7 +52,7 @@ public:
     napi_ref connectResultRef_ = nullptr;
     napi_ref dataReceivedRef_ = nullptr;
     napi_ref disconnectRef_ = nullptr;
-    napi_env env_;
+    napi_env env_ = nullptr;
 
     std::string deviceId_ = "";
     std::string name_ = "";

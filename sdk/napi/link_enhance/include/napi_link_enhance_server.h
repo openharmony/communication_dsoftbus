@@ -34,7 +34,7 @@ public:
     static napi_value Stop(napi_env env, napi_callback_info info);
     static napi_value Close(napi_env env, napi_callback_info info);
 
-    NapiLinkEnhanceServer(std::string &name)
+    NapiLinkEnhanceServer(const std::string &name)
     {
         this->name_ = name;
     }
@@ -48,9 +48,9 @@ public:
 
     napi_ref acceptConnectRef_ = nullptr;
     napi_ref serverStopRef_ = nullptr;
-    napi_env env_;
+    napi_env env_ = nullptr;
 
-    std::string name_;
+    std::string name_ = "";
 private:
     std::recursive_timed_mutex lock_;
     bool isAcceptedEnable_ = false;

@@ -26,7 +26,7 @@ namespace OHOS::Softbus {
 using namespace std;
 static std::map<int32_t, std::string> napiErrMsgMap {
     {LINK_ENHANCE_PERMISSION_DENIED, "Permission denied."},
-    {LINK_ENHANCE_CONNECT_TIEMOUT, "Connect timeout."},
+    {LINK_ENHANCE_CONNECT_TIMEOUT, "Connect timeout."},
     {LINK_ENHANCE_CONNECT_PEER_NOT_START_SERVICE, "Peer server is not started."},
     {LINK_ENHANCE_SERVERS_EXCEEDS, "The number of servers exceeds the limit."},
     {LINK_ENHANCE_DUPLICATE_SERVER_NAME, "Duplicate server name."},
@@ -77,7 +77,7 @@ bool ParseInt32(napi_env env, int32_t &param, napi_value args)
         return false;
     }
     if (napi_get_value_int32(env, args, &param) != napi_ok) {
-        COMM_LOGE(COMM_SDK, "napi_get_value_uint32 failed");
+        COMM_LOGE(COMM_SDK, "napi_get_value_int32 failed");
         return false;
     }
     return true;
@@ -192,7 +192,7 @@ int32_t ConvertToJsErrcode(int32_t err)
         case SOFTBUS_CONN_GENERAL_CREATE_CLIENT_MAX:
             return LINK_ENHANCE_CONNECTIONS_EXCEEDS;
         case SOFTBUS_CONN_GENERAL_CONNECT_TIMEOUT:
-            return LINK_ENHANCE_CONNECT_TIEMOUT;
+            return LINK_ENHANCE_CONNECT_TIMEOUT;
         case SOFTBUS_CONN_GENERAL_SERVER_NOT_OPENED:
             return LINK_ENHANCE_CONNECT_PEER_NOT_START_SERVICE;
         case SOFTBUS_CONN_GENERAL_DUPLICATE_SERVER:
