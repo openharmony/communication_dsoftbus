@@ -199,14 +199,23 @@ napi_value NapiLinkEnhanceConnection::On(napi_env env, napi_callback_info info)
 
     if (strcmp(type, "connectResult") == 0) {
         COMM_LOGI(COMM_SDK, "register connectResult");
+        if (connection->connectResultRef_ != nullptr) {
+            napi_delete_reference(env, connection->connectResultRef_);
+        }
         napi_create_reference(env, args[ARGS_SIZE_ONE], 1, &(connection->connectResultRef_));
         connection->SetConnectResultEnable(true);
     } else if (strcmp(type, "dataReceived") == 0) {
         COMM_LOGI(COMM_SDK, "register dataReceived");
+        if (connection->dataReceivedRef_ != nullptr) {
+            napi_delete_reference(env, connection->dataReceivedRef_);
+        }
         napi_create_reference(env, args[ARGS_SIZE_ONE], 1, &(connection->dataReceivedRef_));
-        connection->SetEnableData(true) ;
+        connection->SetEnableData(true);
     } else if (strcmp(type, "disconnected") == 0) {
         COMM_LOGI(COMM_SDK, "register disconnected");
+        if (connection->disconnectRef_ != nullptr) {
+            napi_delete_reference(env, connection->disconnectRef_);
+        }
         napi_create_reference(env, args[ARGS_SIZE_ONE], 1, &(connection->disconnectRef_));
         connection->SetEnableDisconnect(true);
     } else {
@@ -252,7 +261,7 @@ napi_value NapiLinkEnhanceConnection::Off(napi_env env, napi_callback_info info)
         napi_delete_reference(env, connection->disconnectRef_);
         connection->disconnectRef_ = nullptr;
         connection->SetEnableDisconnect(false);
-        COMM_LOGI(COMM_SDK, "register disconnected");
+        COMM_LOGI(COMM_SDK, "unregister disconnected");
     } else {
         HandleSyncErr(env, LINK_ENHANCE_PARAMETER_INVALID);
         return NapiGetUndefinedRet(env);
@@ -283,7 +292,7 @@ napi_value NapiLinkEnhanceConnection::Connect(napi_env env, napi_callback_info i
     
     int32_t handle = GeneralConnect(PKG_NAME.c_str(), connection->name_.c_str(), &address);
     if (handle <= 0) {
-        COMM_LOGE(COMM_SDK, "connect faield, err=%{public}d", handle);
+        COMM_LOGE(COMM_SDK, "connect failed, err=%{public}d", handle);
         int32_t errcode = ConvertToJsErrcode(handle);
         HandleSyncErr(env, errcode);
         return NapiGetUndefinedRet(env);
@@ -351,7 +360,7 @@ napi_value NapiLinkEnhanceConnection::Close(napi_env env, napi_callback_info inf
         connection->dataReceivedRef_ = nullptr;
     }
     if (connection->disconnectRef_ != nullptr) {
-        COMM_LOGI(COMM_SDK, "uregister disconnected");
+        COMM_LOGI(COMM_SDK, "unregister disconnected");
         napi_delete_reference(env, connection->disconnectRef_);
         connection->disconnectRef_ = nullptr;
     }
