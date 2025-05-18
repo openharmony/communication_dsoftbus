@@ -582,7 +582,7 @@ static void DfxRecordCoapInitEnd(int32_t reason)
 
 uint32_t GetDiscCapability(void)
 {
-    return g_subscribeMgr == NULL ? SOFTBUS_INVALID_PARAM : g_subscribeMgr->allCap[0];
+    return g_subscribeMgr == NULL ? 0 : g_subscribeMgr->allCap[0];
 }
 
 DiscoveryFuncInterface *DiscCoapInit(DiscInnerCallback *discInnerCb)
