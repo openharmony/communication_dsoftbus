@@ -38,6 +38,7 @@
 #define REPORT_SYN_INFO_NUM 3
 #define SYN_INFO_LEN (sizeof(uint32_t) * REPORT_SYN_INFO_NUM)
 #define ACCESS_INFO_PARAM_NUM 3
+#define INVALID_USER_ID (-1)
 
 static int32_t WriteAcessInfoToBuf(uint8_t *buf, uint32_t bufLen, int32_t *offSet, const SocketAccessInfo *accessInfo)
 {
@@ -150,6 +151,7 @@ int32_t TransOnChannelOpened(const char *sessionName, const ChannelInfo *channel
     }
 
     SocketAccessInfo accessInfo = { 0 };
+    accessInfo.userId = INVALID_USER_ID;
     int32_t ret = SOFTBUS_NO_INIT;
     int32_t udpPort = 0;
     switch (channel->channelType) {
