@@ -1489,7 +1489,7 @@ static void TransProcessAsyncOpenTdcChannelFailed(
     CloseTcpDirectFd(conn->listenMod, conn->appInfo.fd);
 }
 
-static int32_t HandChannelOpenedReply(
+static int32_t HandleTdcChannelOpenedReply(
     SessionConn *conn, int32_t channelId, TransEventExtra *extra, uint32_t flags, uint64_t seq)
 {
     int32_t ret = HandleDataBusReply(conn, channelId, extra, flags, seq);
@@ -1552,7 +1552,7 @@ static void HandleTdcGenUkResult(uint32_t requestId, int32_t ukId, int32_t reaso
     NodeInfo nodeInfo;
     (void)memset_s(&nodeInfo, sizeof(NodeInfo), 0, sizeof(NodeInfo));
     ReportTransEventExtra(&extra, channelId, &conn, &nodeInfo, peerUuid);
-    (void)HandChannelOpenedReply(&conn, channelId, &extra, flags, seq);
+    (void)HandleTdcChannelOpenedReply(&conn, channelId, &extra, flags, seq);
     (void)TransUkRequestDeleteItem(requestId);
     (void)memset_s(
         conn.appInfo.sinkSessionKey, sizeof(conn.appInfo.sinkSessionKey), 0, sizeof(conn.appInfo.sinkSessionKey));
@@ -1587,10 +1587,8 @@ int32_t TransDealTdcChannelOpenResult(int32_t channelId, int32_t openResult, con
     uint32_t flags = 0;
     uint64_t seq = 0;
     ret = TransSrvGetSeqAndFlagsByChannelId(&seq, &flags, channelId);
-    if (ret != SOFTBUS_OK) {
-        TRANS_LOGE(TRANS_CTRL, "get seqs and flags failed, channelId=%{public}d, ret=%{public}d", channelId, ret);
-        return ret;
-    }
+    TRANS_CHECK_AND_RETURN_RET_LOGE(ret == SOFTBUS_OK, ret, TRANS_CTRL,
+        "get seqs and flags failed, channelId=%{public}d, ret=%{public}d", channelId, ret);
     TransEventExtra extra;
     (void)memset_s(&extra, sizeof(TransEventExtra), 0, sizeof(TransEventExtra));
     char peerUuid[DEVICE_ID_SIZE_MAX] = { 0 };
@@ -1608,7 +1606,7 @@ int32_t TransDealTdcChannelOpenResult(int32_t channelId, int32_t openResult, con
     if (GetCapabilityBit(conn.appInfo.channelCapability, TRANS_CHANNEL_SINK_GENERATE_KEY_OFFSET)) {
         if (accessInfo != NULL && accessInfo->userId == INVALID_USER_ID) {
             DisableCapabilityBit(&conn.appInfo.channelCapability, TRANS_CHANNEL_SINK_KEY_ENCRYPT_OFFSET);
-            return HandChannelOpenedReply(&conn, channelId, &extra, flags, seq);
+            return HandleTdcChannelOpenedReply(&conn, channelId, &extra, flags, seq);
         }
         ret = GetUserkeyIdByAClInfo(
             &conn.appInfo, channelId, CHANNEL_TYPE_TCP_DIRECT, &conn.appInfo.myData.userKeyId, &tdcAuthGenUkCallback);
@@ -1617,7 +1615,7 @@ int32_t TransDealTdcChannelOpenResult(int32_t channelId, int32_t openResult, con
         }
         if (ret == SOFTBUS_AUTH_ACL_NOT_FOUND && SoftBusSaCanUseDeviceKey(conn.appInfo.myData.tokenId)) {
             DisableCapabilityBit(&conn.appInfo.channelCapability, TRANS_CHANNEL_SINK_KEY_ENCRYPT_OFFSET);
-            return HandChannelOpenedReply(&conn, channelId, &extra, flags, seq);
+            return HandleTdcChannelOpenedReply(&conn, channelId, &extra, flags, seq);
         }
         if (ret != SOFTBUS_OK) {
             (void)NotifyChannelClosed(&conn.appInfo, channelId);
@@ -1625,7 +1623,7 @@ int32_t TransDealTdcChannelOpenResult(int32_t channelId, int32_t openResult, con
             return SOFTBUS_OK;
         }
     }
-    return HandChannelOpenedReply(&conn, channelId, &extra, flags, seq);
+    return HandleTdcChannelOpenedReply(&conn, channelId, &extra, flags, seq);
 }
 
 void TransAsyncTcpDirectChannelTask(int32_t channelId)
