@@ -43,6 +43,7 @@ ohos_unittest("ConnClientConnectionTest") {
     "c_utils:utils",
     "dsoftbus:softbus_client",
     "hilog:libhilog",
+    "selinux_adapter:librestorecon",
   ]
 }
 
