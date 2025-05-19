@@ -1390,6 +1390,10 @@ int32_t TransDealProxyChannelOpenResult(int32_t channelId, int32_t openResult, c
     }
     chan.appInfo.myHandleId = 0;
     if (GetCapabilityBit(chan.appInfo.channelCapability, TRANS_CHANNEL_SINK_GENERATE_KEY_OFFSET)) {
+        if (accessInfo != NULL && accessInfo->userId == INVALID_USER_ID) {
+            (void)DisableCapabilityBit(&chan.appInfo.channelCapability, TRANS_CHANNEL_SINK_KEY_ENCRYPT_OFFSET);
+            return HandleProxyChanelOpened(&chan, channelId); 
+        }
         ret = GetUserkeyIdByAClInfo(
             &chan.appInfo, channelId, CHANNEL_TYPE_PROXY, &chan.appInfo.myData.userKeyId, &proxyAuthGenUkCallback);
         if (ret == SOFTBUS_TRANS_GEN_USER_KEY) {

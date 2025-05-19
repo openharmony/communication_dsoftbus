@@ -1055,10 +1055,6 @@ static int32_t TransReportChannelOpenedInfo(uint8_t *buf, uint32_t len)
 {
     OpenChannelResult info = { 0 };
     AccessInfo accessInfo = { 0 };
-    accessInfo.businessAccountId = (char *)SoftBusCalloc(ACCOUNT_UID_LEN_MAX);
-    if (accessInfo.businessAccountId == NULL) {
-        return SOFTBUS_MALLOC_ERR;
-    }
     int32_t udpPort = 0;
     int32_t ret = SOFTBUS_OK;
     if (len == sizeof(int32_t) * REPORT_UDP_INFO_SIZE ||
@@ -1068,7 +1064,6 @@ static int32_t TransReportChannelOpenedInfo(uint8_t *buf, uint32_t len)
         ret = GetChannelInfoFromBuf(buf, len, &info, &accessInfo);
     }
     if (ret != SOFTBUS_OK) {
-        SoftBusFree(accessInfo.businessAccountId);
         return ret;
     }
     switch (info.channelType) {
@@ -1091,7 +1086,6 @@ static int32_t TransReportChannelOpenedInfo(uint8_t *buf, uint32_t len)
     if (ret != SOFTBUS_OK) {
         TRANS_LOGE(TRANS_CTRL, "report Event channel opened info failed");
     }
-    SoftBusFree(accessInfo.businessAccountId);
     return ret;
 }
 
