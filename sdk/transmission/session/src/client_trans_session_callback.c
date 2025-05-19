@@ -317,7 +317,7 @@ static int32_t HandleServerOnNegotiate(int32_t socket, int32_t tokenType, const 
     if (tokenType > ACCESS_TOKEN_TYPE_HAP && channel->channelType != CHANNEL_TYPE_AUTH) {
         ret = TransOnNegotiate2(socket, socketCallback, channel, localAccessInfo);
         if (ret != SOFTBUS_OK) {
-            TRANS_LOGE(TRANS_SDK, "TransOnCheckAccess failed, ret=%{public}d", ret);
+            TRANS_LOGE(TRANS_SDK, "TransOnNegotiate2 failed, ret=%{public}d", ret);
             (void)ClientDeleteSocketSession(socket);
             return ret;
         }

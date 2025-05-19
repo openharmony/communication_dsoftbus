@@ -26,7 +26,6 @@
 #include "softbus_json_utils.h"
 #include "softbus_utils.h"
 #include "trans_log.h"
-#include "trans_session_account_adapter.h"
 #include "trans_session_manager.h"
 
 static SoftBusList *g_ukRequestManagerList = NULL;

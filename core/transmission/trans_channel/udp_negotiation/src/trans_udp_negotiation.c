@@ -41,7 +41,6 @@
 #include "trans_lane_manager.h"
 #include "trans_lane_pending_ctl.h"
 #include "trans_log.h"
-#include "trans_session_account_adapter.h"
 #include "trans_session_manager.h"
 #include "trans_udp_channel_manager.h"
 #include "trans_udp_negotiation_exchange.h"
@@ -1494,6 +1493,10 @@ int32_t TransDealUdpChannelOpenResult(
         return SOFTBUS_OK;
     }
     if (GetCapabilityBit(channel.info.channelCapability, TRANS_CHANNEL_SINK_GENERATE_KEY_OFFSET)) {
+        if (accessInfo != NULL && accessInfo->userId == INVALID_USER_ID) {
+            DisableCapabilityBit(&channel.info.channelCapability, TRANS_CHANNEL_SINK_KEY_ENCRYPT_OFFSET);
+            return TransProcessAsyncOpenUdpChannelSuccess(&channel, channelId);
+        }
         ret = GetUserkeyIdByAClInfo(
             &channel.info, channelId, CHANNEL_TYPE_UDP, &channel.info.myData.userKeyId, &udpGenUkCallback);
         if (ret == SOFTBUS_TRANS_GEN_USER_KEY) {
