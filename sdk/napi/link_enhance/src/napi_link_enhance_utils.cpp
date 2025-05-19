@@ -199,6 +199,8 @@ int32_t ConvertToJsErrcode(int32_t err)
             return LINK_ENHANCE_DUPLICATE_SERVER_NAME;
         case SOFTBUS_CONN_GENERAL_CONNECTION_NOT_READY:
             return LINK_ENHANCE_CONNECTION_NOT_READY;
+        case SOFTBUS_INVALID_PARAM:
+            return LINK_ENHANCE_PARAMETER_INVALID;
         default:
             return LINK_ENHANCE_INTERVAL_ERR;
     }

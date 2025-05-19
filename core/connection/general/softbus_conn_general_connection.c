@@ -748,8 +748,8 @@ static bool IsAllowSave(const char *pkgName, bool isFindServer)
         }
         (void)SoftBusMutexUnlock(&g_generalManager.servers->lock);
     }
-    if (count > GENERAL_PKGNAME_MAX_COUNT) {
-        CONN_LOGE(CONN_BLE, "create pkgName is max,not allowed");
+    if (count >= GENERAL_PKGNAME_MAX_COUNT) {
+        CONN_LOGE(CONN_BLE, "create pkgName is max, not allowed");
         return false;
     }
     return true;
@@ -1119,6 +1119,10 @@ static int32_t Send(uint32_t generalHandle, const uint8_t *data, uint32_t dataLe
             generalConnection->generalId, status);
         ConnReturnGeneralConnection(&generalConnection);
         return SOFTBUS_LOCK_ERR;
+    }
+    if (generalConnection->state != STATE_CONNECTED) {
+        CONN_LOGE(CONN_BLE, "connection not ready, handle=%{public}u", generalConnection->generalId);
+        return SOFTBUS_CONN_GENERAL_CONNECTION_NOT_READY;
     }
     uint32_t underlayerHandle = generalConnection->underlayerHandle;
     (void)SoftBusMutexUnlock(&generalConnection->lock);
