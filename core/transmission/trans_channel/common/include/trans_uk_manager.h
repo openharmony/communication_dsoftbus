@@ -30,6 +30,7 @@ extern "C" {
 #define ENCRYPT_KEY_LENGTH 60 // User Key encrypt SessionKey length
 #define BASE64_SESSION_KEY_LEN 45
 #define BASE64_ENCRYPT_KEY_LENGTH 83
+#define INVALID_USER_ID (-1)
 
 typedef struct {
     int32_t myId;

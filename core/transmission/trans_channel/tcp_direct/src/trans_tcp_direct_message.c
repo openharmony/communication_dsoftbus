@@ -49,7 +49,6 @@
 #include "trans_event.h"
 #include "trans_lane_manager.h"
 #include "trans_log.h"
-#include "trans_session_account_adapter.h"
 #include "trans_tcp_process_data.h"
 #include "trans_session_manager.h"
 #include "trans_tcp_direct_callback.h"
@@ -1607,6 +1606,10 @@ int32_t TransDealTdcChannelOpenResult(int32_t channelId, int32_t openResult, con
         NotifyFastDataRecv(&conn, channelId);
     }
     if (GetCapabilityBit(conn.appInfo.channelCapability, TRANS_CHANNEL_SINK_GENERATE_KEY_OFFSET)) {
+        if (accessInfo != NULL && accessInfo->userId == INVALID_USER_ID) {
+            DisableCapabilityBit(&conn.appInfo.channelCapability, TRANS_CHANNEL_SINK_KEY_ENCRYPT_OFFSET);
+            return HandChannelOpenedReply(&conn, channelId, &extra, flags, seq);
+        }
         ret = GetUserkeyIdByAClInfo(
             &conn.appInfo, channelId, CHANNEL_TYPE_TCP_DIRECT, &conn.appInfo.myData.userKeyId, &tdcAuthGenUkCallback);
         if (ret == SOFTBUS_TRANS_GEN_USER_KEY) {
