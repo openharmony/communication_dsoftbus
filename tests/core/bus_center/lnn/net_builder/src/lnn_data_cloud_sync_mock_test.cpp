@@ -535,8 +535,6 @@ HWTEST_F(LNNDataCloudSyncMockTest, LnnDBDataAddChangeSyncToCache_Test_001, TestS
     int32_t keySize = 0;
     EXPECT_EQ(LnnDBDataAddChangeSyncToCache(nullptr, value, keySize), SOFTBUS_INVALID_PARAM);
     EXPECT_EQ(LnnDBDataAddChangeSyncToCache(key, nullptr, keySize), SOFTBUS_INVALID_PARAM);
-    SoftBusFree(key);
-    SoftBusFree(value);
 }
 
 /*
