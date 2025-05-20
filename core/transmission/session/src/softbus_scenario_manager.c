@@ -57,33 +57,33 @@ typedef struct ScenarioItem {
     char localMac[MAC_STR_LEN];
     char peerMac[MAC_STR_LEN];
     uint32_t finalType;
-    int totalFileCount;
-    int totalAudioCount;
-    int totalVideoCount;
+    int32_t totalFileCount;
+    int32_t totalAudioCount;
+    int32_t totalVideoCount;
     ListNode businessCounterList;
 } ScenarioItem;
 
 typedef struct BusinessCounter {
     ListNode node;
-    int localPid;
-    int totalCount;
-    int fileCount;
-    int audioCount;
-    int videoCount;
+    int32_t localPid;
+    int32_t totalCount;
+    int32_t fileCount;
+    int32_t audioCount;
+    int32_t videoCount;
 } BusinessCounter;
 
 typedef struct OriginalScenario {
     char localMac[MAC_STR_LEN];
     char peerMac[MAC_STR_LEN];
-    int localPid;
-    int businessType;
+    int32_t localPid;
+    int32_t businessType;
 } OriginalScenario;
 
 typedef struct LocalScenarioCount {
-    int allMacVideoCount;
-    int allMacAudioCount;
-    int allMacFileCount;
-    int allMacTotalCount;
+    int32_t allMacVideoCount;
+    int32_t allMacAudioCount;
+    int32_t allMacFileCount;
+    int32_t allMacTotalCount;
 } LocalScenarioCount;
 
 static ScenarioManager *g_manager = NULL;
@@ -119,7 +119,7 @@ static void NotifyWifi(const char *ifName, const char *localMac,
 }
 
 static void OriginalScenarioInit(OriginalScenario *scenarioInfo,
-    const char *localMac, const char *peerMac, int localPid, int businessType)
+    const char *localMac, const char *peerMac, int32_t localPid, int32_t businessType)
 {
     if (localMac == NULL || peerMac == NULL) {
         TRANS_LOGE(TRANS_CTRL, "Invalid parameter");
@@ -279,7 +279,7 @@ static bool ScenarioManagerCheckAndUpdateIfaceName(ScenarioManager *manager, con
 }
 
 static void ScenarioManagerAddBusinessType(ScenarioManager *manager,
-    ScenarioItem *scenarioItem, BusinessCounter *counter, int businessType)
+    ScenarioItem *scenarioItem, BusinessCounter *counter, int32_t businessType)
 {
     switch (businessType) {
         case SM_FILE_TYPE:
@@ -309,10 +309,10 @@ static void ScenarioManagerAddBusinessType(ScenarioManager *manager,
 }
 
 static void ScenarioManagerDelBusinessType(ScenarioManager *manager,
-    ScenarioItem *scenarioItem, BusinessCounter *counter, int businessType)
+    ScenarioItem *scenarioItem, BusinessCounter *counter, int32_t businessType)
 {
-    int *singleCount = NULL;
-    int *itemCount = NULL;
+    int32_t *singleCount = NULL;
+    int32_t *itemCount = NULL;
     switch (businessType) {
         case SM_FILE_TYPE:
             singleCount = &counter->fileCount;
@@ -346,7 +346,7 @@ static void ScenarioManagerDelBusinessType(ScenarioManager *manager,
         scenarioItem->totalVideoCount);
 }
 
-static int32_t ScenarioManagerGetBitPosByBusinessType(int businessType)
+static int32_t ScenarioManagerGetBitPosByBusinessType(int32_t businessType)
 {
     int32_t bitPos = 0;
     switch (businessType) {
@@ -367,7 +367,7 @@ static int32_t ScenarioManagerGetBitPosByBusinessType(int businessType)
 }
 
 static bool ScenarioManagerIsBusinesExisted(ScenarioManager *manager,
-    ScenarioItem *item, int businessType)
+    ScenarioItem *item, int32_t businessType)
 {
     TRANS_LOGI(TRANS_CTRL,
         "businessType=%{public}d, filecount=%{public}d, audiocuont=%{public}d, videocount=%{public}d",
@@ -419,7 +419,7 @@ static void ScenarioManagerDoNotifyIfNeed(ScenarioManager *manager,
         return;
     }
     uint32_t finalType = item->finalType;
-    int bitPos = ScenarioManagerGetBitPosByBusinessType(info->businessType);
+    int32_t bitPos = ScenarioManagerGetBitPosByBusinessType(info->businessType);
     if (bitPos < 0) {
         TRANS_LOGE(TRANS_CTRL, "error, invalid business type!");
         SoftBusFree(localScenarioCount);
@@ -645,7 +645,7 @@ static void ScenarioManagerClearScenarioItemList(ScenarioManager *manager)
 }
 
 static int32_t ScenarioManagerAddScenario(ScenarioManager *manager, const char *localMac,
-    const char *peerMac, int localPid, int businessType)
+    const char *peerMac, int32_t localPid, int32_t businessType)
 {
     OriginalScenario scenarioInfo;
     OriginalScenarioInit(&scenarioInfo, localMac, peerMac, localPid, businessType);
@@ -658,7 +658,7 @@ static int32_t ScenarioManagerAddScenario(ScenarioManager *manager, const char *
 }
 
 static int32_t ScenarioManagerDelScenario(ScenarioManager *manager, const char *localMac,
-    const char *peerMac, int localPid, int businessType)
+    const char *peerMac, int32_t localPid, int32_t businessType)
 {
     OriginalScenario scenarioInfo;
     OriginalScenarioInit(&scenarioInfo, localMac, peerMac, localPid, businessType);
@@ -670,12 +670,12 @@ static int32_t ScenarioManagerDelScenario(ScenarioManager *manager, const char *
     return SOFTBUS_OK;
 }
 
-int32_t AddScenario(const char *localMac, const char *peerMac, int localPid, int businessType)
+int32_t AddScenario(const char *localMac, const char *peerMac, int32_t localPid, int32_t businessType)
 {
     return ScenarioManagerAddScenario(g_manager, localMac, peerMac, localPid, businessType);
 }
 
-int32_t DelScenario(const char *localMac, const char *peerMac, int localPid, int businessType)
+int32_t DelScenario(const char *localMac, const char *peerMac, int32_t localPid, int32_t businessType)
 {
     return ScenarioManagerDelScenario(g_manager, localMac, peerMac, localPid, businessType);
 }
