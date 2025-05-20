@@ -228,9 +228,9 @@ int32_t SetReservedInfoFromDeviceInfo(NSTACKX_DeviceInfo *deviceList, const Devi
 
     (void)memset_s(wifiIpAddr, sizeof(wifiIpAddr), 0, sizeof(wifiIpAddr));
     if (inet_ntop(deviceInfo->netChannelInfo.wifiApInfo.af, &deviceInfo->netChannelInfo.wifiApInfo.addr,
-        wifiIpAddr, sizeof(wifiIpAddr)) <= 0) {
+        wifiIpAddr, sizeof(wifiIpAddr)) == NULL) {
         DFINDER_LOGW(TAG, "no set wifi ip addr, cause inet_ntop failed");
-        return NSTACKX_EOK;
+        return NSTACKX_EINVAL;
     }
     if (sprintf_s(deviceList->reservedInfo, sizeof(deviceList->reservedInfo),
         NSTACKX_RESERVED_INFO_JSON_FORMAT, wifiIpAddr) == -1) {
