@@ -27,9 +27,8 @@
 #include "lnn_node_info.h"
 #include "lnn_ohos_account_adapter.h"
 #include "lnn_settingdata_event_monitor.h"
-#include "lnn_settingdata_event_monitor_deps_mock.h"
-#include "locale_config.h"
 #include "message_handler.h"
+#include "parameter.h"
 #include "softbus_adapter_mem.h"
 #include "softbus_bus_center.h"
 #include "softbus_def.h"
@@ -40,10 +39,15 @@ using namespace std;
 using namespace testing;
 using namespace testing::ext;
 namespace OHOS {
+const std::string CHINESE_LANGUAGE = "zh-Hans";
+const std::string TRADITIONAL_CHINESE_LANGUAGE = "zh-Hant";
 const char *NICK_NAME = "TEST_NICK_NAME";
 const char *DEFAULT_NAME = "TEST_DEFAULT_NAME";
 static constexpr const char *INTERNAL_NAME_CONCAT_STRING = "的";
 static constexpr const char *EXTERNAL_NAME_CONCAT_STRING = "-";
+static constexpr const char *LANGUAGE_KEY = "persist.global.language";
+static constexpr const char *DEFAULT_LANGUAGE_KEY = "const.global.language";
+static constexpr const int32_t CONFIG_LEN = 128;
 
 class LnnSettingdataEventMonitorTest : public testing::Test {
 protected:
@@ -56,6 +60,31 @@ void LnnSettingdataEventMonitorTest::SetUpTestCase(void) { }
 void LnnSettingdataEventMonitorTest::TearDownTestCase(void) { }
 void LnnSettingdataEventMonitorTest::SetUp(void) { }
 void LnnSettingdataEventMonitorTest::TearDown(void) { }
+
+static std::string ReadSystemParameter(const char *paramKey)
+{
+    char param[CONFIG_LEN + 1];
+    (void)memset_s(param, CONFIG_LEN + 1, 0, CONFIG_LEN + 1);
+    int32_t ret = GetParameter(paramKey, "", param, CONFIG_LEN);
+    if (ret > 0) {
+        return param;
+    }
+    return "";
+}
+
+static bool IsZHLanguage(void)
+{
+    std::string systemLanguage = ReadSystemParameter(LANGUAGE_KEY);
+    if (!systemLanguage.empty()) {
+        return CHINESE_LANGUAGE == systemLanguage || TRADITIONAL_CHINESE_LANGUAGE == systemLanguage;
+    }
+    systemLanguage = ReadSystemParameter(DEFAULT_LANGUAGE_KEY);
+    if (!systemLanguage.empty()) {
+        return CHINESE_LANGUAGE == systemLanguage || TRADITIONAL_CHINESE_LANGUAGE == systemLanguage;
+    }
+    // Default language is Chinese.
+    return true;
+}
 
 /*
 * @tc.name: LnnGetSettingDeviceNameTest003
@@ -70,8 +99,7 @@ HWTEST_F(LnnSettingdataEventMonitorTest, LnnGetSettingDeviceNameTest003, TestSiz
     EXPECT_TRUE(ret == SOFTBUS_OK || ret == SOFTBUS_NOT_IMPLEMENT);
     if (ret != SOFTBUS_NOT_IMPLEMENT) {
         char devName[DEVICE_NAME_BUF_LEN] = {0};
-        std::string language = OHOS::Global::I18n::LocaleConfig::GetSystemLanguage();
-        if ("zh-Hans" == language || "zh-Hant" == language) {
+        if (IsZHLanguage()) {
             ASSERT_GT(sprintf_s(devName, DEVICE_NAME_BUF_LEN, "%s%s%s", NICK_NAME,
             INTERNAL_NAME_CONCAT_STRING, DEFAULT_NAME), 0);
             EXPECT_EQ(strncmp(devName, deviceName, DEVICE_NAME_BUF_LEN), 0);
