@@ -38,6 +38,7 @@ group("unittest") {
       "ble:BleTransTest",
       "ble:ConnectionBleSwitchTest",
       "ble:ConnectionBleTest",
+      "general:GeneralConnectionTest",
     ]
   }
   if (dsoftbus_feature_conn_tcp_comm && dsoftbus_feature_conn_tcp_proxy) {
