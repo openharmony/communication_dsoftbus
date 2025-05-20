@@ -108,16 +108,16 @@ void ClientTransChannelManagerTest::TearDownTestCase(void) {}
 HWTEST_F(ClientTransChannelManagerTest, ClientTransCloseChannelTest001, TestSize.Level1)
 {
     int32_t channelId = 1;
-    int32_t ret = ClientTransCloseChannel(channelId, CHANNEL_TYPE_PROXY);
+    int32_t ret = ClientTransCloseChannel(channelId, CHANNEL_TYPE_PROXY, 1);
     EXPECT_EQ(SOFTBUS_OK, ret);
 
-    ret = ClientTransCloseChannel(channelId, CHANNEL_TYPE_TCP_DIRECT);
+    ret = ClientTransCloseChannel(channelId, CHANNEL_TYPE_TCP_DIRECT, 1);
     EXPECT_EQ(SOFTBUS_OK, ret);
 
-    ret = ClientTransCloseChannel(channelId, CHANNEL_TYPE_AUTH);
+    ret = ClientTransCloseChannel(channelId, CHANNEL_TYPE_AUTH, 1);
     EXPECT_EQ(SOFTBUS_OK, ret);
 
-    ret = ClientTransCloseChannel(channelId, CHANNEL_TYPE_BUTT);
+    ret = ClientTransCloseChannel(channelId, CHANNEL_TYPE_BUTT, 1);
     EXPECT_EQ(SOFTBUS_TRANS_INVALID_CHANNEL_TYPE, ret);
 }
 

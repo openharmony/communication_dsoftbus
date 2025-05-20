@@ -27,6 +27,8 @@ void UpdateChannelStatistics(int32_t socketId, int64_t len);
 
 void DeleteSocketResourceByChannelId(int32_t channelId, int32_t channelType);
 
+void DeleteSocketResourceBySocketId(int32_t socketId);
+
 int32_t ClientTransStatisticsInit(void);
 
 void ClientTransStatisticsDeinit(void);

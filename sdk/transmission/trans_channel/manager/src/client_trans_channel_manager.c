@@ -56,13 +56,13 @@ void ClientTransChannelDeinit(void)
     ClientTransStatisticsDeinit();
 }
 
-int32_t ClientTransCloseChannel(int32_t channelId, int32_t type)
+int32_t ClientTransCloseChannel(int32_t channelId, int32_t type, int32_t socketId)
 {
     if (channelId < 0) {
         TRANS_LOGW(TRANS_SDK, "Invalid param");
         return SOFTBUS_INVALID_PARAM;
     }
-    DeleteSocketResourceByChannelId(channelId, type);
+    DeleteSocketResourceBySocketId(socketId);
     int32_t ret = SOFTBUS_OK;
     switch (type) {
         case CHANNEL_TYPE_PROXY:

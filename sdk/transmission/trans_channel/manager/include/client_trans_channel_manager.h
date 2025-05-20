@@ -26,7 +26,7 @@ int32_t ClientTransChannelInit(void);
 
 void ClientTransChannelDeinit(void);
 
-int32_t ClientTransCloseChannel(int32_t channelId, int32_t type);
+int32_t ClientTransCloseChannel(int32_t channelId, int32_t type, int32_t socketId);
 
 int32_t ClientTransChannelSendBytes(int32_t channelId, int32_t type, const void *data, uint32_t len);
 

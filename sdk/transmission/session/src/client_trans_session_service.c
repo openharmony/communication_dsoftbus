@@ -577,7 +577,7 @@ void CloseSession(int sessionId)
         return;
     }
     AddSessionStateClosing();
-    ret = ClientTransCloseChannel(channelId, type);
+    ret = ClientTransCloseChannel(channelId, type, sessionId);
     if (ret != SOFTBUS_OK) {
         TRANS_LOGE(TRANS_SDK, "close channel err: ret=%{public}d, channelId=%{public}d, channelType=%{public}d",
             ret, channelId, type);
@@ -1106,7 +1106,7 @@ static int32_t CheckSessionCancelState(int32_t socket)
         if (ret != SOFTBUS_OK) {
             TRANS_LOGE(TRANS_SDK, "get channel by socket=%{public}d failed, ret=%{public}d", socket, ret);
         }
-        ret = ClientTransCloseChannel(channelId, type);
+        ret = ClientTransCloseChannel(channelId, type, socket);
         if (ret != SOFTBUS_OK) {
             TRANS_LOGE(TRANS_SDK, "close channel err: ret=%{public}d, channelId=%{public}d, channeType=%{public}d", ret,
                 channelId, type);
@@ -1248,7 +1248,7 @@ void ClientShutdown(int32_t socket, int32_t cancelReason)
         } else {
             AddSessionStateClosing();
         }
-        ret = ClientTransCloseChannel(channelId, type);
+        ret = ClientTransCloseChannel(channelId, type, socket);
         if (ret != SOFTBUS_OK) {
             TRANS_LOGE(TRANS_SDK, "close channel err: ret=%{public}d, channelId=%{public}d, channeType=%{public}d", ret,
                 channelId, type);

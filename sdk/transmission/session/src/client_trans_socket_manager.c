@@ -182,7 +182,7 @@ NO_SANITIZE("cfi") void ClientDestroySession(const ListNode *destroyList, Shutdo
     LIST_FOR_EACH_ENTRY_SAFE(destroyNode, destroyNodeNext, destroyList, DestroySessionInfo, node) {
         int32_t id = destroyNode->sessionId;
         (void)ClientDeleteRecvFileList(id);
-        (void)ClientTransCloseChannel(destroyNode->channelId, destroyNode->channelType);
+        (void)ClientTransCloseChannel(destroyNode->channelId, destroyNode->channelType, id);
         if (destroyNode->OnSessionClosed != NULL) {
             destroyNode->OnSessionClosed(id);
         } else if (destroyNode->OnShutdown != NULL) {
@@ -684,7 +684,7 @@ void ClientCleanUpIdleTimeoutSocket(const ListNode *destroyList)
     LIST_FOR_EACH_ENTRY_SAFE(destroyNode, destroyNodeNext, destroyList, DestroySessionInfo, node) {
         int32_t id = destroyNode->sessionId;
         (void)ClientDeleteRecvFileList(id);
-        (void)ClientTransCloseChannel(destroyNode->channelId, destroyNode->channelType);
+        (void)ClientTransCloseChannel(destroyNode->channelId, destroyNode->channelType, id);
         TRANS_LOGI(TRANS_SDK, "session is idle, sessionId=%{public}d", id);
         if (destroyNode->OnShutdown != NULL) {
             destroyNode->OnShutdown(id, SHUTDOWN_REASON_TIMEOUT);
@@ -1111,7 +1111,7 @@ static void TransOnBindSentProc(ListNode *timeoutItemList)
             continue;
         }
         sessionCallback.socketClient.OnBytesSent(item->socketId, item->seq, SOFTBUS_TRANS_ASYNC_SEND_TIMEOUT);
-        TRANS_LOGI(TRANS_SDK, "async sendbytes recv ack timeout, socketId=%{public}d, dataSeq=%{public}u",
+        TRANS_LOGI(TRANS_SDK, "async sendbytes recv ack timeout, socket=%{public}d, dataSeq=%{public}u",
             item->socketId, item->seq);
         ListDelete(&(item->node));
         SoftBusFree(item);
