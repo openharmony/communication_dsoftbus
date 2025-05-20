@@ -282,6 +282,10 @@ static int32_t TransOnNegotiate2(int32_t socket, const ISocketListener *socketCa
         return SOFTBUS_OK;
     }
 
+    if (channel->peerUserId == -1) {
+        TRANS_LOGW(TRANS_SDK, "default access info, no need check acl, socket=%{public}d", socket);
+        return SOFTBUS_OK;
+    }
     PeerSocketInfo socketInfo = {0};
     int32_t ret = ClientGetPeerSocketInfoById(socket, &socketInfo);
     if (ret != SOFTBUS_OK) {
