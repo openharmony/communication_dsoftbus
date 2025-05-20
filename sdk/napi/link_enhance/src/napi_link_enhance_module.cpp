@@ -101,7 +101,10 @@ static int32_t NotifyConnectResult(NapiLinkEnhanceConnection *connection, bool s
     }
     COMM_LOGI(COMM_SDK, "find connection object, handle=%{public}u, success=%{public}d", connection->handle_, success);
     connection->state_ = success ? ConnectionState::STATE_CONNECTED : ConnectionState::STATE_DISCONNECTED;
-    int32_t napiReason = ConvertToJsErrcode(reason);
+    int32_t napiReason = reason;
+    if (napiReason != 0) {
+        napiReason = ConvertToJsErrcode(reason);
+    }
     auto func = [connection, success, napiReason]() {
         auto changeState = std::make_shared<NapiConnectionChangeState>(connection->deviceId_,
             success, napiReason);
