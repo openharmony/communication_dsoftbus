@@ -28,7 +28,7 @@ ohos_unittest("DiscBleTest") {
     "bus_center_mock.cpp",
     "disc_ble_test.cpp",
   ]
-  if (support_i18n && qemu_arm_disable) {
+  if (qemu_arm_disable) {
     sources += [
       "$dsoftbus_root_path/core/discovery/common/src/locale_config_wrapper.cpp",
     ]
@@ -71,12 +71,10 @@ ohos_unittest("DiscBleTest") {
     "googletest:gtest_main",
     "hilog:libhilog",
     "huks:libhukssdk",
+    "init:libbegetutil",
   ]
   if (is_standard_system && has_ces_part) {
     external_deps += [ "common_event_service:cesfwk_innerkits" ]
-  }
-  if (support_i18n && qemu_arm_disable) {
-    external_deps += [ "i18n:intl_util" ]
   }
 }
 
