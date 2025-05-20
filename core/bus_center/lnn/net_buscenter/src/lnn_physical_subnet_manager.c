@@ -151,7 +151,7 @@ void DoNotifyStatusChange(const char *ifName, ProtocolType protocolType, void *s
 void LnnNotifyPhysicalSubnetStatusChanged(const char *ifName, ProtocolType protocolType, void *status)
 {
     CALL_VOID_FUNC_WITH_LOCK(&g_physicalSubnetsLock, DoNotifyStatusChange(ifName, protocolType, status));
-    LNN_LOGI(LNN_BUILDER, "success");
+    LNN_LOGD(LNN_BUILDER, "success");
 }
 
 static void EnableResetingSubnetByType(ProtocolType protocolType)
