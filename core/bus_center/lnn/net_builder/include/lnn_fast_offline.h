@@ -41,6 +41,7 @@ void LnnIpAddrChangeEventHandler(void);
 void EhLoginEventHandler(void);
 int32_t LnnSyncTrustedRelationShip(const char *pkgName, const char *msg, uint32_t msgLen);
 int32_t LnnSyncBleOfflineMsg(void);
+void BleOfflineOnceEnd(void *para);
 
 #ifdef __cplusplus
 }

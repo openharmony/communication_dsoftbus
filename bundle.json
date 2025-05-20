@@ -133,6 +133,7 @@
         "ffrt",
         "usb_manager",
         "selinux_adapter",
+        "time_service",
         "napi"
       ],
       "third_party": [
