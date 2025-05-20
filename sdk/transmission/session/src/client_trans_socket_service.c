@@ -343,7 +343,7 @@ int32_t SetAccessInfo(int32_t socket, SocketAccessInfo accessInfo)
 {
 #define WRITE_BUF_PARAM_NUM 5 // tokenId + userId + 2 * string info len
     TRANS_LOGI(TRANS_SDK, "SetAccessInfo: socket=%{public}d", socket);
-    if (accessInfo.extraAccessInfo == NULL) {
+    if (accessInfo.extraAccessInfo == NULL || accessInfo.userId < 0) {
         TRANS_LOGE(TRANS_SDK, "accessInfo param invalid, socket=%{public}d.", socket);
         return SOFTBUS_INVALID_PARAM;
     }
