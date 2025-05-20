@@ -42,15 +42,15 @@ typedef enum {
     EVENT_HML_REUSE,                // is HML retry
     EVENT_WIFI_DETECT_STATE,        // wifi detect state
     EVENT_DELAY_FREE,               // is delay free
-    EVENT_32_BIT_BUTT,
+    EVENT_32_BIT_MAX,               // max index for lane event type 32-bit array
 } LaneEventType32Bit;
 
 typedef enum {
     EVENT_LANE_ID = 0x0,            // lane id
-    EVENT_BUILD_LINK_TIME,          // lane bulid link time
+    EVENT_BUILD_LINK_TIME,          // lane build link time
     EVENT_WIFI_DETECT_TIME,         // wifi detect time
     EVENT_FREE_LINK_TIME,           // lane free link time
-    EVENT_64_BIT_BUTT,
+    EVENT_64_BIT_MAX,               // max index for lane event type 64-bit array
 } LaneEventType64Bit;
 
 typedef enum {
@@ -67,8 +67,8 @@ typedef enum {
 
 typedef struct {
     ListNode node;
-    uint32_t laneProcessList32Bit[EVENT_32_BIT_BUTT];
-    uint64_t laneProcessList64Bit[EVENT_64_BIT_BUTT];
+    uint32_t laneProcessList32Bit[EVENT_32_BIT_MAX];
+    uint64_t laneProcessList64Bit[EVENT_64_BIT_MAX];
     char peerNetWorkId[NETWORK_ID_BUF_LEN];
 } LaneProcess;
 

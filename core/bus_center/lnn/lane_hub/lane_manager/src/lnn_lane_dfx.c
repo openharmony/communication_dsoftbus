@@ -61,7 +61,11 @@ int32_t CreateLaneEventInfo(const LaneProcess *processInfo)
         LNN_LOGE(LNN_LANE, "processInfo calloc fail");
         return SOFTBUS_MALLOC_ERR;
     }
-    if (memcpy_s(info, sizeof(LaneProcess), processInfo, sizeof(LaneProcess)) != EOK) {
+    if (memcpy_s(info->laneProcessList32Bit, EVENT_32_BIT_MAX, processInfo->laneProcessList32Bit, EVENT_32_BIT_MAX) !=
+            EOK ||
+        memcpy_s(info->laneProcessList64Bit, EVENT_64_BIT_MAX, processInfo->laneProcessList64Bit, EVENT_64_BIT_MAX) !=
+            EOK ||
+        memcpy_s(info->peerNetWorkId, NETWORK_ID_BUF_LEN, processInfo->peerNetWorkId, NETWORK_ID_BUF_LEN) != EOK) {
         LNN_LOGE(LNN_LANE, "copy processInfo fail");
         SoftBusFree(info);
         return SOFTBUS_MEM_ERR;
@@ -89,7 +93,9 @@ static int32_t DeleteLaneEventInfo(uint32_t laneHandle)
         if (item->laneProcessList32Bit[EVENT_LANE_HANDLE] == laneHandle) {
             ListDelete(&item->node);
             SoftBusFree(item);
-            g_laneProcessInfo.cnt--;
+            if (g_laneProcessInfo.cnt != 0) {
+                g_laneProcessInfo.cnt--;
+            }
             LaneEventUnLock();
             return SOFTBUS_OK;
         }
@@ -102,10 +108,11 @@ static int32_t DeleteLaneEventInfo(uint32_t laneHandle)
 int32_t UpdateLaneEventInfo(uint32_t laneHandle, uint32_t eventType, LaneProcessValueType valueType, void *arg)
 {
     if (arg == NULL || valueType == LANE_PROCESS_TYPE_BUTT ||
-        (valueType == LANE_PROCESS_TYPE_UINT32 && eventType >= EVENT_32_BIT_BUTT) ||
-        (valueType == LANE_PROCESS_TYPE_UINT64 && eventType >= EVENT_64_BIT_BUTT) ||
+        (valueType == LANE_PROCESS_TYPE_UINT32 && eventType >= EVENT_32_BIT_MAX) ||
+        (valueType == LANE_PROCESS_TYPE_UINT64 && eventType >= EVENT_64_BIT_MAX) ||
         laneHandle == INVALID_LANE_REQ_ID) {
-        LNN_LOGE(LNN_LANE, "invalid parameter");
+        LNN_LOGE(LNN_LANE, "invalid parameter, laneHandle=%{public}u, eventType=%{public}u, valueType=%{public}u",
+            laneHandle, eventType, valueType);
         return SOFTBUS_INVALID_PARAM;
     }
     LaneProcess *info = NULL;
@@ -206,11 +213,11 @@ int32_t ReportLaneEventInfo(uint32_t laneHandle, int32_t result)
 
 int32_t InitLaneEvent(void)
 {
+    ListInit(&g_laneProcessInfo.list);
     if (SoftBusMutexInit(&g_laneProcessInfo.lock, NULL) != SOFTBUS_OK) {
         LNN_LOGE(LNN_LANE, "lane process info mutex init fail");
         return SOFTBUS_NO_INIT;
     }
-    ListInit(&g_laneProcessInfo.list);
     g_laneProcessInfo.cnt = 0;
     return SOFTBUS_OK;
 }
@@ -229,6 +236,5 @@ void DeinitLaneEvent(void)
     }
     g_laneProcessInfo.cnt = 0;
     LaneEventUnLock();
-    SoftBusMutexUnlock(&g_laneProcessInfo.lock);
     (void)SoftBusMutexDestroy(&g_laneProcessInfo.lock);
 }

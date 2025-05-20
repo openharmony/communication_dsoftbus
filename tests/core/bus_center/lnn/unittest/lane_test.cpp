@@ -47,7 +47,7 @@ constexpr uint32_t DEFAULT_QOSINFO_MAX_LATENCY = 10000;
 constexpr uint32_t DEFAULT_QOSINFO_MIN_LATENCY = 2500;
 constexpr uint32_t LOW_BW = 500 * 1024;
 constexpr uint32_t HIGH_BW = 160 * 1024 * 1024;
-constexpr uint32_t LANE_REQ_ID_TYPE_SHIFT = 28;
+constexpr uint32_t LANE_REQID_TYPE_SHIFT = 28;
 constexpr uint64_t LANE_ID = 123456;
 
 static NodeInfo g_nodeInfo;
@@ -210,7 +210,7 @@ HWTEST_F(LaneTest, LANE_REQ_ID_APPLY_Test_001, TestSize.Level1)
     LaneType laneType = LANE_TYPE_TRANS;
     uint32_t laneReqId = laneManager->lnnGetLaneHandle(laneType);
     EXPECT_TRUE(laneReqId != INVALID_LANE_REQ_ID);
-    EXPECT_EQ(laneType, laneReqId >> LANE_REQ_ID_TYPE_SHIFT);
+    EXPECT_EQ(laneType, laneReqId >> LANE_REQID_TYPE_SHIFT);
     FreeLaneReqId(laneReqId);
 }
 
@@ -408,7 +408,7 @@ HWTEST_F(LaneTest, UPDATE_LANE_RESOURCE_LANE_ID_Test_001, TestSize.Level1)
  */
 HWTEST_F(LaneTest, DESTROY_LINK_Test_001, TestSize.Level1)
 {
-    uint32_t laneReqId = LANE_REQ_ID_TYPE_SHIFT;
+    uint32_t laneReqId = LANE_REQID_TYPE_SHIFT;
     EXPECT_EQ(DestroyLink(nullptr, laneReqId, LANE_P2P), SOFTBUS_INVALID_PARAM);
 }
 } // namespace OHOS

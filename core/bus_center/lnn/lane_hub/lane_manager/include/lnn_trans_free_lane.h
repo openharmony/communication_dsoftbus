@@ -26,7 +26,7 @@ extern "C" {
 void NotifyFreeLaneResult(uint32_t laneReqId, int32_t errCode);
 void HandleDelayDestroyLink(SoftBusMessage *msg);
 void HandelNotifyFreeLaneResult(SoftBusMessage *msg);
-int32_t Free(uint32_t laneReqId);
+int32_t FreeLane(uint32_t laneReqId);
 void FreeUnusedLink(uint32_t laneReqId, const LaneLinkInfo *linkInfo);
 
 #ifdef __cplusplus
