@@ -437,7 +437,7 @@ int32_t TransAddSocketChannelInfo(
         char *tmpName = NULL;
         Anonymize(sessionName, &tmpName);
         TRANS_LOGI(
-            TRANS_SVC, "socket lane info has existed. socketId=%{public}d, sessionName=%{public}s",
+            TRANS_SVC, "socket lane info has existed. socket=%{public}d, sessionName=%{public}s",
                 sessionId, AnonymizeWrapper(tmpName));
         AnonymizeFree(tmpName);
         SoftBusFree(newSocket);
