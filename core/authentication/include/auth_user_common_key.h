@@ -48,3 +48,4 @@ int32_t GetUserKeyByUkId(int32_t sessionKeyId, uint8_t *uk, uint32_t ukLen);
 #endif
 #endif
 #endif /* AUTH_USER_COMMON_KEY_H */
+
