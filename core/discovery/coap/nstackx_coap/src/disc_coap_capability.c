@@ -83,7 +83,7 @@ int32_t DiscCoapProcessDeviceInfo(const NSTACKX_DeviceInfo *nstackxInfo, DeviceI
     char *anonymizedName = NULL;
     char *anonymizedId = NULL;
     char *anonymizedIp = NULL;
-    Anonymize(devInfo->devName, &anonymizedName);
+    AnonymizeDeviceName(devInfo->devName, &anonymizedName);
     Anonymize(devInfo->devId, &anonymizedId);
     Anonymize(devInfo->addr[0].info.ip.ip, &anonymizedIp);
     if (nstackxInfo->discoveryType == NSTACKX_DISCOVERY_TYPE_ACTIVE ||

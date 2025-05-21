@@ -2392,7 +2392,7 @@ static int32_t BleAdvertiserDump(int fd)
         SOFTBUS_DPRINTF(fd, "accountHash                             : %s\n", AnonymizeWrapper(anonymizedInfo));
         AnonymizeFree(anonymizedInfo);
         SOFTBUS_DPRINTF(fd, "devType                                 : %u\n", g_bleAdvertiser[i].deviceInfo.devType);
-        Anonymize(g_bleAdvertiser[i].deviceInfo.devName, &anonymizedInfo);
+        AnonymizeDeviceName(g_bleAdvertiser[i].deviceInfo.devName, &anonymizedInfo);
         SOFTBUS_DPRINTF(fd, "devName                                 : %s\n", AnonymizeWrapper(anonymizedInfo));
         AnonymizeFree(anonymizedInfo);
         SOFTBUS_DPRINTF(fd, "addrNum                                 : %u\n", g_bleAdvertiser[i].deviceInfo.addrNum);

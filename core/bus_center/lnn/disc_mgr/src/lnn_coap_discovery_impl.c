@@ -90,7 +90,7 @@ static void DeviceFound(const DeviceInfo *device, const InnerDeviceInfoAddtions 
     char *anonyDevId = NULL;
     Anonymize(device->devId, &anonyDevId);
     char *anonyDevName = NULL;
-    Anonymize(device->devName, &anonyDevName);
+    AnonymizeDeviceName(device->devName, &anonyDevName);
     // devId format is hex hash string here
     LNN_LOGI(LNN_BUILDER, "DeviceFound devName=%{public}s, devId=%{public}s, devType=%{public}03X, port=%{public}u",
         AnonymizeWrapper(anonyDevName), AnonymizeWrapper(anonyDevId), device->devType, device->addr[0].info.ip.port);
