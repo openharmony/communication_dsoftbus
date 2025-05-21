@@ -1700,8 +1700,10 @@ static int32_t BrPendConnection(const ConnectOption *option, uint32_t time)
             (time < BR_CONNECTION_PEND_TIMEOUT_MAX_MILLIS ? time : BR_CONNECTION_PEND_TIMEOUT_MAX_MILLIS));
         if (status != SOFTBUS_OK) {
             CONN_LOGE(CONN_BR, "post msg to looper failed, addr=%{public}s, error=%{public}d", animizeAddress, status);
+            ListDelete(&pending->node);
             SoftBusFree(copyAddr);
             SoftBusFree(pending);
+            g_brManager.pendings->cnt--;
             break;
         }
         CONN_LOGD(CONN_BR, "br pend connection success, address=%{public}s", animizeAddress);
