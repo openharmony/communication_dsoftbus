@@ -55,7 +55,7 @@ ohos_unittest("GeneralConnectionTest") {
   ]
   sources = [
     "$dsoftbus_root_path/core/connection/general/softbus_conn_general_connection.c",
-    "$dsoftbus_root_path/core/connection/general/softbus_conn_general_negoation.c",
+    "$dsoftbus_root_path/core/connection/general/softbus_conn_general_negotiation.c",
     "$dsoftbus_root_path/core/connection/manager/softbus_conn_ipc.c",
     "$dsoftbus_root_path/core/connection/manager/softbus_conn_manager.c",
     "general_connection_mock.cpp",

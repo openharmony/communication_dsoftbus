@@ -297,9 +297,9 @@ static Server *NewServerNode(const GeneralConnectionParam *param)
     Server *nameNode = (Server *)SoftBusCalloc(sizeof(Server));
     CONN_CHECK_AND_RETURN_RET_LOGE(nameNode != NULL, NULL, CONN_BLE, "nameNode is null");
     ListInit(&nameNode->node);
-    if ((strcpy_s(nameNode->info.bundleName, BUNDLE_NAME_MAX, param->bundleName) != EOK) ||
-        (strcpy_s(nameNode->info.name, GENERAL_NAME_LEN, param->name) != EOK) ||
-        (strcpy_s(nameNode->info.pkgName, PKG_NAME_SIZE_MAX, param->pkgName) != EOK)) {
+    if ((strncpy_s(nameNode->info.bundleName, BUNDLE_NAME_MAX, param->bundleName, BUNDLE_NAME_MAX) != EOK) ||
+        (strncpy_s(nameNode->info.name, GENERAL_NAME_LEN, param->name, GENERAL_NAME_LEN) != EOK) ||
+        (strncpy_s(nameNode->info.pkgName, PKG_NAME_SIZE_MAX, param->pkgName, PKG_NAME_SIZE_MAX) != EOK)) {
         CONN_LOGE(CONN_BLE, "strcpy failed");
         SoftBusFree(nameNode);
         return NULL;
@@ -317,6 +317,7 @@ static void FreeServerNode(Server **nameNode)
 static void ClearAllGeneralConnection(const char *pkgName, int32_t pid)
 {
     CONN_LOGW(CONN_BLE, "clean up connections");
+    CONN_CHECK_AND_RETURN_LOGE(pkgName != NULL, CONN_BLE, "pkgName is null");
     CONN_CHECK_AND_RETURN_LOGE((SoftBusMutexLock(&g_generalManager.servers->lock)) == SOFTBUS_OK, CONN_BLE,
         "lock servers failed");
     Server *serverIt = NULL;
@@ -440,6 +441,7 @@ static int32_t SetConnectionDeviceId(struct GeneralConnection *generalConnection
 
 static void OnCommConnectSucc(uint32_t requestId, uint32_t connectionId, const ConnectionInfo *info)
 {
+    (void)info;
     struct GeneralConnection *generalConnection = GetGeneralConnectionByReqId(requestId);
     CONN_CHECK_AND_RETURN_LOGE(generalConnection != NULL, CONN_BLE, "get connection failed");
     int32_t status = SOFTBUS_OK;
@@ -567,9 +569,9 @@ static bool FindInfoFromServer(GeneralConnectionInfo *info, struct GeneralConnec
             break;
         }
     }
-    if (strcpy_s(infoTemp.name, GENERAL_NAME_LEN, it->info.name) != EOK ||
-        strcpy_s(infoTemp.pkgName, PKG_NAME_SIZE_MAX, it->info.pkgName) != EOK ||
-        strcpy_s(infoTemp.bundleName, BUNDLE_NAME_MAX, it->info.bundleName) != EOK) {
+    if (strncpy_s(infoTemp.name, GENERAL_NAME_LEN, it->info.name, GENERAL_NAME_LEN) != EOK ||
+        strncpy_s(infoTemp.pkgName, PKG_NAME_SIZE_MAX, it->info.pkgName, PKG_NAME_SIZE_MAX) != EOK ||
+        strncpy_s(infoTemp.bundleName, BUNDLE_NAME_MAX, it->info.bundleName, BUNDLE_NAME_MAX) != EOK) {
         CONN_LOGE(CONN_BLE, "copy info failed");
         (void)SoftBusMutexUnlock(&g_generalManager.servers->lock);
         return false;
@@ -581,9 +583,9 @@ static bool FindInfoFromServer(GeneralConnectionInfo *info, struct GeneralConnec
     }
     status = SoftBusMutexLock(&generalConnection->lock);
     CONN_CHECK_AND_RETURN_RET_LOGE(status == SOFTBUS_OK, false, CONN_BLE, "lock failed");
-    if (strcpy_s(generalConnection->info.name, GENERAL_NAME_LEN, infoTemp.name) != EOK ||
-        strcpy_s(generalConnection->info.pkgName, PKG_NAME_SIZE_MAX, infoTemp.pkgName) != EOK ||
-        strcpy_s(generalConnection->info.bundleName, BUNDLE_NAME_MAX, infoTemp.bundleName) != EOK) {
+    if (strncpy_s(generalConnection->info.name, GENERAL_NAME_LEN, infoTemp.name, GENERAL_NAME_LEN) != EOK ||
+        strncpy_s(generalConnection->info.pkgName, PKG_NAME_SIZE_MAX, infoTemp.pkgName, PKG_NAME_SIZE_MAX) != EOK ||
+        strncpy_s(generalConnection->info.bundleName, BUNDLE_NAME_MAX, infoTemp.bundleName, BUNDLE_NAME_MAX) != EOK) {
         CONN_LOGE(CONN_BLE, "copy failed");
         (void)SoftBusMutexUnlock(&generalConnection->lock);
         return false;
@@ -768,10 +770,10 @@ static struct GeneralConnection *CreateConnection(const GeneralConnectionParam *
     CONN_CHECK_AND_RETURN_RET_LOGW(connection != NULL, NULL, CONN_BLE, "calloc connection failed");
     ListInit(&connection->node);
     connection->underlayerHandle = underlayerHandle;
-    if (strcpy_s(connection->addr, BT_MAC_LEN, addr) != EOK ||
-        strcpy_s(connection->info.name, GENERAL_NAME_LEN, param->name) != EOK ||
-        strcpy_s(connection->info.pkgName, PKG_NAME_SIZE_MAX, param->pkgName) != EOK ||
-        strcpy_s(connection->info.bundleName, BUNDLE_NAME_MAX, param->bundleName) != EOK) {
+    if (strncpy_s(connection->addr, BT_MAC_LEN, addr, BT_MAC_LEN) != EOK ||
+        strncpy_s(connection->info.name, GENERAL_NAME_LEN, param->name, GENERAL_NAME_LEN) != EOK ||
+        strncpy_s(connection->info.pkgName, PKG_NAME_SIZE_MAX, param->pkgName, PKG_NAME_SIZE_MAX) != EOK ||
+        strncpy_s(connection->info.bundleName, BUNDLE_NAME_MAX, param->bundleName, BUNDLE_NAME_MAX) != EOK) {
         CONN_LOGE(CONN_BLE, "copy failed");
         SoftBusFree(connection);
         *errorCode = SOFTBUS_STRCPY_ERR;
@@ -990,6 +992,7 @@ static void OnCommConnected(uint32_t connectionId, const ConnectionInfo *info)
 
 static void OnCommDisconnected(uint32_t connectionId, const ConnectionInfo *info)
 {
+    CONN_CHECK_AND_RETURN_LOGE(info != NULL, CONN_BLE, "info is null");
     CONN_CHECK_AND_RETURN_LOGE(SoftBusMutexLock(&g_generalManager.connections->lock) == SOFTBUS_OK, CONN_BLE,
         "lock failed");
     CONN_LOGI(CONN_BLE, "on connect disconnected, connectionId=%{public}u", connectionId);
@@ -1018,7 +1021,7 @@ static void OnCommDisconnected(uint32_t connectionId, const ConnectionInfo *info
 
 static void OnCommDataReceived(uint32_t connectionId, ConnModule moduleId, int64_t seq, char *data, int32_t len)
 {
-    if (data == NULL || len <= 0 || moduleId != MODULE_BLE_GENERAL) {
+    if (data == NULL || len < GENERAL_CONNECTION_HEADER_SIZE || moduleId != MODULE_BLE_GENERAL) {
         CONN_LOGE(CONN_BLE, "invalid param, connectionId=%{public}u", connectionId);
         return;
     }
@@ -1072,6 +1075,8 @@ static int32_t RegisterListener(const GeneralConnectionListener *listener)
 
 static int32_t Connect(const GeneralConnectionParam *param, const char *addr)
 {
+    CONN_CHECK_AND_RETURN_RET_LOGE(param != NULL, SOFTBUS_INVALID_PARAM, CONN_BLE, "param is null");
+    CONN_CHECK_AND_RETURN_RET_LOGE(addr != NULL, SOFTBUS_INVALID_PARAM, CONN_BLE, "addr is null");
     ConnectResult result = {
         .OnConnectSuccessed = OnCommConnectSucc,
         .OnConnectFailed = OnCommConnectFail,
@@ -1110,6 +1115,7 @@ static int32_t Connect(const GeneralConnectionParam *param, const char *addr)
 
 static int32_t Send(uint32_t generalHandle, const uint8_t *data, uint32_t dataLen, int32_t pid)
 {
+    CONN_CHECK_AND_RETURN_RET_LOGE(data != NULL, SOFTBUS_INVALID_PARAM, CONN_BLE, "data is null");
     struct GeneralConnection *generalConnection = GetConnectionByGeneralId(generalHandle);
     CONN_CHECK_AND_RETURN_RET_LOGE(generalConnection != NULL, SOFTBUS_INVALID_PARAM, CONN_BLE,
         "connection is null, generalId=%{public}u", generalHandle);
@@ -1122,6 +1128,8 @@ static int32_t Send(uint32_t generalHandle, const uint8_t *data, uint32_t dataLe
     }
     if (generalConnection->state != STATE_CONNECTED) {
         CONN_LOGE(CONN_BLE, "connection not ready, handle=%{public}u", generalConnection->generalId);
+        (void)SoftBusMutexUnlock(&generalConnection->lock);
+        ConnReturnGeneralConnection(&generalConnection);
         return SOFTBUS_CONN_GENERAL_CONNECTION_NOT_READY;
     }
     uint32_t underlayerHandle = generalConnection->underlayerHandle;
@@ -1152,6 +1160,8 @@ static void Disconnect(uint32_t generalHandle)
 
 static int32_t GetPeerDeviceId(uint32_t generalHandle, char *addr, uint32_t length, uint32_t tokenId)
 {
+    CONN_CHECK_AND_RETURN_RET_LOGE(addr != NULL, SOFTBUS_INVALID_PARAM, CONN_BLE,
+        "addr is null, get deviceId failed");
     if (length != BT_MAC_LEN) {
         CONN_LOGE(CONN_BLE, "invalid param, generalId=%{public}u, len=%{public}u", generalHandle, length);
         return SOFTBUS_INVALID_PARAM;
@@ -1169,6 +1179,8 @@ static int32_t GetPeerDeviceId(uint32_t generalHandle, char *addr, uint32_t leng
 
 static int32_t CreateServer(const GeneralConnectionParam *param)
 {
+    CONN_CHECK_AND_RETURN_RET_LOGE(param != NULL, SOFTBUS_INVALID_PARAM, CONN_BLE,
+        "create server failed, param is null");
     if (!IsAllowSave(param->pkgName, true)) {
         CONN_LOGE(CONN_BLE, "add pkg name is max");
         return SOFTBUS_CONN_GENERAL_CREATE_SERVER_MAX;
@@ -1203,6 +1215,7 @@ static int32_t CreateServer(const GeneralConnectionParam *param)
 
 static void CloseServer(const GeneralConnectionParam *param)
 {
+    CONN_CHECK_AND_RETURN_LOGE(param != NULL, CONN_BLE, "close server failed, param is null");
     int32_t status = SoftBusMutexLock(&g_generalManager.servers->lock);
     CONN_CHECK_AND_RETURN_LOGE(status == SOFTBUS_OK, CONN_BLE, "lock names failed");
     Server *it = NULL;
