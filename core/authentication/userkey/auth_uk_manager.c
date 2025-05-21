@@ -14,11 +14,8 @@
  */
 
 #include "auth_uk_manager.h"
-
 #include <securec.h>
-
 #include "anonymizer.h"
-
 #include "auth_log.h"
 #include "auth_common.h"
 #include "auth_connection.h"
