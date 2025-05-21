@@ -28,6 +28,7 @@ extern "C" {
 int32_t ConnBrInitBrPendingPacket(void);
 int32_t ConnBrCreateBrPendingPacket(uint32_t id, int64_t seq);
 void ConnBrDelBrPendingPacket(uint32_t id, int64_t seq);
+void ConnBrDelBrPendingPacketById(uint32_t id);
 
 int32_t ConnBrGetBrPendingPacket(uint32_t id, int64_t seq, uint32_t waitMillis, void **data);
 int32_t ConnBrSetBrPendingPacket(uint32_t id, int64_t seq, void *data);
