@@ -50,6 +50,7 @@ enum class LinkInfoKey {
     REMOTE_IPV6 = 22,
     CUSTOM_PORT = 23,
     IPADDR_TYPE = 24,
+    RATE_PREFERENCE =25,
 };
 
 class LinkInfo : public Serializable, public InfoContainer<LinkInfoKey> {
@@ -145,6 +146,9 @@ public:
 
     void SetIpAddrType(enum IpAddrType value);
     enum IpAddrType GetIpAddrType();
+
+    void SetRatePreference(bool ratePreference);
+    bool IsRatePreference() const;
 
     static std::string ToString(LinkMode mode);
 };

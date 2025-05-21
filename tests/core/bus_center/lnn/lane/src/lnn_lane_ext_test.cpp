@@ -789,7 +789,7 @@ HWTEST_F(LNNLaneExtMockTest, LANE_FIND_LANERESOURCE_BY_LINKADDR_001, TestSize.Le
     EXPECT_STREQ(laneResourse.link.linkInfo.p2p.connInfo.peerIp, PEER_IP_HML);
     EXPECT_STREQ(laneResourse.link.peerUdid, PEER_UDID);
 
-    DelLaneResourceByLaneId(laneId, false);
+    ret = DelLaneResourceByLaneId(laneId, false);
     EXPECT_EQ(ret, SOFTBUS_OK);
 }
 
@@ -844,7 +844,7 @@ HWTEST_F(LNNLaneExtMockTest, LANE_FIND_LANERESOURCE_BY_LINKTYPE_001, TestSize.Le
     EXPECT_STREQ(laneResourse.link.linkInfo.p2p.connInfo.peerIp, PEER_IP_HML);
     EXPECT_STREQ(laneResourse.link.peerUdid, PEER_UDID);
 
-    DelLaneResourceByLaneId(laneId, false);
+    ret = DelLaneResourceByLaneId(laneId, false);
     EXPECT_EQ(ret, SOFTBUS_OK);
 }
 
@@ -891,7 +891,7 @@ HWTEST_F(LNNLaneExtMockTest, LANE_FIND_LANERESOURCE_BY_LANEID_001, TestSize.Leve
     EXPECT_STREQ(laneResourse.link.linkInfo.p2p.connInfo.peerIp, PEER_IP_HML);
     EXPECT_STREQ(laneResourse.link.peerUdid, PEER_UDID);
 
-    DelLaneResourceByLaneId(laneId, false);
+    ret = DelLaneResourceByLaneId(laneId, false);
     EXPECT_EQ(ret, SOFTBUS_OK);
 }
 
@@ -2207,5 +2207,27 @@ HWTEST_F(LNNLaneExtMockTest, LANE_INFO_006, TestSize.Level1)
 
     ret = LaneInfoProcess(&info, nullptr, &profile);
     EXPECT_EQ(ret, SOFTBUS_INVALID_PARAM);
+}
+
+/*
+* @tc.name: CHECK_LANE_LINK_EXIST_BY_TYPE_001
+* @tc.desc: test CheckLaneLinkExistByType
+* @tc.type: FUNC
+* @tc.require:
+*/
+HWTEST_F(LNNLaneExtMockTest, CHECK_LANE_LINK_EXIST_BY_TYPE_001, TestSize.Level1)
+{
+    EXPECT_FALSE(CheckLaneLinkExistByType(LANE_LINK_TYPE_BUTT));
+    EXPECT_FALSE(CheckLaneLinkExistByType(LANE_HML));
+
+    NiceMock<LaneDepsInterfaceMock> laneDepMock;
+    EXPECT_CALL(laneDepMock, LnnGetLocalStrInfo).WillRepeatedly(Return(SOFTBUS_OK));
+    LaneLinkInfo linkInfo = { .type = LANE_HML };
+    ASSERT_EQ(strcpy_s(linkInfo.linkInfo.p2p.connInfo.peerIp, IP_LEN, PEER_IP_HML), EOK);
+    ASSERT_EQ(strcpy_s(linkInfo.peerUdid, UDID_BUF_LEN, PEER_UDID), EOK);
+    uint64_t laneId = LANE_ID_BASE;
+    EXPECT_EQ(SOFTBUS_OK, AddLaneResourceToPool(&linkInfo, laneId, false));
+    EXPECT_TRUE(CheckLaneLinkExistByType(LANE_HML));
+    EXPECT_EQ(SOFTBUS_OK, DelLaneResourceByLaneId(laneId, false));
 }
 } // namespace OHOS
