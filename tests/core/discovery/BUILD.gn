@@ -28,6 +28,7 @@ group("unittest") {
   deps = [ "manager/unittest:unittest" ]
   if (dsoftbus_feature_disc_ble && dsoftbus_feature_inner_disc_ble) {
     deps += [
+      "ble/approach_ble:unittest",
       "ble/dispatcher:unittest",
       "ble/softbus_ble:unittest",
       "ble/softbus_ble_mock:unittest",
