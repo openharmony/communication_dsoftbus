@@ -56,6 +56,7 @@ public:
     virtual int32_t LnnGetLinkLedgerInfo(const char *udid, LinkLedgerInfo *info) = 0;
     virtual int32_t LnnAddLinkLedgerInfo(const char *udid, const LinkLedgerInfo *info) = 0;
     virtual void LnnDeleteLinkLedgerInfo(const char *udid) = 0;
+    virtual bool CheckLaneLinkExistByType(LaneLinkType linkType) = 0;
 };
 
 class LaneLinkDepsInterfaceMock : public LaneLinkDepsInterface {
@@ -92,6 +93,7 @@ public:
     MOCK_METHOD2(LnnGetLinkLedgerInfo, int32_t (const char *udid, LinkLedgerInfo *info));
     MOCK_METHOD2(LnnAddLinkLedgerInfo, int32_t (const char *udid, const LinkLedgerInfo *info));
     MOCK_METHOD1(LnnDeleteLinkLedgerInfo, void (const char *udid));
+    MOCK_METHOD1(CheckLaneLinkExistByType, bool (LaneLinkType linkType));
 
     static int32_t ActionOfChannelOpenFailed(int32_t requestId, const char *networkId,
         const TransProxyPipelineChannelOption *option, const ITransProxyPipelineCallback *callback);
