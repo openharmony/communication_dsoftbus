@@ -306,6 +306,21 @@ int32_t TransProxyPipelineSendMessage(
         channelId, data, dataLen, type);
 }
 
+int32_t LnnGetRecommendChannel(const char *udid, int32_t *preferChannel)
+{
+    return OHOS::SoftBus::WifiDirectInterfaceMock::GetMock()->LnnGetRecommendChannel(udid, preferChannel);
+}
+
+int32_t LnnGetRemoteNodeInfoByKey(const char *key, NodeInfo *info)
+{
+    return OHOS::SoftBus::WifiDirectInterfaceMock::GetMock()->LnnGetRemoteNodeInfoByKey(key, info);
+}
+
+int32_t LnnGetRemoteNodeInfoById(const char *id, IdCategory type, NodeInfo *info)
+{
+    return OHOS::SoftBus::WifiDirectInterfaceMock::GetMock()->LnnGetRemoteNodeInfoById(id, type, info);
+}
+
 int32_t Hid2dIsWideBandwidthSupported()
 {
     return OHOS::SoftBus::WifiDirectInterfaceMock::GetMock()->Hid2dIsWideBandwidthSupported();
@@ -337,16 +352,6 @@ bool LnnGetOnlineStateById(const char *id, IdCategory type)
 }
 
 int32_t GenerateRandomStr(char *str, uint32_t len)
-{
-    return SOFTBUS_OK;
-}
-
-int32_t LnnGetRemoteNodeInfoById(const char *id, IdCategory type, NodeInfo *info)
-{
-    return SOFTBUS_OK;
-}
-
-int32_t LnnGetRemoteNodeInfoByKey(const char *key, NodeInfo *info)
 {
     return SOFTBUS_OK;
 }
