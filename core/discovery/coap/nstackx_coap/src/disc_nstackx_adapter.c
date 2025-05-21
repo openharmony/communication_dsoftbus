@@ -650,7 +650,7 @@ void DiscCoapUpdateDevName(void)
     }
     localDevName[truncateLen] = '\0';
     char *anonymizedName = NULL;
-    Anonymize(localDevName, &anonymizedName);
+    AnonymizeDeviceName(localDevName, &anonymizedName);
     DISC_LOGI(DISC_COAP, "register new local device name. localDevName=%{public}s", AnonymizeWrapper(anonymizedName));
     AnonymizeFree(anonymizedName);
     ret = NSTACKX_RegisterDeviceName(localDevName);

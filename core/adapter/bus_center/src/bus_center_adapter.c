@@ -281,7 +281,10 @@ int32_t GetCommonDeviceProductId(char *value, uint32_t len)
         SoftBusFree(productId);
         return SOFTBUS_NETWORK_GET_INVALID_DEVICE_INFO;
     }
-    LNN_LOGI(LNN_STATE, "get productId=%{public}s", productId);
+    char *anonyProductId = NULL;
+    Anonymize(productId, &anonyProductId);
+    LNN_LOGI(LNN_STATE, "get productId=%{public}s", AnonymizeWrapper(anonyProductId));
+    AnonymizeFree(anonyProductId);
     SoftBusFree(productId);
     return SOFTBUS_OK;
 }
@@ -309,7 +312,10 @@ int32_t GetCommonDeviceModelName(char *value, uint32_t len)
         SoftBusFree(modelName);
         return SOFTBUS_NETWORK_GET_INVALID_DEVICE_INFO;
     }
-    LNN_LOGI(LNN_STATE, "get modelName=%{public}s", modelName);
+    char *anonyModelName = NULL;
+    Anonymize(modelName, &anonyModelName);
+    LNN_LOGI(LNN_STATE, "get modelName=%{public}s", AnonymizeWrapper(anonyModelName));
+    AnonymizeFree(anonyModelName);
     SoftBusFree(modelName);
     return SOFTBUS_OK;
 }
