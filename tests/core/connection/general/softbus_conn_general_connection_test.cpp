@@ -102,7 +102,7 @@ HWTEST_F(GeneralConnectionTest, TestCreateServer, TestSize.Level1)
     EXPECT_EQ(ret, SOFTBUS_OK);
     ret = manager->createServer(&param);
     EXPECT_EQ(ret, SOFTBUS_CONN_GENERAL_DUPLICATE_SERVER);
-    for (uint32_t i = 0; i < GENERAL_PKGNAME_MAX_COUNT; ++i) { 
+    for (uint32_t i = 0; i < GENERAL_PKGNAME_MAX_COUNT; ++i) {
         string nameTemp = name + to_string(i);
         ret = strcpy_s(param.name, GENERAL_NAME_LEN, nameTemp.c_str());
         EXPECT_EQ(ret, EOK);
@@ -151,7 +151,7 @@ HWTEST_F(GeneralConnectionTest, TestConnect, TestSize.Level1)
     param.pid = 0;
     GeneralConnectionInterfaceMock mock;
     EXPECT_CALL(mock, BleConnectDeviceMock).WillRepeatedly(Return(SOFTBUS_OK));
-    for (uint32_t i = 0; i < GENERAL_PKGNAME_MAX_COUNT; ++i) { 
+    for (uint32_t i = 0; i < GENERAL_PKGNAME_MAX_COUNT; ++i) {
         string nameTemp = name + to_string(i);
         ret = strcpy_s(param.name, GENERAL_NAME_LEN, nameTemp.c_str());
         EXPECT_EQ(ret, EOK);

@@ -293,6 +293,10 @@ int SoftBusSetBtName(const char *name)
 
 int SoftBusGetRandomAddress(const char *addr, char *out, int tokenId)
 {
+    COMM_CHECK_AND_RETURN_RET_LOGE(addr != NULL, SOFTBUS_INVALID_PARAM,
+        COMM_ADAPTER, "get random address failed, addr is null");
+    COMM_CHECK_AND_RETURN_RET_LOGE(out != NULL, SOFTBUS_INVALID_PARAM,
+        COMM_ADAPTER, "get random address failed, outaddr is null");
     uint8_t binaryAddr[BT_ADDR_LEN] = { 0 };
     int32_t status = ConvertBtMacToBinary(addr, BT_MAC_LEN, binaryAddr, BT_ADDR_LEN);
     COMM_CHECK_AND_RETURN_RET_LOGE(status == SOFTBUS_OK, status,
