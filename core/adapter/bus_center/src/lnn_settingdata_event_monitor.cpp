@@ -16,16 +16,34 @@
 #include "lnn_settingdata_event_monitor.h"
 
 #include <securec.h>
+#include <string>
 
 #include "anonymizer.h"
 #include "lnn_log.h"
-#include "locale_config.h"
+#include "parameter.h"
 #include "softbus_bus_center.h"
 #include "softbus_def.h"
 #include "softbus_error_code.h"
 
+const std::string CHINESE_LANGUAGE = "zh-Hans";
+const std::string TRADITIONAL_CHINESE_LANGUAGE = "zh-Hant";
+static constexpr const char *LANGUAGE_KEY = "persist.global.language";
+static constexpr const char *DEFAULT_LANGUAGE_KEY = "const.global.language";
 static constexpr const char *INTERNAL_NAME_CONCAT_STRING = "的";
 static constexpr const char *EXTERNAL_NAME_CONCAT_STRING = "-";
+static constexpr const int32_t CONFIG_LEN = 128;
+
+static std::string ReadSystemParameter(const char *paramKey)
+{
+    char param[CONFIG_LEN + 1];
+    (void)memset_s(param, CONFIG_LEN + 1, 0, CONFIG_LEN + 1);
+    int32_t ret = GetParameter(paramKey, "", param, CONFIG_LEN);
+    if (ret > 0) {
+        return param;
+    }
+    LNN_LOGE(LNN_STATE, "GetParameter failed");
+    return "";
+}
 
 int32_t LnnGetUnifiedDeviceName(char *unifiedName, uint32_t len)
 {
@@ -52,8 +70,16 @@ int32_t LnnGetSettingNickName(const char *defaultName, const char *unifiedName, 
 
 static bool IsZHLanguage(void)
 {
-    std::string language = OHOS::Global::I18n::LocaleConfig::GetSystemLanguage();
-    return "zh-Hans" == language || "zh-Hant" == language;
+    std::string systemLanguage = ReadSystemParameter(LANGUAGE_KEY);
+    if (!systemLanguage.empty()) {
+        return CHINESE_LANGUAGE == systemLanguage || TRADITIONAL_CHINESE_LANGUAGE == systemLanguage;
+    }
+    systemLanguage = ReadSystemParameter(DEFAULT_LANGUAGE_KEY);
+    if (!systemLanguage.empty()) {
+        return CHINESE_LANGUAGE == systemLanguage || TRADITIONAL_CHINESE_LANGUAGE == systemLanguage;
+    }
+    // Default language is Chinese.
+    return true;
 }
 
 int32_t LnnGetDeviceDisplayName(const char *nickName, const char *defaultName, char *deviceName, uint32_t len)
