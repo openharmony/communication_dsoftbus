@@ -53,13 +53,9 @@ ohos_unittest("LnnKVAdapterWrapperTest") {
   ]
 }
 
-ohos_unittest("LnnKSettingDataEventMonitorTest") {
+ohos_unittest("LnnSettingDataEventMonitorTest") {
   module_out_path = module_output_path
-  sources = [
-    "$dsoftbus_root_path/core/adapter/bus_center/src/lnn_settingdata_event_monitor.cpp",
-    "unittest/lnn_settingdata_event_monitor_deps_mock.cpp",
-    "unittest/lnn_settingdata_event_monitor_test.cpp",
-  ]
+  sources = [ "unittest/lnn_settingdata_event_monitor_test.cpp" ]
   include_dirs = [
     "$dsoftbus_root_path/core/adapter/kv_store/include",
     "$dsoftbus_root_path/core/adapter/bus_center/include",
@@ -76,7 +72,10 @@ ohos_unittest("LnnKSettingDataEventMonitorTest") {
     "$dsoftbus_root_path/interfaces/kits/bus_center",
     "$dsoftbus_root_path/interfaces/kits/common",
   ]
-  deps = [ "$dsoftbus_root_path/core/common:softbus_utils" ]
+  deps = [
+    "$dsoftbus_root_path/core/common:softbus_utils",
+    "$dsoftbus_root_path/core/frame:softbus_server",
+  ]
   external_deps = [
     "ability_base:want",
     "ability_base:zuri",
@@ -85,14 +84,12 @@ ohos_unittest("LnnKSettingDataEventMonitorTest") {
     "googletest:gmock_main",
     "googletest:gtest_main",
     "hilog:libhilog",
+    "init:libbegetutil",
     "kv_store:distributeddata_inner",
     "samgr:samgr_proxy",
   ]
   if (is_standard_system && has_ces_part) {
     external_deps += [ "common_event_service:cesfwk_innerkits" ]
-  }
-  if (support_i18n && qemu_arm_disable) {
-    external_deps += [ "i18n:intl_util" ]
   }
 }
 
@@ -307,7 +304,7 @@ ohos_unittest("LnnUsbAdapterTest") {
     "googletest:gmock_main",
     "hilog:libhilog",
   ]
-  
+
   if (dsoftbus_feature_lnn_usb_ncm && dsoftbus_feature_deps_usb_manager) {
     external_deps += [ "usb_manager:usbsrv_client" ]
   }
@@ -320,9 +317,9 @@ group("unittest") {
     ":AdapterDsoftbusRsaCryptoTest",
     ":LNNKvStoreLaunchListenerTest",
     ":LNNOhosAccountTest",
-    ":LnnKSettingDataEventMonitorTest",
     ":LnnOhosAccountAdapterTest",
     ":LnnSaStatusMonitorTest",
+    ":LnnSettingDataEventMonitorTest",
   ]
   if (dsoftbus_feature_lnn_cloud_sync) {
     deps += [
