@@ -335,9 +335,11 @@ HWTEST_F(WifiDirectUtilsTest, SyncLnnInfoForP2pTest, TestSize.Level1)
 
     WifiDirectInterfaceMock mock;
 
-    EXPECT_CALL(mock, LnnSetLocalNumInfo).WillOnce(Return(-1));
-    EXPECT_CALL(mock, LnnSetLocalStrInfo).WillRepeatedly(Return(-1));
-    EXPECT_CALL(mock, LnnSyncP2pInfo).WillOnce(Return(SOFTBUS_OK));
+    EXPECT_CALL(mock, LnnSetLocalNumInfo).WillOnce(Return(-1))
+        .WillRepeatedly(Return(SOFTBUS_OK));
+    EXPECT_CALL(mock, LnnSetLocalStrInfo).WillOnce(Return(-1))
+        .WillRepeatedly(Return(SOFTBUS_OK));
+    EXPECT_CALL(mock, LnnSyncP2pInfo).WillRepeatedly(Return(SOFTBUS_OK));
     EXPECT_NO_FATAL_FAILURE(WifiDirectUtils::SyncLnnInfoForP2p(role, localMac, goMac));
 }
 
@@ -632,7 +634,7 @@ HWTEST_F(WifiDirectUtilsTest, GetRemoteConnSubFeatureTest, TestSize.Level1)
 
 /*
  * @tc.name: GetChloadTest
- * @tc.desc: test GetChload method with no permisson
+ * @tc.desc: test GetChload method
  * @tc.type: FUNC
  * @tc.require:
  */
@@ -642,5 +644,143 @@ HWTEST_F(WifiDirectUtilsTest, GetChloadTest, TestSize.Level1)
     EXPECT_CALL(*mockDevice, GetLinkedInfo).WillRepeatedly(Return(Wifi::WIFI_OPT_PERMISSION_DENIED));
     auto ret = WifiDirectUtils::GetChload();
     EXPECT_EQ(ret, Wifi::WIFI_OPT_PERMISSION_DENIED);
+
+    int chload = 6;
+    EXPECT_CALL(*mockDevice, GetLinkedInfo).WillRepeatedly(Return(Wifi::WIFI_OPT_SUCCESS));
+    ret = WifiDirectUtils::GetChload();
+    EXPECT_EQ(ret, chload);
+}
+
+/*
+ * @tc.name: GetRecommendChannelFromLnnTest
+ * @tc.desc: test GetRecommendChannelFromLnn method
+ * @tc.type: FUNC
+ * @tc.require:
+ */
+HWTEST_F(WifiDirectUtilsTest, GetRecommendChannelFromLnnTest, TestSize.Level1)
+{
+    int channelIdLnn = 0;
+    std::string networkId = "1234567890";
+    WifiDirectInterfaceMock mock;
+
+    EXPECT_CALL(mock, LnnGetRemoteStrInfo).WillRepeatedly(Return(SOFTBUS_OK));
+    EXPECT_CALL(mock, LnnGetRecommendChannel).WillRepeatedly(Return(SOFTBUS_OK));
+
+    auto ret = WifiDirectUtils::GetRecommendChannelFromLnn(networkId);
+    EXPECT_EQ(ret, channelIdLnn);
+}
+
+/*
+ * @tc.name: IsDeviceOnline
+ * @tc.desc: test IsDeviceOnline method
+ * @tc.type: FUNC
+ * @tc.require:
+ */
+HWTEST_F(WifiDirectUtilsTest, IsDeviceOnlineTest, TestSize.Level1)
+{
+    char remoteNetworkId[NETWORK_ID_BUF_LEN] = { 1 };
+    auto ret = WifiDirectUtils::IsDeviceOnline(remoteNetworkId);
+    EXPECT_EQ(ret, true);
+}
+
+/*
+ * @tc.name: MacArrayToString
+ * @tc.desc: test MacArrayToString method
+ * @tc.type: FUNC
+ * @tc.require:
+ */
+HWTEST_F(WifiDirectUtilsTest, MacArrayToStringTest, TestSize.Level1)
+{
+    uint8_t mac[6] = {0x01, 0x02, 0x03, 0x04, 0x05, 0x06};
+
+    auto ret = WifiDirectUtils::MacArrayToString(mac, 6);
+    EXPECT_EQ(ret, "01:02:03:04:05:06");
+}
+
+/*
+ * @tc.name: GetRemoteOsVersion
+ * @tc.desc: test GetRemoteOsVersion method
+ * @tc.type: FUNC
+ * @tc.require:
+ */
+HWTEST_F(WifiDirectUtilsTest, GetRemoteOsVersionTest, TestSize.Level1)
+{
+    char networkId[NETWORK_ID_BUF_LEN] = { 1 };
+    WifiDirectInterfaceMock mock;
+
+    EXPECT_CALL(mock, LnnGetRemoteNodeInfoById).WillRepeatedly(Return(SOFTBUS_INVALID_PARAM));
+    auto ret = WifiDirectUtils::GetRemoteOsVersion(networkId);
+    EXPECT_EQ(ret, "");
+}
+
+/*
+ * @tc.name: GetRemoteScreenStatus
+ * @tc.desc: test GetRemoteScreenStatus method
+ * @tc.type: FUNC
+ * @tc.require:
+ */
+HWTEST_F(WifiDirectUtilsTest, GetRemoteScreenStatusTest, TestSize.Level1)
+{
+    int screenStatus = 0;
+    char networkId[NETWORK_ID_BUF_LEN] = { 1 };
+    WifiDirectInterfaceMock mock;
+
+    EXPECT_CALL(mock, LnnGetRemoteNodeInfoByKey).WillRepeatedly(Return(SOFTBUS_INVALID_PARAM));
+    auto ret = WifiDirectUtils::GetRemoteScreenStatus(networkId);
+    EXPECT_EQ(ret, SOFTBUS_INVALID_PARAM);
+
+    EXPECT_CALL(mock, LnnGetRemoteNodeInfoByKey).WillRepeatedly(Return(SOFTBUS_OK));
+    ret = WifiDirectUtils::GetRemoteScreenStatus(networkId);
+    EXPECT_EQ(ret, screenStatus);
+}
+
+/*
+ * @tc.name: RemoteDeviceIdToMac
+ * @tc.desc: test RemoteDeviceIdToMac method
+ * @tc.type: FUNC
+ * @tc.require:
+ */
+HWTEST_F(WifiDirectUtilsTest, RemoteDeviceIdToMacTest, TestSize.Level1)
+{
+    std::string remoteDeviceId = "01234567890ABCDEF";
+    WifiDirectInterfaceMock mock;
+
+    EXPECT_CALL(mock, LnnGetRemoteStrInfo).WillRepeatedly(Return(SOFTBUS_OK));
+    auto ret = WifiDirectUtils::RemoteDeviceIdToMac(remoteDeviceId);
+    EXPECT_EQ(ret, "");
+}
+
+/*
+ * @tc.name: SupportHml
+ * @tc.desc: test SupportHml method and SupportHmlTwo method
+ * @tc.type: FUNC
+ * @tc.require:
+ */
+HWTEST_F(WifiDirectUtilsTest, SupportHmlTest, TestSize.Level1)
+{
+    bool ret = WifiDirectUtils::SupportHml();
+    EXPECT_EQ(ret, true);
+
+    ret = WifiDirectUtils::SupportHmlTwo();
+    EXPECT_EQ(ret, true);
+}
+
+/*
+ * @tc.name: CompareIgnoreCase
+ * @tc.desc: test CompareIgnoreCase method
+ * @tc.type: FUNC
+ * @tc.require:
+ */
+HWTEST_F(WifiDirectUtilsTest, CompareIgnoreCaseTest, TestSize.Level1)
+{
+    int32_t result = 0;
+    std::string left = "test";
+    std::string right = "test";
+
+    int32_t ret = WifiDirectUtils::CompareIgnoreCase(left, right);
+    EXPECT_EQ(ret, result);
+
+    WifiDirectUtils::ParallelFlowEnter();
+    WifiDirectUtils::ParallelFlowExit();
 }
 } // namespace OHOS::SoftBus

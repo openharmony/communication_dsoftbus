@@ -120,6 +120,9 @@ public:
     virtual void HidumpInit() = 0;
     using Hidumper = std::function<int()>;
     virtual void Register(const Hidumper &hidumper) = 0;
+    virtual int32_t LnnGetRecommendChannel(const char *udid, int32_t *preferChannel) = 0;
+    virtual int32_t LnnGetRemoteNodeInfoByKey(const char *key, NodeInfo *info) = 0;
+    virtual int32_t LnnGetRemoteNodeInfoById(const char *id, IdCategory type, NodeInfo *info) = 0;
 };
 
 class WifiDirectInterfaceMock : public WifiDirectInterface {
@@ -213,6 +216,9 @@ public:
     MOCK_METHOD(void, HidumpInit, (), (override));
     using Hidumper = std::function<int()>;
     MOCK_METHOD(void, Register, (const Hidumper &hidumper), (override));
+    MOCK_METHOD(int32_t, LnnGetRecommendChannel, (const char *udid, int32_t *preferChannel), (override));
+    MOCK_METHOD(int32_t, LnnGetRemoteNodeInfoByKey, (const char *key, NodeInfo *info), (override));
+    MOCK_METHOD(int32_t, LnnGetRemoteNodeInfoById, (const char *id, IdCategory type, NodeInfo *info), (override));
 
     static void InjectWifiDirectConnectCallbackMock(WifiDirectConnectCallback &callback);
     static void InjectWifiDirectDisconnectCallbackMock(WifiDirectDisconnectCallback &callback);
