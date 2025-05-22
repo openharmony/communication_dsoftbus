@@ -891,7 +891,7 @@ static void GetLocalDevReportInfo(AuditReportDevInfo *reportInfo, LnnAuditExtra 
 
     (void)LnnGetLocalStrInfo(STRING_KEY_DEV_NAME, reportInfo->localDevName, DEVICE_NAME_BUF_LEN);
     char *anonyLocalDevName = NULL;
-    Anonymize(reportInfo->localDevName, &anonyLocalDevName);
+    AnonymizeDeviceName(reportInfo->localDevName, &anonyLocalDevName);
     if (strcpy_s((char *)lnnAuditExtra->localDevName, DEVICE_NAME_BUF_LEN, AnonymizeWrapper(anonyLocalDevName)) !=
         EOK) {
         AUTH_LOGE(AUTH_FSM, "LOCAL DEVICE NAME COPY ERROR");

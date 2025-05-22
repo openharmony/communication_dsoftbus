@@ -788,6 +788,23 @@ int32_t LnnDBDataAddChangeSyncToCache(const char **key, const char **value, int3
     return SOFTBUS_OK;
 }
 
+static void PrintSyncNodeInfoEx(const NodeInfo *cacheInfo)
+{
+    char *anonyProductId = NULL;
+    Anonymize(cacheInfo->deviceInfo.productId, &anonyProductId);
+    char *anonyModelName = NULL;
+    Anonymize(cacheInfo->deviceInfo.modelName, &anonyModelName);
+    LNN_LOGI(LNN_BUILDER,
+        "Sync NodeInfoEx: BROADCAST_CIPHER_KEY=%{public}02x, BROADCAST_CIPHER_IV=%{public}02x, IRK=%{public}02x,"
+        " PUB_MAC=%{public}02x, PTK=%{public}02x, SPUk=%{public}d, PRODUCT_ID=%{public}s, MODEL_NAME=%{public}s, "
+        "SLE_CAP=%{public}d",
+        *cacheInfo->cipherInfo.key, *cacheInfo->cipherInfo.iv, *cacheInfo->rpaInfo.peerIrk,
+        *cacheInfo->rpaInfo.publicAddress, *cacheInfo->remotePtk, cacheInfo->isSupportUkNego,
+        AnonymizeWrapper(anonyProductId), AnonymizeWrapper(anonyModelName), cacheInfo->sleRangeCapacity);
+    AnonymizeFree(anonyProductId);
+    AnonymizeFree(anonyModelName);
+}
+
 static void PrintSyncNodeInfo(const NodeInfo *cacheInfo)
 {
     LNN_CHECK_AND_RETURN_LOGE(cacheInfo != NULL, LNN_BUILDER, "invalid param");
@@ -807,43 +824,30 @@ static void PrintSyncNodeInfo(const NodeInfo *cacheInfo)
     Anonymize(cacheInfo->uuid, &anonyUuid);
     char *anonyNetworkId = NULL;
     Anonymize(cacheInfo->networkId, &anonyNetworkId);
-    char *anonyDeviceVersion = NULL;
-    Anonymize(cacheInfo->deviceInfo.deviceVersion, &anonyDeviceVersion);
     char *anonyDeviceName = NULL;
     AnonymizeDeviceName(cacheInfo->deviceInfo.deviceName, &anonyDeviceName);
-    char *anonyProductId = NULL;
-    Anonymize(cacheInfo->deviceInfo.productId, &anonyProductId);
-    char *anonyModelName = NULL;
-    Anonymize(cacheInfo->deviceInfo.modelName, &anonyModelName);
     LNN_LOGI(LNN_BUILDER,
         "Sync NodeInfo: WIFI_VERSION=%{public}" PRId64 ", BLE_VERSION=%{public}" PRId64 ", ACCOUNT_ID=%{public}s, "
         "TRANSPORT_PROTOCOL=%{public}" PRIu64 ", FEATURE=%{public}" PRIu64 ", CONN_SUB_FEATURE=%{public}" PRIu64 ", "
         "TIMESTAMP=%{public}" PRIu64 ", P2P_MAC_ADDR=%{public}s, PKG_VERSION=%{public}s, DEVICE_NAME=%{public}s, "
         "STATIC_NET_CAP=%{public}u, AUTH_CAP=%{public}u, HB_CAP=%{public}u, OS_TYPE=%{public}d, OS_VERSION=%{public}s, "
         "BLE_P2P=%{public}d, BT_MAC=%{public}s, DEVICE_TYPE=%{public}d, SW_VERSION=%{public}s, DEVICE_UDID=%{public}s, "
-        "DEVICE_UUID=%{public}s, STATE_VERSION=%{public}d, NETWORK_ID=%{public}s, BROADCAST_CIPHER_KEY=%{public}02x, "
-        "BROADCAST_CIPHER_IV=%{public}02x, IRK=%{public}02x, PUB_MAC=%{public}02x, PTK=%{public}02x, SPUk=%{public}d, "
-        "DEVICE_VERSION=%{public}s, PRODUCT_ID=%{public}s, MODEL_NAME=%{public}s, SLE_CAP=%{public}d",
+        "DEVICE_UUID=%{public}s, STATE_VERSION=%{public}d, NETWORK_ID=%{public}s",
         cacheInfo->wifiVersion, cacheInfo->bleVersion, AnonymizeWrapper(anonyAccountId), cacheInfo->supportedProtocols,
         cacheInfo->feature, cacheInfo->connSubFeature, cacheInfo->updateTimestamp, AnonymizeWrapper(anonyP2pMac),
         cacheInfo->pkgVersion, AnonymizeWrapper(anonyDeviceName), cacheInfo->staticNetCap, cacheInfo->authCapacity,
         cacheInfo->heartbeatCapacity, cacheInfo->deviceInfo.osType, cacheInfo->deviceInfo.osVersion,
         cacheInfo->isBleP2p, AnonymizeWrapper(anonyMacAddr), cacheInfo->deviceInfo.deviceTypeId,
         cacheInfo->softBusVersion, AnonymizeWrapper(anonyUdid), AnonymizeWrapper(anonyUuid), cacheInfo->stateVersion,
-        AnonymizeWrapper(anonyNetworkId), *cacheInfo->cipherInfo.key, *cacheInfo->cipherInfo.iv,
-        *cacheInfo->rpaInfo.peerIrk, *cacheInfo->rpaInfo.publicAddress, *cacheInfo->remotePtk,
-        cacheInfo->isSupportUkNego, AnonymizeWrapper(anonyDeviceVersion), AnonymizeWrapper(anonyProductId),
-        AnonymizeWrapper(anonyModelName), cacheInfo->sleRangeCapacity);
+        AnonymizeWrapper(anonyNetworkId));
     AnonymizeFree(anonyAccountId);
     AnonymizeFree(anonyP2pMac);
     AnonymizeFree(anonyMacAddr);
     AnonymizeFree(anonyUdid);
     AnonymizeFree(anonyUuid);
     AnonymizeFree(anonyNetworkId);
-    AnonymizeFree(anonyDeviceVersion);
     AnonymizeFree(anonyDeviceName);
-    AnonymizeFree(anonyProductId);
-    AnonymizeFree(anonyModelName);
+    PrintSyncNodeInfoEx(cacheInfo);
 }
 
 static void UpdateDeviceNameToCache(const NodeInfo *newInfo, NodeInfo *oldInfo)

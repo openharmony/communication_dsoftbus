@@ -370,32 +370,32 @@ HWTEST_F(AnonymizerTest, AnonymizeDeviceNameTest002, TestSize.Level0)
 {
     char *anonymizedStr = nullptr;
 
-    AnonymizeDeviceName("张的Mate 70 Pro", &anonymizedStr);
-    EXPECT_STREQ("张*********Pro", anonymizedStr);
+    AnonymizeDeviceName("张的Mxxe 00 Pxx", &anonymizedStr);
+    EXPECT_STREQ("张*********Pxx", anonymizedStr);
     AnonymizeFree(anonymizedStr);
 
-    AnonymizeDeviceName("张三-Mate 70 Pro", &anonymizedStr);
-    EXPECT_STREQ("张**********Pro", anonymizedStr);
+    AnonymizeDeviceName("张三-Mxxe 00 Pxx", &anonymizedStr);
+    EXPECT_STREQ("张**********Pxx", anonymizedStr);
     AnonymizeFree(anonymizedStr);
 
-    AnonymizeDeviceName("张三的Mate 70 Pro+", &anonymizedStr);
-    EXPECT_STREQ("张***********ro+", anonymizedStr);
+    AnonymizeDeviceName("张三的Mxxe 00 Pxx+", &anonymizedStr);
+    EXPECT_STREQ("张***********xx+", anonymizedStr);
     AnonymizeFree(anonymizedStr);
 
-    AnonymizeDeviceName("abcdefghijklmnopqrst的Mate 70 Pro+", &anonymizedStr);
-    EXPECT_STREQ("a*****************************ro+", anonymizedStr);
+    AnonymizeDeviceName("abcdefghijklmnopqrst的Mxxe 00 Pxx+", &anonymizedStr);
+    EXPECT_STREQ("a*****************************xx+", anonymizedStr);
     AnonymizeFree(anonymizedStr);
 
-    AnonymizeDeviceName("哈哈哈哈哈哈哈哈哈哈哈哈哈哈哈哈哈哈哈哈的Mate 70 Pro+", &anonymizedStr);
-    EXPECT_STREQ("哈*****************************ro+", anonymizedStr);
+    AnonymizeDeviceName("哈哈哈哈哈哈哈哈哈哈哈哈哈哈哈哈哈哈哈哈的Mxxe 00 Pxx+", &anonymizedStr);
+    EXPECT_STREQ("哈*****************************xx+", anonymizedStr);
     AnonymizeFree(anonymizedStr);
 
-    AnonymizeDeviceName("zhang-san-sanaaaaaaa-Mate 70 Pro+", &anonymizedStr);
-    EXPECT_STREQ("z*****************************ro+", anonymizedStr);
+    AnonymizeDeviceName("zhang-san-sanaaaaaaa-Mxxe 00 Pxx+", &anonymizedStr);
+    EXPECT_STREQ("z*****************************xx+", anonymizedStr);
     AnonymizeFree(anonymizedStr);
 
-    AnonymizeDeviceName("张的三的四的一二三四-1234-5678-Mate 70 Pro+", &anonymizedStr);
-    EXPECT_STREQ("张*****************************ro+", anonymizedStr);
+    AnonymizeDeviceName("张的三的四的一二三四-1234-5678-Mxxe 00 Pxx+", &anonymizedStr);
+    EXPECT_STREQ("张*****************************xx+", anonymizedStr);
     AnonymizeFree(anonymizedStr);
 }
 
@@ -409,35 +409,35 @@ HWTEST_F(AnonymizerTest, AnonymizeDeviceNameTest003, TestSize.Level0)
 {
     char *anonymizedStr = nullptr;
 
-    AnonymizeDeviceName("a",&anonymizedStr);
+    AnonymizeDeviceName("a", &anonymizedStr);
     EXPECT_STREQ("*", anonymizedStr);
     AnonymizeFree(anonymizedStr);
 
-    AnonymizeDeviceName("ab",&anonymizedStr);
+    AnonymizeDeviceName("ab", &anonymizedStr);
     EXPECT_STREQ("*b", anonymizedStr);
     AnonymizeFree(anonymizedStr);
 
-    AnonymizeDeviceName("张三1",&anonymizedStr);
+    AnonymizeDeviceName("张三1", &anonymizedStr);
     EXPECT_STREQ("**1", anonymizedStr);
     AnonymizeFree(anonymizedStr);
 
-    AnonymizeDeviceName("张三李四",&anonymizedStr);
+    AnonymizeDeviceName("张三李四", &anonymizedStr);
     EXPECT_STREQ("张**四", anonymizedStr);
     AnonymizeFree(anonymizedStr);
 
-    AnonymizeDeviceName("张三w李四王",&anonymizedStr);
+    AnonymizeDeviceName("张三w李四王", &anonymizedStr);
     EXPECT_STREQ("张***四王", anonymizedStr);
     AnonymizeFree(anonymizedStr);
 
-    AnonymizeDeviceName("张三w李12四",&anonymizedStr);
+    AnonymizeDeviceName("张三w李12四", &anonymizedStr);
     EXPECT_STREQ("张****2四", anonymizedStr);
     AnonymizeFree(anonymizedStr);
 
-    AnonymizeDeviceName("张三w李123四",&anonymizedStr);
+    AnonymizeDeviceName("张三w李123四", &anonymizedStr);
     EXPECT_STREQ("张****23四", anonymizedStr);
     AnonymizeFree(anonymizedStr);
 
-    AnonymizeDeviceName("zhagnsan李si",&anonymizedStr);
+    AnonymizeDeviceName("zhagnsan李si", &anonymizedStr);
     EXPECT_STREQ("z*******李si", anonymizedStr);
     AnonymizeFree(anonymizedStr);
 
