@@ -19,5 +19,6 @@ group("fuzztest") {
     "softbusproxychannelmanagermock_fuzzer:fuzztest",
     "softbusproxychannelnetwork_fuzzer:fuzztest",
     "transproxyonmessagereceived_fuzzer:fuzztest",
+    "transnegotiationmessage_fuzzer:fuzztest",
   ]
 }
