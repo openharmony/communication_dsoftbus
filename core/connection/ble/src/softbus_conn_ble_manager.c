@@ -2187,8 +2187,10 @@ static void ConflictOccupy(const char *udid, int32_t timeout)
         ret = ConnPostMsgToLooper(&g_bleManagerSyncHandler, BLE_MGR_MSG_PREVENT_TIMEOUT, 0, 0, copyUdid, timeout);
         if (ret != SOFTBUS_OK) {
             CONN_LOGE(CONN_BLE, "post msg to looper failed, udid=%{public}s, error=%{public}d", anomizeUdid, ret);
+            ListDelete( &prevent->node);
             SoftBusFree(copyUdid);
             SoftBusFree(prevent);
+            g_bleManager.prevents->cnt--;
             break;
         }
     } while (false);
