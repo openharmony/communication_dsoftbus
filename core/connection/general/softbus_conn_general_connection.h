@@ -16,7 +16,7 @@
 #ifndef SOFTBUS_CONN_GENERAL_CONNECTION_H
 #define SOFTBUS_CONN_GENERAL_CONNECTION_H
 
-#include "softbus_conn_general_negoation.h"
+#include "softbus_conn_general_negotiation.h"
 #include "softbus_conn_interface.h"
 #include "softbus_utils.h"
 

@@ -12,8 +12,8 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-#ifndef SOFTBUS_CONN_GENERAL_NEGOATION_H
-#define SOFTBUS_CONN_GENERAL_NEGOATION_H
+#ifndef SOFTBUS_CONN_GENERAL_NEGOTIATION_H
+#define SOFTBUS_CONN_GENERAL_NEGOTIATION_H
 
 #include "softbus_common.h"
 #include "softbus_conn_common.h"
@@ -36,6 +36,7 @@ typedef enum {
     GENERAL_CONNECTION_MSG_TYPE_NORMAL = 12,
     GENERAL_CONNECTION_MSG_TYPE_MAX = 22,
 } GeneralConnectionMsgType;
+
 typedef struct {
     int32_t msgType;
     int32_t localId;
@@ -68,4 +69,4 @@ void FreeOutData(OutData *outData);
 #ifdef __cplusplus
 }
 #endif /* _cplusplus */
-#endif /* SOFTBUS_CONN_GENERAL_NEGOATION_H */
+#endif /* SOFTBUS_CONN_GENERAL_NEGOTIATION_H */

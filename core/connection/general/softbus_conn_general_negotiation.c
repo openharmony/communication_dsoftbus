@@ -13,7 +13,7 @@
  * limitations under the License.
  */
 
-#include "softbus_conn_general_negoation.h"
+#include "softbus_conn_general_negotiation.h"
 #include "softbus_json_utils.h"
 #include "conn_log.h"
 #include "softbus_error_code.h"
@@ -52,6 +52,11 @@ static OutData *ConstructOutData(GeneralConnectionInfo *info, GeneralConnectionM
 
 OutData *GeneralConnectionPackMsg(GeneralConnectionInfo *info, GeneralConnectionMsgType msgType)
 {
+    CONN_CHECK_AND_RETURN_RET_LOGE(info != NULL, NULL, CONN_BLE, "pack msg failed, info is null");
+    CONN_CHECK_AND_RETURN_RET_LOGE(strnlen(info->name, GENERAL_NAME_LEN) <= GENERAL_NAME_LEN, NULL,
+        CONN_BLE, "pack msg failed, name invalid");
+    CONN_CHECK_AND_RETURN_RET_LOGE(strnlen(info->bundleName, BUNDLE_NAME_MAX) <= BUNDLE_NAME_MAX, NULL,
+        CONN_BLE, "pack msg failed, bundleName invalid");
     cJSON *json = cJSON_CreateObject();
     CONN_CHECK_AND_RETURN_RET_LOGE(json != NULL, NULL, CONN_BLE, "create json object failed");
     int32_t status = SOFTBUS_OK;
@@ -102,6 +107,9 @@ OutData *GeneralConnectionPackMsg(GeneralConnectionInfo *info, GeneralConnection
 int32_t GeneralConnectionUnpackMsg(const uint8_t *data, uint32_t dataLen, GeneralConnectionInfo *info,
     GeneralConnectionMsgType parseMsgType)
 {
+    CONN_CHECK_AND_RETURN_RET_LOGE(data != NULL, SOFTBUS_INVALID_PARAM, CONN_BLE, "unpack msg failed, data is null");
+    CONN_CHECK_AND_RETURN_RET_LOGE(info != NULL, SOFTBUS_INVALID_PARAM, CONN_BLE, "unpack msg failed, info is null");
+
     cJSON *json = cJSON_ParseWithLength((char *)data, dataLen);
     CONN_CHECK_AND_RETURN_RET_LOGE(json != NULL, SOFTBUS_PARSE_JSON_ERR, CONN_BLE, "parse json failed");
     int32_t status = SOFTBUS_OK;
