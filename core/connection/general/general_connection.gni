@@ -24,5 +24,5 @@ general_connection_inc += [
 
 general_connection_src += [
   "$dsoftbus_root_path/core/connection/general/softbus_conn_general_connection.c",
-  "$dsoftbus_root_path/core/connection/general/softbus_conn_general_negoation.c",
+  "$dsoftbus_root_path/core/connection/general/softbus_conn_general_negotiation.c",
 ]
