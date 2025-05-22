@@ -1355,8 +1355,8 @@ bool SetDisplayNameInnerFuzzTest(const uint8_t *data, size_t size)
 }
 
 /*
- * The testing of the ipc message is divided into several parts: 
- * 1. Constructing scenarios with missing fields; 
+ * The testing of the ipc message is divided into several parts:
+ * 1. Constructing scenarios with missing fields;
  * 2. Constructing scenarios with random field contents;
 */
 // Discard specific field messages in sequence

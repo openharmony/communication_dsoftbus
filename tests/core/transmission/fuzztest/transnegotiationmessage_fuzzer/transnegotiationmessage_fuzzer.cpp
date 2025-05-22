@@ -32,8 +32,8 @@ int64_t TRANS_FUZZ_INT64_VAL = 0;
 int16_t TRANS_FUZZ_INT16_VAL = 0;
 
 /*
- * The testing of the protocol content is divided into several parts: 
- * 1. Constructing scenarios with missing fields; 
+ * The testing of the protocol content is divided into several parts:
+ * 1. Constructing scenarios with missing fields;
  * 2. Constructing scenarios with random field contents;
 */
 // Discard specific field messages in sequence
@@ -1064,7 +1064,6 @@ bool RunFuzzTestCaseWithStr(const uint8_t *data, size_t size)
     (void)UdpChannelNegMessageFuzzTest();
     (void)DirectChannelNegMessageFuzzTest();
     (void)AuthChannelNegMessageFuzzTest();
-    
 
     return true;
 }
