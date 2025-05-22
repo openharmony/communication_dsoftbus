@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2023 Huawei Device Co., Ltd.
+ * Copyright (c) 2023-2025 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -16,6 +16,7 @@
 #include "softbusserverstub_fuzzer.h"
 #include <cstddef>
 #include <cstdint>
+#include "fuzz_data_generator.h"
 #include "iservice_registry.h"
 #include "message_option.h"
 #include "message_parcel.h"
@@ -1353,6 +1354,320 @@ bool SetDisplayNameInnerFuzzTest(const uint8_t *data, size_t size)
     return true;
 }
 
+/*
+ * The testing of the ipc message is divided into several parts: 
+ * 1. Constructing scenarios with missing fields; 
+ * 2. Constructing scenarios with random field contents;
+*/
+// Discard specific field messages in sequence
+static bool CheckAddItem(uint32_t index, bool newCase)
+{
+    static uint32_t base = 0;
+    if (newCase) {
+        base = 0;
+    }
+
+    bool ret = true;
+    if (index == base) {
+        ret = false;
+    }
+
+    base++;
+
+    return ret;
+}
+
+static bool ReleaseResourcesFuzzTest(uint32_t index)
+{
+    sptr<IRemoteObject> object = GetRemoteObject();
+    if (object == nullptr) {
+        return false;
+    }
+
+    sptr<OHOS::SoftBusServerStub> SoftBusServer = new OHOS::SoftBusServer(SOFTBUS_SERVER_SA_ID, true);
+    if (SoftBusServer == nullptr) {
+        return false;
+    }
+
+    int32_t channelId = 0;
+    GenerateInt32(channelId);
+
+    MessageParcel datas;
+    MessageParcel reply;
+
+    if (CheckAddItem(index, true)) {
+        datas.WriteInt32(channelId);
+    }
+
+    (void)SoftBusServer->ReleaseResourcesInner(datas, reply);
+
+    return true;
+}
+
+static bool CloseChannelWithStatisticsFuzzTest(uint32_t index, const uint8_t *data, size_t size)
+{
+    sptr<IRemoteObject> object = GetRemoteObject();
+    if (object == nullptr || data == nullptr) {
+        return false;
+    }
+
+    int32_t channelId = 0;
+    int32_t channelType = 0;
+    uint64_t laneId = 0;
+    uint32_t len = size;
+
+    GenerateInt32(channelId);
+    GenerateInt32(channelType);
+    GenerateUint64(laneId);
+
+    MessageParcel datas;
+    MessageParcel reply;
+
+    sptr<OHOS::SoftBusServerStub> SoftBusServer = new OHOS::SoftBusServer(SOFTBUS_SERVER_SA_ID, true);
+    if (SoftBusServer == nullptr) {
+        return false;
+    }
+
+    if (CheckAddItem(index, true)) {
+        datas.WriteInt32(channelId);
+    }
+
+    if (CheckAddItem(index, false)) {
+        datas.WriteInt32(channelType);
+    }
+
+    if (CheckAddItem(index, false)) {
+        datas.WriteUint64(laneId);
+    }
+
+    if (CheckAddItem(index, false)) {
+        datas.WriteUint32(len);
+        datas.WriteRawData(data, len);
+    }
+
+    (void)SoftBusServer->CloseChannelWithStatisticsInner(datas, reply);
+
+    return true;
+}
+
+static bool ProcessInnerEventFuzzTestType(uint32_t index, const uint8_t *data, size_t size)
+{
+    sptr<IRemoteObject> object = GetRemoteObject();
+    if (object == nullptr || data == nullptr) {
+        return false;
+    }
+
+    int32_t eventType = 0;
+    uint32_t len = size;
+
+    GenerateInt32(eventType);
+
+    MessageParcel datas;
+    MessageParcel reply;
+
+    sptr<OHOS::SoftBusServerStub> SoftBusServer = new OHOS::SoftBusServer(SOFTBUS_SERVER_SA_ID, true);
+    if (SoftBusServer == nullptr) {
+        return false;
+    }
+
+    if (CheckAddItem(index, true)) {
+        datas.WriteInt32(eventType);
+    }
+
+    if (CheckAddItem(index, false)) {
+        datas.WriteUint32(len);
+        datas.WriteRawData(data, len);
+    }
+
+    (void)SoftBusServer->ProcessInnerEventInner(datas, reply);
+
+    return true;
+}
+
+static bool ProcessInnerEventFuzzTestData(int32_t eventType, const uint8_t *data, size_t size)
+{
+    sptr<IRemoteObject> object = GetRemoteObject();
+    if (object == nullptr || data == nullptr) {
+        return false;
+    }
+
+    uint32_t len = size;
+
+    MessageParcel datas;
+    MessageParcel reply;
+
+    sptr<OHOS::SoftBusServerStub> SoftBusServer = new OHOS::SoftBusServer(SOFTBUS_SERVER_SA_ID, true);
+    if (SoftBusServer == nullptr) {
+        return false;
+    }
+
+    datas.WriteInt32(eventType);
+    datas.WriteUint32(len);
+    datas.WriteRawData(data, len);
+
+    (void)SoftBusServer->ProcessInnerEventInner(datas, reply);
+
+    return true;
+}
+
+static bool ProcessInnerEventFuzzTest(uint32_t index, const uint8_t *data, size_t size)
+{
+    (void)ProcessInnerEventFuzzTestType(index, data, size);
+    (void)ProcessInnerEventFuzzTestData(EVENT_TYPE_CHANNEL_OPENED, data, size);
+    (void)ProcessInnerEventFuzzTestData(EVENT_TYPE_TRANS_LIMIT_CHANGE, data, size);
+    (void)ProcessInnerEventFuzzTestData(EVENT_TYPE_COLLAB_CHECK, data, size);
+
+    return true;
+}
+
+static bool PrivilegeCloseChannelFuzzTestType(uint32_t index)
+{
+    sptr<IRemoteObject> object = GetRemoteObject();
+    if (object == nullptr) {
+        return false;
+    }
+
+    uint64_t tokenId = 0;
+    int32_t pid = 0;
+    std::string str;
+
+    GenerateUint64(tokenId);
+    GenerateInt32(pid);
+    GenerateString(str);
+
+    sptr<OHOS::SoftBusServerStub> SoftBusServer = new OHOS::SoftBusServer(SOFTBUS_SERVER_SA_ID, true);
+    if (SoftBusServer == nullptr) {
+        return false;
+    }
+
+    MessageParcel datas;
+    if (CheckAddItem(index, true)) {
+        datas.WriteUint64(tokenId);
+    }
+
+    if (CheckAddItem(index, false)) {
+        datas.WriteInt32(pid);
+    }
+
+    if (CheckAddItem(index, false)) {
+        datas.WriteCString(str.c_str());
+    }
+
+    MessageParcel reply;
+    (void)SoftBusServer->PrivilegeCloseChannelInner(datas, reply);
+
+    return true;
+}
+
+static void OpenSessionQosAddItem(uint32_t index, MessageParcel &datas, const uint8_t *data, size_t size)
+{
+    if (CheckAddItem(index, false)) {
+        int32_t sessionId = 0;
+        GenerateInt32(sessionId);
+        datas.WriteInt32(sessionId);
+    }
+
+    if (CheckAddItem(index, false)) {
+        uint32_t actionId = 0;
+        GenerateUint32(actionId);
+        datas.WriteUint32(actionId);
+    }
+
+    if (CheckAddItem(index, false)) {
+        int32_t dataType = 0;
+        GenerateInt32(dataType);
+        datas.WriteInt32(dataType);
+    }
+
+    if (CheckAddItem(index, false)) {
+        int32_t linkNum = 0;
+        GenerateInt32(linkNum);
+        datas.WriteInt32(linkNum);
+        if (linkNum > 0) {
+            datas.WriteBuffer(data, size);
+        }
+    }
+
+    if (CheckAddItem(index, false)) {
+        int32_t streamType = 0;
+        GenerateInt32(streamType);
+        datas.WriteInt32(streamType);
+    }
+
+    if (CheckAddItem(index, false)) {
+        uint32_t fastDataSize = 0;
+        GenerateUint32(fastDataSize);
+        datas.WriteUint16(fastDataSize);
+        if (fastDataSize > 0) {
+            datas.WriteRawData(data, size);
+        }
+    }
+
+    if (CheckAddItem(index, false)) {
+        bool isQos = true;
+        datas.WriteBool(isQos);
+    }
+
+    if (CheckAddItem(index, false)) {
+        uint32_t qosCnt = 0;
+        GenerateUint32(qosCnt);
+        datas.WriteUint32(qosCnt);
+        if (qosCnt > 0) {
+            datas.WriteBuffer(data, size);
+        }
+    }
+}
+
+static bool OpenSessionQosFuzzTest(uint32_t index, const uint8_t *data, size_t size)
+{
+    sptr<IRemoteObject> object = GetRemoteObject();
+    if (object == nullptr || data == nullptr) {
+        return false;
+    }
+
+    std::string str;
+    GenerateString(str);
+
+    MessageParcel datas;
+    if (CheckAddItem(index, true)) {
+        const char *sessionName = str.c_str();
+        datas.WriteCString(sessionName);
+    }
+
+    if (CheckAddItem(index, false)) {
+        const char *peerSessionName = str.c_str();
+        datas.WriteCString(peerSessionName);
+    }
+
+    if (CheckAddItem(index, false)) {
+        const char *peerDeviceId = str.c_str();
+        datas.WriteCString(peerDeviceId);
+    }
+
+    if (CheckAddItem(index, false)) {
+        const char *groupId = str.c_str();
+        datas.WriteCString(groupId);
+    }
+
+    if (CheckAddItem(index, false)) {
+        bool isAsync = false;
+        GenerateBool(isAsync);
+        datas.WriteBool(isAsync);
+    }
+
+    OpenSessionQosAddItem(index, datas, data, size);
+
+    MessageParcel reply;
+    sptr<OHOS::SoftBusServerStub> SoftBusServer = new OHOS::SoftBusServer(SOFTBUS_SERVER_SA_ID, true);
+    if (SoftBusServer == nullptr) {
+        return false;
+    }
+
+    (void)SoftBusServer->OpenSessionInner(datas, reply);
+
+    return true;
+}
+
 bool RunFuzzTestCase(const uint8_t *data, size_t size)
 {
     OHOS::EvaLuateQosInnerDataTypeFuzzTest(data, size);
@@ -1394,6 +1709,33 @@ bool RunFuzzTestCase(const uint8_t *data, size_t size)
     OHOS::SetDisplayNameInnerFuzzTest(data, size);
     return true;
 }
+
+constexpr uint32_t TRANS_FUZZ_TEST_BASE = 100;
+bool RunFuzzTestCaseWithStr(const uint8_t *data, size_t size)
+{
+    (void)EvaLuateQosInnerNetworkIdFuzzTest(data, size);
+
+    if (data == nullptr || size < sizeof(int64_t)) {
+        return false;
+    }
+
+    static uint32_t index = 0;
+    if (index > TRANS_FUZZ_TEST_BASE) {
+        index = 0;
+    }
+
+    DataGenerator::Write(data, size);
+    (void)ReleaseResourcesFuzzTest(index);
+    (void)CloseChannelWithStatisticsFuzzTest(index, data, size);
+    (void)ProcessInnerEventFuzzTest(index, data, size);
+    (void)PrivilegeCloseChannelFuzzTestType(index);
+    (void)OpenSessionQosFuzzTest(index, data, size);
+    DataGenerator::Clear();
+
+    index++;
+
+    return true;
+}
 } // namespace OHOS
 
 /* Fuzzer entry point */
@@ -1411,7 +1753,7 @@ extern "C" int32_t LLVMFuzzerTestOneInput(const uint8_t* ptr, size_t size)
         SoftBusFree(data);
         return 0;
     }
-    OHOS::EvaLuateQosInnerNetworkIdFuzzTest(data, size);
+    OHOS::RunFuzzTestCaseWithStr(data, size);
     SoftBusFree(data);
     return 0;
 }
