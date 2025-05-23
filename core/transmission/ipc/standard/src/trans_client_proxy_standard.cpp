@@ -471,7 +471,7 @@ int32_t TransClientProxy::OnCheckCollabRelation(const CollabInfo *sourceInfo, bo
     return ret;
 }
 
-int32_t TransClientProxy::OnJoinLNNResult(void *addr, uint32_t addrTypeLen, const char *networkId, int retCode)
+int32_t TransClientProxy::OnJoinLNNResult(void *addr, uint32_t addrTypeLen, const char *networkId, int32_t retCode)
 {
     (void)addr;
     (void)addrTypeLen;
@@ -481,7 +481,7 @@ int32_t TransClientProxy::OnJoinLNNResult(void *addr, uint32_t addrTypeLen, cons
 }
 
 int32_t TransClientProxy::OnJoinMetaNodeResult(void *addr, uint32_t addrTypeLen, void *metaInfo,
-    uint32_t infoLen, int retCode)
+    uint32_t infoLen, int32_t retCode)
 {
     (void)addr;
     (void)addrTypeLen;
@@ -491,14 +491,14 @@ int32_t TransClientProxy::OnJoinMetaNodeResult(void *addr, uint32_t addrTypeLen,
     return SOFTBUS_OK;
 }
 
-int32_t TransClientProxy::OnLeaveLNNResult(const char *networkId, int retCode)
+int32_t TransClientProxy::OnLeaveLNNResult(const char *networkId, int32_t retCode)
 {
     (void)networkId;
     (void)retCode;
     return SOFTBUS_OK;
 }
 
-int32_t TransClientProxy::OnLeaveMetaNodeResult(const char *networkId, int retCode)
+int32_t TransClientProxy::OnLeaveMetaNodeResult(const char *networkId, int32_t retCode)
 {
     (void)networkId;
     (void)retCode;

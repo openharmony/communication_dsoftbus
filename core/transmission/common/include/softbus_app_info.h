@@ -90,9 +90,9 @@ typedef struct {
     char authState[AUTH_STATE_SIZE_MAX];
     char addr[IP_LEN];
     char accountId[ACCOUNT_UID_LEN_MAX];
-    int uid;
-    int pid;
-    int port;
+    int32_t uid;
+    int32_t pid;
+    int32_t port;
     ApiVersion apiVersion;
     uint32_t dataConfig;
     int32_t userId;
@@ -129,8 +129,8 @@ typedef struct {
     int32_t crc;
     int32_t fileProtocol;
     int32_t autoCloseTime;
-    int myHandleId;
-    int peerHandleId;
+    int32_t myHandleId;
+    int32_t peerHandleId;
     int32_t transFlag;
     int32_t linkType;
     int32_t connectType;
