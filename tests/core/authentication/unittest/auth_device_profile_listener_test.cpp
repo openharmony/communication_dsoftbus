@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2023-2025 Huawei Device Co., Ltd.
+ * Copyright (c) 2024-2025 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -12,11 +12,13 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+
+
+#include <gtest/gtest.h>
+
 #include "auth_device_profile_listener.h"
 #include "auth_device_profile_listener_mock.h"
 #include "auth_deviceprofile.h"
-#include <gtest/gtest.h>
-
 #include "auth_log.h"
 #include "device_profile_listener.h"
 #include "lnn_app_bind_interface.h"
@@ -82,7 +84,7 @@ HWTEST_F(AuthDeviceProfileListenerTest, ON_TRUST_DEVICE_PROFILE_ADD_TEST_001, Te
 
 /*
  * @tc.name: ON_TRUST_DEVICE_PROFILE_ADD_TEST
- * @tc.desc: test onDeviceProfileAdd is null
+ * @tc.desc: test onDeviceProfileAdd is null.
  * @tc.type: FUNC
  * @tc.require:
  */
@@ -97,7 +99,7 @@ HWTEST_F(AuthDeviceProfileListenerTest, ON_TRUST_DEVICE_PROFILE_ADD_TEST_002, Te
 
 /*
  * @tc.name: ON_TRUST_DEVICE_PROFILE_ADD_TEST
- * @tc.desc:
+ * @tc.desc: test OnTrustDeviceProfileAdd is OnDeviceBound success.
  * @tc.type: FUNC
  * @tc.require:
  */
@@ -112,7 +114,7 @@ HWTEST_F(AuthDeviceProfileListenerTest, ON_TRUST_DEVICE_PROFILE_ADD_TEST_003, Te
 
 /*
  * @tc.name: ON_TRUST_DEVICE_PROFILE_DELETE_TEST_001
- * @tc.desc:
+ * @tc.desc: test OnTrustDeviceProfileDelete success
  * @tc.type: FUNC
  * @tc.require:
  */
@@ -128,7 +130,7 @@ HWTEST_F(AuthDeviceProfileListenerTest, ON_TRUST_DEVICE_PROFILE_DELETE_TEST_001,
 
 /*
  * @tc.name: ON_TRUST_DEVICE_PROFILE_DELETE_TEST_002
- * @tc.desc: test onDeviceProfileDeleted is null
+ * @tc.desc: test onDeviceProfileDeleted is null.
  * @tc.type: FUNC
  * @tc.require:
  */
@@ -144,7 +146,7 @@ HWTEST_F(AuthDeviceProfileListenerTest, ON_TRUST_DEVICE_PROFILE_DELETE_TEST_002,
 
 /*
  * @tc.name: ON_TRUST_DEVICE_PROFILE_UPDATE_TEST
- * @tc.desc:
+ * @tc.desc: test OnTrustDeviceProfileUpdate is null.
  * @tc.type: FUNC
  * @tc.require:
  */
@@ -157,7 +159,7 @@ HWTEST_F(AuthDeviceProfileListenerTest, ON_TRUST_DEVICE_PROFILE_UPDATE_TEST, Tes
 
 /*
  * @tc.name: ON_DEVICE_PROFILE_ADD_TEST
- * @tc.desc:
+ * @tc.desc: test OnDeviceProfileAdd is success.
  * @tc.type: FUNC
  * @tc.require:
  */
@@ -170,7 +172,7 @@ HWTEST_F(AuthDeviceProfileListenerTest, ON_DEVICE_PROFILE_ADD_TEST, TestSize.Lev
 
 /*
  * @tc.name: ON_DEVICE_PROFILE_DELETE_TEST
- * @tc.desc:
+ * @tc.desc: test OnDeviceProfileDelete is success.
  * @tc.type: FUNC
  * @tc.require:
  */
@@ -183,7 +185,7 @@ HWTEST_F(AuthDeviceProfileListenerTest, ON_DEVICE_PROFILE_DELETE_TEST, TestSize.
 
 /*
  * @tc.name: ON_DEVICE_PROFILE_UPDATE_TEST
- * @tc.desc:
+ * @tc.desc: test OnDeviceProfileUpdate is success.
  * @tc.type: FUNC
  * @tc.require:
  */
@@ -196,7 +198,7 @@ HWTEST_F(AuthDeviceProfileListenerTest, ON_DEVICE_PROFILE_UPDATE_TEST, TestSize.
 
 /*
  * @tc.name: ON_SERVICE_PROFILE_ADD_TEST
- * @tc.desc:
+ * @tc.desc: test OnServiceProfileAdd is success.
  * @tc.type: FUNC
  * @tc.require:
  */
@@ -209,7 +211,7 @@ HWTEST_F(AuthDeviceProfileListenerTest, ON_SERVICE_PROFILE_ADD_TEST, TestSize.Le
 
 /*
  * @tc.name: ON_SERVICE_PROFILE_DELETE_TEST
- * @tc.desc:
+ * @tc.desc: test OnServiceProfileDelete is success.
  * @tc.type: FUNC
  * @tc.require:
  */
@@ -222,7 +224,7 @@ HWTEST_F(AuthDeviceProfileListenerTest, ON_SERVICE_PROFILE_DELETE_TEST, TestSize
 
 /*
  * @tc.name: ON_SERVICE_PROFILE_UPDATE_TEST
- * @tc.desc:
+ * @tc.desc: test OnServiceProfileUpdate is success.
  * @tc.type: FUNC
  * @tc.require:
  */
@@ -235,7 +237,7 @@ HWTEST_F(AuthDeviceProfileListenerTest, ON_SERVICE_PROFILE_UPDATE_TEST, TestSize
 
 /*
  * @tc.name: ON_CHARACTERISTIC_PROFILE_ADD_TEST
- * @tc.desc:
+ * @tc.desc: test OnCharacteristicProfileAdd is success.
  * @tc.type: FUNC
  * @tc.require:
  */
@@ -248,7 +250,7 @@ HWTEST_F(AuthDeviceProfileListenerTest, ON_CHARACTERISTIC_PROFILE_ADD_TEST, Test
 
 /*
  * @tc.name: ON_CHARACTERISTIC_PROFILE_DELETE_TEST
- * @tc.desc:
+ * @tc.desc: test OnCharacteristicProfileDelete is success.
  * @tc.type: FUNC
  * @tc.require:
  */
@@ -261,7 +263,7 @@ HWTEST_F(AuthDeviceProfileListenerTest, ON_CHARACTERISTIC_PROFILE_DELETE_TEST, T
 
 /*
  * @tc.name: ON_CHARACTERISTIC_PROFILE_UPDATE_TEST
- * @tc.desc:
+ * @tc.desc: test OnCharacteristicProfileUpdate is success.
  * @tc.type: FUNC
  * @tc.require:
  */
