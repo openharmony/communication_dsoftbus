@@ -183,6 +183,7 @@ struct WifiDirectConnectInfo {
     char remoteNetworkId[NETWORK_ID_BUF_LEN];
     char remoteMac[MAC_ADDR_STR_LEN];
     bool isNetworkDelegate;
+    bool ratePreference;
     int32_t bandWidth;
     enum IpAddrType ipAddrType;
 

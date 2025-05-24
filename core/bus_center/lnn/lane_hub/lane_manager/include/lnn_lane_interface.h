@@ -224,6 +224,7 @@ typedef struct {
     LaneRttLevel rttLevel;
     bool continuousTask;
     bool reuseBestEffort;
+    bool ratePreference;
 } QosInfo;
 
 typedef struct {

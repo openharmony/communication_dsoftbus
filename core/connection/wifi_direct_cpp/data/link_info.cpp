@@ -386,6 +386,16 @@ enum IpAddrType LinkInfo::GetIpAddrType()
     return static_cast<enum IpAddrType>(ret);
 }
 
+void LinkInfo::SetRatePreference(bool ratePreference)
+{
+    Set(LinkInfoKey::RATE_PREFERENCE, ratePreference);
+}
+
+bool LinkInfo::IsRatePreference() const
+{
+    return Get(LinkInfoKey::RATE_PREFERENCE, false);
+}
+
 std::string LinkInfo::ToString(LinkMode mode)
 {
     switch (mode) {

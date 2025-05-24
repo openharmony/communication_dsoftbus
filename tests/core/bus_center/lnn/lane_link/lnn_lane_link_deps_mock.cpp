@@ -194,5 +194,10 @@ void LnnDeleteLinkLedgerInfo(const char *udid)
 {
     GetLaneLinkDepsInterface()->LnnDeleteLinkLedgerInfo(udid);
 }
+
+bool CheckLaneLinkExistByType(LaneLinkType linkType)
+{
+    return GetLaneLinkDepsInterface()->CheckLaneLinkExistByType(linkType);
+}
 }
 } // namespace OHOS
