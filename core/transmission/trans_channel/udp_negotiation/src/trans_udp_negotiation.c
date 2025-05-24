@@ -1493,7 +1493,8 @@ int32_t TransDealUdpChannelOpenResult(
         return SOFTBUS_OK;
     }
     if (GetCapabilityBit(channel.info.channelCapability, TRANS_CHANNEL_SINK_GENERATE_KEY_OFFSET)) {
-        if (accessInfo != NULL && accessInfo->userId == INVALID_USER_ID) {
+        if (accessInfo != NULL && accessInfo->userId == INVALID_USER_ID &&
+            channel.info.myData.tokenType > ACCESS_TOKEN_TYPE_HAP) {
             DisableCapabilityBit(&channel.info.channelCapability, TRANS_CHANNEL_SINK_KEY_ENCRYPT_OFFSET);
             return TransProcessAsyncOpenUdpChannelSuccess(&channel, channelId);
         }

@@ -1604,7 +1604,8 @@ int32_t TransDealTdcChannelOpenResult(int32_t channelId, int32_t openResult, con
         NotifyFastDataRecv(&conn, channelId);
     }
     if (GetCapabilityBit(conn.appInfo.channelCapability, TRANS_CHANNEL_SINK_GENERATE_KEY_OFFSET)) {
-        if (accessInfo != NULL && accessInfo->userId == INVALID_USER_ID) {
+        if (accessInfo != NULL && accessInfo->userId == INVALID_USER_ID &&
+            conn.appInfo.myData.tokenType > ACCESS_TOKEN_TYPE_HAP) {
             DisableCapabilityBit(&conn.appInfo.channelCapability, TRANS_CHANNEL_SINK_KEY_ENCRYPT_OFFSET);
             return HandleTdcChannelOpenedReply(&conn, channelId, &extra, flags, seq);
         }
