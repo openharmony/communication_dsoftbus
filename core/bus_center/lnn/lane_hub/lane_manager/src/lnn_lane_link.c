@@ -960,6 +960,28 @@ int32_t GetAllLinkWithDevId(const char *peerUdid, LaneLinkType **linkList, uint8
     return SOFTBUS_OK;
 }
 
+bool CheckLaneLinkExistByType(LaneLinkType linkType)
+{
+    if (linkType >= LANE_LINK_TYPE_BUTT) {
+        LNN_LOGE(LNN_LANE, "invalid linkType=%{public}d", linkType);
+        return false;
+    }
+    if (LaneLock() != SOFTBUS_OK) {
+        LNN_LOGE(LNN_LANE, "lane lock fail");
+        return false;
+    }
+    LaneResource *item = NULL;
+    LaneResource *next = NULL;
+    LIST_FOR_EACH_ENTRY_SAFE(item, next, &g_laneResource.list, LaneResource, node) {
+        if (linkType == item->link.type) {
+            LaneUnlock();
+            return true;
+        }
+    }
+    LaneUnlock();
+    return false;
+}
+
 static int32_t ConvertUdidToHexStr(const char *peerUdid, char *udidHashStr, uint32_t hashStrLen)
 {
     if (peerUdid == NULL || udidHashStr == NULL) {
