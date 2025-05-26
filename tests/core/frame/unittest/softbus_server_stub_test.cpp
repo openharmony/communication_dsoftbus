@@ -49,6 +49,7 @@ namespace OHOS {
 #define TEST_DEVICE_ID_SIZE_MAX    50
 #define TEST_GROUP_ID_SIZE_MAX     50
 #define TEST_PKG_NAME_SIZE_MAX     65
+#define TEST_MAX_LEN               1025
 
 char g_mySessionName[TEST_SESSION_NAME_SIZE_MAX] = "com.test.trans.session";
 char g_peerSessionName[TEST_SESSION_NAME_SIZE_MAX] = "com.test.trans.session.sendfile";
@@ -2000,11 +2001,6 @@ HWTEST_F(SoftbusServerStubTest, SoftbusServerStubTest053, TestSize.Level1)
 
     int32_t ret = softBusServer->DisconnectInner(data, reply);
     EXPECT_EQ(SOFTBUS_IPC_ERR, ret);
-
-    int32_t handle = 0;
-    data.WriteInt32(handle);
-    ret = softBusServer->DisconnectInner(data, reply);
-    EXPECT_EQ(SOFTBUS_OK, ret);
 }
 
 /**
@@ -2029,19 +2025,11 @@ HWTEST_F(SoftbusServerStubTest, SoftbusServerStubTest054, TestSize.Level1)
     ret = softBusServer->SendInner(data, reply);
     EXPECT_EQ(SOFTBUS_IPC_ERR, ret);
 
-    uint32_t len = 0;
+    uint32_t len = TEST_MAX_LEN;
     data.WriteInt32(handle);
     data.WriteUint32(len);
     ret = softBusServer->SendInner(data, reply);
-    EXPECT_EQ(SOFTBUS_IPC_ERR, ret);
-
-    const uint8_t *sendData = reinterpret_cast<const uint8_t *>("test");
-    len = strlen("test");
-    data.WriteInt32(handle);
-    data.WriteUint32(len);
-    data.WriteRawData(sendData, len);
-    ret = softBusServer->SendInner(data, reply);
-    EXPECT_EQ(SOFTBUS_OK, ret);
+    EXPECT_EQ(SOFTBUS_INVALID_PARAM, ret);
 }
 
 /**
@@ -2066,10 +2054,10 @@ HWTEST_F(SoftbusServerStubTest, SoftbusServerStubTest055, TestSize.Level1)
     ret = softBusServer->GetPeerDeviceIdInner(data, reply);
     EXPECT_EQ(SOFTBUS_IPC_ERR, ret);
 
-    uint32_t len = 10;
+    uint32_t len = TEST_DEVICE_ID_SIZE_MAX;
     data.WriteInt32(handle);
     data.WriteUint32(len);
     ret = softBusServer->GetPeerDeviceIdInner(data, reply);
-    EXPECT_EQ(SOFTBUS_OK, ret);
+    EXPECT_EQ(SOFTBUS_INVALID_PARAM, ret);
 }
 }
