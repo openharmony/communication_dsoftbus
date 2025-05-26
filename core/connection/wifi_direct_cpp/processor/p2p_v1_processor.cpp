@@ -119,10 +119,10 @@ bool P2pV1Processor::CanAcceptNegotiateDataAtState(WifiDirectCommand &command)
         return false;
     }
 
-    auto nc = dynamic_cast<NegotiateCommand *>(&command);
-    if (nc == nullptr) {
+    if (command.GetType() != CommandType::NEGOTIATE_COMMAND) {
         return false;
     }
+    auto nc = static_cast<NegotiateCommand *>(&command);
     return nc->GetNegotiateMessage().GetLegacyP2pCommandType() != LegacyCommandType::CMD_INVALID &&
         nc->GetNegotiateMessage().GetLegacyP2pCommandType() != LegacyCommandType::CMD_DISCONNECT_V1_REQ;
 }
@@ -130,10 +130,10 @@ bool P2pV1Processor::CanAcceptNegotiateDataAtState(WifiDirectCommand &command)
 void P2pV1Processor::HandleCommandAfterTerminate(WifiDirectCommand &command)
 {
     CONN_LOGI(CONN_WIFI_DIRECT, "enter");
-    auto nc = dynamic_cast<NegotiateCommand *>(&command);
-    if (nc == nullptr) {
+    if (command.GetType() != CommandType::NEGOTIATE_COMMAND) {
         return;
     }
+    auto nc = static_cast<NegotiateCommand *>(&command);
     auto messageType = nc->GetNegotiateMessage().GetLegacyP2pCommandType();
     CONN_LOGI(CONN_WIFI_DIRECT, "messageType = %{public}d", messageType);
     std::set<LegacyCommandType> vaildMessageTypes = {
@@ -612,7 +612,12 @@ void P2pV1Processor::ProcessAuthExceptionEvent(const std::shared_ptr<AuthExcepti
     CONN_LOGE(CONN_WIFI_DIRECT, "AuthExceptionEvent error=%{public}d", event->error_);
     auto negotiateChannel = connectCommand_->GetConnectInfo().channel_;
     CONN_CHECK_AND_RETURN_LOGE(negotiateChannel != nullptr, CONN_WIFI_DIRECT, "auth negotiate channel is nullptr");
-    auto authChannel = std::dynamic_pointer_cast<AuthNegotiateChannel>(negotiateChannel);
+
+    std::shared_ptr<AuthNegotiateChannel> authChannel = nullptr;
+    if (negotiateChannel->GetType() == NegotiateChannelType::AUTH_CHANNEL) {
+        authChannel = std::static_pointer_cast<AuthNegotiateChannel>(negotiateChannel);
+    }
+
     CONN_CHECK_AND_RETURN_LOGE(authChannel != nullptr && *authChannel == event->handle_,
         CONN_WIFI_DIRECT, "other auth exception ignore");
     CleanupIfNeed(event->error_, connectCommand_->GetRemoteDeviceId());
@@ -1291,8 +1296,10 @@ int P2pV1Processor::ProcessGetInterfaceInfoRequest(std::shared_ptr<NegotiateComm
 
 int P2pV1Processor::ProcessAuthHandShakeRequest(std::shared_ptr<NegotiateCommand> &command)
 {
-    auto channel = std::dynamic_pointer_cast<AuthNegotiateChannel>(command->GetNegotiateChannel());
-    if (channel != nullptr) {
+
+    std::shared_ptr<AuthNegotiateChannel> channel = nullptr;
+    if (command->GetNegotiateChannel()->GetType() == NegotiateChannelType::AUTH_CHANNEL) {
+        channel = std::static_pointer_cast<AuthNegotiateChannel>(command->GetNegotiateChannel());
         channel->SetClose();
     }
     auto remoteDeviceId = command->GetRemoteDeviceId();
@@ -1893,7 +1900,11 @@ int P2pV1Processor::OpenAuthConnection(const NegotiateMessage &msg, const std::s
     CONN_CHECK_AND_RETURN_RET_LOGW(
         ret == SOFTBUS_OK, ret, CONN_WIFI_DIRECT, "get listen module failed, error=%{public}d", ret);
 
-    auto authChannel = std::dynamic_pointer_cast<AuthNegotiateChannel>(channel);
+    std::shared_ptr<AuthNegotiateChannel> authChannel = nullptr;
+    if (channel->GetType() != NegotiateChannelType::AUTH_CHANNEL) {
+        authChannel = std::static_pointer_cast<AuthNegotiateChannel>(channel);
+    }
+
     uint32_t authReqId = 0;
     ret = AuthNegotiateChannel::OpenConnection(param, authChannel, authReqId);
     CONN_CHECK_AND_RETURN_RET_LOGW(

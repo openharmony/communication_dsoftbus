@@ -23,12 +23,15 @@ bus_center_sdk_test_inc = [
   "$dsoftbus_root_path/sdk/bus_center/ipc/standard/include",
   "$dsoftbus_root_path/sdk/bus_center/ipc/include",
   "$dsoftbus_root_path/adapter/common/include",
+  "$dsoftbus_root_path/interfaces/kits/bus_center",
   "$dsoftbus_root_path/core/bus_center/interface",
+  "$dsoftbus_root_path/interfaces/kits/lnn",
   "$dsoftbus_root_path/core/bus_center/lnn/lane_hub/heartbeat/include",
   "$dsoftbus_root_path/core/bus_center/lnn/lane_hub/lane_manager/include",
   "$dsoftbus_root_path/core/bus_center/lnn/net_ledger/common/include",
   "$dsoftbus_root_path/core/bus_center/lnn/net_ledger/local_ledger/include",
   "$dsoftbus_root_path/core/common/include",
+  "$dsoftbus_root_path/interfaces/kits/disc",
   "$dsoftbus_root_path/core/discovery/interface",
   "$dsoftbus_root_path/core/discovery/manager/include",
   "$dsoftbus_root_path/interfaces/kits/bus_center",
@@ -49,10 +52,12 @@ bus_center_sdk_test_deps = [
 
 if (dsoftbus_feature_lnn_ble) {
   bus_center_sdk_test_inc += [
+    "$dsoftbus_root_path/interfaces/kits/authentication",
     "$dsoftbus_root_path/core/authentication/interface",
     "$dsoftbus_root_path/core/adapter/bus_center/include",
     "$dsoftbus_root_path/core/bus_center/interface",
     "$dsoftbus_root_path/core/bus_center/lnn/decision_center/include",
+    "$dsoftbus_root_path/interfaces/kits/lnn",
     "$dsoftbus_root_path/core/bus_center/lnn/disc_mgr/include",
     "$dsoftbus_root_path/core/bus_center/lnn/lane_hub/common/include",
     "$dsoftbus_root_path/core/bus_center/lnn/lane_hub/heartbeat/include",
@@ -80,6 +85,7 @@ if (defined(ohos_lite)) {
       ]
       include_dirs = bus_center_sdk_test_inc
       include_dirs += [
+        "$dsoftbus_root_path/interfaces/kits/lnn",
         "$dsoftbus_root_path/adapter/common/bus_center/include",
         "$dsoftbus_root_path/core/bus_center/service/include",
         "$dsoftbus_root_path/core/bus_center/utils/include",
@@ -221,11 +227,13 @@ if (defined(ohos_lite)) {
     sources = [
       "$dsoftbus_root_path/core/bus_center/service/src/bus_center_manager.c",
       "bus_center_heartbeat_sdk_test.cpp",
+      "$dsoftbus_root_path/core/frame/init/src/g_enhance_lnn_func.c",
     ]
     include_dirs = bus_center_sdk_test_inc
     include_dirs += [
       "unittest/common/",
       "$dsoftbus_root_path/core/authentication/include",
+      "$dsoftbus_root_path/core/frame/init/include",
     ]
     deps = bus_center_sdk_test_deps
     deps += [

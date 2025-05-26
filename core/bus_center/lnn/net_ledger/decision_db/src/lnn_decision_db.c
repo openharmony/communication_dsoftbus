@@ -26,8 +26,8 @@
 #include "auth_device_common_key.h"
 #include "bus_center_info_key.h"
 #include "bus_center_manager.h"
+#include "g_enhance_lnn_func_pack.h"
 #include "lnn_async_callback_utils.h"
-#include "lnn_cipherkey_manager.h"
 #include "lnn_device_info_recovery.h"
 #include "lnn_ohos_account.h"
 #include "lnn_file_utils.h"
@@ -36,7 +36,7 @@
 #include "lnn_local_net_ledger.h"
 #include "lnn_log.h"
 #include "lnn_p2p_info.h"
-#include "lnn_secure_storage.h"
+#include "lnn_secure_storage_struct.h"
 #include "sqlite3_utils.h"
 
 #include "softbus_adapter_crypto.h"
@@ -248,6 +248,10 @@ static int32_t UpdateDecisionDbKey(DbContext *ctx)
 
     if (LnnGenerateKeyByHuks(&g_keyAlias) != SOFTBUS_OK) {
         LNN_LOGE(LNN_LEDGER, "update decision db de key fail");
+        return SOFTBUS_GENERATE_KEY_FAIL;
+    }
+    if (LnnGenerateCeKeyByHuks(&g_ceKeyAlias) != SOFTBUS_OK) {
+        LNN_LOGE(LNN_LEDGER, "update decision db ce key fail");
         return SOFTBUS_GENERATE_KEY_FAIL;
     }
     int32_t ret = GetDecisionDbKey(dbKey, sizeof(dbKey), true);
@@ -552,9 +556,9 @@ bool LnnIsPotentialHomeGroup(const char *udid)
     return false;
 }
 
-int32_t LnnGenerateCeParams(bool isUnlocked)
+int32_t LnnGenerateCeParams(void)
 {
-    return LnnGenerateCeKeyByHuks(&g_ceKeyAlias, isUnlocked);
+    return LnnGenerateCeKeyByHuks(&g_ceKeyAlias);
 }
 
 int32_t LnnCheckGenerateSoftBusKeyByHuks(void)
@@ -570,6 +574,10 @@ int32_t LnnInitDecisionDbDelay(void)
 {
     if (LnnGenerateKeyByHuks(&g_keyAlias) != SOFTBUS_OK) {
         LNN_LOGE(LNN_LEDGER, "generate decision db huks de key fail");
+        return SOFTBUS_GENERATE_KEY_FAIL;
+    }
+    if (LnnGenerateCeKeyByHuks(&g_ceKeyAlias) != SOFTBUS_OK) {
+        LNN_LOGE(LNN_LEDGER, "update decision db huks ce key fail");
         return SOFTBUS_GENERATE_KEY_FAIL;
     }
     if (InitTrustedDevInfoTable() != SOFTBUS_OK) {

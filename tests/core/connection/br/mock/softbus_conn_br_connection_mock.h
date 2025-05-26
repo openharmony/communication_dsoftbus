@@ -41,7 +41,7 @@ public:
     virtual int32_t SoftBusThreadCreate(
         SoftBusThread *thread, SoftBusThreadAttr *threadAttr, void *(*threadEntry) (void *), void *arg) = 0;
     virtual int32_t SoftbusGetConfig(ConfigType type, unsigned char *val, uint32_t len) = 0;
-    virtual SppSocketDriver *InitSppSocketDriver() = 0;
+    virtual SppSocketDriver *InitSppSocketDriver(void) = 0;
     virtual int32_t SoftBusAddBtStateListener(const SoftBusBtStateListener *listener, int32_t *listenerId) = 0;
     virtual uint32_t ConnGetHeadSize(void) = 0;
     virtual int32_t ConnBrOnAckRequest(ConnBrConnection *connection, const cJSON *json) = 0;

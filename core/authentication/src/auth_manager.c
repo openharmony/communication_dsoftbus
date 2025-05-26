@@ -20,9 +20,7 @@
 #include "anonymizer.h"
 #include "auth_common.h"
 #include "auth_connection.h"
-#include "auth_device_common_key.h"
 #include "auth_deviceprofile.h"
-#include "auth_hichain.h"
 #include "auth_interface.h"
 #include "auth_log.h"
 #include "auth_normalize_request.h"
@@ -31,8 +29,11 @@
 #include "auth_session_message.h"
 #include "auth_tcp_connection.h"
 #include "auth_uk_manager.h"
+#include "auth_hichain.h"
 #include "bus_center_manager.h"
 #include "device_profile_listener.h"
+#include "g_enhance_lnn_func.h"
+#include "g_enhance_lnn_func_pack.h"
 #include "lnn_app_bind_interface.h"
 #include "lnn_async_callback_utils.h"
 #include "lnn_decision_db.h"
@@ -41,13 +42,15 @@
 #include "lnn_event.h"
 #include "lnn_feature_capability.h"
 #include "lnn_net_builder.h"
+#include "lnn_log.h"
+#include "lnn_init_monitor.h"
+#include "lnn_connection_fsm.h"
 #include "legacy/softbus_adapter_hitrace.h"
 #include "softbus_adapter_mem.h"
 #include "softbus_adapter_socket.h"
 #include "softbus_base_listener.h"
 #include "softbus_def.h"
-#include "lnn_connection_fsm.h"
-#include "lnn_init_monitor.h"
+#include "softbus_init_common.h"
 
 #define MAX_AUTH_VALID_PERIOD              (30 * 60 * 1000L)            /* 30 mins */
 #define SCHEDULE_UPDATE_SESSION_KEY_PERIOD ((5 * 60 + 30) * 60 * 1000L) /* 5 hour 30 mins */
@@ -309,7 +312,7 @@ void RemoveAuthSessionKeyByIndex(int64_t authId, int32_t index, AuthLinkType typ
     char udid[UDID_BUF_LEN] = { 0 };
     (void)memcpy_s(udid, UDID_BUF_LEN, auth->udid, UDID_BUF_LEN);
     ReleaseAuthLock();
-    AuthRemoveDeviceKeyByUdid(udid);
+    AuthRemoveDeviceKeyByUdidPacked(udid);
     if (IsListEmpty(&auth->sessionKeyList)) {
         AUTH_LOGI(AUTH_CONN, "auth key clear empty, Lnn offline. authId=%{public}" PRId64, authId);
         LnnNotifyEmptySessionKey(authId);
@@ -1038,7 +1041,7 @@ void AuthManagerSetAuthPassed(int64_t authSeq, const AuthSessionInfo *info)
     bool isExchangeUdid = true;
     if (GetIsExchangeUdidByNetworkId(info->nodeInfo.networkId, &isExchangeUdid) == SOFTBUS_OK && isExchangeUdid) {
         AUTH_LOGI(AUTH_FSM, "clear isExchangeUdid");
-        LnnClearAuthExchangeUdid(info->nodeInfo.networkId);
+        LnnClearAuthExchangeUdidPacked(info->nodeInfo.networkId);
     }
     NotifyAuthResult(authHandle, info);
 }

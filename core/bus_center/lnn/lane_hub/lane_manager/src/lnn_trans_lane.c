@@ -20,6 +20,8 @@
 #include "anonymizer.h"
 #include "bus_center_manager.h"
 #include "common_list.h"
+#include "g_enhance_lnn_func.h"
+#include "g_enhance_lnn_func_pack.h"
 #include "lnn_distributed_net_ledger.h"
 #include "lnn_event.h"
 #include "lnn_event_form.h"
@@ -34,15 +36,16 @@
 #include "lnn_lane_model.h"
 #include "lnn_lane_reliability.h"
 #include "lnn_log.h"
-#include "lnn_parameter_utils.h"
 #include "lnn_select_rule.h"
 #include "lnn_trans_free_lane.h"
+#include "lnn_lane_link.h"
 #include "message_handler.h"
 #include "softbus_adapter_mem.h"
 #include "softbus_def.h"
 #include "softbus_error_code.h"
 #include "softbus_protocol_def.h"
 #include "softbus_utils.h"
+#include "softbus_init_common.h"
 #include "wifi_direct_error_code.h"
 #include "wifi_direct_manager.h"
 
@@ -1360,7 +1363,7 @@ static void ProcessPowerControlInfoByLaneReqId(const LaneLinkType linkType, uint
         }
     }
     Unlock();
-    if (linkType == LANE_HML && IsPowerControlEnabled()) {
+    if (linkType == LANE_HML && IsPowerControlEnabledPacked()) {
         LNN_LOGI(LNN_LANE, "low-power transtype = %{public}d", transType);
         if (transType == LANE_T_BYTE || transType == LANE_T_MSG) {
             DetectDisableWifiDirectApply();

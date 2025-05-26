@@ -20,10 +20,10 @@
 
 #include "anonymizer.h"
 #include "bus_center_manager.h"
+#include "g_enhance_lnn_func_pack.h"
 #include "lnn_distributed_net_ledger.h"
 #include "lnn_log.h"
 #include "lnn_net_builder.h"
-#include "lnn_ranging_manager.h"
 #include "softbus_adapter_mem.h"
 #include "softbus_error_code.h"
 #include "softbus_utils.h"
@@ -202,7 +202,7 @@ int32_t InitDecisionCenter(void)
         g_exceptionConnMgr.initFlag = false;
         return SOFTBUS_CREATE_LIST_ERR;
     }
-    if (RegistAuthTransListener() != SOFTBUS_OK) {
+    if (RegistAuthTransListenerPacked() != SOFTBUS_OK) {
         LNN_LOGE(LNN_INIT, "regist auth trans failed");
         g_exceptionConnMgr.initFlag = false;
         return SOFTBUS_SLE_RANGING_REGIST_TRANS_ERROR;
@@ -219,7 +219,7 @@ void DeinitDecisionCenter(void)
         DestroySoftBusList(g_exceptionConnMgr.connections);
         g_exceptionConnMgr.connections = NULL;
     }
-    if (UnregistAuthTransListener() != SOFTBUS_OK) {
+    if (UnregistAuthTransListenerPacked() != SOFTBUS_OK) {
         LNN_LOGE(LNN_INIT, "unregist auth trans failed");
     }
     LNN_LOGD(LNN_INIT, "deinit ok");

@@ -12,15 +12,17 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+#include "lnn_kv_adapter.h"
 
 #include <unistd.h>
 
 #include "anonymizer.h"
-#include "lnn_kv_adapter.h"
-#include "lnn_log.h"
-#include "lnn_parameter_utils.h"
-
 #include "datetime_ex.h"
+#include "g_enhance_lnn_func.h"
+#include "g_enhance_lnn_func_pack.h"
+#include "lnn_log.h"
+#include "softbus_init_common.h"
+
 namespace OHOS {
 using namespace OHOS::DistributedKv;
 namespace {
@@ -82,7 +84,7 @@ int32_t KVAdapter::RegisterDataChangeListener(
     const std::shared_ptr<DistributedKv::KvStoreObserver> &dataChangeListener)
 {
     LNN_LOGI(LNN_LEDGER, "Register db data change listener");
-    if (!IsCloudSyncEnabled()) {
+    if (!IsCloudSyncEnabledPacked()) {
         LNN_LOGW(LNN_LEDGER, "not support cloud sync");
         return SOFTBUS_KV_CLOUD_DISABLED;
     }
@@ -110,7 +112,7 @@ int32_t KVAdapter::RegisterDataChangeListener(
 int32_t KVAdapter::UnRegisterDataChangeListener()
 {
     LNN_LOGI(LNN_LEDGER, "UnRegister db data change listener");
-    if (!IsCloudSyncEnabled()) {
+    if (!IsCloudSyncEnabledPacked()) {
         LNN_LOGW(LNN_LEDGER, "not support cloud sync");
         return SOFTBUS_KV_CLOUD_DISABLED;
     }
@@ -329,7 +331,7 @@ int32_t KVAdapter::DeleteKvStorePtr()
 int32_t KVAdapter::CloudSync()
 {
     LNN_LOGI(LNN_LEDGER, "call!");
-    if (!IsCloudSyncEnabled()) {
+    if (!IsCloudSyncEnabledPacked()) {
         LNN_LOGW(LNN_LEDGER, "not support cloud sync");
         return SOFTBUS_KV_CLOUD_DISABLED;
     }

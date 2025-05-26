@@ -21,6 +21,8 @@
 #include "general_client_connection.h"
 #include "client_trans_socket_manager.h"
 #include "general_connection_server_proxy.h"
+#include "comm_log.h"
+#include "g_enhance_sdk_func.h"
 #include "ipc_skeleton.h"
 #include "softbus_adapter_mem.h"
 #include "softbus_client_death_recipient.h"
@@ -155,6 +157,24 @@ static void RestartAuthParaNotify(void)
     COMM_LOGI(COMM_SDK, "Restart AuthPara notify success!");
 }
 
+static int32_t ClientCheckFuncPointer(void *func)
+{
+    if (func == NULL) {
+        COMM_LOGE(COMM_SDK, "enhance func not register");
+        return SOFTBUS_FUNC_NOT_REGISTER;
+    }
+    return SOFTBUS_OK;
+}
+
+static int32_t DiscRecoveryPolicyPacked(void)
+{
+    ClientEnhanceFuncList *pfnClientEnhanceFuncList = ClientEnhanceFuncListGet();
+    if (ClientCheckFuncPointer((void *)pfnClientEnhanceFuncList->discRecoveryPolicy) != SOFTBUS_OK) {
+        return SOFTBUS_OK;
+    }
+    return pfnClientEnhanceFuncList->discRecoveryPolicy();
+}
+
 void ClientDeathProcTask(void)
 {
     {
@@ -192,7 +212,7 @@ void ClientDeathProcTask(void)
     RestartAuthParaNotify();
     DiscRecoveryPublish();
     DiscRecoverySubscribe();
-    DiscRecoveryPolicy();
+    DiscRecoveryPolicyPacked();
     RestartRegDataLevelChange();
 }
 
@@ -201,6 +221,7 @@ void RestartAuthParaCallbackUnregister(void)
     g_restartAuthParaCallback = nullptr;
 }
 
+extern "C" {
 int32_t RestartAuthParaCallbackRegister(RestartEventCallback callback)
 {
     if (callback == nullptr) {
@@ -210,6 +231,7 @@ int32_t RestartAuthParaCallbackRegister(RestartEventCallback callback)
     g_restartAuthParaCallback = callback;
     COMM_LOGI(COMM_SDK, "Restart event callback register success!");
     return SOFTBUS_OK;
+}
 }
 
 int32_t ClientStubInit(void)

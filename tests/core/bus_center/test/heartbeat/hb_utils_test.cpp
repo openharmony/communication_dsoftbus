@@ -21,7 +21,6 @@
 #include "distribute_net_ledger_mock.h"
 #include "hb_heartbeat_utils_mock.h"
 #include "hb_strategy_mock.h"
-#include "lnn_ble_heartbeat.h"
 #include "lnn_connection_mock.h"
 #include "lnn_heartbeat_utils.h"
 #include "lnn_net_ledger_mock.h"

@@ -29,6 +29,5 @@ if (enhanced) {
 } else {
   bus_center_decision_center_inc =
       [ "$dsoftbus_root_path/core/bus_center/lnn/decision_center/include" ]
-  bus_center_decision_center_src = [ "$dsoftbus_root_path/core/bus_center/lnn/decision_center/src/lnn_ranging_manager_virtual.c" ]
   bus_center_decision_center_deps = []
 }

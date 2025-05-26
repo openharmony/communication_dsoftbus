@@ -19,7 +19,6 @@
 
 #include "bus_center_event.h"
 #include "bus_center_manager.h"
-#include "lnn_decision_center.h"
 #include "lnn_heartbeat_ctrl.h"
 #include "message_handler.h"
 #include "softbus_access_token_test.h"

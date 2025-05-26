@@ -23,10 +23,12 @@ ohos_unittest("DiscDistributedBleTest") {
   sources = [ "disc_ble_distributed_test.cpp" ]
 
   include_dirs = [
+    "$dsoftbus_root_path/interfaces/kits/broadcast",
     "$dsoftbus_root_path/core/broadcast/scheduler/include",
     "$dsoftbus_root_path/core/broadcast/scheduler/interface",
     "$dsoftbus_root_path/core/common/include",
     "$dsoftbus_root_path/core/discovery/ble/dispatcher/include",
+    "$dsoftbus_root_path/interfaces/kits/disc",
     "$dsoftbus_root_path/core/discovery/manager/include",
     "$dsoftbus_root_path/core/discovery/interface",
     "$dsoftbus_root_path/core/discovery/ble/approach_ble/include",
@@ -39,6 +41,7 @@ ohos_unittest("DiscDistributedBleTest") {
     "$softbus_adapter_common/net/bluetooth/broadcast/interface",
     "$dsoftbus_root_path/core/broadcast/common/include",
     "$dsoftbus_root_path/core/common/include",
+    "$dsoftbus_root_path/interfaces/kits/connect",
     "$dsoftbus_root_path/core/connection/interface",
     "$dsoftbus_root_path/core/connection/manager",
     "$dsoftbus_root_path/core/connection/tcp/include",
@@ -86,14 +89,19 @@ ohos_unittest("DiscBleUtilsTest") {
   include_dirs = [
     "$dsoftbus_dfx_path/interface/include",
     "$dsoftbus_root_path/adapter/common/include",
+    "$dsoftbus_root_path/interfaces/kits/adapter",
     "$dsoftbus_root_path/adapter/common/net/bluetooth/broadcast/interface",
+    "$dsoftbus_root_path/interfaces/kits/broadcast",
     "$dsoftbus_root_path/core/adapter/bus_center/include",
+    "$dsoftbus_root_path/interfaces/kits/bus_center",
     "$dsoftbus_root_path/core/broadcast/common/include",
     "$dsoftbus_root_path/core/bus_center/interface",
+    "$dsoftbus_root_path/interfaces/kits/lnn",
     "$dsoftbus_root_path/core/bus_center/lnn/net_ledger/common/include",
     "$dsoftbus_root_path/core/common/include",
     "$dsoftbus_root_path/core/discovery/ble/softbus_ble/include",
     "$dsoftbus_root_path/core/discovery/common/include",
+    "$dsoftbus_root_path/interfaces/kits/disc",
     "$dsoftbus_root_path/core/discovery/interface",
     "$dsoftbus_root_path/core/discovery/manager/include",
   ]
@@ -101,6 +109,7 @@ ohos_unittest("DiscBleUtilsTest") {
   deps = [
     "$dsoftbus_root_path/core/common:softbus_utils",
     "$dsoftbus_root_path/core/frame:softbus_server",
+    "$dsoftbus_root_path/adapter:softbus_adapter",
   ]
 
   external_deps = [

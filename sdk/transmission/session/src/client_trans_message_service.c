@@ -22,6 +22,7 @@
 #include "client_trans_session_service.h"
 #include "client_trans_socket_manager.h"
 #include "client_trans_statistics.h"
+#include "g_enhance_sdk_func.h"
 #include "softbus_def.h"
 #include "softbus_error_code.h"
 #include "softbus_feature_config.h"
@@ -272,6 +273,33 @@ int SendStream(int sessionId, const StreamData *data, const StreamData *ext, con
     return ClientTransChannelSendStream(channelId, type, data, ext, param);
 }
 
+static int32_t ClientCheckFuncPointer(void *func)
+{
+    if (func == NULL) {
+        TRANS_LOGE(TRANS_FILE, "enhance func not register.");
+        return SOFTBUS_FUNC_NOT_REGISTER;
+    }
+    return SOFTBUS_OK;
+}
+
+static int32_t CheckFileSchemaPacked(int32_t sessionId, FileSchemaListener *fileSchemaListener)
+{
+    ClientEnhanceFuncList *pfnClientEnhanceFuncList = ClientEnhanceFuncListGet();
+    if (ClientCheckFuncPointer((void *)pfnClientEnhanceFuncList->checkFileSchema) != SOFTBUS_OK) {
+        return SOFTBUS_OK;
+    }
+    return pfnClientEnhanceFuncList->checkFileSchema(sessionId, fileSchemaListener);
+}
+
+static int32_t SetSchemaCallbackPacked(FileSchema fileSchema, const char *sFileList[], uint32_t fileCnt)
+{
+    ClientEnhanceFuncList *pfnClientEnhanceFuncList = ClientEnhanceFuncListGet();
+    if (ClientCheckFuncPointer((void *)pfnClientEnhanceFuncList->setSchemaCallback) != SOFTBUS_OK) {
+        return SOFTBUS_OK;
+    }
+    return pfnClientEnhanceFuncList->setSchemaCallback(fileSchema, sFileList, fileCnt);
+}
+
 int SendFile(int sessionId, const char *sFileList[], const char *dFileList[], uint32_t fileCnt)
 {
     if ((sFileList == NULL) || (fileCnt == 0)) {
@@ -286,8 +314,8 @@ int SendFile(int sessionId, const char *sFileList[], const char *dFileList[], ui
     if (fileSchemaListener == NULL) {
         return SOFTBUS_MALLOC_ERR;
     }
-    if (CheckFileSchema(sessionId, fileSchemaListener) == SOFTBUS_OK) {
-        ret = SetSchemaCallback(fileSchemaListener->schema, sFileList, fileCnt);
+    if (CheckFileSchemaPacked(sessionId, fileSchemaListener) == SOFTBUS_OK) {
+        ret = SetSchemaCallbackPacked(fileSchemaListener->schema, sFileList, fileCnt);
         if (ret != SOFTBUS_OK) {
             TRANS_LOGE(TRANS_FILE, "set schema callback failed, sessionId=%{public}d, ret=%{public}d", sessionId, ret);
             SoftBusFree(fileSchemaListener);

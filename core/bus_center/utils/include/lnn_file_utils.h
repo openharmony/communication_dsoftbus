@@ -17,23 +17,11 @@
 #define LNN_FILE_UTILS_H
 
 #include <stdint.h>
+#include "lnn_file_utils_struct.h"
 
 #ifdef __cplusplus
 extern "C" {
 #endif
-
-typedef enum {
-    LNN_FILE_ID_UUID,
-    LNN_FILE_ID_DB_KEY,
-    LNN_FILE_ID_LOCAL_DEVICE,
-    LNN_FILE_ID_REMOTE_DEVICE,
-    LNN_FILE_ID_COMM_KEY,
-    LNN_FILE_ID_BROADCAST_KEY,
-    LNN_FILE_ID_PTK_KEY,
-    LNN_FILE_ID_IRK_KEY,
-    LNN_FILE_ID_BROADCAST_CIPHER,
-    LNN_FILE_ID_MAX
-} LnnFileId;
 
 int32_t LnnGetFullStoragePath(LnnFileId id, char *path, uint32_t len);
 int32_t LnnRemoveStorageConfigPath(LnnFileId id);

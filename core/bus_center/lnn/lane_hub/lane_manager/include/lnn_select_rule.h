@@ -18,34 +18,12 @@
 
 #include "lnn_lane_interface.h"
 #include "lnn_lane_select.h"
+#include "lnn_select_rule_struct.h"
 #include "softbus_common.h"
 
 #ifdef __cplusplus
 extern "C" {
 #endif
-
-#define UNACCEPT_SCORE 20
-
-typedef enum {
-    HIGH_BAND_WIDTH = 0,
-    MIDDLE_HIGH_BAND_WIDTH,
-    MIDDLE_LOW_BAND_WIDTH,
-    LOW_BAND_WIDTH,
-    BW_TYPE_BUTT,
-} BandWidthType;
-
-typedef enum {
-    CUSTOM_QOS_MESH = 0,
-    CUSTOM_QOS_DB,
-    CUSTOM_QOS_RTT,
-    CUSTOM_QOS_BUTT,
-} CustomQos;
-
-typedef struct {
-    bool available;
-    int32_t (*linkFeatureCheck)(const char *networkId);
-    int32_t (*getLinkScore)(const char *networkId, uint32_t expectedBw);
-} LinkAttribute;
 
 int32_t UpdateP2pAvailability(const char *peerUdid, bool isSupportP2p);
 int32_t GetWlanLinkedFrequency(void);

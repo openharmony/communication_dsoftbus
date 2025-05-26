@@ -60,23 +60,6 @@ config("dsoftbus_sdk_interface") {
     "$dsoftbus_sdk_path/transmission/session/cpp/include",
     "$dsoftbus_root_path/interfaces/kits/connection",
   ]
-
-  if (enhanced_kits_broadcast) {
-    include_dirs +=
-        [ "$dsoftbus_root_path/dsoftbus_enhance/interfaces/kits/broadcast" ]
-  }
-
-  if (dsoftbus_feature_ex_kits) {
-    include_dirs +=
-        [ "$dsoftbus_root_path/dsoftbus_enhance/interfaces/kits/bus_center" ]
-  }
-
-  if (schema_enhanced) {
-    include_dirs += [
-      "$dsoftbus_core_path/transmission/common/include",
-      "$dsoftbus_root_path/dsoftbus_enhance/interfaces/kits/transport",
-    ]
-  }
 }
 
 ohos_static_library("softbus_client_static") {

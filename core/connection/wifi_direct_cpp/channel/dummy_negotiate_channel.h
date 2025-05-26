@@ -23,6 +23,10 @@ public:
     ~DummyNegotiateChannel() override;
     int SendMessage(const NegotiateMessage &msg) const override;
     std::string GetRemoteDeviceId() const override;
+    NegotiateChannelType GetType() const override
+    {
+        return NegotiateChannelType::DUMMY_CHANNEL;
+    }
 };
 } // namespace OHOS::SoftBus
 #endif

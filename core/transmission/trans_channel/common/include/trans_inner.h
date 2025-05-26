@@ -17,28 +17,11 @@
 #define TRANS_INNER_H
 
 #include <stdint.h>
+#include "trans_inner_struct.h"
 
 #ifdef __cplusplus
 extern "C" {
 #endif
-
-#ifndef SESSION_KEY_LENGTH
-#define SESSION_KEY_LENGTH 32
-#endif
-
-typedef struct {
-    int32_t (*func)(int32_t sessionId, const void *data, uint32_t dataLen);
-} SessionInnerCallback;
-
-typedef struct {
-    bool supportTlv;
-    char sessionKey[SESSION_KEY_LENGTH];
-    char peerNetworkId[NETWORK_ID_BUF_LEN];
-    int32_t fd;
-    int32_t channelId;
-    int32_t channelType;
-    SessionInnerCallback *listener;
-} InnerSessionInfo;
 
 int32_t GetSessionInfo(int32_t channelId, int32_t *fd, int32_t *channelType, char *sessionKey, int32_t keyLen);
 int32_t InnerListInit(void);

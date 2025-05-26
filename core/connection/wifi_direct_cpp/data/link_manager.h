@@ -22,11 +22,7 @@
 namespace OHOS::SoftBus {
 class LinkManager {
 public:
-    static LinkManager& GetInstance()
-    {
-        static LinkManager instance;
-        return instance;
-    }
+    static LinkManager& GetInstance();
 
     using Handler = std::function<void(InnerLink &)>;
     using Checker = std::function<bool(InnerLink &)>;

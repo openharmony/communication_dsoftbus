@@ -17,15 +17,10 @@
 #define DISC_COAP_PARSER_H
 
 #include "broadcast_protocol_constant.h"
+#include "disc_manager.h"
+#include "disc_coap_parser_struct.h"
 #include "softbus_common.h"
 #include "softbus_json_utils.h"
-
-#define SERVICE_DATA_PORT "port"
-#define DEVICE_UDID       "UDID"
-#define JSON_SERVICE_DATA "serviceData"
-
-#define MAX_PORT_STR_LEN  6
-#define MAX_SERVICE_DATA_LEN 64
 
 #ifdef __cplusplus
 extern "C" {

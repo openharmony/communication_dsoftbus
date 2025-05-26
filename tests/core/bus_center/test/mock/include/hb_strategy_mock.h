@@ -22,7 +22,6 @@
 #include "auth_hichain_adapter.h"
 #include "auth_manager.h"
 #include "lnn_async_callback_utils.h"
-#include "lnn_device_info_recovery.h"
 #include "lnn_heartbeat_strategy.h"
 #include "lnn_net_builder.h"
 

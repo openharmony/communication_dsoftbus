@@ -18,6 +18,24 @@
 #include "conn_log.h"
 
 namespace OHOS::SoftBus {
+DurationStatisticCalculatorFactory& DurationStatisticCalculatorFactory::GetInstance()
+{
+    static DurationStatisticCalculatorFactory instance;
+    return instance;
+}
+
+DurationStatistic& DurationStatistic::GetInstance()
+{
+    static DurationStatistic instance;
+    return instance;
+}
+
+P2pCalculator& P2pCalculator::GetInstance()
+{
+    static P2pCalculator instance;
+    return instance;
+}
+
 uint64_t DurationStatistic::GetTime()
 {
     auto now = std::chrono::system_clock::now();

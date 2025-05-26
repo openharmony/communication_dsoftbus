@@ -26,8 +26,6 @@
 #include "bus_center_event.h"
 #include "bus_center_manager.h"
 #include "lnn_bus_center_ipc.h"
-#include "lnn_cipherkey_manager.h"
-#include "lnn_device_info_recovery.h"
 #include "lnn_distributed_net_ledger.h"
 #include "lnn_log.h"
 #include "lnn_network_id.h"
@@ -40,7 +38,6 @@
 #include "softbus_def.h"
 #include "softbus_common.h"
 #include "softbus_error_code.h"
-#include "softbus_qos.h"
 #include "softbus_bus_center.h"
 
 using namespace testing;
@@ -142,7 +139,7 @@ HWTEST_F(BusCenterEventTest, BusCenterEventTest002, TestSize.Level1)
     };
     EXPECT_NE(&info2, nullptr);
     NiceMock<BusCenterEventDepsInterfaceMock> BusCenterEventMock;
-    EXPECT_CALL(BusCenterEventMock, AnonymizeDeviceName(_, _)).WillOnce(Return());
+    EXPECT_CALL(BusCenterEventMock, Anonymize(_, _)).WillOnce(Return());
     EXPECT_CALL(BusCenterEventMock, AnonymizeFree(_)).WillOnce(Return());
     LnnNotifyBasicInfoChanged(&info2, type);
     int32_t ret = LnnRegisterEventHandler(event, handler);

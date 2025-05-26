@@ -58,13 +58,11 @@ void RegisterFileCb(const UdpChannelMgrCb *fileCb)
     (void)fileCb;
 }
 
-int32_t TransOnFileChannelOpened(
-    const char *sessionName, const ChannelInfo *channel, int32_t *filePort, SocketAccessInfo *accessInfo)
+int32_t TransOnFileChannelOpened(const char *sessionName, const ChannelInfo *channel, int32_t *filePort)
 {
     (void)sessionName;
     (void)channel;
     (void)filePort;
-    (void)accessInfo;
     return SOFTBUS_FUNC_NOT_SUPPORT;
 }
 

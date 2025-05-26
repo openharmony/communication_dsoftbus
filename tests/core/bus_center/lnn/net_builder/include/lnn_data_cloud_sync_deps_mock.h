@@ -19,12 +19,12 @@
 #include <gmock/gmock.h>
 #include <mutex>
 
+#include "cJSON.h"
 #include "lnn_async_callback_utils.h"
-#include "lnn_cipherkey_manager.h"
-#include "lnn_device_info_recovery.h"
 #include "lnn_distributed_net_ledger.h"
 #include "lnn_heartbeat_utils.h"
 #include "softbus_utils.h"
+#include "lnn_data_cloud_sync_struct.h"
 
 namespace OHOS {
 class LnnDataCloudSyncInterface {

@@ -29,7 +29,6 @@
 #include "lnn_common_utils.h"
 #include "lnn_connection_fsm.h"
 #include "lnn_discovery_manager.h"
-#include "lnn_fast_offline.h"
 #include "lnn_ip_utils_adapter.h"
 #include "lnn_linkwatch.h"
 #include "lnn_log.h"

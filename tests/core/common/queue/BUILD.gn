@@ -31,7 +31,10 @@ ohos_unittest("CommonCoreQueueTest") {
     "$dsoftbus_root_path/core/common/include",
   ]
 
-  deps = [ "$dsoftbus_root_path/core/common:softbus_utils" ]
+  deps = [ 
+    "$dsoftbus_root_path/core/common:softbus_utils",
+    "$dsoftbus_root_path/adapter:softbus_adapter",
+  ]
 
   external_deps = [
     "googletest:gtest_main",

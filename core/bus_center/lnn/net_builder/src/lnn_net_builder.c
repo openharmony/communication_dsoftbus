@@ -29,19 +29,18 @@
 #include "bus_center_event.h"
 #include "bus_center_manager.h"
 #include "common_list.h"
+#include "g_enhance_lnn_func.h"
+#include "g_enhance_lnn_func_pack.h"
 #include "lnn_async_callback_utils.h"
 #include "lnn_battery_info.h"
-#include "lnn_cipherkey_manager.h"
 #include "lnn_connection_addr_utils.h"
 #include "lnn_connection_fsm.h"
 #include "lnn_deviceinfo_to_profile.h"
 #include "lnn_devicename_info.h"
 #include "lnn_discovery_manager.h"
 #include "lnn_distributed_net_ledger.h"
-#include "lnn_fast_offline.h"
 #include "lnn_heartbeat_utils.h"
 #include "lnn_kv_adapter_wrapper.h"
-#include "lnn_link_finder.h"
 #include "lnn_local_net_ledger.h"
 #include "lnn_log.h"
 #include "lnn_map.h"
@@ -56,6 +55,8 @@
 #include "lnn_sync_info_manager.h"
 #include "lnn_sync_item_info.h"
 #include "lnn_topo_manager.h"
+#include "lnn_net_builder_process.h"
+#include "lnn_net_builder_init.h"
 #include "softbus_adapter_bt_common.h"
 #include "softbus_adapter_crypto.h"
 #include "softbus_adapter_json.h"
@@ -67,8 +68,7 @@
 #include "softbus_adapter_json.h"
 #include "softbus_utils.h"
 #include "softbus_wifi_api_adapter.h"
-#include "lnn_net_builder_process.h"
-#include "lnn_net_builder_init.h"
+#include "softbus_init_common.h"
 #include "trans_auth_manager.h"
 
 #define LNN_CONN_CAPABILITY_MSG_LEN      8
@@ -682,7 +682,7 @@ void LnnDeleteLinkFinderInfo(const char *peerUdid)
         return;
     }
 
-    if (LnnRemoveLinkFinderInfo(networkId) != SOFTBUS_OK) {
+    if (LnnRemoveLinkFinderInfoPacked(networkId) != SOFTBUS_OK) {
         LNN_LOGE(LNN_BUILDER, "remove a rpa info fail.");
         return;
     }
@@ -1070,12 +1070,9 @@ static bool AuthCapabilityIsSupport(char *peerUdid, AuthCapability capaBit)
     }
     NodeInfo nodeInfo;
     (void)memset_s(&nodeInfo, sizeof(NodeInfo), 0, sizeof(NodeInfo));
-    int32_t ret = LnnRetrieveDeviceInfoByUdid(peerUdid, &nodeInfo);
+    int32_t ret = LnnRetrieveDeviceInfoByUdidPacked(peerUdid, &nodeInfo);
     if (ret != SOFTBUS_OK) {
-        char *anonyPeerUdid = NULL;
-        Anonymize(peerUdid, &anonyPeerUdid);
-        LNN_LOGE(LNN_BUILDER, "retrieve device info fail, peerUdid:%{public}s", AnonymizeWrapper(anonyPeerUdid));
-        AnonymizeFree(anonyPeerUdid);
+        LNN_LOGE(LNN_BUILDER, "retrieve device info fail, peerUdid:%{public}s", peerUdid);
         return false;
     }
     return IsSupportFeatureByCapaBit(nodeInfo.authCapacity, capaBit);
@@ -1738,7 +1735,7 @@ void NotifyForegroundUseridChange(char *networkId, uint32_t discoveryType, bool 
     }
     char *msg = cJSON_PrintUnformatted(json);
     cJSON_Delete(json);
-    if (msg == NULL) {
+    if(msg == NULL) {
         LNN_LOGE(LNN_BUILDER, "msg is null!");
         return;
     }

@@ -37,6 +37,8 @@
 #include "softbus_error_code.h"
 #include "softbus_wifi_api_adapter.h"
 #include "wifi_direct_error_code.h"
+#include "dsoftbus_enhance_interface.h"
+#include "g_enhance_lnn_func.h"
 
 namespace OHOS {
 using namespace testing::ext;
@@ -79,6 +81,8 @@ public:
 
 void LNNLaneExtMockTest::SetUpTestCase()
 {
+    LnnEnhanceFuncList *pfnLnnEnhanceFuncList = LnnEnhanceFuncListGet();
+    pfnLnnEnhanceFuncList->enablePowerControl = EnablePowerControl;
     int32_t ret = LnnInitLnnLooper();
     EXPECT_EQ(ret, SOFTBUS_OK);
     ret = LooperInit();

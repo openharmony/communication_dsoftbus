@@ -18,7 +18,6 @@
 
 #include "bus_center_manager.h"
 #include "disc_event_manager.h"
-#include "lnn_lane_qos.h"
 #include "message_handler.h"
 #include "softbus_adapter_mem.h"
 #include "softbus_feature_config.h"

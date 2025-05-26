@@ -18,33 +18,12 @@
 
 #include "stdbool.h"
 #include "stdint.h"
+#include "softbus_proxychannel_pipeline_struct.h"
 
 #ifdef __cplusplus
 extern "C" {
 #endif
 
-typedef struct {
-    void (*onDataReceived)(int32_t channelId, const char *data, uint32_t len);
-    void (*onDisconnected)(int32_t channelId);
-} ITransProxyPipelineListener;
-
-typedef struct {
-    void (*onChannelOpened)(int32_t requestId, int32_t channelId);
-    void (*onChannelOpenFailed)(int32_t requestId, int32_t reason);
-} ITransProxyPipelineCallback;
-
-typedef enum {
-    MSG_TYPE_INVALID = 0,
-
-    MSG_TYPE_P2P_NEGO = 0xABADBEEF,
-    MSG_TYPE_IP_PORT_EXCHANGE,
-
-    MSG_TYPE_CNT = 2,
-} TransProxyPipelineMsgType;
-
-typedef struct {
-    bool bleDirect;
-} TransProxyPipelineChannelOption;
 int32_t TransProxyPipelineGenRequestId(void);
 int32_t TransProxyPipelineRegisterListener(TransProxyPipelineMsgType type, const ITransProxyPipelineListener *listener);
 int32_t TransProxyPipelineOpenChannel(int32_t requestId, const char *networkId,

@@ -21,7 +21,7 @@
 
 #include "ble_protocol_interface_factory.h"
 #include "softbus_conn_ble_manager_mock.h"
-#include "softbus_adapter_ble_conflict.h"
+#include "softbus_adapter_ble_conflict_struct.h"
 #include "softbus_adapter_bt_common.h"
 #include "softbus_adapter_crypto.h"
 #include "softbus_adapter_mem.h"
@@ -33,6 +33,7 @@
 #include "softbus_feature_config.h"
 #include "softbus_utils.h"
 #include "softbus_conn_ble_manager.c"
+#include "g_enhance_conn_func.h"
 
 using namespace testing::ext;
 using namespace testing;
@@ -150,6 +151,8 @@ public:
     static void TearDownTestCase();
     void SetUp() override
     {
+        ConnEnhanceFuncList *pfnLConnEnhanceFuncList = ConnEnhanceFuncListGet();
+        pfnLConnEnhanceFuncList->softbusBleConflictRegisterListener = SoftbusBleConflictRegisterListener;
         ConnectCallback connectCb = { 0 };
         connectCb.OnConnected = OnConnected;
         connectCb.OnReusedConnected = OnReusedConnected;

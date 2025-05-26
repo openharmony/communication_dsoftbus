@@ -14,6 +14,11 @@
 import("//foundation/communication/dsoftbus/dsoftbus.gni")
 
 auth_manager_include = [
+  "$dsoftbus_root_path/interfaces/kits/adapter",
+  "$dsoftbus_root_path/interfaces/kits/authentication",
+  "$dsoftbus_root_path/interfaces/kits/lnn",
+  "$dsoftbus_root_path/interfaces/kits/connect",
+  "$dsoftbus_root_path/interfaces/kits/disc",
   "$dsoftbus_root_path/core/authentication/include",
   "$dsoftbus_root_path/core/authentication/interface",
   "$dsoftbus_root_path/core/bus_center/interface",

@@ -17,19 +17,12 @@
 #define LNN_LANE_H
 
 #include "lnn_lane_def.h"
+#include "softbus_def.h"
+#include "lnn_lane_struct.h"
 
 #ifdef __cplusplus
 extern "C" {
 #endif
-
-#define MAX_LANE_REQ_ID_NUM 4096
-#define MAX_LANE_ID_NUM 1024
-#define NET_IF_NAME_MAX_LEN 16
-
-typedef struct {
-    void (*OnLaneIdEnabled)(uint64_t laneId, uint32_t laneProfileId);
-    void (*OnLaneIdDisabled)(uint64_t laneId, uint32_t laneProfileId);
-} ILaneIdStateListener;
 
 void RegisterLaneIdListener(const ILaneIdStateListener *listener);
 void UnregisterLaneIdListener(const ILaneIdStateListener *listener);

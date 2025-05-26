@@ -546,9 +546,3 @@ int32_t SetLpDeviceParam(const BtLpDeviceParam *lpParam)
     LOG("%s", __func__);
     return BluetoothMock::GetMock()->SetLpDeviceParam(lpParam);
 }
-
-int32_t GetRandomAddress(const BdAddr *realAddr, BdAddr *randomAddr, uint64_t tokenId)
-{
-    LOG("%s", __func__);
-    return BluetoothMock::GetMock()->GetRandomAddress(realAddr, randomAddr, tokenId);
-}

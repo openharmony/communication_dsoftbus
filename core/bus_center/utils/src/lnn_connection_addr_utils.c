@@ -211,6 +211,7 @@ static bool ConvertAddrToAuthConnInfoForSession(const ConnectionAddr *addr, Auth
         return false;
     }
     connInfo->type = AUTH_LINK_TYPE_SESSION_KEY;
+    LNN_LOGI(LNN_STATE, "connection_addr_session, deviceIdhash=%{public}s", connInfo->info.ipInfo.deviceIdHash);
     return true;
 }
 

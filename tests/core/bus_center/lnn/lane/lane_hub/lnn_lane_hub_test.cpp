@@ -18,9 +18,11 @@
 #include <securec.h>
 #include <thread>
 
+#include "dsoftbus_enhance_interface.h"
 #include "lnn_lane_hub_deps_mock.h"
 #include "lnn_lane_hub.h"
 #include "softbus_error_code.h"
+#include "g_enhance_lnn_func.h"
 
 namespace OHOS {
 using namespace testing::ext;
@@ -60,6 +62,8 @@ void LNNLaneHubTest::TearDown()
 */
 HWTEST_F(LNNLaneHubTest, LNN_INIT_LANE_HUB_TEST_001, TestSize.Level1)
 {
+    LnnEnhanceFuncList *pfnLnnEnhanceFuncList = LnnEnhanceFuncListGet();
+    pfnLnnEnhanceFuncList->lnnInitQos = LnnInitQos();
     NiceMock<LaneHubDepsInterfaceMock> laneHubMock;
     EXPECT_CALL(laneHubMock, InitLane).WillOnce(Return(SOFTBUS_OK));
     EXPECT_CALL(laneHubMock, LnnInitQos).WillOnce(Return(SOFTBUS_OK));
@@ -94,6 +98,8 @@ HWTEST_F(LNNLaneHubTest, LNN_INIT_LANE_HUB_TEST_002, TestSize.Level1)
 */
 HWTEST_F(LNNLaneHubTest, LNN_INIT_LANE_HUB_TEST_003, TestSize.Level1)
 {
+    LnnEnhanceFuncList *pfnLnnEnhanceFuncList = LnnEnhanceFuncListGet();
+    pfnLnnEnhanceFuncList->lnnInitQos = LnnInitQos();
     NiceMock<LaneHubDepsInterfaceMock> laneHubMock;
     EXPECT_CALL(laneHubMock, InitLane).WillOnce(Return(SOFTBUS_OK));
     EXPECT_CALL(laneHubMock, LnnInitQos).WillOnce(Return(SOFTBUS_NO_INIT));
@@ -110,6 +116,8 @@ HWTEST_F(LNNLaneHubTest, LNN_INIT_LANE_HUB_TEST_003, TestSize.Level1)
 */
 HWTEST_F(LNNLaneHubTest, LNN_INIT_LANE_HUB_TEST_004, TestSize.Level1)
 {
+    LnnEnhanceFuncList *pfnLnnEnhanceFuncList = LnnEnhanceFuncListGet();
+    pfnLnnEnhanceFuncList->lnnInitQos = LnnInitQos();
     NiceMock<LaneHubDepsInterfaceMock> laneHubMock;
     EXPECT_CALL(laneHubMock, InitLane).WillOnce(Return(SOFTBUS_OK));
     EXPECT_CALL(laneHubMock, LnnInitQos).WillOnce(Return(SOFTBUS_OK));
@@ -127,6 +135,8 @@ HWTEST_F(LNNLaneHubTest, LNN_INIT_LANE_HUB_TEST_004, TestSize.Level1)
 */
 HWTEST_F(LNNLaneHubTest, LNN_INIT_LANE_HUB_TEST_005, TestSize.Level1)
 {
+    LnnEnhanceFuncList *pfnLnnEnhanceFuncList = LnnEnhanceFuncListGet();
+    pfnLnnEnhanceFuncList->lnnInitQos = LnnInitQos();
     NiceMock<LaneHubDepsInterfaceMock> laneHubMock;
     EXPECT_CALL(laneHubMock, InitLane).WillOnce(Return(SOFTBUS_OK));
     EXPECT_CALL(laneHubMock, LnnInitQos).WillOnce(Return(SOFTBUS_OK));

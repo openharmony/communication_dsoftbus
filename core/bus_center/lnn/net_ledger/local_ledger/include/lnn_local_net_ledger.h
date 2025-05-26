@@ -17,41 +17,11 @@
 #define LNN_LOCAL_NET_LEDGER_H
 
 #include "lnn_node_info.h"
+#include "lnn_local_net_ledger_struct.h"
 
 #ifdef __cplusplus
 extern "C" {
 #endif
-
-typedef enum {
-    LL_INIT_UNKNOWN = 0,
-    LL_INIT_FAIL,
-    LL_INIT_SUCCESS,
-} LocalLedgerStatus;
-
-typedef struct {
-    InfoKey key;
-    int32_t maxLen;
-    int32_t (*getInfo)(void *info, uint32_t len);
-    int32_t (*setInfo)(const void *info);
-} LocalLedgerKey;
-
-typedef struct {
-    InfoKey key;
-    int32_t maxLen;
-    int32_t (*getInfo)(void *info, uint32_t len, int32_t ifnameIdx);
-    int32_t (*setInfo)(const void *info, int32_t ifnameIdx);
-} LocalLedgerKeyByIfname;
-
-typedef enum {
-    UPDATE_ACCOUNT_LONG = 1,
-    UPDATE_DEV_NAME = 2,
-    UPDATE_DEV_UNIFIED_NAME = 4,
-    UPDATE_DEV_UNIFIED_DEFAULT_NAME = 8,
-    UPDATE_DEV_NICK_NAME = 16,
-    UPDATE_NETWORKID = 32,
-    UPDATE_CONCURRENT_AUTH = 64,
-    UPDATE_CIPHERKEY = 128,
-} StateVersionChangeReason;
 
 int32_t LnnInitLocalLedger(void);
 int32_t LnnInitLocalLedgerDelay(void);

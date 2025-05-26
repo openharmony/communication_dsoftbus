@@ -14,11 +14,63 @@
  */
 
 #include "trans_spec_object_stub.h"
+#include <dlfcn.h>
+#include "trans_log.h"
 
 namespace OHOS {
+
+#ifdef __aarch64__
+static constexpr const char *SOFTBUS_PLUGIN_PATH_NAME = "/system/lib64/libdsoftbus_server_plugin.z.so";
+#else
+static constexpr const char *SOFTBUS_PLUGIN_PATH_NAME = "/system/lib/libdsoftbus_server_plugin.z.so";
+#endif
+
+#define SOFTBUS_TRANS_FUNC_NOT_REGISTER false
+#define SOFTBUS_TRANS_SPEC_OBJECT_STUB_DLOPEN_FAILED_BOOL false
+#define SOFTBUS_TRANS_SPEC_OBJECT_STUB_DLSYM_FAILED_BOOL false
+
+TransSpecObjectStub::TransSpecObjectStub()
+{
+}
+
+bool TransSpecObjectStub::OpenSoftbusPluginSo()
+{
+    std::lock_guard<std::mutex> lockGuard(loadSoMutex_);
+
+    if (isLoaded_ && (soHandle_ != nullptr)) {
+        return true;
+    }
+
+    // soHandle_ = dlopen(SOFTBUS_PLUGIN_PATH_NAME, RTLD_NOW | RTLD_NODELETE | RTLD_GLOBAL);
+    soHandle_ = dlopen(SOFTBUS_PLUGIN_PATH_NAME, RTLD_NOW | RTLD_GLOBAL);
+    if (soHandle_ == nullptr) {
+        TRANS_LOGE(TRANS_EVENT, "dlopen %{public}s failed, err msg:%{public}s", SOFTBUS_PLUGIN_PATH_NAME, dlerror());
+        return false;
+    }
+
+    isLoaded_ = true;
+    TRANS_LOGI(TRANS_EVENT, "dlopen %{public}s SOFTBUS_CLIENT_SUCCESS", SOFTBUS_PLUGIN_PATH_NAME);
+
+    return true;
+}
+
 int32_t TransSpecObjectStub::OnRemoteRequest(uint32_t code,
     MessageParcel &data, MessageParcel &reply, MessageOption &option)
 {
-    return IPCObjectStub::OnRemoteRequest(code, data, reply, option);
+    if (onRemoteRequestFunc_ != nullptr) {
+        return onRemoteRequestFunc_(code, data, reply, option);
+    }
+
+    if (!OpenSoftbusPluginSo()) {
+        return IPCObjectStub::OnRemoteRequest(code, data, reply, option);
+    }
+
+    onRemoteRequestFunc_ = (OnRemoteRequestFunc)dlsym(soHandle_, "TransOnRemoteRequestByDlsym");
+    if (onRemoteRequestFunc_ == nullptr) {
+        TRANS_LOGE(TRANS_EVENT, "dlsym AuthGetDeviceUuid fail, err msg:%{public}s", dlerror());
+        return IPCObjectStub::OnRemoteRequest(code, data, reply, option);
+    }
+
+    return onRemoteRequestFunc_(code, data, reply, option);
 }
 } // namespace OHOS

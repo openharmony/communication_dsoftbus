@@ -18,6 +18,7 @@
 
 #include <gmock/gmock.h>
 #include <mutex>
+#include <typeinfo>
 
 #include "auth_common.h"
 #include "auth_log.h"

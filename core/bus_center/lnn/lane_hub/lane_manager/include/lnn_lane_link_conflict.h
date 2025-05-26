@@ -19,46 +19,11 @@
 #include "lnn_lane_interface.h"
 #include "softbus_common.h"
 #include "softbus_def.h"
-
-#define CONFLICT_DEV_IP_LEN 32
-#define CONFLICT_UDIDHASH_STR_LEN 16
+#include "lnn_lane_link_conflict_struct.h"
 
 #ifdef __cplusplus
 extern "C" {
 #endif
-
-typedef enum {
-    CONFLICT_THREE_VAP = 0,
-    CONFLICT_ROLE,
-    CONFLICT_LINK_NUM_LIMITED,
-    CONFLICT_SOFTAP,
-    CONFLICT_BUTT,
-} LinkConflictType;
-
-typedef enum {
-    IDENTIFY_TYPE_DEV_ID = 0,
-    IDENTIFY_TYPE_UDID_HASH,
-    IDENTIFY_TYPE_BUTT,
-} DevIdentifyType;
-
-typedef struct {
-    DevIdentifyType type;
-    union {
-        char peerDevId[NETWORK_ID_BUF_LEN];
-        char udidHash[CONFLICT_UDIDHASH_STR_LEN + 1];
-    } devInfo;
-} DevIdentifyInfo;
-
-typedef struct {
-    uint8_t devIdCnt;
-    uint8_t devIpCnt;
-    LaneLinkType releaseLink;
-    LinkConflictType conflictType;
-    DevIdentifyInfo identifyInfo;
-    char (*devIdList)[NETWORK_ID_BUF_LEN];
-    char (*devIpList)[CONFLICT_DEV_IP_LEN];
-    ListNode node;
-} LinkConflictInfo;
 
 int32_t InitLaneLinkConflict(void);
 void DeinitLaneLinkConflict(void);

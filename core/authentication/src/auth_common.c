@@ -20,6 +20,9 @@
 #include "anonymizer.h"
 #include "auth_log.h"
 #include "bus_center_manager.h"
+#include "g_enhance_lnn_func.h"
+#include "g_enhance_lnn_func_pack.h"
+#include "lnn_log.h"
 #include "message_handler.h"
 #include "softbus_adapter_crypto.h"
 #include "softbus_adapter_mem.h"
@@ -27,6 +30,7 @@
 #include "softbus_base_listener.h"
 #include "softbus_def.h"
 #include "softbus_feature_config.h"
+#include "softbus_init_common.h"
 
 #define TIME_SEC_TO_MSEC  1000L
 #define TIME_MSEC_TO_USEC 1000L
@@ -589,7 +593,7 @@ int32_t GetPeerUdidByNetworkId(const char *networkId, char *udid, uint32_t len)
     }
     NodeInfo cacheInfo;
     (void)memset_s(&cacheInfo, sizeof(NodeInfo), 0, sizeof(NodeInfo));
-    if (LnnRetrieveDeviceInfoByNetworkId(networkId, &cacheInfo) == SOFTBUS_OK &&
+    if (LnnRetrieveDeviceInfoByNetworkIdPacked(networkId, &cacheInfo) == SOFTBUS_OK &&
         cacheInfo.deviceInfo.deviceUdid[0] != '\0') {
         if (strcpy_s(udid, len, cacheInfo.deviceInfo.deviceUdid) != EOK) {
             AUTH_LOGE(AUTH_CONN, "copy deviceUdid failed");
@@ -609,7 +613,7 @@ int32_t GetIsExchangeUdidByNetworkId(const char *networkId, bool *isExchangeUdid
     }
     NodeInfo cacheInfo;
     (void)memset_s(&cacheInfo, sizeof(NodeInfo), 0, sizeof(NodeInfo));
-    if (LnnRetrieveDeviceInfoByNetworkId(networkId, &cacheInfo) == SOFTBUS_OK) {
+    if (LnnRetrieveDeviceInfoByNetworkIdPacked(networkId, &cacheInfo) == SOFTBUS_OK) {
         *isExchangeUdid = cacheInfo.isAuthExchangeUdid;
         return SOFTBUS_OK;
     }
