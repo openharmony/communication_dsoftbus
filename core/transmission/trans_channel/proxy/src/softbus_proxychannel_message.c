@@ -37,7 +37,6 @@
 #include "trans_session_account_adapter.h"
 #include "trans_uk_manager.h"
 
-
 static _Atomic int32_t g_proxyPktHeadSeq = 2048;
 
 static int32_t TransProxyParseMessageHead(char *data, int32_t len, ProxyMessage *msg)

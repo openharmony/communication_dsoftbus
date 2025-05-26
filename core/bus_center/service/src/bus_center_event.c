@@ -21,10 +21,12 @@
 #include "anonymizer.h"
 #include "bus_center_decision_center.h"
 #include "bus_center_manager.h"
+#include "g_enhance_lnn_func.h"
+#include "g_enhance_lnn_func_pack.h"
+#include "g_enhance_trans_func.h"
+#include "g_enhance_trans_func_pack.h"
 #include "lnn_bus_center_ipc.h"
-#include "lnn_cipherkey_manager.h"
 #include "lnn_connId_callback_manager.h"
-#include "lnn_device_info_recovery.h"
 #include "lnn_distributed_net_ledger.h"
 #include "lnn_log.h"
 #include "lnn_network_id.h"
@@ -36,7 +38,8 @@
 #include "softbus_adapter_thread.h"
 #include "softbus_def.h"
 #include "softbus_error_code.h"
-#include "softbus_qos.h"
+#include "softbus_init_common.h"
+#include "trans_log.h"
 
 typedef struct {
     ListNode node;
@@ -157,7 +160,7 @@ static void HandleNetworkUpdateMessage(SoftBusMessage *msg)
     LnnSetLocalStrInfo(STRING_KEY_NETWORKID, networkId);
     LnnNotifyNetworkIdChangeEvent(networkId);
     LnnNotifyLocalNetworkIdChanged();
-    LnnUpdateAuthExchangeUdid();
+    LnnUpdateAuthExchangeUdidPacked();
     LNN_LOGD(LNN_EVENT, "offline exceted 5min, process networkId update event");
 }
 
@@ -481,13 +484,13 @@ void LnnNotifyOnlineState(bool isOnline, NodeBasicInfo *info)
     char *anonyNetworkId = NULL;
     Anonymize(info->networkId, &anonyNetworkId);
     char *anonyDeviceName = NULL;
-    AnonymizeDeviceName(info->deviceName, &anonyDeviceName);
+    Anonymize(info->deviceName, &anonyDeviceName);
     LNN_LOGI(LNN_EVENT, "notify node. deviceName=%{public}s, isOnline=%{public}s, networkId=%{public}s",
         AnonymizeWrapper(anonyDeviceName), (isOnline == true) ? "online" : "offline",
         AnonymizeWrapper(anonyNetworkId));
     AnonymizeFree(anonyNetworkId);
     AnonymizeFree(anonyDeviceName);
-    SetDefaultQdisc();
+    SetDefaultQdiscPacked();
     (void)PostNotifyMessage(NOTIFY_ONLINE_STATE_CHANGED, (uint64_t)isOnline, info);
     eventInfo.basic.event = LNN_EVENT_NODE_ONLINE_STATE_CHANGED;
     eventInfo.isOnline = isOnline;
@@ -533,7 +536,7 @@ void LnnNotifyBasicInfoChanged(NodeBasicInfo *info, NodeBasicInfoType type)
     }
     if (type == TYPE_DEVICE_NAME) {
         char *anonyDeviceName = NULL;
-        AnonymizeDeviceName(info->deviceName, &anonyDeviceName);
+        Anonymize(info->deviceName, &anonyDeviceName);
         LNN_LOGI(LNN_EVENT, "notify peer device name changed. deviceName=%{public}s",
             AnonymizeWrapper(anonyDeviceName));
         AnonymizeFree(anonyDeviceName);

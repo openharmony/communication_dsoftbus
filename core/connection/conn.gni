@@ -35,6 +35,7 @@ conn_manager_src += [
 conn_manager_inc += [
   "$dsoftbus_root_path/interfaces/kits/connection",
   "$dsoftbus_root_path/core/connection/manager",
+  "$dsoftbus_root_path/interfaces/kits/connect",
   "$dsoftbus_root_path/core/connection/interface",
   "$dsoftbus_root_path/core/common/include",
   "$dsoftbus_root_path/core/connection/coap/include",
@@ -53,50 +54,6 @@ if (dsoftbus_feature_conn_ble) {
 if (dsoftbus_feature_conn_br) {
   CONN_SERVER_DEFINES += [ "DSOFTBUS_FEATURE_CONN_BR" ]
 }
-
-if (dsoftbus_feature_ex_kits) {
-  import(
-      "$dsoftbus_root_path/dsoftbus_enhance/core/connection/coap/conn_coap.gni")
-
-  conn_manager_inc += conn_coap_inc
-  conn_manager_src += conn_coap_src
-  conn_manager_common_deps += conn_coap_common_deps
-  conn_manager_external_deps += conn_coap_external_deps
-
-  import(
-      "$dsoftbus_root_path/dsoftbus_enhance/core/connection/legacy/legacy.gni")
-
-  conn_manager_inc += legacy_connection_inc
-  conn_manager_src += legacy_connection_src
-  conn_manager_common_deps += legacy_connection_common_deps
-  conn_manager_external_deps += legacy_connection_external_deps
-  if (dsoftbus_feature_conn_ble_direct) {
-    CONN_SERVER_DEFINES += [ "DSOFTBUS_FEATURE_CONN_BLE_DIRECT" ]
-  }
-  if (dsoftbus_feature_conn_coc) {
-    CONN_SERVER_DEFINES += [ "DSOFTBUS_FEATURE_CONN_COC" ]
-  }
-  if (dsoftbus_feature_conn_legacy_data) {
-    CONN_SERVER_DEFINES += [ "DSOFTBUS_FEATURE_CONN_LEGACY_DATA" ]
-  }
-  if (dsoftbus_feature_conn_legacy_im) {
-    CONN_SERVER_DEFINES += [ "DSOFTBUS_FEATURE_CONN_LEGACY_IM" ]
-  }
-  import(
-      "$dsoftbus_root_path/dsoftbus_enhance/core/connection/sle/conn_sle.gni")
-
-  conn_manager_inc += conn_sle_inc
-  conn_manager_src += conn_sle_src
-  conn_manager_common_deps += conn_sle_common_deps
-  conn_manager_external_deps += conn_sle_external_deps
-} else {
-  conn_manager_src += [
-    "$dsoftbus_root_path/adapter/common/net/bluetooth/ble/softbus_adapter_ble_conflict_virtual.c",
-    "$dsoftbus_root_path/core/connection/coap/src/conn_coap_manager_virtual.c",
-    "$dsoftbus_root_path/core/connection/sle/src/conn_sle_manager_virtual.c",
-  ]
-}
-
 conn_manager_inc += [ "$dsoftbus_root_path/core/connection/ipc/include" ]
 if (defined(ohos_lite)) {
   if (ohos_kernel_type == "liteos_m") {

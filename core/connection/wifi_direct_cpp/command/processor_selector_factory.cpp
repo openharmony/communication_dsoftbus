@@ -18,6 +18,12 @@
 #include "simple_processor_selector.h"
 
 namespace OHOS::SoftBus {
+ProcessorSelectorFactory& ProcessorSelectorFactory::GetInstance()
+{
+    static ProcessorSelectorFactory instance;
+    return instance;
+}
+
 void ProcessorSelectorFactory::Register(const std::shared_ptr<ProcessorSelector> &selector)
 {
     selector_ = selector;

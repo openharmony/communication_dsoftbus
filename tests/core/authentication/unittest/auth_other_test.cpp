@@ -36,7 +36,6 @@
 #include "auth_common_mock.h"
 #include "lnn_ctrl_lane.h"
 #include "lnn_lane_interface.h"
-#include "lnn_lane_score.h"
 #include "softbus_adapter_json.h"
 #include "softbus_error_code.h"
 #include "softbus_socket.h"

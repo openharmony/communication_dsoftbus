@@ -18,38 +18,12 @@
 
 #include "softbus_app_info.h"
 #include "softbus_common.h"
+#include "trans_uk_manager.h"
+#include "trans_udp_channel_manager_struct.h"
 
 #ifdef __cplusplus
 extern "C" {
 #endif
-
-typedef enum {
-    UDP_CHANNEL_STATUS_INIT = 0,
-    UDP_CHANNEL_STATUS_OPEN_AUTH,
-    UDP_CHANNEL_STATUS_NEGING,
-    UDP_CHANNEL_STATUS_DONE
-} UdpChannelStatus;
-
-typedef struct {
-    bool isMeta;
-    bool isReply;
-    uint8_t tos;
-    UdpChannelStatus status;
-    uint32_t requestId;
-    int32_t errCode;
-    uint32_t timeOut;
-    int64_t seq;
-    ListNode node;
-    AuthHandle authHandle;
-    AppInfo info;
-} UdpChannelInfo;
-
-typedef struct {
-    ListNode node;
-    int64_t channelId;
-    int pid;
-    char pkgName[PKG_NAME_SIZE_MAX];
-} UdpChannelNotifyInfo;
 
 SoftBusList *GetUdpChannelMgrHead(void);
 

@@ -23,18 +23,24 @@ ohos_unittest("DiscClientOnDeviceFoundTest") {
   module_out_path = module_output_path
   sources = [
     "$dsoftbus_root_path/core/bus_center/ipc/standard/src/lnn_bus_center_ipc.cpp",
-    "$dsoftbus_root_path/core/bus_center/lnn/decision_center/src/lnn_ranging_manager_virtual.c",
     "$dsoftbus_root_path/core/frame/common/src/softbus_ddos.c",
     "disc_client_on_device_found_test.cpp",
+    "$dsoftbus_root_path/core/frame/init/src/g_enhance_lnn_func.c",
   ]
 
   include_dirs = [
     "$dsoftbus_root_path/adapter/common/include",
+    "$dsoftbus_root_path/interfaces/kits/authentication/enhance",
+    "$dsoftbus_root_path/interfaces/kits/authentication",
+    "$dsoftbus_root_path/interfaces/kits/lnn/enhance",
+    "$dsoftbus_root_path/interfaces/kits/adapter",
     "$dsoftbus_root_path/core/authentication/interface",
+    "$dsoftbus_root_path/interfaces/kits/bus_center",
     "$dsoftbus_root_path/core/bus_center/interface",
     "$dsoftbus_root_path/core/bus_center/ipc/include",
     "$dsoftbus_root_path/core/bus_center/ipc/standard/include",
     "$dsoftbus_root_path/core/bus_center/lnn/decision_center/include",
+    "$dsoftbus_root_path/interfaces/kits/lnn",
     "$dsoftbus_root_path/core/bus_center/lnn/lane_hub/heartbeat/include",
     "$dsoftbus_root_path/core/bus_center/lnn/lane_hub/lane_manager/include",
     "$dsoftbus_root_path/core/bus_center/lnn/lane_hub/time_sync/include",
@@ -42,10 +48,13 @@ ohos_unittest("DiscClientOnDeviceFoundTest") {
     "$dsoftbus_root_path/core/bus_center/lnn/meta_node/include",
     "$dsoftbus_root_path/core/bus_center/lnn/net_ledger/common/include",
     "$dsoftbus_root_path/core/bus_center/lnn/net_ledger/distributed_ledger/include",
+    "$dsoftbus_root_path/interfaces/kits/bus_center",
     "$dsoftbus_root_path/core/bus_center/service/include",
     "$dsoftbus_root_path/core/bus_center/utils/include",
     "$dsoftbus_root_path/core/common/include",
+    "$dsoftbus_root_path/interfaces/kits/connect",
     "$dsoftbus_root_path/core/connection/interface",
+    "$dsoftbus_root_path/interfaces/kits/disc",
     "$dsoftbus_root_path/core/discovery/interface",
     "$dsoftbus_root_path/core/discovery/manager/include",
     "$dsoftbus_root_path/core/frame/common/include",
@@ -54,6 +63,7 @@ ohos_unittest("DiscClientOnDeviceFoundTest") {
     "$dsoftbus_root_path/interfaces/kits/common",
     "$dsoftbus_root_path/interfaces/kits/discovery",
     "$dsoftbus_root_path/interfaces/kits/transport",
+    "$dsoftbus_root_path/core/frame/init/include",
   ]
 
   deps = [
@@ -68,6 +78,7 @@ ohos_unittest("DiscClientOnDeviceFoundTest") {
     "googletest:gtest_main",
     "hilog:libhilog",
     "ipc:ipc_single",
+    "cJSON:cjson",
   ]
 }
 

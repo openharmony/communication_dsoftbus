@@ -20,15 +20,14 @@
 
 #include "bus_center_decision_center.h"
 #include "bus_center_event.h"
+#include "g_enhance_lnn_func.h"
+#include "g_enhance_lnn_func_pack.h"
 #include "lnn_async_callback_utils.h"
 #include "lnn_coap_discovery_impl.h"
-#include "lnn_change_channel.h"
-#include "lnn_lane_prelink.h"
 #include "lnn_discovery_manager.h"
 #include "lnn_event_monitor.h"
 #include "lnn_lane_hub.h"
 #include "lnn_log.h"
-#include "lnn_meta_node_interface.h"
 #include "lnn_net_builder.h"
 #include "lnn_net_ledger.h"
 #include "lnn_network_manager.h"
@@ -39,6 +38,7 @@
 #include "softbus_error_code.h"
 #include "softbus_feature_config.h"
 #include "softbus_utils.h"
+#include "softbus_init_common.h"
 
 #define WATCHDOG_TASK_NAME "LNN_WATCHDOG_TASK"
 #define WATCHDOG_INTERVAL_TIME 10000
@@ -66,7 +66,6 @@ typedef enum {
     INIT_NETWORK_MANAGER_DELAY_TYPE,
     INIT_NETBUILDER_DELAY_TYPE,
     INIT_LANEHUB_DELAY_TYPE,
-    INIT_HUKS_CE_PARAMS_TYPE,
     INIT_DELAY_MAX_TYPE,
 } InitDelayType;
 
@@ -111,10 +110,6 @@ static LnnLocalConfigInit g_lnnLocalConfigInit = {
             .implInit = LnnInitLaneHubDelay,
             .isInit = false,
         },
-        [INIT_HUKS_CE_PARAMS_TYPE] = {
-            .implInit = LnnInitHuksCeParamsDelay,
-            .isInit = false,
-        },
     },
 };
 
@@ -155,7 +150,7 @@ static void BusCenterServerDelayInit(void *para)
             g_lnnLocalConfigInit.initDelayImpl[i].isInit = true;
         }
     }
-    LnnCoapConnectInit();
+    LnnCoapConnectInitPacked();
     if (ret != SOFTBUS_OK) {
         retry++;
         SoftBusLooper *looper = GetLooper(LOOP_TYPE_DEFAULT);
@@ -206,7 +201,7 @@ static int32_t BusCenterServerInitFirstStep(void)
         LNN_LOGE(LNN_INIT, "init net builder fail");
         return SOFTBUS_NETWORK_BUILDER_INIT_FAILED;
     }
-    if (LnnInitMetaNode() != SOFTBUS_OK) {
+    if (LnnInitMetaNodePacked() != SOFTBUS_OK) {
         LNN_LOGE(LNN_INIT, "init meta node fail");
         return SOFTBUS_NETWORK_META_NODE_INIT_FAILED;
     }
@@ -246,13 +241,13 @@ static int32_t BusCenterServerInitSecondStep(void)
     if (InitAuthGenCertParallelList() != SOFTBUS_OK) {
         LNN_LOGE(LNN_INIT, "initAuthGenCertParallelList fail");
     }
-    if (InitActionBleConcurrency() != SOFTBUS_OK) {
+    if (InitActionBleConcurrencyPacked() != SOFTBUS_OK) {
         LNN_LOGE(LNN_INIT, "initActionBleConcurrencyList fail");
     }
-    if (InitActionStateAdapter() != SOFTBUS_OK) {
+    if (InitActionStateAdapterPacked() != SOFTBUS_OK) {
         LNN_LOGE(LNN_INIT, "initActionStateAdapter fail");
     }
-    if (LnnLoadLocalDeviceAccountIdInfo() != SOFTBUS_OK) {
+    if (LnnLoadLocalDeviceAccountIdInfoPacked() != SOFTBUS_OK) {
         LNN_LOGE(LNN_INIT, "lnnLoadLocalDeviceAccountIdInfo fail");
     }
     RestoreLocalDeviceInfo();
@@ -308,8 +303,8 @@ void BusCenterServerDeinit(void)
     LnnDeinitBusCenterEvent();
     LnnDeinitNetLedger();
     DeinitDecisionCenter();
-    LnnDeinitMetaNode();
-    LnnCoapConnectDeinit();
+    LnnDeinitMetaNodePacked();
+    LnnCoapConnectDeinitPacked();
     LnnDeinitLnnLooper();
     DeinitAuthGenCertParallelList();
     DeinitAuthPreLinkList();

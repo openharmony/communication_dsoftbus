@@ -17,17 +17,13 @@
 #define DISC_BLE_DISPATCHER_H
 
 #include "disc_manager.h"
+#include "disc_ble_dispatcher_struct.h"
 
 #ifdef __cplusplus
 #if __cplusplus
 extern "C" {
 #endif
 #endif
-
-typedef struct {
-    bool (*IsConcern)(uint32_t capability);
-    DiscoveryFuncInterface *mediumInterface;
-} DiscoveryBleDispatcherInterface;
 
 DiscoveryFuncInterface *DiscBleInit(DiscInnerCallback *discInnerCb);
 // for test

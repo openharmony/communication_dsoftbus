@@ -26,17 +26,19 @@
 #include "anonymizer.h"
 #include "auth_common.h"
 #include "auth_deviceprofile.h"
+#include "bus_center_manager.h"
+#include "bus_center_event.h"
+#include "g_enhance_lnn_func.h"
+#include "g_enhance_lnn_func_pack.h"
 #include "lnn_connection_addr_utils.h"
-#include "lnn_fast_offline.h"
+
 #include "lnn_map.h"
 #include "lnn_net_builder.h"
 #include "lnn_node_info.h"
 #include "lnn_lane_def.h"
 #include "lnn_decision_db.h"
 #include "lnn_deviceinfo_to_profile.h"
-#include "lnn_device_info_recovery.h"
 #include "lnn_feature_capability.h"
-#include "lnn_link_finder.h"
 #include "lnn_local_net_ledger.h"
 #include "lnn_log.h"
 #include "lnn_ohos_account.h"
@@ -49,10 +51,9 @@
 #include "softbus_adapter_crypto.h"
 #include "softbus_json_utils.h"
 #include "softbus_utils.h"
+#include "softbus_init_common.h"
 #include "legacy/softbus_hidumper_buscenter.h"
-#include "bus_center_manager.h"
 #include "legacy/softbus_hisysevt_bus_center.h"
-#include "bus_center_event.h"
 
 DistributedNetLedger g_distributedNetLedger;
 
@@ -86,9 +87,9 @@ static void UpdateDeviceNameInfo(const char *udid, const char *oldDeviceName)
         return;
     }
     char *anonyOldDeviceName = NULL;
-    AnonymizeDeviceName(oldDeviceName, &anonyOldDeviceName);
+    Anonymize(oldDeviceName, &anonyOldDeviceName);
     char *anonyDeviceName = NULL;
-    AnonymizeDeviceName(basic.deviceName, &anonyDeviceName);
+    Anonymize(basic.deviceName, &anonyDeviceName);
     LNN_LOGI(LNN_LEDGER, "report deviceName update, name:%{public}s -> %{public}s.",
         AnonymizeWrapper(anonyOldDeviceName), AnonymizeWrapper(anonyDeviceName));
     AnonymizeFree(anonyOldDeviceName);
@@ -846,7 +847,7 @@ static int32_t RemoteNodeInfoRetrieve(NodeInfo *newInfo, int32_t connectionType)
         LNN_LOGE(LNN_LEDGER, "convert udidhash to hexstr fail");
         return ret;
     }
-    ret = LnnRetrieveDeviceInfo(hashStr, &deviceInfo);
+    ret = LnnRetrieveDeviceInfoPacked(hashStr, &deviceInfo);
     if (ret != SOFTBUS_OK) {
         LNN_LOGE(LNN_LEDGER, "no this device info.");
         return ret;
@@ -855,7 +856,7 @@ static int32_t RemoteNodeInfoRetrieve(NodeInfo *newInfo, int32_t connectionType)
     if (ret != SOFTBUS_OK) {
         return ret;
     }
-    ret = LnnSaveRemoteDeviceInfo(&deviceInfo);
+    ret = LnnSaveRemoteDeviceInfoPacked(&deviceInfo);
     if (ret != SOFTBUS_OK) {
         LNN_LOGE(LNN_LEDGER, "save remote devInfo fail");
         return ret;
@@ -896,7 +897,7 @@ int32_t LnnUpdateNodeInfo(NodeInfo *newInfo, int32_t connectionType)
         UpdateDeviceNameInfo(newInfo->deviceInfo.deviceUdid, deviceName);
     }
     if (isIrkChanged) {
-        LnnInsertLinkFinderInfo(oldInfo->networkId);
+        LnnInsertLinkFinderInfoPacked(oldInfo->networkId);
     }
     CheckUserIdCheckSumChange(oldInfo, newInfo);
     ret = RemoteNodeInfoRetrieve(newInfo, connectionType);
@@ -1095,7 +1096,7 @@ static bool IsDeviceInfoChanged(NodeInfo *info)
         LNN_LOGI(LNN_LEDGER, "convert udidhash to hexstr fail");
         return false;
     }
-    int32_t ret = LnnRetrieveDeviceInfo(hashStr, &deviceInfo);
+    int32_t ret = LnnRetrieveDeviceInfoPacked(hashStr, &deviceInfo);
     if (ret == SOFTBUS_NETWORK_NOT_FOUND) {
         return true;
     }
@@ -1139,7 +1140,7 @@ static void GetAndSaveRemoteDeviceInfo(NodeInfo *deviceInfo, NodeInfo *info)
     deviceInfo->netCapacity = info->netCapacity;
     deviceInfo->accountId = info->accountId;
     deviceInfo->staticNetCap = info->staticNetCap;
-    if (LnnSaveRemoteDeviceInfo(deviceInfo) != SOFTBUS_OK) {
+    if (LnnSaveRemoteDeviceInfoPacked(deviceInfo) != SOFTBUS_OK) {
         LNN_LOGE(LNN_LEDGER, "save remote devInfo fail");
         return;
     }
@@ -1164,7 +1165,7 @@ static void BleDirectlyOnlineProc(NodeInfo *info)
             LNN_LOGE(LNN_LEDGER, "convert udidhash to hexstr fail");
             return;
         }
-        if (LnnRetrieveDeviceInfo(hashStr, &deviceInfo) != SOFTBUS_OK) {
+        if (LnnRetrieveDeviceInfoPacked(hashStr, &deviceInfo) != SOFTBUS_OK) {
             LNN_LOGE(LNN_LEDGER, "get deviceInfo by udidhash fail");
             return;
         }
@@ -1191,11 +1192,11 @@ static void BleDirectlyOnlineProc(NodeInfo *info)
     }
     if (IsDeviceInfoChanged(info)) {
         LNN_LOGI(LNN_LEDGER, "device info changed");
-        if (LnnSaveRemoteDeviceInfo(info) != SOFTBUS_OK) {
+        if (LnnSaveRemoteDeviceInfoPacked(info) != SOFTBUS_OK) {
             LNN_LOGE(LNN_LEDGER, "save remote devInfo fail");
         }
     } else {
-        LnnUpdateRemoteDeviceInfo(info);
+        LnnUpdateRemoteDeviceInfoPacked(info);
     }
 }
 
@@ -1323,7 +1324,7 @@ static void TryUpdateDeviceSecurityLevel(NodeInfo *info)
         LNN_LOGE(LNN_LEDGER, "convert udidhash to hexstr fail");
         return;
     }
-    if (LnnRetrieveDeviceInfo(hashStr, &deviceInfo) != SOFTBUS_OK) {
+    if (LnnRetrieveDeviceInfoPacked(hashStr, &deviceInfo) != SOFTBUS_OK) {
         LNN_LOGE(LNN_LEDGER, "get deviceInfo by udidhash fail");
         return;
     }
@@ -1350,7 +1351,7 @@ static void ReversionLastAuthSeq(NodeInfo *info)
         LNN_LOGE(LNN_LEDGER, "convert udidhash to hexstr fail");
         return;
     }
-    if (LnnRetrieveDeviceInfo(hashStr, &deviceInfo) != SOFTBUS_OK) {
+    if (LnnRetrieveDeviceInfoPacked(hashStr, &deviceInfo) != SOFTBUS_OK) {
         LNN_LOGE(LNN_LEDGER, "get deviceInfo by udidhash fail");
         return;
     }
@@ -1501,7 +1502,7 @@ int32_t LnnUpdateRemoteDeviceName(const NodeInfo *info)
     SoftBusMutexUnlock(&g_distributedNetLedger.lock);
     if (isNeedUpdate) {
         char *anonyDeviceName = NULL;
-        AnonymizeDeviceName(basic.deviceName, &anonyDeviceName);
+        Anonymize(basic.deviceName, &anonyDeviceName);
         LNN_LOGI(LNN_LEDGER, "report deviceName update, name=%{public}s", AnonymizeWrapper(anonyDeviceName));
         AnonymizeFree(anonyDeviceName);
         LnnNotifyBasicInfoChanged(&basic, TYPE_DEVICE_NAME);

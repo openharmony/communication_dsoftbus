@@ -26,35 +26,34 @@
 #include "auth_deviceprofile.h"
 #include "bus_center_event.h"
 #include "bus_center_manager.h"
+#include "g_enhance_lnn_func.h"
+#include "g_enhance_lnn_func_pack.h"
 #include "lnn_async_callback_utils.h"
-#include "lnn_ble_lpdevice.h"
-#include "lnn_cipherkey_manager.h"
 #include "lnn_connection_addr_utils.h"
 #include "lnn_connection_fsm_process.h"
 #include "lnn_connId_callback_manager.h"
 #include "lnn_decision_db.h"
 #include "lnn_devicename_info.h"
 #include "lnn_device_info.h"
-#include "lnn_device_info_recovery.h"
 #include "lnn_distributed_net_ledger.h"
 #include "lnn_event.h"
 #include "lnn_heartbeat_ctrl.h"
 #include "lnn_heartbeat_utils.h"
-#include "lnn_link_finder.h"
 #include "lnn_local_net_ledger.h"
 #include "lnn_log.h"
 #include "lnn_net_builder.h"
 #include "lnn_net_builder_init.h"
 #include "lnn_sync_item_info.h"
-#include "softbus_adapter_bt_common.h"
+#include "lnn_async_callback_utils.h"
 #include "lnn_feature_capability.h"
 #include "lnn_deviceinfo_to_profile.h"
+#include "softbus_adapter_bt_common.h"
 #include "softbus_adapter_mem.h"
 #include "softbus_adapter_socket.h"
 #include "softbus_adapter_timer.h"
 #include "softbus_error_code.h"
 #include "softbus_utils.h"
-#include "lnn_async_callback_utils.h"
+#include "softbus_init_common.h"
 #include "trans_channel_manager.h"
 
 #define DATA_SIZE 32
@@ -113,7 +112,7 @@ typedef struct {
 
 static LnnTriggerInfo g_lnnTriggerInfo = { 0 };
 static SoftBusMutex g_lnnTriggerInfoMutex;
-static bool g_lnnTriggerInfoIsInit = false;
+bool g_lnnTriggerInfoIsInit = false;
 
 static bool AuthStateProcess(FsmStateMachine *fsm, int32_t msgType, void *para);
 static bool CleanInvalidConnStateProcess(FsmStateMachine *fsm, int32_t msgType, void *para);
@@ -406,7 +405,8 @@ static void DeviceStateChangeProcess(char *udid, ConnectionAddrType type, bool i
     }
     info->isOnline = isOnline;
     SoftBusLooper *looper = GetLooper(LOOP_TYPE_DEFAULT);
-    if (LnnAsyncCallbackDelayHelper(looper, SendDeviceStateToMlps, (void *)info, 0) != SOFTBUS_OK) {
+    if (LnnAsyncCallbackDelayHelper(looper, SendDeviceStateToMlpsPacked,
+        (void *)info, 0) != SOFTBUS_OK) {
         LNN_LOGE(LNN_BUILDER, "async call online process fail");
         SoftBusFree(info);
     }
@@ -451,14 +451,14 @@ static void SetLnnConnNodeInfo(
     uint8_t relation[CONNECTION_ADDR_MAX] = { 0 };
     NodeInfo oldInfo;
     (void)memset_s(&oldInfo, sizeof(NodeInfo), 0, sizeof(NodeInfo));
-    int32_t ret = LnnRetrieveDeviceInfoByNetworkId(networkId, &oldInfo);
+    int32_t ret = LnnRetrieveDeviceInfoByNetworkIdPacked(networkId, &oldInfo);
     if (!connFsm->isNeedConnect && connInfo->addr.type == CONNECTION_ADDR_BLE) {
         connInfo->nodeInfo->isSupportSv = true;
     }
     report = LnnAddOnlineNode(connInfo->nodeInfo);
     SetAssetSessionKeyByAuthInfo(connInfo->nodeInfo, connInfo->authHandle);
     LnnOfflineTimingByHeartbeat(networkId, connInfo->addr.type);
-    if (LnnInsertLinkFinderInfo(networkId) != SOFTBUS_OK) {
+    if (LnnInsertLinkFinderInfoPacked(networkId) != SOFTBUS_OK) {
         LNN_LOGE(LNN_BUILDER, "insert rpa info fail.");
     }
     if (LnnUpdateGroupType(connInfo->nodeInfo) != SOFTBUS_OK) {
@@ -470,7 +470,8 @@ static void SetLnnConnNodeInfo(
         IsFeatureSupport(localFeature, BIT_BLE_SUPPORT_LP_HEARTBEAT)) {
         DeviceStateChangeProcess(connInfo->nodeInfo->deviceInfo.deviceUdid, connInfo->addr.type, true);
     }
-    if (LnnAsyncCallbackDelayHelper(GetLooper(LOOP_TYPE_DEFAULT), SetLpKeepAliveState, NULL, 0) != SOFTBUS_OK) {
+    if (LnnAsyncCallbackDelayHelper(GetLooper(LOOP_TYPE_DEFAULT),
+        SetLpKeepAliveStatePacked, NULL, 0) != SOFTBUS_OK) {
         LNN_LOGE(LNN_BUILDER, "async call online process fail");
     }
     NotifyJoinResult(connFsm, networkId, retCode);
@@ -1161,7 +1162,7 @@ static void FilterRetrieveDeviceInfo(NodeInfo *info)
 
 static int32_t LnnRecoveryBroadcastKey()
 {
-    int32_t ret = LnnLoadLocalBroadcastCipherKey();
+    int32_t ret = LnnLoadLocalBroadcastCipherKeyPacked();
     if (ret != SOFTBUS_OK) {
         LNN_LOGE(LNN_BUILDER, "load BroadcastCipherInfo fail");
         return ret;
@@ -1169,7 +1170,7 @@ static int32_t LnnRecoveryBroadcastKey()
     BroadcastCipherKey broadcastKey;
     (void)memset_s(&broadcastKey, sizeof(BroadcastCipherKey), 0, sizeof(BroadcastCipherKey));
     do {
-        ret = LnnGetLocalBroadcastCipherKey(&broadcastKey);
+        ret = LnnGetLocalBroadcastCipherKeyPacked(&broadcastKey);
         if (ret != SOFTBUS_OK) {
             LNN_LOGE(LNN_BUILDER, "get local info failed");
             break;
@@ -1219,10 +1220,10 @@ static int32_t BleDirectOnline(LnnConntionInfo *connInfo, AuthConnInfo *authConn
     LNN_LOGI(LNN_BUILDER, "join udidHash=%{public}s", AnonymizeWrapper(anonyUdidHash));
     AnonymizeFree(anonyUdidHash);
     if (ret == SOFTBUS_OK) {
-        if ((dupOk ||
-            (LnnRetrieveDeviceInfo(udidHash, deviceInfo) == SOFTBUS_OK && LnnRecoveryBroadcastKey() == SOFTBUS_OK)) &&
+        if ((dupOk || (LnnRetrieveDeviceInfoPacked(udidHash, deviceInfo) == SOFTBUS_OK &&
+            LnnRecoveryBroadcastKey() == SOFTBUS_OK)) &&
             AuthRestoreAuthManager(udidHash, authConn, connInfo->requestId, deviceInfo,
-                &authHandle.authId) == SOFTBUS_OK) {
+            &authHandle.authId) == SOFTBUS_OK) {
             FilterRetrieveDeviceInfo(deviceInfo);
             LnnGetVerifyCallback()->onVerifyPassed(connInfo->requestId, authHandle, deviceInfo);
             return SOFTBUS_OK;
@@ -1455,8 +1456,8 @@ static void UpdateDeviceDeviceName(NodeInfo *nodeInfo, NodeInfo *remoteInfo)
         }
         char *anonyOldName = NULL;
         char *anonyNewName = NULL;
-        AnonymizeDeviceName(remoteInfo->deviceInfo.deviceName, &anonyOldName);
-        AnonymizeDeviceName(nodeInfo->deviceInfo.deviceName, &anonyNewName);
+        Anonymize(remoteInfo->deviceInfo.deviceName, &anonyOldName);
+        Anonymize(nodeInfo->deviceInfo.deviceName, &anonyNewName);
         LNN_LOGI(LNN_BUILDER, "update deviceName=%{public}s -> %{public}s", AnonymizeWrapper(anonyOldName),
             AnonymizeWrapper(anonyNewName));
         AnonymizeFree(anonyOldName);
@@ -1861,7 +1862,7 @@ static void OnlineStateEnter(FsmStateMachine *fsm)
     if (isNodeInfoValid) {
         Anonymize(connFsm->connInfo.nodeInfo->deviceInfo.deviceUdid, &anonyUdid);
         Anonymize(connFsm->connInfo.nodeInfo->uuid, &anonyUuid);
-        AnonymizeDeviceName(connFsm->connInfo.nodeInfo->deviceInfo.deviceName, &anonyDeviceName);
+        Anonymize(connFsm->connInfo.nodeInfo->deviceInfo.deviceName, &anonyDeviceName);
     }
     LNN_LOGI(LNN_BUILDER,
         "online state enter. [id=%{public}u], networkId=%{public}s, udid=%{public}s, "
@@ -2014,7 +2015,7 @@ static void LeavingStateEnter(FsmStateMachine *fsm)
     Anonymize(connFsm->connInfo.peerNetworkId, &anonyNetworkId);
     if (isNodeInfoValid) {
         Anonymize(connFsm->connInfo.nodeInfo->deviceInfo.deviceUdid, &anonyUdid);
-        AnonymizeDeviceName(connFsm->connInfo.nodeInfo->deviceInfo.deviceName, &anonyDeviceName);
+        Anonymize(connFsm->connInfo.nodeInfo->deviceInfo.deviceName, &anonyDeviceName);
     }
     DelUserKeyByNetworkId(connFsm->connInfo.peerNetworkId);
     LNN_LOGI(LNN_BUILDER,

@@ -16,7 +16,7 @@
 #ifndef BROADCAST_SCHEDULER_H
 #define BROADCAST_SCHEDULER_H
 
-#include "broadcast_scheduler_type.h"
+#include "broadcast_scheduler_type_struct.h"
 #include "softbus_broadcast_manager.h"
 
 #ifdef __cplusplus
@@ -253,35 +253,6 @@ int32_t SchedulerQueryBroadcastStatus(int32_t bcId, int32_t *status);
  * @version 1.0
  */
 bool SchedulerIsLpDeviceAvailable(void);
-
-/**
- * @brief Set low-power chip broadcast parameters, scanning parameters, scanning filters, and broadcast data.
- *
- * @param bcParam Indicates low-power chip broadcast parameters and broadcast data.
- * @param scanParam Indicates low power chip scan parameters and filters.
- *
- * @return Returns <b>true</b> if the service set parameters succ.
- * @return Returns false for failed.
- *
- * @since 5.0
- * @version 1.0
- */
-bool SchedulerSetAdvDeviceParam(LpServerType type, const LpBroadcastParam *bcParam,
-    const LpScanParam *scanParam);
-
-/**
- * @brief Obtain the advHandle by advId.
- *
- * @param bcId Indicates the service broadcast ID, when the service register successfully
- * @param bcHandle Indicates Convert to bcHandle via advId.
- *
- * @return Returns <b>SOFTBUS_OK</b> if the service get the handle succ.
- * returns any other value for failed.
- *
- * @since 5.0
- * @version 1.0
- */
-int32_t SchedulerGetBroadcastHandle(int32_t bcId, int32_t *bcHandle);
 
 /**
  * @brief Enables data synchronization to a low-power chip.

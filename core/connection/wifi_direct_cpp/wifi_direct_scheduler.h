@@ -121,7 +121,7 @@ public:
     }
 
     template<typename Command>
-    void FetchAndDispatchCommand(const std::string &remoteDeviceId)
+    void FetchAndDispatchCommand(const std::string &remoteDeviceId, CommandType type)
     {
         std::lock_guard executorLock(executorLock_);
         auto executor = executorManager_.Find(remoteDeviceId);
@@ -135,8 +135,8 @@ public:
             if (command->GetRemoteDeviceId() != remoteDeviceId) {
                 continue;
             }
-            auto cmd = std::dynamic_pointer_cast<Command>(command);
-            if (cmd != nullptr) {
+            if (command->GetType() == type) {
+                auto cmd = std::static_pointer_cast<Command>(command);
                 CONN_LOGI(CONN_WIFI_DIRECT, "type=%{public}d, commandId=%{public}u",
                           static_cast<int>(command->GetType()), command->GetId());
                 executor->SendEvent(cmd);
@@ -175,11 +175,7 @@ protected:
 
 private:
     friend WifiDirectSchedulerFactory;
-    static WifiDirectScheduler& GetInstance()
-    {
-        static WifiDirectScheduler instance;
-        return instance;
-    }
+    static WifiDirectScheduler& GetInstance();
 };
 }
 #endif

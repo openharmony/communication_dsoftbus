@@ -26,14 +26,18 @@
 #include "bus_center_manager.h"
 #include "device_profile_listener.h"
 #include "lnn_app_bind_interface.h"
+#include "g_enhance_lnn_func.h"
+#include "g_enhance_lnn_func_pack.h"
 #include "lnn_decision_db.h"
 #include "lnn_heartbeat_ctrl.h"
 #include "lnn_local_net_ledger.h"
 #include "lnn_ohos_account_adapter.h"
 #include "lnn_map.h"
 #include "lnn_net_builder.h"
+#include "lnn_log.h"
 #include "legacy/softbus_adapter_hitrace.h"
 #include "softbus_adapter_mem.h"
+#include "softbus_init_common.h"
 
 #define DELAY_AUTH_TIME                    (8 * 1000L)
 
@@ -341,7 +345,7 @@ void AuthDeviceNotTrust(const char *peerUdid)
     AuthSessionHandleDeviceNotTrusted(peerUdid);
     LnnDeleteSpecificTrustedDevInfo(peerUdid, GetActiveOsAccountIds());
     LnnHbOnTrustedRelationReduced();
-    AuthRemoveDeviceKeyByUdid(peerUdid);
+    AuthRemoveDeviceKeyByUdidPacked(peerUdid);
     if (LnnRequestLeaveSpecific(networkId, CONNECTION_ADDR_MAX) != SOFTBUS_OK) {
         AUTH_LOGE(AUTH_HICHAIN, "request leave specific fail");
     } else {
@@ -398,7 +402,7 @@ static void OnDeviceNotTrusted(const char *peerUdid, int32_t localUserId)
     }
     g_verifyListener.onDeviceNotTrusted(peerUdid);
     LnnHbOnTrustedRelationReduced();
-    AuthRemoveDeviceKeyByUdid(peerUdid);
+    AuthRemoveDeviceKeyByUdidPacked(peerUdid);
 }
 
 int32_t RegAuthVerifyListener(const AuthVerifyListener *listener)

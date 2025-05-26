@@ -255,7 +255,7 @@ HWTEST_F(ClientTransProxyManagerTest, ClientTransProxyOnDataReceivedTest001, Tes
     EXPECT_EQ(EOK, ret);
     ret = ClientTransProxyOnDataReceived(channelId, buf, TEST_DATA_LENGTH_2, TRANS_SESSION_BYTES);
     EXPECT_EQ(SOFTBUS_TRANS_PROXY_INVALID_SLICE_HEAD, ret);
-    
+
     sliceHead.priority = PROXY_CHANNEL_PRORITY_MESSAGE;
     sliceHead.sliceNum = 0;
     sliceHead.sliceSeq = 0;
@@ -280,7 +280,7 @@ HWTEST_F(ClientTransProxyManagerTest, ClientTransProxyOnDataReceivedTest001, Tes
     EXPECT_EQ(EOK, ret);
     ret = ClientTransProxyOnDataReceived(channelId, buf, TEST_DATA_LENGTH_2, TRANS_SESSION_BYTES);
     EXPECT_EQ(SOFTBUS_TRANS_SESSION_INFO_NOT_FOUND, ret);
-    
+
     packetHead.dataLen = sizeof(PacketHead) - 1;
     ret = memcpy_s(buf + sizeof(SliceHead), TEST_DATA_LENGTH_2, &packetHead, sizeof(PacketHead));
     EXPECT_EQ(EOK, ret);

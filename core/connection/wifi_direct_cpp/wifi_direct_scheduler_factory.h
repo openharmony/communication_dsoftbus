@@ -23,24 +23,11 @@ namespace OHOS::SoftBus {
 class WifiDirectScheduler;
 class WifiDirectSchedulerFactory {
 public:
-    static WifiDirectSchedulerFactory& GetInstance()
-    {
-        static WifiDirectSchedulerFactory instance;
-        return instance;
-    }
+    static WifiDirectSchedulerFactory& GetInstance();
 
-    WifiDirectScheduler& GetScheduler()
-    {
-        if (scheduler_ == nullptr) {
-            return WifiDirectScheduler::GetInstance();
-        }
-        return *scheduler_;
-    }
+    WifiDirectScheduler& GetScheduler();
 
-    void Register(const std::shared_ptr<WifiDirectScheduler> &scheduler)
-    {
-        scheduler_ = scheduler;
-    }
+    void Register(const std::shared_ptr<WifiDirectScheduler> &scheduler);
 
 private:
     std::shared_ptr<WifiDirectScheduler> scheduler_ = nullptr;

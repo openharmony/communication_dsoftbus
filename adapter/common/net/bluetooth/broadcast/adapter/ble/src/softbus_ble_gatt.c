@@ -13,7 +13,8 @@
  * limitations under the License.
  */
 
-#include "softbus_ble_gatt.h"
+#include "softbus_broadcast_adapter_interface.h"
+#include "softbus_ble_gatt_public.h"
 #include "softbus_adapter_bt_common.h"
 #include "softbus_adapter_thread.h"
 #include "softbus_adapter_mem.h"

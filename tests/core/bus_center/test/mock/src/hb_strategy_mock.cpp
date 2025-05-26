@@ -144,9 +144,11 @@ bool IsExistLnnDfxNodeByUdidHash(const char *udidHash, LnnBleReportExtra *bleExt
     return HeartBeatStrategyInterface()->IsExistLnnDfxNodeByUdidHash(udidHash, bleExtra);
 }
 
-int32_t LnnRetrieveDeviceInfo(const char *udid, NodeInfo *deviceInfo)
-{
-    return HeartBeatStrategyInterface()->LnnRetrieveDeviceInfo(udid, deviceInfo);
+extern "C" {
+    int32_t LnnRetrieveDeviceInfo(const char *udid, NodeInfo *deviceInfo)
+    {
+        return HeartBeatStrategyInterface()->LnnRetrieveDeviceInfo(udid, deviceInfo);
+    }
 }
 
 bool IsSameAccountGroupDevice(void)

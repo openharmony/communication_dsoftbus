@@ -1345,7 +1345,7 @@ static void OnPostByteFinshed(
     }
 }
 
-static uint32_t AllocateConnectionIdUnsafe()
+static uint32_t AllocateConnectionIdUnsafe(void)
 {
     static uint16_t nextId = 0;
 
@@ -1772,7 +1772,7 @@ static void OnBtStateChanged(int listenerId, int state)
     }
 }
 
-static int32_t InitBrManager()
+static int32_t InitBrManager(void)
 {
     SoftBusList *connections = CreateSoftBusList();
     SoftBusList *pendings = CreateSoftBusList();

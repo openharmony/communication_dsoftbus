@@ -18,6 +18,7 @@
 
 #include <stdbool.h>
 #include <stdint.h>
+#include "auth_interface_struct.h"
 #include "lnn_node_info.h"
 #include "softbus_common.h"
 #include "softbus_conn_interface.h"
@@ -29,135 +30,8 @@ extern "C" {
 #endif
 #endif
 
-#define AUTH_INVALID_ID (-1)
-
-#define AUTH_IDENTICAL_ACCOUNT_GROUP 1
-#define AUTH_PEER_TO_PEER_GROUP 256
-#define CUST_UDID_LEN 16
-#define AUTH_INVALID_DEVICEKEY_ID 0x0
-
-typedef enum {
-    /* nearby type v1 */
-    SOFTBUS_OLD_V1 = 1,
-    /* nearby type v2 */
-    SOFTBUS_OLD_V2 = 2,
-    /* softbus type v1 */
-    SOFTBUS_NEW_V1 = 100,
-    /* softbus type v2 */
-    SOFTBUS_NEW_V2 = 101,
-} SoftBusVersion;
-
-typedef enum {
-    AUTH_VERSION_INVALID = 0,
-    AUTH_VERSION_V1 = 1,
-    AUTH_VERSION_V2 = 2,
-} AuthVersion;
-
-typedef enum {
-    AUTH_LINK_TYPE_WIFI = 1,
-    AUTH_LINK_TYPE_BR,
-    AUTH_LINK_TYPE_BLE,
-    AUTH_LINK_TYPE_P2P,
-    AUTH_LINK_TYPE_ENHANCED_P2P,
-    AUTH_LINK_TYPE_RAW_ENHANCED_P2P,
-    AUTH_LINK_TYPE_NORMALIZED,
-    AUTH_LINK_TYPE_SESSION,
-    AUTH_LINK_TYPE_SESSION_KEY,
-    AUTH_LINK_TYPE_SLE,
-    AUTH_LINK_TYPE_USB,
-    AUTH_LINK_TYPE_MAX,
-} AuthLinkType;
-
-typedef struct {
-    uint32_t linkTypeNum;
-    AuthLinkType linkType[AUTH_LINK_TYPE_MAX];
-} AuthLinkTypeList;
-
-typedef enum {
-    AUTH_MODULE_LNN,
-    AUTH_MODULE_TRANS,
-    AUTH_MODULE_BUTT,
-} AuthVerifyModule;
-
-typedef struct {
-    AuthLinkType type;
-    union {
-        struct {
-            char brMac[BT_MAC_LEN];
-            uint32_t connectionId;
-        } brInfo;
-        struct {
-            BleProtocolType protocol;
-            char bleMac[BT_MAC_LEN];
-            uint8_t deviceIdHash[UDID_HASH_LEN];
-            int32_t psm;
-        } bleInfo;
-        struct {
-            char ip[IP_LEN];
-            uint8_t deviceIdHash[UDID_HASH_LEN];
-            int32_t port;
-            int64_t authId; /* for open p2p auth conn */
-            ListenerModule moduleId; /* for open enhance p2p auth conn */
-            char udid[UDID_BUF_LEN];
-            int32_t fd;
-        } ipInfo;
-        struct {
-            uint32_t connId;
-            char udid[UDID_BUF_LEN];
-        } sessionInfo;
-        struct {
-            SleProtocolType protocol;
-            char sleMac[BT_MAC_LEN];
-            char networkId[NETWORK_ID_BUF_LEN];
-        } sleInfo;
-    } info;
-    char peerUid[MAX_ACCOUNT_HASH_LEN];
-} AuthConnInfo;
-
-typedef struct {
-    bool isForceJoin;
-    ConnectionAddr addr;
-    char networkId[NETWORK_ID_BUF_LEN];
-} ForceJoinInfo;
-
-typedef struct {
-    uint32_t requestId;
-    AuthVerifyModule module;
-    bool isFastAuth;
-    DeviceKeyId deviceKeyId;
-    ForceJoinInfo forceJoinInfo;
-} AuthVerifyParam;
-
-typedef enum {
-    ONLINE_HICHAIN = 0,
-    ONLINE_METANODE,
-    ONLINE_MIX,
-    AUTH_TYPE_BUTT,
-} AuthType;
-
-typedef struct {
-    void (*onDeviceVerifyPass)(AuthHandle authHandle, const NodeInfo *info);
-    void (*onDeviceNotTrusted)(const char *peerUdid);
-    void (*onDeviceDisconnect)(AuthHandle authHandle);
-} AuthVerifyListener;
 int32_t RegAuthVerifyListener(const AuthVerifyListener *listener);
 void UnregAuthVerifyListener(void);
-
-typedef struct {
-    void (*onVerifyPassed)(uint32_t requestId, AuthHandle authHandle, const NodeInfo *info);
-    void (*onVerifyFailed)(uint32_t requestId, int32_t reason);
-} AuthVerifyCallback;
-
-typedef struct {
-    void (*onConnOpened)(uint32_t requestId, AuthHandle authHandle);
-    void (*onConnOpenFailed)(uint32_t requestId, int32_t reason);
-} AuthConnCallback;
-
-typedef struct {
-    const uint8_t *key;
-    uint32_t keyLen;
-} AuthKeyInfo;
-
 uint32_t AuthGenRequestId(void);
 int32_t AuthStartVerify(const AuthConnInfo *connInfo, AuthVerifyParam *authVerifyParam,
     const AuthVerifyCallback *callback);
@@ -171,18 +45,6 @@ int32_t AuthMetaStartVerify(uint32_t connectionId, const AuthKeyInfo *authKeyInf
     int32_t callingPid, const AuthVerifyCallback *callBack);
 void AuthMetaReleaseVerify(int64_t authId);
 void AuthServerDeathCallback(const char *pkgName, int32_t pid);
-
-typedef struct {
-    void (*onGroupCreated)(const char *groupId, int32_t groupType);
-    void (*onGroupDeleted)(const char *groupId, int32_t groupType);
-    void (*onDeviceBound)(const char *udid, const char *groupInfo);
-} GroupChangeListener;
-
-typedef enum {
-    TRUSTED_RELATION_IGNORE = 0,
-    TRUSTED_RELATION_NO,
-    TRUSTED_RELATION_YES,
-} TrustedReturnType;
 
 int32_t RegGroupChangeListener(const GroupChangeListener *listener);
 void UnregGroupChangeListener(void);
@@ -199,19 +61,6 @@ void AuthStopListening(AuthLinkType type);
 int32_t AuthStartListeningForWifiDirect(AuthLinkType type, const char *ip, int32_t port, ListenerModule *moduleId);
 void AuthStopListeningForWifiDirect(AuthLinkType type, ListenerModule moduleId);
 
-typedef struct {
-    int32_t module;
-    int32_t flag;
-    int64_t seq;
-    uint32_t len;
-    const uint8_t *data;
-} AuthTransData;
-
-typedef struct {
-    void (*onDataReceived)(AuthHandle authHandle, const AuthTransData *data);
-    void (*onDisconnected)(AuthHandle authHandle);
-    void (*onException)(AuthHandle authHandle, int32_t error);
-} AuthTransListener;
 int32_t RegAuthTransListener(int32_t module, const AuthTransListener *listener);
 void UnregAuthTransListener(int32_t module);
 

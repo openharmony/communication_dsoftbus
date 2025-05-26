@@ -20,10 +20,13 @@
 #include "access_control.h"
 #include "anonymizer.h"
 #include "bus_center_manager.h"
+#include "g_enhance_lnn_func.h"
+#include "g_enhance_lnn_func_pack.h"
+#include "g_enhance_trans_func.h"
+#include "g_enhance_trans_func_pack.h"
 #include "legacy/softbus_adapter_hitrace.h"
 #include "legacy/softbus_hisysevt_transreporter.h"
 #include "lnn_distributed_net_ledger.h"
-#include "lnn_lane_qos.h"
 #include "message_handler.h"
 #include "session.h"
 #include "softbus_adapter_mem.h"
@@ -33,8 +36,8 @@
 #include "softbus_proxychannel_manager.h"
 #include "softbus_proxychannel_session.h"
 #include "softbus_proxychannel_transceiver.h"
-#include "softbus_qos.h"
 #include "softbus_utils.h"
+#include "softbus_init_common.h"
 #include "trans_auth_lane_pending_ctl.h"
 #include "trans_auth_manager.h"
 #include "trans_auth_negotiation.h"
@@ -686,7 +689,7 @@ int32_t TransStreamStats(int32_t channelId, int32_t channelType, const StreamSen
     info.statsType = LANE_T_COMMON_VIDEO;
     FrameSendStats *stats = &info.statsInfo.stream.frameStats;
     ConvertStreamStats(data, stats);
-    LnnReportLaneIdStatsInfo(&info, 1); /* only report stream stats */
+    LnnReportLaneIdStatsInfoPacked(&info, 1); /* only report stream stats */
     return SOFTBUS_OK;
 }
 
@@ -705,10 +708,10 @@ int32_t TransRequestQos(int32_t channelId, int32_t chanType, int32_t appType, in
     int32_t result = 0;
     if (quality == QOS_IMPROVE) {
         TRANS_LOGI(TRANS_QOS, "trans requestQos");
-        ret = LnnRequestQosOptimization(&laneId, 1, &result, 1);
+        ret = LnnRequestQosOptimizationPacked(&laneId, 1, &result, 1);
     } else if (quality == QOS_RECOVER) {
         TRANS_LOGI(TRANS_QOS, "trans cancel Qos");
-        LnnCancelQosOptimization(&laneId, 1);
+        LnnCancelQosOptimizationPacked(&laneId, 1);
         ret = SOFTBUS_OK;
     } else {
         TRANS_LOGE(TRANS_QOS, "requestQos invalid. quality=%{public}d", quality);
@@ -744,7 +747,7 @@ int32_t TransRippleStats(int32_t channelId, int32_t channelType, const TrafficSt
     }
     // modify with laneId
     uint64_t laneId = INVALID_LANE_ID;
-    LnnReportRippleData(laneId, &rptdata);
+    LnnReportRippleDataPacked(laneId, &rptdata);
     return SOFTBUS_OK;
 }
 
@@ -775,7 +778,7 @@ int32_t TransNotifyAuthSuccess(int32_t channelId, int32_t channelType)
 int32_t TransReleaseUdpResources(int32_t channelId)
 {
     TRANS_LOGI(TRANS_CTRL, "release Udp channel resources: channelId=%{public}d", channelId);
-    NotifyQosChannelClosed(channelId, CHANNEL_TYPE_UDP);
+    NotifyQosChannelClosedPacked(channelId, CHANNEL_TYPE_UDP);
     (void)TransLaneMgrDelLane(channelId, CHANNEL_TYPE_UDP, false);
     (void)TransDelUdpChannel(channelId);
     return SOFTBUS_OK;

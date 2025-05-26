@@ -33,6 +33,8 @@
 #include "softbus_adapter_mem.h"
 #include "softbus_common.h"
 #include "softbus_error_code.h"
+#include "dsoftbus_enhance_interface.h"
+#include "g_enhance_lnn_func.h"
 
 #define FUNC_SLEEP_MS 10
 constexpr char IP[IP_STR_MAX_LEN] = "127.0.0.1";
@@ -778,6 +780,9 @@ HWTEST_F(LNNConnectionFsmTest, UPDATE_LEAVE_TO_LEDGER_TEST_001, TestSize.Level1)
  */
 HWTEST_F(LNNConnectionFsmTest, LNN_RECOVERY_BROADCAST_KEY_TEST_001, TestSize.Level1)
 {
+    LnnEnhanceFuncList *pfnLnnEnhanceFuncList = LnnEnhanceFuncListGet();
+    pfnLnnEnhanceFuncList->lnnLoadLocalBroadcastCipherKey = LnnLoadLocalBroadcastCipherKey;
+    pfnLnnEnhanceFuncList->lnnGetLocalBroadcastCipherKey = LnnGetLocalBroadcastCipherKey;
     NiceMock<LnnConnFsmInterfaceMock> lnnConnMock;
     EXPECT_CALL(lnnConnMock, LnnLoadLocalBroadcastCipherKey)
         .WillOnce(Return(SOFTBUS_INVALID_PARAM))

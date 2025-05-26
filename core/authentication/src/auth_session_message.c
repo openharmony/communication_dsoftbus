@@ -19,14 +19,11 @@
 #include <securec.h>
 
 #include "anonymizer.h"
-#include "auth_attest_interface.h"
 #include "auth_common.h"
 #include "auth_connection.h"
-#include "auth_device_common_key.h"
 #include "auth_hichain_adapter.h"
 #include "auth_log.h"
 #include "auth_manager.h"
-#include "auth_meta_manager.h"
 #include "auth_request.h"
 #include "auth_session_json.h"
 #include "bus_center_manager.h"

@@ -66,10 +66,12 @@ void WifiDirectExecutor::Run(std::shared_ptr<WifiDirectProcessor> processor)
         try {
             CONN_LOGI(CONN_WIFI_DIRECT, "processor run");
             processor_->Run();
-        } catch (const ProcessorTerminate &) {
-            LinkManager::GetInstance().Dump();
-            CONN_LOGI(CONN_WIFI_DIRECT, "processor terminate");
-            ProcessUnHandleCommand();
+        } catch (const std::exception& e) {
+            if (typeid(e).name() == typeid(ProcessorTerminate).name()) {
+                LinkManager::GetInstance().Dump();
+                CONN_LOGI(CONN_WIFI_DIRECT, "processor terminate");
+                ProcessUnHandleCommand();
+            }
         }
 
         std::lock_guard lock(processorLock_);
@@ -119,9 +121,10 @@ void WifiDirectExecutor::ProcessUnHandleCommand()
     CONN_LOGI(CONN_WIFI_DIRECT, "enter");
     WifiDirectSchedulerFactory::GetInstance().GetScheduler().RejectNegotiateData(*processor_);
     GetSender().ProcessUnHandle([this](std::shared_ptr<WifiDirectEventBase> &content) {
-        auto ncw =
-            std::dynamic_pointer_cast<WifiDirectEventWrapper<std::shared_ptr<NegotiateCommand>>>(content);
-        if (ncw != nullptr) {
+        if (content->getContentTypeid() == typeid(NegotiateCommand).name()) {
+            CONN_LOGI(CONN_WIFI_DIRECT, "type id is same");
+            auto ncw =
+                std::static_pointer_cast<WifiDirectEventWrapper<std::shared_ptr<NegotiateCommand>>>(content);
             processor_->HandleCommandAfterTerminate(*ncw->content_);
             return;
         }

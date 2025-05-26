@@ -23,6 +23,8 @@
 #include "lnn_heartbeat_utils.h"
 #include "lnn_net_ledger_mock.h"
 #include "lnn_node_info.h"
+#include "dsoftbus_enhance_interface.h"
+#include "g_enhance_lnn_func.h"
 
 namespace OHOS {
 using namespace testing::ext;
@@ -345,6 +347,9 @@ HWTEST_F(HeartBeatMediumStaticTest, IsNeedConnectOnLineTest_01, TestSize.Level1)
     HbRespData hbResp;
     NodeInfo deviceInfo;
     ConnectOnlineReason connectReason;
+    LnnEnhanceFuncList *pfnLnnEnhanceFuncList = LnnEnhanceFuncListGet();
+    pfnLnnEnhanceFuncList->lnnRetrieveDeviceInfo = LnnRetrieveDeviceInfo;
+
     (void)memset_s(&device, sizeof(DeviceInfo), 0, sizeof(DeviceInfo));
     (void)memset_s(&hbResp, sizeof(HbRespData), 0, sizeof(HbRespData));
     (void)memset_s(&deviceInfo, sizeof(NodeInfo), 0, sizeof(NodeInfo));
@@ -395,6 +400,14 @@ HWTEST_F(HeartBeatMediumStaticTest, IsNeedConnectOnLineTest_02, TestSize.Level1)
     HbRespData hbResp;
     NodeInfo deviceInfo;
     ConnectOnlineReason connectReason;
+    LnnEnhanceFuncList *pfnLnnEnhanceFuncList = LnnEnhanceFuncListGet();
+    pfnLnnEnhanceFuncList->lnnRetrieveDeviceInfo = LnnRetrieveDeviceInfo;
+    pfnLnnEnhanceFuncList->isCipherManagerFindKey = IsCipherManagerFindKey;
+    pfnLnnEnhanceFuncList->isCloudSyncEnabled = IsCloudSyncEnabled;
+    pfnLnnEnhanceFuncList->authFindDeviceKey = AuthFindDeviceKey;
+    pfnLnnEnhanceFuncList->authFindLatestNormalizeKey = AuthFindLatestNormalizeKey;
+    pfnLnnEnhanceFuncList->lnnUpdateRemoteDeviceInfo = LnnUpdateRemoteDeviceInfo;
+
     (void)memset_s(&device, sizeof(DeviceInfo), 0, sizeof(DeviceInfo));
     (void)memset_s(&hbResp, sizeof(HbRespData), 0, sizeof(HbRespData));
     (void)memset_s(&deviceInfo, sizeof(NodeInfo), 0, sizeof(NodeInfo));
@@ -674,6 +687,8 @@ HWTEST_F(HeartBeatMediumStaticTest, CheckJoinLnnRequestTest_01, TestSize.Level1)
     NiceMock<HbMediumMgrInterfaceMock> hbMediumMock;
     DeviceInfo device;
     HbRespData hbResp;
+    LnnEnhanceFuncList *pfnLnnEnhanceFuncList = LnnEnhanceFuncListGet();
+    pfnLnnEnhanceFuncList->lnnRetrieveDeviceInfo = LnnRetrieveDeviceInfo;
     (void)memset_s(&device, sizeof(DeviceInfo), 0, sizeof(DeviceInfo));
     (void)memset_s(&hbResp, sizeof(HbRespData), 0, sizeof(HbRespData));
     ProcRespVapChange(nullptr, nullptr);
@@ -702,6 +717,8 @@ HWTEST_F(HeartBeatMediumStaticTest, IsSupportCloudSyncTest_01, TestSize.Level1)
     NiceMock<HbMediumMgrInterfaceMock> hbMediumMock;
     DeviceInfo device;
     HbRespData hbResp;
+    LnnEnhanceFuncList *pfnLnnEnhanceFuncList = LnnEnhanceFuncListGet();
+    pfnLnnEnhanceFuncList->lnnRetrieveDeviceInfo = LnnRetrieveDeviceInfo;
     (void)memset_s(&device, sizeof(DeviceInfo), 0, sizeof(DeviceInfo));
     (void)memset_s(&hbResp, sizeof(HbRespData), 0, sizeof(HbRespData));
     int32_t infoNum = 0;
@@ -778,6 +795,8 @@ HWTEST_F(HeartBeatMediumStaticTest, CheckJoinLnnConnectResultTest_01, TestSize.L
     DeviceInfo device;
     HbRespData hbResp;
     LnnHeartbeatRecvInfo storedInfo;
+    LnnEnhanceFuncList *pfnLnnEnhanceFuncList = LnnEnhanceFuncListGet();
+    pfnLnnEnhanceFuncList->lnnRetrieveDeviceInfo = LnnRetrieveDeviceInfo;
     (void)memset_s(&device, sizeof(DeviceInfo), 0, sizeof(DeviceInfo));
     (void)memset_s(&hbResp, sizeof(HbRespData), 0, sizeof(HbRespData));
     (void)memset_s(&storedInfo, sizeof(LnnHeartbeatRecvInfo), 0, sizeof(LnnHeartbeatRecvInfo));
@@ -901,6 +920,9 @@ HWTEST_F(HeartBeatMediumStaticTest, HbMediumMgrRecvHigherWeightStaticTest_02, Te
  */
 HWTEST_F(HeartBeatMediumStaticTest, LnnHbMediumMgrInitTest_01, TestSize.Level1)
 {
+    LnnEnhanceFuncList *pfnLnnEnhanceFuncList = LnnEnhanceFuncListGet();
+    pfnLnnEnhanceFuncList->lnnRegistBleHeartbeatMediumMgr = LnnRegistBleHeartbeatMediumMgr;
+    
     NiceMock<HbMediumMgrInterfaceMock> hbMediumMock;
     EXPECT_CALL(hbMediumMock, LnnRegistBleHeartbeatMediumMgr).WillRepeatedly(Return(SOFTBUS_INVALID_PARAM));
     CheckUserIdCheckSumChange(nullptr, nullptr);

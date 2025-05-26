@@ -17,12 +17,11 @@
 #define LNN_ASYNC_CALLBACK_UTILS_H
 
 #include "message_handler.h"
+#include "lnn_async_callback_utils_struct.h"
 
 #ifdef __cplusplus
 extern "C" {
 #endif
-
-typedef void (*LnnAsyncCallbackFunc)(void *para);
 
 int32_t LnnAsyncCallbackHelper(SoftBusLooper *looper, LnnAsyncCallbackFunc callback, void *para);
 int32_t LnnAsyncCallbackDelayHelper(SoftBusLooper *looper, LnnAsyncCallbackFunc callback,

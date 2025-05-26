@@ -34,6 +34,12 @@ static constexpr const char *WIFI_DIRECT_HIDUMPER_INFO = "WifiDirectHidumper";
 static constexpr int P2P_GROUP_EXIST = 1;
 static constexpr int P2P_GROUP_NOT_EXIST = 0;
 
+WifiDirectHidumper& WifiDirectHidumper::GetInstance()
+{
+    static WifiDirectHidumper instance;
+    return instance;
+}
+
 void WifiDirectHidumper::HidumperInit()
 {
     if (hiDumper_ == nullptr) {

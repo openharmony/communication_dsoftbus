@@ -19,10 +19,8 @@
 #include <gmock/gmock.h>
 #include <mutex>
 
-#include "auth_attest_interface.h"
 #include "auth_common.h"
 #include "auth_connection.h"
-#include "auth_device_common_key.h"
 #include "auth_hichain_adapter.h"
 #include "auth_interface.h"
 #include "auth_manager.h"
@@ -30,11 +28,11 @@
 #include "auth_session_json.h"
 #include "auth_session_key.h"
 #include "auth_pre_link.h"
+#include "auth_device_common_key_struct.h"
 #include "bus_center_manager.h"
-#include "lnn_cipherkey_manager.h"
 #include "lnn_common_utils.h"
 #include "lnn_device_info.h"
-#include "lnn_device_info_recovery.h"
+#include "lnn_cipherkey_manager_struct.h"
 #include "lnn_extdata_config.h"
 #include "lnn_feature_capability.h"
 #include "lnn_local_net_ledger.h"

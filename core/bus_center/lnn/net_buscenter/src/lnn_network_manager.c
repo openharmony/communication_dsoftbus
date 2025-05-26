@@ -23,24 +23,26 @@
 #include "bus_center_event.h"
 #include "bus_center_manager.h"
 #include "disc_interface.h"
+#include "g_enhance_lnn_func.h"
+#include "g_enhance_lnn_func_pack.h"
 #include "lnn_async_callback_utils.h"
 #include "lnn_common_utils.h"
 #include "lnn_discovery_manager.h"
 #include "lnn_distributed_net_ledger.h"
-#include "lnn_fast_offline.h"
 #include "lnn_heartbeat_ctrl.h"
 #include "lnn_log.h"
 #include "lnn_net_builder.h"
 #include "lnn_ohos_account.h"
-#include "lnn_oobe_manager.h"
 #include "lnn_physical_subnet_manager.h"
 #include "lnn_settingdata_event_monitor.h"
+#include "lnn_connection_fsm.h"
+#include "lnn_init_monitor.h"
+#include "lnn_network_manager.h"
 #include "softbus_adapter_mem.h"
 #include "softbus_def.h"
 #include "softbus_error_code.h"
 #include "softbus_feature_config.h"
-#include "lnn_connection_fsm.h"
-#include "lnn_init_monitor.h"
+#include "softbus_init_common.h"
 
 #define LNN_MAX_IF_NAME_LEN   256
 #define LNN_DELIMITER_OUTSIDE ","
@@ -383,7 +385,7 @@ static void DataShareStateEventHandler(const LnnEventBasicInfo *info)
             LNN_LOGI(LNN_BUILDER, "data share state is=%{public}d", g_isDataShareInit);
             if (!g_isDataShareInit) {
                 g_isDataShareInit = true;
-                LnnInitOOBEStateMonitorImpl();
+                LnnInitOOBEStateMonitorImplPacked();
                 RetryCheckOOBEState(NULL);
             }
             (void)SoftBusMutexUnlock(&g_dataShareLock);
@@ -549,7 +551,7 @@ static void OnGroupCreated(const char *groupId, int32_t groupType)
     }
     RestartCoapDiscovery();
     DfxRecordWifiTriggerTimestamp(WIFI_GROUP_CREATED);
-    EhLoginEventHandler();
+    EhLoginEventHandlerPacked();
 }
 
 static void OnGroupDeleted(const char *groupId, int32_t groupType)

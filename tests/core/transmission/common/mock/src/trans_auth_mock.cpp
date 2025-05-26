@@ -250,6 +250,21 @@ int32_t LnnGetNetworkIdByUdidHash(
     return GetTransAuthInterface()->LnnGetNetworkIdByUdidHash(udidHash, udidHashLen, buf, len, needOnline);
 }
 
+int32_t UnPackUkRequest(const cJSON *msg, AuthACLInfo *aclInfo, char *sessionName)
+{
+    return GetTransAuthInterface()->UnPackUkRequest(msg, aclInfo, sessionName);
+}
+
+int32_t FillSinkAclInfo(const char *sessionName, AuthACLInfo *aclInfo, int32_t *pid)
+{
+    return GetTransAuthInterface()->FillSinkAclInfo(sessionName, aclInfo, pid);
+}
+
+int32_t UnPackUkReply(const cJSON *msg, AuthACLInfo *aclInfo, int32_t *ukId)
+{
+    return GetTransAuthInterface()->UnPackUkReply(msg, aclInfo, ukId);
+}
+
 int32_t AuthDecryptByUkId(int32_t ukId, const uint8_t *inData, uint32_t inLen, uint8_t *outData, uint32_t *outLen)
 {
     return GetTransAuthInterface()->AuthDecryptByUkId(ukId, inData, inLen, outData, outLen);

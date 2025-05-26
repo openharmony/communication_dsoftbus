@@ -21,7 +21,6 @@
 #include "lnn_network_manager.c"
 #include "lnn_network_manager.h"
 #include "lnn_network_manager_mock.h"
-#include "lnn_oobe_manager.h"
 #include "lnn_physical_subnet_manager.h"
 #include "lnn_settingdata_event_monitor.h"
 #include "lnn_trans_mock.h"

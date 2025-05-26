@@ -17,6 +17,7 @@
 
 #include "securec.h"
 #include <memory>
+#include <dlfcn.h>
 
 #include "kits/c/wifi_device.h"
 #include "kits/c/wifi_hid2d.h"
@@ -39,6 +40,12 @@ namespace OHOS::SoftBus {
 static constexpr char DEFAULT_NET_MASK[] = "255.255.255.0";
 static constexpr int CHANNEL_ARRAY_NUM_MAX = 256;
 static constexpr int DECIMAL_BASE = 10;
+
+P2pAdapter& P2pAdapter::GetInstance()
+{
+    static P2pAdapter instance;
+    return instance;
+}
 
 int32_t P2pAdapter::GetChannel5GListIntArray(std::vector<int> &channels)
 {

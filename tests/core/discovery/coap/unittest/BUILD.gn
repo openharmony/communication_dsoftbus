@@ -27,7 +27,9 @@ ohos_unittest("DiscCoapTest") {
     "$dsoftbus_root_path/adapter/common/include",
     "$dsoftbus_root_path/adapter/default_config/spec_config",
     "$dsoftbus_root_path/components/nstackx/nstackx_util/interface",
+    "$dsoftbus_root_path/interfaces/kits/bus_center",
     "$dsoftbus_root_path/core/bus_center/interface",
+    "$dsoftbus_root_path/interfaces/kits/lnn",
     "$dsoftbus_root_path/core/bus_center/lnn/lane_hub/lane_manager/include",
     "$dsoftbus_root_path/core/bus_center/lnn/net_ledger/common/include",
     "$dsoftbus_root_path/core/bus_center/lnn/net_ledger/local_ledger/include",
@@ -37,11 +39,13 @@ ohos_unittest("DiscCoapTest") {
     "$dsoftbus_root_path/core/discovery/coap/interface",
     "$dsoftbus_root_path/core/discovery/coap/nstackx_coap/include",
     "$dsoftbus_root_path/core/discovery/coap/nstackx_coap/src",
+    "$dsoftbus_root_path/interfaces/kits/disc",
     "$dsoftbus_root_path/core/discovery/interface",
     "$dsoftbus_root_path/core/discovery/manager/include",
     "$dsoftbus_root_path/interfaces/kits/bus_center",
     "$dsoftbus_root_path/interfaces/kits/common",
     "$dsoftbus_root_path/tests/core/discovery/coap/nstackx_adapter_mock",
+    "$dsoftbus_root_path/adapter:softbus_adapter",
   ]
 
   deps = [

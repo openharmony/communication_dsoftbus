@@ -18,21 +18,22 @@
 #include <securec.h>
 
 #include "anonymizer.h"
-#include "auth_device_common_key.h"
 #include "bus_center_manager.h"
+#include "g_enhance_lnn_func.h"
+#include "g_enhance_lnn_func_pack.h"
 #include "lnn_async_callback_utils.h"
-#include "lnn_cipherkey_manager.h"
 #include "lnn_distributed_net_ledger.h"
 #include "lnn_feature_capability.h"
 #include "lnn_lane_link_p2p.h"
 #include "lnn_local_net_ledger.h"
 #include "lnn_log.h"
-#include "lnn_secure_storage.h"
 #include "lnn_sync_info_manager.h"
 #include "softbus_adapter_crypto.h"
 #include "softbus_adapter_json.h"
 #include "softbus_adapter_mem.h"
 #include "softbus_def.h"
+#include "softbus_init_common.h"
+#include "softbus_json_utils.h"
 #include "softbus_error_code.h"
 #include "wifi_direct_manager.h"
 
@@ -218,7 +219,7 @@ static void ProcessSyncP2pInfo(void *para)
         if (IsNeedSyncP2pInfo(localInfo, &info[i]) &&
             LnnSendSyncInfoMsg(LNN_INFO_TYPE_P2P_INFO, info[i].networkId, (uint8_t *)msg, len, NULL) != SOFTBUS_OK) {
             char *anonyDeviceName = NULL;
-            AnonymizeDeviceName(info[i].deviceName, &anonyDeviceName);
+            Anonymize(info[i].deviceName, &anonyDeviceName);
             LNN_LOGE(LNN_BUILDER, "sync p2p info fail. deviceName=%{public}s", AnonymizeWrapper(anonyDeviceName));
             AnonymizeFree(anonyDeviceName);
         }
@@ -358,13 +359,13 @@ int32_t LnnInitLocalP2pInfo(NodeInfo *info)
 
 int32_t LnnInitP2p(void)
 {
-    if (LnnInitPtk() != SOFTBUS_OK) {
+    if (LnnInitPtkPacked() != SOFTBUS_OK) {
         LNN_LOGE(LNN_INIT, "init ptk fail");
     }
     if (LnnInitPtkSyncListener() != SOFTBUS_OK) {
         LNN_LOGE(LNN_INIT, "init ptk listener fail");
     }
-    if (LnnInitBroadcastLinkKey() != SOFTBUS_OK) {
+    if (LnnInitBroadcastLinkKeyPacked() != SOFTBUS_OK) {
         LNN_LOGE(LNN_INIT, "init broadcast link key fail");
     }
     return LnnRegSyncInfoHandler(LNN_INFO_TYPE_P2P_INFO, OnReceiveP2pSyncInfoMsg);
@@ -372,8 +373,8 @@ int32_t LnnInitP2p(void)
 
 void LnnDeinitP2p(void)
 {
-    LnnDeinitPtk();
-    LnnDeinitBroadcastLinkKey();
+    LnnDeinitPtkPacked();
+    LnnDeinitBroadcastLinkKeyPacked();
     (void)LnnUnregSyncInfoHandler(LNN_INFO_TYPE_P2P_INFO, OnReceiveP2pSyncInfoMsg);
 }
 

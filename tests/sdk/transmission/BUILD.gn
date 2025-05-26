@@ -14,33 +14,6 @@
 import("//build/test.gni")
 import("../../../dsoftbus.gni")
 
-dsoftbus_root_path = "../../.."
-
-native_source_path = rebase_path("$dsoftbus_root_path")
-dep_dir = "dsoftbus_enhance/test/sdk/transmission"
-trans_enhance_test = exec_script("$dsoftbus_root_path/check_sub_module.py",
-                                 [
-                                   "$native_source_path",
-                                   "$dep_dir",
-                                 ],
-                                 "value")
-
-trans_enhance_fuzz_dir = "dsoftbus_enhance/test/sdk/transmission/fuzztest"
-trans_enhance_fuzz_test = exec_script("$dsoftbus_root_path/check_sub_module.py",
-                                      [
-                                        "$native_source_path",
-                                        "$trans_enhance_fuzz_dir",
-                                      ],
-                                      "value")
-
-trans_enhance_mt_dir = "dsoftbus_enhance/test/sdk/transmission/moduletest"
-trans_enhance_mt_test = exec_script("$dsoftbus_root_path/check_sub_module.py",
-                                    [
-                                      "$native_source_path",
-                                      "$trans_enhance_mt_dir",
-                                    ],
-                                    "value")
-
 group("benchmarktest") {
   testonly = true
   deps = [ "benchmarktest:benchmarktest" ]
@@ -49,9 +22,6 @@ group("benchmarktest") {
 group("fuzztest") {
   testonly = true
   deps = [ "fuzztest:fuzztest" ]
-  if (trans_enhance_fuzz_test) {
-    deps += [ "$dsoftbus_root_path/dsoftbus_enhance/test/sdk/transmission/fuzztest:fuzztest" ]
-  }
 }
 
 group("integration_test") {
@@ -62,9 +32,6 @@ group("integration_test") {
 group("moduletest") {
   testonly = true
   deps = [ "moduletest:moduletest" ]
-  if (trans_enhance_mt_test) {
-    deps += [ "$dsoftbus_root_path/dsoftbus_enhance/test/sdk/transmission/moduletest:moduletest" ]
-  }
 }
 
 group("unittest") {
@@ -74,7 +41,4 @@ group("unittest") {
     "session:unittest",
     "trans_channel:unittest",
   ]
-  if (trans_enhance_test) {
-    deps += [ "$dsoftbus_root_path/dsoftbus_enhance/test/sdk/transmission/unittest:unittest" ]
-  }
 }

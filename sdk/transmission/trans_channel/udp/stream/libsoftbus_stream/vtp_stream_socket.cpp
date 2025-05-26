@@ -18,6 +18,10 @@
 #include <ifaddrs.h>
 #include <thread>
 
+#include "fillpinc.h"
+#include "g_enhance_sdk_func.h"
+#include "raw_stream_data.h"
+#include "session.h"
 #include "legacy/softbus_hisysevt_transreporter.h"
 #include "softbus_adapter_crypto.h"
 #include "softbus_adapter_socket.h"
@@ -254,11 +258,29 @@ int VtpStreamSocket::HandleFillpFrameEvt(int fd, const FtEventCbkInfo *info)
     return SOFTBUS_OK;
 }
 
+static int32_t FirstClientCheckFuncPointer(
+    int (*func)(int fd, OnFrameEvt cb, const FtEventCbkInfo *info))
+{
+    if (func == NULL) {
+        return SOFTBUS_FUNC_NOT_REGISTER;
+    }
+    return SOFTBUS_OK;
+}
+
+static int HandleVtpFrameEvtPacked(int fd, OnFrameEvt cb, const FtEventCbkInfo *info)
+{
+    ClientEnhanceFuncList *pfnClientEnhanceFuncList = ClientEnhanceFuncListGet();
+    if (FirstClientCheckFuncPointer(pfnClientEnhanceFuncList->handleVtpFrameEvt) != SOFTBUS_OK) {
+        return SOFTBUS_FUNC_NOT_SUPPORT;
+    }
+    return pfnClientEnhanceFuncList->handleVtpFrameEvt(fd, cb, info);
+}
+
 int VtpStreamSocket::HandleFillpFrameEvtInner(int fd, const FtEventCbkInfo *info)
 {
     if (onStreamEvtCb_ != nullptr) {
         TRANS_LOGD(TRANS_STREAM, "onStreamEvtCb_ enter");
-        return HandleVtpFrameEvt(fd, onStreamEvtCb_, info);
+        return HandleVtpFrameEvtPacked(fd, onStreamEvtCb_, info);
     } else {
         TRANS_LOGD(TRANS_STREAM, "onStreamEvtCb_ is nullptr");
     }
@@ -297,6 +319,23 @@ void VtpStreamSocket::FillSupportDet(int fd, const FtEventCbkInfo *info, QosTv *
 }
 #endif
 
+static int32_t SecondClientCheckFuncPointer(bool (*func)(const FtEventCbkInfo *info))
+{
+    if (func == NULL) {
+        return SOFTBUS_FUNC_NOT_REGISTER;
+    }
+    return SOFTBUS_OK;
+}
+
+static bool IsVtpFrameSentEvtPacked(const FtEventCbkInfo *info)
+{
+    ClientEnhanceFuncList *pfnClientEnhanceFuncList = ClientEnhanceFuncListGet();
+    if (SecondClientCheckFuncPointer(pfnClientEnhanceFuncList->isVtpFrameSentEvt) != SOFTBUS_OK) {
+        return false;
+    }
+    return pfnClientEnhanceFuncList->isVtpFrameSentEvt(info);
+}
+
 /* This function is used to prompt the metrics returned by FtApiRegEventCallbackFunc() function */
 int VtpStreamSocket::FillpStatistics(int fd, const FtEventCbkInfo *info)
 {
@@ -310,7 +349,7 @@ int VtpStreamSocket::FillpStatistics(int fd, const FtEventCbkInfo *info)
     } else if (info->evt == FT_EVT_TRAFFIC_DATA) {
         TRANS_LOGI(TRANS_STREAM, "recv fillp traffic data");
         return HandleRipplePolicy(fd, info);
-    } else if (IsVtpFrameSentEvt(info)) {
+    } else if (IsVtpFrameSentEvtPacked(info)) {
         TRANS_LOGI(TRANS_STREAM, "fd %{public}d recv fillp frame send evt", fd);
         return HandleFillpFrameEvt(fd, info);
     }
@@ -1596,10 +1635,28 @@ ssize_t VtpStreamSocket::Decrypt(const void *in, ssize_t inLen, void *out, ssize
     return outLen;
 }
 
+static int32_t ThirdClientCheckFuncPointer(
+    int32_t (*func)(int fd, OnFrameEvt *cb, const void *para))
+{
+    if (func == NULL) {
+        return SOFTBUS_FUNC_NOT_REGISTER;
+    }
+    return SOFTBUS_OK;
+}
+
+static int32_t VtpSetSocketMultiLayerPacked(int fd, OnFrameEvt *cb, const void *para)
+{
+    ClientEnhanceFuncList *pfnClientEnhanceFuncList = ClientEnhanceFuncListGet();
+    if (ThirdClientCheckFuncPointer(pfnClientEnhanceFuncList->vtpSetSocketMultiLayer) != SOFTBUS_OK) {
+        return SOFTBUS_FUNC_NOT_SUPPORT;
+    }
+    return pfnClientEnhanceFuncList->vtpSetSocketMultiLayer(fd, cb, para);
+}
+
 int32_t VtpStreamSocket::SetMultiLayer(const void *para)
 {
     int fd = GetStreamSocketFd(FD).GetIntValue();
-    return VtpSetSocketMultiLayer(fd, &onStreamEvtCb_, para);
+    return VtpSetSocketMultiLayerPacked(fd, &onStreamEvtCb_, para);
 }
 
 void VtpStreamSocket::CreateServerProcessThread()

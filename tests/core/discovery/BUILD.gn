@@ -14,15 +14,6 @@
 import("//build/test.gni")
 import("../../../dsoftbus.gni")
 
-native_source_path = rebase_path("$dsoftbus_root_path")
-dep_dir = "dsoftbus_enhance/test/core/discovery"
-has_enhance_test = exec_script("$dsoftbus_root_path/check_sub_module.py",
-                               [
-                                 "$native_source_path",
-                                 "$dep_dir",
-                               ],
-                               "value")
-
 group("unittest") {
   testonly = true
   deps = [ "manager/unittest:unittest" ]
@@ -39,21 +30,5 @@ group("unittest") {
       "coap/common/unittest:unittest",
       "coap/unittest:unittest",
     ]
-  }
-  if (has_enhance_test) {
-    deps += [
-      "$dsoftbus_root_path/dsoftbus_enhance/test/core/connection:unittest",
-      "$dsoftbus_root_path/dsoftbus_enhance/test/core/discovery:unittest",
-      "$dsoftbus_root_path/tests/core/broadcast:unittest",
-    ]
-  }
-}
-
-group("fuzztest") {
-  testonly = true
-  deps = []
-  if (has_enhance_test) {
-    deps +=
-        [ "$dsoftbus_root_path/dsoftbus_enhance/test/core/discovery:fuzztest" ]
   }
 }
