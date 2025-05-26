@@ -1811,7 +1811,6 @@ static void UpdateDevBasicInfoToDLedger(NodeInfo *newInfo, NodeInfo *oldInfo)
     oldInfo->deviceSecurityLevel = newInfo->deviceSecurityLevel;
     oldInfo->staticNetCap = newInfo->staticNetCap;
     oldInfo->sleRangeCapacity = newInfo->sleRangeCapacity;
-    oldInfo->isSupportUkNego = newInfo->isSupportUkNego;
 }
 
 static void UpdateDistributedLedger(NodeInfo *newInfo, NodeInfo *oldInfo)
