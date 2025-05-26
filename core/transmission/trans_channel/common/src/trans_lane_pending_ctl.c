@@ -21,7 +21,8 @@
 #include "auth_interface.h"
 #include "bus_center_manager.h"
 #include "common_list.h"
-#include "legacy/softbus_adapter_hitrace.h"
+#include "g_enhance_trans_func.h"
+#include "g_enhance_trans_func_pack.h"
 #include "lnn_distributed_net_ledger.h"
 #include "permission_entry.h"
 #include "softbus_adapter_mem.h"
@@ -31,6 +32,8 @@
 #include "softbus_proxychannel_manager.h"
 #include "softbus_proxychannel_network.h"
 #include "softbus_utils.h"
+#include "softbus_init_common.h"
+#include "legacy/softbus_adapter_hitrace.h"
 #include "trans_channel_common.h"
 #include "trans_channel_manager.h"
 #include "trans_client_proxy.h"
@@ -38,9 +41,7 @@
 #include "trans_lane_manager.h"
 #include "trans_log.h"
 #include "trans_network_statistics.h"
-#include "trans_qos_info.h"
 #include "trans_session_manager.h"
-#include "trans_uk_manager.h"
 
 #define MIN(a, b) ((a) < (b) ? (a) : (b))
 
@@ -664,10 +665,7 @@ static int32_t TransProxyGetAppInfo(const char *sessionName, const char *peerNet
 
     GetRemoteUdidWithNetworkId(peerNetworkId, appInfo->peerUdid, sizeof(appInfo->peerUdid));
     TransGetRemoteDeviceVersion(peerNetworkId, CATEGORY_NETWORK_ID, appInfo->peerVersion, sizeof(appInfo->peerVersion));
-    if (GetUkPolicy(appInfo) == NO_NEED_UK) {
-        TRANS_LOGI(TRANS_CTRL, "No need sink generate key.");
-        DisableCapabilityBit(&(appInfo->channelCapability), TRANS_CHANNEL_SINK_GENERATE_KEY_OFFSET);
-    }
+
     return SOFTBUS_OK;
 }
 
@@ -1198,7 +1196,7 @@ static void TransGetQosInfo(const SessionParam *param, QosInfo *qosInfo, AllocEx
                 qosInfo->ratePreference = (param->qos[i].value != 0) ? true : false;
                 break;
             default:
-                GetExtQosInfo(param, qosInfo, i, extendInfo);
+                GetExtQosInfoPacked(param, qosInfo, i, extendInfo);
                 break;
         }
     }

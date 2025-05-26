@@ -23,6 +23,18 @@ ohos_unittest("AuthNegotiateChannelTest") {
   module_out_path = ut_out_path
 
   include_dirs = [
+    "$dsoftbus_root_path/interfaces/kits/transport",
+    "$dsoftbus_root_path/interfaces/kits/conncect",
+    "$dsoftbus_root_path/interfaces/kits/adapter",
+    "$dsoftbus_root_path/interfaces/kits/lnn",
+    "$dsoftbus_root_path/interfaces/kits/lnn/enhance",
+    "$dsoftbus_root_path/core/connection/wifi_direct_cpp/dbinder",
+    "$dsoftbus_root_path/interfaces/kits/authentication",
+    "$dsoftbus_root_path/interfaces/kits/disc",
+    "$dsoftbus_root_path/interfaces/kits/adapter",
+    "$dsoftbus_root_path/core/frame/init/include",
+    "$dsoftbus_root_path/core/frame/common/include",
+
     "$dsoftbus_dfx_path/interface/include",
     "$dsoftbus_root_path/tests/core/connection/wifi_direct_cpp/processor",
     "$dsoftbus_root_path/tests/core/connection/wifi_direct_cpp",
@@ -53,6 +65,8 @@ ohos_unittest("AuthNegotiateChannelTest") {
     "$dsoftbus_root_path/core/bus_center/lnn/lane_hub/lane_manager/include",
     "$wifi_direct_path/command",
     "$dsoftbus_root_path/tests/common/include",
+    "$dsoftbus_root_path/interfaces/kits/connect",
+    "$dsoftbus_root_path/interfaces/kits/authentication/enhance",
   ]
 
   sources = [
@@ -98,6 +112,7 @@ ohos_unittest("AuthNegotiateChannelTest") {
     "$wifi_direct_path/protocol/tlv_protocol.cpp",
     "$wifi_direct_path/utils/wifi_direct_anonymous.cpp",
     "$wifi_direct_path/utils/wifi_direct_utils.cpp",
+    "$dsoftbus_root_path/core/frame/common/src/softbus_init_common.c",
     "$wifi_direct_path/wifi_direct_executor.cpp",
     "$wifi_direct_path/wifi_direct_executor_manager.cpp",
     "$wifi_direct_path/wifi_direct_initiator.cpp",
@@ -106,6 +121,7 @@ ohos_unittest("AuthNegotiateChannelTest") {
     "$wifi_direct_path/wifi_direct_role_option.cpp",
     "$wifi_direct_path/wifi_direct_scheduler.cpp",
     "auth_negotiate_channel_test.cpp",
+    "$dsoftbus_root_path/core/frame/init/src/g_enhance_lnn_func.c",
   ]
 
   configs = [
@@ -118,7 +134,11 @@ ohos_unittest("AuthNegotiateChannelTest") {
     "-frtti",
   ]
 
-  deps = [ "$dsoftbus_root_path/adapter:softbus_adapter" ]
+  deps = [
+    "$dsoftbus_root_path/adapter:softbus_adapter",
+    "$dsoftbus_root_path/dfx:softbus_dfx",
+    "$dsoftbus_root_path/core/connection/wifi_direct_cpp:wifi_direct",
+  ]
 
   external_deps = [
     "cJSON:cjson",
@@ -140,6 +160,17 @@ ohos_unittest("ProxyNegotiateChannelTest") {
   module_out_path = ut_out_path
 
   include_dirs = [
+    "$dsoftbus_root_path/interfaces/kits/transport",
+    "$dsoftbus_root_path/interfaces/kits/conncect",
+    "$dsoftbus_root_path/interfaces/kits/lnn",
+    "$dsoftbus_root_path/interfaces/kits/lnn/enhance",
+    "$dsoftbus_root_path/core/connection/wifi_direct_cpp/dbinder",
+    "$dsoftbus_root_path/interfaces/kits/authentication",
+    "$dsoftbus_root_path/interfaces/kits/authentication/enhance",
+    "$dsoftbus_root_path/interfaces/kits/disc",
+    "$dsoftbus_root_path/interfaces/kits/adapter",
+    "$dsoftbus_root_path/core/frame/init/include",
+    "$dsoftbus_root_path/core/frame/common/include",
     "$dsoftbus_root_path/tests/core/connection/wifi_direct_cpp/processor",
     "$dsoftbus_root_path/tests/core/connection/wifi_direct_cpp",
     "$dsoftbus_root_path/core/connection/wifi_direct_cpp/channel",
@@ -170,6 +201,7 @@ ohos_unittest("ProxyNegotiateChannelTest") {
     "$dsoftbus_root_path/core/bus_center/lnn/lane_hub/lane_manager/include",
     "$wifi_direct_path/command",
     "$dsoftbus_root_path/tests/common/include",
+    "$dsoftbus_root_path/interfaces/kits/connect",
   ]
 
   sources = [
@@ -215,6 +247,7 @@ ohos_unittest("ProxyNegotiateChannelTest") {
     "$wifi_direct_path/protocol/tlv_protocol.cpp",
     "$wifi_direct_path/utils/wifi_direct_anonymous.cpp",
     "$wifi_direct_path/utils/wifi_direct_utils.cpp",
+    "$dsoftbus_root_path/core/frame/common/src/softbus_init_common.c",
     "$wifi_direct_path/wifi_direct_executor.cpp",
     "$wifi_direct_path/wifi_direct_executor_manager.cpp",
     "$wifi_direct_path/wifi_direct_initiator.cpp",
@@ -223,6 +256,7 @@ ohos_unittest("ProxyNegotiateChannelTest") {
     "$wifi_direct_path/wifi_direct_role_option.cpp",
     "$wifi_direct_path/wifi_direct_scheduler.cpp",
     "proxy_negotiate_channel_test.cpp",
+    "$dsoftbus_root_path/core/frame/init/src/g_enhance_lnn_func.c",
   ]
 
   configs = [
@@ -235,7 +269,11 @@ ohos_unittest("ProxyNegotiateChannelTest") {
     "-frtti",
   ]
 
-  deps = [ "$dsoftbus_root_path/adapter:softbus_adapter" ]
+  deps = [
+    "$dsoftbus_root_path/adapter:softbus_adapter",
+    "$dsoftbus_root_path/dfx:softbus_dfx",
+    "$dsoftbus_root_path/core/connection/wifi_direct_cpp:wifi_direct",
+  ]
 
   external_deps = [
     "cJSON:cjson",

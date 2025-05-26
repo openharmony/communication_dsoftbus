@@ -35,6 +35,8 @@ ohos_fuzztest("ClientTransTcpDirectListenerFuzzTest") {
     "$dsoftbus_root_path/sdk/transmission/trans_channel/tcp_direct/include",
     "$dsoftbus_root_path/sdk/transmission/session/include",
     "$dsoftbus_root_path/tests/common/include",
+    "$dsoftbus_root_path/interfaces/kits/sdk",
+    "$dsoftbus_root_path/interfaces/kits/connect",
   ]
   cflags = [
     "-g",

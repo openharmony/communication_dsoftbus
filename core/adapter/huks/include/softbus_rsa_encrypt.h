@@ -17,21 +17,11 @@
 #define SOFTBUS_RSA_ENCRYPT_H
 
 #include <stdint.h>
+#include "softbus_rsa_encrypt_struct.h"
 
 #ifdef __cplusplus
 extern "C" {
 #endif
-
-typedef struct {
-    const uint8_t *key;
-    uint32_t len;
-} PublicKey;
-
-#define SOFTBUS_RSA_LEN         2048
-#define SOFTBUS_RSA_ENCRYPT_LEN (SOFTBUS_RSA_LEN / 8)
-#define SOFTBUS_RSA_PUB_KEY_LEN (SOFTBUS_RSA_ENCRYPT_LEN + 38)
-
-#define RSA_PUB_KEY_LEN_SUBTRACT_ENCRYPT_LEN 38
 
 int32_t SoftBusGetPublicKey(uint8_t *publicKey, uint32_t publicKeyLen);
 int32_t SoftBusRsaEncrypt(const uint8_t *srcData, uint32_t srcDataLen, PublicKey *publicKey, uint8_t **encryptedData,

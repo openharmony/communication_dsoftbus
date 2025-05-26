@@ -17,37 +17,13 @@
 #define LNN_DISTRIBUTED_NET_LEDGER_H
 
 #include "auth_interface.h"
+#include "bus_center_info_key.h"
+#include "lnn_node_info.h"
+#include "lnn_distributed_net_ledger_struct.h"
 
 #ifdef __cplusplus
 extern "C" {
 #endif
-
-#define INT_TO_STR_SIZE 12
-#define INVALID_CONNECTION_CODE_VALUE (-1)
-#define SHORT_UDID_HASH_LEN 8
-#define SHORT_UDID_HASH_HEX_LEN 16
-typedef struct {
-    InfoKey key;
-    int32_t (*getInfo)(const char *netWorkId, bool checkOnline, void *info, uint32_t len);
-} DistributedLedgerKey;
-
-typedef struct {
-    InfoKey key;
-    int32_t (*getInfo)(const char *netWorkId, bool checkOnline, void *info, uint32_t len, int32_t ifnameIdx);
-} DistributedLedgerKeyByIfname;
-
-typedef enum {
-    CATEGORY_UDID,
-    CATEGORY_UUID,
-    CATEGORY_NETWORK_ID,
-} IdCategory;
-
-typedef enum {
-    REPORT_NONE,
-    REPORT_CHANGE,
-    REPORT_ONLINE,
-    REPORT_OFFLINE,
-} ReportCategory;
 
 int32_t LnnInitDistributedLedger(void);
 void LnnDeinitDistributedLedger(void);
@@ -78,6 +54,7 @@ int32_t LnnGetDLAuthCapacity(const char *networkId, uint32_t *authCapacity);
 bool LnnGetOnlineStateById(const char *id, IdCategory type);
 int32_t LnnGetLnnRelation(const char *id, IdCategory type, uint8_t *relation, uint32_t len);
 int32_t LnnSetDLConnCapability(const char *networkId, uint32_t connCapability);
+int32_t LnnSetDLConnUserIdCheckSum(const char *networked, int32_t userIdCheckSum);
 int32_t LnnSetDLNodeAddr(const char *id, IdCategory type, const char *addr);
 int32_t LnnSetDLConnUserIdCheckSum(const char *networkId, int32_t userIdCheckSum);
 int32_t LnnSetDLConnUserId(const char *networkId, int32_t userId);

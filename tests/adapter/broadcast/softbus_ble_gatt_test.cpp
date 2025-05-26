@@ -18,7 +18,7 @@
 #include "c_header/ohos_bt_gatt.h"
 #include "disc_log.h"
 #include "softbus_adapter_mem.h"
-#include "softbus_ble_gatt.h"
+#include "softbus_ble_gatt_public.h"
 #include "softbus_broadcast_type.h"
 #include "softbus_error_code.h"
 #include "gmock/gmock.h"

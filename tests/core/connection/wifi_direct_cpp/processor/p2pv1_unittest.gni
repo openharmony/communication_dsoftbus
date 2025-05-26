@@ -20,12 +20,15 @@ current_path = rebase_path(".")
 
 processorv1_ut_include_dirs = [
   "$current_path",
+  "$dsoftbus_root_path/interfaces/kits/transport",
   "$dsoftbus_dfx_path/interface/include",
+  "$dsoftbus_root_path/interfaces/kits/lnn",
   "$dsoftbus_root_path/core/bus_center/utils/include",
+  "$dsoftbus_root_path/interfaces/kits/adapter",
+  "$dsoftbus_root_path/interfaces/kits/authentication",
   "$dsoftbus_root_path/core/authentication/include",
   "$dsoftbus_root_path/core/authentication/interface",
   "$dsoftbus_root_path/core/bus_center/lnn/net_builder/include",
-  "$dsoftbus_root_path/core/bus_center/lnn/net_ledger/common/include",
   "$dsoftbus_root_path/core/bus_center/lnn/net_ledger/common/include",
   "$dsoftbus_root_path/core/bus_center/lnn/net_ledger/distributed_ledger/include",
   "$dsoftbus_root_path/core/bus_center/lnn/lane_hub/lane_manager/include",
@@ -33,17 +36,21 @@ processorv1_ut_include_dirs = [
   "$dsoftbus_root_path/core/connection/interface",
   "$dsoftbus_root_path/core/common/include",
   "$dsoftbus_root_path/core/discovery/manager/include",
+  "$dsoftbus_root_path/interfaces/kits/bus_center",
   "$dsoftbus_root_path/core/discovery/interface",
   "$dsoftbus_root_path/adapter/common/include",
   "$dsoftbus_root_path/interfaces/kits/common",
   "$dsoftbus_root_path/interfaces/kits/discovery",
-  "$dsoftbus_root_path/interfaces/kits/bus_center",
   "$dsoftbus_root_path/interfaces/inner_kits/lnn",
   "$dsoftbus_root_path/core/transmission/trans_channel/proxy/include",
   "$dsoftbus_root_path/adapter/common/include/OS_adapter_define/linux",
-  "$dsoftbus_root_path/core/transmission/trans_channel/proxy/include",
 
   "$dsoftbus_root_path/tests/common/include",
+  "$dsoftbus_root_path/interfaces/kits/connect",
+  "$dsoftbus_root_path/interfaces/kits/disc",
+  "$dsoftbus_root_path/core/frame/init/include",
+  "$dsoftbus_root_path/core/connection/wifi_direct_cpp/dbinder",
+  "$dsoftbus_root_path/core/frame/common/include",
 
   "$wifi_direct_path",
   "$wifi_direct_unit_path",
@@ -96,6 +103,8 @@ processorv1_ut_sources = [
   "$wifi_direct_unit_path/net_conn_client.cpp",
   "$wifi_direct_unit_path/wifi_direct_mock.cpp",
   "$wifi_direct_unit_path/wifi_direct_utils.cpp",
+  "$dsoftbus_root_path/core/frame/common/src/softbus_init_common.c",
+  "$dsoftbus_root_path/core/frame/init/src/g_enhance_lnn_func.c",
 ]
 
 processorv1_ut_defines = [ "P2P_V1_WAITING_TIMEOUT_MS_OVERWRITE=1000" ]

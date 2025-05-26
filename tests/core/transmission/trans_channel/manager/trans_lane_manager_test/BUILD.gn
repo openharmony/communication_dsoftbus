@@ -50,13 +50,16 @@ ohos_unittest("TransLaneManagerTest") {
     "$dsoftbus_core_path/transmission/trans_channel/tcp_direct/include",
     "$dsoftbus_core_path/transmission/trans_channel/udp_negotiation/include",
 
+    "$dsoftbus_root_path/interfaces/kits/transport",
     "$dsoftbus_root_path/adapter/common/net/wifi/include",
+    "$dsoftbus_root_path/interfaces/kits/connect",
   ]
 
   deps = [
     "$dsoftbus_core_path/common:softbus_utils",
     "$dsoftbus_core_path/frame:softbus_server",
     "$dsoftbus_root_path/adapter:softbus_adapter",
+    "$dsoftbus_root_path/core/connection/wifi_direct_cpp:wifi_direct",
   ]
 
   external_deps = [

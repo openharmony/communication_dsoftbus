@@ -17,33 +17,14 @@
 #define LNN_SUBNET_MANAGER_H
 
 #include "lnn_network_manager.h"
+#include "lnn_physical_subnet_manager_struct.h"
+#include "stdint.h"
 
 #ifdef __cplusplus
 #if __cplusplus
 extern "C" {
 #endif
 #endif
-#define LNN_PHYSICAL_SUBNET_ALL_NETIF "*"
-
-typedef enum {
-    LNN_SUBNET_IDLE, // can be enable
-    LNN_SUBNET_RUNNING,
-    LNN_SUBNET_SHUTDOWN, // will not be auto enable
-    LNN_SUBNET_RESETTING, // Will be auto enable in high pri
-    LNN_SUBNET_STATUS_MAX
-} LnnPhysicalSubnetStatus;
-
-typedef struct LnnPhysicalSubnet {
-    char ifName[NET_IF_NAME_LEN];
-    const LnnProtocolManager *protocol;
-    LnnPhysicalSubnetStatus status;
-    void (*destroy)(struct LnnPhysicalSubnet *);
-    void (*onNetifStatusChanged)(struct LnnPhysicalSubnet *, void *status);
-    void (*onSoftbusNetworkDisconnected)(struct LnnPhysicalSubnet *);
-} LnnPhysicalSubnet;
-
-typedef int16_t PhysicalSubnetId;
-#define PHYSICAL_SUBNET_ID_NOT_EXIST (-1)
 
 int32_t LnnInitPhysicalSubnetManager(void);
 
@@ -55,7 +36,6 @@ int32_t LnnUnregistPhysicalSubnetByType(ProtocolType type);
 
 void LnnNotifyPhysicalSubnetStatusChanged(const char *ifName, ProtocolType type, void *status);
 
-typedef VisitNextChoice (*LnnVisitPhysicalSubnetCallback)(const LnnPhysicalSubnet *, void *);
 bool LnnVisitPhysicalSubnet(LnnVisitPhysicalSubnetCallback callback, void *data);
 
 void LnnNotifyAllTypeOffline(ConnectionAddrType type);

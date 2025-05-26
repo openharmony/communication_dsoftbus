@@ -21,6 +21,12 @@
 #include "utils/wifi_direct_utils.h"
 
 namespace OHOS::SoftBus {
+InterfaceManager& InterfaceManager::GetInstance()
+{
+    static InterfaceManager instance;
+    return instance;
+}
+
 int InterfaceManager::UpdateInterface(InterfaceInfo::InterfaceType type, const Updater &updater)
 {
     std::unique_lock lock(lock_);

@@ -19,7 +19,7 @@
 #include <gmock/gmock.h>
 #include <mutex>
 
-#include "lnn_lane_power_control.h"
+#include "lnn_lane_power_control_struct.h"
 
 namespace OHOS {
 class LanePowerCtrlDepsInterface {

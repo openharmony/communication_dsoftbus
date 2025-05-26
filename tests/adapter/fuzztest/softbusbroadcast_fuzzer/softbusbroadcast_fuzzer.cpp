@@ -16,7 +16,7 @@
 #include "softbusbroadcast_fuzzer.h"
 #include "softbus_broadcast_manager.h"
 #include "softbus_ble_utils.h"
-#include "softbus_ble_gatt.h"
+#include "softbus_ble_gatt_public.h"
 
 #include <cstddef>
 #include <type_traits>

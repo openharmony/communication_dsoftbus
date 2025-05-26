@@ -28,6 +28,7 @@ ohos_fuzztest("LnnSyncInfoManagerFuzzTest") {
     "$dsoftbus_root_path/adapter/common/include",
     "$dsoftbus_root_path/core/common/message_handler/include",
     "$dsoftbus_root_path/interfaces/kits/common",
+    "$dsoftbus_root_path/interfaces/kits/lnn",
     "$dsoftbus_root_path/tests/sdk/common/include",
     "$dsoftbus_root_path/tests/common/include",
   ]

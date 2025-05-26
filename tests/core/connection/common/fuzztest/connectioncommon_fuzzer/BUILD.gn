@@ -25,6 +25,7 @@ ohos_fuzztest("ConnectionCommonFuzzTest") {
 
   include_dirs = [
     "$dsoftbus_root_path/core/connection/common/include",
+    "$dsoftbus_root_path/interfaces/kits/connect",
     "$dsoftbus_root_path/core/connection/interface",
   ]
 

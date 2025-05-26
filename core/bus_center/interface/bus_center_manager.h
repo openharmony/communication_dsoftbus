@@ -20,23 +20,11 @@
 #include "data_level.h"
 #include "disc_manager.h"
 #include "softbus_bus_center.h"
+#include "bus_center_manager_struct.h"
 
 #ifdef __cplusplus
 extern "C" {
 #endif
-
-typedef enum {
-    LNN_MESSAGE_LANE = 1,
-    LNN_BYTES_LANE,
-    LNN_FILE_LANE,
-    LNN_STREAM_LANE,
-    LNN_LANE_PROPERTY_BUTT,
-} LnnLaneProperty;
-
-typedef union  {
-    IServerDiscInnerCallback serverCb;
-    DiscInnerCallback innerCb;
-} InnerCallback;
 
 int32_t LnnPublishService(const char *pkgName, const PublishInfo *info, bool isInnerRequest, int32_t callingPid);
 int32_t LnnUnPublishService(const char *pkgName, int32_t publishId, bool isInnerRequest, int32_t callingPid);
@@ -92,7 +80,6 @@ int32_t LnnGetConnSubFeatureByUdidHashStr(const char *udidHashStr, uint64_t *con
 int32_t LnnSetLocalUnifiedName(const char *unifiedName);
 bool LnnIsMasterNode(void);
 void SoftBusDumpBusCenterPrintInfo(int fd, NodeBasicInfo *nodeInfo);
-int32_t LnnRequestCheckOnlineStatus(const char *networkId, uint64_t timeout);
 
 int32_t LnnServerJoin(ConnectionAddr *addr, const char *pkgName, bool isForceJoin);
 int32_t LnnServerLeave(const char *networkId, const char *pkgName);

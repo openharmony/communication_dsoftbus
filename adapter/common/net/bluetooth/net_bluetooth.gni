@@ -14,6 +14,8 @@
 import("../../../../dsoftbus.gni")
 
 adapter_ble_inc = [
+  "$dsoftbus_root_path/interfaces/kits/adapter",
+  "$dsoftbus_root_path/interfaces/kits/broadcast",
   "$dsoftbus_root_path/adapter/common/include",
   "$dsoftbus_root_path/core/common/include",
   "$dsoftbus_root_path/adapter/common/net/bluetooth/include",
@@ -35,26 +37,10 @@ adapter_ble_src = [
   "$dsoftbus_dfx_path/dumper/legacy/softbus_hidumper.c",
 ]
 
-adapter_ble_external_deps = []
-if (dsoftbus_feature_ex_kits) {
-  import(
-      "$dsoftbus_root_path/dsoftbus_enhance/adapter/common/net/bluetooth/broadcast/adapter/ble/adapter_ble_enhance.gni")
-  import(
-      "$dsoftbus_root_path/dsoftbus_enhance/adapter/common/net/bluetooth/broadcast/adapter/sle/adapter_sle_enhance.gni")
-  import(
-      "$dsoftbus_root_path/dsoftbus_enhance/adapter/common/net/bluetooth/broadcast/manager_sle_enhance.gni")
-
-  adapter_ble_inc += adapter_ble_enhance_inc + adapter_sle_enhance_inc +
-                     manager_sle_enhance_inc
-  adapter_ble_src += adapter_ble_enhance_src + adapter_sle_enhance_src +
-                     manager_sle_enhance_src
-  adapter_ble_external_deps += adapter_sle_enhance_external_deps
-} else {
-  adapter_ble_src += [ "$dsoftbus_root_path/adapter/common/net/bluetooth/broadcast/adapter/ble/src/softbus_ble_gatt.c" ]
-}
+adapter_ble_src += [ "$dsoftbus_root_path/adapter/common/net/bluetooth/broadcast/adapter/ble/src/softbus_ble_gatt.c" ]
 
 adapter_net_br_src = [ "$dsoftbus_root_path/adapter/common/net/bluetooth/common/softbus_adapter_bt_common.c" ]
-adapter_ble_external_deps += [ "bluetooth:btframework" ]
+adapter_ble_external_deps = [ "bluetooth:btframework" ]
 
 if (defined(ohos_lite)) {
   if (ohos_kernel_type == "liteos_m") {

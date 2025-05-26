@@ -49,6 +49,7 @@ HWTEST_F(TransLogTest, TransLogTest001, TestSize.Level0)
     ExpectMatchSoftBusLogAttrs(TRANS_LABELS[++index], TRANS_MSG, ++transDomainBase, "TransMsg");
     ExpectMatchSoftBusLogAttrs(TRANS_LABELS[++index], TRANS_STREAM, ++transDomainBase, "TransStream");
     ExpectMatchSoftBusLogAttrs(TRANS_LABELS[++index], TRANS_QOS, ++transDomainBase, "TransQos");
+    ExpectMatchSoftBusLogAttrs(TRANS_LABELS[++index], TRANS_EVENT, ++transDomainBase, "TransEvent");
     ExpectMatchSoftBusLogAttrs(TRANS_LABELS[++index], TRANS_TEST, DOMAIN_ID_TEST, "TransTest");
     SoftBusLogLabel label = TRANS_LABELS[TRANS_TEST];
     HilogMock mock;

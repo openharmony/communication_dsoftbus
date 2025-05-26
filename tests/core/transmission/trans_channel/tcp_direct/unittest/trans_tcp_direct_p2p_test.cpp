@@ -29,7 +29,11 @@
 #include "softbus_app_info.h"
 #include "softbus_conn_interface.h"
 #include "softbus_error_code.h"
+#include "dsoftbus_enhance_interface.h"
+#include "g_enhance_lnn_func.h"
+#include "trans_tcp_direct_common_mock.h"
 
+using namespace testing;
 using namespace testing::ext;
 
 namespace OHOS {
@@ -300,11 +304,15 @@ HWTEST_F(TransTcpDirectP2pTest, StartP2pListenerTest001, TestSize.Level1)
  */
 HWTEST_F(TransTcpDirectP2pTest, VerifyP2pTest001, TestSize.Level1)
 {
+    LnnEnhanceFuncList *pfnLnnEnhanceFuncList = LnnEnhanceFuncListGet();
+    pfnLnnEnhanceFuncList->authMetaPostTransData = AuthMetaPostTransData;
     AuthHandle authHandle = { .authId = 1, .type = AUTH_LINK_TYPE_WIFI };
     int64_t seq = 1;
     int32_t ret = VerifyP2p(authHandle, nullptr, nullptr, 0, seq);
     ASSERT_EQ(ret, SOFTBUS_PARSE_JSON_ERR);
 
+    NiceMock<TransTcpDirectCommonInterfaceMock> TransTcpDirectP2pMock;
+    EXPECT_CALL(TransTcpDirectP2pMock, AuthMetaPostTransData).WillOnce(Return(SOFTBUS_LOCK_ERR));
     int32_t port = MY_PORT;
     ret = VerifyP2p(authHandle, g_ip, nullptr, port, seq);
     EXPECT_EQ(ret, SOFTBUS_NOT_IMPLEMENT);
@@ -339,6 +347,8 @@ HWTEST_F(TransTcpDirectP2pTest, OpenAuthConnTest001, TestSize.Level1)
  */
 HWTEST_F(TransTcpDirectP2pTest, OnVerifyP2pRequestTest001, TestSize.Level1)
 {
+    LnnEnhanceFuncList *pfnLnnEnhanceFuncList = LnnEnhanceFuncListGet();
+    pfnLnnEnhanceFuncList->authMetaPostTransData = AuthMetaPostTransData;
     AuthHandle authHandle = { .authId = 1, .type = AUTH_LINK_TYPE_WIFI };
     int64_t seq = 1;
     int32_t code = CODE_VERIFY_P2P;
@@ -347,6 +357,8 @@ HWTEST_F(TransTcpDirectP2pTest, OnVerifyP2pRequestTest001, TestSize.Level1)
     string msg = TestGetMsgPack();
     cJSON *json = cJSON_Parse(msg.c_str());
     EXPECT_TRUE(json != nullptr);
+    NiceMock<TransTcpDirectCommonInterfaceMock> TransTcpDirectP2pMock;
+    EXPECT_CALL(TransTcpDirectP2pMock, AuthMetaPostTransData).WillOnce(Return(SOFTBUS_OK));
     SendVerifyP2pFailRsp(authHandle, seq, code, errCode, nullptr, true);
 
     SendVerifyP2pFailRsp(authHandle, seq, code, errCode, errDesc, true);
@@ -379,6 +391,8 @@ HWTEST_F(TransTcpDirectP2pTest, ConnectTcpDirectPeerTest001, TestSize.Level1)
  */
 HWTEST_F(TransTcpDirectP2pTest, OnAuthDataRecvTest001, TestSize.Level1)
 {
+    LnnEnhanceFuncList *pfnLnnEnhanceFuncList = LnnEnhanceFuncListGet();
+    pfnLnnEnhanceFuncList->authMetaPostTransData = AuthMetaPostTransData;
     AuthHandle authHandle = { .authId = 1, .type = AUTH_LINK_TYPE_WIFI };
     int64_t seq = 1;
     int32_t flags = MSG_FLAG_REQUEST;
@@ -389,6 +403,8 @@ HWTEST_F(TransTcpDirectP2pTest, OnAuthDataRecvTest001, TestSize.Level1)
     data->seq = 1;
     data->data = (const uint8_t *)str;
     data->len = AUTH_TRANS_DATA_LEN;
+    NiceMock<TransTcpDirectCommonInterfaceMock> TransTcpDirectP2pMock;
+    EXPECT_CALL(TransTcpDirectP2pMock, AuthMetaPostTransData).WillOnce(Return(SOFTBUS_OK));
     int32_t ret = OnVerifyP2pRequest(authHandle, seq, nullptr, true);
     EXPECT_EQ(ret, SOFTBUS_INVALID_PARAM);
     OnAuthMsgProc(authHandle, flags, seq, nullptr);
@@ -439,17 +455,24 @@ HWTEST_F(TransTcpDirectP2pTest, OpenAuthConntest002, TestSize.Level1)
  */
 HWTEST_F(TransTcpDirectP2pTest, SendVerifyP2pRsp003, TestSize.Level1)
 {
+    LnnEnhanceFuncList *pfnLnnEnhanceFuncList = LnnEnhanceFuncListGet();
+    pfnLnnEnhanceFuncList->authMetaPostTransData = AuthMetaPostTransData;
     AuthHandle authHandle = { .authId = 1, .type = AUTH_LINK_TYPE_WIFI };
     int32_t ret;
     int32_t errCode = SOFTBUS_NO_INIT;
     int64_t seq = 1;
     bool isAuthLink = true;
     bool notAuthLink = false;
+    NiceMock<TransTcpDirectCommonInterfaceMock> TransTcpDirectP2pMock;
+    EXPECT_CALL(TransTcpDirectP2pMock, AuthMetaPostTransData).WillOnce(Return(SOFTBUS_OK));
     SendVerifyP2pFailRsp(authHandle, seq, CODE_VERIFY_P2P, errCode, "pack reply failed", isAuthLink);
     SendVerifyP2pFailRsp(authHandle, seq, CODE_VERIFY_P2P, errCode, "pack reply failed", notAuthLink);
 
+    EXPECT_CALL(TransTcpDirectP2pMock, AuthMetaPostTransData).WillOnce(Return(SOFTBUS_LOCK_ERR));
     ret = SendVerifyP2pRsp(authHandle, MODULE_P2P_LISTEN, MES_FLAG_REPLY, seq, "pack reply failed", isAuthLink);
     EXPECT_EQ(ret, SOFTBUS_NOT_IMPLEMENT);
+
+    SendVerifyP2pFailRsp(authHandle, seq, CODE_VERIFY_P2P, errCode, "pack reply failed", notAuthLink);
     ret = SendVerifyP2pRsp(authHandle, MODULE_P2P_LISTEN, MES_FLAG_REPLY, seq, "pack reply failed", notAuthLink);
     EXPECT_EQ(ret, SOFTBUS_TRANS_PROXY_INVALID_CHANNEL_ID);
 }

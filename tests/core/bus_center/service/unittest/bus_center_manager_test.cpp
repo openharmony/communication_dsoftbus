@@ -21,12 +21,10 @@
 #include "bus_center_event.h"
 #include "lnn_async_callback_utils.h"
 #include "lnn_coap_discovery_impl.h"
-#include "lnn_decision_center.h"
 #include "lnn_discovery_manager.h"
 #include "lnn_event_monitor.h"
 #include "lnn_lane_hub.h"
 #include "lnn_log.h"
-#include "lnn_meta_node_interface.h"
 #include "lnn_net_builder.h"
 #include "lnn_net_ledger.h"
 #include "lnn_network_manager.h"
@@ -36,6 +34,8 @@
 #include "softbus_error_code.h"
 #include "softbus_feature_config.h"
 #include "softbus_utils.h"
+#include "dsoftbus_enhance_interface.h"
+#include "g_enhance_lnn_func.h"
 
 #include "bus_center_manager_deps_mock.h"
 
@@ -118,6 +118,9 @@ HWTEST_F(BusCenterManagerTest, BusCenterManagerTest003, TestSize.Level1)
 */
 HWTEST_F(BusCenterManagerTest, BusCenterManagerTest004, TestSize.Level1)
 {
+    LnnEnhanceFuncList *pfnLnnEnhanceFuncList = LnnEnhanceFuncListGet();
+    pfnLnnEnhanceFuncList->lnnInitMetaNode = LnnInitMetaNode;
+
     NiceMock<BusCenterManagerDepsInterfaceMock> BusCenterManagerMock;
     SoftBusLooper loop;
     EXPECT_CALL(BusCenterManagerMock, CreateNewLooper(_)).WillOnce(Return(&loop));
@@ -143,6 +146,9 @@ HWTEST_F(BusCenterManagerTest, BusCenterManagerTest004, TestSize.Level1)
 */
 HWTEST_F(BusCenterManagerTest, BusCenterManagerTest005, TestSize.Level1)
 {
+    LnnEnhanceFuncList *pfnLnnEnhanceFuncList = LnnEnhanceFuncListGet();
+    pfnLnnEnhanceFuncList->lnnInitMetaNode = LnnInitMetaNode;
+
     NiceMock<BusCenterManagerDepsInterfaceMock> BusCenterManagerMock;
     SoftBusLooper loop;
     EXPECT_CALL(BusCenterManagerMock, CreateNewLooper(_)).WillRepeatedly(Return(&loop));
@@ -190,6 +196,9 @@ HWTEST_F(BusCenterManagerTest, BusCenterManagerTest005, TestSize.Level1)
 */
 HWTEST_F(BusCenterManagerTest, BusCenterManagerTest006, TestSize.Level1)
 {
+    LnnEnhanceFuncList *pfnLnnEnhanceFuncList = LnnEnhanceFuncListGet();
+    pfnLnnEnhanceFuncList->lnnInitMetaNode = LnnInitMetaNode;
+    
     NiceMock<BusCenterManagerDepsInterfaceMock> BusCenterManagerMock;
     SoftBusLooper loop;
     EXPECT_CALL(BusCenterManagerMock, CreateNewLooper(_)).WillRepeatedly(Return(&loop));

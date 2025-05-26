@@ -20,6 +20,9 @@
 
 #include "bus_center_manager.h"
 #include "common_list.h"
+#include "conn_log.h"
+#include "g_enhance_conn_func.h"
+#include "g_enhance_conn_func_pack.h"
 #include "lnn_lane_interface.h"
 #include "message_handler.h"
 #include "softbus_adapter_mem.h"
@@ -27,6 +30,7 @@
 #include "softbus_error_code.h"
 #include "softbus_transmission_interface.h"
 #include "softbus_utils.h"
+#include "softbus_init_common.h"
 #include "trans_log.h"
 
 #define SESSION_NAME "ohos.dsoftbus.inner.p2pchannel"
@@ -185,7 +189,8 @@ int32_t TransProxyPipelineOpenChannel(int32_t requestId, const char *networkId,
 
     if (option->bleDirect) {
         TRANS_CHECK_AND_RETURN_RET_LOGE(
-            ConnBleDirectIsEnable(BLE_COC), SOFTBUS_FUNC_NOT_SUPPORT, TRANS_CTRL, "ble direct is not enable");
+            ConnBleDirectIsEnablePacked(BLE_COC), SOFTBUS_FUNC_NOT_SUPPORT,
+                TRANS_CTRL, "ble direct is not enable");
     }
     struct PipelineChannelItem *item = (struct PipelineChannelItem *)SoftBusCalloc(sizeof(struct PipelineChannelItem));
     TRANS_CHECK_AND_RETURN_RET_LOGE(

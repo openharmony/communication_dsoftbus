@@ -246,7 +246,7 @@ HWTEST_F(TransSdkFileTest, TransFileListenerTest002, TestSize.Level0)
 
     ret = TransSetFileReceiveListener(sessionName, &g_fileRecvListener, rootDir);
     EXPECT_EQ(ret, SOFTBUS_TRANS_FILE_LISTENER_NOT_INIT);
-    
+
     TransFileDeinit();
 }
 
@@ -268,7 +268,7 @@ HWTEST_F(TransSdkFileTest, TransFileListenerTest003, TestSize.Level0)
     ret = TransSetFileReceiveListener(sessionName, &g_fileRecvListener, rootDir);
     EXPECT_EQ(ret, SOFTBUS_OK);
     TransDeleteFileListener(inValidName);
-    
+
     TransDeleteFileListener(sessionName);
     TransFileDeinit();
 
@@ -616,12 +616,12 @@ HWTEST_F(TransSdkFileTest, TransFileTest007, TestSize.Level1)
 
     ret = TransSetFileSendListener(g_mySessionName, sendListener);
     EXPECT_EQ(ret, SOFTBUS_OK);
-    
+
     ret = TransOnFileChannelOpened(g_mySessionName, channelInfo, &filePort, nullptr);
     EXPECT_EQ(ret, SOFTBUS_FILE_ERR);
-    
+
     TransCloseFileChannel(channel->dfileId);
-    
+
     TransDeleteFileListener(g_mySessionName);
     TransFileDeinit();
     ClientTransUdpMgrDeinit();
@@ -662,7 +662,7 @@ HWTEST_F(TransSdkFileTest, TransFileTest009, TestSize.Level1)
 
     ret = SetReuseAddr(-1, -1);
     EXPECT_EQ(ret, SOFTBUS_INVALID_FD);
-    
+
     ret = SetReuseAddr(0, on);
     EXPECT_EQ(ret, SOFTBUS_INVALID_FD);
     ret = close(fd);
@@ -681,7 +681,7 @@ HWTEST_F(TransSdkFileTest, TransFileTest010, TestSize.Level1)
     int32_t on = 65536;
     int32_t ret = SetReusePort(fd, on);
     EXPECT_EQ(ret, SOFTBUS_OK);
-    
+
     ret = SetReusePort(0, on);
     EXPECT_EQ(ret, SOFTBUS_INVALID_FD);
     ret = close(fd);

@@ -20,10 +20,11 @@
 
 #include "bus_center_client_proxy.h"
 #include "bus_center_manager.h"
+#include "g_enhance_lnn_func.h"
+#include "g_enhance_lnn_func_pack.h"
 #include "ipc_skeleton.h"
 #include "lnn_connection_addr_utils.h"
 #include "lnn_distributed_net_ledger.h"
-#include "lnn_fast_offline.h"
 #include "lnn_heartbeat_ctrl.h"
 #include "lnn_log.h"
 #include "lnn_meta_node_ledger.h"
@@ -32,7 +33,7 @@
 #include "softbus_ddos.h"
 #include "softbus_error_code.h"
 #include "softbus_permission.h"
-#include "lnn_ranging_manager.h"
+#include "softbus_init_common.h"
 
 struct JoinLnnRequestInfo {
     char pkgName[PKG_NAME_SIZE_MAX];
@@ -356,6 +357,7 @@ int32_t LnnIpcSetDataLevel(const DataLevel *dataLevel)
         LNN_LOGE(LNN_EVENT, "Set Data Level but trigger heartbeat failed, ret=%{public}d", ret);
         return ret;
     }
+    LNN_LOGE(LNN_EVENT, "Set Data Level and trigger heartbeat success!");
     return SOFTBUS_OK;
 }
 
@@ -534,7 +536,7 @@ int32_t LnnIpcTriggerRangeForMsdp(const char *pkgName, const RangeConfig *config
         return LnnTriggerHbRangeForMsdp(pkgName, config);
     }
     if (config->medium == SLE_CONN_HADM) {
-        return LnnStartRange(config);
+        return LnnStartRangePacked(config);
     }
     COMM_LOGE(COMM_SVC, "invalid medium=%{public}d", config->medium);
     return SOFTBUS_INVALID_PARAM;
@@ -547,7 +549,7 @@ int32_t LnnIpcStopRangeForMsdp(const char *pkgName, const RangeConfig *config)
         return SOFTBUS_INVALID_PARAM;
     }
     if (config->medium == SLE_CONN_HADM) {
-        return LnnStopRange(config);
+        return LnnStopRangePacked(config);
     }
     COMM_LOGE(COMM_SVC, "invalid medium=%{public}d", config->medium);
     return SOFTBUS_INVALID_PARAM;
@@ -585,6 +587,7 @@ int32_t LnnIpcUnregRangeCbForMsdp(const char *pkgName, int32_t callingPid)
         ++iter;
     }
     LnnUnregBleRangeCb();
+    LnnUnregSleRangeCbPacked();
     return SOFTBUS_OK;
 }
 
@@ -594,7 +597,7 @@ int32_t LnnIpcSyncTrustedRelationShip(const char *pkgName, const char *msg, uint
     if (ret >= SOFTBUS_DDOS_ID_AND_USER_SAME_COUNT_LIMIT && ret <= SOFTBUS_DDOS_USER_ID_ALL_COUNT_LIMIT) {
         LNN_LOGE(LNN_EVENT, "here's the statistics, no need return");
     }
-    return LnnSyncTrustedRelationShip(pkgName, msg, msgLen);
+    return LnnSyncTrustedRelationShipPacked(pkgName, msg, msgLen);
 }
 
 int32_t LnnIpcSetDisplayName(const char *pkgName, const char *nameData, uint32_t len)

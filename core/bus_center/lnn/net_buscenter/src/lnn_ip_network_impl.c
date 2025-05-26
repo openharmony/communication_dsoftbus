@@ -24,17 +24,23 @@
 #include "bus_center_event.h"
 #include "bus_center_info_key.h"
 #include "bus_center_manager.h"
+#include "conn_log.h"
 #include "disc_interface.h"
+#include "g_enhance_lnn_func.h"
+#include "g_enhance_lnn_func_pack.h"
+#include "g_enhance_conn_func.h"
+#include "g_enhance_conn_func_pack.h"
 #include "lnn_async_callback_utils.h"
 #include "lnn_common_utils.h"
 #include "lnn_discovery_manager.h"
-#include "lnn_fast_offline.h"
+
 #include "lnn_ip_utils_adapter.h"
 #include "lnn_linkwatch.h"
 #include "lnn_log.h"
 #include "lnn_net_builder.h"
 #include "lnn_network_manager.h"
 #include "lnn_physical_subnet_manager.h"
+#include "lnn_connection_fsm.h"
 #include "message_handler.h"
 #include "softbus_adapter_mem.h"
 #include "softbus_adapter_thread.h"
@@ -42,11 +48,10 @@
 #include "softbus_common.h"
 #include "softbus_def.h"
 #include "softbus_error_code.h"
+#include "softbus_init_common.h"
 #include "softbus_feature_config.h"
 #include "softbus_protocol_def.h"
 #include "trans_tcp_direct_listener.h"
-#include "conn_coap.h"
-#include "lnn_connection_fsm.h"
 
 #define IP_DEFAULT_PORT 0
 #define LNN_LOOPBACK_IP "127.0.0.1"
@@ -403,7 +408,7 @@ static int32_t EnableIpSubnet(LnnPhysicalSubnet *subnet)
         LNN_LOGE(LNN_BUILDER, "open ip link failed");
         return SOFTBUS_CONN_AUTH_START_LISTEN_FAIL;
     }
-    if (ConnCoapStartServerListen() != SOFTBUS_OK) {
+    if (ConnCoapStartServerListenPacked() != SOFTBUS_OK) {
         LNN_LOGE(LNN_BUILDER, "start coap conn server failed");
     }
     if (!LnnIsAutoNetWorkingEnabled()) {
@@ -423,11 +428,11 @@ static int32_t EnableIpSubnet(LnnPhysicalSubnet *subnet)
 static int32_t DisableIpSubnet(LnnPhysicalSubnet *subnet)
 {
     if (subnet->status == LNN_SUBNET_RUNNING) {
-        LnnIpAddrChangeEventHandler();
+        LnnIpAddrChangeEventHandlerPacked();
         CloseIpLink();
         LnnStopPublish();
         LnnStopDiscovery();
-        ConnCoapStopServerListen();
+        ConnCoapStopServerListenPacked();
         DiscLinkStatusChanged(LINK_STATUS_DOWN, COAP, WLAN_IF);
         LeaveOldIpNetwork(subnet->ifName);
         ReleaseMainPort(subnet->ifName);
@@ -440,7 +445,7 @@ static int32_t ChangeIpSubnetAddress(LnnPhysicalSubnet *subnet)
     CloseIpLink();
     LnnStopPublish();
     LnnStopDiscovery();
-    ConnCoapStopServerListen();
+    ConnCoapStopServerListenPacked();
     DiscLinkStatusChanged(LINK_STATUS_DOWN, COAP, WLAN_IF);
     LeaveOldIpNetwork(subnet->ifName);
     return SOFTBUS_OK;

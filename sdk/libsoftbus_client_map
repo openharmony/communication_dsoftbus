@@ -198,6 +198,23 @@
         "GeneralRegisterListener";
         "GeneralUnregisterListener";
         "GeneralGetPeerDeviceId";
+        "ClientAddSession";
+        "InitSoftBus";
+        "CheckPackageName";
+        "RestartAuthParaCallbackRegister";
+        "ClientGetChannelBySessionId";
+        "TransGetUdpChannel";
+        "TransUdpChannelSetStreamMultiLayer";
+        "TransSetUdpChannelTos";
+        "ClientGetChannelBusinessTypeBySessionId";
+        "ClientAddAuthSession";
+        "ClientSetActionIdBySessionId";
+        "TransSetUdpChannelRenameHook";
+        "ClientDeleteSession";
+        "ClientSetChannelBySessionId";
+        "TransGetUdpChannelByFileId";
+        "ClientGetSessionIdByChannelId";
+        "ClientCancelAuthSessionTimer";
     local:
         *;
 };

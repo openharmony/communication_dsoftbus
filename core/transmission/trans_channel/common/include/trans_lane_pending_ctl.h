@@ -19,16 +19,11 @@
 #include "lnn_lane_interface.h"
 #include "softbus_conn_interface.h"
 #include "softbus_trans_def.h"
+#include "trans_lane_pending_ctl_struct.h"
 
 #ifdef __cplusplus
 extern "C" {
 #endif /* __cplusplus */
-
-typedef struct {
-    char sessionName[SESSION_NAME_SIZE_MAX];
-    bool isNetWorkingChannel;
-    int32_t channelId;
-} NetWorkingChannelInfo;
 
 int32_t TransReqLanePendingInit(void);
 void TransReqLanePendingDeinit(void);

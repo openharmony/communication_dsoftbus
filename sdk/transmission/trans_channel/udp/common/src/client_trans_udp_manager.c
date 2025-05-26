@@ -20,6 +20,7 @@
 #include "client_trans_file_listener.h"
 #include "client_trans_socket_manager.h"
 #include "client_trans_stream.h"
+#include "g_enhance_sdk_func.h"
 #include "nstackx_dfile.h"
 #include "securec.h"
 #include "softbus_access_token_adapter.h"
@@ -635,6 +636,24 @@ static UdpChannelMgrCb g_udpChannelCb = {
     .OnRawStreamEncryptOptGet = OnRawStreamEncryptOptGet,
 };
 
+static int32_t ClientCheckFuncPointer(void *func)
+{
+    if (func == NULL) {
+        TRANS_LOGE(TRANS_INIT, "enhance func not register.");
+        return SOFTBUS_FUNC_NOT_REGISTER;
+    }
+    return SOFTBUS_OK;
+}
+
+static int32_t TransFileSchemaInitPacked(void)
+{
+    ClientEnhanceFuncList *pfnClientEnhanceFuncList = ClientEnhanceFuncListGet();
+    if (ClientCheckFuncPointer((void *)pfnClientEnhanceFuncList->transFileSchemaInit) != SOFTBUS_OK) {
+        return SOFTBUS_NOT_IMPLEMENT;
+    }
+    return pfnClientEnhanceFuncList->transFileSchemaInit();
+}
+
 int32_t ClientTransUdpMgrInit(IClientSessionCallBack *callback)
 {
     if (g_udpChannelMgr != NULL) {
@@ -648,7 +667,7 @@ int32_t ClientTransUdpMgrInit(IClientSessionCallBack *callback)
     g_sessionCb = callback;
     RegisterStreamCb(&g_udpChannelCb);
     TransFileInit();
-    TransFileSchemaInit();
+    TransFileSchemaInitPacked();
     if (PendingInit(PENDING_TYPE_UDP) != SOFTBUS_OK) {
         TRANS_LOGE(TRANS_INIT, "trans udp pending init failed.");
         return SOFTBUS_TRANS_SERVER_INIT_FAILED;
@@ -662,6 +681,15 @@ int32_t ClientTransUdpMgrInit(IClientSessionCallBack *callback)
     }
     TRANS_LOGI(TRANS_INIT, "trans udp channel manager init success.");
     return SOFTBUS_OK;
+}
+
+static void TransFileSchemaDeinitPacked(void)
+{
+    ClientEnhanceFuncList *pfnClientEnhanceFuncList = ClientEnhanceFuncListGet();
+    if (ClientCheckFuncPointer((void *)pfnClientEnhanceFuncList->transFileSchemaDeinit) != SOFTBUS_OK) {
+        return;
+    }
+    return pfnClientEnhanceFuncList->transFileSchemaDeinit();
 }
 
 void ClientTransUdpMgrDeinit(void)
@@ -685,7 +713,7 @@ void ClientTransUdpMgrDeinit(void)
     DestroySoftBusList(g_udpChannelMgr);
     g_udpChannelMgr = NULL;
     TransFileDeinit();
-    TransFileSchemaDeinit();
+    TransFileSchemaDeinitPacked();
     PendingDeinit(PENDING_TYPE_UDP);
     TRANS_LOGI(TRANS_INIT, "trans udp channel manager deinit success.");
 }

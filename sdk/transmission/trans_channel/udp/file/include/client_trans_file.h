@@ -17,26 +17,12 @@
 #define CLIENT_TRANS_FILE_H
 
 #include "client_trans_udp_manager.h"
+#include "client_trans_file_struct.h"
+#include "softbus_def.h"
 
 #ifdef __cplusplus
 extern "C" {
 #endif
-
-#define SCHEMASEPARATORLENGTH 2
-#define SCHEMA_MAX_LENGTH 32
-
-typedef struct {
-    const char name[SCHEMA_MAX_LENGTH];
-    int (*OpenFd)(const char *filename, int32_t flag, int32_t mode);
-    int (*CloseFd)(int32_t fd);
-    int (*RemoveFd)(const char *pathName);
-} FileSchema;
-
-typedef struct {
-    ListNode node;
-    char mySessionName[SESSION_NAME_SIZE_MAX];
-    FileSchema schema;
-} FileSchemaListener;
 
 void RegisterFileCb(const UdpChannelMgrCb *fileCb);
 
@@ -46,14 +32,6 @@ int32_t TransOnFileChannelOpened(
 void TransCloseFileChannel(int32_t dfileId);
 
 int32_t TransSendFile(int32_t dfileId, const char *sFileList[], const char *dFileList[], uint32_t fileCnt);
-
-int32_t TransFileSchemaInit(void);
-
-void TransFileSchemaDeinit(void);
-
-int32_t CheckFileSchema(int32_t sessionId, FileSchemaListener *fileSchemaListener);
-
-int32_t SetSchemaCallback(FileSchema fileSchema, const char *sFileList[], uint32_t fileCnt);
 
 int32_t NotifyTransLimitChanged(int32_t channelId, uint8_t tos);
 #ifdef __cplusplus

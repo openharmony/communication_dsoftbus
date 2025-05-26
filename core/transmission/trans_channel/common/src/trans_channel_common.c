@@ -19,6 +19,8 @@
 
 #include "access_control.h"
 #include "bus_center_manager.h"
+#include "g_enhance_trans_func.h"
+#include "g_enhance_trans_func_pack.h"
 #include "lnn_distributed_net_ledger.h"
 #include "lnn_lane_interface.h"
 #include "lnn_network_manager.h"
@@ -30,8 +32,8 @@
 #include "softbus_feature_config.h"
 #include "legacy/softbus_hisysevt_transreporter.h"
 #include "softbus_proxychannel_manager.h"
-#include "softbus_qos.h"
 #include "softbus_wifi_api_adapter.h"
+#include "softbus_init_common.h"
 #include "trans_auth_manager.h"
 #include "trans_client_proxy.h"
 #include "trans_event.h"
@@ -458,7 +460,7 @@ int32_t TransCommonCloseChannel(const char *sessionName, int32_t channelId, int3
                 ret = SOFTBUS_OK;
                 break;
             case CHANNEL_TYPE_UDP:
-                (void)NotifyQosChannelClosed(channelId, channelType);
+                (void)NotifyQosChannelClosedPacked(channelId, channelType);
                 ret = TransCloseUdpChannel(channelId);
                 (void)TransLaneMgrDelLane(channelId, channelType, false);
                 break;

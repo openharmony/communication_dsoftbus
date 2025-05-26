@@ -17,7 +17,6 @@
 #include <securec.h>
 
 #include "auth_pre_link.h"
-#include "auth_attest_interface.h"
 #include "softbus_adapter_mem.h"
 #include "softbus_error_code.h"
 

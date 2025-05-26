@@ -19,7 +19,6 @@
 #include <securec.h>
 
 #include "lnn_lane_deps_mock.h"
-#include "lnn_lane_score_virtual.c"
 #include "lnn_trans_free_lane.h"
 #include "lnn_trans_lane.h"
 #include "lnn_trans_lane_deps_mock.h"
@@ -33,9 +32,6 @@ using namespace testing;
 constexpr uint32_t LANE_REQ_ID_ONE = 111;
 constexpr uint32_t LANE_REQ_ID_TWO = 222;
 constexpr uint32_t LANE_REQ_ID_THREE = 333;
-constexpr int32_t CHANNEL_ID = 5;
-constexpr int32_t INTERVAL = 2;
-constexpr uint32_t LIST_SIZE = 10;
 constexpr char PEER_UDID[] = "111122223333abcdef";
 constexpr char PEER_IP[] = "127.30.0.1";
 constexpr char NODE_NETWORK_ID[] = "123456789";
@@ -452,30 +448,6 @@ HWTEST_F(LNNTransLaneMockTest, LNN_TRANS_LANE_007, TestSize.Level1)
     int32_t ret = transObj->allocLane(laneReqId, (const LaneRequestOption *)&request, &listener);
     EXPECT_EQ(ret, SOFTBUS_OK);
     CondWait();
-}
-
-/*
-* @tc.name: LNN_LANE_SCORE_VIRTUAL_001
-* @tc.desc: lnn_lane_score_virtual.c
-* @tc.type: FUNC
-* @tc.require:
-*/
-HWTEST_F(LNNTransLaneMockTest, LNN_LANE_SCORE_VIRTUAL_001, TestSize.Level1)
-{
-    uint32_t listSize = LIST_SIZE;
-    int32_t ret = LnnInitScore();
-    EXPECT_TRUE(ret == SOFTBUS_OK);
-    LnnDeinitScore();
-    ret = LnnGetWlanLinkedInfo(nullptr);
-    EXPECT_EQ(ret, SOFTBUS_LANE_SELECT_FAIL);
-    ret = LnnGetCurrChannelScore(CHANNEL_ID);
-    EXPECT_EQ(ret, VIRTUAL_DEFAULT_SCORE);
-    ret = LnnStartScoring(INTERVAL);
-    EXPECT_TRUE(ret == SOFTBUS_OK);
-    ret = LnnStopScoring();
-    EXPECT_TRUE(ret == SOFTBUS_OK);
-    ret = LnnGetAllChannelScore(nullptr, &listSize);
-    EXPECT_TRUE(ret == SOFTBUS_OK);
 }
 
 /*

@@ -17,13 +17,15 @@
 
 #include "auth_channel.h"
 #include "auth_manager.h"
-#include "auth_meta_manager.h"
 #include "auth_tcp_connection.h"
 #include "bus_center_manager.h"
 #include "common_list.h"
+#include "comm_log.h"
 #include "legacy/softbus_adapter_hitrace.h"
 #include "lnn_connection_addr_utils.h"
 #include "lnn_net_builder.h"
+#include "g_enhance_auth_func.h"
+#include "g_enhance_auth_func_pack.h"
 #include "securec.h"
 #include "softbus_adapter_mem.h"
 #include "softbus_adapter_thread.h"
@@ -32,6 +34,8 @@
 #include "softbus_feature_config.h"
 #include "legacy/softbus_hisysevt_transreporter.h"
 #include "softbus_utils.h"
+#include "softbus_init_common.h"
+#include "legacy/softbus_adapter_hitrace.h"
 #include "trans_auth_message.h"
 #include "trans_channel_common.h"
 #include "trans_channel_limit.h"
@@ -736,7 +740,7 @@ static void OnDisconnect(int32_t authId)
 
     // If it is an ishare session, clean up the auth manager
     if (strcmp(dstInfo.appInfo.myData.sessionName, ISHARE_AUTH_SESSION) == 0) {
-        DelAuthMetaManagerByConnectionId(authId);
+        DelAuthMetaManagerByConnectionIdPacked(authId);
     }
     TransAuthCloseChannel(authId, dstInfo.appInfo.linkType, dstInfo.isClient);
     DelAuthChannelInfoByChanId((int32_t)(dstInfo.appInfo.myData.channelId));
@@ -1250,7 +1254,7 @@ int32_t TransCloseAuthChannel(int32_t channelId)
         g_authChannelList->cnt--;
         // If it is an ishare session, clean up the auth manager
         if (strcmp(channel->appInfo.myData.sessionName, ISHARE_AUTH_SESSION) == 0) {
-            DelAuthMetaManagerByConnectionId(channel->authId);
+            DelAuthMetaManagerByConnectionIdPacked(channel->authId);
         }
         if (strcmp(channel->appInfo.myData.sessionName, DM_PKG_NAME) == 0) {
             DelAuthManagerByConnectionId(channel->authId);

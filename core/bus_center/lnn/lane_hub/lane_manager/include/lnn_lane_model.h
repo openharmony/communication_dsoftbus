@@ -17,17 +17,11 @@
 #define LNN_LANE_MODEL_H
 
 #include "lnn_lane_def.h"
+#include "lnn_lane_model_struct.h"
 
 #ifdef __cplusplus
 extern "C" {
 #endif
-
-typedef struct {
-    uint32_t linkType  : 6; /* LaneLinkType */
-    uint32_t transType : 4;
-    uint32_t priority  : 4;
-    uint32_t reserved  : 18;
-} LaneGenerateParam;
 
 int32_t InitLaneModel(void);
 void DeinitLaneModel(void);

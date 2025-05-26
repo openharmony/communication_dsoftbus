@@ -13,14 +13,12 @@
 
 import("../../../dsoftbus.gni")
 
-native_source_path = rebase_path("$dsoftbus_root_path")
-disc_dep_dir = "dsoftbus_enhance/core/discovery/ble"
-
 ble_discovery_inc = [
+  "$dsoftbus_root_path/interfaces/kits/broadcast",
+  "$dsoftbus_root_path/interfaces/kits/disc",
   "$dsoftbus_root_path/core/broadcast/common/include",
   "$dsoftbus_root_path/core/discovery/ble/dispatcher/include",
   "$dsoftbus_root_path/core/discovery/ble/approach_ble/include",
-  "$dsoftbus_root_path/core/discovery/ble/oop_ble/include",
   "$dsoftbus_root_path/core/discovery/ble/share_ble/include",
   "$dsoftbus_root_path/core/discovery/ble/softbus_ble/include",
   "$dsoftbus_root_path/core/discovery/ble/touch_ble/include",
@@ -50,70 +48,4 @@ if (dsoftbus_feature_disc_ble && dsoftbus_feature_inner_disc_ble) {
   ble_discovery_src += [
     "$dsoftbus_root_path/core/discovery/ble/softbus_ble/src/disc_ble_virtual.c",
   ]
-}
-
-if (dsoftbus_feature_disc_virtual_link_ble && dsoftbus_feature_inner_disc_ble &&
-    dsoftbus_feature_ex_kits) {
-  import(
-      "$dsoftbus_root_path/dsoftbus_enhance/core/discovery/ble/virtual_link_ble/virtual_link_ble.gni")
-
-  ble_discovery_src += vlink_sources
-  ble_discovery_inc += vlink_include_dirs
-  ble_discovery_deps += vlink_deps
-} else {
-  ble_discovery_src += [ "$dsoftbus_root_path/core/discovery/ble/virtual_link_ble/src/disc_virtual_link_ble_virtual.c" ]
-}
-
-if (dsoftbus_feature_disc_approach && dsoftbus_feature_inner_disc_ble &&
-    dsoftbus_feature_ex_kits) {
-  import(
-      "$dsoftbus_root_path/dsoftbus_enhance/core/discovery/ble/approach_ble/approach_ble.gni")
-  import(
-      "$dsoftbus_root_path/dsoftbus_enhance/core/discovery/ble/oh_approach_ble/oh_approach_ble.gni")
-
-  ble_discovery_src += approach_sources
-  ble_discovery_inc += approach_include_dirs
-  ble_discovery_deps += approach_deps
-  ble_discovery_src += oh_approach_sources
-  ble_discovery_inc += oh_approach_include_dirs
-  ble_discovery_deps += oh_approach_deps
-} else {
-  ble_discovery_src += [ "$dsoftbus_root_path/core/discovery/ble/approach_ble/src/disc_approach_ble_virtual.c" ]
-}
-
-if (dsoftbus_feature_disc_touch && dsoftbus_feature_inner_disc_ble &&
-    dsoftbus_feature_ex_kits) {
-  import(
-      "$dsoftbus_root_path/dsoftbus_enhance/core/discovery/ble/touch_ble/touch_ble.gni")
-
-  ble_discovery_src += touch_sources
-  ble_discovery_inc += touch_include_dirs
-  ble_discovery_deps += touch_deps
-} else {
-  ble_discovery_src += [ "$dsoftbus_root_path/core/discovery/ble/touch_ble/src/disc_touch_ble_virtual.c" ]
-}
-
-if (dsoftbus_feature_disc_oop && dsoftbus_feature_inner_disc_ble &&
-    dsoftbus_feature_ex_kits) {
-  import(
-      "$dsoftbus_root_path/dsoftbus_enhance/core/discovery/ble/oop_ble/oop_ble.gni")
-
-  ble_discovery_src += oop_sources
-  ble_discovery_inc += oop_include_dirs
-  ble_discovery_deps += oop_deps
-} else {
-  ble_discovery_src += [
-    "$dsoftbus_root_path/core/discovery/ble/oop_ble/src/disc_oop_ble_virtual.c",
-  ]
-}
-
-if (dsoftbus_feature_ex_kits) {
-  import(
-      "$dsoftbus_root_path/dsoftbus_enhance/core/discovery/ble/share_ble/share_ble.gni")
-
-  ble_discovery_src += share_sources
-  ble_discovery_inc += share_include_dirs
-  ble_discovery_deps += share_deps
-} else {
-  ble_discovery_src += [ "$dsoftbus_root_path/core/discovery/ble/share_ble/src/disc_share_ble_virtual.c" ]
 }

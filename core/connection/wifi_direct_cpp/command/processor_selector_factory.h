@@ -22,11 +22,7 @@
 namespace OHOS::SoftBus {
 class ProcessorSelectorFactory {
 public:
-    static ProcessorSelectorFactory& GetInstance()
-    {
-        static ProcessorSelectorFactory instance;
-        return instance;
-    }
+    static ProcessorSelectorFactory& GetInstance();
 
     void Register(const std::shared_ptr<ProcessorSelector> &selector);
     std::shared_ptr<ProcessorSelector> NewSelector();

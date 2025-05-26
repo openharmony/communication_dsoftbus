@@ -19,18 +19,20 @@
 #include <securec.h>
 
 #include "anonymizer.h"
-#include "auth_attest_interface.h"
 #include "auth_connection.h"
 #include "auth_hichain_adapter.h"
 #include "auth_deviceprofile.h"
 #include "auth_identity_service_adapter.h"
 #include "auth_log.h"
 #include "auth_manager.h"
-#include "auth_meta_manager.h"
 #include "auth_pre_link.h"
 #include "bus_center_info_key.h"
 #include "bus_center_manager.h"
-#include "lnn_cipherkey_manager.h"
+#include "comm_log.h"
+#include "g_enhance_lnn_func.h"
+#include "g_enhance_auth_func.h"
+#include "g_enhance_auth_func_pack.h"
+#include "g_enhance_lnn_func_pack.h"
 #include "lnn_common_utils.h"
 #include "lnn_extdata_config.h"
 #include "lnn_feature_capability.h"
@@ -38,6 +40,7 @@
 #include "lnn_node_info.h"
 #include "lnn_ohos_account.h"
 #include "lnn_settingdata_event_monitor.h"
+#include "lnn_log.h"
 #include "softbus_adapter_bt_common.h"
 #include "softbus_adapter_json.h"
 #include "softbus_adapter_mem.h"
@@ -46,6 +49,7 @@
 #include "softbus_feature_config.h"
 #include "softbus_socket.h"
 #include "softbus_utils.h"
+#include "softbus_init_common.h"
 
 /* DeviceId */
 #define CMD_TAG               "TECmd"
@@ -358,7 +362,7 @@ bool GetUdidShortHash(const AuthSessionInfo *info, char *udidBuf, uint32_t bufLe
     char udid[UDID_BUF_LEN] = { 0 };
     switch (info->connInfo.type) {
         case AUTH_LINK_TYPE_BR:
-            if (LnnGetUdidByBrMac(info->connInfo.info.brInfo.brMac, udid, UDID_BUF_LEN) != SOFTBUS_OK) {
+            if (LnnGetUdidByBrMacPacked(info->connInfo.info.brInfo.brMac, udid, UDID_BUF_LEN) != SOFTBUS_OK) {
                 AUTH_LOGE(AUTH_FSM, "get udid by brMac fail.");
                 return false;
             }
@@ -391,8 +395,8 @@ bool GetUdidShortHash(const AuthSessionInfo *info, char *udidBuf, uint32_t bufLe
 static int32_t GetEnhancedP2pAuthKey(const char *udidHash, AuthSessionInfo *info, AuthDeviceKeyInfo *deviceKey)
 {
     /* first, reuse ble authKey */
-    if (AuthFindLatestNormalizeKey(udidHash, deviceKey, true) == SOFTBUS_OK ||
-        AuthFindDeviceKey(udidHash, AUTH_LINK_TYPE_BLE, deviceKey) == SOFTBUS_OK) {
+    if (AuthFindLatestNormalizeKeyPacked(udidHash, deviceKey, true) == SOFTBUS_OK ||
+        AuthFindDeviceKeyPacked(udidHash, AUTH_LINK_TYPE_BLE, deviceKey) == SOFTBUS_OK) {
         AUTH_LOGD(AUTH_FSM, "get ble authKey succ");
         return SOFTBUS_OK;
     }
@@ -432,7 +436,7 @@ static int32_t GetFastAuthKey(const char *udidHash, AuthSessionInfo *info, AuthD
         AUTH_LOGI(AUTH_FSM, "get enhanced p2p fastAuth key");
         return GetEnhancedP2pAuthKey(udidHash, info, deviceKey);
     }
-    if (AuthFindDeviceKey(udidHash, info->connInfo.type, deviceKey) != SOFTBUS_OK) {
+    if (AuthFindDeviceKeyPacked(udidHash, info->connInfo.type, deviceKey) != SOFTBUS_OK) {
         AUTH_LOGW(AUTH_FSM, "can't find common key, unsupport fastAuth");
         info->isSupportFastAuth = false;
         return SOFTBUS_AUTH_NOT_FOUND;
@@ -564,7 +568,7 @@ static void PackNormalizedKeyInner(JsonObj *obj, AuthSessionInfo *info, int64_t 
             return;
         }
         deviceKey.keyIndex = authSeq;
-    } else if (AuthFindLatestNormalizeKey((char *)udidHashHexStr, &deviceKey, true) != SOFTBUS_OK) {
+    } else if (AuthFindLatestNormalizeKeyPacked((char *)udidHashHexStr, &deviceKey, true) != SOFTBUS_OK) {
         AUTH_LOGW(AUTH_FSM, "can't find device key");
         return;
     }
@@ -717,7 +721,7 @@ static int32_t ParseNormalizeData(AuthSessionInfo *info, char *encNormalizedKey,
         return TryGetDmSessionKeyForUnpack(info, encNormalizedKey, deviceKey, authSeq);
     }
     // First: use latest normalizedKey
-    if (AuthFindLatestNormalizeKey(hashHexStr, deviceKey, true) != SOFTBUS_OK) {
+    if (AuthFindLatestNormalizeKeyPacked(hashHexStr, deviceKey, true) != SOFTBUS_OK) {
         AUTH_LOGE(AUTH_FSM, "can't find common key, parse normalize data fail");
         return SOFTBUS_AUTH_NORMALIZED_KEY_PROC_ERR;
     }
@@ -732,7 +736,7 @@ static int32_t ParseNormalizeData(AuthSessionInfo *info, char *encNormalizedKey,
     }
     // Second: decrypt fail, use another side normalizedKey
     AUTH_LOGI(AUTH_FSM, "find another key");
-    if (AuthFindNormalizeKeyByServerSide(hashHexStr, !deviceKey->isServerSide, deviceKey) != SOFTBUS_OK) {
+    if (AuthFindNormalizeKeyByServerSidePacked(hashHexStr, !deviceKey->isServerSide, deviceKey) != SOFTBUS_OK) {
         AUTH_LOGE(AUTH_FSM, "can't find another key, parse normalize data fail");
         return SOFTBUS_AUTH_NORMALIZED_KEY_PROC_ERR;
     }
@@ -746,7 +750,7 @@ static int32_t ParseNormalizeData(AuthSessionInfo *info, char *encNormalizedKey,
         return SOFTBUS_AUTH_NORMALIZED_KEY_PROC_ERR;
     }
     (void)memset_s(&sessionKey, sizeof(sessionKey), 0, sizeof(sessionKey));
-    AuthUpdateCreateTime(hashHexStr, AUTH_LINK_TYPE_NORMALIZED, deviceKey->isServerSide);
+    AuthUpdateCreateTimePacked(hashHexStr, AUTH_LINK_TYPE_NORMALIZED, deviceKey->isServerSide);
     return SOFTBUS_OK;
 }
 
@@ -1010,7 +1014,7 @@ static bool VerifySessionInfoIdType(const AuthSessionInfo *info, JsonObj *obj, c
 
 static void PackUDIDAbatementFlag(JsonObj *obj, const AuthSessionInfo *info)
 {
-    if (IsSupportUDIDAbatement() && !JSON_AddBoolToObject(obj, IS_NEED_PACK_CERT, IsNeedUDIDAbatement(info))) {
+    if (IsSupportUDIDAbatementPacked() && !JSON_AddBoolToObject(obj, IS_NEED_PACK_CERT, IsNeedUDIDAbatementPacked(info))) {
         AUTH_LOGE(AUTH_FSM, "add pack cert flag fail.");
     }
 }
@@ -1519,13 +1523,13 @@ static void PackWifiDirectInfo(
     char localPtk[PTK_DEFAULT_LEN] = { 0 };
     if (isMetaAuth || remoteUuid == NULL) {
         uint32_t connId;
-        AuthMetaGetConnIdByInfo(connInfo, &connId);
-        if (LnnGetMetaPtk(connId, localPtk, PTK_DEFAULT_LEN) != SOFTBUS_OK) {
+        AuthMetaGetConnIdByInfoPacked(connInfo, &connId);
+        if (LnnGetMetaPtkPacked(connId, localPtk, PTK_DEFAULT_LEN) != SOFTBUS_OK) {
             AUTH_LOGE(AUTH_FSM, "get meta ptk fail");
             return;
         }
     } else {
-        if (LnnGetLocalPtkByUuid(remoteUuid, localPtk, PTK_DEFAULT_LEN) != SOFTBUS_OK) {
+        if (LnnGetLocalPtkByUuidPacked(remoteUuid, localPtk, PTK_DEFAULT_LEN) != SOFTBUS_OK) {
             AUTH_LOGE(AUTH_FSM, "get ptk by uuid fail");
             return;
         }
@@ -1602,7 +1606,7 @@ static int32_t UpdateBroadcastCipherKey(const NodeInfo *info)
         (void)memset_s(&broadcastKey, sizeof(BroadcastCipherKey), 0, sizeof(BroadcastCipherKey));
         return SOFTBUS_AUTH_CIPHER_KEY_PROC_ERR;
     }
-    if (LnnUpdateLocalBroadcastCipherKey(&broadcastKey) != SOFTBUS_OK) {
+    if (LnnUpdateLocalBroadcastCipherKeyPacked(&broadcastKey) != SOFTBUS_OK) {
         AUTH_LOGE(AUTH_FSM, "update local broadcast key failed");
         (void)memset_s(&broadcastKey, sizeof(BroadcastCipherKey), 0, sizeof(BroadcastCipherKey));
         return SOFTBUS_AUTH_CIPHER_KEY_PROC_ERR;
@@ -1782,7 +1786,7 @@ static int32_t PackCommon(JsonObj *json, const NodeInfo *info, SoftBusVersion ve
     PackOsInfo(json, info);
     PackDeviceVersion(json, info);
     PackCommonFastAuth(json, info);
-    if (!PackCipherKeySyncMsg(json)) {
+    if (!PackCipherKeySyncMsgPacked(json)) {
         AUTH_LOGE(AUTH_FSM, "PackCipherKeySyncMsg failed.");
     }
     PackCommP2pInfo(json, info);
@@ -1960,7 +1964,7 @@ static void UnpackCommon(const JsonObj *json, NodeInfo *info, SoftBusVersion ver
             AUTH_LOGE(AUTH_FSM, "v1 version strcpy networkid fail");
         }
     }
-    ProcessCipherKeySyncInfo(json, info->deviceInfo.deviceUdid);
+    ProcessCipherKeySyncInfoPacked(json, info->deviceInfo.deviceUdid);
 
     // unpack p2p info
     OptInt(json, P2P_ROLE, &info->p2pInfo.p2pRole, -1);
@@ -2251,7 +2255,7 @@ static int32_t UnpackDeviceInfoBtV1(const JsonObj *json, NodeInfo *info)
 
 static int32_t PackCertificateInfo(JsonObj *json, const AuthSessionInfo *info)
 {
-    if (info == NULL || !IsSupportUDIDAbatement() || !info->isNeedPackCert) {
+    if (info == NULL || !IsSupportUDIDAbatementPacked() || !info->isNeedPackCert) {
         AUTH_LOGI(AUTH_FSM, "device not support udid abatement or no need");
         return SOFTBUS_OK;
     }
@@ -2263,7 +2267,7 @@ static int32_t PackCertificateInfo(JsonObj *json, const AuthSessionInfo *info)
         softbusCertChainPtr = authGenCertNodePtr->softbusCertChain;
     } else {
         (void)memset_s(&softbusCertChain, sizeof(SoftbusCertChain), 0, sizeof(SoftbusCertChain));
-        if (GenerateCertificate(&softbusCertChain, info) != SOFTBUS_OK) {
+        if (GenerateCertificatePacked(&softbusCertChain, info) != SOFTBUS_OK) {
             AUTH_LOGW(AUTH_FSM, "GenerateCertificate fail");
             return SOFTBUS_OK;
         }
@@ -2277,27 +2281,27 @@ static int32_t PackCertificateInfo(JsonObj *json, const AuthSessionInfo *info)
         softbusCertChainPtr->cert[MANUFACTURE_CERTS_INDEX].size) ||
         !JSON_AddBytesToObject(json, ROOT_CERTS, softbusCertChainPtr->cert[ROOT_CERTS_INDEX].data,
         softbusCertChainPtr->cert[ROOT_CERTS_INDEX].size)) {
-        FreeSoftbusChain(softbusCertChainPtr);
+        FreeSoftbusChainPacked(softbusCertChainPtr);
         AUTH_LOGE(AUTH_FSM, "pack certChain fail.");
         return SOFTBUS_AUTH_INNER_ERR;
     }
     if (authGenCertNodePtr != NULL) {
         DelAuthGenCertParaNodeById(info->requestId);
     } else {
-        FreeSoftbusChain(softbusCertChainPtr);
+        FreeSoftbusChainPacked(softbusCertChainPtr);
     }
     return SOFTBUS_OK;
 }
 
 static int32_t UnpackCertificateInfo(JsonObj *json, NodeInfo *nodeInfo, const AuthSessionInfo *info)
 {
-    if (info == NULL || !IsSupportUDIDAbatement() || !IsNeedUDIDAbatement(info)) {
+    if (info == NULL || !IsSupportUDIDAbatementPacked() || !IsNeedUDIDAbatementPacked(info)) {
         AUTH_LOGI(AUTH_FSM, "device not support udid abatement or no need");
         return SOFTBUS_OK;
     }
     SoftbusCertChain softbusCertChain;
     (void)memset_s(&softbusCertChain, sizeof(SoftbusCertChain), 0, sizeof(SoftbusCertChain));
-    if (InitSoftbusChain(&softbusCertChain) != SOFTBUS_OK) {
+    if (InitSoftbusChainPacked(&softbusCertChain) != SOFTBUS_OK) {
         AUTH_LOGW(AUTH_FSM, "malloc fail.");
         return SOFTBUS_OK;
     }
@@ -2309,17 +2313,17 @@ static int32_t UnpackCertificateInfo(JsonObj *json, NodeInfo *nodeInfo, const Au
         SOFTBUS_CERTIFICATE_SIZE, &softbusCertChain.cert[MANUFACTURE_CERTS_INDEX].size) ||
         !JSON_GetBytesFromObject(json, ROOT_CERTS, softbusCertChain.cert[ROOT_CERTS_INDEX].data,
         SOFTBUS_CERTIFICATE_SIZE, &softbusCertChain.cert[ROOT_CERTS_INDEX].size)) {
-        FreeSoftbusChain(&softbusCertChain);
+        FreeSoftbusChainPacked(&softbusCertChain);
         nodeInfo->deviceSecurityLevel = 0;
         AUTH_LOGE(AUTH_FSM, "unpack certChain fail.");
         return SOFTBUS_OK;
     }
-    if (VerifyCertificate(&softbusCertChain, nodeInfo, info) != SOFTBUS_OK) {
+    if (VerifyCertificatePacked(&softbusCertChain, nodeInfo, info) != SOFTBUS_OK) {
         AUTH_LOGE(AUTH_FSM, "attest cert fail.");
-        FreeSoftbusChain(&softbusCertChain);
+        FreeSoftbusChainPacked(&softbusCertChain);
         return SOFTBUS_AUTH_ATTEST_CERT_FAIL;
     }
-    FreeSoftbusChain(&softbusCertChain);
+    FreeSoftbusChainPacked(&softbusCertChain);
     return SOFTBUS_OK;
 }
 
@@ -2454,9 +2458,9 @@ static void UpdatePeerDeviceName(NodeInfo *peerNodeInfo)
             deviceName, DEVICE_NAME_BUF_LEN);
     }
     char *anonyDeviceName = NULL;
-    AnonymizeDeviceName(deviceName, &anonyDeviceName);
+    Anonymize(deviceName, &anonyDeviceName);
     char *anonyPeerDeviceName = NULL;
-    AnonymizeDeviceName(peerNodeInfo->deviceInfo.deviceName, &anonyPeerDeviceName);
+    Anonymize(peerNodeInfo->deviceInfo.deviceName, &anonyPeerDeviceName);
     char *anonyUnifiedName = NULL;
     Anonymize(peerNodeInfo->deviceInfo.unifiedName, &anonyUnifiedName);
     char *anonyUnifiedDefaultName = NULL;

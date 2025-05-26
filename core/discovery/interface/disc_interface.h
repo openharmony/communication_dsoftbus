@@ -16,44 +16,14 @@
 #ifndef DISC_MANAGER_INTERFACE_H
 #define DISC_MANAGER_INTERFACE_H
 
-#include "softbus_common.h"
+#include "disc_interface_struct.h"
+#include "stdint.h"
 
 #ifdef __cplusplus
 #if __cplusplus
 extern "C" {
 #endif
 #endif
-
-/**
- * @ingroup softbus_disc_manager
- * Inner Module.
- *
- */
-typedef enum {
-    MODULE_MIN = 1,
-    MODULE_LNN = MODULE_MIN,
-    MODULE_CONN = 2,
-    MODULE_MAX = MODULE_CONN
-} DiscModule;
-
-typedef enum {
-    LINK_STATUS_UP = 0,
-    LINK_STATUS_DOWN,
-} LinkStatus;
-
-typedef enum {
-    TYPE_LOCAL_DEVICE_NAME,
-    TYPE_ACCOUNT,
-} InfoTypeChanged;
-
-/**
- * @ingroup softbus_disc_manager
- * Inner Callback.
- *
- */
-typedef struct {
-    void (*OnDeviceFound)(const DeviceInfo *device, const InnerDeviceInfoAddtions *addtions);
-} DiscInnerCallback;
 
 /**
  * @ingroup softbus_disc_manager

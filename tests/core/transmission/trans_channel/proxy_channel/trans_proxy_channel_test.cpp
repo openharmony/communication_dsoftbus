@@ -210,7 +210,7 @@ HWTEST_F(TransProxyChannelTest, TransProxyHandshakeTest001, TestSize.Level1)
 
     TestAddTestProxyChannel();
     info.channelId = m_testProxyChannelId;
-    
+
     ret = TransProxyHandshake(&info);
     EXPECT_EQ(ret, SOFTBUS_TRANS_PROXY_SET_CIPHER_FAILED);
 
@@ -604,7 +604,7 @@ HWTEST_F(TransProxyChannelTest, TransProxyParseMessageTest001, TestSize.Level1)
     char *data = (char *)dataInfo.outData;
     int32_t len = dataInfo.outLen;
     AuthHandle authHandle = { .authId = AUTH_INVALID_ID };
-    
+
     ProxyMessage msg;
     int32_t ret = TransProxyParseMessage(data, len, &msg, &authHandle);
     EXPECT_NE(SOFTBUS_OK, ret);
@@ -629,7 +629,7 @@ HWTEST_F(TransProxyChannelTest, TransGetConnIdByChanIdTest001, TestSize.Level1)
     int32_t connId = -1;
     int32_t channelType = -1;
     TestAddTestProxyChannel();
-    
+
     int32_t ret = TransGetConnByChanId(channelId, 0, &connId);
     EXPECT_NE(SOFTBUS_OK, ret);
 

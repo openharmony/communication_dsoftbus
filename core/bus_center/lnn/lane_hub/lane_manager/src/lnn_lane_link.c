@@ -20,16 +20,18 @@
 #include "anonymizer.h"
 #include "bus_center_info_key.h"
 #include "bus_center_manager.h"
+#include "g_enhance_lnn_func.h"
+#include "g_enhance_lnn_func_pack.h"
 #include "lnn_distributed_net_ledger.h"
 #include "lnn_lane.h"
 #include "lnn_lane_common.h"
 #include "lnn_lane_def.h"
-#include "lnn_lane_score.h"
+#include "lnn_lane_interface.h"
+#include "lnn_lane_link.h"
 #include "lnn_lane_link_p2p.h"
-#include "lnn_parameter_utils.h"
-#include "lnn_lane_power_control.h"
+
 #include "lnn_lane_reliability.h"
-#include "lnn_lane_vap_info.h"
+
 #include "lnn_local_net_ledger.h"
 #include "lnn_log.h"
 #include "lnn_net_capability.h"
@@ -46,6 +48,7 @@
 #include "softbus_network_utils.h"
 #include "softbus_protocol_def.h"
 #include "softbus_utils.h"
+#include "softbus_init_common.h"
 #include "trans_network_statistics.h"
 #include "wifi_direct_manager.h"
 
@@ -301,7 +304,7 @@ static void AddVapInfo(const LaneLinkInfo *linkInfo)
     (void)memset_s(&vapAttr, sizeof(vapAttr), 0, sizeof(vapAttr));
     vapAttr.isEnable = true;
     vapAttr.channelId = linkInfo->linkInfo.p2p.channel;
-    int32_t ret = LnnAddLocalVapInfo(vapType, (const LnnVapAttr *)&vapAttr);
+    int32_t ret = LnnAddLocalVapInfoPacked(vapType, (const LnnVapAttr *)&vapAttr);
     if (ret != SOFTBUS_OK) {
         LNN_LOGE(LNN_LANE, "add vapInfo err, ret=%{public}d", ret);
     }
@@ -314,7 +317,7 @@ static void DeleteVapInfo(LaneLinkType linkType)
         LNN_LOGE(LNN_LANE, "deleteVap fail, vapType unknown");
         return;
     }
-    int32_t ret = LnnDeleteLocalVapInfo(vapType);
+    int32_t ret = LnnDeleteLocalVapInfoPacked(vapType);
     if (ret != SOFTBUS_OK) {
         LNN_LOGE(LNN_LANE, "delete vapInfo fail=%{public}d", linkType);
     }
@@ -367,10 +370,10 @@ static void HandleDetectWifiDirectApply(bool isDisableLowPower,  WifiDirectLinkI
         return;
     }
     if (isDisableLowPower) {
-        DisablePowerControl(wifiDirectInfo);
+        DisablePowerControlPacked(wifiDirectInfo);
         SetLanePowerStatus(false);
     } else {
-        int32_t ret = EnablePowerControl(wifiDirectInfo);
+        int32_t ret = EnablePowerControlPacked(wifiDirectInfo);
         SetLanePowerStatus(true);
         if (ret != SOFTBUS_OK) {
             LNN_LOGE(LNN_LANE, "enable fail, ret=%{public}d", ret);
@@ -1873,7 +1876,7 @@ int32_t DestroyLink(const char *networkId, uint32_t laneReqId, LaneLinkType type
         LNN_LOGE(LNN_LANE, "the networkId is nullptr");
         return SOFTBUS_INVALID_PARAM;
     }
-    if (type == LANE_HML && IsPowerControlEnabled()) {
+    if (type == LANE_HML && IsPowerControlEnabledPacked()) {
         DetectDisableWifiDirectApply();
     }
     if (type == LANE_P2P || type == LANE_HML || type == LANE_HML_RAW) {

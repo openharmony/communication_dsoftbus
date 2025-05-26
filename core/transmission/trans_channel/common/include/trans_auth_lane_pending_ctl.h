@@ -17,22 +17,11 @@
 #define TRANS_AUTH_LANE_PENDING_CTL_H
 
 #include "trans_lane_pending_ctl.h"
+#include "trans_auth_lane_pending_ctl_struct.h"
 
 #ifdef __cplusplus
 extern "C" {
 #endif /* __cplusplus */
-
-typedef struct {
-    bool bSucc;
-    bool isFinished;
-    bool accountInfo;
-    char *sessionName;
-    int32_t errCode;
-    uint32_t laneReqId;
-    int32_t channelId;
-    ListNode node;
-    LaneConnInfo connInfo;
-} TransAuthWithParaNode;
 
 int32_t TransAuthWithParaReqLanePendingInit(void);
 void TransAuthWithParaReqLanePendingDeinit(void);

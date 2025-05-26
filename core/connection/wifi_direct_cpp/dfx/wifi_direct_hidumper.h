@@ -21,11 +21,7 @@
 namespace OHOS::SoftBus {
 class WifiDirectHidumper {
 public:
-    static WifiDirectHidumper &GetInstance()
-    {
-        static WifiDirectHidumper instance;
-        return instance;
-    }
+    static WifiDirectHidumper &GetInstance();
 
     void HidumperInit();
     using HiDumper = std::function<int()>;

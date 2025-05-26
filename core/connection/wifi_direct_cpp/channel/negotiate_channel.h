@@ -22,12 +22,22 @@
 #include "data/negotiate_message.h"
 
 namespace OHOS::SoftBus {
+
+enum class NegotiateChannelType {
+    BASE_CHANNEL,
+    DUMMY_CHANNEL,
+    AUTH_CHANNEL,
+    ACTION_CHANNEL,
+    SHARE_CHANNEL,
+};
+
 class NegotiateChannel {
 public:
     virtual ~NegotiateChannel() = default;
 
     virtual int SendMessage(const NegotiateMessage &msg) const = 0;
     virtual std::string GetRemoteDeviceId() const = 0;
+    virtual NegotiateChannelType GetType() const { return NegotiateChannelType::BASE_CHANNEL; }
 
 protected:
     std::string remoteDeviceId_;

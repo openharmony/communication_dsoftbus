@@ -28,11 +28,7 @@
 namespace OHOS::SoftBus {
 class WifiDirectDfx {
 public:
-    static WifiDirectDfx &GetInstance()
-    {
-        static WifiDirectDfx instance;
-        return instance;
-    }
+    static WifiDirectDfx &GetInstance();
     void DfxRecord(bool success, int32_t reason, WifiDirectConnectInfo &connectInfo);
     void Record(uint32_t requestId, uint16_t challengeCode);
     void Clear(uint32_t requestId);

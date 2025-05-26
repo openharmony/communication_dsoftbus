@@ -26,6 +26,8 @@
 #include "softbus_adapter_bt_common.h"
 #include "softbus_common.h"
 #include "softbus_error_code.h"
+#include "dsoftbus_enhance_interface.h"
+#include "g_enhance_lnn_func.h"
 
 namespace OHOS {
 using namespace testing::ext;
@@ -155,6 +157,8 @@ HWTEST_F(LNNNetBuilderMockTest, CONFIG_LOCAL_LEDGER_TEST_001, TestSize.Level1)
  */
 HWTEST_F(LNNNetBuilderMockTest, LNN_INIT_NET_BUILDER_DELAY_TEST_001, TestSize.Level1)
 {
+    LnnEnhanceFuncList *pfnLnnEnhanceFuncList = LnnEnhanceFuncListGet();
+    pfnLnnEnhanceFuncList->lnnInitFastOffline = LnnInitFastOffline;
     NiceMock<NetBuilderDepsInterfaceMock> NetBuilderMock;
     EXPECT_CALL(NetBuilderMock, LnnSetLocalStrInfo(_, _)).WillRepeatedly(Return(SOFTBUS_OK));
     EXPECT_CALL(NetBuilderMock, LnnGetLocalWeight()).WillRepeatedly(Return(LOCAL_WEIGHT));
@@ -283,6 +287,8 @@ HWTEST_F(LNNNetBuilderMockTest, NODE_INFO_SYNC_TEST_001, TestSize.Level1)
  */
 HWTEST_F(LNNNetBuilderMockTest, ON_DEVICE_NOT_TRUSTED_TEST_001, TestSize.Level1)
 {
+    LnnEnhanceFuncList *pfnLnnEnhanceFuncList = LnnEnhanceFuncListGet();
+    pfnLnnEnhanceFuncList->lnnSendNotTrustedInfo = LnnSendNotTrustedInfo;
     NiceMock<NetBuilderDepsInterfaceMock> NetBuilderMock;
     SoftBusLooper loop;
     EXPECT_CALL(NetBuilderMock, LnnGetOnlineStateById(_, _)).WillOnce(Return(false)).WillRepeatedly(Return(true));

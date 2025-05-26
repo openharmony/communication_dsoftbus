@@ -13,7 +13,6 @@
 
 import("../../../core/transmission/trans_channel/common/common.gni")
 import("../../../core/transmission/trans_channel/proxy/proxy.gni")
-import("../../../core/transmission/trans_channel/qos/qos.gni")
 import("../../../core/transmission/trans_channel/tcp_direct/tcp_direct.gni")
 import(
     "../../../core/transmission/trans_channel/udp_negotiation/udp_negotiation.gni")
@@ -21,12 +20,12 @@ import("../../../dsoftbus.gni")
 
 trans_channel_src =
     trans_channel_common_src + trans_proxy_channel_src +
-    trans_direct_channel_src + trans_udp_channel_src + trans_qos_src
+    trans_direct_channel_src + trans_udp_channel_src
 trans_channel_inc =
     trans_channel_common_inc + trans_proxy_channel_inc +
-    trans_direct_channel_inc + trans_udp_channel_inc + trans_qos_inc
+    trans_direct_channel_inc + trans_udp_channel_inc
 trans_channel_deps =
-    trans_channel_common_deps + trans_proxy_channel_deps + trans_qos_deps
+    trans_channel_common_deps + trans_proxy_channel_deps
 
 trans_channel_src += [
   "$dsoftbus_root_path/core/transmission/trans_channel/auth/src/trans_auth_manager.c",
@@ -46,10 +45,14 @@ if (defined(ohos_lite)) {
 }
 trans_channel_inc += [
   "$dsoftbus_root_path/core/adapter/transmission/include",
+  "$dsoftbus_root_path/interfaces/kits/adapter",
+  "$dsoftbus_root_path/interfaces/kits/authentication",
   "$dsoftbus_root_path/core/authentication/include",
   "$dsoftbus_root_path/core/transmission/trans_channel/auth/include",
+  "$dsoftbus_root_path/interfaces/kits/transport",
   "$dsoftbus_root_path/core/transmission/trans_channel/manager/include",
   "$dsoftbus_root_path/core/transmission/trans_channel/common/include",
+  "$dsoftbus_root_path/interfaces/kits/lnn",
   "$dsoftbus_root_path/core/transmission/trans_channel/inner_session/include",
   "$dsoftbus_root_path/core/bus_center/lnn/lane_hub/lane_manager/include",
 ]

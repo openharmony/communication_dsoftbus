@@ -17,26 +17,16 @@
 #define AUTH_SESSION_KEY_H
 
 #include "auth_interface.h"
+#include "auth_session_key_struct.h"
+#include "common_list.h"
+#include "softbus_adapter_crypto.h"
+#include "softbus_def.h"
 
 #ifdef __cplusplus
 #if __cplusplus
 extern "C" {
 #endif
 #endif
-
-#define ENCRYPT_INDEX_LEN 4
-#define ENCRYPT_OVER_HEAD_LEN (OVERHEAD_LEN + ENCRYPT_INDEX_LEN)
-
-typedef struct {
-    uint8_t value[SESSION_KEY_LENGTH];
-    uint32_t len;
-} SessionKey;
-
-typedef struct {
-    const uint8_t *inData;
-    uint32_t inLen;
-} InDataInfo;
-typedef ListNode SessionKeyList;
 
 void InitSessionKeyList(SessionKeyList *list);
 void DestroySessionKeyList(SessionKeyList *list);

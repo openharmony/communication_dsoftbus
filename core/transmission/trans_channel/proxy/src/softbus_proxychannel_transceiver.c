@@ -17,9 +17,12 @@
 
 #include <securec.h>
 
-#include "auth_device_common_key.h"
 #include "lnn_device_info_recovery.h"
 #include "message_handler.h"
+#include "g_enhance_lnn_func.h"
+#include "g_enhance_lnn_func_pack.h"
+#include "g_enhance_conn_func.h"
+#include "g_enhance_conn_func_pack.h"
 #include "legacy/softbus_adapter_hitrace.h"
 #include "legacy/softbus_hisysevt_transreporter.h"
 #include "softbus_adapter_mem.h"
@@ -33,6 +36,7 @@
 #include "softbus_proxychannel_message.h"
 #include "softbus_proxychannel_pipeline.h"
 #include "softbus_utils.h"
+#include "softbus_init_common.h"
 #include "trans_auth_negotiation.h"
 #include "trans_channel_common.h"
 #include "trans_channel_manager.h"
@@ -750,7 +754,7 @@ static int32_t TransProxyConnectDevice(const ConnectOption *connInfo, uint32_t r
     result.OnConnectFailed = TransOnConnectFailed;
     result.OnConnectSuccessed = TransOnConnectSucceed;
     if (connInfo->type == CONNECT_BLE_DIRECT || connInfo->type == CONNECT_SLE_DIRECT) {
-        return ConnDirectConnectDevice(connInfo, requestId, &result);
+        return ConnDirectConnectDevicePacked(connInfo, requestId, &result);
     } else {
         return ConnConnectDevice(connInfo, requestId, &result);
     }
@@ -926,8 +930,8 @@ static void TransProxyOnDataReceived(uint32_t connectionId, ConnModule moduleId,
         char peerBrMac[BT_MAC_LEN] = {0};
         char udid[UDID_BUF_LEN] = {0};
         if (GetBrMacFromConnInfo(connectionId, peerBrMac, BT_MAC_LEN) == SOFTBUS_OK) {
-            if (LnnGetUdidByBrMac(peerBrMac, udid, UDID_BUF_LEN) == SOFTBUS_OK) {
-                AuthRemoveDeviceKeyByUdid(udid);
+            if (LnnGetUdidByBrMacPacked(peerBrMac, udid, UDID_BUF_LEN) == SOFTBUS_OK) {
+                AuthRemoveDeviceKeyByUdidPacked(udid);
             }
         }
     }

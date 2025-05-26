@@ -16,54 +16,18 @@
 #ifndef DISC_BLE_UTILS_H
 #define DISC_BLE_UTILS_H
 
-#include "softbus_common.h"
+#include <stdbool.h>
+#include <stdint.h>
+
 #include "broadcast_protocol_constant.h"
+#include "disc_ble_utils_struct.h"
+#include "softbus_common.h"
 
 #ifdef __cplusplus
 #if __cplusplus
 extern "C" {
 #endif
 #endif
-
-#define ADV_DATA_MAX_LEN 24
-#define RESP_DATA_MAX_LEN 26
-#define REAL_RESP_DATA_MAX_LEN 27
-#define CUST_CAPABILITY_LEN 2
-#define CUST_CAPABILITY_TYPE_LEN 1
-#define BROADCAST_MAX_LEN (ADV_DATA_MAX_LEN + RESP_DATA_MAX_LEN)
-
-typedef struct {
-    union {
-        unsigned char data[BROADCAST_MAX_LEN];
-        struct {
-            unsigned char advData[ADV_DATA_MAX_LEN];
-            unsigned char rspData[RESP_DATA_MAX_LEN];
-        };
-    } data;
-    // for total mode
-    unsigned short dataLen;
-    
-    // for separate mode
-    unsigned short advDataLen;
-    unsigned short rspDataLen;
-} BroadcastData;
-
-typedef struct {
-    DeviceInfo *info;
-    int8_t power;
-    char devName[DISC_MAX_DEVICE_NAME_LEN];
-    uint32_t devNameLen;
-    char nickname[DISC_MAX_NICKNAME_LEN];
-    uint32_t nicknameLen;
-} DeviceWrapper;
-
-typedef enum {
-    HEART_BEAT = 0,
-    CAST_PLUS,
-    DV_KIT,
-    PC_COLLABORATION,
-    OSD
-} CustDataCapability;
 
 bool CheckBitMapEmpty(uint32_t capBitMapNum, const uint32_t *capBitMap);
 bool CheckCapBitMapExist(uint32_t capBitMapNum, const uint32_t *capBitMap, uint32_t pos);

@@ -16,13 +16,37 @@
 #ifndef OHOS_TRANS_SPEC_OBJECT_STUB_H
 #define OHOS_TRANS_SPEC_OBJECT_STUB_H
 
+#include "broadcast_struct.h"
 #include "itrans_spec_object.h"
 #include "iremote_stub.h"
 
 namespace OHOS {
+enum {
+    SOFTBUS_TRANS_SPEC_OBJECT_STUB_INIT_SUCCESS = 0,
+    SOFTBUS_TRANS_SPEC_OBJECT_STUB_DLOPEN_FAILED,
+    SOFTBUS_TRANS_SPEC_OBJECT_STUB_DLSYM_FAILED,
+    SOFTBUS_TRANS_SPEC_OBJECT_STUB_INSTANCE_EXIT,
+    SOFTBUS_TRANS_SPEC_OBJECT_STUB_GET_SOFTBUS_SERVER_INFO_FAILED,
+};
+
 class TransSpecObjectStub : public IRemoteStub<ITransSpecObject> {
 public:
+    TransSpecObjectStub();
+
     int32_t OnRemoteRequest(uint32_t code, MessageParcel &data, MessageParcel &reply, MessageOption &option) override;
+
+private:
+
+    bool OpenSoftbusPluginSo();
+
+    using OnRemoteRequestFunc = int32_t (*)(uint32_t code, MessageParcel &data, MessageParcel &reply,
+        MessageOption &option);
+
+    OnRemoteRequestFunc onRemoteRequestFunc_ = nullptr;
+
+    std::mutex loadSoMutex_;
+    bool isLoaded_ = false;
+    void *soHandle_ = nullptr;
 };
 } // namespace OHOS
 

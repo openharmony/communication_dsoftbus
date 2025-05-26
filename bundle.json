@@ -169,6 +169,180 @@
             ],
             "header_base": "//foundation/communication/dsoftbus/interfaces/kits"
           }
+        },
+        {
+          "name": "//foundation/communication/dsoftbus/core/common:softbus_utils",
+          "header": {
+            "header_files": [
+              "adapter/enhance/softbus_adapter_ble_conflict_struct.h",
+              "adapter/auth_session_message_struct.h",
+              "adapter/softbus_adapter_ble_gatt_client_struct.h",
+              "adapter/softbus_adapter_ble_gatt_server_struct.h",
+              "adapter/softbus_adapter_bt_common_struct.h",
+              "adapter/softbus_adapter_wlan_extend_struct.h",
+              "adapter/softbus_ble_gatt_public.h",
+              "adapter/softbus_broadcast_adapter_interface_struct.h",
+              "adapter/softbus_broadcast_adapter_type_struct.h",
+              "adapter/softbus_broadcast_manager_struct.h",
+              "adapter/softbus_broadcast_utils_struct.h",
+              "adapter/softbus_broadcast_type_struct.h",
+              "adapter/softbus_rsa_encrypt_struct.h",
+              "adapter/wrapper_br_interface_struct.h",
+              "../../adapter/common/include/softbus_adapter_json.h",
+              "authentication/auth_common_struct.h",
+              "authentication/auth_connection_struct.h",
+              "authentication/auth_hichain_adapter_struct.h",
+              "authentication/auth_interface_struct.h",
+              "authentication/auth_manager_struct.h",
+              "authentication/auth_session_fsm_struct.h",
+              "authentication/auth_session_key_struct.h",
+              "authentication/auth_tcp_connection_struct.h",
+              "authentication/enhance/auth_attest_interface_struct.h",
+              "authentication/enhance/auth_device_common_key_struct.h",
+              "broadcast/enhance/broadcast_scheduler_type_struct.h",
+              "broadcast/enhance/broadcast_struct.h",
+              "broadcast/enhance/link_broadcast_manager_struct.h",
+              "broadcast/broadcast_dfx_event_struct.h",
+              "broadcast/broadcast_protocol_constant_struct.h",
+              "bus_center/bus_center_event_struct.h",
+              "bus_center/bus_center_info_key_struct.h",
+              "bus_center/bus_center_manager_struct.h",
+              "bus_center/lnn_async_callback_utils_struct.h",
+              "bus_center/lnn_network_manager_struct.h",
+              "bus_center/lnn_physical_subnet_manager_struct.h",
+              "bus_center/softbus_bus_center.h",
+              "connect/softbus_base_listener_struct.h",
+              "connect/softbus_conn_ble_client_struct.h",
+              "connect/softbus_conn_ble_manager_struct.h",
+              "connect/softbus_conn_ble_server_struct.h",
+              "connect/softbus_conn_br_connection_struct.h",
+              "connect/softbus_conn_br_manager_struct.h",
+              "connect/softbus_conn_interface_struct.h",
+              "connect/softbus_conn_manager_struct.h",
+              "connect/softbus_conn_ble_trans_struct.h",
+              "connect/wifi_direct_defines_struct.h",
+              "connect/wifi_direct_error_code_struct.h",
+              "connect/wifi_direct_manager_struct.h",
+              "connect/wifi_direct_types_struct.h",
+              "disc/disc_ble_constant_struct.h",
+              "disc/disc_ble_dispatcher_struct.h",
+              "disc/disc_ble_utils_struct.h",
+              "disc/disc_coap_capability_public.h",
+              "disc/disc_interface_struct.h",
+              "disc/disc_manager_struct.h",
+              "disc/disc_usb_dispatcher_struct.h",
+              "lnn/lnn_coap_discovery_impl_struct.h",
+              "lnn/lnn_connect_info_struct.h",
+              "lnn/lnn_distributed_net_ledger_struct.h",
+              "lnn/lnn_lane_link_struct.h",
+              "lnn/lnn_map_struct.h",
+              "lnn/lnn_node_info_struct.h",
+              "lnn/lnn_p2p_info_struct.h",
+              "lnn/lnn_lane_model_struct.h",
+              "lnn/lnn_lane_struct.h",
+              "lnn/lnn_local_net_ledger_struct.h",
+              "lnn/lnn_lane_link_conflict_struct.h",
+              "lnn/lnn_net_builder_struct.h",
+              "lnn/lnn_state_machine_struct.h",
+              "lnn/lnn_sync_info_manager_struct.h",
+              "lnn/lnn_trans_lane_struct.h",
+              "lnn/lnn_decision_db_struct.h",
+              "lnn/lnn_file_utils_struct.h",
+              "lnn/lnn_device_info_struct.h",
+              "lnn/lnn_event_monitor_impl_struct.h",
+              "lnn/lnn_data_cloud_sync_struct.h",
+              "lnn/enhance/lnn_ble_lpdevice_struct.h",
+              "lnn/enhance/lnn_cipherkey_manager_struct.h",
+              "lnn/enhance/lnn_decision_center_struct.h",
+              "lnn/enhance/lnn_device_info_recovery_struct.h",
+              "lnn/lnn_heartbeat_medium_mgr_struct.h",
+              "lnn/lnn_heartbeat_utils_struct.h",
+              "lnn/enhance/lnn_fast_offline_struct.h",
+              "lnn/enhance/lnn_lane_power_control_struct.h",
+              "lnn/enhance/lnn_lane_qos_struct.h",
+              "lnn/enhance/lnn_lane_score_struct.h",
+              "lnn/enhance/lnn_lane_vap_info_struct.h",
+              "lnn/enhance/lnn_secure_storage_struct.h",
+              "lnn/enhance/lnn_ranging_manager_struct.h",
+              "lnn/lnn_topo_manager_struct.h",
+              "lnn/lnn_usb_adapter_struct.h",
+              "lnn/lnn_select_rule_struct.h",
+              "nstackx/nstackx_struct.h",
+              "../../core/transmission/common/include/softbus_app_info.h",
+              "sdk/client_trans_file_struct.h",
+              "sdk/client_trans_session_manager_struct.h",
+              "sdk/client_trans_udp_manager_struct.h",
+              "sdk/softbus_server_proxy_frame_struct.h",
+              "transport/softbus_proxychannel_message_struct.h",
+              "transport/softbus_proxychannel_pipeline_struct.h",
+              "transport/softbus_wifi_api_adapter_struct.h",
+              "transport/trans_auth_lane_pending_ctl_struct.h",
+              "transport/trans_lane_manager_struct.h",
+              "transport/trans_udp_channel_manager_struct.h",
+              "transport/trans_inner_session_struct.h",
+              "../../core/common/include/softbus_json_utils.h",
+              "../../sdk/bus_center/interface/common/g_reg_sdk_func.h",
+              "../../core/common/include/message_handler.h",
+              "../../core/transmission/common/include/softbus_trans_def.h",
+              "../../core/frame/init/include/g_reg_trans_func.h",
+              "../../core/frame/init/include/g_reg_conn_func.h",
+              "../../core/frame/init/include/g_reg_adapter_func.h",
+              "../../core/frame/init/include/g_reg_disc_func.h",
+              "../../core/frame/init/include/g_reg_lnn_func.h",
+              "../../core/frame/init/include/g_reg_authentication_func.h",
+              "../../core/frame/init/include/g_enhance_lnn_func.h",
+              "../../core/frame/init/include/g_enhance_auth_func.h",
+              "../../core/frame/init/include/g_enhance_disc_func.h",
+              "../../core/frame/init/include/g_enhance_trans_func.h",
+              "../../core/frame/init/include/g_enhance_conn_func.h",
+              "../inner_kits/lnn/data_level.h",
+              "../../sdk/frame/init/include/g_enhance_sdk_func.h"
+            ],
+            "header_base": "//foundation/communication/dsoftbus/interfaces/kits"
+          }
+        },
+        {
+          "name": "//foundation/communication/dsoftbus/adapter:softbus_adapter",
+          "header": {
+            "header_files": [
+              "../../adapter/common/net/bluetooth/broadcast/interface/softbus_broadcast_manager.h"
+            ],
+            "header_base": "//foundation/communication/dsoftbus/interfaces/kits"
+          }
+        },
+        {
+          "name": "//foundation/communication/dsoftbus/dfx:softbus_dfx",
+          "header": {
+            "header_files": [
+              "event/src/softbus_event.h"
+            ],
+            "header_base": "//foundation/communication/dsoftbus/dfx"
+          }
+        },
+        {
+          "name": "//foundation/communication/dsoftbus/components/nstackx/nstackx_util:nstackx_util.open",
+          "header": {
+            "header_files": [
+              "nstackx_util/interface/nstackx_error.h"
+            ],
+            "header_base": "//foundation/communication/dsoftbus/components/nstackx"
+          }
+        },
+        {
+          "name": "//foundation/communication/dsoftbus/core/connection/wifi_direct_cpp:wifi_direct",
+          "header": {
+            "header_files": [
+            ],
+            "header_base": "//foundation/communication/dsoftbus/core/connection/wifi_direct_cpp"
+          }
+        },
+        {
+          "name": "//foundation/communication/dsoftbus/dfx/dumper/legacy:softbus_dfx_dump",
+          "header": {
+            "header_files": [
+            ],
+            "header_base": "//foundation/communication/dsoftbus/dfx/interface/include"
+          }
         }
       ],
       "test": [

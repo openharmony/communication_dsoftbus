@@ -20,6 +20,11 @@
 #include "utils/wifi_direct_utils.h"
 
 namespace OHOS::SoftBus {
+WifiDirectDfx& WifiDirectDfx::GetInstance()
+{
+    static WifiDirectDfx instance;
+    return instance;
+}
 
 void WifiDirectDfx::DfxRecord(bool success, int32_t reason, WifiDirectConnectInfo &connectInfo)
 {

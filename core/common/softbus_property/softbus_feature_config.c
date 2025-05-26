@@ -13,6 +13,7 @@
  * limitations under the License.
  */
 
+#include <dlfcn.h>
 #include <securec.h>
 #include <stdbool.h>
 
@@ -99,6 +100,12 @@
 #define DEFAULT_PROXY_MAX_MESSAGE_LEN (1 * 1024)
 #define DEFAULT_IS_SUPPORT_TCP_PROXY 1
 #define DEFAULT_BLE_MAC_AUTO_REFRESH 0
+#endif
+
+#ifdef __aarch64__
+static const char *SOFTBUS_SERVER_PLUGIN_PATH_NAME = "/system/lib64/libdsoftbus_server_plugin.z.so";
+#else
+static const char *SOFTBUS_SERVER_PLUGIN_PATH_NAME = "/system/lib/libdsoftbus_server_plugin.z.so";
 #endif
 
 typedef struct {
@@ -415,10 +422,52 @@ static void SoftbusConfigSetDefaultVal(void)
     SoftbusConfigSetTransDefaultVal();
 }
 
+// static void SoftbusConfigAdapterInitPacked(const ConfigSetProc *sets)
+// {
+//     AdapterEnhanceFuncList *pfnAdapterEnhanceFuncList = AdapterEnhanceFuncListGet();
+//     if (pfnAdapterEnhanceFuncList->softbusConfigAdapterInit != NULL) {
+//         return pfnAdapterEnhanceFuncList->softbusConfigAdapterInit(sets);
+//     }
+//     void *soHandle = NULL;
+//     soHandle = dlopen(SOFTBUS_SERVER_PLUGIN_PATH_NAME, RTLD_NOW | RTLD_NODELETE | RTLD_GLOBAL);
+//     if (soHandle == NULL) {
+//         COMM_LOGW(COMM_DFX, "dlopen libdsoftbus_server_plugin.z.so failed.");
+//         return SoftbusConfigAdapterInit(sets);
+//     }
+//     pfnAdapterEnhanceFuncList->softbusConfigAdapterInit = (SoftbusConfigAdapterInitFunc)dlsym(soHandle, "SoftbusConfigAdapterInit");
+//     if (AdapterCheckFuncPointer((void *)pfnAdapterEnhanceFuncList->softbusConfigAdapterInit) != SOFTBUS_OK) {
+//         COMM_LOGW(COMM_DFX, "SoftbusConfigAdapterInitPacked fail");
+//         return SoftbusConfigAdapterInit(sets);
+//     }
+//     return pfnAdapterEnhanceFuncList->softbusConfigAdapterInit(sets);
+// }
+
+typedef void (*SoftbusConfigAdapterInitFunc)(const ConfigSetProc *sets);
+
+static void SoftbusConfigAdapterInitPacked(const ConfigSetProc *sets)
+{
+    void *soHandle = NULL;
+
+    SoftbusConfigAdapterInitFunc softbusConfigAdapterInitFunc_ = NULL;
+
+    soHandle = dlopen(SOFTBUS_SERVER_PLUGIN_PATH_NAME, RTLD_NOW | RTLD_NODELETE | RTLD_GLOBAL);
+    if (soHandle == NULL) {
+        COMM_LOGW(COMM_DFX, "dlopen libdsoftbus_server_plugin.z.so failed.");
+        return SoftbusConfigAdapterInit(sets);
+    }
+    softbusConfigAdapterInitFunc_ = (SoftbusConfigAdapterInitFunc)dlsym(soHandle, "SoftbusConfigAdapterInit");
+    if (softbusConfigAdapterInitFunc_ == NULL) {
+        COMM_LOGW(COMM_DFX, "dlsym SoftbusConfigAdapterInit failed.");
+        return SoftbusConfigAdapterInit(sets);
+    }
+
+    return softbusConfigAdapterInitFunc_(sets);
+}
+
 void SoftbusConfigInit(void)
 {
     ConfigSetProc sets;
     SoftbusConfigSetDefaultVal();
     sets.SetConfig = &SoftbusSetConfig;
-    SoftbusConfigAdapterInit(&sets);
+    SoftbusConfigAdapterInitPacked(&sets);
 }

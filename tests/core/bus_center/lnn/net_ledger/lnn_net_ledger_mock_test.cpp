@@ -21,6 +21,8 @@
 #include "lnn_distributed_net_ledger.h"
 #include "lnn_distributed_net_ledger_manager.c"
 #include "lnn_net_ledger.c"
+#include "dsoftbus_enhance_interface.h"
+#include "g_enhance_lnn_func.h"
 
 namespace OHOS {
 using namespace testing::ext;

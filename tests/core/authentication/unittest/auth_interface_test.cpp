@@ -36,7 +36,6 @@
 #include "softbus_adapter_json.h"
 #include "softbus_socket.h"
 #include "lnn_ctrl_lane.h"
-#include "lnn_lane_score.h"
 #include "lnn_lane_interface.h"
 
 namespace OHOS {

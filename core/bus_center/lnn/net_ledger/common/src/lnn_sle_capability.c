@@ -17,9 +17,10 @@
 #include <securec.h>
 
 #include "bus_center_manager.h"
+#include "g_enhance_adapter_func_pack.h"
 #include "lnn_log.h"
 #include "lnn_sle_capability.h"
-#include "softbus_adapter_sle_common.h"
+#include "softbus_adapter_sle_common_struct.h"
 #include "softbus_error_code.h"
 
 static void SleStateChangeEventHandler(int32_t state);
@@ -32,7 +33,7 @@ static int32_t g_sleStateListenerId = -1;
 
 int32_t SetSleRangeCapToLocalLedger()
 {
-    int32_t sleRangeCap = GetSleRangeCapacity();
+    int32_t sleRangeCap = GetSleRangeCapacityPacked();
     int32_t ret = LnnSetLocalNumInfo(NUM_KEY_SLE_RANGE_CAP, sleRangeCap);
     if (ret != SOFTBUS_OK) {
         LNN_LOGE(LNN_LEDGER, "LnnSetLocalNumInfo fail, ret=%u", ret);
@@ -43,12 +44,12 @@ int32_t SetSleRangeCapToLocalLedger()
 
 int32_t SetSleAddrToLocalLedger()
 {
-    if (!IsSleEnabled()) {
+    if (!IsSleEnabledPacked()) {
         LNN_LOGI(LNN_LEDGER, "SLE not enabled!");
         return SOFTBUS_SLE_RANGING_NOT_ENABLE;
     }
     char sleMacAddr[MAC_LEN];
-    int32_t ret = GetLocalSleAddr(sleMacAddr, MAC_LEN);
+    int32_t ret = GetLocalSleAddrPacked(sleMacAddr, MAC_LEN);
     if (ret != SOFTBUS_OK) {
         LNN_LOGE(LNN_LEDGER, "GetLocalSleAddr fail, ret=%u", ret);
         return ret;
@@ -77,16 +78,16 @@ int32_t LocalLedgerInitSleCapacity(NodeInfo* nodeInfo)
         LNN_LOGE(LNN_LEDGER, "NodeInfo is NULL");
         return SOFTBUS_ERR;
     }
-    int32_t sleCapacity = GetSleRangeCapacity();
+    int32_t sleCapacity = GetSleRangeCapacityPacked();
     char sleMacAddr[MAC_LEN] = { 0 };
-    int32_t ret = GetLocalSleAddr(sleMacAddr, MAC_LEN);
+    int32_t ret = GetLocalSleAddrPacked(sleMacAddr, MAC_LEN);
     if (ret != SOFTBUS_OK) {
         LNN_LOGE(LNN_LEDGER, "GetLocalSleAddr fail, ret=%u", ret);
         return ret;
     }
     nodeInfo->sleRangeCapacity = sleCapacity;
     memcpy_s(nodeInfo->connectInfo.sleMacAddr, MAC_LEN, sleMacAddr, MAC_LEN);
-    ret = SoftBusAddSleStateListener(&g_sleStateChangedListener, &g_sleStateListenerId);
+    ret = SoftBusAddSleStateListenerPacked(&g_sleStateChangedListener, &g_sleStateListenerId);
     if (ret != SOFTBUS_OK) {
         LNN_LOGE(LNN_LEDGER, "Add sle state listener failed.");
         return ret;
@@ -96,6 +97,6 @@ int32_t LocalLedgerInitSleCapacity(NodeInfo* nodeInfo)
 
 void LocalLedgerDeinitSleCapacity()
 {
-    SoftBusRemoveSleStateListener(g_sleStateListenerId);
+    SoftBusRemoveSleStateListenerPacked(g_sleStateListenerId);
     g_sleStateListenerId = -1;
 }

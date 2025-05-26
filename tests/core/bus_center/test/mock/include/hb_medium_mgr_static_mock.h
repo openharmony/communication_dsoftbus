@@ -19,7 +19,8 @@
 #include <gmock/gmock.h>
 #include <mutex>
 
-#include "auth_device_common_key.h"
+#include "auth_device_common_key_struct.h"
+#include "auth_interface_struct.h"
 #include "lnn_event_form.h"
 #include "lnn_feature_capability.h"
 #include "lnn_node_info.h"

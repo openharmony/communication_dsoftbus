@@ -24,25 +24,12 @@
 namespace OHOS::SoftBus {
 class EntityFactory {
 public:
-    static EntityFactory& GetInstance()
-    {
-        static EntityFactory instance;
-        return instance;
-    }
+    static EntityFactory& GetInstance();
 
     using Creator = std::function<WifiDirectEntity&(InnerLink::LinkType)>;
-    void Register(const Creator &creator)
-    {
-        creator_ = creator;
-    }
+    void Register(const Creator &creator);
 
-    WifiDirectEntity& GetEntity(InnerLink::LinkType type)
-    {
-        if (creator_ == nullptr) {
-            return P2pEntity::GetInstance();
-        }
-        return creator_(type);
-    }
+    WifiDirectEntity& GetEntity(InnerLink::LinkType type);
 
 private:
     EntityFactory() = default;
