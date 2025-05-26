@@ -12,19 +12,21 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+#include "lnn_common_utils.h"
 #include <stdbool.h>
 #include <stdlib.h>
 
 #include <securec.h>
 
-#include "lnn_common_utils.h"
+#include "g_enhance_lnn_func.h"
+#include "g_enhance_lnn_func_pack.h"
 #include "lnn_log.h"
-#include "lnn_oobe_manager.h"
 #include "softbus_adapter_crypto.h"
 #include "softbus_adapter_mem.h"
 #include "softbus_def.h"
 #include "softbus_error_code.h"
 #include "softbus_utils.h"
+#include "softbus_init_common.h"
 
 bool IsEnableSoftBusHeartbeat(void)
 {
@@ -34,7 +36,7 @@ bool IsEnableSoftBusHeartbeat(void)
 bool IsOOBEState(void)
 {
     SoftBusOOBEState state = SOFTBUS_OOBE_RUNNING;
-    if (LnnGetOOBEState(&state) != SOFTBUS_OK) {
+    if (LnnGetOOBEStatePacked(&state) != SOFTBUS_OK) {
         LNN_LOGE(LNN_STATE, "get oobe state fail");
         return true;
     }

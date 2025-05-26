@@ -23,6 +23,8 @@
 #include "client_trans_socket_manager.h"
 #include "comm_log.h"
 #include "general_connection_server_proxy.h"
+#include "g_enhance_sdk_func.h"
+#include "g_enhance_adapter_func.h"
 #include "softbus_adapter_mem.h"
 #include "softbus_adapter_thread.h"
 #include "softbus_base_listener.h"
@@ -33,6 +35,14 @@
 #include "softbus_feature_config.h"
 #include "softbus_socket.h"
 #include "softbus_utils.h"
+#include "softbus_client_init.h"
+#include "softbus_init_common.h"
+
+#ifdef __aarch64__
+static const char *SOFTBUS_CLIENT_PLUGIN_PATH_NAME = "/system/lib64/platformsdk/libdsoftbus_client_plugin.z.so";
+#else
+static const char *SOFTBUS_CLIENT_PLUGIN_PATH_NAME = "/system/lib/platformsdk/libdsoftbus_client_plugin.z.so";
+#endif
 
 static bool g_isInited = false;
 static SoftBusMutex g_isInitedLock;
@@ -184,6 +194,32 @@ static int32_t ConnClientInit(void)
     return ret;
 }
 
+static void ClientFuncInit(void)
+{
+    int ret = SOFTBUS_OK;
+    void *soHandle = NULL;
+    (void)SoftBusDlopen(SOFTBUS_CLIENT_PLUGIN_PATH_NAME, &soHandle);
+    if (soHandle == NULL) {
+        COMM_LOGE(COMM_SDK, "dlopen libdsoftbus_client_plugin.z.so failed.");
+        SoftbusClientPluginLoadedFlagSet(false);
+        return;
+    }
+
+    ret = SoftBusClientOpenFuncInit(soHandle);
+    if (ret != SOFTBUS_OK) {
+        COMM_LOGE(COMM_SDK, "init softbus client Open func failed");
+    }
+
+    ret = ClientRegisterEnhanceFunc(soHandle);
+    if (ret != SOFTBUS_OK) {
+        COMM_LOGE(COMM_SDK, "init softbus client Enhance func failed");
+    } else {
+        SoftbusClientPluginLoadedFlagSet(true);
+    }
+
+    return;
+}
+
 static int32_t ClientModuleInit(void)
 {
     SoftbusConfigInit();
@@ -217,6 +253,7 @@ ERR_EXIT:
 
 int32_t InitSoftBus(const char *pkgName)
 {
+    ClientFuncInit();
     COMM_CHECK_AND_RETURN_RET_LOGE(IsValidString(pkgName, PKG_NAME_SIZE_MAX - 1),
         SOFTBUS_INVALID_PKGNAME, COMM_SDK, "init softbus sdk fail.Package name is empty or length exceeds");
 

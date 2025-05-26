@@ -17,17 +17,12 @@
 #define LNN_COMMON_UTILS_H
 
 #include <stdint.h>
+#include <stdbool.h>
+#include "lnn_common_utils_struct.h"
 
 #ifdef __cplusplus
 extern "C" {
 #endif /* __cplusplus */
-
-typedef struct {
-    uint8_t *data;
-    uint32_t dataLen;
-    uint8_t *key;
-    uint32_t keyLen;
-} AesGcmInputParam;
 
 bool IsEnableSoftBusHeartbeat(void);
 bool IsOOBEState(void);

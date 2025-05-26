@@ -30,6 +30,8 @@ extern "C" {
 
 #define MAGIC_NUMBER 0xBABEFACE
 #define MODULE_SESSION 6
+#define MODULE_UK_NEGOSESSION 7
+#define MODULE_UK_ENCYSESSION 8
 #define FLAG_REQUEST 0
 #define FLAG_REPLY 1
 #define FLAG_WIFI 0

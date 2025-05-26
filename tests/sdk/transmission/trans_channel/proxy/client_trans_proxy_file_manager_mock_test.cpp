@@ -192,7 +192,7 @@ HWTEST_F(ClientTransProxyFileManagerMockTest, UnpackFileTransStartInfoTest001, T
         .WillRepeatedly(Return(TEST_FILE_LENGTH));
     EXPECT_CALL(ClientProxyFileManagerMock, SoftBusLtoHll).WillOnce(Return(TEST_FILE_LENGTH))
         .WillRepeatedly(Return(MAX_FILE_SIZE));
-    
+
     ret = UnpackFileTransStartInfo(&fileFrame, &info, &singleFileInfo, packetSize);
     EXPECT_EQ(SOFTBUS_OK, ret);
 

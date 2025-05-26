@@ -20,15 +20,27 @@ wifi_direct_cpp_unit_path =
 ohos_unittest("P2pEntityTest") {
   module_out_path = ut_out_path
   include_dirs = [
+    "$dsoftbus_root_path/interfaces/kits/transport",
+    "$dsoftbus_root_path/interfaces/kits/connect",
+    "$dsoftbus_root_path/interfaces/kits/lnn",
+    "$dsoftbus_root_path/interfaces/kits/lnn/enhance",
+    "$dsoftbus_root_path/core/connection/wifi_direct_cpp/dbinder",
+    "$dsoftbus_root_path/interfaces/kits/authentication",
+    "$dsoftbus_root_path/interfaces/kits/authentication/enhance",
+    "$dsoftbus_root_path/interfaces/kits/disc",
+    "$dsoftbus_root_path/interfaces/kits/adapter",
+    "$dsoftbus_root_path/core/frame/init/include",
     "$dsoftbus_dfx_path/interface/include",
     "$dsoftbus_root_path/core/authentication/include",
     "$dsoftbus_root_path/core/authentication/interface",
     "$dsoftbus_root_path/core/adapter/authentication/include",
+    "$dsoftbus_root_path/interfaces/kits/lnn",
     "$dsoftbus_root_path/core/bus_center/lnn/lane_hub/heartbeat/include",
     "$dsoftbus_root_path/core/adapter/bus_center/include",
     "$dsoftbus_root_path/core/bus_center/utils/include",
     "$dsoftbus_root_path/core/bus_center/lnn/net_builder/include",
     "$dsoftbus_root_path/core/bus_center/lnn/net_ledger/common/include",
+    "$dsoftbus_root_path/interfaces/kits/bus_center",
     "$dsoftbus_root_path/core/bus_center/interface",
     "$dsoftbus_root_path/core/bus_center/lnn/net_ledger/distributed_ledger/include",
     "$dsoftbus_root_path/core/bus_center/service/include",
@@ -46,6 +58,8 @@ ohos_unittest("P2pEntityTest") {
     "$dsoftbus_root_path/adapter/common/include/OS_adapter_define/linux",
     "$wifi_direct_cpp_path",
     "$wifi_direct_cpp_unit_path",
+    "$dsoftbus_root_path/core/frame/common/include",
+    "$dsoftbus_root_path/interfaces/kits/connect",
   ]
 
   remove_configs = [
@@ -64,6 +78,7 @@ ohos_unittest("P2pEntityTest") {
   deps = [
     "$dsoftbus_dfx_path:softbus_dfx",
     "$dsoftbus_root_path/adapter:softbus_adapter",
+    "$dsoftbus_root_path/core/connection/wifi_direct_cpp:wifi_direct",
   ]
 
   sources = [
@@ -107,6 +122,7 @@ ohos_unittest("P2pEntityTest") {
     "$wifi_direct_cpp_path/protocol/tlv_protocol.cpp",
     "$wifi_direct_cpp_path/utils/wifi_direct_anonymous.cpp",
     "$wifi_direct_cpp_path/utils/wifi_direct_utils.cpp",
+    "$dsoftbus_root_path/core/frame/common/src/softbus_init_common.c",
     "$wifi_direct_cpp_path/wifi_direct_executor.cpp",
     "$wifi_direct_cpp_path/wifi_direct_executor_manager.cpp",
     "$wifi_direct_cpp_path/wifi_direct_initiator.cpp",
@@ -119,6 +135,7 @@ ohos_unittest("P2pEntityTest") {
     "p2p_available_state_test.cpp",
     "p2p_connect_state_test.cpp",
     "p2p_entity_test.cpp",
+    "$dsoftbus_root_path/core/frame/init/src/g_enhance_lnn_func.c",
   ]
 
   external_deps = [

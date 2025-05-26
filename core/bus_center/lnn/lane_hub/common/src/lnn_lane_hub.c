@@ -15,13 +15,14 @@
 
 #include "lnn_lane_hub.h"
 
+#include "g_enhance_lnn_func.h"
+#include "g_enhance_lnn_func_pack.h"
 #include "lnn_heartbeat_ctrl.h"
 #include "lnn_lane.h"
-#include "lnn_lane_qos.h"
 #include "lnn_log.h"
 #include "lnn_time_sync_manager.h"
 #include "softbus_error_code.h"
-
+#include "softbus_init_common.h"
 
 int32_t LnnInitLaneHub(void)
 {
@@ -29,7 +30,7 @@ int32_t LnnInitLaneHub(void)
         LNN_LOGE(LNN_INIT, "init lane fail");
         return SOFTBUS_NO_INIT;
     }
-    if (LnnInitQos() != SOFTBUS_OK) {
+    if (LnnInitQosPacked() != SOFTBUS_OK) {
         LNN_LOGE(LNN_INIT, "init laneQos fail");
         return SOFTBUS_NO_INIT;
     }
@@ -55,7 +56,7 @@ int32_t LnnInitLaneHubDelay(void)
 
 void LnnDeinitLaneHub(void)
 {
-    LnnDeinitQos();
+    LnnDeinitQosPacked();
     DeinitLane();
     LnnDeinitTimeSync();
     LnnDeinitHeartbeat();

@@ -29,10 +29,14 @@ ohos_unittest("TransProxyChannelTest") {
     "$dsoftbus_root_path/core/common/security/permission/include",
     "$dsoftbus_root_path/core/adapter/bus_center/include",
     "$dsoftbus_root_path/core/adapter/transmission/include",
+    "$dsoftbus_root_path/interfaces/kits/adapter",
+    "$dsoftbus_root_path/interfaces/kits/authentication",
     "$dsoftbus_root_path/core/authentication/include",
     "$dsoftbus_root_path/core/authentication/interface",
 
+    "$dsoftbus_root_path/interfaces/kits/bus_center",
     "$dsoftbus_root_path/core/bus_center/interface",
+    "$dsoftbus_root_path/interfaces/kits/lnn",
     "$dsoftbus_root_path/core/bus_center/lnn/net_ledger/common/include",
     "$dsoftbus_root_path/core/bus_center/lnn/net_ledger/distributed_ledger/include",
     "$dsoftbus_root_path/core/bus_center/lnn/net_ledger/local_ledger/include",
@@ -46,8 +50,10 @@ ohos_unittest("TransProxyChannelTest") {
     "$dsoftbus_root_path/core/common/include",
     "$dsoftbus_root_path/core/common/message_handler/include",
 
+    "$dsoftbus_root_path/interfaces/kits/connect",
     "$dsoftbus_root_path/core/connection/interface",
-
+    
+    "$dsoftbus_root_path/interfaces/kits/disc",
     "$dsoftbus_root_path/core/discovery/interface",
     "$dsoftbus_root_path/core/discovery/manager/include",
 
@@ -59,6 +65,7 @@ ohos_unittest("TransProxyChannelTest") {
     "$dsoftbus_root_path/core/transmission/interface",
     "$dsoftbus_root_path/core/transmission/session/cpp/include",
     "$dsoftbus_root_path/core/transmission/session/include",
+    "$dsoftbus_root_path/interfaces/kits/transport",
     "$dsoftbus_root_path/core/transmission/trans_channel/manager/include",
     "$dsoftbus_root_path/core/transmission/pending_packet/include",
 
@@ -74,6 +81,7 @@ ohos_unittest("TransProxyChannelTest") {
   deps = [
     "$dsoftbus_root_path/core/common:softbus_utils",
     "$dsoftbus_root_path/core/frame:softbus_server",
+    "$dsoftbus_root_path/adapter:softbus_adapter",
   ]
 
   external_deps = [
@@ -129,6 +137,7 @@ ohos_unittest("SoftbusTransProxyManagerTest") {
   deps = [
     "$dsoftbus_root_path/core/common:softbus_utils",
     "$dsoftbus_root_path/core/frame:softbus_server",
+    "$dsoftbus_root_path/adapter:softbus_adapter",
   ]
 
   external_deps = [
@@ -185,6 +194,7 @@ ohos_unittest("SoftbusTransProxyMessageTest") {
   deps = [
     "$dsoftbus_core_path/common:softbus_utils",
     "$dsoftbus_core_path/frame:softbus_server",
+    "$dsoftbus_root_path/adapter:softbus_adapter",
   ]
 
   external_deps = [
@@ -205,6 +215,7 @@ ohos_unittest("SoftbusProxyChannelManagerTest") {
   deps = [
     "$dsoftbus_root_path/core/common:softbus_utils",
     "$dsoftbus_root_path/core/frame:softbus_server",
+    "$dsoftbus_root_path/adapter:softbus_adapter",
   ]
 
   external_deps = [
@@ -228,8 +239,12 @@ ohos_unittest("SoftbusProxyChannelMessageTest") {
     "$dsoftbus_root_path/core/adapter/transmission/include",
     "$dsoftbus_root_path/core/authentication/include",
     "$dsoftbus_root_path/core/authentication/interface",
+    "$dsoftbus_root_path/interfaces/kits/adapter",
+    "$dsoftbus_root_path/interfaces/kits/authentication",
 
+    "$dsoftbus_root_path/interfaces/kits/bus_center",
     "$dsoftbus_root_path/core/bus_center/interface",
+    "$dsoftbus_root_path/interfaces/kits/lnn",
     "$dsoftbus_root_path/core/bus_center/lnn/net_ledger/common/include",
     "$dsoftbus_root_path/core/bus_center/lnn/net_ledger/distributed_ledger/include",
     "$dsoftbus_root_path/core/bus_center/lnn/net_ledger/local_ledger/include",
@@ -265,6 +280,7 @@ ohos_unittest("SoftbusProxyChannelMessageTest") {
   ]
 
   deps = [
+    "$dsoftbus_root_path/adapter:softbus_adapter",
     "$dsoftbus_root_path/core/common:softbus_utils",
     "$dsoftbus_root_path/core/frame:softbus_server",
   ]
@@ -303,7 +319,9 @@ ohos_unittest("SoftbusProxyNetworkTest") {
     "$dsoftbus_root_path/core/bus_center/utils/include",
     "$dsoftbus_root_path/core/common/include",
     "$dsoftbus_root_path/core/common/message_handler/include",
+    "$dsoftbus_root_path/interfaces/kits/connect",
     "$dsoftbus_root_path/core/connection/interface",
+    "$dsoftbus_root_path/interfaces/kits/disc",
     "$dsoftbus_root_path/core/discovery/interface",
     "$dsoftbus_root_path/core/discovery/manager/include",
     "$dsoftbus_root_path/core/transmission/common/include",
@@ -313,6 +331,7 @@ ohos_unittest("SoftbusProxyNetworkTest") {
     "$dsoftbus_root_path/core/transmission/trans_channel/proxy/src",
     "$dsoftbus_root_path/core/transmission/interface",
     "$dsoftbus_root_path/core/transmission/session/include",
+    "$dsoftbus_root_path/interfaces/kits/transport",  
     "$dsoftbus_root_path/core/transmission/trans_channel/manager/include",
     "$dsoftbus_root_path/core/transmission/pending_packet/include",
     "$dsoftbus_root_path/core/connection/p2p/interface",
@@ -328,6 +347,7 @@ ohos_unittest("SoftbusProxyNetworkTest") {
   deps = [
     "$dsoftbus_root_path/core/common:softbus_utils",
     "$dsoftbus_root_path/core/frame:softbus_server",
+    "$dsoftbus_root_path/adapter:softbus_adapter",
   ]
 
   external_deps = [
@@ -348,10 +368,14 @@ ohos_unittest("SoftbusProxySessionTest") {
     "$trans_comm_mock_path/include",
     "$dsoftbus_root_path/core/adapter/bus_center/include",
     "$dsoftbus_root_path/core/adapter/transmission/include",
+    "$dsoftbus_root_path/interfaces/kits/adapter",
+    "$dsoftbus_root_path/interfaces/kits/authentication",
     "$dsoftbus_root_path/core/authentication/include",
     "$dsoftbus_root_path/core/authentication/interface",
 
+    "$dsoftbus_root_path/interfaces/kits/bus_center",
     "$dsoftbus_root_path/core/bus_center/interface",
+    "$dsoftbus_root_path/interfaces/kits/lnn",
     "$dsoftbus_root_path/core/bus_center/lnn/net_ledger/common/include",
     "$dsoftbus_root_path/core/bus_center/lnn/net_ledger/distributed_ledger/include",
     "$dsoftbus_root_path/core/bus_center/lnn/net_ledger/local_ledger/include",
@@ -363,7 +387,9 @@ ohos_unittest("SoftbusProxySessionTest") {
     "$dsoftbus_root_path/core/bus_center/utils/include",
     "$dsoftbus_root_path/core/common/include",
     "$dsoftbus_root_path/core/common/message_handler/include",
+    "$dsoftbus_root_path/interfaces/kits/connect",
     "$dsoftbus_root_path/core/connection/interface",
+    "$dsoftbus_root_path/interfaces/kits/disc",
     "$dsoftbus_root_path/core/discovery/interface",
     "$dsoftbus_root_path/core/discovery/manager/include",
     "$dsoftbus_root_path/core/transmission/common/include",
@@ -373,6 +399,7 @@ ohos_unittest("SoftbusProxySessionTest") {
     "$dsoftbus_root_path/core/transmission/trans_channel/proxy/src",
     "$dsoftbus_root_path/core/transmission/interface",
     "$dsoftbus_root_path/core/transmission/session/include",
+    "$dsoftbus_root_path/interfaces/kits/transport",
     "$dsoftbus_root_path/core/transmission/trans_channel/manager/include",
     "$dsoftbus_root_path/core/transmission/pending_packet/include",
     "$dsoftbus_root_path/core/connection/p2p/interface",
@@ -388,6 +415,7 @@ ohos_unittest("SoftbusProxySessionTest") {
   deps = [
     "$dsoftbus_root_path/core/common:softbus_utils",
     "$dsoftbus_root_path/core/frame:softbus_server",
+    "$dsoftbus_root_path/adapter:softbus_adapter",
   ]
 
   external_deps = [
@@ -408,10 +436,14 @@ ohos_unittest("SoftbusProxyTransceiverTest") {
     "$trans_comm_mock_path/include",
     "$dsoftbus_root_path/core/adapter/bus_center/include",
     "$dsoftbus_root_path/core/adapter/transmission/include",
+    "$dsoftbus_root_path/interfaces/kits/adapter",
+    "$dsoftbus_root_path/interfaces/kits/authentication",
     "$dsoftbus_root_path/core/authentication/include",
     "$dsoftbus_root_path/core/authentication/interface",
 
+    "$dsoftbus_root_path/interfaces/kits/bus_center",
     "$dsoftbus_root_path/core/bus_center/interface",
+    "$dsoftbus_root_path/interfaces/kits/lnn",
     "$dsoftbus_root_path/core/bus_center/lnn/net_ledger/common/include",
     "$dsoftbus_root_path/core/bus_center/lnn/net_ledger/distributed_ledger/include",
     "$dsoftbus_root_path/core/bus_center/lnn/net_ledger/local_ledger/include",
@@ -423,7 +455,9 @@ ohos_unittest("SoftbusProxyTransceiverTest") {
     "$dsoftbus_root_path/core/bus_center/utils/include",
     "$dsoftbus_root_path/core/common/include",
     "$dsoftbus_root_path/core/common/message_handler/include",
+    "$dsoftbus_root_path/interfaces/kits/connect",
     "$dsoftbus_root_path/core/connection/interface",
+    "$dsoftbus_root_path/interfaces/kits/disc",
     "$dsoftbus_root_path/core/discovery/interface",
     "$dsoftbus_root_path/core/discovery/manager/include",
     "$dsoftbus_root_path/core/transmission/common/include",
@@ -433,6 +467,7 @@ ohos_unittest("SoftbusProxyTransceiverTest") {
     "$dsoftbus_root_path/core/transmission/trans_channel/proxy/src",
     "$dsoftbus_root_path/core/transmission/interface",
     "$dsoftbus_root_path/core/transmission/session/include",
+    "$dsoftbus_root_path/interfaces/kits/transport",
     "$dsoftbus_root_path/core/transmission/trans_channel/manager/include",
     "$dsoftbus_root_path/core/transmission/pending_packet/include",
     "$dsoftbus_root_path/core/connection/p2p/interface",
@@ -448,6 +483,7 @@ ohos_unittest("SoftbusProxyTransceiverTest") {
   deps = [
     "$dsoftbus_root_path/core/common:softbus_utils",
     "$dsoftbus_root_path/core/frame:softbus_server",
+    "$dsoftbus_root_path/adapter:softbus_adapter",
   ]
 
   external_deps = [
@@ -468,10 +504,14 @@ ohos_unittest("SoftbusProxyChannelListenerTest") {
     "$trans_comm_mock_path/include",
     "$dsoftbus_root_path/core/adapter/bus_center/include",
     "$dsoftbus_root_path/core/adapter/transmission/include",
+    "$dsoftbus_root_path/interfaces/kits/adapter",
+    "$dsoftbus_root_path/interfaces/kits/authentication",
     "$dsoftbus_root_path/core/authentication/include",
     "$dsoftbus_root_path/core/authentication/interface",
     "$dsoftbus_root_path/core/common/security/permission/include",
+    "$dsoftbus_root_path/interfaces/kits/bus_center",
     "$dsoftbus_root_path/core/bus_center/interface",
+    "$dsoftbus_root_path/interfaces/kits/lnn",
     "$dsoftbus_root_path/core/bus_center/lnn/net_ledger/common/include",
     "$dsoftbus_root_path/core/bus_center/lnn/net_ledger/distributed_ledger/include",
     "$dsoftbus_root_path/core/bus_center/lnn/net_ledger/local_ledger/include",
@@ -483,7 +523,9 @@ ohos_unittest("SoftbusProxyChannelListenerTest") {
     "$dsoftbus_root_path/core/bus_center/utils/include",
     "$dsoftbus_root_path/core/common/include",
     "$dsoftbus_root_path/core/common/message_handler/include",
+    "$dsoftbus_root_path/interfaces/kits/connect",
     "$dsoftbus_root_path/core/connection/interface",
+    "$dsoftbus_root_path/interfaces/kits/disc",
     "$dsoftbus_root_path/core/discovery/interface",
     "$dsoftbus_root_path/core/discovery/manager/include",
     "$dsoftbus_root_path/core/transmission/common/include",
@@ -494,6 +536,7 @@ ohos_unittest("SoftbusProxyChannelListenerTest") {
     "$dsoftbus_root_path/core/transmission/session/cpp/include",
     "$dsoftbus_root_path/core/transmission/interface",
     "$dsoftbus_root_path/core/transmission/session/include",
+    "$dsoftbus_root_path/interfaces/kits/transport",
     "$dsoftbus_root_path/core/transmission/trans_channel/manager/include",
     "$dsoftbus_root_path/core/transmission/pending_packet/include",
     "$dsoftbus_root_path/core/connection/p2p/interface",
@@ -510,6 +553,7 @@ ohos_unittest("SoftbusProxyChannelListenerTest") {
   deps = [
     "$dsoftbus_root_path/core/common:softbus_utils",
     "$dsoftbus_root_path/core/frame:softbus_server",
+    "$dsoftbus_root_path/adapter:softbus_adapter",
   ]
 
   external_deps = [
@@ -531,9 +575,13 @@ ohos_unittest("SoftbusProxyChannelPipelineTest") {
     "$trans_comm_mock_path/include",
     "$dsoftbus_root_path/core/adapter/bus_center/include",
     "$dsoftbus_root_path/core/adapter/transmission/include",
+    "$dsoftbus_root_path/interfaces/kits/adapter",
+    "$dsoftbus_root_path/interfaces/kits/authentication",
     "$dsoftbus_root_path/core/authentication/include",
     "$dsoftbus_root_path/core/authentication/interface",
+    "$dsoftbus_root_path/interfaces/kits/bus_center",
     "$dsoftbus_root_path/core/bus_center/interface",
+    "$dsoftbus_root_path/interfaces/kits/lnn",
     "$dsoftbus_root_path/core/bus_center/lnn/net_ledger/common/include",
     "$dsoftbus_root_path/core/bus_center/lnn/net_ledger/distributed_ledger/include",
     "$dsoftbus_root_path/core/bus_center/lnn/net_ledger/local_ledger/include",
@@ -545,7 +593,9 @@ ohos_unittest("SoftbusProxyChannelPipelineTest") {
     "$dsoftbus_root_path/core/bus_center/utils/include",
     "$dsoftbus_root_path/core/common/include",
     "$dsoftbus_root_path/core/common/message_handler/include",
+    "$dsoftbus_root_path/interfaces/kits/connect",
     "$dsoftbus_root_path/core/connection/interface",
+    "$dsoftbus_root_path/interfaces/kits/disc",
     "$dsoftbus_root_path/core/discovery/interface",
     "$dsoftbus_root_path/core/discovery/manager/include",
     "$dsoftbus_root_path/core/transmission/common/include",
@@ -555,6 +605,7 @@ ohos_unittest("SoftbusProxyChannelPipelineTest") {
     "$dsoftbus_root_path/core/transmission/trans_channel/proxy/src",
     "$dsoftbus_root_path/core/transmission/interface",
     "$dsoftbus_root_path/core/transmission/session/include",
+    "$dsoftbus_root_path/interfaces/kits/transport",
     "$dsoftbus_root_path/core/transmission/trans_channel/manager/include",
     "$dsoftbus_root_path/core/transmission/pending_packet/include",
     "$dsoftbus_root_path/core/connection/p2p/interface",
@@ -571,6 +622,7 @@ ohos_unittest("SoftbusProxyChannelPipelineTest") {
   deps = [
     "$dsoftbus_root_path/core/common:softbus_utils",
     "$dsoftbus_root_path/core/frame:softbus_server",
+    "$dsoftbus_root_path/adapter:softbus_adapter",
   ]
 
   external_deps = [
@@ -632,6 +684,7 @@ ohos_unittest("TransProxyNetworkTest") {
   deps = [
     "$dsoftbus_root_path/core/common:softbus_utils",
     "$dsoftbus_root_path/core/frame:softbus_server",
+    "$dsoftbus_root_path/adapter:softbus_adapter",
   ]
 
   external_deps = [
@@ -676,7 +729,7 @@ ohos_unittest("SoftbusTransProxyChannelManagerTest") {
 
     "$dsoftbus_core_path/discovery/interface",
     "$dsoftbus_core_path/discovery/manager/include",
-    "$dsoftbus_root_path/core/adapter/bus_center/include",
+
     "$dsoftbus_root_path/core/transmission/session/cpp/include",
     "$dsoftbus_core_path/transmission/session/include",
     "$dsoftbus_core_path/transmission/trans_channel/common/include",
@@ -685,11 +738,13 @@ ohos_unittest("SoftbusTransProxyChannelManagerTest") {
     "$dsoftbus_core_path/transmission/trans_channel/manager/include",
 
     "$dsoftbus_test_path/core/transmission/trans_channel/proxy_channel",
+    "$dsoftbus_root_path/core/adapter/bus_center/include",
   ]
 
   deps = [
     "$dsoftbus_root_path/core/common:softbus_utils",
     "$dsoftbus_root_path/core/frame:softbus_server",
+    "$dsoftbus_root_path/adapter:softbus_adapter",
   ]
 
   external_deps = [

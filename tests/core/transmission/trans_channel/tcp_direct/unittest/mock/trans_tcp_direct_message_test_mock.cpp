@@ -240,7 +240,6 @@ int32_t GetTokenTypeBySessionName(const char *sessionName, int32_t *tokenType)
 {
     return GetTransTcpDirectMessageInterface()->GetTokenTypeBySessionName(sessionName, tokenType);
 }
-
 int32_t AuthDecryptByUkId(int32_t ukId, const uint8_t *inData, uint32_t inLen, uint8_t *outData, uint32_t *outLen)
 {
     return GetTransTcpDirectMessageInterface()->AuthDecryptByUkId(ukId, inData, inLen, outData, outLen);

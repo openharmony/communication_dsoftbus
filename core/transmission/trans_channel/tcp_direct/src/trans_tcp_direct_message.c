@@ -55,8 +55,8 @@
 #include "trans_tcp_direct_manager.h"
 #include "trans_tcp_direct_sessionconn.h"
 #include "trans_tcp_direct_listener.h"
-#include "wifi_direct_manager.h"
 #include "trans_uk_manager.h"
+#include "wifi_direct_manager.h"
 
 #define MAX_PACKET_SIZE (64 * 1024)
 #define MIN_META_LEN 6

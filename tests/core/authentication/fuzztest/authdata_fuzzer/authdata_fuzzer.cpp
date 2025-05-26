@@ -181,7 +181,6 @@ extern "C" int32_t LLVMFuzzerTestOneInput(const uint8_t* data, size_t size)
     OHOS::AuthCryptFuzzTest(data, size);
     OHOS::AuthFlushDeviceFuzzTest(data, size);
     OHOS::AuthStartVerifyFuzzTest(data, size);
-    OHOS::AuthMetaStartVerifyFuzzTest(data, size);
 
     DataGenerator::Clear();
 

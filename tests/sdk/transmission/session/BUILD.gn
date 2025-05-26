@@ -30,11 +30,16 @@ ohos_unittest("TransClientSessionManagerTest") {
     "$dsoftbus_root_path/core/frame/common/include",
     "$dsoftbus_root_path/core/transmission/common/include",
     "$dsoftbus_root_path/sdk/transmission/session/include",
+    "$dsoftbus_root_path/interfaces/kits/authentication",
     "$dsoftbus_root_path/core/authentication/interface",
+    "$dsoftbus_root_path/interfaces/kits/bus_center",
     "$dsoftbus_root_path/core/bus_center/interface",
     "$dsoftbus_root_path/core/transmission/session/include",
+    "$dsoftbus_root_path/interfaces/kits/connect",
     "$dsoftbus_root_path/core/connection/interface",
+    "$dsoftbus_root_path/interfaces/kits/lnn",
     "$dsoftbus_root_path/core/bus_center/lnn/net_ledger/common/include",
+    "$dsoftbus_root_path/interfaces/kits/disc",
     "$dsoftbus_root_path/core/discovery/manager/include",
     "$dsoftbus_root_path/core/discovery/interface",
   ]
@@ -44,6 +49,7 @@ ohos_unittest("TransClientSessionManagerTest") {
     "$dsoftbus_root_path/core/common:softbus_utils",
     "$dsoftbus_root_path/core/frame:softbus_server",
     "$dsoftbus_root_path/tests/sdk:softbus_client_static",
+    "$dsoftbus_root_path/adapter:softbus_adapter",
   ]
 
   if (is_standard_system) {
@@ -69,11 +75,16 @@ ohos_unittest("TransClientSessionServiceTest") {
     "$dsoftbus_root_path/core/transmission/common/include",
     "$dsoftbus_root_path/sdk/transmission/session/include",
     "$dsoftbus_root_path/adapter/default_config/spec_config",
+    "$dsoftbus_root_path/interfaces/kits/connect",
     "$dsoftbus_root_path/core/connection/interface",
+    "$dsoftbus_root_path/interfaces/kits/authentication",
     "$dsoftbus_root_path/core/authentication/interface",
+    "$dsoftbus_root_path/interfaces/kits/bus_center",
     "$dsoftbus_root_path/core/bus_center/interface",
     "$dsoftbus_root_path/core/transmission/session/include",
+    "$dsoftbus_root_path/interfaces/kits/lnn",
     "$dsoftbus_root_path/core/bus_center/lnn/net_ledger/common/include",
+    "$dsoftbus_root_path/interfaces/kits/disc",
     "$dsoftbus_root_path/core/discovery/manager/include",
     "$dsoftbus_root_path/core/discovery/interface",
   ]
@@ -116,11 +127,16 @@ ohos_unittest("TransClientSessionCallbackTest") {
     "$dsoftbus_root_path/sdk/transmission/session/src",
     "$dsoftbus_root_path/sdk/transmission/trans_channel/proxy/include",
     "$dsoftbus_root_path/sdk/transmission/trans_channel/udp/file/include",
+    "$dsoftbus_root_path/interfaces/kits/connect",
     "$dsoftbus_root_path/core/connection/interface",
+    "$dsoftbus_root_path/interfaces/kits/authentication",
     "$dsoftbus_root_path/core/authentication/interface",
+    "$dsoftbus_root_path/interfaces/kits/bus_center",
     "$dsoftbus_root_path/core/bus_center/interface",
     "$dsoftbus_root_path/core/transmission/session/include",
+    "$dsoftbus_root_path/interfaces/kits/lnn",
     "$dsoftbus_root_path/core/bus_center/lnn/net_ledger/common/include",
+    "$dsoftbus_root_path/interfaces/kits/disc",
     "$dsoftbus_root_path/core/discovery/manager/include",
     "$dsoftbus_root_path/core/discovery/interface",
     "$dsoftbus_root_path/sdk/transmission/trans_channel/udp/common/include",
@@ -131,6 +147,7 @@ ohos_unittest("TransClientSessionCallbackTest") {
     "$dsoftbus_root_path/core/common:softbus_utils",
     "$dsoftbus_root_path/core/frame:softbus_server",
     "$dsoftbus_root_path/tests/sdk:softbus_client_static",
+    "$dsoftbus_root_path/adapter:softbus_adapter",
   ]
 
   if (is_standard_system) {
@@ -151,6 +168,7 @@ ohos_unittest("TransClientMsgServiceTest") {
   sources = [ "client_trans_message_service_test.cpp" ]
 
   include_dirs = [
+    "$dsoftbus_root_path/interfaces/kits/adapter",
     "$dsoftbus_root_path/core/common/include",
     "$dsoftbus_root_path/core/frame/common/include",
     "$dsoftbus_root_path/core/transmission/common/include",
@@ -167,17 +185,23 @@ ohos_unittest("TransClientMsgServiceTest") {
     "$dsoftbus_root_path/core/authentication/interface",
     "$dsoftbus_root_path/core/bus_center/interface",
     "$dsoftbus_root_path/core/transmission/session/include",
+    "$dsoftbus_root_path/interfaces/kits/connect",
     "$dsoftbus_root_path/core/bus_center/lnn/net_ledger/common/include",
+    "$dsoftbus_root_path/interfaces/kits/authentication",
     "$dsoftbus_root_path/core/discovery/manager/include",
+    "$dsoftbus_root_path/interfaces/kits/bus_center",
     "$dsoftbus_root_path/core/discovery/interface",
+    "$dsoftbus_root_path/components/nstackx/fillp/include",
   ]
 
   deps = [
     "$dsoftbus_dfx_path:softbus_dfx",
     "$dsoftbus_root_path/core/common:softbus_utils",
     "$dsoftbus_root_path/core/frame:softbus_server",
+    "$dsoftbus_root_path/components/nstackx/fillp:FillpSo.open",
     "$dsoftbus_root_path/tests/sdk:softbus_client_static",
     "$dsoftbus_root_path/tests/sdk/common:softbus_access_token_test",
+    "$dsoftbus_root_path/adapter:softbus_adapter",
   ]
 
   if (is_standard_system) {
@@ -219,11 +243,16 @@ ohos_unittest("TransClientSessionTest") {
     "$dsoftbus_root_path/sdk/bus_center/manager/include",
     "$dsoftbus_root_path/sdk/transmission/trans_channel/tcp_direct/include",
     "$dsoftbus_root_path/sdk/transmission/trans_channel/udp/common/include",
+    "$dsoftbus_root_path/interfaces/kits/connect",
     "$dsoftbus_root_path/core/connection/interface",
+    "$dsoftbus_root_path/interfaces/kits/authentication",
     "$dsoftbus_root_path/core/authentication/interface",
+    "$dsoftbus_root_path/interfaces/kits/bus_center",
     "$dsoftbus_root_path/core/bus_center/interface",
     "$dsoftbus_root_path/core/transmission/session/include",
+    "$dsoftbus_root_path/interfaces/kits/lnn",
     "$dsoftbus_root_path/core/bus_center/lnn/net_ledger/common/include",
+    "$dsoftbus_root_path/interfaces/kits/disc",
     "$dsoftbus_root_path/core/discovery/manager/include",
     "$dsoftbus_root_path/core/discovery/interface",
   ]
@@ -234,6 +263,7 @@ ohos_unittest("TransClientSessionTest") {
     "$dsoftbus_root_path/core/frame:softbus_server",
     "$dsoftbus_root_path/tests/sdk:softbus_client_static",
     "$dsoftbus_root_path/tests/sdk/common:softbus_access_token_test",
+    "$dsoftbus_root_path/adapter:softbus_adapter",
   ]
 
   if (is_standard_system) {

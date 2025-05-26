@@ -29,7 +29,6 @@ typedef struct {
     int64_t authSeq;
     AuthConnInfo connInfo;
     bool isConnectServer;
-    bool isNeedNotifyVerify;
     ListNode node;
 } NormalizeRequest;
 

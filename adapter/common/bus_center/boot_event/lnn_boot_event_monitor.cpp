@@ -17,15 +17,16 @@
 
 #include "auth_interface.h"
 #include "bus_center_manager.h"
+#include "g_enhance_lnn_func.h"
+#include "g_enhance_lnn_func_pack.h"
 #include "lnn_async_callback_utils.h"
-#include "lnn_ble_heartbeat.h"
 #include "lnn_event_monitor_impl.h"
-#include "lnn_fast_offline.h"
 #include "lnn_heartbeat_strategy.h"
 #include "lnn_log.h"
 #include "lnn_ohos_account.h"
 #include "parameter.h"
 #include "lnn_init_monitor.h"
+#include "softbus_init_common.h"
 
 static int32_t ProcessBootEvent(void)
 {
@@ -38,7 +39,7 @@ static int32_t ProcessBootEvent(void)
     if (ret != SOFTBUS_OK) {
         LNN_LOGW(LNN_EVENT, "set userId failed");
     }
-    ret = HbBuildUserIdCheckSum(&userId, 1, userIdCheckSum, USERID_CHECKSUM_LEN);
+    ret = HbBuildUserIdCheckSumPacked(&userId, 1, userIdCheckSum, USERID_CHECKSUM_LEN);
     if (ret != SOFTBUS_OK) {
         LNN_LOGW(LNN_EVENT, "get userIdCheckSum failed");
     }
@@ -53,7 +54,7 @@ static int32_t ProcessBootEvent(void)
     if (!LnnIsDefaultOhosAccount()) {
         LnnNotifyAccountStateChangeEvent(SOFTBUS_ACCOUNT_LOG_IN);
     }
-    EhLoginEventHandler();
+    EhLoginEventHandlerPacked();
     LnnStartHeartbeat(0);
     return SOFTBUS_OK;
 }

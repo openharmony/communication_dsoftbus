@@ -30,6 +30,7 @@
 #include "lnn_network_info.h"
 #include "lnn_network_manager.h"
 #include "lnn_ohos_account.h"
+#include "lnn_heartbeat_utils.h"
 
 static const uint32_t SOFTBUS_SA_ID = 4700;
 static DeviceProfileChangeListener g_deviceProfileChange = { 0 };

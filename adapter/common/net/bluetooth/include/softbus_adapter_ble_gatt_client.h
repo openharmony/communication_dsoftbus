@@ -17,6 +17,7 @@
 #define SOFTBUS_ADAPTER_BLE_GATT_CLIENT_H
 
 #include "softbus_adapter_bt_common.h"
+#include "softbus_adapter_ble_gatt_client_struct.h"
 #include "common_list.h"
 
 #ifdef __cplusplus
@@ -24,48 +25,6 @@
 extern "C" {
 #endif
 #endif
-
-typedef struct {
-    uint32_t dataLen;
-    uint8_t *data;
-    SoftBusBtUuid charaUuid;
-} SoftBusGattcNotify;
-
-typedef enum {
-    SOFTBUS_GATT_WRITE_NO_RSP = 0x1,
-    SOFTBUS_GATT_WRITE_DEFAULT,
-    SOFTBUS_GATT_WRITE_PREPARE,
-    SOFTBUS_GATT_WRITE_SIGNED,
-    SOFTBUS_GATT_WRITE_TYPE_UNKNOWN,
-} SoftBusGattWriteType;
-
-typedef struct {
-    uint32_t valueLen;
-    SoftBusGattWriteType writeType;
-    const uint8_t *value;
-    SoftBusBtUuid serviceUuid;
-    SoftBusBtUuid characterUuid;
-} SoftBusGattcData;
-
-typedef struct {
-    void (*connectionStateCallback)(int32_t clientId, int32_t connState, int32_t status);
-    void (*serviceCompleteCallback)(int32_t clientId, int32_t status);
-    void (*registNotificationCallback)(int32_t clientId, int status);
-    void (*notificationReceiveCallback)(int32_t clientId, SoftBusGattcNotify *param, int32_t status);
-    void (*configureMtuSizeCallback)(int clientId, int mtuSize, int status);
-} SoftBusGattcCallback;
-
-typedef enum {
-    SOFTBUS_GATT_PRIORITY_BALANCED = 0x0,
-    SOFTBUS_GATT_PRIORITY_HIGH,
-    SOFTBUS_GATT_PRIORITY_LOW_POWER,
-} SoftbusBleGattPriority;
-
-typedef struct {
-    int32_t clientId;
-    ListNode node;
-    SoftBusGattcCallback callback;
-} SoftBusGattcManager;
 
 int32_t SoftbusGattcRegisterCallback(SoftBusGattcCallback *cb, int32_t clientId);
 int32_t SoftbusGattcRegister(void);

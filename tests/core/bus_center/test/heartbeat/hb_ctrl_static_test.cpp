@@ -20,8 +20,6 @@
 #include "ble_mock.h"
 #include "bus_center_manager.h"
 #include "hb_ctrl_static_mock.h"
-#include "lnn_ble_heartbeat.h"
-#include "lnn_decision_center.h"
 #include "lnn_heartbeat_ctrl.c"
 #include "lnn_heartbeat_ctrl.h"
 #include "lnn_heartbeat_utils.h"

@@ -17,6 +17,7 @@
 #define AUTH_TCP_CONNECTION_H
 
 #include "auth_connection.h"
+#include "auth_tcp_connection_struct.h"
 
 #ifdef __cplusplus
 #if __cplusplus
@@ -24,22 +25,6 @@ extern "C" {
 #endif
 #endif
 
-#define AUTH_INVALID_FD                    (-1)
-#define TCP_KEEPALIVE_INTERVAL             2
-#define TCP_KEEPALIVE_HIGH_COUNT           3
-#define TCP_KEEPALIVE_MID_COUNT            3
-#define TCP_KEEPALIVE_LOW_COUNT            5
-#define TCP_KEEPALIVE_DEFAULT_COUNT        5
-#define TCP_KEEPALIVE_HIGH_USER_TIMEOUT    (10 * 1000)
-#define TCP_KEEPALIVE_MID_USER_TIMEOUT     (10 * 1000)
-#define TCP_KEEPALIVE_LOW_USER_TIMEOUT     (15 * 1000)
-#define TCP_KEEPALIVE_DEFAULT_USER_TIMEOUT (15 * 1000)
-
-typedef struct {
-    void (*onConnected)(ListenerModule module, int32_t fd, bool isClient);
-    void (*onDisconnected)(ListenerModule module, int32_t fd);
-    void (*onDataReceived)(ListenerModule module, int32_t fd, const AuthDataHead *head, const uint8_t *data);
-} SocketCallback;
 int32_t SetSocketCallback(const SocketCallback *cb);
 void UnsetSocketCallback(void);
 

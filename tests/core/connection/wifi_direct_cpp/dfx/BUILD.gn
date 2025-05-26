@@ -23,6 +23,16 @@ ohos_unittest("WifiDirectDfxTest") {
   module_out_path = ut_out_path
 
   include_dirs = [
+    "$dsoftbus_root_path/interfaces/kits/transport",
+    "$dsoftbus_root_path/interfaces/kits/connect",
+    "$dsoftbus_root_path/interfaces/kits/lnn",
+    "$dsoftbus_root_path/interfaces/kits/lnn/enhance",
+    "$dsoftbus_root_path/core/connection/wifi_direct_cpp/dbinder",
+    "$dsoftbus_root_path/interfaces/kits/authentication",
+    "$dsoftbus_root_path/interfaces/kits/authentication/enhance",
+    "$dsoftbus_root_path/interfaces/kits/disc",
+    "$dsoftbus_root_path/interfaces/kits/adapter",
+    "$dsoftbus_root_path/core/frame/init/include",
     "$dsoftbus_dfx_path/interface/include",
     "$dsoftbus_root_path/core/bus_center/utils/include",
     "$dsoftbus_root_path/core/authentication/include",
@@ -49,6 +59,10 @@ ohos_unittest("WifiDirectDfxTest") {
     "$dsoftbus_root_path/core/transmission/trans_channel/proxy/include",
     "$wifi_direct_cpp_path",
     "$wifi_direct_cpp_unit_path",
+    "$dsoftbus_root_path/core/frame/init/include",
+    "$dsoftbus_root_path/core/connection/wifi_direct_cpp/dbinder",
+    "$dsoftbus_root_path/core/frame/common/include",
+    "$dsoftbus_root_path/interfaces/kits/connect",
   ]
   sources = [
     "$dsoftbus_root_path/core/connection/wifi_direct_cpp/adapter/p2p_adapter.cpp",
@@ -90,6 +104,7 @@ ohos_unittest("WifiDirectDfxTest") {
     "$dsoftbus_root_path/core/connection/wifi_direct_cpp/protocol/tlv_protocol.cpp",
     "$dsoftbus_root_path/core/connection/wifi_direct_cpp/utils/wifi_direct_anonymous.cpp",
     "$dsoftbus_root_path/core/connection/wifi_direct_cpp/utils/wifi_direct_utils.cpp",
+    "$dsoftbus_root_path/core/frame/common/src/softbus_init_common.c",
     "$dsoftbus_root_path/core/connection/wifi_direct_cpp/wifi_direct_executor.cpp",
     "$dsoftbus_root_path/core/connection/wifi_direct_cpp/wifi_direct_initiator.cpp",
     "$dsoftbus_root_path/core/connection/wifi_direct_cpp/wifi_direct_ip_manager.cpp",
@@ -100,6 +115,7 @@ ohos_unittest("WifiDirectDfxTest") {
     "$dsoftbus_root_path/tests/core/connection/wifi_direct_cpp/wifi_direct_mock.cpp",
     "$wifi_direct_cpp_path/wifi_direct_executor_manager.cpp",
     "wifi_direct_dfx_test.cpp",
+    "$dsoftbus_root_path/core/frame/init/src/g_enhance_lnn_func.c",
   ]
   remove_configs = [
     "//build/config/compiler:no_rtti",
@@ -118,6 +134,7 @@ ohos_unittest("WifiDirectDfxTest") {
   deps = [
     "$dsoftbus_dfx_path:softbus_dfx",
     "$dsoftbus_root_path/adapter:softbus_adapter",
+    "$dsoftbus_root_path/core/connection/wifi_direct_cpp:wifi_direct",
   ]
   external_deps = [
     "bounds_checking_function:libsec_shared",

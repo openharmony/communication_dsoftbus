@@ -52,5 +52,7 @@ ohos_fuzztest("SoftbusClientStub2FuzzTest") {
 
 group("fuzztest") {
   testonly = true
-  deps = [ ":SoftbusClientStub2FuzzTest" ]
+  deps = [
+    ":SoftbusClientStub2FuzzTest"
+  ]
 }

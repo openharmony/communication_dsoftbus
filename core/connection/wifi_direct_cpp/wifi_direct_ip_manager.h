@@ -30,18 +30,7 @@
 namespace OHOS::SoftBus {
 class WifiDirectIpManager {
 public:
-    static WifiDirectIpManager& GetInstance()
-    {
-        static WifiDirectIpManager instance;
-        {
-            std::lock_guard lock(clearMutex_);
-            if (!hasClear_) {
-                ClearAllIpv4();
-                hasClear_ = true;
-            }
-        }
-        return instance;
-    }
+    static WifiDirectIpManager& GetInstance();
     static void Init();
 
     std::string ApplyIpv6(const std::string &mac);

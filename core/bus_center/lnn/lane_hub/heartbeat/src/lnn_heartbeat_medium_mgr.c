@@ -20,20 +20,18 @@
 
 #include "anonymizer.h"
 #include "auth_manager.h"
-#include "auth_device_common_key.h"
+
 #include "auth_deviceprofile.h"
 #include "auth_interface.h"
 #include "bus_center_event.h"
 #include "bus_center_info_key.h"
 #include "bus_center_manager.h"
 #include "common_list.h"
+#include "g_enhance_lnn_func.h"
+#include "g_enhance_lnn_func_pack.h"
 #include "lnn_async_callback_utils.h"
-#include "lnn_ble_heartbeat.h"
-#include "lnn_ble_lpdevice.h"
-#include "lnn_cipherkey_manager.h"
 #include "lnn_connection_addr_utils.h"
 #include "lnn_device_info.h"
-#include "lnn_device_info_recovery.h"
 #include "lnn_distributed_net_ledger.h"
 #include "lnn_distributed_net_ledger_common.h"
 #include "lnn_event.h"
@@ -41,20 +39,18 @@
 #include "lnn_heartbeat_fsm.h"
 #include "lnn_heartbeat_strategy.h"
 #include "lnn_heartbeat_utils.h"
-#include "lnn_lane_vap_info.h"
 #include "lnn_local_net_ledger.h"
 #include "lnn_log.h"
 #include "lnn_net_builder.h"
 #include "lnn_node_info.h"
-#include "lnn_parameter_utils.h"
-
+#include "lnn_heartbeat_utils.h"
 #include "softbus_adapter_mem.h"
 #include "softbus_adapter_bt_common.h"
 #include "softbus_adapter_timer.h"
-#include "softbus_common.h"
 #include "softbus_def.h"
 #include "softbus_error_code.h"
 #include "softbus_utils.h"
+#include "softbus_init_common.h"
 
 #define INVALID_BR_MAC_ADDR "00:00:00:00:00:00"
 
@@ -549,7 +545,7 @@ static int32_t UpdateUserIdCheckSum(NodeInfo *deviceInfo, HbRespData *hbResp)
     }
     uint8_t defaultUserId[USERID_LEN] = {0};
     if ((memcmp(defaultUserId, hbResp->advUserId, USERID_LEN) != 0) &&
-        DecryptUserId(deviceInfo, hbResp->advUserId, USERID_LEN) != SOFTBUS_OK) {
+        DecryptUserIdPacked(deviceInfo, hbResp->advUserId, USERID_LEN) != SOFTBUS_OK) {
         return SOFTBUS_DECRYPT_ERR;
     }
     return SOFTBUS_OK;
@@ -564,7 +560,7 @@ static bool IsAccountChange(DeviceInfo *device, NodeInfo *cacheDeviceInfo)
     }
     char accountHash[SHA_256_HASH_LEN] = { 0 };
     int32_t ret = SoftBusGenerateStrHash((uint8_t *)accountString, strlen(accountString),
-        (unsigned char *)accountHash);
+    (unsigned char *)accountHash);
     if (ret != SOFTBUS_OK) {
         LNN_LOGE(LNN_HEART_BEAT, "account hash fail, ret=%{public}d", ret);
         return true;
@@ -572,7 +568,7 @@ static bool IsAccountChange(DeviceInfo *device, NodeInfo *cacheDeviceInfo)
     bool isChange = memcmp(accountHash, device->accountHash, HB_SHORT_ACCOUNT_HASH_LEN) != 0;
     if (isChange) {
         LNN_LOGI(LNN_HEART_BEAT, "accountHash compare. "
-            "accountHash=[%{public}02X, %{public}02X], device->accountHash=[%{public}02X, %{public}02X]",
+        "accountHash=[%{public}02X, %{public}02X], device->accountHash=[%{public}02X, %{public}02X]",
             accountHash[0], accountHash[1], device->accountHash[0], device->accountHash[1]);
     }
     return isChange;
@@ -589,7 +585,7 @@ static bool IsNeedConnectOnLine(DeviceInfo *device, HbRespData *hbResp, ConnectO
         LNN_LOGI(LNN_HEART_BEAT, "ble don't support ble direct online");
         return true;
     }
-    if (LnnRetrieveDeviceInfo(device->devId, &deviceInfo) != SOFTBUS_OK ||
+    if (LnnRetrieveDeviceInfoPacked(device->devId, &deviceInfo) != SOFTBUS_OK ||
         IsInvalidBrmac(deviceInfo.connectInfo.macAddr) || IsAccountChange(device, &deviceInfo)) {
         *connectReason = BLE_FIRST_CONNECT;
         LNN_LOGI(LNN_HEART_BEAT, "don't support ble direct online because retrieve fail, "
@@ -601,9 +597,9 @@ static bool IsNeedConnectOnLine(DeviceInfo *device, HbRespData *hbResp, ConnectO
         return true;
     }
     AuthDeviceKeyInfo keyInfo = { 0 };
-    if ((!IsCloudSyncEnabled() || !IsFeatureSupport(deviceInfo.feature, BIT_CLOUD_SYNC_DEVICE_INFO)) &&
-        AuthFindDeviceKey(device->devId, AUTH_LINK_TYPE_BLE, &keyInfo) != SOFTBUS_OK &&
-        AuthFindLatestNormalizeKey(device->devId, &keyInfo, true) != SOFTBUS_OK) {
+    if ((!IsCloudSyncEnabledPacked() || !IsFeatureSupport(deviceInfo.feature, BIT_CLOUD_SYNC_DEVICE_INFO)) &&
+        AuthFindDeviceKeyPacked(device->devId, AUTH_LINK_TYPE_BLE, &keyInfo) != SOFTBUS_OK &&
+        AuthFindLatestNormalizeKeyPacked(device->devId, &keyInfo, true) != SOFTBUS_OK) {
         *connectReason = DEVICEKEY_NOT_EXISTED;
         LNN_LOGE(LNN_HEART_BEAT, "don't support ble direct online because key not exist");
         return true;
@@ -613,12 +609,12 @@ static bool IsNeedConnectOnLine(DeviceInfo *device, HbRespData *hbResp, ConnectO
     (void)SetDeviceScreenStatus(&deviceInfo, hbResp->isScreenOn);
     LNN_CHECK_AND_RETURN_RET_LOGE(UpdateUserIdCheckSum(&deviceInfo, hbResp) == SOFTBUS_OK,
         true, LNN_HEART_BEAT, "don't support ble direct online because UpdateUserIdCheckSum fail");
-    if ((ret = LnnUpdateRemoteDeviceInfo(&deviceInfo)) != SOFTBUS_OK) {
+    if ((ret = LnnUpdateRemoteDeviceInfoPacked(&deviceInfo)) != SOFTBUS_OK) {
         *connectReason = UPDATE_REMOTE_DEVICE_INFO_FAILED;
         LNN_LOGE(LNN_HEART_BEAT, "don't support ble direct online because update device info fail ret=%{public}d", ret);
         return true;
     }
-    if ((deviceInfo.deviceInfo.osType == OH_OS_TYPE) && (!IsCipherManagerFindKey(deviceInfo.deviceInfo.deviceUdid))) {
+    if ((deviceInfo.deviceInfo.osType == OH_OS_TYPE) && (!IsCipherManagerFindKeyPk(deviceInfo.deviceInfo.deviceUdid))) {
         *connectReason = FIND_REMOTE_CIPHERKEY_FAILED;
         LNN_LOGE(LNN_HEART_BEAT, "don't support ble direct online because broadcast key");
         return true;
@@ -650,7 +646,7 @@ static bool HbIsValidJoinLnnRequest(DeviceInfo *device, HbRespData *hbResp)
         LNN_LOGI(LNN_HEART_BEAT, "local don't support three state");
         return true;
     }
-    if (LnnRetrieveDeviceInfo(device->devId, &nodeInfo) != SOFTBUS_OK) {
+    if (LnnRetrieveDeviceInfoPacked(device->devId, &nodeInfo) != SOFTBUS_OK) {
         LNN_LOGI(LNN_HEART_BEAT, "retrieve device info failed");
         return true;
     }
@@ -947,7 +943,7 @@ static void ProcRespVapChange(DeviceInfo *device, HbRespData *hbResp)
         }
         if (strncmp(udidHash, device->devId, HB_SHORT_UDID_HASH_HEX_LEN) == 0) {
             LNN_LOGD(LNN_HEART_BEAT, "hbResp preChannelCode=%{public}d", hbResp->preferChannel);
-            (void)LnnAddRemoteChannelCode(nodeInfo.deviceInfo.deviceUdid, hbResp->preferChannel);
+            (void)LnnAddRemoteChannelCodePacked(nodeInfo.deviceInfo.deviceUdid, hbResp->preferChannel);
             SoftBusFree(info);
             return;
         }
@@ -960,7 +956,7 @@ static bool IsSupportCloudSync(DeviceInfo *device)
     NodeInfo info;
     (void)memset_s(&info, sizeof(NodeInfo), 0, sizeof(NodeInfo));
     uint64_t localFeature = 0;
-    if (LnnRetrieveDeviceInfo(device->devId, &info) != SOFTBUS_OK) {
+    if (LnnRetrieveDeviceInfoPacked(device->devId, &info) != SOFTBUS_OK) {
         LNN_LOGE(LNN_HEART_BEAT, "don't support cloud sync beacause retrive info fail");
         return false;
     }
@@ -1049,7 +1045,7 @@ static bool IsNetworkIdChange(DeviceInfo *device, NodeInfo *remoteInfo, HbRespDa
 
     NodeInfo cacheInfo;
     (void)memset_s(&cacheInfo, sizeof(NodeInfo), 0, sizeof(NodeInfo));
-    if (LnnRetrieveDeviceInfo(device->devId, &cacheInfo) != SOFTBUS_OK) {
+    if (LnnRetrieveDeviceInfoPacked(device->devId, &cacheInfo) != SOFTBUS_OK) {
         LNN_LOGE(LNN_HEART_BEAT, "retrieve device info fail");
         return false;
     }
@@ -1331,7 +1327,7 @@ void LnnDumpHbOnlineNodeList(void)
         }
         char *deviceTypeStr = LnnConvertIdToDeviceType(nodeInfo.deviceInfo.deviceTypeId);
         char *anonyDeviceName = NULL;
-        AnonymizeDeviceName(nodeInfo.deviceInfo.deviceName, &anonyDeviceName);
+        Anonymize(nodeInfo.deviceInfo.deviceName, &anonyDeviceName);
         LNN_LOGD(LNN_HEART_BEAT,
             "DumpOnlineNodeList count=%{public}d, i=%{public}d, deviceName=%{public}s, deviceTypeId=%{public}d, "
             "deviceTypeStr=%{public}s, masterWeight=%{public}d, discoveryType=%{public}d, "
@@ -1345,11 +1341,11 @@ void LnnDumpHbOnlineNodeList(void)
 
 int32_t LnnHbMediumMgrInit(void)
 {
-    if (LnnRegistBleHeartbeatMediumMgr() != SOFTBUS_OK) {
+    if (LnnRegistBleHeartbeatMediumMgrPacked() != SOFTBUS_OK) {
         LNN_LOGE(LNN_HEART_BEAT, "regist ble heartbeat manager fail");
         return SOFTBUS_NETWORK_HB_MGR_REG_FAIL;
     }
-    if (LnnRegisterBleLpDeviceMediumMgr() != SOFTBUS_OK) {
+    if (LnnRegisterBleLpDeviceMediumMgrPacked() != SOFTBUS_OK) {
         LNN_LOGE(LNN_HEART_BEAT, "LP regist LpDevice manager fail");
         return SOFTBUS_NETWORK_HB_MGR_REG_FAIL;
     }

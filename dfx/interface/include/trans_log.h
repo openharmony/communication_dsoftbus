@@ -32,21 +32,23 @@ typedef enum {
     TRANS_MSG,
     TRANS_STREAM,
     TRANS_QOS,
+    TRANS_EVENT,
     TRANS_TEST,
 } TransLogLabelEnum;
 
 /* Keep consistent with labels */
 static const SoftBusLogLabel TRANS_LABELS[MODULE_DOMAIN_MAX_LEN] = {
-    { TRANS_SDK,    0xd005740,      "TransSdk"   },
-    { TRANS_SVC,    0xd005741,      "TransSvc"   },
-    { TRANS_INIT,   0xd005742,      "TransInit"  },
-    { TRANS_CTRL,   0xd005743,      "TransCtrl"  },
-    { TRANS_BYTES,  0xd005744,      "TransBytes" },
-    { TRANS_FILE,   0xd005745,      "TransFile"  },
-    { TRANS_MSG,    0xd005746,      "TransMsg"   },
-    { TRANS_STREAM, 0xd005747,      "TransStream"},
-    { TRANS_QOS,    0xd005748,      "TransQos"   },
-    { TRANS_TEST,   DOMAIN_ID_TEST, "TransTest"  },
+    { TRANS_SDK,        0xd005740,      "TransSdk"      },
+    { TRANS_SVC,        0xd005741,      "TransSvc"      },
+    { TRANS_INIT,       0xd005742,      "TransInit"     },
+    { TRANS_CTRL,       0xd005743,      "TransCtrl"     },
+    { TRANS_BYTES,      0xd005744,      "TransBytes"    },
+    { TRANS_FILE,       0xd005745,      "TransFile"     },
+    { TRANS_MSG,        0xd005746,      "TransMsg"      },
+    { TRANS_STREAM,     0xd005747,      "TransStream"   },
+    { TRANS_QOS,        0xd005748,      "TransQos"      },
+    { TRANS_EVENT,      0xd005748,      "TransEvent"    },
+    { TRANS_TEST,       DOMAIN_ID_TEST, "TransTest"     },
 };
 
 #if defined(SOFTBUS_LITEOS_M)

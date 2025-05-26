@@ -17,31 +17,15 @@
 #define AUTH_MESSAGE_H
 
 #include "auth_manager.h"
+#include "auth_session_fsm.h"
+#include "auth_session_message_struct.h"
+#include "softbus_json_utils.h"
 
 #ifdef __cplusplus
 #if __cplusplus
 extern "C" {
 #endif
 #endif
-
-typedef struct {
-    const char *msg;
-    uint32_t len;
-    int32_t linkType;
-    SoftBusVersion version;
-} DevInfoData;
-
-#define UDID_SHORT_HASH_HEX_STR 16
-#define UDID_SHORT_HASH_LEN_TEMP 8
-/* DeviceInfo-common */
-#define CODE "CODE"
-/* VerifyDevice */
-#define CODE_VERIFY_DEVICE 2
-#define DEVICE_ID "DEVICE_ID"
-
-/* TcpKeepalive */
-#define TIME "TIME"
-#define CODE_TCP_KEEPALIVE 3
 
 char *PackDeviceInfoMessage(const AuthConnInfo *connInfo, SoftBusVersion version, bool isMetaAuth,
     const char *remoteUuid, const AuthSessionInfo *info);

@@ -22,7 +22,6 @@
 #include "hb_ctrl_deps_mock.h"
 #include "hb_fsm_mock.h"
 #include "hb_strategy_mock.h"
-#include "lnn_ble_heartbeat.h"
 #include "lnn_heartbeat_ctrl.h"
 #include "lnn_heartbeat_utils.h"
 #include "lnn_ip_network_impl_mock.h"

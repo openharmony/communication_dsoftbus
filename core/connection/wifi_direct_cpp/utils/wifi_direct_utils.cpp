@@ -31,19 +31,24 @@
 #include "bus_center_manager.h"
 #include "conn_log.h"
 #include "data/link_manager.h"
-#include "inner_api/wifi_device.h"
+#include "g_enhance_lnn_func.h"
 #include "inner_api/wifi_msg.h"
 #include "lnn_distributed_net_ledger.h"
 #include "lnn_feature_capability.h"
-#include "lnn_lane_vap_info.h"
+#include "lnn_lane_vap_info_struct.h"
 #include "lnn_node_info.h"
 #include "lnn_p2p_info.h"
+#include "lnn_log.h"
 #include "securec.h"
 #include "softbus_adapter_mem.h"
 #include "softbus_error_code.h"
+#include "softbus_init_common.h"
 #include "syspara/parameters.h"
 #include "utils/wifi_direct_anonymous.h"
 #include "wifi_direct_defines.h"
+#include "wifi_direct_init.h"
+#include "inner_api/wifi_device.h"
+#include "inner_api/wifi_msg.h"
 
 #define CONN_WIFI_DIRECT_FD_TAG fdsan_create_owner_tag(FDSAN_OWNER_TYPE_FILE, 0xd005764)
 
@@ -148,13 +153,26 @@ int WifiDirectUtils::FrequencyToChannel(int frequency)
     }
 }
 
+static int32_t LnnGetRecommendChannelPacked(const char *udid, int32_t *preferChannel)
+{
+    LnnEnhanceFuncList *pfnLnnEnhanceFuncList = DBinderSoftbusServer::GetInstance().LnnEnhanceFuncListGet();
+    if (pfnLnnEnhanceFuncList == NULL) {
+        return SOFTBUS_NETWORK_DLOPEN_FAILED;
+    }
+    if (LnnCheckFuncPointer((void *)pfnLnnEnhanceFuncList->lnnGetRecommendChannel) != SOFTBUS_OK) {
+        return SOFTBUS_NOT_IMPLEMENT;
+    }
+    return pfnLnnEnhanceFuncList->lnnGetRecommendChannel(udid, preferChannel);
+}
+
 int WifiDirectUtils::GetRecommendChannelFromLnn(const std::string &networkId)
 {
     char udid[UDID_BUF_LEN] {};
-    int ret = LnnGetRemoteStrInfo(networkId.c_str(), STRING_KEY_DEV_UDID, udid, UDID_BUF_LEN);
+    int ret = DBinderSoftbusServer::GetInstance().LnnGetRemoteStrInfo(networkId.c_str(), STRING_KEY_DEV_UDID, udid,
+        UDID_BUF_LEN);
     CONN_CHECK_AND_RETURN_RET_LOGE(ret == SOFTBUS_OK, ret, CONN_WIFI_DIRECT, "get udid failed, ret = %{public}d", ret);
     int channelIdLnn = 0;
-    ret = LnnGetRecommendChannel(udid, &channelIdLnn);
+    ret = LnnGetRecommendChannelPacked(udid, &channelIdLnn);
     CONN_CHECK_AND_RETURN_RET_LOGE(
         ret == SOFTBUS_OK, ret, CONN_WIFI_DIRECT, "get channel from Lnn fail, ret = %{public}d", ret);
     return channelIdLnn;
@@ -163,7 +181,8 @@ int WifiDirectUtils::GetRecommendChannelFromLnn(const std::string &networkId)
 std::string WifiDirectUtils::NetworkIdToUuid(const std::string &networkId)
 {
     char uuid[UUID_BUF_LEN] {};
-    int ret = LnnGetRemoteStrInfo(networkId.c_str(), STRING_KEY_UUID, uuid, UUID_BUF_LEN);
+    int ret = DBinderSoftbusServer::GetInstance().LnnGetRemoteStrInfo(networkId.c_str(), STRING_KEY_UUID, uuid,
+        UUID_BUF_LEN);
     CONN_CHECK_AND_RETURN_RET_LOGE(ret == SOFTBUS_OK, "", CONN_WIFI_DIRECT, "get uuid failed");
     return uuid;
 }
@@ -171,7 +190,7 @@ std::string WifiDirectUtils::NetworkIdToUuid(const std::string &networkId)
 std::string WifiDirectUtils::UuidToNetworkId(const std::string &uuid)
 {
     char networkId[NETWORK_ID_BUF_LEN] {};
-    auto ret = LnnGetNetworkIdByUuid(uuid.c_str(), networkId, sizeof(networkId));
+    auto ret = DBinderSoftbusServer::GetInstance().LnnGetNetworkIdByUuid(uuid.c_str(), networkId, sizeof(networkId));
     CONN_CHECK_AND_RETURN_RET_LOGE(ret == SOFTBUS_OK, "", CONN_WIFI_DIRECT, "get network id failed");
     return networkId;
 }
@@ -179,7 +198,8 @@ std::string WifiDirectUtils::UuidToNetworkId(const std::string &uuid)
 std::string WifiDirectUtils::GetLocalNetworkId()
 {
     char networkId[NETWORK_ID_BUF_LEN] {};
-    auto ret = LnnGetLocalStrInfo(STRING_KEY_NETWORKID, networkId, NETWORK_ID_BUF_LEN);
+    auto ret = DBinderSoftbusServer::GetInstance().LnnGetLocalStrInfo(STRING_KEY_NETWORKID, networkId,
+        NETWORK_ID_BUF_LEN);
     CONN_CHECK_AND_RETURN_RET_LOGE(ret == SOFTBUS_OK, "", CONN_WIFI_DIRECT, "get network id failed");
     return networkId;
 }
@@ -187,7 +207,7 @@ std::string WifiDirectUtils::GetLocalNetworkId()
 std::string WifiDirectUtils::GetLocalUuid()
 {
     char uuid[UUID_BUF_LEN] {};
-    auto ret = LnnGetLocalStrInfo(STRING_KEY_UUID, uuid, UUID_BUF_LEN);
+    auto ret = DBinderSoftbusServer::GetInstance().LnnGetLocalStrInfo(STRING_KEY_UUID, uuid, UUID_BUF_LEN);
     CONN_CHECK_AND_RETURN_RET_LOGE(ret == SOFTBUS_OK, "", CONN_WIFI_DIRECT, "get uuid id failed");
     return uuid;
 }
@@ -195,10 +215,35 @@ std::string WifiDirectUtils::GetLocalUuid()
 int32_t WifiDirectUtils::GetLocalConnSubFeature(uint64_t &feature)
 {
     uint64_t connSubFeature = 0;
-    auto ret = LnnGetLocalNumU64Info(NUM_KEY_CONN_SUB_FEATURE_CAPA, &connSubFeature);
+    auto ret = DBinderSoftbusServer::GetInstance().LnnGetLocalNumU64Info(NUM_KEY_CONN_SUB_FEATURE_CAPA,
+        &connSubFeature);
     CONN_CHECK_AND_RETURN_RET_LOGE(ret == SOFTBUS_OK, ret, CONN_WIFI_DIRECT, "get connSubFeature failed");
     feature = connSubFeature;
     return SOFTBUS_OK;
+}
+
+static int32_t LnnGetLocalPtkByUuidPacked(const char *uuid, char *localPtk, uint32_t len)
+{
+    LnnEnhanceFuncList *pfnLnnEnhanceFuncList = DBinderSoftbusServer::GetInstance().LnnEnhanceFuncListGet();
+    if (pfnLnnEnhanceFuncList == NULL) {
+        return SOFTBUS_NETWORK_DLOPEN_FAILED;
+    }
+    if (LnnCheckFuncPointer((void *)pfnLnnEnhanceFuncList->lnnGetLocalPtkByUuid) != SOFTBUS_OK) {
+        return SOFTBUS_OK;
+    }
+    return pfnLnnEnhanceFuncList->lnnGetLocalPtkByUuid(uuid, localPtk, len);
+}
+
+static int32_t LnnGetLocalDefaultPtkByUuidPacked(const char *uuid, char *localPtk, uint32_t len)
+{
+    LnnEnhanceFuncList *pfnLnnEnhanceFuncList = DBinderSoftbusServer::GetInstance().LnnEnhanceFuncListGet();
+    if (pfnLnnEnhanceFuncList == NULL) {
+        return SOFTBUS_NETWORK_DLOPEN_FAILED;
+    }
+    if (LnnCheckFuncPointer((void *)pfnLnnEnhanceFuncList->lnnGetLocalDefaultPtkByUuid) != SOFTBUS_OK) {
+        return SOFTBUS_OK;
+    }
+    return pfnLnnEnhanceFuncList->lnnGetLocalDefaultPtkByUuid(uuid, localPtk, len);
 }
 
 static constexpr int PTK_128BIT_LEN = 16;
@@ -207,13 +252,26 @@ std::vector<uint8_t> WifiDirectUtils::GetLocalPtk(const std::string &remoteNetwo
     auto remoteUuid = NetworkIdToUuid(remoteNetworkId);
     std::vector<uint8_t> result;
     uint8_t ptkBytes[PTK_DEFAULT_LEN] {};
-    auto ret = LnnGetLocalPtkByUuid(remoteUuid.c_str(), (char *)ptkBytes, sizeof(ptkBytes));
+    auto ret = LnnGetLocalPtkByUuidPacked(remoteUuid.c_str(), (char *)ptkBytes, sizeof(ptkBytes));
     if (ret == SOFTBUS_NOT_FIND) {
-        ret = LnnGetLocalDefaultPtkByUuid(remoteUuid.c_str(), (char *)ptkBytes, sizeof(ptkBytes));
+        ret = LnnGetLocalDefaultPtkByUuidPacked(remoteUuid.c_str(),
+            (char *)ptkBytes, sizeof(ptkBytes));
     }
     CONN_CHECK_AND_RETURN_RET_LOGE(ret == SOFTBUS_OK, result, CONN_WIFI_DIRECT, "get local ptk failed");
     result.insert(result.end(), ptkBytes, ptkBytes + PTK_128BIT_LEN);
     return result;
+}
+
+static int32_t LnnGetRemoteDefaultPtkByUuidPacked(const char *uuid, char *remotePtk, uint32_t len)
+{
+    LnnEnhanceFuncList *pfnLnnEnhanceFuncList = DBinderSoftbusServer::GetInstance().LnnEnhanceFuncListGet();
+    if (pfnLnnEnhanceFuncList == NULL) {
+        return SOFTBUS_NETWORK_DLOPEN_FAILED;
+    }
+    if (LnnCheckFuncPointer((void *)pfnLnnEnhanceFuncList->lnnGetRemoteDefaultPtkByUuid) != SOFTBUS_OK) {
+        return SOFTBUS_OK;
+    }
+    return pfnLnnEnhanceFuncList->lnnGetRemoteDefaultPtkByUuid(uuid, remotePtk, len);
 }
 
 std::vector<uint8_t> WifiDirectUtils::GetRemotePtk(const std::string &remoteNetworkId)
@@ -222,9 +280,11 @@ std::vector<uint8_t> WifiDirectUtils::GetRemotePtk(const std::string &remoteNetw
     uint8_t ptkBytes[PTK_DEFAULT_LEN] {};
     uint8_t zeroPtkBytes[PTK_DEFAULT_LEN] {};
     auto remoteUuid = NetworkIdToUuid(remoteNetworkId);
-    int32_t ret = LnnGetRemoteByteInfo(remoteNetworkId.c_str(), BYTE_KEY_REMOTE_PTK, ptkBytes, sizeof(ptkBytes));
+    int32_t ret = DBinderSoftbusServer::GetInstance().LnnGetRemoteByteInfo(remoteNetworkId.c_str(), BYTE_KEY_REMOTE_PTK,
+        ptkBytes, sizeof(ptkBytes));
     if (ret == SOFTBUS_OK && memcmp(ptkBytes, zeroPtkBytes, PTK_DEFAULT_LEN) == 0) {
-        ret = LnnGetRemoteDefaultPtkByUuid(remoteUuid.c_str(), (char *)ptkBytes, sizeof(ptkBytes));
+        ret = LnnGetRemoteDefaultPtkByUuidPacked(remoteUuid.c_str(),
+            (char *)ptkBytes, sizeof(ptkBytes));
     }
     CONN_CHECK_AND_RETURN_RET_LOGE(ret == SOFTBUS_OK, result, CONN_WIFI_DIRECT, "get remote ptk failed");
     result.insert(result.end(), ptkBytes, ptkBytes + PTK_128BIT_LEN);
@@ -235,25 +295,26 @@ bool WifiDirectUtils::IsRemoteSupportTlv(const std::string &remoteDeviceId)
 {
     bool result = false;
     auto networkId = UuidToNetworkId(remoteDeviceId);
-    auto ret = LnnGetRemoteBoolInfoIgnoreOnline(networkId.c_str(), BOOL_KEY_TLV_NEGOTIATION, &result);
+    auto ret = DBinderSoftbusServer::GetInstance().LnnGetRemoteBoolInfoIgnoreOnline(networkId.c_str(),
+        BOOL_KEY_TLV_NEGOTIATION, &result);
     CONN_CHECK_AND_RETURN_RET_LOGE(ret == SOFTBUS_OK, true, CONN_WIFI_DIRECT, "get tlv feature failed");
     return result;
 }
 
 bool WifiDirectUtils::IsLocalSupportTlv()
 {
-    uint64_t capability = LnnGetFeatureCapabilty();
-    return IsFeatureSupport(capability, BIT_WIFI_DIRECT_TLV_NEGOTIATION);
+    uint64_t capability = DBinderSoftbusServer::GetInstance().LnnGetFeatureCapabilty();
+    return DBinderSoftbusServer::GetInstance().IsFeatureSupport(capability, BIT_WIFI_DIRECT_TLV_NEGOTIATION);
 }
 
 void WifiDirectUtils::SetLocalWifiDirectMac(const std::string &mac)
 {
-    LnnSetLocalStrInfo(STRING_KEY_WIFIDIRECT_ADDR, mac.c_str());
+    DBinderSoftbusServer::GetInstance().LnnSetLocalStrInfo(STRING_KEY_WIFIDIRECT_ADDR, mac.c_str());
 }
 
 bool WifiDirectUtils::IsDeviceOnline(const std::string &remoteNetworkId)
 {
-    return LnnGetOnlineStateById(remoteNetworkId.c_str(), CATEGORY_NETWORK_ID);
+    return DBinderSoftbusServer::GetInstance().LnnGetOnlineStateById(remoteNetworkId.c_str(), CATEGORY_NETWORK_ID);
 }
 
 static constexpr int MAC_BYTE_HEX_SIZE = 4;
@@ -290,10 +351,12 @@ std::vector<uint8_t> WifiDirectUtils::MacStringToArray(const std::string &macStr
         try {
             result = std::stoul(token, &idx, BASE_HEX);
         } catch (const std::out_of_range& e) {
-            CONN_LOGE(CONN_NEARBY, "out of range");
+            // invalid mac address, which is printed for fault locating.
+            CONN_LOGE(CONN_NEARBY, "out of range, error mac string=%{public}s", macString.c_str());
             return std::vector<uint8_t>();
         } catch (const std::invalid_argument& e) {
-            CONN_LOGE(CONN_NEARBY, "invalid argument");
+            // invalid mac address, which is printed for fault locating.
+            CONN_LOGE(CONN_NEARBY, "invalid argument, error mac string=%{public}s", macString.c_str());
             return std::vector<uint8_t>();
         }
         array.push_back(static_cast<uint8_t>(result));
@@ -578,22 +641,22 @@ void WifiDirectUtils::SyncLnnInfoForP2p(WifiDirectRole role, const std::string &
 {
     CONN_LOGI(CONN_WIFI_DIRECT, "role=%{public}d, localMac=%{public}s, goMac=%{public}s",
         role, WifiDirectAnonymizeMac(localMac).c_str(), WifiDirectAnonymizeMac(goMac).c_str());
-    int32_t ret = LnnSetLocalNumInfo(NUM_KEY_P2P_ROLE, role);
+    int32_t ret = DBinderSoftbusServer::GetInstance().LnnSetLocalNumInfo(NUM_KEY_P2P_ROLE, role);
     if (ret != SOFTBUS_OK) {
         CONN_LOGE(CONN_WIFI_DIRECT, "set lnn p2p role failed");
     }
 
-    ret = LnnSetLocalStrInfo(STRING_KEY_P2P_MAC, localMac.c_str());
+    ret = DBinderSoftbusServer::GetInstance().LnnSetLocalStrInfo(STRING_KEY_P2P_MAC, localMac.c_str());
     if (ret != SOFTBUS_OK) {
         CONN_LOGE(CONN_WIFI_DIRECT, "set lnn my mac failed");
     }
 
-    ret = LnnSetLocalStrInfo(STRING_KEY_P2P_GO_MAC, goMac.c_str());
+    ret = DBinderSoftbusServer::GetInstance().LnnSetLocalStrInfo(STRING_KEY_P2P_GO_MAC, goMac.c_str());
     if (ret != SOFTBUS_OK) {
         CONN_LOGE(CONN_WIFI_DIRECT, "set lnn go mac failed");
     }
 
-    LnnSyncP2pInfo();
+    DBinderSoftbusServer::GetInstance().LnnSyncP2pInfo();
 }
 
 static constexpr int DFS_CHANNEL_FIRST = 52;
@@ -614,7 +677,7 @@ bool WifiDirectUtils::CheckLinkAtDfsChannelConflict(const std::string &remoteDev
     auto remoteNetworkId = UuidToNetworkId(remoteDeviceId);
 
     int32_t osType = OH_OS_TYPE;
-    if (LnnGetOsTypeByNetworkId(remoteNetworkId.c_str(), &osType) != SOFTBUS_OK) {
+    if (DBinderSoftbusServer::GetInstance().LnnGetOsTypeByNetworkId(remoteNetworkId.c_str(), &osType) != SOFTBUS_OK) {
         CONN_LOGE(CONN_WIFI_DIRECT, "get os type failed");
         return false;
     }
@@ -633,7 +696,7 @@ bool WifiDirectUtils::CheckLinkAtDfsChannelConflict(const std::string &remoteDev
 int32_t WifiDirectUtils::GetOsType(const char *networkId)
 {
     int32_t osType = OH_OS_TYPE;
-    auto ret = LnnGetOsTypeByNetworkId(networkId, &osType);
+    auto ret = DBinderSoftbusServer::GetInstance().LnnGetOsTypeByNetworkId(networkId, &osType);
     CONN_CHECK_AND_RETURN_RET_LOGE(ret == SOFTBUS_OK, ret, CONN_WIFI_DIRECT, "get os type failed");
     CONN_LOGI(CONN_WIFI_DIRECT, "dfx remote os type %{public}d", osType);
     return osType;
@@ -642,7 +705,7 @@ int32_t WifiDirectUtils::GetOsType(const char *networkId)
 int32_t WifiDirectUtils::GetDeviceType(const char *networkId)
 {
     int32_t deviceTypeId = 0;
-    auto ret = LnnGetRemoteNumInfo(networkId, NUM_KEY_DEV_TYPE_ID, &deviceTypeId);
+    auto ret = DBinderSoftbusServer::GetInstance().LnnGetRemoteNumInfo(networkId, NUM_KEY_DEV_TYPE_ID, &deviceTypeId);
     CONN_CHECK_AND_RETURN_RET_LOGE(ret == SOFTBUS_OK, ret, CONN_WIFI_DIRECT, "get remote device type failed");
     CONN_LOGI(CONN_WIFI_DIRECT, "dfx remote device type %{public}d", deviceTypeId);
     return deviceTypeId;
@@ -651,7 +714,7 @@ int32_t WifiDirectUtils::GetDeviceType(const char *networkId)
 int32_t WifiDirectUtils::GetDeviceType()
 {
     int32_t deviceTypeId = 0;
-    auto ret = LnnGetLocalNumInfo(NUM_KEY_DEV_TYPE_ID, &deviceTypeId);
+    auto ret = DBinderSoftbusServer::GetInstance().LnnGetLocalNumInfo(NUM_KEY_DEV_TYPE_ID, &deviceTypeId);
     CONN_CHECK_AND_RETURN_RET_LOGE(ret == SOFTBUS_OK, ret, CONN_WIFI_DIRECT, "get local device type failed");
     CONN_LOGI(CONN_WIFI_DIRECT, "dfx local device type %{public}d", deviceTypeId);
     return deviceTypeId;
@@ -660,7 +723,8 @@ int32_t WifiDirectUtils::GetDeviceType()
 int32_t WifiDirectUtils::GetRemoteConnSubFeature(const std::string &remoteNetworkId, uint64_t &feature)
 {
     uint64_t connSubFeature = 0;
-    auto ret = LnnGetRemoteNumU64Info(remoteNetworkId.c_str(), NUM_KEY_CONN_SUB_FEATURE_CAPA, &connSubFeature);
+    auto ret = DBinderSoftbusServer::GetInstance().LnnGetRemoteNumU64Info(remoteNetworkId.c_str(),
+        NUM_KEY_CONN_SUB_FEATURE_CAPA, &connSubFeature);
     CONN_CHECK_AND_RETURN_RET_LOGE(ret == SOFTBUS_OK, ret, CONN_WIFI_DIRECT,
         "remoteNetworkId=%{public}s, get connSubFeature failed", WifiDirectAnonymizeDeviceId(remoteNetworkId).c_str());
     feature = connSubFeature;
@@ -673,7 +737,8 @@ std::string WifiDirectUtils::GetRemoteOsVersion(const char *remoteNetworkId)
     std::string remoteOsVersion;
     NodeInfo *nodeInfo = (NodeInfo *)SoftBusCalloc(sizeof(NodeInfo));
     CONN_CHECK_AND_RETURN_RET_LOGE(nodeInfo != nullptr, "", CONN_WIFI_DIRECT, "nodeInfo malloc err");
-    auto ret = LnnGetRemoteNodeInfoById(remoteNetworkId, CATEGORY_NETWORK_ID, nodeInfo);
+    auto ret = DBinderSoftbusServer::GetInstance().LnnGetRemoteNodeInfoById(remoteNetworkId,
+        CATEGORY_NETWORK_ID, nodeInfo);
     if (ret != SOFTBUS_OK) {
         CONN_LOGE(CONN_WIFI_DIRECT, "get remote os version failed");
         SoftBusFree(nodeInfo);
@@ -690,7 +755,7 @@ int32_t WifiDirectUtils::GetRemoteScreenStatus(const char *remoteNetworkId)
         "remoteNetworkId is null");
     NodeInfo *nodeInfo = (NodeInfo *)SoftBusCalloc(sizeof(NodeInfo));
     CONN_CHECK_AND_RETURN_RET_LOGE(nodeInfo != nullptr, SOFTBUS_MALLOC_ERR, CONN_WIFI_DIRECT, "nodeInfo malloc err");
-    auto ret = LnnGetRemoteNodeInfoByKey(remoteNetworkId, nodeInfo);
+    auto ret = DBinderSoftbusServer::GetInstance().LnnGetRemoteNodeInfoByKey(remoteNetworkId, nodeInfo);
     if (ret != SOFTBUS_OK) {
         CONN_LOGE(CONN_WIFI_DIRECT, "get screen status failed");
         SoftBusFree(nodeInfo);
@@ -711,7 +776,7 @@ std::string WifiDirectUtils::RemoteDeviceIdToMac(const std::string &remoteDevice
 {
     auto remoteNetworkId = UuidToNetworkId(remoteDeviceId);
     char remoteMac[MAC_ADDR_STR_LEN] {};
-    auto ret = LnnGetRemoteStrInfo(remoteNetworkId.c_str(), STRING_KEY_WIFIDIRECT_ADDR, remoteMac, MAC_ADDR_STR_LEN);
+    auto ret = DBinderSoftbusServer::GetInstance().LnnGetRemoteStrInfo(remoteNetworkId.c_str(), STRING_KEY_WIFIDIRECT_ADDR, remoteMac, MAC_ADDR_STR_LEN);
     CONN_CHECK_AND_RETURN_RET_LOGE(ret == SOFTBUS_OK, "", CONN_WIFI_DIRECT,
         "get wifi direct addr failed, ret=%{public}d", ret);
     CONN_LOGI(CONN_WIFI_DIRECT, "remoteMac=%{public}s", WifiDirectAnonymizeMac(remoteMac).c_str());
@@ -722,13 +787,13 @@ std::string WifiDirectUtils::RemoteMacToDeviceId(const std::string &remoteMac)
 {
     int32_t num = 0;
     NodeBasicInfo *basicInfo = nullptr;
-    auto ret = LnnGetAllOnlineNodeInfo(&basicInfo, &num);
+    auto ret = DBinderSoftbusServer::GetInstance().LnnGetAllOnlineNodeInfo(&basicInfo, &num);
     CONN_CHECK_AND_RETURN_RET_LOGE(ret == SOFTBUS_OK, "", CONN_WIFI_DIRECT,
         "get online node info failed, ret=%{public}d", ret);
 
     for (int32_t i = 0; i < num; i++) {
         char wifiDirectAddr[MAC_ADDR_STR_LEN] {};
-        ret = LnnGetRemoteStrInfo(basicInfo[i].networkId, STRING_KEY_WIFIDIRECT_ADDR, wifiDirectAddr, MAC_ADDR_STR_LEN);
+        ret = DBinderSoftbusServer::GetInstance().LnnGetRemoteStrInfo(basicInfo[i].networkId, STRING_KEY_WIFIDIRECT_ADDR, wifiDirectAddr, MAC_ADDR_STR_LEN);
         if (ret != SOFTBUS_OK) {
             CONN_LOGE(CONN_WIFI_DIRECT, "get wifi direct addr failed, remoteNetworkId=%{public}s, ret=%{public}d",
                 WifiDirectAnonymizeDeviceId(basicInfo[i].networkId).c_str(), ret);

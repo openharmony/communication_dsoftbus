@@ -70,7 +70,6 @@ if (defined(ohos_lite)) {
       "core/bus_center:fuzztest",
       "core/common:fuzztest",
       "core/connection:fuzztest",
-      "core/discovery:fuzztest",
       "core/frame:fuzztest",
       "core/transmission:fuzztest",
       "dfx:fuzztest",

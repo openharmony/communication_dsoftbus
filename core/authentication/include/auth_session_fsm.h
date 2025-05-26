@@ -17,8 +17,13 @@
 #define AUTH_SESSION_H
 
 #include "auth_common.h"
-#include "auth_device_common_key.h"
+
 #include "auth_request.h"
+#include "auth_interface.h"
+#include "auth_session_key.h"
+#include "auth_session_fsm_struct.h"
+#include "common_list.h"
+#include "lnn_node_info.h"
 #include "lnn_p2p_info.h"
 #include "lnn_state_machine.h"
 #include "legacy/softbus_hisysevt_bus_center.h"
@@ -28,106 +33,6 @@
 extern "C" {
 #endif
 #endif
-
-#define AUTH_FSM_NAME_LEN 32
-
-typedef enum {
-    STATE_SYNC_NEGOTIATION,
-    STATE_SYNC_DEVICE_ID,
-    STATE_DEVICE_AUTH,
-    STATE_SYNC_DEVICE_INFO,
-    STATE_NUM_MAX
-} AuthFsmStateIndex;
-
-typedef enum {
-    EXCHANGE_UDID = 0,
-    EXCHANGE_NETWORKID,
-    EXCHANGE_FAIL,
-    EXCHANGE_TYPE_MAX
-} ExchangeDataType;
-
-typedef enum {
-    NORMALIZED_NOT_SUPPORT,
-    NORMALIZED_KEY_ERROR,
-    NORMALIZED_SUPPORT,
-} NormalizedType;
-
-typedef enum {
-    AUTH_STATE_WAIT = 1,
-    AUTH_STATE_START,
-    AUTH_STATE_UNKNOW,
-    AUTH_STATE_ACK,
-    AUTH_STATE_COMPATIBLE,
-} AuthStartState;
-
-typedef struct {
-    int64_t authSeq;
-    uint32_t requestId;
-    uint64_t connId;
-    bool isServer;
-    DeviceKeyId deviceKeyId;
-} AuthFsmParam;
-
-typedef struct {
-    uint32_t requestId;
-    bool isServer;
-    bool isConnectServer;
-    uint64_t connId;
-    AuthConnInfo connInfo;
-    uint8_t *deviceInfoData;
-    uint32_t deviceInfoDataLen;
-    NodeInfo nodeInfo;
-    bool isNodeInfoReceived;
-    bool isCloseAckReceived;
-    bool isAuthFinished;
-    char udid[UDID_BUF_LEN];
-    char uuid[UUID_BUF_LEN];
-    char udidHash[SHA_256_HEX_HASH_LEN];
-    SoftBusVersion version;
-    AuthVersion authVersion;
-    bool isSupportCompress;
-    bool isSupportFastAuth;
-    bool isNeedFastAuth;
-    bool isSupportDmDeviceKey;
-    DeviceKeyId deviceKeyId;
-    int64_t oldIndex;
-    int32_t idType;
-    int32_t userId;
-    bool isNeedPackCert;
-    bool isSameAccount;
-    uint64_t sessionKeyRandomNum;
-    AuthVerifyModule module;
-    NormalizedType normalizedType;
-    SessionKey *normalizedKey;
-    int64_t normalizedIndex;
-    bool isOldKey;
-    bool isSavedSessionKey;
-    AuthStartState localState;
-    AuthStartState peerState;
-    char udidShortHash[SHA_256_HEX_HASH_LEN];
-    char accountHash[SHA_256_HEX_HASH_LEN];
-    char *credId;
-} AuthSessionInfo;
-
-typedef struct {
-    ListNode node;
-    uint32_t id;
-    int64_t authSeq;
-    char fsmName[AUTH_FSM_NAME_LEN];
-    FsmStateMachine fsm;
-    AuthSessionInfo info;
-    AuthFsmStateIndex curState;
-    AuthStatisticData statisticData;
-    bool isDead;
-} AuthFsm;
-
-typedef struct {
-    int64_t authSeq;
-    uint32_t requestId;
-    uint64_t connId;
-    bool isServer;
-    bool isFastAuth;
-} AuthParam;
 
 void AuthSessionSetReSyncDeviceName(void);
 int32_t AuthSessionStartAuth(const AuthParam *authParam, const AuthConnInfo *connInfo,

@@ -166,7 +166,7 @@ bool IsAclConnected(const BT_ADDR mac)
     return false;
 }
 
-SppSocketDriver *InitSppSocketDriver()
+SppSocketDriver *InitSppSocketDriver(void)
 {
     CONN_LOGI(CONN_INIT, "[InitSppSocketDriver]");
     Init(&g_sppSocketDriver);

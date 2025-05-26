@@ -26,70 +26,12 @@
 #include "softbus_bus_center.h"
 #include "legacy/softbus_hisysevt_bus_center.h"
 #include "lnn_net_builder.h"
-
+#include "lnn_connection_fsm_struct.h"
 #ifdef __cplusplus
 #if __cplusplus
 extern "C" {
 #endif
 #endif
-
-#define LNN_CONNECTION_FSM_NAME_LEN 32
-
-#define LNN_CONN_INFO_FLAG_JOIN_REQUEST 0x01
-#define LNN_CONN_INFO_FLAG_JOIN_AUTO 0x02
-#define LNN_CONN_INFO_FLAG_JOIN_PASSIVE 0x04
-#define LNN_CONN_INFO_FLAG_LEAVE_REQUEST 0x08
-#define LNN_CONN_INFO_FLAG_LEAVE_AUTO 0x10
-#define LNN_CONN_INFO_FLAG_LEAVE_PASSIVE 0x20
-#define LNN_CONN_INFO_FLAG_INITIATE_ONLINE 0x40
-#define LNN_CONN_INFO_FLAG_ONLINE 0x80
-
-#define LNN_CONN_INFO_FLAG_JOIN_ACTIVE (LNN_CONN_INFO_FLAG_JOIN_REQUEST | LNN_CONN_INFO_FLAG_JOIN_AUTO)
-#define LNN_CONN_INFO_FLAG_JOIN (LNN_CONN_INFO_FLAG_JOIN_ACTIVE | LNN_CONN_INFO_FLAG_JOIN_PASSIVE)
-
-#define LNN_CONN_INFO_FLAG_LEAVE_ACTIVE (LNN_CONN_INFO_FLAG_LEAVE_REQUEST | LNN_CONN_INFO_FLAG_LEAVE_AUTO)
-#define LNN_CONN_INFO_FLAG_LEAVE (LNN_CONN_INFO_FLAG_LEAVE_ACTIVE | LNN_CONN_INFO_FLAG_LEAVE_PASSIVE)
-
-typedef struct {
-    /* clean invalid addr type */
-    ConnectionAddrType addrType;
-    /* record newer connection networkId */
-    char networkId[NETWORK_ID_BUF_LEN];
-} LnnInvalidCleanInfo;
-
-typedef struct {
-    char peerNetworkId[NETWORK_ID_BUF_LEN];
-    uint32_t requestId;
-    uint32_t flag;
-    SoftBusVersion version;
-    AuthHandle authHandle;
-    LnnDfxDeviceInfoReport infoReport;
-    ConnectionAddr addr;
-    LnnInvalidCleanInfo *cleanInfo;
-    NodeInfo *nodeInfo;
-    NodeInfo *dupInfo;
-} LnnConntionInfo;
-
-struct tagLnnConnectionFsm;
-
-typedef void (*LnnConnectionFsmStopCallback)(struct tagLnnConnectionFsm *connFsm);
-
-typedef struct tagLnnConnectionFsm {
-    char fsmName[LNN_CONNECTION_FSM_NAME_LEN];
-    char pkgName[PKG_NAME_SIZE_MAX];
-    bool isDead;
-    bool isNeedConnect;
-    bool isSession;
-    uint16_t id;
-    int32_t localDeviceKeyId;
-    int32_t remoteDeviceKeyId;
-
-    LnnConnectionFsmStopCallback stopCallback;
-    ListNode node;
-    LnnStatisticData statisticData;
-    FsmStateMachine fsm;
-    LnnConntionInfo connInfo;
-} LnnConnectionFsm;
 
 LnnConnectionFsm *LnnCreateConnectionFsm(const ConnectionAddr *target, const char *pkgName, bool isNeedConnect);
 void LnnDestroyConnectionFsm(LnnConnectionFsm *connFsm);

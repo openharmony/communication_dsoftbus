@@ -13,7 +13,7 @@
  * limitations under the License.
  */
 
-#include "disc_coap_capability.h"
+#include "disc_coap_capability_public.h"
 
 #include "anonymizer.h"
 #include "disc_log.h"
@@ -119,9 +119,4 @@ int32_t DiscCoapProcessDeviceInfo(const NSTACKX_DeviceInfo *nstackxInfo, DeviceI
         return SOFTBUS_DISCOVER_COAP_SEND_RSP_FAIL;
     }
     return SOFTBUS_OK;
-}
-
-void DiscCoapReportNotification(const NSTACKX_NotificationConfig *notification)
-{
-    (void)notification;
 }

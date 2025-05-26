@@ -30,6 +30,7 @@ ohos_unittest("DiscCoapParserTest") {
   deps = [
     "$dsoftbus_dfx_path:softbus_dfx",
     "$dsoftbus_root_path/core/common:softbus_utils",
+    "$dsoftbus_root_path/adapter:softbus_adapter",
   ]
 
   external_deps = [

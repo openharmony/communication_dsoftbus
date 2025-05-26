@@ -28,8 +28,6 @@
 #include "lnn_lane_link.h"
 #include "lnn_lane_link_ledger.h"
 #include "lnn_lane_query.h"
-#include "lnn_lane_score.h"
-#include "lnn_lane_vap_info.h"
 #include "lnn_local_net_ledger.h"
 #include "lnn_node_info.h"
 #include "bus_center_manager.h"

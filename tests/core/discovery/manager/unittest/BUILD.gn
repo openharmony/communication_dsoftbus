@@ -25,6 +25,7 @@ ohos_unittest("DiscManagerTest") {
   include_dirs = [
     "$softbus_adapter_common/include",
     "$dsoftbus_root_path/core/common/include",
+    "$dsoftbus_root_path/interfaces/kits/disc",
     "$dsoftbus_root_path/core/discovery/interface",
     "$dsoftbus_root_path/interfaces/kits/common",
     "$dsoftbus_root_path/interfaces/kits/discovery",
@@ -32,6 +33,7 @@ ohos_unittest("DiscManagerTest") {
     "$dsoftbus_root_path/core/discovery/coap/interface",
     "$dsoftbus_root_path/components/nstackx/nstackx_ctrl/interface",
     "unittest/common/",
+    "$dsoftbus_root_path/interfaces/kits/nstackx",
   ]
 
   deps = [
@@ -50,8 +52,6 @@ ohos_unittest("DiscManagerTest") {
 ohos_unittest("DiscManagerMockTest") {
   module_out_path = module_output_path
   sources = [
-    "$dsoftbus_core_path/discovery/ble/approach_ble/src/disc_approach_ble_virtual.c",
-    "$dsoftbus_core_path/discovery/ble/virtual_link_ble/src/disc_virtual_link_ble_virtual.c",
     "$dsoftbus_core_path/discovery/manager/src/disc_manager.c",
     "ble_mock.cpp",
     "coap_mock.cpp",
@@ -82,6 +82,7 @@ ohos_unittest("DiscManagerMockTest") {
   deps = [
     "$dsoftbus_root_path/adapter:softbus_adapter",
     "$dsoftbus_root_path/core/common:softbus_utils",
+    "$dsoftbus_root_path/dfx:softbus_dfx",
   ]
   external_deps = [
     "googletest:gmock",

@@ -128,7 +128,10 @@ napi_value NapiLinkEnhanceConnection::Constructor(napi_env env, napi_callback_in
     } else {
         connection = new NapiLinkEnhanceConnection(deviceId, name);
     }
-    CONN_CHECK_AND_RETURN_RET_LOGE(connection != nullptr, thisVar, COMM_SDK, "new link enhance connection failed");
+    if (connection == nullptr) {
+        COMM_LOGE(COMM_SDK, "new link enhance connection failed");
+        return thisVar;
+    }
     auto status = napi_wrap(
         env, thisVar, connection,
         [](napi_env env, void *data, void *hint) {

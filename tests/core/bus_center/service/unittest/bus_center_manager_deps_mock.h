@@ -49,7 +49,6 @@ public:
     virtual void LnnCoapConnectInit(void);
     virtual int32_t LnnInitNetLedgerDelay(void);
     virtual int32_t LnnInitEventMoniterDelay(void);
-    virtual int32_t LnnInitHuksCeParamsDelay(void);
     virtual int32_t LnnInitNetworkManagerDelay(void);
     virtual int32_t LnnInitNetBuilderDelay(void);
     virtual int32_t LnnInitLaneHubDelay(void);
@@ -82,7 +81,6 @@ public:
     MOCK_METHOD0(LnnCoapConnectInit, void (void));
     MOCK_METHOD0(LnnInitNetLedgerDelay, int32_t (void));
     MOCK_METHOD0(LnnInitEventMoniterDelay, int32_t (void));
-    MOCK_METHOD0(LnnInitHuksCeParamsDelay, int32_t (void));
     MOCK_METHOD0(LnnInitNetworkManagerDelay, int32_t (void));
     MOCK_METHOD0(LnnInitNetBuilderDelay, int32_t (void));
     MOCK_METHOD0(LnnInitLaneHubDelay, int32_t (void));

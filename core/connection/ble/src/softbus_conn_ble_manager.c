@@ -22,7 +22,9 @@
 #include "bus_center_manager.h"
 #include "conn_event.h"
 #include "conn_log.h"
-#include "softbus_adapter_ble_conflict.h"
+#include "g_enhance_conn_func.h"
+#include "g_enhance_conn_func_pack.h"
+#include "softbus_adapter_ble_conflict_struct.h"
 #include "softbus_adapter_bt_common.h"
 #include "softbus_adapter_crypto.h"
 #include "softbus_adapter_mem.h"
@@ -33,6 +35,7 @@
 #include "softbus_conn_common.h"
 #include "softbus_datahead_transform.h"
 #include "softbus_utils.h"
+#include "softbus_init_common.h"
 
 #define CONFLICT_REUSE_CONNECTING 0
 #define SHORT_UDID_HASH_LEN       8
@@ -876,7 +879,7 @@ static void BleConnectionClosed(uint32_t connectionId, int32_t error)
             CONN_BLE, "convert udid hash to string failed, It cann't backoff now, just ahead. err=%{public}d", status);
     }
     if (connection->protocol == BLE_GATT) {
-        SoftbusBleConflictNotifyDisconnect(connection->addr, udidHashStr);
+        SoftbusBleConflictNotifyDisconnectPacked(connection->addr, udidHashStr);
     }
     ConnBleRemoveConnection(connection);
     ConnBleReturnConnection(&connection);
@@ -949,7 +952,7 @@ static void BleDataReceived(ConnBleDataReceivedContext *ctx)
         if (head->module == MODULE_CONNECTION) {
             ReceivedControlData(connection, ctx->data + pktHeadLen, ctx->dataLen - pktHeadLen);
         } else if (head->module == MODULE_OLD_NEARBY) {
-            SoftbusBleConflictNotifyDateReceive(
+            SoftbusBleConflictNotifyDateReceivePacked(
                 connection->underlayerHandle, ctx->data + pktHeadLen, ctx->dataLen - pktHeadLen);
         } else {
             g_connectCallback.OnDataReceived(
@@ -1040,13 +1043,13 @@ static void ConflictOnConnectSuccessed(uint32_t requestId, uint32_t connectionId
     CONN_CHECK_AND_RETURN_LOGW(connection != NULL, CONN_BLE, "conn not exist, connId=%{public}u", connectionId);
     int32_t underlayHandle = connection->underlayerHandle;
     ConnBleReturnConnection(&connection);
-    SoftbusBleConflictNotifyConnectResult(requestId, underlayHandle, true);
+    SoftbusBleConflictNotifyConnectResultPacked(requestId, underlayHandle, true);
 }
 
 static void ConflictOnConnectFailed(uint32_t requestId, int32_t reason)
 {
     (void)reason;
-    SoftbusBleConflictNotifyConnectResult(requestId, INVALID_UNDERLAY_HANDLE, false);
+    SoftbusBleConflictNotifyConnectResultPacked(requestId, INVALID_UNDERLAY_HANDLE, false);
 }
 
 static int32_t BleReuseConnectionRequestOnConnectingState(const ConnBleReuseConnectionContext *ctx)
@@ -2284,7 +2287,7 @@ static int32_t InitBleManager(const ConnectCallback *callback)
     CONN_CHECK_AND_RETURN_RET_LOGW(ret == SOFTBUS_OK, SOFTBUS_INVALID_NUM, CONN_INIT,
         "int ble manager failed: add bluetooth state change listener failed, invalid listener id=%{public}d",
         listenerId);
-    static SoftBusBleConflictListener bleConflictListener = {
+    SoftBusBleConflictListener bleConflictListener = {
         .reuseConnection = ConflictReuseConnection,
         .postBytes = ConflictPostBytes,
         .disconnect = ConflictDisconnect,
@@ -2292,7 +2295,7 @@ static int32_t InitBleManager(const ConnectCallback *callback)
         .cancelOccupy = ConflictCancelOccupy,
         .getConnection = ConflictGetConnection,
     };
-    SoftbusBleConflictRegisterListener(&bleConflictListener);
+    SoftbusBleConflictRegisterListenerPacked(&bleConflictListener);
 
     g_connectCallback = *callback;
     TransitionToState(BLE_MGR_STATE_AVAILABLE);

@@ -30,7 +30,7 @@
 #include "lnn_device_info.h"
 #include "lnn_distributed_net_ledger.h"
 #include "lnn_event_form.h"
-#include "lnn_fast_offline.h"
+#include "lnn_fast_offline_struct.h"
 #include "lnn_feature_capability.h"
 #include "lnn_file_utils.h"
 #include "lnn_heartbeat_utils.h"
@@ -43,7 +43,7 @@
 #include "softbus_adapter_bt_common.h"
 #include "softbus_adapter_crypto.h"
 #include "softbus_adapter_thread.h"
-#include "softbus_adapter_sle_common.h"
+#include "softbus_adapter_sle_common_struct.h"
 #include "softbus_config_type.h"
 #include "sqlite3_utils.h"
 

@@ -21,6 +21,12 @@
 #include "wifi_direct_manager.h"
 
 namespace OHOS::SoftBus {
+LinkManager& LinkManager::GetInstance()
+{
+    static LinkManager instance;
+    return instance;
+}
+
 int LinkManager::AllocateLinkId()
 {
     CONN_LOGD(CONN_WIFI_DIRECT, "enter");

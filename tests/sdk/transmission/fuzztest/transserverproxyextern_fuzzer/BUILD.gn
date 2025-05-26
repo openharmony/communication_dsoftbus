@@ -55,5 +55,7 @@ ohos_fuzztest("TransServerProxyExternFuzzTest") {
 
 group("fuzztest") {
   testonly = true
-  deps = [ ":TransServerProxyExternFuzzTest" ]
+  deps = [
+    ":TransServerProxyExternFuzzTest"
+  ]
 }

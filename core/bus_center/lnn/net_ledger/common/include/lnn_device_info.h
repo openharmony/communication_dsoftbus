@@ -18,36 +18,11 @@
 
 #include "softbus_bus_center.h"
 #include "softbus_def.h"
+#include "lnn_device_info_struct.h"
 
 #ifdef __cplusplus
 extern "C" {
 #endif
-
-#define TYPE_UNKNOW_ID 0x00
-#define TYPE_PHONE_ID 0x0E
-#define TYPE_PAD_ID 0x11
-#define TYPE_TV_ID 0x9C
-#define TYPE_AUDIO_ID 0x0A
-#define TYPE_CAR_ID 0x83
-#define TYPE_WATCH_ID 0x6D
-#define TYPE_IPCAMERA_ID 0X08
-#define TYPE_PC_ID 0x0C
-#define TYPE_SMART_DISPLAY_ID 0xA02
-#define TYPE_2IN1_ID 0xA2F
-
-typedef struct {
-    uint16_t deviceTypeId;
-    int32_t osType;
-    char deviceName[DEVICE_NAME_BUF_LEN];
-    char unifiedName[DEVICE_NAME_BUF_LEN];
-    char nickName[DEVICE_NAME_BUF_LEN];
-    char unifiedDefaultName[DEVICE_NAME_BUF_LEN];
-    char deviceUdid[UDID_BUF_LEN];
-    char osVersion[OS_VERSION_BUF_LEN];
-    char deviceVersion[DEVICE_VERSION_SIZE_MAX];
-    char productId[PRODUCT_ID_SIZE_MAX];
-    char modelName[MODEL_NAME_SIZE_MAX];
-} DeviceBasicInfo;
 
 int32_t LnnSetDeviceName(DeviceBasicInfo *info, const char *name);
 const char *LnnGetDeviceName(const DeviceBasicInfo *info);

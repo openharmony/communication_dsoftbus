@@ -23,7 +23,6 @@
 
 #include "c_header/ohos_bt_gap.h"
 #include "c_header/ohos_bt_gatt.h"
-#include "c_header/ohos_bt_socket.h"
 
 namespace OHOS {
 using testing::NiceMock;
@@ -67,7 +66,6 @@ public:
         int32_t bcHandle) = 0;
     virtual int32_t IsLpDeviceAvailable() = 0;
     virtual int32_t SetLpDeviceParam(const BtLpDeviceParam *lpParam) = 0;
-    virtual int32_t GetRandomAddress(const BdAddr *realAddr, BdAddr *randomAddr, uint64_t tokenId) = 0;
 };
 
 class BluetoothMock : public BluetoothInterface {
@@ -119,8 +117,6 @@ public:
         int32_t interval, int32_t bcHandle), (override));
     MOCK_METHOD(int32_t, IsLpDeviceAvailable, (), (override));
     MOCK_METHOD(int32_t, SetLpDeviceParam, (const BtLpDeviceParam *lpParam), (override));
-    MOCK_METHOD(int32_t, GetRandomAddress, (const BdAddr *realAddr,
-        BdAddr *randomAddr, uint64_t tokenId), (override));
 
     static BluetoothMock *GetMock(void);
     static bool ActionEnableBle(void);

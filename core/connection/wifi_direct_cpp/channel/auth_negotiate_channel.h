@@ -22,8 +22,8 @@
 #include <memory>
 
 #include "timer.h"
-#include "auth_interface.h"
-#include "bus_center_event.h"
+#include "auth_interface_struct.h"
+#include "bus_center_event_struct.h"
 #include "softbus_common.h"
 
 #include "wifi_direct_initiator.h"
@@ -78,6 +78,10 @@ public:
     int SendMessage(const NegotiateMessage &msg) const override;
     NegotiateMessage SendMessageAndWaitResponse(const NegotiateMessage &msg);
     std::string GetRemoteDeviceId() const override;
+    NegotiateChannelType GetType() const override
+    {
+        return NegotiateChannelType::AUTH_CHANNEL;
+    }
 
 private:
     static void OnConnOpened(uint32_t requestId, AuthHandle authHandle);
