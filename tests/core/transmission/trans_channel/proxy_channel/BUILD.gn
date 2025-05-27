@@ -497,7 +497,10 @@ ohos_unittest("SoftbusProxyTransceiverTest") {
 
 ohos_unittest("SoftbusProxyChannelListenerTest") {
   module_out_path = module_output_path
-  sources = [ "softbus_proxychannel_listener_test.cpp" ]
+  sources = [
+    "softbus_proxychannel_listener_test.cpp",
+    "$trans_comm_mock_path/src/trans_auth_mock.cpp",
+  ]
 
   include_dirs = [
     "$softbus_adapter_common/include",
@@ -546,6 +549,7 @@ ohos_unittest("SoftbusProxyChannelListenerTest") {
     "$dsoftbus_root_path/interfaces/kits/common",
     "$dsoftbus_root_path/interfaces/kits/transport",
     "$dsoftbus_root_path/third_party/dfinder/include",
+    "$dsoftbus_root_path/tests/core/transmission/common/mock/include",
     "$dsoftbus_root_path/tests/core/transmission/trans_channel/proxy_channel",
     "unittest/common/",
   ]

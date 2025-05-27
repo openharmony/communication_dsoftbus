@@ -17,13 +17,17 @@
 
 #include "if_system_ability_manager.h"
 #include "iservice_registry.h"
+#include "softbus_adapter_mem.h"
+#include "softbus_def.h"
 #include "trans_client_proxy_standard.h"
+#include "trans_type.h"
 
 using namespace std;
 using namespace testing::ext;
 
 #define TEST_TMP_DATE 1
 #define TEST_ERRTMP_DATE (-1)
+#define SOFTBUS_SA_ID 4700
 
 namespace OHOS {
 class TransClientProxyStandardTest : public testing::Test {
@@ -48,9 +52,7 @@ void TransClientProxyStandardTest::TearDownTestCase(void) {}
 HWTEST_F(TransClientProxyStandardTest, TransClientProxyStandardTest001, TestSize.Level1)
 {
     #define TEST_INVALID 0
-    int32_t ret;
 
-    static const uint32_t SOFTBUS_SA_ID = 4700;
     sptr<ISystemAbilityManager> saManager = SystemAbilityManagerClient::GetInstance().GetSystemAbilityManager();
     sptr<IRemoteObject> remoteObject = saManager->GetSystemAbility(SOFTBUS_SA_ID);
     ASSERT_TRUE(remoteObject != nullptr);
@@ -64,7 +66,7 @@ HWTEST_F(TransClientProxyStandardTest, TransClientProxyStandardTest001, TestSize
     void *metaInfo = nullptr;
     uint32_t infoLen = TEST_INVALID;
     const char *networkId = nullptr;
-    ret = clientProxy->OnJoinLNNResult(addr, addrTypeLen, networkId, tmp);
+    int32_t ret = clientProxy->OnJoinLNNResult(addr, addrTypeLen, networkId, tmp);
     EXPECT_EQ(SOFTBUS_OK, ret);
 
     ret = clientProxy->OnJoinMetaNodeResult(addr, addrTypeLen, metaInfo, infoLen, tmp);
@@ -101,16 +103,14 @@ HWTEST_F(TransClientProxyStandardTest, TransClientProxyStandardTest001, TestSize
  */
 HWTEST_F(TransClientProxyStandardTest, TransClientProxyStandardTest002, TestSize.Level1)
 {
-    int32_t ret;
     const char *pkgName = "dms";
-    static const uint32_t SOFTBUS_SA_ID = 4700;
     sptr<ISystemAbilityManager> saManager = SystemAbilityManagerClient::GetInstance().GetSystemAbilityManager();
     sptr<IRemoteObject> remoteObject = saManager->GetSystemAbility(SOFTBUS_SA_ID);
     ASSERT_TRUE(remoteObject != nullptr);
     sptr<TransClientProxy> clientProxy = new (std::nothrow) TransClientProxy(remoteObject);
     ASSERT_TRUE(clientProxy != nullptr);
 
-    ret = clientProxy->OnChannelLinkDown(nullptr, TEST_TMP_DATE);
+    int32_t ret = clientProxy->OnChannelLinkDown(nullptr, TEST_TMP_DATE);
     EXPECT_EQ(SOFTBUS_INVALID_PARAM, ret);
 
     ret = clientProxy->OnClientPermissonChange(nullptr, TEST_TMP_DATE);
@@ -118,5 +118,83 @@ HWTEST_F(TransClientProxyStandardTest, TransClientProxyStandardTest002, TestSize
     
     ret = clientProxy->OnClientPermissonChange(pkgName, TEST_ERRTMP_DATE);
     EXPECT_EQ(SOFTBUS_OK, ret);
+}
+
+/**
+ * @tc.name: OnCheckCollabRelation001
+ * @tc.desc: trans client proxy standard test, use the normal parameter.
+ * @tc.type: FUNC
+ * @tc.require:
+ */
+HWTEST_F(TransClientProxyStandardTest, TransClientProxyStandardTest003, TestSize.Level1)
+{
+    sptr<ISystemAbilityManager> saManager = SystemAbilityManagerClient::GetInstance().GetSystemAbilityManager();
+    sptr<IRemoteObject> remoteObject = saManager->GetSystemAbility(SOFTBUS_SA_ID);
+    ASSERT_TRUE(remoteObject != nullptr);
+    sptr<TransClientProxy> clientProxy = new (std::nothrow) TransClientProxy(remoteObject);
+    ASSERT_TRUE(clientProxy != nullptr);
+
+    int32_t ret = clientProxy->OnCheckCollabRelation(nullptr, false, nullptr, 1, 1);
+    EXPECT_EQ(SOFTBUS_INVALID_PARAM, ret);
+
+    CollabInfo sourceInfo = {};
+    CollabInfo sinkInfo = {};
+
+    ret = clientProxy->OnCheckCollabRelation(&sourceInfo, false, nullptr, 1, 1);
+    EXPECT_EQ(SOFTBUS_INVALID_PARAM, ret);
+
+    ret = clientProxy->OnCheckCollabRelation(&sourceInfo, false, &sinkInfo, 1, 1);
+    EXPECT_EQ(SOFTBUS_TRANS_PROXY_SEND_REQUEST_FAILED, ret);
+}
+
+/**
+ * @tc.name: OnChannelOpened001
+ * @tc.desc: trans client proxy standard test, use the normal parameter.
+ * @tc.type: FUNC
+ * @tc.require:
+ */
+HWTEST_F(TransClientProxyStandardTest, TransClientProxyStandardTest004, TestSize.Level1)
+{
+    sptr<ISystemAbilityManager> saManager = SystemAbilityManagerClient::GetInstance().GetSystemAbilityManager();
+    sptr<IRemoteObject> remoteObject = saManager->GetSystemAbility(SOFTBUS_SA_ID);
+    ASSERT_TRUE(remoteObject != nullptr);
+    sptr<TransClientProxy> clientProxy = new (std::nothrow) TransClientProxy(remoteObject);
+    ASSERT_TRUE(clientProxy != nullptr);
+
+    ChannelInfo channel = {0};
+    const char *sessionName = "testSessionName";
+    int32_t ret = clientProxy->OnChannelOpened(nullptr, nullptr);
+    EXPECT_EQ(SOFTBUS_INVALID_PARAM, ret);
+
+    ret = clientProxy->OnChannelOpened(sessionName, nullptr);
+    EXPECT_EQ(SOFTBUS_INVALID_PARAM, ret);
+
+    ret = clientProxy->OnChannelOpened(sessionName, &channel);
+    EXPECT_EQ(SOFTBUS_IPC_ERR, ret);
+    channel.isServer = true;
+    ret = clientProxy->OnChannelOpened(sessionName, &channel);
+    EXPECT_EQ(SOFTBUS_IPC_ERR, ret);
+}
+
+/**
+ * @tc.name: SetChannelInfo001
+ * @tc.desc: trans client proxy standard test, use the normal parameter.
+ * @tc.type: FUNC
+ * @tc.require:
+ */
+HWTEST_F(TransClientProxyStandardTest, TransClientProxyStandardTest005, TestSize.Level1)
+{
+    sptr<ISystemAbilityManager> saManager = SystemAbilityManagerClient::GetInstance().GetSystemAbilityManager();
+    sptr<IRemoteObject> remoteObject = saManager->GetSystemAbility(SOFTBUS_SA_ID);
+    ASSERT_TRUE(remoteObject != nullptr);
+    sptr<TransClientProxy> clientProxy = new (std::nothrow) TransClientProxy(remoteObject);
+    ASSERT_TRUE(clientProxy != nullptr);
+
+    const char *sessionName = "testSessionName";
+    int32_t ret = clientProxy->SetChannelInfo(sessionName, 1, 1, 1);
+    EXPECT_EQ(SOFTBUS_TRANS_PROXY_SEND_REQUEST_FAILED, ret);
+
+    ret = clientProxy->SetChannelInfo(nullptr, 1, 1, 1);
+    EXPECT_EQ(SOFTBUS_INVALID_PARAM, ret);
 }
 } // namespace OHOS
