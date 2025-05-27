@@ -137,8 +137,8 @@ HWTEST_F(TransClientProxyStandardTest, TransClientProxyStandardTest003, TestSize
     int32_t ret = clientProxy->OnCheckCollabRelation(nullptr, false, nullptr, 1, 1);
     EXPECT_EQ(SOFTBUS_INVALID_PARAM, ret);
 
-    CollabInfo sourceInfo = {0};
-    CollabInfo sinkInfo = {0};
+    CollabInfo sourceInfo = {};
+    CollabInfo sinkInfo = {};
 
     ret = clientProxy->OnCheckCollabRelation(&sourceInfo, false, nullptr, 1, 1);
     EXPECT_EQ(SOFTBUS_INVALID_PARAM, ret);
