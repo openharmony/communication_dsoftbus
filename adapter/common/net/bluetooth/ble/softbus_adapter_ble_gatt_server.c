@@ -21,6 +21,8 @@
 #include "c_header/ohos_bt_gatt_server.h"
 
 #include "common_list.h"
+#include "conn_log.h"
+#include "softbus_adapter_ble_gatt_client.h"
 #include "softbus_adapter_timer.h"
 #include "softbus_def.h"
 #include "softbus_error_code.h"
@@ -28,11 +30,8 @@
 #include "softbus_adapter_mem.h"
 #include "softbus_utils.h"
 
-#include "conn_log.h"
-#include "softbus_adapter_ble_gatt_client.h"
-
-#define WAIT_HAL_REG_TIME_MS 5 // ms
-#define WAIT_HAL_REG_RETRY 3
+#define WAIT_HAL_REG_TIME_MS        5 // ms
+#define WAIT_HAL_REG_RETRY          3
 
 static const char SOFTBUS_APP_UUID[BT_UUID_LEN] = {
     0x00, 0x00, 0xFE, 0x36, 0x00, 0x00, 0x10, 0x00,
@@ -52,7 +51,7 @@ static _Atomic int g_halServerId = -1;
 static _Atomic int g_halRegFlag = -1; // -1:not registered or register failed; 0:registerring; 1:registered
 static SoftBusGattsManager g_softBusGattsManager = { 0 };
 static _Atomic bool g_isRegisterHalCallback = false;
-static SoftBusBleSendSignal g_serverSendSignal = {0};
+static SoftBusBleSendSignal g_serverSendSignal = { 0 };
 
 static bool IsGattsManagerEmpty(void)
 {

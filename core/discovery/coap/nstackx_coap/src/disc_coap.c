@@ -27,11 +27,11 @@
 #include "legacy/softbus_hidumper_disc.h"
 #include "legacy/softbus_hisysevt_discreporter.h"
 
-#define INT32_MAX_BIT_NUM 32
-#define MAX_CAP_NUM (CAPABILITY_NUM * INT32_MAX_BIT_NUM)
+#define INT32_MAX_BIT_NUM                   32
+#define MAX_CAP_NUM                         (CAPABILITY_NUM * INT32_MAX_BIT_NUM)
 
-#define COAP_PUBLISH_INFO "coapPublishInfo"
-#define COAP_SUBSCRIBE_INFO "coapSubscribeInfo"
+#define COAP_PUBLISH_INFO                   "coapPublishInfo"
+#define COAP_SUBSCRIBE_INFO                 "coapSubscribeInfo"
 
 typedef struct {
     bool isUpdate;
