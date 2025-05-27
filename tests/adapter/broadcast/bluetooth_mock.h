@@ -116,7 +116,7 @@ public:
         (override));
     MOCK_METHOD(int32_t, BleStopScan, (int32_t scannerId), (override));
     MOCK_METHOD(int, BleChangeScanParams, (int32_t scannerId, const BleScanConfigs *config,
-    const BleScanNativeFilter *filter, uint32_t filterSize, uint32_t filterAction), (override));
+        const BleScanNativeFilter *filter, uint32_t filterSize, uint32_t filterAction), (override));
     MOCK_METHOD(
         int32_t, BleStartAdvEx, (int32_t * advId, const StartAdvRawData rawData, BleAdvParams advParam), (override));
     MOCK_METHOD(int32_t, BleStopAdv, (int32_t advId), (override));
@@ -167,12 +167,14 @@ public:
         (SoftbusMediumType type, const SoftbusBroadcastMediumInterface *interface), (override));
     MOCK_METHOD(int32_t, SoftBusAddBtStateListener,
         (const SoftBusBtStateListener *listener, int32_t *listenerId), (override));
+    static int32_t ActionBleStartAdvEx(int32_t *advId, const StartAdvRawData rawData, BleAdvParams advParam);
     static MockBluetooth *GetMocker();
 
     static BtGapCallBacks *btGapCallback;
     static BtGattCallbacks *btGattCallback;
     static BleScanCallbacks *bleScanCallback;
     static const SoftbusBroadcastMediumInterface *interface;
+    static int32_t g_btAdvId;
 
 private:
     static MockBluetooth *targetMocker;
