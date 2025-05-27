@@ -676,6 +676,7 @@ void PrintAuthConnInfo(const AuthConnInfo *connInfo)
                 AnonymizeWrapper(anonyMac), AnonymizeWrapper(anonyNetworkId));
             AnonymizeFree(anonyMac);
             AnonymizeFree(anonyNetworkId);
+            break;
         default:
             break;
     }
