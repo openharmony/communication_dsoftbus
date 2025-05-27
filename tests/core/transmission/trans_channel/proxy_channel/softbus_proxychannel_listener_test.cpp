@@ -31,6 +31,7 @@
 #include "softbus_proxychannel_listener.h"
 #include "softbus_proxychannel_listener.c"
 #include "softbus_utils.h"
+#include "trans_auth_mock.h"
 #include "trans_channel_callback.h"
 #include "trans_channel_manager.h"
 
@@ -158,7 +159,7 @@ void SoftbusProxyChannelListenerTest::TearDownTestCase(void)
 HWTEST_F(SoftbusProxyChannelListenerTest, NotifyNormalChannelClosedTest001, TestSize.Level1)
 {
     char pkgName[SESSIONKEYSIZE] = {0};
-    strcpy_s(pkgName, SESSIONKEYSIZE, TEST_CHANNEL_INDENTITY);
+    (void)strcpy_s(pkgName, SESSIONKEYSIZE, TEST_CHANNEL_INDENTITY);
 
     int32_t ret = NotifyNormalChannelClosed(pkgName, TEST_NUMBER_25, TEST_NUMBER_TEN);
     EXPECT_EQ(SOFTBUS_OK, ret);
@@ -173,7 +174,7 @@ HWTEST_F(SoftbusProxyChannelListenerTest, NotifyNormalChannelClosedTest001, Test
 HWTEST_F(SoftbusProxyChannelListenerTest, NotifyNormalChannelOpenFailedTest001, TestSize.Level1)
 {
     char pkgName[SESSIONKEYSIZE] = {0};
-    strcpy_s(pkgName, SESSIONKEYSIZE, TEST_CHANNEL_INDENTITY);
+    (void)strcpy_s(pkgName, SESSIONKEYSIZE, TEST_CHANNEL_INDENTITY);
 
     int32_t ret = NotifyNormalChannelOpenFailed(pkgName, TEST_NUMBER_25, TEST_NUMBER_TEN, TEST_NUMBER_ONE);
     EXPECT_EQ(SOFTBUS_OK, ret);
@@ -188,17 +189,54 @@ HWTEST_F(SoftbusProxyChannelListenerTest, NotifyNormalChannelOpenFailedTest001, 
 HWTEST_F(SoftbusProxyChannelListenerTest, NotifyNormalChannelOpenedTest001, TestSize.Level1)
 {
     char pkgName[SESSIONKEYSIZE] = {0};
-    strcpy_s(pkgName, SESSIONKEYSIZE, TEST_CHANNEL_INDENTITY);
+    (void)strcpy_s(pkgName, SESSIONKEYSIZE, TEST_CHANNEL_INDENTITY);
+    TransAuthInterfaceMock authMock;
 
-    AppInfo *appInfo =  (AppInfo *)SoftBusCalloc(sizeof(AppInfo));
-    EXPECT_NE(nullptr, appInfo);
+    AppInfo *appInfo = reinterpret_cast<AppInfo *>(SoftBusCalloc(sizeof(AppInfo)));
+    ASSERT_TRUE(appInfo != nullptr);
     appInfo->appType = APP_TYPE_AUTH;
+    EXPECT_CALL(authMock, LnnGetNetworkIdByUuid).WillRepeatedly(Return(SOFTBUS_TRANS_INIT_FAILED));
     int32_t ret = NotifyNormalChannelOpened(TEST_NUMBER_25, appInfo, 0);
     EXPECT_EQ(SOFTBUS_OK, ret);
     appInfo->appType = APP_TYPE_NORMAL;
+    EXPECT_CALL(authMock, LnnGetNetworkIdByUuid).WillRepeatedly(Return(SOFTBUS_TRANS_INIT_FAILED));
     ret = NotifyNormalChannelOpened(TEST_NUMBER_25, appInfo, 0);
     SoftBusFree(appInfo);
     EXPECT_NE(SOFTBUS_OK, ret);
+}
+
+/**
+ * @tc.name: NotifyNormalChannelOpenedTest002
+ * @tc.desc: test notify normal channel opened.
+ * @tc.type: FUNC
+ * @tc.require:
+ */
+HWTEST_F(SoftbusProxyChannelListenerTest, NotifyNormalChannelOpenedTest002, TestSize.Level1)
+{
+    char pkgName[SESSIONKEYSIZE] = {0};
+    (void)strcpy_s(pkgName, SESSIONKEYSIZE, TEST_CHANNEL_INDENTITY);
+    TransAuthInterfaceMock authMock;
+
+    AppInfo *appInfo = reinterpret_cast<AppInfo *>(SoftBusCalloc(sizeof(AppInfo)));
+    ASSERT_TRUE(appInfo != nullptr);
+    appInfo->appType = APP_TYPE_AUTH;
+    EXPECT_CALL(authMock, LnnGetNetworkIdByUuid).WillRepeatedly(Return(SOFTBUS_OK));
+    int32_t ret = NotifyNormalChannelOpened(TEST_NUMBER_25, appInfo, 0);
+    EXPECT_EQ(SOFTBUS_OK, ret);
+
+    EXPECT_CALL(authMock, LnnGetNetworkIdByUuid).WillRepeatedly(Return(SOFTBUS_OK));
+    ret = NotifyNormalChannelOpened(TEST_NUMBER_25, appInfo, 1);
+    EXPECT_EQ(SOFTBUS_OK, ret);
+
+    appInfo->myData.tokenType = ACCESS_TOKEN_TYPE_NATIVE;
+    EXPECT_CALL(authMock, LnnGetNetworkIdByUuid).WillRepeatedly(Return(SOFTBUS_OK));
+    ret = NotifyNormalChannelOpened(TEST_NUMBER_25, appInfo, 1);
+    EXPECT_EQ(SOFTBUS_OK, ret);
+
+    EXPECT_CALL(authMock, LnnGetNetworkIdByUuid).WillRepeatedly(Return(SOFTBUS_OK));
+    ret = NotifyNormalChannelOpened(TEST_NUMBER_25, appInfo, 0);
+    EXPECT_EQ(SOFTBUS_OK, ret);
+    SoftBusFree(appInfo);
 }
 
 /**
@@ -209,9 +247,9 @@ HWTEST_F(SoftbusProxyChannelListenerTest, NotifyNormalChannelOpenedTest001, Test
  */
 HWTEST_F(SoftbusProxyChannelListenerTest, OnProxyChannelOpenedTest001, TestSize.Level1)
 {
-    AppInfo *appInfo =  (AppInfo *)SoftBusCalloc(sizeof(AppInfo));
-    EXPECT_NE(nullptr, appInfo);
-    strcpy_s(appInfo->myData.sessionName, SESSIONKEYSIZE, VALID_SESSIONNAME);
+    AppInfo *appInfo = reinterpret_cast<AppInfo *>(SoftBusCalloc(sizeof(AppInfo)));
+    ASSERT_TRUE(appInfo != nullptr);
+    (void)strcpy_s(appInfo->myData.sessionName, SESSIONKEYSIZE, VALID_SESSIONNAME);
     appInfo->appType = APP_TYPE_AUTH;
     int32_t ret = OnProxyChannelOpened(TEST_NUMBER_25, appInfo, 0);
     SoftBusFree(appInfo);
@@ -226,12 +264,12 @@ HWTEST_F(SoftbusProxyChannelListenerTest, OnProxyChannelOpenedTest001, TestSize.
  */
 HWTEST_F(SoftbusProxyChannelListenerTest, OnProxyChannelOpenFailedTest001, TestSize.Level1)
 {
-    AppInfo *appInfo =  (AppInfo *)SoftBusCalloc(sizeof(AppInfo));
-    EXPECT_NE(nullptr, appInfo);
-    strcpy_s(appInfo->myData.pkgName, SESSIONKEYSIZE, TEST_PKG_NAME);
+    AppInfo *appInfo = reinterpret_cast<AppInfo *>(SoftBusCalloc(sizeof(AppInfo)));
+    ASSERT_TRUE(appInfo != nullptr);
+    (void)strcpy_s(appInfo->myData.pkgName, SESSIONKEYSIZE, TEST_PKG_NAME);
     appInfo->myData.pid = TEST_NUMBER_25;
-    strcpy_s(appInfo->myData.sessionName, SESSIONKEYSIZE, VALID_SESSIONNAME);
-    strcpy_s(appInfo->peerData.deviceId, SESSIONKEYSIZE, TEST_STRING_TEN);
+    (void)strcpy_s(appInfo->myData.sessionName, SESSIONKEYSIZE, VALID_SESSIONNAME);
+    (void)strcpy_s(appInfo->peerData.deviceId, SESSIONKEYSIZE, TEST_STRING_TEN);
 
     appInfo->appType = APP_TYPE_AUTH;
     int32_t ret = OnProxyChannelOpenFailed(TEST_NUMBER_25, appInfo, 0);
@@ -256,11 +294,11 @@ HWTEST_F(SoftbusProxyChannelListenerTest, OnProxyChannelOpenFailedTest001, TestS
  */
 HWTEST_F(SoftbusProxyChannelListenerTest, OnProxyChannelClosedTest001, TestSize.Level1)
 {
-    AppInfo *appInfo =  (AppInfo *)SoftBusCalloc(sizeof(AppInfo));
-    EXPECT_NE(nullptr, appInfo);
-    strcpy_s(appInfo->myData.pkgName, SESSIONKEYSIZE, TEST_PKG_NAME);
+    AppInfo *appInfo = reinterpret_cast<AppInfo *>(SoftBusCalloc(sizeof(AppInfo)));
+    ASSERT_TRUE(appInfo != nullptr);
+    (void)strcpy_s(appInfo->myData.pkgName, SESSIONKEYSIZE, TEST_PKG_NAME);
     appInfo->myData.pid = TEST_NUMBER_25;
-    strcpy_s(appInfo->myData.sessionName, SESSIONKEYSIZE, VALID_SESSIONNAME);
+    (void)strcpy_s(appInfo->myData.sessionName, SESSIONKEYSIZE, VALID_SESSIONNAME);
 
     appInfo->appType = APP_TYPE_AUTH;
     int32_t ret = OnProxyChannelClosed(TEST_NUMBER_25, appInfo);
@@ -276,13 +314,13 @@ HWTEST_F(SoftbusProxyChannelListenerTest, OnProxyChannelClosedTest001, TestSize.
  */
 HWTEST_F(SoftbusProxyChannelListenerTest, OnProxyChannelMsgReceivedTest001, TestSize.Level1)
 {
-    AppInfo *appInfo =  (AppInfo *)SoftBusCalloc(sizeof(AppInfo));
-    EXPECT_NE(nullptr, appInfo);
-    strcpy_s(appInfo->myData.pkgName, SESSIONKEYSIZE, TEST_PKG_NAME);
+    AppInfo *appInfo = reinterpret_cast<AppInfo *>(SoftBusCalloc(sizeof(AppInfo)));
+    ASSERT_TRUE(appInfo != nullptr);
+    (void)strcpy_s(appInfo->myData.pkgName, SESSIONKEYSIZE, TEST_PKG_NAME);
     appInfo->myData.pid = TEST_NUMBER_25;
-    strcpy_s(appInfo->myData.sessionName, SESSIONKEYSIZE, VALID_SESSIONNAME);
+    (void)strcpy_s(appInfo->myData.sessionName, SESSIONKEYSIZE, VALID_SESSIONNAME);
     char data[SESSIONKEYSIZE] = {0};
-    strcpy_s(data, SESSIONKEYSIZE, VALID_SESSIONNAME);
+    (void)strcpy_s(data, SESSIONKEYSIZE, VALID_SESSIONNAME);
 
     appInfo->appType = APP_TYPE_AUTH;
     int32_t ret = OnProxyChannelMsgReceived(TEST_NUMBER_25, appInfo, data, SESSIONKEYSIZE);
@@ -299,9 +337,9 @@ HWTEST_F(SoftbusProxyChannelListenerTest, OnProxyChannelMsgReceivedTest001, Test
 HWTEST_F(SoftbusProxyChannelListenerTest, TransOpenNetWorkingChannelTest001, TestSize.Level1)
 {
     char sessionName[SESSIONKEYSIZE] = {0};
-    strcpy_s(sessionName, SESSIONKEYSIZE, VALID_SESSIONNAME);
+    (void)strcpy_s(sessionName, SESSIONKEYSIZE, VALID_SESSIONNAME);
     char peerNetworkId[SESSIONKEYSIZE] = {0};
-    strcpy_s(peerNetworkId, SESSIONKEYSIZE, TEST_CHANNEL_INDENTITY);
+    (void)strcpy_s(peerNetworkId, SESSIONKEYSIZE, TEST_CHANNEL_INDENTITY);
 
     int32_t ret = TransOpenNetWorkingChannel(sessionName, peerNetworkId, nullptr);
     EXPECT_EQ(INVALID_CHANNEL_ID, ret);
@@ -316,10 +354,79 @@ HWTEST_F(SoftbusProxyChannelListenerTest, TransOpenNetWorkingChannelTest001, Tes
 HWTEST_F(SoftbusProxyChannelListenerTest, TransSendNetworkingMessageTest001, TestSize.Level1)
 {
     char sendData[SESSIONKEYSIZE] = {0};
-    strcpy_s(sendData, SESSIONKEYSIZE, VALID_SESSIONNAME);
+    (void)strcpy_s(sendData, SESSIONKEYSIZE, VALID_SESSIONNAME);
 
     int32_t ret = TransSendNetworkingMessage(TEST_NUMBER_25, sendData, PROXY_CHANNEL_BT_IDLE_TIMEOUT, CONN_HIGH);
     EXPECT_EQ(SOFTBUS_TRANS_PROXY_INVALID_CHANNEL_ID, ret);
+}
+
+/**
+ * @tc.name: TransSendNetworkingMessageTest002
+ * @tc.desc: test trans send networking message.
+ * @tc.type: FUNC
+ * @tc.require:
+ */
+HWTEST_F(SoftbusProxyChannelListenerTest, TransSendNetworkingMessageTest002, TestSize.Level1)
+{
+    char sendData[SESSIONKEYSIZE] = {0};
+    (void)strcpy_s(sendData, SESSIONKEYSIZE, VALID_SESSIONNAME);
+
+    AppInfo *appInfo = reinterpret_cast<AppInfo *>(SoftBusCalloc(sizeof(AppInfo)));
+    ASSERT_TRUE(appInfo != nullptr);
+    (void)strcpy_s(appInfo->myData.sessionName, sizeof(appInfo->myData.sessionName), "testSessionName");
+    (void)strcpy_s(appInfo->myData.pkgName, sizeof(appInfo->myData.pkgName), "testPkgName");
+    (void)strcpy_s(appInfo->peerVersion, sizeof(appInfo->peerVersion), "testPeerVersion");
+    appInfo->connectType = 1;
+    appInfo->appType = APP_TYPE_NORMAL;
+    ProxyChannelInfo *chan = reinterpret_cast<ProxyChannelInfo *>(SoftBusCalloc(sizeof(ProxyChannelInfo)));
+    ASSERT_TRUE(chan != nullptr);
+    chan->channelId = TEST_NUMBER_ONE;
+    chan->status = PROXY_CHANNEL_STATUS_KEEPLIVEING;
+
+    int32_t ret = TransProxyCreateChanInfo(chan, chan->channelId, appInfo);
+    EXPECT_EQ(ret, SOFTBUS_OK);
+    ret = TransSendNetworkingMessage(TEST_NUMBER_ONE, sendData, PROXY_CHANNEL_BT_IDLE_TIMEOUT, CONN_HIGH);
+    EXPECT_EQ(SOFTBUS_TRANS_PROXY_ERROR_APP_TYPE, ret);
+    SoftBusFree(chan);
+    SoftBusFree(appInfo);
+}
+
+/**
+ * @tc.name: TransSendNetworkingMessageTest003
+ * @tc.desc: test trans send networking message.
+ * @tc.type: FUNC
+ * @tc.require:
+ */
+HWTEST_F(SoftbusProxyChannelListenerTest, TransSendNetworkingMessageTest003, TestSize.Level1)
+{
+    char sendData[SESSIONKEYSIZE] = {0};
+    (void)strcpy_s(sendData, SESSIONKEYSIZE, VALID_SESSIONNAME);
+
+    AppInfo *appInfo = reinterpret_cast<AppInfo *>(SoftBusCalloc(sizeof(AppInfo)));
+    ASSERT_TRUE(appInfo != nullptr);
+    (void)strcpy_s(appInfo->myData.sessionName, sizeof(appInfo->myData.sessionName), "testSessionName");
+    (void)strcpy_s(appInfo->myData.pkgName, sizeof(appInfo->myData.pkgName), "testPkgName");
+    (void)strcpy_s(appInfo->peerVersion, sizeof(appInfo->peerVersion), "testPeerVersion");
+    appInfo->connectType = 1;
+    appInfo->appType = APP_TYPE_NORMAL;
+    ProxyChannelInfo *chan = reinterpret_cast<ProxyChannelInfo *>(SoftBusCalloc(sizeof(ProxyChannelInfo)));
+    ASSERT_TRUE(chan != nullptr);
+    chan->channelId = TEST_NUMBER_THREE;
+    chan->status = PROXY_CHANNEL_STATUS_COMPLETED;
+
+    int32_t ret = TransProxyCreateChanInfo(chan, chan->channelId, appInfo);
+    EXPECT_EQ(ret, SOFTBUS_OK);
+    ret = TransSendNetworkingMessage(TEST_NUMBER_THREE, sendData, PROXY_CHANNEL_BT_IDLE_TIMEOUT, CONN_HIGH);
+    EXPECT_EQ(SOFTBUS_TRANS_PROXY_ERROR_APP_TYPE, ret);
+    
+    chan->channelId = TEST_NUMBER_5000;
+    chan->status = PROXY_CHANNEL_STATUS_HANDSHAKE_TIMEOUT;
+    ret = TransProxyCreateChanInfo(chan, chan->channelId, appInfo);
+    EXPECT_EQ(ret, SOFTBUS_OK);
+    ret = TransSendNetworkingMessage(TEST_NUMBER_5000, sendData, PROXY_CHANNEL_BT_IDLE_TIMEOUT, CONN_HIGH);
+    EXPECT_EQ(SOFTBUS_TRANS_PROXY_CHANNLE_STATUS_INVALID, ret);
+    SoftBusFree(chan);
+    SoftBusFree(appInfo);
 }
 
 /**
@@ -354,6 +461,8 @@ HWTEST_F(SoftbusProxyChannelListenerTest, OnProxyChannelBindTest001, TestSize.Le
  */
 HWTEST_F(SoftbusProxyChannelListenerTest, FillExtraByProxyChannelErrorEndTest001, TestSize.Level1)
 {
+    TransAuthInterfaceMock authMock;
+    EXPECT_CALL(authMock, LnnGetLocalStrInfo).WillRepeatedly(Return(SOFTBUS_OK));
     FillExtraByProxyChannelErrorEnd(nullptr, nullptr, nullptr, 1);
     char localUdid[UDID_BUF_LEN] = { 0 };
     TransEventExtra extra = {
@@ -367,7 +476,7 @@ HWTEST_F(SoftbusProxyChannelListenerTest, FillExtraByProxyChannelErrorEndTest001
         .result = EVENT_STAGE_RESULT_OK
     };
     AppInfo *appInfo = static_cast<AppInfo *>(SoftBusCalloc(sizeof(AppInfo)));
-    EXPECT_NE(nullptr, appInfo);
+    ASSERT_TRUE(appInfo != nullptr);
     (void)strcpy_s(appInfo->myData.sessionName, sizeof(appInfo->myData.sessionName), "testSessionName");
     (void)strcpy_s(appInfo->myData.pkgName, sizeof(appInfo->myData.pkgName), "testPkgName");
     (void)strcpy_s(appInfo->peerVersion, sizeof(appInfo->peerVersion), "testPeerVersion");
@@ -388,13 +497,39 @@ HWTEST_F(SoftbusProxyChannelListenerTest, TransGetConnectOptionTest001, TestSize
     const char *peerNetworkId = "1111"; // test value
     LanePreferredLinkList *preferred =
         static_cast<LanePreferredLinkList *>(SoftBusCalloc(sizeof(LanePreferredLinkList)));
-    EXPECT_NE(nullptr, preferred);
+    ASSERT_TRUE(preferred != nullptr);
     preferred->linkTypeNum = 1;
     int32_t channelId = 1111; // test value
+    TransAuthInterfaceMock authMock;
+    EXPECT_CALL(authMock, ApplyLaneReqId).WillRepeatedly(Return(SOFTBUS_OK));
 
     int32_t ret = TransGetConnectOption(sessionName, peerNetworkId, preferred, channelId);
     EXPECT_EQ(SOFTBUS_TRANS_GET_LANE_INFO_ERR, ret);
     SoftBusFree(preferred);
+}
+
+/**
+ * @tc.name: FillExtraByProxyChannelErrorEnd002
+ * @tc.desc: test fill extra by proxy channel.
+ * @tc.type: FUNC
+ * @tc.require:
+ */
+HWTEST_F(SoftbusProxyChannelListenerTest, FillExtraByProxyChannelErrorEnd002, TestSize.Level1)
+{
+    TransAuthInterfaceMock authMock;
+    EXPECT_CALL(authMock, LnnGetLocalStrInfo).WillRepeatedly(Return(SOFTBUS_OK));
+    FillExtraByProxyChannelErrorEnd(nullptr, nullptr, nullptr, 1);
+    char localUdid[UDID_BUF_LEN] = { 0 };
+    TransEventExtra *extra = reinterpret_cast<TransEventExtra *>(SoftBusCalloc(sizeof(AppInfo)));
+    ASSERT_TRUE(extra != nullptr);
+    AppInfo *appInfo = reinterpret_cast<AppInfo *>(SoftBusCalloc(sizeof(AppInfo)));
+    ASSERT_TRUE(appInfo != nullptr);
+    appInfo->connectType = 1;
+    appInfo->appType = APP_TYPE_AUTH;
+    FillExtraByProxyChannelErrorEnd(extra, appInfo, nullptr, 1);
+    FillExtraByProxyChannelErrorEnd(extra, appInfo, localUdid, 1);
+    SoftBusFree(appInfo);
+    SoftBusFree(extra);
 }
 } // namespace OHOS
 
