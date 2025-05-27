@@ -37,10 +37,10 @@ extern "C"{
  * @since 4.1
  * @version 1.0
  */
-#define SOFTBUS_ADDR_MAC_LEN 6
+#define SOFTBUS_ADDR_MAC_LEN           6
 
-#define SOFTBUS_IRK_LEN   16
-#define SOFTBUS_UDID_HASH_LEN 32
+#define SOFTBUS_IRK_LEN                16
+#define SOFTBUS_UDID_HASH_LEN          32
 
 /**
  * @brief Defines the length of local name, the maximum length of complete local name is 30 bytes.
@@ -48,7 +48,7 @@ extern "C"{
  * @since 4.1
  * @version 1.0
  */
-#define SOFTBUS_LOCAL_NAME_LEN_MAX 30
+#define SOFTBUS_LOCAL_NAME_LEN_MAX    30
 
 /**
  * @brief Defines different broadcast media protocol stacks

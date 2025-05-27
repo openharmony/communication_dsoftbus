@@ -21,7 +21,7 @@
 #include "g_enhance_disc_func_pack.h"
 #include "softbus_error_code.h"
 
-#define DISPATCHER_SIZE 6
+#define DISPATCHER_SIZE      6
 
 static DiscoveryBleDispatcherInterface *g_dispatchers[DISPATCHER_SIZE];
 static uint32_t g_dispatcherSize = 0;

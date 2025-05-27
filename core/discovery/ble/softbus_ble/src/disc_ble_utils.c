@@ -22,8 +22,8 @@
 #include "bus_center_manager.h"
 #include "cJSON.h"
 #include "disc_ble_constant.h"
-#include "softbus_broadcast_type.h"
 #include "disc_log.h"
+#include "softbus_broadcast_type.h"
 #include "lnn_device_info.h"
 #include "lnn_ohos_account.h"
 #include "locale_config_wrapper.h"
@@ -36,17 +36,17 @@
 #include "softbus_json_utils.h"
 #include "softbus_utils.h"
 
-#define MAC_BIT_ZERO 0
-#define MAC_BIT_ONE 1
-#define MAC_BIT_TWO 2
-#define MAC_BIT_THREE 3
-#define MAC_BIT_FOUR 4
-#define MAC_BIT_FIVE 5
-#define TLV_MAX_DATA_LEN 15
-#define TLV_VARIABLE_DATA_LEN 0
-#define HYPHEN_ZH        "的"
-#define HYPHEN_EXCEPT_ZH "-"
-#define EMPTY_STRING     ""
+#define MAC_BIT_ZERO                0
+#define MAC_BIT_ONE                 1
+#define MAC_BIT_TWO                 2
+#define MAC_BIT_THREE               3
+#define MAC_BIT_FOUR                4
+#define MAC_BIT_FIVE                5
+#define TLV_MAX_DATA_LEN            15
+#define TLV_VARIABLE_DATA_LEN       0
+#define HYPHEN_ZH                   "的"
+#define HYPHEN_EXCEPT_ZH            "-"
+#define EMPTY_STRING                ""
 
 bool CheckBitMapEmpty(uint32_t capBitMapNum, const uint32_t *capBitMap)
 {

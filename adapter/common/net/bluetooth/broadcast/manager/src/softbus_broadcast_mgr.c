@@ -32,27 +32,20 @@
 #include "legacy/softbus_hidumper_bc_mgr.h"
 #include "softbus_utils.h"
 
-#define BC_WAIT_TIME_MS 50
-#define BC_WAIT_TIME_SEC 1
-#define BC_DFX_REPORT_NUM 4
-#define MAX_BLE_ADV_NUM 7
-#define MGR_TIME_THOUSAND_MULTIPLIER 1000LL
-#define BC_WAIT_TIME_MICROSEC (BC_WAIT_TIME_MS * MGR_TIME_THOUSAND_MULTIPLIER)
-#define MAX_FILTER_SIZE 32
-
-static volatile bool g_mgrInit = false;
-static volatile bool g_mgrLockInit = false;
-static SoftBusMutex g_bcLock = {0};
-static SoftBusMutex g_scanLock = {0};
-
-static int32_t g_btStateListenerId = -1;
+#define BC_WAIT_TIME_MS                  50
+#define BC_WAIT_TIME_SEC                 1
+#define BC_DFX_REPORT_NUM                4
+#define MAX_BLE_ADV_NUM                  7
+#define MGR_TIME_THOUSAND_MULTIPLIER     1000LL
+#define BC_WAIT_TIME_MICROSEC            (BC_WAIT_TIME_MS * MGR_TIME_THOUSAND_MULTIPLIER)
+#define MAX_FILTER_SIZE                  32
+#define REGISTER_INFO_MANAGER            "registerInfoMgr"
 
 typedef struct {
     bool isAdapterScanCbReg;
     int32_t adapterScannerId;
 } AdapterScannerControl;
 
-#define REGISTER_INFO_MANAGER "registerInfoMgr"
 static int32_t RegisterInfoDump(int fd);
 
 typedef struct {
@@ -99,6 +92,12 @@ typedef struct {
     uint8_t addSize;
     ScanCallback *scanCallback;
 } ScanManager;
+
+static volatile bool g_mgrInit = false;
+static volatile bool g_mgrLockInit = false;
+static SoftBusMutex g_bcLock = { 0 };
+static SoftBusMutex g_scanLock = { 0 };
+static int32_t g_btStateListenerId = -1;
 
 static int32_t g_bcMaxNum = 0;
 static int32_t g_bcCurrentNum = 0;

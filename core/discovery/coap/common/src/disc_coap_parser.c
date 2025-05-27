@@ -23,14 +23,13 @@
 #include "softbus_error_code.h"
 #include "softbus_utils.h"
 
-#define JSON_WLAN_IP       "wifiIpAddr"
-#define JSON_HW_ACCOUNT    "hwAccountHashVal"
-#define JSON_KEY_CAST_PLUS "castPlus"
-#define JSON_KEY_BDATA     "bData"
-#define JSON_KEY_NICKNAME  "nickName"
-#define MAX_BDATA_LEN      300
-
-#define HEX_HASH_LEN 16
+#define JSON_WLAN_IP             "wifiIpAddr"
+#define JSON_HW_ACCOUNT          "hwAccountHashVal"
+#define JSON_KEY_CAST_PLUS       "castPlus"
+#define JSON_KEY_BDATA           "bData"
+#define JSON_KEY_NICKNAME        "nickName"
+#define MAX_BDATA_LEN            300
+#define HEX_HASH_LEN             16
 
 int32_t DiscCoapParseDeviceUdid(const char *raw, DeviceInfo *device)
 {

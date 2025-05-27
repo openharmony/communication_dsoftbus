@@ -22,8 +22,8 @@ extern "C" {
 #endif
 #endif
 
-#define WIFI_MAC_SIZE 6
-#define SLE_MAC_SIZE 6
+#define WIFI_MAC_SIZE      6
+#define SLE_MAC_SIZE       6
 
 typedef enum {
     BLE_GATT_MASTER = 0,

@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2023-2024 Huawei Device Co., Ltd.
+ * Copyright (c) 2023-2025 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -13,29 +13,24 @@
  * limitations under the License.
  */
 
-#include "softbus_broadcast_adapter_interface.h"
-#include "softbus_ble_gatt_public.h"
-#include "softbus_adapter_bt_common.h"
-#include "softbus_adapter_thread.h"
-#include "softbus_adapter_mem.h"
-#include "softbus_broadcast_type.h"
-#include "softbus_error_code.h"
-#include "softbus_ble_utils.h"
-#include "disc_log.h"
 #include <stdatomic.h>
 #include <string.h>
 
-#define GATT_ADV_MAX_NUM       20
-#define LP_BT_UUID_BURST       "43d4a49f-604d-45b5-9302-4ddbbfd538fd"
-#define LP_BT_UUID_HEARTBEAT   "43d4a49f-605d-45b5-9302-4ddbbfd538fd"
-#define LP_DELIVERY_MODE_REPLY 0xF0
-#define LP_ADV_DURATION_MS     0
+#include "disc_log.h"
+#include "softbus_adapter_bt_common.h"
+#include "softbus_adapter_mem.h"
+#include "softbus_adapter_thread.h"
+#include "softbus_ble_gatt_public.h"
+#include "softbus_ble_utils.h"
+#include "softbus_broadcast_adapter_interface.h"
+#include "softbus_broadcast_type.h"
+#include "softbus_error_code.h"
 
-static atomic_bool g_init = false;
-static atomic_bool g_bcCbReg = false;
-static SoftBusMutex g_advLock = { 0 };
-static SoftBusMutex g_scannerLock = { 0 };
-static int32_t g_adapterBtStateListenerId = -1;
+#define GATT_ADV_MAX_NUM            20
+#define LP_BT_UUID_BURST            "43d4a49f-604d-45b5-9302-4ddbbfd538fd"
+#define LP_BT_UUID_HEARTBEAT        "43d4a49f-605d-45b5-9302-4ddbbfd538fd"
+#define LP_DELIVERY_MODE_REPLY      0xF0
+#define LP_ADV_DURATION_MS          0
 
 typedef struct {
     bool isUsed;
@@ -52,6 +47,11 @@ typedef struct {
     SoftbusScanCallback *scanCallback;
 } ScanChannel;
 
+static atomic_bool g_init = false;
+static atomic_bool g_bcCbReg = false;
+static SoftBusMutex g_advLock = { 0 };
+static SoftBusMutex g_scannerLock = { 0 };
+static int32_t g_adapterBtStateListenerId = -1;
 static AdvChannel g_advChannel[GATT_ADV_MAX_NUM];
 static ScanChannel g_scanChannel[GATT_SCAN_MAX_NUM];
 

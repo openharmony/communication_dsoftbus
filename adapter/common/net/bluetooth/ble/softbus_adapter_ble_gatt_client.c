@@ -31,8 +31,8 @@
 #include "conn_log.h"
 #include "softbus_type_def.h"
 
-#define APP_UUID_LEN 2
-#define INVALID_ID   (-1)
+#define APP_UUID_LEN      2
+#define INVALID_ID        (-1)
 
 static int32_t BleOhosStatusToSoftBus(BtStatus status);
 static void GetGattcCallback(int32_t clientId, SoftBusGattcCallback *cb);
@@ -43,6 +43,7 @@ static BtGattClientCallbacks g_btGattClientCallbacks = { 0 };
 static SoftBusList *g_softBusGattcManager = NULL;
 static SoftBusList *g_btAddrs = NULL;
 static SoftBusBleSendSignal g_clientSendSignal = {0};
+
 typedef struct {
     char addr[BT_MAC_LEN];
     int32_t clientId;

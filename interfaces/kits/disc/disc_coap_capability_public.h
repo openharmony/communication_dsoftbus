@@ -17,10 +17,11 @@
 #define DISC_COAP_CAPABILITY_PUBLIC_H
 
 #include "stdint.h"
-#include "nstackx_struct.h"
-#include "disc_manager_struct.h"
-#include "softbus_adapter_thread.h"
+
 #include "disc_interface_struct.h"
+#include "disc_manager_struct.h"
+#include "nstackx_struct.h"
+#include "softbus_adapter_thread.h"
 #include "softbus_common.h"
 
 #ifdef __cplusplus

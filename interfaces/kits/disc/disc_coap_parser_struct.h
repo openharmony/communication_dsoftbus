@@ -16,12 +16,12 @@
 #ifndef DISC_COAP_PARSER_STRUCT_H
 #define DISC_COAP_PARSER_STRUCT_H
 
-#define SERVICE_DATA_PORT "port"
-#define DEVICE_UDID       "UDID"
-#define JSON_SERVICE_DATA "serviceData"
+#define SERVICE_DATA_PORT                "port"
+#define DEVICE_UDID                      "UDID"
+#define JSON_SERVICE_DATA                "serviceData"
 
-#define MAX_PORT_STR_LEN  6
-#define MAX_SERVICE_DATA_LEN 64
+#define MAX_PORT_STR_LEN                 6
+#define MAX_SERVICE_DATA_LEN             64
 
 #ifdef __cplusplus
 extern "C" {
