@@ -162,6 +162,9 @@ if (defined(ohos_lite)) {
     ]
     include_dirs += conn_common_inc + trans_common_inc + dsoftbus_plugin_inc
   }
+  config("dsoftbus_utils_link_config") {
+    ldflags = [ "-Wl,--lto-O0" ]
+  }
   ohos_shared_library("softbus_utils") {
     sanitize = {
       ubsan = true
@@ -205,6 +208,7 @@ if (defined(ohos_lite)) {
       defines += [ "ASAN_BUILD" ]
     }
 
+    configs = [ ":dsoftbus_utils_link_config" ]
     public_configs = [ ":dsoftbus_utils_interface_L2" ]
     deps = [
       "$dsoftbus_dfx_path:softbus_dfx",
