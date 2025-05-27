@@ -137,18 +137,14 @@ HWTEST_F(TransClientProxyStandardTest, TransClientProxyStandardTest003, TestSize
     int32_t ret = clientProxy->OnCheckCollabRelation(nullptr, false, nullptr, 1, 1);
     EXPECT_EQ(SOFTBUS_INVALID_PARAM, ret);
 
-    CollabInfo *sourceInfo = reinterpret_cast<CollabInfo *>(SoftBusCalloc(sizeof(CollabInfo)));
-    ASSERT_TRUE(sourceInfo != nullptr);
-    CollabInfo *sinkInfo = reinterpret_cast<CollabInfo *>(SoftBusCalloc(sizeof(CollabInfo)));
-    ASSERT_TRUE(sinkInfo != nullptr);
+    CollabInfo sourceInfo = {0};
+    CollabInfo sinkInfo = {0};
 
-    ret = clientProxy->OnCheckCollabRelation(sourceInfo, false, nullptr, 1, 1);
+    ret = clientProxy->OnCheckCollabRelation(&sourceInfo, false, nullptr, 1, 1);
     EXPECT_EQ(SOFTBUS_INVALID_PARAM, ret);
 
-    ret = clientProxy->OnCheckCollabRelation(sourceInfo, false, sinkInfo, 1, 1);
+    ret = clientProxy->OnCheckCollabRelation(&sourceInfo, false, &sinkInfo, 1, 1);
     EXPECT_EQ(SOFTBUS_TRANS_PROXY_SEND_REQUEST_FAILED, ret);
-    SoftBusFree(sourceInfo);
-    SoftBusFree(sinkInfo);
 }
 
 /**
@@ -165,8 +161,7 @@ HWTEST_F(TransClientProxyStandardTest, TransClientProxyStandardTest004, TestSize
     sptr<TransClientProxy> clientProxy = new (std::nothrow) TransClientProxy(remoteObject);
     ASSERT_TRUE(clientProxy != nullptr);
 
-    ChannelInfo *channel = reinterpret_cast<ChannelInfo *>(SoftBusCalloc(sizeof(ChannelInfo)));
-    ASSERT_TRUE(channel != nullptr);
+    ChannelInfo channel = {0};
     const char *sessionName = "testSessionName";
     int32_t ret = clientProxy->OnChannelOpened(nullptr, nullptr);
     EXPECT_EQ(SOFTBUS_INVALID_PARAM, ret);
@@ -174,12 +169,11 @@ HWTEST_F(TransClientProxyStandardTest, TransClientProxyStandardTest004, TestSize
     ret = clientProxy->OnChannelOpened(sessionName, nullptr);
     EXPECT_EQ(SOFTBUS_INVALID_PARAM, ret);
 
-    ret = clientProxy->OnChannelOpened(sessionName, channel);
+    ret = clientProxy->OnChannelOpened(sessionName, &channel);
     EXPECT_EQ(SOFTBUS_IPC_ERR, ret);
-    channel->isServer = true;
-    ret = clientProxy->OnChannelOpened(sessionName, channel);
+    channel.isServer = true;
+    ret = clientProxy->OnChannelOpened(sessionName, &channel);
     EXPECT_EQ(SOFTBUS_IPC_ERR, ret);
-    SoftBusFree(channel);
 }
 
 /**
