@@ -46,7 +46,6 @@ ohos_unittest("DiscApproachBleVirtualTest") {
     "c_utils:utils",
     "hilog:libhilog",
     "googletest:gmock",
-    "googletest:gtest_main",
   ]
 }
 
