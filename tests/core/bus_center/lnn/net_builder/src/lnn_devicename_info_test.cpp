@@ -407,4 +407,40 @@ HWTEST_F(LNNDeviceNameInfoTest, LNN_ASYNC_DEVICE_NAME_DELAY_TEST_003, TestSize.L
     SoftBusFree(nodeInfo);
     SoftBusFree(data);
 }
+
+/*
+* @tc.name: LNN_SET_DISPLAY_NAME_TEST_001
+* @tc.desc: LnnSetDisplayName test
+* @tc.type: FUNC
+* @tc.require:
+*/
+HWTEST_F(LNNDeviceNameInfoTest, LNN_SET_DISPLAY_NAME_TEST_001, TestSize.Level1)
+{
+    NodeInfo peerNodeInfo = {
+        .deviceInfo.nickName = "diffNickName",
+        .deviceInfo.unifiedName = "unifiedName",
+        .deviceInfo.unifiedDefaultName = "unifiedDefaultName",
+        .deviceInfo.deviceName = "deviceName",
+    };
+    NodeInfo localNodeInfo = {
+        .deviceInfo.nickName = "diffNickName",
+        .deviceInfo.unifiedName = "",
+        .deviceInfo.unifiedDefaultName = "unifiedDefaultName",
+        .deviceInfo.deviceName = "deviceName",
+        .accountId = ACCOUNT_ID,
+    };
+    NiceMock<LnnServicetInterfaceMock> serviceMock;
+    EXPECT_CALL(serviceMock, LnnGetDeviceDisplayName).WillRepeatedly(Return(SOFTBUS_OK));
+    char displayName[] = "displayName";
+    const char *nickName = "";
+    int64_t accountId = ACCOUNT_ID;
+    EXPECT_NO_FATAL_FAILURE(LnnSetDisplayName(displayName, nickName, &peerNodeInfo, &localNodeInfo, accountId));
+    EXPECT_EQ(EOK, strcpy_s(peerNodeInfo.deviceInfo.unifiedName, DEVICE_NAME_BUF_LEN, "unifiedDefaultName"));
+    EXPECT_NO_FATAL_FAILURE(LnnSetDisplayName(displayName, nickName, &peerNodeInfo, &localNodeInfo, accountId));
+    const char *nickNameNew = "nickNameNew";
+    EXPECT_NO_FATAL_FAILURE(LnnSetDisplayName(displayName, nickNameNew, &peerNodeInfo, &localNodeInfo, accountId));
+    accountId = ACCOUNT_ID + 1;
+    (void)memset_s(peerNodeInfo.deviceInfo.unifiedName, DEVICE_NAME_BUF_LEN, 0, DEVICE_NAME_BUF_LEN);
+    EXPECT_NO_FATAL_FAILURE(LnnSetDisplayName(displayName, nickNameNew, &peerNodeInfo, &localNodeInfo, accountId));
+}
 } // namespace OHOS
