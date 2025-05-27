@@ -225,6 +225,8 @@ int32_t ConnGetTypeByConnectionId(uint32_t connectionId, ConnectType *type);
  */
 int32_t ConnConfigPostLimit(const LimitConfiguration *configuration);
 
+void ConnDeathCallback(const char *pkgName, int32_t pid);
+
 #ifdef __cplusplus
 #if __cplusplus
 }
