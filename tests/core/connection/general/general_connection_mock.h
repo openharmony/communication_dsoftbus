@@ -27,7 +27,6 @@ class GeneralConnectionInterface {
 public:
     GeneralConnectionInterface() {};
     virtual ~GeneralConnectionInterface() {};
-    virtual ConnBleConnection *ConnBleGetConnectionById(uint32_t connectionId) = 0;
     virtual int32_t LnnGetLocalStrInfo(InfoKey key, char *info, uint32_t len) = 0;
     virtual int32_t BleConnectDeviceMock(const ConnectOption *option,
         uint32_t requestId, const ConnectResult *result) = 0;
@@ -39,12 +38,14 @@ class GeneralConnectionInterfaceMock : public GeneralConnectionInterface {
 public:
     GeneralConnectionInterfaceMock();
     ~GeneralConnectionInterfaceMock() override;
-    MOCK_METHOD(ConnBleConnection *, ConnBleGetConnectionById, (uint32_t), (override));
     MOCK_METHOD(int32_t, LnnGetLocalStrInfo, (InfoKey key, char *info, uint32_t len), (override));
     MOCK_METHOD(int32_t, BleConnectDeviceMock, (const ConnectOption *option,
         uint32_t requestId, const ConnectResult *result), (override));
     MOCK_METHOD(int32_t, ConnBlePostBytesMock, (uint32_t connectionId, uint8_t *data,
         uint32_t dataLen, int32_t pid, int32_t flag, int32_t module, int64_t seq), (override));
+
+    static ConnectCallback *GetConnectCallbackMock();
+    static ConnectResult *GetConnectResultMock();
 };
 } // namespace OHOS
 #endif // GENERAL_CONNECTION_MOCK_H

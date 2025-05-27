@@ -40,6 +40,7 @@ ohos_unittest("GeneralConnectionTest") {
     "$dsoftbus_root_path/core/connection/tcp/include",
     "$dsoftbus_root_path/core/connection/sle/include",
     "$dsoftbus_root_path/core/frame/init/include",
+    "$dsoftbus_root_path/adapter/common/include",
   ]
 
   deps = [
