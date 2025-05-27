@@ -49,6 +49,7 @@ static SoftBusList *g_userKeyList = NULL;
 int32_t AuthUserKeyInit(void)
 {
     if (g_userKeyList != NULL) {
+        AUTH_LOGI(AUTH_KEY, "g_userKeyList already init");
         return SOFTBUS_OK;
     }
     g_userKeyList = CreateSoftBusList();
