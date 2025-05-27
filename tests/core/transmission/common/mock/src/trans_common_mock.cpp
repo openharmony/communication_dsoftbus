@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2022 Huawei Device Co., Ltd.
+ * Copyright (c) 2022-2025 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -73,6 +73,21 @@ int32_t SoftBusDecryptDataWithSeq(AesGcmCipherKey *cipherKey, const unsigned cha
 int32_t SoftBusGenerateStrHash(const unsigned char *str, uint32_t len, unsigned char *hash)
 {
     return GetCommonInterface()->SoftBusGenerateStrHash(str, len, hash);
+}
+
+int32_t SoftbusGetConfig(ConfigType type, unsigned char *val, uint32_t len)
+{
+    return GetCommonInterface()->SoftbusGetConfig(type, val, len);
+}
+
+void *SoftBusCalloc(unsigned int size)
+{
+    return GetCommonInterface()->SoftBusCalloc(size);
+}
+
+int32_t TransAssembleTlvData(DataHead *pktHead, uint8_t type, uint8_t *buffer, uint8_t bufferLen, int32_t *bufferSize)
+{
+    return GetCommonInterface()->TransAssembleTlvData(pktHead, type, buffer, bufferLen, bufferSize);
 }
 }
 }
