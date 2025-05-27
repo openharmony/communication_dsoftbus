@@ -45,7 +45,7 @@ ohos_unittest("DiscApproachBleVirtualTest") {
   external_deps = [
     "c_utils:utils",
     "hilog:libhilog",
-    "googletest:gmock",
+    "googletest:gtest_main",
   ]
 }
 
