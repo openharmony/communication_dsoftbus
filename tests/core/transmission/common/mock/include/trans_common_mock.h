@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2022 Huawei Device Co., Ltd.
+ * Copyright (c) 2022-2025 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -18,8 +18,9 @@
 
 #include <gmock/gmock.h>
 
-#include "softbus_utils.h"
 #include "softbus_adapter_crypto.h"
+#include "softbus_feature_config.h"
+#include "trans_assemble_tlv.h"
 
 namespace OHOS {
 class TransCommInterface {
@@ -44,6 +45,13 @@ public:
         unsigned char *decryptData, uint32_t *decryptLen, int32_t seqNum) = 0;
 
     virtual int32_t SoftBusGenerateStrHash(const unsigned char *str, uint32_t len, unsigned char *hash) = 0;
+
+    virtual int32_t SoftbusGetConfig(ConfigType type, unsigned char *val, uint32_t len) = 0;
+
+    virtual void *SoftBusCalloc(unsigned int size) = 0;
+
+    virtual int32_t TransAssembleTlvData(
+        DataHead *pktHead, uint8_t type, uint8_t *buffer, uint8_t bufferLen, int32_t *bufferSize) = 0;
 };
 
 class TransCommInterfaceMock : public TransCommInterface {
@@ -63,6 +71,13 @@ public:
         unsigned char *, uint32_t *, int32_t));
 
     MOCK_METHOD3(SoftBusGenerateStrHash, int32_t (const unsigned char *, uint32_t, unsigned char *));
+
+    MOCK_METHOD3(SoftbusGetConfig, int32_t (ConfigType type, unsigned char *val, uint32_t len));
+
+    MOCK_METHOD1(SoftBusCalloc, void * (unsigned int size));
+
+    MOCK_METHOD5(TransAssembleTlvData,
+        int32_t (DataHead *pktHead, uint8_t type, uint8_t *buffer, uint8_t bufferLen, int32_t *bufferSize));
 };
 
 } // namespace OHOS
