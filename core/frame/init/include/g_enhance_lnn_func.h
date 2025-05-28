@@ -244,6 +244,7 @@ typedef void (*LnnRegSleRangeCbFunc)(const ISleRangeInnerCallback *callback);
 typedef int32_t (*LnnStopRangeFunc)(const RangeConfig *config);
 typedef int32_t (*LnnStartRangeFunc)(const RangeConfig *config);
 typedef int32_t (*UnregistAuthTransListenerFunc)(void);
+typedef void (*SleRangeDeathCallbackFunc)(void);
 typedef struct TagLnnEnhanceFuncList {
     // time_sync
     LnnTimeSyncImplInitFunc lnnTimeSyncImplInit;
@@ -256,12 +257,14 @@ typedef struct TagLnnEnhanceFuncList {
     LnnDcSubscribeFunc lnnDcSubscribe;
     LnnDcUnsubscribeFunc lnnDcUnsubscribe;
     LnnDcDispatchEventFunc lnnDcDispatchEvent;
+    // sle range
     RegistAuthTransListenerFunc registAuthTransListener;
     UnregistAuthTransListenerFunc unregistAuthTransListener;
     LnnUnregSleRangeCbFunc lnnUnregSleRangeCb;
     LnnStopRangeFunc lnnStopRange;
     LnnStartRangeFunc lnnStartRange;
     LnnRegSleRangeCbFunc lnnRegSleRangeCb;
+    SleRangeDeathCallbackFunc sleRangeDeathCallback;
     // disc_mgr
     LnnDestroyCoapConnectListFunc lnnDestroyCoapConnectList;
     LnnCoapConnectFunc lnnCoapConnect;

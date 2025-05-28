@@ -186,6 +186,7 @@ int32_t LnnGetLocalPtkByUuidPacked(const char *uuid, char *localPtk, uint32_t le
 int32_t RegistAuthTransListenerPacked(void);
 void LnnUnregSleRangeCbPacked(void);
 void LnnRegSleRangeCbPacked(const ISleRangeInnerCallback *callback);
+void SleRangeDeathCallbackPacked(void);
 int32_t LnnStopRangePacked(const RangeConfig *config);
 int32_t LnnStartRangePacked(const RangeConfig *config);
 int32_t UnregistAuthTransListenerPacked(void);

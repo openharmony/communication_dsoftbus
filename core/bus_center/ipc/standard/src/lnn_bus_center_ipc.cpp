@@ -90,6 +90,11 @@ static IBleRangeInnerCallback g_msdpRangeCb = {
     .onRangeStateChange = nullptr,
 };
 
+static ISleRangeInnerCallback g_msdpSleRangeCb = {
+    .onRangeResult = onRangeResult,
+    .onRangeStateChange = nullptr,
+};
+
 static bool IsRepeatJoinLNNRequest(const char *pkgName, int32_t callingPid, const ConnectionAddr *addr)
 {
     for (const auto &iter : g_joinLNNRequestInfo) {
@@ -571,6 +576,7 @@ int32_t LnnIpcRegRangeCbForMsdp(const char *pkgName, int32_t callingPid)
     info->pid = callingPid;
     g_msdpRangeReqInfo.push_back(info);
     LnnRegBleRangeCb(&g_msdpRangeCb);
+    LnnRegSleRangeCbPacked(&g_msdpSleRangeCb);
     return SOFTBUS_OK;
 }
 
@@ -739,4 +745,9 @@ void BusCenterServerDeathCallback(const char *pkgName)
     RemoveJoinRequestInfoByPkgName(pkgName);
     RemoveLeaveRequestInfoByPkgName(pkgName);
     RemoveRefreshRequestInfoByPkgName(pkgName);
+    const char *msdpPkgName = "ohos.msdp.spatialawareness";
+    if (strcmp(msdpPkgName, pkgName) != 0) {
+        return;
+    }
+    SleRangeDeathCallbackPacked();
 }
