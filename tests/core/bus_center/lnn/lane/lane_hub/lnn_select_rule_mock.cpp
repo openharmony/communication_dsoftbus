@@ -13,6 +13,8 @@
  * limitations under the License.
  */
 
+#include "lnn_distributed_net_ledger.h"
+#include "lnn_node_info.h"
 #include "lnn_select_rule_mock.h"
 #include "softbus_error_code.h"
 
@@ -50,6 +52,66 @@ int32_t LnnGetRemoteNumU32Info(const char *networkId, InfoKey key, uint32_t *inf
 int32_t LnnGetRemoteStrInfo(const char *netWorkId, InfoKey key, char *info, uint32_t len)
 {
     return GetLnnSelectRuleInterface()->LnnGetRemoteStrInfo(netWorkId, key, info, len);
+}
+
+int32_t LnnGetCurrChannelScorePacked(int32_t channelId)
+{
+    return GetLnnSelectRuleInterface()->LnnGetCurrChannelScorePacked(channelId);
+}
+
+int32_t FindLaneResourceByLinkType(const char *peerUdid, LaneLinkType type, LaneResource *resource)
+{
+    return GetLnnSelectRuleInterface()->FindLaneResourceByLinkType(peerUdid, type, resource);
+}
+
+int32_t LnnGetLinkLedgerInfo(const char *udid, LinkLedgerInfo *info)
+{
+    return GetLnnSelectRuleInterface()->LnnGetLinkLedgerInfo(udid, info);
+}
+
+int32_t LnnGetLocalNumU64Info(InfoKey key, uint64_t *info)
+{
+    return GetLnnSelectRuleInterface()->LnnGetLocalNumU64Info(key, info);
+}
+
+int32_t LnnGetRemoteNumU64Info(const char *networkId, InfoKey key, uint64_t *info)
+{
+    return GetLnnSelectRuleInterface()->LnnGetRemoteNumU64Info(networkId, key, info);
+}
+
+int32_t LnnGetOsTypeByNetworkId(const char *networkId, int32_t *osType)
+{
+    return GetLnnSelectRuleInterface()->LnnGetOsTypeByNetworkId(networkId, osType);
+}
+
+int32_t LnnGetLocalNumInfo(InfoKey key, int32_t *info)
+{
+    return GetLnnSelectRuleInterface()->LnnGetLocalNumInfo(key, info);
+}
+
+int32_t LnnGetRemoteNumInfo(const char *netWorkId, InfoKey key, int32_t *info)
+{
+    return GetLnnSelectRuleInterface()->LnnGetRemoteNumInfo(netWorkId, key, info);
+}
+
+bool LnnGetOnlineStateById(const char *id, IdCategory type)
+{
+    return GetLnnSelectRuleInterface()->LnnGetOnlineStateById(id, type);
+}
+
+int32_t LnnGetRemoteNodeInfoById(const char *id, IdCategory type, NodeInfo *info)
+{
+    return GetLnnSelectRuleInterface()->LnnGetRemoteNodeInfoById(id, type, info);
+}
+
+int32_t SoftBusGetBtState(void)
+{
+    return GetLnnSelectRuleInterface()->SoftBusGetBtState();
+}
+
+SoftBusWifiDetailState SoftBusGetWifiState(void)
+{
+    return GetLnnSelectRuleInterface()->SoftBusGetWifiState();
 }
 }
 } // namespace OHOS
