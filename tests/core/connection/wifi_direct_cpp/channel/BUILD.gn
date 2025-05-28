@@ -71,6 +71,8 @@ ohos_unittest("AuthNegotiateChannelTest") {
 
   sources = [
     "$dsoftbus_dfx_path/anonymize/src/anonymizer.c",
+    "$dsoftbus_root_path/core/frame/common/src/softbus_init_common.c",
+    "$dsoftbus_root_path/core/frame/init/src/g_enhance_lnn_func.c",
     "$dsoftbus_root_path/tests/core/connection/wifi_direct_cpp/net_conn_client.cpp",
     "$dsoftbus_root_path/tests/core/connection/wifi_direct_cpp/wifi_direct_mock.cpp",
     "$wifi_direct_path/adapter/p2p_adapter.cpp",
@@ -97,6 +99,7 @@ ohos_unittest("AuthNegotiateChannelTest") {
     "$wifi_direct_path/dfx/processor_snapshot.cpp",
     "$wifi_direct_path/dfx/wifi_direct_dfx.cpp",
     "$wifi_direct_path/dfx/wifi_direct_trace.cpp",
+    "$wifi_direct_path/entity/entity_factory.cpp",
     "$wifi_direct_path/entity/p2p_available_state.cpp",
     "$wifi_direct_path/entity/p2p_broadcast_receiver.cpp",
     "$wifi_direct_path/entity/p2p_connect_state.cpp",
@@ -112,16 +115,16 @@ ohos_unittest("AuthNegotiateChannelTest") {
     "$wifi_direct_path/protocol/tlv_protocol.cpp",
     "$wifi_direct_path/utils/wifi_direct_anonymous.cpp",
     "$wifi_direct_path/utils/wifi_direct_utils.cpp",
-    "$dsoftbus_root_path/core/frame/common/src/softbus_init_common.c",
     "$wifi_direct_path/wifi_direct_executor.cpp",
+    "$wifi_direct_path/wifi_direct_executor_factory.cpp",
     "$wifi_direct_path/wifi_direct_executor_manager.cpp",
     "$wifi_direct_path/wifi_direct_initiator.cpp",
     "$wifi_direct_path/wifi_direct_ip_manager.cpp",
     "$wifi_direct_path/wifi_direct_manager.cpp",
     "$wifi_direct_path/wifi_direct_role_option.cpp",
     "$wifi_direct_path/wifi_direct_scheduler.cpp",
+    "$wifi_direct_path/wifi_direct_scheduler_factory.cpp",
     "auth_negotiate_channel_test.cpp",
-    "$dsoftbus_root_path/core/frame/init/src/g_enhance_lnn_func.c",
   ]
 
   configs = [
@@ -136,8 +139,8 @@ ohos_unittest("AuthNegotiateChannelTest") {
 
   deps = [
     "$dsoftbus_root_path/adapter:softbus_adapter",
-    "$dsoftbus_root_path/dfx:softbus_dfx",
     "$dsoftbus_root_path/core/connection/wifi_direct_cpp:wifi_direct",
+    "$dsoftbus_root_path/dfx:softbus_dfx",
   ]
 
   external_deps = [
@@ -206,6 +209,8 @@ ohos_unittest("ProxyNegotiateChannelTest") {
 
   sources = [
     "$dsoftbus_dfx_path/anonymize/src/anonymizer.c",
+    "$dsoftbus_root_path/core/frame/common/src/softbus_init_common.c",
+    "$dsoftbus_root_path/core/frame/init/src/g_enhance_lnn_func.c",
     "$dsoftbus_root_path/tests/core/connection/wifi_direct_cpp/net_conn_client.cpp",
     "$dsoftbus_root_path/tests/core/connection/wifi_direct_cpp/wifi_direct_mock.cpp",
     "$wifi_direct_path/adapter/p2p_adapter.cpp",
@@ -232,6 +237,7 @@ ohos_unittest("ProxyNegotiateChannelTest") {
     "$wifi_direct_path/dfx/processor_snapshot.cpp",
     "$wifi_direct_path/dfx/wifi_direct_dfx.cpp",
     "$wifi_direct_path/dfx/wifi_direct_trace.cpp",
+    "$wifi_direct_path/entity/entity_factory.cpp",
     "$wifi_direct_path/entity/p2p_available_state.cpp",
     "$wifi_direct_path/entity/p2p_broadcast_receiver.cpp",
     "$wifi_direct_path/entity/p2p_connect_state.cpp",
@@ -247,16 +253,16 @@ ohos_unittest("ProxyNegotiateChannelTest") {
     "$wifi_direct_path/protocol/tlv_protocol.cpp",
     "$wifi_direct_path/utils/wifi_direct_anonymous.cpp",
     "$wifi_direct_path/utils/wifi_direct_utils.cpp",
-    "$dsoftbus_root_path/core/frame/common/src/softbus_init_common.c",
     "$wifi_direct_path/wifi_direct_executor.cpp",
+    "$wifi_direct_path/wifi_direct_executor_factory.cpp",
     "$wifi_direct_path/wifi_direct_executor_manager.cpp",
     "$wifi_direct_path/wifi_direct_initiator.cpp",
     "$wifi_direct_path/wifi_direct_ip_manager.cpp",
     "$wifi_direct_path/wifi_direct_manager.cpp",
     "$wifi_direct_path/wifi_direct_role_option.cpp",
     "$wifi_direct_path/wifi_direct_scheduler.cpp",
+    "$wifi_direct_path/wifi_direct_scheduler_factory.cpp",
     "proxy_negotiate_channel_test.cpp",
-    "$dsoftbus_root_path/core/frame/init/src/g_enhance_lnn_func.c",
   ]
 
   configs = [
@@ -271,8 +277,8 @@ ohos_unittest("ProxyNegotiateChannelTest") {
 
   deps = [
     "$dsoftbus_root_path/adapter:softbus_adapter",
-    "$dsoftbus_root_path/dfx:softbus_dfx",
     "$dsoftbus_root_path/core/connection/wifi_direct_cpp:wifi_direct",
+    "$dsoftbus_root_path/dfx:softbus_dfx",
   ]
 
   external_deps = [
