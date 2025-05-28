@@ -73,6 +73,10 @@ static napi_status CheckCreateConnectionParams(napi_env env, napi_callback_info 
 napi_value NapiLinkEnhanceConnection::Create(napi_env env, napi_callback_info info)
 {
     COMM_LOGD(COMM_SDK, "enter");
+    if (!CheckAccessTocken()) {
+        HandleSyncErr(env, LINK_ENHANCE_PERMISSION_DENIED);
+        return NapiGetUndefinedRet(env);
+    }
     napi_value result;
     auto status = CheckCreateConnectionParams(env, info, result);
     if (status != napi_ok) {
@@ -128,10 +132,7 @@ napi_value NapiLinkEnhanceConnection::Constructor(napi_env env, napi_callback_in
     } else {
         connection = new NapiLinkEnhanceConnection(deviceId, name);
     }
-    if (connection == nullptr) {
-        COMM_LOGE(COMM_SDK, "new link enhance connection failed");
-        return thisVar;
-    }
+    CONN_CHECK_AND_RETURN_RET_LOGE(connection != nullptr, thisVar, COMM_SDK, "new link enhance connection failed");
     auto status = napi_wrap(
         env, thisVar, connection,
         [](napi_env env, void *data, void *hint) {
@@ -177,19 +178,25 @@ static NapiLinkEnhanceConnection *NapiGetEnhanceConnection(napi_env env, napi_ca
     return NapiGetEnhanceConnection(env, thisVar);
 }
 
-napi_value NapiLinkEnhanceConnection::On(napi_env env, napi_callback_info info)
+static bool CheckParams(napi_env env, napi_callback_info info, std::string &funcName)
 {
+    if (!CheckAccessTocken()) {
+        HandleSyncErr(env, LINK_ENHANCE_PERMISSION_DENIED);
+        return false;
+    }
     size_t argc = ARGS_SIZE_TWO;
     napi_value args[ARGS_SIZE_TWO];
     napi_status status = napi_get_cb_info(env, info, &argc, args, nullptr, nullptr);
     if (status != napi_ok || argc != ARGS_SIZE_TWO) {
         HandleSyncErr(env, LINK_ENHANCE_PARAMETER_INVALID);
-        return NapiGetUndefinedRet(env);
+        return false;
     }
-    NapiLinkEnhanceConnection *connection = NapiGetEnhanceConnection(env, info);
-    if (connection == nullptr) {
+
+    napi_valuetype valueType = napi_null;
+    napi_typeof(env, args[PARAM1], &valueType);
+    if (valueType != napi_function) {
         HandleSyncErr(env, LINK_ENHANCE_PARAMETER_INVALID);
-        return NapiGetUndefinedRet(env);
+        return false;
     }
 
     char type[ARGS_TYPE_MAX_LEN];
@@ -197,24 +204,42 @@ napi_value NapiLinkEnhanceConnection::On(napi_env env, napi_callback_info info)
     status = napi_get_value_string_utf8(env, args[ARGS_SIZE_ZERO], type, sizeof(type), &typeLen);
     if (status != napi_ok) {
         HandleSyncErr(env, LINK_ENHANCE_PARAMETER_INVALID);
-        return NapiGetUndefinedRet(env);
+        return false;
     }
 
-    if (strcmp(type, "connectResult") == 0) {
+    funcName = type;
+    return true;
+}
+
+napi_value NapiLinkEnhanceConnection::On(napi_env env, napi_callback_info info)
+{
+    std::string funcName = "";
+    if (!CheckParams(env, info, funcName)) {
+        return NapiGetUndefinedRet(env);
+    }
+    NapiLinkEnhanceConnection *connection = NapiGetEnhanceConnection(env, info);
+    size_t argc = ARGS_SIZE_TWO;
+    napi_value args[ARGS_SIZE_TWO];
+    napi_status status = napi_get_cb_info(env, info, &argc, args, nullptr, nullptr);
+    if (status != napi_ok || argc != ARGS_SIZE_TWO || connection == nullptr) {
+        HandleSyncErr(env, LINK_ENHANCE_PARAMETER_INVALID);
+        return NapiGetUndefinedRet(env);
+    }
+    if (strcmp(funcName.c_str(), "connectResult") == 0) {
         COMM_LOGI(COMM_SDK, "register connectResult");
         if (connection->connectResultRef_ != nullptr) {
             napi_delete_reference(env, connection->connectResultRef_);
         }
         napi_create_reference(env, args[ARGS_SIZE_ONE], 1, &(connection->connectResultRef_));
         connection->SetConnectResultEnable(true);
-    } else if (strcmp(type, "dataReceived") == 0) {
+    } else if (strcmp(funcName.c_str(), "dataReceived") == 0) {
         COMM_LOGI(COMM_SDK, "register dataReceived");
         if (connection->dataReceivedRef_ != nullptr) {
             napi_delete_reference(env, connection->dataReceivedRef_);
         }
         napi_create_reference(env, args[ARGS_SIZE_ONE], 1, &(connection->dataReceivedRef_));
         connection->SetEnableData(true);
-    } else if (strcmp(type, "disconnected") == 0) {
+    } else if (strcmp(funcName.c_str(), "disconnected") == 0) {
         COMM_LOGI(COMM_SDK, "register disconnected");
         if (connection->disconnectRef_ != nullptr) {
             napi_delete_reference(env, connection->disconnectRef_);
@@ -230,11 +255,8 @@ napi_value NapiLinkEnhanceConnection::On(napi_env env, napi_callback_info info)
 
 napi_value NapiLinkEnhanceConnection::Off(napi_env env, napi_callback_info info)
 {
-    size_t argc = ARGS_SIZE_TWO;
-    napi_value args[ARGS_SIZE_TWO];
-    napi_status status = napi_get_cb_info(env, info, &argc, args, nullptr, nullptr);
-    if (status != napi_ok || argc != ARGS_SIZE_TWO) {
-        HandleSyncErr(env, LINK_ENHANCE_PARAMETER_INVALID);
+    std::string funcName = "";
+    if (!CheckParams(env, info, funcName)) {
         return NapiGetUndefinedRet(env);
     }
     NapiLinkEnhanceConnection *connection = NapiGetEnhanceConnection(env, info);
@@ -242,25 +264,17 @@ napi_value NapiLinkEnhanceConnection::Off(napi_env env, napi_callback_info info)
         HandleSyncErr(env, LINK_ENHANCE_PARAMETER_INVALID);
         return NapiGetUndefinedRet(env);
     }
-
-    char type[ARGS_TYPE_MAX_LEN];
-    size_t typeLen = 0;
-    status = napi_get_value_string_utf8(env, args[ARGS_SIZE_ZERO], type, sizeof(type), &typeLen);
-    if (status != napi_ok) {
-        HandleSyncErr(env, LINK_ENHANCE_PARAMETER_INVALID);
-        return NapiGetUndefinedRet(env);
-    }
-    if (strcmp(type, "connectResult") == 0 && connection->connectResultRef_ != nullptr) {
+    if (strcmp(funcName.c_str(), "connectResult") == 0 && connection->connectResultRef_ != nullptr) {
         COMM_LOGI(COMM_SDK, "unregister connectResult");
         napi_delete_reference(env, connection->connectResultRef_);
         connection->connectResultRef_ = nullptr;
         connection->SetConnectResultEnable(false);
-    } else if (strcmp(type, "dataReceived") == 0 && connection->dataReceivedRef_ != nullptr) {
+    } else if (strcmp(funcName.c_str(), "dataReceived") == 0 && connection->dataReceivedRef_ != nullptr) {
         COMM_LOGI(COMM_SDK, "unregister dataReceived");
         napi_delete_reference(env, connection->dataReceivedRef_);
         connection->dataReceivedRef_ = nullptr;
         connection->SetEnableData(false);
-    } else if (strcmp(type, "disconnected") == 0 && connection->disconnectRef_ != nullptr) {
+    } else if (strcmp(funcName.c_str(), "disconnected") == 0 && connection->disconnectRef_ != nullptr) {
         napi_delete_reference(env, connection->disconnectRef_);
         connection->disconnectRef_ = nullptr;
         connection->SetEnableDisconnect(false);
@@ -278,6 +292,10 @@ napi_value NapiLinkEnhanceConnection::Connect(napi_env env, napi_callback_info i
     napi_status status = napi_get_cb_info(env, info, &argc, nullptr, nullptr, nullptr);
     if (status != napi_ok || argc > ARGS_SIZE_ZERO) {
         HandleSyncErr(env, LINK_ENHANCE_PARAMETER_INVALID);
+        return NapiGetUndefinedRet(env);
+    }
+    if (!CheckAccessTocken()) {
+        HandleSyncErr(env, LINK_ENHANCE_PERMISSION_DENIED);
         return NapiGetUndefinedRet(env);
     }
     NapiLinkEnhanceConnection *connection = NapiGetEnhanceConnection(env, info);
@@ -308,6 +326,10 @@ napi_value NapiLinkEnhanceConnection::Connect(napi_env env, napi_callback_info i
 
 napi_value NapiLinkEnhanceConnection::Disconnect(napi_env env, napi_callback_info info)
 {
+    if (!CheckAccessTocken()) {
+        HandleSyncErr(env, LINK_ENHANCE_PERMISSION_DENIED);
+        return NapiGetUndefinedRet(env);
+    }
     size_t argc = 0;
     napi_status status = napi_get_cb_info(env, info, &argc, nullptr, nullptr, nullptr);
     if (status != napi_ok || argc > ARGS_SIZE_ZERO) {
@@ -335,6 +357,10 @@ napi_value NapiLinkEnhanceConnection::Disconnect(napi_env env, napi_callback_inf
 
 napi_value NapiLinkEnhanceConnection::Close(napi_env env, napi_callback_info info)
 {
+    if (!CheckAccessTocken()) {
+        HandleSyncErr(env, LINK_ENHANCE_PERMISSION_DENIED);
+        return NapiGetUndefinedRet(env);
+    }
     size_t argc = 0;
     napi_status status = napi_get_cb_info(env, info, &argc, nullptr, nullptr, nullptr);
     if (status != napi_ok || argc > ARGS_SIZE_ZERO) {
@@ -368,13 +394,9 @@ napi_value NapiLinkEnhanceConnection::Close(napi_env env, napi_callback_info inf
         connection->disconnectRef_ = nullptr;
     }
 
-    int32_t errCode = ConvertToJsErrcode(GeneralDisconnect(connection->handle_));
-    if (errCode == LINK_ENHANCE_PERMISSION_DENIED) {
-        HandleSyncErr(env, errCode);
-    }
+    (void)GeneralDisconnect(connection->handle_);
     std::lock_guard<std::mutex> guard(connectionListMutex_);
-    for (auto iter = connectionList_.begin(); iter != connectionList_.end();
-        ++iter) {
+    for (auto iter = connectionList_.begin(); iter != connectionList_.end(); ++iter) {
         if ((*iter)->handle_ == connection->handle_) {
             COMM_LOGI(COMM_SDK, "erase connection, handle=%{public}u", connection->handle_);
             connectionList_.erase(iter);
@@ -386,6 +408,10 @@ napi_value NapiLinkEnhanceConnection::Close(napi_env env, napi_callback_info inf
 
 napi_value NapiLinkEnhanceConnection::GetPeerDeviceId(napi_env env, napi_callback_info info)
 {
+    if (!CheckAccessTocken()) {
+        HandleSyncErr(env, LINK_ENHANCE_PERMISSION_DENIED);
+        return NapiGetUndefinedRet(env);
+    }
     std::string deviceId = "";
     size_t argc = 0;
     napi_status status = napi_get_cb_info(env, info, &argc, nullptr, nullptr, nullptr);
@@ -420,6 +446,10 @@ napi_value NapiLinkEnhanceConnection::GetPeerDeviceId(napi_env env, napi_callbac
 
 napi_value NapiLinkEnhanceConnection::SendData(napi_env env, napi_callback_info info)
 {
+    if (!CheckAccessTocken()) {
+        HandleSyncErr(env, LINK_ENHANCE_PERMISSION_DENIED);
+        return NapiGetUndefinedRet(env);
+    }
     size_t argc = ARGS_SIZE_ONE;
     napi_value args[ARGS_SIZE_ONE] = { 0 };
     napi_status status = napi_get_cb_info(env, info, &argc, args, nullptr, nullptr);
@@ -448,11 +478,7 @@ napi_value NapiLinkEnhanceConnection::SendData(napi_env env, napi_callback_info 
         return NapiGetUndefinedRet(env);
     }
     uint8_t *data = (uint8_t *)SoftBusCalloc(dataLen);
-    if (data == nullptr) {
-        HandleSyncErr(env, LINK_ENHANCE_INTERVAL_ERR);
-        return NapiGetUndefinedRet(env);
-    }
-    if (memcpy_s(data, dataLen, bufferData, dataLen) != EOK) {
+    if (data == nullptr || memcpy_s(data, dataLen, bufferData, dataLen) != EOK) {
         SoftBusFree(data);
         HandleSyncErr(env, LINK_ENHANCE_INTERVAL_ERR);
         return NapiGetUndefinedRet(env);
