@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2024 Huawei Device Co., Ltd.
+ * Copyright (c) 2024-2025 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -21,6 +21,7 @@ using namespace testing::ext;
 namespace OHOS {
 constexpr int64_t TEST_AUTH_SEQ = 1;
 void *g_hichainMockInterface;
+
 AuthHichainInterfaceMock::AuthHichainInterfaceMock()
 {
     g_hichainMockInterface = reinterpret_cast<void *>(this);
