@@ -1734,3 +1734,399 @@ ERR_EXIT:
     TransDelSessionConnById(channelId);
     return ret;
 }
+
+typedef struct {
+    int32_t channelType;
+    int32_t businessType;
+    ConfigType configType;
+} ConfigTypeMap;
+
+static SoftBusList *g_tcpSrvDataList = NULL;
+
+static void PackTdcPacketHead(TdcPacketHead *data)
+{
+    data->magicNumber = SoftBusHtoLl(data->magicNumber);
+    data->module = SoftBusHtoLl(data->module);
+    data->seq = SoftBusHtoLll(data->seq);
+    data->flags = SoftBusHtoLl(data->flags);
+    data->dataLen = SoftBusHtoLl(data->dataLen);
+}
+
+static void UnpackTdcPacketHead(TdcPacketHead *data)
+{
+    if (data == NULL) {
+        TRANS_LOGE(TRANS_CTRL, "param invalid");
+        return;
+    }
+    data->magicNumber = SoftBusLtoHl(data->magicNumber);
+    data->module = SoftBusLtoHl(data->module);
+    data->seq = SoftBusLtoHll(data->seq);
+    data->flags = SoftBusLtoHl(data->flags);
+    data->dataLen = SoftBusLtoHl(data->dataLen);
+}
+
+int32_t TransSrvDataListInit(void)
+{
+    if (g_tcpSrvDataList != NULL) {
+        return SOFTBUS_OK;
+    }
+    g_tcpSrvDataList = CreateSoftBusList();
+    if (g_tcpSrvDataList == NULL) {
+        TRANS_LOGE(TRANS_CTRL, "creat list failed");
+        return SOFTBUS_MALLOC_ERR;
+    }
+    return SOFTBUS_OK;
+}
+
+static void TransSrvDestroyDataBuf(void)
+{
+    if (g_tcpSrvDataList == NULL) {
+        TRANS_LOGE(TRANS_CTRL, "g_tcpSrvDataList is null");
+        return;
+    }
+
+    DataBuf *item = NULL;
+    DataBuf *next = NULL;
+    if (SoftBusMutexLock(&g_tcpSrvDataList->lock) != SOFTBUS_OK) {
+        TRANS_LOGE(TRANS_CTRL, "mutex lock failed");
+        return;
+    }
+    LIST_FOR_EACH_ENTRY_SAFE(item, next, &g_tcpSrvDataList->list, DataBuf, node) {
+        ListDelete(&item->node);
+        SoftBusFree(item->data);
+        SoftBusFree(item);
+        g_tcpSrvDataList->cnt--;
+    }
+    SoftBusMutexUnlock(&g_tcpSrvDataList->lock);
+}
+
+void TransSrvDataListDeinit(void)
+{
+    if (g_tcpSrvDataList == NULL) {
+        TRANS_LOGE(TRANS_BYTES, "g_tcpSrvDataList is null");
+        return;
+    }
+    TransSrvDestroyDataBuf();
+    DestroySoftBusList(g_tcpSrvDataList);
+    g_tcpSrvDataList = NULL;
+}
+
+int32_t TransSrvAddDataBufNode(int32_t channelId, int32_t fd)
+{
+#define MAX_DATA_BUF 4096
+    DataBuf *node = (DataBuf *)SoftBusCalloc(sizeof(DataBuf));
+    if (node == NULL) {
+        TRANS_LOGE(TRANS_CTRL, "create server data buf node fail.");
+        return SOFTBUS_MALLOC_ERR;
+    }
+    node->channelId = channelId;
+    node->fd = fd;
+    node->size = MAX_DATA_BUF;
+    node->data = (char *)SoftBusCalloc(MAX_DATA_BUF);
+    if (node->data == NULL) {
+        TRANS_LOGE(TRANS_CTRL, "create server data buf fail.");
+        SoftBusFree(node);
+        return SOFTBUS_MALLOC_ERR;
+    }
+    node->w = node->data;
+
+    if (SoftBusMutexLock(&(g_tcpSrvDataList->lock)) != SOFTBUS_OK) {
+        SoftBusFree(node->data);
+        SoftBusFree(node);
+        return SOFTBUS_LOCK_ERR;
+    }
+    ListInit(&node->node);
+    ListTailInsert(&g_tcpSrvDataList->list, &node->node);
+    g_tcpSrvDataList->cnt++;
+    SoftBusMutexUnlock(&(g_tcpSrvDataList->lock));
+
+    return SOFTBUS_OK;
+}
+
+void TransSrvDelDataBufNode(int32_t channelId)
+{
+    if (g_tcpSrvDataList ==  NULL) {
+        TRANS_LOGE(TRANS_BYTES, "g_tcpSrvDataList is null");
+        return;
+    }
+
+    DataBuf *item = NULL;
+    DataBuf *next = NULL;
+    if (SoftBusMutexLock(&g_tcpSrvDataList->lock) != SOFTBUS_OK) {
+        return;
+    }
+    LIST_FOR_EACH_ENTRY_SAFE(item, next, &g_tcpSrvDataList->list, DataBuf, node) {
+        if (item->channelId == channelId) {
+            ListDelete(&item->node);
+            TRANS_LOGI(TRANS_BYTES, "delete channelId=%{public}d", item->channelId);
+            SoftBusFree(item->data);
+            SoftBusFree(item);
+            g_tcpSrvDataList->cnt--;
+            break;
+        }
+    }
+    SoftBusMutexUnlock(&g_tcpSrvDataList->lock);
+}
+
+static AuthLinkType SwitchCipherTypeToAuthLinkType(uint32_t cipherFlag)
+{
+    if (cipherFlag & FLAG_BR) {
+        return AUTH_LINK_TYPE_BR;
+    }
+
+    if (cipherFlag & FLAG_BLE) {
+        return AUTH_LINK_TYPE_BLE;
+    }
+
+    if (cipherFlag & FLAG_P2P) {
+        return AUTH_LINK_TYPE_P2P;
+    }
+    if (cipherFlag & FLAG_ENHANCE_P2P) {
+        return AUTH_LINK_TYPE_ENHANCED_P2P;
+    }
+    if (cipherFlag & FLAG_SESSION_KEY) {
+        return AUTH_LINK_TYPE_SESSION_KEY;
+    }
+
+    if (cipherFlag & FLAG_SLE) {
+        return AUTH_LINK_TYPE_SLE;
+    }
+    return AUTH_LINK_TYPE_WIFI;
+}
+
+static int32_t PackBytes(int32_t channelId, const char *data, TdcPacketHead *packetHead,
+    char *buffer, uint32_t bufLen)
+{
+    AuthHandle authHandle = { 0 };
+    if (GetAuthHandleByChanId(channelId, &authHandle) != SOFTBUS_OK ||
+        authHandle.authId == AUTH_INVALID_ID) {
+        TRANS_LOGE(TRANS_BYTES, "PackBytes get auth id fail");
+        return SOFTBUS_NOT_FIND;
+    }
+
+    uint8_t *encData = (uint8_t *)buffer + DC_MSG_PACKET_HEAD_SIZE;
+    uint32_t encDataLen = bufLen - DC_MSG_PACKET_HEAD_SIZE;
+    if (AuthEncrypt(&authHandle, (const uint8_t *)data, packetHead->dataLen, encData, &encDataLen) != SOFTBUS_OK) {
+        TRANS_LOGE(TRANS_BYTES, "PackBytes encrypt fail");
+        return SOFTBUS_ENCRYPT_ERR;
+    }
+    packetHead->dataLen = encDataLen;
+
+    TRANS_LOGI(TRANS_BYTES, "PackBytes: flag=%{public}u, seq=%{public}" PRIu64,
+        packetHead->flags, packetHead->seq);
+    PackTdcPacketHead(packetHead);
+    if (memcpy_s(buffer, bufLen, packetHead, sizeof(TdcPacketHead)) != EOK) {
+        TRANS_LOGE(TRANS_BYTES, "memcpy_s buffer fail");
+        return SOFTBUS_MEM_ERR;
+    }
+    return SOFTBUS_OK;
+}
+
+static DataBuf *TransSrvGetDataBufNodeById(int32_t channelId)
+{
+    if (g_tcpSrvDataList ==  NULL) {
+        TRANS_LOGE(TRANS_CTRL, "g_tcpSrvDataList is null");
+        return NULL;
+    }
+
+    DataBuf *item = NULL;
+    LIST_FOR_EACH_ENTRY(item, &(g_tcpSrvDataList->list), DataBuf, node) {
+        if (item->channelId == channelId) {
+            return item;
+        }
+    }
+    TRANS_LOGE(TRANS_CTRL, "srv tcp direct channelId=%{public}d not exist.", channelId);
+    return NULL;
+}
+
+static int32_t TransSrvGetSeqAndFlagsByChannelId(uint64_t *seq, uint32_t *flags, int32_t channelId)
+{
+    TRANS_CHECK_AND_RETURN_RET_LOGE(
+        g_tcpSrvDataList != NULL, SOFTBUS_NO_INIT, TRANS_CTRL, "g_tcpSrvDataList is null");
+
+    int32_t ret = SoftBusMutexLock(&g_tcpSrvDataList->lock);
+    TRANS_CHECK_AND_RETURN_RET_LOGE(ret == SOFTBUS_OK, SOFTBUS_LOCK_ERR, TRANS_CTRL, "lock mutex fail!");
+    DataBuf *node = TransSrvGetDataBufNodeById(channelId);
+    if (node == NULL || node->data == NULL) {
+        TRANS_LOGE(TRANS_CTRL, "node is null.");
+        (void)SoftBusMutexUnlock(&g_tcpSrvDataList->lock);
+        return SOFTBUS_TRANS_NODE_IS_NULL;
+    }
+    TdcPacketHead *pktHead = (TdcPacketHead *)(node->data);
+    *seq = pktHead->seq;
+    *flags = pktHead->flags;
+    TRANS_LOGI(TRANS_CTRL, "flags=%{public}d, seq=%{public}" PRIu64, *flags, *seq);
+    (void)SoftBusMutexUnlock(&g_tcpSrvDataList->lock);
+    return SOFTBUS_OK;
+}
+
+static void SendFailToFlushDevice(SessionConn *conn)
+{
+    if (conn->appInfo.routeType == WIFI_STA || conn->appInfo.routeType == WIFI_USB) {
+        char *tmpId = NULL;
+        Anonymize(conn->appInfo.peerData.deviceId, &tmpId);
+        TRANS_LOGE(TRANS_CTRL, "send data fail, do Authflushdevice deviceId=%{public}s", AnonymizeWrapper(tmpId));
+        AnonymizeFree(tmpId);
+        if (AuthFlushDevice(conn->appInfo.peerData.deviceId) != SOFTBUS_OK) {
+            TRANS_LOGE(TRANS_CTRL, "tcp flush failed, wifi will offline");
+            LnnRequestLeaveSpecific(conn->appInfo.peerNetWorkId, CONNECTION_ADDR_WLAN);
+        }
+    }
+}
+
+int32_t TransTdcPostBytes(
+    int32_t channelId, TdcPacketHead *packetHead, const char *data)
+{
+    if (data == NULL || packetHead == NULL || packetHead->dataLen == 0) {
+        TRANS_LOGE(TRANS_BYTES, "Invalid para.");
+        return SOFTBUS_INVALID_PARAM;
+    }
+    AuthHandle authHandle = { 0 };
+    if (GetAuthHandleByChanId(channelId, &authHandle) != SOFTBUS_OK || authHandle.authId == AUTH_INVALID_ID) {
+        TRANS_LOGE(TRANS_BYTES, "get auth id fail, channelId=%{public}d", channelId);
+        return SOFTBUS_TRANS_TCP_GET_AUTHID_FAILED;
+    }
+    uint32_t bufferLen = AuthGetEncryptSize(authHandle.authId, packetHead->dataLen) + DC_MSG_PACKET_HEAD_SIZE;
+    char *buffer = (char *)SoftBusCalloc(bufferLen);
+    if (buffer == NULL) {
+        TRANS_LOGE(TRANS_BYTES, "buffer malloc error.");
+        return SOFTBUS_MALLOC_ERR;
+    }
+    if (PackBytes(channelId, data, packetHead, buffer, bufferLen) != SOFTBUS_OK) {
+        TRANS_LOGE(TRANS_BYTES, "Pack Bytes error.");
+        SoftBusFree(buffer);
+        return SOFTBUS_ENCRYPT_ERR;
+    }
+    SessionConn *conn = (SessionConn *)SoftBusCalloc(sizeof(SessionConn));
+    if (conn == NULL) {
+        TRANS_LOGE(TRANS_BYTES, "malloc conn fail");
+        SoftBusFree(buffer);
+        return SOFTBUS_MALLOC_ERR;
+    }
+    if (GetSessionConnById(channelId, conn) != SOFTBUS_OK) {
+        TRANS_LOGE(TRANS_BYTES, "Get SessionConn fail");
+        SoftBusFree(buffer);
+        SoftBusFree(conn);
+        return SOFTBUS_TRANS_GET_SESSION_CONN_FAILED;
+    }
+    (void)memset_s(conn->appInfo.sessionKey, sizeof(conn->appInfo.sessionKey), 0, sizeof(conn->appInfo.sessionKey));
+    int fd = conn->appInfo.fd;
+    SetIpTos(fd, FAST_MESSAGE_TOS);
+    if (ConnSendSocketData(fd, buffer, bufferLen, 0) != (int)bufferLen) {
+        SendFailToFlushDevice(conn);
+        SoftBusFree(buffer);
+        SoftBusFree(conn);
+        return GetErrCodeBySocketErr(SOFTBUS_TCP_SOCKET_ERR);
+    }
+    SoftBusFree(conn);
+    SoftBusFree(buffer);
+    return SOFTBUS_OK;
+}
+
+static void GetChannelInfoFromConn(ChannelInfo *info, SessionConn *conn, int32_t channelId)
+{
+    info->channelId = channelId;
+    info->channelType = CHANNEL_TYPE_TCP_DIRECT;
+    info->isServer = conn->serverSide;
+    info->isEnabled = true;
+    info->fd = conn->appInfo.fd;
+    info->sessionKey = GetCapabilityBit(conn->appInfo.channelCapability, TRANS_CHANNEL_SINK_GENERATE_KEY_OFFSET) ?
+        conn->appInfo.sinkSessionKey :
+        conn->appInfo.sessionKey;
+    info->myHandleId = conn->appInfo.myHandleId;
+    info->peerHandleId = conn->appInfo.peerHandleId;
+    info->peerSessionName = conn->appInfo.peerData.sessionName;
+    info->groupId = conn->appInfo.groupId;
+    info->isEncrypt = true;
+    info->keyLen = SESSION_KEY_LENGTH;
+    info->peerUid = conn->appInfo.peerData.uid;
+    info->peerPid = conn->appInfo.peerData.pid;
+    info->routeType = conn->appInfo.routeType;
+    info->businessType = conn->appInfo.businessType;
+    info->autoCloseTime = conn->appInfo.autoCloseTime;
+    info->peerIp = conn->appInfo.peerData.addr;
+    info->peerPort = conn->appInfo.peerData.port;
+    info->linkType = conn->appInfo.linkType;
+    info->dataConfig = conn->appInfo.myData.dataConfig;
+    info->timeStart = conn->appInfo.timeStart;
+    info->linkType = conn->appInfo.linkType;
+    info->connectType = conn->appInfo.connectType;
+    info->osType = conn->appInfo.osType;
+    info->tokenType = conn->appInfo.myData.tokenType;
+    if (conn->appInfo.myData.tokenType > ACCESS_TOKEN_TYPE_HAP && conn->serverSide) {
+        info->peerUserId = conn->appInfo.peerData.userId;
+        info->peerTokenId = conn->appInfo.peerData.tokenId;
+        info->peerExtraAccessInfo = conn->appInfo.extraAccessInfo;
+    }
+}
+
+static int32_t GetServerSideIpInfo(const AppInfo *appInfo, char *ip, uint32_t len)
+{
+    char myIp[IP_LEN] = { 0 };
+    if (appInfo->routeType == WIFI_STA) {
+        if (LnnGetLocalStrInfoByIfnameIdx(STRING_KEY_IP, myIp, sizeof(myIp), WLAN_IF) != SOFTBUS_OK) {
+            TRANS_LOGE(TRANS_CTRL, "NotifyChannelOpened get local ip fail");
+            return SOFTBUS_TRANS_GET_LOCAL_IP_FAILED;
+        }
+    } else if (appInfo->routeType == WIFI_P2P) {
+        struct WifiDirectManager *mgr = GetWifiDirectManager();
+        if (mgr == NULL || mgr->getLocalIpByRemoteIp == NULL) {
+            TRANS_LOGE(TRANS_CTRL, "GetWifiDirectManager failed");
+            return SOFTBUS_WIFI_DIRECT_INIT_FAILED;
+        }
+
+        int32_t ret = mgr->getLocalIpByRemoteIp(appInfo->peerData.addr, myIp, sizeof(myIp));
+        if (ret != SOFTBUS_OK) {
+            TRANS_LOGE(TRANS_CTRL, "get Local Ip fail, ret=%{public}d", ret);
+            return SOFTBUS_TRANS_GET_P2P_INFO_FAILED;
+        }
+
+        if (LnnSetLocalStrInfo(STRING_KEY_P2P_IP, myIp) != SOFTBUS_OK) {
+            TRANS_LOGW(TRANS_CTRL, "ServerSide set local p2p ip fail");
+        }
+        if (LnnSetDLP2pIp(appInfo->peerData.deviceId, CATEGORY_UUID, appInfo->peerData.addr) != SOFTBUS_OK) {
+            TRANS_LOGW(TRANS_CTRL, "ServerSide set peer p2p ip fail");
+        }
+    } else if (appInfo->routeType == WIFI_USB) {
+        if (LnnGetLocalStrInfoByIfnameIdx(STRING_KEY_IP, myIp, sizeof(myIp), USB_IF) != SOFTBUS_OK) {
+            TRANS_LOGE(TRANS_CTRL, "ServerSide get local usb ip fail");
+            return SOFTBUS_TRANS_GET_LOCAL_IP_FAILED;
+        }
+    }
+    if (strcpy_s(ip, len, myIp) != EOK) {
+        TRANS_LOGE(TRANS_CTRL, "copy str failed");
+        return SOFTBUS_STRCPY_ERR;
+    }
+    return SOFTBUS_OK;
+}
+
+static int32_t GetClientSideIpInfo(const AppInfo *appInfo, char *ip, uint32_t len)
+{
+    if (appInfo->routeType == WIFI_P2P) {
+        if (LnnSetLocalStrInfo(STRING_KEY_P2P_IP, appInfo->myData.addr) != SOFTBUS_OK) {
+            TRANS_LOGW(TRANS_CTRL, "Client set local p2p ip fail");
+        }
+        if (LnnSetDLP2pIp(appInfo->peerData.deviceId, CATEGORY_UUID, appInfo->peerData.addr) != SOFTBUS_OK) {
+            TRANS_LOGW(TRANS_CTRL, "Client set peer p2p ip fail");
+        }
+    }
+    if (strcpy_s(ip, len, appInfo->myData.addr) != EOK) {
+        TRANS_LOGE(TRANS_CTRL, "copy str failed");
+        return SOFTBUS_STRCPY_ERR;
+    }
+    return SOFTBUS_OK;
+}
+
+static void SetByteChannelTos(const AppInfo *info)
+{
+    if (info->businessType == BUSINESS_TYPE_BYTE && info->channelType == CHANNEL_TYPE_TCP_DIRECT) {
+        SetIpTos(info->fd, FAST_BYTE_TOS);
+    }
+    return;
+}
+
+static void ClearAppInfoSessionKey(AppInfo *appInfo)
+{
+    (void)memset_s(appInfo->sessionKey, sizeof(appInfo->sessionKey), 0, sizeof(appInfo->sessionKey));
+    (void)memset_s(appInfo->sinkSessionKey, sizeof(appInfo->sinkSessionKey), 0, sizeof(appInfo->sinkSessionKey));
+}
