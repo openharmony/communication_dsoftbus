@@ -625,6 +625,18 @@ int32_t OHOS::DBinderSoftbusServer::LnnGetOsTypeByNetworkId(const char *networkI
     (void)lnnGetOsTypeByNetworkIdFunc_;
     return OHOS::SoftBus::WifiDirectInterfaceMock::GetMock()->LnnGetOsTypeByNetworkId(networkId, osType);
 }
+
+int32_t OHOS::DBinderSoftbusServer::LnnRegisterEventHandler(LnnEventType event, LnnEventHandler handler)
+{
+    (void)lnnRegisterEventHandlerFunc_;
+    return OHOS::SoftBus::WifiDirectInterfaceMock::GetMock()->LnnRegisterEventHandler(event, handler);
+}
+
+int32_t OHOS::DBinderSoftbusServer::LnnGetAllOnlineNodeInfo(NodeBasicInfo **info, int32_t *infoNum)
+{
+    (void)lnnGetAllOnlineNodeInfoFunc_;
+    return OHOS::SoftBus::WifiDirectInterfaceMock::GetMock()->LnnGetAllOnlineNodeInfo(info, infoNum);
+}
 }
 
 namespace OHOS::SoftBus {
@@ -798,5 +810,12 @@ WifiErrorCode WifiDirectInterfaceMock::DestroyGroupTimeOutAction()
 void WifiDirectHidumper::HidumperInit() { }
 using Hidumper = std::function<int()>;
 void WifiDirectHidumper::Register(const Hidumper &hidumper) { }
+
+WifiDirectHidumper& WifiDirectHidumper::GetInstance()
+{
+    static WifiDirectHidumper instance;
+    return instance;
+}
+
 } // namespace OHOS::SoftBus
 // namespace OHOS::SoftBus
