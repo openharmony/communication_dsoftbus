@@ -171,5 +171,10 @@ int32_t LnnServerJoin(ConnectionAddr *addr, const char *pkgName, bool isForceJoi
 {
     return BusCenterIpcInterfaceInstance()->LnnServerJoin(addr, pkgName, isForceJoin);
 }
+
+void SleRangeDeathCallbackPacked(void)
+{
+    return BusCenterIpcInterfaceInstance()->SleRangeDeathCallbackPacked();
+}
 }
 } // namespace OHOS
