@@ -1318,6 +1318,15 @@ int32_t RegistAuthTransListenerPacked(void)
     return pfnLnnEnhanceFuncList->registAuthTransListener();
 }
 
+void SleRangeDeathCallback(void)
+{
+    LnnEnhanceFuncList *pfnLnnEnhanceFuncList = LnnEnhanceFuncListGet();
+    if (LnnCheckFuncPointer((void *)pfnLnnEnhanceFuncList->sleRangeDeathCallback) != SOFTBUS_OK) {
+        return;
+    }
+    return pfnLnnEnhanceFuncList->sleRangeDeathCallback();
+}
+
 int32_t UnregistAuthTransListenerPacked(void)
 {
     LnnEnhanceFuncList *pfnLnnEnhanceFuncList = LnnEnhanceFuncListGet();
@@ -1361,6 +1370,15 @@ void LnnUnregSleRangeCbPacked(void)
         return;
     }
     return pfnLnnEnhanceFuncList->lnnUnregSleRangeCb();
+}
+
+void SleRangeDeathCallbackPacked()
+{
+    LnnEnhanceFuncList *pfnLnnEnhanceFuncList = LnnEnhanceFuncListGet();
+    if (LnnCheckFuncPointer((void *)pfnLnnEnhanceFuncList->sleRangeDeathCallback) != SOFTBUS_OK) {
+        return;
+    }
+    return pfnLnnEnhanceFuncList->sleRangeDeathCallback();
 }
 
 void LnnDeinitMetaNodeExtLedgerPacked(void)
