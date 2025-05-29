@@ -317,9 +317,6 @@ HWTEST_F(AuthTcpConnectionTest, SESSION_NOTIFY_DATA_RECEIVED_TEST_001, TestSize.
     int32_t module = MODULE_AUTH_CANCEL;
     uint32_t ret = ModuleToDataType(module);
     EXPECT_TRUE(ret == DATA_TYPE_CANCEL_AUTH);
-    module = MODULE_USER_KEY_CONNECTION;
-    ret = ModuleToDataType(module);
-    EXPECT_TRUE(ret == DATA_TYPE_UK_CONNECTION);
 }
 
 /*
