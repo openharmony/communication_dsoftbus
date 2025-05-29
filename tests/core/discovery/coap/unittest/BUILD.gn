@@ -39,7 +39,6 @@ ohos_unittest("DiscNstackxAdapterTest") {
     "$dsoftbus_root_path/core/discovery/ble/dispatcher/include",
     "$dsoftbus_root_path/core/discovery/coap/interface",
     "$dsoftbus_root_path/core/discovery/coap/nstackx_coap/include",
-    "$dsoftbus_root_path/core/discovery/coap/nstackx_coap/src",
     "$dsoftbus_root_path/core/discovery/coap/common/include",
     "$dsoftbus_root_path/core/discovery/common/include",
     "$dsoftbus_root_path/core/discovery/interface",
@@ -110,8 +109,8 @@ ohos_unittest("DiscCoapTest") {
 
 group("unittest") {
   testonly = true
-  deps = [
-    ":DiscCoapTest",
-    ":DiscNstackxAdapterTest",
-  ]
+  deps = [ ":DiscCoapTest" ]
+  if (dsoftbus_feature_ex_kits) {
+    deps += [ ":DiscNstackxAdapterTest" ]
+  }
 }
