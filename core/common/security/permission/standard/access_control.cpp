@@ -47,8 +47,9 @@
 #endif
 
 #define DEFAULT_ACCOUNT_UID "ohosAnonymousUid"
+#define DBINDER_PREFIX "DBinder"
+#define DBINDER_DMS "DBinder5522"
 
-const std::string DMS_SESSIONNAME = "ohos.distributedschedule.dms";
 namespace {
     using namespace OHOS::DistributedDeviceProfile;
     using namespace OHOS;
@@ -333,15 +334,12 @@ int32_t TransCheckServerAccessControl(const AppInfo *appInfo)
     }
     int32_t peerTokenType = SoftBusGetAccessTokenType(callingTokenId);
     int32_t myTokenType = SoftBusGetAccessTokenType(myTokenId);
-    if ((StrStartWith(appInfo->peerData.sessionName, DMS_SESSIONNAME.c_str()) &&
-        peerTokenType == ACCESS_TOKEN_TYPE_NATIVE) ||
-        (StrStartWith(appInfo->myData.sessionName, DMS_SESSIONNAME.c_str()) &&
-        myTokenType == ACCESS_TOKEN_TYPE_NATIVE)) {
-        return SOFTBUS_OK;
-    }
     
     if (peerTokenType != myTokenType) {
-        if (CheckDBinder(appInfo->myData.sessionName) && CheckDBinder(appInfo->peerData.sessionName)) {
+        const char *mySessionName = appInfo->myData.sessionName;
+        const char *peerSessionName = appInfo->peerData.sessionName;
+        if (StrStartWith(peerSessionName, DBINDER_DMS) && (peerTokenType == ACCESS_TOKEN_TYPE_NATIVE) &&
+            StrStartWith(mySessionName, DBINDER_PREFIX)) {
             return SOFTBUS_OK;
         }
         COMM_LOGE(COMM_PERM, "peerTokenType=%{public}d, myTokenType=%{public}d, not support",
