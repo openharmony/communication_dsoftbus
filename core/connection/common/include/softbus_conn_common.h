@@ -33,7 +33,7 @@ extern "C" {
 
 #define WAIT_TIMEOUT_OCCUPY                        (3 * 1000)
 #define WAIT_TIMEOUT_TRY_AGAIN                     (1 * 1000)
-#define WAIT_DISCONNECT_TIME_MS                    60
+#define WAIT_DISCONNECT_TIME_MS                    200
 
 // provide remove event compare function field
 typedef struct {

@@ -127,7 +127,7 @@ typedef struct {
     // ble Quick connection fails due to scan failures
     bool underlayerFastConnectFailedScanFailure;
 
-    bool isNeedDisconnect;
+    bool isNeedSetIdleTimeout;
     bool isOccupied;
 } ConnBleConnection;
 
