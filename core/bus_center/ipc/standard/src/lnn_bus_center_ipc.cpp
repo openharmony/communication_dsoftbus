@@ -745,8 +745,16 @@ void BusCenterServerDeathCallback(const char *pkgName)
     RemoveJoinRequestInfoByPkgName(pkgName);
     RemoveLeaveRequestInfoByPkgName(pkgName);
     RemoveRefreshRequestInfoByPkgName(pkgName);
-    const char *msdpPkgName = "ohos.msdp.spatialawareness";
-    if (strcmp(msdpPkgName, pkgName) == 0) {
-        SleRangeDeathCallbackPacked();
+
+    std::lock_guard<std::mutex> autoLock(g_lock);
+    std::vector<MsdpRangeReqInfo *>::iterator iter;
+    for (iter = g_msdpRangeReqInfo.begin(); iter != g_msdpRangeReqInfo.end();) {
+        if (strcmp(pkgName, (*iter)->pkgName) == 0) {
+            delete *iter;
+            g_msdpRangeReqInfo.erase(iter);
+            (void)SleRangeDeathCallbackPacked();
+            break;
+        }
+        ++iter;
     }
 }
