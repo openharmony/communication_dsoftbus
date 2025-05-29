@@ -35,6 +35,7 @@ ohos_unittest("TransNetworkStatisticsTest") {
     "$dsoftbus_dfx_path/dumper/legacy:softbus_dfx_dump",
     "$dsoftbus_root_path/core/common:softbus_utils",
     "$dsoftbus_root_path/core/frame:softbus_server",
+    "$dsoftbus_root_path/adapter:softbus_adapter",
   ]
   external_deps = [
     "c_utils:utils",

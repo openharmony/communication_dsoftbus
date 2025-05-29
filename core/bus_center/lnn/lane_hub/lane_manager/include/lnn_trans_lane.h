@@ -18,31 +18,11 @@
 
 #include "lnn_lane_assign.h"
 #include "lnn_lane_listener.h"
+#include "lnn_trans_lane_struct.h"
 
 #ifdef __cplusplus
 extern "C" {
 #endif
-
-typedef struct {
-    bool isSupportIpv6;
-    uint32_t actionAddr;
-    TransOption info;
-    ILaneListener listener;
-} ExtraReqInfo;
-
-typedef struct {
-    bool isWithQos;
-    bool isCanceled;
-    bool isNotified;
-    bool notifyFree;
-    bool hasNotifiedFree;
-    uint32_t laneReqId;
-    LaneAllocInfo allocInfo;
-    uint64_t laneId;
-    ListNode node;
-    LaneAllocListener listener;
-    ExtraReqInfo extraInfo;
-} TransReqInfo;
 
 LaneInterface *TransLaneGetInstance(void);
 int32_t GetTransReqInfoByLaneReqId(uint32_t laneReqId, TransReqInfo *reqInfo);

@@ -43,11 +43,7 @@ class P2pEntity : public WifiDirectEntity {
 public:
     static constexpr int TIMEOUT_WAIT_CLIENT_JOIN_MS = 10000;
 
-    static P2pEntity &GetInstance()
-    {
-        static P2pEntity instance;
-        return instance;
-    }
+    static P2pEntity &GetInstance();
 
     static void Init();
     void DisconnectLink(const std::string &remoteMac) override;

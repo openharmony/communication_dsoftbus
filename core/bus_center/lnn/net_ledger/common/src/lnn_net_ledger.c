@@ -19,15 +19,16 @@
 #include <securec.h>
 
 #include "anonymizer.h"
-#include "auth_device_common_key.h"
+
 #include "auth_interface.h"
 #include "bus_center_event.h"
 #include "bus_center_manager.h"
-#include "lnn_ble_lpdevice.h"
-#include "lnn_cipherkey_manager.h"
+#include "g_enhance_lnn_func.h"
+#include "g_enhance_lnn_func_pack.h"
+#include "g_enhance_auth_func.h"
+#include "g_enhance_auth_func_pack.h"
 #include "lnn_data_cloud_sync.h"
 #include "lnn_decision_db.h"
-#include "lnn_device_info_recovery.h"
 #include "lnn_distributed_net_ledger.h"
 #include "lnn_event_monitor.h"
 #include "lnn_event_monitor_impl.h"
@@ -36,17 +37,17 @@
 #include "lnn_huks_utils.h"
 #include "lnn_local_net_ledger.h"
 #include "lnn_log.h"
-#include "lnn_meta_node_interface.h"
 #include "lnn_meta_node_ledger.h"
 #include "lnn_network_id.h"
 #include "lnn_net_builder.h"
 #include "lnn_p2p_info.h"
 #include "lnn_settingdata_event_monitor.h"
+#include "lnn_init_monitor.h"
 #include "softbus_adapter_mem.h"
 #include "softbus_def.h"
 #include "softbus_error_code.h"
 #include "softbus_utils.h"
-#include "lnn_init_monitor.h"
+#include "softbus_init_common.h"
 
 #define RETRY_TIMES                      5
 #define DELAY_REG_DP_TIME                1000
@@ -55,6 +56,7 @@ static bool g_isDeviceInfoSet = false;
 
 int32_t LnnInitNetLedger(void)
 {
+    LNN_LOGE(LNN_EVENT, "LnnInitNetLedger enter.");
     if (LnnInitModuleNotifyWithRetrySync(INIT_DEPS_HUKS, LnnInitHuksInterface, RETRY_TIMES, DELAY_REG_DP_TIME) !=
         SOFTBUS_OK) {
         LNN_LOGE(LNN_LEDGER, "init huks interface fail");
@@ -72,7 +74,7 @@ int32_t LnnInitNetLedger(void)
         LNN_LOGE(LNN_LEDGER, "init meta node ledger fail");
         return SOFTBUS_NETWORK_LEDGER_INIT_FAILED;
     }
-    if (LnnInitMetaNodeExtLedger() != SOFTBUS_OK) {
+    if (LnnInitMetaNodeExtLedgerPacked() != SOFTBUS_OK) {
         LNN_LOGE(LNN_LEDGER, "init meta node ext ledger fail");
         return SOFTBUS_NETWORK_LEDGER_INIT_FAILED;
     }
@@ -162,17 +164,6 @@ static bool IsLocalBroadcastLinKeyChange(NodeInfo *info)
     return false;
 }
 
-static bool IsLocalSupportUserKeyChange(NodeInfo *info)
-{
-    bool supportUkNego = false;
-    if ((LnnGetLocalBoolInfo(BOOL_KEY_SUPPORT_UK_NEGO, &supportUkNego, NODE_SCREEN_STATUS_LEN) == SOFTBUS_OK) &&
-        (supportUkNego != info->isSupportUkNego)) {
-        LNN_LOGW(LNN_LEDGER, "isSupportUkNego=%{public}d->%{public}d", info->isSupportUkNego, supportUkNego);
-        return true;
-    }
-    return false;
-}
-
 static bool IsBleDirectlyOnlineFactorChange(NodeInfo *info)
 {
     if (IsCapacityChange(info)) {
@@ -217,15 +208,12 @@ static bool IsBleDirectlyOnlineFactorChange(NodeInfo *info)
     if (IsLocalBroadcastLinKeyChange(info)) {
         return true;
     }
-    if (IsLocalSupportUserKeyChange(info)) {
-        return true;
-    }
     return false;
 }
 
 static void LnnSetLocalFeature(void)
 {
-    if (IsSupportLpFeature()) {
+    if (IsSupportLpFeaturePacked()) {
         uint64_t feature = 1 << BIT_BLE_SUPPORT_LP_HEARTBEAT;
         if (LnnSetLocalNum64Info(NUM_KEY_FEATURE_CAPA, feature) != SOFTBUS_OK) {
             LNN_LOGE(LNN_LEDGER, "set feature fail");
@@ -240,11 +228,11 @@ static void ProcessLocalDeviceInfo(void)
     g_isRestore = true;
     NodeInfo info;
     (void)memset_s(&info, sizeof(NodeInfo), 0, sizeof(NodeInfo));
-    (void)LnnGetLocalDevInfo(&info);
+    (void)LnnGetLocalDevInfoPacked(&info);
     LnnDumpNodeInfo(&info, "load local deviceInfo success");
     if (IsBleDirectlyOnlineFactorChange(&info)) {
         info.stateVersion++;
-        LnnSaveLocalDeviceInfo(&info);
+        LnnSaveLocalDeviceInfoPacked(&info);
     }
     LNN_LOGI(LNN_LEDGER, "load local deviceInfo stateVersion=%{public}d", info.stateVersion);
     if (LnnSetLocalNumInfo(NUM_KEY_STATE_VERSION, info.stateVersion) != SOFTBUS_OK) {
@@ -299,7 +287,7 @@ void RestoreLocalDeviceInfo(void)
         LnnLedgerInfoStatusSet();
         return;
     }
-    int32_t ret = LnnLoadLocalDeviceInfo();
+    int32_t ret = LnnLoadLocalDeviceInfoPacked();
     if (ret != SOFTBUS_OK) {
         LNN_LOGI(LNN_LEDGER, "get local device info fail, ret=%{public}d", ret);
         if (ret == SOFTBUS_HUKS_UPDATE_ERR || ret == SOFTBUS_PARSE_JSON_ERR) {
@@ -311,7 +299,7 @@ void RestoreLocalDeviceInfo(void)
             }
         }
         const NodeInfo *temp = LnnGetLocalNodeInfo();
-        if (LnnSaveLocalDeviceInfo(temp) != SOFTBUS_OK) {
+        if (LnnSaveLocalDeviceInfoPacked(temp) != SOFTBUS_OK) {
             LNN_LOGE(LNN_LEDGER, "save local device info fail");
         } else {
             LNN_LOGI(LNN_LEDGER, "save local device info success");
@@ -320,18 +308,18 @@ void RestoreLocalDeviceInfo(void)
         ProcessLocalDeviceInfo();
     }
     LnnLedgerInfoStatusSet();
-    LnnLoadPtkInfo();
-    if (LnnLoadRemoteDeviceInfo() != SOFTBUS_OK) {
+    LnnLoadPtkInfoPacked();
+    if (LnnLoadRemoteDeviceInfoPacked() != SOFTBUS_OK) {
         LNN_LOGE(LNN_LEDGER, "load remote deviceInfo fail");
         return;
     }
-    LoadBleBroadcastKey();
-    LnnLoadLocalBroadcastCipherKey();
+    LoadBleBroadcastKeyPacked();
+    LnnLoadLocalBroadcastCipherKeyPacked();
 }
 
 int32_t LnnInitNetLedgerDelay(void)
 {
-    AuthLoadDeviceKey();
+    AuthLoadDeviceKeyPacked();
     int32_t ret = LnnInitLocalLedgerDelay();
     if (ret != SOFTBUS_OK) {
         LNN_LOGE(LNN_LEDGER, "delay init local ledger fail");
@@ -355,23 +343,13 @@ int32_t LnnInitEventMoniterDelay(void)
     return SOFTBUS_OK;
 }
 
-int32_t LnnInitHuksCeParamsDelay(void)
-{
-    int32_t ret = LnnGenerateCeParams(false);
-    if (ret != SOFTBUS_OK) {
-        LNN_LOGE(LNN_LEDGER, "delay init huks ce key fail, ret=%{public}d", ret);
-        return ret;
-    }
-    return SOFTBUS_OK;
-}
-
 void LnnDeinitNetLedger(void)
 {
     LnnDeinitMetaNodeLedger();
     LnnDeinitDistributedLedger();
     LnnDeinitLocalLedger();
     LnnDeinitHuksInterface();
-    LnnDeinitMetaNodeExtLedger();
+    LnnDeinitMetaNodeExtLedgerPacked();
     LnnDeInitCloudSyncModule();
 }
 
@@ -716,15 +694,14 @@ int32_t SoftbusDumpPrintMac(int fd, NodeBasicInfo *nodeInfo)
     NodeDeviceInfoKey key;
     key = NODE_KEY_BR_MAC;
     unsigned char brMac[BT_MAC_LEN] = {0};
-    char *anonyBrMac = NULL;
+    char newBrMac[BT_MAC_LEN] = {0};
 
     if (LnnGetNodeKeyInfo(nodeInfo->networkId, key, brMac, BT_MAC_LEN) != SOFTBUS_OK) {
         LNN_LOGE(LNN_LEDGER, "LnnGetNodeKeyInfo brMac failed");
         return SOFTBUS_NOT_FIND;
     }
-    Anonymize((char *)brMac, &anonyBrMac);
-    SOFTBUS_DPRINTF(fd, "  %-15s->%s\n", "BrMac", AnonymizeWrapper(anonyBrMac));
-    AnonymizeFree(anonyBrMac);
+    DataMasking((char *)brMac, BT_MAC_LEN, MAC_DELIMITER, newBrMac);
+    SOFTBUS_DPRINTF(fd, "  %-15s->%s\n", "BrMac", newBrMac);
     return SOFTBUS_OK;
 }
 
@@ -737,15 +714,14 @@ int32_t SoftbusDumpPrintIp(int fd, NodeBasicInfo *nodeInfo)
     NodeDeviceInfoKey key;
     key = NODE_KEY_IP_ADDRESS;
     char ipAddr[IP_STR_MAX_LEN] = {0};
-    char *anonyIpAddr = NULL;
+    char newIpAddr[IP_STR_MAX_LEN] = {0};
 
     if (LnnGetNodeKeyInfo(nodeInfo->networkId, key, (uint8_t *)ipAddr, IP_STR_MAX_LEN) != SOFTBUS_OK) {
         LNN_LOGE(LNN_LEDGER, "LnnGetNodeKeyInfo ipAddr failed");
         return SOFTBUS_NOT_FIND;
     }
-    Anonymize((char *)ipAddr, &anonyIpAddr);
-    SOFTBUS_DPRINTF(fd, "  %-15s->%s\n", "IpAddr", AnonymizeWrapper(anonyIpAddr));
-    AnonymizeFree(anonyIpAddr);
+    DataMasking((char *)ipAddr, IP_STR_MAX_LEN, IP_DELIMITER, newIpAddr);
+    SOFTBUS_DPRINTF(fd, "  %-15s->%s\n", "IpAddr", newIpAddr);
     return SOFTBUS_OK;
 }
 
@@ -956,7 +932,7 @@ static int32_t SoftbusDumpPrintLocalPtk(int fd, NodeBasicInfo *nodeInfo)
         return SOFTBUS_NOT_FIND;
     }
     char localPtk[PTK_DEFAULT_LEN] = {0};
-    if (LnnGetLocalPtkByUuid(peerUuid, localPtk, PTK_DEFAULT_LEN) != SOFTBUS_OK) {
+    if (LnnGetLocalPtkByUuidPacked(peerUuid, localPtk, PTK_DEFAULT_LEN) != SOFTBUS_OK) {
         LNN_LOGE(LNN_LEDGER, "LnnGetLocalPtkByUuid failed");
         return SOFTBUS_NOT_FIND;
     }
@@ -1056,7 +1032,7 @@ void SoftBusDumpBusCenterPrintInfo(int fd, NodeBasicInfo *nodeInfo)
         return;
     }
     char *anonyDeviceName = NULL;
-    AnonymizeDeviceName(nodeInfo->deviceName, &anonyDeviceName);
+    Anonymize(nodeInfo->deviceName, &anonyDeviceName);
     SOFTBUS_DPRINTF(fd, "DeviceName->%s\n", AnonymizeWrapper(anonyDeviceName));
     AnonymizeFree(anonyDeviceName);
     SoftbusDumpPrintAccountId(fd, nodeInfo);
@@ -1067,15 +1043,15 @@ void SoftBusDumpBusCenterPrintInfo(int fd, NodeBasicInfo *nodeInfo)
 
 static void LnnClearLocalPtkList(void)
 {
-    LnnClearPtkList();
+    LnnClearPtkListPacked();
 }
 
 int32_t LnnUpdateLocalDeviceInfo(void)
 {
     char networkId[NETWORK_ID_BUF_LEN] = { 0 };
 
-    ClearDeviceInfo();
-    AuthClearDeviceKey();
+    ClearDeviceInfoPacked();
+    AuthClearDeviceKeyPacked();
     LnnClearLocalPtkList();
 
     int32_t ret = LnnUpdateLocalUuidAndIrk();
@@ -1093,7 +1069,7 @@ int32_t LnnUpdateLocalDeviceInfo(void)
         LNN_LOGE(LNN_LEDGER, "set local networkId failed");
         return ret;
     }
-    ret = GenerateNewLocalCipherKey();
+    ret = GenerateNewLocalCipherKeyPacked();
     if (ret != SOFTBUS_OK) {
         LNN_LOGE(LNN_LEDGER, "generate new local cipher key failed");
         return ret;

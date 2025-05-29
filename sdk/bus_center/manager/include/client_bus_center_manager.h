@@ -82,7 +82,6 @@ void LnnOnRangeResult(const RangeResultInnerInfo *rangeInfo);
 
 int32_t DiscRecoveryPublish(void);
 int32_t DiscRecoverySubscribe(void);
-int32_t DiscRecoveryPolicy(void);
 
 #ifdef __cplusplus
 }

@@ -19,9 +19,10 @@
 #include <stdatomic.h>
 
 #include "bus_center_event.h"
+#include "g_enhance_adapter_func_pack.h"
 #include "lnn_async_callback_utils.h"
 #include "lnn_log.h"
-#include "softbus_adapter_sle_common.h"
+#include "softbus_adapter_sle_common_struct.h"
 #include "softbus_adapter_mem.h"
 #include "softbus_def.h"
 #include "softbus_error_code.h"
@@ -71,13 +72,13 @@ static void LnnOnSleStateChanged(int32_t sleState)
 int32_t LnnInitSle(void)
 {
     int32_t listenId = -1;
-    int32_t ret = SoftBusAddSleStateListener(&g_softbusLnnSleStateListener, &listenId);
+    int32_t ret = SoftBusAddSleStateListenerPacked(&g_softbusLnnSleStateListener, &listenId);
     if (ret != SOFTBUS_OK || listenId == -1) {
         LNN_LOGE(LNN_INIT, "monitor add sle state listener fail");
         return SOFTBUS_COMM_BLUETOOTH_ADD_STATE_LISTENER_ERR;
     }
     g_lnnsleListenerId = listenId;
-    if (IsSleEnabled()) {
+    if (IsSleEnabledPacked()) {
         LnnOnSleStateChanged(SOFTBUS_SLE_STATE_TURN_ON);
     } else {
         LnnOnSleStateChanged(SOFTBUS_SLE_STATE_TURN_OFF);
@@ -88,5 +89,5 @@ int32_t LnnInitSle(void)
 
 void LnnDeinitSle(void)
 {
-    (void)SoftBusRemoveSleStateListener(g_lnnsleListenerId);
+    (void)SoftBusRemoveSleStateListenerPacked(g_lnnsleListenerId);
 }

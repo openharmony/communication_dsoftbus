@@ -85,13 +85,18 @@ if (dsoftbus_feature_inner_coap) {
       "core/nstackx_statistics.c",
       "core/nstackx_smartgenius.c",
     ]
-    standard_small_diff_include_dirs = [ "include/coap_discover" ]
     cflags += [
       "-DDFINDER_MGT_MSG_LOG",
       "-DNSTACKX_DFINDER_HIDUMP",
     ]
   }
 }
+
+# standard_small_diff_include_dirs = [
+#   "include/coap_discover",
+#   "$dsoftbus_root_path/interfaces/kits/nstackx"
+#]
+
 
 config("nstackx_ctrl_interface") {
   include_dirs = [ "interface" ]
@@ -107,12 +112,20 @@ if (defined(ohos_lite)) {
           "interface",
           "../nstackx_util/interface",
         ]
+        # include_dirs += standard_small_diff_include_dirs
+        include_dirs += [
+          "include/coap_discover",
+          "$dsoftbus_root_path/interfaces/kits/nstackx"
+        ]
+
+        deps = [ "$dsoftbus_root_path/core/common:softbus_utils" ]
       } else {
         sources = base_src
         sources += mini_diff_src
         include_dirs = base_include_dirs
         include_dirs += mini_diff_include_dirs
         include_dirs += [ "//third_party/cJSON" ]
+        deps = []
         if (board_toolchain_type != "iccarm") {
           cflags += [ "-std=c99" ]
           cflags_cc = cflags
@@ -127,7 +140,9 @@ if (defined(ohos_lite)) {
           ]
         }
       }
-      deps = [ "../nstackx_util:nstackx_util.open" ]
+      deps += [
+        "../nstackx_util:nstackx_util.open",
+      ]
       public_configs = [ ":nstackx_ctrl_interface" ]
     }
   } else {
@@ -139,13 +154,22 @@ if (defined(ohos_lite)) {
           "interface",
           "../nstackx_util/interface",
         ]
+        # include_dirs += standard_small_diff_include_dirs
+        include_dirs += [
+          "include/coap_discover",
+          "$dsoftbus_root_path/interfaces/kits/nstackx"
+        ]
         deps = [ "../nstackx_util:nstackx_util.open" ]
         public_configs = [ ":nstackx_ctrl_interface" ]
       } else {
         sources = base_src
         sources += standard_small_diff_src
         include_dirs = base_include_dirs
-        include_dirs += standard_small_diff_include_dirs
+        # include_dirs += standard_small_diff_include_dirs
+        include_dirs += [
+          "include/coap_discover",
+          "$dsoftbus_root_path/interfaces/kits/nstackx"
+        ]
         public_configs = [ ":nstackx_ctrl_interface" ]
         deps = [
           "../nstackx_util:nstackx_util.open",
@@ -194,6 +218,11 @@ if (defined(ohos_lite)) {
         "interface",
         "../nstackx_util/interface",
       ]
+      # include_dirs += standard_small_diff_include_dirs
+      include_dirs += [
+        "include/coap_discover",
+        "$dsoftbus_root_path/interfaces/kits/nstackx"
+      ]
       deps = [ "../nstackx_util:nstackx_util.open" ]
       public_configs = [ ":nstackx_ctrl_interface" ]
     } else {
@@ -205,7 +234,11 @@ if (defined(ohos_lite)) {
       sources = base_src
       sources += standard_small_diff_src
       include_dirs = base_include_dirs
-      include_dirs += standard_small_diff_include_dirs
+      # include_dirs += standard_small_diff_include_dirs
+      include_dirs += [
+        "include/coap_discover",
+        "$dsoftbus_root_path/interfaces/kits/nstackx"
+      ]
       include_dirs += [ "../nstackx_util/platform/unix" ]
       public_configs = [ ":nstackx_ctrl_interface" ]
       deps = [ "../nstackx_util:nstackx_util.open" ]

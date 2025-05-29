@@ -403,7 +403,7 @@ void LnnDumpLocalBasicInfo(void)
     Anonymize(localIp, &anonyIp);
     Anonymize(localBtMac, &anonyBtMac);
     Anonymize(localP2PMac, &anonyP2pMac);
-    AnonymizeDeviceName(localInfo.deviceName, &anonyDeviceName);
+    Anonymize(localInfo.deviceName, &anonyDeviceName);
     LNN_LOGI(LNN_HEART_BEAT, "devType=%{public}s, deviceTypeId=%{public}hu, deviceName=%{public}s, ip=%{public}s, "
         "brMac=%{public}s, p2pMac=%{public}s, onlineNodeNum=%{public}d", devTypeStr, localInfo.deviceTypeId,
         AnonymizeWrapper(anonyDeviceName), AnonymizeWrapper(anonyIp), AnonymizeWrapper(anonyBtMac),
@@ -510,7 +510,7 @@ static void LnnDumpOnlinePrintInfo(NodeBasicInfo *nodeInfo)
         return;
     }
     char *anonyDeviceName = NULL;
-    AnonymizeDeviceName(nodeInfo->deviceName, &anonyDeviceName);
+    Anonymize(nodeInfo->deviceName, &anonyDeviceName);
     LNN_LOGI(LNN_HEART_BEAT, "DeviceName=%{public}s", AnonymizeWrapper(anonyDeviceName));
     AnonymizeFree(anonyDeviceName);
     char *tmpNetWorkId = NULL;

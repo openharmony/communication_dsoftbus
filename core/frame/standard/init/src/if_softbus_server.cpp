@@ -19,7 +19,7 @@
 #include "softbus_error_code.h"
 
 namespace OHOS {
-int32_t ISoftBusServer::GrantPermission(int uid, int pid, const char *sessionName)
+int32_t ISoftBusServer::GrantPermission(int32_t uid, int32_t pid, const char *sessionName)
 {
     (void)uid;
     (void)pid;

@@ -19,13 +19,12 @@
 #include <securec.h>
 
 #include "anonymizer.h"
+#include "g_enhance_lnn_func.h"
+#include "g_enhance_lnn_func_pack.h"
 #include "lnn_async_callback_utils.h"
-#include "lnn_cipherkey_manager.h"
-#include "lnn_device_info_recovery.h"
 #include "lnn_distributed_net_ledger.h"
 #include "lnn_heartbeat_utils.h"
 #include "lnn_kv_adapter_wrapper.h"
-#include "lnn_link_finder.h"
 #include "lnn_local_net_ledger.h"
 #include "lnn_log.h"
 #include "lnn_map.h"
@@ -37,6 +36,7 @@
 #include "softbus_error_code.h"
 #include "softbus_json_utils.h"
 #include "softbus_utils.h"
+#include "softbus_init_common.h"
 
 #define APPID                "dsoftbus"
 #define STOREID              "dsoftbus_kv_db"
@@ -72,7 +72,7 @@ static int32_t DBCipherInfoSyncToCache(
             return SOFTBUS_KV_CONVERT_BYTES_FAILED;
         }
     } else if (strcmp(fieldName, DEVICE_INFO_JSON_BROADCAST_KEY_TABLE) == 0) {
-        LnnSetRemoteBroadcastCipherInfo(value, udid);
+        LnnSetRemoteBroadcastCipherInfoPacked(value, udid);
     } else if (strcmp(fieldName, DEVICE_INFO_DISTRIBUTED_SWITCH) == 0) {
         LNN_LOGD(LNN_BUILDER, "distributed switch info no need update into nodeinfo");
     } else {
@@ -91,7 +91,7 @@ static int32_t DBDeviceNameInfoSyncToCache(NodeInfo *cacheInfo, char *fieldName,
             return SOFTBUS_STRCPY_ERR;
         }
         char *anonyDeviceName = NULL;
-        AnonymizeDeviceName(cacheInfo->deviceInfo.deviceName, &anonyDeviceName);
+        Anonymize(cacheInfo->deviceInfo.deviceName, &anonyDeviceName);
         LNN_LOGI(LNN_BUILDER, "success. deviceName=%{public}s", AnonymizeWrapper(anonyDeviceName));
         AnonymizeFree(anonyDeviceName);
     } else if (strcmp(fieldName, DEVICE_INFO_UNIFIED_DEVICE_NAME) == 0 && valueLength < DEVICE_NAME_BUF_LEN) {
@@ -464,7 +464,7 @@ static int32_t HandleDBAddChangeInternal(const char *key, const char *value, Nod
         return SOFTBUS_STRCPY_ERR;
     }
     NodeInfo localCacheInfo = { 0 };
-    ret = LnnGetLocalCacheNodeInfo(&localCacheInfo);
+    ret = LnnGetLocalCacheNodeInfoPacked(&localCacheInfo);
     if (ret != SOFTBUS_OK) {
         LNN_LOGE(LNN_BUILDER, "get local cache node info fail");
         return ret;
@@ -592,7 +592,7 @@ static int32_t HandleDBUpdateInternal(
         return SOFTBUS_NETWORK_GENERATE_STR_HASH_ERR;
     }
     NodeInfo cacheInfo = { 0 };
-    if (LnnRetrieveDeviceInfo(udidHash, &cacheInfo) != SOFTBUS_OK) {
+    if (LnnRetrieveDeviceInfoPacked(udidHash, &cacheInfo) != SOFTBUS_OK) {
         LNN_LOGI(LNN_BUILDER, "no this device info in deviceCacheInfoMap, ignore update");
         return SOFTBUS_OK;
     }
@@ -606,7 +606,7 @@ static int32_t HandleDBUpdateInternal(
     cacheInfo.stateVersion = parseValue->stateVersion;
     UpdateInfoToLedger(&cacheInfo, deviceUdid, fieldName, trueValue);
     cacheInfo.localStateVersion = localStateVersion;
-    (void)LnnSaveRemoteDeviceInfo(&cacheInfo);
+    (void)LnnSaveRemoteDeviceInfoPacked(&cacheInfo);
     (void)memset_s(&cacheInfo, sizeof(NodeInfo), 0, sizeof(NodeInfo));
     return SOFTBUS_OK;
 }
@@ -647,7 +647,7 @@ static int32_t HandleDBUpdateChangeInternal(const char *key, const char *value)
         return ret;
     }
     NodeInfo localCacheInfo = { 0 };
-    ret = LnnGetLocalCacheNodeInfo(&localCacheInfo);
+    ret = LnnGetLocalCacheNodeInfoPacked(&localCacheInfo);
     if (ret != SOFTBUS_OK) {
         LNN_LOGE(LNN_BUILDER, "get local cache node info fail");
         return ret;
@@ -698,12 +698,12 @@ static int32_t HandleDBDeleteChangeInternal(const char *key, const char *value)
         return SOFTBUS_NETWORK_GENERATE_STR_HASH_ERR;
     }
     NodeInfo cacheInfo = { 0 };
-    if (LnnRetrieveDeviceInfo(udidHash, &cacheInfo) != SOFTBUS_OK) {
+    if (LnnRetrieveDeviceInfoPacked(udidHash, &cacheInfo) != SOFTBUS_OK) {
         LNN_LOGI(LNN_BUILDER, "no device info in deviceCacheInfoMap, no need to delete");
         return SOFTBUS_OK;
     }
 
-    LnnDeleteDeviceInfo(deviceUdid);
+    LnnDeleteDeviceInfoPacked(deviceUdid);
     LnnRemoveNode(deviceUdid);
     LNN_LOGI(LNN_BUILDER, "success");
     return SOFTBUS_OK;
@@ -765,12 +765,12 @@ int32_t LnnDBDataAddChangeSyncToCache(const char **key, const char **value, int3
         return SOFTBUS_NETWORK_GENERATE_STR_HASH_ERR;
     }
     NodeInfo oldCacheInfo = { 0 };
-    if (LnnRetrieveDeviceInfo(udidHash, &oldCacheInfo) == SOFTBUS_OK &&
+    if (LnnRetrieveDeviceInfoPacked(udidHash, &oldCacheInfo) == SOFTBUS_OK &&
         IsIgnoreUpdate(oldCacheInfo.stateVersion, oldCacheInfo.updateTimestamp, cacheInfo.stateVersion,
             cacheInfo.updateTimestamp)) {
         return SOFTBUS_KV_IGNORE_OLD_DEVICE_INFO;
     }
-    (void)LnnSaveRemoteDeviceInfo(&cacheInfo);
+    (void)LnnSaveRemoteDeviceInfoPacked(&cacheInfo);
     char *anonyUdid = NULL;
     Anonymize(cacheInfo.deviceInfo.deviceUdid, &anonyUdid);
     LNN_LOGI(LNN_BUILDER,
@@ -796,10 +796,10 @@ static void PrintSyncNodeInfoEx(const NodeInfo *cacheInfo)
     Anonymize(cacheInfo->deviceInfo.modelName, &anonyModelName);
     LNN_LOGI(LNN_BUILDER,
         "Sync NodeInfoEx: BROADCAST_CIPHER_KEY=%{public}02x, BROADCAST_CIPHER_IV=%{public}02x, IRK=%{public}02x,"
-        " PUB_MAC=%{public}02x, PTK=%{public}02x, SPUk=%{public}d, PRODUCT_ID=%{public}s, MODEL_NAME=%{public}s, "
+        " PUB_MAC=%{public}02x, PTK=%{public}02x, PRODUCT_ID=%{public}s, MODEL_NAME=%{public}s, "
         "SLE_CAP=%{public}d",
         *cacheInfo->cipherInfo.key, *cacheInfo->cipherInfo.iv, *cacheInfo->rpaInfo.peerIrk,
-        *cacheInfo->rpaInfo.publicAddress, *cacheInfo->remotePtk, cacheInfo->isSupportUkNego,
+        *cacheInfo->rpaInfo.publicAddress, *cacheInfo->remotePtk,
         AnonymizeWrapper(anonyProductId), AnonymizeWrapper(anonyModelName), cacheInfo->sleRangeCapacity);
     AnonymizeFree(anonyProductId);
     AnonymizeFree(anonyModelName);
@@ -913,7 +913,6 @@ static void UpdateDevBasicInfoToCache(const NodeInfo *newInfo, NodeInfo *oldInfo
     oldInfo->localStateVersion = newInfo->localStateVersion;
     oldInfo->heartbeatCapacity = newInfo->heartbeatCapacity;
     oldInfo->staticNetCap = newInfo->staticNetCap;
-    oldInfo->isSupportUkNego = newInfo->isSupportUkNego;
 }
 
 static int32_t LnnUpdateOldCacheInfo(const NodeInfo *newInfo, NodeInfo *oldInfo)
@@ -981,7 +980,7 @@ static int32_t LnnSaveAndUpdateDistributedNode(NodeInfo *cacheInfo, NodeInfo *ol
         return SOFTBUS_INVALID_PARAM;
     }
     NodeInfo localCacheInfo = { 0 };
-    int32_t ret = LnnGetLocalCacheNodeInfo(&localCacheInfo);
+    int32_t ret = LnnGetLocalCacheNodeInfoPacked(&localCacheInfo);
     if (ret != SOFTBUS_OK || cacheInfo->accountId != localCacheInfo.accountId) {
         char accountId[INT64_TO_STR_MAX_LEN] = {0};
         char localAccountId[INT64_TO_STR_MAX_LEN] = {0};
@@ -1004,9 +1003,9 @@ static int32_t LnnSaveAndUpdateDistributedNode(NodeInfo *cacheInfo, NodeInfo *ol
     LnnIsdeviceNameChangeAck(cacheInfo, oldCacheInfo);
     cacheInfo->localStateVersion = localCacheInfo.stateVersion;
     if (LnnUpdateOldCacheInfo(cacheInfo, oldCacheInfo) != SOFTBUS_OK ||
-        LnnSaveRemoteDeviceInfo(oldCacheInfo) != SOFTBUS_OK) {
+        LnnSaveRemoteDeviceInfoPacked(oldCacheInfo) != SOFTBUS_OK) {
         LNN_LOGE(LNN_BUILDER, "update cache info fail, use cloud sync data");
-        (void)LnnSaveRemoteDeviceInfo(cacheInfo);
+        (void)LnnSaveRemoteDeviceInfoPacked(cacheInfo);
     }
     char *anonyUdid = NULL;
     Anonymize(cacheInfo->deviceInfo.deviceUdid, &anonyUdid);
@@ -1034,7 +1033,7 @@ int32_t LnnDBDataChangeSyncToCacheInner(const char *key, const char *value)
         return SOFTBUS_PARSE_JSON_ERR;
     }
     NodeInfo cacheInfo = { 0 };
-    int32_t ret = LnnUnPackCloudSyncDeviceInfo(json, &cacheInfo);
+    int32_t ret = LnnUnPackCloudSyncDeviceInfoPacked(json, &cacheInfo);
     if (ret != SOFTBUS_OK) {
         cJSON_Delete(json);
         return ret;
@@ -1048,7 +1047,7 @@ int32_t LnnDBDataChangeSyncToCacheInner(const char *key, const char *value)
         return SOFTBUS_NETWORK_GENERATE_STR_HASH_ERR;
     }
     NodeInfo oldCacheInfo = { 0 };
-    ret = LnnRetrieveDeviceInfo(udidHash, &oldCacheInfo);
+    ret = LnnRetrieveDeviceInfoPacked(udidHash, &oldCacheInfo);
     if (ret == SOFTBUS_OK && IsIgnoreUpdate(oldCacheInfo.stateVersion, oldCacheInfo.updateTimestamp,
         cacheInfo.stateVersion, cacheInfo.updateTimestamp)) {
         return SOFTBUS_KV_IGNORE_OLD_DEVICE_INFO;
@@ -1104,7 +1103,7 @@ int32_t LnnLedgerDataChangeSyncToDB(const char *key, const char *value, size_t v
         return SOFTBUS_INVALID_PARAM;
     }
     NodeInfo localCacheInfo = { 0 };
-    int32_t ret = LnnGetLocalCacheNodeInfo(&localCacheInfo);
+    int32_t ret = LnnGetLocalCacheNodeInfoPacked(&localCacheInfo);
     if (ret != SOFTBUS_OK) {
         LNN_LOGE(LNN_BUILDER, "get local cache node info fail");
         return ret;
@@ -1145,12 +1144,12 @@ int32_t LnnLedgerDataChangeSyncToDB(const char *key, const char *value, size_t v
 
 static int32_t PackBroadcastCipherKeyInner(cJSON *json, NodeInfo *info)
 {
-    if (LnnPackCloudSyncDeviceInfo(json, info) != SOFTBUS_OK) {
+    if (LnnPackCloudSyncDeviceInfoPacked(json, info) != SOFTBUS_OK) {
         LNN_LOGE(LNN_BUILDER, "pack cloud sync info fail");
         return SOFTBUS_KV_CLOUD_SYNC_FAIL;
     }
     CloudSyncInfo syncInfo = { 0 };
-    if (LnnGetLocalBroadcastCipherInfo(&syncInfo) != SOFTBUS_OK) {
+    if (LnnGetLocalBroadcastCipherInfoPacked(&syncInfo) != SOFTBUS_OK) {
         LNN_LOGE(LNN_BUILDER, "get local cipher info fail");
         return SOFTBUS_KV_CLOUD_SYNC_FAIL;
     }
@@ -1187,7 +1186,7 @@ int32_t LnnLedgerAllDataSyncToDB(NodeInfo *info, bool isAckSeq, char *peerudid)
         cJSON_Delete(json);
         return ret;
     }
-    if (isAckSeq && peerudid != NULL && (ret = LnnPackCloudSyncAckSeq(json, peerudid)) != SOFTBUS_OK) {
+    if (isAckSeq && peerudid != NULL && (ret = LnnPackCloudSyncAckSeqPacked(json, peerudid)) != SOFTBUS_OK) {
         cJSON_Delete(json);
         return ret;
     }
@@ -1244,7 +1243,7 @@ int32_t LnnAsyncCallLedgerAllDataSyncToDB(NodeInfo *info)
 int32_t LnnDeleteSyncToDB(void)
 {
     NodeInfo localCacheInfo = { 0 };
-    int32_t ret = LnnGetLocalCacheNodeInfo(&localCacheInfo);
+    int32_t ret = LnnGetLocalCacheNodeInfoPacked(&localCacheInfo);
     if (ret != SOFTBUS_OK) {
         LNN_LOGE(LNN_BUILDER, "get local cache node info fail");
         return ret;

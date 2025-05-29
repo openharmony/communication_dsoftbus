@@ -39,6 +39,19 @@ void WifiDirectIpManager::Init()
     CONN_LOGI(CONN_WIFI_DIRECT, "enter");
 }
 
+WifiDirectIpManager& WifiDirectIpManager::GetInstance()
+{
+    static WifiDirectIpManager instance;
+    {
+        std::lock_guard lock(clearMutex_);
+        if (!hasClear_) {
+            ClearAllIpv4();
+            hasClear_ = true;
+        }
+    }
+    return instance;
+}
+
 std::string WifiDirectIpManager::ApplyIpv6(const std::string &mac)
 {
     CONN_CHECK_AND_RETURN_RET_LOGE(!mac.empty(), "", CONN_WIFI_DIRECT, "mac is null");

@@ -23,12 +23,6 @@ ohos_unittest("HeartBeatMediumTest") {
     "$dsoftbus_root_path/core/authentication/src/auth_deviceprofile_virtual.cpp",
     "$dsoftbus_root_path/core/authentication/src/auth_interface.c",
     "$dsoftbus_root_path/core/authentication/src/auth_tcp_connection.c",
-    "$dsoftbus_root_path/core/authentication/src/virtual/auth_device_common_key_virtual.c",
-    "$dsoftbus_root_path/core/bus_center/lnn/lane_hub/heartbeat/src/lnn_ble_heartbeat_virtual.c",
-    "$dsoftbus_root_path/core/bus_center/lnn/lane_hub/heartbeat/src/lnn_heartbeat_utils.c",
-    "$dsoftbus_root_path/core/bus_center/lnn/lane_hub/lane_manager/src/lnn_lane_vap_info_virtual.c",
-    "$dsoftbus_root_path/core/bus_center/lnn/net_builder/src/lnn_cipherkey_manager_virtual.c",
-    "$dsoftbus_root_path/core/bus_center/lnn/net_ledger/common/src/lnn_feature_capability.c",
     "$dsoftbus_root_path/core/bus_center/monitor/src/lnn_init_monitor.c",
     "$dsoftbus_root_path/core/bus_center/utils/src/lnn_connection_addr_utils.c",
     "$dsoftbus_root_path/core/transmission/trans_channel/auth/src/trans_auth_manager.c",
@@ -39,6 +33,8 @@ ohos_unittest("HeartBeatMediumTest") {
     "$dsoftbus_root_path/tests/core/bus_center/test/heartbeat/hb_medium_mgr_test.cpp",
     "$dsoftbus_root_path/tests/core/bus_center/test/mock/src/hb_strategy_mock.cpp",
     "$dsoftbus_root_path/tests/core/discovery/ble/softbus_ble_mock/ble_mock.cpp",
+    "$dsoftbus_root_path/core/frame/init/src/g_enhance_lnn_func.c",
+    "$dsoftbus_root_path/core/frame/init/src/g_enhance_auth_func.c",
   ]
 
   include_dirs = [
@@ -77,6 +73,14 @@ ohos_unittest("HeartBeatMediumTest") {
     "$dsoftbus_root_path/interfaces/kits/bus_center",
     "$dsoftbus_root_path/core/bus_center/monitor/include",
     "$dsoftbus_root_path/interfaces/kits/discovery",
+    "$dsoftbus_root_path/interfaces/kits/transport",
+    "$dsoftbus_root_path/interfaces/kits/authentication",
+    "$dsoftbus_root_path/interfaces/kits/lnn",
+    "$dsoftbus_root_path/interfaces/kits/adapter",
+    "$dsoftbus_root_path/interfaces/kits/broadcast",
+    "$dsoftbus_root_path/interfaces/kits/disc",
+    "$dsoftbus_root_path/core/frame/init/include",
+    "$dsoftbus_root_path/tests/interfaces/enhance",
     "$dsoftbus_root_path/tests/core/discovery/ble/softbus_ble_mock",
     "$dsoftbus_root_path/core/discovery/ble/softbus_ble/include",
     "$dsoftbus_root_path/adapter/common/net/bluetooth/broadcast/interface",
@@ -92,12 +96,14 @@ ohos_unittest("HeartBeatMediumTest") {
     "$dsoftbus_root_path/core/transmission/trans_channel/tcp_direct/include",
     "$dsoftbus_root_path/core/transmission/trans_channel/udp_negotiation/include",
     "$dsoftbus_root_path/core/adapter/transmission/include",
+    "$dsoftbus_root_path/tests/interface/enhance",
   ]
 
   deps = [
     "$dsoftbus_dfx_path:softbus_dfx",
     "$dsoftbus_root_path/adapter:softbus_adapter",
     "$dsoftbus_root_path/core/common:softbus_utils",
+    "$dsoftbus_root_path/core/frame:softbus_server",
   ]
 
   if (is_standard_system) {
@@ -129,6 +135,8 @@ ohos_unittest("HeartBeatMediumStaticTest") {
     "$dsoftbus_root_path/tests/core/bus_center/test/heartbeat/hb_medium_mgr_static_test.cpp",
     "$dsoftbus_root_path/tests/core/bus_center/test/mock/src/hb_medium_mgr_static_mock.cpp",
     "$dsoftbus_root_path/tests/core/bus_center/test/mock/src/hb_strategy_mock.cpp",
+    "$dsoftbus_root_path/core/frame/init/src/g_enhance_lnn_func.c",
+    "$dsoftbus_root_path/core/frame/init/src/g_enhance_lnn_func_pack.c",
   ]
 
   include_dirs = [
@@ -156,6 +164,13 @@ ohos_unittest("HeartBeatMediumStaticTest") {
     "$dsoftbus_root_path/dfx/interface/include/form",
     "$dsoftbus_root_path/interfaces/inner_kits/lnn",
     "$dsoftbus_root_path/interfaces/kits/bus_center",
+    "$dsoftbus_root_path/interfaces/kits/adapter",
+    "$dsoftbus_root_path/interfaces/kits/transport",
+    "$dsoftbus_root_path/interfaces/kits/authentication",
+    "$dsoftbus_root_path/interfaces/kits/lnn",
+    "$dsoftbus_root_path/interfaces/kits/disc",
+    "$dsoftbus_root_path/core/frame/init/include",
+    "$dsoftbus_root_path/tests/interface/enhance",
     "$dsoftbus_root_path/tests/adapter/common/include",
     "$dsoftbus_root_path/tests/core/bus_center/lnn/net_builder/include",
     "$dsoftbus_root_path/tests/core/bus_center/test/mock/include",
@@ -185,7 +200,6 @@ ohos_unittest("HeartBeatFSMTest") {
   module_out_path = module_output_path
   sources = [
     "$dsoftbus_root_path/core/adapter/bus_center/src/lnn_deviceinfo_to_profile_virtual.c",
-    "$dsoftbus_root_path/core/bus_center/lnn/lane_hub/heartbeat/src/lnn_ble_heartbeat_virtual.c",
     "$dsoftbus_root_path/core/bus_center/lnn/lane_hub/heartbeat/src/lnn_heartbeat_utils.c",
     "$dsoftbus_root_path/core/bus_center/lnn/net_ledger/common/src/lnn_feature_capability.c",
     "$dsoftbus_root_path/core/bus_center/service/src/bus_center_manager.c",
@@ -195,6 +209,7 @@ ohos_unittest("HeartBeatFSMTest") {
     "$dsoftbus_root_path/tests/core/bus_center/mock_common/src/lnn_connection_mock.cpp",
     "$dsoftbus_root_path/tests/core/bus_center/test/heartbeat/hb_fsm_test.cpp",
     "$dsoftbus_root_path/tests/core/bus_center/test/mock/src/hb_fsm_mock.cpp",
+    "$dsoftbus_root_path/core/frame/init/src/g_enhance_lnn_func.c",
   ]
 
   include_dirs = [
@@ -229,10 +244,16 @@ ohos_unittest("HeartBeatFSMTest") {
     "$dsoftbus_root_path/adapter/common/include",
     "$dsoftbus_root_path/core/bus_center/lnn/lane_hub/lane_manager/include",
     "$dsoftbus_root_path/core/connection/wifi_direct_cpp",
-    "$dsoftbus_root_path/dsoftbus_enhance/adapter/common/mlps/interface",
     "$dsoftbus_root_path/interfaces/inner_kits/lnn",
     "$dsoftbus_root_path/interfaces/kits/bus_center",
     "$dsoftbus_root_path/interfaces/kits/discovery",
+    "$dsoftbus_root_path/interfaces/kits/adapter",
+    "$dsoftbus_root_path/interfaces/kits/transport",
+    "$dsoftbus_root_path/interfaces/kits/authentication",
+    "$dsoftbus_root_path/interfaces/kits/lnn",
+    "$dsoftbus_root_path/interfaces/kits/connect",
+    "$dsoftbus_root_path/interfaces/kits/disc",
+    "$dsoftbus_root_path/core/frame/init/include",
   ]
 
   deps = [
@@ -294,6 +315,10 @@ ohos_unittest("HeartBeatStrategyTest") {
     "$dsoftbus_root_path/interfaces/inner_kits/lnn",
     "$dsoftbus_root_path/interfaces/kits/bus_center",
     "$dsoftbus_root_path/interfaces/kits/discovery",
+    "$dsoftbus_root_path/interfaces/kits/lnn",
+    "$dsoftbus_root_path/interfaces/kits/disc",
+    "$dsoftbus_root_path/interfaces/kits/authentication",
+    "$dsoftbus_root_path/tests/interface/enhance",
   ]
 
   deps = [
@@ -327,7 +352,6 @@ ohos_unittest("HeartBeatUtilsTest") {
   module_out_path = module_output_path
   sources = [
     "$dsoftbus_root_path/core/adapter/bus_center/src/lnn_deviceinfo_to_profile_virtual.c",
-    "$dsoftbus_root_path/core/bus_center/lnn/lane_hub/heartbeat/src/lnn_ble_heartbeat_virtual.c",
     "$dsoftbus_root_path/core/bus_center/lnn/lane_hub/heartbeat/src/lnn_heartbeat_utils.c",
     "$dsoftbus_root_path/core/bus_center/lnn/net_ledger/common/src/lnn_feature_capability.c",
     "$dsoftbus_root_path/core/bus_center/utils/src/lnn_state_machine.c",
@@ -368,6 +392,12 @@ ohos_unittest("HeartBeatUtilsTest") {
     "$dsoftbus_root_path/interfaces/inner_kits/lnn",
     "$dsoftbus_root_path/interfaces/kits/bus_center",
     "$dsoftbus_root_path/interfaces/kits/discovery",
+    "$dsoftbus_root_path/interfaces/kits/connect",
+    "$dsoftbus_root_path/interfaces/kits/adapter",
+    "$dsoftbus_root_path/interfaces/kits/transport",
+    "$dsoftbus_root_path/interfaces/kits/disc",
+    "$dsoftbus_root_path/interfaces/kits/lnn",
+    "$dsoftbus_root_path/interfaces/kits/authentication",   
   ]
 
   deps = [
@@ -400,7 +430,6 @@ ohos_unittest("HeartBeatUtilsTest") {
 ohos_unittest("HeartBeatCtrlTest") {
   module_out_path = module_output_path
   sources = [
-    "$dsoftbus_root_path/core/bus_center/lnn/decision_center/src/lnn_decision_center_virtual.c",
     "$dsoftbus_root_path/core/bus_center/lnn/lane_hub/heartbeat/src/lnn_heartbeat_ctrl.c",
     "$dsoftbus_root_path/core/bus_center/monitor/src/lnn_init_monitor.c",
     "$dsoftbus_root_path/tests/core/bus_center/lnn/net_buscenter/lnn_ip_network_impl_mock.cpp",
@@ -408,6 +437,7 @@ ohos_unittest("HeartBeatCtrlTest") {
     "$dsoftbus_root_path/tests/core/bus_center/test/heartbeat/hb_ctrl_test.cpp",
     "$dsoftbus_root_path/tests/core/bus_center/test/mock/src/hb_ctrl_deps_mock.cpp",
     "$dsoftbus_root_path/tests/core/bus_center/test/mock/src/hb_strategy_mock.cpp",
+    "$dsoftbus_root_path/core/frame/init/src/g_enhance_lnn_func.c",
   ]
 
   include_dirs = [
@@ -450,6 +480,12 @@ ohos_unittest("HeartBeatCtrlTest") {
     "$dsoftbus_root_path/interfaces/inner_kits/lnn",
     "$dsoftbus_root_path/interfaces/kits/bus_center",
     "$dsoftbus_root_path/interfaces/kits/discovery",
+    "$dsoftbus_root_path/interfaces/kits/adapter",
+    "$dsoftbus_root_path/interfaces/kits/transport",
+    "$dsoftbus_root_path/interfaces/kits/authentication",
+    "$dsoftbus_root_path/interfaces/kits/lnn",
+    "$dsoftbus_root_path/interfaces/kits/disc",
+    "$dsoftbus_root_path/core/frame/init/include",
   ]
 
   deps = [
@@ -533,7 +569,6 @@ ohos_unittest("ClientProxyTest") {
 ohos_unittest("BusCenterIpcTest") {
   module_out_path = module_output_path
   sources = [
-    "$dsoftbus_root_path/core/bus_center/lnn/decision_center/src/lnn_ranging_manager_virtual.c",
     "$dsoftbus_root_path/core/frame/common/src/softbus_ddos.c",
     "$dsoftbus_root_path/tests/core/bus_center/test/ipc/bus_center_ipc_test.cpp",
     "$dsoftbus_root_path/tests/core/bus_center/test/mock/src/bus_center_ipc_mock.cpp",
@@ -565,6 +600,9 @@ ohos_unittest("BusCenterIpcTest") {
     "$dsoftbus_root_path/interfaces/inner_kits/lnn",
     "$dsoftbus_root_path/interfaces/kits/bus_center",
     "$dsoftbus_root_path/interfaces/kits/discovery",
+    "$dsoftbus_root_path/interfaces/kits/authentication",
+    "$dsoftbus_root_path/interfaces/kits/lnn",
+    "$dsoftbus_root_path/interfaces/kits/disc",
   ]
 
   deps = [
@@ -604,6 +642,8 @@ ohos_unittest("HeartBeatCtrlStaticTest") {
     "$dsoftbus_root_path/tests/core/bus_center/test/heartbeat/hb_ctrl_static_test.cpp",
     "$dsoftbus_root_path/tests/core/bus_center/test/mock/src/hb_ctrl_static_mock.cpp",
     "$dsoftbus_root_path/tests/core/discovery/ble/softbus_ble_mock/ble_mock.cpp",
+    "$dsoftbus_root_path/core/frame/init/src/g_enhance_lnn_func.c",
+    "$dsoftbus_root_path/core/frame/init/src/g_enhance_lnn_func_pack.c",
   ]
 
   include_dirs = [
@@ -646,6 +686,12 @@ ohos_unittest("HeartBeatCtrlStaticTest") {
     "$dsoftbus_root_path/interfaces/inner_kits/lnn",
     "$dsoftbus_root_path/interfaces/kits/bus_center",
     "$dsoftbus_root_path/interfaces/kits/discovery",
+    "$dsoftbus_root_path/interfaces/kits/adapter",
+    "$dsoftbus_root_path/interfaces/kits/transport",
+    "$dsoftbus_root_path/interfaces/kits/authentication",
+    "$dsoftbus_root_path/interfaces/kits/lnn",
+    "$dsoftbus_root_path/interfaces/kits/disc",
+    "$dsoftbus_root_path/core/frame/init/include",
     "$dsoftbus_root_path/tests/core/discovery/ble/softbus_ble_mock",
     "$dsoftbus_root_path/core/discovery/ble/softbus_ble/include",
     "$dsoftbus_root_path/adapter/common/net/bluetooth/broadcast/interface",
@@ -686,7 +732,6 @@ ohos_unittest("HeartBeatCtrlStaticTest") {
 ohos_unittest("BusCenterDecisionCenterTest") {
   module_out_path = module_output_path
   sources = [
-    "$dsoftbus_root_path/core/bus_center/lnn/decision_center/src/lnn_ranging_manager_virtual.c",
     "$dsoftbus_root_path/core/bus_center/lnn/net_builder/src/lnn_net_builder_init.c",
     "$dsoftbus_root_path/core/bus_center/lnn/net_builder/src/lnn_net_builder_process.c",
     "$dsoftbus_root_path/core/bus_center/lnn/net_ledger/common/src/lnn_node_info.c",
@@ -696,6 +741,8 @@ ohos_unittest("BusCenterDecisionCenterTest") {
     "$dsoftbus_root_path/tests/core/bus_center/test/mock/src/bus_center_decision_center_mock.cpp",
     "$dsoftbus_root_path/tests/core/bus_center/test/service/bus_center_decision_center_test.cpp",
     "$dsoftbus_root_path/tests/core/discovery/ble/softbus_ble_mock/ble_mock.cpp",
+    "$dsoftbus_root_path/core/frame/init/src/g_enhance_lnn_func.c",
+    "$dsoftbus_root_path/core/frame/init/src/g_enhance_lnn_func_pack.c",
   ]
 
   include_dirs = [
@@ -740,6 +787,13 @@ ohos_unittest("BusCenterDecisionCenterTest") {
     "$dsoftbus_root_path/adapter/common/net/wifi/include",
     "$dsoftbus_root_path/core/broadcast/common/include",
     "$dsoftbus_root_path/interfaces/kits/bus_center",
+    "$dsoftbus_root_path/interfaces/kits/adapter",
+    "$dsoftbus_root_path/interfaces/kits/authentication",
+    "$dsoftbus_root_path/interfaces/kits/lnn",
+    "$dsoftbus_root_path/interfaces/kits/disc",
+    "$dsoftbus_root_path/interfaces/kits/broadcast",
+    "$dsoftbus_root_path/interfaces/kits/transport",
+    "$dsoftbus_root_path/core/frame/init/include",
     "$dsoftbus_root_path/tests/core/connection/interface",
     "$dsoftbus_root_path/core/transmission/trans_channel/manager/include",
   ]

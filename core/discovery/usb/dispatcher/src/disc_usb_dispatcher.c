@@ -17,7 +17,7 @@
 #include "disc_event.h"
 #include "disc_log.h"
 #include "disc_manager.h"
-#include "disc_usb.h"
+#include "g_enhance_disc_func_pack.h"
 #include "softbus_error_code.h"
 
 #define DISPATCHER_SIZE 1
@@ -197,7 +197,7 @@ DiscoveryFuncInterface *DiscUsbDispatcherInit(DiscInnerCallback *discInnerCb)
     }
     DISC_LOGI(DISC_INIT, "DiscUsbFrameInit");
     g_dispatcherSize = 0;
-    DiscoveryUsbDispatcherInterface *usbInterface = DiscUsbInit(discInnerCb);
+    DiscoveryUsbDispatcherInterface *usbInterface = DiscUsbInitPacked(discInnerCb);
     if (usbInterface == NULL) {
         DfxRecordUsbInitEnd(EVENT_STAGE_USB_INIT, SOFTBUS_DISCOVER_MANAGER_INIT_FAIL);
         DISC_LOGE(DISC_INIT, "DiscUsbInit err");
@@ -225,5 +225,5 @@ void DiscUsbDispatcherDeinit(void)
         g_usbDispatchers[i] = NULL;
     }
     g_dispatcherSize = 0;
-    DiscUsbDeinit();
+    DiscUsbDeinitPacked();
 }

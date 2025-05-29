@@ -18,7 +18,6 @@
 
 #include "common_inner.h"
 #include "vtp_instance.h"
-#include "vtp_stream_opt.h"
 
 namespace Communication {
 namespace SoftBus {

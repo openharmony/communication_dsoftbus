@@ -32,16 +32,15 @@
 #include "common_list.h"
 #include "lnn_async_callback_utils.h"
 #include "lnn_battery_info.h"
-#include "lnn_cipherkey_manager.h"
 #include "lnn_connection_addr_utils.h"
 #include "lnn_connection_fsm.h"
 #include "lnn_deviceinfo_to_profile.h"
 #include "lnn_devicename_info.h"
 #include "lnn_discovery_manager.h"
 #include "lnn_distributed_net_ledger.h"
-#include "lnn_fast_offline.h"
+
 #include "lnn_heartbeat_utils.h"
-#include "lnn_link_finder.h"
+
 #include "lnn_local_net_ledger.h"
 #include "lnn_log.h"
 #include "lnn_map.h"

@@ -21,7 +21,8 @@
 #include "softbus_adapter_bt_common.h"
 #include "softbus_adapter_mem.h"
 #include "softbus_adapter_thread.h"
-#include "softbus_ble_gatt.h"
+#include "softbus_broadcast_adapter_interface.h"
+#include "softbus_ble_gatt_public.h"
 #include "softbus_broadcast_adapter_interface.h"
 #include "softbus_broadcast_manager.h"
 #include "softbus_broadcast_mgr_utils.h"
@@ -1253,6 +1254,8 @@ static int32_t CopyScanFilterServiceInfo(const BcScanFilter *srcFilter, SoftBusB
 
 static int32_t CopySoftBusBcScanFilter(const BcScanFilter *srcFilter, SoftBusBcScanFilter *dstFilter)
 {
+    DISC_CHECK_AND_RETURN_RET_LOGE(srcFilter != NULL, SOFTBUS_INVALID_PARAM, DISC_BROADCAST, "srcFilter is NULL");
+    DISC_CHECK_AND_RETURN_RET_LOGE(dstFilter != NULL, SOFTBUS_INVALID_PARAM, DISC_BROADCAST, "dstFilter is NULL");
     if (srcFilter->address != NULL) {
         uint32_t addressLength = strlen((char *)srcFilter->address) + 1;
         dstFilter->address = (int8_t *)SoftBusCalloc(addressLength);
@@ -1407,7 +1410,12 @@ static int32_t DeleteFilterByIndex(int32_t listenerId, SoftBusBcScanFilter **ada
         "memory allocation failed");
     for (int i = 0; i < size; i++) {
         int filterIndex = g_scanManager[listenerId].deleted[i];
-        DISC_CHECK_AND_RETURN_RET_LOGE(filterIndex != 0, SOFTBUS_INVALID_PARAM, DISC_BROADCAST, "invalid index!");
+        if (filterIndex == 0) {
+            DISC_LOGE(DISC_BROADCAST, "invalid index");
+            ReleaseSoftBusBcScanFilter(*adapterFilter, size);
+            *adapterFilter = NULL;
+            return SOFTBUS_INVALID_PARAM;
+        }
         (*adapterFilter + i)->filterIndex = filterIndex;
         ret = g_interface[g_interfaceId]->SetScanParams(g_scanManager[listenerId].adapterScanId, adapterParam,
             *adapterFilter, filterSize, SOFTBUS_SCAN_FILTER_CMD_DELETE);
@@ -1428,11 +1436,15 @@ static int32_t GetAddFiltersByIndex(int32_t listenerId, SoftBusBcScanFilter **ad
     uint8_t size = g_scanManager[listenerId].addSize;
     DISC_CHECK_AND_RETURN_RET_LOGE(size != 0, SOFTBUS_INVALID_PARAM, DISC_BROADCAST, "size is 0");
     *adapterFilter = (SoftBusBcScanFilter *)SoftBusCalloc(sizeof(SoftBusBcScanFilter) * size);
+    DISC_CHECK_AND_RETURN_RET_LOGE(*adapterFilter != NULL, SOFTBUS_MALLOC_ERR, DISC_BROADCAST,
+        "memory allocation failed");
     for (int i = 0; i < size; i++) {
         int addIndex = g_scanManager[listenerId].added[i];
         BcScanFilter *tempFilter = &(g_scanManager[listenerId].filter[addIndex]);
         if (tempFilter->filterIndex == 0) {
             DISC_LOGE(DISC_BROADCAST, "invalid index");
+            ReleaseSoftBusBcScanFilter(*adapterFilter, size);
+            *adapterFilter = NULL;
             return SOFTBUS_INVALID_PARAM;
         }
         ret = CopySoftBusBcScanFilter(tempFilter, (*adapterFilter) + i);
@@ -1453,6 +1465,8 @@ static int32_t GetModifyFiltersByIndex(int32_t listenerId, SoftBusBcScanFilter *
     int32_t ret;
     uint8_t size = g_scanManager[listenerId].addSize;
     *adapterFilter = (SoftBusBcScanFilter *)SoftBusCalloc(sizeof(SoftBusBcScanFilter) * size);
+    DISC_CHECK_AND_RETURN_RET_LOGE(*adapterFilter != NULL, SOFTBUS_MALLOC_ERR, DISC_BROADCAST,
+        "memory allocation failed");
     for (int i = 0; i < size; i++) {
         uint8_t addIndex = g_scanManager[listenerId].added[i];
         uint8_t deleteIndex = g_scanManager[listenerId].deleted[i];
@@ -1462,6 +1476,8 @@ static int32_t GetModifyFiltersByIndex(int32_t listenerId, SoftBusBcScanFilter *
         tempFilter->filterIndex = deleteIndex;
         if (tempFilter->filterIndex == 0) {
             DISC_LOGE(DISC_BROADCAST, "invalid index");
+            ReleaseSoftBusBcScanFilter(*adapterFilter, size);
+            *adapterFilter = NULL;
             return SOFTBUS_INVALID_PARAM;
         }
         ret = CopySoftBusBcScanFilter(tempFilter, (*adapterFilter) + i);
@@ -2439,12 +2455,23 @@ bool CompareSameFilter(BcScanFilter *srcFilter, BcScanFilter *dstFilter)
 
 static int32_t CompareFilterAndGetIndex(int32_t listenerId, BcScanFilter *filter, uint8_t filterNum)
 {
+    DISC_CHECK_AND_RETURN_RET_LOGE(filter != NULL, SOFTBUS_INVALID_PARAM, DISC_BROADCAST, "filter is nullptr");
+    DISC_CHECK_AND_RETURN_RET_LOGE(!((filterNum <= 0) && (filterNum >= MAX_FILTER_SIZE)),
+        SOFTBUS_INVALID_PARAM, DISC_BROADCAST, "invalid param filterNum");
+
     ReleaseScanIdx(listenerId);
 
     g_scanManager[listenerId].added = (uint8_t *)SoftBusCalloc(filterNum * sizeof(uint8_t));
+    DISC_CHECK_AND_RETURN_RET_LOGE(g_scanManager[listenerId].added != NULL, SOFTBUS_MALLOC_ERR, DISC_BROADCAST,
+        "memory allocation failed");
     g_scanManager[listenerId].addSize = 0;
     g_scanManager[listenerId].deleted = (uint8_t *)SoftBusCalloc(g_scanManager[listenerId].filterSize *
         sizeof(uint8_t));
+    if (g_scanManager[listenerId].deleted == NULL) {
+        DISC_LOGI(DISC_BROADCAST, "memory allocation failed");
+        ReleaseScanIdx(listenerId);
+        return SOFTBUS_MALLOC_ERR;
+    }
     g_scanManager[listenerId].deleteSize = 0;
 
     for (int i = 0; i < g_scanManager[listenerId].filterSize; i++) {
@@ -2473,6 +2500,7 @@ static int32_t CompareFilterAndGetIndex(int32_t listenerId, BcScanFilter *filter
                 DISC_LOGI(DISC_BROADCAST, "new filter add index, filterIndex=%{public}d", filter[i].filterIndex);
             } else {
                 DISC_LOGI(DISC_BROADCAST, "filter add index failed");
+                ReleaseScanIdx(listenerId);
                 return SOFTBUS_INVALID_PARAM;
             }
         }
@@ -2484,7 +2512,8 @@ int32_t SetScanFilter(int32_t listenerId, const BcScanFilter *scanFilter, uint8_
 {
     DISC_LOGI(DISC_BROADCAST, "enter set scan filter, filterNum=%{public}d", filterNum);
     DISC_CHECK_AND_RETURN_RET_LOGE(scanFilter != NULL, SOFTBUS_INVALID_PARAM, DISC_BROADCAST, "param is nullptr");
-    DISC_CHECK_AND_RETURN_RET_LOGE(filterNum != 0, SOFTBUS_INVALID_PARAM, DISC_BROADCAST, "filterNum is 0");
+    DISC_CHECK_AND_RETURN_RET_LOGE(!((filterNum <= 0) && (filterNum >= MAX_FILTER_SIZE)),
+        SOFTBUS_INVALID_PARAM, DISC_BROADCAST, "invalid param filterNum");
     int32_t ret = SoftBusMutexLock(&g_scanLock);
     DISC_CHECK_AND_RETURN_RET_LOGE(ret == SOFTBUS_OK, SOFTBUS_LOCK_ERR, DISC_BROADCAST, "mutex error");
 

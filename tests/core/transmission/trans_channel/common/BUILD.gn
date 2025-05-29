@@ -50,12 +50,14 @@ ohos_unittest("TransLaneTest") {
     "$dsoftbus_core_path/transmission/session/include",
 
     "$softbus_adapter_common/net/wifi/include",
+    "$dsoftbus_root_path/interfaces/kits/connect",
   ]
 
   deps = [
     "$dsoftbus_core_path/common:softbus_utils",
     "$dsoftbus_core_path/frame:softbus_server",
     "$dsoftbus_root_path/adapter:softbus_adapter",
+    "$dsoftbus_root_path/core/connection/wifi_direct_cpp:wifi_direct",
   ]
 
   external_deps = [
@@ -104,12 +106,14 @@ ohos_unittest("TransLaneCommonTest") {
     "$dsoftbus_test_path/core/transmission/trans_channel/common/mock",
 
     "$softbus_adapter_common/net/wifi/include",
+    "$dsoftbus_root_path/interfaces/kits/connect",
   ]
 
   deps = [
     "$dsoftbus_core_path/common:softbus_utils",
     "$dsoftbus_core_path/frame:softbus_server",
     "$dsoftbus_root_path/adapter:softbus_adapter",
+    "$dsoftbus_root_path/core/connection/wifi_direct_cpp:wifi_direct",
   ]
 
   external_deps = [

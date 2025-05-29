@@ -22,6 +22,8 @@
 #include "auth_manager.h"
 #include "bus_center_info_key.h"
 #include "bus_center_manager.h"
+#include "g_enhance_lnn_func.h"
+#include "g_enhance_lnn_func_pack.h"
 #include "lnn_async_callback_utils.h"
 #include "lnn_distributed_net_ledger.h"
 #include "lnn_event.h"
@@ -33,9 +35,7 @@
 #include "lnn_lane_link_conflict.h"
 #include "lnn_lane_link_ledger.h"
 #include "lnn_lane_link_wifi_direct.h"
-#include "lnn_lane_prelink.h"
 #include "lnn_lane_reliability.h"
-#include "lnn_lane_vap_info.h"
 #include "lnn_local_net_ledger.h"
 #include "lnn_log.h"
 #include "lnn_network_manager.h"
@@ -50,6 +50,7 @@
 #include "softbus_network_utils.h"
 #include "softbus_utils.h"
 #include "softbus_proxychannel_pipeline.h"
+#include "softbus_init_common.h"
 #include "wifi_direct_manager.h"
 
 typedef struct {
@@ -610,6 +611,30 @@ static bool CheckStrictProtocol(const char *networkId, LaneLinkType linkType)
     return (linkType == LANE_P2P && IsSupportWifiDirectEnhance(networkId));
 }
 
+static bool CheckRatePreference(uint32_t laneReqId, LaneLinkType linkType)
+{
+    if (linkType != LANE_HML && linkType != LANE_HML_RAW) {
+        return false;
+    }
+    TransReqInfo reqInfo;
+    (void)memset_s(&reqInfo, sizeof(TransReqInfo), 0, sizeof(TransReqInfo));
+    if (GetTransReqInfoByLaneReqId(laneReqId, &reqInfo) != SOFTBUS_OK) {
+        LNN_LOGE(LNN_LANE, "get lane reqInfo fail");
+        return false;
+    }
+    if (!reqInfo.allocInfo.qosRequire.ratePreference) {
+        return false;
+    }
+    return (!CheckLaneLinkExistByType(LANE_HML) && !CheckLaneLinkExistByType(LANE_HML_RAW));
+}
+
+static void GenerateWifiDirectExtParam(const char *networkId, LaneLinkType linkType, uint32_t laneReqId,
+    struct WifiDirectConnectInfo *wifiDirectInfo)
+{
+    wifiDirectInfo->isStrictProtocol = CheckStrictProtocol(networkId, linkType);
+    wifiDirectInfo->ratePreference = CheckRatePreference(laneReqId, linkType);
+}
+
 static int32_t GetP2pLinkReqParamByChannelRequetId(
     int32_t channelRequestId, int32_t channelId, uint32_t p2pRequestId, struct WifiDirectConnectInfo *wifiDirectInfo)
 {
@@ -651,8 +676,8 @@ static int32_t GetP2pLinkReqParamByChannelRequetId(
         wifiDirectInfo->isNetworkDelegate = item->p2pInfo.networkDelegate;
         wifiDirectInfo->connectType = item->laneRequestInfo.linkType == LANE_HML ?
             WIFI_DIRECT_CONNECT_TYPE_AUTH_NEGO_HML : WIFI_DIRECT_CONNECT_TYPE_AUTH_NEGO_P2P;
-        wifiDirectInfo->isStrictProtocol = CheckStrictProtocol(item->laneRequestInfo.networkId,
-            item->laneRequestInfo.linkType);
+        GenerateWifiDirectExtParam(item->laneRequestInfo.networkId, item->laneRequestInfo.linkType,
+            item->laneRequestInfo.laneReqId, wifiDirectInfo);
         item->p2pInfo.p2pRequestId = p2pRequestId;
         item->proxyChannelInfo.channelId = channelId;
         LinkUnlock();
@@ -706,8 +731,8 @@ static int32_t GetP2pLinkReqParamByAuthHandle(uint32_t authRequestId, uint32_t p
         wifiDirectInfo->isNetworkDelegate = item->p2pInfo.networkDelegate;
         wifiDirectInfo->connectType = item->laneRequestInfo.linkType == LANE_HML ?
             WIFI_DIRECT_CONNECT_TYPE_AUTH_NEGO_HML : WIFI_DIRECT_CONNECT_TYPE_AUTH_NEGO_P2P;
-        wifiDirectInfo->isStrictProtocol = CheckStrictProtocol(item->laneRequestInfo.networkId,
-            item->laneRequestInfo.linkType);
+        GenerateWifiDirectExtParam(item->laneRequestInfo.networkId, item->laneRequestInfo.linkType,
+            item->laneRequestInfo.laneReqId, wifiDirectInfo);
         LinkUnlock();
         return SOFTBUS_OK;
     }
@@ -1311,18 +1336,18 @@ static int32_t NotifyRawLinkSucc(uint32_t p2pRequestId, const struct WifiDirectL
 
 static void TryDelPreLinkByConnReqId(uint32_t connReqId)
 {
-    if (HaveConcurrencyPreLinkReqIdByReuseConnReqId(connReqId, false)) {
+    if (HaveConcurrencyPreLinkReqIdByReuseConnReqIdPacked(connReqId, false)) {
         uint32_t *laneReqIdPtr = (uint32_t *)SoftBusCalloc(sizeof(uint32_t));
         if (laneReqIdPtr == NULL) {
             LNN_LOGE(LNN_LANE, "create lane req id fail");
             return;
         }
-        if (GetConcurrencyLaneReqIdByConnReqId(connReqId, laneReqIdPtr) != SOFTBUS_OK) {
+        if (GetConcurrencyLaneReqIdByConnReqIdPacked(connReqId, laneReqIdPtr) != SOFTBUS_OK) {
             LNN_LOGE(LNN_LANE, "get lane req id fail");
             SoftBusFree(laneReqIdPtr);
             return;
         }
-        if (LnnAsyncCallbackHelper(GetLooper(LOOP_TYPE_DEFAULT), LnnFreePreLink, (void *)laneReqIdPtr) != SOFTBUS_OK) {
+        if (LnnAsyncCallbackHelper(GetLooper(LOOP_TYPE_DEFAULT), LnnFreePreLinkPacked, (void *)laneReqIdPtr) != SOFTBUS_OK) {
             LNN_LOGE(LNN_LANE, "async call LnnFreePreLink fail");
             SoftBusFree(laneReqIdPtr);
             laneReqIdPtr = NULL;
@@ -1334,7 +1359,7 @@ static void NotifyRawLinkConnectSuccess(uint32_t p2pRequestId, const struct Wifi
     LaneLinkInfo *linkInfo)
 {
     if (link->isReuse) {
-        if (HaveConcurrencyPreLinkReqIdByReuseConnReqId(p2pRequestId, true)) {
+        if (HaveConcurrencyPreLinkReqIdByReuseConnReqIdPacked(p2pRequestId, true)) {
             TryDelPreLinkByConnReqId(p2pRequestId);
             NotifyLinkSucc(ASYNC_RESULT_P2P, p2pRequestId, linkInfo, link->linkId);
         } else {
@@ -1543,7 +1568,7 @@ static void HandleActionTriggerError(uint32_t p2pRequestId)
     }
     LNN_LOGI(LNN_LANE, "current guideType=%{public}d", guideType);
     if (guideType == LANE_ACTION_TRIGGER || guideType == LANE_BLE_TRIGGER) {
-        (void)LnnRequestCheckOnlineStatus(reqInfo.laneRequestInfo.networkId, BLE_TRIGGER_TIMEOUT);
+        (void)LnnRequestCheckOnlineStatusPacked(reqInfo.laneRequestInfo.networkId, BLE_TRIGGER_TIMEOUT);
     }
 }
 
@@ -1632,7 +1657,7 @@ static void OnWifiDirectConnectFailure(uint32_t p2pRequestId, int32_t reason)
             NotifyLinkFail(ASYNC_RESULT_P2P, p2pRequestId, reason);
             return;
         }
-        int32_t ret = LnnSyncPtk(reqInfo.laneRequestInfo.networkId);
+        int32_t ret = LnnSyncPtkPacked(reqInfo.laneRequestInfo.networkId);
         LNN_LOGI(LNN_LANE, "syncptk done, ret=%{public}d", ret);
     }
     if (IsGuideChannelRetryErrcode(p2pRequestId, reason)) {
@@ -1934,8 +1959,8 @@ static int32_t GetAuthTriggerLinkReqParamByAuthHandle(uint32_t authRequestId, ui
         wifiDirectInfo->ipAddrType = item->laneRequestInfo.isSupportIpv6 ? IPV6 : IPV4;
         wifiDirectInfo->isNetworkDelegate = item->p2pInfo.networkDelegate;
         wifiDirectInfo->connectType = WIFI_DIRECT_CONNECT_TYPE_AUTH_TRIGGER_HML;
-        wifiDirectInfo->isStrictProtocol = CheckStrictProtocol(item->laneRequestInfo.networkId,
-            item->laneRequestInfo.linkType);
+        GenerateWifiDirectExtParam(item->laneRequestInfo.networkId, item->laneRequestInfo.linkType,
+            item->laneRequestInfo.laneReqId, wifiDirectInfo);
         LinkUnlock();
         return SOFTBUS_OK;
     }
@@ -2326,7 +2351,7 @@ static int32_t OpenBleTriggerToConn(const LinkRequest *request, uint32_t laneReq
         return SOFTBUS_STRCPY_ERR;
     }
     wifiDirectInfo.isNetworkDelegate = request->networkDelegate;
-    wifiDirectInfo.isStrictProtocol = CheckStrictProtocol(request->peerNetworkId, request->linkType);
+    GenerateWifiDirectExtParam(request->peerNetworkId, request->linkType, laneReqId, &wifiDirectInfo);
 
     struct WifiDirectConnectCallback cb = {
         .onConnectSuccess = OnWifiDirectConnectSuccess,
@@ -2348,10 +2373,10 @@ static void TryConcurrencyToConn(const LinkRequest *request, uint32_t laneLinkRe
     struct WifiDirectConnectInfo *wifiDirectInfo)
 {
     uint32_t recordLaneReqId = 0;
-    if (GetConcurrencyLaneReqIdByActionId(request->actionAddr, &recordLaneReqId) == SOFTBUS_OK) {
+    if (GetConcurrencyLaneReqIdByActionIdPacked(request->actionAddr, &recordLaneReqId) == SOFTBUS_OK) {
         wifiDirectInfo->connectType = WIFI_DIRECT_CONNECT_TYPE_BLE_TRIGGER_HML;
         wifiDirectInfo->ipAddrType = IPV4;
-        if (UpdateConcurrencyReuseLaneReqIdByActionId(request->actionAddr, laneLinkReqId,
+        if (UpdateConcurrencyReuseLaneReqIdByActionIdPacked(request->actionAddr, laneLinkReqId,
             wifiDirectInfo->requestId) != SOFTBUS_OK) {
             LNN_LOGE(LNN_LANE, "pre link update reuse link lane req id fail");
         }
@@ -2388,7 +2413,7 @@ static int32_t OpenActionToConn(const LinkRequest *request, uint32_t laneLinkReq
         return SOFTBUS_STRCPY_ERR;
     }
     wifiDirectInfo.isNetworkDelegate = request->networkDelegate;
-    wifiDirectInfo.isStrictProtocol = CheckStrictProtocol(request->peerNetworkId, request->linkType);
+    GenerateWifiDirectExtParam(request->peerNetworkId, request->linkType, laneLinkReqId, &wifiDirectInfo);
 
     struct WifiDirectConnectCallback cb = {
         .onConnectSuccess = OnWifiDirectConnectSuccess,
@@ -2473,7 +2498,8 @@ static int32_t UpdateP2pReuseInfoByReqId(AsyncResultType type, uint32_t requestI
     return SOFTBUS_LANE_NOT_FOUND;
 }
 
-static int32_t GetWifiDirectParamWithReuse(const LinkRequest *request, struct WifiDirectConnectInfo *wifiDirectInfo)
+static int32_t GetWifiDirectParamWithReuse(const LinkRequest *request, uint32_t laneReqId,
+    struct WifiDirectConnectInfo *wifiDirectInfo)
 {
     wifiDirectInfo->requestId = GetWifiDirectManager()->getRequestId();
     wifiDirectInfo->pid = request->pid;
@@ -2501,7 +2527,7 @@ static int32_t GetWifiDirectParamWithReuse(const LinkRequest *request, struct Wi
     }
     wifiDirectInfo->isNetworkDelegate = request->networkDelegate;
     wifiDirectInfo->ipAddrType = request->isSupportIpv6 ? IPV6 : IPV4;
-    wifiDirectInfo->isStrictProtocol = CheckStrictProtocol(request->peerNetworkId, request->linkType);
+    GenerateWifiDirectExtParam(request->peerNetworkId, request->linkType, laneReqId, wifiDirectInfo);
     return SOFTBUS_OK;
 }
 
@@ -2509,7 +2535,7 @@ static int32_t ConnectWifiDirectWithReuse(const LinkRequest *request, uint32_t l
 {
     struct WifiDirectConnectInfo wifiDirectInfo;
     (void)memset_s(&wifiDirectInfo, sizeof(wifiDirectInfo), 0, sizeof(wifiDirectInfo));
-    int32_t ret = GetWifiDirectParamWithReuse(request, &wifiDirectInfo);
+    int32_t ret = GetWifiDirectParamWithReuse(request, laneReqId, &wifiDirectInfo);
     if (ret != SOFTBUS_OK) {
         LNN_LOGE(LNN_LANE, "get wifidirect reuse param fail, laneReqId=%{public}u, ret=%{public}d", laneReqId, ret);
         return ret;
@@ -2885,8 +2911,8 @@ static int32_t GenerateWifiDirectInfo(const P2pLinkReqList *reqInfo, struct Wifi
         LNN_LOGE(LNN_LANE, "strcpy remote networkId fail");
         return SOFTBUS_STRCPY_ERR;
     }
-    info->isStrictProtocol = CheckStrictProtocol(reqInfo->laneRequestInfo.networkId,
-        reqInfo->laneRequestInfo.linkType);
+    GenerateWifiDirectExtParam(reqInfo->laneRequestInfo.networkId, reqInfo->laneRequestInfo.linkType,
+        reqInfo->laneRequestInfo.laneReqId, info);
     WdGuideInfo guideInfo;
     (void)memset_s(&guideInfo, sizeof(WdGuideInfo), -1, sizeof(WdGuideInfo));
     if (GetGuideInfo(reqInfo->laneRequestInfo.laneReqId, reqInfo->laneRequestInfo.linkType,
@@ -3061,7 +3087,7 @@ static void DumpHmlPreferChannel(const LinkRequest *request)
         return;
     }
     int32_t preferChannel = 0;
-    int32_t ret = LnnGetRecommendChannel(udid, &preferChannel);
+    int32_t ret = LnnGetRecommendChannelPacked(udid, &preferChannel);
     if (ret != SOFTBUS_OK) {
         LNN_LOGE(LNN_LANE, "get recommend channel fail, ret=%{public}d", ret);
         return;
@@ -3331,7 +3357,7 @@ static void HandlePtkNotMatch(const char *remoteNetworkId, uint32_t len, int32_t
     LNN_LOGI(LNN_LANE, "handle ptk not match, networkId=%{public}s, result=%{public}d",
         AnonymizeWrapper(anonyNetworkId), result);
     AnonymizeFree(anonyNetworkId);
-    if (LnnSyncPtk(remoteNetworkId) != SOFTBUS_OK) {
+    if (LnnSyncPtkPacked(remoteNetworkId) != SOFTBUS_OK) {
         LNN_LOGE(LNN_LANE, "sync ptk fail");
         return;
     }

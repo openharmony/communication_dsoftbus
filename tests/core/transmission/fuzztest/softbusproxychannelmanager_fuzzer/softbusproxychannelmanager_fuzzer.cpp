@@ -24,7 +24,6 @@
 #include "softbus_conn_interface.h"
 #include "softbus_proxychannel_manager.h"
 #include "softbus_proxychannel_transceiver.h"
-#include "softbus_qos.h"
 
 namespace OHOS {
 class SoftBusProxyChannelManagerTestEnv {
@@ -34,7 +33,6 @@ public:
         isInited_ = false;
         (void)ConnServerInit();
         (void)TransProxyManagerInit(TransServerGetChannelCb());
-        (void)InitQos();
         isInited_ = true;
     }
 

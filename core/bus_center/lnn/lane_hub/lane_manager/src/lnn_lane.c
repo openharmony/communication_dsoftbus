@@ -21,6 +21,8 @@
 #include "anonymizer.h"
 #include "bus_center_manager.h"
 #include "common_list.h"
+#include "g_enhance_lnn_func.h"
+#include "g_enhance_lnn_func_pack.h"
 #include "lnn_async_callback_utils.h"
 #include "lnn_distributed_net_ledger.h"
 #include "lnn_event.h"
@@ -36,9 +38,7 @@
 #include "lnn_lane_model.h"
 #include "lnn_lane_query.h"
 #include "lnn_lane_reliability.h"
-#include "lnn_lane_score.h"
 #include "lnn_lane_select.h"
-#include "lnn_lane_vap_info.h"
 #include "lnn_log.h"
 #include "lnn_select_rule.h"
 #include "lnn_trans_lane.h"
@@ -48,6 +48,7 @@
 #include "softbus_def.h"
 #include "softbus_error_code.h"
 #include "softbus_utils.h"
+#include "softbus_init_common.h"
 #include "wifi_direct_manager.h"
 
 #define ID_SHIFT_STEP 5
@@ -606,11 +607,11 @@ int32_t LnnQueryLaneResource(const LaneQueryInfo *queryInfo, const QosInfo *qosI
 static void LaneInitChannelRatingDelay(void *para)
 {
     (void)para;
-    if (LnnInitScore() != SOFTBUS_OK) {
+    if (LnnInitScorePacked() != SOFTBUS_OK) {
         LNN_LOGE(LNN_LANE, "init laneScoring fail");
         return;
     }
-    if (LnnStartScoring(LANE_SCORING_INTERVAL) != SOFTBUS_OK) {
+    if (LnnStartScoringPacked(LANE_SCORING_INTERVAL) != SOFTBUS_OK) {
         LNN_LOGE(LNN_LANE, "start laneScoring fail");
     }
 }
@@ -651,7 +652,7 @@ static int32_t InitLaneFirstStep(void)
         LNN_LOGE(LNN_LANE, "InitLaneSelectRule fail");
         return SOFTBUS_NO_INIT;
     }
-    int32_t ret = LnnInitVapInfo();
+    int32_t ret = LnnInitVapInfoPacked();
     if (ret != SOFTBUS_OK) {
         /* optional case, ignore result */
         LNN_LOGW(LNN_LANE, "init vap info err, ret=%{public}d", ret);
@@ -705,8 +706,8 @@ void DeinitLane(void)
     DeinitLaneModel();
     DeinitLaneLink();
     DeinitLaneListener();
-    LnnDeinitScore();
-    LnnDeinitVapInfo();
+    LnnDeinitScorePacked();
+    LnnDeinitVapInfoPacked();
     DeinitLaneSelectRule();
     DeinitLaneLinkConflict();
     DeinitLaneEvent();

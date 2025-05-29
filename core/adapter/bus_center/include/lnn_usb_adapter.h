@@ -16,16 +16,11 @@
 #define LNN_USB_ADAPTER_H
 
 #include <stdint.h>
+#include "lnn_usb_adapter_struct.h"
 
 #ifdef __cplusplus
 extern "C" {
 #endif
-
-#define NCM_DEVICE_NAME "ncm0"
-#define NCM_HOST_NAME "wwan0"
-#define NCM_DEVICE_MODE 0
-#define NCM_HOST_MODE 1
-#define NCM_TIME_OUT 10
 
 int32_t StartUsbNcmAdapter(int32_t mode);
 

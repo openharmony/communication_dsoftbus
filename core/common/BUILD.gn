@@ -24,12 +24,43 @@ common_utils_src = [
   "queue/softbus_queue.c",
   "security/sequence_verification/softbus_sequence_verification.c",
   "softbus_property/softbus_feature_config.c",
+  "$dsoftbus_root_path/core/frame/common/src/softbus_init_common.c",
   "utils/softbus_utils.c",
   "$dsoftbus_dfx_path/event/legacy/softbus_hisysevt_bus_center.c",
   "$dsoftbus_dfx_path/event/legacy/softbus_hisysevt_common.c",
   "$dsoftbus_dfx_path/event/legacy/softbus_hisysevt_connreporter.c",
   "$dsoftbus_dfx_path/event/legacy/softbus_hisysevt_discreporter.c",
   "$dsoftbus_dfx_path/event/legacy/softbus_hisysevt_transreporter.c",
+]
+dsoftbus_plugin_inc = [
+  "$dsoftbus_root_path/interfaces/kits/adapter",
+  "$dsoftbus_root_path/interfaces/kits/authentication",
+  "$dsoftbus_root_path/interfaces/kits/authentication/enhance",
+  "$dsoftbus_root_path/interfaces/kits/broadcast",
+  "$dsoftbus_root_path/interfaces/kits/bus_center",
+  "$dsoftbus_root_path/interfaces/kits/connect",
+  "$dsoftbus_root_path/interfaces/kits/disc",
+  "$dsoftbus_root_path/interfaces/kits/lnn",
+  "$dsoftbus_root_path/interfaces/kits/lnn/enhance",
+  "$dsoftbus_root_path/interfaces/kits/transport",
+  "$dsoftbus_root_path/core/common/include",
+  "$dsoftbus_root_path/adapter/common/include",
+  "$dsoftbus_root_path/sdk/bus_center/interface/common",
+  "$dsoftbus_root_path/core/frame/init/include",
+  "$dsoftbus_root_path/core/connection/wifi_direct_cpp/adapter",
+  "$dsoftbus_root_path/core/connection/wifi_direct_cpp/entity",
+  "$dsoftbus_root_path/core/connection/wifi_direct_cpp/data",
+  "$dsoftbus_root_path/core/connection/wifi_direct_cpp",
+  "$dsoftbus_root_path/core/connection/wifi_direct_cpp/utils",
+  "$dsoftbus_root_path/core/connection/wifi_direct_cpp/protocol",
+  "$dsoftbus_root_path/interfaces/kits/broadcast/enhance",
+  "$dsoftbus_root_path/interfaces/kits/adapter/enhance",
+  "$dsoftbus_root_path/interfaces/kits/nstackx",
+  "$dsoftbus_root_path/interfaces/kits/sdk",
+  "$dsoftbus_root_path/sdk/transmission/trans_channel/udp/stream/libsoftbus_stream",
+  "$dsoftbus_root_path/interfaces/inner_kits/lnn",
+  "$dsoftbus_root_path/sdk/frame/init/include",
+  "$dsoftbus_root_path/core/frame/common/include",
 ]
 external_deps = []
 
@@ -58,7 +89,7 @@ if (defined(ohos_lite)) {
       "$hilog_lite_include_path",
       "$utils_lite_include_path",
     ]
-    include_dirs += conn_common_inc + trans_common_inc
+    include_dirs += conn_common_inc + trans_common_inc + dsoftbus_plugin_inc
     if (board_toolchain_type != "iccarm") {
       cflags = [
         "-ffunction-sections",
@@ -79,8 +110,9 @@ if (defined(ohos_lite)) {
     include_dirs = [
       "$dsoftbus_root_path/interfaces/kits/common",
       "$dsoftbus_root_path/components/nstackx/nstackx_core/dfile/interface",
+      "$dsoftbus_root_path/core/frame/init/include",
     ]
-    include_dirs += conn_common_inc + trans_common_inc
+    include_dirs += conn_common_inc + trans_common_inc + dsoftbus_plugin_inc
     dfx_src =
         [ "$dsoftbus_dfx_path/event/legacy/softbus_hisysevt_nstack_virtual.c" ]
     sources = common_utils_src
@@ -128,7 +160,10 @@ if (defined(ohos_lite)) {
       "$softbus_adapter_common/include",
       "$dsoftbus_root_path/components/nstackx/nstackx_core/dfile/interface",
     ]
-    include_dirs += conn_common_inc + trans_common_inc
+    include_dirs += conn_common_inc + trans_common_inc + dsoftbus_plugin_inc
+  }
+  config("dsoftbus_utils_link_config") {
+    ldflags = [ "-Wl,--lto-O0" ]
   }
   ohos_shared_library("softbus_utils") {
     sanitize = {
@@ -143,14 +178,17 @@ if (defined(ohos_lite)) {
 
     include_dirs = [
       "$dsoftbus_root_path/interfaces/kits/common",
+      "$dsoftbus_root_path/interfaces/kits/lnn",
       "$dsoftbus_root_path/core/bus_center/utils/include",
       "$dsoftbus_root_path/core/common/include",
       "$dsoftbus_root_path/components/nstackx/fillp/include",
       "$dsoftbus_root_path/components/nstackx/nstackx_core/dfile/interface",
       "$dsoftbus_root_path/components/nstackx/nstackx_util/interface",
       "$dsoftbus_root_path/components/nstackx/nstackx_ctrl/interface",
+      "$dsoftbus_root_path/interfaces/kits/nstackx",
+      "$dsoftbus_root_path/core/frame/init/include",
     ]
-    include_dirs += conn_common_inc + trans_common_inc
+    include_dirs += conn_common_inc + trans_common_inc + dsoftbus_plugin_inc
     dfx_source = [
       "$dsoftbus_dfx_path/dumper/legacy/softbus_hidumper.c",
       "$dsoftbus_dfx_path/dumper/legacy/softbus_hidumper_bc_mgr.c",
@@ -170,8 +208,9 @@ if (defined(ohos_lite)) {
       defines += [ "ASAN_BUILD" ]
     }
 
+    configs = [ ":dsoftbus_utils_link_config" ]
     public_configs = [ ":dsoftbus_utils_interface_L2" ]
-    public_deps = [
+    deps = [
       "$dsoftbus_dfx_path:softbus_dfx",
       "$dsoftbus_root_path/adapter:softbus_adapter",
     ]
@@ -191,7 +230,7 @@ if (defined(ohos_lite)) {
       if (dsoftbus_feature_vtp) {
         cflags += [ "-DDFILLP_OPEN" ]
       }
-      public_deps += [
+      deps += [
         "$dsoftbus_root_path/components/nstackx/fillp:FillpSo.open",
         "$dsoftbus_root_path/components/nstackx/nstackx_core/dfile:nstackx_dfile.open",
         "$dsoftbus_root_path/components/nstackx/nstackx_ctrl:nstackx_ctrl",

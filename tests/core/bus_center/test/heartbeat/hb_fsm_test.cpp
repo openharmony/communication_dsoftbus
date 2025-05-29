@@ -21,7 +21,6 @@
 #include "distribute_net_ledger_mock.h"
 #include "hb_fsm_mock.h"
 #include "hb_strategy_mock.h"
-#include "lnn_ble_heartbeat.h"
 #include "lnn_connection_mock.h"
 #include "lnn_heartbeat_fsm.c"
 #include "lnn_heartbeat_utils.h"
@@ -1030,5 +1029,360 @@ HWTEST_F(HeartBeatFSMTest, HbFsmStateProcessFunc_01, TestSize.Level1)
 
     ret = HbFsmStateProcessFunc(&hbFsm.fsm, msgType, para);
     EXPECT_EQ(ret, false);
+}
+
+/*
+ * @tc.name: LnnPostScreenOffCheckDevMsgToHbFsm_03
+ * @tc.desc: LnnPostScreenOffCheckDevMsgToHbFsm test
+ * @tc.type: FUNC
+ * @tc.require:
+ */
+HWTEST_F(HeartBeatFSMTest, LnnPostScreenOffCheckDevMsgToHbFsm_03, TestSize.Level1)
+{
+    LnnHeartbeatFsm *hbFsm = LnnCreateHeartbeatFsm();
+    LnnCheckDevStatusMsgPara msgPara = {0};
+    int32_t ret = LnnPostScreenOffCheckDevMsgToHbFsm(hbFsm, &msgPara, TEST_TIME2);
+    SoftBusFree(hbFsm);
+    EXPECT_EQ(ret, SOFTBUS_OK);
+}
+
+/*
+ * @tc.name: LnnPostCheckDevStatusMsgToHbFsm_01
+ * @tc.desc: LnnPostCheckDevStatusMsgToHbFsm test
+ * @tc.type: FUNC
+ * @tc.require:
+ */
+HWTEST_F(HeartBeatFSMTest, LnnPostCheckDevStatusMsgToHbFsm_01, TestSize.Level1)
+{
+    LnnHeartbeatFsm hbFsm = { .fsmName = "test66", };
+    LnnCheckDevStatusMsgPara msgPara = {0};
+    int32_t ret = LnnPostCheckDevStatusMsgToHbFsm(&hbFsm, &msgPara, TEST_TIME3);
+    EXPECT_EQ(ret, SOFTBUS_NETWORK_POST_MSG_DELAY_FAIL);
+}
+
+/*
+ * @tc.name: LnnPostSendEndMsgToHbFsm_01
+ * @tc.desc: LnnPostSendEndMsgToHbFsm test
+ * @tc.type: FUNC
+ * @tc.require:
+ */
+HWTEST_F(HeartBeatFSMTest, LnnPostSendEndMsgToHbFsm_01, TestSize.Level1)
+{
+    LnnHeartbeatFsm hbFsm = { .fsmName = "test66", };
+    LnnHeartbeatSendEndData msgPara = {0};
+    int32_t ret = LnnPostSendEndMsgToHbFsm(&hbFsm, &msgPara, TEST_TIME3);
+    EXPECT_EQ(ret, SOFTBUS_NETWORK_POST_MSG_DELAY_FAIL);
+}
+
+/*
+ * @tc.name: LnnPostSendBeginMsgToHbFsm_03
+ * @tc.desc: LnnPostSendBeginMsgToHbFsm test
+ * @tc.type: FUNC
+ * @tc.require:
+ */
+HWTEST_F(HeartBeatFSMTest, LnnPostSendBeginMsgToHbFsm_03, TestSize.Level1)
+{
+    LnnHeartbeatFsm *hbFsm = LnnCreateHeartbeatFsm();
+    LnnProcessSendOnceMsgPara msgPara = {0};
+    int32_t ret = LnnPostSendBeginMsgToHbFsm(hbFsm, HEARTBEAT_TYPE_BLE_V0, false, &msgPara, TEST_TIME3);
+    SoftBusFree(hbFsm);
+    EXPECT_EQ(ret, SOFTBUS_OK);
+}
+
+/*
+ * @tc.name: LnnCreateHeartbeatFsm_01
+ * @tc.desc: LnnCreateHeartbeatFsm test
+ * @tc.type: FUNC
+ * @tc.require:
+ */
+HWTEST_F(HeartBeatFSMTest, LnnCreateHeartbeatFsm_01, TestSize.Level1)
+{
+    LooperDeinit();
+    LnnDeinitLnnLooper();
+    LnnHeartbeatFsm *ret = LnnCreateHeartbeatFsm();
+    EXPECT_EQ(ret, NULL);
+}
+
+/*
+ * @tc.name: InitHeartbeatFsm_01
+ * @tc.desc: InitHeartbeatFsm test
+ * @tc.type: FUNC
+ * @tc.require:
+ */
+HWTEST_F(HeartBeatFSMTest, InitHeartbeatFsm_01, TestSize.Level1)
+{
+    LnnHeartbeatFsm hbFsm = { .fsmName = "test66", };
+    LooperDeinit();
+    LnnDeinitLnnLooper();
+    int32_t ret = InitHeartbeatFsm(&hbFsm);
+    EXPECT_EQ(ret, SOFTBUS_LOOPER_ERR);
+}
+
+/*
+ * @tc.name: OnScreeOffCheckDevStatus_02
+ * @tc.desc: OnScreeOffCheckDevStatus test
+ * @tc.type: FUNC
+ * @tc.require:
+ */
+HWTEST_F(HeartBeatFSMTest, OnScreeOffCheckDevStatus_02, TestSize.Level1)
+{
+    NiceMock<LnnNetLedgertInterfaceMock> netLedgerMock;
+    NiceMock<DistributeLedgerInterfaceMock> distriLedgerMock;
+    NiceMock<HeartBeatFSMInterfaceMock> heartbeatFsmMock;
+    LnnCheckDevStatusMsgPara *msgPara = (LnnCheckDevStatusMsgPara *)SoftBusCalloc(sizeof(LnnCheckDevStatusMsgPara));
+    ASSERT_TRUE(msgPara != NULL);
+    LnnHeartbeatFsm *hbFsm = LnnCreateHeartbeatFsm();
+    msgPara->hasNetworkId = true;
+    EXPECT_CALL(heartbeatFsmMock, GetScreenState).WillRepeatedly(Return(SOFTBUS_SCREEN_ON));
+    EXPECT_CALL(distriLedgerMock, LnnGetDLHeartbeatTimestamp).WillRepeatedly(Return(SOFTBUS_OK));
+    int32_t ret = OnScreeOffCheckDevStatus(&(hbFsm->fsm), 0, msgPara);
+    SoftBusFree(hbFsm);
+    EXPECT_EQ(ret, SOFTBUS_OK);
+}
+
+/*
+ * @tc.name: OnScreeOffCheckDevStatus_03
+ * @tc.desc: OnScreeOffCheckDevStatus test
+ * @tc.type: FUNC
+ * @tc.require:
+ */
+HWTEST_F(HeartBeatFSMTest, OnScreeOffCheckDevStatus_03, TestSize.Level1)
+{
+    NiceMock<LnnNetLedgertInterfaceMock> netLedgerMock;
+    NiceMock<DistributeLedgerInterfaceMock> distriLedgerMock;
+    NiceMock<HeartBeatFSMInterfaceMock> heartbeatFsmMock;
+    LnnCheckDevStatusMsgPara *msgPara = (LnnCheckDevStatusMsgPara *)SoftBusCalloc(sizeof(LnnCheckDevStatusMsgPara));
+    ASSERT_TRUE(msgPara != NULL);
+    LnnHeartbeatFsm *hbFsm = LnnCreateHeartbeatFsm();
+    EXPECT_CALL(heartbeatFsmMock, GetScreenState).WillRepeatedly(Return(SOFTBUS_SCREEN_ON));
+    EXPECT_CALL(distriLedgerMock, LnnGetDLHeartbeatTimestamp).WillRepeatedly(Return(SOFTBUS_OK));
+    msgPara->hasNetworkId = false;
+    EXPECT_CALL(netLedgerMock, LnnGetAllOnlineNodeInfo).WillRepeatedly(Return(SOFTBUS_INVALID_PARAM));
+    int32_t ret = OnScreeOffCheckDevStatus(&(hbFsm->fsm), 0, msgPara);
+    SoftBusFree(hbFsm);
+    EXPECT_EQ(ret, SOFTBUS_NETWORK_GET_ALL_NODE_INFO_ERR);
+}
+
+/*
+ * @tc.name: OnScreeOffCheckDevStatus_04
+ * @tc.desc: OnScreeOffCheckDevStatus test
+ * @tc.type: FUNC
+ * @tc.require:
+ */
+HWTEST_F(HeartBeatFSMTest, OnScreeOffCheckDevStatus_04, TestSize.Level1)
+{
+    NiceMock<LnnNetLedgertInterfaceMock> netLedgerMock;
+    NiceMock<DistributeLedgerInterfaceMock> distriLedgerMock;
+    NiceMock<HeartBeatFSMInterfaceMock> heartbeatFsmMock;
+    int32_t infoNum = 2;
+    LnnCheckDevStatusMsgPara *msgPara = (LnnCheckDevStatusMsgPara *)SoftBusCalloc(sizeof(LnnCheckDevStatusMsgPara));
+    ASSERT_TRUE(msgPara != NULL);
+    NodeBasicInfo *nodeBasicInfo = (NodeBasicInfo *)SoftBusCalloc(sizeof(NodeBasicInfo) * infoNum);
+    ASSERT_TRUE(nodeBasicInfo != NULL);
+    LnnHeartbeatFsm *hbFsm = LnnCreateHeartbeatFsm();
+    EXPECT_CALL(heartbeatFsmMock, GetScreenState).WillRepeatedly(Return(SOFTBUS_SCREEN_ON));
+    EXPECT_CALL(distriLedgerMock, LnnGetDLHeartbeatTimestamp).WillRepeatedly(Return(SOFTBUS_OK));
+    EXPECT_CALL(netLedgerMock, LnnGetAllOnlineNodeInfo).WillOnce(
+        DoAll(SetArgPointee<0>(nodeBasicInfo), SetArgPointee<1>(infoNum), Return(SOFTBUS_OK)));
+    EXPECT_CALL(netLedgerMock, LnnIsLSANode).WillOnce(Return(true)).WillRepeatedly(Return(false));
+    msgPara->hasNetworkId = false;
+    int32_t ret = OnScreeOffCheckDevStatus(&(hbFsm->fsm), 0, msgPara);
+    SoftBusFree(hbFsm);
+    EXPECT_EQ(ret, SOFTBUS_OK);
+}
+
+/*
+ * @tc.name: OnScreeOffCheckDevStatus_05
+ * @tc.desc: OnScreeOffCheckDevStatus test
+ * @tc.type: FUNC
+ * @tc.require:
+ */
+HWTEST_F(HeartBeatFSMTest, OnScreeOffCheckDevStatus_05, TestSize.Level1)
+{
+    NiceMock<LnnNetLedgertInterfaceMock> netLedgerMock;
+    int32_t infoNum = 0;
+    LnnCheckDevStatusMsgPara *msgPara = (LnnCheckDevStatusMsgPara *)SoftBusCalloc(sizeof(LnnCheckDevStatusMsgPara));
+    ASSERT_TRUE(msgPara != NULL);
+    NodeBasicInfo *nodeBasicInfo = (NodeBasicInfo *)SoftBusCalloc(sizeof(NodeBasicInfo));
+    ASSERT_TRUE(nodeBasicInfo != NULL);
+    LnnHeartbeatFsm *hbFsm = LnnCreateHeartbeatFsm();
+    EXPECT_CALL(netLedgerMock, LnnGetAllOnlineNodeInfo).WillOnce(
+        DoAll(SetArgPointee<0>(nodeBasicInfo), SetArgPointee<1>(infoNum), Return(SOFTBUS_OK)));
+    msgPara->hasNetworkId = false;
+    int32_t ret = OnScreeOffCheckDevStatus(&(hbFsm->fsm), 0, msgPara);
+    SoftBusFree(nodeBasicInfo);
+    SoftBusFree(hbFsm);
+    EXPECT_EQ(ret, SOFTBUS_OK);
+}
+
+/*
+ * @tc.name: OnScreeOffCheckDevStatus_06
+ * @tc.desc: OnScreeOffCheckDevStatus test
+ * @tc.type: FUNC
+ * @tc.require:
+ */
+HWTEST_F(HeartBeatFSMTest, OnScreeOffCheckDevStatus_06, TestSize.Level1)
+{
+    NiceMock<LnnNetLedgertInterfaceMock> netLedgerMock;
+    int32_t infoNum = 0;
+    LnnCheckDevStatusMsgPara *msgPara = (LnnCheckDevStatusMsgPara *)SoftBusCalloc(sizeof(LnnCheckDevStatusMsgPara));
+    ASSERT_TRUE(msgPara != NULL);
+    LnnHeartbeatFsm *hbFsm = LnnCreateHeartbeatFsm();
+    msgPara->hasNetworkId = false;
+    EXPECT_CALL(netLedgerMock, LnnGetAllOnlineNodeInfo).WillOnce(
+        DoAll(SetArgPointee<0>(NULL), SetArgPointee<1>(infoNum), Return(SOFTBUS_OK)));
+    int32_t ret = OnScreeOffCheckDevStatus(&(hbFsm->fsm), 0, msgPara);
+    SoftBusFree(hbFsm);
+    EXPECT_EQ(ret, SOFTBUS_OK);
+}
+
+/*
+ * @tc.name: OnScreeOffCheckDevStatus_07
+ * @tc.desc: OnScreeOffCheckDevStatus test
+ * @tc.type: FUNC
+ * @tc.require:
+ */
+HWTEST_F(HeartBeatFSMTest, OnScreeOffCheckDevStatus_07, TestSize.Level1)
+{
+    NiceMock<LnnNetLedgertInterfaceMock> netLedgerMock;
+    int32_t infoNum = 1;
+    LnnCheckDevStatusMsgPara *msgPara = (LnnCheckDevStatusMsgPara *)SoftBusCalloc(sizeof(LnnCheckDevStatusMsgPara));
+    ASSERT_TRUE(msgPara != NULL);
+    LnnHeartbeatFsm *hbFsm = LnnCreateHeartbeatFsm();
+    EXPECT_CALL(netLedgerMock, LnnGetAllOnlineNodeInfo).WillOnce(
+        DoAll(SetArgPointee<0>(NULL), SetArgPointee<1>(infoNum), Return(SOFTBUS_OK)));
+    msgPara->hasNetworkId = false;
+    int32_t ret = OnScreeOffCheckDevStatus(&(hbFsm->fsm), 0, msgPara);
+    SoftBusFree(hbFsm);
+    EXPECT_EQ(ret, SOFTBUS_OK);
+}
+
+/*
+ * @tc.name: OnCheckDevStatus_01
+ * @tc.desc: OnCheckDevStatus test
+ * @tc.type: FUNC
+ * @tc.require:
+ */
+HWTEST_F(HeartBeatFSMTest, OnCheckDevStatus_01, TestSize.Level1)
+{
+    NiceMock<HeartBeatFSMInterfaceMock> heartbeatFsmMock;
+    NiceMock<LnnNetLedgertInterfaceMock> netLedgerMock;
+    NiceMock<DistributeLedgerInterfaceMock> distriLedgerMock;
+    FsmStateMachine fsm;
+    LnnCheckDevStatusMsgPara *msgPara = (LnnCheckDevStatusMsgPara *)SoftBusCalloc(sizeof(LnnCheckDevStatusMsgPara));
+    ASSERT_TRUE(msgPara != NULL);
+    EXPECT_CALL(heartbeatFsmMock, GetScreenState).WillRepeatedly(Return(SOFTBUS_SCREEN_ON));
+    EXPECT_CALL(distriLedgerMock, LnnGetDLHeartbeatTimestamp).WillRepeatedly(Return(SOFTBUS_OK));
+    int32_t ret = OnCheckDevStatus(&fsm, TEST_ARGS, msgPara);
+    EXPECT_EQ(ret, SOFTBUS_NETWORK_HB_CHECK_DEV_STATUS_ERROR);
+    int32_t infoNum = 2;
+    LnnCheckDevStatusMsgPara *msgPara1 = (LnnCheckDevStatusMsgPara *)SoftBusCalloc(sizeof(LnnCheckDevStatusMsgPara));
+    ASSERT_TRUE(msgPara1 != NULL);
+    NodeBasicInfo *nodeBasicInfo = (NodeBasicInfo *)SoftBusCalloc(sizeof(NodeBasicInfo) * infoNum);
+    ASSERT_TRUE(nodeBasicInfo != NULL);
+    LnnHeartbeatFsm *hbFsm = LnnCreateHeartbeatFsm();
+    msgPara1->hasNetworkId = false;
+    EXPECT_CALL(netLedgerMock, LnnGetAllOnlineNodeInfo).WillOnce(
+        DoAll(SetArgPointee<0>(nodeBasicInfo), SetArgPointee<1>(infoNum), Return(SOFTBUS_OK)));
+    EXPECT_CALL(netLedgerMock, LnnIsLSANode).WillOnce(Return(true)).WillRepeatedly(Return(false));
+    ret = OnCheckDevStatus(&(hbFsm->fsm), TEST_ARGS, msgPara1);
+    SoftBusFree(hbFsm);
+    EXPECT_EQ(ret, SOFTBUS_OK);
+}
+
+/*
+ * @tc.name: OnCheckDevStatus_02
+ * @tc.desc: OnCheckDevStatus test
+ * @tc.type: FUNC
+ * @tc.require:
+ */
+HWTEST_F(HeartBeatFSMTest, OnCheckDevStatus_02, TestSize.Level1)
+{
+    NiceMock<HeartBeatFSMInterfaceMock> heartbeatFsmMock;
+    NiceMock<LnnNetLedgertInterfaceMock> netLedgerMock;
+    NiceMock<DistributeLedgerInterfaceMock> distriLedgerMock;
+    EXPECT_CALL(heartbeatFsmMock, GetScreenState).WillRepeatedly(Return(SOFTBUS_SCREEN_ON));
+    EXPECT_CALL(distriLedgerMock, LnnGetDLHeartbeatTimestamp).WillRepeatedly(Return(SOFTBUS_OK));
+    EXPECT_CALL(netLedgerMock, LnnIsLSANode).WillRepeatedly(Return(false));
+    LnnCheckDevStatusMsgPara *msgPara = (LnnCheckDevStatusMsgPara *)SoftBusCalloc(sizeof(LnnCheckDevStatusMsgPara));
+    ASSERT_TRUE(msgPara != NULL);
+    msgPara->hasNetworkId = false;
+    LnnHeartbeatFsm *hbFsm = LnnCreateHeartbeatFsm();
+    EXPECT_CALL(netLedgerMock, LnnGetAllOnlineNodeInfo).WillRepeatedly(Return(SOFTBUS_INVALID_PARAM));
+    int32_t ret = OnCheckDevStatus(&(hbFsm->fsm), TEST_ARGS, msgPara);
+    SoftBusFree(hbFsm);
+    EXPECT_EQ(ret, SOFTBUS_NETWORK_HB_CHECK_DEV_STATUS_ERROR);
+}
+
+/*
+ * @tc.name: OnCheckDevStatus_03
+ * @tc.desc: OnCheckDevStatus test
+ * @tc.type: FUNC
+ * @tc.require:
+ */
+HWTEST_F(HeartBeatFSMTest, OnCheckDevStatus_03, TestSize.Level1)
+{
+    NiceMock<HeartBeatFSMInterfaceMock> heartbeatFsmMock;
+    NiceMock<LnnNetLedgertInterfaceMock> netLedgerMock;
+    int32_t infoNum = 0;
+    LnnCheckDevStatusMsgPara *msgPara = (LnnCheckDevStatusMsgPara *)SoftBusCalloc(sizeof(LnnCheckDevStatusMsgPara));
+    ASSERT_TRUE(msgPara != NULL);
+    NodeBasicInfo *nodeBasicInfo = (NodeBasicInfo *)SoftBusCalloc(sizeof(NodeBasicInfo));
+    ASSERT_TRUE(nodeBasicInfo != NULL);
+    LnnHeartbeatFsm *hbFsm = LnnCreateHeartbeatFsm();
+    EXPECT_CALL(heartbeatFsmMock, GetScreenState).WillRepeatedly(Return(SOFTBUS_SCREEN_ON));
+    EXPECT_CALL(netLedgerMock, LnnGetAllOnlineNodeInfo).WillOnce(
+        DoAll(SetArgPointee<0>(nodeBasicInfo), SetArgPointee<1>(infoNum), Return(SOFTBUS_OK)));
+    msgPara->hasNetworkId = false;
+    int32_t ret = OnCheckDevStatus(&(hbFsm->fsm), 0, msgPara);
+    SoftBusFree(hbFsm);
+    SoftBusFree(nodeBasicInfo);
+    EXPECT_EQ(ret, SOFTBUS_OK);
+}
+
+/*
+ * @tc.name: OnCheckDevStatus_04
+ * @tc.desc: OnCheckDevStatus test
+ * @tc.type: FUNC
+ * @tc.require:
+ */
+HWTEST_F(HeartBeatFSMTest, OnCheckDevStatus_04, TestSize.Level1)
+{
+    NiceMock<HeartBeatFSMInterfaceMock> heartbeatFsmMock;
+    NiceMock<LnnNetLedgertInterfaceMock> netLedgerMock;
+    int32_t infoNum = 0;
+    LnnCheckDevStatusMsgPara *msgPara = (LnnCheckDevStatusMsgPara *)SoftBusCalloc(sizeof(LnnCheckDevStatusMsgPara));
+    ASSERT_TRUE(msgPara != NULL);
+    LnnHeartbeatFsm *hbFsm = LnnCreateHeartbeatFsm();
+    msgPara->hasNetworkId = false;
+    EXPECT_CALL(heartbeatFsmMock, GetScreenState).WillRepeatedly(Return(SOFTBUS_SCREEN_ON));
+    EXPECT_CALL(netLedgerMock, LnnGetAllOnlineNodeInfo).WillOnce(
+        DoAll(SetArgPointee<0>(NULL), SetArgPointee<1>(infoNum), Return(SOFTBUS_OK)));
+    int32_t ret = OnCheckDevStatus(&(hbFsm->fsm), 0, msgPara);
+    SoftBusFree(hbFsm);
+    EXPECT_EQ(ret, SOFTBUS_OK);
+}
+
+/*
+ * @tc.name: OnCheckDevStatus_05
+ * @tc.desc: OnCheckDevStatus test
+ * @tc.type: FUNC
+ * @tc.require:
+ */
+HWTEST_F(HeartBeatFSMTest, OnCheckDevStatus_05, TestSize.Level1)
+{
+    NiceMock<HeartBeatFSMInterfaceMock> heartbeatFsmMock;
+    NiceMock<LnnNetLedgertInterfaceMock> netLedgerMock;
+    int32_t infoNum = 1;
+    LnnCheckDevStatusMsgPara *msgPara = (LnnCheckDevStatusMsgPara *)SoftBusCalloc(sizeof(LnnCheckDevStatusMsgPara));
+    ASSERT_TRUE(msgPara != NULL);
+    EXPECT_CALL(heartbeatFsmMock, GetScreenState).WillRepeatedly(Return(SOFTBUS_SCREEN_ON));
+    LnnHeartbeatFsm *hbFsm = LnnCreateHeartbeatFsm();
+    EXPECT_CALL(netLedgerMock, LnnGetAllOnlineNodeInfo).WillOnce(
+        DoAll(SetArgPointee<0>(NULL), SetArgPointee<1>(infoNum), Return(SOFTBUS_OK)));
+    msgPara->hasNetworkId = false;
+    int32_t ret = OnCheckDevStatus(&(hbFsm->fsm), 0, msgPara);
+    SoftBusFree(hbFsm);
+    EXPECT_EQ(ret, SOFTBUS_OK);
 }
 } // namespace OHOS

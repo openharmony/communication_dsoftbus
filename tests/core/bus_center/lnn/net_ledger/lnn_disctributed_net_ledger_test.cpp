@@ -25,7 +25,6 @@
 #include "lnn_distributed_net_ledger.c"
 #include "lnn_distributed_net_ledger.h"
 #include "lnn_distributed_net_ledger_manager.c"
-#include "lnn_fast_offline.h"
 #include "lnn_log.h"
 #include "lnn_map.h"
 #include "lnn_node_info.h"
@@ -34,8 +33,12 @@
 #include "softbus_bus_center.h"
 #include "softbus_error_code.h"
 #include "softbus_utils.h"
+#include "dsoftbus_enhance_interface.h"
+#include "g_enhance_lnn_func.h"
+#include "lnn_disctributed_net_ledger_mock.h"
 
 namespace OHOS {
+using namespace testing;
 using namespace testing::ext;
 constexpr char NODE1_DEVICE_NAME[] = "node1_test";
 constexpr char NODE1_UDID[] = "123456ABCDEF";
@@ -83,6 +86,8 @@ void LNNDisctributedLedgerTest::TearDownTestCase() { }
 void LNNDisctributedLedgerTest::SetUp()
 {
     LNN_LOGI(LNN_TEST, "LocalLedgerTest start");
+    LnnEnhanceFuncList *pfnLnnEnhanceFuncList = LnnEnhanceFuncListGet();
+    pfnLnnEnhanceFuncList->lnnRetrieveDeviceInfo = LnnRetrieveDeviceInfo;
     int32_t ret = LnnInitDistributedLedger();
     EXPECT_EQ(ret, SOFTBUS_OK);
     NodeInfo info;
@@ -95,6 +100,9 @@ void LNNDisctributedLedgerTest::SetUp()
     info.authSeq[0] = AUTH_SEQ;
     info.heartbeatTimestamp = TIME_STAMP;
     info.deviceInfo.osType = HO_OS_TYPE;
+
+    NiceMock<LnnDisctributedNetLedgerInterfaceMock> mock;
+    EXPECT_CALL(mock, LnnRetrieveDeviceInfo).WillRepeatedly(Return(SOFTBUS_OK));
     EXPECT_EQ(REPORT_ONLINE, LnnAddOnlineNode(&info));
 }
 
@@ -112,6 +120,11 @@ void LNNDisctributedLedgerTest::TearDown()
  */
 HWTEST_F(LNNDisctributedLedgerTest, LNN_ADD_ONLINE_NODE_Test_001, TestSize.Level1)
 {
+    LnnEnhanceFuncList *pfnLnnEnhanceFuncList = LnnEnhanceFuncListGet();
+    pfnLnnEnhanceFuncList->lnnRetrieveDeviceInfo = LnnRetrieveDeviceInfo;
+	
+	NiceMock<LnnDisctributedNetLedgerInterfaceMock> mock;
+    EXPECT_CALL(mock, LnnRetrieveDeviceInfo).WillRepeatedly(Return(SOFTBUS_OK));
     NodeInfo info;
     (void)memset_s(&info, sizeof(NodeInfo), 0, sizeof(NodeInfo));
     info.discoveryType = DISCOVERY_TYPE;
@@ -292,6 +305,14 @@ HWTEST_F(LNNDisctributedLedgerTest, LNN_GET_CNN_CODE_Test_001, TestSize.Level1)
  */
 HWTEST_F(LNNDisctributedLedgerTest, LNN_UPDATE_NODE_INFO_Test_001, TestSize.Level1)
 {
+    LnnEnhanceFuncList *pfnLnnEnhanceFuncList = LnnEnhanceFuncListGet();
+    pfnLnnEnhanceFuncList->lnnRetrieveDeviceInfo = LnnRetrieveDeviceInfo;
+    pfnLnnEnhanceFuncList->lnnSaveRemoteDeviceInfo = LnnSaveRemoteDeviceInfo;
+
+	NiceMock<LnnDisctributedNetLedgerInterfaceMock> mock;
+    EXPECT_CALL(mock, LnnRetrieveDeviceInfo).WillRepeatedly(Return(SOFTBUS_OK));
+    EXPECT_CALL(mock, LnnSaveRemoteDeviceInfo).WillRepeatedly(Return(SOFTBUS_OK));
+
     NodeInfo newInfo;
     (void)memset_s(&newInfo, sizeof(NodeInfo), 0, sizeof(NodeInfo));
     (void)strncpy_s(newInfo.deviceInfo.deviceUdid, UDID_BUF_LEN, NODE1_UDID, strlen(NODE1_UDID));
@@ -1385,6 +1406,12 @@ HWTEST_F(LNNDisctributedLedgerTest, Lnn_IsAvailableMeta_Test_003, TestSize.Level
  */
 HWTEST_F(LNNDisctributedLedgerTest, Lnn_IsAvailableMeta_Test_004, TestSize.Level1)
 {
+    LnnEnhanceFuncList *pfnLnnEnhanceFuncList = LnnEnhanceFuncListGet();
+    pfnLnnEnhanceFuncList->lnnRetrieveDeviceInfo = LnnRetrieveDeviceInfo;
+	
+	NiceMock<LnnDisctributedNetLedgerInterfaceMock> mock;
+    EXPECT_CALL(mock, LnnRetrieveDeviceInfo).WillRepeatedly(Return(SOFTBUS_OK));
+    
     NodeInfo info;
     (void)memset_s(&info, sizeof(NodeInfo), 0, sizeof(NodeInfo));
     info.discoveryType = DISCOVERY_TYPE;

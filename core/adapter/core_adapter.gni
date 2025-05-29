@@ -53,6 +53,7 @@ if (defined(ohos_lite)) {
   ]
   bus_center_core_adapter_inc += [
     "$dsoftbus_root_path/core/adapter/bus_center/include",
+    "$dsoftbus_root_path/interfaces/kits/lnn",
     "$dsoftbus_root_path/core/bus_center/utils/include",
     "//base/startup/init/interfaces/innerkits/include/syspara",
   ]
@@ -85,6 +86,7 @@ if (defined(ohos_lite)) {
     bus_center_core_adapter_src += [ "$dsoftbus_root_path/core/adapter/bus_center/src/lnn_settingdata_event_monitor.cpp" ]
 
     bus_center_core_adapter_inc += [
+      "$dsoftbus_root_path/interfaces/kits/lnn",
       "$dsoftbus_root_path/adapter/common/bus_center/include",
       "$dsoftbus_root_path/core/adapter/bus_center/include",
     ]
@@ -135,6 +137,7 @@ if (defined(ohos_lite)) {
     bus_center_core_adapter_src += [
       "$dsoftbus_root_path/core/adapter/bus_center/src/lnn_usb_adapter.cpp",
     ]
+    bus_center_core_adapter_inc += [ "$dsoftbus_root_path/interfaces/kits/lnn" ]
     bus_center_core_adapter_external_deps += [ "usb_manager:usbsrv_client" ]
   } else {
     bus_center_core_adapter_src += [ "$dsoftbus_root_path/core/adapter/bus_center/src/lnn_usb_adapter_virtual.cpp" ]

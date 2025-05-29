@@ -30,19 +30,18 @@
 #include "bus_center_event.h"
 #include "bus_center_manager.h"
 #include "common_list.h"
+#include "g_enhance_lnn_func.h"
+#include "g_enhance_lnn_func_pack.h"
 #include "lnn_async_callback_utils.h"
 #include "lnn_battery_info.h"
-#include "lnn_cipherkey_manager.h"
 #include "lnn_connection_addr_utils.h"
 #include "lnn_connection_fsm.h"
 #include "lnn_deviceinfo_to_profile.h"
 #include "lnn_devicename_info.h"
 #include "lnn_discovery_manager.h"
 #include "lnn_distributed_net_ledger.h"
-#include "lnn_fast_offline.h"
 #include "lnn_heartbeat_utils.h"
 #include "lnn_kv_adapter_wrapper.h"
-#include "lnn_link_finder.h"
 #include "lnn_local_net_ledger.h"
 #include "lnn_log.h"
 #include "lnn_map.h"
@@ -52,13 +51,14 @@
 #include "lnn_node_info.h"
 #include "lnn_node_weight.h"
 #include "lnn_ohos_account.h"
-#include "lnn_oobe_manager.h"
 #include "lnn_p2p_info.h"
 #include "lnn_physical_subnet_manager.h"
 #include "lnn_sa_status_monitor.h"
 #include "lnn_sync_info_manager.h"
 #include "lnn_sync_item_info.h"
 #include "lnn_topo_manager.h"
+#include "lnn_net_builder_process.h"
+#include "lnn_init_monitor.h"
 #include "softbus_adapter_bt_common.h"
 #include "softbus_adapter_crypto.h"
 #include "softbus_adapter_json.h"
@@ -70,11 +70,8 @@
 #include "softbus_adapter_json.h"
 #include "softbus_utils.h"
 #include "softbus_wifi_api_adapter.h"
+#include "softbus_init_common.h"
 #include "trans_channel_manager.h"
-#include "lnn_net_builder.h"
-#include "lnn_net_builder_process.h"
-#include "lnn_init_monitor.h"
-
 
 #define DEFAULT_PKG_NAME                 "com.huawei.nearby"
 #define DEFAULT_MAX_LNN_CONNECTION_COUNT 10
@@ -574,7 +571,7 @@ static int32_t InitNodeInfoSync(void)
         LNN_LOGE(LNN_INIT, "LnnInitBatteryInfo fail, rc=%{public}d", rc);
         return rc;
     }
-    rc = LnnInitCipherKeyManager();
+    rc = LnnInitCipherKeyManagerPacked();
     if (rc != SOFTBUS_OK) {
         LNN_LOGE(LNN_INIT, "LnnInitCipherKeyManager fail, rc=%{public}d", rc);
         return rc;
@@ -762,7 +759,8 @@ static void OnDeviceNotTrusted(const char *peerUdid)
         SoftBusFree(info);
         return;
     }
-    if (LnnSendNotTrustedInfo(info, DISCOVERY_TYPE_COUNT, LnnProcessCompleteNotTrustedMsg) != SOFTBUS_OK) {
+    if (LnnSendNotTrustedInfoPacked(info, DISCOVERY_TYPE_COUNT,
+        LnnProcessCompleteNotTrustedMsg) != SOFTBUS_OK) {
         LNN_LOGE(LNN_BUILDER, "send NotTrustedInfo fail");
         OnLnnProcessNotTrustedMsgDelay((void *)info);
         return;
@@ -794,7 +792,7 @@ static void UserSwitchedHandler(const LnnEventBasicInfo *info)
             LNN_LOGI(LNN_BUILDER, "SOFTBUS_USER_SWITCHED");
             LnnGetDataShareInitResult(&isDataShareInit);
             if (isDataShareInit) {
-                RegisterOOBEMonitor(NULL);
+                RegisterOOBEMonitorPacked(NULL);
             }
             LnnSetUnlockState();
             break;
@@ -853,7 +851,7 @@ int32_t LnnInitNetBuilder(void)
     LnnInitConnIdCallbackManager();
     NetBuilderConfigInit();
     // link finder init fail will not cause softbus init fail
-    if (LnnLinkFinderInit() != SOFTBUS_OK) {
+    if (LnnLinkFinderInitPacked() != SOFTBUS_OK) {
         LNN_LOGE(LNN_INIT, "link finder init fail");
     }
     rc = RegAuthVerifyListener(&g_verifyListener);
@@ -899,7 +897,7 @@ int32_t LnnInitNetBuilderDelay(void)
     }
     LnnSetLocalStrInfo(STRING_KEY_MASTER_NODE_UDID, udid);
     LnnSetLocalNumInfo(NUM_KEY_MASTER_NODE_WEIGHT, LnnGetLocalWeight());
-    ret = LnnInitFastOffline();
+    ret = LnnInitFastOfflinePacked();
     if (ret != SOFTBUS_OK) {
         LNN_LOGE(LNN_INIT, "fast offline init fail!");
         return ret;
@@ -929,7 +927,7 @@ void LnnDeinitNetBuilder(void)
     UnregAuthVerifyListener();
     LnnDeinitTopoManager();
     DeinitNodeInfoSync();
-    LnnDeinitFastOffline();
+    LnnDeinitFastOfflinePacked();
     LnnDeinitSyncInfoManager();
     LnnDeInitSaStatusMonitor();
     LnnDeinitConnIdCallbackManager();

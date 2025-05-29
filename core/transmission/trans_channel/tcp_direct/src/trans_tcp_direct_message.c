@@ -55,8 +55,8 @@
 #include "trans_tcp_direct_manager.h"
 #include "trans_tcp_direct_sessionconn.h"
 #include "trans_tcp_direct_listener.h"
-#include "wifi_direct_manager.h"
 #include "trans_uk_manager.h"
+#include "wifi_direct_manager.h"
 
 #define MAX_PACKET_SIZE (64 * 1024)
 #define MIN_META_LEN 6
@@ -802,7 +802,7 @@ static void OpenDataBusRequestOutSessionName(const char *mySessionName, const ch
     AnonymizeFree(tmpPeerName);
 }
 
-static SessionConn* GetSessionConnFromDataBusRequest(int32_t channelId, const cJSON *request)
+static SessionConn *GetSessionConnFromDataBusRequest(int32_t channelId, const cJSON *request)
 {
     SessionConn *conn = (SessionConn *)SoftBusCalloc(sizeof(SessionConn));
     if (conn == NULL) {
@@ -1604,7 +1604,8 @@ int32_t TransDealTdcChannelOpenResult(int32_t channelId, int32_t openResult, con
         NotifyFastDataRecv(&conn, channelId);
     }
     if (GetCapabilityBit(conn.appInfo.channelCapability, TRANS_CHANNEL_SINK_GENERATE_KEY_OFFSET)) {
-        if (accessInfo != NULL && accessInfo->userId == INVALID_USER_ID) {
+        if (accessInfo != NULL && accessInfo->userId == INVALID_USER_ID &&
+            conn.appInfo.myData.tokenType > ACCESS_TOKEN_TYPE_HAP) {
             DisableCapabilityBit(&conn.appInfo.channelCapability, TRANS_CHANNEL_SINK_KEY_ENCRYPT_OFFSET);
             return HandleTdcChannelOpenedReply(&conn, channelId, &extra, flags, seq);
         }

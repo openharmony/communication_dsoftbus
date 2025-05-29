@@ -31,8 +31,10 @@ ohos_fuzztest("SoftBusServerStub2FuzzTest") {
   ]
 
   include_dirs = [
+    "$dsoftbus_root_path/interfaces/kits/bus_center",
     "$dsoftbus_root_path/core/bus_center/interface",
     "$dsoftbus_root_path/core/common/include",
+    "$dsoftbus_root_path/interfaces/kits/disc",
     "$dsoftbus_root_path/core/discovery/interface",
     "$dsoftbus_root_path/core/discovery/manager/include",
     "$dsoftbus_root_path/core/frame/common/include",
@@ -45,6 +47,7 @@ ohos_fuzztest("SoftBusServerStub2FuzzTest") {
   deps = [
     "$dsoftbus_root_path/core/common:softbus_utils",
     "$dsoftbus_root_path/core/frame:softbus_server",
+    "$dsoftbus_root_path/adapter:softbus_adapter",
   ]
 
   external_deps = [

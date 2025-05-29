@@ -23,7 +23,10 @@ ohos_fuzztest("WifiDirectProtocolFuzzTest") {
   module_out_path = dsoftbus_fuzz_out_path
   fuzz_config_file = "$dsoftbus_root_path/tests/core/connection/fuzztest/wifidirectprotocol_fuzzer"
 
-  include_dirs = [ "$dsoftbus_root_path/core/connection/wifi_direct_cpp" ]
+  include_dirs = [
+    "$dsoftbus_root_path/core/connection/wifi_direct_cpp",
+    "$dsoftbus_root_path/interfaces/kits/connect",
+  ]
 
   sources = [ "protocol_fuzzer.cpp" ]
 
@@ -39,6 +42,7 @@ ohos_fuzztest("WifiDirectProtocolFuzzTest") {
     "$dsoftbus_root_path/core/common:softbus_utils",
     "$dsoftbus_root_path/core/frame:softbus_server",
     "$dsoftbus_root_path/tests/sdk/common:softbus_access_token_test",
+    "$dsoftbus_root_path/core/connection/wifi_direct_cpp:wifi_direct",
   ]
 
   external_deps = [

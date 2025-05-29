@@ -14,10 +14,17 @@
  */
 
 #include "wifi_direct_mock.h"
+#include <dlfcn.h>
 #include <thread>
 #include "bus_center_event.h"
 #include "conn_log.h"
 #include "softbus_adapter_socket.h"
+#include "wifi_direct_init.h"
+#ifdef __aarch64__
+static constexpr const char *SOFTBUS_PATH_NAME = "/system/lib64/libsoftbus_server.z.so";
+#else
+static constexpr const char *SOFTBUS_PATH_NAME = "/system/lib/libsoftbus_server.z.so";
+#endif
 
 extern "C" {
 // implement dependencies and redirect request to mock object here
@@ -355,6 +362,281 @@ int32_t GenerateRandomStr(char *str, uint32_t len)
 {
     return SOFTBUS_OK;
 }
+
+OHOS::DBinderSoftbusServer& OHOS::DBinderSoftbusServer::GetInstance()
+{
+    static DBinderSoftbusServer instance;
+    return instance;
+}
+ 
+OHOS::DBinderSoftbusServer::DBinderSoftbusServer()
+{
+}
+ 
+OHOS::DBinderSoftbusServer::~DBinderSoftbusServer()
+{
+    exitFlag_ = true;
+    CONN_LOGI(CONN_COMMON, "dBinderSoftbusServer destroy");
+}
+ 
+LnnEnhanceFuncList *OHOS::DBinderSoftbusServer::LnnEnhanceFuncListGet(void)
+{
+    // CHECK_INSTANCE_EXIT(exitFlag_);
+    if (lnnEnhanceFuncListGetFunc_ != nullptr) {
+        return lnnEnhanceFuncListGetFunc_();
+    }
+ 
+    if (!OpenSoftbusServerSo()) {
+        return nullptr;
+    }
+ 
+    lnnEnhanceFuncListGetFunc_ = (LnnEnhanceFuncListGetFunc)dlsym(soHandle_, "LnnEnhanceFuncListGet");
+    if (lnnEnhanceFuncListGetFunc_ == nullptr) {
+        // ZLOGE(LOG_LABEL, "dlsym LnnEnhanceFuncListGet fail, err msg:%{public}s", dlerror());
+        return nullptr;
+    }
+ 
+    return lnnEnhanceFuncListGetFunc_();
+}
+ 
+bool OHOS::DBinderSoftbusServer::OpenSoftbusServerSo()
+{
+    // CHECK_INSTANCE_EXIT_WITH_RETVAL(exitFlag_, false);
+    std::lock_guard<std::mutex> lockGuard(loadSoMutex_);
+ 
+    if (isLoaded_ && (soHandle_ != nullptr)) {
+        return true;
+    }
+ 
+    // soHandle_ = dlopen(SOFTBUS_PATH_NAME, RTLD_NOW | RTLD_NODELETE | RTLD_GLOBAL);
+    soHandle_ = dlopen(SOFTBUS_PATH_NAME, RTLD_NOW | RTLD_GLOBAL);
+    if (soHandle_ == nullptr) {
+        // ZLOGE(LOG_LABEL, "dlopen %{public}s failed, err msg:%{public}s", SOFTBUS_PATH_NAME, dlerror());
+        return false;
+    }
+ 
+    isLoaded_ = true;
+    // ZLOGI(LOG_LABEL, "dlopen %{public}s SOFTBUS_CLIENT_SUCCESS", SOFTBUS_PATH_NAME);
+ 
+    return true;
+}
+
+int32_t OHOS::DBinderSoftbusServer::AuthGetDeviceUuid(int64_t authId, char *uuid, uint16_t size)
+{
+    (void)authGetDeviceUuidFunc_;
+    return OHOS::SoftBus::WifiDirectInterfaceMock::GetMock()->AuthGetDeviceUuid(authId, uuid, size);
+}
+ 
+int32_t OHOS::DBinderSoftbusServer::AuthPostTransData(AuthHandle authHandle, const AuthTransData *dataInfo)
+{
+    (void)authPostTransDataFunc_;
+    return OHOS::SoftBus::WifiDirectInterfaceMock::GetMock()->AuthPostTransData(authHandle, dataInfo);
+}
+ 
+int32_t OHOS::DBinderSoftbusServer::RegAuthTransListener(int32_t module, const AuthTransListener *listener)
+{
+    (void)regAuthTransListenerFunc_;
+    return OHOS::SoftBus::WifiDirectInterfaceMock::GetMock()->RegAuthTransListener(module, listener);
+}
+ 
+int32_t OHOS::DBinderSoftbusServer::LnnGetLocalStrInfo(InfoKey key, char *info, uint32_t len)
+{
+    (void)lnnGetLocalStrInfoFunc_;
+    return OHOS::SoftBus::WifiDirectInterfaceMock::GetMock()->LnnGetLocalStrInfo(key, info, len);
+}
+int32_t OHOS::DBinderSoftbusServer::LnnSetLocalStrInfo(InfoKey key, const char *info)
+{
+    (void)lnnSetLocalStrInfoFunc_;
+    return OHOS::SoftBus::WifiDirectInterfaceMock::GetMock()->LnnSetLocalStrInfo(key, info);
+}
+ 
+int32_t OHOS::DBinderSoftbusServer::LnnSetLocalNumInfo(InfoKey key, int32_t info)
+{
+    (void)lnnSetLocalNumInfoFunc_;
+    return OHOS::SoftBus::WifiDirectInterfaceMock::GetMock()->LnnSetLocalNumInfo(key, info);
+}
+ 
+int32_t OHOS::DBinderSoftbusServer::LnnGetLocalNumU64Info(InfoKey key, uint64_t *info)
+{
+    (void)lnnGetLocalNumU64InfoFunc_;
+    return OHOS::SoftBus::WifiDirectInterfaceMock::GetMock()->LnnGetLocalNumU64Info(key, info);
+}
+ 
+int32_t OHOS::DBinderSoftbusServer::LnnSyncP2pInfo()
+{
+    (void)lnnSyncP2pInfoFunc_;
+    return OHOS::SoftBus::WifiDirectInterfaceMock::GetMock()->LnnSyncP2pInfo();
+}
+ 
+uint64_t OHOS::DBinderSoftbusServer::LnnGetFeatureCapabilty()
+{
+    (void)lnnGetFeatureCapabiltyFunc_;
+    return OHOS::SoftBus::WifiDirectInterfaceMock::GetMock()->LnnGetFeatureCapabilty();
+}
+ 
+bool OHOS::DBinderSoftbusServer::IsFeatureSupport(uint64_t feature, FeatureCapability capaBit)
+{
+    (void)isFeatureSupportFunc_;
+    return OHOS::SoftBus::WifiDirectInterfaceMock::GetMock()->IsFeatureSupport(feature, capaBit);
+}
+ 
+int32_t OHOS::DBinderSoftbusServer::LnnGetRemoteStrInfo(const char *networkId, InfoKey key,
+    char *info, uint32_t len)
+{
+    (void)lnnGetRemoteStrInfoFunc_;
+    auto id = std::string(networkId);
+    return OHOS::SoftBus::WifiDirectInterfaceMock::GetMock()->LnnGetRemoteStrInfo(id, key, info, len);
+}
+ 
+int32_t OHOS::DBinderSoftbusServer::LnnGetRemoteBoolInfoIgnoreOnline(const char *networkId,
+    InfoKey key, bool *info)
+{
+    (void)lnnGetRemoteBoolInfoIgnoreOnlineFunc_;
+    auto id = std::string(networkId);
+    return OHOS::SoftBus::WifiDirectInterfaceMock::GetMock()->LnnGetRemoteBoolInfoIgnoreOnline(id, key, info);
+}
+ 
+int32_t OHOS::DBinderSoftbusServer::LnnGetRemoteNumU64Info(const char *networkId, InfoKey key, uint64_t *info)
+{
+    (void)lnnGetRemoteNumU64InfoFunc_;
+    auto id = std::string(networkId);
+    return OHOS::SoftBus::WifiDirectInterfaceMock::GetMock()->LnnGetRemoteNumU64Info(id, key, info);
+}
+ 
+int32_t OHOS::DBinderSoftbusServer::AuthStartListeningForWifiDirect(AuthLinkType type, const char *ip,
+    int32_t port, ListenerModule *moduleId)
+{
+    (void)authStartListeningForWifiDirectFunc_;
+    return OHOS::SoftBus::WifiDirectInterfaceMock::GetMock()->AuthStartListeningForWifiDirect(type, ip, port, moduleId);
+}
+ 
+int32_t OHOS::DBinderSoftbusServer::LnnGetNetworkIdByUuid(const char *uuid, char *buf, uint32_t len)
+{
+    (void)lnnGetNetworkIdByUuidFunc_;
+    auto id = std::string(uuid);
+    return OHOS::SoftBus::WifiDirectInterfaceMock::GetMock()->LnnGetNetworkIdByUuid(id, buf, len);
+}
+ 
+void OHOS::DBinderSoftbusServer::AuthCloseConn(AuthHandle authHandle)
+{
+    (void)authCloseConnFunc_;
+    return OHOS::SoftBus::WifiDirectInterfaceMock::GetMock()->AuthCloseConn(authHandle);
+}
+ 
+void OHOS::DBinderSoftbusServer::AuthStopListeningForWifiDirect(AuthLinkType type, ListenerModule moduleId)
+{
+    (void)authStopListeningForWifiDirectFunc_;
+    return OHOS::SoftBus::WifiDirectInterfaceMock::GetMock()->AuthStopListeningForWifiDirect(type, moduleId);
+}
+ 
+int32_t OHOS::DBinderSoftbusServer::AuthGetMetaType(int64_t authId, bool *isMetaAuth)
+{
+    (void)authGetMetaTypeFunc_;
+    return OHOS::SoftBus::WifiDirectInterfaceMock::GetMock()->AuthGetMetaType(authId, isMetaAuth);
+}
+ 
+const char *OHOS::DBinderSoftbusServer::LnnConvertDLidToUdid(const char *id, IdCategory type)
+{
+    (void)lnnConvertDLidToUdidFunc_;
+    return OHOS::SoftBus::WifiDirectInterfaceMock::GetMock()->LnnConvertDLidToUdid(id, type);
+}
+ 
+uint32_t OHOS::DBinderSoftbusServer::AuthGenRequestId(void)
+{
+    (void)authGenRequestIdFunc_;
+    return OHOS::SoftBus::WifiDirectInterfaceMock::GetMock()->AuthGenRequestId();
+}
+ 
+int32_t OHOS::DBinderSoftbusServer::AuthOpenConn(const AuthConnInfo *info, uint32_t requestId,
+                     const AuthConnCallback *callback, bool isMeta)
+{
+    (void)authOpenConnFunc_;
+    return OHOS::SoftBus::WifiDirectInterfaceMock::GetMock()->AuthOpenConn(info, requestId, callback, isMeta);
+}
+ 
+void OHOS::DBinderSoftbusServer::AuthStopListening(AuthLinkType type)
+{
+    (void)authStopListeningFunc_;
+    return OHOS::SoftBus::WifiDirectInterfaceMock::GetMock()->AuthStopListening(type);
+}
+ 
+int32_t OHOS::DBinderSoftbusServer::LnnGetLocalNumInfo(InfoKey key, int32_t *info)
+{
+    (void)lnnGetLocalNumInfoFunc_;
+    return OHOS::SoftBus::WifiDirectInterfaceMock::GetMock()->LnnGetLocalNumInfo(key, info);
+}
+ 
+int32_t OHOS::DBinderSoftbusServer::LnnGetRemoteNumInfo(const char *netWorkId, InfoKey key, int32_t *info)
+{
+    (void)lnnGetRemoteNumInfoFunc_;
+    return OHOS::SoftBus::WifiDirectInterfaceMock::GetMock()->LnnGetRemoteNumInfo(netWorkId, key, info);
+}
+ 
+int32_t OHOS::DBinderSoftbusServer::LnnGetRemoteByteInfo(const char *networkId, InfoKey key,
+    uint8_t *info, uint32_t len)
+{
+    (void)lnnGetRemoteByteInfoFunc_;
+    return OHOS::SoftBus::WifiDirectInterfaceMock::GetMock()->LnnGetRemoteByteInfo(networkId, key, info, len);
+}
+ 
+int32_t OHOS::DBinderSoftbusServer::TransProxyPipelineRegisterListener(TransProxyPipelineMsgType type,
+                                           const ITransProxyPipelineListener *listener)
+{
+    (void)transProxyPipelineRegisterListenerFunc_;
+    return OHOS::SoftBus::WifiDirectInterfaceMock::GetMock()->TransProxyPipelineRegisterListener(type, listener);
+}
+ 
+int32_t OHOS::DBinderSoftbusServer::TransProxyPipelineGetUuidByChannelId(int32_t channelId,
+    char *uuid, uint32_t uuidLen)
+{
+    (void)transProxyPipelineGetUuidByChannelIdFunc_;
+    return OHOS::SoftBus::WifiDirectInterfaceMock::GetMock()->TransProxyPipelineGetUuidByChannelId(channelId,
+                                                                                                   uuid, uuidLen);
+}
+ 
+int32_t OHOS::DBinderSoftbusServer::TransProxyPipelineSendMessage(
+    int32_t channelId, const uint8_t *data, uint32_t dataLen, TransProxyPipelineMsgType type)
+{
+    (void)transProxyPipelineSendMessageFunc_;
+    return OHOS::SoftBus::WifiDirectInterfaceMock::GetMock()->TransProxyPipelineSendMessage(
+        channelId, data, dataLen, type);
+}
+ 
+bool OHOS::DBinderSoftbusServer::LnnGetOnlineStateById(const char *id, IdCategory type)
+{
+    (void)lnnGetOnlineStateByIdFunc_;
+    return true;
+}
+ 
+int32_t OHOS::DBinderSoftbusServer::LnnGetRemoteNodeInfoById(const char *id, IdCategory type, NodeInfo *info)
+{
+    (void)lnnGetRemoteNodeInfoByIdFunc_;
+    return SOFTBUS_OK;
+}
+ 
+int32_t OHOS::DBinderSoftbusServer::LnnGetRemoteNodeInfoByKey(const char *key, NodeInfo *info)
+{
+    (void)lnnGetRemoteNodeInfoByKeyFunc_;
+    return SOFTBUS_OK;
+}
+ 
+int32_t OHOS::DBinderSoftbusServer::LnnGetOsTypeByNetworkId(const char *networkId, int32_t *osType)
+{
+    (void)lnnGetOsTypeByNetworkIdFunc_;
+    return OHOS::SoftBus::WifiDirectInterfaceMock::GetMock()->LnnGetOsTypeByNetworkId(networkId, osType);
+}
+
+int32_t OHOS::DBinderSoftbusServer::LnnRegisterEventHandler(LnnEventType event, LnnEventHandler handler)
+{
+    (void)lnnRegisterEventHandlerFunc_;
+    return OHOS::SoftBus::WifiDirectInterfaceMock::GetMock()->LnnRegisterEventHandler(event, handler);
+}
+
+int32_t OHOS::DBinderSoftbusServer::LnnGetAllOnlineNodeInfo(NodeBasicInfo **info, int32_t *infoNum)
+{
+    (void)lnnGetAllOnlineNodeInfoFunc_;
+    return OHOS::SoftBus::WifiDirectInterfaceMock::GetMock()->LnnGetAllOnlineNodeInfo(info, infoNum);
+}
 }
 
 namespace OHOS::SoftBus {
@@ -528,5 +810,12 @@ WifiErrorCode WifiDirectInterfaceMock::DestroyGroupTimeOutAction()
 void WifiDirectHidumper::HidumperInit() { }
 using Hidumper = std::function<int()>;
 void WifiDirectHidumper::Register(const Hidumper &hidumper) { }
+
+WifiDirectHidumper& WifiDirectHidumper::GetInstance()
+{
+    static WifiDirectHidumper instance;
+    return instance;
+}
+
 } // namespace OHOS::SoftBus
 // namespace OHOS::SoftBus

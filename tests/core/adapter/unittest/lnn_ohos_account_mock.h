@@ -27,7 +27,7 @@
 #include "lnn_async_callback_utils.h"
 #include "lnn_connection_fsm.h"
 #include "lnn_event_form.h"
-#include "lnn_fast_offline.h"
+#include "lnn_fast_offline_struct.h"
 #include "lnn_file_utils.h"
 #include "lnn_heartbeat_utils.h"
 #include "lnn_node_info.h"

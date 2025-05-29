@@ -177,9 +177,9 @@ void AuthLoadDeviceKey(void)
     return HeartBeatCtrlStaticInterface()->AuthLoadDeviceKey();
 }
 
-int32_t LnnGenerateCeParams(bool isUnlocked)
+int32_t LnnGenerateCeParams(void)
 {
-    return HeartBeatCtrlStaticInterface()->LnnGenerateCeParams(isUnlocked);
+    return HeartBeatCtrlStaticInterface()->LnnGenerateCeParams();
 }
 
 void DfxRecordTriggerTime(LnnTriggerReason reason, LnnEventLnnStage stage)

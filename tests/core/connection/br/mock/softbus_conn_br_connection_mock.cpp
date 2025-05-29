@@ -69,7 +69,7 @@ int32_t SoftbusGetConfig(ConfigType type, unsigned char *val, uint32_t len)
     return GetConnectionBrInterface()->SoftbusGetConfig(type, val, len);
 }
 
-SppSocketDriver *InitSppSocketDriver()
+SppSocketDriver *InitSppSocketDriver(void)
 {
     return GetConnectionBrInterface()->InitSppSocketDriver();
 }

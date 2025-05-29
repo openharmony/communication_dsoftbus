@@ -32,7 +32,6 @@ public:
     virtual ~BusCenterEventDepsInterface() {};
 
     virtual void Anonymize(const char *plainStr, char **anonymizedStr);
-    virtual void AnonymizeDeviceName(const char *plainStr, char **anonymizedStr);
     virtual void AnonymizeFree(char *anonymizedStr);
     virtual int32_t SetDefaultQdisc(void);
     virtual int32_t LnnGetAllOnlineNodeNum(int32_t *nodeNum);
@@ -62,7 +61,6 @@ public:
     ~BusCenterEventDepsInterfaceMock() override;
 
     MOCK_METHOD2(Anonymize, void (const char *, char **));
-    MOCK_METHOD2(AnonymizeDeviceName, void (const char *, char **));
     MOCK_METHOD1(AnonymizeFree, void (char *));
     MOCK_METHOD0(SetDefaultQdisc, int32_t (void));
     MOCK_METHOD1(LnnGetAllOnlineNodeNum, int32_t (int32_t *));

@@ -21,12 +21,15 @@
 #include "anonymizer.h"
 #include "auth_interface.h"
 #include "bus_center_manager.h"
+#include "g_enhance_lnn_func.h"
+#include "g_enhance_lnn_func_pack.h"
 #include "lnn_log.h"
 #include "softbus_adapter_crypto.h"
 #include "softbus_adapter_mem.h"
 #include "softbus_def.h"
 #include "softbus_error_code.h"
 #include "softbus_utils.h"
+#include "softbus_init_common.h"
 
 #define LNN_DISC_CAPABILITY "ddmpCapability"
 #define LNN_SUBSCRIBE_ID 0
@@ -52,7 +55,7 @@ static int32_t LnnCheckDiscoveryDeviceInfo(const DeviceInfo *device)
     }
     if (device->addr[0].info.ip.port == 0) {
         LNN_LOGD(LNN_BUILDER, "discovery get port is 0!");
-        LnnCoapConnect(device->addr[0].info.ip.ip);
+        LnnCoapConnectPacked(device->addr[0].info.ip.ip);
         return SOFTBUS_INVALID_PARAM;
     }
     return SOFTBUS_OK;
@@ -168,7 +171,7 @@ int32_t LnnStartCoapDiscovery(void)
     InnerCallback callback = {
         .innerCb = g_discCb,
     };
-    LnnDestroyCoapConnectList();
+    LnnDestroyCoapConnectListPacked();
     int32_t pid = getpid();
     return LnnStartDiscDevice(NULL, &subscribeInfo, &callback, true, pid);
 }

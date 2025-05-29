@@ -18,40 +18,11 @@
 
 #include <stdint.h>
 #include <stdbool.h>
+#include "../../../../interfaces/kits/lnn/lnn_map_struct.h"
 
 #ifdef __cplusplus
 extern "C" {
 #endif /* __cplusplus */
-
-/**
- * LNN map node struct
- */
-typedef struct tagMapNode {
-    uint32_t hash;
-    uint32_t valueSize;
-    void *key;
-    void *value;
-    struct tagMapNode *next;
-} MapNode;
-
-/**
- * LNN map struct define.
- */
-typedef struct {
-    MapNode **nodes; /* Map node bucket */
-    uint32_t nodeSize; /* Map node count */
-    uint32_t bucketSize; /* Map node bucket size */
-} Map;
-
-/**
- * LNN map node struct
- */
-typedef struct {
-    MapNode *node; /* Map node */
-    uint32_t nodeNum; /* Map node  */
-    uint32_t bucketNum; /* Map node */
-    Map *map;
-} MapIterator;
 
 MapIterator *LnnMapInitIterator(Map *map);
 bool LnnMapHasNext(MapIterator *it);

@@ -31,6 +31,8 @@
 #include "wifi_direct_anonymous.h"
 #include "wifi_direct_mock.h"
 #include "wifi_direct_utils.h"
+#include "g_enhance_lnn_func.h"
+#include "dsoftbus_enhance_interface.h"
 
 using namespace testing::ext;
 using testing::_;
@@ -154,15 +156,19 @@ HWTEST_F(WifiDirectUtilsTest, UuidToNetworkIdTest, TestSize.Level1)
  */
 HWTEST_F(WifiDirectUtilsTest, GetLocalPtkTest, TestSize.Level1)
 {
+    LnnEnhanceFuncList *pfnLnnEnhanceFuncList = LnnEnhanceFuncListGet();
+    pfnLnnEnhanceFuncList->lnnGetLocalDefaultPtkByUuid = LnnGetLocalDefaultPtkByUuid;
+    pfnLnnEnhanceFuncList->lnnGetLocalPtkByUuid = LnnGetLocalPtkByUuid;
     char networkId[NETWORK_ID_BUF_LEN] = { 1 };
     std::string remoteDeviceId = "01234567890ABCDEF";
     char ptkBytes[PTK_DEFAULT_LEN] = { 3 };
     WifiDirectInterfaceMock mock;
 
     EXPECT_CALL(mock, LnnGetRemoteStrInfo).WillRepeatedly(Return(SOFTBUS_OK));
+    EXPECT_CALL(mock, LnnGetLocalPtkByUuid).WillRepeatedly(Return(SOFTBUS_NOT_FIND));
     EXPECT_CALL(mock, LnnGetLocalPtkByUuid).WillOnce(Return(SOFTBUS_NOT_FIND));
     EXPECT_CALL(mock, LnnGetLocalDefaultPtkByUuid(_, _, _))
-        .WillOnce([&ptkBytes](const std::string &uuid, char *localPtk, uint32_t len) {
+        .WillRepeatedly([&ptkBytes](const std::string &uuid, char *localPtk, uint32_t len) {
             (void)strcpy_s(localPtk, len, ptkBytes);
             return SOFTBUS_OK;
         });
@@ -170,7 +176,7 @@ HWTEST_F(WifiDirectUtilsTest, GetLocalPtkTest, TestSize.Level1)
 
     EXPECT_NE(ret.size(), 0);
 
-    EXPECT_CALL(mock, LnnGetLocalPtkByUuid).WillOnce(Return(SOFTBUS_OK));
+    EXPECT_CALL(mock, LnnGetLocalPtkByUuid).WillRepeatedly(Return(SOFTBUS_OK));
     ret = WifiDirectUtils::GetLocalPtk(networkId);
 
     EXPECT_NE(ret.size(), 0);
@@ -184,6 +190,8 @@ HWTEST_F(WifiDirectUtilsTest, GetLocalPtkTest, TestSize.Level1)
  */
 HWTEST_F(WifiDirectUtilsTest, GetRemotePtkTest, TestSize.Level1)
 {
+    LnnEnhanceFuncList *pfnLnnEnhanceFuncList = LnnEnhanceFuncListGet();
+    pfnLnnEnhanceFuncList->lnnGetRemoteDefaultPtkByUuid = LnnGetRemoteDefaultPtkByUuid;
     char remoteNetworkId[NETWORK_ID_BUF_LEN] = { 1 };
     WifiDirectInterfaceMock mock;
 
@@ -193,7 +201,7 @@ HWTEST_F(WifiDirectUtilsTest, GetRemotePtkTest, TestSize.Level1)
     EXPECT_EQ(ret.size(), 0);
 
     EXPECT_CALL(mock, LnnGetRemoteByteInfo).WillOnce(Return(SOFTBUS_OK));
-    EXPECT_CALL(mock, LnnGetRemoteDefaultPtkByUuid).WillOnce(Return(SOFTBUS_OK));
+    EXPECT_CALL(mock, LnnGetRemoteDefaultPtkByUuid).WillRepeatedly(Return(SOFTBUS_OK));
     ret = WifiDirectUtils::GetRemotePtk(remoteNetworkId);
     EXPECT_NE(ret.size(), 0);
 }

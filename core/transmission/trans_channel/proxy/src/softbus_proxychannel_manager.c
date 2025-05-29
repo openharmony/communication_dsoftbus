@@ -1390,7 +1390,8 @@ int32_t TransDealProxyChannelOpenResult(int32_t channelId, int32_t openResult, c
     }
     chan.appInfo.myHandleId = 0;
     if (GetCapabilityBit(chan.appInfo.channelCapability, TRANS_CHANNEL_SINK_GENERATE_KEY_OFFSET)) {
-        if (accessInfo != NULL && accessInfo->userId == INVALID_USER_ID) {
+        if (accessInfo != NULL && accessInfo->userId == INVALID_USER_ID &&
+            chan.appInfo.myData.tokenType > ACCESS_TOKEN_TYPE_HAP) {
             (void)DisableCapabilityBit(&chan.appInfo.channelCapability, TRANS_CHANNEL_SINK_KEY_ENCRYPT_OFFSET);
             return HandleProxyChanelOpened(&chan, channelId);
         }

@@ -17,15 +17,21 @@
 #include "command/negotiate_command.h"
 
 namespace OHOS::SoftBus {
+WifiDirectScheduler& WifiDirectScheduler::GetInstance()
+{
+    static WifiDirectScheduler instance;
+    return instance;
+}
+
 int WifiDirectScheduler::ConnectDevice(const WifiDirectConnectInfo &info, const WifiDirectConnectCallback &callback,
                                        bool markRetried)
 {
-    CONN_LOGI(CONN_WIFI_DIRECT,
-        "requestId=%{public}d, pid=%{public}d, type=%{public}d, networkId=%{public}s, remoteUuid=%{public}s, "
-        "expectRole=0x%{public}x, bw=%{public}d, ipaddrType=%{public}d isStrictProtocol=%{public}d",
+    CONN_LOGI(CONN_WIFI_DIRECT, "requestId=%{public}d, pid=%{public}d, type=%{public}d, networkId=%{public}s, "
+        "remoteUuid=%{public}s, expectRole=0x%{public}x, bw=%{public}d, ipaddrType=%{public}d, "
+        "isStrictProtocol=%{public}d, ratePreference=%{public}d",
         info.requestId, info.pid, info.connectType, WifiDirectAnonymizeDeviceId(info.remoteNetworkId).c_str(),
         WifiDirectAnonymizeDeviceId(WifiDirectUtils::NetworkIdToUuid(info.remoteNetworkId)).c_str(),
-        info.expectApiRole, info.bandWidth, info.ipAddrType, info.isStrictProtocol);
+        info.expectApiRole, info.bandWidth, info.ipAddrType, info.isStrictProtocol, info.ratePreference);
     DumpNegotiateChannel(info.negoChannel);
 
     auto command = CommandFactory::GetInstance().CreateConnectCommand(info, callback);
@@ -47,10 +53,12 @@ int WifiDirectScheduler::CancelConnectDevice(const WifiDirectConnectInfo &info)
 
     std::lock_guard commandLock(commandLock_);
     for (auto itc = commandList_.begin(); itc != commandList_.end(); itc++) {
-        auto connectCommand = std::dynamic_pointer_cast<ConnectCommand>(*itc);
-        if (connectCommand != nullptr && connectCommand->IsSameCommand(info)) {
-            commandList_.erase(itc);
-            return SOFTBUS_OK;
+        if ((*itc)->GetType() == CommandType::CONNECT_COMMAND) {
+            auto connectCommand = std::static_pointer_cast<ConnectCommand>(*itc);
+            if (connectCommand != nullptr && connectCommand->IsSameCommand(info)) {
+                commandList_.erase(itc);
+                return SOFTBUS_OK;
+            }
         }
     }
     return SOFTBUS_NOT_FIND;
@@ -129,12 +137,12 @@ bool WifiDirectScheduler::ProcessNextCommand(WifiDirectExecutor *executor,
             executor->SetRemoteDeviceId(commandDeviceId);
             if (command->GetType() == CommandType::CONNECT_COMMAND) {
                 executor->SetActive(true);
-                executor->SendEvent(std::dynamic_pointer_cast<ConnectCommand>(command));
+                executor->SendEvent(std::static_pointer_cast<ConnectCommand>(command));
             } else if (command->GetType() == CommandType::DISCONNECT_COMMAND) {
                 executor->SetActive(true);
-                executor->SendEvent(std::dynamic_pointer_cast<DisconnectCommand>(command));
+                executor->SendEvent(std::static_pointer_cast<DisconnectCommand>(command));
             } else if (command->GetType() == CommandType::NEGOTIATE_COMMAND) {
-                auto negotiateCommand = std::dynamic_pointer_cast<NegotiateCommand>(command);
+                auto negotiateCommand = std::static_pointer_cast<NegotiateCommand>(command);
                 CONN_LOGI(CONN_WIFI_DIRECT, "msgType=%{public}s",
                           negotiateCommand->GetNegotiateMessage().MessageTypeToString().c_str());
                 executor->SetActive(false);

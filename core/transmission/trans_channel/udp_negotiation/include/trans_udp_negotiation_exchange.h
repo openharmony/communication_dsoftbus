@@ -18,6 +18,7 @@
 
 #include "cJSON.h"
 #include "softbus_app_info.h"
+#include "trans_uk_manager.h"
 
 #ifdef __cplusplus
 extern "C" {

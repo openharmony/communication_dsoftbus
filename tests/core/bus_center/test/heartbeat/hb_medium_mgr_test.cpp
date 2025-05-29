@@ -22,14 +22,13 @@
 #include "bus_center_adapter.h"
 #include "distribute_net_ledger_mock.h"
 #include "hb_strategy_mock.h"
-#include "lnn_ble_heartbeat.h"
+#include "dsoftbus_enhance_interface.h"
 #include "lnn_connection_fsm_mock.h"
 #include "lnn_heartbeat_ctrl_virtual.c"
 #include "lnn_heartbeat_medium_mgr.c"
 #include "lnn_heartbeat_utils.h"
 #include "lnn_net_builder.h"
 #include "lnn_net_ledger_mock.h"
-#include "lnn_parameter_utils_virtual.c"
 #include "softbus_common.h"
 
 namespace OHOS {
@@ -476,6 +475,8 @@ HWTEST_F(HeartBeatMediumTest, LnnDumpHbOnlineNodeList_TEST01, TestSize.Level1)
  */
 HWTEST_F(HeartBeatMediumTest, VisitHbMediumMgrSendBegin_TEST01, TestSize.Level1)
 {
+    LnnEnhanceFuncList *pfnLnnEnhanceFuncList = LnnEnhanceFuncListGet();
+    pfnLnnEnhanceFuncList->lnnRegisterBleLpDeviceMediumMgr = LnnRegisterBleLpDeviceMediumMgr;
     bool ret = VisitHbMediumMgrSendBegin(nullptr, HEARTBEAT_TYPE_MAX, nullptr);
     EXPECT_FALSE(ret);
     LnnHeartbeatSendBeginData data = {
@@ -536,6 +537,8 @@ HWTEST_F(HeartBeatMediumTest, VisitHbMediumMgrSendEnd_TEST01, TestSize.Level1)
 {
     int32_t num;
     LnnHeartbeatSendEndData custData;
+    LnnEnhanceFuncList *pfnLnnEnhanceFuncList = LnnEnhanceFuncListGet();
+    pfnLnnEnhanceFuncList->lnnRegisterBleLpDeviceMediumMgr = LnnRegisterBleLpDeviceMediumMgr;
     bool ret = VisitHbMediumMgrSendEnd(nullptr, HEARTBEAT_TYPE_MAX, nullptr);
     EXPECT_FALSE(ret);
     ret = VisitHbMediumMgrSendEnd(nullptr, HEARTBEAT_TYPE_BLE_V3, static_cast<void *>(&num));
@@ -905,6 +908,8 @@ HWTEST_F(HeartBeatMediumTest, LnnDumpHbOnlineNodeList_TEST02, TestSize.Level1)
  */
 HWTEST_F(HeartBeatMediumTest, LnnHbMediumMgrInit_TEST01, TestSize.Level1)
 {
+    LnnEnhanceFuncList *pfnLnnEnhanceFuncList = LnnEnhanceFuncListGet();
+    pfnLnnEnhanceFuncList->lnnRegisterBleLpDeviceMediumMgr = LnnRegisterBleLpDeviceMediumMgr;
     NiceMock<LnnNetLedgertInterfaceMock> ledgerMock;
     EXPECT_CALL(ledgerMock, LnnRegisterBleLpDeviceMediumMgr)
         .WillOnce(Return(SOFTBUS_NETWORK_HB_MGR_REG_FAIL))
@@ -974,6 +979,8 @@ HWTEST_F(HeartBeatMediumTest, IsLocalSupportThreeState_TEST01, TestSize.Level1)
  */
 HWTEST_F(HeartBeatMediumTest, HbIsValidJoinLnnRequest_TEST01, TestSize.Level1)
 {
+    LnnEnhanceFuncList *pfnLnnEnhanceFuncList = LnnEnhanceFuncListGet();
+    pfnLnnEnhanceFuncList->lnnRetrieveDeviceInfo = LnnRetrieveDeviceInfo;
     NiceMock<LnnNetLedgertInterfaceMock> netLedgertMock;
     uint64_t localFeatureCap = 0x0;
     EXPECT_CALL(netLedgertMock, LnnGetLocalNumU64Info)

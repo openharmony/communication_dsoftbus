@@ -63,6 +63,7 @@ if (defined(ohos_lite)) {
     include_dirs = [
       "interface/include",
       "$dsoftbus_root_path/interfaces/kits/common",
+      "event/src",
     ]
   }
   ohos_shared_library("softbus_dfx") {

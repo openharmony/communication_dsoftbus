@@ -18,7 +18,6 @@
 
 #include "bus_center_event.h"
 #include "hb_fsm_strategy_mock.h"
-#include "lnn_ble_heartbeat_virtual.c"
 #include "lnn_heartbeat_strategy.c"
 #include "lnn_heartbeat_strategy.h"
 #include "softbus_error_code.h"
@@ -30,7 +29,6 @@ using namespace testing;
 
 constexpr uint32_t LNN_HB_TYPE = 1;
 constexpr char NETWORKID[NETWORK_ID_BUF_LEN] = "123456ABD";
-constexpr int32_t LISTENER_ID = 3;
 constexpr uint64_t DELAY_MILLIS = 6000;
 
 class HeartBeatStrategyTest : public testing::Test {
@@ -428,30 +426,6 @@ HWTEST_F(HeartBeatStrategyTest, LNN_START_HEARTBEAT_TEST_01, TestSize.Level1)
     EXPECT_TRUE(ret == SOFTBUS_OK);
 }
 
-/*
- * @tc.name: LNN_BLE_HEARTBEAT_VIRTUAL_TEST_01
- * @tc.desc: lnn_ble_heartbeat_virtual.c
- * @tc.type: FUNC
- * @tc.require:
- */
-HWTEST_F(HeartBeatStrategyTest, LNN_BLE_HEARTBEAT_VIRTUAL_TEST_01, TestSize.Level1)
-{
-    int32_t ret = InitBleHeartbeat(nullptr);
-    EXPECT_TRUE(ret == SOFTBUS_OK);
-    ret = BleHeartbeatOnceBegin(nullptr);
-    EXPECT_TRUE(ret == SOFTBUS_NOT_IMPLEMENT);
-    ret = BleHeartbeatOnceEnd(nullptr);
-    EXPECT_TRUE(ret == SOFTBUS_NOT_IMPLEMENT);
-    ret = SetBleMediumParam(nullptr);
-    EXPECT_TRUE(ret == SOFTBUS_NOT_IMPLEMENT);
-    ret = UpdateBleSendInfo(UPDATE_HB_ACCOUNT_INFO);
-    EXPECT_TRUE(ret == SOFTBUS_NOT_IMPLEMENT);
-    ret = StopBleHeartbeat();
-    EXPECT_TRUE(ret == SOFTBUS_NOT_IMPLEMENT);
-    DeinitBleHeartbeat();
-    ret = HbUpdateBleScanFilter(LISTENER_ID, LNN_HB_TYPE);
-    EXPECT_TRUE(ret == SOFTBUS_OK);
-}
 /*
  * @tc.name: LNN_START_STRATEGY_DIRECTLY_TEST_01
  * @tc.desc: LnnStartHbByTypeAndStrategyDirectly test

@@ -218,7 +218,7 @@ int32_t SoftBusServer::GetLocalDeviceInfo(const char *pkgName, void *info, uint3
     return LnnIpcGetLocalDeviceInfo(pkgName, info, infoTypeLen);
 }
 
-int32_t SoftBusServer::GetNodeKeyInfo(const char *pkgName, const char *networkId, int key, unsigned char *buf,
+int32_t SoftBusServer::GetNodeKeyInfo(const char *pkgName, const char *networkId, int32_t key, unsigned char *buf,
     uint32_t len)
 {
     return LnnIpcGetNodeKeyInfo(pkgName, networkId, key, buf, len);
@@ -357,10 +357,10 @@ int SoftBusServer::Dump(int fd, const std::vector<std::u16string> &args)
         argsStr.emplace_back(Str16ToStr8(item));
     }
 
-    int argc = (int)argsStr.size();
+    int32_t argc = (int)argsStr.size();
     const char *argv[argc];
 
-    for (int i = 0; i < argc; i++) {
+    for (int32_t i = 0; i < argc; i++) {
         argv[i] = argsStr[i].c_str();
     }
 

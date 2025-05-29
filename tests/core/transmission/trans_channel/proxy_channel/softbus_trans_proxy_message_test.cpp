@@ -43,6 +43,7 @@ namespace OHOS {
 #define TEST_AUTH_DECRYPT_SIZE 35
 #define TEST_UDID_MAX_LENGTH 32
 #define TEST_CONN_ID 1795
+#define TEST_INVALID_DATA_SIZE 4200000
 
 class TransProxyMessageTest : public testing::Test {
 public:
@@ -173,20 +174,199 @@ HWTEST_F(TransProxyMessageTest, GetRemoteBtMacByUdidHash001, TestSize.Level1)
 }
 
 /**
- * @tc.name: GetRemoteBtMacByUdidHash002
- * @tc.desc: test get remote btMac byUdidHash.
+ * @tc.name: ConvertBrConnInfo2BleConnInfo001
+ * @tc.desc: test get remote bleMac byUdidHash.
  * @tc.type: FUNC
  * @tc.require:
  */
-HWTEST_F(TransProxyMessageTest, GetRemoteBtMacByUdidHash002, TestSize.Level1)
+HWTEST_F(TransProxyMessageTest, ConvertBrConnInfo2BleConnInfo001, TestSize.Level1)
 {
-    uint8_t udidHash[UDID_HASH_LEN] = "default_udid_hash";
-    char brMac[BT_MAC_LEN] = {0};
+    AuthConnInfo connInfo;
+    TransAuthInterfaceMock authMock;
+    TransCommInterfaceMock commMock;
 
+    EXPECT_CALL(authMock, LnnGetNetworkIdByUdidHash).WillRepeatedly(Return(SOFTBUS_OK));
+    EXPECT_CALL(authMock, LnnGetRemoteStrInfo).WillRepeatedly(Return(SOFTBUS_OK));
+    EXPECT_CALL(commMock, SoftBusGenerateStrHash).WillRepeatedly(Return(SOFTBUS_INVALID_PARAM));
+    int32_t ret = ConvertBrConnInfo2BleConnInfo(&connInfo);
+    EXPECT_EQ(ret, SOFTBUS_INVALID_PARAM);
+}
+
+/**
+ * @tc.name: ConvertBrConnInfo2BleConnInfo002
+ * @tc.desc: test get remote bleMac byUdidHash.
+ * @tc.type: FUNC
+ * @tc.require:
+ */
+HWTEST_F(TransProxyMessageTest, ConvertBrConnInfo2BleConnInfo002, TestSize.Level1)
+{
+    AuthConnInfo connInfo;
+    TransAuthInterfaceMock authMock;
+    TransCommInterfaceMock commMock;
+
+    EXPECT_CALL(authMock, LnnGetNetworkIdByUdidHash).WillRepeatedly(Return(SOFTBUS_OK));
+    EXPECT_CALL(authMock, LnnGetRemoteStrInfo).WillRepeatedly(Return(SOFTBUS_OK));
+    EXPECT_CALL(commMock, SoftBusGenerateStrHash).WillRepeatedly(Return(SOFTBUS_OK));
+    int32_t ret = ConvertBrConnInfo2BleConnInfo(&connInfo);
+    EXPECT_EQ(ret, SOFTBUS_OK);
+}
+
+/**
+ * @tc.name: ConvertSleConnInfo2BleConnInfo001
+ * @tc.desc: test get remote bleMac byUdidHash.
+ * @tc.type: FUNC
+ * @tc.require:
+ */
+HWTEST_F(TransProxyMessageTest, ConvertSleConnInfo2BleConnInfo001, TestSize.Level1)
+{
+    AuthConnInfo connInfo;
+    TransAuthInterfaceMock authMock;
+    EXPECT_CALL(authMock, LnnGetRemoteStrInfo).WillOnce(Return(SOFTBUS_INVALID_PARAM));
+    int32_t ret = ConvertSleConnInfo2BleConnInfo(&connInfo);
+    EXPECT_EQ(ret, SOFTBUS_INVALID_PARAM);
+}
+
+/**
+ * @tc.name: ConvertSleConnInfo2BleConnInfo002
+ * @tc.desc: test get remote bleMac byUdidHash.
+ * @tc.type: FUNC
+ * @tc.require:
+ */
+HWTEST_F(TransProxyMessageTest, ConvertSleConnInfo2BleConnInfo002, TestSize.Level1)
+{
+    AuthConnInfo connInfo;
+    TransAuthInterfaceMock authMock;
+    TransCommInterfaceMock commMock;
+
+    EXPECT_CALL(authMock, LnnGetRemoteStrInfo).WillOnce(Return(SOFTBUS_OK));
+    EXPECT_CALL(commMock, SoftBusGenerateStrHash).WillOnce(Return(SOFTBUS_INVALID_PARAM));
+    int32_t ret = ConvertSleConnInfo2BleConnInfo(&connInfo);
+    EXPECT_EQ(ret, SOFTBUS_INVALID_PARAM);
+}
+
+/**
+ * @tc.name: ConvertSleConnInfo2BleConnInfo003
+ * @tc.desc: test get remote bleMac byUdidHash.
+ * @tc.type: FUNC
+ * @tc.require:
+ */
+HWTEST_F(TransProxyMessageTest, ConvertSleConnInfo2BleConnInfo003, TestSize.Level1)
+{
+    AuthConnInfo connInfo;
+    TransAuthInterfaceMock authMock;
+    TransCommInterfaceMock commMock;
+
+    EXPECT_CALL(authMock, LnnGetRemoteStrInfo).WillOnce(Return(SOFTBUS_OK));
+    EXPECT_CALL(commMock, SoftBusGenerateStrHash).WillOnce(Return(SOFTBUS_OK));
+    int32_t ret = ConvertSleConnInfo2BleConnInfo(&connInfo);
+    EXPECT_EQ(ret, SOFTBUS_OK);
+}
+
+/**
+ * @tc.name: ConvertBleConnInfo2BrConnInfo001
+ * @tc.desc: test get remote bleMac byUdidHash.
+ * @tc.type: FUNC
+ * @tc.require:
+ */
+HWTEST_F(TransProxyMessageTest, ConvertBleConnInfo2BrConnInfo001, TestSize.Level1)
+{
+    AuthConnInfo connInfo;
     TransAuthInterfaceMock authMock;
     EXPECT_CALL(authMock, LnnGetNetworkIdByUdidHash).WillOnce(Return(SOFTBUS_OK));
     EXPECT_CALL(authMock, LnnGetRemoteStrInfo).WillOnce(Return(SOFTBUS_OK));
-    int32_t ret = GetRemoteBtMacByUdidHash(udidHash, UDID_HASH_LEN, brMac, BT_MAC_LEN);
+    int32_t ret = ConvertBleConnInfo2BrConnInfo(&connInfo);
+    EXPECT_EQ(ret, SOFTBUS_OK);
+}
+
+/**
+ * @tc.name: GetAuthIdReDecrypt001
+ * @tc.desc: test get remote bleMac byUdidHash.
+ * @tc.type: FUNC
+ * @tc.require:
+ */
+HWTEST_F(TransProxyMessageTest, GetAuthIdReDecrypt001, TestSize.Level1)
+{
+    AuthHandle authHandle = {0};
+    ProxyMessage msg = {
+        .dataLen = TEST_AUTH_DECRYPT_SIZE,
+        .connId = TEST_AUTH_DECRYPT_SIZE,
+        .keyIndex = TEST_AUTH_DECRYPT_SIZE,
+    };
+    msg.data = const_cast<char *>(reinterpret_cast<const char *>("test_data"));
+    uint8_t decData;
+    uint32_t decDataLen;
+    ConnectionInfo mockInfo;
+    mockInfo.type = CONNECT_SLE;
+    TransConnInterfaceMock connMock;
+    EXPECT_CALL(connMock, ConnGetConnectionInfo).WillOnce(DoAll(SetArgPointee<1>(mockInfo), Return(SOFTBUS_NO_INIT)));
+    int32_t ret = GetAuthIdReDecrypt(&authHandle, &msg, &decData, &decDataLen);
+    EXPECT_EQ(ret, SOFTBUS_NO_INIT);
+}
+
+/**
+ * @tc.name: GetAuthIdReDecrypt002
+ * @tc.desc: test get remote bleMac byUdidHash.
+ * @tc.type: FUNC
+ * @tc.require:
+ */
+HWTEST_F(TransProxyMessageTest, GetAuthIdReDecrypt002, TestSize.Level1)
+{
+    AuthHandle authHandle = {0};
+    ProxyMessage msg = {
+        .dataLen = TEST_AUTH_DECRYPT_SIZE,
+        .connId = TEST_AUTH_DECRYPT_SIZE,
+        .keyIndex = TEST_AUTH_DECRYPT_SIZE,
+    };
+    msg.data = const_cast<char *>(reinterpret_cast<const char *>("test_data"));
+    uint8_t decData;
+    uint32_t decDataLen;
+    ConnectionInfo mockInfo;
+    mockInfo.type = CONNECT_SLE;
+    TransConnInterfaceMock connMock;
+    EXPECT_CALL(connMock, ConnGetConnectionInfo).WillOnce(DoAll(SetArgPointee<1>(mockInfo), Return(SOFTBUS_OK)));
+    int32_t ret = GetAuthIdReDecrypt(&authHandle, &msg, &decData, &decDataLen);
+    EXPECT_EQ(ret, SOFTBUS_NOT_FIND);
+}
+
+/**
+ * @tc.name: TransProxyParseMessageNoDecrypt001
+ * @tc.desc: test get remote bleMac byUdidHash.
+ * @tc.type: FUNC
+ * @tc.require:
+ */
+HWTEST_F(TransProxyMessageTest, TransProxyParseMessageNoDecrypt001, TestSize.Level1)
+{
+    ProxyMessage msg = {
+        .dataLen = TEST_INVALID_DATA_SIZE,
+        .connId = TEST_AUTH_DECRYPT_SIZE,
+        .keyIndex = TEST_AUTH_DECRYPT_SIZE,
+    };
+    msg.data = const_cast<char *>(reinterpret_cast<const char *>("test_data"));
+    int32_t ret = TransProxyParseMessageNoDecrypt(&msg);
+    EXPECT_EQ(ret, SOFTBUS_TRANS_INVALID_DATA_LENGTH);
+    msg.dataLen = TEST_AUTH_DECRYPT_SIZE;
+    ret = TransProxyParseMessageNoDecrypt(&msg);
+    EXPECT_EQ(ret, SOFTBUS_OK);
+}
+
+/**
+ * @tc.name: TransProxyParseMessageNoDecrypt002
+ * @tc.desc: test get remote bleMac byUdidHash.
+ * @tc.type: FUNC
+ * @tc.require:
+ */
+HWTEST_F(TransProxyMessageTest, TransProxyParseMessageNoDecrypt002, TestSize.Level1)
+{
+    ProxyMessage msg = {
+        .dataLen = TEST_INVALID_DATA_SIZE,
+        .connId = TEST_AUTH_DECRYPT_SIZE,
+        .keyIndex = TEST_AUTH_DECRYPT_SIZE,
+    };
+    msg.data = const_cast<char *>(reinterpret_cast<const char *>("test_data"));
+    int32_t ret = TransProxyParseMessageNoDecrypt(&msg);
+    EXPECT_EQ(ret, SOFTBUS_TRANS_INVALID_DATA_LENGTH);
+    msg.dataLen = TEST_AUTH_DECRYPT_SIZE;
+    ret = TransProxyParseMessageNoDecrypt(&msg);
     EXPECT_EQ(ret, SOFTBUS_OK);
 }
 
@@ -264,6 +444,42 @@ HWTEST_F(TransProxyMessageTest, TransProxyGetAuthConnInfo004, TestSize.Level1)
     AuthConnInfo authConnInfo;
     int32_t ret = TransProxyGetAuthConnInfo(TEST_CONN_ID, &authConnInfo);
     EXPECT_EQ(ret, SOFTBUS_TRANS_UNEXPECTED_CONN_TYPE);
+}
+
+/**
+ * @tc.name:TransProxyGetAuthConnInfo005
+ * @tc.desc: test get auth connInfo.
+ * @tc.type: FUNC
+ * @tc.require:
+ */
+HWTEST_F(TransProxyMessageTest, TransProxyGetAuthConnInfo005, TestSize.Level1)
+{
+    ConnectionInfo mockInfo;
+    mockInfo.type = CONNECT_SLE;
+
+    TransConnInterfaceMock connMock;
+    EXPECT_CALL(connMock, ConnGetConnectionInfo).WillOnce(DoAll(SetArgPointee<1>(mockInfo), Return(SOFTBUS_OK)));
+
+    AuthConnInfo authConnInfo;
+    int32_t ret = TransProxyGetAuthConnInfo(TEST_CONN_ID, &authConnInfo);
+    EXPECT_EQ(ret, SOFTBUS_OK);
+}
+
+/**
+  * @tc.name: TransProxyConvertBrConnInfoTest001
+  * @tc.desc: test proxy reset peer.
+  * @tc.type: FUNC
+  * @tc.require:
+  */
+HWTEST_F(TransProxyMessageTest, TransProxyConvertBrConnInfoTest001, TestSize.Level1)
+{
+    TransAuthInterfaceMock authMock;
+    TransCommInterfaceMock commMock;
+    EXPECT_CALL(authMock, LnnGetNetworkIdByBtMac).WillOnce(Return(SOFTBUS_OK));
+    EXPECT_CALL(authMock, LnnGetRemoteStrInfo).WillOnce(Return(SOFTBUS_INVALID_PARAM));
+    AuthConnInfo connInfo;
+    int32_t ret = ConvertBrConnInfo2BleConnInfo(&connInfo);
+    EXPECT_EQ(ret, SOFTBUS_INVALID_PARAM);
 }
 
 /**
@@ -443,6 +659,8 @@ HWTEST_F(TransProxyMessageTest, TransProxyHandshakeMsgTest003, TestSize.Level1)
     ProxyChannelInfo info;
     info.appInfo.appType = APP_TYPE_INNER;
     char *msg = TransProxyPackHandshakeMsg(&info);
+    EXPECT_EQ(nullptr, msg);
+    msg = TransProxyPackHandshakeMsg(nullptr);
     EXPECT_EQ(nullptr, msg);
     msg = TransProxyPackHandshakeMsg(&info);
     ASSERT_TRUE(msg != nullptr);

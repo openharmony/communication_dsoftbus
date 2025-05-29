@@ -17,67 +17,11 @@
 #define LNN_LANE_DEF_H
 
 #include "lnn_lane_interface.h"
+#include "lnn_lane_def_struct.h"
 
 #ifdef __cplusplus
 extern "C" {
 #endif
-
-#define LNN_LANE_P2P_MAX_NUM 4
-
-typedef enum {
-    LANE_BW_RANDOM = 0x0,
-    LANE_BW_20M,
-    LANE_BW_40M,
-    LANE_BW_80M,
-    LANE_BW_80P80M,
-    LANE_BW_160M,
-    LANE_BW_BUTT = 0xFF,
-} LaneBandwidth;
-
-typedef enum {
-    LANE_TS_RANDOM = 0x0,
-    LANE_TS_BUTT = 0xFF,
-} LaneTimeSlotPolicy;
-
-typedef enum {
-    LANE_POWER_RANDOM = 0x0,
-    LANE_POWER_SMART,
-    LANE_POWER_VSR,
-    LANE_POWER_BUTT = 0xFF,
-} LanePowerType;
-
-typedef enum {
-    LANE_PRI_LOW = 0x0,
-    LANE_PRI_HIGH,
-    LANE_PRI_BUTT = 0xFF,
-} LaneTransPriority;
-
-typedef struct {
-    uint16_t baseProfileNum;
-    LaneLinkType linkType;
-    LaneBandwidth bw;
-    LaneTimeSlotPolicy ts;
-    LanePowerType energy;
-    LaneTransType content;
-    LaneTransPriority priority;
-    uint32_t serialNum;
-    int32_t phyChannel;
-    uint32_t maxSpeed;
-} LaneProfile;
-
-typedef struct {
-    char localIp[IP_LEN];
-    char peerIp[IP_LEN];
-} LnnLaneP2pInfo;
-
-typedef enum {
-    LNN_LINK_TYPE_WLAN_5G = 0x0,
-    LNN_LINK_TYPE_WLAN_2P4G,
-    LNN_LINK_TYPE_BR,
-    LNN_LINK_TYPE_P2P,
-    LNN_LINK_TYPE_P2P_MAX = LNN_LINK_TYPE_P2P + LNN_LANE_P2P_MAX_NUM,
-    LNN_LINK_TYPE_BUTT,
-} LnnLaneLinkType;
 
 #ifdef __cplusplus
 }

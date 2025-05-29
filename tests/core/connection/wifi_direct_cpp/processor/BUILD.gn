@@ -25,6 +25,20 @@ ohos_unittest("P2pv1ProcessorTest") {
   include_dirs = processorv1_ut_include_dirs
   include_dirs += [ "$dsoftbus_root_path/core/bus_center/service/include" ]
 
+  include_dirs += [
+    "$dsoftbus_root_path/interfaces/kits/transport",
+    "$dsoftbus_root_path/interfaces/kits/connect",
+    "$dsoftbus_root_path/interfaces/kits/lnn",
+    "$dsoftbus_root_path/interfaces/kits/lnn/enhance",
+    "$dsoftbus_root_path/core/connection/wifi_direct_cpp/dbinder",
+    "$dsoftbus_root_path/interfaces/kits/authentication",
+    "$dsoftbus_root_path/interfaces/kits/authentication/enhance",
+    "$dsoftbus_root_path/interfaces/kits/disc",
+    "$dsoftbus_root_path/interfaces/kits/adapter",
+    "$dsoftbus_root_path/core/frame/init/include",
+    
+  ]
+
   sources = processorv1_ut_sources
 
   defines += processorv1_ut_defines
@@ -47,6 +61,8 @@ ohos_unittest("P2pv1ProcessorTest") {
   deps = [
     "$dsoftbus_dfx_path:softbus_dfx",
     "$dsoftbus_root_path/adapter:softbus_adapter",
+    "$dsoftbus_root_path/core/frame:softbus_server",
+    "$dsoftbus_root_path/core/connection/wifi_direct_cpp:wifi_direct",
   ]
 
   external_deps = [

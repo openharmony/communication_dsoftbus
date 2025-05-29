@@ -18,15 +18,6 @@ softbus_adapter_common = "${dsoftbus_root_path}/adapter/common"
 dsoftbus_feature_product_config_path =
     "${dsoftbus_root_path}/adapter/default_config"
 softbus_adapter_config = "${dsoftbus_root_path}/adapter/default_config"
-native_source_path = rebase_path("$dsoftbus_root_path")
-dep_feature = "dsoftbus_enhance/adapter/default_config/spec_config/softbus_config_adapter.c"
-enhance_feature = exec_script("$dsoftbus_root_path/check_sub_module.py",
-                              [
-                                "$native_source_path",
-                                "$dep_feature",
-                              ],
-                              "value")
-
 if (defined(ohos_lite)) {
   import("//build/lite/config/component/lite_component.gni")
   config("dsoftbus_adapter_common_interface") {
@@ -108,12 +99,7 @@ if (defined(ohos_lite)) {
         sources += [ "$softbus_adapter_common/security/access_token/common/softbus_access_token_adapter_virtual.c" ]
       }
 
-      if (enhance_feature) {
-        sources += [ "$dsoftbus_root_path/dsoftbus_enhance/adapter/default_config/spec_config/softbus_config_adapter.c" ]
-      } else {
-        sources +=
-            [ "$softbus_adapter_config/spec_config/softbus_config_adapter.c" ]
-      }
+      sources += [ "$softbus_adapter_config/spec_config/softbus_config_adapter.c" ]
 
       if (board_name == "v200zr") {
         external_deps += [ "json:nlohmann_json_static" ]
@@ -132,19 +118,13 @@ if (defined(ohos_lite)) {
           "$softbus_adapter_common/range/softbus_adapter_range.c",
         ]
 
-        if (enhance_feature) {
-          sources += [ "$dsoftbus_root_path/dsoftbus_enhance/adapter/default_config/spec_config/softbus_config_adapter.c" ]
-        } else {
-          sources +=
-              [ "$softbus_adapter_config/spec_config/softbus_config_adapter.c" ]
-        }
+        sources += [ "$softbus_adapter_config/spec_config/softbus_config_adapter.c" ]
       }
 
       deps = [
         "$dsoftbus_dfx_path:softbus_dfx",
         "$hilog_lite_deps_path",
       ]
-
 
       if (dsoftbus_feature_encrypt == 0) {
         sources += [
@@ -201,12 +181,7 @@ if (defined(ohos_lite)) {
         sources += [ "$softbus_adapter_common/security/access_token/common/softbus_access_token_adapter_virtual.c" ]
       }
 
-      if (enhance_feature) {
-        sources += [ "$dsoftbus_root_path/dsoftbus_enhance/adapter/default_config/spec_config/softbus_config_adapter.c" ]
-      } else {
-        sources +=
-            [ "$softbus_adapter_config/spec_config/softbus_config_adapter.c" ]
-      }
+      sources += [ "$softbus_adapter_config/spec_config/softbus_config_adapter.c" ]
 
       deps = [
         "$dsoftbus_dfx_path:softbus_dfx",
@@ -299,44 +274,22 @@ if (defined(ohos_lite)) {
       sources += [ "$softbus_adapter_common/security/access_token/common/softbus_access_token_adapter_virtual.c" ]
     }
 
-    if (enhance_feature) {
-      sources += [ "$dsoftbus_root_path/dsoftbus_enhance/adapter/default_config/spec_config/softbus_config_adapter.c" ]
-    } else {
-      sources +=
-          [ "$softbus_adapter_config/spec_config/softbus_config_adapter.c" ]
-    }
+    sources += [ "$softbus_adapter_config/spec_config/softbus_config_adapter.c" ]
 
-    public_deps = [ "$dsoftbus_dfx_path:softbus_dfx" ]
+    deps = [ "$dsoftbus_dfx_path:softbus_dfx" ]
     public_external_deps = [
       "bounds_checking_function:libsec_shared",
       "json:nlohmann_json_static",
     ]
 
-    ble_enhanced_impl =
-        "dsoftbus_enhance/adapter/common/range/softbus_adapter_range.c"
-    enhanced_range = exec_script("$dsoftbus_root_path/check_sub_module.py",
-                                 [
-                                   "$native_source_path",
-                                   "$ble_enhanced_impl",
-                                 ],
-                                 "value")
-    if (enhanced_range && defined(global_parts_info.msdp_algorithm) &&
-        defined(global_parts_info.msdp_range_measure)) {
-      sources += [ "$dsoftbus_root_path/dsoftbus_enhance/adapter/common/range/softbus_adapter_range.c" ]
-      external_deps += [
-        "algorithm:msdp_ble_range",
-        "spatial_awareness:msdp_range_measure",
-      ]
-    } else {
-      sources += [ "$softbus_adapter_common/range/softbus_adapter_range.c" ]
-    }
+    sources += [ "$softbus_adapter_common/range/softbus_adapter_range.c" ]
 
     if (dsoftbus_feature_encrypt == 0) {
       sources += [
         "$softbus_adapter_common/mbedtls/softbus_adapter_crypto.c",
         "$softbus_adapter_common/mbedtls/softbus_aes_encrypt_virtual.c",
       ]
-      public_deps += [ "//third_party/mbedtls" ]
+      external_deps += [ "//third_party/mbedtls" ]
     } else if (dsoftbus_feature_encrypt == 1) {
       sources += [
         "$softbus_adapter_common/openssl/softbus_adapter_crypto.c",

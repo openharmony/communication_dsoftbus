@@ -34,6 +34,7 @@ ohos_fuzztest("ClientTransUdpManagerFuzzTest") {
     "$dsoftbus_root_path/sdk/transmission/trans_channel/tcp_direct/include",
     "$dsoftbus_root_path/sdk/transmission/session/include",
     "$dsoftbus_root_path/tests/common/include",
+    "$dsoftbus_root_path/interfaces/kits/sdk",
   ]
   cflags = [
     "-g",

@@ -28,13 +28,11 @@ void ClientTransUdpMgrDeinit(void)
     return;
 }
 
-int32_t TransOnUdpChannelOpened(
-    const char *sessionName, const ChannelInfo *channel, int32_t *udpPort, SocketAccessInfo *accessInfo)
+int32_t TransOnUdpChannelOpened(const char *sessionName, const ChannelInfo *channel, int32_t *udpPort)
 {
     (void)sessionName;
     (void)channel;
     (void)udpPort;
-    (void)accessInfo;
     return SOFTBUS_FUNC_NOT_SUPPORT;
 }
 
