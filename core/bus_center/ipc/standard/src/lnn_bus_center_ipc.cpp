@@ -737,15 +737,8 @@ static void RemoveRefreshRequestInfoByPkgName(const char *pkgName)
     }
 }
 
-void BusCenterServerDeathCallback(const char *pkgName)
+static void RemoveRangeRequestInfoByPkgName(const char *pkgName)
 {
-    if (pkgName == nullptr) {
-        return;
-    }
-    RemoveJoinRequestInfoByPkgName(pkgName);
-    RemoveLeaveRequestInfoByPkgName(pkgName);
-    RemoveRefreshRequestInfoByPkgName(pkgName);
-
     std::lock_guard<std::mutex> autoLock(g_lock);
     std::vector<MsdpRangeReqInfo *>::iterator iter;
     for (iter = g_msdpRangeReqInfo.begin(); iter != g_msdpRangeReqInfo.end();) {
@@ -757,4 +750,15 @@ void BusCenterServerDeathCallback(const char *pkgName)
         }
         ++iter;
     }
+}
+
+void BusCenterServerDeathCallback(const char *pkgName)
+{
+    if (pkgName == nullptr) {
+        return;
+    }
+    RemoveJoinRequestInfoByPkgName(pkgName);
+    RemoveLeaveRequestInfoByPkgName(pkgName);
+    RemoveRefreshRequestInfoByPkgName(pkgName);
+    RemoveRangeRequestInfoByPkgName(pkgName);
 }
