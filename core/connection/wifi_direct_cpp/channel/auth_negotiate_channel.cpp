@@ -183,8 +183,20 @@ void AuthNegotiateChannel::ProcessDetectLinkResponse(AuthHandle handle, const Ne
     channel->promise_->set_value(response);
 }
 
-static bool CheckSameAccount(const NegotiateMessage &msg)
+static bool CheckSameAccount(const NegotiateMessage &msg, const std::string &remoteDeviceId)
 {
+    // The default value of extradata carried in the CMD_CONN_V2_RESP_3 message of the 3.0 device is 0.
+    auto remoteNetworkId = WifiDirectUtils::UuidToNetworkId(remoteDeviceId);
+    CONN_LOGI(CONN_WIFI_DIRECT, "remoteNetworkId=%{public}s", WifiDirectAnonymizeDeviceId(remoteNetworkId).c_str());
+    int32_t osType = 0;
+    if (LnnGetOsTypeByNetworkId(remoteNetworkId.c_str(), &osType) == SOFTBUS_OK) {
+        CONN_LOGI(CONN_WIFI_DIRECT, "remote osType is %{public}d", osType);
+        // The osType of the remote device is not OH_OS_TYPE, the remote device uses the same account.
+        if (osType != OH_OS_TYPE) {
+            CONN_LOGI(CONN_WIFI_DIRECT, "remote device version is not later than 4.x");
+            return true;
+        }
+    }
     bool ret = true;
     switch (msg.GetMessageType()) {
         case NegotiateMessageType::CMD_V3_REQ:
@@ -218,7 +230,7 @@ static void OnAuthDataReceived(AuthHandle handle, const AuthTransData *data)
     input.insert(input.end(), data->data, data->data + data->len);
     NegotiateMessage msg;
     msg.Unmarshalling(*protocol, input);
-    bool sameAccount = CheckSameAccount(msg);
+    bool sameAccount = CheckSameAccount(msg, remoteDeviceId);
     CONN_LOGI(CONN_WIFI_DIRECT, "sameAccount=%{public}d", sameAccount);
     if (!sameAccount) {
         CONN_LOGI(CONN_WIFI_DIRECT, "diff account, use remote mac as device id");
