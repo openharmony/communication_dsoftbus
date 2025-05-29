@@ -15,7 +15,6 @@
 #include <securec.h>
 #include "nstackx_adapter_mock.h"
 #include "softbus_error_code.h"
-#include "disc_log.h"
 
 const int32_t MOCK_PHONE_DEVICE_TYPE = 14;
 const int32_t MOCK_ACCOUNT_ID = 1234567890;
