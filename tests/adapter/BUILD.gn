@@ -22,9 +22,6 @@ group("unittest") {
     "common:unittest",
     "unittest:unittest",
   ]
-  if (dsoftbus_feature_ex_kits) {
-    deps += [ "$dsoftbus_root_path/dsoftbus_enhance/test/adapter:unittest" ]
-  }
 }
 
 group("fuzztest") {

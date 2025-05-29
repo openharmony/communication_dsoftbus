@@ -15,24 +15,46 @@
 
 #include "softbus_server_frame.h"
 
+#include <dlfcn.h>
+
 #include "auth_interface.h"
 #include "auth_uk_manager.h"
 #include "bus_center_manager.h"
+#include "conn_log.h"
 #include "disc_event_manager.h"
-#include "softbus_ddos.h"
+#include "g_enhance_conn_func.h"
+#include "g_enhance_conn_func_pack.h"
+#include "g_enhance_lnn_func.h"
+#include "g_enhance_trans_func.h"
+#include "g_enhance_disc_func.h"
+#include "g_enhance_adapter_func.h"
+#include "g_enhance_auth_func.h"
 #include "instant_statistics.h"
 #include "lnn_bus_center_ipc.h"
 #include "lnn_sle_monitor.h"
+#include "lnn_init_monitor.h"
 #include "softbus_adapter_bt_common.h"
-#include "softbus_conn_ble_direct.h"
 #include "softbus_disc_server.h"
 #include "softbus_feature_config.h"
 #include "legacy/softbus_hidumper_interface.h"
 #include "legacy/softbus_hisysevt_common.h"
 #include "softbus_utils.h"
+#include "softbus_lnn_init.h"
+#include "softbus_conn_init.h"
+#include "softbus_adapter_init.h"
+#include "softbus_authentication_init.h"
+#include "softbus_disc_init.h"
+#include "softbus_trans_init.h"
+#include "softbus_ddos.h"
+#include "softbus_init_common.h"
 #include "trans_session_service.h"
 #include "wifi_direct_manager.h"
-#include "lnn_init_monitor.h"
+
+#ifdef __aarch64__
+static const char *SOFTBUS_SERVER_PLUGIN_PATH_NAME = "/system/lib64/libdsoftbus_server_plugin.z.so";
+#else
+static const char *SOFTBUS_SERVER_PLUGIN_PATH_NAME = "/system/lib/libdsoftbus_server_plugin.z.so";
+#endif
 
 static bool g_isInit = false;
 
@@ -63,6 +85,96 @@ bool GetServerIsInit(void)
     return g_isInit;
 }
 
+static int32_t softbusServerOpenFuncInit(void *soHandle)
+{
+    if (soHandle == NULL) {
+        return SOFTBUS_NETWORK_DLOPEN_FAILED;
+    }
+    if (LnnOpenFuncInit(soHandle) != SOFTBUS_OK) {
+        COMM_LOGE(COMM_SVC, "softbus Lnn Open Func init failed.");
+        return SOFTBUS_NETWORK_LNN_OPEN_FUNC_INIT_FAILED;
+    }
+    if (ConnOpenFuncInit(soHandle) != SOFTBUS_OK) {
+        COMM_LOGE(COMM_SVC, "softbus Conn Open Func init failed.");
+        return SOFTBUS_NETWORK_CONN_OPEN_FUNC_INIT_FAILED;
+    }
+    if (AdapterOpenFuncInit(soHandle) != SOFTBUS_OK) {
+        COMM_LOGE(COMM_SVC, "softbus Adapter Open Func init failed.");
+        return SOFTBUS_NETWORK_ADAPTER_OPEN_FUNC_INIT_FAILED;
+    }
+    if (AuthOpenFuncInit(soHandle) != SOFTBUS_OK) {
+        COMM_LOGE(COMM_SVC, "softbus Auth Open Func init failed.");
+        return SOFTBUS_NETWORK_AUTH_OPEN_FUNC_INIT_FAILED;
+    }
+    if (DiscOpenFuncInit(soHandle) != SOFTBUS_OK) {
+        COMM_LOGE(COMM_SVC, "softbus Disc Open Func init failed.");
+        return SOFTBUS_NETWORK_DISC_OPEN_FUNC_INIT_FAILED;
+    }
+    if (TransOpenFuncInit(soHandle) != SOFTBUS_OK) {
+        COMM_LOGE(COMM_SVC, "softbus Trans Open Func init failed.");
+        return SOFTBUS_NETWORK_TRANS_ENHANCE_FUNC_INIT_FAILED;
+    }
+    return SOFTBUS_OK;
+}
+ 
+static int32_t softbusServerEnhanceFuncInit(void *soHandle)
+{
+    if (soHandle == NULL) {
+        return SOFTBUS_NETWORK_DLOPEN_FAILED;
+    }
+    if (LnnRegisterEnhanceFunc(soHandle) != SOFTBUS_OK) {
+        COMM_LOGE(COMM_SVC, "softbus Lnn Enhance Func init failed.");
+        return SOFTBUS_NETWORK_LNN_ENHANCE_FUNC_INIT_FAILED;
+    }
+    if (ConnRegisterEnhanceFunc(soHandle) != SOFTBUS_OK) {
+        COMM_LOGE(COMM_SVC, "softbus Conn Enhance Func init failed.");
+        return SOFTBUS_NETWORK_CONN_ENHANCE_FUNC_INIT_FAILED;
+    }
+    if (AdapterRegisterEnhanceFunc(soHandle) != SOFTBUS_OK) {
+        COMM_LOGE(COMM_SVC, "softbus Adapter Enhance Func init failed.");
+        return SOFTBUS_NETWORK_ADAPTER_ENHANCE_FUNC_INIT_FAILED;
+    }
+    if (AuthRegisterEnhanceFunc(soHandle) != SOFTBUS_OK) {
+        COMM_LOGE(COMM_SVC, "softbus Auth Enhance Func init failed.");
+        return SOFTBUS_NETWORK_AUTH_ENHANCE_FUNC_INIT_FAILED;
+    }
+    if (DiscRegisterEnhanceFunc(soHandle) != SOFTBUS_OK) {
+        COMM_LOGE(COMM_SVC, "softbus Disc Enhance Func init failed.");
+        return SOFTBUS_NETWORK_DISC_ENHANCE_FUNC_INIT_FAILED;
+    }
+    if (TransRegisterEnhanceFunc(soHandle) != SOFTBUS_OK) {
+        COMM_LOGE(COMM_SVC, "softbus Trans Enhance Func init failed.");
+        return SOFTBUS_NETWORK_TRANS_ENHANCE_FUNC_INIT_FAILED;
+    }
+    return SOFTBUS_OK;
+}
+ 
+static void ServerFuncInit(void)
+{
+    int ret = SOFTBUS_OK;
+    void *pluginServerSoHandle = NULL;
+    (void)SoftBusDlopen(SOFTBUS_SERVER_PLUGIN_PATH_NAME, &pluginServerSoHandle);
+    if (pluginServerSoHandle == NULL) {
+        COMM_LOGE(COMM_SVC, "dlopen libdsoftbus_server_plugin.z.so failed.");
+        SoftbusServerPluginLoadedFlagSet(false);
+        return;
+    }
+ 
+    ret = softbusServerOpenFuncInit(pluginServerSoHandle);
+    if (ret != SOFTBUS_OK) {
+        COMM_LOGE(COMM_SVC, "init softbus server Open func failed");
+    }
+ 
+    ret = softbusServerEnhanceFuncInit(pluginServerSoHandle);
+    if (ret != SOFTBUS_OK) {
+        COMM_LOGE(COMM_SVC, "init softbus server Enhance func failed");
+    } else {
+        SoftbusServerPluginLoadedFlagSet(true);
+    }
+ 
+    // SoftBusDlclose(pluginServerSoHandle);
+}
+
 static int32_t InitServicesAndModules(void)
 {
     COMM_CHECK_AND_RETURN_RET_LOGE(ConnServerInit() == SOFTBUS_OK,
@@ -86,7 +198,7 @@ static int32_t InitServicesAndModules(void)
     COMM_CHECK_AND_RETURN_RET_LOGE(GetWifiDirectManager()->init() == SOFTBUS_OK,
         SOFTBUS_WIFI_DIRECT_INIT_FAILED, COMM_SVC, "softbus wifi direct init failed.");
 
-    COMM_CHECK_AND_RETURN_RET_LOGE(ConnBleDirectInit() == SOFTBUS_OK,
+    COMM_CHECK_AND_RETURN_RET_LOGE(ConnBleDirectInitPacked() == SOFTBUS_OK,
         SOFTBUS_CONN_BLE_DIRECT_INIT_FAILED, COMM_SVC, "softbus ble direct init failed.");
 
     if (InitSoftbusSysEvt() != SOFTBUS_OK || SoftBusHiDumperInit() != SOFTBUS_OK) {
@@ -102,6 +214,7 @@ static int32_t InitServicesAndModules(void)
 
 void InitSoftBusServer(void)
 {
+    ServerFuncInit();
     SoftbusConfigInit();
     LnnInitMonitorInit();
     if (ServerStubInit() != SOFTBUS_OK) {

@@ -25,11 +25,7 @@
 namespace OHOS::SoftBus {
 class InterfaceManager {
 public:
-    static InterfaceManager& GetInstance()
-    {
-        static InterfaceManager instance;
-        return instance;
-    }
+    static InterfaceManager& GetInstance();
 
     using Updater = std::function<int(InterfaceInfo &)>;
     using Reader = std::function<int(const InterfaceInfo &)>;

@@ -23,7 +23,6 @@
 #include "auth_log.h"
 #include "lnn_distributed_net_ledger.h"
 #include "lnn_map.h"
-#include "lnn_secure_storage.h"
 #include "softbus_adapter_crypto.h"
 #include "softbus_adapter_mem.h"
 #include "softbus_adapter_thread.h"
@@ -50,6 +49,7 @@ static SoftBusList *g_userKeyList = NULL;
 int32_t AuthUserKeyInit(void)
 {
     if (g_userKeyList != NULL) {
+        AUTH_LOGI(AUTH_KEY, "g_userKeyList already init");
         return SOFTBUS_OK;
     }
     g_userKeyList = CreateSoftBusList();

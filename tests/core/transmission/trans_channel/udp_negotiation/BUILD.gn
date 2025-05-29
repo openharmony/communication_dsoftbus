@@ -18,7 +18,11 @@ module_output_path = "dsoftbus/soft_bus/transmission"
 
 ohos_unittest("TransUdpNegoTest") {
   module_out_path = module_output_path
-  sources = [ "trans_udp_nego_test.cpp" ]
+  sources = [
+    "trans_udp_nego_test.cpp",
+    "mock/trans_udp_nego_test_mock.cpp",
+    "$dsoftbus_root_path/core/frame/init/src/g_enhance_lnn_func.c",
+  ]
 
   include_dirs = [
     "unittest/common/",
@@ -49,18 +53,26 @@ ohos_unittest("TransUdpNegoTest") {
     "$dsoftbus_core_path/transmission/trans_channel/qos/interface",
     "$dsoftbus_core_path/transmission/trans_channel/udp_negotiation/include",
     "$dsoftbus_core_path/transmission/trans_channel/udp_negotiation/src",
+    "$dsoftbus_root_path/tests/core/transmission/trans_channel/udp_negotiation/mock",
+    "$dsoftbus_root_path/tests/interface/enhance",
+    "$dsoftbus_root_path/core/frame/init/include",
+    "$dsoftbus_root_path/interfaces/kits/connect",
+    "$dsoftbus_root_path/core/adapter/bus_center/include",
   ]
 
   deps = [
     "$dsoftbus_core_path/common:softbus_utils",
     "$dsoftbus_core_path/frame:softbus_server",
     "$dsoftbus_root_path/adapter:softbus_adapter",
+    "$dsoftbus_root_path/core/connection/wifi_direct_cpp:wifi_direct",
   ]
 
   external_deps = [
     "c_utils:utils",
     "dsoftbus:softbus_client",
     "hilog:libhilog",
+    "googletest:gmock_main",
+    "googletest:gtest_main",
   ]
 }
 
@@ -127,6 +139,7 @@ ohos_unittest("TransUdpStaticTest") {
   sources = [ "trans_udp_static_test.cpp" ]
 
   include_dirs = [
+    "$dsoftbus_core_path/interfaces/kits/connect",
     "$dsoftbus_core_path/authentication/interface",
 
     "$dsoftbus_core_path/bus_center/interface",
@@ -155,6 +168,8 @@ ohos_unittest("TransUdpStaticTest") {
   deps = [
     "$dsoftbus_core_path/common:softbus_utils",
     "$dsoftbus_core_path/frame:softbus_server",
+    "$dsoftbus_root_path/adapter:softbus_adapter",
+    "$dsoftbus_root_path/core/connection/wifi_direct_cpp:wifi_direct",
   ]
 
   if (is_standard_system) {
@@ -186,7 +201,7 @@ ohos_unittest("TransUdpManagerTest") {
     "$dsoftbus_core_path/transmission/trans_channel/manager/include",
     "$dsoftbus_core_path/transmission/trans_channel/udp_negotiation/include",
     "$dsoftbus_core_path/transmission/trans_channel/udp_negotiation/src",
-    "$dsoftbus_root_path/core/adapter/bus_center/include",
+    "$dsoftbus_core_path/adapter/bus_center/include",
   ]
 
   deps = [

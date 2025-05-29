@@ -24,6 +24,14 @@ ohos_fuzztest("AuthNegotiateChannelFuzzTest") {
   module_out_path = dsoftbus_fuzz_out_path
   fuzz_config_file = "$dsoftbus_root_path/tests/core/connection/fuzztest/authnegotiatechannel_fuzzer"
   include_dirs = [
+    "$dsoftbus_root_path/interfaces/kits/transport",
+    "$dsoftbus_root_path/core/frame/init/include",
+    "$dsoftbus_root_path/core/connection/wifi_direct_cpp/dbinder",
+    "$dsoftbus_root_path/interfaces/kits/adapter",
+    "$dsoftbus_root_path/interfaces/kits/authentication",
+    "$dsoftbus_root_path/interfaces/kits/lnn",
+    "$dsoftbus_root_path/interfaces/kits/connect",
+    "$dsoftbus_root_path/interfaces/kits/disc",
     "$dsoftbus_root_path/tests/core/connection/wifi_direct_cpp/processor",
     "$dsoftbus_root_path/tests/core/connection/wifi_direct_cpp",
     "$dsoftbus_root_path/core/connection/wifi_direct_cpp/channel",
@@ -63,6 +71,7 @@ ohos_fuzztest("AuthNegotiateChannelFuzzTest") {
     "$dsoftbus_root_path/tests/core/connection/wifi_direct_cpp/net_conn_client.cpp",
     "$dsoftbus_root_path/tests/core/connection/wifi_direct_cpp/wifi_direct_mock.cpp",
     "$dsoftbus_root_path/tests/core/connection/wifi_direct_cpp/wifi_direct_utils.cpp",
+    "$dsoftbus_root_path/core/frame/common/src/softbus_init_common.c",
     "$wifi_direct_path/adapter/p2p_adapter.cpp",
     "$wifi_direct_path/channel/auth_negotiate_channel.cpp",
     "$wifi_direct_path/channel/dummy_negotiate_channel.cpp",
@@ -104,6 +113,7 @@ ohos_fuzztest("AuthNegotiateChannelFuzzTest") {
     "$wifi_direct_path/wifi_direct_role_option.cpp",
     "$wifi_direct_path/wifi_direct_scheduler.cpp",
     "authnegotiatechannel_fuzzer.cpp",
+    "$dsoftbus_root_path/core/frame/init/src/g_enhance_lnn_func.c",
   ]
 
   cflags = [
@@ -120,6 +130,7 @@ ohos_fuzztest("AuthNegotiateChannelFuzzTest") {
     "$dsoftbus_root_path/adapter:softbus_adapter",
     "$dsoftbus_root_path/core/common:softbus_utils",
     "$dsoftbus_root_path/core/frame:softbus_server",
+    "$dsoftbus_root_path/dfx:softbus_dfx",
   ]
 
   external_deps = [

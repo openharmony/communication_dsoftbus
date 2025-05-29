@@ -19,8 +19,10 @@
 
 #include "accesstoken_kit.h"
 #include "comm_log.h"
+#include "ipc_skeleton.h"
 #include "privacy_kit.h"
 #include "regex.h"
+#include "softbus_common.h"
 #include "softbus_error_code.h"
 #include "softbus_permission.h"
 #include "tokenid_kit.h"
@@ -265,6 +267,15 @@ bool SoftBusCheckIsCollabApp(uint64_t fullTokenId, const char *sessionName)
     }
     COMM_LOGI(COMM_ADAPTER, "The caller is an app");
     return true;
+}
+
+bool SoftBusCheckIsAccess(void)
+{
+    uint32_t callingTokenId = IPCSkeleton::GetCallingTokenID();
+    int32_t ret = AccessTokenKit::VerifyAccessToken((AccessTokenID)callingTokenId,
+        OHOS_PERMISSION_DISTRIBUTED_DATASYNC);
+    bool isAccessToken = (ret == PERMISSION_GRANTED);
+    return isAccessToken;
 }
 
 bool SoftBusSaCanUseDeviceKey(uint64_t tokenId)

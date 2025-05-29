@@ -619,7 +619,7 @@ static int32_t ParseRequestAppInfo(AuthHandle authHandle, const cJSON *msg, AppI
         &appInfo->myData.pid);
     TRANS_CHECK_AND_RETURN_RET_LOGE(ret == SOFTBUS_OK,
         SOFTBUS_TRANS_PEER_SESSION_NOT_CREATED, TRANS_CTRL, "get uid and pid failed, ret=%{public}d", ret);
-    
+
     if (appInfo->callingTokenId != TOKENID_NOT_SET && TransCheckServerAccessControl(appInfo) != SOFTBUS_OK) {
         return SOFTBUS_TRANS_CHECK_ACL_FAILED;
     }
@@ -1493,7 +1493,8 @@ int32_t TransDealUdpChannelOpenResult(
         return SOFTBUS_OK;
     }
     if (GetCapabilityBit(channel.info.channelCapability, TRANS_CHANNEL_SINK_GENERATE_KEY_OFFSET)) {
-        if (accessInfo != NULL && accessInfo->userId == INVALID_USER_ID) {
+        if (accessInfo != NULL && accessInfo->userId == INVALID_USER_ID &&
+            channel.info.myData.tokenType > ACCESS_TOKEN_TYPE_HAP) {
             DisableCapabilityBit(&channel.info.channelCapability, TRANS_CHANNEL_SINK_KEY_ENCRYPT_OFFSET);
             return TransProcessAsyncOpenUdpChannelSuccess(&channel, channelId);
         }

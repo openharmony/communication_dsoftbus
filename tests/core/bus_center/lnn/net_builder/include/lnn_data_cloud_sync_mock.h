@@ -30,7 +30,6 @@
 #include "lnn_connection_fsm.h"
 #include "lnn_devicename_info.h"
 #include "lnn_distributed_net_ledger.h"
-#include "lnn_fast_offline.h"
 #include "lnn_local_net_ledger.h"
 #include "lnn_net_capability.h"
 #include "lnn_network_id.h"

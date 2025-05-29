@@ -21,6 +21,7 @@
 #include "common_list.h"
 #include "conn_event.h"
 #include "conn_log.h"
+#include "g_enhance_conn_func_pack.h"
 #include "softbus_adapter_mem.h"
 #include "softbus_adapter_thread.h"
 #include "softbus_base_listener.h"
@@ -53,7 +54,8 @@ static int32_t ModuleCheck(ConnModule moduleId)
     ConnModule id[] = { MODULE_TRUST_ENGINE, MODULE_HICHAIN, MODULE_AUTH_SDK, MODULE_AUTH_CONNECTION,
         MODULE_MESSAGE_SERVICE, MODULE_AUTH_CHANNEL, MODULE_AUTH_MSG, MODULE_BLUETOOTH_MANAGER, MODULE_CONNECTION,
         MODULE_DIRECT_CHANNEL, MODULE_PROXY_CHANNEL, MODULE_DEVICE_AUTH, MODULE_P2P_LINK, MODULE_UDP_INFO,
-        MODULE_PKG_VERIFY, MODULE_META_AUTH, MODULE_P2P_NEGO, MODULE_LANE_SELECT, MODULE_BLE_NET, MODULE_BLE_CONN, MODULE_BLE_GENERAL };
+        MODULE_PKG_VERIFY, MODULE_META_AUTH, MODULE_P2P_NEGO, MODULE_LANE_SELECT, MODULE_BLE_NET, MODULE_BLE_CONN,
+        MODULE_BLE_GENERAL };
     int32_t i;
     int32_t idNum = sizeof(id) / sizeof(ConnModule);
 
@@ -555,7 +557,7 @@ int32_t ConnServerInit(void)
         CONN_LOGD(CONN_COMMON, "init ble ok");
     }
 
-    connectObj = ConnSleInit(&g_connManagerCb);
+    connectObj = ConnSleInitPacked(&g_connManagerCb);
     if (connectObj != NULL) {
         g_connManager[CONNECT_SLE] = connectObj;
         CONN_LOGD(CONN_COMMON, "init sle ok");

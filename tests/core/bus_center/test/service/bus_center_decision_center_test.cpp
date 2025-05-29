@@ -19,7 +19,6 @@
 #include "bus_center_decision_center.h"
 #include "bus_center_decision_center_mock.h"
 #include "bus_center_manager.h"
-#include "lnn_decision_center.h"
 #include "lnn_log.h"
 #include "lnn_net_builder_mock.h"
 #include "lnn_node_info.h"

@@ -259,7 +259,9 @@ struct SpungeEpollEvent {
  * @par Marcos
  */
 #if !defined(FILLP_LW_LITEOS)
+#if !defined(FILLP_TYPES_ERR_OK_INVALID)
 #define ERR_OK 0
+#endif
 #endif
 #define FILLP_OK ERR_OK
 #define FILLP_NULL 0

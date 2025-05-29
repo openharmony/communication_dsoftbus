@@ -18,6 +18,8 @@
 #include <securec.h>
 
 #include "anonymizer.h"
+#include "g_enhance_lnn_func.h"
+#include "g_enhance_lnn_func_pack.h"
 #include "lnn_distributed_net_ledger.h"
 #include "lnn_lane_common.h"
 #include "lnn_lane_communication_capability.h"
@@ -25,14 +27,14 @@
 #include "lnn_lane_link_ledger.h"
 #include "lnn_log.h"
 #include "lnn_node_info.h"
-#include "lnn_parameter_utils.h"
 #include "lnn_trans_lane.h"
 #include "bus_center_manager.h"
 #include "softbus_adapter_mem.h"
 #include "softbus_conn_interface.h"
 #include "softbus_error_code.h"
-#include "wifi_direct_manager.h"
 #include "softbus_socket.h"
+#include "softbus_init_common.h"
+#include "wifi_direct_manager.h"
 
 const static LaneType SUPPORT_TYPE_LIST[] = {LANE_TYPE_HDLC, LANE_TYPE_TRANS, LANE_TYPE_CTRL};
 
@@ -415,7 +417,7 @@ static void LnnOnWifiDirectDeviceOffline(const char *peerMac, const char *peerIp
         LNN_LOGE(LNN_STATE, "get lane state notify info fail");
         return;
     }
-    if (laneLinkInfo.type == LANE_HML && IsPowerControlEnabled()) {
+    if (laneLinkInfo.type == LANE_HML && IsPowerControlEnabledPacked()) {
         DetectDisableWifiDirectApply();
     }
     if (PostLaneStateChangeMessage(LANE_STATE_LINKDOWN, laneLinkInfo.peerUdid, &laneLinkInfo) != SOFTBUS_OK) {
@@ -542,7 +544,7 @@ static void LnnOnWifiDirectConnectedForSink(const struct WifiDirectSinkLink *lin
     if (AddLaneResourceToPool(&laneLinkInfo, laneId, true) != SOFTBUS_OK) {
         LNN_LOGE(LNN_LANE, "add server lane resource fail");
     }
-    if (laneLinkInfo.type == LANE_HML && IsPowerControlEnabled()) {
+    if (laneLinkInfo.type == LANE_HML && IsPowerControlEnabledPacked()) {
         DetectDisableWifiDirectApply();
     }
     (void)HandleLaneQosChange(&laneLinkInfo);

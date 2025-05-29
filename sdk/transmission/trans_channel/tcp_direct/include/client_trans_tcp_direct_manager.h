@@ -65,6 +65,7 @@ int32_t TransDisableSessionListener(int32_t channelId);
 int32_t TransTdcSetListenerStateById(int32_t channelId, bool needStopListener);
 
 void TransUpdateFdState(int32_t channelId);
+
 #ifdef __cplusplus
 }
 #endif

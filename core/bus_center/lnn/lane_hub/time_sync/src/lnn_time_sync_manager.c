@@ -20,12 +20,14 @@
 
 #include "anonymizer.h"
 #include "bus_center_manager.h"
-#include "lnn_time_sync_impl.h"
+#include "g_enhance_lnn_func.h"
+#include "g_enhance_lnn_func_pack.h"
 #include "lnn_log.h"
 #include "message_handler.h"
 #include "softbus_adapter_mem.h"
 #include "softbus_def.h"
 #include "softbus_error_code.h"
+#include "softbus_init_common.h"
 
 #define THOUSAND 1000
 
@@ -87,7 +89,7 @@ static void OnTimeSyncImplComplete(const char *networkId, double offset, int32_t
 
 static TimeSyncCtrl g_timeSyncCtrl;
 
-static TimeSyncImplCallback g_timeSyncImplCb = {
+TimeSyncImplCallback g_timeSyncImplCb = {
     .onTimeSyncImplComplete = OnTimeSyncImplComplete,
 };
 
@@ -250,7 +252,7 @@ static int32_t ProcessStartTimeSyncRequest(const StartTimeSyncReqMsgPara *para)
             break;
         }
         if (isCreateTimeSyncReq || isUpdateTimeSyncReq) {
-            if (LnnStartTimeSyncImpl(existInfo->targetNetworkId, existInfo->curAccuracy,
+            if (LnnStartTimeSyncImplPacked(existInfo->targetNetworkId, existInfo->curAccuracy,
                 existInfo->curPeriod, &g_timeSyncImplCb) != SOFTBUS_OK) {
                 LNN_LOGE(LNN_CLOCK, "start time sync fail");
                 RemoveStartTimeSyncReq(existInfo, para->pkgName, para->pid);
@@ -301,11 +303,12 @@ static void TryUpdateTimeSyncReq(TimeSyncReqInfo *info)
             info->curAccuracy = curAccuracy;
             info->curPeriod = curPeriod;
             LNN_LOGI(LNN_CLOCK, "update time sync request. rc=%{public}d",
-                LnnStartTimeSyncImpl(info->targetNetworkId, curAccuracy, curPeriod, &g_timeSyncImplCb));
+                LnnStartTimeSyncImplPacked(info->targetNetworkId, curAccuracy,
+                    curPeriod, &g_timeSyncImplCb));
         }
     } else {
         LNN_LOGI(LNN_CLOCK, "stop time sync request. rc=%{public}d",
-            LnnStopTimeSyncImpl(info->targetNetworkId));
+            LnnStopTimeSyncImplPacked(info->targetNetworkId));
         ListDelete(&info->node);
         SoftBusFree(info);
     }
@@ -376,7 +379,8 @@ static void RemoveAllStartTimeSyncReq(TimeSyncReqInfo *info)
     LIST_FOR_EACH_ENTRY_SAFE(startTimeSyncItem, startTimeSyncNextItem, &info->startReqList, StartTimeSyncReq, node) {
         RemoveStartTimeSyncReq(info, startTimeSyncItem->pkgName, startTimeSyncItem->pid);
     }
-    (void)LnnStopTimeSyncImpl(info->targetNetworkId);
+
+    (void)LnnStopTimeSyncImplPacked(info->targetNetworkId);
     ListDelete(&info->node);
     SoftBusFree(info);
 }
@@ -518,7 +522,7 @@ int32_t LnnInitTimeSync(void)
         return SOFTBUS_NO_INIT;
     }
     LNN_LOGI(LNN_INIT, "init time sync success");
-    return LnnTimeSyncImplInit();
+    return LnnTimeSyncImplInitPacked();
 }
 
 void LnnDeinitTimeSync(void)
@@ -531,7 +535,7 @@ void LnnDeinitTimeSync(void)
         LNN_LOGE(LNN_INIT, "post remove all time sync msg fail");
     }
     (void)SoftBusMutexDestroy(&g_startReqListLock);
-    LnnTimeSyncImplDeinit();
+    LnnTimeSyncImplDeinitPacked();
 }
 
 int32_t LnnStartTimeSync(const char *pkgName, int32_t callingPid, const char *targetNetworkId,

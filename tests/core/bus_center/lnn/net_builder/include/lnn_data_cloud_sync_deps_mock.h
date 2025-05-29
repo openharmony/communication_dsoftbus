@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2024 Huawei Device Co., Ltd.
+ * Copyright (c) 2024-2025 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -19,9 +19,9 @@
 #include <gmock/gmock.h>
 #include <mutex>
 
+#include "cJSON.h"
 #include "lnn_async_callback_utils.h"
-#include "lnn_cipherkey_manager.h"
-#include "lnn_device_info_recovery.h"
+#include "lnn_data_cloud_sync_struct.h"
 #include "lnn_distributed_net_ledger.h"
 #include "lnn_heartbeat_utils.h"
 #include "softbus_utils.h"
@@ -71,4 +71,5 @@ public:
     MOCK_METHOD2(LnnPackCloudSyncAckSeq, int32_t (cJSON *, char *));
 };
 } // namespace OHOS
-#endif // LNN_AUTH_MOCK_H
+
+#endif // LNN_DATA_CLOUD_SYNC_DEPS_MOCK_H

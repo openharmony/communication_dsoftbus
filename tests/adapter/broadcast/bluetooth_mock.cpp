@@ -23,6 +23,7 @@ BtGapCallBacks *MockBluetooth::btGapCallback = nullptr;
 BtGattCallbacks *MockBluetooth::btGattCallback = nullptr;
 BleScanCallbacks *MockBluetooth::bleScanCallback = nullptr;
 const SoftbusBroadcastMediumInterface *MockBluetooth::interface = nullptr;
+int32_t MockBluetooth::g_btAdvId = 0;
 
 static int32_t ActionGapRegisterCallbacks(BtGapCallBacks *func)
 {
@@ -52,6 +53,14 @@ static int32_t ActionRegisterBroadcastMediumFunction(
     SoftbusMediumType type, const SoftbusBroadcastMediumInterface *func)
 {
     MockBluetooth::interface = func;
+    return OHOS_BT_STATUS_SUCCESS;
+}
+
+int32_t MockBluetooth::ActionBleStartAdvEx(int32_t *advId, const StartAdvRawData rawData, BleAdvParams advParam)
+{
+    (void)rawData;
+    (void)advParam;
+    *advId = g_btAdvId;
     return OHOS_BT_STATUS_SUCCESS;
 }
 

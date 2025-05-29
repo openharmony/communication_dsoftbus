@@ -27,6 +27,8 @@
 #include "disc_event.h"
 #include "disc_log.h"
 #include "disc_manager.h"
+#include "g_enhance_adapter_func.h"
+#include "g_enhance_adapter_func_pack.h"
 #include "lnn_device_info.h"
 #include "lnn_ohos_account.h"
 #include "message_handler.h"
@@ -41,6 +43,7 @@
 #include "legacy/softbus_hisysevt_discreporter.h"
 #include "softbus_json_utils.h"
 #include "softbus_utils.h"
+#include "softbus_init_common.h"
 
 #define BLE_PUBLISH 0x0
 #define BLE_SUBSCRIBE 0x2
@@ -504,7 +507,7 @@ static int32_t RangeDevice(DeviceInfo *device, char rssi, int8_t power)
             device->addr[0].info.ble.bleMac, BT_MAC_LEN);
         DISC_CHECK_AND_RETURN_RET_LOGE(retMem == EOK, SOFTBUS_MEM_ERR, DISC_BLE, "memcpy failed");
 
-        int ret = SoftBusBleRange(&param, &range);
+        int ret = SoftBusBleRangePacked(&param, &range);
         if (ret != SOFTBUS_OK) {
             DISC_LOGE(DISC_BLE, "range device failed, ret=%{public}d", ret);
             range = -1;
@@ -891,7 +894,7 @@ static void AssembleNonOptionalTlv(DeviceInfo *info, BroadcastData *broadcastDat
 #ifdef DISC_COMMUNITY
     if (info->range > 0) {
         int8_t power = 0;
-        if (SoftBusGetBlePower(&power) == SOFTBUS_OK) {
+        if (SoftBusGetBlePowerPacked(&power) == SOFTBUS_OK) {
             (void)AssembleTLV(broadcastData, TLV_TYPE_RANGE_POWER, (const void *)&power, RANGE_POWER_TYPE_LEN);
         }
     }

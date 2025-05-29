@@ -26,6 +26,7 @@ ohos_fuzztest("BleConnectionFuzzTest") {
   fuzz_config_file = "$dsoftbus_root_path/tests/core/connection/ble/fuzztest/bleconnection_fuzzer"
 
   include_dirs = [
+    "$dsoftbus_root_path/interfaces/kits/connect",
     "$dsoftbus_root_path/core/connection/ble/include",
     "$dsoftbus_root_path/adapter/common/include",
     "$dsoftbus_root_path/core/connection/interface",

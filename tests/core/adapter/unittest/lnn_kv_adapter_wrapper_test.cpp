@@ -21,8 +21,12 @@
 #include "softbus_adapter_mem.h"
 #include "softbus_error_code.h"
 #include "gtest/gtest.h"
+#include "dsoftbus_enhance_interface.h"
+#include "g_enhance_lnn_func.h"
+#include "lnn_kv_adapter_wrapper_mock.h"
 
 using namespace std;
+using namespace testing;
 using namespace testing::ext;
 
 namespace OHOS {
@@ -187,7 +191,12 @@ HWTEST_F(KVAdapterWrapperTest, LnnGet001, TestSize.Level1)
  */
 HWTEST_F(KVAdapterWrapperTest, LnnCloudSync001, TestSize.Level1)
 {
+    LnnEnhanceFuncList *pfnLnnEnhanceFuncList = LnnEnhanceFuncListGet();
+    pfnLnnEnhanceFuncList->isCloudSyncEnabled = IsCloudSyncEnabled;
     int32_t dbId = g_dbId;
+
+    NiceMock<LnnKvAdapterWrapperInterfaceMock> LnnKvAdapterWrapperMock;
+    EXPECT_CALL(LnnKvAdapterWrapperMock, IsCloudSyncEnabled).WillOnce(Return(true));
     int32_t lnnCloudRet = LnnCloudSync(dbId);
     EXPECT_EQ(lnnCloudRet, SOFTBUS_ERR);
 

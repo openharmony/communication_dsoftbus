@@ -24,29 +24,15 @@
 namespace OHOS::SoftBus {
 class WifiDirectExecutorFactory {
 public:
-    static WifiDirectExecutorFactory &GetInstance()
-    {
-        static WifiDirectExecutorFactory instance;
-        return instance;
-    }
+    static WifiDirectExecutorFactory &GetInstance();
 
     using ExecutorGenerator = std::function<std::shared_ptr<WifiDirectExecutor>(const std::string &remoteDeviceId,
         WifiDirectScheduler &scheduler, std::shared_ptr<WifiDirectProcessor> &processor, bool active)>;
 
     std::shared_ptr<WifiDirectExecutor> NewExecutor(const std::string &remoteDeviceId, WifiDirectScheduler &scheduler,
-        std::shared_ptr<WifiDirectProcessor> &processor, bool active)
-    {
-        std::shared_ptr<WifiDirectExecutor> executor = (executorGenerator_ == nullptr) ?
-            std::make_shared<WifiDirectExecutor>(remoteDeviceId, scheduler, processor, active) :
-            executorGenerator_(remoteDeviceId, scheduler, processor, active);
-        executor->Start();
-        return executor;
-    }
+        std::shared_ptr<WifiDirectProcessor> &processor, bool active);
 
-    void Register(ExecutorGenerator generator)
-    {
-        executorGenerator_ = std::move(generator);
-    }
+    void Register(ExecutorGenerator generator);
 
 private:
     ExecutorGenerator executorGenerator_;

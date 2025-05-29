@@ -25,40 +25,11 @@
 #define SOFTBUS_BROADCAST_MANAGER_H
 
 #include "softbus_broadcast_type.h"
+#include "softbus_broadcast_manager_struct.h"
 
 #ifdef __cplusplus
 extern "C"{
 #endif
-
-/**
- * @brief Defines the broadcast callback function.
- *
- * @since 4.1
- * @version 1.0
- */
-typedef struct {
-    void (*OnStartBroadcastingCallback)(int32_t bcId, int32_t status);
-    void (*OnStopBroadcastingCallback)(int32_t bcId, int32_t status);
-    void (*OnUpdateBroadcastingCallback)(int32_t bcId, int32_t status);
-    void (*OnSetBroadcastingCallback)(int32_t bcId, int32_t status);
-    void (*OnSetBroadcastingParamCallback)(int32_t bcId, int32_t status);
-    void (*OnEnableBroadcastingCallback)(int32_t bcId, int32_t status);
-    void (*OnDisableBroadcastingCallback)(int32_t bcId, int32_t status);
-} BroadcastCallback;
-
-/**
- * @brief Defines the broadcast scan callback function.
- *
- * @since 4.1
- * @version 1.0
- */
-typedef struct {
-    void (*OnStartScanCallback)(int32_t listenerId, int32_t status);
-    void (*OnStopScanCallback)(int32_t listenerId, int32_t status);
-    void (*OnReportScanDataCallback)(int32_t listenerId, const BroadcastReportInfo *reportInfo);
-    void (*OnScanStateChanged)(int32_t resultCode, bool isStartScan);
-    void (*OnLpDeviceInfoCallback)(const BroadcastUuid *uuid, int32_t type, uint8_t *data, uint32_t dataSize);
-} ScanCallback;
 
 /**
  * @brief init broadcast manager.

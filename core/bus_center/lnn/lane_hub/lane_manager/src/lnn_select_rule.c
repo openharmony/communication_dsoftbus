@@ -19,13 +19,14 @@
 
 #include "anonymizer.h"
 #include "bus_center_manager.h"
+#include "g_enhance_lnn_func.h"
+#include "g_enhance_lnn_func_pack.h"
 #include "lnn_distributed_net_ledger.h"
 #include "lnn_feature_capability.h"
 #include "lnn_lane_communication_capability.h"
 #include "lnn_lane_interface.h"
 #include "lnn_lane_link.h"
 #include "lnn_lane_link_ledger.h"
-#include "lnn_lane_score.h"
 #include "lnn_local_net_ledger.h"
 #include "lnn_log.h"
 #include "lnn_net_capability.h"
@@ -38,6 +39,7 @@
 #include "softbus_network_utils.h"
 #include "softbus_utils.h"
 #include "softbus_wifi_api_adapter.h"
+#include "softbus_init_common.h"
 #include "trans_event.h"
 
 #define LNN_LINK_DEFAULT_SCORE 60    /* Indicates that scoring is not supported */
@@ -173,7 +175,7 @@ static int32_t DelWifiDirectExtCapInfo(const char *peerUdid)
 int32_t GetWlanLinkedFrequency(void)
 {
     LnnWlanLinkedInfo info;
-    int32_t ret = LnnGetWlanLinkedInfo(&info);
+    int32_t ret = LnnGetWlanLinkedInfoPacked(&info);
     if (ret != SOFTBUS_OK) {
         LNN_LOGE(LNN_LANE, "get linked info fail, reason=%{public}d", ret);
         return ret;
@@ -356,7 +358,7 @@ static int32_t GetHmlScore(const char *networkId, uint32_t expectedBw)
 static int32_t GetLinkedChannelScore(void)
 {
     int32_t channel = 0;
-    int32_t score = LnnGetCurrChannelScore(channel);
+    int32_t score = LnnGetCurrChannelScorePacked(channel);
     LNN_LOGI(LNN_LANE, "current channel=%{public}d, score=%{public}d", channel, score);
     if (score <= 0) {
         score = LNN_LINK_DEFAULT_SCORE;

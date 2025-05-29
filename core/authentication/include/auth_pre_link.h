@@ -21,7 +21,7 @@
 #include <stdatomic.h>
 #include "common_list.h"
 #include "softbus_common.h"
-#include "auth_attest_interface.h"
+#include "auth_attest_interface_struct.h"
 
 #ifdef __cplusplus
 extern "C" {

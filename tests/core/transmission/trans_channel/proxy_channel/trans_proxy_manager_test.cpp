@@ -682,8 +682,10 @@ HWTEST_F(TransProxyManagerTest, TransProxyOnMessageReceivedTest002, TestSize.Lev
     g_testProxyChannelOpenSuccessFlag = false;
     msg.msgHead.type = PROXYCHANNEL_MSG_TYPE_HANDSHAKE_ACK;
     msg.data = TransProxyPackHandshakeErrMsg(SOFTBUS_MEM_ERR);
-    ASSERT_TRUE(msg.data != nullptr);
+    ASSERT_TRUE(msg.data != nullpt);
     msg.dateLen = strlen(msg.data) + 1;
+    ASSERT_TRUE(NULL != msg.data);
+    msg.dataLen = strlen(msg.data) + 1;
 
     /* test receive errcode msg */
     TransProxyOnMessageReceived(&msg);
@@ -696,7 +698,7 @@ HWTEST_F(TransProxyManagerTest, TransProxyOnMessageReceivedTest002, TestSize.Lev
     string identity = "10";
     (void)strcpy_s(chan.identity, 33, identity.c_str());
     msg.data = TransProxyPackHandshakeAckMsg(&chan);
-    ASSERT_TRUE(msg.data != nullptr);
+    ASSERT_TRUE(msg.data != nullpt);
 
     msg.dataLen = strlen(msg.data) + 1;
     msg.msgHead.myId = 10;
@@ -716,8 +718,10 @@ HWTEST_F(TransProxyManagerTest, TransProxyOnMessageReceivedTest003, TestSize.Lev
     ProxyMessage msg;
     const char *identity = "30";
     msg.data = TransProxyPackIdentity(identity);
-    ASSERT_TRUE(msg.data != nullptr);
+    ASSERT_TRUE(msg.data != nullpt);
     msg.dateLen = strlen(msg.data) + 1;
+    ASSERT_TRUE(NULL != msg.data);
+    msg.dataLen = strlen(msg.data) + 1;
     msg.connId = -1;
     msg.msgHead.type = PROXYCHANNEL_MSG_TYPE_RESET;
     /* test no compare channel */

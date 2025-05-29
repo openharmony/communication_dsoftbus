@@ -289,8 +289,8 @@ HWTEST_F(TransUdpNegoTest, TransOnExchangeUdpInfoReply001, TestSize.Level1)
     ASSERT_TRUE(newChannel != nullptr);
     int32_t ret = TransAddUdpChannel(newChannel);
     EXPECT_EQ(ret, SOFTBUS_OK);
-    ret = InitQos();
-    EXPECT_NE(ret, SOFTBUS_INVALID_PARAM);
+    // ret = InitQos();
+    // EXPECT_NE(ret, SOFTBUS_INVALID_PARAM);
 
     AuthHandle authHandle = { .authId = AUTH_INVALID_ID, .type = AUTH_LINK_TYPE_WIFI };
 

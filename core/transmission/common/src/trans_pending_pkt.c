@@ -42,7 +42,7 @@ enum PackageStatus {
 
 static SoftBusList *g_pendingList[PENDING_TYPE_BUTT] = {NULL, NULL};
 
-static int32_t IsPendingListTypeLegal(int type)
+static int32_t IsPendingListTypeLegal(int32_t type)
 {
     if (type < PENDING_TYPE_PROXY || type >= PENDING_TYPE_BUTT) {
         return SOFTBUS_INVALID_PARAM;

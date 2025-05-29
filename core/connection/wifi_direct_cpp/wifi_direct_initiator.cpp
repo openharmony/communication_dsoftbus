@@ -15,6 +15,12 @@
 #include "wifi_direct_initiator.h"
 
 namespace OHOS::SoftBus {
+WifiDirectInitiator& WifiDirectInitiator::GetInstance()
+{
+    static WifiDirectInitiator instance;
+    return instance;
+}
+
 void WifiDirectInitiator::Init()
 {
     for (const auto &function : functions_) {

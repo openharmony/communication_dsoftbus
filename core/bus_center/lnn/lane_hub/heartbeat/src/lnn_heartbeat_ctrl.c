@@ -20,21 +20,20 @@
 #include <string.h>
 
 #include "anonymizer.h"
-#include "auth_device_common_key.h"
+
 #include "auth_interface.h"
 #include "auth_manager.h"
 #include "bus_center_manager.h"
+#include "g_enhance_lnn_func.h"
+#include "g_enhance_lnn_func_pack.h"
 #include "lnn_async_callback_utils.h"
-#include "lnn_ble_heartbeat.h"
 #include "lnn_common_utils.h"
 #include "lnn_connection_fsm.h"
 #include "lnn_data_cloud_sync.h"
 #include "lnn_decision_db.h"
-#include "lnn_device_info_recovery.h"
 #include "lnn_deviceinfo_to_profile.h"
 #include "lnn_devicename_info.h"
 #include "lnn_distributed_net_ledger.h"
-#include "lnn_fast_offline.h"
 #include "lnn_feature_capability.h"
 #include "lnn_heartbeat_fsm.h"
 #include "lnn_heartbeat_strategy.h"
@@ -47,8 +46,8 @@
 #include "lnn_network_info.h"
 #include "lnn_network_manager.h"
 #include "lnn_ohos_account.h"
-#include "lnn_parameter_utils.h"
 #include "lnn_settingdata_event_monitor.h"
+#include "lnn_init_monitor.h"
 #include "softbus_adapter_bt_common.h"
 #include "softbus_adapter_mem.h"
 #include "softbus_adapter_range.h"
@@ -57,7 +56,7 @@
 #include "softbus_error_code.h"
 #include "legacy/softbus_hisysevt_bus_center.h"
 #include "softbus_utils.h"
-#include "lnn_init_monitor.h"
+#include "softbus_init_common.h"
 
 #define HB_LOOPBACK_IP "127.0.0.1"
 #define INVALID_DELAY_TIME (-1)
@@ -331,7 +330,7 @@ static int32_t SameAccountDevDisableDiscoveryProcess(void)
     if (LnnRequestLeaveByAddrType(addrType, CONNECTION_ADDR_MAX) != SOFTBUS_OK) {
         LNN_LOGE(LNN_HEART_BEAT, "leave ble network fail");
     }
-    return LnnSyncBleOfflineMsg();
+    return LnnSyncBleOfflineMsgPacked();
 }
 
 void LnnRequestBleDiscoveryProcess(int32_t strategy, int64_t timeout)
@@ -712,8 +711,8 @@ static void HbScreenLockChangeEventHandler(const LnnEventBasicInfo *info)
     SoftBusScreenLockState lockState = (SoftBusScreenLockState)event->status;
     if (lockState == SOFTBUS_USER_UNLOCK) {
         LNN_LOGI(LNN_HEART_BEAT, "user unlocked");
-        (void)LnnGenerateCeParams(true);
-        AuthLoadDeviceKey();
+        (void)LnnGenerateCeParams();
+        AuthLoadDeviceKeyPacked();
         LnnUpdateOhosAccount(UPDATE_ACCOUNT_ONLY);
         if (!LnnIsDefaultOhosAccount()) {
             LnnNotifyAccountStateChangeEvent(SOFTBUS_ACCOUNT_LOG_IN);
@@ -933,7 +932,7 @@ static void HbUserSwitchedHandler(const LnnEventBasicInfo *info)
                 if (ret != SOFTBUS_OK) {
                     LNN_LOGW(LNN_EVENT, "set userId to local failed! userId:%{public}d", userId);
                 }
-                ret = HbBuildUserIdCheckSum(&userId, 1, userIdCheckSum, USERID_CHECKSUM_LEN);
+                ret = HbBuildUserIdCheckSumPacked(&userId, 1, userIdCheckSum, USERID_CHECKSUM_LEN);
                 if (ret != SOFTBUS_OK) {
                     LNN_LOGW(LNN_EVENT, "construct useridchecksum failed! userId:%{public}d", userId);
                 }
@@ -1469,12 +1468,12 @@ int32_t LnnTriggerCloudSyncHeartbeat(void)
 
 void LnnRegDataLevelChangeCb(const IDataLevelChangeCallback *callback)
 {
-    LnnBleHbRegDataLevelChangeCb(callback);
+    LnnBleHbRegDataLevelChangeCbPacked(callback);
 }
 
 void LnnUnregDataLevelChangeCb(void)
 {
-    LnnBleHbUnregDataLevelChangeCb();
+    LnnBleHbUnregDataLevelChangeCbPacked();
 }
 
 void LnnRegBleRangeCb(const IBleRangeInnerCallback *callback)

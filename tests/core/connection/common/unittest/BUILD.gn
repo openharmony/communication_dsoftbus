@@ -24,6 +24,7 @@ ohos_unittest("SoftbusConnCommonTest") {
   include_dirs = [
     "$dsoftbus_root_path/core/common/include",
     "$dsoftbus_root_path/adapter/common/include",
+    "$dsoftbus_root_path/interfaces/kits/connect",
     "$dsoftbus_root_path/core/connection/interface",
     "$dsoftbus_root_path/core/connection/manager",
     "$dsoftbus_root_path/core/connection/common/include",
@@ -36,6 +37,7 @@ ohos_unittest("SoftbusConnCommonTest") {
   deps = [
     "$dsoftbus_root_path/core/common:softbus_utils",
     "$dsoftbus_root_path/core/frame:softbus_server",
+    "$dsoftbus_root_path/adapter:softbus_adapter",
   ]
   external_deps = [
     "bounds_checking_function:libsec_static",

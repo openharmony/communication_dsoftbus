@@ -34,7 +34,11 @@ ohos_unittest("LnnKVAdapterTest") {
 
 ohos_unittest("LnnKVAdapterWrapperTest") {
   module_out_path = module_output_path
-  sources = [ "unittest/lnn_kv_adapter_wrapper_test.cpp" ]
+  sources = [
+    "unittest/lnn_kv_adapter_wrapper_test.cpp",
+    "unittest/lnn_kv_adapter_wrapper_mock.cpp",
+    "$dsoftbus_root_path/core/frame/init/src/g_enhance_lnn_func.c",
+  ]
   include_dirs = [
     "$dsoftbus_root_path/core/adapter/kv_store/include",
     "$dsoftbus_root_path/core/adapter/bus_center/include",
@@ -42,12 +46,17 @@ ohos_unittest("LnnKVAdapterWrapperTest") {
     "$dsoftbus_root_path/core/bus_center/lnn/net_builder/include",
     "$dsoftbus_root_path/core/bus_center/lnn/net_ledger/common/include",
     "$dsoftbus_root_path/core/bus_center/interface",
+    "$dsoftbus_root_path/tests/core/adapter/unittest",
+    "$dsoftbus_root_path/tests/interface/enhance",
+    "$dsoftbus_root_path/core/frame/init/include",
   ]
   deps = [
     "$dsoftbus_root_path/core/common:softbus_utils",
     "$dsoftbus_root_path/core/frame:softbus_server",
+    "$dsoftbus_root_path/adapter:softbus_adapter",
   ]
   external_deps = [
+    "googletest:gmock",
     "dsoftbus:softbus_client",
     "kv_store:distributeddata_inner",
   ]
@@ -156,6 +165,7 @@ ohos_unittest("LNNOhosAccountTest") {
   deps = [
     "$dsoftbus_root_path/core/common:softbus_utils",
     "$dsoftbus_root_path/core/frame:softbus_server",
+    "$dsoftbus_root_path/adapter:softbus_adapter",
   ]
   external_deps = [
     "bounds_checking_function:libsec_static",

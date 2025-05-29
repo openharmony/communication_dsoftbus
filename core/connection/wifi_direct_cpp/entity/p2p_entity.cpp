@@ -21,6 +21,12 @@
 namespace OHOS::SoftBus {
 using InterfaceType = InterfaceInfo::InterfaceType;
 
+P2pEntity& P2pEntity::GetInstance()
+{
+    static P2pEntity instance;
+    return instance;
+}
+
 static void P2pStateChangeCallback(P2pState state)
 {
     CONN_LOGI(CONN_WIFI_DIRECT, "state=%{public}d", state);
@@ -332,13 +338,13 @@ void P2pEntity::ExecuteNextOperation()
     P2pOperationResult result {};
     switch (operation->type_) {
         case P2pOperationType::CREATE_GROUP:
-            ret = state_->CreateGroup(std::dynamic_pointer_cast<P2pOperationWrapper<P2pCreateGroupParam>>(operation));
+            ret = state_->CreateGroup(std::static_pointer_cast<P2pOperationWrapper<P2pCreateGroupParam>>(operation));
             break;
         case P2pOperationType::CONNECT:
-            ret = state_->Connect(std::dynamic_pointer_cast<P2pOperationWrapper<P2pConnectParam>>(operation));
+            ret = state_->Connect(std::static_pointer_cast<P2pOperationWrapper<P2pConnectParam>>(operation));
             break;
         case P2pOperationType::DESTROY_GROUP:
-            ret = state_->DestroyGroup(std::dynamic_pointer_cast<P2pOperationWrapper<P2pDestroyGroupParam>>(operation));
+            ret = state_->DestroyGroup(std::static_pointer_cast<P2pOperationWrapper<P2pDestroyGroupParam>>(operation));
             break;
         default:
             CONN_LOGE(CONN_WIFI_DIRECT, "operation type invalid");

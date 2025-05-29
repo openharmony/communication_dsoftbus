@@ -18,66 +18,12 @@
 
 #include "softbus_conn_common.h"
 #include "softbus_conn_manager.h"
+#include "softbus_conn_ble_trans_struct.h"
 
 #ifdef __cplusplus
 extern "C" {
 #endif
 
-#define CTRL_MSG_KEY_METHOD            "KEY_METHOD"
-#define CTRL_MSG_KEY_DELTA             "KEY_DELTA"
-#define CTRL_MSG_KEY_REF_NUM           "KEY_REF_NUM"
-#define CTRL_MSG_KEY_CHALLENGE         "KEY_CHALLENGE"
-#define CTRL_MSG_METHOD_NOTIFY_REQUEST 1
-
-typedef struct {
-    SoftBusMutex lock;
-    bool messagePosted;
-    bool sendTaskRunning;
-} StartBleSendLPInfo;
-
-typedef struct {
-    uint32_t seq;
-    uint32_t size;
-    uint32_t offset;
-    uint32_t total;
-} BleTransHeader;
-
-typedef struct {
-    ListNode node;
-    BleTransHeader header;
-    uint8_t *data;
-} ConnBlePacket;
-
-typedef struct {
-    uint32_t seq;
-    uint32_t received;
-    uint32_t total;
-    ListNode packets;
-} ConnBleReadBuffer;
-
-enum BleCtlMessageMethod {
-    METHOD_NOTIFY_REQUEST = 1,
-};
-
-typedef struct {
-    uint32_t connectionId;
-    int32_t flag;
-    enum BleCtlMessageMethod method;
-    union {
-        struct {
-            int32_t delta;
-            int32_t referenceNumber;
-        } referenceRequest;
-    };
-    uint16_t challengeCode;
-} BleCtlMessageSerializationContext;
-
-typedef struct {
-    void (*onPostBytesFinished)(
-        uint32_t connectionId, uint32_t len, int32_t pid, int32_t flag, int32_t module, int64_t seq, int32_t error);
-} ConnBleTransEventListener;
-
-typedef void (*PostBytesFinishAction)(uint32_t connectionId, int32_t error);
 int32_t ConnBlePostBytesInner(
     uint32_t connectionId, uint8_t *data, uint32_t len, int32_t pid, int32_t flag, int32_t module, int64_t seq,
     PostBytesFinishAction postBytesFinishAction);

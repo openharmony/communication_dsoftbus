@@ -16,6 +16,7 @@
 #define SOFTBUS_SESSION_LISTENER
 
 #include "softbus_base_listener.h"
+#include "trans_tcp_direct_sessionconn.h"
 
 #ifdef __cplusplus
 extern "C" {

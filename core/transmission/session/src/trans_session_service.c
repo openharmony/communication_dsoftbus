@@ -20,14 +20,16 @@
 
 #include "anonymizer.h"
 #include "lnn_ohos_account_adapter.h"
+#include "g_enhance_trans_func.h"
+#include "g_enhance_trans_func_pack.h"
 #include "softbus_access_token_adapter.h"
 #include "softbus_adapter_mem.h"
 #include "softbus_def.h"
 #include "softbus_error_code.h"
 #include "softbus_permission.h"
-#include "softbus_qos.h"
 #include "softbus_scenario_manager.h"
 #include "softbus_utils.h"
+#include "softbus_init_common.h"
 #include "trans_channel_manager.h"
 #include "trans_client_proxy.h"
 #include "trans_event.h"
@@ -59,7 +61,7 @@ int32_t TransServerInit(void)
         TRANS_LOGE(TRANS_INIT, "TransChannelInit failed");
         return ret;
     }
-    ret = InitQos();
+    ret = InitQosPacked();
     if (ret != SOFTBUS_OK) {
         TRANS_LOGE(TRANS_INIT, "QosInit Failed");
         return ret;

@@ -26,7 +26,10 @@ ohos_unittest("MessageHandlerFfrtTest") {
 
   include_dirs = [ "$dsoftbus_root_path/code/communication_dsoftbus_thread/core/common/include" ]
 
-  deps = [ "$dsoftbus_root_path/core/common:softbus_utils" ]
+  deps = [ 
+    "$dsoftbus_root_path/core/common:softbus_utils",
+    "$dsoftbus_root_path/adapter:softbus_adapter",
+  ]
 
   external_deps = [
     "ffrt:libffrt",

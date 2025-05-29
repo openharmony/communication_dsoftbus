@@ -33,7 +33,7 @@
 #include "lnn_network_manager.h"
 #include "message_handler.h"
 #include "softbus_adapter_bt_common.h"
-#include "softbus_adapter_sle_common.h"
+#include "softbus_adapter_sle_common_struct.h"
 #include "softbus_adapter_socket.h"
 #include "softbus_base_listener.h"
 #include "softbus_conn_interface.h"

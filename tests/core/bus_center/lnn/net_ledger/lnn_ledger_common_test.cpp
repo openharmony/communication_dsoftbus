@@ -33,16 +33,21 @@
 #include "lnn_net_ledger.h"
 #include "lnn_net_ledger_common_mock.h"
 #include "lnn_node_info.h"
-#include "lnn_oobe_manager.h"
 #include "softbus_adapter_mem.h"
 #include "softbus_error_code.h"
 #include "softbus_feature_config.h"
 #include "softbus_utils.h"
+#include "g_enhance_lnn_func.h"
+#include "softbus_def.h"
+#include "softbus_config_adapter.h"
 
 #define ONE_BIT_MAX_HEX               15
 #define DEVICE_TYPE_MAX_LENGTH        3
 #define LEFT_SHIFT_DEVICE_TYPE_LENGTH (DEVICE_TYPE_MAX_LENGTH * 4)
 #define DEFAUTL_LNN_FEATURE           0x3E2
+
+#define LNN_SUPPORT_ENHANCE_FEATURE             0x3F7EA
+#define ENHANCE_SUPPORT_AUTH_CAPACITY           0x7F
 
 namespace OHOS {
 using namespace testing::ext;

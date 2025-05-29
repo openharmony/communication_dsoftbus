@@ -37,6 +37,11 @@ ohos_unittest("BusCenterDecisionTest") {
     "$dsoftbus_root_path/adapter/common/include",
     "$dsoftbus_root_path/core/common/include",
     "$dsoftbus_root_path/interfaces/kits/bus_center",
+    "$dsoftbus_root_path/interfaces/kits/authentication",
+    "$dsoftbus_root_path/interfaces/kits/lnn",
+    "$dsoftbus_root_path/interfaces/kits/connect",
+    "$dsoftbus_root_path/interfaces/kits/disc",
+    "$dsoftbus_root_path/core/frame/init/include",
     "$dsoftbus_root_path/adapter/common/bus_center/include",
     "$dsoftbus_root_path/adapter/common/bus_center/wlan",
     "$dsoftbus_root_path/core/bus_center/utils/include",
@@ -79,7 +84,6 @@ ohos_unittest("BusCenterDecisionTest") {
 ohos_unittest("BusCenterEventTest") {
   module_out_path = module_output_path
   sources = [
-    "$dsoftbus_root_path/core/bus_center/lnn/lane_hub/lane_manager/src/lnn_change_channel_virtual.c",
     "$dsoftbus_root_path/core/bus_center/service/src/bus_center_event.c",
     "unittest/bus_center_event_deps_mock.cpp",
     "unittest/bus_center_event_test.cpp",
@@ -143,16 +147,12 @@ ohos_unittest("BusCenterManagerTest") {
   sources = [
     "$dsoftbus_root_path/core/authentication/src/auth_pre_link.c",
     "$dsoftbus_root_path/core/bus_center/service/src/bus_center_manager.c",
+    "$dsoftbus_root_path/core/frame/init/src/g_enhance_auth_func.c",
     "unittest/bus_center_manager_deps_mock.cpp",
     "unittest/bus_center_manager_test.cpp",
+    "$dsoftbus_root_path/core/frame/init/src/g_enhance_lnn_func_pack.c",
+    "$dsoftbus_root_path/core/frame/init/src/g_enhance_lnn_func.c",
   ]
-
-  if (!enhanced) {
-    sources += [
-      "$dsoftbus_root_path/core/bus_center/lnn/lane_hub/lane_manager/src/lnn_change_channel_virtual.c",
-      "$dsoftbus_root_path/core/bus_center/lnn/lane_hub/lane_manager/src/lnn_lane_prelink_virtual.c",
-    ]
-  }
 
   include_dirs = [
     "$dsoftbus_dfx_path/interface/include",
@@ -175,6 +175,12 @@ ohos_unittest("BusCenterManagerTest") {
     "$dsoftbus_root_path/interfaces/kits/bus_center",
     "$dsoftbus_root_path/interfaces/inner_kits/lnn",
     "$dsoftbus_root_path/interfaces/kits/discovery",
+    "$dsoftbus_root_path/interfaces/kits/lnn",
+    "$dsoftbus_root_path/interfaces/kits/connect",
+    "$dsoftbus_root_path/interfaces/kits/disc",
+    "$dsoftbus_root_path/interfaces/kits/authentication",
+    "$dsoftbus_root_path/core/frame/init/include",
+    "$dsoftbus_root_path/tests/interface/enhance",
     "$dsoftbus_root_path/adapter/common/bus_center/include",
     "$dsoftbus_root_path/adapter/common/bus_center/wlan",
     "$dsoftbus_root_path/core/bus_center/utils/include",

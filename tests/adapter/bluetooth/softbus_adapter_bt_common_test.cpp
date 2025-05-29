@@ -313,7 +313,7 @@ static void StubOnBtAclStateChanged(int32_t listenerId, const SoftBusBtAddr *add
     g_btAclStateChangedCtx.Update(listenerId, addr, aclState);
 }
 
-static SoftBusBtStateListener *GetMockBtStateListener()
+static SoftBusBtStateListener *GetMockBtStateListener(void)
 {
     static SoftBusBtStateListener listener = {
         .OnBtStateChanged = StubOnBtStateChanged,

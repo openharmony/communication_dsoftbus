@@ -19,6 +19,7 @@
 #include <atomic>
 #include <gmock/gmock.h>
 #include "auth_interface.h"
+#include "bus_center_event_struct.h"
 #include "bus_center_manager.h"
 #include "data/negotiate_message.h"
 #include "dfx/wifi_direct_hidumper.h"
@@ -123,6 +124,8 @@ public:
     virtual int32_t LnnGetRecommendChannel(const char *udid, int32_t *preferChannel) = 0;
     virtual int32_t LnnGetRemoteNodeInfoByKey(const char *key, NodeInfo *info) = 0;
     virtual int32_t LnnGetRemoteNodeInfoById(const char *id, IdCategory type, NodeInfo *info) = 0;
+    virtual int32_t LnnRegisterEventHandler(LnnEventType event, LnnEventHandler handler) = 0;
+    virtual int32_t LnnGetAllOnlineNodeInfo(NodeBasicInfo **info, int32_t *infoNum) = 0;
 };
 
 class WifiDirectInterfaceMock : public WifiDirectInterface {
@@ -219,6 +222,9 @@ public:
     MOCK_METHOD(int32_t, LnnGetRecommendChannel, (const char *udid, int32_t *preferChannel), (override));
     MOCK_METHOD(int32_t, LnnGetRemoteNodeInfoByKey, (const char *key, NodeInfo *info), (override));
     MOCK_METHOD(int32_t, LnnGetRemoteNodeInfoById, (const char *id, IdCategory type, NodeInfo *info), (override));
+
+    MOCK_METHOD(int32_t, LnnRegisterEventHandler, (LnnEventType event, LnnEventHandler handler), (override));
+    MOCK_METHOD(int32_t, LnnGetAllOnlineNodeInfo, (NodeBasicInfo **info, int32_t *infoNum), (override));
 
     static void InjectWifiDirectConnectCallbackMock(WifiDirectConnectCallback &callback);
     static void InjectWifiDirectDisconnectCallbackMock(WifiDirectDisconnectCallback &callback);

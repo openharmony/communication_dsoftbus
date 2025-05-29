@@ -24,13 +24,16 @@
 
 #include "anonymizer.h"
 #include "bus_center_manager.h"
-#include "lnn_device_info_recovery.h"
+#include "g_enhance_lnn_func.h"
+#include "g_enhance_lnn_func_pack.h"
+#include "lnn_node_info.h"
 #include "lnn_feature_capability.h"
 #include "lnn_heartbeat_utils.h"
 #include "lnn_log.h"
 #include "lnn_node_info.h"
 #include "softbus_error_code.h"
 #include "softbus_utils.h"
+#include "softbus_init_common.h"
 
 static uint64_t GetCurrentTime(void)
 {
@@ -1174,7 +1177,7 @@ bool LnnSetDlPtk(const char *networkId, const char *remotePtk)
     SoftBusMutexUnlock(&(LnnGetDistributedNetLedger()->lock));
     NodeInfo cacheInfo;
     (void)memset_s(&cacheInfo, sizeof(NodeInfo), 0, sizeof(NodeInfo));
-    if (LnnRetrieveDeviceInfo(udidHash, &cacheInfo) != SOFTBUS_OK) {
+    if (LnnRetrieveDeviceInfoPacked(udidHash, &cacheInfo) != SOFTBUS_OK) {
         LNN_LOGD(LNN_LEDGER, "no this device info in deviceCacheInfoMap, ignore update");
         return true;
     }
@@ -1186,7 +1189,7 @@ bool LnnSetDlPtk(const char *networkId, const char *remotePtk)
         LNN_LOGE(LNN_LEDGER, "memcpy_s ptk fail");
         return true;
     }
-    (void)LnnSaveRemoteDeviceInfo(&cacheInfo);
+    (void)LnnSaveRemoteDeviceInfoPacked(&cacheInfo);
     return true;
 }
 
@@ -1694,7 +1697,7 @@ int32_t LnnGetDLOnlineTimestamp(const char *networkId, uint64_t *timestamp)
         (void)SoftBusMutexUnlock(&(LnnGetDistributedNetLedger()->lock));
         return SOFTBUS_NOT_FIND;
     }
-    *timestamp = nodeInfo->onlinetTimestamp;
+    *timestamp = nodeInfo->onlineTimestamp;
     (void)SoftBusMutexUnlock(&(LnnGetDistributedNetLedger()->lock));
     return SOFTBUS_OK;
 }
@@ -1832,16 +1835,16 @@ int32_t LnnSetDLConnCapability(const char *networkId, uint32_t connCapability)
         return SOFTBUS_MEM_ERR;
     }
     (void)SoftBusMutexUnlock(&(LnnGetDistributedNetLedger()->lock));
-    int32_t ret = LnnRetrieveDeviceInfoByUdid(tempNodeInfo.deviceInfo.deviceUdid, &recoveryInfo);
+    int32_t ret = LnnRetrieveDeviceInfoByUdidPacked(tempNodeInfo.deviceInfo.deviceUdid, &recoveryInfo);
     if (ret != SOFTBUS_OK) {
         LNN_LOGE(LNN_LEDGER, "retrive device info fail, ret=%{public}d", ret);
-        if (LnnSaveRemoteDeviceInfo(&tempNodeInfo) != SOFTBUS_OK) {
+        if (LnnSaveRemoteDeviceInfoPacked(&tempNodeInfo) != SOFTBUS_OK) {
             LNN_LOGE(LNN_LEDGER, "save remote info fail");
         }
         return ret;
     }
     recoveryInfo.netCapacity = connCapability;
-    ret = LnnSaveRemoteDeviceInfo(&recoveryInfo);
+    ret = LnnSaveRemoteDeviceInfoPacked(&recoveryInfo);
     if (ret != SOFTBUS_OK) {
         LNN_LOGE(LNN_LEDGER, "save remote device info fail, ret=%{public}d", ret);
         return ret;
@@ -1871,7 +1874,7 @@ int32_t LnnSetDLConnUserIdCheckSum(const char *networkId, int32_t userIdCheckSum
         (void)SoftBusMutexUnlock(&(LnnGetDistributedNetLedger()->lock));
         return ret;
     }
-    ret = LnnSaveRemoteDeviceInfo(nodeInfo);
+    ret = LnnSaveRemoteDeviceInfoPacked(nodeInfo);
     if (ret != SOFTBUS_OK) {
         (void)SoftBusMutexUnlock(&(LnnGetDistributedNetLedger()->lock));
         LNN_LOGE(LNN_LEDGER, "save remote useridchecksum faile");
@@ -1897,7 +1900,7 @@ int32_t LnnSetDLConnUserId(const char *networkId, int32_t userId)
         return SOFTBUS_NOT_FIND;
     }
     nodeInfo->userId = userId;
-    int32_t ret = LnnSaveRemoteDeviceInfo(nodeInfo);
+    int32_t ret = LnnSaveRemoteDeviceInfoPacked(nodeInfo);
     if (ret != SOFTBUS_OK) {
         (void)SoftBusMutexUnlock(&(LnnGetDistributedNetLedger()->lock));
         LNN_LOGE(LNN_LEDGER, "save remote userid faile");
@@ -2088,7 +2091,7 @@ bool LnnSaveBroadcastLinkKey(const char *udid, const BroadcastCipherInfo *info)
     }
     NodeInfo cacheInfo;
     (void)memset_s(&cacheInfo, sizeof(NodeInfo), 0, sizeof(NodeInfo));
-    if (LnnRetrieveDeviceInfo(udidHash, &cacheInfo) != SOFTBUS_OK) {
+    if (LnnRetrieveDeviceInfoPacked(udidHash, &cacheInfo) != SOFTBUS_OK) {
         LNN_LOGI(LNN_LEDGER, "no this device info, ignore update");
         return true;
     }
@@ -2102,6 +2105,6 @@ bool LnnSaveBroadcastLinkKey(const char *udid, const BroadcastCipherInfo *info)
         LNN_LOGE(LNN_LEDGER, "copy link key failed");
         return false;
     }
-    (void)LnnSaveRemoteDeviceInfo(&cacheInfo);
+    (void)LnnSaveRemoteDeviceInfoPacked(&cacheInfo);
     return true;
 }

@@ -150,7 +150,7 @@ int32_t GetUkPolicy(const AppInfo *appInfo)
     NodeInfo nodeInfo;
     (void)memset_s(&nodeInfo, sizeof(NodeInfo), 0, sizeof(NodeInfo));
     int32_t peerRet = LnnGetRemoteNodeInfoById(appInfo->peerNetWorkId, CATEGORY_NETWORK_ID, &nodeInfo);
-    if (peerRet != SOFTBUS_OK || !nodeInfo.isSupportUkNego) {
+    if (peerRet != SOFTBUS_OK || !IsSupportFeatureByCapaBit(nodeInfo.authCapacity, BIT_SUPPORT_USERKEY_NEGO)) {
         TRANS_LOGE(TRANS_CTRL, "get peer node info failed or peer node not support uk nego.");
         return NO_NEED_UK;
     }

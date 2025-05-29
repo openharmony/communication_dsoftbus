@@ -25,7 +25,7 @@
 #include "softbus_def.h"
 #include "softbus_error_code.h"
 #include "softbus_adapter_mem.h"
-#include "softbus_adapter_ble_conflict.h"
+#include "softbus_adapter_ble_conflict_struct.h"
 #include "bus_center_info_key.h"
 #include "softbus_conn_ble_manager.h"
 #include "ble_protocol_interface_factory.h"

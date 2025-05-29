@@ -29,6 +29,7 @@
 #include "utils/wifi_direct_utils.h"
 #include "wifi_direct_scheduler.h"
 #include "wifi_direct_scheduler_factory.h"
+#include "wifi_direct_init.h"
 
 namespace OHOS::SoftBus {
 static constexpr int TIMER_TIMEOUT = 50;
@@ -40,7 +41,7 @@ AuthNegotiateChannel::AuthNegotiateChannel(const AuthHandle &handle)
     : handle_(handle), timerId_(Utils::TIMER_ERR_INVALID_VALUE), close_(false)
 {
     char remoteUuid[UUID_BUF_LEN] {};
-    auto ret = AuthGetDeviceUuid(handle_.authId, remoteUuid, UUID_BUF_LEN);
+    auto ret = DBinderSoftbusServer::GetInstance().AuthGetDeviceUuid(handle_.authId, remoteUuid, UUID_BUF_LEN);
     CONN_CHECK_AND_RETURN_LOGE(ret == SOFTBUS_OK, CONN_WIFI_DIRECT, "auth get device id failed");
     remoteDeviceId_ = remoteUuid;
     CONN_LOGI(CONN_WIFI_DIRECT, "remoteDeviceId=%{public}s", WifiDirectAnonymizeDeviceId(remoteDeviceId_).c_str());
@@ -50,7 +51,7 @@ AuthNegotiateChannel::~AuthNegotiateChannel()
 {
     if (close_) {
         CONN_LOGI(CONN_WIFI_DIRECT, "close auth");
-        AuthCloseConn(handle_);
+        DBinderSoftbusServer::GetInstance().AuthCloseConn(handle_);
     }
 }
 
@@ -67,7 +68,7 @@ bool AuthNegotiateChannel::operator==(const AuthHandle &otherHandle) const
 bool AuthNegotiateChannel::IsMeta() const
 {
     bool isMeta = false;
-    int32_t ret = AuthGetMetaType(handle_.authId, &isMeta);
+    int32_t ret = DBinderSoftbusServer::GetInstance().AuthGetMetaType(handle_.authId, &isMeta);
     CONN_CHECK_AND_RETURN_RET_LOGW(ret == SOFTBUS_OK, false, CONN_WIFI_DIRECT, "get meta type failed");
     return isMeta;
 }
@@ -114,8 +115,8 @@ int AuthNegotiateChannel::SendMessage(const NegotiateMessage &msg) const
     };
 
     CONN_CHECK_AND_RETURN_RET_LOGE(
-        AuthPostTransData(handle_, &dataInfo) == SOFTBUS_OK, SOFTBUS_CONN_AUTH_POST_DATA_FAILED,
-        CONN_WIFI_DIRECT, "post data failed");
+        DBinderSoftbusServer::GetInstance().AuthPostTransData(handle_, &dataInfo) == SOFTBUS_OK,
+            SOFTBUS_CONN_AUTH_POST_DATA_FAILED, CONN_WIFI_DIRECT, "post data failed");
     return SOFTBUS_OK;
 }
 
@@ -195,7 +196,7 @@ static bool CheckSameAccount(const NegotiateMessage &msg, const std::string &rem
     auto remoteNetworkId = WifiDirectUtils::UuidToNetworkId(remoteDeviceId);
     CONN_LOGI(CONN_WIFI_DIRECT, "remoteNetworkId=%{public}s", WifiDirectAnonymizeDeviceId(remoteNetworkId).c_str());
     int32_t osType = 0;
-    if (LnnGetOsTypeByNetworkId(remoteNetworkId.c_str(), &osType) == SOFTBUS_OK) {
+    if (DBinderSoftbusServer::GetInstance().LnnGetOsTypeByNetworkId(remoteNetworkId.c_str(), &osType) == SOFTBUS_OK) {
         CONN_LOGI(CONN_WIFI_DIRECT, "remote osType is %{public}d", osType);
         // The osType of the remote device is not OH_OS_TYPE, the remote device uses the same account.
         if (osType != OH_OS_TYPE) {
@@ -286,13 +287,15 @@ static void OnAuthDisconnected(AuthHandle authHandle)
     bool isLegacyReused = false;
     LinkManager::GetInstance().ForEach(
         [&disconnectChannel, &type, &remoteDeviceId, &remoteMac, &isLegacyReused] (const InnerLink &innerLink) {
-            auto channel = std::dynamic_pointer_cast<AuthNegotiateChannel>(innerLink.GetNegotiateChannel());
-            if (channel != nullptr && disconnectChannel == *channel) {
-                type = innerLink.GetLinkType();
-                remoteDeviceId= innerLink.GetRemoteDeviceId();
-                remoteMac = innerLink.GetRemoteBaseMac();
-                isLegacyReused = innerLink.GetLegacyReused();
-                return true;
+            if (innerLink.GetNegotiateChannel()->GetType() == NegotiateChannelType::AUTH_CHANNEL) {
+                auto channel = std::static_pointer_cast<AuthNegotiateChannel>(innerLink.GetNegotiateChannel());
+                if (channel != nullptr && disconnectChannel == *channel) {
+                    type = innerLink.GetLinkType();
+                    remoteDeviceId= innerLink.GetRemoteDeviceId();
+                    remoteMac = innerLink.GetRemoteBaseMac();
+                    isLegacyReused = innerLink.GetLegacyReused();
+                    return true;
+                }
             }
             return false;
         });
@@ -329,9 +332,10 @@ void AuthNegotiateChannel::Init()
         .onException = OnAuthException,
     };
 
-    int32_t ret = RegAuthTransListener(MODULE_P2P_LINK, &authListener);
+    int32_t ret = DBinderSoftbusServer::GetInstance().RegAuthTransListener(MODULE_P2P_LINK, &authListener);
     CONN_CHECK_AND_RETURN_LOGW(ret == SOFTBUS_OK, CONN_INIT, "register auth transfer listener failed");
-    ret = LnnRegisterEventHandler(LNN_EVENT_NOTIFY_RAW_ENHANCE_P2P, AddAuthConnection);
+    ret = DBinderSoftbusServer::GetInstance().LnnRegisterEventHandler(LNN_EVENT_NOTIFY_RAW_ENHANCE_P2P,
+        AddAuthConnection);
     CONN_CHECK_AND_RETURN_LOGW(ret == SOFTBUS_OK, CONN_INIT, "register lnn event failed, ret=%{public}d", ret);
 }
 
@@ -341,7 +345,8 @@ std::pair<int, ListenerModule> AuthNegotiateChannel::StartListening(
     CONN_LOGI(CONN_WIFI_DIRECT, "type=%{public}d, localIp=%{public}s, port=%{public}d", type,
               WifiDirectAnonymizeIp(localIp).c_str(), port);
     ListenerModule module;
-    auto resultPort = AuthStartListeningForWifiDirect(type, localIp.c_str(), port, &module);
+    auto resultPort = DBinderSoftbusServer::GetInstance().AuthStartListeningForWifiDirect(type, localIp.c_str(),
+        port, &module);
     CONN_LOGI(CONN_WIFI_DIRECT, "resultPort=%{public}d, module=%{public}d", resultPort, module);
     return { resultPort, module };
 }
@@ -349,7 +354,7 @@ std::pair<int, ListenerModule> AuthNegotiateChannel::StartListening(
 void AuthNegotiateChannel::StopListening(AuthLinkType type, ListenerModule module)
 {
     CONN_LOGI(CONN_WIFI_DIRECT, "type=%{public}d, moduleId=%{public}d", type, module);
-    AuthStopListeningForWifiDirect(type, module);
+    DBinderSoftbusServer::GetInstance().AuthStopListeningForWifiDirect(type, module);
 }
 
 void AuthNegotiateChannel::OnConnOpened(uint32_t requestId, AuthHandle authHandle)
@@ -449,7 +454,8 @@ int AuthNegotiateChannel::AssignValueForAuthConnInfo(bool isMeta, bool needUdid,
     CONN_CHECK_AND_RETURN_RET_LOGW(
         ret == EOK, SOFTBUS_CONN_OPEN_CONNECTION_COPY_IP_FAILED, CONN_WIFI_DIRECT, "copy ip failed");
     if (needUdid) {
-        const char *remoteUdid = LnnConvertDLidToUdid(param.remoteUuid.c_str(), CATEGORY_UUID);
+        const char *remoteUdid = DBinderSoftbusServer::GetInstance().LnnConvertDLidToUdid(param.remoteUuid.c_str(),
+            CATEGORY_UUID);
         CONN_CHECK_AND_RETURN_RET_LOGE(remoteUdid != nullptr && strlen(remoteUdid) != 0,
             SOFTBUS_CONN_OPEN_CONNECTION_GET_REMOTE_UUID_FAILED, CONN_WIFI_DIRECT, "get remote udid failed");
         ret = strcpy_s(authConnInfo.info.ipInfo.udid, UDID_BUF_LEN, remoteUdid);
@@ -466,7 +472,7 @@ int AuthNegotiateChannel::AuthOpenConnection(uint32_t requestId, AuthConnInfo au
         .onConnOpenFailed = AuthNegotiateChannel::OnConnOpenFailed,
     };
 
-    return AuthOpenConn(&authConnInfo, requestId, &authConnCallback, isMeta);
+    return DBinderSoftbusServer::GetInstance().AuthOpenConn(&authConnInfo, requestId, &authConnCallback, isMeta);
 }
 
 int AuthNegotiateChannel::OpenConnection(const OpenParam &param, const std::shared_ptr<AuthNegotiateChannel> &channel,
@@ -490,7 +496,7 @@ int AuthNegotiateChannel::OpenConnection(const OpenParam &param, const std::shar
     auto ret = AssignValueForAuthConnInfo(isMeta, needUdid, param, channel, authConnInfo);
     CONN_CHECK_AND_RETURN_RET_LOGE(ret == SOFTBUS_OK, ret, CONN_WIFI_DIRECT, "assign value for auth conn info failed");
 
-    auto requestId = AuthGenRequestId();
+    auto requestId = DBinderSoftbusServer::GetInstance().AuthGenRequestId();
     {
         std::lock_guard lock(lock_);
         requestIdToDeviceIdMap_[requestId] = param.remoteUuid;
@@ -513,7 +519,7 @@ int AuthNegotiateChannel::OpenConnection(const OpenParam &param, const std::shar
 
 void AuthNegotiateChannel::StopCustomListening()
 {
-    AuthStopListening(AUTH_LINK_TYPE_RAW_ENHANCED_P2P);
+    DBinderSoftbusServer::GetInstance().AuthStopListening(AUTH_LINK_TYPE_RAW_ENHANCED_P2P);
 }
 
 void AuthNegotiateChannel::RemovePendingAuthReq(uint32_t authReqId)

@@ -38,7 +38,10 @@ void P2pConnectState::Enter(const std::shared_ptr<P2pOperation> &operation)
     timer_.Setup();
     operation_ = operation;
     int outTime = CONNECT_TIMEOUT_MS;
-    auto connectOp = std::dynamic_pointer_cast<P2pOperationWrapper<P2pConnectParam>>(operation);
+    std::shared_ptr<P2pOperationWrapper<P2pConnectParam>> connectOp = nullptr;
+    if (operation->type_ == P2pOperationType::CONNECT) {
+        connectOp = std::static_pointer_cast<P2pOperationWrapper<P2pConnectParam>>(operation);
+    }
     if (connectOp->content_.isNeedDhcp) {
         outTime = CONNECT_TIMEOUT_DHCP_MS;
     }
@@ -128,7 +131,10 @@ void P2pConnectState::PreprocessP2pConnectionChangeEvent(
         return;
     }
     P2pEntity::GetInstance().Lock();
-    auto operation = std::dynamic_pointer_cast<P2pOperationWrapper<P2pConnectParam>>(operation_);
+    std::shared_ptr<P2pOperationWrapper<P2pConnectParam>> operation = nullptr;
+    if (operation_->type_ == P2pOperationType::CONNECT) {
+        operation = std::static_pointer_cast<P2pOperationWrapper<P2pConnectParam>>(operation_);
+    }
     if (operation == nullptr) {
         CONN_LOGE(CONN_WIFI_DIRECT, "operation is null");
         P2pEntity::GetInstance().Unlock();
@@ -181,7 +187,10 @@ void P2pConnectState::OnP2pConnectionChangeEvent(
 
 bool P2pConnectState::DetectDhcpTimeout()
 {
-    auto operation = std::dynamic_pointer_cast<P2pOperationWrapper<P2pConnectParam>>(operation_);
+    std::shared_ptr<P2pOperationWrapper<P2pConnectParam>> operation = nullptr;
+    if (operation_->type_ == P2pOperationType::CONNECT) {
+        operation = std::static_pointer_cast<P2pOperationWrapper<P2pConnectParam>>(operation_);
+    }
     if (operation == nullptr || !operation->content_.isNeedDhcp) {
         return false;
     }

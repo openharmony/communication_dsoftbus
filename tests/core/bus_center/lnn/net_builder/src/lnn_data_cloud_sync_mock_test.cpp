@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2024 Huawei Device Co., Ltd.
+ * Copyright (c) 2024-2025 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -24,6 +24,7 @@
 #include "lnn_data_cloud_sync_deps_mock.h"
 #include "lnn_kv_adapter_wrapper_mock.h"
 #include "lnn_net_ledger_mock.h"
+#include "dsoftbus_enhance_interface.h"
 
 constexpr char MACTEST[BT_MAC_LEN] = "00:11:22:33:44";
 constexpr char PEERUUID[UUID_BUF_LEN] = "021315ASD";
@@ -334,7 +335,7 @@ HWTEST_F(LNNDataCloudSyncMockTest, GetInfoFromSplitKey_Test_001, TestSize.Level1
         "234567",
         "345678",
     };
-    int64_t accountId;
+    int64_t accountId = 0;
     char deviceUdid[UDID_BUF_LEN] = { 0 };
     char fieldName[FIELDNAME_MAX_LEN] = { 0 };
     EXPECT_EQ(GetInfoFromSplitKey(splitKey, &accountId, deviceUdid, fieldName), SOFTBUS_OK);
@@ -366,6 +367,8 @@ HWTEST_F(LNNDataCloudSyncMockTest, HandleDBAddChangeInternal_Test_001, TestSize.
     };
     EXPECT_EQ(EOK, strcpy_s(localCaheInfo.deviceInfo.deviceUdid, UDID_BUF_LEN, PEERUDID));
     NiceMock<LnnDataCloudSyncInterfaceMock> DataCloudSyncMock;
+    LnnEnhanceFuncList *pfnLnnEnhanceFuncList = LnnEnhanceFuncListGet();
+    pfnLnnEnhanceFuncList->lnnGetLocalCacheNodeInfo = LnnGetLocalCacheNodeInfo;
     EXPECT_CALL(DataCloudSyncMock, LnnGetLocalCacheNodeInfo)
         .WillOnce(Return(SOFTBUS_INVALID_PARAM))
         .WillRepeatedly(DoAll(SetArgPointee<0>(localCaheInfo), Return(SOFTBUS_OK)));
@@ -498,6 +501,9 @@ HWTEST_F(LNNDataCloudSyncMockTest, IsIgnoreUpdate_Test_001, TestSize.Level1)
 HWTEST_F(LNNDataCloudSyncMockTest, HandleDBUpdateInternal_Test_001, TestSize.Level1)
 {
     NiceMock<LnnDataCloudSyncInterfaceMock> DataCloudSyncMock;
+    LnnEnhanceFuncList *pfnLnnEnhanceFuncList = LnnEnhanceFuncListGet();
+    pfnLnnEnhanceFuncList->lnnRetrieveDeviceInfo = LnnRetrieveDeviceInfo;
+    pfnLnnEnhanceFuncList->lnnSaveRemoteDeviceInfo = LnnSaveRemoteDeviceInfo;
     EXPECT_CALL(DataCloudSyncMock, LnnGenerateHexStringHash)
         .WillOnce(Return(SOFTBUS_ENCRYPT_ERR))
         .WillRepeatedly(Return(SOFTBUS_OK));
@@ -548,6 +554,10 @@ HWTEST_F(LNNDataCloudSyncMockTest, LnnDBDataChangeSyncToCacheInner_Test_001, Tes
     NodeInfo cacheInfo = {
         .accountId = 12345,
     };
+    LnnEnhanceFuncList *pfnLnnEnhanceFuncList = LnnEnhanceFuncListGet();
+    pfnLnnEnhanceFuncList->lnnUnPackCloudSyncDeviceInfo = LnnUnPackCloudSyncDeviceInfo;
+    pfnLnnEnhanceFuncList->lnnRetrieveDeviceInfo = LnnRetrieveDeviceInfo;
+    pfnLnnEnhanceFuncList->lnnGetLocalCacheNodeInfo = LnnGetLocalCacheNodeInfo;
     EXPECT_EQ(EOK, strcpy_s(cacheInfo.p2pInfo.p2pMac, MAC_LEN, MACTEST));
     EXPECT_EQ(EOK, strcpy_s(cacheInfo.connectInfo.macAddr, MAC_LEN, MACTEST));
     EXPECT_EQ(EOK, strcpy_s(cacheInfo.deviceInfo.deviceUdid, UDID_BUF_LEN, PEERUDID));
@@ -590,6 +600,8 @@ HWTEST_F(LNNDataCloudSyncMockTest, LnnLedgerDataChangeSyncToDB_Test_001, TestSiz
         .accountId = 0,
         .stateVersion = 12,
     };
+    LnnEnhanceFuncList *pfnLnnEnhanceFuncList = LnnEnhanceFuncListGet();
+    pfnLnnEnhanceFuncList->lnnGetLocalCacheNodeInfo = LnnGetLocalCacheNodeInfo;
     EXPECT_EQ(EOK, strcpy_s(localCaheInfo.deviceInfo.deviceUdid, UDID_BUF_LEN, PEERUDID));
     NiceMock<LnnDataCloudSyncInterfaceMock> DataCloudSyncMock;
     EXPECT_CALL(DataCloudSyncMock, LnnGetLocalCacheNodeInfo)
@@ -614,6 +626,9 @@ HWTEST_F(LNNDataCloudSyncMockTest, LnnLedgerDataChangeSyncToDB_Test_001, TestSiz
 HWTEST_F(LNNDataCloudSyncMockTest, PackBroadcastCipherKeyInner_Test_001, TestSize.Level1)
 {
     CloudSyncInfo syncInfo;
+    LnnEnhanceFuncList *pfnLnnEnhanceFuncList = LnnEnhanceFuncListGet();
+    pfnLnnEnhanceFuncList->lnnPackCloudSyncDeviceInfo = LnnPackCloudSyncDeviceInfo;
+    pfnLnnEnhanceFuncList->lnnGetLocalBroadcastCipherInfo = LnnGetLocalBroadcastCipherInfo;
     (void)memset_s(&syncInfo, sizeof(CloudSyncInfo), 0, sizeof(CloudSyncInfo));
     syncInfo.broadcastCipherKey = reinterpret_cast<char *>(SoftBusCalloc(TMP_LEN));
     ASSERT_TRUE(syncInfo.broadcastCipherKey != nullptr);

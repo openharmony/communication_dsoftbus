@@ -16,6 +16,9 @@
 #include "bus_center_server_proxy.h"
 #include "bus_center_server_proxy_standard.h"
 
+#include <mutex>
+#include "comm_log.h"
+#include "g_enhance_sdk_func.h"
 #include "ipc_skeleton.h"
 #include "lnn_log.h"
 #include "softbus_error_code.h"
@@ -81,9 +84,27 @@ int32_t BusCenterServerProxyInit(void)
     return SOFTBUS_OK;
 }
 
+static int32_t ClientCheckFuncPointer(void *func)
+{
+    if (func == NULL) {
+        LNN_LOGE(LNN_EVENT, "enhance func not register");
+        return SOFTBUS_FUNC_NOT_REGISTER;
+    }
+    return SOFTBUS_OK;
+}
+
+static void BusCenterExProxyDeInitPacked(void)
+{
+    ClientEnhanceFuncList *pfnClientEnhanceFuncList = ClientEnhanceFuncListGet();
+    if (ClientCheckFuncPointer((void *)pfnClientEnhanceFuncList->busCenterExProxyDeInit) != SOFTBUS_OK) {
+        return;
+    }
+    return pfnClientEnhanceFuncList->busCenterExProxyDeInit();
+}
+
 void BusCenterServerProxyDeInit(void)
 {
-    BusCenterExProxyDeInit();
+    BusCenterExProxyDeInitPacked();
     std::lock_guard<std::mutex> lock(g_mutex);
     if (g_serverProxy == nullptr) {
         LNN_LOGE(LNN_EVENT, "g_serverProxy is nullptr");

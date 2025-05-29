@@ -13,8 +13,8 @@
  * limitations under the License.
  */
 
-#ifndef AUTH_COMMON_MOCK_H
-#define AUTH_COMMON_MOCK_H
+#ifndef AUTH_INTERFACE_MOCK_H
+#define AUTH_INTERFACE_MOCK_H
 
 #include <gmock/gmock.h>
 #include <mutex>
@@ -22,7 +22,7 @@
 
 #include "auth_common.h"
 #include "auth_connection.h"
-#include "auth_device_common_key.h"
+#include "auth_device_common_key_struct.h"
 #include "auth_hichain_adapter.h"
 #include "auth_manager.h"
 #include "device_auth.h"
@@ -94,4 +94,4 @@ public:
     static int32_t ActionOfLnnGetRemoteNodeInfoById(const char *id, IdCategory type, NodeInfo *info);
 };
 } // namespace OHOS
-#endif // AUTH_COMMON_MOCK_H
+#endif // AUTH_INTERFACE_MOCK_H
