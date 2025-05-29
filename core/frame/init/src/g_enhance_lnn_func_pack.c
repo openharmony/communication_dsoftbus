@@ -1363,6 +1363,15 @@ void LnnUnregSleRangeCbPacked(void)
     return pfnLnnEnhanceFuncList->lnnUnregSleRangeCb();
 }
 
+void SleRangeDeathCallbackPacked()
+{
+    LnnEnhanceFuncList *pfnLnnEnhanceFuncList = LnnEnhanceFuncListGet();
+    if (LnnCheckFuncPointer((void *)pfnLnnEnhanceFuncList->sleRangeDeathCallback) != SOFTBUS_OK) {
+        return;
+    }
+    return pfnLnnEnhanceFuncList->sleRangeDeathCallback();
+}
+
 void LnnDeinitMetaNodeExtLedgerPacked(void)
 {
     LnnEnhanceFuncList *pfnLnnEnhanceFuncList = LnnEnhanceFuncListGet();
