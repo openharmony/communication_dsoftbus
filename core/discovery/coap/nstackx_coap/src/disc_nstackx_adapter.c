@@ -603,7 +603,8 @@ static int32_t SetLocalDeviceInfo(LinkStatus status, int32_t ifnameIdx)
     g_localDeviceInfo->businessType = (uint8_t)NSTACKX_BUSINESS_TYPE_NULL;
     (void)SoftBusMutexUnlock(&g_localDeviceInfoLock);
 
-    DISC_CHECK_AND_RETURN_RET_LOGE(SetLocalLinkInfo(status, ifnameIdx) == SOFTBUS_OK, ret, DISC_COAP,
+    ret = SetLocalLinkInfo(status, ifnameIdx);
+    DISC_CHECK_AND_RETURN_RET_LOGE(ret == SOFTBUS_OK, ret, DISC_COAP,
         "set local linkInfo failed, ret=%{public}d", ret);
     return SOFTBUS_OK;
 }
@@ -662,7 +663,8 @@ void DiscCoapUpdateLocalIp(LinkStatus status, int32_t ifnameIdx)
     int32_t port = 0;
     int32_t ret = LnnGetLocalNum64Info(NUM_KEY_ACCOUNT_LONG, &accountId);
     DISC_CHECK_AND_RETURN_LOGE(ret == SOFTBUS_OK, DISC_COAP, "get local account failed");
-    LnnGetLocalNumInfoByIfnameIdx(NUM_KEY_AUTH_PORT, &port, ifnameIdx);
+    ret = LnnGetLocalNumInfoByIfnameIdx(NUM_KEY_AUTH_PORT, &port, ifnameIdx);
+    DISC_CHECK_AND_RETURN_LOGE(ret != SOFTBUS_INVALID_PARAM, DISC_COAP, "get local port failed");
     DISC_LOGI(DISC_COAP, "register ifname=%{public}s. status=%{public}s, port=%{public}d, accountInfo=%{public}s",
         g_localDeviceInfo->localIfInfo->networkName, status == LINK_STATUS_UP ? "up" : "down", port,
         accountId == 0 ? "without" : "with");
