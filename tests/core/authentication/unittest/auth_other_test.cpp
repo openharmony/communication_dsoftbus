@@ -1182,12 +1182,12 @@ HWTEST_F(AuthOtherTest, DEL_AUTH_REQ_INFO_BY_AUTH_HANDLE_TEST_001, TestSize.Leve
 }
 
 /*
- * @tc.name: IS_ENHANCE_P2P_MODULE_ID_Test_001
+ * @tc.name: IS_ENHANCE_P2P_MODULE_ID_TEST_001
  * @tc.desc: IsEnhanceP2pModuleId test
  * @tc.type: FUNC
  * @tc.require:
  */
-HWTEST_F(AuthOtherTest, IS_ENHANCE_P2P_MODULE_ID_Test_001, TestSize.Level1)
+HWTEST_F(AuthOtherTest, IS_ENHANCE_P2P_MODULE_ID_TEST_001, TestSize.Level1)
 {
     EXPECT_EQ(IsEnhanceP2pModuleId(AUTH_ENHANCED_P2P_START), true);
     EXPECT_EQ(IsEnhanceP2pModuleId(DIRECT_CHANNEL_SERVER_P2P), false);
@@ -1195,12 +1195,12 @@ HWTEST_F(AuthOtherTest, IS_ENHANCE_P2P_MODULE_ID_Test_001, TestSize.Level1)
 }
 
 /*
- * @tc.name: AUTH_START_LISTENING_FOR_WIFI_DIRECT_Test_001
+ * @tc.name: AUTH_START_LISTENING_FOR_WIFI_DIRECT_TEST_001
  * @tc.desc: AuthStartListeningForWifiDirect test
  * @tc.type: FUNC
  * @tc.require:
  */
-HWTEST_F(AuthOtherTest, AUTH_START_LISTENING_FOR_WIFI_DIRECT_Test_001, TestSize.Level1)
+HWTEST_F(AuthOtherTest, AUTH_START_LISTENING_FOR_WIFI_DIRECT_TEST_001, TestSize.Level1)
 {
     AsyncCallDeviceIdReceived(nullptr);
     AuthCommonInterfaceMock connMock;
@@ -1225,12 +1225,12 @@ HWTEST_F(AuthOtherTest, AUTH_START_LISTENING_FOR_WIFI_DIRECT_Test_001, TestSize.
 }
 
 /*
- * @tc.name: IS_AUTH_SESSION_KEY_MODULE_Test_001
+ * @tc.name: IS_AUTH_SESSION_KEY_MODULE_TEST_001
  * @tc.desc: IsAuthSessionKeyModule test
  * @tc.type: FUNC
  * @tc.require:
  */
-HWTEST_F(AuthOtherTest, IS_AUTH_SESSION_KEY_MODULE_Test_001, TestSize.Level1)
+HWTEST_F(AuthOtherTest, IS_AUTH_SESSION_KEY_MODULE_TEST_001, TestSize.Level1)
 {
     AuthDataHead head;
 
@@ -1253,12 +1253,12 @@ HWTEST_F(AuthOtherTest, IS_AUTH_SESSION_KEY_MODULE_Test_001, TestSize.Level1)
 }
 
 /*
- * @tc.name: ON_WIFI_CONNECTED_Test_001
+ * @tc.name: ON_WIFI_CONNECTED_TEST_001
  * @tc.desc: OnWiFiConnected test
  * @tc.type: FUNC
  * @tc.require:
  */
-HWTEST_F(AuthOtherTest, ON_WIFI_CONNECTED_Test_001, TestSize.Level1)
+HWTEST_F(AuthOtherTest, ON_WIFI_CONNECTED_TEST_001, TestSize.Level1)
 {
     ListenerModule module = AUTH;
     int32_t fd = 1;
@@ -1273,12 +1273,12 @@ HWTEST_F(AuthOtherTest, ON_WIFI_CONNECTED_Test_001, TestSize.Level1)
 }
 
 /*
- * @tc.name: ON_TCP_SESSION_CONNECTED_Test_001
+ * @tc.name: ON_TCP_SESSION_CONNECTED_TEST_001
  * @tc.desc: OnTcpSessionConnected test
  * @tc.type: FUNC
  * @tc.require:
  */
-HWTEST_F(AuthOtherTest, ON_TCP_SESSION_CONNECTED_Test_001, TestSize.Level1)
+HWTEST_F(AuthOtherTest, ON_TCP_SESSION_CONNECTED_TEST_001, TestSize.Level1)
 {
     ListenerModule module = AUTH;
     int32_t fd = 1;
@@ -1293,12 +1293,12 @@ HWTEST_F(AuthOtherTest, ON_TCP_SESSION_CONNECTED_Test_001, TestSize.Level1)
 }
 
 /*
- * @tc.name: ON_WIFI_DISCONNECTED_Test_001
+ * @tc.name: ON_WIFI_DISCONNECTED_TEST_001
  * @tc.desc: OnWiFiDisconnected test
  * @tc.type: FUNC
  * @tc.require:
  */
-HWTEST_F(AuthOtherTest, ON_WIFI_DISCONNECTED_Test_001, TestSize.Level1)
+HWTEST_F(AuthOtherTest, ON_WIFI_DISCONNECTED_TEST_001, TestSize.Level1)
 {
     ListenerModule module = AUTH;
     int32_t fd = 1;
