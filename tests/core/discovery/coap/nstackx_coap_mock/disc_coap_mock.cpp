@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2022-2025 Huawei Device Co., Ltd.
+ * Copyright (c) 2022 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -13,7 +13,7 @@
  * limitations under the License.
  */
 #include <securec.h>
-#include "nstackx_adapter_mock.h"
+#include "disc_coap_mock.h"
 #include "softbus_error_code.h"
 
 const int32_t MOCK_PHONE_DEVICE_TYPE = 14;
@@ -23,73 +23,47 @@ const char *MOCK_DEVICE_ID = "ABCDEF11223344556677889900";
 const char *MOCK_DEVICE_NAME = "deviceName";
 const char *MOCK_WLAN_IP = "192.168.0.1";
 
-AdapterMock::AdapterMock()
+DiscCoapMock::DiscCoapMock()
 {
     mock.store(this);
 }
 
-AdapterMock::~AdapterMock()
+DiscCoapMock::~DiscCoapMock()
 {
     mock.store(nullptr);
 }
 
-int32_t NSTACKX_Init(const NSTACKX_Parameter *parameter)
-{
-    return AdapterMock::ActionOfNstackInit(parameter);
-}
-
 int32_t NSTACKX_RegisterServiceDataV2(const struct NSTACKX_ServiceData *param, uint32_t cnt)
 {
-    return AdapterMock::ActionOfRegisterServiceDataV2(param, cnt);
-}
-
-int32_t NSTACKX_RegisterCapability(uint32_t capabilityBitmapNum, uint32_t capabilityBitmap[])
-{
-    return SOFTBUS_OK;
-}
-
-int32_t NSTACKX_SetFilterCapability(uint32_t capabilityBitmapNum, uint32_t capabilityBitmap[])
-{
-    return SOFTBUS_OK;
-}
-
-int32_t NSTACKX_SendDiscoveryRsp(const NSTACKX_ResponseSettings *responseSettings)
-{
-    return SOFTBUS_OK;
+    return DiscCoapMock::ActionOfRegisterServiceDataV2(param, cnt);
 }
 
 int32_t LnnGetLocalNumInfo(InfoKey key, int32_t *info)
 {
-    return AdapterMock::ActionOfLnnGetLocalNumInfo(key, info);
+    return DiscCoapMock::ActionOfLnnGetLocalNumInfo(key, info);
 }
 
 int32_t LnnGetLocalNum64Info(InfoKey key, int64_t *info)
 {
-    return AdapterMock::ActionOfLnnGetLocalNum64Info(key, info);
+    return DiscCoapMock::ActionOfLnnGetLocalNum64Info(key, info);
 }
 
 int32_t LnnGetLocalStrInfo(InfoKey key, char *info, uint32_t len)
 {
-    return AdapterMock::ActionOfLnnGetLocalStrInfo(key, info, len);
+    return DiscCoapMock::ActionOfLnnGetLocalStrInfo(key, info, len);
 }
 
 int32_t LnnGetLocalNumInfoByIfnameIdx(InfoKey key, int32_t *info, int32_t ifIdx)
 {
-    return AdapterMock::ActionOfLnnGetLocalNumInfoByIfnameIdx(key, info, ifIdx);
+    return DiscCoapMock::ActionOfLnnGetLocalNumInfoByIfnameIdx(key, info, ifIdx);
 }
 
 int32_t LnnGetLocalStrInfoByIfnameIdx(InfoKey key, char *info, uint32_t len, int32_t ifIdx)
 {
-    return AdapterMock::ActionOfLnnGetLocalStrInfoByIfnameIdx(key, info, len, ifIdx);
+    return DiscCoapMock::ActionOfLnnGetLocalStrInfoByIfnameIdx(key, info, len, ifIdx);
 }
 
-int32_t AdapterMock::ActionOfNstackInit(const NSTACKX_Parameter *parameter)
-{
-    deviceFoundCallback_ = *parameter;
-    return SOFTBUS_OK;
-}
-
-int32_t AdapterMock::ActionOfRegisterServiceDataV2(const struct NSTACKX_ServiceData *param, uint32_t cnt)
+int32_t DiscCoapMock::ActionOfRegisterServiceDataV2(const struct NSTACKX_ServiceData *param, uint32_t cnt)
 {
     if (cnt == 0) {
         return SOFTBUS_INVALID_PARAM;
@@ -97,7 +71,7 @@ int32_t AdapterMock::ActionOfRegisterServiceDataV2(const struct NSTACKX_ServiceD
     return SOFTBUS_OK;
 }
 
-int32_t AdapterMock::ActionOfLnnGetLocalNumInfo(InfoKey key, int32_t *info)
+int32_t DiscCoapMock::ActionOfLnnGetLocalNumInfo(InfoKey key, int32_t *info)
 {
     if (info == NULL) {
         return SOFTBUS_INVALID_PARAM;
@@ -109,7 +83,7 @@ int32_t AdapterMock::ActionOfLnnGetLocalNumInfo(InfoKey key, int32_t *info)
     return SOFTBUS_OK;
 }
 
-int32_t AdapterMock::ActionOfLnnGetLocalNum64Info(InfoKey key, int64_t *info)
+int32_t DiscCoapMock::ActionOfLnnGetLocalNum64Info(InfoKey key, int64_t *info)
 {
     if (info == NULL) {
         return SOFTBUS_INVALID_PARAM;
@@ -121,7 +95,7 @@ int32_t AdapterMock::ActionOfLnnGetLocalNum64Info(InfoKey key, int64_t *info)
     return SOFTBUS_OK;
 }
 
-int32_t AdapterMock::ActionOfLnnGetLocalStrInfo(InfoKey key, char *info, uint32_t len)
+int32_t DiscCoapMock::ActionOfLnnGetLocalStrInfo(InfoKey key, char *info, uint32_t len)
 {
     if (info == NULL) {
         return SOFTBUS_INVALID_PARAM;
@@ -136,7 +110,7 @@ int32_t AdapterMock::ActionOfLnnGetLocalStrInfo(InfoKey key, char *info, uint32_
     return SOFTBUS_OK;
 }
 
-int32_t AdapterMock::ActionOfLnnGetLocalNumInfoByIfnameIdx(InfoKey key, int32_t *info, int32_t ifIdx)
+int32_t DiscCoapMock::ActionOfLnnGetLocalNumInfoByIfnameIdx(InfoKey key, int32_t *info, int32_t ifIdx)
 {
     if (info == NULL) {
         return SOFTBUS_INVALID_PARAM;
@@ -148,7 +122,7 @@ int32_t AdapterMock::ActionOfLnnGetLocalNumInfoByIfnameIdx(InfoKey key, int32_t 
     return SOFTBUS_OK;
 }
 
-int32_t AdapterMock::ActionOfLnnGetLocalStrInfoByIfnameIdx(InfoKey key, char *info, uint32_t len, int32_t ifIdx)
+int32_t DiscCoapMock::ActionOfLnnGetLocalStrInfoByIfnameIdx(InfoKey key, char *info, uint32_t len, int32_t ifIdx)
 {
     if (info == NULL) {
         return SOFTBUS_INVALID_PARAM;
@@ -163,21 +137,14 @@ int32_t AdapterMock::ActionOfLnnGetLocalStrInfoByIfnameIdx(InfoKey key, char *in
     return SOFTBUS_OK;
 }
 
-void AdapterMock::InjectDeviceFoundEvent(const NSTACKX_DeviceInfo *deviceInfo, uint32_t deviceCount)
+void DiscCoapMock::SetupSuccessStub()
 {
-    if (deviceFoundCallback_.onDeviceListChanged) {
-        deviceFoundCallback_.onDeviceListChanged(deviceInfo, deviceCount);
-    }
-}
-
-void AdapterMock::SetupSuccessStub()
-{
-    EXPECT_CALL(*this, NSTACKX_RegisterServiceDataV2).WillRepeatedly(AdapterMock::ActionOfRegisterServiceDataV2);
-    EXPECT_CALL(*this, LnnGetLocalNumInfo).WillRepeatedly(AdapterMock::ActionOfLnnGetLocalNumInfo);
-    EXPECT_CALL(*this, LnnGetLocalNum64Info).WillRepeatedly(AdapterMock::ActionOfLnnGetLocalNum64Info);
-    EXPECT_CALL(*this, LnnGetLocalStrInfo).WillRepeatedly(AdapterMock::ActionOfLnnGetLocalStrInfo);
+    EXPECT_CALL(*this, NSTACKX_RegisterServiceDataV2).WillRepeatedly(DiscCoapMock::ActionOfRegisterServiceDataV2);
+    EXPECT_CALL(*this, LnnGetLocalNumInfo).WillRepeatedly(DiscCoapMock::ActionOfLnnGetLocalNumInfo);
+    EXPECT_CALL(*this, LnnGetLocalNum64Info).WillRepeatedly(DiscCoapMock::ActionOfLnnGetLocalNum64Info);
+    EXPECT_CALL(*this, LnnGetLocalStrInfo).WillRepeatedly(DiscCoapMock::ActionOfLnnGetLocalStrInfo);
     EXPECT_CALL(*this, LnnGetLocalNumInfoByIfnameIdx).
-        WillRepeatedly(AdapterMock::ActionOfLnnGetLocalNumInfoByIfnameIdx);
+        WillRepeatedly(DiscCoapMock::ActionOfLnnGetLocalNumInfoByIfnameIdx);
     EXPECT_CALL(*this, LnnGetLocalStrInfoByIfnameIdx).
-        WillRepeatedly(AdapterMock::ActionOfLnnGetLocalStrInfoByIfnameIdx);
+        WillRepeatedly(DiscCoapMock::ActionOfLnnGetLocalStrInfoByIfnameIdx);
 }
