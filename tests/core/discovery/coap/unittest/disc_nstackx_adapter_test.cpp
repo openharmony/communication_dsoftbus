@@ -412,4 +412,99 @@ HWTEST_F(DiscNstackxAdapterTest, DiscCoapAdapterFound002, TestSize.Level1)
     adapterMock.InjectDeviceFoundEvent(&testDeviceList, 1);
     EXPECT_TRUE(!isDeviceFound);
 }
+
+/*
+ * @tc.name: DiscCoapAdapterFound003
+ * @tc.desc: Test DiscOnDeviceFound should reach the branch when given different network
+ *           when DiscCoapRegisterCb was given vaild callback
+ * @tc.type: FUNC
+ * @tc.require:
+ */
+HWTEST_F(DiscNstackxAdapterTest, DiscCoapAdapterFound003, TestSize.Level1)
+{
+    AdapterMock adapterMock;
+    EXPECT_CALL(adapterMock, NSTACKX_Init).WillRepeatedly(AdapterMock::ActionOfNstackInit);
+
+    int32_t ret = DiscNstackxInit();
+    ASSERT_EQ(ret, SOFTBUS_OK);
+    ret = DiscCoapRegisterCb(&g_discInnerCb);
+    EXPECT_EQ(ret, SOFTBUS_OK);
+
+    NSTACKX_DeviceInfo testDeviceList;
+    testDeviceList.update = 1;
+    ret = strcpy_s(testDeviceList.deviceId, sizeof(testDeviceList.deviceId), "{\"UDID\":\"abcde\"}");
+    EXPECT_EQ(ret, EOK);
+    ret = strcpy_s(testDeviceList.reservedInfo, sizeof(testDeviceList.reservedInfo), "{\"version\":\"1.0.0\"}");
+    EXPECT_EQ(ret, EOK);
+
+    ret = strcpy_s(testDeviceList.networkName, sizeof(testDeviceList.networkName), "wlan0");
+    EXPECT_EQ(ret, EOK);
+    adapterMock.InjectDeviceFoundEvent(&testDeviceList, 1);
+    EXPECT_TRUE(!isDeviceFound);
+
+    ret = strcpy_s(testDeviceList.networkName, sizeof(testDeviceList.networkName), "ncm0");
+    EXPECT_EQ(ret, EOK);
+    adapterMock.InjectDeviceFoundEvent(&testDeviceList, 1);
+    EXPECT_TRUE(!isDeviceFound);
+
+    ret = strcpy_s(testDeviceList.networkName, sizeof(testDeviceList.networkName), "wwan0");
+    EXPECT_EQ(ret, EOK);
+    adapterMock.InjectDeviceFoundEvent(&testDeviceList, 1);
+    EXPECT_TRUE(!isDeviceFound);
+
+    ret = strcpy_s(testDeviceList.networkName, sizeof(testDeviceList.networkName), "eth0");
+    EXPECT_EQ(ret, EOK);
+    adapterMock.InjectDeviceFoundEvent(&testDeviceList, 1);
+    EXPECT_TRUE(!isDeviceFound);
+
+    ret = strcpy_s(testDeviceList.networkName, sizeof(testDeviceList.networkName), "net");
+    EXPECT_EQ(ret, EOK);
+    adapterMock.InjectDeviceFoundEvent(&testDeviceList, 1);
+    EXPECT_TRUE(!isDeviceFound);
 }
+
+/*
+ * @tc.name: DiscCoapAdapterParseResInfo001
+ * @tc.desc: Test DiscParseReservedInfo when given different NSTACKX_DeviceInfo.reservedInfo,
+ * @tc.type: FUNC
+ * @tc.require:
+ */
+HWTEST_F(DiscNstackxAdapterTest, DiscCoapAdapterParseResInfo001, TestSize.Level1)
+{
+    AdapterMock adapterMock;
+    EXPECT_CALL(adapterMock, NSTACKX_Init).WillRepeatedly(AdapterMock::ActionOfNstackInit);
+
+    int32_t ret = DiscNstackxInit();
+    ASSERT_EQ(ret, SOFTBUS_OK);
+    ret = DiscCoapRegisterCb(&g_discInnerCb);
+    EXPECT_EQ(ret, SOFTBUS_OK);
+
+    NSTACKX_DeviceInfo testDeviceList;
+    testDeviceList.update = 1;
+    ret = strcpy_s(testDeviceList.deviceId, sizeof(testDeviceList.deviceId), "test");
+    EXPECT_EQ(ret, EOK);
+    adapterMock.InjectDeviceFoundEvent(&testDeviceList, 1);
+    EXPECT_TRUE(!isDeviceFound);
+
+    ret = strcpy_s(testDeviceList.deviceId, sizeof(testDeviceList.deviceId), "{\"UDID\":\"abcde\"}");
+    EXPECT_EQ(ret, EOK);
+    adapterMock.InjectDeviceFoundEvent(&testDeviceList, 1);
+    EXPECT_TRUE(!isDeviceFound);
+
+    ret = strcpy_s(testDeviceList.reservedInfo, sizeof(testDeviceList.reservedInfo), "test");
+    EXPECT_EQ(ret, EOK);
+    adapterMock.InjectDeviceFoundEvent(&testDeviceList, 1);
+    EXPECT_TRUE(!isDeviceFound);
+
+    ret = strcpy_s(testDeviceList.reservedInfo, sizeof(testDeviceList.reservedInfo), "{\"version\":\"1.0.0\"}");
+    EXPECT_EQ(ret, EOK);
+    adapterMock.InjectDeviceFoundEvent(&testDeviceList, 1);
+    EXPECT_TRUE(!isDeviceFound);
+
+    ret = strcpy_s(testDeviceList.reservedInfo, sizeof(testDeviceList.reservedInfo),
+        "{\"version\":\"1.0.0\",\"bData\":{\"nickname\":\"Jane\"}}");
+    EXPECT_EQ(ret, EOK);
+    adapterMock.InjectDeviceFoundEvent(&testDeviceList, 1);
+    EXPECT_TRUE(!isDeviceFound);
+}
+} // namespace OHOS
