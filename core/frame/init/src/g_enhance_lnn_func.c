@@ -397,6 +397,7 @@ int32_t LnnRegisterEnhanceFunc(void *soHandle)
     g_lnnEnhanceFuncList.lnnStopRange = dlsym(soHandle, "LnnStopRange");
     g_lnnEnhanceFuncList.lnnRegSleRangeCb = dlsym(soHandle, "LnnRegSleRangeCb");
     g_lnnEnhanceFuncList.lnnUnregSleRangeCb = dlsym(soHandle, "LnnUnregSleRangeCb");
+    g_lnnEnhanceFuncList.sleRangeDeathCallback = dlsym(soHandle, "SleRangeDeathCallback");
 
     return SOFTBUS_OK;
 }
