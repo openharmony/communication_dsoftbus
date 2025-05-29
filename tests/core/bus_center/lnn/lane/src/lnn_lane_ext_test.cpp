@@ -18,10 +18,10 @@
 #include <securec.h>
 #include <thread>
 
+#include "bus_center_info_key.h"
 #include "dsoftbus_enhance_interface.h"
 #include "g_enhance_lnn_func_pack.h"
 #include "g_enhance_lnn_func.h"
-#include "bus_center_info_key.h"
 #include "lnn_lane.h"
 #include "lnn_lane_common.h"
 #include "lnn_lane_def.h"
