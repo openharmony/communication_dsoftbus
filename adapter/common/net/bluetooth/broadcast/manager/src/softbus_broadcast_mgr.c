@@ -2456,7 +2456,7 @@ bool CompareSameFilter(BcScanFilter *srcFilter, BcScanFilter *dstFilter)
 static int32_t CompareFilterAndGetIndex(int32_t listenerId, BcScanFilter *filter, uint8_t filterNum)
 {
     DISC_CHECK_AND_RETURN_RET_LOGE(filter != NULL, SOFTBUS_INVALID_PARAM, DISC_BROADCAST, "filter is nullptr");
-    DISC_CHECK_AND_RETURN_RET_LOGE(!((filterNum <= 0) && (filterNum >= MAX_FILTER_SIZE)),
+    DISC_CHECK_AND_RETURN_RET_LOGE(!((filterNum <= 0) || (filterNum >= MAX_FILTER_SIZE)),
         SOFTBUS_INVALID_PARAM, DISC_BROADCAST, "invalid param filterNum");
 
     ReleaseScanIdx(listenerId);
@@ -2512,7 +2512,7 @@ int32_t SetScanFilter(int32_t listenerId, const BcScanFilter *scanFilter, uint8_
 {
     DISC_LOGI(DISC_BROADCAST, "enter set scan filter, filterNum=%{public}d", filterNum);
     DISC_CHECK_AND_RETURN_RET_LOGE(scanFilter != NULL, SOFTBUS_INVALID_PARAM, DISC_BROADCAST, "param is nullptr");
-    DISC_CHECK_AND_RETURN_RET_LOGE(!((filterNum <= 0) && (filterNum >= MAX_FILTER_SIZE)),
+    DISC_CHECK_AND_RETURN_RET_LOGE(!((filterNum <= 0) || (filterNum >= MAX_FILTER_SIZE)),
         SOFTBUS_INVALID_PARAM, DISC_BROADCAST, "invalid param filterNum");
     int32_t ret = SoftBusMutexLock(&g_scanLock);
     DISC_CHECK_AND_RETURN_RET_LOGE(ret == SOFTBUS_OK, SOFTBUS_LOCK_ERR, DISC_BROADCAST, "mutex error");
