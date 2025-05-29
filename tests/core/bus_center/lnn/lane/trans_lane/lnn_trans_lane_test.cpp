@@ -22,6 +22,7 @@
 #include "lnn_trans_free_lane.h"
 #include "lnn_trans_lane.h"
 #include "lnn_trans_lane_deps_mock.h"
+#include "lnn_wifi_adpter_mock.h"
 #include "softbus_adapter_thread.h"
 #include "softbus_error_code.h"
 
@@ -965,5 +966,78 @@ HWTEST_F(LNNTransLaneMockTest, LNN_HANDLE_LANE_QOS_CHANGE_TEST_004, TestSize.Lev
     EXPECT_EQ(transObj->freeLane(LANE_REQ_ID_TWO), SOFTBUS_OK);
     EXPECT_NO_FATAL_FAILURE(NotifyFreeLaneResult(LANE_REQ_ID_ONE, SOFTBUS_OK));
     EXPECT_NO_FATAL_FAILURE(NotifyFreeLaneResult(LANE_REQ_ID_TWO, SOFTBUS_OK));
+}
+
+/*
+* @tc.name: LNN_HANDLE_LANE_FREE_UNUSED_LINK_001
+* @tc.desc: free unused link with nullptr info and invalid lane reqId
+* @tc.type: FUNC
+* @tc.require:
+*/
+HWTEST_F(LNNTransLaneMockTest, LNN_HANDLE_LANE_FREE_UNUSED_LINK_001, TestSize.Level1)
+{
+    EXPECT_NO_FATAL_FAILURE(FreeUnusedLink(INVALID_LANE_REQ_ID, nullptr));
+}
+
+/*
+* @tc.name: LNN_HANDLE_LANE_FREE_UNUSED_LINK_002
+* @tc.desc: free unused link with invalid lane reqId
+* @tc.type: FUNC
+* @tc.require:
+*/
+HWTEST_F(LNNTransLaneMockTest, LNN_HANDLE_LANE_FREE_UNUSED_LINK_002, TestSize.Level1)
+{
+    LaneLinkInfo info = {
+        .type = LANE_P2P,
+    };
+    EXPECT_NO_FATAL_FAILURE(FreeUnusedLink(INVALID_LANE_REQ_ID, &info));
+}
+
+/*
+* @tc.name: LNN_HANDLE_LANE_FREE_UNUSED_LINK_003
+* @tc.desc: free unused link with nullptr info
+* @tc.type: FUNC
+* @tc.require:
+*/
+HWTEST_F(LNNTransLaneMockTest, LNN_HANDLE_LANE_FREE_UNUSED_LINK_003, TestSize.Level1)
+{
+    uint32_t laneReqId = 1;
+    EXPECT_NO_FATAL_FAILURE(FreeUnusedLink(laneReqId, nullptr));
+}
+
+/*
+* @tc.name: LNN_HANDLE_LANE_FREE_UNUSED_LINK_004
+* @tc.desc: free unused link with get networkid fail
+* @tc.type: FUNC
+* @tc.require:
+*/
+HWTEST_F(LNNTransLaneMockTest, LNN_HANDLE_LANE_FREE_UNUSED_LINK_004, TestSize.Level1)
+{
+    NiceMock<LaneDepsInterfaceMock> laneMock;
+    uint32_t laneReqId = 1;
+    LaneLinkInfo info = {
+        .type = LANE_P2P,
+    };
+    EXPECT_CALL(laneMock, LnnGetNetworkIdByUdid).WillRepeatedly(Return(SOFTBUS_INVALID_PARAM));
+    EXPECT_NO_FATAL_FAILURE(FreeUnusedLink(laneReqId, &info));
+}
+
+/*
+* @tc.name: LNN_HANDLE_LANE_FREE_UNUSED_LINK_005
+* @tc.desc: free unused link with get networkid succ
+* @tc.type: FUNC
+* @tc.require:
+*/
+HWTEST_F(LNNTransLaneMockTest, LNN_HANDLE_LANE_FREE_UNUSED_LINK_005, TestSize.Level1)
+{
+    NiceMock<LaneDepsInterfaceMock> laneMock;
+    NiceMock<LnnWifiAdpterInterfaceMock> lnnMock;
+    uint32_t laneReqId = 1;
+    LaneLinkInfo info = {
+        .type = LANE_HML,
+    };
+    EXPECT_CALL(laneMock, LnnGetNetworkIdByUdid).WillRepeatedly(Return(SOFTBUS_OK));
+    EXPECT_CALL(lnnMock, LnnDisconnectP2p).WillRepeatedly(Return(SOFTBUS_OK));
+    EXPECT_NO_FATAL_FAILURE(FreeUnusedLink(laneReqId, &info));
 }
 } // namespace OHOS

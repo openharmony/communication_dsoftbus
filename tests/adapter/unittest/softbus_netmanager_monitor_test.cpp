@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2024 Huawei Device Co., Ltd.
+ * Copyright (c) 2024-2025 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -54,10 +54,10 @@ void AdapterNetManagerMonitorTest::TearDown() { }
 HWTEST_F(AdapterNetManagerMonitorTest, ConfigNetLinkUpTest001, TestSize.Level1)
 {
     int32_t ret = ConfigNetLinkUp(nullptr);
-    EXPECT_TRUE(ret == SOFTBUS_INVALID_PARAM);
+    EXPECT_EQ(ret, SOFTBUS_INVALID_PARAM);
     char ifName[] = NCM_LINK_NAME;
     ret = ConfigNetLinkUp(ifName);
-    EXPECT_TRUE(ret == SOFTBUS_NETWORK_CONFIG_NETLINK_UP_FAIL);
+    EXPECT_EQ(ret, SOFTBUS_NETWORK_CONFIG_NETLINK_UP_FAIL);
 }
 
 /*
@@ -70,10 +70,10 @@ HWTEST_F(AdapterNetManagerMonitorTest, ConfigLocalIpTest001, TestSize.Level1)
 {
     char ifName[] = NCM_LINK_NAME;
     int32_t ret = ConfigLocalIp(ifName, nullptr);
-    EXPECT_TRUE(ret == SOFTBUS_INVALID_PARAM);
+    EXPECT_EQ(ret, SOFTBUS_INVALID_PARAM);
     char ip[] = LOCAL_IP_LINK;
     ret = ConfigLocalIp(ifName, ip);
-    EXPECT_TRUE(ret == SOFTBUS_NETWORK_CONFIG_NETLINK_IP_FAIL);
+    EXPECT_EQ(ret, SOFTBUS_NETWORK_CONFIG_NETLINK_IP_FAIL);
 }
 
 /*
@@ -89,14 +89,14 @@ HWTEST_F(AdapterNetManagerMonitorTest, ConfigRouteTest001, TestSize.Level1)
     char destination[] = DEFAULT_GATEWAY_POSTFIX;
     char gateway[] = "";
     int32_t ret = ConfigRoute(id, ifName, destination, nullptr);
-    EXPECT_TRUE(ret == SOFTBUS_INVALID_PARAM);
+    EXPECT_EQ(ret, SOFTBUS_INVALID_PARAM);
     ret = ConfigRoute(id, ifName, destination, gateway);
-    EXPECT_TRUE(ret == SOFTBUS_NETWORK_CONFIG_NETLINK_ROUTE_FAIL);
+    EXPECT_EQ(ret, SOFTBUS_NETWORK_CONFIG_NETLINK_ROUTE_FAIL);
 }
 
 /**
- * @tc.name:LnnNetmanagerMonitorTest_001
- * @tc.desc: Verify the SetSoftBusWifiConnState function return value equal SOFTBUS_WIFI_UNKNOWN.
+ * @tc.name: LnnInitNetManagerMonitorImpl_001
+ * @tc.desc: Verify the LnnInitNetManagerMonitorImpl function return value equal SOFTBUS_INVALID_PARAM.
  * @tc.type: FUNC
  * @tc.require: 1
  */
@@ -109,7 +109,7 @@ HWTEST_F(AdapterNetManagerMonitorTest, LnnInitNetManagerMonitorImpl_001, TestSiz
 }
 
 /**
- * @tc.name:LnnNetmanagerMonitorTest_001
+ * @tc.name: LnnInitNetlinkMonitorImpl_001
  * @tc.desc: Verify the LnnInitNetlinkMonitorImpl function return value equal SOFTBUS_LOCK_ERR.
  * @tc.type: FUNC
  * @tc.require: 1
@@ -123,7 +123,7 @@ HWTEST_F(AdapterNetManagerMonitorTest, LnnInitNetlinkMonitorImpl_001, TestSize.L
 }
 
 /**
- * @tc.name:LnnInitNetlinkMonitorImpl_002
+ * @tc.name: LnnInitNetlinkMonitorImpl_002
  * @tc.desc: Verify the LnnInitNetlinkMonitorImpl function return value SOFTBUS_NETWORK_CREATE_SOCKET_FAILED.
  * @tc.type: FUNC
  * @tc.require: 1
@@ -139,7 +139,7 @@ HWTEST_F(AdapterNetManagerMonitorTest, LnnInitNetlinkMonitorImpl_002, TestSize.L
 }
 
 /**
- * @tc.name:LnnInitNetlinkMonitorImpl_003
+ * @tc.name: LnnInitNetlinkMonitorImpl_003
  * @tc.desc: Verify the LnnInitNetlinkMonitorImpl function return value equal SOFTBUS_LOCK_ERR.
  * @tc.type: FUNC
  * @tc.require: 1
@@ -155,5 +155,24 @@ HWTEST_F(AdapterNetManagerMonitorTest, LnnInitNetlinkMonitorImpl_003, TestSize.L
     EXPECT_CALL(NetworkInterfaceMock, AddTrigger).WillRepeatedly(Return(SOFTBUS_LOCK_ERR));
     int32_t ret = LnnInitNetlinkMonitorImpl();
     EXPECT_EQ(ret, SOFTBUS_LOCK_ERR);
+}
+
+/**
+ * @tc.name: LnnInitNetlinkMonitorImpl_004
+ * @tc.desc: Verify the LnnInitNetlinkMonitorImpl function return value equal SOFTBUS_OK.
+ * @tc.type: FUNC
+ * @tc.require: 1
+ */
+HWTEST_F(AdapterNetManagerMonitorTest, LnnInitNetlinkMonitorImpl_004, TestSize.Level1)
+{
+    NiceMock<NetworkInterfaceMock> NetworkInterfaceMock;
+    EXPECT_CALL(NetworkInterfaceMock, StartBaseClient).WillRepeatedly(Return(SOFTBUS_OK));
+    ON_CALL(NetworkInterfaceMock, SoftBusSocketCreate).WillByDefault(Return(SOFTBUS_OK));
+    ON_CALL(NetworkInterfaceMock, SoftBusSocketSetOpt).WillByDefault(Return(SOFTBUS_OK));
+    ON_CALL(NetworkInterfaceMock, SoftBusSocketClose).WillByDefault(Return(SOFTBUS_OK));
+    ON_CALL(NetworkInterfaceMock, SoftBusSocketBind).WillByDefault(Return(SOFTBUS_OK));
+    EXPECT_CALL(NetworkInterfaceMock, AddTrigger).WillRepeatedly(Return(SOFTBUS_OK));
+    int32_t ret = LnnInitNetlinkMonitorImpl();
+    EXPECT_EQ(ret, SOFTBUS_OK);
 }
 } // namespace OHOS

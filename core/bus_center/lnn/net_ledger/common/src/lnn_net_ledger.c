@@ -164,17 +164,6 @@ static bool IsLocalBroadcastLinKeyChange(NodeInfo *info)
     return false;
 }
 
-static bool IsLocalSupportUserKeyChange(NodeInfo *info)
-{
-    bool supportUkNego = false;
-    if ((LnnGetLocalBoolInfo(BOOL_KEY_SUPPORT_UK_NEGO, &supportUkNego, NODE_SCREEN_STATUS_LEN) == SOFTBUS_OK) &&
-        (supportUkNego != info->isSupportUkNego)) {
-        LNN_LOGW(LNN_LEDGER, "isSupportUkNego=%{public}d->%{public}d", info->isSupportUkNego, supportUkNego);
-        return true;
-    }
-    return false;
-}
-
 static bool IsBleDirectlyOnlineFactorChange(NodeInfo *info)
 {
     if (IsCapacityChange(info)) {
@@ -217,9 +206,6 @@ static bool IsBleDirectlyOnlineFactorChange(NodeInfo *info)
         return true;
     }
     if (IsLocalBroadcastLinKeyChange(info)) {
-        return true;
-    }
-    if (IsLocalSupportUserKeyChange(info)) {
         return true;
     }
     return false;

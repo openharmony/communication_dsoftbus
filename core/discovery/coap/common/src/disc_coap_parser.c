@@ -81,7 +81,7 @@ int32_t DiscCoapParseKeyValueStr(const char *src, const char *key, char *outValu
         "src len >= max len. srcLen=%{public}zu, maxLen=%{public}u", strlen(src), DISC_MAX_CUST_DATA_LEN);
 
     char tmpSrc[DISC_MAX_CUST_DATA_LEN] = { 0 };
-    if (memcpy_s(tmpSrc, DISC_MAX_CUST_DATA_LEN, src, strlen(src)) != EOK) {
+    if (memcpy_s(tmpSrc, (DISC_MAX_CUST_DATA_LEN - 1), src, strlen(src)) != EOK) {
         DISC_LOGE(DISC_COAP, "copy src failed");
         return SOFTBUS_MEM_ERR;
     }

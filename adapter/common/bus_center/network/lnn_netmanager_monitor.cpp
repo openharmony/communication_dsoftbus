@@ -133,7 +133,7 @@ int32_t NetInterfaceStateMonitor::OnInterfaceAddressUpdated(
     Anonymize(addr.c_str(), &anonyAddr);
     LNN_LOGI(LNN_BUILDER, "ifName=%{public}s, addr=%{public}s", ifName.c_str(), AnonymizeWrapper(anonyAddr));
     AnonymizeFree(anonyAddr);
-    if ((flags & IFA_F_TENTATIVE) == 0 && addr.find("fe80") != std::string::npos) {
+    if (((uint32_t)flags & IFA_F_TENTATIVE) == 0 && addr.find("fe80") != std::string::npos) {
         LnnNotifyNetlinkStateChangeEvent(SOFTBUS_NETMANAGER_IFNAME_IPV6_UPDATED, ifName.c_str());
         return SOFTBUS_OK;
     }

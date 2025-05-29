@@ -55,7 +55,6 @@ int32_t AuthGetConnInfo(AuthHandle authHandle, AuthConnInfo *connInfo)
 {
     return GetTransTcpDirectListenerInterface()->AuthGetConnInfo(authHandle, connInfo);
 }
-
 }
 }
 

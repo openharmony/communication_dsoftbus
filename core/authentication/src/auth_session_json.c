@@ -163,7 +163,6 @@
 #define AUTH_START_STATE            "AUTH_START_STATE"
 #define SLE_RANGE_CAP               "SLE_RANGE_CAP"
 #define SLE_MAC                     "SLE_MAC"
-#define SUPPORT_USERKEY_NEGO        "SUPPORT_USERKEY_NEGO"
 
 #define HAS_CTRL_CHANNEL                 (0x1L)
 #define HAS_CHANNEL_AUTH                 (0x2L)
@@ -1772,10 +1771,6 @@ static int32_t PackCommon(JsonObj *json, const NodeInfo *info, SoftBusVersion ve
         AUTH_LOGE(AUTH_FSM, "add version info fail");
         return SOFTBUS_AUTH_PACK_DEVINFO_FAIL;
     }
-    if (!JSON_AddBoolToObject(json, SUPPORT_USERKEY_NEGO, true)) {
-        AUTH_LOGE(AUTH_FSM, "add uk nego info fail");
-        return SOFTBUS_AUTH_PACK_DEVINFO_FAIL;
-    }
     if (PackCommonDevInfo(json, info, isMetaAuth) != SOFTBUS_OK) {
         return SOFTBUS_AUTH_PACK_DEVINFO_FAIL;
     }
@@ -2589,7 +2584,6 @@ int32_t UnpackDeviceInfoMessage(
         JSON_Delete(json);
         return SOFTBUS_AUTH_UNPACK_DEVINFO_FAIL;
     }
-    OptBool(json, SUPPORT_USERKEY_NEGO, &nodeInfo->isSupportUkNego, false);
     UnpackUserIdCheckSum(json, nodeInfo);
     if (IsInvalidDeviceInfo(json, nodeInfo, info)) {
         JSON_Delete(json);

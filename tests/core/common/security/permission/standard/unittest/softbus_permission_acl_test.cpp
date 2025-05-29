@@ -310,8 +310,7 @@ HWTEST_F(SoftbusPermissionACLTest, TransCheckServerAccessControl004, TestSize.Le
     EXPECT_CALL(mockSPACL, SoftBusGetAccessTokenType)
         .WillOnce(Return(ACCESS_TOKEN_TYPE_NATIVE))
         .WillOnce(Return(ACCESS_TOKEN_TYPE_NATIVE));
-    EXPECT_CALL(mockSPACL, StrStartWith)
-        .WillRepeatedly(Return(true));
+    EXPECT_CALL(mockSPACL, StrStartWith).WillRepeatedly(Return(true));
     int32_t ret = TransCheckServerAccessControl(&info);
     EXPECT_EQ(SOFTBUS_OK, ret);
 }
@@ -332,11 +331,9 @@ HWTEST_F(SoftbusPermissionACLTest, TransCheckServerAccessControl005, TestSize.Le
     EXPECT_CALL(mockSPACL, SoftBusGetAccessTokenType)
         .WillOnce(Return(ACCESS_TOKEN_TYPE_HAP))
         .WillOnce(Return(ACCESS_TOKEN_TYPE_NATIVE));
-    EXPECT_CALL(mockSPACL, StrStartWith)
-        .WillOnce(Return(true))
-        .WillOnce(Return(true));
+    EXPECT_CALL(mockSPACL, StrStartWith).WillRepeatedly(Return(true));
     int32_t ret = TransCheckServerAccessControl(&info);
-    EXPECT_EQ(SOFTBUS_OK, ret);
+    EXPECT_EQ(SOFTBUS_TRANS_CROSS_LAYER_DENIED, ret);
 }
 
 /**
@@ -355,13 +352,9 @@ HWTEST_F(SoftbusPermissionACLTest, TransCheckServerAccessControl006, TestSize.Le
     EXPECT_CALL(mockSPACL, SoftBusGetAccessTokenType)
         .WillOnce(Return(ACCESS_TOKEN_TYPE_HAP))
         .WillOnce(Return(ACCESS_TOKEN_TYPE_NATIVE));
-    EXPECT_CALL(mockSPACL, StrStartWith)
-        .WillOnce(Return(false))
-        .WillOnce(Return(false));
-    EXPECT_CALL(mockSPACL, CheckDBinder)
-        .WillRepeatedly(Return(true));
+    EXPECT_CALL(mockSPACL, StrStartWith).WillRepeatedly(Return(false));
     int32_t ret = TransCheckServerAccessControl(&info);
-    EXPECT_EQ(SOFTBUS_OK, ret);
+    EXPECT_EQ(SOFTBUS_TRANS_CROSS_LAYER_DENIED, ret);
 }
 
 /**
@@ -380,11 +373,7 @@ HWTEST_F(SoftbusPermissionACLTest, TransCheckServerAccessControl007, TestSize.Le
     EXPECT_CALL(mockSPACL, SoftBusGetAccessTokenType)
         .WillOnce(Return(ACCESS_TOKEN_TYPE_NATIVE))
         .WillOnce(Return(ACCESS_TOKEN_TYPE_HAP));
-    EXPECT_CALL(mockSPACL, StrStartWith)
-        .WillOnce(Return(false))
-        .WillOnce(Return(false));
-    EXPECT_CALL(mockSPACL, CheckDBinder)
-        .WillRepeatedly(Return(false));
+    EXPECT_CALL(mockSPACL, StrStartWith).WillRepeatedly(Return(false));
     
     int32_t ret = TransCheckServerAccessControl(&info);
     EXPECT_EQ(SOFTBUS_TRANS_CROSS_LAYER_DENIED, ret);
@@ -406,11 +395,7 @@ HWTEST_F(SoftbusPermissionACLTest, TransCheckServerAccessControl008, TestSize.Le
     EXPECT_CALL(mockSPACL, SoftBusGetAccessTokenType)
         .WillOnce(Return(ACCESS_TOKEN_TYPE_HAP))
         .WillOnce(Return(ACCESS_TOKEN_TYPE_HAP));
-    EXPECT_CALL(mockSPACL, StrStartWith)
-        .WillOnce(Return(false))
-        .WillOnce(Return(false));
-    EXPECT_CALL(mockSPACL, CheckDBinder)
-        .WillRepeatedly(Return(false));
+    EXPECT_CALL(mockSPACL, StrStartWith).WillRepeatedly(Return(false));
     EXPECT_CALL(mockSPACL, TransProxyGetUidAndPidBySessionName)
         .WillRepeatedly(Return(SOFTBUS_INVALID_PARAM));
 
@@ -435,11 +420,7 @@ HWTEST_F(SoftbusPermissionACLTest, TransCheckServerAccessControl009, TestSize.Le
     EXPECT_CALL(mockSPACL, SoftBusGetAccessTokenType)
         .WillOnce(Return(ACCESS_TOKEN_TYPE_HAP))
         .WillOnce(Return(ACCESS_TOKEN_TYPE_HAP));
-    EXPECT_CALL(mockSPACL, StrStartWith)
-        .WillOnce(Return(false))
-        .WillOnce(Return(false));
-    EXPECT_CALL(mockSPACL, CheckDBinder)
-        .WillRepeatedly(Return(false));
+    EXPECT_CALL(mockSPACL, StrStartWith).WillRepeatedly(Return(false));
 
     EXPECT_CALL(mockSPACL, TransProxyGetUidAndPidBySessionName)
         .WillRepeatedly(Return(SOFTBUS_OK));
@@ -469,11 +450,7 @@ HWTEST_F(SoftbusPermissionACLTest, TransCheckServerAccessControl010, TestSize.Le
     EXPECT_CALL(mockSPACL, SoftBusGetAccessTokenType)
         .WillOnce(Return(ACCESS_TOKEN_TYPE_HAP))
         .WillOnce(Return(ACCESS_TOKEN_TYPE_HAP));
-    EXPECT_CALL(mockSPACL, StrStartWith)
-        .WillOnce(Return(false))
-        .WillOnce(Return(false));
-    EXPECT_CALL(mockSPACL, CheckDBinder)
-        .WillRepeatedly(Return(false));
+    EXPECT_CALL(mockSPACL, StrStartWith).WillRepeatedly(Return(false));
 
     EXPECT_CALL(mockSPACL, TransProxyGetUidAndPidBySessionName)
         .WillRepeatedly(Return(SOFTBUS_OK));
@@ -504,11 +481,7 @@ HWTEST_F(SoftbusPermissionACLTest, TransCheckServerAccessControl011, TestSize.Le
     EXPECT_CALL(mockSPACL, SoftBusGetAccessTokenType)
         .WillOnce(Return(ACCESS_TOKEN_TYPE_HAP))
         .WillOnce(Return(ACCESS_TOKEN_TYPE_HAP));
-    EXPECT_CALL(mockSPACL, StrStartWith)
-        .WillOnce(Return(false))
-        .WillOnce(Return(false));
-    EXPECT_CALL(mockSPACL, CheckDBinder)
-        .WillRepeatedly(Return(false));
+    EXPECT_CALL(mockSPACL, StrStartWith).WillRepeatedly(Return(false));
     
     EXPECT_CALL(mockSPACL, TransProxyGetUidAndPidBySessionName)
         .WillRepeatedly(Return(SOFTBUS_OK));
@@ -540,11 +513,7 @@ HWTEST_F(SoftbusPermissionACLTest, TransCheckServerAccessControl012, TestSize.Le
     EXPECT_CALL(mockSPACL, SoftBusGetAccessTokenType)
         .WillOnce(Return(ACCESS_TOKEN_TYPE_HAP))
         .WillOnce(Return(ACCESS_TOKEN_TYPE_HAP));
-    EXPECT_CALL(mockSPACL, StrStartWith)
-        .WillOnce(Return(false))
-        .WillOnce(Return(false));
-    EXPECT_CALL(mockSPACL, CheckDBinder)
-        .WillRepeatedly(Return(false));
+    EXPECT_CALL(mockSPACL, StrStartWith).WillRepeatedly(Return(false));
     
     EXPECT_CALL(mockSPACL, TransProxyGetUidAndPidBySessionName)
         .WillRepeatedly(Return(SOFTBUS_OK));
@@ -579,11 +548,7 @@ HWTEST_F(SoftbusPermissionACLTest, TransCheckServerAccessControl013, TestSize.Le
     EXPECT_CALL(mockSPACL, SoftBusGetAccessTokenType)
         .WillOnce(Return(ACCESS_TOKEN_TYPE_HAP))
         .WillOnce(Return(ACCESS_TOKEN_TYPE_HAP));
-    EXPECT_CALL(mockSPACL, StrStartWith)
-        .WillOnce(Return(false))
-        .WillOnce(Return(false));
-    EXPECT_CALL(mockSPACL, CheckDBinder)
-        .WillRepeatedly(Return(false));
+    EXPECT_CALL(mockSPACL, StrStartWith).WillRepeatedly(Return(false));
     
     EXPECT_CALL(mockSPACL, TransProxyGetUidAndPidBySessionName)
         .WillRepeatedly(Return(SOFTBUS_OK));
@@ -620,11 +585,7 @@ HWTEST_F(SoftbusPermissionACLTest, TransCheckServerAccessControl014, TestSize.Le
     EXPECT_CALL(mockSPACL, SoftBusGetAccessTokenType)
         .WillOnce(Return(ACCESS_TOKEN_TYPE_HAP))
         .WillOnce(Return(ACCESS_TOKEN_TYPE_HAP));
-    EXPECT_CALL(mockSPACL, StrStartWith)
-        .WillOnce(Return(false))
-        .WillOnce(Return(false));
-    EXPECT_CALL(mockSPACL, CheckDBinder)
-        .WillRepeatedly(Return(false));
+    EXPECT_CALL(mockSPACL, StrStartWith).WillRepeatedly(Return(false));
         
     EXPECT_CALL(mockSPACL, TransProxyGetUidAndPidBySessionName)
         .WillRepeatedly(Return(SOFTBUS_OK));
