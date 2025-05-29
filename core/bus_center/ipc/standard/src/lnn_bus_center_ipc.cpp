@@ -746,8 +746,7 @@ void BusCenterServerDeathCallback(const char *pkgName)
     RemoveLeaveRequestInfoByPkgName(pkgName);
     RemoveRefreshRequestInfoByPkgName(pkgName);
     const char *msdpPkgName = "ohos.msdp.spatialawareness";
-    if (strcmp(msdpPkgName, pkgName) != 0) {
-        return;
+    if (strcmp(msdpPkgName, pkgName) == 0) {
+        SleRangeDeathCallbackPacked();
     }
-    SleRangeDeathCallbackPacked();
 }
