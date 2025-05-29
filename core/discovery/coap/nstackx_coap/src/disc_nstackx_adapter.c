@@ -24,9 +24,10 @@
 #include "nstackx.h"
 #include "anonymizer.h"
 #include "bus_center_manager.h"
-#include "disc_coap_capability.h"
+#include "disc_coap_capability_public.h"
 #include "disc_coap_parser.h"
 #include "disc_log.h"
+#include "g_enhance_disc_func_pack.h"
 #include "lnn_ohos_account.h"
 #include "locale_config_wrapper.h"
 #include "securec.h"
@@ -219,15 +220,9 @@ static int32_t ParseDiscDevInfo(const NSTACKX_DeviceInfo *nstackxDevInfo, Device
 
     // coap not support range now, just assign -1 as unknown
     discDevInfo->range = -1;
-    if (strlen(nickName) != 0) {
-        ret = SpliceCoapDisplayName(devName, nickName, discDevInfo);
-        DISC_CHECK_AND_RETURN_RET_LOGE(ret == SOFTBUS_OK, ret, DISC_COAP,
-            "parse display name failed, ret=%{public}d", ret);
-    } else {
-        ret = memcpy_s(discDevInfo->devName, DISC_MAX_DEVICE_NAME_LEN, devName, strlen(devName));
-        DISC_CHECK_AND_RETURN_RET_LOGE(
-            ret == SOFTBUS_OK, SOFTBUS_MEM_ERR, DISC_COAP, "devName copy failed, ret=%{public}d", ret);
-    }
+    ret = SpliceCoapDisplayName(devName, nickName, discDevInfo);
+    DISC_CHECK_AND_RETURN_RET_LOGE(ret == SOFTBUS_OK, ret, DISC_COAP,
+        "parse display name failed, ret=%{public}d", ret);
 
     return SOFTBUS_OK;
 }
@@ -250,7 +245,7 @@ static void OnDeviceFound(const NSTACKX_DeviceInfo *deviceList, uint32_t deviceC
 
         if ((nstackxDeviceInfo->update & 0x1) == 0) {
             char *anonymizedName = NULL;
-            AnonymizeDeviceName(nstackxDeviceInfo->deviceName, &anonymizedName);
+            Anonymize(nstackxDeviceInfo->deviceName, &anonymizedName);
             DISC_LOGI(DISC_COAP, "duplicate device do not need report. deviceName=%{public}s",
                 AnonymizeWrapper(anonymizedName));
             AnonymizeFree(anonymizedName);
@@ -262,7 +257,7 @@ static void OnDeviceFound(const NSTACKX_DeviceInfo *deviceList, uint32_t deviceC
             DISC_LOGW(DISC_COAP, "parse discovery device info failed.");
             continue;
         }
-        ret = DiscCoapProcessDeviceInfo(nstackxDeviceInfo, discDeviceInfo, g_discCoapInnerCb,
+        ret = DiscCoapProcessDeviceInfoPacked(nstackxDeviceInfo, discDeviceInfo, g_discCoapInnerCb,
             &g_discCoapInnerCbLock);
         if (ret != SOFTBUS_OK) {
             DISC_LOGD(DISC_COAP, "DiscRecv: process device info failed, ret=%{public}d", ret);
@@ -274,7 +269,7 @@ static void OnDeviceFound(const NSTACKX_DeviceInfo *deviceList, uint32_t deviceC
 
 static void OnNotificationReceived(const NSTACKX_NotificationConfig *notification)
 {
-    DiscCoapReportNotification(notification);
+    DiscCoapReportNotificationPacked(notification);
 }
 
 static NSTACKX_Parameter g_nstackxCallBack = {
@@ -381,7 +376,7 @@ int32_t DiscCoapRegisterServiceData(const PublishOption *option, uint32_t allCap
 #ifdef DSOFTBUS_FEATURE_DISC_COAP
     DISC_CHECK_AND_RETURN_RET_LOGE(SoftBusMutexLock(&g_localDeviceInfoLock) == SOFTBUS_OK, SOFTBUS_LOCK_ERR,
         DISC_COAP, "lock failed");
-    int32_t ret = DiscCoapFillServiceData(option, g_serviceData, NSTACKX_MAX_SERVICE_DATA_LEN, allCap);
+    int32_t ret = DiscCoapFillServiceDataPacked(option, g_serviceData, NSTACKX_MAX_SERVICE_DATA_LEN, allCap);
     if (ret != SOFTBUS_OK) {
         (void)SoftBusMutexUnlock(&g_localDeviceInfoLock);
         DISC_LOGE(DISC_COAP, "fill castJson failed. ret=%{public}d", ret);
@@ -404,7 +399,7 @@ int32_t DiscCoapRegisterCapabilityData(const unsigned char *capabilityData, uint
     }
     char *registerCapaData = (char *)SoftBusCalloc(MAX_CAPABILITYDATA_LEN);
     DISC_CHECK_AND_RETURN_RET_LOGE(registerCapaData, SOFTBUS_MALLOC_ERR, DISC_COAP, "malloc capability data failed");
-    int32_t ret = DiscCoapAssembleCapData(capability, (const char *)capabilityData, dataLen, registerCapaData,
+    int32_t ret = DiscCoapAssembleCapDataPacked(capability, (const char *)capabilityData, dataLen, registerCapaData,
         DISC_MAX_CUST_DATA_LEN);
     if (ret == SOFTBUS_FUNC_NOT_SUPPORT) {
         DISC_LOGI(DISC_COAP, "the capability not support yet. capability=%{public}u", capability);
@@ -452,7 +447,7 @@ static int32_t ConvertDiscoverySettings(NSTACKX_DiscoverySettings *discSet, cons
     DISC_CHECK_AND_RETURN_RET_LOGE(ret == SOFTBUS_OK, ret, DISC_COAP, "get disc freq failed");
     discSet->advertiseCount = discFreq & DISC_FREQ_COUNT_MASK;
     discSet->advertiseDuration = (discFreq >> DISC_FREQ_DURATION_BIT) * DISC_USECOND;
-    ret = DiscFillBtype(option->capability, option->allCap, discSet);
+    ret = DiscFillBtypePacked(option->capability, option->allCap, discSet);
     DISC_CHECK_AND_RETURN_RET_LOGE(ret == SOFTBUS_OK, ret, DISC_COAP, "unsupport capability");
     return SOFTBUS_OK;
 }
