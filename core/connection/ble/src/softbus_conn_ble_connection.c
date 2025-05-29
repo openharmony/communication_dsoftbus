@@ -142,6 +142,7 @@ ConnBleConnection *ConnBleCreateConnection(
     connection->retrySearchServiceCnt = 0;
     connection->underlayerFastConnectFailedScanFailure = false;
     connection->isOccupied = false;
+    connection->isNeedSetIdleTimeout = true;
     SoftBusList *list = CreateSoftBusList();
     if (list == NULL) {
         CONN_LOGE(CONN_BLE, "create softbus list failed");
@@ -523,7 +524,7 @@ void ConnBleRefreshIdleTimeout(ConnBleConnection *connection)
 {
     ConnRemoveMsgFromLooper(
         &g_bleConnectionAsyncHandler, MSG_CONNECTION_IDLE_DISCONNECT_TIMEOUT, connection->connectionId, 0, NULL);
-    CONN_CHECK_AND_RETURN_LOGD(connection->isNeedDisconnect, CONN_BLE,
+    CONN_CHECK_AND_RETURN_LOGD(connection->isNeedSetIdleTimeout, CONN_BLE,
         "no need refresh idle timeout, connId=%{public}u", connection->connectionId);
     ConnPostMsgToLooper(&g_bleConnectionAsyncHandler, MSG_CONNECTION_IDLE_DISCONNECT_TIMEOUT, connection->connectionId,
         0, NULL, CONNECTION_IDLE_DISCONNECT_TIMEOUT_MILLIS);
@@ -537,7 +538,7 @@ void ConnBleCancelIdleTimeout(ConnBleConnection *connection)
     int32_t status = SoftBusMutexLock(&connection->lock);
     CONN_CHECK_AND_RETURN_LOGW(status == SOFTBUS_OK, CONN_BLE,
         "lock faild, connId=%{public}u, err=%{public}d", connection->connectionId, status);
-    connection->isNeedDisconnect = false;
+    connection->isNeedSetIdleTimeout = false;
     CONN_LOGI(CONN_BLE, "cancel idle timout, connId=%{public}u", connection->connectionId);
     (void)SoftBusMutexUnlock(&connection->lock);
 }
