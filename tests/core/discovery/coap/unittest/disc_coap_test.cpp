@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2022-2025 Huawei Device Co., Ltd.
+ * Copyright (c) 2022-2024 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -20,7 +20,7 @@
 #include "disc_coap.h"
 #include "disc_manager.h"
 #include "disc_nstackx_adapter.h"
-#include "nstackx_adapter_mock.h"
+#include "disc_coap_mock.h"
 #include "softbus_adapter_mem.h"
 #include "softbus_error_code.h"
 
@@ -73,8 +73,8 @@ static SubscribeOption g_testSubOption = { .freq = LOW,
  */
 HWTEST_F(DiscCoapTest, CoapPublish001, TestSize.Level1)
 {
-    AdapterMock adapterMock;
-    adapterMock.SetupSuccessStub();
+    DiscCoapMock discCoapMock;
+    discCoapMock.SetupSuccessStub();
 
     g_discCoapFuncInterface = DiscCoapInit(&g_discInnerCb);
     ASSERT_NE(g_discCoapFuncInterface, nullptr);
@@ -133,8 +133,8 @@ HWTEST_F(DiscCoapTest, CoapPublish002, TestSize.Level1)
  */
 HWTEST_F(DiscCoapTest, CoapPublish003, TestSize.Level1)
 {
-    AdapterMock adapterMock;
-    adapterMock.SetupSuccessStub();
+    DiscCoapMock discCoapMock;
+    discCoapMock.SetupSuccessStub();
 
     g_discCoapFuncInterface = DiscCoapInit(&g_discInnerCb);
     ASSERT_NE(g_discCoapFuncInterface, nullptr);
@@ -171,8 +171,8 @@ HWTEST_F(DiscCoapTest, CoapPublish003, TestSize.Level1)
  */
 HWTEST_F(DiscCoapTest, CoapPublish004, TestSize.Level1)
 {
-    AdapterMock adapterMock;
-    adapterMock.SetupSuccessStub();
+    DiscCoapMock discCoapMock;
+    discCoapMock.SetupSuccessStub();
 
     g_discCoapFuncInterface = DiscCoapInit(&g_discInnerCb);
     ASSERT_NE(g_discCoapFuncInterface, nullptr);
@@ -303,8 +303,8 @@ HWTEST_F(DiscCoapTest, CoapStartScan003, TestSize.Level1)
  */
 HWTEST_F(DiscCoapTest, CoapStartAdvertise001, TestSize.Level1)
 {
-    AdapterMock adapterMock;
-    adapterMock.SetupSuccessStub();
+    DiscCoapMock discCoapMock;
+    discCoapMock.SetupSuccessStub();
 
     g_discCoapFuncInterface = DiscCoapInit(&g_discInnerCb);
     ASSERT_NE(g_discCoapFuncInterface, nullptr);
@@ -357,8 +357,8 @@ HWTEST_F(DiscCoapTest, CoapStartAdvertise002, TestSize.Level1)
  */
 HWTEST_F(DiscCoapTest, CoapStartAdvertise003, TestSize.Level1)
 {
-    AdapterMock adapterMock;
-    adapterMock.SetupSuccessStub();
+    DiscCoapMock discCoapMock;
+    discCoapMock.SetupSuccessStub();
 
     g_discCoapFuncInterface = DiscCoapInit(&g_discInnerCb);
     ASSERT_NE(g_discCoapFuncInterface, nullptr);
@@ -396,8 +396,8 @@ HWTEST_F(DiscCoapTest, CoapStartAdvertise003, TestSize.Level1)
  */
 HWTEST_F(DiscCoapTest, CoapStartAdvertise004, TestSize.Level1)
 {
-    AdapterMock adapterMock;
-    adapterMock.SetupSuccessStub();
+    DiscCoapMock discCoapMock;
+    discCoapMock.SetupSuccessStub();
 
     g_discCoapFuncInterface = DiscCoapInit(&g_discInnerCb);
     ASSERT_NE(g_discCoapFuncInterface, nullptr);
@@ -520,8 +520,8 @@ HWTEST_F(DiscCoapTest, CoapSubscribe003, TestSize.Level1)
  */
 HWTEST_F(DiscCoapTest, testCoapLinkStatusChanged001, TestSize.Level1)
 {
-    AdapterMock adapterMock;
-    adapterMock.SetupSuccessStub();
+    DiscCoapMock discCoapMock;
+    discCoapMock.SetupSuccessStub();
 
     g_discCoapFuncInterface = DiscCoapInit(&g_discInnerCb);
     ASSERT_NE(g_discCoapFuncInterface, nullptr);
@@ -556,8 +556,8 @@ HWTEST_F(DiscCoapTest, testCoapLinkStatusChanged001, TestSize.Level1)
  */
 HWTEST_F(DiscCoapTest, testCoapUpdateLocalDevInfo001, TestSize.Level1)
 {
-    AdapterMock adapterMock;
-    adapterMock.SetupSuccessStub();
+    DiscCoapMock discCoapMock;
+    discCoapMock.SetupSuccessStub();
 
     g_discCoapFuncInterface = DiscCoapInit(&g_discInnerCb);
     ASSERT_NE(g_discCoapFuncInterface, nullptr);
