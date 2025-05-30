@@ -34,31 +34,18 @@
 #include "lnn_devicename_info.h"
 #include "softbus_utils.h"
 
-#define SKIP_VALID_PID_VALUE (-1)
-#define DEVICE_TYPE_SIZE_MAX 3
-#define DUMP_STR_LEN 256
-#define DISC_INFO_LIST_SIZE_MAX 1024
-#define DISPLAY_NAME_BUF_LEN 128
-#define DISPLAY_NAME_LEN_24 24
-#define DISPLAY_NAME_LEN_21 21
-#define DISPLAY_NAME_LEN_18 18
-#define JSON_KEY_RAW_NAME        "raw"
-#define JSON_KEY_NAME_LEN_24     "name24"
-#define JSON_KEY_NAME_LEN_21     "name21"
-#define JSON_KEY_NAME_LEN_18     "name18"
-
-static bool g_isInited = false;
-
-static SoftBusList *g_publishInfoList = NULL;
-static SoftBusList *g_discoveryInfoList = NULL;
-
-static DiscoveryFuncInterface *g_discCoapInterface = NULL;
-static DiscoveryFuncInterface *g_discBleInterface = NULL;
-static DiscoveryFuncInterface *g_discUsbInterface = NULL;
-
-static DiscInnerCallback g_discMgrMediumCb;
-
-static ListNode g_capabilityList[CAPABILITY_MAX_BITNUM];
+#define SKIP_VALID_PID_VALUE             (-1)
+#define DEVICE_TYPE_SIZE_MAX             3
+#define DUMP_STR_LEN                     256
+#define DISC_INFO_LIST_SIZE_MAX          1024
+#define DISPLAY_NAME_BUF_LEN             128
+#define DISPLAY_NAME_LEN_24              24
+#define DISPLAY_NAME_LEN_21              21
+#define DISPLAY_NAME_LEN_18              18
+#define JSON_KEY_RAW_NAME                "raw"
+#define JSON_KEY_NAME_LEN_24             "name24"
+#define JSON_KEY_NAME_LEN_21             "name21"
+#define JSON_KEY_NAME_LEN_18             "name18"
 
 typedef struct {
     char raw[DISPLAY_NAME_BUF_LEN];
@@ -66,13 +53,6 @@ typedef struct {
     char name21[DISPLAY_NAME_LEN_21 + 1];
     char name24[DISPLAY_NAME_LEN_24 + 1];
 } DisplayNameList;
-
-static DisplayNameList g_displayName = { 0 };
-
-static const char *g_discModuleMap[] = {
-    "MODULE_LNN",
-    "MODULE_CONN",
-};
 
 typedef enum {
     MIN_SERVICE = 0,
@@ -127,6 +107,25 @@ typedef struct {
         BuildDiscCallEvent(&extra, infoNode, packageName, interfaceType);  \
         DISC_EVENT(EVENT_SCENE_DISC, EVENT_STAGE_CALL_INTERFACE, extra);   \
     } while (0)
+
+static bool g_isInited = false;
+static SoftBusList *g_publishInfoList = NULL;
+static SoftBusList *g_discoveryInfoList = NULL;
+
+static DiscoveryFuncInterface *g_discCoapInterface = NULL;
+static DiscoveryFuncInterface *g_discBleInterface = NULL;
+static DiscoveryFuncInterface *g_discUsbInterface = NULL;
+
+static DiscInnerCallback g_discMgrMediumCb;
+
+static ListNode g_capabilityList[CAPABILITY_MAX_BITNUM];
+
+static DisplayNameList g_displayName = { 0 };
+
+static const char *g_discModuleMap[] = {
+    "MODULE_LNN",
+    "MODULE_CONN",
+};
 
 static void UpdateDiscEventAndReport(DiscEventExtra *extra, const DeviceInfo *device)
 {

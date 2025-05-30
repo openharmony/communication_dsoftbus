@@ -42,20 +42,20 @@
 #include "softbus_json_utils.h"
 #include "softbus_utils.h"
 
-#define WLAN_IFACE_NAME_PREFIX "wlan"
-#define NCM_LINK_NAME_PREFIX   "ncm0"
-#define NCM_HOST_NAME_PREFIX   "wwan0"
-#define DISC_FREQ_COUNT_MASK   0xFFFF
-#define DISC_FREQ_DURATION_BIT 16
-#define DISC_USECOND           1000
-#define DEFAULT_MAX_DEVICE_NUM 20
-#define IPV4_MAX_LEN           16
+#define WLAN_IFACE_NAME_PREFIX            "wlan"
+#define NCM_LINK_NAME_PREFIX              "ncm0"
+#define NCM_HOST_NAME_PREFIX              "wwan0"
+#define DISC_FREQ_COUNT_MASK              0xFFFF
+#define DISC_FREQ_DURATION_BIT            16
+#define DISC_USECOND                      1000
+#define DEFAULT_MAX_DEVICE_NUM            20
+#define IPV4_MAX_LEN                      16
 
-#define NSTACKX_LOCAL_DEV_INFO "NstackxLocalDevInfo"
-#define HYPHEN_ZH              "的"
-#define HYPHEN_EXCEPT_ZH       "-"
-#define EMPTY_STRING           ""
-#define DEFAULT_LINK_IFNAME    "lo"
+#define NSTACKX_LOCAL_DEV_INFO            "NstackxLocalDevInfo"
+#define HYPHEN_ZH                         "的"
+#define HYPHEN_EXCEPT_ZH                  "-"
+#define EMPTY_STRING                      ""
+#define DEFAULT_LINK_IFNAME               "lo"
 
 static NSTACKX_LocalDeviceInfoV2 *g_localDeviceInfo = NULL;
 static DiscInnerCallback *g_discCoapInnerCb = NULL;
