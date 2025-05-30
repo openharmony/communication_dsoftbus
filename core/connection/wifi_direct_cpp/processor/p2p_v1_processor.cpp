@@ -1296,9 +1296,9 @@ int P2pV1Processor::ProcessGetInterfaceInfoRequest(std::shared_ptr<NegotiateComm
 
 int P2pV1Processor::ProcessAuthHandShakeRequest(std::shared_ptr<NegotiateCommand> &command)
 {
-
     std::shared_ptr<AuthNegotiateChannel> channel = nullptr;
-    if (command->GetNegotiateChannel()->GetType() == NegotiateChannelType::AUTH_CHANNEL) {
+    if (command->GetNegotiateChannel() != nullptr && command->GetNegotiateChannel()->GetType() ==
+        NegotiateChannelType::AUTH_CHANNEL) {
         channel = std::static_pointer_cast<AuthNegotiateChannel>(command->GetNegotiateChannel());
         channel->SetClose();
     }
@@ -1901,7 +1901,7 @@ int P2pV1Processor::OpenAuthConnection(const NegotiateMessage &msg, const std::s
         ret == SOFTBUS_OK, ret, CONN_WIFI_DIRECT, "get listen module failed, error=%{public}d", ret);
 
     std::shared_ptr<AuthNegotiateChannel> authChannel = nullptr;
-    if (channel->GetType() != NegotiateChannelType::AUTH_CHANNEL) {
+    if (channel != nullptr && channel->GetType() != NegotiateChannelType::AUTH_CHANNEL) {
         authChannel = std::static_pointer_cast<AuthNegotiateChannel>(channel);
     }
 
