@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2022-2023 Huawei Device Co., Ltd.
+ * Copyright (c) 2022-2025 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -297,5 +297,102 @@ HWTEST_F(AuthTcpConnectionTest, AUTH_OPEN_CHANNEL_WITH_ALL_IP_TEST_001, TestSize
     EXPECT_TRUE(ret == SOFTBUS_INVALID_PARAM);
     ret = AuthOpenChannelWithAllIp(localIp, remoteIp, 0);
     EXPECT_TRUE(ret == SOFTBUS_INVALID_PARAM);
+}
+
+/*
+ * @tc.name: SESSION_NOTIFY_DATA_RECEIVED_TEST_001
+ * @tc.desc: SessionNotifyDataReceived test
+ * @tc.type: FUNC
+ * @tc.require:
+ */
+HWTEST_F(AuthTcpConnectionTest, SESSION_NOTIFY_DATA_RECEIVED_TEST_001, TestSize.Level1)
+{
+    const uint8_t data[AUTH_PKT_HEAD_LEN] = { 0 };
+    uint32_t len = AUTH_PKT_HEAD_LEN;
+    int32_t fd = 1;
+
+    SessionNotifyDataReceived(AUTH, fd, len, data);
+    SessionKeyNotifyDataReceived(AUTH, fd, len, data);
+
+    int32_t module = MODULE_AUTH_CANCEL;
+    uint32_t ret = ModuleToDataType(module);
+    EXPECT_TRUE(ret == DATA_TYPE_CANCEL_AUTH);
+}
+
+/*
+ * @tc.name: AUTH_TCP_CREATE_LISTENER_TEST_001
+ * @tc.desc: AuthTcpCreateListener test
+ * @tc.type: FUNC
+ * @tc.require:
+ */
+HWTEST_F(AuthTcpConnectionTest, AUTH_TCP_CREATE_LISTENER_TEST_001, TestSize.Level1)
+{
+    ListenerModule module = PROXY;
+    int32_t fd = 1;
+    TriggerType trigger = READ_TRIGGER;
+
+    int32_t ret = AuthTcpCreateListener(module, fd, trigger);
+    EXPECT_TRUE(ret == SOFTBUS_NOT_FIND);
+}
+
+/*
+ * @tc.name: GET_CONNECT_OPTION_BY_IFNAME_TEST_001
+ * @tc.desc: GetConnectOptionByIfname test
+ * @tc.type: FUNC
+ * @tc.require:
+ */
+HWTEST_F(AuthTcpConnectionTest, GET_CONNECT_OPTION_BY_IFNAME_TEST_001, TestSize.Level1)
+{
+    int32_t ifnameIdx = 0;
+    int32_t port = 1;
+
+    ConnectOption option = GetConnectOptionByIfname(ifnameIdx, port);
+    EXPECT_TRUE(option.socketOption.moduleId == AUTH);
+    ifnameIdx = 1;
+    option = GetConnectOptionByIfname(ifnameIdx, port);
+    EXPECT_TRUE(option.socketOption.moduleId == AUTH_USB);
+}
+
+/*
+ * @tc.name: SET_SESSION_KEY_LISTENER_MODULE_TEST_001
+ * @tc.desc: SetSessionKeyListenerModule test
+ * @tc.type: FUNC
+ * @tc.require:
+ */
+HWTEST_F(AuthTcpConnectionTest, SET_SESSION_KEY_LISTENER_MODULE_TEST_001, TestSize.Level1)
+{
+    int32_t fd = -1;
+    AuthConnInfo connInfo;
+    bool isServer = true;
+    int32_t ifnameIdx = 1;
+
+    SetSessionKeyListenerModule(fd);
+    StopSessionKeyListening(fd);
+    fd = 1;
+    SetSessionKeyListenerModule(fd);
+    StopSessionKeyListening(fd);
+    (void)memset_s(&connInfo, sizeof(AuthConnInfo), 0, sizeof(AuthConnInfo));
+    int32_t ret = SocketGetConnInfo(fd, &connInfo, &isServer, ifnameIdx);
+    EXPECT_TRUE(ret == SOFTBUS_AUTH_GET_PEER_SOCKET_ADDR_FAIL);
+}
+
+/*
+ * @tc.name: ADD_AUTH_TCP_CONN_FD_ITEM_TEST_001
+ * @tc.desc: AddAuthTcpConnFdItem test
+ * @tc.type: FUNC
+ * @tc.require:
+ */
+HWTEST_F(AuthTcpConnectionTest, ADD_AUTH_TCP_CONN_FD_ITEM_TEST_001, TestSize.Level1)
+{
+    int32_t fd = 1;
+
+    int32_t ret = AddAuthTcpConnFdItem(fd);
+    EXPECT_TRUE(ret == SOFTBUS_LOCK_ERR);
+    ret = AuthTcpConnFdLockInit();
+    EXPECT_TRUE(ret == SOFTBUS_OK);
+    ret = AddAuthTcpConnFdItem(fd);
+    EXPECT_TRUE(ret == SOFTBUS_OK);
+    DeleteAuthTcpConnFdItemByConnId(fd);
+    AuthTcpConnFdLockDeinit();
 }
 } // namespace OHOS
