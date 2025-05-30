@@ -75,6 +75,7 @@ void LaneDepsInterfaceMock::SetDefaultResultForAlloc(int32_t localNetCap, int32_
         .WillRepeatedly(DoAll(SetArgPointee<LANE_MOCK_PARAM3>(remoteFeatureCap), Return(SOFTBUS_OK)));
     EXPECT_CALL(*this, LnnGetRemoteStrInfo).WillRepeatedly(ActionOfGetRemoteStrInfo);
     EXPECT_CALL(*this, SoftBusGenerateStrHash).WillRepeatedly(ActionOfGenerateStrHash);
+    EXPECT_CALL(*this, LnnGetOsTypeByNetworkId).WillRepeatedly(Return(SOFTBUS_NOT_FIND));
 }
 
 int32_t LaneDepsInterfaceMock::ActionOfGenerateStrHash(const unsigned char *str, uint32_t len, unsigned char *hash)
