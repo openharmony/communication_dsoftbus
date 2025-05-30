@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2022-2025 Huawei Device Co., Ltd.
+ * Copyright (c) 2025 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -22,7 +22,7 @@
 #include "disc_manager.h"
 #include "disc_nstackx_adapter.h"
 #include "lnn_local_net_ledger.h"
-#include "nstackx_adapter_mock.h"
+#include "disc_nstackx_adapter_mock.h"
 #include "softbus_adapter_mem.h"
 #include "softbus_error_code.h"
 
@@ -301,7 +301,10 @@ HWTEST_F(DiscNstackxAdapterTest, DiscCoapModifyNstackThread001, TestSize.Level1)
  */
 HWTEST_F(DiscNstackxAdapterTest, DiscCoapSendRsp001, TestSize.Level1)
 {
-    LnnInitLocalLedger();
+    AdapterMock adapterMock;
+    EXPECT_CALL(adapterMock, LnnGetLocalStrInfoByIfnameIdx).
+        WillRepeatedly(AdapterMock::ActionOfLnnGetLocalStrInfoByIfnameIdx);
+
     int32_t ret = DiscNstackxInit();
     ASSERT_EQ(ret, SOFTBUS_OK);
 
@@ -313,7 +316,6 @@ HWTEST_F(DiscNstackxAdapterTest, DiscCoapSendRsp001, TestSize.Level1)
     EXPECT_EQ(ret, SOFTBUS_INVALID_PARAM);
 
     DiscCoapRecordLinkStatus(LINK_STATUS_UP, WLAN_IF);
-    DiscCoapModifyNstackThread(LINK_STATUS_UP, WLAN_IF);
     strcpy_s(devInfo.addr[0].info.ip.ip, IP_STR_MAX_LEN, "test");
     ret = DiscCoapSendRsp(&devInfo, 0);
     EXPECT_EQ(ret, SOFTBUS_OK);
@@ -332,7 +334,6 @@ HWTEST_F(DiscNstackxAdapterTest, DiscCoapSendRsp001, TestSize.Level1)
     EXPECT_EQ(ret, SOFTBUS_INVALID_PARAM);
 
     DiscNstackxDeinit();
-    LnnDeinitLocalLedger();
 }
 
 /*
