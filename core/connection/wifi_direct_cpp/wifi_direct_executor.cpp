@@ -121,7 +121,7 @@ void WifiDirectExecutor::ProcessUnHandleCommand()
     CONN_LOGI(CONN_WIFI_DIRECT, "enter");
     WifiDirectSchedulerFactory::GetInstance().GetScheduler().RejectNegotiateData(*processor_);
     GetSender().ProcessUnHandle([this](std::shared_ptr<WifiDirectEventBase> &content) {
-        if (content->getContentTypeid() == typeid(NegotiateCommand).name()) {
+        if (content != nullptr && content->getContentTypeid() == typeid(NegotiateCommand).name()) {
             CONN_LOGI(CONN_WIFI_DIRECT, "type id is same");
             auto ncw =
                 std::static_pointer_cast<WifiDirectEventWrapper<std::shared_ptr<NegotiateCommand>>>(content);

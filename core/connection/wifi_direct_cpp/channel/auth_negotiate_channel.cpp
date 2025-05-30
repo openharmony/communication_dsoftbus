@@ -287,7 +287,8 @@ static void OnAuthDisconnected(AuthHandle authHandle)
     bool isLegacyReused = false;
     LinkManager::GetInstance().ForEach(
         [&disconnectChannel, &type, &remoteDeviceId, &remoteMac, &isLegacyReused] (const InnerLink &innerLink) {
-            if (innerLink.GetNegotiateChannel()->GetType() == NegotiateChannelType::AUTH_CHANNEL) {
+            if (innerLink.GetNegotiateChannel() != nullptr &&
+                innerLink.GetNegotiateChannel()->GetType() == NegotiateChannelType::AUTH_CHANNEL) {
                 auto channel = std::static_pointer_cast<AuthNegotiateChannel>(innerLink.GetNegotiateChannel());
                 if (channel != nullptr && disconnectChannel == *channel) {
                     type = innerLink.GetLinkType();
