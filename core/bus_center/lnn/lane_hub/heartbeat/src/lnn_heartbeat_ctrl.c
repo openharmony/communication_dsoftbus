@@ -1263,13 +1263,15 @@ static void HbDelayCheckTrustedRelation(void *para)
 
 void LnnHbOnTrustedRelationIncreased(int32_t groupType)
 {
-    /* If it is a peer-to-peer group, delay initialization to give BR networking priority. */
-    int32_t ret = LnnStartHeartbeat(0);
-    if (ret != SOFTBUS_OK) {
-        LNN_LOGE(LNN_HEART_BEAT, "account group created start heartbeat fail, ret=%{public}d", ret);
-        return;
+    /* If it is a peer-to-peer group or share group, delay initialization to give BR networking priority. */
+    if (groupType != AUTH_PEER_TO_PEER_GROUP || !IsHeartbeatEnable()) {
+        int32_t ret = LnnStartHeartbeat(0);
+        if (ret != SOFTBUS_OK) {
+            LNN_LOGE(LNN_HEART_BEAT, "account group created start heartbeat fail, ret=%{public}d", ret);
+            return;
+        }
     }
-    if (groupType == AUTH_PEER_TO_PEER_GROUP &&
+    if ((groupType == AUTH_PEER_TO_PEER_GROUP || groupType == AUTH_SHARE) &&
         LnnAsyncCallbackDelayHelper(GetLooper(LOOP_TYPE_DEFAULT), HbDelayCheckTrustedRelation, NULL,
             CHECK_TRUSTED_RELATION_TIME) != SOFTBUS_OK) {
         LNN_LOGE(LNN_HEART_BEAT, "async check trusted relaion fail");
