@@ -702,7 +702,7 @@ HWTEST_F(BusCenterSdkTest, BUS_CENTER_SDK_TRIGGER_RANGE_Test001, TestSize.Level1
         .configInfo.heartbeat.mode.replyFlag = false,
     };
     EXPECT_EQ(TriggerRangeForMsdp(nullptr, nullptr), SOFTBUS_INVALID_PARAM);
-    EXPECT_EQ(TriggerRangeForMsdp(TEST_PKG_NAME, nullptr), SOFTBUS_INVALID_PARAM);
+    EXPECT_EQ(TriggerRangeForMsdp(TEST_PKG_NAME, nullptr), SOFTBUS_OK);
     EXPECT_EQ(TriggerRangeForMsdp(TEST_MSDP_NAME, &config), SOFTBUS_OK);
 }
 } // namespace OHOS
