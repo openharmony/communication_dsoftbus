@@ -18,6 +18,7 @@
 
 #include <stdint.h>
 #include "lnn_node_info.h"
+#include "lnn_sync_info_manager.h"
 
 #ifdef __cplusplus
 extern "C" {
