@@ -364,7 +364,7 @@ FAIL:
 
 static int32_t ProcessSocketInEvent(ListenerModule module, int32_t fd)
 {
-    AUTH_CHECK_AND_RETURN_LOGE(RequireAuthTcpConnFdListLock(), SOFTBUS_LOCK_ERR, AUTH_CONN,
+    AUTH_CHECK_AND_RETURN_RET_LOGE(RequireAuthTcpConnFdListLock(), SOFTBUS_LOCK_ERR, AUTH_CONN,
         "RequireAuthTcpConnFdListLock fail");
     if ((module == AUTH || module == AUTH_USB) && !IsExistAuthTcpConnFdItemByConnId(fd)) {
         AUTH_LOGE(AUTH_CONN, "fd=%{public}d not exist, ignore", fd);
