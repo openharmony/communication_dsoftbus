@@ -34,6 +34,8 @@ void SoftBusRemoveSleStateListenerPacked(int listenerId);
 int32_t GetSleRangeCapacityPacked(void);
 int32_t GetLocalSleAddrPacked(char *sleAddr, uint32_t sleAddrLen);
 
+int32_t SoftBusRegRangeCbPacked(SoftBusRangeModule module, const SoftBusRangeCallback *callback);
+void SoftBusUnregRangeCbPacked(SoftBusRangeModule module);
 #ifdef __cplusplus
 }
 #endif

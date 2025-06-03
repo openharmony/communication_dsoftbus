@@ -26,6 +26,8 @@ AdapterEnhanceFuncList *AdapterEnhanceFuncListGet(void)
 
 int32_t AdapterRegisterEnhanceFunc(void *soHandle)
 {
+    g_adapterEnhanceFuncList.softBusRegRangeCb = dlsym(soHandle, "SoftBusRegRangeCb");
+    g_adapterEnhanceFuncList.softBusUnregRangeCb = dlsym(soHandle, "SoftBusUnregRangeCb");
     g_adapterEnhanceFuncList.softBusBleRange = dlsym(soHandle, "SoftBusBleRange");
     g_adapterEnhanceFuncList.softBusGetBlePower = dlsym(soHandle, "SoftBusGetBlePower");
     g_adapterEnhanceFuncList.softBusAddSleStateListener = dlsym(soHandle, "SoftBusAddSleStateListener");
