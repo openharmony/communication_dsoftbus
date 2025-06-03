@@ -16,7 +16,6 @@
 #include <cinttypes>
 #include <gtest/gtest.h>
 #include <securec.h>
-
 #include "auth_uk_manager.h"
 #include "auth_user_common_key.h"
 
