@@ -38,19 +38,19 @@ static int32_t g_sleStateListenerId = -1;
 static int32_t g_sleRangeCap = 0;
 static char g_sleMacAddr[MAC_LEN];
 
-int32_t SetSleRangeCapToLocalLedger()
+int32_t SetSleRangeCapToLocalLedger(void)
 {
     g_sleRangeCap = GetSleRangeCapacityPacked();
     int32_t ret = LnnSetLocalNumInfo(NUM_KEY_SLE_RANGE_CAP, g_sleRangeCap);
     if (ret != SOFTBUS_OK) {
-        LNN_LOGE(LNN_LEDGER, "LnnSetLocalNumInfo fail, ret=%u", ret);
+        LNN_LOGE(LNN_LEDGER, "LnnSetLocalNumInfo fail, ret=%{public}d", ret);
         return ret;
     }
     LNN_LOGI(LNN_LEDGER, "LnnSetLocalNumInfo set sle range cap %{public}d", g_sleRangeCap);
     return SOFTBUS_OK;
 }
 
-int32_t SetSleAddrToLocalLedger()
+int32_t SetSleAddrToLocalLedger(void)
 {
     if (!IsSleEnabledPacked()) {
         LNN_LOGI(LNN_LEDGER, "SLE not enabled!");
@@ -69,7 +69,7 @@ int32_t SetSleAddrToLocalLedger()
     char *anonySleMac = NULL;
     Anonymize(g_sleMacAddr, &anonySleMac);
     LNN_LOGI(LNN_LEDGER, "LnnSetLocalStrInfo set sle mac %{public}s", AnonymizeWrapper(anonySleMac));
-    AnonymizeFree();
+    AnonymizeFree(anonySleMac);
     return SOFTBUS_OK;
 }
 
@@ -145,8 +145,7 @@ int32_t LocalLedgerInitSleCapacity(NodeInfo* nodeInfo)
     char sleMacAddr[MAC_LEN] = { 0 };
     int32_t ret = GetLocalSleAddrPacked(sleMacAddr, MAC_LEN);
     if (ret != SOFTBUS_OK) {
-        LNN_LOGE(LNN_LEDGER, "GetLocalSleAddr fail, ret=%u", ret);
-        return ret;
+        LNN_LOGE(LNN_LEDGER, "GetLocalSleAddr fail, init pass, ret=%{public}d", ret);
     }
     nodeInfo->sleRangeCapacity = sleCapacity;
     memcpy_s(nodeInfo->connectInfo.sleMacAddr, MAC_LEN, sleMacAddr, MAC_LEN);
@@ -166,7 +165,7 @@ void OnReceiveSleMacChangedMsg(LnnSyncInfoType type, const char *networkId, cons
     }
     uint32_t addrLen = (uint32_t)strnlen((const char *)msg, size);
     if (size == 0 || addrLen != size - 1 || addrLen == 0) {
-        LNN_LOGE(LNN_LEDGER, "invaild msg");
+        LNN_LOGE(LNN_LEDGER, "invalid msg");
         return;
     }
     char *anonyNetworkId = NULL;
@@ -197,7 +196,7 @@ void OnReceiveSleMacChangedMsg(LnnSyncInfoType type, const char *networkId, cons
     AnonymizeFree(anonySleMac);
 }
 
-int32_t LnnDeinitSleInfo(void)
+int32_t LnnInitSleInfo(void)
 {
     int32_t ret = LnnRegSyncInfoHandler(LNN_INFO_TYPE_SLE_MAC, OnReceiveSleMacChangedMsg);
     if (ret != SOFTBUS_OK) {
@@ -212,7 +211,7 @@ void LnnDeinitSleInfo(void)
     (void)LnnUnregSyncInfoHandler(LNN_INFO_TYPE_SLE_MAC, OnReceiveSleMacChangedMsg);
 }
 
-void LocalLedgerDeinitSleCapacity()
+void LocalLedgerDeinitSleCapacity(void)
 {
     SoftBusRemoveSleStateListenerPacked(g_sleStateListenerId);
     g_sleStateListenerId = -1;
