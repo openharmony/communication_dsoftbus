@@ -2118,7 +2118,7 @@ int32_t LnnSetDLSleRangeInfo(const char *id, IdCategory type, int32_t sleCap, co
     NodeInfo *nodeInfo = LnnGetNodeInfoById(id, type);
     if (nodeInfo == NULL) {
         LNN_LOGE(LNN_LEDGER, "get info fail");
-        (void)SoftBusMutexUnlock(&(LnnGetDistributedNetLedger->lock));
+        (void)SoftBusMutexUnlock(&(LnnGetDistributedNetLedger()->lock));
         return SOFTBUS_NOT_FIND;
     }
     nodeInfo->sleRangeCapacity = sleCap;
