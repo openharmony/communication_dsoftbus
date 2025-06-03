@@ -2108,3 +2108,26 @@ bool LnnSaveBroadcastLinkKey(const char *udid, const BroadcastCipherInfo *info)
     (void)LnnSaveRemoteDeviceInfoPacked(&cacheInfo);
     return true;
 }
+
+int32_t LnnSetDLSleRangeInfo(const char *id, IdCategory type, int32_t sleCap, const char *addr)
+{
+    if (SoftBusMutexLock(&(LnnGetDistributedNetLedger()->lock)) != 0) {
+        LNN_LOGE(LNN_LEDGER, "lock mutex fail");
+        return SOFTBUS_LOCK_ERR;
+    }
+    NodeInfo *nodeInfo = LnnGetNodeInfoById(id, type);
+    if (nodeInfo == NULL) {
+        LNN_LOGE(LNN_LEDGER, "get info fail");
+        (void)SoftBusMutexUnlock(&(LnnGetDistributedNetLedger->lock));
+        return SOFTBUS_NOT_FIND;
+    }
+    nodeInfo->sleRangeCapacity = sleCap;
+    int32_t ret = strcpy_s(nodeInfo->connectInfo.sleMacAddr, sizeof(nodeInfo->connectInfo.sleMacAddr), addr);
+    if (ret != EOK) {
+        LNN_LOGE(LNN_LEDGER, "set sle addr failed! ret=%{public}d", ret);
+    }
+    // sle range info save in disk
+    (void)LnnSaveRemoteDeviceInfoPacked(nodeInfo);
+    (void)SoftBusMutexUnlock(&(LnnGetDistributedNetLedger()->lock));
+    return SOFTBUS_OK;
+}
