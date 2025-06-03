@@ -555,5 +555,18 @@
         "ACTIONS": "create,open"
       }
     ]
+  },
+  {
+    "SESSION_NAME": "ohos.security.huks.dks*",
+    "REGEXP": "true",
+    "DEVID": "NETWORKID",
+    "SEC_LEVEL": "public",
+    "APP_INFO": [
+      {
+        "TYPE": "system_app",
+        "PKG_NAME": "ohos.security.huks.dks",
+        "ACTIONS": "create,open"
+      }
+    ]
   }
 ]
