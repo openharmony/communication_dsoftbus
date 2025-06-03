@@ -184,7 +184,7 @@ int32_t AuthInsertUserKey(const AuthACLInfo *aclInfo, const AuthUserKeyInfo *use
     return SOFTBUS_OK;
 }
 
-void DelUserKeyByNetworkId(char *networkId)
+void DelUserKeyByNetworkId(const char *networkId)
 {
     if (g_userKeyList == NULL || networkId == NULL) {
         AUTH_LOGE(AUTH_KEY, "invalid param");

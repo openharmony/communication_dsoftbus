@@ -85,7 +85,7 @@ public:
     virtual int32_t GetLatestSessionKey(
         const SessionKeyList *list, AuthLinkType type, int32_t *index, SessionKey *key) = 0;
     virtual void DelDupAuthManager(AuthManager *auth) = 0;
-    virtual void DelUserKeyByNetworkId(char *networkId) = 0;
+    virtual void DelUserKeyByNetworkId(const char *networkId) = 0;
     virtual void LnnNotifyAddRawEnhanceP2pEvent(LnnNotifyRawEnhanceP2pEvent *event) = 0;
     virtual bool RawLinkNeedUpdateAuthManager(const char *uuid, bool isServer) = 0;
 };
@@ -133,7 +133,7 @@ public:
     MOCK_METHOD1(GetAuthManagerByAuthId, AuthManager *(int64_t));
     MOCK_METHOD4(GetLatestSessionKey, int32_t(const SessionKeyList *, AuthLinkType, int32_t *, SessionKey *));
     MOCK_METHOD1(DelDupAuthManager, void(AuthManager *));
-    MOCK_METHOD1(DelUserKeyByNetworkId, void(char *));
+    MOCK_METHOD1(DelUserKeyByNetworkId, void(const char *));
     MOCK_METHOD1(LnnNotifyAddRawEnhanceP2pEvent, void(LnnNotifyRawEnhanceP2pEvent *));
     MOCK_METHOD2(RawLinkNeedUpdateAuthManager, bool(const char *, bool));
 };
