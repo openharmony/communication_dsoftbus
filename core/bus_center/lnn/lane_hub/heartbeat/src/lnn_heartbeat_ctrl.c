@@ -24,6 +24,7 @@
 #include "auth_interface.h"
 #include "auth_manager.h"
 #include "bus_center_manager.h"
+#include "g_enhance_adapter_func_pack.h"
 #include "g_enhance_lnn_func.h"
 #include "g_enhance_lnn_func_pack.h"
 #include "lnn_async_callback_utils.h"
@@ -1394,7 +1395,7 @@ int32_t LnnInitHeartbeat(void)
     static SoftBusRangeCallback cb = {
         .onRangeResult = HbRangeCallback,
     };
-    (void)SoftBusRegRangeCb(MODULE_BLE_HEARTBEAT, &cb);
+    (void)SoftBusRegRangeCbPacked(MODULE_BLE_HEARTBEAT, &cb);
     InitHbConditionState();
     InitHbSpecificConditionState();
     LNN_LOGI(LNN_INIT, "heartbeat(HB) init success");
@@ -1405,7 +1406,7 @@ void LnnDeinitHeartbeat(void)
 {
     LnnHbStrategyDeinit();
     LnnHbMediumMgrDeinit();
-    SoftBusUnregRangeCb(MODULE_BLE_HEARTBEAT);
+    SoftBusUnregRangeCbPacked(MODULE_BLE_HEARTBEAT);
     LnnUnregisterEventHandler(LNN_EVENT_IP_ADDR_CHANGED, HbIpAddrChangeEventHandler);
     LnnUnregisterEventHandler(LNN_EVENT_BT_STATE_CHANGED, HbBtStateChangeEventHandler);
     LnnUnregisterEventHandler(LNN_EVENT_LANE_VAP_CHANGE, HbLaneVapChangeEventHandler);

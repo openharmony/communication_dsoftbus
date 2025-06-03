@@ -25,6 +25,8 @@ extern "C" {
 #include "softbus_config_type.h"
 #include "softbus_adapter_sle_common_struct.h"
 
+typedef int32_t (*SoftBusRegRangeCbFunc)(SoftBusRangeModule module, const SoftBusRangeCallback *callback);
+typedef void (*SoftBusUnregRangeCbFunc)(SoftBusRangeModule module);
 typedef int (*SoftBusBleRangeFunc)(SoftBusRangeParam *param, int32_t *range);
 typedef int (*SoftBusGetBlePowerFunc)(int8_t *power);
 typedef void (*SoftbusConfigAdapterInitFunc)(const ConfigSetProc *sets);
@@ -35,6 +37,8 @@ typedef int32_t (*GetSleRangeCapacityFunc)(void);
 typedef int32_t (*GetLocalSleAddrFunc)(char *sleAddr, uint32_t sleAddrLen);
 
 typedef struct TagAdapterEnhanceFuncList {
+    SoftBusRegRangeCbFunc softBusRegRangeCb;
+    SoftBusUnregRangeCbFunc softBusUnregRangeCb;
     SoftBusBleRangeFunc softBusBleRange;
     SoftBusGetBlePowerFunc softBusGetBlePower;
     SoftbusConfigAdapterInitFunc softbusConfigAdapterInit;
