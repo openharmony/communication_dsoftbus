@@ -61,7 +61,7 @@ HWTEST_F(LNNNetLedgerMockTest, IsLocalIrkInfoChangeTest001, TestSize.Level0)
     NodeInfo info;
     (void)memset_s(&info, sizeof(NodeInfo), 0, sizeof(NodeInfo));
     BusCenterMock busCenterMock;
-    EXPECT_CALL(busCenterMock, LnnGetLocalByteInfo).WillRepeatedly(Return(SOFTBUS_NETWORK_NOT_FOUND));
+    EXPECT_CALL(busCenterMock, LnnGetLocalByteInfo).WillRepeatedly(Return(SOFTBUS_ERR));
     EXPECT_EQ(IsLocalIrkInfoChange(&info), false);
 }
 
@@ -91,7 +91,7 @@ HWTEST_F(LNNNetLedgerMockTest, IsLocalBroadcastLinKeyChangeTest001, TestSize.Lev
     NodeInfo info;
     (void)memset_s(&info, sizeof(NodeInfo), 0, sizeof(NodeInfo));
     BusCenterMock busCenterMock;
-    EXPECT_CALL(busCenterMock, LnnGetLocalByteInfo).WillRepeatedly(Return(SOFTBUS_NETWORK_NOT_FOUND));
+    EXPECT_CALL(busCenterMock, LnnGetLocalByteInfo).WillRepeatedly(Return(SOFTBUS_ERR));
     EXPECT_EQ(IsLocalBroadcastLinKeyChange(&info), false);
 }
 

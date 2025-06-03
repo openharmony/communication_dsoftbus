@@ -77,8 +77,7 @@ bool LnnConvertAddrToOption(const ConnectionAddr *addr, ConnectOption *option)
     return GetLnnOhosAccountInterface()->LnnConvertAddrToOption(addr, option);
 }
 
-bool LnnConvertAuthConnInfoToAddr(
-    ConnectionAddr *addr, const AuthConnInfo *connInfo, ConnectionAddrType hintType)
+bool LnnConvertAuthConnInfoToAddr(ConnectionAddr *addr, const AuthConnInfo *connInfo, ConnectionAddrType hintType)
 {
     return GetLnnOhosAccountInterface()->LnnConvertAuthConnInfoToAddr(addr, connInfo, hintType);
 }
@@ -151,8 +150,8 @@ int32_t AuthGetLatestAuthSeqList(const char *udid, int64_t *authSeq, uint32_t nu
 int32_t AuthMetaStartVerify(uint32_t connectionId, const AuthKeyInfo *authKeyInfo, uint32_t requestId,
     int32_t callingPid, const AuthVerifyCallback *callBack)
 {
-    return GetLnnOhosAccountInterface()->AuthMetaStartVerify(
-        connectionId, authKeyInfo, requestId, callingPid, callBack);
+    return GetLnnOhosAccountInterface()->AuthMetaStartVerify(connectionId, authKeyInfo, requestId, callingPid,
+        callBack);
 }
 
 int32_t AuthStartListening(AuthLinkType type, const char *ip, int32_t port)
@@ -226,14 +225,12 @@ int32_t LnnAsyncCallbackHelper(SoftBusLooper *looper, LnnAsyncCallbackFunc callb
     return GetLnnOhosAccountInterface()->LnnAsyncCallbackHelper(looper, callback, para);
 }
 
-int32_t LnnCeDecryptDataByHuks(
-    const struct HksBlob *keyAlias, const struct HksBlob *inData, struct HksBlob *outData)
+int32_t LnnCeDecryptDataByHuks(const struct HksBlob *keyAlias, const struct HksBlob *inData, struct HksBlob *outData)
 {
     return GetLnnOhosAccountInterface()->LnnCeDecryptDataByHuks(keyAlias, inData, outData);
 }
 
-int32_t LnnCeEncryptDataByHuks(
-    const struct HksBlob *keyAlias, const struct HksBlob *inData, struct HksBlob *outData)
+int32_t LnnCeEncryptDataByHuks(const struct HksBlob *keyAlias, const struct HksBlob *inData, struct HksBlob *outData)
 {
     return GetLnnOhosAccountInterface()->LnnCeEncryptDataByHuks(keyAlias, inData, outData);
 }
