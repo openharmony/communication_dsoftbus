@@ -1132,9 +1132,6 @@ static int32_t SocketCheckAndSetSessionState(int32_t socket)
         return SOFTBUS_TRANS_SESSION_OPENING;
     }
 
-    ret = SetSessionStateBySessionId(socket, SESSION_STATE_INIT, 0);
-    TRANS_CHECK_AND_RETURN_RET_LOGE(
-        ret == SOFTBUS_OK, ret, TRANS_SDK, "init session state failed, ret=%{public}d", ret);
     return SOFTBUS_OK;
 }
 
