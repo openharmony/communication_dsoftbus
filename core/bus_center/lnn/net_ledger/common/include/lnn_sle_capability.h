@@ -23,11 +23,19 @@
 extern "C" {
 #endif
 
-int32_t SetSleRangeCapToLocalLedger();
-int32_t SetSleAddrToLocalLedger();
+#define JSON_KEY_SLE_MAC "SLE_MAC"
+#define JSON_KEY_SLE_CAP "SLE_CAP"
+
+int32_t SetSleRangeCapToLocalLedger(void);
+int32_t SetSleAddrToLocalLedger(void);
 
 int32_t LocalLedgerInitSleCapacity(NodeInfo *nodeInfo);
-void LocalLedgerDeinitSleCapacity();
+void LocalLedgerDeinitSleCapacity(void);
+void OnReceiveSleMacChangedMsg(LnnSyncInfoType type, const char *networkId, const uint8_t *msg, uint32_t size);
+void LnnSendSleInfoForAllNode(void);
+
+int32_t LnnInitSleInfo(void);
+void LnnDeinitSleInfo(void);
 
 #ifdef __cplusplus
 }
