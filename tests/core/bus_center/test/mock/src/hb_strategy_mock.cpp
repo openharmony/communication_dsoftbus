@@ -161,7 +161,7 @@ uint32_t AuthGenRequestId(void)
     return HeartBeatStrategyInterface()->AuthGenRequestId();
 }
 
-int32_t AuthStartVerify(const AuthConnInfo *connInfo, AuthVerifyParam *authVerifyParam,
+int32_t AuthStartVerify(const AuthConnInfo *connInfo, const AuthVerifyParam *authVerifyParam,
     const AuthVerifyCallback *verifyCallback)
 {
     return HeartBeatStrategyInterface()->AuthStartVerify(connInfo, authVerifyParam, verifyCallback);
