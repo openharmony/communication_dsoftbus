@@ -328,6 +328,8 @@ HWTEST_F(TransTcpDirectP2pTest, OpenAuthConnTest001, TestSize.Level1)
 {
     int32_t reqId = 1;
     ConnectType type = CONNECT_TCP;
+    NiceMock<TransTcpDirectCommonInterfaceMock> TransTcpDirectP2pMock;
+    EXPECT_CALL(TransTcpDirectP2pMock, AuthMetaPostTransData).WillOnce(Return(SOFTBUS_OK));
 
     int32_t ret = OpenAuthConn(nullptr, reqId, true, type);
     EXPECT_EQ(ret, SOFTBUS_TRANS_OPEN_AUTH_CONN_FAILED);
