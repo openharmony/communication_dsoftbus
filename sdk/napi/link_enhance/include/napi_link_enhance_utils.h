@@ -90,7 +90,7 @@ napi_value PropertyInit(napi_env env, napi_value exports);
 void NapiCallFunction(napi_env env, napi_ref callbackRef, napi_value *argv, size_t argc);
 int32_t ConvertToJsErrcode(int32_t err);
 void HandleSyncErr(const napi_env &env, int32_t errCode);
-bool CheckAccessTocken(void);
+bool CheckAccessToken(void);
 } // namespace Softbus
 } // namespace Communication
 #endif /* NAPI_SOFTBUS_LINK_ENHANCE_UTILS_H_ */

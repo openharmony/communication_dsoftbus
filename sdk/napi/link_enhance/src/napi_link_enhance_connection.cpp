@@ -45,15 +45,16 @@ static napi_status CheckCreateConnectionParams(napi_env env, napi_callback_info 
         COMM_LOGE(COMM_SDK, "expect string");
         return napi_string_expected;
     }
-    if (deviceId.length() == 0) {
-        COMM_LOGE(COMM_SDK, "Invalid deviceId: %{public}s", deviceId.c_str());
-        return napi_invalid_arg;
-    }
 
     std::string name {};
     if (!ParseString(env, name, argv[ARGS_SIZE_ONE])) {
         COMM_LOGE(COMM_SDK, "expect string");
         return napi_string_expected;
+    }
+
+    if (deviceId.length() == 0 || name.length() == 0) {
+        COMM_LOGE(COMM_SDK, "name or deviceId is null");
+        return napi_invalid_arg;
     }
 
     if (argc == ARGS_SIZE_THREE) {
@@ -73,7 +74,7 @@ static napi_status CheckCreateConnectionParams(napi_env env, napi_callback_info 
 napi_value NapiLinkEnhanceConnection::Create(napi_env env, napi_callback_info info)
 {
     COMM_LOGD(COMM_SDK, "enter");
-    if (!CheckAccessTocken()) {
+    if (!CheckAccessToken()) {
         HandleSyncErr(env, LINK_ENHANCE_PERMISSION_DENIED);
         return NapiGetUndefinedRet(env);
     }
@@ -178,9 +179,9 @@ static NapiLinkEnhanceConnection *NapiGetEnhanceConnection(napi_env env, napi_ca
     return NapiGetEnhanceConnection(env, thisVar);
 }
 
-static bool CheckParams(napi_env env, napi_callback_info info, std::string &funcName)
+static bool CheckAccessTokenAndParams(napi_env env, napi_callback_info info, std::string &funcName)
 {
-    if (!CheckAccessTocken()) {
+    if (!CheckAccessToken()) {
         HandleSyncErr(env, LINK_ENHANCE_PERMISSION_DENIED);
         return false;
     }
@@ -199,14 +200,18 @@ static bool CheckParams(napi_env env, napi_callback_info info, std::string &func
         return false;
     }
 
-    char type[ARGS_TYPE_MAX_LEN];
     size_t typeLen = 0;
+    status = napi_get_value_string_utf8(env, args[ARGS_SIZE_ZERO], nullptr, -1, &typeLen);
+    if (status != napi_ok || typeLen >= ARGS_TYPE_MAX_LEN) {
+        HandleSyncErr(env, LINK_ENHANCE_PARAMETER_INVALID);
+        return false;
+    }
+    char type[ARGS_TYPE_MAX_LEN];
     status = napi_get_value_string_utf8(env, args[ARGS_SIZE_ZERO], type, sizeof(type), &typeLen);
     if (status != napi_ok) {
         HandleSyncErr(env, LINK_ENHANCE_PARAMETER_INVALID);
         return false;
     }
-
     funcName = type;
     return true;
 }
@@ -214,7 +219,7 @@ static bool CheckParams(napi_env env, napi_callback_info info, std::string &func
 napi_value NapiLinkEnhanceConnection::On(napi_env env, napi_callback_info info)
 {
     std::string funcName = "";
-    if (!CheckParams(env, info, funcName)) {
+    if (!CheckAccessTokenAndParams(env, info, funcName)) {
         return NapiGetUndefinedRet(env);
     }
     NapiLinkEnhanceConnection *connection = NapiGetEnhanceConnection(env, info);
@@ -256,7 +261,7 @@ napi_value NapiLinkEnhanceConnection::On(napi_env env, napi_callback_info info)
 napi_value NapiLinkEnhanceConnection::Off(napi_env env, napi_callback_info info)
 {
     std::string funcName = "";
-    if (!CheckParams(env, info, funcName)) {
+    if (!CheckAccessTokenAndParams(env, info, funcName)) {
         return NapiGetUndefinedRet(env);
     }
     NapiLinkEnhanceConnection *connection = NapiGetEnhanceConnection(env, info);
@@ -275,10 +280,10 @@ napi_value NapiLinkEnhanceConnection::Off(napi_env env, napi_callback_info info)
         connection->dataReceivedRef_ = nullptr;
         connection->SetEnableData(false);
     } else if (strcmp(funcName.c_str(), "disconnected") == 0 && connection->disconnectRef_ != nullptr) {
+        COMM_LOGI(COMM_SDK, "unregister disconnected");
         napi_delete_reference(env, connection->disconnectRef_);
         connection->disconnectRef_ = nullptr;
         connection->SetEnableDisconnect(false);
-        COMM_LOGI(COMM_SDK, "unregister disconnected");
     } else {
         HandleSyncErr(env, LINK_ENHANCE_PARAMETER_INVALID);
         return NapiGetUndefinedRet(env);
@@ -294,7 +299,7 @@ napi_value NapiLinkEnhanceConnection::Connect(napi_env env, napi_callback_info i
         HandleSyncErr(env, LINK_ENHANCE_PARAMETER_INVALID);
         return NapiGetUndefinedRet(env);
     }
-    if (!CheckAccessTocken()) {
+    if (!CheckAccessToken()) {
         HandleSyncErr(env, LINK_ENHANCE_PERMISSION_DENIED);
         return NapiGetUndefinedRet(env);
     }
@@ -320,13 +325,13 @@ napi_value NapiLinkEnhanceConnection::Connect(napi_env env, napi_callback_info i
     }
     connection->handle_ = (uint32_t)handle;
     connection->state_ = ConnectionState::STATE_CONNECTING;
-    COMM_LOGE(COMM_SDK, "start connect handle=%{public}u", handle);
+    COMM_LOGI(COMM_SDK, "start connect handle=%{public}u", handle);
     return NapiGetUndefinedRet(env);
 }
 
 napi_value NapiLinkEnhanceConnection::Disconnect(napi_env env, napi_callback_info info)
 {
-    if (!CheckAccessTocken()) {
+    if (!CheckAccessToken()) {
         HandleSyncErr(env, LINK_ENHANCE_PERMISSION_DENIED);
         return NapiGetUndefinedRet(env);
     }
@@ -357,7 +362,7 @@ napi_value NapiLinkEnhanceConnection::Disconnect(napi_env env, napi_callback_inf
 
 napi_value NapiLinkEnhanceConnection::Close(napi_env env, napi_callback_info info)
 {
-    if (!CheckAccessTocken()) {
+    if (!CheckAccessToken()) {
         HandleSyncErr(env, LINK_ENHANCE_PERMISSION_DENIED);
         return NapiGetUndefinedRet(env);
     }
@@ -408,7 +413,7 @@ napi_value NapiLinkEnhanceConnection::Close(napi_env env, napi_callback_info inf
 
 napi_value NapiLinkEnhanceConnection::GetPeerDeviceId(napi_env env, napi_callback_info info)
 {
-    if (!CheckAccessTocken()) {
+    if (!CheckAccessToken()) {
         HandleSyncErr(env, LINK_ENHANCE_PERMISSION_DENIED);
         return NapiGetUndefinedRet(env);
     }
@@ -439,14 +444,12 @@ napi_value NapiLinkEnhanceConnection::GetPeerDeviceId(napi_env env, napi_callbac
         }
         return NapiGetStringRet(env, deviceId);
     }
-    deviceId = cDeviceId;
-    connection->deviceId_ = deviceId;
-    return NapiGetStringRet(env, deviceId);
+    return NapiGetStringRet(env, cDeviceId);
 }
 
 napi_value NapiLinkEnhanceConnection::SendData(napi_env env, napi_callback_info info)
 {
-    if (!CheckAccessTocken()) {
+    if (!CheckAccessToken()) {
         HandleSyncErr(env, LINK_ENHANCE_PERMISSION_DENIED);
         return NapiGetUndefinedRet(env);
     }
