@@ -67,7 +67,9 @@ void WifiDirectExecutor::Run(std::shared_ptr<WifiDirectProcessor> processor)
             CONN_LOGI(CONN_WIFI_DIRECT, "processor run");
             processor_->Run();
         } catch (const std::exception& e) {
-            if (typeid(e).name() == typeid(ProcessorTerminate).name()) {
+            std::string src = typeid(e).name();
+            std::string dst = typeid(ProcessorTerminate).name();
+            if (WifiDirectUtils::CompareIgnoreCase(src, dst) == 0) {
                 LinkManager::GetInstance().Dump();
                 CONN_LOGI(CONN_WIFI_DIRECT, "processor terminate");
                 ProcessUnHandleCommand();
