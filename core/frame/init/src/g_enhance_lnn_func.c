@@ -381,10 +381,14 @@ int32_t LnnRegisterEnhanceFunc(void *soHandle)
     g_lnnEnhanceFuncList.isNeedSyncBroadcastLinkKey = dlsym(soHandle, "IsNeedSyncBroadcastLinkKey");
     g_lnnEnhanceFuncList.lnnSyncBroadcastLinkKey = dlsym(soHandle, "LnnSyncBroadcastLinkKey");
     g_lnnEnhanceFuncList.haveConcurrencyPreLinkReqIdByReuseConnReqId = dlsym(soHandle, "HaveConcurrencyPreLinkReqIdByReuseConnReqId");
+    g_lnnEnhanceFuncList.haveConcurrencyPreLinkNodeByLaneReqId = dlsym(soHandle,
+        "HaveConcurrencyPreLinkNodeByLaneReqId");
     g_lnnEnhanceFuncList.getConcurrencyLaneReqIdByConnReqId = dlsym(soHandle, "GetConcurrencyLaneReqIdByConnReqId");
     g_lnnEnhanceFuncList.lnnFreePreLink = dlsym(soHandle, "LnnFreePreLink");
     g_lnnEnhanceFuncList.getConcurrencyLaneReqIdByActionId = dlsym(soHandle, "GetConcurrencyLaneReqIdByActionId");
     g_lnnEnhanceFuncList.updateConcurrencyReuseLaneReqIdByActionId = dlsym(soHandle, "UpdateConcurrencyReuseLaneReqIdByActionId");
+    g_lnnEnhanceFuncList.updateConcurrencyReuseLaneReqIdByUdid = dlsym(soHandle,
+        "UpdateConcurrencyReuseLaneReqIdByUdid");
     g_lnnEnhanceFuncList.lnnPackCloudSyncAckSeq = dlsym(soHandle, "LnnPackCloudSyncAckSeq");
     g_lnnEnhanceFuncList.lnnClearPtkList = dlsym(soHandle, "LnnClearPtkList");
     g_lnnEnhanceFuncList.generateNewLocalCipherKey = dlsym(soHandle, "GenerateNewLocalCipherKey");
