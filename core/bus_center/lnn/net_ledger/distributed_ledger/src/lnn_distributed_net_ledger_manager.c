@@ -2127,7 +2127,33 @@ int32_t LnnSetDLSleRangeInfo(const char *id, IdCategory type, int32_t sleCap, co
         LNN_LOGE(LNN_LEDGER, "set sle addr failed! ret=%{public}d", ret);
     }
     // sle range info save in disk
-    (void)LnnSaveRemoteDeviceInfoPacked(nodeInfo);
+    NodeInfo tempNodeInfo;
+    (void)memset_s(&tempNodeInfo, sizeof(NodeInfo), 0, sizeof(NodeInfo));
+    NodeInfo recoveryInfo;
+    (void)memset_s(&recoveryInfo, sizeof(NodeInfo), 0, sizeof(NodeInfo));
+    if (memcpy_s(&tempNodeInfo, sizeof(NodeInfo), nodeInfo, sizeof(NodeInfo) != EOK)) {
+        LNN_LOGE(LNN_LEDGER, "memcpy_s fail");
+        (void)SoftBusMutexUnlock(&(LnnGetDistributedNetLedger()->lock));
+        return SOFTBUS_MEM_ERR;
+    }
     (void)SoftBusMutexUnlock(&(LnnGetDistributedNetLedger()->lock));
+    ret = LnnRetrieveDeviceInfoByUdidPacked(tempNodeInfo.deviceInfo.deviceUdid, &recoveryInfo);
+    if (ret != SOFTBUS_OK) {
+        LNN_LOGE(LNN_LEDGER, "retrive device info fail, ret=%{public}d", ret);
+        if (LnnSaveRemoteDeviceInfoPacked(&tempNodeInfo) != SOFTBUS_OK) {
+            LNN_LOGE(LNN_LEDGER, "save remote info fail");
+        }
+        return ret;
+    }
+    recoveryInfo.sleRangeCapacity = sleCap;
+    ret = strcpy_s(recoveryInfo.connectInfo.sleMacAddr, sizeof(recoveryInfo.connectInfo.sleMacAddr), addr);
+    if (ret != EOK) {
+        LNN_LOGE(LNN_LEDGER, "recovery info set sle addr failed! ret=%{public}d", ret);
+    }
+    ret = LnnSaveRemoteDeviceInfoPacked(&recoveryInfo);
+    if (ret != SOFTBUS_OK) {
+        LNN_LOGE(LNN_LEDGER, "save remote device info fail, ret=%{public}d", ret);
+        return ret;
+    }
     return SOFTBUS_OK;
 }
