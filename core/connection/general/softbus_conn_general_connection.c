@@ -734,7 +734,7 @@ static bool IsAllowSave(const char *pkgName, bool isFindServer)
             false, CONN_BLE, "lock failed");
         struct GeneralConnection *it = NULL;
         LIST_FOR_EACH_ENTRY(it, &g_generalManager.connections->list, struct GeneralConnection, node) {
-            if (StrCmpIgnoreCase(it->info.pkgName, pkgName) == 0) {
+            if (StrCmpIgnoreCase(it->info.pkgName, pkgName) == 0 && it->isClient) {
                 count += 1;
             }
         }
