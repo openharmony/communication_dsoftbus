@@ -2131,7 +2131,7 @@ int32_t LnnSetDLSleRangeInfo(const char *id, IdCategory type, int32_t sleCap, co
     (void)memset_s(&tempNodeInfo, sizeof(NodeInfo), 0, sizeof(NodeInfo));
     NodeInfo recoveryInfo;
     (void)memset_s(&recoveryInfo, sizeof(NodeInfo), 0, sizeof(NodeInfo));
-    if (memcpy_s(&tempNodeInfo, sizeof(NodeInfo), nodeInfo, sizeof(NodeInfo) != EOK)) {
+    if (memcpy_s(&tempNodeInfo, sizeof(NodeInfo), nodeInfo, sizeof(NodeInfo)) != EOK) {
         LNN_LOGE(LNN_LEDGER, "memcpy_s fail");
         (void)SoftBusMutexUnlock(&(LnnGetDistributedNetLedger()->lock));
         return SOFTBUS_MEM_ERR;
