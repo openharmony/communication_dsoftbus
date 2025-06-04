@@ -33,7 +33,7 @@ extern "C" {
 int32_t RegAuthVerifyListener(const AuthVerifyListener *listener);
 void UnregAuthVerifyListener(void);
 uint32_t AuthGenRequestId(void);
-int32_t AuthStartVerify(const AuthConnInfo *connInfo, AuthVerifyParam *authVerifyParam,
+int32_t AuthStartVerify(const AuthConnInfo *connInfo, const AuthVerifyParam *authVerifyParam,
     const AuthVerifyCallback *callback);
 int32_t AuthStartConnVerify(const AuthConnInfo *connInfo, uint32_t requestId, const AuthConnCallback *connCallback,
     AuthVerifyModule module, bool isFastAuth);

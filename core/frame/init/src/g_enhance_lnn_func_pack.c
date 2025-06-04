@@ -536,6 +536,15 @@ bool HaveConcurrencyPreLinkReqIdByReuseConnReqIdPacked(uint32_t connReqId, bool 
     return pfnLnnEnhanceFuncList->haveConcurrencyPreLinkReqIdByReuseConnReqId(connReqId, isCheckPreLink);
 }
 
+bool HaveConcurrencyPreLinkNodeByLaneReqIdPacked(uint32_t laneReqId, bool isCheckPreLink)
+{
+    LnnEnhanceFuncList *pfnLnnEnhanceFuncList = LnnEnhanceFuncListGet();
+    if (LnnCheckFuncPointer((void *)pfnLnnEnhanceFuncList->haveConcurrencyPreLinkNodeByLaneReqId) != SOFTBUS_OK) {
+        return false;
+    }
+    return pfnLnnEnhanceFuncList->haveConcurrencyPreLinkNodeByLaneReqId(laneReqId, isCheckPreLink);
+}
+
 int32_t GetConcurrencyLaneReqIdByConnReqIdPacked(uint32_t connReqId, uint32_t *laneReqId)
 {
     LnnEnhanceFuncList *pfnLnnEnhanceFuncList = LnnEnhanceFuncListGet();
@@ -588,6 +597,15 @@ int32_t UpdateConcurrencyReuseLaneReqIdByActionIdPacked(uint32_t actionId, uint3
         return SOFTBUS_NOT_IMPLEMENT;
     }
     return pfnLnnEnhanceFuncList->updateConcurrencyReuseLaneReqIdByActionId(actionId, reuseLaneReqId, connReqId);
+}
+
+int32_t UpdateConcurrencyReuseLaneReqIdByUdidPacked(char *udidHash, uint32_t reuseLaneReqId, uint32_t connReqId)
+{
+    LnnEnhanceFuncList *pfnLnnEnhanceFuncList = LnnEnhanceFuncListGet();
+    if (LnnCheckFuncPointer((void *)pfnLnnEnhanceFuncList->updateConcurrencyReuseLaneReqIdByUdid) != SOFTBUS_OK) {
+        return SOFTBUS_NOT_IMPLEMENT;
+    }
+    return pfnLnnEnhanceFuncList->updateConcurrencyReuseLaneReqIdByUdid(udidHash, reuseLaneReqId, connReqId);
 }
 
 int32_t LnnAddLocalVapInfoPacked(LnnVapType type, const LnnVapAttr *vapAttr)
