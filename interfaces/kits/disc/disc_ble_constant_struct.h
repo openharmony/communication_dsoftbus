@@ -24,6 +24,15 @@
 #define SHA_HASH_LEN                             32
 #define BT_ADDR_LEN                              6
 #define BLE_DISCOVERY_TYPE_VAL_MAX_LEN           16
+#define PRE_LINK_MAX_LEN                         16
+#define DISC_EXT_CUST_MAX_LEN                    256
+
+#define BLE_DISCOVERY_KEY_CUST                   "castPlus"
+#define BLE_DISCOVERY_KEY_EXT_CUST               "extCustData"
+#define BLE_DISCOVERY_KEY_ACTION_ID              "actionId"
+#define BLE_DISCOVERY_KEY_PRE_LINKTYPE           "preLinkType"
+
+#define BLE_DISCOVERY_KEY_HML                    "HML"
 
 #define BLE_DISCOVERY_TYPE                       "discType"
 #define BLE_DISCOVERY_TYPE_HANDLE                "handle"
@@ -37,6 +46,7 @@
 #define TLV_TYPE_CUST                            0x04
 #define TLV_TYPE_BR_MAC                          0x05
 #define TLV_TYPE_RANGE_POWER                     0x06
+#define TLV_TYPE_ACTION                          0x07
 
 #define POS_VERSION                              0
 #define POS_BUSINESS                             1
