@@ -385,8 +385,18 @@ void P2pEntity::OnP2pConnectionChangeEvent(
         currentFrequency_ = 0;
     }
 
-    state_->PreprocessP2pConnectionChangeEvent(info, groupInfo);
+    bool result = true;
+    if (groupInfo != nullptr && !groupInfo->isGroupOwner) {
+        CONN_LOGI(CONN_WIFI_DIRECT, "local is GC, groupOwnerMac=%{public}s",
+            WifiDirectAnonymizeMac(groupInfo->groupOwner.address).c_str());
+        result = LinkManager::GetInstance().ProcessIfPresent(groupInfo->groupOwner.address, [] (InnerLink &link) {
+            });
+    }
+    if (result) {
+        state_->PreprocessP2pConnectionChangeEvent(info, groupInfo);
+    }
     UpdateInterfaceManager(info, groupInfo);
+    CONN_CHECK_AND_RETURN_LOGE(result, CONN_WIFI_DIRECT, "not found innerlink");
     UpdateLinkManager(info, groupInfo);
     state_->OnP2pConnectionChangeEvent(info, groupInfo);
 }
