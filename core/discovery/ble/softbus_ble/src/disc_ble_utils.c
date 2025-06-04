@@ -334,6 +334,32 @@ static int32_t UpdateDeviceName(DeviceWrapper *device)
     return ret;
 }
 
+static int32_t CopyActionValue(DeviceWrapper *device, const uint8_t *data, uint32_t len)
+{
+    DISC_CHECK_AND_RETURN_RET_LOGE(device != NULL && data != NULL, SOFTBUS_INVALID_PARAM, DISC_BLE, "invalid param");
+    DISC_CHECK_AND_RETURN_RET_LOGE(len == ACTION_MAC_SIZE + ACTION_CHANNEL_SIZE,
+        SOFTBUS_INVALID_PARAM, DISC_BLE, "invalid action len");
+    device->channelId = data[0];
+    errno_t ret = memcpy_s(device->mac, ACTION_MAC_SIZE, data + ACTION_CHANNEL_SIZE, ACTION_MAC_SIZE);
+    DISC_CHECK_AND_RETURN_RET_LOGE(ret == EOK, SOFTBUS_MEM_ERR, DISC_BLE, "memcpy mac failed");
+    return SOFTBUS_OK;
+}
+
+static int32_t ParseRecvTlvsExt(uint8_t type, DeviceWrapper *device, const uint8_t *data, uint32_t len)
+{
+    DISC_CHECK_AND_RETURN_RET_LOGE(device != NULL && data != NULL, SOFTBUS_INVALID_PARAM, DISC_BLE, "invalid param");
+    int32_t ret = SOFTBUS_OK;
+    switch (type) {
+        case TLV_TYPE_ACTION:
+            ret = CopyActionValue(device, data, len);
+            break;
+        default:
+            DISC_LOGW(DISC_BLE, "Unknown TLV, just skip, tlvType=%{public}d, tlvLen=%{public}u", type, len);
+            break;
+    }
+    return ret;
+}
+
 static int32_t ParseRecvTlvs(DeviceWrapper *device, const uint8_t *data, uint32_t dataLen)
 {
     uint32_t curLen = 0;
@@ -349,23 +375,23 @@ static int32_t ParseRecvTlvs(DeviceWrapper *device, const uint8_t *data, uint32_
             type, len, curLen, dataLen);
         switch (type) {
             case TLV_TYPE_DEVICE_ID_HASH:
-                ret = CopyDeviceIdHashValue(device, &data[curLen + 1], len);
+                ret = CopyDeviceIdHashValue(device, &data[curLen + TL_LEN], len);
                 break;
             case TLV_TYPE_DEVICE_TYPE:
-                ret = ParseDeviceType(device, &data[curLen + 1], len);
+                ret = ParseDeviceType(device, &data[curLen + TL_LEN], len);
                 break;
             case TLV_TYPE_DEVICE_NAME:
-                ret = CopyDeviceNameValue(device, &data[curLen + 1], &len, dataLen - curLen - TL_LEN);
+                ret = CopyDeviceNameValue(device, &data[curLen + TL_LEN], &len, dataLen - curLen - TL_LEN);
                 break;
             case TLV_TYPE_CUST:
-                ret = ParseCustData(device, &data[curLen + 1], len);
+                ret = ParseCustData(device, &data[curLen + TL_LEN], len);
                 break;
             case TLV_TYPE_BR_MAC:
-                ret = CopyBrAddrValue(device, &data[curLen + 1], len);
+                ret = CopyBrAddrValue(device, &data[curLen + TL_LEN], len);
                 break;
             case TLV_TYPE_RANGE_POWER:
                 if (len > RANGE_POWER_TYPE_LEN) {
-                    ret = CopyNicknameValue(device, &data[curLen + 1], &len, dataLen - curLen - TL_LEN);
+                    ret = CopyNicknameValue(device, &data[curLen + TL_LEN], &len, dataLen - curLen - TL_LEN);
                     break;
                 }
                 errno_t retMem = memcpy_s(&device->power, RANGE_POWER_TYPE_LEN, (void *)&data[curLen + 1], len);
@@ -373,7 +399,7 @@ static int32_t ParseRecvTlvs(DeviceWrapper *device, const uint8_t *data, uint32_
                     DISC_BLE, "parse tlv copy range power failed");
                 break;
             default:
-                DISC_LOGW(DISC_BLE, "Unknown TLV, just skip, tlvType=%{public}d, tlvLen=%{public}u", type, len);
+                ret = ParseRecvTlvsExt(type, device, &data[curLen + TL_LEN], len);
                 break;
         }
         if (ret != SOFTBUS_OK) {
