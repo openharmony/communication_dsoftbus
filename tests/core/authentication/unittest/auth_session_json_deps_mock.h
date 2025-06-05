@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2024 Huawei Device Co., Ltd.
+ * Copyright (c) 2024-2025 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -156,6 +156,7 @@ public:
     virtual bool AuthSessionGetIsSameAccount(int64_t authSeq) = 0;
     virtual int32_t AuthSessionGetUserId(int64_t authSeq) = 0;
     virtual int32_t GetActiveOsAccountIds(void) = 0;
+    virtual bool IsTrustedDeviceFromAccess(const char *peerAccountHash, const char *peerUdid, int32_t peerUserId) = 0;
 };
 class AuthSessionJsonDepsInterfaceMock : public AuthSessionJsonDepsInterface {
 public:
@@ -250,6 +251,7 @@ public:
     MOCK_METHOD1(AuthSessionGetUserId, int32_t (int64_t authSeq));
     MOCK_METHOD0(GetActiveOsAccountIds, int32_t(void));
     MOCK_METHOD4(LnnGetLocalStrInfoByIfnameIdx, int32_t(InfoKey, char *, uint32_t, int32_t));
+    MOCK_METHOD3(IsTrustedDeviceFromAccess, bool (const char *, const char *, int32_t));
 };
 } // namespace OHOS
 #endif // AUTH_TCP_CONNECTION_MOCK_H

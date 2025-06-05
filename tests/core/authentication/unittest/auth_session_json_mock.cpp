@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2024 Huawei Device Co., Ltd.
+ * Copyright (c) 2024-2025 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -442,6 +442,11 @@ bool IsSKIdInvalid(int32_t sessionKeyId, const char *accountHash, const char *ud
     int32_t userId)
 {
     return GetInterface()->IsSKIdInvalid(sessionKeyId, accountHash, udidShortHash, userId);
+}
+
+bool IsTrustedDeviceFromAccess(const char *peerAccountHash, const char *peerUdid, int32_t peerUserId)
+{
+    return GetInterface()->IsTrustedDeviceFromAccess(peerAccountHash, peerUdid, peerUserId);
 }
 }
 }
