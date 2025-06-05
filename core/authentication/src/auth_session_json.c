@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2024 Huawei Device Co., Ltd.
+ * Copyright (c) 2024-2025 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -1046,6 +1046,27 @@ static int32_t PackDeviceJsonInfo(const AuthSessionInfo *info, JsonObj *obj)
     return SOFTBUS_OK;
 }
 
+static bool IsNeedNormalizedProcess(const AuthSessionInfo *info)
+{
+    if (!info->isConnectServer) {
+        return true;
+    }
+    if (info->authVersion < AUTH_VERSION_V2) {
+        AUTH_LOGI(AUTH_FSM, "lower version don't need check acl");
+        return true;
+    }
+    if (IsTrustedDeviceFromAccess(info->accountHash, info->udid, info->userId)) {
+        AUTH_LOGI(AUTH_FSM, "has trust device acl");
+        return true;
+    }
+    char *anonyDeviceIdHash = NULL;
+    Anonymize(info->udid, &anonyDeviceIdHash);
+    AUTH_LOGE(AUTH_FSM, "device is not trusted in dp, deviceIdHash=%{public}s, userId=%{public}d",
+        AnonymizeWrapper(anonyDeviceIdHash), info->userId);
+    AnonymizeFree(anonyDeviceIdHash);
+    return false;
+}
+
 static int32_t PackNormalizedData(const AuthSessionInfo *info, JsonObj *obj, const NodeInfo *nodeInfo, int64_t authSeq)
 {
     bool isSupportNormalizedKey = IsSupportFeatureByCapaBit(nodeInfo->authCapacity, BIT_SUPPORT_NORMALIZED_LINK);
@@ -1053,7 +1074,7 @@ static int32_t PackNormalizedData(const AuthSessionInfo *info, JsonObj *obj, con
         AUTH_LOGE(AUTH_FSM, "add normalizedType fail");
         return SOFTBUS_AUTH_PACK_NORMALIZED_DATA_FAIL;
     }
-    if (isSupportNormalizedKey) {
+    if (isSupportNormalizedKey && IsNeedNormalizedProcess(info)) {
         PackNormalizedKey(obj, (AuthSessionInfo *)info, authSeq);
     }
     if (info->isServer &&
