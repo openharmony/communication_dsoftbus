@@ -41,7 +41,7 @@ typedef struct {
     int32_t msgType;
     int32_t localId;
     int32_t peerId;
-    int32_t headLen;
+    uint32_t headLen;
 } GeneralConnectionHead;
 
 typedef uint32_t GeneralConnAbilityBitSet;

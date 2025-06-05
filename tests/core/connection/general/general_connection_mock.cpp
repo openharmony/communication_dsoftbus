@@ -105,6 +105,11 @@ ConnBleConnection *ConnBleGetConnectionById(uint32_t connectionId)
     return &connection;
 }
 
+int32_t LnnGetLocalStrInfo(InfoKey key, char *info, uint32_t len)
+{
+    return SOFTBUS_INVALID_PARAM;
+}
+
 ConnectFuncInterface *ConnInitTcp(const ConnectCallback *callback)
 {
     (void)callback;
@@ -121,11 +126,6 @@ ConnectFuncInterface *ConnSleInit(const ConnectCallback *callback)
 {
     (void)callback;
     return NULL;
-}
-
-int32_t LnnGetLocalStrInfo(InfoKey key, char *info, uint32_t len)
-{
-    return GetGeneralConnectionInterface()->LnnGetLocalStrInfo(key, info, len);
 }
 
 int32_t BleConnectDeviceMock(const ConnectOption *option, uint32_t requestId, const ConnectResult *result)
