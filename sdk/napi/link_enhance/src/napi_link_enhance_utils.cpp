@@ -225,13 +225,13 @@ void HandleSyncErr(const napi_env &env, int32_t errCode)
     }
 }
 
-bool CheckAccessTocken(void)
+bool CheckAccessToken(void)
 {
-    bool isAccessTocken = SoftBusCheckIsAccess();
-    if (!isAccessTocken) {
+    bool isAccessToken = SoftBusCheckIsAccess();
+    if (!isAccessToken) {
         COMM_LOGW(COMM_SDK, "no access token");
     }
-    return isAccessTocken;
+    return isAccessToken;
 }
 } // namespace Softbus
 } // namespace Communication
