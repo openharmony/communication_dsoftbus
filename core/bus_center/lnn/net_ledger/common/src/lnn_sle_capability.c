@@ -163,6 +163,10 @@ void OnReceiveSleMacChangedMsg(LnnSyncInfoType type, const char *networkId, cons
         LNN_LOGE(LNN_LEDGER, "not sle mac type");
         return;
     }
+    if (networkId == NULL || msg == NULL) {
+        LNN_LOGE(LNN_LEDGER, "networkId or msg is null");
+        return;
+    }
     uint32_t addrLen = (uint32_t)strnlen((const char *)msg, size);
     if (size == 0 || addrLen != size - 1 || addrLen == 0) {
         LNN_LOGE(LNN_LEDGER, "invalid msg");
