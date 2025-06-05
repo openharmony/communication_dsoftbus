@@ -12,6 +12,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+
 #include "softbus_disc_init.h"
 #include "softbus_init_common.h"
 #include "softbus_error_code.h"

@@ -24,40 +24,68 @@
 extern "C" {
 #endif
 
-#define NSTACKX_MAX_DEVICE_NAME_LEN 64
-#define NSTACKX_MAX_MODULE_NAME_LEN 64
-#define NSTACKX_MAX_DEVICE_ID_LEN 96
-#define NSTACKX_MAX_SENDMSG_DATA_LEN 512
-#define NSTACKX_MAX_MAC_STRING_LEN 18
-#define NSTACKX_MAX_IP_STRING_LEN 46
-#define NSTACKX_MAX_CAPABILITY_NUM 2
-#define NSTACKX_MAX_INTERFACE_NAME_LEN 16
-#define NSTACKX_MAX_SERVICE_DATA_LEN 64
-#define NSTACKX_MAX_EXTEND_SERVICE_DATA_LEN 128
+#define NSTACKX_MAX_DEVICE_NAME_LEN               64
+#define NSTACKX_MAX_MODULE_NAME_LEN               64
+#define NSTACKX_MAX_DEVICE_ID_LEN                 96
+#define NSTACKX_MAX_SENDMSG_DATA_LEN              512
+#define NSTACKX_MAX_MAC_STRING_LEN                18
+#define NSTACKX_MAX_IP_STRING_LEN                 46
+#define NSTACKX_MAX_CAPABILITY_NUM                2
+#define NSTACKX_MAX_INTERFACE_NAME_LEN            16
+#define NSTACKX_MAX_SERVICE_DATA_LEN              64
+#define NSTACKX_MAX_EXTEND_SERVICE_DATA_LEN       128
 #ifndef NSTACKX_EXTEND_BUSINESSDATA
-#define NSTACKX_MAX_BUSINESS_DATA_LEN 1
+#define NSTACKX_MAX_BUSINESS_DATA_LEN             1
 #else
-#define NSTACKX_MAX_BUSINESS_DATA_LEN 300
+#define NSTACKX_MAX_BUSINESS_DATA_LEN             300
 #endif
-#define NSTACKX_MAX_NOTIFICATION_DATA_LEN 800
+#define NSTACKX_MAX_NOTIFICATION_DATA_LEN         800
 
 #ifdef DFINDER_SAVE_DEVICE_LIST
-#define NSTACKX_MIN_DEVICE_NUM 1
-#define NSTACKX_DEFAULT_DEVICE_NUM 20
-#define NSTACKX_MAX_DEVICE_NUM 400
-#define NSTACKX_DEFAULT_AGING_TIME 1
-#define NSTACKX_MIN_AGING_TIME 1
-#define NSTACKX_MAX_AGING_TIME 10
+#define NSTACKX_MIN_DEVICE_NUM                    1
+#define NSTACKX_DEFAULT_DEVICE_NUM                20
+#define NSTACKX_MAX_DEVICE_NUM                    400
+#define NSTACKX_DEFAULT_AGING_TIME                1
+#define NSTACKX_MIN_AGING_TIME                    1
+#define NSTACKX_MAX_AGING_TIME                    10
 #else
-#define NSTACKX_MAX_DEVICE_NUM 1
+#define NSTACKX_MAX_DEVICE_NUM                    1
 #endif
 
 // expand from 131 to 219 (+88) bytes to hold service data
 // expand from 219 to 400 (+128 +53) bytes to hold extend service data
 // expand from 400 to (420 + NSTACKX_MAX_BUSINESS_DATA_LEN) bytes to hold business data and type
-#define NSTACKX_MAX_RESERVED_INFO_LEN (420 + NSTACKX_MAX_BUSINESS_DATA_LEN)
+#define NSTACKX_MAX_RESERVED_INFO_LEN             (420 + NSTACKX_MAX_BUSINESS_DATA_LEN)
 
-#define DEVICE_HASH_LEN 21
+#define DEVICE_HASH_LEN                           21
+
+#define NSTACKX_MAX_LISTENED_NIF_NUM              2
+
+#define NSTACKX_MIN_ADVERTISE_COUNT               1
+#define NSTACKX_MAX_ADVERTISE_COUNT               100
+
+/* The unit is ms. */
+#define NSTACKX_MIN_ADVERTISE_DURATION            5000
+#define NSTACKX_MAX_ADVERTISE_DURATION            50000
+#define NSTACKX_MIN_ADVERTISE_INTERVAL            10
+#define NSTACKX_MAX_ADVERTISE_INTERVAL            10000
+
+#define PUBLISH_DEVICE_NUM                        1
+#define INNER_DISCOVERY                           1
+#define PUBLISH_NUM                               1
+#define COUNT_INIT                                0
+
+#define DFINDER_EVENT_NAME_LEN                    32
+#define DFINDER_EVENT_TAG_LEN                     16
+
+#ifndef DFINDER_EXPORT
+#ifdef _WIN32
+#define DFINDER_EXPORT                    __declspec(dllexport)
+#else
+#define DFINDER_EXPORT
+#endif
+#endif
+
 enum {
     DEFAULT_MODE = 0,
     DISCOVER_MODE = 1,
@@ -65,23 +93,11 @@ enum {
     PUBLISH_MODE_OFFLINE = 3,
     PUBLISH_MODE_PROACTIVE = 10
 }; // discovery mode
-#define PUBLISH_DEVICE_NUM 1
-#define INNER_DISCOVERY 1
-#define PUBLISH_NUM 1
-#define COUNT_INIT 0
 
 enum {
     NSTACKX_DISCOVERY_TYPE_PASSIVE = 1,
     NSTACKX_DISCOVERY_TYPE_ACTIVE = 2
 };
-
-#ifndef DFINDER_EXPORT
-#ifdef _WIN32
-#define DFINDER_EXPORT __declspec(dllexport)
-#else
-#define DFINDER_EXPORT
-#endif
-#endif
 
 /* Remote device information */
 typedef struct NSTACKX_DeviceInfo {
@@ -99,7 +115,6 @@ typedef struct NSTACKX_DeviceInfo {
     char reservedInfo[NSTACKX_MAX_RESERVED_INFO_LEN];
 } NSTACKX_DeviceInfo;
 
-#define NSTACKX_MAX_LISTENED_NIF_NUM 2
 
 typedef struct {
     char networkName[NSTACKX_MAX_INTERFACE_NAME_LEN];
@@ -138,13 +153,6 @@ typedef enum {
     NSTACKX_BUSINESS_TYPE_MAX           /* for parameter legality verification */
 } NSTACKX_BusinessType;
 
-#define NSTACKX_MIN_ADVERTISE_COUNT 1
-#define NSTACKX_MAX_ADVERTISE_COUNT 100
-/* The unit is ms. */
-#define NSTACKX_MIN_ADVERTISE_DURATION 5000
-#define NSTACKX_MAX_ADVERTISE_DURATION 50000
-#define NSTACKX_MIN_ADVERTISE_INTERVAL 10
-#define NSTACKX_MAX_ADVERTISE_INTERVAL 10000
 
 typedef struct {
     uint8_t businessType;       /* service identify */
@@ -251,9 +259,6 @@ typedef enum {
     DFINDER_PARAM_TYPE_DOUBLE,
     DFINDER_PARAM_TYPE_STRING,
 } DFinderEventParamType;
-
-#define DFINDER_EVENT_NAME_LEN 32
-#define DFINDER_EVENT_TAG_LEN 16
 
 typedef struct {
     DFinderEventParamType type;

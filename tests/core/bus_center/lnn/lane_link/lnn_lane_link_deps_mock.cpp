@@ -195,6 +195,16 @@ void LnnDeleteLinkLedgerInfo(const char *udid)
     GetLaneLinkDepsInterface()->LnnDeleteLinkLedgerInfo(udid);
 }
 
+int32_t InitLinkLedger(void)
+{
+    return GetLaneLinkDepsInterface()->InitLinkLedger();
+}
+
+void DeinitLinkLedger(void)
+{
+    GetLaneLinkDepsInterface()->DeinitLinkLedger();
+}
+
 bool CheckLaneLinkExistByType(LaneLinkType linkType)
 {
     return GetLaneLinkDepsInterface()->CheckLaneLinkExistByType(linkType);

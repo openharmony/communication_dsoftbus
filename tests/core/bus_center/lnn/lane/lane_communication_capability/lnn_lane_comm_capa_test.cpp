@@ -545,6 +545,10 @@ HWTEST_F(LNNLaneCommCapaTest, SetRemoteDynamicNetCapTest001, TestSize.Level1)
     EXPECT_CALL(commCapaMock, LnnGetRemoteNumU32Info)
         .WillRepeatedly(DoAll(SetArgPointee<2>(netCap), Return(SOFTBUS_OK)));
     EXPECT_NO_FATAL_FAILURE(SetRemoteDynamicNetCap("test_udid1", LANE_HML));
+    netCap = 1 << BIT_BLE;
+    EXPECT_CALL(commCapaMock, LnnGetRemoteNumU32Info)
+        .WillRepeatedly(DoAll(SetArgPointee<2>(netCap), Return(SOFTBUS_OK)));
+    EXPECT_NO_FATAL_FAILURE(SetRemoteDynamicNetCap("test_udid1", LANE_HML));
 }
 
 /*

@@ -1182,12 +1182,12 @@ HWTEST_F(AuthOtherTest, DEL_AUTH_REQ_INFO_BY_AUTH_HANDLE_TEST_001, TestSize.Leve
 }
 
 /*
- * @tc.name: IS_ENHANCE_P2P_MODULE_ID_Test_001
+ * @tc.name: IS_ENHANCE_P2P_MODULE_ID_TEST_001
  * @tc.desc: IsEnhanceP2pModuleId test
  * @tc.type: FUNC
  * @tc.require:
  */
-HWTEST_F(AuthOtherTest, IS_ENHANCE_P2P_MODULE_ID_Test_001, TestSize.Level1)
+HWTEST_F(AuthOtherTest, IS_ENHANCE_P2P_MODULE_ID_TEST_001, TestSize.Level1)
 {
     EXPECT_EQ(IsEnhanceP2pModuleId(AUTH_ENHANCED_P2P_START), true);
     EXPECT_EQ(IsEnhanceP2pModuleId(DIRECT_CHANNEL_SERVER_P2P), false);
@@ -1195,12 +1195,12 @@ HWTEST_F(AuthOtherTest, IS_ENHANCE_P2P_MODULE_ID_Test_001, TestSize.Level1)
 }
 
 /*
- * @tc.name: AUTH_START_LISTENING_FOR_WIFI_DIRECT_Test_001
+ * @tc.name: AUTH_START_LISTENING_FOR_WIFI_DIRECT_TEST_001
  * @tc.desc: AuthStartListeningForWifiDirect test
  * @tc.type: FUNC
  * @tc.require:
  */
-HWTEST_F(AuthOtherTest, AUTH_START_LISTENING_FOR_WIFI_DIRECT_Test_001, TestSize.Level1)
+HWTEST_F(AuthOtherTest, AUTH_START_LISTENING_FOR_WIFI_DIRECT_TEST_001, TestSize.Level1)
 {
     AsyncCallDeviceIdReceived(nullptr);
     AuthCommonInterfaceMock connMock;
@@ -1222,5 +1222,94 @@ HWTEST_F(AuthOtherTest, AUTH_START_LISTENING_FOR_WIFI_DIRECT_Test_001, TestSize.
     EXPECT_NE(
         AuthStartListeningForWifiDirect(AUTH_LINK_TYPE_ENHANCED_P2P, ip, 37025, &moduleId), SOFTBUS_INVALID_PORT);
     EXPECT_EQ(AuthStartListeningForWifiDirect(AUTH_LINK_TYPE_WIFI, ip, 37025, &moduleId), SOFTBUS_INVALID_PARAM);
+}
+
+/*
+ * @tc.name: IS_AUTH_SESSION_KEY_MODULE_TEST_001
+ * @tc.desc: IsAuthSessionKeyModule test
+ * @tc.type: FUNC
+ * @tc.require:
+ */
+HWTEST_F(AuthOtherTest, IS_AUTH_SESSION_KEY_MODULE_TEST_001, TestSize.Level1)
+{
+    AuthDataHead head;
+
+    (void)memset_s(&head, sizeof(AuthDataHead), 0, sizeof(AuthDataHead));
+    head.dataType = DATA_TYPE_AUTH;
+    bool ret = IsAuthSessionKeyModule(&head);
+    EXPECT_TRUE(ret);
+    head.dataType = DATA_TYPE_DEVICE_INFO;
+    ret = IsAuthSessionKeyModule(&head);
+    EXPECT_TRUE(ret);
+    head.dataType = DATA_TYPE_DEVICE_ID;
+    ret = IsAuthSessionKeyModule(&head);
+    EXPECT_TRUE(ret);
+    head.dataType = DATA_TYPE_CLOSE_ACK;
+    ret = IsAuthSessionKeyModule(&head);
+    EXPECT_TRUE(ret);
+    head.dataType = DATA_TYPE_CONNECTION;
+    ret = IsAuthSessionKeyModule(&head);
+    EXPECT_FALSE(ret);
+}
+
+/*
+ * @tc.name: ON_WIFI_CONNECTED_TEST_001
+ * @tc.desc: OnWiFiConnected test
+ * @tc.type: FUNC
+ * @tc.require:
+ */
+HWTEST_F(AuthOtherTest, ON_WIFI_CONNECTED_TEST_001, TestSize.Level1)
+{
+    ListenerModule module = AUTH;
+    int32_t fd = 1;
+    bool isClient = false;
+
+    OnWiFiConnected(module, fd, isClient);
+    isClient = true;
+    OnWiFiConnected(module, fd, isClient);
+
+    bool ret = IsSessionAuth(module);
+    EXPECT_FALSE(ret);
+}
+
+/*
+ * @tc.name: ON_TCP_SESSION_CONNECTED_TEST_001
+ * @tc.desc: OnTcpSessionConnected test
+ * @tc.type: FUNC
+ * @tc.require:
+ */
+HWTEST_F(AuthOtherTest, ON_TCP_SESSION_CONNECTED_TEST_001, TestSize.Level1)
+{
+    ListenerModule module = AUTH;
+    int32_t fd = 1;
+    bool isClient = false;
+
+    OnTcpSessionConnected(module, fd, isClient);
+    isClient = true;
+    OnTcpSessionConnected(module, fd, isClient);
+
+    bool ret = IsSessionAuth(module);
+    EXPECT_FALSE(ret);
+}
+
+/*
+ * @tc.name: ON_WIFI_DISCONNECTED_TEST_001
+ * @tc.desc: OnWiFiDisconnected test
+ * @tc.type: FUNC
+ * @tc.require:
+ */
+HWTEST_F(AuthOtherTest, ON_WIFI_DISCONNECTED_TEST_001, TestSize.Level1)
+{
+    ListenerModule module = AUTH;
+    int32_t fd = 1;
+
+    OnWiFiDisconnected(module, fd);
+    module = AUTH_USB;
+    OnWiFiDisconnected(module, fd);
+    module = AUTH_SESSION_KEY;
+    OnWiFiDisconnected(module, fd);
+
+    bool ret = IsSessionAuth(module);
+    EXPECT_FALSE(ret);
 }
 } // namespace OHOS

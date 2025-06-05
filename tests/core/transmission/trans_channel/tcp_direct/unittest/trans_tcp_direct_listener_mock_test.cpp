@@ -109,7 +109,7 @@ HWTEST_F(TransTcpDirectListenerMockTest, TransPostBytesTest001, TestSize.Level1)
     EXPECT_CALL(tcpDirectListenerMock, PackRequest).WillOnce(Return(nullptr));
     int32_t ret = TransPostBytes(conn, true, 0);
     EXPECT_EQ(SOFTBUS_TRANS_PACK_REQUEST_FAILED, ret);
-    if(conn != nullptr) {
+    if (conn != nullptr) {
         SoftBusFree(conn);
     }
 }
@@ -137,7 +137,7 @@ HWTEST_F(TransTcpDirectListenerMockTest, TransPostBytesTest002, TestSize.Level1)
     EXPECT_CALL(tcpDirectListenerMock, TransTdcPostBytes).WillRepeatedly(Return(SOFTBUS_OK));
     int32_t ret = TransPostBytes(conn, true, 0);
     EXPECT_EQ(SOFTBUS_OK, ret);
-    if(conn != nullptr) {
+    if (conn != nullptr) {
         SoftBusFree(conn);
     }
 }

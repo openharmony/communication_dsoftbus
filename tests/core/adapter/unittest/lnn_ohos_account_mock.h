@@ -13,8 +13,8 @@
  * limitations under the License.
  */
 
-#ifndef LNN_LANE_DEPS_MOCK_H
-#define LNN_LANE_DEPS_MOCK_H
+#ifndef LNN_OHOS_ACCOUNT_MOCK_H
+#define LNN_OHOS_ACCOUNT_MOCK_H
 
 #include <gmock/gmock.h>
 #include <mutex>
@@ -292,4 +292,4 @@ public:
     MOCK_METHOD5(QueryRecordByKey, int32_t(DbContext *, TableNameID, uint8_t *, uint8_t **, int));
 };
 } // namespace OHOS
-#endif
+#endif // LNN_OHOS_ACCOUNT_MOCK_H

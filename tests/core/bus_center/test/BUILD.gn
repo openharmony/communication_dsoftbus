@@ -642,6 +642,8 @@ ohos_unittest("HeartBeatCtrlStaticTest") {
     "$dsoftbus_root_path/tests/core/bus_center/test/heartbeat/hb_ctrl_static_test.cpp",
     "$dsoftbus_root_path/tests/core/bus_center/test/mock/src/hb_ctrl_static_mock.cpp",
     "$dsoftbus_root_path/tests/core/discovery/ble/softbus_ble_mock/ble_mock.cpp",
+    "$dsoftbus_root_path/core/frame/init/src/g_enhance_adapter_func.c",
+    "$dsoftbus_root_path/core/frame/init/src/g_enhance_adapter_func_pack.c",
     "$dsoftbus_root_path/core/frame/init/src/g_enhance_lnn_func.c",
     "$dsoftbus_root_path/core/frame/init/src/g_enhance_lnn_func_pack.c",
   ]

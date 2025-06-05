@@ -49,6 +49,7 @@ static SoftBusList *g_userKeyList = NULL;
 int32_t AuthUserKeyInit(void)
 {
     if (g_userKeyList != NULL) {
+        AUTH_LOGI(AUTH_KEY, "g_userKeyList already init");
         return SOFTBUS_OK;
     }
     g_userKeyList = CreateSoftBusList();
@@ -183,7 +184,7 @@ int32_t AuthInsertUserKey(const AuthACLInfo *aclInfo, const AuthUserKeyInfo *use
     return SOFTBUS_OK;
 }
 
-void DelUserKeyByNetworkId(char *networkId)
+void DelUserKeyByNetworkId(const char *networkId)
 {
     if (g_userKeyList == NULL || networkId == NULL) {
         AUTH_LOGE(AUTH_KEY, "invalid param");
