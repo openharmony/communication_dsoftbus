@@ -19,6 +19,7 @@ ble_discovery_inc = [
   "$dsoftbus_root_path/core/broadcast/common/include",
   "$dsoftbus_root_path/core/discovery/ble/dispatcher/include",
   "$dsoftbus_root_path/core/discovery/ble/approach_ble/include",
+  "$dsoftbus_root_path/core/discovery/ble/raise_ble/include",
   "$dsoftbus_root_path/core/discovery/ble/share_ble/include",
   "$dsoftbus_root_path/core/discovery/ble/softbus_ble/include",
   "$dsoftbus_root_path/core/discovery/ble/touch_ble/include",
@@ -36,7 +37,10 @@ if (dsoftbus_feature_deps_bluetooth) {
 if (!dsoftbus_feature_inner_disc_ble) {
   ble_discovery_src += [ "$dsoftbus_root_path/core/discovery/ble/dispatcher/src/disc_ble_dispatcher_virtual.c" ]
 } else {
-  ble_discovery_src += [ "$dsoftbus_root_path/core/discovery/ble/dispatcher/src/disc_ble_dispatcher.c" ]
+  ble_discovery_src += [
+    "$dsoftbus_root_path/core/discovery/ble/dispatcher/src/disc_ble_dispatcher.c",
+    "$dsoftbus_root_path/core/discovery/ble/raise_ble/src/disc_raise_ble.c",
+    ]
 }
 
 if (dsoftbus_feature_disc_ble && dsoftbus_feature_inner_disc_ble) {
