@@ -198,7 +198,7 @@ HWTEST_F(KVAdapterWrapperTest, LnnCloudSync001, TestSize.Level1)
     NiceMock<LnnKvAdapterWrapperInterfaceMock> LnnKvAdapterWrapperMock;
     EXPECT_CALL(LnnKvAdapterWrapperMock, IsCloudSyncEnabled).WillOnce(Return(true));
     int32_t lnnCloudRet = LnnCloudSync(dbId);
-    EXPECT_EQ(lnnCloudRet, SOFTBUS_ERR);
+    EXPECT_EQ(lnnCloudRet, SOFTBUS_KV_CLOUD_SYNC_FAIL);
 
     lnnCloudRet = LnnCloudSync(dbId + 1);
     EXPECT_EQ(lnnCloudRet, SOFTBUS_INVALID_PARAM);

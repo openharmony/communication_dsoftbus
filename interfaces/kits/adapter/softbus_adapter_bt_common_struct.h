@@ -26,13 +26,13 @@
 extern "C" {
 #endif
 
-#define BT_ADDR_LEN 6
-#define BT_UUID_LEN 16
+#define BT_ADDR_LEN                  6
+#define BT_UUID_LEN                  16
 
-#define MAC_FIRST_INDEX 0
-#define MAC_ONE_INDEX 1
-#define MAC_FIVE_INDEX 5
-#define BLE_WRITE_TIMEOUT_IN_MS 500
+#define MAC_FIRST_INDEX              0
+#define MAC_ONE_INDEX                1
+#define MAC_FIVE_INDEX               5
+#define BLE_WRITE_TIMEOUT_IN_MS      500
 
 typedef enum {
     BLE_DISABLE = 0,

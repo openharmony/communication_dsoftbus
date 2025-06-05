@@ -38,6 +38,25 @@ int SoftBusBleRangePacked(SoftBusRangeParam *param, int32_t *range)
     return pfnAdapterEnhanceFuncList->softBusBleRange(param, range);
 }
 
+int32_t SoftBusRegRangeCbPacked(SoftBusRangeModule module, const SoftBusRangeCallback *callback)
+{
+    AdapterEnhanceFuncList *pfnAdapterEnhanceFuncList = AdapterEnhanceFuncListGet();
+    if (AdapterCheckFuncPointer((void *)pfnAdapterEnhanceFuncList->softBusRegRangeCb) != SOFTBUS_OK) {
+        return SoftBusRegRangeCb(module, callback);
+    }
+    return pfnAdapterEnhanceFuncList->softBusRegRangeCb(module, callback);
+}
+
+void SoftBusUnregRangeCbPacked(SoftBusRangeModule module)
+{
+    AdapterEnhanceFuncList *pfnAdapterEnhanceFuncList = AdapterEnhanceFuncListGet();
+    if (AdapterCheckFuncPointer((void *)pfnAdapterEnhanceFuncList->softBusUnregRangeCb) != SOFTBUS_OK) {
+        SoftBusUnregRangeCb(module);
+        return;
+    }
+    return pfnAdapterEnhanceFuncList->softBusUnregRangeCb(module);
+}
+
 int32_t SoftBusAddSleStateListenerPacked(const SoftBusSleStateListener *listener, int32_t *listenerId)
 {
     AdapterEnhanceFuncList *pfnAdapterEnhanceFuncList = AdapterEnhanceFuncListGet();

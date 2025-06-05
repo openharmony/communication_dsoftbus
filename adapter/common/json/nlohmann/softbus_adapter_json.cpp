@@ -307,6 +307,12 @@ bool JSON_GetStringArrayFromOject(const JsonObj *obj, const char *key, char **va
         COMM_LOGE(COMM_ADAPTER, "item size invalid, size=%{public}lu.", (unsigned long)item.size());
         return false;
     }
+    for (nlohmann::json::iterator it = item.begin(); it != item.end(); ++it) {
+        if (!it.value().is_string()) {
+            COMM_LOGE(COMM_ADAPTER, "invalid value");
+            return false;
+        }
+    }
     int32_t i = 0;
     for (nlohmann::json::iterator it = item.begin(); it != item.end(); ++it) {
         std::string str = it.value().get<std::string>();

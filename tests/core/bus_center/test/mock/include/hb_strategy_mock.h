@@ -59,7 +59,7 @@ public:
     virtual int32_t LnnRetrieveDeviceInfo(const char *udid, NodeInfo *deviceInfo) = 0;
     virtual bool IsSameAccountGroupDevice(void) = 0;
     virtual uint32_t AuthGenRequestId(void) = 0;
-    virtual int32_t AuthStartVerify(const AuthConnInfo *connInfo, AuthVerifyParam *authVerifyParam,
+    virtual int32_t AuthStartVerify(const AuthConnInfo *connInfo, const AuthVerifyParam *authVerifyParam,
         const AuthVerifyCallback *verifyCallback) = 0;
     virtual void AddNodeToLnnBleReportExtraMap(const char *udidHash, const LnnBleReportExtra *bleExtra) = 0;
     virtual int32_t GetNodeFromLnnBleReportExtraMap(const char *udidHash, LnnBleReportExtra *bleExtra) = 0;
@@ -102,7 +102,7 @@ public:
     MOCK_METHOD0(IsSameAccountGroupDevice, bool(void));
     MOCK_METHOD0(AuthGenRequestId, uint32_t(void));
     MOCK_METHOD3(
-        AuthStartVerify, int32_t(const AuthConnInfo *, AuthVerifyParam *, const AuthVerifyCallback *));
+        AuthStartVerify, int32_t(const AuthConnInfo *, const AuthVerifyParam *, const AuthVerifyCallback *));
     MOCK_METHOD2(AddNodeToLnnBleReportExtraMap, void(const char *, const LnnBleReportExtra *));
     MOCK_METHOD2(GetNodeFromLnnBleReportExtraMap, int32_t(const char *, LnnBleReportExtra *));
     MOCK_METHOD1(DeleteNodeFromLnnBleReportExtraMap, void(const char *));

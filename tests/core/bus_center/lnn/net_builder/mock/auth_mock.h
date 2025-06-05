@@ -28,7 +28,7 @@ public:
 
     virtual void AuthHandleLeaveLNN(AuthHandle authHandle) = 0;
     virtual uint32_t AuthGenRequestId(void) = 0;
-    virtual int32_t AuthStartVerify(const AuthConnInfo *connInfo, AuthVerifyParam *authVerifyParam,
+    virtual int32_t AuthStartVerify(const AuthConnInfo *connInfo, const AuthVerifyParam *authVerifyParam,
         const AuthVerifyCallback *callback) = 0;
     virtual int32_t AuthGetVersion(int64_t authId, SoftBusVersion *version) = 0;
     virtual int32_t AuthGetDeviceUuid(int64_t authId, char *uuid, uint16_t size) = 0;
@@ -103,7 +103,7 @@ public:
     MOCK_METHOD(void, AuthHandleLeaveLNN, (AuthHandle), (override));
     MOCK_METHOD(uint32_t, AuthGenRequestId, (), (override));
     MOCK_METHOD(int32_t, AuthStartVerify,
-        (const AuthConnInfo *, AuthVerifyParam *, const AuthVerifyCallback *), (override));
+        (const AuthConnInfo *, const AuthVerifyParam *, const AuthVerifyCallback *), (override));
     MOCK_METHOD(int32_t, AuthGetVersion, (int64_t, SoftBusVersion *), (override));
     MOCK_METHOD(int32_t, AuthGetDeviceUuid, (int64_t, char *, uint16_t), (override));
 

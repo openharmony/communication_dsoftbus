@@ -125,6 +125,7 @@ typedef enum {
     BIT_SUPPORT_ADV_OFFLINE = 4,
     BIT_SUPPORT_ENHANCEDP2P_DUP_BLE = 5,
     BIT_SUPPORT_SESSION_DUP_BLE = 6,
+    BIT_SUPPORT_USERKEY_NEGO = 7,
 } AuthCapability;
 
 typedef struct {
@@ -163,7 +164,6 @@ typedef struct {
     bool isSupportIpv6;
     bool isBleP2p; // true: this device support connect p2p via ble connection
     bool isSupportSv;
-    bool isSupportUkNego;
     uint8_t staticCapability[STATIC_CAP_LEN];
     uint8_t relation[CONNECTION_ADDR_MAX];
     uint8_t userIdCheckSum[USERID_CHECKSUM_LEN];
@@ -212,7 +212,7 @@ typedef struct {
     int64_t authSeqNum;
     uint64_t heartbeatTimestamp;
     uint64_t bleDirectTimestamp;
-    uint64_t onlinetTimestamp;
+    uint64_t onlineTimestamp;
     uint64_t updateTimestamp;
     int64_t lastAuthSeq;
     uint64_t huksKeyTime;

@@ -33,7 +33,7 @@ uint32_t AuthGenRequestId(void)
     return 0;
 }
 
-int32_t AuthStartVerify(const AuthConnInfo *connInfo, AuthVerifyParam *authVerifyParam,
+int32_t AuthStartVerify(const AuthConnInfo *connInfo, const AuthVerifyParam *authVerifyParam,
     const AuthVerifyCallback *callback)
 {
     (void)connInfo;

@@ -802,7 +802,7 @@ static void OpenDataBusRequestOutSessionName(const char *mySessionName, const ch
     AnonymizeFree(tmpPeerName);
 }
 
-static SessionConn* GetSessionConnFromDataBusRequest(int32_t channelId, const cJSON *request)
+static SessionConn *GetSessionConnFromDataBusRequest(int32_t channelId, const cJSON *request)
 {
     SessionConn *conn = (SessionConn *)SoftBusCalloc(sizeof(SessionConn));
     if (conn == NULL) {

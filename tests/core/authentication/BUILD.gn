@@ -1023,6 +1023,7 @@ ohos_unittest("AuthSessionFsmTest") {
   sources = [
     "$dsoftbus_root_path/tests/core/discovery/ble/softbus_ble_mock/ble_mock.cpp",
     "unittest/auth_session_fsm_test.cpp",
+    "unittest/auth_session_fsm_mock.cpp",
   ]
 
   include_dirs = [
