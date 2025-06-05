@@ -23,6 +23,8 @@
 #include "bus_center_manager.h"
 #include "lnn_connection_addr_utils.h"
 #include "lnn_local_net_ledger.h"
+#include "lnn_ranging_manager_struct.h"
+#include "lnn_heartbeat_utils_struct.h"
 
 namespace OHOS {
 class BusCenterIpcInterface {
@@ -67,6 +69,11 @@ public:
         const char *pkgName, int32_t pid, const void *device, uint32_t deviceLen) = 0;
     virtual int32_t LnnServerJoin(ConnectionAddr *addr, const char *pkgName, bool isForceJoin) = 0;
     virtual void SleRangeDeathCallbackPacked(void) = 0;
+    virtual void LnnRegBleRangeCb(const IBleRangeInnerCallback *callback) = 0;
+    virtual void LnnRegSleRangeCbPacked(const ISleRangeInnerCallback *callback) = 0;
+    virtual void LnnUnregBleRangeCb(void) = 0;
+    virtual void LnnUnregSleRangeCbPacked(void) = 0;
+    virtual int32_t ClientOnRangeResult(const char *pkgName, int32_t pid, const RangeResultInnerInfo *rangeInfo) = 0;
 };
 class BusCenterIpcInterfaceMock : public BusCenterIpcInterface {
 public:
@@ -101,6 +108,12 @@ public:
     MOCK_METHOD4(ClientOnRefreshDeviceFound, int32_t(const char *, int32_t, const void *, uint32_t));
     MOCK_METHOD3(LnnServerJoin, int32_t(ConnectionAddr *, const char *, bool));
     MOCK_METHOD0(SleRangeDeathCallbackPacked, void(void));
+    MOCK_METHOD1(LnnRegBleRangeCb, void(const IBleRangeInnerCallback *callback));
+    MOCK_METHOD1(LnnRegSleRangeCbPacked, void(const ISleRangeInnerCallback *callback));
+    MOCK_METHOD0(LnnUnregBleRangeCb, void(void));
+    MOCK_METHOD0(LnnUnregSleRangeCbPacked, void(void));
+    MOCK_METHOD3(ClientOnRangeResult, int32_t(const char *pkgName, int32_t pid,
+        const RangeResultInnerInfo *rangeInfo));
 };
 } // namespace OHOS
 #endif // AUTH_CONNECTION_MOCK_H
