@@ -2111,6 +2111,10 @@ bool LnnSaveBroadcastLinkKey(const char *udid, const BroadcastCipherInfo *info)
 
 int32_t LnnSetDLSleRangeInfo(const char *id, IdCategory type, int32_t sleCap, const char *addr)
 {
+    if (id == NULL || addr == NULL) {
+        LNN_LOGE(LNN_LEDGER, "inavalid param");
+        return SOFTBUS_INVALID_PARAM;
+    }
     if (SoftBusMutexLock(&(LnnGetDistributedNetLedger()->lock)) != 0) {
         LNN_LOGE(LNN_LEDGER, "lock mutex fail");
         return SOFTBUS_LOCK_ERR;
