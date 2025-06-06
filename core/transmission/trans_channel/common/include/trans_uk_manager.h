@@ -55,6 +55,7 @@ void FillHapSinkAclInfoToAppInfo(AppInfo *appInfo);
 
 bool IsValidUkInfo(const UkIdInfo *ukIdInfo);
 
+int32_t GetLocalAccountUidByUserId(char *id, uint32_t idLen, uint32_t *len, int32_t userId);
 int32_t EncryptAndAddSinkSessionKey(cJSON *msg, const AppInfo *appInfo);
 int32_t DecryptAndAddSinkSessionKey(const cJSON *msg, AppInfo *appInfo);
 int32_t GetUserkeyIdByAClInfo(

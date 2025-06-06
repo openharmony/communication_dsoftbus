@@ -30,6 +30,7 @@
 #include "trans_client_proxy.h"
 #include "trans_log.h"
 #include "trans_udp_negotiation.h"
+#include "trans_uk_manager.h"
 
 #define MAX_WAIT_CONNECT_TIME 15
 
@@ -804,8 +805,8 @@ int32_t TransUdpUpdateAccessInfo(int32_t channelId, const AccessInfo *accessInfo
         return SOFTBUS_LOCK_ERR;
     }
     uint32_t size = 0;
-    char accountId[ACCOUNT_UID_LEN_MAX];
-    int32_t ret = GetOsAccountUidByUserId(accountId, ACCOUNT_UID_LEN_MAX - 1, &size, accessInfo->userId);
+    char accountId[ACCOUNT_UID_LEN_MAX] = { 0 };
+    int32_t ret = GetLocalAccountUidByUserId(accountId, ACCOUNT_UID_LEN_MAX, &size, accessInfo->userId);
     if (ret != SOFTBUS_OK) {
         TRANS_LOGE(TRANS_CTRL, "get current account failed. ret=%{public}d", ret);
     }
