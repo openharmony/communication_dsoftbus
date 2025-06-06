@@ -104,9 +104,9 @@ if (defined(ohos_lite)) {
 } else {
   import("//build/ohos.gni")
 
-  config("nstakcx_FillpSo_open_header") {
+  config("nstackx_FillpSo_open_header") {
     include_dirs = [
-      "include/fillptypes.h"
+      "include/fillptypes.h",
     ]
   }
 
@@ -188,7 +188,7 @@ if (defined(ohos_lite)) {
       external_deps += [ "c_utils:utils" ]
     }
 
-    public_configs = [ ":nstakcx_FillpSo_open_header" ]
+    public_configs = [ ":nstackx_FillpSo_open_header" ]
     innerapi_tags = [ "platformsdk_indirect" ]
     part_name = "dsoftbus"
     subsystem_name = "communication"

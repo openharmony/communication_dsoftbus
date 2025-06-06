@@ -1072,7 +1072,10 @@ static bool AuthCapabilityIsSupport(char *peerUdid, AuthCapability capaBit)
     (void)memset_s(&nodeInfo, sizeof(NodeInfo), 0, sizeof(NodeInfo));
     int32_t ret = LnnRetrieveDeviceInfoByUdidPacked(peerUdid, &nodeInfo);
     if (ret != SOFTBUS_OK) {
-        LNN_LOGE(LNN_BUILDER, "retrieve device info fail, peerUdid:%{public}s", peerUdid);
+        char *anonyPeerUdid = NULL;
+        Anonymize(peerUdid, &anonyPeerUdid);
+        LNN_LOGE(LNN_BUILDER, "retrieve device info fail, peerUdid:%{public}s", AnonymizeWrapper(anonyPeerUdid));
+        AnonymizeFree(anonyPeerUdid);
         return false;
     }
     return IsSupportFeatureByCapaBit(nodeInfo.authCapacity, capaBit);
@@ -1735,7 +1738,7 @@ void NotifyForegroundUseridChange(char *networkId, uint32_t discoveryType, bool 
     }
     char *msg = cJSON_PrintUnformatted(json);
     cJSON_Delete(json);
-    if(msg == NULL) {
+    if (msg == NULL) {
         LNN_LOGE(LNN_BUILDER, "msg is null!");
         return;
     }

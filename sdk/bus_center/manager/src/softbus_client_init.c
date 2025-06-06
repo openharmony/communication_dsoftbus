@@ -21,7 +21,7 @@
 int32_t SoftBusClientOpenFuncInit(void *soHandle)
 {
     int32_t (*clientRegisterOpenFunc)(void);
-    int ret = SOFTBUS_OK;
+    int32_t ret = SOFTBUS_OK;
 
     if (soHandle == NULL) {
         return SOFTBUS_NETWORK_DLOPEN_FAILED;

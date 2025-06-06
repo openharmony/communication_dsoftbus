@@ -24,7 +24,7 @@ ohos_unittest("SoftBusMessageOpenChannelTest") {
   include_dirs = [
     "unittest/common/",
 
-    "$dsoftbus_core_path/transmission/common/src",
+    "$dsoftbus_core_path/transmission/trans_channel/common/src",
     "$dsoftbus_core_path/transmission/trans_channel/auth/include",
   ]
 

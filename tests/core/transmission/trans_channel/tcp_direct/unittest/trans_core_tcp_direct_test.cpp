@@ -24,7 +24,11 @@
 #include "trans_tcp_direct_callback.h"
 #include "trans_tcp_direct_manager.h"
 #include "trans_tcp_direct_test.h"
+#include "dsoftbus_enhance_interface.h"
+#include "g_enhance_lnn_func.h"
+#include "trans_tcp_direct_common_mock.h"
 
+using namespace testing;
 using namespace testing::ext;
 
 namespace OHOS {
@@ -375,11 +379,15 @@ HWTEST_F(TransCoreTcpDirectTest, VerifyP2pPackErrorTest0010, TestSize.Level1)
 */
 HWTEST_F(TransCoreTcpDirectTest, GetCipherFlagByAuthIdTest0011, TestSize.Level1)
 {
+    LnnEnhanceFuncList *pfnLnnEnhanceFuncList = LnnEnhanceFuncListGet();
+    pfnLnnEnhanceFuncList->authMetaGetServerSide = AuthMetaGetServerSide;
     bool isAuthServer = false;
     bool isLegacyOs = false;
     AuthHandle authHandle = { .authId = 1, .type = AUTH_LINK_TYPE_WIFI };
     uint32_t flag = 0;
 
+    NiceMock<TransTcpDirectCommonInterfaceMock> TransCoreTcpDirectMock;
+    EXPECT_CALL(TransCoreTcpDirectMock, AuthMetaGetServerSide).WillRepeatedly(Return(SOFTBUS_NOT_FIND));
     int32_t ret = GetCipherFlagByAuthId(authHandle, &flag, &isAuthServer, isLegacyOs);
     EXPECT_EQ(ret, SOFTBUS_NOT_IMPLEMENT);
 

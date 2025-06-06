@@ -151,7 +151,7 @@ static BleUnifyInterface g_bleUnifyInterface[BLE_PROTOCOL_MAX] = {
 
 static void ConnCocInit(void)
 {
-    if (SoftbusServerPluginLoadedFlagGet() == true) {
+    if (SoftbusServerPluginLoadedFlagGet()) {
         g_bleUnifyInterface[BLE_COC].bleClientConnect = ConnCocClientConnect;
         g_bleUnifyInterface[BLE_COC].bleClientDisconnect = ConnCocClientDisconnect;
         g_bleUnifyInterface[BLE_COC].bleClientSend = ConnCocClientSend;
@@ -170,6 +170,10 @@ static void ConnCocInit(void)
 
 const BleUnifyInterface *ConnBleGetUnifyInterface(BleProtocolType type)
 {
+    if (type != BLE_GATT && type != BLE_COC) {
+        CONN_LOGE(CONN_BLE, "Failed to return type.");
+        return NULL;
+    }
     ConnCocInit();
     if (g_bleUnifyInterface[BLE_COC].bleClientConnect == NULL || g_bleUnifyInterface[BLE_COC].bleClientDisconnect == NULL ||
         g_bleUnifyInterface[BLE_COC].bleClientSend == NULL || g_bleUnifyInterface[BLE_COC].bleClientUpdatePriority == NULL ||
@@ -180,10 +184,6 @@ const BleUnifyInterface *ConnBleGetUnifyInterface(BleProtocolType type)
             CONN_LOGE(CONN_BLE, "Failed to return type, ble_coc not register.");
             return NULL;
         }
-    }
-    if (type != BLE_GATT && type != BLE_COC) {
-        CONN_LOGE(CONN_BLE, "Failed to return type.");
-        return NULL;
     }
     return &g_bleUnifyInterface[type];
 }

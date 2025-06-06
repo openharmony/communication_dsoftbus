@@ -16,45 +16,22 @@ import("../public_feature/public_feature.gni")
 import("softbus_common_feature.gni")
 
 # deal broadcast
-if (dsoftbus_feature_disc_ble || dsoftbus_feature_disc_share_ble ||
-    dsoftbus_feature_disc_approach || dsoftbus_feature_disc_touch ||
-    dsoftbus_feature_disc_virtual_link_ble || dsoftbus_feature_disc_link_ble ||
-    dsoftbus_feature_disc_notification ||
-    dsoftbus_feature_disc_notification_rx) {
-  dsoftbus_feature_inner_disc_broadcast = true
-} else {
-  dsoftbus_feature_inner_disc_broadcast = false
-}
-
-if (dsoftbus_feature_ex_kits && !dsoftbus_feature_linkfinder) {
-  dsoftbus_feature_inner_disc_broadcast = false
-}
-
 if (!dsoftbus_feature_deps_bluetooth) {
   dsoftbus_feature_inner_disc_broadcast = false
+} else {
+  dsoftbus_feature_inner_disc_broadcast = true
 }
 
 # deal coap
-if (dsoftbus_feature_disc_coap || dsoftbus_feature_disc_lnn_coap ||
-    dsoftbus_feature_disc_share_coap) {
-  dsoftbus_feature_inner_disc_coap = true
-} else {
-  dsoftbus_feature_inner_disc_coap = false
-}
-
 if (!dsoftbus_feature_coap || !dsoftbus_feature_deps_wifi) {
   dsoftbus_feature_inner_disc_coap = false
+} else {
+  dsoftbus_feature_inner_disc_coap = true
 }
 
 # deal ble
-if (dsoftbus_feature_disc_ble || dsoftbus_feature_disc_share_ble ||
-    dsoftbus_feature_disc_approach || dsoftbus_feature_disc_touch ||
-    dsoftbus_feature_disc_virtual_link_ble) {
-  dsoftbus_feature_inner_disc_ble = true
-} else {
-  dsoftbus_feature_inner_disc_ble = false
-}
-
 if (!dsoftbus_feature_inner_disc_broadcast) {
   dsoftbus_feature_inner_disc_ble = false
+} else {
+  dsoftbus_feature_inner_disc_ble = true
 }

@@ -21,13 +21,17 @@
 #include "lnn_ohos_account_adapter.h"
 #include "softbus_adapter_mem.h"
 #include "softbus_json_utils.h"
-#include "softbus_qos.h"
 #include "trans_session_account_adapter.h"
 #include "trans_session_manager.h"
 #include "trans_udp_channel_manager.h"
 #include "trans_udp_negotiation.c"
 #include "trans_udp_negotiation_exchange.c"
+#include "trans_udp_nego_test_mock.h"
+#include "g_enhance_lnn_func.h"
+#include "g_enhance_trans_func_pack.h"
+#include "dsoftbus_enhance_interface.h"
 
+using namespace testing;
 using namespace testing::ext;
 
 namespace OHOS {
@@ -242,6 +246,8 @@ HWTEST_F(TransUdpNegoTest, SendUdpInfo001, TestSize.Level1)
  */
 HWTEST_F(TransUdpNegoTest, SendReplyErrInfo001, TestSize.Level1)
 {
+    LnnEnhanceFuncList *pfnLnnEnhanceFuncList = LnnEnhanceFuncListGet();
+    pfnLnnEnhanceFuncList->authMetaPostTransData = AuthMetaPostTransData;
     int32_t errCode = 0;
     string errDesc = "ProcessMessage";
     AuthHandle authHandle = { .authId = 0, .type = AUTH_LINK_TYPE_WIFI };
@@ -260,6 +266,8 @@ HWTEST_F(TransUdpNegoTest, SendReplyErrInfo001, TestSize.Level1)
  */
 HWTEST_F(TransUdpNegoTest, SendReplyUdpInfo001, TestSize.Level1)
 {
+    LnnEnhanceFuncList *pfnLnnEnhanceFuncList = LnnEnhanceFuncListGet();
+    pfnLnnEnhanceFuncList->authMetaPostTransData = AuthMetaPostTransData;
     AuthHandle authHandle = { .authId = INVALID_ID, .type = AUTH_LINK_TYPE_WIFI };
     int64_t seq = INVALID_SEQ;
     AppInfo appInfo;
@@ -269,6 +277,8 @@ HWTEST_F(TransUdpNegoTest, SendReplyUdpInfo001, TestSize.Level1)
     int32_t ret = SendReplyUdpInfo(nullptr, authHandle, seq);
     EXPECT_EQ(ret, SOFTBUS_INVALID_PARAM);
     authHandle.authId = 0;
+    NiceMock<TransUdpNegoInterfaceMock> TransUdpNegoMock;
+    EXPECT_CALL(TransUdpNegoMock, AuthMetaPostTransData).WillOnce(Return(SOFTBUS_LOCK_ERR));
     ret = SendReplyUdpInfo(&appInfo, authHandle, seq);
     EXPECT_EQ(ret, SOFTBUS_NOT_IMPLEMENT);
 }
@@ -289,8 +299,8 @@ HWTEST_F(TransUdpNegoTest, TransOnExchangeUdpInfoReply001, TestSize.Level1)
     ASSERT_TRUE(newChannel != nullptr);
     int32_t ret = TransAddUdpChannel(newChannel);
     EXPECT_EQ(ret, SOFTBUS_OK);
-    // ret = InitQos();
-    // EXPECT_NE(ret, SOFTBUS_INVALID_PARAM);
+    ret = InitQosPacked();
+    EXPECT_NE(ret, SOFTBUS_INVALID_PARAM);
 
     AuthHandle authHandle = { .authId = AUTH_INVALID_ID, .type = AUTH_LINK_TYPE_WIFI };
 
@@ -343,6 +353,8 @@ HWTEST_F(TransUdpNegoTest, TransOnExchangeUdpInfoReply002, TestSize.Level1)
  */
 HWTEST_F(TransUdpNegoTest, TransOnExchangeUdpInfoRequest001, TestSize.Level1)
 {
+    LnnEnhanceFuncList *pfnLnnEnhanceFuncList = LnnEnhanceFuncListGet();
+    pfnLnnEnhanceFuncList->authMetaPostTransData = AuthMetaPostTransData;
     char* data = TestGetMsgInfo();
     ASSERT_TRUE(data != nullptr);
     cJSON *msg = cJSON_Parse(data);
@@ -354,6 +366,9 @@ HWTEST_F(TransUdpNegoTest, TransOnExchangeUdpInfoRequest001, TestSize.Level1)
 
     int32_t ret = TransAddUdpChannel(newChannel);
     EXPECT_EQ(ret, SOFTBUS_OK);
+
+    NiceMock<TransUdpNegoInterfaceMock> TransUdpNegoMock;
+    EXPECT_CALL(TransUdpNegoMock, AuthMetaPostTransData).WillOnce(Return(SOFTBUS_OK));
     TransOnExchangeUdpInfoRequest(authHandle, newChannel->seq, nullptr);
     cJSON_Delete(msg);
 }
@@ -366,6 +381,8 @@ HWTEST_F(TransUdpNegoTest, TransOnExchangeUdpInfoRequest001, TestSize.Level1)
  */
 HWTEST_F(TransUdpNegoTest, TransOnExchangeUdpInfoRequest002, TestSize.Level1)
 {
+    LnnEnhanceFuncList *pfnLnnEnhanceFuncList = LnnEnhanceFuncListGet();
+    pfnLnnEnhanceFuncList->authMetaPostTransData = AuthMetaPostTransData;
     AuthHandle authHandle = { .authId = 1, .type = AUTH_LINK_TYPE_WIFI };
     int64_t invalidSeq = 0;
     string msgStr = "normal msgStr";
@@ -376,6 +393,8 @@ HWTEST_F(TransUdpNegoTest, TransOnExchangeUdpInfoRequest002, TestSize.Level1)
     int32_t ret = TransAddUdpChannel(channel);
     EXPECT_EQ(ret, SOFTBUS_OK);
 
+    NiceMock<TransUdpNegoInterfaceMock> TransUdpNegoMock;
+    EXPECT_CALL(TransUdpNegoMock, AuthMetaPostTransData).WillRepeatedly(Return(SOFTBUS_OK));
     TransOnExchangeUdpInfoRequest(authHandle, channel->seq, nullptr);
 
     TransOnExchangeUdpInfoRequest(authHandle, invalidSeq, msg);
@@ -393,6 +412,8 @@ HWTEST_F(TransUdpNegoTest, TransOnExchangeUdpInfoRequest002, TestSize.Level1)
  */
 HWTEST_F(TransUdpNegoTest, StartExchangeUdpInfo001, TestSize.Level1)
 {
+    LnnEnhanceFuncList *pfnLnnEnhanceFuncList = LnnEnhanceFuncListGet();
+    pfnLnnEnhanceFuncList->authMetaPostTransData = AuthMetaPostTransData;
     AuthHandle authHandle = { .authId = 0, .type = AUTH_LINK_TYPE_WIFI };
     int64_t seq = 0;
     UdpChannelInfo channel;
@@ -490,6 +511,8 @@ HWTEST_F(TransUdpNegoTest, UdpModuleCb002, TestSize.Level1)
  */
 HWTEST_F(TransUdpNegoTest, TransOnExchangeUdpInfo001, TestSize.Level1)
 {
+    LnnEnhanceFuncList *pfnLnnEnhanceFuncList = LnnEnhanceFuncListGet();
+    pfnLnnEnhanceFuncList->authMetaPostTransData = AuthMetaPostTransData;
     AuthHandle authHandle = { .authId = 1, .type = AUTH_LINK_TYPE_WIFI };
     uint8_t val = 1;
     AuthTransData data = {
@@ -498,6 +521,8 @@ HWTEST_F(TransUdpNegoTest, TransOnExchangeUdpInfo001, TestSize.Level1)
 
     cJSON *json = cJSON_CreateObject();
     EXPECT_NE(json, nullptr);
+    NiceMock<TransUdpNegoInterfaceMock> TransUdpNegoMock;
+    EXPECT_CALL(TransUdpNegoMock, AuthMetaPostTransData).WillOnce(Return(SOFTBUS_OK));
     TransOnExchangeUdpInfo(authHandle, data.flag, data.seq, json);
 
     data.flag = 1;
@@ -889,6 +914,8 @@ HWTEST_F(TransUdpNegoTest, ParseRequestAppInfo001, TestSize.Level1)
  */
 HWTEST_F(TransUdpNegoTest, TransPackRequestUdpInfo001, TestSize.Level1)
 {
+    LnnEnhanceFuncList *pfnLnnEnhanceFuncList = LnnEnhanceFuncListGet();
+    pfnLnnEnhanceFuncList->authMetaPostTransData = AuthMetaPostTransData;
     AuthHandle authHandle = { .authId = 1, .type = AUTH_LINK_TYPE_WIFI };
     int64_t seq = 1;
     AppInfo *appInfo = (AppInfo*)SoftBusMalloc(sizeof(AppInfo));
@@ -901,6 +928,8 @@ HWTEST_F(TransUdpNegoTest, TransPackRequestUdpInfo001, TestSize.Level1)
     int32_t ret = TransPackRequestUdpInfo(msg, appInfo);
     EXPECT_EQ(ret, SOFTBUS_INVALID_PARAM);
 
+    NiceMock<TransUdpNegoInterfaceMock> TransUdpNegoMock;
+    EXPECT_CALL(TransUdpNegoMock, AuthMetaPostTransData).WillOnce(Return(SOFTBUS_OK));
     TransOnExchangeUdpInfoRequest(authHandle, seq, msg);
     cJSON_Delete(msg);
     SoftBusFree(appInfo);

@@ -29,12 +29,14 @@ typedef int32_t (*DiscGetDisplayNameFunc)(char *displayName, uint32_t length, ui
 typedef int32_t (*DiscCoapParseKeyValueStrFunc)(const char *src, const char *key, char *outValue, uint32_t outLen);
 typedef void (*DiscSoftbusBleSetHandleIdFunc)(uint32_t handleId);
 typedef int32_t (*OnRaiseHandDeviceFoundFunc)(RaiseHandDeviceInfo *deviceInfo);
+typedef uint32_t (*GetDiscCapabilityFunc)(void);
 typedef struct TagDiscOpenFuncList {
     DiscCoapSendRspFunc discCoapSendRsp;
     DiscGetDisplayNameFunc discGetDisplayName;
     DiscCoapParseKeyValueStrFunc discCoapParseKeyValueStr;
     DiscSoftbusBleSetHandleIdFunc discSoftbusBleSetHandleId;
     OnRaiseHandDeviceFoundFunc onRaiseHandDeviceFound;
+    GetDiscCapabilityFunc getDiscCapability;
 } DiscOpenFuncList;
 
 #ifdef __cplusplus

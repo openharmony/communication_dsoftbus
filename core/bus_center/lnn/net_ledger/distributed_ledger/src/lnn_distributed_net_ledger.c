@@ -87,9 +87,9 @@ static void UpdateDeviceNameInfo(const char *udid, const char *oldDeviceName)
         return;
     }
     char *anonyOldDeviceName = NULL;
-    Anonymize(oldDeviceName, &anonyOldDeviceName);
+    AnonymizeDeviceName(oldDeviceName, &anonyOldDeviceName);
     char *anonyDeviceName = NULL;
-    Anonymize(basic.deviceName, &anonyDeviceName);
+    AnonymizeDeviceName(basic.deviceName, &anonyDeviceName);
     LNN_LOGI(LNN_LEDGER, "report deviceName update, name:%{public}s -> %{public}s.",
         AnonymizeWrapper(anonyOldDeviceName), AnonymizeWrapper(anonyDeviceName));
     AnonymizeFree(anonyOldDeviceName);
@@ -1502,7 +1502,7 @@ int32_t LnnUpdateRemoteDeviceName(const NodeInfo *info)
     SoftBusMutexUnlock(&g_distributedNetLedger.lock);
     if (isNeedUpdate) {
         char *anonyDeviceName = NULL;
-        Anonymize(basic.deviceName, &anonyDeviceName);
+        AnonymizeDeviceName(basic.deviceName, &anonyDeviceName);
         LNN_LOGI(LNN_LEDGER, "report deviceName update, name=%{public}s", AnonymizeWrapper(anonyDeviceName));
         AnonymizeFree(anonyDeviceName);
         LnnNotifyBasicInfoChanged(&basic, TYPE_DEVICE_NAME);
