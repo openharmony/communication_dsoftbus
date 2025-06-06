@@ -936,6 +936,9 @@ static int32_t LnnUpdateOldCacheInfo(const NodeInfo *newInfo, NodeInfo *oldInfo)
     if (strcpy_s(oldInfo->p2pInfo.p2pMac, MAC_LEN, newInfo->p2pInfo.p2pMac) != EOK) {
         LNN_LOGE(LNN_LEDGER, "strcpy_s p2pMac to cache info fail");
     }
+    if (strcpy_s(oldInfo->accountUid, ACCOUNT_UID_STR_LEN, newInfo->accountUid) != EOK) {
+        LNN_LOGE(LNN_LEDGER, "strcpy_s accountUid to cache info fail");
+    }
     if (memcpy_s((char *)oldInfo->rpaInfo.peerIrk, LFINDER_IRK_LEN, (char *)newInfo->rpaInfo.peerIrk,
         LFINDER_IRK_LEN) != EOK) {
         LNN_LOGE(LNN_LEDGER, "memcpy_s peerIrk to cache info fail");

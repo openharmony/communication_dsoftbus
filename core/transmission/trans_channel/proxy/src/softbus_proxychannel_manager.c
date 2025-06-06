@@ -296,8 +296,8 @@ static int32_t TransProxyUpdateSinkAccessInfo(int32_t chanId, const AccessInfo *
     TRANS_CHECK_AND_RETURN_RET_LOGE(
         SoftBusMutexLock(&g_proxyChannelList->lock) == SOFTBUS_OK, SOFTBUS_LOCK_ERR, TRANS_CTRL, "lock mutex fail!");
     uint32_t size = 0;
-    char accountId[ACCOUNT_UID_LEN_MAX];
-    int32_t ret = GetOsAccountUidByUserId(accountId, ACCOUNT_UID_LEN_MAX - 1, &size, accessInfo->userId);
+    char accountId[ACCOUNT_UID_LEN_MAX] = { 0 };
+    int32_t ret = GetLocalAccountUidByUserId(accountId, ACCOUNT_UID_LEN_MAX, &size, accessInfo->userId);
     if (ret != SOFTBUS_OK) {
         TRANS_LOGE(TRANS_CTRL, "get current account failed. ret=%{public}d", ret);
     }

@@ -176,7 +176,7 @@ static void TransGetAccessInfo(AppInfo *appInfo)
         return;
     }
     uint32_t size = 0;
-    ret = GetOsAccountUidByUserId(appInfo->myData.accountId, ACCOUNT_UID_LEN_MAX - 1, &size, appInfo->myData.userId);
+    ret = GetLocalAccountUidByUserId(appInfo->myData.accountId, ACCOUNT_UID_LEN_MAX, &size, appInfo->myData.userId);
     if (ret != SOFTBUS_OK) {
         TRANS_LOGW(TRANS_CTRL, "get accountId by userId=%{public}d failed, ret=%{public}d",
             appInfo->myData.userId, ret);
