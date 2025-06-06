@@ -333,4 +333,35 @@ HWTEST_F(AuthDeviceProfileTest, IsTrustDevice_Test01, TestSize.Level1)
     bool result = IsTrustDevice(trustDevices, deviceIdHash, anonyDeviceIdHash, isOnlyPointToPoint);
     EXPECT_FALSE(result);
 }
+
+/*
+ * @tc.name: IS_TRUSTED_DEVICE_FROM_ACCESS_TEST_003
+ * @tc.desc: device is trust from access
+ * @tc.type: FUNC
+ * @tc.require:
+ */
+HWTEST_F(AuthDeviceProfileTest, IS_TRUSTED_DEVICE_FROM_ACCESS_TEST_003, TestSize.Level1)
+{
+    const char *accountHash = nullptr;
+    const char *udid = nullptr;
+    bool ret = IsTrustedDeviceFromAccess(accountHash, udid, 100);
+    EXPECT_EQ(ret, false);
+    accountHash = "dev/ice%Id()Hash()";
+    udid = "dev/ice%Id()Hash()";
+    ret = IsTrustedDeviceFromAccess(accountHash, udid, 100);
+    EXPECT_EQ(ret, false);
+    int32_t peerUserId = -1;
+    int64_t accountId = 100;
+    SessionKey sessionKey;
+    (void)memset_s(&sessionKey, sizeof(SessionKey), 0, sizeof(SessionKey));
+    DelNotTrustDevice(nullptr);
+    UpdateDpAclParams aclParams = {
+        .accountId = accountId,
+        .deviceId = nullptr,
+        .peerUserId = peerUserId
+    };
+    UpdateDpSameAccount(&aclParams, sessionKey, true, ACL_WRITE_DEFAULT);
+    ret = IsTrustedDeviceFromAccess(accountHash, udid, 100);
+    EXPECT_EQ(ret, false);
+}
 } // namespace OHOS

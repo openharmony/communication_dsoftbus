@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2024 Huawei Device Co., Ltd.
+ * Copyright (c) 2024-2025 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -483,6 +483,11 @@ int32_t LnnGetLocalByteInfo(InfoKey key, uint8_t *info, uint32_t len)
 int32_t LnnGetLocalStrInfoByIfnameIdx(InfoKey key, char *info, uint32_t len, int32_t ifIdx)
 {
     return GetInterface()->LnnGetLocalStrInfoByIfnameIdx(key, info, len, ifIdx);
+}
+
+bool IsTrustedDeviceFromAccess(const char *peerAccountHash, const char *peerUdid, int32_t peerUserId)
+{
+    return GetInterface()->IsTrustedDeviceFromAccess(peerAccountHash, peerUdid, peerUserId);
 }
 }
 } // namespace OHOS
