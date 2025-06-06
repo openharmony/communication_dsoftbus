@@ -63,6 +63,7 @@ void UpdateAssetSessionKeyByAcl(
     AuthACLInfo *info, const uint8_t *sessionKey, uint32_t sessionKeyLen, int32_t *sessionKeyId, bool isSameAccount);
 bool IsSKIdInvalid(int32_t sessionKeyId, const char *accountHash, const char *udidShortHash, int32_t userId);
 int32_t SelectAllAcl(TrustedInfo **trustedInfoArray, uint32_t *num);
+bool IsTrustedDeviceFromAccess(const char *peerAccountHash, const char *peerUdid, int32_t peerUserId);
 
 #ifdef __cplusplus
 #if __cplusplus

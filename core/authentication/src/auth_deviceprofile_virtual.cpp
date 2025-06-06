@@ -114,3 +114,11 @@ int32_t SelectAllAcl(TrustedInfo **trustedInfoArray, uint32_t *num)
     (void)num;
     return SOFTBUS_NOT_IMPLEMENT;
 }
+
+bool IsTrustedDeviceFromAccess(const char *peerAccountHash, const char *peerUdid, int32_t peerUserId)
+{
+    (void)peerAccountHash;
+    (void)peerUdid;
+    (void)peerUserId;
+    return false;
+}

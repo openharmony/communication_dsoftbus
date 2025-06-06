@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2024 Huawei Device Co., Ltd.
+ * Copyright (c) 2024-2025 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -122,6 +122,7 @@ public:
     virtual int32_t GetActiveOsAccountIds(void) = 0;
     virtual bool IsSKIdInvalid(int32_t sessionKeyId, const char *accountHash, const char *udidShortHash,
         int32_t userId) = 0;
+    virtual bool IsTrustedDeviceFromAccess(const char *peerAccountHash, const char *peerUdid, int32_t peerUserId) = 0;
 };
 
 class AuthSessionJsonInterfaceMock : public AuthSessionJsonInterface {
@@ -199,6 +200,7 @@ public:
     MOCK_METHOD1(IdServiceDestroyCredentialList, void (char **returnData));
     MOCK_METHOD0(GetActiveOsAccountIds, int32_t(void));
     MOCK_METHOD4(IsSKIdInvalid, bool (int32_t, const char *, const char *, int32_t));
+    MOCK_METHOD3(IsTrustedDeviceFromAccess, bool (const char *, const char *, int32_t));
 };
 
 extern "C" {
