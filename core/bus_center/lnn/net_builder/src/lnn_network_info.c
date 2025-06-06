@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2022-2023 Huawei Device Co., Ltd.
+ * Copyright (c) 2022-2025 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -312,10 +312,9 @@ static void WifiStateProcess(uint32_t netCapability, bool isSend)
     return;
 }
 
-static bool IsP2pAvailable(bool isApSwitchOn)
+static bool IsP2pAvailable(void)
 {
-    bool isTripleMode = SoftBusIsWifiTripleMode();
-    return g_isWifiDirectSupported && (g_isApCoexistSupported || !isApSwitchOn || isTripleMode) && g_isWifiEnable;
+    return g_isWifiDirectSupported && g_isWifiEnable;
 }
 
 static void LnnSetNetworkCapability(uint32_t *capability)
@@ -369,7 +368,7 @@ static void ProcessApEnabled(uint32_t *capability, bool *needSync)
 {
     g_isApEnable = true;
     LnnSetNetworkCapability(capability);
-    if (IsP2pAvailable(true)) {
+    if (IsP2pAvailable()) {
         (void)LnnSetNetCapability(capability, BIT_WIFI_P2P);
     }
     *needSync = true;
@@ -378,8 +377,12 @@ static void ProcessApEnabled(uint32_t *capability, bool *needSync)
 static void ProcessApDisabled(uint32_t *capability, bool *needSync)
 {
     g_isApEnable = false;
-    if (IsP2pAvailable(false)) {
+    SoftBusWifiDetailState wifiState = SoftBusGetWifiState();
+    if (IsP2pAvailable()) {
         (void)LnnSetNetCapability(capability, BIT_WIFI_P2P);
+    }
+    if (!g_isWifiEnable || (wifiState != SOFTBUS_WIFI_STATE_ACTIVED && wifiState != SOFTBUS_WIFI_STATE_ACTIVATING)) {
+        LnnClearNetworkCapability(capability);
     }
     *needSync = true;
 }
@@ -412,6 +415,8 @@ static void GetNetworkCapability(SoftBusWifiState wifiState, uint32_t *capabilit
             if (!g_isApEnable) {
                 LnnClearNetworkCapability(capability);
                 LnnSetP2pNetCapability(capability);
+            } else if (!IsP2pAvailable()) {
+                (void)LnnClearNetCapability(capability, BIT_WIFI_P2P);
             }
             *needSync = true;
             break;

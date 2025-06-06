@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2022-2023 Huawei Device Co., Ltd.
+ * Copyright (c) 2022-2025 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -180,7 +180,7 @@ HWTEST_F(LNNNetworkInfoTest, IS_P2P_AVAILABLE_TEST_001, TestSize.Level1)
     OnReceiveCapaSyncInfoMsg(LNN_INFO_TYPE_CAPABILITY, networkId, MSG, BITS);
     OnReceiveCapaSyncInfoMsg(LNN_INFO_TYPE_CAPABILITY, networkId, MSG, BITS);
     EXPECT_CALL(serviceMock, SoftBusIsWifiTripleMode).WillRepeatedly(Return(true));
-    bool ret = IsP2pAvailable(true);
+    bool ret = IsP2pAvailable();
     EXPECT_EQ(ret, false);
 }
 
