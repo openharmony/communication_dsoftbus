@@ -399,13 +399,13 @@ HWTEST_F(TransUdpNegoTest, StartExchangeUdpInfo001, TestSize.Level1)
     (void)memset_s(&channel, sizeof(UdpChannelInfo), 0, sizeof(UdpChannelInfo));
     channel.info.udpChannelOptType = TYPE_UDP_CHANNEL_OPEN;
     int32_t ret = StartExchangeUdpInfo(&channel, authHandle, 0);
-    EXPECT_NE(SOFTBUS_OK, ret);
+    EXPECT_EQ(SOFTBUS_LOCK_ERR, ret);
 
     channel.info.udpChannelOptType = TYPE_UDP_CHANNEL_CLOSE;
 
     (void)AuthCommonInit();
     ret = StartExchangeUdpInfo(&channel, authHandle, seq);
-    EXPECT_NE(SOFTBUS_OK, ret);
+    EXPECT_EQ(SOFTBUS_LOCK_ERR, ret);
 }
 
 /**
