@@ -91,7 +91,7 @@ static int32_t DBDeviceNameInfoSyncToCache(NodeInfo *cacheInfo, char *fieldName,
             return SOFTBUS_STRCPY_ERR;
         }
         char *anonyDeviceName = NULL;
-        Anonymize(cacheInfo->deviceInfo.deviceName, &anonyDeviceName);
+        AnonymizeDeviceName(cacheInfo->deviceInfo.deviceName, &anonyDeviceName);
         LNN_LOGI(LNN_BUILDER, "success. deviceName=%{public}s", AnonymizeWrapper(anonyDeviceName));
         AnonymizeFree(anonyDeviceName);
     } else if (strcmp(fieldName, DEVICE_INFO_UNIFIED_DEVICE_NAME) == 0 && valueLength < DEVICE_NAME_BUF_LEN) {

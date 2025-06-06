@@ -15,18 +15,7 @@ declare_args() {
   dsoftbus_feature_disc_ble = true
   dsoftbus_feature_disc_coap = true
   dsoftbus_feature_disc_lnn_coap = true
-  dsoftbus_feature_disc_share_ble = false
   dsoftbus_feature_disc_share_coap = false
-  dsoftbus_feature_disc_approach = false
-  dsoftbus_feature_disc_notification = false
-  dsoftbus_feature_disc_notification_rx = false
-  dsoftbus_feature_disc_link_ble = false
-  dsoftbus_feature_disc_virtual_link_ble = false
-  dsoftbus_feature_disc_lnn_hb = false
-  dsoftbus_feature_disc_touch = false
-  dsoftbus_feature_disc_sle = false
-  dsoftbus_feature_disc_usb = false
-  dsoftbus_feature_disc_oop = false
 
   dsoftbus_feature_conn_tcp_proxy = true
   dsoftbus_feature_conn_tcp_comm = true
@@ -64,7 +53,6 @@ declare_args() {
   dsoftbus_feature_lnn_power_ctrl = true
   dsoftbus_feature_lnn_lane_qos = true
 
-  dsoftbus_feature_lnn_meta_node = true
   dsoftbus_feature_lnn_frame = true
   dsoftbus_feature_vtp = true
   dsoftbus_feature_dfile = true

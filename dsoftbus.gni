@@ -42,6 +42,7 @@ declare_args() {
   dsoftbus_build_eng = false
   dsoftbus_access_token_feature = true
   dsoftbus_ipc_feature = true
+  softbus_config_enhance = false
 
   if (product_name != "qemu-arm-linux-min") {
     qemu_arm_disable = true
@@ -112,20 +113,6 @@ if (defined(ohos_lite)) {
 
 defines += [ "OPENSSL_NO_FILENAMES" ]
 
-if (dsoftbus_feature_disc_notification &&
-    dsoftbus_feature_inner_disc_broadcast) {
-  defines += [ "DSOFTBUS_FEATURE_DISC_NOTIFICATION" ]
-}
-
-if (dsoftbus_feature_disc_notification_rx &&
-    dsoftbus_feature_inner_disc_broadcast) {
-  defines += [ "DSOFTBUS_FEATURE_DISC_NOTIFICATION_RX" ]
-}
-
-if (dsoftbus_feature_disc_link_ble && dsoftbus_feature_inner_disc_broadcast) {
-  defines += [ "DSOFTBUS_FEATURE_DISC_LINK_BLE" ]
-}
-
 if (dsoftbus_feature_disc_coap && dsoftbus_feature_inner_disc_coap) {
   defines += [ "DSOFTBUS_FEATURE_DISC_COAP" ]
 }
@@ -143,6 +130,10 @@ if (defined(global_parts_info) &&
   dsoftbus_feature_lnn_cloud_sync = false
 } else {
   dsoftbus_feature_lnn_cloud_sync = true
+}
+
+if (softbus_config_enhance) {
+  defines += [ "DSOFTBUS_CONFIG_ENHANCE" ]
 }
 
 import("$dsoftbus_dfx_path/dsoftbus_dfx.gni")
@@ -172,15 +163,11 @@ if (dsoftbus_feature_conn_pv1 && softbus_communication_wifi_feature &&
     defines += [ "DSOFTBUS_FEATURE_CONN_PV2" ]
   }
   if (dsoftbus_feature_conn_action) {
-    defines += [ "DSOFTBUS_FEATURE_CONN_ACTION" ]
-    if (dsoftbus_feature_conn_hv2 && dsoftbus_feature_disc_link_ble) {
+    if (dsoftbus_feature_conn_hv2) {
       defines += [ "DSOFTBUS_FEATURE_CONN_HV2" ]
       if (dsoftbus_feature_conn_hv1 && dsoftbus_feature_conn_pv2 &&
           dsoftbus_feature_conn_pv1) {
         defines += [ "DSOFTBUS_FEATURE_CONN_HV1" ]
-      }
-      if (dsoftbus_feature_conn_hv2c) {
-        defines += [ "DSOFTBUS_FEATURE_CONN_HV2C" ]
       }
     }
   }

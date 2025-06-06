@@ -1367,7 +1367,7 @@ ohos_unittest("LNNNetLedgerCommonTest") {
   ]
   if (dsoftbus_feature_lnn_frame) {
     sources += [ "$dsoftbus_root_path/core/bus_center/lnn/net_ledger/distributed_ledger/src/lnn_distributed_net_ledger.c" ]
-    sources += [ 
+    sources += [
       "$dsoftbus_root_path/core/bus_center/lnn/net_ledger/distributed_ledger/src/lnn_distributed_net_ledger_manager.c",
       "$dsoftbus_root_path/core/frame/init/src/g_enhance_lnn_func.c",
     ]
@@ -1399,7 +1399,7 @@ ohos_unittest("LNNNetLedgerCommonTest") {
 
 ohos_unittest("LNNDisctributedLedgerTest") {
   module_out_path = module_output_path
-  sources = [ 
+  sources = [
     "$dsoftbus_root_path/core/frame/init/src/g_enhance_lnn_func.c",
     "net_ledger/lnn_disctributed_net_ledger_test.cpp",
     "net_ledger/lnn_disctributed_net_ledger_mock.cpp",
@@ -1476,7 +1476,7 @@ ohos_unittest("LNNDisctributedLedgerTest") {
       "hilog:libhilog",
     ]
   }
-  external_deps += [ 
+  external_deps += [
     "huks:libhukssdk",
     "googletest:gmock",
     ]
@@ -1588,7 +1588,7 @@ ohos_unittest("LNNMetaNodeLedgerTest") {
   ]
   if (dsoftbus_feature_lnn_frame) {
     sources += [ "$dsoftbus_root_path/core/bus_center/lnn/net_ledger/distributed_ledger/src/lnn_distributed_net_ledger.c" ]
-    sources += [ 
+    sources += [
       "$dsoftbus_root_path/core/bus_center/lnn/net_ledger/distributed_ledger/src/lnn_distributed_net_ledger_manager.c",
       "$dsoftbus_root_path/core/frame/init/src/g_enhance_lnn_func.c",
     ]
@@ -2240,7 +2240,7 @@ ohos_unittest("LNNLaneLinkExtTest") {
     "$dsoftbus_root_path/interfaces/kits/lnn",
     "$dsoftbus_root_path/interfaces/kits/connect",
     "$dsoftbus_root_path/interfaces/kits/disc",
-    "$dsoftbus_root_path/core/frame/init/include",  
+    "$dsoftbus_root_path/core/frame/init/include",
     "$dsoftbus_root_path/tests/core/bus_center/lnn/lane/include",
     "$dsoftbus_root_path/core/bus_center/lnn/net_ledger/decision_db/include",
     "$dsoftbus_root_path/core/adapter/bus_center/include",
@@ -2290,8 +2290,8 @@ ohos_unittest("LNNLaneHubTest") {
     "$dsoftbus_root_path/interfaces/kits/bus_center",
     "$dsoftbus_root_path/interfaces/kits/lnn",
     "$dsoftbus_root_path/core/frame/init/include",
-    "$dsoftbus_root_path/core/frame/common/include", 
-    "$dsoftbus_root_path/tests/interfaces/enhance", 
+    "$dsoftbus_root_path/core/frame/common/include",
+    "$dsoftbus_root_path/tests/interfaces/enhance",
     "$dsoftbus_root_path/core/bus_center/interface",
     "$dsoftbus_root_path/core/bus_center/lnn/lane_hub/common/include",
     "$dsoftbus_root_path/core/bus_center/lnn/lane_hub/lane_manager/include",
@@ -3428,12 +3428,6 @@ group("unittest") {
       ":LNNTransLaneMockTest",
       ":LaneTest",
     ]
-  }
-  if (dsoftbus_feature_lnn_meta_node) {
-    deps += [ ":LNNMetaNodeLedgerTest" ]
-  }
-  if (!defined(ohos_lite)) {
-    deps += [ ":LNNDbMockTest" ]
   }
 }
 

@@ -448,6 +448,8 @@ static int32_t OnConnectEvent(ListenerModule module, int32_t cfd, const ConnectO
     }
     if ((module == AUTH || module == AUTH_USB) && AddAuthTcpConnFdItem(cfd) != SOFTBUS_OK) {
         AUTH_LOGE(AUTH_CONN, "insert auth tcp conn fd item fail.");
+        (void)DelTrigger(module, cfd, READ_TRIGGER);
+        ConnShutdownSocket(cfd);
         return SOFTBUS_MEM_ERR;
     }
     NotifyConnected(module, cfd, false);
@@ -613,21 +615,19 @@ static ConnectOption GetConnectOptionByIfname(int32_t ifnameIdx, int32_t port)
 static int32_t SetTcpKeepaliveAndIpTos(bool isBlockMode, int32_t ifnameIdx, TriggerType triggerMode,
     ListenerModule module, int32_t fd)
 {
-    if (ConnSetTcpKeepalive(fd, (int32_t)DEFAULT_FREQ_CYCLE, TCP_KEEPALIVE_INTERVAL, TCP_KEEPALIVE_DEFAULT_COUNT) !=
-        SOFTBUS_OK) {
+    int32_t ret = SOFTBUS_OK;
+    ret = ConnSetTcpKeepalive(fd, (int32_t)DEFAULT_FREQ_CYCLE, TCP_KEEPALIVE_INTERVAL, TCP_KEEPALIVE_DEFAULT_COUNT);
+    if (ret != SOFTBUS_OK) {
         AUTH_LOGE(AUTH_CONN, "set tcp keep alive fail.");
-        (void)DelTrigger(module, fd, triggerMode);
-        ConnShutdownSocket(fd);
-        return AUTH_INVALID_FD;
+        return ret;
     }
     int32_t ipTos = TCP_KEEPALIVE_TOS_VAL;
-    if (SoftBusSocketSetOpt(fd, SOFTBUS_IPPROTO_IP_, SOFTBUS_IP_TOS_, &ipTos, sizeof(ipTos)) != SOFTBUS_ADAPTER_OK) {
+    ret = SoftBusSocketSetOpt(fd, SOFTBUS_IPPROTO_IP_, SOFTBUS_IP_TOS_, &ipTos, sizeof(ipTos));
+    if (ret != SOFTBUS_ADAPTER_OK) {
         AUTH_LOGE(AUTH_CONN, "set option fail.");
-        (void)DelTrigger(module, fd, triggerMode);
-        ConnShutdownSocket(fd);
-        return AUTH_INVALID_FD;
+        return SOFTBUS_NETWORK_SET_KEEPALIVE_OPTION_FAIL;
     }
-    return fd;
+    return SOFTBUS_OK;
 }
 
 int32_t SocketConnectDevice(const char *ip, int32_t port, bool isBlockMode, int32_t ifnameIdx)
@@ -657,17 +657,24 @@ int32_t SocketConnectDevice(const char *ip, int32_t port, bool isBlockMode, int3
     int32_t fd = ret;
     TriggerType triggerMode = isBlockMode ? READ_TRIGGER : WRITE_TRIGGER;
     ListenerModule module = (ifnameIdx == USB_IF) ? AUTH_USB : AUTH;
-    if (isBlockMode && AddAuthTcpConnFdItem(fd) != SOFTBUS_OK) {
-        AUTH_LOGE(AUTH_CONN, "insert auth tcp conn fd item fail.");
-        ConnShutdownSocket(fd);
-        return AUTH_INVALID_FD;
-    }
     if (AddTrigger(module, fd, triggerMode) != SOFTBUS_OK) {
         AUTH_LOGE(AUTH_CONN, "AddTrigger fail.");
         ConnShutdownSocket(fd);
         return AUTH_INVALID_FD;
     }
-    return SetTcpKeepaliveAndIpTos(isBlockMode, ifnameIdx, triggerMode, module, fd);
+    if (SetTcpKeepaliveAndIpTos(isBlockMode, ifnameIdx, triggerMode, module, fd) != SOFTBUS_OK) {
+        AUTH_LOGE(AUTH_CONN, "SetTcpKeepaliveAndIpTos fail.");
+        (void)DelTrigger(module, fd, triggerMode);
+        ConnShutdownSocket(fd);
+        return AUTH_INVALID_FD;
+    }
+    if (isBlockMode && AddAuthTcpConnFdItem(fd) != SOFTBUS_OK) {
+        AUTH_LOGE(AUTH_CONN, "insert auth tcp conn fd item fail.");
+        (void)DelTrigger(module, fd, triggerMode);
+        ConnShutdownSocket(fd);
+        return AUTH_INVALID_FD;
+    }
+    return fd;
 }
 
 int32_t NipSocketConnectDevice(ListenerModule module, const char *addr, int32_t port, bool isBlockMode)

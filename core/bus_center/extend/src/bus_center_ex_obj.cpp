@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2023 Huawei Device Co., Ltd.
+ * Copyright (c) 2025 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -18,6 +18,7 @@
 #include <dlfcn.h>
 
 #include "lnn_log.h"
+#include "softbus_init_common.h"
 namespace OHOS {
 #ifdef __aarch64__
 static constexpr const char *SOFTBUS_SERVER_PLUGIN_PATH_NAME = "/system/lib64/libdsoftbus_server_plugin.z.so";
@@ -33,8 +34,7 @@ bool BusCenterExObj::OpenSoftbusPluginSo()
         return true;
     }
 
-    // soHandle_ = dlopen(SOFTBUS_SERVER_PLUGIN_PATH_NAME, RTLD_NOW | RTLD_NODELETE | RTLD_GLOBAL);
-    soHandle_ = dlopen(SOFTBUS_SERVER_PLUGIN_PATH_NAME, RTLD_NOW | RTLD_GLOBAL);
+    (void)SoftBusDlopen(SOFTBUS_HANDLE_SERVER_PLUGIN, &soHandle_);
     if (soHandle_ == nullptr) {
         LNN_LOGE(LNN_EVENT, "dlopen %{public}s failed, err msg:%{public}s", SOFTBUS_SERVER_PLUGIN_PATH_NAME, dlerror());
         return false;

@@ -21,7 +21,7 @@ trans_direct_channel_sdk_src = [
 ]
 trans_direct_channel_sdk_inc = [
   "$dsoftbus_sdk_path/transmission/trans_channel/tcp_direct/include",
-  "$dsoftbus_sdk_path/interfaces/kits/authentication",
+  "$dsoftbus_root_path/interfaces/kits/authentication",
   "$dsoftbus_root_path/core/authentication/interface",
   "$dsoftbus_root_path/core/connection/interface",
 ]

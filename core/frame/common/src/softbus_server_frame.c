@@ -16,7 +16,6 @@
 #include "softbus_server_frame.h"
 
 #include <dlfcn.h>
-
 #include "auth_interface.h"
 #include "auth_uk_manager.h"
 #include "br_proxy_server_manager.h"
@@ -32,8 +31,8 @@
 #include "g_enhance_auth_func.h"
 #include "instant_statistics.h"
 #include "lnn_bus_center_ipc.h"
-#include "lnn_sle_monitor.h"
 #include "lnn_init_monitor.h"
+#include "lnn_sle_monitor.h"
 #include "softbus_adapter_bt_common.h"
 #include "softbus_disc_server.h"
 #include "softbus_feature_config.h"
@@ -50,12 +49,6 @@
 #include "softbus_init_common.h"
 #include "trans_session_service.h"
 #include "wifi_direct_manager.h"
-
-#ifdef __aarch64__
-static const char *SOFTBUS_SERVER_PLUGIN_PATH_NAME = "/system/lib64/libdsoftbus_server_plugin.z.so";
-#else
-static const char *SOFTBUS_SERVER_PLUGIN_PATH_NAME = "/system/lib/libdsoftbus_server_plugin.z.so";
-#endif
 
 static bool g_isInit = false;
 
@@ -117,7 +110,7 @@ static int32_t softbusServerOpenFuncInit(void *soHandle)
     }
     return SOFTBUS_OK;
 }
- 
+
 static int32_t softbusServerEnhanceFuncInit(void *soHandle)
 {
     if (soHandle == NULL) {
@@ -149,31 +142,26 @@ static int32_t softbusServerEnhanceFuncInit(void *soHandle)
     }
     return SOFTBUS_OK;
 }
- 
+
 static void ServerFuncInit(void)
 {
     int ret = SOFTBUS_OK;
     void *pluginServerSoHandle = NULL;
-    (void)SoftBusDlopen(SOFTBUS_SERVER_PLUGIN_PATH_NAME, &pluginServerSoHandle);
+    (void)SoftBusDlopen(SOFTBUS_HANDLE_SERVER_PLUGIN, &pluginServerSoHandle);
     if (pluginServerSoHandle == NULL) {
         COMM_LOGE(COMM_SVC, "dlopen libdsoftbus_server_plugin.z.so failed.");
-        SoftbusServerPluginLoadedFlagSet(false);
         return;
     }
- 
+
     ret = softbusServerOpenFuncInit(pluginServerSoHandle);
     if (ret != SOFTBUS_OK) {
         COMM_LOGE(COMM_SVC, "init softbus server Open func failed");
     }
- 
+
     ret = softbusServerEnhanceFuncInit(pluginServerSoHandle);
     if (ret != SOFTBUS_OK) {
         COMM_LOGE(COMM_SVC, "init softbus server Enhance func failed");
-    } else {
-        SoftbusServerPluginLoadedFlagSet(true);
     }
- 
-    // SoftBusDlclose(pluginServerSoHandle);
 }
 
 static int32_t InitServicesAndModules(void)

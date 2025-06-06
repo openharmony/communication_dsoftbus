@@ -26,7 +26,7 @@ if (dsoftbus_feature_lnn_frame) {
   bus_center_utils_src +=
       [ "$core_bus_center_utils_path/src/lnn_state_machine.c" ]
 }
-if (dsoftbus_feature_lnn_frame || dsoftbus_feature_lnn_meta_node) {
+if (dsoftbus_feature_lnn_frame) {
   bus_center_utils_src += [
     "$core_bus_center_utils_path/src/lnn_file_utils.c",
     "$core_bus_center_utils_path/src/lnn_network_id.c",
@@ -37,12 +37,5 @@ bus_center_utils_inc = [
   "$dsoftbus_dfx_path/interface/include",
 ]
 bus_center_utils_deps = [ "$dsoftbus_dfx_path:softbus_dfx" ]
-
-if (dsoftbus_feature_disc_lnn_hb) {
-  bus_center_utils_src += [ "$core_bus_center_utils_path/src/lnn_compress.c" ]
-  bus_center_utils_ex_deps = [ "zlib:libz" ]
-} else {
-  bus_center_utils_ex_deps = []
-  bus_center_utils_src +=
-      [ "$core_bus_center_utils_path/src/lnn_compress_virtual.c" ]
-}
+bus_center_utils_ex_deps = []
+bus_center_utils_src += [ "$core_bus_center_utils_path/src/lnn_compress_virtual.c" ]
