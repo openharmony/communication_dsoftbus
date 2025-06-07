@@ -36,23 +36,23 @@ extern "C"{
  * @since 4.1
  * @version 1.0
  */
-#define BC_ADDR_MAC_LEN 6
+#define BC_ADDR_MAC_LEN                          6
 
 // Bluetooth scan duty cycle, unit: ms
-#define SOFTBUS_BC_SCAN_INTERVAL_P2 3000
-#define SOFTBUS_BC_SCAN_INTERVAL_P2_FAST 1500
-#define SOFTBUS_BC_SCAN_INTERVAL_P10 300
-#define SOFTBUS_BC_SCAN_INTERVAL_P25 240
-#define SOFTBUS_BC_SCAN_INTERVAL_P50 60
-#define SOFTBUS_BC_SCAN_INTERVAL_P75 40
-#define SOFTBUS_BC_SCAN_INTERVAL_P100 1000
-#define SOFTBUS_BC_SCAN_WINDOW_P2 60
-#define SOFTBUS_BC_SCAN_WINDOW_P2_FAST 30
-#define SOFTBUS_BC_SCAN_WINDOW_P10 30
-#define SOFTBUS_BC_SCAN_WINDOW_P25 60
-#define SOFTBUS_BC_SCAN_WINDOW_P50 30
-#define SOFTBUS_BC_SCAN_WINDOW_P75 30
-#define SOFTBUS_BC_SCAN_WINDOW_P100 1000
+#define SOFTBUS_BC_SCAN_INTERVAL_P2              3000
+#define SOFTBUS_BC_SCAN_INTERVAL_P2_FAST         1500
+#define SOFTBUS_BC_SCAN_INTERVAL_P10             300
+#define SOFTBUS_BC_SCAN_INTERVAL_P25             240
+#define SOFTBUS_BC_SCAN_INTERVAL_P50             60
+#define SOFTBUS_BC_SCAN_INTERVAL_P75             40
+#define SOFTBUS_BC_SCAN_INTERVAL_P100            1000
+#define SOFTBUS_BC_SCAN_WINDOW_P2                60
+#define SOFTBUS_BC_SCAN_WINDOW_P2_FAST           30
+#define SOFTBUS_BC_SCAN_WINDOW_P10               30
+#define SOFTBUS_BC_SCAN_WINDOW_P25               60
+#define SOFTBUS_BC_SCAN_WINDOW_P50               30
+#define SOFTBUS_BC_SCAN_WINDOW_P75               30
+#define SOFTBUS_BC_SCAN_WINDOW_P100              1000
 
 /**
  * @brief Defines the maxium lenght of irk information.
@@ -60,7 +60,7 @@ extern "C"{
  * @since 4.1
  * @version 1.0
  */
-#define BC_IRK_LEN   16
+#define BC_IRK_LEN                               16
 
 /**
  * @brief Defines the maxium lenght of udid hash information.
@@ -68,7 +68,7 @@ extern "C"{
  * @since 4.1
  * @version 1.0
  */
-#define BC_UDID_HASH_LEN 32
+#define BC_UDID_HASH_LEN                         32
 
 /**
  * @brief Defines the length of local name, the maximum length of complete local name is 30 bytes.
@@ -76,7 +76,7 @@ extern "C"{
  * @since 4.1
  * @version 1.0
  */
-#define BC_LOCAL_NAME_LEN_MAX 30
+#define BC_LOCAL_NAME_LEN_MAX                    30
 
 /**
  * @brief Defines the broadcast service type.

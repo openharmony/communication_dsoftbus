@@ -45,35 +45,35 @@
 #include "softbus_utils.h"
 #include "softbus_init_common.h"
 
-#define BLE_PUBLISH 0x0
-#define BLE_SUBSCRIBE 0x2
-#define BLE_ACTIVE 0x0
-#define BLE_PASSIVE 0x1
-#define BLE_INFO_COUNT 4
+#define BLE_PUBLISH                    0x0
+#define BLE_SUBSCRIBE                  0x2
+#define BLE_ACTIVE                     0x0
+#define BLE_PASSIVE                    0x1
+#define BLE_INFO_COUNT                 4
 
-#define BLE_CHANNLE_MAP 0x0
+#define BLE_CHANNLE_MAP                0x0
 
-#define BLE_ADV_TX_POWER_DEFAULT (-6)
-#define BLE_ADV_TX_POWER_MAX (-2)
+#define BLE_ADV_TX_POWER_DEFAULT       (-6)
+#define BLE_ADV_TX_POWER_MAX           (-2)
 
-#define CON_ADV_ID 0x0
-#define NON_ADV_ID 0x1
-#define NUM_ADVERTISER 2
-#define ADV_INTERNAL 48
+#define CON_ADV_ID                     0x0
+#define NON_ADV_ID                     0x1
+#define NUM_ADVERTISER                 2
+#define ADV_INTERNAL                   48
 
-#define BLE_MSG_TIME_OUT 6000
+#define BLE_MSG_TIME_OUT               6000
 
 // Defination of boardcast
-#define BLE_VERSION 4
-#define DISTRIBUTE_BUSINESS 0x5
-#define DEVICE_NAME_MAX_LEN 15
+#define BLE_VERSION                    4
+#define DISTRIBUTE_BUSINESS            0x5
+#define DEVICE_NAME_MAX_LEN            15
 
-#define BIT_WAKE_UP 0x01
-#define BIT_CUST_DATA_TYPE 0x10
-#define BIT_HEART_BIT 0x20
-#define BIT_CONNECT_BIT 0x40
-#define BIT_CON 0x80
-#define BIT_CON_POS 7
+#define BIT_WAKE_UP                    0x01
+#define BIT_CUST_DATA_TYPE             0x10
+#define BIT_HEART_BIT                  0x20
+#define BIT_CONNECT_BIT                0x40
+#define BIT_CON                        0x80
+#define BIT_CON_POS                    7
 
 #define BLE_INFO_MANAGER "bleInfoManager"
 #define BlE_ADVERTISER "bleAdvertiser"

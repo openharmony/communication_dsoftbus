@@ -186,6 +186,8 @@ void DiscLinkStatusChanged(LinkStatus status, ExchangeMedium medium, int32_t ifn
  */
 void DiscDeviceInfoChanged(InfoTypeChanged type);
 
+int32_t OnRaiseHandDeviceFound(RaiseHandDeviceInfo *deviceInfo);
+
 #ifdef __cplusplus
 #if __cplusplus
 }

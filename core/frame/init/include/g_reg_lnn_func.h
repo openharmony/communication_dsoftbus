@@ -240,7 +240,7 @@ typedef int32_t (*StartBroadcastingFunc)(int32_t bcId, const BroadcastParam *par
 typedef int32_t (*BroadcastEnableSyncDataToLpDeviceFunc)(void);
 typedef int32_t (*StartScanFunc)(int32_t listenerId, const BcScanParams *param);
 typedef int32_t (*RegisterScanListenerFunc)(BaseServiceType srvType, int32_t *listenerId, const ScanCallback *cb);
-typedef int32_t (*AuthStartVerifyFunc)(const AuthConnInfo *connInfo, AuthVerifyParam *authVerifyParam,
+typedef int32_t (*AuthStartVerifyFunc)(const AuthConnInfo *connInfo, const AuthVerifyParam *authVerifyParam,
     const AuthVerifyCallback *callback);
 typedef AuthVerifyCallback *(*LnnGetReAuthVerifyCallbackFunc)(void);
 typedef void (*NotifyForegroundUseridChangeFunc)(char *networkId, uint32_t discoveryType, bool isChange);

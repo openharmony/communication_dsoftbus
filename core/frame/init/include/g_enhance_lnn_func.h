@@ -228,11 +228,14 @@ typedef void (*LnnDeinitBroadcastLinkKeyFunc)(void);
 typedef bool (*IsNeedSyncBroadcastLinkKeyFunc)(const char *networkId);
 typedef int32_t (*LnnSyncBroadcastLinkKeyFunc)(const char *networkId);
 typedef bool (*HaveConcurrencyPreLinkReqIdByReuseConnReqIdFunc)(uint32_t connReqId, bool isCheckPreLink);
+typedef bool (*HaveConcurrencyPreLinkNodeByLaneReqIdFunc)(uint32_t laneReqId, bool isCheckPreLink);
 typedef int32_t (*GetConcurrencyLaneReqIdByConnReqIdFunc)(uint32_t connReqId, uint32_t *laneReqId);
 typedef void (*LnnFreePreLinkFunc)(void *para);
 typedef int32_t (*GetConcurrencyLaneReqIdByActionIdFunc)(uint32_t actionId, uint32_t *laneReqId);
 typedef int32_t (*UpdateConcurrencyReuseLaneReqIdByActionIdFunc)(uint32_t actionId, uint32_t reuseLaneReqId,
     uint32_t connRequestId);
+typedef int32_t (*UpdateConcurrencyReuseLaneReqIdByUdidFunc)(char *udidHash, uint32_t reuseLaneReqId,
+    uint32_t connReqId);
 typedef int32_t (*LnnPackCloudSyncAckSeqFunc)(cJSON *json, char *peerudid);
 typedef void (*LnnClearPtkListFunc)(void);
 typedef int32_t (*GenerateNewLocalCipherKeyFunc)(void);
@@ -244,6 +247,7 @@ typedef void (*LnnRegSleRangeCbFunc)(const ISleRangeInnerCallback *callback);
 typedef int32_t (*LnnStopRangeFunc)(const RangeConfig *config);
 typedef int32_t (*LnnStartRangeFunc)(const RangeConfig *config);
 typedef int32_t (*UnregistAuthTransListenerFunc)(void);
+typedef void (*SleRangeDeathCallbackFunc)(void);
 typedef struct TagLnnEnhanceFuncList {
     // time_sync
     LnnTimeSyncImplInitFunc lnnTimeSyncImplInit;
@@ -256,12 +260,14 @@ typedef struct TagLnnEnhanceFuncList {
     LnnDcSubscribeFunc lnnDcSubscribe;
     LnnDcUnsubscribeFunc lnnDcUnsubscribe;
     LnnDcDispatchEventFunc lnnDcDispatchEvent;
+    // sle range
     RegistAuthTransListenerFunc registAuthTransListener;
     UnregistAuthTransListenerFunc unregistAuthTransListener;
     LnnUnregSleRangeCbFunc lnnUnregSleRangeCb;
     LnnStopRangeFunc lnnStopRange;
     LnnStartRangeFunc lnnStartRange;
     LnnRegSleRangeCbFunc lnnRegSleRangeCb;
+    SleRangeDeathCallbackFunc sleRangeDeathCallback;
     // disc_mgr
     LnnDestroyCoapConnectListFunc lnnDestroyCoapConnectList;
     LnnCoapConnectFunc lnnCoapConnect;
@@ -392,9 +398,11 @@ typedef struct TagLnnEnhanceFuncList {
     LnnUpdateDeviceDataFunc lnnUpdateDeviceData;
     GetConcurrencyLaneReqIdByConnReqIdFunc getConcurrencyLaneReqIdByConnReqId;
     HaveConcurrencyPreLinkReqIdByReuseConnReqIdFunc haveConcurrencyPreLinkReqIdByReuseConnReqId;
+    HaveConcurrencyPreLinkNodeByLaneReqIdFunc haveConcurrencyPreLinkNodeByLaneReqId;
     GetConcurrencyLaneReqIdByActionIdFunc getConcurrencyLaneReqIdByActionId;
     LnnFreePreLinkFunc lnnFreePreLink;
     UpdateConcurrencyReuseLaneReqIdByActionIdFunc updateConcurrencyReuseLaneReqIdByActionId;
+    UpdateConcurrencyReuseLaneReqIdByUdidFunc updateConcurrencyReuseLaneReqIdByUdid;
     LnnPackCloudSyncAckSeqFunc lnnPackCloudSyncAckSeq;
     LnnClearPtkListFunc lnnClearPtkList;
     GenerateNewLocalCipherKeyFunc generateNewLocalCipherKey;

@@ -53,7 +53,7 @@ int WifiDirectScheduler::CancelConnectDevice(const WifiDirectConnectInfo &info)
 
     std::lock_guard commandLock(commandLock_);
     for (auto itc = commandList_.begin(); itc != commandList_.end(); itc++) {
-        if ((*itc)->GetType() == CommandType::CONNECT_COMMAND) {
+        if (*itc != nullptr && (*itc)->GetType() == CommandType::CONNECT_COMMAND) {
             auto connectCommand = std::static_pointer_cast<ConnectCommand>(*itc);
             if (connectCommand != nullptr && connectCommand->IsSameCommand(info)) {
                 commandList_.erase(itc);
@@ -135,13 +135,13 @@ bool WifiDirectScheduler::ProcessNextCommand(WifiDirectExecutor *executor,
             CONN_LOGI(CONN_WIFI_DIRECT, "add executor=%{public}s, commandId=%{public}u",
                       WifiDirectAnonymizeDeviceId(commandDeviceId).c_str(), command->GetId());
             executor->SetRemoteDeviceId(commandDeviceId);
-            if (command->GetType() == CommandType::CONNECT_COMMAND) {
+            if (command != nullptr && command->GetType() == CommandType::CONNECT_COMMAND) {
                 executor->SetActive(true);
                 executor->SendEvent(std::static_pointer_cast<ConnectCommand>(command));
-            } else if (command->GetType() == CommandType::DISCONNECT_COMMAND) {
+            } else if (command != nullptr && command->GetType() == CommandType::DISCONNECT_COMMAND) {
                 executor->SetActive(true);
                 executor->SendEvent(std::static_pointer_cast<DisconnectCommand>(command));
-            } else if (command->GetType() == CommandType::NEGOTIATE_COMMAND) {
+            } else if (command != nullptr && command->GetType() == CommandType::NEGOTIATE_COMMAND) {
                 auto negotiateCommand = std::static_pointer_cast<NegotiateCommand>(command);
                 CONN_LOGI(CONN_WIFI_DIRECT, "msgType=%{public}s",
                           negotiateCommand->GetNegotiateMessage().MessageTypeToString().c_str());

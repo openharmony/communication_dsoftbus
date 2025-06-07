@@ -233,7 +233,7 @@ void DelDupAuthManager(AuthManager *auth)
     return GetLnnConnInterface()->DelDupAuthManager(auth);
 }
 
-void DelUserKeyByNetworkId(char *networkId)
+void DelUserKeyByNetworkId(const char *networkId)
 {
     return GetLnnConnInterface()->DelUserKeyByNetworkId(networkId);
 }

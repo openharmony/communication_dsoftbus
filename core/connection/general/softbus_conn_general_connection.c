@@ -734,7 +734,7 @@ static bool IsAllowSave(const char *pkgName, bool isFindServer)
             false, CONN_BLE, "lock failed");
         struct GeneralConnection *it = NULL;
         LIST_FOR_EACH_ENTRY(it, &g_generalManager.connections->list, struct GeneralConnection, node) {
-            if (StrCmpIgnoreCase(it->info.pkgName, pkgName) == 0) {
+            if (StrCmpIgnoreCase(it->info.pkgName, pkgName) == 0 && it->isClient) {
                 count += 1;
             }
         }
@@ -1028,7 +1028,7 @@ static void OnCommDataReceived(uint32_t connectionId, ConnModule moduleId, int64
     GeneralConnectionHead *head = (GeneralConnectionHead *)data;
     GeneralConnectionMsgType msgType = head->msgType;
     if (msgType >= GENERAL_CONNECTION_MSG_TYPE_MAX || len < head->headLen) {
-        CONN_LOGE(CONN_BLE, "invalid msgType, msgType=%{public}d, msgType=%{public}d, msgType=%{public}d",
+        CONN_LOGE(CONN_BLE, "invalid msgType, msgType=%{public}d, len=%{public}d, headLen=%{public}u",
             msgType, len, head->headLen);
         return;
     }

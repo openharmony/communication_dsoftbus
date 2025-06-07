@@ -364,13 +364,17 @@ FAIL:
 
 static int32_t ProcessSocketInEvent(ListenerModule module, int32_t fd)
 {
+    AUTH_CHECK_AND_RETURN_RET_LOGE(RequireAuthTcpConnFdListLock(), SOFTBUS_LOCK_ERR, AUTH_CONN,
+        "RequireAuthTcpConnFdListLock fail");
     if ((module == AUTH || module == AUTH_USB) && !IsExistAuthTcpConnFdItemByConnId(fd)) {
         AUTH_LOGE(AUTH_CONN, "fd=%{public}d not exist, ignore", fd);
+        ReleaseAuthTcpConnFdListLock();
         return SOFTBUS_INVALID_PARAM;
     }
     SocketPktHead head = { 0 };
     int32_t ret = RecvPacketHead(module, fd, &head);
     if (ret != SOFTBUS_OK) {
+        ReleaseAuthTcpConnFdListLock();
         return ret;
     }
     AUTH_LOGI(AUTH_CONN,
@@ -378,16 +382,20 @@ static int32_t ProcessSocketInEvent(ListenerModule module, int32_t fd)
         fd, head.module, head.seq, head.flag, head.len);
     if (head.len == 0 || head.len > AUTH_SOCKET_MAX_DATA_LEN) {
         AUTH_LOGW(AUTH_CONN, "data is out of size, abandon it.");
+        ReleaseAuthTcpConnFdListLock();
         return SOFTBUS_INVALID_DATA_HEAD;
     }
     if (head.magic != (int32_t)MAGIC_NUMBER) {
         AUTH_LOGE(AUTH_CONN, "magic number not match.");
+        ReleaseAuthTcpConnFdListLock();
         return SOFTBUS_INVALID_DATA_HEAD;
     }
     uint8_t *data = RecvPacketData(fd, head.len);
     if (data == NULL) {
+        ReleaseAuthTcpConnFdListLock();
         return SOFTBUS_DATA_NOT_ENOUGH;
     }
+    ReleaseAuthTcpConnFdListLock();
     NotifyDataReceived(module, fd, &head, data);
     SoftBusFree(data);
     return SOFTBUS_OK;
@@ -729,10 +737,21 @@ int32_t SocketPostBytes(int32_t fd, const AuthDataHead *head, const uint8_t *dat
         SoftBusFree(buf);
         return SOFTBUS_AUTH_PACK_SOCKET_PKT_FAIL;
     }
-
+    if (!RequireAuthTcpConnFdListLock()) {
+        AUTH_LOGE(AUTH_CONN, "RequireAuthTcpConnFdListLock fail");
+        SoftBusFree(buf);
+        return SOFTBUS_LOCK_ERR;
+    }
+    if ((pktHead.module == AUTH || pktHead.module == AUTH_USB) && !IsExistAuthTcpConnFdItemByConnId(fd)) {
+        AUTH_LOGE(AUTH_CONN, "fd=%{public}d not exist, ignore", fd);
+        ReleaseAuthTcpConnFdListLock();
+        SoftBusFree(buf);
+        return SOFTBUS_INVALID_PARAM;
+    }
     AUTH_LOGI(AUTH_CONN, "fd=%{public}d, module=%{public}d, seq=%{public}" PRId64 ", flag=%{public}d, len=%{public}u.",
         fd, pktHead.module, pktHead.seq, pktHead.flag, pktHead.len);
     ssize_t ret = ConnSendSocketData(fd, (const char *)buf, (size_t)size, 0);
+    ReleaseAuthTcpConnFdListLock();
     SoftBusFree(buf);
     if (ret != (ssize_t)size) {
         AUTH_LOGE(AUTH_CONN, "fail. ret=%{public}zd", ret);
@@ -963,7 +982,9 @@ int32_t AuthSetTcpKeepaliveOption(int32_t fd, ModeCycle cycle)
 
 int32_t AuthTcpConnFdLockInit(void)
 {
-    if (SoftBusMutexInit(&g_authTcpConnFdListLock, NULL) != SOFTBUS_OK) {
+    SoftBusMutexAttr mutexAttr;
+    mutexAttr.type = SOFTBUS_MUTEX_RECURSIVE;
+    if (SoftBusMutexInit(&g_authTcpConnFdListLock, &mutexAttr) != SOFTBUS_OK) {
         AUTH_LOGE(AUTH_CONN, "authTcpConnFdList mutex init fail");
         return SOFTBUS_LOCK_ERR;
     }

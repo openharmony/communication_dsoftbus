@@ -919,7 +919,7 @@ void LnnDeinitBusCenterEvent(void)
     return GetLocalLedgerDepsInterface()->LnnDeinitBusCenterEvent();
 }
 
-int32_t AuthStartVerify(const AuthConnInfo *connInfo, AuthVerifyParam *authVerifyParam,
+int32_t AuthStartVerify(const AuthConnInfo *connInfo, const AuthVerifyParam *authVerifyParam,
     const AuthVerifyCallback *callback)
 {
     return GetLocalLedgerDepsInterface()->AuthStartVerify(connInfo, authVerifyParam, callback);

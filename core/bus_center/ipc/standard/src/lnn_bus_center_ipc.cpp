@@ -90,6 +90,11 @@ static IBleRangeInnerCallback g_msdpRangeCb = {
     .onRangeStateChange = nullptr,
 };
 
+static ISleRangeInnerCallback g_msdpSleRangeCb = {
+    .onRangeResult = onRangeResult,
+    .onRangeStateChange = nullptr,
+};
+
 static bool IsRepeatJoinLNNRequest(const char *pkgName, int32_t callingPid, const ConnectionAddr *addr)
 {
     for (const auto &iter : g_joinLNNRequestInfo) {
@@ -571,6 +576,7 @@ int32_t LnnIpcRegRangeCbForMsdp(const char *pkgName, int32_t callingPid)
     info->pid = callingPid;
     g_msdpRangeReqInfo.push_back(info);
     LnnRegBleRangeCb(&g_msdpRangeCb);
+    LnnRegSleRangeCbPacked(&g_msdpSleRangeCb);
     return SOFTBUS_OK;
 }
 
@@ -731,6 +737,25 @@ static void RemoveRefreshRequestInfoByPkgName(const char *pkgName)
     }
 }
 
+static void RemoveRangeRequestInfoByPkgName(const char *pkgName)
+{
+    std::lock_guard<std::mutex> autoLock(g_lock);
+    std::vector<MsdpRangeReqInfo *>::iterator iter;
+    bool isRangePkg = false;
+    for (iter = g_msdpRangeReqInfo.begin(); iter != g_msdpRangeReqInfo.end();) {
+        if (strncmp(pkgName, (*iter)->pkgName, strlen(pkgName)) != 0) {
+            ++iter;
+            continue;
+        }
+        isRangePkg = true;
+        delete *iter;
+        iter = g_msdpRangeReqInfo.erase(iter);
+    }
+    if (isRangePkg) {
+        (void)SleRangeDeathCallbackPacked();
+    }
+}
+
 void BusCenterServerDeathCallback(const char *pkgName)
 {
     if (pkgName == nullptr) {
@@ -739,4 +764,5 @@ void BusCenterServerDeathCallback(const char *pkgName)
     RemoveJoinRequestInfoByPkgName(pkgName);
     RemoveLeaveRequestInfoByPkgName(pkgName);
     RemoveRefreshRequestInfoByPkgName(pkgName);
+    RemoveRangeRequestInfoByPkgName(pkgName);
 }

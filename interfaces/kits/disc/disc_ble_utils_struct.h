@@ -19,8 +19,8 @@
 #include <stdbool.h>
 #include <stdint.h>
 
-#include "softbus_common.h"
 #include "broadcast_protocol_constant.h"
+#include "softbus_common.h"
 
 #ifdef __cplusplus
 #if __cplusplus
@@ -28,12 +28,12 @@ extern "C" {
 #endif
 #endif
 
-#define ADV_DATA_MAX_LEN 24
-#define RESP_DATA_MAX_LEN 26
-#define REAL_RESP_DATA_MAX_LEN 27
-#define CUST_CAPABILITY_LEN 2
-#define CUST_CAPABILITY_TYPE_LEN 1
-#define BROADCAST_MAX_LEN (ADV_DATA_MAX_LEN + RESP_DATA_MAX_LEN)
+#define ADV_DATA_MAX_LEN                   24
+#define RESP_DATA_MAX_LEN                  26
+#define REAL_RESP_DATA_MAX_LEN             27
+#define CUST_CAPABILITY_LEN                2
+#define CUST_CAPABILITY_TYPE_LEN           1
+#define BROADCAST_MAX_LEN                  (ADV_DATA_MAX_LEN + RESP_DATA_MAX_LEN)
 
 typedef struct {
     union {

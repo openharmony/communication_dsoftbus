@@ -89,6 +89,7 @@ int32_t LnnSetDLDeviceBroadcastCipherIv(const char *udid, const void *cipherIv);
 bool IsAvailableMeta(const char *peerNetWorkId);
 bool LnnSaveBroadcastLinkKey(const char *udid, const BroadcastCipherInfo *info);
 bool IsRemoteDeviceSupportBleGuide(const char *id, IdCategory type);
+int32_t LnnSetDLSleRangeInfo(const char *id, IdCategory type, int32_t sleCap, const char *addr);
 #ifdef __cplusplus
 }
 #endif

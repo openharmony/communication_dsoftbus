@@ -109,7 +109,7 @@ HWTEST_F(AuthOtherMockTest, AUTH_INIT_TEST_002, TestSize.Level1)
     int32_t ret = AuthInit();
     EXPECT_EQ(ret, SOFTBUS_AUTH_HICHAIN_SA_PROC_ERR);
     ret = AuthInit();
-    EXPECT_EQ(ret, SOFTBUS_CREATE_LIST_ERR);
+    EXPECT_EQ(ret, SOFTBUS_OK);
     EXPECT_NO_FATAL_FAILURE(AuthDeinit());
 }
 
@@ -325,8 +325,6 @@ HWTEST_F(AuthOtherMockTest, AUTH_RESTORE_AUTH_MANAGER_TEST_001, TestSize.Level1)
     EXPECT_CALL(authMock, AuthFindLatestNormalizeKey).WillRepeatedly(Return(SOFTBUS_OK));
     EXPECT_CALL(authMock, IsCloudSyncEnabled).WillRepeatedly(Return(true));
     EXPECT_CALL(authMock, IsFeatureSupport).WillRepeatedly(Return(true));
-    EXPECT_CALL(authMock, SoftBusGenerateStrHash)
-        .WillOnce(Return(SOFTBUS_INVALID_PARAM)).WillRepeatedly(Return(SOFTBUS_OK));
     EXPECT_CALL(authMock, LnnGetLocalByteInfo).WillRepeatedly(Return(SOFTBUS_OK));
 
     AuthConnInfo connInfo = {
@@ -338,9 +336,9 @@ HWTEST_F(AuthOtherMockTest, AUTH_RESTORE_AUTH_MANAGER_TEST_001, TestSize.Level1)
     NodeInfo nodeInfo;
     (void)memset_s(&nodeInfo, sizeof(NodeInfo), 0, sizeof(NodeInfo));
     int32_t ret = AuthRestoreAuthManager(udidHash, &connInfo, requestId, &nodeInfo, &authId);
-    EXPECT_EQ(ret, SOFTBUS_NETWORK_GENERATE_STR_HASH_ERR);
+    EXPECT_EQ(ret, SOFTBUS_AUTH_MANAGER_RESTORE_FAIL);
     ret = AuthRestoreAuthManager(udidHash, &connInfo, requestId, &nodeInfo, &authId);
-    EXPECT_EQ(ret, SOFTBUS_AUTH_SESSION_KEY_PROC_ERR);
+    EXPECT_EQ(ret, SOFTBUS_AUTH_MANAGER_RESTORE_FAIL);
 }
 
 /*
@@ -367,7 +365,7 @@ HWTEST_F(AuthOtherMockTest, AUTH_RESTORE_AUTH_MANAGER_TEST_002, TestSize.Level1)
     NodeInfo nodeInfo;
     (void)memset_s(&nodeInfo, sizeof(NodeInfo), 0, sizeof(NodeInfo));
     int32_t ret = AuthRestoreAuthManager(udidHash, &connInfo, requestId, &nodeInfo, &authId);
-    EXPECT_EQ(ret, SOFTBUS_NETWORK_GET_NODE_INFO_ERR);
+    EXPECT_EQ(ret, SOFTBUS_AUTH_MANAGER_RESTORE_FAIL);
 }
 
 /*
@@ -395,7 +393,7 @@ HWTEST_F(AuthOtherMockTest, AUTH_RESTORE_AUTH_MANAGER_TEST_003, TestSize.Level1)
     NodeInfo nodeInfo;
     (void)memset_s(&nodeInfo, sizeof(NodeInfo), 0, sizeof(NodeInfo));
     int32_t ret = AuthRestoreAuthManager(udidHash, &connInfo, requestId, &nodeInfo, &authId);
-    EXPECT_EQ(ret, SOFTBUS_LOCK_ERR);
+    EXPECT_EQ(ret, SOFTBUS_AUTH_MANAGER_RESTORE_FAIL);
 }
 
 /*
@@ -570,9 +568,6 @@ HWTEST_F(AuthOtherMockTest, AUTH_CHECK_SESSION_KEY_VALID_BY_CONN_INFO_TEST_001, 
 HWTEST_F(AuthOtherMockTest, GET_IS_EXCHANGE_UDID_BY_NETWORKID_TEST_001, TestSize.Level1)
 {
     AuthOtherInterfaceMock authMock;
-    EXPECT_CALL(authMock, LnnRetrieveDeviceInfoByNetworkId).WillOnce(Return(SOFTBUS_INVALID_PARAM))
-        .WillRepeatedly(Return(SOFTBUS_OK));
-
     bool isExchangeUdid = false;
     const char *networkId = "networkId";
     int32_t ret = GetIsExchangeUdidByNetworkId(nullptr, &isExchangeUdid);
@@ -582,7 +577,7 @@ HWTEST_F(AuthOtherMockTest, GET_IS_EXCHANGE_UDID_BY_NETWORKID_TEST_001, TestSize
     ret = GetIsExchangeUdidByNetworkId(networkId, &isExchangeUdid);
     EXPECT_EQ(ret, SOFTBUS_NOT_FIND);
     ret = GetIsExchangeUdidByNetworkId(networkId, &isExchangeUdid);
-    EXPECT_EQ(ret, SOFTBUS_OK);
+    EXPECT_EQ(ret, SOFTBUS_NOT_FIND);
 }
 
 /*

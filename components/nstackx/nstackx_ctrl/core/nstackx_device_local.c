@@ -388,14 +388,25 @@ static void RemoveAllLocalIface(void)
     RemoveAllLocalIfaceOfList(&g_localDevice.creatingList);
 }
 
-static inline void RemoveSpecifiedLocalIface(const NSTACKX_InterfaceInfo *ifInfo, uint32_t ifNums)
+static void RemoveSpecifiedLocalIface(const NSTACKX_InterfaceInfo *ifInfo, uint32_t ifNums)
 {
     uint32_t i;
     for (i = 0; i < ifNums; ++i) {
         // af is always AF_INET/AF_INET6
         union InetAddr addr;
         uint8_t af = InetGetAfType(ifInfo[i].networkIpAddr, &addr);
-        RemoveLocalIface(af, ifInfo[i].networkName);
+        struct LocalIface *iface = GetActiveLocalIface(af, ifInfo[i].networkName);
+        if (iface == NULL) {
+            DFINDER_LOGI(TAG, "af %hhu iface %s not found when deleting iface", af, ifInfo[i].networkName);
+            continue;
+        }
+
+        if (af == AF_INET) {
+            AddToDestroyList(iface);
+        } else {
+            // USB(ipv6) use old iface, send coap unicast failed(network unreachable), must destroy iface
+            DestroyLocalIface(iface, true);
+        }
     }
 }
 

@@ -171,5 +171,35 @@ int32_t LnnServerJoin(ConnectionAddr *addr, const char *pkgName, bool isForceJoi
 {
     return BusCenterIpcInterfaceInstance()->LnnServerJoin(addr, pkgName, isForceJoin);
 }
+
+void SleRangeDeathCallbackPacked(void)
+{
+    return BusCenterIpcInterfaceInstance()->SleRangeDeathCallbackPacked();
+}
+
+void LnnRegBleRangeCb(const IBleRangeInnerCallback *callback)
+{
+    return BusCenterIpcInterfaceInstance()->LnnRegBleRangeCb(callback);
+}
+
+void LnnRegSleRangeCbPacked(const ISleRangeInnerCallback *callback)
+{
+    return BusCenterIpcInterfaceInstance()->LnnRegSleRangeCbPacked(callback);
+}
+
+void LnnUnregBleRangeCb(void)
+{
+    return BusCenterIpcInterfaceInstance()->LnnUnregBleRangeCb();
+}
+
+void LnnUnregSleRangeCbPacked(void)
+{
+    return BusCenterIpcInterfaceInstance()->LnnUnregSleRangeCbPacked();
+}
+
+int32_t ClientOnRangeResult(const char *pkgName, int32_t pid, const RangeResultInnerInfo *rangeInfo)
+{
+    return BusCenterIpcInterfaceInstance()->ClientOnRangeResult(pkgName, pid, rangeInfo);
+}
 }
 } // namespace OHOS
