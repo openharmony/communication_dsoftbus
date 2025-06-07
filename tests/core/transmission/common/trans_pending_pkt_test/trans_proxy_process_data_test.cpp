@@ -86,17 +86,6 @@ HWTEST_F(TransProxyProcessDataTest, TransPackSliceHead001, TestSize.Level1)
 }
 
 /**
- * @tc.name: TransUnPackSliceHead001
- * @tc.desc: TransUnPackSliceHead
- * @tc.type: FUNC
- * @tc.require:
- */
-HWTEST_F(TransProxyProcessDataTest, TransUnPackSliceHead001, TestSize.Level1)
-{
-    EXPECT_NO_FATAL_FAILURE(TransPackSliceHead(nullptr));
-}
-
-/**
  * @tc.name: TransPackPacketHead001
  * @tc.desc: TransPackPacketHead
  * @tc.type: FUNC
