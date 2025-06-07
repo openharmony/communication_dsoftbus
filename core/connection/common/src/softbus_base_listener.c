@@ -846,7 +846,7 @@ static void CleanupWatchThreadState(WatchThreadState **statePtr)
     *statePtr = NULL;
 }
 
-static void DispatchFdEvent(
+static int32_t DispatchFdEvent(
     int32_t fd, ListenerModule module, enum SocketEvent event, const SoftbusBaseListener *listener, int32_t wakeupTrace)
 {
     if (listener->onDataEvent != NULL) {
@@ -854,12 +854,14 @@ static void DispatchFdEvent(
         CONN_LOGI(CONN_COMMON,
             "wakeupTrace=%{public}d, module=%{public}d, fd=%{public}d, event=%{public}d",
             wakeupTrace, module, fd, event);
+        return SOFTBUS_OK;
     } else {
         CONN_LOGE(CONN_COMMON,
             "listener not registered, to avoid repeat wakeup, close it,"
             "wakeupTrace=%{public}d, module=%{public}d, fd=%{public}d, event=%{public}d",
             wakeupTrace, module, fd, event);
         ConnCloseSocket(fd);
+        return SOFTBUS_FUNC_NOT_REGISTER;
     }
 }
 
@@ -1045,13 +1047,19 @@ static void ProcessFdEvent(SoftbusListenerNode *node, struct FdNode fdEvent,
                 CONN_LOGD(CONN_COMMON, "trigger IN event, wakeupTrace=%{public}d, "
                     "module=%{public}d, fd=%{public}d, triggerSet=%{public}u",
                     wakeupTrace, node->module, fdEvent.fd, fdEvent.triggerSet);
-                DispatchFdEvent(fdEvent.fd, node->module, SOFTBUS_SOCKET_IN, listener, wakeupTrace);
+                int32_t ret = DispatchFdEvent(fdEvent.fd, node->module, SOFTBUS_SOCKET_IN, listener, wakeupTrace);
+                if (ret != SOFTBUS_OK) {
+                    continue;
+                }
             }
             if ((triggerSet & WRITE_TRIGGER) != 0) {
                 CONN_LOGD(CONN_COMMON, "trigger OUT event, wakeupTrace=%{public}d, "
                     "module=%{public}d, fd=%{public}d, triggerSet=%{public}u",
                     wakeupTrace, node->module, fdEvent.fd, fdEvent.triggerSet);
-                DispatchFdEvent(fdEvent.fd, node->module, SOFTBUS_SOCKET_OUT, listener, wakeupTrace);
+                int32_t ret = DispatchFdEvent(fdEvent.fd, node->module, SOFTBUS_SOCKET_OUT, listener, wakeupTrace);
+                if (ret != SOFTBUS_OK) {
+                    continue;
+                }
             }
             if ((triggerSet & EXCEPT_TRIGGER) != 0) {
                 CONN_LOGW(CONN_COMMON, "trigger EXCEPTION(out-of-band data) event, wakeupTrace=%{public}d, "
