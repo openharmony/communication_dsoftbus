@@ -53,6 +53,17 @@ typedef struct {
     void (*OnDeviceFound)(const DeviceInfo *device, const InnerDeviceInfoAddtions *addtions);
 } DiscInnerCallback;
 
+typedef struct {
+    char bleMac[BT_MAC_LEN];
+    char accountHash[MAX_ACCOUNT_HASH_LEN];
+    char deviceIdHash[DISC_MAX_DEVICE_ID_LEN];
+    uint8_t heartbeatValue[HB_HEARTBEAT_VALUE_LEN];
+    uint32_t deviceTypeId;
+    int32_t heartbeatVersion;
+    int32_t heartbeatType;
+    uint64_t nowTimes;
+} RaiseHandDeviceInfo;
+
 #ifdef __cplusplus
 }
 #endif /* __cplusplus */

@@ -18,10 +18,11 @@
 #include "disc_event.h"
 #include "disc_log.h"
 #include "disc_manager.h"
+#include "disc_raise_ble.h"
 #include "g_enhance_disc_func_pack.h"
 #include "softbus_error_code.h"
 
-#define DISPATCHER_SIZE      6
+#define DISPATCHER_SIZE      7
 
 static DiscoveryBleDispatcherInterface *g_dispatchers[DISPATCHER_SIZE];
 static uint32_t g_dispatcherSize = 0;
@@ -208,6 +209,13 @@ static int32_t DiscBleInitExt(DiscInnerCallback *discInnerCb)
         return SOFTBUS_DISCOVER_MANAGER_INIT_FAIL;
     }
     g_dispatchers[g_dispatcherSize++] = oopInterface;
+    DiscoveryBleDispatcherInterface *raiseInterface = DiscRaiseBleInit(discInnerCb);
+    if (raiseInterface == NULL) {
+        DfxRecordBleInitEnd(EVENT_STAGE_RAISE_BLE_INIT, SOFTBUS_DISCOVER_MANAGER_INIT_FAIL);
+        DISC_LOGE(DISC_INIT, "DiscRaiseBleInit err");
+        return SOFTBUS_DISCOVER_MANAGER_INIT_FAIL;
+    }
+    g_dispatchers[g_dispatcherSize++] = raiseInterface;
     return SOFTBUS_OK;
 }
 
@@ -285,4 +293,5 @@ void DiscBleDeinit(void)
     DiscVLinkBleDeinitPacked();
     DiscTouchBleDeinitPacked();
     DiscOopBleDeinitPacked();
+    DiscRaiseBleDeinit();
 }
