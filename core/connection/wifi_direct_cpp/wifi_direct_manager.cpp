@@ -56,45 +56,12 @@ static void AddPtkMismatchListener(PtkMismatchListener listener)
     g_ptkMismatchListener = listener;
 }
 
-static void SetBootLinkTypeByAuthHandle(WifiDirectConnectInfo &info)
-{
-    auto type = info.negoChannel.handle.authHandle.type;
-    auto authHandleType = static_cast<AuthLinkType>(type);
-    CONN_LOGI(CONN_WIFI_DIRECT, "auth handle type %{public}d", authHandleType);
-    switch (authHandleType) {
-        case AUTH_LINK_TYPE_WIFI:
-            info.dfxInfo.bootLinkType = STATISTIC_WLAN;
-            break;
-        case AUTH_LINK_TYPE_BR:
-            info.dfxInfo.bootLinkType = STATISTIC_BR;
-            break;
-        case AUTH_LINK_TYPE_BLE:
-            info.dfxInfo.bootLinkType = STATISTIC_BLE;
-            break;
-        default:
-            CONN_LOGE(CONN_WIFI_DIRECT, "undefined handle type");
-            info.dfxInfo.bootLinkType = STATISTIC_NONE;
-            break;
-    }
-}
-
 static void SetElementTypeExtra(struct WifiDirectConnectInfo *info, ConnEventExtra *extra)
 {
     extra->requestId = static_cast<int32_t>(info->requestId);
     extra->linkType = info->connectType;
     extra->expectRole = static_cast<int32_t>(info->expectApiRole);
     extra->peerIp = info->remoteMac;
-
-    info->dfxInfo.bootLinkType = STATISTIC_NONE;
-    OHOS::SoftBus::WifiDirectDfx::SetLinkType(*info);
-    WifiDirectNegoChannelType type = info->negoChannel.type;
-    if (type == NEGO_CHANNEL_AUTH) {
-        SetBootLinkTypeByAuthHandle(*info);
-    } else if (type == NEGO_CHANNEL_COC) {
-        info->dfxInfo.bootLinkType = STATISTIC_COC;
-    } else if (type == NEGO_CHANNEL_ACTION) {
-        info->dfxInfo.bootLinkType = STATISTIC_ACTION;
-    }
 }
 
 static int32_t AllocateListenerModuleId(void)

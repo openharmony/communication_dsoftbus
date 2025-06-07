@@ -76,17 +76,6 @@ HWTEST_F(WifiDirectManagerCppTest, SetElementTypeTest, TestSize.Level1)
     SetElementTypeExtra(&info, &extra);
     EXPECT_EQ(info.dfxInfo.linkType, STATISTIC_HML);
     EXPECT_EQ(info.dfxInfo.bootLinkType, STATISTIC_COC);
-
-    info.connectType = WIFI_DIRECT_CONNECT_TYPE_BLE_TRIGGER_HML;
-    info.negoChannel.type = NEGO_CHANNEL_NULL;
-    SetElementTypeExtra(&info, &extra);
-    EXPECT_EQ(info.dfxInfo.linkType, STATISTIC_TRIGGER_HML);
-    EXPECT_EQ(info.dfxInfo.bootLinkType, STATISTIC_NONE);
-
-    info.connectType = WIFI_DIRECT_CONNECT_TYPE_AUTH_TRIGGER_HML;
-    info.dfxInfo.linkType = STATISTIC_P2P;
-    SetElementTypeExtra(&info, &extra);
-    EXPECT_EQ(info.dfxInfo.linkType, STATISTIC_TRIGGER_HML);
 }
 
 /*
