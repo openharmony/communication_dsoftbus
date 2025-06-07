@@ -15,6 +15,7 @@
 
 #include <gtest/gtest.h>
 
+#include "auth_interface.h"
 #include "conn_log.h"
 #include "data/negotiate_message.h"
 #include "dfx/duration_statistic.h"
@@ -57,9 +58,58 @@ HWTEST_F(WifiDirectDfxTest, ReportConnEventExtraTest, TestSize.Level1)
     sleep(1);
     DurationStatistic::GetInstance().Record(requestId, TOTAL_END);
     EXPECT_NO_FATAL_FAILURE(WifiDirectDfx::GetInstance().DfxRecord(result, reason, wifiDirectConnectInfo));
-    wifiDirectConnectInfo.dfxInfo.linkType = STATISTIC_TRIGGER_HML;
+    wifiDirectConnectInfo.connectType = WIFI_DIRECT_CONNECT_TYPE_AUTH_NEGO_P2P;
+    EXPECT_NO_FATAL_FAILURE(WifiDirectDfx::GetInstance().DfxRecord(result, reason, wifiDirectConnectInfo));
+    wifiDirectConnectInfo.connectType = WIFI_DIRECT_CONNECT_TYPE_AUTH_NEGO_HML;
+    EXPECT_NO_FATAL_FAILURE(WifiDirectDfx::GetInstance().DfxRecord(result, reason, wifiDirectConnectInfo));
+    wifiDirectConnectInfo.connectType = WIFI_DIRECT_CONNECT_TYPE_BLE_TRIGGER_HML;
+    EXPECT_NO_FATAL_FAILURE(WifiDirectDfx::GetInstance().DfxRecord(result, reason, wifiDirectConnectInfo));
+    wifiDirectConnectInfo.connectType = WIFI_DIRECT_CONNECT_TYPE_AUTH_TRIGGER_HML;
+    EXPECT_NO_FATAL_FAILURE(WifiDirectDfx::GetInstance().DfxRecord(result, reason, wifiDirectConnectInfo));
+    wifiDirectConnectInfo.connectType = WIFI_DIRECT_CONNECT_TYPE_ACTION_TRIGGER_HML;
+    EXPECT_NO_FATAL_FAILURE(WifiDirectDfx::GetInstance().DfxRecord(result, reason, wifiDirectConnectInfo));
+    wifiDirectConnectInfo.connectType = static_cast<WifiDirectConnectType>(-1);
     EXPECT_NO_FATAL_FAILURE(WifiDirectDfx::GetInstance().DfxRecord(result, reason, wifiDirectConnectInfo));
     CONN_LOGI(CONN_WIFI_DIRECT, "ReportConnEventExtraTest end");
+}
+
+/*
+ * @tc.name: SetBootLinkTypeTest
+ * @tc.desc: test set boot link type
+ * @tc.type: FUNC
+ * @tc.require:
+ */
+HWTEST_F(WifiDirectDfxTest, SetBootLinkTypeTest, TestSize.Level1)
+{
+    CONN_LOGI(CONN_WIFI_DIRECT, "SetBootLinkTypeTest start");
+    WifiDirectInterfaceMock wifiDirectInterfaceMock;
+    EXPECT_CALL(wifiDirectInterfaceMock, LnnSetLocalStrInfo).WillRepeatedly(Return(SOFTBUS_OK));
+    bool result = false;
+    int32_t reason = SOFTBUS_CONN_FAIL;
+    WifiDirectConnectInfo wifiDirectConnectInfo = { 0 };
+    wifiDirectConnectInfo.negoChannel.type = NEGO_CHANNEL_NULL;
+    EXPECT_NO_FATAL_FAILURE(WifiDirectDfx::GetInstance().DfxRecord(result, reason, wifiDirectConnectInfo));
+    wifiDirectConnectInfo.connectType = WIFI_DIRECT_CONNECT_TYPE_BLE_TRIGGER_HML;
+    EXPECT_NO_FATAL_FAILURE(WifiDirectDfx::GetInstance().DfxRecord(result, reason, wifiDirectConnectInfo));
+    wifiDirectConnectInfo.negoChannel.type = NEGO_CHANNEL_AUTH;
+    wifiDirectConnectInfo.negoChannel.handle.authHandle.type = 1;
+    EXPECT_NO_FATAL_FAILURE(WifiDirectDfx::GetInstance().DfxRecord(result, reason, wifiDirectConnectInfo));
+    wifiDirectConnectInfo.negoChannel.type = NEGO_CHANNEL_AUTH;
+    wifiDirectConnectInfo.negoChannel.handle.authHandle.type = 2;
+    EXPECT_NO_FATAL_FAILURE(WifiDirectDfx::GetInstance().DfxRecord(result, reason, wifiDirectConnectInfo));
+    wifiDirectConnectInfo.negoChannel.type = NEGO_CHANNEL_AUTH;
+    wifiDirectConnectInfo.negoChannel.handle.authHandle.type = 3;
+    EXPECT_NO_FATAL_FAILURE(WifiDirectDfx::GetInstance().DfxRecord(result, reason, wifiDirectConnectInfo));
+    wifiDirectConnectInfo.negoChannel.type = NEGO_CHANNEL_AUTH;
+    wifiDirectConnectInfo.negoChannel.handle.authHandle.type = 4;
+    EXPECT_NO_FATAL_FAILURE(WifiDirectDfx::GetInstance().DfxRecord(result, reason, wifiDirectConnectInfo));
+    wifiDirectConnectInfo.negoChannel.type = NEGO_CHANNEL_COC;
+    EXPECT_NO_FATAL_FAILURE(WifiDirectDfx::GetInstance().DfxRecord(result, reason, wifiDirectConnectInfo));
+    wifiDirectConnectInfo.negoChannel.type = NEGO_CHANNEL_ACTION;
+    EXPECT_NO_FATAL_FAILURE(WifiDirectDfx::GetInstance().DfxRecord(result, reason, wifiDirectConnectInfo));
+    wifiDirectConnectInfo.dfxInfo.bootLinkType = STATISTIC_BLE_AND_ACTION;
+    EXPECT_NO_FATAL_FAILURE(WifiDirectDfx::GetInstance().DfxRecord(result, reason, wifiDirectConnectInfo));
+    CONN_LOGI(CONN_WIFI_DIRECT, "SetBootLinkTypeTest end");
 }
 
 /*

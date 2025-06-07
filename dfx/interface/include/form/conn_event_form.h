@@ -125,6 +125,7 @@ typedef struct {
     int32_t needHmlConnect;       // NEED_HML_CONNECT
     const char *businessTag;      // BUSINESS_TAG
     int32_t staChload;            // STA_CHLOAD
+    int32_t sameAccount;          // SAME_ACCOUNT
 } ConnEventExtra;
 
 typedef enum {
