@@ -29,6 +29,7 @@
 #include "trans_channel_manager.h"
 #include "trans_client_proxy.h"
 #include "trans_inner.h"
+#include "trans_ipc_adapter.h"
 #include "trans_lane_manager.h"
 #include "trans_log.h"
 #include "trans_proxy_process_data.h"

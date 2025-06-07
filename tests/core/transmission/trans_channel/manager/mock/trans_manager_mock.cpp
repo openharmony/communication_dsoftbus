@@ -51,9 +51,9 @@ int32_t ConnGetConnectionInfo(uint32_t connectionId, ConnectionInfo *info)
     return GetTransManagerInterface()->ConnGetConnectionInfo(connectionId, info);
 }
 
-uint64_t TransACLGetFirstTokenID()
+uint64_t TransAclGetFirstTokenID()
 {
-    return GetTransManagerInterface()->TransACLGetFirstTokenID();
+    return GetTransManagerInterface()->TransAclGetFirstTokenID();
 }
 
 int32_t TransCommonGetAppInfo(const SessionParam *param, AppInfo *appInfo)
