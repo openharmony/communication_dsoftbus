@@ -628,7 +628,7 @@ void LnnDeinitBusCenterEvent(void)
     return GetNetBuilderDepsInterface()->LnnDeinitBusCenterEvent();
 }
 
-int32_t AuthStartVerify(const AuthConnInfo *connInfo, AuthVerifyParam *authVerifyParam,
+int32_t AuthStartVerify(const AuthConnInfo *connInfo, const AuthVerifyParam *authVerifyParam,
     const AuthVerifyCallback *callback)
 {
     return GetNetBuilderDepsInterface()->AuthStartVerify(connInfo, authVerifyParam, callback);

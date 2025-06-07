@@ -54,6 +54,7 @@
 #include "lnn_p2p_info.h"
 #include "lnn_physical_subnet_manager.h"
 #include "lnn_sa_status_monitor.h"
+#include "lnn_sle_capability.h"
 #include "lnn_sync_info_manager.h"
 #include "lnn_sync_item_info.h"
 #include "lnn_topo_manager.h"
@@ -526,6 +527,7 @@ static void DeinitNodeInfoSync(void)
     LnnDeinitOffline();
     LnnDeinitBatteryInfo();
     LnnDeinitWifiDirect();
+    LnnDeinitSleInfo();
 }
 
 static void NetBuilderConfigInit(void)
@@ -579,6 +581,11 @@ static int32_t InitNodeInfoSync(void)
     rc = LnnInitWifiDirect();
     if (rc != SOFTBUS_OK) {
         LNN_LOGE(LNN_INIT, "init lnn wifidirect addr fail, rc=%{public}d", rc);
+        return rc;
+    }
+    rc = LnnInitSleInfo();
+    if (rc != SOFTBUS_OK) {
+        LNN_LOGE(LNN_INIT, "init lnn sle info fail, rx=%{public}d", rc);
         return rc;
     }
     return SOFTBUS_OK;

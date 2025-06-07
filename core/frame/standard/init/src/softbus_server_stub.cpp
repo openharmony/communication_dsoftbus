@@ -1938,9 +1938,9 @@ int32_t SoftBusServerStub::ConnectInner(MessageParcel &data, MessageParcel &repl
         COMM_LOGE(COMM_SVC, "read address fail, address is nullptr");
         return SOFTBUS_IPC_ERR;
     }
-    int32_t len = strnlen(address, BT_MAC_LEN);
+    size_t len = strnlen(address, BT_MAC_LEN);
     if (len != (BT_MAC_LEN - 1) || strcpy_s(connectAddress.addr.ble.mac, BT_MAC_LEN, address) != EOK) {
-        COMM_LOGE(COMM_SVC, "read address fail, address is=%{public}s", address);
+        COMM_LOGE(COMM_SVC, "read address fail");
         return SOFTBUS_IPC_ERR;
     }
     int32_t addrType = data.ReadInt32();

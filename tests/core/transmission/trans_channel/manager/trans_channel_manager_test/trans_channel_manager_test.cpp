@@ -542,7 +542,7 @@ HWTEST_F(TransChannelManagerTest, TransSetFirstTokenInfo001, TestSize.Level1)
     TransEventExtra extra;
     (void)memset_s(&extra, sizeof(TransEventExtra), 0, sizeof(TransEventExtra));
     TransManagerInterfaceMock mock;
-    EXPECT_CALL(mock, TransACLGetFirstTokenID).WillOnce(Return(TOKENID_NOT_SET));
+    EXPECT_CALL(mock, TransAclGetFirstTokenID).WillOnce(Return(TOKENID_NOT_SET));
     TransSetFirstTokenInfo(appInfo, &extra);
     EXPECT_NE(nullptr, appInfo);
     TransFreeAppInfo(appInfo);
@@ -963,27 +963,27 @@ HWTEST_F(TransChannelManagerTest, TransReportChannelOpenedInfo001, TestSize.Leve
     uint32_t len = 28;
 
     buf[4] = CHANNEL_TYPE_PROXY;
-    int ret = TransReportChannelOpenedInfo(buf, len);
+    int ret = TransReportChannelOpenedInfo(buf, len, TRANS_TEST_PID);
     EXPECT_NE(SOFTBUS_OK, ret);
 
     buf[4] = CHANNEL_TYPE_TCP_DIRECT;
-    ret = TransReportChannelOpenedInfo(buf, len);
+    ret = TransReportChannelOpenedInfo(buf, len, TRANS_TEST_PID);
     EXPECT_NE(SOFTBUS_OK, ret);
 
     buf[4] = CHANNEL_TYPE_UDP;
-    ret = TransReportChannelOpenedInfo(buf, len);
+    ret = TransReportChannelOpenedInfo(buf, len, TRANS_TEST_PID);
     EXPECT_NE(SOFTBUS_OK, ret);
 
     buf[4] = CHANNEL_TYPE_AUTH;
-    ret = TransReportChannelOpenedInfo(buf, len);
+    ret = TransReportChannelOpenedInfo(buf, len, TRANS_TEST_PID);
     EXPECT_NE(SOFTBUS_OK, ret);
 
     buf[4] = CHANNEL_TYPE_BUTT;
-    ret = TransReportChannelOpenedInfo(buf, len);
+    ret = TransReportChannelOpenedInfo(buf, len, TRANS_TEST_PID);
     EXPECT_EQ(SOFTBUS_TRANS_INVALID_CHANNEL_TYPE, ret);
 
     len = 1;
-    ret = TransReportChannelOpenedInfo(buf, len);
+    ret = TransReportChannelOpenedInfo(buf, len, TRANS_TEST_PID);
     EXPECT_NE(SOFTBUS_OK, ret);
 }
 

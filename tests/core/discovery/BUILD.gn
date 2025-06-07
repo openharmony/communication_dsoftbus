@@ -24,6 +24,7 @@ group("unittest") {
     deps += [
       "ble/approach_ble:unittest",
       "ble/dispatcher:unittest",
+      "ble/raise_ble:unittest",
       "ble/softbus_ble:unittest",
       "ble/softbus_ble_mock:unittest",
       "ipc:unittest",

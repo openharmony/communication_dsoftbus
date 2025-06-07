@@ -104,6 +104,7 @@ int32_t DiscStopDiscovery(const char *packageName, int32_t subscribeId, int32_t 
 int32_t DiscSetDisplayName(const char *pkgName, const char *nameData, uint32_t len);
 
 int32_t DiscGetDisplayName(char *displayName, uint32_t length, uint32_t remainLen);
+
 #ifdef __cplusplus
 #if __cplusplus
 }

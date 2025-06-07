@@ -20,6 +20,9 @@ using namespace testing::ext;
 
 namespace OHOS {
 void *g_connectionGeneralInterface;
+static ConnectCallback g_connectCallback = {0};
+static ConnectResult g_connectResult = {0};
+
 GeneralConnectionInterfaceMock::GeneralConnectionInterfaceMock()
 {
     g_connectionGeneralInterface = reinterpret_cast<void *>(this);
@@ -28,6 +31,16 @@ GeneralConnectionInterfaceMock::GeneralConnectionInterfaceMock()
 GeneralConnectionInterfaceMock::~GeneralConnectionInterfaceMock()
 {
     g_connectionGeneralInterface = nullptr;
+}
+
+ConnectCallback *GeneralConnectionInterfaceMock::GetConnectCallbackMock()
+{
+    return &g_connectCallback;
+}
+
+ConnectResult *GeneralConnectionInterfaceMock::GetConnectResultMock()
+{
+    return &g_connectResult;
 }
 
 static GeneralConnectionInterface *GetGeneralConnectionInterface()
@@ -78,6 +91,25 @@ int32_t ClientIpcOnDataReceived(const char *pkgName, int32_t pid, uint32_t handl
     return SOFTBUS_OK;
 }
 
+ConnBleConnection *ConnBleGetConnectionById(uint32_t connectionId)
+{
+    static ConnBleConnection connection = {
+        .featureBitSet = 0,
+        .protocol = BLE_COC,
+    };
+
+    (void)memcpy_s(connection.networkId, UDID_BUF_LEN, "testNetworkId", UDID_BUF_LEN);
+    (void)memcpy_s(connection.udid, UDID_BUF_LEN, "testnetUdid", UDID_BUF_LEN);
+    const char *addr = "11:22:33:44:55:66";
+    (void)memcpy_s(connection.addr, BT_MAC_LEN, addr, BT_MAC_LEN);
+    return &connection;
+}
+
+int32_t LnnGetLocalStrInfo(InfoKey key, char *info, uint32_t len)
+{
+    return SOFTBUS_INVALID_PARAM;
+}
+
 ConnectFuncInterface *ConnInitTcp(const ConnectCallback *callback)
 {
     (void)callback;
@@ -101,27 +133,9 @@ int32_t ProxyChannelManagerInit(void)
     return SOFTBUS_OK;
 }
 
-ConnBleConnection *ConnBleGetConnectionById(uint32_t connectionId)
-{
-    static ConnBleConnection connection = {
-        .featureBitSet = 0,
-        .protocol = BLE_COC,
-    };
-
-    (void)memcpy_s(connection.networkId, UDID_BUF_LEN, "testNetworkId", UDID_BUF_LEN);
-    (void)memcpy_s(connection.udid, UDID_BUF_LEN, "testnetUdid", UDID_BUF_LEN);
-    const char *addr = "11:22:33:44:55:66";
-    (void)memcpy_s(connection.addr, BT_MAC_LEN, addr, BT_MAC_LEN);
-    return &connection;
-}
-
-int32_t LnnGetLocalStrInfo(InfoKey key, char *info, uint32_t len)
-{
-    return SOFTBUS_INVALID_PARAM;
-}
-
 int32_t BleConnectDeviceMock(const ConnectOption *option, uint32_t requestId, const ConnectResult *result)
 {
+    g_connectResult = *result;
     return GetGeneralConnectionInterface()->BleConnectDeviceMock(option, requestId, result);
 }
 
@@ -137,6 +151,7 @@ ConnectFuncInterface *ConnInitBle(const ConnectCallback *callback)
         .ConnectDevice = BleConnectDeviceMock,
         .PostBytes = ConnBlePostBytesMock,
     };
+    g_connectCallback= *callback;
     return &bleFuncInterface;
 }
 }

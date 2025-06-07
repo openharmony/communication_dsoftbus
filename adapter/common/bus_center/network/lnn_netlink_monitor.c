@@ -130,6 +130,8 @@ static void WifiBandSetCapability()
         (void)LnnSetNetCapability(&netCapability, BIT_WIFI_5G);
         (void)LnnSetNetCapability(&netCapability, BIT_WIFI_24G);
     }
+    (void)LnnSetNetCapability(&netCapability, BIT_WIFI);
+    (void)LnnSetNetCapability(&netCapability, BIT_WIFI_P2P);
     LNN_LOGD(LNN_BUILDER, "netCapability==%{public}d", netCapability);
     if (LnnSetLocalNumU32Info(NUM_KEY_NET_CAP, netCapability) != SOFTBUS_OK) {
         LNN_LOGE(LNN_LEDGER, "set local capability fail");

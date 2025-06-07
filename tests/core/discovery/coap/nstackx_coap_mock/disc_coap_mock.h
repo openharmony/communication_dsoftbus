@@ -13,8 +13,8 @@
  * limitations under the License.
  */
 
-#ifndef NSTACKX_ADAPTER_MOCK_H
-#define NSTACKX_ADAPTER_MOCK_H
+#ifndef DISC_COAP_MOCK_H
+#define DISC_COAP_MOCK_H
 
 #include <atomic>
 #include <gmock/gmock.h>
@@ -23,25 +23,25 @@
 #include "nstackx.h"
 #include "softbus_config_type.h"
 
-class AdapterInterface {
+class DiscCoapInterface {
 public:
     virtual int32_t NSTACKX_RegisterServiceDataV2(const struct NSTACKX_ServiceData *param, uint32_t cnt) = 0;
-    virtual int32_t LnnGetLocalNumInfo(InfoKey key, int32_t *info);
+    virtual int32_t LnnGetLocalNumInfo(InfoKey key, int32_t *info) = 0;
     virtual int32_t LnnGetLocalNum64Info(InfoKey key, int64_t *info) = 0;
     virtual int32_t LnnGetLocalStrInfo(InfoKey key, char *info, uint32_t len) = 0;
     virtual int32_t LnnGetLocalNumInfoByIfnameIdx(InfoKey key, int32_t *info, int32_t ifIdx) = 0;
     virtual int32_t LnnGetLocalStrInfoByIfnameIdx(InfoKey key, char *info, uint32_t len, int32_t ifIdx) = 0;
 };
 
-class AdapterMock : public AdapterInterface {
+class DiscCoapMock : public DiscCoapInterface {
 public:
-    static AdapterMock* GetMock()
+    static DiscCoapMock* GetMock()
     {
         return mock.load();
     }
 
-    AdapterMock();
-    ~AdapterMock();
+    DiscCoapMock();
+    ~DiscCoapMock();
 
     void SetupSuccessStub();
 
@@ -54,15 +54,16 @@ public:
     MOCK_METHOD(int32_t, LnnGetLocalStrInfoByIfnameIdx,
         (InfoKey key, char *info, uint32_t len, int32_t ifIdx), (override));
 
-    static int32_t ActionRegisterServiceDataV2(const struct NSTACKX_ServiceData *param, uint32_t cnt);
-    static int32_t ActionLnnGetLocalNumInfo(InfoKey key, int32_t *info);
-    static int32_t ActionLnnGetLocalNum64Info(InfoKey key, int64_t *info);
-    static int32_t ActionLnnGetLocalStrInfo(InfoKey key, char *info, uint32_t len);
-    static int32_t ActionLnnGetLocalNumInfoByIfnameIdx(InfoKey key, int32_t *info, int32_t ifIdx);
-    static int32_t ActionLnnGetLocalStrInfoByIfnameIdx(InfoKey key, char *info, uint32_t len, int32_t ifIdx);
+    static int32_t ActionOfNstackInit(const NSTACKX_Parameter *parameter);
+    static int32_t ActionOfRegisterServiceDataV2(const struct NSTACKX_ServiceData *param, uint32_t cnt);
+    static int32_t ActionOfLnnGetLocalNumInfo(InfoKey key, int32_t *info);
+    static int32_t ActionOfLnnGetLocalNum64Info(InfoKey key, int64_t *info);
+    static int32_t ActionOfLnnGetLocalStrInfo(InfoKey key, char *info, uint32_t len);
+    static int32_t ActionOfLnnGetLocalNumInfoByIfnameIdx(InfoKey key, int32_t *info, int32_t ifIdx);
+    static int32_t ActionOfLnnGetLocalStrInfoByIfnameIdx(InfoKey key, char *info, uint32_t len, int32_t ifIdx);
 
 private:
-    static inline std::atomic<AdapterMock*> mock = nullptr;
+    static inline std::atomic<DiscCoapMock*> mock = nullptr;
 };
 
 #endif

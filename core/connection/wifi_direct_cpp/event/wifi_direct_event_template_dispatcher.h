@@ -62,7 +62,7 @@ private:
 
     bool Dispatch(const std::shared_ptr<WifiDirectEventBase> &content)
     {
-        if (content->getContentTypeid() == typeName_) {
+        if (content != nullptr && content->getContentTypeid() == typeName_) {
             auto wrapper = static_cast<WifiDirectEventWrapper<Content> *>(content.get());
             func_(wrapper->content_);
             return true;

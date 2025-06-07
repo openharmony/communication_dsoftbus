@@ -606,7 +606,7 @@ static int32_t StartConnVerifyDevice(uint32_t requestId, const AuthConnInfo *con
     return VerifyDevice(&request);
 }
 
-static int32_t StartVerifyDevice(AuthVerifyParam *authVerifyParam, const AuthConnInfo *connInfo,
+static int32_t StartVerifyDevice(const AuthVerifyParam *authVerifyParam, const AuthConnInfo *connInfo,
     const AuthVerifyCallback *verifyCb)
 {
     if (connInfo == NULL || verifyCb == NULL || authVerifyParam == NULL) {
@@ -755,7 +755,7 @@ void AuthDeviceCloseConn(AuthHandle authHandle)
     return;
 }
 
-int32_t AuthStartVerify(const AuthConnInfo *connInfo, AuthVerifyParam *authVerifyParam,
+int32_t AuthStartVerify(const AuthConnInfo *connInfo, const AuthVerifyParam *authVerifyParam,
     const AuthVerifyCallback *callback)
 {
     if (connInfo == NULL || authVerifyParam == NULL || !CheckVerifyCallback(callback)) {
