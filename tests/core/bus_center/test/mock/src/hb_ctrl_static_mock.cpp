@@ -260,5 +260,10 @@ void LnnRemoveV0BroadcastAndCheckDev(void)
 {
     return HeartBeatCtrlStaticInterface()->LnnRemoveV0BroadcastAndCheckDev();
 }
+
+int32_t UpdateRecoveryDeviceInfoFromDb(void)
+{
+    return HeartBeatCtrlStaticInterface()->UpdateRecoveryDeviceInfoFromDb();
+}
 }
 } // namespace OHOS

@@ -86,6 +86,7 @@ public:
     virtual int32_t LnnStartHbByTypeAndStrategyEx(LnnProcessSendOnceMsgPara *msgPara) = 0;
     virtual int32_t LnnSyncBleOfflineMsg(void) = 0;
     virtual void LnnRemoveV0BroadcastAndCheckDev(void) = 0;
+    virtual int32_t UpdateRecoveryDeviceInfoFromDb(void) = 0;
 };
 class HeartBeatCtrlStaticInterfaceMock : public HeartBeatCtrlStaticInterface {
 public:
@@ -138,6 +139,7 @@ public:
     MOCK_METHOD1(LnnStartHbByTypeAndStrategyEx, int32_t (LnnProcessSendOnceMsgPara *));
     MOCK_METHOD0(LnnSyncBleOfflineMsg, int32_t (void));
     MOCK_METHOD0(LnnRemoveV0BroadcastAndCheckDev, void (void));
+    MOCK_METHOD0(UpdateRecoveryDeviceInfoFromDb, int32_t (void));
 };
 } // namespace OHOS
 #endif // OHOS_LNN_CTRL_STATIC_MOCK_H
