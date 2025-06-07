@@ -741,14 +741,18 @@ static void RemoveRangeRequestInfoByPkgName(const char *pkgName)
 {
     std::lock_guard<std::mutex> autoLock(g_lock);
     std::vector<MsdpRangeReqInfo *>::iterator iter;
+    bool isRangePkg = false;
     for (iter = g_msdpRangeReqInfo.begin(); iter != g_msdpRangeReqInfo.end();) {
-        if (strcmp(pkgName, (*iter)->pkgName) == 0) {
-            delete *iter;
-            g_msdpRangeReqInfo.erase(iter);
-            (void)SleRangeDeathCallbackPacked();
-            break;
+        if (strncmp(pkgName, (*iter)->pkgName, strlen(pkgName)) != 0) {
+            ++iter;
+            continue;
         }
-        ++iter;
+        isRangePkg = true;
+        delete *iter;
+        iter = g_msdpRangeReqInfo.erase(iter);
+    }
+    if (isRangePkg) {
+        (void)SleRangeDeathCallbackPacked();
     }
 }
 

@@ -34,6 +34,7 @@ using namespace testing;
 #define TEST_ADDR_TYPE_LEN 17
 #define TEST_RET_CODE      0
 #define TEST_TYPE          1
+#define TEST_MSDP_PKGNAME  "ohos.msdp.spatialawareness"
 
 class BusCenterIpcTest : public testing::Test {
 public:
@@ -194,4 +195,55 @@ HWTEST_F(BusCenterIpcTest, LnnIpcServerLeaveTest_03, TestSize.Level1)
     EXPECT_TRUE(ret == SOFTBUS_INVALID_PARAM);
 }
 
+/*
+ * @tc.name: RemoveRangeRequestInfoByPkgName
+ * @tc.desc: buscenter ipc test
+ * @tc.type: FUNC
+ * @tc.require:
+ */
+HWTEST_F(BusCenterIpcTest, RemoveRangeRequestInfoByPkgNameTest_01, TestSize.Level1)
+{
+    NiceMock<BusCenterIpcInterfaceMock> busCenterIpcMock;
+    int32_t ret = LnnIpcRegRangeCbForMsdp(TEST_MSDP_PKGNAME, 0);
+    EXPECT_TRUE(ret == SOFTBUS_OK);
+    RemoveRangeRequestInfoByPkgName(TEST_MSDP_PKGNAME);
+    ret = LnnIpcUnregRangeCbForMsdp(TEST_MSDP_PKGNAME, 0);
+    EXPECT_TRUE(ret == SOFTBUS_OK);
+}
+
+/*
+ * @tc.name: RemoveRangeRequestInfoByPkgName
+ * @tc.desc: buscenter ipc test
+ * @tc.type: FUNC
+ * @tc.require:
+ */
+HWTEST_F(BusCenterIpcTest, RemoveRangeRequestInfoByPkgNameTest_02, TestSize.Level1)
+{
+    NiceMock<BusCenterIpcInterfaceMock> busCenterIpcMock;
+    int32_t ret = LnnIpcRegRangeCbForMsdp(TEST_MSDP_PKGNAME, 0);
+    EXPECT_TRUE(ret == SOFTBUS_OK);
+    RemoveRangeRequestInfoByPkgName(TEST_PKGNAME);
+    ret = LnnIpcUnregRangeCbForMsdp(TEST_MSDP_PKGNAME, 0);
+    EXPECT_TRUE(ret == SOFTBUS_OK);
+}
+
+/*
+ * @tc.name: RemoveRangeRequestInfoByPkgName
+ * @tc.desc: buscenter ipc test
+ * @tc.type: FUNC
+ * @tc.require:
+ */
+HWTEST_F(BusCenterIpcTest, RemoveRangeRequestInfoByPkgNameTest_03, TestSize.Level1)
+{
+    NiceMock<BusCenterIpcInterfaceMock> busCenterIpcMock;
+    int32_t ret = LnnIpcRegRangeCbForMsdp(TEST_PKGNAME, 0);
+    EXPECT_TRUE(ret == SOFTBUS_OK);
+    ret = LnnIpcRegRangeCbForMsdp(TEST_MSDP_PKGNAME, 0);
+    EXPECT_TRUE(ret == SOFTBUS_OK);
+    RemoveRangeRequestInfoByPkgName(TEST_MSDP_PKGNAME);
+    ret = LnnIpcUnregRangeCbForMsdp(TEST_PKGNAME, 0);
+    EXPECT_TRUE(ret == SOFTBUS_OK);
+    ret = LnnIpcUnregRangeCbForMsdp(TEST_MSDP_PKGNAME, 0);
+    EXPECT_TRUE(ret == SOFTBUS_OK);
+}
 } // namespace OHOS
