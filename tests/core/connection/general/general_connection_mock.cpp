@@ -128,6 +128,11 @@ ConnectFuncInterface *ConnSleInit(const ConnectCallback *callback)
     return NULL;
 }
 
+int32_t ProxyChannelManagerInit(void)
+{
+    return SOFTBUS_OK;
+}
+
 int32_t BleConnectDeviceMock(const ConnectOption *option, uint32_t requestId, const ConnectResult *result)
 {
     g_connectResult = *result;

@@ -22,6 +22,7 @@
 #include "conn_event.h"
 #include "conn_log.h"
 #include "g_enhance_conn_func_pack.h"
+#include "proxy_manager.h"
 #include "softbus_adapter_mem.h"
 #include "softbus_adapter_thread.h"
 #include "softbus_base_listener.h"
@@ -572,6 +573,9 @@ int32_t ConnServerInit(void)
     }
     CONN_CHECK_AND_RETURN_RET_LOGE(InitGeneralConnection() == SOFTBUS_OK,
         SOFTBUS_CONN_INTERNAL_ERR, CONN_COMMON, "init failed.");
+
+    CONN_CHECK_AND_RETURN_RET_LOGE(ProxyChannelManagerInit() == SOFTBUS_OK,
+        SOFTBUS_CONN_INTERNAL_ERR, CONN_COMMON, "init proxy manager failed");
 
     CONN_CHECK_AND_RETURN_RET_LOGE(SoftBusMutexInit(&g_ReqLock, NULL) == SOFTBUS_OK,
         SOFTBUS_CONN_INTERNAL_ERR, CONN_COMMON, "g_ReqLock init lock failed.");
