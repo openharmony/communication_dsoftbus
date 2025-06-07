@@ -126,6 +126,7 @@ ohos_unittest("BleConnectionManagerTest") {
     "$dsoftbus_root_path/core/frame/init/include",
     "$dsoftbus_root_path/adapter/default_config/spec_config",
     "$dsoftbus_root_path/core/frame/common/include",
+    "$dsoftbus_root_path/core/connection/proxy",
   ]
   public_configs = [ ":softbus_connection_ble_test_config" ]
   sources = [
@@ -269,6 +270,7 @@ ohos_unittest("BleHidumperTest") {
     "$dsoftbus_root_path/core/connection/sle/include",
     "$dsoftbus_root_path/core/frame/init/include",
     "$dsoftbus_root_path/core/frame/common/include",
+    "$dsoftbus_root_path/core/connection/proxy",
   ]
 
   public_configs = [ ":softbus_connection_ble_test_config" ]
