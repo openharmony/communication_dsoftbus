@@ -25,7 +25,7 @@
 #define SOFTBUS_BUSCENTER_MODULE_NAME  "buscenter"
 #define SOFTBUS_CONN_MODULE_HELP "List all the dump item of buscenter"
 
-static LIST_HEAD(g_busCenter_var_list);
+LIST_HEAD(g_busCenter_var_list);
 
 int32_t SoftBusRegBusCenterVarDump(char *dumpVar, SoftBusVarDumpCb cb)
 {
