@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021 Huawei Device Co., Ltd.
+ * Copyright (c) 2025 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -12,22 +12,19 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-
-#ifndef SOFTBUS_CLIENT_STUB_INTERFACE_H
-#define SOFTBUS_CLIENT_STUB_INTERFACE_H
-
-#include <stdint.h>
+#ifndef BR_PROXY_COMMON_HANDLE_H
+#define BR_PROXY_COMMON_HANDLE_H
 
 #ifdef __cplusplus
 extern "C" {
-#endif
+#endif /* __cplusplus */
 
-int32_t ClientStubInit(void);
-int32_t ClientRegisterService(const char *pkgName);
-int32_t ClientRegisterBrProxyService(const char *pkgName);
+int32_t PullUpHap(const char *bundleName, const char *abilityName);
+int32_t GetCallerHapInfo(char *bundleName, uint32_t bundleNamelen, char *abilityName, uint32_t abilityNameLen);
+pid_t GetCallerPid();
+pid_t GetCallerUid();
 
 #ifdef __cplusplus
 }
-#endif
-
-#endif
+#endif /* __cplusplus */
+#endif // BR_PROXY_H

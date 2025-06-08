@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021-2024 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2025 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -19,6 +19,7 @@
 
 #include "auth_interface.h"
 #include "auth_uk_manager.h"
+#include "br_proxy_server_manager.h"
 #include "bus_center_manager.h"
 #include "conn_log.h"
 #include "disc_event_manager.h"
@@ -264,4 +265,5 @@ void ClientDeathCallback(const char *pkgName, int32_t pid)
     BusCenterServerDeathCallback(pkgName);
     AuthServerDeathCallback(pkgName, pid);
     ConnDeathCallback(pkgName, pid);
+    BrProxyClientDeathClearResource(pid);
 }

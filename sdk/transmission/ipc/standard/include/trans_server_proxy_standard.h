@@ -66,6 +66,11 @@ public:
     int32_t RegisterRangeCallbackForMsdp(const char *pkgName) override;
     int32_t UnregisterRangeCallbackForMsdp(const char *pkgName) override;
     int32_t GetRemoteObject(sptr<IRemoteObject> &object);
+    int32_t OpenBrProxy(const char *brMac, const char *uuid) override;
+    int32_t CloseBrProxy(int32_t channelId) override;
+    int32_t SendBrProxyData(int32_t channelId, char *data, uint32_t dataLen) override;
+    int32_t SetListenerState(int32_t channelId, int32_t type, bool CbEnabled) override;
+    int32_t GetProxyChannelState(int32_t uid, bool *isEnable);
 private:
     static inline BrokerDelegator<TransServerProxy> delegator_;
 };

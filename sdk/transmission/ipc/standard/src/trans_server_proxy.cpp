@@ -344,3 +344,73 @@ int32_t ServerIpcPrivilegeCloseChannel(uint64_t tokenId, int32_t pid, const char
         proxy != nullptr, SOFTBUS_NO_INIT, TRANS_SDK, "softbus server g_serverProxy is nullptr");
     return proxy->PrivilegeCloseChannel(tokenId, pid, peerNetworkId);
 }
+
+int32_t ServerIpcOpenBrProxy(const char *brMac, const char *uuid)
+{
+    sptr<TransServerProxy> proxy = RetryGetProxy();
+    TRANS_CHECK_AND_RETURN_RET_LOGE(
+        proxy != nullptr, SOFTBUS_NO_INIT, TRANS_SDK, "[br_proxy] softbus server g_serverProxy is nullptr");
+ 
+    if (brMac == nullptr || uuid == nullptr) {
+        TRANS_LOGE(TRANS_SDK, "[br_proxy] parameter is nullptr!");
+        return SOFTBUS_INVALID_PARAM;
+    }
+ 
+    return proxy->OpenBrProxy(brMac, uuid);
+}
+ 
+int32_t ServerIpcCloseBrProxy(int32_t channelId)
+{
+    sptr<TransServerProxy> proxy = RetryGetProxy();
+    TRANS_CHECK_AND_RETURN_RET_LOGE(
+        proxy != nullptr, SOFTBUS_NO_INIT, TRANS_SDK, "[br_proxy] softbus server g_serverProxy is nullptr");
+ 
+    int32_t ret = proxy->CloseBrProxy(channelId);
+    if (ret != SOFTBUS_OK) {
+        TRANS_LOGE(TRANS_SDK, "[br_proxy] CloseBrProxy failed! ret=%{public}d.", ret);
+    }
+ 
+    return ret;
+}
+ 
+int32_t ServerIpcSendBrProxyData(int32_t channelId, char *data, uint32_t dataLen)
+{
+    sptr<TransServerProxy> proxy = RetryGetProxy();
+    TRANS_CHECK_AND_RETURN_RET_LOGE(
+        proxy != nullptr, SOFTBUS_NO_INIT, TRANS_SDK, "[br_proxy] softbus server g_serverProxy is nullptr");
+ 
+    int32_t ret = proxy->SendBrProxyData(channelId, data, dataLen);
+    if (ret != SOFTBUS_OK) {
+        TRANS_LOGE(TRANS_SDK, "[br_proxy] SendBrProxyData failed! ret=%{public}d.", ret);
+    }
+ 
+    return ret;
+}
+ 
+int32_t ServerIpcSetListenerState(int32_t channelId, int32_t type, bool CbEnabled)
+{
+    sptr<TransServerProxy> proxy = RetryGetProxy();
+    TRANS_CHECK_AND_RETURN_RET_LOGE(
+        proxy != nullptr, SOFTBUS_NO_INIT, TRANS_SDK, "[br_proxy] softbus server g_serverProxy is nullptr");
+ 
+    int32_t ret = proxy->SetListenerState(channelId, type, CbEnabled);
+    if (ret != SOFTBUS_OK) {
+        TRANS_LOGE(TRANS_SDK, "[br_proxy] SetListenerState failed! ret=%{public}d.", ret);
+    }
+ 
+    return ret;
+}
+ 
+int32_t ServerIpcIsProxyChannelEnabled(int32_t uid, bool *isEnable)
+{
+    sptr<TransServerProxy> proxy = RetryGetProxy();
+    TRANS_CHECK_AND_RETURN_RET_LOGE(
+        proxy != nullptr, SOFTBUS_NO_INIT, TRANS_SDK, "[br_proxy] softbus server g_serverProxy is nullptr");
+ 
+    int32_t ret = proxy->GetProxyChannelState(uid, isEnable);
+    if (ret != SOFTBUS_OK) {
+        TRANS_LOGE(TRANS_SDK, "[br_proxy] GetProxyChannelState failed! ret=%{public}d.", ret);
+    }
+ 
+    return ret;
+}

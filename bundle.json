@@ -150,7 +150,8 @@
       "group_type":{
         "base_group":[],
         "fwk_group":[
-          "//foundation/communication/dsoftbus/sdk:softbus_client"
+          "//foundation/communication/dsoftbus/sdk:softbus_client",
+          "//foundation/communication/dsoftbus/br_proxy:br_proxy"
         ],
         "service_group":[
           "//foundation/communication/dsoftbus/core:softbus_server",

@@ -27,6 +27,7 @@ ohos_unittest("SoftBusFrameStandardTest") {
   sources = [ "softbus_frame_standard_test.cpp" ]
 
   include_dirs = [
+    "${dsoftbus_root_path}/br_proxy",
     "${dsoftbus_root_path}/core/frame/standard/init/include",
     "${dsoftbus_root_path}/interfaces/kits/common",
     "${dsoftbus_root_path}/interfaces/kits/discovery",

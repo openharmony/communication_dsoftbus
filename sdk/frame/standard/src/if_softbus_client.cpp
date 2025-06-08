@@ -229,4 +229,30 @@ int32_t ISoftBusClient::OnDataReceived(uint32_t handle, const uint8_t *data, uin
     COMM_LOGI(COMM_EVENT, "ipc default impl");
     return SOFTBUS_OK;
 }
+
+int32_t ISoftBusClient::OnBrProxyOpened(int32_t channelId, const char *brMac, int32_t reason)
+{
+    (void)channelId;
+    (void)brMac;
+    (void)reason;
+    COMM_LOGI(COMM_EVENT, "ipc default impl");
+    return SOFTBUS_OK;
+}
+ 
+int32_t ISoftBusClient::OnBrProxyDataRecv(int32_t channelId, const uint8_t *data, uint32_t len)
+{
+    (void)channelId;
+    (void)data;
+    (void)len;
+    COMM_LOGI(COMM_EVENT, "ipc default impl");
+    return SOFTBUS_OK;
+}
+ 
+int32_t ISoftBusClient::OnBrProxyStateChanged(int32_t channelId, int32_t channelState)
+{
+    (void)channelId;
+    (void)channelState;
+    COMM_LOGI(COMM_EVENT, "ipc default impl");
+    return SOFTBUS_OK;
+}
 } // namespace OHOS
