@@ -57,45 +57,46 @@ void GeneralConnectionTest::SetUp(void) { }
 
 void GeneralConnectionTest::TearDown(void) { }
 
-static OutData *PackReciveData(const uint8_t *data, uint32_t dataLen, uint32_t localId, uint32_t peerId)
+static OutData *PackReceiveData(const uint8_t *data, uint32_t dataLen, uint32_t localId, uint32_t peerId)
 {
+    uint32_t tmpLen = GENERAL_CONNECTION_HEADER_SIZE + dataLen;
+    GeneralConnectionHead *dataTmp = (GeneralConnectionHead *)SoftBusCalloc(tmpLen);
+    if (dataTmp == nullptr) {
+        return nullptr;
+    }
+    dataTmp->headLen = GENERAL_CONNECTION_HEADER_SIZE;
+    dataTmp->localId = localId;
+    dataTmp->peerId = peerId;
+    dataTmp->msgType = GENERAL_CONNECTION_MSG_TYPE_NORMAL;
+
+    if (memcpy_s(dataTmp + GENERAL_CONNECTION_HEADER_SIZE, dataLen, data, dataLen) != EOK) {
+        SoftBusFree(dataTmp);
+        return nullptr;
+    }
+
+    uint32_t connectHeadLen = ConnGetHeadSize();
+    uint32_t totalLen = tmpLen + connectHeadLen;
     OutData *outData = (OutData *)SoftBusCalloc(sizeof(OutData));
-    CONN_CHECK_AND_RETURN_RET_LOGE(outData != nullptr, nullptr, CONN_BLE, "malloc outData err");
-    outData->dataLen = GENERAL_CONNECTION_HEADER_SIZE + dataLen;
-    outData->data = (uint8_t *)SoftBusCalloc(outData->dataLen);
+    if (outData == nullptr) {
+        SoftBusFree(dataTmp);
+        return nullptr;
+    }
+    outData->dataLen = totalLen;
+    outData->data = (uint8_t *)SoftBusCalloc(totalLen);
     if (outData->data == nullptr) {
+        SoftBusFree(dataTmp);
         SoftBusFree(outData);
         return nullptr;
     }
-    GeneralConnectionHead *header = (GeneralConnectionHead *)outData->data;
-    header->headLen = GENERAL_CONNECTION_HEADER_SIZE;
-    header->localId = localId;
-    header->peerId = peerId;
-    header->msgType = GENERAL_CONNECTION_MSG_TYPE_NORMAL;
 
-    if (memcpy_s(outData->data + GENERAL_CONNECTION_HEADER_SIZE,
-        outData->dataLen - GENERAL_CONNECTION_HEADER_SIZE, data, dataLen) != EOK) {
-        FreeOutData(outData);
-        outData = nullptr;
-    }
-
-    uint32_t size = ConnGetHeadSize();
-    uint32_t totalLen = outData->dataLen + size;
-
-    OutData *dataOut = (OutData *)SoftBusCalloc(sizeof(OutData));
-    if (dataOut == nullptr) {
-        FreeOutData(outData);
-        return nullptr;
-    }
-    dataOut->dataLen = totalLen;
-    dataOut->data = (uint8_t *)SoftBusCalloc(totalLen);
-    int32_t ret = memcpy_s(dataOut->data + size, outData->dataLen, outData->data, outData->dataLen);
+    int32_t ret = memcpy_s(outData->data + connectHeadLen, tmpLen, dataTmp, tmpLen);
     if (ret != EOK) {
         FreeOutData(outData);
-        FreeOutData(dataOut);
+        SoftBusFree(dataTmp);
         return nullptr;
     }
-    return dataOut;
+    SoftBusFree(dataTmp);
+    return outData;
 }
 
 static ConnPostData *PackInnerMsg(GeneralConnectionInfo *info, GeneralConnectionMsgType msgType, int32_t module)
@@ -119,6 +120,7 @@ static ConnPostData *PackInnerMsg(GeneralConnectionInfo *info, GeneralConnection
         FreeOutData(data);
         return nullptr;
     }
+    FreeOutData(data);
     return &buff;
 }
 
@@ -247,6 +249,7 @@ HWTEST_F(GeneralConnectionTest, TestRegisterListener, TestSize.Level1)
 
     CONN_LOGI(CONN_BLE, "test register listener end");
 }
+
 /*
 * @tc.name: TestCreateServerMax
 * @tc.desc: test create server include max count(10) and normal case
@@ -392,6 +395,9 @@ HWTEST_F(GeneralConnectionTest, TestSend, TestSize.Level1)
     connectResult->OnConnectSuccessed(requestId, g_ConnectionId, &infos); // save connectionId
     g_ConnectCallback->OnDataReceived(g_ConnectionId, MODULE_BLE_GENERAL, 0, buff, dataLen); // state change to success
     EXPECT_EQ(true, GetConnectCallbackFlag());
+    uint32_t ConnectionId = (CONNECT_BLE << CONNECT_TYPE_SHIFT) + 1;
+    g_ConnectCallback->OnDataReceived(ConnectionId, MODULE_BLE_GENERAL, 0, buff, dataLen); // not target connId
+    
     EXPECT_CALL(mock, ConnBlePostBytesMock).WillRepeatedly(Return(SOFTBUS_OK));
     ret = manager->send(g_handle, data, sizeof(uint8_t), 0);
     EXPECT_EQ(ret, SOFTBUS_OK);
@@ -415,10 +421,14 @@ HWTEST_F(GeneralConnectionTest, TestRecv, TestSize.Level1)
     EXPECT_NE(data, nullptr);
     g_ConnectCallback->OnDataReceived(0, MODULE_BLE_CONN, 0, (char *)data, GENERAL_CONNECTION_HEADER_SIZE + 1);
     EXPECT_EQ(GetRecvDataFlag(), false);
-    OutData *dataRecv = PackReciveData(data, sizeof(uint8_t), 0, g_handle);
+    OutData *dataRecv = PackReceiveData(data, sizeof(uint8_t), 0, g_handle);
     EXPECT_NE(dataRecv, nullptr);
     g_ConnectCallback->OnDataReceived(g_ConnectionId, MODULE_BLE_GENERAL, 0, (char *)dataRecv->data, dataRecv->dataLen);
     EXPECT_EQ(GetRecvDataFlag(), true);
+    // not target connId
+    g_ConnectCallback->OnDataReceived(0, MODULE_BLE_GENERAL, 0, (char *)dataRecv->data, dataRecv->dataLen);
+    SoftBusFree(data);
+    FreeOutData(dataRecv);
     CONN_LOGI(CONN_BLE, "test recv end");
 }
 
@@ -483,7 +493,13 @@ HWTEST_F(GeneralConnectionTest, TestOnConnectDisconnected, TestSize.Level1)
     EXPECT_NE(data, nullptr);
     g_ConnectCallback->OnDataReceived(connectionId, MODULE_BLE_GENERAL, 0, data->buf, data->len);
     EXPECT_EQ(GetFailCallbackReason(), SOFTBUS_CONN_GENERAL_PEER_CONNECTION_CLOSE);
+
+    // not target connId
+    g_ConnectCallback->OnDataReceived(0, MODULE_BLE_GENERAL, 0, data->buf, data->len);
+    EXPECT_EQ(GetFailCallbackReason(), SOFTBUS_OK);
+    
     g_ConnectCallback->OnDisconnected(connectionId, &infos);
+    SoftBusFree(data->buf);
     CONN_LOGI(CONN_BLE, "test on connect disconnect end");
 }
 
@@ -530,5 +546,6 @@ HWTEST_F(GeneralConnectionTest, TestRecvNewConnection, TestSize.Level1)
     };
     data = PackInnerMsg(&info1, GENERAL_CONNECTION_MSG_TYPE_MERGE, MODULE_BLE_GENERAL);
     g_ConnectCallback->OnDataReceived(connectionId, MODULE_BLE_GENERAL, 0, data->buf, data->len);
+    SoftBusFree(data->buf);
 }
 }

@@ -25,7 +25,7 @@
 extern "C" {
 #endif
 
-#define GENERAL_NAME_LEN (30)
+#define GENERAL_NAME_LEN (256)
 #define BUNDLE_NAME_MAX (256)
 
 typedef enum {

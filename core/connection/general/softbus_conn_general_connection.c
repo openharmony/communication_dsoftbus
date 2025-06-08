@@ -882,9 +882,23 @@ static void NotifyConnectFailed(struct GeneralConnection *generalConnection, int
     }
 }
 
+static struct GeneralConnection *GetValidConnectionByGeneralId(uint32_t underlayerHandle, uint32_t generalId)
+{
+    struct GeneralConnection *generalConnection = GetConnectionByGeneralId(generalId);
+    CONN_CHECK_AND_RETURN_RET_LOGE(generalConnection != NULL, NULL, CONN_BLE,
+        "connection is null, generalId=%{public}u", generalId);
+    if (generalConnection->underlayerHandle != underlayerHandle) {
+        CONN_LOGE(CONN_BLE, "unexpect message, recvId=%{public}u, localId=%{public}u",
+            underlayerHandle, generalConnection->underlayerHandle);
+        ConnReturnGeneralConnection(&generalConnection);
+        return NULL;
+    }
+    return generalConnection;
+}
+
 static int32_t ProcessMergeMessage(uint32_t connectionId, GeneralConnectionInfo *info)
 {
-    struct GeneralConnection *generalConnection = GetConnectionByGeneralId(info->localId);
+    struct GeneralConnection *generalConnection = GetValidConnectionByGeneralId(connectionId, info->localId);
     CONN_CHECK_AND_RETURN_RET_LOGE(generalConnection != NULL, SOFTBUS_INVALID_PARAM, CONN_BLE,
         "connection is null, generalId=%{public}u", info->localId);
     ConnDisconnectDevice(connectionId);
@@ -913,7 +927,7 @@ static int32_t ProcessMergeMessage(uint32_t connectionId, GeneralConnectionInfo 
 
 static int32_t ProcessResetMessage(uint32_t connectionId, GeneralConnectionInfo *info)
 {
-    struct GeneralConnection *generalConnection = GetConnectionByGeneralId(info->localId);
+    struct GeneralConnection *generalConnection = GetValidConnectionByGeneralId(connectionId, info->localId);
     CONN_CHECK_AND_RETURN_RET_LOGE(generalConnection != NULL, SOFTBUS_INVALID_PARAM, CONN_BLE,
         "connection is null, generalId=%{public}u", info->localId);
     CONN_LOGI(CONN_BLE, "recv reset msg, generalId=%{public}u", generalConnection->generalId);
@@ -938,11 +952,12 @@ static void UpdateGeneralConnectionByInfo(struct GeneralConnection *generalConne
     (void)SoftBusMutexUnlock(&generalConnection->lock);
 }
 
-static int32_t ProcessHandShakeAck(GeneralConnectionInfo *info)
+static int32_t ProcessHandShakeAck(uint32_t connectionId, GeneralConnectionInfo *info)
 {
-    struct GeneralConnection *generalConnection = GetConnectionByGeneralId(info->localId);
+    struct GeneralConnection *generalConnection = GetValidConnectionByGeneralId(connectionId, info->localId);
     CONN_CHECK_AND_RETURN_RET_LOGE(generalConnection != NULL, SOFTBUS_INVALID_PARAM, CONN_BLE,
-        "connection is null, generalId=%{public}u", info->peerId);
+        "connection is null, generalId=%{public}u", info->localId);
+
     ConnRemoveMsgFromLooper(&g_generalManagerSyncHandler, GENERAL_MGR_MSG_CONNECT_TIMEOUT,
         generalConnection->generalId, 0, NULL);
     if (info->ackStatus != SOFTBUS_OK) {
@@ -973,7 +988,7 @@ static int32_t ProcessInnerMessageByType(
         case GENERAL_CONNECTION_MSG_TYPE_HANDSHAKE:
             return ProcessHandshakeMessage(connectionId, info);
         case GENERAL_CONNECTION_MSG_TYPE_HANDSHAKE_ACK:
-            return ProcessHandShakeAck(info);
+            return ProcessHandShakeAck(connectionId, info);
         case GENERAL_CONNECTION_MSG_TYPE_MERGE:
             return ProcessMergeMessage(connectionId, info);
         case GENERAL_CONNECTION_MSG_TYPE_RESET:
@@ -1027,7 +1042,7 @@ static void OnCommDataReceived(uint32_t connectionId, ConnModule moduleId, int64
     }
     GeneralConnectionHead *head = (GeneralConnectionHead *)data;
     GeneralConnectionMsgType msgType = head->msgType;
-    if (msgType >= GENERAL_CONNECTION_MSG_TYPE_MAX || len < head->headLen) {
+    if (msgType >= GENERAL_CONNECTION_MSG_TYPE_MAX || (uint32_t)len < head->headLen) {
         CONN_LOGE(CONN_BLE, "invalid msgType, msgType=%{public}d, len=%{public}d, headLen=%{public}u",
             msgType, len, head->headLen);
         return;
@@ -1035,12 +1050,12 @@ static void OnCommDataReceived(uint32_t connectionId, ConnModule moduleId, int64
     GeneralConnectionInfo info = {0};
     info.peerId = head->localId;
     info.localId = head->peerId;
-    uint32_t recvDataLen = len - head->headLen;
+    uint32_t recvDataLen = (uint32_t)len - head->headLen; // len greater than GENERAL_CONNECTION_HEADER_SIZE
     uint8_t *recvData = (uint8_t *)data + head->headLen;
     CONN_LOGI(CONN_BLE, "handle=%{public}u,"
         "recv data len=%{public}d, seq=%{public}" PRId64 ", msgtype=%{public}u", info.localId, len, seq, msgType);
     if (msgType == GENERAL_CONNECTION_MSG_TYPE_NORMAL) {
-        struct GeneralConnection *connection = GetConnectionByGeneralId(head->peerId);
+        struct GeneralConnection *connection = GetValidConnectionByGeneralId(connectionId, head->peerId);
         CONN_CHECK_AND_RETURN_LOGE(connection != NULL, CONN_BLE, "conncetion is null");
         CONN_LOGI(CONN_BLE, "recv data generalId=%{public}u, len=%{public}d",
             connection->generalId, recvDataLen);
