@@ -86,6 +86,11 @@ public:
     int32_t Send(uint32_t handle, const uint8_t *data, uint32_t len) override;
     int32_t ConnGetPeerDeviceId(uint32_t handle, char *deviceId, uint32_t len) override;
 
+    int32_t OpenBrProxy(const char *brMac, const char *uuid) override;
+    int32_t CloseBrProxy(int32_t channelId) override;
+    int32_t SendBrProxyData(int32_t channelId, char *data, uint32_t dataLen) override;
+    int32_t SetListenerState(int32_t channelId, int32_t type, bool CbEnabled) override;
+    bool IsProxyChannelEnabled(int32_t uid) override;
 protected:
     void OnStart() override;
     void OnStop() override;

@@ -259,6 +259,7 @@ if (defined(ohos_lite)) {
     sources = [ "proxy/client_trans_proxy_file_manager_test.cpp" ]
     include_dirs = trans_sdk_test_common_inc
     include_dirs += [
+      "$dsoftbus_root_path/sdk/frame/common/include",
       "$dsoftbus_root_path/sdk/transmission/trans_channel/common/include",
       "$dsoftbus_root_path/sdk/transmission/trans_channel/proxy/include",
       "$dsoftbus_root_path/sdk/transmission/trans_channel/udp/file/include",

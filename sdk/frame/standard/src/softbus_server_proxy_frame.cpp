@@ -267,3 +267,30 @@ int ClientRegisterService(const char *pkgName)
     COMM_LOGD(COMM_SDK, "softbus server register service success! pkgName=%{public}s", pkgName);
     return SOFTBUS_OK;
 }
+
+int32_t ClientRegisterBrProxyService(const char *pkgName)
+{
+    if (g_serverProxy == nullptr) {
+        COMM_LOGE(COMM_SDK, "g_serverProxy is nullptr!");
+        return SOFTBUS_INVALID_PARAM;
+    }
+    OHOS::sptr<OHOS::SoftBusServerProxyFrame> serverProxyFrame =
+        new (std::nothrow) OHOS::SoftBusServerProxyFrame(g_serverProxy);
+    if (serverProxyFrame == nullptr) {
+        COMM_LOGE(COMM_SDK, "serverProxyFrame is nullptr!");
+        return SOFTBUS_INVALID_PARAM;
+    }
+    uint32_t sleepCnt = 0;
+    int32_t ret = SOFTBUS_SERVER_NOT_INIT;
+    while (ret != SOFTBUS_OK) {
+        ret = serverProxyFrame->RegisterBrProxyService(pkgName, nullptr);
+        SoftBusSleepMs(WAIT_SERVER_READY_INTERVAL);
+        sleepCnt++;
+        if (sleepCnt >= SOFTBUS_MAX_RETRY_TIMES) {
+            return ret;
+        }
+    }
+ 
+    COMM_LOGD(COMM_SDK, "softbus server register service success! pkgName=%{public}s", pkgName);
+    return SOFTBUS_OK;
+}

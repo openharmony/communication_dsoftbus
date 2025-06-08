@@ -215,6 +215,11 @@
         "TransGetUdpChannelByFileId";
         "ClientGetSessionIdByChannelId";
         "ClientCancelAuthSessionTimer";
+        "OpenBrProxy";
+        "CloseBrProxy";
+        "SendBrProxyData";
+        "SetListenerState";
+        "IsProxyChannelEnabled";
     local:
         *;
 };
