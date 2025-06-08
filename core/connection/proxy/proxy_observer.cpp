@@ -63,7 +63,6 @@ int32_t RegisterHfpListener(const ProxyListener listener)
     CONN_CHECK_AND_RETURN_RET_LOGE(listener != nullptr, SOFTBUS_INVALID_PARAM, CONN_PROXY, "listener is null");
     std::shared_ptr<OHOS::SoftBus::ProxyObserver> observer =
         std::make_shared<OHOS::SoftBus::ProxyObserver>(listener);
-    CONN_CHECK_AND_RETURN_RET_LOGE(observer != nullptr, SOFTBUS_INVALID_PARAM, CONN_PROXY, "observer is null");
     OHOS::Bluetooth::HandsFreeAudioGateway::GetProfile()->RegisterObserver(observer);
     return SOFTBUS_OK;
 }
