@@ -771,7 +771,7 @@ static int32_t RecoveryNormalizedDeviceKey(AuthFsm *authFsm)
         AUTH_LOGE(AUTH_FSM, "post save sessionKey event fail");
         return ret;
     }
-    return AuthSessionHandleAuthFinish(authFsm->authSeq, ACL_WRITE_DEFAULT);
+    return AuthSessionHandleAuthFinish(authFsm->authSeq, authFsm->info.nodeInfo.aclState);
 }
 
 static int32_t RecoveryFastAuthKey(AuthFsm *authFsm)
@@ -807,7 +807,7 @@ static int32_t RecoveryFastAuthKey(AuthFsm *authFsm)
         return ret;
     }
     (void)memset_s(&key, sizeof(AuthDeviceKeyInfo), 0, sizeof(AuthDeviceKeyInfo));
-    return AuthSessionHandleAuthFinish(authFsm->authSeq, ACL_WRITE_DEFAULT);
+    return AuthSessionHandleAuthFinish(authFsm->authSeq, authFsm->info.nodeInfo.aclState);
 }
 
 static void AuditReportSetPeerDevInfo(LnnAuditExtra *lnnAuditExtra, AuthSessionInfo *info)

@@ -696,6 +696,8 @@ static int32_t TryGetDmSessionKeyForUnpack(AuthSessionInfo *info, char *encNorma
         return SOFTBUS_AUTH_NORMALIZED_KEY_PROC_ERR;
     }
     (void)memset_s(&sessionKey, sizeof(sessionKey), 0, sizeof(sessionKey));
+    info->nodeInfo.aclState = ACL_NOT_WRITE;
+    AUTH_LOGI(AUTH_FSM, "use skId. authSeq=%{public}" PRId64, authSeq);
     return SOFTBUS_OK;
 }
 
