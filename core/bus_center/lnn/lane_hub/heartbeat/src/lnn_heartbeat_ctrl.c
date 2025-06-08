@@ -1014,6 +1014,10 @@ int32_t LnnStartHeartbeatFrameDelay(void)
         LNN_LOGD(LNN_HEART_BEAT, "no trusted relation, heartbeat(HB) process start later");
         return SOFTBUS_OK;
     }
+    if (LnnIsNeedInterceptBroadcast()) {
+        LNN_LOGI(LNN_HEART_BEAT, "local heartbeat disable");
+        return SOFTBUS_OK;
+    }
     return LnnStartHeartbeat(0);
 }
 
