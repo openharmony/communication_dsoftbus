@@ -1,0 +1,125 @@
+/*
+ * Copyright (c) 2025 Huawei Device Co., Ltd.
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+#include "softbus_error_code.h"
+#include "softbus_napi_utils.h"
+
+typedef struct {
+    int32_t errorCode;
+    const char *errorMessage;
+} NapiSoftbusErrEntry;
+
+typedef struct {
+    int32_t cErrCode;
+    int32_t jsErrCode;
+} NapiSoftbusErrCMapJs;
+
+const NapiSoftbusErrCMapJs ERRCODE_C_JS_MAP[] = {
+    { SOFTBUS_ACCESS_TOKEN_DENIED,              COMMON_ACCESS_TOKEN_DENIED                      },
+    { SOFTBUS_CONN_BR_DISABLE_ERR,              NAPI_SOFTBUS_DEVICE_NOT_PAIRED                  },
+    { SOFTBUS_INVALID_PARAM,                    COMMON_INVALID_PARAM                            },
+    { SOFTBUS_TRANS_INVALID_CHANNEL_ID,         NAPI_SOFTBUS_CHANNEL_UNAVAILABLE                },
+};
+
+const NapiSoftbusErrEntry ERRCODE_MSG_MAP[] = {
+    { COMMON_ACCESS_TOKEN_DENIED,
+        "BusinessError 201:Permission denied. need permission: ohos.permission.ACCESS_BLUETOOTH."                   },
+    { COMMON_INVALID_PARAM,                         "BusinessError 401:Parameter error."                            },
+    { NAPI_SOFTBUS_LINK_DISABLED,                   "BusinessError 32390001: Link disabled."                        },
+    { NAPI_SOFTBUS_DEVICE_NOT_PAIRED,               "BusinessError 32390002: Device not paired."                    },
+    { NAPI_SOFTBUS_PROFILE_NOT_SUPPORT,             "BusinessError 32390003: Profile not supported"                 },
+    { NAPI_SOFTBUS_CHANNEL_UNAVAILABLE,             "BusinessError 32390004: The channel is unavailable"            },
+    { NAPI_SOFTBUS_INTERNAL_ERROR,                  "BusinessError 32390100: Internal error, It is can be ignored." },
+    { NAPI_SOFTBUS_CALL_IS_RESTRICTED,              "BusinessError 32390101: Call is restricted."                   },
+    { NAPI_SOFTBUS_OPEN_OPERATION_FAILED,
+        "BusinessError 32390102: Operation failed or Connection timed out, it is recommended to retry"              },
+    { NAPI_SOFTBUS_DATA_TOO_LONG,                   "BusinessError 32390103: Data too long."                        },
+    { NAPI_SOFTBUS_SEND_OPERATION_FAILED,
+        "BusinessError 32390104: Operation failed or Send timed out, it is recommended to retry"                    },
+    { NAPI_SOFTBUS_UNKNOWN_ERR,                     "BusinessError 30200000: unknow error"                          },
+};
+
+const char *GetErrMsgByErrCode(int32_t errCode)
+{
+    size_t mapSize = sizeof(ERRCODE_MSG_MAP) / sizeof(ERRCODE_MSG_MAP[0]);
+    for (size_t i = 0; i < mapSize; ++i) {
+        if (ERRCODE_MSG_MAP[i].errorCode == errCode) {
+            return ERRCODE_MSG_MAP[i].errorMessage;
+        }
+    }
+    return NULL;
+}
+
+static napi_value CreateBusinessError(napi_env env, int32_t errCode, bool isThrow)
+{
+    const char *commMsg = GetErrMsgByErrCode(errCode);
+    napi_value result = NULL;
+    if (commMsg == NULL) {
+        napi_get_undefined(env, &result);
+        return result;
+    }
+
+    napi_value message = NULL;
+    napi_create_string_utf8(env, commMsg, NAPI_AUTO_LENGTH, &message);
+
+    napi_value code = NULL;
+    napi_create_int32(env, errCode, &code);
+
+    napi_value businessError = NULL;
+    if (isThrow) {
+        napi_create_error(env, NULL, message, &businessError);
+    } else {
+        napi_create_object(env, &businessError);
+    }
+
+    napi_set_named_property(env, businessError, "code", code);
+    napi_set_named_property(env, businessError, "message", message);
+    return businessError;
+}
+
+static int32_t NapiTransConvertErr(int32_t err)
+{
+    size_t mapSize = sizeof(ERRCODE_C_JS_MAP) / sizeof(ERRCODE_C_JS_MAP[0]);
+    for (int32_t i = 0; i < mapSize; ++i) {
+        if (err == ERRCODE_C_JS_MAP[i].cErrCode) {
+            return ERRCODE_C_JS_MAP[i].jsErrCode;
+        }
+    }
+
+    return NAPI_SOFTBUS_UNKNOWN_ERR;
+}
+
+static void ThrowBusinessError(napi_env env, int32_t errCode, bool isThrow)
+{
+    napi_value businessError = NULL;
+    businessError = CreateBusinessError(env, errCode, true);
+    napi_throw(env, businessError);
+}
+
+void ThrowErrFromC2Js(napi_env env, int32_t err)
+{
+    if (err == SOFTBUS_OK) {
+        return;
+    }
+    int32_t jsRet = NapiTransConvertErr(err);
+    ThrowBusinessError(env, jsRet, true);
+}
+
+napi_value GetBusinessError(napi_env env, int32_t errCode)
+{
+    napi_value businessError = NULL;
+    int32_t jsRet = NapiTransConvertErr(errCode);
+    businessError = CreateBusinessError(env, jsRet, false);
+    return businessError;
+}

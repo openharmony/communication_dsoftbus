@@ -55,6 +55,9 @@ public:
     int32_t OnCheckCollabRelation(const CollabInfo *sourceInfo, bool isSinkSide, const CollabInfo *sinkInfo,
         int32_t channelId, int32_t channeltype) override;
     void OnMsdpRangeResult(const RangeResultInnerInfo *rangeInfo) override;
+    int32_t OnBrProxyOpened(int32_t channelId, const char *brMac, int32_t reason) override;
+    int32_t OnBrProxyDataRecv(int32_t channelId, const uint8_t *data, uint32_t len) override;
+    int32_t OnBrProxyStateChanged(int32_t channelId, int32_t channelState) override;
 
 private:
     static inline BrokerDelegator<TransClientProxy> delegator_;

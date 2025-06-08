@@ -196,4 +196,52 @@ int32_t ISoftBusServer::ConnGetPeerDeviceId(uint32_t handle, char *deviceId, uin
     COMM_LOGE(COMM_SVC, "GetPeerDeviceId ipc default impl");
     return SOFTBUS_IPC_ERR;
 }
+
+int32_t ISoftBusServer::RegisterBrProxyService(const char *clientPkgName, const sptr<IRemoteObject>& object)
+{
+    (void)clientPkgName;
+    (void)object;
+    COMM_LOGE(COMM_SVC, "RegisterBrProxyService ipc default impl");
+    return SOFTBUS_IPC_ERR;
+}
+ 
+int32_t ISoftBusServer::OpenBrProxy(const char *brMac, const char *uuid)
+{
+    (void)brMac;
+    (void)uuid;
+    COMM_LOGE(COMM_SVC, "OpenBrProxy ipc default impl");
+    return SOFTBUS_IPC_ERR;
+}
+ 
+int32_t ISoftBusServer::CloseBrProxy(int32_t channelId)
+{
+    (void)channelId;
+    COMM_LOGE(COMM_SVC, "CloseBrProxy ipc default impl");
+    return SOFTBUS_IPC_ERR;
+}
+ 
+int32_t ISoftBusServer::SendBrProxyData(int32_t channelId, char *data, uint32_t dataLen)
+{
+    (void)channelId;
+    (void)data;
+    (void)dataLen;
+    COMM_LOGE(COMM_SVC, "SendBrProxyData ipc default impl");
+    return SOFTBUS_IPC_ERR;
+}
+ 
+int32_t ISoftBusServer::SetListenerState(int32_t channelId, int32_t type, bool CbEnabled)
+{
+    (void)channelId;
+    (void)type;
+    (void)CbEnabled;
+    COMM_LOGE(COMM_SVC, "SetListenerState ipc default impl");
+    return SOFTBUS_IPC_ERR;
+}
+ 
+bool ISoftBusServer::IsProxyChannelEnabled(int32_t uid)
+{
+    (void)uid;
+    COMM_LOGE(COMM_SVC, "IsProxyChannelEnabled ipc default impl");
+    return SOFTBUS_IPC_ERR;
+}
 } // namespace OHOS
