@@ -471,6 +471,102 @@ int32_t TransClientProxy::OnCheckCollabRelation(const CollabInfo *sourceInfo, bo
     return ret;
 }
 
+int32_t TransClientProxy::OnBrProxyOpened(int32_t channelId, const char *brMac, int32_t reason)
+{
+    if (brMac == nullptr) {
+        TRANS_LOGE(TRANS_CTRL, "[br_proxy] invalid param.");
+        return SOFTBUS_INVALID_PARAM;
+    }
+    sptr<IRemoteObject> remote = Remote();
+    if (remote == nullptr) {
+        TRANS_LOGE(TRANS_CTRL, "[br_proxy] Remote is nullptr");
+        return SOFTBUS_TRANS_PROXY_REMOTE_NULL;
+    }
+ 
+    MessageParcel data;
+    if (!data.WriteInterfaceToken(GetDescriptor())) {
+        TRANS_LOGE(TRANS_CTRL, "[br_proxy] Write InterfaceToken failed!");
+        return SOFTBUS_TRANS_PROXY_WRITETOKEN_FAILED;
+    }
+ 
+    WRITE_PARCEL_WITH_RET(data, Int32, channelId, SOFTBUS_TRANS_PROXY_WRITEINT_FAILED);
+    WRITE_PARCEL_WITH_RET(data, CString, brMac, SOFTBUS_TRANS_PROXY_WRITECSTRING_FAILED);
+    WRITE_PARCEL_WITH_RET(data, Int32, reason, SOFTBUS_TRANS_PROXY_WRITEINT_FAILED);
+ 
+    MessageParcel reply;
+    MessageOption option(MessageOption::TF_SYNC);
+    int32_t ret = remote->SendRequest(CLIENT_ON_BR_PROXY_OPENED, data, reply, option);
+    if (ret != SOFTBUS_OK) {
+        TRANS_LOGE(TRANS_CTRL, "[br_proxy] Send request failed, ret=%{public}d", ret);
+        return SOFTBUS_TRANS_PROXY_SEND_REQUEST_FAILED;
+    }
+    return ret;
+}
+ 
+int32_t TransClientProxy::OnBrProxyDataRecv(int32_t channelId, const uint8_t *data, uint32_t len)
+{
+    if (data == nullptr) {
+        TRANS_LOGE(TRANS_CTRL, "[br_proxy] invalid param.");
+        return SOFTBUS_INVALID_PARAM;
+    }
+    sptr<IRemoteObject> remote = Remote();
+    if (remote == nullptr) {
+        TRANS_LOGE(TRANS_CTRL, "[br_proxy] Remote is nullptr");
+        return SOFTBUS_TRANS_PROXY_REMOTE_NULL;
+    }
+ 
+    MessageParcel pData;
+    if (!pData.WriteInterfaceToken(GetDescriptor())) {
+        TRANS_LOGE(TRANS_CTRL, "[br_proxy] Write InterfaceToken failed!");
+        return SOFTBUS_TRANS_PROXY_WRITETOKEN_FAILED;
+    }
+ 
+    TRANS_CHECK_AND_RETURN_RET_LOGE(pData.WriteInt32(channelId),
+        SOFTBUS_TRANS_PROXY_WRITEINT_FAILED, TRANS_CTRL, "[br_proxy] write channelId failed");
+    TRANS_CHECK_AND_RETURN_RET_LOGE(pData.WriteUint32(len),
+        SOFTBUS_TRANS_PROXY_WRITEINT_FAILED, TRANS_CTRL, "[br_proxy] write data len failed");
+    TRANS_CHECK_AND_RETURN_RET_LOGE(pData.WriteRawData(data, len),
+        SOFTBUS_TRANS_PROXY_READRAWDATA_FAILED, TRANS_CTRL, "[br_proxy] write (data, len) failed");
+ 
+    MessageParcel reply;
+    MessageOption option(MessageOption::TF_SYNC);
+    int32_t ret = remote->SendRequest(CLIENT_ON_BR_PROXY_DATA_RECV, pData, reply, option);
+    if (ret != SOFTBUS_OK) {
+        TRANS_LOGE(TRANS_CTRL, "[br_proxy] Send request failed, ret=%{public}d", ret);
+        return SOFTBUS_TRANS_PROXY_SEND_REQUEST_FAILED;
+    }
+    return ret;
+}
+ 
+int32_t TransClientProxy::OnBrProxyStateChanged(int32_t channelId, int32_t channelState)
+{
+    sptr<IRemoteObject> remote = Remote();
+    if (remote == nullptr) {
+        TRANS_LOGE(TRANS_CTRL, "[br_proxy] Remote is nullptr");
+        return SOFTBUS_TRANS_PROXY_REMOTE_NULL;
+    }
+ 
+    MessageParcel data;
+    if (!data.WriteInterfaceToken(GetDescriptor())) {
+        TRANS_LOGE(TRANS_CTRL, "[br_proxy] Write InterfaceToken failed!");
+        return SOFTBUS_TRANS_PROXY_WRITETOKEN_FAILED;
+    }
+ 
+    TRANS_CHECK_AND_RETURN_RET_LOGE(data.WriteInt32(channelId),
+        SOFTBUS_TRANS_PROXY_WRITEINT_FAILED, TRANS_CTRL, "[br_proxy] write channelId failed");
+    TRANS_CHECK_AND_RETURN_RET_LOGE(data.WriteInt32(channelState),
+        SOFTBUS_TRANS_PROXY_WRITEINT_FAILED, TRANS_CTRL, "[br_proxy] write channelState failed");
+ 
+    MessageParcel reply;
+    MessageOption option(MessageOption::TF_SYNC);
+    int32_t ret = remote->SendRequest(CLIENT_ON_BR_PROXY_STATE_CHANGED, data, reply, option);
+    if (ret != SOFTBUS_OK) {
+        TRANS_LOGE(TRANS_CTRL, "[br_proxy] Send request failed, ret=%{public}d", ret);
+        return SOFTBUS_TRANS_PROXY_SEND_REQUEST_FAILED;
+    }
+    return ret;
+}
+
 int32_t TransClientProxy::OnJoinLNNResult(void *addr, uint32_t addrTypeLen, const char *networkId, int32_t retCode)
 {
     (void)addr;

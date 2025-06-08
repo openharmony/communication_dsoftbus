@@ -16,6 +16,7 @@
 #include "softbus_client_stub.h"
 
 #include "anonymizer.h"
+#include "br_proxy.h"
 #include "client_bus_center_manager.h"
 #include "general_client_connection.h"
 #include "client_trans_channel_callback.h"
@@ -60,6 +61,9 @@ SoftBusClientStub::SoftBusClientStub()
     memberFuncMap_[CLIENT_GENERAL_CONNECTION_STATE_CHANGE] = &SoftBusClientStub::OnConnectionStateChangeInner;
     memberFuncMap_[CLIENT_GENERAL_ACCEPT_CONNECT] = &SoftBusClientStub::OnAcceptConnectInner;
     memberFuncMap_[CLIENT_GENERAL_DATA_RECEIVED] = &SoftBusClientStub::OnDataReceivedInner;
+    memberFuncMap_[CLIENT_ON_BR_PROXY_OPENED] = &SoftBusClientStub::OnBrProxyOpenedInner;
+    memberFuncMap_[CLIENT_ON_BR_PROXY_DATA_RECV] = &SoftBusClientStub::OnBrProxyDataRecvInner;
+    memberFuncMap_[CLIENT_ON_BR_PROXY_STATE_CHANGED] = &SoftBusClientStub::OnBrProxyStateChangedInner;
 }
 
 int32_t SoftBusClientStub::OnRemoteRequest(uint32_t code,
@@ -831,6 +835,42 @@ int32_t SoftBusClientStub::OnCheckCollabRelationInner(MessageParcel &data, Messa
     COMM_CHECK_AND_RETURN_RET_LOGE(
         ret == SOFTBUS_OK, ret, COMM_SDK, "CheckCollabRelation failed! ret=%{public}d.", ret);
     return SOFTBUS_OK;
+}
+
+int32_t SoftBusClientStub::OnBrProxyOpenedInner(MessageParcel &data, MessageParcel &reply)
+{
+    int32_t channelId;
+    COMM_CHECK_AND_RETURN_RET_LOGE(data.ReadInt32(channelId), SOFTBUS_IPC_ERR, COMM_SDK, "read channelId failed");
+    char *brMac = (char *)data.ReadCString();
+    COMM_CHECK_AND_RETURN_RET_LOGE(brMac != nullptr, SOFTBUS_IPC_ERR, COMM_SDK, "read brMac failed");
+    int32_t reason;
+    COMM_CHECK_AND_RETURN_RET_LOGE(data.ReadInt32(reason), SOFTBUS_IPC_ERR, COMM_SDK, "read reason failed");
+ 
+    return ClientTransOnBrProxyOpened(channelId, brMac, reason);
+}
+ 
+int32_t SoftBusClientStub::OnBrProxyDataRecvInner(MessageParcel &data, MessageParcel &reply)
+{
+    int32_t channelId;
+    COMM_CHECK_AND_RETURN_RET_LOGE(data.ReadInt32(channelId), SOFTBUS_IPC_ERR, COMM_SDK, "read channelId failed");
+    uint32_t len;
+    COMM_CHECK_AND_RETURN_RET_LOGE(
+        data.ReadUint32(len), SOFTBUS_TRANS_PROXY_READUINT_FAILED, COMM_SDK, "read data len failed");
+    uint8_t *dataInfo = (uint8_t *)data.ReadRawData(len);
+    COMM_CHECK_AND_RETURN_RET_LOGE(
+        dataInfo != nullptr, SOFTBUS_TRANS_PROXY_READRAWDATA_FAILED, COMM_SDK, "read dataInfo failed!");
+ 
+    return ClientTransBrProxyDataReceived(channelId, dataInfo, len);
+}
+ 
+int32_t SoftBusClientStub::OnBrProxyStateChangedInner(MessageParcel &data, MessageParcel &reply)
+{
+    int32_t channelId;
+    COMM_CHECK_AND_RETURN_RET_LOGE(data.ReadInt32(channelId), SOFTBUS_IPC_ERR, COMM_SDK, "read channelId failed");
+    int32_t errCode;
+    COMM_CHECK_AND_RETURN_RET_LOGE(data.ReadInt32(errCode), SOFTBUS_IPC_ERR, COMM_SDK, "read errCode failed");
+ 
+    return ClientTransBrProxyChannelChange(channelId, errCode);
 }
 
 int32_t SoftBusClientStub::OnJoinLNNResult(void *addr, uint32_t addrTypeLen, const char *networkId, int retCode)

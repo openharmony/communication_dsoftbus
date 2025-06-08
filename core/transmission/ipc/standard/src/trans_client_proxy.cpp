@@ -290,3 +290,54 @@ int32_t ClientIpcCheckCollabRelation(const char *pkgName, int32_t pid,
     return clientProxy->OnCheckCollabRelation(
         sourceInfo, sinkInfo->pid != -1, sinkInfo, transInfo->channelId, transInfo->channelType);
 }
+
+int32_t ClientIpcBrProxyOpened(const char *pkgName, int32_t channelId, const char *brMac, int32_t reason)
+{
+    if (pkgName == nullptr || brMac == nullptr) {
+        TRANS_LOGE(TRANS_SDK, "invalid param.");
+        return SOFTBUS_INVALID_PARAM;
+    }
+ 
+    sptr<IRemoteObject> clientObject = SoftbusClientInfoManager::GetInstance().GetSoftbusClientProxy(pkgName);
+    sptr<TransClientProxy> clientProxy = new (std::nothrow) TransClientProxy(clientObject);
+    if (clientProxy == nullptr) {
+        TRANS_LOGE(TRANS_SDK, "softbus client proxy is nullptr!");
+        return SOFTBUS_TRANS_GET_CLIENT_PROXY_NULL;
+    }
+ 
+    return clientProxy->OnBrProxyOpened(channelId, brMac, reason);
+}
+ 
+int32_t ClientIpcBrProxyReceivedData(const char *pkgName, int32_t channelId, const uint8_t *data, uint32_t len)
+{
+    if (pkgName == nullptr || data == nullptr) {
+        TRANS_LOGE(TRANS_SDK, "invalid param.");
+        return SOFTBUS_INVALID_PARAM;
+    }
+ 
+    sptr<IRemoteObject> clientObject = SoftbusClientInfoManager::GetInstance().GetSoftbusClientProxy(pkgName);
+    sptr<TransClientProxy> clientProxy = new (std::nothrow) TransClientProxy(clientObject);
+    if (clientProxy == nullptr) {
+        TRANS_LOGE(TRANS_SDK, "softbus client proxy is nullptr!");
+        return SOFTBUS_TRANS_GET_CLIENT_PROXY_NULL;
+    }
+ 
+    return clientProxy->OnBrProxyDataRecv(channelId, data, len);
+}
+ 
+int32_t ClientIpcBrProxyStateChanged(const char *pkgName, int32_t channelId, int32_t channelState)
+{
+    if (pkgName == nullptr) {
+        TRANS_LOGE(TRANS_SDK, "invalid param.");
+        return SOFTBUS_INVALID_PARAM;
+    }
+ 
+    sptr<IRemoteObject> clientObject = SoftbusClientInfoManager::GetInstance().GetSoftbusClientProxy(pkgName);
+    sptr<TransClientProxy> clientProxy = new (std::nothrow) TransClientProxy(clientObject);
+    if (clientProxy == nullptr) {
+        TRANS_LOGE(TRANS_SDK, "softbus client proxy is nullptr!");
+        return SOFTBUS_TRANS_GET_CLIENT_PROXY_NULL;
+    }
+ 
+    return clientProxy->OnBrProxyStateChanged(channelId, channelState);
+}

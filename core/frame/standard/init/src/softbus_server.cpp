@@ -15,6 +15,7 @@
 
 #include "softbus_server.h"
 
+#include "br_proxy_server_manager.h"
 #include "bus_center_ex_obj.h"
 #include "ipc_skeleton.h"
 #include "lnn_bus_center_ipc.h"
@@ -656,5 +657,30 @@ int32_t SoftBusServer::ConnGetPeerDeviceId(uint32_t handle, char *deviceId, uint
         COMM_LOGE(COMM_SVC, "get peer deviceId failed, handle=%{public}d", handle);
     }
     return ret;
+}
+
+int32_t SoftBusServer::OpenBrProxy(const char *brMac, const char *uuid)
+{
+    return TransOpenBrProxy(brMac, uuid);
+}
+ 
+int32_t SoftBusServer::CloseBrProxy(int32_t channelId)
+{
+    return TransCloseBrProxy(channelId);
+}
+ 
+int32_t SoftBusServer::SendBrProxyData(int32_t channelId, char *data, uint32_t dataLen)
+{
+    return TransSendBrProxyData(channelId, data, dataLen);
+}
+ 
+int32_t SoftBusServer::SetListenerState(int32_t channelId, int32_t type, bool CbEnabled)
+{
+    return TransSetListenerState(channelId, type, CbEnabled);
+}
+ 
+bool SoftBusServer::IsProxyChannelEnabled(int32_t uid)
+{
+    return TransIsProxyChannelEnabled(uid);
 }
 } // namespace OHOS

@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021 Huawei Device Co., Ltd.
+ * Copyright (c) 2025 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -13,18 +13,21 @@
  * limitations under the License.
  */
 
-#ifndef SOFTBUS_CLIENT_STUB_INTERFACE_H
-#define SOFTBUS_CLIENT_STUB_INTERFACE_H
+#ifndef BR_PROXY_SERVER_MANAGER_H
+#define BR_PROXY_SERVER_MANAGER_H
 
-#include <stdint.h>
+#include <unistd.h>
 
 #ifdef __cplusplus
 extern "C" {
 #endif
 
-int32_t ClientStubInit(void);
-int32_t ClientRegisterService(const char *pkgName);
-int32_t ClientRegisterBrProxyService(const char *pkgName);
+int32_t TransOpenBrProxy(const char *brMac, const char *uuid);
+int32_t TransCloseBrProxy(int32_t channelId);
+int32_t TransSendBrProxyData(int32_t channelId, char* data, uint32_t dataLen);
+int32_t TransSetListenerState(int32_t channelId, int32_t type, bool isEnable);
+bool TransIsProxyChannelEnabled(int32_t uid);
+void BrProxyClientDeathClearResource(pid_t callingPid);
 
 #ifdef __cplusplus
 }
