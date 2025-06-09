@@ -1468,7 +1468,7 @@ int32_t TransDealAuthChannelOpenResult(int32_t channelId, int32_t openResult, pi
         TRANS_LOGE(TRANS_SVC, "auth get id by sessionName failed");
         return SOFTBUS_TRANS_GET_PID_FAILED;
     }
-    if (pid != 0 && pid != callingPid) {
+    if (callingPid != 0 && pid != callingPid) {
         TRANS_LOGE(TRANS_CTRL, "pid does not match, pid=%{public}d, callingPid=%{public}d", pid, callingPid);
         return SOFTBUS_TRANS_CHECK_PID_ERROR;
     }
