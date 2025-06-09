@@ -601,6 +601,7 @@ static int32_t SetLocalDeviceInfo(LinkStatus status, int32_t ifnameIdx)
     g_localDeviceInfo->name = "";
     g_localDeviceInfo->deviceType = (uint32_t)deviceType;
     g_localDeviceInfo->businessType = (uint8_t)NSTACKX_BUSINESS_TYPE_NULL;
+    g_localDeviceInfo->hasDeviceHash = true;
     (void)SoftBusMutexUnlock(&g_localDeviceInfoLock);
 
     ret = SetLocalLinkInfo(status, ifnameIdx);
