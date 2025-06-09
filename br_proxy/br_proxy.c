@@ -280,11 +280,11 @@ static int32_t ClientDeleteChannelFromList(int32_t channelId, const char *brMac)
                 continue;
             }
         }
+        TRANS_LOGI(TRANS_SDK, "[br_proxy] by channelId:%{public}d delete node success, cnt:%{public}d",
+            channelNode->channelId, g_clientList->cnt);
         ListDelete(&channelNode->node);
         SoftBusFree(channelNode);
         g_clientList->cnt--;
-        TRANS_LOGI(TRANS_SDK, "[br_proxy] by channelId:%{public}d delete node success, cnt:%{public}d",
-            channelId, g_clientList->cnt);
         (void)SoftBusMutexUnlock(&(g_clientList->lock));
         return SOFTBUS_OK;
     }
@@ -353,6 +353,7 @@ static int32_t ClientQueryList(int32_t channelId, const char *peerBRMacAddr, Cli
     }
 EXIT:
     (void)SoftBusMutexUnlock(&(g_clientList->lock));
+    TRANS_LOGE(TRANS_SDK, "[br_proxy] failed! channelId=%{public}d", channelId);
     return ret;
 }
 
@@ -481,7 +482,7 @@ int32_t OpenBrProxy(BrProxyChannelInfo *channelInfo, IBrProxyListener *listener)
         }
         TRANS_LOGI(TRANS_SDK, "[br_proxy] sdk reopen");
     }
-    return SOFTBUS_OK;
+    return ret;
 }
 
 int32_t CloseBrProxy(int32_t channelId)
@@ -531,6 +532,10 @@ int32_t SendBrProxyData(int32_t channelId, char* data, uint32_t dataLen)
 {
     if (!IsChannelValid(channelId)) {
         return SOFTBUS_TRANS_INVALID_CHANNEL_ID;
+    }
+    if (dataLen > BR_PROXY_SEND_MAX_LEN) {
+        TRANS_LOGE(TRANS_SDK, "[br_proxy] data too long! datalen:%{public}d", dataLen);
+        return SOFTBUS_TRANS_BR_PROXY_DATA_TOO_LONG;
     }
     int32_t ret = ServerIpcSendBrProxyData(channelId, data, dataLen);
     if (ret != SOFTBUS_OK) {

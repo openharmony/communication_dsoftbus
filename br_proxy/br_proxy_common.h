@@ -23,6 +23,7 @@ int32_t PullUpHap(const char *bundleName, const char *abilityName);
 int32_t GetCallerHapInfo(char *bundleName, uint32_t bundleNamelen, char *abilityName, uint32_t abilityNameLen);
 pid_t GetCallerPid();
 pid_t GetCallerUid();
+uint32_t GetCallerTokenId();
 
 #ifdef __cplusplus
 }

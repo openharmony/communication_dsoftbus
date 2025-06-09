@@ -52,6 +52,7 @@ typedef enum {
 #define COMM_PKGNAME_WECHAT "WeChatPkgName"
 #define PKGNAME_MAX_LEN  30
 #define DEFAULT_CHANNEL_ID (-1)
+#define BR_PROXY_SEND_MAX_LEN 4096
 
 typedef struct {
     int32_t (*onChannelOpened)(int32_t channelId, int32_t result);
