@@ -330,27 +330,6 @@ int32_t IdServiceProcessCredData(int64_t authSeq, const uint8_t *data, uint32_t 
     return SOFTBUS_OK;
 }
 
-bool IdServiceIsPotentialTrustedDevice(const char *udidHash, const char *accountIdHash, bool isSameAccount)
-{
-    char *credList = NULL;
-    int32_t userId = GetActiveOsAccountIds();
-    AUTH_LOGI(AUTH_HICHAIN, "get userId=%{public}d", userId);
-    int32_t ret = IdServiceQueryCredential(userId, udidHash, accountIdHash, isSameAccount, &credList);
-    if (ret != SOFTBUS_OK) {
-        AUTH_LOGE(AUTH_HICHAIN, "query credential fail, ret=%{public}d", ret);
-        return false;
-    }
-    char *credId = IdServiceGetCredIdFromCredList(userId, credList);
-    if (credId == NULL) {
-        AUTH_LOGE(AUTH_HICHAIN, "get cred id fail");
-        IdServiceDestroyCredentialList(&credList);
-        return false;
-    }
-    IdServiceDestroyCredentialList(&credList);
-    SoftBusFree(credId);
-    return true;
-}
-
 static int32_t GetCredInfoFromJson(const char *credInfo, SoftBusCredInfo *info)
 {
     JsonObj *json = JSON_Parse(credInfo, strlen(credInfo));
@@ -368,6 +347,69 @@ static int32_t GetCredInfoFromJson(const char *credInfo, SoftBusCredInfo *info)
     }
     JSON_Delete(json);
     return SOFTBUS_OK;
+}
+
+static int32_t GetCredInfoByUserIdAndCredId(int32_t userId, const char *credId, SoftBusCredInfo *credInfo)
+{
+    if (credId == NULL || credInfo == NULL) {
+        AUTH_LOGE(AUTH_HICHAIN, "invalid param");
+        return SOFTBUS_INVALID_PARAM;
+    }
+    const CredManager *credManager = IdServiceGetCredMgrInstance();
+    AUTH_CHECK_AND_RETURN_RET_LOGE(credManager != NULL, SOFTBUS_AUTH_GET_CRED_INSTANCE_FALI, AUTH_HICHAIN,
+        "hichain identity service not initialized");
+    char *credInfoMsg = NULL;
+
+    int32_t ret = credManager->queryCredInfoByCredId(userId, credId, &credInfoMsg);
+    if (ret != HC_SUCCESS) {
+        uint32_t authErrCode = 0;
+        (void)GetSoftbusHichainAuthErrorCode((uint32_t)ret, &authErrCode);
+        AUTH_LOGE(AUTH_HICHAIN,
+            "hichain identity service quere credential info failed, err=%{public}d, authErrCode=%{public}d", ret,
+            authErrCode);
+        return authErrCode;
+    }
+    ret = GetCredInfoFromJson(credInfoMsg, credInfo);
+    if (ret != SOFTBUS_OK) {
+        AUTH_LOGE(AUTH_HICHAIN, "get credential info from json fail");
+        IdServiceDestroyCredentialList(&credInfoMsg);
+        return ret;
+    }
+    IdServiceDestroyCredentialList(&credInfoMsg);
+    AUTH_LOGI(AUTH_HICHAIN, "potential device credIdType=%{public}d", credInfo->credIdType);
+    return SOFTBUS_OK;
+}
+
+bool IdServiceIsPotentialTrustedDevice(const char *udidHash, const char *accountIdHash, bool isSameAccount)
+{
+    if (accountIdHash == NULL || udidHash == NULL) {
+        AUTH_LOGE(AUTH_HICHAIN, "invalid param");
+        return false;
+    }
+
+    char *credList = NULL;
+    int32_t userId = GetActiveOsAccountIds();
+    SoftBusCredInfo credInfo = { 0 };
+    AUTH_LOGI(AUTH_HICHAIN, "get userId=%{public}d", userId);
+    int32_t ret = IdServiceQueryCredential(userId, udidHash, accountIdHash, isSameAccount, &credList);
+    if (ret != SOFTBUS_OK) {
+        AUTH_LOGE(AUTH_HICHAIN, "query credential fail, ret=%{public}d", ret);
+        return false;
+    }
+    char *credId = IdServiceGetCredIdFromCredList(userId, credList);
+    if (credId == NULL) {
+        AUTH_LOGE(AUTH_HICHAIN, "get cred id fail");
+        IdServiceDestroyCredentialList(&credList);
+        return false;
+    }
+    IdServiceDestroyCredentialList(&credList);
+    if (GetCredInfoByUserIdAndCredId(userId, credId, &credInfo) != SOFTBUS_OK) {
+        AUTH_LOGE(AUTH_HICHAIN, "get cred info fail");
+        SoftBusFree(credId);
+        return false;
+    }
+    SoftBusFree(credId);
+    return credInfo.credIdType == ACCOUNT_SHARE;
 }
 
 static bool IsLocalCredInfo(const char *udid)
