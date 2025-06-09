@@ -228,6 +228,11 @@ static int32_t SaveProxyConnection(struct ProxyConnection *proxyConnection)
         channelId = AllocateConnectionIdUnsafe();
         retryNum++;
     } while (channelId == 0 && retryNum < RETRY_MAX_NUM);
+    if (channelId == 0) {
+        CONN_LOGE(CONN_PROXY, "allocate channelId failed");
+        SoftBusMutexUnlock(&GetProxyChannelManager()->proxyConnectionList->lock);
+        return SOFTBUS_CONN_PROXY_INTERNAL_ERR;
+    }
     proxyConnection->channelId = channelId;
     proxyConnection->proxyChannel.channelId = channelId;
     ListAdd(&GetProxyChannelManager()->proxyConnectionList->list, &proxyConnection->node);
@@ -425,17 +430,7 @@ static ProxyConnectInfo *CopyProxyConnectInfo(ProxyConnectInfo *srcInfo)
 {
     ProxyConnectInfo *destInfo = (ProxyConnectInfo *)SoftBusCalloc(sizeof(ProxyConnectInfo));
     CONN_CHECK_AND_RETURN_RET_LOGE(destInfo != NULL, NULL, CONN_PROXY, "data is NULL");
-
-    char anomizeAddress[BT_MAC_LEN] = { 0 };
-    ConvertAnonymizeMacAddress(anomizeAddress, BT_MAC_LEN, srcInfo->brMac, BT_MAC_LEN);
-    char anomizeUuid[UUID_STRING_LEN] = { 0 };
-    ConvertAnonymizeSensitiveString(anomizeUuid, UUID_STRING_LEN, srcInfo->uuid);
-    if (memcpy_s(destInfo, sizeof(ProxyConnectInfo), srcInfo, sizeof(ProxyConnectInfo)) != EOK) {
-        CONN_LOGE(CONN_PROXY, "reqId=%{public}u, addr=%{public}s, uuid=%{public}s",
-            srcInfo->requestId, anomizeAddress, anomizeUuid);
-        DestoryProxyConnectInfo(&destInfo);
-        return NULL;
-    }
+    (void)memcpy_s(destInfo, sizeof(ProxyConnectInfo), srcInfo, sizeof(ProxyConnectInfo));
     ListInit(&destInfo->node);
     return destInfo;
 }
@@ -576,7 +571,7 @@ static int32_t OpenProxyChannel(ProxyChannelParam *param, const OpenProxyChannel
     char anomizeUuid[UUID_STRING_LEN] = { 0 };
     ConvertAnonymizeMacAddress(anomizeAddress, BT_MAC_LEN, param->brMac, BT_MAC_LEN);
     ConvertAnonymizeSensitiveString(anomizeUuid, UUID_STRING_LEN, param->uuid);
-    CONN_LOGE(CONN_PROXY, "reqId=%{public}u, brMac=%{public}s, uuid=%{public}s, timeoutMs=%{public}llu",
+    CONN_LOGI(CONN_PROXY, "reqId=%{public}u, brMac=%{public}s, uuid=%{public}s, timeoutMs=%{public}" PRIu64,
         param->requestId, anomizeAddress, anomizeUuid, param->timeoutMs);
 
     ProxyConnectInfo *connectInfo = NULL;
@@ -671,6 +666,16 @@ static void OnInnerReConnectFail(uint32_t requestId, int32_t reason)
     CONN_LOGE(CONN_PROXY, "requestId=%{public}u, reason=%{public}d", requestId, reason);
 }
 
+static bool IsTargetDeviceAlreadyConnected(char *brAddr)
+{
+    struct ProxyConnection *proxyConnection = GetProxyChannelByAddr(brAddr);
+    CONN_CHECK_AND_RETURN_RET_LOGI(proxyConnection != NULL, false,
+        CONN_PROXY, "not exit same proxyConnection");
+    bool isValidProxyConnection = GetProxyChannelState(proxyConnection) == PROXY_CHANNEL_CONNECTED;
+    proxyConnection->dereference(proxyConnection);
+    return isValidProxyConnection;
+}
+
 static void AttemptReconnectDevice(char *brAddr)
 {
     char anomizeAddress[BT_MAC_LEN] = { 0 };
@@ -679,16 +684,8 @@ static void AttemptReconnectDevice(char *brAddr)
     CONN_CHECK_AND_RETURN_LOGW(reconnectDeviceInfo != NULL, CONN_PROXY,
         "not exit same addr=%{public}s need to reconnect", anomizeAddress);
     CONN_CHECK_AND_RETURN_LOGW(reconnectDeviceInfo->isAclConnected, CONN_PROXY, "acl is disconnect not retry");
-    struct ProxyConnection *proxyConnection = GetProxyChannelByAddr(brAddr);
-
-    if (proxyConnection != NULL && GetProxyChannelState(proxyConnection) == PROXY_CHANNEL_CONNECTED) {
-        CONN_LOGE(CONN_PROXY, "A proxy channel with the same address exists, addr=%{public}s", anomizeAddress);
-        proxyConnection->dereference(proxyConnection);
-        return;
-    }
-    if (proxyConnection != NULL) {
-        proxyConnection->dereference(proxyConnection);
-    }
+    bool isAlreadyConnected = IsTargetDeviceAlreadyConnected(brAddr);
+    CONN_CHECK_AND_RETURN_LOGI(!isAlreadyConnected, CONN_PROXY, "exist already connection");
 
     ProxyConnectInfo *proxyChannelRequestInfo = CopyProxyConnectInfo(reconnectDeviceInfo);
     CONN_CHECK_AND_RETURN_LOGW(proxyChannelRequestInfo != NULL, CONN_PROXY, "CopyProxyConnectInfo failed");
@@ -778,7 +775,7 @@ static void OnHfpConnectionStateChanged(const char *addr, int32_t state)
     CONN_LOGI(CONN_PROXY, "state=%{public}d", state);
     CONN_CHECK_AND_RETURN_LOGW(addr != NULL, CONN_PROXY, "addr is NULL");
     char *copyAddr = (char *)SoftBusCalloc(BT_MAC_LEN);
-    if (copyAddr == NULL || strncpy_s(copyAddr, BT_MAC_LEN, addr, BT_MAC_LEN) != EOK) {
+    if (copyAddr == NULL || strncpy_s(copyAddr, BT_MAC_LEN, addr, BT_MAC_LEN - 1) != EOK) {
         CONN_LOGE(CONN_PROXY, "copyAddr failed");
         SoftBusFree(copyAddr);
         return;
