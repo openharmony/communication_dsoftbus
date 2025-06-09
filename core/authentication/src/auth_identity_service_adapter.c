@@ -401,7 +401,7 @@ static void IdServiceHandleCredAdd(const char *credInfo)
         AUTH_LOGE(AUTH_HICHAIN, "id service insert trust info fail");
         return;
     }
-    LnnHbOnTrustedRelationIncreased(AUTH_PEER_TO_PEER_GROUP);
+    LnnHbOnTrustedRelationIncreased(info.credIdType == ACCOUNT_SHARE ? AUTH_SHARE : AUTH_PEER_TO_PEER_GROUP);
 }
 
 static bool IsExitPotentialTrusted(const char *udid)
