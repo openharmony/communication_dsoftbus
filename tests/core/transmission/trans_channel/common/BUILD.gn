@@ -186,7 +186,6 @@ ohos_unittest("TransInnerTest") {
     "$dsoftbus_root_path/core/transmission/session/include",
     "$dsoftbus_root_path/core/transmission/trans_channel/tcp_direct/include",
     "$dsoftbus_root_path/tests/core/transmission/trans_channel/common/mock",
-    "$dsoftbus_root_path/core/common/security/permission/include/",
   ]
 
   deps = [
@@ -202,7 +201,6 @@ ohos_unittest("TransInnerTest") {
     "hilog:libhilog",
   ]
 }
-
 ohos_unittest("TransUkManagerTest") {
   module_out_path = module_output_path
   sources = [

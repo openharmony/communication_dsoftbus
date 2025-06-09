@@ -17,6 +17,7 @@
 
 #include <unistd.h>
 
+#include "access_control.h"
 #include "bus_center_manager.h"
 #include "g_enhance_trans_func.h"
 #include "g_enhance_trans_func_pack.h"
@@ -36,7 +37,6 @@
 #include "trans_auth_manager.h"
 #include "trans_client_proxy.h"
 #include "trans_event.h"
-#include "trans_ipc_adapter.h"
 #include "trans_lane_manager.h"
 #include "trans_lane_pending_ctl.h"
 #include "trans_log.h"
@@ -347,7 +347,7 @@ int32_t TransCommonGetAppInfo(const SessionParam *param, AppInfo *appInfo)
     appInfo->myHandleId = -1;
     appInfo->peerHandleId = -1;
     appInfo->timeStart = GetSoftbusRecordTimeMillis();
-    appInfo->callingTokenId = appInfo->myData.pid == getpid() ? 0 : TransAclGetCallingTokenID();
+    appInfo->callingTokenId = appInfo->myData.pid == getpid() ? 0 : TransACLGetCallingTokenID();
     appInfo->isClient = true;
     appInfo->channelCapability = TRANS_CHANNEL_CAPABILITY;
     TRANS_LOGD(TRANS_CTRL, "GetAppInfo ok");
