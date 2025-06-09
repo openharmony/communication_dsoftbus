@@ -77,7 +77,7 @@ int32_t ProxyChannelMock::ActionOfRead(int32_t clientFd, uint8_t *buf, const int
         return -1;
     }
     sleep(1);
-    CONN_LOGI(CONN_PROXY, "read data len=%{public}u", sizeof(data));
+    CONN_LOGI(CONN_PROXY, "read data len=%{public}zu", sizeof(data));
     return static_cast<int32_t>(sizeof(data));
 }
 
