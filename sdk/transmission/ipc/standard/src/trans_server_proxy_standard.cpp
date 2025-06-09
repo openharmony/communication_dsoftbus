@@ -1167,11 +1167,11 @@ int32_t TransServerProxy::GetProxyChannelState(int32_t uid, bool *isEnable)
         TRANS_LOGE(TRANS_SDK, "[br_proxy] send request failed! ret=%{public}d", ret);
         return ret;
     }
-    if (!data.ReadBool(*isEnable)) {
+    if (!reply.ReadBool(*isEnable)) {
         TRANS_LOGE(TRANS_SDK, "[br_proxy] read bool failed!");
         return SOFTBUS_TRANS_PROXY_WRITEINT_FAILED;
     }
- 
+
     return ret;
 }
 } // namespace OHOS

@@ -43,6 +43,7 @@ typedef struct {
     int32_t ret;
 } AsyncOpenChannelData;
 
+static bool g_sem_inited = false;
 static sem_t g_sem;
 static int32_t g_channelId = 0;
 static int32_t g_openResult = 0;
@@ -73,15 +74,12 @@ static void OpenProxyChannelExecute(napi_env env, void* data)
         .onDataReceived = OnDataReceived,
         .onChannelStatusChanged = OnChannelStatusChanged,
     };
-    sem_init(&g_sem, 0, 0);
     int32_t ret = OpenBrProxy(&channelInfo, &listener);
     asyncData->ret = ret;
     if (ret != SOFTBUS_OK) {
-        sem_destroy(&g_sem);
         return;
     }
     sem_wait(&g_sem);
-    sem_destroy(&g_sem);
     asyncData->channelId = g_channelId;
     asyncData->openResult = g_openResult;
 }
@@ -222,7 +220,10 @@ napi_value NapiOpenProxyChannel(napi_env env, napi_callback_info info)
         SoftBusFree(asyncData);
         return NULL;
     }
-
+    if (!g_sem_inited) {
+        sem_init(&g_sem, 0, 0);
+        g_sem_inited = true;
+    }
     napi_value promise;
     status = napi_create_promise(env, &asyncData->deferred, &promise);
     if (status != napi_ok) {
@@ -307,6 +308,10 @@ napi_value NapiCloseProxyChannel(napi_env env, napi_callback_info info)
     if (status != napi_ok) {
         napi_throw_error(env, NULL, "Failed to get undefined value.");
         return NULL;
+    }
+    if (g_sem_inited) {
+        g_sem_inited = false;
+        sem_destroy(&g_sem);
     }
     return undefined;
 }

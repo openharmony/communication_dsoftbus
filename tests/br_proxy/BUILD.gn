@@ -56,6 +56,7 @@ ohos_unittest("BrProxyTest") {
     "access_token:libnativetoken",
     "access_token:libaccesstoken_sdk",
     "access_token:libtoken_setproc",
+    "selinux_adapter:librestorecon",
   ]
 }
 

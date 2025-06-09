@@ -27,9 +27,13 @@ typedef struct {
 
 const NapiSoftbusErrCMapJs ERRCODE_C_JS_MAP[] = {
     { SOFTBUS_ACCESS_TOKEN_DENIED,              COMMON_ACCESS_TOKEN_DENIED                      },
-    { SOFTBUS_CONN_BR_DISABLE_ERR,              NAPI_SOFTBUS_DEVICE_NOT_PAIRED                  },
+    { SOFTBUS_CONN_BR_DISABLE_ERR,              NAPI_SOFTBUS_LINK_DISABLED                      },
     { SOFTBUS_INVALID_PARAM,                    COMMON_INVALID_PARAM                            },
     { SOFTBUS_TRANS_INVALID_CHANNEL_ID,         NAPI_SOFTBUS_CHANNEL_UNAVAILABLE                },
+    { SOFTBUS_CONN_OPEN_PROXY_TIMEOUT,          NAPI_SOFTBUS_OPEN_OPERATION_FAILED              },
+    { SOFTBUS_TRANS_BR_PROXY_DATA_TOO_LONG,     NAPI_SOFTBUS_DATA_TOO_LONG                      },
+    { SOFTBUS_TRANS_BR_PROXY_TOKENID_ERR,       NAPI_SOFTBUS_CALL_IS_RESTRICTED                 },
+    { SOFTBUS_CONN_BR_UNDERLAY_WRITE_FAIL,      NAPI_SOFTBUS_SEND_OPERATION_FAILED              },
 };
 
 const NapiSoftbusErrEntry ERRCODE_MSG_MAP[] = {
@@ -39,14 +43,13 @@ const NapiSoftbusErrEntry ERRCODE_MSG_MAP[] = {
     { NAPI_SOFTBUS_LINK_DISABLED,                   "BusinessError 32390001: Link disabled."                        },
     { NAPI_SOFTBUS_DEVICE_NOT_PAIRED,               "BusinessError 32390002: Device not paired."                    },
     { NAPI_SOFTBUS_PROFILE_NOT_SUPPORT,             "BusinessError 32390003: Profile not supported"                 },
-    { NAPI_SOFTBUS_CHANNEL_UNAVAILABLE,             "BusinessError 32390004: The channel is unavailable"            },
+    { NAPI_SOFTBUS_CHANNEL_UNAVAILABLE,             "BusinessError 32390004: ChannelId is invalid or unavailable"   },
     { NAPI_SOFTBUS_INTERNAL_ERROR,                  "BusinessError 32390100: Internal error, It is can be ignored." },
     { NAPI_SOFTBUS_CALL_IS_RESTRICTED,              "BusinessError 32390101: Call is restricted."                   },
     { NAPI_SOFTBUS_OPEN_OPERATION_FAILED,
         "BusinessError 32390102: Operation failed or Connection timed out, it is recommended to retry"              },
     { NAPI_SOFTBUS_DATA_TOO_LONG,                   "BusinessError 32390103: Data too long."                        },
-    { NAPI_SOFTBUS_SEND_OPERATION_FAILED,
-        "BusinessError 32390104: Operation failed or Send timed out, it is recommended to retry"                    },
+    { NAPI_SOFTBUS_SEND_OPERATION_FAILED,           "BusinessError 32390104: Send failed."                          },
     { NAPI_SOFTBUS_UNKNOWN_ERR,                     "BusinessError 30200000: unknow error"                          },
 };
 
@@ -97,7 +100,7 @@ static int32_t NapiTransConvertErr(int32_t err)
         }
     }
 
-    return NAPI_SOFTBUS_UNKNOWN_ERR;
+    return NAPI_SOFTBUS_INTERNAL_ERROR;
 }
 
 static void ThrowBusinessError(napi_env env, int32_t errCode, bool isThrow)
