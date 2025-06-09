@@ -45,7 +45,6 @@
 #include "trans_channel_callback.h"
 #include "trans_channel_common.h"
 #include "trans_event.h"
-#include "trans_ipc_adapter.h"
 #include "trans_lane_manager.h"
 #include "trans_lane_pending_ctl.h"
 #include "trans_link_listener.h"
@@ -336,7 +335,7 @@ void TransChannelDeinit(void)
 
 static void TransSetFirstTokenInfo(AppInfo *appInfo, TransEventExtra *event)
 {
-    event->firstTokenId = TransAclGetFirstTokenID();
+    event->firstTokenId = TransACLGetFirstTokenID();
     if (event->firstTokenId == TOKENID_NOT_SET) {
         event->firstTokenId = appInfo->callingTokenId;
     }
@@ -1055,7 +1054,7 @@ static int32_t GetLimitChangeInfoFromBuf(
     return ret;
 }
 
-static int32_t TransReportChannelOpenedInfo(uint8_t *buf, uint32_t len, pid_t callingPid)
+static int32_t TransReportChannelOpenedInfo(uint8_t *buf, uint32_t len)
 {
     OpenChannelResult info = { 0 };
     AccessInfo accessInfo = { 0 };
@@ -1081,7 +1080,7 @@ static int32_t TransReportChannelOpenedInfo(uint8_t *buf, uint32_t len, pid_t ca
             ret = TransDealUdpChannelOpenResult(info.channelId, info.openResult, udpPort, &accessInfo);
             break;
         case CHANNEL_TYPE_AUTH:
-            ret = TransDealAuthChannelOpenResult(info.channelId, info.openResult, callingPid);
+            ret = TransDealAuthChannelOpenResult(info.channelId, info.openResult);
             break;
         default:
             TRANS_LOGE(TRANS_CTRL, "channelType=%{public}d is error", info.channelType);
@@ -1207,12 +1206,10 @@ int32_t TransProcessInnerEvent(int32_t eventType, uint8_t *buf, uint32_t len)
         SoftBusHitraceChainEnd();
         return SOFTBUS_INVALID_PARAM;
     }
-
-    pid_t callingPid = TransGetCallingPid();
     int32_t ret = SOFTBUS_OK;
     switch (eventType) {
         case EVENT_TYPE_CHANNEL_OPENED:
-            ret = TransReportChannelOpenedInfo(buf, len, callingPid);
+            ret = TransReportChannelOpenedInfo(buf, len);
             break;
         case EVENT_TYPE_TRANS_LIMIT_CHANGE:
             TransReportLimitChangeInfo(buf, len);

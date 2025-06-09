@@ -38,7 +38,6 @@
 #include "trans_channel_manager.h"
 #include "trans_client_proxy.h"
 #include "trans_event.h"
-#include "trans_ipc_adapter.h"
 #include "trans_lane_manager.h"
 #include "trans_log.h"
 #include "trans_network_statistics.h"
@@ -411,7 +410,7 @@ static int32_t TransAddAsyncLaneReqFromPendingList(uint32_t laneHandle, const Se
     item->bSucc = false;
     item->isFinished = false;
     item->callingTokenId = callingTokenId;
-    item->firstTokenId = TransAclGetFirstTokenID();
+    item->firstTokenId = TransACLGetFirstTokenID();
     item->timeStart = timeStart;
     if (CopyAsyncReqItemSessionParam(param, &(item->param)) != SOFTBUS_OK) {
         DestroyAsyncReqItemParam(&(item->param));
