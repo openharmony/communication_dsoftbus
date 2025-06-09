@@ -1664,11 +1664,9 @@ int P2pV1Processor::UpdateWhenConnectSuccess(std::string groupConfig, const Nego
         });
     CONN_CHECK_AND_RETURN_RET_LOGW(
         ret == SOFTBUS_OK, ret, CONN_WIFI_DIRECT, "update interface failed, error=%{public}d", ret);
-    std::string remoteMac = msg.GetLegacyP2pMac();
     std::string remoteIp = msg.GetLegacyP2pGoIp();
-    auto success = LinkManager::GetInstance().ProcessIfAbsent(
-        InnerLink::LinkType::P2P, msg.GetRemoteDeviceId(), [localMac, localIp, remoteMac, remoteIp](InnerLink &link) {
-            link.SetRemoteBaseMac(remoteMac);
+    auto success = LinkManager::GetInstance().ProcessIfPresent(
+        InnerLink::LinkType::P2P, msg.GetRemoteDeviceId(), [localMac, localIp, remoteIp](InnerLink &link) {
             link.SetLocalBaseMac(localMac);
             link.SetRemoteIpv4(remoteIp);
             link.SetLocalIpv4(localIp);
@@ -1703,6 +1701,10 @@ int P2pV1Processor::ConnectGroup(const NegotiateMessage &msg, const std::shared_
     params.groupConfig = groupConfig;
     params.gcIp = gcIp;
     params.goIp = msg.GetLegacyP2pGoIp();
+    LinkManager::GetInstance().ProcessIfAbsent(
+        InnerLink::LinkType::P2P, msg.GetRemoteDeviceId(), [&msg] (InnerLink &link) {
+            link.SetRemoteBaseMac(msg.GetLegacyP2pMac());
+        });
     auto result = P2pEntity::GetInstance().Connect(params);
     if (result.errorCode_ != SOFTBUS_OK) {
         CONN_LOGI(CONN_WIFI_DIRECT, "connect group failed, error=%{public}d", result.errorCode_);
