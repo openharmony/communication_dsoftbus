@@ -57,3 +57,9 @@ void ConnBleCancelIdleTimeout(ConnBleConnection *connection)
 {
     (void)connection;
 }
+
+const BleUnifyInterface *ConnBleGetUnifyInterface(BleProtocolType type)
+{
+    (void)type;
+    return NULL;
+}

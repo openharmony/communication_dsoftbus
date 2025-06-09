@@ -19,6 +19,7 @@
 #include <stdint.h>
 #include "securec.h"
 
+#include "ble_protocol_interface_factory.h"
 #include "conn_log.h"
 #include "softbus_adapter_mem.h"
 #include "softbus_adapter_bt_common.h"
@@ -397,6 +398,8 @@ static int32_t GeneralSessionNegotiation(
 static int32_t StartConnConnectDevice(const char *addr,
     BleProtocolType protocol, ConnectResult *result, uint32_t requestId)
 {
+    // if protocol is not supported, BLE_GATT will be used by default.
+    protocol = ConnBleGetUnifyInterface(protocol) == NULL ? BLE_GATT : protocol;
     ConnectOption option = {
         .type = CONNECT_BLE,
         .bleOption.protocol = protocol,
