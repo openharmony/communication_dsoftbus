@@ -16,14 +16,15 @@
 #ifndef G_REG_TRANS_FUNC_H
 #define G_REG_TRANS_FUNC_H
 
+#include "form/trans_event_form.h"
 #include "g_enhance_trans_func.h"
 #include "lnn_lane_interface_struct.h"
-#include "stdint.h"
-#include "stdbool.h"
-#include "softbus_trans_def.h"
 #include "softbus_app_info.h"
+#include "softbus_trans_def.h"
+#include "stdbool.h"
+#include "stdint.h"
 #include "trans_auth_lane_pending_ctl_struct.h"
-#include "form/trans_event_form.h"
+#include "trans_inner_session_struct.h"
 
 // 需要改成struct
 #include "trans_inner.h"
@@ -73,6 +74,8 @@ typedef int32_t (*TransInnerAddDataBufNodeFunc)(int32_t channelId, int32_t fd, i
 typedef int32_t (*ServerSideSendAckFunc)(int32_t sessionId, int32_t result);
 typedef int32_t (*TransSendDataFunc)(int32_t channelId, const void *data, uint32_t len);
 typedef int32_t (*ProxyDataRecvHandlerFunc)(int32_t channelId, const char *data, uint32_t len);
+typedef int32_t (*SoftbusAddServiceInnerForEnhanceFunc)((const char *pkgName, ISessionListenerInner *listener,
+    int32_t pid));
 
 typedef struct TagTransOpenFuncList {
     TransProxyGetAppInfoByChanIdFunc transProxyGetAppInfoByChanId;
@@ -108,6 +111,7 @@ typedef struct TagTransOpenFuncList {
     ServerSideSendAckFunc serverSideSendAck;
     TransSendDataFunc transSendData;
     ProxyDataRecvHandlerFunc proxyDataRecvHandler;
+    SoftbusAddServiceInnerForEnhanceFunc softbusAddServiceInnerForEnhance;
 } TransOpenFuncList;
 
 #ifdef __cplusplus
