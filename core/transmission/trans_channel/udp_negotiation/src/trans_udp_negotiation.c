@@ -1467,7 +1467,7 @@ static AuthGenUkCallback udpGenUkCallback = {
 };
 
 int32_t TransDealUdpChannelOpenResult(
-    int32_t channelId, int32_t openResult, int32_t udpPort, const AccessInfo *accessInfo)
+    int32_t channelId, int32_t openResult, int32_t udpPort, const AccessInfo *accessInfo, pid_t callingPid)
 {
     (void)TransUdpUpdateAccessInfo(channelId, accessInfo);
     int32_t ret = TransUdpUpdateUdpPort(channelId, udpPort);
@@ -1486,6 +1486,12 @@ int32_t TransDealUdpChannelOpenResult(
     if (ret != SOFTBUS_OK) {
         TRANS_LOGE(TRANS_CTRL, "update count failed, channelId=%{public}d, ret=%{public}d", channelId, ret);
         return ret;
+    }
+    if (channel.info.myData.pid != callingPid) {
+        TRANS_LOGE(TRANS_CTRL,
+            "pid does not match callingPid, pid=%{public}d, callingPid=%{public}d, channelId=%{public}d",
+            channel.info.myData.pid, callingPid, channelId);
+        return SOFTBUS_TRANS_CHECK_PID_ERROR;
     }
     char *errDesc = NULL;
     if (openResult != SOFTBUS_OK) {

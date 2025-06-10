@@ -1368,7 +1368,8 @@ static AuthGenUkCallback proxyAuthGenUkCallback = {
     .onGenFailed = OnProxyGenUkFailed,
 };
 
-int32_t TransDealProxyChannelOpenResult(int32_t channelId, int32_t openResult, const AccessInfo *accessInfo)
+int32_t TransDealProxyChannelOpenResult(
+    int32_t channelId, int32_t openResult, const AccessInfo *accessInfo, pid_t callingPid)
 {
     (void)TransProxyUpdateSinkAccessInfo(channelId, accessInfo);
     ProxyChannelInfo chan = { 0 };
@@ -1378,6 +1379,12 @@ int32_t TransDealProxyChannelOpenResult(int32_t channelId, int32_t openResult, c
     ret = TransProxyUpdateReplyCnt(channelId);
     TRANS_CHECK_AND_RETURN_RET_LOGE(ret == SOFTBUS_OK, ret, TRANS_CTRL,
         "update waitOpenReplyCnt failed, channelId=%{public}d, ret=%{public}d", channelId, ret);
+    if (chan.appInfo.myData.pid != callingPid) {
+        TRANS_LOGE(TRANS_CTRL,
+            "pid does not match callingPid, pid=%{public}d, callingPid=%{public}d, channelId=%{public}d",
+            chan.appInfo.myData.pid, callingPid, channelId);
+        return SOFTBUS_TRANS_CHECK_PID_ERROR;
+    }
     if (openResult != SOFTBUS_OK) {
         TRANS_LOGE(TRANS_CTRL, "open proxy channel failed, ret=%{public}d", openResult);
         (void)TransProxyAckHandshake(chan.connId, &chan, openResult);

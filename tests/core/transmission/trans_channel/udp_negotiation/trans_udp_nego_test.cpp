@@ -43,6 +43,7 @@ const char *g_groupid = "TEST_GROUP_ID";
 #define INVALID_SEQ (-1)
 #define INVALID_AUTH_ID (-2)
 #define TEST_SOCKET_ADDR "192.168.8.119"
+#define TEST_UDP_PID 1588
 
 class TransUdpNegoTest : public testing::Test {
 public:
@@ -1011,7 +1012,7 @@ HWTEST_F(TransUdpNegoTest, TransDealUdpChannelOpenResultTest001, TestSize.Level1
     int32_t openResult = SOFTBUS_NO_INIT;
     int32_t udpPort = 1;
     AccessInfo accessInfo = { 0 };
-    int32_t ret = TransDealUdpChannelOpenResult(channelId, openResult, udpPort, &accessInfo);
+    int32_t ret = TransDealUdpChannelOpenResult(channelId, openResult, udpPort, &accessInfo, TEST_UDP_PID);
     EXPECT_EQ(SOFTBUS_NO_INIT, ret);
 
     ret = TransUdpChannelMgrInit();
@@ -1021,7 +1022,7 @@ HWTEST_F(TransUdpNegoTest, TransDealUdpChannelOpenResultTest001, TestSize.Level1
     channel->info.myData.channelId = channelId;
     ret = TransAddUdpChannel(channel);
     EXPECT_EQ(SOFTBUS_OK, ret);
-    ret = TransDealUdpChannelOpenResult(channelId, openResult, udpPort, &accessInfo);
+    ret = TransDealUdpChannelOpenResult(channelId, openResult, udpPort, &accessInfo, TEST_UDP_PID);
     EXPECT_EQ(SOFTBUS_OK, ret);
     TransUdpChannelMgrDeinit();
 }
@@ -1045,7 +1046,7 @@ HWTEST_F(TransUdpNegoTest, TransDealUdpChannelOpenResultTest002, TestSize.Level1
     channel->info.myData.channelId = channelId;
     ret = TransAddUdpChannel(channel);
     EXPECT_EQ(SOFTBUS_OK, ret);
-    ret = TransDealUdpChannelOpenResult(channelId, openResult, udpPort, &accessInfo);
+    ret = TransDealUdpChannelOpenResult(channelId, openResult, udpPort, &accessInfo, TEST_UDP_PID);
     EXPECT_EQ(SOFTBUS_TRANS_INVALID_CHANNEL_TYPE, ret);
 
     ret = TransDelUdpChannel(channelId);
@@ -1059,7 +1060,7 @@ HWTEST_F(TransUdpNegoTest, TransDealUdpChannelOpenResultTest002, TestSize.Level1
     ret = TransAddUdpChannel(channel);
     EXPECT_EQ(SOFTBUS_OK, ret);
 
-    ret = TransDealUdpChannelOpenResult(channelId, openResult, udpPort, &accessInfo);
+    ret = TransDealUdpChannelOpenResult(channelId, openResult, udpPort, &accessInfo, TEST_UDP_PID);
     EXPECT_EQ(SOFTBUS_OK, ret);
 
     ret = TransDelUdpChannel(channelId);

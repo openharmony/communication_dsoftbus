@@ -36,6 +36,7 @@
 #include "wifi_direct_manager.h"
 
 #define TEST_CHANNEL_ID 1027
+#define TEST_TDC_PID 3284
 
 using namespace testing::ext;
 
@@ -889,17 +890,17 @@ HWTEST_F(TransTcpDirectMessageStaticTest, TransDealTdcChannelOpenResultTest001, 
     int32_t channelId = 1;
     int32_t fd = 1;
     AccessInfo accessInfo = { 0 };
-    int32_t ret = TransDealTdcChannelOpenResult(channelId, openResult, &accessInfo);
+    int32_t ret = TransDealTdcChannelOpenResult(channelId, openResult, &accessInfo, TEST_TDC_PID);
     EXPECT_EQ(ret, SOFTBUS_TRANS_GET_SESSION_CONN_FAILED);
     SessionConn *conn = TestSetSessionConn();
     ASSERT_TRUE(conn != nullptr);
     ret = TransTdcAddSessionConn(conn);
     EXPECT_EQ(ret, SOFTBUS_OK);
-    ret = TransDealTdcChannelOpenResult(channelId, openResult, &accessInfo);
+    ret = TransDealTdcChannelOpenResult(channelId, openResult, &accessInfo, TEST_TDC_PID);
     EXPECT_EQ(ret, SOFTBUS_TRANS_NODE_IS_NULL);
     ret = TransSrvAddDataBufNode(channelId, fd);
     EXPECT_EQ(ret, SOFTBUS_OK);
-    ret = TransDealTdcChannelOpenResult(channelId, openResult, &accessInfo);
+    ret = TransDealTdcChannelOpenResult(channelId, openResult, &accessInfo, TEST_TDC_PID);
     EXPECT_EQ(ret, SOFTBUS_OK);
     TransDelSessionConnById(channelId);
 }
@@ -916,7 +917,7 @@ HWTEST_F(TransTcpDirectMessageStaticTest, TransDealTdcChannelOpenResultTest002, 
     int32_t channelId = 1;
     int32_t fd = 1;
     AccessInfo accessInfo = { 0 };
-    int32_t ret = TransDealTdcChannelOpenResult(channelId, openResult, &accessInfo);
+    int32_t ret = TransDealTdcChannelOpenResult(channelId, openResult, &accessInfo, TEST_TDC_PID);
     EXPECT_EQ(ret, SOFTBUS_TRANS_GET_SESSION_CONN_FAILED);
     SessionConn *conn = TestSetSessionConn();
     ASSERT_TRUE(conn != nullptr);
@@ -924,11 +925,11 @@ HWTEST_F(TransTcpDirectMessageStaticTest, TransDealTdcChannelOpenResultTest002, 
     conn->appInfo.channelCapability = 0xF;
     ret = TransTdcAddSessionConn(conn);
     EXPECT_EQ(ret, SOFTBUS_OK);
-    ret = TransDealTdcChannelOpenResult(channelId, openResult, &accessInfo);
+    ret = TransDealTdcChannelOpenResult(channelId, openResult, &accessInfo, TEST_TDC_PID);
     EXPECT_EQ(ret, SOFTBUS_TRANS_NODE_IS_NULL);
     ret = TransSrvAddDataBufNode(channelId, fd);
     EXPECT_EQ(ret, SOFTBUS_OK);
-    ret = TransDealTdcChannelOpenResult(channelId, openResult, &accessInfo);
+    ret = TransDealTdcChannelOpenResult(channelId, openResult, &accessInfo, TEST_TDC_PID);
     EXPECT_EQ(ret, SOFTBUS_OK);
     TransDelSessionConnById(channelId);
 }

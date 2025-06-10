@@ -1575,7 +1575,8 @@ static AuthGenUkCallback tdcAuthGenUkCallback = {
     .onGenFailed = OnTdcGenUkFailed,
 };
 
-int32_t TransDealTdcChannelOpenResult(int32_t channelId, int32_t openResult, const AccessInfo *accessInfo)
+int32_t TransDealTdcChannelOpenResult(
+    int32_t channelId, int32_t openResult, const AccessInfo *accessInfo, pid_t callingPid)
 {
     (void)UpdateAccessInfoById(channelId, accessInfo);
     SessionConn conn;
@@ -1595,6 +1596,12 @@ int32_t TransDealTdcChannelOpenResult(int32_t channelId, int32_t openResult, con
     NodeInfo nodeInfo;
     (void)memset_s(&nodeInfo, sizeof(NodeInfo), 0, sizeof(NodeInfo));
     ReportTransEventExtra(&extra, channelId, &conn, &nodeInfo, peerUuid);
+    if (conn.appInfo.myData.pid != callingPid) {
+        TRANS_LOGE(TRANS_CTRL,
+            "pid does not match callingPid, pid=%{public}d, callingPid=%{public}d, channelId=%{public}d",
+            conn.appInfo.myData.pid, callingPid, channelId);
+        return SOFTBUS_TRANS_CHECK_PID_ERROR;
+    }
     if (openResult != SOFTBUS_OK) {
         TRANS_LOGE(TRANS_CTRL, "Tdc channel open failed, openResult=%{public}d", openResult);
         TransProcessAsyncOpenTdcChannelFailed(&conn, openResult, seq, flags);
