@@ -63,15 +63,6 @@ bool IsNeedUDIDAbatementPacked(const AuthSessionInfo *info)
     return pfnAuthEnhanceFuncList->isNeedUDIDAbatement(info);
 }
 
-bool AuthIsLatestNormalizeKeyInTimePacked(const char *udidHash, uint64_t time)
-{
-    AuthEnhanceFuncList *pfnAuthEnhanceFuncList = AuthEnhanceFuncListGet();
-    if (AuthCheckFuncPointer((void *)pfnAuthEnhanceFuncList->authIsLatestNormalizeKeyInTime) != SOFTBUS_OK) {
-        return true;
-    }
-    return pfnAuthEnhanceFuncList->authIsLatestNormalizeKeyInTime(udidHash, time);
-}
-
 int32_t VerifyCertificatePacked(SoftbusCertChain *softbusCertChain, const NodeInfo *nodeInfo,
     const AuthSessionInfo *info)
 {

@@ -59,17 +59,15 @@ if (defined(ohos_lite)) {
 config("dsoftbus_sdk_interface") {
   include_dirs = [
     "$dsoftbus_dfx_path/interface/include",
-    "$dsoftbus_root_path/core/transmission/common/include",
-    "$dsoftbus_root_path/interfaces/inner_kits/lnn",
-    "$dsoftbus_root_path/interfaces/inner_kits/transport",
     "$dsoftbus_root_path/interfaces/kits",
-    "$dsoftbus_root_path/interfaces/kits/broadcast/enhance",
+    "$dsoftbus_root_path/interfaces/inner_kits/lnn",
     "$dsoftbus_root_path/interfaces/kits/bus_center",
     "$dsoftbus_root_path/interfaces/kits/common",
     "$dsoftbus_root_path/interfaces/kits/discovery",
-    "$dsoftbus_root_path/core/common/include",
     "$dsoftbus_root_path/interfaces/kits/transport",
     "$dsoftbus_root_path/sdk/transmission/session/cpp/include",
+    "$dsoftbus_root_path/interfaces/inner_kits/transport",
+    "$dsoftbus_root_path/core/transmission/common/include",
   ]
 }
 

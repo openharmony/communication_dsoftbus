@@ -35,6 +35,8 @@ typedef bool (*IsSleEnabledFunc)(void);
 typedef void (*SoftBusRemoveSleStateListenerFunc)(int listenerId);
 typedef int32_t (*GetSleRangeCapacityFunc)(void);
 typedef int32_t (*GetLocalSleAddrFunc)(char *sleAddr, uint32_t sleAddrLen);
+typedef void (*SoftbusBleAdapterInitFunc)(void);
+typedef void (*SoftbusBleAdapterDeInitFunc)(void);
 
 typedef struct TagAdapterEnhanceFuncList {
     SoftBusRegRangeCbFunc softBusRegRangeCb;
@@ -47,6 +49,8 @@ typedef struct TagAdapterEnhanceFuncList {
     SoftBusRemoveSleStateListenerFunc softBusRemoveSleStateListener;
     GetSleRangeCapacityFunc getSleRangeCapacity;
     GetLocalSleAddrFunc getLocalSleAddr;
+    SoftbusBleAdapterInitFunc softbusBleAdapterInit;
+    SoftbusBleAdapterDeInitFunc softbusBleAdapterDeInit;
 } AdapterEnhanceFuncList;
 
 AdapterEnhanceFuncList *AdapterEnhanceFuncListGet(void);

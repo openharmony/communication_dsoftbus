@@ -1456,8 +1456,8 @@ static void UpdateDeviceDeviceName(NodeInfo *nodeInfo, NodeInfo *remoteInfo)
         }
         char *anonyOldName = NULL;
         char *anonyNewName = NULL;
-        Anonymize(remoteInfo->deviceInfo.deviceName, &anonyOldName);
-        Anonymize(nodeInfo->deviceInfo.deviceName, &anonyNewName);
+        AnonymizeDeviceName(remoteInfo->deviceInfo.deviceName, &anonyOldName);
+        AnonymizeDeviceName(nodeInfo->deviceInfo.deviceName, &anonyNewName);
         LNN_LOGI(LNN_BUILDER, "update deviceName=%{public}s -> %{public}s", AnonymizeWrapper(anonyOldName),
             AnonymizeWrapper(anonyNewName));
         AnonymizeFree(anonyOldName);
@@ -1862,7 +1862,7 @@ static void OnlineStateEnter(FsmStateMachine *fsm)
     if (isNodeInfoValid) {
         Anonymize(connFsm->connInfo.nodeInfo->deviceInfo.deviceUdid, &anonyUdid);
         Anonymize(connFsm->connInfo.nodeInfo->uuid, &anonyUuid);
-        Anonymize(connFsm->connInfo.nodeInfo->deviceInfo.deviceName, &anonyDeviceName);
+        AnonymizeDeviceName(connFsm->connInfo.nodeInfo->deviceInfo.deviceName, &anonyDeviceName);
     }
     LNN_LOGI(LNN_BUILDER,
         "online state enter. [id=%{public}u], networkId=%{public}s, udid=%{public}s, "
@@ -2015,7 +2015,7 @@ static void LeavingStateEnter(FsmStateMachine *fsm)
     Anonymize(connFsm->connInfo.peerNetworkId, &anonyNetworkId);
     if (isNodeInfoValid) {
         Anonymize(connFsm->connInfo.nodeInfo->deviceInfo.deviceUdid, &anonyUdid);
-        Anonymize(connFsm->connInfo.nodeInfo->deviceInfo.deviceName, &anonyDeviceName);
+        AnonymizeDeviceName(connFsm->connInfo.nodeInfo->deviceInfo.deviceName, &anonyDeviceName);
     }
     DelUserKeyByNetworkId(connFsm->connInfo.peerNetworkId);
     LNN_LOGI(LNN_BUILDER,

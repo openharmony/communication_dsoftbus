@@ -12,10 +12,10 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-
-#include "trans_spec_object_stub.h"
 #include <dlfcn.h>
+#include "softbus_init_common.h"
 #include "trans_log.h"
+#include "trans_spec_object_stub.h"
 
 namespace OHOS {
 
@@ -24,10 +24,6 @@ static constexpr const char *SOFTBUS_PLUGIN_PATH_NAME = "/system/lib64/libdsoftb
 #else
 static constexpr const char *SOFTBUS_PLUGIN_PATH_NAME = "/system/lib/libdsoftbus_server_plugin.z.so";
 #endif
-
-#define SOFTBUS_TRANS_FUNC_NOT_REGISTER false
-#define SOFTBUS_TRANS_SPEC_OBJECT_STUB_DLOPEN_FAILED_BOOL false
-#define SOFTBUS_TRANS_SPEC_OBJECT_STUB_DLSYM_FAILED_BOOL false
 
 TransSpecObjectStub::TransSpecObjectStub()
 {
@@ -41,8 +37,7 @@ bool TransSpecObjectStub::OpenSoftbusPluginSo()
         return true;
     }
 
-    // soHandle_ = dlopen(SOFTBUS_PLUGIN_PATH_NAME, RTLD_NOW | RTLD_NODELETE | RTLD_GLOBAL);
-    soHandle_ = dlopen(SOFTBUS_PLUGIN_PATH_NAME, RTLD_NOW | RTLD_GLOBAL);
+    (void)SoftBusDlopen(SOFTBUS_HANDLE_SERVER_PLUGIN, &soHandle_);
     if (soHandle_ == nullptr) {
         TRANS_LOGE(TRANS_EVENT, "dlopen %{public}s failed, err msg:%{public}s", SOFTBUS_PLUGIN_PATH_NAME, dlerror());
         return false;
