@@ -120,7 +120,7 @@ static void OnReceiveDeviceName(LnnSyncInfoType type, const char *networkId, con
     char *anonyNetworkId = NULL;
     Anonymize(networkId, &anonyNetworkId);
     char *anonyDeviceName = NULL;
-    Anonymize(deviceName, &anonyDeviceName);
+    AnonymizeDeviceName(deviceName, &anonyDeviceName);
     LNN_LOGI(LNN_BUILDER, "recv device name changed. deviceName=%{public}s, networkId=%{public}s",
         AnonymizeWrapper(anonyDeviceName), AnonymizeWrapper(anonyNetworkId));
     AnonymizeFree(anonyNetworkId);
@@ -182,7 +182,7 @@ static void LnnSetDisplayName(char *displayName, const char *nickName, const Nod
         LNN_LOGW(LNN_BUILDER, "strcpy_s fail, use default name");
     }
     char *anonyDeviceName = NULL;
-    Anonymize(displayName, &anonyDeviceName);
+    AnonymizeDeviceName(displayName, &anonyDeviceName);
     LNN_LOGI(LNN_BUILDER, "peer deviceName=%{public}s", AnonymizeWrapper(anonyDeviceName));
     AnonymizeFree(anonyDeviceName);
 }
@@ -217,7 +217,7 @@ static void NickNameMsgProc(const char *networkId, int64_t accountId, const char
     char *anonyUnifiedName = NULL;
     Anonymize(peerNodeInfo.deviceInfo.unifiedName, &anonyUnifiedName);
     char *anonyDeviceName = NULL;
-    Anonymize(peerNodeInfo.deviceInfo.deviceName, &anonyDeviceName);
+    AnonymizeDeviceName(peerNodeInfo.deviceInfo.deviceName, &anonyDeviceName);
     LNN_LOGI(LNN_BUILDER, "peer unifiedDefaultName=%{public}s, nickName=%{public}s, "
         "unifiedName=%{public}s, deviceName=%{public}s",
         AnonymizeWrapper(anonyUnifiedDefaultName), AnonymizeWrapper(anonyNickName),

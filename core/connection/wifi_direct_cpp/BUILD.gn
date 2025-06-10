@@ -35,8 +35,8 @@ if (defined(ohos_lite)) {
       }
       deps = [
         "$dsoftbus_root_path/adapter:softbus_adapter",
-        "$dsoftbus_root_path/dfx:softbus_dfx",
         "$dsoftbus_root_path/core/common:softbus_utils",
+        "$dsoftbus_root_path/dfx:softbus_dfx",
       ]
       public_configs = [ ":wifi_direct_interface" ]
 
@@ -188,8 +188,8 @@ if (defined(ohos_lite)) {
       }
       deps = [
         "$dsoftbus_root_path/adapter:softbus_adapter",
-        "$dsoftbus_root_path/dfx:softbus_dfx",
         "$dsoftbus_root_path/core/common:softbus_utils",
+        "$dsoftbus_root_path/dfx:softbus_dfx",
       ]
       public_configs = [ ":wifi_direct_interface" ]
 
@@ -348,8 +348,8 @@ if (defined(ohos_lite)) {
     }
     deps = [
       "$dsoftbus_root_path/adapter:softbus_adapter",
-      "$dsoftbus_root_path/dfx:softbus_dfx",
       "$dsoftbus_root_path/core/common:softbus_utils",
+      "$dsoftbus_root_path/dfx:softbus_dfx",
     ]
     public_configs = [ ":wifi_direct_interface" ]
 
@@ -398,7 +398,7 @@ if (defined(ohos_lite)) {
     ]
 
     wifi_direct_connection_inc +=
-      [ "$dsoftbus_root_path/adapter/common/include/OS_adapter_define/linux" ]
+        [ "$dsoftbus_root_path/adapter/common/include/OS_adapter_define/linux" ]
 
     wifi_direct_connection_external_deps = []
 

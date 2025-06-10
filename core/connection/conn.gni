@@ -20,6 +20,7 @@ import("$dsoftbus_root_path/core/connection/proxy/proxy_connection.gni")
 
 #import("//foundation/communication/dsoftbus/core/connection/common/conn_common.gni")
 import("../../core/connection/tcp/conn_tcp.gni")
+
 CONN_SERVER_DEFINES = []
 conn_manager_src = ble_connection_src + br_connection_src + tcp_connection_src +
                    general_connection_src + proxy_connection_src
@@ -55,6 +56,15 @@ if (dsoftbus_feature_conn_ble) {
 if (dsoftbus_feature_conn_br) {
   CONN_SERVER_DEFINES += [ "DSOFTBUS_FEATURE_CONN_BR" ]
 }
+
+if (dsoftbus_feature_conn_ble_direct) {
+  CONN_SERVER_DEFINES += [ "DSOFTBUS_FEATURE_CONN_BLE_DIRECT" ]
+}
+
+if (dsoftbus_feature_conn_coc) {
+  CONN_SERVER_DEFINES += [ "DSOFTBUS_FEATURE_CONN_COC" ]
+}
+
 conn_manager_inc += [ "$dsoftbus_root_path/core/connection/ipc/include" ]
 if (defined(ohos_lite)) {
   if (ohos_kernel_type == "liteos_m") {

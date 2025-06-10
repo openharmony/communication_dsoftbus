@@ -315,7 +315,7 @@ napi_value NapiLinkEnhanceConnection::Connect(napi_env env, napi_callback_info i
         HandleSyncErr(env, LINK_ENHANCE_INTERVAL_ERR);
         return NapiGetUndefinedRet(env);
     }
-    
+
     int32_t handle = GeneralConnect(PKG_NAME.c_str(), connection->name_.c_str(), &address);
     if (handle <= 0) {
         COMM_LOGE(COMM_SDK, "connect failed, err=%{public}d", handle);
@@ -356,7 +356,7 @@ napi_value NapiLinkEnhanceConnection::Disconnect(napi_env env, napi_callback_inf
             break;
         }
     }
-    
+
     return NapiGetUndefinedRet(env);
 }
 

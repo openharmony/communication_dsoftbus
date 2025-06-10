@@ -2476,9 +2476,9 @@ static void UpdatePeerDeviceName(NodeInfo *peerNodeInfo)
             deviceName, DEVICE_NAME_BUF_LEN);
     }
     char *anonyDeviceName = NULL;
-    Anonymize(deviceName, &anonyDeviceName);
+    AnonymizeDeviceName(deviceName, &anonyDeviceName);
     char *anonyPeerDeviceName = NULL;
-    Anonymize(peerNodeInfo->deviceInfo.deviceName, &anonyPeerDeviceName);
+    AnonymizeDeviceName(peerNodeInfo->deviceInfo.deviceName, &anonyPeerDeviceName);
     char *anonyUnifiedName = NULL;
     Anonymize(peerNodeInfo->deviceInfo.unifiedName, &anonyUnifiedName);
     char *anonyUnifiedDefaultName = NULL;

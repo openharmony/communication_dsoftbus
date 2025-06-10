@@ -12,7 +12,6 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-
 #ifndef BROADCAST_PROTOCOL_CONSTANT_H
 #define BROADCAST_PROTOCOL_CONSTANT_H
 

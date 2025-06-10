@@ -38,12 +38,6 @@
 #include "softbus_client_init.h"
 #include "softbus_init_common.h"
 
-#ifdef __aarch64__
-static const char *SOFTBUS_CLIENT_PLUGIN_PATH_NAME = "/system/lib64/platformsdk/libdsoftbus_client_plugin.z.so";
-#else
-static const char *SOFTBUS_CLIENT_PLUGIN_PATH_NAME = "/system/lib/platformsdk/libdsoftbus_client_plugin.z.so";
-#endif
-
 static bool g_isInited = false;
 static SoftBusMutex g_isInitedLock;
 typedef struct PkgNameInfo {
@@ -198,10 +192,9 @@ static void ClientFuncInit(void)
 {
     int ret = SOFTBUS_OK;
     void *soHandle = NULL;
-    (void)SoftBusDlopen(SOFTBUS_CLIENT_PLUGIN_PATH_NAME, &soHandle);
+    (void)SoftBusDlopen(SOFTBUS_HANDLE_CLIENT_PLGUIN, &soHandle);
     if (soHandle == NULL) {
         COMM_LOGE(COMM_SDK, "dlopen libdsoftbus_client_plugin.z.so failed.");
-        SoftbusClientPluginLoadedFlagSet(false);
         return;
     }
 
@@ -213,8 +206,6 @@ static void ClientFuncInit(void)
     ret = ClientRegisterEnhanceFunc(soHandle);
     if (ret != SOFTBUS_OK) {
         COMM_LOGE(COMM_SDK, "init softbus client Enhance func failed");
-    } else {
-        SoftbusClientPluginLoadedFlagSet(true);
     }
 
     return;

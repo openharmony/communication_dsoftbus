@@ -42,6 +42,11 @@ void Anonymize(const char *plainStr, char **anonymizedStr)
     return GetBusCenterEventDepsInterface()->Anonymize(plainStr, anonymizedStr);
 }
 
+void AnonymizeDeviceName(const char *plainStr, char **anonymizedStr)
+{
+    return GetBusCenterEventDepsInterface()->AnonymizeDeviceName(plainStr, anonymizedStr);
+}
+
 void AnonymizeFree(char *anonymizedStr)
 {
     return GetBusCenterEventDepsInterface()->AnonymizeFree(anonymizedStr);

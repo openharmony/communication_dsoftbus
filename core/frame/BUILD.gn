@@ -232,7 +232,6 @@ if (defined(ohos_lite)) {
         "-fPIC",
         "-fno-builtin",
         "-std=c99",
-
       ]
       cflags_cc = cflags
       deps = dsoftbus_server_common_deps
@@ -241,7 +240,6 @@ if (defined(ohos_lite)) {
         "$dsoftbus_dfx_path/dumper/legacy:softbus_dfx_dump",
         "$dsoftbus_root_path/adapter:softbus_adapter",
         "$dsoftbus_root_path/core/common:softbus_utils",
-        "$dsoftbus_root_path/core/connection/wifi_direct_cpp:wifi_direct",
         "//build/lite/config/component/cJSON:cjson_shared",
         "//foundation/communication/ipc/interfaces/innerkits/c/ipc:ipc_single",
         "//foundation/systemabilitymgr/samgr_lite/samgr:samgr",
@@ -393,9 +391,7 @@ if (defined(ohos_lite)) {
       "$dsoftbus_root_path/core/common:softbus_utils",
       "$dsoftbus_root_path/core/connection/wifi_direct_cpp:wifi_direct",
     ]
-    external_deps = [
-      "cJSON:cjson",
-    ]
+    external_deps = [ "cJSON:cjson" ]
     external_deps += auth_server_ex_deps
     public_deps = [ "$dsoftbus_dfx_path:softbus_dfx" ]
     dsoftbus_server_common_external_deps =
@@ -430,10 +426,6 @@ if (defined(ohos_lite)) {
       if (!defined(global_parts_info) ||
           defined(global_parts_info.bundlemanager_bundle_framework)) {
         cflags = [ "-DSUPPORT_BUNDLENAME" ]
-        external_deps += [
-          "bundle_framework:appexecfwk_base",
-          "bundle_framework:appexecfwk_core",
-        ]
       }
       if (!defined(global_parts_info) ||
           defined(global_parts_info.ability_ability_runtime)) {
@@ -453,10 +445,9 @@ if (defined(ohos_lite)) {
       ]
       external_deps += [ "hiview_xcommradar_plugin:communication_radar_client" ]
     } else {
-      sources += [
-        "$dsoftbus_dfx_path/statistics/instant/instant_statistics_virtual.cpp",
-      ]
+      sources += [ "$dsoftbus_dfx_path/statistics/instant/instant_statistics_virtual.cpp" ]
     }
+
     part_name = "dsoftbus"
     subsystem_name = "communication"
   }
