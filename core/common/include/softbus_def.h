@@ -79,6 +79,7 @@ extern "C" {
 #define NODE_ADDR_LOOPBACK "0"
 
 #define MAX_UDP_CHANNEL_ID_COUNT 20
+#define ACCOUNT_UID_STR_LEN 65
 
 #ifndef ARRAY_SIZE
 #define ARRAY_SIZE(a) (sizeof(a) / sizeof((a)[0]))
