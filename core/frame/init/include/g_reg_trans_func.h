@@ -74,8 +74,8 @@ typedef int32_t (*TransInnerAddDataBufNodeFunc)(int32_t channelId, int32_t fd, i
 typedef int32_t (*ServerSideSendAckFunc)(int32_t sessionId, int32_t result);
 typedef int32_t (*TransSendDataFunc)(int32_t channelId, const void *data, uint32_t len);
 typedef int32_t (*ProxyDataRecvHandlerFunc)(int32_t channelId, const char *data, uint32_t len);
-typedef int32_t (*SoftbusAddServiceInnerForEnhanceFunc)((const char *pkgName, ISessionListenerInner *listener,
-    int32_t pid));
+typedef int32_t (*SoftbusAddServiceInnerForEnhanceFunc)(const char *pkgName, ISessionListenerInner *listener,
+    int32_t pid);
 
 typedef struct TagTransOpenFuncList {
     TransProxyGetAppInfoByChanIdFunc transProxyGetAppInfoByChanId;
