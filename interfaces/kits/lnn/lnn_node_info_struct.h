@@ -154,6 +154,7 @@ typedef struct {
     char extData[EXTDATA_LEN];
     char wifiDirectAddr[MAC_LEN];
     char accountHash[SHA_256_HASH_LEN];
+    char accountUid[ACCOUNT_UID_STR_LEN];
     unsigned char offlineCode[OFFLINE_CODE_BYTE_SIZE];
     char remotePtk[PTK_DEFAULT_LEN];
     char remoteMetaPtk[PTK_DEFAULT_LEN];

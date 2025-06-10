@@ -164,6 +164,12 @@ HWTEST_F(TransUkManagerTest, UkGetUkPolicyTest001, TestSize.Level1)
     EXPECT_EQ(true, isValidUk);
 
     FillHapSinkAclInfoToAppInfo(&appInfo);
+
+    uint32_t len =0;
+    ret = GetLocalAccountUidByUserId(nullptr, ACCOUNT_UID_LEN_MAX, &len, appInfo.myData.userId);
+    EXPECT_EQ(SOFTBUS_INVALID_PARAM, ret);
+    ret = GetLocalAccountUidByUserId(appInfo.myData.accountId, ACCOUNT_UID_LEN_MAX, &len, appInfo.myData.userId);
+    EXPECT_EQ(SOFTBUS_OK, ret);
 }
 
 /**
