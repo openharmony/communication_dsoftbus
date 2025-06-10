@@ -1073,9 +1073,18 @@ static int32_t TransProxyFillChannelInfo(const ProxyMessage *msg, ProxyChannelIn
         return SOFTBUS_TRANS_PROXY_ERROR_APP_TYPE;
     }
 
-    if (chan->appInfo.appType == APP_TYPE_NORMAL && chan->appInfo.callingTokenId != TOKENID_NOT_SET &&
-        TransCheckServerAccessControl(&chan->appInfo) != SOFTBUS_OK) {
-        return SOFTBUS_TRANS_CHECK_ACL_FAILED;
+    if (chan->appInfo.appType == APP_TYPE_NORMAL && chan->appInfo.callingTokenId != TOKENID_NOT_SET) {
+        (void)LnnGetNetworkIdByUuid(chan->appInfo.peerData.deviceId, chan->appInfo.peerNetWorkId, NETWORK_ID_BUF_LEN);
+        int32_t osType = 0;
+        (void)GetOsTypeByNetworkId(chan->appInfo.peerNetWorkId, &osType);
+        if (osType != OH_OS_TYPE) {
+            TRANS_LOGI(TRANS_CTRL, "not support acl check osType=%{public}d", osType);
+        } else if (GetCapabilityBit(chan->appInfo.channelCapability, TRANS_CHANNEL_ACL_CHECK_OFFSET)) {
+            ret = TransCheckServerAccessControl(&chan->appInfo);
+            TRANS_CHECK_AND_RETURN_RET_LOGE(ret == SOFTBUS_OK, ret, TRANS_CTRL, "acl check failed.");
+        } else {
+            TRANS_LOGI(TRANS_CTRL, "not support acl check");
+        }
     }
 
     if (CheckSecLevelPublic(chan->appInfo.myData.sessionName, chan->appInfo.peerData.sessionName) != SOFTBUS_OK) {
