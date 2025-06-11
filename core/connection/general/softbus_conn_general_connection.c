@@ -694,7 +694,8 @@ static void MergeConnection(uint32_t generalId)
 static void OnConnectTimeout(uint32_t generalId)
 {
     struct GeneralConnection *generalConnection = GetConnectionByGeneralId(generalId);
-    CONN_CHECK_AND_RETURN_LOGE(generalConnection != NULL, CONN_BLE, "connection is null");
+    CONN_CHECK_AND_RETURN_LOGE(generalConnection != NULL, CONN_BLE,
+        "connection is null, generalId=%{public}u", generalId);
     g_generalConnectionListener.onConnectFailed(&generalConnection->info,
         generalConnection->generalId, SOFTBUS_CONN_GENERAL_CONNECT_TIMEOUT);
     GeneralSendResetMessage(generalConnection);
@@ -1131,12 +1132,26 @@ static int32_t Connect(const GeneralConnectionParam *param, const char *addr)
     return handle;
 }
 
+static struct GeneralConnection *GetConnectionByGeneralIdAndCheckPid(uint32_t generalHandle, int32_t pid)
+{
+    struct GeneralConnection *generalConnection = GetConnectionByGeneralId(generalHandle);
+    CONN_CHECK_AND_RETURN_RET_LOGE(generalConnection != NULL, NULL, CONN_BLE,
+        "connection is null, generalId=%{public}u", generalHandle);
+    if (generalConnection->info.pid != pid) {
+        CONN_LOGE(CONN_BLE, "invalid pid=%{public}d, generalId=%{public}u, localPid=%{public}d",
+            pid, generalHandle, generalConnection->info.pid);
+        ConnReturnGeneralConnection(&generalConnection);
+        return NULL;
+    }
+    return generalConnection;
+}
+
 static int32_t Send(uint32_t generalHandle, const uint8_t *data, uint32_t dataLen, int32_t pid)
 {
     CONN_CHECK_AND_RETURN_RET_LOGE(data != NULL, SOFTBUS_INVALID_PARAM, CONN_BLE, "data is null");
-    struct GeneralConnection *generalConnection = GetConnectionByGeneralId(generalHandle);
+    struct GeneralConnection *generalConnection = GetConnectionByGeneralIdAndCheckPid(generalHandle, pid);
     CONN_CHECK_AND_RETURN_RET_LOGE(generalConnection != NULL, SOFTBUS_INVALID_PARAM, CONN_BLE,
-        "connection is null, generalId=%{public}u", generalHandle);
+        "invalid param, generalId=%{public}u", generalHandle);
     int32_t status = SoftBusMutexLock(&generalConnection->lock);
     if (status != SOFTBUS_OK) {
         CONN_LOGE(CONN_BLE, "lock failed, handle=%{public}u, err=%{public}u",
@@ -1163,11 +1178,11 @@ static int32_t Send(uint32_t generalHandle, const uint8_t *data, uint32_t dataLe
     return status;
 }
 
-static void Disconnect(uint32_t generalHandle)
+static void Disconnect(uint32_t generalHandle, int32_t pid)
 {
-    struct GeneralConnection *generalConnection = GetConnectionByGeneralId(generalHandle);
+    struct GeneralConnection *generalConnection = GetConnectionByGeneralIdAndCheckPid(generalHandle, pid);
     CONN_CHECK_AND_RETURN_LOGE(generalConnection != NULL, CONN_BLE,
-        "connection is null, generalId=%{public}u", generalHandle);
+        "invalid param, generalId=%{public}u", generalHandle);
     CONN_LOGI(CONN_BLE, "disconnect connection, generalId=%{public}u, connectionId=%{public}u",
         generalHandle, generalConnection->underlayerHandle);
     GeneralSendResetMessage(generalConnection);
@@ -1176,17 +1191,16 @@ static void Disconnect(uint32_t generalHandle)
     return;
 }
 
-static int32_t GetPeerDeviceId(uint32_t generalHandle, char *addr, uint32_t length, uint32_t tokenId)
+static int32_t GetPeerDeviceId(uint32_t generalHandle, char *addr, uint32_t length, uint32_t tokenId, int32_t pid)
 {
     CONN_CHECK_AND_RETURN_RET_LOGE(addr != NULL, SOFTBUS_INVALID_PARAM, CONN_BLE,
         "addr is null, get deviceId failed");
-    if (length != BT_MAC_LEN) {
-        CONN_LOGE(CONN_BLE, "invalid param, generalId=%{public}u, len=%{public}u", generalHandle, length);
-        return SOFTBUS_INVALID_PARAM;
-    }
-    struct GeneralConnection *generalConnection = GetConnectionByGeneralId(generalHandle);
+    CONN_CHECK_AND_RETURN_RET_LOGE(length == BT_MAC_LEN, SOFTBUS_INVALID_PARAM, CONN_BLE,
+        "invalid param, generalId=%{public}u, len=%{public}u", generalHandle, length);
+
+    struct GeneralConnection *generalConnection = GetConnectionByGeneralIdAndCheckPid(generalHandle, pid);
     CONN_CHECK_AND_RETURN_RET_LOGE(generalConnection != NULL, SOFTBUS_INVALID_PARAM, CONN_BLE,
-        "connection is null, generalId=%{public}u", generalHandle);
+        "invalid param, generalId=%{public}u", generalHandle);
     int32_t status = SoftBusGetRandomAddress(generalConnection->addr, addr, (int32_t)tokenId);
     if (status != SOFTBUS_OK) {
         CONN_LOGE(CONN_BLE, "get mac failed, generalId=%{public}u", generalHandle);
