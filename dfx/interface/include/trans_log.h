@@ -47,7 +47,7 @@ static const SoftBusLogLabel TRANS_LABELS[MODULE_DOMAIN_MAX_LEN] = {
     { TRANS_MSG,        0xd005746,      "TransMsg"      },
     { TRANS_STREAM,     0xd005747,      "TransStream"   },
     { TRANS_QOS,        0xd005748,      "TransQos"      },
-    { TRANS_EVENT,      0xd005748,      "TransEvent"    },
+    { TRANS_EVENT,      0xd005749,      "TransEvent"    },
     { TRANS_TEST,       DOMAIN_ID_TEST, "TransTest"     },
 };
 

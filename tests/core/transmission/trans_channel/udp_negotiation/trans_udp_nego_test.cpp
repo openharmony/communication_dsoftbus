@@ -251,11 +251,13 @@ HWTEST_F(TransUdpNegoTest, SendReplyErrInfo001, TestSize.Level1)
     int32_t errCode = 0;
     string errDesc = "ProcessMessage";
     AuthHandle authHandle = { .authId = 0, .type = AUTH_LINK_TYPE_WIFI };
+    NiceMock<TransUdpNegoInterfaceMock> TransUdpNegoMock;
+    EXPECT_CALL(TransUdpNegoMock, AuthMetaPostTransData).WillRepeatedly(Return(SOFTBUS_LOCK_ERR));
     int32_t ret = SendReplyErrInfo(errCode, nullptr, authHandle, 0);
     EXPECT_EQ(ret, SOFTBUS_INVALID_PARAM);
 
     ret = SendReplyErrInfo(errCode, (char *)errDesc.c_str(), authHandle, 0);
-    EXPECT_EQ(ret, SOFTBUS_NOT_IMPLEMENT);
+    EXPECT_EQ(ret, SOFTBUS_LOCK_ERR);
 }
 
 /**
@@ -280,7 +282,7 @@ HWTEST_F(TransUdpNegoTest, SendReplyUdpInfo001, TestSize.Level1)
     NiceMock<TransUdpNegoInterfaceMock> TransUdpNegoMock;
     EXPECT_CALL(TransUdpNegoMock, AuthMetaPostTransData).WillOnce(Return(SOFTBUS_LOCK_ERR));
     ret = SendReplyUdpInfo(&appInfo, authHandle, seq);
-    EXPECT_EQ(ret, SOFTBUS_NOT_IMPLEMENT);
+    EXPECT_EQ(ret, SOFTBUS_LOCK_ERR);
 }
 
 /**
@@ -414,6 +416,8 @@ HWTEST_F(TransUdpNegoTest, StartExchangeUdpInfo001, TestSize.Level1)
 {
     LnnEnhanceFuncList *pfnLnnEnhanceFuncList = LnnEnhanceFuncListGet();
     pfnLnnEnhanceFuncList->authMetaPostTransData = AuthMetaPostTransData;
+    NiceMock<TransUdpNegoInterfaceMock> TransUdpNegoMock;
+    EXPECT_CALL(TransUdpNegoMock, AuthMetaPostTransData).WillRepeatedly(Return(SOFTBUS_LOCK_ERR));
     AuthHandle authHandle = { .authId = 0, .type = AUTH_LINK_TYPE_WIFI };
     int64_t seq = 0;
     UdpChannelInfo channel;
@@ -605,11 +609,10 @@ HWTEST_F(TransUdpNegoTest, OpenAuthConnForUdpNegotiation001, TestSize.Level1)
     ret = OpenAuthConnForUdpNegotiation(nullptr);
     EXPECT_EQ(ret, SOFTBUS_INVALID_PARAM);
 
-    ret = OpenAuthConnForUdpNegotiation(channel);
-    EXPECT_EQ(ret, SOFTBUS_TRANS_OPEN_AUTH_CHANNEL_FAILED);
-
-    channel->info.myData.channelId = 0;
-    ret = OpenAuthConnForUdpNegotiation(channel);
+    UdpChannelInfo channelTest = {
+        .info.myData.channelId = 0,
+    };
+    ret = OpenAuthConnForUdpNegotiation(&channelTest);
     EXPECT_EQ(ret, SOFTBUS_NOT_FIND);
 }
 

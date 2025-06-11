@@ -389,11 +389,11 @@ HWTEST_F(TransCoreTcpDirectTest, GetCipherFlagByAuthIdTest0011, TestSize.Level1)
     NiceMock<TransTcpDirectCommonInterfaceMock> TransCoreTcpDirectMock;
     EXPECT_CALL(TransCoreTcpDirectMock, AuthMetaGetServerSide).WillRepeatedly(Return(SOFTBUS_NOT_FIND));
     int32_t ret = GetCipherFlagByAuthId(authHandle, &flag, &isAuthServer, isLegacyOs);
-    EXPECT_EQ(ret, SOFTBUS_NOT_IMPLEMENT);
+    EXPECT_EQ(ret, SOFTBUS_NOT_FIND);
 
     authHandle.authId = INVALID_VALUE;
     ret = GetCipherFlagByAuthId(authHandle, &flag, &isAuthServer, isLegacyOs);
-    EXPECT_EQ(ret, SOFTBUS_NOT_IMPLEMENT);
+    EXPECT_EQ(ret, SOFTBUS_NOT_FIND);
 }
 
 /**
