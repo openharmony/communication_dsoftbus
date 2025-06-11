@@ -729,7 +729,7 @@ static void Dereference(struct GeneralConnection *underlayer)
     }
 }
 
-static bool IsAllowSave(const char *pkgName, bool isFindServer)
+static bool IsAllowSave(const char *bundleName, bool isFindServer)
 {
     int32_t count = 0;
     if (!isFindServer) {
@@ -737,7 +737,7 @@ static bool IsAllowSave(const char *pkgName, bool isFindServer)
             false, CONN_BLE, "lock failed");
         struct GeneralConnection *it = NULL;
         LIST_FOR_EACH_ENTRY(it, &g_generalManager.connections->list, struct GeneralConnection, node) {
-            if (StrCmpIgnoreCase(it->info.pkgName, pkgName) == 0 && it->isClient) {
+            if (StrCmpIgnoreCase(it->info.bundleName, bundleName) == 0 && it->isClient) {
                 count += 1;
             }
         }
@@ -747,7 +747,7 @@ static bool IsAllowSave(const char *pkgName, bool isFindServer)
             SOFTBUS_LOCK_ERR, CONN_BLE, "lock failed");
         Server *item = NULL;
         LIST_FOR_EACH_ENTRY(item, &g_generalManager.servers->list, Server, node) {
-            if (StrCmpIgnoreCase(item->info.pkgName, pkgName) == 0) {
+            if (StrCmpIgnoreCase(item->info.bundleName, bundleName) == 0) {
                 count += 1;
             }
         }
@@ -763,7 +763,7 @@ static bool IsAllowSave(const char *pkgName, bool isFindServer)
 static struct GeneralConnection *CreateConnection(const GeneralConnectionParam *param, const char *addr,
     int32_t underlayerHandle, bool isClient, int32_t *errorCode)
 {
-    if (!IsAllowSave(param->pkgName, false)) {
+    if (!IsAllowSave(param->bundleName, false)) {
         CONN_LOGE(CONN_BLE, "add pkg name is max");
         *errorCode = SOFTBUS_CONN_GENERAL_CREATE_CLIENT_MAX;
         return NULL;
@@ -1199,7 +1199,7 @@ static int32_t CreateServer(const GeneralConnectionParam *param)
 {
     CONN_CHECK_AND_RETURN_RET_LOGE(param != NULL, SOFTBUS_INVALID_PARAM, CONN_BLE,
         "create server failed, param is null");
-    if (!IsAllowSave(param->pkgName, true)) {
+    if (!IsAllowSave(param->bundleName, true)) {
         CONN_LOGE(CONN_BLE, "add pkg name is max");
         return SOFTBUS_CONN_GENERAL_CREATE_SERVER_MAX;
     }
