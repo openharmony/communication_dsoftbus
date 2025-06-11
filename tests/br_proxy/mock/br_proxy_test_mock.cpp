@@ -46,5 +46,10 @@ int32_t ConnectPeerDevice(BrProxyChannelInfo *channelInfo, uint32_t *requestId)
 {
     return GetBrProxyInterface()->ConnectPeerDevice(channelInfo, requestId);
 }
+
+int32_t GetCallerHapInfo(char *bundleName, uint32_t bundleNamelen, char *abilityName, uint32_t abilityNameLen)
+{
+    return GetBrProxyInterface()->GetCallerHapInfo(bundleName, bundleNamelen, abilityName, abilityNameLen);
+}
 }
 }
