@@ -77,6 +77,7 @@ typedef struct {
 typedef struct {
     uint32_t requestId;
     bool isInnerRequest;
+    uint32_t innerRetryNum;
     char brMac[BT_MAC_LEN];
     char uuid[UUID_STRING_LEN];
     uint64_t timeoutMs;

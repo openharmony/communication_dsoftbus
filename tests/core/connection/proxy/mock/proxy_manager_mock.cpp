@@ -43,6 +43,11 @@ void InitProxyChannelManagerWrapper(void)
 {
     return ProxyChannelMock::GetMock()->InitProxyChannelManagerWrapper();
 }
+
+bool IsPairedDevice(const char *addr)
+{
+    return ProxyChannelMock::GetMock()->IsPairedDevice(addr);
+}
 }
 
 /* definition for class ProxyChannelMock */
@@ -85,6 +90,33 @@ int32_t ProxyChannelMock::ActionOfRead1(int32_t clientFd, uint8_t *buf, const in
 {
     sleep(READ_SLEEP_TIME);
     return BR_READ_SOCKET_CLOSED;
+}
+
+int32_t ProxyChannelMock::ActionOfConnect(const char *uuid, const BT_ADDR mac, void *connectCallback)
+{
+    sleep(1);
+    return UNDERLAYER_HANDLE;
+}
+
+int32_t ProxyChannelMock::ActionOfConnect1(const char *uuid, const BT_ADDR mac, void *connectCallback)
+{
+    SoftBusFree(GetProxyChannelManager()->proxyChannelRequestInfo);
+    GetProxyChannelManager()->proxyChannelRequestInfo = nullptr;
+    sleep(1);
+    return UNDERLAYER_HANDLE;
+}
+
+int32_t ProxyChannelMock::ActionOfConnect2(const char *uuid, const BT_ADDR mac, void *connectCallback)
+{
+    SoftBusFree(GetProxyChannelManager()->proxyChannelRequestInfo);
+    GetProxyChannelManager()->proxyChannelRequestInfo = nullptr;
+    ProxyConnectInfo *connectInfo = (ProxyConnectInfo *)SoftBusCalloc(sizeof(ProxyConnectInfo));
+    if (connectInfo == nullptr || strcpy_s(connectInfo->brMac, BT_MAC_LEN, "00:22:33:44:55:66") != EOK) {
+        SoftBusFree(connectInfo);
+    }
+    GetProxyChannelManager()->proxyChannelRequestInfo = connectInfo;
+    sleep(1);
+    return UNDERLAYER_HANDLE;
 }
 
 int32_t SoftBusGetBrState(void)
