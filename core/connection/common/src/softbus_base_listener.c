@@ -1079,6 +1079,7 @@ static void ProcessFdEvent(SoftbusListenerNode *node, struct FdNode fdEvent,
     LIST_FOR_EACH_ENTRY_SAFE(it, next, fdNode, struct FdNode, node) {
         if (it->fd == fdEvent.fd) {
             uint32_t triggerSet = fdEvent.triggerSet & it->triggerSet;
+            // Because the maximum nesting depth is more than 5, the function is decimated
             bool match = CheckAndDispatchFdEvent(node, fdEvent, listener, triggerSet, wakeupTrace);
             if (match) {
                 ListDelete(&it->node);
