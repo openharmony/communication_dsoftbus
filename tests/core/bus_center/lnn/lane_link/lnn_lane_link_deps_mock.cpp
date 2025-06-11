@@ -73,7 +73,7 @@ int32_t LaneLinkDepsInterfaceMock::ActionOfDetectFail(uint32_t laneReqId, const 
 }
 
 extern "C" {
-int32_t GetTransReqInfoByLaneReqId(uint32_t laneReqId, TransOption *reqInfo)
+int32_t GetTransReqInfoByLaneReqId(uint32_t laneReqId, TransReqInfo *reqInfo)
 {
     return GetLaneLinkDepsInterface()->GetTransReqInfoByLaneReqId(laneReqId, reqInfo);
 }
