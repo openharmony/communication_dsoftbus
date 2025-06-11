@@ -18,6 +18,7 @@
 #include <stdio.h>
 #include "securec.h"
 
+#include "anonymizer.h"
 #include "conn_log.h"
 #include "softbus_adapter_mem.h"
 #include "softbus_adapter_thread.h"
@@ -31,7 +32,6 @@
 #include "softbus_feature_config.h"
 #include "softbus_socket.h"
 #include "softbus_type_def.h"
-#include "softbus_utils.h"
 #include "legacy/softbus_hidumper_conn.h"
 #include "legacy/softbus_hisysevt_connreporter.h"
 #include "conn_event.h"
@@ -805,7 +805,7 @@ ConnectFuncInterface *ConnInitTcp(const ConnectCallback *callback)
 
 static int TcpConnectInfoDump(int fd)
 {
-    char addr[MAX_SOCKET_ADDR_LEN] = {0};
+    char *anonyIpAddr = NULL;
     if (SoftBusMutexLock(&g_tcpConnInfoList->lock) != SOFTBUS_OK) {
         CONN_LOGE(CONN_COMMON, "lock failed");
         return SOFTBUS_LOCK_ERR;
@@ -819,8 +819,9 @@ static int TcpConnectInfoDump(int fd)
         SOFTBUS_DPRINTF(fd, "Connection Info isServer          : %d\n", itemNode->info.isServer);
         SOFTBUS_DPRINTF(fd, "Connection Info type              : %d\n", itemNode->info.type);
         SOFTBUS_DPRINTF(fd, "SocketInfo                        :\n");
-        DataMasking(itemNode->info.socketInfo.addr, MAX_SOCKET_ADDR_LEN, MAC_DELIMITER, addr);
-        SOFTBUS_DPRINTF(fd, "SocketInfo addr                   : %s\n", addr);
+        Anonymize(itemNode->info.socketInfo.addr, &anonyIpAddr);
+        SOFTBUS_DPRINTF(fd, "SocketInfo addr                   : %s\n", AnonymizeWrapper(anonyIpAddr));
+        AnonymizeFree(anonyIpAddr);
         SOFTBUS_DPRINTF(fd, "SocketInfo protocol               : %u\n", itemNode->info.socketInfo.protocol);
         SOFTBUS_DPRINTF(fd, "SocketInfo port                   : %d\n", itemNode->info.socketInfo.port);
         SOFTBUS_DPRINTF(fd, "SocketInfo fd                     : %d\n", itemNode->info.socketInfo.fd);

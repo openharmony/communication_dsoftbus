@@ -46,7 +46,6 @@ HWTEST_F(AuthLogTest, AuthLogTest001, TestSize.Level0)
     EXPECT_NO_FATAL_FAILURE(ExpectMatchSoftBusLogAttrs(AUTH_LABELS[++index], AUTH_CONN, ++authDomainBase, "AuthConn"));
     EXPECT_NO_FATAL_FAILURE(ExpectMatchSoftBusLogAttrs(AUTH_LABELS[++index], AUTH_FSM, ++authDomainBase, "AuthFsm"));
     EXPECT_NO_FATAL_FAILURE(ExpectMatchSoftBusLogAttrs(AUTH_LABELS[++index], AUTH_KEY, ++authDomainBase, "AuthKey"));
-    EXPECT_NO_FATAL_FAILURE(ExpectMatchSoftBusLogAttrs(AUTH_LABELS[++index], AUTH_EVENT, ++authDomainBase, "AuthKey"));
     EXPECT_NO_FATAL_FAILURE(ExpectMatchSoftBusLogAttrs(AUTH_LABELS[++index], AUTH_TEST, DOMAIN_ID_TEST, "AuthTest"));
 }
 

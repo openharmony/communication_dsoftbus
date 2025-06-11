@@ -25,17 +25,23 @@
 #ifndef SOFTBUS_INIT_COMMON_H
 #define SOFTBUS_INIT_COMMON_H
 
+typedef enum {
+    SOFTBUS_HANDLE_SERVER_PLUGIN,
+    SOFTBUS_HANDLE_CLIENT_PLGUIN,
+    SOFTBUS_HANDLE_SERVER,
+    SOFTBUS_HANDLE_CLIENT,
+    SOFTBUS_HANDLE_BUTT
+} SoftBusHandleType;
+
 #ifdef __cplusplus
 extern "C" {
 #endif
 
 bool SoftbusServerPluginLoadedFlagGet(void);
 bool SoftbusClientPluginLoadedFlagGet(void);
-void SoftbusServerPluginLoadedFlagSet(bool soLoadFlag);
-void SoftbusClientPluginLoadedFlagSet(bool soLoadFlag);
-int32_t SoftBusDlopen(const char *DllName, void **DllHandle);
+int32_t SoftBusDlopen(SoftBusHandleType type, void **dllHandle);
 int32_t SoftBusDlsym(const void *DllHandle, const char *funcName, void **funcHandle);
-void SoftBusDlclose(const void *DllHandle);
+void SoftBusDlclose(SoftBusHandleType type);
 int32_t LnnCheckFuncPointer(void *func);
 int32_t ConnCheckFuncPointer(void *func);
 int32_t DiscCheckFuncPointer(void *func);

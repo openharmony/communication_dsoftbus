@@ -26,6 +26,7 @@
 #include "softbus_json_utils.h"
 #include "softbus_utils.h"
 #include "trans_log.h"
+#include "trans_uk_manager.h"
 
 #define BASE64KEY 45 // Base64 encrypt SessionKey length
 #define INVALID_USER_ID (-1)
@@ -122,6 +123,7 @@ static int32_t JsonObjectPackRequestEx(const AppInfo *appInfo, cJSON *json, unsi
         !AddNumberToJsonObject(json, MSG_ROUTE_TYPE, appInfo->routeType))) {
         return SOFTBUS_PARSE_JSON_ERR;
     }
+    (void)AddStringToJsonObject(json, DEVICE_ID, appInfo->myData.deviceId);
     (void)AddNumberToJsonObject(json, BUSINESS_TYPE, appInfo->businessType);
     (void)AddNumberToJsonObject(json, AUTO_CLOSE_TIME, appInfo->autoCloseTime);
     (void)AddNumberToJsonObject(json, TRANS_FLAGS, TRANS_FLAG_HAS_CHANNEL_AUTH);
@@ -130,6 +132,8 @@ static int32_t JsonObjectPackRequestEx(const AppInfo *appInfo, cJSON *json, unsi
     (void)AddNumber64ToJsonObject(json, JSON_KEY_CALLING_TOKEN_ID, (int64_t)appInfo->callingTokenId);
     (void)AddStringToJsonObject(json, ACCOUNT_ID, appInfo->myData.accountId);
     (void)AddNumberToJsonObject(json, USER_ID, appInfo->myData.userId);
+    (void)AddNumber64ToJsonObject(json, SOURCE_ACL_TOKEN_ID, (int64_t)appInfo->myData.tokenId);
+    (void)AddStringToJsonObject(json, SOURCE_ACL_EXTRA_INFO, appInfo->extraAccessInfo);
     return SOFTBUS_OK;
 }
 
@@ -218,9 +222,9 @@ static int32_t UnpackFirstData(AppInfo *appInfo, const cJSON *json)
 static int32_t ParseMessageToAppInfo(const cJSON *msg, AppInfo *appInfo)
 {
     char sessionKey[BASE64KEY] = {0};
+    (void)GetJsonObjectStringItem(msg, SESSION_KEY, sessionKey, sizeof(sessionKey));
     if (!GetJsonObjectStringItem(msg, BUS_NAME, (appInfo->myData.sessionName), SESSION_NAME_SIZE_MAX) ||
-        !GetJsonObjectStringItem(msg, GROUP_ID, (appInfo->groupId), GROUP_ID_SIZE_MAX) ||
-        !GetJsonObjectStringItem(msg, SESSION_KEY, sessionKey, sizeof(sessionKey))) {
+        !GetJsonObjectStringItem(msg, GROUP_ID, (appInfo->groupId), GROUP_ID_SIZE_MAX)) {
         TRANS_LOGE(TRANS_CTRL, "Failed to get BUS_NAME");
         return SOFTBUS_PARSE_JSON_ERR;
     }
@@ -235,6 +239,8 @@ static int32_t ParseMessageToAppInfo(const cJSON *msg, AppInfo *appInfo)
     if (!GetJsonObjectNumberItem(msg, USER_ID, &appInfo->peerData.userId)) {
         appInfo->peerData.userId = INVALID_USER_ID;
     }
+    (void)GetJsonObjectNumber64Item(msg, SOURCE_ACL_TOKEN_ID, (int64_t *)&appInfo->peerData.tokenId);
+    (void)GetJsonObjectStringItem(msg, SOURCE_ACL_EXTRA_INFO, appInfo->extraAccessInfo, EXTRA_ACCESS_INFO_LEN_MAX);
     appInfo->myHandleId = -1;
     appInfo->peerHandleId = -1;
     if (!GetJsonObjectInt32Item(msg, MY_HANDLE_ID, &(appInfo->peerHandleId)) ||
@@ -244,12 +250,14 @@ static int32_t ParseMessageToAppInfo(const cJSON *msg, AppInfo *appInfo)
     }
 
     size_t len = 0;
-    int32_t ret = SoftBusBase64Decode((unsigned char *)appInfo->sessionKey, SESSION_KEY_LENGTH,
-        &len, (unsigned char *)sessionKey, strlen(sessionKey));
-    (void)memset_s(sessionKey, sizeof(sessionKey), 0, sizeof(sessionKey));
-    if (len != SESSION_KEY_LENGTH) {
-        TRANS_LOGE(TRANS_CTRL, "Failed to decode sessionKey ret=%{public}d, len=%{public}zu", ret, len);
-        return SOFTBUS_PARSE_JSON_ERR;
+    if (strlen(sessionKey) != 0) {
+        int32_t ret = SoftBusBase64Decode((unsigned char *)appInfo->sessionKey, SESSION_KEY_LENGTH, &len,
+            (unsigned char *)sessionKey, strlen(sessionKey));
+        (void)memset_s(sessionKey, sizeof(sessionKey), 0, sizeof(sessionKey));
+        if (len != SESSION_KEY_LENGTH) {
+            TRANS_LOGE(TRANS_CTRL, "Failed to decode sessionKey ret=%{public}d, len=%{public}zu", ret, len);
+            return SOFTBUS_PARSE_JSON_ERR;
+        }
     }
     return SOFTBUS_OK;
 }
@@ -290,7 +298,7 @@ int32_t UnpackRequest(const cJSON *msg, AppInfo *appInfo)
         TRANS_LOGW(TRANS_CTRL, "Failed to get route type");
     }
     appInfo->routeType = (RouteType)routeType;
-
+    (void)GetJsonObjectStringItem(msg, DEVICE_ID, appInfo->peerData.deviceId, DEVICE_ID_SIZE_MAX);
     if (!GetJsonObjectNumberItem(msg, BUSINESS_TYPE, (int32_t *)&appInfo->businessType)) {
         appInfo->businessType = BUSINESS_TYPE_NOT_CARE;
     }
@@ -320,7 +328,10 @@ static int32_t AddItemsToJsonObject(const AppInfo *appInfo, cJSON *json)
         SOFTBUS_CREATE_JSON_ERR, TRANS_CTRL, "Failed to add pid");
     TRANS_CHECK_AND_RETURN_RET_LOGE(AddNumberToJsonObject(json, TRANS_CAPABILITY, appInfo->channelCapability),
         SOFTBUS_CREATE_JSON_ERR, TRANS_CTRL, "Failed to add channelCapability");
-    return SOFTBUS_OK;
+    (void)AddStringToJsonObject(json, SINK_ACL_ACCOUNT_ID, appInfo->myData.accountId);
+    (void)AddNumberToJsonObject(json, USER_ID, appInfo->myData.userId);
+    (void)AddNumber64ToJsonObject(json, SINK_ACL_TOKEN_ID, (int64_t)appInfo->myData.tokenId);
+    return EncryptAndAddSinkSessionKey(json, appInfo);
 }
 
 char *PackReply(const AppInfo *appInfo)
@@ -398,6 +409,11 @@ int32_t UnpackReply(const cJSON *msg, AppInfo *appInfo, uint16_t *fastDataSize)
     appInfo->peerData.pid = -1;
     (void)GetJsonObjectNumberItem(msg, UID, &appInfo->peerData.uid);
     (void)GetJsonObjectNumberItem(msg, PID, &appInfo->peerData.pid);
+    (void)GetJsonObjectStringItem(msg, SINK_ACL_ACCOUNT_ID, (appInfo->peerData.accountId), ACCOUNT_UID_LEN_MAX);
+    if (!GetJsonObjectNumberItem(msg, USER_ID, &appInfo->peerData.userId)) {
+        appInfo->peerData.userId = INVALID_USER_ID;
+    }
+    (void)GetJsonObjectNumber64Item(msg, SINK_ACL_TOKEN_ID, (int64_t *)&appInfo->peerData.tokenId);
     if (!GetJsonObjectInt32Item(msg, MY_HANDLE_ID, &(appInfo->peerHandleId)) ||
         !GetJsonObjectInt32Item(msg, PEER_HANDLE_ID, &(appInfo->myHandleId))) {
             appInfo->myHandleId = -1;
@@ -416,7 +432,7 @@ int32_t UnpackReply(const cJSON *msg, AppInfo *appInfo, uint16_t *fastDataSize)
     if (!GetJsonObjectNumberItem(msg, TRANS_CAPABILITY, (int32_t *)&(appInfo->channelCapability))) {
         appInfo->channelCapability = 0;
     }
-    return SOFTBUS_OK;
+    return DecryptAndAddSinkSessionKey(msg, appInfo);
 }
 
 int32_t UnpackReplyErrCode(const cJSON *msg, int32_t *errCode)

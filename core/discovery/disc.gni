@@ -38,9 +38,7 @@ disc_server_src += [
   "$dsoftbus_root_path/core/discovery/manager/src/softbus_disc_server.c",
 ]
 
-if (!dsoftbus_feature_ex_kits) {
-  DISC_SERVER_DEFINES += [ "DISC_COMMUNITY" ]
-}
+DISC_SERVER_DEFINES += [ "DISC_COMMUNITY" ]
 if (defined(ohos_lite)) {
   if (ohos_kernel_type != "liteos_m") {
     disc_server_deps += [

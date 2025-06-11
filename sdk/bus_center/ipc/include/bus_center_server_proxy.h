@@ -22,7 +22,6 @@
 #include "data_level.h"
 #include "softbus_bus_center.h"
 
-void BusCenterExProxyDeInit(void);
 #ifdef __cplusplus
 #if __cplusplus
 extern "C" {

@@ -91,7 +91,7 @@ static int32_t DBDeviceNameInfoSyncToCache(NodeInfo *cacheInfo, char *fieldName,
             return SOFTBUS_STRCPY_ERR;
         }
         char *anonyDeviceName = NULL;
-        Anonymize(cacheInfo->deviceInfo.deviceName, &anonyDeviceName);
+        AnonymizeDeviceName(cacheInfo->deviceInfo.deviceName, &anonyDeviceName);
         LNN_LOGI(LNN_BUILDER, "success. deviceName=%{public}s", AnonymizeWrapper(anonyDeviceName));
         AnonymizeFree(anonyDeviceName);
     } else if (strcmp(fieldName, DEVICE_INFO_UNIFIED_DEVICE_NAME) == 0 && valueLength < DEVICE_NAME_BUF_LEN) {
@@ -935,6 +935,9 @@ static int32_t LnnUpdateOldCacheInfo(const NodeInfo *newInfo, NodeInfo *oldInfo)
     }
     if (strcpy_s(oldInfo->p2pInfo.p2pMac, MAC_LEN, newInfo->p2pInfo.p2pMac) != EOK) {
         LNN_LOGE(LNN_LEDGER, "strcpy_s p2pMac to cache info fail");
+    }
+    if (strcpy_s(oldInfo->accountUid, ACCOUNT_UID_STR_LEN, newInfo->accountUid) != EOK) {
+        LNN_LOGE(LNN_LEDGER, "strcpy_s accountUid to cache info fail");
     }
     if (memcpy_s((char *)oldInfo->rpaInfo.peerIrk, LFINDER_IRK_LEN, (char *)newInfo->rpaInfo.peerIrk,
         LFINDER_IRK_LEN) != EOK) {

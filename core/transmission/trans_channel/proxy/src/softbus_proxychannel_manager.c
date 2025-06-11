@@ -296,8 +296,8 @@ static int32_t TransProxyUpdateSinkAccessInfo(int32_t chanId, const AccessInfo *
     TRANS_CHECK_AND_RETURN_RET_LOGE(
         SoftBusMutexLock(&g_proxyChannelList->lock) == SOFTBUS_OK, SOFTBUS_LOCK_ERR, TRANS_CTRL, "lock mutex fail!");
     uint32_t size = 0;
-    char accountId[ACCOUNT_UID_LEN_MAX];
-    int32_t ret = GetOsAccountUidByUserId(accountId, ACCOUNT_UID_LEN_MAX - 1, &size, accessInfo->userId);
+    char accountId[ACCOUNT_UID_LEN_MAX] = { 0 };
+    int32_t ret = GetLocalAccountUidByUserId(accountId, ACCOUNT_UID_LEN_MAX, &size, accessInfo->userId);
     if (ret != SOFTBUS_OK) {
         TRANS_LOGE(TRANS_CTRL, "get current account failed. ret=%{public}d", ret);
     }
@@ -1073,9 +1073,18 @@ static int32_t TransProxyFillChannelInfo(const ProxyMessage *msg, ProxyChannelIn
         return SOFTBUS_TRANS_PROXY_ERROR_APP_TYPE;
     }
 
-    if (chan->appInfo.appType == APP_TYPE_NORMAL && chan->appInfo.callingTokenId != TOKENID_NOT_SET &&
-        TransCheckServerAccessControl(&chan->appInfo) != SOFTBUS_OK) {
-        return SOFTBUS_TRANS_CHECK_ACL_FAILED;
+    if (chan->appInfo.appType == APP_TYPE_NORMAL && chan->appInfo.callingTokenId != TOKENID_NOT_SET) {
+        (void)LnnGetNetworkIdByUuid(chan->appInfo.peerData.deviceId, chan->appInfo.peerNetWorkId, NETWORK_ID_BUF_LEN);
+        int32_t osType = 0;
+        (void)GetOsTypeByNetworkId(chan->appInfo.peerNetWorkId, &osType);
+        if (osType != OH_OS_TYPE) {
+            TRANS_LOGI(TRANS_CTRL, "not support acl check osType=%{public}d", osType);
+        } else if (GetCapabilityBit(chan->appInfo.channelCapability, TRANS_CHANNEL_ACL_CHECK_OFFSET)) {
+            ret = TransCheckServerAccessControl(&chan->appInfo);
+            TRANS_CHECK_AND_RETURN_RET_LOGE(ret == SOFTBUS_OK, ret, TRANS_CTRL, "acl check failed.");
+        } else {
+            TRANS_LOGI(TRANS_CTRL, "not support acl check");
+        }
     }
 
     if (CheckSecLevelPublic(chan->appInfo.myData.sessionName, chan->appInfo.peerData.sessionName) != SOFTBUS_OK) {
@@ -1379,7 +1388,7 @@ int32_t TransDealProxyChannelOpenResult(
     ret = TransProxyUpdateReplyCnt(channelId);
     TRANS_CHECK_AND_RETURN_RET_LOGE(ret == SOFTBUS_OK, ret, TRANS_CTRL,
         "update waitOpenReplyCnt failed, channelId=%{public}d, ret=%{public}d", channelId, ret);
-    if (chan.appInfo.myData.pid != callingPid) {
+    if (callingPid != 0 && chan.appInfo.myData.pid != callingPid) {
         TRANS_LOGE(TRANS_CTRL,
             "pid does not match callingPid, pid=%{public}d, callingPid=%{public}d, channelId=%{public}d",
             chan.appInfo.myData.pid, callingPid, channelId);

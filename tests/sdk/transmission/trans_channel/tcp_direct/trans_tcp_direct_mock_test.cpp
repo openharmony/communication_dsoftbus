@@ -473,4 +473,16 @@ HWTEST_F(TransTcpDirectMockTest, TransTdcProcessTlvData001, TestSize.Level1)
     SoftBusFree(head);
     TransDataListDeinit();
 }
+
+/**
+ * @tc.name: MoveNode001
+ * @tc.desc: MoveNode
+ * @tc.type: FUNC
+ * @tc.require:
+ */
+HWTEST_F(TransTcpDirectMockTest, MoveNode001, TestSize.Level1)
+{
+    int32_t ret = MoveNode(TRANS_TEST_CHANNEL_ID, nullptr, TEST_DATA_LEN, PKG_HEAD_SIZE);
+    EXPECT_EQ(ret, SOFTBUS_INVALID_PARAM);
+}
 } // namespace OHOS

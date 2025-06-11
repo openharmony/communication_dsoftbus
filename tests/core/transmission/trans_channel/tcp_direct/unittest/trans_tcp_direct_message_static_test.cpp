@@ -901,7 +901,7 @@ HWTEST_F(TransTcpDirectMessageStaticTest, TransDealTdcChannelOpenResultTest001, 
     ret = TransSrvAddDataBufNode(channelId, fd);
     EXPECT_EQ(ret, SOFTBUS_OK);
     ret = TransDealTdcChannelOpenResult(channelId, openResult, &accessInfo, TEST_TDC_PID);
-    EXPECT_EQ(ret, SOFTBUS_OK);
+    EXPECT_EQ(ret, SOFTBUS_TRANS_CHECK_PID_ERROR);
     TransDelSessionConnById(channelId);
 }
 
@@ -926,11 +926,11 @@ HWTEST_F(TransTcpDirectMessageStaticTest, TransDealTdcChannelOpenResultTest002, 
     ret = TransTdcAddSessionConn(conn);
     EXPECT_EQ(ret, SOFTBUS_OK);
     ret = TransDealTdcChannelOpenResult(channelId, openResult, &accessInfo, TEST_TDC_PID);
-    EXPECT_EQ(ret, SOFTBUS_TRANS_NODE_IS_NULL);
+    EXPECT_EQ(ret, SOFTBUS_TRANS_CHECK_PID_ERROR);
     ret = TransSrvAddDataBufNode(channelId, fd);
     EXPECT_EQ(ret, SOFTBUS_OK);
     ret = TransDealTdcChannelOpenResult(channelId, openResult, &accessInfo, TEST_TDC_PID);
-    EXPECT_EQ(ret, SOFTBUS_OK);
+    EXPECT_EQ(ret, SOFTBUS_TRANS_CHECK_PID_ERROR);
     TransDelSessionConnById(channelId);
 }
 

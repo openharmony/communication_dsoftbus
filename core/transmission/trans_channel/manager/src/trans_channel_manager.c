@@ -1072,13 +1072,13 @@ static int32_t TransReportChannelOpenedInfo(uint8_t *buf, uint32_t len, pid_t ca
     }
     switch (info.channelType) {
         case CHANNEL_TYPE_PROXY:
-            ret = TransDealProxyChannelOpenResult(info.channelId, info.openResult, &accessInfo);
+            ret = TransDealProxyChannelOpenResult(info.channelId, info.openResult, &accessInfo, callingPid);
             break;
         case CHANNEL_TYPE_TCP_DIRECT:
-            ret = TransDealTdcChannelOpenResult(info.channelId, info.openResult, &accessInfo);
+            ret = TransDealTdcChannelOpenResult(info.channelId, info.openResult, &accessInfo, callingPid);
             break;
         case CHANNEL_TYPE_UDP:
-            ret = TransDealUdpChannelOpenResult(info.channelId, info.openResult, udpPort, &accessInfo);
+            ret = TransDealUdpChannelOpenResult(info.channelId, info.openResult, udpPort, &accessInfo, callingPid);
             break;
         case CHANNEL_TYPE_AUTH:
             ret = TransDealAuthChannelOpenResult(info.channelId, info.openResult, callingPid);

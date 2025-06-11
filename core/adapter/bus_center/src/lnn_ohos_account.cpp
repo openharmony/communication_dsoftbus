@@ -27,6 +27,7 @@
 #include "lnn_init_monitor.h"
 
 static const std::string DEFAULT_USER_ID = "0";
+static const std::string DEFAULT_ACCOUNT_UID = "ohosAnonymousUid";
 static bool g_accountIdInited = false;
 
 int32_t LnnGetOhosAccountInfo(uint8_t *accountHash, uint32_t len)
@@ -105,6 +106,8 @@ int32_t LnnInitOhosAccount(void)
 {
     int64_t accountId = 0;
     uint8_t accountHash[SHA_256_HASH_LEN] = {0};
+    char accountUid[ACCOUNT_UID_STR_LEN] = {0};
+    uint32_t size = 0;
 
     if (LnnGetOhosAccountInfo(accountHash, SHA_256_HASH_LEN) != SOFTBUS_OK) {
         if (SoftBusGenerateStrHash(reinterpret_cast<const unsigned char *>(DEFAULT_USER_ID.c_str()),
@@ -115,6 +118,11 @@ int32_t LnnInitOhosAccount(void)
     }
     if (GetCurrentAccount(&accountId) == SOFTBUS_OK) {
         (void)LnnSetLocalNum64Info(NUM_KEY_ACCOUNT_LONG, accountId);
+    }
+    if (GetOsAccountUid(accountUid, ACCOUNT_UID_STR_LEN, &size) == SOFTBUS_OK) {
+        LnnSetLocalStrInfo(STRING_KEY_ACCOUNT_UID, accountUid);
+    } else {
+        LnnSetLocalStrInfo(STRING_KEY_ACCOUNT_UID, DEFAULT_ACCOUNT_UID.c_str());
     }
     LnnAccoutIdStatusSet(accountId);
     LNN_LOGI(LNN_STATE, "init accountHash. accountHash[0]=%{public}02X, accountHash[1]=%{public}02X",
@@ -127,9 +135,16 @@ void LnnUpdateOhosAccount(UpdateAccountReason reason)
     int64_t accountId = 0;
     uint8_t accountHash[SHA_256_HASH_LEN] = {0};
     uint8_t localAccountHash[SHA_256_HASH_LEN] = {0};
+    char accountUid[ACCOUNT_UID_STR_LEN] = {0};
+    uint32_t size = 0;
 
     if (GetCurrentAccount(&accountId) == SOFTBUS_OK) {
         (void)LnnSetLocalNum64Info(NUM_KEY_ACCOUNT_LONG, accountId);
+    }
+    if (GetOsAccountUid(accountUid, ACCOUNT_UID_STR_LEN, &size) == SOFTBUS_OK) {
+        LnnSetLocalStrInfo(STRING_KEY_ACCOUNT_UID, accountUid);
+    } else {
+        LnnSetLocalStrInfo(STRING_KEY_ACCOUNT_UID, DEFAULT_ACCOUNT_UID.c_str());
     }
     LnnAccoutIdStatusSet(accountId);
     if (LnnGetLocalByteInfo(BYTE_KEY_ACCOUNT_HASH, localAccountHash, SHA_256_HASH_LEN) != SOFTBUS_OK) {
@@ -169,6 +184,8 @@ void LnnUpdateOhosAccount(UpdateAccountReason reason)
 void LnnOnOhosAccountLogout(void)
 {
     uint8_t accountHash[SHA_256_HASH_LEN] = {0};
+    char accountUid[ACCOUNT_UID_STR_LEN] = {0};
+    uint32_t size = 0;
 
     (void)LnnSetLocalNum64Info(NUM_KEY_ACCOUNT_LONG, 0);
     if (SoftBusGenerateStrHash(reinterpret_cast<const unsigned char *>(DEFAULT_USER_ID.c_str()),
@@ -179,6 +196,11 @@ void LnnOnOhosAccountLogout(void)
     LNN_LOGI(LNN_STATE,
         "accountHash changed. accountHash=[%{public}02X, %{public}02X]", accountHash[0], accountHash[1]);
     LnnSetLocalByteInfo(BYTE_KEY_ACCOUNT_HASH, accountHash, SHA_256_HASH_LEN);
+    if (GetOsAccountUid(accountUid, ACCOUNT_UID_STR_LEN, &size) == SOFTBUS_OK) {
+        LnnSetLocalStrInfo(STRING_KEY_ACCOUNT_UID, accountUid);
+    } else {
+        LnnSetLocalStrInfo(STRING_KEY_ACCOUNT_UID, DEFAULT_ACCOUNT_UID.c_str());
+    }
     DiscDeviceInfoChanged(TYPE_ACCOUNT);
     LnnNotifyDeviceInfoChanged(SOFTBUS_LOCAL_DEVICE_INFO_ACOUNT_CHANGED);
     LnnUpdateHeartbeatInfo(UPDATE_HB_ACCOUNT_INFO);

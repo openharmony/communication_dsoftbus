@@ -14,28 +14,31 @@
  */
 
 #include "softbus_adapter_init.h"
-#include "softbus_init_common.h"
-#include "softbus_error_code.h"
+
+#include "auth_interface.h"
+#include "auth_connection.h"
+#include "bus_center_event.h"
 #include "comm_log.h"
 
 int32_t AdapterOpenFuncInit(void *soHandle)
 {
     if (soHandle == NULL) {
-        COMM_LOGE(COMM_SVC, "libdsoftbus_server_plugin.z.so soHandle is null.");
+        COMM_LOGE(COMM_SVC, "libdsoftbus_server_plugin.z.so soHandle is null");
         return SOFTBUS_NETWORK_DLOPEN_FAILED;
     }
     int32_t (*adapterRegisterOpenfunc)(void);
 
     int ret = SOFTBUS_OK;
 
-    ret = SoftBusDlsym(soHandle, "AdapterRegisterOpenFunc", (void**)&adapterRegisterOpenfunc);
+    ret = SoftBusDlsym(soHandle, "AdapterRegisterOpenFunc", (void **)&adapterRegisterOpenfunc);
     if (ret != SOFTBUS_OK) {
-        COMM_LOGE(COMM_SVC, "dlsym AdapterRegisterOpenFunc failed, ret = %d", ret);
+        COMM_LOGE(COMM_SVC, "dlsym AdapterRegisterOpenFunc failed, ret=%d", ret);
         return SOFTBUS_NETWORK_DLSYM_FAILED;
     }
 
-    if (adapterRegisterOpenfunc() != SOFTBUS_OK) {
-        COMM_LOGE(COMM_SVC, "AdapterRegisterOpenFunc return failed, ret = %d", ret);
+    ret = adapterRegisterOpenfunc();
+    if (ret != SOFTBUS_OK) {
+        COMM_LOGE(COMM_SVC, "AdapterRegisterOpenFunc return failed, ret=%d", ret);
         return SOFTBUS_NETWORK_ADAPTER_OPEN_FUNC_INIT_FAILED;
     }
 

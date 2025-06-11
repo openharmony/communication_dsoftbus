@@ -24,10 +24,4 @@ usb_disc_src = []
 usb_disc_deps = [ "$dsoftbus_dfx_path:softbus_dfx" ]
 usb_disc_external_deps = []
 
-if (dsoftbus_feature_disc_usb && has_ces_part) {
-  dsoftbus_feature_disc_usb_support = true
-} else {
-  dsoftbus_feature_disc_usb_support = false
-}
-
 usb_disc_src += [ "$dsoftbus_root_path/core/discovery/usb/dispatcher/src/disc_usb_dispatcher.c" ]

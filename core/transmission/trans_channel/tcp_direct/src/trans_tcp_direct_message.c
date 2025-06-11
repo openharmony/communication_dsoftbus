@@ -924,10 +924,20 @@ static void ReportTransEventExtra(
 
 static int32_t CheckServerPermission(AppInfo *appInfo, char *ret)
 {
-    if (appInfo->callingTokenId != TOKENID_NOT_SET &&
-        TransCheckServerAccessControl(appInfo) != SOFTBUS_OK) {
-        ret = (char *)"Server check acl failed";
-        return SOFTBUS_TRANS_CHECK_ACL_FAILED;
+    if (appInfo->callingTokenId != TOKENID_NOT_SET) {
+        (void)LnnGetNetworkIdByUuid(appInfo->peerData.deviceId, appInfo->peerNetWorkId, NETWORK_ID_BUF_LEN);
+        int32_t osType = 0;
+        (void)GetOsTypeByNetworkId(appInfo->peerNetWorkId, &osType);
+        if (osType != OH_OS_TYPE) {
+            TRANS_LOGI(TRANS_CTRL, "not support acl check osType=%{public}d", osType);
+        } else if (GetCapabilityBit(appInfo->channelCapability, TRANS_CHANNEL_ACL_CHECK_OFFSET)) {
+            if (TransCheckServerAccessControl(appInfo) != SOFTBUS_OK) {
+                ret = (char *)"Server check acl failed";
+                return SOFTBUS_TRANS_CHECK_ACL_FAILED;
+            }
+        } else {
+            TRANS_LOGI(TRANS_CTRL, "not support acl check");
+        }
     }
 
     if (CheckSecLevelPublic(appInfo->myData.sessionName, appInfo->peerData.sessionName) != SOFTBUS_OK) {
@@ -1575,28 +1585,45 @@ static AuthGenUkCallback tdcAuthGenUkCallback = {
     .onGenFailed = OnTdcGenUkFailed,
 };
 
+static int32_t GetSessionConnSeqAndFlagByChannelId(int32_t channelId, SessionConn *conn, uint32_t *flags, uint64_t *seq)
+{
+    if (conn == NULL || flags == NULL || seq == NULL) {
+        TRANS_LOGE(TRANS_CTRL, "invalid param");
+        return SOFTBUS_INVALID_PARAM;
+    }
+
+    int32_t ret = GetSessionConnById(channelId, conn);
+    TRANS_CHECK_AND_RETURN_RET_LOGE(ret == SOFTBUS_OK, ret, TRANS_CTRL, "get sessionConn failed, ret=%{public}d", ret);
+
+    ret = TransTdcUpdateReplyCnt(channelId);
+    TRANS_CHECK_AND_RETURN_RET_LOGE(ret == SOFTBUS_OK, ret, TRANS_CTRL, "update reply cnt failed, ret=%{public}d", ret);
+
+    ret = TransSrvGetSeqAndFlagsByChannelId(seq, flags, channelId);
+    TRANS_CHECK_AND_RETURN_RET_LOGE(ret == SOFTBUS_OK, ret, TRANS_CTRL,
+        "get seqs and flags failed, channelId=%{public}d, ret=%{public}d", channelId, ret);
+    
+    return SOFTBUS_OK;
+}
+
 int32_t TransDealTdcChannelOpenResult(
     int32_t channelId, int32_t openResult, const AccessInfo *accessInfo, pid_t callingPid)
 {
     (void)UpdateAccessInfoById(channelId, accessInfo);
-    SessionConn conn;
-    (void)memset_s(&conn, sizeof(SessionConn), 0, sizeof(SessionConn));
-    int32_t ret = GetSessionConnById(channelId, &conn);
-    TRANS_CHECK_AND_RETURN_RET_LOGE(ret == SOFTBUS_OK, ret, TRANS_CTRL, "get sessionConn failed, ret=%{public}d", ret);
-    ret = TransTdcUpdateReplyCnt(channelId);
-    TRANS_CHECK_AND_RETURN_RET_LOGE(ret == SOFTBUS_OK, ret, TRANS_CTRL, "update reply cnt failed, ret=%{public}d", ret);
+
+    SessionConn conn = { 0 };
     uint32_t flags = 0;
     uint64_t seq = 0;
-    ret = TransSrvGetSeqAndFlagsByChannelId(&seq, &flags, channelId);
+
+    int32_t ret = GetSessionConnSeqAndFlagByChannelId(channelId, &conn, &flags, &seq);
     TRANS_CHECK_AND_RETURN_RET_LOGE(ret == SOFTBUS_OK, ret, TRANS_CTRL,
-        "get seqs and flags failed, channelId=%{public}d, ret=%{public}d", channelId, ret);
-    TransEventExtra extra;
-    (void)memset_s(&extra, sizeof(TransEventExtra), 0, sizeof(TransEventExtra));
+        "get SessionConn or seq or flags failed, channelId=%{public}d, ret=%{public}d", channelId, ret);
+
+    TransEventExtra extra = { 0 };
     char peerUuid[DEVICE_ID_SIZE_MAX] = { 0 };
     NodeInfo nodeInfo;
     (void)memset_s(&nodeInfo, sizeof(NodeInfo), 0, sizeof(NodeInfo));
     ReportTransEventExtra(&extra, channelId, &conn, &nodeInfo, peerUuid);
-    if (conn.appInfo.myData.pid != callingPid) {
+    if (callingPid != 0 && conn.appInfo.myData.pid != callingPid) {
         TRANS_LOGE(TRANS_CTRL,
             "pid does not match callingPid, pid=%{public}d, callingPid=%{public}d, channelId=%{public}d",
             conn.appInfo.myData.pid, callingPid, channelId);
