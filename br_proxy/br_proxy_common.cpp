@@ -56,6 +56,11 @@ extern "C" pid_t GetCallerUid()
     return IPCSkeleton::GetCallingUid();
 }
 
+extern "C" uint32_t GetCallerTokenId()
+{
+    return IPCSkeleton::GetCallingTokenID();
+}
+
 extern "C" int32_t GetCallerHapInfo(char *bundleName, uint32_t bundleNamelen,
     char *abilityName, uint32_t abilityNameLen)
 {
