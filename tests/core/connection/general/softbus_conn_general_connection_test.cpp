@@ -356,14 +356,11 @@ HWTEST_F(GeneralConnectionTest, TestSend, TestSize.Level1)
     CONN_LOGI(CONN_BLE, "test send start");
     GeneralConnectionManager *manager = GetGeneralConnectionManager();
     ASSERT_NE(manager, nullptr);
-    GeneralConnectionParam param = {0};
-    const char *pkgName = "testPkgName1";
-    int32_t ret = strcpy_s(param.pkgName, PKG_NAME_SIZE_MAX, pkgName);
-    EXPECT_EQ(ret, EOK);
-    ret = strcpy_s(param.bundleName, BUNDLE_NAME_MAX, "testBundleName");
-    EXPECT_EQ(ret, EOK);
-    ret = strcpy_s(param.name, GENERAL_NAME_LEN, "test");
-    EXPECT_EQ(ret, EOK);
+    GeneralConnectionParam param = {
+        .pkgName = "testPkgName1",
+        .bundleName = "testBundleName",
+        .name = "test",
+    };
     const char *addr = "11:22:33:44:55:66";
     param.pid = 0;
     NiceMock<GeneralConnectionInterfaceMock> mock;
@@ -372,7 +369,7 @@ HWTEST_F(GeneralConnectionTest, TestSend, TestSize.Level1)
     EXPECT_EQ(g_handle > 0, true);
     uint8_t *data = (uint8_t *)SoftBusCalloc(sizeof(uint8_t));
     EXPECT_NE(data, nullptr);
-    ret = manager->send(g_handle, data, 0, 0); // unexpect state
+    int32_t ret = manager->send(g_handle, data, 0, 0); // unexpect state
     EXPECT_EQ(ret, SOFTBUS_CONN_GENERAL_CONNECTION_NOT_READY);
     GeneralConnectionInfo info = {{0}};
     info.peerId = g_handle;
@@ -395,10 +392,12 @@ HWTEST_F(GeneralConnectionTest, TestSend, TestSize.Level1)
     EXPECT_EQ(true, GetConnectCallbackFlag());
     uint32_t ConnectionId = (CONNECT_BLE << CONNECT_TYPE_SHIFT) + 1;
     g_ConnectCallback->OnDataReceived(ConnectionId, MODULE_BLE_GENERAL, 0, buff, dataLen); // not target connId
-    
+
     EXPECT_CALL(mock, ConnBlePostBytesMock).WillRepeatedly(Return(SOFTBUS_OK));
     ret = manager->send(g_handle, data, sizeof(uint8_t), 0);
     EXPECT_EQ(ret, SOFTBUS_OK);
+    ret = manager->send(g_handle, data, sizeof(uint8_t), 1);
+    EXPECT_EQ(ret, SOFTBUS_INVALID_PARAM);
     SoftBusFree(data);
     SoftBusFree(buff);
     CONN_LOGI(CONN_BLE, "test send end");
@@ -443,10 +442,13 @@ HWTEST_F(GeneralConnectionTest, TestGetPeerDeviceId, TestSize.Level1)
     ASSERT_NE(manager, nullptr);
     
     char addr[BT_MAC_LEN] = {0};
-    int32_t ret = manager->getPeerDeviceId(g_handle, addr, BT_MAC_LEN - 1, 0);
+    int32_t ret = manager->getPeerDeviceId(g_handle, addr, BT_MAC_LEN - 1, 0, 0);
     EXPECT_EQ(ret, SOFTBUS_INVALID_PARAM);
-    
-    ret = manager->getPeerDeviceId(g_handle, addr, BT_MAC_LEN, 0);
+
+    ret = manager->getPeerDeviceId(g_handle, addr, BT_MAC_LEN, 0, 1);
+    EXPECT_EQ(ret, SOFTBUS_INVALID_PARAM);
+
+    ret = manager->getPeerDeviceId(g_handle, addr, BT_MAC_LEN, 0, 0);
     EXPECT_NE(ret, SOFTBUS_OK);
     CONN_LOGI(CONN_BLE, "test get peer deviceId end");
 }
