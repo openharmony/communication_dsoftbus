@@ -21,6 +21,7 @@
 #include "lnn_lane_link.h"
 #include "lnn_lane_link_conflict.h"
 #include "lnn_lane_link_ledger.h"
+#include "lnn_trans_lane.h"
 #include "softbus_proxychannel_pipeline.h"
 
 namespace OHOS {
@@ -29,7 +30,7 @@ public:
     LaneLinkDepsInterface() {};
     virtual ~LaneLinkDepsInterface() {};
 
-    virtual int32_t GetTransReqInfoByLaneReqId(uint32_t laneReqId, TransOption *reqInfo) = 0;
+    virtual int32_t GetTransReqInfoByLaneReqId(uint32_t laneReqId, TransReqInfo *reqInfo) = 0;
     virtual int32_t TransProxyPipelineGenRequestId(void) = 0;
     virtual int32_t TransProxyPipelineOpenChannel(int32_t requestId, const char *networkId,
         const TransProxyPipelineChannelOption *option, const ITransProxyPipelineCallback *callback) = 0;
@@ -66,7 +67,7 @@ public:
     LaneLinkDepsInterfaceMock();
     ~LaneLinkDepsInterfaceMock() override;
 
-    MOCK_METHOD2(GetTransReqInfoByLaneReqId, int32_t (uint32_t laneReqId, TransOption *reqInfo));
+    MOCK_METHOD2(GetTransReqInfoByLaneReqId, int32_t (uint32_t laneReqId, TransReqInfo *reqInfo));
     MOCK_METHOD0(TransProxyPipelineGenRequestId, int32_t (void));
     MOCK_METHOD4(TransProxyPipelineOpenChannel, int32_t (int32_t requestId, const char *networkId,
         const TransProxyPipelineChannelOption *option, const ITransProxyPipelineCallback *callback));
