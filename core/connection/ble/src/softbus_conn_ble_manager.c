@@ -2265,6 +2265,15 @@ static int32_t BleInitLooper(void)
     return SOFTBUS_OK;
 }
 
+SoftBusBleConflictListener bleConflictListener = {
+    .reuseConnection = ConflictReuseConnection,
+    .postBytes = ConflictPostBytes,
+    .disconnect = ConflictDisconnect,
+    .occupy = ConflictOccupy,
+    .cancelOccupy = ConflictCancelOccupy,
+    .getConnection = ConflictGetConnection,
+};
+
 static int32_t InitBleManager(const ConnectCallback *callback)
 {
     SoftBusList *connections = CreateSoftBusList();
@@ -2287,14 +2296,7 @@ static int32_t InitBleManager(const ConnectCallback *callback)
     CONN_CHECK_AND_RETURN_RET_LOGW(ret == SOFTBUS_OK, SOFTBUS_INVALID_NUM, CONN_INIT,
         "int ble manager failed: add bluetooth state change listener failed, invalid listener id=%{public}d",
         listenerId);
-    SoftBusBleConflictListener bleConflictListener = {
-        .reuseConnection = ConflictReuseConnection,
-        .postBytes = ConflictPostBytes,
-        .disconnect = ConflictDisconnect,
-        .occupy = ConflictOccupy,
-        .cancelOccupy = ConflictCancelOccupy,
-        .getConnection = ConflictGetConnection,
-    };
+
     SoftbusBleConflictRegisterListenerPacked(&bleConflictListener);
 
     g_connectCallback = *callback;

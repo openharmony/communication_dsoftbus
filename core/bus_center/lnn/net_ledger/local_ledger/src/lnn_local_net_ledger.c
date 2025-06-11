@@ -2076,6 +2076,34 @@ static int32_t L1GetHuksKeyTime(void *buf, uint32_t len)
     return SOFTBUS_OK;
 }
 
+static int32_t LlGetLocalAccountUid(void *buf, uint32_t len)
+{
+    if (buf == NULL || len != ACCOUNT_UID_STR_LEN) {
+        LNN_LOGE(LNN_LEDGER, "input invalid");
+        return SOFTBUS_INVALID_PARAM;
+    }
+    errno_t rc = strcpy_s((char *)buf, len, g_localNetLedger.localInfo.accountUid);
+    if (rc != EOK) {
+        LNN_LOGE(LNN_LEDGER, "strcpy_s failed, ret=%{public}d", rc);
+        return SOFTBUS_MEM_ERR;
+    }
+    return SOFTBUS_OK;
+}
+
+static int32_t LlSetLocalAccountUid(const void *accountUid)
+{
+    if (accountUid == NULL) {
+        LNN_LOGE(LNN_LEDGER, "input invalid");
+        return SOFTBUS_INVALID_PARAM;
+    }
+    errno_t rc = strcpy_s(g_localNetLedger.localInfo.accountUid, ACCOUNT_UID_STR_LEN, (const char *)accountUid);
+    if (rc != EOK) {
+        LNN_LOGE(LNN_LEDGER, "strcpy_s failed, ret=%{public}d", rc);
+        return SOFTBUS_MEM_ERR;
+    }
+    return SOFTBUS_OK;
+}
+
 static LocalLedgerKey g_localKeyTable[] = {
     {STRING_KEY_HICE_VERSION, VERSION_MAX_LEN, LlGetNodeSoftBusVersion, NULL},
     {STRING_KEY_DEV_UDID, UDID_BUF_LEN, LlGetDeviceUdid, UpdateLocalDeviceUdid},
@@ -2100,6 +2128,7 @@ static LocalLedgerKey g_localKeyTable[] = {
     {STRING_KEY_WIFIDIRECT_ADDR, MAC_LEN, LlGetWifiDirectAddr, UpdateWifiDirectAddr},
     {STRING_KEY_P2P_IP, IP_LEN, LlGetP2pIp, LlUpdateLocalP2pIp},
     {STRING_KEY_SLE_ADDR, MAC_LEN, LlGetLocalSleAddr, LlSetLocalSleAddr},
+    {STRING_KEY_ACCOUNT_UID, ACCOUNT_UID_STR_LEN, LlGetLocalAccountUid, LlSetLocalAccountUid},
     {NUM_KEY_NET_CAP, -1, LlGetNetCap, UpdateLocalNetCapability},
     {NUM_KEY_FEATURE_CAPA, -1, LlGetFeatureCapa, UpdateLocalFeatureCapability},
     {NUM_KEY_DISCOVERY_TYPE, -1, LlGetNetType, NULL},

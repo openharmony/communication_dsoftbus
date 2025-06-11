@@ -130,6 +130,8 @@ typedef int32_t (*SoftBusGetCurrentGroupFunc)(SoftBusWifiP2pGroupInfo *groupInfo
 typedef uint64_t (*LnnGetSysTimeMsFunc)(void);
 typedef int32_t (*LnnGetRemoteStrInfoFunc)(const char *networkId, InfoKey key, char *info, uint32_t len);
 typedef int64_t (*AuthGetIdByConnInfoFunc)(const AuthConnInfo *connInfo, bool isServer, bool isMeta);
+typedef int32_t (*AuthOpenConnFunc)(const AuthConnInfo *info, uint32_t requestId,
+    const AuthConnCallback *callback, bool isMeta);
 typedef int32_t (*AuthPostTransDataFunc)(AuthHandle authHandle, const AuthTransData *dataInfo);
 typedef int32_t (*LnnGetRemoteNodeInfoByIdFunc)(const char *id, IdCategory type, NodeInfo *info);
 
@@ -147,7 +149,6 @@ typedef int32_t (*SoftBusAccessFileFunc)(const char *pathName, int32_t mode);
 typedef void (*SoftBusRemoveFileFunc)(const char *fileName);
 typedef int32_t (*SoftBusWriteFileFunc)(const char *fileName, const char *writeBuf, uint32_t len);
 typedef int32_t (*SoftBusReadFullFileAndSizeFunc)(const char *fileName, char *readBuf, uint32_t maxLen, int32_t *size);
-typedef void (*LnnEventExtraInitFunc)(LnnEventExtra *extra);
 typedef int (*SoftBusChannelToFrequencyFunc)(int channel);
 typedef bool (*SoftBusIs5GBandFunc)(int frequency);
 typedef int32_t (*LnnNotifyDiscoveryDeviceFunc)(
@@ -201,7 +202,7 @@ typedef int32_t (*LnnGetAllMetaNodeInfoFunc)(MetaNodeInfo *infos, int32_t *infoN
 typedef void (*LnnNotifyNodeStatusChangedFunc)(NodeStatus *info, NodeStatusType type);
 typedef bool (*LnnIsLSANodeFunc)(const NodeBasicInfo *info);
 typedef NodeInfo *(*LnnGetNodeInfoByIdFunc)(const char *id, IdCategory type);
-typedef int32_t (*ClientCancelAuthSessionTimerFunc)(int32_t sessionId);
+
 typedef int32_t (*TransGetChannelInfoByLaneHandleFunc)(uint32_t laneHandle, int32_t *channelId, int32_t *channelType);
 typedef int32_t (*SoftBusGetLinkedInfoFunc)(SoftBusWifiLinkedInfo *info);
 typedef int32_t (*SoftBusGetChannelListFor5GFunc)(int32_t *channelList, int32_t num);
@@ -303,7 +304,8 @@ typedef int32_t (*SoftBusRegisterWifiEventFunc)(ISoftBusScanResult *cb);
 typedef int32_t (*SoftBusUnRegisterWifiEventFunc)(ISoftBusScanResult *cb);
 typedef int32_t (*ConnConfigPostLimitFunc)(const LimitConfiguration *configuration);
 typedef int32_t (*ProcessAuthDataFunc)(int64_t authSeq, const uint8_t *data, uint32_t len, DeviceAuthCallback *cb);
-typedef int32_t (*AuthDeviceFunc)(int64_t authReqId, const char *authParams, const DeviceAuthCallback *cb);
+typedef int32_t (*AuthDeviceFunc)(
+    int32_t userId, int64_t authReqId, const char *authParams, const DeviceAuthCallback *cb);
 typedef int32_t (*SoftBusGetPublicKeyFunc)(uint8_t *publicKey, uint32_t publicKeyLen);
 typedef int32_t (*SoftBusRsaEncryptFunc)(const uint8_t *srcData, uint32_t srcDataLen, PublicKey *publicKey, uint8_t **encryptedData,
     uint32_t *encryptedDataLen);
@@ -524,11 +526,9 @@ typedef struct TagLnnOpenFuncList {
     SchedulerUnregisterListenerFunc schedulerUnregisterListener;
 
     // dfx
-    LnnEventExtraInitFunc lnnEventExtraInit;
     AddChannelStatisticsInfoFunc addChannelStatisticsInfo;
 
     // trans
-    ClientCancelAuthSessionTimerFunc clientCancelAuthSessionTimer;
     TransGetChannelInfoByLaneHandleFunc transGetChannelInfoByLaneHandle;
     TransGetConnByChanIdFunc transGetConnByChanId;
     NotifyUdpQosEventFunc notifyUdpQosEvent;
@@ -554,6 +554,7 @@ typedef struct TagLnnOpenFuncList {
     AuthGetLatestAuthSeqListByTypeFunc authGetLatestAuthSeqListByType;
     AuthGetIdByConnInfoFunc authGetIdByConnInfo;
     AuthPostTransDataFunc authPostTransData;
+    AuthOpenConnFunc authOpenConn;
     SocketGetConnInfoFunc socketGetConnInfo;
     GetConnInfoByConnectionIdFunc getConnInfoByConnectionId;
     AuthGenRequestIdFunc authGenRequestId;

@@ -620,9 +620,20 @@ static int32_t ParseRequestAppInfo(AuthHandle authHandle, const cJSON *msg, AppI
     TRANS_CHECK_AND_RETURN_RET_LOGE(ret == SOFTBUS_OK,
         SOFTBUS_TRANS_PEER_SESSION_NOT_CREATED, TRANS_CTRL, "get uid and pid failed, ret=%{public}d", ret);
 
-    if (appInfo->callingTokenId != TOKENID_NOT_SET && TransCheckServerAccessControl(appInfo) != SOFTBUS_OK) {
-        return SOFTBUS_TRANS_CHECK_ACL_FAILED;
+    if (appInfo->callingTokenId != TOKENID_NOT_SET) {
+        (void)LnnGetNetworkIdByUuid(appInfo->peerData.deviceId, appInfo->peerNetWorkId, NETWORK_ID_BUF_LEN);
+        int32_t osType = 0;
+        (void)GetOsTypeByNetworkId(appInfo->peerNetWorkId, &osType);
+        if (osType != OH_OS_TYPE) {
+            TRANS_LOGI(TRANS_CTRL, "not support acl check osType=%{public}d", osType);
+        } else if (GetCapabilityBit(appInfo->channelCapability, TRANS_CHANNEL_ACL_CHECK_OFFSET)) {
+            ret = TransCheckServerAccessControl(appInfo);
+            TRANS_CHECK_AND_RETURN_RET_LOGE(ret == SOFTBUS_OK, ret, TRANS_CTRL, "acl check failed.");
+        } else {
+            TRANS_LOGI(TRANS_CTRL, "not support acl check");
+        }
     }
+
     if (CheckSecLevelPublic(appInfo->myData.sessionName, appInfo->peerData.sessionName) != SOFTBUS_OK) {
         return SOFTBUS_PERMISSION_SERVER_DENIED;
     }
@@ -1483,11 +1494,9 @@ int32_t TransDealUdpChannelOpenResult(
         return ret;
     }
     ret = TransUdpUpdateReplyCnt(channelId);
-    if (ret != SOFTBUS_OK) {
-        TRANS_LOGE(TRANS_CTRL, "update count failed, channelId=%{public}d, ret=%{public}d", channelId, ret);
-        return ret;
-    }
-    if (channel.info.myData.pid != callingPid) {
+    TRANS_CHECK_AND_RETURN_RET_LOGE(ret == SOFTBUS_OK, ret, TRANS_CTRL,
+        "update count failed, channelId=%{public}d, ret=%{public}d", channelId, ret);
+    if (callingPid != 0 && channel.info.myData.pid != callingPid) {
         TRANS_LOGE(TRANS_CTRL,
             "pid does not match callingPid, pid=%{public}d, callingPid=%{public}d, channelId=%{public}d",
             channel.info.myData.pid, callingPid, channelId);

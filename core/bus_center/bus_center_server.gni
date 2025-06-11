@@ -39,7 +39,7 @@ bus_center_server_deps =
     bus_center_disc_mgr_deps + bus_center_hub_deps + bus_center_builder_deps +
     bus_center_net_mgr_deps + bus_center_ledger_deps + bus_center_monitor_deps +
     bus_center_utils_deps
-bus_center_server_external_deps = bus_center_utils_ex_deps
+
 bus_center_server_src += [
   "$dsoftbus_root_path/core/bus_center/service/src/bus_center_manager.c",
   "$dsoftbus_root_path/core/bus_center/service/src/bus_center_event.c",
@@ -47,13 +47,15 @@ bus_center_server_src += [
 ]
 
 bus_center_server_inc += [
-  "$dsoftbus_root_path/interface/kits/bus_center",
+  "$dsoftbus_root_path/interfaces/kits/bus_center",
   "$dsoftbus_root_path/core/bus_center/interface",
   "$dsoftbus_root_path/core/bus_center/ipc/include",
   "$dsoftbus_root_path/core/bus_center/service/include",
   "$dsoftbus_root_path/core/bus_center/lnn/lane_hub/lane_manager/include",
   "$dsoftbus_root_path/sdk/bus_center/manager/include",
 ]
+
+bus_center_server_external_deps = []
 
 if (defined(global_parts_info) && defined(global_parts_info.hicollie)) {
   bus_center_server_src +=
@@ -97,7 +99,7 @@ if (defined(ohos_lite)) {
     "$dsoftbus_root_path/core/bus_center/extend/include",
     "$dsoftbus_root_path/interfaces/kits/bus_center/enhance",
   ]
-  bus_center_server_src +=[
+  bus_center_server_src += [
     "$dsoftbus_root_path/core/bus_center/extend/src/bus_center_ex_obj_stub.cpp",
     "$dsoftbus_root_path/core/bus_center/extend/src/bus_center_ex_obj.cpp",
   ]
@@ -108,4 +110,3 @@ if (defined(ohos_lite)) {
       adapter_hdi_external_deps
   bus_center_server_external_deps += [ "c_utils:utils" ]
 }
-

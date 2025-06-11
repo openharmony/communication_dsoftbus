@@ -24,11 +24,7 @@ trans_session_sdk_src = [
   "$dsoftbus_sdk_path/transmission/session/src/client_trans_socket_option.c",
 ]
 
-trans_session_sdk_inc = [
-  "$dsoftbus_root_path/components/nstackx/fillp/include",
-]
-
-trans_session_sdk_inc += br_proxy_include_dirs
+trans_session_sdk_inc = br_proxy_include_dirs
 
 if (defined(ohos_lite)) {
   trans_session_sdk_inc += [

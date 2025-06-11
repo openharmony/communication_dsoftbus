@@ -62,9 +62,13 @@ void P2pEntity::Listener(BroadcastReceiverAction action, const struct BroadcastP
     }
 }
 
+static bool g_p2pEntityInit = false;
 void P2pEntity::Init()
 {
-    CONN_LOGI(CONN_WIFI_DIRECT, "enter");
+    if (g_p2pEntityInit) {
+        return;
+    }
+    g_p2pEntityInit = true;
     BroadcastReceiverAction actions[2] = {
         BroadcastReceiverAction::WIFI_P2P_STATE_CHANGED_ACTION,
         BroadcastReceiverAction::WIFI_P2P_CONNECTION_CHANGED_ACTION,

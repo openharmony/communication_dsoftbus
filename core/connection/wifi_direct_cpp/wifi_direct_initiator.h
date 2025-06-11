@@ -24,12 +24,11 @@ namespace OHOS::SoftBus {
 class WifiDirectInitiator {
 public:
     static WifiDirectInitiator& GetInstance();
-
+    
     using InitFuncion = std::function<void()>;
 
     void Init();
     void Add(const InitFuncion &function);
-    void AddByDlsymPluginStr(std::string dlsymStr);
 
 private:
     std::list<InitFuncion> functions_;

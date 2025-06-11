@@ -78,7 +78,7 @@ typedef void (*UpdateRemoteDeviceInfoListToMlpsFunc)(void);
 typedef int32_t (*GetBurstAdvIdFunc)(void);
 typedef int32_t (*SendDeviceInfoToSHByTypeFunc)(LpFeatureType type);
 typedef int32_t (*SendAdvInfoToMlpsFunc)(LpBroadcastParam *lpAdvParam, LpServerType type);
-typedef int32_t (*SwtichHeartbeatReportChannelFunc)(bool isToAP, uint16_t scanInterval, uint16_t scanWindow);
+typedef int32_t (*SwitchHeartbeatReportChannelFunc)(bool isToAP, uint16_t scanInterval, uint16_t scanWindow);
 typedef bool (*IsSupportLpFeatureFunc)(void);
 typedef void (*SetLpKeepAliveStateFunc)(void *para);
 typedef int32_t (*LnnRegistBleHeartbeatMediumMgrFunc)(void);
@@ -110,7 +110,8 @@ typedef void (*LnnDeinitQosFunc)(void);
 typedef int32_t (*LnnRegPeriodAdjustmentCallbackFunc)(OnStatsPeriodAdjustment callback);
 typedef void (*LnnReportLaneIdStatsInfoFunc)(const LaneIdStatsInfo *statsList, uint32_t listSize);
 typedef void (*LnnReportRippleDataFunc)(uint64_t laneId, const LnnRippleData *data);
-typedef int32_t (*LnnRequestQosOptimizationFunc)(const uint64_t *laneIdList, uint32_t listSize, int32_t *result, uint32_t resultSize);
+typedef int32_t (*LnnRequestQosOptimizationFunc)(const uint64_t *laneIdList, uint32_t listSize,
+    int32_t *result, uint32_t resultSize);
 typedef void (*LnnCancelQosOptimizationFunc)(const uint64_t *laneIdList, uint32_t listSize);
 typedef int32_t (*LnnInitMetaNodeFunc)(void);
 typedef void (*LnnDeinitMetaNodeFunc)(void);
@@ -156,6 +157,7 @@ typedef int32_t (*LnnUnPackCloudSyncDeviceInfoFunc)(cJSON *json, NodeInfo *cloud
 typedef void (*LnnUpdateAuthExchangeUdidFunc)(void);
 typedef void (*LnnClearAuthExchangeUdidFunc)(const char *networkId);
 
+/* lnn_fast_offline.h */
 typedef int32_t (*LnnInitFastOfflineFunc)(void);
 typedef void (*LnnDeinitFastOfflineFunc)(void);
 typedef int32_t (*LnnSendNotTrustedInfoFunc)(const NotTrustedDelayInfo *info, uint32_t num, LnnSyncInfoMsgComplete complete);
@@ -248,6 +250,9 @@ typedef int32_t (*LnnStopRangeFunc)(const RangeConfig *config);
 typedef int32_t (*LnnStartRangeFunc)(const RangeConfig *config);
 typedef int32_t (*UnregistAuthTransListenerFunc)(void);
 typedef void (*SleRangeDeathCallbackFunc)(void);
+typedef int32_t (*LnnInitUsbChannelManagerFunc)(void);
+typedef void (*LnnDeinitUsbChannelManagerFunc)(void);
+
 typedef struct TagLnnEnhanceFuncList {
     // time_sync
     LnnTimeSyncImplInitFunc lnnTimeSyncImplInit;
@@ -291,7 +296,7 @@ typedef struct TagLnnEnhanceFuncList {
     GetBurstAdvIdFunc getBurstAdvId;
     SendDeviceInfoToSHByTypeFunc sendDeviceInfoToSHByType;
     SendAdvInfoToMlpsFunc sendAdvInfoToMlps;
-    SwtichHeartbeatReportChannelFunc swtichHeartbeatReportChannel;
+    SwitchHeartbeatReportChannelFunc switchHeartbeatReportChannel;
     IsSupportLpFeatureFunc isSupportLpFeature;
     SetLpKeepAliveStateFunc setLpKeepAliveState;
     LnnRegistBleHeartbeatMediumMgrFunc lnnRegistBleHeartbeatMediumMgr;
@@ -449,6 +454,10 @@ typedef struct TagLnnEnhanceFuncList {
     // ccmp
     CustomizedSecurityProtocolInitFunc customizedSecurityProtocolInit;
     CustomizedSecurityProtocolDeinitFunc customizedSecurityProtocolDeinit;
+
+    //usb
+    LnnInitUsbChannelManagerFunc lnnInitUsbChannelManager;
+    LnnDeinitUsbChannelManagerFunc lnnDeinitUsbChannelManager;
 } LnnEnhanceFuncList;
 
 LnnEnhanceFuncList *LnnEnhanceFuncListGet(void);

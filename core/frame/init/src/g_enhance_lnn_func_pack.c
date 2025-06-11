@@ -16,6 +16,7 @@
 
 #include "auth_log.h"
 #include "g_enhance_lnn_func.h"
+#include "lnn_heartbeat_utils_struct.h"
 #include "lnn_heartbeat_medium_mgr.h"
 #include "softbus_error_code.h"
 #include "softbus_init_common.h"
@@ -1388,31 +1389,4 @@ void SleRangeDeathCallbackPacked()
         return;
     }
     return pfnLnnEnhanceFuncList->sleRangeDeathCallback();
-}
-
-void LnnDeinitMetaNodeExtLedgerPacked(void)
-{
-    LnnEnhanceFuncList *pfnLnnEnhanceFuncList = LnnEnhanceFuncListGet();
-    if (LnnCheckFuncPointer((void *)pfnLnnEnhanceFuncList->lnnDeinitMetaNodeExtLedger) != SOFTBUS_OK) {
-        return;
-    }
-    return pfnLnnEnhanceFuncList->lnnDeinitMetaNodeExtLedger();
-}
-
-int32_t LnnRetrieveDeviceDataPacked(LnnDataType dataType, char **data, uint32_t *dataLen)
-{
-    LnnEnhanceFuncList *pfnLnnEnhanceFuncList = LnnEnhanceFuncListGet();
-    if (LnnCheckFuncPointer((void *)pfnLnnEnhanceFuncList->lnnRetrieveDeviceData) != SOFTBUS_OK) {
-        return SOFTBUS_NOT_IMPLEMENT;
-    }
-    return pfnLnnEnhanceFuncList->lnnRetrieveDeviceData(dataType, data, dataLen);
-}
-
-int32_t LnnSaveDeviceDataPacked(const char *data, LnnDataType dataType)
-{
-    LnnEnhanceFuncList *pfnLnnEnhanceFuncList = LnnEnhanceFuncListGet();
-    if (LnnCheckFuncPointer((void *)pfnLnnEnhanceFuncList->lnnSaveDeviceData) != SOFTBUS_OK) {
-        return SOFTBUS_NOT_IMPLEMENT;
-    }
-    return pfnLnnEnhanceFuncList->lnnSaveDeviceData(data, dataType);
 }

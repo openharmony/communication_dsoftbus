@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021-2025 Huawei Device Co., Ltd.
+ * Copyright (c) 2021 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -81,11 +81,13 @@ int32_t NotifyUdpQosEvent(const AppInfo *info, int32_t eventId, int32_t tvCount,
     return SOFTBUS_FUNC_NOT_SUPPORT;
 }
 
-int32_t TransDealUdpChannelOpenResult(int32_t channelId, int32_t openResult, int32_t udpPort, pid_t callingPid)
+int32_t TransDealUdpChannelOpenResult(
+    int32_t channelId, int32_t openResult, int32_t udpPort, const AccessInfo *accessInfo, pid_t callingPid)
 {
     (void)channelId;
     (void)openResult;
     (void)udpPort;
+    (void)accessInfo;
     (void)callingPid;
     return SOFTBUS_FUNC_NOT_SUPPORT;
 }

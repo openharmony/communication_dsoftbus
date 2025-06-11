@@ -34,10 +34,7 @@ static constexpr char HML_IP_PREFIX[] = "172.30.";
 static constexpr char HML_IP_SOURCE_SUFFIX[] = ".2";
 static constexpr char HML_IP_SINK_SUFFIX[] = ".1";
 
-void WifiDirectIpManager::Init()
-{
-    CONN_LOGI(CONN_WIFI_DIRECT, "enter");
-}
+void WifiDirectIpManager::Init() {}
 
 WifiDirectIpManager& WifiDirectIpManager::GetInstance()
 {
