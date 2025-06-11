@@ -269,7 +269,7 @@ HWTEST_F(GeneralConnectionTest, TestCreateServer, TestSize.Level1)
     const char *pkgName = "testPkgName";
     ret = strcpy_s(param.pkgName, PKG_NAME_SIZE_MAX, pkgName);
     EXPECT_EQ(ret, EOK);
-    
+
     ret = strcpy_s(param.bundleName, BUNDLE_NAME_MAX, "testBundleName");
     EXPECT_EQ(ret, EOK);
 
@@ -281,14 +281,12 @@ HWTEST_F(GeneralConnectionTest, TestCreateServer, TestSize.Level1)
         string nameTemp = name + to_string(i);
         ret = strcpy_s(param.name, GENERAL_NAME_LEN, nameTemp.c_str());
         EXPECT_EQ(ret, EOK);
-        manager->createServer(&param);
-        EXPECT_EQ(ret, SOFTBUS_OK);
+        ret = manager->createServer(&param);
+        int32_t expectedRet = (i == GENERAL_PKGNAME_MAX_COUNT - 1) ?
+            SOFTBUS_CONN_GENERAL_CREATE_SERVER_MAX : SOFTBUS_OK;
+        EXPECT_EQ(ret, expectedRet);
     }
-    
-    ret = strcpy_s(param.name, GENERAL_NAME_LEN, "test10");
-    EXPECT_EQ(ret, EOK);
-    ret = manager->createServer(&param);
-    EXPECT_EQ(ret, SOFTBUS_CONN_GENERAL_CREATE_SERVER_MAX);
+
     manager->closeServer(&param);
     ret = strcpy_s(param.name, GENERAL_NAME_LEN, "test9");
     EXPECT_EQ(ret, EOK);
