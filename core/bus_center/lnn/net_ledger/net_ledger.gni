@@ -61,6 +61,7 @@ net_ledger_enhanced = exec_script("$dsoftbus_root_path/check_sub_module.py",
 
 if (defined(ohos_lite)) {
   bus_center_ledger_src += [ "$dsoftbus_root_path/core/bus_center/lnn/net_ledger/decision_db/src/lnn_decision_db_virtual.c" ]
+  bus_center_ledger_src += [ "$dsoftbus_root_path/adapter/common/net/bluetooth/common/softbus_adapter_sle_common_virtual.c" ]
   bus_center_ledger_inc +=
       [ "//base/security/huks/interfaces/inner_api/huks_standard/main/include" ]
   if (ohos_kernel_type != "liteos_m") {
