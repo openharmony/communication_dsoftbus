@@ -246,7 +246,7 @@ HWTEST_F(TransServerTcpDirectTest, GetCipherFlagByAuthId001, TestSize.Level1)
     NiceMock<TransTcpDirectCommonInterfaceMock> TransServerTcpDirectMock;
     EXPECT_CALL(TransServerTcpDirectMock, AuthMetaGetServerSide).WillOnce(Return(SOFTBUS_NOT_FIND));
     int32_t ret = GetCipherFlagByAuthId(authHandle, &flag, &isAuthServer, isLegacyOs);
-    EXPECT_EQ(ret, SOFTBUS_NOT_IMPLEMENT);
+    EXPECT_EQ(ret, SOFTBUS_NOT_FIND);
 }
 
 /**
@@ -268,8 +268,7 @@ HWTEST_F(TransServerTcpDirectTest, GetCipherFlagByAuthId002, TestSize.Level1)
     NiceMock<TransTcpDirectCommonInterfaceMock> TransServerTcpDirectMock;
     EXPECT_CALL(TransServerTcpDirectMock, AuthMetaGetServerSide).WillOnce(Return(SOFTBUS_NOT_FIND));
     ret = GetCipherFlagByAuthId(authHandle, &flag, &isAuthServer, isLegacyOs);
-    EXPECT_EQ(ret, SOFTBUS_NOT_IMPLEMENT);
-    EXPECT_EQ(ret, SOFTBUS_NOT_IMPLEMENT);
+    EXPECT_EQ(ret, SOFTBUS_NOT_FIND);
     EXPECT_FALSE(isAuthServer);
     TestDelAuthManager(TRANS_TEST_AUTH_SEQ);
 }
@@ -546,7 +545,7 @@ HWTEST_F(TransServerTcpDirectTest, SendAuthData001, TestSize.Level1)
     NiceMock<TransTcpDirectCommonInterfaceMock> TransServerTcpDirectMock;
     EXPECT_CALL(TransServerTcpDirectMock, AuthMetaPostTransData).WillOnce(Return(SOFTBUS_AUTH_NOT_FOUND));
     int32_t ret = SendAuthData(authHandle, MODULE_P2P_LISTEN, MSG_FLAG_REQUEST, seq, data);
-    EXPECT_EQ(ret, SOFTBUS_NOT_IMPLEMENT);
+    EXPECT_EQ(ret, SOFTBUS_AUTH_NOT_FOUND);
 }
 
 /**
