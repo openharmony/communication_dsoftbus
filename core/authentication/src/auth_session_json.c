@@ -1049,7 +1049,7 @@ static int32_t PackDeviceJsonInfo(const AuthSessionInfo *info, JsonObj *obj)
     return SOFTBUS_OK;
 }
 
-static bool IsNeedNormalizedProcess(const AuthSessionInfo *info)
+static bool IsNeedNormalizedProcess(AuthSessionInfo *info)
 {
     if (!info->isConnectServer) {
         return true;
@@ -1067,6 +1067,7 @@ static bool IsNeedNormalizedProcess(const AuthSessionInfo *info)
     AUTH_LOGE(AUTH_FSM, "device is not trusted in dp, deviceIdHash=%{public}s, userId=%{public}d",
         AnonymizeWrapper(anonyDeviceIdHash), info->userId);
     AnonymizeFree(anonyDeviceIdHash);
+    info->normalizedType = NORMALIZED_KEY_ERROR;
     return false;
 }
 
@@ -1077,7 +1078,7 @@ static int32_t PackNormalizedData(const AuthSessionInfo *info, JsonObj *obj, con
         AUTH_LOGE(AUTH_FSM, "add normalizedType fail");
         return SOFTBUS_AUTH_PACK_NORMALIZED_DATA_FAIL;
     }
-    if (isSupportNormalizedKey && IsNeedNormalizedProcess(info)) {
+    if (isSupportNormalizedKey && IsNeedNormalizedProcess((AuthSessionInfo *)info)) {
         PackNormalizedKey(obj, (AuthSessionInfo *)info, authSeq);
     }
     if (info->isServer &&
