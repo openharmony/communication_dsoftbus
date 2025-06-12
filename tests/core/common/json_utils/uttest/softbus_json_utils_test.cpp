@@ -706,6 +706,26 @@ HWTEST_F(SoftbusJsonUtilsTest, AddNumber64ToJsonObject003, TestSize.Level1)
 }
 
 /**
+ * @tc.name: InvalidParamTest
+ * @tc.desc: Returns false when the param is nullptr
+ * @tc.type: FUNC
+ * @tc.require:
+ */
+HWTEST_F(SoftbusJsonUtilsTest, AddDoubleToJsonObject001, TestSize.Level1)
+{
+    cJSON *json = cJSON_CreateObject();
+    int64_t num = 1234567890; // 1234567890 is test value
+    const char *string = "test";
+    bool ret = AddDoubleToJsonObject(nullptr, string, num);
+    EXPECT_FALSE(ret);
+    ret = AddDoubleToJsonObject(json, nullptr, num);
+    EXPECT_FALSE(ret);
+    ret = AddDoubleToJsonObject(json, string, num);
+    EXPECT_TRUE(ret);
+    cJSON_Delete(json);
+}
+
+/**
  * @tc.name: NullJsonTest
  * @tc.desc: Returns false if json parameter is nullptr
  * @tc.type: FUNC
