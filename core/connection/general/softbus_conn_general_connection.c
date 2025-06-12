@@ -572,6 +572,12 @@ static bool FindInfoFromServer(GeneralConnectionInfo *info, struct GeneralConnec
             break;
         }
     }
+
+    if (!found) {
+        (void)SoftBusMutexUnlock(&g_generalManager.servers->lock);
+        return false;
+    }
+
     if (strncpy_s(infoTemp.name, GENERAL_NAME_LEN, it->info.name, GENERAL_NAME_LEN) != EOK ||
         strncpy_s(infoTemp.pkgName, PKG_NAME_SIZE_MAX, it->info.pkgName, PKG_NAME_SIZE_MAX) != EOK ||
         strncpy_s(infoTemp.bundleName, BUNDLE_NAME_MAX, it->info.bundleName, BUNDLE_NAME_MAX) != EOK) {
@@ -581,9 +587,7 @@ static bool FindInfoFromServer(GeneralConnectionInfo *info, struct GeneralConnec
     }
     infoTemp.pid = it->info.pid;
     (void)SoftBusMutexUnlock(&g_generalManager.servers->lock);
-    if (!found) {
-        return false;
-    }
+
     status = SoftBusMutexLock(&generalConnection->lock);
     CONN_CHECK_AND_RETURN_RET_LOGE(status == SOFTBUS_OK, false, CONN_BLE, "lock failed");
     if (strncpy_s(generalConnection->info.name, GENERAL_NAME_LEN, infoTemp.name, GENERAL_NAME_LEN) != EOK ||
