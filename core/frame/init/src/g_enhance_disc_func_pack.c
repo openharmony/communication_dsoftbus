@@ -14,10 +14,12 @@
  */
 #include "g_enhance_disc_func_pack.h"
 
+#include "disc_coap_capability_public.h"
+#include "disc_log.h"
 #include "g_enhance_disc_func.h"
 #include "softbus_broadcast_manager.h"
+#include "softbus_error_code.h"
 #include "softbus_init_common.h"
-#include "disc_coap_capability_public.h"
 
 #if !defined(__G_ENHANCE_DISC_FUNC_PACK_BROADCAST_MGR_VIRTUAL)
 
@@ -775,4 +777,76 @@ void DiscUsbDeinitPacked(void)
         return;
     }
     return pfnDiscEnhanceFuncList->discUsbDeinit();
+}
+
+int32_t DistUpdatePublishParamPacked(const char *cust, const char *extCust)
+{
+    DiscEnhanceFuncList *pfnDiscEnhanceFuncList = DiscEnhanceFuncListGet();
+
+    int32_t ret = DiscCheckFuncPointer((void *)pfnDiscEnhanceFuncList->distUpdatePublishParam);
+    DISC_CHECK_AND_RETURN_RET_LOGD(ret == SOFTBUS_OK, SOFTBUS_OK, DISC_BLE, "not find DistUpdatePublishParam");
+    return pfnDiscEnhanceFuncList->distUpdatePublishParam(cust, extCust);
+}
+
+int32_t DistDiscoveryStartActionPreLinkPacked(void)
+{
+    DiscEnhanceFuncList *pfnDiscEnhanceFuncList = DiscEnhanceFuncListGet();
+
+    int32_t ret = DiscCheckFuncPointer((void *)pfnDiscEnhanceFuncList->distDiscoveryStartActionPreLink);
+    DISC_CHECK_AND_RETURN_RET_LOGD(ret == SOFTBUS_OK, SOFTBUS_OK, DISC_BLE, "not find DistDiscoveryStartActionPreLink");
+    return pfnDiscEnhanceFuncList->distDiscoveryStartActionPreLink();
+}
+
+int32_t DistDiscoveryStopActionPreLinkPacked(void)
+{
+    DiscEnhanceFuncList *pfnDiscEnhanceFuncList = DiscEnhanceFuncListGet();
+
+    int32_t ret = DiscCheckFuncPointer((void *)pfnDiscEnhanceFuncList->distDiscoveryStopActionPreLink);
+    DISC_CHECK_AND_RETURN_RET_LOGD(ret == SOFTBUS_OK, SOFTBUS_OK, DISC_BLE, "not find DistDiscoveryStopActionPreLink");
+    return pfnDiscEnhanceFuncList->distDiscoveryStopActionPreLink();
+}
+
+int32_t DistPublishStopActionPreLinkPacked(void)
+{
+    DiscEnhanceFuncList *pfnDiscEnhanceFuncList = DiscEnhanceFuncListGet();
+
+    int32_t ret = DiscCheckFuncPointer((void *)pfnDiscEnhanceFuncList->distPublishStopActionPreLink);
+    DISC_CHECK_AND_RETURN_RET_LOGD(ret == SOFTBUS_OK, SOFTBUS_OK, DISC_BLE, "not find DistPublishStopActionPreLink");
+    return pfnDiscEnhanceFuncList->distPublishStopActionPreLink();
+}
+
+void DistGetActionParamPacked(DiscActionParam *action)
+{
+    DiscEnhanceFuncList *pfnDiscEnhanceFuncList = DiscEnhanceFuncListGet();
+
+    int32_t ret = DiscCheckFuncPointer((void *)pfnDiscEnhanceFuncList->distGetActionParam);
+    DISC_CHECK_AND_RETURN_LOGD(ret == SOFTBUS_OK, DISC_BLE, "not find DistGetActionParam");
+    return pfnDiscEnhanceFuncList->distGetActionParam(action);
+}
+
+bool DistActionProcessConPacketPacked(DeviceWrapper *wrapperDevice, const uint8_t *key, uint32_t len)
+{
+    DiscEnhanceFuncList *pfnDiscEnhanceFuncList = DiscEnhanceFuncListGet();
+
+    int32_t ret = DiscCheckFuncPointer((void *)pfnDiscEnhanceFuncList->distActionProcessConPacket);
+    DISC_CHECK_AND_RETURN_RET_LOGD(ret == SOFTBUS_OK, false, DISC_BLE, "not find DistActionProcessConPacket");
+    return pfnDiscEnhanceFuncList->distActionProcessConPacket(wrapperDevice, key, len);
+}
+
+int32_t DistActionInitPacked(DiscActionUpdateBleCallback *updateAdvCb, DiscInnerCallback *innerCb)
+{
+    DiscEnhanceFuncList *pfnDiscEnhanceFuncList = DiscEnhanceFuncListGet();
+
+    int32_t ret = DiscCheckFuncPointer((void *)pfnDiscEnhanceFuncList->distActionInit);
+    DISC_CHECK_AND_RETURN_RET_LOGD(ret == SOFTBUS_OK, SOFTBUS_OK, DISC_BLE, "not find DistActionInit");
+    return pfnDiscEnhanceFuncList->distActionInit(updateAdvCb, innerCb);
+}
+
+void DistActionDeinitPacked(void)
+{
+    DiscEnhanceFuncList *pfnDiscEnhanceFuncList = DiscEnhanceFuncListGet();
+
+    int32_t ret = DiscCheckFuncPointer((void *)pfnDiscEnhanceFuncList->distActionDeinit);
+    DISC_CHECK_AND_RETURN_LOGD(ret == SOFTBUS_OK, DISC_BLE, "not find DistActionDeinit");
+    return pfnDiscEnhanceFuncList->distActionDeinit();
 }

@@ -18,6 +18,7 @@
 
 #include "broadcast_scheduler_type_struct.h"
 #include "disc_ble_dispatcher_struct.h"
+#include "disc_ble_utils_struct.h"
 #include "disc_interface_struct.h"
 #include "disc_manager_struct.h"
 #include "disc_usb_dispatcher_struct.h"
@@ -77,6 +78,17 @@ typedef void (*DiscOopBleDeinitFunc)(void);
 typedef int32_t (*DiscOopBleEventInitFunc)(void);
 typedef void (*DiscOopBleEventDeinitFunc)(void);
 
+typedef int32_t (*DistUpdatePublishParamFunc)(const char *cust, const char *extCust);
+typedef int32_t (*DistDiscoveryStartActionPreLinkFunc)(void);
+typedef int32_t (*DistDiscoveryStopActionPreLinkFunc)(void);
+typedef int32_t (*DistPublishStopActionPreLinkFunc)(void);
+typedef int32_t (*DistMgrStartActionReplyFunc)(DistActionContext *ctx);
+typedef void (*DistGetActionParamFunc)(DiscActionParam *action);
+typedef bool (*DistActionProcessConPacketFunc)(DeviceWrapper *wrapperDevice, const uint8_t *key, uint32_t len);
+
+typedef int32_t (*DistActionInitFunc)(DiscActionUpdateBleCallback *updateAdvCb, DiscInnerCallback *innerCb);
+typedef void (*DistActionDeinitFunc)(void);
+
 typedef struct TagDiscEnhanceFuncList {
     DiscTouchBleInitFunc discTouchBleInit;
     DiscShareBleInitFunc discShareBleInit;
@@ -125,6 +137,15 @@ typedef struct TagDiscEnhanceFuncList {
     DiscFillBtypeFunc discFillBtype;
 #endif
 
+    DistUpdatePublishParamFunc distUpdatePublishParam;
+    DistDiscoveryStartActionPreLinkFunc distDiscoveryStartActionPreLink;
+    DistDiscoveryStopActionPreLinkFunc distDiscoveryStopActionPreLink;
+    DistPublishStopActionPreLinkFunc distPublishStopActionPreLink;
+    DistMgrStartActionReplyFunc distMgrStartActionReply;
+    DistGetActionParamFunc distGetActionParam;
+    DistActionProcessConPacketFunc distActionProcessConPacket;
+    DistActionInitFunc distActionInit;
+    DistActionDeinitFunc distActionDeinit;
 } DiscEnhanceFuncList;
 
 DiscEnhanceFuncList *DiscEnhanceFuncListGet(void);
