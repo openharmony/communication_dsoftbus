@@ -542,6 +542,14 @@ static void UpdateDpAclSKId(AuthFsm *authFsm)
     (void)memset_s(&sessionKey, sizeof(SessionKey), 0, sizeof(SessionKey));
 }
 
+static void StopAuthFsm(AuthFsm *authFsm)
+{
+    authFsm->isDead = true;
+    DelAuthNormalizeRequest(authFsm->authSeq);
+    LnnFsmStop(&authFsm->fsm);
+    LnnFsmDeinit(&authFsm->fsm);
+}
+
 static void CompleteAuthSession(AuthFsm *authFsm, int32_t result)
 {
     SoftbusHitraceStart(SOFTBUS_HITRACE_ID_VALID, (uint64_t)authFsm->authSeq);
@@ -584,17 +592,8 @@ static void CompleteAuthSession(AuthFsm *authFsm, int32_t result)
         AuthManagerSetAuthFailed(authFsm->authSeq, &authFsm->info, result);
     }
 
-    authFsm->isDead = true;
-    LnnFsmStop(&authFsm->fsm);
-    LnnFsmDeinit(&authFsm->fsm);
+    StopAuthFsm(authFsm);
     SoftbusHitraceStop();
-}
-
-static void StopAuthFsm(AuthFsm *authFsm)
-{
-    authFsm->isDead = true;
-    LnnFsmStop(&authFsm->fsm);
-    LnnFsmDeinit(&authFsm->fsm);
 }
 
 static void HandleCommonMsg(AuthFsm *authFsm, int32_t msgType, MessagePara *msgPara)
@@ -645,7 +644,8 @@ static uint32_t AddConcurrentAuthRequest(AuthFsm *authFsm)
     NormalizeRequest normalizeRequest = {
         .authSeq = authFsm->authSeq,
         .connInfo = authFsm->info.connInfo,
-        .isConnectServer = authFsm->info.isConnectServer
+        .isConnectServer = authFsm->info.isConnectServer,
+        .isNeedNotifyVerify = false
     };
     if (strcpy_s(normalizeRequest.udidHash, sizeof(normalizeRequest.udidHash), authFsm->info.udidHash) != EOK) {
         AUTH_LOGE(AUTH_FSM, "strcpy udid hash fail. authSeq=%{public}" PRId64, authFsm->authSeq);
@@ -771,7 +771,7 @@ static int32_t RecoveryNormalizedDeviceKey(AuthFsm *authFsm)
         AUTH_LOGE(AUTH_FSM, "post save sessionKey event fail");
         return ret;
     }
-    return AuthSessionHandleAuthFinish(authFsm->authSeq, ACL_WRITE_DEFAULT);
+    return AuthSessionHandleAuthFinish(authFsm->authSeq, authFsm->info.nodeInfo.aclState);
 }
 
 static int32_t RecoveryFastAuthKey(AuthFsm *authFsm)
@@ -807,7 +807,7 @@ static int32_t RecoveryFastAuthKey(AuthFsm *authFsm)
         return ret;
     }
     (void)memset_s(&key, sizeof(AuthDeviceKeyInfo), 0, sizeof(AuthDeviceKeyInfo));
-    return AuthSessionHandleAuthFinish(authFsm->authSeq, ACL_WRITE_DEFAULT);
+    return AuthSessionHandleAuthFinish(authFsm->authSeq, authFsm->info.nodeInfo.aclState);
 }
 
 static void AuditReportSetPeerDevInfo(LnnAuditExtra *lnnAuditExtra, AuthSessionInfo *info)
@@ -2087,7 +2087,6 @@ int32_t AuthSessionHandleDeviceDisconnected(uint64_t connId, bool isNeedDisconne
     if (isNeedDisconnect && !isDisconnected &&
         (GetConnType(connId) == AUTH_LINK_TYPE_WIFI || GetConnType(connId) == AUTH_LINK_TYPE_USB) &&
         IsExistAuthTcpConnFdItemByConnId(GetConnId(connId))) {
-        DeleteAuthTcpConnFdItemByConnId(GetConnId(connId));
         DisconnectAuthDevice(&connId);
     }
     return SOFTBUS_OK;

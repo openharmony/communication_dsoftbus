@@ -187,7 +187,7 @@ public:
     virtual bool LnnConvertAddrToAuthConnInfo(const ConnectionAddr *addr, AuthConnInfo *connInfo);
     virtual int32_t LnnFsmRemoveMessageByType(FsmStateMachine *fsm, int32_t what);
     virtual void LnnDeinitBusCenterEvent(void);
-    virtual int32_t AuthStartVerify(const AuthConnInfo *connInfo, AuthVerifyParam *authVerifyParam,
+    virtual int32_t AuthStartVerify(const AuthConnInfo *connInfo, const AuthVerifyParam *authVerifyParam,
         const AuthVerifyCallback *callback);
     virtual bool IsSupportLpFeature(void);
     virtual int32_t LnnSubcribeKvStoreService(void);
@@ -339,7 +339,7 @@ public:
     MOCK_METHOD2(LnnFsmRemoveMessageByType, int32_t(FsmStateMachine *, int32_t));
     MOCK_METHOD0(LnnDeinitBusCenterEvent, void());
     MOCK_METHOD3(
-        AuthStartVerify, int32_t(const AuthConnInfo *, AuthVerifyParam *, const AuthVerifyCallback *));
+        AuthStartVerify, int32_t(const AuthConnInfo *, const AuthVerifyParam *, const AuthVerifyCallback *));
     MOCK_METHOD2(LnnIsNeedCleanConnectionFsm, bool(const NodeInfo *, ConnectionAddrType));
     MOCK_METHOD1(AuthFlushDevice, int32_t(const char *uuid));
     MOCK_METHOD0(IsSupportLpFeature, bool());

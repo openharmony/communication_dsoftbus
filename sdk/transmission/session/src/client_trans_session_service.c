@@ -1116,6 +1116,25 @@ static int32_t CheckSessionCancelState(int32_t socket)
     return SOFTBUS_OK;
 }
 
+static int32_t SocketCheckAndSetSessionState(int32_t socket)
+{
+    SocketLifecycleData lifecycle;
+    (void)memset_s(&lifecycle, sizeof(SocketLifecycleData), 0, sizeof(SocketLifecycleData));
+
+    int32_t ret = GetSocketLifecycleAndSessionNameBySessionId(socket, NULL, &lifecycle);
+    if (ret != SOFTBUS_OK) {
+        TRANS_LOGE(TRANS_SDK, "get socket state failed, socket=%{public}d failed, ret=%{public}d", socket, ret);
+        return ret;
+    }
+
+    if (lifecycle.sessionState != SESSION_STATE_INIT) {
+        TRANS_LOGE(TRANS_SDK, "socket=%{public}d is being bound, please check", socket);
+        return SOFTBUS_TRANS_SESSION_OPENING;
+    }
+
+    return SOFTBUS_OK;
+}
+
 int32_t ClientBind(int32_t socket, const QosTV qos[], uint32_t qosCount, const ISocketListener *listener, bool isAsync)
 {
     if (!IsValidSessionId(socket) || !IsValidSocketListener(listener, false) ||
@@ -1127,9 +1146,12 @@ int32_t ClientBind(int32_t socket, const QosTV qos[], uint32_t qosCount, const I
     // For rebind, clear the socket state.
     int32_t ret = ClientSetSocketState(socket, 0, SESSION_ROLE_INIT);
     TRANS_CHECK_AND_RETURN_RET_LOGE(ret == SOFTBUS_OK, ret, TRANS_SDK, "init session role failed, ret=%{public}d", ret);
-    ret = SetSessionStateBySessionId(socket, SESSION_STATE_INIT, 0);
-    TRANS_CHECK_AND_RETURN_RET_LOGE(
-        ret == SOFTBUS_OK, ret, TRANS_SDK, "init session state failed, ret=%{public}d", ret);
+
+    ret = SocketCheckAndSetSessionState(socket);
+    if (ret != SOFTBUS_OK) {
+        TRANS_LOGE(TRANS_SDK, "check the socket=%{public}d status failed, ret=%{public}d", socket, ret);
+        return ret;
+    }
 
     ret = ClientSetListenerBySessionId(socket, listener, false);
     TRANS_CHECK_AND_RETURN_RET_LOGE(

@@ -12,6 +12,7 @@
 # limitations under the License.
 
 import("../../../dsoftbus.gni")
+import("$dsoftbus_root_path/br_proxy/br_proxy.gni")
 
 trans_session_sdk_src = [
   "$dsoftbus_sdk_path/transmission/session/src/client_trans_session_callback.c",
@@ -23,9 +24,7 @@ trans_session_sdk_src = [
   "$dsoftbus_sdk_path/transmission/session/src/client_trans_socket_option.c",
 ]
 
-trans_session_sdk_inc = [
-  "$dsoftbus_root_path/components/nstackx/fillp/include",
-]
+trans_session_sdk_inc = br_proxy_include_dirs
 
 if (defined(ohos_lite)) {
   trans_session_sdk_inc += [
@@ -53,6 +52,8 @@ if (defined(ohos_lite)) {
   trans_session_sdk_src += [
     "$dsoftbus_sdk_path/transmission/session/cpp/src/session_ipc_adapter.cpp",
   ]
+
+  trans_session_sdk_src += br_proxy_sdk_sources
 
   if (defined(global_parts_info) &&
       defined(global_parts_info.hiviewdfx_hicollie)) {

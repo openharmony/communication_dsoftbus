@@ -29,6 +29,7 @@ public:
     virtual ~ISoftBusServer() = default;
 
     virtual int32_t SoftbusRegisterService(const char *clientPkgName, const sptr<IRemoteObject> &object) = 0;
+    virtual int32_t RegisterBrProxyService(const char *clientPkgName, const sptr<IRemoteObject>& object);
 
     virtual int32_t CreateSessionServer(const char *pkgName, const char *sessionName) = 0;
     virtual int32_t RemoveSessionServer(const char *pkgName, const char *sessionName) = 0;
@@ -87,6 +88,11 @@ public:
     virtual int32_t Send(uint32_t handle, const uint8_t *data, uint32_t len);
     virtual int32_t ConnGetPeerDeviceId(uint32_t handle, char *deviceId, uint32_t len);
 
+    virtual int32_t OpenBrProxy(const char *brMac, const char *uuid);
+    virtual int32_t CloseBrProxy(int32_t channelId);
+    virtual int32_t SendBrProxyData(int32_t channelId, char *data, uint32_t dataLen);
+    virtual int32_t SetListenerState(int32_t channelId, int32_t type, bool CbEnabled);
+    virtual bool IsProxyChannelEnabled(int32_t uid);
 public:
     DECLARE_INTERFACE_DESCRIPTOR(u"OHOS.ISoftBusServer");
 };

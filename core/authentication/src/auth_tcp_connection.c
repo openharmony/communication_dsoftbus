@@ -364,13 +364,17 @@ FAIL:
 
 static int32_t ProcessSocketInEvent(ListenerModule module, int32_t fd)
 {
+    AUTH_CHECK_AND_RETURN_RET_LOGE(RequireAuthTcpConnFdListLock(), SOFTBUS_LOCK_ERR, AUTH_CONN,
+        "RequireAuthTcpConnFdListLock fail");
     if ((module == AUTH || module == AUTH_USB) && !IsExistAuthTcpConnFdItemByConnId(fd)) {
         AUTH_LOGE(AUTH_CONN, "fd=%{public}d not exist, ignore", fd);
+        ReleaseAuthTcpConnFdListLock();
         return SOFTBUS_INVALID_PARAM;
     }
     SocketPktHead head = { 0 };
     int32_t ret = RecvPacketHead(module, fd, &head);
     if (ret != SOFTBUS_OK) {
+        ReleaseAuthTcpConnFdListLock();
         return ret;
     }
     AUTH_LOGI(AUTH_CONN,
@@ -378,16 +382,20 @@ static int32_t ProcessSocketInEvent(ListenerModule module, int32_t fd)
         fd, head.module, head.seq, head.flag, head.len);
     if (head.len == 0 || head.len > AUTH_SOCKET_MAX_DATA_LEN) {
         AUTH_LOGW(AUTH_CONN, "data is out of size, abandon it.");
+        ReleaseAuthTcpConnFdListLock();
         return SOFTBUS_INVALID_DATA_HEAD;
     }
     if (head.magic != (int32_t)MAGIC_NUMBER) {
         AUTH_LOGE(AUTH_CONN, "magic number not match.");
+        ReleaseAuthTcpConnFdListLock();
         return SOFTBUS_INVALID_DATA_HEAD;
     }
     uint8_t *data = RecvPacketData(fd, head.len);
     if (data == NULL) {
+        ReleaseAuthTcpConnFdListLock();
         return SOFTBUS_DATA_NOT_ENOUGH;
     }
+    ReleaseAuthTcpConnFdListLock();
     NotifyDataReceived(module, fd, &head, data);
     SoftBusFree(data);
     return SOFTBUS_OK;
@@ -440,6 +448,8 @@ static int32_t OnConnectEvent(ListenerModule module, int32_t cfd, const ConnectO
     }
     if ((module == AUTH || module == AUTH_USB) && AddAuthTcpConnFdItem(cfd) != SOFTBUS_OK) {
         AUTH_LOGE(AUTH_CONN, "insert auth tcp conn fd item fail.");
+        (void)DelTrigger(module, cfd, READ_TRIGGER);
+        ConnShutdownSocket(cfd);
         return SOFTBUS_MEM_ERR;
     }
     NotifyConnected(module, cfd, false);
@@ -605,21 +615,19 @@ static ConnectOption GetConnectOptionByIfname(int32_t ifnameIdx, int32_t port)
 static int32_t SetTcpKeepaliveAndIpTos(bool isBlockMode, int32_t ifnameIdx, TriggerType triggerMode,
     ListenerModule module, int32_t fd)
 {
-    if (ConnSetTcpKeepalive(fd, (int32_t)DEFAULT_FREQ_CYCLE, TCP_KEEPALIVE_INTERVAL, TCP_KEEPALIVE_DEFAULT_COUNT) !=
-        SOFTBUS_OK) {
+    int32_t ret = SOFTBUS_OK;
+    ret = ConnSetTcpKeepalive(fd, (int32_t)DEFAULT_FREQ_CYCLE, TCP_KEEPALIVE_INTERVAL, TCP_KEEPALIVE_DEFAULT_COUNT);
+    if (ret != SOFTBUS_OK) {
         AUTH_LOGE(AUTH_CONN, "set tcp keep alive fail.");
-        (void)DelTrigger(module, fd, triggerMode);
-        ConnShutdownSocket(fd);
-        return AUTH_INVALID_FD;
+        return ret;
     }
     int32_t ipTos = TCP_KEEPALIVE_TOS_VAL;
-    if (SoftBusSocketSetOpt(fd, SOFTBUS_IPPROTO_IP_, SOFTBUS_IP_TOS_, &ipTos, sizeof(ipTos)) != SOFTBUS_ADAPTER_OK) {
+    ret = SoftBusSocketSetOpt(fd, SOFTBUS_IPPROTO_IP_, SOFTBUS_IP_TOS_, &ipTos, sizeof(ipTos));
+    if (ret != SOFTBUS_ADAPTER_OK) {
         AUTH_LOGE(AUTH_CONN, "set option fail.");
-        (void)DelTrigger(module, fd, triggerMode);
-        ConnShutdownSocket(fd);
-        return AUTH_INVALID_FD;
+        return SOFTBUS_NETWORK_SET_KEEPALIVE_OPTION_FAIL;
     }
-    return fd;
+    return SOFTBUS_OK;
 }
 
 int32_t SocketConnectDevice(const char *ip, int32_t port, bool isBlockMode, int32_t ifnameIdx)
@@ -649,17 +657,24 @@ int32_t SocketConnectDevice(const char *ip, int32_t port, bool isBlockMode, int3
     int32_t fd = ret;
     TriggerType triggerMode = isBlockMode ? READ_TRIGGER : WRITE_TRIGGER;
     ListenerModule module = (ifnameIdx == USB_IF) ? AUTH_USB : AUTH;
-    if (isBlockMode && AddAuthTcpConnFdItem(fd) != SOFTBUS_OK) {
-        AUTH_LOGE(AUTH_CONN, "insert auth tcp conn fd item fail.");
-        ConnShutdownSocket(fd);
-        return AUTH_INVALID_FD;
-    }
     if (AddTrigger(module, fd, triggerMode) != SOFTBUS_OK) {
         AUTH_LOGE(AUTH_CONN, "AddTrigger fail.");
         ConnShutdownSocket(fd);
         return AUTH_INVALID_FD;
     }
-    return SetTcpKeepaliveAndIpTos(isBlockMode, ifnameIdx, triggerMode, module, fd);
+    if (SetTcpKeepaliveAndIpTos(isBlockMode, ifnameIdx, triggerMode, module, fd) != SOFTBUS_OK) {
+        AUTH_LOGE(AUTH_CONN, "SetTcpKeepaliveAndIpTos fail.");
+        (void)DelTrigger(module, fd, triggerMode);
+        ConnShutdownSocket(fd);
+        return AUTH_INVALID_FD;
+    }
+    if (isBlockMode && AddAuthTcpConnFdItem(fd) != SOFTBUS_OK) {
+        AUTH_LOGE(AUTH_CONN, "insert auth tcp conn fd item fail.");
+        (void)DelTrigger(module, fd, triggerMode);
+        ConnShutdownSocket(fd);
+        return AUTH_INVALID_FD;
+    }
+    return fd;
 }
 
 int32_t NipSocketConnectDevice(ListenerModule module, const char *addr, int32_t port, bool isBlockMode)
@@ -729,10 +744,21 @@ int32_t SocketPostBytes(int32_t fd, const AuthDataHead *head, const uint8_t *dat
         SoftBusFree(buf);
         return SOFTBUS_AUTH_PACK_SOCKET_PKT_FAIL;
     }
-
+    if (!RequireAuthTcpConnFdListLock()) {
+        AUTH_LOGE(AUTH_CONN, "RequireAuthTcpConnFdListLock fail");
+        SoftBusFree(buf);
+        return SOFTBUS_LOCK_ERR;
+    }
+    if ((pktHead.module == AUTH || pktHead.module == AUTH_USB) && !IsExistAuthTcpConnFdItemByConnId(fd)) {
+        AUTH_LOGE(AUTH_CONN, "fd=%{public}d not exist, ignore", fd);
+        ReleaseAuthTcpConnFdListLock();
+        SoftBusFree(buf);
+        return SOFTBUS_INVALID_PARAM;
+    }
     AUTH_LOGI(AUTH_CONN, "fd=%{public}d, module=%{public}d, seq=%{public}" PRId64 ", flag=%{public}d, len=%{public}u.",
         fd, pktHead.module, pktHead.seq, pktHead.flag, pktHead.len);
     ssize_t ret = ConnSendSocketData(fd, (const char *)buf, (size_t)size, 0);
+    ReleaseAuthTcpConnFdListLock();
     SoftBusFree(buf);
     if (ret != (ssize_t)size) {
         AUTH_LOGE(AUTH_CONN, "fail. ret=%{public}zd", ret);
@@ -963,7 +989,9 @@ int32_t AuthSetTcpKeepaliveOption(int32_t fd, ModeCycle cycle)
 
 int32_t AuthTcpConnFdLockInit(void)
 {
-    if (SoftBusMutexInit(&g_authTcpConnFdListLock, NULL) != SOFTBUS_OK) {
+    SoftBusMutexAttr mutexAttr;
+    mutexAttr.type = SOFTBUS_MUTEX_RECURSIVE;
+    if (SoftBusMutexInit(&g_authTcpConnFdListLock, &mutexAttr) != SOFTBUS_OK) {
         AUTH_LOGE(AUTH_CONN, "authTcpConnFdList mutex init fail");
         return SOFTBUS_LOCK_ERR;
     }

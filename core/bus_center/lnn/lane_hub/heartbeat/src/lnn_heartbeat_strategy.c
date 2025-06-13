@@ -955,7 +955,7 @@ int32_t LnnStartNewHbStrategyFsm(void)
         return SOFTBUS_NETWORK_FSM_START_FAIL;
     }
     g_hbFsm = hbFsm;
-    LNN_LOGE(LNN_EVENT, "LnnStartNewHbStrategyFsm Finish. g_hbFsm = %{public}p", &g_hbFsm);
+    LNN_LOGI(LNN_EVENT, "LnnStartNewHbStrategyFsm Finish. g_hbFsm = %{public}p", &g_hbFsm);
     hbFsm = NULL;
     return SOFTBUS_OK;
 }

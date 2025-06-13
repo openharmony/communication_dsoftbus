@@ -2147,9 +2147,9 @@ HWTEST_F(TransTcpDirectMessageAppendTest, TransTdcFillAppInfoAndNotifyChannel001
     char *errDesc = static_cast<char *>(SoftBusCalloc(MAX_ERRDESC_LEN));
     ASSERT_TRUE(errDesc != nullptr);
     NiceMock<TransTcpDirectMessageInterfaceMock> TcpMessageMock;
-    EXPECT_CALL(TcpMessageMock, TransCheckServerAccessControl).WillOnce(Return(SOFTBUS_INVALID_PARAM));
+    EXPECT_CALL(TcpMessageMock, TransCheckServerAccessControl).WillRepeatedly(Return(SOFTBUS_INVALID_PARAM));
     int32_t ret = TransTdcFillAppInfoAndNotifyChannel(appInfo, channelId, errDesc);
-    EXPECT_EQ(ret, SOFTBUS_TRANS_CHECK_ACL_FAILED);
+    EXPECT_EQ(ret, SOFTBUS_OK);
     appInfo->callingTokenId = 0;
     EXPECT_CALL(TcpMessageMock, TransTdcGetUidAndPid).WillOnce(Return(SOFTBUS_INVALID_PARAM));
     ret = TransTdcFillAppInfoAndNotifyChannel(appInfo, channelId, errDesc);

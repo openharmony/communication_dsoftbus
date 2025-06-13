@@ -92,8 +92,9 @@ CONN_ASSIGNER(Errcode, P2pRole, p2pRole)
 CONN_ASSIGNER(Errcode, NeedHmlConnect, needHmlConnect)
 CONN_ASSIGNER(String, BusinessTag, businessTag)
 CONN_ASSIGNER(Errcode, StaChload, staChload)
+CONN_ASSIGNER(Errcode, SameAccount, sameAccount)
 
-#define CONN_ASSIGNER_SIZE 58 // Size of g_connAssigners
+#define CONN_ASSIGNER_SIZE 59 // Size of g_connAssigners
 static HiSysEventParamAssigner g_connAssigners[] = {
     { "STAGE_RES",         HISYSEVENT_INT32,  ConnAssignerResult        },
     { "ERROR_CODE",        HISYSEVENT_INT32,  ConnAssignerErrcode       },
@@ -153,6 +154,7 @@ static HiSysEventParamAssigner g_connAssigners[] = {
     { "NEED_HML_CONNECT",       HISYSEVENT_INT32,  ConnAssignerNeedHmlConnect      },
     { "BUSINESS_TAG",           HISYSEVENT_STRING, ConnAssignerBusinessTag         },
     { "STA_CHLOAD",             HISYSEVENT_INT32,  ConnAssignerStaChload           },
+    { "SAME_ACCOUNT",           HISYSEVENT_INT32,  ConnAssignerSameAccount         },
  // Modification Note: remember updating CONN_ASSIGNER_SIZE
 };
 

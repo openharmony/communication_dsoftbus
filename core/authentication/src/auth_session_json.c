@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2024 Huawei Device Co., Ltd.
+ * Copyright (c) 2024-2025 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -134,6 +134,7 @@
 #define IP_MAC                      "IP_MAC"
 #define NODE_WEIGHT                 "NODE_WEIGHT"
 #define ACCOUNT_ID                  "ACCOUNT_ID"
+#define ACCOUNT_UID                 "ACCOUNT_UID"
 #define DISTRIBUTED_SWITCH          "DISTRIBUTED_SWITCH"
 #define TRANS_FLAGS                 "TRANS_FLAGS"
 #define BLE_TIMESTAMP               "BLE_TIMESTAMP"
@@ -696,6 +697,8 @@ static int32_t TryGetDmSessionKeyForUnpack(AuthSessionInfo *info, char *encNorma
         return SOFTBUS_AUTH_NORMALIZED_KEY_PROC_ERR;
     }
     (void)memset_s(&sessionKey, sizeof(sessionKey), 0, sizeof(sessionKey));
+    info->nodeInfo.aclState = ACL_NOT_WRITE;
+    AUTH_LOGI(AUTH_FSM, "use skId. authSeq=%{public}" PRId64, authSeq);
     return SOFTBUS_OK;
 }
 
@@ -1046,6 +1049,28 @@ static int32_t PackDeviceJsonInfo(const AuthSessionInfo *info, JsonObj *obj)
     return SOFTBUS_OK;
 }
 
+static bool IsNeedNormalizedProcess(AuthSessionInfo *info)
+{
+    if (!info->isConnectServer) {
+        return true;
+    }
+    if (info->authVersion < AUTH_VERSION_V2) {
+        AUTH_LOGI(AUTH_FSM, "lower version don't need check acl");
+        return true;
+    }
+    if (IsTrustedDeviceFromAccess(info->accountHash, info->udid, info->userId)) {
+        AUTH_LOGI(AUTH_FSM, "has trust device acl");
+        return true;
+    }
+    char *anonyDeviceIdHash = NULL;
+    Anonymize(info->udid, &anonyDeviceIdHash);
+    AUTH_LOGE(AUTH_FSM, "device is not trusted in dp, deviceIdHash=%{public}s, userId=%{public}d",
+        AnonymizeWrapper(anonyDeviceIdHash), info->userId);
+    AnonymizeFree(anonyDeviceIdHash);
+    info->normalizedType = NORMALIZED_KEY_ERROR;
+    return false;
+}
+
 static int32_t PackNormalizedData(const AuthSessionInfo *info, JsonObj *obj, const NodeInfo *nodeInfo, int64_t authSeq)
 {
     bool isSupportNormalizedKey = IsSupportFeatureByCapaBit(nodeInfo->authCapacity, BIT_SUPPORT_NORMALIZED_LINK);
@@ -1053,7 +1078,7 @@ static int32_t PackNormalizedData(const AuthSessionInfo *info, JsonObj *obj, con
         AUTH_LOGE(AUTH_FSM, "add normalizedType fail");
         return SOFTBUS_AUTH_PACK_NORMALIZED_DATA_FAIL;
     }
-    if (isSupportNormalizedKey) {
+    if (isSupportNormalizedKey && IsNeedNormalizedProcess((AuthSessionInfo *)info)) {
         PackNormalizedKey(obj, (AuthSessionInfo *)info, authSeq);
     }
     if (info->isServer &&
@@ -1737,6 +1762,7 @@ static int32_t PackCommonEx(JsonObj *json, const NodeInfo *info)
         !JSON_AddBoolToObject(json, IS_SCREENON, info->isScreenOn) ||
         !JSON_AddInt32ToObject(json, NODE_WEIGHT, info->masterWeight) ||
         !JSON_AddInt64ToObject(json, ACCOUNT_ID, info->accountId) ||
+        !JSON_AddStringToObject(json, ACCOUNT_UID, info->accountUid) ||
         !JSON_AddBoolToObject(json, DISTRIBUTED_SWITCH, true) ||
         !JSON_AddInt64ToObject(json, BLE_TIMESTAMP, info->bleStartTimestamp) ||
         !JSON_AddInt32ToObject(json, WIFI_BUFF_SIZE, info->wifiBuffSize) ||
@@ -1885,6 +1911,7 @@ static void ParseCommonJsonOptInfo(const JsonObj *json, NodeInfo *info)
     OptString(json, BLE_MAC, info->connectInfo.bleMacAddr, MAC_LEN, "");
     OptBool(json, IS_SCREENON, &info->isScreenOn, false);
     OptInt64(json, ACCOUNT_ID, &info->accountId, 0);
+    OptString(json, ACCOUNT_UID, info->accountUid, ACCOUNT_UID_STR_LEN, "");
     OptInt(json, NODE_WEIGHT, &info->masterWeight, DEFAULT_NODE_WEIGHT);
     OptInt(json, OS_TYPE, &info->deviceInfo.osType, -1);
     if ((info->deviceInfo.osType == -1) && info->authCapacity != 0) {
@@ -2453,9 +2480,9 @@ static void UpdatePeerDeviceName(NodeInfo *peerNodeInfo)
             deviceName, DEVICE_NAME_BUF_LEN);
     }
     char *anonyDeviceName = NULL;
-    Anonymize(deviceName, &anonyDeviceName);
+    AnonymizeDeviceName(deviceName, &anonyDeviceName);
     char *anonyPeerDeviceName = NULL;
-    Anonymize(peerNodeInfo->deviceInfo.deviceName, &anonyPeerDeviceName);
+    AnonymizeDeviceName(peerNodeInfo->deviceInfo.deviceName, &anonyPeerDeviceName);
     char *anonyUnifiedName = NULL;
     Anonymize(peerNodeInfo->deviceInfo.unifiedName, &anonyUnifiedName);
     char *anonyUnifiedDefaultName = NULL;

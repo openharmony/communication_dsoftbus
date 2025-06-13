@@ -29,11 +29,9 @@ if (dsoftbus_feature_lnn_frame) {
 } else {
   bus_center_ledger_src += [ "$dsoftbus_root_path/core/bus_center/lnn/net_ledger/distributed_ledger/src/lnn_distributed_net_ledger_virtual.c" ]
 }
-if (dsoftbus_feature_lnn_meta_node) {
-  bus_center_ledger_src += [ "$dsoftbus_root_path/core/bus_center/lnn/net_ledger/distributed_ledger/src/lnn_meta_node_ledger.c" ]
-} else {
-  bus_center_ledger_src += [ "$dsoftbus_root_path/core/bus_center/lnn/net_ledger/distributed_ledger/src/lnn_meta_node_ledger_virtual.c" ]
-}
+
+bus_center_ledger_src += [ "$dsoftbus_root_path/core/bus_center/lnn/net_ledger/distributed_ledger/src/lnn_meta_node_ledger.c" ]
+
 bus_center_ledger_inc = [
   "$dsoftbus_root_path/adapter/common/include",
   "$dsoftbus_root_path/interfaces/kits/lnn",
@@ -45,7 +43,7 @@ bus_center_ledger_inc = [
   "$dsoftbus_root_path/core/bus_center/lnn/net_ledger/local_ledger/include",
   "$dsoftbus_root_path/core/bus_center/utils/include",
   "$dsoftbus_root_path/core/bus_center/lnn/lane_hub/heartbeat/include",
-  "$dsoftbus_root_path/interfaces/kits/adpter",
+  "$dsoftbus_root_path/interfaces/kits/adapter",
   "$dsoftbus_root_path/adapter/common/net/bluetooth/broadcast/interface",
   "$dsoftbus_root_path/interfaces/kits/common",
   "$dsoftbus_root_path/interfaces/kits/bus_center",

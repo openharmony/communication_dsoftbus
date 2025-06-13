@@ -16,6 +16,7 @@
 
 #include "auth_log.h"
 #include "g_enhance_lnn_func.h"
+#include "lnn_heartbeat_utils_struct.h"
 #include "lnn_heartbeat_medium_mgr.h"
 #include "softbus_error_code.h"
 #include "softbus_init_common.h"
@@ -536,6 +537,15 @@ bool HaveConcurrencyPreLinkReqIdByReuseConnReqIdPacked(uint32_t connReqId, bool 
     return pfnLnnEnhanceFuncList->haveConcurrencyPreLinkReqIdByReuseConnReqId(connReqId, isCheckPreLink);
 }
 
+bool HaveConcurrencyPreLinkNodeByLaneReqIdPacked(uint32_t laneReqId, bool isCheckPreLink)
+{
+    LnnEnhanceFuncList *pfnLnnEnhanceFuncList = LnnEnhanceFuncListGet();
+    if (LnnCheckFuncPointer((void *)pfnLnnEnhanceFuncList->haveConcurrencyPreLinkNodeByLaneReqId) != SOFTBUS_OK) {
+        return false;
+    }
+    return pfnLnnEnhanceFuncList->haveConcurrencyPreLinkNodeByLaneReqId(laneReqId, isCheckPreLink);
+}
+
 int32_t GetConcurrencyLaneReqIdByConnReqIdPacked(uint32_t connReqId, uint32_t *laneReqId)
 {
     LnnEnhanceFuncList *pfnLnnEnhanceFuncList = LnnEnhanceFuncListGet();
@@ -588,6 +598,15 @@ int32_t UpdateConcurrencyReuseLaneReqIdByActionIdPacked(uint32_t actionId, uint3
         return SOFTBUS_NOT_IMPLEMENT;
     }
     return pfnLnnEnhanceFuncList->updateConcurrencyReuseLaneReqIdByActionId(actionId, reuseLaneReqId, connReqId);
+}
+
+int32_t UpdateConcurrencyReuseLaneReqIdByUdidPacked(char *udidHash, uint32_t reuseLaneReqId, uint32_t connReqId)
+{
+    LnnEnhanceFuncList *pfnLnnEnhanceFuncList = LnnEnhanceFuncListGet();
+    if (LnnCheckFuncPointer((void *)pfnLnnEnhanceFuncList->updateConcurrencyReuseLaneReqIdByUdid) != SOFTBUS_OK) {
+        return SOFTBUS_NOT_IMPLEMENT;
+    }
+    return pfnLnnEnhanceFuncList->updateConcurrencyReuseLaneReqIdByUdid(udidHash, reuseLaneReqId, connReqId);
 }
 
 int32_t LnnAddLocalVapInfoPacked(LnnVapType type, const LnnVapAttr *vapAttr)
@@ -1370,31 +1389,4 @@ void SleRangeDeathCallbackPacked()
         return;
     }
     return pfnLnnEnhanceFuncList->sleRangeDeathCallback();
-}
-
-void LnnDeinitMetaNodeExtLedgerPacked(void)
-{
-    LnnEnhanceFuncList *pfnLnnEnhanceFuncList = LnnEnhanceFuncListGet();
-    if (LnnCheckFuncPointer((void *)pfnLnnEnhanceFuncList->lnnDeinitMetaNodeExtLedger) != SOFTBUS_OK) {
-        return;
-    }
-    return pfnLnnEnhanceFuncList->lnnDeinitMetaNodeExtLedger();
-}
-
-int32_t LnnRetrieveDeviceDataPacked(LnnDataType dataType, char **data, uint32_t *dataLen)
-{
-    LnnEnhanceFuncList *pfnLnnEnhanceFuncList = LnnEnhanceFuncListGet();
-    if (LnnCheckFuncPointer((void *)pfnLnnEnhanceFuncList->lnnRetrieveDeviceData) != SOFTBUS_OK) {
-        return SOFTBUS_NOT_IMPLEMENT;
-    }
-    return pfnLnnEnhanceFuncList->lnnRetrieveDeviceData(dataType, data, dataLen);
-}
-
-int32_t LnnSaveDeviceDataPacked(const char *data, LnnDataType dataType)
-{
-    LnnEnhanceFuncList *pfnLnnEnhanceFuncList = LnnEnhanceFuncListGet();
-    if (LnnCheckFuncPointer((void *)pfnLnnEnhanceFuncList->lnnSaveDeviceData) != SOFTBUS_OK) {
-        return SOFTBUS_NOT_IMPLEMENT;
-    }
-    return pfnLnnEnhanceFuncList->lnnSaveDeviceData(data, dataType);
 }

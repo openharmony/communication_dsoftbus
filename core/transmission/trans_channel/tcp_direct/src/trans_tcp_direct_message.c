@@ -924,10 +924,20 @@ static void ReportTransEventExtra(
 
 static int32_t CheckServerPermission(AppInfo *appInfo, char *ret)
 {
-    if (appInfo->callingTokenId != TOKENID_NOT_SET &&
-        TransCheckServerAccessControl(appInfo) != SOFTBUS_OK) {
-        ret = (char *)"Server check acl failed";
-        return SOFTBUS_TRANS_CHECK_ACL_FAILED;
+    if (appInfo->callingTokenId != TOKENID_NOT_SET) {
+        (void)LnnGetNetworkIdByUuid(appInfo->peerData.deviceId, appInfo->peerNetWorkId, NETWORK_ID_BUF_LEN);
+        int32_t osType = 0;
+        (void)GetOsTypeByNetworkId(appInfo->peerNetWorkId, &osType);
+        if (osType != OH_OS_TYPE) {
+            TRANS_LOGI(TRANS_CTRL, "not support acl check osType=%{public}d", osType);
+        } else if (GetCapabilityBit(appInfo->channelCapability, TRANS_CHANNEL_ACL_CHECK_OFFSET)) {
+            if (TransCheckServerAccessControl(appInfo) != SOFTBUS_OK) {
+                ret = (char *)"Server check acl failed";
+                return SOFTBUS_TRANS_CHECK_ACL_FAILED;
+            }
+        } else {
+            TRANS_LOGI(TRANS_CTRL, "not support acl check");
+        }
     }
 
     if (CheckSecLevelPublic(appInfo->myData.sessionName, appInfo->peerData.sessionName) != SOFTBUS_OK) {

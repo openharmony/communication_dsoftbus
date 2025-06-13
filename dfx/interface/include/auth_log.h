@@ -27,7 +27,6 @@ typedef enum {
     AUTH_CONN,
     AUTH_FSM,
     AUTH_KEY,
-    AUTH_EVENT,
     AUTH_TEST,
 } AuthLogLabelEnum;
 
@@ -38,7 +37,6 @@ static const SoftBusLogLabel AUTH_LABELS[MODULE_DOMAIN_MAX_LEN] = {
     { AUTH_CONN,    0xd005722,      "AuthConn"    },
     { AUTH_FSM,     0xd005723,      "AuthFsm"     },
     { AUTH_KEY,     0xd005724,      "AuthKey"     },
-    { AUTH_EVENT,   0xd005725,      "AuthEvent"   },
     { AUTH_TEST,    DOMAIN_ID_TEST, "AuthTest"    },
 };
 

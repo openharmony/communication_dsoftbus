@@ -49,6 +49,7 @@ typedef enum {
     EVENT_STAGE_TOUCH_BLE_INIT = 6,
     EVENT_STAGE_USB_INIT = 7,
     EVENT_STAGE_OOP_BLE_INIT = 8,
+    EVENT_STAGE_RAISE_BLE_INIT = 9,
 } DiscEventInitStage;
 
 typedef enum {

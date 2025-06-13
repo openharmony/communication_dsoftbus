@@ -34,7 +34,7 @@ int32_t AuthOpenFuncInit(void *soHandle)
     }
 
     if (authRegisterOpenfunc() != SOFTBUS_OK) {
-        COMM_LOGE(COMM_SVC, "AuthRegisterOpenFunc return failed, ret = %d", ret);
+        COMM_LOGE(COMM_SVC, "AuthRegisterOpenFunc return failed, ret=%d", ret);
         return SOFTBUS_NETWORK_AUTH_OPEN_FUNC_INIT_FAILED;
     }
 

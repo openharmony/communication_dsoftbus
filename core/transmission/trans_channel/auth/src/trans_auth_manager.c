@@ -1435,7 +1435,7 @@ static int32_t TransSetAuthChannelReplyCnt(int32_t channelId)
     return SOFTBUS_TRANS_NODE_NOT_FOUND;
 }
 
-int32_t TransDealAuthChannelOpenResult(int32_t channelId, int32_t openResult)
+int32_t TransDealAuthChannelOpenResult(int32_t channelId, int32_t openResult, pid_t callingPid)
 {
     AuthChannelInfo info;
     (void)memset_s(&info, sizeof(AuthChannelInfo), 0, sizeof(AuthChannelInfo));
@@ -1460,6 +1460,19 @@ int32_t TransDealAuthChannelOpenResult(int32_t channelId, int32_t openResult)
         .socketName = info.appInfo.myData.sessionName,
         .peerUdid = info.appInfo.peerData.deviceId,
     };
+
+    int32_t pid = 0;
+    int32_t uid = 0;
+    ret = AuthGetUidAndPidBySessionName(info.appInfo.myData.sessionName, &uid, &pid);
+    if (ret != SOFTBUS_OK) {
+        TRANS_LOGE(TRANS_SVC, "auth get id by sessionName failed");
+        return SOFTBUS_TRANS_GET_PID_FAILED;
+    }
+    if (callingPid != 0 && pid != callingPid) {
+        TRANS_LOGE(TRANS_CTRL, "pid does not match, pid=%{public}d, callingPid=%{public}d", pid, callingPid);
+        return SOFTBUS_TRANS_CHECK_PID_ERROR;
+    }
+
     if (openResult != SOFTBUS_OK) {
         TRANS_LOGE(TRANS_SVC, "open auth channel failed, openResult=%{public}d", openResult);
         TransPostAuthChannelErrMsg(info.authId, openResult, "open auth channel failed");

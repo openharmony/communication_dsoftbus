@@ -159,4 +159,12 @@ bool SoftbusClientInfoManager::SoftbusClientIsExist(const std::string &pkgName, 
     }
     return false;
 }
+
+extern "C"
+{
+int32_t SoftbusAddServiceInnerForEnhance(const char *pkgName, ISessionListenerInner *listener, int32_t pid)
+{
+    return SoftbusClientInfoManager::GetInstance().SoftbusAddServiceInner(pkgName, listener, pid);
+}
+}
 } // namespace OHOS

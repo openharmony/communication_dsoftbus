@@ -36,7 +36,6 @@ int32_t AuthRegisterEnhanceFunc(void *soHandle)
 
     g_authEnhanceFuncList.delAuthMetaManagerByConnectionId = dlsym(soHandle, "DelAuthMetaManagerByConnectionId");
     g_authEnhanceFuncList.authMetaGetConnInfoBySide = dlsym(soHandle, "AuthMetaGetConnInfoBySide");
-    g_authEnhanceFuncList.authIsLatestNormalizeKeyInTime = dlsym(soHandle, "AuthIsLatestNormalizeKeyInTime");
     g_authEnhanceFuncList.authClearDeviceKey = dlsym(soHandle, "AuthClearDeviceKey");
     return SOFTBUS_OK;
 }

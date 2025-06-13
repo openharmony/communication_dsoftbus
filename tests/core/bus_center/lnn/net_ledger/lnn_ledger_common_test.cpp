@@ -47,7 +47,7 @@
 #define DEFAUTL_LNN_FEATURE           0x3E2
 
 #define LNN_SUPPORT_ENHANCE_FEATURE             0x3F7EA
-#define ENHANCE_SUPPORT_AUTH_CAPACITY           0x7F
+#define ENHANCE_SUPPORT_AUTH_CAPACITY           0xFF
 
 namespace OHOS {
 using namespace testing::ext;

@@ -94,8 +94,8 @@ int32_t LnnRegisterEnhanceFunc(void *soHandle)
     g_lnnEnhanceFuncList.sendDeviceInfoToSHByType = sendDeviceInfoToSHByType;
     SendAdvInfoToMlpsFunc sendAdvInfoToMlps = dlsym(soHandle, "SendAdvInfoToMlps");
     g_lnnEnhanceFuncList.sendAdvInfoToMlps = sendAdvInfoToMlps;
-    SwtichHeartbeatReportChannelFunc swtichHeartbeatReportChannel = dlsym(soHandle, "SwtichHeartbeatReportChannel");
-    g_lnnEnhanceFuncList.swtichHeartbeatReportChannel = swtichHeartbeatReportChannel;
+    SwitchHeartbeatReportChannelFunc switchHeartbeatReportChannel = dlsym(soHandle, "SwitchHeartbeatReportChannel");
+    g_lnnEnhanceFuncList.switchHeartbeatReportChannel = switchHeartbeatReportChannel;
     IsSupportLpFeatureFunc isSupportLpFeature = dlsym(soHandle, "IsSupportLpFeature");
     g_lnnEnhanceFuncList.isSupportLpFeature = isSupportLpFeature;
     SetLpKeepAliveStateFunc setLpKeepAliveState = dlsym(soHandle, "SetLpKeepAliveState");
@@ -381,10 +381,14 @@ int32_t LnnRegisterEnhanceFunc(void *soHandle)
     g_lnnEnhanceFuncList.isNeedSyncBroadcastLinkKey = dlsym(soHandle, "IsNeedSyncBroadcastLinkKey");
     g_lnnEnhanceFuncList.lnnSyncBroadcastLinkKey = dlsym(soHandle, "LnnSyncBroadcastLinkKey");
     g_lnnEnhanceFuncList.haveConcurrencyPreLinkReqIdByReuseConnReqId = dlsym(soHandle, "HaveConcurrencyPreLinkReqIdByReuseConnReqId");
+    g_lnnEnhanceFuncList.haveConcurrencyPreLinkNodeByLaneReqId = dlsym(soHandle,
+        "HaveConcurrencyPreLinkNodeByLaneReqId");
     g_lnnEnhanceFuncList.getConcurrencyLaneReqIdByConnReqId = dlsym(soHandle, "GetConcurrencyLaneReqIdByConnReqId");
     g_lnnEnhanceFuncList.lnnFreePreLink = dlsym(soHandle, "LnnFreePreLink");
     g_lnnEnhanceFuncList.getConcurrencyLaneReqIdByActionId = dlsym(soHandle, "GetConcurrencyLaneReqIdByActionId");
     g_lnnEnhanceFuncList.updateConcurrencyReuseLaneReqIdByActionId = dlsym(soHandle, "UpdateConcurrencyReuseLaneReqIdByActionId");
+    g_lnnEnhanceFuncList.updateConcurrencyReuseLaneReqIdByUdid = dlsym(soHandle,
+        "UpdateConcurrencyReuseLaneReqIdByUdid");
     g_lnnEnhanceFuncList.lnnPackCloudSyncAckSeq = dlsym(soHandle, "LnnPackCloudSyncAckSeq");
     g_lnnEnhanceFuncList.lnnClearPtkList = dlsym(soHandle, "LnnClearPtkList");
     g_lnnEnhanceFuncList.generateNewLocalCipherKey = dlsym(soHandle, "GenerateNewLocalCipherKey");
@@ -398,6 +402,9 @@ int32_t LnnRegisterEnhanceFunc(void *soHandle)
     g_lnnEnhanceFuncList.lnnRegSleRangeCb = dlsym(soHandle, "LnnRegSleRangeCb");
     g_lnnEnhanceFuncList.lnnUnregSleRangeCb = dlsym(soHandle, "LnnUnregSleRangeCb");
     g_lnnEnhanceFuncList.sleRangeDeathCallback = dlsym(soHandle, "SleRangeDeathCallback");
+
+    g_lnnEnhanceFuncList.lnnInitUsbChannelManager = dlsym(soHandle, "LnnInitUsbChannelManager");
+    g_lnnEnhanceFuncList.lnnDeinitUsbChannelManager = dlsym(soHandle, "LnnDeinitUsbChannelManager");
 
     return SOFTBUS_OK;
 }

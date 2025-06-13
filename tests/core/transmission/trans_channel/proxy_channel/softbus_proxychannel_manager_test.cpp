@@ -2406,7 +2406,6 @@ HWTEST_F(SoftbusProxyChannelManagerTest, TransAsyncProxyChannelTask002, TestSize
     EXPECT_EQ(SOFTBUS_OK, ret);
 
     TransAsyncProxyChannelTask(channelId);
-    TransProxyDelChanByReqId(channelInfo->reqId, 1);
 }
 
 /**
