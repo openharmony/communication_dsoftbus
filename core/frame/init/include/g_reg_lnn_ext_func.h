@@ -33,6 +33,7 @@
 #include "lnn_physical_subnet_manager_struct.h"
 #include "lnn_decision_db_struct.h"
 #include "lnn_feature_capability_struct.h"
+#include "lnn_lane_link_struct.h"
 #include "lnn_local_net_ledger_struct.h"
 #include "lnn_file_utils_struct.h"
 #include "lnn_lane_interface_struct.h"
@@ -129,6 +130,7 @@ typedef int32_t (*LnnDeleteDevInfoSyncToDBFunc)(const char *udid, int64_t accoun
 typedef int32_t (*SoftBusGetCurrentGroupFunc)(SoftBusWifiP2pGroupInfo *groupInfo);
 typedef uint64_t (*LnnGetSysTimeMsFunc)(void);
 typedef int32_t (*LnnGetRemoteStrInfoFunc)(const char *networkId, InfoKey key, char *info, uint32_t len);
+typedef int32_t (*AuthGetHmlConnInfoFunc)(const char *uuid, AuthConnInfo *connInfo, bool isMeta);
 typedef int64_t (*AuthGetIdByConnInfoFunc)(const AuthConnInfo *connInfo, bool isServer, bool isMeta);
 typedef int32_t (*AuthOpenConnFunc)(const AuthConnInfo *info, uint32_t requestId,
     const AuthConnCallback *callback, bool isMeta);
@@ -345,6 +347,7 @@ typedef int32_t (*LnnGetRemoteNumInfoByIfnameIdxFunc)(const char *networkId, Inf
 typedef int32_t (*GetSupportBandWidthFunc)(const char *peerNetworkId, LaneTransType transType, uint32_t *supportBw);
 typedef int32_t (*GetAllSupportReuseBandWidthFunc)(const char *peerNetworkId, LaneTransType transType,
     uint32_t **supportBw, uint8_t *bwCnt);
+typedef int32_t (*FindLaneResourceByLinkTypeFunc)(const char *peerUdid, LaneLinkType type, LaneResource *resource);
 typedef bool (*LnnIsNeedInterceptBroadcastFunc)(void);
 
 #ifdef __cplusplus
