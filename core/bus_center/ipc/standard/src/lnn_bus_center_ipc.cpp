@@ -63,12 +63,19 @@ struct MsdpRangeReqInfo {
     int32_t pid;
 };
 
+struct TimeSyncReqInfo {
+    char pkgName[PKG_NAME_SIZE_MAX];
+    char networkId[NETWORK_ID_BUF_LEN];
+    int32_t pid;
+};
+
 static std::mutex g_lock;
 static std::vector<JoinLnnRequestInfo *> g_joinLNNRequestInfo;
 static std::vector<LeaveLnnRequestInfo *> g_leaveLNNRequestInfo;
 static std::vector<RefreshLnnRequestInfo *> g_refreshLnnRequestInfo;
 static std::vector<DataLevelChangeReqInfo *> g_dataLevelChangeRequestInfo;
 static std::vector<MsdpRangeReqInfo *> g_msdpRangeReqInfo;
+static std::vector<TimeSyncReqInfo *> g_timeSyncRequestInfo;
 
 static int32_t OnRefreshDeviceFound(const char *pkgName, const DeviceInfo *device,
     const InnerDeviceInfoAddtions *additions);
@@ -106,6 +113,29 @@ static bool IsRepeatJoinLNNRequest(const char *pkgName, int32_t callingPid, cons
         }
     }
     return false;
+}
+
+static int32_t AddTimeSyncInfo(const char *pkgName, int32_t callingPid, const char *networkId)
+{
+    TimeSyncReqInfo *info = new (std::nothrow) TimeSyncReqInfo();
+    if (info == nullptr) {
+        LNN_LOGE(LNN_EVENT, "new timesyncreq info fail");
+        return SOFTBUS_MEM_ERR;
+    }
+    if (strncpy_s(info->pkgName, PKG_NAME_SIZE_MAX, pkgName, strlen(pkgName)) != EOK) {
+        LNN_LOGE(LNN_EVENT, "copy pkgName fail");
+        delete info;
+        return SOFTBUS_MEM_ERR;
+    }
+    if (strncpy_s(info->networkId, NETWORK_ID_BUF_LEN, networkId, strlen(networkId)) != EOK) {
+        LNN_LOGE(LNN_EVENT, "copy networkId fail");
+        delete info;
+        return SOFTBUS_MEM_ERR;
+    }
+    info->pid = callingPid;
+    std::lock_guard<std::mutex> autoLock(g_lock);
+    g_timeSyncRequestInfo.push_back(info);
+    return SOFTBUS_OK;
 }
 
 static int32_t AddJoinLNNInfo(const char *pkgName, int32_t callingPid, const ConnectionAddr *addr)
@@ -369,9 +399,18 @@ int32_t LnnIpcSetDataLevel(const DataLevel *dataLevel)
 int32_t LnnIpcStartTimeSync(const char *pkgName,  int32_t callingPid, const char *targetNetworkId,
     int32_t accuracy, int32_t period)
 {
+    if (pkgName == nullptr || targetNetworkId == nullptr) {
+        LNN_LOGE(LNN_EVENT, "invalid param");
+        return SOFTBUS_INVALID_PARAM;
+    }
     int32_t ret = IsOverThreshold(pkgName, SERVER_START_TIME_SYNC);
     if (ret >= SOFTBUS_DDOS_ID_AND_USER_SAME_COUNT_LIMIT && ret <= SOFTBUS_DDOS_USER_ID_ALL_COUNT_LIMIT) {
         LNN_LOGE(LNN_EVENT, "here's the statistics, no need return");
+    }
+    ret = AddTimeSyncInfo(pkgName, callingPid, targetNetworkId);
+    if (ret != SOFTBUS_OK) {
+        LNN_LOGE(LNN_EVENT, "add time sync info fail");
+        return ret;
     }
     return LnnStartTimeSync(pkgName, callingPid, targetNetworkId, (TimeSyncAccuracy)accuracy, (TimeSyncPeriod)period);
 }
@@ -756,6 +795,31 @@ static void RemoveRangeRequestInfoByPkgName(const char *pkgName)
     }
 }
 
+static void StopTimeSyncReq(const char *pkgName)
+{
+    std::lock_guard<std::mutex> autoLock(g_lock);
+    std::vector<TimeSyncReqInfo *>::iterator iter;
+    for (iter = g_timeSyncRequestInfo.begin(); iter != g_timeSyncRequestInfo.end();) {
+        if ((*iter) == nullptr) {
+            LNN_LOGE(LNN_EVENT, "iter is nullptr");
+            continue;
+        }
+        if (strncmp(pkgName, (*iter)->pkgName, strlen(pkgName)) != 0) {
+            ++iter;
+            continue;
+        }
+        char networkId[NETWORK_ID_BUF_LEN] = { 0 };
+        if (strcpy_s(networkId, NETWORK_ID_BUF_LEN, (*iter)->networkId) != EOK) {
+            LNN_LOGE(LNN_EVENT, "strcpy_s networkId fail");
+            continue;
+        }
+        int32_t pid = (*iter)->pid;
+        delete *iter;
+        iter = g_timeSyncRequestInfo.erase(iter);
+        LnnIpcStopTimeSync(pkgName, networkId, pid);
+    }
+}
+
 void BusCenterServerDeathCallback(const char *pkgName)
 {
     if (pkgName == nullptr) {
@@ -765,4 +829,5 @@ void BusCenterServerDeathCallback(const char *pkgName)
     RemoveLeaveRequestInfoByPkgName(pkgName);
     RemoveRefreshRequestInfoByPkgName(pkgName);
     RemoveRangeRequestInfoByPkgName(pkgName);
+    StopTimeSyncReq(pkgName);
 }
