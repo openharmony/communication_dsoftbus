@@ -13,6 +13,7 @@
 
 import("//build/test.gni")
 import("../../../../dsoftbus.gni")
+deps = []
 
 group("fuzztest") {
   testonly = true
@@ -25,4 +26,5 @@ group("fuzztest") {
       "wifidirectprotocol_fuzzer:WifiDirectProtocolFuzzTest",
     ]
   }
+  deps += [ "conngeneralconnection_fuzzer:ConnGeneralConnectionFuzzTest" ]
 }

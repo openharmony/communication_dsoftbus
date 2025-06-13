@@ -69,7 +69,7 @@ static OutData *PackReceiveData(const uint8_t *data, uint32_t dataLen, uint32_t 
     dataTmp->peerId = peerId;
     dataTmp->msgType = GENERAL_CONNECTION_MSG_TYPE_NORMAL;
 
-    if (memcpy_s(dataTmp + GENERAL_CONNECTION_HEADER_SIZE, dataLen, data, dataLen) != EOK) {
+    if (memcpy_s((uint8_t *)dataTmp + GENERAL_CONNECTION_HEADER_SIZE, dataLen, data, dataLen) != EOK) {
         SoftBusFree(dataTmp);
         return nullptr;
     }
@@ -189,6 +189,27 @@ static void ConnectionDisconnected(GeneralConnectionParam *info, uint32_t genera
     (void)info;
     (void)generalHandle;
     (void)reason;
+}
+
+const uint8_t *g_baseFuzzData = nullptr;
+size_t g_baseFuzzSize = 0;
+size_t g_baseFuzzPos;
+template <class T>
+T GetConnGeneralRandomData()
+{
+    T objetct {};
+    size_t objetctSize = sizeof(objetct);
+    if (g_baseFuzzData == nullptr || objetctSize > g_baseFuzzSize - g_baseFuzzPos) {
+        COMM_LOGE(COMM_TEST, "data invalid");
+        return objetct;
+    }
+    errno_t ret = memcpy_s(&objetct, objetctSize, g_baseFuzzData + g_baseFuzzPos, objetctSize);
+    if (ret != EOK) {
+        COMM_LOGE(COMM_TEST, "memory copy error");
+        return {};
+    }
+    g_baseFuzzPos += objetctSize;
+    return objetct;
 }
 
 /*
@@ -382,7 +403,7 @@ HWTEST_F(GeneralConnectionTest, TestSend, TestSize.Level1)
     ret = memcpy_s(buff + size, dataRecv->dataLen, dataRecv->data, dataRecv->dataLen);
     EXPECT_EQ(ret, EOK);
     g_ConnectCallback->OnDataReceived(0, MODULE_BLE_GENERAL, 0, buff, dataRecv->dataLen);
-    g_ConnectCallback->OnDataReceived(0, MODULE_BLE_GENERAL, 0, (char *)dataRecv->data, dataLen);
+    g_ConnectCallback->OnDataReceived(0, MODULE_BLE_GENERAL, 0, (char *)dataRecv->data, dataRecv->dataLen);
     g_ConnectionId = (CONNECT_BLE << CONNECT_TYPE_SHIFT);
     ConnectResult *connectResult = GeneralConnectionInterfaceMock::GetConnectResultMock();
     uint32_t requestId = 12;
@@ -545,6 +566,30 @@ HWTEST_F(GeneralConnectionTest, TestRecvNewConnection, TestSize.Level1)
         .updateHandle = 222,
     };
     data = PackInnerMsg(&info1, GENERAL_CONNECTION_MSG_TYPE_MERGE, MODULE_BLE_GENERAL);
+    g_ConnectCallback->OnDataReceived(connectionId, MODULE_BLE_GENERAL, 0, data->buf, data->len);
+    SoftBusFree(data->buf);
+}
+
+/*
+ * @tc.name: TestDataReceivedFuzzTest
+ * @tc.desc: test the unpack data interface with fuzz, just for fuzz
+ * @tc.type: FUNC
+ * @tc.require:
+ */
+HWTEST_F(GeneralConnectionTest, TestDataReceivedFuzzTest, TestSize.Level1)
+{
+    CONN_LOGI(CONN_BLE, "TestDataReceivedFuzzTest start ");
+    NiceMock<GeneralConnectionInterfaceMock> mock;
+    EXPECT_CALL(mock, ConnBlePostBytesMock).WillRepeatedly(Return(SOFTBUS_OK));
+    uint32_t handle = GetConnGeneralRandomData<uint32_t>();
+    uint32_t connectionId = GetConnGeneralRandomData<uint32_t>();
+    GeneralConnectionInfo info = {
+        .peerId = handle,
+        .name = "test",
+        .bundleName = "testApp",
+    };
+    ConnPostData *data = PackInnerMsg(
+        &info, GetConnGeneralRandomData<GeneralConnectionMsgType>(), GetConnGeneralRandomData<ConnModule>());
     g_ConnectCallback->OnDataReceived(connectionId, MODULE_BLE_GENERAL, 0, data->buf, data->len);
     SoftBusFree(data->buf);
 }
