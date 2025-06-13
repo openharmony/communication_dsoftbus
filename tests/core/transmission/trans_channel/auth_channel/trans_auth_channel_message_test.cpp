@@ -296,7 +296,7 @@ HWTEST_F(TransAuthChannelMessageTest, TransAuthChannelErrorPack003, TestSize.Lev
     EXPECT_CALL(authChannelObj, AddStringToJsonObject).WillOnce(testing::Return(true));
 
     char *data = static_cast<char *>(SoftBusCalloc(20));
-    (void)strcpy(data, 20, "hfohfOHFEPJFHWQ");
+    (void)strcpy_s(data, 20, "hfohfOHFEPJFHWQ");
     EXPECT_CALL(authChannelObj, cJSON_PrintUnformatted).WillOnce(Return(data));
 
     int32_t ret = TransAuthChannelErrorPack(errcode, "errMsg", cJsonStr, ERR_MSG_MAX_LEN);
