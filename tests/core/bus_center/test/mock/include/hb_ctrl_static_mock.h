@@ -68,7 +68,7 @@ public:
     virtual bool LnnIsLocalSupportBurstFeature(void) = 0;
     virtual void LnnNotifyAccountStateChangeEvent(SoftBusAccountState state) = 0;
     virtual void AuthLoadDeviceKey(void) = 0;
-    virtual int32_t LnnGenerateCeParams(void) = 0;
+    virtual int32_t LnnGenerateCeParams(bool isUnlocked) = 0;
     virtual void DfxRecordTriggerTime(LnnTriggerReason reason, LnnEventLnnStage stage) = 0;
     virtual int32_t LnnHbMediumMgrInit(void) = 0;
     virtual int32_t LnnStartNewHbStrategyFsm(void) = 0;
@@ -86,6 +86,7 @@ public:
     virtual int32_t LnnStartHbByTypeAndStrategyEx(LnnProcessSendOnceMsgPara *msgPara) = 0;
     virtual int32_t LnnSyncBleOfflineMsg(void) = 0;
     virtual void LnnRemoveV0BroadcastAndCheckDev(void) = 0;
+    virtual int32_t UpdateRecoveryDeviceInfoFromDb(void) = 0;
 };
 class HeartBeatCtrlStaticInterfaceMock : public HeartBeatCtrlStaticInterface {
 public:
@@ -120,7 +121,7 @@ public:
     MOCK_METHOD0(LnnIsLocalSupportBurstFeature, bool(void));
     MOCK_METHOD1(LnnNotifyAccountStateChangeEvent, void(SoftBusAccountState));
     MOCK_METHOD0(AuthLoadDeviceKey, void(void));
-    MOCK_METHOD0(LnnGenerateCeParams, int32_t(void));
+    MOCK_METHOD1(LnnGenerateCeParams, int32_t(bool));
     MOCK_METHOD2(DfxRecordTriggerTime, void(LnnTriggerReason, LnnEventLnnStage));
     MOCK_METHOD0(LnnHbMediumMgrInit, int32_t(void));
     MOCK_METHOD0(LnnStartNewHbStrategyFsm, int32_t(void));
@@ -138,6 +139,7 @@ public:
     MOCK_METHOD1(LnnStartHbByTypeAndStrategyEx, int32_t (LnnProcessSendOnceMsgPara *));
     MOCK_METHOD0(LnnSyncBleOfflineMsg, int32_t (void));
     MOCK_METHOD0(LnnRemoveV0BroadcastAndCheckDev, void (void));
+    MOCK_METHOD0(UpdateRecoveryDeviceInfoFromDb, int32_t (void));
 };
 } // namespace OHOS
 #endif // OHOS_LNN_CTRL_STATIC_MOCK_H

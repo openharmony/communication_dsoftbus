@@ -36,15 +36,6 @@ int32_t TransCheckServerAccessControl(const AppInfo *appInfo)
     (void)appInfo;
     return SOFTBUS_OK;
 }
-uint64_t TransACLGetFirstTokenID(void)
-{
-    return TOKENID_NOT_SET;
-}
-
-uint64_t TransACLGetCallingTokenID(void)
-{
-    return TOKENID_NOT_SET;
-}
 
 void TransGetTokenInfo(uint64_t callingId, char *tokenName, int32_t nameLen, int32_t *tokenType)
 {

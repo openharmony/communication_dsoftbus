@@ -84,22 +84,22 @@ if (defined(ohos_lite)) {
     "$dsoftbus_root_path/interfaces/inner_kits/lnn",
     "$dsoftbus_root_path/interfaces/kits/discovery",
     "$dsoftbus_root_path/interfaces/kits/transport",
+    "$dsoftbus_root_path/sdk/bus_center/interface/common",
+    "$dsoftbus_root_path/core/frame/common/include",
   ]
   bus_center_manager_sdk_src += [
     "$dsoftbus_root_path/sdk/bus_center/ipc/$os_type/src/bus_center_server_proxy.cpp",
     "$dsoftbus_root_path/sdk/bus_center/ipc/$os_type/src/bus_center_server_proxy_standard.cpp",
     "$dsoftbus_root_path/sdk/bus_center/manager/src/client_bus_center_manager.c",
     "$dsoftbus_root_path/sdk/bus_center/manager/src/softbus_client_init.c",
+    "$dsoftbus_root_path/core/frame/common/src/softbus_init_common.c",
   ]
 
-  bus_center_manager_sdk_inc += [
+  bus_center_manager_sdk_inc +=
+  [
     "$dsoftbus_root_path/core/bus_center/extend/include",
     "$dsoftbus_root_path/interfaces/kits/bus_center/enhance",
-    "$dsoftbus_root_path/sdk/bus_center/interface/common",
-    "$dsoftbus_root_path/core/frame/common/include",
-    "$dsoftbus_root_path/components/nstackx/fillp/include",
   ]
-
   bus_center_manager_sdk_src += [ "$dsoftbus_root_path/core/bus_center/extend/src/bus_center_ex_obj_proxy.cpp" ]
 }
 

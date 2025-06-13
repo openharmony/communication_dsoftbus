@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2023-2024 Huawei Device Co., Ltd.
+ * Copyright (c) 2025 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -13,36 +13,20 @@
  * limitations under the License.
  */
 
-/**
- * @file softbus_ble_gatt.h
- * @brief ble stack adapter
- *
- * @since 4.1
- * @version 1.0
- */
+#ifndef DISC_RAISE_BLE_H
+#define DISC_RAISE_BLE_H
 
-#ifndef SOFTBUS_BLE_GATT_H
-#define SOFTBUS_BLE_GATT_H
-
-#include "softbus_broadcast_adapter_interface.h"
+#include "disc_ble_dispatcher.h"
 
 #ifdef __cplusplus
-extern "C"{
-#endif
+extern "C" {
+#endif /* __cplusplus */
 
-#define GATT_SCAN_MAX_NUM        4
-
-#define CHANEL_LP                0
-#define CHANEL_STEADY            1
-#define CHANEL_SHARE             2
-#define CHANEL_UNSTEADY          3
-#define CHANEL_UNKNOW            1999
-
-void SoftbusBleAdapterInit(void);
-void SoftbusBleAdapterDeInit(void);
+DiscoveryBleDispatcherInterface *DiscRaiseBleInit(DiscInnerCallback *discInnerCb);
+void DiscRaiseBleDeinit(void);
 
 #ifdef __cplusplus
 }
-#endif
+#endif /* __cplusplus */
 
-#endif /* SOFTBUS_BLE_GATT_H */
+#endif /* DISC_RAISE_BLE_H */

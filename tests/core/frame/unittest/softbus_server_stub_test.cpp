@@ -752,7 +752,7 @@ HWTEST_F(SoftbusServerStubTest, SoftbusServerStubTest020, TestSize.Level1)
     datas.WriteUint32(addrTypeLen);
     datas.WriteRawData(&addr, addrTypeLen);
     ret = softBusServer->JoinLNNInner(datas, reply);
-    EXPECT_EQ(SOFTBUS_OK, ret);
+    EXPECT_EQ(SOFTBUS_IPC_ERR, ret);
 
     ret = softBusServer->LeaveLNNInner(datas, reply);
     EXPECT_EQ(SOFTBUS_IPC_ERR, ret);

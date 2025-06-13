@@ -26,6 +26,8 @@ AdapterEnhanceFuncList *AdapterEnhanceFuncListGet(void)
 
 int32_t AdapterRegisterEnhanceFunc(void *soHandle)
 {
+    g_adapterEnhanceFuncList.softBusRegRangeCb = dlsym(soHandle, "SoftBusRegRangeCb");
+    g_adapterEnhanceFuncList.softBusUnregRangeCb = dlsym(soHandle, "SoftBusUnregRangeCb");
     g_adapterEnhanceFuncList.softBusBleRange = dlsym(soHandle, "SoftBusBleRange");
     g_adapterEnhanceFuncList.softBusGetBlePower = dlsym(soHandle, "SoftBusGetBlePower");
     g_adapterEnhanceFuncList.softBusAddSleStateListener = dlsym(soHandle, "SoftBusAddSleStateListener");
@@ -33,6 +35,7 @@ int32_t AdapterRegisterEnhanceFunc(void *soHandle)
     g_adapterEnhanceFuncList.softBusRemoveSleStateListener = dlsym(soHandle, "SoftBusRemoveSleStateListener");
     g_adapterEnhanceFuncList.getSleRangeCapacity = dlsym(soHandle, "GetSleRangeCapacity");
     g_adapterEnhanceFuncList.getLocalSleAddr = dlsym(soHandle, "GetLocalSleAddr");
-
+    g_adapterEnhanceFuncList.softbusBleAdapterInit = dlsym(soHandle, "SoftbusBleAdapterInit");
+    g_adapterEnhanceFuncList.softbusBleAdapterDeInit = dlsym(soHandle, "SoftbusBleAdapterDeInit");
     return SOFTBUS_OK;
 }

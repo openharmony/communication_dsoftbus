@@ -1397,6 +1397,9 @@ static void OnWifiDirectConnectSuccess(uint32_t p2pRequestId, const struct WifiD
         NotifyRawLinkConnectSuccess(p2pRequestId, link, &linkInfo);
         return;
     }
+    if (linkInfo.type == LANE_HML && link->isReuse) {
+        TryDelPreLinkByConnReqId(p2pRequestId);
+    }
     NotifyLinkSucc(ASYNC_RESULT_P2P, p2pRequestId, &linkInfo, link->linkId);
     return;
 FAIL:
@@ -2321,6 +2324,26 @@ static int32_t CheckTransReqInfo(const LinkRequest *request, uint32_t laneReqId)
     return SOFTBUS_OK;
 }
 
+static void TryConcurrencyPreLinkConn(const LinkRequest *request, uint32_t laneLinkReqId,
+    struct WifiDirectConnectInfo *wifiDirectInfo)
+{
+    LNN_LOGI(LNN_LANE, "prelink connect enter");
+    char udid[UDID_BUF_LEN] = {0};
+    uint8_t udidHash[SHA_256_HASH_LEN] = {0};
+    if (LnnConvertDlId(request->peerNetworkId, CATEGORY_NETWORK_ID, CATEGORY_UDID, udid, UDID_BUF_LEN) != SOFTBUS_OK) {
+        LNN_LOGE(LNN_LANE, "convert networkId to udid fail");
+        return;
+    }
+    if (SoftBusGenerateStrHash((uint8_t *)udid, strlen(udid), udidHash) != SOFTBUS_OK) {
+        LNN_LOGE(LNN_LANE, "GenerateStrHash fail");
+        return;
+    }
+    if (UpdateConcurrencyReuseLaneReqIdByUdidPacked((char *)udidHash, laneLinkReqId,
+        wifiDirectInfo->requestId) != SOFTBUS_OK) {
+        LNN_LOGE(LNN_LANE, "pre link update reuse link lane req id fail");
+    }
+}
+
 static int32_t OpenBleTriggerToConn(const LinkRequest *request, uint32_t laneReqId, const LaneLinkCb *callback)
 {
     if (CheckTransReqInfo(request, laneReqId) != SOFTBUS_OK) {
@@ -2345,6 +2368,7 @@ static int32_t OpenBleTriggerToConn(const LinkRequest *request, uint32_t laneReq
     wifiDirectInfo.connectType = WIFI_DIRECT_CONNECT_TYPE_BLE_TRIGGER_HML;
     wifiDirectInfo.reuseOnly = false;
     wifiDirectInfo.ipAddrType = request->isSupportIpv6 ? IPV6 : IPV4;
+    TryConcurrencyPreLinkConn(request, laneReqId, &wifiDirectInfo);
     if (strcpy_s(wifiDirectInfo.remoteNetworkId, NETWORK_ID_BUF_LEN, request->peerNetworkId) != EOK) {
         LNN_LOGE(LNN_LANE, "copy networkId failed");
         (void)DelP2pLinkReqByReqId(ASYNC_RESULT_P2P, wifiDirectInfo.requestId);
@@ -2550,6 +2574,7 @@ static int32_t ConnectWifiDirectWithReuse(const LinkRequest *request, uint32_t l
         LNN_LOGE(LNN_LANE, "update p2p reuse info fail, laneReqId=%{public}u", laneReqId);
         return ret;
     }
+    TryConcurrencyPreLinkConn(request, laneReqId, &wifiDirectInfo);
     struct WifiDirectConnectCallback cb = {
         .onConnectSuccess = OnWifiDirectConnectSuccess,
         .onConnectFailure = OnWifiDirectConnectFailure,

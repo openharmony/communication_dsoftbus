@@ -513,8 +513,14 @@ HWTEST_F(TransProcessDataTest, TransProcessDataTest016, TestSize.Level1)
     (void)strcpy_s(node->data, 10, plain); // test value
     (void)strcpy_s(node->w, 10, plain); // test value
 
-    int32_t ret = TransTdcUnPackData(channelId, sessionKey, plain, &plainLen, node);
-    EXPECT_EQ(SOFTBUS_DECRYPT_ERR, ret);
+    int32_t ret = TransTdcUnPackData(channelId, nullptr, plain, &plainLen, node);
+    EXPECT_EQ(SOFTBUS_INVALID_PARAM, ret);
+    ret = TransTdcUnPackData(channelId, sessionKey, nullptr, &plainLen, node);
+    EXPECT_EQ(SOFTBUS_INVALID_PARAM, ret);
+    ret = TransTdcUnPackData(channelId, sessionKey, plain, nullptr, node);
+    EXPECT_EQ(SOFTBUS_INVALID_PARAM, ret);
+    ret = TransTdcUnPackData(channelId, sessionKey, plain, &plainLen, nullptr);
+    EXPECT_EQ(SOFTBUS_INVALID_PARAM, ret);
     SoftBusFree(node->w);
     SoftBusFree(node->data);
     SoftBusFree(node);
@@ -556,43 +562,19 @@ HWTEST_F(TransProcessDataTest, TransProcessDataTest017, TestSize.Level1)
 HWTEST_F(TransProcessDataTest, TransProcessDataTest018, TestSize.Level1)
 {
     int32_t channelId = 1124; // test value
-    char plain[10] = "testPlain";
     uint32_t headSize = 1;
     bool flag = true;
 
-    TcpDataTlvPacketHead *head = static_cast<TcpDataTlvPacketHead *>(SoftBusCalloc(sizeof(TcpDataTlvPacketHead)));
-    ASSERT_NE(nullptr, head);
-    DataBuf *node = static_cast<DataBuf *>(SoftBusCalloc(sizeof(DataBuf) * 10)); // test value
-    if (node == nullptr) {
-        SoftBusFree(head);
-        return;
-    }
-    node->data = static_cast<char *>(SoftBusCalloc(sizeof(char)));
-    if (node->data == nullptr) {
-        SoftBusFree(node);
-        SoftBusFree(head);
-        return;
-    }
+    TcpDataTlvPacketHead head;
+    DataBuf node; // test value
 
-    node->w = static_cast<char *>(SoftBusCalloc(sizeof(char) * 10)); // test value
-    if (node->w == nullptr) {
-        SoftBusFree(node->data);
-        SoftBusFree(node);
-        SoftBusFree(head);
-        return;
-    }
-
-    node->channelId = channelId;
-    node->size = 10; // test value
-    node->fd = 1;
-    (void)strcpy_s(node->data, 10, plain); // test value
-    (void)strcpy_s(node->w, 10, plain); // test value
-
-    int32_t ret = TransTdcUnPackAllTlvData(channelId, head, &headSize, node, &flag);
-    EXPECT_NE(SOFTBUS_OK, ret);
-    SoftBusFree(node->w);
-    SoftBusFree(node->data);
-    SoftBusFree(node);
-    SoftBusFree(head);
+    int32_t ret = TransTdcUnPackAllTlvData(channelId, nullptr, &headSize, &node, &flag);
+    EXPECT_EQ(SOFTBUS_INVALID_PARAM, ret);
+    ret = TransTdcUnPackAllTlvData(channelId, &head, nullptr, &node, &flag);
+    EXPECT_EQ(SOFTBUS_INVALID_PARAM, ret);
+    ret = TransTdcUnPackAllTlvData(channelId, &head, &headSize, nullptr, &flag);
+    EXPECT_EQ(SOFTBUS_INVALID_PARAM, ret);
+    ret = TransTdcUnPackAllTlvData(channelId, &head, &headSize, &node, nullptr);
+    EXPECT_EQ(SOFTBUS_INVALID_PARAM, ret);
 }
 }

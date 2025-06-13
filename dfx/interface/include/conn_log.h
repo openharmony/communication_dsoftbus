@@ -34,6 +34,7 @@ typedef enum {
     CONN_ACTION,
     CONN_SLE,
     CONN_EVENT,
+    CONN_PROXY,
     CONN_TEST,
 } ConnLogLabelEnum;
 
@@ -51,6 +52,7 @@ static const SoftBusLogLabel CONN_LABELS[MODULE_DOMAIN_MAX_LEN] = {
     {CONN_ACTION,       0xd005769,      "ConnAction"},
     {CONN_SLE,          0xd005761,      "ConnSle"},
     {CONN_EVENT,        0xd00576a,      "ConnEvent"},
+    {CONN_PROXY,        0xd005762,      "ConnProxy"},
     {CONN_TEST,         DOMAIN_ID_TEST, "ConnTest"},
 };
 

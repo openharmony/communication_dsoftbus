@@ -245,7 +245,7 @@ static void OnDeviceFound(const NSTACKX_DeviceInfo *deviceList, uint32_t deviceC
 
         if ((nstackxDeviceInfo->update & 0x1) == 0) {
             char *anonymizedName = NULL;
-            Anonymize(nstackxDeviceInfo->deviceName, &anonymizedName);
+            AnonymizeDeviceName(nstackxDeviceInfo->deviceName, &anonymizedName);
             DISC_LOGI(DISC_COAP, "duplicate device do not need report. deviceName=%{public}s",
                 AnonymizeWrapper(anonymizedName));
             AnonymizeFree(anonymizedName);
@@ -601,6 +601,7 @@ static int32_t SetLocalDeviceInfo(LinkStatus status, int32_t ifnameIdx)
     g_localDeviceInfo->name = "";
     g_localDeviceInfo->deviceType = (uint32_t)deviceType;
     g_localDeviceInfo->businessType = (uint8_t)NSTACKX_BUSINESS_TYPE_NULL;
+    g_localDeviceInfo->hasDeviceHash = true;
     (void)SoftBusMutexUnlock(&g_localDeviceInfoLock);
 
     ret = SetLocalLinkInfo(status, ifnameIdx);

@@ -31,6 +31,7 @@ public:
 private:
     int32_t GetNodeKeyInfoLen(int32_t key);
     int32_t SoftbusRegisterServiceInner(MessageParcel &data, MessageParcel &reply);
+    int32_t SoftbusRegisterBrProxyServiceInner(MessageParcel &data, MessageParcel &reply);
 
     int32_t CreateSessionServerInner(MessageParcel &data, MessageParcel &reply);
     int32_t RemoveSessionServerInner(MessageParcel &data, MessageParcel &reply);
@@ -85,6 +86,11 @@ private:
     int32_t DisconnectInner(MessageParcel &data, MessageParcel &reply);
     int32_t SendInner(MessageParcel &data, MessageParcel &reply);
     int32_t GetPeerDeviceIdInner(MessageParcel &data, MessageParcel &reply);
+    int32_t OpenBrProxyInner(MessageParcel &data, MessageParcel &reply);
+    int32_t CloseBrProxyInner(MessageParcel &data, MessageParcel &reply);
+    int32_t SendBrProxyDataInner(MessageParcel &data, MessageParcel &reply);
+    int32_t SetBrProxyListenerStateInner(MessageParcel &data, MessageParcel &reply);
+    int32_t GetBrProxyChannelStateInner(MessageParcel &data, MessageParcel &reply);
 
     void InitMemberFuncMap();
     void InitMemberPermissionMap();

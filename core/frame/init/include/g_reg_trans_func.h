@@ -16,14 +16,15 @@
 #ifndef G_REG_TRANS_FUNC_H
 #define G_REG_TRANS_FUNC_H
 
+#include "form/trans_event_form.h"
 #include "g_enhance_trans_func.h"
 #include "lnn_lane_interface_struct.h"
-#include "stdint.h"
-#include "stdbool.h"
-#include "softbus_trans_def.h"
 #include "softbus_app_info.h"
+#include "softbus_trans_def.h"
+#include "stdbool.h"
+#include "stdint.h"
 #include "trans_auth_lane_pending_ctl_struct.h"
-#include "form/trans_event_form.h"
+#include "trans_inner_session_struct.h"
 
 // 需要改成struct
 #include "trans_inner.h"
@@ -39,18 +40,21 @@ typedef int32_t (*TransSendMsgFunc)(int32_t channelId, int32_t channelType, cons
     uint32_t len, int32_t msgType);
 typedef int32_t (*TransProxyCloseProxyChannelFunc)(int32_t channelId);
 typedef int32_t (*GetAppInfoByIdFunc)(int32_t channelId, AppInfo *appInfo);
-typedef int32_t (*TransDealTdcChannelOpenResultFunc)(int32_t channelId, int32_t openResult);
-typedef int32_t (*TransDealProxyChannelOpenResultFunc)(int32_t channelId, int32_t openResult);
+typedef int32_t (*TransDealTdcChannelOpenResultFunc)(
+    int32_t channelId, int32_t openResult, const AccessInfo *accessInfo);
+typedef int32_t (*TransDealProxyChannelOpenResultFunc)(
+    int32_t channelId, int32_t openResult, const AccessInfo *accessInfo);
 typedef int32_t (*TransOpenChannelFunc)(const SessionParam *param, TransInfo *transInfo);
-typedef int32_t (*TransCreateSessionServerFunc)(const char *pkgName, const char *sessionName, int32_t uid, int32_t pid);
+typedef int32_t (*TransCreateSessionServerFunc)(
+    const char *pkgName, const char *sessionName, int32_t uid, int32_t pid);
 typedef TransDeviceState (*TransGetDeviceStateFunc)(const char *networkId);
 typedef int32_t (*TransAuthWithParaGetLaneReqByLaneReqIdFunc)(uint32_t laneReqId, TransAuthWithParaNode *paraNode);
 typedef int32_t (*TransAuthWithParaDelLaneReqByIdFunc)(uint32_t laneReqId);
 typedef int32_t (*GetAppInfoFunc)(const char *sessionName, int32_t channelId, AppInfo *appInfo, bool isClient);
 typedef int32_t (*TransOpenAuthMsgChannelWithParaFunc)(const char *sessionName, const LaneConnInfo *connInfo,
     int32_t *channelId, bool accountInfo);
-typedef int32_t (*TransLaneMgrAddLaneFunc)(
-    const TransInfo *transInfo, const LaneConnInfo *connInfo, uint32_t laneHandle, bool isQosLane, AppInfoData *myData);
+typedef int32_t (*TransLaneMgrAddLaneFunc)(const TransInfo *transInfo,
+    const LaneConnInfo *connInfo, uint32_t laneHandle, bool isQosLane, AppInfoData *myData);
 typedef int32_t (*TransCloseChannelFunc)(const char *sessionName, int32_t channelId, int32_t channelType);
 typedef int32_t (*NotifyOpenAuthChannelFailedFunc)(const char *pkgName, int32_t pid, int32_t channelId,
     int32_t errCode);
@@ -66,13 +70,16 @@ typedef int32_t (*TransUdpGetIpAndConnectTypeByIdFunc)(int32_t channelId, char *
 typedef int32_t (*TransAuthGetRoleByAuthIdFunc)(int32_t authId, bool *isClient);
 
 typedef void (*CloseSessionInnerFunc)(int32_t channelId);
-typedef int32_t (*GetSessionInfoFunc)(int32_t channelId, int32_t *fd, int32_t *channelType, char *sessionKey, int32_t keyLen);
+typedef int32_t (*GetSessionInfoFunc)(
+    int32_t channelId, int32_t *fd, int32_t *channelType, char *sessionKey, int32_t keyLen);
 typedef int32_t (*DirectChannelCreateListenerFunc)(int32_t fd);
 typedef int32_t (*InnerAddSessionFunc)(InnerSessionInfo *innerInfo);
 typedef int32_t (*TransInnerAddDataBufNodeFunc)(int32_t channelId, int32_t fd, int32_t channelType);
 typedef int32_t (*ServerSideSendAckFunc)(int32_t sessionId, int32_t result);
 typedef int32_t (*TransSendDataFunc)(int32_t channelId, const void *data, uint32_t len);
 typedef int32_t (*ProxyDataRecvHandlerFunc)(int32_t channelId, const char *data, uint32_t len);
+typedef int32_t (*SoftbusAddServiceInnerForEnhanceFunc)(const char *pkgName, ISessionListenerInner *listener,
+    int32_t pid);
 
 typedef struct TagTransOpenFuncList {
     TransProxyGetAppInfoByChanIdFunc transProxyGetAppInfoByChanId;
@@ -108,6 +115,7 @@ typedef struct TagTransOpenFuncList {
     ServerSideSendAckFunc serverSideSendAck;
     TransSendDataFunc transSendData;
     ProxyDataRecvHandlerFunc proxyDataRecvHandler;
+    SoftbusAddServiceInnerForEnhanceFunc softbusAddServiceInnerForEnhance;
 } TransOpenFuncList;
 
 #ifdef __cplusplus

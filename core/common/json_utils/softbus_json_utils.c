@@ -289,7 +289,7 @@ bool AddNumber64ToJsonObject(cJSON *json, const char * const string, int64_t num
     return true;
 }
 
-bool AdddDoubleToJsonObject(cJSON *json, const char * const string, double num)
+bool AddDoubleToJsonObject(cJSON *json, const char * const string, double num)
 {
     if (json == NULL || string == NULL) {
         COMM_LOGE(COMM_UTILS, "invalid param");

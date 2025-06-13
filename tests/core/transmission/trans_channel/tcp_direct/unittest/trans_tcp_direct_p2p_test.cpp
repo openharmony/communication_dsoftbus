@@ -315,7 +315,7 @@ HWTEST_F(TransTcpDirectP2pTest, VerifyP2pTest001, TestSize.Level1)
     EXPECT_CALL(TransTcpDirectP2pMock, AuthMetaPostTransData).WillOnce(Return(SOFTBUS_LOCK_ERR));
     int32_t port = MY_PORT;
     ret = VerifyP2p(authHandle, g_ip, nullptr, port, seq);
-    EXPECT_EQ(ret, SOFTBUS_NOT_IMPLEMENT);
+    EXPECT_EQ(ret, SOFTBUS_LOCK_ERR);
 }
 
 /**
@@ -328,6 +328,8 @@ HWTEST_F(TransTcpDirectP2pTest, OpenAuthConnTest001, TestSize.Level1)
 {
     int32_t reqId = 1;
     ConnectType type = CONNECT_TCP;
+    NiceMock<TransTcpDirectCommonInterfaceMock> TransTcpDirectP2pMock;
+    EXPECT_CALL(TransTcpDirectP2pMock, AuthMetaPostTransData).WillRepeatedly(Return(SOFTBUS_OK));
 
     int32_t ret = OpenAuthConn(nullptr, reqId, true, type);
     EXPECT_EQ(ret, SOFTBUS_TRANS_OPEN_AUTH_CONN_FAILED);
@@ -358,7 +360,7 @@ HWTEST_F(TransTcpDirectP2pTest, OnVerifyP2pRequestTest001, TestSize.Level1)
     cJSON *json = cJSON_Parse(msg.c_str());
     EXPECT_TRUE(json != nullptr);
     NiceMock<TransTcpDirectCommonInterfaceMock> TransTcpDirectP2pMock;
-    EXPECT_CALL(TransTcpDirectP2pMock, AuthMetaPostTransData).WillOnce(Return(SOFTBUS_OK));
+    EXPECT_CALL(TransTcpDirectP2pMock, AuthMetaPostTransData).WillRepeatedly(Return(SOFTBUS_OK));
     SendVerifyP2pFailRsp(authHandle, seq, code, errCode, nullptr, true);
 
     SendVerifyP2pFailRsp(authHandle, seq, code, errCode, errDesc, true);
@@ -404,7 +406,7 @@ HWTEST_F(TransTcpDirectP2pTest, OnAuthDataRecvTest001, TestSize.Level1)
     data->data = (const uint8_t *)str;
     data->len = AUTH_TRANS_DATA_LEN;
     NiceMock<TransTcpDirectCommonInterfaceMock> TransTcpDirectP2pMock;
-    EXPECT_CALL(TransTcpDirectP2pMock, AuthMetaPostTransData).WillOnce(Return(SOFTBUS_OK));
+    EXPECT_CALL(TransTcpDirectP2pMock, AuthMetaPostTransData).WillRepeatedly(Return(SOFTBUS_OK));
     int32_t ret = OnVerifyP2pRequest(authHandle, seq, nullptr, true);
     EXPECT_EQ(ret, SOFTBUS_INVALID_PARAM);
     OnAuthMsgProc(authHandle, flags, seq, nullptr);
@@ -470,7 +472,7 @@ HWTEST_F(TransTcpDirectP2pTest, SendVerifyP2pRsp003, TestSize.Level1)
 
     EXPECT_CALL(TransTcpDirectP2pMock, AuthMetaPostTransData).WillOnce(Return(SOFTBUS_LOCK_ERR));
     ret = SendVerifyP2pRsp(authHandle, MODULE_P2P_LISTEN, MES_FLAG_REPLY, seq, "pack reply failed", isAuthLink);
-    EXPECT_EQ(ret, SOFTBUS_NOT_IMPLEMENT);
+    EXPECT_EQ(ret, SOFTBUS_LOCK_ERR);
 
     SendVerifyP2pFailRsp(authHandle, seq, CODE_VERIFY_P2P, errCode, "pack reply failed", notAuthLink);
     ret = SendVerifyP2pRsp(authHandle, MODULE_P2P_LISTEN, MES_FLAG_REPLY, seq, "pack reply failed", notAuthLink);
@@ -881,6 +883,8 @@ HWTEST_F(TransTcpDirectP2pTest, TransGetRemoteUuidByAuthHandleTest001, TestSize.
  */
 HWTEST_F(TransTcpDirectP2pTest, OnVerifyP2pRequestTest002, TestSize.Level1)
 {
+    NiceMock<TransTcpDirectCommonInterfaceMock> TransTcpDirectP2pMock;
+    EXPECT_CALL(TransTcpDirectP2pMock, AuthMetaPostTransData).WillRepeatedly(Return(SOFTBUS_LOCK_ERR));
     AuthHandle authHandle = { .authId = AUTH_INVALID_ID, .type = AUTH_LINK_TYPE_BLE };
     int64_t seq = 0;
     char *data = VerifyP2pPack(g_ip, g_port, g_ip);

@@ -53,6 +53,14 @@ public:
 HWTEST_F(P2pEntityTest, CreateGroupTest001, TestSize.Level1)
 {
     WifiDirectInterfaceMock mock;
+    std::string remoteDeviceId("0123456789ABCDEF");
+    std::string remoteMac("00:00:00:00:00:00");
+    LinkManager::GetInstance().ProcessIfAbsent(
+        InnerLink::LinkType::P2P, remoteDeviceId, [&remoteMac] (InnerLink &link) {
+            link.SetRemoteBaseMac(remoteMac);
+            link.SetState(OHOS::SoftBus::InnerLink::LinkState::CONNECTING);
+        });
+    LinkManager::GetInstance().Dump();
     EXPECT_CALL(mock, AuthStopListeningForWifiDirect).WillRepeatedly(Return());
     EXPECT_CALL(mock, GetCurrentGroup(_)).WillRepeatedly(Return(WIFI_SUCCESS));
     {
@@ -75,6 +83,7 @@ HWTEST_F(P2pEntityTest, CreateGroupTest001, TestSize.Level1)
         P2pOperationResult result = P2pEntity::GetInstance().CreateGroup(param);
         EXPECT_EQ(result.errorCode_, SOFTBUS_CONN_CREATE_GROUP_TIMEOUT);
     }
+    LinkManager::GetInstance().RemoveLinks(InnerLink::LinkType::P2P);
 }
 
 /*
@@ -131,6 +140,14 @@ HWTEST_F(P2pEntityTest, CreateGroupTest003, TestSize.Level1)
 HWTEST_F(P2pEntityTest, ConnectTest001, TestSize.Level1)
 {
     WifiDirectInterfaceMock mock;
+    std::string remoteDeviceId("0123456789ABCDEF");
+    std::string remoteMac("00:00:00:00:00:00");
+    LinkManager::GetInstance().ProcessIfAbsent(
+        InnerLink::LinkType::P2P, remoteDeviceId, [&remoteMac] (InnerLink &link) {
+            link.SetRemoteBaseMac(remoteMac);
+            link.SetState(OHOS::SoftBus::InnerLink::LinkState::CONNECTING);
+        });
+    LinkManager::GetInstance().Dump();
     EXPECT_CALL(mock, GetCurrentGroup(_)).WillRepeatedly(Return(WIFI_SUCCESS));
     {
         EXPECT_CALL(mock, Hid2dConnect(_)).WillOnce(WifiDirectInterfaceMock::ConnectSuccessAction);
@@ -170,6 +187,7 @@ HWTEST_F(P2pEntityTest, ConnectTest001, TestSize.Level1)
         P2pOperationResult result = P2pEntity::GetInstance().Connect(param);
         EXPECT_EQ(result.errorCode_, SOFTBUS_CONN_CONNECT_GROUP_TIMEOUT);
     }
+    LinkManager::GetInstance().RemoveLinks(InnerLink::LinkType::P2P);
 }
 
 /*
@@ -219,10 +237,15 @@ HWTEST_F(P2pEntityTest, DestroyGroupTest001, TestSize.Level1)
 {
     sleep(1);
     WifiDirectInterfaceMock mock;
+    std::string remoteDevId("0123456789ABCDEF");
+    std::string remoteMac("00:00:00:00:00:00");
+    LinkManager::GetInstance().ProcessIfAbsent(InnerLink::LinkType::P2P, remoteDevId, [&remoteMac] (InnerLink &link) {
+            link.SetRemoteBaseMac(remoteMac);
+            link.SetState(OHOS::SoftBus::InnerLink::LinkState::CONNECTED);
+        });
     {
         EXPECT_CALL(mock, GetCurrentGroup(_)).WillRepeatedly(Return(ERROR_WIFI_UNKNOWN));
-        InterfaceManager::GetInstance().UpdateInterface(
-            InterfaceInfo::InterfaceType::P2P, [](InterfaceInfo &info) {
+        InterfaceManager::GetInstance().UpdateInterface(InterfaceInfo::InterfaceType::P2P, [](InterfaceInfo &info) {
             info.SetRole(LinkInfo::LinkMode::GO);
             return SOFTBUS_OK;
         });
@@ -232,6 +255,10 @@ HWTEST_F(P2pEntityTest, DestroyGroupTest001, TestSize.Level1)
         EXPECT_EQ(result.errorCode_, SOFTBUS_OK);
     }
     sleep(1);
+    LinkManager::GetInstance().ProcessIfAbsent(InnerLink::LinkType::P2P, remoteDevId, [&remoteMac] (InnerLink &link) {
+            link.SetRemoteBaseMac(remoteMac);
+            link.SetState(OHOS::SoftBus::InnerLink::LinkState::CONNECTED);
+        });
     EXPECT_CALL(mock, GetCurrentGroup(_)).WillRepeatedly(Return(WIFI_SUCCESS));
     {
         InterfaceManager::GetInstance().UpdateInterface(
@@ -246,8 +273,7 @@ HWTEST_F(P2pEntityTest, DestroyGroupTest001, TestSize.Level1)
     }
     sleep(1);
     {
-        InterfaceManager::GetInstance().UpdateInterface(
-            InterfaceInfo::InterfaceType::P2P, [](InterfaceInfo &info) {
+        InterfaceManager::GetInstance().UpdateInterface(InterfaceInfo::InterfaceType::P2P, [](InterfaceInfo &info) {
             info.SetRole(LinkInfo::LinkMode::GC);
             return SOFTBUS_OK;
         });
@@ -256,6 +282,7 @@ HWTEST_F(P2pEntityTest, DestroyGroupTest001, TestSize.Level1)
         P2pOperationResult result = P2pEntity::GetInstance().DestroyGroup(param);
         EXPECT_EQ(result.errorCode_, SOFTBUS_CONN_DESTROY_GROUP_TIMEOUT);
     }
+    LinkManager::GetInstance().RemoveLinks(InnerLink::LinkType::P2P);
 }
 
 /*
@@ -352,6 +379,14 @@ HWTEST_F(P2pEntityTest, ReuseLinkTest001, TestSize.Level1)
 HWTEST_F(P2pEntityTest, DisconnectTest001, TestSize.Level1)
 {
     WifiDirectInterfaceMock mock;
+    std::string remoteDeviceId("0123456789ABCDEF");
+    std::string remoteMac("00:00:00:00:00:00");
+    LinkManager::GetInstance().ProcessIfAbsent(
+        InnerLink::LinkType::P2P, remoteDeviceId, [&remoteMac] (InnerLink &link) {
+            link.SetRemoteBaseMac(remoteMac);
+            link.SetState(OHOS::SoftBus::InnerLink::LinkState::CONNECTING);
+        });
+    LinkManager::GetInstance().Dump();
     EXPECT_CALL(mock, GetCurrentGroup(_)).WillRepeatedly(Return(WIFI_SUCCESS));
     {
         InterfaceManager::GetInstance().UpdateInterface(
@@ -383,6 +418,7 @@ HWTEST_F(P2pEntityTest, DisconnectTest001, TestSize.Level1)
         result = P2pEntity::GetInstance().Disconnect(param);
         EXPECT_EQ(result.errorCode_, SOFTBUS_CONN_P2P_SHORT_RANGE_CALLBACK_DESTROY_FAILED);
     }
+    LinkManager::GetInstance().RemoveLinks(InnerLink::LinkType::P2P);
 }
 
 /*
@@ -427,6 +463,12 @@ HWTEST_F(P2pEntityTest, NotifyNewClientJoining001, TestSize.Level1)
 HWTEST_F(P2pEntityTest, PushOperation001, TestSize.Level1)
 {
     WifiDirectInterfaceMock mock;
+    std::string remoteDevId("0123456789ABCDEF");
+    std::string remoteMac("00:00:00:00:00:00");
+    LinkManager::GetInstance().ProcessIfAbsent(InnerLink::LinkType::P2P, remoteDevId, [&remoteMac] (InnerLink &link) {
+            link.SetRemoteBaseMac(remoteMac);
+            link.SetState(OHOS::SoftBus::InnerLink::LinkState::CONNECTED);
+        });
     EXPECT_CALL(mock, AuthStopListeningForWifiDirect).WillRepeatedly(Return());
     EXPECT_CALL(mock, GetCurrentGroup(_)).WillRepeatedly(Return(WIFI_SUCCESS));
     P2pDestroyGroupParam param1;
@@ -442,8 +484,10 @@ HWTEST_F(P2pEntityTest, PushOperation001, TestSize.Level1)
     P2pEntity::GetInstance().ExecuteNextOperation();
     int32_t ret = destroyGroupOp->promise_.get_future().get().errorCode_;
     EXPECT_EQ(ret, SOFTBUS_CONN_P2P_SHORT_RANGE_CALLBACK_DESTROY_FAILED);
-
-
+    LinkManager::GetInstance().ProcessIfAbsent(InnerLink::LinkType::P2P, remoteDevId, [&remoteMac] (InnerLink &link) {
+            link.SetRemoteBaseMac(remoteMac);
+            link.SetState(OHOS::SoftBus::InnerLink::LinkState::CONNECTING);
+        });
     P2pCreateGroupParam param2;
     auto createGroupOp =
         std::make_shared<P2pOperationWrapper<P2pCreateGroupParam>>(param2, P2pOperationType::CREATE_GROUP);
@@ -452,15 +496,18 @@ HWTEST_F(P2pEntityTest, PushOperation001, TestSize.Level1)
     P2pEntity::GetInstance().ExecuteNextOperation();
     ret = createGroupOp->promise_.get_future().get().errorCode_;
     EXPECT_EQ(ret, SOFTBUS_CONN_P2P_ABNORMAL_DISCONNECTION);
-
+    LinkManager::GetInstance().ProcessIfAbsent(InnerLink::LinkType::P2P, remoteDevId, [&remoteMac] (InnerLink &link) {
+            link.SetRemoteBaseMac(remoteMac);
+            link.SetState(OHOS::SoftBus::InnerLink::LinkState::CONNECTING);
+        });
     P2pConnectParam param3{"123\n01:02:03:04:05:06\n555\n16\n1", false, false};
-    auto connectOp =
-        std::make_shared<P2pOperationWrapper<P2pConnectParam>>(param3, P2pOperationType::CONNECT);
+    auto connectOp = std::make_shared<P2pOperationWrapper<P2pConnectParam>>(param3, P2pOperationType::CONNECT);
     P2pEntity::GetInstance().PushOperation(connectOp);
     EXPECT_CALL(mock, Hid2dConnect(_)).WillOnce(WifiDirectInterfaceMock::ConnectFailureAction);
     P2pEntity::GetInstance().ExecuteNextOperation();
     ret = connectOp->promise_.get_future().get().errorCode_;
     EXPECT_EQ(ret, SOFTBUS_CONN_P2P_ABNORMAL_DISCONNECTION);
+    LinkManager::GetInstance().RemoveLinks(InnerLink::LinkType::P2P);
 }
 
 /*

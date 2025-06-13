@@ -122,6 +122,18 @@ SoftBusServerStub::SoftBusServerStub()
 {
     InitMemberFuncMap();
     InitMemberPermissionMap();
+    memberFuncMap_[MANAGE_REGISTER_BR_PROXY_SERVICE] = &SoftBusServerStub::SoftbusRegisterBrProxyServiceInner;
+    memberFuncMap_[SERVER_OPEN_BR_PROXY] = &SoftBusServerStub::OpenBrProxyInner;
+    memberFuncMap_[SERVER_CLOSE_BR_PROXY] = &SoftBusServerStub::CloseBrProxyInner;
+    memberFuncMap_[SERVER_SEND_BR_PROXY_DATA] = &SoftBusServerStub::SendBrProxyDataInner;
+    memberFuncMap_[SERVER_SET_BR_PROXY_LISTENER_STATE] = &SoftBusServerStub::SetBrProxyListenerStateInner;
+    memberFuncMap_[SERVER_GET_BR_PROXY_CHANNEL_STATE] = &SoftBusServerStub::GetBrProxyChannelStateInner;
+    memberPermissionMap_[MANAGE_REGISTER_BR_PROXY_SERVICE] = OHOS_PERMISSION_ACCESS_BLUETOOTH;
+    memberPermissionMap_[SERVER_OPEN_BR_PROXY] = OHOS_PERMISSION_ACCESS_BLUETOOTH;
+    memberPermissionMap_[SERVER_CLOSE_BR_PROXY] = OHOS_PERMISSION_ACCESS_BLUETOOTH;
+    memberPermissionMap_[SERVER_SEND_BR_PROXY_DATA] = OHOS_PERMISSION_ACCESS_BLUETOOTH;
+    memberPermissionMap_[SERVER_SET_BR_PROXY_LISTENER_STATE] = OHOS_PERMISSION_ACCESS_BLUETOOTH;
+    memberPermissionMap_[SERVER_GET_BR_PROXY_CHANNEL_STATE] = OHOS_PERMISSION_ACCESS_BLUETOOTH;
 }
 
 void SoftBusServerStub::InitMemberFuncMap()
@@ -1938,9 +1950,9 @@ int32_t SoftBusServerStub::ConnectInner(MessageParcel &data, MessageParcel &repl
         COMM_LOGE(COMM_SVC, "read address fail, address is nullptr");
         return SOFTBUS_IPC_ERR;
     }
-    int32_t len = strnlen(address, BT_MAC_LEN);
+    size_t len = strnlen(address, BT_MAC_LEN);
     if (len != (BT_MAC_LEN - 1) || strcpy_s(connectAddress.addr.ble.mac, BT_MAC_LEN, address) != EOK) {
-        COMM_LOGE(COMM_SVC, "read address fail, address is=%{public}s", address);
+        COMM_LOGE(COMM_SVC, "read address fail");
         return SOFTBUS_IPC_ERR;
     }
     int32_t addrType = data.ReadInt32();
@@ -2028,6 +2040,135 @@ int32_t SoftBusServerStub::GetPeerDeviceIdInner(MessageParcel &data, MessageParc
     if (!reply.WriteInt32(retReply)) {
         COMM_LOGE(COMM_SVC, "write ret failed!");
         return SOFTBUS_IPC_ERR;
+    }
+    return SOFTBUS_OK;
+}
+
+int32_t SoftBusServerStub::SoftbusRegisterBrProxyServiceInner(MessageParcel &data, MessageParcel &reply)
+{
+    COMM_LOGD(COMM_SVC, "enter");
+    auto remote = data.ReadRemoteObject();
+    if (remote == nullptr) {
+        COMM_LOGE(COMM_SVC, "SoftbusRegisterServiceInner read systemAbilityId failed!");
+        return SOFTBUS_TRANS_PROXY_REMOTE_NULL;
+    }
+    const char *pkgName = data.ReadCString();
+    if (pkgName == nullptr) {
+        COMM_LOGE(COMM_SVC, "SoftbusRegisterServiceInner read pkgName failed!");
+        return SOFTBUS_TRANS_PROXY_READCSTRING_FAILED;
+    }
+    uint32_t code = MANAGE_REGISTER_BR_PROXY_SERVICE;
+    SoftbusRecordCalledApiInfo(pkgName, code);
+    int32_t retReply = SoftbusRegisterService(pkgName, remote);
+    if (!reply.WriteInt32(retReply)) {
+        COMM_LOGE(COMM_SVC, "SoftbusRegisterServiceInner write reply failed!");
+        return SOFTBUS_TRANS_PROXY_WRITEINT_FAILED;
+    }
+    return SOFTBUS_OK;
+}
+ 
+int32_t SoftBusServerStub::OpenBrProxyInner(MessageParcel &data, MessageParcel &reply)
+{
+    const char *brMac = data.ReadCString();
+    if (brMac == nullptr) {
+        COMM_LOGE(COMM_SVC, "[br_proxy] read brMac failed!");
+        return SOFTBUS_TRANS_PROXY_READCSTRING_FAILED;
+    }
+ 
+    const char *uuid = data.ReadCString();
+    if (uuid == nullptr) {
+        COMM_LOGE(COMM_SVC, "[br_proxy] read uuid failed!");
+        return SOFTBUS_TRANS_PROXY_READCSTRING_FAILED;
+    }
+ 
+    int32_t retReply = OpenBrProxy(brMac, uuid);
+    if (!reply.WriteInt32(retReply)) {
+        COMM_LOGE(COMM_SVC, "[br_proxy] write reply failed!");
+        return SOFTBUS_TRANS_PROXY_WRITEINT_FAILED;
+    }
+    return SOFTBUS_OK;
+}
+ 
+int32_t SoftBusServerStub::CloseBrProxyInner(MessageParcel &data, MessageParcel &reply)
+{
+    int32_t channelId;
+    if (!data.ReadInt32(channelId)) {
+        COMM_LOGE(COMM_SVC, "[br_proxy] read channelId failed!");
+        return SOFTBUS_TRANS_PROXY_READINT_FAILED;
+    }
+ 
+    int32_t retReply = CloseBrProxy(channelId);
+    if (!reply.WriteInt32(retReply)) {
+        COMM_LOGE(COMM_SVC, "[br_proxy] write reply failed!");
+        return SOFTBUS_TRANS_PROXY_WRITEINT_FAILED;
+    }
+    return SOFTBUS_OK;
+}
+ 
+int32_t SoftBusServerStub::SendBrProxyDataInner(MessageParcel &data, MessageParcel &reply)
+{
+    int32_t channelId;
+    if (!data.ReadInt32(channelId)) {
+        COMM_LOGE(COMM_SVC, "[br_proxy] read channelId failed!");
+        return SOFTBUS_TRANS_PROXY_READINT_FAILED;
+    }
+ 
+    uint32_t dataLen;
+    if (!data.ReadUint32(dataLen)) {
+        COMM_LOGE(COMM_SVC, "[br_proxy] read dataLen failed!");
+        return SOFTBUS_TRANS_PROXY_READUINT_FAILED;
+    }
+ 
+    auto rawData = data.ReadRawData(dataLen);
+    COMM_CHECK_AND_RETURN_RET_LOGE(rawData != nullptr, SOFTBUS_IPC_ERR, COMM_SVC, "[br_proxy] read data failed!");
+    void *dataInfo = const_cast<void *>(rawData);
+ 
+    int32_t retReply = SendBrProxyData(channelId, (char *)dataInfo, dataLen);
+    if (!reply.WriteInt32(retReply)) {
+        COMM_LOGE(COMM_SVC, "[br_proxy] write reply failed!");
+        return SOFTBUS_TRANS_PROXY_WRITEINT_FAILED;
+    }
+    return SOFTBUS_OK;
+}
+ 
+int32_t SoftBusServerStub::SetBrProxyListenerStateInner(MessageParcel &data, MessageParcel &reply)
+{
+    int32_t channelId;
+    if (!data.ReadInt32(channelId)) {
+        COMM_LOGE(COMM_SVC, "[br_proxy] read channelId failed!");
+        return SOFTBUS_TRANS_PROXY_READINT_FAILED;
+    }
+    int32_t type;
+    if (!data.ReadInt32(type)) {
+        COMM_LOGE(COMM_SVC, "[br_proxy] read type failed!");
+        return SOFTBUS_TRANS_PROXY_READINT_FAILED;
+    }
+    bool CbEnabled = false;
+    if (!data.ReadBool(CbEnabled)) {
+        COMM_LOGE(COMM_SVC, "[br_proxy] read CbEnabled failed");
+        return SOFTBUS_TRANS_PROXY_READINT_FAILED;
+    }
+ 
+    int32_t retReply = SetListenerState(channelId, type, CbEnabled);
+    if (!reply.WriteInt32(retReply)) {
+        COMM_LOGE(COMM_SVC, "[br_proxy] write reply failed!");
+        return SOFTBUS_TRANS_PROXY_WRITEINT_FAILED;
+    }
+    return SOFTBUS_OK;
+}
+ 
+int32_t SoftBusServerStub::GetBrProxyChannelStateInner(MessageParcel &data, MessageParcel &reply)
+{
+    int32_t uid;
+    if (!data.ReadInt32(uid)) {
+        COMM_LOGE(COMM_SVC, "[br_proxy] read channelId failed!");
+        return SOFTBUS_TRANS_PROXY_READINT_FAILED;
+    }
+ 
+    bool retReply = IsProxyChannelEnabled(uid);
+    if (!reply.WriteBool(retReply)) {
+        COMM_LOGE(COMM_SVC, "[br_proxy] write reply failed!");
+        return SOFTBUS_TRANS_PROXY_WRITEINT_FAILED;
     }
     return SOFTBUS_OK;
 }

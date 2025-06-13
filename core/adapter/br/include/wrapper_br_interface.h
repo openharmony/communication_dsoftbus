@@ -24,7 +24,7 @@
 extern "C" {
 #endif
 
-SppSocketDriver *InitSppSocketDriver();
+SppSocketDriver *InitSppSocketDriver(void);
 bool IsAclConnected(const BT_ADDR mac);
 #ifdef __cplusplus
 }

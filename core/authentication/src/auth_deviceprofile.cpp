@@ -104,6 +104,20 @@ static int32_t GetAclPeerUserId(const OHOS::DistributedDeviceProfile::AccessCont
     return trustDevice.GetAccesser().GetAccesserUserId();
 }
 
+static int32_t GetStringHash(std::string str, char *hashStrBuf, int32_t len)
+{
+    uint8_t hash[SHA_256_HASH_LEN] = { 0 };
+    if (SoftBusGenerateStrHash((const unsigned char *)str.c_str(), str.length(), hash) != SOFTBUS_OK) {
+        LNN_LOGE(LNN_STATE, "generate hash fail");
+        return SOFTBUS_NETWORK_GENERATE_STR_HASH_ERR;
+    }
+    if (ConvertBytesToHexString(hashStrBuf, len + 1, hash, len / HEXIFY_UNIT_LEN) != SOFTBUS_OK) {
+        LNN_LOGE(LNN_STATE, "convert hash hex string fail");
+        return SOFTBUS_NETWORK_BYTES_TO_HEX_STR_ERR;
+    }
+    return SOFTBUS_OK;
+}
+
 static bool IsTrustDevice(std::vector<OHOS::DistributedDeviceProfile::AccessControlProfile> &trustDevices,
     const char *deviceIdHash, const char *anonyDeviceIdHash, bool isOnlyPointToPoint)
 {
@@ -140,6 +154,81 @@ static bool IsTrustDevice(std::vector<OHOS::DistributedDeviceProfile::AccessCont
             LNN_LOGI(LNN_STATE, "device trusted in dp continue verify, deviceIdHash=%{public}s", anonyDeviceIdHash);
             return true;
         }
+    }
+    return false;
+}
+
+static bool CompareAclWithPeerDeviceInfo(const OHOS::DistributedDeviceProfile::AccessControlProfile &aclProfile,
+    const char *peerAccountHash, const char *peerUdid, int32_t peerUserId)
+{
+    int32_t localUserId = GetActiveOsAccountIds();
+    char udid[UDID_BUF_LEN] = { 0 };
+    uint8_t localAccountHash[SHA_256_HASH_LEN] = { 0 };
+    char localAccountString[SHA_256_HEX_HASH_LEN] = { 0 };
+    if (LnnGetLocalStrInfo(STRING_KEY_DEV_UDID, udid, UDID_BUF_LEN) != SOFTBUS_OK) {
+        LNN_LOGE(LNN_STATE, "get local udid fail");
+        return false;
+    }
+    if (LnnGetLocalByteInfo(BYTE_KEY_ACCOUNT_HASH, localAccountHash, SHA_256_HASH_LEN) != SOFTBUS_OK) {
+        LNN_LOGE(LNN_STATE, "get local account hash fail");
+        return false;
+    }
+    if (ConvertBytesToHexString(
+        localAccountString, SHA_256_HEX_HASH_LEN, (unsigned char *)localAccountHash, SHA_256_HASH_LEN) != SOFTBUS_OK) {
+        LNN_LOGE(LNN_STATE, "convert account to string fail");
+        return false;
+    }
+    std::string localUdid(udid);
+    std::string sourceAccountId = aclProfile.GetAccesser().GetAccesserAccountId();
+    std::string sinkAccountId = aclProfile.GetAccessee().GetAccesseeAccountId();
+    char aclAccountHash[SHA_256_HEX_HASH_LEN] = { 0 };
+    if (strcmp(DEFAULT_ACCOUNT_UID, sourceAccountId.c_str()) == 0) {
+        (void)GetStringHash(DEFAULT_ACCOUNT_VALUE, aclAccountHash, SHA_256_HEX_HASH_LEN - 1);
+        sourceAccountId = aclAccountHash;
+    }
+    if (strcmp(DEFAULT_ACCOUNT_UID, sinkAccountId.c_str()) == 0) {
+        (void)GetStringHash(DEFAULT_ACCOUNT_VALUE, aclAccountHash, SHA_256_HEX_HASH_LEN - 1);
+        sinkAccountId = aclAccountHash;
+    }
+    if (((aclProfile.GetAccessee().GetAccesseeDeviceId() != peerUdid ||
+        aclProfile.GetAccesser().GetAccesserDeviceId() != localUdid ||
+        StrCmpIgnoreCase(sinkAccountId.c_str(), peerAccountHash) != 0 ||
+        StrCmpIgnoreCase(sourceAccountId.c_str(), localAccountString) != 0) &&
+        (aclProfile.GetAccesser().GetAccesserDeviceId() != peerUdid ||
+        aclProfile.GetAccessee().GetAccesseeDeviceId() != localUdid ||
+        StrCmpIgnoreCase(sinkAccountId.c_str(), localAccountString) != 0 ||
+        StrCmpIgnoreCase(sourceAccountId.c_str(), peerAccountHash) != 0)) ||
+        GetAclLocalUserId(aclProfile) != localUserId || GetAclPeerUserId(aclProfile) != peerUserId) {
+        return false;
+    }
+    return true;
+}
+
+bool IsTrustedDeviceFromAccess(const char *peerAccountHash, const char *peerUdid, int32_t peerUserId)
+{
+    if (peerAccountHash == nullptr || peerUdid == nullptr) {
+        LNN_LOGE(LNN_STATE, "peerUdid is null");
+        return false;
+    }
+    std::vector<OHOS::DistributedDeviceProfile::AccessControlProfile> aclProfiles;
+    int32_t ret = DpClient::GetInstance().GetAllAccessControlProfile(aclProfiles);
+    if (ret != OHOS::DistributedDeviceProfile::DP_NOT_FIND_DATA && ret != OHOS::DistributedDeviceProfile::DP_SUCCESS) {
+        LNN_LOGE(LNN_STATE, "GetAllAccessControlProfile ret=%{public}d", ret);
+        return false;
+    }
+    if (aclProfiles.empty()) {
+        LNN_LOGE(LNN_STATE, "aclProfiles is empty");
+        return false;
+    }
+    for (auto &aclProfile : aclProfiles) {
+        if (aclProfile.GetDeviceIdType() != (uint32_t)OHOS::DistributedDeviceProfile::DeviceIdType::UDID ||
+            aclProfile.GetTrustDeviceId().empty() || aclProfile.GetTrustDeviceId() != peerUdid) {
+            continue;
+        }
+        if (!CompareAclWithPeerDeviceInfo(aclProfile, peerAccountHash, peerUdid, peerUserId)) {
+            continue;
+        }
+        return true;
     }
     return false;
 }
@@ -922,20 +1011,6 @@ void UpdateAssetSessionKeyByAcl(
     ret = UpdateDpAclByAuthAcl(info, *sessionKeyId, currentTime, isSameAccount);
     LNN_LOGW(LNN_STATE, "UpdateDpAclByAuthAcl result ret=%{public}d", ret);
     return;
-}
-
-static int32_t GetStringHash(std::string str, char *hashStrBuf, int32_t len)
-{
-    uint8_t hash[SHA_256_HASH_LEN] = { 0 };
-    if (SoftBusGenerateStrHash((const unsigned char *)str.c_str(), str.length(), hash) != SOFTBUS_OK) {
-        LNN_LOGE(LNN_STATE, "generate hash fail");
-        return SOFTBUS_NETWORK_GENERATE_STR_HASH_ERR;
-    }
-    if (ConvertBytesToHexString(hashStrBuf, len + 1, hash, len / HEXIFY_UNIT_LEN) != SOFTBUS_OK) {
-        LNN_LOGE(LNN_STATE, "convert hash hex string fail");
-        return SOFTBUS_NETWORK_BYTES_TO_HEX_STR_ERR;
-    }
-    return SOFTBUS_OK;
 }
 
 static bool IsSKIdInvalidInner(int32_t sessionKeyId, const char *accountHash, const char *udidShortHash,

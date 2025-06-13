@@ -61,6 +61,7 @@ extern "C" {
 */
 #define OHOS_PERMISSION_DISTRIBUTED_DATASYNC "ohos.permission.DISTRIBUTED_DATASYNC"
 #define OHOS_PERMISSION_DISTRIBUTED_SOFTBUS_CENTER "ohos.permission.DISTRIBUTED_SOFTBUS_CENTER"
+#define OHOS_PERMISSION_ACCESS_BLUETOOTH "ohos.permission.ACCESS_BLUETOOTH"
 
 /**
  * @brief Indicates the length of the Bluetooth device MAC address in string format,
@@ -126,6 +127,12 @@ extern "C" {
  *
  */
 #define MAX_ACCOUNT_HASH_LEN 96
+
+/**
+ * @brief Indicates the maximum length of the heart beat value code in <b>IDiscoveryCallback</b>.
+ *
+ */
+#define HB_HEARTBEAT_VALUE_LEN 3
 
 /**
  * @brief Indicates the maximum length of the hash code in HEX calculated by SHA-256.
@@ -439,7 +446,9 @@ typedef enum {
     /**Oop capability */
     OOP_CAPABILITY_BITMAP,
     /**Oh Approach capability */
-    OH_APPROACH_CAPABILITY_BITMAP
+    OH_APPROACH_CAPABILITY_BITMAP,
+    /**Raise Hand capability */
+    RAISE_HAND_CAPABILITY_BITMAP
 } DataBitMap;
 
 typedef struct {
@@ -476,7 +485,8 @@ static const CapabilityMap g_capabilityMap[] = {
     {VLINK_CAPABILITY_BITMAP, (char *)"virtualLink"},
     {TOUCH_CAPABILITY_BITMAP, (char *)"touch"},
     {OOP_CAPABILITY_BITMAP, (char *)"oop"},
-    {OH_APPROACH_CAPABILITY_BITMAP, (char *)"oh_approach"}
+    {OH_APPROACH_CAPABILITY_BITMAP, (char *)"oh_approach"},
+    {RAISE_HAND_CAPABILITY_BITMAP, (char *)"raiseHand"}
 };
 
 /**

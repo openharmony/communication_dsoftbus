@@ -28,6 +28,7 @@
 #include "trans_log.h"
 #include "trans_session_manager.h"
 
+#define DEFAULT_ACCOUNT_UID "ohosAnonymousUid"
 static SoftBusList *g_ukRequestManagerList = NULL;
 
 int32_t TransUkRequestMgrInit(void)
@@ -189,6 +190,24 @@ bool IsValidUkInfo(const UkIdInfo *ukIdInfo)
     return (ukIdInfo != NULL && ukIdInfo->myId != 0 && ukIdInfo->peerId != 0);
 }
 
+int32_t GetLocalAccountUidByUserId(char *id, uint32_t idLen, uint32_t *len, int32_t userId)
+{
+    if (id == NULL || len == NULL) {
+        TRANS_LOGE(TRANS_CTRL, "invalid param.");
+        return SOFTBUS_INVALID_PARAM;
+    }
+    (void)userId;
+    int32_t ret = LnnGetLocalStrInfo(STRING_KEY_ACCOUNT_UID, id, idLen);
+    if (ret != SOFTBUS_OK) {
+        TRANS_LOGE(TRANS_CTRL, "get local account uid failed, ret=%{public}d", ret);
+        id = DEFAULT_ACCOUNT_UID;
+        *len = strlen(id);
+        return ret;
+    }
+    *len = strnlen(id, idLen);
+    return SOFTBUS_OK;
+}
+
 static int32_t FillSinkAclInfoByAppInfo(const AppInfo *appInfo, AuthACLInfo *aclInfo)
 {
     if (appInfo == NULL || aclInfo == NULL) {
@@ -318,7 +337,7 @@ void FillHapSinkAclInfoToAppInfo(AppInfo *appInfo)
             appInfo->myData.sessionName, &appInfo->myData.tokenId, NULL, &appInfo->myData.userId);
         uint32_t size = 0;
         int32_t ret =
-            GetOsAccountUidByUserId(appInfo->myData.accountId, ACCOUNT_UID_LEN_MAX - 1, &size, appInfo->myData.userId);
+            GetLocalAccountUidByUserId(appInfo->myData.accountId, ACCOUNT_UID_LEN_MAX, &size, appInfo->myData.userId);
         if (ret != SOFTBUS_OK) {
             COMM_LOGE(COMM_SVC, "get current account failed. ret=%{public}d", ret);
         }

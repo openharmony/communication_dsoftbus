@@ -57,18 +57,13 @@ void AuthSessionJsonMockTest::TearDown() {}
 HWTEST_F(AuthSessionJsonMockTest, GET_ENHANCED_P2P_AUTH_KEY_TEST_001, TestSize.Level1)
 {
     NiceMock<AuthSessionJsonDepsInterfaceMock> mocker;
-    EXPECT_CALL(mocker, AuthFindLatestNormalizeKey).WillOnce(Return(SOFTBUS_OK))
-        .WillRepeatedly(Return(SOFTBUS_INVALID_PARAM));
-    EXPECT_CALL(mocker, AuthFindDeviceKey).WillOnce(Return(SOFTBUS_OK))
-        .WillRepeatedly(Return(SOFTBUS_INVALID_PARAM));
-
     char udidHash[SHA_256_HEX_HASH_LEN] = {0};
     AuthSessionInfo info = {0};
     AuthDeviceKeyInfo deviceKey = {0};
     int32_t ret = GetEnhancedP2pAuthKey(udidHash, &info, &deviceKey);
-    EXPECT_EQ(ret, SOFTBUS_OK);
+    EXPECT_EQ(ret, SOFTBUS_AUTH_NOT_FOUND);
     ret = GetEnhancedP2pAuthKey(udidHash, &info, &deviceKey);
-    EXPECT_EQ(ret, SOFTBUS_OK);
+    EXPECT_EQ(ret, SOFTBUS_AUTH_NOT_FOUND);
 
     AuthHandle authHandle = { .authId = TEST_AUTH_ID };
     EXPECT_CALL(mocker, AuthGetLatestIdByUuid).WillRepeatedly(DoAll(SetArgPointee<3>(authHandle), Return()));
@@ -186,13 +181,7 @@ HWTEST_F(AuthSessionJsonMockTest, PARSE_NORMALIZE_DATA_TEST_001, TestSize.Level1
         .WillRepeatedly(Return(SOFTBUS_OK));
     EXPECT_CALL(mocker, ConvertBytesToUpperCaseHexString).WillOnce(Return(SOFTBUS_INVALID_PARAM))
         .WillRepeatedly(Return(SOFTBUS_OK));
-    AuthDeviceKeyInfo testKey = { .keyLen = KEY_VALUE_LEN };
-    EXPECT_EQ(memcpy_s(testKey.deviceKey, SESSION_KEY_LENGTH, KEY_VALUE, KEY_VALUE_LEN), EOK);
-    EXPECT_CALL(mocker, AuthFindLatestNormalizeKey).WillOnce(Return(SOFTBUS_INVALID_PARAM))
-        .WillRepeatedly(DoAll(SetArgPointee<1>(testKey), Return(SOFTBUS_OK)));
     EXPECT_CALL(mocker, ConvertHexStringToBytes).WillRepeatedly(Return(SOFTBUS_INVALID_PARAM));
-    EXPECT_CALL(mocker, AuthFindNormalizeKeyByServerSide).WillOnce(Return(SOFTBUS_INVALID_PARAM))
-        .WillRepeatedly(Return(SOFTBUS_OK));
     EXPECT_CALL(mocker, AuthUpdateCreateTime).WillRepeatedly(Return());
     AuthSessionInfo info = {0};
     AuthDeviceKeyInfo deviceKey = {0};
@@ -426,8 +415,6 @@ HWTEST_F(AuthSessionJsonMockTest, SET_EXCHANGE_ID_TYPE_AND_VALUE_TEST_001, TestS
     int32_t ret = SetExchangeIdTypeAndValue(&obj, &info);
     EXPECT_EQ(ret, SOFTBUS_OK);
     EXPECT_CALL(mocker, AuthMetaGetConnIdByInfo).WillRepeatedly(Return(SOFTBUS_OK));
-    EXPECT_CALL(mocker, LnnGetMetaPtk).WillOnce(Return(SOFTBUS_INVALID_PARAM))
-        .WillRepeatedly(Return(SOFTBUS_OK));
     EXPECT_CALL(mocker, LnnDumpRemotePtk).WillRepeatedly(Return());
     EXPECT_CALL(mocker, SoftBusBase64Encode).WillOnce(Return(SOFTBUS_INVALID_PARAM))
         .WillRepeatedly(Return(SOFTBUS_OK));
@@ -493,10 +480,8 @@ HWTEST_F(AuthSessionJsonMockTest, PACK_CIPHER_RPA_INFO_TEST_001, TestSize.Level1
     EXPECT_NE(ret, SOFTBUS_OK);
     EXPECT_CALL(mocker, ConvertBytesToHexString).WillRepeatedly(Return(SOFTBUS_OK));
     EXPECT_CALL(mocker, JSON_AddStringToObject).WillRepeatedly(Return(true));
-    EXPECT_CALL(mocker, LnnUpdateLocalBroadcastCipherKey).WillOnce(Return(SOFTBUS_INVALID_PARAM))
-        .WillRepeatedly(Return(SOFTBUS_OK));
     ret = PackCipherRpaInfo(&json, &info);
-    EXPECT_NE(ret, SOFTBUS_OK);
+    EXPECT_EQ(ret, SOFTBUS_OK);
     ret = PackCipherRpaInfo(&json, &info);
     EXPECT_EQ(ret, SOFTBUS_OK);
 }
@@ -639,8 +624,6 @@ HWTEST_F(AuthSessionJsonMockTest, PACK_CERTIFICATEINFO_TEST_001, TestSize.Level1
     AuthSessionInfo info;
     (void)memset_s(&info, sizeof(AuthSessionInfo), 0, sizeof(AuthSessionInfo));
     info.isNeedPackCert = false;
-    EXPECT_CALL(mocker, IsSupportUDIDAbatement).WillOnce(Return(false))
-        .WillRepeatedly(Return(true));
     int32_t ret = PackCertificateInfo(&json, nullptr);
     EXPECT_EQ(ret, SOFTBUS_OK);
     ret = PackCertificateInfo(&json, &info);
@@ -648,10 +631,8 @@ HWTEST_F(AuthSessionJsonMockTest, PACK_CERTIFICATEINFO_TEST_001, TestSize.Level1
     ret = PackCertificateInfo(&json, &info);
     EXPECT_EQ(ret, SOFTBUS_OK);
     info.isNeedPackCert = true;
-    EXPECT_CALL(mocker, GenerateCertificate).WillOnce(Return(SOFTBUS_OK))
-        .WillRepeatedly(Return(SOFTBUS_INVALID_PARAM));
     ret = PackCertificateInfo(&json, &info);
-    EXPECT_NE(ret, SOFTBUS_OK);
+    EXPECT_EQ(ret, SOFTBUS_OK);
     EXPECT_CALL(mocker, JSON_AddBytesToObject).WillRepeatedly(Return(false));
     EXPECT_CALL(mocker, FreeSoftbusChain).WillRepeatedly(Return());
     ret = PackCertificateInfo(&json, &info);
@@ -675,19 +656,12 @@ HWTEST_F(AuthSessionJsonMockTest, UNPACK_CERTIFICATEINFO_TEST_001, TestSize.Leve
     (void)memset_s(&info, sizeof(AuthSessionInfo), 0, sizeof(AuthSessionInfo));
     NodeInfo nodeInfo;
     (void)memset_s(&nodeInfo, sizeof(NodeInfo), 0, sizeof(NodeInfo));
-    EXPECT_CALL(mocker, IsSupportUDIDAbatement).WillOnce(Return(false))
-        .WillRepeatedly(Return(true));
-    EXPECT_CALL(mocker, IsNeedUDIDAbatement).WillOnce(Return(false))
-        .WillRepeatedly(Return(true));
-
     int32_t ret = UnpackCertificateInfo(nullptr, &nodeInfo, &info);
     EXPECT_EQ(ret, SOFTBUS_OK);
     ret = UnpackCertificateInfo(&json, &nodeInfo, &info);
     EXPECT_EQ(ret, SOFTBUS_OK);
     ret = UnpackCertificateInfo(&json, &nodeInfo, &info);
     EXPECT_EQ(ret, SOFTBUS_OK);
-    EXPECT_CALL(mocker, InitSoftbusChain).WillOnce(Return(SOFTBUS_INVALID_PARAM))
-        .WillRepeatedly(Return(SOFTBUS_OK));
     ret = UnpackCertificateInfo(&json, &nodeInfo, &info);
     EXPECT_EQ(ret, SOFTBUS_OK);
     EXPECT_CALL(mocker, JSON_GetBytesFromObject).WillRepeatedly(Return(false));
@@ -695,10 +669,8 @@ HWTEST_F(AuthSessionJsonMockTest, UNPACK_CERTIFICATEINFO_TEST_001, TestSize.Leve
     ret = UnpackCertificateInfo(&json, &nodeInfo, &info);
     EXPECT_EQ(ret, SOFTBUS_OK);
     EXPECT_CALL(mocker, JSON_GetBytesFromObject).WillRepeatedly(Return(true));
-    EXPECT_CALL(mocker, VerifyCertificate).WillOnce(Return(SOFTBUS_INVALID_PARAM))
-        .WillRepeatedly(Return(SOFTBUS_OK));
     ret = UnpackCertificateInfo(&json, &nodeInfo, &info);
-    EXPECT_NE(ret, SOFTBUS_OK);
+    EXPECT_EQ(ret, SOFTBUS_OK);
     ret = UnpackCertificateInfo(&json, &nodeInfo, &info);
     EXPECT_EQ(ret, SOFTBUS_OK);
 }

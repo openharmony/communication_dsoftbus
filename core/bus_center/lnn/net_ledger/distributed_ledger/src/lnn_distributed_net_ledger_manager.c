@@ -2108,3 +2108,56 @@ bool LnnSaveBroadcastLinkKey(const char *udid, const BroadcastCipherInfo *info)
     (void)LnnSaveRemoteDeviceInfoPacked(&cacheInfo);
     return true;
 }
+
+int32_t LnnSetDLSleRangeInfo(const char *id, IdCategory type, int32_t sleCap, const char *addr)
+{
+    if (id == NULL || addr == NULL) {
+        LNN_LOGE(LNN_LEDGER, "inavalid param");
+        return SOFTBUS_INVALID_PARAM;
+    }
+    if (SoftBusMutexLock(&(LnnGetDistributedNetLedger()->lock)) != 0) {
+        LNN_LOGE(LNN_LEDGER, "lock mutex fail");
+        return SOFTBUS_LOCK_ERR;
+    }
+    NodeInfo *nodeInfo = LnnGetNodeInfoById(id, type);
+    if (nodeInfo == NULL) {
+        LNN_LOGE(LNN_LEDGER, "get info fail");
+        (void)SoftBusMutexUnlock(&(LnnGetDistributedNetLedger()->lock));
+        return SOFTBUS_NOT_FIND;
+    }
+    nodeInfo->sleRangeCapacity = sleCap;
+    int32_t ret = strcpy_s(nodeInfo->connectInfo.sleMacAddr, sizeof(nodeInfo->connectInfo.sleMacAddr), addr);
+    if (ret != EOK) {
+        LNN_LOGE(LNN_LEDGER, "set sle addr failed! ret=%{public}d", ret);
+    }
+    // sle range info save in disk
+    NodeInfo tempNodeInfo;
+    (void)memset_s(&tempNodeInfo, sizeof(NodeInfo), 0, sizeof(NodeInfo));
+    NodeInfo recoveryInfo;
+    (void)memset_s(&recoveryInfo, sizeof(NodeInfo), 0, sizeof(NodeInfo));
+    if (memcpy_s(&tempNodeInfo, sizeof(NodeInfo), nodeInfo, sizeof(NodeInfo)) != EOK) {
+        LNN_LOGE(LNN_LEDGER, "memcpy_s fail");
+        (void)SoftBusMutexUnlock(&(LnnGetDistributedNetLedger()->lock));
+        return SOFTBUS_MEM_ERR;
+    }
+    (void)SoftBusMutexUnlock(&(LnnGetDistributedNetLedger()->lock));
+    ret = LnnRetrieveDeviceInfoByUdidPacked(tempNodeInfo.deviceInfo.deviceUdid, &recoveryInfo);
+    if (ret != SOFTBUS_OK) {
+        LNN_LOGE(LNN_LEDGER, "retrive device info fail, ret=%{public}d", ret);
+        if (LnnSaveRemoteDeviceInfoPacked(&tempNodeInfo) != SOFTBUS_OK) {
+            LNN_LOGE(LNN_LEDGER, "save remote info fail");
+        }
+        return ret;
+    }
+    recoveryInfo.sleRangeCapacity = sleCap;
+    ret = strcpy_s(recoveryInfo.connectInfo.sleMacAddr, sizeof(recoveryInfo.connectInfo.sleMacAddr), addr);
+    if (ret != EOK) {
+        LNN_LOGE(LNN_LEDGER, "recovery info set sle addr failed! ret=%{public}d", ret);
+    }
+    ret = LnnSaveRemoteDeviceInfoPacked(&recoveryInfo);
+    if (ret != SOFTBUS_OK) {
+        LNN_LOGE(LNN_LEDGER, "save remote device info fail, ret=%{public}d", ret);
+        return ret;
+    }
+    return SOFTBUS_OK;
+}

@@ -79,9 +79,10 @@ typedef struct {
     int32_t (*connect)(const GeneralConnectionParam *param, const char *addr);
     int32_t (*send)(uint32_t generalHandle, const uint8_t *data, uint32_t dataLen, int32_t pid);
 
-    void (*disconnect)(uint32_t generalHandle);
-    int32_t (*getPeerDeviceId)(uint32_t generalHandle, char *addr, uint32_t length, uint32_t tokenId);
-    void (*cleanupGeneralConnection)(const char *pkgName, int32_t pid);
+    void (*disconnect)(uint32_t generalHandle, int32_t pid);
+    int32_t (*getPeerDeviceId)(uint32_t generalHandle, char *addr, uint32_t length,
+        uint32_t tokenId, int32_t pid);
+    void (*cleanupGeneralConnection)(const char *bundleName, int32_t pid);
 } GeneralConnectionManager;
 
 GeneralConnectionManager *GetGeneralConnectionManager(void);

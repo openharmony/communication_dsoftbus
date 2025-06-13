@@ -353,16 +353,6 @@ int32_t TransCheckServerAccessControl(const AppInfo *appInfo)
     return TranCheckSinkAccessControl(appInfo, myTokenId);
 }
 
-uint64_t TransACLGetFirstTokenID(void)
-{
-    return OHOS::IPCSkeleton::GetFirstFullTokenID();
-}
-
-uint64_t TransACLGetCallingTokenID(void)
-{
-    return OHOS::IPCSkeleton::GetCallingFullTokenID();
-}
-
 #ifdef SUPPORT_ABILITY_RUNTIME
 static sptr<AppExecFwk::IAppMgr> g_appMgrProxy = nullptr;
 

@@ -44,6 +44,11 @@ int32_t ServerIpcRippleStats(int32_t channelId, int32_t channelType, const Traff
 int32_t ServerIpcEvaluateQos(const char *peerNetworkId, TransDataType dataType, const QosTV *qos, uint32_t qosCount);
 int32_t ServerIpcProcessInnerEvent(int32_t eventType, uint8_t *buf, uint32_t len);
 int32_t ServerIpcPrivilegeCloseChannel(uint64_t tokenId, int32_t pid, const char *peerNetworkId);
+int32_t ServerIpcOpenBrProxy(const char *brMac, const char *uuid);
+int32_t ServerIpcCloseBrProxy(int32_t channelId);
+int32_t ServerIpcSendBrProxyData(int32_t channelId, char* data, uint32_t dataLen);
+int32_t ServerIpcSetListenerState(int32_t channelId, int32_t type, bool CbEnabled);
+int32_t ServerIpcIsProxyChannelEnabled(int32_t uid, bool *isEnable);
 #ifdef __cplusplus
 }
 #endif

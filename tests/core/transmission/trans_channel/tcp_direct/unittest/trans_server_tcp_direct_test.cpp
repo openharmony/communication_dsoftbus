@@ -12,10 +12,11 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
- 
+
 #include <arpa/inet.h>
 #include <unistd.h>
 #include <securec.h>
+#include <gtest/gtest.h>
 
 #include "auth_interface.h"
 #include "auth_manager.h"
@@ -46,7 +47,11 @@
 #include "disc_event_manager.h"
 #include "softbus_conn_ble_direct.h"
 #include "message_handler.h"
+#include "dsoftbus_enhance_interface.h"
+#include "g_enhance_lnn_func.h"
+#include "trans_tcp_direct_common_mock.h"
 
+using namespace testing;
 using namespace testing::ext;
 
 namespace OHOS {
@@ -232,13 +237,16 @@ static void TestDelSessionConnNode(int32_t channelId)
  */
 HWTEST_F(TransServerTcpDirectTest, GetCipherFlagByAuthId001, TestSize.Level1)
 {
+    LnnEnhanceFuncList *pfnLnnEnhanceFuncList = LnnEnhanceFuncListGet();
+    pfnLnnEnhanceFuncList->authMetaGetServerSide = AuthMetaGetServerSide;
     AuthHandle authHandle = { .authId = 0, .type = AUTH_LINK_TYPE_WIFI };
     uint32_t flag = 0;
     bool isAuthServer = false;
     bool isLegacyOs = false;
-
+    NiceMock<TransTcpDirectCommonInterfaceMock> TransServerTcpDirectMock;
+    EXPECT_CALL(TransServerTcpDirectMock, AuthMetaGetServerSide).WillOnce(Return(SOFTBUS_NOT_FIND));
     int32_t ret = GetCipherFlagByAuthId(authHandle, &flag, &isAuthServer, isLegacyOs);
-    EXPECT_EQ(ret, SOFTBUS_NOT_IMPLEMENT);
+    EXPECT_EQ(ret, SOFTBUS_NOT_FIND);
 }
 
 /**
@@ -249,16 +257,18 @@ HWTEST_F(TransServerTcpDirectTest, GetCipherFlagByAuthId001, TestSize.Level1)
  */
 HWTEST_F(TransServerTcpDirectTest, GetCipherFlagByAuthId002, TestSize.Level1)
 {
+    LnnEnhanceFuncList *pfnLnnEnhanceFuncList = LnnEnhanceFuncListGet();
+    pfnLnnEnhanceFuncList->authMetaGetServerSide = AuthMetaGetServerSide;
     AuthHandle authHandle = { .authId = TRANS_TEST_AUTH_SEQ, .type = AUTH_LINK_TYPE_WIFI };
     int32_t ret = TestAddAuthManager(TRANS_TEST_AUTH_SEQ, g_sessionKey, false);
     ASSERT_EQ(ret, SOFTBUS_OK);
     uint32_t flag = 0;
     bool isAuthServer = false;
     bool isLegacyOs = false;
-
+    NiceMock<TransTcpDirectCommonInterfaceMock> TransServerTcpDirectMock;
+    EXPECT_CALL(TransServerTcpDirectMock, AuthMetaGetServerSide).WillOnce(Return(SOFTBUS_NOT_FIND));
     ret = GetCipherFlagByAuthId(authHandle, &flag, &isAuthServer, isLegacyOs);
-    EXPECT_EQ(ret, SOFTBUS_NOT_IMPLEMENT);
-    EXPECT_EQ(ret, SOFTBUS_NOT_IMPLEMENT);
+    EXPECT_EQ(ret, SOFTBUS_NOT_FIND);
     EXPECT_FALSE(isAuthServer);
     TestDelAuthManager(TRANS_TEST_AUTH_SEQ);
 }
@@ -527,11 +537,15 @@ HWTEST_F(TransServerTcpDirectTest, GetAuthHandleByChanId001, TestSize.Level1)
  */
 HWTEST_F(TransServerTcpDirectTest, SendAuthData001, TestSize.Level1)
 {
+    LnnEnhanceFuncList *pfnLnnEnhanceFuncList = LnnEnhanceFuncListGet();
+    pfnLnnEnhanceFuncList->authMetaPostTransData = AuthMetaPostTransData;
     AuthHandle authHandle = { .authId = 1, .type = AUTH_LINK_TYPE_WIFI };
     int64_t seq = 0;
     const char *data = TEST_MESSAGE;
+    NiceMock<TransTcpDirectCommonInterfaceMock> TransServerTcpDirectMock;
+    EXPECT_CALL(TransServerTcpDirectMock, AuthMetaPostTransData).WillOnce(Return(SOFTBUS_AUTH_NOT_FOUND));
     int32_t ret = SendAuthData(authHandle, MODULE_P2P_LISTEN, MSG_FLAG_REQUEST, seq, data);
-    EXPECT_EQ(ret, SOFTBUS_NOT_IMPLEMENT);
+    EXPECT_EQ(ret, SOFTBUS_AUTH_NOT_FOUND);
 }
 
 /**
@@ -582,7 +596,7 @@ HWTEST_F(TransServerTcpDirectTest, TransTdcStopSessionProc001, TestSize.Level1)
 
     int32_t ret = TestAddSessionConn(false);
     ASSERT_EQ(ret, SOFTBUS_OK);
-    
+
     TransTdcTimerProc();
     NotifyTdcChannelTimeOut(nullptr);
     NotifyTdcChannelStopProc(nullptr);

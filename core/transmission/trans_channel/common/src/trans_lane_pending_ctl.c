@@ -38,6 +38,7 @@
 #include "trans_channel_manager.h"
 #include "trans_client_proxy.h"
 #include "trans_event.h"
+#include "trans_ipc_adapter.h"
 #include "trans_lane_manager.h"
 #include "trans_log.h"
 #include "trans_network_statistics.h"
@@ -410,7 +411,7 @@ static int32_t TransAddAsyncLaneReqFromPendingList(uint32_t laneHandle, const Se
     item->bSucc = false;
     item->isFinished = false;
     item->callingTokenId = callingTokenId;
-    item->firstTokenId = TransACLGetFirstTokenID();
+    item->firstTokenId = TransAclGetFirstTokenID();
     item->timeStart = timeStart;
     if (CopyAsyncReqItemSessionParam(param, &(item->param)) != SOFTBUS_OK) {
         DestroyAsyncReqItemParam(&(item->param));
@@ -665,7 +666,10 @@ static int32_t TransProxyGetAppInfo(const char *sessionName, const char *peerNet
 
     GetRemoteUdidWithNetworkId(peerNetworkId, appInfo->peerUdid, sizeof(appInfo->peerUdid));
     TransGetRemoteDeviceVersion(peerNetworkId, CATEGORY_NETWORK_ID, appInfo->peerVersion, sizeof(appInfo->peerVersion));
-
+    if (GetUkPolicy(appInfo) == NO_NEED_UK) {
+        TRANS_LOGI(TRANS_CTRL, "No need sink generate key.");
+        DisableCapabilityBit(&(appInfo->channelCapability), TRANS_CHANNEL_SINK_GENERATE_KEY_OFFSET);
+    }
     return SOFTBUS_OK;
 }
 

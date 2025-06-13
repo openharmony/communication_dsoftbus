@@ -172,7 +172,7 @@ static ConnEventExtra g_invalidExtra = {
 HWTEST_F(ConnEventTest, ConnEventTest003, TestSize.Level0)
 {
     constexpr int32_t TWO_VALID_EXTRA_SIZE = 2; // result, errcode is valid
-    constexpr int32_t VALID_EXTRA_SIZE = 23;
+    constexpr int32_t VALID_EXTRA_SIZE = 24;
 
     HiSysEventMock mock;
     EXPECT_CALL(mock,
@@ -192,7 +192,7 @@ HWTEST_F(ConnEventTest, ConnEventTest004, TestSize.Level0)
 {
     ConnEventExtra emptyExtra = { 0 };
     constexpr int32_t TWO_VALID_EXTRA_SIZE = 2; // result, errcode is valid
-    constexpr int32_t VALID_EXTRA_SIZE = 23;
+    constexpr int32_t VALID_EXTRA_SIZE = 24;
 
     HiSysEventMock mock;
     EXPECT_CALL(mock,

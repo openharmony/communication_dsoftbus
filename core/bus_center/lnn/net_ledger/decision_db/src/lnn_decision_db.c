@@ -250,10 +250,6 @@ static int32_t UpdateDecisionDbKey(DbContext *ctx)
         LNN_LOGE(LNN_LEDGER, "update decision db de key fail");
         return SOFTBUS_GENERATE_KEY_FAIL;
     }
-    if (LnnGenerateCeKeyByHuks(&g_ceKeyAlias) != SOFTBUS_OK) {
-        LNN_LOGE(LNN_LEDGER, "update decision db ce key fail");
-        return SOFTBUS_GENERATE_KEY_FAIL;
-    }
     int32_t ret = GetDecisionDbKey(dbKey, sizeof(dbKey), true);
     if (ret != SOFTBUS_OK) {
         LNN_LOGE(LNN_LEDGER, "get decision dbKey fail");
@@ -556,9 +552,9 @@ bool LnnIsPotentialHomeGroup(const char *udid)
     return false;
 }
 
-int32_t LnnGenerateCeParams(void)
+int32_t LnnGenerateCeParams(bool isUnlocked)
 {
-    return LnnGenerateCeKeyByHuks(&g_ceKeyAlias);
+    return LnnGenerateCeKeyByHuks(&g_ceKeyAlias, isUnlocked);
 }
 
 int32_t LnnCheckGenerateSoftBusKeyByHuks(void)
@@ -574,10 +570,6 @@ int32_t LnnInitDecisionDbDelay(void)
 {
     if (LnnGenerateKeyByHuks(&g_keyAlias) != SOFTBUS_OK) {
         LNN_LOGE(LNN_LEDGER, "generate decision db huks de key fail");
-        return SOFTBUS_GENERATE_KEY_FAIL;
-    }
-    if (LnnGenerateCeKeyByHuks(&g_ceKeyAlias) != SOFTBUS_OK) {
-        LNN_LOGE(LNN_LEDGER, "update decision db huks ce key fail");
         return SOFTBUS_GENERATE_KEY_FAIL;
     }
     if (InitTrustedDevInfoTable() != SOFTBUS_OK) {

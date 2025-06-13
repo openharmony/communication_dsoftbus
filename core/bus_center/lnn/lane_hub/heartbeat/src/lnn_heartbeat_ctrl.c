@@ -24,6 +24,7 @@
 #include "auth_interface.h"
 #include "auth_manager.h"
 #include "bus_center_manager.h"
+#include "g_enhance_adapter_func_pack.h"
 #include "g_enhance_lnn_func.h"
 #include "g_enhance_lnn_func_pack.h"
 #include "lnn_async_callback_utils.h"
@@ -711,7 +712,7 @@ static void HbScreenLockChangeEventHandler(const LnnEventBasicInfo *info)
     SoftBusScreenLockState lockState = (SoftBusScreenLockState)event->status;
     if (lockState == SOFTBUS_USER_UNLOCK) {
         LNN_LOGI(LNN_HEART_BEAT, "user unlocked");
-        (void)LnnGenerateCeParams();
+        (void)LnnGenerateCeParams(true);
         AuthLoadDeviceKeyPacked();
         LnnUpdateOhosAccount(UPDATE_ACCOUNT_ONLY);
         if (!LnnIsDefaultOhosAccount()) {
@@ -941,6 +942,8 @@ static void HbUserSwitchedHandler(const LnnEventBasicInfo *info)
                     LNN_LOGW(LNN_EVENT, "set useridchecksum to local failed! userId:%{public}d", userId);
                 }
                 LnnUpdateOhosAccount(UPDATE_USER_SWITCH);
+                UpdateRecoveryDeviceInfoFromDb();
+                LnnUpdateHeartbeatInfo(UPDATE_HB_NETWORK_INFO);
                 HbConditionChanged(false);
                 RefreshBleBroadcastByUserSwitched();
                 if (IsHeartbeatEnable()) {
@@ -1009,6 +1012,10 @@ int32_t LnnStartHeartbeatFrameDelay(void)
     bool hasTrustedRelation = (AuthHasTrustedRelation() == TRUSTED_RELATION_YES) ? true : false;
     if (LnnIsDefaultOhosAccount() && !hasTrustedRelation) {
         LNN_LOGD(LNN_HEART_BEAT, "no trusted relation, heartbeat(HB) process start later");
+        return SOFTBUS_OK;
+    }
+    if (LnnIsNeedInterceptBroadcast()) {
+        LNN_LOGI(LNN_HEART_BEAT, "local heartbeat disable");
         return SOFTBUS_OK;
     }
     return LnnStartHeartbeat(0);
@@ -1263,13 +1270,15 @@ static void HbDelayCheckTrustedRelation(void *para)
 
 void LnnHbOnTrustedRelationIncreased(int32_t groupType)
 {
-    /* If it is a peer-to-peer group, delay initialization to give BR networking priority. */
-    int32_t ret = LnnStartHeartbeat(0);
-    if (ret != SOFTBUS_OK) {
-        LNN_LOGE(LNN_HEART_BEAT, "account group created start heartbeat fail, ret=%{public}d", ret);
-        return;
+    /* If it is a peer-to-peer group or share group, delay initialization to give BR networking priority. */
+    if (groupType != AUTH_PEER_TO_PEER_GROUP || !IsHeartbeatEnable()) {
+        int32_t ret = LnnStartHeartbeat(0);
+        if (ret != SOFTBUS_OK) {
+            LNN_LOGE(LNN_HEART_BEAT, "account group created start heartbeat fail, ret=%{public}d", ret);
+            return;
+        }
     }
-    if (groupType == AUTH_PEER_TO_PEER_GROUP &&
+    if ((groupType == AUTH_PEER_TO_PEER_GROUP || groupType == AUTH_SHARE) &&
         LnnAsyncCallbackDelayHelper(GetLooper(LOOP_TYPE_DEFAULT), HbDelayCheckTrustedRelation, NULL,
             CHECK_TRUSTED_RELATION_TIME) != SOFTBUS_OK) {
         LNN_LOGE(LNN_HEART_BEAT, "async check trusted relaion fail");
@@ -1394,7 +1403,7 @@ int32_t LnnInitHeartbeat(void)
     static SoftBusRangeCallback cb = {
         .onRangeResult = HbRangeCallback,
     };
-    (void)SoftBusRegRangeCb(MODULE_BLE_HEARTBEAT, &cb);
+    (void)SoftBusRegRangeCbPacked(MODULE_BLE_HEARTBEAT, &cb);
     InitHbConditionState();
     InitHbSpecificConditionState();
     LNN_LOGI(LNN_INIT, "heartbeat(HB) init success");
@@ -1405,7 +1414,7 @@ void LnnDeinitHeartbeat(void)
 {
     LnnHbStrategyDeinit();
     LnnHbMediumMgrDeinit();
-    SoftBusUnregRangeCb(MODULE_BLE_HEARTBEAT);
+    SoftBusUnregRangeCbPacked(MODULE_BLE_HEARTBEAT);
     LnnUnregisterEventHandler(LNN_EVENT_IP_ADDR_CHANGED, HbIpAddrChangeEventHandler);
     LnnUnregisterEventHandler(LNN_EVENT_BT_STATE_CHANGED, HbBtStateChangeEventHandler);
     LnnUnregisterEventHandler(LNN_EVENT_LANE_VAP_CHANGE, HbLaneVapChangeEventHandler);

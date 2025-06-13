@@ -42,7 +42,7 @@ public:
     virtual int32_t LnnHbMediumMgrSetParam(void *param) = 0;
     virtual bool LnnIsLocalSupportBurstFeature(void) = 0;
     virtual int32_t AuthSendKeepaliveOption(const char *uuid, ModeCycle cycle) = 0;
-    virtual int32_t LnnGenerateCeParams(void) = 0;
+    virtual int32_t LnnGenerateCeParams(bool isUnlocked) = 0;
 };
 class HeartBeatCtrlDepsInterfaceMock : public HeartBeatCtrlDepsInterface {
 public:
@@ -60,7 +60,7 @@ public:
     MOCK_METHOD1(LnnHbMediumMgrSetParam, int32_t(void *));
     MOCK_METHOD0(LnnIsLocalSupportBurstFeature, bool(void));
     MOCK_METHOD2(AuthSendKeepaliveOption, int32_t(const char *, ModeCycle));
-    MOCK_METHOD0(LnnGenerateCeParams, int32_t(void));
+    MOCK_METHOD1(LnnGenerateCeParams, int32_t(bool));
 };
 } // namespace OHOS
 #endif // HEARTBEAT_CTRL_DEPS_H

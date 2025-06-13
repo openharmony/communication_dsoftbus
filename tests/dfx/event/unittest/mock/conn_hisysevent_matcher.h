@@ -89,6 +89,7 @@ static int32_t MatchConnEventNameTypeExtraForAddMsg(const HiSysEventParam *param
     MatchConnEventNameTypeExtraInt32Param(params, ++index, extra.needHmlConnect);
     MatchConnEventNameTypeExtraStrParam(params, ++index, extra.businessTag);
     MatchConnEventNameTypeExtraInt32Param(params, ++index, extra.staChload);
+    MatchConnEventNameTypeExtraInt32Param(params, ++index, extra.sameAccount);
     return ++index;
 }
 

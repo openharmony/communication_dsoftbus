@@ -177,10 +177,11 @@ void AuthLoadDeviceKey(void)
     return HeartBeatCtrlStaticInterface()->AuthLoadDeviceKey();
 }
 
-int32_t LnnGenerateCeParams(void)
+int32_t LnnGenerateCeParams(bool isUnlocked)
 {
-    return HeartBeatCtrlStaticInterface()->LnnGenerateCeParams();
+    return HeartBeatCtrlStaticInterface()->LnnGenerateCeParams(isUnlocked);
 }
+
 
 void DfxRecordTriggerTime(LnnTriggerReason reason, LnnEventLnnStage stage)
 {
@@ -259,6 +260,11 @@ int32_t LnnSyncBleOfflineMsg(void)
 void LnnRemoveV0BroadcastAndCheckDev(void)
 {
     return HeartBeatCtrlStaticInterface()->LnnRemoveV0BroadcastAndCheckDev();
+}
+
+int32_t UpdateRecoveryDeviceInfoFromDb(void)
+{
+    return HeartBeatCtrlStaticInterface()->UpdateRecoveryDeviceInfoFromDb();
 }
 }
 } // namespace OHOS
