@@ -16,8 +16,8 @@
 #ifndef CLIENT_TRANS_SESSION_MANAGER_STRUCT_H
 #define CLIENT_TRANS_SESSION_MANAGER_STRUCT_H
 
-#include "../transport/session.h"
-#include "../transport/socket.h"
+#include "transport/session.h"
+#include "transport/socket.h"
 #include "softbus_def.h"
 #include "softbus_trans_def.h"
 
