@@ -81,7 +81,7 @@ int32_t LocalLedgerDepsInterfaceMock::LedgerSoftBusRegBusCenterVarDump(char *dum
     return ret;
 }
 
-int32_t LocalLedgerDepsInterfaceMock::MockGetLocalSleAddrFunc(char *sleAddr, uint32_t sleAddrLen)
+int32_t LocalLedgerDepsInterfaceMock::MockGetLocalSleAddrPackedFunc(char *sleAddr, uint32_t sleAddrLen)
 {
     if (sleAddr == nullptr) {
         return SOFTBUS_ERR;
@@ -179,14 +179,14 @@ void SoftBusRemoveSleStateListener(int listenerId)
     return GetLocalLedgerDepsInterface()->SoftBusRemoveSleStateListener(listenerId);
 }
 
-int32_t GetSleRangeCapacity()
+int32_t GetSleRangeCapacityPacked(void)
 {
-    return GetLocalLedgerDepsInterface()->GetSleRangeCapacity();
+    return GetLocalLedgerDepsInterface()->GetSleRangeCapacityPacked();
 }
 
-int32_t GetLocalSleAddr(char *sleAddr, uint32_t sleAddrLen)
+int32_t GetLocalSleAddrPacked(char *sleAddr, uint32_t sleAddrLen)
 {
-    return GetLocalLedgerDepsInterface()->GetLocalSleAddr(sleAddr, sleAddrLen);
+    return GetLocalLedgerDepsInterface()->GetLocalSleAddrPacked(sleAddr, sleAddrLen);
 }
 
 int32_t LnnGenerateKeyByHuks(struct HksBlob *keyAlias)

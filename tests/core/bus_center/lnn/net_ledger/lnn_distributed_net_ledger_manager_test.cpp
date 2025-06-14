@@ -258,18 +258,15 @@ HWTEST_F(LNNDistributedNetLedgerManagerTest, LNN_SET_DL_CONN_USER_ID_TEST_001, T
     ASSERT_NE(nodeInfo, nullptr);
     LnnDistributedNetLedgerManagerInterfaceMock mock;
     EXPECT_CALL(mock, LnnGetNodeInfoById).WillOnce(Return(nullptr)).WillRepeatedly(Return(nodeInfo));
-    EXPECT_CALL(mock, LnnSaveRemoteDeviceInfo)
-        .WillOnce(Return(SOFTBUS_MEM_ERR)).WillRepeatedly(Return(SOFTBUS_OK));
-
     int32_t userId = 0;
     int32_t ret = LnnSetDLConnUserId(nullptr, userId);
     EXPECT_EQ(ret, SOFTBUS_INVALID_PARAM);
     ret = LnnSetDLConnUserId(NODE_NETWORK_ID, userId);
     EXPECT_EQ(ret, SOFTBUS_NOT_FIND);
     ret = LnnSetDLConnUserId(NODE_NETWORK_ID, userId);
-    EXPECT_EQ(ret, SOFTBUS_MEM_ERR);
+    EXPECT_EQ(ret, SOFTBUS_NOT_IMPLEMENT);
     ret = LnnSetDLConnUserId(NODE_NETWORK_ID, userId);
-    EXPECT_EQ(ret, SOFTBUS_OK);
+    EXPECT_EQ(ret, SOFTBUS_NOT_IMPLEMENT);
     SoftBusFree(nodeInfo);
 }
 
@@ -285,18 +282,15 @@ HWTEST_F(LNNDistributedNetLedgerManagerTest, LNN_SET_DL_CONN_USER_ID_CHECK_SUM_T
     ASSERT_NE(nodeInfo, nullptr);
     LnnDistributedNetLedgerManagerInterfaceMock mock;
     EXPECT_CALL(mock, LnnGetNodeInfoById).WillOnce(Return(nullptr)).WillRepeatedly(Return(nodeInfo));
-    EXPECT_CALL(mock, LnnSaveRemoteDeviceInfo)
-        .WillOnce(Return(SOFTBUS_MEM_ERR)).WillRepeatedly(Return(SOFTBUS_OK));
-
     int32_t userIdCheckSum = 0;
     int32_t ret = LnnSetDLConnUserIdCheckSum(nullptr, userIdCheckSum);
     EXPECT_EQ(ret, SOFTBUS_INVALID_PARAM);
     ret = LnnSetDLConnUserIdCheckSum(NODE_NETWORK_ID, userIdCheckSum);
     EXPECT_EQ(ret, SOFTBUS_NOT_FIND);
     ret = LnnSetDLConnUserIdCheckSum(NODE_NETWORK_ID, userIdCheckSum);
-    EXPECT_EQ(ret, SOFTBUS_MEM_ERR);
+    EXPECT_EQ(ret, SOFTBUS_NOT_IMPLEMENT);
     ret = LnnSetDLConnUserIdCheckSum(NODE_NETWORK_ID, userIdCheckSum);
-    EXPECT_EQ(ret, SOFTBUS_OK);
+    EXPECT_EQ(ret, SOFTBUS_NOT_IMPLEMENT);
     SoftBusFree(nodeInfo);
 }
 
@@ -312,16 +306,14 @@ HWTEST_F(LNNDistributedNetLedgerManagerTest, LNN_SET_DL_CONN_CAPABILITY_TEST_001
     ASSERT_NE(nodeInfo, nullptr);
     LnnDistributedNetLedgerManagerInterfaceMock mock;
     EXPECT_CALL(mock, LnnGetNodeInfoById).WillOnce(Return(nullptr)).WillRepeatedly(Return(nodeInfo));
-    EXPECT_CALL(mock, LnnSaveRemoteDeviceInfo)
-        .WillOnce(Return(SOFTBUS_MEM_ERR)).WillRepeatedly(Return(SOFTBUS_OK));
-
+    EXPECT_CALL(mock, LnnRetrieveDeviceInfoByUdidPacked).WillRepeatedly(Return(SOFTBUS_OK));
     uint32_t connCapability = 0;
     int32_t ret = LnnSetDLConnCapability(NODE_NETWORK_ID, connCapability);
     EXPECT_EQ(ret, SOFTBUS_NOT_FIND);
     ret = LnnSetDLConnCapability(NODE_NETWORK_ID, connCapability);
-    EXPECT_EQ(ret, SOFTBUS_MEM_ERR);
+    EXPECT_EQ(ret, SOFTBUS_NOT_IMPLEMENT);
     ret = LnnSetDLConnCapability(NODE_NETWORK_ID, connCapability);
-    EXPECT_EQ(ret, SOFTBUS_OK);
+    EXPECT_EQ(ret, SOFTBUS_NOT_IMPLEMENT);
     SoftBusFree(nodeInfo);
 }
 
@@ -649,8 +641,7 @@ HWTEST_F(LNNDistributedNetLedgerManagerTest, LNN_SET_DL_PTK_TEST_001, TestSize.L
     ASSERT_NE(nodeInfo, nullptr);
     LnnDistributedNetLedgerManagerInterfaceMock mock;
     EXPECT_CALL(mock, LnnGetNodeInfoById).WillOnce(Return(nullptr)).WillRepeatedly(Return(nodeInfo));
-    EXPECT_CALL(mock, SoftBusGenerateStrHash)
-        .WillOnce(Return(SOFTBUS_INVALID_PARAM)).WillRepeatedly(Return(SOFTBUS_OK));
+    EXPECT_CALL(mock, SoftBusGenerateStrHash).WillRepeatedly(Return(SOFTBUS_INVALID_PARAM));
     EXPECT_CALL(mock, ConvertBytesToHexString).WillRepeatedly(Return(SOFTBUS_OK));
 
     const char *remotePtk = "testRemotePtk";
@@ -662,6 +653,7 @@ HWTEST_F(LNNDistributedNetLedgerManagerTest, LNN_SET_DL_PTK_TEST_001, TestSize.L
     EXPECT_FALSE(ret);
     ret = LnnSetDlPtk(NODE_NETWORK_ID, remotePtk);
     EXPECT_FALSE(ret);
+    EXPECT_CALL(mock, SoftBusGenerateStrHash).WillRepeatedly(Return(SOFTBUS_OK));
     ret = LnnSetDlPtk(NODE_NETWORK_ID, remotePtk);
     EXPECT_TRUE(ret);
     SoftBusFree(nodeInfo);

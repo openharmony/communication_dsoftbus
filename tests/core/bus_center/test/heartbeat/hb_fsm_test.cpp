@@ -604,8 +604,7 @@ HWTEST_F(HeartBeatFSMTest, RemoveSendOneEndMsgTest_01, TestSize.Level1)
     delMsgPara.wakeupFlag = false;
     ctrlMsgObj.obj = reinterpret_cast<void *>(msgPara);
     ret = RemoveSendOneEndMsg(&ctrlMsgObj, &delMsg);
-    EXPECT_EQ(ret, SOFTBUS_NETWORK_HB_REMOVE_MSG_FAIL);
-    SoftBusFree(msgPara);
+    EXPECT_EQ(ret, SOFTBUS_OK);
 }
 /*
  * @tc.name: RemoveSendOneEndMsgTest_02

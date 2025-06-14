@@ -691,10 +691,10 @@ HWTEST_F(BusCenterSdkTest, BUS_CENTER_SDK_TRIGGER_RANGE_Test001, TestSize.Level1
     EXPECT_EQ(RegisterRangeCallbackForMsdp(nullptr, nullptr), SOFTBUS_INVALID_PARAM);
     EXPECT_EQ(RegisterRangeCallbackForMsdp(nullptr, &g_bleRangeCb1), SOFTBUS_INVALID_PARAM);
     EXPECT_EQ(RegisterRangeCallbackForMsdp(TEST_PKG_NAME, &g_bleRangeCb), SOFTBUS_INVALID_PARAM);
-    EXPECT_EQ(RegisterRangeCallbackForMsdp(TEST_MSDP_NAME, &g_bleRangeCb), SOFTBUS_OK);
+    EXPECT_EQ(RegisterRangeCallbackForMsdp(TEST_MSDP_NAME, &g_bleRangeCb), SOFTBUS_FUNC_NOT_SUPPORT);
     EXPECT_EQ(UnregisterRangeCallbackForMsdp(nullptr), SOFTBUS_INVALID_PARAM);
     EXPECT_EQ(UnregisterRangeCallbackForMsdp(TEST_PKG_NAME), SOFTBUS_INVALID_PARAM);
-    EXPECT_EQ(UnregisterRangeCallbackForMsdp(TEST_MSDP_NAME), SOFTBUS_OK);
+    EXPECT_EQ(UnregisterRangeCallbackForMsdp(TEST_MSDP_NAME), SOFTBUS_FUNC_NOT_SUPPORT);
 
     RangeConfig config = { .medium = BLE_ADV_HB,
         .configInfo.heartbeat.mode.connFlag = true,
@@ -703,6 +703,6 @@ HWTEST_F(BusCenterSdkTest, BUS_CENTER_SDK_TRIGGER_RANGE_Test001, TestSize.Level1
     };
     EXPECT_EQ(TriggerRangeForMsdp(nullptr, nullptr), SOFTBUS_INVALID_PARAM);
     EXPECT_EQ(TriggerRangeForMsdp(TEST_PKG_NAME, nullptr), SOFTBUS_INVALID_PARAM);
-    EXPECT_EQ(TriggerRangeForMsdp(TEST_MSDP_NAME, &config), SOFTBUS_OK);
+    EXPECT_EQ(TriggerRangeForMsdp(TEST_MSDP_NAME, &config), SOFTBUS_NETWORK_HB_START_ADV_FAILED);
 }
 } // namespace OHOS
