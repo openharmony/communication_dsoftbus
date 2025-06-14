@@ -73,6 +73,8 @@ typedef void (*DiscCoapReportNotificationFunc)(const NSTACKX_NotificationConfig 
 #ifdef DSOFTBUS_FEATURE_DISC_COAP
 typedef int32_t (*DiscCoapFillServiceDataFunc)(const PublishOption *option, char *outData, uint32_t outDataLen, uint32_t allCap);
 #endif /* DSOFTBUS_FEATURE_DISC_COAP */
+typedef int32_t (*DiscCoapAssembleBdataFunc)(
+    const unsigned char *capabilityData, uint32_t dataLen, char *businessData, uint32_t businessDataLen);
 typedef DiscoveryBleDispatcherInterface *(*DiscOopBleInitFunc)(DiscInnerCallback *discInnerCb);
 typedef void (*DiscOopBleDeinitFunc)(void);
 typedef int32_t (*DiscOopBleEventInitFunc)(void);
@@ -109,6 +111,7 @@ typedef struct TagDiscEnhanceFuncList {
 #ifdef DSOFTBUS_FEATURE_DISC_COAP
     DiscCoapFillServiceDataFunc discCoapFillServiceData;
 #endif /* DSOFTBUS_FEATURE_DISC_COAP */
+    DiscCoapAssembleBdataFunc discCoapAssembleBdata;
 
     DiscUsbInitFunc discUsbInit;
     DiscUsbDeinitFunc discUsbDeinit;

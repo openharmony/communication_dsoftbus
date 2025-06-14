@@ -231,34 +231,47 @@ static bool CheckFeature(const PublishOption *option)
     }
 }
 
+static int32_t RegisterInfoToDfinder(const PublishOption *option, bool isActive)
+{
+    DISC_CHECK_AND_RETURN_RET_LOGE(CheckParam(option, NULL, true), SOFTBUS_INVALID_PARAM, DISC_COAP, "invalid param");
+    DISC_CHECK_AND_RETURN_RET_LOGE(CheckFeature(option), SOFTBUS_INVALID_PARAM, DISC_COAP, "invalid param");
+    if (RegisterAllCapBitmap(CAPABILITY_NUM, option->capabilityBitmap, g_publishMgr, MAX_CAP_NUM) != SOFTBUS_OK) {
+        SoftbusReportDiscFault(SOFTBUS_HISYSEVT_DISC_MEDIUM_COAP, SOFTBUS_HISYSEVT_DISCOVER_COAP_MERGE_CAP_FAIL);
+        DISC_LOGE(DISC_COAP, "merge publish capability failed. isActive=%{public}s", isActive ? "active" : "passive");
+        return SOFTBUS_DISCOVER_COAP_START_PUBLISH_FAIL;
+    }
+    if (g_publishMgr->isUpdate && DiscCoapRegisterCapability(CAPABILITY_NUM, g_publishMgr->allCap) != SOFTBUS_OK) {
+        SoftbusReportDiscFault(SOFTBUS_HISYSEVT_DISC_MEDIUM_COAP, SOFTBUS_HISYSEVT_DISCOVER_COAP_REGISTER_CAP_FAIL);
+        DISC_LOGE(DISC_COAP, "register all capability to dfinder failed.");
+        return SOFTBUS_DISCOVER_COAP_START_PUBLISH_FAIL;
+    }
+    uint32_t curCap = option->capabilityBitmap[0];
+    if (DiscCoapRegisterServiceData(option, g_publishMgr->allCap[0]) != SOFTBUS_OK) {
+        DfxRecordRegisterEnd(curCap, SOFTBUS_DISCOVER_COAP_REGISTER_CAP_FAIL);
+        DISC_LOGE(DISC_COAP, "register service data to dfinder failed.");
+        return SOFTBUS_DISCOVER_COAP_START_PUBLISH_FAIL;
+    }
+    int32_t ret = DiscCoapRegisterBusinessData(option->capabilityData, option->dataLen);
+    DISC_CHECK_AND_RETURN_RET_LOGW(ret == SOFTBUS_OK, ret, DISC_COAP, "register businessdata to dfinder failed.");
+#ifdef DSOFTBUS_FEATURE_DISC_SHARE_COAP
+    if (DiscCoapRegisterCapabilityData(option->capabilityData, option->dataLen, curCap) != SOFTBUS_OK) {
+        DISC_LOGW(DISC_COAP, "register capability data to dfinder failed.");
+        return SOFTBUS_DISCOVER_COAP_START_PUBLISH_FAIL;
+    }
+#endif /* DSOFTBUS_FEATURE_DISC_SHARE_COAP */
+    return SOFTBUS_OK;
+}
+
 static int32_t Publish(const PublishOption *option, bool isActive)
 {
     DISC_CHECK_AND_RETURN_RET_LOGE(CheckParam(option, NULL, true), SOFTBUS_INVALID_PARAM, DISC_COAP, "invalid param");
     DISC_CHECK_AND_RETURN_RET_LOGE(CheckFeature(option), SOFTBUS_INVALID_PARAM, DISC_COAP, "invalid param");
     DISC_CHECK_AND_RETURN_RET_LOGE(SoftBusMutexLock(&(g_publishMgr->lock)) == 0, SOFTBUS_LOCK_ERR, DISC_COAP,
         "publish mutex lock failed. isActive=%{public}s", isActive ? "active" : "passive");
-    if (RegisterAllCapBitmap(CAPABILITY_NUM, option->capabilityBitmap, g_publishMgr, MAX_CAP_NUM) != SOFTBUS_OK) {
-        SoftbusReportDiscFault(SOFTBUS_HISYSEVT_DISC_MEDIUM_COAP, SOFTBUS_HISYSEVT_DISCOVER_COAP_MERGE_CAP_FAIL);
-        DISC_LOGE(DISC_COAP, "merge publish capability failed. isActive=%{public}s", isActive ? "active" : "passive");
+    if (RegisterInfoToDfinder(option, isActive) != SOFTBUS_OK) {
+        DISC_LOGE(DISC_COAP, "register info to dfinder failed.");
         goto PUB_FAIL;
     }
-    if (g_publishMgr->isUpdate && DiscCoapRegisterCapability(CAPABILITY_NUM, g_publishMgr->allCap) != SOFTBUS_OK) {
-        SoftbusReportDiscFault(SOFTBUS_HISYSEVT_DISC_MEDIUM_COAP, SOFTBUS_HISYSEVT_DISCOVER_COAP_REGISTER_CAP_FAIL);
-        DISC_LOGE(DISC_COAP, "register all capability to dfinder failed.");
-        goto PUB_FAIL;
-    }
-    uint32_t curCap = option->capabilityBitmap[0];
-    if (DiscCoapRegisterServiceData(option, g_publishMgr->allCap[0]) != SOFTBUS_OK) {
-        DfxRecordRegisterEnd(curCap, SOFTBUS_DISCOVER_COAP_REGISTER_CAP_FAIL);
-        DISC_LOGE(DISC_COAP, "register service data to dfinder failed.");
-        goto PUB_FAIL;
-    }
-#ifdef DSOFTBUS_FEATURE_DISC_SHARE_COAP
-    if (DiscCoapRegisterCapabilityData(option->capabilityData, option->dataLen, curCap) != SOFTBUS_OK) {
-        DISC_LOGW(DISC_COAP, "register capability data to dfinder failed.");
-        goto PUB_FAIL;
-    }
-#endif /* DSOFTBUS_FEATURE_DISC_SHARE_COAP */
     if (isActive) {
         DiscCoapOption discCoapOption;
         DiscOption discOption = {

@@ -48,6 +48,7 @@ int32_t DiscRegisterEnhanceFunc(void *soHandle)
     g_discEnhanceFuncList.discCoapAssembleCapData = dlsym(soHandle, "DiscCoapAssembleCapData");
 #endif /* DSOFTBUS_FEATURE_DISC_COAP */
     g_discEnhanceFuncList.discFillBtype = dlsym(soHandle, "DiscFillBtype");
+    g_discEnhanceFuncList.discCoapAssembleBdata = dlsym(soHandle, "DiscCoapAssembleBdata");
 #endif
 
     g_discEnhanceFuncList.discTouchBleInit = dlsym(soHandle, "DiscTouchBleInit");
