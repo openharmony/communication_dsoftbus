@@ -632,4 +632,55 @@ HWTEST_F(LNNLaneLinkExtTest, SELECT_LANE_TEST_002, TestSize.Level1)
     int32_t ret = SelectLane(NODE_NETWORK_ID, &selectParam, &linkList, &listNum);
     EXPECT_EQ(ret, SOFTBUS_LANE_NO_AVAILABLE_LINK);
 }
+
+/*
+* @tc.name: LNN_LANE_LINK_RATE_PRE_TEST_001
+* @tc.desc: test build raw hml link for rate preference
+* @tc.type: FUNC
+* @tc.require:
+*/
+HWTEST_F(LNNLaneLinkExtTest, LNN_LANE_LINK_RATE_PRE_TEST_001, TestSize.Level1)
+{
+    LinkRequest request = {};
+    EXPECT_EQ(strcpy_s(request.peerNetworkId, NETWORK_ID_BUF_LEN, NODE_NETWORK_ID), EOK);
+    request.linkType = LANE_HML_RAW;
+    request.pid = ASYNCSUCC;
+    request.triggerLinkTime = SoftBusGetSysTimeMs();
+    request.availableLinkTime = DEFAULT_LINK_LATENCY;
+    request.actionAddr = 1;
+    uint32_t laneReqId = g_laneReqId++;
+    int32_t value = 3;
+    g_isRawHmlResuse = false;
+    TransReqInfo reqInfo = {.allocInfo.qosRequire.ratePreference = true};
+
+    NiceMock<LaneDepsInterfaceMock> laneMock;
+    NiceMock<LaneLinkDepsInterfaceMock> laneLinkMock;
+    EXPECT_CALL(laneMock, LnnGetRemoteStrInfo).WillOnce(Return(SOFTBUS_NOT_FIND)).WillOnce(Return(SOFTBUS_NOT_FIND))
+        .WillRepeatedly(Return(SOFTBUS_OK));
+    EXPECT_CALL(laneMock, LnnGetRemoteNumInfo)
+        .WillRepeatedly(DoAll(SetArgPointee<LANE_MOCK_PARAM3>(value), Return(SOFTBUS_OK)));
+    EXPECT_CALL(laneLinkMock, GetTransReqInfoByLaneReqId).WillOnce(Return(SOFTBUS_OK))
+        .WillOnce(DoAll(SetArgPointee<LANE_MOCK_PARAM2>(reqInfo), Return(SOFTBUS_OK)))
+        .WillRepeatedly(Return(SOFTBUS_OK));
+    g_manager.connectDevice = ConnectDeviceRawHml;
+    EXPECT_CALL(laneMock, GetWifiDirectManager).WillRepeatedly(Return(&g_manager));
+    EXPECT_CALL(laneLinkMock, CheckLaneLinkExistByType).WillRepeatedly(Return(true));
+    NiceMock<LaneNetCapInterfaceMock> capMock;
+    EXPECT_CALL(capMock, SetRemoteDynamicNetCap).WillRepeatedly(Return());
+
+    SetIsNeedCondWait(true);
+    int32_t ret = LnnConnectP2p(&request, laneReqId, &g_linkCb);
+    EXPECT_EQ(SOFTBUS_OK, ret);
+    CondWait();
+    EXPECT_NO_FATAL_FAILURE(LnnDisconnectP2p(NODE_NETWORK_ID, laneReqId));
+
+    EXPECT_CALL(laneLinkMock, GetTransReqInfoByLaneReqId).WillOnce(Return(SOFTBUS_OK))
+        .WillOnce(Return(SOFTBUS_NOT_FIND)).WillRepeatedly(Return(SOFTBUS_OK));
+    SetIsNeedCondWait(true);
+    ret = LnnConnectP2p(&request, laneReqId, &g_linkCb);
+    EXPECT_EQ(SOFTBUS_OK, ret);
+    CondWait();
+    EXPECT_NO_FATAL_FAILURE(LnnDisconnectP2p(NODE_NETWORK_ID, laneReqId));
+    EXPECT_NO_FATAL_FAILURE(LnnDestroyP2p());
+}
 } // namespace OHOS
