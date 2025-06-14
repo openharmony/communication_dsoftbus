@@ -46,10 +46,6 @@ void CommonEventMonitor::OnReceiveEvent(const CommonEventData &data)
     std::string action = data.GetWant().GetAction();
     LNN_LOGI(LNN_EVENT, "notify common event=%{public}s", action.c_str());
 
-    if (action == CommonEventSupport::COMMON_EVENT_TIME_CHANGED) {
-        LnnNotifySysTimeChangeEvent();
-    }
-
     SoftBusScreenState screenState = SOFTBUS_SCREEN_UNKNOWN;
     if (action == CommonEventSupport::COMMON_EVENT_SCREEN_OFF) {
         screenState = SOFTBUS_SCREEN_OFF;
@@ -107,7 +103,6 @@ int32_t SubscribeEvent::SubscribeCommonEvent()
     matchingSkills.AddEvent(CommonEventSupport::COMMON_EVENT_SCREEN_UNLOCKED);
     matchingSkills.AddEvent(CommonEventSupport::COMMON_EVENT_USER_SWITCHED);
     matchingSkills.AddEvent(CommonEventSupport::COMMON_EVENT_DATA_SHARE_READY);
-    matchingSkills.AddEvent(CommonEventSupport::COMMON_EVENT_TIME_CHANGED);
     CommonEventSubscribeInfo subscriberInfo(matchingSkills);
     subscriber_ = std::make_shared<CommonEventMonitor>(subscriberInfo);
     if (!CommonEventManager::SubscribeCommonEvent(subscriber_)) {
