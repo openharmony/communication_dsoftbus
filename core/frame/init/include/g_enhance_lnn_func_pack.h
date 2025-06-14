@@ -120,6 +120,8 @@ int32_t LnnStartTimeSyncImplPacked(const char *targetNetworkId, TimeSyncAccuracy
 int32_t LnnStopTimeSyncImplPacked(const char *targetNetworkId);
 int32_t LnnTimeSyncImplInitPacked(void);
 void LnnTimeSyncImplDeinitPacked(void);
+int32_t LnnTimeChangeNotifyPacked(void);
+
 void SendDeviceStateToMlpsPacked(void *para);
 int32_t LnnRetrieveDeviceInfoByNetworkIdPacked(const char *networkId, NodeInfo *info);
 void SetLpKeepAliveStatePacked(void *para);
