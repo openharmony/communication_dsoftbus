@@ -13,12 +13,21 @@
  * limitations under the License.
  */
 
+#include <stdint.h>
+
+#include "br_proxy_server_manager.h"
 #include "softbus_ddos.h"
 
 int32_t InitDdos(void)
 {
     return SOFTBUS_OK;
 }
+
+void BrProxyClientDeathClearResource(pid_t callingPid)
+{
+    return;
+}
+
 void DeinitDdos(void)
 {
     return;
