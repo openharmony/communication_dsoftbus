@@ -22,6 +22,7 @@
 #include "softbus_conn_ble_client.h"
 #include "softbus_conn_ble_server.h"
 
+#ifdef DSOFTBUS_FEATURE_CONN_COC
 static int32_t ConnCocClientConnect(ConnBleConnection *connection)
 {
     ConnEnhanceFuncList *pfnConnEnhanceFuncList = ConnEnhanceFuncListGet();
@@ -132,6 +133,7 @@ static int32_t ConnCocInitServerModule(SoftBusLooper *looper, const ConnBleServe
     }
     return pfnConnEnhanceFuncList->connCocInitServerModule(looper, sListener);
 }
+#endif
 
 static BleUnifyInterface g_bleUnifyInterface[BLE_PROTOCOL_MAX] = {
     [BLE_GATT] = {
@@ -152,6 +154,7 @@ static BleUnifyInterface g_bleUnifyInterface[BLE_PROTOCOL_MAX] = {
 static void ConnCocInit(void)
 {
     if (SoftbusServerPluginLoadedFlagGet()) {
+#ifdef DSOFTBUS_FEATURE_CONN_COC
         g_bleUnifyInterface[BLE_COC].bleClientConnect = ConnCocClientConnect;
         g_bleUnifyInterface[BLE_COC].bleClientDisconnect = ConnCocClientDisconnect;
         g_bleUnifyInterface[BLE_COC].bleClientSend = ConnCocClientSend;
@@ -163,6 +166,7 @@ static void ConnCocInit(void)
         g_bleUnifyInterface[BLE_COC].bleServerConnect = ConnCocServerConnect;
         g_bleUnifyInterface[BLE_COC].bleClientInitModule = ConnCocInitClientModule;
         g_bleUnifyInterface[BLE_COC].bleServerInitModule = ConnCocInitServerModule;
+#endif
     }
 
     return;
