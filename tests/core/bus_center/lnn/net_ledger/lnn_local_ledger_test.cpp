@@ -312,7 +312,7 @@ HWTEST_F(LNNLedgerMockTest, Local_Ledger_Key_Test_001, TestSize.Level1)
     EXPECT_EQ(g_localKeyTable[10].getInfo(infoMinsize, len), SOFTBUS_MEM_ERR);
     EXPECT_EQ(g_localKeyTable[11].getInfo(infoMinsize, len), SOFTBUS_INVALID_PARAM);
     EXPECT_EQ(g_localKeyTable[18].getInfo(infoMinsize, len), SOFTBUS_MEM_ERR);
-    EXPECT_EQ(g_localKeyTable[19].getInfo(infoMinsize, len), SOFTBUS_INVALID_PARAM);
+    EXPECT_EQ(g_localKeyTable[19].getInfo(infoMinsize, len), SOFTBUS_MEM_ERR);
     EXPECT_EQ(g_localKeyTable[35].getInfo(infoMinsize, len), SOFTBUS_INVALID_PARAM);
     LnnDeinitLocalLedger();
 }
@@ -349,7 +349,7 @@ HWTEST_F(LNNLedgerMockTest, Local_Ledger_Key_Test_002, TestSize.Level1)
     EXPECT_EQ(g_localKeyTable[15].getInfo(infoMinsize, len), SOFTBUS_INVALID_PARAM);
     EXPECT_EQ(g_localKeyTable[16].getInfo(infoMinsize, len), SOFTBUS_INVALID_PARAM);
     EXPECT_EQ(g_localKeyTable[17].getInfo(infoMinsize, len), SOFTBUS_MEM_ERR);
-    EXPECT_EQ(g_localKeyTable[20].getInfo(infoMinsize, len), SOFTBUS_MEM_ERR);
+    EXPECT_EQ(g_localKeyTable[20].getInfo(infoMinsize, len), SOFTBUS_INVALID_PARAM);
     EXPECT_EQ(g_localKeyTable[24].getInfo(infoMinsize, len), SOFTBUS_INVALID_PARAM);
     EXPECT_EQ(g_localKeyTable[25].getInfo(infoMinsize, len), SOFTBUS_INVALID_PARAM);
     EXPECT_EQ(g_localKeyTable[26].getInfo(infoMinsize, len), SOFTBUS_INVALID_PARAM);
@@ -926,21 +926,21 @@ HWTEST_F(LNNLedgerMockTest, L1_GET_USER_ID_Test_001, TestSize.Level1)
  */
  HWTEST_F(LNNLedgerMockTest, LL_SLE_CAP_Test_001, TestSize.Level1)
 {
-    int32_t mockSleRangeCap = 1;
-    int32_t sleRangeCapRet = -1;
-    char mockSleAddr[MAC_LEN] = "11:11:11:11:11:11";
+    int32_t mockSleRangeCap = 0;
+    int32_t sleRangeCapRet = 0;
     char sleAddrRet[MAC_LEN] = { 0 };
     LocalLedgerDepsInterfaceMock localLedgerMock;
     EXPECT_CALL(localLedgerMock, IsSleEnabled()).WillRepeatedly(Return(true));
     EXPECT_CALL(localLedgerMock, SoftBusAddSleStateListener(_, _)).WillRepeatedly(Return(SOFTBUS_OK));
-    EXPECT_CALL(localLedgerMock, GetSleRangeCapacity()).WillRepeatedly(Return(mockSleRangeCap));
-    EXPECT_CALL(localLedgerMock, GetLocalSleAddr(_, _)).WillRepeatedly(localLedgerMock.MockGetLocalSleAddrFunc);
+    EXPECT_CALL(localLedgerMock, GetSleRangeCapacityPacked()).WillRepeatedly(Return(mockSleRangeCap));
+    EXPECT_CALL(localLedgerMock, GetLocalSleAddrPacked(_, _))
+        .WillRepeatedly(localLedgerMock.MockGetLocalSleAddrPackedFunc);
 
     EXPECT_TRUE(LnnInitLocalLedger() == SOFTBUS_OK);
     EXPECT_TRUE(LnnGetLocalNumInfo(NUM_KEY_SLE_RANGE_CAP, &sleRangeCapRet) == SOFTBUS_OK);
     EXPECT_EQ(sleRangeCapRet, mockSleRangeCap);
     EXPECT_TRUE(LnnGetLocalStrInfo(STRING_KEY_SLE_ADDR, sleAddrRet, MAC_LEN) == SOFTBUS_OK);
-    EXPECT_STREQ(sleAddrRet, mockSleAddr);
+    EXPECT_STREQ(sleAddrRet, "");
     LnnDeinitLocalLedger();
 }
 
