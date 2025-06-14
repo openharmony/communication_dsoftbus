@@ -238,7 +238,6 @@ void Register5thPartFunc(void *soHandle)
 {
     g_lnnEnhanceFuncList.lnnRetrieveDeviceInfo = dlsym(soHandle, "LnnRetrieveDeviceInfo");
     g_lnnEnhanceFuncList.lnnRetrieveDeviceInfoByNetworkId = dlsym(soHandle, "LnnRetrieveDeviceInfoByNetworkId");
-    g_lnnEnhanceFuncList.lnnTimeChangeNotify = dlsym(soHandle, "LnnTimeChangeNotify");
 }
 
 int32_t LnnRegisterEnhanceFunc(void *soHandle)
