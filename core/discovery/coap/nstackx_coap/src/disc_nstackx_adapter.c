@@ -390,6 +390,18 @@ int32_t DiscCoapRegisterServiceData(const PublishOption *option, uint32_t allCap
     return SOFTBUS_OK;
 }
 
+int32_t DiscCoapRegisterBusinessData(const unsigned char *capabilityData, uint32_t dataLen)
+{
+    DISC_CHECK_AND_RETURN_RET_LOGD(capabilityData != NULL && dataLen > 0, SOFTBUS_OK, DISC_COAP,
+        "no capability data, no need to parse and register");
+    char businessData[NSTACKX_MAX_BUSINESS_DATA_LEN] = { 0 };
+    int32_t ret = DiscCoapAssembleBdataPacked(capabilityData, dataLen, businessData, sizeof(businessData));
+    DISC_CHECK_AND_RETURN_RET_LOGE(ret == SOFTBUS_OK, ret, DISC_COAP, "assemble bdata failed, ret=%{public}d", ret);
+    ret = NSTACKX_RegisterBusinessData(businessData);
+    DISC_CHECK_AND_RETURN_RET_LOGE(ret == SOFTBUS_OK, ret, DISC_COAP, "register bdata failed, ret=%{public}d", ret);
+    return SOFTBUS_OK;
+}
+
 #ifdef DSOFTBUS_FEATURE_DISC_SHARE_COAP
 int32_t DiscCoapRegisterCapabilityData(const unsigned char *capabilityData, uint32_t dataLen, uint32_t capability)
 {

@@ -45,6 +45,8 @@ int32_t SchedulerDeinitBroadcastPacked(void);
 #endif
 
 #if !defined(__G_ENHANCE_DISC_FUNC_PACK_INNER_DISC_COAP_VIRTUAL)
+int32_t DiscCoapAssembleBdataPacked(
+    const unsigned char *capabilityData, uint32_t dataLen, char *businessData, uint32_t businessDataLen);
 int32_t DiscCoapProcessDeviceInfoPacked(const NSTACKX_DeviceInfo *nstackxInfo, DeviceInfo *devInfo,
     const DiscInnerCallback *discCb, SoftBusMutex *discCbLock);
 #ifdef DSOFTBUS_FEATURE_DISC_SHARE_COAP
