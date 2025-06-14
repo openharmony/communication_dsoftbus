@@ -158,7 +158,6 @@ typedef struct TagLnnOpenFuncList {
     AddLinkConflictInfoFunc addLinkConflictInfo;
     GetSupportBandWidthFunc getSupportBandWidth;
     GetAllSupportReuseBandWidthFunc getAllSupportReuseBandWidth;
-    FindLaneResourceByLinkTypeFunc findLaneResourceByLinkType;
 
     // bus_center
     LnnNotifyDeviceTrustedChangeFunc lnnNotifyDeviceTrustedChange;
@@ -234,7 +233,6 @@ typedef struct TagLnnOpenFuncList {
     AuthGetLatestAuthSeqListByTypeFunc authGetLatestAuthSeqListByType;
     AuthGetIdByConnInfoFunc authGetIdByConnInfo;
     AuthPostTransDataFunc authPostTransData;
-    AuthGetHmlConnInfoFunc authGetHmlConnInfo;
     AuthOpenConnFunc authOpenConn;
     SocketGetConnInfoFunc socketGetConnInfo;
     GetConnInfoByConnectionIdFunc getConnInfoByConnectionId;

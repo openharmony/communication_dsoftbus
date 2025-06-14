@@ -49,7 +49,6 @@ extern "C" {
 typedef void (*OnStatsPeriodAdjustmentFunc)(uint32_t ms);
 typedef int32_t (*LnnTimeSyncImplInitFunc)(void);
 typedef void (*LnnTimeSyncImplDeinitFunc)(void);
-typedef int32_t (*LnnTimeChangeNotifyFunc)(void);
 typedef int32_t (*LnnStartTimeSyncImplFunc)(const char *targetNetworkId, TimeSyncAccuracy accuracy,
                              TimeSyncPeriod period, const TimeSyncImplCallback *cb);
 typedef int32_t (*LnnStopTimeSyncImplFunc)(const char *targetNetworkId);
@@ -257,7 +256,6 @@ typedef void (*LnnDeinitUsbChannelManagerFunc)(void);
 typedef struct TagLnnEnhanceFuncList {
     // time_sync
     LnnTimeSyncImplInitFunc lnnTimeSyncImplInit;
-    LnnTimeChangeNotifyFunc lnnTimeChangeNotify;
     LnnTimeSyncImplDeinitFunc lnnTimeSyncImplDeinit;
     LnnStartTimeSyncImplFunc lnnStartTimeSyncImpl;
     LnnStopTimeSyncImplFunc lnnStopTimeSyncImpl;

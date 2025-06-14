@@ -690,12 +690,6 @@ void LnnNotifyVapInfoChangeEvent(int32_t preferChannel)
     NotifyEvent((const LnnEventBasicInfo *)&event);
 }
 
-void LnnNotifySysTimeChangeEvent(void)
-{
-    LnnEventBasicInfo event = {.event = LNN_EVENT_SYS_TIME_CHANGE};
-    NotifyEvent((const LnnEventBasicInfo *)&event);
-}
-
 void LnnNotifyScreenLockStateChangeEvent(SoftBusScreenLockState state)
 {
     if (state < SOFTBUS_SCREEN_LOCK || state >= SOFTBUS_SCREEN_LOCK_UNKNOWN) {
