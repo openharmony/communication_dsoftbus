@@ -34,6 +34,8 @@ int32_t DiscCoapProcessDeviceInfo(const NSTACKX_DeviceInfo *nstackxInfo, DeviceI
 int32_t DiscCoapFillServiceData(const PublishOption *option, char *outData, uint32_t outDataLen, uint32_t allCap);
 int32_t DiscCoapAssembleCapData(uint32_t capability, const char *capabilityData, uint32_t dataLen, char *outData,
     uint32_t outLen);
+int32_t DiscCoapAssembleBdata(const unsigned char *capabilityData, uint32_t dataLen, char *businessData,
+    uint32_t businessDataLen);
 void DiscCoapReportNotification(const NSTACKX_NotificationConfig *notification);
 
 #ifdef __cplusplus
