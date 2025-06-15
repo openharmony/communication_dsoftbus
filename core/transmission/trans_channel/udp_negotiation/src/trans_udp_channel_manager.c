@@ -891,7 +891,7 @@ void TransAsyncUdpChannelTask(int32_t channelId)
     TransCheckChannelOpenToLooperDelay(channelId, CHANNEL_TYPE_UDP, delayTime);
 }
 
-int32_t TransSetTos(int32_t channelId, uint8_t tos)
+int32_t TransSetTos(int32_t channelId, uint8_t tos, pid_t callingPid)
 {
     if (g_udpChannelMgr == NULL) {
         TRANS_LOGE(TRANS_CTRL, "udp channel manager not initialized.");
@@ -903,7 +903,8 @@ int32_t TransSetTos(int32_t channelId, uint8_t tos)
     }
     UdpChannelInfo *udpChannelNode = NULL;
     LIST_FOR_EACH_ENTRY(udpChannelNode, &(g_udpChannelMgr->list), UdpChannelInfo, node) {
-        if (udpChannelNode->info.myData.channelId == channelId) {
+        if (udpChannelNode->info.myData.channelId == channelId &&
+            (callingPid == 0 || udpChannelNode->info.myData.pid == callingPid)) {
             udpChannelNode->tos = tos;
             (void)SoftBusMutexUnlock(&(g_udpChannelMgr->lock));
             return SOFTBUS_OK;

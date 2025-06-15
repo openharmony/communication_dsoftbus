@@ -32,6 +32,7 @@ using namespace testing::ext;
 
 namespace OHOS {
 
+#define TEST_CALLING_PID 3588
 #define TEST_SOCKET_PORT 60000
 #define TEST_CHANNEL_ID  12345
 
@@ -344,7 +345,7 @@ HWTEST_F(TransUdpNegotiationTest, TransUdpNegotiationTest12, TestSize.Level1)
 HWTEST_F(TransUdpNegotiationTest, TransDealUdpCheckCollabResult001, TestSize.Level1)
 {
     int32_t checkResult = SOFTBUS_OK;
-    int32_t ret = TransDealUdpCheckCollabResult(TEST_CHANNEL_ID, checkResult);
+    int32_t ret = TransDealUdpCheckCollabResult(TEST_CHANNEL_ID, checkResult, TEST_CALLING_PID);
     EXPECT_EQ(ret, SOFTBUS_TRANS_UDP_CHANNEL_NOT_FOUND);
 }
 
@@ -367,8 +368,8 @@ HWTEST_F(TransUdpNegotiationTest, TransDealUdpCheckCollabResult002, TestSize.Lev
     int32_t checkResult = SOFTBUS_OK;
     int32_t ret = TransAddUdpChannel(newChannel);
     EXPECT_EQ(ret, SOFTBUS_OK);
-    ret = TransDealUdpCheckCollabResult(TEST_CHANNEL_ID, checkResult);
-    EXPECT_EQ(ret, SOFTBUS_INVALID_PARAM);
+    ret = TransDealUdpCheckCollabResult(TEST_CHANNEL_ID, checkResult, TEST_CALLING_PID);
+    EXPECT_EQ(ret, SOFTBUS_TRANS_CHECK_PID_ERROR);
 
     ReleaseUdpChannelId(TEST_CHANNEL_ID);
 }
@@ -390,9 +391,9 @@ HWTEST_F(TransUdpNegotiationTest, TransDealUdpCheckCollabResult003, TestSize.Lev
     EXPECT_EQ(ret, EOK);
     int32_t checkResult = SOFTBUS_COND_INIT_FAILED;
     ret = TransAddUdpChannel(newChannel);
-    EXPECT_EQ(ret, SOFTBUS_OK);
-    ret = TransDealUdpCheckCollabResult(TEST_CHANNEL_ID, checkResult);
-    EXPECT_EQ(ret, SOFTBUS_COND_INIT_FAILED);
+    EXPECT_EQ(ret, SOFTBUS_TRANS_UDP_CHANNEL_ALREADY_EXIST);
+    ret = TransDealUdpCheckCollabResult(TEST_CHANNEL_ID, checkResult, TEST_CALLING_PID);
+    EXPECT_EQ(ret, SOFTBUS_TRANS_CHECK_PID_ERROR);
 
     ReleaseUdpChannelId(TEST_CHANNEL_ID);
 }

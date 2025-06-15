@@ -531,7 +531,7 @@ static int32_t CheckAccessInfoAndCalloc(SessionServer *pos, uint32_t strLen)
     return SOFTBUS_OK;
 }
 
-int32_t AddAccessInfoBySessionName(const char *sessionName, const AccessInfo *accessInfo)
+int32_t AddAccessInfoBySessionName(const char *sessionName, const AccessInfo *accessInfo, pid_t callingPid)
 {
     if (sessionName == NULL || accessInfo == NULL) {
         TRANS_LOGE(TRANS_CTRL, "invalid param.");
@@ -548,7 +548,7 @@ int32_t AddAccessInfoBySessionName(const char *sessionName, const AccessInfo *ac
     }
     SessionServer *pos = NULL;
     LIST_FOR_EACH_ENTRY(pos, &g_sessionServerList->list, SessionServer, node) {
-        if (strcmp(pos->sessionName, sessionName) == 0) {
+        if (strcmp(pos->sessionName, sessionName) == 0 && (callingPid == 0 || pos->pid == callingPid)) {
             uint32_t extraAccessInfoLen = strlen(accessInfo->extraAccessInfo) + 1;
             if (CheckAccessInfoAndCalloc(pos, extraAccessInfoLen) != SOFTBUS_OK) {
                 TRANS_LOGE(TRANS_CTRL, "accountId or extra access info calloc failed.");
@@ -557,8 +557,7 @@ int32_t AddAccessInfoBySessionName(const char *sessionName, const AccessInfo *ac
             }
             pos->accessInfo.userId = accessInfo->userId;
             pos->accessInfo.localTokenId = accessInfo->localTokenId;
-            if (strcpy_s(pos->accessInfo.extraAccessInfo, extraAccessInfoLen, accessInfo->extraAccessInfo) !=
-                EOK) {
+            if (strcpy_s(pos->accessInfo.extraAccessInfo, extraAccessInfoLen, accessInfo->extraAccessInfo) != EOK) {
                 TRANS_LOGE(TRANS_CTRL, "accountId or extra access info strcpy failed.");
                 SoftBusFree(pos->accessInfo.extraAccessInfo);
                 pos->accessInfo.extraAccessInfo = NULL;

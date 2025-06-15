@@ -77,7 +77,7 @@ int32_t TransProxyGetPrivilegeCloseList(ListNode *privilegeCloseList, uint64_t t
 int32_t TransProxyGetConnIdByChanId(int32_t channelId, int32_t *connId);
 int32_t TransProxyGetProxyChannelInfoByChannelId(int32_t channelId, ProxyChannelInfo *chan);
 
-int32_t TransDealProxyCheckCollabResult(int32_t channelId, int32_t checkResult);
+int32_t TransDealProxyCheckCollabResult(int32_t channelId, int32_t checkResult, pid_t callingPid);
 int32_t TransProxyGetAppInfoById(int16_t channelId, AppInfo *appInfo);
 #ifdef __cplusplus
 }
