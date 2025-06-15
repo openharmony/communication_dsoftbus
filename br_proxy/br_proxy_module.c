@@ -23,6 +23,7 @@
 #include "softbus_adapter_mem.h"
 #include "softbus_error_code.h"
 #include "softbus_napi_utils.h"
+#include "softbus_utils.h"
 #include "trans_log.h"
 
 #define ARGS_SIZE_1         1
@@ -41,20 +42,179 @@ typedef struct {
     int32_t channelId;
     int32_t openResult;
     int32_t ret;
+    int32_t sessionId;
 } AsyncOpenChannelData;
 
-static bool g_sem_inited = false;
-static sem_t g_sem;
-static int32_t g_channelId = 0;
-static int32_t g_openResult = 0;
+static SoftBusMutex g_sessionIdLock;
+static SoftBusList *g_sessionList = NULL;
+
+typedef struct {
+    int32_t sessionId;
+    int32_t channelId;
+    int32_t openResult;
+    sem_t sem;
+    ListNode node;
+} SessionInfo;
+
+static int32_t GetSessionId(void)
+{
+    static int32_t sessionId = 0;
+    int32_t id = 0;
+
+    if (SoftBusMutexLock(&g_sessionIdLock) != SOFTBUS_OK) {
+        TRANS_LOGE(TRANS_SVC, "[br_proxy] get sessionId lock fail");
+        return SOFTBUS_LOCK_ERR;
+    }
+    id = ++sessionId;
+    (void)SoftBusMutexUnlock(&g_sessionIdLock);
+    return id;
+}
+
+static int32_t SessionInit(void)
+{
+    static bool initSuccess = false;
+    if (initSuccess) {
+        return SOFTBUS_OK;
+    }
+    g_sessionList = CreateSoftBusList();
+    if (g_sessionList == NULL) {
+        TRANS_LOGE(TRANS_SDK, "[br_proxy] init list failed");
+        return SOFTBUS_CREATE_LIST_ERR;
+    }
+
+    SoftBusMutexAttr mutexAttr;
+    mutexAttr.type = SOFTBUS_MUTEX_RECURSIVE;
+    if (SoftBusMutexInit(&g_sessionIdLock, &mutexAttr) != SOFTBUS_OK) {
+        TRANS_LOGE(TRANS_SVC, "[br_proxy] init lock failed");
+        DestroySoftBusList(g_sessionList);
+        return SOFTBUS_TRANS_INIT_FAILED;
+    }
+    initSuccess = true;
+    TRANS_LOGI(TRANS_SDK, "[br_proxy] init trans session success");
+    return SOFTBUS_OK;
+}
+
+static int32_t AddSessionToList(int32_t sessionId)
+{
+    int32_t ret = SOFTBUS_OK;
+    SessionInfo *info = (SessionInfo *)SoftBusCalloc(sizeof(SessionInfo));
+    if (info == NULL) {
+        TRANS_LOGE(TRANS_SDK, "[br_proxy] calloc failed");
+        return SOFTBUS_MALLOC_ERR;
+    }
+    info->sessionId = sessionId;
+    sem_init(&info->sem, 0, 0);
+    ListInit(&info->node);
+    if (SoftBusMutexLock(&(g_sessionList->lock)) != SOFTBUS_OK) {
+        TRANS_LOGE(TRANS_SDK, "[br_proxy] lock failed");
+        ret = SOFTBUS_LOCK_ERR;
+        goto EXIT_ERR;
+    }
+    ListAdd(&g_sessionList->list, &info->node);
+    g_sessionList->cnt++;
+    TRANS_LOGI(TRANS_SDK, "[br_proxy] add session node success, cnt:%{public}d", g_sessionList->cnt);
+    (void)SoftBusMutexUnlock(&g_sessionList->lock);
+    return SOFTBUS_OK;
+
+EXIT_ERR:
+    SoftBusFree(info);
+    return ret;
+}
+
+static int32_t UpdateListBySessionId(int32_t sessionId, int32_t channelId, int32_t openResult)
+{
+    if (g_sessionList == NULL) {
+        TRANS_LOGE(TRANS_SDK, "[br_proxy] not init");
+        return SOFTBUS_NO_INIT;
+    }
+    if (SoftBusMutexLock(&(g_sessionList->lock)) != SOFTBUS_OK) {
+        TRANS_LOGE(TRANS_SDK, "[br_proxy] lock failed");
+        return SOFTBUS_LOCK_ERR;
+    }
+    SessionInfo *nodeInfo = NULL;
+    LIST_FOR_EACH_ENTRY(nodeInfo, &(g_sessionList->list), SessionInfo, node) {
+        if (nodeInfo->sessionId != sessionId) {
+            continue;
+        }
+        nodeInfo->channelId = channelId;
+        nodeInfo->openResult = openResult;
+        (void)SoftBusMutexUnlock(&(g_sessionList->lock));
+        return SOFTBUS_OK;
+    }
+    TRANS_LOGE(TRANS_SDK, "[br_proxy] not find sessionId:%{public}d", sessionId);
+    (void)SoftBusMutexUnlock(&(g_sessionList->lock));
+    return SOFTBUS_NOT_FIND;
+}
+
+static SessionInfo *GetSessionInfoBySessionId(int32_t sessionId)
+{
+    if (g_sessionList == NULL) {
+        TRANS_LOGE(TRANS_SDK, "[br_proxy] invalid param");
+        return NULL;
+    }
+    if (SoftBusMutexLock(&(g_sessionList->lock)) != SOFTBUS_OK) {
+        TRANS_LOGE(TRANS_SDK, "[br_proxy] lock failed");
+        return NULL;
+    }
+    SessionInfo *info = NULL;
+    SessionInfo *nodeInfo = NULL;
+    LIST_FOR_EACH_ENTRY(nodeInfo, &(g_sessionList->list), SessionInfo, node) {
+        if (nodeInfo->sessionId != sessionId) {
+            continue;
+        }
+        info = nodeInfo;
+        (void)SoftBusMutexUnlock(&(g_sessionList->lock));
+        return info;
+    }
+    TRANS_LOGE(TRANS_SDK, "[br_proxy] not find sessionId:%{public}d", sessionId);
+    (void)SoftBusMutexUnlock(&(g_sessionList->lock));
+    return NULL;
+}
+
+static int32_t DeleteSessionById(int32_t sessionId)
+{
+    if (g_sessionList == NULL) {
+        TRANS_LOGE(TRANS_SDK, "[br_proxy] not init");
+        return SOFTBUS_NO_INIT;
+    }
+    if (SoftBusMutexLock(&(g_sessionList->lock)) != SOFTBUS_OK) {
+        TRANS_LOGE(TRANS_SDK, "[br_proxy] lock failed");
+        return SOFTBUS_LOCK_ERR;
+    }
+    SessionInfo *sessionNode = NULL;
+    SessionInfo *sessionNodeNext = NULL;
+    LIST_FOR_EACH_ENTRY_SAFE(sessionNode, sessionNodeNext, &(g_sessionList->list), SessionInfo, node) {
+        if (sessionNode->sessionId != sessionId) {
+            continue;
+        }
+        sem_destroy(&sessionNode->sem);
+        TRANS_LOGI(TRANS_SDK, "[br_proxy] by sessionId:%{public}d delete node success, cnt:%{public}d",
+            sessionNode->sessionId, g_sessionList->cnt);
+        ListDelete(&sessionNode->node);
+        SoftBusFree(sessionNode);
+        g_sessionList->cnt--;
+        (void)SoftBusMutexUnlock(&(g_sessionList->lock));
+        return SOFTBUS_OK;
+    }
+    (void)SoftBusMutexUnlock(&(g_sessionList->lock));
+    return SOFTBUS_NOT_FIND;
+}
 
 static void OnDataReceived(int32_t channelId, const char* data, uint32_t dataLen);
 static void OnChannelStatusChanged(int32_t channelId, int32_t state);
-static int32_t ChannelOpened(int32_t channelId, int32_t result)
+static int32_t ChannelOpened(int32_t sessionId, int32_t channelId, int32_t result)
 {
-    g_channelId = channelId;
-    g_openResult = result;
-    sem_post(&g_sem);
+    TRANS_LOGI(TRANS_SDK, "[br_proxy] sessionId:%{public}d.", sessionId);
+    int32_t ret = UpdateListBySessionId(sessionId, channelId, result);
+    if (ret != SOFTBUS_OK) {
+        TRANS_LOGI(TRANS_SDK, "[br_proxy] ret:%{public}d.", ret);
+        return ret;
+    }
+    SessionInfo *info = GetSessionInfoBySessionId(sessionId);
+    if (info == NULL) {
+        return SOFTBUS_NOT_FIND;
+    }
+    sem_post(&info->sem);
     return SOFTBUS_OK;
 }
 
@@ -74,14 +234,23 @@ static void OpenProxyChannelExecute(napi_env env, void* data)
         .onDataReceived = OnDataReceived,
         .onChannelStatusChanged = OnChannelStatusChanged,
     };
-    int32_t ret = OpenBrProxy(&channelInfo, &listener);
-    asyncData->ret = ret;
+    int32_t ret = AddSessionToList(asyncData->sessionId);
     if (ret != SOFTBUS_OK) {
         return;
     }
-    sem_wait(&g_sem);
-    asyncData->channelId = g_channelId;
-    asyncData->openResult = g_openResult;
+    ret = OpenBrProxy(asyncData->sessionId, &channelInfo, &listener);
+    asyncData->ret = ret;
+    if (ret != SOFTBUS_OK) {
+        TRANS_LOGI(TRANS_SDK, "[br_proxy] ret:%{public}d.", ret);
+        return;
+    }
+    SessionInfo *info = GetSessionInfoBySessionId(asyncData->sessionId);
+    if (info == NULL) {
+        return;
+    }
+    sem_wait(&info->sem);
+    asyncData->channelId = info->channelId;
+    asyncData->openResult = info->openResult;
 }
 
 static void OpenProxyChannelComplete(napi_env env, napi_status status, void* data)
@@ -91,6 +260,7 @@ static void OpenProxyChannelComplete(napi_env env, napi_status status, void* dat
     napi_value channelIdValue;
     int32_t ret = asyncData->ret;
     int32_t openResult = asyncData->openResult;
+    int32_t sessionId = asyncData->sessionId;
 
     if (ret != SOFTBUS_OK) {
         napi_reject_deferred(env, asyncData->deferred, GetBusinessError(env, ret));
@@ -113,6 +283,7 @@ cleanup:
         napi_reject_deferred(env, asyncData->deferred, NULL);
     }
 exit:
+    DeleteSessionById(sessionId);
     napi_delete_async_work(env, asyncData->work);
     SoftBusFree(asyncData);
 }
@@ -123,42 +294,47 @@ static int32_t GetChannelInfoParam(napi_env env, napi_value arg, AsyncOpenChanne
     napi_value peerBRMacAddrValue;
     napi_value peerBRUuidValue;
     size_t strLen;
+    size_t macLen;
+    size_t uuidLen;
     napi_value linkTypeValue;
     status = napi_get_named_property(env, arg, "linkType", &linkTypeValue);
     if (status != napi_ok) {
-        napi_throw_error(env, NULL, "Failed to get linkType property");
-        return SOFTBUS_INVALID_PARAM;
+        goto EXIT;
     }
     status = napi_get_value_int32(env, linkTypeValue, &asyncData->channelInfo.linktype);
     if (status != napi_ok) {
-        napi_throw_error(env, NULL, "Failed to convert linkType to integer");
-        return SOFTBUS_INVALID_PARAM;
+        goto EXIT;
     }
     if (napi_get_named_property(env, arg, "peerDevAddr", &peerBRMacAddrValue) != napi_ok ||
-        napi_get_value_string_utf8(env, peerBRMacAddrValue, asyncData->channelInfo.peerBRMacAddr,
-            sizeof(asyncData->channelInfo.peerBRMacAddr), &strLen) != napi_ok) {
-        napi_throw_error(env, NULL, "Failed to get peerBRMacAddr");
-        return SOFTBUS_INVALID_PARAM;
+        napi_get_named_property(env, arg, "peerUuid", &peerBRUuidValue) != napi_ok) {
+        TRANS_LOGE(TRANS_SDK, "[br_proxy] Failed to get linkType property");
+        goto EXIT;
+    }
+    if (napi_get_value_string_utf8(env, peerBRMacAddrValue, NULL, 0, &macLen) != napi_ok ||
+        napi_get_value_string_utf8(env, peerBRUuidValue, NULL, 0, &uuidLen)) {
+        goto EXIT;
+    }
+    if (macLen < MAC_MIN_LENGTH || macLen > MAC_MAX_LENGTH) {
+        TRANS_LOGE(TRANS_SDK, "[br_proxy] mac len is wrong, macLen:%{public}zu", macLen);
+        goto EXIT;
+    }
+    if (uuidLen != UUID_STD_LENGTH && uuidLen != UUID_NO_HYPHEN_LENGTH) {
+        TRANS_LOGE(TRANS_SDK, "[br_proxy] uuid len is wrong, uuidLen:%{public}zu", uuidLen);
+        goto EXIT;
     }
 
-    if (napi_get_named_property(env, arg, "peerUuid", &peerBRUuidValue) != napi_ok ||
-        napi_get_value_string_utf8(env, peerBRUuidValue, asyncData->channelInfo.peerBRUuid,
-            sizeof(asyncData->channelInfo.peerBRUuid), &strLen) != napi_ok) {
-        napi_throw_error(env, NULL, "Failed to get peerUuid");
-        return SOFTBUS_INVALID_PARAM;
+    if (napi_get_value_string_utf8(env, peerBRMacAddrValue, asyncData->channelInfo.peerBRMacAddr,
+        sizeof(asyncData->channelInfo.peerBRMacAddr), &strLen) != napi_ok) {
+        goto EXIT;
     }
-
-    napi_value recvPriValue;
-    status = napi_get_named_property(env, arg, "recvPri", &recvPriValue);
-    if (status == napi_ok) {
-        status = napi_get_value_int32(env, recvPriValue, &asyncData->channelInfo.recvPri);
-        if (status != napi_ok) {
-            napi_throw_error(env, NULL, "Failed to get recvPri");
-            return SOFTBUS_INVALID_PARAM;
-        }
-        asyncData->channelInfo.recvPriSet = true;
+    if (napi_get_value_string_utf8(env, peerBRUuidValue, asyncData->channelInfo.peerBRUuid,
+        sizeof(asyncData->channelInfo.peerBRUuid), &strLen) != napi_ok) {
+        goto EXIT;
     }
     return SOFTBUS_OK;
+EXIT:
+    ThrowErrFromC2Js(env, SOFTBUS_INVALID_PARAM);
+    return SOFTBUS_INVALID_PARAM;
 }
 
 static int32_t StartWork(napi_env env, AsyncOpenChannelData *asyncData)
@@ -168,7 +344,6 @@ static int32_t StartWork(napi_env env, AsyncOpenChannelData *asyncData)
     status = napi_create_string_utf8(env, "OpenProxyChannelAsyncWork", NAPI_AUTO_LENGTH, &resourceName);
     if (status != napi_ok) {
         napi_reject_deferred(env, asyncData->deferred, NULL);
-        SoftBusFree(asyncData);
         return SOFTBUS_NO_INIT;
     }
 
@@ -176,14 +351,12 @@ static int32_t StartWork(napi_env env, AsyncOpenChannelData *asyncData)
         asyncData, &asyncData->work);
     if (status != napi_ok) {
         napi_reject_deferred(env, asyncData->deferred, NULL);
-        SoftBusFree(asyncData);
         return SOFTBUS_NO_INIT;
     }
     status = napi_queue_async_work(env, asyncData->work);
     if (status != napi_ok) {
         napi_reject_deferred(env, asyncData->deferred, NULL);
         napi_delete_async_work(env, asyncData->work);
-        SoftBusFree(asyncData);
         return SOFTBUS_NO_INIT;
     }
     return SOFTBUS_OK;
@@ -213,31 +386,29 @@ napi_value NapiOpenProxyChannel(napi_env env, napi_callback_info info)
         return NULL;
     }
     asyncData->env = env;
-    asyncData->channelInfo.recvPriSet = false;
-    
-    int32_t ret = GetChannelInfoParam(env, args[0], asyncData);
-    if (ret != SOFTBUS_OK) {
-        SoftBusFree(asyncData);
-        return NULL;
+
+    if (GetChannelInfoParam(env, args[0], asyncData) != SOFTBUS_OK || SessionInit() != SOFTBUS_OK) {
+        goto EXIT;
     }
-    if (!g_sem_inited) {
-        sem_init(&g_sem, 0, 0);
-        g_sem_inited = true;
+    int32_t sessionId = GetSessionId();
+    if (sessionId <= 0) {
+        goto EXIT;
     }
+    asyncData->sessionId = sessionId;
     napi_value promise;
     status = napi_create_promise(env, &asyncData->deferred, &promise);
     if (status != napi_ok) {
         napi_throw_error(env, NULL, "Failed to create promise");
-        SoftBusFree(asyncData);
-        return NULL;
+        goto EXIT;
     }
-
-    ret = StartWork(env, asyncData);
+    int32_t ret = StartWork(env, asyncData);
     if (ret != SOFTBUS_OK) {
-        SoftBusFree(asyncData);
-        return NULL;
+        goto EXIT;
     }
     return promise;
+EXIT:
+    SoftBusFree(asyncData);
+    return NULL;
 }
 
 napi_value ChannelStateEnumInit(napi_env env, napi_value exports)
@@ -282,19 +453,19 @@ napi_value NapiCloseProxyChannel(napi_env env, napi_callback_info info)
     void* data;
     status = napi_get_cb_info(env, info, &argc, args, &thisArg, &data);
     if (status != napi_ok || argc < ARGS_SIZE_1) {
-        napi_throw_error(env, NULL, "Invalid arguments: Expected one argument.");
+        ThrowErrFromC2Js(env, SOFTBUS_INVALID_PARAM);
         return NULL;
     }
     napi_valuetype valuetype;
     status = napi_typeof(env, args[0], &valuetype);
     if (status != napi_ok || valuetype != napi_number) {
-        napi_throw_type_error(env, NULL, "Invalid argument type: Expected a number.");
+        ThrowErrFromC2Js(env, SOFTBUS_INVALID_PARAM);
         return NULL;
     }
     int32_t channelId;
     status = napi_get_value_int32(env, args[0], &channelId);
     if (status != napi_ok) {
-        napi_throw_error(env, NULL, "Failed to get argument value.");
+        ThrowErrFromC2Js(env, SOFTBUS_INVALID_PARAM);
         return NULL;
     }
 
@@ -308,10 +479,6 @@ napi_value NapiCloseProxyChannel(napi_env env, napi_callback_info info)
     if (status != napi_ok) {
         napi_throw_error(env, NULL, "Failed to get undefined value.");
         return NULL;
-    }
-    if (g_sem_inited) {
-        g_sem_inited = false;
-        sem_destroy(&g_sem);
     }
     return undefined;
 }
@@ -367,40 +534,44 @@ static int32_t GetSendParam(napi_env env, napi_callback_info info, AsyncSendData
     void* data;
     napi_status status = napi_get_cb_info(env, info, &argc, args, &thisArg, &data);
     if (status != napi_ok || argc < ARGS_SIZE_2) {
-        napi_throw_error(env, NULL, "Invalid arguments: Expected two arguments.");
+        ThrowErrFromC2Js(env, SOFTBUS_INVALID_PARAM);
         return SOFTBUS_INVALID_PARAM;
     }
     napi_valuetype valueTypeNum;
     status = napi_typeof(env, args[0], &valueTypeNum);
     if (status != napi_ok || valueTypeNum != napi_number) {
-        napi_throw_type_error(env, NULL, "Invalid argument type: First argument must be a number.");
+        ThrowErrFromC2Js(env, SOFTBUS_INVALID_PARAM);
         return SOFTBUS_INVALID_PARAM;
     }
     status = napi_get_value_int32(env, args[0], &asyncData->channelId);
     if (status != napi_ok) {
-        napi_throw_error(env, NULL, "Failed to get channel ID argument value.");
+        ThrowErrFromC2Js(env, SOFTBUS_INVALID_PARAM);
         return SOFTBUS_INVALID_PARAM;
     }
     napi_valuetype valueTypeBuffer;
     status = napi_typeof(env, args[1], &valueTypeBuffer);
     if (status != napi_ok) {
-        napi_throw_type_error(env, NULL, "Invalid argument type: Second argument must be an ArrayBuffer.");
+        ThrowErrFromC2Js(env, SOFTBUS_INVALID_PARAM);
         return SOFTBUS_INVALID_PARAM;
     }
     void* bufferData;
     status = napi_get_arraybuffer_info(env, args[1], &bufferData, &asyncData->dataLength);
     if (status != napi_ok) {
-        napi_throw_error(env, NULL, "Failed to get ArrayBuffer info.");
+        ThrowErrFromC2Js(env, SOFTBUS_INVALID_PARAM);
+        return SOFTBUS_INVALID_PARAM;
+    }
+    if (asyncData->dataLength == 0) {
+        ThrowErrFromC2Js(env, SOFTBUS_INVALID_PARAM);
         return SOFTBUS_INVALID_PARAM;
     }
     asyncData->data = (char*)SoftBusCalloc(asyncData->dataLength);
     if (asyncData->data == NULL) {
-        napi_throw_error(env, NULL, "Memory allocation for data failed");
+        ThrowErrFromC2Js(env, SOFTBUS_MEM_ERR);
         return SOFTBUS_INVALID_PARAM;
     }
     if (memcpy_s(asyncData->data, asyncData->dataLength, bufferData, asyncData->dataLength) != EOK) {
         SoftBusFree(asyncData->data);
-        napi_throw_error(env, NULL, "Memory allocation for data failed");
+        ThrowErrFromC2Js(env, SOFTBUS_MEM_ERR);
         return SOFTBUS_INVALID_PARAM;
     }
     return SOFTBUS_OK;
@@ -654,22 +825,26 @@ napi_value On(napi_env env, napi_callback_info info)
     napi_value args[ARGS_SIZE_3];
     napi_status status = napi_get_cb_info(env, info, &argc, args, NULL, NULL);
     if (status != napi_ok || argc != ARGS_SIZE_3) {
-        napi_throw_type_error(env, NULL, "Expected 3 arguments");
+        ThrowErrFromC2Js(env, SOFTBUS_INVALID_PARAM);
         return NULL;
     }
-
     char type[FUNC_NAME_MAX_LEN];
     size_t typeLen;
     status = napi_get_value_string_utf8(env, args[ARGS_INDEX_0], type, sizeof(type), &typeLen);
     if (status != napi_ok) {
-        napi_throw_type_error(env, NULL, "get string failed");
+        ThrowErrFromC2Js(env, SOFTBUS_INVALID_PARAM);
         return NULL;
     }
-
     int32_t channelId;
     status = napi_get_value_int32(env, args[ARGS_INDEX_1], &channelId);
     if (status != napi_ok) {
-        napi_throw_type_error(env, NULL, "get channelId failed");
+        ThrowErrFromC2Js(env, SOFTBUS_INVALID_PARAM);
+        return NULL;
+    }
+    napi_valuetype funcType;
+    status = napi_typeof(env, args[ARGS_INDEX_2], &funcType);
+    if (status != napi_ok || funcType != napi_function) {
+        ThrowErrFromC2Js(env, SOFTBUS_INVALID_PARAM);
         return NULL;
     }
 
@@ -682,7 +857,7 @@ napi_value On(napi_env env, napi_callback_info info)
         int32_t ret = SetListenerState(channelId, CHANNEL_STATE, true);
         ThrowErrFromC2Js(env, ret);
     } else {
-        napi_throw_type_error(env, NULL, "Invalid event type");
+        ThrowErrFromC2Js(env, SOFTBUS_INVALID_PARAM);
         return NULL;
     }
     global_env = env;
@@ -695,7 +870,7 @@ napi_value Off(napi_env env, napi_callback_info info)
     napi_value args[ARGS_SIZE_2];
     napi_status status = napi_get_cb_info(env, info, &argc, args, NULL, NULL);
     if (status != napi_ok || argc < ARGS_SIZE_2) {
-        napi_throw_type_error(env, NULL, "Expected at least 2 arguments");
+        ThrowErrFromC2Js(env, SOFTBUS_INVALID_PARAM);
         return NULL;
     }
 
@@ -703,14 +878,14 @@ napi_value Off(napi_env env, napi_callback_info info)
     size_t typeLen;
     status = napi_get_value_string_utf8(env, args[ARGS_INDEX_0], type, sizeof(type), &typeLen);
     if (status != napi_ok) {
-        napi_throw_type_error(env, NULL, "get string failed");
+        ThrowErrFromC2Js(env, SOFTBUS_INVALID_PARAM);
         return NULL;
     }
 
     int32_t channelId;
     status = napi_get_value_int32(env, args[ARGS_INDEX_1], &channelId);
     if (status != napi_ok) {
-        napi_throw_type_error(env, NULL, "get channelId failed");
+        ThrowErrFromC2Js(env, SOFTBUS_INVALID_PARAM);
         return NULL;
     }
     if (strcmp(type, "receiveData") == 0) {
@@ -728,7 +903,7 @@ napi_value Off(napi_env env, napi_callback_info info)
         int32_t ret = SetListenerState(channelId, CHANNEL_STATE, false);
         ThrowErrFromC2Js(env, ret);
     } else {
-        napi_throw_type_error(env, NULL, "Invalid event type");
+        ThrowErrFromC2Js(env, SOFTBUS_INVALID_PARAM);
         return NULL;
     }
 
