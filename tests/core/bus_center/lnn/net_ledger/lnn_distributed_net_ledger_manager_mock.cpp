@@ -42,9 +42,9 @@ NodeInfo *LnnGetNodeInfoById(const char *id, IdCategory type)
     return GetLnnDistributedNetLedgerManagerInterface()->LnnGetNodeInfoById(id, type);
 }
 
-int32_t LnnSaveRemoteDeviceInfo(const NodeInfo *deviceInfo)
+int32_t LnnSaveRemoteDeviceInfoPacked(const NodeInfo *deviceInfo)
 {
-    return GetLnnDistributedNetLedgerManagerInterface()->LnnSaveRemoteDeviceInfo(deviceInfo);
+    return GetLnnDistributedNetLedgerManagerInterface()->LnnSaveRemoteDeviceInfoPacked(deviceInfo);
 }
 
 int32_t LnnSetWifiDirectAddr(NodeInfo *info, const char *wifiDirectAddr)
@@ -70,6 +70,11 @@ bool LnnIsNodeOnline(const NodeInfo *info)
 NodeInfo *GetNodeInfoFromMap(const DoubleHashMap *map, const char *id)
 {
     return GetLnnDistributedNetLedgerManagerInterface()->GetNodeInfoFromMap(map, id);
+}
+
+int32_t LnnRetrieveDeviceInfoByUdidPacked(const char *udid, NodeInfo *deviceInfo)
+{
+    return GetLnnDistributedNetLedgerManagerInterface()->LnnRetrieveDeviceInfoByUdidPacked(udid, deviceInfo);
 }
 } // extern "C"
 } // namespace OHOS

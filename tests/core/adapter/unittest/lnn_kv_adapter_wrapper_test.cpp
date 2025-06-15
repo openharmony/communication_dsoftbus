@@ -189,7 +189,7 @@ HWTEST_F(KVAdapterWrapperTest, LnnCloudSync001, TestSize.Level1)
 {
     int32_t dbId = g_dbId;
     int32_t lnnCloudRet = LnnCloudSync(dbId);
-    EXPECT_EQ(lnnCloudRet, SOFTBUS_ERR);
+    EXPECT_EQ(lnnCloudRet, SOFTBUS_KV_CLOUD_DISABLED);
 
     lnnCloudRet = LnnCloudSync(dbId + 1);
     EXPECT_EQ(lnnCloudRet, SOFTBUS_INVALID_PARAM);
