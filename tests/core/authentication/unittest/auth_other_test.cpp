@@ -623,9 +623,12 @@ HWTEST_F(AuthOtherTest, AUTH_MANAGER_SET_SESSION_KEY_TEST_001, TestSize.Level1)
     info->connInfo.type = AUTH_LINK_TYPE_WIFI;
     SessionKey *sessionKey = (SessionKey *)SoftBusCalloc(sizeof(SessionKey));
     if (sessionKey == nullptr) {
+        SoftBusFree(info);
         return;
     }
     sessionKey->len = 0;
+    AuthCommonInterfaceMock connMock;
+    EXPECT_CALL(connMock, LnnGetLocalNumU64Info).WillRepeatedly(Return(SOFTBUS_OK));
     int32_t ret = AuthManagerSetSessionKey(authSeq, info, sessionKey, false, false);
     EXPECT_TRUE(ret == SOFTBUS_OK);
     ret = AuthManagerGetSessionKey(authSeq, info, sessionKey);
@@ -728,6 +731,8 @@ HWTEST_F(AuthOtherTest, CONVERT_AUTH_LINK_TYPE_TO_HISYSEVENT_LINKTYPE_TEST_001, 
     ret = ConvertAuthLinkTypeToHisysEvtLinkType(AUTH_LINK_TYPE_P2P);
     EXPECT_TRUE(ret == SOFTBUS_HISYSEVT_LINK_TYPE_P2P);
 
+    AuthCommonInterfaceMock connMock;
+    EXPECT_CALL(connMock, SoftBusGenerateStrHash).WillRepeatedly(Return(SOFTBUS_OK));
     ReportAuthResultEvt(authFsm, SOFTBUS_AUTH_SEND_FAIL);
     ReportAuthResultEvt(authFsm, SOFTBUS_AUTH_DEVICE_DISCONNECTED);
     ReportAuthResultEvt(authFsm, SOFTBUS_AUTH_HICHAIN_PROCESS_FAIL);
@@ -1119,6 +1124,8 @@ HWTEST_F(AuthOtherTest, IS_SAME_ACCOUNT_DEVICE_TEST_001, TestSize.Level1)
         .devId = "testId",
         .accountHash = "accounthashtest",
     };
+    AuthCommonInterfaceMock connMock;
+    EXPECT_CALL(connMock, SoftBusGenerateStrHash).WillRepeatedly(Return(SOFTBUS_OK));
     EXPECT_TRUE(AuthIsPotentialTrusted(&device, true) == true);
     EXPECT_TRUE(IsSameAccountDevice(nullptr) == false);
     EXPECT_TRUE(IsSameAccountDevice(&device) == true);
@@ -1141,6 +1148,8 @@ HWTEST_F(AuthOtherTest, FILL_AUTH_SESSION_INFO_TEST_001, TestSize.Level1)
         .uuid = "123456789uuidhashtest",
         .deviceInfo.deviceUdid = "123456789udidtest",
     };
+    AuthCommonInterfaceMock connMock;
+    EXPECT_CALL(connMock, SoftBusGenerateStrHash).WillRepeatedly(Return(SOFTBUS_OK));
     AuthDeviceKeyInfo keyInfo;
     EXPECT_TRUE(FillAuthSessionInfo(&info, &nodeInfo, &keyInfo, true) == SOFTBUS_OK);
     EXPECT_TRUE(FillAuthSessionInfo(&info, &nodeInfo, &keyInfo, false) == SOFTBUS_OK);

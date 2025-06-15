@@ -198,7 +198,7 @@ HWTEST_F(AuthManagerTest, FIND_AUTH_MANAGER_TEST_001, TestSize.Level1)
     uint32_t type = 0;
     EXPECT_EQ(GetAuthConnInfoByUuid(UUID_TEST, (AuthLinkType)type, &connInfo), SOFTBUS_INVALID_PARAM);
     type = AUTH_LINK_TYPE_MAX;
-    EXPECT_EQ(GetAuthConnInfoByUuid(UUID_TEST, (AuthLinkType)type, &connInfo), SOFTBUS_INVALID_PARAM);
+    EXPECT_EQ(GetAuthConnInfoByUuid(UUID_TEST, (AuthLinkType)type, &connInfo), SOFTBUS_AUTH_NOT_FOUND);
     EXPECT_EQ(GetAuthConnInfoByUuid(UUID_TEST, AUTH_LINK_TYPE_WIFI, &connInfo), SOFTBUS_OK);
     AuthHandle authHandle2 = {
         .authId = AUTH_SEQ,

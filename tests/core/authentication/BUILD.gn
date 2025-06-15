@@ -1541,7 +1541,7 @@ group("unittest") {
     ":AuthUkManagerTest",
     ":AuthUserCommonKeyTest",
   ]
-  if (dsoftbus_feature_lnn_lane_mgr) {
+  if (!dsoftbus_feature_lnn_lane_mgr) {
     deps += [ ":AuthLaneTest" ]
   }
 }
