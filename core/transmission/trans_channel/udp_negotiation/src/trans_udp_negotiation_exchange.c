@@ -66,13 +66,10 @@ int32_t TransUnpackReplyUdpInfo(const cJSON *msg, AppInfo *appInfo)
         return SOFTBUS_INVALID_PARAM;
     }
 
-    (void)GetJsonObjectStringItem(msg, "PKG_NAME", appInfo->peerData.pkgName, PKG_NAME_SIZE_MAX);
-    (void)GetJsonObjectNumberItem(msg, "UID", &(appInfo->peerData.uid));
-    (void)GetJsonObjectNumberItem(msg, "PID", &(appInfo->peerData.pid));
     (void)GetJsonObjectNumberItem(msg, "BUSINESS_TYPE", (int*)&(appInfo->businessType));
     (void)GetJsonObjectNumberItem(msg, "API_VERSION", (int32_t *)&(appInfo->peerData.apiVersion));
 
-    int code = CODE_EXCHANGE_UDP_INFO;
+    int32_t code = CODE_EXCHANGE_UDP_INFO;
     (void)GetJsonObjectNumberItem(msg, "CODE", &code);
     if ((code == CODE_FILE_TRANS_UDP) && (getCodeType(appInfo) == CODE_FILE_TRANS_UDP)) {
         appInfo->fileProtocol = APP_INFO_UDP_FILE_PROTOCOL;
@@ -106,14 +103,11 @@ int32_t TransUnpackReplyUdpInfo(const cJSON *msg, AppInfo *appInfo)
 
 static void TransGetCommonUdpInfoFromJson(const cJSON *msg, AppInfo *appInfo)
 {
-    (void)GetJsonObjectStringItem(msg, "PKG_NAME", appInfo->peerData.pkgName, PKG_NAME_SIZE_MAX);
     (void)GetJsonObjectStringItem(msg, "BUS_NAME", appInfo->myData.sessionName, SESSION_NAME_SIZE_MAX);
     (void)GetJsonObjectStringItem(msg, "CLIENT_BUS_NAME", appInfo->peerData.sessionName, SESSION_NAME_SIZE_MAX);
     (void)GetJsonObjectStringItem(msg, "GROUP_ID", appInfo->groupId, GROUP_ID_SIZE_MAX);
 
     (void)GetJsonObjectNumberItem(msg, "API_VERSION", (int32_t *)&(appInfo->peerData.apiVersion));
-    (void)GetJsonObjectNumberItem(msg, "PID", &(appInfo->peerData.pid));
-    (void)GetJsonObjectNumberItem(msg, "UID", &(appInfo->peerData.uid));
     (void)GetJsonObjectNumberItem(msg, "BUSINESS_TYPE", (int32_t *)&(appInfo->businessType));
     (void)GetJsonObjectNumberItem(msg, "STREAM_TYPE", (int32_t *)&(appInfo->streamType));
     (void)GetJsonObjectNumberItem(msg, "CHANNEL_TYPE", (int32_t *)&(appInfo->udpChannelOptType));
