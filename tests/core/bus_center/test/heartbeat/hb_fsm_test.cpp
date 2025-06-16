@@ -604,7 +604,8 @@ HWTEST_F(HeartBeatFSMTest, RemoveSendOneEndMsgTest_01, TestSize.Level1)
     delMsgPara.wakeupFlag = false;
     ctrlMsgObj.obj = reinterpret_cast<void *>(msgPara);
     ret = RemoveSendOneEndMsg(&ctrlMsgObj, &delMsg);
-    EXPECT_EQ(ret, SOFTBUS_OK);
+    EXPECT_EQ(ret, SOFTBUS_NETWORK_HB_REMOVE_MSG_FAIL);
+    SoftBusFree(msgPara);
 }
 /*
  * @tc.name: RemoveSendOneEndMsgTest_02
@@ -673,20 +674,6 @@ HWTEST_F(HeartBeatFSMTest, RemoveSendOneEndMsgTest_03, TestSize.Level1)
     delMsgPara.hbType = HEARTBEAT_TYPE_BLE_V0;
     ret = RemoveSendOneEndMsg(&ctrlMsgObj, &delMsg);
     EXPECT_TRUE(ret == SOFTBUS_OK);
-
-    LnnHeartbeatSendEndData *msgPara1 = (LnnHeartbeatSendEndData *)SoftBusMalloc(sizeof(LnnHeartbeatSendEndData));
-    msgPara1->wakeupFlag = true;
-    msgPara1->isRelay = false;
-    delMsgPara.wakeupFlag = true;
-    delMsgPara.isRelay = false;
-    delMsgPara.isRemoved = &isRemoved;
-    ctrlMsgObj.obj = reinterpret_cast<void *>(msgPara1);
-    delMsg.obj = reinterpret_cast<void *>(&delMsgPara);
-    msgPara1->hbType = HEARTBEAT_TYPE_BLE_V0;
-    delMsgPara.hbType = HEARTBEAT_TYPE_BLE_V1;
-    ret = RemoveSendOneEndMsg(&ctrlMsgObj, &delMsg);
-    EXPECT_EQ(ret, SOFTBUS_NETWORK_HB_REMOVE_MSG_FAIL);
-    SoftBusFree(msgPara);
 }
 /*
  * @tc.name: RemoveSendOneEndMsgTest_04

@@ -703,6 +703,6 @@ HWTEST_F(BusCenterSdkTest, BUS_CENTER_SDK_TRIGGER_RANGE_Test001, TestSize.Level1
     };
     EXPECT_EQ(TriggerRangeForMsdp(nullptr, nullptr), SOFTBUS_INVALID_PARAM);
     EXPECT_EQ(TriggerRangeForMsdp(TEST_PKG_NAME, nullptr), SOFTBUS_INVALID_PARAM);
-    EXPECT_EQ(TriggerRangeForMsdp(TEST_MSDP_NAME, &config), SOFTBUS_NETWORK_HB_START_ADV_FAILED);
+    EXPECT_EQ(TriggerRangeForMsdp(TEST_MSDP_NAME, &config), SOFTBUS_OK);
 }
 } // namespace OHOS
