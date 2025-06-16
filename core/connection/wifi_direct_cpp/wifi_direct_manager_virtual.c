@@ -151,6 +151,11 @@ static void AddSyncPtkListener(SyncPtkListener listener)
     (void)listener;
 }
 
+static void AddHmlStateListener(HmlStateListener listener)
+{
+    (void)listener;
+}
+
 static bool SupportHmlTwo(void)
 {
     return false;
@@ -171,6 +176,11 @@ static bool IsHmlConnected(void)
     return false;
 }
 
+static VspCapabilityCode GetVspCapabilityCode(void)
+{
+    return CONN_VSP_CAP_UNKNOWN;
+}
+
 static void RegisterEnhanceManager(struct WifiDirectEnhanceManager *manager)
 {
     (void)manager;
@@ -180,6 +190,11 @@ static void NotifyPtkSyncResult(const char *remoteDeviceId, int result)
 {
     (void)remoteDeviceId;
     (void)result;
+}
+
+static void NotifyHmlState(SoftBusHmlState state)
+{
+    (void)state;
 }
 
 static int32_t Init(void)
@@ -203,6 +218,7 @@ static struct WifiDirectManager g_manager = {
     .savePTK = SavePtk,
     .syncPTK = SyncPtk,
     .addSyncPtkListener = AddSyncPtkListener,
+    .addHmlStateListener = AddHmlStateListener,
 
     .isDeviceOnline = IsDeviceOnline,
     .getLocalIpByUuid = GetLocalIpByUuid,
@@ -213,6 +229,7 @@ static struct WifiDirectManager g_manager = {
     .isWifiP2pEnabled = IsWifiP2pEnabled,
     .getStationFrequency = GetStationFrequency,
     .isHmlConnected = IsHmlConnected,
+    .getVspCapabilityCode = GetVspCapabilityCode,
 
     .init = Init,
     .notifyOnline = NotifyOnline,
@@ -220,6 +237,7 @@ static struct WifiDirectManager g_manager = {
     .notifyRoleChange = NotifyRoleChange,
     .registerEnhanceManager = RegisterEnhanceManager,
     .notifyPtkSyncResult = NotifyPtkSyncResult,
+    .notifyHmlState = NotifyHmlState,
 };
 
 struct WifiDirectManager *GetWifiDirectManager(void)
