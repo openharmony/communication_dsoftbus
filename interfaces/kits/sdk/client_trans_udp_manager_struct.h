@@ -18,9 +18,9 @@
 
 #include <stdint.h>
 #include <stdbool.h>
-#include "../transport/session.h"
+#include "session.h"
 #include "softbus_def.h"
-#include "../transport/trans_type.h"
+#include "trans_type.h"
 
 #ifdef __cplusplus
 extern "C" {
