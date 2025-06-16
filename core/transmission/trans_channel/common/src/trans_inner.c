@@ -214,8 +214,8 @@ int32_t InnerAddSession(InnerSessionInfo *innerInfo)
     }
     ListAdd(&g_sessionList->list, &info->node);
     g_sessionList->cnt++;
-    (void)SoftBusMutexUnlock(&g_sessionList->lock);
     TRANS_LOGI(TRANS_CTRL, "add fd=%{public}d, channelId=%{public}d", info->fd, info->channelId);
+    (void)SoftBusMutexUnlock(&g_sessionList->lock);
 
     return SOFTBUS_OK;
 }
