@@ -1585,26 +1585,50 @@ static AuthGenUkCallback tdcAuthGenUkCallback = {
     .onGenFailed = OnTdcGenUkFailed,
 };
 
-int32_t TransDealTdcChannelOpenResult(int32_t channelId, int32_t openResult, const AccessInfo *accessInfo)
+static int32_t GetSessionConnSeqAndFlagByChannelId(int32_t channelId, SessionConn *conn, uint32_t *flags, uint64_t *seq)
 {
-    (void)UpdateAccessInfoById(channelId, accessInfo);
-    SessionConn conn;
-    (void)memset_s(&conn, sizeof(SessionConn), 0, sizeof(SessionConn));
-    int32_t ret = GetSessionConnById(channelId, &conn);
+    if (conn == NULL || flags == NULL || seq == NULL) {
+        TRANS_LOGE(TRANS_CTRL, "invalid param");
+        return SOFTBUS_INVALID_PARAM;
+    }
+
+    int32_t ret = GetSessionConnById(channelId, conn);
     TRANS_CHECK_AND_RETURN_RET_LOGE(ret == SOFTBUS_OK, ret, TRANS_CTRL, "get sessionConn failed, ret=%{public}d", ret);
+
     ret = TransTdcUpdateReplyCnt(channelId);
     TRANS_CHECK_AND_RETURN_RET_LOGE(ret == SOFTBUS_OK, ret, TRANS_CTRL, "update reply cnt failed, ret=%{public}d", ret);
-    uint32_t flags = 0;
-    uint64_t seq = 0;
-    ret = TransSrvGetSeqAndFlagsByChannelId(&seq, &flags, channelId);
+
+    ret = TransSrvGetSeqAndFlagsByChannelId(seq, flags, channelId);
     TRANS_CHECK_AND_RETURN_RET_LOGE(ret == SOFTBUS_OK, ret, TRANS_CTRL,
         "get seqs and flags failed, channelId=%{public}d, ret=%{public}d", channelId, ret);
-    TransEventExtra extra;
-    (void)memset_s(&extra, sizeof(TransEventExtra), 0, sizeof(TransEventExtra));
+    
+    return SOFTBUS_OK;
+}
+
+int32_t TransDealTdcChannelOpenResult(
+    int32_t channelId, int32_t openResult, const AccessInfo *accessInfo, pid_t callingPid)
+{
+    (void)UpdateAccessInfoById(channelId, accessInfo);
+
+    SessionConn conn = { 0 };
+    uint32_t flags = 0;
+    uint64_t seq = 0;
+
+    int32_t ret = GetSessionConnSeqAndFlagByChannelId(channelId, &conn, &flags, &seq);
+    TRANS_CHECK_AND_RETURN_RET_LOGE(ret == SOFTBUS_OK, ret, TRANS_CTRL,
+        "get SessionConn or seq or flags failed, channelId=%{public}d, ret=%{public}d", channelId, ret);
+
+    TransEventExtra extra = { 0 };
     char peerUuid[DEVICE_ID_SIZE_MAX] = { 0 };
     NodeInfo nodeInfo;
     (void)memset_s(&nodeInfo, sizeof(NodeInfo), 0, sizeof(NodeInfo));
     ReportTransEventExtra(&extra, channelId, &conn, &nodeInfo, peerUuid);
+    if (callingPid != 0 && conn.appInfo.myData.pid != callingPid) {
+        TRANS_LOGE(TRANS_CTRL,
+            "pid does not match callingPid, pid=%{public}d, callingPid=%{public}d, channelId=%{public}d",
+            conn.appInfo.myData.pid, callingPid, channelId);
+        return SOFTBUS_TRANS_CHECK_PID_ERROR;
+    }
     if (openResult != SOFTBUS_OK) {
         TRANS_LOGE(TRANS_CTRL, "Tdc channel open failed, openResult=%{public}d", openResult);
         TransProcessAsyncOpenTdcChannelFailed(&conn, openResult, seq, flags);
