@@ -32,6 +32,8 @@
 #define BR_PROXY_MAX_WAIT_TIME_MS   10000    // 10000ms
 #define SINGLE_TIME_MAX_BYTES       4096
 #define HAP_NAME_MAX_LEN            256
+#define IS_CONNECTED                true
+#define IS_DISCONNECTED             false
 
 typedef struct {
     char brMac[BR_MAC_LEN];
@@ -44,6 +46,7 @@ typedef struct {
     char abilityName[HAP_NAME_MAX_LEN];
     pid_t uid;
     bool isEnable;
+    bool isConnected;
     ListNode node;
 } BrProxyInfo;
 
@@ -193,8 +196,9 @@ static bool IsBrProxyEnable(pid_t uid)
         if (nodeInfo->uid != uid) {
             continue;
         }
+        bool flag = nodeInfo->isEnable;
         (void)SoftBusMutexUnlock(&(g_proxyList->lock));
-        return nodeInfo->isEnable;
+        return flag;
     }
     (void)SoftBusMutexUnlock(&(g_proxyList->lock));
     return false;
@@ -244,6 +248,29 @@ static int32_t UpdateBrProxy(const char *brMac, const char *uuid)
             continue;
         }
         nodeInfo->isEnable = true;
+        (void)SoftBusMutexUnlock(&(g_proxyList->lock));
+        return SOFTBUS_OK;
+    }
+    (void)SoftBusMutexUnlock(&(g_proxyList->lock));
+    return SOFTBUS_NOT_FIND;
+}
+
+static int32_t UpdateConnectState(const char *brMac, bool isConnect)
+{
+    if (brMac == NULL || g_proxyList == NULL) {
+        TRANS_LOGE(TRANS_SVC, "[br_proxy] Something that couldn't have happened!");
+        return SOFTBUS_INVALID_PARAM;
+    }
+    if (SoftBusMutexLock(&(g_proxyList->lock)) != SOFTBUS_OK) {
+        TRANS_LOGE(TRANS_SVC, "[br_proxy] lock failed");
+        return SOFTBUS_LOCK_ERR;
+    }
+    BrProxyInfo *nodeInfo = NULL;
+    LIST_FOR_EACH_ENTRY(nodeInfo, &(g_proxyList->list), BrProxyInfo, node) {
+        if (strcmp(nodeInfo->proxyInfo.brMac, brMac) != 0) {
+            continue;
+        }
+        nodeInfo->isConnected = isConnect;
         (void)SoftBusMutexUnlock(&(g_proxyList->lock));
         return SOFTBUS_OK;
     }
@@ -302,6 +329,7 @@ static int32_t ServerAddProxyToList(const char *brMac, const char *uuid)
     }
     info->uid = GetCallerUid();
     info->isEnable = false;
+    info->isConnected = IS_DISCONNECTED;
     ListInit(&info->node);
     if (SoftBusMutexLock(&(g_proxyList->lock)) != SOFTBUS_OK) {
         TRANS_LOGE(TRANS_SVC, "[br_proxy] lock failed");
@@ -309,7 +337,7 @@ static int32_t ServerAddProxyToList(const char *brMac, const char *uuid)
         goto EXIT_WITH_FREE_INFO;
     }
     ListAdd(&g_proxyList->list, &info->node);
-    g_proxyList->cnt++;
+    g_proxyList->cnt++;                                         //需要增加一个数量限制
     TRANS_LOGI(TRANS_SVC, "[br_proxy] serverInfo add success, cnt:%{public}d", g_proxyList->cnt);
     (void)SoftBusMutexUnlock(&g_proxyList->lock);
     return SOFTBUS_OK;
@@ -535,7 +563,7 @@ static void onOpenSuccess(uint32_t requestId, struct ProxyChannel *channel)
         return;
     }
 
-    char pkgName[PKGNAME_MAX_LEN];
+    char pkgName[PKGNAME_MAX_LEN] = {0};
     ret = sprintf_s(pkgName, sizeof(pkgName), "%s_%d", COMM_PKGNAME_WECHAT, nodeInfo.callingPid);
     if (ret < 0) {
         TRANS_LOGE(TRANS_SVC, "[br_proxy] sprintf_s failed! ret=%{public}d", ret);
@@ -553,6 +581,11 @@ static void onOpenSuccess(uint32_t requestId, struct ProxyChannel *channel)
     }
 
     ret = UpdateBrProxy(channel->brMac, channel->uuid);
+    if (ret != SOFTBUS_OK) {
+        TRANS_LOGE(TRANS_SVC, "[br_proxy] failed! ret=%{public}d requestId=%{public}d", ret, requestId);
+        return;
+    }
+    ret = UpdateConnectState(channel->brMac, IS_CONNECTED);
     if (ret != SOFTBUS_OK) {
         TRANS_LOGE(TRANS_SVC, "[br_proxy] failed! ret=%{public}d requestId=%{public}d", ret, requestId);
         return;
@@ -710,6 +743,10 @@ int32_t TransSendBrProxyData(int32_t channelId, char* data, uint32_t dataLen)
     if (tokenId != info.callingTokenId) {
         TRANS_LOGE(TRANS_SVC, "[br_proxy] tokenid check failed");
         return SOFTBUS_TRANS_BR_PROXY_TOKENID_ERR;
+    }
+    if (info.channel == NULL) {
+        TRANS_LOGE(TRANS_SVC, "[br_proxy] info.channel is null");
+        return SOFTBUS_INVALID_PARAM;
     }
     ret = info.channel->send(info.channel, (const uint8_t *)data, dataLen);
     if (ret != SOFTBUS_OK) {
@@ -945,6 +982,11 @@ static void OnDisconnected(struct ProxyChannel *channel, int32_t reason)
         TRANS_LOGE(TRANS_SVC, "[br_proxy] sprintf_s failed! ret=%{public}d", ret);
         return;
     }
+    ret = UpdateConnectState(channel->brMac, IS_DISCONNECTED);
+    if (ret != SOFTBUS_OK) {
+        TRANS_LOGE(TRANS_SVC, "[br_proxy] failed! ret=%{public}d", ret);
+        return;
+    }
     ClientIpcBrProxyStateChanged(pkgName, info.channelId, reason);
 }
 
@@ -955,9 +997,14 @@ static void OnReconnected(char *addr, struct ProxyChannel *channel)
         return;
     }
     TRANS_LOGI(TRANS_SVC, "[br_proxy] reconnect ok");
+    int32_t ret = UpdateConnectState(channel->brMac, IS_CONNECTED);
+    if (ret != SOFTBUS_OK) {
+        TRANS_LOGE(TRANS_SVC, "[br_proxy] Update ConnectState failed! ret=%{public}d", ret);
+        return;
+    }
     if (IsSessionExist(channel->brMac, channel->uuid)) {
         ServerBrProxyChannelInfo info = {0};
-        int32_t ret = GetChannelInfo(addr, DEFAULT_INVALID_CHANNEL_ID, DEFAULT_INVALID_REQ_ID, &info);
+        ret = GetChannelInfo(addr, DEFAULT_INVALID_CHANNEL_ID, DEFAULT_INVALID_REQ_ID, &info);
         if (ret != SOFTBUS_OK) {
             return;
         }
@@ -973,7 +1020,7 @@ static void OnReconnected(char *addr, struct ProxyChannel *channel)
     }
     // the client is dead
     BrProxyInfo info;
-    int32_t ret = GetBrProxy(channel->brMac, channel->uuid, &info);
+    ret = GetBrProxy(channel->brMac, channel->uuid, &info);
     if (ret != SOFTBUS_OK) {
         TRANS_LOGE(TRANS_SVC, "[br_proxy] get brproxy failed. ret:%{public}d", ret);
         return;
@@ -1071,7 +1118,29 @@ void BrProxyClientDeathClearResource(pid_t callingPid)
     ServerDeleteChannelByPid(callingPid);
 }
 
+static bool CheckSessionExistByUid(pid_t uid)
+{
+    if (g_proxyList == NULL) {
+        return false;
+    }
+    if (SoftBusMutexLock(&(g_proxyList->lock)) != SOFTBUS_OK) {
+        TRANS_LOGE(TRANS_SVC, "[br_proxy] lock failed");
+        return false;
+    }
+    BrProxyInfo *nodeInfo = NULL;
+    LIST_FOR_EACH_ENTRY(nodeInfo, &(g_proxyList->list), BrProxyInfo, node) {
+        if (nodeInfo->uid != uid) {
+            continue;
+        }
+        bool flag = nodeInfo->isConnected;
+        (void)SoftBusMutexUnlock(&(g_proxyList->lock));
+        return flag;
+    }
+    (void)SoftBusMutexUnlock(&(g_proxyList->lock));
+    return false;
+}
+
 bool TransIsProxyChannelEnabled(pid_t uid)
 {
-    return IsBrProxyEnable(uid);
+    return CheckSessionExistByUid(uid);
 }
