@@ -13,25 +13,22 @@
  * limitations under the License.
  */
 
-#ifndef BR_PROXY_SERVER_MANAGER_H
-#define BR_PROXY_SERVER_MANAGER_H
+#include "trans_ipc_adapter.h"
 
-#include <stdbool.h>
-#include <unistd.h>
+#include "access_control.h"
+#include "softbus_error_code.h"
 
-#ifdef __cplusplus
-extern "C" {
-#endif
-
-int32_t TransOpenBrProxy(const char *brMac, const char *uuid);
-int32_t TransCloseBrProxy(int32_t channelId);
-int32_t TransSendBrProxyData(int32_t channelId, char* data, uint32_t dataLen);
-int32_t TransSetListenerState(int32_t channelId, int32_t type, bool isEnable);
-bool TransIsProxyChannelEnabled(int32_t uid);
-void BrProxyClientDeathClearResource(pid_t callingPid);
-
-#ifdef __cplusplus
+uint64_t TransAclGetFirstTokenID(void)
+{
+    return TOKENID_NOT_SET;
 }
-#endif
 
-#endif
+uint64_t TransAclGetCallingTokenID(void)
+{
+    return TOKENID_NOT_SET;
+}
+
+pid_t TransGetCallingPid(void)
+{
+    return SOFTBUS_OK;
+}
