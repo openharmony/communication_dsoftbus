@@ -709,7 +709,9 @@ static int32_t GetSinkSessionKeyFromHandshakeAckMsg(cJSON *root, AppInfo *appInf
 
 static void GetNoramlInfoFromHandshakeAckMsg(cJSON *root, ProxyChannelInfo *chanInfo, uint16_t *fastDataSize)
 {
-    if (!GetJsonObjectNumberItem(root, JSON_KEY_ENCRYPT, &chanInfo->appInfo.encrypt) ||
+    if (!GetJsonObjectNumberItem(root, JSON_KEY_UID, &chanInfo->appInfo.peerData.uid) ||
+        !GetJsonObjectNumberItem(root, JSON_KEY_PID, &chanInfo->appInfo.peerData.pid) ||
+        !GetJsonObjectNumberItem(root, JSON_KEY_ENCRYPT, &chanInfo->appInfo.encrypt) ||
         !GetJsonObjectNumberItem(root, JSON_KEY_ALGORITHM, &chanInfo->appInfo.algorithm) ||
         !GetJsonObjectNumberItem(root, JSON_KEY_CRC, &chanInfo->appInfo.crc) ||
         !GetJsonObjectNumber16Item(root, JSON_KEY_FIRST_DATA_SIZE, fastDataSize) ||
@@ -759,6 +761,10 @@ int32_t TransProxyUnpackHandshakeAckMsg(const char *msg, ProxyChannelInfo *chanI
         }
     }
 
+    if (!GetJsonObjectStringItem(root, JSON_KEY_PKG_NAME, chanInfo->appInfo.peerData.pkgName,
+                                 sizeof(chanInfo->appInfo.peerData.pkgName))) {
+        TRANS_LOGW(TRANS_CTRL, "no item to get pkg name");
+    }
     if (!GetJsonObjectNumberItem(root, TRANS_CAPABILITY, (int32_t *)&(chanInfo->appInfo.channelCapability))) {
         chanInfo->appInfo.channelCapability = 0;
     }
@@ -816,6 +822,12 @@ static int32_t UnpackPackHandshakeMsgForFastData(AppInfo *appInfo, cJSON *root)
 static int32_t TransProxyUnpackNormalHandshakeMsg(cJSON *root, AppInfo *appInfo, char *sessionKey, int32_t keyLen)
 {
     (void)GetJsonObjectStringItem(root, JSON_KEY_SESSION_KEY, sessionKey, keyLen);
+    if (!GetJsonObjectNumberItem(root, JSON_KEY_UID, &(appInfo->peerData.uid)) ||
+        !GetJsonObjectNumberItem(root, JSON_KEY_PID, &(appInfo->peerData.pid)) ||
+        !GetJsonObjectStringItem(root, JSON_KEY_PKG_NAME, appInfo->peerData.pkgName, PKG_NAME_SIZE_MAX)) {
+        TRANS_LOGE(TRANS_CTRL, "Failed to get handshake msg APP_TYPE_NORMAL");
+        return SOFTBUS_PARSE_JSON_ERR;
+    }
     if (!GetJsonObjectNumberItem(root, JSON_KEY_ENCRYPT, &appInfo->encrypt) ||
         !GetJsonObjectNumberItem(root, JSON_KEY_ALGORITHM, &appInfo->algorithm) ||
         !GetJsonObjectNumberItem(root, JSON_KEY_CRC, &appInfo->crc)) {
@@ -824,7 +836,7 @@ static int32_t TransProxyUnpackNormalHandshakeMsg(cJSON *root, AppInfo *appInfo,
         appInfo->algorithm = APP_INFO_ALGORITHM_AES_GCM_256;
         appInfo->crc = APP_INFO_FILE_FEATURES_NO_SUPPORT;
     }
-    if (!GetJsonObjectNumberItem(root, JSON_KEY_BUSINESS_TYPE, (int32_t *)&appInfo->businessType)) {
+    if (!GetJsonObjectNumberItem(root, JSON_KEY_BUSINESS_TYPE, (int *)&appInfo->businessType)) {
         appInfo->businessType = BUSINESS_TYPE_NOT_CARE;
     }
 
