@@ -329,11 +329,36 @@ static bool ClientTransCheckHmlIp(const char *ip)
     return false;
 }
 
+static const char *g_dmHandleAgingSessionName[] = {
+    "ohos.distributedhardware.devicemanager.resident",
+    "com.huawei.devicemanager.resident",
+    "com.huawei.devicemanager.dynamic",
+};
+
+static bool CheckDMHandleAgingSession(const char *sessionName, const SessionInfo *sessionNode)
+{
+    if (sessionNode->channelType != CHANNEL_TYPE_AUTH) {
+        return false;
+    }
+    const int len = sizeof(g_dmHandleAgingSessionName) / sizeof(g_dmHandleAgingSessionName[0]);
+    for (int i = 0; i < len; i++) {
+        if (strcmp(sessionName, g_dmHandleAgingSessionName[i]) == 0) {
+            TRANS_LOGI(TRANS_SDK, "device management handles aging sessions and keeps opening the session");
+            return true;
+        }
+    }
+    return false;
+}
+
 // determine connection type based on IP, delete session when connection type and parameter connType are consistent
-static bool ClientTransCheckNeedDel(SessionInfo *sessionNode, int32_t routeType, int32_t connType)
+static bool ClientTransCheckNeedDel(const char *name, SessionInfo *sessionNode, int32_t routeType, int32_t connType)
 {
     if (connType == TRANS_CONN_ALL) {
         if (routeType != ROUTE_TYPE_ALL && sessionNode->routeType != routeType) {
+            return false;
+        }
+
+        if (CheckDMHandleAgingSession(name, sessionNode)) {
             return false;
         }
         return true;
@@ -416,7 +441,7 @@ void DestroyClientSessionByNetworkId(const ClientSessionServer *server,
             continue;
         }
 
-        if (!ClientTransCheckNeedDel(sessionNode, routeType, connType)) {
+        if (!ClientTransCheckNeedDel(server->sessionName, sessionNode, routeType, connType)) {
             continue;
         }
 
