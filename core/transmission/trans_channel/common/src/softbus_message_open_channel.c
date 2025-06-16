@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021-2025 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2024 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -231,6 +231,10 @@ static int32_t ParseMessageToAppInfo(const cJSON *msg, AppInfo *appInfo)
     if (!GetJsonObjectNumberItem(msg, MTU_SIZE, (int32_t *)&(appInfo->peerData.dataConfig))) {
         TRANS_LOGW(TRANS_CTRL, "peer dataconfig is null.");
     }
+    appInfo->peerData.uid = -1;
+    appInfo->peerData.pid = -1;
+    (void)GetJsonObjectNumberItem(msg, UID, &appInfo->peerData.uid);
+    (void)GetJsonObjectNumberItem(msg, PID, &appInfo->peerData.pid);
     (void)GetJsonObjectStringItem(msg, ACCOUNT_ID, (appInfo->peerData.accountId), ACCOUNT_UID_LEN_MAX);
     if (!GetJsonObjectNumberItem(msg, USER_ID, &appInfo->peerData.userId)) {
         appInfo->peerData.userId = INVALID_USER_ID;
@@ -282,9 +286,10 @@ int32_t UnpackRequest(const cJSON *msg, AppInfo *appInfo)
         return SOFTBUS_OK;
     }
 
-    if (!GetJsonObjectStringItem(msg, CLIENT_BUS_NAME, (appInfo->peerData.sessionName), SESSION_NAME_SIZE_MAX) ||
+    if (!GetJsonObjectStringItem(msg, PKG_NAME, (appInfo->peerData.pkgName), PKG_NAME_SIZE_MAX) ||
+        !GetJsonObjectStringItem(msg, CLIENT_BUS_NAME, (appInfo->peerData.sessionName), SESSION_NAME_SIZE_MAX) ||
         !GetJsonObjectStringItem(msg, AUTH_STATE, (appInfo->peerData.authState), AUTH_STATE_SIZE_MAX)) {
-        TRANS_LOGE(TRANS_CTRL, "Failed to get sessionName or authState");
+        TRANS_LOGE(TRANS_CTRL, "Failed to get pkgName");
         SoftBusFree((void *)appInfo->fastTransData);
         return SOFTBUS_PARSE_JSON_ERR;
     }
@@ -400,6 +405,10 @@ int32_t UnpackReply(const cJSON *msg, AppInfo *appInfo, uint16_t *fastDataSize)
     int32_t apiVersion = API_V1;
     (void)GetJsonObjectNumberItem(msg, API_VERSION, &apiVersion);
     appInfo->peerData.apiVersion = (ApiVersion)apiVersion;
+    appInfo->peerData.uid = -1;
+    appInfo->peerData.pid = -1;
+    (void)GetJsonObjectNumberItem(msg, UID, &appInfo->peerData.uid);
+    (void)GetJsonObjectNumberItem(msg, PID, &appInfo->peerData.pid);
     (void)GetJsonObjectStringItem(msg, SINK_ACL_ACCOUNT_ID, (appInfo->peerData.accountId), ACCOUNT_UID_LEN_MAX);
     if (!GetJsonObjectNumberItem(msg, USER_ID, &appInfo->peerData.userId)) {
         appInfo->peerData.userId = INVALID_USER_ID;
@@ -414,8 +423,9 @@ int32_t UnpackReply(const cJSON *msg, AppInfo *appInfo, uint16_t *fastDataSize)
         TRANS_LOGW(TRANS_CTRL, "peer dataconfig is null.");
     }
     if (apiVersion != API_V1) {
-        if (!GetJsonObjectStringItem(msg, AUTH_STATE, (appInfo->peerData.authState), AUTH_STATE_SIZE_MAX)) {
-            TRANS_LOGE(TRANS_CTRL, "Failed to get authState");
+        if (!GetJsonObjectStringItem(msg, PKG_NAME, (appInfo->peerData.pkgName), PKG_NAME_SIZE_MAX) ||
+            !GetJsonObjectStringItem(msg, AUTH_STATE, (appInfo->peerData.authState), AUTH_STATE_SIZE_MAX)) {
+            TRANS_LOGE(TRANS_CTRL, "Failed to get pkgName or authState");
             return SOFTBUS_PARSE_JSON_ERR;
         }
     }
