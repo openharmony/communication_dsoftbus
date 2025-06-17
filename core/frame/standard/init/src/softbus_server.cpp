@@ -624,7 +624,7 @@ int32_t SoftBusServer::Disconnect(uint32_t handle)
         COMM_LOGE(COMM_SVC, "invalid param");
         return SOFTBUS_NO_INIT;
     }
-    manager->disconnect(handle);
+    manager->disconnect(handle, OHOS::IPCSkeleton::GetCallingPid());
     COMM_LOGI(COMM_SVC, "disconnect success, handle=%{public}d", handle);
     return SOFTBUS_OK;
 }
@@ -651,7 +651,8 @@ int32_t SoftBusServer::ConnGetPeerDeviceId(uint32_t handle, char *deviceId, uint
         return SOFTBUS_NO_INIT;
     }
     uint32_t callingTokenId = IPCSkeleton::GetCallingTokenID();
-    int32_t ret = manager->getPeerDeviceId(handle, deviceId, len, callingTokenId);
+    int32_t ret = manager->getPeerDeviceId(handle, deviceId, len,
+        callingTokenId, OHOS::IPCSkeleton::GetCallingPid());
     if (ret != SOFTBUS_OK) {
         COMM_LOGE(COMM_SVC, "get peer deviceId failed, handle=%{public}d", handle);
     }
