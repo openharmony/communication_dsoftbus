@@ -59,6 +59,8 @@ int32_t ClientOnChannelOpened(IpcIo *data, IpcIo *reply)
         ReadInt32(data, &(channel.peerPort));
         channel.peerIp = (char *)ReadString(data, &size);
     }
+    ReadInt32(data, &(channel.routeType));
+    ReadBool(data, &(channel.isSupportTlv));
     int ret = TransOnChannelOpened(sessionName, &channel);
     if (ret < 0) {
         TRANS_LOGE(TRANS_CTRL, "TransOnChannelOpened fail, errcode=%{public}d.", ret);
