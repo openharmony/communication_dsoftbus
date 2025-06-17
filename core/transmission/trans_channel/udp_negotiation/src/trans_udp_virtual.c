@@ -92,9 +92,10 @@ int32_t TransDealUdpChannelOpenResult(
     return SOFTBUS_FUNC_NOT_SUPPORT;
 }
 
-int32_t TransDealUdpCheckCollabResult(int32_t channelId, int32_t checkResult)
+int32_t TransDealUdpCheckCollabResult(int32_t channelId, int32_t checkResult, pid_t callingPid)
 {
     (void)channelId;
     (void)checkResult;
+    (void)callingPid;
     return SOFTBUS_FUNC_NOT_SUPPORT;
 }

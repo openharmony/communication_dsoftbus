@@ -38,7 +38,7 @@ int32_t NotifyChannelOpenFailed(int32_t channelId, int32_t errCode);
 int32_t TransDealTdcChannelOpenResult(
     int32_t channelId, int32_t openResult, const AccessInfo *accessInfo, pid_t callingPid);
 void TransAsyncTcpDirectChannelTask(int32_t channelId);
-int32_t TransDealTdcCheckCollabResult(int32_t channelId, int32_t checkResult);
+int32_t TransDealTdcCheckCollabResult(int32_t channelId, int32_t checkResult, pid_t callingPid);
 
 #ifdef __cplusplus
 }

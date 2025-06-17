@@ -1530,7 +1530,7 @@ int32_t TransDealUdpChannelOpenResult(
     return TransProcessAsyncOpenUdpChannelSuccess(&channel, channelId);
 }
 
-int32_t TransDealUdpCheckCollabResult(int32_t channelId, int32_t checkResult)
+int32_t TransDealUdpCheckCollabResult(int32_t channelId, int32_t checkResult, pid_t callingPid)
 {
     char *errDesc = NULL;
     UdpChannelInfo channel = { 0 };
@@ -1539,6 +1539,17 @@ int32_t TransDealUdpCheckCollabResult(int32_t channelId, int32_t checkResult)
         TRANS_LOGE(TRANS_CTRL, "get udp channel failed, channelId=%{public}d", channelId);
         return ret;
     }
+
+    int32_t dmsPid = 0;
+    char dmsPkgName[PKG_NAME_SIZE_MAX] = { 0 };
+    (void)TransGetPidAndPkgName(DMS_SESSIONNAME, DMS_UID, &dmsPid, dmsPkgName, PKG_NAME_SIZE_MAX);
+    if (callingPid != 0 && dmsPid != callingPid) {
+        TRANS_LOGE(TRANS_CTRL,
+            "dmsPid does not match callingPid, dmsPid=%{public}d, callingPid=%{public}d", dmsPid, callingPid);
+        ret = SOFTBUS_TRANS_CHECK_PID_ERROR;
+        goto ERR_EXIT;
+    }
+
     ret = TransUdpUpdateReplyCnt(channelId);
     if (ret != SOFTBUS_OK) {
         TRANS_LOGE(TRANS_CTRL, "disconnect device channelId=%{public}d", channelId);

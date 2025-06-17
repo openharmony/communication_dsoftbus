@@ -944,6 +944,7 @@ HWTEST_F(TransTcpDirectMessageStaticTest, TransAsyncTcpDirectChannelTaskTest001,
 {
     int32_t channelId = 1;
     TransAsyncTcpDirectChannelTask(channelId);
+    // conn will free in Line 956
     SessionConn *conn = TestSetSessionConn();
     ASSERT_TRUE(conn != nullptr);
     int32_t ret = TransTdcAddSessionConn(conn);
@@ -953,7 +954,11 @@ HWTEST_F(TransTcpDirectMessageStaticTest, TransAsyncTcpDirectChannelTaskTest001,
     TransAsyncTcpDirectChannelTask(channelId);
     conn->appInfo.waitOpenReplyCnt = LOOPER_REPLY_CNT_MAX;
     TransAsyncTcpDirectChannelTask(channelId);
-    conn->appInfo.waitOpenReplyCnt = LOOPER_REPLY_CNT_MAX - 1;
+    SessionConn *testConn = TestSetSessionConn();
+    ASSERT_TRUE(testConn != nullptr);
+    ret = TransTdcAddSessionConn(testConn);
+    EXPECT_EQ(ret, SOFTBUS_OK);
+    testConn->appInfo.waitOpenReplyCnt = LOOPER_REPLY_CNT_MAX - 1;
     TransAsyncTcpDirectChannelTask(channelId);
     TransDelSessionConnById(channelId);
 }
