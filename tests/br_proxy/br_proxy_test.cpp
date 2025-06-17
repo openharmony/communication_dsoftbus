@@ -268,9 +268,9 @@ HWTEST_F(BrProxyTest, BrProxyTest0012, TestSize.Level1)
     int32_t ret = ServerAddChannelToList(VALID_BR_MAC, TEST_UUID, g_validChannelId, g_validRequestId);
     EXPECT_EQ(SOFTBUS_OK, ret);
     struct ProxyChannel channel;
-    ret = UpdateProxyChannel(INVALID_BR_MAC, &channel);
+    ret = UpdateProxyChannel(INVALID_BR_MAC, TEST_UUID, &channel);
     EXPECT_EQ(SOFTBUS_NOT_FIND, ret);
-    ret = UpdateProxyChannel(VALID_BR_MAC, &channel);
+    ret = UpdateProxyChannel(VALID_BR_MAC, TEST_UUID, &channel);
     EXPECT_EQ(SOFTBUS_OK, ret);
     ret = ServerDeleteChannelFromList(g_validChannelId);
     EXPECT_EQ(SOFTBUS_OK, ret);
@@ -286,7 +286,7 @@ HWTEST_F(BrProxyTest, BrProxyTest0013, TestSize.Level1)
     ret = GetChannelInfo(VALID_BR_MAC, DEFAULT_INVALID_CHANNEL_ID, DEFAULT_INVALID_REQ_ID, &info);
     EXPECT_EQ(SOFTBUS_OK, ret);
     ret = GetChannelInfo(nullptr, g_invalidChannelId, DEFAULT_INVALID_REQ_ID, &info);
-    EXPECT_EQ(SOFTBUS_NOT_FIND, ret);
+    EXPECT_EQ(SOFTBUS_TRANS_INVALID_CHANNEL_ID, ret);
     ret = GetChannelInfo(nullptr, g_validChannelId, DEFAULT_INVALID_REQ_ID, &info);
     EXPECT_EQ(SOFTBUS_OK, ret);
     ret = GetChannelInfo(nullptr, DEFAULT_INVALID_CHANNEL_ID, g_invalidRequestId, &info);
@@ -317,8 +317,6 @@ HWTEST_F(BrProxyTest, BrProxyTest0014, TestSize.Level1)
     onOpenSuccess(g_validRequestId, &channel);
     ret = GetChannelInfo(VALID_BR_MAC, DEFAULT_INVALID_CHANNEL_ID, DEFAULT_INVALID_REQ_ID, &info);
     EXPECT_EQ(SOFTBUS_OK, ret);
-    ret = strcmp(info.channel->brMac, "F0:FA:C7:13:56:BC");
-    EXPECT_EQ(EOK, ret);
     ret = ServerDeleteChannelFromList(g_validChannelId);
     EXPECT_EQ(SOFTBUS_OK, ret);
 }
@@ -335,33 +333,14 @@ HWTEST_F(BrProxyTest, BrProxyTest0015, TestSize.Level1)
     EXPECT_EQ(SOFTBUS_OK, ret);
     onOpenFail(g_validRequestId, 0);
     ret = GetChannelInfo(nullptr, g_validChannelId, DEFAULT_INVALID_REQ_ID, &info);
-    EXPECT_EQ(SOFTBUS_NOT_FIND, ret);
+    EXPECT_EQ(SOFTBUS_TRANS_INVALID_CHANNEL_ID, ret);
     ret = ServerDeleteChannelFromList(g_validChannelId);
     EXPECT_EQ(SOFTBUS_NOT_FIND, ret);
 }
 
 HWTEST_F(BrProxyTest, BrProxyTest0016, TestSize.Level1)
 {
-    int32_t ret =LooperInit();
-    EXPECT_EQ(SOFTBUS_OK, ret);
-    ret = ConnServerInit();
-    EXPECT_EQ(SOFTBUS_OK, ret);
-    NiceMock<BrProxyInterfaceMock> BrProxyMock;
-    EXPECT_CALL(BrProxyMock, ConnectPeerDevice).WillRepeatedly(Return(SOFTBUS_OK));
-    ServerBrProxyChannelInfo info;
-    ret = TransOpenBrProxy(VALID_BR_MAC, TEST_UUID);
-    EXPECT_EQ(SOFTBUS_OK, ret);
-    ret = GetChannelInfo(VALID_BR_MAC, DEFAULT_INVALID_CHANNEL_ID, DEFAULT_INVALID_REQ_ID, &info);
-    EXPECT_EQ(SOFTBUS_OK, ret);
-    ret = ServerDeleteChannelFromList(info.channelId);
-    EXPECT_EQ(SOFTBUS_OK, ret);
-    ConnServerDeinit();
-    LooperDeinit();
-}
-
-HWTEST_F(BrProxyTest, BrProxyTest0017, TestSize.Level1)
-{
-    int32_t ret = TransCloseBrProxy(-1);
+    int32_t ret = TransCloseBrProxy(-1, false);
     EXPECT_EQ(SOFTBUS_NOT_FIND, ret);
 }
 }

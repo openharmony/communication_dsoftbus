@@ -468,7 +468,18 @@ napi_value NapiCloseProxyChannel(napi_env env, napi_callback_info info)
         ThrowErrFromC2Js(env, SOFTBUS_INVALID_PARAM);
         return NULL;
     }
-
+    double value;
+    status = napi_get_value_double(env, args[0], &value);
+    if (status != napi_ok) {
+        ThrowErrFromC2Js(env, SOFTBUS_INVALID_PARAM);
+        return NULL;
+    }
+    int32_t intValue = (int32_t)value;
+    bool isInteger = (double)intValue == value;
+    if (!isInteger) {
+        ThrowErrFromC2Js(env, SOFTBUS_INVALID_PARAM);
+        return NULL;
+    }
     int32_t ret = CloseBrProxy(channelId);
     if (ret != SOFTBUS_OK) {
         ThrowErrFromC2Js(env, ret);
@@ -526,6 +537,18 @@ cleanup:
     SoftBusFree(asyncData);
 }
 
+static bool ChanneIdIsInt(napi_env env, napi_value *args)
+{
+    double value;
+    napi_status status = napi_get_value_double(env, args[0], &value);
+    if (status != napi_ok) {
+        return false;
+    }
+    int32_t intValue = (int32_t)value;
+    bool isInteger = (double)intValue == value;
+    return isInteger;
+}
+
 static int32_t GetSendParam(napi_env env, napi_callback_info info, AsyncSendData *asyncData)
 {
     size_t argc = ARGS_SIZE_2;
@@ -534,35 +557,30 @@ static int32_t GetSendParam(napi_env env, napi_callback_info info, AsyncSendData
     void* data;
     napi_status status = napi_get_cb_info(env, info, &argc, args, &thisArg, &data);
     if (status != napi_ok || argc < ARGS_SIZE_2) {
-        ThrowErrFromC2Js(env, SOFTBUS_INVALID_PARAM);
-        return SOFTBUS_INVALID_PARAM;
+        goto EXIT;
     }
     napi_valuetype valueTypeNum;
     status = napi_typeof(env, args[0], &valueTypeNum);
     if (status != napi_ok || valueTypeNum != napi_number) {
-        ThrowErrFromC2Js(env, SOFTBUS_INVALID_PARAM);
-        return SOFTBUS_INVALID_PARAM;
+        goto EXIT;
     }
     status = napi_get_value_int32(env, args[0], &asyncData->channelId);
     if (status != napi_ok) {
-        ThrowErrFromC2Js(env, SOFTBUS_INVALID_PARAM);
-        return SOFTBUS_INVALID_PARAM;
+        goto EXIT;
+    }
+
+    if (!ChanneIdIsInt(env, args)) {
+        goto EXIT;
     }
     napi_valuetype valueTypeBuffer;
     status = napi_typeof(env, args[1], &valueTypeBuffer);
     if (status != napi_ok) {
-        ThrowErrFromC2Js(env, SOFTBUS_INVALID_PARAM);
-        return SOFTBUS_INVALID_PARAM;
+        goto EXIT;
     }
     void* bufferData;
     status = napi_get_arraybuffer_info(env, args[1], &bufferData, &asyncData->dataLength);
-    if (status != napi_ok) {
-        ThrowErrFromC2Js(env, SOFTBUS_INVALID_PARAM);
-        return SOFTBUS_INVALID_PARAM;
-    }
-    if (asyncData->dataLength == 0) {
-        ThrowErrFromC2Js(env, SOFTBUS_INVALID_PARAM);
-        return SOFTBUS_INVALID_PARAM;
+    if (status != napi_ok || asyncData->dataLength == 0) {
+        goto EXIT;
     }
     asyncData->data = (char*)SoftBusCalloc(asyncData->dataLength);
     if (asyncData->data == NULL) {
@@ -575,6 +593,9 @@ static int32_t GetSendParam(napi_env env, napi_callback_info info, AsyncSendData
         return SOFTBUS_INVALID_PARAM;
     }
     return SOFTBUS_OK;
+EXIT:
+    ThrowErrFromC2Js(env, SOFTBUS_INVALID_PARAM);
+    return SOFTBUS_INVALID_PARAM;
 }
 
 napi_value SendDataAsync(napi_env env, napi_callback_info info)
@@ -825,29 +846,34 @@ napi_value On(napi_env env, napi_callback_info info)
     napi_value args[ARGS_SIZE_3];
     napi_status status = napi_get_cb_info(env, info, &argc, args, NULL, NULL);
     if (status != napi_ok || argc != ARGS_SIZE_3) {
-        ThrowErrFromC2Js(env, SOFTBUS_INVALID_PARAM);
-        return NULL;
+        goto EXIT;
     }
     char type[FUNC_NAME_MAX_LEN];
     size_t typeLen;
     status = napi_get_value_string_utf8(env, args[ARGS_INDEX_0], type, sizeof(type), &typeLen);
     if (status != napi_ok) {
-        ThrowErrFromC2Js(env, SOFTBUS_INVALID_PARAM);
-        return NULL;
+        goto EXIT;
     }
     int32_t channelId;
     status = napi_get_value_int32(env, args[ARGS_INDEX_1], &channelId);
     if (status != napi_ok) {
-        ThrowErrFromC2Js(env, SOFTBUS_INVALID_PARAM);
-        return NULL;
+        goto EXIT;
+    }
+    double value;
+    status = napi_get_value_double(env, args[ARGS_INDEX_1], &value);
+    if (status != napi_ok) {
+        goto EXIT;
+    }
+    int32_t intValue = (int32_t)value;
+    bool isInteger = (double)intValue == value;
+    if (!isInteger) {
+        goto EXIT;
     }
     napi_valuetype funcType;
     status = napi_typeof(env, args[ARGS_INDEX_2], &funcType);
     if (status != napi_ok || funcType != napi_function) {
-        ThrowErrFromC2Js(env, SOFTBUS_INVALID_PARAM);
-        return NULL;
+        goto EXIT;
     }
-
     if (strcmp(type, "receiveData") == 0) {
         napi_create_reference(env, args[ARGS_INDEX_2], 1, &receiveDataCallbackRef);
         int32_t ret = SetListenerState(channelId, DATA_RECEIVE, true);
@@ -857,10 +883,12 @@ napi_value On(napi_env env, napi_callback_info info)
         int32_t ret = SetListenerState(channelId, CHANNEL_STATE, true);
         ThrowErrFromC2Js(env, ret);
     } else {
-        ThrowErrFromC2Js(env, SOFTBUS_INVALID_PARAM);
-        return NULL;
+        goto EXIT;
     }
     global_env = env;
+    return NULL;
+EXIT:
+    ThrowErrFromC2Js(env, SOFTBUS_INVALID_PARAM);
     return NULL;
 }
 
@@ -870,23 +898,28 @@ napi_value Off(napi_env env, napi_callback_info info)
     napi_value args[ARGS_SIZE_2];
     napi_status status = napi_get_cb_info(env, info, &argc, args, NULL, NULL);
     if (status != napi_ok || argc < ARGS_SIZE_2) {
-        ThrowErrFromC2Js(env, SOFTBUS_INVALID_PARAM);
-        return NULL;
+        goto EXIT;
     }
-
     char type[FUNC_NAME_MAX_LEN];
     size_t typeLen;
     status = napi_get_value_string_utf8(env, args[ARGS_INDEX_0], type, sizeof(type), &typeLen);
     if (status != napi_ok) {
-        ThrowErrFromC2Js(env, SOFTBUS_INVALID_PARAM);
-        return NULL;
+        goto EXIT;
     }
-
     int32_t channelId;
     status = napi_get_value_int32(env, args[ARGS_INDEX_1], &channelId);
     if (status != napi_ok) {
-        ThrowErrFromC2Js(env, SOFTBUS_INVALID_PARAM);
-        return NULL;
+        goto EXIT;
+    }
+    double value;
+    status = napi_get_value_double(env, args[ARGS_INDEX_1], &value);
+    if (status != napi_ok) {
+        goto EXIT;
+    }
+    int32_t intValue = (int32_t)value;
+    bool isInteger = (double)intValue == value;
+    if (!isInteger) {
+        goto EXIT;
     }
     if (strcmp(type, "receiveData") == 0) {
         if (receiveDataCallbackRef != NULL) {
@@ -903,10 +936,11 @@ napi_value Off(napi_env env, napi_callback_info info)
         int32_t ret = SetListenerState(channelId, CHANNEL_STATE, false);
         ThrowErrFromC2Js(env, ret);
     } else {
-        ThrowErrFromC2Js(env, SOFTBUS_INVALID_PARAM);
-        return NULL;
+        goto EXIT;
     }
-
+    return NULL;
+EXIT:
+    ThrowErrFromC2Js(env, SOFTBUS_INVALID_PARAM);
     return NULL;
 }
 

@@ -34,6 +34,7 @@ ohos_unittest("BrProxyTest") {
     "$dsoftbus_root_path/core/bus_center/lnn/lane_hub/lane_manager/include",
     "$dsoftbus_root_path/core/transmission/ipc/include",
     "$dsoftbus_root_path/core/connection/proxy",
+    "$dsoftbus_root_path/core/bus_center/service/include",
   ]
   sources = [
     "mock/br_proxy_test_mock.cpp",

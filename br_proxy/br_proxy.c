@@ -493,6 +493,8 @@ int32_t CloseBrProxy(int32_t channelId)
     if (!IsChannelValid(channelId)) {
         return SOFTBUS_TRANS_INVALID_CHANNEL_ID;
     }
+    (void)ClientRecordListenerState(channelId, DATA_RECEIVE, false);
+    (void)ClientRecordListenerState(channelId, CHANNEL_STATE, false);
     int32_t ret = ServerIpcCloseBrProxy(channelId);
     if (ret != SOFTBUS_OK) {
         TRANS_LOGE(TRANS_SDK, "[br_proxy] ipc close brproxy failed! ret:%{public}d", ret);
@@ -500,34 +502,6 @@ int32_t CloseBrProxy(int32_t channelId)
     }
     ClientDeleteChannelFromList(channelId, NULL);
     return SOFTBUS_OK;
-}
-
-bool IsProxyChannelEnabled(int32_t uid)
-{
-    int32_t ret = ClientStubInit();
-    if (ret != SOFTBUS_OK) {
-        TRANS_LOGE(TRANS_SDK, "[br_proxy] client stub init failed! ret:%{public}d", ret);
-        return false;
-    }
-    char pkgName[PKGNAME_MAX_LEN];
-    ret = sprintf_s(pkgName, sizeof(pkgName), "%s_%d", "PUSH_SERVICE", getpid());
-    if (ret < 0) {
-        TRANS_LOGE(TRANS_SVC, "[br_proxy] sprintf_s failed! ret=%{public}d", ret);
-        return false;
-    }
-    TRANS_LOGI(TRANS_SVC, "[br_proxy] pkgName=%{public}s", pkgName);
-    ret = ClientRegisterBrProxyService(pkgName);
-    if (ret != SOFTBUS_OK) {
-        TRANS_LOGE(TRANS_SDK, "[br_proxy] client register service failed! ret:%{public}d", ret);
-        return false;
-    }
-    bool isEnable = false;
-    ret = ServerIpcIsProxyChannelEnabled(uid, &isEnable);
-    if (ret != SOFTBUS_OK) {
-        TRANS_LOGE(TRANS_SDK, "[br_proxy] ipc get brproxy channel state failed! ret:%{public}d", ret);
-    }
-
-    return isEnable;
 }
 
 int32_t SendBrProxyData(int32_t channelId, char* data, uint32_t dataLen)
@@ -643,4 +617,70 @@ int32_t ClientTransOnBrProxyOpened(int32_t channelId, const char *brMac, int32_t
         info.listener.onChannelOpened(info.sessionId, channelId, result);
     }
     return SOFTBUS_OK;
+}
+
+bool IsProxyChannelEnabled(int32_t uid)
+{
+    int32_t ret = ClientStubInit();
+    if (ret != SOFTBUS_OK) {
+        TRANS_LOGE(TRANS_SDK, "[br_proxy] client stub init failed! ret:%{public}d", ret);
+        return false;
+    }
+    TRANS_LOGI(TRANS_SVC, "[br_proxy] enter uid:%{public}d", uid);
+    ret = ClientRegisterBrProxyService(COMM_PKGNAME_PUSH);
+    if (ret != SOFTBUS_OK) {
+        TRANS_LOGE(TRANS_SDK, "[br_proxy] client register service failed! ret:%{public}d", ret);
+        return false;
+    }
+    bool isEnable = false;
+    ret = ServerIpcIsProxyChannelEnabled(uid, &isEnable);
+    if (ret != SOFTBUS_OK) {
+        TRANS_LOGE(TRANS_SDK, "[br_proxy] ipc get brproxy channel state failed! ret:%{public}d", ret);
+    }
+
+    return isEnable;
+}
+
+static PermissonHookCb g_pushCb;
+int32_t RegisterAccessHook(PermissonHookCb *cb)
+{
+    int32_t ret = ClientStubInit();
+    if (ret != SOFTBUS_OK) {
+        TRANS_LOGE(TRANS_SDK, "[br_proxy] client stub init failed! ret:%{public}d", ret);
+        return ret;
+    }
+    TRANS_LOGI(TRANS_SVC, "[br_proxy] enter");
+    ret = ClientRegisterBrProxyService(COMM_PKGNAME_PUSH);
+    if (ret != SOFTBUS_OK) {
+        TRANS_LOGE(TRANS_SDK, "[br_proxy] client register service failed! ret:%{public}d", ret);
+        return ret;
+    }
+    ret = ServerIpcRegisterPushHook();
+    if (ret != SOFTBUS_OK) {
+        TRANS_LOGE(TRANS_SDK, "[br_proxy] client register push hook failed! ret:%{public}d", ret);
+        return ret;
+    }
+    ret = memcpy_s(&g_pushCb, sizeof(PermissonHookCb), cb, sizeof(PermissonHookCb));
+    if (ret != EOK) {
+        TRANS_LOGE(TRANS_SDK, "[br_proxy] memcpy failed! ret:%{public}d", ret);
+        return SOFTBUS_MEM_ERR;
+    }
+    return SOFTBUS_OK;
+}
+
+int32_t ClientTransBrProxyQueryPermission(const char *bundleName, bool *isEmpowered)
+{
+    if (bundleName == NULL || isEmpowered == NULL) {
+        return SOFTBUS_INVALID_PARAM;
+    }
+    if (g_pushCb.queryPermission == NULL) {
+        return SOFTBUS_NO_INIT;
+    }
+
+    int32_t ret = g_pushCb.queryPermission(bundleName, isEmpowered);
+    if (ret != SOFTBUS_OK) {
+        TRANS_LOGE(TRANS_SDK, "[br_proxy] client query permission failed! ret:%{public}d", ret);
+    }
+
+    return ret;
 }

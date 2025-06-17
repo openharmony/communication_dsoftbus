@@ -95,6 +95,7 @@ public:
     virtual int32_t OnBrProxyOpened(int32_t channelId, const char *brMac, int32_t reason);
     virtual int32_t OnBrProxyDataRecv(int32_t channelId, const uint8_t *data, uint32_t len);
     virtual int32_t OnBrProxyStateChanged(int32_t channelId, int32_t channelState);
+    virtual int32_t OnBrProxyQueryPermission(const char *bundleName, bool *isEmpowered);
 
 public:
     DECLARE_INTERFACE_DESCRIPTOR(u"OHOS.ISoftBusClient");
