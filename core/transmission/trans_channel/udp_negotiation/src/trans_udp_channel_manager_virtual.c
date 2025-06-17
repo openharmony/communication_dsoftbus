@@ -74,10 +74,11 @@ void TransAsyncUdpChannelTask(int32_t channelId)
     (void)channelId;
 }
 
-int32_t TransSetTos(int32_t channelId, uint8_t tos)
+int32_t TransSetTos(int32_t channelId, uint8_t tos, pid_t callingPid)
 {
     (void)channelId;
     (void)tos;
+    (void)callingPid;
     return SOFTBUS_FUNC_NOT_SUPPORT;
 }
 

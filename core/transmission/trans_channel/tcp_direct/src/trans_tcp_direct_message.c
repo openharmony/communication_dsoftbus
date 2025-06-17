@@ -1725,7 +1725,7 @@ static int32_t TransTdcPostErrorMsg(uint64_t *seq, uint32_t *flags, int32_t chan
     return SOFTBUS_OK;
 }
 
-int32_t TransDealTdcCheckCollabResult(int32_t channelId, int32_t checkResult)
+int32_t TransDealTdcCheckCollabResult(int32_t channelId, int32_t checkResult, pid_t callingPid)
 {
     uint32_t tranFlags = 0;
     uint64_t seq = 0;
@@ -1735,6 +1735,16 @@ int32_t TransDealTdcCheckCollabResult(int32_t channelId, int32_t checkResult)
         TRANS_LOGE(TRANS_CTRL, "get session conn by channelId=%{public}d failed.", channelId);
         return SOFTBUS_TRANS_GET_SESSION_CONN_FAILED;
     }
+
+    int32_t dmsPid = 0;
+    char dmsPkgName[PKG_NAME_SIZE_MAX] = { 0 };
+    (void)TransGetPidAndPkgName(DMS_SESSIONNAME, DMS_UID, &dmsPid, dmsPkgName, PKG_NAME_SIZE_MAX);
+    if (callingPid != 0 && dmsPid != callingPid) {
+        TRANS_LOGE(TRANS_CTRL,
+            "dmsPid does not match callingPid, dmsPid=%{public}d, callingPid=%{public}d", dmsPid, callingPid);
+        goto ERR_EXIT;
+    }
+
     ret = TransTdcUpdateReplyCnt(channelId);
     if (ret != SOFTBUS_OK) {
         TRANS_LOGE(TRANS_CTRL, "update waitOpenReplyCnt failed, channelId=%{public}d.", channelId);

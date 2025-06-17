@@ -58,6 +58,7 @@ namespace OHOS {
 #define TEST_CHANNEL_ID 1024
 #define TEST_USER_ID 100
 #define TEST_TOKEN_ID 1111111
+#define TEST_CALLING_PID 1234
 
 static int32_t m_testProxyAuthChannelId = -1;
 static bool g_testProxyChannelOpenSuccessFlag = false;
@@ -2214,7 +2215,7 @@ HWTEST_F(SoftbusProxyChannelManagerTest, TransProxyGetPrivilegeCloseList001, Tes
 HWTEST_F(SoftbusProxyChannelManagerTest, TransDealProxyCheckCollabResult001, TestSize.Level1)
 {
     int32_t channelId = TEST_VALID_CHANNEL_ID;
-    int32_t ret = TransDealProxyCheckCollabResult(channelId, SOFTBUS_OK);
+    int32_t ret = TransDealProxyCheckCollabResult(channelId, SOFTBUS_OK, TEST_CALLING_PID);
     EXPECT_EQ(SOFTBUS_TRANS_NODE_NOT_FOUND, ret);
 
     ProxyChannelInfo *chan = reinterpret_cast<ProxyChannelInfo *>(SoftBusCalloc(sizeof(ProxyChannelInfo)));
@@ -2227,11 +2228,11 @@ HWTEST_F(SoftbusProxyChannelManagerTest, TransDealProxyCheckCollabResult001, Tes
     EXPECT_EQ(SOFTBUS_OK, ret);
 
     TransCheckChannelOpenToLooperDelay(channelId, CHANNEL_TYPE_PROXY, TEST_SLEEP_TIME);
-    ret = TransDealProxyCheckCollabResult(channelId, SOFTBUS_OK);
-    EXPECT_EQ(SOFTBUS_TRANS_PROXY_ERROR_APP_TYPE, ret);
+    ret = TransDealProxyCheckCollabResult(channelId, SOFTBUS_OK, TEST_CALLING_PID);
+    EXPECT_EQ(SOFTBUS_TRANS_CHECK_PID_ERROR, ret);
 
     ret = TransProxyDelByChannelId(channelId, chan);
-    EXPECT_EQ(SOFTBUS_TRANS_NODE_NOT_FOUND, ret);
+    EXPECT_EQ(SOFTBUS_OK, ret);
 }
 
 /**
@@ -2249,10 +2250,10 @@ HWTEST_F(SoftbusProxyChannelManagerTest, TransDealProxyCheckCollabResult002, Tes
     EXPECT_EQ(SOFTBUS_OK, ret);
 
     TransCheckChannelOpenToLooperDelay(TEST_VALID_CHANNEL_ID, CHANNEL_TYPE_PROXY, TEST_SLEEP_TIME);
-    ret = TransDealProxyCheckCollabResult(TEST_VALID_CHANNEL_ID, SOFTBUS_TRANS_NODE_NOT_FOUND);
-    EXPECT_EQ(SOFTBUS_TRANS_NODE_NOT_FOUND, ret);
+    ret = TransDealProxyCheckCollabResult(TEST_VALID_CHANNEL_ID, SOFTBUS_TRANS_NODE_NOT_FOUND, TEST_CALLING_PID);
+    EXPECT_EQ(SOFTBUS_TRANS_CHECK_PID_ERROR, ret);
     ret = TransProxyDelByChannelId(TEST_VALID_CHANNEL_ID, chan);
-    EXPECT_EQ(SOFTBUS_TRANS_NODE_NOT_FOUND, ret);
+    EXPECT_EQ(SOFTBUS_OK, ret);
 }
 
 /**
