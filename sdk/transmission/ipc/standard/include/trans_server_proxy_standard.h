@@ -71,6 +71,7 @@ public:
     int32_t SendBrProxyData(int32_t channelId, char *data, uint32_t dataLen) override;
     int32_t SetListenerState(int32_t channelId, int32_t type, bool CbEnabled) override;
     int32_t GetProxyChannelState(int32_t uid, bool *isEnable);
+    int32_t RegisterPushHook();
 private:
     static inline BrokerDelegator<TransServerProxy> delegator_;
 };

@@ -91,6 +91,7 @@ private:
     int32_t SendBrProxyDataInner(MessageParcel &data, MessageParcel &reply);
     int32_t SetBrProxyListenerStateInner(MessageParcel &data, MessageParcel &reply);
     int32_t GetBrProxyChannelStateInner(MessageParcel &data, MessageParcel &reply);
+    int32_t RegisterPushHookInner(MessageParcel &data, MessageParcel &reply);
 
     void InitMemberFuncMap();
     void InitMemberPermissionMap();
