@@ -264,7 +264,7 @@ static int32_t TransTdcNeedAckProcessPostData(TcpDirectChannelInfo *channel, con
         tmpSeq = SoftBusHtoNl((uint32_t)finalSeq);
         finalData = (char *)(&tmpSeq);
     }
-    DataHead pktHead;
+    DataHead pktHead = { 0 };
     int32_t tlvBufferSize = 0;
     int32_t ret = BuildDataHead(&pktHead, finalSeq, flags, dataLen, &tlvBufferSize);
     TRANS_CHECK_AND_RETURN_RET_LOGE(ret == SOFTBUS_OK, ret, TRANS_SDK, "build tlv dataHead error");
