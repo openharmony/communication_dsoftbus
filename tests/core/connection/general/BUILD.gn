@@ -39,11 +39,15 @@ ohos_unittest("GeneralConnectionTest") {
     "$dsoftbus_root_path/core/adapter/br/include",
     "$dsoftbus_root_path/core/connection/tcp/include",
     "$dsoftbus_root_path/core/connection/sle/include",
+    "$dsoftbus_root_path/core/frame/init/include",
+    "$dsoftbus_root_path/core/connection/proxy",
+    "$dsoftbus_root_path/adapter/common/include",
   ]
 
   deps = [
     "$dsoftbus_root_path/adapter:softbus_adapter",
     "$dsoftbus_root_path/core/common:softbus_utils",
+    "$dsoftbus_root_path/dfx:softbus_dfx",
   ]
 
   external_deps = [
@@ -60,6 +64,58 @@ ohos_unittest("GeneralConnectionTest") {
     "$dsoftbus_root_path/core/connection/manager/softbus_conn_manager.c",
     "general_connection_mock.cpp",
     "softbus_conn_general_connection_test.cpp",
+  ]
+
+  if (dsoftbus_feature_conn_br) {
+    sources += [ "$dsoftbus_root_path/adapter/common/net/bluetooth/common/softbus_adapter_bt_common.c" ]
+  } else {
+    sources += [ "$dsoftbus_root_path/adapter/common/net/bluetooth/common/softbus_adapter_bt_common_virtual.c" ]
+  }
+}
+
+ohos_unittest("GeneralNegotiationTest") {
+  module_out_path = module_output_path
+  include_dirs = [
+    "$dsoftbus_root_path/core/connection/general",
+    "$dsoftbus_root_path/core/connection/interface",
+    "$dsoftbus_root_path/core/common/include",
+    "$dsoftbus_root_path/interfaces/kits/common",
+    "$dsoftbus_root_path/dfx/interface/include",
+    "$dsoftbus_root_path/adapter/common/include",
+    "$dsoftbus_root_path/adapter/common/net/bluetooth/include",
+    "$dsoftbus_root_path/core/connection/ble/include",
+    "$dsoftbus_root_path/core/connection/manager",
+    "$dsoftbus_root_path/core/bus_center/interface",
+    "$dsoftbus_root_path/interfaces/kits/bus_center",
+    "$dsoftbus_root_path/core/discovery/manager/include",
+    "$dsoftbus_root_path/core/discovery/interface",
+    "$dsoftbus_root_path/core/connection/ipc/include",
+    "$dsoftbus_root_path/interfaces/kits/connection",
+    "$dsoftbus_root_path/core/connection/br/include",
+    "$dsoftbus_root_path/core/adapter/br/include",
+    "$dsoftbus_root_path/core/connection/tcp/include",
+    "$dsoftbus_root_path/core/connection/sle/include",
+    "$dsoftbus_root_path/core/connection/proxy",
+  ]
+
+  deps = [
+    "$dsoftbus_root_path/adapter:softbus_adapter",
+    "$dsoftbus_root_path/core/common:softbus_utils",
+  ]
+
+  external_deps = [
+    "bluetooth:btframework",
+    "bounds_checking_function:libsec_shared",
+    "c_utils:utils",
+    "googletest:gmock_main",
+    "hilog:libhilog",
+  ]
+  sources = [
+    "$dsoftbus_root_path/core/connection/general/softbus_conn_general_negotiation.c",
+    "$dsoftbus_root_path/core/connection/manager/softbus_conn_ipc.c",
+    "$dsoftbus_root_path/core/connection/manager/softbus_conn_manager.c",
+    "general_negotiation_mock.cpp",
+    "softbus_conn_general_negotiation_test.cpp",
   ]
 
   if (dsoftbus_feature_conn_br) {
