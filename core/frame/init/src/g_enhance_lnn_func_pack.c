@@ -1390,3 +1390,13 @@ void SleRangeDeathCallbackPacked()
     }
     return pfnLnnEnhanceFuncList->sleRangeDeathCallback();
 }
+
+bool IsSupportLowLatencyPacked(const TransReqInfo *reqInfo, const LaneLinkInfo *laneLinkInfo)
+{
+    LnnEnhanceFuncList *pfnLnnEnhanceFuncList = LnnEnhanceFuncListGet();
+    if (LnnCheckFuncPointer((void *)pfnLnnEnhanceFuncList->isSupportLowLatency) != SOFTBUS_OK) {
+        LNN_LOGI(LNN_LANE, "Is support low latency packed, func pointer is NULL");
+        return false;
+    }
+    return pfnLnnEnhanceFuncList->isSupportLowLatency(reqInfo, laneLinkInfo);
+}
