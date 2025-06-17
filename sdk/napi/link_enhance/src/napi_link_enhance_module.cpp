@@ -38,9 +38,13 @@ static int32_t OnAcceptConnectAdapter(const char *name, uint32_t handle)
     std::string serverName = name;
     std::string deviceId = "";
     NapiLinkEnhanceServer *enhanceServer = nullptr;
-    if (NapiLinkEnhanceServer::enhanceServerMap_.count(serverName) > 0) {
-        enhanceServer = NapiLinkEnhanceServer::enhanceServerMap_[serverName];
+    {
+        std::lock_guard<std::mutex> guard(NapiLinkEnhanceServer::serverMapMutex_);
+        if (NapiLinkEnhanceServer::enhanceServerMap_.count(serverName) > 0) {
+            enhanceServer = NapiLinkEnhanceServer::enhanceServerMap_[serverName];
+        }
     }
+
     if (enhanceServer == nullptr || enhanceServer->env_ == nullptr ||
         !enhanceServer->IsAcceptedEnable()) {
         COMM_LOGE(COMM_SDK, "server status error, name=%{public}s", name);
@@ -52,12 +56,11 @@ static int32_t OnAcceptConnectAdapter(const char *name, uint32_t handle)
         size_t argc = ARGS_SIZE_THREE;
         napi_value nHandle = nullptr;
         napi_status status = napi_create_uint32(enhanceServer->env_, inHandle, &nHandle);
-        napi_valuetype valuetype;
-        napi_typeof(enhanceServer->env_, nHandle, &valuetype);
         if (status != napi_ok) {
             return;
         }
-        napi_value argv[ARGS_SIZE_THREE];
+
+        napi_value argv[ARGS_SIZE_THREE] = { nullptr };
         argv[PARAM0] = NapiGetStringRet(enhanceServer->env_, deviceId),
         argv[PARAM1] = NapiGetStringRet(enhanceServer->env_, serverName),
         argv[PARAM2] = nHandle;

@@ -18,6 +18,7 @@
 #include <regex>
 #include "napi_link_enhance_error_code.h"
 #include "securec.h"
+#include "softbus_access_token_adapter.h"
 #include "softbus_adapter_mem.h"
 #include "softbus_error_code.h"
 
@@ -201,6 +202,8 @@ int32_t ConvertToJsErrcode(int32_t err)
             return LINK_ENHANCE_CONNECTION_NOT_READY;
         case SOFTBUS_INVALID_PARAM:
             return LINK_ENHANCE_PARAMETER_INVALID;
+        case SOFTBUS_CONN_GENERAL_CREATE_SERVER_MAX:
+            return LINK_ENHANCE_SERVERS_EXCEEDS;
         default:
             return LINK_ENHANCE_INTERVAL_ERR;
     }
@@ -220,6 +223,15 @@ void HandleSyncErr(const napi_env &env, int32_t errCode)
     if (errMsg != "") {
         napi_throw_error(env, std::to_string(errCode).c_str(), errMsg.c_str());
     }
+}
+
+bool CheckAccessToken(void)
+{
+    bool isAccessToken = SoftBusCheckIsAccess();
+    if (!isAccessToken) {
+        COMM_LOGW(COMM_SDK, "no access token");
+    }
+    return isAccessToken;
 }
 } // namespace Softbus
 } // namespace Communication
