@@ -91,6 +91,7 @@ public:
     int32_t SendBrProxyData(int32_t channelId, char *data, uint32_t dataLen) override;
     int32_t SetListenerState(int32_t channelId, int32_t type, bool CbEnabled) override;
     bool IsProxyChannelEnabled(int32_t uid) override;
+    int32_t PushRegisterHook() override;
 protected:
     void OnStart() override;
     void OnStop() override;
