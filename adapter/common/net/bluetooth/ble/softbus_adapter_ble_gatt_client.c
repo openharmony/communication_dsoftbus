@@ -201,7 +201,7 @@ int32_t SoftbusGattcRegisterCallback(SoftBusGattcCallback *cb, int32_t clientId)
     }
     ListAdd(&g_softBusGattcManager->list, &gattcManager->node);
     (void)SoftBusMutexUnlock(&g_softBusGattcManager->lock);
-    CONN_LOGI(CONN_BLE, "clientId=%{public}d", clientId);
+    CONN_LOGI(CONN_BLE, "clientId=%{public}d", gattcManager->clientId);
     return SOFTBUS_OK;
 }
 
