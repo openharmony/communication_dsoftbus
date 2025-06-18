@@ -568,7 +568,7 @@ uint32_t WifiDirectUtils::CalculateStringLength(const char *str, uint32_t size)
     return 0;
 }
 
-void WifiDirectUtils::SyncLnnInfoForP2p(WifiDirectRole role, const std::string &localMac, const std::string &goMac)
+void WifiDirectUtils::SyncLnnInfoForP2p(WifiDirectApiRole role, const std::string &localMac, const std::string &goMac)
 {
     CONN_LOGI(CONN_WIFI_DIRECT, "role=%{public}d, localMac=%{public}s, goMac=%{public}s",
         role, WifiDirectAnonymizeMac(localMac).c_str(), WifiDirectAnonymizeMac(goMac).c_str());
