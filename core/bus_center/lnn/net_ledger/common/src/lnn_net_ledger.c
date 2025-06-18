@@ -51,6 +51,7 @@
 
 #define RETRY_TIMES                      5
 #define DELAY_REG_DP_TIME                1000
+#define UNKNOWN_CAP                      (-1)
 static bool g_isRestore = false;
 static bool g_isDeviceInfoSet = false;
 
@@ -108,6 +109,20 @@ static bool IsCapacityChange(NodeInfo *info)
     if (LnnGetLocalNumU32Info(NUM_KEY_STATIC_NET_CAP, &staticNetCap) == SOFTBUS_OK) {
         if (staticNetCap != info->staticNetCap) {
             LNN_LOGW(LNN_LEDGER, "staticNetCap=%{public}u->%{public}u", info->staticNetCap, staticNetCap);
+            return true;
+        }
+    }
+    int32_t sleRangeCap = 0;
+    if (LnnGetLocalNumInfo(NUM_KEY_SLE_RANGE_CAP, &sleRangeCap) == SOFTBUS_OK) {
+        if (sleRangeCap == UNKNOWN_CAP) {
+            LNN_LOGI(LNN_LEDGER, "sleRangeCap get illegal, recovery from cache");
+            int32_t ret = LnnSetLocalNumInfo(NUM_KEY_SLE_RANGE_CAP, info->sleRangeCapacity);
+            if (ret != SOFTBUS_OK) {
+                LNN_LOGE(LNN_LEDGER, "LnnSetLocalNumInfo fail, ret = %{public}d", ret);
+                return false;
+            }
+        } else if (sleRangeCap != info->sleRangeCapacity) {
+            LNN_LOGW(LNN_LEDGER, "sleRangeCap=%{public}d->%{public}d", info->sleRangeCapacity, sleRangeCap);
             return true;
         }
     }

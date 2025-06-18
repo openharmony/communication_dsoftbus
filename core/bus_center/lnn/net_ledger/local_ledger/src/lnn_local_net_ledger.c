@@ -2901,3 +2901,15 @@ int32_t LnnUpdateLocalScreenStatus(bool isScreenOn)
     SoftBusMutexUnlock(&g_localNetLedger.lock);
     return SOFTBUS_OK;
 }
+
+int32_t LnnUpdateSleCapacityAndVersion(int32_t slecap)
+{
+    if (SoftBusMutexLock(&g_localNetLedger.lock) != SOFTBUS_OK) {
+        LNN_LOGE(LNN_LEDGER, "lock mutex failed");
+        return SOFTBUS_LOCK_ERR;
+    }
+    g_localNetLedger.localInfo.sleRangeCapacity = slecap;
+    UpdateStateVersionAndStore(UPDATE_SLE_CAP);
+    SoftBusMutexUnlock(&g_localNetLedger.lock);
+    return SOFTBUS_OK;
+}
