@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2024 Huawei Device Co., Ltd.
+ * Copyright (c) 2024-2025 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -43,6 +43,26 @@ extern "C" {
 int32_t LnnServerJoinExt(ConnectionAddr *addr, LnnServerJoinExtCallBack *callback)
 {
     return GetAuthChannelInterface()->LnnServerJoinExt(addr, callback);
+}
+
+bool AddNumberToJsonObject(cJSON *json, const char *const string, int32_t num)
+{
+    return GetAuthChannelInterface()->AddNumberToJsonObject(json, string, num);
+}
+
+int32_t GenerateRandomStr(char *str, uint32_t size)
+{
+    return GetAuthChannelInterface()->GenerateRandomStr(str, size);
+}
+
+bool AddStringToJsonObject(cJSON *json, const char * const string, const char *value)
+{
+    return GetAuthChannelInterface()->AddStringToJsonObject(json, string, value);
+}
+
+char *cJSON_PrintUnformatted(const cJSON *json)
+{
+    return GetAuthChannelInterface()->cJSON_PrintUnformatted(json);
 }
 }
 }

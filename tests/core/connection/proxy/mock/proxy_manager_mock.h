@@ -39,6 +39,8 @@
 #define READ_SLEEP_TIME 5
 #define UNDERLAYER_HANDLE 1
 #define CONNECT_TIMEOUT 1000
+#define CONNECT_TIMEOUT1 500
+#define CONNECT_SLEEP_TIME 2
 
 class ProxyChannelInterface {
 public:
@@ -49,6 +51,7 @@ public:
     virtual int32_t Connect(const char *uuid, const BT_ADDR mac, void *connectCallback) = 0;
     virtual int32_t Write(int32_t clientFd, const uint8_t *buf, const int32_t len) = 0;
     virtual int32_t Read(int32_t clientFd, uint8_t *buf, const int32_t len) = 0;
+    virtual bool IsPairedDevice(const char *addr) = 0;
 };
 class ProxyChannelMock : public ProxyChannelInterface {
 public:
@@ -66,12 +69,17 @@ public:
     MOCK_METHOD(int32_t, Connect, (const char *uuid, const BT_ADDR mac, void *connectCallback), (override));
     MOCK_METHOD(int32_t, Write, (int32_t clientFd, const uint8_t *buf, const int32_t len), (override));
     MOCK_METHOD(int32_t, Read, (int32_t clientFd, uint8_t *buf, const int32_t len), (override));
+    MOCK_METHOD(bool, IsPairedDevice, (const char *addr), (override));
+
     static int32_t ActionOfAddBtStateListener(const SoftBusBtStateListener *listener, int *listenerId);
     static int32_t ActionOfRegisterHfpListener(const ProxyListener listener);
     MOCK_METHOD(SppSocketDriver *, InitSppSocketDriver, (), (override));
     static SppSocketDriver *ActionOfInitSppSocketDriver();
     static int32_t ActionOfRead(int32_t clientFd, uint8_t *buf, const int32_t len);
     static int32_t ActionOfRead1(int32_t clientFd, uint8_t *buf, const int32_t len);
+    static int32_t ActionOfConnect(const char *uuid, const BT_ADDR mac, void *connectCallback);
+    static int32_t ActionOfConnect1(const char *uuid, const BT_ADDR mac, void *connectCallback);
+    static int32_t ActionOfConnect2(const char *uuid, const BT_ADDR mac, void *connectCallback);
     static void InjectHfpConnectionChanged(std::string addr, int32_t state);
     static void InjectBtAclStateChanged(
         int32_t listenerId, const SoftBusBtAddr *btAddr, int32_t aclState, int32_t hciReason);

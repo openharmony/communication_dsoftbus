@@ -48,6 +48,7 @@ int32_t DiscRegisterEnhanceFunc(void *soHandle)
     g_discEnhanceFuncList.discCoapAssembleCapData = dlsym(soHandle, "DiscCoapAssembleCapData");
 #endif /* DSOFTBUS_FEATURE_DISC_COAP */
     g_discEnhanceFuncList.discFillBtype = dlsym(soHandle, "DiscFillBtype");
+    g_discEnhanceFuncList.discCoapAssembleBdata = dlsym(soHandle, "DiscCoapAssembleBdata");
 #endif
 
     g_discEnhanceFuncList.discTouchBleInit = dlsym(soHandle, "DiscTouchBleInit");
@@ -77,5 +78,14 @@ int32_t DiscRegisterEnhanceFunc(void *soHandle)
     g_discEnhanceFuncList.discOopBleEventInit = dlsym(soHandle, "DiscOopBleEventInit");
     g_discEnhanceFuncList.discOopBleEventDeinit = dlsym(soHandle, "DiscOopBleEventDeinit");
 
+    g_discEnhanceFuncList.distUpdatePublishParam = dlsym(soHandle, "DistUpdatePublishParam");
+    g_discEnhanceFuncList.distDiscoveryStartActionPreLink = dlsym(soHandle, "DistDiscoveryStartActionPreLink");
+    g_discEnhanceFuncList.distDiscoveryStopActionPreLink = dlsym(soHandle, "DistDiscoveryStopActionPreLink");
+    g_discEnhanceFuncList.distPublishStopActionPreLink = dlsym(soHandle, "DistPublishStopActionPreLink");
+    g_discEnhanceFuncList.distMgrStartActionReply = dlsym(soHandle, "DistMgrStartActionReply");
+    g_discEnhanceFuncList.distGetActionParam = dlsym(soHandle, "DistGetActionParam");
+    g_discEnhanceFuncList.distActionProcessConPacket = dlsym(soHandle, "DistActionProcessConPacket");
+    g_discEnhanceFuncList.distActionInit = dlsym(soHandle, "DistActionInit");
+    g_discEnhanceFuncList.distActionDeinit = dlsym(soHandle, "DistActionDeinit");
     return SOFTBUS_OK;
 }

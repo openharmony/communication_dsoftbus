@@ -17,6 +17,7 @@
 #define LNN_LANE_INTERFACE_STRUCT_H
 
 #include <stdint.h>
+#include "../../inner_kits/transport/inner_socket.h"
 #include "softbus_common.h"
 #include "softbus_def.h"
 #include "softbus_protocol_def.h"
@@ -150,6 +151,7 @@ typedef struct {
 typedef struct {
     uint64_t laneId;
     LaneLinkType type;
+    bool isLowLatency;
     union {
         BrConnInfo br;
         BleConnInfo ble;
@@ -277,6 +279,7 @@ typedef struct {
     bool isSupportIpv6;
     LaneSpecifiedLink linkType;
     uint32_t actionAddr;
+    TransFlowInfo flowInfo;
 } AllocExtendInfo;
 
 typedef struct {

@@ -1072,13 +1072,13 @@ static int32_t TransReportChannelOpenedInfo(uint8_t *buf, uint32_t len, pid_t ca
     }
     switch (info.channelType) {
         case CHANNEL_TYPE_PROXY:
-            ret = TransDealProxyChannelOpenResult(info.channelId, info.openResult, &accessInfo);
+            ret = TransDealProxyChannelOpenResult(info.channelId, info.openResult, &accessInfo, callingPid);
             break;
         case CHANNEL_TYPE_TCP_DIRECT:
-            ret = TransDealTdcChannelOpenResult(info.channelId, info.openResult, &accessInfo);
+            ret = TransDealTdcChannelOpenResult(info.channelId, info.openResult, &accessInfo, callingPid);
             break;
         case CHANNEL_TYPE_UDP:
-            ret = TransDealUdpChannelOpenResult(info.channelId, info.openResult, udpPort, &accessInfo);
+            ret = TransDealUdpChannelOpenResult(info.channelId, info.openResult, udpPort, &accessInfo, callingPid);
             break;
         case CHANNEL_TYPE_AUTH:
             ret = TransDealAuthChannelOpenResult(info.channelId, info.openResult, callingPid);
@@ -1093,7 +1093,7 @@ static int32_t TransReportChannelOpenedInfo(uint8_t *buf, uint32_t len, pid_t ca
     return ret;
 }
 
-static void TransReportLimitChangeInfo(uint8_t *buf, uint32_t len)
+static void TransReportLimitChangeInfo(uint8_t *buf, uint32_t len, pid_t callingPid)
 {
     int32_t channelId = 0;
     uint8_t tos = 0;
@@ -1106,7 +1106,7 @@ static void TransReportLimitChangeInfo(uint8_t *buf, uint32_t len)
     if (limitChangeResult != SOFTBUS_OK) {
         TRANS_LOGE(TRANS_CTRL, "limitChangeResult is failed, limitChangeResult=%{public}d", limitChangeResult);
     }
-    ret = TransSetTos(channelId, tos);
+    ret = TransSetTos(channelId, tos, callingPid);
     if (ret != SOFTBUS_OK) {
         TRANS_LOGE(TRANS_CTRL, "Set limit change event failed, ret=%{public}d", ret);
     }
@@ -1134,7 +1134,7 @@ static int32_t GetCollabCheckResultFromBuf(uint8_t *buf,
     return ret;
 }
 
-static int32_t TransReportCheckCollabInfo(uint8_t *buf, uint32_t len)
+static int32_t TransReportCheckCollabInfo(uint8_t *buf, uint32_t len, pid_t callingPid)
 {
     int32_t channelId = 0;
     int32_t channelType = 0;
@@ -1145,13 +1145,13 @@ static int32_t TransReportCheckCollabInfo(uint8_t *buf, uint32_t len)
     }
     switch (channelType) {
         case CHANNEL_TYPE_PROXY:
-            ret = TransDealProxyCheckCollabResult(channelId, checkResult);
+            ret = TransDealProxyCheckCollabResult(channelId, checkResult, callingPid);
             break;
         case CHANNEL_TYPE_TCP_DIRECT:
-            ret = TransDealTdcCheckCollabResult(channelId, checkResult);
+            ret = TransDealTdcCheckCollabResult(channelId, checkResult, callingPid);
             break;
         case CHANNEL_TYPE_UDP:
-            ret = TransDealUdpCheckCollabResult(channelId, checkResult);
+            ret = TransDealUdpCheckCollabResult(channelId, checkResult, callingPid);
             break;
         default:
             TRANS_LOGE(TRANS_CTRL, "channelType=%{public}d is error.", channelType);
@@ -1160,7 +1160,7 @@ static int32_t TransReportCheckCollabInfo(uint8_t *buf, uint32_t len)
     return ret;
 }
 
-static int32_t TransSetAccessInfo(uint8_t *buf, uint32_t len)
+static int32_t TransSetAccessInfo(uint8_t *buf, uint32_t len, pid_t callingPid)
 {
     char sessionName[SESSION_NAME_SIZE_MAX] = { 0 };
     char extraAccessInfo[EXTRA_ACCESS_INFO_LEN_MAX] = { 0 };
@@ -1192,7 +1192,7 @@ static int32_t TransSetAccessInfo(uint8_t *buf, uint32_t len)
         .localTokenId = tokenId,
         .extraAccessInfo = extraAccessInfo,
     };
-    ret = AddAccessInfoBySessionName(sessionName, &accessInfo);
+    ret = AddAccessInfoBySessionName(sessionName, &accessInfo, callingPid);
     if (ret != SOFTBUS_OK) {
         TRANS_LOGE(TRANS_CTRL, "add accessInfo by sessionName failed.");
     }
@@ -1215,13 +1215,13 @@ int32_t TransProcessInnerEvent(int32_t eventType, uint8_t *buf, uint32_t len)
             ret = TransReportChannelOpenedInfo(buf, len, callingPid);
             break;
         case EVENT_TYPE_TRANS_LIMIT_CHANGE:
-            TransReportLimitChangeInfo(buf, len);
+            TransReportLimitChangeInfo(buf, len, callingPid);
             break;
         case EVENT_TYPE_COLLAB_CHECK:
-            ret = TransReportCheckCollabInfo(buf, len);
+            ret = TransReportCheckCollabInfo(buf, len, callingPid);
             break;
         case EVENT_TYPE_SET_ACCESS_INFO:
-            ret = TransSetAccessInfo(buf, len);
+            ret = TransSetAccessInfo(buf, len, callingPid);
             break;
         default:
             TRANS_LOGE(TRANS_CTRL, "eventType=%{public}d error", eventType);

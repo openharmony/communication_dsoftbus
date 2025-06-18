@@ -20,6 +20,7 @@
 #include "disc_interface.h"
 #include "disc_ble_dispatcher.h"
 #include "disc_usb_dispatcher.h"
+#include "disc_ble_utils_struct.h"
 #include "nstackx.h"
 #include "stdint.h"
 #include "stdbool.h"
@@ -44,6 +45,8 @@ int32_t SchedulerDeinitBroadcastPacked(void);
 #endif
 
 #if !defined(__G_ENHANCE_DISC_FUNC_PACK_INNER_DISC_COAP_VIRTUAL)
+int32_t DiscCoapAssembleBdataPacked(
+    const unsigned char *capabilityData, uint32_t dataLen, char *businessData, uint32_t businessDataLen);
 int32_t DiscCoapProcessDeviceInfoPacked(const NSTACKX_DeviceInfo *nstackxInfo, DeviceInfo *devInfo,
     const DiscInnerCallback *discCb, SoftBusMutex *discCbLock);
 #ifdef DSOFTBUS_FEATURE_DISC_SHARE_COAP
@@ -82,6 +85,14 @@ void DiscOopBleEventDeinitPacked(void);
 DiscoveryUsbDispatcherInterface *DiscUsbInitPacked(DiscInnerCallback *discInnerCb);
 void DiscUsbDeinitPacked(void);
 
+int32_t DistUpdatePublishParamPacked(const char *cust, const char *extCust);
+int32_t DistDiscoveryStartActionPreLinkPacked(void);
+int32_t DistDiscoveryStopActionPreLinkPacked(void);
+int32_t DistPublishStopActionPreLinkPacked(void);
+void DistGetActionParamPacked(DiscActionParam *action);
+bool DistActionProcessConPacketPacked(DeviceWrapper *wrapperDevice, const uint8_t *key, uint32_t len);
+int32_t DistActionInitPacked(DiscActionUpdateBleCallback *updateAdvCb, DiscInnerCallback *innerCb);
+void DistActionDeinitPacked(void);
 #ifdef __cplusplus
 }
 #endif

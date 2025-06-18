@@ -164,7 +164,7 @@ static void DumpMsgInfo(const SoftBusMessage *msg)
         COMM_LOGE(COMM_UTILS, "invalid para when dump msg info");
         return;
     }
-    COMM_LOGI(COMM_UTILS, "handling msg, %{public}s, %{public}s, %{public}" PRId32 ", %{public}" PRIu64 ", "
+    COMM_LOGD(COMM_UTILS, "handling msg, %{public}s, %{public}s, %{public}" PRId32 ", %{public}" PRIu64 ", "
         "%{public}" PRIu64 ", %{public}" PRId64 "",
         msg->handler->looper->context->name, msg->handler->name, msg->what, msg->arg1, msg->arg2, msg->time);
 }

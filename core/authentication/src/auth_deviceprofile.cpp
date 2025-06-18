@@ -560,7 +560,7 @@ void UpdateDpSameAccount(UpdateDpAclParams *aclParams, SessionKey sessionKey, bo
             LNN_LOGW(LNN_STATE, "not need update uk for acl");
         }
     }
-    if (isNeedUpdateDk || IsSameAccount(aclParams->accountId)) {
+    if (isNeedUpdateDk || IsSameAccount(aclParams->accountId) || (aclState == ACL_CAN_WRITE)) {
         ret = UpdateDpSameAccountAcl(peerUdid, aclParams->peerUserId, sessionKeyId);
         if (ret != UPDATE_ACL_SUCC) {
             InsertDpSameAccountAcl(peerUdid, aclParams->peerUserId, sessionKeyId);

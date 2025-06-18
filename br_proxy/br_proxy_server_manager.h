@@ -16,6 +16,7 @@
 #ifndef BR_PROXY_SERVER_MANAGER_H
 #define BR_PROXY_SERVER_MANAGER_H
 
+#include <stdbool.h>
 #include <unistd.h>
 
 #ifdef __cplusplus

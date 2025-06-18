@@ -49,7 +49,7 @@ public:
     void SetUp() override { }
     void TearDown() override { }
 
-    static inline std::string g_customCapData = "name=Bill";
+    static inline std::string g_customCapData = R"({"castPlus":"1122", "extCustData":"1122", "preLinkType":"HML"})";
     static inline DeviceInfo g_foundDeviceInfo;
     static constexpr char FOUND_DEVICE_ID[] = "e831f7630b7619ae";
     static inline std::string validRefreshData = R"({"discType":"handle"})";
