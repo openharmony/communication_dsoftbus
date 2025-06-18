@@ -436,6 +436,11 @@ napi_value ChannelStateEnumInit(napi_env env, napi_value exports)
         return NULL;
     }
 
+    if (napi_create_int32(env, CHANNEL_BR_NO_PAIRED, &typeValue) != napi_ok ||
+        napi_set_named_property(env, typeEnum, "CHANNEL_BR_NO_PAIRED", typeValue) != napi_ok) {
+        return NULL;
+    }
+
     status = napi_set_named_property(env, exports, "ChannelState", typeEnum);
     if (status != napi_ok) {
         return NULL;
