@@ -341,3 +341,20 @@ int32_t ClientIpcBrProxyStateChanged(const char *pkgName, int32_t channelId, int
  
     return clientProxy->OnBrProxyStateChanged(channelId, channelState);
 }
+
+int32_t ClientIpcQueryPermission(const char *pkgName, const char *bundleName, bool *isEmpowered)
+{
+    if (pkgName == nullptr || bundleName == nullptr || isEmpowered == nullptr) {
+        TRANS_LOGE(TRANS_SDK, "invalid param.");
+        return SOFTBUS_INVALID_PARAM;
+    }
+ 
+    sptr<IRemoteObject> clientObject = SoftbusClientInfoManager::GetInstance().GetSoftbusClientProxy(pkgName);
+    sptr<TransClientProxy> clientProxy = new (std::nothrow) TransClientProxy(clientObject);
+    if (clientProxy == nullptr) {
+        TRANS_LOGE(TRANS_SDK, "softbus client proxy is nullptr!");
+        return SOFTBUS_TRANS_GET_CLIENT_PROXY_NULL;
+    }
+ 
+    return clientProxy->OnBrProxyQueryPermission(bundleName, isEmpowered);
+}
