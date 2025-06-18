@@ -562,6 +562,7 @@ typedef struct {
 const SoftBusCodeToStateMap G_CODE_MAP[] = {
     { SOFTBUS_CONN_BR_UNDERLAY_SOCKET_CLOSED,   CHANNEL_WAIT_RESUME },
     { SOFTBUS_OK,                               CHANNEL_RESUME      },
+    { SOFTBUS_CONN_BR_UNPAIRED,                 CHANNEL_BR_NO_PAIRED},
 };
 
 static int32_t SoftbusErrConvertChannelState(int32_t err)
