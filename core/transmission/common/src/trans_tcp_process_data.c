@@ -170,7 +170,8 @@ int32_t TransTdcUnPackAllData(int32_t channelId, DataBuf *node, bool *flag)
     if (pktHead->magicNumber != MAGIC_NUMBER) {
         return SOFTBUS_INVALID_DATA_HEAD;
     }
-    if ((pktHead->dataLen > g_dataBufferMaxLen - DC_DATA_HEAD_SIZE) || (pktHead->dataLen <= OVERHEAD_LEN)) {
+    if ((g_dataBufferMaxLen <= DC_DATA_HEAD_SIZE) || (pktHead->dataLen > g_dataBufferMaxLen - DC_DATA_HEAD_SIZE)
+        || (pktHead->dataLen <= OVERHEAD_LEN)) {
         TRANS_LOGE(TRANS_CTRL, "illegal dataLen=%{public}u", pktHead->dataLen);
         return SOFTBUS_TRANS_INVALID_DATA_LENGTH;
     }
@@ -211,7 +212,7 @@ int32_t TransTdcUnPackData(int32_t channelId, const char *sessionKey, char *plai
 
 static int32_t CheckBufLenAndCopyData(uint32_t bufLen, uint32_t headSize, char *data, TcpDataTlvPacketHead *head)
 {
-    if (bufLen < headSize) {
+    if (bufLen <= headSize) {
         TRANS_LOGE(TRANS_CTRL, "data bufLen not enough, bufLen Less than headSize. bufLen=%{public}u", bufLen);
         return SOFTBUS_DATA_NOT_ENOUGH;
     }
@@ -303,7 +304,8 @@ int32_t TransTdcUnPackAllTlvData(
         TRANS_LOGE(TRANS_CTRL, "invalid data packet head. channelId=%{public}d", channelId);
         return SOFTBUS_INVALID_DATA_HEAD;
     }
-    if ((head->dataLen > g_dataBufferMaxLen - *headSize) || (head->dataLen <= OVERHEAD_LEN)) {
+    if ((g_dataBufferMaxLen <= *headSize) || (head->dataLen > g_dataBufferMaxLen - *headSize)
+        || (head->dataLen <= OVERHEAD_LEN)) {
         TRANS_LOGE(TRANS_CTRL, "illegal dataLen=%{public}u", head->dataLen);
         return SOFTBUS_TRANS_INVALID_DATA_LENGTH;
     }
@@ -516,7 +518,7 @@ char *TransTdcPackAllData(
         finalData = (char *)(&tmpSeq);
     }
     if (info->supportTlv) {
-        DataHead pktHead;
+        DataHead pktHead = { 0 };
         int32_t tlvBufferSize = 0;
         int32_t ret = BuildDataHead(&pktHead, finalSeq, flags, dataLen, &tlvBufferSize);
         TRANS_CHECK_AND_RETURN_RET_LOGE(ret == SOFTBUS_OK, NULL, TRANS_CTRL, "build tlv dataHead failed");

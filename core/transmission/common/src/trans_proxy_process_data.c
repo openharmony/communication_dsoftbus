@@ -596,7 +596,7 @@ int32_t TransProxyNormalSliceProcess(
 
 static int32_t CheckLenAndCopyData(uint32_t len, uint32_t headSize, const char *data, DataHeadTlvPacketHead *head)
 {
-    if (len < headSize) {
+    if (len <= headSize) {
         TRANS_LOGE(TRANS_CTRL, "data len not enough, bufLen Less than headSize. len=%{public}u", len);
         return SOFTBUS_DATA_NOT_ENOUGH;
     }

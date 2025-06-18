@@ -29,6 +29,8 @@
 #include "lnn_lane_vap_info_struct.h"
 #include "lnn_lane_power_control_struct.h"
 #include "lnn_lane_score_struct.h"
+#include "lnn_lane_link_struct.h"
+#include "lnn_trans_lane_struct.h"
 #include "lnn_fast_offline_struct.h"
 #include "lnn_data_cloud_sync_struct.h"
 #include "lnn_sync_info_manager_struct.h"
@@ -81,6 +83,7 @@ int32_t InitSoftbusChainPacked(SoftbusCertChain *softbusCertChain);
 int32_t LnnSyncTrustedRelationShipPacked(const char *pkgName, const char *msg, uint32_t msgLen);
 void LnnCoapConnectPacked(const char *ip);
 void LnnDestroyCoapConnectListPacked(void);
+bool IsSupportLowLatencyPacked(const TransReqInfo *reqInfo, const LaneLinkInfo *laneLinkInfo);
 int32_t LnnInitQosPacked(void);
 void LnnDeinitQosPacked(void);
 int32_t LnnSyncBleOfflineMsgPacked(void);

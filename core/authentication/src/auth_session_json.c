@@ -568,6 +568,7 @@ static void PackNormalizedKeyInner(JsonObj *obj, AuthSessionInfo *info, int64_t 
             return;
         }
         deviceKey.keyIndex = authSeq;
+        info->nodeInfo.aclState = ACL_NOT_WRITE;
     } else if (AuthFindLatestNormalizeKeyPacked((char *)udidHashHexStr, &deviceKey, true) != SOFTBUS_OK) {
         AUTH_LOGW(AUTH_FSM, "can't find device key");
         return;
@@ -1051,7 +1052,7 @@ static int32_t PackDeviceJsonInfo(const AuthSessionInfo *info, JsonObj *obj)
 
 static bool IsNeedNormalizedProcess(AuthSessionInfo *info)
 {
-    if (!info->isConnectServer) {
+    if (!info->isConnectServer || info->deviceKeyId.hasDeviceKeyId) {
         return true;
     }
     if (info->authVersion < AUTH_VERSION_V2) {

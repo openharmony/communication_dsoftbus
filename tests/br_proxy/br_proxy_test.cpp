@@ -88,7 +88,7 @@ BrProxyChannelInfo g_channelInfo = {
     .recvPriSet = true,
 };
 
-static int32_t onChannelOpened(int32_t channelId, int32_t result)
+static int32_t onChannelOpened(int32_t sessionId, int32_t channelId, int32_t result)
 {
     return SOFTBUS_OK;
 }
@@ -111,6 +111,7 @@ static int32_t g_validChannelId = 1;
 static uint32_t g_validRequestId = 1;
 static int32_t g_invalidChannelId = 2;
 static uint32_t g_invalidRequestId = 2;
+static int32_t g_sessionId = 1;
 
 HWTEST_F(BrProxyTest, BrProxyTest000, TestSize.Level1)
 {
@@ -120,16 +121,16 @@ HWTEST_F(BrProxyTest, BrProxyTest000, TestSize.Level1)
 
 HWTEST_F(BrProxyTest, BrProxyTest001, TestSize.Level1)
 {
-    int32_t ret = ClientAddChannelToList(nullptr, nullptr);
+    int32_t ret = ClientAddChannelToList(g_sessionId, nullptr, nullptr);
     EXPECT_EQ(SOFTBUS_INVALID_PARAM, ret);
     BrProxyChannelInfo info = {
         .peerBRMacAddr = "F0:FA:C7:13:56:BC",
     };
-    ret = ClientAddChannelToList(&info, nullptr);
+    ret = ClientAddChannelToList(g_sessionId, &info, nullptr);
     EXPECT_EQ(SOFTBUS_INVALID_PARAM, ret);
-    ret = ClientAddChannelToList(nullptr, &g_listener);
+    ret = ClientAddChannelToList(g_sessionId, nullptr, &g_listener);
     EXPECT_EQ(SOFTBUS_INVALID_PARAM, ret);
-    ret = ClientAddChannelToList(&info, &g_listener);
+    ret = ClientAddChannelToList(g_sessionId, &info, &g_listener);
     EXPECT_EQ(SOFTBUS_OK, ret);
 }
 
@@ -188,15 +189,15 @@ HWTEST_F(BrProxyTest, BrProxyTest006, TestSize.Level1)
 
 HWTEST_F(BrProxyTest, BrProxyTest007, TestSize.Level1)
 {
-    int32_t ret = OpenBrProxy(nullptr, nullptr);
+    int32_t ret = OpenBrProxy(g_sessionId, nullptr, nullptr);
     EXPECT_EQ(SOFTBUS_INVALID_PARAM, ret);
-    ret = OpenBrProxy(&g_channelInfo, nullptr);
+    ret = OpenBrProxy(g_sessionId, &g_channelInfo, nullptr);
     EXPECT_EQ(SOFTBUS_INVALID_PARAM, ret);
-    ret = OpenBrProxy(nullptr, &g_listener);
+    ret = OpenBrProxy(g_sessionId, nullptr, &g_listener);
     EXPECT_EQ(SOFTBUS_INVALID_PARAM, ret);
     NiceMock<BrProxyInterfaceMock> BrProxyMock;
     EXPECT_CALL(BrProxyMock, GetCallerHapInfo).WillRepeatedly(Return(SOFTBUS_TRANS_TOKEN_HAP_ERR));
-    ret = OpenBrProxy(&g_channelInfo, &g_listener);
+    ret = OpenBrProxy(g_sessionId, &g_channelInfo, &g_listener);
     EXPECT_EQ(SOFTBUS_TRANS_TOKEN_HAP_ERR, ret);
     ClientBrProxyChannelInfo info;
     ret = ClientQueryList(DEFAULT_CHANNEL_ID, VALID_BR_MAC, &info);

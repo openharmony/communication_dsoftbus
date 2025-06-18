@@ -36,6 +36,8 @@
 #include "lnn_lane_vap_info_struct.h"
 #include "lnn_secure_storage_struct.h"
 #include "lnn_time_sync_impl_struct.h"
+#include "lnn_lane_link_struct.h"
+#include "lnn_trans_lane_struct.h"
 #include "lnn_lane_score_struct.h"
 #include "lnn_ranging_manager_struct.h"
 #include "softbus_bus_center.h"
@@ -105,6 +107,7 @@ typedef int32_t (*LnnGetRecommendChannelFunc)(const char *udid, int32_t *preferC
 typedef bool (*IsCloudSyncEnabledFunc)(void);
 typedef bool (*IsPowerControlEnabledFunc)(void);
 typedef int32_t (*LnnRequestCheckOnlineStatusFunc)(const char *networkId, uint64_t timeout);
+typedef bool (*IsSupportLowLatencyFunc)(const TransReqInfo *reqInfo, const LaneLinkInfo *laneLinkInfo);
 typedef int32_t (*LnnInitQosFunc)(void);
 typedef void (*LnnDeinitQosFunc)(void);
 typedef int32_t (*LnnRegPeriodAdjustmentCallbackFunc)(OnStatsPeriodAdjustment callback);
@@ -325,6 +328,8 @@ typedef struct TagLnnEnhanceFuncList {
     IsCloudSyncEnabledFunc isCloudSyncEnabled;
     IsPowerControlEnabledFunc isPowerControlEnabled;
     LnnGetCurrChannelScoreFunc lnnGetCurrChannelScore;
+    // lane_low_latency
+    IsSupportLowLatencyFunc isSupportLowLatency;
     // lane_qos
     LnnInitQosFunc lnnInitQos;
     LnnDeinitQosFunc lnnDeinitQos;

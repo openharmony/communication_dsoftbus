@@ -36,6 +36,7 @@
 #include "wifi_direct_manager.h"
 
 #define TEST_CHANNEL_ID 1027
+#define TEST_TDC_PID 3284
 
 using namespace testing::ext;
 
@@ -889,18 +890,18 @@ HWTEST_F(TransTcpDirectMessageStaticTest, TransDealTdcChannelOpenResultTest001, 
     int32_t channelId = 1;
     int32_t fd = 1;
     AccessInfo accessInfo = { 0 };
-    int32_t ret = TransDealTdcChannelOpenResult(channelId, openResult, &accessInfo);
+    int32_t ret = TransDealTdcChannelOpenResult(channelId, openResult, &accessInfo, TEST_TDC_PID);
     EXPECT_EQ(ret, SOFTBUS_TRANS_GET_SESSION_CONN_FAILED);
     SessionConn *conn = TestSetSessionConn();
     ASSERT_TRUE(conn != nullptr);
     ret = TransTdcAddSessionConn(conn);
     EXPECT_EQ(ret, SOFTBUS_OK);
-    ret = TransDealTdcChannelOpenResult(channelId, openResult, &accessInfo);
+    ret = TransDealTdcChannelOpenResult(channelId, openResult, &accessInfo, TEST_TDC_PID);
     EXPECT_EQ(ret, SOFTBUS_TRANS_NODE_IS_NULL);
     ret = TransSrvAddDataBufNode(channelId, fd);
     EXPECT_EQ(ret, SOFTBUS_OK);
-    ret = TransDealTdcChannelOpenResult(channelId, openResult, &accessInfo);
-    EXPECT_EQ(ret, SOFTBUS_OK);
+    ret = TransDealTdcChannelOpenResult(channelId, openResult, &accessInfo, TEST_TDC_PID);
+    EXPECT_EQ(ret, SOFTBUS_TRANS_CHECK_PID_ERROR);
     TransDelSessionConnById(channelId);
 }
 
@@ -916,7 +917,7 @@ HWTEST_F(TransTcpDirectMessageStaticTest, TransDealTdcChannelOpenResultTest002, 
     int32_t channelId = 1;
     int32_t fd = 1;
     AccessInfo accessInfo = { 0 };
-    int32_t ret = TransDealTdcChannelOpenResult(channelId, openResult, &accessInfo);
+    int32_t ret = TransDealTdcChannelOpenResult(channelId, openResult, &accessInfo, TEST_TDC_PID);
     EXPECT_EQ(ret, SOFTBUS_TRANS_GET_SESSION_CONN_FAILED);
     SessionConn *conn = TestSetSessionConn();
     ASSERT_TRUE(conn != nullptr);
@@ -924,12 +925,12 @@ HWTEST_F(TransTcpDirectMessageStaticTest, TransDealTdcChannelOpenResultTest002, 
     conn->appInfo.channelCapability = 0xF;
     ret = TransTdcAddSessionConn(conn);
     EXPECT_EQ(ret, SOFTBUS_OK);
-    ret = TransDealTdcChannelOpenResult(channelId, openResult, &accessInfo);
-    EXPECT_EQ(ret, SOFTBUS_TRANS_NODE_IS_NULL);
+    ret = TransDealTdcChannelOpenResult(channelId, openResult, &accessInfo, TEST_TDC_PID);
+    EXPECT_EQ(ret, SOFTBUS_TRANS_CHECK_PID_ERROR);
     ret = TransSrvAddDataBufNode(channelId, fd);
     EXPECT_EQ(ret, SOFTBUS_OK);
-    ret = TransDealTdcChannelOpenResult(channelId, openResult, &accessInfo);
-    EXPECT_EQ(ret, SOFTBUS_OK);
+    ret = TransDealTdcChannelOpenResult(channelId, openResult, &accessInfo, TEST_TDC_PID);
+    EXPECT_EQ(ret, SOFTBUS_TRANS_CHECK_PID_ERROR);
     TransDelSessionConnById(channelId);
 }
 
@@ -943,6 +944,7 @@ HWTEST_F(TransTcpDirectMessageStaticTest, TransAsyncTcpDirectChannelTaskTest001,
 {
     int32_t channelId = 1;
     TransAsyncTcpDirectChannelTask(channelId);
+    // conn will free in Line 956
     SessionConn *conn = TestSetSessionConn();
     ASSERT_TRUE(conn != nullptr);
     int32_t ret = TransTdcAddSessionConn(conn);
@@ -952,7 +954,11 @@ HWTEST_F(TransTcpDirectMessageStaticTest, TransAsyncTcpDirectChannelTaskTest001,
     TransAsyncTcpDirectChannelTask(channelId);
     conn->appInfo.waitOpenReplyCnt = LOOPER_REPLY_CNT_MAX;
     TransAsyncTcpDirectChannelTask(channelId);
-    conn->appInfo.waitOpenReplyCnt = LOOPER_REPLY_CNT_MAX - 1;
+    SessionConn *testConn = TestSetSessionConn();
+    ASSERT_TRUE(testConn != nullptr);
+    ret = TransTdcAddSessionConn(testConn);
+    EXPECT_EQ(ret, SOFTBUS_OK);
+    testConn->appInfo.waitOpenReplyCnt = LOOPER_REPLY_CNT_MAX - 1;
     TransAsyncTcpDirectChannelTask(channelId);
     TransDelSessionConnById(channelId);
 }

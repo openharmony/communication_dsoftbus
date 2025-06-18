@@ -26,6 +26,7 @@ using namespace testing::ext;
 
 namespace OHOS {
 
+#define TEST_CALLING_PID 3068
 #define TEST_CHANNEL_ID 1000
 #define TEST_LEN 64
 #define TEST_AUTH_PORT (6000)
@@ -1126,7 +1127,7 @@ HWTEST_F(TransUdpManagerTest, TransSetTosTest001, TestSize.Level1)
 {
     int32_t channelId = TEST_CHANNEL_ID;
     uint8_t tos = FILE_PRIORITY_BK;
-    int32_t ret = TransSetTos(channelId, tos);
+    int32_t ret = TransSetTos(channelId, tos, TEST_CALLING_PID);
     EXPECT_EQ(SOFTBUS_NO_INIT, ret);
 
     ret = TransUdpChannelMgrInit();
@@ -1136,11 +1137,11 @@ HWTEST_F(TransUdpManagerTest, TransSetTosTest001, TestSize.Level1)
     channel->info.myData.channelId = channelId;
     ret = TransAddUdpChannel(channel);
     EXPECT_EQ(SOFTBUS_OK, ret);
-    ret = TransSetTos(channelId, tos);
-    EXPECT_EQ(SOFTBUS_OK, ret);
+    ret = TransSetTos(channelId, tos, TEST_CALLING_PID);
+    EXPECT_EQ(SOFTBUS_TRANS_NODE_NOT_FOUND, ret);
 
     TransDelUdpChannel(channelId);
-    ret = TransSetTos(channelId, tos);
+    ret = TransSetTos(channelId, tos, TEST_CALLING_PID);
     EXPECT_EQ(SOFTBUS_TRANS_NODE_NOT_FOUND, ret);
     TransUdpChannelMgrDeinit();
 }

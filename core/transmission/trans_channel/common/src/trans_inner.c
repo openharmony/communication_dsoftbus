@@ -214,8 +214,8 @@ int32_t InnerAddSession(InnerSessionInfo *innerInfo)
     }
     ListAdd(&g_sessionList->list, &info->node);
     g_sessionList->cnt++;
-    (void)SoftBusMutexUnlock(&g_sessionList->lock);
     TRANS_LOGI(TRANS_CTRL, "add fd=%{public}d, channelId=%{public}d", info->fd, info->channelId);
+    (void)SoftBusMutexUnlock(&g_sessionList->lock);
 
     return SOFTBUS_OK;
 }
@@ -1194,10 +1194,11 @@ int32_t ServerSideSendAck(int32_t sessionId, int32_t result)
     if (ret != SOFTBUS_OK) {
         channelType = CHANNEL_TYPE_PROXY;
     }
-    TRANS_LOGI(TRANS_CTRL, "channelId=%{public}d, result=%{public}d, channelType=%{public}d",
-        sessionId, result, channelType);
+    pid_t callingPid = TransGetCallingPid();
+    TRANS_LOGI(TRANS_CTRL, "channelId=%{public}d, result=%{public}d, channelType=%{public}d, callingPid=%{public}d",
+        sessionId, result, channelType, callingPid);
     if (channelType == CHANNEL_TYPE_TCP_DIRECT) {
-        return TransDealTdcChannelOpenResult(sessionId, result, NULL);
+        return TransDealTdcChannelOpenResult(sessionId, result, NULL, callingPid);
     }
-    return TransDealProxyChannelOpenResult(sessionId, result, NULL);
+    return TransDealProxyChannelOpenResult(sessionId, result, NULL, callingPid);
 }

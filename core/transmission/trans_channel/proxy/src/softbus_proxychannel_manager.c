@@ -1377,7 +1377,8 @@ static AuthGenUkCallback proxyAuthGenUkCallback = {
     .onGenFailed = OnProxyGenUkFailed,
 };
 
-int32_t TransDealProxyChannelOpenResult(int32_t channelId, int32_t openResult, const AccessInfo *accessInfo)
+int32_t TransDealProxyChannelOpenResult(
+    int32_t channelId, int32_t openResult, const AccessInfo *accessInfo, pid_t callingPid)
 {
     (void)TransProxyUpdateSinkAccessInfo(channelId, accessInfo);
     ProxyChannelInfo chan = { 0 };
@@ -1387,6 +1388,12 @@ int32_t TransDealProxyChannelOpenResult(int32_t channelId, int32_t openResult, c
     ret = TransProxyUpdateReplyCnt(channelId);
     TRANS_CHECK_AND_RETURN_RET_LOGE(ret == SOFTBUS_OK, ret, TRANS_CTRL,
         "update waitOpenReplyCnt failed, channelId=%{public}d, ret=%{public}d", channelId, ret);
+    if (callingPid != 0 && chan.appInfo.myData.pid != callingPid) {
+        TRANS_LOGE(TRANS_CTRL,
+            "pid does not match callingPid, pid=%{public}d, callingPid=%{public}d, channelId=%{public}d",
+            chan.appInfo.myData.pid, callingPid, channelId);
+        return SOFTBUS_TRANS_CHECK_PID_ERROR;
+    }
     if (openResult != SOFTBUS_OK) {
         TRANS_LOGE(TRANS_CTRL, "open proxy channel failed, ret=%{public}d", openResult);
         (void)TransProxyAckHandshake(chan.connId, &chan, openResult);
@@ -2405,7 +2412,7 @@ static int32_t TransProxyResetReplyCnt(int32_t channelId)
     return SOFTBUS_TRANS_PROXY_CHANNEL_NOT_FOUND;
 }
 
-int32_t TransDealProxyCheckCollabResult(int32_t channelId, int32_t checkResult)
+int32_t TransDealProxyCheckCollabResult(int32_t channelId, int32_t checkResult, pid_t callingPid)
 {
     SoftBusHitraceChainBegin("TransDealProxyCheckCollabResult");
     ProxyChannelInfo chan = { 0 };
@@ -2414,6 +2421,16 @@ int32_t TransDealProxyCheckCollabResult(int32_t channelId, int32_t checkResult)
         TRANS_LOGE(TRANS_CTRL, "get channelInfo failed, channelId=%{public}d.", channelId);
         SoftBusHitraceChainEnd();
         return ret;
+    }
+
+    int32_t dmsPid = 0;
+    char dmsPkgName[PKG_NAME_SIZE_MAX] = { 0 };
+    (void)TransGetPidAndPkgName(DMS_SESSIONNAME, DMS_UID, &dmsPid, dmsPkgName, PKG_NAME_SIZE_MAX);
+    if (callingPid != 0 && dmsPid != callingPid) {
+        TRANS_LOGE(TRANS_CTRL,
+            "dmsPid does not match callingPid, dmsPid=%{public}d, callingPid=%{public}d", dmsPid, callingPid);
+        ret = SOFTBUS_TRANS_CHECK_PID_ERROR;
+        goto ERR_EXIT;
     }
 
     ret = TransProxyUpdateReplyCnt(channelId);

@@ -22,9 +22,12 @@ extern "C" {
 #endif
 
 #define SOFTBUS_HFP_CONNECTED 1
+#define SOFTBUS_DEVICE_UNPAIRED 2
 
 typedef void (*ProxyListener)(const char *addr, int32_t state);
+
 int32_t RegisterHfpListener(const ProxyListener listener);
+bool IsPairedDevice(const char *addr);
 #ifdef __cplusplus
 }
 #endif

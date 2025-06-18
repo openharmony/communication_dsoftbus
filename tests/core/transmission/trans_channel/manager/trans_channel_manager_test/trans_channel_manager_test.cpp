@@ -997,9 +997,9 @@ HWTEST_F(TransChannelManagerTest, TransReportLimitChangeInfo001, TestSize.Level1
     uint8_t buf[9] = {0};
     int32_t len = 9;
 
-    EXPECT_NO_FATAL_FAILURE(TransReportLimitChangeInfo(buf, len));
+    EXPECT_NO_FATAL_FAILURE(TransReportLimitChangeInfo(buf, len, TRANS_TEST_PID));
     len = 1;
-    EXPECT_NO_FATAL_FAILURE(TransReportLimitChangeInfo(buf, len));
+    EXPECT_NO_FATAL_FAILURE(TransReportLimitChangeInfo(buf, len, TRANS_TEST_PID));
 }
 
 /**
@@ -1042,23 +1042,23 @@ HWTEST_F(TransChannelManagerTest, TransReportCheckCollabInfo001, TestSize.Level1
     int32_t len = 12;
 
     buf[4] = CHANNEL_TYPE_PROXY;
-    int ret = TransReportCheckCollabInfo(buf, len);
+    int ret = TransReportCheckCollabInfo(buf, len, TRANS_TEST_PID);
     EXPECT_NE(SOFTBUS_OK, ret);
 
     buf[4] = CHANNEL_TYPE_TCP_DIRECT;
-    ret = TransReportCheckCollabInfo(buf, len);
+    ret = TransReportCheckCollabInfo(buf, len, TRANS_TEST_PID);
     EXPECT_NE(SOFTBUS_OK, ret);
 
     buf[4] = CHANNEL_TYPE_UDP;
-    ret = TransReportCheckCollabInfo(buf, len);
+    ret = TransReportCheckCollabInfo(buf, len, TRANS_TEST_PID);
     EXPECT_NE(SOFTBUS_OK, ret);
 
     buf[4] = CHANNEL_TYPE_BUTT;
-    ret = TransReportCheckCollabInfo(buf, len);
+    ret = TransReportCheckCollabInfo(buf, len, TRANS_TEST_PID);
     EXPECT_EQ(SOFTBUS_TRANS_INVALID_CHANNEL_TYPE, ret);
 
     len = 1;
-    ret = TransReportCheckCollabInfo(buf, len);
+    ret = TransReportCheckCollabInfo(buf, len, TRANS_TEST_PID);
     EXPECT_NE(SOFTBUS_OK, ret);
 }
 

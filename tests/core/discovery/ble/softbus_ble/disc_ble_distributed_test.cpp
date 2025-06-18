@@ -56,6 +56,36 @@ static DiscInnerCallback g_testDiscInnerCallBack = {
 };
 
 static DiscoveryBleDispatcherInterface *g_testDiscBleDispatcherInterface = nullptr;
+static inline std::string g_castCapData = R"({"castPlus":"1122", "extCustData":"112233445566"})";
+static inline std::string g_invalidCastCapData =
+    R"({"castPlus1":"1122", "extCustData1":"112233445566", "extCustData":"112"})";
+static inline std::string g_discCapData = R"({"preLinkType":"HML"})";
+static inline std::string g_invalidDiscCapData = R"({"preLinkType":"BLE"})";
+
+
+static PublishOption GetPublishOptionForCastPlus()
+{
+    PublishOption option {};
+    option.freq = LOW;
+    option.capabilityData = reinterpret_cast<uint8_t *>(g_castCapData.data());
+    option.dataLen = g_castCapData.length();
+
+    SetCapBitMapPos(CAPABILITY_NUM, option.capabilityBitmap, CASTPLUS_CAPABILITY_BITMAP);
+    return option;
+}
+
+static SubscribeOption GetSubscribeOptionForCastPlus()
+{
+    SubscribeOption option {};
+    option.freq = LOW;
+    option.isSameAccount = false;
+    option.isWakeRemote = false;
+    option.capabilityData = reinterpret_cast<uint8_t *>(g_castCapData.data());
+    option.dataLen = g_castCapData.length();
+
+    SetCapBitMapPos(CAPABILITY_NUM, option.capabilityBitmap, CASTPLUS_CAPABILITY_BITMAP);
+    return option;
+}
 
 /*
  * @tc.name: GetNeedUpdateAdvertiser001
@@ -417,13 +447,17 @@ HWTEST_F(DiscDistributedBleTest, GetBroadcastData001, TestSize.Level1)
     ASSERT_NE(g_testDiscBleDispatcherInterface, nullptr);
 
     int32_t advId = CON_ADV_ID;
-    DeviceInfo infoTest;
+    DiscBleAdvertiser advertiser;
     BroadcastData broadcastDataTest;
-    int32_t ret = GetBroadcastData(&infoTest, advId, &broadcastDataTest);
+    int32_t ret = GetBroadcastData(&advertiser, advId, &broadcastDataTest);
+    EXPECT_EQ(ret, SOFTBUS_OK);
+
+    advertiser.action.channelId = 1;
+    ret = GetBroadcastData(&advertiser, advId, &broadcastDataTest);
     EXPECT_EQ(ret, SOFTBUS_OK);
 
     advId = NON_ADV_ID;
-    ret = GetBroadcastData(&infoTest, advId, &broadcastDataTest);
+    ret = GetBroadcastData(&advertiser, advId, &broadcastDataTest);
     EXPECT_EQ(ret, SOFTBUS_OK);
 
     DiscSoftBusBleDeinit();
@@ -449,6 +483,218 @@ HWTEST_F(DiscDistributedBleTest, GetScannerParam001, TestSize.Level1)
 
     DiscSoftBusBleDeinit();
     DISC_LOGI(DISC_TEST, "DiscDistributedBleTest, GetScannerParam001, End");
+}
+
+/*
+ * @tc.name: TestGetStopIsTakeHmlInfo001
+ * @tc.desc: Test Publish GetStopIsTakeHmlInfo
+ * @tc.type: FUNC
+ * @tc.require:
+ */
+HWTEST_F(DiscDistributedBleTest, TestGetStopIsTakeHmlInfo001, TestSize.Level1)
+{
+    DISC_LOGI(DISC_TEST, "DiscDistributedBleTest, TestGetStopIsTakeHmlInfo001, Start");
+    g_testDiscBleDispatcherInterface = DiscSoftBusBleInit(&g_testDiscInnerCallBack);
+    ASSERT_NE(g_testDiscBleDispatcherInterface, nullptr);
+
+    PublishOption pubOption = GetPublishOptionForCastPlus();
+    bool processHml = GetStopIsTakeHmlInfo(BLE_PUBLISH, BLE_PASSIVE, UNPUBLISH_SERVICE, &pubOption);
+    EXPECT_TRUE(!processHml);
+    processHml = GetStopIsTakeHmlInfo(BLE_PUBLISH, BLE_PASSIVE, UNPUBLISH_SERVICE, nullptr);
+    EXPECT_TRUE(!processHml);
+    processHml = GetStopIsTakeHmlInfo(BLE_PUBLISH, BLE_ACTIVE, UNPUBLISH_SERVICE, &pubOption);
+    EXPECT_TRUE(!processHml);
+
+
+    bool isStart = true;
+    int32_t ret = ProcessBleInfoManager(isStart, BLE_PUBLISH, BLE_PASSIVE, &pubOption);
+    EXPECT_EQ(ret, SOFTBUS_OK);
+
+    processHml = GetStopIsTakeHmlInfo(BLE_PUBLISH, BLE_PASSIVE, UNPUBLISH_SERVICE, &pubOption);
+    EXPECT_TRUE(processHml);
+
+    DiscSoftBusBleDeinit();
+    DISC_LOGI(DISC_TEST, "DiscDistributedBleTest, TestGetStopIsTakeHmlInfo001, End");
+}
+
+/*
+ * @tc.name: TestGetStopIsTakeHmlInfo002
+ * @tc.desc: Test Discovery GetStopIsTakeHmlInfo
+ * @tc.type: FUNC
+ * @tc.require:
+ */
+HWTEST_F(DiscDistributedBleTest, TestGetStopIsTakeHmlInfo002, TestSize.Level1)
+{
+    DISC_LOGI(DISC_TEST, "DiscDistributedBleTest, TestGetStopIsTakeHmlInfo002, Start");
+    g_testDiscBleDispatcherInterface = DiscSoftBusBleInit(&g_testDiscInnerCallBack);
+    ASSERT_NE(g_testDiscBleDispatcherInterface, nullptr);
+
+    SubscribeOption subOption = GetSubscribeOptionForCastPlus();
+    bool isStart = true;
+    subOption.capabilityData = reinterpret_cast<uint8_t *>(g_invalidDiscCapData.data());
+    subOption.dataLen = g_invalidDiscCapData.length();
+    int32_t ret = ProcessBleInfoManager(isStart, BLE_SUBSCRIBE, BLE_ACTIVE, &subOption);
+    EXPECT_EQ(ret, SOFTBUS_OK);
+
+    bool processHml = GetStopIsTakeHmlInfo(BLE_SUBSCRIBE, BLE_ACTIVE, STOP_DISCOVERY, &subOption);
+    EXPECT_TRUE(!processHml);
+
+    subOption.capabilityData = reinterpret_cast<uint8_t *>(g_discCapData.data());
+    subOption.dataLen = g_discCapData.length();
+    ret = ProcessBleInfoManager(isStart, BLE_SUBSCRIBE, BLE_ACTIVE, &subOption);
+    EXPECT_EQ(ret, SOFTBUS_OK);
+
+    processHml = GetStopIsTakeHmlInfo(BLE_SUBSCRIBE, BLE_ACTIVE, STOP_DISCOVERY, &subOption);
+    EXPECT_TRUE(processHml);
+
+    DiscSoftBusBleDeinit();
+    DISC_LOGI(DISC_TEST, "DiscDistributedBleTest, TestGetStopIsTakeHmlInfo002, End");
+}
+
+/*
+ * @tc.name: TestGetStartIsTakeHmlInfo001
+ * @tc.desc: Test Discovery GetStartIsTakeHmlInfo
+ * @tc.type: FUNC
+ * @tc.require:
+ */
+HWTEST_F(DiscDistributedBleTest, TestGetStartIsTakeHmlInfo001, TestSize.Level1)
+{
+    DISC_LOGI(DISC_TEST, "DiscDistributedBleTest, TestGetStartIsTakeHmlInfo001, Start");
+    g_testDiscBleDispatcherInterface = DiscSoftBusBleInit(&g_testDiscInnerCallBack);
+    ASSERT_NE(g_testDiscBleDispatcherInterface, nullptr);
+
+    SubscribeOption subOption = GetSubscribeOptionForCastPlus();
+    bool processHml = GetStartIsTakeHmlInfo(START_PASSIVE_DISCOVERY);
+    EXPECT_TRUE(!processHml);
+    processHml = GetStartIsTakeHmlInfo(START_ACTIVE_DISCOVERY);
+    EXPECT_TRUE(!processHml);
+
+    bool isStart = true;
+    subOption.capabilityData = reinterpret_cast<uint8_t *>(g_invalidDiscCapData.data());
+    subOption.dataLen = g_invalidDiscCapData.length();
+    int32_t ret = ProcessBleInfoManager(isStart, BLE_SUBSCRIBE, BLE_ACTIVE, &subOption);
+    EXPECT_EQ(ret, SOFTBUS_OK);
+
+    processHml = GetStartIsTakeHmlInfo(START_ACTIVE_DISCOVERY);
+    EXPECT_TRUE(!processHml);
+
+    subOption.capabilityData = reinterpret_cast<uint8_t *>(g_discCapData.data());
+    subOption.dataLen = g_discCapData.length();
+    ret = ProcessBleInfoManager(isStart, BLE_SUBSCRIBE, BLE_ACTIVE, &subOption);
+    EXPECT_EQ(ret, SOFTBUS_OK);
+
+    processHml = GetStartIsTakeHmlInfo(START_ACTIVE_DISCOVERY);
+    EXPECT_TRUE(processHml);
+
+    DiscSoftBusBleDeinit();
+    DISC_LOGI(DISC_TEST, "DiscDistributedBleTest, TestGetStartIsTakeHmlInfo001, End");
+}
+
+/*
+ * @tc.name: TestUpdateCustData001
+ * @tc.desc: Test UpdateCustData
+ * @tc.type: FUNC
+ * @tc.require:
+ */
+HWTEST_F(DiscDistributedBleTest, TestUpdateCustData001, TestSize.Level1)
+{
+    DISC_LOGI(DISC_TEST, "DiscDistributedBleTest, TestUpdateCustData001, Start");
+    g_testDiscBleDispatcherInterface = DiscSoftBusBleInit(&g_testDiscInnerCallBack);
+    ASSERT_NE(g_testDiscBleDispatcherInterface, nullptr);
+
+    EXPECT_NO_FATAL_FAILURE(UpdateCustData(START_ACTIVE_DISCOVERY));
+    EXPECT_NO_FATAL_FAILURE(UpdateCustData(PUBLISH_PASSIVE_SERVICE));
+
+    PublishOption pubOption = GetPublishOptionForCastPlus();
+    bool isStart = true;
+    int32_t ret = ProcessBleInfoManager(isStart, BLE_PUBLISH, BLE_PASSIVE, &pubOption);
+    EXPECT_EQ(ret, SOFTBUS_OK);
+    EXPECT_NO_FATAL_FAILURE(UpdateCustData(PUBLISH_PASSIVE_SERVICE));
+
+    pubOption.capabilityData = reinterpret_cast<uint8_t *>(g_invalidCastCapData.data());
+    pubOption.dataLen = g_invalidCastCapData.length();
+    ret = ProcessBleInfoManager(isStart, BLE_PUBLISH, BLE_PASSIVE, &pubOption);
+    EXPECT_EQ(ret, SOFTBUS_OK);
+    EXPECT_NO_FATAL_FAILURE(UpdateCustData(PUBLISH_PASSIVE_SERVICE));
+
+    DiscSoftBusBleDeinit();
+    DISC_LOGI(DISC_TEST, "DiscDistributedBleTest, TestUpdateCustData001, End");
+}
+
+/*
+ * @tc.name: TestSoftbusBleGeneratePacketHash001
+ * @tc.desc: Test SoftbusBleGeneratePacketHash
+ * @tc.type: FUNC
+ * @tc.require:
+ */
+HWTEST_F(DiscDistributedBleTest, TestSoftbusBleGeneratePacketHash001, TestSize.Level1)
+{
+    DISC_LOGI(DISC_TEST, "DiscDistributedBleTest, TestSoftbusBleGeneratePacketHash001, Start");
+    g_testDiscBleDispatcherInterface = DiscSoftBusBleInit(&g_testDiscInnerCallBack);
+    ASSERT_NE(g_testDiscBleDispatcherInterface, nullptr);
+
+    char key[SHA_HASH_LEN];
+    uint8_t payload[POS_TLV] = { 0 };
+    BroadcastReportInfo info = {
+        .packet = {
+            .bcData = {
+                .payload = &payload[0],
+            },
+            .rspData = {
+                .payload = &payload[0],
+            },
+        },
+    };
+    int32_t ret = SoftbusBleGeneratePacketHash(key, &info);
+    EXPECT_EQ(ret, SOFTBUS_INVALID_PARAM);
+
+    info.packet.bcData.payloadLen = ADV_DATA_MAX_LEN + 1;
+    ret = SoftbusBleGeneratePacketHash(key, &info);
+    EXPECT_EQ(ret, SOFTBUS_INVALID_PARAM);
+
+    info.packet.bcData.payloadLen = ADV_DATA_MAX_LEN;
+    ret = SoftbusBleGeneratePacketHash(key, &info);
+    EXPECT_EQ(ret, SOFTBUS_OK);
+
+    info.packet.rspData.payloadLen = ADV_DATA_MAX_LEN + 1;
+    ret = SoftbusBleGeneratePacketHash(key, &info);
+    EXPECT_EQ(ret, SOFTBUS_OK);
+
+    info.packet.rspData.payloadLen = ADV_DATA_MAX_LEN;
+    ret = SoftbusBleGeneratePacketHash(key, &info);
+    EXPECT_EQ(ret, SOFTBUS_OK);
+
+    info.packet.rspData.payloadLen = ADV_DATA_MAX_LEN - 1;
+    ret = SoftbusBleGeneratePacketHash(key, &info);
+    EXPECT_EQ(ret, SOFTBUS_OK);
+
+    DiscSoftBusBleDeinit();
+    DISC_LOGI(DISC_TEST, "DiscDistributedBleTest, TestSoftbusBleGeneratePacketHash001, End");
+}
+
+/*
+ * @tc.name: TestAction001
+ * @tc.desc: Test Action
+ * @tc.type: FUNC
+ * @tc.require:
+ */
+HWTEST_F(DiscDistributedBleTest, TestAction001, TestSize.Level1)
+{
+    DISC_LOGI(DISC_TEST, "DiscDistributedBleTest, TestAction001, Start");
+    g_testDiscBleDispatcherInterface = DiscSoftBusBleInit(&g_testDiscInnerCallBack);
+    ASSERT_NE(g_testDiscBleDispatcherInterface, nullptr);
+
+    SoftBusMessage msg;
+    EXPECT_NO_FATAL_FAILURE(ProcessStartAction(nullptr));
+    EXPECT_NO_FATAL_FAILURE(ProcessStopAction(nullptr, false));
+    msg.arg1 = true;
+    EXPECT_NO_FATAL_FAILURE(ProcessStartAction(&msg));
+    EXPECT_NO_FATAL_FAILURE(DistBleUpdateConAdv());
+    EXPECT_NO_FATAL_FAILURE(ProcessStopAction(&msg, false));
+    EXPECT_NO_FATAL_FAILURE(ProcessStopAction(&msg, true));
+    EXPECT_NO_FATAL_FAILURE(DistBleUpdateConAdv());
+    DiscSoftBusBleDeinit();
+    DISC_LOGI(DISC_TEST, "DiscDistributedBleTest, TestAction001, End");
 }
 
 /*
