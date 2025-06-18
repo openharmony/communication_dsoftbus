@@ -58,6 +58,7 @@ enum BrConnectionLooperMsgType {
     MSG_CONNECTION_OCCUPY_RELEASE,
     MSG_CONNECTION_UPDATE_LOCAL_RC,
     MSG_CONNECTION_UPDATE_PEER_RC,
+    MSG_CONNECTION_IDLE_DISCONNECT_TIMEOUT,
 };
 
 static void BrConnectionMsgHandler(SoftBusMessage *msg);
@@ -106,6 +107,7 @@ static int32_t LoopRead(ConnBrConnection *connection)
             status = dataLen;
             break;
         }
+        ConnBrRefreshIdleTimeout(connection);
         g_eventListener.onDataReceived(connection->connectionId, data, dataLen);
     }
     ConnDeleteLimitedBuffer(&buffer);
@@ -217,6 +219,7 @@ static void *StartClientConnect(void *connectCtx)
         CONN_LOGI(CONN_BR, "connect ok, id=%{public}u, address=%{public}s, socket=%{public}d",
             connection->connectionId, anomizeAddress, connection->socketHandle);
         g_eventListener.onClientConnected(connection->connectionId);
+        ConnBrRefreshIdleTimeout(connection);
         ret = LoopRead(connection);
         CONN_LOGD(CONN_BR, "br client loop read exit, connId=%{public}u, address=%{public}s, socketHandle=%{public}d, "
             "error=%{public}d", connection->connectionId, anomizeAddress, connection->socketHandle, ret);
@@ -283,6 +286,7 @@ static void *StartServerServe(void *serveCtx)
     do {
         CONN_LOGI(CONN_BR, "connId=%{public}u, socket=%{public}d", connection->connectionId, socketHandle);
         g_eventListener.onServerAccepted(connection->connectionId);
+        ConnBrRefreshIdleTimeout(connection);
         int32_t ret = LoopRead(connection);
         CONN_LOGD(CONN_BR, "loop read exit, connId=%{public}u, socket=%{public}d, ret=%{public}d",
             connection->connectionId, socketHandle, ret);
@@ -502,6 +506,8 @@ int32_t ConnBrDisconnectNow(ConnBrConnection *connection)
     connection->socketHandle = INVALID_SOCKET_HANDLE;
     connection->state = BR_CONNECTION_STATE_CONNECTING;
     SoftBusMutexUnlock(&connection->lock);
+    ConnRemoveMsgFromLooper(
+        &g_brConnectionAsyncHandler, MSG_CONNECTION_IDLE_DISCONNECT_TIMEOUT, connection->connectionId, 0, NULL);
     // ensure that the underlayer schedules read/write before disconnection
     SoftBusSleepMs(WAIT_DISCONNECT_TIME_MS);
     int32_t ret = g_sppDriver->DisConnect(socketHandle);
@@ -832,6 +838,27 @@ int32_t ConnBrStopServer(void)
     return SOFTBUS_OK;
 }
 
+void ConnBrRefreshIdleTimeout(ConnBrConnection *connection)
+{
+    ConnRemoveMsgFromLooper(
+        &g_brConnectionAsyncHandler, MSG_CONNECTION_IDLE_DISCONNECT_TIMEOUT, connection->connectionId, 0, NULL);
+    ConnPostMsgToLooper(&g_brConnectionAsyncHandler, MSG_CONNECTION_IDLE_DISCONNECT_TIMEOUT, connection->connectionId,
+        0, NULL, BR_CONNECTION_IDLE_DISCONNECT_TIMEOUT_MILLIS);
+}
+
+static void BrConnectionIdleDisconnectTimeoutHandler(uint32_t connectionId)
+{
+    ConnBrConnection *connection = ConnBrGetConnectionById(connectionId);
+    CONN_CHECK_AND_RETURN_LOGW(connection != NULL, CONN_BR,
+        "connection idle disconnect timeout handler failed: connection not exist, connId=%{public}u", connectionId);
+    CONN_LOGW(CONN_BR,
+        "connection idle disconnect timeout handler, connection idle exceed forgot call "
+        "disconnect? disconnect now, timeoutMillis=%{public}d, connId=%{public}u",
+        BR_CONNECTION_IDLE_DISCONNECT_TIMEOUT_MILLIS, connectionId);
+    ConnBrDisconnectNow(connection);
+    ConnBrReturnConnection(&connection);
+}
+
 static void WaitNegotiationClosingTimeoutHandler(uint32_t connectionId)
 {
     ConnBrConnection *connection = ConnBrGetConnectionById(connectionId);
@@ -895,6 +922,9 @@ static void BrConnectionMsgHandler(SoftBusMessage *msg)
         case MSG_CONNECTION_UPDATE_PEER_RC:
             BrOnReferenceRequest((uint32_t)msg->arg1, (ReferenceCount *)msg->obj);
             break;
+        case MSG_CONNECTION_IDLE_DISCONNECT_TIMEOUT:
+            BrConnectionIdleDisconnectTimeoutHandler((uint32_t)msg->arg1);
+            break;
         default:
             CONN_LOGW(CONN_BR, "receive unexpected msg, what=%{public}d", msg->what);
             break;
@@ -911,7 +941,8 @@ static int BrCompareConnectionLooperEventFunc(const SoftBusMessage *msg, void *a
         case MSG_CONNECTION_WAIT_NEGOTIATION_CLOSING_TIMEOUT:
         case MSG_CONNECTION_UPDATE_PEER_RC:
         case MSG_CONNECTION_OCCUPY_RELEASE:
-        case MSG_CONNECTION_UPDATE_LOCAL_RC: {
+        case MSG_CONNECTION_UPDATE_LOCAL_RC:
+        case MSG_CONNECTION_IDLE_DISCONNECT_TIMEOUT: {
             if (msg->arg1 == ctx->arg1) {
                 return COMPARE_SUCCESS;
             }
