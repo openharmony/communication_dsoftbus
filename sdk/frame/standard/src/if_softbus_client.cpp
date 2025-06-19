@@ -255,4 +255,12 @@ int32_t ISoftBusClient::OnBrProxyStateChanged(int32_t channelId, int32_t channel
     COMM_LOGI(COMM_EVENT, "ipc default impl");
     return SOFTBUS_OK;
 }
+
+int32_t ISoftBusClient::OnBrProxyQueryPermission(const char *bundleName, bool *isEmpowered)
+{
+    (void)bundleName;
+    (void)isEmpowered;
+    COMM_LOGI(COMM_EVENT, "ipc default impl");
+    return SOFTBUS_OK;
+}
 } // namespace OHOS

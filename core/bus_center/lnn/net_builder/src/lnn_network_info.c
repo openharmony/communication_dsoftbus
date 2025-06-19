@@ -529,34 +529,125 @@ static void SleStateChangeEventHandle(const LnnEventBasicInfo *info)
     SendNetCapabilityToRemote(netCapability, 0, true);
 }
 
-static int32_t GetEnhancedP2PCap(uint32_t *staticNetCap)
+static int32_t GetEnhancedFLFeature(uint64_t *feature)
 {
-    if (staticNetCap == NULL) {
+    if (feature == NULL) {
         return SOFTBUS_INVALID_PARAM;
     }
+    if (GetWifiDirectManager() == NULL || GetWifiDirectManager()->getVspCapabilityCode == NULL) {
+        LNN_LOGI(LNN_BUILDER, "failed to get wifi direct manager.");
+        return SOFTBUS_WIFI_DIRECT_INIT_FAILED;
+    }
+    VspCapabilityCode vspCapability = GetWifiDirectManager()->getVspCapabilityCode();
+    LNN_LOGI(LNN_BUILDER, "GetEnhancedFLFeature vspCap=%{public}d", vspCapability);
+    int32_t ret;
+    if (CONN_VSP_SUPPORT == vspCapability) {
+        ret = LnnSetFeatureCapability(feature, BIT_FL_CAPABILITY);
+        if (ret != SOFTBUS_OK) {
+            LNN_LOGE(LNN_BUILDER, "set feature capability failed, ret=%{public}d.", ret);
+            return ret;
+        }
+    }
+    return SOFTBUS_OK;
+}
+
+static void UpdateLocalFeatureByWifiVspRes()
+{
+    uint64_t localFeatureCap = 0;
+    if (LnnGetLocalNumU64Info(NUM_KEY_FEATURE_CAPA, &localFeatureCap) != SOFTBUS_OK) {
+        LNN_LOGE(LNN_BUILDER, "wifi service FL feature, get local feature cap failed");
+        return;
+    }
+    uint64_t oldFeature = localFeatureCap;
+    if (GetEnhancedFLFeature(&localFeatureCap) != SOFTBUS_OK) {
+        LNN_LOGE(LNN_BUILDER, "get local fl feature fail");
+        // fall-through
+    }
+    if (oldFeature == localFeatureCap) {
+        return;
+    }
+    int32_t ret = LnnSetLocalNum64Info(NUM_KEY_FEATURE_CAPA, localFeatureCap);
+    if (ret != SOFTBUS_OK) {
+        LNN_LOGE(LNN_BUILDER, "set localFeatureCap failed, ret=%{public}d.", ret);
+        return;
+    }
+    LNN_LOGI(LNN_BUILDER, "local feature changed:%{public}" PRIu64 "->%{public}" PRIu64, oldFeature, localFeatureCap);
+}
+
+static int32_t UpdateHmlStaticCap(void)
+{
+    uint32_t staticNetCap = 0;
+    int32_t ret = LnnGetLocalNumU32Info(NUM_KEY_STATIC_NET_CAP, &staticNetCap);
+    if (ret != SOFTBUS_OK) {
+        LNN_LOGE(LNN_BUILDER, "get staticNetCap failed, ret=%{public}d.", ret);
+        return ret;
+    }
+    uint32_t oldCap = staticNetCap;
     if (GetWifiDirectManager() == NULL || GetWifiDirectManager()->getHmlCapabilityCode == NULL) {
         LNN_LOGI(LNN_BUILDER, "failed to get wifi direct manager.");
         return SOFTBUS_WIFI_DIRECT_INIT_FAILED;
     }
     HmlCapabilityCode code = GetWifiDirectManager()->getHmlCapabilityCode();
-    LNN_LOGI(LNN_BUILDER, "enhanced p2p capability code=%{public}d.", code);
-    int32_t ret;
+    LNN_LOGI(LNN_BUILDER, "hml capability code=%{public}d.", code);
     if (code == CONN_HML_SUPPORT) {
-        ret = LnnSetStaticNetCap(staticNetCap, STATIC_CAP_BIT_ENHANCED_P2P);
+        ret = LnnSetStaticNetCap(&staticNetCap, STATIC_CAP_BIT_ENHANCED_P2P);
         if (ret != SOFTBUS_OK) {
             LNN_LOGE(LNN_BUILDER, "clear staticNetCap failed, ret=%{public}d.", ret);
             return ret;
         }
-        return SOFTBUS_OK;
     }
     if (code == CONN_HML_CAP_UNKNOWN || code == CONN_HML_NOT_SUPPORT) {
-        ret = LnnClearStaticNetCap(staticNetCap, STATIC_CAP_BIT_ENHANCED_P2P);
+        ret = LnnClearStaticNetCap(&staticNetCap, STATIC_CAP_BIT_ENHANCED_P2P);
         if (ret != SOFTBUS_OK) {
             LNN_LOGE(LNN_BUILDER, "clear staticNetCap failed, ret=%{public}d.", ret);
             return ret;
         }
     }
+    if (oldCap == staticNetCap) {
+        return SOFTBUS_OK;
+    }
+    ret = LnnSetLocalNumU32Info(NUM_KEY_STATIC_NET_CAP, staticNetCap);
+    if (ret != SOFTBUS_OK) {
+        LNN_LOGE(LNN_BUILDER, "set staticNetCap failed, ret=%{public}d.", ret);
+        return ret;
+    }
+    LNN_LOGI(LNN_BUILDER, "static netCap changed:%{public}u->%{public}u.", oldCap, staticNetCap);
     return SOFTBUS_OK;
+}
+
+static void OnHmlServiceStart(void *state)
+{
+    if (state == NULL) {
+        LNN_LOGE(LNN_EVENT, "state is empty");
+        return;
+    }
+    SoftBusHmlState *curState = (SoftBusHmlState *)state;
+    if (*curState == CONN_HML_ENABLED) {
+        int32_t ret = UpdateHmlStaticCap();
+        if (ret != SOFTBUS_OK) {
+            LNN_LOGE(LNN_BUILDER, "update hml static cap failed, ret=%{public}d.", ret);
+        }
+        UpdateLocalFeatureByWifiVspRes();
+    }
+    SoftBusFree(curState);
+}
+
+static void HmlStateOnStartCb(SoftBusHmlState state)
+{
+    if (state != CONN_HML_ENABLED) {
+        LNN_LOGI(LNN_BUILDER, "ignore it.");
+        return;
+    }
+    SoftBusHmlState *notifyState = (SoftBusHmlState *)SoftBusCalloc(sizeof(SoftBusHmlState));
+    if (notifyState == NULL) {
+        LNN_LOGE(LNN_BUILDER, "notifyState malloc err");
+        return;
+    }
+    *notifyState = state;
+    if (LnnAsyncCallbackHelper(GetLooper(LOOP_TYPE_DEFAULT), OnHmlServiceStart, (void *)notifyState) != SOFTBUS_OK) {
+        LNN_LOGE(LNN_BUILDER, "async fail");
+        SoftBusFree(notifyState);
+    }
 }
 
 static void WifiServiceOnStartHandle(const LnnEventBasicInfo *info)
@@ -566,28 +657,11 @@ static void WifiServiceOnStartHandle(const LnnEventBasicInfo *info)
         LNN_LOGE(LNN_BUILDER, "invalid param.");
         return;
     }
-    uint32_t staticNetCap = 0;
-    uint32_t ret = LnnGetLocalNumU32Info(NUM_KEY_STATIC_NET_CAP, &staticNetCap);
+    int32_t ret = UpdateHmlStaticCap();
     if (ret != SOFTBUS_OK) {
-        LNN_LOGE(LNN_BUILDER, "get staticNetCap failed, ret=%{public}d.", ret);
-        return;
+        LNN_LOGE(LNN_BUILDER, "update hml static cap failed, ret=%{public}d.", ret);
     }
-    uint32_t oldCap = staticNetCap;
-    ret = GetEnhancedP2PCap(&staticNetCap);
-    if (ret != SOFTBUS_OK) {
-        LNN_LOGE(LNN_BUILDER, "update enhanced p2p static cap failed, ret=%{public}d.", ret);
-        return;
-    }
-    if (oldCap == staticNetCap) {
-        return;
-    }
-
-    ret = LnnSetLocalNumU32Info(NUM_KEY_STATIC_NET_CAP, staticNetCap);
-    if (ret != SOFTBUS_OK) {
-        LNN_LOGE(LNN_BUILDER, "set staticNetCap failed, ret=%{public}d.", ret);
-        return;
-    }
-    LNN_LOGI(LNN_BUILDER, "static netCap changed:%{public}u->%{public}u.", oldCap, staticNetCap);
+    UpdateLocalFeatureByWifiVspRes();
 }
 
 static bool IsSupportApCoexist(const char *coexistCap)
@@ -653,9 +727,24 @@ static void InitWifiDirectCapability(void)
         g_isWifiDirectSupported, g_isApCoexistSupported);
 }
 
+static void InitWifiDirectListener(void)
+{
+    struct WifiDirectManager *pManager = GetWifiDirectManager();
+    if (pManager == NULL) {
+        LNN_LOGE(LNN_BUILDER, "get wifi direct manager fail");
+        return;
+    }
+    if (pManager->addHmlStateListener == NULL) {
+        LNN_LOGE(LNN_BUILDER, "addHmlStateListener null");
+        return;
+    }
+    pManager->addHmlStateListener(HmlStateOnStartCb);
+}
+
 int32_t LnnInitNetworkInfo(void)
 {
     InitWifiDirectCapability();
+    InitWifiDirectListener();
     int32_t ret = LnnRegisterEventHandler(LNN_EVENT_BT_STATE_CHANGED, BtStateChangeEventHandler);
     if (ret != SOFTBUS_OK) {
         LNN_LOGE(LNN_BUILDER, "network info register bt state change fail, ret=%{public}d", ret);

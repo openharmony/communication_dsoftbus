@@ -567,6 +567,37 @@ int32_t TransClientProxy::OnBrProxyStateChanged(int32_t channelId, int32_t chann
     return ret;
 }
 
+int32_t TransClientProxy::OnBrProxyQueryPermission(const char *bundleName, bool *isEmpowered)
+{
+    sptr<IRemoteObject> remote = Remote();
+    if (remote == nullptr) {
+        TRANS_LOGE(TRANS_CTRL, "[br_proxy] Remote is nullptr");
+        return SOFTBUS_TRANS_PROXY_REMOTE_NULL;
+    }
+ 
+    MessageParcel data;
+    if (!data.WriteInterfaceToken(GetDescriptor())) {
+        TRANS_LOGE(TRANS_CTRL, "[br_proxy] Write InterfaceToken failed!");
+        return SOFTBUS_TRANS_PROXY_WRITETOKEN_FAILED;
+    }
+ 
+    WRITE_PARCEL_WITH_RET(data, CString, bundleName, SOFTBUS_TRANS_PROXY_WRITECSTRING_FAILED);
+ 
+    MessageParcel reply;
+    MessageOption option(MessageOption::TF_SYNC);
+    int32_t ret = remote->SendRequest(CLIENT_ON_BR_PROXY_QUERY_PERMISSION, data, reply, option);
+    if (ret != SOFTBUS_OK) {
+        TRANS_LOGE(TRANS_CTRL, "[br_proxy] Send request failed, ret=%{public}d", ret);
+        return SOFTBUS_TRANS_PROXY_SEND_REQUEST_FAILED;
+    }
+ 
+    if (!reply.ReadBool(*isEmpowered)) {
+        TRANS_LOGE(TRANS_CTRL, "read serverRet failed");
+        return SOFTBUS_TRANS_PROXY_READRAWDATA_FAILED;
+    }
+    return ret;
+}
+
 int32_t TransClientProxy::OnJoinLNNResult(void *addr, uint32_t addrTypeLen, const char *networkId, int32_t retCode)
 {
     (void)addr;

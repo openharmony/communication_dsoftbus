@@ -518,7 +518,7 @@ char *TransTdcPackAllData(
         finalData = (char *)(&tmpSeq);
     }
     if (info->supportTlv) {
-        DataHead pktHead;
+        DataHead pktHead = { 0 };
         int32_t tlvBufferSize = 0;
         int32_t ret = BuildDataHead(&pktHead, finalSeq, flags, dataLen, &tlvBufferSize);
         TRANS_CHECK_AND_RETURN_RET_LOGE(ret == SOFTBUS_OK, NULL, TRANS_CTRL, "build tlv dataHead failed");

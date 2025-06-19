@@ -93,6 +93,7 @@ public:
     virtual int32_t SendBrProxyData(int32_t channelId, char *data, uint32_t dataLen);
     virtual int32_t SetListenerState(int32_t channelId, int32_t type, bool CbEnabled);
     virtual bool IsProxyChannelEnabled(int32_t uid);
+    virtual int32_t PushRegisterHook();
 public:
     DECLARE_INTERFACE_DESCRIPTOR(u"OHOS.ISoftBusServer");
 };

@@ -45,6 +45,7 @@ static bool g_listenerModuleIds[AUTH_ENHANCED_P2P_NUM];
 static WifiDirectEnhanceManager g_enhanceManager;
 static SyncPtkListener g_syncPtkListener;
 static PtkMismatchListener g_ptkMismatchListener;
+static HmlStateListener g_hmlStateListener;
 
 static uint32_t GetRequestId(void)
 {
@@ -54,6 +55,11 @@ static uint32_t GetRequestId(void)
 static void AddPtkMismatchListener(PtkMismatchListener listener)
 {
     g_ptkMismatchListener = listener;
+}
+
+static void AddHmlStateListener(HmlStateListener listener)
+{
+    g_hmlStateListener = listener;
 }
 
 static void SetElementTypeExtra(struct WifiDirectConnectInfo *info, ConnEventExtra *extra)
@@ -550,6 +556,14 @@ static HmlCapabilityCode GetHmlCapabilityCode(void)
     return entity.GetHmlCapabilityCode();
 }
 
+static VspCapabilityCode GetVspCapabilityCode(void)
+{
+    CONN_LOGI(CONN_WIFI_DIRECT, "enter");
+    OHOS::SoftBus::InnerLink::LinkType type = OHOS::SoftBus::InnerLink::LinkType::HML;
+    auto &entity = OHOS::SoftBus::EntityFactory::GetInstance().GetEntity(type);
+    return entity.GetVspCapabilityCode();
+}
+
 static bool IsWifiP2pEnabled(void)
 {
     return OHOS::SoftBus::P2pAdapter::IsWifiP2pEnabled();
@@ -603,6 +617,16 @@ static void NotifyPtkMismatch(const char *remoteNetworkId, uint32_t len, int32_t
     g_ptkMismatchListener(remoteNetworkId, len, reason);
 }
 
+static void NotifyHmlState(SoftBusHmlState state)
+{
+    CONN_LOGI(CONN_WIFI_DIRECT, "enter");
+    if (g_hmlStateListener == nullptr) {
+        CONN_LOGW(CONN_WIFI_DIRECT, "listener is null");
+        return;
+    }
+    g_hmlStateListener(state);
+}
+
 static int32_t Init(void)
 {
     CONN_LOGI(CONN_INIT, "init enter");
@@ -631,6 +655,7 @@ static struct WifiDirectManager g_manager = {
     .syncPTK = SyncPtk,
     .addSyncPtkListener = AddSyncPtkListener,
     .addPtkMismatchListener = AddPtkMismatchListener,
+    .addHmlStateListener = AddHmlStateListener,
 
     .isDeviceOnline = IsDeviceOnline,
     .getLocalIpByUuid = GetLocalIpByUuid,
@@ -643,6 +668,7 @@ static struct WifiDirectManager g_manager = {
     .getStationFrequency = GetStationFrequency,
     .isHmlConnected = IsHmlConnected,
     .getHmlCapabilityCode = GetHmlCapabilityCode,
+    .getVspCapabilityCode = GetVspCapabilityCode,
 
     .init = Init,
     .notifyOnline = NotifyOnline,
@@ -653,6 +679,7 @@ static struct WifiDirectManager g_manager = {
     .registerEnhanceManager = RegisterEnhanceManager,
     .notifyPtkSyncResult = NotifyPtkSyncResult,
     .notifyPtkMismatch = NotifyPtkMismatch,
+    .notifyHmlState = NotifyHmlState,
 };
 
 struct WifiDirectManager *GetWifiDirectManager(void)
