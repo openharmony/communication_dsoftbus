@@ -1681,7 +1681,7 @@ int P2pV1Processor::UpdateWhenConnectSuccess(std::string groupConfig, const Nego
         });
     CONN_CHECK_AND_RETURN_RET_LOGW(
         success, SOFTBUS_CONN_PV1_INTERNAL_ERR0R, CONN_WIFI_DIRECT, "update inner link failed");
-    WifiDirectUtils::SyncLnnInfoForP2p(WifiDirectUtils::ToWifiDirectRole(myRole), localMac, msg.GetLegacyP2pGoMac());
+    WifiDirectUtils::SyncLnnInfoForP2p((enum WifiDirectApiRole)myRole, localMac, msg.GetLegacyP2pGoMac());
     ret = StartAuthListening(localIp);
     CONN_CHECK_AND_RETURN_RET_LOGW(
         ret == SOFTBUS_OK, ret, CONN_WIFI_DIRECT, "start auth listen failed, error=%{public}d", ret);
