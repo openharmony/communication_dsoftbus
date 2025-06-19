@@ -58,6 +58,7 @@ void LnnNotifyBtAclStateChangeEvent(const char *btMac, SoftBusBtAclState state);
 void LnnNotifyAddressChangedEvent(const char* ifName);
 void LnnNotifyLnnRelationChanged(const char *udid, ConnectionAddrType type, uint8_t relation, bool isJoin);
 void LnnNotifyDeviceVerified(const char *udid);
+void LnnNotifySysTimeChangeEvent(void);
 
 void LnnNotifyTimeSyncResult(const char *pkgName, int32_t pid, const TimeSyncResultInfo *info, int32_t retCode);
 
