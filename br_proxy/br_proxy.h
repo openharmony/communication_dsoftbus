@@ -33,6 +33,7 @@ typedef enum {
     CHANNEL_WAIT_RESUME = 0,
     CHANNEL_RESUME,
     CHANNEL_EXCEPTION_SOFTWARE_FAILED,
+    CHANNEL_BR_NO_PAIRED,
 } ChannelState;
 
 typedef enum {

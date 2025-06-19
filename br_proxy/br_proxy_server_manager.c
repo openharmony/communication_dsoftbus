@@ -1190,7 +1190,8 @@ static void OnDisconnected(struct ProxyChannel *channel, int32_t reason)
     ServerBrProxyChannelInfo info = {0};
     int32_t ret = GetChannelInfo(channel->brMac, DEFAULT_INVALID_CHANNEL_ID, DEFAULT_INVALID_REQ_ID, &info);
     if (ret != SOFTBUS_OK) {
-        return;
+        //client is died
+        goto EXIT;
     }
     char pkgName[PKGNAME_MAX_LEN];
     ret = sprintf_s(pkgName, sizeof(pkgName), "%s_%d", COMM_PKGNAME_WECHAT, info.callingPid);
@@ -1204,6 +1205,10 @@ static void OnDisconnected(struct ProxyChannel *channel, int32_t reason)
         return;
     }
     ClientIpcBrProxyStateChanged(pkgName, info.channelId, reason);
+EXIT:
+    if (reason == SOFTBUS_CONN_BR_UNPAIRED || reason == SOFTBUS_CONN_PROXY_RETRY_FAILED) {
+        CloseAllConnect();
+    }
 }
 
 static void OnReconnected(char *addr, struct ProxyChannel *channel)
