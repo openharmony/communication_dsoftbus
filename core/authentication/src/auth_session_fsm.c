@@ -1138,6 +1138,10 @@ static void HandleMsgRecvAuthData(AuthFsm *authFsm, const MessagePara *para)
 {
     HiChainAuthMode authMode = (authFsm->info.authVersion < AUTH_VERSION_V2) ?
         HICHAIN_AUTH_DEVICE : HICHAIN_AUTH_IDENTITY_SERVICE;
+
+#ifdef DISABLE_IDENTITY_SERVICE
+    authMode = HICHAIN_AUTH_DEVICE;
+#endif
     int32_t ret = HichainProcessData(authFsm->authSeq, para->data, para->len, authMode);
     if (ret != SOFTBUS_OK) {
         LnnAuditExtra lnnAuditExtra = { 0 };
@@ -1290,6 +1294,9 @@ static int32_t ProcessClientAuthState(AuthFsm *authFsm)
     HiChainAuthMode authMode = (authFsm->info.authVersion < AUTH_VERSION_V2) ?
         HICHAIN_AUTH_DEVICE : HICHAIN_AUTH_IDENTITY_SERVICE;
 
+#ifdef DISABLE_IDENTITY_SERVICE
+    authMode = HICHAIN_AUTH_DEVICE;
+#endif
     (void)memset_s(&authParam, sizeof(HiChainAuthParam), 0, sizeof(HiChainAuthParam));
     /* just client need start authDevice */
     if (ClientSetExchangeIdType(authFsm) != SOFTBUS_OK) {
