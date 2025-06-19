@@ -40,6 +40,7 @@ typedef enum {
     BIT_CLOUD_SYNC_DEVICE_INFO,
     BIT_SUPPORT_SLE_CAPABILITY,
     BIT_HIGH_ACCURACY_SYNC_TIME_CAPABILITY,
+    BIT_FL_CAPABILITY, // support flash light channel
     BIT_FEATURE_COUNT,
 } FeatureCapability;
 

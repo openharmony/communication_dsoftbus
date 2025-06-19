@@ -27,6 +27,7 @@ group("unittest") {
       "ble/raise_ble:unittest",
       "ble/softbus_ble:unittest",
       "ble/softbus_ble_mock:unittest",
+      "common:unittest",
       "ipc:unittest",
     ]
   }

@@ -128,12 +128,14 @@ SoftBusServerStub::SoftBusServerStub()
     memberFuncMap_[SERVER_SEND_BR_PROXY_DATA] = &SoftBusServerStub::SendBrProxyDataInner;
     memberFuncMap_[SERVER_SET_BR_PROXY_LISTENER_STATE] = &SoftBusServerStub::SetBrProxyListenerStateInner;
     memberFuncMap_[SERVER_GET_BR_PROXY_CHANNEL_STATE] = &SoftBusServerStub::GetBrProxyChannelStateInner;
+    memberFuncMap_[SERVER_REGISTER_PUSH_HOOK] = &SoftBusServerStub::RegisterPushHookInner;
     memberPermissionMap_[MANAGE_REGISTER_BR_PROXY_SERVICE] = OHOS_PERMISSION_ACCESS_BLUETOOTH;
     memberPermissionMap_[SERVER_OPEN_BR_PROXY] = OHOS_PERMISSION_ACCESS_BLUETOOTH;
     memberPermissionMap_[SERVER_CLOSE_BR_PROXY] = OHOS_PERMISSION_ACCESS_BLUETOOTH;
     memberPermissionMap_[SERVER_SEND_BR_PROXY_DATA] = OHOS_PERMISSION_ACCESS_BLUETOOTH;
     memberPermissionMap_[SERVER_SET_BR_PROXY_LISTENER_STATE] = OHOS_PERMISSION_ACCESS_BLUETOOTH;
     memberPermissionMap_[SERVER_GET_BR_PROXY_CHANNEL_STATE] = OHOS_PERMISSION_ACCESS_BLUETOOTH;
+    memberPermissionMap_[SERVER_REGISTER_PUSH_HOOK] = OHOS_PERMISSION_ACCESS_BLUETOOTH;
 }
 
 void SoftBusServerStub::InitMemberFuncMap()
@@ -2167,6 +2169,16 @@ int32_t SoftBusServerStub::GetBrProxyChannelStateInner(MessageParcel &data, Mess
  
     bool retReply = IsProxyChannelEnabled(uid);
     if (!reply.WriteBool(retReply)) {
+        COMM_LOGE(COMM_SVC, "[br_proxy] write reply failed!");
+        return SOFTBUS_TRANS_PROXY_WRITEINT_FAILED;
+    }
+    return SOFTBUS_OK;
+}
+
+int32_t SoftBusServerStub::RegisterPushHookInner(MessageParcel &data, MessageParcel &reply)
+{
+    int32_t ret = PushRegisterHook();
+    if (!reply.WriteInt32(ret)) {
         COMM_LOGE(COMM_SVC, "[br_proxy] write reply failed!");
         return SOFTBUS_TRANS_PROXY_WRITEINT_FAILED;
     }

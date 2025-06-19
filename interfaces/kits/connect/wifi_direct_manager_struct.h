@@ -32,6 +32,7 @@ struct WifiDirectStatusListener {
 
 typedef void (*SyncPtkListener)(const char *remoteDeviceId, int result);
 typedef void (*PtkMismatchListener)(const char *remoteNetworkId, uint32_t len, int32_t reason);
+typedef void (*HmlStateListener)(SoftBusHmlState state);
 struct WifiDirectEnhanceManager {
     int32_t (*savePTK)(const char *remoteDeviceId, const char *ptk);
     int32_t (*syncPTK)(const char *remoteDeviceId);
@@ -59,6 +60,7 @@ struct WifiDirectManager {
     int32_t (*syncPTK)(const char *remoteDeviceId);
     void (*addSyncPtkListener)(SyncPtkListener listener);
     void (*addPtkMismatchListener)(PtkMismatchListener listener);
+    void (*addHmlStateListener)(HmlStateListener listener);
 
     bool (*isDeviceOnline)(const char *remoteMac);
     int32_t (*getLocalIpByUuid)(const char *uuid, char *localIp, int32_t localIpSize);
@@ -72,6 +74,7 @@ struct WifiDirectManager {
     int (*getStationFrequency)(void);
     bool (*isHmlConnected)(void);
     HmlCapabilityCode (*getHmlCapabilityCode)(void);
+    VspCapabilityCode (*getVspCapabilityCode)(void);
 
     int32_t (*init)(void);
 
@@ -84,6 +87,7 @@ struct WifiDirectManager {
     void (*registerEnhanceManager)(struct WifiDirectEnhanceManager *manager);
     void (*notifyPtkSyncResult)(const char *remoteDeviceId, int result);
     void (*notifyPtkMismatch)(const char *remoteNetworkId, uint32_t len, int32_t reason);
+    void (*notifyHmlState)(SoftBusHmlState state);
 };
 
 #ifdef __cplusplus

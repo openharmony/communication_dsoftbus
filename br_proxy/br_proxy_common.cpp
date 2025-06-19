@@ -98,3 +98,15 @@ extern "C" int32_t GetCallerHapInfo(char *bundleName, uint32_t bundleNamelen,
 
     return SOFTBUS_OK;
 }
+
+extern "C" int32_t CheckPushPermission()
+{
+    auto callerToken = IPCSkeleton::GetCallingTokenID();
+    auto type = Security::AccessToken::AccessTokenKit::GetTokenType(callerToken);
+    if (type != Security::AccessToken::ATokenTypeEnum::TOKEN_NATIVE) {
+        TRANS_LOGE(TRANS_SVC, "[br_proxy] push must be native sa");
+        return SOFTBUS_TRANS_TOKEN_HAP_ERR;
+    }
+    TRANS_LOGI(TRANS_SVC, "[br_proxy] The push identity passes the authentication.");
+    return SOFTBUS_OK;
+}

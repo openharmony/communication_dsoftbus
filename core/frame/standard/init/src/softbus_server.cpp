@@ -667,7 +667,7 @@ int32_t SoftBusServer::OpenBrProxy(const char *brMac, const char *uuid)
  
 int32_t SoftBusServer::CloseBrProxy(int32_t channelId)
 {
-    return TransCloseBrProxy(channelId);
+    return TransCloseBrProxy(channelId, false);
 }
  
 int32_t SoftBusServer::SendBrProxyData(int32_t channelId, char *data, uint32_t dataLen)
@@ -683,5 +683,10 @@ int32_t SoftBusServer::SetListenerState(int32_t channelId, int32_t type, bool Cb
 bool SoftBusServer::IsProxyChannelEnabled(int32_t uid)
 {
     return TransIsProxyChannelEnabled(uid);
+}
+
+int32_t SoftBusServer::PushRegisterHook()
+{
+    return TransRegisterPushHook();
 }
 } // namespace OHOS

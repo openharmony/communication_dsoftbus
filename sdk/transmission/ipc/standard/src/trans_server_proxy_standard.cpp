@@ -1174,4 +1174,34 @@ int32_t TransServerProxy::GetProxyChannelState(int32_t uid, bool *isEnable)
 
     return ret;
 }
+
+int32_t TransServerProxy::RegisterPushHook()
+{
+    sptr<IRemoteObject> remote = GetSystemAbility();
+    if (remote == nullptr) {
+        TRANS_LOGE(TRANS_SDK, "[br_proxy] remote is nullptr!");
+        return SOFTBUS_TRANS_PROXY_REMOTE_NULL;
+    }
+ 
+    MessageParcel data;
+    if (!data.WriteInterfaceToken(GetDescriptor())) {
+        TRANS_LOGE(TRANS_SDK, "[br_proxy] write InterfaceToken failed!");
+        return SOFTBUS_TRANS_PROXY_WRITETOKEN_FAILED;
+    }
+ 
+    MessageParcel reply;
+    MessageOption option = { MessageOption::TF_SYNC };
+    int32_t ret = remote->SendRequest(SERVER_REGISTER_PUSH_HOOK, data, reply, option);
+    if (ret != SOFTBUS_OK) {
+        TRANS_LOGE(TRANS_SDK, "[br_proxy] send request failed! ret=%{public}d", ret);
+        return ret;
+    }
+ 
+    int32_t serverRet = 0;
+    if (!reply.ReadInt32(serverRet)) {
+        TRANS_LOGE(TRANS_SDK, "[br_proxy] read serverRet failed!");
+        return SOFTBUS_TRANS_PROXY_READINT_FAILED;
+    }
+    return serverRet;
+}
 } // namespace OHOS

@@ -414,3 +414,17 @@ int32_t ServerIpcIsProxyChannelEnabled(int32_t uid, bool *isEnable)
  
     return ret;
 }
+
+int32_t ServerIpcRegisterPushHook()
+{
+    sptr<TransServerProxy> proxy = RetryGetProxy();
+    TRANS_CHECK_AND_RETURN_RET_LOGE(
+        proxy != nullptr, SOFTBUS_NO_INIT, TRANS_SDK, "[br_proxy] softbus server g_serverProxy is nullptr");
+
+    int32_t ret = proxy->RegisterPushHook();
+    if (ret != SOFTBUS_OK) {
+        TRANS_LOGE(TRANS_SDK, "[br_proxy] RegisterPushHook failed! ret=%{public}d.", ret);
+    }
+
+    return ret;
+}

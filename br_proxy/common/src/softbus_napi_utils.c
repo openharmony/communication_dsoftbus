@@ -37,6 +37,8 @@ const NapiSoftbusErrCMapJs ERRCODE_C_JS_MAP[] = {
     { SOFTBUS_TRANS_BR_PROXY_TOKENID_ERR,       NAPI_SOFTBUS_CALL_IS_RESTRICTED                 },
     { SOFTBUS_CONN_BR_UNDERLAY_WRITE_FAIL,      NAPI_SOFTBUS_SEND_OPERATION_FAILED              },
     { SOFTBUS_CONN_BR_UNDERLAY_CONNECT_FAIL,    NAPI_SOFTBUS_DEVICE_NOT_PAIRED                  },
+    { SOFTBUS_TRANS_BR_PROXY_CALLER_RESTRICTED, NAPI_SOFTBUS_CALL_IS_RESTRICTED                 },
+    { SOFTBUS_CONN_BR_UNPAIRED,                 NAPI_SOFTBUS_DEVICE_NOT_PAIRED                  },
 };
 
 const NapiSoftbusErrEntry ERRCODE_MSG_MAP[] = {
@@ -124,6 +126,9 @@ void ThrowErrFromC2Js(napi_env env, int32_t err)
 
 napi_value GetBusinessError(napi_env env, int32_t errCode)
 {
+    if (errCode == SOFTBUS_TRANS_SESSION_OPENING) {
+        return NULL;
+    }
     napi_value businessError = NULL;
     int32_t jsRet = NapiTransConvertErr(errCode);
     businessError = CreateBusinessError(env, jsRet);

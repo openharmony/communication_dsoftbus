@@ -381,7 +381,7 @@ void P2pEntity::OnP2pStateChangeEvent(P2pState state)
 {
     std::lock_guard lock(operationLock_);
     UpdateInterfaceManagerWhenStateChanged(state);
-    WifiDirectUtils::SyncLnnInfoForP2p(WIFI_DIRECT_ROLE_NONE, P2pAdapter::GetMacAddress(), "");
+    WifiDirectUtils::SyncLnnInfoForP2p(WIFI_DIRECT_API_ROLE_NONE, P2pAdapter::GetMacAddress(), "");
     state_->OnP2pStateChangeEvent(state);
 }
 
