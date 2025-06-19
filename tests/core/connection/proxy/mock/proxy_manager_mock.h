@@ -42,6 +42,9 @@
 #define CONNECT_TIMEOUT1 500
 #define CONNECT_SLEEP_TIME 2
 
+#define CONNECT_SLEEP_TIME_MS 500
+#define CONNECT_SLEEP_TIME_MS1 1000
+
 class ProxyChannelInterface {
 public:
     virtual int SoftBusAddBtStateListener(const SoftBusBtStateListener *listener, int *listenerId) = 0;
