@@ -23,6 +23,7 @@
 #include "softbus_feature_config.h"
 #include "trans_session_account_adapter.h"
 #include "trans_session_ipc_adapter.h"
+#include "trans_session_manager.c"
 #include "trans_session_manager.h"
 #include "trans_session_service.h"
 
@@ -31,6 +32,7 @@
 
 #define MAX_SESSION_SERVER_NUM 100
 #define TEST_UID 488
+#define TEST_PID 1335
 
 using namespace testing::ext;
 
@@ -505,6 +507,142 @@ HWTEST_F(TransSessionManagerTest, TransSessionManagerTest17, TestSize.Level1)
     ret = TransGetUserIdFromSessionName(g_sessionName);
     EXPECT_EQ(SOFTBUS_OK, ret);
 
+    TransSessionMgrDeinit();
+}
+
+/**
+ * @tc.name: TransSessionManagerTest20
+ * @tc.desc: test AddAccessInfoBySessionName invalid value.
+ * @tc.type: FUNC
+ * @tc.require:
+ */
+HWTEST_F(TransSessionManagerTest, TransSessionManagerTest20, TestSize.Level1)
+{
+    char *sessionName = NULL;
+    AccessInfo accessInfo;
+    memset_s(&accessInfo, sizeof(AccessInfo), 0, sizeof(AccessInfo));
+    pid_t callingPid = (pid_t)TEST_PID;
+    int32_t ret = AddAccessInfoBySessionName(nullptr, &accessInfo, callingPid);
+    EXPECT_EQ(SOFTBUS_INVALID_PARAM, ret);
+    ret = AddAccessInfoBySessionName(sessionName, nullptr, callingPid);
+    EXPECT_EQ(SOFTBUS_INVALID_PARAM, ret);
+}
+
+/**
+ * @tc.name: TransSessionManagerTest21
+ * @tc.desc: test AddAccessInfoBySessionName not init.
+ * @tc.type: FUNC
+ * @tc.require:
+ */
+HWTEST_F(TransSessionManagerTest, TransSessionManagerTest21, TestSize.Level1)
+{
+    char sessionName[] = "testSessionName";
+    AccessInfo accessInfo;
+    pid_t callingPid = (pid_t)TEST_PID;
+    memset_s(&accessInfo, sizeof(AccessInfo), 0, sizeof(AccessInfo));
+    int32_t ret = AddAccessInfoBySessionName(sessionName, &accessInfo, callingPid);
+    EXPECT_EQ(SOFTBUS_NO_INIT, ret);
+}
+
+/**
+ * @tc.name: TransSessionManagerTest22
+ * @tc.desc: test AddAccessInfoBySessionName already init.
+ * @tc.type: FUNC
+ * @tc.require:
+ */
+HWTEST_F(TransSessionManagerTest, TransSessionManagerTest22, TestSize.Level1)
+{
+    char sessionName[] = "testSessionName";
+    AccessInfo accessInfo;
+    memset_s(&accessInfo, sizeof(AccessInfo), 0, sizeof(AccessInfo));
+    pid_t callingPid = (pid_t)TEST_PID;
+    int32_t ret = TransSessionMgrInit();
+    EXPECT_EQ(SOFTBUS_OK, ret);
+    ret = AddAccessInfoBySessionName(sessionName, &accessInfo, callingPid);
+    EXPECT_EQ(SOFTBUS_TRANS_SESSION_NAME_NO_EXIST, ret);
+    TransSessionMgrDeinit();
+}
+
+/**
+ * @tc.name: TransSessionManagerTest23
+ * @tc.desc: test AddAccessInfoBySessionName success.
+ * @tc.type: FUNC
+ * @tc.require:
+ */
+HWTEST_F(TransSessionManagerTest, TransSessionManagerTest23, TestSize.Level1)
+{
+    AccessInfo accessInfo;
+    memset_s(&accessInfo, sizeof(AccessInfo), 0, sizeof(AccessInfo));
+    accessInfo.extraAccessInfo = (char *)SoftBusCalloc(EXTRA_ACCESS_INFO_LEN_MAX);
+    ASSERT_TRUE(accessInfo.extraAccessInfo != nullptr);
+    memset_s(accessInfo.extraAccessInfo, EXTRA_ACCESS_INFO_LEN_MAX - 1, 'm', EXTRA_ACCESS_INFO_LEN_MAX - 1);
+    pid_t callingPid = (pid_t)TEST_PID;
+    int32_t userId = TEST_PID;
+    uint64_t tokenId = TEST_PID;
+    char businessAccountId[] = "testBusinessAccountId";
+    char extraAccessInfo[] = "testExtraAccessInfo";
+
+    SessionServer *newNode = (SessionServer *)SoftBusCalloc(sizeof(SessionServer));
+    ASSERT_TRUE(newNode != nullptr);
+    char sessionName[] = "testSessionNametest";
+    strcpy_s(newNode->sessionName, sizeof(sessionName), sessionName);
+    newNode->pid = (pid_t)TEST_PID;
+    int32_t ret = GetAccessInfoBySessionName(sessionName, &userId, &tokenId, businessAccountId, extraAccessInfo);
+    EXPECT_EQ(SOFTBUS_NO_INIT, ret);
+
+    ret = TransSessionMgrInit();
+    EXPECT_EQ(SOFTBUS_OK, ret);
+
+    ret = TransSessionServerAddItem(newNode);
+    EXPECT_EQ(SOFTBUS_OK, ret);
+
+    ret = AddAccessInfoBySessionName(sessionName, &accessInfo, callingPid);
+    EXPECT_EQ(SOFTBUS_OK, ret);
+    ret = GetAccessInfoBySessionName(nullptr, &userId, &tokenId, businessAccountId, extraAccessInfo);
+    EXPECT_EQ(SOFTBUS_INVALID_PARAM, ret);
+    ret = GetAccessInfoBySessionName(sessionName, nullptr, &tokenId, businessAccountId, extraAccessInfo);
+    EXPECT_EQ(SOFTBUS_INVALID_PARAM, ret);
+    ret = GetAccessInfoBySessionName(sessionName, &userId, nullptr, businessAccountId, extraAccessInfo);
+    EXPECT_EQ(SOFTBUS_INVALID_PARAM, ret);
+    ret = GetAccessInfoBySessionName(sessionName, &userId, &tokenId, businessAccountId, nullptr);
+    EXPECT_EQ(SOFTBUS_OK, ret);
+
+    ret = TransSessionServerDelItem(sessionName);
+    EXPECT_EQ(SOFTBUS_OK, ret);
+    TransSessionMgrDeinit();
+    SoftBusFree(accessInfo.extraAccessInfo);
+}
+
+/**
+ * @tc.name: TransSessionManagerTest24
+ * @tc.desc: test AddAccessInfoBySessionName extraAccessInfo is null.
+ * @tc.type: FUNC
+ * @tc.require:
+ */
+HWTEST_F(TransSessionManagerTest, TransSessionManagerTest24, TestSize.Level1)
+{
+    char sessionName[] = "testSessionName1";
+    AccessInfo accessInfo;
+    memset_s(&accessInfo, sizeof(AccessInfo), 0, sizeof(AccessInfo));
+    SessionServer *newNode = (SessionServer *)SoftBusCalloc(sizeof(SessionServer));
+    ASSERT_TRUE(newNode != nullptr);
+    strcpy_s(newNode->sessionName, strlen(sessionName), sessionName);
+    newNode->pid = (pid_t)TEST_PID;
+    pid_t callingPid = (pid_t)TEST_PID;
+
+    int32_t ret = TransSessionMgrInit();
+    EXPECT_EQ(SOFTBUS_OK, ret);
+
+    ret = TransSessionServerAddItem(newNode);
+    EXPECT_EQ(SOFTBUS_OK, ret);
+
+    ret = AddAccessInfoBySessionName(sessionName, &accessInfo, callingPid);
+    EXPECT_NE(SOFTBUS_NO_INIT, ret);
+    ret = AddAccessInfoBySessionName(sessionName, &accessInfo, 0);
+    EXPECT_EQ(SOFTBUS_NO_INIT, ret);
+
+    ret = TransSessionServerDelItem(sessionName);
+    EXPECT_EQ(SOFTBUS_OK, ret);
     TransSessionMgrDeinit();
 }
 }
