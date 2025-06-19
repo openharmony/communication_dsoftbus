@@ -178,7 +178,7 @@ static OutData *PackData(struct GeneralConnection *generalConnection, const uint
     header->localId = generalConnection->generalId;
     header->peerId = generalConnection->peerGeneralId;
     header->msgType = GENERAL_CONNECTION_MSG_TYPE_NORMAL;
-
+    PackGeneralHead(header);
     if (memcpy_s(outData->data + GENERAL_CONNECTION_HEADER_SIZE,
         outData->dataLen - GENERAL_CONNECTION_HEADER_SIZE, data, dataLen) != EOK) {
         FreeOutData(outData);
@@ -1049,6 +1049,7 @@ static void OnCommDataReceived(uint32_t connectionId, ConnModule moduleId, int64
         return;
     }
     GeneralConnectionHead *head = (GeneralConnectionHead *)data;
+    UnpackGeneralHead(head);
     GeneralConnectionMsgType msgType = head->msgType;
     if (msgType >= GENERAL_CONNECTION_MSG_TYPE_MAX || (uint32_t)len < head->headLen) {
         CONN_LOGE(CONN_BLE, "invalid msgType, msgType=%{public}d, len=%{public}d, headLen=%{public}u",
