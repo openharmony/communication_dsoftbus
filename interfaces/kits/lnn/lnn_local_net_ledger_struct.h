@@ -53,6 +53,7 @@ typedef enum {
     UPDATE_NETWORKID = 32,
     UPDATE_CONCURRENT_AUTH = 64,
     UPDATE_CIPHERKEY = 128,
+    UPDATE_SLE_CAP = 256,
 } StateVersionChangeReason;
 
 #ifdef __cplusplus
