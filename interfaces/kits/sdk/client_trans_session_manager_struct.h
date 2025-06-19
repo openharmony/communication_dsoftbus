@@ -113,6 +113,7 @@ typedef struct {
     uint64_t peerTokenId;
     char peerBusinessAccountId[ACCOUNT_UID_LEN_MAX];
     char peerExtraAccessInfo[EXTRA_ACCESS_INFO_LEN_MAX];
+    bool isLowLatency;
 } SessionInfo;
 
 typedef struct {

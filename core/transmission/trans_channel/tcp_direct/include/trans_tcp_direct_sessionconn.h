@@ -67,6 +67,7 @@ typedef struct {
     int64_t timeStart;
     int32_t linkType;
     uint64_t callingTokenId;
+    ProtocolType fdProtocol;
 } TcpChannelInfo;
 
 uint64_t TransTdcGetNewSeqId(void);
