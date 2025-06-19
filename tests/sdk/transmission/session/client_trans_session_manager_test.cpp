@@ -1956,4 +1956,37 @@ HWTEST_F(TransClientSessionManagerTest, TransClientSessionManagerTest64, TestSiz
     EXPECT_EQ(ret,  SOFTBUS_OK);
     SoftBusFree(sessionParam);
 }
+
+/**
+ * @tc.name: ClientSetLowLatencyBySocketTest65
+ * @tc.desc: ClientSetLowLatencyBySocket
+ * @tc.type: FUNC
+ * @tc.require:
+ */
+HWTEST_F(TransClientSessionManagerTest, ClientSetLowLatencyBySocketTest65, TestSize.Level1)
+{
+    TransClientInit();
+    int32_t ret = ClientSetLowLatencyBySocket(0);
+    EXPECT_EQ(ret, SOFTBUS_INVALID_PARAM);
+    ret = ClientSetLowLatencyBySocket(1);
+    EXPECT_EQ(ret, SOFTBUS_TRANS_SESSION_INFO_NOT_FOUND);
+
+    ret = ClientAddSessionServer(SEC_TYPE_PLAINTEXT, g_pkgName, g_sessionName, &g_sessionlistener);
+    EXPECT_EQ(ret, SOFTBUS_OK);
+    SessionParam *sessionParam = (SessionParam *)SoftBusMalloc(sizeof(SessionParam));
+    EXPECT_TRUE(sessionParam != nullptr);
+    memset_s(sessionParam, sizeof(SessionParam), 0, sizeof(SessionParam));
+    GenerateCommParam(sessionParam);
+    int32_t sessionId = 1;
+    SessionEnableStatus isEnabled = ENABLE_STATUS_INIT;
+    ret = ClientAddSession(sessionParam, &sessionId, &isEnabled);
+    EXPECT_EQ(ret, SOFTBUS_OK);
+    ret = ClientSetLowLatencyBySocket(sessionId);
+    EXPECT_EQ(ret, SOFTBUS_OK);
+
+    ret = ClientDeleteSessionServer(SEC_TYPE_PLAINTEXT, g_sessionName);
+    EXPECT_EQ(ret, SOFTBUS_OK);
+    SoftBusFree(sessionParam);
+    TransClientDeinit();
+}
 }

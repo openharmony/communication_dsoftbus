@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2023 Huawei Device Co., Ltd.
+ * Copyright (c) 2023-2025 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -635,6 +635,30 @@ static int32_t Init(void)
     return SOFTBUS_OK;
 }
 
+static int32_t GetRemoteIpByRemoteMac(const char *remoteMac, char *remoteIp, int32_t remoteIpSize)
+{
+    bool found = false;
+    OHOS::SoftBus::LinkManager::GetInstance().ForEach(
+        [&found, &remoteIp, remoteIpSize, remoteMac](const OHOS::SoftBus::InnerLink &innerLink) {
+            if (innerLink.GetRemoteDynamicMac() == remoteMac || innerLink.GetRemoteBaseMac() == remoteMac) {
+                found = true;
+                if (strcpy_s(remoteIp, remoteIpSize, innerLink.GetRemoteIpv4().c_str()) != EOK) {
+                    found = false;
+                }
+                return true;
+            }
+            return false;
+        });
+    if (!found) {
+        CONN_LOGI(CONN_WIFI_DIRECT, "not found %{public}s", OHOS::SoftBus::WifiDirectAnonymizeMac(remoteMac).c_str());
+        return SOFTBUS_CONN_NOT_FOUND_FAILED;
+    }
+    CONN_LOGI(CONN_WIFI_DIRECT, "remoteMac=%{public}s, remoteIp=%{public}s",
+        OHOS::SoftBus::WifiDirectAnonymizeMac(remoteMac).c_str(),
+        OHOS::SoftBus::WifiDirectAnonymizeIp(remoteIp).c_str());
+    return SOFTBUS_OK;
+}
+
 static struct WifiDirectManager g_manager = {
     .getRequestId = GetRequestId,
     .allocateListenerModuleId = AllocateListenerModuleId,
@@ -680,6 +704,7 @@ static struct WifiDirectManager g_manager = {
     .notifyPtkSyncResult = NotifyPtkSyncResult,
     .notifyPtkMismatch = NotifyPtkMismatch,
     .notifyHmlState = NotifyHmlState,
+    .getRemoteIpByRemoteMac = GetRemoteIpByRemoteMac,
 };
 
 struct WifiDirectManager *GetWifiDirectManager(void)

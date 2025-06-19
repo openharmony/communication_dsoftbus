@@ -69,6 +69,7 @@ int32_t ClientTransCloseChannel(int32_t channelId, int32_t type, int32_t socketI
             ClientTransProxyCloseChannel(channelId);
             break;
         case CHANNEL_TYPE_TCP_DIRECT:
+            TransStopTimeSync(channelId);
             TransDelDataBufNode(channelId);
             TransTdcCloseChannel(channelId);
             break;

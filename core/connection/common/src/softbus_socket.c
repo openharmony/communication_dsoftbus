@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2025 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -25,6 +25,7 @@
 #include "softbus_conn_common.h"
 #include "softbus_def.h"
 #include "softbus_error_code.h"
+#include "softbus_mintp_socket.h"
 #include "softbus_tcp_socket.h"
 #include "softbus_usb_tcp_socket.h"
 #include "softbus_watch_event_interface.h"
@@ -124,6 +125,14 @@ int32_t ConnInitSockets(void)
         return ret;
     }
     CONN_LOGD(CONN_INIT, "usb registed!");
+
+    ret = RegistSocketProtocol(GetMintpProtocol());
+    if (ret != SOFTBUS_OK) {
+        CONN_LOGE(CONN_INIT, "regist mintp failed!! ret=%{public}" PRId32, ret);
+        (void)SoftBusMutexDestroy(&g_socketsMutex);
+        return ret;
+    }
+    CONN_LOGD(CONN_INIT, "mintp registed!");
 
     return ret;
 }

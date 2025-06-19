@@ -645,6 +645,7 @@ void FillSessionParam(SessionParam *param, SessionAttribute *tmpAttr,
     param->attr = tmpAttr;
     param->isQosLane = true;
     param->actionId = sessionNode->actionId;
+    param->isLowLatency = sessionNode->isLowLatency;
 }
 
 void ClientConvertRetVal(int32_t socket, int32_t *retOut)

@@ -1023,4 +1023,106 @@ HWTEST_F(TransSdkTcpDirectTest, TransTdcGetInfoByIdWithIncSeqTest001, TestSize.L
     DestroySoftBusList(g_tcpDirectChannelInfoList);
     g_tcpDirectChannelInfoList = nullptr;
 }
+
+/**
+ * @tc.name: GetFdByPeerIpAndPortTest001
+ * @tc.desc: test GetFdByPeerIpAndPort function.
+ * @tc.type: FUNC
+ * @tc.require:
+ */
+HWTEST_F(TransSdkTcpDirectTest, GetFdByPeerIpAndPortTest001, TestSize.Level1)
+{
+    int32_t channelId = 1;
+    TcpDirectChannelInfo *info = (TcpDirectChannelInfo *)SoftBusCalloc(sizeof(TcpDirectChannelInfo));
+    ASSERT_TRUE(info != nullptr);
+    (void)strcpy_s(info->detail.peerIp, sizeof(info->detail.peerIp), "127.0.0.1");
+    info->detail.peerPort = 1234;
+    info->detail.fd = 123;
+    info->channelId = channelId;
+
+    g_tcpDirectChannelInfoList = CreateSoftBusList();
+    ASSERT_TRUE(g_tcpDirectChannelInfoList != nullptr);
+    (void)SoftBusMutexLock(&g_tcpDirectChannelInfoList->lock);
+    ListAdd(&g_tcpDirectChannelInfoList->list, &info->node);
+    (void)SoftBusMutexUnlock(&g_tcpDirectChannelInfoList->lock);
+
+    int32_t fd = -1;
+    int32_t ret = GetFdByPeerIpAndPort("127.0.0.1", 1234, &fd);
+    EXPECT_EQ(ret, SOFTBUS_OK);
+    EXPECT_EQ(fd, 123);
+    ret = GetFdByPeerIpAndPort("127.0.0.1", 1235, &fd);
+    EXPECT_EQ(ret, SOFTBUS_NOT_FIND);
+
+    SoftBusFree(info);
+    DestroySoftBusList(g_tcpDirectChannelInfoList);
+    g_tcpDirectChannelInfoList = nullptr;
+}
+
+/**
+ * @tc.name: TransStartTimeSyncTest001
+ * @tc.desc: test TransStartTimeSync function.
+ * @tc.type: FUNC
+ * @tc.require:
+ */
+HWTEST_F(TransSdkTcpDirectTest, OnTimeSyncResultByIpTest001, TestSize.Level1)
+{
+    ChannelInfo channel;
+    channel.peerIp = nullptr;
+    int32_t ret = TransStartTimeSync(&channel);
+    EXPECT_EQ(ret, SOFTBUS_STRCPY_ERR);
+    channel.peerIp = (char *)"127.0.0.1";
+    channel.peerDeviceId = nullptr;
+    ret = TransStartTimeSync(&channel);
+    EXPECT_EQ(ret, SOFTBUS_STRCPY_ERR);
+    channel.peerDeviceId = (char *)"1234567890";
+    channel.pkgName = nullptr;
+    ret = TransStartTimeSync(&channel);
+    EXPECT_NE(ret, SOFTBUS_OK);
+    channel.pkgName = (char *)"test";
+    ret = TransStartTimeSync(&channel);
+
+    OnTimeSyncResultByIp(nullptr, -1);
+    OnTimeSyncResultByIp(nullptr, SOFTBUS_OK);
+    TimeSyncResultWithSocket info;
+    (void)strcpy_s(info.targetSocketInfo.peerIp, sizeof(info.targetSocketInfo.peerIp), "127.0.0.1");
+    info.targetSocketInfo.peerPort = 1234;
+    OnTimeSyncResultByIp(&info, SOFTBUS_OK);
+}
+
+/**
+ * @tc.name: TransStopTimeSyncTest001
+ * @tc.desc: test TransStopTimeSync function.
+ * @tc.type: FUNC
+ * @tc.require:
+ */
+HWTEST_F(TransSdkTcpDirectTest, TransStopTimeSyncTest001, TestSize.Level1)
+{
+    int32_t ret = TransStopTimeSync(0);
+    EXPECT_NE(ret, SOFTBUS_OK);
+
+    int32_t channelId = 1;
+    TcpDirectChannelInfo *info = (TcpDirectChannelInfo *)SoftBusCalloc(sizeof(TcpDirectChannelInfo));
+    ASSERT_TRUE(info != nullptr);
+    (void)strcpy_s(info->detail.peerIp, sizeof(info->detail.peerIp), "127.0.0.1");
+    info->detail.peerPort = 1234;
+    info->detail.fd = 123;
+    info->channelId = channelId;
+    info->detail.fdProtocol = LNN_PROTOCOL_IP;
+    (void)strcpy_s(info->detail.peerDeviceId, sizeof(info->detail.peerDeviceId), "1234567890");
+    g_tcpDirectChannelInfoList = CreateSoftBusList();
+    ASSERT_TRUE(g_tcpDirectChannelInfoList != nullptr);
+    (void)SoftBusMutexLock(&g_tcpDirectChannelInfoList->lock);
+    ListAdd(&g_tcpDirectChannelInfoList->list, &info->node);
+    (void)SoftBusMutexUnlock(&g_tcpDirectChannelInfoList->lock);
+
+    ret = TransStopTimeSync(channelId);
+    EXPECT_EQ(ret, SOFTBUS_OK);
+
+    info->detail.fdProtocol = LNN_PROTOCOL_MINTP;
+    ret = TransStopTimeSync(channelId);
+    EXPECT_NE(ret, SOFTBUS_OK);
+    SoftBusFree(info);
+    DestroySoftBusList(g_tcpDirectChannelInfoList);
+    g_tcpDirectChannelInfoList = nullptr;
+}
 } // namespace OHOS
