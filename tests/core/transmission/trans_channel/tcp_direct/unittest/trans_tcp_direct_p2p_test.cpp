@@ -308,13 +308,20 @@ HWTEST_F(TransTcpDirectP2pTest, VerifyP2pTest001, TestSize.Level1)
     pfnLnnEnhanceFuncList->authMetaPostTransData = AuthMetaPostTransData;
     AuthHandle authHandle = { .authId = 1, .type = AUTH_LINK_TYPE_WIFI };
     int64_t seq = 1;
-    int32_t ret = VerifyP2p(authHandle, nullptr, nullptr, 0, seq);
+    VerifyP2pInfo info;
+    info.myIp = nullptr;
+    info.peerIp = nullptr;
+    info.myPort = 0;
+    info.protocol = LNN_PROTOCOL_IP;
+    int32_t ret = VerifyP2p(authHandle, seq, &info);
     ASSERT_EQ(ret, SOFTBUS_PARSE_JSON_ERR);
 
     NiceMock<TransTcpDirectCommonInterfaceMock> TransTcpDirectP2pMock;
     EXPECT_CALL(TransTcpDirectP2pMock, AuthMetaPostTransData).WillOnce(Return(SOFTBUS_LOCK_ERR));
     int32_t port = MY_PORT;
-    ret = VerifyP2p(authHandle, g_ip, nullptr, port, seq);
+    info.myIp = g_ip;
+    info.myPort = port;
+    ret = VerifyP2p(authHandle, seq, &info);
     EXPECT_EQ(ret, SOFTBUS_LOCK_ERR);
 }
 
@@ -555,13 +562,13 @@ HWTEST_F(TransTcpDirectP2pTest, StartVerifyP2pInfo005, TestSize.Level1)
 HWTEST_F(TransTcpDirectP2pTest, StartNewHmlListenerTest001, TestSize.Level1)
 {
     ListenerModule moduleType = UNUSE_BUTT;
-    int32_t ret = StartNewHmlListener(nullptr, &g_port, &moduleType);
+    int32_t ret = StartNewHmlListener(nullptr, LNN_PROTOCOL_IP, &g_port, &moduleType);
     EXPECT_EQ(ret, SOFTBUS_STRCPY_ERR);
 
-    ret = StartNewHmlListener(g_ip, &g_port, &moduleType);
+    ret = StartNewHmlListener(g_ip, LNN_PROTOCOL_IP, &g_port, &moduleType);
     EXPECT_EQ(ret, SOFTBUS_TRANS_TDC_START_SESSION_LISTENER_FAILED);
 
-    ret = StartNewHmlListener(g_localIp, &g_port, &moduleType);
+    ret = StartNewHmlListener(g_localIp, LNN_PROTOCOL_IP, &g_port, &moduleType);
     EXPECT_EQ(ret, SOFTBUS_OK);
     for (int32_t i = DIRECT_CHANNEL_SERVER_HML_START; i <= DIRECT_CHANNEL_SERVER_HML_END; i++) {
         StopHmlListener((ListenerModule)i);
@@ -576,7 +583,7 @@ HWTEST_F(TransTcpDirectP2pTest, StartNewHmlListenerTest001, TestSize.Level1)
  */
 HWTEST_F(TransTcpDirectP2pTest, StartHmlListenerTest001, TestSize.Level1)
 {
-    int32_t ret = StartHmlListener(g_ip, &g_port, g_udid);
+    int32_t ret = StartHmlListener(g_ip, &g_port, g_udid, LNN_PROTOCOL_IP);
     EXPECT_EQ(ret, SOFTBUS_NO_INIT);
 }
 
@@ -590,7 +597,7 @@ HWTEST_F(TransTcpDirectP2pTest, StartHmlListenerTest002, TestSize.Level1)
 {
     int32_t ret = CreatHmlListenerList();
     EXPECT_EQ(ret, SOFTBUS_OK);
-    ret = StartHmlListener(g_ip, &g_port, g_udid);
+    ret = StartHmlListener(g_ip, &g_port, g_udid, LNN_PROTOCOL_IP);
     EXPECT_EQ(ret, SOFTBUS_TRANS_TDC_START_SESSION_LISTENER_FAILED);
 
     ListenerModule moduleType = GetModuleByHmlIp(g_ip);
@@ -611,7 +618,7 @@ HWTEST_F(TransTcpDirectP2pTest, StartHmlListenerTest003, TestSize.Level1)
 {
     int32_t ret = CreatHmlListenerList();
     EXPECT_EQ(ret, SOFTBUS_OK);
-    ret = StartHmlListener(g_ip, &g_port, g_udid);
+    ret = StartHmlListener(g_ip, &g_port, g_udid, LNN_PROTOCOL_IP);
     EXPECT_EQ(ret, SOFTBUS_TRANS_TDC_START_SESSION_LISTENER_FAILED);
     for (int32_t i = DIRECT_CHANNEL_SERVER_HML_START; i <= DIRECT_CHANNEL_SERVER_HML_END; i++) {
         StopHmlListener((ListenerModule)i);
@@ -628,9 +635,9 @@ HWTEST_F(TransTcpDirectP2pTest, StartHmlListenerTest004, TestSize.Level1)
 {
     int32_t ret = CreatHmlListenerList();
     EXPECT_EQ(ret, SOFTBUS_OK);
-    ret = StartHmlListener(g_localIp, &g_port, g_udid);
+    ret = StartHmlListener(g_localIp, &g_port, g_udid, LNN_PROTOCOL_IP);
     EXPECT_EQ(ret, SOFTBUS_OK);
-    ret = StartHmlListener(g_localIp, &g_port, g_udid);
+    ret = StartHmlListener(g_localIp, &g_port, g_udid, LNN_PROTOCOL_IP);
     EXPECT_EQ(ret, SOFTBUS_OK);
     for (int32_t i = DIRECT_CHANNEL_SERVER_HML_START; i <= DIRECT_CHANNEL_SERVER_HML_END; i++) {
         StopHmlListener((ListenerModule)i);
@@ -691,7 +698,7 @@ HWTEST_F(TransTcpDirectP2pTest, AddP2pOrHmlTriggerTest001, TestSize.Level1)
     int32_t fd = NORMAL_FD;
     const char *myAddr = HML_ADDR;
     int32_t seq = NOAMAL_SEQ;
-    ret = AddP2pOrHmlTrigger(fd, myAddr, seq);
+    ret = AddP2pOrHmlTrigger(fd, myAddr, seq, 0);
     EXPECT_EQ(SOFTBUS_TRANS_ADD_HML_TRIGGER_FAILED, ret);
 }
 
@@ -709,7 +716,7 @@ HWTEST_F(TransTcpDirectP2pTest, AddP2pOrHmlTriggerTest002, TestSize.Level1)
     int32_t fd = NORMAL_FD;
     const char *myAddr = MY_IP;
     int32_t seq = NOAMAL_SEQ;
-    ret = AddP2pOrHmlTrigger(fd, myAddr, seq);
+    ret = AddP2pOrHmlTrigger(fd, myAddr, seq, 0);
     EXPECT_EQ(SOFTBUS_CONN_FAIL, ret);
 }
 
@@ -757,10 +764,10 @@ HWTEST_F(TransTcpDirectP2pTest, ClearHmlListenerByUuidTest001, TestSize.Level1)
     ClearHmlListenerByUuid(g_uuid);
     int32_t ret = CreatHmlListenerList();
     EXPECT_EQ(SOFTBUS_OK, ret);
-    ret = StartHmlListener(g_ip, &g_port, g_udid);
+    ret = StartHmlListener(g_ip, &g_port, g_udid, LNN_PROTOCOL_IP);
     EXPECT_EQ(ret, SOFTBUS_TRANS_TDC_START_SESSION_LISTENER_FAILED);
     ClearHmlListenerByUuid(g_uuid);
-    ret = StartHmlListener(g_localIp, &g_port, g_udid);
+    ret = StartHmlListener(g_localIp, &g_port, g_udid, LNN_PROTOCOL_IP);
     EXPECT_EQ(ret, SOFTBUS_OK);
     ClearHmlListenerByUuid(g_uuid);
     AnonymizeIp(g_ip, (char *)g_ip, g_port);
@@ -839,7 +846,11 @@ HWTEST_F(TransTcpDirectP2pTest, PackAndSendVerifyP2pRspTest001, TestSize.Level1)
 {
     int32_t seq = 0;
     AuthHandle authHandle = { .authId = AUTH_INVALID_ID, .type = AUTH_LINK_TYPE_MAX };
-    int32_t ret = PackAndSendVerifyP2pRsp(nullptr, g_port, seq, true, authHandle);
+    VerifyP2pInfo info;
+    info.myIp = nullptr;
+    info.myPort = g_port;
+    info.protocol = LNN_PROTOCOL_IP;
+    int32_t ret = PackAndSendVerifyP2pRsp(&info, seq, true, authHandle);
     EXPECT_EQ(SOFTBUS_PARSE_JSON_ERR, ret);
 }
 
@@ -853,9 +864,13 @@ HWTEST_F(TransTcpDirectP2pTest, PackAndSendVerifyP2pRspTest002, TestSize.Level1)
 {
     int64_t seq = 0;
     AuthHandle authHandle = { .authId = AUTH_INVALID_ID, .type = AUTH_LINK_TYPE_MAX };
-    int32_t ret = PackAndSendVerifyP2pRsp(g_ip, g_port, seq, true, authHandle);
+    VerifyP2pInfo info;
+    info.myIp = g_ip;
+    info.myPort = g_port;
+    info.protocol = LNN_PROTOCOL_IP;
+    int32_t ret = PackAndSendVerifyP2pRsp(&info, seq, true, authHandle);
     EXPECT_EQ(SOFTBUS_INVALID_PARAM, ret);
-    ret = PackAndSendVerifyP2pRsp(g_ip, g_port, seq, false, authHandle);
+    ret = PackAndSendVerifyP2pRsp(&info, seq, false, authHandle);
     EXPECT_EQ(SOFTBUS_TRANS_PROXY_INVALID_CHANNEL_ID, ret);
 }
 
@@ -928,9 +943,9 @@ HWTEST_F(TransTcpDirectP2pTest, AddHmlTriggerTest001, TestSize.Level1)
 {
     int32_t fd = 1;
     int64_t seq = 1;
-    int32_t ret = StartHmlListener(g_localIp, &g_port, g_udid);
+    int32_t ret = StartHmlListener(g_localIp, &g_port, g_udid, LNN_PROTOCOL_IP);
     EXPECT_EQ(ret, SOFTBUS_OK);
-    ret = AddHmlTrigger(fd, g_ip, seq);
+    ret = AddHmlTrigger(fd, g_ip, seq, 0);
     EXPECT_NE(SOFTBUS_OK, ret);
     ClearHmlListenerByUuid(g_uuid);
 }

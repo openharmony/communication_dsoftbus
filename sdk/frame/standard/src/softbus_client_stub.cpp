@@ -169,6 +169,12 @@ static int32_t MessageTcpParcelRead(MessageParcel &data, ChannelInfo *channel)
         channel->fd = data.ReadFileDescriptor();
         channel->myIp = (char *)data.ReadCString();
         COMM_CHECK_AND_RETURN_RET_LOGE(channel->myIp != nullptr, SOFTBUS_IPC_ERR, COMM_SDK, "read myIp failed");
+        READ_PARCEL_WITH_RET(data, Uint32, channel->fdProtocol, SOFTBUS_IPC_ERR);
+        channel->peerIp = (char *)data.ReadCString();
+        COMM_CHECK_AND_RETURN_RET_LOGE(channel->peerIp != nullptr, SOFTBUS_IPC_ERR, COMM_SDK, "read peerIp failed");
+        READ_PARCEL_WITH_RET(data, Int32, channel->peerPort, SOFTBUS_IPC_ERR);
+        channel->pkgName = (char *)data.ReadCString();
+        COMM_CHECK_AND_RETURN_RET_LOGE(channel->pkgName != nullptr, SOFTBUS_IPC_ERR, COMM_SDK, "read pkgName failed");
     }
     return SOFTBUS_OK;
 }

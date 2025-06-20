@@ -88,6 +88,7 @@ struct WifiDirectManager {
     void (*notifyPtkSyncResult)(const char *remoteDeviceId, int result);
     void (*notifyPtkMismatch)(const char *remoteNetworkId, uint32_t len, int32_t reason);
     void (*notifyHmlState)(SoftBusHmlState state);
+    int32_t (*getRemoteIpByRemoteMac)(const char *remoteMac, char *remoteIp, int32_t remoteIpSize);
 };
 
 #ifdef __cplusplus

@@ -221,6 +221,7 @@
         "SetListenerState";
         "IsProxyChannelEnabled";
         "RegisterAccessHook";
+        "ClientSetLowLatencyBySocket";
     local:
         *;
 };

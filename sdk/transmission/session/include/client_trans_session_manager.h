@@ -184,6 +184,8 @@ int32_t ClientGetSessionNameBySessionId(int32_t sessionId, char *sessionName);
 
 int32_t GetIsAsyncAndTokenTypeBySessionId(int32_t sessionId, bool *isAsync, int32_t *tokenType);
 
+int32_t ClientSetLowLatencyBySocket(int32_t socket);
+
 #ifdef __cplusplus
 }
 #endif

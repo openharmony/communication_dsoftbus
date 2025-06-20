@@ -90,5 +90,10 @@ int32_t ClientTransTdcOnDataReceived(int32_t channelId, const void *data, uint32
 {
     return GetTransTcpDirectInterface()->ClientTransTdcOnDataReceived(channelId, data, len, type);
 }
+
+int32_t SetMintpSocketTos(int32_t fd, uint32_t tos)
+{
+    return GetTransTcpDirectInterface()->SetMintpSocketTos(fd, tos);
+}
 }
 }

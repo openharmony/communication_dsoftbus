@@ -2063,6 +2063,27 @@ HWTEST_F(TransTcpDirectMessageAppendTest, CreateSessionConnNode001, TestSize.Lev
 }
 
 /**
+ * @tc.name: CreateSessionConnNode002
+ * @tc.desc: Should return SOFTBUS_TRANS_PACK_REQUEST_FAILED  when PackRequest return NULL.
+ * @tc.type: FUNC
+ * @tc.require:
+ */
+HWTEST_F(TransTcpDirectMessageAppendTest, CreateSessionConnNode002, TestSize.Level1)
+{
+    ConnectOption *clientAddr = (ConnectOption *)SoftBusMalloc(sizeof(ConnectOption));
+    ASSERT_TRUE(clientAddr != nullptr);
+
+    ListenerModule module = UNUSE_BUTT;
+    int32_t fd = NORMAL_FD;
+    int32_t channelId = TEST_CHANNELID;
+    NiceMock<TransTcpDirectMessageInterfaceMock> TcpMessageMock;
+    EXPECT_CALL(TcpMessageMock, LnnGetLocalStrInfo).WillOnce(Return(SOFTBUS_OK));
+    int32_t ret = CreateSessionConnNode(module, fd, channelId, clientAddr);
+    EXPECT_NE(SOFTBUS_OK, ret);
+    SoftBusFree(clientAddr);
+}
+
+/**
  * @tc.name: NotifyFastDataRecv001
  * @tc.desc: test NotifyFastDataRecv
  * @tc.type: FUNC

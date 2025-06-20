@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2022 Huawei Device Co., Ltd.
+ * Copyright (c) 2022-2025 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -19,6 +19,7 @@
 #include <stdint.h>
 
 #include "cJSON.h"
+#include "softbus_protocol_def.h"
 
 #ifdef __cplusplus
 #if __cplusplus
@@ -31,6 +32,10 @@ char *VerifyP2pPackError(int32_t code, int32_t errCode, const char *errDesc);
 char *VerifyP2pPack(const char *myIp, int32_t myPort, const char *peerIp);
 
 int32_t VerifyP2pUnPack(const cJSON *json, char *ip, uint32_t ipLen, int32_t *port);
+
+char *VerifyP2pPackWithProtocol(const char *myIp, int32_t myPort, const char *peerIp, ProtocolType protocol);
+
+int32_t VerifyP2pUnPackWithProtocol(const cJSON *json, char *ip, uint32_t ipLen, int32_t *port, ProtocolType *protocol);
 
 #ifdef __cplusplus
 #if __cplusplus
