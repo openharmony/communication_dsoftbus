@@ -844,10 +844,12 @@ int32_t SoftBusClientStub::OnBrProxyOpenedInner(MessageParcel &data, MessageParc
     COMM_CHECK_AND_RETURN_RET_LOGE(data.ReadInt32(channelId), SOFTBUS_IPC_ERR, COMM_SDK, "read channelId failed");
     char *brMac = (char *)data.ReadCString();
     COMM_CHECK_AND_RETURN_RET_LOGE(brMac != nullptr, SOFTBUS_IPC_ERR, COMM_SDK, "read brMac failed");
+    char *uuid = (char *)data.ReadCString();
+    COMM_CHECK_AND_RETURN_RET_LOGE(brMac != nullptr, SOFTBUS_IPC_ERR, COMM_SDK, "read uuid failed");
     int32_t reason;
     COMM_CHECK_AND_RETURN_RET_LOGE(data.ReadInt32(reason), SOFTBUS_IPC_ERR, COMM_SDK, "read reason failed");
  
-    return ClientTransOnBrProxyOpened(channelId, brMac, reason);
+    return ClientTransOnBrProxyOpened(channelId, brMac, uuid, reason);
 }
  
 int32_t SoftBusClientStub::OnBrProxyDataRecvInner(MessageParcel &data, MessageParcel &reply)

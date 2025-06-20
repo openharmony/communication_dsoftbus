@@ -897,10 +897,41 @@ EXIT:
     return NULL;
 }
 
+static int32_t GetOffParam(napi_env env, napi_value *args, size_t argc, int32_t *channelId)
+{
+    if (channelId == NULL) {
+        return SOFTBUS_INVALID_PARAM;
+    }
+
+    napi_status status = napi_get_value_int32(env, args[ARGS_INDEX_1], channelId);
+    if (status != napi_ok) {
+        return SOFTBUS_INVALID_PARAM;
+    }
+    double value;
+    status = napi_get_value_double(env, args[ARGS_INDEX_1], &value);
+    if (status != napi_ok) {
+        return SOFTBUS_INVALID_PARAM;
+    }
+    int32_t intValue = (int32_t)value;
+    bool isInteger = (double)intValue == value;
+    if (!isInteger) {
+        return SOFTBUS_INVALID_PARAM;
+    }
+    if (argc != ARGS_SIZE_3) {
+        return SOFTBUS_OK;
+    }
+    napi_valuetype funcType;
+    status = napi_typeof(env, args[ARGS_INDEX_2], &funcType);
+    if (status != napi_ok || funcType != napi_function) {
+        return SOFTBUS_INVALID_PARAM;
+    }
+    return SOFTBUS_OK;
+}
+
 napi_value Off(napi_env env, napi_callback_info info)
 {
-    size_t argc = ARGS_SIZE_2;
-    napi_value args[ARGS_SIZE_2];
+    size_t argc = ARGS_SIZE_3;
+    napi_value args[ARGS_SIZE_3];
     napi_status status = napi_get_cb_info(env, info, &argc, args, NULL, NULL);
     if (status != napi_ok || argc < ARGS_SIZE_2) {
         goto EXIT;
@@ -911,37 +942,26 @@ napi_value Off(napi_env env, napi_callback_info info)
     if (status != napi_ok) {
         goto EXIT;
     }
-    int32_t channelId;
-    status = napi_get_value_int32(env, args[ARGS_INDEX_1], &channelId);
-    if (status != napi_ok) {
+    int32_t channelId = 0;
+    int32_t ret = GetOffParam(env, args, argc, &channelId);
+    if (ret != SOFTBUS_OK) {
         goto EXIT;
     }
-    double value;
-    status = napi_get_value_double(env, args[ARGS_INDEX_1], &value);
-    if (status != napi_ok) {
-        goto EXIT;
-    }
-    int32_t intValue = (int32_t)value;
-    bool isInteger = (double)intValue == value;
-    if (!isInteger) {
-        goto EXIT;
-    }
+    
     if (strcmp(type, "receiveData") == 0) {
         if (receiveDataCallbackRef != NULL) {
             napi_delete_reference(env, receiveDataCallbackRef);
             receiveDataCallbackRef = NULL;
         }
-        int32_t ret = SetListenerState(channelId, DATA_RECEIVE, false);
+        ret = SetListenerState(channelId, DATA_RECEIVE, false);
         ThrowErrFromC2Js(env, ret);
     } else if (strcmp(type, "channelStateChange") == 0) {
         if (receiveChannelStatusCallbackRef != NULL) {
             napi_delete_reference(env, receiveChannelStatusCallbackRef);
             receiveChannelStatusCallbackRef = NULL;
         }
-        int32_t ret = SetListenerState(channelId, CHANNEL_STATE, false);
+        ret = SetListenerState(channelId, CHANNEL_STATE, false);
         ThrowErrFromC2Js(env, ret);
-    } else {
-        goto EXIT;
     }
     return NULL;
 EXIT:

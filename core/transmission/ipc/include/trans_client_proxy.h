@@ -50,7 +50,8 @@ void RegisterPermissionChangeCallback(void);
 int32_t ClientIpcChannelOnQos(ChannelMsg *data, QoSEvent event, const QosTV *qos, uint32_t count);
 int32_t ClientIpcCheckCollabRelation(const char *pkgName, int32_t pid,
     const CollabInfo *sourceInfo, const CollabInfo *sinkInfo, const TransInfo *transInfo);
-int32_t ClientIpcBrProxyOpened(const char *pkgName, int32_t channelId, const char *brMac, int32_t reason);
+int32_t ClientIpcBrProxyOpened(const char *pkgName, int32_t channelId,
+    const char *brMac, const char *uuid, int32_t reason);
 int32_t ClientIpcBrProxyReceivedData(const char *pkgName, int32_t channelId, const uint8_t *data, uint32_t len);
 int32_t ClientIpcBrProxyStateChanged(const char *pkgName, int32_t channelId, int32_t channelState);
 int32_t ClientIpcQueryPermission(const char *pkgName, const char *bundleName, bool *isEmpowered);
