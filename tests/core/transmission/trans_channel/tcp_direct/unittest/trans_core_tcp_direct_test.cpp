@@ -695,4 +695,24 @@ HWTEST_F(TransCoreTcpDirectTest, TransTcpGetPrivilegeCloseList001, TestSize.Leve
     ret = TransDelTcpChannelInfoByChannelId(info->channelId);
     EXPECT_EQ(SOFTBUS_OK, ret);
 }
+
+/**
+ * @tc.name: TransDelTcpChannelInfoByChannelId001
+ * @tc.desc: test TransDelTcpChannelInfoByChannelId.
+ * @tc.type: FUNC
+ * @tc.require:
+ */
+HWTEST_F(TransCoreTcpDirectTest, TransDelTcpChannelInfoByChannelId001, TestSize.Level1)
+{
+    TcpChannelInfo *info = (TcpChannelInfo *)SoftBusCalloc(sizeof(TcpChannelInfo));
+    ASSERT_TRUE(info != nullptr);
+    info->channelId = 1;
+    info->businessType = BUSINESS_TYPE_BYTE;
+    info->fdProtocol = LNN_PROTOCOL_MINTP;
+    info->isServer = false;
+    int32_t ret = TransAddTcpChannelInfo(info);
+    EXPECT_EQ(SOFTBUS_OK, ret);
+    ret = TransDelTcpChannelInfoByChannelId(info->channelId);
+    EXPECT_EQ(SOFTBUS_OK, ret);
+}
 }

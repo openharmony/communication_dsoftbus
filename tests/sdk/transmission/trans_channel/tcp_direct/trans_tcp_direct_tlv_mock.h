@@ -45,6 +45,7 @@ public:
         int32_t channelType) = 0;
     virtual int32_t ClientTransTdcOnDataReceived(int32_t channelId, const void *data, uint32_t len,
     SessionPktType type) = 0;
+    virtual int32_t SetMintpSocketTos(int32_t fd, uint32_t tos) = 0;
 };
 
 class TransTcpDirectInterfaceMock : public TransTcpDirectInterface {
@@ -69,6 +70,7 @@ public:
         int32_t channelType));
     MOCK_METHOD4(ClientTransTdcOnDataReceived, int32_t(int32_t channelId, const void *data, uint32_t len,
         SessionPktType type));
+    MOCK_METHOD2(SetMintpSocketTos, int32_t(int32_t fd, uint32_t tos));
 };
 } // namespace OHOS
 #endif // TRANS_TCP_DIRECT_TLV_MOCK_H

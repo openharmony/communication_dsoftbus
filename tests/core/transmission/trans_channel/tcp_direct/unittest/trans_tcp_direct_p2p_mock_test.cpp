@@ -199,7 +199,7 @@ HWTEST_F(TransTcpDirectP2pMockTest, StartNewHmlListenerTest001, TestSize.Level1)
     int32_t port = TEST_PORT;
     NiceMock<TransTcpDirectP2pInterfaceMock> TcpP2pDirectMock;
     EXPECT_CALL(TcpP2pDirectMock, TransTdcStartSessionListener).WillOnce(Return(port));
-    int32_t ret = StartNewHmlListener(IP, &port, &moudleType);
+    int32_t ret = StartNewHmlListener(IP, LNN_PROTOCOL_IP, &port, &moudleType);
     EXPECT_EQ(SOFTBUS_OK, ret);
 }
 
@@ -215,9 +215,9 @@ HWTEST_F(TransTcpDirectP2pMockTest, StartHmlListenerTest001, TestSize.Level1)
     int32_t port = TEST_PORT;
     NiceMock<TransTcpDirectP2pInterfaceMock> TcpP2pDirectMock;
     EXPECT_CALL(TcpP2pDirectMock, TransTdcStartSessionListener).WillOnce(Return(port));
-    int32_t ret = StartHmlListener(IP, &port, TEST_UDID);
+    int32_t ret = StartHmlListener(IP, &port, TEST_UDID, LNN_PROTOCOL_IP);
     EXPECT_EQ(SOFTBUS_OK, ret);
-    ret = StartHmlListener(IP, &port, TEST_UDID);
+    ret = StartHmlListener(IP, &port, TEST_UDID, LNN_PROTOCOL_IP);
     EXPECT_EQ(SOFTBUS_OK, ret);
     EXPECT_CALL(TcpP2pDirectMock, StopBaseListener).WillOnce(Return(SOFTBUS_INVALID_PARAM));
     StopHmlListener(moudleType);
@@ -237,7 +237,7 @@ HWTEST_F(TransTcpDirectP2pMockTest, GetModuleByHmlIpTest001, TestSize.Level1)
     int32_t port = TEST_PORT;
     NiceMock<TransTcpDirectP2pInterfaceMock> TcpP2pDirectMock;
     EXPECT_CALL(TcpP2pDirectMock, TransTdcStartSessionListener).WillOnce(Return(port));
-    int32_t ret = StartHmlListener(IP, &port, TEST_UDID);
+    int32_t ret = StartHmlListener(IP, &port, TEST_UDID, LNN_PROTOCOL_IP);
     EXPECT_EQ(SOFTBUS_OK, ret);
     moudleType = GetModuleByHmlIp(IP);
     EXPECT_EQ(DIRECT_CHANNEL_SERVER_HML_START, moudleType);
@@ -311,11 +311,16 @@ HWTEST_F(TransTcpDirectP2pMockTest, VerifyP2pTest001, TestSize.Level1)
     (void)memcpy_s(data, TEST_LEN, DATA, TEST_LEN);
     NiceMock<TransTcpDirectP2pInterfaceMock> TcpP2pDirectMock;
     EXPECT_CALL(TcpP2pDirectMock, VerifyP2pPack).WillOnce(Return(nullptr));
-    int32_t ret = VerifyP2p(authHandle, IP, IP, port, seq);
+    VerifyP2pInfo info;
+    info.myIp = IP;
+    info.peerIp = IP;
+    info.myPort = port;
+    info.protocol = LNN_PROTOCOL_IP;
+    int32_t ret = VerifyP2p(authHandle, seq, &info);
     EXPECT_EQ(SOFTBUS_PARSE_JSON_ERR, ret);
     EXPECT_CALL(TcpP2pDirectMock, VerifyP2pPack).WillOnce(Return(data));
     EXPECT_CALL(TcpP2pDirectMock, AuthPostTransData).WillOnce(Return(SOFTBUS_INVALID_PARAM));
-    ret = VerifyP2p(authHandle, IP, IP, port, seq);
+    ret = VerifyP2p(authHandle, seq, &info);
     EXPECT_EQ(SOFTBUS_INVALID_PARAM, ret);
     // will free in VerifyP2p
     char *testData = static_cast<char *>(SoftBusCalloc(TEST_LEN));
@@ -323,7 +328,7 @@ HWTEST_F(TransTcpDirectP2pMockTest, VerifyP2pTest001, TestSize.Level1)
     (void)memcpy_s(testData, TEST_LEN, DATA, TEST_LEN);
     EXPECT_CALL(TcpP2pDirectMock, VerifyP2pPack).WillOnce(Return(testData));
     EXPECT_CALL(TcpP2pDirectMock, AuthPostTransData).WillOnce(Return(SOFTBUS_OK));
-    ret = VerifyP2p(authHandle, IP, IP, port, seq);
+    ret = VerifyP2p(authHandle, seq, &info);
     EXPECT_EQ(SOFTBUS_OK, ret);
 }
 
@@ -430,11 +435,16 @@ HWTEST_F(TransTcpDirectP2pMockTest, PackAndSendVerifyP2pRspTest001, TestSize.Lev
     ASSERT_TRUE(data != nullptr);
     (void)memcpy_s(data, TEST_LEN, DATA, TEST_LEN);
 
+    VerifyP2pInfo info;
+    info.myIp = IP;
+    info.myPort = port;
+    info.protocol = LNN_PROTOCOL_IP;
+
     NiceMock<TransTcpDirectP2pInterfaceMock> TcpP2pDirectMock;
     EXPECT_CALL(TcpP2pDirectMock, VerifyP2pPack).WillOnce(Return(nullptr));
     EXPECT_CALL(TcpP2pDirectMock, VerifyP2pPackError).WillOnce(Return(data));
     EXPECT_CALL(TcpP2pDirectMock, TransProxyPipelineSendMessage).WillOnce(Return(SOFTBUS_NOT_FIND));
-    int32_t ret = PackAndSendVerifyP2pRsp(IP, port, seq, isAuthLink, authHandle);
+    int32_t ret = PackAndSendVerifyP2pRsp(&info, seq, isAuthLink, authHandle);
     EXPECT_EQ(SOFTBUS_PARSE_JSON_ERR, ret);
 
     isAuthLink = true;
@@ -444,7 +454,7 @@ HWTEST_F(TransTcpDirectP2pMockTest, PackAndSendVerifyP2pRspTest001, TestSize.Lev
     EXPECT_CALL(TcpP2pDirectMock, VerifyP2pPack).WillOnce(Return(nullptr));
     EXPECT_CALL(TcpP2pDirectMock, VerifyP2pPackError).WillOnce(Return(testData));
     EXPECT_CALL(TcpP2pDirectMock, AuthPostTransData).WillOnce(Return(SOFTBUS_OK));
-    ret = PackAndSendVerifyP2pRsp(IP, port, seq, isAuthLink, authHandle);
+    ret = PackAndSendVerifyP2pRsp(&info, seq, isAuthLink, authHandle);
     EXPECT_EQ(SOFTBUS_PARSE_JSON_ERR, ret);
 }
 
@@ -469,16 +479,21 @@ HWTEST_F(TransTcpDirectP2pMockTest, PackAndSendVerifyP2pRspTest002, TestSize.Lev
     ASSERT_TRUE(newData != nullptr);
     (void)memcpy_s(data, TEST_LEN, DATA, TEST_LEN);
 
+    VerifyP2pInfo info;
+    info.myIp = IP;
+    info.myPort = port;
+    info.protocol = LNN_PROTOCOL_IP;
+
     NiceMock<TransTcpDirectP2pInterfaceMock> TcpP2pDirectMock;
     EXPECT_CALL(TcpP2pDirectMock, VerifyP2pPack).WillOnce(Return(data));
     EXPECT_CALL(TcpP2pDirectMock, TransProxyPipelineSendMessage).WillOnce(Return(SOFTBUS_NOT_FIND));
-    int32_t ret = PackAndSendVerifyP2pRsp(IP, port, seq, isAuthLink, authHandle);
+    int32_t ret = PackAndSendVerifyP2pRsp(&info, seq, isAuthLink, authHandle);
     EXPECT_EQ(SOFTBUS_NOT_FIND, ret);
 
     isAuthLink = true;
     EXPECT_CALL(TcpP2pDirectMock, VerifyP2pPack).WillOnce(Return(newData));
     EXPECT_CALL(TcpP2pDirectMock, AuthPostTransData).WillOnce(Return(SOFTBUS_OK));
-    ret = PackAndSendVerifyP2pRsp(IP, port, seq, isAuthLink, authHandle);
+    ret = PackAndSendVerifyP2pRsp(&info, seq, isAuthLink, authHandle);
     EXPECT_EQ(SOFTBUS_OK, ret);
 }
 
@@ -541,18 +556,18 @@ HWTEST_F(TransTcpDirectP2pMockTest, AddHmlTriggerTest001, TestSize.Level1)
     int32_t port = TEST_PORT;
     int32_t fd = TEST_FD;
     int64_t seq = TEST_SEQ;
-    int32_t ret = AddHmlTrigger(fd, IP, seq);
+    int32_t ret = AddHmlTrigger(fd, IP, seq, port);
     EXPECT_EQ(SOFTBUS_TRANS_ADD_HML_TRIGGER_FAILED, ret);
     NiceMock<TransTcpDirectP2pInterfaceMock> TcpP2pDirectMock;
     EXPECT_CALL(TcpP2pDirectMock, TransTdcStartSessionListener).WillOnce(Return(port));
-    ret = StartHmlListener(IP, &port, TEST_UDID);
+    ret = StartHmlListener(IP, &port, TEST_UDID, LNN_PROTOCOL_IP);
     EXPECT_EQ(SOFTBUS_OK, ret);
     EXPECT_CALL(TcpP2pDirectMock, AddTrigger).WillOnce(Return(SOFTBUS_NO_INIT));
-    ret = AddHmlTrigger(fd, IP, seq);
+    ret = AddHmlTrigger(fd, IP, seq, port);
     EXPECT_EQ(SOFTBUS_NO_INIT, ret);
 
     EXPECT_CALL(TcpP2pDirectMock, AddTrigger).WillOnce(Return(SOFTBUS_OK));
-    ret = AddHmlTrigger(fd, IP, seq);
+    ret = AddHmlTrigger(fd, IP, seq, port);
     EXPECT_EQ(SOFTBUS_NOT_FIND, ret);
 
     SessionConn *conn = TestSetSessionConn();
@@ -561,7 +576,7 @@ HWTEST_F(TransTcpDirectP2pMockTest, AddHmlTriggerTest001, TestSize.Level1)
     EXPECT_EQ(SOFTBUS_OK, ret);
 
     EXPECT_CALL(TcpP2pDirectMock, AddTrigger).WillOnce(Return(SOFTBUS_OK));
-    ret = AddHmlTrigger(fd, IP, seq);
+    ret = AddHmlTrigger(fd, IP, seq, port);
     EXPECT_EQ(SOFTBUS_OK, ret);
     TransDelSessionConnById(conn->channelId);
 }
@@ -579,7 +594,7 @@ HWTEST_F(TransTcpDirectP2pMockTest, AddP2pOrHmlTriggerTest001, TestSize.Level1)
     NiceMock<TransTcpDirectP2pInterfaceMock> TcpP2pDirectMock;
     EXPECT_CALL(TcpP2pDirectMock, IsHmlIpAddr).WillOnce(Return(false));
     EXPECT_CALL(TcpP2pDirectMock, AddTrigger).WillOnce(Return(SOFTBUS_OK));
-    int32_t ret = AddP2pOrHmlTrigger(fd, IP, seq);
+    int32_t ret = AddP2pOrHmlTrigger(fd, IP, seq, 0);
     EXPECT_EQ(SOFTBUS_OK, ret);
 }
 
