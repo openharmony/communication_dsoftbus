@@ -41,6 +41,7 @@ namespace OHOS {
 #define TRANS_TEST_PID 4700
 #define TEST_PROXY_CHANNEL_ID 1026
 #define TEST_TDC_CHANNEL_ID 2048
+#define TEST_BUF_LEN 1024
 
 const char *g_pkgName = "dms";
 const char *g_sessionName = "ohos.distributedschedule.dms.test";
@@ -1116,5 +1117,97 @@ HWTEST_F(TransChannelManagerTest, GenerateChannelId001, TestSize.Level1)
     EXPECT_EQ(INVALID_CHANNEL_ID, channelId);
     g_channelIdCount = proxyChannel;
     SoftBusMutexDestroy(&g_myIdLock);
+}
+
+static void AddInt32ToBuffer(int32_t value, uint8_t *testBuffer, int32_t &bufferOffset)
+{
+    if (memcpy_s(testBuffer + bufferOffset, sizeof(int32_t), &value, sizeof(int32_t)) != EOK) {
+        return;
+    }
+    bufferOffset += sizeof(int32_t);
+}
+
+static void AddUint64ToBuffer(uint64_t value, uint8_t *testBuffer, int32_t &bufferOffset)
+{
+    if (memcpy_s(testBuffer + bufferOffset, sizeof(uint64_t), &value, sizeof(uint64_t)) != EOK) {
+        return;
+    }
+    bufferOffset += sizeof(uint64_t);
+}
+
+static void AddStringToBuffer(const char *str, uint8_t *testBuffer, int32_t &bufferOffset)
+{
+    uint32_t len = strlen(str);
+    if (memcpy_s(testBuffer + bufferOffset, sizeof(uint32_t), &len, sizeof(uint32_t)) != EOK) {
+        return;
+    }
+    bufferOffset += sizeof(uint32_t);
+    if (memcpy_s(testBuffer + bufferOffset, len, str, len) != EOK) {
+        return;
+    }
+    bufferOffset += len;
+}
+
+/**
+ * @tc.name: TransSetAccessInfo test
+ * @tc.desc: TransSetAccessInfo001
+ * @tc.type: FUNC
+ * @tc.require:
+ */
+HWTEST_F(TransChannelManagerTest, TransSetAccessInfo001, TestSize.Level1)
+{
+    int32_t expectedUserId = 123;
+    uint64_t expectedTokenId = 987654321;
+    const char *expectedSessionName = "test_session";
+    const char *expectedExtraInfo = "extra_info_data";
+    const char *expectedBusinessVer = "v1.2.3";
+    uint8_t testBuffer[TEST_BUF_LEN] = {0};
+    int32_t bufferOffset = 0;
+    pid_t callingPid = (pid_t)TRANS_TEST_PID;
+ 
+    AddInt32ToBuffer(expectedUserId, testBuffer, bufferOffset);
+    AddUint64ToBuffer(expectedTokenId, testBuffer, bufferOffset);
+    AddStringToBuffer(expectedSessionName, testBuffer, bufferOffset);
+    AddStringToBuffer(expectedExtraInfo, testBuffer, bufferOffset);
+    AddStringToBuffer(expectedBusinessVer, testBuffer, bufferOffset);
+
+    int32_t ret = TransSetAccessInfo(testBuffer, TEST_BUF_LEN, callingPid);
+    EXPECT_EQ(ret, SOFTBUS_NO_INIT);
+
+    char sessionName[] = "test_session";
+    SessionServer *newNode = (SessionServer *)SoftBusCalloc(sizeof(SessionServer));
+    ASSERT_TRUE(newNode != nullptr);
+    strcpy_s(newNode->sessionName, sizeof(sessionName), sessionName);
+    newNode->pid = callingPid;
+
+    ret = TransSessionMgrInit();
+    EXPECT_EQ(ret, SOFTBUS_OK);
+    ret = TransSessionServerAddItem(newNode);
+    EXPECT_EQ(ret, SOFTBUS_OK);
+
+    ret = TransSetAccessInfo(testBuffer, TEST_BUF_LEN, callingPid);
+    EXPECT_EQ(ret, SOFTBUS_OK);
+
+    ret = TransSessionServerDelItem(sessionName);
+    EXPECT_EQ(SOFTBUS_OK, ret);
+    TransSessionMgrDeinit();
+}
+
+/**
+ * @tc.name: TransSetAccessInfo test
+ * @tc.desc: TransSetAccessInfo002
+ * @tc.type: FUNC
+ * @tc.require:
+ */
+HWTEST_F(TransChannelManagerTest, TransSetAccessInfo002, TestSize.Level1)
+{
+    uint8_t shortBuf[1] = {0};
+    pid_t callingPid = (pid_t)TRANS_TEST_PID;
+    int32_t ret = TransSetAccessInfo(shortBuf, 1, callingPid);
+    EXPECT_EQ(ret, SOFTBUS_TRANS_INVALID_DATA_LENGTH);
+
+    uint8_t buf[sizeof(int32_t) + 1] = {0};
+    ret = TransSetAccessInfo(buf, sizeof(buf), callingPid);
+    EXPECT_EQ(ret, SOFTBUS_TRANS_INVALID_DATA_LENGTH);
 }
 } // OHOS

@@ -24,9 +24,11 @@ ohos_unittest("TransSessionManagerTest") {
     "$dsoftbus_core_path/authentication/interface",
 
     "$dsoftbus_core_path/bus_center/interface",
+    "$dsoftbus_core_path/bus_center/lnn/lane_hub/lane_manager/include",
     "$dsoftbus_core_path/bus_center/lnn/net_ledger/common/include",
 
     "$dsoftbus_core_path/common/include",
+    "$dsoftbus_core_path/common/security/permission/include",
 
     "$dsoftbus_core_path/connection/interface",
 
@@ -34,8 +36,11 @@ ohos_unittest("TransSessionManagerTest") {
     "$dsoftbus_core_path/discovery/interface",
 
     "$dsoftbus_core_path/transmission/common/include",
-    "$dsoftbus_core_path/transmission/session/include",
+    "$dsoftbus_core_path/transmission/ipc/include",
     "$dsoftbus_core_path/transmission/session/cpp/include",
+    "$dsoftbus_core_path/transmission/session/include",
+    "$dsoftbus_core_path/transmission/session/src",
+    "$dsoftbus_core_path/transmission/trans_channel/manager/include",
   ]
 
   deps = [
