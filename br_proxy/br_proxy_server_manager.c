@@ -50,7 +50,7 @@ typedef struct {
     pid_t uid;
     bool isEnable;
     bool isConnected;
-    struct ProxyChannel *channel;
+    struct ProxyChannel channel;
     ListNode node;
 } BrProxyInfo;
 
@@ -64,7 +64,7 @@ typedef struct {
     bool isReceiveCbSet;
     bool isChannelStateCbSet;
     ListNode node;
-    struct ProxyChannel *channel;
+    struct ProxyChannel channel;
 } ServerBrProxyChannelInfo;
 
 typedef struct {
@@ -162,9 +162,8 @@ static int32_t CloseAllBrProxy()
     BrProxyInfo *nodeInfo = NULL;
     BrProxyInfo *nodeNext = NULL;
     LIST_FOR_EACH_ENTRY_SAFE(nodeInfo, nodeNext, &(g_proxyList->list), BrProxyInfo, node) {
-        nodeInfo->channel->close(nodeInfo->channel);
+        nodeInfo->channel.close(&nodeInfo->channel);
         ListDelete(&nodeInfo->node);
-        SoftBusFree(nodeInfo->channel);
         SoftBusFree(nodeInfo);
         g_proxyList->cnt--;
         TRANS_LOGI(TRANS_SVC, "[br_proxy] brproxy is close");
@@ -419,7 +418,7 @@ static int32_t UpdateBrProxy(const char *brMac, const char *uuid, struct ProxyCh
             continue;
         }
         nodeInfo->isEnable = true;
-        int32_t ret = memcpy_s(nodeInfo->channel, sizeof(struct ProxyChannel), channel, sizeof(struct ProxyChannel));
+        int32_t ret = memcpy_s(&nodeInfo->channel, sizeof(struct ProxyChannel), channel, sizeof(struct ProxyChannel));
         if (ret != EOK) {
             TRANS_LOGE(TRANS_SVC, "[br_proxy] memcpy failed! ret:%{public}d", ret);
             (void)SoftBusMutexUnlock(&(g_proxyList->lock));
@@ -433,7 +432,7 @@ static int32_t UpdateBrProxy(const char *brMac, const char *uuid, struct ProxyCh
     return SOFTBUS_NOT_FIND;
 }
 
-static int32_t UpdateConnectState(const char *brMac, bool isConnect)
+static int32_t UpdateConnectState(const char *brMac, const char *uuid, bool isConnect)
 {
     if (brMac == NULL || g_proxyList == NULL) {
         TRANS_LOGE(TRANS_SVC, "[br_proxy] Something that couldn't have happened!");
@@ -445,7 +444,7 @@ static int32_t UpdateConnectState(const char *brMac, bool isConnect)
     }
     BrProxyInfo *nodeInfo = NULL;
     LIST_FOR_EACH_ENTRY(nodeInfo, &(g_proxyList->list), BrProxyInfo, node) {
-        if (strcmp(nodeInfo->proxyInfo.brMac, brMac) != 0) {
+        if (strcmp(nodeInfo->proxyInfo.brMac, brMac) != 0 || strcmp(nodeInfo->proxyInfo.uuid, uuid) != 0) {
             continue;
         }
         nodeInfo->isConnected = isConnect;
@@ -510,21 +509,16 @@ static int32_t ServerAddProxyToList(const char *brMac, const char *uuid)
         TRANS_LOGE(TRANS_SVC, "[br_proxy] calloc failed");
         return SOFTBUS_MALLOC_ERR;
     }
-    info->channel = (struct ProxyChannel *)SoftBusCalloc(sizeof(struct ProxyChannel));
-    if (info->channel == NULL) {
-        TRANS_LOGE(TRANS_SVC, "[br_proxy] calloc failed");
-        ret = SOFTBUS_MALLOC_ERR;
-        goto EXIT_WITH_FREE_INFO;
-    }
+
     ret = GetCallerInfoAndVerifyPermission(info);
     if (ret != SOFTBUS_OK) {
-        goto EXIT_WITH_FREE_CHANNEL;
+        goto EXIT_WITH_FREE_INFO;
     }
     if (strcpy_s(info->proxyInfo.brMac, sizeof(info->proxyInfo.brMac), brMac) != EOK ||
         strcpy_s(info->proxyInfo.uuid, sizeof(info->proxyInfo.uuid), uuid) != EOK) {
         TRANS_LOGE(TRANS_SVC, "[br_proxy] copy brMac or uuid failed");
         ret = SOFTBUS_STRCPY_ERR;
-        goto EXIT_WITH_FREE_CHANNEL;
+        goto EXIT_WITH_FREE_INFO;
     }
     info->uid = GetCallerUid();
     info->isEnable = false;
@@ -533,7 +527,7 @@ static int32_t ServerAddProxyToList(const char *brMac, const char *uuid)
     if (SoftBusMutexLock(&(g_proxyList->lock)) != SOFTBUS_OK) {
         TRANS_LOGE(TRANS_SVC, "[br_proxy] lock failed");
         ret = SOFTBUS_LOCK_ERR;
-        goto EXIT_WITH_FREE_CHANNEL;
+        goto EXIT_WITH_FREE_INFO;
     }
     ListAdd(&g_proxyList->list, &info->node);
     g_proxyList->cnt++;
@@ -541,8 +535,6 @@ static int32_t ServerAddProxyToList(const char *brMac, const char *uuid)
     (void)SoftBusMutexUnlock(&g_proxyList->lock);
     return SOFTBUS_OK;
 
-EXIT_WITH_FREE_CHANNEL:
-    SoftBusFree(info->channel);
 EXIT_WITH_FREE_INFO:
     SoftBusFree(info);
     return ret;
@@ -565,7 +557,6 @@ static int32_t ServerDeleteProxyFromList(const char *brMac, const char *uuid)
             continue;
         }
         ListDelete(&nodeInfo->node);
-        SoftBusFree(nodeInfo->channel);
         SoftBusFree(nodeInfo);
         g_proxyList->cnt--;
         TRANS_LOGI(TRANS_SVC, "[br_proxy] brproxy is close");
@@ -608,17 +599,11 @@ static int32_t ServerAddChannelToList(const char *brMac, const char *uuid, int32
         TRANS_LOGE(TRANS_SVC, "[br_proxy] calloc failed");
         return SOFTBUS_MALLOC_ERR;
     }
-    info->channel = (struct ProxyChannel *)SoftBusCalloc(sizeof(struct ProxyChannel));
-    if (info->channel == NULL) {
-        TRANS_LOGE(TRANS_SVC, "[br_proxy] calloc failed");
-        ret = SOFTBUS_MALLOC_ERR;
-        goto EXIT_WITH_FREE_INFO;
-    }
     if (strcpy_s(info->proxyInfo.brMac, sizeof(info->proxyInfo.brMac), brMac) != EOK ||
         strcpy_s(info->proxyInfo.uuid, sizeof(info->proxyInfo.uuid), uuid) != EOK) {
         TRANS_LOGE(TRANS_SVC, "[br_proxy] copy brMac or uuid failed");
         ret = SOFTBUS_STRCPY_ERR;
-        goto EXIT_WITH_FREE_CHANNEL_INFO;
+        goto EXIT_WITH_FREE_INFO;
     }
     info->channelId = channelId;
     info->requestId = requestId;
@@ -629,15 +614,14 @@ static int32_t ServerAddChannelToList(const char *brMac, const char *uuid, int32
     if (SoftBusMutexLock(&(g_serverList->lock)) != SOFTBUS_OK) {
         TRANS_LOGE(TRANS_SVC, "[br_proxy] lock failed");
         ret = SOFTBUS_LOCK_ERR;
-        goto EXIT_WITH_FREE_CHANNEL_INFO;
+        goto EXIT_WITH_FREE_INFO;
     }
     ListAdd(&g_serverList->list, &info->node);
     g_serverList->cnt++;
     TRANS_LOGI(TRANS_SVC, "[br_proxy] serverInfo channelId:%{public}d, cnt:%{public}d", channelId, g_serverList->cnt);
     (void)SoftBusMutexUnlock(&g_serverList->lock);
     return SOFTBUS_OK;
-EXIT_WITH_FREE_CHANNEL_INFO:
-    SoftBusFree(info->channel);
+
 EXIT_WITH_FREE_INFO:
     SoftBusFree(info);
     return ret;
@@ -660,7 +644,6 @@ static int32_t ServerDeleteChannelFromList(int32_t channelId)
             continue;
         }
         ListDelete(&nodeInfo->node);
-        SoftBusFree(nodeInfo->channel);
         SoftBusFree(nodeInfo);
         g_serverList->cnt--;
         TRANS_LOGI(TRANS_SVC, "[br_proxy] by channelId:%{public}d delete node success, cnt%{public}d",
@@ -687,7 +670,7 @@ static int32_t UpdateProxyChannel(const char *brMac, const char *uuid, struct Pr
         if (strcmp(brMac, info->proxyInfo.brMac) != 0 || strcmp(uuid, info->proxyInfo.uuid) != 0) {
             continue;
         }
-        int32_t ret = memcpy_s(info->channel, sizeof(struct ProxyChannel), channel, sizeof(struct ProxyChannel));
+        int32_t ret = memcpy_s(&info->channel, sizeof(struct ProxyChannel), channel, sizeof(struct ProxyChannel));
         if (ret != EOK) {
             TRANS_LOGE(TRANS_SVC, "[br_proxy] memcpy failed! ret:%{public}d", ret);
             (void)SoftBusMutexUnlock(&(g_serverList->lock));
@@ -704,7 +687,8 @@ static int32_t UpdateProxyChannel(const char *brMac, const char *uuid, struct Pr
     return SOFTBUS_NOT_FIND;
 }
 
-static int32_t GetChannelInfo(const char *brMac, int32_t channelId, uint32_t requestId, ServerBrProxyChannelInfo *info)
+static int32_t GetChannelInfo(const char *brMac, const char *uuid, int32_t channelId,
+    uint32_t requestId, ServerBrProxyChannelInfo *info)
 {
     if (g_serverList == NULL) {
         TRANS_LOGE(TRANS_SVC, "[br_proxy] not init");
@@ -725,7 +709,7 @@ static int32_t GetChannelInfo(const char *brMac, int32_t channelId, uint32_t req
                 continue;
             }
         } else if (brMac != NULL) {
-            if (strcmp(brMac, nodeInfo->proxyInfo.brMac) != 0) {
+            if (strcmp(brMac, nodeInfo->proxyInfo.brMac) != 0 || strcmp(uuid, nodeInfo->proxyInfo.uuid) != 0) {
                 continue;
             }
         } else {
@@ -763,7 +747,8 @@ static void onOpenSuccess(uint32_t requestId, struct ProxyChannel *channel)
     AnonymizeFree(tmpName);
 
     ServerBrProxyChannelInfo nodeInfo = {0};
-    int32_t ret = GetChannelInfo(channel->brMac, DEFAULT_INVALID_CHANNEL_ID, DEFAULT_INVALID_REQ_ID, &nodeInfo);
+    int32_t ret = GetChannelInfo(channel->brMac, channel->uuid,
+        DEFAULT_INVALID_CHANNEL_ID, DEFAULT_INVALID_REQ_ID, &nodeInfo);
     if (ret != SOFTBUS_OK) {
         return;
     }
@@ -774,7 +759,8 @@ static void onOpenSuccess(uint32_t requestId, struct ProxyChannel *channel)
         TRANS_LOGE(TRANS_SVC, "[br_proxy] sprintf_s failed! ret=%{public}d", ret);
         return;
     }
-    ret = ClientIpcBrProxyOpened(pkgName, nodeInfo.channelId, (const char *)nodeInfo.proxyInfo.brMac, SOFTBUS_OK);
+    ret = ClientIpcBrProxyOpened(pkgName, nodeInfo.channelId,
+        (const char *)nodeInfo.proxyInfo.brMac, (const char *)nodeInfo.proxyInfo.uuid, SOFTBUS_OK);
     if (ret != SOFTBUS_OK) {
         TRANS_LOGE(TRANS_SVC, "[br_proxy] failed! ret=%{public}d requestId=%{public}d", ret, requestId);
         return;
@@ -790,7 +776,7 @@ static void onOpenSuccess(uint32_t requestId, struct ProxyChannel *channel)
         TRANS_LOGE(TRANS_SVC, "[br_proxy] failed! ret=%{public}d requestId=%{public}d", ret, requestId);
         return;
     }
-    ret = UpdateConnectState(channel->brMac, IS_CONNECTED);
+    ret = UpdateConnectState(channel->brMac, channel->uuid, IS_CONNECTED);
     if (ret != SOFTBUS_OK) {
         TRANS_LOGE(TRANS_SVC, "[br_proxy] failed! ret=%{public}d requestId=%{public}d", ret, requestId);
         return;
@@ -802,7 +788,7 @@ void onOpenFail(uint32_t requestId, int32_t reason)
     TRANS_LOGE(TRANS_SVC, "[br_proxy] OpenFail requestId=%{public}d, reason = %{public}d",
         requestId, reason);
     ServerBrProxyChannelInfo info = {0};
-    int32_t ret = GetChannelInfo(NULL, DEFAULT_INVALID_CHANNEL_ID, requestId, &info);
+    int32_t ret = GetChannelInfo(NULL, NULL, DEFAULT_INVALID_CHANNEL_ID, requestId, &info);
     if (ret != SOFTBUS_OK) {
         return;
     }
@@ -824,7 +810,8 @@ void onOpenFail(uint32_t requestId, int32_t reason)
         TRANS_LOGE(TRANS_SVC, "[br_proxy] sprintf_s failed! ret=%{public}d", ret);
         return;
     }
-    ret = ClientIpcBrProxyOpened(pkgName, DEFAULT_INVALID_CHANNEL_ID, (const char *)info.proxyInfo.brMac, reason);
+    ret = ClientIpcBrProxyOpened(pkgName, DEFAULT_INVALID_CHANNEL_ID,
+        (const char *)info.proxyInfo.brMac, (const char *)info.proxyInfo.uuid, reason);
     if (ret != SOFTBUS_OK) {
         TRANS_LOGE(TRANS_SVC, "[br_proxy] failed! ret=%{public}d requestId=%{public}d", ret, requestId);
         return;
@@ -915,7 +902,7 @@ int32_t TransCloseBrProxy(int32_t channelId, bool isInnerCall)
 {
     TRANS_LOGI(TRANS_SVC, "[br_proxy] enter, channelId:%{public}d", channelId);
     ServerBrProxyChannelInfo info;
-    int32_t ret = GetChannelInfo(NULL, channelId, DEFAULT_INVALID_REQ_ID, &info);
+    int32_t ret = GetChannelInfo(NULL, NULL, channelId, DEFAULT_INVALID_REQ_ID, &info);
     if (ret != SOFTBUS_OK) {
         TRANS_LOGE(TRANS_SVC, "[br_proxy] failed, ret:%{public}d, channelId:%{public}d", ret, channelId);
         return ret;
@@ -937,7 +924,7 @@ int32_t TransCloseBrProxy(int32_t channelId, bool isInnerCall)
         TRANS_LOGE(TRANS_SVC, "[br_proxy] failed, ret:%{public}d, channelId:%{public}d", ret, channelId);
         return ret;
     }
-    info.channel->close(info.channel);
+    info.channel.close(&info.channel);
     return SOFTBUS_OK;
 }
 
@@ -950,7 +937,7 @@ int32_t TransSendBrProxyData(int32_t channelId, char* data, uint32_t dataLen)
     TRANS_LOGI(TRANS_SVC, "[br_proxy] enter, channelId:%{public}d, dataLen:%{public}d", channelId, dataLen);
 
     ServerBrProxyChannelInfo info = {0};
-    int32_t ret = GetChannelInfo(NULL, channelId, DEFAULT_INVALID_REQ_ID, &info);
+    int32_t ret = GetChannelInfo(NULL, NULL, channelId, DEFAULT_INVALID_REQ_ID, &info);
     if (ret != SOFTBUS_OK) {
         TRANS_LOGE(TRANS_SVC, "[br_proxy] failed, ret=%{public}d", ret);
         return ret;
@@ -960,11 +947,7 @@ int32_t TransSendBrProxyData(int32_t channelId, char* data, uint32_t dataLen)
         TRANS_LOGE(TRANS_SVC, "[br_proxy] tokenid check failed");
         return SOFTBUS_TRANS_BR_PROXY_TOKENID_ERR;
     }
-    if (info.channel == NULL) {
-        TRANS_LOGE(TRANS_SVC, "[br_proxy] info.channel is null");
-        return SOFTBUS_INVALID_PARAM;
-    }
-    ret = info.channel->send(info.channel, (const uint8_t *)data, dataLen);
+    ret = info.channel.send(&info.channel, (const uint8_t *)data, dataLen);
     if (ret != SOFTBUS_OK) {
         TRANS_LOGE(TRANS_SVC, "[br_proxy] failed, ret=%{public}d", ret);
         return ret;
@@ -1188,9 +1171,10 @@ static void OnDisconnected(struct ProxyChannel *channel, int32_t reason)
     TRANS_LOGI(TRANS_SVC, "[br_proxy] disconnect enter, reason:%{public}d", reason);
 
     ServerBrProxyChannelInfo info = {0};
-    int32_t ret = GetChannelInfo(channel->brMac, DEFAULT_INVALID_CHANNEL_ID, DEFAULT_INVALID_REQ_ID, &info);
+    int32_t ret = GetChannelInfo(channel->brMac, channel->uuid,
+        DEFAULT_INVALID_CHANNEL_ID, DEFAULT_INVALID_REQ_ID, &info);
     if (ret != SOFTBUS_OK) {
-        //client is died
+        // client is died
         goto EXIT;
     }
     char pkgName[PKGNAME_MAX_LEN];
@@ -1199,7 +1183,7 @@ static void OnDisconnected(struct ProxyChannel *channel, int32_t reason)
         TRANS_LOGE(TRANS_SVC, "[br_proxy] sprintf_s failed! ret=%{public}d", ret);
         return;
     }
-    ret = UpdateConnectState(channel->brMac, IS_DISCONNECTED);
+    ret = UpdateConnectState(channel->brMac, channel->uuid, IS_DISCONNECTED);
     if (ret != SOFTBUS_OK) {
         TRANS_LOGE(TRANS_SVC, "[br_proxy] failed! ret=%{public}d", ret);
         return;
@@ -1218,14 +1202,14 @@ static void OnReconnected(char *addr, struct ProxyChannel *channel)
         return;
     }
     TRANS_LOGI(TRANS_SVC, "[br_proxy] reconnect ok");
-    int32_t ret = UpdateConnectState(channel->brMac, IS_CONNECTED);
+    int32_t ret = UpdateConnectState(channel->brMac, channel->uuid, IS_CONNECTED);
     if (ret != SOFTBUS_OK) {
         TRANS_LOGE(TRANS_SVC, "[br_proxy] Update ConnectState failed! ret=%{public}d", ret);
         return;
     }
     if (IsSessionExist(channel->brMac, channel->uuid)) {
         ServerBrProxyChannelInfo info = {0};
-        ret = GetChannelInfo(addr, DEFAULT_INVALID_CHANNEL_ID, DEFAULT_INVALID_REQ_ID, &info);
+        ret = GetChannelInfo(channel->brMac, channel->uuid, DEFAULT_INVALID_CHANNEL_ID, DEFAULT_INVALID_REQ_ID, &info);
         if (ret != SOFTBUS_OK) {
             return;
         }
@@ -1260,7 +1244,7 @@ static ProxyConnectListener g_channelListener = {
 static void SendDataIfExistsInList(int32_t channelId)
 {
     ServerBrProxyChannelInfo info = {0};
-    int32_t ret = GetChannelInfo(NULL, channelId, DEFAULT_INVALID_REQ_ID, &info);
+    int32_t ret = GetChannelInfo(NULL, NULL, channelId, DEFAULT_INVALID_REQ_ID, &info);
     if (ret != SOFTBUS_OK) {
         TRANS_LOGE(TRANS_SVC, "[br_proxy] failed, ret=%{public}d", ret);
         return;
@@ -1277,7 +1261,7 @@ static void SendDataIfExistsInList(int32_t channelId)
 int32_t TransSetListenerState(int32_t channelId, int32_t type, bool isEnable)
 {
     ServerBrProxyChannelInfo info;
-    int32_t ret = GetChannelInfo(NULL, channelId, DEFAULT_INVALID_REQ_ID, &info);
+    int32_t ret = GetChannelInfo(NULL, NULL, channelId, DEFAULT_INVALID_REQ_ID, &info);
     if (ret != SOFTBUS_OK) {
         TRANS_LOGE(TRANS_SVC, "[br_proxy] failed, ret=%{public}d", ret);
         return ret;
@@ -1325,7 +1309,6 @@ static void ServerDeleteChannelByPid(pid_t callingPid)
             continue;
         }
         ListDelete(&nodeInfo->node);
-        SoftBusFree(nodeInfo->channel);
         SoftBusFree(nodeInfo);
         g_serverList->cnt--;
         TRANS_LOGI(TRANS_SVC, "[br_proxy] by pid:%{public}d delete node success, cnt%{public}d",

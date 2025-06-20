@@ -471,9 +471,9 @@ int32_t TransClientProxy::OnCheckCollabRelation(const CollabInfo *sourceInfo, bo
     return ret;
 }
 
-int32_t TransClientProxy::OnBrProxyOpened(int32_t channelId, const char *brMac, int32_t reason)
+int32_t TransClientProxy::OnBrProxyOpened(int32_t channelId, const char *brMac, const char *uuid, int32_t reason)
 {
-    if (brMac == nullptr) {
+    if (brMac == nullptr || uuid == nullptr) {
         TRANS_LOGE(TRANS_CTRL, "[br_proxy] invalid param.");
         return SOFTBUS_INVALID_PARAM;
     }
@@ -491,6 +491,7 @@ int32_t TransClientProxy::OnBrProxyOpened(int32_t channelId, const char *brMac, 
  
     WRITE_PARCEL_WITH_RET(data, Int32, channelId, SOFTBUS_TRANS_PROXY_WRITEINT_FAILED);
     WRITE_PARCEL_WITH_RET(data, CString, brMac, SOFTBUS_TRANS_PROXY_WRITECSTRING_FAILED);
+    WRITE_PARCEL_WITH_RET(data, CString, uuid, SOFTBUS_TRANS_PROXY_WRITECSTRING_FAILED);
     WRITE_PARCEL_WITH_RET(data, Int32, reason, SOFTBUS_TRANS_PROXY_WRITEINT_FAILED);
  
     MessageParcel reply;

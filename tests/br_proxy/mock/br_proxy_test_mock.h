@@ -26,7 +26,7 @@ public:
     BrProxyInterface() {};
     virtual ~BrProxyInterface() {};
     virtual int32_t ClientIpcBrProxyOpened(const char *pkgName, int32_t channelId,
-        const char *brMac, int32_t reason) = 0;
+        const char *brMac, const char *uuid, int32_t reason) = 0;
     virtual int32_t ConnectPeerDevice(BrProxyChannelInfo *channelInfo, uint32_t *requestId) = 0;
     virtual int32_t GetCallerHapInfo(char *bundleName, uint32_t bundleNamelen,
         char *abilityName, uint32_t abilityNameLen) = 0;
@@ -36,8 +36,8 @@ class BrProxyInterfaceMock : public BrProxyInterface {
 public:
     BrProxyInterfaceMock();
     ~BrProxyInterfaceMock() override;
-    MOCK_METHOD4(ClientIpcBrProxyOpened, int32_t (const char *pkgName, int32_t channelId,
-        const char *brMac, int32_t reason));
+    MOCK_METHOD5(ClientIpcBrProxyOpened, int32_t (const char *pkgName, int32_t channelId,
+        const char *brMac, const char *uuid, int32_t reason));
     MOCK_METHOD2(ConnectPeerDevice, int32_t (BrProxyChannelInfo *channelInfo, uint32_t *requestId));
     MOCK_METHOD4(GetCallerHapInfo, int32_t (char *bundleName, uint32_t bundleNamelen,
         char *abilityName, uint32_t abilityNameLen));
