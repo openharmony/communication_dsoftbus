@@ -66,6 +66,8 @@ OutData *GeneralConnectionPackMsg(GeneralConnectionInfo *info, GeneralConnection
 int32_t GeneralConnectionUnpackMsg(const uint8_t *data, uint32_t dataLen, GeneralConnectionInfo *info,
     GeneralConnectionMsgType parseMsgType);
 void FreeOutData(OutData *outData);
+void PackGeneralHead(GeneralConnectionHead *data);
+void UnpackGeneralHead(GeneralConnectionHead *data);
 #ifdef __cplusplus
 }
 #endif /* _cplusplus */
