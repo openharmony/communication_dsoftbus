@@ -18,6 +18,7 @@
 #include "conn_log.h"
 #include "softbus_error_code.h"
 #include "softbus_adapter_mem.h"
+#include "softbus_adapter_socket.h"
 #include "string.h"
 
 #define NAME                "name"
@@ -47,6 +48,7 @@ static OutData *ConstructOutData(GeneralConnectionInfo *info, GeneralConnectionM
     header->localId = info->localId;
     header->peerId = info->peerId;
     header->msgType = msgType;
+    UnpackGeneralHead(header);
     return outData;
 }
 
@@ -147,4 +149,22 @@ void FreeOutData(OutData *outData)
     CONN_CHECK_AND_RETURN_LOGE(outData != NULL, CONN_BLE, "outData is null");
     SoftBusFree(outData->data);
     SoftBusFree(outData);
+}
+
+void PackGeneralHead(GeneralConnectionHead *data)
+{
+    CONN_CHECK_AND_RETURN_LOGE(data != NULL, CONN_BLE, "data is null");
+    data->msgType = (int32_t)SoftBusHtoLl((uint32_t)data->msgType);
+    data->localId = (int32_t)SoftBusHtoLl((uint32_t)data->localId);
+    data->peerId = (int32_t)SoftBusHtoLl((uint32_t)data->peerId);
+    data->headLen = SoftBusHtoLl(data->headLen);
+}
+
+void UnpackGeneralHead(GeneralConnectionHead *data)
+{
+    CONN_CHECK_AND_RETURN_LOGE(data != NULL, CONN_BLE, "data is null");
+    data->msgType = (int32_t)SoftBusLtoHl((uint32_t)data->msgType);
+    data->localId = (int32_t)SoftBusLtoHl((uint32_t)data->localId);
+    data->peerId = (int32_t)SoftBusLtoHl((uint32_t)data->peerId);
+    data->headLen = SoftBusLtoHl(data->headLen);
 }
