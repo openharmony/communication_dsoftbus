@@ -749,6 +749,8 @@ static void AttemptReconnectDevice(char *brAddr)
         struct ProxyChannel proxyChannel = { 0 };
         int32_t ret = strncpy_s(proxyChannel.brMac, BT_MAC_LEN, brAddr, BT_MAC_LEN);
         CONN_CHECK_AND_RETURN_LOGE(ret == EOK, CONN_PROXY, "cpy mac err");
+        ret = strcpy_s(proxyChannel.uuid, UUID_STRING_LEN, reconnectDeviceInfo->uuid);
+        CONN_CHECK_AND_RETURN_LOGE(ret == EOK, CONN_PROXY, "cpy uuid err");
         NotifyDisconnected(&proxyChannel, SOFTBUS_CONN_PROXY_RETRY_FAILED);
         return;
     }
