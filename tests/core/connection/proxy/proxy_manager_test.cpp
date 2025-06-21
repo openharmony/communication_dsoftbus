@@ -402,12 +402,13 @@ HWTEST_F(ProxyManagerTest, ProxyChannelManagerTest007, TestSize.Level1)
 
 static void ProxyChannelDereference(struct ProxyConnection *proxyConnection)
 {
-    (void)proxyConnection;
+    SoftBusMutexDestroy(&proxyConnection->lock);
+    SoftBusFree(proxyConnection);
 }
 
 static void ProxyChannelReference(struct ProxyConnection *proxyConnection)
 {
-    SoftBusMutexDestroy(&proxyConnection->lock);
+    (void)proxyConnection;
 }
 
 static void ConstructProxyChannelRequestInfo(void)
@@ -426,17 +427,27 @@ static void ConstructProxyChannelRequestInfo(void)
 
 static void ConstructProxyConnectionList(void)
 {
-    struct ProxyConnection proxyConnection = {
-        .state = PROXY_CHANNEL_CONNECTED,
-        .reference = ProxyChannelReference,
-        .dereference = ProxyChannelDereference,
-    };
-    ListInit(&proxyConnection.node);
-    if (SoftBusMutexInit(&proxyConnection.lock, NULL)!= SOFTBUS_OK) {
+    struct ProxyConnection *proxyConnection = (struct ProxyConnection *)SoftBusCalloc(sizeof(struct ProxyConnection));
+    CONN_CHECK_AND_RETURN_LOGE(proxyConnection != NULL, CONN_PROXY, "proxyConnection is NULL");
+    ListInit(&proxyConnection->node);
+    if (SoftBusMutexInit(&proxyConnection->lock, NULL)!= SOFTBUS_OK) {
         CONN_LOGE(CONN_PROXY, "init lock failed");
+        SoftBusFree(proxyConnection);
         return;
     }
-    ListAdd(&GetProxyChannelManager()->proxyConnectionList->list, &proxyConnection.node);
+    proxyConnection->state = PROXY_CHANNEL_CONNECTED;
+    proxyConnection->reference = ProxyChannelReference;
+    proxyConnection->dereference = ProxyChannelDereference;
+    int32_t ret = SoftBusMutexLock(&GetProxyChannelManager()->proxyConnectionList->lock);
+    if (ret != SOFTBUS_OK) {
+        CONN_LOGE(CONN_PROXY, "lock proxyConnectionList failed");
+        SoftBusMutexDestroy(&proxyConnection->lock);
+        SoftBusFree(proxyConnection);
+        return;
+    }
+    proxyConnection->refCount = 1;
+    ListAdd(&GetProxyChannelManager()->proxyConnectionList->list, &proxyConnection->node);
+    SoftBusMutexUnlock(&GetProxyChannelManager()->proxyConnectionList->lock);
 }
 
 /*

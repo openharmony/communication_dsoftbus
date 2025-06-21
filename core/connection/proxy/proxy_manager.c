@@ -384,8 +384,8 @@ static void RemoveProxyChannelByChannelId(uint32_t channelId)
         struct ProxyConnection, node) {
         if (it->channelId == channelId) {
             ListDelete(&it->node);
-            it->dereference(it);
             CONN_LOGI(CONN_PROXY, "remove channel channelId=%{public}u", it->channelId);
+            it->dereference(it);
             break;
         }
     }
