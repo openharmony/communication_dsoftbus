@@ -236,13 +236,13 @@ static bool PermissionCheckPass(const char *bundleName)
 {
     if (bundleName == NULL) {
         TRANS_LOGE(TRANS_SVC, "[br_proxy] bundleName is null");
-        return true;
+        return false;
     }
     bool isEmpowered = false;
     int32_t ret = ClientIpcQueryPermission(COMM_PKGNAME_PUSH, bundleName, &isEmpowered);
     if (ret != SOFTBUS_OK) {
         TRANS_LOGE(TRANS_SVC, "[br_proxy] query permission from push_service failed! ret:%{public}d", ret);
-        return true;
+        return false;
     }
     TRANS_LOGI(TRANS_SVC, "[br_proxy] query permission:%{public}s", isEmpowered ? "accept":"denied");
     return true;
@@ -950,7 +950,7 @@ int32_t TransSendBrProxyData(int32_t channelId, char* data, uint32_t dataLen)
     ret = info.channel.send(&info.channel, (const uint8_t *)data, dataLen);
     if (ret != SOFTBUS_OK) {
         TRANS_LOGE(TRANS_SVC, "[br_proxy] failed, ret=%{public}d", ret);
-        return ret;
+        return SOFTBUS_CONN_BR_UNDERLAY_WRITE_FAIL;
     }
     return SOFTBUS_OK;
 }
