@@ -333,8 +333,8 @@ static int32_t GetChannelInfoParam(napi_env env, napi_value arg, AsyncOpenChanne
     }
     return SOFTBUS_OK;
 EXIT:
-    ThrowErrFromC2Js(env, SOFTBUS_INVALID_PARAM);
-    return SOFTBUS_INVALID_PARAM;
+    ThrowErrFromC2Js(env, SOFTBUS_TRANS_BR_PROXY_INVALID_PARAM);
+    return SOFTBUS_TRANS_BR_PROXY_INVALID_PARAM;
 }
 
 static int32_t StartWork(napi_env env, AsyncOpenChannelData *asyncData)
@@ -458,31 +458,31 @@ napi_value NapiCloseProxyChannel(napi_env env, napi_callback_info info)
     void* data;
     status = napi_get_cb_info(env, info, &argc, args, &thisArg, &data);
     if (status != napi_ok || argc < ARGS_SIZE_1) {
-        ThrowErrFromC2Js(env, SOFTBUS_INVALID_PARAM);
+        ThrowErrFromC2Js(env, SOFTBUS_TRANS_BR_PROXY_INVALID_PARAM);
         return NULL;
     }
     napi_valuetype valuetype;
     status = napi_typeof(env, args[0], &valuetype);
     if (status != napi_ok || valuetype != napi_number) {
-        ThrowErrFromC2Js(env, SOFTBUS_INVALID_PARAM);
+        ThrowErrFromC2Js(env, SOFTBUS_TRANS_BR_PROXY_INVALID_PARAM);
         return NULL;
     }
     int32_t channelId;
     status = napi_get_value_int32(env, args[0], &channelId);
     if (status != napi_ok) {
-        ThrowErrFromC2Js(env, SOFTBUS_INVALID_PARAM);
+        ThrowErrFromC2Js(env, SOFTBUS_TRANS_BR_PROXY_INVALID_PARAM);
         return NULL;
     }
     double value;
     status = napi_get_value_double(env, args[0], &value);
     if (status != napi_ok) {
-        ThrowErrFromC2Js(env, SOFTBUS_INVALID_PARAM);
+        ThrowErrFromC2Js(env, SOFTBUS_TRANS_BR_PROXY_INVALID_PARAM);
         return NULL;
     }
     int32_t intValue = (int32_t)value;
     bool isInteger = (double)intValue == value;
     if (!isInteger) {
-        ThrowErrFromC2Js(env, SOFTBUS_INVALID_PARAM);
+        ThrowErrFromC2Js(env, SOFTBUS_TRANS_BR_PROXY_INVALID_PARAM);
         return NULL;
     }
     int32_t ret = CloseBrProxy(channelId);
@@ -590,17 +590,17 @@ static int32_t GetSendParam(napi_env env, napi_callback_info info, AsyncSendData
     asyncData->data = (char*)SoftBusCalloc(asyncData->dataLength);
     if (asyncData->data == NULL) {
         ThrowErrFromC2Js(env, SOFTBUS_MEM_ERR);
-        return SOFTBUS_INVALID_PARAM;
+        return SOFTBUS_TRANS_BR_PROXY_INVALID_PARAM;
     }
     if (memcpy_s(asyncData->data, asyncData->dataLength, bufferData, asyncData->dataLength) != EOK) {
         SoftBusFree(asyncData->data);
         ThrowErrFromC2Js(env, SOFTBUS_MEM_ERR);
-        return SOFTBUS_INVALID_PARAM;
+        return SOFTBUS_TRANS_BR_PROXY_INVALID_PARAM;
     }
     return SOFTBUS_OK;
 EXIT:
-    ThrowErrFromC2Js(env, SOFTBUS_INVALID_PARAM);
-    return SOFTBUS_INVALID_PARAM;
+    ThrowErrFromC2Js(env, SOFTBUS_TRANS_BR_PROXY_INVALID_PARAM);
+    return SOFTBUS_TRANS_BR_PROXY_INVALID_PARAM;
 }
 
 napi_value SendDataAsync(napi_env env, napi_callback_info info)
@@ -893,29 +893,29 @@ napi_value On(napi_env env, napi_callback_info info)
     global_env = env;
     return NULL;
 EXIT:
-    ThrowErrFromC2Js(env, SOFTBUS_INVALID_PARAM);
+    ThrowErrFromC2Js(env, SOFTBUS_TRANS_BR_PROXY_INVALID_PARAM);
     return NULL;
 }
 
 static int32_t GetOffParam(napi_env env, napi_value *args, size_t argc, int32_t *channelId)
 {
     if (channelId == NULL) {
-        return SOFTBUS_INVALID_PARAM;
+        return SOFTBUS_TRANS_BR_PROXY_INVALID_PARAM;
     }
 
     napi_status status = napi_get_value_int32(env, args[ARGS_INDEX_1], channelId);
     if (status != napi_ok) {
-        return SOFTBUS_INVALID_PARAM;
+        return SOFTBUS_TRANS_BR_PROXY_INVALID_PARAM;
     }
     double value;
     status = napi_get_value_double(env, args[ARGS_INDEX_1], &value);
     if (status != napi_ok) {
-        return SOFTBUS_INVALID_PARAM;
+        return SOFTBUS_TRANS_BR_PROXY_INVALID_PARAM;
     }
     int32_t intValue = (int32_t)value;
     bool isInteger = (double)intValue == value;
     if (!isInteger) {
-        return SOFTBUS_INVALID_PARAM;
+        return SOFTBUS_TRANS_BR_PROXY_INVALID_PARAM;
     }
     if (argc != ARGS_SIZE_3) {
         return SOFTBUS_OK;
@@ -923,7 +923,7 @@ static int32_t GetOffParam(napi_env env, napi_value *args, size_t argc, int32_t 
     napi_valuetype funcType;
     status = napi_typeof(env, args[ARGS_INDEX_2], &funcType);
     if (status != napi_ok || funcType != napi_function) {
-        return SOFTBUS_INVALID_PARAM;
+        return SOFTBUS_TRANS_BR_PROXY_INVALID_PARAM;
     }
     return SOFTBUS_OK;
 }
@@ -965,7 +965,7 @@ napi_value Off(napi_env env, napi_callback_info info)
     }
     return NULL;
 EXIT:
-    ThrowErrFromC2Js(env, SOFTBUS_INVALID_PARAM);
+    ThrowErrFromC2Js(env, SOFTBUS_TRANS_BR_PROXY_INVALID_PARAM);
     return NULL;
 }
 

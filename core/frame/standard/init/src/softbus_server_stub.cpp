@@ -2047,6 +2047,20 @@ int32_t SoftBusServerStub::GetPeerDeviceIdInner(MessageParcel &data, MessageParc
     return SOFTBUS_OK;
 }
 
+static int32_t PushIdentifyCheck(const char *pkgName)
+{
+    #define COMM_PKGNAME_PUSH   "PUSH_SERVICE"
+    #define PUSH_SERVICE_UID    7023
+    if (strcmp(pkgName, COMM_PKGNAME_PUSH) != 0) {
+        return SOFTBUS_OK;
+    }
+    pid_t uid = IPCSkeleton::GetCallingUid();
+    if (uid != PUSH_SERVICE_UID) {
+        return SOFTBUS_TRANS_BR_PROXY_CALLER_RESTRICTED;
+    }
+    return SOFTBUS_OK;
+}
+
 int32_t SoftBusServerStub::SoftbusRegisterBrProxyServiceInner(MessageParcel &data, MessageParcel &reply)
 {
     COMM_LOGD(COMM_SVC, "enter");
@@ -2059,6 +2073,11 @@ int32_t SoftBusServerStub::SoftbusRegisterBrProxyServiceInner(MessageParcel &dat
     if (pkgName == nullptr) {
         COMM_LOGE(COMM_SVC, "SoftbusRegisterServiceInner read pkgName failed!");
         return SOFTBUS_TRANS_PROXY_READCSTRING_FAILED;
+    }
+    int32_t ret = PushIdentifyCheck(pkgName);
+    if (ret != SOFTBUS_OK) {
+        COMM_LOGE(COMM_SVC, "[br_proxy] Push identity verification failed! ret=%{public}d", ret);
+        return ret;
     }
     uint32_t code = MANAGE_REGISTER_BR_PROXY_SERVICE;
     SoftbusRecordCalledApiInfo(pkgName, code);
