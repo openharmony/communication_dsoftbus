@@ -509,7 +509,12 @@ int32_t LnnIpcRefreshLNN(const char *pkgName, int32_t callingPid, const Subscrib
     InnerCallback callback = {
         .serverCb = g_discInnerCb,
     };
-    return LnnStartDiscDevice(pkgName, info, &callback, false, callingPid);
+    ret = LnnStartDiscDevice(pkgName, info, &callback, false, callingPid);
+    if (ret != SOFTBUS_OK) {
+        int32_t retValue = DeleteRefreshLnnInfo(pkgName, callingPid, info->subscribeId);
+        LNN_CHECK_AND_RETURN_RET_LOGE(retValue == SOFTBUS_OK, retValue, LNN_EVENT, "delete refresh info failed");
+    }
+    return ret;
 }
 
 int32_t LnnIpcStopRefreshLNN(const char *pkgName, int32_t callingPid, int32_t subscribeId)
