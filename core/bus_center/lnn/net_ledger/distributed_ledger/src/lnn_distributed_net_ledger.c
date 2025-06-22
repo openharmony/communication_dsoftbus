@@ -2056,6 +2056,11 @@ const NodeInfo *LnnGetOnlineNodeByUdidHash(const char *recvUdidHash)
         }
         return NULL;
     }
+    if (SoftBusMutexLock(&g_distributedNetLedger.lock) != 0) {
+        LNN_LOGE(LNN_LEDGER, "lock mutex fail!");
+        SoftBusFree(info);
+        return NULL;
+    }
     for (i = 0; i < infoNum; ++i) {
         const NodeInfo *nodeInfo = LnnGetNodeInfoById(info[i].networkId, CATEGORY_NETWORK_ID);
         if (nodeInfo == NULL) {
@@ -2075,10 +2080,12 @@ const NodeInfo *LnnGetOnlineNodeByUdidHash(const char *recvUdidHash)
                 AnonymizeWrapper(anoyUdid), AnonymizeWrapper(anoyUdidHash));
             AnonymizeFree(anoyUdid);
             AnonymizeFree(anoyUdidHash);
+            (void)SoftBusMutexUnlock(&g_distributedNetLedger.lock);
             SoftBusFree(info);
             return nodeInfo;
         }
     }
+    (void)SoftBusMutexUnlock(&g_distributedNetLedger.lock);
     SoftBusFree(info);
     return NULL;
 }
