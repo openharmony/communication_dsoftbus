@@ -453,13 +453,7 @@ int32_t OpenBrProxy(int32_t sessionId, BrProxyChannelInfo *channelInfo, IBrProxy
         TRANS_LOGE(TRANS_SDK, "[br_proxy] client stub init failed! ret:%{public}d", ret);
         return ret;
     }
-    char pkgName[PKGNAME_MAX_LEN];
-    ret = sprintf_s(pkgName, sizeof(pkgName), "%s_%d", COMM_PKGNAME_WECHAT, getpid());
-    if (ret < 0) {
-        TRANS_LOGE(TRANS_SVC, "[br_proxy] sprintf_s failed! ret=%{public}d", ret);
-        return SOFTBUS_SPRINTF_ERR;
-    }
-    ret = ClientRegisterBrProxyService(pkgName);
+    ret = ClientRegisterBrProxyService(COMM_PKGNAME_BRPROXY);
     if (ret != SOFTBUS_OK) {
         TRANS_LOGE(TRANS_SDK, "[br_proxy] client register service failed! ret:%{public}d", ret);
         return ret;
