@@ -55,7 +55,7 @@ typedef enum {
     LISTENER_TYPE_MAX,
 } ListenerType;
 
-#define COMM_PKGNAME_WECHAT "BrProxyPkgName"
+#define COMM_PKGNAME_BRPROXY "BrProxyPkgName"
 #define PKGNAME_MAX_LEN  30
 #define DEFAULT_CHANNEL_ID (-1)
 #define BR_PROXY_SEND_MAX_LEN 4096
