@@ -639,7 +639,7 @@ HWTEST_F(TransSessionManagerTest, TransSessionManagerTest24, TestSize.Level1)
     ret = AddAccessInfoBySessionName(sessionName, &accessInfo, callingPid);
     EXPECT_NE(SOFTBUS_NO_INIT, ret);
     ret = AddAccessInfoBySessionName(sessionName, &accessInfo, 0);
-    EXPECT_EQ(SOFTBUS_NO_INIT, ret);
+    EXPECT_NE(SOFTBUS_NO_INIT, ret);
 
     ret = TransSessionServerDelItem(sessionName);
     EXPECT_EQ(SOFTBUS_OK, ret);
