@@ -35,6 +35,9 @@ using namespace testing;
 using namespace testing::ext;
 
 namespace OHOS {
+#define CHANNEL_ID 5
+#define CHANNEL_ID_ERR 0
+#define SESSION_ID 2
 const char *TEST_UUID = "0000FEEA-0000-1000-8000-00805F9B34FB";
 const char *VALID_BR_MAC = "F0:FA:C7:13:56:BC";
 const char *INVALID_BR_MAC = "F0:FA:C7:13:56:AB";
@@ -343,5 +346,25 @@ HWTEST_F(BrProxyTest, BrProxyTest0016, TestSize.Level1)
 {
     int32_t ret = TransCloseBrProxy(-1, false);
     EXPECT_EQ(SOFTBUS_NOT_FIND, ret);
+}
+
+HWTEST_F(BrProxyTest, BrProxyTest0017, TestSize.Level1)
+{
+    int32_t ret = TransClientInit();
+    ASSERT_TRUE(ret == SOFTBUS_OK);
+    ret = ClientAddChannelToList(SESSION_ID, &g_channelInfo, &g_listener);
+    ASSERT_TRUE(ret == SOFTBUS_OK);
+    ret = ClientUpdateList(g_channelInfo.peerBRMacAddr, g_channelInfo.peerBRUuid, CHANNEL_ID);
+    ASSERT_TRUE(ret == SOFTBUS_OK);
+    ret = ClientTransBrProxyChannelChange(CHANNEL_ID, 0);
+    EXPECT_EQ(SOFTBUS_OK, ret);
+}
+
+HWTEST_F(BrProxyTest, BrProxyTest0018, TestSize.Level1)
+{
+    int32_t ret = ClientTransBrProxyDataReceived(CHANNEL_ID_ERR, nullptr, 0);
+    EXPECT_EQ(SOFTBUS_NOT_FIND, ret);
+    ret = ClientTransBrProxyDataReceived(CHANNEL_ID, nullptr, 0);
+    EXPECT_EQ(SOFTBUS_OK, ret);
 }
 }
