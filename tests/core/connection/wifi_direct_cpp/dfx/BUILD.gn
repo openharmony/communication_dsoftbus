@@ -137,7 +137,6 @@ ohos_unittest("WifiDirectDfxTest") {
   deps = [
     "$dsoftbus_dfx_path:softbus_dfx",
     "$dsoftbus_root_path/adapter:softbus_adapter",
-    "$dsoftbus_root_path/core/connection/wifi_direct_cpp:wifi_direct",
   ]
   external_deps = [
     "bounds_checking_function:libsec_shared",
