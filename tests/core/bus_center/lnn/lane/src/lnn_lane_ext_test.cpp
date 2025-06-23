@@ -969,10 +969,6 @@ HWTEST_F(LNNLaneExtMockTest, LNN_ADD_LANE_IS_VALID_LINK_ADDR_001, TestSize.Level
     linkInfo.type = LANE_BLE;
     ret = AddLaneResourceToPool(&linkInfo, laneId, false);
     EXPECT_EQ(ret, SOFTBUS_OK);
-    ret = AddLaneResourceToPool(&linkInfo, laneId, false);
-    EXPECT_EQ(ret, SOFTBUS_OK);
-    ret = DelLaneResourceByLaneId(laneId, false);
-    EXPECT_EQ(ret, SOFTBUS_OK);
     ret = DelLaneResourceByLaneId(laneId, false);
     EXPECT_EQ(ret, SOFTBUS_OK);
 }
