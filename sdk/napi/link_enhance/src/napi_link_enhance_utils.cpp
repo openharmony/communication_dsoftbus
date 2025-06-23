@@ -181,7 +181,7 @@ void NapiCallFunction(napi_env env, napi_ref callbackRef, napi_value *argv, size
         napi_value exception = nullptr;
         status = napi_get_and_clear_last_exception(env, &exception);
         COMM_LOGD(
-            COMM_SDK, "napi_get_and_clear_last_exception status: %{public}d, exception: %{public}p", status, exception);
+            COMM_SDK, "napi_get_and_clear_last_exception status: %{public}d", status);
     }
 }
 
