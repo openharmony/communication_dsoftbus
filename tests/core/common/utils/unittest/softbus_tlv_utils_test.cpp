@@ -225,4 +225,111 @@ HWTEST_F(SoftBusTlvUtilsTest, TlvUtilsUnpackTlvTest, TestSize.Level0)
     DestroyTlvObject(obj);
     COMM_LOGI(COMM_UTILS, "===TlvUtilsUnpackTlvTest end");
 }
+
+typedef struct {
+    uint32_t type;
+    union {
+        uint8_t u8;
+        uint16_t u16;
+        uint32_t u32;
+        uint64_t u64;
+    };
+} TlvNumberFrame;
+
+/**
+ * @tc.name: TlvUtilsPackNumberTest
+ * @tc.desc: TlvUtilsPackNumberTest
+ * @tc.type: FUNC
+ * @tc.require:
+ */
+HWTEST_F(SoftBusTlvUtilsTest, TlvUtilsPackNumberTest, TestSize.Level0)
+{
+    COMM_LOGI(COMM_UTILS, "===TlvUtilsPackNumberTest begin");
+    // mock ts=UINT16_T ls=UINT16_T
+    TlvNumberFrame tlvFrames[] = {
+        { .type = 0x08, .u8 = 0x1F },
+        { .type = 0x16, .u16 = 0x2FF },
+        { .type = 0x32, .u32 = 0x3FFF },
+        { .type = 0x64, .u64 = 0x4FFFF },
+    };
+    uint8_t tlvBytes[] = {
+        0x08, 0x00, 0x01, 0x00, 0x1F, // .type = 0x08, .u8 = 0x1F
+        0x16, 0x00, 0x02, 0x00, 0xFF, 0x02, // .type = 0x16, .u16 = 0x2FF
+        0x32, 0x00, 0x04, 0x00, 0xFF, 0x3F, 0x00, 0x00, // .type = 0x32, .u32 = 0x3FFF
+        0x64, 0x00, 0x08, 0x00, 0xFF, 0xFF, 0x04, 0x00, 0x00, 0x00, 0x00, 0x00 // .type = 0x64, .u64 = 0x4FFFF
+    };
+
+    TlvObject *obj = CreateTlvObject(UINT16_T, UINT16_T);
+    ASSERT_TRUE(obj != nullptr);
+
+    int32_t ret = AddTlvMemberU8(obj, tlvFrames[0].type, tlvFrames[0].u8);
+    EXPECT_EQ(ret, SOFTBUS_OK);
+    ret = AddTlvMemberU16(obj, tlvFrames[1].type, tlvFrames[1].u16);
+    EXPECT_EQ(ret, SOFTBUS_OK);
+    ret = AddTlvMemberU32(obj, tlvFrames[2].type, tlvFrames[2].u32);
+    EXPECT_EQ(ret, SOFTBUS_OK);
+    ret = AddTlvMemberU64(obj, tlvFrames[3].type, tlvFrames[3].u64);
+    EXPECT_EQ(ret, SOFTBUS_OK);
+
+    uint8_t *output = NULL;
+    uint32_t outputSize = 0;
+    ret = GetTlvBinary(obj, &output, &outputSize);
+    EXPECT_EQ(ret, SOFTBUS_OK);
+    COMM_LOGI(COMM_UTILS, "output=%{public}s, outputSize=%{public}u",
+        BytesToHexString(output, outputSize).c_str(), outputSize);
+    ASSERT_EQ(outputSize, sizeof(tlvBytes));
+    EXPECT_EQ(memcmp(output, tlvBytes, outputSize), 0);
+
+    DestroyTlvObject(obj);
+    COMM_LOGI(COMM_UTILS, "===TlvUtilsPackNumberTest end");
+}
+
+/**
+ * @tc.name: TlvUtilsUnpackNumberTest
+ * @tc.desc: TlvUtilsUnpackNumberTest
+ * @tc.type: FUNC
+ * @tc.require:
+ */
+HWTEST_F(SoftBusTlvUtilsTest, TlvUtilsUnpackNumberTest, TestSize.Level0)
+{
+    COMM_LOGI(COMM_UTILS, "===TlvUtilsUnpackNumberTest begin");
+    // mock ts=UINT16_T ls=UINT16_T
+    TlvNumberFrame tlvFrames[] = {
+        { .type = 0x08, .u8 = 0x1F },
+        { .type = 0x16, .u16 = 0x2FF },
+        { .type = 0x32, .u32 = 0x3FFF },
+        { .type = 0x64, .u64 = 0x4FFFF },
+    };
+    uint8_t tlvBytes[] = {
+        0x08, 0x00, 0x01, 0x00, 0x1F, // .type = 0x08, .u8 = 0x1F
+        0x16, 0x00, 0x02, 0x00, 0xFF, 0x02, // .type = 0x16, .u16 = 0x2FF
+        0x32, 0x00, 0x04, 0x00, 0xFF, 0x3F, 0x00, 0x00, // .type = 0x32, .u32 = 0x3FFF
+        0x64, 0x00, 0x08, 0x00, 0xFF, 0xFF, 0x04, 0x00, 0x00, 0x00, 0x00, 0x00 // .type = 0x64, .u64 = 0x4FFFF
+    };
+
+    TlvObject *obj = CreateTlvObject(UINT16_T, UINT16_T);
+    ASSERT_TRUE(obj != nullptr);
+    int32_t ret = SetTlvBinary(obj, tlvBytes, sizeof(tlvBytes));
+    EXPECT_EQ(ret, SOFTBUS_OK);
+
+    uint8_t u8 = 0;
+    ret = GetTlvMemberU8(obj, tlvFrames[0].type, &u8);
+    EXPECT_EQ(ret, SOFTBUS_OK);
+    EXPECT_EQ(u8, tlvFrames[0].u8);
+    uint16_t u16 = 0;
+    ret = GetTlvMemberU16(obj, tlvFrames[1].type, &u16);
+    EXPECT_EQ(ret, SOFTBUS_OK);
+    EXPECT_EQ(u16, tlvFrames[1].u16);
+    uint32_t u32 = 0;
+    ret = GetTlvMemberU32(obj, tlvFrames[2].type, &u32);
+    EXPECT_EQ(ret, SOFTBUS_OK);
+    EXPECT_EQ(u32, tlvFrames[2].u32);
+    uint64_t u64 = 0;
+    ret = GetTlvMemberU64(obj, tlvFrames[3].type, &u64);
+    EXPECT_EQ(ret, SOFTBUS_OK);
+    EXPECT_EQ(u64, tlvFrames[3].u64);
+
+    DestroyTlvObject(obj);
+    COMM_LOGI(COMM_UTILS, "===TlvUtilsUnpackNumberTest end");
+}
 } // namespace OHOS
