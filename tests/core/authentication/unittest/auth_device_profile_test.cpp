@@ -189,6 +189,62 @@ HWTEST_F(AuthDeviceProfileTest, GET_ACL_LOCAL_USERID_TEST_001, TestSize.Level1)
     OHOS::DistributedDeviceProfile::AccessControlProfile trustDevice;
     int32_t ret = GetAclLocalUserId(trustDevice);
     EXPECT_EQ(ret, -1);
+
+    std::string deviceId = "abcdef";
+    int32_t userId = 6;
+    DistributedDeviceProfile::Accessee accessee;
+    accessee.SetAccesseeDeviceId(deviceId);
+    trustDevice.SetAccessee(accessee);
+    DistributedDeviceProfile::Accesser accesser;
+    accesser.SetAccesserUserId(userId);
+    trustDevice.SetAccesser(accesser);
+    trustDevice.SetTrustDeviceId(deviceId);
+    ret = GetAclLocalUserId(trustDevice);
+    EXPECT_EQ(ret, userId);
+}
+
+/*
+ * @tc.name: GET_ACL_PEER_USERID_TEST_001
+ * @tc.desc: test GetAclPeerUserId
+ * @tc.type: FUNC
+ * @tc.require:
+ */
+HWTEST_F(AuthDeviceProfileTest, GET_ACL_PEER_USERID_TEST_001, TestSize.Level1)
+{
+    OHOS::DistributedDeviceProfile::AccessControlProfile trustDevice;
+    std::string deviceId = "1234567";
+    trustDevice.SetTrustDeviceId(deviceId);
+    int32_t ret = GetAclPeerUserId(trustDevice);
+    EXPECT_EQ(ret, -1);
+
+    deviceId = "abcdef";
+    int32_t userId = 6;
+    DistributedDeviceProfile::Accessee accessee;
+    accessee.SetAccesseeDeviceId(deviceId);
+    accessee.SetAccesseeUserId(userId);
+    trustDevice.SetAccessee(accessee);
+    trustDevice.SetTrustDeviceId(deviceId);
+    ret = GetAclPeerUserId(trustDevice);
+    EXPECT_EQ(ret, userId);
+}
+
+/*
+ * @tc.name: GET_STRING_HASH_001
+ * @tc.desc: test GetStringHash
+ * @tc.type: FUNC
+ * @tc.require:
+ */
+HWTEST_F(AuthDeviceProfileTest, GET_STRING_HASH_001, TestSize.Level1)
+{
+    std::string str = "";
+    char hashStrBuf[SHA_256_HEX_HASH_LEN] = { 0 };
+    int32_t len = 32;
+    int32_t ret = GetStringHash(str, hashStrBuf, len);
+    EXPECT_EQ(ret, SOFTBUS_NETWORK_GENERATE_STR_HASH_ERR);
+
+    str = "abcdef123456";
+    ret = GetStringHash(str, hashStrBuf, len);
+    EXPECT_EQ(ret, SOFTBUS_OK);
 }
 
 /*
@@ -324,13 +380,124 @@ HWTEST_F(AuthDeviceProfileTest, UPDATE_DP_SAME_ACCOUNT_ACL_TEST_001, TestSize.Le
  * @tc.type: FUNC
  * @tc.require:
  */
-HWTEST_F(AuthDeviceProfileTest, IsTrustDevice_Test01, TestSize.Level1)
+HWTEST_F(AuthDeviceProfileTest, IS_TRUST_DEVICE_TEST_001, TestSize.Level1)
 {
     std::vector<OHOS::DistributedDeviceProfile::AccessControlProfile> trustDevices;
     const char *deviceIdHash = "deviceIdHash";
     const char *anonyDeviceIdHash = "anonyDeviceIdHash";
     bool isOnlyPointToPoint = true;
     bool result = IsTrustDevice(trustDevices, deviceIdHash, anonyDeviceIdHash, isOnlyPointToPoint);
+    EXPECT_FALSE(result);
+
+    OHOS::DistributedDeviceProfile::AccessControlProfile aclProfile0;
+    uint32_t bindType = (uint32_t)OHOS::DistributedDeviceProfile::BindType::SAME_ACCOUNT;
+    aclProfile0.SetBindType(bindType);
+    OHOS::DistributedDeviceProfile::AccessControlProfile aclProfile1;
+    bindType = (uint32_t)OHOS::DistributedDeviceProfile::BindType::SHARE;
+    aclProfile1.SetBindType(bindType);
+    uint32_t deviceIdType = (uint32_t)OHOS::DistributedDeviceProfile::DeviceIdType::UUID;
+    aclProfile1.SetDeviceIdType(deviceIdType);
+    OHOS::DistributedDeviceProfile::AccessControlProfile aclProfile2;
+    aclProfile2.SetBindType(bindType);
+    deviceIdType = (uint32_t)OHOS::DistributedDeviceProfile::DeviceIdType::UDID;
+    aclProfile2.SetDeviceIdType(deviceIdType);
+    OHOS::DistributedDeviceProfile::AccessControlProfile aclProfile3;
+    aclProfile3.SetBindType(bindType);
+    aclProfile3.SetDeviceIdType(deviceIdType);
+    std::string deviceId = "1234567";
+    aclProfile3.SetTrustDeviceId(deviceId);
+    int status = (uint32_t)OHOS::DistributedDeviceProfile::Status::INACTIVE;
+    aclProfile3.SetStatus(status);
+    OHOS::DistributedDeviceProfile::AccessControlProfile aclProfile4;
+    aclProfile4.SetBindType(bindType);
+    aclProfile4.SetDeviceIdType(deviceIdType);
+    aclProfile4.SetTrustDeviceId(deviceId);
+    status = (uint32_t)OHOS::DistributedDeviceProfile::Status::ACTIVE;
+    aclProfile4.SetStatus(status);
+    trustDevices.push_back(aclProfile0);
+    trustDevices.push_back(aclProfile1);
+    trustDevices.push_back(aclProfile2);
+    trustDevices.push_back(aclProfile3);
+    trustDevices.push_back(aclProfile4);
+    result = IsTrustDevice(trustDevices, deviceIdHash, anonyDeviceIdHash, isOnlyPointToPoint);
+    EXPECT_FALSE(result);
+}
+
+/*
+ * @tc.name: IS_TRUST_DEVICE_TEST_002
+ * @tc.desc: device is not trusted
+ * @tc.type: FUNC
+ * @tc.require:
+ */
+HWTEST_F(AuthDeviceProfileTest, IS_TRUST_DEVICE_TEST_002, TestSize.Level1)
+{
+    std::vector<OHOS::DistributedDeviceProfile::AccessControlProfile> trustDevices;
+    const char *deviceIdHash = "deviceIdHash";
+    const char *anonyDeviceIdHash = "anonyDeviceIdHash";
+    bool isOnlyPointToPoint = false;
+    OHOS::DistributedDeviceProfile::AccessControlProfile aclProfile;
+    uint32_t bindType = (uint32_t)OHOS::DistributedDeviceProfile::BindType::SHARE;
+    aclProfile.SetBindType(bindType);
+    uint32_t deviceIdType = (uint32_t)OHOS::DistributedDeviceProfile::DeviceIdType::UDID;
+    aclProfile.SetDeviceIdType(deviceIdType);
+    std::string deviceId = "1234567";
+    aclProfile.SetTrustDeviceId(deviceId);
+    int32_t status = (uint32_t)OHOS::DistributedDeviceProfile::Status::ACTIVE;
+    aclProfile.SetStatus(status);
+    int32_t userId = 100;
+    DistributedDeviceProfile::Accessee accessee;
+    accessee.SetAccesseeDeviceId(deviceId);
+    aclProfile.SetAccessee(accessee);
+    DistributedDeviceProfile::Accesser accesser;
+    accesser.SetAccesserUserId(userId);
+    aclProfile.SetAccesser(accesser);
+    trustDevices.push_back(aclProfile);
+    bool result = IsTrustDevice(trustDevices, deviceIdHash, anonyDeviceIdHash, isOnlyPointToPoint);
+    EXPECT_FALSE(result);
+
+    const char *deviceIdHash1 = "8bb0cf6eb9b17d0f";
+    result = IsTrustDevice(trustDevices, deviceIdHash1, anonyDeviceIdHash, isOnlyPointToPoint);
+    EXPECT_TRUE(result);
+}
+
+/*
+ * @tc.name: COMPARE_ACL_WITH_PEER_DEVICE_INFO_TEST_001
+ * @tc.desc: test CompareAclWithPeerDeviceInfo
+ * @tc.type: FUNC
+ * @tc.require:
+ */
+HWTEST_F(AuthDeviceProfileTest, COMPARE_ACL_WITH_PEER_DEVICE_INFO_TEST_001, TestSize.Level1)
+{
+    OHOS::DistributedDeviceProfile::AccessControlProfile aclProfile;
+    const char *peerAccountHash = "8bb0cf6eb9b17d0f";
+    const char *peerUdid = "1234567890";
+    int32_t peerUserId = 1;
+    bool result = CompareAclWithPeerDeviceInfo(aclProfile, peerAccountHash, peerUdid, peerUserId);
+    EXPECT_FALSE(result);
+}
+
+/*
+ * @tc.name: COMPARE_ACL_WITH_PEER_DEVICE_INFO_TEST_002
+ * @tc.desc: test CompareAclWithPeerDeviceInfo
+ * @tc.type: FUNC
+ * @tc.require:
+ */
+HWTEST_F(AuthDeviceProfileTest, COMPARE_ACL_WITH_PEER_DEVICE_INFO_TEST_002, TestSize.Level1)
+{
+    AuthDeviceProfileInterfaceMock mocker;
+    EXPECT_CALL(mocker, LnnGetLocalStrInfo).WillRepeatedly(Return(SOFTBUS_OK));
+    OHOS::DistributedDeviceProfile::AccessControlProfile aclProfile;
+    const char *peerAccountHash = "8bb0cf6eb9b17d0f";
+    const char *peerUdid = "1234567890";
+    int32_t peerUserId = 1;
+    std::string accountId = "ohosAnonymousUid";
+    DistributedDeviceProfile::Accessee accessee;
+    accessee.SetAccesseeAccountId(accountId);
+    aclProfile.SetAccessee(accessee);
+    DistributedDeviceProfile::Accesser accesser;
+    accesser.SetAccesserAccountId(accountId);
+    aclProfile.SetAccesser(accesser);
+    bool result = CompareAclWithPeerDeviceInfo(aclProfile, peerAccountHash, peerUdid, peerUserId);
     EXPECT_FALSE(result);
 }
 
