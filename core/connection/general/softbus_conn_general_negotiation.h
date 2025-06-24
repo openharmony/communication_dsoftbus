@@ -38,9 +38,9 @@ typedef enum {
 } GeneralConnectionMsgType;
 
 typedef struct {
-    int32_t msgType;
-    int32_t localId;
-    int32_t peerId;
+    uint32_t msgType;
+    uint32_t localId;
+    uint32_t peerId;
     uint32_t headLen;
 } GeneralConnectionHead;
 
