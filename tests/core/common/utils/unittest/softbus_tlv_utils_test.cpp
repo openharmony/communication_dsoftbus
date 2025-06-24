@@ -64,7 +64,7 @@ static void TLvFeatureTest(uint8_t tSize, uint8_t lSize, vector<TlvFrame> &testc
             testcase.value_.length(), (const uint8_t *)testcase.value_.c_str());
         EXPECT_EQ(ret, SOFTBUS_OK);
     }
-    uint8_t *output = NULL;
+    uint8_t *output = nullptr;
     uint32_t outputSize = 0;
     ret = GetTlvBinary(sendObj, &output, &outputSize);
     EXPECT_EQ(ret, SOFTBUS_OK);
@@ -73,7 +73,7 @@ static void TLvFeatureTest(uint8_t tSize, uint8_t lSize, vector<TlvFrame> &testc
         BytesToHexString(output, outputSize).c_str(), outputSize);
 
     uint32_t length = 0;
-    uint8_t *value = NULL;
+    uint8_t *value = nullptr;
     TlvObject *recvObj = CreateTlvObject(tSize, lSize);
     ASSERT_TRUE(recvObj != nullptr);
     ret = SetTlvBinary(recvObj, output, outputSize);
@@ -100,15 +100,15 @@ HWTEST_F(SoftBusTlvUtilsTest, TlvUtilsNormalUsage, TestSize.Level0)
     COMM_LOGI(COMM_UTILS, "===TlvUtilsNormalUsage begin");
     vector<vector<TlvFrame>> tlvFrameTestcases = {
         // 1.only one tlv frame, length = 0
-        { TlvFrame(1, "") }, 
+        { TlvFrame(1, "") },
         // 2.only one tlv frame, length > 0
-        { TlvFrame(1, "test1") }, 
+        { TlvFrame(1, "test1") },
         // 3.many tlv frames, length = 0
-        { TlvFrame(1, ""), TlvFrame(2, ""), TlvFrame(3, "") }, 
+        { TlvFrame(1, ""), TlvFrame(2, ""), TlvFrame(3, "") },
         // 4.many tlv frames, length >= 0
-        { TlvFrame(1, "test1"), TlvFrame(2, ""), TlvFrame(3, "test3") }, 
+        { TlvFrame(1, "test1"), TlvFrame(2, ""), TlvFrame(3, "test3") },
         // 5.many tlv frames, all length > 0
-        { TlvFrame(1, "test1"), TlvFrame(2, "test2"), TlvFrame(3, "test3") }, 
+        { TlvFrame(1, "test1"), TlvFrame(2, "test2"), TlvFrame(3, "test3") },
     };
 
     for (auto frame: tlvFrameTestcases) {
@@ -146,7 +146,7 @@ HWTEST_F(SoftBusTlvUtilsTest, TlvUtilsPackTlvTest, TestSize.Level0)
     ASSERT_TRUE(obj != nullptr);
     int32_t ret = AddTlvMember(obj, frame1.type_, frame1.value_.length(), (const uint8_t *)frame1.value_.c_str());
     EXPECT_EQ(ret, SOFTBUS_OK);
-    uint8_t *output = NULL;
+    uint8_t *output = nullptr;
     uint32_t outputSize = 0;
     ret = GetTlvBinary(obj, &output, &outputSize);
     EXPECT_EQ(ret, SOFTBUS_OK);
@@ -203,7 +203,7 @@ HWTEST_F(SoftBusTlvUtilsTest, TlvUtilsUnpackTlvTest, TestSize.Level0)
     int32_t ret = SetTlvBinary(obj, tlvBytes, 12); // 12: UINT16_T + UINT16_T + strlen("test1024")
     EXPECT_EQ(ret, SOFTBUS_OK);
     uint32_t length = 0;
-    uint8_t *value = NULL;
+    uint8_t *value = nullptr;
     ret = GetTlvMember(obj, frame1.type_, &length, &value);
     EXPECT_EQ(ret, SOFTBUS_OK);
     ASSERT_EQ(length, frame1.value_.length());
@@ -271,7 +271,7 @@ HWTEST_F(SoftBusTlvUtilsTest, TlvUtilsPackNumberTest, TestSize.Level0)
     ret = AddTlvMemberU64(obj, tlvFrames[3].type, tlvFrames[3].u64);
     EXPECT_EQ(ret, SOFTBUS_OK);
 
-    uint8_t *output = NULL;
+    uint8_t *output = nullptr;
     uint32_t outputSize = 0;
     ret = GetTlvBinary(obj, &output, &outputSize);
     EXPECT_EQ(ret, SOFTBUS_OK);
