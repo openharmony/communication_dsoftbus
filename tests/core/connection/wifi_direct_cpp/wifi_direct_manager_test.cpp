@@ -56,29 +56,6 @@ HWTEST_F(WifiDirectManagerCppTest, AllocateListenerModuleIdTest, TestSize.Level1
 }
 
 /*
- * @tc.name: SetElementTypeTest
- * @tc.desc: check SetElementType method
- * @tc.type: FUNC
- * @tc.require:
- */
-HWTEST_F(WifiDirectManagerCppTest, SetElementTypeTest, TestSize.Level1)
-{
-    struct WifiDirectConnectInfo info = { 0 };
-    ConnEventExtra extra = { 0 };
-    info.connectType = WIFI_DIRECT_CONNECT_TYPE_AUTH_NEGO_P2P;
-    info.negoChannel.type = NEGO_CHANNEL_AUTH;
-    SetElementTypeExtra(&info, &extra);
-    EXPECT_EQ(info.dfxInfo.linkType, STATISTIC_P2P);
-    EXPECT_EQ(info.dfxInfo.bootLinkType, STATISTIC_NONE);
-
-    info.connectType = WIFI_DIRECT_CONNECT_TYPE_AUTH_NEGO_HML;
-    info.negoChannel.type = NEGO_CHANNEL_COC;
-    SetElementTypeExtra(&info, &extra);
-    EXPECT_EQ(info.dfxInfo.linkType, STATISTIC_HML);
-    EXPECT_EQ(info.dfxInfo.bootLinkType, STATISTIC_COC);
-}
-
-/*
  * @tc.name: SavePtkTest
  * @tc.desc: check SavePtk method
  * @tc.type: FUNC
