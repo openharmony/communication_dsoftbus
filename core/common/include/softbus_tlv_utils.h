@@ -72,10 +72,8 @@ int32_t GetTlvMemberU64(TlvObject *obj, uint32_t type, uint64_t *value);
 // traverse each tlv member
 // for example:
 // {
-//    TlvObjetc *obj = CreateTlvObject(UINT8_T, UINT8_T);
-//    SetTlvBinary(obj, input, size);
 //    TlvMember *tlv = NULL;
-//    TLV_FOR_EACH(tlv, obj, TlvMember, node) {
+//    TLV_FOR_EACH_ENTRY(tlv, obj, TlvMember, node) {
 //        // do something for tlv->type, tlv->length, tlv->value
 //    }
 // }
@@ -86,7 +84,7 @@ typedef struct {
     uint8_t value[0];
 } TlvMember;
 
-#define TLV_FOR_EACH(tlv, tlvObj, type, member) \
+#define TLV_FOR_EACH_ENTRY(tlv, tlvObj, type, member) \
     LIST_FOR_EACH_ENTRY(tlv, &((tlvObj)->mList), type, member)
 
 #ifdef __cplusplus
