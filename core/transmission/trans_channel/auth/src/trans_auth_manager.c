@@ -1444,6 +1444,19 @@ int32_t TransDealAuthChannelOpenResult(int32_t channelId, int32_t openResult, pi
         TRANS_LOGE(TRANS_CTRL, "get auth channel failed, channelId=%{public}d, ret=%{public}d", channelId, ret);
         return ret;
     }
+
+    int32_t pid = 0;
+    int32_t uid = 0;
+    ret = AuthGetUidAndPidBySessionName(info.appInfo.myData.sessionName, &uid, &pid);
+    if (ret != SOFTBUS_OK) {
+        TRANS_LOGE(TRANS_SVC, "auth get id by sessionName failed");
+        return SOFTBUS_TRANS_GET_PID_FAILED;
+    }
+    if (callingPid != 0 && pid != callingPid) {
+        TRANS_LOGE(TRANS_CTRL, "pid does not match callingPid, pid=%{public}d, callingPid=%{public}d", pid, callingPid);
+        return SOFTBUS_TRANS_CHECK_PID_ERROR;
+    }
+
     ret = TransSetAuthChannelReplyCnt(channelId);
     if (ret != SOFTBUS_OK) {
         TRANS_LOGE(TRANS_CTRL, "update cnt failed, channelId=%{public}d, ret=%{public}d", channelId, ret);
@@ -1460,18 +1473,6 @@ int32_t TransDealAuthChannelOpenResult(int32_t channelId, int32_t openResult, pi
         .socketName = info.appInfo.myData.sessionName,
         .peerUdid = info.appInfo.peerData.deviceId,
     };
-
-    int32_t pid = 0;
-    int32_t uid = 0;
-    ret = AuthGetUidAndPidBySessionName(info.appInfo.myData.sessionName, &uid, &pid);
-    if (ret != SOFTBUS_OK) {
-        TRANS_LOGE(TRANS_SVC, "auth get id by sessionName failed");
-        return SOFTBUS_TRANS_GET_PID_FAILED;
-    }
-    if (callingPid != 0 && pid != callingPid) {
-        TRANS_LOGE(TRANS_CTRL, "pid does not match, pid=%{public}d, callingPid=%{public}d", pid, callingPid);
-        return SOFTBUS_TRANS_CHECK_PID_ERROR;
-    }
 
     if (openResult != SOFTBUS_OK) {
         TRANS_LOGE(TRANS_SVC, "open auth channel failed, openResult=%{public}d", openResult);
