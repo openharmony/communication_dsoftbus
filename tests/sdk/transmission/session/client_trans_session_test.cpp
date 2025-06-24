@@ -1187,6 +1187,7 @@ HWTEST_F(TransClientSessionTest, TransClientSessionTest34, TestSize.Level1)
  */
 HWTEST_F(TransClientSessionTest, TransClientSessionTest35, TestSize.Level1)
 {
+    const char *sessionName = "ohos.distributedschedule.dms.test";
     SessionParam *sessionParam = (SessionParam*)SoftBusCalloc(sizeof(SessionParam));
     ASSERT_TRUE(sessionParam != nullptr);
     TestGenerateCommParam(sessionParam);
@@ -1194,20 +1195,20 @@ HWTEST_F(TransClientSessionTest, TransClientSessionTest35, TestSize.Level1)
     ASSERT_TRUE(info != nullptr);
     int32_t connType = TRANS_CONN_HML;
     int32_t routeType = WIFI_P2P_REUSE;
-    bool ret = ClientTransCheckNeedDel(info, routeType, connType);
+    bool ret = ClientTransCheckNeedDel(sessionName, info, routeType, connType);
     EXPECT_FALSE(ret);
     routeType = ROUTE_TYPE_ALL;
     info->channelType = CHANNEL_TYPE_UDP;
-    ret = ClientTransCheckNeedDel(info, routeType, connType);
+    ret = ClientTransCheckNeedDel(sessionName, info, routeType, connType);
     EXPECT_FALSE(ret);
     info->channelType = CHANNEL_TYPE_TCP_DIRECT;
-    ret = ClientTransCheckNeedDel(info, routeType, connType);
+    ret = ClientTransCheckNeedDel(sessionName, info, routeType, connType);
     EXPECT_FALSE(ret);
     info->channelType = CHANNEL_TYPE_AUTH;
-    ret = ClientTransCheckNeedDel(info, routeType, connType);
+    ret = ClientTransCheckNeedDel(sessionName, info, routeType, connType);
     EXPECT_TRUE(ret);
     info->channelType = CHANNEL_TYPE_BUTT;
-    ret = ClientTransCheckNeedDel(info, routeType, connType);
+    ret = ClientTransCheckNeedDel(sessionName, info, routeType, connType);
     EXPECT_FALSE(ret);
     SoftBusFree(sessionParam);
     SoftBusFree(info);
