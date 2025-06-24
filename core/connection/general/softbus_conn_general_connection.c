@@ -1048,23 +1048,23 @@ static void OnCommDataReceived(uint32_t connectionId, ConnModule moduleId, int64
         CONN_LOGE(CONN_BLE, "invalid param, connectionId=%{public}u", connectionId);
         return;
     }
-    GeneralConnectionHead *head = (GeneralConnectionHead *)data;
-    UnpackGeneralHead(head);
-    GeneralConnectionMsgType msgType = head->msgType;
-    if (msgType >= GENERAL_CONNECTION_MSG_TYPE_MAX || (uint32_t)len < head->headLen) {
-        CONN_LOGE(CONN_BLE, "invalid msgType, msgType=%{public}d, len=%{public}d, headLen=%{public}u",
-            msgType, len, head->headLen);
+    GeneralConnectionHead head = *(GeneralConnectionHead *)data;
+    UnpackGeneralHead(&head);
+    GeneralConnectionMsgType msgType = head.msgType;
+    if (msgType >= GENERAL_CONNECTION_MSG_TYPE_MAX || (uint32_t)len < head.headLen) {
+        CONN_LOGE(CONN_BLE, "invalid msgType, msgType=%{public}u, len=%{public}d, headLen=%{public}u",
+            msgType, len, head.headLen);
         return;
     }
     GeneralConnectionInfo info = {0};
-    info.peerId = head->localId;
-    info.localId = head->peerId;
-    uint32_t recvDataLen = (uint32_t)len - head->headLen; // len greater than GENERAL_CONNECTION_HEADER_SIZE
-    uint8_t *recvData = (uint8_t *)data + head->headLen;
+    info.peerId = head.localId;
+    info.localId = head.peerId;
+    uint32_t recvDataLen = (uint32_t)len - head.headLen; // len greater than GENERAL_CONNECTION_HEADER_SIZE
+    uint8_t *recvData = (uint8_t *)data + head.headLen;
     CONN_LOGI(CONN_BLE, "handle=%{public}u,"
         "recv data len=%{public}d, seq=%{public}" PRId64 ", msgtype=%{public}u", info.localId, len, seq, msgType);
     if (msgType == GENERAL_CONNECTION_MSG_TYPE_NORMAL) {
-        struct GeneralConnection *connection = GetValidConnectionByGeneralId(connectionId, head->peerId);
+        struct GeneralConnection *connection = GetValidConnectionByGeneralId(connectionId, head.peerId);
         CONN_CHECK_AND_RETURN_LOGE(connection != NULL, CONN_BLE, "conncetion is null");
         CONN_LOGI(CONN_BLE, "recv data generalId=%{public}u, len=%{public}d",
             connection->generalId, recvDataLen);
@@ -1073,7 +1073,7 @@ static void OnCommDataReceived(uint32_t connectionId, ConnModule moduleId, int64
         ConnReturnGeneralConnection(&connection);
         return;
     }
-    int32_t status = GeneralConnectionUnpackMsg(recvData, recvDataLen, &info, head->msgType);
+    int32_t status = GeneralConnectionUnpackMsg(recvData, recvDataLen, &info, head.msgType);
     CONN_CHECK_AND_RETURN_LOGE(status == SOFTBUS_OK, CONN_BLE, "pack msg failed, handle=%{public}u, status=%{public}d",
         info.localId, status);
     status = ProcessInnerMessageByType(connectionId, msgType, &info);

@@ -48,7 +48,7 @@ static OutData *ConstructOutData(GeneralConnectionInfo *info, GeneralConnectionM
     header->localId = info->localId;
     header->peerId = info->peerId;
     header->msgType = msgType;
-    UnpackGeneralHead(header);
+    PackGeneralHead(header);
     return outData;
 }
 
@@ -154,17 +154,17 @@ void FreeOutData(OutData *outData)
 void PackGeneralHead(GeneralConnectionHead *data)
 {
     CONN_CHECK_AND_RETURN_LOGE(data != NULL, CONN_BLE, "data is null");
-    data->msgType = (int32_t)SoftBusHtoLl((uint32_t)data->msgType);
-    data->localId = (int32_t)SoftBusHtoLl((uint32_t)data->localId);
-    data->peerId = (int32_t)SoftBusHtoLl((uint32_t)data->peerId);
+    data->msgType = SoftBusHtoLl(data->msgType);
+    data->localId = SoftBusHtoLl(data->localId);
+    data->peerId = SoftBusHtoLl(data->peerId);
     data->headLen = SoftBusHtoLl(data->headLen);
 }
 
 void UnpackGeneralHead(GeneralConnectionHead *data)
 {
     CONN_CHECK_AND_RETURN_LOGE(data != NULL, CONN_BLE, "data is null");
-    data->msgType = (int32_t)SoftBusLtoHl((uint32_t)data->msgType);
-    data->localId = (int32_t)SoftBusLtoHl((uint32_t)data->localId);
-    data->peerId = (int32_t)SoftBusLtoHl((uint32_t)data->peerId);
+    data->msgType = SoftBusLtoHl(data->msgType);
+    data->localId = SoftBusLtoHl(data->localId);
+    data->peerId = SoftBusLtoHl(data->peerId);
     data->headLen = SoftBusLtoHl(data->headLen);
 }
