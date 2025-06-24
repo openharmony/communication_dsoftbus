@@ -23,6 +23,9 @@
 extern "C" {
 #endif // __cplusplus
 
+#define MAX_VALUE_LENGTH 512
+#define MAX_TLV_BINARY_LENGTH 4096
+
 enum BasicSize {
     UINT8_T = 1,
     UINT16_T = 2,
@@ -54,6 +57,9 @@ int32_t GetTlvMemberWithSpecifiedBuffer(TlvObject *obj, uint32_t type, uint8_t *
 int32_t GetTlvMemberWithEstimatedBuffer(TlvObject *obj, uint32_t type, uint8_t *buffer, uint32_t *size);
 
 // note: while calling the following API, no need to handle 'Network Byte Order'.
+int32_t AddTlvMemberU8(TlvObject *obj, uint32_t type, uint8_t value);
+int32_t GetTlvMemberU8(TlvObject *obj, uint32_t type, uint8_t *value);
+
 int32_t AddTlvMemberU16(TlvObject *obj, uint32_t type, uint16_t value);
 int32_t GetTlvMemberU16(TlvObject *obj, uint32_t type, uint16_t *value);
 
@@ -62,6 +68,26 @@ int32_t GetTlvMemberU32(TlvObject *obj, uint32_t type, uint32_t *value);
 
 int32_t AddTlvMemberU64(TlvObject *obj, uint32_t type, uint64_t value);
 int32_t GetTlvMemberU64(TlvObject *obj, uint32_t type, uint64_t *value);
+
+// traverse each tlv member
+// for example:
+// {
+//    TlvObjetc *obj = CreateTlvObject(UINT8_T, UINT8_T);
+//    SetTlvBinary(obj, input, size);
+//    TlvMember *tlv = NULL;
+//    TLV_FOR_EACH(tlv, obj, TlvMember, node) {
+//        // do something for tlv->type, tlv->length, tlv->value
+//    }
+// }
+typedef struct {
+    ListNode node;
+    uint32_t type;
+    uint32_t length;
+    uint8_t value[0];
+} TlvMember;
+
+#define TLV_FOR_EACH(tlv, tlvObj, type, member) \
+    LIST_FOR_EACH_ENTRY(tlv, &((tlvObj)->mList), type, member)
 
 #ifdef __cplusplus
 }
