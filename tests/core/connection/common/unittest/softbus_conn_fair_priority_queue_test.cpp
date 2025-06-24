@@ -73,9 +73,9 @@ static void Dump(const TestAction &action, const DummyQueueItem *item)
 {
     if (item != nullptr) {
         CONN_LOGI(CONN_TEST,
-            "operation=%{public}d, timeout=%{public}dms, wait=%{public}d, ret code=%{public}d; item ptr=%{public}p, "
+            "operation=%{public}d, timeout=%{public}dms, wait=%{public}d, ret code=%{public}d;"
             "id=%{public}d, priority=%{public}d, payload=%{public}d",
-            action.operation_, action.timeoutMs_, action.wait_, action.ret_, item, item->id, item->priority,
+            action.operation_, action.timeoutMs_, action.wait_, action.ret_, item->id, item->priority,
             item->payload);
     } else {
         CONN_LOGI(CONN_TEST,
