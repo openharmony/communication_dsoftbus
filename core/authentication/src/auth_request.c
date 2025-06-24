@@ -72,7 +72,7 @@ static uint32_t GetAuthRequestWaitNum(const AuthRequest *request, ListNode *wait
 uint32_t AddAuthRequest(const AuthRequest *request)
 {
     AUTH_CHECK_AND_RETURN_RET_LOGE(request != NULL, 0, AUTH_CONN, "request is NULL");
-    AuthRequest *newRequest = SoftBusCalloc(sizeof(AuthRequest));
+    AuthRequest *newRequest = static_cast<AuthRequest *>(SoftBusCalloc(sizeof(AuthRequest)));
     if (newRequest == NULL) {
         AUTH_LOGE(AUTH_CONN, "malloc AuthRequest fail");
         return 0;
