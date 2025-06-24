@@ -17,6 +17,8 @@
 #include <cstddef>
 #include <cstdint>
 #include <securec.h>
+#include <fuzzer/FuzzedDataProvider.h>
+#include <vector>
 #include "softbus_transmission_interface.h"
 
 namespace OHOS {
@@ -41,6 +43,14 @@ void TransOpenNetWorkingChannelSessionNameTest(const uint8_t* data, size_t size)
     TransOpenNetWorkingChannel(mySessionName, peerNetworkId, nullptr);
 }
 
+void TransOpenNetWorkingChannelSessionNameTest(FuzzedDataProvider &provider)
+{
+    std::string mySessionName =  provider.ConsumeRandomLengthString(SESSION_NAME_SIZE_MAX);
+    char peerNetworkId[DEVICE_ID_SIZE_MAX] = TEST_PEER_NETWORK_ID;
+
+    TransOpenNetWorkingChannel(mySessionName.c_str(), peerNetworkId, nullptr);
+}
+
 void TransOpenNetWorkingChannelPeerNetworkIdTest(const uint8_t* data, size_t size)
 {
     if ((data == nullptr) || (size >= DEVICE_ID_SIZE_MAX) || (size < 0)) {
@@ -56,6 +66,14 @@ void TransOpenNetWorkingChannelPeerNetworkIdTest(const uint8_t* data, size_t siz
     TransOpenNetWorkingChannel(mySessionName, peerNetworkId, nullptr);
 }
 
+void TransOpenNetWorkingChannelPeerNetworkIdTest(FuzzedDataProvider &provider)
+{
+    std::string peerNetworkId =  provider.ConsumeRandomLengthString(DEVICE_ID_SIZE_MAX);
+    const char *mySessionName = TEST_SESSION_NAME;
+
+    TransOpenNetWorkingChannel(mySessionName, peerNetworkId.c_str(), nullptr);
+}
+
 void TransCloseNetWorkingChannelTest(const uint8_t* data, size_t size)
 {
     if ((data == nullptr) || (size < sizeof(int32_t))) {
@@ -66,6 +84,13 @@ void TransCloseNetWorkingChannelTest(const uint8_t* data, size_t size)
     if (memcpy_s(&channelId, sizeof(int32_t), data, sizeof(int32_t)) != EOK) {
         return;
     }
+
+    TransCloseNetWorkingChannel(channelId);
+}
+
+void TransCloseNetWorkingChannelTest(FuzzedDataProvider &provider)
+{
+    int32_t channelId = provider.ConsumeIntegral<int32_t>();
 
     TransCloseNetWorkingChannel(channelId);
 }
@@ -101,15 +126,26 @@ void TransSendNetworkingMessageTest(const uint8_t* data, size_t size)
 
     TransSendNetworkingMessage(channelId, myData, dataLen, priority);
 }
+
+void TransSendNetworkingMessageTest(FuzzedDataProvider &provider)
+{
+    int32_t channelId = provider.ConsumeIntegral<int32_t>();
+    int32_t priority = provider.ConsumeIntegral<int32_t>();
+    std::string myData =  provider.ConsumeRandomLengthString(SESSION_NAME_SIZE_MAX);
+    uint32_t dataLen = SESSION_NAME_SIZE_MAX;
+
+    TransSendNetworkingMessage(channelId, myData.c_str(), dataLen, priority);
+}
 } // namespace OHOS
 
 /* Fuzzer entry point */
 extern "C" int32_t LLVMFuzzerTestOneInput(const uint8_t* data, size_t size)
 {
     /* Run your code on data */
-    OHOS::TransOpenNetWorkingChannelSessionNameTest(data, size);
-    OHOS::TransOpenNetWorkingChannelPeerNetworkIdTest(data, size);
-    OHOS::TransCloseNetWorkingChannelTest(data, size);
-    OHOS::TransSendNetworkingMessageTest(data, size);
+    FuzzedDataProvider provider(data, size);
+    OHOS::TransOpenNetWorkingChannelSessionNameTest(provider);
+    OHOS::TransOpenNetWorkingChannelPeerNetworkIdTest(provider);
+    OHOS::TransCloseNetWorkingChannelTest(provider);
+    OHOS::TransSendNetworkingMessageTest(provider);
     return 0;
 }

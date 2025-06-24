@@ -202,6 +202,13 @@ void TransProxyGetNewChanSeqTest(const uint8_t *data, size_t size)
     DataGenerator::Clear();
 }
 
+void FillAppInfoTest(FuzzedDataProvider &provider)
+{
+    AppInfo appInfo;
+    (void)memset_s(&appInfo, sizeof(AppInfo), 0, sizeof(AppInfo));
+    FillAppInfo(provider, &appInfo);
+}
+
 void TransProxyGetNewChanSeqTest(FuzzedDataProvider &provider)
 {
     int32_t channelId = provider.ConsumeIntegral<int32_t>();
@@ -1009,6 +1016,7 @@ extern "C" int32_t LLVMFuzzerTestOneInput(const uint8_t *data, size_t size)
     }
 
     FuzzedDataProvider provider(data, size);
+    OHOS::FillAppInfoTest(provider);
     OHOS::TransProxyGetNewChanSeqTest(provider);
     OHOS::TransProxyOpenProxyChannelTest(provider);
     OHOS::TransProxyDelByConnIdTest(provider);
