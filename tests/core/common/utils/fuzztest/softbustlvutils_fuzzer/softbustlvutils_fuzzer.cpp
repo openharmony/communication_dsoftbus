@@ -15,7 +15,7 @@
 
 #include "softbustlvutils_fuzzer.h"
 
-#include <time.h>
+#include <ctime>
 #include <securec.h>
 
 #include "comm_log.h"
@@ -40,7 +40,6 @@ static void FuzzAddTlvMember(uint8_t tSize, uint8_t lSize, const uint8_t *data, 
     uint32_t length = size;
     uint32_t offset = 0;
     for (; offset < size && length > 0; type++) {
-        COMM_LOGE(COMM_UTILS, "type=%{public}u, length=%{public}u, size=%{public}u, offset=%{public}u,", type, length, size, offset);
         length = (rand() % (size - offset));
         (void)AddTlvMember(obj, type, length, data + offset);
         offset += length;
@@ -62,9 +61,6 @@ bool DoSomethingInterestingWithMyAPI(const uint8_t *data, size_t size)
     FuzzSetTlvBinary(UINT32_T, UINT8_T, data, size);
     FuzzSetTlvBinary(UINT32_T, UINT16_T, data, size);
     FuzzSetTlvBinary(UINT32_T, UINT32_T, data, size);
-    if (size > 0 && data[0] > 0) {
-        FuzzSetTlvBinary((data[0] & 0x0F), ((data[0] >> 4) & 0x0F), data + 1, size - 1);
-    }
 
     FuzzAddTlvMember(UINT8_T, UINT8_T, data, size);
     FuzzAddTlvMember(UINT8_T, UINT16_T, data, size);
@@ -84,7 +80,7 @@ bool DoSomethingInterestingWithMyAPI(const uint8_t *data, size_t size)
 extern "C" int32_t LLVMFuzzerTestOneInput(const uint8_t *data, size_t size)
 {
     /* Run your code on data */
-    srand(time(NULL));
+    srand(time(nullptr));
     OHOS::DoSomethingInterestingWithMyAPI(data, size);
     return 0;
 }
