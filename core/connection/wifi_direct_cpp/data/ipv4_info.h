@@ -47,7 +47,7 @@ public:
         return prefixLength_;
     }
 
-    static constexpr int Ipv4InfoSize() { return sizeof(ip_) + sizeof(prefixLength_); }
+    static constexpr size_t Ipv4InfoSize() { return sizeof(ip_) + sizeof(prefixLength_); }
 
 private:
     uint32_t ip_ {}; /* net order */
