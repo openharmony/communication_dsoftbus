@@ -22,13 +22,6 @@
 #include "softbus_adapter_socket.h"
 #include "softbus_error_code.h"
 
-typedef struct {
-    ListNode node;
-    uint32_t type;
-    uint32_t length;
-    uint8_t value[0];
-} TlvMember;
-
 #define TLV_SIZE(obj, length) ((obj)->tSize + (obj)->lSize + (length))
 
 static TlvMember *NewTlvMember(uint32_t type, uint32_t length, const uint8_t *value)
@@ -50,6 +43,10 @@ static void DelTlvMember(TlvMember *tlv)
 
 TlvObject *CreateTlvObject(uint8_t tSize, uint8_t lSize)
 {
+    COMM_CHECK_AND_RETURN_RET_LOGW(tSize >= UINT8_T && tSize <= UINT32_T,
+        NULL, COMM_UTILS, "invalid tSize=%{public}u", tSize);
+    COMM_CHECK_AND_RETURN_RET_LOGW(lSize >= UINT8_T && lSize <= UINT32_T,
+        NULL, COMM_UTILS, "invalid lSize=%{public}u", lSize);
     TlvObject *obj = (TlvObject *)SoftBusMalloc(sizeof(TlvObject));
     COMM_CHECK_AND_RETURN_RET_LOGW(obj != NULL, NULL, COMM_UTILS, "malloc fail");
     obj->tSize = tSize;
@@ -191,29 +188,35 @@ static uint32_t UnpackTypeOrLength(const uint8_t *buf, uint32_t size)
             COMM_LOGW(COMM_UTILS, "unsupport type/length size(=%{public}u)", size);
             break;
     }
-    return 0xFFFFFFFF;
+    return UINT32_MAX;
 }
 
 int32_t SetTlvBinary(TlvObject *obj, const uint8_t *input, uint32_t inputSize)
 {
     COMM_CHECK_AND_RETURN_RET_LOGW(obj != NULL, SOFTBUS_INVALID_PARAM, COMM_UTILS, "obj nullptr");
     COMM_CHECK_AND_RETURN_RET_LOGW(input != NULL, SOFTBUS_INVALID_PARAM, COMM_UTILS, "input nullptr");
-    COMM_CHECK_AND_RETURN_RET_LOGW(inputSize > 0, SOFTBUS_INVALID_PARAM, COMM_UTILS, "inputSize is 0");
-
+    COMM_CHECK_AND_RETURN_RET_LOGW(inputSize > 0 && inputSize < MAX_TLV_BINARY_LENGTH,
+        SOFTBUS_INVALID_DATA_HEAD, COMM_UTILS, "invalid inputSize(=%{public}u)", inputSize);
     uint32_t offset = 0;
     while (offset + TLV_SIZE(obj, 0) <= inputSize) {
         uint32_t type = UnpackTypeOrLength(input + offset, obj->tSize);
         uint32_t length = UnpackTypeOrLength(input + offset + obj->tSize, obj->lSize);
-        if (offset + TLV_SIZE(obj, length) > inputSize) {
-            COMM_LOGW(COMM_UTILS, "invalid tlv, type=%{public}u, length=%{public}u", type, length);
+        COMM_CHECK_AND_RETURN_RET_LOGE((type != UINT32_MAX && length != UINT32_MAX), SOFTBUS_NOT_IMPLEMENT,
+            COMM_UTILS, "invalid tSize(=%{public}u)/lSize(=%{public}u)", obj->tSize, obj->lSize);
+        COMM_CHECK_AND_RETURN_RET_LOGE(length < MAX_VALUE_LENGTH, SOFTBUS_INVALID_DATA_HEAD,
+            COMM_UTILS, "invalid length=%{public}u", length);
+        if (TLV_SIZE(obj, length) > inputSize - offset) {
+            COMM_LOGW(COMM_UTILS, "incomplete tlv, type=%{public}u, length=%{public}u", type, length);
             return SOFTBUS_NO_ENOUGH_DATA;
         }
         int32_t ret = AddTlvMember(obj, type, length, input + offset + TLV_SIZE(obj, 0));
         COMM_CHECK_AND_RETURN_RET_LOGE(ret == SOFTBUS_OK, ret, COMM_UTILS, "add tlv member fail(=%{public}d)", ret);
         offset += TLV_SIZE(obj, length);
     }
+    COMM_CHECK_AND_RETURN_RET_LOGW(offset > 0, SOFTBUS_NO_ENOUGH_DATA,
+        COMM_UTILS, "no tlv member, offset=%{public}u, length=%{public}u", offset, inputSize);
     COMM_CHECK_AND_RETURN_RET_LOGW(offset == inputSize, SOFTBUS_OK,
-        COMM_UTILS, "TLV binary has not parsed completely, offset=%{public}u, length=%{public}u", offset, inputSize);
+        COMM_UTILS, "TLV binary not be parsed completely, offset=%{public}u, length=%{public}u", offset, inputSize);
     return SOFTBUS_OK;
 }
 
@@ -250,6 +253,16 @@ int32_t GetTlvMemberWithEstimatedBuffer(TlvObject *obj, uint32_t type, uint8_t *
     COMM_CHECK_AND_RETURN_RET_LOGE(err == EOK, SOFTBUS_MEM_ERR, COMM_UTILS, "copy value fail(=%{public}d)", ret);
     *size = length;
     return SOFTBUS_OK;
+}
+
+int32_t AddTlvMemberU8(TlvObject *obj, uint32_t type, uint8_t value)
+{
+    return AddTlvMember(obj, type, sizeof(uint8_t), &value);
+}
+
+int32_t GetTlvMemberU8(TlvObject *obj, uint32_t type, uint8_t *value)
+{
+    return GetTlvMemberWithSpecifiedBuffer(obj, type, value, sizeof(uint8_t));
 }
 
 int32_t AddTlvMemberU16(TlvObject *obj, uint32_t type, uint16_t value)
