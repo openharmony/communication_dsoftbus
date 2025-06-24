@@ -54,7 +54,7 @@ void AuthRequestTest::TearDown() { }
 
 /*
  * @tc.name:GET_AUTH_REQUEST_TEST_001
- * @tc.desc: AuthRequestTest test
+ * @tc.desc: GetAuthRequestWaitNum test
  * @tc.type: FUNC
  * @tc.require:
  */
@@ -93,7 +93,7 @@ HWTEST_F(AuthRequestTest, GET_AUTH_REQUEST_TEST_001, TestSize.Level1)
 
 /*
  * @tc.name:GET_AUTH_REQUEST_TEST_002
- * @tc.desc: AuthRequestTest test
+ * @tc.desc: GetAuthRequestWaitNum test
  * @tc.type: FUNC
  * @tc.require:
  */
