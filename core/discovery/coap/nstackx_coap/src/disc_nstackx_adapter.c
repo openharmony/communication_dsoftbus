@@ -78,6 +78,9 @@ static DiscLinkInfo g_linkInfo[MAX_IF + 1] = {
 #if defined(DSOFTBUS_FEATURE_DISC_LNN_COAP) || defined(DSOFTBUS_FEATURE_DISC_SHARE_COAP)
 static int32_t FillRspSettings(NSTACKX_ResponseSettings *settings, const DeviceInfo *deviceInfo, uint8_t bType)
 {
+    DISC_CHECK_AND_RETURN_RET_LOGE(settings != NULL, SOFTBUS_INVALID_PARAM, DISC_COAP, "settings is nullptr");
+    DISC_CHECK_AND_RETURN_RET_LOGE(deviceInfo != NULL, SOFTBUS_INVALID_PARAM, DISC_COAP, "deviceInfo is nullptr");
+
     settings->businessData = NULL;
     settings->length = 0;
     settings->businessType = bType;
@@ -133,6 +136,10 @@ int32_t DiscCoapSendRsp(const DeviceInfo *deviceInfo, uint8_t bType)
 
 static int32_t ParseReservedInfo(const NSTACKX_DeviceInfo *nstackxDevice, DeviceInfo *device, char *nickName)
 {
+    DISC_CHECK_AND_RETURN_RET_LOGE(nstackxDevice != NULL, SOFTBUS_INVALID_PARAM, DISC_COAP, "nstackxDevice is nullptr");
+    DISC_CHECK_AND_RETURN_RET_LOGE(device != NULL, SOFTBUS_INVALID_PARAM, DISC_COAP, "device is nullptr");
+    DISC_CHECK_AND_RETURN_RET_LOGE(nickName != NULL, SOFTBUS_INVALID_PARAM, DISC_COAP, "nickName is nullptr");
+
     cJSON *reserveInfo = cJSON_Parse(nstackxDevice->reservedInfo);
     DISC_CHECK_AND_RETURN_RET_LOGE(reserveInfo != NULL, SOFTBUS_PARSE_JSON_ERR, DISC_COAP,
         "parse reserve data failed.");
@@ -149,6 +156,10 @@ static int32_t ParseReservedInfo(const NSTACKX_DeviceInfo *nstackxDevice, Device
 
 static int32_t SpliceCoapDisplayName(char *devName, char *nickName, DeviceInfo *device)
 {
+    DISC_CHECK_AND_RETURN_RET_LOGE(devName != NULL, SOFTBUS_INVALID_PARAM, DISC_COAP, "devName is nullptr");
+    DISC_CHECK_AND_RETURN_RET_LOGE(device != NULL, SOFTBUS_INVALID_PARAM, DISC_COAP, "device is nullptr");
+    DISC_CHECK_AND_RETURN_RET_LOGE(nickName != NULL, SOFTBUS_INVALID_PARAM, DISC_COAP, "nickName is nullptr");
+
     char *hyphen = NULL;
     bool isSameAccount = false;
     bool isZH = IsZHLanguage();
@@ -189,6 +200,10 @@ static int32_t SpliceCoapDisplayName(char *devName, char *nickName, DeviceInfo *
 
 static int32_t ParseDiscDevInfo(const NSTACKX_DeviceInfo *nstackxDevInfo, DeviceInfo *discDevInfo)
 {
+    DISC_CHECK_AND_RETURN_RET_LOGE(nstackxDevInfo != NULL, SOFTBUS_INVALID_PARAM,
+        DISC_COAP, "nstackxDevInfo is nullptr");
+    DISC_CHECK_AND_RETURN_RET_LOGE(discDevInfo != NULL, SOFTBUS_INVALID_PARAM, DISC_COAP, "discDevInfo is nullptr");
+
     char devName[DISC_MAX_DEVICE_NAME_LEN] = { 0 };
     char nickName[DISC_MAX_NICKNAME_LEN] = { 0 };
     if (strcpy_s(devName, DISC_MAX_DEVICE_NAME_LEN, nstackxDevInfo->deviceName) != EOK ||
@@ -437,6 +452,8 @@ int32_t DiscCoapRegisterCapabilityData(const unsigned char *capabilityData, uint
 
 static int32_t GetDiscFreq(int32_t freq, uint32_t *discFreq)
 {
+    DISC_CHECK_AND_RETURN_RET_LOGE(discFreq != NULL, SOFTBUS_INVALID_PARAM, DISC_COAP, "discFreq is nullptr");
+
     uint32_t arrayFreq[FREQ_BUTT] = { 0 };
     int32_t ret = SoftbusGetConfig(SOFTBUS_INT_DISC_FREQ, (unsigned char *)arrayFreq, sizeof(arrayFreq));
     if (ret != SOFTBUS_OK) {
@@ -449,6 +466,9 @@ static int32_t GetDiscFreq(int32_t freq, uint32_t *discFreq)
 
 static int32_t ConvertDiscoverySettings(NSTACKX_DiscoverySettings *discSet, const DiscCoapOption *option)
 {
+    DISC_CHECK_AND_RETURN_RET_LOGE(discSet != NULL, SOFTBUS_INVALID_PARAM, DISC_COAP, "discSet is nullptr");
+    DISC_CHECK_AND_RETURN_RET_LOGE(option != NULL, SOFTBUS_INVALID_PARAM, DISC_COAP, "option is nullptr");
+
     if (option->mode == ACTIVE_PUBLISH) {
         discSet->discoveryMode = PUBLISH_MODE_PROACTIVE;
     } else {

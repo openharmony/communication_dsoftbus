@@ -129,6 +129,8 @@ static const char *g_discModuleMap[] = {
 
 static void UpdateDiscEventAndReport(DiscEventExtra *extra, const DeviceInfo *device)
 {
+    DISC_CHECK_AND_RETURN_LOGE(extra != NULL, DISC_BROADCAST, "extra is nullptr");
+
     if (device == NULL) {
         DISC_EVENT(EVENT_SCENE_DISC, EVENT_STAGE_DEVICE_FOUND, *extra);
         DISC_LOGI(DISC_CONTROL, "device info is null");
@@ -171,6 +173,8 @@ static void UpdateDiscEventAndReport(DiscEventExtra *extra, const DeviceInfo *de
 
 static void DfxRecordStartDiscoveryDevice(DiscInfo *infoNode)
 {
+    DISC_CHECK_AND_RETURN_LOGE(infoNode != NULL, DISC_BROADCAST, "infoNode is nullptr");
+
     infoNode->statistics.startTime = SoftBusGetSysTimeMs();
     infoNode->statistics.repTimes = 0;
     infoNode->statistics.devNum = 0;
@@ -179,6 +183,8 @@ static void DfxRecordStartDiscoveryDevice(DiscInfo *infoNode)
 
 static void UpdateDdmpStartDiscoveryTime(DiscInfo *info)
 {
+    DISC_CHECK_AND_RETURN_LOGE(info != NULL, DISC_BROADCAST, "info is nullptr");
+
     if (info->medium != AUTO && info->medium != COAP) {
         DISC_LOGD(DISC_CONTROL, "no need update ddmp start discovery time");
         return;
@@ -196,6 +202,10 @@ static void UpdateDdmpStartDiscoveryTime(DiscInfo *info)
 static void DfxRecordDeviceFound(DiscInfo *infoNode, const DeviceInfo *device, const InnerDeviceInfoAddtions *additions)
 {
     DISC_LOGD(DISC_CONTROL, "record device found");
+    DISC_CHECK_AND_RETURN_LOGE(infoNode != NULL, DISC_BROADCAST, "infoNode is nullptr");
+    DISC_CHECK_AND_RETURN_LOGE(device != NULL, DISC_BROADCAST, "device is nullptr");
+    DISC_CHECK_AND_RETURN_LOGE(additions != NULL, DISC_BROADCAST, "additions is nullptr");
+
     if (infoNode->statistics.repTimes == 0) {
         uint64_t costTime = 0;
         uint64_t sysTime = SoftBusGetSysTimeMs();
@@ -219,6 +229,9 @@ static void DfxRecordDeviceFound(DiscInfo *infoNode, const DeviceInfo *device, c
 
 static void DfxRecordStopDiscoveryDevice(const char *packageName, DiscInfo *infoNode)
 {
+    DISC_CHECK_AND_RETURN_LOGE(packageName != NULL, DISC_BROADCAST, "packageName is nullptr");
+    DISC_CHECK_AND_RETURN_LOGE(infoNode != NULL, DISC_BROADCAST, "infoNode is nullptr");
+
     DiscoveryStatistics *statistics = &infoNode->statistics;
     uint64_t totalTime = SoftBusGetSysTimeMs() - statistics->startTime;
     SoftbusRecordBleDiscDetails((char *)packageName, totalTime, statistics->repTimes, statistics->devNum,
@@ -227,11 +240,15 @@ static void DfxRecordStopDiscoveryDevice(const char *packageName, DiscInfo *info
 
 static void BitmapSet(uint32_t *bitMap, uint32_t pos)
 {
+    DISC_CHECK_AND_RETURN_LOGE(bitMap != NULL, DISC_BROADCAST, "bitMap is nullptr");
+
     *bitMap |= 1U << pos;
 }
 
 static bool IsBitmapSet(const uint32_t *bitMap, uint32_t pos)
 {
+    DISC_CHECK_AND_RETURN_RET_LOGE(bitMap != NULL, false, DISC_BROADCAST, "bitMap is nullptr");
+
     return ((1U << pos) & (*bitMap)) ? true : false;
 }
 
@@ -239,6 +256,8 @@ static void BuildDiscCallEvent(DiscEventExtra *extra, const DiscInfo *info, cons
     const InterfaceFuncType type)
 {
     DISC_CHECK_AND_RETURN_LOGE(extra != NULL, DISC_CONTROL, "discEventExtra is null");
+    DISC_CHECK_AND_RETURN_LOGE(info != NULL, DISC_CONTROL, "info is nullptr");
+    DISC_CHECK_AND_RETURN_LOGE(packageName != NULL, DISC_CONTROL, "packageName is nullptr");
 
     if (info != NULL) {
         extra->discType = info->medium + 1;
@@ -255,6 +274,7 @@ static int32_t CallSpecificInterfaceFunc(const InnerOption *option,
 {
     DISC_CHECK_AND_RETURN_RET_LOGW(interface != NULL, SOFTBUS_DISCOVER_MANAGER_INNERFUNCTION_FAIL,
         DISC_CONTROL, "interface is null");
+    DISC_CHECK_AND_RETURN_RET_LOGE(option != NULL, SOFTBUS_INVALID_PARAM, DISC_CONTROL, "option is nullptr");
     switch (type) {
         case PUBLISH_FUNC:
             return ((mode == DISCOVER_MODE_ACTIVE) ? (interface->Publish(&(option->publishOption))) :
@@ -276,6 +296,9 @@ static int32_t CallSpecificInterfaceFunc(const InnerOption *option,
 static void DfxCallInterfaceByMedium(
     const DiscInfo *infoNode, const char *packageName, const InterfaceFuncType type, int32_t reason)
 {
+    DISC_CHECK_AND_RETURN_LOGE(packageName != NULL, DISC_CONTROL, "packageName is nullptr");
+    DISC_CHECK_AND_RETURN_LOGE(infoNode != NULL, DISC_CONTROL, "infoNode is nullptr");
+
     DiscEventExtra extra = {0};
     DiscEventExtraInit(&extra);
     extra.errcode = reason;
@@ -286,6 +309,9 @@ static void DfxCallInterfaceByMedium(
 
 static int32_t CallInterfaceByMedium(const DiscInfo *info, const char *packageName, const InterfaceFuncType type)
 {
+    DISC_CHECK_AND_RETURN_RET_LOGE(info != NULL, SOFTBUS_INVALID_PARAM, DISC_CONTROL, "info is nullptr");
+    DISC_CHECK_AND_RETURN_RET_LOGE(packageName != NULL, SOFTBUS_INVALID_PARAM, DISC_CONTROL, "packageName is nullptr");
+
     int32_t ret = SOFTBUS_OK;
     switch (info->medium) {
         case COAP:
@@ -332,6 +358,8 @@ static int32_t TransferStringCapToBitmap(const char *capability)
 
 static void AddDiscInfoToCapabilityList(DiscInfo *info, const ServiceType type)
 {
+    DISC_CHECK_AND_RETURN_LOGE(info != NULL, DISC_CONTROL, "info is nullptr");
+
     if (type != SUBSCRIBE_SERVICE && type != SUBSCRIBE_INNER_SERVICE) {
         DISC_LOGD(DISC_CONTROL, "publish no need to add");
         return;
@@ -351,6 +379,8 @@ static void AddDiscInfoToCapabilityList(DiscInfo *info, const ServiceType type)
 
 static void RemoveDiscInfoFromCapabilityList(DiscInfo *info, const ServiceType type)
 {
+    DISC_CHECK_AND_RETURN_LOGE(info != NULL, DISC_CONTROL, "info is nullptr");
+
     if (type != SUBSCRIBE_SERVICE && type != SUBSCRIBE_INNER_SERVICE) {
         DISC_LOGD(DISC_CONTROL, "publish no need to delete");
         return;
@@ -360,6 +390,8 @@ static void RemoveDiscInfoFromCapabilityList(DiscInfo *info, const ServiceType t
 
 static void FreeDiscInfo(DiscInfo *info, const ServiceType type)
 {
+    DISC_CHECK_AND_RETURN_LOGE(info != NULL, DISC_CONTROL, "info is nullptr");
+
     if ((type == PUBLISH_SERVICE) || (type == PUBLISH_INNER_SERVICE)) {
         SoftBusFree(info->option.publishOption.capabilityData);
         info->option.publishOption.capabilityData = NULL;
@@ -375,6 +407,8 @@ static void FreeDiscInfo(DiscInfo *info, const ServiceType type)
 
 static bool IsInnerModule(const DiscInfo *infoNode)
 {
+    DISC_CHECK_AND_RETURN_RET_LOGE(infoNode != NULL, false, DISC_CONTROL, "infoNode is nullptr");
+
     for (uint32_t i = 0; i < MODULE_MAX; i++) {
         DISC_LOGD(DISC_CONTROL, "packageName=%{public}s", infoNode->item->packageName);
         if (strcmp(infoNode->item->packageName, g_discModuleMap[i]) == 0) {
@@ -389,6 +423,10 @@ static bool IsInnerModule(const DiscInfo *infoNode)
 static void InnerDeviceFound(DiscInfo *infoNode, const DeviceInfo *device,
                                                 const InnerDeviceInfoAddtions *additions)
 {
+    DISC_CHECK_AND_RETURN_LOGE(infoNode != NULL, DISC_CONTROL, "infoNode is nullptr");
+    DISC_CHECK_AND_RETURN_LOGE(device != NULL, DISC_CONTROL, "device is nullptr");
+    DISC_CHECK_AND_RETURN_LOGE(additions != NULL, DISC_CONTROL, "additions is nullptr");
+
     if (infoNode->item != NULL && infoNode->item->callback.serverCb.OnServerDeviceFound != NULL &&
         !IsInnerModule(infoNode)) {
         (void)infoNode->item->callback.serverCb.OnServerDeviceFound(infoNode->item->packageName, device, additions);
@@ -430,6 +468,7 @@ static void DiscOnDeviceFound(const DeviceInfo *device, const InnerDeviceInfoAdd
 
 static int32_t CheckPublishInfo(const PublishInfo *info)
 {
+    DISC_CHECK_AND_RETURN_RET_LOGE(info != NULL, SOFTBUS_INVALID_PARAM, DISC_CONTROL, "info is nullptr");
     DISC_CHECK_AND_RETURN_RET_LOGW(info->mode == DISCOVER_MODE_PASSIVE || info->mode == DISCOVER_MODE_ACTIVE,
         SOFTBUS_INVALID_PARAM, DISC_CONTROL, "mode is invalid");
     DISC_CHECK_AND_RETURN_RET_LOGW(info->medium >= AUTO && info->medium <= COAP,
@@ -470,6 +509,7 @@ static int32_t CheckPublishInfo(const PublishInfo *info)
 
 static int32_t CheckSubscribeInfo(const SubscribeInfo *info)
 {
+    DISC_CHECK_AND_RETURN_RET_LOGE(info != NULL, SOFTBUS_INVALID_PARAM, DISC_CONTROL, "info is nullptr");
     DISC_CHECK_AND_RETURN_RET_LOGW(info->mode == DISCOVER_MODE_PASSIVE || info->mode == DISCOVER_MODE_ACTIVE,
         SOFTBUS_INVALID_PARAM, DISC_CONTROL, "mode is invalid");
     DISC_CHECK_AND_RETURN_RET_LOGW(info->medium >= AUTO && info->medium <= USB,
@@ -512,6 +552,8 @@ static int32_t CheckSubscribeInfo(const SubscribeInfo *info)
 
 static void SetDiscItemCallback(DiscItem *itemNode, const InnerCallback *cb, const ServiceType type)
 {
+    DISC_CHECK_AND_RETURN_LOGE(itemNode != NULL, DISC_CONTROL, "itemNode is nullptr");
+
     if ((type != SUBSCRIBE_INNER_SERVICE && type != SUBSCRIBE_SERVICE) || cb == NULL) {
         return;
     }
@@ -528,6 +570,9 @@ static void SetDiscItemCallback(DiscItem *itemNode, const InnerCallback *cb, con
 static DiscItem *CreateDiscItem(SoftBusList *serviceList, const char *packageName, const InnerCallback *cb,
                                 const ServiceType type)
 {
+    DISC_CHECK_AND_RETURN_RET_LOGE(serviceList != NULL, NULL, DISC_CONTROL, "serviceList is nullptr");
+    DISC_CHECK_AND_RETURN_RET_LOGE(packageName != NULL, NULL, DISC_CONTROL, "packageName is nullptr");
+
     DiscItem *itemNode = (DiscItem *)SoftBusCalloc(sizeof(DiscItem));
     DISC_CHECK_AND_RETURN_RET_LOGE(itemNode != NULL, NULL, DISC_CONTROL, "calloc item node failed");
 
@@ -551,6 +596,8 @@ static DiscItem *CreateDiscItem(SoftBusList *serviceList, const char *packageNam
 
 static DiscInfo *CreateDiscInfoForPublish(const PublishInfo *info, int32_t callingPid)
 {
+    DISC_CHECK_AND_RETURN_RET_LOGE(info != NULL, NULL, DISC_CONTROL, "info is nullptr");
+
     DiscInfo *infoNode = (DiscInfo *)SoftBusCalloc(sizeof(DiscInfo));
     DISC_CHECK_AND_RETURN_RET_LOGE(infoNode != NULL, NULL, DISC_CONTROL, "calloc info node failed");
 
@@ -594,6 +641,8 @@ static DiscInfo *CreateDiscInfoForPublish(const PublishInfo *info, int32_t calli
 
 static DiscInfo *CreateDiscInfoForSubscribe(const SubscribeInfo *info, int32_t callingPid)
 {
+    DISC_CHECK_AND_RETURN_RET_LOGE(info != NULL, NULL, DISC_CONTROL, "info is nullptr");
+
     DiscInfo *infoNode = (DiscInfo *)SoftBusCalloc(sizeof(DiscInfo));
     DISC_CHECK_AND_RETURN_RET_LOGE(infoNode != NULL, NULL, DISC_CONTROL, "alloc info node failed");
 
@@ -638,6 +687,8 @@ static DiscInfo *CreateDiscInfoForSubscribe(const SubscribeInfo *info, int32_t c
 
 static void DumpDiscInfoList(const DiscItem *itemNode)
 {
+    DISC_CHECK_AND_RETURN_LOGE(itemNode != NULL, DISC_CONTROL, "itemNode is nullptr");
+
     char dumpStr[DUMP_STR_LEN] = {0};
     int32_t dumpStrPos = 0;
     int32_t itemStrLen = 0;
@@ -662,6 +713,10 @@ static void DumpDiscInfoList(const DiscItem *itemNode)
 static int32_t AddDiscInfoToList(SoftBusList *serviceList, const char *packageName, const InnerCallback *cb,
                                  DiscInfo *info, ServiceType type)
 {
+    DISC_CHECK_AND_RETURN_RET_LOGE(serviceList != NULL, SOFTBUS_INVALID_PARAM, DISC_CONTROL, "serviceList is nullptr");
+    DISC_CHECK_AND_RETURN_RET_LOGE(packageName != NULL, SOFTBUS_INVALID_PARAM, DISC_CONTROL, "packageName is nullptr");
+    DISC_CHECK_AND_RETURN_RET_LOGE(info != NULL, SOFTBUS_INVALID_PARAM, DISC_CONTROL, "info is nullptr");
+
     bool isDumpable = (strcmp(g_discModuleMap[0], packageName) != 0);
     if (isDumpable) {
         DISC_LOGI(DISC_CONTROL, "packageName=%{public}s, id=%{public}d", packageName, info->id);
@@ -717,18 +772,25 @@ static int32_t AddDiscInfoToList(SoftBusList *serviceList, const char *packageNa
 static int32_t AddDiscInfoToPublishList(const char *packageName, const InnerCallback *cb, DiscInfo *info,
                                         ServiceType type)
 {
+    DISC_CHECK_AND_RETURN_RET_LOGE(packageName != NULL, SOFTBUS_INVALID_PARAM, DISC_CONTROL, "packageName is nullptr");
+    DISC_CHECK_AND_RETURN_RET_LOGE(info != NULL, SOFTBUS_INVALID_PARAM, DISC_CONTROL, "info is nullptr");
     return AddDiscInfoToList(g_publishInfoList, packageName, cb, info, type);
 }
 
 static int32_t AddDiscInfoToDiscoveryList(const char *packageName, const InnerCallback *cb, DiscInfo *info,
                                           ServiceType type)
 {
+    DISC_CHECK_AND_RETURN_RET_LOGE(packageName != NULL, SOFTBUS_INVALID_PARAM, DISC_CONTROL, "packageName is nullptr");
+    DISC_CHECK_AND_RETURN_RET_LOGE(info != NULL, SOFTBUS_INVALID_PARAM, DISC_CONTROL, "info is nullptr");
     return AddDiscInfoToList(g_discoveryInfoList, packageName, cb, info, type);
 }
 
 static DiscInfo *RemoveInfoFromList(SoftBusList *serviceList, const char *packageName, const int32_t id,
                                     const ServiceType type, int32_t callingPid)
 {
+    DISC_CHECK_AND_RETURN_RET_LOGE(serviceList != NULL, NULL, DISC_CONTROL, "serviceList is nullptr");
+    DISC_CHECK_AND_RETURN_RET_LOGE(packageName != NULL, NULL, DISC_CONTROL, "packageName is nullptr");
+
     bool isDumpable = (strcmp(g_discModuleMap[0], packageName) != 0);
     if (isDumpable) {
         DISC_LOGI(DISC_CONTROL, "packageName=%{public}s, id=%{public}d", packageName, id);
@@ -785,17 +847,22 @@ static DiscInfo *RemoveInfoFromList(SoftBusList *serviceList, const char *packag
 static DiscInfo *RemoveInfoFromPublishList(const char *packageName, const int32_t id, const ServiceType type,
     int32_t callingPid)
 {
+    DISC_CHECK_AND_RETURN_RET_LOGE(packageName != NULL, NULL, DISC_CONTROL, "packageName is nullptr");
     return RemoveInfoFromList(g_publishInfoList, packageName, id, type, callingPid);
 }
 
 static DiscInfo *RemoveInfoFromDiscoveryList(const char *packageName, const int32_t id, const ServiceType type,
     int32_t callingPid)
 {
+    DISC_CHECK_AND_RETURN_RET_LOGE(packageName != NULL, NULL, DISC_CONTROL, "packageName is nullptr");
     return RemoveInfoFromList(g_discoveryInfoList, packageName, id, type, callingPid);
 }
 
 static int32_t InnerPublishService(const char *packageName, DiscInfo *info, const ServiceType type)
 {
+    DISC_CHECK_AND_RETURN_RET_LOGE(packageName != NULL, SOFTBUS_INVALID_PARAM, DISC_CONTROL, "packageName is nullptr");
+    DISC_CHECK_AND_RETURN_RET_LOGE(info != NULL, SOFTBUS_INVALID_PARAM, DISC_CONTROL, "info is nullptr");
+
     int32_t ret = SoftBusMutexLock(&g_publishInfoList->lock);
     DISC_CHECK_AND_RETURN_RET_LOGE(ret == SOFTBUS_OK, SOFTBUS_LOCK_ERR, DISC_CONTROL, "lock failed");
 
@@ -822,6 +889,8 @@ static int32_t InnerPublishService(const char *packageName, DiscInfo *info, cons
 static int32_t InnerUnPublishService(const char *packageName, int32_t publishId, const ServiceType type,
     int32_t callingPid)
 {
+    DISC_CHECK_AND_RETURN_RET_LOGE(packageName != NULL, SOFTBUS_INVALID_PARAM, DISC_CONTROL, "packageName is nullptr");
+
     int32_t ret = SoftBusMutexLock(&g_publishInfoList->lock);
     DISC_CHECK_AND_RETURN_RET_LOGE(ret == SOFTBUS_OK, SOFTBUS_LOCK_ERR, DISC_CONTROL, "lock failed");
 
@@ -849,6 +918,9 @@ static int32_t InnerUnPublishService(const char *packageName, int32_t publishId,
 static int32_t InnerStartDiscovery(const char *packageName, DiscInfo *info, const IServerDiscInnerCallback *cb,
                                    const ServiceType type)
 {
+    DISC_CHECK_AND_RETURN_RET_LOGE(packageName != NULL, SOFTBUS_INVALID_PARAM, DISC_CONTROL, "packageName is nullptr");
+    DISC_CHECK_AND_RETURN_RET_LOGE(info != NULL, SOFTBUS_INVALID_PARAM, DISC_CONTROL, "info is nullptr");
+
     InnerCallback callback;
     callback.serverCb.OnServerDeviceFound = NULL;
     if (cb != NULL) {
@@ -883,6 +955,8 @@ static int32_t InnerStartDiscovery(const char *packageName, DiscInfo *info, cons
 static int32_t InnerStopDiscovery(const char *packageName, int32_t subscribeId, const ServiceType type,
     int32_t callingPid)
 {
+    DISC_CHECK_AND_RETURN_RET_LOGE(packageName != NULL, SOFTBUS_INVALID_PARAM, DISC_CONTROL, "packageName is nullptr");
+
     int32_t ret = SoftBusMutexLock(&g_discoveryInfoList->lock);
     DISC_CHECK_AND_RETURN_RET_LOGE(ret == SOFTBUS_OK, SOFTBUS_LOCK_ERR, DISC_CONTROL, "lock failed");
 
@@ -916,6 +990,8 @@ static const char* TransferModuleIdToPackageName(DiscModule moduleId)
 
 static int32_t InnerSetDiscoveryCallback(const char *packageName, const DiscInnerCallback *cb)
 {
+    DISC_CHECK_AND_RETURN_RET_LOGE(packageName != NULL, SOFTBUS_INVALID_PARAM, DISC_CONTROL, "packageName is nullptr");
+
     if (SoftBusMutexLock(&(g_discoveryInfoList->lock)) != SOFTBUS_OK) {
         DISC_LOGE(DISC_CONTROL, "lock failed");
         return SOFTBUS_LOCK_ERR;
@@ -1066,6 +1142,8 @@ int32_t DiscStopAdvertise(DiscModule moduleId, int32_t subscribeId, int32_t call
 
 static bool IsInnerPackageName(const char *packageName)
 {
+    DISC_CHECK_AND_RETURN_RET_LOGE(packageName != NULL, false, DISC_CONTROL, "packageName is nullptr");
+
     for (uint32_t i = 0; i < MODULE_MAX; i++) {
         if (strcmp(packageName, g_discModuleMap[i]) == 0) {
             DISC_LOGD(DISC_CONTROL, "true");
@@ -1173,6 +1251,8 @@ void DiscDeviceInfoChanged(InfoTypeChanged type)
 
 static IdContainer* CreateIdContainer(int32_t id, const char *pkgName, int32_t pid)
 {
+    DISC_CHECK_AND_RETURN_RET_LOGE(pkgName != NULL, NULL, DISC_CONTROL, "pkgName is nullptr");
+
     IdContainer *container = SoftBusCalloc(sizeof(IdContainer));
     if (container == NULL) {
         DISC_LOGE(DISC_CONTROL, "container calloc failed");
@@ -1204,12 +1284,16 @@ static IdContainer* CreateIdContainer(int32_t id, const char *pkgName, int32_t p
 
 static void DestroyIdContainer(IdContainer* container)
 {
+    DISC_CHECK_AND_RETURN_LOGE(container != NULL, DISC_CONTROL, "container is nullptr");
+
     SoftBusFree(container->pkgName);
     SoftBusFree(container);
 }
 
 static void CleanupPublishDiscovery(ListNode *ids, ServiceType type)
 {
+    DISC_CHECK_AND_RETURN_LOGE(ids != NULL, DISC_CONTROL, "ids is nullptr");
+
     IdContainer *it = NULL;
     int32_t ret = SOFTBUS_DISCOVER_MANAGER_INFO_NOT_DELETE;
 
@@ -1229,6 +1313,9 @@ static void CleanupPublishDiscovery(ListNode *ids, ServiceType type)
 static void RemoveDiscInfoByPackageName(SoftBusList *itemList, const ServiceType type, const char *pkgName,
     int32_t pid)
 {
+    DISC_CHECK_AND_RETURN_LOGE(itemList != NULL, DISC_CONTROL, "itemList is nullptr");
+    DISC_CHECK_AND_RETURN_LOGE(pkgName != NULL, DISC_CONTROL, "pkgName is nullptr");
+
     ListNode ids;
     ListInit(&ids);
 
@@ -1288,11 +1375,13 @@ static void RemoveAllDiscInfoForDiscovery(void)
 
 static void RemoveDiscInfoForPublish(const char *pkgName, int32_t pid)
 {
+    DISC_CHECK_AND_RETURN_LOGE(pkgName != NULL, DISC_CONTROL, "pkgName is nullptr");
     RemoveDiscInfoByPackageName(g_publishInfoList, PUBLISH_SERVICE, pkgName, pid);
 }
 
 static void RemoveDiscInfoForDiscovery(const char *pkgName, int32_t pid)
 {
+    DISC_CHECK_AND_RETURN_LOGE(pkgName != NULL, DISC_CONTROL, "pkgName is nullptr");
     RemoveDiscInfoByPackageName(g_discoveryInfoList, SUBSCRIBE_SERVICE, pkgName, pid);
 }
 
