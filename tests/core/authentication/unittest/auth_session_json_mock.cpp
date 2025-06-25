@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2024-2025 Huawei Device Co., Ltd.
+ * Copyright (c) 2025 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -12,6 +12,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+
 #include "auth_session_json_mock.h"
 
 using namespace testing;
@@ -89,7 +90,8 @@ bool IsNeedUDIDAbatement(const AuthSessionInfo *info)
     return GetInterface()->IsNeedUDIDAbatement(info);
 }
 
-bool IsPotentialTrustedDevice(TrustedRelationIdType idType, const char *deviceId, bool isPrecise, bool isPointToPoint)
+bool IsPotentialTrustedDevice(TrustedRelationIdType idType, const char *deviceId, bool isPrecise,
+    bool isPointToPoint)
 {
     return GetInterface()->IsPotentialTrustedDevice(idType, deviceId, isPrecise, isPointToPoint);
 }
@@ -116,7 +118,7 @@ bool GetSessionKeyProfile(int32_t sessionKeyId, uint8_t *sessionKey, uint32_t *l
 
 void DelSessionKeyProfile(int32_t sessionKeyId)
 {
-(void)sessionKeyId;
+    (void)sessionKeyId;
 }
 
 int32_t LnnGetAuthPort(const NodeInfo *info, int32_t ifnameIdx)
@@ -203,8 +205,8 @@ void RefreshRelationShip(const char *remoteUuid, const char *remoteMac)
     (void)remoteMac;
 }
 
-int32_t DecryptInner(const SessionKeyList *list, AuthLinkType type, const InDataInfo *inDataInfo, uint8_t **outData,
-    uint32_t *outLen)
+int32_t DecryptInner(const SessionKeyList *list, AuthLinkType type, const InDataInfo *inDataInfo,
+    uint8_t **outData, uint32_t *outLen)
 {
     return GetInterface()->DecryptInner(list, type, inDataInfo, outData, outLen);
 }
