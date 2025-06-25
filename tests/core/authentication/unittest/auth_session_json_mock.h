@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2024-2025 Huawei Device Co., Ltd.
+ * Copyright (c) 2025 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -18,23 +18,23 @@
 
 #include <gmock/gmock.h>
 
+#include "auth_device_common_key_struct.h"
 #include "auth_hichain_adapter.h"
+#include "auth_identity_service_adapter.h"
 #include "auth_pre_link.h"
 #include "auth_session_fsm.h"
 #include "auth_session_json.h"
 #include "auth_session_message.h"
-#include "auth_device_common_key_struct.h"
 #include "bus_center_info_key.h"
 #include "common_list.h"
+#include "lnn_cipherkey_manager_struct.h"
 #include "lnn_common_utils.h"
 #include "lnn_feature_capability.h"
 #include "lnn_lane_interface.h"
 #include "lnn_node_info.h"
-#include "lnn_cipherkey_manager_struct.h"
 #include "softbus_adapter_socket.h"
 #include "softbus_common.h"
 #include "wifi_direct_manager.h"
-#include "auth_identity_service_adapter.h"
 
 namespace OHOS {
 class AuthSessionJsonInterface {
@@ -61,21 +61,22 @@ public:
     virtual int32_t LnnGetSessionPort(const NodeInfo *info, int32_t ifnameIdx) = 0;
     virtual int32_t PostAuthData(uint64_t connId, bool toServer, const AuthDataHead *head, const uint8_t *data) = 0;
     virtual int32_t EncryptInner(const SessionKeyList *list, AuthLinkType type, const InDataInfo *inDataInfo,
-    uint8_t **outData, uint32_t *outLen);
-    virtual int32_t AuthManagerGetSessionKey(int64_t authSeq, const AuthSessionInfo *info, SessionKey *sessionKey) = 0;
+        uint8_t **outData, uint32_t *outLen);
+    virtual int32_t AuthManagerGetSessionKey(int64_t authSeq, const AuthSessionInfo *info,
+        SessionKey *sessionKey) = 0;
     virtual int32_t AddSessionKey(SessionKeyList *list, int32_t index, const SessionKey *key, AuthLinkType type,
         bool isOldKey) = 0;
     virtual int32_t SetSessionKeyAvailable(SessionKeyList *list, int32_t index) = 0;
     virtual int64_t AuthDeviceGetIdByConnInfo(const AuthConnInfo *connInfo, bool isServer) = 0;
     virtual uint32_t AuthGetDecryptSize(uint32_t inLen) = 0;
     virtual int32_t AuthDeviceDecrypt(AuthHandle *authHandle, const uint8_t *inData, uint32_t inLen, uint8_t *outData,
-    uint32_t *outLen) = 0;
+        uint32_t *outLen) = 0;
     virtual int32_t AuthManagerSetSessionKey(int64_t authSeq, AuthSessionInfo *info, const SessionKey *sessionKey,
         bool isConnect, bool isOldKey) = 0;
     virtual uint64_t GenerateLaneId(const char *localUdid, const char *remoteUdid, LaneLinkType linkType) = 0;
     virtual int32_t UpdateLaneResourceLaneId(uint64_t oldLaneId, uint64_t newLaneId, const char *peerUdid) = 0;
     virtual int32_t DecryptInner(const SessionKeyList *list, AuthLinkType type, const InDataInfo *inDataInfo,
-    uint8_t **outData, uint32_t *outLen) = 0;
+        uint8_t **outData, uint32_t *outLen) = 0;
     virtual int32_t DataDecompress(uint8_t *in, uint32_t inLen, uint8_t **out, uint32_t *outLen) = 0;
     virtual const NodeInfo *LnnGetLocalNodeInfo(void) = 0;
     virtual int32_t LnnGetProxyPort(const NodeInfo *info, int32_t ifnameIdx) = 0;
@@ -88,7 +89,7 @@ public:
     virtual int32_t LnnGetDeviceDisplayName(const char *nickName, const char *defaultName, char *deviceName,
         uint32_t len) = 0;
     virtual int32_t VerifyCertificate(SoftbusCertChain *softbusCertChain, const NodeInfo *nodeInfo,
-    const AuthSessionInfo *info) = 0;
+        const AuthSessionInfo *info) = 0;
     virtual int32_t LnnConvertDeviceTypeToId(const char *deviceType, uint16_t *typeId) = 0;
     virtual int32_t LnnEncryptAesGcm(AesGcmInputParam *in, int32_t keyIndex, uint8_t **out, uint32_t *outLen) = 0;
     virtual int32_t AuthFindLatestNormalizeKey(const char *udidHash, AuthDeviceKeyInfo *deviceKey,
@@ -122,7 +123,8 @@ public:
     virtual int32_t GetActiveOsAccountIds(void) = 0;
     virtual bool IsSKIdInvalid(int32_t sessionKeyId, const char *accountHash, const char *udidShortHash,
         int32_t userId) = 0;
-    virtual bool IsTrustedDeviceFromAccess(const char *peerAccountHash, const char *peerUdid, int32_t peerUserId) = 0;
+    virtual bool IsTrustedDeviceFromAccess(const char *peerAccountHash, const char *peerUdid,
+        int32_t peerUserId) = 0;
 };
 
 class AuthSessionJsonInterfaceMock : public AuthSessionJsonInterface {
@@ -195,8 +197,8 @@ public:
     MOCK_METHOD3(LnnGetLocalByteInfo, int32_t (InfoKey key, uint8_t *info, uint32_t len));
     MOCK_METHOD0(LnnIsDefaultOhosAccount, bool (void));
     MOCK_METHOD2(IdServiceGetCredIdFromCredList, char * (int32_t userId, const char *credList));
-    MOCK_METHOD5(IdServiceQueryCredential, int32_t (int32_t userId, const char *udidHash, const char *accountidHash,
-        bool isSameAccount, char **credList));
+    MOCK_METHOD5(IdServiceQueryCredential, int32_t (int32_t userId, const char *udidHash,
+        const char *accountidHash, bool isSameAccount, char **credList));
     MOCK_METHOD1(IdServiceDestroyCredentialList, void (char **returnData));
     MOCK_METHOD0(GetActiveOsAccountIds, int32_t(void));
     MOCK_METHOD4(IsSKIdInvalid, bool (int32_t, const char *, const char *, int32_t));
