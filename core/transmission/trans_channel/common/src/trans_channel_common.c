@@ -350,6 +350,7 @@ int32_t TransCommonGetAppInfo(const SessionParam *param, AppInfo *appInfo)
     appInfo->callingTokenId = appInfo->myData.pid == getpid() ? 0 : TransAclGetCallingTokenID();
     appInfo->isClient = true;
     appInfo->channelCapability = TRANS_CHANNEL_CAPABILITY;
+    appInfo->isLowLatency = param->isLowLatency;
     TRANS_LOGD(TRANS_CTRL, "GetAppInfo ok");
     return SOFTBUS_OK;
 }

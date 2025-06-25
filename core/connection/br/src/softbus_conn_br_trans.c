@@ -280,6 +280,7 @@ int32_t ConnBrPostBytes(
         SoftBusFree(data);
         return SOFTBUS_CONN_BR_CONNECTION_NOT_EXIST_ERR;
     }
+    ConnBrRefreshIdleTimeout(connection);
     int32_t status = SoftBusMutexLock(&connection->lock);
     if (status != SOFTBUS_OK) {
         CONN_LOGE(CONN_BR,
@@ -292,12 +293,12 @@ int32_t ConnBrPostBytes(
     }
     enum ConnBrConnectionState state = connection->state;
     (void)SoftBusMutexUnlock(&connection->lock);
+    ConnBrReturnConnection(&connection);
     if (state != BR_CONNECTION_STATE_CONNECTED && module != MODULE_CONNECTION) {
         CONN_LOGE(CONN_BR,
             "br post bytes failed: connection is not ready, state=%{public}d, connId=%{public}u, pid=%{public}d, "
             "Len=%{public}u, Flg=%{public}d, Module=%{public}d, Seq=%{public}" PRId64 "",
             state, connectionId, pid, len, flag, module, seq);
-        ConnBrReturnConnection(&connection);
         SoftBusFree(data);
         return SOFTBUS_CONN_BR_CONNECTION_NOT_READY_ERR;
     }
@@ -308,7 +309,6 @@ int32_t ConnBrPostBytes(
             "br post bytes failed: calloc queue node failed, connectionId=%{public}u, pid=%{public}d, "
             "Len=%{public}u, Flg=%{public}d, Module=%{public}d, Seq=%{public}" PRId64 "",
             connectionId, pid, len, flag, module, seq);
-        ConnBrReturnConnection(&connection);
         SoftBusFree(data);
         return SOFTBUS_MEM_ERR;
     }
@@ -326,12 +326,9 @@ int32_t ConnBrPostBytes(
             "br post bytes failed: enqueue failed, error=%{public}d, connId=%{public}u, pid=%{public}d, "
             "Len=%{public}u, Flg=%{public}d, Module=%{public}d, Seq=%{public}" PRId64 "",
             status, connectionId, pid, len, flag, module, seq);
-        ConnBrReturnConnection(&connection);
         FreeSendNode(node);
         return status;
     }
-    ConnBrRefreshIdleTimeout(connection);
-    ConnBrReturnConnection(&connection);
     CONN_LOGI(CONN_BR,
         "br post bytes: receive post byte request, connId=%{public}u, pid=%{public}d, "
         "Len=%{public}u, Flg=%{public}d, Module=%{public}d, Seq=%{public}" PRId64 "",

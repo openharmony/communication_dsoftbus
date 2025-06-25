@@ -87,6 +87,18 @@ typedef enum {
     CONN_HML_NOT_SUPPORT = 1,
 } HmlCapabilityCode;
 
+typedef enum {
+    CONN_VSP_CAP_UNKNOWN = -1,
+    CONN_VSP_SUPPORT = 0,
+    CONN_VSP_NOT_SUPPORT = 1,
+} VspCapabilityCode;
+
+typedef enum {
+    CONN_HML_ENABLED,
+    CONN_HML_DISABLED,
+    CONN_HML_STATE_MAX,
+} SoftBusHmlState;
+
 struct WifiDirectLink {
     int32_t linkId;
     char localIp[IP_STR_MAX_LEN];

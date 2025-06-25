@@ -244,4 +244,10 @@ bool ISoftBusServer::IsProxyChannelEnabled(int32_t uid)
     COMM_LOGE(COMM_SVC, "IsProxyChannelEnabled ipc default impl");
     return SOFTBUS_IPC_ERR;
 }
+
+int32_t ISoftBusServer::PushRegisterHook()
+{
+    COMM_LOGE(COMM_SVC, "PushRegisterHook ipc default impl");
+    return SOFTBUS_IPC_ERR;
+}
 } // namespace OHOS

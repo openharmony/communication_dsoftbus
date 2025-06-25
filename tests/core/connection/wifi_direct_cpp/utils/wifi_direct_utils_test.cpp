@@ -337,7 +337,7 @@ HWTEST_F(WifiDirectUtilsTest, CalculateStringLengthTest, TestSize.Level1)
  */
 HWTEST_F(WifiDirectUtilsTest, SyncLnnInfoForP2pTest, TestSize.Level1)
 {
-    WifiDirectRole role = WIFI_DIRECT_ROLE_AUTO;
+    WifiDirectApiRole role = WIFI_DIRECT_API_ROLE_GC;
     const std::string localMac = "11:22:33:44:55";
     const std::string goMac = "11:22:33:44:66";
 

@@ -59,7 +59,8 @@ void LNNTimeSyncTest::SetUpTestCase()
 {
     NiceMock<AuthInterfaceMock> tsLnnAuthmock;
     ON_CALL(tsLnnAuthmock, RegAuthTransListener(_, _)).WillByDefault(Return(SOFTBUS_OK));
-
+    NiceMock<EventInterfaceMock> timeSyncEventMock;
+    EXPECT_CALL(timeSyncEventMock, LnnRegisterEventHandler).WillRepeatedly(Return(SOFTBUS_OK));
     int32_t ret = LooperInit();
     EXPECT_EQ(ret, SOFTBUS_OK);
     ret = LnnInitTimeSync();
@@ -70,7 +71,8 @@ void LNNTimeSyncTest::TearDownTestCase()
 {
     NiceMock<AuthInterfaceMock> tsLnnAuthmock;
     ON_CALL(tsLnnAuthmock, UnregAuthTransListener(_)).WillByDefault(Return());
-
+    NiceMock<EventInterfaceMock> timeSyncEventMock;
+    EXPECT_CALL(timeSyncEventMock, LnnUnregisterEventHandler).WillRepeatedly(Return());
     LnnDeinitTimeSync();
     LooperDeinit();
 }

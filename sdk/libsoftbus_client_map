@@ -220,6 +220,8 @@
         "SendBrProxyData";
         "SetListenerState";
         "IsProxyChannelEnabled";
+        "RegisterAccessHook";
+        "ClientSetLowLatencyBySocket";
     local:
         *;
 };

@@ -110,7 +110,6 @@ static int32_t StartClientConnect(struct ProxyConnection *connection)
         return SOFTBUS_CONN_BR_INTERNAL_ERR;
     }
     connection->socketHandle = socketHandle;
-    connection->state = PROXY_CHANNEL_CONNECTED;
     (void)SoftBusMutexUnlock(&connection->lock);
     CONN_LOGI(CONN_PROXY, "connect success, socketHandle=%{public}d", socketHandle);
     return SOFTBUS_OK;

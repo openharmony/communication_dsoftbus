@@ -20,6 +20,7 @@
 #include "bus_center_manager.h"
 #include "cJSON.h"
 #include "g_enhance_adapter_func_pack.h"
+#include "lnn_local_net_ledger.h"
 #include "lnn_log.h"
 #include "lnn_distributed_net_ledger_common.h"
 #include "lnn_sle_capability.h"
@@ -41,7 +42,16 @@ static char g_sleMacAddr[MAC_LEN];
 int32_t SetSleRangeCapToLocalLedger(void)
 {
     g_sleRangeCap = GetSleRangeCapacityPacked();
-    int32_t ret = LnnSetLocalNumInfo(NUM_KEY_SLE_RANGE_CAP, g_sleRangeCap);
+    int32_t sleCapCache = 0;
+    int32_t ret = LnnGetLocalNumInfo(NUM_KEY_SLE_RANGE_CAP, &sleCapCache);
+    if (ret != SOFTBUS_OK) {
+        LNN_LOGE(LNN_LEDGER, "LnnGetLocalNumInfo fail, ret=%{public}d", ret);
+    }
+    if (sleCapCache == g_sleRangeCap) {
+        LNN_LOGW(LNN_LEDGER, "slecap is consistent, not fix");
+        return SOFTBUS_OK;
+    }
+    ret = LnnUpdateSleCapacityAndVersion(g_sleRangeCap);
     if (ret != SOFTBUS_OK) {
         LNN_LOGE(LNN_LEDGER, "LnnSetLocalNumInfo fail, ret=%{public}d", ret);
         return ret;

@@ -51,6 +51,7 @@ typedef int32_t (*ClientGetSessionIdByChannelIdFunc)(int32_t channelId, int32_t 
     int32_t *sessionId, bool isClosing);
 typedef int (*GetMySessionNameFunc)(int sessionId, char *sessionName, unsigned int len);
 typedef int32_t (*ClientRegEnhanceFunc)(ClientEnhanceFuncList *functionList);
+typedef int32_t (*ClientSetLowLatencyBySocketFunc)(int32_t socket);
 
 typedef struct TagClientOpenFuncList {
     CheckPackageNameFunc checkPackageName;
@@ -70,6 +71,7 @@ typedef struct TagClientOpenFuncList {
     TransGetUdpChannelByFileIdFunc transGetUdpChannelByFileId;
     ClientGetSessionIdByChannelIdFunc clientGetSessionIdByChannelId;
     GetMySessionNameFunc getMySessionName;
+    ClientSetLowLatencyBySocketFunc clientSetLowLatencyBySocket;
 } ClientOpenFuncList;
 
 #ifdef __cplusplus

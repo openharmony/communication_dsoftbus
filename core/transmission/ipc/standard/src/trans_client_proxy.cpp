@@ -291,7 +291,8 @@ int32_t ClientIpcCheckCollabRelation(const char *pkgName, int32_t pid,
         sourceInfo, sinkInfo->pid != -1, sinkInfo, transInfo->channelId, transInfo->channelType);
 }
 
-int32_t ClientIpcBrProxyOpened(const char *pkgName, int32_t channelId, const char *brMac, int32_t reason)
+int32_t ClientIpcBrProxyOpened(const char *pkgName, int32_t channelId,
+    const char *brMac, const char *uuid, int32_t reason)
 {
     if (pkgName == nullptr || brMac == nullptr) {
         TRANS_LOGE(TRANS_SDK, "invalid param.");
@@ -305,7 +306,7 @@ int32_t ClientIpcBrProxyOpened(const char *pkgName, int32_t channelId, const cha
         return SOFTBUS_TRANS_GET_CLIENT_PROXY_NULL;
     }
  
-    return clientProxy->OnBrProxyOpened(channelId, brMac, reason);
+    return clientProxy->OnBrProxyOpened(channelId, brMac, uuid, reason);
 }
  
 int32_t ClientIpcBrProxyReceivedData(const char *pkgName, int32_t channelId, const uint8_t *data, uint32_t len)
@@ -340,4 +341,21 @@ int32_t ClientIpcBrProxyStateChanged(const char *pkgName, int32_t channelId, int
     }
  
     return clientProxy->OnBrProxyStateChanged(channelId, channelState);
+}
+
+int32_t ClientIpcQueryPermission(const char *pkgName, const char *bundleName, bool *isEmpowered)
+{
+    if (pkgName == nullptr || bundleName == nullptr || isEmpowered == nullptr) {
+        TRANS_LOGE(TRANS_SDK, "invalid param.");
+        return SOFTBUS_INVALID_PARAM;
+    }
+ 
+    sptr<IRemoteObject> clientObject = SoftbusClientInfoManager::GetInstance().GetSoftbusClientProxy(pkgName);
+    sptr<TransClientProxy> clientProxy = new (std::nothrow) TransClientProxy(clientObject);
+    if (clientProxy == nullptr) {
+        TRANS_LOGE(TRANS_SDK, "softbus client proxy is nullptr!");
+        return SOFTBUS_TRANS_GET_CLIENT_PROXY_NULL;
+    }
+ 
+    return clientProxy->OnBrProxyQueryPermission(bundleName, isEmpowered);
 }

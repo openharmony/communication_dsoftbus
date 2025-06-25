@@ -26,6 +26,8 @@
 
 #define INNER_RECONNECT_TIMEOUT_MS 8000
 #define INNER_RECONNECT_RETRY_WAIT_MS 1000
+#define RECONNECT_AFTER_DISCONNECT_WAIT_MS 500
+#define OPEN_PROXY_CHANNEL_WAIT_MS 200
 
 typedef struct {
     bool isSuccess;
@@ -382,8 +384,8 @@ static void RemoveProxyChannelByChannelId(uint32_t channelId)
         struct ProxyConnection, node) {
         if (it->channelId == channelId) {
             ListDelete(&it->node);
-            it->dereference(it);
             CONN_LOGI(CONN_PROXY, "remove channel channelId=%{public}u", it->channelId);
+            it->dereference(it);
             break;
         }
     }
@@ -395,10 +397,13 @@ static bool IsNeedReuseOrWait(ProxyConnectInfo *connectInfo)
     ProxyConnectInfo *connectingProxyChannel = GetProxyChannelManager()->proxyChannelRequestInfo;
     if (connectingProxyChannel != NULL) {
         if (StrCmpIgnoreCase(connectInfo->brMac, connectingProxyChannel->brMac) == 0) {
+            CONN_LOGI(CONN_PROXY, "wait connect result reqId=%{public}u, isInnerRequest=%{public}d",
+                connectInfo->requestId, connectInfo->isInnerRequest);
             // wait connect finished and reuse
-            connectingProxyChannel->result = connectInfo->result;
-            connectingProxyChannel->requestId = connectInfo->requestId;
-            CONN_LOGI(CONN_PROXY, "wait connect result reqId=%{public}u", connectInfo->requestId);
+            if (!connectInfo->isInnerRequest) {
+                connectingProxyChannel->result = connectInfo->result;
+                connectingProxyChannel->requestId = connectInfo->requestId;
+            }
         } else {
             connectInfo->result.onOpenFail(connectInfo->requestId, SOFTBUS_CONN_PROXY_CUCURRENT_OPRATION_ERR);
         }
@@ -409,16 +414,32 @@ static bool IsNeedReuseOrWait(ProxyConnectInfo *connectInfo)
     struct ProxyConnection *proxyConnection = GetProxyChannelByAddr(connectInfo->brMac);
     CONN_CHECK_AND_RETURN_RET_LOGE(proxyConnection != NULL, false, CONN_PROXY, "proxyConnection is null");
     ProxyChannelState state = GetProxyChannelState(proxyConnection);
+    uint32_t channelId = proxyConnection->channelId;
     CONN_LOGI(CONN_PROXY, "state=%{public}d", state);
     if (state == PROXY_CHANNEL_CONNECTED) {
         CONN_LOGI(CONN_PROXY, "reuse already exist proxy channel channelId=%{public}u, reqId=%{public}u",
-            proxyConnection->channelId, connectInfo->requestId);
+            channelId, connectInfo->requestId);
         proxyConnection->proxyChannel.requestId = connectInfo->requestId;
         connectInfo->result.onOpenSuccess(connectInfo->requestId, &proxyConnection->proxyChannel);
         proxyConnection->dereference(proxyConnection);
         return true;
     }
     proxyConnection->dereference(proxyConnection);
+    // retry after the previous connection ends
+    if (state == PROXY_CHANNEL_CONNECTING) {
+        CONN_LOGI(CONN_PROXY, "reqId=%{public}u, wait channelId=%{public}u stopped",
+            connectInfo->requestId, channelId);
+        ProxyConnectInfo *copyConnectInfo = CopyProxyConnectInfo(connectInfo);
+        CONN_CHECK_AND_RETURN_RET_LOGE(copyConnectInfo != NULL, false, CONN_PROXY, "copyProxyChannel err");
+        int32_t ret = ConnPostMsgToLooper(&g_proxyChannelAsyncHandler, MSG_OPEN_PROXY_CHANNEL, 0, 0,
+            copyConnectInfo, OPEN_PROXY_CHANNEL_WAIT_MS);
+        if (ret < 0) {
+            CONN_LOGE(CONN_PROXY, "send msg failed, error=%{public}d", ret);
+            DestoryProxyConnectInfo(&copyConnectInfo);
+            return false;
+        }
+        return true;
+    }
     return false;
 }
 
@@ -634,8 +655,20 @@ static void ProxyChannelDisconnectHandler(ProxyChannelNotifyContext *ctx)
 
     SetProxyChannelState(proxyConnection, PROXY_CHANNEL_DISCONNECTED);
     NotifyDisconnected(&proxyConnection->proxyChannel, reason);
-
     RemoveProxyChannelByChannelId(channelId);
+    char *copyAddr = (char *)SoftBusCalloc(BT_MAC_LEN);
+    if (copyAddr == NULL || strcpy_s(copyAddr, BT_MAC_LEN, proxyConnection->proxyChannel.brMac) != EOK) {
+        CONN_LOGE(CONN_PROXY, "copyAddr failed");
+        SoftBusFree(copyAddr);
+        proxyConnection->dereference(proxyConnection);
+        return;
+    }
+    int32_t ret = ConnPostMsgToLooper(&g_proxyChannelAsyncHandler, MSG_OPEN_PROXY_CHANNEL_RETRY,
+        0, 0, copyAddr, RECONNECT_AFTER_DISCONNECT_WAIT_MS);
+    if (ret != SOFTBUS_OK) {
+        CONN_LOGE(CONN_PROXY, "post msg err");
+        SoftBusFree(copyAddr);
+    }
     proxyConnection->dereference(proxyConnection);
 }
 
@@ -716,6 +749,8 @@ static void AttemptReconnectDevice(char *brAddr)
         struct ProxyChannel proxyChannel = { 0 };
         int32_t ret = strncpy_s(proxyChannel.brMac, BT_MAC_LEN, brAddr, BT_MAC_LEN);
         CONN_CHECK_AND_RETURN_LOGE(ret == EOK, CONN_PROXY, "cpy mac err");
+        ret = strcpy_s(proxyChannel.uuid, UUID_STRING_LEN, reconnectDeviceInfo->uuid);
+        CONN_CHECK_AND_RETURN_LOGE(ret == EOK, CONN_PROXY, "cpy uuid err");
         NotifyDisconnected(&proxyChannel, SOFTBUS_CONN_PROXY_RETRY_FAILED);
         return;
     }
@@ -794,6 +829,8 @@ static void ProxyDeviceUnpaired(const char *brAddr)
     struct ProxyChannel proxyChannel = { 0 };
     int32_t ret = strncpy_s(proxyChannel.brMac, BT_MAC_LEN, brAddr, BT_MAC_LEN);
     CONN_CHECK_AND_RETURN_LOGE(ret == EOK, CONN_PROXY, "cpy mac err");
+    ret = strcpy_s(proxyChannel.uuid, UUID_STRING_LEN, target->uuid);
+    CONN_CHECK_AND_RETURN_LOGE(ret == EOK, CONN_PROXY, "cpy uuid err");
     NotifyDisconnected(&proxyChannel, SOFTBUS_CONN_BR_UNPAIRED);
 }
 

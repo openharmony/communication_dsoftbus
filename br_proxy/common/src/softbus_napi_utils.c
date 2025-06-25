@@ -37,6 +37,10 @@ const NapiSoftbusErrCMapJs ERRCODE_C_JS_MAP[] = {
     { SOFTBUS_TRANS_BR_PROXY_TOKENID_ERR,       NAPI_SOFTBUS_CALL_IS_RESTRICTED                 },
     { SOFTBUS_CONN_BR_UNDERLAY_WRITE_FAIL,      NAPI_SOFTBUS_SEND_OPERATION_FAILED              },
     { SOFTBUS_CONN_BR_UNDERLAY_CONNECT_FAIL,    NAPI_SOFTBUS_DEVICE_NOT_PAIRED                  },
+    { SOFTBUS_TRANS_BR_PROXY_CALLER_RESTRICTED, NAPI_SOFTBUS_CALL_IS_RESTRICTED                 },
+    { SOFTBUS_CONN_BR_UNPAIRED,                 NAPI_SOFTBUS_DEVICE_NOT_PAIRED                  },
+    { SOFTBUS_TRANS_SESSION_OPENING,            NAPI_SOFTBUS_CHANNEL_REOPEN                     },
+    { SOFTBUS_TRANS_BR_PROXY_INVALID_PARAM,     NAPI_SOFTBUS_INVALID_PARAM                      },
 };
 
 const NapiSoftbusErrEntry ERRCODE_MSG_MAP[] = {
@@ -47,6 +51,8 @@ const NapiSoftbusErrEntry ERRCODE_MSG_MAP[] = {
     { NAPI_SOFTBUS_DEVICE_NOT_PAIRED,               "BusinessError 32390002: Device not paired."                    },
     { NAPI_SOFTBUS_PROFILE_NOT_SUPPORT,             "BusinessError 32390003: Profile not supported"                 },
     { NAPI_SOFTBUS_CHANNEL_UNAVAILABLE,             "BusinessError 32390004: ChannelId is invalid or unavailable"   },
+    { NAPI_SOFTBUS_CHANNEL_REOPEN,                  "BusinessError 32390005: The channel is repeatedly opened."     },
+    { NAPI_SOFTBUS_INVALID_PARAM,                   "BusinessError 32390006: Parameter error."                      },
     { NAPI_SOFTBUS_INTERNAL_ERROR,                  "BusinessError 32390100: Internal error, It is can be ignored." },
     { NAPI_SOFTBUS_CALL_IS_RESTRICTED,              "BusinessError 32390101: Call is restricted."                   },
     { NAPI_SOFTBUS_OPEN_OPERATION_FAILED,

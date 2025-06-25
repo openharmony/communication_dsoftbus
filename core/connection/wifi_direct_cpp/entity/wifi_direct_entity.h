@@ -28,6 +28,12 @@ public:
         CONN_LOGW(CONN_WIFI_DIRECT, "not support");
         return CONN_HML_NOT_SUPPORT;
     }
+
+    virtual VspCapabilityCode GetVspCapabilityCode()
+    {
+        CONN_LOGW(CONN_WIFI_DIRECT, "not support");
+        return CONN_VSP_NOT_SUPPORT;
+    }
 };
 }
 #endif

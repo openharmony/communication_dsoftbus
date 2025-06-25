@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2023 Huawei Device Co., Ltd.
+ * Copyright (c) 2023-2025 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -45,6 +45,7 @@ static bool g_listenerModuleIds[AUTH_ENHANCED_P2P_NUM];
 static WifiDirectEnhanceManager g_enhanceManager;
 static SyncPtkListener g_syncPtkListener;
 static PtkMismatchListener g_ptkMismatchListener;
+static HmlStateListener g_hmlStateListener;
 
 static uint32_t GetRequestId(void)
 {
@@ -54,6 +55,11 @@ static uint32_t GetRequestId(void)
 static void AddPtkMismatchListener(PtkMismatchListener listener)
 {
     g_ptkMismatchListener = listener;
+}
+
+static void AddHmlStateListener(HmlStateListener listener)
+{
+    g_hmlStateListener = listener;
 }
 
 static void SetElementTypeExtra(struct WifiDirectConnectInfo *info, ConnEventExtra *extra)
@@ -550,6 +556,14 @@ static HmlCapabilityCode GetHmlCapabilityCode(void)
     return entity.GetHmlCapabilityCode();
 }
 
+static VspCapabilityCode GetVspCapabilityCode(void)
+{
+    CONN_LOGI(CONN_WIFI_DIRECT, "enter");
+    OHOS::SoftBus::InnerLink::LinkType type = OHOS::SoftBus::InnerLink::LinkType::HML;
+    auto &entity = OHOS::SoftBus::EntityFactory::GetInstance().GetEntity(type);
+    return entity.GetVspCapabilityCode();
+}
+
 static bool IsWifiP2pEnabled(void)
 {
     return OHOS::SoftBus::P2pAdapter::IsWifiP2pEnabled();
@@ -603,11 +617,45 @@ static void NotifyPtkMismatch(const char *remoteNetworkId, uint32_t len, int32_t
     g_ptkMismatchListener(remoteNetworkId, len, reason);
 }
 
+static void NotifyHmlState(SoftBusHmlState state)
+{
+    CONN_LOGI(CONN_WIFI_DIRECT, "enter");
+    if (g_hmlStateListener == nullptr) {
+        CONN_LOGW(CONN_WIFI_DIRECT, "listener is null");
+        return;
+    }
+    g_hmlStateListener(state);
+}
+
 static int32_t Init(void)
 {
     CONN_LOGI(CONN_INIT, "init enter");
     OHOS::SoftBus::WifiDirectInitiator::GetInstance().Init();
     OHOS::SoftBus::WifiDirectHidumper::GetInstance().HidumperInit();
+    return SOFTBUS_OK;
+}
+
+static int32_t GetRemoteIpByRemoteMac(const char *remoteMac, char *remoteIp, int32_t remoteIpSize)
+{
+    bool found = false;
+    OHOS::SoftBus::LinkManager::GetInstance().ForEach(
+        [&found, &remoteIp, remoteIpSize, remoteMac](const OHOS::SoftBus::InnerLink &innerLink) {
+            if (innerLink.GetRemoteDynamicMac() == remoteMac || innerLink.GetRemoteBaseMac() == remoteMac) {
+                found = true;
+                if (strcpy_s(remoteIp, remoteIpSize, innerLink.GetRemoteIpv4().c_str()) != EOK) {
+                    found = false;
+                }
+                return true;
+            }
+            return false;
+        });
+    if (!found) {
+        CONN_LOGI(CONN_WIFI_DIRECT, "not found %{public}s", OHOS::SoftBus::WifiDirectAnonymizeMac(remoteMac).c_str());
+        return SOFTBUS_CONN_NOT_FOUND_FAILED;
+    }
+    CONN_LOGI(CONN_WIFI_DIRECT, "remoteMac=%{public}s, remoteIp=%{public}s",
+        OHOS::SoftBus::WifiDirectAnonymizeMac(remoteMac).c_str(),
+        OHOS::SoftBus::WifiDirectAnonymizeIp(remoteIp).c_str());
     return SOFTBUS_OK;
 }
 
@@ -631,6 +679,7 @@ static struct WifiDirectManager g_manager = {
     .syncPTK = SyncPtk,
     .addSyncPtkListener = AddSyncPtkListener,
     .addPtkMismatchListener = AddPtkMismatchListener,
+    .addHmlStateListener = AddHmlStateListener,
 
     .isDeviceOnline = IsDeviceOnline,
     .getLocalIpByUuid = GetLocalIpByUuid,
@@ -643,6 +692,7 @@ static struct WifiDirectManager g_manager = {
     .getStationFrequency = GetStationFrequency,
     .isHmlConnected = IsHmlConnected,
     .getHmlCapabilityCode = GetHmlCapabilityCode,
+    .getVspCapabilityCode = GetVspCapabilityCode,
 
     .init = Init,
     .notifyOnline = NotifyOnline,
@@ -653,6 +703,8 @@ static struct WifiDirectManager g_manager = {
     .registerEnhanceManager = RegisterEnhanceManager,
     .notifyPtkSyncResult = NotifyPtkSyncResult,
     .notifyPtkMismatch = NotifyPtkMismatch,
+    .notifyHmlState = NotifyHmlState,
+    .getRemoteIpByRemoteMac = GetRemoteIpByRemoteMac,
 };
 
 struct WifiDirectManager *GetWifiDirectManager(void)

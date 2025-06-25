@@ -24,6 +24,7 @@ int32_t GetCallerHapInfo(char *bundleName, uint32_t bundleNamelen, char *ability
 pid_t GetCallerPid();
 pid_t GetCallerUid();
 uint32_t GetCallerTokenId();
+int32_t CheckPushPermission();
 
 #ifdef __cplusplus
 }

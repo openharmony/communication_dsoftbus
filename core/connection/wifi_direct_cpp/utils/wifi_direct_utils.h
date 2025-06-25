@@ -99,7 +99,7 @@ public:
     static void ParallelFlowEnter();
     static void ParallelFlowExit();
     static uint32_t CalculateStringLength(const char *str, uint32_t size);
-    static void SyncLnnInfoForP2p(WifiDirectRole role, const std::string &localMac, const std::string &goMac);
+    static void SyncLnnInfoForP2p(WifiDirectApiRole role, const std::string &localMac, const std::string &goMac);
     static bool IsDfsChannel(const int &frequency);
     static bool CheckLinkAtDfsChannelConflict(const std::string &remoteDeviceId, InnerLink::LinkType type);
     static int32_t GetOsType(const char *networkId);

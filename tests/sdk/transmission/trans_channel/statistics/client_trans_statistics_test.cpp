@@ -322,4 +322,33 @@ HWTEST_F(ClientTransStatisticsTest, ClientTransStatisticsDeinitTest001, TestSize
     ClientTransStatisticsDeinit();
     EXPECT_EQ(g_channelStatisticsList, nullptr);
 }
+
+/**
+ * @tc.name: DeleteSocketResourceBySocketIdTest002
+ * @tc.desc: DeleteSocketResourceBySocketId, use the wrong or normal parameter.
+ * @tc.type: FUNC
+ * @tc.require: I5HZ6N
+ */
+HWTEST_F(ClientTransStatisticsTest, DeleteSocketResourceBySocketIdTest002, TestSize.Level1)
+{
+    int32_t socketId = TRANS_TEST_ID;
+    int64_t len = TRANS_TEST_ID;
+    DeleteSocketResourceBySocketId(socketId);
+    EXPECT_EQ(g_channelStatisticsList, nullptr);
+
+    int32_t ret = ClientTransStatisticsInit();
+    EXPECT_EQ(ret, SOFTBUS_OK);
+    SocketResource *newItem = reinterpret_cast<SocketResource *>(SoftBusCalloc(sizeof(SocketResource)));
+    ASSERT_NE(newItem, nullptr);
+    newItem->socketId = socketId;
+    ListInit(&newItem->node);
+    ListAdd(&g_channelStatisticsList->list, &newItem->node);
+    g_channelStatisticsList->cnt = TRANS_TEST_ID;
+
+    UpdateChannelStatistics(socketId, len);
+    DeleteSocketResourceBySocketId(socketId);
+    EXPECT_EQ(g_channelStatisticsList->cnt, 0);
+
+    ClientTransStatisticsDeinit();
+}
 } // namespace OHOS

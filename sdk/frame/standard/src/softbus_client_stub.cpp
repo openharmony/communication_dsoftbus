@@ -64,6 +64,7 @@ SoftBusClientStub::SoftBusClientStub()
     memberFuncMap_[CLIENT_ON_BR_PROXY_OPENED] = &SoftBusClientStub::OnBrProxyOpenedInner;
     memberFuncMap_[CLIENT_ON_BR_PROXY_DATA_RECV] = &SoftBusClientStub::OnBrProxyDataRecvInner;
     memberFuncMap_[CLIENT_ON_BR_PROXY_STATE_CHANGED] = &SoftBusClientStub::OnBrProxyStateChangedInner;
+    memberFuncMap_[CLIENT_ON_BR_PROXY_QUERY_PERMISSION] = &SoftBusClientStub::OnBrProxyQueryPermissionInner;
 }
 
 int32_t SoftBusClientStub::OnRemoteRequest(uint32_t code,
@@ -168,6 +169,12 @@ static int32_t MessageTcpParcelRead(MessageParcel &data, ChannelInfo *channel)
         channel->fd = data.ReadFileDescriptor();
         channel->myIp = (char *)data.ReadCString();
         COMM_CHECK_AND_RETURN_RET_LOGE(channel->myIp != nullptr, SOFTBUS_IPC_ERR, COMM_SDK, "read myIp failed");
+        READ_PARCEL_WITH_RET(data, Uint32, channel->fdProtocol, SOFTBUS_IPC_ERR);
+        channel->peerIp = (char *)data.ReadCString();
+        COMM_CHECK_AND_RETURN_RET_LOGE(channel->peerIp != nullptr, SOFTBUS_IPC_ERR, COMM_SDK, "read peerIp failed");
+        READ_PARCEL_WITH_RET(data, Int32, channel->peerPort, SOFTBUS_IPC_ERR);
+        channel->pkgName = (char *)data.ReadCString();
+        COMM_CHECK_AND_RETURN_RET_LOGE(channel->pkgName != nullptr, SOFTBUS_IPC_ERR, COMM_SDK, "read pkgName failed");
     }
     return SOFTBUS_OK;
 }
@@ -843,10 +850,12 @@ int32_t SoftBusClientStub::OnBrProxyOpenedInner(MessageParcel &data, MessageParc
     COMM_CHECK_AND_RETURN_RET_LOGE(data.ReadInt32(channelId), SOFTBUS_IPC_ERR, COMM_SDK, "read channelId failed");
     char *brMac = (char *)data.ReadCString();
     COMM_CHECK_AND_RETURN_RET_LOGE(brMac != nullptr, SOFTBUS_IPC_ERR, COMM_SDK, "read brMac failed");
+    char *uuid = (char *)data.ReadCString();
+    COMM_CHECK_AND_RETURN_RET_LOGE(brMac != nullptr, SOFTBUS_IPC_ERR, COMM_SDK, "read uuid failed");
     int32_t reason;
     COMM_CHECK_AND_RETURN_RET_LOGE(data.ReadInt32(reason), SOFTBUS_IPC_ERR, COMM_SDK, "read reason failed");
  
-    return ClientTransOnBrProxyOpened(channelId, brMac, reason);
+    return ClientTransOnBrProxyOpened(channelId, brMac, uuid, reason);
 }
  
 int32_t SoftBusClientStub::OnBrProxyDataRecvInner(MessageParcel &data, MessageParcel &reply)
@@ -871,6 +880,22 @@ int32_t SoftBusClientStub::OnBrProxyStateChangedInner(MessageParcel &data, Messa
     COMM_CHECK_AND_RETURN_RET_LOGE(data.ReadInt32(errCode), SOFTBUS_IPC_ERR, COMM_SDK, "read errCode failed");
  
     return ClientTransBrProxyChannelChange(channelId, errCode);
+}
+
+int32_t SoftBusClientStub::OnBrProxyQueryPermissionInner(MessageParcel &data, MessageParcel &reply)
+{
+    char *bundleName = (char *)data.ReadCString();
+    bool isEmpowered = false;
+
+    int32_t ret = ClientTransBrProxyQueryPermission(bundleName, &isEmpowered);
+    COMM_LOGI(COMM_SDK, "[br_proxy] ret:%{public}d", ret);
+ 
+    if (!reply.WriteBool(isEmpowered)) {
+        COMM_LOGE(COMM_SDK, "OnTimeSyncResultInner write reply failed!");
+        return SOFTBUS_TRANS_PROXY_WRITEINT_FAILED;
+    }
+
+    return SOFTBUS_OK;
 }
 
 int32_t SoftBusClientStub::OnJoinLNNResult(void *addr, uint32_t addrTypeLen, const char *networkId, int retCode)

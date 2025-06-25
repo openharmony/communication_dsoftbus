@@ -35,6 +35,7 @@
 #include "trans_log.h"
 #include "trans_pending_pkt.h"
 #include "trans_tcp_process_data.h"
+#include "softbus_mintp_socket.h"
 
 #define ACK_SIZE 4
 
@@ -123,9 +124,16 @@ static int32_t TransTcpSetTos(TcpDirectChannelInfo *channel, int32_t flags)
     if (CheckCollaborationSessionName(sessionName)) {
         tos = (flags == FLAG_BYTES) ? COLLABORATE_BYTE_TOS : MESSAGE_TOS;
     }
-    if (SetIpTos(channel->detail.fd, tos) != SOFTBUS_OK) {
-        return SOFTBUS_TCP_SOCKET_ERR;
+    if (channel->detail.fdProtocol == LNN_PROTOCOL_MINTP) {
+        if (SetMintpSocketTos(channel->detail.fd, tos) != SOFTBUS_OK) {
+            return SOFTBUS_SOCKET_ERR;
+        }
+    } else {
+        if (SetIpTos(channel->detail.fd, tos) != SOFTBUS_OK) {
+            return SOFTBUS_TCP_SOCKET_ERR;
+        }
     }
+
     return SOFTBUS_OK;
 }
 

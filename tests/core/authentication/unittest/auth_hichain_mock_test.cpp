@@ -21,7 +21,6 @@
 #include "auth_hichain.c"
 #include "auth_hichain_deps_mock.h"
 #include "softbus_error_code.h"
-
 #include "auth_session_json.c"
 #include "auth_hichain_adapter.c"
 
@@ -458,5 +457,4 @@ HWTEST_F(AuthHichainMockTest, UNPACK_EXTERNAL_AUTH_INFO_001, TestSize.Level1)
 
     JSON_Delete(obj);
 }
-
 } // namespace OHOS
