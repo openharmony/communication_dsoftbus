@@ -1611,27 +1611,28 @@ static int32_t GetSessionConnSeqAndFlagByChannelId(int32_t channelId, SessionCon
 int32_t TransDealTdcChannelOpenResult(
     int32_t channelId, int32_t openResult, const AccessInfo *accessInfo, pid_t callingPid)
 {
-    (void)UpdateAccessInfoById(channelId, accessInfo);
-
     SessionConn conn = { 0 };
     uint32_t flags = 0;
     uint64_t seq = 0;
-
     int32_t ret = GetSessionConnSeqAndFlagByChannelId(channelId, &conn, &flags, &seq);
     TRANS_CHECK_AND_RETURN_RET_LOGE(ret == SOFTBUS_OK, ret, TRANS_CTRL,
         "get SessionConn or seq or flags failed, channelId=%{public}d, ret=%{public}d", channelId, ret);
 
-    TransEventExtra extra = { 0 };
-    char peerUuid[DEVICE_ID_SIZE_MAX] = { 0 };
-    NodeInfo nodeInfo;
-    (void)memset_s(&nodeInfo, sizeof(NodeInfo), 0, sizeof(NodeInfo));
-    ReportTransEventExtra(&extra, channelId, &conn, &nodeInfo, peerUuid);
     if (callingPid != 0 && conn.appInfo.myData.pid != callingPid) {
         TRANS_LOGE(TRANS_CTRL,
             "pid does not match callingPid, pid=%{public}d, callingPid=%{public}d, channelId=%{public}d",
             conn.appInfo.myData.pid, callingPid, channelId);
         return SOFTBUS_TRANS_CHECK_PID_ERROR;
     }
+
+    (void)UpdateAccessInfoById(channelId, accessInfo);
+
+    TransEventExtra extra = { 0 };
+    char peerUuid[DEVICE_ID_SIZE_MAX] = { 0 };
+    NodeInfo nodeInfo;
+    (void)memset_s(&nodeInfo, sizeof(NodeInfo), 0, sizeof(NodeInfo));
+    ReportTransEventExtra(&extra, channelId, &conn, &nodeInfo, peerUuid);
+
     if (openResult != SOFTBUS_OK) {
         TRANS_LOGE(TRANS_CTRL, "Tdc channel open failed, openResult=%{public}d", openResult);
         TransProcessAsyncOpenTdcChannelFailed(&conn, openResult, seq, flags);
@@ -1730,6 +1731,15 @@ static int32_t TransTdcPostErrorMsg(uint64_t *seq, uint32_t *flags, int32_t chan
 
 int32_t TransDealTdcCheckCollabResult(int32_t channelId, int32_t checkResult, pid_t callingPid)
 {
+    int32_t dmsPid = 0;
+    char dmsPkgName[PKG_NAME_SIZE_MAX] = { 0 };
+    (void)TransGetPidAndPkgName(DMS_SESSIONNAME, DMS_UID, &dmsPid, dmsPkgName, PKG_NAME_SIZE_MAX);
+    if (callingPid != 0 && dmsPid != callingPid) {
+        TRANS_LOGE(TRANS_CTRL,
+            "dmsPid does not match callingPid, dmsPid=%{public}d, callingPid=%{public}d", dmsPid, callingPid);
+        return SOFTBUS_TRANS_CHECK_PID_ERROR;
+    }
+
     uint32_t tranFlags = 0;
     uint64_t seq = 0;
     SessionConn conn = { 0 };
@@ -1737,15 +1747,6 @@ int32_t TransDealTdcCheckCollabResult(int32_t channelId, int32_t checkResult, pi
     if (ret != SOFTBUS_OK) {
         TRANS_LOGE(TRANS_CTRL, "get session conn by channelId=%{public}d failed.", channelId);
         return SOFTBUS_TRANS_GET_SESSION_CONN_FAILED;
-    }
-
-    int32_t dmsPid = 0;
-    char dmsPkgName[PKG_NAME_SIZE_MAX] = { 0 };
-    (void)TransGetPidAndPkgName(DMS_SESSIONNAME, DMS_UID, &dmsPid, dmsPkgName, PKG_NAME_SIZE_MAX);
-    if (callingPid != 0 && dmsPid != callingPid) {
-        TRANS_LOGE(TRANS_CTRL,
-            "dmsPid does not match callingPid, dmsPid=%{public}d, callingPid=%{public}d", dmsPid, callingPid);
-        goto ERR_EXIT;
     }
 
     ret = TransTdcUpdateReplyCnt(channelId);
