@@ -392,6 +392,9 @@ static void WrapperScanStateChangeCb(uint8_t channelId, int32_t resultCode, bool
 
 static void WrapperLpDeviceInfoCb(uint8_t channelId, BtUuid *uuid, int32_t type, uint8_t *data, uint32_t dataSize)
 {
+    DISC_CHECK_AND_RETURN_LOGE(uuid != NULL, DISC_BLE_ADAPTER, "uuid is nullptr");
+    DISC_CHECK_AND_RETURN_LOGE(data != NULL, DISC_BLE_ADAPTER, "data is nullptr");
+
     if (SoftBusMutexLock(&g_scannerLock) != SOFTBUS_OK) {
         DISC_LOGE(DISC_BLE_ADAPTER, "lock failed, scannerId=%{public}u", channelId);
         return;
@@ -418,21 +421,25 @@ static void WrapperLpDeviceInfoCb(uint8_t channelId, BtUuid *uuid, int32_t type,
 
 static void WrapperScanResultCb0(BtScanResultData *data)
 {
+    DISC_CHECK_AND_RETURN_LOGE(data != NULL, DISC_BLE_ADAPTER, "data is nullptr");
     WrapperScanResultCb(CHANEL_LP, data);
 }
 
 static void WrapperScanResultCb1(BtScanResultData *data)
 {
+    DISC_CHECK_AND_RETURN_LOGE(data != NULL, DISC_BLE_ADAPTER, "data is nullptr");
     WrapperScanResultCb(CHANEL_STEADY, data);
 }
 
 static void WrapperScanResultCb2(BtScanResultData *data)
 {
+    DISC_CHECK_AND_RETURN_LOGE(data != NULL, DISC_BLE_ADAPTER, "data is nullptr");
     WrapperScanResultCb(CHANEL_SHARE, data);
 }
 
 static void WrapperScanResultCb3(BtScanResultData *data)
 {
+    DISC_CHECK_AND_RETURN_LOGE(data != NULL, DISC_BLE_ADAPTER, "data is nullptr");
     WrapperScanResultCb(CHANEL_UNSTEADY, data);
 }
 
@@ -458,21 +465,29 @@ static void WrapperScanStateChangeCb3(int32_t resultCode, bool isStartScan)
 
 static void WrapperLpDeviceInfoCb0(BtUuid *uuid, int32_t type, uint8_t *data, uint32_t dataSize)
 {
+    DISC_CHECK_AND_RETURN_LOGE(uuid != NULL, DISC_BLE_ADAPTER, "uuid is nullptr");
+    DISC_CHECK_AND_RETURN_LOGE(data != NULL, DISC_BLE_ADAPTER, "data is nullptr");
     WrapperLpDeviceInfoCb(CHANEL_LP, uuid, type, data, dataSize);
 }
 
 static void WrapperLpDeviceInfoCb1(BtUuid *uuid, int32_t type, uint8_t *data, uint32_t dataSize)
 {
+    DISC_CHECK_AND_RETURN_LOGE(uuid != NULL, DISC_BLE_ADAPTER, "uuid is nullptr");
+    DISC_CHECK_AND_RETURN_LOGE(data != NULL, DISC_BLE_ADAPTER, "data is nullptr");
     WrapperLpDeviceInfoCb(CHANEL_STEADY, uuid, type, data, dataSize);
 }
 
 static void WrapperLpDeviceInfoCb2(BtUuid *uuid, int32_t type, uint8_t *data, uint32_t dataSize)
 {
+    DISC_CHECK_AND_RETURN_LOGE(uuid != NULL, DISC_BLE_ADAPTER, "uuid is nullptr");
+    DISC_CHECK_AND_RETURN_LOGE(data != NULL, DISC_BLE_ADAPTER, "data is nullptr");
     WrapperLpDeviceInfoCb(CHANEL_SHARE, uuid, type, data, dataSize);
 }
 
 static void WrapperLpDeviceInfoCb3(BtUuid *uuid, int32_t type, uint8_t *data, uint32_t dataSize)
 {
+    DISC_CHECK_AND_RETURN_LOGE(uuid != NULL, DISC_BLE_ADAPTER, "uuid is nullptr");
+    DISC_CHECK_AND_RETURN_LOGE(data != NULL, DISC_BLE_ADAPTER, "data is nullptr");
     WrapperLpDeviceInfoCb(CHANEL_UNSTEADY, uuid, type, data, dataSize);
 }
 
@@ -581,6 +596,10 @@ static bool CheckAdvChanInUsed(int32_t advId)
 static int32_t StartBleAdv(int32_t advId, int32_t *btAdvId, const SoftbusBroadcastParam *param,
     const SoftbusBroadcastData *data)
 {
+    DISC_CHECK_AND_RETURN_RET_LOGE(btAdvId != NULL, SOFTBUS_INVALID_PARAM, DISC_BLE_ADAPTER, "btAdvId is nullptr");
+    DISC_CHECK_AND_RETURN_RET_LOGE(param != NULL, SOFTBUS_INVALID_PARAM, DISC_BLE_ADAPTER, "param is nullptr");
+    DISC_CHECK_AND_RETURN_RET_LOGE(data != NULL, SOFTBUS_INVALID_PARAM, DISC_BLE_ADAPTER, "data is nullptr");
+
     BleAdvParams advParam = {};
     SoftbusAdvParamToBt(param, &advParam);
     StartAdvRawData advRawData = {};
@@ -973,6 +992,8 @@ static bool IsLpAvailable(void)
 
 static int32_t SetBtUuidByBroadCastType(LpServerType type, BtUuid *btUuid)
 {
+    DISC_CHECK_AND_RETURN_RET_LOGE(btUuid != NULL, SOFTBUS_INVALID_PARAM, DISC_BLE_ADAPTER, "btUuid is nullptr");
+
     switch (type) {
         case SOFTBUS_HEARTBEAT_TYPE:
             btUuid->uuid = LP_BT_UUID_HEARTBEAT;
@@ -990,6 +1011,8 @@ static int32_t SetBtUuidByBroadCastType(LpServerType type, BtUuid *btUuid)
 
 static void FreeManufactureFilter(BleScanNativeFilter *nativeFilter, int32_t filterSize)
 {
+    DISC_CHECK_AND_RETURN_LOGE(nativeFilter != NULL, DISC_BLE_ADAPTER, "nativeFilter is nullptr");
+
     while (filterSize-- > 0) {
         SoftBusFree((nativeFilter + filterSize)->manufactureData);
         SoftBusFree((nativeFilter + filterSize)->manufactureDataMask);
