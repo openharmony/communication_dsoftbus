@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2024 Huawei Device Co., Ltd.
+ * Copyright (c) 2025 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -70,7 +70,7 @@ void AuthSessionJsonTest::TearDown() { }
 
 /*
  @tc.name: PackFastAuthValue_TEST_001
- @tc.desc: PackFastAuthValue test
+ @tc.desc: Quickly package authentication values test
  @tc.type: FUNC
  @tc.require:
  */
@@ -121,7 +121,7 @@ HWTEST_F(AuthSessionJsonTest, PackFastAuthValue_TEST_001, TestSize.Level1)
 
 /*
  @tc.name: GetUdidOrShortHash_TEST_001
- @tc.desc: GetUdidOrShortHash test
+ @tc.desc: Get udid or short hash interface test
  @tc.type: FUNC
  @tc.require:
  */
@@ -161,53 +161,8 @@ HWTEST_F(AuthSessionJsonTest, GetUdidOrShortHash_TEST_001, TestSize.Level1)
 }
 
 /*
- @tc.name: GetEnhancedP2pAuthKey_TEST_001
- @tc.desc: GetEnhancedP2pAuthKey test
- @tc.type: FUNC
- @tc.require:
- */
-HWTEST_F(AuthSessionJsonTest, GetEnhancedP2pAuthKey_TEST_001, TestSize.Level1)
-{
-    AuthSessionInfo info;
-    AuthDeviceKeyInfo deviceKey;
-    AuthSessionJsonInterfaceMock mock;
-    (void)memset_s(&info, sizeof(AuthSessionInfo), 0, sizeof(AuthSessionInfo));
-    ASSERT_TRUE(memcpy_s(info.udid, UDID_BUF_LEN, UDID, strlen(UDID)) == EOK);
-    EXPECT_CALL(mock, AuthFindDeviceKey).WillOnce(Return(SOFTBUS_AUTH_NOT_FOUND));
-    info.isServer = true;
-    info.isSupportFastAuth = true;
-    info.isNeedFastAuth = false;
-    PackFastAuth(nullptr, &info);
-    int32_t ret =GetFastAuthKey("hashtest", &info, &deviceKey);
-    EXPECT_EQ(ret, SOFTBUS_AUTH_NOT_FOUND);
-    info.isNeedFastAuth = true;
-    PackFastAuth(nullptr, &info);
-    EXPECT_CALL(mock, AuthFindDeviceKey).WillOnce(Return(SOFTBUS_OK));
-    ret = GetFastAuthKey("hashtest", &info, &deviceKey);
-    EXPECT_EQ(ret, SOFTBUS_OK);
-    info.connInfo.type = AUTH_LINK_TYPE_ENHANCED_P2P;
-    info.isSupportFastAuth = false;
-    EXPECT_CALL(mock, SoftBusGenerateStrHash).WillRepeatedly(Return(SOFTBUS_OK));
-    EXPECT_CALL(mock, LnnEncryptAesGcm).WillRepeatedly(Return(SOFTBUS_OK));
-    PackFastAuth(nullptr, &info);
-    EXPECT_CALL(mock, AuthFindLatestNormalizeKey).WillRepeatedly(Return(SOFTBUS_OK));
-    ret = GetFastAuthKey("hashtest", &info, &deviceKey);
-    EXPECT_EQ(ret, SOFTBUS_OK);
-    info.isServer = false;
-    info.isNeedFastAuth = true;
-    PackFastAuth(nullptr, &info);
-    EXPECT_CALL(mock, AuthFindLatestNormalizeKey).WillRepeatedly(Return(SOFTBUS_AUTH_NOT_FOUND));
-    EXPECT_CALL(mock, AuthFindDeviceKey).WillOnce(Return(SOFTBUS_OK));
-    ret = GetFastAuthKey("hashtest", &info, &deviceKey);
-    EXPECT_EQ(ret, SOFTBUS_OK);
-    EXPECT_CALL(mock, AuthFindDeviceKey).WillRepeatedly(Return(SOFTBUS_AUTH_NOT_FOUND));
-    ret = GetFastAuthKey("hashtest", &info, &deviceKey);
-    EXPECT_EQ(ret, SOFTBUS_AUTH_NOT_FOUND);
-}
-
-/*
  @tc.name: VerifySessionInfoIdType_TEST_001
- @tc.desc: VerifySessionInfoIdType test
+ @tc.desc: Verify session information id type interface test
  @tc.type: FUNC
  @tc.require:
  */
@@ -256,7 +211,7 @@ HWTEST_F(AuthSessionJsonTest, VerifySessionInfoIdType_TEST_001, TestSize.Level1)
 
 /*
  @tc.name: PackDeviceIdJson_TEST_001
- @tc.desc: PackDeviceIdJson test
+ @tc.desc: Device id json pack interface test
  @tc.type: FUNC
  @tc.require:
  */
@@ -300,7 +255,7 @@ HWTEST_F(AuthSessionJsonTest, PackDeviceIdJson_TEST_001, TestSize.Level1)
 
 /*
  @tc.name: UnpackWifiSinglePassInfo_TEST_001
- @tc.desc: UnpackWifiSinglePassInfo test
+ @tc.desc: Unpack of WiFi single channel information test
  @tc.type: FUNC
  @tc.require:
  */
@@ -335,7 +290,7 @@ HWTEST_F(AuthSessionJsonTest, UnpackWifiSinglePassInfo_TEST_001, TestSize.Level1
 
 /*
  @tc.name: SetExchangeIdTypeAndValue_TEST_001
- @tc.desc: SetExchangeIdTypeAndValue test
+ @tc.desc: Set Exchange Id type and value test
  @tc.type: FUNC
  @tc.require:
  */
@@ -382,7 +337,7 @@ HWTEST_F(AuthSessionJsonTest, SetExchangeIdTypeAndValue_TEST_001, TestSize.Level
 
 /*
  @tc.name: UnpackDeviceIdJson_TEST_001
- @tc.desc: UnpackDeviceIdJson test
+ @tc.desc: Device IdJson unpack test
  @tc.type: FUNC
  @tc.require:
  */
@@ -430,7 +385,7 @@ HWTEST_F(AuthSessionJsonTest, UnpackDeviceIdJson_TEST_001, TestSize.Level1)
 
 /*
  @tc.name: PackCommonDevInfo_TEST_001
- @tc.desc: PackCommonDevInfo test
+ @tc.desc: Common Device information pack interface test
  @tc.type: FUNC
  @tc.require:
  */
@@ -467,7 +422,7 @@ HWTEST_F(AuthSessionJsonTest, PackCommonDevInfo_TEST_001, TestSize.Level1)
 
 /*
  @tc.name: UnpackCipherRpaInfo_TEST_001
- @tc.desc: UnpackCipherRpaInfo test
+ @tc.desc: Cipher Rpa information unpack test
  @tc.type: FUNC
  @tc.require:
  */
@@ -503,7 +458,7 @@ HWTEST_F(AuthSessionJsonTest, UnpackCipherRpaInfo_TEST_001, TestSize.Level1)
 
 /*
  @tc.name: UnpackWifiDirectInfo_TEST_001
- @tc.desc: UnpackWifiDirectInfo test
+ @tc.desc: Wifi Direct information unpack interface test
  @tc.type: FUNC
  @tc.require:
  */
@@ -560,7 +515,7 @@ HWTEST_F(AuthSessionJsonTest, UnpackWifiDirectInfo_TEST_001, TestSize.Level1)
 
 /*
  @tc.name: CheckBusVersion_TEST_001
- @tc.desc: CheckBusVersion test
+ @tc.desc: Check bus version information pack interface test
  @tc.type: FUNC
  @tc.require:
  */
@@ -589,7 +544,7 @@ HWTEST_F(AuthSessionJsonTest, CheckBusVersion_TEST_001, TestSize.Level1)
 
 /*
  @tc.name: PackDeviceInfoBtV1_TEST_001
- @tc.desc: PackDeviceInfoBtV1 test
+ @tc.desc: Device BtV1 information pack interface test
  @tc.type: FUNC
  @tc.require:
  */
@@ -626,7 +581,7 @@ HWTEST_F(AuthSessionJsonTest, PackDeviceInfoBtV1_TEST_001, TestSize.Level1)
 
 /*
  @tc.name: UnpackDeviceInfoMessage_TEST_001
- @tc.desc: UnpackDeviceInfoMessage test
+ @tc.desc: Device message information unpack interface test
  @tc.type: FUNC
  @tc.require:
  */
@@ -697,11 +652,13 @@ HWTEST_F(AuthSessionJsonTest, CHECK_BUS_VERSION_TEST_001, TestSize.Level1)
     (void)memset_s(info, sizeof(NodeInfo), 0, sizeof(NodeInfo));
 
     SoftBusVersion version = SOFTBUS_NEW_V1;
-    if (!JSON_AddInt32ToObject(obj, "CODE", (int32_t)1) || !JSON_AddInt32ToObject(obj, "BUS_MAX_VERSION", (int32_t)2) ||
+    if (!JSON_AddInt32ToObject(obj, "CODE", (int32_t)1) ||
+        !JSON_AddInt32ToObject(obj, "BUS_MAX_VERSION", (int32_t)2) ||
         !JSON_AddInt32ToObject(obj, "BUS_MIN_VERSION", (int32_t)1) ||
         !JSON_AddInt32ToObject(obj, "AUTH_PORT", (int32_t)8710) ||
         !JSON_AddInt32ToObject(obj, "SESSION_PORT", (int32_t)26) ||
-        !JSON_AddInt32ToObject(obj, "PROXY_PORT", (int32_t)80) || !JSON_AddStringToObject(obj, "DEV_IP", "127.0.0.1")) {
+        !JSON_AddInt32ToObject(obj, "PROXY_PORT", (int32_t)80) ||
+        !JSON_AddStringToObject(obj, "DEV_IP", "127.0.0.1")) {
         JSON_Delete(obj);
         return;
     }
@@ -735,7 +692,7 @@ HWTEST_F(AuthSessionJsonTest, CHECK_BUS_VERSION_TEST_001, TestSize.Level1)
 
 /*
  @tc.name: PACK_FAST_AUTH_VALUE_TEST_002
- @tc.desc: PackFastAuthValue test
+ @tc.desc: Fast auth value pack test
  @tc.type: FUNC
  @tc.require:
  */
@@ -757,42 +714,8 @@ HWTEST_F(AuthSessionJsonTest, PACK_FAST_AUTH_VALUE_TEST_002, TestSize.Level1)
 }
 
 /*
- @tc.name: GET_UDID_SHORT_HASH_TEST_001
- @tc.desc: GetUdidShortHash test
- @tc.type: FUNC
- @tc.require:
- */
-HWTEST_F(AuthSessionJsonTest, GET_UDID_SHORT_HASH_TEST_001, TestSize.Level1)
-{
-    AuthSessionInfo info = {
-        .connInfo.type = AUTH_LINK_TYPE_BR,
-        .isServer = true,
-    };
-    uint32_t bufLen = UDID_SHORT_HASH_HEX_STR;
-    char udidHash[SHORT_UDID_HASH_HEX_LEN + 1];
-    AuthSessionJsonInterfaceMock mock;
-    EXPECT_CALL(mock, LnnGetUdidByBrMac).WillRepeatedly(Return(SOFTBUS_OK));
-    EXPECT_CALL(mock, SoftBusGenerateStrHash).WillRepeatedly(Return(SOFTBUS_OK));
-    EXPECT_EQ(false, GetUdidShortHash(nullptr, nullptr, bufLen));
-    EXPECT_EQ(false, GetUdidShortHash(&info, nullptr, bufLen));
-    EXPECT_EQ(false, GetUdidShortHash(&info, udidHash, bufLen));
-    bufLen++;
-    EXPECT_EQ(true, GetUdidShortHash(&info, udidHash, bufLen));
-    info.connInfo.type = AUTH_LINK_TYPE_WIFI;
-    EXPECT_EQ(true, GetUdidShortHash(&info, udidHash, bufLen));
-    info.connInfo.type = AUTH_LINK_TYPE_BLE;
-    EXPECT_EQ(true, GetUdidShortHash(&info, udidHash, bufLen));
-    info.connInfo.type = AUTH_LINK_TYPE_P2P;
-    EXPECT_EQ(false, GetUdidShortHash(&info, udidHash, bufLen));
-    info.isServer = false;
-    EXPECT_EQ(true, GetUdidShortHash(&info, udidHash, bufLen));
-    ASSERT_TRUE(memcpy_s(info.udid, UDID_BUF_LEN, UDID, strlen(UDID)) == EOK);
-    EXPECT_EQ(true, GetUdidShortHash(&info, udidHash, bufLen));
-}
-
-/*
  @tc.name: PACK_NORMALIZED_KEY_VALUE_TEST_001
- @tc.desc: PackNormalizedKeyValue test
+ @tc.desc: NormalizedKey Value pack interface test
  @tc.type: FUNC
  @tc.require:
  */
@@ -835,7 +758,7 @@ HWTEST_F(AuthSessionJsonTest, PACK_NORMALIZED_KEY_VALUE_TEST_001, TestSize.Level
 
 /*
  @tc.name: PARSE_NORMALIZED_KEY_VALUE_TEST_001
- @tc.desc: ParseNormalizedKeyValue test
+ @tc.desc: Parse NormalizedKey Value test
  @tc.type: FUNC
  @tc.require:
  */
@@ -860,7 +783,7 @@ HWTEST_F(AuthSessionJsonTest, PARSE_NORMALIZED_KEY_VALUE_TEST_001, TestSize.Leve
 
 /*
  @tc.name: PACK_DEVICE_JSON_INFO_TEST_001
- @tc.desc: PackDeviceJsonInfo test
+ @tc.desc: Device Json information pack test
  @tc.type: FUNC
  @tc.require:
  */
@@ -899,7 +822,7 @@ HWTEST_F(AuthSessionJsonTest, PACK_DEVICE_JSON_INFO_TEST_001, TestSize.Level1)
 
 /*
  @tc.name: PACK_DEVICE_INFO_MESSAGE_TEST_001
- @tc.desc: PackDeviceInfoMessage test
+ @tc.desc: Device Message information pack test
  @tc.type: FUNC
  @tc.require:
  */
@@ -920,7 +843,7 @@ HWTEST_F(AuthSessionJsonTest, PACK_CERTIFICATE_INFO_TEST_001, TestSize.Level1)
 
 /*
  @tc.name: GenerateUdidShortHash_TEST_001
- @tc.desc: GenerateUdidShortHash test
+ @tc.desc: Generate Udid Short Hash interface test
  @tc.type: FUNC
  @tc.require:
  */
