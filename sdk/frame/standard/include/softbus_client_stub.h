@@ -101,6 +101,7 @@ private:
     int32_t OnBrProxyOpenedInner(MessageParcel &data, MessageParcel &reply);
     int32_t OnBrProxyDataRecvInner(MessageParcel &data, MessageParcel &reply);
     int32_t OnBrProxyStateChangedInner(MessageParcel &data, MessageParcel &reply);
+    int32_t OnBrProxyQueryPermissionInner(MessageParcel &data, MessageParcel &reply);
     using SoftBusClientStubFunc =
         int32_t (SoftBusClientStub::*)(MessageParcel &data, MessageParcel &reply);
     std::map<uint32_t, SoftBusClientStubFunc> memberFuncMap_;

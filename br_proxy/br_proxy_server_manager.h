@@ -24,11 +24,14 @@ extern "C" {
 #endif
 
 int32_t TransOpenBrProxy(const char *brMac, const char *uuid);
-int32_t TransCloseBrProxy(int32_t channelId);
+int32_t TransCloseBrProxy(int32_t channelId, bool isInnerCall);
 int32_t TransSendBrProxyData(int32_t channelId, char* data, uint32_t dataLen);
 int32_t TransSetListenerState(int32_t channelId, int32_t type, bool isEnable);
 bool TransIsProxyChannelEnabled(int32_t uid);
+int32_t TransRegisterPushHook();
 void BrProxyClientDeathClearResource(pid_t callingPid);
+bool IsBrProxy(const char *bundleName);
+void CloseAllConnect();
 
 #ifdef __cplusplus
 }

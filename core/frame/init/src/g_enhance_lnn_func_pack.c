@@ -740,9 +740,20 @@ int32_t LnnTimeSyncImplInitPacked(void)
 {
     LnnEnhanceFuncList *pfnLnnEnhanceFuncList = LnnEnhanceFuncListGet();
     if (LnnCheckFuncPointer((void *)pfnLnnEnhanceFuncList->lnnTimeSyncImplInit) != SOFTBUS_OK) {
+        LNN_LOGI(LNN_INIT, "LnnTimeSyncImplInit get fail");
         return SOFTBUS_OK;
     }
     return pfnLnnEnhanceFuncList->lnnTimeSyncImplInit();
+}
+
+int32_t LnnTimeChangeNotifyPacked(void)
+{
+    LnnEnhanceFuncList *pfnLnnEnhanceFuncList = LnnEnhanceFuncListGet();
+    if (LnnCheckFuncPointer((void *)pfnLnnEnhanceFuncList->lnnTimeChangeNotify) != SOFTBUS_OK) {
+        LNN_LOGI(LNN_INIT, "LnnTimeChangeNotify get fail");
+        return SOFTBUS_OK;
+    }
+    return pfnLnnEnhanceFuncList->lnnTimeChangeNotify();
 }
 
 void LnnTimeSyncImplDeinitPacked(void)

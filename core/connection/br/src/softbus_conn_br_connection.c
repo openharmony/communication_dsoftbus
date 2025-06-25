@@ -840,6 +840,7 @@ int32_t ConnBrStopServer(void)
 
 void ConnBrRefreshIdleTimeout(ConnBrConnection *connection)
 {
+    CONN_CHECK_AND_RETURN_LOGW(connection != NULL, CONN_BR, "connection not exist");
     ConnRemoveMsgFromLooper(
         &g_brConnectionAsyncHandler, MSG_CONNECTION_IDLE_DISCONNECT_TIMEOUT, connection->connectionId, 0, NULL);
     ConnPostMsgToLooper(&g_brConnectionAsyncHandler, MSG_CONNECTION_IDLE_DISCONNECT_TIMEOUT, connection->connectionId,

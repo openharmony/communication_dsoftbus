@@ -33,6 +33,7 @@ typedef enum {
     CHANNEL_WAIT_RESUME = 0,
     CHANNEL_RESUME,
     CHANNEL_EXCEPTION_SOFTWARE_FAILED,
+    CHANNEL_BR_NO_PAIRED,
 } ChannelState;
 
 typedef enum {
@@ -54,10 +55,11 @@ typedef enum {
     LISTENER_TYPE_MAX,
 } ListenerType;
 
-#define COMM_PKGNAME_WECHAT "BrProxyPkgName"
+#define COMM_PKGNAME_BRPROXY "BrProxyPkgName"
 #define PKGNAME_MAX_LEN  30
 #define DEFAULT_CHANNEL_ID (-1)
 #define BR_PROXY_SEND_MAX_LEN 4096
+#define COMM_PKGNAME_PUSH "PUSH_SERVICE"
 
 typedef struct {
     int32_t (*onChannelOpened)(int32_t sessionId, int32_t channelId, int32_t result);
@@ -65,15 +67,21 @@ typedef struct {
     void (*onChannelStatusChanged)(int32_t channelId, int32_t state);
 } IBrProxyListener;
 
+typedef struct {
+    int32_t (*queryPermission)(const char *bundleName, bool *isEmpowered);
+} PermissonHookCb;
+
 int32_t OpenBrProxy(int32_t sessionId, BrProxyChannelInfo *channelInfo, IBrProxyListener *listener);
 int32_t CloseBrProxy(int32_t channelId);
 int32_t SendBrProxyData(int32_t channelId, char* data, uint32_t dataLen);
 int32_t SetListenerState(int32_t channelId, ListenerType type, bool isEnable);
 bool IsProxyChannelEnabled(int32_t uid);
+int32_t RegisterAccessHook(PermissonHookCb *cb);
 
-int32_t ClientTransOnBrProxyOpened(int32_t channelId, const char *brMac, int32_t result);
+int32_t ClientTransOnBrProxyOpened(int32_t channelId, const char *brMac, const char *uuid, int32_t result);
 int32_t ClientTransBrProxyDataReceived(int32_t channelId, const uint8_t *data, uint32_t len);
 int32_t ClientTransBrProxyChannelChange(int32_t channelId, int32_t errCode);
+int32_t ClientTransBrProxyQueryPermission(const char *bundleName, bool *isEmpowered);
 
 #ifdef __cplusplus
 }

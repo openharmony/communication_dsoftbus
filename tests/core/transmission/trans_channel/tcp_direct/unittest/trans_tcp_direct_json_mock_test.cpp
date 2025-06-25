@@ -154,5 +154,71 @@ HWTEST_F(TransTcpDirectJsonMockTest, VerifyP2pUnPackTest001, TestSize.Level1)
     int32_t ret = VerifyP2pUnPack(json, tmpIp, ipLen, &tmpPort);
     EXPECT_EQ(SOFTBUS_PARSE_JSON_ERR, ret);
 }
+
+/**
+ * @tc.name: VerifyP2pPackWithProtocolTest001
+ * @tc.desc: VerifyP2pPackWithProtocol test.
+ * @tc.type: FUNC
+ * @tc.require:
+ */
+HWTEST_F(TransTcpDirectJsonMockTest, VerifyP2pPackWithProtocolTest001, TestSize.Level1)
+{
+    const char *myIp = SOCKET_IP;
+    int32_t myPort = SOCKET_PORT;
+    const char *peerIp = SOCKET_IP;
+    cJSON json;
+    EXPECT_EQ(VerifyP2pPackWithProtocol(nullptr, -1, nullptr, LNN_PROTOCOL_MINTP), nullptr);
+    EXPECT_EQ(VerifyP2pPackWithProtocol(myIp, -1, nullptr, LNN_PROTOCOL_MINTP), nullptr);
+
+    NiceMock<TransTcpDirectJsonInterfaceMock> tcpDirectJsonMock;
+    EXPECT_CALL(tcpDirectJsonMock, cJSON_CreateObject).WillOnce(Return(nullptr));
+    EXPECT_EQ(VerifyP2pPackWithProtocol(myIp, myPort, peerIp, LNN_PROTOCOL_MINTP), nullptr);
+
+    EXPECT_CALL(tcpDirectJsonMock, cJSON_CreateObject).WillRepeatedly(Return(&json));
+    EXPECT_CALL(tcpDirectJsonMock, AddNumberToJsonObject).WillOnce(Return(false));
+    EXPECT_EQ(VerifyP2pPackWithProtocol(myIp, myPort, peerIp, LNN_PROTOCOL_MINTP), nullptr);
+
+    EXPECT_CALL(tcpDirectJsonMock, AddStringToJsonObject).WillOnce(Return(true));
+    EXPECT_CALL(tcpDirectJsonMock, AddNumberToJsonObject).WillOnce(Return(false));
+    EXPECT_EQ(VerifyP2pPackWithProtocol(myIp, myPort, peerIp, LNN_PROTOCOL_MINTP), nullptr);
+}
+
+/**
+ * @tc.name: VerifyP2pUnPackWithProtocolTest001
+ * @tc.desc: VerifyP2pUnPackWithProtocol test.
+ * @tc.type: FUNC
+ * @tc.require:
+ */
+HWTEST_F(TransTcpDirectJsonMockTest, VerifyP2pUnPackWithProtocolTest001, TestSize.Level1)
+{
+    char myIp[IP_LEN] = { 0 };
+    int32_t myPort = SOCKET_PORT;
+    ProtocolType protocol = LNN_PROTOCOL_MINTP;
+    cJSON json;
+    EXPECT_EQ(VerifyP2pUnPackWithProtocol(nullptr, nullptr, 0, nullptr, nullptr), SOFTBUS_INVALID_PARAM);
+    EXPECT_EQ(VerifyP2pUnPackWithProtocol(&json, nullptr, 0, nullptr, nullptr), SOFTBUS_INVALID_PARAM);
+    EXPECT_EQ(VerifyP2pUnPackWithProtocol(&json, myIp, sizeof(myIp), nullptr, nullptr), SOFTBUS_INVALID_PARAM);
+    EXPECT_EQ(VerifyP2pUnPackWithProtocol(&json, myIp, sizeof(myIp), &myPort, nullptr), SOFTBUS_INVALID_PARAM);
+
+    NiceMock<TransTcpDirectJsonInterfaceMock> tcpDirectJsonMock;
+    EXPECT_CALL(tcpDirectJsonMock, GetJsonObjectInt32Item).WillOnce(Return(false));
+    EXPECT_NE(VerifyP2pUnPackWithProtocol(&json, myIp, sizeof(myIp), &myPort, &protocol), SOFTBUS_INVALID_PARAM);
+    EXPECT_CALL(tcpDirectJsonMock, GetJsonObjectInt32Item).WillOnce(Return(true));
+    EXPECT_NE(VerifyP2pUnPackWithProtocol(&json, myIp, sizeof(myIp), &myPort, &protocol), SOFTBUS_PARSE_JSON_ERR);
+
+    EXPECT_CALL(tcpDirectJsonMock, GetJsonObjectInt32Item).WillOnce(Return(false));
+    EXPECT_CALL(tcpDirectJsonMock, GetJsonObjectNumberItem).WillOnce(Return(false));
+    EXPECT_EQ(VerifyP2pUnPackWithProtocol(&json, myIp, sizeof(myIp), &myPort, &protocol), SOFTBUS_PARSE_JSON_ERR);
+
+    EXPECT_CALL(tcpDirectJsonMock, GetJsonObjectInt32Item).WillOnce(Return(false));
+    EXPECT_CALL(tcpDirectJsonMock, GetJsonObjectNumberItem).WillOnce(Return(true));
+    EXPECT_CALL(tcpDirectJsonMock, GetJsonObjectStringItem).WillOnce(Return(false));
+    EXPECT_EQ(VerifyP2pUnPackWithProtocol(&json, myIp, sizeof(myIp), &myPort, &protocol), SOFTBUS_PARSE_JSON_ERR);
+
+    EXPECT_CALL(tcpDirectJsonMock, GetJsonObjectInt32Item).WillOnce(Return(false));
+    EXPECT_CALL(tcpDirectJsonMock, GetJsonObjectNumberItem).WillRepeatedly(Return(true));
+    EXPECT_CALL(tcpDirectJsonMock, GetJsonObjectStringItem).WillOnce(Return(true));
+    EXPECT_EQ(VerifyP2pUnPackWithProtocol(&json, myIp, sizeof(myIp), &myPort, &protocol), SOFTBUS_OK);
+}
 } // OHOS
 

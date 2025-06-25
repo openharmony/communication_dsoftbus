@@ -28,6 +28,22 @@
 extern "C" {
 #endif
 
+typedef struct {
+    char peerIp[IP_STR_MAX_LEN];
+    int32_t peerPort;
+    char targetNetworkId[NETWORK_ID_BUF_LEN];
+} TimeSyncSocketInfo;
+
+typedef struct {
+    TimeSyncResult result;                  /**< Time synchronize result */
+    TimeSyncFlag flag;                      /**< Time synchronize flag */
+    TimeSyncSocketInfo targetSocketInfo;    /**< Time synchronize target info */
+} TimeSyncResultWithSocket;
+
+typedef struct {
+    void (*onTimeSyncResultWithSocket)(const TimeSyncResultWithSocket *info, int32_t retCode);
+} ITimeSyncCbWithSocket;
+
 int32_t BusCenterClientInit(void);
 void BusCenterClientDeinit(void);
 
@@ -49,7 +65,10 @@ int32_t UnregRangeCbForMsdpInner(const char *pkgName);
 
 int32_t StartTimeSyncInner(const char *pkgName, const char *targetNetworkId, TimeSyncAccuracy accuracy,
     TimeSyncPeriod period, ITimeSyncCb *cb);
+int32_t StartTimeSyncWithSocketInner(const char *pkgName, const TimeSyncSocketInfo *socketInfo,
+    TimeSyncAccuracy accuracy, TimeSyncPeriod period, ITimeSyncCbWithSocket *cbWithSocket);
 int32_t StopTimeSyncInner(const char *pkgName, const char *targetNetworkId);
+int32_t StopTimeSyncWithSocketInner(const char *pkgName, const TimeSyncSocketInfo *socketInfo);
 int32_t PublishLNNInner(const char *pkgName, const PublishInfo *info, const IPublishCb *cb);
 int32_t StopPublishLNNInner(const char *pkgName, int32_t publishId);
 int32_t RefreshLNNInner(const char *pkgName, const SubscribeInfo *info, const IRefreshCallback *cb);

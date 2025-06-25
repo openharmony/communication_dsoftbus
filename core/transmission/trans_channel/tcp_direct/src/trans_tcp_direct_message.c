@@ -383,6 +383,9 @@ static void GetChannelInfoFromConn(ChannelInfo *info, SessionConn *conn, int32_t
     info->connectType = conn->appInfo.connectType;
     info->osType = conn->appInfo.osType;
     info->tokenType = conn->appInfo.myData.tokenType;
+    info->isLowLatency = conn->appInfo.isLowLatency;
+    info->fdProtocol = conn->appInfo.fdProtocol;
+    info->pkgName = conn->appInfo.myData.pkgName;
     if (conn->appInfo.myData.tokenType > ACCESS_TOKEN_TYPE_HAP && conn->serverSide) {
         info->peerUserId = conn->appInfo.peerData.userId;
         info->peerTokenId = conn->appInfo.peerData.tokenId;

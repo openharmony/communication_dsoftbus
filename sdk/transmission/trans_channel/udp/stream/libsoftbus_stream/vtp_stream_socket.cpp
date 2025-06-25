@@ -790,7 +790,7 @@ int VtpStreamSocket::CreateAndBindSocket(IpAndPort &local, bool isServer)
 
     // bind
     sockaddr_in localSockAddr = { 0 };
-    char host[ADDR_MAX_SIZE];
+    char host[ADDR_MAX_SIZE] = { 0 };
     localSockAddr.sin_family = AF_INET;
     localSockAddr.sin_port = htons((short)local.port);
     localSockAddr.sin_addr.s_addr = inet_addr(local.ip.c_str());
@@ -948,7 +948,7 @@ bool VtpStreamSocket::Accept()
         return false;
     }
 
-    char host[ADDR_MAX_SIZE];
+    char host[ADDR_MAX_SIZE] = { 0 };
     if (remoteAddr.sa_family == AF_INET) {
         auto v4Addr = reinterpret_cast<const sockaddr_in *>(&remoteAddr);
         remoteIpPort_.ip = SoftBusInetNtoP(AF_INET, &(v4Addr->sin_addr), host, ADDR_MAX_SIZE);
@@ -1337,7 +1337,7 @@ bool VtpStreamSocket::SetSocketBoundInner(int fd, std::string ip) const
             continue;
         }
 
-        char host[ADDR_MAX_SIZE];
+        char host[ADDR_MAX_SIZE] = { 0 };
         std::string devName(ifa->ifa_name);
         if (strcmp(boundIp.c_str(), SoftBusInetNtoP(AF_INET, &(((struct sockaddr_in *)ifa->ifa_addr)->sin_addr),
             host, ADDR_MAX_SIZE)) == 0) {

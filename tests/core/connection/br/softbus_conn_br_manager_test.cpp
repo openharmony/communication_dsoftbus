@@ -1358,7 +1358,11 @@ HWTEST_F(ConnectionBrConnectionTest, BrOnOccupyRelease, TestSize.Level1)
         .arg1 = connection->connectionId,
     };
     BrConnectionMsgHandler(&msg);
-    msg.what = MSG_CONNECTION_UPDATE_PEER_RC + 1;
+    msg.what = MSG_CONNECTION_IDLE_DISCONNECT_TIMEOUT;
+    BrConnectionMsgHandler(&msg);
+    EXPECT_EQ(false, connection->isOccupied);
+
+    msg.what = MSG_CONNECTION_IDLE_DISCONNECT_TIMEOUT + 1;
     BrConnectionMsgHandler(&msg);
     EXPECT_EQ(false, connection->isOccupied);
 

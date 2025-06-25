@@ -256,7 +256,7 @@ EXIT_ERR:
     return ret;
 }
 
-static int32_t ClientDeleteChannelFromList(int32_t channelId, const char *brMac)
+static int32_t ClientDeleteChannelFromList(int32_t channelId, const char *brMac, const char *uuid)
 {
     if (g_clientList == NULL) {
         TRANS_LOGE(TRANS_SDK, "[br_proxy] not init");
@@ -274,7 +274,7 @@ static int32_t ClientDeleteChannelFromList(int32_t channelId, const char *brMac)
                 continue;
             }
         } else {
-            if (strcmp(brMac, channelNode->peerBRMacAddr) != 0) {
+            if (strcmp(brMac, channelNode->peerBRMacAddr) != 0 || strcmp(uuid, channelNode->peerBRUuid) != 0) {
                 continue;
             }
         }
@@ -290,7 +290,7 @@ static int32_t ClientDeleteChannelFromList(int32_t channelId, const char *brMac)
     return SOFTBUS_NOT_FIND;
 }
 
-static int32_t ClientUpdateList(const char *peerBRMacAddr, int32_t channelId)
+static int32_t ClientUpdateList(const char *mac, const char *uuid, int32_t channelId)
 {
     if (g_clientList == NULL) {
         TRANS_LOGE(TRANS_SDK, "[br_proxy] not init");
@@ -302,7 +302,7 @@ static int32_t ClientUpdateList(const char *peerBRMacAddr, int32_t channelId)
     }
     ClientBrProxyChannelInfo *nodeInfo = NULL;
     LIST_FOR_EACH_ENTRY(nodeInfo, &(g_clientList->list), ClientBrProxyChannelInfo, node) {
-        if (strcmp(nodeInfo->peerBRMacAddr, peerBRMacAddr) != 0) {
+        if (strcmp(nodeInfo->peerBRMacAddr, mac) != 0 || strcmp(nodeInfo->peerBRUuid, uuid) != 0) {
             continue;
         }
         nodeInfo->channelId = channelId;
@@ -310,14 +310,15 @@ static int32_t ClientUpdateList(const char *peerBRMacAddr, int32_t channelId)
         return SOFTBUS_OK;
     }
     char *brMactmpName = NULL;
-    Anonymize(peerBRMacAddr, &brMactmpName);
+    Anonymize(mac, &brMactmpName);
     TRANS_LOGE(TRANS_SDK, "[br_proxy] not find brMac:%{public}s", brMactmpName);
     AnonymizeFree(brMactmpName);
     (void)SoftBusMutexUnlock(&(g_clientList->lock));
     return SOFTBUS_NOT_FIND;
 }
 
-static int32_t ClientQueryList(int32_t channelId, const char *peerBRMacAddr, ClientBrProxyChannelInfo *info)
+static int32_t ClientQueryList(int32_t channelId, const char *peerBRMacAddr, const char *uuid,
+    ClientBrProxyChannelInfo *info)
 {
     if (g_clientList == NULL) {
         TRANS_LOGE(TRANS_SDK, "[br_proxy] not init");
@@ -340,7 +341,7 @@ static int32_t ClientQueryList(int32_t channelId, const char *peerBRMacAddr, Cli
                 continue;
             }
         } else {
-            if (strcmp(nodeInfo->peerBRMacAddr, peerBRMacAddr) != 0) {
+            if (strcmp(nodeInfo->peerBRMacAddr, peerBRMacAddr) != 0 || strcmp(nodeInfo->peerBRUuid, uuid) != 0) {
                 continue;
             }
         }
@@ -427,11 +428,11 @@ static int32_t CheckOpenParm(BrProxyChannelInfo *channelInfo, IBrProxyListener *
 
     if (!IsMacValid(channelInfo->peerBRMacAddr)) {
         TRANS_LOGE(TRANS_SDK, "[br_proxy] mac is invalid!");
-        return SOFTBUS_INVALID_PARAM;
+        return SOFTBUS_TRANS_BR_PROXY_INVALID_PARAM;
     }
     if (!IsUuidValid(channelInfo->peerBRUuid)) {
         TRANS_LOGE(TRANS_SDK, "[br_proxy] uuid is invalid!");
-        return SOFTBUS_INVALID_PARAM;
+        return SOFTBUS_TRANS_BR_PROXY_INVALID_PARAM;
     }
     return SOFTBUS_OK;
 }
@@ -452,13 +453,7 @@ int32_t OpenBrProxy(int32_t sessionId, BrProxyChannelInfo *channelInfo, IBrProxy
         TRANS_LOGE(TRANS_SDK, "[br_proxy] client stub init failed! ret:%{public}d", ret);
         return ret;
     }
-    char pkgName[PKGNAME_MAX_LEN];
-    ret = sprintf_s(pkgName, sizeof(pkgName), "%s_%d", COMM_PKGNAME_WECHAT, getpid());
-    if (ret < 0) {
-        TRANS_LOGE(TRANS_SVC, "[br_proxy] sprintf_s failed! ret=%{public}d", ret);
-        return SOFTBUS_SPRINTF_ERR;
-    }
-    ret = ClientRegisterBrProxyService(pkgName);
+    ret = ClientRegisterBrProxyService(COMM_PKGNAME_BRPROXY);
     if (ret != SOFTBUS_OK) {
         TRANS_LOGE(TRANS_SDK, "[br_proxy] client register service failed! ret:%{public}d", ret);
         return ret;
@@ -476,7 +471,8 @@ int32_t OpenBrProxy(int32_t sessionId, BrProxyChannelInfo *channelInfo, IBrProxy
         return ret;
     }
     if (ret == SOFTBUS_TRANS_SESSION_OPENING) {
-        int32_t res = ClientDeleteChannelFromList(DEFAULT_CHANNEL_ID, channelInfo->peerBRMacAddr);
+        int32_t res = ClientDeleteChannelFromList(DEFAULT_CHANNEL_ID,
+            channelInfo->peerBRMacAddr, channelInfo->peerBRUuid);
         if (res != SOFTBUS_OK) {
             TRANS_LOGE(TRANS_SDK, "[br_proxy] add to list failed! ret=%{public}d", res);
             return ret;
@@ -493,41 +489,15 @@ int32_t CloseBrProxy(int32_t channelId)
     if (!IsChannelValid(channelId)) {
         return SOFTBUS_TRANS_INVALID_CHANNEL_ID;
     }
+    (void)ClientRecordListenerState(channelId, DATA_RECEIVE, false);
+    (void)ClientRecordListenerState(channelId, CHANNEL_STATE, false);
     int32_t ret = ServerIpcCloseBrProxy(channelId);
-    if (ret != SOFTBUS_OK) {
+    if (ret != SOFTBUS_OK && ret != SOFTBUS_TRANS_INVALID_CHANNEL_ID) {
         TRANS_LOGE(TRANS_SDK, "[br_proxy] ipc close brproxy failed! ret:%{public}d", ret);
         return ret;
     }
-    ClientDeleteChannelFromList(channelId, NULL);
+    ClientDeleteChannelFromList(channelId, NULL, NULL);
     return SOFTBUS_OK;
-}
-
-bool IsProxyChannelEnabled(int32_t uid)
-{
-    int32_t ret = ClientStubInit();
-    if (ret != SOFTBUS_OK) {
-        TRANS_LOGE(TRANS_SDK, "[br_proxy] client stub init failed! ret:%{public}d", ret);
-        return false;
-    }
-    char pkgName[PKGNAME_MAX_LEN];
-    ret = sprintf_s(pkgName, sizeof(pkgName), "%s_%d", "PUSH_SERVICE", getpid());
-    if (ret < 0) {
-        TRANS_LOGE(TRANS_SVC, "[br_proxy] sprintf_s failed! ret=%{public}d", ret);
-        return false;
-    }
-    TRANS_LOGI(TRANS_SVC, "[br_proxy] pkgName=%{public}s", pkgName);
-    ret = ClientRegisterBrProxyService(pkgName);
-    if (ret != SOFTBUS_OK) {
-        TRANS_LOGE(TRANS_SDK, "[br_proxy] client register service failed! ret:%{public}d", ret);
-        return false;
-    }
-    bool isEnable = false;
-    ret = ServerIpcIsProxyChannelEnabled(uid, &isEnable);
-    if (ret != SOFTBUS_OK) {
-        TRANS_LOGE(TRANS_SDK, "[br_proxy] ipc get brproxy channel state failed! ret:%{public}d", ret);
-    }
-
-    return isEnable;
 }
 
 int32_t SendBrProxyData(int32_t channelId, char* data, uint32_t dataLen)
@@ -568,7 +538,7 @@ int32_t ClientTransBrProxyDataReceived(int32_t channelId, const uint8_t *data, u
 {
     TRANS_LOGI(TRANS_SDK, "[br_proxy] client recv brproxy data! channelId:%{public}d", channelId);
     ClientBrProxyChannelInfo info;
-    int32_t ret = ClientQueryList(channelId, NULL, &info);
+    int32_t ret = ClientQueryList(channelId, NULL, NULL, &info);
     if (ret != SOFTBUS_OK) {
         return ret;
     }
@@ -588,6 +558,7 @@ typedef struct {
 const SoftBusCodeToStateMap G_CODE_MAP[] = {
     { SOFTBUS_CONN_BR_UNDERLAY_SOCKET_CLOSED,   CHANNEL_WAIT_RESUME },
     { SOFTBUS_OK,                               CHANNEL_RESUME      },
+    { SOFTBUS_CONN_BR_UNPAIRED,                 CHANNEL_BR_NO_PAIRED},
 };
 
 static int32_t SoftbusErrConvertChannelState(int32_t err)
@@ -605,7 +576,7 @@ int32_t ClientTransBrProxyChannelChange(int32_t channelId, int32_t errCode)
 {
     TRANS_LOGI(TRANS_SDK, "[br_proxy] channelId:%{public}d, errCode:%{public}d", channelId, errCode);
     ClientBrProxyChannelInfo info;
-    int32_t ret = ClientQueryList(channelId, NULL, &info);
+    int32_t ret = ClientQueryList(channelId, NULL, NULL, &info);
     if (ret != SOFTBUS_OK) {
         return ret;
     }
@@ -617,30 +588,96 @@ int32_t ClientTransBrProxyChannelChange(int32_t channelId, int32_t errCode)
     return SOFTBUS_OK;
 }
 
-int32_t ClientTransOnBrProxyOpened(int32_t channelId, const char *brMac, int32_t result)
+int32_t ClientTransOnBrProxyOpened(int32_t channelId, const char *brMac, const char *uuid, int32_t result)
 {
     TRANS_LOGI(TRANS_SDK, "[br_proxy] channelId:%{public}d, result:%{public}d.", channelId, result);
-    if (brMac == NULL) {
+    if (brMac == NULL || uuid == NULL) {
         TRANS_LOGE(TRANS_SDK, "[br_proxy] brMac is NULL");
         return SOFTBUS_INVALID_PARAM;
     }
     ClientBrProxyChannelInfo info;
-    int32_t ret = ClientQueryList(DEFAULT_CHANNEL_ID, brMac, &info);
+    int32_t ret = ClientQueryList(DEFAULT_CHANNEL_ID, brMac, uuid, &info);
     if (ret != SOFTBUS_OK) {
         TRANS_LOGI(TRANS_SDK, "[br_proxy] query list failed! ret:%{public}d", ret);
         return ret;
     }
     if (result == SOFTBUS_OK) {
-        ret = ClientUpdateList(brMac, channelId);
+        ret = ClientUpdateList(brMac, uuid, channelId);
         if (ret != SOFTBUS_OK) {
             return ret;
         }
     } else {
-        ClientDeleteChannelFromList(DEFAULT_CHANNEL_ID, brMac);
+        ClientDeleteChannelFromList(DEFAULT_CHANNEL_ID, brMac, uuid);
     }
     TRANS_LOGI(TRANS_SDK, "[br_proxy] sessionId:%{public}d.", info.sessionId);
     if (info.listener.onChannelOpened != NULL) {
         info.listener.onChannelOpened(info.sessionId, channelId, result);
     }
     return SOFTBUS_OK;
+}
+
+bool IsProxyChannelEnabled(int32_t uid)
+{
+    int32_t ret = ClientStubInit();
+    if (ret != SOFTBUS_OK) {
+        TRANS_LOGE(TRANS_SDK, "[br_proxy] client stub init failed! ret:%{public}d", ret);
+        return false;
+    }
+    TRANS_LOGI(TRANS_SVC, "[br_proxy] enter uid:%{public}d", uid);
+    ret = ClientRegisterBrProxyService(COMM_PKGNAME_PUSH);
+    if (ret != SOFTBUS_OK) {
+        TRANS_LOGE(TRANS_SDK, "[br_proxy] client register service failed! ret:%{public}d", ret);
+        return false;
+    }
+    bool isEnable = false;
+    ret = ServerIpcIsProxyChannelEnabled(uid, &isEnable);
+    if (ret != SOFTBUS_OK) {
+        TRANS_LOGE(TRANS_SDK, "[br_proxy] ipc get brproxy channel state failed! ret:%{public}d", ret);
+    }
+
+    return isEnable;
+}
+
+static PermissonHookCb g_pushCb;
+int32_t RegisterAccessHook(PermissonHookCb *cb)
+{
+    int32_t ret = ClientStubInit();
+    if (ret != SOFTBUS_OK) {
+        TRANS_LOGE(TRANS_SDK, "[br_proxy] client stub init failed! ret:%{public}d", ret);
+        return ret;
+    }
+    TRANS_LOGI(TRANS_SVC, "[br_proxy] enter");
+    ret = ClientRegisterBrProxyService(COMM_PKGNAME_PUSH);
+    if (ret != SOFTBUS_OK) {
+        TRANS_LOGE(TRANS_SDK, "[br_proxy] client register service failed! ret:%{public}d", ret);
+        return ret;
+    }
+    ret = ServerIpcRegisterPushHook();
+    if (ret != SOFTBUS_OK) {
+        TRANS_LOGE(TRANS_SDK, "[br_proxy] client register push hook failed! ret:%{public}d", ret);
+        return ret;
+    }
+    ret = memcpy_s(&g_pushCb, sizeof(PermissonHookCb), cb, sizeof(PermissonHookCb));
+    if (ret != EOK) {
+        TRANS_LOGE(TRANS_SDK, "[br_proxy] memcpy failed! ret:%{public}d", ret);
+        return SOFTBUS_MEM_ERR;
+    }
+    return SOFTBUS_OK;
+}
+
+int32_t ClientTransBrProxyQueryPermission(const char *bundleName, bool *isEmpowered)
+{
+    if (bundleName == NULL || isEmpowered == NULL) {
+        return SOFTBUS_INVALID_PARAM;
+    }
+    if (g_pushCb.queryPermission == NULL) {
+        return SOFTBUS_NO_INIT;
+    }
+
+    int32_t ret = g_pushCb.queryPermission(bundleName, isEmpowered);
+    if (ret != SOFTBUS_OK) {
+        TRANS_LOGE(TRANS_SDK, "[br_proxy] client query permission failed! ret:%{public}d", ret);
+    }
+
+    return ret;
 }

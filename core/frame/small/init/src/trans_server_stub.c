@@ -295,8 +295,8 @@ int32_t ServerNotifyAuthSuccess(IpcIo *req, IpcIo *reply)
     ReadInt32(req, &channelType);
     int32_t callingUid = GetCallingUid();
     int32_t callingPid = GetCallingPid();
-    char pkgName[PKG_NAME_SIZE_MAX];
-    char sessionName[SESSION_NAME_SIZE_MAX];
+    char pkgName[PKG_NAME_SIZE_MAX] = { 0 };
+    char sessionName[SESSION_NAME_SIZE_MAX] = { 0 };
     if (TransAuthGetNameByChanId(channelId, pkgName, sessionName,
         PKG_NAME_SIZE_MAX, SESSION_NAME_SIZE_MAX) != SOFTBUS_OK) {
         TRANS_LOGE(TRANS_CTRL, "get session name fail");

@@ -2860,3 +2860,26 @@ int32_t ClientGetSessionNameBySessionId(int32_t sessionId, char *sessionName)
     TRANS_LOGE(TRANS_SDK, "not found session with sessionId=%{public}d", sessionId);
     return SOFTBUS_NOT_FIND;
 }
+
+int32_t ClientSetLowLatencyBySocket(int32_t socket)
+{
+    if (socket <= 0) {
+        TRANS_LOGE(TRANS_SDK, "invalid param");
+        return SOFTBUS_INVALID_PARAM;
+    }
+    int32_t ret = LockClientSessionServerList();
+    if (ret != SOFTBUS_OK) {
+        TRANS_LOGE(TRANS_SDK, "lock failed");
+        return ret;
+    }
+    ClientSessionServer *serverNode = NULL;
+    SessionInfo *sessionNode = NULL;
+    if (GetSessionById(socket, &serverNode, &sessionNode) != SOFTBUS_OK) {
+        UnlockClientSessionServerList();
+        TRANS_LOGE(TRANS_SDK, "socket not found. socket=%{public}d", socket);
+        return SOFTBUS_TRANS_SESSION_INFO_NOT_FOUND;
+    }
+    sessionNode->isLowLatency = true;
+    UnlockClientSessionServerList();
+    return SOFTBUS_OK;
+}

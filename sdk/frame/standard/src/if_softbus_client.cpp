@@ -230,10 +230,11 @@ int32_t ISoftBusClient::OnDataReceived(uint32_t handle, const uint8_t *data, uin
     return SOFTBUS_OK;
 }
 
-int32_t ISoftBusClient::OnBrProxyOpened(int32_t channelId, const char *brMac, int32_t reason)
+int32_t ISoftBusClient::OnBrProxyOpened(int32_t channelId, const char *brMac, const char *uuid, int32_t reason)
 {
     (void)channelId;
     (void)brMac;
+    (void)uuid;
     (void)reason;
     COMM_LOGI(COMM_EVENT, "ipc default impl");
     return SOFTBUS_OK;
@@ -252,6 +253,14 @@ int32_t ISoftBusClient::OnBrProxyStateChanged(int32_t channelId, int32_t channel
 {
     (void)channelId;
     (void)channelState;
+    COMM_LOGI(COMM_EVENT, "ipc default impl");
+    return SOFTBUS_OK;
+}
+
+int32_t ISoftBusClient::OnBrProxyQueryPermission(const char *bundleName, bool *isEmpowered)
+{
+    (void)bundleName;
+    (void)isEmpowered;
     COMM_LOGI(COMM_EVENT, "ipc default impl");
     return SOFTBUS_OK;
 }

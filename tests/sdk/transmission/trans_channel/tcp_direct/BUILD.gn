@@ -48,6 +48,7 @@ ohos_unittest("TransSdkTcpDirectTest") {
     "$dsoftbus_root_path/core/transmission/trans_channel/udp_negotiation/include",
     "$dsoftbus_root_path/sdk/transmission/trans_channel/udp/file/include",
     "$dsoftbus_root_path/sdk/transmission/ipc/include",
+    "$dsoftbus_root_path/sdk/bus_center/manager/include",
   ]
 
   deps = [
@@ -142,6 +143,7 @@ ohos_unittest("TransTcpDirectTest") {
     "$dsoftbus_root_path/core/transmission/common/src",
     "$dsoftbus_root_path/adapter/common/include/OS_adapter_define/linux",
     "$dsoftbus_root_path/adapter/default_config/spec_config",
+    "$dsoftbus_root_path/sdk/bus_center/manager/include",
   ]
 
   deps = [
@@ -191,11 +193,12 @@ ohos_unittest("TransTcpDirectMockTest") {
     "$dsoftbus_root_path/sdk/transmission/ipc/include",
     "$dsoftbus_root_path/core/transmission/common/include",
     "$dsoftbus_root_path/core/transmission/common/src",
+    "$dsoftbus_root_path/sdk/bus_center/manager/include",
   ]
 
   deps = [
-    "$dsoftbus_root_path/core/common:softbus_utils",
     "$dsoftbus_root_path/adapter:softbus_adapter",
+    "$dsoftbus_root_path/core/common:softbus_utils",
     "$dsoftbus_root_path/tests/sdk/common:softbus_access_token_test",
   ]
 

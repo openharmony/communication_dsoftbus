@@ -38,6 +38,8 @@
 #include "trans_session_account_adapter.h"
 #include "trans_tcp_direct_message.h"
 #include "trans_tcp_direct_sessionconn.h"
+#include "wifi_direct_manager_struct.h"
+#include "wifi_direct_manager.h"
 
 #define ID_OFFSET (0xABAB0000)
 #define OHOS_TYPE_UNKNOWN (-1)
@@ -196,6 +198,7 @@ static int32_t CreateSessionConnNode(ListenerModule module, int fd, int32_t chan
     conn->authHandle.authId = AUTH_INVALID_ID;
     conn->appInfo.routeType = TransGetRouteTypeByModule(module);
     conn->appInfo.peerData.port = clientAddr->socketOption.port;
+    conn->appInfo.fdProtocol = clientAddr->socketOption.protocol;
     TransSetTcpDirectConnectType(&conn->appInfo.connectType, module);
     int32_t ret =
         LnnGetLocalStrInfo(STRING_KEY_UUID, conn->appInfo.myData.deviceId, sizeof(conn->appInfo.myData.deviceId));
@@ -204,11 +207,26 @@ static int32_t CreateSessionConnNode(ListenerModule module, int fd, int32_t chan
         SoftBusFree(conn);
         return ret;
     }
-    if (strcpy_s(conn->appInfo.peerData.addr, sizeof(conn->appInfo.peerData.addr), clientAddr->socketOption.addr) !=
-        EOK) {
-        TRANS_LOGE(TRANS_CTRL, "copy ip to app info failed.");
-        SoftBusFree(conn);
-        return SOFTBUS_STRCPY_ERR;
+    if (clientAddr->socketOption.protocol == LNN_PROTOCOL_MINTP) {
+        struct WifiDirectManager *mgr = GetWifiDirectManager();
+        if (mgr == NULL || mgr->getRemoteIpByRemoteMac == NULL) {
+            TRANS_LOGE(TRANS_CTRL, "get remote ip by remote mac failed.");
+            SoftBusFree(conn);
+            return SOFTBUS_WIFI_DIRECT_INIT_FAILED;
+        }
+        ret = mgr->getRemoteIpByRemoteMac(clientAddr->socketOption.addr, conn->appInfo.peerData.addr, IP_LEN);
+        if (ret != SOFTBUS_OK) {
+            TRANS_LOGE(TRANS_CTRL, "get remote ip by remote mac failed.");
+            SoftBusFree(conn);
+            return ret;
+        }
+    } else {
+        if (strcpy_s(conn->appInfo.peerData.addr, sizeof(conn->appInfo.peerData.addr), clientAddr->socketOption.addr) !=
+            EOK) {
+            TRANS_LOGE(TRANS_CTRL, "copy ip to app info failed.");
+            SoftBusFree(conn);
+            return SOFTBUS_STRCPY_ERR;
+        }
     }
     conn->appInfo.protocol = clientAddr->socketOption.protocol;
 

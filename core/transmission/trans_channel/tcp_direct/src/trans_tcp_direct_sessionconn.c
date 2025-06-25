@@ -18,6 +18,7 @@
 #include <securec.h>
 
 #include "auth_interface.h"
+#include "lnn_bus_center_ipc.h"
 #include "lnn_ohos_account_adapter.h"
 #include "softbus_access_token_adapter.h"
 #include "softbus_adapter_mem.h"
@@ -435,6 +436,7 @@ TcpChannelInfo *CreateTcpChannelInfo(const ChannelInfo *channel)
         return NULL;
     }
     tcpChannelInfo->callingTokenId = conn.appInfo.callingTokenId;
+    tcpChannelInfo->fdProtocol = conn.appInfo.fdProtocol;
     return tcpChannelInfo;
 }
 
@@ -517,6 +519,10 @@ int32_t TransDelTcpChannelInfoByChannelId(int32_t channelId)
     TcpChannelInfo *next = NULL;
     LIST_FOR_EACH_ENTRY_SAFE(item, next, &g_tcpChannelInfoList->list, TcpChannelInfo, node) {
         if (item->channelId == channelId) {
+            if (item->fdProtocol == LNN_PROTOCOL_MINTP && !item->isServer) {
+                TRANS_LOGI(TRANS_CTRL, "tran stop time sync");
+                (void)LnnIpcStopTimeSync(item->pkgName, item->peerDeviceId, item->pid);
+            }
             ListDelete(&item->node);
             TRANS_LOGI(TRANS_CTRL, "delete TcpChannelInfo success, channelId=%{public}d", item->channelId);
             SoftBusFree(item);
@@ -549,6 +555,10 @@ void TransTdcChannelInfoDeathCallback(const char *pkgName, int32_t pid)
     TcpChannelInfo *next = NULL;
     LIST_FOR_EACH_ENTRY_SAFE(item, next, &g_tcpChannelInfoList->list, TcpChannelInfo, node) {
         if ((strcmp(item->pkgName, pkgName) == 0) && (item->pid == pid)) {
+            if (item->fdProtocol == LNN_PROTOCOL_MINTP && !item->isServer) {
+                TRANS_LOGI(TRANS_CTRL, "tran stop time sync");
+                (void)LnnIpcStopTimeSync(item->pkgName, item->peerDeviceId, item->pid);
+            }
             ListDelete(&item->node);
             TRANS_LOGI(TRANS_CTRL, "delete TcpChannelInfo success, channelId=%{public}d", item->channelId);
             SoftBusFree(item);

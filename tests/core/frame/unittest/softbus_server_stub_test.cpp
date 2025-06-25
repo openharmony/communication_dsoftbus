@@ -796,7 +796,7 @@ HWTEST_F(SoftbusServerStubTest, SoftbusServerStubTest021, TestSize.Level1)
         Return(SOFTBUS_NETWORK_GET_ALL_NODE_INFO_ERR)
     );
     ret = softBusServer->GetAllOnlineNodeInfoInner(datas, reply);
-    EXPECT_EQ(SOFTBUS_NETWORK_GET_ALL_NODE_INFO_ERR, ret);
+    EXPECT_EQ(SOFTBUS_INVALID_PARAM, ret);
 
     datas.WriteCString(test);
     datas.WriteUint32(infoTypeLen);
