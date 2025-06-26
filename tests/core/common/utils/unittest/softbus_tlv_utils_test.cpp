@@ -43,12 +43,9 @@ public:
 
 static string BytesToHexString(const uint8_t *data, uint32_t len)
 {
-    // char charItem[7] = {0}; // 7: 0xFF + ',' + ' ' + '\0'
     std::stringstream hexStream;
     for (uint32_t i = 0; i < len; i++) {
-        // (void)sprintf_s(charItem, sizeof(charItem), "0x%02X, ", data[i]);
         hexStream << "0x" << std::hex << std::setw(2) << std::setfill('0') << static_cast<uint32_t>(data[i]) << ", ";
-        // hexStream << string(charItem);
     }
     return hexStream.str();
 }
