@@ -35,7 +35,7 @@ if (defined(ohos_lite)) {
   import("../../../../dsoftbus.gni")
 
   module_output_path = "dsoftbus/soft_bus/common"
-  ohos_unittest("SoftbusUtilsTest") {
+  ohos_unittest("SoftBusUtilsTest") {
     module_out_path = module_output_path
     sources = [ "unittest/softbus_utils_test.cpp" ]
     include_dirs = [ "$dsoftbus_root_path/core/common/include" ]
@@ -65,10 +65,22 @@ if (defined(ohos_lite)) {
     ]
   }
 
+  ohos_unittest("SoftBusTlvUtilsTest") {
+    module_out_path = module_output_path
+    sources = [ "unittest/softbus_tlv_utils_test.cpp" ]
+    include_dirs = [ "$dsoftbus_root_path/core/common/include" ]
+    deps = [
+      "$dsoftbus_root_path/adapter:softbus_adapter",
+      "$dsoftbus_root_path/core/common:softbus_utils"
+    ]
+    external_deps = [ "hilog:libhilog" ]
+  }
+
   group("unittest") {
     testonly = true
     deps = [
-      ":SoftbusUtilsTest",
+      ":SoftBusTlvUtilsTest",
+      ":SoftBusUtilsTest",
       ":Sqlite3UtilsTest",
       "permission_state_test:PermissionStateTest",
     ]
