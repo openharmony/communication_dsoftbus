@@ -179,6 +179,7 @@ typedef int32_t (*LnnGetLocalStrInfoFunc)(InfoKey key, char *info, uint32_t len)
 typedef int32_t (*LnnGetLocalNumInfoFunc)(InfoKey key, int32_t *info);
 
 typedef int32_t (*LnnGetLocalNumU64InfoFunc)(InfoKey key, uint64_t *info);
+typedef int32_t (*LnnGetLocalNum64InfoFunc)(InfoKey key, int64_t *info);
 typedef int32_t (*LnnSetLocalNum64InfoFunc)(InfoKey key, int64_t info);
 typedef int32_t (*LnnGetLocalNum16InfoFunc)(InfoKey key, int16_t *info);
 typedef int32_t (*LnnGetLocalNumU16InfoFunc)(InfoKey key, uint16_t *info);

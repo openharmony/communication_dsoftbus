@@ -20,6 +20,7 @@
 #include "anonymizer.h"
 #include "bus_center_event.h"
 #include "bus_center_manager.h"
+#include "g_enhance_lnn_func_pack.h"
 #include "lnn_async_callback_utils.h"
 #include "lnn_distributed_net_ledger.h"
 #include "lnn_deviceinfo_to_profile.h"
@@ -516,6 +517,8 @@ static void SleStateChangeEventHandle(const LnnEventBasicInfo *info)
     }
     const LnnMonitorSleStateChangedEvent *event = (const LnnMonitorSleStateChangedEvent *)info;
     SoftBusSleState sleState = (SoftBusSleState)event->status;
+    uint32_t delayTime = 0;
+    TriggerSparkGroupClearPacked((uint32_t)sleState, delayTime);
     if (sleState == SOFTBUS_SLE_TURN_ON) {
         (void)LnnSetNetCapability(&netCapability, BIT_SLE);
     } else if (sleState == SOFTBUS_SLE_TURN_OFF) {

@@ -24,6 +24,8 @@
 #include "message_handler.h"
 #include "lnn_net_builder_struct.h"
 
+#define SPARK_GROUP_DELAY_TIME_MS 10000
+
 #ifdef __cplusplus
 extern "C" {
 #endif

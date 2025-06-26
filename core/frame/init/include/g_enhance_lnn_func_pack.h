@@ -200,6 +200,13 @@ int32_t UnregistAuthTransListenerPacked(void);
 void LnnDeinitMetaNodeExtLedgerPacked(void);
 int32_t LnnRetrieveDeviceDataPacked(LnnDataType dataType, char **data, uint32_t *dataLen);
 int32_t LnnSaveDeviceDataPacked(const char *data, LnnDataType dataType);
+void TriggerSparkGroupBuildPacked(uint32_t delayTime);
+void TriggerSparkGroupClearPacked(uint32_t state, uint32_t delayTime);
+void TriggerSparkGroupJoinAgainPacked(const char *udid, uint32_t delayTime);
+int32_t InitSparkGroupManagerPacked(void);
+void DeinitSparkGroupManagerPacked(void);
+int32_t QueryControlPlaneNodeValidPacked(const char *deviceId);
+int32_t LnnDumpControlLaneGroupInfoPacked(int32_t fd);
 
 #ifdef __cplusplus
 }

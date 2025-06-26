@@ -178,6 +178,10 @@ static int32_t BusCenterServerInitFirstStep(void)
         LNN_LOGE(LNN_INIT, "init lnn looper fail");
         return SOFTBUS_LOOPER_ERR;
     }
+    if (LnnInitLaneLooper() != SOFTBUS_OK) {
+        LNN_LOGE(LNN_INIT, "init lane looper fail");
+        return SOFTBUS_LOOPER_ERR;
+    }
     if (LnnInitNetLedger() != SOFTBUS_OK) {
         return SOFTBUS_NETWORK_LEDGER_INIT_FAILED;
     }
@@ -278,6 +282,27 @@ void LnnDeinitLnnLooper(void)
     }
 }
 
+int32_t LnnInitLaneLooper(void)
+{
+    SoftBusLooper *looper = CreateNewLooper("lane_looper");
+    if (!looper) {
+        LNN_LOGE(LNN_LANE, "init lane looper fail");
+        return SOFTBUS_LOOPER_ERR;
+    }
+    SetLooper(LOOP_TYPE_LANE, looper);
+    LNN_LOGI(LNN_LANE, "init laneLooper success");
+    return SOFTBUS_OK;
+}
+
+void LnnDeinitLaneLooper(void)
+{
+    SoftBusLooper *looper = GetLooper(LOOP_TYPE_LANE);
+    if (looper != NULL) {
+        DestroyLooper(looper);
+        SetLooper(LOOP_TYPE_LANE, NULL);
+    }
+}
+
 int32_t BusCenterServerInit(void)
 {
     int32_t ret = BusCenterServerInitFirstStep();
@@ -305,6 +330,7 @@ void BusCenterServerDeinit(void)
     DeinitDecisionCenter();
     LnnDeinitMetaNodePacked();
     LnnCoapConnectDeinitPacked();
+    LnnDeinitLaneLooper();
     LnnDeinitLnnLooper();
     DeinitAuthGenCertParallelList();
     DeinitAuthPreLinkList();
