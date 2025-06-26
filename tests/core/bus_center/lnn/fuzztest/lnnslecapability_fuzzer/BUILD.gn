@@ -1,4 +1,4 @@
-# Copyright (c) 2024 Huawei Device Co., Ltd.
+# Copyright (c) 2025 Huawei Device Co., Ltd.
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
 # You may obtain a copy of the License at
@@ -17,9 +17,9 @@ import("../../../../../../dsoftbus.gni")
 
 ##############################fuzztest##########################################
 
-ohos_fuzztest("LnnSyncInfoManagerFuzzTest") {
+ohos_fuzztest("LnnSleCapabilityFuzzTest") {
   module_out_path = dsoftbus_fuzz_out_path
-  fuzz_config_file = "$dsoftbus_root_path/tests/core/bus_center/lnn/fuzztest/lnnsyncinfomanager_fuzzer"
+  fuzz_config_file = "$dsoftbus_root_path/tests/core/bus_center/lnn/fuzztest/lnnslecapability_fuzzer"
   include_dirs = [
     "$dsoftbus_dfx_path/interface/include",
     "$dsoftbus_root_path/adapter/common/include",
@@ -27,10 +27,20 @@ ohos_fuzztest("LnnSyncInfoManagerFuzzTest") {
     "$dsoftbus_root_path/core/common/include",
     "$dsoftbus_root_path/adapter/common/include",
     "$dsoftbus_root_path/core/common/message_handler/include",
+    "$dsoftbus_root_path/interfaces/kits/bus_center",
     "$dsoftbus_root_path/interfaces/kits/common",
     "$dsoftbus_root_path/interfaces/kits/lnn",
     "$dsoftbus_root_path/tests/sdk/common/include",
     "$dsoftbus_root_path/tests/common/include",
+    "$dsoftbus_root_path/core/bus_center/lnn/net_ledger/common/include",
+    "$dsoftbus_root_path/core/bus_center/lnn/net_ledger/distributed_ledger/include",
+    "$dsoftbus_root_path/core/bus_center/lnn/net_ledger/local_ledger/include",
+    "$dsoftbus_root_path/core/bus_center/interface",
+    "$dsoftbus_root_path/core/bus_center/lnn/net_ledger/common/src",
+    "$dsoftbus_root_path/adapter/common/net/bluetooth/include",
+    "$dsoftbus_root_path/core/discovery/manager/include",
+    "$dsoftbus_root_path/core/discovery/interface",
+    "$dsoftbus_root_path/core/bus_center/utils/include",
   ]
 
   cflags = [
@@ -40,7 +50,7 @@ ohos_fuzztest("LnnSyncInfoManagerFuzzTest") {
     "-fno-omit-frame-pointer",
   ]
 
-  sources = [ "lnnsyncinfomanager_fuzzer.cpp" ]
+  sources = [ "lnnslecapability_fuzzer.cpp" ]
 
   deps = [
     "$dsoftbus_root_path/adapter:softbus_adapter",
