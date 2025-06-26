@@ -35,9 +35,8 @@ enum BasicSize {
 typedef struct {
     uint8_t tSize; // the number of bytes occupied by the type filed
     uint8_t lSize; // the number of bytes occupied by the length filed
-    uint8_t *buffer; // tlv binary buffer
-    uint32_t size; // the size of buffer
     ListNode mList; // tlv member list
+    uint32_t size; // the size of total tlv buffer
 } TlvObject;
 
 TlvObject *CreateTlvObject(uint8_t tSize, uint8_t lSize);
@@ -47,7 +46,7 @@ int32_t AddTlvMember(TlvObject *obj, uint32_t type, uint32_t length, const uint8
 // note: the memory of value no need to be released, it will be released while DestroyTlvObject() called.
 int32_t GetTlvMember(TlvObject *obj, uint32_t type, uint32_t *length, uint8_t **value);
 
-// note: the memory of output no need to be released, it will be released while DestroyTlvObject() called.
+// note: the memory of output need be released by calling SoftBusFree().
 int32_t GetTlvBinary(TlvObject *obj, uint8_t **output, uint32_t *outputSize);
 int32_t SetTlvBinary(TlvObject *obj, const uint8_t *input, uint32_t inputSize);
 
@@ -70,13 +69,6 @@ int32_t AddTlvMemberU64(TlvObject *obj, uint32_t type, uint64_t value);
 int32_t GetTlvMemberU64(TlvObject *obj, uint32_t type, uint64_t *value);
 
 // traverse each tlv member
-// for example:
-// {
-//    TlvMember *tlv = NULL;
-//    TLV_FOR_EACH_ENTRY(tlv, obj, TlvMember, node) {
-//        // do something for tlv->type, tlv->length, tlv->value
-//    }
-// }
 typedef struct {
     ListNode node;
     uint32_t type;

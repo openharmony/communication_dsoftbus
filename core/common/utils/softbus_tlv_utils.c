@@ -51,7 +51,6 @@ TlvObject *CreateTlvObject(uint8_t tSize, uint8_t lSize)
     COMM_CHECK_AND_RETURN_RET_LOGW(obj != NULL, NULL, COMM_UTILS, "malloc fail");
     obj->tSize = tSize;
     obj->lSize = lSize;
-    obj->buffer = NULL;
     obj->size = 0;
     ListInit(&obj->mList);
     return obj;
@@ -60,10 +59,6 @@ TlvObject *CreateTlvObject(uint8_t tSize, uint8_t lSize)
 void DestroyTlvObject(TlvObject *obj)
 {
     COMM_CHECK_AND_RETURN_LOGW(obj != NULL, COMM_UTILS, "obj nullptr");
-    if (obj->buffer != NULL) {
-        SoftBusFree(obj->buffer);
-        obj->buffer = NULL;
-    }
     TlvMember *item = NULL;
     TlvMember *next = NULL;
     LIST_FOR_EACH_ENTRY_SAFE(item, next, &obj->mList, TlvMember, node) {
@@ -76,7 +71,7 @@ void DestroyTlvObject(TlvObject *obj)
 int32_t AddTlvMember(TlvObject *obj, uint32_t type, uint32_t length, const uint8_t *value)
 {
     COMM_CHECK_AND_RETURN_RET_LOGW(obj != NULL, SOFTBUS_INVALID_PARAM, COMM_UTILS, "obj nullptr");
-    COMM_CHECK_AND_RETURN_RET_LOGW(((length > 0 && value != NULL) || (length == 0)),
+    COMM_CHECK_AND_RETURN_RET_LOGW(((length > 0 && length < MAX_VALUE_LENGTH && value != NULL) || (length == 0)),
         SOFTBUS_INVALID_PARAM, COMM_UTILS, "invalid param, length=%{public}u", length);
     TlvMember *tlv = NewTlvMember(type, length, value);
     COMM_CHECK_AND_RETURN_RET_LOGW(tlv != NULL, SOFTBUS_MALLOC_ERR, COMM_UTILS, "new tlv fail");
@@ -135,36 +130,44 @@ static int32_t PackValue(uint8_t *buf, uint32_t size, const uint8_t *value, uint
     return (err != EOK ? SOFTBUS_MEM_ERR : SOFTBUS_OK);
 }
 
+static int32_t PackTlvMember(const TlvObject *obj, const TlvMember *tlv, uint8_t *buffer, uint32_t size)
+{
+    COMM_CHECK_AND_RETURN_RET_LOGE(size >= TLV_SIZE(obj, tlv->length),
+        SOFTBUS_NO_ENOUGH_DATA, COMM_UTILS, "buffer not enough(size=%{public}u, len=%{public}u)", size, tlv->length);
+    uint32_t offset = 0;
+    int32_t ret = PackTypeOrLength(buffer, obj->size, tlv->type, obj->tSize);
+    COMM_CHECK_AND_RETURN_RET_LOGE(ret == SOFTBUS_OK, ret, COMM_UTILS, "pack type fail(=%{public}d)", ret);
+    offset += obj->tSize;
+    ret = PackTypeOrLength(buffer + offset, obj->size - offset, tlv->length, obj->lSize);
+    COMM_CHECK_AND_RETURN_RET_LOGE(ret == SOFTBUS_OK, ret, COMM_UTILS, "pack length fail(=%{public}d)", ret);
+    offset += obj->lSize;
+    ret = PackValue(buffer + offset, obj->size - offset, tlv->value, tlv->length);
+    COMM_CHECK_AND_RETURN_RET_LOGE(ret == SOFTBUS_OK, ret, COMM_UTILS, "pack value fail(=%{public}d)", ret);
+    return SOFTBUS_OK;
+}
+
 int32_t GetTlvBinary(TlvObject *obj, uint8_t **output, uint32_t *outputSize)
 {
     COMM_CHECK_AND_RETURN_RET_LOGW(obj != NULL, SOFTBUS_INVALID_PARAM, COMM_UTILS, "obj nullptr");
     COMM_CHECK_AND_RETURN_RET_LOGW(output != NULL, SOFTBUS_INVALID_PARAM, COMM_UTILS, "output nullptr");
     COMM_CHECK_AND_RETURN_RET_LOGW(outputSize != NULL, SOFTBUS_INVALID_PARAM, COMM_UTILS, "outputSize nullptr");
     COMM_CHECK_AND_RETURN_RET_LOGW(obj->size > 0, SOFTBUS_NOT_FIND, COMM_UTILS, "no tlv member");
-    if (obj->buffer != NULL) {
-        COMM_LOGW(COMM_UTILS, "tlv buffer not NULL, maybe repeatly GET_RESULT");
-        SoftBusFree(obj->buffer);
-        obj->buffer = NULL;
-    }
-    obj->buffer = (uint8_t *)SoftBusCalloc(obj->size);
-    COMM_CHECK_AND_RETURN_RET_LOGE(obj->buffer != NULL, SOFTBUS_MALLOC_ERR, COMM_UTILS, "malloc buf fail");
+
+    uint8_t *buffer = (uint8_t *)SoftBusCalloc(obj->size);
+    COMM_CHECK_AND_RETURN_RET_LOGE(buffer != NULL, SOFTBUS_MALLOC_ERR, COMM_UTILS, "malloc buf fail");
 
     int32_t ret;
     uint32_t offset = 0;
     TlvMember *tlv = NULL;
     LIST_FOR_EACH_ENTRY(tlv, &obj->mList, TlvMember, node) {
-        ret = PackTypeOrLength(obj->buffer + offset, obj->size - offset, tlv->type, obj->tSize);
-        // note: buffer will be released in DestroyTlv(), so there is no need to release while check fail.
-        COMM_CHECK_AND_RETURN_RET_LOGE(ret == SOFTBUS_OK, ret, COMM_UTILS, "pack type fail(=%{public}d)", ret);
-        offset += obj->tSize;
-        ret = PackTypeOrLength(obj->buffer + offset, obj->size - offset, tlv->length, obj->lSize);
-        COMM_CHECK_AND_RETURN_RET_LOGE(ret == SOFTBUS_OK, ret, COMM_UTILS, "pack length fail(=%{public}d)", ret);
-        offset += obj->lSize;
-        ret = PackValue(obj->buffer + offset, obj->size - offset, tlv->value, tlv->length);
-        COMM_CHECK_AND_RETURN_RET_LOGE(ret == SOFTBUS_OK, ret, COMM_UTILS, "pack value fail(=%{public}d)", ret);
-        offset += tlv->length;
+        ret = PackTlvMember(obj, tlv, buffer + offset, obj->size - offset);
+        if (ret != SOFTBUS_OK) {
+            SoftBusFree(buffer);
+            return ret;
+        }
+        offset += TLV_SIZE(obj, tlv->length);
     }
-    *output = obj->buffer;
+    *output = buffer;
     *outputSize = offset;
     return SOFTBUS_OK;
 }
