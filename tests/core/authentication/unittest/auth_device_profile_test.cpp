@@ -31,6 +31,10 @@ const int64_t TEST_ACCOUNT_ID = 123456789;
 const int32_t TEST_SESSION_KEY_ID = 1;
 const int32_t TEST_LOCAL_USER_ID = 100;
 const char TEST_UDID[] = "1234567890";
+const int32_t TEST_SOURCE_USER_ID = 1;
+const int32_t TEST_SINK_USER_ID = 2;
+const int64_t TEST_SOURCE_TOKEN_ID = 3;
+const int64_t TEST_SINK_TOKEN_ID = 4;
 
 class AuthDeviceProfileTest : public testing::Test {
 public:
@@ -57,10 +61,10 @@ int32_t AuthDeviceProfileTest::SetAclInfo(AuthACLInfo *aclInfo)
     }
 
     aclInfo->isServer = true;
-    aclInfo->sourceUserId = 1;
-    aclInfo->sinkUserId = 2;
-    aclInfo->sourceTokenId = 3;
-    aclInfo->sinkTokenId = 4;
+    aclInfo->sourceUserId = TEST_SOURCE_USER_ID;
+    aclInfo->sinkUserId = TEST_SINK_USER_ID;
+    aclInfo->sourceTokenId = TEST_SOURCE_TOKEN_ID;
+    aclInfo->sinkTokenId = TEST_SINK_TOKEN_ID;
     if (strcpy_s(aclInfo->sourceUdid, UDID_BUF_LEN, "ab") != EOK) {
         AUTH_LOGE(AUTH_TEST, "set sourceUdid fail.");
         return SOFTBUS_STRCPY_ERR;
