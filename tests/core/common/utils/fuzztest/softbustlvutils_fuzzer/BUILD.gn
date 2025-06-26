@@ -22,7 +22,7 @@ ohos_fuzztest("SoftBusTlvUtilsFuzzTest") {
   module_out_path = dsoftbus_fuzz_out_path
   fuzz_config_file =
       "$dsoftbus_root_path/tests/core/common/utils/fuzztest/softbustlvutils_fuzzer"
-  include_dirs = [ "$dsoftbus_root_path/core/common/include" ]
+  include_dirs = ["$dsoftbus_root_path/core/common/include" ]
   cflags = [
     "-g",
     "-O0",
@@ -30,6 +30,9 @@ ohos_fuzztest("SoftBusTlvUtilsFuzzTest") {
     "-fno-omit-frame-pointer",
   ]
   sources = [ "softbustlvutils_fuzzer.cpp" ]
-  deps = [ "$dsoftbus_root_path/core/common:softbus_utils" ]
+  deps = [
+    "$dsoftbus_root_path/adapter:softbus_adapter",
+    "$dsoftbus_root_path/core/common:softbus_utils"
+  ]
   external_deps = [ "hilog:libhilog" ]
 }
