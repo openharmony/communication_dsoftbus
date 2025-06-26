@@ -548,7 +548,7 @@ int32_t AddAccessInfoBySessionName(const char *sessionName, const AccessInfo *ac
     }
     SessionServer *pos = NULL;
     LIST_FOR_EACH_ENTRY(pos, &g_sessionServerList->list, SessionServer, node) {
-        if (strcmp(pos->sessionName, sessionName) == 0 && (callingPid == 0 || pos->pid == callingPid)) {
+        if ((callingPid == 0 || pos->pid == callingPid) && strcmp(pos->sessionName, sessionName) == 0) {
             uint32_t extraAccessInfoLen = strlen(accessInfo->extraAccessInfo) + 1;
             if (CheckAccessInfoAndCalloc(pos, extraAccessInfoLen) != SOFTBUS_OK) {
                 TRANS_LOGE(TRANS_CTRL, "accountId or extra access info calloc failed.");

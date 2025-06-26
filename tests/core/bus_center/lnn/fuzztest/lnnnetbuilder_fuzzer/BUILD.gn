@@ -35,6 +35,7 @@ ohos_fuzztest("LnnNetBuilderFuzzTest") {
     "$dsoftbus_root_path/interfaces/kits/connect",
     "$dsoftbus_root_path/interfaces/kits/bus_center",
     "$dsoftbus_root_path/tests/sdk/common/include",
+    "$dsoftbus_root_path/tests/common/include",
   ]
 
   cflags = [
