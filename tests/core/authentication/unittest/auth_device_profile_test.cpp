@@ -31,6 +31,10 @@ const int64_t TEST_ACCOUNT_ID = 123456789;
 const int32_t TEST_SESSION_KEY_ID = 1;
 const int32_t TEST_LOCAL_USER_ID = 100;
 const char TEST_UDID[] = "1234567890";
+const int32_t TEST_SOURCE_USER_ID = 1;
+const int32_t TEST_SINK_USER_ID = 2;
+const int64_t TEST_SOURCE_TOKEN_ID = 3;
+const int64_t TEST_SINK_TOKEN_ID = 4;
 
 class AuthDeviceProfileTest : public testing::Test {
 public:
@@ -38,6 +42,7 @@ public:
     static void TearDownTestCase();
     void SetUp();
     void TearDown();
+    int32_t SetAclInfo(AuthACLInfo *aclInfo);
 };
 
 void AuthDeviceProfileTest::SetUpTestCase() { }
@@ -47,6 +52,37 @@ void AuthDeviceProfileTest::TearDownTestCase() { }
 void AuthDeviceProfileTest::SetUp() { }
 
 void AuthDeviceProfileTest::TearDown() { }
+
+int32_t AuthDeviceProfileTest::SetAclInfo(AuthACLInfo *aclInfo)
+{
+    if (aclInfo == nullptr) {
+        AUTH_LOGE(AUTH_TEST, "aclInfo is null.");
+        return SOFTBUS_INVALID_PARAM;
+    }
+
+    aclInfo->isServer = true;
+    aclInfo->sourceUserId = TEST_SOURCE_USER_ID;
+    aclInfo->sinkUserId = TEST_SINK_USER_ID;
+    aclInfo->sourceTokenId = TEST_SOURCE_TOKEN_ID;
+    aclInfo->sinkTokenId = TEST_SINK_TOKEN_ID;
+    if (strcpy_s(aclInfo->sourceUdid, UDID_BUF_LEN, "ab") != EOK) {
+        AUTH_LOGE(AUTH_TEST, "set sourceUdid fail.");
+        return SOFTBUS_STRCPY_ERR;
+    }
+    if (strcpy_s(aclInfo->sinkUdid, UDID_BUF_LEN, "cd") != EOK) {
+        AUTH_LOGE(AUTH_TEST, "set sinkUdid fail.");
+        return SOFTBUS_STRCPY_ERR;
+    }
+    if (strcpy_s(aclInfo->sourceAccountId, ACCOUNT_ID_BUF_LEN, "ef") != EOK) {
+        AUTH_LOGE(AUTH_TEST, "set sourceAccountId fail.");
+        return SOFTBUS_STRCPY_ERR;
+    }
+    if (strcpy_s(aclInfo->sinkAccountId, ACCOUNT_ID_BUF_LEN, "gh") != EOK) {
+        AUTH_LOGE(AUTH_TEST, "set sinkAccountId fail.");
+        return SOFTBUS_STRCPY_ERR;
+    }
+    return SOFTBUS_OK;
+}
 
 static void OnDeviceBound(const char *udid, const char *groupInfo)
 {
@@ -180,7 +216,7 @@ HWTEST_F(AuthDeviceProfileTest, IS_NOT_TRUSTED_DEVCIE_TEST_002, TestSize.Level1)
 
 /*
  * @tc.name: GET_ACL_LOCAL_USERID_TEST_001
- * @tc.desc: test GetAclLocalUserId
+ * @tc.desc: 1.get accessee userId.2.get accesser userId
  * @tc.type: FUNC
  * @tc.require:
  */
@@ -189,6 +225,62 @@ HWTEST_F(AuthDeviceProfileTest, GET_ACL_LOCAL_USERID_TEST_001, TestSize.Level1)
     OHOS::DistributedDeviceProfile::AccessControlProfile trustDevice;
     int32_t ret = GetAclLocalUserId(trustDevice);
     EXPECT_EQ(ret, -1);
+
+    std::string deviceId = "abcdef";
+    int32_t userId = 6;
+    DistributedDeviceProfile::Accessee accessee;
+    accessee.SetAccesseeDeviceId(deviceId);
+    trustDevice.SetAccessee(accessee);
+    DistributedDeviceProfile::Accesser accesser;
+    accesser.SetAccesserUserId(userId);
+    trustDevice.SetAccesser(accesser);
+    trustDevice.SetTrustDeviceId(deviceId);
+    ret = GetAclLocalUserId(trustDevice);
+    EXPECT_EQ(ret, userId);
+}
+
+/*
+ * @tc.name: GET_ACL_PEER_USERID_TEST_001
+ * @tc.desc: 1.get accessee userId.2.get accesser userId
+ * @tc.type: FUNC
+ * @tc.require:
+ */
+HWTEST_F(AuthDeviceProfileTest, GET_ACL_PEER_USERID_TEST_001, TestSize.Level1)
+{
+    OHOS::DistributedDeviceProfile::AccessControlProfile trustDevice;
+    std::string deviceId = "1234567";
+    trustDevice.SetTrustDeviceId(deviceId);
+    int32_t ret = GetAclPeerUserId(trustDevice);
+    EXPECT_EQ(ret, -1);
+
+    deviceId = "abcdef";
+    int32_t userId = 6;
+    DistributedDeviceProfile::Accessee accessee;
+    accessee.SetAccesseeDeviceId(deviceId);
+    accessee.SetAccesseeUserId(userId);
+    trustDevice.SetAccessee(accessee);
+    trustDevice.SetTrustDeviceId(deviceId);
+    ret = GetAclPeerUserId(trustDevice);
+    EXPECT_EQ(ret, userId);
+}
+
+/*
+ * @tc.name: GET_STRING_HASH_001
+ * @tc.desc: test generate hash fail and success.
+ * @tc.type: FUNC
+ * @tc.require:
+ */
+HWTEST_F(AuthDeviceProfileTest, GET_STRING_HASH_001, TestSize.Level1)
+{
+    std::string str = "";
+    char hashStrBuf[SHA_256_HEX_HASH_LEN] = { 0 };
+    int32_t len = 32;
+    int32_t ret = GetStringHash(str, hashStrBuf, len);
+    EXPECT_EQ(ret, SOFTBUS_NETWORK_GENERATE_STR_HASH_ERR);
+
+    str = "abcdef123456";
+    ret = GetStringHash(str, hashStrBuf, len);
+    EXPECT_EQ(ret, SOFTBUS_OK);
 }
 
 /*
@@ -324,13 +416,153 @@ HWTEST_F(AuthDeviceProfileTest, UPDATE_DP_SAME_ACCOUNT_ACL_TEST_001, TestSize.Le
  * @tc.type: FUNC
  * @tc.require:
  */
-HWTEST_F(AuthDeviceProfileTest, IsTrustDevice_Test01, TestSize.Level1)
+HWTEST_F(AuthDeviceProfileTest, IS_TRUST_DEVICE_TEST_001, TestSize.Level1)
 {
     std::vector<OHOS::DistributedDeviceProfile::AccessControlProfile> trustDevices;
     const char *deviceIdHash = "deviceIdHash";
     const char *anonyDeviceIdHash = "anonyDeviceIdHash";
     bool isOnlyPointToPoint = true;
     bool result = IsTrustDevice(trustDevices, deviceIdHash, anonyDeviceIdHash, isOnlyPointToPoint);
+    EXPECT_FALSE(result);
+
+    OHOS::DistributedDeviceProfile::AccessControlProfile aclProfile0;
+    uint32_t bindType = (uint32_t)OHOS::DistributedDeviceProfile::BindType::SAME_ACCOUNT;
+    aclProfile0.SetBindType(bindType);
+    OHOS::DistributedDeviceProfile::AccessControlProfile aclProfile1;
+    bindType = (uint32_t)OHOS::DistributedDeviceProfile::BindType::SHARE;
+    aclProfile1.SetBindType(bindType);
+    uint32_t deviceIdType = (uint32_t)OHOS::DistributedDeviceProfile::DeviceIdType::UUID;
+    aclProfile1.SetDeviceIdType(deviceIdType);
+    OHOS::DistributedDeviceProfile::AccessControlProfile aclProfile2;
+    aclProfile2.SetBindType(bindType);
+    deviceIdType = (uint32_t)OHOS::DistributedDeviceProfile::DeviceIdType::UDID;
+    aclProfile2.SetDeviceIdType(deviceIdType);
+    OHOS::DistributedDeviceProfile::AccessControlProfile aclProfile3;
+    aclProfile3.SetBindType(bindType);
+    aclProfile3.SetDeviceIdType(deviceIdType);
+    std::string deviceId = "1234567";
+    aclProfile3.SetTrustDeviceId(deviceId);
+    int status = (uint32_t)OHOS::DistributedDeviceProfile::Status::INACTIVE;
+    aclProfile3.SetStatus(status);
+    OHOS::DistributedDeviceProfile::AccessControlProfile aclProfile4;
+    aclProfile4.SetBindType(bindType);
+    aclProfile4.SetDeviceIdType(deviceIdType);
+    aclProfile4.SetTrustDeviceId(deviceId);
+    status = (uint32_t)OHOS::DistributedDeviceProfile::Status::ACTIVE;
+    aclProfile4.SetStatus(status);
+    trustDevices.push_back(aclProfile0);
+    trustDevices.push_back(aclProfile1);
+    trustDevices.push_back(aclProfile2);
+    trustDevices.push_back(aclProfile3);
+    trustDevices.push_back(aclProfile4);
+    result = IsTrustDevice(trustDevices, deviceIdHash, anonyDeviceIdHash, isOnlyPointToPoint);
+    EXPECT_FALSE(result);
+}
+
+/*
+ * @tc.name: IS_TRUST_DEVICE_TEST_002
+ * @tc.desc: device is not trusted
+ * @tc.type: FUNC
+ * @tc.require:
+ */
+HWTEST_F(AuthDeviceProfileTest, IS_TRUST_DEVICE_TEST_002, TestSize.Level1)
+{
+    std::vector<OHOS::DistributedDeviceProfile::AccessControlProfile> trustDevices;
+    const char *deviceIdHash = "deviceIdHash";
+    const char *anonyDeviceIdHash = "anonyDeviceIdHash";
+    bool isOnlyPointToPoint = false;
+    OHOS::DistributedDeviceProfile::AccessControlProfile aclProfile;
+    uint32_t bindType = (uint32_t)OHOS::DistributedDeviceProfile::BindType::SHARE;
+    aclProfile.SetBindType(bindType);
+    uint32_t deviceIdType = (uint32_t)OHOS::DistributedDeviceProfile::DeviceIdType::UDID;
+    aclProfile.SetDeviceIdType(deviceIdType);
+    std::string deviceId = "1234567";
+    aclProfile.SetTrustDeviceId(deviceId);
+    int32_t status = (uint32_t)OHOS::DistributedDeviceProfile::Status::ACTIVE;
+    aclProfile.SetStatus(status);
+    int32_t userId = 100;
+    DistributedDeviceProfile::Accessee accessee;
+    accessee.SetAccesseeDeviceId(deviceId);
+    aclProfile.SetAccessee(accessee);
+    DistributedDeviceProfile::Accesser accesser;
+    accesser.SetAccesserUserId(userId);
+    aclProfile.SetAccesser(accesser);
+    trustDevices.push_back(aclProfile);
+    bool result = IsTrustDevice(trustDevices, deviceIdHash, anonyDeviceIdHash, isOnlyPointToPoint);
+    EXPECT_FALSE(result);
+}
+
+/*
+ * @tc.name: IS_TRUST_DEVICE_TEST_003
+ * @tc.desc: device is trusted
+ * @tc.type: FUNC
+ * @tc.require:
+ */
+HWTEST_F(AuthDeviceProfileTest, IS_TRUST_DEVICE_TEST_003, TestSize.Level1)
+{
+    std::vector<OHOS::DistributedDeviceProfile::AccessControlProfile> trustDevices;
+    const char *deviceIdHash = "8bb0cf6eb9b17d0f";
+    const char *anonyDeviceIdHash = "anonyDeviceIdHash";
+    bool isOnlyPointToPoint = false;
+    OHOS::DistributedDeviceProfile::AccessControlProfile aclProfile;
+    uint32_t bindType = (uint32_t)OHOS::DistributedDeviceProfile::BindType::SHARE;
+    aclProfile.SetBindType(bindType);
+    uint32_t deviceIdType = (uint32_t)OHOS::DistributedDeviceProfile::DeviceIdType::UDID;
+    aclProfile.SetDeviceIdType(deviceIdType);
+    std::string deviceId = "1234567";
+    aclProfile.SetTrustDeviceId(deviceId);
+    int32_t status = (uint32_t)OHOS::DistributedDeviceProfile::Status::ACTIVE;
+    aclProfile.SetStatus(status);
+    int32_t userId = 100;
+    DistributedDeviceProfile::Accessee accessee;
+    accessee.SetAccesseeDeviceId(deviceId);
+    aclProfile.SetAccessee(accessee);
+    DistributedDeviceProfile::Accesser accesser;
+    accesser.SetAccesserUserId(userId);
+    aclProfile.SetAccesser(accesser);
+    trustDevices.push_back(aclProfile);
+    bool result = IsTrustDevice(trustDevices, deviceIdHash, anonyDeviceIdHash, isOnlyPointToPoint);
+    EXPECT_TRUE(result);
+}
+
+/*
+ * @tc.name: COMPARE_ACL_WITH_PEER_DEVICE_INFO_TEST_001
+ * @tc.desc: LnnGetLocalStrInfo fail.
+ * @tc.type: FUNC
+ * @tc.require:
+ */
+HWTEST_F(AuthDeviceProfileTest, COMPARE_ACL_WITH_PEER_DEVICE_INFO_TEST_001, TestSize.Level1)
+{
+    OHOS::DistributedDeviceProfile::AccessControlProfile aclProfile;
+    const char *peerAccountHash = "8bb0cf6eb9b17d0f";
+    const char *peerUdid = "1234567890";
+    int32_t peerUserId = 1;
+    bool result = CompareAclWithPeerDeviceInfo(aclProfile, peerAccountHash, peerUdid, peerUserId);
+    EXPECT_FALSE(result);
+}
+
+/*
+ * @tc.name: COMPARE_ACL_WITH_PEER_DEVICE_INFO_TEST_002
+ * @tc.desc: accountId is default.
+ * @tc.type: FUNC
+ * @tc.require:
+ */
+HWTEST_F(AuthDeviceProfileTest, COMPARE_ACL_WITH_PEER_DEVICE_INFO_TEST_002, TestSize.Level1)
+{
+    AuthDeviceProfileInterfaceMock mocker;
+    EXPECT_CALL(mocker, LnnGetLocalStrInfo).WillRepeatedly(Return(SOFTBUS_OK));
+    OHOS::DistributedDeviceProfile::AccessControlProfile aclProfile;
+    const char *peerAccountHash = "8bb0cf6eb9b17d0f";
+    const char *peerUdid = "1234567890";
+    int32_t peerUserId = 1;
+    std::string accountId = "ohosAnonymousUid";
+    DistributedDeviceProfile::Accessee accessee;
+    accessee.SetAccesseeAccountId(accountId);
+    aclProfile.SetAccessee(accessee);
+    DistributedDeviceProfile::Accesser accesser;
+    accesser.SetAccesserAccountId(accountId);
+    aclProfile.SetAccesser(accesser);
+    bool result = CompareAclWithPeerDeviceInfo(aclProfile, peerAccountHash, peerUdid, peerUserId);
     EXPECT_FALSE(result);
 }
 
@@ -363,5 +595,723 @@ HWTEST_F(AuthDeviceProfileTest, IS_TRUSTED_DEVICE_FROM_ACCESS_TEST_003, TestSize
     UpdateDpSameAccount(&aclParams, sessionKey, true, ACL_WRITE_DEFAULT);
     ret = IsTrustedDeviceFromAccess(accountHash, udid, 100);
     EXPECT_EQ(ret, false);
+}
+
+/*
+ * @tc.name: PUT_DP_ACL_UK_BY_USER_ID_TEST_001
+ * @tc.desc: sessionKey or sessionKeyId is nullptr.
+ * @tc.type: FUNC
+ * @tc.require:
+ */
+HWTEST_F(AuthDeviceProfileTest, PUT_DP_ACL_UK_BY_USER_ID_TEST_001, TestSize.Level1)
+{
+    int32_t userId = 1;
+    uint32_t sessionKeyLen = 32;
+    UpdateDpAclResult ret = PutDpAclUkByUserId(userId, nullptr, sessionKeyLen, nullptr);
+    EXPECT_EQ(ret, GET_ALL_ACL_FAIL);
+
+    uint8_t sessionKey = 2;
+    ret = PutDpAclUkByUserId(userId, &sessionKey, sessionKeyLen, nullptr);
+    EXPECT_EQ(ret, GET_ALL_ACL_FAIL);
+}
+
+/*
+ * @tc.name: COMPARE_ASSET_ACL_SAME_ACCOUNT_TEST_001
+ * @tc.desc: isSameSide is true.
+ * @tc.type: FUNC
+ * @tc.require:
+ */
+HWTEST_F(AuthDeviceProfileTest, COMPARE_ASSET_ACL_SAME_ACCOUNT_TEST_001, TestSize.Level1)
+{
+    OHOS::DistributedDeviceProfile::AccessControlProfile aclProfile;
+    uint32_t bindType = (uint32_t)OHOS::DistributedDeviceProfile::BindType::SHARE;
+    aclProfile.SetBindType(bindType);
+    AuthACLInfo aclInfo;
+    int32_t result = SetAclInfo(&aclInfo);
+    ASSERT_EQ(result, SOFTBUS_OK);
+    bool isSameSide = true;
+    bool ret = CompareAssetAclSameAccount(aclProfile, &aclInfo, isSameSide);
+    EXPECT_FALSE(ret);
+
+    bindType = (uint32_t)OHOS::DistributedDeviceProfile::BindType::SAME_ACCOUNT;
+    aclProfile.SetBindType(bindType);
+    ret = CompareAssetAclSameAccount(aclProfile, &aclInfo, isSameSide);
+    EXPECT_FALSE(ret);
+
+    DistributedDeviceProfile::Accesser accesser;
+    accesser.SetAccesserDeviceId("ab");
+    aclProfile.SetAccesser(accesser);
+    ret = CompareAssetAclSameAccount(aclProfile, &aclInfo, isSameSide);
+    EXPECT_FALSE(ret);
+
+    DistributedDeviceProfile::Accessee accessee;
+    accessee.SetAccesseeDeviceId("cd");
+    aclProfile.SetAccessee(accessee);
+    ret = CompareAssetAclSameAccount(aclProfile, &aclInfo, isSameSide);
+    EXPECT_FALSE(ret);
+
+    accesser.SetAccesserAccountId("ef");
+    aclProfile.SetAccesser(accesser);
+    ret = CompareAssetAclSameAccount(aclProfile, &aclInfo, isSameSide);
+    EXPECT_FALSE(ret);
+
+    accessee.SetAccesseeAccountId("gh");
+    aclProfile.SetAccessee(accessee);
+    ret = CompareAssetAclSameAccount(aclProfile, &aclInfo, isSameSide);
+    EXPECT_FALSE(ret);
+}
+
+/*
+ * @tc.name: COMPARE_ASSET_ACL_SAME_ACCOUNT_TEST_002
+ * @tc.desc: isSameSide is true.
+ * @tc.type: FUNC
+ * @tc.require:
+ */
+HWTEST_F(AuthDeviceProfileTest, COMPARE_ASSET_ACL_SAME_ACCOUNT_TEST_002, TestSize.Level1)
+{
+    OHOS::DistributedDeviceProfile::AccessControlProfile aclProfile;
+    uint32_t bindType = (uint32_t)OHOS::DistributedDeviceProfile::BindType::SHARE;
+    aclProfile.SetBindType(bindType);
+    AuthACLInfo aclInfo;
+    int32_t result = SetAclInfo(&aclInfo);
+    ASSERT_EQ(result, SOFTBUS_OK);
+    bool isSameSide = true;
+    bindType = (uint32_t)OHOS::DistributedDeviceProfile::BindType::SAME_ACCOUNT;
+    aclProfile.SetBindType(bindType);
+    DistributedDeviceProfile::Accesser accesser;
+    accesser.SetAccesserDeviceId("ab");
+    accesser.SetAccesserAccountId("ef");
+    accesser.SetAccesserUserId(1);
+    aclProfile.SetAccesser(accesser);
+    DistributedDeviceProfile::Accessee accessee;
+    accessee.SetAccesseeDeviceId("cd");
+    accessee.SetAccesseeAccountId("gh");
+    aclProfile.SetAccessee(accessee);
+    bool ret = CompareAssetAclSameAccount(aclProfile, &aclInfo, isSameSide);
+    EXPECT_FALSE(ret);
+
+    accessee.SetAccesseeUserId(2);
+    aclProfile.SetAccessee(accessee);
+    ret = CompareAssetAclSameAccount(aclProfile, &aclInfo, isSameSide);
+    EXPECT_TRUE(ret);
+
+    accessee.SetAccesseeAccountId("ohosAnonymousUid");
+    aclProfile.SetAccessee(accessee);
+    result = strcpy_s(aclInfo.sinkAccountId, ACCOUNT_ID_BUF_LEN, "ohosAnonymousUid");
+    EXPECT_EQ(result, EOK);
+    ret = CompareAssetAclSameAccount(aclProfile, &aclInfo, isSameSide);
+    EXPECT_FALSE(ret);
+
+    accesser.SetAccesserAccountId("ohosAnonymousUid");
+    aclProfile.SetAccesser(accesser);
+    result = strcpy_s(aclInfo.sourceAccountId, ACCOUNT_ID_BUF_LEN, "ohosAnonymousUid");
+    EXPECT_EQ(result, EOK);
+    ret = CompareAssetAclSameAccount(aclProfile, &aclInfo, isSameSide);
+    EXPECT_FALSE(ret);
+}
+
+/*
+ * @tc.name: COMPARE_ASSET_ACL_SAME_ACCOUNT_TEST_003
+ * @tc.desc: isSameSide is false.
+ * @tc.type: FUNC
+ * @tc.require:
+ */
+HWTEST_F(AuthDeviceProfileTest, COMPARE_ASSET_ACL_SAME_ACCOUNT_TEST_003, TestSize.Level1)
+{
+    OHOS::DistributedDeviceProfile::AccessControlProfile aclProfile;
+    uint32_t bindType = (uint32_t)OHOS::DistributedDeviceProfile::BindType::SAME_ACCOUNT;
+    aclProfile.SetBindType(bindType);
+    AuthACLInfo aclInfo;
+    int32_t result = SetAclInfo(&aclInfo);
+    ASSERT_EQ(result, SOFTBUS_OK);
+    bool isSameSide = false;
+    bool ret = CompareAssetAclSameAccount(aclProfile, &aclInfo, isSameSide);
+    EXPECT_FALSE(ret);
+
+    DistributedDeviceProfile::Accesser accesser;
+    accesser.SetAccesserDeviceId("cd");
+    aclProfile.SetAccesser(accesser);
+    ret = CompareAssetAclSameAccount(aclProfile, &aclInfo, isSameSide);
+    EXPECT_FALSE(ret);
+
+    DistributedDeviceProfile::Accessee accessee;
+    accessee.SetAccesseeDeviceId("ab");
+    aclProfile.SetAccessee(accessee);
+    ret = CompareAssetAclSameAccount(aclProfile, &aclInfo, isSameSide);
+    EXPECT_FALSE(ret);
+
+    accesser.SetAccesserAccountId("gh");
+    aclProfile.SetAccessee(accessee);
+    ret = CompareAssetAclSameAccount(aclProfile, &aclInfo, isSameSide);
+    EXPECT_FALSE(ret);
+
+    accessee.SetAccesseeAccountId("ef");
+    aclProfile.SetAccessee(accessee);
+    ret = CompareAssetAclSameAccount(aclProfile, &aclInfo, isSameSide);
+    EXPECT_FALSE(ret);
+
+    accesser.SetAccesserUserId(2);
+    aclProfile.SetAccesser(accesser);
+    ret = CompareAssetAclSameAccount(aclProfile, &aclInfo, isSameSide);
+    EXPECT_FALSE(ret);
+}
+
+/*
+ * @tc.name: COMPARE_ASSET_ACL_SAME_ACCOUNT_TEST_004
+ * @tc.desc: isSameSide is false.
+ * @tc.type: FUNC
+ * @tc.require:
+ */
+HWTEST_F(AuthDeviceProfileTest, COMPARE_ASSET_ACL_SAME_ACCOUNT_TEST_004, TestSize.Level1)
+{
+    OHOS::DistributedDeviceProfile::AccessControlProfile aclProfile;
+    uint32_t bindType = (uint32_t)OHOS::DistributedDeviceProfile::BindType::SAME_ACCOUNT;
+    aclProfile.SetBindType(bindType);
+    AuthACLInfo aclInfo;
+    int32_t result = SetAclInfo(&aclInfo);
+    ASSERT_EQ(result, SOFTBUS_OK);
+    bool isSameSide = false;
+    DistributedDeviceProfile::Accesser accesser;
+    accesser.SetAccesserDeviceId("cd");
+    accesser.SetAccesserAccountId("gh");
+    accesser.SetAccesserUserId(2);
+    aclProfile.SetAccesser(accesser);
+    DistributedDeviceProfile::Accessee accessee;
+    accessee.SetAccesseeDeviceId("ab");
+    accessee.SetAccesseeAccountId("ef");
+    accessee.SetAccesseeUserId(1);
+    aclProfile.SetAccessee(accessee);
+    bool ret = CompareAssetAclSameAccount(aclProfile, &aclInfo, isSameSide);
+    EXPECT_TRUE(ret);
+
+    accessee.SetAccesseeAccountId("ohosAnonymousUid");
+    aclProfile.SetAccessee(accessee);
+    result = strcpy_s(aclInfo.sourceAccountId, ACCOUNT_ID_BUF_LEN, "ohosAnonymousUid");
+    EXPECT_EQ(result, EOK);
+    ret = CompareAssetAclSameAccount(aclProfile, &aclInfo, isSameSide);
+    EXPECT_FALSE(ret);
+
+    accesser.SetAccesserAccountId("ohosAnonymousUid");
+    aclProfile.SetAccesser(accesser);
+    result = strcpy_s(aclInfo.sinkAccountId, ACCOUNT_ID_BUF_LEN, "ohosAnonymousUid");
+    EXPECT_EQ(result, EOK);
+    ret = CompareAssetAclSameAccount(aclProfile, &aclInfo, isSameSide);
+    EXPECT_FALSE(ret);
+}
+
+/*
+ * @tc.name: COMPARE_ASSET_ACL_DIFF_ACCOUNT_WITH_USER_LEVEL_TEST_001
+ * @tc.desc: isSameSide is true.
+ * @tc.type: FUNC
+ * @tc.require:
+ */
+HWTEST_F(AuthDeviceProfileTest, COMPARE_ASSET_ACL_DIFF_ACCOUNT_WITH_USER_LEVEL_TEST_001, TestSize.Level1)
+{
+    OHOS::DistributedDeviceProfile::AccessControlProfile aclProfile;
+    uint32_t bindLevel = (uint32_t)OHOS::DistributedDeviceProfile::BindLevel::SERVICE;
+    aclProfile.SetBindLevel(bindLevel);
+    AuthACLInfo aclInfo;
+    int32_t result = SetAclInfo(&aclInfo);
+    ASSERT_EQ(result, SOFTBUS_OK);
+    bool isSameSide = true;
+    bool ret = CompareAssetAclDiffAccountWithUserLevel(aclProfile, &aclInfo, isSameSide);
+    EXPECT_FALSE(ret);
+
+    bindLevel = (uint32_t)OHOS::DistributedDeviceProfile::BindLevel::USER;
+    aclProfile.SetBindLevel(bindLevel);
+    ret = CompareAssetAclDiffAccountWithUserLevel(aclProfile, &aclInfo, isSameSide);
+    EXPECT_FALSE(ret);
+
+    DistributedDeviceProfile::Accesser accesser;
+    accesser.SetAccesserDeviceId("ab");
+    aclProfile.SetAccesser(accesser);
+    ret = CompareAssetAclDiffAccountWithUserLevel(aclProfile, &aclInfo, isSameSide);
+    EXPECT_FALSE(ret);
+
+    DistributedDeviceProfile::Accessee accessee;
+    accessee.SetAccesseeDeviceId("cd");
+    aclProfile.SetAccessee(accessee);
+    ret = CompareAssetAclDiffAccountWithUserLevel(aclProfile, &aclInfo, isSameSide);
+    EXPECT_FALSE(ret);
+
+    accesser.SetAccesserUserId(1);
+    aclProfile.SetAccesser(accesser);
+    ret = CompareAssetAclDiffAccountWithUserLevel(aclProfile, &aclInfo, isSameSide);
+    EXPECT_FALSE(ret);
+
+    accessee.SetAccesseeUserId(2);
+    aclProfile.SetAccessee(accessee);
+    ret = CompareAssetAclDiffAccountWithUserLevel(aclProfile, &aclInfo, isSameSide);
+    EXPECT_TRUE(ret);
+}
+
+/*
+ * @tc.name: COMPARE_ASSET_ACL_DIFF_ACCOUNT_WITH_USER_LEVEL_TEST_002
+ * @tc.desc: isSameSide is true.
+ * @tc.type: FUNC
+ * @tc.require:
+ */
+HWTEST_F(AuthDeviceProfileTest, COMPARE_ASSET_ACL_DIFF_ACCOUNT_WITH_USER_LEVEL_TEST_002, TestSize.Level1)
+{
+    OHOS::DistributedDeviceProfile::AccessControlProfile aclProfile;
+    uint32_t bindLevel = (uint32_t)OHOS::DistributedDeviceProfile::BindLevel::USER;
+    aclProfile.SetBindLevel(bindLevel);
+    AuthACLInfo aclInfo;
+    int32_t result = SetAclInfo(&aclInfo);
+    ASSERT_EQ(result, SOFTBUS_OK);
+    bool isSameSide = false;
+    bool ret = CompareAssetAclDiffAccountWithUserLevel(aclProfile, &aclInfo, isSameSide);
+    EXPECT_FALSE(ret);
+
+    DistributedDeviceProfile::Accesser accesser;
+    accesser.SetAccesserDeviceId("cd");
+    aclProfile.SetAccesser(accesser);
+    ret = CompareAssetAclDiffAccountWithUserLevel(aclProfile, &aclInfo, isSameSide);
+    EXPECT_FALSE(ret);
+
+    DistributedDeviceProfile::Accessee accessee;
+    accessee.SetAccesseeDeviceId("ab");
+    aclProfile.SetAccessee(accessee);
+    ret = CompareAssetAclDiffAccountWithUserLevel(aclProfile, &aclInfo, isSameSide);
+    EXPECT_FALSE(ret);
+
+    accesser.SetAccesserUserId(2);
+    aclProfile.SetAccesser(accesser);
+    ret = CompareAssetAclDiffAccountWithUserLevel(aclProfile, &aclInfo, isSameSide);
+    EXPECT_FALSE(ret);
+
+    accessee.SetAccesseeUserId(1);
+    aclProfile.SetAccessee(accessee);
+    ret = CompareAssetAclDiffAccountWithUserLevel(aclProfile, &aclInfo, isSameSide);
+    EXPECT_TRUE(ret);
+}
+
+/*
+ * @tc.name: COMPARE_ASSET_ACL_DIFF_ACCOUNT_001
+ * @tc.desc: isSameSide is true.
+ * @tc.type: FUNC
+ * @tc.require:
+ */
+HWTEST_F(AuthDeviceProfileTest, COMPARE_ASSET_ACL_DIFF_ACCOUNT_001, TestSize.Level1)
+{
+    OHOS::DistributedDeviceProfile::AccessControlProfile aclProfile;
+    uint32_t bindType = (uint32_t)OHOS::DistributedDeviceProfile::BindType::SAME_ACCOUNT;
+    aclProfile.SetBindType(bindType);
+    AuthACLInfo aclInfo;
+    int32_t result = SetAclInfo(&aclInfo);
+    ASSERT_EQ(result, SOFTBUS_OK);
+    bool isSameSide = true;
+    bool ret = CompareAssetAclDiffAccount(aclProfile, &aclInfo, isSameSide);
+    EXPECT_FALSE(ret);
+
+    bindType = (uint32_t)OHOS::DistributedDeviceProfile::BindType::SHARE;
+    aclProfile.SetBindType(bindType);
+    ret = CompareAssetAclDiffAccount(aclProfile, &aclInfo, isSameSide);
+    EXPECT_FALSE(ret);
+
+    bindType = (uint32_t)OHOS::DistributedDeviceProfile::BindType::POINT_TO_POINT;
+    aclProfile.SetBindType(bindType);
+    uint32_t bindLevel = (uint32_t)OHOS::DistributedDeviceProfile::BindLevel::USER;
+    aclProfile.SetBindLevel(bindLevel);
+    ret = CompareAssetAclDiffAccount(aclProfile, &aclInfo, isSameSide);
+    EXPECT_FALSE(ret);
+
+    bindLevel = (uint32_t)OHOS::DistributedDeviceProfile::BindLevel::SERVICE;
+    aclProfile.SetBindLevel(bindLevel);
+    ret = CompareAssetAclDiffAccount(aclProfile, &aclInfo, isSameSide);
+    EXPECT_FALSE(ret);
+
+    DistributedDeviceProfile::Accesser accesser;
+    accesser.SetAccesserDeviceId("ab");
+    aclProfile.SetAccesser(accesser);
+    ret = CompareAssetAclDiffAccount(aclProfile, &aclInfo, isSameSide);
+    EXPECT_FALSE(ret);
+
+    DistributedDeviceProfile::Accessee accessee;
+    accessee.SetAccesseeDeviceId("cd");
+    aclProfile.SetAccessee(accessee);
+    ret = CompareAssetAclDiffAccount(aclProfile, &aclInfo, isSameSide);
+    EXPECT_FALSE(ret);
+
+    accesser.SetAccesserUserId(1);
+    aclProfile.SetAccesser(accesser);
+    ret = CompareAssetAclDiffAccount(aclProfile, &aclInfo, isSameSide);
+    EXPECT_FALSE(ret);
+}
+
+/*
+ * @tc.name: COMPARE_ASSET_ACL_DIFF_ACCOUNT_002
+ * @tc.desc: isSameSide is true.
+ * @tc.type: FUNC
+ * @tc.require:
+ */
+HWTEST_F(AuthDeviceProfileTest, COMPARE_ASSET_ACL_DIFF_ACCOUNT_002, TestSize.Level1)
+{
+    OHOS::DistributedDeviceProfile::AccessControlProfile aclProfile;
+    uint32_t bindType = (uint32_t)OHOS::DistributedDeviceProfile::BindType::POINT_TO_POINT;
+    aclProfile.SetBindType(bindType);
+    uint32_t bindLevel = (uint32_t)OHOS::DistributedDeviceProfile::BindLevel::SERVICE;
+    aclProfile.SetBindLevel(bindLevel);
+    AuthACLInfo aclInfo;
+    int32_t result = SetAclInfo(&aclInfo);
+    ASSERT_EQ(result, SOFTBUS_OK);
+    bool isSameSide = true;
+    DistributedDeviceProfile::Accesser accesser;
+    accesser.SetAccesserDeviceId("ab");
+    accesser.SetAccesserUserId(1);
+    aclProfile.SetAccesser(accesser);
+    DistributedDeviceProfile::Accessee accessee;
+    accessee.SetAccesseeDeviceId("cd");
+    accessee.SetAccesseeUserId(2);
+    aclProfile.SetAccessee(accessee);
+    bool ret = CompareAssetAclDiffAccount(aclProfile, &aclInfo, isSameSide);
+    EXPECT_FALSE(ret);
+
+    accesser.SetAccesserTokenId(3);
+    aclProfile.SetAccesser(accesser);
+    ret = CompareAssetAclDiffAccount(aclProfile, &aclInfo, isSameSide);
+    EXPECT_FALSE(ret);
+
+    accessee.SetAccesseeTokenId(4);
+    aclProfile.SetAccessee(accessee);
+    ret = CompareAssetAclDiffAccount(aclProfile, &aclInfo, isSameSide);
+    EXPECT_TRUE(ret);
+}
+
+/*
+ * @tc.name: COMPARE_ASSET_ACL_DIFF_ACCOUNT_003
+ * @tc.desc: isSameSide is true.
+ * @tc.type: FUNC
+ * @tc.require:
+ */
+HWTEST_F(AuthDeviceProfileTest, COMPARE_ASSET_ACL_DIFF_ACCOUNT_003, TestSize.Level1)
+{
+    OHOS::DistributedDeviceProfile::AccessControlProfile aclProfile;
+    uint32_t bindType = (uint32_t)OHOS::DistributedDeviceProfile::BindType::POINT_TO_POINT;
+    aclProfile.SetBindType(bindType);
+    uint32_t bindLevel = (uint32_t)OHOS::DistributedDeviceProfile::BindLevel::SERVICE;
+    aclProfile.SetBindLevel(bindLevel);
+    AuthACLInfo aclInfo;
+    int32_t result = SetAclInfo(&aclInfo);
+    ASSERT_EQ(result, SOFTBUS_OK);
+    bool isSameSide = false;
+    bool ret = CompareAssetAclDiffAccount(aclProfile, &aclInfo, isSameSide);
+    EXPECT_FALSE(ret);
+
+    DistributedDeviceProfile::Accesser accesser;
+    accesser.SetAccesserDeviceId("cd");
+    aclProfile.SetAccesser(accesser);
+    ret = CompareAssetAclDiffAccount(aclProfile, &aclInfo, isSameSide);
+    EXPECT_FALSE(ret);
+
+    DistributedDeviceProfile::Accessee accessee;
+    accessee.SetAccesseeDeviceId("ab");
+    aclProfile.SetAccessee(accessee);
+    ret = CompareAssetAclDiffAccount(aclProfile, &aclInfo, isSameSide);
+    EXPECT_FALSE(ret);
+
+    accesser.SetAccesserUserId(2);
+    aclProfile.SetAccesser(accesser);
+    ret = CompareAssetAclDiffAccount(aclProfile, &aclInfo, isSameSide);
+    EXPECT_FALSE(ret);
+
+    accessee.SetAccesseeUserId(1);
+    aclProfile.SetAccessee(accessee);
+    ret = CompareAssetAclDiffAccount(aclProfile, &aclInfo, isSameSide);
+    EXPECT_FALSE(ret);
+
+    accesser.SetAccesserTokenId(4);
+    aclProfile.SetAccesser(accesser);
+    ret = CompareAssetAclDiffAccount(aclProfile, &aclInfo, isSameSide);
+    EXPECT_FALSE(ret);
+
+    accessee.SetAccesseeTokenId(3);
+    aclProfile.SetAccessee(accessee);
+    ret = CompareAssetAclDiffAccount(aclProfile, &aclInfo, isSameSide);
+    EXPECT_TRUE(ret);
+}
+
+/*
+ * @tc.name: COMPARE_ASSET_ALL_ACL_TEST_001
+ * @tc.desc: isSameAccount is true.
+ * @tc.type: FUNC
+ * @tc.require:
+ */
+HWTEST_F(AuthDeviceProfileTest, COMPARE_ASSET_ALL_ACL_TEST_001, TestSize.Level1)
+{
+    OHOS::DistributedDeviceProfile::AccessControlProfile aclProfile;
+    uint32_t bindType = (uint32_t)OHOS::DistributedDeviceProfile::BindType::SHARE;
+    aclProfile.SetBindType(bindType);
+    AuthACLInfo aclInfo;
+    int32_t result = SetAclInfo(&aclInfo);
+    ASSERT_EQ(result, SOFTBUS_OK);
+    bool isSameSide = true;
+    bool isSameAccount = true;
+    bindType = (uint32_t)OHOS::DistributedDeviceProfile::BindType::SAME_ACCOUNT;
+    aclProfile.SetBindType(bindType);
+    DistributedDeviceProfile::Accesser accesser;
+    accesser.SetAccesserDeviceId("ab");
+    accesser.SetAccesserAccountId("ef");
+    accesser.SetAccesserUserId(1);
+    aclProfile.SetAccesser(accesser);
+    DistributedDeviceProfile::Accessee accessee;
+    accessee.SetAccesseeDeviceId("cd");
+    accessee.SetAccesseeAccountId("gh");
+    aclProfile.SetAccessee(accessee);
+    bool ret = CompareAssetAllAcl(aclProfile, &aclInfo, isSameSide, isSameAccount);
+    EXPECT_FALSE(ret);
+
+    accessee.SetAccesseeUserId(2);
+    aclProfile.SetAccessee(accessee);
+    ret = CompareAssetAllAcl(aclProfile, &aclInfo, isSameSide, isSameAccount);
+    EXPECT_TRUE(ret);
+}
+
+/*
+ * @tc.name: COMPARE_ASSET_ALL_ACL_TEST_002
+ * @tc.desc: isSameAccount is false.
+ * @tc.type: FUNC
+ * @tc.require:
+ */
+HWTEST_F(AuthDeviceProfileTest, COMPARE_ASSET_ALL_ACL_TEST_002, TestSize.Level1)
+{
+    OHOS::DistributedDeviceProfile::AccessControlProfile aclProfile;
+    AuthACLInfo aclInfo;
+    int32_t result = SetAclInfo(&aclInfo);
+    ASSERT_EQ(result, SOFTBUS_OK);
+    bool isSameSide = true;
+    bool isSameAccount = false;
+    bool ret = CompareAssetAllAcl(aclProfile, &aclInfo, isSameSide, isSameAccount);
+    EXPECT_FALSE(ret);
+
+    uint32_t bindType = (uint32_t)OHOS::DistributedDeviceProfile::BindType::POINT_TO_POINT;
+    aclProfile.SetBindType(bindType);
+    uint32_t bindLevel = (uint32_t)OHOS::DistributedDeviceProfile::BindLevel::SERVICE;
+    aclProfile.SetBindLevel(bindLevel);
+    DistributedDeviceProfile::Accesser accesser;
+    accesser.SetAccesserDeviceId("ab");
+    accesser.SetAccesserUserId(1);
+    accesser.SetAccesserTokenId(3);
+    aclProfile.SetAccesser(accesser);
+    DistributedDeviceProfile::Accessee accessee;
+    accessee.SetAccesseeDeviceId("cd");
+    accessee.SetAccesseeUserId(2);
+    accessee.SetAccesseeTokenId(4);
+    aclProfile.SetAccessee(accessee);
+    ret = CompareAssetAllAcl(aclProfile, &aclInfo, isSameSide, isSameAccount);
+    EXPECT_TRUE(ret);
+}
+
+/*
+ * @tc.name: COMPARE_ASSET_ALL_ACL_TEST_003
+ * @tc.desc: isSameAccount is false.
+ * @tc.type: FUNC
+ * @tc.require:
+ */
+HWTEST_F(AuthDeviceProfileTest, COMPARE_ASSET_ALL_ACL_TEST_003, TestSize.Level1)
+{
+    OHOS::DistributedDeviceProfile::AccessControlProfile aclProfile;
+    uint32_t bindLevel = (uint32_t)OHOS::DistributedDeviceProfile::BindLevel::USER;
+    aclProfile.SetBindLevel(bindLevel);
+    AuthACLInfo aclInfo;
+    int32_t result = SetAclInfo(&aclInfo);
+    ASSERT_EQ(result, SOFTBUS_OK);
+    DistributedDeviceProfile::Accesser accesser;
+    accesser.SetAccesserDeviceId("ab");
+    accesser.SetAccesserUserId(1);
+    aclProfile.SetAccesser(accesser);
+    DistributedDeviceProfile::Accessee accessee;
+    accessee.SetAccesseeDeviceId("cd");
+    accessee.SetAccesseeUserId(2);
+    aclProfile.SetAccessee(accessee);
+    bool isSameSide = true;
+    bool isSameAccount = false;
+    bool ret = CompareAssetAllAcl(aclProfile, &aclInfo, isSameSide, isSameAccount);
+    EXPECT_TRUE(ret);
+}
+
+/*
+ * @tc.name: GET_LOCAL_UK_ID_FROM_ACCESS_TEST_001
+ * @tc.desc: isServer is true or false.
+ * @tc.type: FUNC
+ * @tc.require:
+ */
+HWTEST_F(AuthDeviceProfileTest, GET_LOCAL_UK_ID_FROM_ACCESS_TEST_001, TestSize.Level1)
+{
+    OHOS::DistributedDeviceProfile::AccessControlProfile aclProfile;
+    AuthACLInfo aclInfo;
+    int32_t result = SetAclInfo(&aclInfo);
+    ASSERT_EQ(result, SOFTBUS_OK);
+    DistributedDeviceProfile::Accesser accesser;
+    accesser.SetAccesserDeviceId("ab");
+    accesser.SetAccesserSessionKeyId(1);
+    accesser.SetAccesserSKTimeStamp(135);
+    aclProfile.SetAccesser(accesser);
+    DistributedDeviceProfile::Accessee accessee;
+    accessee.SetAccesseeDeviceId("cd");
+    accessee.SetAccesseeSessionKeyId(2);
+    accessee.SetAccesseeSKTimeStamp(246);
+    aclProfile.SetAccessee(accessee);
+    int32_t ukId = 0;
+    uint64_t time = 0;
+    GetLocalUkIdFromAccess(aclProfile, &aclInfo, &ukId, &time);
+    EXPECT_EQ(ukId, 1);
+    EXPECT_EQ(time, 135);
+
+    accesser.SetAccesserDeviceId("abcd");
+    aclProfile.SetAccesser(accesser);
+    GetLocalUkIdFromAccess(aclProfile, &aclInfo, &ukId, &time);
+    EXPECT_EQ(ukId, 1);
+    EXPECT_EQ(time, 135);
+
+    aclInfo.isServer = false;
+    GetLocalUkIdFromAccess(aclProfile, &aclInfo, &ukId, &time);
+    EXPECT_EQ(ukId, 2);
+    EXPECT_EQ(time, 246);
+}
+
+/*
+ * @tc.name: UPDATE_ACCESS_PROFILE_SESSION_KEY_ID_TEST_001
+ * @tc.desc: Set ukid as default value.
+ * @tc.type: FUNC
+ * @tc.require:
+ */
+HWTEST_F(AuthDeviceProfileTest, UPDATE_ACCESS_PROFILE_SESSION_KEY_ID_TEST_001, TestSize.Level1)
+{
+    OHOS::DistributedDeviceProfile::AccessControlProfile aclProfile;
+    int32_t ukId = 10;
+    UpdateAccessProfileSessionKeyId(aclProfile, &ukId);
+    EXPECT_EQ(ukId, -1);
+}
+
+/*
+ * @tc.name: GET_ACCESS_UK_ID_SAME_ACCOUNT_TEST_001
+ * @tc.desc: acl or ukid or time is nullptr.
+ * @tc.type: FUNC
+ * @tc.require:
+ */
+HWTEST_F(AuthDeviceProfileTest, GET_ACCESS_UK_ID_SAME_ACCOUNT_TEST_001, TestSize.Level1)
+{
+    AuthACLInfo aclInfo;
+    int32_t ukId = 0;
+    uint64_t time = 0;
+    int32_t ret = GetAccessUkIdSameAccount(nullptr, &ukId, &time);
+    EXPECT_EQ(ret, SOFTBUS_INVALID_PARAM);
+
+    ret = GetAccessUkIdSameAccount(&aclInfo, nullptr, &time);
+    EXPECT_EQ(ret, SOFTBUS_INVALID_PARAM);
+
+    ret = GetAccessUkIdSameAccount(&aclInfo, &ukId, nullptr);
+    EXPECT_EQ(ret, SOFTBUS_INVALID_PARAM);
+}
+
+/*
+ * @tc.name: GET_ACCESS_UK_ID_DIFF_ACCOUNT_WITH_USER_LEVEL_TEST_001
+ * @tc.desc: acl or ukid or time is nullptr.
+ * @tc.type: FUNC
+ * @tc.require:
+ */
+HWTEST_F(AuthDeviceProfileTest, GET_ACCESS_UK_ID_DIFF_ACCOUNT_WITH_USER_LEVEL_TEST_001, TestSize.Level1)
+{
+    AuthACLInfo aclInfo;
+    int32_t ukId = 0;
+    uint64_t time = 0;
+    int32_t ret = GetAccessUkIdDiffAccountWithUserLevel(nullptr, &ukId, &time);
+    EXPECT_EQ(ret, SOFTBUS_INVALID_PARAM);
+
+    ret = GetAccessUkIdDiffAccountWithUserLevel(&aclInfo, nullptr, &time);
+    EXPECT_EQ(ret, SOFTBUS_INVALID_PARAM);
+
+    ret = GetAccessUkIdDiffAccountWithUserLevel(&aclInfo, &ukId, nullptr);
+    EXPECT_EQ(ret, SOFTBUS_INVALID_PARAM);
+}
+
+/*
+ * @tc.name: GET_ACCESS_UK_ID_DIFF_ACCOUNT_TEST_001
+ * @tc.desc: acl or ukid or time is nullptr.
+ * @tc.type: FUNC
+ * @tc.require:
+ */
+HWTEST_F(AuthDeviceProfileTest, GET_ACCESS_UK_ID_DIFF_ACCOUNT_TEST_001, TestSize.Level1)
+{
+    AuthACLInfo aclInfo;
+    int32_t ukId = 0;
+    uint64_t time = 0;
+    int32_t ret = GetAccessUkIdDiffAccount(nullptr, &ukId, &time);
+    EXPECT_EQ(ret, SOFTBUS_INVALID_PARAM);
+
+    ret = GetAccessUkIdDiffAccount(&aclInfo, nullptr, &time);
+    EXPECT_EQ(ret, SOFTBUS_INVALID_PARAM);
+
+    ret = GetAccessUkIdDiffAccount(&aclInfo, &ukId, nullptr);
+    EXPECT_EQ(ret, SOFTBUS_INVALID_PARAM);
+}
+
+/*
+ * @tc.name: GET_ACCESS_UK_BY_UK_ID_TEST_001
+ * @tc.desc: uk is nullptr.
+ * @tc.type: FUNC
+ * @tc.require:
+ */
+HWTEST_F(AuthDeviceProfileTest, GET_ACCESS_UK_BY_UK_ID_TEST_001, TestSize.Level1)
+{
+    int32_t sessionKeyId = 0;
+    uint32_t ukLen = 10;
+    int32_t ret = GetAccessUkByUkId(sessionKeyId, nullptr, ukLen);
+    EXPECT_EQ(ret, SOFTBUS_INVALID_PARAM);
+}
+
+/*
+ * @tc.name: IS_SK_ID_INVALID_TEST_001
+ * @tc.desc: accountHash or udidShortHash is nullptr.
+ * @tc.type: FUNC
+ * @tc.require:
+ */
+HWTEST_F(AuthDeviceProfileTest, IS_SK_ID_INVALID_TEST_001, TestSize.Level1)
+{
+    int32_t sessionKeyId = 1;
+    const char *accountHash = "1a2b3c4d5e6f";
+    int32_t userId = 2;
+    bool ret = IsSKIdInvalid(sessionKeyId, nullptr, nullptr, userId);
+    EXPECT_FALSE(ret);
+
+    ret = IsSKIdInvalid(sessionKeyId, accountHash, nullptr, userId);
+    EXPECT_FALSE(ret);
+}
+
+/*
+ * @tc.name: GET_ACCESS_UK_ID_DIFF_ACCOUNT_TEST_002
+ * @tc.desc: 1.accountHash length error.2.udidShortHash length error
+ * @tc.type: FUNC
+ * @tc.require:
+ */
+HWTEST_F(AuthDeviceProfileTest, GET_ACCESS_UK_ID_DIFF_ACCOUNT_TEST_002, TestSize.Level1)
+{
+    int32_t sessionKeyId = 1;
+    const char *accountHash = "1a2b3c4d5e6f";
+    const char *udidShortHash = "a1b2c3d4e5f6";
+    int32_t userId = 2;
+    bool ret = IsSKIdInvalid(sessionKeyId, accountHash, udidShortHash, userId);
+    EXPECT_FALSE(ret);
+
+    const char *testUdidShortHash = "a1b2c3d4e5f6a1b2c3d4e5f6";
+    ret = IsSKIdInvalid(sessionKeyId, accountHash, testUdidShortHash, userId);
+    EXPECT_FALSE(ret);
+}
+
+/*
+ * @tc.name: SELECT_ALL_ACL_TEST_001
+ * @tc.desc: trustedInfoArray or num is nullptr.
+ * @tc.type: FUNC
+ * @tc.require:
+ */
+HWTEST_F(AuthDeviceProfileTest, SELECT_ALL_ACL_TEST_001, TestSize.Level1)
+{
+    int32_t ret = SelectAllAcl(nullptr, nullptr);
+    EXPECT_EQ(ret, SOFTBUS_INVALID_PARAM);
+
+    uint32_t num = 1;
+    ret = SelectAllAcl(nullptr, &num);
+    EXPECT_EQ(ret, SOFTBUS_INVALID_PARAM);
 }
 } // namespace OHOS
