@@ -19,6 +19,7 @@
 #include <cstring>
 
 #include "comm_log.h"
+#include "softbus_adapter_mem.h"
 #include "softbus_error_code.h"
 #include "softbus_tlv_utils.h"
 
@@ -42,11 +43,12 @@ public:
 
 static string BytesToHexString(const uint8_t *data, uint32_t len)
 {
-    char charItem[7] = {0}; // 7: 0xFF + ',' + ' ' + '\0'
+    // char charItem[7] = {0}; // 7: 0xFF + ',' + ' ' + '\0'
     std::stringstream hexStream;
     for (uint32_t i = 0; i < len; i++) {
-        (void)sprintf_s(charItem, sizeof(charItem), "0x%02X, ", data[i]);
-        hexStream << string(charItem);
+        // (void)sprintf_s(charItem, sizeof(charItem), "0x%02X, ", data[i]);
+        hexStream << "0x" << std::hex << std::setw(2) << std::setfill('0') << static_cast<uint32_t>(data[i]) << ", ";
+        // hexStream << string(charItem);
     }
     return hexStream.str();
 }
@@ -68,6 +70,7 @@ static void TLvFeatureTest(uint8_t tSize, uint8_t lSize, vector<TlvFrame> &testc
     uint32_t outputSize = 0;
     ret = GetTlvBinary(sendObj, &output, &outputSize);
     EXPECT_EQ(ret, SOFTBUS_OK);
+    DestroyTlvObject(sendObj);
 
     COMM_LOGI(COMM_UTILS, "output=%{public}s, outputSize=%{public}u",
         BytesToHexString(output, outputSize).c_str(), outputSize);
@@ -85,8 +88,8 @@ static void TLvFeatureTest(uint8_t tSize, uint8_t lSize, vector<TlvFrame> &testc
         ASSERT_EQ(length, testcase.value_.length());
         EXPECT_EQ(memcmp(value, testcase.value_.c_str(), length), 0);
     }
-    DestroyTlvObject(sendObj);
     DestroyTlvObject(recvObj);
+    SoftBusFree(output);
 }
 
 /**
@@ -154,16 +157,22 @@ HWTEST_F(SoftBusTlvUtilsTest, TlvUtilsPackTlvTest, TestSize.Level0)
         BytesToHexString(output, outputSize).c_str(), outputSize);
     ASSERT_EQ(outputSize, 12); // 12: UINT16_T + UINT16_T + strlen("test1024")
     EXPECT_EQ(memcmp(output, tlvBytes, outputSize), 0);
+    SoftBusFree(output);
+    output = nullptr;
+
     // usage2: append one tlv frame after GetTlvBinary
     ret = AddTlvMember(obj, frame2.type_, frame2.value_.length(), (const uint8_t *)frame2.value_.c_str());
     EXPECT_EQ(ret, SOFTBUS_OK);
     ret = GetTlvBinary(obj, &output, &outputSize);
     EXPECT_EQ(ret, SOFTBUS_OK);
+    DestroyTlvObject(obj);
+
     COMM_LOGI(COMM_UTILS, "output=%{public}s, outputSize=%{public}u",
         BytesToHexString(output, outputSize).c_str(), outputSize);
     ASSERT_EQ(outputSize, sizeof(tlvBytes));
     EXPECT_EQ(memcmp(output, tlvBytes, outputSize), 0);
-    DestroyTlvObject(obj);
+    SoftBusFree(output);
+    output = nullptr;
     // usage3: append new tlv frame after SetTlvBinary
     obj = CreateTlvObject(UINT16_T, UINT16_T);
     ASSERT_TRUE(obj != nullptr);
@@ -173,11 +182,14 @@ HWTEST_F(SoftBusTlvUtilsTest, TlvUtilsPackTlvTest, TestSize.Level0)
     EXPECT_EQ(ret, SOFTBUS_OK);
     ret = GetTlvBinary(obj, &output, &outputSize);
     EXPECT_EQ(ret, SOFTBUS_OK);
+    DestroyTlvObject(obj);
+
     COMM_LOGI(COMM_UTILS, "output=%{public}s, outputSize=%{public}u",
         BytesToHexString(output, outputSize).c_str(), outputSize);
     ASSERT_EQ(outputSize, sizeof(tlvBytes));
     EXPECT_EQ(memcmp(output, tlvBytes, outputSize), 0);
-    DestroyTlvObject(obj);
+    SoftBusFree(output);
+    output = nullptr;
     COMM_LOGI(COMM_UTILS, "===TlvUtilsPackTlvTest end");
 }
 
@@ -275,12 +287,14 @@ HWTEST_F(SoftBusTlvUtilsTest, TlvUtilsPackNumberTest, TestSize.Level0)
     uint32_t outputSize = 0;
     ret = GetTlvBinary(obj, &output, &outputSize);
     EXPECT_EQ(ret, SOFTBUS_OK);
+    DestroyTlvObject(obj);
+
     COMM_LOGI(COMM_UTILS, "output=%{public}s, outputSize=%{public}u",
         BytesToHexString(output, outputSize).c_str(), outputSize);
     ASSERT_EQ(outputSize, sizeof(tlvBytes));
     EXPECT_EQ(memcmp(output, tlvBytes, outputSize), 0);
-
-    DestroyTlvObject(obj);
+    SoftBusFree(output);
+    output = nullptr;
     COMM_LOGI(COMM_UTILS, "===TlvUtilsPackNumberTest end");
 }
 

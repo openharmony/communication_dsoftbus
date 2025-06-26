@@ -15,10 +15,8 @@
 
 #include "softbustlvutils_fuzzer.h"
 
-#include <ctime>
-#include <securec.h>
-
 #include "comm_log.h"
+#include "softbus_adapter_crypto.h"
 #include "softbus_error_code.h"
 #include "softbus_tlv_utils.h"
 
@@ -40,7 +38,7 @@ static void FuzzAddTlvMember(uint8_t tSize, uint8_t lSize, const uint8_t *data, 
     uint32_t length = size;
     uint32_t offset = 0;
     for (; offset < size && length > 0; type++) {
-        length = (rand() % (size - offset));
+        length = (SoftBusCryptoRand() % (size - offset));
         (void)AddTlvMember(obj, type, length, data + offset);
         offset += length;
     }
@@ -80,7 +78,6 @@ bool DoSomethingInterestingWithMyAPI(const uint8_t *data, size_t size)
 extern "C" int32_t LLVMFuzzerTestOneInput(const uint8_t *data, size_t size)
 {
     /* Run your code on data */
-    srand(time(nullptr));
     OHOS::DoSomethingInterestingWithMyAPI(data, size);
     return 0;
 }
