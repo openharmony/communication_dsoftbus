@@ -36,6 +36,8 @@ int32_t ConnBrConnect(ConnBrConnection *connection);
 int32_t ConnBrDisconnectNow(ConnBrConnection *connection);
 int32_t ConnBrStartServer(void);
 int32_t ConnBrStopServer(void);
+// connection will be disconnected forcely when idle more than CONNECTION_IDLE_DISCONNECT_TIMEOUT_MILLIS
+void ConnBrRefreshIdleTimeout(ConnBrConnection *connection);
 
 void ConnBrOccupy(ConnBrConnection *connection);
 int32_t ConnBrConnectionMuduleInit(SoftBusLooper *looper, SppSocketDriver *sppDriver, ConnBrEventListener *listener);
