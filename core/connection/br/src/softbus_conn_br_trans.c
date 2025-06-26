@@ -280,6 +280,7 @@ int32_t ConnBrPostBytes(
         SoftBusFree(data);
         return SOFTBUS_CONN_BR_CONNECTION_NOT_EXIST_ERR;
     }
+    ConnBrRefreshIdleTimeout(connection);
     int32_t status = SoftBusMutexLock(&connection->lock);
     if (status != SOFTBUS_OK) {
         CONN_LOGE(CONN_BR,

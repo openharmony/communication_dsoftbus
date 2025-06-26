@@ -27,14 +27,15 @@
 extern "C" {
 #endif
 
-#define INVALID_SOCKET_HANDLE                      (-1)
-#define MAX_BR_READ_BUFFER_CAPACITY                (40 * 1000)
-#define MAX_BR_MTU_SIZE                            (3 * 1024)
+#define INVALID_SOCKET_HANDLE                        (-1)
+#define MAX_BR_READ_BUFFER_CAPACITY                  (40 * 1000)
+#define MAX_BR_MTU_SIZE                              (3 * 1024)
 
-#define WAIT_BR_NEGOTIATION_CLOSING_TIMEOUT_MILLIS (3 * 1000)
-#define RETRY_NOTIFY_REFERENCE_DELAY_MILLIS        (1 * 1000)
+#define WAIT_BR_NEGOTIATION_CLOSING_TIMEOUT_MILLIS   (3 * 1000)
+#define RETRY_NOTIFY_REFERENCE_DELAY_MILLIS          (1 * 1000)
+#define BR_CONNECTION_IDLE_DISCONNECT_TIMEOUT_MILLIS (5 * 60 * 1000)
 
-#define MAX_RETRY_COUNT                            (2)
+#define MAX_RETRY_COUNT                              (2)
 
 enum ConnBrConnectionState {
     BR_CONNECTION_STATE_CONNECTING = 0,

@@ -1613,6 +1613,7 @@ static bool BrCheckActiveConnection(const ConnectOption *option, bool needOccupy
         anomizeAddress);
     bool isActive = (connection->state == BR_CONNECTION_STATE_CONNECTED);
     if (isActive && needOccupy) {
+        ConnBrRefreshIdleTimeout(connection);
         ConnBrOccupy(connection);
     }
     ConnBrReturnConnection(&connection);
