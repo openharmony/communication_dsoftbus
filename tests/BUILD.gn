@@ -65,6 +65,7 @@ if (defined(ohos_lite)) {
     testonly = true
     deps = [
       "adapter:fuzztest",
+      "br_proxy:fuzztest",
       "core/adapter:fuzztest",
       "core/authentication:fuzztest",
       "core/broadcast:fuzztest",
