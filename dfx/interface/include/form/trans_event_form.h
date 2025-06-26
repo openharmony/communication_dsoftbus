@@ -44,6 +44,7 @@ typedef enum {
     EVENT_SCENE_TRANS_SEND_DATA = 17,
     EVENT_SCENE_CHANNEL_REQUEST = 18,
     EVENT_SCENE_TRANS_RECV_STREAM = 19,
+    EVENT_SCENE_TRANS_REPORT_WIFIINFO = 20,
 } TransEventScene;
 
 typedef enum {
@@ -114,6 +115,21 @@ typedef struct {
     int32_t minBW;             // MIN_BW
     int32_t maxLatency;        // MAX_LATENCY
     int32_t minLatency;        // MIN_LATENCY
+    uint8_t localStaChload;    // LOCAL_STA_CHLOAD
+    uint8_t remoteStaChload;   // REMOTE_STA_CHLOAD
+    uint8_t localHmlChload;    // LOCAL_HML_CHLOAD
+    uint8_t remoteHmlChload;   // REMOTE_HML_CHLOAD
+    uint8_t localP2pChload;    // LOCAL_P2P_CHLOAD
+    uint8_t remoteP2pChload;   // REMOTE_P2P_CHLOAD
+    uint8_t localStaChannel;   // LOCAL_STA_CHANNEL
+    uint8_t remoteStaChannel;  // REMOTE_STA_CHANNEL
+    uint8_t hmlChannel;        // HML_CHANNEL
+    uint8_t localP2pChannel;   // LOCAL_P2P_CHANNEL
+    uint8_t remoteP2pChannel;  // REMOTE_P2P_CHANNEL
+    int32_t localIsDbac;       // LOCAL_IS_DBAC
+    int32_t remoteIsDbac;      // REMOTE_IS_DBAC
+    int32_t localIsDbdc;       // LOCAL_IS_DBDC
+    int32_t remoteIsDbdc;      // REMOTE_IS_DBDC
 } TransEventExtra;
 
 typedef enum {
