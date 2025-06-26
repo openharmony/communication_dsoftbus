@@ -1844,6 +1844,14 @@ static bool CleanInvalidConnStateProcess(FsmStateMachine *fsm, int32_t msgType, 
     return true;
 }
 
+static void StartSparkGroupCreation(const ConnectionAddr *addr)
+{
+    if (addr->type != CONNECTION_ADDR_BLE) {
+        return;
+    }
+    TriggerSparkGroupBuildPacked(SPARK_GROUP_DELAY_TIME_MS);
+}
+
 static void OnlineStateEnter(FsmStateMachine *fsm)
 {
     LnnConnectionFsm *connFsm = NULL;
@@ -1887,6 +1895,7 @@ static void OnlineStateEnter(FsmStateMachine *fsm)
     }
     int32_t ret = IsRepeatDeviceId(connFsm->connInfo.nodeInfo) ? SOFTBUS_NETWORK_REPEATED_DEVICEID : SOFTBUS_OK;
     CompleteJoinLNN(connFsm, connFsm->connInfo.peerNetworkId, ret);
+    StartSparkGroupCreation(&connFsm->connInfo.addr);
 }
 
 static void OnJoinLNNInOnline(LnnConnectionFsm *connFsm)

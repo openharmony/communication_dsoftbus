@@ -111,6 +111,7 @@ typedef struct TagLnnOpenFuncList {
     LnnGetLocalStrInfoFunc lnnGetLocalStrInfo;
     LnnGetLocalNumInfoFunc lnnGetLocalNumInfo;
     LnnGetLocalNumU64InfoFunc lnnGetLocalNumU64Info;
+    LnnGetLocalNum64InfoFunc lnnGetLocalNum64Info;
     LnnSetLocalNum64InfoFunc lnnSetLocalNum64Info;
     LnnGetLocalNum16InfoFunc lnnGetLocalNum16Info;
     LnnGetLocalNumU16InfoFunc lnnGetLocalNumU16Info;

@@ -240,6 +240,13 @@ void Register5thPartFunc(void *soHandle)
     g_lnnEnhanceFuncList.lnnRetrieveDeviceInfoByNetworkId = dlsym(soHandle, "LnnRetrieveDeviceInfoByNetworkId");
     g_lnnEnhanceFuncList.lnnTimeChangeNotify = dlsym(soHandle, "LnnTimeChangeNotify");
     g_lnnEnhanceFuncList.isSupportLowLatency = dlsym(soHandle, "IsSupportLowLatency");
+    g_lnnEnhanceFuncList.triggerSparkGroupBuild = dlsym(soHandle, "TriggerSparkGroupBuild");
+    g_lnnEnhanceFuncList.triggerSparkGroupClear = dlsym(soHandle, "TriggerSparkGroupClear");
+    g_lnnEnhanceFuncList.triggerSparkGroupJoinAgain = dlsym(soHandle, "TriggerSparkGroupJoinAgain");
+    g_lnnEnhanceFuncList.initSparkGroupManager = dlsym(soHandle, "InitSparkGroupManager");
+    g_lnnEnhanceFuncList.deinitSparkGroupManager = dlsym(soHandle, "DeinitSparkGroupManager");
+    g_lnnEnhanceFuncList.queryControlPlaneNodeValid = dlsym(soHandle, "QueryControlPlaneNodeValid");
+    g_lnnEnhanceFuncList.lnnDumpControlLaneGroupInfo = dlsym(soHandle, "LnnDumpControlLaneGroupInfo");
 }
 
 int32_t LnnRegisterEnhanceFunc(void *soHandle)

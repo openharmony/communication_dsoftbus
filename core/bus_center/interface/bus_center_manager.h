@@ -91,6 +91,8 @@ void BusCenterServerDeinit(void);
 int32_t LnnSyncP2pInfo(void);
 int32_t LnnInitLnnLooper(void);
 void LnnDeinitLnnLooper(void);
+int32_t LnnInitLaneLooper(void);
+void LnnDeinitLaneLooper(void);
 
 #ifdef __cplusplus
 }
