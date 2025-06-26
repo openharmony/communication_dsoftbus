@@ -15,6 +15,7 @@ group("fuzztest") {
   testonly = true
   deps = [
     "lnnnetbuilder_fuzzer:LnnNetBuilderFuzzTest",
+    "lnnslecapability_fuzzer:LnnSleCapabilityFuzzTest",
     "lnnsyncinfomanager_fuzzer:LnnSyncInfoManagerFuzzTest",
   ]
 }
