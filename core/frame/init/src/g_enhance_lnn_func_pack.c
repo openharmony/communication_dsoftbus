@@ -1461,7 +1461,7 @@ int32_t QueryControlPlaneNodeValidPacked(const char *deviceId)
 {
     LnnEnhanceFuncList *pfnLnnEnhanceFuncList = LnnEnhanceFuncListGet();
     if (LnnCheckFuncPointer((void *)pfnLnnEnhanceFuncList->queryControlPlaneNodeValid) != SOFTBUS_OK) {
-        return SOFTBUS_OK;
+        return SOFTBUS_NOT_IMPLEMENT;
     }
     return pfnLnnEnhanceFuncList->queryControlPlaneNodeValid(deviceId);
 }

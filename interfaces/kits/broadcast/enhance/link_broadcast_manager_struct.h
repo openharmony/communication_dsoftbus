@@ -22,8 +22,10 @@ extern "C" {
 #endif
 #endif
 
-#define WIFI_MAC_SIZE      6
-#define SLE_MAC_SIZE       6
+#define WIFI_MAC_SIZE        6
+#define SLE_MAC_SIZE         6
+#define SLG_SPARK_ID_SIZE    8
+#define MAX_SLG_ADV_DATA_LEN 11
 
 typedef enum {
     BLE_GATT_MASTER = 0,
@@ -67,13 +69,26 @@ typedef struct {
     uint8_t mac[SLE_MAC_SIZE];
 } SleDirectParam;
 
+typedef struct {
+    uint8_t sparkId[SLG_SPARK_ID_SIZE];
+} SlgParam;
+
 typedef enum {
     LINK_BLE_DIRECT = 0, /* Note: Cannot modify value */
     LINK_WIFI_DIRECT = 1,
     LINK_WIFI_DIRECT_RSP = 2,
     LINK_SLE_DIRECT = 3,
+    LINK_SLE_SLG = 4,
+    LINK_SPARKLINK_DIRECT = 5,
+    LINK_SPARKLINK_DIRECT_RSP = 6,
     LINK_TYPE_BUTT,
 } LinkBroadcastType;
+
+typedef enum {
+    ADV_NON_CONNECTABLE = 0,
+    ADV_CONNECTABLE_RANDOM_ADDR,
+    ADV_TYPE_BUTT,
+} LinkBroadcastAdvType;
 
 typedef struct {
     bool withSrcId;
@@ -84,11 +99,17 @@ typedef struct {
         WiFiDirectParam wifiDirect;
         WiFiDirectRspParam wifiDirectRsp;
         SleDirectParam sleDirect;
+        SlgParam slgInfo;
     };
 } LinkBroadcastOption;
 
+typedef struct {
+    uint8_t sleMac[SLE_MAC_SIZE],
+    uint8_t advData[MAX_SLG_ADV_DATA_LEN],
+} SlgRecordAdvData;
+
 typedef void (*LinkBroadcastListener)(const char *networkId,
-    const LinkBroadcastOption *option, const char *remoteBleMac);
+    const LinkBroadcastOption *option, const char *remoteMac);
 
 #ifdef __cplusplus
 #if __cplusplus
