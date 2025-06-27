@@ -2344,10 +2344,11 @@ static void TryConcurrencyPreLinkConn(const LinkRequest *request, uint32_t laneL
     }
 }
 
-static int32_t OpenBleTriggerToConn(const LinkRequest *request, uint32_t laneReqId, const LaneLinkCb *callback)
+static int32_t OpenHmlTriggerToConn(
+    const LinkRequest *request, uint32_t laneReqId, enum WifiDirectConnectType connectType, const LaneLinkCb *callback)
 {
     if (CheckTransReqInfo(request, laneReqId) != SOFTBUS_OK) {
-        LNN_LOGI(LNN_LANE, "ble trigger not support p2p");
+        LNN_LOGI(LNN_LANE, "hml trigger not support p2p");
         return SOFTBUS_INVALID_PARAM;
     }
     struct WifiDirectConnectInfo wifiDirectInfo;
@@ -2365,7 +2366,7 @@ static int32_t OpenBleTriggerToConn(const LinkRequest *request, uint32_t laneReq
     int32_t ret = AddP2pLinkReqItem(ASYNC_RESULT_P2P, wifiDirectInfo.requestId, laneReqId, request, callback);
     LNN_CHECK_AND_RETURN_RET_LOGE(ret == SOFTBUS_OK, ret, LNN_LANE, "add new connect node failed");
     wifiDirectInfo.pid = request->pid;
-    wifiDirectInfo.connectType = WIFI_DIRECT_CONNECT_TYPE_BLE_TRIGGER_HML;
+    wifiDirectInfo.connectType = connectType;
     wifiDirectInfo.reuseOnly = false;
     wifiDirectInfo.ipAddrType = request->isSupportIpv6 ? IPV6 : IPV4;
     TryConcurrencyPreLinkConn(request, laneReqId, &wifiDirectInfo);
@@ -2391,6 +2392,16 @@ static int32_t OpenBleTriggerToConn(const LinkRequest *request, uint32_t laneReq
         return ret;
     }
     return SOFTBUS_OK;
+}
+
+static int32_t OpenBleTriggerToConn(const LinkRequest *request, uint32_t laneReqId, const LaneLinkCb *callback)
+{
+    return OpenHmlTriggerToConn(request, laneReqId, WIFI_DIRECT_CONNECT_TYPE_BLE_TRIGGER_HML, callback);
+}
+
+static int32_t OpenSparkLinkTriggerToConn(const LinkRequest *request, uint32_t laneReqId, const LaneLinkCb *callback)
+{
+    return OpenHmlTriggerToConn(request, laneReqId, WIFI_DIRECT_CONNECT_TYPE_SPARKLINK_TRIGGER_HML, callback);
 }
 
 static void TryConcurrencyToConn(const LinkRequest *request, uint32_t laneLinkReqId,
@@ -2630,6 +2641,17 @@ static bool BrAuthIsMostPriority(const char *networkId)
         AuthDeviceCheckConnInfo(uuid, AUTH_LINK_TYPE_BR, true));
 }
 
+static void GetHmlTwoGuideType(const LinkRequest *request, WdGuideType *guideList, uint32_t *linksNum)
+{
+    if (QueryControlPlaneNodeValidPacked(request->peerNetworkId) == SOFTBUS_OK) {
+        guideList[(*linksNum)++] = LANE_SPARKLINK_TRIGGER;
+    }
+    if (IsHasAuthConnInfo(request->peerNetworkId)) {
+        guideList[(*linksNum)++] = LANE_ACTIVE_AUTH_TRIGGER;
+    }
+    guideList[(*linksNum)++] = LANE_BLE_TRIGGER;
+}
+
 static int32_t GetGuideChannelInfo(const LinkRequest *request, WdGuideType *guideList, uint32_t *linksNum)
 {
     if (request == NULL || guideList == NULL || linksNum == NULL) {
@@ -2648,10 +2670,7 @@ static int32_t GetGuideChannelInfo(const LinkRequest *request, WdGuideType *guid
         return SOFTBUS_OK;
     }
     if (request->linkType == LANE_HML && GetWifiDirectManager()->supportHmlTwo()) {
-        if (IsHasAuthConnInfo(request->peerNetworkId)) {
-            guideList[(*linksNum)++] = LANE_ACTIVE_AUTH_TRIGGER;
-        }
-        guideList[(*linksNum)++] = LANE_BLE_TRIGGER;
+        GetHmlTwoGuideType(request, guideList, linksNum);
     } else {
         if (IsHasAuthConnInfo(request->peerNetworkId)) {
             guideList[(*linksNum)++] = LANE_ACTIVE_AUTH_NEGO;
@@ -2708,6 +2727,7 @@ static GuideLinkByType g_channelTable[LANE_CHANNEL_BUTT] = {
     [LANE_PROXY_AUTH_NEGO] = OpenProxyChannelToConnP2p,
     [LANE_NEW_AUTH_NEGO] = OpenAuthToConnP2p,
     [LANE_ACTION_TRIGGER] = OpenActionToConn,
+    [LANE_SPARKLINK_TRIGGER] = OpenSparkLinkTriggerToConn,
 };
 
 static int32_t LnnSelectDirectLink(uint32_t laneReqId, LaneLinkType linkType)
@@ -2904,6 +2924,9 @@ static int32_t GenerateWifiDirectNegoChannel(WdGuideType guideType, const P2pLin
             info->connectType = WIFI_DIRECT_CONNECT_TYPE_ACTION_TRIGGER_HML;
             info->negoChannel.type = NEGO_CHANNEL_ACTION;
             info->negoChannel.handle.actionAddr = reqInfo->p2pInfo.actionAddr;
+            break;
+        case LANE_SPARKLINK_TRIGGER:
+            info->connectType = WIFI_DIRECT_CONNECT_TYPE_SPARKLINK_TRIGGER_HML;
             break;
         default:
             LNN_LOGE(LNN_LANE, "not support guideType=%{public}d", guideType);

@@ -80,6 +80,8 @@ typedef struct {
     int32_t (*SetScanParams)(int32_t scannerId, const SoftBusBcScanParams *param, const SoftBusBcScanFilter *scanFilter,
         int32_t filterSize, SoftbusSetFilterCmd cmdId);
     int32_t (*StopBroadcasting)(int32_t advId);
+    int32_t (*EnableAdvertising)(uint8_t advHandle);
+    int32_t (*DisableAdvertising)(uint8_t advHandle);
     int32_t (*SetBroadcastingData)(int32_t advId, const SoftbusBroadcastData *data);
     int32_t (*SetBroadcastingParam)(int32_t advId, const SoftbusBroadcastParam *param);
     int32_t (*EnableBroadcasting)(int32_t advId);
