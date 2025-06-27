@@ -17,12 +17,15 @@
 
 #include "g_enhance_lnn_func.h"
 #include "g_enhance_lnn_func_pack.h"
+#include "legacy/softbus_hidumper_buscenter.h"
 #include "lnn_heartbeat_ctrl.h"
 #include "lnn_lane.h"
 #include "lnn_log.h"
 #include "lnn_time_sync_manager.h"
 #include "softbus_error_code.h"
 #include "softbus_init_common.h"
+
+#define LNN_DUMP_CONTROL_LANE_GEOUP_INFO "control_lane_group_info"
 
 int32_t LnnInitLaneHub(void)
 {
@@ -42,6 +45,14 @@ int32_t LnnInitLaneHub(void)
         LNN_LOGE(LNN_INIT, "init heart beat fail");
         return SOFTBUS_NO_INIT;
     }
+    if (InitSparkGroupManagerPacked() != SOFTBUS_OK) {
+        LNN_LOGE(LNN_INIT, "init spark group manage fail");
+        return SOFTBUS_NO_INIT;
+    }
+    if (SoftBusRegBusCenterVarDump((char*)LNN_DUMP_CONTROL_LANE_GEOUP_INFO,
+        &LnnDumpControlLaneGroupInfoPacked) != SOFTBUS_OK) {
+        LNN_LOGE(LNN_INIT, "SoftBusRegBusCenterVarDump regist fail");
+    }
     return SOFTBUS_OK;
 }
 
@@ -56,6 +67,7 @@ int32_t LnnInitLaneHubDelay(void)
 
 void LnnDeinitLaneHub(void)
 {
+    DeinitSparkGroupManagerPacked();
     LnnDeinitQosPacked();
     DeinitLane();
     LnnDeinitTimeSync();

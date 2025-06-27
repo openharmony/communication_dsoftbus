@@ -60,6 +60,13 @@ typedef void (*LnnDeinitDecisionCenterFunc)(void);
 typedef int32_t (*LnnDcSubscribeFunc)(DcTask *task);
 typedef int32_t (*LnnDcUnsubscribeFunc)(DcTask *task);
 typedef void (*LnnDcDispatchEventFunc)(DcEvent *dcEvent);
+typedef void (*TriggerSparkGroupBuildFunc)(uint32_t delayTime);
+typedef void (*TriggerSparkGroupClearFunc)(uint32_t state, uint32_t delayTime);
+typedef void (*TriggerSparkGroupJoinAgainFunc)(const char *udid, uint32_t delayTime);
+typedef int32_t (*InitSparkGroupManagerFunc)(void);
+typedef void (*DeinitSparkGroupManagerFunc)(void);
+typedef int32_t (*QueryControlPlaneNodeValidFunc)(const char *deviceId);
+typedef int32_t (*LnnDumpControlLaneGroupInfoFunc)(int32_t fd);
 typedef void (*LnnDestroyCoapConnectListFunc)(void);
 typedef void (*LnnCoapConnectFunc)(const char *ip);
 typedef void (*LnnCoapConnectInitFunc)(void);
@@ -270,6 +277,13 @@ typedef struct TagLnnEnhanceFuncList {
     LnnDcSubscribeFunc lnnDcSubscribe;
     LnnDcUnsubscribeFunc lnnDcUnsubscribe;
     LnnDcDispatchEventFunc lnnDcDispatchEvent;
+    TriggerSparkGroupBuildFunc triggerSparkGroupBuild;
+    TriggerSparkGroupClearFunc triggerSparkGroupClear;
+    TriggerSparkGroupJoinAgainFunc triggerSparkGroupJoinAgain;
+    InitSparkGroupManagerFunc initSparkGroupManager;
+    DeinitSparkGroupManagerFunc deinitSparkGroupManager;
+    QueryControlPlaneNodeValidFunc queryControlPlaneNodeValid;
+    LnnDumpControlLaneGroupInfoFunc lnnDumpControlLaneGroupInfo;
     // sle range
     RegistAuthTransListenerFunc registAuthTransListener;
     UnregistAuthTransListenerFunc unregistAuthTransListener;

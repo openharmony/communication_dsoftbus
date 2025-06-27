@@ -802,6 +802,15 @@ static int32_t DlGetSleRangeCapacity(const char *networkId, bool checkOnline, vo
     return SOFTBUS_OK;
 }
 
+static int32_t DlGetUserId(const char *networkId, bool checkOnline, void *buf, uint32_t len)
+{
+    (void)checkOnline;
+    NodeInfo *info = NULL;
+    RETURN_IF_GET_NODE_VALID(networkId, buf, info);
+    *((int32_t *)buf) = info->userId;
+    return SOFTBUS_OK;
+}
+
 static int32_t DlGetSleAddr(const char *networkId, bool checkOnline, void *buf, uint32_t len)
 {
     (void)checkOnline;
@@ -848,6 +857,7 @@ static DistributedLedgerKey g_dlKeyTable[] = {
     {NUM_KEY_CONN_SUB_FEATURE_CAPA, DlGetConnSubFeatureCap},
     {NUM_KEY_STATIC_NET_CAP, DlGetStaticNetCap},
     {NUM_KEY_SLE_RANGE_CAP, DlGetSleRangeCapacity},
+    {NUM_KEY_USERID, DlGetUserId},
     {BOOL_KEY_TLV_NEGOTIATION, DlGetNodeTlvNegoFlag},
     {BOOL_KEY_SCREEN_STATUS, DlGetNodeScreenOnFlag},
     {BYTE_KEY_ACCOUNT_HASH, DlGetAccountHash},
