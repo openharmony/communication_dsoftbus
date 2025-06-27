@@ -451,7 +451,7 @@ uint8_t *AssembleRspData(const SoftbusBroadcastPayload *data, uint16_t *dataLen)
 static int32_t ParseFlag(const uint8_t *advData, uint8_t advLen, SoftBusBcScanResult *dst, uint8_t index)
 {
     DISC_CHECK_AND_RETURN_RET_LOGE(advData != NULL, SOFTBUS_INVALID_PARAM, DISC_BLE_ADAPTER, "advData is nullptr");
-    DISC_CHECK_AND_RETURN_RET_LOGE(dst != NULL, SOFTBUS_INVALID_PARAM, DISC_BLE_ADAPTER, "dst len is nullptr");
+    DISC_CHECK_AND_RETURN_RET_LOGE(dst != NULL, SOFTBUS_INVALID_PARAM, DISC_BLE_ADAPTER, "dst is nullptr");
 
     if (index + 1 >= advLen) {
         DISC_LOGW(DISC_BLE_ADAPTER, "parse flag failed");
@@ -466,7 +466,7 @@ static int32_t ParseLocalName(const uint8_t *advData, uint8_t advLen, SoftBusBcS
     uint8_t len)
 {
     DISC_CHECK_AND_RETURN_RET_LOGE(advData != NULL, SOFTBUS_INVALID_PARAM, DISC_BLE_ADAPTER, "advData is nullptr");
-    DISC_CHECK_AND_RETURN_RET_LOGE(dst != NULL, SOFTBUS_INVALID_PARAM, DISC_BLE_ADAPTER, "dst len is nullptr");
+    DISC_CHECK_AND_RETURN_RET_LOGE(dst != NULL, SOFTBUS_INVALID_PARAM, DISC_BLE_ADAPTER, "dst is nullptr");
 
     if (index + 1 >= advLen) {
         DISC_LOGW(DISC_BLE_ADAPTER, "parse local name failed");
