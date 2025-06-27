@@ -135,13 +135,13 @@ static int32_t PackTlvMember(const TlvObject *obj, const TlvMember *tlv, uint8_t
     COMM_CHECK_AND_RETURN_RET_LOGE(size >= TLV_SIZE(obj, tlv->length),
         SOFTBUS_NO_ENOUGH_DATA, COMM_UTILS, "buffer not enough(size=%{public}u, len=%{public}u)", size, tlv->length);
     uint32_t offset = 0;
-    int32_t ret = PackTypeOrLength(buffer, obj->size, tlv->type, obj->tSize);
+    int32_t ret = PackTypeOrLength(buffer, size, tlv->type, obj->tSize);
     COMM_CHECK_AND_RETURN_RET_LOGE(ret == SOFTBUS_OK, ret, COMM_UTILS, "pack type fail(=%{public}d)", ret);
     offset += obj->tSize;
-    ret = PackTypeOrLength(buffer + offset, obj->size - offset, tlv->length, obj->lSize);
+    ret = PackTypeOrLength(buffer + offset, size - offset, tlv->length, obj->lSize);
     COMM_CHECK_AND_RETURN_RET_LOGE(ret == SOFTBUS_OK, ret, COMM_UTILS, "pack length fail(=%{public}d)", ret);
     offset += obj->lSize;
-    ret = PackValue(buffer + offset, obj->size - offset, tlv->value, tlv->length);
+    ret = PackValue(buffer + offset, size - offset, tlv->value, tlv->length);
     COMM_CHECK_AND_RETURN_RET_LOGE(ret == SOFTBUS_OK, ret, COMM_UTILS, "pack value fail(=%{public}d)", ret);
     return SOFTBUS_OK;
 }
