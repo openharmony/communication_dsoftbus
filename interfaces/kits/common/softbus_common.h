@@ -362,6 +362,7 @@ typedef struct {
     } info;
     char peerUid[MAX_ACCOUNT_HASH_LEN];
     DeviceKeyId deviceKeyId;
+    uint16_t deviceTypeId;
 } ConnectionAddr;
 
 /**
