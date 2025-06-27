@@ -1288,6 +1288,29 @@ static int32_t TryRecoveryKey(AuthFsm *authFsm)
     return ret;
 }
 
+static void PopulateDeviceTypeId(HiChainAuthParam *authParam, uint32_t requestId)
+{
+    AuthRequest request;
+    (void)memset_s(&request, sizeof(AuthRequest), 0, sizeof(AuthRequest));
+    if (GetAuthRequest(requestId, &request) == SOFTBUS_OK) {
+        if (request.deviceTypeId == TYPE_PC_ID) {
+            authParam->deviceTypeId = request.deviceTypeId;
+            AUTH_LOGI(AUTH_FSM, "get deviceTypeId from auth request success");
+            return;
+        }
+    }
+    NodeInfo nodeInfo;
+    (void)memset_s(&nodeInfo, sizeof(NodeInfo), 0, sizeof(NodeInfo));
+    if (LnnRetrieveDeviceInfoByUdidPacked(authParam->udid, &nodeInfo) == SOFTBUS_OK) {
+        if (nodeInfo.deviceInfo.deviceTypeId == TYPE_PC_ID) {
+            authParam->deviceTypeId = nodeInfo.deviceInfo.deviceTypeId;
+            AUTH_LOGI(AUTH_FSM, "get deviceTypeId from deviceInfo success");
+            return;
+        }
+    }
+    AUTH_LOGI(AUTH_FSM, "not setting deviceTypeId");
+}
+
 static int32_t ProcessClientAuthState(AuthFsm *authFsm)
 {
     HiChainAuthParam authParam;
@@ -1315,6 +1338,7 @@ static int32_t ProcessClientAuthState(AuthFsm *authFsm)
     }
     authParam.userId = authFsm->info.userId;
     authParam.cb = NULL;
+    PopulateDeviceTypeId(&authParam, authFsm->info.requestId);
     return HichainStartAuth(authFsm->authSeq, &authParam, authMode);
 }
 

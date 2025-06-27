@@ -624,6 +624,7 @@ static int32_t StartVerifyDevice(const AuthVerifyParam *authVerifyParam, const A
     request.isFastAuth = authVerifyParam->isFastAuth;
     request.deviceKeyId = authVerifyParam->deviceKeyId;
     request.forceJoinInfo = authVerifyParam->forceJoinInfo;
+    request.deviceTypeId = authVerifyParam->deviceTypeId;
     return VerifyDevice(&request);
 }
 

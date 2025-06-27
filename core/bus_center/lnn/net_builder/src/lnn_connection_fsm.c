@@ -1326,6 +1326,7 @@ static int32_t OnJoinLNN(LnnConnectionFsm *connFsm)
     AuthVerifyParam authVerifyParam;
     (void)memset_s(&authVerifyParam, sizeof(authVerifyParam), 0, sizeof(authVerifyParam));
     SetAuthVerifyParam(&authVerifyParam, connInfo->requestId);
+    authVerifyParam.deviceTypeId = connFsm->connInfo.addr.deviceTypeId;
     if (connInfo->addr.type == CONNECTION_ADDR_SESSION) {
         rc = LnnConvertSessionAddrToAuthConnInfo(&connInfo->addr, &authConn);
         if (rc != SOFTBUS_OK) {

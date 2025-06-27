@@ -38,6 +38,9 @@
 static const GroupAuthManager *g_hichain = NULL;
 #define CUST_UDID_LEN 16
 #define KEY_LENGTH 16 /* Note: WinPc's special nearby only support 128 bits key */
+#define FIELD_META_NODE_TYPE "metaNodeType"
+#define META_NODE_TYPE_PC "0x0C"
+#define META_NODE_TYPE_OTHERS "0"
 
 char *GenDeviceLevelParam(HiChainAuthParam *hiChainParam)
 {
@@ -51,12 +54,14 @@ char *GenDeviceLevelParam(HiChainAuthParam *hiChainParam)
         AUTH_LOGE(AUTH_HICHAIN, "create json fail");
         return NULL;
     }
+    const char *metaNodeTypeStr = hiChainParam->deviceTypeId == TYPE_PC_ID ? META_NODE_TYPE_PC : META_NODE_TYPE_OTHERS;
     if (!AddStringToJsonObject(msg, FIELD_PEER_CONN_DEVICE_ID, hiChainParam->udid) ||
         !AddStringToJsonObject(msg, FIELD_SERVICE_PKG_NAME, AUTH_APPID) ||
         !AddBoolToJsonObject(msg, FIELD_IS_DEVICE_LEVEL, true) ||
         !AddBoolToJsonObject(msg, FIELD_IS_CLIENT, true) ||
         !AddBoolToJsonObject(msg, FIELD_IS_UDID_HASH, false) ||
-        !AddNumberToJsonObject(msg, FIELD_KEY_LENGTH, KEY_LENGTH)) {
+        !AddNumberToJsonObject(msg, FIELD_KEY_LENGTH, KEY_LENGTH) ||
+        !AddStringToJsonObject(msg, FIELD_META_NODE_TYPE, metaNodeTypeStr)) {
         AUTH_LOGE(AUTH_HICHAIN, "add json object fail");
         cJSON_Delete(msg);
         return NULL;

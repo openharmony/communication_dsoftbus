@@ -736,4 +736,26 @@ HWTEST_F(AuthSessionFsmTest, GET_FIRST_FSM_STATE_002, TestSize.Level1)
     EXPECT_EQ(info.localState, AUTH_STATE_COMPATIBLE);
     EXPECT_EQ(state, STATE_SYNC_DEVICE_ID);
 }
+
+/*
+ * @tc.name: POPULATE_DEVICE_TYPE_ID_TEST_001
+ * @tc.desc: PopulateDeviceTypeId test
+ * @tc.type: FUNC
+ * @tc.require:
+ */
+HWTEST_F(AuthSessionFsmTest, POPULATE_DEVICE_TYPE_ID_TEST_001, TestSize.Level1)
+{
+    HiChainAuthParam authParam;
+    (void)memset_s(&authParam, sizeof(HiChainAuthParam), 0, sizeof(HiChainAuthParam));
+    uint32_t requestId = REQUEST_ID_1;
+    EXPECT_NO_FATAL_FAILURE(PopulateDeviceTypeId(&authParam, requestId));
+    ClearAuthRequest();
+    AuthRequest request;
+    (void)memset_s(&request, sizeof(AuthRequest), 0, sizeof(AuthRequest));
+    request.authId = REQUEST_ID;
+    request.deviceTypeId = REQUEST_TYPE_RECONNECT;
+    EXPECT_TRUE(AddAuthRequest(&request) == 0);
+    requestId = REQUEST_ID;
+    EXPECT_NO_FATAL_FAILURE(PopulateDeviceTypeId(&authParam, requestId));
+}
 } // namespace OHOS
