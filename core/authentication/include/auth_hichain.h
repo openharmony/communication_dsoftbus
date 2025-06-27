@@ -41,6 +41,7 @@ typedef struct {
     char credId[MAX_CRED_ID_SIZE];
     int32_t userId;
     DeviceAuthCallback *cb;
+    uint16_t deviceTypeId;
 } HiChainAuthParam;
 
 typedef enum {

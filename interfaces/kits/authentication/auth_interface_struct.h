@@ -127,6 +127,7 @@ typedef struct {
    bool isFastAuth;
    DeviceKeyId deviceKeyId;
    ForceJoinInfo forceJoinInfo;
+   uint16_t deviceTypeId;
 } AuthVerifyParam;
 
 typedef enum {
