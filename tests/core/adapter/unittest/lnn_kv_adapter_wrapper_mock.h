@@ -19,12 +19,15 @@
 #include <gmock/gmock.h>
 #include <gtest/gtest.h>
 
+#include "lnn_kv_adapter.h"
+
 namespace OHOS {
 class LnnKvAdapterWrapperInterface {
 public:
     LnnKvAdapterWrapperInterface() {};
     virtual ~LnnKvAdapterWrapperInterface() {};
     virtual bool IsCloudSyncEnabled(void) = 0;
+    virtual std::shared_ptr<KVAdapter> FindKvStorePtr(int32_t &adId) = 0;
 };
 
 class LnnKvAdapterWrapperInterfaceMock : public LnnKvAdapterWrapperInterface {
@@ -32,6 +35,7 @@ public:
     LnnKvAdapterWrapperInterfaceMock();
     ~LnnKvAdapterWrapperInterfaceMock() override;
     MOCK_METHOD0(IsCloudSyncEnabled, bool (void));
+    MOCK_METHOD1(FindKvStorePtr, std::shared_ptr<KVAdapter>(int32_t &adId));
 };
 } // namespace OHOS
 #endif // LNN_KV_ADAPTER_WRAPPER_MOCK_H

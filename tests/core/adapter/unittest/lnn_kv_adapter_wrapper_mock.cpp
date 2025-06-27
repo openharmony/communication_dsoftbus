@@ -35,6 +35,11 @@ static LnnKvAdapterWrapperInterface *GetLnnKvAdapterWrapperInterface()
     return reinterpret_cast<LnnKvAdapterWrapperInterface *>(g_lnnKvAdapterWrapperInterface);
 }
 
+std::shared_ptr<KVAdapter> FindKvStorePtr(int32_t &dbId)
+{
+    return GetLnnKvAdapterWrapperInterface()->FindKvStorePtr(dbId);
+}
+
 extern "C" {
 bool IsCloudSyncEnabled(void)
 {
