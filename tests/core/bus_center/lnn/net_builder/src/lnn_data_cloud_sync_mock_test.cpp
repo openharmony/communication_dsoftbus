@@ -37,6 +37,9 @@ constexpr int32_t STATE_VERSION = 2;
 constexpr uint64_t TIMES_STAP0 = 0;
 constexpr uint64_t TIMES_STAP1 = 1;
 constexpr uint64_t TIMES_STAP2 = 2;
+constexpr int32_t STATE_VERSION2 = 12;
+constexpr int32_t KEY_SIZE0 = 0;
+constexpr int32_t KEY_SIZE1 = 1;
 
 namespace OHOS {
 using namespace testing;
@@ -363,7 +366,7 @@ HWTEST_F(LNNDataCloudSyncMockTest, GetInfoFromSplitKey_Test_001, TestSize.Level1
 HWTEST_F(LNNDataCloudSyncMockTest, HandleDBAddChangeInternal_Test_001, TestSize.Level1)
 {
     NodeInfo localCaheInfo = {
-        .stateVersion = 12,
+        .stateVersion = STATE_VERSION2,
     };
     EXPECT_EQ(EOK, strcpy_s(localCaheInfo.deviceInfo.deviceUdid, UDID_BUF_LEN, PEERUDID));
     NiceMock<LnnDataCloudSyncInterfaceMock> DataCloudSyncMock;
@@ -538,7 +541,7 @@ HWTEST_F(LNNDataCloudSyncMockTest, LnnDBDataAddChangeSyncToCache_Test_001, TestS
 {
     const char **key = reinterpret_cast<const char **>(SoftBusCalloc(TMP_LEN * TMP_LEN));
     const char **value = reinterpret_cast<const char **>(SoftBusCalloc(TMP_LEN * TMP_LEN));
-    int32_t keySize = 0;
+    int32_t keySize = KEY_SIZE0;
     EXPECT_EQ(LnnDBDataAddChangeSyncToCache(nullptr, value, keySize), SOFTBUS_INVALID_PARAM);
     EXPECT_EQ(LnnDBDataAddChangeSyncToCache(key, nullptr, keySize), SOFTBUS_INVALID_PARAM);
 }
@@ -598,7 +601,7 @@ HWTEST_F(LNNDataCloudSyncMockTest, LnnLedgerDataChangeSyncToDB_Test_001, TestSiz
 {
     NodeInfo localCaheInfo = {
         .accountId = 0,
-        .stateVersion = 12,
+        .stateVersion = STATE_VERSION2,
     };
     LnnEnhanceFuncList *pfnLnnEnhanceFuncList = LnnEnhanceFuncListGet();
     pfnLnnEnhanceFuncList->lnnGetLocalCacheNodeInfo = LnnGetLocalCacheNodeInfo;
@@ -692,17 +695,17 @@ HWTEST_F(LNNDataCloudSyncMockTest, CheckParamValidity_Test_001, TestSize.Level1)
 {
     const char **key = reinterpret_cast<const char **>(SoftBusCalloc(TMP_LEN * TMP_LEN));
     const char **value = reinterpret_cast<const char **>(SoftBusCalloc(TMP_LEN * TMP_LEN));
-    int32_t keySize = 1;
+    int32_t keySize = KEY_SIZE1;
     int32_t ret = CheckParamValidity(nullptr, nullptr, keySize);
     EXPECT_EQ(ret, SOFTBUS_INVALID_PARAM);
     ret = CheckParamValidity(nullptr, value, keySize);
     EXPECT_EQ(ret, SOFTBUS_INVALID_PARAM);
     ret = CheckParamValidity(key, nullptr, keySize);
     EXPECT_EQ(ret, SOFTBUS_INVALID_PARAM);
-    keySize = 0;
+    keySize = KEY_SIZE0;
     ret = CheckParamValidity(key, value, keySize);
     EXPECT_EQ(ret, SOFTBUS_INVALID_PARAM);
-    keySize = 1;
+    keySize = KEY_SIZE1;
     ret = CheckParamValidity(key, value, keySize);
     EXPECT_EQ(ret, SOFTBUS_OK);
 }
@@ -717,7 +720,7 @@ HWTEST_F(LNNDataCloudSyncMockTest, LnnDBDataAddChangeSyncToCache_Test_002, TestS
 {
     const char **key = reinterpret_cast<const char **>(SoftBusCalloc(TMP_LEN * TMP_LEN));
     const char **value = reinterpret_cast<const char **>(SoftBusCalloc(TMP_LEN * TMP_LEN));
-    int32_t keySize = 1;
+    int32_t keySize = KEY_SIZE1;
     EXPECT_NE(LnnDBDataAddChangeSyncToCache(key, value, keySize), SOFTBUS_OK);
 }
 
