@@ -268,7 +268,8 @@ std::shared_ptr<InnerLink> LinkManager::GetReuseLink(
     if (connectType == WIFI_DIRECT_CONNECT_TYPE_AUTH_NEGO_HML ||
         connectType == WIFI_DIRECT_CONNECT_TYPE_BLE_TRIGGER_HML ||
         connectType == WIFI_DIRECT_CONNECT_TYPE_AUTH_TRIGGER_HML ||
-        connectType == WIFI_DIRECT_CONNECT_TYPE_ACTION_TRIGGER_HML) {
+        connectType == WIFI_DIRECT_CONNECT_TYPE_ACTION_TRIGGER_HML ||
+        connectType == WIFI_DIRECT_CONNECT_TYPE_SPARKLINK_TRIGGER_HML) {
         linkType = WIFI_DIRECT_LINK_TYPE_HML;
     }
 

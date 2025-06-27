@@ -49,7 +49,9 @@ int WifiDirectRoleOption::GetExpectedRole(
         }
         isStrict = false;
     } else if (type == WIFI_DIRECT_CONNECT_TYPE_BLE_TRIGGER_HML ||
-        type == WIFI_DIRECT_CONNECT_TYPE_AUTH_TRIGGER_HML || type == WIFI_DIRECT_CONNECT_TYPE_ACTION_TRIGGER_HML) {
+        type == WIFI_DIRECT_CONNECT_TYPE_AUTH_TRIGGER_HML ||
+        type == WIFI_DIRECT_CONNECT_TYPE_ACTION_TRIGGER_HML ||
+        type == WIFI_DIRECT_CONNECT_TYPE_SPARKLINK_TRIGGER_HML) {
         expectedRole = WIFI_DIRECT_API_ROLE_HML;
         isStrict = true;
     } else {
