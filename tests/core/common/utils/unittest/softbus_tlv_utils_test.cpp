@@ -343,4 +343,74 @@ HWTEST_F(SoftBusTlvUtilsTest, TlvUtilsUnpackNumberTest, TestSize.Level0)
     DestroyTlvObject(obj);
     COMM_LOGI(COMM_UTILS, "===TlvUtilsUnpackNumberTest end");
 }
+
+/**
+ * @tc.name: GetTlvMemberWithBuffer
+ * @tc.desc: GetTlvMemberWithBuffer
+ * @tc.type: FUNC
+ * @tc.require:
+ */
+HWTEST_F(SoftBusTlvUtilsTest, TlvUtilsGetTlvMemberWithBufferTest, TestSize.Level0)
+{
+    COMM_LOGI(COMM_UTILS, "===TlvUtilsGetTlvMemberWithBufferTest begin");
+    // mock ts=UINT16_T ls=UINT16_T
+    const uint32_t type1 = 1;
+    const uint8_t value1[] = { 0x00, 0x11, 0x22, 0x33, 0x44, 0x55 };
+    const uint32_t type2 = 2;
+    const char value2[] = "test1024";
+    const uint32_t type3 = 3;
+    uint8_t tlvBytes[] = {
+        0x01, 0x00, 0x06, 0x00, 0x00, 0x11, 0x22, 0x33, 0x44, 0x55, // type=1, len=6 MAC
+        0x02, 0x00, 0x08, 0x00, 0x74, 0x65, 0x73, 0x74, 0x31, 0x30, 0x32, 0x34, // type=2, len=6, NAME
+        0x03, 0x00, 0x00, 0x00, // type=3, len=0, empty
+    };
+
+    TlvObject *obj = CreateTlvObject(UINT16_T, UINT16_T);
+    ASSERT_TRUE(obj != nullptr);
+    int32_t ret = SetTlvBinary(obj, tlvBytes, sizeof(tlvBytes));
+    EXPECT_EQ(ret, SOFTBUS_OK);
+
+    uint8_t mac[6]; // 6: mac size
+    ret = GetTlvMemberWithSpecifiedBuffer(obj, type1, mac, sizeof(mac));
+    EXPECT_EQ(ret, SOFTBUS_OK);
+    EXPECT_EQ(memcmp(value1, mac, sizeof(mac)), 0);
+
+    uint8_t name[16]; // 16: max name len
+    uint32_t nameSize = sizeof(name);
+    ret = GetTlvMemberWithEstimatedBuffer(obj, type2, name, &nameSize);
+    EXPECT_EQ(ret, SOFTBUS_OK);
+    EXPECT_EQ(memcmp(value2, name, sizeof(name)), 0);
+
+    uint32_t empty = 0;
+    uint8_t emptyBuf[16]; // 16: not use
+    ret = GetTlvMemberWithEstimatedBuffer(obj, type3, emptyBuf, &empty);
+    EXPECT_EQ(ret, SOFTBUS_OK);
+    EXPECT_EQ(empty, 0);
+
+    DestroyTlvObject(obj);
+    COMM_LOGI(COMM_UTILS, "===TlvUtilsGetTlvMemberWithBufferTest end");
+}
+
+/**
+ * @tc.name: TlvUtilsExceptionDataTest
+ * @tc.desc: TlvUtilsExceptionDataTest
+ * @tc.type: FUNC
+ * @tc.require:
+ */
+HWTEST_F(SoftBusTlvUtilsTest, TlvUtilsExceptionDataTest, TestSize.Level0)
+{
+    COMM_LOGI(COMM_UTILS, "===TlvUtilsExceptionDataTest begin");
+    // mock ts=UINT16_T ls=UINT16_T
+    uint8_t tlvBytes[] = {
+        0x01, 0x00, 0x08, 0x00, 0x00, 0x11, 0x22, 0x33, 0x44, 0x55, // type=1, len=8, value=6
+    };
+
+    TlvObject *obj = CreateTlvObject(UINT16_T, UINT16_T);
+    ASSERT_TRUE(obj != nullptr);
+    int32_t ret = SetTlvBinary(obj, tlvBytes, sizeof(tlvBytes));
+    EXPECT_EQ(ret, SOFTBUS_NO_ENOUGH_DATA);
+
+    DestroyTlvObject(obj);
+    COMM_LOGI(COMM_UTILS, "===TlvUtilsExceptionDataTest end");
+}
 } // namespace OHOS
