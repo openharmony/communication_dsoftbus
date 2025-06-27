@@ -1411,3 +1411,66 @@ bool IsSupportLowLatencyPacked(const TransReqInfo *reqInfo, const LaneLinkInfo *
     }
     return pfnLnnEnhanceFuncList->isSupportLowLatency(reqInfo, laneLinkInfo);
 }
+
+void TriggerSparkGroupBuildPacked(uint32_t delayTime)
+{
+    LnnEnhanceFuncList *pfnLnnEnhanceFuncList = LnnEnhanceFuncListGet();
+    if (LnnCheckFuncPointer((void *)pfnLnnEnhanceFuncList->triggerSparkGroupBuild) != SOFTBUS_OK) {
+        return;
+    }
+    return pfnLnnEnhanceFuncList->triggerSparkGroupBuild(delayTime);
+}
+
+void TriggerSparkGroupClearPacked(uint32_t state, uint32_t delayTime)
+{
+    LnnEnhanceFuncList *pfnLnnEnhanceFuncList = LnnEnhanceFuncListGet();
+    if (LnnCheckFuncPointer((void *)pfnLnnEnhanceFuncList->triggerSparkGroupClear) != SOFTBUS_OK) {
+        return;
+    }
+    return pfnLnnEnhanceFuncList->triggerSparkGroupClear(state, delayTime);
+}
+
+void TriggerSparkGroupJoinAgainPacked(const char *udid, uint32_t delayTime)
+{
+    LnnEnhanceFuncList *pfnLnnEnhanceFuncList = LnnEnhanceFuncListGet();
+    if (LnnCheckFuncPointer((void *)pfnLnnEnhanceFuncList->triggerSparkGroupJoinAgain) != SOFTBUS_OK) {
+        return;
+    }
+    return pfnLnnEnhanceFuncList->triggerSparkGroupJoinAgain(udid, delayTime);
+}
+
+int32_t InitSparkGroupManagerPacked(void)
+{
+    LnnEnhanceFuncList *pfnLnnEnhanceFuncList = LnnEnhanceFuncListGet();
+    if (LnnCheckFuncPointer((void *)pfnLnnEnhanceFuncList->initSparkGroupManager) != SOFTBUS_OK) {
+        return SOFTBUS_OK;
+    }
+    return pfnLnnEnhanceFuncList->initSparkGroupManager();
+}
+
+void DeinitSparkGroupManagerPacked(void)
+{
+    LnnEnhanceFuncList *pfnLnnEnhanceFuncList = LnnEnhanceFuncListGet();
+    if (LnnCheckFuncPointer((void *)pfnLnnEnhanceFuncList->deinitSparkGroupManager) != SOFTBUS_OK) {
+        return;
+    }
+    return pfnLnnEnhanceFuncList->deinitSparkGroupManager();
+}
+
+int32_t QueryControlPlaneNodeValidPacked(const char *deviceId)
+{
+    LnnEnhanceFuncList *pfnLnnEnhanceFuncList = LnnEnhanceFuncListGet();
+    if (LnnCheckFuncPointer((void *)pfnLnnEnhanceFuncList->queryControlPlaneNodeValid) != SOFTBUS_OK) {
+        return SOFTBUS_OK;
+    }
+    return pfnLnnEnhanceFuncList->queryControlPlaneNodeValid(deviceId);
+}
+
+int32_t LnnDumpControlLaneGroupInfoPacked(int32_t fd)
+{
+    LnnEnhanceFuncList *pfnLnnEnhanceFuncList = LnnEnhanceFuncListGet();
+    if (LnnCheckFuncPointer((void *)pfnLnnEnhanceFuncList->lnnDumpControlLaneGroupInfo) != SOFTBUS_OK) {
+        return SOFTBUS_OK;
+    }
+    return pfnLnnEnhanceFuncList->lnnDumpControlLaneGroupInfo(fd);
+}
