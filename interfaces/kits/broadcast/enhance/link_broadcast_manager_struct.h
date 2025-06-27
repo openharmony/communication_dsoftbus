@@ -104,8 +104,8 @@ typedef struct {
 } LinkBroadcastOption;
 
 typedef struct {
-    uint8_t sleMac[SLE_MAC_SIZE],
-    uint8_t advData[MAX_SLG_ADV_DATA_LEN],
+    uint8_t sleMac[SLE_MAC_SIZE];
+    uint8_t advData[MAX_SLG_ADV_DATA_LEN];
 } SlgRecordAdvData;
 
 typedef void (*LinkBroadcastListener)(const char *networkId,
