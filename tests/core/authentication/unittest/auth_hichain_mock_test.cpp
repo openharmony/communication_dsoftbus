@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2024 Huawei Device Co., Ltd.
+ * Copyright (c) 2024-2025 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -29,6 +29,7 @@ using namespace testing;
 using namespace testing::ext;
 
 constexpr int64_t TEST_AUTH_SEQ = 1;
+constexpr int OPERATION_CODE = 100;
 constexpr uint32_t TMP_DATA_LEN = 10;
 constexpr uint8_t TMP_DATA[TMP_DATA_LEN] = "tmpInData";
 static constexpr int32_t DEFALUT_USERID = 100;
@@ -184,7 +185,6 @@ HWTEST_F(AuthHichainMockTest, ON_REQUEST_TEST_001, TestSize.Level1)
 {
     int64_t authSeq = TEST_AUTH_SEQ - 1;
     const char *reqParams = "reqParams";
-    int operationCode = 100;
     AuthHichainInterfaceMock hichainMock;
     cJSON *msg = reinterpret_cast<cJSON *>(SoftBusCalloc(sizeof(cJSON)));
     if (msg == nullptr) {
@@ -204,21 +204,21 @@ HWTEST_F(AuthHichainMockTest, ON_REQUEST_TEST_001, TestSize.Level1)
     EXPECT_CALL(hichainMock, AuthSessionGetUdid).WillOnce(Return(SOFTBUS_INVALID_PARAM))
         .WillRepeatedly(Return(SOFTBUS_OK));
     EXPECT_CALL(hichainMock, LnnGetLocalStrInfo).WillRepeatedly(Return(SOFTBUS_OK));
-    char *ptr = OnRequest(authSeq, operationCode, reqParams);
+    char *ptr = OnRequest(authSeq, OPERATION_CODE, reqParams);
     EXPECT_EQ(ptr, nullptr);
     EXPECT_CALL(hichainMock, cJSON_CreateObject).WillOnce(Return(nullptr)).WillOnce(Return(msg))
         .WillOnce(Return(msg1)).WillOnce(Return(msg2));
 
-    ptr = OnRequest(authSeq, operationCode, reqParams);
+    ptr = OnRequest(authSeq, OPERATION_CODE, reqParams);
     EXPECT_EQ(ptr, nullptr);
     EXPECT_CALL(hichainMock, AddNumberToJsonObject).WillOnce(Return(false)).WillRepeatedly(Return(true));
-    ptr = OnRequest(authSeq, operationCode, reqParams);
+    ptr = OnRequest(authSeq, OPERATION_CODE, reqParams);
     EXPECT_EQ(ptr, nullptr);
     EXPECT_CALL(hichainMock, AddStringToJsonObject).WillOnce(Return(false)).WillRepeatedly(Return(true));
-    ptr = OnRequest(authSeq, operationCode, reqParams);
+    ptr = OnRequest(authSeq, OPERATION_CODE, reqParams);
     EXPECT_EQ(ptr, nullptr);
     EXPECT_CALL(hichainMock, AddBoolToJsonObject).WillOnce(Return(false)).WillRepeatedly(Return(true));
-    ptr = OnRequest(authSeq, operationCode, reqParams);
+    ptr = OnRequest(authSeq, OPERATION_CODE, reqParams);
     EXPECT_EQ(ptr, nullptr);
 }
 
@@ -232,7 +232,6 @@ HWTEST_F(AuthHichainMockTest, ON_REQUEST_TEST_002, TestSize.Level1)
 {
     int64_t authSeq = TEST_AUTH_SEQ;
     const char *reqParams = "reqParams";
-    int operationCode = 100;
     AuthHichainInterfaceMock hichainMock;
     cJSON *msg3 = reinterpret_cast<cJSON *>(SoftBusCalloc(sizeof(cJSON)));
     if (msg3 == nullptr) {
@@ -271,17 +270,17 @@ HWTEST_F(AuthHichainMockTest, ON_REQUEST_TEST_002, TestSize.Level1)
     const char *val = "returnStr";
     EXPECT_EQ(strcpy_s(msgStr, sizeof(msgStr), val), EOK);
     EXPECT_CALL(hichainMock, cJSON_PrintUnformatted).WillOnce(Return(nullptr)).WillRepeatedly(Return(msgStr));
-    char *ptr = OnRequest(authSeq, operationCode, reqParams);
+    char *ptr = OnRequest(authSeq, OPERATION_CODE, reqParams);
     EXPECT_EQ(ptr, nullptr);
 
     authSeq = 0;
-    ptr = OnRequest(authSeq, operationCode, reqParams);
+    ptr = OnRequest(authSeq, OPERATION_CODE, reqParams);
     EXPECT_EQ(ptr, nullptr);
 
-    ptr = OnRequest(authSeq, operationCode, reqParams);
+    ptr = OnRequest(authSeq, OPERATION_CODE, reqParams);
     EXPECT_EQ(ptr, nullptr);
 
-    ptr = OnRequest(authSeq, operationCode, reqParams);
+    ptr = OnRequest(authSeq, OPERATION_CODE, reqParams);
     EXPECT_NE(ptr, nullptr);
 }
 
