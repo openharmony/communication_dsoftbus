@@ -1262,6 +1262,42 @@ HWTEST_F(AuthDeviceProfileTest, GET_ACCESS_UK_BY_UK_ID_TEST_001, TestSize.Level1
 }
 
 /*
+ * @tc.name: IS_SK_ID_INVALID_INNER_TEST_001
+ * @tc.desc: AccountId is default.
+ * @tc.type: FUNC
+ * @tc.require:
+ */
+HWTEST_F(AuthDeviceProfileTest, IS_SK_ID_INVALID_INNER_TEST_001, TestSize.Level1)
+{
+    int32_t sessionKeyId = 1;
+    const char *accountHash = "1a2b3c4d5e6f";
+    const char *udidShortHash = "a1b2c3d4e5f6";
+    int32_t userId = 2;
+    OHOS::DistributedDeviceProfile::AccessControlProfile aclProfile;
+    bool ret = IsSKIdInvalidInner(sessionKeyId, accountHash, udidShortHash, userId, aclProfile);
+    EXPECT_TRUE(ret);
+
+    DistributedDeviceProfile::Accesser accesser;
+    accesser.SetAccesserDeviceId("ab");
+    accesser.SetAccesserAccountId("ohosAnonymousUid");
+    accesser.SetAccesserSessionKeyId(1);
+    accesser.SetAccesserUserId(2);
+    aclProfile.SetAccesser(accesser);
+    DistributedDeviceProfile::Accessee accessee;
+    accessee.SetAccesseeDeviceId("cd");
+    accessee.SetAccesseeAccountId("ohosAnonymousUid");
+    accessee.SetAccesseeSessionKeyId(3);
+    accessee.SetAccesseeUserId(6);
+    aclProfile.SetAccessee(accessee);
+    ret = IsSKIdInvalidInner(sessionKeyId, accountHash, udidShortHash, userId, aclProfile);
+    EXPECT_TRUE(ret);
+
+    sessionKeyId = 3;
+    ret = IsSKIdInvalidInner(sessionKeyId, accountHash, udidShortHash, userId, aclProfile);
+    EXPECT_TRUE(ret);
+}
+
+/*
  * @tc.name: IS_SK_ID_INVALID_TEST_001
  * @tc.desc: accountHash or udidShortHash is nullptr.
  * @tc.type: FUNC
@@ -1280,12 +1316,12 @@ HWTEST_F(AuthDeviceProfileTest, IS_SK_ID_INVALID_TEST_001, TestSize.Level1)
 }
 
 /*
- * @tc.name: GET_ACCESS_UK_ID_DIFF_ACCOUNT_TEST_002
+ * @tc.name: IS_SK_ID_INVALID_TEST_002
  * @tc.desc: 1.accountHash length error.2.udidShortHash length error
  * @tc.type: FUNC
  * @tc.require:
  */
-HWTEST_F(AuthDeviceProfileTest, GET_ACCESS_UK_ID_DIFF_ACCOUNT_TEST_002, TestSize.Level1)
+HWTEST_F(AuthDeviceProfileTest, IS_SK_ID_INVALID_TEST_002, TestSize.Level1)
 {
     int32_t sessionKeyId = 1;
     const char *accountHash = "1a2b3c4d5e6f";
