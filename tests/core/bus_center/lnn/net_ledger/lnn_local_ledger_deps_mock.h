@@ -30,9 +30,11 @@
 #include "lnn_device_info.h"
 #include "lnn_distributed_net_ledger.h"
 #include "lnn_event_form.h"
+#include "lnn_cipherkey_manager_struct.h"
 #include "lnn_fast_offline_struct.h"
 #include "lnn_feature_capability.h"
 #include "lnn_file_utils.h"
+#include "lnn_file_utils_struct.h"
 #include "lnn_heartbeat_utils.h"
 #include "lnn_net_capability.h"
 #include "lnn_network_manager.h"
@@ -270,6 +272,11 @@ public:
     virtual int32_t SoftBusGenerateStrHash(const unsigned char *str, uint32_t len, unsigned char *hash);
     virtual int32_t SoftBusGenerateSessionKey(char *key, uint32_t len);
     virtual uint32_t SoftBusCryptoRand(void);
+    virtual int32_t LnnGetLocalDevInfoPacked(NodeInfo *deviceInfo) = 0;
+    virtual int32_t LnnRemoveStorageConfigPath(LnnFileId id) = 0;
+    virtual int32_t InitTrustedDevInfoTable(void) = 0;
+    virtual int32_t LnnLoadLocalBroadcastCipherKeyPacked(void) = 0;
+    virtual int32_t LnnUpdateLocalBroadcastCipherKeyPacked(BroadcastCipherKey *broadcastKey) = 0;
 };
 class LocalLedgerDepsInterfaceMock : public LocalLedgerDepsInterface {
 public:
@@ -482,6 +489,11 @@ public:
     MOCK_METHOD3(SoftBusGenerateStrHash, int32_t(const unsigned char *, uint32_t, unsigned char *));
     MOCK_METHOD2(SoftBusGenerateSessionKey, int32_t(char *, uint32_t));
     MOCK_METHOD0(SoftBusCryptoRand, uint32_t());
+    MOCK_METHOD1(LnnGetLocalDevInfoPacked, int32_t(NodeInfo *));
+    MOCK_METHOD1(LnnRemoveStorageConfigPath, int32_t(LnnFileId));
+    MOCK_METHOD0(InitTrustedDevInfoTable, int32_t(void));
+    MOCK_METHOD0(LnnLoadLocalBroadcastCipherKeyPacked, int32_t(void));
+    MOCK_METHOD1(LnnUpdateLocalBroadcastCipherKeyPacked, int32_t(BroadcastCipherKey *));
 
     static int32_t LedgerGetCommonDevInfo(const CommonDeviceKey key, char *value, uint32_t len);
     static int32_t LedgerSoftBusRegBusCenterVarDump(char *dumpVar, SoftBusVarDumpCb cb);
