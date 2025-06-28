@@ -61,6 +61,7 @@ public:
     virtual SoftBusScreenState GetScreenState(void) = 0;
     virtual void SetScreenState(SoftBusScreenState state) = 0;
     virtual struct WifiDirectManager *GetWifiDirectManager(void) = 0;
+    virtual int32_t LnnStartSleOfflineTimingStrategy(const char *networkId) = 0;
 };
 class HeartBeatFSMInterfaceMock : public HeartBeatFSMInterface {
 public:
@@ -94,6 +95,7 @@ public:
     MOCK_METHOD0(GetScreenState, SoftBusScreenState(void));
     MOCK_METHOD1(SetScreenState, void(SoftBusScreenState));
     MOCK_METHOD0(GetWifiDirectManager, WifiDirectManager *(void));
+    MOCK_METHOD1(LnnStartSleOfflineTimingStrategy, int32_t(const char *));
 };
 } // namespace OHOS
 #endif // AUTH_CONNECTION_MOCK_H

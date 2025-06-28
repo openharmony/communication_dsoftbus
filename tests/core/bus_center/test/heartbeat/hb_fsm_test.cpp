@@ -21,6 +21,7 @@
 #include "distribute_net_ledger_mock.h"
 #include "hb_fsm_mock.h"
 #include "hb_strategy_mock.h"
+#include "g_enhance_lnn_func_pack.h"
 #include "lnn_connection_mock.h"
 #include "lnn_heartbeat_fsm.c"
 #include "lnn_heartbeat_utils.h"

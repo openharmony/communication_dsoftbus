@@ -30,6 +30,7 @@
 #include "bus_center_event.h"
 #include "bus_center_manager.h"
 #include "common_list.h"
+#include "g_enhance_lnn_func_pack.h"
 #include "lnn_async_callback_utils.h"
 #include "lnn_battery_info.h"
 #include "lnn_connection_addr_utils.h"
@@ -410,6 +411,14 @@ static int32_t GetPeerDeviceUdid(char *peerNetworkId, char *peerUdid, uint32_t u
     return SOFTBUS_OK;
 }
 
+static void TryTriggerSparkGroupBuild(const DeviceVerifyPassMsgPara *msgPara)
+{
+    if (IsSameAccountId(msgPara->nodeInfo->accountId) &&
+        LnnHasDiscoveryType(msgPara->nodeInfo, DISCOVERY_TYPE_BLE)) {
+        TriggerSparkGroupBuildPacked(SPARK_GROUP_DELAY_TIME_MS);
+    }
+}
+
 static int32_t ProcessDeviceVerifyPass(const void *para)
 {
     int32_t rc;
@@ -450,6 +459,7 @@ static int32_t ProcessDeviceVerifyPass(const void *para)
         if (LnnUpdateNodeInfo(msgPara->nodeInfo, msgPara->addr.type) != SOFTBUS_OK) {
             LNN_LOGE(LNN_BUILDER, "LnnUpdateNodeInfo failed");
         }
+        TryTriggerSparkGroupBuild(msgPara);
         GetSessionKeyByAuthHandle(msgPara, msgPara->authHandle);
         LNN_LOGI(LNN_BUILDER, "fsmId=%{public}u connection fsm exist, ignore VerifyPass authId=%{public}" PRId64,
             connFsm->id, msgPara->authHandle.authId);

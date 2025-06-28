@@ -26,6 +26,7 @@ extern "C" {
 
 SoftBusScreenState GetScreenState(void);
 void SetScreenState(SoftBusScreenState state);
+SoftBusScreenLockState GetScreenLockState(void);
 void HbEnableDiscovery(void);
 int32_t LnnStartHeartbeatFrameDelay(void);
 int32_t LnnSetHeartbeatMediumParam(const LnnHeartbeatMediumParam *param);
@@ -48,6 +49,10 @@ void LnnDeinitHeartbeat(void);
 
 int32_t LnnTriggerDataLevelHeartbeat(void);
 int32_t LnnTriggerCloudSyncHeartbeat(void);
+int32_t LnnTriggerSleHeartbeat(void);
+int32_t LnnStopSleHeartbeat(void);
+int32_t LnnOfflineTimingBySleHb(const char *networkId, ConnectionAddrType addrType);
+void LnnStopOfflineTimingBySleHb(const char *networkId, ConnectionAddrType addrType);
 void LnnRegDataLevelChangeCb(const IDataLevelChangeCallback *callback);
 void LnnUnregDataLevelChangeCb(void);
 bool IsHeartbeatEnable(void);

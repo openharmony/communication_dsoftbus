@@ -528,6 +528,15 @@ int32_t LnnRegisterBleLpDeviceMediumMgrPacked(void)
     return pfnLnnEnhanceFuncList->lnnRegisterBleLpDeviceMediumMgr();
 }
 
+int32_t LnnRegisterSleHeartbeatMediumMgrPacked(void)
+{
+    LnnEnhanceFuncList *pfnLnnEnhanceFuncList = LnnEnhanceFuncListGet();
+    if (LnnCheckFuncPointer((void *)pfnLnnEnhanceFuncList->lnnRegisterSleHeartbeatMediumMgr) != SOFTBUS_OK) {
+        return SOFTBUS_OK;
+    }
+    return pfnLnnEnhanceFuncList->lnnRegisterSleHeartbeatMediumMgr();
+}
+
 bool HaveConcurrencyPreLinkReqIdByReuseConnReqIdPacked(uint32_t connReqId, bool isCheckPreLink)
 {
     LnnEnhanceFuncList *pfnLnnEnhanceFuncList = LnnEnhanceFuncListGet();

@@ -123,5 +123,25 @@ int32_t DecryptUserId(NodeInfo *deviceInfo, uint8_t *advUserId, uint32_t len)
 {
     return HbMediumMgrInterface()->DecryptUserId(deviceInfo, advUserId, len);
 }
+
+int32_t LnnGetDLSleHbTimestamp(const char *networkId, uint64_t *timestamp)
+{
+    return HbMediumMgrInterface()->LnnGetDLSleHbTimestamp(networkId, timestamp);
+}
+
+int32_t LnnSetDLSleHbTimestamp(const char *networkId, const uint64_t timestamp)
+{
+    return HbMediumMgrInterface()->LnnSetDLSleHbTimestamp(networkId, timestamp);
+}
+
+int32_t LnnStartSleOfflineTimingStrategy(const char *networkId)
+{
+    return HbMediumMgrInterface()->LnnStartSleOfflineTimingStrategy(networkId);
+}
+
+int32_t LnnStopSleOfflineTimingStrategy(const char *networkId)
+{
+    return HbMediumMgrInterface()->LnnStopSleOfflineTimingStrategy(networkId);
+}
 }
 } // namespace OHOS

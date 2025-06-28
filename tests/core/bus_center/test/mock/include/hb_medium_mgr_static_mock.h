@@ -52,6 +52,10 @@ public:
         char *outBuf, uint32_t outBufLen, const unsigned char *inBuf, uint32_t inLen) = 0;
     virtual bool AuthIsPotentialTrusted(const DeviceInfo *device, bool isOnlyPointToPoint) = 0;
     virtual int32_t DecryptUserId(NodeInfo *deviceInfo, uint8_t *advUserId, uint32_t len) = 0;
+    virtual int32_t LnnGetDLSleHbTimestamp(const char *networkId, uint64_t *timestamp) = 0;
+    virtual int32_t LnnSetDLSleHbTimestamp(const char *networkId, const uint64_t timestamp) = 0;
+    virtual int32_t LnnStartSleOfflineTimingStrategy(const char *networkId) = 0;
+    virtual int32_t LnnStopSleOfflineTimingStrategy(const char *networkId) = 0;
 };
 class HbMediumMgrInterfaceMock : public HbMediumMgrInterface {
 public:
@@ -74,6 +78,10 @@ public:
     MOCK_METHOD4(ConvertBytesToHexString, int32_t (char *, uint32_t, const unsigned char *, uint32_t));
     MOCK_METHOD2(AuthIsPotentialTrusted, bool (const DeviceInfo *, bool));
     MOCK_METHOD3(DecryptUserId, int32_t (NodeInfo *, uint8_t *, uint32_t));
+    MOCK_METHOD2(LnnGetDLSleHbTimestamp, int32_t(const char *, uint64_t *));
+    MOCK_METHOD2(LnnSetDLSleHbTimestamp, int32_t(const char *, const uint64_t));
+    MOCK_METHOD1(LnnStartSleOfflineTimingStrategy, int32_t (const char *));
+    MOCK_METHOD1(LnnStopSleOfflineTimingStrategy, int32_t (const char *));
 };
 } // namespace OHOS
 #endif // HB_MEDIUM_MGR_STATIC_MOCK_H
