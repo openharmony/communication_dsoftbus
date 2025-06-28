@@ -1081,5 +1081,30 @@ uint32_t SoftBusCryptoRand(void)
 {
     return GetLocalLedgerDepsInterface()->SoftBusCryptoRand();
 }
+
+int32_t LnnGetLocalDevInfoPacked(NodeInfo *deviceInfo)
+{
+    return GetLocalLedgerDepsInterface()->LnnGetLocalDevInfoPacked(deviceInfo);
+}
+
+int32_t LnnRemoveStorageConfigPath(LnnFileId id)
+{
+    return GetLocalLedgerDepsInterface()->LnnRemoveStorageConfigPath(id);
+}
+
+int32_t InitTrustedDevInfoTable(void)
+{
+    return GetLocalLedgerDepsInterface()->InitTrustedDevInfoTable();
+}
+
+int32_t LnnLoadLocalBroadcastCipherKeyPacked(void)
+{
+    return GetLocalLedgerDepsInterface()->LnnLoadLocalBroadcastCipherKeyPacked();
+}
+
+int32_t LnnUpdateLocalBroadcastCipherKeyPacked(BroadcastCipherKey *broadcastKey)
+{
+    return GetLocalLedgerDepsInterface()->LnnUpdateLocalBroadcastCipherKeyPacked(broadcastKey);
+}
 } // extern "C"
 } // namespace OHOS

@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2022 Huawei Device Co., Ltd.
+ * Copyright (c) 2022-2025 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -310,5 +310,115 @@ HWTEST_F(LNNHuksUtilsTest, Decrypt_Data_Test_01, TestSize.Level0)
     EXPECT_EQ(memcmp(decryptData.data, plainData.data, decryptData.size), 0);
     SoftBusFree(encryptData.data);
     SoftBusFree(decryptData.data);
+}
+
+/*
+ * @tc.name: Generate_Random_Test_02
+ * @tc.desc: generate randowm key test
+ * @tc.type: FUNC
+ * @tc.require: I5RHYE
+ */
+HWTEST_F(LNNHuksUtilsTest, Generate_Random_Test_02, TestSize.Level0)
+{
+    int32_t ret = LnnGenerateRandomByHuks(NULL, LNN_HUKS_AES_COMMON_SIZE);
+    EXPECT_EQ(ret, SOFTBUS_INVALID_PARAM);
+}
+
+/*
+ * @tc.name: CeDecrypt_Data_Test_01
+ * @tc.desc: decrypt data param error
+ * @tc.type: FUNC
+ * @tc.require: I5RHYE
+ */
+HWTEST_F(LNNHuksUtilsTest, CeDecrypt_Data_Test_01, TestSize.Level0)
+{
+    struct HksBlob keyAlias;
+    struct HksBlob inData;
+    struct HksBlob outData;
+    (void)memset_s(&keyAlias, sizeof(HksBlob), 0, sizeof(HksBlob));
+    (void)memset_s(&inData, sizeof(HksBlob), 0, sizeof(HksBlob));
+    (void)memset_s(&outData, sizeof(HksBlob), 0, sizeof(HksBlob));
+    int32_t ret = LnnCeDecryptDataByHuks(NULL, &inData, &outData);
+    EXPECT_EQ(ret, SOFTBUS_INVALID_PARAM);
+    ret = LnnCeDecryptDataByHuks(&keyAlias, NULL, &outData);
+    EXPECT_EQ(ret, SOFTBUS_INVALID_PARAM);
+    ret = LnnCeDecryptDataByHuks(&keyAlias, &inData, NULL);
+    EXPECT_EQ(ret, SOFTBUS_INVALID_PARAM);
+    ret = LnnCeDecryptDataByHuks(&keyAlias, &inData, &outData);
+    EXPECT_EQ(ret, SOFTBUS_INVALID_PARAM);
+}
+
+/*
+ * @tc.name: CeDecrypt_Data_Test_02
+ * @tc.desc: decrypt data param error
+ * @tc.type: FUNC
+ * @tc.require: I5RHYE
+ */
+HWTEST_F(LNNHuksUtilsTest, CeDecrypt_Data_Test_02, TestSize.Level0)
+{
+    struct HksBlob keyAlias;
+    struct HksBlob inData;
+    struct HksBlob outData;
+    (void)memset_s(&keyAlias, sizeof(HksBlob), 0, sizeof(HksBlob));
+    (void)memset_s(&inData, sizeof(HksBlob), 0, sizeof(HksBlob));
+    (void)memset_s(&outData, sizeof(HksBlob), 0, sizeof(HksBlob));
+    inData.size = LNN_HUKS_AES_COMMON_SIZE;
+    int32_t ret = LnnCeDecryptDataByHuks(&keyAlias, &inData, &outData);
+    EXPECT_EQ(ret, SOFTBUS_HUKS_INIT_FAILED);
+}
+
+/*
+ * @tc.name: CeEncrypt_Data_Test_01
+ * @tc.desc: encrypt data param error
+ * @tc.type: FUNC
+ * @tc.require: I5RHYE
+ */
+HWTEST_F(LNNHuksUtilsTest, CeEncrypt_Data_Test_01, TestSize.Level0)
+{
+    struct HksBlob keyAlias;
+    struct HksBlob inData;
+    struct HksBlob outData;
+    (void)memset_s(&keyAlias, sizeof(HksBlob), 0, sizeof(HksBlob));
+    (void)memset_s(&inData, sizeof(HksBlob), 0, sizeof(HksBlob));
+    (void)memset_s(&outData, sizeof(HksBlob), 0, sizeof(HksBlob));
+    int32_t ret = LnnCeEncryptDataByHuks(NULL, &inData, &outData);
+    EXPECT_EQ(ret, SOFTBUS_INVALID_PARAM);
+    ret = LnnCeEncryptDataByHuks(&keyAlias, NULL, &outData);
+    EXPECT_EQ(ret, SOFTBUS_INVALID_PARAM);
+    ret = LnnCeEncryptDataByHuks(&keyAlias, &inData, NULL);
+    EXPECT_EQ(ret, SOFTBUS_INVALID_PARAM);
+    ret = LnnCeEncryptDataByHuks(&keyAlias, &inData, &outData);
+    EXPECT_EQ(ret, SOFTBUS_INVALID_PARAM);
+}
+
+/*
+ * @tc.name: CeEncrypt_Data_Test_02
+ * @tc.desc: encrypt data  error
+ * @tc.type: FUNC
+ * @tc.require: I5RHYE
+ */
+HWTEST_F(LNNHuksUtilsTest, CeEncrypt_Data_Test_02, TestSize.Level0)
+{
+    struct HksBlob keyAlias;
+    struct HksBlob inData;
+    struct HksBlob outData;
+    (void)memset_s(&keyAlias, sizeof(HksBlob), 0, sizeof(HksBlob));
+    (void)memset_s(&inData, sizeof(HksBlob), 0, sizeof(HksBlob));
+    (void)memset_s(&outData, sizeof(HksBlob), 0, sizeof(HksBlob));
+    inData.size = LNN_HUKS_AES_COMMON_SIZE;
+    int32_t ret = LnnCeEncryptDataByHuks(&keyAlias, &inData, &outData);
+    EXPECT_EQ(ret, SOFTBUS_HUKS_INIT_FAILED);
+}
+
+/*
+ * @tc.name: GenerateCeKey_Test_01
+ * @tc.desc: generate key param error
+ * @tc.type: FUNC
+ * @tc.require: I5RHYE
+ */
+HWTEST_F(LNNHuksUtilsTest, GenerateCeKey_Test_01, TestSize.Level0)
+{
+    int32_t ret = LnnGenerateCeKeyByHuks(NULL, true);
+    EXPECT_EQ(ret, SOFTBUS_INVALID_PARAM);
 }
 } // namespace OHOS

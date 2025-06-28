@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2024 Huawei Device Co., Ltd.
+ * Copyright (c) 2024-2025 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -831,5 +831,91 @@ HWTEST_F(HeartBeatCtrlStaticTest, REQUEST_DISABLE_DISCOVERY_TEST_001, TestSize.L
     EXPECT_NO_FATAL_FAILURE(RequestDisableDiscovery(modeDuration));
     g_hbConditionState.isRequestDisable = true;
     EXPECT_NO_FATAL_FAILURE(RequestDisableDiscovery(modeDuration));
+}
+
+/*
+ * @tc.name: LNN_START_HEARTBEAT_FRAMED_ELAY_TEST_001
+ * @tc.desc: LnnStartHeartbeatFrameDelay test
+ * @tc.type: FUNC
+ * @tc.require:
+ */
+HWTEST_F(HeartBeatCtrlStaticTest, LNN_START_HEARTBEAT_FRAMED_ELAY_TEST_001, TestSize.Level1)
+{
+    NiceMock<LnnNetLedgertInterfaceMock> ledgerMock;
+    NiceMock<HeartBeatCtrlStaticInterfaceMock> hbStaticMock;
+    NiceMock<BleMock> bleMock;
+    EXPECT_CALL(bleMock, SoftBusGetBtState).WillRepeatedly(Return(BLE_ENABLE));
+    EXPECT_CALL(hbStaticMock, LnnUpdateOhosAccount).WillRepeatedly(Return());
+    EXPECT_CALL(ledgerMock, LnnIsDefaultOhosAccount).WillRepeatedly(Return(false));
+    EXPECT_CALL(ledgerMock, IsActiveOsAccountUnlocked).WillRepeatedly(Return(true));
+    EXPECT_CALL(hbStaticMock, AuthHasTrustedRelation).WillRepeatedly(Return(TRUSTED_RELATION_YES));
+    EXPECT_CALL(hbStaticMock, IsEnableSoftBusHeartbeat).WillRepeatedly(Return(true));
+    EXPECT_CALL(hbStaticMock, LnnStartHbByTypeAndStrategy).WillRepeatedly(Return(SOFTBUS_INVALID_PARAM));
+    EXPECT_CALL(hbStaticMock, LnnStartNewHbStrategyFsm).WillRepeatedly(Return(SOFTBUS_OK));
+    EXPECT_CALL(hbStaticMock, LnnAsyncCallbackDelayHelper).WillRepeatedly(Return(SOFTBUS_OK));
+    EXPECT_CALL(hbStaticMock, LnnHbMediumMgrInit).WillRepeatedly(Return(SOFTBUS_OK));
+    EXPECT_CALL(ledgerMock, LnnGetLocalNumInfo).WillRepeatedly(
+        DoAll(SetArgPointee<1>(TYPE_WATCH_ID), Return(SOFTBUS_OK)));
+    g_hbConditionState.isRequestDisable = true;
+    int32_t ret = LnnStartHeartbeatFrameDelay();
+    EXPECT_CALL(ledgerMock, LnnGetLocalNumInfo).WillRepeatedly(Return(SOFTBUS_INVALID_PARAM));
+    EXPECT_EQ(ret, SOFTBUS_OK);
+    g_hbConditionState.isRequestDisable = false;
+    ret = LnnStartHeartbeatFrameDelay();
+    EXPECT_EQ(ret, SOFTBUS_OK);
+}
+
+/*
+ * @tc.name: LNN_IS_CLOUD_SYNC_END_TEST_001
+ * @tc.desc: LnnIsCloudSyncEnd test
+ * @tc.type: FUNC
+ * @tc.require:
+ */
+HWTEST_F(HeartBeatCtrlStaticTest, LNN_IS_CLOUD_SYNC_END_TEST_001, TestSize.Level1)
+{
+    g_isCloudSyncEnd = true;
+    bool ret = LnnIsCloudSyncEnd();
+    EXPECT_TRUE(ret);
+    g_isCloudSyncEnd = false;
+    ret = LnnIsCloudSyncEnd();
+    EXPECT_FALSE(ret);
+}
+
+/*
+ * @tc.name: LNN_TRIGGER_HB_FOR_RANGE_TEST_002
+ * @tc.desc: LnnTriggerHbRangeForMsdp Abnormal test
+ * @tc.type: FUNC
+ * @tc.require:
+ */
+HWTEST_F(HeartBeatCtrlStaticTest, LNN_TRIGGER_HB_FOR_RANGE_TEST_002, TestSize.Level1)
+{
+    NiceMock<LnnNetLedgertInterfaceMock> ledgerMock;
+    EXPECT_CALL(ledgerMock, LnnGetLocalNumInfo).WillRepeatedly(
+        DoAll(SetArgPointee<1>(TYPE_WATCH_ID), Return(SOFTBUS_OK)));
+    g_hbConditionState.isRequestDisable = true;
+    HbMode mode = { .connFlag = false, .duration = 5, .replyFlag = false};
+    RangeConfig config = {.medium = BLE_ADV_HB, .configInfo.heartbeat.mode = mode };
+    int32_t ret = LnnTriggerHbRangeForMsdp("test", &config);
+    EXPECT_EQ(ret, SOFTBUS_FUNC_NOT_SUPPORT);
+}
+
+/*
+ * @tc.name: LNN_TRIGGER_HB_FOR_RANGE_TEST_003
+ * @tc.desc: LnnTriggerHbRangeForMsdp Abnormal test
+ * @tc.type: FUNC
+ * @tc.require:
+ */
+HWTEST_F(HeartBeatCtrlStaticTest, LNN_TRIGGER_HB_FOR_RANGE_TEST_003, TestSize.Level1)
+{
+    NiceMock<HeartBeatCtrlStaticInterfaceMock> hbStaticMock;
+    NiceMock<LnnNetLedgertInterfaceMock> ledgerMock;
+    g_hbConditionState.isRequestDisable = false;
+    EXPECT_CALL(ledgerMock, LnnGetLocalNumInfo).WillRepeatedly(Return(SOFTBUS_INVALID_PARAM));
+    EXPECT_CALL(hbStaticMock, LnnStartHbByTypeAndStrategyEx).WillRepeatedly(Return(SOFTBUS_OK));
+    EXPECT_CALL(hbStaticMock, LnnAsyncCallbackDelayHelper).WillRepeatedly(Return(SOFTBUS_INVALID_PARAM));
+    HbMode mode = { .connFlag = false, .duration = 5, .replyFlag = false};
+    RangeConfig config = {.medium = BLE_ADV_HB, .configInfo.heartbeat.mode = mode };
+    int32_t ret = LnnTriggerHbRangeForMsdp("test", &config);
+    EXPECT_EQ(ret, SOFTBUS_OK);
 }
 } // namespace OHOS
