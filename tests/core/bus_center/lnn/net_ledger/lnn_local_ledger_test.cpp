@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2023 Huawei Device Co., Ltd.
+ * Copyright (c) 2023-2025 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -738,6 +738,8 @@ HWTEST_F(LNNLedgerMockTest, LOCAL_GET_NETWORK_ID_TIME_STAMP_Test_001, TestSize.L
  */
 HWTEST_F(LNNLedgerMockTest, UPDATE_UNIFIED_NAME_Test_001, TestSize.Level1)
 {
+    LocalLedgerDepsInterfaceMock localLedgerMock;
+    EXPECT_CALL(localLedgerMock, LnnGetLocalDevInfoPacked).WillRepeatedly(Return(SOFTBUS_OK));
     const char *unifiedName = "unifiedNameTest";
     EXPECT_EQ(UpdateUnifiedName(nullptr), SOFTBUS_INVALID_PARAM);
     EXPECT_EQ(UpdateUnifiedName(reinterpret_cast<const void *>(const_cast<char *>(unifiedName))), SOFTBUS_OK);
@@ -751,6 +753,8 @@ HWTEST_F(LNNLedgerMockTest, UPDATE_UNIFIED_NAME_Test_001, TestSize.Level1)
  */
 HWTEST_F(LNNLedgerMockTest, UPDATE_UNIFIED_DEFAULT_NAME_Test_001, TestSize.Level1)
 {
+    LocalLedgerDepsInterfaceMock localLedgerMock;
+    EXPECT_CALL(localLedgerMock, LnnGetLocalDevInfoPacked).WillRepeatedly(Return(SOFTBUS_OK));
     const char *unifiedDefaultName = "unifiedDefaultNameTest";
     EXPECT_EQ(UpdateUnifiedDefaultName(nullptr), SOFTBUS_INVALID_PARAM);
     EXPECT_EQ(UpdateUnifiedDefaultName(reinterpret_cast<const void *>(const_cast<char *>(unifiedDefaultName))),
@@ -765,6 +769,8 @@ HWTEST_F(LNNLedgerMockTest, UPDATE_UNIFIED_DEFAULT_NAME_Test_001, TestSize.Level
  */
 HWTEST_F(LNNLedgerMockTest, UPDATE_NICK_NAME_Test_001, TestSize.Level1)
 {
+    LocalLedgerDepsInterfaceMock localLedgerMock;
+    EXPECT_CALL(localLedgerMock, LnnGetLocalDevInfoPacked).WillRepeatedly(Return(SOFTBUS_OK));
     const char *nickName = "nickNameTest";
     EXPECT_EQ(UpdateNickName(nullptr), SOFTBUS_INVALID_PARAM);
     EXPECT_EQ(UpdateNickName(reinterpret_cast<const void *>(const_cast<char *>(nickName))), SOFTBUS_OK);
@@ -957,4 +963,158 @@ HWTEST_F(LNNLedgerMockTest, L1_GET_HUKS_KEY_TIME_Test_001, TestSize.Level1)
     EXPECT_EQ(L1GetHuksKeyTime(nullptr, len), SOFTBUS_INVALID_PARAM);
     EXPECT_EQ(L1GetHuksKeyTime(reinterpret_cast<void *>(&hukTime), len), SOFTBUS_OK);
 }
+
+/*
+ * @tc.name: HANDLE_DEVICE_INFOIF_UDID_CHANGED_001
+ * @tc.desc: HandleDeviceInfoIfUdidChanged test
+ * @tc.type: FUNC
+ * @tc.require:
+ */
+HWTEST_F(LNNLedgerMockTest, HANDLE_DEVICE_INFOIF_UDID_CHANGED_001, TestSize.Level1)
+{
+    LocalLedgerDepsInterfaceMock localLedgerMock;
+    EXPECT_CALL(localLedgerMock, GetCommonDevInfo).WillRepeatedly(Return(SOFTBUS_INVALID_PARAM));
+    int32_t ret = HandleDeviceInfoIfUdidChanged();
+    EXPECT_EQ(ret, SOFTBUS_NETWORK_GET_DEVICE_INFO_ERR);
+    NodeInfo localNodeInfo;
+    (void)memset_s(&localNodeInfo, sizeof(NodeInfo), 0, sizeof(NodeInfo));
+    localNodeInfo.deviceInfo.deviceUdid[0] = 4;
+    EXPECT_CALL(localLedgerMock, LnnGetLocalDevInfoPacked)
+        .WillRepeatedly(DoAll(SetArgPointee<0>(localNodeInfo), Return(SOFTBUS_OK)));
+    EXPECT_CALL(localLedgerMock, GetCommonDevInfo).WillRepeatedly(Return(SOFTBUS_OK));
+    EXPECT_CALL(localLedgerMock, LnnRemoveStorageConfigPath)
+        .WillOnce(Return(SOFTBUS_INVALID_PARAM))
+        .WillRepeatedly(Return(SOFTBUS_OK));
+    ret = HandleDeviceInfoIfUdidChanged();
+    EXPECT_EQ(ret, SOFTBUS_FILE_ERR);
+    EXPECT_CALL(localLedgerMock, InitTrustedDevInfoTable)
+        .WillOnce(Return(SOFTBUS_INVALID_PARAM))
+        .WillRepeatedly(Return(SOFTBUS_OK));
+    ret = HandleDeviceInfoIfUdidChanged();
+    EXPECT_EQ(ret, SOFTBUS_NETWORK_INVALID_DEV_INFO);
+}
+
+/*
+ * @tc.name: HANDLE_DEVICE_INFOIF_UDID_CHANGED_002
+ * @tc.desc: HandleDeviceInfoIfUdidChanged test
+ * @tc.type: FUNC
+ * @tc.require:
+ */
+HWTEST_F(LNNLedgerMockTest, HANDLE_DEVICE_INFOIF_UDID_CHANGED_002, TestSize.Level1)
+{
+    LocalLedgerDepsInterfaceMock localLedgerMock;
+    NodeInfo localNodeInfo;
+    (void)memset_s(&localNodeInfo, sizeof(NodeInfo), 0, sizeof(NodeInfo));
+    localNodeInfo.deviceInfo.deviceUdid[0] = 4;
+    EXPECT_CALL(localLedgerMock, LnnGetLocalDevInfoPacked)
+        .WillRepeatedly(DoAll(SetArgPointee<0>(localNodeInfo), Return(SOFTBUS_OK)));
+    EXPECT_CALL(localLedgerMock, GetCommonDevInfo).WillRepeatedly(Return(SOFTBUS_OK));
+    EXPECT_CALL(localLedgerMock, LnnRemoveStorageConfigPath).WillRepeatedly(Return(SOFTBUS_OK));
+    EXPECT_CALL(localLedgerMock, InitTrustedDevInfoTable).WillRepeatedly(Return(SOFTBUS_OK));
+    int32_t ret = HandleDeviceInfoIfUdidChanged();
+    EXPECT_EQ(ret, SOFTBUS_OK);
+}
+
+/*
+ * @tc.name: LNN_INIT_LOCAL_NODE_INFO_001
+ * @tc.desc: LnnInitLocalNodeInfo test
+ * @tc.type: FUNC
+ * @tc.require:
+ */
+HWTEST_F(LNNLedgerMockTest, LNN_INIT_LOCAL_NODE_INFO_001, TestSize.Level1)
+{
+    LocalLedgerDepsInterfaceMock localLedgerMock;
+    NodeInfo nodeInfo;
+    (void)memset_s(&nodeInfo, sizeof(NodeInfo), 0, sizeof(NodeInfo));
+    nodeInfo.deviceInfo.deviceTypeId = TYPE_WATCH_ID;
+    EXPECT_CALL(localLedgerMock, GetCommonDevInfo(Eq(COMM_DEVICE_KEY_DEVNAME), _, _))
+        .WillRepeatedly(Return(SOFTBUS_OK));
+    EXPECT_CALL(localLedgerMock, GetCommonDevInfo(Eq(COMM_DEVICE_KEY_DEVTYPE), _, _))
+        .WillRepeatedly(Return(SOFTBUS_OK));
+    EXPECT_CALL(localLedgerMock, GetCommonDevInfo(Eq(COMM_DEVICE_KEY_VERSION_TYPE), _, _))
+        .WillRepeatedly(Return(SOFTBUS_INVALID_PARAM));
+    int32_t ret = LnnInitLocalNodeInfo(&nodeInfo);
+    EXPECT_EQ(ret, SOFTBUS_NETWORK_GET_DEVICE_INFO_ERR);
+    EXPECT_CALL(localLedgerMock, GetDeviceSecurityLevel)
+        .WillOnce(Return(SOFTBUS_INVALID_PARAM))
+        .WillRepeatedly(Return(SOFTBUS_OK));
+    EXPECT_CALL(localLedgerMock, GetCommonDevInfo(Eq(COMM_DEVICE_KEY_VERSION_TYPE), _, _))
+        .WillRepeatedly(Return(SOFTBUS_OK));
+    EXPECT_CALL(localLedgerMock, GetCommonDevInfo(Eq(COMM_DEVICE_KEY_BT_MAC), _, _))
+        .WillRepeatedly(Return(SOFTBUS_INVALID_PARAM));
+    ret = LnnInitLocalNodeInfo(&nodeInfo);
+    EXPECT_EQ(ret, SOFTBUS_INVALID_PARAM);
+}
+
+/*
+ * @tc.name: LNN_GET_LOCAL_HUM_U16_INFO_001
+ * @tc.desc: LnnGetLocalNumU16Info test
+ * @tc.type: FUNC
+ * @tc.require:
+ */
+HWTEST_F(LNNLedgerMockTest, LNN_GET_LOCAL_HUM_U16_INFO_001, TestSize.Level1)
+{
+    int32_t ret = LnnGetLocalNumU16Info(NUM_KEY_DATA_SWITCH_LENGTH, NULL);
+    EXPECT_EQ(ret, SOFTBUS_INVALID_PARAM);
+    uint16_t info = 0;
+    ret = LnnGetLocalNumU16Info(NUM_KEY_DATA_SWITCH_LENGTH, &info);
+    EXPECT_EQ(ret, SOFTBUS_OK);
+}
+
+/*
+ * @tc.name: LNN_GEN_BROAD_CAST_CIPHER_INFO_001
+ * @tc.desc: LnnGenBroadcastCipherInfo test
+ * @tc.type: FUNC
+ * @tc.require:
+ */
+HWTEST_F(LNNLedgerMockTest, LNN_GEN_BROAD_CAST_CIPHER_INFO_001, TestSize.Level1)
+{
+    LocalLedgerDepsInterfaceMock localLedgerMock;
+    EXPECT_CALL(localLedgerMock, LnnLoadLocalBroadcastCipherKeyPacked)
+        .WillRepeatedly(Return(SOFTBUS_INVALID_PARAM));
+    int32_t ret = LnnGenBroadcastCipherInfo();
+    EXPECT_EQ(ret, SOFTBUS_OK);
+}
+
+/*
+ * @tc.name: LNN_GEN_BROAD_CAST_CIPHER_INFO_002
+ * @tc.desc: LnnGenBroadcastCipherInfo test
+ * @tc.type: FUNC
+ * @tc.require:
+ */
+HWTEST_F(LNNLedgerMockTest, LNN_GEN_BROAD_CAST_CIPHER_INFO_002, TestSize.Level1)
+{
+    LocalLedgerDepsInterfaceMock localLedgerMock;
+    EXPECT_CALL(localLedgerMock, LnnLoadLocalBroadcastCipherKeyPacked)
+        .WillRepeatedly(Return(SOFTBUS_INVALID_PARAM));
+    EXPECT_CALL(localLedgerMock, SoftBusGenerateRandomArray(_, Eq(SESSION_KEY_LENGTH)))
+        .WillOnce(Return(SOFTBUS_INVALID_PARAM))
+        .WillRepeatedly(Return(SOFTBUS_OK));
+    int32_t ret = LnnGenBroadcastCipherInfo();
+    EXPECT_EQ(ret, SOFTBUS_NETWORK_GENERATE_CIPHER_INFO_FAILED);
+    EXPECT_CALL(localLedgerMock, SoftBusGenerateRandomArray(_, Eq(BROADCAST_IV_LEN)))
+        .WillOnce(Return(SOFTBUS_INVALID_PARAM))
+        .WillRepeatedly(Return(SOFTBUS_OK));
+    ret = LnnGenBroadcastCipherInfo();
+    EXPECT_EQ(ret, SOFTBUS_NETWORK_GENERATE_CIPHER_INFO_FAILED);
+}
+
+/*
+ * @tc.name: LNN_GEN_BROAD_CAST_CIPHER_INFO_003
+ * @tc.desc: LnnGenBroadcastCipherInfo test
+ * @tc.type: FUNC
+ * @tc.require:
+ */
+HWTEST_F(LNNLedgerMockTest, LNN_GEN_BROAD_CAST_CIPHER_INFO_003, TestSize.Level1)
+{
+    LocalLedgerDepsInterfaceMock localLedgerMock;
+    EXPECT_CALL(localLedgerMock, LnnLoadLocalBroadcastCipherKeyPacked)
+        .WillRepeatedly(Return(SOFTBUS_INVALID_PARAM));
+    EXPECT_CALL(localLedgerMock, SoftBusGenerateRandomArray).WillRepeatedly(Return(SOFTBUS_OK));
+    EXPECT_CALL(localLedgerMock, LnnUpdateLocalBroadcastCipherKeyPacked)
+        .WillRepeatedly(Return(SOFTBUS_INVALID_PARAM));
+    int32_t ret = LnnGenBroadcastCipherInfo();
+    EXPECT_EQ(ret, SOFTBUS_NETWORK_GENERATE_CIPHER_INFO_FAILED);
+}
+
 } // namespace OHOS
