@@ -73,6 +73,7 @@ typedef struct {
     bool hasTrustedRelation;
     bool heartbeatEnable;
     bool isRequestDisable;
+    bool isSleEnable;
 } HbConditionState;
 
 static HbConditionState g_hbConditionState;
@@ -144,6 +145,11 @@ bool IsHeartbeatEnable(void)
 SoftBusScreenState GetScreenState(void)
 {
     return g_hbConditionState.screenState;
+}
+
+SoftBusScreenLockState GetScreenLockState(void)
+{
+    return g_hbConditionState.lockState;
 }
 
 bool LnnIsCloudSyncEnd(void)
@@ -237,6 +243,27 @@ static void HbSendCheckOffLineMessage(LnnHeartbeatType hbType)
         }
     }
     SoftBusFree(info);
+}
+
+static void HbSleStateEventHandler(const LnnEventBasicInfo *info)
+{
+    if (info == NULL || info->event != LNN_EVENT_SLE_STATE_CHANGED) {
+        LNN_LOGE(LNN_HEART_BEAT, "sle state change evt handler get invalid event");
+        return;
+    }
+
+    const LnnMonitorSleStateChangedEvent *event = (const LnnMonitorSleStateChangedEvent *)info;
+    SoftBusSleState sleState = (SoftBusSleState)event->status;
+    LNN_LOGI(LNN_HEART_BEAT, "hb sle state change, sleState=%{public}d", sleState);
+    if (sleState == SOFTBUS_SLE_TURN_ON) {
+        if (LnnEnableHeartbeatByType(HEARTBEAT_TYPE_SLE, true) != SOFTBUS_OK) {
+            LNN_LOGE(LNN_HEART_BEAT, "ctrl enable sle heartbeat fail");
+        }
+    } else if (sleState == SOFTBUS_SLE_TURN_OFF) {
+        if (LnnEnableHeartbeatByType(HEARTBEAT_TYPE_SLE, false) != SOFTBUS_OK) {
+            LNN_LOGE(LNN_HEART_BEAT, "ctrl disable sle heartbeat fail");
+        }
+    }
 }
 
 static void HbConditionChanged(bool isOnlySetState)
@@ -1306,6 +1333,8 @@ static int32_t LnnRegisterCommonEvent(void)
     LNN_CHECK_AND_RETURN_RET_LOGE(ret == SOFTBUS_OK, ret, LNN_INIT, "regist OOBE state evt handler fail");
     ret = LnnRegisterEventHandler(LNN_EVENT_USER_SWITCHED, HbUserSwitchedHandler);
     LNN_CHECK_AND_RETURN_RET_LOGE(ret == SOFTBUS_OK, ret, LNN_INIT, "regist user switch evt handler fail");
+    ret = LnnRegisterEventHandler(LNN_EVENT_SLE_STATE_CHANGED, HbSleStateEventHandler);
+    LNN_CHECK_AND_RETURN_RET_LOGE(ret == SOFTBUS_OK, ret, LNN_INIT, "regist sle state change evt handler fail");
     return SOFTBUS_OK;
 }
 
@@ -1429,6 +1458,7 @@ void LnnDeinitHeartbeat(void)
     LnnUnregisterEventHandler(LNN_EVENT_OOBE_STATE_CHANGED, HbOOBEStateEventHandler);
     LnnUnregisterEventHandler(LNN_EVENT_LP_EVENT_REPORT, HbLpEventHandler);
     LnnUnregisterEventHandler(LNN_EVENT_USER_SWITCHED, HbUserSwitchedHandler);
+    LnnUnregisterEventHandler(LNN_EVENT_SLE_STATE_CHANGED, HbSleStateEventHandler);
 }
 
 int32_t LnnTriggerDataLevelHeartbeat(void)
@@ -1498,4 +1528,75 @@ void LnnRegBleRangeCb(const IBleRangeInnerCallback *callback)
 void LnnUnregBleRangeCb(void)
 {
     g_bleRangeCallback.onRangeResult = NULL;
+}
+
+int32_t LnnTriggerSleHeartbeat(void)
+{
+    if (!IsHeartbeatEnable()) {
+        LNN_LOGD(LNN_HEART_BEAT, "sle no need handle");
+        return SOFTBUS_OK;
+    }
+    if (g_hbConditionState.isSleEnable) {
+        LNN_LOGD(LNN_HEART_BEAT, "sle has started");
+        return SOFTBUS_OK;
+    }
+    if (LnnStartHbByTypeAndStrategy(HEARTBEAT_TYPE_SLE, STRATEGY_HB_SEND_FIXED_PERIOD, false) != SOFTBUS_OK) {
+        LNN_LOGE(LNN_HEART_BEAT, "start sle spark hb fail");
+        return SOFTBUS_NETWORK_HB_START_STRATEGY_FAIL;
+    }
+    g_hbConditionState.isSleEnable = true;
+    LNN_LOGI(LNN_HEART_BEAT, "start sle spark hb success");
+    return SOFTBUS_OK;
+}
+
+int32_t LnnStopSleHeartbeat(void)
+{
+    if (!g_hbConditionState.isSleEnable) {
+        LNN_LOGD(LNN_HEART_BEAT, "sle has stoped");
+        return SOFTBUS_OK;
+    }
+    if (LnnStopHeartbeatByType(HEARTBEAT_TYPE_SLE) != SOFTBUS_OK) {
+        LNN_LOGE(LNN_HEART_BEAT, "stop sle spark hb fail");
+        return SOFTBUS_NETWORK_HB_STOP_STRATEGY_FAIL;
+    }
+    g_hbConditionState.isSleEnable = false;
+    LNN_LOGI(LNN_HEART_BEAT, "stop sle spark hb success");
+    return SOFTBUS_OK;
+}
+
+int32_t LnnOfflineTimingBySleHb(const char *networkId, ConnectionAddrType addrType)
+{
+    LNN_CHECK_AND_RETURN_RET_LOGE(networkId != NULL, SOFTBUS_INVALID_PARAM, LNN_HEART_BEAT, "invalid param");
+    LNN_CHECK_AND_RETURN_RET_LOGE(addrType == CONNECTION_ADDR_BLE, SOFTBUS_INVALID_PARAM, LNN_HEART_BEAT,
+        "only support ble");
+    SoftBusSysTime time = { 0 };
+    (void)SoftBusGetTime(&time);
+    uint64_t nowTime = (uint64_t)time.sec * HB_TIME_FACTOR + (uint64_t)time.usec / HB_TIME_FACTOR;
+    if (LnnSetDLSleHbTimestamp(networkId, nowTime) != SOFTBUS_OK) {
+        LNN_LOGE(LNN_HEART_BEAT, "HB set sle time stamp fail");
+        return SOFTBUS_NETWORK_HB_STOP_STRATEGY_FAIL;
+    }
+    (void)LnnStopSleOfflineTimingStrategy(networkId);
+    if (LnnStartSleOfflineTimingStrategy(networkId) != SOFTBUS_OK) {
+        LNN_LOGE(LNN_HEART_BEAT, "ctrl start offline timing strategy fail");
+        return SOFTBUS_NETWORK_HB_START_STRATEGY_FAIL;
+    }
+    char *anonyNetworkId = NULL;
+    Anonymize(networkId, &anonyNetworkId);
+    LNN_LOGI(LNN_HEART_BEAT, "HB start sle offline strategy, netwrokId=%{publc}s, timestamp=%{public}" PRIu64 "",
+        AnonymizeWrapper(anonyNetworkId), nowTime);
+    AnonymizeFree(anonyNetworkId);
+    return SOFTBUS_OK;
+}
+
+void LnnStopOfflineTimingBySleHb(const char *networkId, ConnectionAddrType addrType)
+{
+    LNN_CHECK_AND_RETURN_LOGE(networkId != NULL, LNN_HEART_BEAT, "invalid param");
+    LNN_CHECK_AND_RETURN_LOGE(addrType == CONNECTION_ADDR_BLE, LNN_HEART_BEAT, "only support ble");
+    char *anonyNetworkId = NULL;
+    Anonymize(networkId, &anonyNetworkId);
+    LNN_LOGI(LNN_HEART_BEAT, "HB stop sle offline strategy, netwrokId=%{publc}s",
+        AnonymizeWrapper(anonyNetworkId));
+    AnonymizeFree(anonyNetworkId);
+    LnnStopSleOfflineTimingStrategy(networkId);
 }

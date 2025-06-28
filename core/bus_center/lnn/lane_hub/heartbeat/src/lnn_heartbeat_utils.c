@@ -57,6 +57,7 @@ ConnectionAddrType LnnConvertHbTypeToConnAddrType(LnnHeartbeatType type)
             return CONNECTION_ADDR_WLAN;
         case HEARTBEAT_TYPE_BLE_V1:
         case HEARTBEAT_TYPE_BLE_V0:
+        case HEARTBEAT_TYPE_SLE:
             return CONNECTION_ADDR_BLE;
         default:
             break;

@@ -35,6 +35,7 @@ extern "C" {
 #define HB_SHORT_UDID_HASH_HEX_LEN 16
 #define HB_SHORT_ACCOUNT_HASH_LEN  2
 #define HB_FSM_NAME_LEN            32
+#define HB_SLE_SHORT_UDID_HASH_LEN 6
 
 #define HB_TIME_FACTOR_TWO_HUNDRED_MS         (200LL)
 #define HB_TIME_FACTOR                        (1000LL)
@@ -56,11 +57,13 @@ extern "C" {
 #define HB_SEND_RELAY_LEN_ONCE                (3 * HB_TIME_FACTOR)
 #define HB_SEND_DIRECT_LEN_ONCE               (5 * HB_TIME_FACTOR)
 #define HB_OFFLINE_PERIOD                     2
+#define HB_SEND_SLE_HB_MODE                   (1 * HB_TIME_FACTOR + 4 * HB_TIME_FACTOR_TWO_HUNDRED_MS)
+#define HB_SLE_OFFLINE_TIME                   (9 * HB_TIME_FACTOR + 3 * HB_TIME_FACTOR_TWO_HUNDRED_MS)
 
 #define HB_SEND_EACH_SEPARATELY_LEN (2 * HB_TIME_FACTOR) // Split and send a single heartbeat
 #define HB_SEND_SEPARATELY_CNT      (HB_SEND_ONCE_LEN / HB_SEND_EACH_SEPARATELY_LEN)
 
-#define HB_MAX_TYPE_COUNT         6
+#define HB_MAX_TYPE_COUNT         7
 #define HB_MULTI_DEVICE_THRESHOLD 8
 
 // heartbeat type
@@ -72,7 +75,8 @@ typedef uint32_t LnnHeartbeatType;
 #define HEARTBEAT_TYPE_TCP_FLUSH (0x1L << 3)
 #define HEARTBEAT_TYPE_BLE_V3    (0x1L << 4)
 #define HEARTBEAT_TYPE_BLE_V4    (0x1L << 5) // for heartbeat to lowpower
-#define HEARTBEAT_TYPE_MAX       (0x1L << 6)
+#define HEARTBEAT_TYPE_SLE       (0x1L << 6) // for heartbeat to lowpower
+#define HEARTBEAT_TYPE_MAX       (0x1L << 7)
 #define HEARTBEAT_TYPE_INVALID   0xFFFF
 
 #define NORMAL_STRATEGY               1
@@ -104,6 +108,14 @@ typedef uint32_t LnnHeartbeatType;
 #define HB_ADV_RANDOM_TIME_1000 1000
 
 #define HB_USER_SWITCH_CALLER_ID "HEARTBEAT_USER_SWITCH_CALLER_ID"
+
+typedef struct {
+    bool isScreenOn;
+    bool isLocked;
+    bool isPlugged;
+    bool isOffline;
+    uint8_t netcap;
+} SleDeviceInfo;
 
 typedef enum {
     STRATEGY_HB_SEND_SINGLE = 0,

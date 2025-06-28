@@ -70,7 +70,7 @@ static LnnHeartbeatStrategyManager g_hbStrategyMgr[] = {
         .onProcess = SingleSendStrategy,
     },
     [STRATEGY_HB_SEND_FIXED_PERIOD] = {
-        .supportType = HEARTBEAT_TYPE_UDP | HEARTBEAT_TYPE_BLE_V1,
+        .supportType = HEARTBEAT_TYPE_UDP | HEARTBEAT_TYPE_BLE_V1 | HEARTBEAT_TYPE_SLE,
         .onProcess = FixedPeriodSendStrategy,
     },
     [STRATEGY_HB_SEND_ADJUSTABLE_PERIOD] = {
@@ -616,6 +616,16 @@ static int32_t ProcessCheckDevStatusMsg(LnnHeartbeatFsm *hbFsm, LnnProcessSendOn
     return SOFTBUS_OK;
 }
 
+static int32_t SendSleBroadCast(
+    LnnHeartbeatFsm *hbFsm, LnnHeartbeatType hbType, bool wakeupFlag, LnnProcessSendOnceMsgPara *msgPara)
+{
+    if (LnnPostSendBeginMsgToHbFsm(hbFsm, hbType, wakeupFlag, msgPara, 0) != SOFTBUS_OK) {
+        LNN_LOGE(LNN_HEART_BEAT, "HB send once begin fail, hbType=%{public}d", hbType);
+        return SOFTBUS_NETWORK_POST_MSG_FAIL;
+    }
+    return SOFTBUS_OK;
+}
+
 static int32_t ProcessSendOnceStrategy(LnnHeartbeatFsm *hbFsm, LnnProcessSendOnceMsgPara *msgPara, const GearMode *mode)
 {
     bool isRemoved = true;
@@ -625,6 +635,9 @@ static int32_t ProcessSendOnceStrategy(LnnHeartbeatFsm *hbFsm, LnnProcessSendOnc
     if (registedHbType < HEARTBEAT_TYPE_MIN) {
         LNN_LOGW(LNN_HEART_BEAT, "HB send once get hbType is not available. hbType=%{public}d", msgPara->hbType);
         return SOFTBUS_OK;
+    }
+    if ((registedHbType & HEARTBEAT_TYPE_SLE) == HEARTBEAT_TYPE_SLE) {
+        return SendSleBroadCast(hbFsm, registedHbType, wakeupFlag, msgPara);
     }
     LnnRemoveSendEndMsg(hbFsm, msgPara, wakeupFlag, &isRemoved);
     bool isUserSwitch = (strlen(msgPara->callerId) != 0 && strcmp(msgPara->callerId, HB_USER_SWITCH_CALLER_ID) == 0) ?
@@ -675,6 +688,22 @@ static int32_t SingleSendStrategy(LnnHeartbeatFsm *hbFsm, void *obj)
     return SOFTBUS_OK;
 }
 
+static uint64_t GetFixedPeriodByMsgPara(LnnProcessSendOnceMsgPara *msgPara)
+{
+    uint64_t period = 0;
+    switch (msgPara->hbType) {
+        case HEARTBEAT_TYPE_BLE_V1:
+            period = (uint64_t)LOW_FREQ_CYCLE * HB_TIME_FACTOR;
+            break;
+        case HEARTBEAT_TYPE_SLE:
+            period = (uint64_t)HB_SEND_SLE_HB_MODE;
+            break;
+        default:
+            break;
+    }
+    return period;
+}
+
 static int32_t FixedPeriodSendStrategy(LnnHeartbeatFsm *hbFsm, void *obj)
 {
     LnnProcessSendOnceMsgPara *msgPara = (LnnProcessSendOnceMsgPara *)obj;
@@ -687,7 +716,7 @@ static int32_t FixedPeriodSendStrategy(LnnHeartbeatFsm *hbFsm, void *obj)
         LNN_LOGE(LNN_HEART_BEAT, "HB fixed period send once fail");
         return SOFTBUS_NETWORK_HB_SEND_STRATEGY_FAIL;
     }
-    if (LnnPostNextSendOnceMsgToHbFsm(hbFsm, msgPara, (uint64_t)LOW_FREQ_CYCLE * HB_TIME_FACTOR) != SOFTBUS_OK) {
+    if (LnnPostNextSendOnceMsgToHbFsm(hbFsm, msgPara, GetFixedPeriodByMsgPara(msgPara)) != SOFTBUS_OK) {
         LNN_LOGE(LNN_HEART_BEAT, "HB fixed period send loop msg fail");
         return SOFTBUS_NETWORK_POST_MSG_FAIL;
     }
@@ -1048,6 +1077,37 @@ int32_t LnnStopScreenChangeOfflineTiming(const char *networkId, ConnectionAddrTy
     return SOFTBUS_OK;
 }
 
+int32_t LnnStartSleOfflineTimingStrategy(const char *networkId)
+{
+    LNN_CHECK_AND_RETURN_RET_LOGE(networkId != NULL, SOFTBUS_INVALID_PARAM, LNN_HEART_BEAT, "invalid param");
+
+    LnnCheckDevStatusMsgPara msgPara = { 0 };
+    if (strcpy_s((char *)msgPara.networkId, NETWORK_ID_BUF_LEN, networkId) != EOK) {
+        LNN_LOGE(LNN_HEART_BEAT, "HB start offline timing strcpy_s networkId fail");
+        return SOFTBUS_MEM_ERR;
+    }
+    msgPara.addrType = CONNECTION_ADDR_BLE;
+    msgPara.hasNetworkId = true;
+    msgPara.hbType = HEARTBEAT_TYPE_SLE;
+    return LnnPostSleCheckDevStatusMsgToHbFsm(g_hbFsm, &msgPara, (uint64_t)HB_SLE_OFFLINE_TIME);
+}
+
+int32_t LnnStopSleOfflineTimingStrategy(const char *networkId)
+{
+    LNN_CHECK_AND_RETURN_RET_LOGE(networkId != NULL, SOFTBUS_INVALID_PARAM, LNN_HEART_BEAT, "invalid param");
+    LnnCheckDevStatusMsgPara msgPara = {
+        .hbType = HEARTBEAT_TYPE_SLE,
+        .addrType = CONNECTION_ADDR_BLE,
+    };
+    if (strcpy_s((char *)msgPara.networkId, NETWORK_ID_BUF_LEN, networkId) != EOK) {
+        LNN_LOGE(LNN_HEART_BEAT, "HB stop offline timing strcpy_s networkId fail");
+        return SOFTBUS_MEM_ERR;
+    }
+    msgPara.hasNetworkId = true;
+    LnnRemoveSleCheckStatusMsg(g_hbFsm, &msgPara);
+    return SOFTBUS_OK;
+}
+
 int32_t LnnStartHbByTypeAndStrategy(LnnHeartbeatType hbType, LnnHeartbeatStrategyType strategyType, bool isRelay)
 {
     LnnProcessSendOnceMsgPara msgPara = {
@@ -1226,6 +1286,10 @@ int32_t LnnHbStrategyInit(void)
         LNN_LOGE(LNN_HEART_BEAT, "HB regist udp/tcp strategy fail");
         return SOFTBUS_NETWORK_HB_MGR_REG_FAIL;
     }
+    if (LnnRegistParamMgrByType(HEARTBEAT_TYPE_SLE) != SOFTBUS_OK) {
+        LNN_LOGE(LNN_HEART_BEAT, "HB regist sle strategy fail");
+        return SOFTBUS_NETWORK_HB_MGR_REG_FAIL;
+    }
     return SOFTBUS_OK;
 }
 
@@ -1236,6 +1300,7 @@ void LnnHbStrategyDeinit(void)
     }
     LnnUnRegistParamMgrByType(HEARTBEAT_TYPE_BLE_V0 | HEARTBEAT_TYPE_BLE_V1 | HEARTBEAT_TYPE_BLE_V3);
     LnnUnRegistParamMgrByType(HEARTBEAT_TYPE_TCP_FLUSH);
+    LnnUnRegistParamMgrByType(HEARTBEAT_TYPE_SLE);
     (void)SoftBusMutexDestroy(&g_hbStrategyMutex);
 }
 

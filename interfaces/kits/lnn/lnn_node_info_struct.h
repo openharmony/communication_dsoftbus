@@ -213,6 +213,7 @@ typedef struct {
     int64_t authSeqNum;
     uint64_t heartbeatTimestamp;
     uint64_t bleDirectTimestamp;
+    uint64_t sleHbTiemstamp;
     uint64_t onlineTimestamp;
     uint64_t updateTimestamp;
     int64_t lastAuthSeq;

@@ -168,5 +168,10 @@ struct WifiDirectManager *GetWifiDirectManager(void)
 {
     return HeartBeatFSMInterfaceInstance()->GetWifiDirectManager();
 }
+
+int32_t LnnStartSleOfflineTimingStrategy(const char *networkId)
+{
+    return HeartBeatFSMInterfaceInstance()->LnnStartSleOfflineTimingStrategy(networkId);
+}
 }
 } // namespace OHOS

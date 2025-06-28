@@ -266,5 +266,25 @@ int32_t UpdateRecoveryDeviceInfoFromDb(void)
 {
     return HeartBeatCtrlStaticInterface()->UpdateRecoveryDeviceInfoFromDb();
 }
+
+int32_t LnnGetDLSleHbTimestamp(const char *networkId, uint64_t *timestamp)
+{
+    return HeartBeatCtrlStaticInterface()->LnnGetDLSleHbTimestamp(networkId, timestamp);
+}
+
+int32_t LnnSetDLSleHbTimestamp(const char *networkId, const uint64_t timestamp)
+{
+    return HeartBeatCtrlStaticInterface()->LnnSetDLSleHbTimestamp(networkId, timestamp);
+}
+
+int32_t LnnStartSleOfflineTimingStrategy(const char *networkId)
+{
+    return HeartBeatCtrlStaticInterface()->LnnStartSleOfflineTimingStrategy(networkId);
+}
+
+int32_t LnnStopSleOfflineTimingStrategy(const char *networkId)
+{
+    return HeartBeatCtrlStaticInterface()->LnnStopSleOfflineTimingStrategy(networkId);
+}
 }
 } // namespace OHOS

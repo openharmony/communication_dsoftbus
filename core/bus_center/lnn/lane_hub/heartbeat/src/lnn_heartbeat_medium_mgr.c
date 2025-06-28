@@ -23,6 +23,7 @@
 
 #include "auth_deviceprofile.h"
 #include "auth_interface.h"
+#include "auth_session_message_struct.h"
 #include "bus_center_event.h"
 #include "bus_center_info_key.h"
 #include "bus_center_manager.h"
@@ -36,6 +37,7 @@
 #include "lnn_distributed_net_ledger_common.h"
 #include "lnn_event.h"
 #include "lnn_feature_capability.h"
+#include "lnn_heartbeat_ctrl.h"
 #include "lnn_heartbeat_fsm.h"
 #include "lnn_heartbeat_strategy.h"
 #include "lnn_heartbeat_utils.h"
@@ -43,7 +45,6 @@
 #include "lnn_log.h"
 #include "lnn_net_builder.h"
 #include "lnn_node_info.h"
-#include "lnn_heartbeat_utils.h"
 #include "softbus_adapter_mem.h"
 #include "softbus_adapter_bt_common.h"
 #include "softbus_adapter_timer.h"
@@ -59,13 +60,17 @@
 #define HB_REAUTH_TIME        (10 * HB_TIME_FACTOR)
 #define HB_DFX_DELAY_TIME     (7 * HB_TIME_FACTOR)
 #define PC_RESTRICT_TIME      3
+#define SLE_JOIN_SPARK_TIMES  2
+
 typedef struct {
     ListNode node;
     DeviceInfo *device;
     int32_t weight;
     int32_t masterWeight;
+    int32_t triggerSparkCount;
     uint64_t lastRecvTime;
     uint64_t lastJoinLnnTime;
+    uint64_t triggerSparkTime;
 } LnnHeartbeatRecvInfo;
 
 typedef struct {
@@ -80,6 +85,7 @@ static int32_t HbMediumMgrRecvProcess(DeviceInfo *device, const LnnHeartbeatWeig
 static int32_t HbMediumMgrRecvHigherWeight(
     const char *udidHash, int32_t weight, ConnectionAddrType type, bool isReElect, bool isPeerScreenOn);
 static void HbMediumMgrRecvLpInfo(const char *networkId, uint64_t nowTime);
+static void HbMediumMgrRecvSleInfo(const char *networkId, SleDeviceInfo *info);
 
 static LnnHeartbeatMediumMgr *g_hbMeidumMgr[HB_MAX_TYPE_COUNT] = { 0 };
 
@@ -88,6 +94,7 @@ static LnnHeartbeatMediumMgrCb g_hbMediumMgrCb = {
     .onReceive = HbMediumMgrRecvProcess,
     .onRecvHigherWeight = HbMediumMgrRecvHigherWeight,
     .onRecvLpInfo = HbMediumMgrRecvLpInfo,
+    .onRecvSleInfo = HbMediumMgrRecvSleInfo,
 };
 
 static SoftBusList *g_hbRecvList = NULL;
@@ -1064,6 +1071,79 @@ static bool IsNetworkIdChange(DeviceInfo *device, NodeInfo *remoteInfo, HbRespDa
     return true;
 }
 
+static bool IsNeedTriggerSparkGroup(const NodeInfo *remoteInfo, LnnHeartbeatRecvInfo *storedInfo, uint64_t nowTime)
+{
+    if (remoteInfo == NULL || storedInfo == NULL) {
+        LNN_LOGW(LNN_HEART_BEAT, "no need handle");
+        return false;
+    }
+    char *anonyNetworkId = NULL;
+    Anonymize(remoteInfo->networkId, &anonyNetworkId);
+    int32_t oldTriggerCnt = storedInfo->triggerSparkCount;
+    if (!LnnHasDiscoveryType(remoteInfo, DISCOVERY_TYPE_BLE)) {
+        LNN_LOGW(LNN_HEART_BEAT, "target dev ble not online, networkId=%{public}s", AnonymizeWrapper(anonyNetworkId));
+        AnonymizeFree(anonyNetworkId);
+        return false;
+    }
+    if (oldTriggerCnt > SLE_JOIN_SPARK_TIMES) {
+        LNN_LOGW(LNN_HEART_BEAT, "target dev has exceeded limt, TriggerCnt=%{public}d, networkId=%{public}s",
+            oldTriggerCnt, AnonymizeWrapper(anonyNetworkId));
+        AnonymizeFree(anonyNetworkId);
+        return false;
+    }
+    if ((storedInfo->triggerSparkTime != 0) &&
+        (nowTime - storedInfo->triggerSparkTime <= LOW_FREQ_CYCLE * HB_TIME_FACTOR)) {
+        LNN_LOGW(LNN_HEART_BEAT, "repeta request, networkId=%{public}s", AnonymizeWrapper(anonyNetworkId));
+        AnonymizeFree(anonyNetworkId);
+        return false;
+    }
+    if (QueryControlPlaneNodeValidPacked(remoteInfo->networkId) == SOFTBUS_OK) {
+        LNN_LOGW(LNN_HEART_BEAT, "target node has exit spark group, networkId=%{public}s",
+            AnonymizeWrapper(anonyNetworkId));
+        AnonymizeFree(anonyNetworkId);
+        return false;
+    }
+    storedInfo->triggerSparkCount++;
+    storedInfo->triggerSparkTime = nowTime;
+    LNN_LOGW(LNN_HEART_BEAT, "need trigger spark group, networkId=%{public}s", AnonymizeWrapper(anonyNetworkId));
+    AnonymizeFree(anonyNetworkId);
+    return true;
+}
+
+int32_t LnnCleanTriggerSparkInfo(const char *udid, ConnectionAddrType addrType)
+{
+    LNN_CHECK_AND_RETURN_RET_LOGE(udid != NULL, SOFTBUS_INVALID_PARAM, LNN_HEART_BEAT, "invalid param");
+    LNN_CHECK_AND_RETURN_RET_LOGW(addrType == CONNECTION_ADDR_BLE, SOFTBUS_OK, LNN_HEART_BEAT, "no need handle");
+
+    uint64_t nowTime = GetNowTime();
+    char *anonyUdid = NULL;
+    Anonymize(udid, &anonyUdid);
+    uint8_t udidHash[SHA_256_HASH_LEN] = { 0 };
+    char udidHashStr[UDID_SHORT_HASH_HEX_STR + 1] = { 0 };
+    if (SoftBusGenerateStrHash((uint8_t *)udid, strlen(udid), udidHash) != SOFTBUS_OK) {
+        LNN_LOGE(LNN_HEART_BEAT, "generate udiahash fail, udid=%{public}s", AnonymizeWrapper(anonyUdid));
+        AnonymizeFree(anonyUdid);
+        return SOFTBUS_NETWORK_GENERATE_STR_HASH_ERR;
+    }
+    if (ConvertBytesToHexString(
+        udidHashStr, UDID_SHORT_HASH_HEX_STR + 1, udidHash, UDID_SHORT_HASH_LEN_TEMP) != SOFTBUS_OK) {
+        LNN_LOGE(LNN_HEART_BEAT, "udiahash convert hash str fail, udid=%{public}s", AnonymizeWrapper(anonyUdid));
+        AnonymizeFree(anonyUdid);
+        return SOFTBUS_NETWORK_BYTES_TO_HEX_STR_ERR;
+    }
+    LNN_CHECK_AND_RETURN_RET_LOGE(SoftBusMutexLock(&g_hbRecvList->lock) == SOFTBUS_OK, SOFTBUS_LOCK_ERR,
+        LNN_HEART_BEAT, "try to lock failed");
+    LnnHeartbeatRecvInfo *storedInfo = HbGetStoredRecvInfo(udidHashStr, CONNECTION_ADDR_BLE, nowTime);
+    if (storedInfo != NULL) {
+        storedInfo->triggerSparkCount = 0;
+        storedInfo->triggerSparkTime = 0;
+        LNN_LOGI(LNN_HEART_BEAT, "clean trigger info done, udid=%{public}s", AnonymizeWrapper(anonyUdid));
+        AnonymizeFree(anonyUdid);
+    }
+    (void)SoftBusMutexUnlock(&g_hbRecvList->lock);
+    return SOFTBUS_OK;
+}
+
 static int32_t HbNotifyReceiveDevice(DeviceInfo *device, const LnnHeartbeatWeight *mediumWeight,
     LnnHeartbeatType hbType, bool isOnlineDirectly, HbRespData *hbResp)
 {
@@ -1092,6 +1172,9 @@ static int32_t HbNotifyReceiveDevice(DeviceInfo *device, const LnnHeartbeatWeigh
     bool isDirectlyHb = IsDirectlyHeartBeat(device, hbResp);
     if (HbGetOnlineNodeByRecvInfo(device->devId, device->addr[0].type, &nodeInfo, hbResp) == SOFTBUS_OK) {
         CheckUserIdCheckSumChange(hbResp, &nodeInfo);
+        if (IsNeedTriggerSparkGroup(&nodeInfo, storedInfo, nowTime)) {
+            TriggerSparkGroupJoinAgainPacked(nodeInfo.deviceInfo.deviceUdid, SPARK_GROUP_DELAY_TIME_MS);
+        }
         if (isDirectlyHb || (!HbIsNeedReAuth(&nodeInfo, device->accountHash) &&
             !IsUuidChange(nodeInfo.uuid, hbResp, HB_SHORT_UUID_LEN) &&
             !IsNetworkIdChange(device, &nodeInfo, hbResp))) {
@@ -1178,6 +1261,41 @@ static void HbMediumMgrRecvLpInfo(const char *networkId, uint64_t nowTime)
     if (HbUpdateOfflineTimingByRecvInfo(networkId, CONNECTION_ADDR_BLE, HEARTBEAT_TYPE_BLE_V4, nowTime) != SOFTBUS_OK) {
         LNN_LOGE(LNN_HEART_BEAT, "HB medium mgr update time stamp fail");
     }
+}
+
+static void HbMediumMgrRecvSleInfo(const char *networkId, SleDeviceInfo *info)
+{
+    if (networkId == NULL || info == NULL) {
+        LNN_LOGE(LNN_HEART_BEAT, "invalid param");
+        return;
+    }
+    uint64_t oldSleTimestamp = 0;
+    uint64_t currentTime = GetNowTime();
+    char *anonyNetworkId = NULL;
+    Anonymize(networkId, &anonyNetworkId);
+    if (LnnGetDLSleHbTimestamp(networkId, &oldSleTimestamp) != SOFTBUS_OK) {
+        LNN_LOGE(LNN_HEART_BEAT, "get sle time stamp fail, networkId=%{public}s",
+            AnonymizeWrapper(anonyNetworkId));
+        AnonymizeFree(anonyNetworkId);
+        return;
+    }
+    if (LnnSetDLSleHbTimestamp(networkId, currentTime) != SOFTBUS_OK) {
+        LNN_LOGE(LNN_HEART_BEAT, "set sle time stamp fail, networkId=%{public}s",
+            AnonymizeWrapper(anonyNetworkId));
+        AnonymizeFree(anonyNetworkId);
+        return;
+    }
+    (void)LnnStopSleOfflineTimingStrategy(networkId);
+    if (LnnStartSleOfflineTimingStrategy(networkId) != SOFTBUS_OK) {
+        LNN_LOGE(LNN_HEART_BEAT, "start sle offline timing stragegy fail, networkId=%{public}s",
+            AnonymizeWrapper(anonyNetworkId));
+        AnonymizeFree(anonyNetworkId);
+        return;
+    }
+    LNN_LOGI(LNN_HEART_BEAT, "recv sle spark info, networkId=%{public}s,"
+        "timestamp:%{public}" PRIu64 "->%{public}" PRIu64 "",
+        AnonymizeWrapper(anonyNetworkId), oldSleTimestamp, currentTime);
+    AnonymizeFree(anonyNetworkId);
 }
 
 static void HbMediumMgrRelayProcess(const char *udidHash, ConnectionAddrType type, LnnHeartbeatType hbType)
@@ -1347,6 +1465,10 @@ int32_t LnnHbMediumMgrInit(void)
     }
     if (LnnRegisterBleLpDeviceMediumMgrPacked() != SOFTBUS_OK) {
         LNN_LOGE(LNN_HEART_BEAT, "LP regist LpDevice manager fail");
+        return SOFTBUS_NETWORK_HB_MGR_REG_FAIL;
+    }
+    if (LnnRegisterSleHeartbeatMediumMgrPacked() != SOFTBUS_OK) {
+        LNN_LOGE(LNN_HEART_BEAT, "regist sle heartbeat manager fail");
         return SOFTBUS_NETWORK_HB_MGR_REG_FAIL;
     }
     return HbInitRecvList();
