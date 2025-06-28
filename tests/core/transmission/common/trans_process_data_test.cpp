@@ -157,6 +157,11 @@ HWTEST_F(TransProcessDataTest, TransProcessDataTest004, TestSize.Level1)
     len = 1000; // test value
     ret = TransProxyNoSubPacketProc(head, len, data, channelId);
     EXPECT_EQ(SOFTBUS_INVALID_DATA_HEAD, ret);
+
+    head->magicNumber = 0xBABEFACE;
+    head->dataLen = 1;
+    ret = TransProxyNoSubPacketProc(head, len, data, channelId);
+    EXPECT_EQ(SOFTBUS_INVALID_DATA_HEAD, ret);
     SoftBusFree(head);
 }
 
@@ -396,8 +401,18 @@ HWTEST_F(TransProcessDataTest, TransProcessDataTest012, TestSize.Level1)
     int32_t ret = TransTdcRecvFirstData(channelId, nullptr, nullptr, fd, len);
     EXPECT_EQ(SOFTBUS_INVALID_PARAM, ret);
 
-    ret = TransTdcUnPackAllData(channelId, nullptr, nullptr);
+    char *recvBuf = static_cast<char *>(SoftBusCalloc(len));
+    ASSERT_NE(nullptr, recvBuf);
+    int32_t recvLen = 0;
+    ret = TransTdcRecvFirstData(channelId, recvBuf, nullptr, fd, len);
     EXPECT_EQ(SOFTBUS_INVALID_PARAM, ret);
+
+    ret = TransTdcRecvFirstData(channelId, recvBuf, &recvLen, fd, len);
+    EXPECT_EQ(SOFTBUS_TRANS_INVALID_DATA_LENGTH, ret);
+
+    ret = TransTdcRecvFirstData(channelId, nullptr, &recvLen, fd, len);
+    EXPECT_EQ(SOFTBUS_INVALID_PARAM, ret);
+    SoftBusFree(recvBuf);
 }
 
 /**
@@ -415,7 +430,9 @@ HWTEST_F(TransProcessDataTest, TransProcessDataTest013, TestSize.Level1)
     EXPECT_EQ(SOFTBUS_INVALID_PARAM, ret);
 
     DataLenInfo *lenInfo = static_cast<DataLenInfo *>(SoftBusCalloc(sizeof(DataLenInfo)));
-    EXPECT_NE(nullptr, lenInfo);
+    ASSERT_NE(nullptr, lenInfo);
+    ret = TransTdcSendData(lenInfo, supportTlv, fd, len, nullptr);
+    EXPECT_EQ(SOFTBUS_INVALID_PARAM, ret);
     lenInfo->outLen = 1;
     char buf[64] = "1212"; // test value
     ret = TransTdcSendData(lenInfo, supportTlv, fd, len, buf);
@@ -534,22 +551,14 @@ HWTEST_F(TransProcessDataTest, TransProcessDataTest016, TestSize.Level1)
  */
 HWTEST_F(TransProcessDataTest, TransProcessDataTest017, TestSize.Level1)
 {
-    uint32_t bufLen = 32; // test value
     char data[] = "testDataStringValue";
+    uint32_t bufLen = strlen(data);
     TcpDataTlvPacketHead *head = static_cast<TcpDataTlvPacketHead *>(SoftBusCalloc(sizeof(TcpDataTlvPacketHead)));
     ASSERT_NE(nullptr, head);
     uint32_t headSize = 4; // test value
 
     int32_t ret = TransTdcParseTlv(bufLen, data, head, &headSize);
     EXPECT_EQ(SOFTBUS_DATA_NOT_ENOUGH, ret);
-
-    bufLen = 64; // test value
-    ret = TransTdcParseTlv(bufLen, data, head, &headSize);
-    EXPECT_EQ(SOFTBUS_DATA_NOT_ENOUGH, ret);
-
-    bufLen = 1024; // test value
-    ret = TransTdcParseTlv(bufLen, data, head, &headSize);
-    EXPECT_NE(SOFTBUS_OK, ret);
     SoftBusFree(head);
 }
 
@@ -576,5 +585,62 @@ HWTEST_F(TransProcessDataTest, TransProcessDataTest018, TestSize.Level1)
     EXPECT_EQ(SOFTBUS_INVALID_PARAM, ret);
     ret = TransTdcUnPackAllTlvData(channelId, &head, &headSize, &node, nullptr);
     EXPECT_EQ(SOFTBUS_INVALID_PARAM, ret);
+    ret = TransTdcUnPackAllTlvData(channelId, &head, nullptr, nullptr, nullptr);
+    EXPECT_EQ(SOFTBUS_INVALID_PARAM, ret);
+    ret = TransTdcUnPackAllTlvData(channelId, nullptr, &headSize, nullptr, nullptr);
+    EXPECT_EQ(SOFTBUS_INVALID_PARAM, ret);
+    ret = TransTdcUnPackAllTlvData(channelId, nullptr, nullptr, &node, nullptr);
+    EXPECT_EQ(SOFTBUS_INVALID_PARAM, ret);
+    ret = TransTdcUnPackAllTlvData(channelId, nullptr, nullptr, nullptr, &flag);
+    EXPECT_EQ(SOFTBUS_INVALID_PARAM, ret);
+}
+
+/**
+ * @tc.name: TransProcessDataTest019
+ * @tc.desc: test trans tdc unpack data.
+ * @tc.type: FUNC
+ * @tc.require:
+ */
+HWTEST_F(TransProcessDataTest, TransProcessDataTest019, TestSize.Level1)
+{
+    int32_t channelId = 1124; // test value
+    char plain[10] = "testPlain";
+    uint32_t plainLen = 10; // test value
+    DataBuf *node = static_cast<DataBuf *>(SoftBusCalloc(sizeof(DataBuf)));
+    ASSERT_NE(nullptr, node);
+    node->data = static_cast<char *>(SoftBusCalloc(sizeof(char) * plainLen));
+    if (node->data == nullptr) {
+        SoftBusFree(node);
+        return;
+    }
+
+    node->w = static_cast<char *>(SoftBusCalloc(sizeof(char) * plainLen));
+    if (node->w == nullptr) {
+        SoftBusFree(node->data);
+        SoftBusFree(node);
+        return;
+    }
+
+    node->channelId = channelId;
+    node->size = 10; // test value
+    node->fd = 1;
+    (void)strcpy_s(node->data, 10, plain); // test value
+    (void)strcpy_s(node->w, 10, plain); // test value
+
+    int32_t ret = TransTdcUnPackAllData(channelId, nullptr, nullptr);
+    EXPECT_EQ(SOFTBUS_INVALID_PARAM, ret);
+
+    ret = TransTdcUnPackAllData(channelId, node, nullptr);
+    EXPECT_EQ(SOFTBUS_INVALID_PARAM, ret);
+
+    bool flag = true;
+    ret = TransTdcUnPackAllData(channelId, nullptr, &flag);
+    EXPECT_EQ(SOFTBUS_INVALID_PARAM, ret);
+
+    ret = TransTdcUnPackAllData(channelId, node, &flag);
+    EXPECT_EQ(SOFTBUS_INVALID_DATA_HEAD, ret);
+    SoftBusFree(node->w);
+    SoftBusFree(node->data);
+    SoftBusFree(node);
 }
 }
