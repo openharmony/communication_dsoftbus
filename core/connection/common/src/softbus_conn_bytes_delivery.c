@@ -133,7 +133,7 @@ static void *DeliverTask(void *arg)
             int32_t res = SoftBusMutexLock(&delivery->lock);
             CONN_CHECK_AND_RETURN_RET_LOGE(res == SOFTBUS_OK, NULL, CONN_COMMON,
                 "%{public}s, lock failed: error=%{public}d", delivery->config.name, res);
-            if (delivery->deliverymessagePosted) {
+            if (delivery->deliveryMessagePosted) {
                 (void)SoftBusMutexUnlock(&delivery->lock);
                 CONN_LOGI(CONN_COMMON, "message already enqueue, need dequeue again");
                 continue;
