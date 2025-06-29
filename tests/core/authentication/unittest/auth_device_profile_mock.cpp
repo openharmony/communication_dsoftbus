@@ -33,6 +33,7 @@ static AuthDeviceProfileInterfaceMock *GetInterface()
     return reinterpret_cast<AuthDeviceProfileInterfaceMock *>(g_authDeviceProfileIterface);
 }
 
+extern "C" {
 int32_t GetActiveOsAccountIds(void)
 {
     return GetInterface()->GetActiveOsAccountIds();
@@ -58,13 +59,49 @@ bool AuthIsUkExpired(uint64_t time)
     return GetInterface()->AuthIsUkExpired(time);
 }
 
-int32_t AuthInsertUserKey(const AuthACLInfo *aclInfo, const AuthUserKeyInfo *userKeyInfo)
+int32_t AuthInsertUserKey(const AuthACLInfo *aclInfo, const AuthUserKeyInfo *userKeyInfo, bool isUserBindLevel)
 {
-    return GetInterface()->AuthInsertUserKey(aclInfo, userKeyInfo);
+    return GetInterface()->AuthInsertUserKey(aclInfo, userKeyInfo, isUserBindLevel);
 }
 
 uint64_t SoftBusGetSysTimeMs(void)
 {
     return GetInterface()->SoftBusGetSysTimeMs();
+}
+
+int32_t SoftBusGenerateStrHash(const unsigned char *str, uint32_t len, unsigned char *hash)
+{
+    return GetInterface()->SoftBusGenerateStrHash(str, len, hash);
+}
+
+int32_t ConvertBytesToHexString(char *outBuf, uint32_t outBufLen, const unsigned char *inBuf, uint32_t inLen)
+{
+    return GetInterface()->ConvertBytesToHexString(outBuf, outBufLen, inBuf, inLen);
+}
+
+int32_t LnnGetLocalByteInfo(InfoKey key, uint8_t *info, uint32_t len)
+{
+    return GetInterface()->LnnGetLocalByteInfo(key, info, len);
+}
+
+int32_t IdServiceGetCredInfoByUdid(const char *udid, SoftBusCredInfo *credInfo)
+{
+    return GetInterface()->IdServiceGetCredInfoByUdid(udid, credInfo);
+}
+
+int32_t RegisterToDp(DeviceProfileChangeListener *deviceProfilePara)
+{
+    return GetInterface()->RegisterToDp(deviceProfilePara);
+}
+
+int32_t GetUserKeyByUkId(int32_t sessionKeyId, uint8_t *uk, uint32_t ukLen)
+{
+    return GetInterface()->GetUserKeyByUkId(sessionKeyId, uk, ukLen);
+}
+
+int32_t CheckAclInfoIsAccesser(const AuthACLInfo *acl, bool *isAccesser)
+{
+    return GetInterface()->CheckAclInfoIsAccesser(acl, isAccesser);
+}
 }
 }
