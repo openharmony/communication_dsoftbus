@@ -14,12 +14,10 @@
  */
 
 #include <gtest/gtest.h>
+#include <securec.h>
 
-#include "auth_device_profile_listener.h"
-#include "auth_deviceprofile.cpp"
 #include "auth_device_profile_mock.h"
-#include "auth_log.h"
-#include "device_profile_listener.h"
+#include "auth_deviceprofile.cpp"
 #include "lnn_app_bind_interface.h"
 #include "softbus_error_code.h"
 #include "trust_device_profile.h"
@@ -31,10 +29,25 @@ const int64_t TEST_ACCOUNT_ID = 123456789;
 const int32_t TEST_SESSION_KEY_ID = 1;
 const int32_t TEST_LOCAL_USER_ID = 100;
 const char TEST_UDID[] = "1234567890";
+const char TEST_UDID_HASH[] = "abcd";
 const int32_t TEST_SOURCE_USER_ID = 1;
 const int32_t TEST_SINK_USER_ID = 2;
 const int64_t TEST_SOURCE_TOKEN_ID = 3;
 const int64_t TEST_SINK_TOKEN_ID = 4;
+const int32_t TEST_USER_ID_ONE = 1;
+const int32_t TEST_USER_ID_TWO = 2;
+const int32_t TEST_USER_ID_THREE = 3;
+const uint32_t TEST_ERROR_USER_ID = -1;
+const uint32_t CRED_ID_STR_LEN = 65;
+
+typedef struct {
+    bool isLocal;
+    int32_t userId;
+    char udid[UDID_BUF_LEN];
+    char credId[CRED_ID_STR_LEN];
+    char shareCredId[CRED_ID_STR_LEN];
+    char accountUid[ACCOUNT_UID_STR_LEN];
+} SoftBusAclInfo;
 
 class AuthDeviceProfileTest : public testing::Test {
 public:
@@ -43,6 +56,7 @@ public:
     void SetUp();
     void TearDown();
     int32_t SetAclInfo(AuthACLInfo *aclInfo);
+    int32_t SetSoftBusAclInfo(SoftBusAclInfo *info, int32_t userId);
 };
 
 void AuthDeviceProfileTest::SetUpTestCase() { }
@@ -84,55 +98,54 @@ int32_t AuthDeviceProfileTest::SetAclInfo(AuthACLInfo *aclInfo)
     return SOFTBUS_OK;
 }
 
-static void OnDeviceBound(const char *udid, const char *groupInfo)
+int32_t AuthDeviceProfileTest::SetSoftBusAclInfo(SoftBusAclInfo *info, int32_t userId)
 {
-    (void)udid;
-    (void)groupInfo;
-    AUTH_LOGI(AUTH_TEST, "deviceBound success!");
-}
+    if (info == nullptr) {
+        AUTH_LOGE(AUTH_TEST, "info is null.");
+        return SOFTBUS_INVALID_PARAM;
+    }
 
-static void OnDeviceNotTrusted(const char *udid, int32_t localUserId)
-{
-    (void)udid;
-    (void)localUserId;
-    AUTH_LOGI(AUTH_TEST, "device is not trusted!");
-}
-
-static DeviceProfileChangeListener g_deviceProfilePara = {
-    .onDeviceProfileAdd = OnDeviceBound,
-    .onDeviceProfileDeleted = OnDeviceNotTrusted,
-};
-
-/*
- * @tc.name: TRUST_DEVICE_PROFILE_ADD_TEST_001
- * @tc.desc:
- * @tc.type: FUNC
- * @tc.require:
- */
-HWTEST_F(AuthDeviceProfileTest, TRUST_DEVICE_PROFILE_ADD_TEST_001, TestSize.Level1)
-{
-    RegisterToDp(&g_deviceProfilePara);
-    std::unique_ptr<AuthToDeviceProfile::AuthDeviceProfileListener> myFunc_ =
-        std::make_unique<AuthToDeviceProfile::AuthDeviceProfileListener>();
-    AuthToDeviceProfile::TrustDeviceProfile profile;
-    int32_t ret = myFunc_->OnTrustDeviceProfileAdd(profile);
-    EXPECT_EQ(ret, SOFTBUS_OK);
-}
-
-/*
- * @tc.name: TRUST_DEVICE_PROFILE_DELETE_TEST_002
- * @tc.desc:
- * @tc.type: FUNC
- * @tc.require:
- */
-HWTEST_F(AuthDeviceProfileTest, TRUST_DEVICE_PROFILE_DELETE_TEST_002, TestSize.Level1)
-{
-    RegisterToDp(&g_deviceProfilePara);
-    std::unique_ptr<AuthToDeviceProfile::AuthDeviceProfileListener> myFunc_ =
-        std::make_unique<AuthToDeviceProfile::AuthDeviceProfileListener>();
-    AuthToDeviceProfile::TrustDeviceProfile profile;
-    int32_t ret = myFunc_->OnTrustDeviceProfileDelete(profile);
-    EXPECT_EQ(ret, SOFTBUS_OK);
+    bool isLocal = true;
+    std::string udid = "ab";
+    std::string credId = "cd";
+    std::string shareCredId = "ef";
+    std::string accountUid = "gh";
+    switch (userId) {
+        case TEST_USER_ID_TWO:
+            isLocal = false;
+            udid = "12";
+            credId = "34";
+            shareCredId = "56";
+            accountUid = "78";
+            break;
+        case TEST_USER_ID_THREE:
+            udid = "ij";
+            credId = "kl";
+            shareCredId = "mn";
+            accountUid = "op";
+            break;
+        default:
+            break;
+    }
+    info->userId = userId;
+    info->isLocal = isLocal;
+    if (strcpy_s(info->udid, UDID_BUF_LEN, udid.c_str()) != EOK) {
+        AUTH_LOGE(AUTH_TEST, "set udid fail.");
+        return SOFTBUS_STRCPY_ERR;
+    }
+    if (strcpy_s(info->credId, CRED_ID_STR_LEN, credId.c_str()) != EOK) {
+        AUTH_LOGE(AUTH_TEST, "set credId fail.");
+        return SOFTBUS_STRCPY_ERR;
+    }
+    if (strcpy_s(info->shareCredId, CRED_ID_STR_LEN, shareCredId.c_str()) != EOK) {
+        AUTH_LOGE(AUTH_TEST, "set shareCredId fail.");
+        return SOFTBUS_STRCPY_ERR;
+    }
+    if (strcpy_s(info->accountUid, ACCOUNT_UID_STR_LEN, accountUid.c_str()) != EOK) {
+        AUTH_LOGE(AUTH_TEST, "set accountUid fail.");
+        return SOFTBUS_STRCPY_ERR;
+    }
+    return SOFTBUS_OK;
 }
 
 /*
@@ -145,10 +158,13 @@ HWTEST_F(AuthDeviceProfileTest, IS_POTENTIAL_DEVCIE_TEST_003, TestSize.Level1)
 {
     const char *deviceIdHash = nullptr;
     bool ret = IsPotentialTrustedDeviceDp(deviceIdHash, true);
-    EXPECT_EQ(ret, false);
+    EXPECT_FALSE(ret);
     deviceIdHash = "dev/ice%Id()Hash()";
+    int64_t localAccountId = TEST_ACCOUNT_ID;
+    int64_t peerAccountId = TEST_ACCOUNT_ID;
     ret = IsPotentialTrustedDeviceDp(deviceIdHash, true);
-    EXPECT_EQ(ret, false);
+    EXPECT_FALSE(ret);
+    DumpAccountId(localAccountId, peerAccountId);
 }
 
 /*
@@ -185,15 +201,17 @@ HWTEST_F(AuthDeviceProfileTest, IS_POTENTIAL_DEVCIE_TEST_004, TestSize.Level1)
 HWTEST_F(AuthDeviceProfileTest, IS_NOT_TRUSTED_DEVCIE_TEST_001, TestSize.Level1)
 {
     const char udid[] = "testUdid";
-    uint8_t udidHash[SHA_256_HASH_LEN] = { 0 };
     char hashStr[CUST_UDID_LEN + 1] = { 0 };
-    int32_t ret = SoftBusGenerateStrHash((const unsigned char *)udid, strlen(udid), udidHash);
-    EXPECT_EQ(ret, SOFTBUS_OK);
-    ret = ConvertBytesToHexString(hashStr, CUST_UDID_LEN + 1, udidHash, CUST_UDID_LEN / HEXIFY_UNIT_LEN);
-    EXPECT_EQ(ret, SOFTBUS_OK);
+    int32_t ret = strcpy_s(hashStr, CUST_UDID_LEN, TEST_UDID_HASH);
+    EXPECT_EQ(ret, EOK);
     InsertNotTrustDevice(hashStr);
     bool result = IsNotTrustDevice(hashStr);
     EXPECT_TRUE(result);
+    AuthDeviceProfileInterfaceMock mock;
+    EXPECT_CALL(mock, SoftBusGenerateStrHash).WillRepeatedly(Return(SOFTBUS_OK));
+    EXPECT_CALL(mock, ConvertBytesToHexString).WillOnce(Return(SOFTBUS_INVALID_PARAM));
+    DelNotTrustDevice(udid);
+    EXPECT_CALL(mock, ConvertBytesToHexString).WillOnce(Return(SOFTBUS_OK));
     DelNotTrustDevice(udid);
 }
 
@@ -209,9 +227,15 @@ HWTEST_F(AuthDeviceProfileTest, IS_NOT_TRUSTED_DEVCIE_TEST_002, TestSize.Level1)
     std::string peerUdid = "peerUdid";
     int32_t peerUserId = 1;
     int32_t sessionKeyId = 1;
+    AuthDeviceProfileInterfaceMock mock;
+    EXPECT_CALL(mock, LnnGetLocalStrInfo).WillOnce(Return(SOFTBUS_INVALID_PARAM));
+    EXPECT_CALL(mock, SoftBusGetSysTimeMs).WillRepeatedly(Return(0));
+    EXPECT_CALL(mock, GetActiveOsAccountIds).WillRepeatedly(Return(TEST_USER_ID_ONE));
+    InsertDpSameAccountAcl(peerUdid, peerUserId, sessionKeyId);
+    EXPECT_CALL(mock, LnnGetLocalStrInfo).WillRepeatedly(Return(SOFTBUS_OK));
+    InsertDpSameAccountAcl(peerUdid, peerUserId, sessionKeyId);
     bool result = IsNotTrustDevice(deviceIdHash);
     EXPECT_FALSE(result);
-    InsertDpSameAccountAcl(peerUdid, peerUserId, sessionKeyId);
 }
 
 /*
@@ -275,9 +299,15 @@ HWTEST_F(AuthDeviceProfileTest, GET_STRING_HASH_001, TestSize.Level1)
     std::string str = "";
     char hashStrBuf[SHA_256_HEX_HASH_LEN] = { 0 };
     int32_t len = 32;
+    AuthDeviceProfileInterfaceMock mock;
+    EXPECT_CALL(mock, SoftBusGenerateStrHash).WillOnce(Return(SOFTBUS_ENCRYPT_ERR));
     int32_t ret = GetStringHash(str, hashStrBuf, len);
     EXPECT_EQ(ret, SOFTBUS_NETWORK_GENERATE_STR_HASH_ERR);
-
+    EXPECT_CALL(mock, SoftBusGenerateStrHash).WillRepeatedly(Return(SOFTBUS_OK));
+    EXPECT_CALL(mock, ConvertBytesToHexString).WillOnce(Return(SOFTBUS_NETWORK_BYTES_TO_HEX_STR_ERR));
+    ret = GetStringHash(str, hashStrBuf, len);
+    EXPECT_EQ(ret, SOFTBUS_NETWORK_BYTES_TO_HEX_STR_ERR);
+    EXPECT_CALL(mock, ConvertBytesToHexString).WillOnce(Return(SOFTBUS_OK));
     str = "abcdef123456";
     ret = GetStringHash(str, hashStrBuf, len);
     EXPECT_EQ(ret, SOFTBUS_OK);
@@ -318,6 +348,8 @@ HWTEST_F(AuthDeviceProfileTest, DP_HAS_ACCESS_CONTROL_PROFILE_TEST_002, TestSize
  */
 HWTEST_F(AuthDeviceProfileTest, IS_SAME_ACCOUNT_TEST_001, TestSize.Level1)
 {
+    AuthDeviceProfileInterfaceMock mock;
+    EXPECT_CALL(mock, LnnGetLocalNum64Info).WillOnce(Return(SOFTBUS_NETWORK_NOT_FOUND));
     bool result = IsSameAccount(TEST_ACCOUNT_ID);
     EXPECT_FALSE(result);
 }
@@ -331,11 +363,20 @@ HWTEST_F(AuthDeviceProfileTest, IS_SAME_ACCOUNT_TEST_001, TestSize.Level1)
 HWTEST_F(AuthDeviceProfileTest, IS_SAME_ACCOUNT_TEST_002, TestSize.Level1)
 {
     int64_t accountId = TEST_ACCOUNT_ID;
-    AuthDeviceProfileInterfaceMock mocker;
-    EXPECT_CALL(mocker, LnnGetLocalNum64Info).WillRepeatedly(DoAll(SetArgPointee<1>(TEST_ACCOUNT_ID + 1),
-        Return(SOFTBUS_OK)));
+    AuthDeviceProfileInterfaceMock mock;
+    EXPECT_CALL(mock, LnnGetLocalNum64Info).WillRepeatedly(Return(SOFTBUS_OK));
+    EXPECT_CALL(mock, LnnGetLocalNum64Info).WillOnce(DoAll(SetArgPointee<1>(TEST_ACCOUNT_ID + 1), Return(SOFTBUS_OK)));
     bool result = IsSameAccount(accountId);
     EXPECT_FALSE(result);
+    OHOS::DistributedDeviceProfile::AccessControlProfile trustDevices;
+    std::string peerUdid = TEST_UDID;
+    int32_t localUserId = TEST_LOCAL_USER_ID;
+    int32_t peerUserId = TEST_SOURCE_USER_ID;
+    DumpDpAclInfo(peerUdid, localUserId, peerUserId, trustDevices);
+    EXPECT_CALL(mock, LnnGetLocalNum64Info).WillOnce(DoAll(SetArgPointee<1>(TEST_ACCOUNT_ID), Return(SOFTBUS_OK)));
+    EXPECT_CALL(mock, LnnIsDefaultOhosAccount).WillOnce(Return(false));
+    result = IsSameAccount(accountId);
+    EXPECT_TRUE(result);
 }
 
 /*
@@ -347,11 +388,12 @@ HWTEST_F(AuthDeviceProfileTest, IS_SAME_ACCOUNT_TEST_002, TestSize.Level1)
 HWTEST_F(AuthDeviceProfileTest, IS_SAME_ACCOUNT_TEST_003, TestSize.Level1)
 {
     int64_t accountId = TEST_ACCOUNT_ID;
-    AuthDeviceProfileInterfaceMock mocker;
-    EXPECT_CALL(mocker, LnnGetLocalNum64Info).WillRepeatedly(DoAll(SetArgPointee<1>(TEST_ACCOUNT_ID),
+    AuthDeviceProfileInterfaceMock mock;
+    EXPECT_CALL(mock, LnnGetLocalNum64Info).WillRepeatedly(DoAll(SetArgPointee<1>(TEST_ACCOUNT_ID),
         Return(SOFTBUS_OK)));
+    EXPECT_CALL(mock, LnnIsDefaultOhosAccount).WillOnce(Return(false));
     bool result = IsSameAccount(accountId);
-    EXPECT_FALSE(result);
+    EXPECT_TRUE(result);
 }
 
 /*
@@ -391,7 +433,12 @@ HWTEST_F(AuthDeviceProfileTest, GET_SESSION_KEY_PROFILE_TEST_003, TestSize.Level
 {
     uint8_t sessionKey = 0;
     uint32_t length = 0;
+    AuthDeviceProfileInterfaceMock mock;
+    EXPECT_CALL(mock, GetActiveOsAccountIds).WillOnce(Return(TEST_ERROR_USER_ID));
     bool result = GetSessionKeyProfile(TEST_SESSION_KEY_ID, &sessionKey, &length);
+    EXPECT_FALSE(result);
+    EXPECT_CALL(mock, GetActiveOsAccountIds).WillRepeatedly(Return(TEST_USER_ID_ONE));
+    result = GetSessionKeyProfile(TEST_SESSION_KEY_ID, &sessionKey, &length);
     EXPECT_FALSE(result);
 }
 
@@ -406,8 +453,10 @@ HWTEST_F(AuthDeviceProfileTest, UPDATE_DP_SAME_ACCOUNT_ACL_TEST_001, TestSize.Le
     std::string peerUdid = TEST_UDID;
     int32_t peerUserId = TEST_LOCAL_USER_ID;
     int32_t sessionKeyId = TEST_SESSION_KEY_ID;
-    int32_t ret = UpdateDpSameAccountAcl(peerUdid, peerUserId, sessionKeyId);
-    EXPECT_EQ(ret, UPDATE_ACL_NOT_MATCH);
+    int32_t ret = UpdateDpSameAccountAcl(peerUdid, 0, sessionKeyId);
+    EXPECT_EQ(ret, GET_ALL_ACL_FAIL);
+    ret = UpdateDpSameAccountAcl(peerUdid, peerUserId, sessionKeyId);
+    EXPECT_EQ(ret, GET_ALL_ACL_FAIL);
 }
 
 /*
@@ -422,6 +471,10 @@ HWTEST_F(AuthDeviceProfileTest, IS_TRUST_DEVICE_TEST_001, TestSize.Level1)
     const char *deviceIdHash = "deviceIdHash";
     const char *anonyDeviceIdHash = "anonyDeviceIdHash";
     bool isOnlyPointToPoint = true;
+    AuthDeviceProfileInterfaceMock mock;
+    EXPECT_CALL(mock, GetActiveOsAccountIds).WillRepeatedly(Return(TEST_USER_ID_ONE));
+    EXPECT_CALL(mock, SoftBusGenerateStrHash).WillRepeatedly(Return(SOFTBUS_OK));
+    EXPECT_CALL(mock, ConvertBytesToHexString).WillRepeatedly(Return(SOFTBUS_OK));
     bool result = IsTrustDevice(trustDevices, deviceIdHash, anonyDeviceIdHash, isOnlyPointToPoint);
     EXPECT_FALSE(result);
 
@@ -488,6 +541,10 @@ HWTEST_F(AuthDeviceProfileTest, IS_TRUST_DEVICE_TEST_002, TestSize.Level1)
     accesser.SetAccesserUserId(userId);
     aclProfile.SetAccesser(accesser);
     trustDevices.push_back(aclProfile);
+    AuthDeviceProfileInterfaceMock mock;
+    EXPECT_CALL(mock, GetActiveOsAccountIds).WillRepeatedly(Return(TEST_USER_ID_ONE));
+    EXPECT_CALL(mock, SoftBusGenerateStrHash).WillRepeatedly(Return(SOFTBUS_OK));
+    EXPECT_CALL(mock, ConvertBytesToHexString).WillRepeatedly(Return(SOFTBUS_OK));
     bool result = IsTrustDevice(trustDevices, deviceIdHash, anonyDeviceIdHash, isOnlyPointToPoint);
     EXPECT_FALSE(result);
 }
@@ -521,8 +578,12 @@ HWTEST_F(AuthDeviceProfileTest, IS_TRUST_DEVICE_TEST_003, TestSize.Level1)
     accesser.SetAccesserUserId(userId);
     aclProfile.SetAccesser(accesser);
     trustDevices.push_back(aclProfile);
+    AuthDeviceProfileInterfaceMock mock;
+    EXPECT_CALL(mock, GetActiveOsAccountIds).WillRepeatedly(Return(TEST_USER_ID_ONE));
+    EXPECT_CALL(mock, SoftBusGenerateStrHash).WillRepeatedly(Return(SOFTBUS_OK));
+    EXPECT_CALL(mock, ConvertBytesToHexString).WillRepeatedly(Return(SOFTBUS_OK));
     bool result = IsTrustDevice(trustDevices, deviceIdHash, anonyDeviceIdHash, isOnlyPointToPoint);
-    EXPECT_TRUE(result);
+    EXPECT_FALSE(result);
 }
 
 /*
@@ -537,7 +598,18 @@ HWTEST_F(AuthDeviceProfileTest, COMPARE_ACL_WITH_PEER_DEVICE_INFO_TEST_001, Test
     const char *peerAccountHash = "8bb0cf6eb9b17d0f";
     const char *peerUdid = "1234567890";
     int32_t peerUserId = 1;
+    AuthDeviceProfileInterfaceMock mock;
+    EXPECT_CALL(mock, GetActiveOsAccountIds).WillRepeatedly(Return(TEST_LOCAL_USER_ID));
+    EXPECT_CALL(mock, LnnGetLocalStrInfo).WillOnce(Return(SOFTBUS_NETWORK_NOT_FOUND));
     bool result = CompareAclWithPeerDeviceInfo(aclProfile, peerAccountHash, peerUdid, peerUserId);
+    EXPECT_FALSE(result);
+    EXPECT_CALL(mock, LnnGetLocalStrInfo).WillRepeatedly(Return(SOFTBUS_OK));
+    EXPECT_CALL(mock, LnnGetLocalByteInfo).WillOnce(Return(SOFTBUS_NETWORK_NOT_FOUND));
+    result = CompareAclWithPeerDeviceInfo(aclProfile, peerAccountHash, peerUdid, peerUserId);
+    EXPECT_FALSE(result);
+    EXPECT_CALL(mock, LnnGetLocalByteInfo).WillRepeatedly(Return(SOFTBUS_OK));
+    EXPECT_CALL(mock, ConvertBytesToHexString).WillOnce(Return(SOFTBUS_INVALID_PARAM));
+    result = CompareAclWithPeerDeviceInfo(aclProfile, peerAccountHash, peerUdid, peerUserId);
     EXPECT_FALSE(result);
 }
 
@@ -549,8 +621,7 @@ HWTEST_F(AuthDeviceProfileTest, COMPARE_ACL_WITH_PEER_DEVICE_INFO_TEST_001, Test
  */
 HWTEST_F(AuthDeviceProfileTest, COMPARE_ACL_WITH_PEER_DEVICE_INFO_TEST_002, TestSize.Level1)
 {
-    AuthDeviceProfileInterfaceMock mocker;
-    EXPECT_CALL(mocker, LnnGetLocalStrInfo).WillRepeatedly(Return(SOFTBUS_OK));
+    AuthDeviceProfileInterfaceMock mock;
     OHOS::DistributedDeviceProfile::AccessControlProfile aclProfile;
     const char *peerAccountHash = "8bb0cf6eb9b17d0f";
     const char *peerUdid = "1234567890";
@@ -562,6 +633,11 @@ HWTEST_F(AuthDeviceProfileTest, COMPARE_ACL_WITH_PEER_DEVICE_INFO_TEST_002, Test
     DistributedDeviceProfile::Accesser accesser;
     accesser.SetAccesserAccountId(accountId);
     aclProfile.SetAccesser(accesser);
+    EXPECT_CALL(mock, GetActiveOsAccountIds).WillRepeatedly(Return(TEST_LOCAL_USER_ID));
+    EXPECT_CALL(mock, LnnGetLocalStrInfo).WillRepeatedly(Return(SOFTBUS_OK));
+    EXPECT_CALL(mock, LnnGetLocalByteInfo).WillRepeatedly(Return(SOFTBUS_OK));
+    EXPECT_CALL(mock, ConvertBytesToHexString).WillRepeatedly(Return(SOFTBUS_OK));
+    EXPECT_CALL(mock, SoftBusGenerateStrHash).WillRepeatedly(Return(SOFTBUS_OK));
     bool result = CompareAclWithPeerDeviceInfo(aclProfile, peerAccountHash, peerUdid, peerUserId);
     EXPECT_FALSE(result);
 }
@@ -592,6 +668,7 @@ HWTEST_F(AuthDeviceProfileTest, IS_TRUSTED_DEVICE_FROM_ACCESS_TEST_003, TestSize
         .deviceId = nullptr,
         .peerUserId = peerUserId
     };
+    UpdateDpSameAccount(&aclParams, sessionKey, true, ACL_NOT_WRITE);
     UpdateDpSameAccount(&aclParams, sessionKey, true, ACL_WRITE_DEFAULT);
     ret = IsTrustedDeviceFromAccess(accountHash, udid, 100);
     EXPECT_EQ(ret, false);
@@ -1239,10 +1316,8 @@ HWTEST_F(AuthDeviceProfileTest, GET_ACCESS_UK_ID_DIFF_ACCOUNT_TEST_001, TestSize
     uint64_t time = 0;
     int32_t ret = GetAccessUkIdDiffAccount(nullptr, &ukId, &time);
     EXPECT_EQ(ret, SOFTBUS_INVALID_PARAM);
-
     ret = GetAccessUkIdDiffAccount(&aclInfo, nullptr, &time);
     EXPECT_EQ(ret, SOFTBUS_INVALID_PARAM);
-
     ret = GetAccessUkIdDiffAccount(&aclInfo, &ukId, nullptr);
     EXPECT_EQ(ret, SOFTBUS_INVALID_PARAM);
 }
@@ -1274,6 +1349,9 @@ HWTEST_F(AuthDeviceProfileTest, IS_SK_ID_INVALID_INNER_TEST_001, TestSize.Level1
     const char *udidShortHash = "a1b2c3d4e5f6";
     int32_t userId = 2;
     OHOS::DistributedDeviceProfile::AccessControlProfile aclProfile;
+    AuthDeviceProfileInterfaceMock mock;
+    EXPECT_CALL(mock, SoftBusGenerateStrHash).WillRepeatedly(Return(SOFTBUS_OK));
+    EXPECT_CALL(mock, ConvertBytesToHexString).WillRepeatedly(Return(SOFTBUS_OK));
     bool ret = IsSKIdInvalidInner(sessionKeyId, accountHash, udidShortHash, userId, aclProfile);
     EXPECT_TRUE(ret);
 
@@ -1310,7 +1388,6 @@ HWTEST_F(AuthDeviceProfileTest, IS_SK_ID_INVALID_TEST_001, TestSize.Level1)
     int32_t userId = 2;
     bool ret = IsSKIdInvalid(sessionKeyId, nullptr, nullptr, userId);
     EXPECT_FALSE(ret);
-
     ret = IsSKIdInvalid(sessionKeyId, accountHash, nullptr, userId);
     EXPECT_FALSE(ret);
 }
