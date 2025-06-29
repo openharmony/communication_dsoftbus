@@ -41,6 +41,11 @@ typedef struct TagLnnOpenFuncList {
     LnnIsSupportHeartbeatCapFunc lnnIsSupportHeartbeatCap;
     LnnRequestBleDiscoveryProcessFunc lnnRequestBleDiscoveryProcess;
     GetScreenStateFunc getScreenState;
+    GetScreenLockStateFunc getscreenLockState;
+    LnnTriggerSleHeartbeatFunc lnnTriggerSleHeartbeat;
+    LnnCleanTriggerSparkInfoFunc lnnCleanTriggerSparkInfo;
+    LnnOfflineTimingBySleHbFunc lnnOfflineTimingBySleHb;
+    LnnStopSleHeartbeatFunc lnnStopSleHeartbeat;
 
     // net_builder
     LnnRegSyncInfoHandlerFunc lnnRegSyncInfoHandler;

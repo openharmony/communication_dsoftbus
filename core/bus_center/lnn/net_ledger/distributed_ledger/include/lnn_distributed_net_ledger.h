@@ -48,6 +48,8 @@ int32_t LnnGetDLHeartbeatTimestamp(const char *networkId, uint64_t *timestamp);
 int32_t LnnGetDLOnlineTimestamp(const char *networkId, uint64_t *timestamp);
 int32_t LnnSetDLHeartbeatTimestamp(const char *networkId, const uint64_t timestamp);
 int32_t LnnGetDLBleDirectTimestamp(const char *networkId, uint64_t *timestamp);
+int32_t LnnSetDLSleHbTimestamp(const char *networkId, const uint64_t timestamp);
+int32_t LnnGetDLSleHbTimestamp(const char *networkId, uint64_t *timestamp);
 int32_t LnnGetDLUpdateTimestamp(const char *udid, uint64_t *timestamp);
 int32_t LnnSetDLBleDirectTimestamp(const char *networkId, uint64_t timestamp);
 int32_t LnnGetDLAuthCapacity(const char *networkId, uint32_t *authCapacity);

@@ -38,6 +38,7 @@
 #include "lnn_distributed_net_ledger.h"
 #include "lnn_event.h"
 #include "lnn_heartbeat_ctrl.h"
+#include "lnn_heartbeat_medium_mgr.h"
 #include "lnn_heartbeat_utils.h"
 #include "lnn_local_net_ledger.h"
 #include "lnn_log.h"
@@ -1118,6 +1119,7 @@ static void CompleteLeaveLNN(LnnConnectionFsm *connFsm, const char *networkId, i
     NotifyLeaveResult(connFsm, networkId, retCode);
     if (needReportOffline) {
         LnnStopOfflineTimingByHeartbeat(networkId, connInfo->addr.type);
+        LnnStopOfflineTimingBySleHb(networkId, connInfo->addr.type);
         LnnNotifyOnlineState(false, &basic);
     } else if (retCode == SOFTBUS_OK) {
         LnnNotifySingleOffLineEvent(&connInfo->addr, &basic);
@@ -1131,6 +1133,7 @@ static void CompleteLeaveLNN(LnnConnectionFsm *connFsm, const char *networkId, i
     connFsm->isDead = true;
     LnnNotifyAuthHandleLeaveLNN(connInfo->authHandle);
     LnnRequestCleanConnFsm(connFsm->id);
+    LnnCleanTriggerSparkInfo(info.deviceInfo.deviceUdid, connInfo->addr.type);
     LNN_LOGI(LNN_BUILDER, "complete leave lnn, ready clean. [id=%{public}u]", connFsm->id);
 }
 

@@ -56,6 +56,7 @@ typedef struct {
     int32_t (*onRecvHigherWeight)(const char *udidHash, int32_t weight, ConnectionAddrType type, bool isReElect,
         bool isPeerScreenOn);
     void (*onRecvLpInfo)(const char *networkId, uint64_t nowTime);
+    void (*onRecvSleInfo)(const char *networkId, SleDeviceInfo *info);
 } LnnHeartbeatMediumMgrCb;
 
 typedef struct {

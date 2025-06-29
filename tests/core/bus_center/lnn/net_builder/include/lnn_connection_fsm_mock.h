@@ -88,6 +88,8 @@ public:
     virtual void DelUserKeyByNetworkId(const char *networkId) = 0;
     virtual void LnnNotifyAddRawEnhanceP2pEvent(LnnNotifyRawEnhanceP2pEvent *event) = 0;
     virtual bool RawLinkNeedUpdateAuthManager(const char *uuid, bool isServer) = 0;
+    virtual void LnnStopOfflineTimingBySleHb(const char *networkId, ConnectionAddrType addrType) = 0;
+    virtual int32_t LnnCleanTriggerSparkInfo(const char *udid, ConnectionAddrType addrType) = 0;
 };
 
 class LnnConnFsmInterfaceMock : public LnnConnFsmInterface {
@@ -136,6 +138,8 @@ public:
     MOCK_METHOD1(DelUserKeyByNetworkId, void(const char *));
     MOCK_METHOD1(LnnNotifyAddRawEnhanceP2pEvent, void(LnnNotifyRawEnhanceP2pEvent *));
     MOCK_METHOD2(RawLinkNeedUpdateAuthManager, bool(const char *, bool));
+    MOCK_METHOD2(LnnStopOfflineTimingBySleHb, void(const char *, ConnectionAddrType));
+    MOCK_METHOD2(LnnCleanTriggerSparkInfo, int32_t(const char *, ConnectionAddrType));
 };
 } // namespace OHOS
 #endif // LNN_CONNECTION_FSM_MOCK_H

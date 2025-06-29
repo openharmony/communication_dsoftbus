@@ -765,6 +765,21 @@ int32_t AuthCheckMetaExist(const AuthConnInfo *connInfo, bool *isExist)
     return SOFTBUS_OK;
 }
 
+bool IsSameAccountId(int64_t accountId)
+{
+    int64_t localAccountId = 0;
+    int32_t ret = LnnGetLocalNum64Info(NUM_KEY_ACCOUNT_LONG, &localAccountId);
+    if (ret != SOFTBUS_OK) {
+        LNN_LOGE(AUTH_CONN, "get local accountId fail");
+        return false;
+    }
+    if (localAccountId == accountId && !LnnIsDefaultOhosAccount()) {
+        return true;
+    }
+    LNN_LOGI(AUTH_CONN, "not same account");
+    return false;
+}
+
 int32_t AuthInit(void)
 {
     AuthTransCallback callBack = {

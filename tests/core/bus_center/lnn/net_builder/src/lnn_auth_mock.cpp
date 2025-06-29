@@ -51,5 +51,10 @@ int32_t RegGroupChangeListener(const GroupChangeListener *listener)
 {
     return GetAuthInterface()->RegGroupChangeListener(listener);
 }
+
+bool IsSameAccountId(int64_t accountId)
+{
+    return GetAuthInterface()->IsSameAccountId(accountId);
+}
 }
 }
