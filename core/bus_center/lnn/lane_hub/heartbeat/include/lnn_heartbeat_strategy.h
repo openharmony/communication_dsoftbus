@@ -52,6 +52,8 @@ int32_t LnnStopScreenChangeOfflineTiming(const char *networkId, ConnectionAddrTy
 int32_t LnnStopHeartBeatAdvByTypeNow(LnnHeartbeatType registedHbType);
 int32_t LnnUpdateSendInfoStrategy(LnnHeartbeatUpdateInfoType type);
 LnnHeartbeatStrategyType GetStrategyTypeByPolicy(int32_t policy);
+int32_t LnnStartSleOfflineTimingStrategy(const char *networkId);
+int32_t LnnStopSleOfflineTimingStrategy(const char *networkId);
 
 bool LnnIsHeartbeatEnable(LnnHeartbeatType type);
 int32_t LnnEnableHeartbeatByType(LnnHeartbeatType type, bool isEnable);

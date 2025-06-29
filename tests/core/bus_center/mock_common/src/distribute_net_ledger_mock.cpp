@@ -102,5 +102,10 @@ int32_t ConvertBtMacToBinary(const char *strMac, uint32_t strMacLen, uint8_t *bi
 {
     return GetDistriLedgerInterface()->ConvertBtMacToBinary(strMac, strMacLen, binMac, binMacLen);
 }
+
+int32_t LnnGetDLSleHbTimestamp(const char *networkId, uint64_t *timestamp)
+{
+    return GetDistriLedgerInterface()->LnnGetDLSleHbTimestamp(networkId, timestamp);
+}
 }
 } // namespace OHOS

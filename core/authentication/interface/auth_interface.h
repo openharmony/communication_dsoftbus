@@ -54,6 +54,7 @@ bool AuthIsPotentialTrusted(const DeviceInfo *device, bool isOnlyPointToPoint);
 bool IsAuthHasTrustedRelation(void);
 bool IsSameAccountDevice(const DeviceInfo *device);
 bool AuthHasSameAccountGroup(void);
+bool IsSameAccountId(int64_t accountId);
 
 int32_t AuthStartListening(AuthLinkType type, const char *ip, int32_t port);
 void AuthStopListening(AuthLinkType type);

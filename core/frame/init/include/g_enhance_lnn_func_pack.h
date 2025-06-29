@@ -97,6 +97,7 @@ bool IsCipherManagerFindKeyPk(const char *udid);
 int32_t LnnAddRemoteChannelCodePacked(const char *udid, int32_t channelCode);
 int32_t LnnRegistBleHeartbeatMediumMgrPacked(void);
 int32_t LnnRegisterBleLpDeviceMediumMgrPacked(void);
+int32_t LnnRegisterSleHeartbeatMediumMgrPacked(void);
 bool HaveConcurrencyPreLinkReqIdByReuseConnReqIdPacked(uint32_t connReqId, bool isCheckPreLink);
 bool HaveConcurrencyPreLinkNodeByLaneReqIdPacked(uint32_t laneReqId, bool isCheckPreLink);
 int32_t GetConcurrencyLaneReqIdByConnReqIdPacked(uint32_t connReqId, uint32_t *laneReqId);

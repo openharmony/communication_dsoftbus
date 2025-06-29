@@ -81,6 +81,7 @@ typedef int32_t (*HbBuildUserIdCheckSumFunc)(const int32_t *userIdArray, int32_t
 typedef int32_t (*EncryptUserIdFunc)(uint8_t *advUserId, uint32_t len, int32_t userId);
 typedef int32_t (*DecryptUserIdFunc)(NodeInfo *deviceInfo, uint8_t *advUserId, uint32_t len);
 typedef int32_t (*LnnRegisterBleLpDeviceMediumMgrFunc)(void);
+typedef int32_t (*LnnRegisterSleHeartbeatMediumMgrFunc)(void);
 typedef void (*SendDeviceStateToMlpsFunc)(void *para);
 typedef void (*UpdateLocalDeviceInfoToMlpsFunc)(const NodeInfo *localInfo);
 typedef void (*UpdateRemoteDeviceInfoToMlpsFunc)(const NodeInfo *info);
@@ -308,6 +309,7 @@ typedef struct TagLnnEnhanceFuncList {
     EncryptUserIdFunc encryptUserId;
     DecryptUserIdFunc decryptUserId;
     LnnRegisterBleLpDeviceMediumMgrFunc lnnRegisterBleLpDeviceMediumMgr;
+    LnnRegisterSleHeartbeatMediumMgrFunc lnnRegisterSleHeartbeatMediumMgr;
     SendDeviceStateToMlpsFunc sendDeviceStateToMlps;
     UpdateLocalDeviceInfoToMlpsFunc updateLocalDeviceInfoToMlps;
     UpdateRemoteDeviceInfoToMlpsFunc updateRemoteDeviceInfoToMlps;

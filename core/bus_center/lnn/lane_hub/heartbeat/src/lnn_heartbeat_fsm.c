@@ -20,6 +20,7 @@
 
 #include "anonymizer.h"
 #include "bus_center_manager.h"
+#include "g_enhance_lnn_func_pack.h"
 #include "lnn_connection_addr_utils.h"
 #include "lnn_deviceinfo_to_profile.h"
 #include "lnn_distributed_net_ledger.h"
@@ -62,6 +63,7 @@ static int32_t OnSetMediumParam(FsmStateMachine *fsm, int32_t msgType, void *par
 static int32_t OnUpdateSendInfo(FsmStateMachine *fsm, int32_t msgType, void *para);
 static int32_t OnScreeOffCheckDevStatus(FsmStateMachine *fsm, int32_t msgType, void *para);
 static int32_t OnReStartHbProcess(FsmStateMachine *fsm, int32_t msgType, void *para);
+static int32_t OnCheckSleDevStatus(FsmStateMachine *fsm, int32_t msgType, void *para);
 
 static LnnHeartbeatStateHandler g_hbNoneStateHandler[] = {
     {EVENT_HB_CHECK_DEV_STATUS, OnCheckDevStatus},
@@ -86,6 +88,7 @@ static LnnHeartbeatStateHandler g_normalNodeHandler[] = {
     {EVENT_HB_STOP_SPECIFIC, OnStopHbByType},
     {EVENT_HB_SCREEN_OFF_CHECK_STATUS, OnScreeOffCheckDevStatus},
     {EVENT_HB_START_PROCESS, OnReStartHbProcess},
+    {EVENT_HB_CHECK_SLE_DEV_STATUS, OnCheckSleDevStatus},
 };
 
 static LnnHeartbeatStateHandler g_masterNodeHandler[] = {
@@ -101,6 +104,7 @@ static LnnHeartbeatStateHandler g_masterNodeHandler[] = {
     {EVENT_HB_STOP_SPECIFIC, OnStopHbByType},
     {EVENT_HB_SCREEN_OFF_CHECK_STATUS, OnScreeOffCheckDevStatus},
     {EVENT_HB_START_PROCESS, OnReStartHbProcess},
+    {EVENT_HB_CHECK_SLE_DEV_STATUS, OnCheckSleDevStatus},
 };
 
 static LnnHeartbeatFsmHandler g_hbFsmHandler[] = {
@@ -353,6 +357,26 @@ static int32_t RemoveScreenOffCheckStatus(FsmCtrlMsgObj *ctrlMsgObj, SoftBusMess
     return SOFTBUS_NETWORK_HB_REMOVE_MSG_FAIL;
 }
 
+static int32_t RemoveCheckSleDevStatusMsg(FsmCtrlMsgObj *ctrlMsgObj, SoftBusMessage *delMsg)
+{
+    LnnCheckDevStatusMsgPara *msgPara = (LnnCheckDevStatusMsgPara *)ctrlMsgObj->obj;
+    LnnCheckDevStatusMsgPara *delMsgPara = (LnnCheckDevStatusMsgPara *)delMsg->obj;
+
+    if (delMsgPara->hasNetworkId != msgPara->hasNetworkId) {
+        return SOFTBUS_NETWORK_HB_REMOVE_MSG_FAIL;
+    }
+    if (!delMsgPara->hasNetworkId && msgPara->hbType == delMsgPara->hbType) {
+        return SOFTBUS_NETWORK_HB_REMOVE_MSG_FAIL;
+    }
+    if (delMsgPara->hasNetworkId && msgPara->hbType == delMsgPara->hbType &&
+        strcmp(msgPara->networkId, delMsgPara->networkId) == 0) {
+        SoftBusFree(msgPara);
+        msgPara = NULL;
+        return SOFTBUS_OK;
+    }
+    return SOFTBUS_NETWORK_HB_REMOVE_MSG_FAIL;
+}
+
 static int32_t CustomFuncRemoveHbMsg(const SoftBusMessage *msg, void *args)
 {
     if (!CheckRemoveHbMsgParams(msg, args)) {
@@ -373,6 +397,8 @@ static int32_t CustomFuncRemoveHbMsg(const SoftBusMessage *msg, void *args)
             return RemoveSendOneEndMsg(ctrlMsgObj, delMsg);
         case EVENT_HB_SCREEN_OFF_CHECK_STATUS:
             return RemoveScreenOffCheckStatus(ctrlMsgObj, delMsg);
+        case EVENT_HB_CHECK_SLE_DEV_STATUS:
+            return RemoveCheckSleDevStatusMsg(ctrlMsgObj, delMsg);
         default:
             break;
     }
@@ -429,6 +455,15 @@ void LnnRemoveScreenOffCheckStatusMsg(LnnHeartbeatFsm *hbFsm, LnnCheckDevStatusM
         return;
     }
     RemoveHbMsgByCustObj(hbFsm, EVENT_HB_SCREEN_OFF_CHECK_STATUS, (void *)msgPara);
+}
+
+void LnnRemoveSleCheckStatusMsg(LnnHeartbeatFsm *hbFsm, LnnCheckDevStatusMsgPara *msgPara)
+{
+    if (hbFsm == NULL || msgPara == NULL) {
+        LNN_LOGW(LNN_HEART_BEAT, "remove check msg get invalid param");
+        return;
+    }
+    RemoveHbMsgByCustObj(hbFsm, EVENT_HB_CHECK_SLE_DEV_STATUS, (void *)msgPara);
 }
 
 void LnnRemoveProcessSendOnceMsg(LnnHeartbeatFsm *hbFsm, LnnHeartbeatType hbType,
@@ -679,6 +714,10 @@ static int32_t OnStopHbByType(FsmStateMachine *fsm, int32_t msgType, void *para)
             LnnFsmRemoveMessage(&hbFsm->fsm, EVENT_HB_SEND_ONE_BEGIN);
             LnnFsmRemoveMessage(&hbFsm->fsm, EVENT_HB_SEND_ONE_END);
         }
+        if ((*hbType & HEARTBEAT_TYPE_SLE) != 0) {
+            LnnFsmRemoveMessage(&hbFsm->fsm, EVENT_HB_PROCESS_SEND_ONCE);
+            LnnRemoveProcessSendOnceMsg(hbFsm, HEARTBEAT_TYPE_SLE, STRATEGY_HB_SEND_FIXED_PERIOD);
+        }
         ret = SOFTBUS_OK;
     } while (false);
     SoftBusFree(hbType);
@@ -790,10 +829,8 @@ static int32_t ProcessLostHeartbeat(const char *networkId, LnnHeartbeatType type
     ConnectionAddrType addrType = LnnConvertHbTypeToConnAddrType(type);
     char udidHash[HB_SHORT_UDID_HASH_HEX_LEN + 1] = {0};
     char *anonyNetworkId = NULL;
-    if (networkId == NULL) {
-        LNN_LOGW(LNN_HEART_BEAT, "process dev lost networkId is null");
-        return SOFTBUS_INVALID_PARAM;
-    }
+    LNN_CHECK_AND_RETURN_RET_LOGE(networkId != NULL, SOFTBUS_INVALID_PARAM, LNN_HEART_BEAT, "networkId is null");
+
     if (ProcOfflineWithoutSoftbus(networkId, addrType)) {
         LNN_LOGI(LNN_HEART_BEAT, "proc offline, that device online without softbus");
         return SOFTBUS_OK;
@@ -805,7 +842,7 @@ static int32_t ProcessLostHeartbeat(const char *networkId, LnnHeartbeatType type
         AnonymizeFree(anonyNetworkId);
         return SOFTBUS_OK;
     }
-    if (LnnHasActiveConnection(networkId, addrType)) {
+    if (LnnHasActiveConnection(networkId, addrType) || QueryControlPlaneNodeValidPacked(networkId) == SOFTBUS_OK) {
         Anonymize(networkId, &anonyNetworkId);
         LNN_LOGD(LNN_HEART_BEAT, "process dev lost in next period, networkId=%{public}s",
             AnonymizeWrapper(anonyNetworkId));
@@ -922,7 +959,8 @@ static void CheckDevStatusForScreenOff(LnnHeartbeatFsm *hbFsm, const char *netwo
     (void)hbFsm;
     uint64_t oldTimeStamp;
     char *anonyNetworkId = NULL;
-    if (LnnHasActiveConnection(networkId, LnnConvertHbTypeToConnAddrType(hbType))) {
+    if (LnnHasActiveConnection(networkId, LnnConvertHbTypeToConnAddrType(hbType)) ||
+        QueryControlPlaneNodeValidPacked(networkId) == SOFTBUS_OK) {
         Anonymize(networkId, &anonyNetworkId);
         LNN_LOGD(LNN_HEART_BEAT, "process screen off dev lost in next period, networkId=%{public}s",
             AnonymizeWrapper(anonyNetworkId));
@@ -1056,6 +1094,85 @@ static int32_t OnScreeOffCheckDevStatus(FsmStateMachine *fsm, int32_t msgType, v
             CheckDevStatusForScreenOff(hbFsm, info[i].networkId, msgPara->hbType, nowTime);
         }
         SoftBusFree(info);
+    } while (false);
+    SoftBusFree(msgPara);
+    return ret;
+}
+
+static void CheckSleDevStatus(LnnHeartbeatFsm *hbFsm, const char *networkId,
+    LnnHeartbeatType hbType, uint64_t nowTime)
+{
+    (void)hbFsm;
+    uint64_t oldTimeStamp;
+    char *anonyNetworkId = NULL;
+    Anonymize(networkId, &anonyNetworkId);
+    NodeInfo nodeInfo;
+    (void)memset_s(&nodeInfo, sizeof(NodeInfo), 0, sizeof(NodeInfo));
+    if (LnnGetRemoteNodeInfoById(networkId, CATEGORY_NETWORK_ID, &nodeInfo) != SOFTBUS_OK) {
+        LNN_LOGE(LNN_HEART_BEAT, "get nodeInfo fail, networkId=%{public}s", AnonymizeWrapper(anonyNetworkId));
+        AnonymizeFree(anonyNetworkId);
+        return;
+    }
+    if (QueryControlPlaneNodeValidPacked(networkId) != SOFTBUS_OK) {
+        LNN_LOGD(LNN_HEART_BEAT, "target dev not in spark group, networkId=%{public}s",
+            AnonymizeWrapper(anonyNetworkId));
+        AnonymizeFree(anonyNetworkId);
+        return;
+    }
+    if (!LnnHasDiscoveryType(&nodeInfo, LnnConvAddrTypeToDiscType(CONNECTION_ADDR_BLE))) {
+        LNN_LOGD(LNN_HEART_BEAT, "target dev ble not online, networkId=%{public}s",
+            AnonymizeWrapper(anonyNetworkId));
+        AnonymizeFree(anonyNetworkId);
+        return;
+    }
+    if (LnnGetDLSleHbTimestamp(networkId, &oldTimeStamp) != SOFTBUS_OK) {
+        LNN_LOGE(LNN_HEART_BEAT, "get sle time stamp fail, networkId=%{public}s",
+            AnonymizeWrapper(anonyNetworkId));
+        AnonymizeFree(anonyNetworkId);
+        return;
+    }
+    if (nowTime - oldTimeStamp < HB_SLE_OFFLINE_TIME) {
+        LNN_LOGE(LNN_HEART_BEAT, "sle check dev status in period time, networkId=%{public}s",
+            AnonymizeWrapper(anonyNetworkId));
+        AnonymizeFree(anonyNetworkId);
+        (void)LnnStartSleOfflineTimingStrategy(networkId);
+        return;
+    }
+    LNN_LOGI(LNN_HEART_BEAT, "notify node lost sle heartbeat, networkId=%{public}s,"
+        "timestamp=%{public}" PRIu64 "->%{public}" PRIu64 "",
+        AnonymizeWrapper(anonyNetworkId), oldTimeStamp, nowTime);
+    if (LnnRequestLeaveSpecific(networkId, CONNECTION_ADDR_BLE) != SOFTBUS_OK) {
+        LNN_LOGE(LNN_HEART_BEAT, "process dev lost sle hb, send request to NetBuilder fail, networkId=%{public}s",
+            AnonymizeWrapper(anonyNetworkId));
+    }
+    AnonymizeFree(anonyNetworkId);
+}
+
+static int32_t OnCheckSleDevStatus(FsmStateMachine *fsm, int32_t msgType, void *para)
+{
+    (void)msgType;
+    int32_t ret = SOFTBUS_OK;
+    uint64_t nowTime;
+    SoftBusSysTime times = {0};
+    LnnCheckDevStatusMsgPara *msgPara = (LnnCheckDevStatusMsgPara *)para;
+    if (msgPara == NULL) {
+        LNN_LOGE(LNN_HEART_BEAT, "check sle dev status get invalid para");
+        return SOFTBUS_INVALID_PARAM;
+    }
+    do {
+        SoftBusGetTime(&times);
+        nowTime = (uint64_t)times.sec * HB_TIME_FACTOR + (uint64_t)times.usec / HB_TIME_FACTOR;
+        if (!CheckHbFsmStateMsgArgs(fsm)) {
+            LNN_LOGE(LNN_HEART_BEAT, "check sle dev status get invalid fsm");
+            ret = SOFTBUS_NETWORK_HB_CHECK_DEV_STATUS_ERROR;
+            break;
+        }
+        LnnHeartbeatFsm *hbFsm = TO_HEARTBEAT_FSM(fsm);
+        if (!msgPara->hasNetworkId) {
+            LNN_LOGE(LNN_HEART_BEAT, "check sle dev status no need handle");
+            break;
+        }
+        CheckSleDevStatus(hbFsm, msgPara->networkId, msgPara->hbType, nowTime);
     } while (false);
     SoftBusFree(msgPara);
     return ret;
@@ -1373,4 +1490,27 @@ int32_t LnnPostUpdateSendInfoMsgToHbFsm(LnnHeartbeatFsm *hbFsm, LnnHeartbeatUpda
         return SOFTBUS_INVALID_PARAM;
     }
     return LnnFsmPostMessage(&hbFsm->fsm, EVENT_HB_UPDATE_SEND_INFO, (void *)(uintptr_t)type);
+}
+
+int32_t LnnPostSleCheckDevStatusMsgToHbFsm(
+    LnnHeartbeatFsm *hbFsm, const LnnCheckDevStatusMsgPara *para, uint64_t delayMillis)
+{
+    if (hbFsm == NULL || para == NULL) {
+        LNN_LOGE(LNN_HEART_BEAT, "post sle check dev status msg get invalid param");
+        return SOFTBUS_INVALID_PARAM;
+    }
+    LnnCheckDevStatusMsgPara *dupPara = (LnnCheckDevStatusMsgPara *)SoftBusCalloc(sizeof(LnnCheckDevStatusMsgPara));
+    LNN_CHECK_AND_RETURN_RET_LOGE(dupPara != NULL, SOFTBUS_MALLOC_ERR, LNN_HEART_BEAT, "malloc fail");
+    if (memcpy_s(dupPara, sizeof(LnnCheckDevStatusMsgPara), para, sizeof(LnnCheckDevStatusMsgPara)) != EOK) {
+        LNN_LOGE(LNN_HEART_BEAT, "post sle check dev status msg memcpy_s msgPara fail");
+        SoftBusFree(dupPara);
+        return SOFTBUS_MEM_ERR;
+    }
+    if (LnnFsmPostMessageDelay(
+        &hbFsm->fsm, EVENT_HB_CHECK_SLE_DEV_STATUS, (void *)dupPara, delayMillis) != SOFTBUS_OK) {
+        LNN_LOGE(LNN_HEART_BEAT, "post sle check dev status msg to hbFsm fail");
+        SoftBusFree(dupPara);
+        return SOFTBUS_NETWORK_POST_MSG_DELAY_FAIL;
+    }
+    return SOFTBUS_OK;
 }

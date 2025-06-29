@@ -28,6 +28,7 @@ int32_t LnnHbMediumMgrSendEnd(LnnHeartbeatSendEndData *custData);
 int32_t LnnHbMediumMgrStop(LnnHeartbeatType *type);
 int32_t LnnHbMediumMgrUpdateSendInfo(LnnHeartbeatUpdateInfoType type);
 void LnnHbClearRecvList(void);
+int32_t LnnCleanTriggerSparkInfo(const char *udid, ConnectionAddrType addrType);
 
 int32_t LnnHbMediumMgrInit(void);
 void LnnHbMediumMgrDeinit(void);

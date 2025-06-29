@@ -160,6 +160,9 @@ static void OnReAuthVerifyPassed(uint32_t requestId, AuthHandle authHandle, cons
     LnnConnectionFsm *connFsm = FindConnectionFsmByAddr(&addr, true);
     if (connFsm != NULL && !connFsm->isDead && !LnnIsNeedCleanConnectionFsm(info, addr.type)) {
         if (info != NULL && LnnUpdateGroupType(info) == SOFTBUS_OK && LnnUpdateAccountInfo(info) == SOFTBUS_OK) {
+            if (IsSameAccountId(info->accountId) && LnnHasDiscoveryType(info, DISCOVERY_TYPE_BLE)) {
+                TriggerSparkGroupBuildPacked(SPARK_GROUP_DELAY_TIME_MS);
+            }
             UpdateProfile(info);
             LnnUpdateRemoteDeviceName(info);
             GetSessionKeyByNodeInfo(info, authHandle);

@@ -247,5 +247,15 @@ bool RawLinkNeedUpdateAuthManager(const char *uuid, bool isServer)
 {
     return GetLnnConnInterface()->RawLinkNeedUpdateAuthManager(uuid, isServer);
 }
+
+void LnnStopOfflineTimingBySleHb(const char *networkId, ConnectionAddrType addrType)
+{
+    return GetLnnConnInterface()->LnnStopOfflineTimingBySleHb(networkId, addrType);
+}
+
+int32_t LnnCleanTriggerSparkInfo(const char *udid, ConnectionAddrType addrType)
+{
+    return GetLnnConnInterface()->LnnCleanTriggerSparkInfo(udid, addrType);
+}
 }
 } // namespace OHOS

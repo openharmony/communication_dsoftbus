@@ -209,6 +209,7 @@ ohos_unittest("HeartBeatFSMTest") {
     "$dsoftbus_root_path/tests/core/bus_center/mock_common/src/lnn_connection_mock.cpp",
     "$dsoftbus_root_path/tests/core/bus_center/test/heartbeat/hb_fsm_test.cpp",
     "$dsoftbus_root_path/tests/core/bus_center/test/mock/src/hb_fsm_mock.cpp",
+    "$dsoftbus_root_path/core/frame/init/src/g_enhance_lnn_func_pack.c",
     "$dsoftbus_root_path/core/frame/init/src/g_enhance_lnn_func.c",
   ]
 
