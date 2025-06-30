@@ -121,8 +121,8 @@ tests/core/transmission/        jiazhenyu1@huawei.com baiyuxin6@huawei.com
 tests/sdk/transmission/         jiazhenyu1@huawei.com baiyuxin6@huawei.com
 
 [TransInterface]
-interfaces/inner_kits/transport/    gouwenbo@huawei.com
-interfaces/kits/transport/          gouwenbo@huawei.com
+interfaces/inner_kits/transport/    gouwenbo@huawei.com baiyuxin6@huawei.com
+interfaces/kits/transport/          gouwenbo@huawei.com baiyuxin6@huawei.com
 
 [Comm]
 adapter/common/include/     zhusiyuan2@huawei.com
@@ -143,12 +143,12 @@ hisysevent.yaml             litongxin3@huawei.com
 interfaces/kits/common/softbus_error_code.h     litongxin3@huawei.com songzhengteng@huawei.com
 
 [Framework]
-core/frame/                 zhangfengxi@huawei.com
-sdk/frame/                  zhangfengxi@huawei.com
-sdk/BUILD.gn                zhangfengxi@huawei.com
-sdk/libsoftbus_client_map   zhangfengxi@huawei.com
-tests/core/frame/           zhangfengxi@huawei.com
-tests/sdk/frame/            zhangfengxi@huawei.com
+core/frame/                 baiyuxin6@huawei.com
+sdk/frame/                  baiyuxin6@huawei.com
+sdk/BUILD.gn                baiyuxin6@huawei.com
+sdk/libsoftbus_client_map   baiyuxin6@huawei.com
+tests/core/frame/           baiyuxin6@huawei.com
+tests/sdk/frame/            baiyuxin6@huawei.com
 
 [Permission]
 core/common/security/permission/        liubao6@huawei.com
