@@ -108,7 +108,6 @@ static void FillAppInfoPart(FuzzedDataProvider &provider, AppInfo *appInfo)
     appInfo->crc = provider.ConsumeIntegral<int32_t>();
     appInfo->fastTransData = data.data();
     appInfo->fastTransDataSize = dataSize;
-    DataGenerator::Clear();
 }
 
 static void FillAppInfo(const uint8_t *data, size_t size, AppInfo *appInfo)
@@ -216,6 +215,10 @@ void TransProxyGetNewChanSeqTest(FuzzedDataProvider &provider)
     AppInfo appInfo;
     (void)memset_s(&appInfo, sizeof(AppInfo), 0, sizeof(AppInfo));
     FillAppInfo(provider, &appInfo);
+    auto dataSize = provider.ConsumeIntegral<uint32_t>();
+    auto data = provider.ConsumeBytes<uint8_t>(dataSize);
+    appInfo.fastTransData = data.data();
+    appInfo.fastTransDataSize = dataSize;
 
     ProxyChannelInfo *proxyChannelInfo = static_cast<ProxyChannelInfo *>(SoftBusCalloc(sizeof(ProxyChannelInfo)));
     proxyChannelInfo->channelId = channelId;
@@ -246,6 +249,10 @@ void TransProxyOpenProxyChannelTest(FuzzedDataProvider &provider)
     AppInfo appInfo;
     (void)memset_s(&appInfo, sizeof(AppInfo), 0, sizeof(AppInfo));
     FillAppInfo(provider, &appInfo);
+    auto dataSize = provider.ConsumeIntegral<uint32_t>();
+    auto data = provider.ConsumeBytes<uint8_t>(dataSize);
+    appInfo.fastTransData = data.data();
+    appInfo.fastTransDataSize = dataSize;
     ConnectOption connectOption;
     FillConnectOption(provider, &connectOption);
 
@@ -272,6 +279,10 @@ void TransProxyCloseProxyChannelTest(FuzzedDataProvider &provider)
     AppInfo appInfo;
     (void)memset_s(&appInfo, sizeof(AppInfo), 0, sizeof(AppInfo));
     FillAppInfo(provider, &appInfo);
+    auto dataSize = provider.ConsumeIntegral<uint32_t>();
+    auto data = provider.ConsumeBytes<uint8_t>(dataSize);
+    appInfo.fastTransData = data.data();
+    appInfo.fastTransDataSize = dataSize;
  
     ProxyChannelInfo *proxyChannelInfo = static_cast<ProxyChannelInfo *>(SoftBusCalloc(sizeof(ProxyChannelInfo)));
     proxyChannelInfo->channelId = channelId;
@@ -301,6 +312,10 @@ void TransProxyDelByConnIdTest(FuzzedDataProvider &provider)
     AppInfo appInfo;
     (void)memset_s(&appInfo, sizeof(AppInfo), 0, sizeof(AppInfo));
     FillAppInfo(provider, &appInfo);
+    auto dataSize = provider.ConsumeIntegral<uint32_t>();
+    auto data = provider.ConsumeBytes<uint8_t>(dataSize);
+    appInfo.fastTransData = data.data();
+    appInfo.fastTransDataSize = dataSize;
  
     ProxyChannelInfo *proxyChannelInfo = static_cast<ProxyChannelInfo *>(SoftBusCalloc(sizeof(ProxyChannelInfo)));
     proxyChannelInfo->channelId = channelId;
@@ -373,6 +388,10 @@ void TransProxyGetChanByChanIdTest(FuzzedDataProvider &provider)
     AppInfo appInfo;
     (void)memset_s(&appInfo, sizeof(AppInfo), 0, sizeof(AppInfo));
     FillAppInfo(provider, &appInfo);
+    auto dataSize = provider.ConsumeIntegral<uint32_t>();
+    auto data = provider.ConsumeBytes<uint8_t>(dataSize);
+    appInfo.fastTransData = data.data();
+    appInfo.fastTransDataSize = dataSize;
 
     ProxyChannelInfo *proxyChannelInfo = static_cast<ProxyChannelInfo *>(SoftBusCalloc(sizeof(ProxyChannelInfo)));
     proxyChannelInfo->channelId = channelId;
@@ -403,6 +422,10 @@ void TransProxyGetChanByReqIdTest(FuzzedDataProvider &provider)
     AppInfo appInfo;
     (void)memset_s(&appInfo, sizeof(AppInfo), 0, sizeof(AppInfo));
     FillAppInfo(provider, &appInfo);
+    auto dataSize = provider.ConsumeIntegral<uint32_t>();
+    auto data = provider.ConsumeBytes<uint8_t>(dataSize);
+    appInfo.fastTransData = data.data();
+    appInfo.fastTransDataSize = dataSize;
 
     ProxyChannelInfo *proxyChannelInfo = static_cast<ProxyChannelInfo *>(SoftBusCalloc(sizeof(ProxyChannelInfo)));
     proxyChannelInfo->channelId = channelId;
@@ -431,6 +454,10 @@ void TransProxyOpenProxyChannelSuccessTest(FuzzedDataProvider &provider)
     AppInfo appInfo;
     (void)memset_s(&appInfo, sizeof(AppInfo), 0, sizeof(AppInfo));
     FillAppInfo(provider, &appInfo);
+    auto dataSize = provider.ConsumeIntegral<uint32_t>();
+    auto data = provider.ConsumeBytes<uint8_t>(dataSize);
+    appInfo.fastTransData = data.data();
+    appInfo.fastTransDataSize = dataSize;
 
     ProxyChannelInfo *proxyChannelInfo = static_cast<ProxyChannelInfo *>(SoftBusCalloc(sizeof(ProxyChannelInfo)));
     proxyChannelInfo->channelId = channelId;
@@ -467,6 +494,10 @@ void TransProxyOpenProxyChannelFailTest(FuzzedDataProvider &provider)
     AppInfo appInfo;
     (void)memset_s(&appInfo, sizeof(AppInfo), 0, sizeof(AppInfo));
     FillAppInfo(provider, &appInfo);
+    auto dataSize = provider.ConsumeIntegral<uint32_t>();
+    auto data = provider.ConsumeBytes<uint8_t>(dataSize);
+    appInfo.fastTransData = data.data();
+    appInfo.fastTransDataSize = dataSize;
 
     TransProxyOpenProxyChannelFail(channelId, &appInfo, errCode);
 }
@@ -492,6 +523,10 @@ void TransProxyGetSessionKeyByChanIdTest(FuzzedDataProvider &provider)
     AppInfo appInfo;
     (void)memset_s(&appInfo, sizeof(AppInfo), 0, sizeof(AppInfo));
     FillAppInfo(provider, &appInfo);
+    auto dataSize = provider.ConsumeIntegral<uint32_t>();
+    auto data = provider.ConsumeBytes<uint8_t>(dataSize);
+    appInfo.fastTransData = data.data();
+    appInfo.fastTransDataSize = dataSize;
 
     ProxyChannelInfo *proxyChannelInfo = static_cast<ProxyChannelInfo *>(SoftBusCalloc(sizeof(ProxyChannelInfo)));
     proxyChannelInfo->channelId = channelId;
@@ -524,6 +559,10 @@ void TransProxyGetSendMsgChanInfoTest(FuzzedDataProvider &provider)
     AppInfo appInfo;
     (void)memset_s(&appInfo, sizeof(AppInfo), 0, sizeof(AppInfo));
     FillAppInfo(provider, &appInfo);
+    auto dataSize = provider.ConsumeIntegral<uint32_t>();
+    auto data = provider.ConsumeBytes<uint8_t>(dataSize);
+    appInfo.fastTransData = data.data();
+    appInfo.fastTransDataSize = dataSize;
 
     ProxyChannelInfo *proxyChannelInfo = static_cast<ProxyChannelInfo *>(SoftBusCalloc(sizeof(ProxyChannelInfo)));
     proxyChannelInfo->channelId = channelId;
@@ -558,6 +597,10 @@ void TransProxyCreateChanInfoTest(FuzzedDataProvider &provider)
     AppInfo appInfo;
     (void)memset_s(&appInfo, sizeof(AppInfo), 0, sizeof(AppInfo));
     FillAppInfo(provider, &appInfo);
+    auto dataSize = provider.ConsumeIntegral<uint32_t>();
+    auto data = provider.ConsumeBytes<uint8_t>(dataSize);
+    appInfo.fastTransData = data.data();
+    appInfo.fastTransDataSize = dataSize;
 
     ProxyChannelInfo *proxyChannelInfo = static_cast<ProxyChannelInfo *>(SoftBusCalloc(sizeof(ProxyChannelInfo)));
     proxyChannelInfo->channelId = channelId;
@@ -593,6 +636,10 @@ void TransProxyChanProcessByReqIdTest(FuzzedDataProvider &provider)
     AppInfo appInfo;
     (void)memset_s(&appInfo, sizeof(AppInfo), 0, sizeof(AppInfo));
     FillAppInfo(provider, &appInfo);
+    auto dataSize = provider.ConsumeIntegral<uint32_t>();
+    auto data = provider.ConsumeBytes<uint8_t>(dataSize);
+    appInfo.fastTransData = data.data();
+    appInfo.fastTransDataSize = dataSize;
 
     ProxyChannelInfo *proxyChannelInfo = static_cast<ProxyChannelInfo *>(SoftBusCalloc(sizeof(ProxyChannelInfo)));
     proxyChannelInfo->channelId = channelId;
@@ -623,6 +670,10 @@ void TransProxyGetAuthIdTest(FuzzedDataProvider &provider)
     AppInfo appInfo;
     (void)memset_s(&appInfo, sizeof(AppInfo), 0, sizeof(AppInfo));
     FillAppInfo(provider, &appInfo);
+    auto dataSize = provider.ConsumeIntegral<uint32_t>();
+    auto data = provider.ConsumeBytes<uint8_t>(dataSize);
+    appInfo.fastTransData = data.data();
+    appInfo.fastTransDataSize = dataSize;
 
     ProxyChannelInfo *proxyChannelInfo = static_cast<ProxyChannelInfo *>(SoftBusCalloc(sizeof(ProxyChannelInfo)));
     proxyChannelInfo->channelId = channelId;
@@ -663,6 +714,10 @@ void TransProxyGetNameByChanIdTest(FuzzedDataProvider &provider)
     AppInfo appInfo;
     (void)memset_s(&appInfo, sizeof(AppInfo), 0, sizeof(AppInfo));
     FillAppInfo(provider, &appInfo);
+    auto dataSize = provider.ConsumeIntegral<uint32_t>();
+    auto data = provider.ConsumeBytes<uint8_t>(dataSize);
+    appInfo.fastTransData = data.data();
+    appInfo.fastTransDataSize = dataSize;
 
     ProxyChannelInfo *proxyChannelInfo = static_cast<ProxyChannelInfo *>(SoftBusCalloc(sizeof(ProxyChannelInfo)));
     proxyChannelInfo->channelId = chanId;
@@ -690,6 +745,10 @@ void TransRefreshProxyTimesNativeTest(FuzzedDataProvider &provider)
     AppInfo appInfo;
     (void)memset_s(&appInfo, sizeof(AppInfo), 0, sizeof(AppInfo));
     FillAppInfo(provider, &appInfo);
+    auto dataSize = provider.ConsumeIntegral<uint32_t>();
+    auto data = provider.ConsumeBytes<uint8_t>(dataSize);
+    appInfo.fastTransData = data.data();
+    appInfo.fastTransDataSize = dataSize;
 
     ProxyChannelInfo *proxyChannelInfo = static_cast<ProxyChannelInfo *>(SoftBusCalloc(sizeof(ProxyChannelInfo)));
     proxyChannelInfo->channelId = channelId;
@@ -727,6 +786,10 @@ void TransProxyDeathCallbackTest(FuzzedDataProvider &provider)
     AppInfo appInfo;
     (void)memset_s(&appInfo, sizeof(AppInfo), 0, sizeof(AppInfo));
     FillAppInfo(provider, &appInfo);
+    auto dataSize = provider.ConsumeIntegral<uint32_t>();
+    auto data = provider.ConsumeBytes<uint8_t>(dataSize);
+    appInfo.fastTransData = data.data();
+    appInfo.fastTransDataSize = dataSize;
     appInfo.myData.pid = pid;
 
     ProxyChannelInfo *proxyChannelInfo = static_cast<ProxyChannelInfo *>(SoftBusCalloc(sizeof(ProxyChannelInfo)));
@@ -757,6 +820,10 @@ void TransProxyGetAppInfoByChanIdTest(FuzzedDataProvider &provider)
     AppInfo appInfo;
     (void)memset_s(&appInfo, sizeof(AppInfo), 0, sizeof(AppInfo));
     FillAppInfo(provider, &appInfo);
+    auto dataSize = provider.ConsumeIntegral<uint32_t>();
+    auto data = provider.ConsumeBytes<uint8_t>(dataSize);
+    appInfo.fastTransData = data.data();
+    appInfo.fastTransDataSize = dataSize;
 
     ProxyChannelInfo *proxyChannelInfo = static_cast<ProxyChannelInfo *>(SoftBusCalloc(sizeof(ProxyChannelInfo)));
     proxyChannelInfo->channelId = chanId;
@@ -786,6 +853,10 @@ void TransProxyGetConnIdByChanIdTest(FuzzedDataProvider &provider)
     AppInfo appInfo;
     (void)memset_s(&appInfo, sizeof(AppInfo), 0, sizeof(AppInfo));
     FillAppInfo(provider, &appInfo);
+    auto dataSize = provider.ConsumeIntegral<uint32_t>();
+    auto data = provider.ConsumeBytes<uint8_t>(dataSize);
+    appInfo.fastTransData = data.data();
+    appInfo.fastTransDataSize = dataSize;
 
     ProxyChannelInfo *proxyChannelInfo = static_cast<ProxyChannelInfo *>(SoftBusCalloc(sizeof(ProxyChannelInfo)));
     proxyChannelInfo->channelId = channelId;
@@ -815,6 +886,10 @@ void TransProxyGetConnOptionByChanIdTest(FuzzedDataProvider &provider)
     AppInfo appInfo;
     (void)memset_s(&appInfo, sizeof(AppInfo), 0, sizeof(AppInfo));
     FillAppInfo(provider, &appInfo);
+    auto dataSize = provider.ConsumeIntegral<uint32_t>();
+    auto data = provider.ConsumeBytes<uint8_t>(dataSize);
+    appInfo.fastTransData = data.data();
+    appInfo.fastTransDataSize = dataSize;
 
     ProxyChannelInfo *proxyChannelInfo = static_cast<ProxyChannelInfo *>(SoftBusCalloc(sizeof(ProxyChannelInfo)));
     proxyChannelInfo->channelId = channelId;
@@ -850,6 +925,10 @@ void TransProxyGetAppInfoTypeTest(FuzzedDataProvider &provider)
     AppInfo appInfo;
     (void)memset_s(&appInfo, sizeof(AppInfo), 0, sizeof(AppInfo));
     FillAppInfo(provider, &appInfo);
+    auto dataSize = provider.ConsumeIntegral<uint32_t>();
+    auto data = provider.ConsumeBytes<uint8_t>(dataSize);
+    appInfo.fastTransData = data.data();
+    appInfo.fastTransDataSize = dataSize;
 
     ProxyChannelInfo *proxyChannelInfo = static_cast<ProxyChannelInfo *>(SoftBusCalloc(sizeof(ProxyChannelInfo)));
     proxyChannelInfo->channelId = channelId;
@@ -919,6 +998,10 @@ void TransProxySetAuthHandleByChanIdTest(FuzzedDataProvider &provider)
     AppInfo appInfo;
     (void)memset_s(&appInfo, sizeof(AppInfo), 0, sizeof(AppInfo));
     FillAppInfo(provider, &appInfo);
+    auto dataSize = provider.ConsumeIntegral<uint32_t>();
+    auto data = provider.ConsumeBytes<uint8_t>(dataSize);
+    appInfo.fastTransData = data.data();
+    appInfo.fastTransDataSize = dataSize;
 
     ProxyChannelInfo *proxyChannelInfo = static_cast<ProxyChannelInfo *>(SoftBusCalloc(sizeof(ProxyChannelInfo)));
     proxyChannelInfo->channelId = channelId;
@@ -950,6 +1033,10 @@ void TransProxyNegoSessionKeySuccTest(FuzzedDataProvider &provider)
     AppInfo appInfo;
     (void)memset_s(&appInfo, sizeof(AppInfo), 0, sizeof(AppInfo));
     FillAppInfo(provider, &appInfo);
+    auto dataSize = provider.ConsumeIntegral<uint32_t>();
+    auto data = provider.ConsumeBytes<uint8_t>(dataSize);
+    appInfo.fastTransData = data.data();
+    appInfo.fastTransDataSize = dataSize;
 
     ProxyChannelInfo *proxyChannelInfo = static_cast<ProxyChannelInfo *>(SoftBusCalloc(sizeof(ProxyChannelInfo)));
     proxyChannelInfo->channelId = channelId;
@@ -979,6 +1066,10 @@ void TransProxyNegoSessionKeyFailTest(FuzzedDataProvider &provider)
     AppInfo appInfo;
     (void)memset_s(&appInfo, sizeof(AppInfo), 0, sizeof(AppInfo));
     FillAppInfo(provider, &appInfo);
+    auto dataSize = provider.ConsumeIntegral<uint32_t>();
+    auto data = provider.ConsumeBytes<uint8_t>(dataSize);
+    appInfo.fastTransData = data.data();
+    appInfo.fastTransDataSize = dataSize;
 
     ProxyChannelInfo *proxyChannelInfo = static_cast<ProxyChannelInfo *>(SoftBusCalloc(sizeof(ProxyChannelInfo)));
     proxyChannelInfo->channelId = channelId;
