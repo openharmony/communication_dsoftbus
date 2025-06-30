@@ -104,7 +104,6 @@ void ConnDestroyBytesDelivery(ConnBytesDelivery *delivery)
 }
 
 #define MESSAGE_POSTING 1
-
 static int32_t RetryDequeueExclusiveIfNeed(
     ConnBytesDelivery *delivery, int32_t code, struct ConnBytesDeliveryItem **out)
 {
@@ -181,6 +180,15 @@ static int32_t PullDeliverTaskIfNeed(ConnBytesDelivery *delivery)
     return ret;
 }
 
+void MarkPostMessageDone(ConnBytesDelivery *delivery)
+{
+    int32_t ret = SoftBusMutexLock(&delivery->lock);
+    CONN_CHECK_AND_RETURN_LOGE(
+        ret == SOFTBUS_OK, CONN_COMMON, "%{public}s, lock failed: error=%{public}d", delivery->config.name, ret);
+    delivery->deliveryMessagePosting = false;
+    SoftBusMutexUnlock(&delivery->lock);
+}
+
 int32_t ConnDeliver(ConnBytesDelivery *delivery, uint32_t connectionId, uint8_t *data, uint32_t length,
     const struct ConnBytesAddition addition)
 {
@@ -198,11 +206,7 @@ int32_t ConnDeliver(ConnBytesDelivery *delivery, uint32_t connectionId, uint8_t 
         CONN_LOGE(CONN_COMMON, "%{public}s, enqueue item failed: error=%{public}d", delivery->config.name, ret);
         ConnDestroyBytesDeliveryItem(item);
     }
-    ret = SoftBusMutexLock(&delivery->lock);
-    CONN_CHECK_AND_RETURN_RET_LOGE(
-        ret == SOFTBUS_OK, ret, CONN_COMMON, "%{public}s, lock failed: error=%{public}d", delivery->config.name, ret);
-    delivery->deliveryMessagePosting = false;
-    SoftBusMutexUnlock(&delivery->lock);
+    MarkPostMessageDone(delivery);
     return ret;
 }
 
