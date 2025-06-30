@@ -411,6 +411,8 @@ bool GetJsonObjectIntArrayItem(const cJSON *json, const char *string, int32_t *a
 
 static int32_t GetCjsonMaxDepth(const char *jsonStr)
 {
+    COMM_CHECK_AND_RETURN_RET_LOGE(jsonStr != NULL, SOFTBUS_INVALID_PARAM, COMM_UTILS, "jsonStr is nullptr");
+
     int32_t max = 0;
     uint32_t len = strlen(jsonStr);
     int32_t cnt = 0;

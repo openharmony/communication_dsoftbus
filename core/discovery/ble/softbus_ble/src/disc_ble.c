@@ -281,6 +281,8 @@ static int ConvertCapBitMap(int oldCap)
 
 static void DeConvertBitMap(uint32_t *dstCap, uint32_t *srcCap, int nums)
 {
+    DISC_CHECK_AND_RETURN_LOGE(dstCap != NULL, DISC_BLE, "dstCap is nullptr");
+    DISC_CHECK_AND_RETURN_LOGE(srcCap != NULL, DISC_BLE, "srcCap is nullptr");
     (void)nums;
     for (int32_t i = 0; i < CAPABILITY_MAX_BITNUM; i++) {
         if (!SoftbusIsBitmapSet(srcCap, i)) {
@@ -372,6 +374,7 @@ static void BleAdvUpdateCallback(int channel, int status)
 
 static void GetScannerFilterType(uint8_t *type, uint32_t capBitMapPos)
 {
+    DISC_CHECK_AND_RETURN_LOGE(type != NULL, DISC_BLE, "type is nullptr");
     DISC_CHECK_AND_RETURN_LOGE(SoftBusMutexLock(&g_bleInfoLock) == SOFTBUS_OK, DISC_BLE, "lock failed");
     uint32_t conScanCapBit = g_bleInfoManager[BLE_PUBLISH | BLE_PASSIVE].capBitMap[0];
     uint32_t nonScanCapBit = g_bleInfoManager[BLE_SUBSCRIBE | BLE_ACTIVE].capBitMap[0] |
@@ -399,6 +402,8 @@ static bool CheckScanner(void)
 
 static int32_t ScanFilter(const BroadcastReportInfo *reportInfo)
 {
+    DISC_CHECK_AND_RETURN_RET_LOGE(reportInfo != NULL, SOFTBUS_INVALID_PARAM, DISC_BLE, "reportInfo is nullptr");
+
     uint32_t advLen = reportInfo->packet.bcData.payloadLen;
     uint8_t *advData = reportInfo->packet.bcData.payload;
 
@@ -456,6 +461,9 @@ static int32_t SoftbusBleGeneratePacketHash(char *key, const BroadcastReportInfo
 
 static void ProcessDisConPacket(const BroadcastReportInfo *reportInfo, DeviceInfo *foundInfo)
 {
+    DISC_CHECK_AND_RETURN_LOGE(reportInfo != NULL, DISC_BLE, "reportInfo is nullptr");
+    DISC_CHECK_AND_RETURN_LOGE(foundInfo != NULL, DISC_BLE, "foundInfo is nullptr");
+
     static uint32_t callCount = 0;
     DeviceWrapper device = {
         .info = foundInfo,
@@ -485,6 +493,8 @@ static void ProcessDisConPacket(const BroadcastReportInfo *reportInfo, DeviceInf
 
 static bool ProcessHashAccount(DeviceInfo *foundInfo)
 {
+    DISC_CHECK_AND_RETURN_RET_LOGE(foundInfo != NULL, false, DISC_BLE, "foundInfo is nullptr");
+
     int32_t ret;
     for (uint32_t pos = 0; pos < CAPABILITY_MAX_BITNUM; pos++) {
         if (!CheckCapBitMapExist(CAPABILITY_NUM, foundInfo->capabilityBitmap, pos)) {
@@ -511,6 +521,8 @@ static bool ProcessHashAccount(DeviceInfo *foundInfo)
 
 static int32_t ConvertBleAddr(DeviceInfo *foundInfo)
 {
+    DISC_CHECK_AND_RETURN_RET_LOGE(foundInfo != NULL, SOFTBUS_INVALID_PARAM, DISC_BLE, "foundInfo is nullptr");
+
     // convert ble bin mac to string mac before report
     char bleMac[BT_MAC_LEN] = {0};
     int32_t ret = ConvertBtMacToStr(bleMac, BT_MAC_LEN, (uint8_t *)foundInfo->addr[0].info.ble.bleMac, BT_ADDR_LEN);
@@ -524,6 +536,8 @@ static int32_t ConvertBleAddr(DeviceInfo *foundInfo)
 
 static int32_t RangeDevice(DeviceInfo *device, char rssi, int8_t power)
 {
+    DISC_CHECK_AND_RETURN_RET_LOGE(device != NULL, SOFTBUS_INVALID_PARAM, DISC_BLE, "device is nullptr");
+
     int32_t range = -1;
     if (power != SOFTBUS_ILLEGAL_BLE_POWER) {
         SoftBusRangeParam param = {
@@ -548,6 +562,9 @@ static int32_t RangeDevice(DeviceInfo *device, char rssi, int8_t power)
 
 static void ProcessDisNonPacket(const BroadcastReportInfo *reportInfo, char rssi, DeviceInfo *foundInfo)
 {
+    DISC_CHECK_AND_RETURN_LOGE(reportInfo != NULL, DISC_BLE, "reportInfo is nullptr");
+    DISC_CHECK_AND_RETURN_LOGE(foundInfo != NULL, DISC_BLE, "foundInfo is nullptr");
+
     static uint32_t callCount = 0;
     DeviceWrapper device = {
         .info = foundInfo,
@@ -593,6 +610,8 @@ static void ProcessDisNonPacket(const BroadcastReportInfo *reportInfo, char rssi
 
 static void ProcessDistributePacket(const BroadcastReportInfo *reportInfo)
 {
+    DISC_CHECK_AND_RETURN_LOGE(reportInfo != NULL, DISC_BLE, "reportInfo is nullptr");
+
     uint32_t advLen = reportInfo->packet.bcData.payloadLen;
     uint8_t *advData = reportInfo->packet.bcData.payload;
     DeviceInfo foundInfo;
@@ -739,6 +758,8 @@ static bool GetWakeRemote(void)
 
 static int32_t DiscBleGetCustData(DeviceInfo *info)
 {
+    DISC_CHECK_AND_RETURN_RET_LOGE(info != NULL, SOFTBUS_INVALID_PARAM, DISC_BLE, "info is nullptr");
+
     uint32_t infoIndex = BLE_PUBLISH | BLE_PASSIVE;
     uint32_t pos = 0;
     for (pos = 0; pos < CAPABILITY_MAX_BITNUM; pos++) {
@@ -770,6 +791,8 @@ static int32_t DiscBleGetCustData(DeviceInfo *info)
 
 static int32_t GetConDeviceInfo(DeviceInfo *info)
 {
+    DISC_CHECK_AND_RETURN_RET_LOGE(info != NULL, SOFTBUS_INVALID_PARAM, DISC_BLE, "info is nullptr");
+
     (void)memset_s(info, sizeof(DeviceInfo), 0x0, sizeof(DeviceInfo));
     uint32_t infoIndex = BLE_SUBSCRIBE | BLE_ACTIVE;
     DISC_CHECK_AND_RETURN_RET_LOGE(!CheckBitMapEmpty(CAPABILITY_NUM, g_bleInfoManager[infoIndex].capBitMap),
@@ -803,6 +826,8 @@ static int32_t GetConDeviceInfo(DeviceInfo *info)
 
 static int32_t GetNonDeviceInfo(DeviceInfo *info)
 {
+    DISC_CHECK_AND_RETURN_RET_LOGE(info != NULL, SOFTBUS_INVALID_PARAM, DISC_BLE, "info is nullptr");
+
     (void)memset_s(info, sizeof(DeviceInfo), 0x0, sizeof(DeviceInfo));
     if (DiscBleGetDeviceIdHash((uint8_t *)info->devId, DISC_MAX_DEVICE_ID_LEN) != SOFTBUS_OK) {
         DISC_LOGE(DISC_BLE, "get deviceId failed");
@@ -839,6 +864,8 @@ static int32_t GetNonDeviceInfo(DeviceInfo *info)
 
 static void DestroyBleConfigAdvData(BroadcastPacket *packet)
 {
+    DISC_CHECK_AND_RETURN_LOGE(packet != NULL, DISC_BLE, "packet is nullptr");
+
     SoftBusFree(packet->bcData.payload);
     SoftBusFree(packet->rspData.payload);
     packet->bcData.payload = NULL;
@@ -847,6 +874,9 @@ static void DestroyBleConfigAdvData(BroadcastPacket *packet)
 
 static int32_t BuildBleConfigAdvData(BroadcastPacket *packet, const BroadcastData *broadcastData)
 {
+    DISC_CHECK_AND_RETURN_RET_LOGE(packet != NULL, SOFTBUS_INVALID_PARAM, DISC_BLE, "packet is nullptr");
+    DISC_CHECK_AND_RETURN_RET_LOGE(broadcastData != NULL, SOFTBUS_INVALID_PARAM, DISC_BLE, "broadcastData is nullptr");
+
     if (packet->bcData.payload != NULL || packet->rspData.payload != NULL) {
         DestroyBleConfigAdvData(packet);
     }
@@ -896,6 +926,9 @@ static int32_t BuildBleConfigAdvData(BroadcastPacket *packet, const BroadcastDat
 
 static void AssembleCustData(DeviceInfo *info, BroadcastData *broadcastData)
 {
+    DISC_CHECK_AND_RETURN_LOGE(info != NULL, DISC_BLE, "info is nullptr");
+    DISC_CHECK_AND_RETURN_LOGE(broadcastData != NULL, DISC_BLE, "broadcastData is nullptr");
+
     if ((info->capabilityBitmap[0] & 0x02) == 0) { // CastPlus
         return;
     }
@@ -911,6 +944,8 @@ static void AssembleCustData(DeviceInfo *info, BroadcastData *broadcastData)
 
 static void AssembleNonOptionalTlv(DeviceInfo *info, BroadcastData *broadcastData)
 {
+    DISC_CHECK_AND_RETURN_LOGE(info != NULL, DISC_BLE, "info is nullptr");
+    DISC_CHECK_AND_RETURN_LOGE(broadcastData != NULL, DISC_BLE, "broadcastData is nullptr");
     DISC_CHECK_AND_RETURN_LOGE(SoftBusMutexLock(&g_recvMessageInfo.lock) == SOFTBUS_OK, DISC_BLE, "lock failed");
     if (g_recvMessageInfo.numNeedBrMac > 0) {
         SoftBusBtAddr addr;
@@ -947,6 +982,9 @@ static void AssembleActionTlv(DiscBleAdvertiser *advertiser, BroadcastData *broa
 
 static int32_t AssembleBroadcastData(DeviceInfo *info, int32_t advId, BroadcastData *broadcastData)
 {
+    DISC_CHECK_AND_RETURN_RET_LOGE(info != NULL, SOFTBUS_INVALID_PARAM, DISC_BLE, "info is nullptr");
+    DISC_CHECK_AND_RETURN_RET_LOGE(broadcastData != NULL, SOFTBUS_INVALID_PARAM, DISC_BLE, "broadcastData is nullptr");
+
     bool isWakeRemote = GetWakeRemote();
     errno_t retMem = memset_s(broadcastData->data.data, BROADCAST_MAX_LEN, 0x0, BROADCAST_MAX_LEN);
     DISC_CHECK_AND_RETURN_RET_LOGE(retMem == EOK, SOFTBUS_MEM_ERR, DISC_BLE, "memset failed");
@@ -1014,6 +1052,8 @@ static int32_t GetBroadcastData(DiscBleAdvertiser *advertiser, int32_t advId, Br
 
 static void BuildAdvParam(BroadcastParam *advParam)
 {
+    DISC_CHECK_AND_RETURN_LOGE(advParam != NULL, DISC_BLE, "advParam is nullptr");
+
     advParam->minInterval = ADV_INTERNAL;
     advParam->maxInterval = ADV_INTERNAL;
     advParam->advType = SOFTBUS_BC_ADV_IND;
@@ -1081,6 +1121,8 @@ static void ClearScanEventExtra(int32_t index)
 
 static void DfxDelayRecord(const SoftBusMessage *msg)
 {
+    (void)msg;
+
     BroadcastDiscEvent(EVENT_SCENE_BLE, EVENT_STAGE_BLE_PROCESS, g_bleDiscExtra, MAX_DISC_EVENT);
     BroadcastScanEvent(EVENT_SCENE_BLE, EVENT_STAGE_BLE_PROCESS, g_bleScanExtra, MAX_SCAN_EVENT);
     ClearDiscEventExtra(MAX_DISC_EVENT);
@@ -1366,6 +1408,9 @@ static int32_t StopScaner(void)
 
 static void GetBleOption(BleOption *bleOption, const DiscBleOption *option)
 {
+    DISC_CHECK_AND_RETURN_LOGE(bleOption != NULL, DISC_BLE, "bleOption is nullptr");
+    DISC_CHECK_AND_RETURN_LOGE(option != NULL, DISC_BLE, "option is nullptr");
+
     if (option->publishOption != NULL) {
         bleOption->optionCapBitMap[0] = (uint32_t)ConvertCapBitMap(option->publishOption->capabilityBitmap[0]);
         bleOption->custDataLen = option->publishOption->dataLen;
@@ -1387,6 +1432,9 @@ static void GetBleOption(BleOption *bleOption, const DiscBleOption *option)
 
 static int32_t RegisterCapability(DiscBleInfo *info, const DiscBleOption *option)
 {
+    DISC_CHECK_AND_RETURN_RET_LOGE(info != NULL, SOFTBUS_INVALID_PARAM, DISC_BLE, "info is nullptr");
+    DISC_CHECK_AND_RETURN_RET_LOGE(option != NULL, SOFTBUS_INVALID_PARAM, DISC_BLE, "option is nullptr");
+
     BleOption bleOption;
     (void)memset_s(&bleOption, sizeof(BleOption), 0, sizeof(BleOption));
     GetBleOption(&bleOption, option);
@@ -1436,6 +1484,9 @@ static int32_t RegisterCapability(DiscBleInfo *info, const DiscBleOption *option
 
 static void UnregisterCapability(DiscBleInfo *info, DiscBleOption *option)
 {
+    DISC_CHECK_AND_RETURN_LOGE(info != NULL, DISC_BLE, "info is nullptr");
+    DISC_CHECK_AND_RETURN_LOGE(option != NULL, DISC_BLE, "option is nullptr");
+
     uint32_t *optionCapBitMap = NULL;
     bool ranging = false;
     if (option->publishOption != NULL) {
@@ -1530,6 +1581,8 @@ static SoftBusMessage *CreateBleHandlerMsg(int32_t what, uint64_t arg1, uint64_t
 static void DfxRecordBleProcessEnd(uint8_t publishFlag, uint8_t activeFlag, int32_t funcCode,
     const void *option, int32_t reason)
 {
+    DISC_CHECK_AND_RETURN_LOGE(option != NULL, DISC_BLE, "option is nullptr");
+
     DiscEventExtra extra = { 0 };
     DiscEventExtraInit(&extra);
     extra.errcode = reason;
@@ -1660,6 +1713,8 @@ static void UpdateCustData(int32_t funcCode)
 static int32_t ProcessBleDiscFunc(bool isStart, uint8_t publishFlags, uint8_t activeFlags,
     int32_t funcCode, const void *option)
 {
+    DISC_CHECK_AND_RETURN_RET_LOGE(option != NULL, SOFTBUS_INVALID_PARAM, DISC_BLE, "option is nullptr");
+
     if (isStart && SoftBusGetBtState() != BLE_ENABLE) {
         DfxRecordBleProcessEnd(publishFlags, activeFlags, funcCode, option, SOFTBUS_BLUETOOTH_OFF);
         DISC_LOGE(DISC_BLE, "get bt state failed.");
@@ -1716,6 +1771,8 @@ static void ReportHandle(SoftBusMessage *msg)
 
 static int32_t SoftbusBleCheckJson(bool isStart, const SubscribeOption *option)
 {
+    DISC_CHECK_AND_RETURN_RET_LOGE(option != NULL, SOFTBUS_INVALID_PARAM, DISC_BLE, "option is nullptr");
+
     cJSON *json = cJSON_ParseWithLength((const char *)option->capabilityData, option->dataLen);
     DISC_CHECK_AND_RETURN_RET_LOGW(json != NULL, SOFTBUS_DISCOVER_BLE_NEED_TRIGGER,
         DISC_BLE, "softbus ble parse json failed");
@@ -1743,29 +1800,35 @@ static int32_t SoftbusBleCheckJson(bool isStart, const SubscribeOption *option)
 static int32_t BleStartActivePublish(const PublishOption *option)
 {
     DISC_LOGI(DISC_BLE, "start active publish");
+    DISC_CHECK_AND_RETURN_RET_LOGE(option != NULL, SOFTBUS_INVALID_PARAM, DISC_BLE, "option is nullptr");
     return ProcessBleDiscFunc(true, BLE_PUBLISH, BLE_ACTIVE, PUBLISH_ACTIVE_SERVICE, (void *)option);
 }
 
 static int32_t BleStartPassivePublish(const PublishOption *option)
 {
     DISC_LOGD(DISC_BLE, "start passive publish");
+    DISC_CHECK_AND_RETURN_RET_LOGE(option != NULL, SOFTBUS_INVALID_PARAM, DISC_BLE, "option is nullptr");
     return ProcessBleDiscFunc(true, BLE_PUBLISH, BLE_PASSIVE, PUBLISH_PASSIVE_SERVICE, (void *)option);
 }
 
 static int32_t BleStopActivePublish(const PublishOption *option)
 {
     DISC_LOGI(DISC_BLE, "stop active publish");
+    DISC_CHECK_AND_RETURN_RET_LOGE(option != NULL, SOFTBUS_INVALID_PARAM, DISC_BLE, "option is nullptr");
     return ProcessBleDiscFunc(false, BLE_PUBLISH, BLE_ACTIVE, UNPUBLISH_SERVICE, (void *)option);
 }
 
 static int32_t BleStopPassivePublish(const PublishOption *option)
 {
     DISC_LOGD(DISC_BLE, "stop passive publish");
+    DISC_CHECK_AND_RETURN_RET_LOGE(option != NULL, SOFTBUS_INVALID_PARAM, DISC_BLE, "option is nullptr");
     return ProcessBleDiscFunc(false, BLE_PUBLISH, BLE_PASSIVE, UNPUBLISH_SERVICE, (void *)option);
 }
 
 static int32_t BleStartActiveDiscovery(const SubscribeOption *option)
 {
+    DISC_CHECK_AND_RETURN_RET_LOGE(option != NULL, SOFTBUS_INVALID_PARAM, DISC_BLE, "option is nullptr");
+
     int32_t ret = SoftbusBleCheckJson(true, option);
     if (ret == SOFTBUS_OK) {
         DISC_LOGI(DISC_BLE, "disc ble prepare report handle");
@@ -1780,11 +1843,14 @@ static int32_t BleStartActiveDiscovery(const SubscribeOption *option)
 static int32_t BleStartPassiveDiscovery(const SubscribeOption *option)
 {
     DISC_LOGI(DISC_BLE, "start passive discovery");
+    DISC_CHECK_AND_RETURN_RET_LOGE(option != NULL, SOFTBUS_INVALID_PARAM, DISC_BLE, "option is nullptr");
     return ProcessBleDiscFunc(true, BLE_SUBSCRIBE, BLE_PASSIVE, START_PASSIVE_DISCOVERY, (void *)option);
 }
 
 static int32_t BleStopActiveDiscovery(const SubscribeOption *option)
 {
+    DISC_CHECK_AND_RETURN_RET_LOGE(option != NULL, SOFTBUS_INVALID_PARAM, DISC_BLE, "option is nullptr");
+
     int32_t ret = SoftbusBleCheckJson(false, option);
     if (ret == SOFTBUS_OK) {
         DISC_LOGI(DISC_BLE, "no need trigger stop adv");
@@ -1799,6 +1865,7 @@ static int32_t BleStopActiveDiscovery(const SubscribeOption *option)
 static int32_t BleStopPassiveDiscovery(const SubscribeOption *option)
 {
     DISC_LOGI(DISC_BLE, "stop passive discovery");
+    DISC_CHECK_AND_RETURN_RET_LOGE(option != NULL, SOFTBUS_INVALID_PARAM, DISC_BLE, "option is nullptr");
     return ProcessBleDiscFunc(false, BLE_SUBSCRIBE, BLE_PASSIVE, STOP_DISCOVERY, (void *)option);
 }
 
@@ -1884,6 +1951,8 @@ static int32_t InitAdvertiser(void)
 
 static void InitDiscBleInfo(DiscBleInfo *info)
 {
+    DISC_CHECK_AND_RETURN_LOGE(info != NULL, DISC_BLE, "info is nullptr");
+
     (void)memset_s(info, sizeof(DiscBleInfo), 0, sizeof(DiscBleInfo));
     for (uint32_t pos = 0; pos < CAPABILITY_MAX_BITNUM; pos++) {
         info->freq[pos] = -1;
@@ -1904,6 +1973,7 @@ static void DiscBleInitSubscribe(void)
 
 static void StartActivePublish(SoftBusMessage *msg)
 {
+    (void)msg;
     DISC_LOGD(DISC_BLE, "enter");
     if (StartAdvertiser(NON_ADV_ID) != SOFTBUS_OK) {
         DISC_LOGE(DISC_BLE, "Start msg failed");
@@ -1913,6 +1983,7 @@ static void StartActivePublish(SoftBusMessage *msg)
 
 static void StartPassivePublish(SoftBusMessage *msg)
 {
+    (void)msg;
     DISC_LOGD(DISC_BLE, "enter");
     if (g_bleAdvertiser[NON_ADV_ID].isAdvertising) {
         DISC_LOGI(DISC_BLE, "UpdateAdvertiser NON_ADV_ID=%{public}d", NON_ADV_ID);
@@ -1924,6 +1995,7 @@ static void StartPassivePublish(SoftBusMessage *msg)
 
 static void StartActiveDiscovery(SoftBusMessage *msg)
 {
+    (void)msg;
     DISC_LOGD(DISC_BLE, "enter");
     if (StartAdvertiser(CON_ADV_ID) == SOFTBUS_OK) {
         StartScaner();
@@ -1933,6 +2005,7 @@ static void StartActiveDiscovery(SoftBusMessage *msg)
 
 static void StartPassiveDiscovery(SoftBusMessage *msg)
 {
+    (void)msg;
     DISC_LOGD(DISC_BLE, "enter");
     StartScaner();
     DISC_LOGD(DISC_BLE, "end");
@@ -1940,6 +2013,7 @@ static void StartPassiveDiscovery(SoftBusMessage *msg)
 
 static void Recovery(SoftBusMessage *msg)
 {
+    (void)msg;
     DISC_LOGD(DISC_BLE, "enter");
     if (StartAdvertiser(CON_ADV_ID) != SOFTBUS_OK) {
         DISC_LOGE(DISC_BLE, "Start CON_ADV_ID failed");
@@ -1953,6 +2027,7 @@ static void Recovery(SoftBusMessage *msg)
 
 static void BleDiscTurnOff(SoftBusMessage *msg)
 {
+    (void)msg;
     DISC_LOGD(DISC_BLE, "enter");
     if (StopAdvertiser(NON_ADV_ID) != SOFTBUS_OK) {
         DISC_LOGE(DISC_BLE, "Stop NON_ADV_ID failed");
@@ -1980,6 +2055,8 @@ static int32_t ReplyPassiveNonBroadcast(void)
 static int32_t MessageRemovePredicate(const SoftBusMessage *msg, void *args)
 {
     DISC_LOGD(DISC_BLE, "enter");
+    DISC_CHECK_AND_RETURN_RET_LOGE(msg != NULL, SOFTBUS_INVALID_PARAM, DISC_BLE, "msg is nullptr");
+    DISC_CHECK_AND_RETURN_RET_LOGE(args != NULL, SOFTBUS_INVALID_PARAM, DISC_BLE, "args is nullptr");
     uintptr_t key = (uintptr_t)args;
     if (msg->what == PROCESS_TIME_OUT && msg->arg1 == key) {
         DISC_LOGD(DISC_BLE, "find key");
@@ -1991,6 +2068,8 @@ static int32_t MessageRemovePredicate(const SoftBusMessage *msg, void *args)
 
 static RecvMessage *GetRecvMessage(const char *key)
 {
+    DISC_CHECK_AND_RETURN_RET_LOGE(key != NULL, NULL, DISC_BLE, "key is nullptr");
+
     RecvMessage *msg = NULL;
     LIST_FOR_EACH_ENTRY(msg, &g_recvMessageInfo.node, RecvMessage, node) {
         if (memcmp((void *)key, (void *)msg->key, SHA_HASH_LEN) == 0) {
@@ -2002,6 +2081,9 @@ static RecvMessage *GetRecvMessage(const char *key)
 
 static int32_t MatchRecvMessage(const uint32_t *publishInfoMap, uint32_t *capBitMap, uint32_t len)
 {
+    DISC_CHECK_AND_RETURN_RET_LOGE(publishInfoMap != NULL, SOFTBUS_INVALID_PARAM,
+        DISC_BLE, "publishInfoMap is nullptr");
+    DISC_CHECK_AND_RETURN_RET_LOGE(capBitMap != NULL, SOFTBUS_INVALID_PARAM, DISC_BLE, "capBitMap is nullptr");
     DISC_CHECK_AND_RETURN_RET_LOGE(SoftBusMutexLock(&g_recvMessageInfo.lock) == SOFTBUS_OK,
         SOFTBUS_LOCK_ERR, DISC_BLE, "lock failed");
     RecvMessage *msg = NULL;
@@ -2018,6 +2100,7 @@ static int32_t MatchRecvMessage(const uint32_t *publishInfoMap, uint32_t *capBit
 static void StartTimeout(const char *key)
 {
     DISC_LOGD(DISC_BLE, "enter");
+    DISC_CHECK_AND_RETURN_LOGE(key != NULL, DISC_BLE, "key is nullptr");
     DISC_CHECK_AND_RETURN_LOGE(SoftBusMutexLock(&g_recvMessageInfo.lock) == SOFTBUS_OK, DISC_BLE, "lock failed");
     if (GetRecvMessage(key) == NULL) {
         DISC_LOGE(DISC_BLE, "key is not exists");
@@ -2033,6 +2116,7 @@ static void StartTimeout(const char *key)
 static void RemoveTimeout(const char *key)
 {
     DISC_LOGD(DISC_BLE, "enter");
+    DISC_CHECK_AND_RETURN_LOGE(key != NULL, DISC_BLE, "key is nullptr");
     DISC_CHECK_AND_RETURN_LOGE(SoftBusMutexLock(&g_recvMessageInfo.lock) == SOFTBUS_OK, DISC_BLE, "lock failed");
     if (GetRecvMessage(key) == NULL) {
         DISC_LOGI(DISC_BLE, "key is not in recv message");
@@ -2058,6 +2142,8 @@ static uint32_t RecvMsgAggregateCap(void)
 
 static void DfxRecordAddRecvMsgEnd(const uint32_t *capBitMap, int32_t reason)
 {
+    DISC_CHECK_AND_RETURN_LOGE(capBitMap != NULL, DISC_BLE, "capBitMap is nullptr");
+
     DiscEventExtra extra = { 0 };
     DiscEventExtraInit(&extra);
     extra.discType = BLE + 1;
@@ -2073,6 +2159,9 @@ static void DfxRecordAddRecvMsgEnd(const uint32_t *capBitMap, int32_t reason)
 static int32_t AddRecvMessage(const char *key, const uint32_t *capBitMap, bool needBrMac)
 {
     DISC_LOGD(DISC_BLE, "enter");
+    DISC_CHECK_AND_RETURN_RET_LOGE(key != NULL, SOFTBUS_INVALID_PARAM, DISC_BLE, "key is nullptr");
+    DISC_CHECK_AND_RETURN_RET_LOGE(capBitMap != NULL, SOFTBUS_INVALID_PARAM, DISC_BLE, "capBitMap is nullptr");
+
     if (SoftBusMutexLock(&g_recvMessageInfo.lock) != SOFTBUS_OK) {
         DfxRecordAddRecvMsgEnd(capBitMap, SOFTBUS_LOCK_ERR);
         DISC_LOGE(DISC_BLE, "lock failed");
@@ -2158,6 +2247,8 @@ static void ClearRecvMessage(void)
 static void ProcessTimeout(SoftBusMessage *msg)
 {
     DISC_LOGD(DISC_BLE, "enter");
+    DISC_CHECK_AND_RETURN_LOGE(msg != NULL, DISC_BLE, "msg is nullptr");
+
     RemoveRecvMessage(msg->arg1);
     if (g_bleAdvertiser[NON_ADV_ID].isAdvertising) {
         UpdateAdvertiser(NON_ADV_ID);
@@ -2198,6 +2289,7 @@ static void DistBleUpdateConAdv()
 
 static void DiscBleMsgHandlerExt(SoftBusMessage *msg)
 {
+    DISC_CHECK_AND_RETURN_LOGE(msg != NULL, DISC_BLE, "msg is nullptr");
     switch (msg->what) {
         case PROCESS_TIME_OUT:
             ProcessTimeout(msg);
@@ -2254,6 +2346,7 @@ static void ProcessStopAction(SoftBusMessage *msg, bool isDisc)
 
 static void DiscBleMsgHandler(SoftBusMessage *msg)
 {
+    DISC_CHECK_AND_RETURN_LOGE(msg != NULL, DISC_BLE, "msg is nullptr");
     switch (msg->what) {
         case PUBLISH_ACTIVE_SERVICE:
             StartActivePublish(msg);
@@ -2346,6 +2439,9 @@ static bool GetScanFilterSameAccount(uint8_t filterType, uint32_t capBitMapPos)
 
 static void BuildScannerFilterOption(DiscBleFilterOption **filterOption, uint8_t *filterSize)
 {
+    DISC_CHECK_AND_RETURN_LOGE(filterOption != NULL, DISC_BLE, "filterOption is nullptr");
+    DISC_CHECK_AND_RETURN_LOGE(filterSize != NULL, DISC_BLE, "filterSize is nullptr");
+
     uint32_t totalCapBitMap[CAPABILITY_NUM];
     (void)SoftBusMutexLock(&g_bleInfoLock);
     totalCapBitMap[0] = g_bleInfoManager[BLE_PUBLISH | BLE_PASSIVE].capBitMap[0] |
@@ -2385,6 +2481,9 @@ static void BuildScannerFilterOption(DiscBleFilterOption **filterOption, uint8_t
 
 static void DiscBleFillSingleFilter(BcScanFilter *filter, DiscBleFilterOption *filterOption)
 {
+    DISC_CHECK_AND_RETURN_LOGE(filter != NULL, DISC_BLE, "filter is nullptr");
+    DISC_CHECK_AND_RETURN_LOGE(filterOption != NULL, DISC_BLE, "filterOption is nullptr");
+
     filter->serviceUuid = SERVICE_UUID;
     filter->serviceDataLength = BLE_SCAN_FILTER_LEN;
     filter->serviceData[POS_VERSION] = 0x0;
@@ -2527,6 +2626,8 @@ DiscoveryBleDispatcherInterface *DiscSoftBusBleInit(DiscInnerCallback *callback)
 
 static bool CheckLockInit(SoftBusMutex *lock)
 {
+    DISC_CHECK_AND_RETURN_RET_LOGE(lock != NULL, false, DISC_BLE, "lock is nullptr");
+
     if (SoftBusMutexLock(lock) != SOFTBUS_OK) {
         return false;
     }

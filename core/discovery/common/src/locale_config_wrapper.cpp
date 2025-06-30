@@ -32,6 +32,8 @@ static constexpr const int32_t CONFIG_LEN = 128;
 
 static std::string ReadSystemParameter(const char *paramKey)
 {
+    DISC_CHECK_AND_RETURN_RET_LOGE(paramKey != NULL, "", DISC_INIT, "paramKey is nullptr");
+
     char param[CONFIG_LEN + 1];
     (void)memset_s(param, CONFIG_LEN + 1, 0, CONFIG_LEN + 1);
     int32_t ret = GetParameter(paramKey, "", param, CONFIG_LEN);

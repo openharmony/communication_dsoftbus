@@ -775,7 +775,9 @@ HWTEST_F(SoftbusBleGattTest, SoftbusSetAdvData005, TestSize.Level1)
 HWTEST_F(SoftbusBleGattTest, SoftbusUpdateAdvData001, TestSize.Level1)
 {
     int32_t advld = 0;
-    int32_t ret = MockBluetooth::interface->UpdateBroadcasting(advld, nullptr, nullptr);
+    SoftbusBroadcastParam param;
+    SoftbusBroadcastData packet;
+    int32_t ret = MockBluetooth::interface->UpdateBroadcasting(advld, &param, &packet);
     EXPECT_EQ(ret, SOFTBUS_LOCK_ERR);
 }
 
