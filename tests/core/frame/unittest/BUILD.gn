@@ -162,10 +162,48 @@ ohos_unittest("SoftbusClientInfoManagerTest") {
   }
 }
 
+ohos_unittest("SoftbusGEnhanceTest") {
+  module_out_path = module_output_path
+  sources = [ "softbus_g_enhance_test.cpp" ]
+
+  include_dirs = [
+    "$dsoftbus_root_path/adapter/common/net/bluetooth/broadcast/interface",
+    "$dsoftbus_root_path/components/nstackx/nstackx_ctrl/interface",
+    "$dsoftbus_root_path/core/broadcast/common/include",
+    "$dsoftbus_root_path/core/bus_center/lnn/lane_hub/heartbeat/include",
+    "$dsoftbus_root_path/core/bus_center/lnn/lane_hub/lane_manager/include",
+    "$dsoftbus_root_path/core/discovery/ble/dispatcher/include",
+    "$dsoftbus_root_path/core/discovery/interface",
+    "$dsoftbus_root_path/core/discovery/manager/include",
+    "$dsoftbus_root_path/core/discovery/usb/dispatcher/include",
+    "$dsoftbus_root_path/core/frame/init/include",
+    "$dsoftbus_root_path/core/transmission/ipc/include",
+  ]
+
+  deps = [
+    "$dsoftbus_root_path/adapter:softbus_adapter",
+    "$dsoftbus_root_path/core/common:softbus_utils",
+    "$dsoftbus_root_path/core/frame:softbus_server",
+  ]
+
+  if (is_standard_system) {
+    external_deps = [
+      "c_utils:utils",
+      "dsoftbus:softbus_client",
+      "googletest:gmock",
+      "hilog:libhilog",
+      "ipc:ipc_single",
+      "safwk:system_ability_fwk",
+      "samgr:samgr_proxy",
+    ]
+  }
+}
+
 group("unittest") {
   testonly = true
   deps = [
     ":SoftbusClientInfoManagerTest",
+    ":SoftbusGEnhanceTest",
     ":SoftbusServerTest",
   ]
   if (dsoftbus_access_token_feature) {
