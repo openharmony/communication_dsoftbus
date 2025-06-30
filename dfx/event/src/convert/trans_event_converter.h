@@ -70,45 +70,75 @@ TRANS_ASSIGNER(Int32,  SessionId, sessionId)
 TRANS_ASSIGNER(Int32,  MinBW, minBW)
 TRANS_ASSIGNER(Int32,  MaxLatency, maxLatency)
 TRANS_ASSIGNER(Int32,  MinLatency, minLatency)
+TRANS_ASSIGNER(Uint8,  LocalStaChload, localStaChload)
+TRANS_ASSIGNER(Uint8,  RemoteStaChload, remoteStaChload)
+TRANS_ASSIGNER(Uint8,  LocalHmlChload, localHmlChload)
+TRANS_ASSIGNER(Uint8,  RemoteHmlChload, remoteHmlChload)
+TRANS_ASSIGNER(Uint8,  LocalP2pChload, localP2pChload)
+TRANS_ASSIGNER(Uint8,  RemoteP2pChload, remoteP2pChload)
+TRANS_ASSIGNER(Uint8,  LocalStaChannel, localStaChannel)
+TRANS_ASSIGNER(Uint8,  RemoteStaChannel, remoteStaChannel)
+TRANS_ASSIGNER(Uint8,  HmlChannel, hmlChannel)
+TRANS_ASSIGNER(Uint8,  LocalP2pChannel, localP2pChannel)
+TRANS_ASSIGNER(Uint8,  RemoteP2pChannel, remoteP2pChannel)
+TRANS_ASSIGNER(Int32,  LocalIsDbac, localIsDbac)
+TRANS_ASSIGNER(Int32,  RemoteIsDbac, remoteIsDbac)
+TRANS_ASSIGNER(Int32,  LocalIsDbdc, localIsDbdc)
+TRANS_ASSIGNER(Int32,  RemoteIsDbdc, remoteIsDbdc)
 
-#define TRANS_ASSIGNER_SIZE 36 // Size of TRANS_ASSIGNERS
+#define TRANS_ASSIGNER_SIZE 51 // Size of TRANS_ASSIGNERS
 static const HiSysEventParamAssigner TRANS_ASSIGNERS[] = {
-    { "STAGE_RES",        HISYSEVENT_INT32,  TransAssignerResult        },
-    { "ERROR_CODE",       HISYSEVENT_INT32,  TransAssignerErrcode       },
-    { "SOCKET_NAME",      HISYSEVENT_STRING, TransAssignerSocketName    },
-    { "DATA_TYPE",        HISYSEVENT_INT32,  TransAssignerDataType      },
-    { "LOGIC_CHAN_TYPE",  HISYSEVENT_INT32,  TransAssignerChannelType   },
-    { "LANE_ID",          HISYSEVENT_INT32,  TransAssignerLaneId        },
-    { "PREFER_LINK_TYPE", HISYSEVENT_INT32,  TransAssignerPreferLinkType},
-    { "LANE_TRANS_TYPE",  HISYSEVENT_INT32,  TransAssignerLaneTransType },
-    { "CHAN_ID",          HISYSEVENT_INT32,  TransAssignerChannelId     },
-    { "REQ_ID",           HISYSEVENT_INT32,  TransAssignerRequestId     },
-    { "CONN_ID",          HISYSEVENT_INT32,  TransAssignerConnectionId  },
-    { "LINK_TYPE",        HISYSEVENT_INT32,  TransAssignerLinkType      },
-    { "AUTH_ID",          HISYSEVENT_INT32,  TransAssignerAuthId        },
-    { "SOCKET_FD",        HISYSEVENT_INT32,  TransAssignerSocketFd      },
-    { "COST_TIME",        HISYSEVENT_INT32,  TransAssignerCostTime      },
-    { "CHAN_SCORE",       HISYSEVENT_INT32,  TransAssignerChannelScore  },
-    { "PEER_CHAN_ID",     HISYSEVENT_INT32,  TransAssignerPeerChannelId },
-    { "BT_FLOW",          HISYSEVENT_INT32,  TransAssignerBtFlow        },
-    { "PEER_NET_ID",      HISYSEVENT_STRING, TransAssignerPeerNetworkId },
-    { "PEER_UDID",        HISYSEVENT_STRING, TransAssignerPeerUdid      },
-    { "PEER_DEV_VER",     HISYSEVENT_STRING, TransAssignerPeerDevVer    },
-    { "LOCAL_UDID",       HISYSEVENT_STRING, TransAssignerLocalUdid     },
-    { "HOST_PKG",         HISYSEVENT_STRING, TransAssignerCallerPkg     },
-    { "TO_CALL_PKG",      HISYSEVENT_STRING, TransAssignerCalleePkg     },
-    { "FIRST_TOKEN_NAME", HISYSEVENT_STRING, TransAssignerFirstTokenName},
-    { "FIRST_TOKEN_ID",   HISYSEVENT_UINT64, TransAssignerFirstTokenId  },
-    { "FIRST_TOKEN_TYPE", HISYSEVENT_INT32,  TransAssignerFirstTokenType},
-    { "TRAFFIC_STATS",    HISYSEVENT_STRING, TransAssignerTrafficStats  },
-    { "OS_TYPE",          HISYSEVENT_INT32,  TransAssignerOsType        },
-    { "DEVICE_STATE",     HISYSEVENT_INT32,  TransAssignerDeviceState   },
-    { "BUSINESS_ID",      HISYSEVENT_INT32,  TransAssignerBusinessId    },
-    { "BUSINESS_TYPE",    HISYSEVENT_INT32,  TransAssignerBusinessType  },
-    { "SESSION_ID",       HISYSEVENT_INT32,  TransAssignerSessionId     },
-    { "MIN_BW",           HISYSEVENT_INT32,  TransAssignerMinBW         },
-    { "MAX_LATENCY",      HISYSEVENT_INT32,  TransAssignerMaxLatency    },
-    { "MIN_LATENCY",      HISYSEVENT_INT32,  TransAssignerMinLatency    },
+    { "STAGE_RES",           HISYSEVENT_INT32,    TransAssignerResult          },
+    { "ERROR_CODE",          HISYSEVENT_INT32,    TransAssignerErrcode         },
+    { "SOCKET_NAME",         HISYSEVENT_STRING,   TransAssignerSocketName      },
+    { "DATA_TYPE",           HISYSEVENT_INT32,    TransAssignerDataType        },
+    { "LOGIC_CHAN_TYPE",     HISYSEVENT_INT32,    TransAssignerChannelType     },
+    { "LANE_ID",             HISYSEVENT_INT32,    TransAssignerLaneId          },
+    { "PREFER_LINK_TYPE",    HISYSEVENT_INT32,    TransAssignerPreferLinkType  },
+    { "LANE_TRANS_TYPE",     HISYSEVENT_INT32,    TransAssignerLaneTransType   },
+    { "CHAN_ID",             HISYSEVENT_INT32,    TransAssignerChannelId       },
+    { "REQ_ID",              HISYSEVENT_INT32,    TransAssignerRequestId       },
+    { "CONN_ID",             HISYSEVENT_INT32,    TransAssignerConnectionId    },
+    { "LINK_TYPE",           HISYSEVENT_INT32,    TransAssignerLinkType        },
+    { "AUTH_ID",             HISYSEVENT_INT32,    TransAssignerAuthId          },
+    { "SOCKET_FD",           HISYSEVENT_INT32,    TransAssignerSocketFd        },
+    { "COST_TIME",           HISYSEVENT_INT32,    TransAssignerCostTime        },
+    { "CHAN_SCORE",          HISYSEVENT_INT32,    TransAssignerChannelScore    },
+    { "PEER_CHAN_ID",        HISYSEVENT_INT32,    TransAssignerPeerChannelId   },
+    { "BT_FLOW",             HISYSEVENT_INT32,    TransAssignerBtFlow          },
+    { "PEER_NET_ID",         HISYSEVENT_STRING,   TransAssignerPeerNetworkId   },
+    { "PEER_UDID",           HISYSEVENT_STRING,   TransAssignerPeerUdid        },
+    { "PEER_DEV_VER",        HISYSEVENT_STRING,   TransAssignerPeerDevVer      },
+    { "LOCAL_UDID",          HISYSEVENT_STRING,   TransAssignerLocalUdid       },
+    { "HOST_PKG",            HISYSEVENT_STRING,   TransAssignerCallerPkg       },
+    { "TO_CALL_PKG",         HISYSEVENT_STRING,   TransAssignerCalleePkg       },
+    { "FIRST_TOKEN_NAME",    HISYSEVENT_STRING,   TransAssignerFirstTokenName  },
+    { "FIRST_TOKEN_ID",      HISYSEVENT_UINT64,   TransAssignerFirstTokenId    },
+    { "FIRST_TOKEN_TYPE",    HISYSEVENT_INT32,    TransAssignerFirstTokenType  },
+    { "TRAFFIC_STATS",       HISYSEVENT_STRING,   TransAssignerTrafficStats    },
+    { "OS_TYPE",             HISYSEVENT_INT32,    TransAssignerOsType          },
+    { "DEVICE_STATE",        HISYSEVENT_INT32,    TransAssignerDeviceState     },
+    { "BUSINESS_ID",         HISYSEVENT_INT32,    TransAssignerBusinessId      },
+    { "BUSINESS_TYPE",       HISYSEVENT_INT32,    TransAssignerBusinessType    },
+    { "SESSION_ID",          HISYSEVENT_INT32,    TransAssignerSessionId       },
+    { "MIN_BW",              HISYSEVENT_INT32,    TransAssignerMinBW           },
+    { "MAX_LATENCY",         HISYSEVENT_INT32,    TransAssignerMaxLatency      },
+    { "MIN_LATENCY",         HISYSEVENT_INT32,    TransAssignerMinLatency      },
+    { "LOCAL_STA_CHLOAD",    HISYSEVENT_INT8,     TransAssignerLocalStaChload  },
+    { "REMOTE_STA_CHLOAD",   HISYSEVENT_INT8,     TransAssignerRemoteStaChload },
+    { "LOCAL_HML_CHLOAD",    HISYSEVENT_INT8,     TransAssignerLocalHmlChload  },
+    { "REMOTE_HML_CHLOAD",   HISYSEVENT_INT8,     TransAssignerRemoteHmlChload },
+    { "LOCAL_P2P_CHLOAD",    HISYSEVENT_INT8,     TransAssignerLocalP2pChload  },
+    { "REMOTE_P2P_CHLOAD",   HISYSEVENT_INT8,     TransAssignerRemoteP2pChload },
+    { "LOCAL_STA_CHANNEL",   HISYSEVENT_INT8,     TransAssignerLocalStaChannel },
+    { "REMOTE_STA_CHANNEL",  HISYSEVENT_INT8,     TransAssignerRemoteStaChannel},
+    { "HML_CHANNEL",         HISYSEVENT_INT8,     TransAssignerHmlChannel      },
+    { "LOCAL_P2P_CHANNEL",   HISYSEVENT_INT8,     TransAssignerLocalP2pChannel },
+    { "REMOTE_P2P_CHANNEL",  HISYSEVENT_INT8,     TransAssignerRemoteP2pChannel},
+    { "LOCAL_IS_DBAC",       HISYSEVENT_INT32,    TransAssignerLocalIsDbac     },
+    { "REMOTE_IS_DBAC",      HISYSEVENT_INT32,    TransAssignerRemoteIsDbac    },
+    { "LOCAL_IS_DBDC",       HISYSEVENT_INT32,    TransAssignerLocalIsDbdc     },
+    { "REMOTE_IS_DBDC",      HISYSEVENT_INT32,    TransAssignerRemoteIsDbdc    },
     // Modification Note: remember updating TRANS_ASSIGNER_SIZE
 };
 
