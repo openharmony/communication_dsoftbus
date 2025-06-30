@@ -109,6 +109,9 @@ static int32_t UnregisterAllCapBitmap(uint32_t capBitmapNum, const uint32_t inCa
 
 static void SetDiscCoapOption(DiscCoapOption *discCoapOption, DiscOption *option, uint32_t allCap)
 {
+    DISC_CHECK_AND_RETURN_LOGE(discCoapOption != NULL, DISC_COAP, "discCoapOption is nullptr");
+    DISC_CHECK_AND_RETURN_LOGE(option != NULL, DISC_COAP, "option is nullptr");
+
     if (option->isPublish) {
         discCoapOption->mode = ACTIVE_PUBLISH;
         discCoapOption->freq = option->option.publishOption.freq;
@@ -123,6 +126,8 @@ static void SetDiscCoapOption(DiscCoapOption *discCoapOption, DiscOption *option
 
 static void DfxRecordCoapEnd(bool isStart, bool isActive, bool isPublish, const void *option, int32_t reason)
 {
+    DISC_CHECK_AND_RETURN_LOGE(option != NULL, DISC_COAP, "option is nullptr");
+
     DiscEventExtra extra = { 0 };
     DiscEventExtraInit(&extra);
     extra.discType = COAP + 1;
@@ -297,6 +302,7 @@ PUB_FAIL:
 
 static int32_t CoapPublish(const PublishOption *option)
 {
+    DISC_CHECK_AND_RETURN_RET_LOGE(option != NULL, SOFTBUS_INVALID_PARAM, DISC_COAP, "option is nullptr");
     int32_t ret = Publish(option, true);
     DfxRecordCoapEnd(true, true, true, (void *)option, ret);
     return ret;
@@ -304,6 +310,7 @@ static int32_t CoapPublish(const PublishOption *option)
 
 static int32_t CoapStartScan(const PublishOption *option)
 {
+    DISC_CHECK_AND_RETURN_RET_LOGE(option != NULL, SOFTBUS_INVALID_PARAM, DISC_COAP, "option is nullptr");
     int32_t ret = Publish(option, false);
     if (ret != SOFTBUS_OK && option != NULL) {
         DiscAuditExtra extra = {
@@ -367,6 +374,7 @@ static int32_t UnPublish(const PublishOption *option, bool isActive)
 
 static int32_t CoapUnPublish(const PublishOption *option)
 {
+    DISC_CHECK_AND_RETURN_RET_LOGE(option != NULL, SOFTBUS_INVALID_PARAM, DISC_COAP, "option is nullptr");
     int32_t ret = UnPublish(option, true);
     DfxRecordCoapEnd(false, true, true, (void *)option, ret);
     return ret;
@@ -374,6 +382,7 @@ static int32_t CoapUnPublish(const PublishOption *option)
 
 static int32_t CoapStopScan(const PublishOption *option)
 {
+    DISC_CHECK_AND_RETURN_RET_LOGE(option != NULL, SOFTBUS_INVALID_PARAM, DISC_COAP, "option is nullptr");
     int32_t ret = UnPublish(option, false);
     DfxRecordCoapEnd(false, false, true, (void *)option, ret);
     return ret;
@@ -441,6 +450,7 @@ static int32_t Discovery(const SubscribeOption *option, bool isActive)
 
 static int32_t CoapStartAdvertise(const SubscribeOption *option)
 {
+    DISC_CHECK_AND_RETURN_RET_LOGE(option != NULL, SOFTBUS_INVALID_PARAM, DISC_COAP, "option is nullptr");
     int32_t ret = Discovery(option, true);
     if (ret != SOFTBUS_OK && option != NULL) {
         DiscAuditExtra extra = {
@@ -459,6 +469,7 @@ static int32_t CoapStartAdvertise(const SubscribeOption *option)
 
 static int32_t CoapSubscribe(const SubscribeOption *option)
 {
+    DISC_CHECK_AND_RETURN_RET_LOGE(option != NULL, SOFTBUS_INVALID_PARAM, DISC_COAP, "option is nullptr");
     int32_t ret = Discovery(option, false);
     DfxRecordCoapEnd(true, false, false, (void *)option, ret);
     return ret;
@@ -498,6 +509,7 @@ static int32_t StopDisc(const SubscribeOption *option, bool isActive)
 
 static int32_t CoapStopAdvertise(const SubscribeOption *option)
 {
+    DISC_CHECK_AND_RETURN_RET_LOGE(option != NULL, SOFTBUS_INVALID_PARAM, DISC_COAP, "option is nullptr");
     int32_t ret = StopDisc(option, true);
     DfxRecordCoapEnd(false, true, false, (void *)option, ret);
     return ret;
@@ -505,6 +517,7 @@ static int32_t CoapStopAdvertise(const SubscribeOption *option)
 
 static int32_t CoapUnsubscribe(const SubscribeOption *option)
 {
+    DISC_CHECK_AND_RETURN_RET_LOGE(option != NULL, SOFTBUS_INVALID_PARAM, DISC_COAP, "option is nullptr");
     int32_t ret = StopDisc(option, false);
     DfxRecordCoapEnd(false, false, false, (void *)option, ret);
     return ret;
