@@ -114,6 +114,11 @@ typedef enum {
     PROXY_CHANNEL_STATUS_COMPLETED
 } ProxyChannelStatus;
 
+typedef enum {
+    PAGING_WAIT_LISTEN_DONE,
+    PAGING_WAIT_LISTEN_LOAD_SA_FAIL
+} PaingWaitListenStatus;
+
 #define BASE64KEY 45 // encrypt SessionKey len
 typedef struct {
     char sessionKeyBase64[BASE64KEY];
