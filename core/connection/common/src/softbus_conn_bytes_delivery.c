@@ -64,7 +64,7 @@ struct ConnBytesDelivery {
 
     SoftBusMutex lock;
     bool deliveryTaskRunning;
-    bool deliveryMessagePosted;
+    bool deliveryMessagePosting;
 };
 
 ConnBytesDelivery *ConnCreateBytesDelivery(const struct ConnBytesDeliveryConfig *config)
@@ -90,7 +90,7 @@ ConnBytesDelivery *ConnCreateBytesDelivery(const struct ConnBytesDeliveryConfig 
         return NULL;
     }
     delivery->deliveryTaskRunning = false;
-    delivery->deliveryMessagePosted = false;
+    delivery->deliveryMessagePosting = false;
     return delivery;
 }
 
@@ -102,6 +102,8 @@ void ConnDestroyBytesDelivery(ConnBytesDelivery *delivery)
     SoftBusMutexDestroy(&delivery->lock);
     SoftBusFree(delivery);
 }
+
+#define MESSAGE_POSTING 1
 
 static int32_t RetryDequeueExclusiveIfNeed(
     ConnBytesDelivery *delivery, int32_t code, struct ConnBytesDeliveryItem **out)
@@ -115,6 +117,9 @@ static int32_t RetryDequeueExclusiveIfNeed(
         delivery->config.name, code);
     code = ConnDequeue(delivery->queue, (struct ConnQueueItem **)&out, 0);
     if (code == SOFTBUS_TIMOUT) {
+        if (delivery->deliveryMessagePosting) {
+            return MESSAGE_POSTING;
+        }
         delivery->deliveryTaskRunning = false;
     }
     SoftBusMutexUnlock(&delivery->lock);
@@ -130,19 +135,14 @@ static void *DeliverTask(void *arg)
         int32_t ret = ConnDequeue(delivery->queue, (struct ConnQueueItem **)&item, delivery->config.idleTimeoutMs);
         ret = RetryDequeueExclusiveIfNeed(delivery, ret, &item);
         if (ret == SOFTBUS_TIMOUT) {
-            int32_t res = SoftBusMutexLock(&delivery->lock);
-            CONN_CHECK_AND_RETURN_RET_LOGE(res == SOFTBUS_OK, NULL, CONN_COMMON,
-                "%{public}s, lock failed: error=%{public}d", delivery->config.name, res);
-            if (delivery->deliveryMessagePosted) {
-                (void)SoftBusMutexUnlock(&delivery->lock);
-                CONN_LOGI(CONN_COMMON, "message already enqueue, need dequeue again");
-                continue;
-            }
-            (void)SoftBusMutexUnlock(&delivery->lock);
             CONN_LOGE(CONN_COMMON,
                 "%{public}s, dequeue timeout, exit delivery task, it will restart after enqueue later",
                 delivery->config.name);
             break;
+        }
+        if (ret == MESSAGE_POSTING) {
+            CONN_LOGE(CONN_COMMON, "message already enqueue, need dequeue again");
+            continue;
         }
         if (ret != SOFTBUS_OK) {
             CONN_LOGE(CONN_COMMON, "%{public}s, dequeue failed: error=%{public}d, retry %{public}d later",
@@ -164,8 +164,8 @@ static int32_t PullDeliverTaskIfNeed(ConnBytesDelivery *delivery)
     CONN_CHECK_AND_RETURN_RET_LOGE(
         ret == SOFTBUS_OK, ret, CONN_COMMON, "%{public}s, lock failed: error=%{public}d", delivery->config.name, ret);
     do {
+        delivery->deliveryMessagePosting = true;
         if (delivery->deliveryTaskRunning) {
-            delivery->deliveryMessagePosted = true;
             break;
         }
         ret = ConnStartActionAsync(delivery, DeliverTask, delivery->config.name);
@@ -201,7 +201,7 @@ int32_t ConnDeliver(ConnBytesDelivery *delivery, uint32_t connectionId, uint8_t 
     ret = SoftBusMutexLock(&delivery->lock);
     CONN_CHECK_AND_RETURN_RET_LOGE(
         ret == SOFTBUS_OK, ret, CONN_COMMON, "%{public}s, lock failed: error=%{public}d", delivery->config.name, ret);
-    delivery->deliveryMessagePosted = false;
+    delivery->deliveryMessagePosting = false;
     SoftBusMutexUnlock(&delivery->lock);
     return ret;
 }
