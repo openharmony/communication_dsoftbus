@@ -18,6 +18,9 @@ group("unittest") {
   testonly = true
   deps = [
     "common/unittest:SoftbusConnCommonTest",
+    "common/unittest:SoftbusRcTest",
+    "common/unittest:SoftbusConnAsyncHelperTest",
+    "common/unittest:SoftbusConnQueueTest",
     "ipc:unittest",
     "manager:ConnectionManagerTest",
   ]
