@@ -106,6 +106,8 @@ void TransServerProxyClear(void)
 {
     TRANS_LOGI(TRANS_SDK, "enter");
     std::lock_guard<std::mutex> lock(g_mutex);
+    TRANS_CHECK_AND_RETURN_LOGE(
+        g_serverProxy != nullptr, TRANS_SDK, "softbus server g_serverProxy is nullptr");
     if (g_serverProxy->GetRemoteObject(g_oldObject) != SOFTBUS_OK) {
         g_oldObject = nullptr;
         TRANS_LOGW(TRANS_SDK, "Failed to get old remote object.");
@@ -118,6 +120,8 @@ void TransServerProxyDeInit(void)
 {
     TRANS_LOGI(TRANS_SDK, "enter");
     std::lock_guard<std::mutex> lock(g_mutex);
+    TRANS_CHECK_AND_RETURN_LOGE(
+        g_serverProxy != nullptr, TRANS_SDK, "softbus server g_serverProxy is nullptr");
     g_serverProxy.clear();
     g_serverProxy = nullptr;
 }
