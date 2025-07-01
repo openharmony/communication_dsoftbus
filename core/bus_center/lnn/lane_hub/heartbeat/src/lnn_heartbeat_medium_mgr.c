@@ -1131,15 +1131,18 @@ int32_t LnnCleanTriggerSparkInfo(const char *udid, ConnectionAddrType addrType)
         AnonymizeFree(anonyUdid);
         return SOFTBUS_NETWORK_BYTES_TO_HEX_STR_ERR;
     }
-    LNN_CHECK_AND_RETURN_RET_LOGE(SoftBusMutexLock(&g_hbRecvList->lock) == SOFTBUS_OK, SOFTBUS_LOCK_ERR,
-        LNN_HEART_BEAT, "try to lock failed");
+    if (SoftBusMutexLock(&g_hbRecvList->lock) != SOFTBUS_OK) {
+        LNN_LOGE(LNN_HEART_BEAT, "try to lock failed, udid=%{public}s", AnonymizeWrapper(anonyUdid));
+        AnonymizeFree(anonyUdid);
+        return SOFTBUS_LOCK_ERR;
+    }
     LnnHeartbeatRecvInfo *storedInfo = HbGetStoredRecvInfo(udidHashStr, CONNECTION_ADDR_BLE, nowTime);
     if (storedInfo != NULL) {
         storedInfo->triggerSparkCount = 0;
         storedInfo->triggerSparkTime = 0;
         LNN_LOGI(LNN_HEART_BEAT, "clean trigger info done, udid=%{public}s", AnonymizeWrapper(anonyUdid));
-        AnonymizeFree(anonyUdid);
     }
+    AnonymizeFree(anonyUdid);
     (void)SoftBusMutexUnlock(&g_hbRecvList->lock);
     return SOFTBUS_OK;
 }
