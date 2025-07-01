@@ -64,6 +64,7 @@ struct ConnBytesDelivery {
 
     SoftBusMutex lock;
     bool deliveryTaskRunning;
+    bool deliveryMessagePosting;
 };
 
 ConnBytesDelivery *ConnCreateBytesDelivery(const struct ConnBytesDeliveryConfig *config)
@@ -89,6 +90,7 @@ ConnBytesDelivery *ConnCreateBytesDelivery(const struct ConnBytesDeliveryConfig 
         return NULL;
     }
     delivery->deliveryTaskRunning = false;
+    delivery->deliveryMessagePosting = false;
     return delivery;
 }
 
@@ -101,6 +103,7 @@ void ConnDestroyBytesDelivery(ConnBytesDelivery *delivery)
     SoftBusFree(delivery);
 }
 
+#define MESSAGE_POSTING 1
 static int32_t RetryDequeueExclusiveIfNeed(
     ConnBytesDelivery *delivery, int32_t code, struct ConnBytesDeliveryItem **out)
 {
@@ -113,6 +116,9 @@ static int32_t RetryDequeueExclusiveIfNeed(
         delivery->config.name, code);
     code = ConnDequeue(delivery->queue, (struct ConnQueueItem **)&out, 0);
     if (code == SOFTBUS_TIMOUT) {
+        if (delivery->deliveryMessagePosting) {
+            return MESSAGE_POSTING;
+        }
         delivery->deliveryTaskRunning = false;
     }
     SoftBusMutexUnlock(&delivery->lock);
@@ -133,6 +139,10 @@ static void *DeliverTask(void *arg)
                 delivery->config.name);
             break;
         }
+        if (ret == MESSAGE_POSTING) {
+            CONN_LOGE(CONN_COMMON, "message already enqueue, need dequeue again");
+            continue;
+        }
         if (ret != SOFTBUS_OK) {
             CONN_LOGE(CONN_COMMON, "%{public}s, dequeue failed: error=%{public}d, retry %{public}d later",
                 delivery->config.name, ret, delivery->config.errorRetryWaitMs);
@@ -147,24 +157,35 @@ static void *DeliverTask(void *arg)
     return NULL;
 }
 
-static void PullDeliverTaskIfNeed(ConnBytesDelivery *delivery)
+static int32_t PullDeliverTaskIfNeed(ConnBytesDelivery *delivery)
 {
-    int32_t code = SoftBusMutexLock(&delivery->lock);
-    CONN_CHECK_AND_RETURN_LOGE(
-        code == SOFTBUS_OK, CONN_COMMON, "%{public}s, lock failed: error=%{public}d", delivery->config.name, code);
+    int32_t ret = SoftBusMutexLock(&delivery->lock);
+    CONN_CHECK_AND_RETURN_RET_LOGE(
+        ret == SOFTBUS_OK, ret, CONN_COMMON, "%{public}s, lock failed: error=%{public}d", delivery->config.name, ret);
     do {
+        delivery->deliveryMessagePosting = true;
         if (delivery->deliveryTaskRunning) {
             break;
         }
-        code = ConnStartActionAsync(delivery, DeliverTask, delivery->config.name);
-        if (code != SOFTBUS_OK) {
+        ret = ConnStartActionAsync(delivery, DeliverTask, delivery->config.name);
+        if (ret != SOFTBUS_OK) {
             CONN_LOGE(
-                CONN_COMMON, "%{public}s, pull deliver task failed: error=%{public}d", delivery->config.name, code);
+                CONN_COMMON, "%{public}s, pull deliver task failed: error=%{public}d", delivery->config.name, ret);
             break;
         }
         delivery->deliveryTaskRunning = true;
         CONN_LOGI(CONN_COMMON, "%{public}s, pull deliver task", delivery->config.name);
     } while (false);
+    SoftBusMutexUnlock(&delivery->lock);
+    return ret;
+}
+
+void MarkPostMessageDone(ConnBytesDelivery *delivery)
+{
+    int32_t ret = SoftBusMutexLock(&delivery->lock);
+    CONN_CHECK_AND_RETURN_LOGE(
+        ret == SOFTBUS_OK, CONN_COMMON, "%{public}s, lock failed: error=%{public}d", delivery->config.name, ret);
+    delivery->deliveryMessagePosting = false;
     SoftBusMutexUnlock(&delivery->lock);
 }
 
@@ -172,19 +193,21 @@ int32_t ConnDeliver(ConnBytesDelivery *delivery, uint32_t connectionId, uint8_t 
     const struct ConnBytesAddition addition)
 {
     CONN_CHECK_AND_RETURN_RET_LOGE(delivery != NULL, SOFTBUS_INVALID_PARAM, CONN_COMMON, "delivery is null");
+    int32_t ret = PullDeliverTaskIfNeed(delivery);
+    CONN_CHECK_AND_RETURN_RET_LOGE(ret == SOFTBUS_OK, ret, CONN_COMMON,
+        "%{public}s, pull deliver task failed ret=%{public}d", delivery->config.name, ret);
 
     struct ConnBytesDeliveryItem *item = ConnCreateBytesDeliveryItem(connectionId, data, length, addition);
     CONN_CHECK_AND_RETURN_RET_LOGE(
         item != NULL, SOFTBUS_MALLOC_ERR, CONN_COMMON, "%{public}s, create queue item failed", delivery->config.name);
 
-    int32_t ret = ConnEnqueue(delivery->queue, (struct ConnQueueItem *)item, delivery->config.waitTimeoutMs);
+    ret = ConnEnqueue(delivery->queue, (struct ConnQueueItem *)item, delivery->config.waitTimeoutMs);
     if (ret != SOFTBUS_OK) {
         CONN_LOGE(CONN_COMMON, "%{public}s, enqueue item failed: error=%{public}d", delivery->config.name, ret);
         ConnDestroyBytesDeliveryItem(item);
-        return ret;
     }
-    PullDeliverTaskIfNeed(delivery);
-    return SOFTBUS_OK;
+    MarkPostMessageDone(delivery);
+    return ret;
 }
 
 bool ConnIsDeliveryTaskRunning(ConnBytesDelivery *delivery)
