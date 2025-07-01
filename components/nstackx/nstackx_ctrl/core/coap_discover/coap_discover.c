@@ -345,6 +345,11 @@ static int32_t HndPostServiceDiscoverEx(coap_session_t *session, const coap_pdu_
         goto L_ERR;
     }
 
+    if (coapCtx->freeCtxLater == NSTACKX_TRUE) {
+        DFINDER_LOGE(TAG, "coapCtx is will free");
+        goto L_ERR;
+    }
+
     if (strcpy_s(deviceInfo->networkName, sizeof(deviceInfo->networkName),
         GetLocalIfaceName(coapCtx->iface)) != EOK) {
         DFINDER_LOGE(TAG, "copy local network name %s fail", GetLocalIfaceName(coapCtx->iface));
@@ -640,6 +645,11 @@ static void HndPostServiceMsg(coap_resource_t *resource, coap_session_t *session
 
 static int32_t CoapPostServiceDiscoverEx(CoapCtxType *ctx)
 {
+    if (ctx->freeCtxLater == NSTACKX_TRUE) {
+        DFINDER_LOGE(TAG, "ctx is will free");
+        return NSTACKX_EFAILED;
+    }
+
     char broadcastIp[NSTACKX_MAX_IP_STRING_LEN] = {0};
     if (GetBroadcastIp(ctx->iface, broadcastIp, sizeof(broadcastIp)) != NSTACKX_EOK) {
         DFINDER_LOGE(TAG, "get broadcast ip failed");
