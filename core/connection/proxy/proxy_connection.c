@@ -185,6 +185,8 @@ int32_t ProxyBrConnect(struct ProxyConnection *connection, const ProxyBrConnectS
 
 static int32_t Disconnect(struct ProxyConnection *connection)
 {
+    CONN_CHECK_AND_RETURN_RET_LOGE(connection != NULL,
+                                   SOFTBUS_INVALID_PARAM, CONN_PROXY, "connection is null");
     int32_t ret = SoftBusMutexLock(&connection->lock);
     CONN_CHECK_AND_RETURN_RET_LOGE(ret == SOFTBUS_OK, ret, CONN_PROXY,
         "br disconnect lock failed, connId=%{public}u, ret=%{public}d", connection->channelId, ret);
@@ -204,6 +206,8 @@ static int32_t Disconnect(struct ProxyConnection *connection)
 
 static int32_t Send(struct ProxyConnection *connection, const uint8_t *data, uint32_t dataLen)
 {
+    CONN_CHECK_AND_RETURN_RET_LOGE(connection != NULL,
+                                   SOFTBUS_INVALID_PARAM, CONN_PROXY, "connection is null");
     int32_t ret = SoftBusMutexLock(&connection->lock);
     CONN_CHECK_AND_RETURN_RET_LOGE(ret == SOFTBUS_OK, ret, CONN_PROXY,
         "lock connection failed, channelId=%{public}u, ret=%{public}d", connection->channelId, ret);
