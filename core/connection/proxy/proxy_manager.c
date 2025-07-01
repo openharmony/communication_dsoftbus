@@ -115,6 +115,7 @@ static ProxyChannelState SetProxyChannelState(struct ProxyConnection *proxyConne
 
 static void ProxyChannelDereference(struct ProxyConnection *proxyConnection)
 {
+    CONN_CHECK_AND_RETURN_LOGE(proxyConnection != NULL, CONN_PROXY, "proxyConnection is null");
     int32_t ret = SoftBusMutexLock(&proxyConnection->lock);
     CONN_CHECK_AND_RETURN_LOGE(ret == SOFTBUS_OK, CONN_PROXY,
         "lock channel failed. channelId=%{public}u", proxyConnection->channelId);
@@ -129,6 +130,7 @@ static void ProxyChannelDereference(struct ProxyConnection *proxyConnection)
 
 static void ProxyChannelReference(struct ProxyConnection *proxyConnection)
 {
+    CONN_CHECK_AND_RETURN_LOGE(proxyConnection != NULL, CONN_PROXY, "proxyConnection is null");
     int32_t ret = SoftBusMutexLock(&proxyConnection->lock);
     CONN_CHECK_AND_RETURN_LOGE(ret == SOFTBUS_OK, CONN_PROXY,
         "lock channel failed. channelId=%{public}u", proxyConnection->channelId);

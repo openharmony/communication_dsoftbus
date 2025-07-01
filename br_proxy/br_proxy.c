@@ -564,7 +564,7 @@ const SoftBusCodeToStateMap G_CODE_MAP[] = {
 static int32_t SoftbusErrConvertChannelState(int32_t err)
 {
     size_t mapSize = sizeof(G_CODE_MAP) / sizeof(G_CODE_MAP[0]);
-    for (int32_t i = 0; i < mapSize; ++i) {
+    for (size_t i = 0; i < mapSize; ++i) {
         if (err == G_CODE_MAP[i].softbusErrCode) {
             return G_CODE_MAP[i].channelState;
         }

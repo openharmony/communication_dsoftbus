@@ -98,7 +98,7 @@ static napi_value CreateBusinessError(napi_env env, int32_t errCode)
 static int32_t NapiTransConvertErr(int32_t err)
 {
     size_t mapSize = sizeof(ERRCODE_C_JS_MAP) / sizeof(ERRCODE_C_JS_MAP[0]);
-    for (int32_t i = 0; i < mapSize; ++i) {
+    for (size_t i = 0; i < mapSize; ++i) {
         if (err == ERRCODE_C_JS_MAP[i].cErrCode) {
             return ERRCODE_C_JS_MAP[i].jsErrCode;
         }
