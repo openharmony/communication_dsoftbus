@@ -399,6 +399,9 @@ static int32_t ClientRecordListenerState(int32_t channelId, ListenerType type, b
 
 static bool IsChannelValid(int32_t channelId)
 {
+    if (channelId <= 0) {
+        return false;
+    }
     bool isValid = false;
     if (g_clientList == NULL) {
         TRANS_LOGE(TRANS_SDK, "[br_proxy] not init");

@@ -52,7 +52,7 @@ typedef struct {
     int32_t sessionId;
     int32_t channelId;
     int32_t openResult;
-    sem_t sem;
+    sem_t *sem;
     ListNode node;
 } SessionInfo;
 
@@ -102,8 +102,14 @@ static int32_t AddSessionToList(int32_t sessionId)
         TRANS_LOGE(TRANS_SDK, "[br_proxy] calloc failed");
         return SOFTBUS_MALLOC_ERR;
     }
+    info->sem = (sem_t *)SoftBusCalloc(sizeof(sem_t));
+    if (info->sem == NULL) {
+        TRANS_LOGE(TRANS_SDK, "[br_proxy] calloc failed");
+        ret = SOFTBUS_LOCK_ERR;
+        goto EXIT_FREE_INFO;
+    }
     info->sessionId = sessionId;
-    sem_init(&info->sem, 0, 0);
+    sem_init(info->sem, 0, 0);
     ListInit(&info->node);
     if (SoftBusMutexLock(&(g_sessionList->lock)) != SOFTBUS_OK) {
         TRANS_LOGE(TRANS_SDK, "[br_proxy] lock failed");
@@ -117,6 +123,8 @@ static int32_t AddSessionToList(int32_t sessionId)
     return SOFTBUS_OK;
 
 EXIT_ERR:
+    SoftBusFree(info->sem);
+EXIT_FREE_INFO:
     SoftBusFree(info);
     return ret;
 }
@@ -146,29 +154,32 @@ static int32_t UpdateListBySessionId(int32_t sessionId, int32_t channelId, int32
     return SOFTBUS_NOT_FIND;
 }
 
-static SessionInfo *GetSessionInfoBySessionId(int32_t sessionId)
+static int32_t GetSessionInfoBySessionId(int32_t sessionId, SessionInfo *info)
 {
-    if (g_sessionList == NULL) {
+    if (g_sessionList == NULL || info == NULL) {
         TRANS_LOGE(TRANS_SDK, "[br_proxy] invalid param");
-        return NULL;
+        return SOFTBUS_INVALID_PARAM;
     }
     if (SoftBusMutexLock(&(g_sessionList->lock)) != SOFTBUS_OK) {
         TRANS_LOGE(TRANS_SDK, "[br_proxy] lock failed");
-        return NULL;
+        return SOFTBUS_LOCK_ERR;
     }
-    SessionInfo *info = NULL;
     SessionInfo *nodeInfo = NULL;
     LIST_FOR_EACH_ENTRY(nodeInfo, &(g_sessionList->list), SessionInfo, node) {
         if (nodeInfo->sessionId != sessionId) {
             continue;
         }
-        info = nodeInfo;
+        if (memcpy_s(info, sizeof(SessionInfo), nodeInfo, sizeof(SessionInfo)) != EOK) {
+            (void)SoftBusMutexUnlock(&(g_sessionList->lock));
+            return SOFTBUS_MEM_ERR;
+        }
+        info->sem = nodeInfo->sem;
         (void)SoftBusMutexUnlock(&(g_sessionList->lock));
-        return info;
+        return SOFTBUS_OK;
     }
     TRANS_LOGE(TRANS_SDK, "[br_proxy] not find sessionId:%{public}d", sessionId);
     (void)SoftBusMutexUnlock(&(g_sessionList->lock));
-    return NULL;
+    return SOFTBUS_NOT_FIND;
 }
 
 static int32_t DeleteSessionById(int32_t sessionId)
@@ -187,10 +198,11 @@ static int32_t DeleteSessionById(int32_t sessionId)
         if (sessionNode->sessionId != sessionId) {
             continue;
         }
-        sem_destroy(&sessionNode->sem);
+        sem_destroy(sessionNode->sem);
         TRANS_LOGI(TRANS_SDK, "[br_proxy] by sessionId:%{public}d delete node success, cnt:%{public}d",
             sessionNode->sessionId, g_sessionList->cnt);
         ListDelete(&sessionNode->node);
+        SoftBusFree(sessionNode->sem);
         SoftBusFree(sessionNode);
         g_sessionList->cnt--;
         (void)SoftBusMutexUnlock(&(g_sessionList->lock));
@@ -210,11 +222,12 @@ static int32_t ChannelOpened(int32_t sessionId, int32_t channelId, int32_t resul
         TRANS_LOGI(TRANS_SDK, "[br_proxy] ret:%{public}d.", ret);
         return ret;
     }
-    SessionInfo *info = GetSessionInfoBySessionId(sessionId);
-    if (info == NULL) {
-        return SOFTBUS_NOT_FIND;
+    SessionInfo info;
+    ret = GetSessionInfoBySessionId(sessionId, &info);
+    if (ret != SOFTBUS_OK) {
+        return ret;
     }
-    sem_post(&info->sem);
+    sem_post(info.sem);
     return SOFTBUS_OK;
 }
 
@@ -226,6 +239,7 @@ static void OpenProxyChannelExecute(napi_env env, void* data)
         asyncData->channelInfo.peerBRMacAddr, sizeof(asyncData->channelInfo.peerBRMacAddr)) != EOK ||
         memcpy_s(channelInfo.peerBRUuid, sizeof(channelInfo.peerBRUuid),
             asyncData->channelInfo.peerBRUuid, sizeof(asyncData->channelInfo.peerBRUuid)) != EOK) {
+        asyncData->ret = SOFTBUS_MEM_ERR;
         return;
     }
     channelInfo.recvPri = asyncData->channelInfo.recvPri;
@@ -236,6 +250,7 @@ static void OpenProxyChannelExecute(napi_env env, void* data)
     };
     int32_t ret = AddSessionToList(asyncData->sessionId);
     if (ret != SOFTBUS_OK) {
+        asyncData->ret = ret;
         return;
     }
     ret = OpenBrProxy(asyncData->sessionId, &channelInfo, &listener);
@@ -244,13 +259,20 @@ static void OpenProxyChannelExecute(napi_env env, void* data)
         TRANS_LOGI(TRANS_SDK, "[br_proxy] ret:%{public}d.", ret);
         return;
     }
-    SessionInfo *info = GetSessionInfoBySessionId(asyncData->sessionId);
-    if (info == NULL) {
+    SessionInfo info;
+    ret = GetSessionInfoBySessionId(asyncData->sessionId, &info);
+    if (ret != SOFTBUS_OK) {
+        asyncData->ret = ret;
         return;
     }
-    sem_wait(&info->sem);
-    asyncData->channelId = info->channelId;
-    asyncData->openResult = info->openResult;
+    sem_wait(info.sem);
+    ret = GetSessionInfoBySessionId(asyncData->sessionId, &info);
+    if (ret != SOFTBUS_OK) {
+        asyncData->ret = ret;
+        return;
+    }
+    asyncData->channelId = info.channelId;
+    asyncData->openResult = info.openResult;
 }
 
 static void OpenProxyChannelComplete(napi_env env, napi_status status, void* data)
@@ -651,198 +673,175 @@ cleanup:
     return NULL;
 }
 
-napi_env global_env = NULL;
-napi_ref receiveDataCallbackRef = NULL;
-napi_ref receiveChannelStatusCallbackRef = NULL;
+static napi_threadsafe_function tsfn_data_received = NULL;
+static napi_threadsafe_function tsfn_channel_status = NULL;
 
 typedef struct {
-    napi_async_work work;
-    napi_env env;
-    napi_ref callback_ref;
     int32_t channelId;
     char* data;
     uint32_t dataLen;
-} AsyncRecvData;
+} DataReceiveArgs;
 
 typedef struct {
-    napi_async_work work;
-    napi_env env;
-    napi_ref callback_ref;
     int32_t channelId;
-    int32_t state;
-} AsyncChannelStatus;
+    int32_t status;
+} ChannelStatusArgs;
 
-void AsyncDataExecute(napi_env env, void* data)
+static void DataReceivedCallback(napi_env env, napi_value callback, void *context, void *data)
 {
-}
-
-void AsyncDataComplete(napi_env env, napi_status res, void* data)
-{
-    AsyncRecvData* asyncData = (AsyncRecvData*)data;
-
-    if (asyncData->callback_ref == NULL) {
-        goto cleanup;
-    }
-
-    napi_value callback;
-    napi_status status = napi_get_reference_value(env, asyncData->callback_ref, &callback);
-    if (status != napi_ok) {
-        goto cleanup;
-    }
-
+    DataReceiveArgs* args = (DataReceiveArgs*)data;
     napi_value dataInfo;
-    status = napi_create_object(env, &dataInfo);
+    napi_status status = napi_create_object(env, &dataInfo);
     if (status != napi_ok) {
         goto cleanup;
     }
 
     napi_value channelIdValue;
-    status = napi_create_int32(env, asyncData->channelId, &channelIdValue);
+    status = napi_create_int32(env, args->channelId, &channelIdValue);
     if (status != napi_ok) {
         goto cleanup;
     }
+
     status = napi_set_named_property(env, dataInfo, "channelId", channelIdValue);
     if (status != napi_ok) {
         goto cleanup;
     }
+
     napi_value arrayBuffer;
     void *dataBuffer;
-    status = napi_create_arraybuffer(env, asyncData->dataLen, &dataBuffer, &arrayBuffer);
+    status = napi_create_arraybuffer(env, args->dataLen, &dataBuffer, &arrayBuffer);
     if (status != napi_ok) {
         goto cleanup;
     }
-    for (uint32_t i = 0; i < asyncData->dataLen; i++) {
-        ((char *)dataBuffer)[i] = asyncData->data[i];
+    if (memcpy_s(dataBuffer, args->dataLen, args->data, args->dataLen) != EOK) {
+        goto cleanup;
     }
     status = napi_set_named_property(env, dataInfo, "data", arrayBuffer);
     if (status != napi_ok) {
         goto cleanup;
     }
     napi_value result;
-    napi_value args[ARGS_SIZE_1] = {dataInfo};
-    napi_call_function(env, NULL, callback, ARGS_SIZE_1, args, &result);
+    napi_value args_array[1] = {dataInfo};
+    status = napi_call_function(env, NULL, callback, 1, args_array, &result);
 cleanup:
-    SoftBusFree(asyncData->data);
-    SoftBusFree(asyncData);
+    SoftBusFree(args->data);
+    SoftBusFree(args);
 }
 
-static void AsyncChannelStatusExecute(napi_env env, void* data)
+static void ChannelStatusCallback(napi_env env, napi_value callback, void *context, void *data)
 {
-}
+    ChannelStatusArgs* args = (ChannelStatusArgs*)data;
 
-static void AsyncChannelStatusComplete(napi_env env, napi_status res, void* data)
-{
-    AsyncChannelStatus* asyncStatus = (AsyncChannelStatus*)data;
-    if (asyncStatus->callback_ref == NULL) {
-        goto cleanup;
-    }
-    napi_value callback;
-    napi_status status = napi_get_reference_value(env, asyncStatus->callback_ref, &callback);
+    napi_value statusInfo;
+    napi_status status = napi_create_object(env, &statusInfo);
     if (status != napi_ok) {
         goto cleanup;
     }
-    napi_value channelStateInfo;
-    status = napi_create_object(env, &channelStateInfo);
+
+    napi_value channelIdValue;
+    status = napi_create_int32(env, args->channelId, &channelIdValue);
     if (status != napi_ok) {
         goto cleanup;
     }
-    napi_value value;
-    if (napi_create_int32(env, asyncStatus->channelId, &value) != napi_ok ||
-        napi_set_named_property(env, channelStateInfo, "channelId", value) != napi_ok) {
-        goto cleanup;
-    }
-    status = napi_create_int32(env, asyncStatus->state, &value);
+
+    status = napi_set_named_property(env, statusInfo, "channelId", channelIdValue);
     if (status != napi_ok) {
         goto cleanup;
     }
-    status = napi_set_named_property(env, channelStateInfo, "state", value);
+
+    napi_value statusValue;
+    status = napi_create_int32(env, args->status, &statusValue);
+    if (status != napi_ok) {
+        goto cleanup;
+    }
+
+    status = napi_set_named_property(env, statusInfo, "state", statusValue);
     if (status != napi_ok) {
         goto cleanup;
     }
 
     napi_value result;
-    napi_value args[ARGS_SIZE_1] = {channelStateInfo};
-    napi_call_function(env, NULL, callback, ARGS_SIZE_1, args, &result);
+    napi_value args_array[1] = {statusInfo};
+    status = napi_call_function(env, NULL, callback, 1, args_array, &result);
 cleanup:
-    SoftBusFree(asyncStatus);
+    SoftBusFree(args);
 }
 
 static void OnDataReceived(int32_t channelId, const char* data, uint32_t dataLen)
 {
-    if (global_env == NULL || receiveDataCallbackRef == NULL) {
+    if (tsfn_data_received == NULL) {
         return;
     }
 
-    AsyncRecvData* asyncData = (AsyncRecvData*)SoftBusCalloc(sizeof(AsyncRecvData));
-    if (asyncData == NULL) {
+    DataReceiveArgs* args = (DataReceiveArgs*)SoftBusCalloc(sizeof(DataReceiveArgs));
+    if (args == NULL) {
         return;
     }
-    asyncData->env = global_env;
-    asyncData->callback_ref = receiveDataCallbackRef;
-    asyncData->channelId = channelId;
-    asyncData->data = (char*)SoftBusCalloc(dataLen);
-    if (asyncData->data == NULL) {
-        SoftBusFree(asyncData);
+    args->channelId = channelId;
+    args->dataLen = dataLen;
+    args->data = (char *)SoftBusCalloc(dataLen);
+    if (args->data == NULL) {
+        SoftBusFree(args);
         return;
     }
-    if (memcpy_s(asyncData->data, dataLen, data, dataLen) != EOK) {
-        goto cleanup;
-    }
-    asyncData->dataLen = dataLen;
 
-    napi_value resource_name;
-    napi_status status = napi_create_string_utf8(global_env, "DataReceivedAsync", NAPI_AUTO_LENGTH, &resource_name);
-    if (status != napi_ok) {
-        goto cleanup;
+    if (memcpy_s(args->data, dataLen, data, dataLen) != EOK) {
+        SoftBusFree(args->data);
+        SoftBusFree(args);
+        return;
     }
-    status = napi_create_async_work(global_env, NULL, resource_name, AsyncDataExecute, AsyncDataComplete,
-        asyncData, &asyncData->work);
-    if (status != napi_ok) {
-        goto cleanup;
-    }
-    status = napi_queue_async_work(global_env, asyncData->work);
-    if (status != napi_ok) {
-        goto cleanup;
-    }
-    return;
-cleanup:
-    SoftBusFree(asyncData->data);
-    SoftBusFree(asyncData);
+
+    napi_call_threadsafe_function(tsfn_data_received, args, napi_tsfn_nonblocking);
 }
 
-static void OnChannelStatusChanged(int32_t channelId, int32_t state)
+static void OnChannelStatusChanged(int32_t channelId, int32_t status)
 {
-    if (global_env == NULL || receiveChannelStatusCallbackRef == NULL) {
+    if (tsfn_channel_status == NULL) {
         return;
     }
 
-    AsyncChannelStatus* asyncStatus = (AsyncChannelStatus*)SoftBusCalloc(sizeof(AsyncChannelStatus));
-    if (asyncStatus == NULL) {
+    ChannelStatusArgs* args = (ChannelStatusArgs*)SoftBusCalloc(sizeof(ChannelStatusArgs));
+    if (args == NULL) {
         return;
     }
-    asyncStatus->env = global_env;
-    asyncStatus->callback_ref = receiveChannelStatusCallbackRef;
-    asyncStatus->channelId = channelId;
-    asyncStatus->state = state;
 
-    napi_value resource_name;
-    napi_status status = napi_create_string_utf8(global_env, "ChannelStatusChangedAsync",
-        NAPI_AUTO_LENGTH, &resource_name);
-    if (status != napi_ok) {
-        goto cleanup;
+    args->channelId = channelId;
+    args->status = status;
+
+    napi_call_threadsafe_function(tsfn_channel_status, args, napi_tsfn_nonblocking);
+}
+
+static void SetCallbackInternal(napi_env env, napi_value callback, int32_t channelId, ListenerType type)
+{
+    int32_t ret;
+    switch (type) {
+        case DATA_RECEIVE:
+            if (tsfn_data_received != NULL) {
+                napi_release_threadsafe_function(tsfn_data_received, napi_tsfn_abort);
+                tsfn_data_received = NULL;
+            }
+            napi_create_threadsafe_function(
+                env, callback, NULL, "DataReceived",
+                0, 1, NULL, NULL, NULL,
+                DataReceivedCallback, &tsfn_data_received);
+            ret = SetListenerState(channelId, DATA_RECEIVE, true);
+            ThrowErrFromC2Js(env, ret);
+            break;
+        case CHANNEL_STATE:
+            if (tsfn_channel_status != NULL) {
+                napi_release_threadsafe_function(tsfn_channel_status, napi_tsfn_abort);
+                tsfn_channel_status = NULL;
+            }
+            napi_create_threadsafe_function(
+                env, callback, NULL, "ChannelStatus",
+                0, 1, NULL, NULL, NULL,
+                ChannelStatusCallback, &tsfn_channel_status);
+            ret = SetListenerState(channelId, CHANNEL_STATE, true);
+            ThrowErrFromC2Js(env, ret);
+            break;
+        default:
+            break;
     }
-    status = napi_create_async_work(global_env, NULL, resource_name,
-        AsyncChannelStatusExecute, AsyncChannelStatusComplete, asyncStatus, &asyncStatus->work);
-    if (status != napi_ok) {
-        goto cleanup;
-    }
-    status = napi_queue_async_work(global_env, asyncStatus->work);
-    if (status != napi_ok) {
-        goto cleanup;
-    }
-    return;
-cleanup:
-    SoftBusFree(asyncStatus);
 }
 
 napi_value On(napi_env env, napi_callback_info info)
@@ -880,17 +879,12 @@ napi_value On(napi_env env, napi_callback_info info)
         goto EXIT;
     }
     if (strcmp(type, "receiveData") == 0) {
-        napi_create_reference(env, args[ARGS_INDEX_2], 1, &receiveDataCallbackRef);
-        int32_t ret = SetListenerState(channelId, DATA_RECEIVE, true);
-        ThrowErrFromC2Js(env, ret);
+        SetCallbackInternal(env, args[ARGS_INDEX_2], channelId, DATA_RECEIVE);
     } else if (strcmp(type, "channelStateChange") == 0) {
-        napi_create_reference(env, args[ARGS_INDEX_2], 1, &receiveChannelStatusCallbackRef);
-        int32_t ret = SetListenerState(channelId, CHANNEL_STATE, true);
-        ThrowErrFromC2Js(env, ret);
+        SetCallbackInternal(env, args[ARGS_INDEX_2], channelId, CHANNEL_STATE);
     } else {
         goto EXIT;
     }
-    global_env = env;
     return NULL;
 EXIT:
     ThrowErrFromC2Js(env, SOFTBUS_TRANS_BR_PROXY_INVALID_PARAM);
@@ -949,16 +943,16 @@ napi_value Off(napi_env env, napi_callback_info info)
     }
     
     if (strcmp(type, "receiveData") == 0) {
-        if (receiveDataCallbackRef != NULL) {
-            napi_delete_reference(env, receiveDataCallbackRef);
-            receiveDataCallbackRef = NULL;
+        if (tsfn_data_received != NULL) {
+            napi_release_threadsafe_function(tsfn_data_received, napi_tsfn_abort);
+            tsfn_data_received = NULL;
         }
         ret = SetListenerState(channelId, DATA_RECEIVE, false);
         ThrowErrFromC2Js(env, ret);
     } else if (strcmp(type, "channelStateChange") == 0) {
-        if (receiveChannelStatusCallbackRef != NULL) {
-            napi_delete_reference(env, receiveChannelStatusCallbackRef);
-            receiveChannelStatusCallbackRef = NULL;
+        if (tsfn_channel_status != NULL) {
+            napi_release_threadsafe_function(tsfn_channel_status, napi_tsfn_abort);
+            tsfn_channel_status = NULL;
         }
         ret = SetListenerState(channelId, CHANNEL_STATE, false);
         ThrowErrFromC2Js(env, ret);
@@ -1068,4 +1062,13 @@ __attribute__((constructor)) void RegisterSoftbusTransModule(void)
 
 __attribute__((destructor)) void DestructSoftbusTransModule(void)
 {
+    if (tsfn_data_received != NULL) {
+        napi_release_threadsafe_function(tsfn_data_received, napi_tsfn_abort);
+        tsfn_data_received = NULL;
+    }
+    
+    if (tsfn_channel_status != NULL) {
+        napi_release_threadsafe_function(tsfn_channel_status, napi_tsfn_abort);
+        tsfn_channel_status = NULL;
+    }
 }
