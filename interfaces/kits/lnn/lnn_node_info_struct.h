@@ -215,6 +215,7 @@ typedef struct {
     uint64_t bleDirectTimestamp;
     uint64_t sleHbTiemstamp;
     uint64_t onlineTimestamp;
+    uint64_t offlineTimestamp;
     uint64_t updateTimestamp;
     int64_t lastAuthSeq;
     uint64_t huksKeyTime;

@@ -142,6 +142,7 @@ int32_t LnnSendNotTrustedInfoPacked(const NotTrustedDelayInfo *info, uint32_t nu
 void RegisterOOBEMonitorPacked(void *para);
 int32_t LnnLinkFinderInitPacked(void);
 int32_t LnnInitFastOfflinePacked(void);
+int32_t LnnDeviceCloudConvergenceInitPacked(void);
 void LnnDeinitFastOfflinePacked(void);
 int32_t LnnRemoveLinkFinderInfoPacked(const char *networkId);
 int32_t LnnRetrieveDeviceInfoByUdidPacked(const char *udid, NodeInfo *deviceInfo);
@@ -208,6 +209,7 @@ int32_t InitSparkGroupManagerPacked(void);
 void DeinitSparkGroupManagerPacked(void);
 int32_t QueryControlPlaneNodeValidPacked(const char *deviceId);
 int32_t LnnDumpControlLaneGroupInfoPacked(int32_t fd);
+void CheckNeedCloudSyncOfflinePacked(DiscoveryType type);
 
 #ifdef __cplusplus
 }

@@ -517,5 +517,9 @@ HWTEST_F(SoftbusGEnhanceTest, SoftbusGEnhanceTest016, TestSize.Level1)
     LnnRegSleRangeCbPacked(nullptr);
     LnnUnregSleRangeCbPacked();
     SleRangeDeathCallbackPacked();
+    ret = LnnDeviceCloudConvergenceInitPacked();
+    EXPECT_EQ(ret, SOFTBUS_OK);
+    EXPECT_NO_FATAL_FAILURE(CheckNeedCloudSyncOfflinePacked(DISCOVERY_TYPE_BLE));
+    EXPECT_NO_FATAL_FAILURE(CheckNeedCloudSyncOfflinePacked(DISCOVERY_TYPE_WIFI));
 }
 }

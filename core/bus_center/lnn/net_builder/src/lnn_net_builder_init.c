@@ -912,6 +912,8 @@ int32_t LnnInitNetBuilderDelay(void)
         LNN_LOGE(LNN_INIT, "fast offline init fail!");
         return ret;
     }
+    ret = LnnDeviceCloudConvergenceInitPacked();
+    LNN_LOGW(LNN_INIT, "init device cloud convergence init ret=%{public}d", ret);
 #ifndef ENABLE_FEATURE_DATAMGR_SERVICE
     LNN_LOGI(LNN_INIT, "no data manager, release datashare init monitor");
     LnnNotifyDataShareStateChangeEvent(SOFTBUS_DATA_SHARE_READY);
