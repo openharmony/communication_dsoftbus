@@ -923,6 +923,39 @@ ohos_unittest("TransTcpDirectJsonMockTest") {
   ]
 }
 
+ohos_unittest("TransTcpDirectSessionConnTest") {
+  module_out_path = module_output_path
+  sources = [ "unittest/trans_tcp_direct_sessionconn_test.cpp" ]
+
+  include_dirs = [
+    "$softbus_adapter_common/include",
+    "$dsoftbus_root_path/core/adapter/bus_center/include",
+    "$dsoftbus_root_path/core/bus_center/interface",
+    "$dsoftbus_root_path/core/common/include",
+    "$dsoftbus_root_path/core/transmission/session/cpp/include",
+    "$dsoftbus_root_path/core/transmission/trans_channel/common/include",
+    "$dsoftbus_root_path/core/transmission/session/include",
+    "$dsoftbus_root_path/core/transmission/trans_channel/manager/include",
+    "$dsoftbus_root_path/core/transmission/trans_channel/tcp_direct/include",
+    "$dsoftbus_root_path/core/transmission/trans_channel/tcp_direct/src",
+    "$dsoftbus_root_path/interfaces/kits",
+    "$dsoftbus_root_path/interfaces/kits/disc",
+  ]
+
+  deps = [
+    "$dsoftbus_root_path/core/common:softbus_utils",
+    "$dsoftbus_root_path/core/frame:softbus_server",
+    "$dsoftbus_root_path/adapter:softbus_adapter",
+  ]
+
+  external_deps = [
+    "cJSON:cjson",
+    "c_utils:utils",
+    "dsoftbus:softbus_client",
+    "hilog:libhilog",
+  ]
+}
+
 group("unittest") {
   testonly = true
   deps = [
@@ -939,5 +972,6 @@ group("unittest") {
     ":TransTcpDirectP2pMockTest",
     ":TransTcpDirectP2pTest",
     ":TransTcpDirectWifiTest",
+    ":TransTcpDirectSessionConnTest",
   ]
 }
