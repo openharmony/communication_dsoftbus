@@ -78,6 +78,13 @@ extern "C"{
  */
 #define BC_LOCAL_NAME_LEN_MAX                    30
 
+
+typedef enum {
+    BROADCAST_PROTOCOL_BLE,
+    BROADCAST_PROTOCOL_SLE,
+    BROADCAST_PROTOCOL_BUTT,
+} BroadcastProtocol;
+
 /**
  * @brief Defines the broadcast service type.
  *

@@ -57,6 +57,7 @@ typedef enum {
     MODULE_BLE_NET = 100,
     MODULE_BLE_CONN = 101,
     MODULE_BLE_GENERAL = 102,
+    MODULE_PAGING_CONN = 103,
     MODULE_NIP_BR_CHANNEL = 201,
     MODULE_OLD_NEARBY = 300,
 } ConnModule;
@@ -75,6 +76,7 @@ typedef enum {
     CONNECT_BLE_GENERAL,
     CONNECT_TRIGGER_HML_V2C,
     CONNECT_PROXY_CHANNEL,
+    CONNECT_PAGING,
     CONNECT_TYPE_MAX
 } ConnectType;
 
@@ -129,6 +131,9 @@ struct SleInfo {
     uint16_t challengeCode;
     SleProtocolType protocol;
     char networkId[NETWORK_ID_BUF_LEN];
+
+    uint8_t deviceIdHash[SHA_256_HASH_LEN];
+    uint8_t deviceIdHashLen;
 };
 
 struct ConnSocketInfo {
@@ -224,7 +229,12 @@ struct SleOption {
     char networkId[NETWORK_ID_BUF_LEN];
     char address[BT_MAC_LEN];
     uint16_t challengeCode;
+    bool isHighPower;
     SleProtocolType protocol;
+};
+
+struct PagingOption {
+    char accountId[ACCOUNT_ID_SIZE_MAX];
 };
 
 typedef struct {
@@ -236,6 +246,7 @@ typedef struct {
         struct BleDirectOption bleDirectOption;
         struct SleOption sleOption;
         struct SleDirectOption sleDirectOption;
+        struct PagingOption pagingOption;
     };
 } ConnectOption;
 
