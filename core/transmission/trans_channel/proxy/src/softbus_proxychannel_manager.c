@@ -1392,6 +1392,9 @@ int32_t TransDealProxyChannelOpenResult(
         return SOFTBUS_TRANS_CHECK_PID_ERROR;
     }
     (void)TransProxyUpdateSinkAccessInfo(channelId, accessInfo);
+    ret = TransProxyGetChanByChanId(channelId, &chan);
+    TRANS_CHECK_AND_RETURN_RET_LOGE(ret == SOFTBUS_OK, ret, TRANS_CTRL,
+        "get proxy channelInfo failed, channelId=%{public}d, ret=%{public}d", channelId, ret);
     ret = TransProxyUpdateReplyCnt(channelId);
     TRANS_CHECK_AND_RETURN_RET_LOGE(ret == SOFTBUS_OK, ret, TRANS_CTRL,
         "update waitOpenReplyCnt failed, channelId=%{public}d, ret=%{public}d", channelId, ret);

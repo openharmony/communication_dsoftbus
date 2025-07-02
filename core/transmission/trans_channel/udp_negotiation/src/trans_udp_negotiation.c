@@ -1483,10 +1483,8 @@ int32_t TransDealUdpChannelOpenResult(
     UdpChannelInfo channel;
     (void)memset_s(&channel, sizeof(UdpChannelInfo), 0, sizeof(UdpChannelInfo));
     int32_t ret = TransGetUdpChannelById(channelId, &channel);
-    if (ret != SOFTBUS_OK) {
-        TRANS_LOGE(TRANS_CTRL, "get udpChannel failed, channelId=%{public}d, ret=%{public}d", channelId, ret);
-        return ret;
-    }
+    TRANS_CHECK_AND_RETURN_RET_LOGE(ret == SOFTBUS_OK, ret,
+        TRANS_CTRL, "get udpChannel failed, channelId=%{public}d, ret=%{public}d", channelId, ret);
 
     if (callingPid != 0 && channel.info.myData.pid != callingPid) {
         TRANS_LOGE(TRANS_CTRL,
@@ -1497,10 +1495,13 @@ int32_t TransDealUdpChannelOpenResult(
 
     (void)TransUdpUpdateAccessInfo(channelId, accessInfo);
     ret = TransUdpUpdateUdpPort(channelId, udpPort);
-    if (ret != SOFTBUS_OK) {
-        TRANS_LOGE(TRANS_CTRL, "get udpPort failed, channelId=%{public}d, ret=%{public}d", channelId, ret);
-        return ret;
-    }
+    TRANS_CHECK_AND_RETURN_RET_LOGE(ret == SOFTBUS_OK, ret,
+        TRANS_CTRL, "get udpPort failed, channelId=%{public}d, ret=%{public}d", channelId, ret);
+
+    ret = TransGetUdpChannelById(channelId, &channel);
+    TRANS_CHECK_AND_RETURN_RET_LOGE(ret == SOFTBUS_OK, ret,
+        TRANS_CTRL, "get udpChannel failed, channelId=%{public}d, ret=%{public}d", channelId, ret);
+
     ret = TransUdpUpdateReplyCnt(channelId);
     TRANS_CHECK_AND_RETURN_RET_LOGE(ret == SOFTBUS_OK, ret, TRANS_CTRL,
         "update count failed, channelId=%{public}d, ret=%{public}d", channelId, ret);
