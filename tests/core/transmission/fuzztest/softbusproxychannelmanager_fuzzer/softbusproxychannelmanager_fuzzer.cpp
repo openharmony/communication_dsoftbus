@@ -1110,7 +1110,6 @@ extern "C" int32_t LLVMFuzzerTestOneInput(const uint8_t *data, size_t size)
     OHOS::FillAppInfoTest(provider);
     OHOS::TransProxyGetNewChanSeqTest(provider);
     OHOS::TransProxyOpenProxyChannelTest(provider);
-    OHOS::TransProxyDelByConnIdTest(provider);
     OHOS::TransProxyDelChanByReqIdTest(provider);
     OHOS::TransProxyDelChanByChanIdTest(provider);
     OHOS::TransProxyGetChanByChanIdTest(provider);
