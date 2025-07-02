@@ -31,24 +31,18 @@ public:
     MOCK_METHOD(void *, dlsym, (void *handle, const char *symbol));
 };
 
-NiceMock<MockDlsym> *mockDlsym;
+NiceMock<MockDlsym> *mockDlsym = nullptr;
 
 extern "C" {
 // mock dlopen
 void *dlopen(const char *fileName, int flag)
 {
-    if (mockDlsym == nullptr) {
-        mockDlsym = new NiceMock<MockDlsym>();
-    }
     return mockDlsym->dlopen(fileName, flag);
 }
 
 // mock dlsym
 void *dlsym(void *handle, const char *symbol)
 {
-    if (mockDlsym == nullptr) {
-        mockDlsym = new NiceMock<MockDlsym>();
-    }
     return mockDlsym->dlsym(handle, symbol);
 }
 }
@@ -77,6 +71,7 @@ void AddAuthConnectionTest(const LnnEventBasicInfo *info)
 HWTEST_F(WifiDirectInitTest, ReAuthTransListener001, TestSize.Level1)
 {
     mockDlsym = new NiceMock<MockDlsym>();
+    ASSERT_NE(mockDlsym, nullptr);
     EXPECT_CALL(*mockDlsym, dlopen(_, _)).WillRepeatedly(Return(nullptr));
     int32_t ret = DBinderSoftbusServer::GetInstance().RegAuthTransListener(MODULE_P2P_LINK, nullptr);
     EXPECT_EQ(ret, SOFTBUS_WIFI_DIRECT_DLOPEN_FAILED);
@@ -157,7 +152,7 @@ HWTEST_F(WifiDirectInitTest, AuthStartListeningForWifiDirect005, TestSize.Level1
 HWTEST_F(WifiDirectInitTest, AuthGenRequestId006, TestSize.Level1)
 {
     EXPECT_CALL(*mockDlsym, dlsym(_, _)).WillRepeatedly(Return(nullptr));
-    int32_t ret = DBinderSoftbusServer::GetInstance().AuthGenRequestId();
+    uint32_t ret = DBinderSoftbusServer::GetInstance().AuthGenRequestId();
     EXPECT_EQ(ret, SOFTBUS_WIFI_DIRECT_DLSYM_FAILED);
 }
 
@@ -327,7 +322,7 @@ HWTEST_F(WifiDirectInitTest, LnnGetRemoteBoolInfoIgnoreOnline018, TestSize.Level
 HWTEST_F(WifiDirectInitTest, LnnGetFeatureCapabilty019, TestSize.Level1)
 {
     EXPECT_CALL(*mockDlsym, dlsym(_, _)).WillRepeatedly(Return(nullptr));
-    int32_t ret = DBinderSoftbusServer::GetInstance().LnnGetFeatureCapabilty();
+    uint64_t ret = DBinderSoftbusServer::GetInstance().LnnGetFeatureCapabilty();
     EXPECT_EQ(ret, SOFTBUS_WIFI_DIRECT_DLSYM_FAILED);
 }
 
@@ -500,5 +495,6 @@ HWTEST_F(WifiDirectInitTest, LnnRegisterEventHandler032, TestSize.Level1)
         DBinderSoftbusServer::GetInstance().LnnRegisterEventHandler(LNN_EVENT_IP_ADDR_CHANGED, AddAuthConnectionTest);
     EXPECT_EQ(ret, SOFTBUS_WIFI_DIRECT_DLSYM_FAILED);
     delete mockDlsym;
+    mockDlsym = nullptr;
 }
 } // namespace OHOS::SoftBus
