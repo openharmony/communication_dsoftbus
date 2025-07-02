@@ -234,6 +234,16 @@ int SendMessage(int sessionId, const void *data, unsigned int len)
     return ClientTransChannelSendMessage(channelId, channelType, data, len);
 }
 
+int32_t SendMessageAsync(int32_t socket, uint16_t dataSeq, const void *data, uint32_t dataLen)
+{
+    (void)socket;
+    (void)dataSeq;
+    (void)data;
+    (void)dataLen;
+    TRANS_LOGI(TRANS_MSG, "socket=%{public}d, len=%{public}u", socket, dataLen);
+    return SOFTBUS_OK;
+}
+
 int SendStream(int sessionId, const StreamData *data, const StreamData *ext, const StreamFrameInfo *param)
 {
     if ((data == NULL) || (ext == NULL) || (param == NULL)) {
