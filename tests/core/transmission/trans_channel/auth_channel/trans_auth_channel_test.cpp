@@ -717,8 +717,8 @@ HWTEST_F(TransAuthChannelTest, OnRecvAuthChannelRequestTest001, TestSize.Level1)
     ret = TransAuthChannelMsgPack(msg, appInfo);
     EXPECT_EQ(ret, SOFTBUS_CREATE_JSON_ERR);
     char *data = cJSON_PrintUnformatted(msg);
-    ASSERT_FALSE(data != nullptr);
-    OnRecvAuthChannelRequest(TRANS_TEST_AUTH_ID, nullptr, strlen(data));
+    ASSERT_EQ(data, nullptr);
+    OnRecvAuthChannelRequest(TRANS_TEST_AUTH_ID, nullptr, 0);
     OnRecvAuthChannelRequest(TRANS_TEST_AUTH_ID, data, 0);
     SoftBusFree(appInfo);
     cJSON_free(data);
@@ -750,8 +750,8 @@ HWTEST_F(TransAuthChannelTest, OnRecvAuthChannelRequestTest002, TestSize.Level1)
     ret = TransAuthChannelMsgPack(msg, appInfo);
     EXPECT_EQ(ret, SOFTBUS_CREATE_JSON_ERR);
     char *data = cJSON_PrintUnformatted(msg);
-    ASSERT_FALSE(data != nullptr);
-    OnRecvAuthChannelRequest(TRANS_TEST_AUTH_ID, data, strlen(data));
+    ASSERT_EQ(data, nullptr);
+    OnRecvAuthChannelRequest(TRANS_TEST_AUTH_ID, data, 0);
     bool res = strcpy_s(appInfo->myData.sessionName, sizeof(appInfo->myData.sessionName), g_authSessionName);
     EXPECT_EQ(res, EOK);
     cJSON_Delete(msg);
@@ -760,8 +760,8 @@ HWTEST_F(TransAuthChannelTest, OnRecvAuthChannelRequestTest002, TestSize.Level1)
     ret = TransAuthChannelMsgPack(msg, appInfo);
     EXPECT_EQ(ret, SOFTBUS_CREATE_JSON_ERR);
     data = cJSON_PrintUnformatted(msg);
-    ASSERT_FALSE(data != nullptr);
-    OnRecvAuthChannelRequest(TRANS_TEST_AUTH_ID, data, strlen(data));
+    ASSERT_EQ(data, nullptr);
+    OnRecvAuthChannelRequest(TRANS_TEST_AUTH_ID, data, 0);
     SoftBusFree(appInfo);
     cJSON_free(data);
     cJSON_Delete(msg);
@@ -793,8 +793,8 @@ HWTEST_F(TransAuthChannelTest, OnRecvAuthChannelRequestTest003, TestSize.Level1)
     ret = TransAuthChannelMsgPack(msg, appInfo);
     EXPECT_EQ(ret, SOFTBUS_CREATE_JSON_ERR);
     char *data = cJSON_PrintUnformatted(msg);
-    ASSERT_FALSE(data != nullptr);
-    OnRecvAuthChannelRequest(TRANS_TEST_AUTH_ID, data, strlen(data));
+    ASSERT_EQ(data, nullptr);
+    OnRecvAuthChannelRequest(TRANS_TEST_AUTH_ID, data, 0);
     bool isClient = true;
     AuthChannelInfo *info = CreateAuthChannelInfo(g_authSessionName, isClient);
     ASSERT_TRUE(info != nullptr);
@@ -1193,8 +1193,8 @@ HWTEST_F(TransAuthChannelTest, OnRecvAuthChannelReply001, TestSize.Level1)
     ret = TransAuthChannelMsgPack(msg, appInfo);
     ASSERT_EQ(ret, SOFTBUS_CREATE_JSON_ERR);
     char *data = cJSON_PrintUnformatted(msg);
-    ASSERT_FALSE(data != nullptr);
-    OnRecvAuthChannelReply(TRANS_TEST_AUTH_ID, data, strlen(data));
+    ASSERT_EQ(data, nullptr);
+    OnRecvAuthChannelReply(TRANS_TEST_AUTH_ID, data, 0);
     DelAuthChannelInfoByAuthId(TRANS_TEST_AUTH_ID);
     SoftBusFree(appInfo);
     cJSON_free(data);
