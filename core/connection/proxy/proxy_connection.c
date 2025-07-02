@@ -254,6 +254,8 @@ int32_t RegisterEventListener(const ProxyEventListener *listener)
         CONN_PROXY, "onDataReceived is null");
     g_eventListener = *listener;
     g_sppDriver = InitSppSocketDriver();
+    CONN_CHECK_AND_RETURN_RET_LOGE(g_sppDriver != NULL, SOFTBUS_CONN_PROXY_INTERNAL_ERR, CONN_INIT,
+        "init spp socket driver failed");
     return SOFTBUS_OK;
 }
 
