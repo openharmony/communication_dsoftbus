@@ -116,3 +116,12 @@ int32_t ConnDirectConnectDevicePacked(const ConnectOption *option, uint32_t reqI
     }
     return pfnConnEnhanceFuncList->connDirectConnectDevice(option, reqId, result);
 }
+
+int32_t ConnPagingConnectInitPacked(void)
+{
+    ConnEnhanceFuncList *pfnConnEnhanceFuncList = ConnEnhanceFuncListGet();
+    if (ConnCheckFuncPointer((void *)pfnConnEnhanceFuncList->connPagingConnectInit) != SOFTBUS_OK) {
+        return SOFTBUS_NOT_IMPLEMENT;
+    }
+    return pfnConnEnhanceFuncList->connPagingConnectInit();
+}
