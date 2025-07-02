@@ -42,6 +42,7 @@ typedef enum {
     DATA_TYPE_AUDIO_STREAM,        /**< Audio data stream */
     DATA_TYPE_SLICE_STREAM,        /**< Video slice stream */
     DATA_TYPE_RAW_STREAM_ENCRYPED, /**< Encryped raw stream data */
+    DATA_TYPE_D2D_MESSAGE = 10,    /**< D2D Message */
     DATA_TYPE_BUTT,
 } TransDataType;
 
@@ -90,7 +91,10 @@ typedef struct {
     char *name;              /**< Peer socket name, maximum length 255 bytes */
     char *networkId;         /**< Peer network ID, maximum length 64 bytes */
     char *pkgName;           /**< Peer package name, maximum length 64 bytes */
-    TransDataType dataType; /**< Data type of peer socket*/
+    char *accountId;         /**< Peer accountId, maximum length 64 bytes */
+    void *extraData;         /**< Peer extradata, maximum length 5 bytes */
+    uint32_t dataLen;        /**< Peer dataLen, maximum 5 */
+    TransDataType dataType;  /**< Data type of peer socket*/
 } PeerSocketInfo;
 
 /**

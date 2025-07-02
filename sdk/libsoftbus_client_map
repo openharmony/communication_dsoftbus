@@ -67,6 +67,7 @@
         "GetPeerSessionName";
         "SendBytes";
         "SendBytesAsync";
+        "SendMessageAsync";
         "RegistFileSchema";
         "UnregistFileSchema";
         "TransRegistFileSchema";
@@ -180,6 +181,11 @@
         "SetFileRenameHook";
         "RegisterFileSchema";
         "UnRegisterFileSchema";
+        "Paging";
+        "StopPaging";
+        "PagingListen";
+        "StopPagingListen";
+        "ForkPagingSocket";
         "SoftBusDFileSetSessionOpt";
         "CtrlLNNBleHb";
         "PrivilegeShutdown";
@@ -221,6 +227,16 @@
         "SetListenerState";
         "IsProxyChannelEnabled";
         "RegisterAccessHook";
+        "CreatePagingSession";
+        "ClientDeletePagingSession";
+        "ClientGetChannelIdAndTypeBySocketId";
+        "ClientForkSocketById";
+        "ClientTransSetChannelInfo";
+        "ClientAddSocketServer";
+        "GeneratePagingId";
+        "DestroyPagingId";
+        "SocketServerStateUpdate";
+        "GetD2DCapability";
         "ClientSetLowLatencyBySocket";
     local:
         *;
