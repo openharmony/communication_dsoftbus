@@ -1626,6 +1626,8 @@ int32_t TransDealTdcChannelOpenResult(
     }
 
     (void)UpdateAccessInfoById(channelId, accessInfo);
+    ret = GetSessionConnById(channelId, &conn);
+    TRANS_CHECK_AND_RETURN_RET_LOGE(ret == SOFTBUS_OK, ret, TRANS_CTRL, "get sessionConn failed, ret=%{public}d", ret);
 
     TransEventExtra extra = { 0 };
     char peerUuid[DEVICE_ID_SIZE_MAX] = { 0 };
