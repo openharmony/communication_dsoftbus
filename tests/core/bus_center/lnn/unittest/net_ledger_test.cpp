@@ -232,4 +232,24 @@ HWTEST_F(NetLedgerTest, LNN_GET_REMOTE_NUM16_INFO_Test_001, TestSize.Level1)
     ret = LnnGetRemoteNum16Info(NODE1_UDID, BYTE_KEY_END, &info1);
     EXPECT_EQ(ret, SOFTBUS_INVALID_PARAM);
 }
+
+/*
+ * @tc.name: LNN_GET_ONLINE_AND_OFFLINE_WITHIN_TIME_UDIDS_Test_001
+ * @tc.desc: lnn get remote udids info test
+ * @tc.type: FUNC
+ * @tc.require:
+ */
+HWTEST_F(NetLedgerTest, LNN_GET_ONLINE_AND_OFFLINE_WITHIN_TIME_UDIDS_Test_001, TestSize.Level1)
+{
+    char *udids = nullptr;
+    int32_t udidNum = 0;
+    EXPECT_EQ(LnnGetOnlineAndOfflineWithinTimeUdids(nullptr, &udidNum, 0), SOFTBUS_INVALID_PARAM);
+    EXPECT_EQ(LnnGetOnlineAndOfflineWithinTimeUdids(&udids, nullptr, 0), SOFTBUS_INVALID_PARAM);
+    EXPECT_EQ(LnnGetOnlineAndOfflineWithinTimeUdids(&udids, &udidNum, 0), SOFTBUS_OK);
+    SoftBusFree(udids);
+    udids = nullptr;
+    udidNum = DEFAULT_SIZE;
+    EXPECT_EQ(LnnGetOnlineAndOfflineWithinTimeUdids(&udids, &udidNum, 0), SOFTBUS_OK);
+    SoftBusFree(udids);
+}
 } // namespace OHOS
