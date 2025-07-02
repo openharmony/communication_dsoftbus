@@ -398,6 +398,11 @@ int32_t TransSetUdpChannelStatus(int64_t seq, UdpChannelStatus status, bool isRe
     UdpChannelInfo *udpChannelNode = NULL;
     LIST_FOR_EACH_ENTRY(udpChannelNode, &(g_udpChannelMgr->list), UdpChannelInfo, node) {
         if (udpChannelNode->seq == seq && udpChannelNode->isReply == isReply) {
+            if (udpChannelNode->status == UDP_CHANNEL_STATUS_DONE &&
+                status == UDP_CHANNEL_STATUS_NEGING) {
+                (void)SoftBusMutexUnlock(&(g_udpChannelMgr->lock));
+                return SOFTBUS_OK;
+            }
             udpChannelNode->status = status;
             (void)SoftBusMutexUnlock(&(g_udpChannelMgr->lock));
             return SOFTBUS_OK;
