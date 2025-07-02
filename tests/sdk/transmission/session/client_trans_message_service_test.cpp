@@ -462,17 +462,27 @@ HWTEST_F(TransClientMsgServiceTest, CheckAsyncSendBytesFuncTest01, TestSize.Leve
 HWTEST_F(TransClientMsgServiceTest, SendBytesAsyncTest01, TestSize.Level1)
 {
     int32_t socket = TRANS_TEST_SESSION_ID;
-    uint32_t dataSeq = 0;
+    uint32_t dataSeq = 1;
     const void *data = "testdata";
-    uint32_t len = 0;
-    int32_t ret = SendBytesAsync(socket, dataSeq, nullptr, len);
+    uint32_t len = TRANS_TEST_SEND_LEN;
+    int32_t ret = SendBytesAsync(socket, 0, data, len);
     EXPECT_EQ(ret, SOFTBUS_INVALID_PARAM);
 
-    len = TRANS_TEST_SEND_LEN;
-    ret = SendBytesAsync(socket, dataSeq, data, len);
+    ret = SendBytesAsync(socket, dataSeq, nullptr, len);
     EXPECT_EQ(ret, SOFTBUS_INVALID_PARAM);
 
-    dataSeq = 1;
+    ret = SendBytesAsync(socket, dataSeq, data, 0);
+    EXPECT_EQ(ret, SOFTBUS_INVALID_PARAM);
+
+    ret = SendBytesAsync(socket, 0, nullptr, len);
+    EXPECT_EQ(ret, SOFTBUS_INVALID_PARAM);
+
+    ret = SendBytesAsync(socket, dataSeq, nullptr, 0);
+    EXPECT_EQ(ret, SOFTBUS_INVALID_PARAM);
+
+    ret = SendBytesAsync(socket, 0, data, 0);
+    EXPECT_EQ(ret, SOFTBUS_INVALID_PARAM);
+
     ret = SendBytesAsync(socket, dataSeq, data, len);
     EXPECT_EQ(ret, SOFTBUS_TRANS_SESSION_INFO_NOT_FOUND);
 
