@@ -698,7 +698,7 @@ HWTEST_F(TransTcpDirectP2pTest, AddP2pOrHmlTriggerTest001, TestSize.Level1)
     int32_t fd = NORMAL_FD;
     const char *myAddr = HML_ADDR;
     int32_t seq = NOAMAL_SEQ;
-    ret = AddP2pOrHmlTrigger(fd, myAddr, seq, 0);
+    ret = AddP2pOrHmlTrigger(fd, myAddr, seq, 0, nullptr);
     EXPECT_EQ(SOFTBUS_TRANS_ADD_HML_TRIGGER_FAILED, ret);
 }
 
@@ -716,7 +716,7 @@ HWTEST_F(TransTcpDirectP2pTest, AddP2pOrHmlTriggerTest002, TestSize.Level1)
     int32_t fd = NORMAL_FD;
     const char *myAddr = MY_IP;
     int32_t seq = NOAMAL_SEQ;
-    ret = AddP2pOrHmlTrigger(fd, myAddr, seq, 0);
+    ret = AddP2pOrHmlTrigger(fd, myAddr, seq, 0, nullptr);
     EXPECT_EQ(SOFTBUS_CONN_FAIL, ret);
 }
 
@@ -945,7 +945,7 @@ HWTEST_F(TransTcpDirectP2pTest, AddHmlTriggerTest001, TestSize.Level1)
     int64_t seq = 1;
     int32_t ret = StartHmlListener(g_localIp, &g_port, g_udid, LNN_PROTOCOL_IP);
     EXPECT_EQ(ret, SOFTBUS_OK);
-    ret = AddHmlTrigger(fd, g_ip, seq, 0);
+    ret = AddHmlTrigger(fd, g_ip, seq, 0, g_udid);
     EXPECT_NE(SOFTBUS_OK, ret);
     ClearHmlListenerByUuid(g_uuid);
 }

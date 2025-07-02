@@ -859,7 +859,7 @@ static int32_t ConnectDirectPeerWithProtocol(const char *addr, int port, const c
     return ConnOpenClientSocket(&options, myIp, true);
 }
 
-static int32_t AddHmlTrigger(int32_t fd, const char *myAddr, int64_t seq, int32_t port)
+static int32_t AddHmlTrigger(int32_t fd, const char *myAddr, int64_t seq, int32_t port, const char *peerUuid)
 {
     ListenerModule moudleType;
     SessionConn *conn = NULL;
@@ -870,7 +870,8 @@ static int32_t AddHmlTrigger(int32_t fd, const char *myAddr, int64_t seq, int32_
     HmlListenerInfo *item = NULL;
     HmlListenerInfo *nextItem = NULL;
     LIST_FOR_EACH_ENTRY_SAFE(item, nextItem, &g_hmlListenerList->list, HmlListenerInfo, node) {
-        if (strncmp(item->myIp, myAddr, IP_LEN) == 0 && item->myPort == port) {
+        if (strncmp(item->myIp, myAddr, IP_LEN) == 0 && item->myPort == port &&
+            strncmp(item->peerUuid, peerUuid, UUID_BUF_LEN) == 0) {
             int32_t ret = AddTrigger(item->moudleType, fd, WRITE_TRIGGER);
             if (ret != SOFTBUS_OK) {
                 TRANS_LOGE(TRANS_CTRL, "fail");
@@ -897,10 +898,10 @@ static int32_t AddHmlTrigger(int32_t fd, const char *myAddr, int64_t seq, int32_
     return SOFTBUS_TRANS_ADD_HML_TRIGGER_FAILED;
 }
 
-static int32_t AddP2pOrHmlTrigger(int32_t fd, const char *myAddr, int64_t seq, int32_t port)
+static int32_t AddP2pOrHmlTrigger(int32_t fd, const char *myAddr, int64_t seq, int32_t port, const char *peerUuid)
 {
     if (IsHmlIpAddr(myAddr)) {
-        return AddHmlTrigger(fd, myAddr, seq, port);
+        return AddHmlTrigger(fd, myAddr, seq, port, peerUuid);
     } else {
         int32_t ret = AddTrigger(DIRECT_CHANNEL_SERVER_P2P, fd, WRITE_TRIGGER);
         TRANS_CHECK_AND_RETURN_RET_LOGE(ret == SOFTBUS_OK, ret, TRANS_CTRL, "AddTrigger fail");
@@ -918,6 +919,7 @@ static int32_t OnVerifyP2pReply(int64_t authId, int64_t seq, const cJSON *json)
     char peerNetworkId[DEVICE_ID_SIZE_MAX] = { 0 };
     char peerAddr[IP_LEN] = { 0 };
     char myAddr[IP_LEN] = { 0 };
+    char peerUuid[UUID_BUF_LEN] = { 0 };
     int32_t peerPort = -1;
     ProtocolType protocol = LNN_PROTOCOL_IP;
 
@@ -962,7 +964,8 @@ static int32_t OnVerifyP2pReply(int64_t authId, int64_t seq, const cJSON *json)
     conn->status = TCP_DIRECT_CHANNEL_STATUS_CONNECTING;
     if (strcpy_s(peerNetworkId, sizeof(peerNetworkId), conn->appInfo.peerNetWorkId) != EOK ||
         strcpy_s(peerAddr, sizeof(peerAddr), conn->appInfo.peerData.addr) != EOK ||
-        strcpy_s(myAddr, sizeof(myAddr), conn->appInfo.myData.addr) != EOK) {
+        strcpy_s(myAddr, sizeof(myAddr), conn->appInfo.myData.addr) != EOK ||
+        strcpy_s(peerUuid, sizeof(peerUuid), conn->appInfo.peerData.deviceId) != EOK) {
         ReleaseSessionConnLock();
         TRANS_LOGE(TRANS_CTRL, "strcpy_s failed!");
         goto EXIT_ERR;
@@ -973,7 +976,7 @@ static int32_t OnVerifyP2pReply(int64_t authId, int64_t seq, const cJSON *json)
     if (TransSrvAddDataBufNode(channelId, fd) != SOFTBUS_OK) {
         goto EXIT_ERR;
     }
-    if (AddP2pOrHmlTrigger(fd, myAddr, seq, conn->appInfo.myData.port) != SOFTBUS_OK) {
+    if (AddP2pOrHmlTrigger(fd, myAddr, seq, conn->appInfo.myData.port, peerUuid) != SOFTBUS_OK) {
         TRANS_LOGE(TRANS_CTRL, "AddP2pOrHmlTrigger fail");
         goto EXIT_ERR;
     }
