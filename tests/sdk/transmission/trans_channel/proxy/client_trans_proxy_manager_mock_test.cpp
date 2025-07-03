@@ -16,16 +16,16 @@
 #include <gtest/gtest.h>
 #include "securec.h"
 
+#include "client_trans_proxy_file_manager.h"
+#include "client_trans_proxy_manager.c"
 #include "client_trans_proxy_manager_mock.h"
 #include "client_trans_session_manager.h"
 #include "client_trans_socket_manager.h"
+#include "client_trans_tcp_direct_message.h"
 #include "session.h"
+#include "softbus_access_token_test.h"
 #include "softbus_def.h"
 #include "softbus_error_code.h"
-#include "softbus_access_token_test.h"
-#include "client_trans_proxy_file_manager.h"
-#include "client_trans_proxy_manager.c"
-#include "client_trans_tcp_direct_message.h"
 #include "trans_proxy_process_data.h"
 
 using namespace testing;
@@ -48,14 +48,14 @@ int32_t TransOnSessionOpenFailed(int32_t channelId, int32_t channelType, int32_t
     return SOFTBUS_OK;
 }
 
-int32_t TransOnBytesReceived(int32_t channelId, int32_t channelType,
-    const void *data, uint32_t len, SessionPktType type)
+int32_t TransOnBytesReceived(
+    int32_t channelId, int32_t channelType, const void *data, uint32_t len, SessionPktType type)
 {
     return SOFTBUS_OK;
 }
 
-int32_t TransOnOnStreamRecevied(int32_t channelId, int32_t channelType,
-    const StreamData *data, const StreamData *ext, const StreamFrameInfo *param)
+int32_t TransOnOnStreamRecevied(
+    int32_t channelId, int32_t channelType, const StreamData *data, const StreamData *ext, const StreamFrameInfo *param)
 {
     return SOFTBUS_OK;
 }
@@ -64,16 +64,17 @@ int32_t TransOnGetSessionId(int32_t channelId, int32_t channelType, int32_t *ses
 {
     return SOFTBUS_OK;
 }
-int32_t TransOnQosEvent(int32_t channelId, int32_t channelType, int32_t eventId,
-    int32_t tvCount, const QosTv *tvList)
+
+int32_t TransOnQosEvent(
+    int32_t channelId, int32_t channelType, int32_t eventId, int32_t tvCount, const QosTv *tvList)
 {
     return SOFTBUS_OK;
 }
 
 static SoftBusList *InitSoftBusList(void)
 {
-    int ret = 0;
-    SoftBusList *list = (SoftBusList *)SoftBusMalloc(sizeof(SoftBusList));
+    int32_t ret = 0;
+    SoftBusList *list = reinterpret_cast<SoftBusList *>(SoftBusCalloc(sizeof(SoftBusList)));
     (void)memset_s(list, sizeof(SoftBusList), 0, sizeof(SoftBusList));
 
     SoftBusMutexAttr mutexAttr;
@@ -155,7 +156,7 @@ HWTEST_F(ClientTransProxyManagerMockTest, ClientTransProxyOnChannelClosed001, Te
                                 -> int32_t {return SOFTBUS_INVALID_PARAM;};
     int32_t channelId = 1;
     ShutdownReason reason = SHUTDOWN_REASON_UNKNOWN;
-    int ret = 0;
+    int32_t ret = 0;
 
     NiceMock<ClientTransProxyManagerInterfaceMock> ClientProxyManagerMock;
     SoftBusList *infoList = InitSoftBusList();
@@ -183,8 +184,8 @@ HWTEST_F(ClientTransProxyManagerMockTest, ClientTransProxySendSessionAck001, Tes
     int32_t ret = 0;
     int32_t channelId = 1;
     int32_t Seq = 0;
-    uint8_t *temSliceData = (uint8_t *)SoftBusCalloc(sizeof(uint8_t));
-    ClientProxyChannelInfo *info = (ClientProxyChannelInfo*)SoftBusMalloc(sizeof(ClientProxyChannelInfo));
+    uint8_t *temSliceData = reinterpret_cast<uint8_t *>(SoftBusCalloc(sizeof(uint8_t)));
+    ClientProxyChannelInfo *info = reinterpret_cast<ClientProxyChannelInfo *>(SoftBusCalloc(sizeof(ClientProxyChannelInfo)));
     ProxyChannelInfoDetail detail = {0};
     detail.osType = OH_TYPE;
     info->channelId = channelId;
@@ -204,13 +205,14 @@ HWTEST_F(ClientTransProxyManagerMockTest, ClientTransProxySendSessionAck001, Tes
     ret = ClientTransProxyAddChannelInfo(info);
     EXPECT_EQ(SOFTBUS_OK, ret);
 
-    EXPECT_CALL(ClientProxyManagerMock, SoftBusHtoL1).WillRepeatedly(Return(Seq));
+    EXPECT_CALL(ClientProxyManagerMock, SoftBusHtoLl).WillRepeatedly(Return(Seq));
     EXPECT_CALL(ClientProxyManagerMock, ServerIpcSendMessage).WillRepeatedly(Return(SOFTBUS_OK));
     EXPECT_CALL(ClientProxyManagerMock, GetSupportTlvAndNeedAckById).WillRepeatedly(Return(SOFTBUS_OK));
     EXPECT_CALL(ClientProxyManagerMock, TransProxyPackData).WillRepeatedly(Return(temSliceData));
     ClientTransProxySendSessionAck(channelId, Seq);
 
     (void)ClientTransProxyListDeinit();
+    SoftBusFree(temSliceData);
 }
 
 /**
@@ -224,7 +226,7 @@ HWTEST_F(ClientTransProxyManagerMockTest, ClientTransProxySendSessionAck002, Tes
     int32_t ret = 0;
     int32_t channelId = 1;
     int32_t Seq = 0;
-    ClientProxyChannelInfo *info = (ClientProxyChannelInfo*)SoftBusMalloc(sizeof(ClientProxyChannelInfo));
+    ClientProxyChannelInfo *info = reinterpret_cast<ClientProxyChannelInfo *>(SoftBusCalloc(sizeof(ClientProxyChannelInfo)))
     ProxyChannelInfoDetail detail = {0};
     detail.osType = OH_TYPE + 1;
     info->channelId = channelId;
@@ -244,7 +246,7 @@ HWTEST_F(ClientTransProxyManagerMockTest, ClientTransProxySendSessionAck002, Tes
     ret = ClientTransProxyAddChannelInfo(info);
     EXPECT_EQ(SOFTBUS_OK, ret);
 
-    EXPECT_CALL(ClientProxyManagerMock, SoftBusHtoN1).WillRepeatedly(Return(Seq));
+    EXPECT_CALL(ClientProxyManagerMock, SoftBusHtoNl).WillRepeatedly(Return(Seq));
     EXPECT_CALL(ClientProxyManagerMock, GetSupportTlvAndNeedAckById).WillRepeatedly(Return(SOFTBUS_TIMOUT));
     ClientTransProxySendSessionAck(channelId, Seq);
 
@@ -294,7 +296,7 @@ HWTEST_F(ClientTransProxyManagerMockTest, ClientTransProxySendBytesAck001, TestS
     int32_t Seq = 0;
     uint32_t dataSeq = 0;
     bool needAck = true;
-    ClientProxyChannelInfo *info = (ClientProxyChannelInfo*)SoftBusMalloc(sizeof(ClientProxyChannelInfo));
+    ClientProxyChannelInfo *info = reinterpret_cast<ClientProxyChannelInfo *>(SoftBusCalloc(sizeof(ClientProxyChannelInfo)))
     ProxyChannelInfoDetail detail = {0};
     detail.osType = OH_TYPE;
     info->channelId = channelId;
@@ -314,7 +316,7 @@ HWTEST_F(ClientTransProxyManagerMockTest, ClientTransProxySendBytesAck001, TestS
     ret = ClientTransProxyAddChannelInfo(info);
     EXPECT_EQ(SOFTBUS_OK, ret);
 
-    EXPECT_CALL(ClientProxyManagerMock, SoftBusHtoL1).WillOnce(Return(Seq));
+    EXPECT_CALL(ClientProxyManagerMock, SoftBusHtoLl).WillOnce(Return(Seq));
     EXPECT_CALL(ClientProxyManagerMock, TransProxyPackTlvBytes).WillOnce(Return(SOFTBUS_TIMOUT));
     ClientTransProxySendBytesAck(channelId, Seq, dataSeq, needAck);
 
@@ -334,7 +336,7 @@ HWTEST_F(ClientTransProxyManagerMockTest, ClientTransProxySendBytesAck002, TestS
     int32_t Seq = 0;
     uint32_t dataSeq = 1;
     bool needAck = true;
-    ClientProxyChannelInfo *info = (ClientProxyChannelInfo*)SoftBusMalloc(sizeof(ClientProxyChannelInfo));
+    ClientProxyChannelInfo *info = reinterpret_cast<ClientProxyChannelInfo *>(SoftBusCalloc(sizeof(ClientProxyChannelInfo)))
     ProxyChannelInfoDetail detail = {0};
     detail.osType = OH_TYPE + 1;
     info->channelId = channelId;
@@ -354,7 +356,7 @@ HWTEST_F(ClientTransProxyManagerMockTest, ClientTransProxySendBytesAck002, TestS
     ret = ClientTransProxyAddChannelInfo(info);
     EXPECT_EQ(SOFTBUS_OK, ret);
 
-    EXPECT_CALL(ClientProxyManagerMock, SoftBusHtoL1).WillOnce(Return(Seq));
+    EXPECT_CALL(ClientProxyManagerMock, SoftBusHtoLl).WillOnce(Return(Seq));
     EXPECT_CALL(ClientProxyManagerMock, TransProxyPackTlvBytes).WillOnce(Return(SOFTBUS_TIMOUT));
     ClientTransProxySendBytesAck(channelId, Seq, dataSeq, needAck);
 
@@ -371,7 +373,7 @@ HWTEST_F(ClientTransProxyManagerMockTest, ClientTransProxyProcessSessionData001,
 {
     int32_t ret = 0;
     int32_t channelId = 1;
-    ClientProxyChannelInfo *info = (ClientProxyChannelInfo*)SoftBusMalloc(sizeof(ClientProxyChannelInfo));
+    ClientProxyChannelInfo *info = reinterpret_cast<ClientProxyChannelInfo *>(SoftBusCalloc(sizeof(ClientProxyChannelInfo)))
     ProxyChannelInfoDetail detail = {0};
     detail.osType = OH_TYPE;
     info->channelId = channelId;
@@ -391,7 +393,7 @@ HWTEST_F(ClientTransProxyManagerMockTest, ClientTransProxyProcessSessionData001,
     ret = ClientTransProxyAddChannelInfo(info);
     EXPECT_EQ(SOFTBUS_OK, ret);
 
-    PacketHead *dataHead = (PacketHead *)SoftBusCalloc(sizeof(PacketHead));
+    PacketHead *dataHead = reinterpret_cast<PacketHead *>(SoftBusCalloc(sizeof(PacketHead)));
     dataHead->dataLen = OVERHEAD_LEN + 8;
     dataHead->flags = 12;
     const char *data = "000";
@@ -418,7 +420,7 @@ HWTEST_F(ClientTransProxyManagerMockTest, ClientTransProxyProcessSessionData002,
             const void *data, uint32_t len, SessionPktType type) -> int32_t {return SOFTBUS_TIMOUT;};
 
     int32_t channelId = 1;
-    ClientProxyChannelInfo *info = (ClientProxyChannelInfo*)SoftBusMalloc(sizeof(ClientProxyChannelInfo));
+    ClientProxyChannelInfo *info = reinterpret_cast<ClientProxyChannelInfo *>(SoftBusCalloc(sizeof(ClientProxyChannelInfo)))
     ProxyChannelInfoDetail detail = {0};
     detail.osType = OH_TYPE;
     info->channelId = channelId;
@@ -446,7 +448,7 @@ HWTEST_F(ClientTransProxyManagerMockTest, ClientTransProxyProcessSessionData002,
     ret = ClientTransProxyProcessSessionData(channelId, dataHead, data);
     EXPECT_EQ(SOFTBUS_INVALID_DATA_HEAD, ret);
 
-    EXPECT_CALL(ClientProxyManagerMock, TransProxyDecryptPacketData).WillOnce(Return(SOFTBUS_TIMOUT));
+    EXPECT_CALL(ClientProxyManagerMock, TransProxySessionDataLenCheck).WillOnce(Return(SOFTBUS_TIMOUT));
     ret = ClientTransProxyProcessSessionData(channelId, dataHead, data);
     EXPECT_EQ(SOFTBUS_TRANS_INVALID_DATA_LENGTH, ret);
 
@@ -464,7 +466,7 @@ HWTEST_F(ClientTransProxyManagerMockTest, ClientTransProxyProcData001, TestSize.
 {
     int32_t ret = 0;
     int32_t channelId = 1;
-    ClientProxyChannelInfo *info = (ClientProxyChannelInfo*)SoftBusMalloc(sizeof(ClientProxyChannelInfo));
+    ClientProxyChannelInfo *info = reinterpret_cast<ClientProxyChannelInfo *>(SoftBusCalloc(sizeof(ClientProxyChannelInfo)))
     ProxyChannelInfoDetail detail = {0};
     detail.osType = OH_TYPE;
     info->channelId = channelId;
@@ -510,7 +512,7 @@ HWTEST_F(ClientTransProxyManagerMockTest, ClientTransProxyProcData002, TestSize.
         const void *data, uint32_t len, SessionPktType type) -> int32_t {return SOFTBUS_TIMOUT;};
 
     int32_t channelId = 1;
-    ClientProxyChannelInfo *info = (ClientProxyChannelInfo*)SoftBusMalloc(sizeof(ClientProxyChannelInfo));
+    ClientProxyChannelInfo *info = reinterpret_cast<ClientProxyChannelInfo *>(SoftBusCalloc(sizeof(ClientProxyChannelInfo)))
     ProxyChannelInfoDetail detail = {0};
     detail.osType = OH_TYPE;
     info->channelId = channelId;
@@ -559,10 +561,10 @@ HWTEST_F(ClientTransProxyManagerMockTest, TransProxyAsyncPackAndSendData001, Tes
     const void *data = SoftBusCalloc(sizeof(int32_t));
     uint32_t len = 4 * 1024;
     uint32_t dataSeq = 0;
-    uint8_t *temSliceData = (uint8_t *)SoftBusCalloc(sizeof(uint8_t));
+    uint8_t *temSliceData = reinterpret_cast<uint8_t *>(SoftBusCalloc(sizeof(uint8_t)));
     SessionPktType pktType = TRANS_SESSION_BYTES;
 
-    ClientProxyChannelInfo *info = (ClientProxyChannelInfo*)SoftBusMalloc(sizeof(ClientProxyChannelInfo));
+    ClientProxyChannelInfo *info = reinterpret_cast<ClientProxyChannelInfo *>(SoftBusCalloc(sizeof(ClientProxyChannelInfo)))
     ProxyChannelInfoDetail detail = {0};
     detail.osType = OH_TYPE;
     info->channelId = channelId;
@@ -604,10 +606,10 @@ HWTEST_F(ClientTransProxyManagerMockTest, TransProxyAsyncPackAndSendData002, Tes
     const void *data = SoftBusCalloc(sizeof(int32_t));
     uint32_t len = 4 * 1024;
     uint32_t dataSeq = 0;
-    uint8_t *temSliceData = (uint8_t *)SoftBusCalloc(sizeof(uint8_t));
+    uint8_t *temSliceData = reinterpret_cast<uint8_t *>(SoftBusCalloc(sizeof(uint8_t)));
     SessionPktType pktType = TRANS_SESSION_BYTES;
 
-    ClientProxyChannelInfo *info = (ClientProxyChannelInfo*)SoftBusMalloc(sizeof(ClientProxyChannelInfo));
+    ClientProxyChannelInfo *info = reinterpret_cast<ClientProxyChannelInfo *>(SoftBusCalloc(sizeof(ClientProxyChannelInfo)))
     ProxyChannelInfoDetail detail = {0};
     detail.osType = OH_TYPE;
     info->channelId = channelId;
@@ -665,10 +667,10 @@ HWTEST_F(ClientTransProxyManagerMockTest, TransProxyChannelSendBytes001, TestSiz
     int32_t channelId = 1;
     const void *data = SoftBusCalloc(sizeof(int32_t));
     uint32_t len = 1;
-    uint8_t *temSliceData = (uint8_t *)SoftBusCalloc(sizeof(uint8_t));
+    uint8_t *temSliceData = reinterpret_cast<uint8_t *>(SoftBusCalloc(sizeof(uint8_t)));
     bool needAck = true;
 
-    ClientProxyChannelInfo *info = (ClientProxyChannelInfo*)SoftBusMalloc(sizeof(ClientProxyChannelInfo));
+    ClientProxyChannelInfo *info = reinterpret_cast<ClientProxyChannelInfo *>(SoftBusCalloc(sizeof(ClientProxyChannelInfo)))
     ProxyChannelInfoDetail detail = {0};
     detail.isEncrypted = true;
     detail.sequence = 1;
@@ -700,6 +702,7 @@ HWTEST_F(ClientTransProxyManagerMockTest, TransProxyChannelSendBytes001, TestSiz
 
     (void)ClientTransProxyListDeinit();
     (void)PendingDeinit(PENDING_TYPE_PROXY);
+    SoftBusFree(temSliceData);
 }
 
 /**
@@ -716,7 +719,7 @@ HWTEST_F(ClientTransProxyManagerMockTest, TransProxyChannelSendBytes002, TestSiz
     uint32_t len = 1;
     bool needAck = true;
 
-    ClientProxyChannelInfo *info = (ClientProxyChannelInfo*)SoftBusMalloc(sizeof(ClientProxyChannelInfo));
+    ClientProxyChannelInfo *info = reinterpret_cast<ClientProxyChannelInfo *>(SoftBusCalloc(sizeof(ClientProxyChannelInfo)))
     ProxyChannelInfoDetail detail = {0};
     detail.isEncrypted = false;
     detail.sequence = 1;
@@ -763,7 +766,7 @@ HWTEST_F(ClientTransProxyManagerMockTest, TransProxyChannelSendBytes003, TestSiz
     uint32_t len = 1;
     bool needAck = true;
 
-    ClientProxyChannelInfo *info = (ClientProxyChannelInfo*)SoftBusMalloc(sizeof(ClientProxyChannelInfo));
+    ClientProxyChannelInfo *info = reinterpret_cast<ClientProxyChannelInfo *>(SoftBusCalloc(sizeof(ClientProxyChannelInfo)))
     ProxyChannelInfoDetail detail = {0};
     detail.isEncrypted = true;
     detail.sequence = 1;
