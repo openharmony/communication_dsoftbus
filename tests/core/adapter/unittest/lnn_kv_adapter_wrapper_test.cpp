@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2024 Huawei Device Co., Ltd.
+ * Copyright (c) 2025 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -15,6 +15,7 @@
 
 #include <cstdint>
 #include <cstring>
+#include <securec.h>
 #include <string>
 
 #include "lnn_kv_adapter_wrapper.h"
@@ -848,4 +849,19 @@ HWTEST_F(KVAdapterWrapperTest, LnnSetCloudAbilityInner_Dbid_LessThanMin, TestSiz
     EXPECT_EQ(ret, SOFTBUS_INVALID_PARAM);
 }
 
+/**
+ * @tc.name: LnnCloudSync002
+ * @tc.desc: test LnnCloudSync
+ * @tc.type: FUNC
+ * @tc.require:
+ */
+HWTEST_F(KVAdapterWrapperTest, LnnCloudSync002, TestSize.Level1)
+{
+    LnnEnhanceFuncList *pfnLnnEnhanceFuncList = LnnEnhanceFuncListGet();
+    pfnLnnEnhanceFuncList->isCloudSyncEnabled = IsCloudSyncEnabled;
+    int32_t dbId = g_dbId;
+    constexpr int32_t idOffset = 1;
+    int32_t lnnCloudRet = LnnCloudSync(dbId + idOffset);
+    EXPECT_EQ(lnnCloudRet, SOFTBUS_INVALID_PARAM);
+}
 } // namespace OHOS

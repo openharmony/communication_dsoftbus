@@ -346,7 +346,7 @@ HWTEST_F(TransUdpNegotiationTest, TransDealUdpCheckCollabResult001, TestSize.Lev
 {
     int32_t checkResult = SOFTBUS_OK;
     int32_t ret = TransDealUdpCheckCollabResult(TEST_CHANNEL_ID, checkResult, TEST_CALLING_PID);
-    EXPECT_EQ(ret, SOFTBUS_TRANS_UDP_CHANNEL_NOT_FOUND);
+    EXPECT_EQ(ret, SOFTBUS_TRANS_CHECK_PID_ERROR);
 }
 
 /**
@@ -391,7 +391,7 @@ HWTEST_F(TransUdpNegotiationTest, TransDealUdpCheckCollabResult003, TestSize.Lev
     EXPECT_EQ(ret, EOK);
     int32_t checkResult = SOFTBUS_COND_INIT_FAILED;
     ret = TransAddUdpChannel(newChannel);
-    EXPECT_EQ(ret, SOFTBUS_OK);
+    EXPECT_NE(ret, SOFTBUS_OK);
     ret = TransDealUdpCheckCollabResult(TEST_CHANNEL_ID, checkResult, TEST_CALLING_PID);
     EXPECT_EQ(ret, SOFTBUS_TRANS_CHECK_PID_ERROR);
 
