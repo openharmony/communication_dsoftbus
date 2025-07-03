@@ -627,4 +627,97 @@ HWTEST_F(TransClientProxyTest, ClientIpcCheckParamTest001, TestSize.Level1)
     ret = ClientIpcOnChannelQosEvent(nullptr, &param);
     EXPECT_EQ(SOFTBUS_TRANS_GET_CLIENT_PROXY_NULL, ret);
 }
+
+/**
+ * @tc.name: ClientIpcBrProxyOpenedTest001
+ * @tc.desc: ClientIpcBrProxyOpened test.
+ * @tc.type: FUNC
+ * @tc.require:
+ */
+HWTEST_F(TransClientProxyTest, ClientIpcBrProxyOpenedTest001, TestSize.Level1)
+{
+    int32_t channelId = 1;
+    int32_t reason = 1;
+
+    int32_t ret = ClientIpcBrProxyOpened(nullptr, channelId, nullptr, nullptr, reason);
+    EXPECT_EQ(SOFTBUS_INVALID_PARAM, ret);
+
+    const char *pkgName = "testName";
+    ret = ClientIpcBrProxyOpened(pkgName, channelId, nullptr, nullptr, reason);
+    EXPECT_EQ(SOFTBUS_INVALID_PARAM, ret);
+
+    const char *uuid = "testUuid";
+    ret = ClientIpcBrProxyOpened(nullptr, channelId, nullptr, uuid, reason);
+    EXPECT_EQ(SOFTBUS_INVALID_PARAM, ret);
+
+    const char *brMac = "11:22:33:44"; // test value
+    ret = ClientIpcBrProxyOpened(nullptr, channelId, brMac, nullptr, reason);
+    EXPECT_NE(SOFTBUS_INVALID_PARAM, ret);
+}
+
+/**
+ * @tc.name: ClientIpcBrProxyReceivedDataTest001
+ * @tc.desc: ClientIpcBrProxyReceivedData test.
+ * @tc.type: FUNC
+ * @tc.require:
+ */
+HWTEST_F(TransClientProxyTest, ClientIpcBrProxyReceivedDataTest001, TestSize.Level1)
+{
+    int32_t channelId = 1;
+    uint32_t len = 1;
+
+    int32_t ret = ClientIpcBrProxyReceivedData(nullptr, channelId, nullptr, len);
+    EXPECT_EQ(SOFTBUS_INVALID_PARAM, ret);
+
+    const char *pkgName = "testName";
+    ret = ClientIpcBrProxyReceivedData(pkgName, channelId, nullptr, len);
+    EXPECT_EQ(SOFTBUS_INVALID_PARAM, ret);
+
+    uint8_t data = 1;
+    ret = ClientIpcBrProxyReceivedData(pkgName, channelId, &data, len);
+    EXPECT_NE(SOFTBUS_INVALID_PARAM, ret);
+}
+
+/**
+ * @tc.name: ClientIpcBrProxyStateChangedTest001
+ * @tc.desc: ClientIpcBrProxyStateChanged test.
+ * @tc.type: FUNC
+ * @tc.require:
+ */
+HWTEST_F(TransClientProxyTest, ClientIpcBrProxyStateChangedTest001, TestSize.Level1)
+{
+    int32_t channelId = 1;
+    int32_t channelState = 1;
+
+    int32_t ret = ClientIpcBrProxyStateChanged(nullptr, channelId, channelState);
+    EXPECT_EQ(SOFTBUS_INVALID_PARAM, ret);
+
+    const char *pkgName = "testName";
+    ret = ClientIpcBrProxyStateChanged(pkgName, channelId, channelState);
+    EXPECT_NE(SOFTBUS_INVALID_PARAM, ret);
+}
+
+/**
+ * @tc.name: ClientIpcQueryPermissionTest001
+ * @tc.desc: ClientIpcQueryPermission test.
+ * @tc.type: FUNC
+ * @tc.require:
+ */
+HWTEST_F(TransClientProxyTest, ClientIpcQueryPermissionTest001, TestSize.Level1)
+{
+    int32_t ret = ClientIpcQueryPermission(nullptr, nullptr, nullptr);
+    EXPECT_EQ(SOFTBUS_INVALID_PARAM, ret);
+
+    const char *pkgName = "testName";
+    ret = ClientIpcQueryPermission(pkgName, nullptr, nullptr);
+    EXPECT_EQ(SOFTBUS_INVALID_PARAM, ret);
+
+    const char *bundleName = "testName";
+    ret = ClientIpcQueryPermission(pkgName, bundleName, nullptr);
+    EXPECT_EQ(SOFTBUS_INVALID_PARAM, ret);
+
+    bool isEmpowered = true;
+    ret = ClientIpcQueryPermission(pkgName, bundleName, &isEmpowered);
+    EXPECT_NE(SOFTBUS_INVALID_PARAM, ret);
+}
 } // namespace OHOS

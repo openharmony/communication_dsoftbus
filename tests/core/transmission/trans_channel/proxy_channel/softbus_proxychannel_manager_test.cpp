@@ -2232,7 +2232,7 @@ HWTEST_F(SoftbusProxyChannelManagerTest, TransDealProxyCheckCollabResult001, Tes
     EXPECT_EQ(SOFTBUS_TRANS_CHECK_PID_ERROR, ret);
 
     ret = TransProxyDelByChannelId(channelId, chan);
-    EXPECT_EQ(SOFTBUS_TRANS_NODE_NOT_FOUND, ret);
+    EXPECT_EQ(SOFTBUS_OK, ret);
 }
 
 /**
@@ -2253,7 +2253,7 @@ HWTEST_F(SoftbusProxyChannelManagerTest, TransDealProxyCheckCollabResult002, Tes
     ret = TransDealProxyCheckCollabResult(TEST_VALID_CHANNEL_ID, SOFTBUS_TRANS_NODE_NOT_FOUND, TEST_CALLING_PID);
     EXPECT_EQ(SOFTBUS_TRANS_CHECK_PID_ERROR, ret);
     ret = TransProxyDelByChannelId(TEST_VALID_CHANNEL_ID, chan);
-    EXPECT_EQ(SOFTBUS_TRANS_NODE_NOT_FOUND, ret);
+    EXPECT_EQ(SOFTBUS_OK, ret);
 }
 
 /**
