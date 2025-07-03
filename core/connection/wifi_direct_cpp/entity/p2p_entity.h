@@ -54,7 +54,7 @@ public:
     P2pOperationResult Disconnect(const P2pDestroyGroupParam &param);
     int32_t ReuseLink();
 
-    void NotifyNewClientJoining(const std::string &remoteMac);
+    void NotifyNewClientJoining(const std::string &remoteMac, int waitTime);
     void CancelNewClientJoining(const std::string &remoteMac);
     void RemoveNewClientJoining(const std::string &remoteMac);
     void ClearJoiningClient();

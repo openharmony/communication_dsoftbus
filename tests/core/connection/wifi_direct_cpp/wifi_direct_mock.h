@@ -34,6 +34,7 @@
 #include "wifi_direct_types.h"
 
 namespace OHOS::SoftBus {
+static constexpr int P2P_V1_WAITING_CLIENT_JOIN_MS = 10000;
 class WifiDirectInterface {
 public:
     WifiDirectInterface() = default;
