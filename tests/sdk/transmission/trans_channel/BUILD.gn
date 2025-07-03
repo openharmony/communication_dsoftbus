@@ -164,6 +164,42 @@ if (defined(ohos_lite)) {
   }
 
   module_output_path = "dsoftbus/soft_bus/transmission"
+  ohos_unittest("ClientTransProxyManagerMockTest") {
+    module_out_path = module_output_path
+    sources = [
+      "proxy/client_trans_proxy_manager_mock_test.cpp",
+      "proxy/mock/client_trans_proxy_manager_mock.cpp",
+    ]
+    include_dirs = trans_sdk_test_common_inc
+    include_dirs += [
+      "$dsoftbus_root_path/sdk/transmission/trans_channel/common/include",
+      "$dsoftbus_root_path/sdk/transmission/trans_channel/proxy/include",
+      "$dsoftbus_root_path/core/transmission/common/src",
+      "$dsoftbus_root_path/sdk/transmission/trans_channel/proxy/src",
+      "$dsoftbus_root_path/sdk/transmission/trans_channel/manager/include",
+      "$dsoftbus_root_path/core/frame/common/include",
+      "$dsoftbus_root_path/core/transmission/common/include",
+      "$dsoftbus_root_path/sdk/transmission/ipc/include",
+      "$dsoftbus_root_path/interfaces/kits/lnn",
+      "$dsoftbus_root_path/core/bus_center/lnn/lane_hub/lane_manager/include",
+      "$dsoftbus_root_path/interfaces/inner_kits/lnn",
+      "$dsoftbus_root_path/sdk/transmission/session/include",
+      "$dsoftbus_root_path/tests/sdk/transmission/trans_channel/proxy/mock",
+      "$dsoftbus_root_path/adapter/common/include/OS_adapter_define/linux",
+      "$dsoftbus_root_path/adapter/default_config/spec_config",
+    ]
+    deps = trans_sdk_test_common_deps
+    deps += [
+      "$dsoftbus_root_path/adapter:softbus_adapter",
+      "$dsoftbus_root_path/dfx:softbus_dfx",
+    ]
+    external_deps = [
+      "googletest:gmock",
+      "hilog:libhilog",
+    ]
+  }
+
+  module_output_path = "dsoftbus/soft_bus/transmission"
   ohos_unittest("ClientTransUdpManagerTest") {
     sanitize = {
       cfi = true
@@ -476,6 +512,7 @@ if (defined(ohos_lite)) {
       ":ClientTransProxyFileCommonTest",
       ":ClientTransProxyFileManagerMockTest",
       ":ClientTransProxyFileManagerTest",
+      ":ClientTransProxyManagerMockTest",
       ":ClientTransProxyManagerTest",
       ":ClientTransUdpManagerStaticTest",
       ":ClientTransUdpManagerTest",
