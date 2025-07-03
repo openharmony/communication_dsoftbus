@@ -116,7 +116,6 @@ void AuthTcpConnectionTest::OnDisconnect(int32_t authId)
     isOnDisconnectSuccess = true;
 }
 
-
 /*
  * @tc.name: PACK_SOCKET_PKT_TEST_001
  * @tc.desc: pack socket pkt test
@@ -148,10 +147,10 @@ HWTEST_F(AuthTcpConnectionTest, UNPACK_SOCKET_PKT_TEST_001, TestSize.Level1)
     SocketPktHead head;
     (void)memset_s(&head, sizeof(head), 0, sizeof(head));
     int32_t ret = UnpackSocketPkt(data, len, &head);
-    EXPECT_TRUE(ret == SOFTBUS_NO_ENOUGH_DATA);
+    EXPECT_EQ(ret, SOFTBUS_NO_ENOUGH_DATA);
     len = AUTH_PKT_HEAD_LEN;
     ret = UnpackSocketPkt(data, len, &head);
-    EXPECT_TRUE(ret == SOFTBUS_OK);
+    EXPECT_EQ(ret, SOFTBUS_OK);
 }
 
 /*
@@ -451,7 +450,7 @@ HWTEST_F(AuthTcpConnectionTest, RECV_PACKET_DATA_TEST_001, TestSize.Level1)
 
     uint32_t len = TEST_DATA_LEN;
     uint8_t *packetData = RecvPacketData(fd, len);
-    EXPECT_TRUE(packetData == nullptr);
+    EXPECT_EQ(packetData, nullptr);
 }
 
 /*
@@ -486,11 +485,11 @@ HWTEST_F(AuthTcpConnectionTest, ADD_AUTH_TCP_CONN_FD_ITEM_TEST_001, TestSize.Lev
     int32_t fd = 1;
 
     int32_t ret = AddAuthTcpConnFdItem(fd);
-    EXPECT_TRUE(ret == SOFTBUS_LOCK_ERR);
+    EXPECT_EQ(ret, SOFTBUS_LOCK_ERR);
     ret = AuthTcpConnFdLockInit();
-    EXPECT_TRUE(ret == SOFTBUS_OK);
+    EXPECT_EQ(ret, SOFTBUS_OK);
     ret = AddAuthTcpConnFdItem(fd);
-    EXPECT_TRUE(ret == SOFTBUS_OK);
+    EXPECT_EQ(ret, SOFTBUS_OK);
     DeleteAuthTcpConnFdItemByConnId(fd);
     AuthTcpConnFdLockDeinit();
 }
@@ -604,7 +603,7 @@ HWTEST_F(AuthTcpConnectionTest, ON_CONNECT_EVENT_TEST_001, TestSize.Level1)
     ConnectOption clientAddr;
     (void)memset_s(&clientAddr, sizeof(ConnectOption), 0, sizeof(ConnectOption));
     int32_t ret = OnConnectEvent(module, cfd, &clientAddr);
-    EXPECT_TRUE(ret == SOFTBUS_INVALID_PARAM);
+    EXPECT_EQ(ret, SOFTBUS_INVALID_PARAM);
     cfd = 1;
     ret = OnConnectEvent(module, cfd, &clientAddr);
     EXPECT_EQ(ret, SOFTBUS_NETWORK_SET_KEEPALIVE_OPTION_FAIL);
@@ -691,7 +690,7 @@ HWTEST_F(AuthTcpConnectionTest, AUTH_TCP_CREATE_LISTENER_TEST_001, TestSize.Leve
     TriggerType trigger = READ_TRIGGER;
 
     int32_t ret = AuthTcpCreateListener(module, fd, trigger);
-    EXPECT_TRUE(ret == SOFTBUS_NOT_FIND);
+    EXPECT_EQ(ret, SOFTBUS_NOT_FIND);
 }
 
 /*
@@ -703,13 +702,15 @@ HWTEST_F(AuthTcpConnectionTest, AUTH_TCP_CREATE_LISTENER_TEST_001, TestSize.Leve
 HWTEST_F(AuthTcpConnectionTest, SOCKET_GET_CONN_INFO_TEST_001, TestSize.Level1)
 {
     int32_t fd = 0;
-    AuthConnInfo connInfo;
+    AuthConnInfo connInfo = {
+        .type = AUTH_LINK_TYPE_WIFI,
+    };
     bool isServer;
     (void)memset_s(&connInfo, sizeof(AuthConnInfo), 0, sizeof(AuthConnInfo));
     int32_t ret = SocketGetConnInfo(fd, nullptr, &isServer, WLAN_IF);
-    EXPECT_TRUE(ret == SOFTBUS_INVALID_PARAM);
+    EXPECT_EQ(ret, SOFTBUS_INVALID_PARAM);
     ret = SocketGetConnInfo(fd, &connInfo, nullptr, WLAN_IF);
-    EXPECT_TRUE(ret == SOFTBUS_INVALID_PARAM);
+    EXPECT_EQ(ret, SOFTBUS_INVALID_PARAM);
     ret = SocketGetConnInfo(fd, &connInfo, &isServer, WLAN_IF);
     EXPECT_NE(ret, SOFTBUS_OK);
 }
@@ -723,7 +724,9 @@ HWTEST_F(AuthTcpConnectionTest, SOCKET_GET_CONN_INFO_TEST_001, TestSize.Level1)
 HWTEST_F(AuthTcpConnectionTest, SOCKET_GET_CONN_INFO_TEST_002, TestSize.Level1)
 {
     int32_t fd = -1;
-    AuthConnInfo connInfo;
+    AuthConnInfo connInfo = {
+        .type = AUTH_LINK_TYPE_WIFI,
+    };
     bool isServer = true;
     int32_t ifnameIdx = 1;
 
@@ -758,11 +761,11 @@ HWTEST_F(AuthTcpConnectionTest, SOCKET_CONNECT_INNER_TEST_001, TestSize.Level1)
     const char *localIp = "192.168.11.22";
     const char *peerIp = "192.168.11.33";
     int32_t ret = SocketConnectInner(nullptr, peerIp, 37025, AUTH, true);
-    EXPECT_TRUE(ret == AUTH_INVALID_FD);
+    EXPECT_EQ(ret, AUTH_INVALID_FD);
     ret = SocketConnectInner(localIp, nullptr, 37025, AUTH, true);
-    EXPECT_TRUE(ret == AUTH_INVALID_FD);
+    EXPECT_EQ(ret, AUTH_INVALID_FD);
     ret = SocketConnectInner(localIp, peerIp, 37025, AUTH, true);
-    EXPECT_TRUE(ret == SOFTBUS_CONN_SOCKET_GET_INTERFACE_ERR);
+    EXPECT_EQ(ret, SOFTBUS_CONN_SOCKET_GET_INTERFACE_ERR);
 }
 
 /*
@@ -831,9 +834,9 @@ HWTEST_F(AuthTcpConnectionTest, SOCKET_CONNECT_DEVICE_TEST_001, TestSize.Level1)
     bool isBlockMode = true;
     int32_t ifnameIdx = 1;
     int32_t ret = SocketConnectDevice(nullptr, port, isBlockMode, ifnameIdx);
-    EXPECT_TRUE(ret == AUTH_INVALID_FD);
+    EXPECT_EQ(ret, AUTH_INVALID_FD);
     ret = SocketConnectDevice(addr, port, isBlockMode, ifnameIdx);
-    EXPECT_TRUE(ret == AUTH_INVALID_FD);
+    EXPECT_EQ(ret, AUTH_INVALID_FD);
 }
 
 /*
@@ -846,9 +849,9 @@ HWTEST_F(AuthTcpConnectionTest, NIP_SOCKET_CONNECT_DEVICE_TEST_001, TestSize.Lev
 {
     const char *addr = "192.168.11.44";
     int32_t ret = NipSocketConnectDevice(AUTH, addr, 37025, true);
-    EXPECT_TRUE(ret == AUTH_INVALID_FD);
+    EXPECT_EQ(ret, AUTH_INVALID_FD);
     ret = NipSocketConnectDevice(AUTH, nullptr, 37025, true);
-    EXPECT_TRUE(ret == AUTH_INVALID_FD);
+    EXPECT_EQ(ret, AUTH_INVALID_FD);
 }
 
 /*
@@ -986,13 +989,13 @@ HWTEST_F(AuthTcpConnectionTest, AUTH_OPEN_CHANNEL_WITH_ALL_IP_TEST_001, TestSize
     const char *localIp = "192.168.11.22";
     const char *remoteIp = "192.168.11.33";
     int32_t ret = AuthOpenChannelWithAllIp(localIp, remoteIp, 37025);
-    EXPECT_TRUE(ret == INVALID_CHANNEL_ID);
+    EXPECT_EQ(ret, INVALID_CHANNEL_ID);
     ret = AuthOpenChannelWithAllIp(nullptr, remoteIp, 37025);
-    EXPECT_TRUE(ret == SOFTBUS_INVALID_PARAM);
+    EXPECT_EQ(ret, SOFTBUS_INVALID_PARAM);
     ret = AuthOpenChannelWithAllIp(localIp, nullptr, 37025);
-    EXPECT_TRUE(ret == SOFTBUS_INVALID_PARAM);
+    EXPECT_EQ(ret, SOFTBUS_INVALID_PARAM);
     ret = AuthOpenChannelWithAllIp(localIp, remoteIp, 0);
-    EXPECT_TRUE(ret == SOFTBUS_INVALID_PARAM);
+    EXPECT_EQ(ret, SOFTBUS_INVALID_PARAM);
 }
 
 /*
@@ -1123,9 +1126,9 @@ HWTEST_F(AuthTcpConnectionTest, GET_CONNECT_OPTION_BY_IFNAME_TEST_001, TestSize.
     int32_t port = 1;
 
     ConnectOption option = GetConnectOptionByIfname(ifnameIdx, port);
-    EXPECT_TRUE(option.socketOption.moduleId == AUTH);
+    EXPECT_EQ(option.socketOption.moduleId, AUTH);
     ifnameIdx = 1;
     option = GetConnectOptionByIfname(ifnameIdx, port);
-    EXPECT_TRUE(option.socketOption.moduleId == AUTH_USB);
+    EXPECT_EQ(option.socketOption.moduleId, AUTH_USB);
 }
 } // namespace OHOS

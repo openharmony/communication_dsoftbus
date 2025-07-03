@@ -232,7 +232,9 @@ HWTEST_F(AuthConnectionTest, FIND_CONN_REQUEST_BY_FD_TEST_001, TestSize.Level1)
  */
 HWTEST_F(AuthConnectionTest, FIND_CONN_REQUEST_BY_FD_TEST_002, TestSize.Level1)
 {
-    AuthConnInfo connInfo;
+    AuthConnInfo connInfo = {
+        .type = AUTH_LINK_TYPE_WIFI,
+    };
 
     int32_t ret = AddConnRequest(&connInfo, TEST_REQUEST_ID, TEST_FD);
     EXPECT_EQ(ret, SOFTBUS_OK);
@@ -264,7 +266,9 @@ HWTEST_F(AuthConnectionTest, NOTIFY_CLIENT_CONNECTED_TEST_001, TestSize.Level1)
     uint32_t requestId = 1;
     uint64_t connId = 2;
     int32_t result = 3;
-    AuthConnInfo connInfo;
+    AuthConnInfo connInfo = {
+        .type = AUTH_LINK_TYPE_WIFI,
+    };
     isOnConnectResultSuccess = false;
     NotifyClientConnected(requestId, connId, result, &connInfo);
     EXPECT_FALSE(isOnConnectResultSuccess);
@@ -292,7 +296,9 @@ HWTEST_F(AuthConnectionTest, NOTIFY_CLIENT_CONNECTED_TEST_001, TestSize.Level1)
 HWTEST_F(AuthConnectionTest, NOTIFY_CLIENT_DISCONNECTED_TEST_001, TestSize.Level1)
 {
     uint64_t connId = 2;
-    AuthConnInfo connInfo;
+    AuthConnInfo connInfo = {
+        .type = AUTH_LINK_TYPE_WIFI,
+    };
     isOnDisconnectedSuccess = false;
     NotifyDisconnected(connId, &connInfo);
     EXPECT_FALSE(isOnDisconnectedSuccess);
@@ -320,8 +326,13 @@ HWTEST_F(AuthConnectionTest, NOTIFY_CLIENT_DISCONNECTED_TEST_001, TestSize.Level
 HWTEST_F(AuthConnectionTest, NOTIFY_DATE_RECEIVED_TEST_001, TestSize.Level1)
 {
     uint64_t connId = 2;
-    AuthConnInfo connInfo;
-    AuthDataHead head;
+    AuthConnInfo connInfo = {
+        .type = AUTH_LINK_TYPE_WIFI,
+    };
+    AuthDataHead head = {
+        .dataType = DATA_TYPE_AUTH,
+        .len = TEST_HEAD_LEN,
+    };
     uint8_t data = 3;
     isOnDataReceivedSuccess = false;
     NotifyDataReceived(connId, &connInfo, true, &head, &data);
@@ -362,9 +373,9 @@ HWTEST_F(AuthConnectionTest, GET_AUTH_DATA_SIZE_TEST_001, TestSize.Level1)
  */
 HWTEST_F(AuthConnectionTest, PACK_AUTH_DATA_TEST_001, TestSize.Level1)
 {
-    AuthDataHead head;
-    (void)memset_s(&head, 0, sizeof(AuthDataHead), 0);
-    head.len = TEST_HEAD_LEN;
+    AuthDataHead head = {
+        .len = TEST_HEAD_LEN,
+    };
     uint8_t data[TEST_SIZE] = { 0 };
     uint8_t buf[TEST_SIZE] = { 0 };
     int32_t ret = PackAuthData(nullptr, data, buf, TEST_SIZE);
@@ -394,6 +405,7 @@ HWTEST_F(AuthConnectionTest, UNPACK_AUTH_DATA_TEST_001, TestSize.Level1)
 {
     uint8_t data[TEST_DATA_LEN] = { 0 };
     AuthDataHead head;
+    (void)memset_s(&head, sizeof(head), 0, sizeof(head));
     const uint8_t *buf = UnpackAuthData(data, TEST_DATA_LEN, &head);
     EXPECT_EQ(buf, nullptr);
 
@@ -489,7 +501,12 @@ HWTEST_F(AuthConnectionTest, INIT_WIFI_CONN_TEST_001, TestSize.Level1)
 HWTEST_F(AuthConnectionTest, ON_COMM_DISCONNECTED_TEST_001, TestSize.Level1)
 {
     uint32_t connectionId = 1;
-    ConnectionInfo info;
+    ConnectionInfo info = {
+        .isAvailable = 1,
+        .isServer = 1,
+        .type = CONNECT_BR,
+        .brInfo.brMac = "11:22:33:44:55:66",
+    };
     AuthConnListener connListener = {
         .onConnectResult = OnConnectResult,
         .onDisconnected = OnDisconnected,
@@ -517,7 +534,9 @@ HWTEST_F(AuthConnectionTest, ON_COMM_DISCONNECTED_TEST_001, TestSize.Level1)
 HWTEST_F(AuthConnectionTest, GET_CONN_INFO_BY_CONNECTION_ID_TEST_001, TestSize.Level1)
 {
     uint32_t connectionId = 1;
-    AuthConnInfo connInfo;
+    AuthConnInfo connInfo = {
+        .type = AUTH_LINK_TYPE_WIFI,
+    };
     int32_t ret = GetConnInfoByConnectionId(connectionId, &connInfo);
     EXPECT_NE(ret, SOFTBUS_OK);
 }
@@ -544,7 +563,9 @@ HWTEST_F(AuthConnectionTest, INIT_COMM_CONN_TEST_001, TestSize.Level1)
 HWTEST_F(AuthConnectionTest, SESSION_CONNECT_SUCC_TEST_001, TestSize.Level1)
 {
     uint32_t requestId = 1;
-    AuthConnInfo connInfo;
+    AuthConnInfo connInfo = {
+        .type = AUTH_LINK_TYPE_WIFI,
+    };
     isOnConnectResultSuccess = false;
     AuthConnListener connListener = {
         .onConnectResult = OnConnectResult,
@@ -566,9 +587,11 @@ HWTEST_F(AuthConnectionTest, SESSION_CONNECT_SUCC_TEST_001, TestSize.Level1)
  * @tc.type: FUNC
  * @tc.require:
  */
-HWTEST_F(AuthConnectionTest, CONNECT_AUT_DEVICE_TEST_001, TestSize.Level0)
+HWTEST_F(AuthConnectionTest, CONNECT_AUT_DEVICE_TEST_001, TestSize.Level1)
 {
-    AuthConnInfo connInfo;
+    AuthConnInfo connInfo = {
+        .type = AUTH_LINK_TYPE_WIFI,
+    };
     connInfo.type = AUTH_LINK_TYPE_BR;
     AuthConnectionInterfaceMock mock;
     EXPECT_CALL(mock, SoftBusGetBtState).WillOnce(Return(BLE_DISABLE));
@@ -583,9 +606,11 @@ HWTEST_F(AuthConnectionTest, CONNECT_AUT_DEVICE_TEST_001, TestSize.Level0)
  * @tc.type: FUNC
  * @tc.require:
  */
-HWTEST_F(AuthConnectionTest, CONNECT_AUT_DEVICE_TEST_002, TestSize.Level0)
+HWTEST_F(AuthConnectionTest, CONNECT_AUT_DEVICE_TEST_002, TestSize.Level1)
 {
-    AuthConnInfo connInfo;
+    AuthConnInfo connInfo = {
+        .type = AUTH_LINK_TYPE_WIFI,
+    };
     connInfo.type = AUTH_LINK_TYPE_SESSION;
     AuthConnectionInterfaceMock mock;
     EXPECT_CALL(mock, PostAuthEvent).WillOnce(Return(SOFTBUS_OK));
@@ -601,9 +626,11 @@ HWTEST_F(AuthConnectionTest, CONNECT_AUT_DEVICE_TEST_002, TestSize.Level0)
  * @tc.type: FUNC
  * @tc.require:
  */
-HWTEST_F(AuthConnectionTest, CONNECT_AUT_DEVICE_TEST_003, TestSize.Level0)
+HWTEST_F(AuthConnectionTest, CONNECT_AUT_DEVICE_TEST_003, TestSize.Level1)
 {
-    AuthConnInfo connInfo;
+    AuthConnInfo connInfo = {
+        .type = AUTH_LINK_TYPE_WIFI,
+    };
     connInfo.type = AUTH_LINK_TYPE_SESSION_KEY;
     AuthConnectionInterfaceMock mock;
     EXPECT_CALL(mock, PostAuthEvent).WillRepeatedly(Return(SOFTBUS_OK));
@@ -617,9 +644,11 @@ HWTEST_F(AuthConnectionTest, CONNECT_AUT_DEVICE_TEST_003, TestSize.Level0)
  * @tc.type: FUNC
  * @tc.require:
  */
-HWTEST_F(AuthConnectionTest, CONNECT_AUT_DEVICE_TEST_004, TestSize.Level0)
+HWTEST_F(AuthConnectionTest, CONNECT_AUT_DEVICE_TEST_004, TestSize.Level1)
 {
-    AuthConnInfo connInfo;
+    AuthConnInfo connInfo = {
+        .type = AUTH_LINK_TYPE_WIFI,
+    };
     connInfo.type = AUTH_LINK_TYPE_MAX;
     AuthConnectionInterfaceMock mock;
     EXPECT_CALL(mock, PostAuthEvent).WillOnce(Return(SOFTBUS_OK));
@@ -633,9 +662,11 @@ HWTEST_F(AuthConnectionTest, CONNECT_AUT_DEVICE_TEST_004, TestSize.Level0)
  * @tc.type: FUNC
  * @tc.require:
  */
-HWTEST_F(AuthConnectionTest, CONNECT_AUT_DEVICE_TEST_005, TestSize.Level0)
+HWTEST_F(AuthConnectionTest, CONNECT_AUT_DEVICE_TEST_005, TestSize.Level1)
 {
-    AuthConnInfo connInfo;
+    AuthConnInfo connInfo = {
+        .type = AUTH_LINK_TYPE_WIFI,
+    };
     connInfo.type = AUTH_LINK_TYPE_WIFI;
     AuthConnectionInterfaceMock mock;
     EXPECT_CALL(mock, PostAuthEvent).WillRepeatedly(Return(SOFTBUS_OK));
@@ -653,9 +684,11 @@ HWTEST_F(AuthConnectionTest, CONNECT_AUT_DEVICE_TEST_005, TestSize.Level0)
  * @tc.type: FUNC
  * @tc.require:
  */
-HWTEST_F(AuthConnectionTest, CONNECT_AUT_DEVICE_TEST_006, TestSize.Level0)
+HWTEST_F(AuthConnectionTest, CONNECT_AUT_DEVICE_TEST_006, TestSize.Level1)
 {
-    AuthConnInfo connInfo;
+    AuthConnInfo connInfo = {
+        .type = AUTH_LINK_TYPE_WIFI,
+    };
     connInfo.type = AUTH_LINK_TYPE_BLE;
     AuthConnectionInterfaceMock mock;
     EXPECT_CALL(mock, PostAuthEvent).WillRepeatedly(Return(SOFTBUS_OK));
@@ -673,9 +706,11 @@ HWTEST_F(AuthConnectionTest, CONNECT_AUT_DEVICE_TEST_006, TestSize.Level0)
  * @tc.type: FUNC
  * @tc.require:
  */
-HWTEST_F(AuthConnectionTest, CONNECT_AUT_DEVICE_TEST_007, TestSize.Level0)
+HWTEST_F(AuthConnectionTest, CONNECT_AUT_DEVICE_TEST_007, TestSize.Level1)
 {
-    AuthConnInfo connInfo;
+    AuthConnInfo connInfo = {
+        .type = AUTH_LINK_TYPE_WIFI,
+    };
     connInfo.type = AUTH_LINK_TYPE_P2P;
     AuthConnectionInterfaceMock mock;
     EXPECT_CALL(mock, PostAuthEvent).WillRepeatedly(Return(SOFTBUS_OK));
@@ -693,7 +728,7 @@ HWTEST_F(AuthConnectionTest, CONNECT_AUT_DEVICE_TEST_007, TestSize.Level0)
  * @tc.type: FUNC
  * @tc.require:
  */
-HWTEST_F(AuthConnectionTest, POST_BY_TEST_FOR_SESSION_TEST_001, TestSize.Level0)
+HWTEST_F(AuthConnectionTest, POST_BY_TEST_FOR_SESSION_TEST_001, TestSize.Level1)
 {
     AuthDataHead head;
     (void)memset_s(&head, sizeof(head), 0, sizeof(head));
@@ -707,7 +742,7 @@ HWTEST_F(AuthConnectionTest, POST_BY_TEST_FOR_SESSION_TEST_001, TestSize.Level0)
  * @tc.type: FUNC
  * @tc.require:
  */
-HWTEST_F(AuthConnectionTest, POST_BY_TEST_FOR_SESSION_TEST_002, TestSize.Level0)
+HWTEST_F(AuthConnectionTest, POST_BY_TEST_FOR_SESSION_TEST_002, TestSize.Level1)
 {
     AuthDataHead head;
     uint8_t data[TEST_DATA_LEN] = {0};
@@ -727,7 +762,7 @@ HWTEST_F(AuthConnectionTest, POST_BY_TEST_FOR_SESSION_TEST_002, TestSize.Level0)
  * @tc.type: FUNC
  * @tc.require:
  */
-HWTEST_F(AuthConnectionTest, POST_BY_TEST_FOR_SESSION_TEST_003, TestSize.Level0)
+HWTEST_F(AuthConnectionTest, POST_BY_TEST_FOR_SESSION_TEST_003, TestSize.Level1)
 {
     AuthDataHead head;
     uint8_t data[TEST_DATA_LEN] = {0};
@@ -780,9 +815,10 @@ HWTEST_F(AuthConnectionTest, POST_BYTES_FOR_SESSION_KEY_TEST_001, TestSize.Level
     AuthConnectionInterfaceMock mock;
     EXPECT_CALL(mock, SocketPostBytes).WillRepeatedly(Return(SOFTBUS_OK));
 
-    AuthDataHead head;
-    head.dataType = DATA_TYPE_AUTH;
-    head.len = TEST_HEAD_LEN;
+    AuthDataHead head = {
+        .dataType = DATA_TYPE_AUTH,
+        .len = TEST_HEAD_LEN,
+    };
     int32_t fd = 1;
     uint8_t data = 2;
     int32_t ret = PostBytesForSessionKey(fd, &head, &data);
@@ -806,9 +842,10 @@ HWTEST_F(AuthConnectionTest, POST_AUTH_DATA_TEST_001, TestSize.Level1)
 
     uint64_t connId = 0x100000000;
     bool toServer = true;
-    AuthDataHead head;
-    head.dataType = DATA_TYPE_AUTH;
-    head.len = TEST_HEAD_LEN;
+    AuthDataHead head = {
+        .dataType = DATA_TYPE_AUTH,
+        .len = TEST_HEAD_LEN,
+    };
     uint8_t data = 2;
     int32_t ret = PostAuthData(connId, toServer, nullptr, &data);
     EXPECT_EQ(ret, SOFTBUS_INVALID_PARAM);
@@ -849,9 +886,10 @@ HWTEST_F(AuthConnectionTest, POST_AUTH_DATA_TEST_002, TestSize.Level1)
 
     uint64_t connId = 0x900000000;
     bool toServer = true;
-    AuthDataHead head;
-    head.dataType = DATA_TYPE_AUTH;
-    head.len = TEST_HEAD_LEN;
+    AuthDataHead head = {
+        .dataType = DATA_TYPE_AUTH,
+        .len = TEST_HEAD_LEN,
+    };
     uint8_t data = 2;
     int32_t ret = PostAuthData(connId, toServer, &head, &data);
     EXPECT_EQ(ret, SOFTBUS_OK);
@@ -904,7 +942,9 @@ HWTEST_F(AuthConnectionTest, CHECK_ACTIVE_AUTH_CONNECTION_TEST_001, TestSize.Lev
 {
     bool ret = CheckActiveAuthConnection(nullptr);
     EXPECT_FALSE(ret);
-    AuthConnInfo connInfo;
+    AuthConnInfo connInfo = {
+        .type = AUTH_LINK_TYPE_WIFI,
+    };
     connInfo.type = AUTH_LINK_TYPE_BLE;
     ret = CheckActiveAuthConnection(nullptr);
     EXPECT_FALSE(ret);
@@ -916,7 +956,7 @@ HWTEST_F(AuthConnectionTest, CHECK_ACTIVE_AUTH_CONNECTION_TEST_001, TestSize.Lev
  * @tc.type: FUNC
  * @tc.require:
  */
-HWTEST_F(AuthConnectionTest, AUTH_START_LISTENING_TEST_001, TestSize.Level0)
+HWTEST_F(AuthConnectionTest, AUTH_START_LISTENING_TEST_001, TestSize.Level1)
 {
     AuthConnectionInterfaceMock mock;
     EXPECT_CALL(mock, StartSocketListening).WillOnce(Return(SOFTBUS_OK));
@@ -931,7 +971,7 @@ HWTEST_F(AuthConnectionTest, AUTH_START_LISTENING_TEST_001, TestSize.Level0)
  * @tc.type: FUNC
  * @tc.require:
  */
-HWTEST_F(AuthConnectionTest, AUTH_START_LISTENING_TEST_002, TestSize.Level0)
+HWTEST_F(AuthConnectionTest, AUTH_START_LISTENING_TEST_002, TestSize.Level1)
 {
     AuthConnectionInterfaceMock mock;
     EXPECT_CALL(mock, StartSocketListening).WillOnce(Return(SOFTBUS_OK));
@@ -946,7 +986,7 @@ HWTEST_F(AuthConnectionTest, AUTH_START_LISTENING_TEST_002, TestSize.Level0)
  * @tc.type: FUNC
  * @tc.require:
  */
-HWTEST_F(AuthConnectionTest, AUTH_START_LISTENING_TEST_003, TestSize.Level0)
+HWTEST_F(AuthConnectionTest, AUTH_START_LISTENING_TEST_003, TestSize.Level1)
 {
     int32_t ret = AuthStartListening(AUTH_LINK_TYPE_ENHANCED_P2P, TEST_IP, TEST_PORT);
     EXPECT_EQ(ret, SOFTBUS_INVALID_PARAM);
@@ -959,7 +999,7 @@ HWTEST_F(AuthConnectionTest, AUTH_START_LISTENING_TEST_003, TestSize.Level0)
  * @tc.type: FUNC
  * @tc.require:
  */
-HWTEST_F(AuthConnectionTest, AUTH_START_LISTENING_TEST_004, TestSize.Level0)
+HWTEST_F(AuthConnectionTest, AUTH_START_LISTENING_TEST_004, TestSize.Level1)
 {
     AuthConnectionInterfaceMock mock;
     EXPECT_CALL(mock, StartSocketListening).WillOnce(Return(SOFTBUS_OK));
@@ -974,7 +1014,7 @@ HWTEST_F(AuthConnectionTest, AUTH_START_LISTENING_TEST_004, TestSize.Level0)
  * @tc.type: FUNC
  * @tc.require:
  */
-HWTEST_F(AuthConnectionTest, AUTH_START_LISTENING_FOR_WIFI_DIRECT_TEST_001, TestSize.Level0)
+HWTEST_F(AuthConnectionTest, AUTH_START_LISTENING_FOR_WIFI_DIRECT_TEST_001, TestSize.Level1)
 {
     AuthLinkType type = AUTH_LINK_TYPE_P2P;
     const char *addr = "192.168.11.44";
