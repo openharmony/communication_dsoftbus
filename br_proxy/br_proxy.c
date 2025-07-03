@@ -627,7 +627,7 @@ bool IsProxyChannelEnabled(int32_t uid)
         return false;
     }
     TRANS_LOGI(TRANS_SVC, "[br_proxy] enter uid:%{public}d", uid);
-    ret = ClientRegisterBrProxyService(COMM_PKGNAME_PUSH);
+    ret = ClientRegisterService(COMM_PKGNAME_PUSH);
     if (ret != SOFTBUS_OK) {
         TRANS_LOGE(TRANS_SDK, "[br_proxy] client register service failed! ret:%{public}d", ret);
         return false;
@@ -650,7 +650,7 @@ int32_t RegisterAccessHook(PermissonHookCb *cb)
         return ret;
     }
     TRANS_LOGI(TRANS_SVC, "[br_proxy] enter");
-    ret = ClientRegisterBrProxyService(COMM_PKGNAME_PUSH);
+    ret = ClientRegisterService(COMM_PKGNAME_PUSH);
     if (ret != SOFTBUS_OK) {
         TRANS_LOGE(TRANS_SDK, "[br_proxy] client register service failed! ret:%{public}d", ret);
         return ret;
