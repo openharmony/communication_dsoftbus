@@ -26,8 +26,10 @@ int32_t SchedulerDeinitBroadcast(void)
     return SOFTBUS_OK;
 }
 
-int32_t SchedulerRegisterBroadcaster(BaseServiceType type, int32_t *bcId, const BroadcastCallback *cb)
+int32_t SchedulerRegisterBroadcaster(
+    BroadcastProtocol protocol, BaseServiceType type, int32_t *bcId, const BroadcastCallback *cb)
 {
+    (void)protocol;
     (void)type;
     (void)bcId;
     (void)cb;
@@ -40,8 +42,10 @@ int32_t SchedulerUnregisterBroadcaster(int32_t bcId)
     return SOFTBUS_OK;
 }
 
-int32_t SchedulerRegisterScanListener(BaseServiceType type, int32_t *listenerId, const ScanCallback *cb)
+int32_t SchedulerRegisterScanListener(
+    BroadcastProtocol protocol, BaseServiceType type, int32_t *listenerId, const ScanCallback *cb)
 {
+    (void)protocol;
     (void)type;
     (void)listenerId;
     (void)cb;

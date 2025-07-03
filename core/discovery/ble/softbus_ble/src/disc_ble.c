@@ -1920,10 +1920,10 @@ static int32_t InitAdvertiser(void)
 {
     int32_t conChannel = -1;
     int32_t nonChannel = -1;
-    int32_t ret = SchedulerRegisterBroadcaster(SRV_TYPE_DIS, &conChannel, &g_advCallback);
+    int32_t ret = SchedulerRegisterBroadcaster(BROADCAST_PROTOCOL_BLE, SRV_TYPE_DIS, &conChannel, &g_advCallback);
     DISC_CHECK_AND_RETURN_RET_LOGE(ret == SOFTBUS_OK, ret, DISC_BLE, "register broadcaster con fail");
 
-    ret = SchedulerRegisterBroadcaster(SRV_TYPE_DIS, &nonChannel, &g_advCallback);
+    ret = SchedulerRegisterBroadcaster(BROADCAST_PROTOCOL_BLE, SRV_TYPE_DIS, &nonChannel, &g_advCallback);
     if (ret != SOFTBUS_OK) {
         DISC_LOGE(DISC_INIT, "register broadcaster non fail");
         (void)SchedulerUnregisterBroadcaster(conChannel);
@@ -2555,7 +2555,8 @@ static void DiscBleSetScanFilter(int32_t listenerId)
 
 static int32_t InitBleListener(void)
 {
-    int32_t ret = SchedulerRegisterScanListener(SRV_TYPE_DIS, &g_bleListener.scanListenerId, &g_scanListener);
+    int32_t ret = SchedulerRegisterScanListener(BROADCAST_PROTOCOL_BLE,
+        SRV_TYPE_DIS, &g_bleListener.scanListenerId, &g_scanListener);
     DISC_CHECK_AND_RETURN_RET_LOGE(ret == SOFTBUS_OK, ret, DISC_BLE, "register scanner listener fail");
     ret = SoftBusAddBtStateListener(&g_stateChangedListener, &g_bleListener.stateListenerId);
     DISC_CHECK_AND_RETURN_RET_LOGE(ret == SOFTBUS_OK, ret, DISC_BLE, "register broadcast listener fail");

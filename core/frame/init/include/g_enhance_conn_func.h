@@ -55,6 +55,8 @@ typedef void (*SoftbusBleConflictNotifyDisconnectFunc)(const char *addr, const c
 typedef void (*SoftbusBleConflictNotifyConnectResultFunc)(uint32_t requestId, int32_t underlayerHandle, bool status);
 typedef ConnectFuncInterface *(*ConnSleInitFunc)(const ConnectCallback *callback);
 typedef int32_t (*ConnDirectConnectDeviceFunc)(const ConnectOption *option, uint32_t reqId, const ConnectResult* result);
+typedef int32_t (*ConnPagingConnectInitFunc)(void);
+
 typedef struct TagConnEnhanceFuncList {
     // Coc
     ConnCocClientConnectFunc connCocClientConnect;
@@ -84,6 +86,8 @@ typedef struct TagConnEnhanceFuncList {
     SoftbusBleConflictNotifyDisconnectFunc softbusBleConflictNotifyDisconnect;
     SoftbusBleConflictNotifyConnectResultFunc softbusBleConflictNotifyConnectResult;
 
+    //paging
+    ConnPagingConnectInitFunc connPagingConnectInit;
     // sle
     ConnSleInitFunc connSleInit;
 } ConnEnhanceFuncList;
