@@ -172,7 +172,7 @@ static void SendClientJoinEvent(const std::string &remoteMac, int32_t result)
     WifiDirectSchedulerFactory::GetInstance().GetScheduler().ProcessEvent(remoteDeviceId, event);
 }
 
-void P2pEntity::NotifyNewClientJoining(const std::string &remoteMac)
+void P2pEntity::NotifyNewClientJoining(const std::string &remoteMac, int waitTime)
 {
     CONN_LOGI(CONN_WIFI_DIRECT, "enter");
     CONN_CHECK_AND_RETURN_LOGW(!remoteMac.empty(), CONN_WIFI_DIRECT, "remote mac is empty, skip");
@@ -191,7 +191,7 @@ void P2pEntity::NotifyNewClientJoining(const std::string &remoteMac)
                 timer_.Shutdown(false);
             }
         },
-        TIMEOUT_WAIT_CLIENT_JOIN_MS, true);
+        waitTime, true);
     joiningClients_[remoteMac] = timerId;
     CONN_LOGI(CONN_WIFI_DIRECT, "remoteMac=%{public}s, joining client count=%{public}zu",
         WifiDirectAnonymizeMac(remoteMac).c_str(), joiningClients_.size());
