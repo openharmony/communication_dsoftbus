@@ -21,5 +21,6 @@ group("fuzztest") {
     "transnegotiationmessage_fuzzer:fuzztest",
     "transproxyonmessagereceived_fuzzer:fuzztest",
     "transproxyprocessdata_fuzzer:fuzztest",
+    "transtcpprocessdata_fuzzer:fuzztest",
   ]
 }
