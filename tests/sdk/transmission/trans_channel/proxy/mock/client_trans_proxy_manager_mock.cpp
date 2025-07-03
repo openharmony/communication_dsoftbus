@@ -68,7 +68,7 @@ int32_t ClientGetSessionIdByChannelId(int32_t channelId, int32_t channelType, in
 int32_t ClientGetSessionCallbackAdapterById(int32_t sessionId, SessionListenerAdapter *callbackAdapter, bool *isServer)
 {
     return GetClientTransProxyManagerInterface()->ClientGetSessionCallbackAdapterById(
-        channelId, callbackAdapter, isServer);
+        sessionId, callbackAdapter, isServer);
 }
 int32_t DeleteDataSeqInfoList(uint32_t dataSeq, int32_t channelId)
 {
