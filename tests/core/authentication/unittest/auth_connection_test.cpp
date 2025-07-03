@@ -39,8 +39,8 @@ public:
     void TearDown();
     static void OnConnectResult(uint32_t requestId, uint64_t connId, int32_t result, const AuthConnInfo *connInfo);
     static void OnDisconnected(uint64_t connId, const AuthConnInfo *connInfo);
-    static void OnDataReceived(uint64_t connId, const AuthConnInfo *connInfo, bool fromServer, const AuthDataHead *head,
-        const uint8_t *data);
+    static void OnDataReceived(uint64_t connId, const AuthConnInfo *connInfo, bool fromServer,
+        const AuthDataHead *head, const uint8_t *data);
     static bool isOnConnectResultSuccess;
     static bool isOnDisconnectedSuccess;
     static bool isOnDataReceivedSuccess;
@@ -58,7 +58,8 @@ void AuthConnectionTest::SetUp() { }
 
 void AuthConnectionTest::TearDown() { }
 
-void AuthConnectionTest::OnConnectResult(uint32_t requestId, uint64_t connId, int32_t result, const AuthConnInfo *connInfo)
+void AuthConnectionTest::OnConnectResult(uint32_t requestId, uint64_t connId, int32_t result,
+    const AuthConnInfo *connInfo)
 {
     (void)requestId;
     (void)connInfo;
@@ -75,8 +76,8 @@ void AuthConnectionTest::OnDisconnected(uint64_t connId, const AuthConnInfo *con
     AUTH_LOGI(AUTH_TEST, "Auth Connection Disconnected.");
 }
 
-void AuthConnectionTest::OnDataReceived(uint64_t connId, const AuthConnInfo *connInfo, bool fromServer, const AuthDataHead *head,
-    const uint8_t *data)
+void AuthConnectionTest::OnDataReceived(uint64_t connId, const AuthConnInfo *connInfo, bool fromServer,
+    const AuthDataHead *head, const uint8_t *data)
 {
     (void)connId;
     (void)connInfo;

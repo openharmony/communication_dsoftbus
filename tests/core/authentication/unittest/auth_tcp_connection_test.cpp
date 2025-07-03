@@ -163,13 +163,13 @@ HWTEST_F(AuthTcpConnectionTest, UNPACK_SOCKET_PKT_TEST_001, TestSize.Level1)
 HWTEST_F(AuthTcpConnectionTest, NOTIFY_CONNECTED_TEST_001, TestSize.Level1)
 {
     ListenerModule module = ListenerModule::LISTENER_MODULE_DYNAMIC_START;
-     int32_t fd = 1;
-     bool isClient = true;
-     isOnWiFiConnectedSuccess = false;
-     NotifyConnected(module, fd, isClient);
-     EXPECT_FALSE(isOnWiFiConnectedSuccess);
+    int32_t fd = 1;
+    bool isClient = true;
+    isOnWiFiConnectedSuccess = false;
+    NotifyConnected(module, fd, isClient);
+    EXPECT_FALSE(isOnWiFiConnectedSuccess);
 
-     SocketCallback socketCb = {
+    SocketCallback socketCb = {
         .onConnected = OnWiFiConnected,
         .onDisconnected = OnWiFiDisconnected,
         .onDataReceived = OnWiFiDataReceived,
