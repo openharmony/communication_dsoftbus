@@ -38,6 +38,7 @@ bool ConnBleDirectIsEnablePacked(BleProtocolType protocol);
 int32_t ConnBleDirectConnectDevicePacked(const ConnectOption *option, uint32_t reqId, const ConnectResult* result);
 ConnectFuncInterface *ConnSleInitPacked(const ConnectCallback *callback);
 int32_t ConnDirectConnectDevicePacked(const ConnectOption *option, uint32_t reqId, const ConnectResult* result);
+int32_t ConnPagingConnectInitPacked(void);
 
 #ifdef __cplusplus
 }

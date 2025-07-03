@@ -51,6 +51,7 @@ int32_t ConnRegisterEnhanceFunc(void *soHandle)
         "SoftbusBleConflictNotifyConnectResult");
     g_connEnhanceFuncList.connSleInit = dlsym(soHandle, "ConnSleInit");
     g_connEnhanceFuncList.connDirectConnectDevice = dlsym(soHandle, "ConnDirectConnectDevice");
+    g_connEnhanceFuncList.connPagingConnectInit = dlsym(soHandle, "ConnPagingConnectInit");
 
     return SOFTBUS_OK;
 }
