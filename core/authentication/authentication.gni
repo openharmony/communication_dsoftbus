@@ -36,6 +36,8 @@ auth_server_inc = [
 ]
 if (dsoftbus_feature_lnn_frame) {
   auth_server_src = [
+    "$authentication_path/applykey/auth_apply_key_manager_virtual.c",
+    "$authentication_path/applykey/auth_apply_key_process_virtual.c",
     "$authentication_path/src/auth_common.c",
     "$authentication_path/src/auth_connection.c",
     "$authentication_path/src/auth_device.c",
