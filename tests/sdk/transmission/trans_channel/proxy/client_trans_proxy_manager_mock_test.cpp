@@ -78,7 +78,7 @@ static SoftBusList *InitSoftBusList(void)
 
     SoftBusMutexAttr mutexAttr;
     mutexAttr.type = SOFTBUS_MUTEX_RECURSIVE;
-    ret = SoftBusMutexInit(&list->list, &mutexAttr);
+    ret = SoftBusMutexInit(&list->lock, &mutexAttr);
     EXPECT_EQ(SOFTBUS_OK, ret);
     ListInit(&list->list);
     return list;
@@ -659,7 +659,7 @@ HWTEST_F(ClientTransProxyManagerMockTest, TransProxyAsyncPackAndSendData002, Tes
  * @tc.type: FUNC
  * @tc.require:
  */
-HWTEST_F(ClientTransProxyManagerMockTest, TransProxyChannelAsyncSendBytes001, TestSize.Level1)
+HWTEST_F(ClientTransProxyManagerMockTest, TransProxyChannelSendBytes001, TestSize.Level1)
 {
     int32_t ret = 0;
     int32_t channelId = 1;
@@ -708,7 +708,7 @@ HWTEST_F(ClientTransProxyManagerMockTest, TransProxyChannelAsyncSendBytes001, Te
  * @tc.type: FUNC
  * @tc.require:
  */
-HWTEST_F(ClientTransProxyManagerMockTest, TransProxyChannelAsyncSendBytes002, TestSize.Level1)
+HWTEST_F(ClientTransProxyManagerMockTest, TransProxyChannelSendBytes002, TestSize.Level1)
 {
     int32_t ret = 0;
     int32_t channelId = 1;
@@ -755,7 +755,7 @@ HWTEST_F(ClientTransProxyManagerMockTest, TransProxyChannelAsyncSendBytes002, Te
  * @tc.type: FUNC
  * @tc.require:
  */
-HWTEST_F(ClientTransProxyManagerMockTest, TransProxyChannelAsyncSendBytes003, TestSize.Level1)
+HWTEST_F(ClientTransProxyManagerMockTest, TransProxyChannelSendBytes003, TestSize.Level1)
 {
     int32_t ret = 0;
     int32_t channelId = 1;
@@ -883,5 +883,55 @@ HWTEST_F(ClientTransProxyManagerMockTest, ClientTransProxyOnChannelBind003, Test
     EXPECT_EQ(SOFTBUS_INVALID_PARAM, ret);
 
     (void)ClientTransProxyListDeinit();
+}
+
+
+/**
+ * @tc.name: TransProxyChannelAsyncSendBytes001
+ * @tc.desc: TransProxyChannelAsyncSendBytes, enter the normal branch
+ * @tc.type: FUNC
+ * @tc.require:
+ */
+HWTEST_F(ClientTransProxyManagerMockTest, TransProxyChannelAsyncSendBytes001, TestSize.Level1)
+{
+    int32_t ret = 0;
+    int32_t channelId = 1;
+    const void *data = SoftBusCalloc(sizeof(int32_t));
+    uint32_t len = 1;
+    uint8_t *temSliceData = (uint8_t *)SoftBusCalloc(sizeof(uint8_t));
+    bool needAck = true;
+
+    ClientProxyChannelInfo *info = (ClientProxyChannelInfo*)SoftBusMalloc(sizeof(ClientProxyChannelInfo));
+    ProxyChannelInfoDetail detail = {0};
+    detail.isEncrypted = true;
+    detail.sequence = 1;
+    detail.osType = OH_TYPE;
+    info->channelId = channelId;
+    info->detail = detail;
+    info->node.next = NULL;
+    info->node.prev = NULL;
+
+    NiceMock<ClientTransProxyManagerInterfaceMock> ClientProxyManagerMock;
+    SoftBusList *infoList = InitSoftBusList();
+    SoftBusList *sliceList = InitSoftBusList();
+    EXPECT_CALL(ClientProxyManagerMock, ClinetTransProxyFileManagerInit).WillRepeatedly(Return(SOFTBUS_OK));
+    EXPECT_CALL(ClientProxyManagerMock, PendingInit).WillOnce(Return(SOFTBUS_OK));
+    EXPECT_CALL(ClientProxyManagerMock, CreateSoftBusList).WillOnce(Return(infoList)).WillOnce(Return(sliceList));
+    ret = ClientTransProxyInit(&g_clientSessionCb);
+    EXPECT_EQ(SOFTBUS_OK, ret);
+
+    ret = ClientTransProxyAddChannelInfo(info);
+    EXPECT_EQ(SOFTBUS_OK, ret);
+
+    EXPECT_CALL(ClientProxyManagerMock, TransProxyPackTlvBytes).WillOnce(Return(SOFTBUS_OK));
+    EXPECT_CALL(ClientProxyManagerMock, TransProxyPackData).WillRepeatedly(Return(temSliceData));
+    EXPECT_CALL(ClientProxyManagerMock, ServerIpcSendMessage).WillRepeatedly(Return(SOFTBUS_OK));
+    EXPECT_CALL(ClientProxyManagerMock, ClientGetSessionIdByChannelId).WillOnce(Return(SOFTBUS_OK));
+
+    ret = TransProxyChannelSendBytes(channelId, data, len, needAck);
+    EXPECT_EQ(SOFTBUS_OK, ret);
+
+    (void)ClientTransProxyListDeinit();
+    (void)PendingDeinit(PENDING_TYPE_PROXY);
 }
 } // namespace OHOS
