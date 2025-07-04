@@ -957,7 +957,6 @@ HWTEST_F(ClientTransProxyManagerMockTest, TransProxyChannelAsyncSendBytes002, Te
     int32_t channelId = 1;
     const void *data = SoftBusCalloc(sizeof(int32_t));
     uint32_t len = 1;
-    uint8_t *temSliceData = (uint8_t *)SoftBusCalloc(sizeof(uint8_t));
     uint32_t dataSeq = 0;
 
     ClientProxyChannelInfo *info = (ClientProxyChannelInfo*)SoftBusMalloc(sizeof(ClientProxyChannelInfo));
