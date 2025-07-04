@@ -184,7 +184,8 @@ HWTEST_F(ClientTransProxyManagerMockTest, ClientTransProxySendSessionAck001, Tes
     int32_t channelId = 1;
     int32_t Seq = 0;
     uint8_t *temSliceData = reinterpret_cast<uint8_t *>(SoftBusCalloc(sizeof(uint8_t)));
-    ClientProxyChannelInfo *info = reinterpret_cast<ClientProxyChannelInfo *>(SoftBusCalloc(sizeof(ClientProxyChannelInfo)));
+    ClientProxyChannelInfo *info =
+        reinterpret_cast<ClientProxyChannelInfo *>(SoftBusCalloc(sizeof(ClientProxyChannelInfo)));
     ProxyChannelInfoDetail detail = {0};
     detail.osType = OH_TYPE;
     info->channelId = channelId;
@@ -224,7 +225,8 @@ HWTEST_F(ClientTransProxyManagerMockTest, ClientTransProxySendSessionAck002, Tes
     int32_t ret = 0;
     int32_t channelId = 1;
     int32_t Seq = 0;
-    ClientProxyChannelInfo *info = reinterpret_cast<ClientProxyChannelInfo *>(SoftBusCalloc(sizeof(ClientProxyChannelInfo)));
+    ClientProxyChannelInfo *info =
+        reinterpret_cast<ClientProxyChannelInfo *>(SoftBusCalloc(sizeof(ClientProxyChannelInfo)));
     ProxyChannelInfoDetail detail = {0};
     detail.osType = OH_TYPE + 1;
     info->channelId = channelId;
@@ -294,7 +296,8 @@ HWTEST_F(ClientTransProxyManagerMockTest, ClientTransProxySendBytesAck001, TestS
     int32_t Seq = 0;
     uint32_t dataSeq = 0;
     bool needAck = true;
-    ClientProxyChannelInfo *info = reinterpret_cast<ClientProxyChannelInfo *>(SoftBusCalloc(sizeof(ClientProxyChannelInfo)));
+    ClientProxyChannelInfo *info =
+        reinterpret_cast<ClientProxyChannelInfo *>(SoftBusCalloc(sizeof(ClientProxyChannelInfo)));
     ProxyChannelInfoDetail detail = {0};
     detail.osType = OH_TYPE;
     info->channelId = channelId;
@@ -334,7 +337,8 @@ HWTEST_F(ClientTransProxyManagerMockTest, ClientTransProxySendBytesAck002, TestS
     int32_t Seq = 0;
     uint32_t dataSeq = 1;
     bool needAck = true;
-    ClientProxyChannelInfo *info = reinterpret_cast<ClientProxyChannelInfo *>(SoftBusCalloc(sizeof(ClientProxyChannelInfo)));
+    ClientProxyChannelInfo *info =
+        reinterpret_cast<ClientProxyChannelInfo *>(SoftBusCalloc(sizeof(ClientProxyChannelInfo)));
     ProxyChannelInfoDetail detail = {0};
     detail.osType = OH_TYPE + 1;
     info->channelId = channelId;
@@ -370,7 +374,8 @@ HWTEST_F(ClientTransProxyManagerMockTest, ClientTransProxyProcessSessionData001,
 {
     int32_t ret = 0;
     int32_t channelId = 1;
-    ClientProxyChannelInfo *info = reinterpret_cast<ClientProxyChannelInfo *>(SoftBusCalloc(sizeof(ClientProxyChannelInfo)));
+    ClientProxyChannelInfo *info =
+        reinterpret_cast<ClientProxyChannelInfo *>(SoftBusCalloc(sizeof(ClientProxyChannelInfo)));
     ProxyChannelInfoDetail detail = {0};
     detail.osType = OH_TYPE;
     info->channelId = channelId;
@@ -417,7 +422,8 @@ HWTEST_F(ClientTransProxyManagerMockTest, ClientTransProxyProcessSessionData002,
             const void *data, uint32_t len, SessionPktType type) -> int32_t {return SOFTBUS_TIMOUT;};
 
     int32_t channelId = 1;
-    ClientProxyChannelInfo *info = reinterpret_cast<ClientProxyChannelInfo *>(SoftBusCalloc(sizeof(ClientProxyChannelInfo)));
+    ClientProxyChannelInfo *info =
+        reinterpret_cast<ClientProxyChannelInfo *>(SoftBusCalloc(sizeof(ClientProxyChannelInfo)));
     ProxyChannelInfoDetail detail = {0};
     detail.osType = OH_TYPE;
     info->channelId = channelId;
@@ -463,7 +469,8 @@ HWTEST_F(ClientTransProxyManagerMockTest, ClientTransProxyProcData001, TestSize.
 {
     int32_t ret = 0;
     int32_t channelId = 1;
-    ClientProxyChannelInfo *info = reinterpret_cast<ClientProxyChannelInfo *>(SoftBusCalloc(sizeof(ClientProxyChannelInfo)));
+    ClientProxyChannelInfo *info =
+        reinterpret_cast<ClientProxyChannelInfo *>(SoftBusCalloc(sizeof(ClientProxyChannelInfo)));
     ProxyChannelInfoDetail detail = {0};
     detail.osType = OH_TYPE;
     info->channelId = channelId;
@@ -562,7 +569,8 @@ HWTEST_F(ClientTransProxyManagerMockTest, TransProxyAsyncPackAndSendData001, Tes
     uint8_t *temSliceData = reinterpret_cast<uint8_t *>(SoftBusCalloc(sizeof(uint8_t)));
     SessionPktType pktType = TRANS_SESSION_BYTES;
 
-    ClientProxyChannelInfo *info = reinterpret_cast<ClientProxyChannelInfo *>(SoftBusCalloc(sizeof(ClientProxyChannelInfo)));
+    ClientProxyChannelInfo *info =
+        reinterpret_cast<ClientProxyChannelInfo *>(SoftBusCalloc(sizeof(ClientProxyChannelInfo)));
     ProxyChannelInfoDetail detail = {0};
     detail.osType = OH_TYPE;
     info->channelId = channelId;
@@ -607,7 +615,8 @@ HWTEST_F(ClientTransProxyManagerMockTest, TransProxyAsyncPackAndSendData002, Tes
     uint8_t *temSliceData = reinterpret_cast<uint8_t *>(SoftBusCalloc(sizeof(uint8_t)));
     SessionPktType pktType = TRANS_SESSION_BYTES;
 
-    ClientProxyChannelInfo *info = reinterpret_cast<ClientProxyChannelInfo *>(SoftBusCalloc(sizeof(ClientProxyChannelInfo)));
+    ClientProxyChannelInfo *info =
+        reinterpret_cast<ClientProxyChannelInfo *>(SoftBusCalloc(sizeof(ClientProxyChannelInfo)));
     ProxyChannelInfoDetail detail = {0};
     detail.osType = OH_TYPE;
     info->channelId = channelId;
@@ -668,7 +677,8 @@ HWTEST_F(ClientTransProxyManagerMockTest, TransProxyChannelSendBytes001, TestSiz
     uint8_t *temSliceData = reinterpret_cast<uint8_t *>(SoftBusCalloc(sizeof(uint8_t)));
     bool needAck = true;
 
-    ClientProxyChannelInfo *info = reinterpret_cast<ClientProxyChannelInfo *>(SoftBusCalloc(sizeof(ClientProxyChannelInfo)));
+    ClientProxyChannelInfo *info =
+        reinterpret_cast<ClientProxyChannelInfo *>(SoftBusCalloc(sizeof(ClientProxyChannelInfo)));
     ProxyChannelInfoDetail detail = {0};
     detail.isEncrypted = true;
     detail.sequence = 1;
@@ -716,7 +726,8 @@ HWTEST_F(ClientTransProxyManagerMockTest, TransProxyChannelSendBytes002, TestSiz
     uint32_t len = 1;
     bool needAck = true;
 
-    ClientProxyChannelInfo *info = reinterpret_cast<ClientProxyChannelInfo *>(SoftBusCalloc(sizeof(ClientProxyChannelInfo)));
+    ClientProxyChannelInfo *info =
+        reinterpret_cast<ClientProxyChannelInfo *>(SoftBusCalloc(sizeof(ClientProxyChannelInfo)));
     ProxyChannelInfoDetail detail = {0};
     detail.isEncrypted = false;
     detail.sequence = 1;
