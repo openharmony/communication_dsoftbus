@@ -510,7 +510,8 @@ HWTEST_F(ClientTransProxyManagerMockTest, ClientTransProxyProcData002, TestSize.
         const void *data, uint32_t len, SessionPktType type) -> int32_t {return SOFTBUS_TIMOUT;};
 
     int32_t channelId = 1;
-    ClientProxyChannelInfo *info = reinterpret_cast<ClientProxyChannelInfo *>(SoftBusCalloc(sizeof(ClientProxyChannelInfo)));
+    ClientProxyChannelInfo *info =
+        reinterpret_cast<ClientProxyChannelInfo *>(SoftBusCalloc(sizeof(ClientProxyChannelInfo)));
     ProxyChannelInfoDetail detail = {0};
     detail.osType = OH_TYPE;
     info->channelId = channelId;

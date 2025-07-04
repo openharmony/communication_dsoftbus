@@ -45,8 +45,8 @@ public:
     virtual int32_t ServerIpcSendMessage(
         int32_t channelId, int32_t channelType, const void *data, uint32_t len, int32_t msgType) = 0;
     virtual int32_t TransProxySessionDataLenCheck(uint32_t dataLen, SessionPktType type) = 0;
-    virtual int32_t TransProxyPackTlvBytes(
-        ProxyDataInfo *dataInfo, const char *sessionKey, SessionPktType flag, int32_t seq, DataHeadTlvPacketHead *info) = 0;
+    virtual int32_t TransProxyPackTlvBytes(ProxyDataInfo *dataInfo, const char *sessionKey,
+        SessionPktType flag, int32_t seq, DataHeadTlvPacketHead *info) = 0;
     virtual uint8_t *TransProxyPackData(
         ProxyDataInfo *dataInfo, uint32_t sliceNum, SessionPktType pktType, uint32_t cnt, uint32_t *dataLen) = 0;
     virtual int32_t ProcPendingPacket(int32_t channelId, int32_t seqNum, int32_t type) = 0;
@@ -66,15 +66,16 @@ public:
     MOCK_METHOD1(SoftBusNtoHl, uint32_t (uint32_t netlong));
     MOCK_METHOD4(ClientGetSessionIdByChannelId, int32_t (
         int32_t channelId, int32_t channelType, int32_t *sessionId, bool isClosing));
-    MOCK_METHOD3(ClientGetSessionCallbackAdapterById, int32_t (int32_t sessionId, SessionListenerAdapter *callbackAdapter, bool *isServer));
+    MOCK_METHOD3(ClientGetSessionCallbackAdapterById, int32_t (
+        int32_t sessionId, SessionListenerAdapter *callbackAdapter, bool *isServer));
     MOCK_METHOD2(DeleteDataSeqInfoList, int32_t (uint32_t dataSeq, int32_t channelId));
     MOCK_METHOD4(GetSupportTlvAndNeedAckById, int32_t (
         int32_t channelId, int32_t channelType, bool *supportTlv, bool *needAck));
     MOCK_METHOD5(ServerIpcSendMessage, int32_t (
         int32_t channelId, int32_t channelType, const void *data, uint32_t len, int32_t msgType));
     MOCK_METHOD2(TransProxySessionDataLenCheck, int32_t (uint32_t dataLen, SessionPktType type));
-    MOCK_METHOD5(TransProxyPackTlvBytes, int32_t (
-        ProxyDataInfo *dataInfo, const char *sessionKey, SessionPktType flag, int32_t seq, DataHeadTlvPacketHead *info));
+    MOCK_METHOD5(TransProxyPackTlvBytes, int32_t (ProxyDataInfo *dataInfo, const char *sessionKey,
+        SessionPktType flag, int32_t seq, DataHeadTlvPacketHead *info));
     MOCK_METHOD5(TransProxyPackData, uint8_t* (
         ProxyDataInfo *dataInfo, uint32_t sliceNum, SessionPktType pktType, uint32_t cnt, uint32_t *dataLen));
     MOCK_METHOD3(ProcPendingPacket, int32_t (int32_t channelId, int32_t seqNum, int32_t type));
