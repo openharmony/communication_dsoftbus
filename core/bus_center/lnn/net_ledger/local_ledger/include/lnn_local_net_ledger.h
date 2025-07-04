@@ -23,6 +23,8 @@
 extern "C" {
 #endif
 
+#define MAX_STATE_VERSION 0xFF
+
 int32_t LnnInitLocalLedger(void);
 int32_t LnnInitLocalLedgerDelay(void);
 void LnnDeinitLocalLedger(void);
