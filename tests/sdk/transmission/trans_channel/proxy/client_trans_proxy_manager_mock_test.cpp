@@ -764,7 +764,8 @@ HWTEST_F(ClientTransProxyManagerMockTest, TransProxyChannelSendBytes003, TestSiz
     uint32_t len = 1;
     bool needAck = true;
 
-    ClientProxyChannelInfo *info = reinterpret_cast<ClientProxyChannelInfo *>(SoftBusCalloc(sizeof(ClientProxyChannelInfo)));
+    ClientProxyChannelInfo *info =
+        reinterpret_cast<ClientProxyChannelInfo *>(SoftBusCalloc(sizeof(ClientProxyChannelInfo)));
     ProxyChannelInfoDetail detail = {0};
     detail.isEncrypted = true;
     detail.sequence = 1;
