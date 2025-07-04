@@ -48,6 +48,7 @@ public:
     template<typename Command>
     void ProcessNegotiateData(const std::string &remoteDeviceId, Command &command)
     {
+        CONN_CHECK_AND_RETURN_LOGE(!remoteDeviceId.empty(), CONN_WIFI_DIRECT, "remote device id is empty");
         auto aDeviceId = WifiDirectAnonymizeDeviceId(remoteDeviceId);
         CONN_LOGD(CONN_WIFI_DIRECT, "remoteDeviceId=%{public}s", aDeviceId.c_str());
         std::lock_guard lock(executorLock_);
