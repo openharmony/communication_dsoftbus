@@ -41,7 +41,7 @@ public:
     virtual ~P2pEntityInterface() = default;
 
     virtual void CancelNewClientJoining(const std::string &remoteMac) = 0;
-    virtual void NotifyNewClientJoining(const std::string &remoteMac) = 0;
+    virtual void NotifyNewClientJoining(const std::string &remoteMac, int waitTime) = 0;
     virtual P2pOperationResult CreateGroup(const P2pCreateGroupParam &param) = 0;
     virtual P2pOperationResult Connect(const P2pConnectParam &param) = 0;
     virtual P2pOperationResult DestroyGroup(const P2pDestroyGroupParam &param) = 0;
@@ -63,7 +63,7 @@ public:
     }
 
     MOCK_METHOD(void, CancelNewClientJoining, (const std::string &remoteMac), (override));
-    MOCK_METHOD(void, NotifyNewClientJoining, (const std::string &remoteMac), (override));
+    MOCK_METHOD(void, NotifyNewClientJoining, (const std::string &remoteMac, int waitTime), (override));
     MOCK_METHOD(P2pOperationResult, CreateGroup, (const P2pCreateGroupParam &param), (override));
     MOCK_METHOD(P2pOperationResult, Connect, (const P2pConnectParam &param), (override));
     MOCK_METHOD(P2pOperationResult, DestroyGroup, (const P2pDestroyGroupParam &param), (override));
