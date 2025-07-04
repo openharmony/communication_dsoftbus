@@ -75,8 +75,7 @@ static SoftBusList *InitSoftBusList(void)
 {
     int32_t ret = 0;
     SoftBusList *list = reinterpret_cast<SoftBusList *>(SoftBusCalloc(sizeof(SoftBusList)));
-    (void)memset_s(list, sizeof(SoftBusList), 0, sizeof(SoftBusList));
-
+    
     SoftBusMutexAttr mutexAttr;
     mutexAttr.type = SOFTBUS_MUTEX_RECURSIVE;
     ret = SoftBusMutexInit(&list->lock, &mutexAttr);
