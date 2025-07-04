@@ -22,6 +22,7 @@
 #include "client_trans_proxy_file_manager.h"
 #include "client_trans_session_manager.h"
 #include "trans_proxy_process_data.h"
+#include "client_trans_socket_manager.h"
 #include "trans_server_proxy.h"
 
 namespace OHOS {
@@ -52,6 +53,8 @@ public:
     virtual int32_t ProcPendingPacket(int32_t channelId, int32_t seqNum, int32_t type) = 0;
     virtual int32_t AddPendingPacket(int32_t channelId, int32_t seqNum, int32_t type) = 0;
     virtual int32_t TransProxyDecryptPacketData(int32_t seq, ProxyDataInfo *dataInfo, const char *sessionKey) = 0;
+    virtual int32_t DataSeqInfoListAddItem(uint32_t dataSeq, int32_t channelId,
+        int32_t socketId, int32_t channelType);
 };
 
 class ClientTransProxyManagerInterfaceMock : public ClientTransProxyManagerInterface {
@@ -81,6 +84,8 @@ public:
     MOCK_METHOD3(ProcPendingPacket, int32_t (int32_t channelId, int32_t seqNum, int32_t type));
     MOCK_METHOD3(AddPendingPacket, int32_t (int32_t channelId, int32_t seqNum, int32_t type));
     MOCK_METHOD3(TransProxyDecryptPacketData, int32_t (int32_t seq, ProxyDataInfo *dataInfo, const char *sessionKey));
+    MOCK_METHOD4(DataSeqInfoListAddItem, int32_t (uint32_t dataSeq, int32_t channelId,
+        int32_t socketId, int32_t channelType));
 };
 }
 #endif

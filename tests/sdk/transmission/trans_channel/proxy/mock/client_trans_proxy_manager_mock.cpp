@@ -50,12 +50,10 @@ int32_t PendingInit(int32_t type)
 {
     return GetClientTransProxyManagerInterface()->PendingInit(type);
 }
-
 uint32_t SoftBusHtoLl(uint32_t value)
 {
     return GetClientTransProxyManagerInterface()->SoftBusHtoLl(value);
 }
-
 uint32_t SoftBusHtoNl(uint32_t value)
 {
     return GetClientTransProxyManagerInterface()->SoftBusHtoNl(value);
@@ -124,6 +122,11 @@ int32_t AddPendingPacket(int32_t channelId, int32_t seqNum, int32_t type)
 int32_t TransProxyDecryptPacketData(int32_t seq, ProxyDataInfo *dataInfo, const char *sessionKey)
 {
     return GetClientTransProxyManagerInterface()->TransProxyDecryptPacketData(seq, dataInfo, sessionKey);
+}
+
+int32_t DataSeqInfoListAddItem(uint32_t dataSeq, int32_t channelId, int32_t socketId, int32_t channelType)
+{
+    return GetClientTransProxyManagerInterface()->DataSeqInfoListAddItem(dataSeq, channelId, socketId, channelType);
 }
 }
 }

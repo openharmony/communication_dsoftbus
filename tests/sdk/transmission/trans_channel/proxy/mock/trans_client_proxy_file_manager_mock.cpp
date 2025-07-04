@@ -99,5 +99,41 @@ int32_t ServerIpcSendMessage(int32_t channelId, int32_t channelType, const void 
 {
     return GetTransClientProxyFileManagerInterface()->ServerIpcSendMessage(channelId, channelType, data, len, msgType);
 }
+
+int32_t CreatePendingPacket(uint32_t id, uint64_t seq)
+{
+    return GetTransClientProxyFileManagerInterface()->CreatePendingPacket(id, seq);
+}
+
+int32_t ProxyChannelSendFileStream(int32_t channelId, const char *data, uint32_t len, int32_t type)
+{
+    return GetTransClientProxyFileManagerInterface()->ProxyChannelSendFileStream(channelId, data, len, type);
+}
+
+int32_t GetPendingPacketData(uint32_t id, uint64_t seq, uint32_t waitMillis, bool isDelete, TransPendData *data)
+{
+    return GetTransClientProxyFileManagerInterface()->GetPendingPacketData(id, seq, waitMillis, isDelete, data);
+}
+
+int64_t SoftBusPwriteFile(int32_t fd, const void *buf, uint64_t writeBytes, uint64_t offset)
+{
+    return GetTransClientProxyFileManagerInterface()->SoftBusPwriteFile(fd, buf, writeBytes, offset);
+}
+
+int32_t SendFileAckReqAndResData(int32_t channelId, uint32_t startSeq, uint32_t value, int32_t type)
+{
+    return GetTransClientProxyFileManagerInterface()->SendFileAckReqAndResData(
+        channelId, startSeq, value, type);
+}
+
+void DeletePendingPacket(uint32_t id, uint64_t seq)
+{
+    return GetTransClientProxyFileManagerInterface()->DeletePendingPacket(id, seq);
+}
+
+int32_t AckResponseDataHandle(const SendListenerInfo *info, const char *data, uint32_t len)
+{
+    return GetTransClientProxyFileManagerInterface()->AckResponseDataHandle(info, data, len);
+}
 }
 }
