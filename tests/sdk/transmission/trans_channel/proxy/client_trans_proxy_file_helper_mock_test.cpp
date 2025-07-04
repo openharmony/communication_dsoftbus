@@ -68,7 +68,7 @@ HWTEST_F(ClientTransProxyFileHelperMockTest, SendFileTransResult001, TestSize.Le
     EXPECT_CALL(ClientHelperMock, SoftBusHtoLll).WillRepeatedly(Return(seq64));
     EXPECT_CALL(ClientHelperMock, ClientTransProxyGetInfoByChannelId).WillRepeatedly(Return(SOFTBUS_OK));
     EXPECT_CALL(ClientHelperMock, ClientTransProxyPackAndSendData).WillRepeatedly(Return(SOFTBUS_OK));
-    ret = SendFileTransResult(channelId ,seq, result, side);
+    ret = SendFileTransResult(channelId , seq, result, side);
     EXPECT_EQ(SOFTBUS_OK, ret);
 }
 
@@ -92,7 +92,7 @@ HWTEST_F(ClientTransProxyFileHelperMockTest, SendFileAckReqAndResData001, TestSi
     EXPECT_CALL(ClientHelperMock, SoftBusHtoLll).WillRepeatedly(Return(seq64));
     EXPECT_CALL(ClientHelperMock, ClientTransProxyGetInfoByChannelId).WillRepeatedly(Return(SOFTBUS_OK));
     EXPECT_CALL(ClientHelperMock, ClientTransProxyPackAndSendData).WillRepeatedly(Return(SOFTBUS_OK));
-    ret = SendFileAckReqAndResData(channelId ,seq, result, side);
+    ret = SendFileAckReqAndResData(channelId , seq, result, side);
     EXPECT_EQ(SOFTBUS_OK, ret);
 }
 

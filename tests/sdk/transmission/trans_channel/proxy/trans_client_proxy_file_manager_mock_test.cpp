@@ -585,6 +585,7 @@ HWTEST_F(TransClientProxyFileManagerMockTest, HandleSendProgress001, TestSize.Le
     fileListener->socketSendCallback = [](int32_t socket, FileEvent *event) {};
     sendInfo->fileListener = *fileListener;
     (void)HandleSendProgress(sendInfo, fileOffset, fileSize);
+    EXPECT_EQ(0, fileSize);
 
     SoftBusFree(sendInfo);
     SoftBusFree(fileListener);
@@ -637,6 +638,7 @@ HWTEST_F(TransClientProxyFileManagerMockTest, ClientDeleteRecvFileList001, TestS
 {
     int32_t sessionId = -1;
     (void)ClientDeleteRecvFileList(sessionId);
+    EXPECT_EQ(-1, sessionId);
 }
 
 /**
@@ -680,7 +682,8 @@ HWTEST_F(TransClientProxyFileManagerMockTest, HandleFileTransferCompletion001, T
 
     recipient->fileListener.socketRecvCallback = [] (int32_t socket, FileEvent *event){return;};
     HandleFileTransferCompletion(recipient, sessionId, file);
-    
+    EXPECT_EQ(1, sessionId);
+
     SoftBusFree(recipient);
     SoftBusFree(file);
 }
