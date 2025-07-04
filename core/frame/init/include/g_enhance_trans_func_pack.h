@@ -18,6 +18,7 @@
 #include <stdint.h>
 
 #include "lnn_lane_interface_struct.h"
+#include "softbus_proxychannel_message_struct.h"
 #include "softbus_trans_def.h"
 #include "softbus_def.h"
 
@@ -30,6 +31,15 @@ int32_t InitQosPacked(void);
 void NotifyQosChannelClosedPacked(int32_t channelId, int32_t channelType);
 void GetExtQosInfoPacked(const SessionParam *param, QosInfo *qosInfo, uint32_t index, AllocExtendInfo *extendInfo);
 int32_t NotifyQosChannelOpenedPacked(const ChannelInfo *chanInfo);
+int32_t TransReversePullUpPacked(const uint32_t chatMode, const uint32_t businessFlag, const char *pkgName);
+int32_t TransGetPkgnameByBusinessFlagPacked(const uint32_t businessFlag, char *pkgName, const uint32_t pkgLen);
+int32_t InitSoftbusPagingPacked(void);
+void DeInitSoftbusPagingPacked(void);
+void TransPagingDeathCallbackPacked(const char *pkgName, int32_t pid);
+bool TransHasAndUpdatePagingListenPacked(ProxyChannelInfo *info);
+int32_t TransPagingGetPidAndDataByFlgPacked(bool isClient, uint32_t businessFlag, int32_t *pid,
+    char *data, uint32_t *len);
+int32_t TransDelPagingInfoByBusinessFlagPacked(uint32_t businessFlag);
 
 #ifdef __cplusplus
 }

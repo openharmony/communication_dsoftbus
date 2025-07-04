@@ -20,9 +20,11 @@
 #include "g_enhance_trans_func.h"
 #include "lnn_lane_interface_struct.h"
 #include "softbus_app_info.h"
-#include "softbus_trans_def.h"
 #include "stdbool.h"
 #include "stdint.h"
+#include "softbus_trans_def.h"
+#include "softbus_proxychannel_message_struct.h"
+#include "softbus_proxychannel_transceiver.h"
 #include "trans_auth_lane_pending_ctl_struct.h"
 #include "trans_inner_session_struct.h"
 
@@ -80,6 +82,16 @@ typedef int32_t (*TransSendDataFunc)(int32_t channelId, const void *data, uint32
 typedef int32_t (*ProxyDataRecvHandlerFunc)(int32_t channelId, const char *data, uint32_t len);
 typedef int32_t (*SoftbusAddServiceInnerForEnhanceFunc)(const char *pkgName, ISessionListenerInner *listener,
     int32_t pid);
+typedef void (*TransProxyCloseChannelByRequestIdFunc)(uint32_t requestId);
+typedef int32_t (*TransProxyGetProxyChannelInfoByChannelIdFunc)(int32_t channelId, ProxyChannelInfo *chan);
+typedef int32_t (*TransProxyGetProxyChannelIdByAuthReqFunc)(uint32_t reqId, int32_t *channelId);
+typedef void (*ReleaseProxyChannelIdFunc)(int32_t channelId);
+typedef int32_t (*TransProxyDelChanByChanIdFunc)(int32_t channelId);
+typedef int32_t (*TransProxyCreatePagingChanInfoFunc)(ProxyChannelInfo *chan);
+typedef void (*TransProxyPagingHandshakeMsgToLoopFunc)(int32_t channelId, uint8_t *authKey, uint32_t keyLen);
+typedef int32_t (*TransPagingWaitListenStatusFunc)(const uint32_t businessFlag, PagingWaitListenStatus status);
+typedef int32_t (*TransAddConnItemFunc)(ProxyConnInfo *chan);
+typedef int32_t (*TransAddConnRefByConnIdFunc)(uint32_t connId, bool isServer);
 
 typedef struct TagTransOpenFuncList {
     TransProxyGetAppInfoByChanIdFunc transProxyGetAppInfoByChanId;
@@ -116,6 +128,16 @@ typedef struct TagTransOpenFuncList {
     TransSendDataFunc transSendData;
     ProxyDataRecvHandlerFunc proxyDataRecvHandler;
     SoftbusAddServiceInnerForEnhanceFunc softbusAddServiceInnerForEnhance;
+    TransProxyCloseChannelByRequestIdFunc transProxyCloseChannelByRequestId;
+    TransProxyGetProxyChannelInfoByChannelIdFunc transProxyGetProxyChannelInfoByChannelId;
+    TransProxyGetProxyChannelIdByAuthReqFunc transProxyGetProxyChannelIdByAuthReq;
+    ReleaseProxyChannelIdFunc releaseProxyChannelId;
+    TransProxyDelChanByChanIdFunc transProxyDelChanByChanId;
+    TransProxyCreatePagingChanInfoFunc transProxyCreatePagingChanInfo;
+    TransProxyPagingHandshakeMsgToLoopFunc transProxyPagingHandshakeMsgToLoop;
+    TransPagingWaitListenStatusFunc transPagingWaitListenStatus;
+    TransAddConnItemFunc transAddConnItem;
+    TransAddConnRefByConnIdFunc transAddConnRefByConnId;
 } TransOpenFuncList;
 
 #ifdef __cplusplus

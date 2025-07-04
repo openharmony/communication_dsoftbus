@@ -33,5 +33,13 @@ int32_t TransRegisterEnhanceFunc(void *soHandle)
     g_transEnhanceFuncList.getExtQosInfo = dlsym(soHandle, "GetExtQosInfo");
     g_transEnhanceFuncList.setDefaultQdisc = dlsym(soHandle, "SetDefaultQdisc");
 
+    g_transEnhanceFuncList.transReversePullUp = dlsym(soHandle, "TransReversePullUp");
+    g_transEnhanceFuncList.transGetPkgnameByBusinessFlag = dlsym(soHandle, "TransGetPkgnameByBusinessFlag");
+    g_transEnhanceFuncList.initSoftbusPaging = dlsym(soHandle, "InitSoftbusPaging");
+    g_transEnhanceFuncList.deInitSoftbusPaging = dlsym(soHandle, "DeInitSoftbusPaging");
+    g_transEnhanceFuncList.transPagingDeathCallback = dlsym(soHandle, "TransPagingDeathCallback");
+    g_transEnhanceFuncList.transHasAndUpdatePagingListen = dlsym(soHandle, "TransHasAndUpdatePagingListen");
+    g_transEnhanceFuncList.transPagingGetPidAndDataByFlg = dlsym(soHandle, "TransPagingGetPidAndDataByFlg");
+    g_transEnhanceFuncList.transDelPagingInfoByBusinessFlag = dlsym(soHandle, "TransDelPagingInfoByBusinessFlag");
     return SOFTBUS_OK;
 }

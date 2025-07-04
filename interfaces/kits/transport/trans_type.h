@@ -91,10 +91,10 @@ typedef struct {
     char *name;              /**< Peer socket name, maximum length 255 bytes */
     char *networkId;         /**< Peer network ID, maximum length 64 bytes */
     char *pkgName;           /**< Peer package name, maximum length 64 bytes */
+    TransDataType dataType;  /**< Data type of peer socket*/
     char *accountId;         /**< Peer accountId, maximum length 64 bytes */
     void *extraData;         /**< Peer extradata, maximum length 5 bytes */
     uint32_t dataLen;        /**< Peer dataLen, maximum 5 */
-    TransDataType dataType;  /**< Data type of peer socket*/
 } PeerSocketInfo;
 
 /**

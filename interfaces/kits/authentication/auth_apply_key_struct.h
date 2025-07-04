@@ -20,6 +20,7 @@
 
 #include "common_list.h"
 #include "softbus_adapter_crypto.h"
+#include "softbus_common.h"
 #include "softbus_def.h"
 
 #ifdef __cplusplus
@@ -41,6 +42,7 @@ typedef struct {
     RequestBusinessType type;
     char udidHash[D2D_UDID_HASH_STR_LEN];
     char accountHash[D2D_ACCOUNT_HASH_STR_LEN];
+    char peerAccountHash[SHA_256_HEX_HASH_LEN];
 } RequestBusinessInfo;
 
 typedef struct {
