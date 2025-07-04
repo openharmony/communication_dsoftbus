@@ -2060,4 +2060,34 @@ HWTEST_F(SoftbusServerStubTest, SoftbusServerStubTest055, TestSize.Level1)
     ret = softBusServer->GetPeerDeviceIdInner(data, reply);
     EXPECT_EQ(SOFTBUS_INVALID_PARAM, ret);
 }
+
+/**
+ * @tc.name: SoftbusServerStubTest056
+ * @tc.desc: Verify the Create and Remove SessionServerInner function.
+ * @tc.type: FUNC
+ * @tc.require:
+ */
+HWTEST_F(SoftbusServerStubTest, SoftbusServerStubTest056, TestSize.Level1)
+{
+    sptr<OHOS::SoftBusServerStub> softBusServer = new OHOS::SoftBusServer(SOFTBUS_SERVER_SA_ID, true);
+    ASSERT_NE(nullptr, softBusServer);
+    NiceMock<SoftbusServerStubTestInterfaceMock> softbusServerStubMock;
+    char test[10] = "test";
+    MessageParcel datas;
+    MessageParcel reply;
+    datas.WriteCString(test);
+    datas.WriteCString(test);
+    int32_t ret = softBusServer->CreateSessionServerInner(datas, reply);
+    EXPECT_EQ(SOFTBUS_OK, ret);
+
+    datas.WriteCString(test);
+    datas.WriteCString(test);
+    EXPECT_CALL(softbusServerStubMock, SoftBusCheckIsSystemApp).WillRepeatedly(Return(true));
+    ret = softBusServer->CreateSessionServerInner(datas, reply);
+    EXPECT_EQ(SOFTBUS_OK, ret);
+
+    datas.WriteCString(test);
+    ret = softBusServer->RemoveSessionServerInner(datas, reply);
+    EXPECT_EQ(SOFTBUS_OK, ret);
+}
 }
