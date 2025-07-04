@@ -176,3 +176,7 @@ if (dsoftbus_feature_conn_pv1 && softbus_communication_wifi_feature &&
 if (dsoftbus_feature_deps_sle) {
   defines += [ "DSOFTBUS_FEATURE_SLE" ]
 }
+
+if (dsoftbus_feature_deps_remoteP2p_service) {
+  defines += [ "DSOFTBUS_DEVICE_CLOUD_CONVERGENCE" ]
+}

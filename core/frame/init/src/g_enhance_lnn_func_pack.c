@@ -919,6 +919,15 @@ void LnnDeinitFastOfflinePacked(void)
     return pfnLnnEnhanceFuncList->lnnDeinitFastOffline();
 }
 
+int32_t LnnDeviceCloudConvergenceInitPacked(void)
+{
+    LnnEnhanceFuncList *pfnLnnEnhanceFuncList = LnnEnhanceFuncListGet();
+    if (LnnCheckFuncPointer((void *)pfnLnnEnhanceFuncList->lnnDeviceCloudConvergenceInit) != SOFTBUS_OK) {
+        return SOFTBUS_OK;
+    }
+    return pfnLnnEnhanceFuncList->lnnDeviceCloudConvergenceInit();
+}
+
 int32_t LnnRemoveLinkFinderInfoPacked(const char *networkId)
 {
     LnnEnhanceFuncList *pfnLnnEnhanceFuncList = LnnEnhanceFuncListGet();
@@ -1482,4 +1491,13 @@ int32_t LnnDumpControlLaneGroupInfoPacked(int32_t fd)
         return SOFTBUS_OK;
     }
     return pfnLnnEnhanceFuncList->lnnDumpControlLaneGroupInfo(fd);
+}
+
+void CheckNeedCloudSyncOfflinePacked(DiscoveryType type)
+{
+    LnnEnhanceFuncList *pfnLnnEnhanceFuncList = LnnEnhanceFuncListGet();
+    if (LnnCheckFuncPointer((void *)pfnLnnEnhanceFuncList->checkNeedCloudSyncOffline) != SOFTBUS_OK) {
+        return;
+    }
+    pfnLnnEnhanceFuncList->checkNeedCloudSyncOffline(type);
 }
