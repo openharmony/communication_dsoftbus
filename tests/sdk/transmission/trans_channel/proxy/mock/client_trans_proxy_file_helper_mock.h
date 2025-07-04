@@ -21,8 +21,8 @@
 #include "client_trans_proxy_manager.h"
 #include "client_trans_proxy_file_manager.h"
 #include "client_trans_session_manager.h"
-#include "trans_proxy_process_data.h"
 #include "client_trans_socket_manager.h"
+#include "trans_proxy_process_data.h"
 #include "trans_server_proxy.h"
 
 namespace OHOS {

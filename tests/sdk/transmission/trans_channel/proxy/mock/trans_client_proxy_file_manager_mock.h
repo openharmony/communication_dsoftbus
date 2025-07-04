@@ -18,11 +18,11 @@
 
 #include <gmock/gmock.h>
 
+#include "client_trans_pending.h"
+#include "client_trans_proxy_file_manager.h"
 #include "softbus_def.h"
 #include "softbus_utils.h"
 #include "trans_proxy_process_data.h"
-#include "client_trans_pending.h"
-#include "client_trans_proxy_file_manager.h"
 
 namespace OHOS {
 class TransClientProxyFileManagerInterface {
