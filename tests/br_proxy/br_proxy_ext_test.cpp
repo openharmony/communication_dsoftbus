@@ -302,11 +302,11 @@ HWTEST_F(BrProxyExtTest, IsProxyChannelEnabledTest001, TestSize.Level1)
     int32_t ret = IsProxyChannelEnabled(0);
     EXPECT_EQ(false, ret);
 
-    EXPECT_CALL(brProxyExtMock, ClientRegisterBrProxyService).WillOnce(Return(SOFTBUS_TRANS_INVALID_CHANNEL_ID));
+    EXPECT_CALL(brProxyExtMock, ClientRegisterService).WillOnce(Return(SOFTBUS_TRANS_INVALID_CHANNEL_ID));
     ret = IsProxyChannelEnabled(0);
     EXPECT_EQ(false, ret);
 
-    EXPECT_CALL(brProxyExtMock, ClientRegisterBrProxyService).WillOnce(Return(SOFTBUS_OK));
+    EXPECT_CALL(brProxyExtMock, ClientRegisterService).WillOnce(Return(SOFTBUS_OK));
     EXPECT_CALL(brProxyExtMock, ServerIpcIsProxyChannelEnabled).WillOnce(Return(SOFTBUS_INVALID_PARAM));
     ret = IsProxyChannelEnabled(0);
     EXPECT_EQ(false, ret);
