@@ -285,6 +285,16 @@ static int32_t AddAuthTcpConnFdItem(int32_t fd)
         AUTH_LOGE(AUTH_CONN, "RequireAuthTcpConnFdListLock fail");
         return SOFTBUS_LOCK_ERR;
     }
+    AuthTcpConnInstance *item = NULL;
+    LIST_FOR_EACH_ENTRY(item, &g_authTcpConnFdList, AuthTcpConnInstance, node) {
+        if (item->fd != fd) {
+            continue;
+        }
+        AUTH_LOGE(AUTH_CONN, "fd already exist.");
+        ReleaseAuthTcpConnFdListLock();
+        return SOFTBUS_OK;
+    }
+
     AuthTcpConnInstance *connItem = (AuthTcpConnInstance *)SoftBusCalloc(sizeof(AuthTcpConnInstance));
     if (connItem == NULL) {
         AUTH_LOGE(AUTH_CONN, "malloc connItem fail");
@@ -336,6 +346,12 @@ void DeleteAuthTcpConnFdItemByConnId(int32_t fd)
     ReleaseAuthTcpConnFdListLock();
 }
 
+static bool IsNeededFdControl(ListenerModule module)
+{
+    return (module == AUTH || module == AUTH_USB || module == AUTH_RAW_P2P_CLIENT ||
+        module == AUTH_RAW_P2P_SERVER || module == AUTH_SESSION_KEY);
+}
+
 static int32_t ProcessSocketOutEvent(ListenerModule module, int32_t fd)
 {
     AUTH_LOGI(AUTH_CONN, "socket client connect succ: fd=%{public}d.", fd);
@@ -348,7 +364,7 @@ static int32_t ProcessSocketOutEvent(ListenerModule module, int32_t fd)
         AUTH_LOGE(AUTH_CONN, "set none block mode fail.");
         goto FAIL;
     }
-    if (AddAuthTcpConnFdItem(fd) != SOFTBUS_OK) {
+    if (IsNeededFdControl(module) && AddAuthTcpConnFdItem(fd) != SOFTBUS_OK) {
         AUTH_LOGE(AUTH_CONN, "insert auth tcp conn fd item fail.");
         goto FAIL;
     }
@@ -366,7 +382,7 @@ static int32_t ProcessSocketInEvent(ListenerModule module, int32_t fd)
 {
     AUTH_CHECK_AND_RETURN_RET_LOGE(RequireAuthTcpConnFdListLock(), SOFTBUS_LOCK_ERR, AUTH_CONN,
         "RequireAuthTcpConnFdListLock fail");
-    if ((module == AUTH || module == AUTH_USB) && !IsExistAuthTcpConnFdItemByConnId(fd)) {
+    if (IsNeededFdControl(module) && !IsExistAuthTcpConnFdItemByConnId(fd)) {
         AUTH_LOGE(AUTH_CONN, "fd=%{public}d not exist, ignore", fd);
         ReleaseAuthTcpConnFdListLock();
         return SOFTBUS_INVALID_PARAM;
@@ -430,8 +446,14 @@ static int32_t OnConnectEvent(ListenerModule module, int32_t cfd, const ConnectO
             return SOFTBUS_NETWORK_SET_KEEPALIVE_OPTION_FAIL;
         }
     }
+    if (IsNeededFdControl(module) && AddAuthTcpConnFdItem(cfd) != SOFTBUS_OK) {
+        AUTH_LOGE(AUTH_CONN, "insert auth tcp conn fd item fail.");
+        ConnShutdownSocket(cfd);
+        return SOFTBUS_MEM_ERR;
+    }
     if (AddTrigger(module, cfd, READ_TRIGGER) != SOFTBUS_OK) {
         AUTH_LOGE(AUTH_CONN, "AddTrigger fail.");
+        DeleteAuthTcpConnFdItemByConnId(cfd);
         ConnShutdownSocket(cfd);
         return SOFTBUS_AUTH_ADD_TRIGGER_FAIL;
     }
@@ -441,16 +463,11 @@ static int32_t OnConnectEvent(ListenerModule module, int32_t cfd, const ConnectO
         if (RouteBuildServerAuthManager(cfd, clientAddr) != SOFTBUS_OK) {
             AUTH_LOGE(AUTH_CONN, "build auth manager fail.");
             (void)DelTrigger(module, cfd, READ_TRIGGER);
+            DeleteAuthTcpConnFdItemByConnId(cfd);
             ConnShutdownSocket(cfd);
             return SOFTBUS_AUTH_MANAGER_BUILD_FAIL;
         }
         return SOFTBUS_OK;
-    }
-    if ((module == AUTH || module == AUTH_USB) && AddAuthTcpConnFdItem(cfd) != SOFTBUS_OK) {
-        AUTH_LOGE(AUTH_CONN, "insert auth tcp conn fd item fail.");
-        (void)DelTrigger(module, cfd, READ_TRIGGER);
-        ConnShutdownSocket(cfd);
-        return SOFTBUS_MEM_ERR;
     }
     NotifyConnected(module, cfd, false);
     return SOFTBUS_OK;
@@ -539,8 +556,14 @@ static int32_t SocketConnectInner(
     }
     int32_t fd = ret;
     TriggerType triggerMode = isBlockMode ? READ_TRIGGER : WRITE_TRIGGER;
+    if (isBlockMode && IsNeededFdControl(module) && AddAuthTcpConnFdItem(fd) != SOFTBUS_OK) {
+        AUTH_LOGE(AUTH_CONN, "insert auth tcp conn fd item fail.");
+        ConnShutdownSocket(fd);
+        return AUTH_INVALID_FD;
+    }
     if (AuthTcpCreateListener(module, fd, triggerMode) != SOFTBUS_OK) {
         AUTH_LOGE(AUTH_CONN, "AddTrigger fail.");
+        DeleteAuthTcpConnFdItemByConnId(fd);
         ConnShutdownSocket(fd);
         return AUTH_INVALID_FD;
     }
@@ -548,6 +571,7 @@ static int32_t SocketConnectInner(
         SOFTBUS_OK) {
         AUTH_LOGE(AUTH_CONN, "set tcp keep alive fail.");
         (void)DelTrigger(module, fd, triggerMode);
+        DeleteAuthTcpConnFdItemByConnId(fd);
         ConnShutdownSocket(fd);
         return AUTH_INVALID_FD;
     }
@@ -657,20 +681,21 @@ int32_t SocketConnectDevice(const char *ip, int32_t port, bool isBlockMode, int3
     int32_t fd = ret;
     TriggerType triggerMode = isBlockMode ? READ_TRIGGER : WRITE_TRIGGER;
     ListenerModule module = (ifnameIdx == USB_IF) ? AUTH_USB : AUTH;
+    if (isBlockMode && AddAuthTcpConnFdItem(fd) != SOFTBUS_OK) {
+        AUTH_LOGE(AUTH_CONN, "insert auth tcp conn fd item fail.");
+        ConnShutdownSocket(fd);
+        return AUTH_INVALID_FD;
+    }
     if (AddTrigger(module, fd, triggerMode) != SOFTBUS_OK) {
         AUTH_LOGE(AUTH_CONN, "AddTrigger fail.");
+        DeleteAuthTcpConnFdItemByConnId(fd);
         ConnShutdownSocket(fd);
         return AUTH_INVALID_FD;
     }
     if (SetTcpKeepaliveAndIpTos(isBlockMode, ifnameIdx, triggerMode, module, fd) != SOFTBUS_OK) {
         AUTH_LOGE(AUTH_CONN, "SetTcpKeepaliveAndIpTos fail.");
         (void)DelTrigger(module, fd, triggerMode);
-        ConnShutdownSocket(fd);
-        return AUTH_INVALID_FD;
-    }
-    if (isBlockMode && AddAuthTcpConnFdItem(fd) != SOFTBUS_OK) {
-        AUTH_LOGE(AUTH_CONN, "insert auth tcp conn fd item fail.");
-        (void)DelTrigger(module, fd, triggerMode);
+        DeleteAuthTcpConnFdItemByConnId(fd);
         ConnShutdownSocket(fd);
         return AUTH_INVALID_FD;
     }
@@ -749,7 +774,7 @@ int32_t SocketPostBytes(int32_t fd, const AuthDataHead *head, const uint8_t *dat
         SoftBusFree(buf);
         return SOFTBUS_LOCK_ERR;
     }
-    if ((pktHead.module == AUTH || pktHead.module == AUTH_USB) && !IsExistAuthTcpConnFdItemByConnId(fd)) {
+    if (IsNeededFdControl((ListenerModule)pktHead.module) && !IsExistAuthTcpConnFdItemByConnId(fd)) {
         AUTH_LOGE(AUTH_CONN, "fd=%{public}d not exist, ignore", fd);
         ReleaseAuthTcpConnFdListLock();
         SoftBusFree(buf);
@@ -903,7 +928,7 @@ int32_t AuthOpenChannel(const char *ip, int32_t port, int32_t ifnameIdx)
 void AuthCloseChannel(int32_t channelId, int32_t moduleId)
 {
     AUTH_LOGI(AUTH_CONN, "close auth channel, moduleId=%{public}d, id=%{public}d.", moduleId, channelId);
-    if (moduleId == AUTH_USB || moduleId == AUTH) {
+    if (IsNeededFdControl((ListenerModule)moduleId)) {
         DeleteAuthTcpConnFdItemByConnId(channelId);
     }
     SocketDisconnectDevice((ListenerModule)moduleId, channelId);
