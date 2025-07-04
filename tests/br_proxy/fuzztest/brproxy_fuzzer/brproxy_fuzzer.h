@@ -13,9 +13,9 @@
  * limitations under the License.
  */
 
-#ifndef BR_PROXY_FUZZER_H
-#define BR_PROXY_FUZZER_H
+#ifndef BRPROXY_FUZZER_H
+#define BRPROXY_FUZZER_H
 
-#define FUZZ_PROJECT_NAME "br_proxy_fuzzer"
+#define FUZZ_PROJECT_NAME "brproxy_fuzzer"
 
 #endif
