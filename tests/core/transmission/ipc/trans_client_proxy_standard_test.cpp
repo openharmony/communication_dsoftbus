@@ -219,7 +219,7 @@ HWTEST_F(TransClientProxyStandardTest, TransClientProxyStandardTest006, TestSize
     uint32_t count = 1;
 
     int32_t ret = clientProxy->OnClientChannelOnQos(channelId, channelType, event, qos, count);
-    EXPECT_NE(SOFTBUS_INVALID_PARAM, ret);
+    EXPECT_EQ(SOFTBUS_INVALID_PARAM, ret);
 }
 
 /**
@@ -291,7 +291,7 @@ HWTEST_F(TransClientProxyStandardTest, TransClientProxyStandardTest009, TestSize
     int32_t channelState = 1;
 
     int32_t ret = clientProxy->OnBrProxyStateChanged(channelId, channelState);
-    EXPECT_EQ(SOFTBUS_INVALID_PARAM, ret);
+    EXPECT_EQ(SOFTBUS_TRANS_PROXY_SEND_REQUEST_FAILED, ret);
 }
 
 /**
@@ -312,7 +312,7 @@ HWTEST_F(TransClientProxyStandardTest, TransClientProxyStandardTest010, TestSize
     bool isEmpowered = true;
 
     int32_t ret = clientProxy->OnBrProxyQueryPermission(bundleName, &isEmpowered);
-    EXPECT_EQ(SOFTBUS_INVALID_PARAM, ret);
+    EXPECT_EQ(SOFTBUS_TRANS_PROXY_SEND_REQUEST_FAILED, ret);
 
     clientProxy->OnDataLevelChanged(nullptr, nullptr);
     clientProxy->OnMsdpRangeResult(nullptr);

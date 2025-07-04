@@ -120,6 +120,13 @@ int32_t DataSeqInfoListAddItem(uint32_t dataSeq, int32_t channelId, int32_t sock
 int32_t DeleteDataSeqInfoList(uint32_t dataSeq, int32_t channelId);
 
 void TransAsyncSendBytesTimeoutProc(void);
+
+int32_t GeneratePagingId(void);
+
+void DestroyPagingId(void);
+
+int32_t ClientDeletePagingSession(int32_t sessionId);
+
 #ifdef __cplusplus
 }
 #endif

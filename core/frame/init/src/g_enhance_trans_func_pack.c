@@ -62,3 +62,76 @@ int32_t NotifyQosChannelOpenedPacked(const ChannelInfo *chanInfo)
     }
     return pfnTransEnhanceFuncList->notifyQosChannelOpened(chanInfo);
 }
+
+int32_t TransReversePullUpPacked(const uint32_t chatMode, const uint32_t businessFlag, const char *pkgName)
+{
+    TransEnhanceFuncList *pfnTransEnhanceFuncList = TransEnhanceFuncListGet();
+    if (TransCheckFuncPointer((void *)pfnTransEnhanceFuncList->transReversePullUp) != SOFTBUS_OK) {
+        return SOFTBUS_OK;
+    }
+    return pfnTransEnhanceFuncList->transReversePullUp(chatMode, businessFlag, pkgName);
+}
+
+int32_t TransGetPkgnameByBusinessFlagPacked(const uint32_t businessFlag, char *pkgName, const uint32_t pkgLen)
+{
+    TransEnhanceFuncList *pfnTransEnhanceFuncList = TransEnhanceFuncListGet();
+    if (TransCheckFuncPointer((void *)pfnTransEnhanceFuncList->transGetPkgnameByBusinessFlag) != SOFTBUS_OK) {
+        return SOFTBUS_OK;
+    }
+    return pfnTransEnhanceFuncList->transGetPkgnameByBusinessFlag(businessFlag, pkgName, pkgLen);
+}
+
+int32_t InitSoftbusPagingPacked(void)
+{
+    TransEnhanceFuncList *pfnTransEnhanceFuncList = TransEnhanceFuncListGet();
+    if (TransCheckFuncPointer((void *)pfnTransEnhanceFuncList->initSoftbusPaging) != SOFTBUS_OK) {
+        return SOFTBUS_OK;
+    }
+    return pfnTransEnhanceFuncList->initSoftbusPaging();
+}
+
+void DeInitSoftbusPagingPacked(void)
+{
+    TransEnhanceFuncList *pfnTransEnhanceFuncList = TransEnhanceFuncListGet();
+    if (TransCheckFuncPointer((void *)pfnTransEnhanceFuncList->deInitSoftbusPaging) != SOFTBUS_OK) {
+        return;
+    }
+    return pfnTransEnhanceFuncList->deInitSoftbusPaging();
+}
+
+void TransPagingDeathCallbackPacked(const char *pkgName, int32_t pid)
+{
+    TransEnhanceFuncList *pfnTransEnhanceFuncList = TransEnhanceFuncListGet();
+    if (TransCheckFuncPointer((void *)pfnTransEnhanceFuncList->transPagingDeathCallback) != SOFTBUS_OK) {
+        return;
+    }
+    return pfnTransEnhanceFuncList->transPagingDeathCallback(pkgName, pid);
+}
+
+bool TransHasAndUpdatePagingListenPacked(ProxyChannelInfo *info)
+{
+    TransEnhanceFuncList *pfnTransEnhanceFuncList = TransEnhanceFuncListGet();
+    if (TransCheckFuncPointer((void *)pfnTransEnhanceFuncList->transHasAndUpdatePagingListen) != SOFTBUS_OK) {
+        return true;
+    }
+    return pfnTransEnhanceFuncList->transHasAndUpdatePagingListen(info);
+}
+
+int32_t TransPagingGetPidAndDataByFlgPacked(bool isClient, uint32_t businessFlag, int32_t *pid,
+    char *data, uint32_t *len)
+{
+    TransEnhanceFuncList *pfnTransEnhanceFuncList = TransEnhanceFuncListGet();
+    if (TransCheckFuncPointer((void *)pfnTransEnhanceFuncList->transPagingGetPidAndDataByFlg) != SOFTBUS_OK) {
+        return SOFTBUS_OK;
+    }
+    return pfnTransEnhanceFuncList->transPagingGetPidAndDataByFlg(isClient, businessFlag, pid, data, len);
+}
+
+int32_t TransDelPagingInfoByBusinessFlagPacked(uint32_t businessFlag)
+{
+    TransEnhanceFuncList *pfnTransEnhanceFuncList = TransEnhanceFuncListGet();
+    if (TransCheckFuncPointer((void *)pfnTransEnhanceFuncList->transDelPagingInfoByBusinessFlag) != SOFTBUS_OK) {
+        return SOFTBUS_OK;
+    }
+    return pfnTransEnhanceFuncList->transDelPagingInfoByBusinessFlag(businessFlag);
+}

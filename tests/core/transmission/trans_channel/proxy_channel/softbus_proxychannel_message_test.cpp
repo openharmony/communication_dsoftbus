@@ -479,7 +479,7 @@ HWTEST_F(SoftbusProxyChannelMessageTest, TransProxyParseMessageTest001, TestSize
     msg.msgHead.type = (PROXYCHANNEL_MSG_TYPE_MAX & FOUR_BIT_MASK) | (TEST_INVALID_HEAD_VERSION << VERSION_SHIFT);
     ASSERT_TRUE(EOK == memcpy_s(buf, len, &msg, len));
     ret = TransProxyParseMessage(buf, len, &msg, &authHandle);
-    EXPECT_NE(SOFTBUS_OK, ret);
+    EXPECT_EQ(SOFTBUS_OK, ret);
 
     /* test invalid head type */
     msg.msgHead.type = (PROXYCHANNEL_MSG_TYPE_MAX & FOUR_BIT_MASK) | (1 << VERSION_SHIFT);
@@ -525,7 +525,7 @@ HWTEST_F(SoftbusProxyChannelMessageTest, TransProxyParseMessageTest002, TestSize
     msg.msgHead.type = (PROXYCHANNEL_MSG_TYPE_NORMAL & FOUR_BIT_MASK) | (1 << VERSION_SHIFT);
     ASSERT_TRUE(EOK == memcpy_s(buf, len, &msg, len));
     int32_t ret = TransProxyParseMessage(buf, len, &outMsg, &authHandle);
-    EXPECT_NE(SOFTBUS_OK, ret);
+    EXPECT_EQ(SOFTBUS_OK, ret);
 
     ret = TransProxyParseMessage(buf, len, &outMsg, &authHandle);
     EXPECT_NE(SOFTBUS_OK, ret);
@@ -561,7 +561,7 @@ HWTEST_F(SoftbusProxyChannelMessageTest, TransProxyParseMessageTest003, TestSize
 
     /* test get auth connection info or type err */
     int32_t ret = TransProxyParseMessage(buf, len, &outMsg, &authHandle);
-    EXPECT_NE(SOFTBUS_OK, ret);
+    EXPECT_EQ(SOFTBUS_OK, ret);
     /* test auth connection type is invalid */
     ret = TransProxyParseMessage(buf, len, &outMsg, &authHandle);
     EXPECT_NE(SOFTBUS_OK, ret);
@@ -890,7 +890,7 @@ HWTEST_F(SoftbusProxyChannelMessageTest, TransProxyParseMessageHeadTest001, Test
     char *buf = (char *)SoftBusCalloc(sizeof(ProxyMessage));
     ASSERT_TRUE(buf != nullptr);
     int32_t ret = TransProxyParseMessageHead(buf, len, &msg);
-    EXPECT_NE(SOFTBUS_OK, ret);
+    EXPECT_EQ(SOFTBUS_OK, ret);
 
     char *bufHead = (char *)SoftBusCalloc(sizeof(ProxyMessage)+2);
     ASSERT_TRUE(bufHead != nullptr);

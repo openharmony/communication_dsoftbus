@@ -652,7 +652,7 @@ HWTEST_F(TransClientProxyTest, ClientIpcBrProxyOpenedTest001, TestSize.Level1)
 
     const char *brMac = "11:22:33:44"; // test value
     ret = ClientIpcBrProxyOpened(nullptr, channelId, brMac, nullptr, reason);
-    EXPECT_NE(SOFTBUS_INVALID_PARAM, ret);
+    EXPECT_EQ(SOFTBUS_INVALID_PARAM, ret);
 }
 
 /**

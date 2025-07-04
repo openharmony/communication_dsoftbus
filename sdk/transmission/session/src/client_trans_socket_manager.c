@@ -939,6 +939,25 @@ int32_t ClientRemovePermission(const char *busName)
     return ret;
 }
 
+int32_t ClientDeletePagingSession(int32_t sessionId)
+{
+    if (sessionId <= 0) {
+        TRANS_LOGE(TRANS_SDK, "invalid sessionId=%{public}d", sessionId);
+        return SOFTBUS_INVALID_PARAM;
+    }
+
+    char pkgName[PKG_NAME_SIZE_MAX] = { 0 };
+    char sessionName[SESSION_NAME_SIZE_MAX] = { 0 };
+    int32_t ret = DeletePagingSession(sessionId, pkgName, sessionName);
+    if (ret != SOFTBUS_OK) {
+        TRANS_LOGE(TRANS_SDK, "failed delete session");
+        return ret;
+    }
+
+    (void)TryDeleteEmptySessionServer(pkgName, sessionName);
+    return SOFTBUS_OK;
+}
+
 int32_t ClientDeleteSocketSession(int32_t sessionId)
 {
     if (sessionId <= 0) {

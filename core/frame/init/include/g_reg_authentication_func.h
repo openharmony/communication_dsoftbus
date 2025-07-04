@@ -16,6 +16,7 @@
 #ifndef G_REG_AUTHENTICATION_FUNC_H
 #define G_REG_AUTHENTICATION_FUNC_H
 
+#include "auth_apply_key_struct.h"
 #include "auth_common_struct.h"
 #include "auth_session_message_struct.h"
 #include "auth_session_fsm_struct.h"
@@ -35,6 +36,10 @@ typedef int32_t (*UnpackDeviceInfoMessageFunc)(const DevInfoData *devInfo, NodeI
 typedef char *(*PackDeviceInfoMessageFunc)(const AuthConnInfo *connInfo, SoftBusVersion version, bool isMetaAuth,
     const char *remoteUuid, const AuthSessionInfo *info);
 typedef bool (*AuthIsPotentialTrustedFunc)(const DeviceInfo *device, bool isOnlyPointToPoint);
+typedef int32_t (*AuthFindApplyKeyFunc)(const RequestBusinessInfo *info, uint8_t *applyKey);
+typedef int32_t (*AuthGenApplyKeyFunc)(
+    const RequestBusinessInfo *info, uint32_t requestId, uint32_t connId, const GenApplyKeyCallback *genCb);
+typedef uint32_t (*GenApplyKeySeqFunc)(void);
 typedef struct TagAuthOpenFuncList {
     RemoveAuthEventFunc removeAuthEvent;
     PackAuthDataFunc packAuthData;
@@ -43,6 +48,9 @@ typedef struct TagAuthOpenFuncList {
     UnpackDeviceInfoMessageFunc unpackDeviceInfoMessage;
     PackDeviceInfoMessageFunc packDeviceInfoMessage;
     AuthIsPotentialTrustedFunc authIsPotentialTrusted;
+    AuthFindApplyKeyFunc authFindApplyKey;
+    AuthGenApplyKeyFunc authGenApplyKey;
+    GenApplyKeySeqFunc genApplyKeySeq;
 } AuthOpenFuncList;
 
 #ifdef __cplusplus

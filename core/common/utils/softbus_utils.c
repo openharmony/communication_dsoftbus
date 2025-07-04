@@ -55,6 +55,7 @@
 #define MAX_IP_LEN 48
 #define MAX_MAC_LEN 46
 #define MAX_HANDLE_TIMES 3600
+#define INT_TO_STRING_MAX_LEN 21
 
 #define ONE_BYTE_SIZE 8
 
@@ -929,5 +930,47 @@ int32_t CalculateMbsTruncateSize(const char *multiByteStr, uint32_t capacity, ui
 
     *truncatedSize = (multiByteStrLen >= truncateTotal) ? (multiByteStrLen - truncateTotal) : 0;
     RestoreLocale(localeBefore);
+    return SOFTBUS_OK;
+}
+
+#define SOFTBUS_DUMP_BYTES_MAX_LEN (256)
+void SoftbusDumpBytes(const char *message, const uint8_t *data, uint32_t dataLen)
+{
+    COMM_CHECK_AND_RETURN_LOGE(message, COMM_UTILS, "message is null");
+    COMM_CHECK_AND_RETURN_LOGE(data, COMM_UTILS, "data is null");
+    COMM_CHECK_AND_RETURN_LOGE(dataLen != 0, COMM_UTILS, "data len is 0");
+    COMM_CHECK_AND_RETURN_LOGE(
+        dataLen <= SOFTBUS_DUMP_BYTES_MAX_LEN, COMM_UTILS, "data len=%{public}u is too large", dataLen);
+    uint16_t hexLen = HEXIFY_LEN(dataLen);
+    char *hex = SoftBusCalloc(hexLen);
+    int32_t ret = ConvertBytesToHexString(hex, hexLen, data, dataLen);
+    if (ret != SOFTBUS_OK) {
+        COMM_LOGE(COMM_UTILS, "convert to hex string error=%{public}d", ret);
+        SoftBusFree(hex);
+        return;
+    }
+    COMM_LOGI(COMM_UTILS, "%{public}s dump %{public}u bytes: %{public}s", message, dataLen, hex);
+    SoftBusFree(hex);
+}
+
+int32_t AddNumberToSocketName(uint32_t num, const char *prefix, uint32_t preLen, char *socketName)
+{
+    if (socketName == NULL || preLen > (SESSION_NAME_SIZE_MAX - INT_TO_STRING_MAX_LEN)) {
+        COMM_LOGE(COMM_UTILS, "invalid param!");
+        return SOFTBUS_INVALID_PARAM;
+    }
+    if (strcpy_s(socketName, preLen, prefix) != EOK) {
+        COMM_LOGE(COMM_UTILS, "copy socketName prefix failed!");
+        return SOFTBUS_STRCPY_ERR;
+    }
+    char numStr[INT_TO_STRING_MAX_LEN];
+    if (sprintf_s(numStr, INT_TO_STRING_MAX_LEN, "%u", num) < 0) {
+        COMM_LOGE(COMM_UTILS, "sprintf_s fail!");
+        return SOFTBUS_SPRINTF_ERR;
+    }
+    if (strcat_s(socketName, INT_TO_STRING_MAX_LEN, numStr) != EOK) {
+        COMM_LOGE(COMM_UTILS, "strcat_s fail!");
+        return SOFTBUS_SPRINTF_ERR;
+    }
     return SOFTBUS_OK;
 }

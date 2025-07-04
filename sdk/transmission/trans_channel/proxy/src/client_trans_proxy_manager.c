@@ -246,16 +246,44 @@ static ClientProxyChannelInfo *ClientTransProxyCreateChannelInfo(const ChannelIn
         TRANS_LOGE(TRANS_SDK, "info is null");
         return NULL;
     }
-    if (memcpy_s(info->detail.sessionKey, SESSION_KEY_LENGTH, channel->sessionKey, SESSION_KEY_LENGTH) != EOK) {
-        SoftBusFree(info);
-        TRANS_LOGE(TRANS_SDK, "sessionKey memcpy fail");
-        return NULL;
-    }
     info->channelId = channel->channelId;
     info->detail.isEncrypted = channel->isEncrypt;
     info->detail.sequence = 0;
     info->detail.linkType = channel->linkType;
     info->detail.osType = channel->osType;
+    info->detail.isD2D = channel->isD2D;
+    if (channel->isD2D) {
+        info->detail.dataLen = channel->dataLen;
+        if (memcpy_s(info->detail.pagingNonce, PAGING_NONCE_LEN, channel->pagingNonce, PAGING_NONCE_LEN) != EOK) {
+            SoftBusFree(info);
+            TRANS_LOGE(TRANS_SDK, "pagingNonce memcpy fail");
+            return NULL;
+        }
+        if (memcpy_s(info->detail.pagingSessionkey, SHORT_SESSION_KEY_LENGTH, channel->pagingSessionkey,
+            SHORT_SESSION_KEY_LENGTH) != EOK) {
+            SoftBusFree(info);
+            TRANS_LOGE(TRANS_SDK, "pagingSessionkey memcpy fail");
+            return NULL;
+        }
+        if (channel->dataLen > 0 && channel->dataLen < EXTRA_DATA_MAX_LEN &&
+            memcpy_s(info->detail.extraData, EXTRA_DATA_MAX_LEN, channel->extraData, channel->dataLen) != EOK) {
+            SoftBusFree(info);
+            TRANS_LOGE(TRANS_SDK, "extraData memcpy fail");
+            return NULL;
+        }
+        if (channel->isServer &&
+            strcpy_s(info->detail.pagingAccountId, ACCOUNT_UID_LEN_MAX, channel->pagingAccountId) != EOK) {
+            SoftBusFree(info);
+            TRANS_LOGE(TRANS_SDK, "pagingAccountId strcpy fail");
+            return NULL;
+        }
+    } else {
+        if (memcpy_s(info->detail.sessionKey, SESSION_KEY_LENGTH, channel->sessionKey, SESSION_KEY_LENGTH) != EOK) {
+            SoftBusFree(info);
+            TRANS_LOGE(TRANS_SDK, "sessionKey memcpy fail");
+            return NULL;
+        }
+    }
     return info;
 }
 
@@ -288,6 +316,12 @@ int32_t ClientTransProxyOnChannelOpened(
             break;
         case BUSINESS_TYPE_FILE:
             type = TYPE_FILE;
+            break;
+        case BUSINESS_TYPE_D2D_MESSAGE:
+            type = TYPE_D2D_MESSAGE;
+            break;
+        case BUSINESS_TYPE_D2D_VOICE:
+            type = TYPE_D2D_VOICE;
             break;
         default:
             type = TYPE_MESSAGE;

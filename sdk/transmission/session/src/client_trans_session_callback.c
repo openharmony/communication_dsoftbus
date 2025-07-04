@@ -23,6 +23,7 @@
 #include "client_trans_session_manager.h"
 #include "client_trans_socket_manager.h"
 #include "client_trans_udp_manager.h"
+#include "g_enhance_sdk_func.h"
 #include "softbus_access_token_adapter.h"
 #include "softbus_adapter_mem.h"
 #include "softbus_def.h"
@@ -32,6 +33,31 @@
 #define RETRY_GET_INFO_TIMES_MS 300
 
 static IClientSessionCallBack g_sessionCb;
+
+static int32_t FillSessionInfoEx(SessionInfo *session, const ChannelInfo *channel)
+{
+    if (strcpy_s(session->info.peerSessionName, SESSION_NAME_SIZE_MAX, channel->peerSessionName) != EOK ||
+        strcpy_s(session->info.peerDeviceId, DEVICE_ID_SIZE_MAX, channel->peerDeviceId) != EOK ||
+        strcpy_s(session->info.groupId, GROUP_ID_SIZE_MAX, channel->groupId) != EOK) {
+        TRANS_LOGE(TRANS_SDK, "client or peer session name, device id, group id failed");
+        return SOFTBUS_STRCPY_ERR;
+    }
+    if (channel->tokenType > ACCESS_TOKEN_TYPE_HAP && channel->peerBusinessAccountId != NULL) {
+        session->peerUserId = channel->peerUserId;
+        session->peerTokenId = channel->peerTokenId;
+        if (channel->peerBusinessAccountId != NULL &&
+            strcpy_s(session->peerBusinessAccountId, ACCOUNT_UID_LEN_MAX, channel->peerBusinessAccountId) != EOK) {
+            TRANS_LOGE(TRANS_SDK, "copy accountId failed");
+            return SOFTBUS_STRCPY_ERR;
+        }
+        if (channel->peerExtraAccessInfo != NULL &&
+            strcpy_s(session->peerExtraAccessInfo, EXTRA_ACCESS_INFO_LEN_MAX, channel->peerExtraAccessInfo) != EOK) {
+            TRANS_LOGE(TRANS_SDK, "copy extraAccessInfo failed");
+            return SOFTBUS_STRCPY_ERR;
+        }
+    }
+    return SOFTBUS_OK;
+}
 
 static int32_t FillSessionInfo(SessionInfo *session, const ChannelInfo *channel, uint32_t flag)
 {
@@ -54,27 +80,26 @@ static int32_t FillSessionInfo(SessionInfo *session, const ChannelInfo *channel,
     session->lifecycle.sessionState = SESSION_STATE_CALLBACK_FINISHED;
     session->isSupportTlv = channel->isSupportTlv;
     session->tokenType = channel->tokenType;
-    if (strcpy_s(session->info.peerSessionName, SESSION_NAME_SIZE_MAX, channel->peerSessionName) != EOK ||
-        strcpy_s(session->info.peerDeviceId, DEVICE_ID_SIZE_MAX, channel->peerDeviceId) != EOK ||
-        strcpy_s(session->info.groupId, GROUP_ID_SIZE_MAX, channel->groupId) != EOK) {
-        TRANS_LOGE(TRANS_SDK, "client or peer session name, device id, group id failed");
-        return SOFTBUS_STRCPY_ERR;
-    }
-    if (channel->tokenType > ACCESS_TOKEN_TYPE_HAP && channel->peerBusinessAccountId != NULL) {
-        session->peerUserId = channel->peerUserId;
-        session->peerTokenId = channel->peerTokenId;
-        if (channel->peerBusinessAccountId != NULL &&
-            strcpy_s(session->peerBusinessAccountId, ACCOUNT_UID_LEN_MAX, channel->peerBusinessAccountId) != EOK) {
-            TRANS_LOGE(TRANS_SDK, "copy accountId failed");
+    if (channel->isD2D) {
+        session->isD2D = channel->isD2D;
+        session->dataLen = channel->dataLen;
+        if (channel->dataLen > 0 && channel->dataLen <= EXTRA_DATA_MAX_LEN &&
+            memcpy_s(session->extraData, EXTRA_DATA_MAX_LEN, channel->extraData, channel->dataLen) != EOK) {
+            TRANS_LOGE(TRANS_SDK, "copy extraData failed");
+            return SOFTBUS_MEM_ERR;
+        }
+        if (channel->isServer &&
+            strcpy_s(session->peerPagingAccountId, ACCOUNT_UID_LEN_MAX, channel->pagingAccountId) != EOK) {
+            TRANS_LOGE(TRANS_SDK, "copy peerPagingAccountId failed");
             return SOFTBUS_STRCPY_ERR;
         }
-        if (channel->peerExtraAccessInfo != NULL &&
-            strcpy_s(session->peerExtraAccessInfo, EXTRA_ACCESS_INFO_LEN_MAX, channel->peerExtraAccessInfo) != EOK) {
-            TRANS_LOGE(TRANS_SDK, "copy extraAccessInfo failed");
+        if (strcpy_s(session->info.peerDeviceId, DEVICE_ID_SIZE_MAX, channel->peerDeviceId) != EOK) {
+            TRANS_LOGE(TRANS_SDK, "copy peerDeviceId failed");
             return SOFTBUS_STRCPY_ERR;
         }
+        return SOFTBUS_OK;
     }
-    return SOFTBUS_OK;
+    return FillSessionInfoEx(session, channel);
 }
 
 static int32_t AcceptSessionAsServer(const char *sessionName, const ChannelInfo *channel, uint32_t flag,
@@ -416,6 +441,55 @@ static void AnonymizeLogTransOnSessionOpenedInfo(const char *sessionName, const 
     AnonymizeFree(tmpName);
 }
 
+static int32_t ClientCheckFuncPointer(void *func)
+{
+    if (func == NULL) {
+        TRANS_LOGE(TRANS_SDK, "enhance func not register");
+        return SOFTBUS_FUNC_NOT_REGISTER;
+    }
+    return SOFTBUS_OK;
+}
+
+static int32_t TransOnPagingConnectPacked(const int32_t socket, const ChannelInfo *channel)
+{
+    ClientEnhanceFuncList *pfnClientEnhanceFuncList = ClientEnhanceFuncListGet();
+    if (ClientCheckFuncPointer((void *)pfnClientEnhanceFuncList->transOnPagingConnect) != SOFTBUS_OK) {
+        return SOFTBUS_FUNC_NOT_SUPPORT;
+    }
+    return pfnClientEnhanceFuncList->transOnPagingConnect(socket, channel);
+}
+
+static int32_t TransOnPagingSessionOpened(const char *sessionName, const ChannelInfo *channel, SessionType flag)
+{
+    int32_t socket = INVALID_SESSION_ID;
+    SessionListenerAdapter sessionCallback;
+    bool isServer = false;
+    (void)memset_s(&sessionCallback, sizeof(SessionListenerAdapter), 0, sizeof(SessionListenerAdapter));
+    int32_t ret = GetSocketCallbackAdapterByChannelId(
+        channel->channelId, channel->channelType, &socket, &sessionCallback, &isServer);
+    if (ret == SOFTBUS_OK) {
+        ret = ClientEnableSessionByChannelId(channel, &socket);
+        if (ret != SOFTBUS_OK) {
+            TRANS_LOGE(TRANS_SDK, "enable session failed, ret=%{public}d", ret);
+            return ret;
+        }
+        ISocketListener *listener = isServer ? &sessionCallback.socketServer : &sessionCallback.socketClient;
+        ret = TransOnBindSuccess(socket, listener);
+        if (ret != SOFTBUS_OK) {
+            TRANS_LOGE(TRANS_SDK, "fork paging on bind failed, channelId=%{public}d", channel->channelId);
+            return ret;
+        }
+        TRANS_LOGI(TRANS_SDK, "fork ok, channelId=%{public}d", channel->channelId);
+        return SOFTBUS_OK;
+    }
+    ret = AcceptSessionAsServer(sessionName, channel, flag, &socket);
+    if (ret != SOFTBUS_OK) {
+        TRANS_LOGE(TRANS_SDK, "accept paging session failed, ret=%{public}d", ret);
+        return ret;
+    }
+    return TransOnPagingConnectPacked(socket, channel);
+}
+
 NO_SANITIZE("cfi")
 int32_t TransOnSessionOpened(
     const char *sessionName, const ChannelInfo *channel, SessionType flag, SocketAccessInfo *accessInfo)
@@ -432,7 +506,9 @@ int32_t TransOnSessionOpened(
         TRANS_LOGE(TRANS_SDK, "get session listener failed, ret=%{public}d", ret);
         return ret;
     }
-
+    if (!channel->isServer && channel->isD2D) {
+        return TransOnPagingSessionOpened(sessionName, channel, flag);
+    }
     int32_t sessionId = INVALID_SESSION_ID;
     if (channel->isServer) {
         ret = AcceptSessionAsServer(sessionName, channel, flag, &sessionId);

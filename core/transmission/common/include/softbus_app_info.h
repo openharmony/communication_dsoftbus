@@ -39,6 +39,7 @@ extern "C" {
 #define BASE64_FAST_DATA_LEN 5558
 #define TOKENID_NOT_SET 0
 #define ACCOUNT_UID_LEN_MAX 65
+#define PAGING_NONCE_LEN 16
 
 typedef enum {
     API_UNKNOWN = 0,
@@ -90,6 +91,13 @@ typedef struct {
     char authState[AUTH_STATE_SIZE_MAX];
     char addr[IP_LEN];
     char accountId[ACCOUNT_UID_LEN_MAX];
+    char callerAccountId[ACCOUNT_UID_LEN_MAX];
+    char calleeAccountId[ACCOUNT_UID_LEN_MAX];
+    uint8_t shortAccountHash[D2D_SHORT_ACCOUNT_HASH_LEN];
+    uint8_t shortUdidHash[D2D_SHORT_UDID_HASH_LEN];
+    char extraData[EXTRA_DATA_MAX_LEN];
+    uint32_t dataLen;
+    uint32_t businessFlag;
     int32_t uid;
     int32_t pid;
     int32_t port;
@@ -101,6 +109,7 @@ typedef struct {
     uint64_t tokenId; // identify first caller
     int32_t tokenType;
     int32_t sessionId;
+    uint32_t devTypeId;
 } AppInfoData;
 
 typedef struct {
@@ -113,7 +122,10 @@ typedef struct {
     char peerVersion[DEVICE_VERSION_SIZE_MAX];
     char tokenName[PKG_NAME_SIZE_MAX];
     char extraAccessInfo[EXTRA_ACCESS_INFO_LEN_MAX];
+    char pagingNonce[PAGING_NONCE_LEN];
+    char pagingSessionkey[SHORT_SESSION_KEY_LENGTH];
     bool isClient;
+    bool isD2D;
     uint16_t fastTransDataSize;
     RouteType routeType;
     BusinessType businessType;
