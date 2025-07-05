@@ -931,3 +931,23 @@ int32_t CalculateMbsTruncateSize(const char *multiByteStr, uint32_t capacity, ui
     RestoreLocale(localeBefore);
     return SOFTBUS_OK;
 }
+
+#define SOFTBUS_DUMP_BYTES_MAX_LEN (256)
+void SoftbusDumpBytes(const char *message, const uint8_t *data, uint32_t dataLen)
+{
+    COMM_CHECK_AND_RETURN_LOGE(message, COMM_UTILS, "message is null");
+    COMM_CHECK_AND_RETURN_LOGE(data, COMM_UTILS, "data is null");
+    COMM_CHECK_AND_RETURN_LOGE(dataLen != 0, COMM_UTILS, "data len is 0");
+    COMM_CHECK_AND_RETURN_LOGE(
+        dataLen <= SOFTBUS_DUMP_BYTES_MAX_LEN, COMM_UTILS, "data len=%{public}u is too large", dataLen);
+    uint16_t hexLen = HEXIFY_LEN(dataLen);
+    char *hex = SoftBusCalloc(hexLen);
+    int32_t ret = ConvertBytesToHexString(hex, hexLen, data, dataLen);
+    if (ret != SOFTBUS_OK) {
+        COMM_LOGE(COMM_UTILS, "convert to hex string error=%{public}d", ret);
+        SoftBusFree(hex);
+        return;
+    }
+    COMM_LOGI(COMM_UTILS, "%{public}s dump %{public}u bytes: %{public}s", message, dataLen, hex);
+    SoftBusFree(hex);
+}
