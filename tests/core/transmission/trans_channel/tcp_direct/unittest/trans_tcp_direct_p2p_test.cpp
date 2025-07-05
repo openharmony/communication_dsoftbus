@@ -51,6 +51,7 @@ namespace OHOS {
 #define MY_PORT 6000
 
 static const char *g_addr = "192.168.8.119";
+static const char *hmlAddr = "172.30.1.2";
 static const char *g_ip = "192.168.8.1";
 static const char *g_localIp = "127.0.0.1";
 static int32_t g_port = 6000;
@@ -58,6 +59,7 @@ static const char *g_sessionName = "com.test.trans.auth.demo";
 static const char *g_pkgName = "dms";
 static const char *g_udid = "ABCDEF00ABCDEF00ABCDEF00ABCDEF00ABCDEF00ABCDEF00ABCDEF00ABCDEF00";
 static const char *g_uuid = "ABCDEF00ABCDEF00ABCDEF00ABCDEF00ABCDEF00ABCDEF00ABCDEF00ABCDEF00";
+static const char *g_peerUuid = "ABCDEF00ABCDEF00ABCDEF00ABCDEF00ABCDEF00ABCDEF00ABCDEF00ABCDEF01";
 static IServerChannelCallBack g_testChannelCallBack;
 class TransTcpDirectP2pTest : public testing::Test {
 public:
@@ -91,8 +93,6 @@ SessionConn *TestSetSessionConn()
     if (conn == nullptr) {
         return nullptr;
     }
-
-    (void)memset_s(conn, sizeof(SessionConn), 0, sizeof(SessionConn));
     conn->serverSide = true;
     conn->channelId = 1;
     conn->status = TCP_DIRECT_CHANNEL_STATUS_INIT;
@@ -976,5 +976,176 @@ HWTEST_F(TransTcpDirectP2pTest, OnVerifyP2pReplyTest001, TestSize.Level1)
     EXPECT_NE(ret, SOFTBUS_OK);
     cJSON_Delete(json);
     TransDelSessionConnById(channelId);
+}
+
+
+/**
+ * @tc.name: GetModuleByHmlIp
+ * @tc.desc: test GetModuleByHmlIp001.
+ * @tc.type: FUNC
+ * @tc.require:
+ */
+HWTEST_F(TransTcpDirectP2pTest, GetModuleByHmlIp001, TestSize.Level1)
+{
+    int32_t ret = CreatHmlListenerList();
+    EXPECT_EQ(SOFTBUS_OK, ret);
+    ret = StartHmlListener(g_ip, &g_port, g_peerUuid, LNN_PROTOCOL_IP);
+    EXPECT_EQ(SOFTBUS_TRANS_TDC_START_SESSION_LISTENER_FAILED, ret);
+    ret = GetModuleByHmlIp(g_ip);
+    EXPECT_EQ(UNUSE_BUTT, ret);
+    StopHmlListener(DIRECT_CHANNEL_SERVER_HML_START);
+}
+
+/**
+ * @tc.name: ConnectTcpDirectPeerTest002
+ * @tc.desc: ConnectTcpDirectPeer
+ * @tc.type: FUNC
+ * @tc.require:
+ */
+HWTEST_F(TransTcpDirectP2pTest, ConnectTcpDirectPeerTest002, TestSize.Level1)
+{
+    int32_t ret = ConnectTcpDirectPeer(hmlAddr, g_port, g_localIp);
+    EXPECT_EQ(ret, 17);
+}
+
+/**
+ * @tc.name: OnAuthDataRecv
+ * @tc.desc: test OnAuthDataRecv001
+ * @tc.type: FUNC
+ * @tc.require:
+ */
+HWTEST_F(TransTcpDirectP2pTest, OnAuthDataRecv001, TestSize.Level1)
+{
+    AuthHandle authHandle = { .authId = 1, .type = AUTH_LINK_TYPE_WIFI };
+    const char *str = "data";
+    AuthTransData *data = (AuthTransData*)SoftBusCalloc(sizeof(AuthTransData));
+    ASSERT_TRUE(data != nullptr);
+    data->module = MODULE_P2P_LINK;
+    data->flag = FLAG_REPLY;
+    data->seq = 1;
+    data->data = (const uint8_t *)str;
+    data->len = -1;
+    OnAuthDataRecv(authHandle, data);
+    SoftBusFree(data);
+}
+
+/**
+ * @tc.name: OnAuthDataRecv
+ * @tc.desc: test OnAuthDataRecv002
+ * @tc.type: FUNC
+ * @tc.require:
+ */
+HWTEST_F(TransTcpDirectP2pTest, OnAuthDataRecv002, TestSize.Level1)
+{
+    AuthHandle authHandle = { .authId = 1, .type = AUTH_LINK_TYPE_WIFI };
+    AuthTransData *data = (AuthTransData*)SoftBusCalloc(sizeof(AuthTransData));
+    ASSERT_TRUE(data != nullptr);
+    data->module = MODULE_P2P_LINK;
+    data->flag = FLAG_REPLY;
+    data->seq = 1;
+    data->len = AUTH_TRANS_DATA_LEN;
+    OnAuthDataRecv(authHandle, data);
+    SoftBusFree(data);
+}
+
+/**
+ * @tc.name: OnAuthDataRecv
+ * @tc.desc: test OnAuthDataRecv003
+ * @tc.type: FUNC
+ * @tc.require:
+ */
+HWTEST_F(TransTcpDirectP2pTest, OnAuthDataRecv003, TestSize.Level1)
+{
+    AuthHandle authHandle = { .authId = 1, .type = AUTH_LINK_TYPE_WIFI -1 };
+    const char *str = "data";
+    AuthTransData *data = (AuthTransData*)SoftBusCalloc(sizeof(AuthTransData));
+    ASSERT_TRUE(data != nullptr);
+    data->module = MODULE_P2P_LINK;
+    data->flag = FLAG_REPLY;
+    data->seq = 1;
+    data->data = (const uint8_t *)str;
+    data->len = AUTH_TRANS_DATA_LEN;
+    OnAuthDataRecv(authHandle, data);
+    SoftBusFree(data);
+}
+
+/**
+ * @tc.name: OnAuthDataRecv
+ * @tc.desc: test OnAuthDataRecv004
+ * @tc.type: FUNC
+ * @tc.require:
+ */
+HWTEST_F(TransTcpDirectP2pTest, OnAuthDataRecv004, TestSize.Level1)
+{
+    AuthHandle authHandle = { .authId = 1, .type = AUTH_LINK_TYPE_MAX };
+    const char *str = "data";
+    AuthTransData *data = (AuthTransData*)SoftBusCalloc(sizeof(AuthTransData));
+    ASSERT_TRUE(data != nullptr);
+    data->module = MODULE_P2P_LINK;
+    data->flag = FLAG_REPLY;
+    data->seq = 1;
+    data->data = (const uint8_t *)str;
+    data->len = AUTH_TRANS_DATA_LEN;
+    OnAuthDataRecv(authHandle, data);
+    SoftBusFree(data);
+}
+
+/**
+ * @tc.name: OnAuthDataRecv
+ * @tc.desc: test OnAuthDataRecv005
+ * @tc.type: FUNC
+ * @tc.require:
+ */
+HWTEST_F(TransTcpDirectP2pTest, OnAuthDataRecv005, TestSize.Level1)
+{
+    AuthHandle authHandle = { .authId = 1, .type = AUTH_LINK_TYPE_MAX };
+    const char *str = "data";
+    AuthTransData *data = (AuthTransData*)SoftBusCalloc(sizeof(AuthTransData));
+    ASSERT_TRUE(data != nullptr);
+    data->module = MODULE_P2P_LISTEN;
+    data->flag = FLAG_REPLY;
+    data->seq = 1;
+    data->data = (const uint8_t *)str;
+    data->len = AUTH_TRANS_DATA_LEN;
+    OnAuthDataRecv(authHandle, data);
+    SoftBusFree(data);
+}
+
+/**
+ * @tc.name: OnAuthDataRecv
+ * @tc.desc: test OnAuthDataRecv006
+ * @tc.type: FUNC
+ * @tc.require:
+ */
+HWTEST_F(TransTcpDirectP2pTest, OnAuthDataRecv006, TestSize.Level1)
+{
+    AuthHandle authHandle = { .authId = 1, .type = AUTH_LINK_TYPE_MAX };
+    const char *str = "data";
+    AuthTransData *data = (AuthTransData*)SoftBusCalloc(sizeof(AuthTransData));
+    ASSERT_TRUE(data != nullptr);
+    data->module = MODULE_SESSION_KEY_AUTH;
+    data->flag = FLAG_REPLY;
+    data->seq = 1;
+    data->data = (const uint8_t *)str;
+    data->len = AUTH_TRANS_DATA_LEN;
+    OnAuthDataRecv(authHandle, data);
+    SoftBusFree(data);
+}
+
+/**
+ * @tc.name: TransProxyGetAuthIdByUuid
+ * @tc.desc: test TransProxyGetAuthIdByUuid001
+ * @tc.type: FUNC
+ * @tc.require:
+ */
+HWTEST_F(TransTcpDirectP2pTest, TransProxyGetAuthIdByUuid001, TestSize.Level1)
+{
+    SessionConn *conn = (SessionConn*)SoftBusCalloc(sizeof(SessionConn));
+    ASSERT_TRUE(conn != nullptr);
+    (void)memcpy_s(conn->appInfo.peerData.deviceId, DEVICE_ID_SIZE_MAX, g_peerUuid, DEVICE_ID_SIZE_MAX);
+    conn->authHandle.authId = 1;
+    int32_t ret = TransProxyGetAuthIdByUuid(conn);
+    EXPECT_EQ(SOFTBUS_TRANS_TCP_GET_AUTHID_FAILED, ret);
+    SoftBusFree(conn);
 }
 }
