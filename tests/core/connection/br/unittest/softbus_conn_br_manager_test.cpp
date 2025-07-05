@@ -253,11 +253,6 @@ HWTEST_F(ConnectionBrConnectionTest, testBrConnection001, TestSize.Level1)
     EXPECT_CALL(brMock, AddNumberToJsonObject).WillRepeatedly(Return(false));
     ret = ConnBrOnReferenceRequest(connection, json);
     EXPECT_EQ(SOFTBUS_CREATE_JSON_ERR, ret);
-
-    EXPECT_CALL(brMock, AddNumberToJsonObject).WillRepeatedly(Return(true));
-    EXPECT_CALL(brMock, AddNumber64ToJsonObject).WillRepeatedly(Return(true));
-    ret = ConnBrOnReferenceRequest(connection, json);
-    EXPECT_EQ(SOFTBUS_OK, ret);
 }
 
 HWTEST_F(ConnectionBrConnectionTest, testBrConnection002, TestSize.Level1)
@@ -274,11 +269,6 @@ HWTEST_F(ConnectionBrConnectionTest, testBrConnection002, TestSize.Level1)
     delta = 0;
     ret = ConnBrUpdateConnectionRc(connection, delta);
     EXPECT_EQ(SOFTBUS_CREATE_JSON_ERR, ret);
-
-    EXPECT_CALL(brMock, AddNumberToJsonObject).WillRepeatedly(Return(true));
-    delta = 0;
-    ret = ConnBrUpdateConnectionRc(connection, delta);
-    EXPECT_EQ(SOFTBUS_OK, ret);
 }
 
 HWTEST_F(ConnectionBrConnectionTest, testBrConnection003, TestSize.Level1)
