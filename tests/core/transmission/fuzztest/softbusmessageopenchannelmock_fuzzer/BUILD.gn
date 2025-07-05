@@ -1,4 +1,4 @@
-# Copyright (c) 2024 Huawei Device Co., Ltd.
+# Copyright (c) 2025 Huawei Device Co., Ltd.
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
 # You may obtain a copy of the License at
@@ -20,13 +20,16 @@ import("../../trans_channel/proxy_channel/proxy_channel_unittest.gni")
 
 ##############################fuzztest##########################################
 
-ohos_fuzztest("SoftBusProxyChannelManagerMockFuzzTest") {
+ohos_fuzztest("SoftBusMessageOpenChannelMockFuzzTest") {
   module_out_path = dsoftbus_fuzz_out_path
 
-  fuzz_config_file = "$dsoftbus_root_path/tests/core/transmission/fuzztest/softbusproxychannelmanagermock_fuzzer"
+  fuzz_config_file = "$dsoftbus_root_path/tests/core/transmission/fuzztest/softbusmessageopenchannelmock_fuzzer"
 
-  include_dirs = softbus_proxy_channel_manager_ut_include_dirs
-  include_dirs += [ "$dsoftbus_root_path/tests/common/include" ]
+  include_dirs = [
+    "unittest/common/",
+    "$dsoftbus_core_path/transmission/trans_channel/common/src",
+    "$dsoftbus_core_path/transmission/trans_channel/auth/include",
+  ]
 
   cflags = [
     "-g",
@@ -35,8 +38,10 @@ ohos_fuzztest("SoftBusProxyChannelManagerMockFuzzTest") {
     "-fno-omit-frame-pointer",
   ]
 
-  sources = [ "softbusproxychannelmanagermock_fuzzer.cpp" ]
-  sources += softbus_proxy_channel_manager_ut_sources
+  sources = [ "softbusmessageopenchannelmock_fuzzer.cpp" ]
+  sources += [
+    "$dsoftbus_root_path/tests/core/transmission/trans_channel/common/mock/softbus_message_open_channel_test/softbus_message_open_channel_test.cpp",
+  ]
 
   deps = [
     "$dsoftbus_root_path/adapter:softbus_adapter",
@@ -45,19 +50,22 @@ ohos_fuzztest("SoftBusProxyChannelManagerMockFuzzTest") {
   ]
 
   external_deps = [
+    "cJSON:cjson",
     "c_utils:utils",
-    "dsoftbus:softbus_client",
     "googletest:gmock_rtti",
     "googletest:gtest_rtti",
     "hilog:libhilog",
-    "ipc:ipc_single",
   ]
+
+  if (!is_standard_system) {
+    external_deps += [ "hilog_lite:hilog_lite" ]
+  }
 }
 
 group("fuzztest") {
   testonly = true
   deps = [
     # deps file
-    ":SoftBusProxyChannelManagerMockFuzzTest",
+    ":SoftBusMessageOpenChannelMockFuzzTest",
   ]
 }
