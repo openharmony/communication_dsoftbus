@@ -1,4 +1,4 @@
-# Copyright (c) 2024 Huawei Device Co., Ltd.
+# Copyright (c) 2025 Huawei Device Co., Ltd.
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
 # You may obtain a copy of the License at
@@ -20,13 +20,15 @@ import("../../trans_channel/proxy_channel/proxy_channel_unittest.gni")
 
 ##############################fuzztest##########################################
 
-ohos_fuzztest("SoftBusProxyChannelManagerMockFuzzTest") {
+ohos_fuzztest("TransTcpProcessDataMockFuzzTest") {
   module_out_path = dsoftbus_fuzz_out_path
 
-  fuzz_config_file = "$dsoftbus_root_path/tests/core/transmission/fuzztest/softbusproxychannelmanagermock_fuzzer"
+  fuzz_config_file = "$dsoftbus_root_path/tests/core/transmission/fuzztest/transtcpprocessdatamock_fuzzer"
 
-  include_dirs = softbus_proxy_channel_manager_ut_include_dirs
-  include_dirs += [ "$dsoftbus_root_path/tests/common/include" ]
+  include_dirs = [
+    "$dsoftbus_root_path/core/transmission/common/include",
+    "$dsoftbus_root_path/core/transmission/common/src",
+  ]
 
   cflags = [
     "-g",
@@ -35,8 +37,10 @@ ohos_fuzztest("SoftBusProxyChannelManagerMockFuzzTest") {
     "-fno-omit-frame-pointer",
   ]
 
-  sources = [ "softbusproxychannelmanagermock_fuzzer.cpp" ]
-  sources += softbus_proxy_channel_manager_ut_sources
+  sources = [ "transtcpprocessdatamock_fuzzer.cpp" ]
+  sources += [
+    "$dsoftbus_root_path/tests/core/transmission/common/trans_process_data_test.cpp",
+  ]
 
   deps = [
     "$dsoftbus_root_path/adapter:softbus_adapter",
@@ -50,7 +54,6 @@ ohos_fuzztest("SoftBusProxyChannelManagerMockFuzzTest") {
     "googletest:gmock_rtti",
     "googletest:gtest_rtti",
     "hilog:libhilog",
-    "ipc:ipc_single",
   ]
 }
 
@@ -58,6 +61,6 @@ group("fuzztest") {
   testonly = true
   deps = [
     # deps file
-    ":SoftBusProxyChannelManagerMockFuzzTest",
+    ":TransTcpProcessDataMockFuzzTest",
   ]
 }
