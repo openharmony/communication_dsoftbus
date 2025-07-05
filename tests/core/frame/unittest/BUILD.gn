@@ -93,6 +93,16 @@ ohos_unittest("SoftbusServerStubTest") {
       "cJSON:cjson_static",
     ]
   }
+  if (!defined(global_parts_info) ||
+      defined(global_parts_info.bundlemanager_bundle_framework)) {
+    cflags = [ "-DSUPPORT_BUNDLENAME" ]
+    external_deps += [
+      "bundle_framework:appexecfwk_base",
+      "bundle_framework:appexecfwk_core",
+      "os_account:libaccountkits",
+      "os_account:os_account_innerkits",
+    ]
+  }
 }
 
 ohos_unittest("SoftbusServerTest") {

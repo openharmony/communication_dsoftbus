@@ -56,6 +56,13 @@ namespace OHOS {
         static const char *DB_PACKAGE_NAME = "distributeddata-default";
         static const char *DM_PACKAGE_NAME = "ohos.distributedhardware.devicemanager";
         static const char *MSDP_PACKAGE_NAME = "ohos.msdp.spatialawareness";
+#ifdef SUPPORT_BUNDLENAME
+        static constexpr std::array systemAppWhitelist = {
+            "com.huawei.hmos.hiviewcare",
+            "com.ohos.plrdtest.hongyan",
+            "com.huawei.hmos.aibase",
+        };
+#endif // SUPPORT_BUNDLENAME
     }
 
 int32_t SoftBusServerStub::CheckOpenSessionPermission(const SessionParam *param)
@@ -425,6 +432,28 @@ static int32_t CheckNormalAppSessionName(
     }
     return SOFTBUS_OK;
 }
+
+static bool IsInWhitelist(std::string_view app)
+{
+    return std::find(systemAppWhitelist.begin(), systemAppWhitelist.end(), app) != systemAppWhitelist.end();
+}
+
+static int32_t TransCheckSystemAppList(pid_t callingUid)
+{
+    uint64_t callingFullTokenId = IPCSkeleton::GetCallingFullTokenID();
+    if (SoftBusCheckIsSystemApp(callingFullTokenId) == false) {
+        return SOFTBUS_OK;
+    }
+    std::string bundleName;
+    int32_t ret = GetBundleName(callingUid, bundleName);
+    COMM_CHECK_AND_RETURN_RET_LOGE(ret == SOFTBUS_OK, ret, COMM_SVC, "get bundle name failed.");
+
+    if (!IsInWhitelist(bundleName)) {
+        COMM_LOGE(COMM_SVC, "not found bundleName in system app whitelist.");
+        return SOFTBUS_TRANS_NOT_FIND_BUNDLENAME;
+    }
+    return SOFTBUS_OK;
+}
 #endif
 
 int32_t SoftBusServerStub::CreateSessionServerInner(MessageParcel &data, MessageParcel &reply)
@@ -455,6 +484,10 @@ int32_t SoftBusServerStub::CreateSessionServerInner(MessageParcel &data, Message
         goto EXIT;
     }
 #ifdef SUPPORT_BUNDLENAME
+    if (TransCheckSystemAppList(callingUid) != SOFTBUS_OK) {
+        retReply = SOFTBUS_PERMISSION_DENIED;
+        goto EXIT;
+    }
     if (CheckNormalAppSessionName(sessionName, callingUid, strName) != SOFTBUS_OK) {
         retReply = SOFTBUS_PERMISSION_DENIED;
         goto EXIT;

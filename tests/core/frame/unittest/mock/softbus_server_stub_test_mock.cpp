@@ -106,5 +106,9 @@ int32_t SoftBusCheckDmsServerPermission(uint64_t tokenId)
 {
     return GetSoftbusServerStubTestInterface()->SoftBusCheckDmsServerPermission(tokenId);
 }
+bool SoftBusCheckIsSystemApp(uint64_t tokenId)
+{
+    return GetSoftbusServerStubTestInterface()->SoftBusCheckIsSystemApp(tokenId);
+}
 }
 }
