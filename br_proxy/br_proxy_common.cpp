@@ -12,38 +12,99 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-#include "ability_manager_client.h"
-#include "ability_manager_errors.h"
+
+#include <dlfcn.h>
+#include <securec.h>
+#include <cstring>
 #include "accesstoken_kit.h"
-#include "bundle_mgr_interface.h"
 #include "ipc_skeleton.h"
-#include "iservice_registry.h"
 #include "lnn_ohos_account_adapter.h"
 #include "softbus_error_code.h"
-#include "system_ability_definition.h"
 #include "trans_log.h"
-
+ 
 using namespace OHOS;
+
+typedef int32_t (*GetAbilityNameFunc)(char *abilityName, int32_t userId, uint32_t abilityNameLen,
+    std::string bundleName);
+typedef int32_t (*StartAbilityFunc)(const char *bundleName, const char *abilityName);
+static void* g_abilityMgrHandle = nullptr;
+static StartAbilityFunc g_startAbilityFunc = nullptr;
+static GetAbilityNameFunc g_getAbilityName = nullptr;
+
+static int32_t AbilityManagerClientDynamicLoader(const char *bundleName, const char *abilityName)
+{
+    if (bundleName == nullptr || abilityName == nullptr) {
+        TRANS_LOGE(TRANS_SVC, "[br_proxy] invalid param");
+        return SOFTBUS_INVALID_PARAM;
+    }
+
+    g_abilityMgrHandle = dlopen("/system/lib64/libbr_proxy_adapter.z.so", RTLD_LAZY);
+    if (g_abilityMgrHandle == nullptr) {
+        TRANS_LOGE(TRANS_SVC, "[br_proxy] dlopen failed!");
+        return SOFTBUS_INVALID_PARAM;
+    }
+
+    g_startAbilityFunc = (StartAbilityFunc)dlsym(g_abilityMgrHandle, "StartAbility");
+    if (g_startAbilityFunc == nullptr) {
+        TRANS_LOGE(TRANS_SVC, "[br_proxy] dlsym failed!");
+        dlclose(g_abilityMgrHandle);
+        g_abilityMgrHandle = nullptr;
+        return SOFTBUS_INVALID_PARAM;
+    }
+
+    return g_startAbilityFunc(bundleName, abilityName);
+}
+
+static int32_t GetAbilityName(char *abilityName, int32_t userId, uint32_t abilityNameLen, std::string bundleName)
+{
+    if (abilityName == nullptr) {
+        TRANS_LOGE(TRANS_SVC, "[br_proxy] invalid param");
+        return SOFTBUS_INVALID_PARAM;
+    }
+
+    g_abilityMgrHandle = dlopen("/system/lib64/libbr_proxy_adapter.z.so", RTLD_LAZY);
+    if (g_abilityMgrHandle == nullptr) {
+        TRANS_LOGE(TRANS_SVC, "[br_proxy] dlopen failed!");
+        return SOFTBUS_INVALID_PARAM;
+    }
+
+    g_getAbilityName = (GetAbilityNameFunc)dlsym(g_abilityMgrHandle, "ProxyChannelMgrGetAbilityName");
+    if (g_getAbilityName == nullptr) {
+        TRANS_LOGE(TRANS_SVC, "[br_proxy] dlsym failed!");
+        dlclose(g_abilityMgrHandle);
+        g_abilityMgrHandle = nullptr;
+        return SOFTBUS_INVALID_PARAM;
+    }
+
+    int32_t ret = g_getAbilityName(abilityName, userId, abilityNameLen, bundleName);
+    if (ret != SOFTBUS_OK) {
+        TRANS_LOGE(TRANS_SVC, "[br_proxy] failed, ret = %{public}d", ret);
+        return ret;
+    }
+    if (g_abilityMgrHandle != nullptr) {
+        dlclose(g_abilityMgrHandle);
+        g_abilityMgrHandle = nullptr;
+    }
+    return SOFTBUS_OK;
+}
+
+void BrProxyDynamicLoaderDeInit()
+{
+    if (g_abilityMgrHandle != nullptr) {
+        dlclose(g_abilityMgrHandle);
+        g_abilityMgrHandle = nullptr;
+    }
+}
 
 extern "C" int32_t PullUpHap(const char *bundleName, const char *abilityName)
 {
-    AAFwk::Want want;
-    want.SetElementName(bundleName, abilityName);
-    return AAFwk::AbilityManagerClient::GetInstance()->StartAbility(want);
-}
-
-sptr<AppExecFwk::IBundleMgr> GetBundleMgr()
-{
-    sptr<ISystemAbilityManager> systemAbilityManager =
-        SystemAbilityManagerClient::GetInstance().GetSystemAbilityManager();
-    if (systemAbilityManager == nullptr) {
-        return nullptr;
+    int32_t ret = AbilityManagerClientDynamicLoader(bundleName, abilityName);
+    if (ret != SOFTBUS_OK) {
+        TRANS_LOGE(TRANS_SVC, "[br_proxy] failed, ret = %{public}d", ret);
+        return ret;
     }
-    sptr<IRemoteObject> remoteObject = systemAbilityManager->GetSystemAbility(BUNDLE_MGR_SERVICE_SYS_ABILITY_ID);
-    if (remoteObject == nullptr) {
-        return nullptr;
-    }
-    return iface_cast<AppExecFwk::IBundleMgr>(remoteObject);
+    BrProxyDynamicLoaderDeInit();
+    return SOFTBUS_OK;
 }
 
 extern "C" pid_t GetCallerPid()
@@ -72,28 +133,15 @@ extern "C" int32_t GetCallerHapInfo(char *bundleName, uint32_t bundleNamelen,
     Security::AccessToken::HapTokenInfo hapTokenInfoRes;
     Security::AccessToken::AccessTokenKit::GetHapTokenInfo(callerToken, hapTokenInfoRes);
 
-    AAFwk::Want want;
-    want.SetElementName(hapTokenInfoRes.bundleName, "");
-    want.SetAction("action.ohos.pull.listener");
-
-    std::vector<AppExecFwk::AbilityInfo> abilityInfos;
-
-    auto bundleMgr = GetBundleMgr();
-    if (bundleMgr == nullptr) {
-        return SOFTBUS_TRANS_GET_BUNDLE_MGR_FAILED;
-    }
-    int32_t userId = GetActiveOsAccountIds();
-    auto flag = static_cast<int32_t>(AppExecFwk::GetAbilityInfoFlag::GET_ABILITY_INFO_DEFAULT);
-    int32_t ret = bundleMgr->QueryAbilityInfosV9(want, flag, userId, abilityInfos);
-    if (ret != SOFTBUS_OK) {
-        TRANS_LOGE(TRANS_SDK, "[br_proxy] get abilityName failed! ret:%{public}d", ret);
-        return ret;
-    }
-
-    if (strcpy_s(bundleName, bundleNamelen, hapTokenInfoRes.bundleName.c_str()) != EOK ||
-        strcpy_s(abilityName, abilityNameLen, abilityInfos[0].name.c_str()) != EOK) {
+    if (strcpy_s(bundleName, bundleNamelen, hapTokenInfoRes.bundleName.c_str()) != EOK) {
         TRANS_LOGE(TRANS_SVC, "[br_proxy] copy bundleName or abilityName failed");
         return SOFTBUS_STRCPY_ERR;
+    }
+    int32_t userId = GetActiveOsAccountIds();
+    int32_t ret = GetAbilityName(abilityName, userId, abilityNameLen, hapTokenInfoRes.bundleName);
+    if (ret != SOFTBUS_OK) {
+        TRANS_LOGE(TRANS_SVC, "[br_proxy] get abilityName failed, ret=%{public}d", ret);
+        return ret;
     }
 
     return SOFTBUS_OK;
