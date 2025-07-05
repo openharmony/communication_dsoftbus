@@ -47,6 +47,39 @@ ohos_shared_library("proxychannelmanager") {
   part_name = "dsoftbus"
 }
 
+ohos_shared_library("br_proxy_adapter") {
+  sanitize = {
+    cfi = true
+    cfi_cross_dso = true
+    debug = false
+  }
+  sources = []
+  if (is_standard_system) {
+    sources += [
+      "br_proxy_adapter.cpp",
+    ]
+    external_deps = [
+      "c_utils:utils",
+      "ability_runtime:ability_manager",
+      "bundle_framework:appexecfwk_base",
+      "bundle_framework:appexecfwk_core",
+      "ipc:ipc_single",
+      "samgr:samgr_proxy",
+    ]
+  } else {
+    sources += [ "br_proxy_adapter_virtual.cpp" ]
+  }
+
+  include_dirs = [
+    "$dsoftbus_root_path/interfaces/kits/common",
+  ]
+  subsystem_name = "communication"
+  part_name = "dsoftbus"
+}
+
 group("br_proxy") {
-    deps = [ ":proxychannelmanager" ]
+    deps = [
+      ":proxychannelmanager",
+      ":br_proxy_adapter",
+    ]
 }
