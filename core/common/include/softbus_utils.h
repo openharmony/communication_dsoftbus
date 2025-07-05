@@ -151,6 +151,9 @@ void EnableCapabilityBit(uint32_t *value, uint32_t offSet);
 void DisableCapabilityBit(uint32_t *value, uint32_t offSet);
 
 bool GetCapabilityBit(uint32_t value, uint32_t offSet);
+
+void SoftbusDumpBytes(const char *message, const uint8_t *data, uint32_t dataLen);
+
 #ifdef __cplusplus
 #if __cplusplus
 }
