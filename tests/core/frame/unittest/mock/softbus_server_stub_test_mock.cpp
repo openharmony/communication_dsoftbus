@@ -110,5 +110,10 @@ bool SoftBusCheckIsSystemApp(uint64_t tokenId)
 {
     return GetSoftbusServerStubTestInterface()->SoftBusCheckIsSystemApp(tokenId);
 }
+
+int32_t CheckLnnPermission(const char *interfaceName, const char *processName)
+{
+    return GetSoftbusServerStubTestInterface()->CheckLnnPermission(interfaceName, processName);
+}
 }
 }

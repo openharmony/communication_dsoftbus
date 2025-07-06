@@ -39,8 +39,11 @@ enum {
 
 int32_t TransPermissionInit(void);
 void TransPermissionDeinit(void);
+int32_t LnnInitPermission(void);
+void LnnDeinitPermission(void);
 int32_t CheckTransPermission(pid_t callingUid, pid_t callingPid,
     const char *pkgName, const char *sessionName, uint32_t actions);
+int32_t CheckLnnPermission(const char *interfaceName, const char *processName);
 int32_t CheckTransSecLevel(const char *mySessionName, const char *peerSessionName);
 bool CheckDiscPermission(pid_t callingUid, const char *pkgName);
 bool CheckBusCenterPermission(pid_t callingUid, const char *pkgName);

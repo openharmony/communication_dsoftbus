@@ -56,6 +56,7 @@ public:
     virtual bool CheckUidAndPid(const char *sessionName, pid_t callingUid, pid_t callingPid) = 0;
     virtual int32_t SoftBusCheckDmsServerPermission(uint64_t tokenId) = 0;
     virtual bool SoftBusCheckIsSystemApp(uint64_t tokenId) = 0;
+    virtual int32_t CheckLnnPermission(const char *interfaceName, const char *processName) = 0;
 };
 class SoftbusServerStubTestInterfaceMock : public SoftbusServerStubTestInterface {
 public:
@@ -82,6 +83,7 @@ public:
     MOCK_METHOD3(CheckUidAndPid, bool (const char *sessionName, pid_t callingUid, pid_t callingPid));
     MOCK_METHOD1(SoftBusCheckDmsServerPermission, int32_t (uint64_t tokenId));
     MOCK_METHOD1(SoftBusCheckIsSystemApp, bool (uint64_t tokenId));
+    MOCK_METHOD2(CheckLnnPermission, int32_t (const char *interfaceName, const char *processName));
 };
 }
 
