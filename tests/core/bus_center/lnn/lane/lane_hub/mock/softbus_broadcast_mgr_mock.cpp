@@ -95,9 +95,10 @@ int32_t BroadcastSetScanReportChannelToLpDevice(int32_t listenerId, bool enable)
     return SoftbusBroadcastMgrMock::GetMock()->BroadcastSetScanReportChannelToLpDevice(listenerId, enable);
 }
 
-int32_t RegisterScanListener(BaseServiceType type, int32_t *listenerId, const ScanCallback *cb)
+int32_t RegisterScanListener(BroadcastProtocol protocol,
+    BaseServiceType type, int32_t *listenerId, const ScanCallback *cb)
 {
-    return SoftbusBroadcastMgrMock::GetMock()->RegisterScanListener(type, listenerId, cb);
+    return SoftbusBroadcastMgrMock::GetMock()->RegisterScanListener(protocol, type, listenerId, cb);
 }
 
 int32_t SoftBusGetBtState()
@@ -105,9 +106,10 @@ int32_t SoftBusGetBtState()
     return SoftbusBroadcastMgrMock::GetMock()->SoftBusGetBtState();
 }
 
-int32_t RegisterBroadcaster(BaseServiceType type, int32_t *bcId, const BroadcastCallback *cb)
+int32_t RegisterBroadcaster(BroadcastProtocol protocol,
+    BaseServiceType type, int32_t *bcId, const BroadcastCallback *cb)
 {
-    return SoftbusBroadcastMgrMock::GetMock()->RegisterBroadcaster(type, bcId, cb);
+    return SoftbusBroadcastMgrMock::GetMock()->RegisterBroadcaster(protocol, type, bcId, cb);
 }
 
 int32_t BroadcastGetBroadcastHandle(int32_t bcId, int32_t *bcHandle)
@@ -183,7 +185,7 @@ int32_t SoftbusBroadcastMgrMock::ActionOfRemoveBtStateListener(int32_t listenerI
 }
 
 int32_t SoftbusBroadcastMgrMock::ActionOfRegisterScanListener(
-    BaseServiceType type, int32_t *listenerId, const ScanCallback *cb)
+    BroadcastProtocol protocol, BaseServiceType type, int32_t *listenerId, const ScanCallback *cb)
 {
     *listenerId = scanListenerId_;
     scanListener_ = cb;
@@ -257,8 +259,9 @@ int32_t SoftbusBroadcastMgrMock::ActionOfSetScanFilter(
 }
 
 int32_t SoftbusBroadcastMgrMock::ActionOfRegisterBroadcaster(
-    BaseServiceType type, int32_t *bcId, const BroadcastCallback *cb)
+    BroadcastProtocol protocol, BaseServiceType type, int32_t *bcId, const BroadcastCallback *cb)
 {
+    (void)protocol;
     static int32_t advChannel = 0;
     *bcId = advChannel;
     advChannel++;

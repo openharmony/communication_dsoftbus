@@ -66,7 +66,7 @@ static void ActionOfSoftbusBleAdapterInitNull()
 {
     DISC_LOGI(DISC_TEST, "enter");
     static SoftbusBroadcastMediumInterface interface = {};
-    if (RegisterBroadcastMediumFunction(BROADCAST_MEDIUM_TYPE_BLE, &interface) != 0) {
+    if (RegisterBroadcastMediumFunction(BROADCAST_PROTOCOL_BLE, &interface) != 0) {
         DISC_LOGE(DISC_TEST, "Register gatt interface failed.");
     }
 }
@@ -389,9 +389,11 @@ HWTEST_F(SoftbusBroadcastMgrTest, SoftbusBroadcastInterface001, TestSize.Level1)
 
     int32_t bcId = -1;
     int32_t listenerId = -1;
-    EXPECT_EQ(SOFTBUS_BC_MGR_NO_FUNC_REGISTERED, RegisterBroadcaster(SRV_TYPE_DIS, &bcId, GetBroadcastCallback()));
+    EXPECT_EQ(SOFTBUS_BC_MGR_NO_FUNC_REGISTERED, RegisterBroadcaster(BROADCAST_PROTOCOL_BLE,
+        SRV_TYPE_DIS, &bcId, GetBroadcastCallback()));
     EXPECT_EQ(SOFTBUS_BC_MGR_NO_FUNC_REGISTERED, UnRegisterBroadcaster(bcId));
-    EXPECT_EQ(SOFTBUS_BC_MGR_NO_FUNC_REGISTERED, RegisterScanListener(SRV_TYPE_DIS, &listenerId, GetScanCallback()));
+    EXPECT_EQ(SOFTBUS_BC_MGR_NO_FUNC_REGISTERED, RegisterScanListener(BROADCAST_PROTOCOL_BLE,
+        SRV_TYPE_DIS, &listenerId, GetScanCallback()));
     EXPECT_EQ(SOFTBUS_BC_MGR_NO_FUNC_REGISTERED, UnRegisterScanListener(listenerId));
 
     BroadcastParam bcParam = {};
@@ -433,9 +435,11 @@ HWTEST_F(SoftbusBroadcastMgrTest, SoftbusBroadcastInterface002, TestSize.Level1)
     EXPECT_EQ(SOFTBUS_BC_MGR_FUNC_NULL, InitBroadcastMgr());
     int32_t bcId = -1;
     int32_t listenerId = -1;
-    EXPECT_EQ(SOFTBUS_BC_MGR_FUNC_NULL, RegisterBroadcaster(SRV_TYPE_DIS, &bcId, GetBroadcastCallback()));
+    EXPECT_EQ(SOFTBUS_BC_MGR_FUNC_NULL, RegisterBroadcaster(BROADCAST_PROTOCOL_BLE,
+        SRV_TYPE_DIS, &bcId, GetBroadcastCallback()));
     EXPECT_EQ(SOFTBUS_BC_MGR_FUNC_NULL, UnRegisterBroadcaster(bcId));
-    EXPECT_EQ(SOFTBUS_BC_MGR_FUNC_NULL, RegisterScanListener(SRV_TYPE_DIS, &listenerId, GetScanCallback()));
+    EXPECT_EQ(SOFTBUS_BC_MGR_FUNC_NULL, RegisterScanListener(BROADCAST_PROTOCOL_BLE,
+        SRV_TYPE_DIS, &listenerId, GetScanCallback()));
     EXPECT_EQ(SOFTBUS_BC_MGR_FUNC_NULL, UnRegisterScanListener(listenerId));
 
     BroadcastParam bcParam = {};
@@ -477,10 +481,11 @@ HWTEST_F(SoftbusBroadcastMgrTest, SoftbusBroadcastRegisterBroadcaster001, TestSi
 
     EXPECT_EQ(SOFTBUS_OK, InitBroadcastMgr());
     int32_t bcId = -1;
-    EXPECT_EQ(SOFTBUS_BC_MGR_INVALID_SRV,
-        RegisterBroadcaster(static_cast<BaseServiceType>(SRV_TYPE_INVALID), &bcId, GetBroadcastCallback()));
-    EXPECT_EQ(SOFTBUS_INVALID_PARAM, RegisterBroadcaster(SRV_TYPE_DIS, nullptr, GetBroadcastCallback()));
-    EXPECT_EQ(SOFTBUS_INVALID_PARAM, RegisterBroadcaster(SRV_TYPE_DIS, &bcId, nullptr));
+    EXPECT_EQ(SOFTBUS_BC_MGR_INVALID_SRV, RegisterBroadcaster(BROADCAST_PROTOCOL_BLE,
+        static_cast<BaseServiceType>(SRV_TYPE_INVALID), &bcId, GetBroadcastCallback()));
+    EXPECT_EQ(SOFTBUS_INVALID_PARAM, RegisterBroadcaster(BROADCAST_PROTOCOL_BLE,
+        SRV_TYPE_DIS, nullptr, GetBroadcastCallback()));
+    EXPECT_EQ(SOFTBUS_INVALID_PARAM, RegisterBroadcaster(BROADCAST_PROTOCOL_BLE, SRV_TYPE_DIS, &bcId, nullptr));
 
     EXPECT_EQ(SOFTBUS_OK, DeInitBroadcastMgr());
 
@@ -500,7 +505,8 @@ HWTEST_F(SoftbusBroadcastMgrTest, SoftbusBroadcastRegisterBroadcaster002, TestSi
 
     EXPECT_EQ(SOFTBUS_OK, InitBroadcastMgr());
     int32_t bcId = -1;
-    EXPECT_EQ(SOFTBUS_OK, RegisterBroadcaster(SRV_TYPE_DIS, &bcId, GetBroadcastCallback()));
+    EXPECT_EQ(SOFTBUS_OK, RegisterBroadcaster(BROADCAST_PROTOCOL_BLE,
+        SRV_TYPE_DIS, &bcId, GetBroadcastCallback()));
     EXPECT_TRUE(bcId >= 0);
 
     EXPECT_EQ(SOFTBUS_OK, UnRegisterBroadcaster(bcId));
@@ -523,12 +529,13 @@ HWTEST_F(SoftbusBroadcastMgrTest, SoftbusBroadcastRegisterBroadcaster003, TestSi
     EXPECT_EQ(SOFTBUS_OK, InitBroadcastMgr());
     int32_t bcId[BC_NUM_MAX + 1] = { -1 };
     for (int32_t i = 0; i < BC_NUM_MAX; i++) {
-        EXPECT_EQ(SOFTBUS_OK, RegisterBroadcaster(SRV_TYPE_DIS, &bcId[i], GetBroadcastCallback()));
+        EXPECT_EQ(SOFTBUS_OK, RegisterBroadcaster(BROADCAST_PROTOCOL_BLE,
+            SRV_TYPE_DIS, &bcId[i], GetBroadcastCallback()));
         EXPECT_TRUE(bcId[i] >= 0);
     }
 
     EXPECT_EQ(SOFTBUS_BC_MGR_REG_NO_AVAILABLE_BC_ID,
-        RegisterBroadcaster(SRV_TYPE_DIS, &bcId[BC_NUM_MAX], GetBroadcastCallback()));
+        RegisterBroadcaster(BROADCAST_PROTOCOL_BLE, SRV_TYPE_DIS, &bcId[BC_NUM_MAX], GetBroadcastCallback()));
 
     for (int32_t i = 0; i < BC_NUM_MAX; i++) {
         EXPECT_EQ(SOFTBUS_OK, UnRegisterBroadcaster(bcId[i]));
@@ -577,7 +584,8 @@ HWTEST_F(SoftbusBroadcastMgrTest, SoftbusBroadcastUnRegisterBroadcaster002, Test
     EXPECT_EQ(SOFTBUS_OK, InitBroadcastMgr());
 
     int32_t bcId = -1;
-    EXPECT_EQ(SOFTBUS_OK, RegisterBroadcaster(SRV_TYPE_DIS, &bcId, GetBroadcastCallback()));
+    EXPECT_EQ(SOFTBUS_OK, RegisterBroadcaster(BROADCAST_PROTOCOL_BLE,
+        SRV_TYPE_DIS, &bcId, GetBroadcastCallback()));
     EXPECT_TRUE(bcId >= 0);
 
     BroadcastParam bcParam = {};
@@ -610,10 +618,11 @@ HWTEST_F(SoftbusBroadcastMgrTest, SoftbusBroadcastRegisterScanListener001, TestS
 
     EXPECT_EQ(SOFTBUS_OK, InitBroadcastMgr());
     int32_t listenerId = -1;
-    EXPECT_EQ(SOFTBUS_BC_MGR_INVALID_SRV,
-        RegisterScanListener(static_cast<BaseServiceType>(SRV_TYPE_INVALID), &listenerId, GetScanCallback()));
-    EXPECT_EQ(SOFTBUS_INVALID_PARAM, RegisterScanListener(SRV_TYPE_DIS, nullptr, GetScanCallback()));
-    EXPECT_EQ(SOFTBUS_INVALID_PARAM, RegisterScanListener(SRV_TYPE_DIS, &listenerId, nullptr));
+    EXPECT_EQ(SOFTBUS_BC_MGR_INVALID_SRV, RegisterScanListener(BROADCAST_PROTOCOL_BLE,
+        static_cast<BaseServiceType>(SRV_TYPE_INVALID), &listenerId, GetScanCallback()));
+    EXPECT_EQ(SOFTBUS_INVALID_PARAM, RegisterScanListener(BROADCAST_PROTOCOL_BLE,
+        SRV_TYPE_DIS, nullptr, GetScanCallback()));
+    EXPECT_EQ(SOFTBUS_INVALID_PARAM, RegisterScanListener(BROADCAST_PROTOCOL_BLE, SRV_TYPE_DIS, &listenerId, nullptr));
 
     EXPECT_EQ(SOFTBUS_OK, DeInitBroadcastMgr());
 
@@ -633,7 +642,7 @@ HWTEST_F(SoftbusBroadcastMgrTest, SoftbusBroadcastRegisterScanListener002, TestS
 
     EXPECT_EQ(SOFTBUS_OK, InitBroadcastMgr());
     int32_t listenerId = -1;
-    EXPECT_EQ(SOFTBUS_OK, RegisterScanListener(SRV_TYPE_DIS, &listenerId, GetScanCallback()));
+    EXPECT_EQ(SOFTBUS_OK, RegisterScanListener(BROADCAST_PROTOCOL_BLE, SRV_TYPE_DIS, &listenerId, GetScanCallback()));
     EXPECT_TRUE(listenerId >= 0);
 
     EXPECT_EQ(SOFTBUS_OK, UnRegisterScanListener(listenerId));
@@ -655,14 +664,18 @@ HWTEST_F(SoftbusBroadcastMgrTest, SoftbusBroadcastRegisterScanListener003, TestS
 
     EXPECT_EQ(SOFTBUS_OK, InitBroadcastMgr());
     int32_t listenerId = -1;
-    EXPECT_EQ(SOFTBUS_OK, RegisterScanListener(SRV_TYPE_DIS, &listenerId, GetScanCallback()));
+    EXPECT_EQ(SOFTBUS_OK, RegisterScanListener(BROADCAST_PROTOCOL_BLE,
+        SRV_TYPE_DIS, &listenerId, GetScanCallback()));
     EXPECT_TRUE(listenerId >= 0);
-    EXPECT_EQ(SOFTBUS_BC_MGR_REG_DUP, RegisterScanListener(SRV_TYPE_DIS, &listenerId, GetScanCallback()));
+    EXPECT_EQ(SOFTBUS_BC_MGR_REG_DUP, RegisterScanListener(BROADCAST_PROTOCOL_BLE,
+        SRV_TYPE_DIS, &listenerId, GetScanCallback()));
     EXPECT_EQ(SOFTBUS_OK, UnRegisterScanListener(listenerId));
 
-    EXPECT_EQ(SOFTBUS_OK, RegisterScanListener(SRV_TYPE_LP_BURST, &listenerId, GetScanCallback()));
+    EXPECT_EQ(SOFTBUS_OK, RegisterScanListener(BROADCAST_PROTOCOL_BLE,
+        SRV_TYPE_LP_BURST, &listenerId, GetScanCallback()));
     EXPECT_TRUE(listenerId >= 0);
-    EXPECT_EQ(SOFTBUS_BC_MGR_REG_DUP, RegisterScanListener(SRV_TYPE_LP_BURST, &listenerId, GetScanCallback()));
+    EXPECT_EQ(SOFTBUS_BC_MGR_REG_DUP, RegisterScanListener(BROADCAST_PROTOCOL_BLE,
+        SRV_TYPE_LP_BURST, &listenerId, GetScanCallback()));
     EXPECT_EQ(SOFTBUS_OK, UnRegisterScanListener(listenerId));
 
     EXPECT_EQ(SOFTBUS_OK, DeInitBroadcastMgr());
@@ -712,7 +725,8 @@ HWTEST_F(SoftbusBroadcastMgrTest, SoftbusBroadcastUnRegisterScanListener002, Tes
     BcScanParams scanParam = {};
     BuildScanParam(&scanParam);
 
-    EXPECT_EQ(SOFTBUS_OK, RegisterScanListener(SRV_TYPE_DIS, &listenerId, GetScanCallback()));
+    EXPECT_EQ(SOFTBUS_OK, RegisterScanListener(BROADCAST_PROTOCOL_BLE,
+        SRV_TYPE_DIS, &listenerId, GetScanCallback()));
     EXPECT_TRUE(listenerId >= 0);
 
     EXPECT_EQ(SOFTBUS_OK, SetScanFilter(listenerId, filter, filterNum));
@@ -738,7 +752,8 @@ HWTEST_F(SoftbusBroadcastMgrTest, SoftbusBroadcastStartBroadcasting001, TestSize
     EXPECT_EQ(SOFTBUS_OK, InitBroadcastMgr());
 
     int32_t bcId = -1;
-    EXPECT_EQ(SOFTBUS_OK, RegisterBroadcaster(SRV_TYPE_DIS, &bcId, GetBroadcastCallback()));
+    EXPECT_EQ(SOFTBUS_OK, RegisterBroadcaster(BROADCAST_PROTOCOL_BLE,
+        SRV_TYPE_DIS, &bcId, GetBroadcastCallback()));
     EXPECT_TRUE(bcId >= 0);
 
     BroadcastParam bcParam = {};
@@ -778,7 +793,8 @@ HWTEST_F(SoftbusBroadcastMgrTest, SoftbusBroadcastStartBroadcasting002, TestSize
     EXPECT_EQ(SOFTBUS_OK, InitBroadcastMgr());
 
     int32_t bcId = -1;
-    EXPECT_EQ(SOFTBUS_OK, RegisterBroadcaster(SRV_TYPE_DIS, &bcId, GetBroadcastCallback()));
+    EXPECT_EQ(SOFTBUS_OK, RegisterBroadcaster(BROADCAST_PROTOCOL_BLE,
+        SRV_TYPE_DIS, &bcId, GetBroadcastCallback()));
     EXPECT_TRUE(bcId >= 0);
 
     BroadcastParam bcParam = {};
@@ -814,7 +830,7 @@ HWTEST_F(SoftbusBroadcastMgrTest, SoftbusBroadcastStartBroadcasting003, TestSize
     EXPECT_EQ(SOFTBUS_OK, InitBroadcastMgr());
 
     int32_t bcId = -1;
-    EXPECT_EQ(SOFTBUS_OK, RegisterBroadcaster(SRV_TYPE_DIS, &bcId, GetBroadcastCallback()));
+    EXPECT_EQ(SOFTBUS_OK, RegisterBroadcaster(BROADCAST_PROTOCOL_BLE, SRV_TYPE_DIS, &bcId, GetBroadcastCallback()));
     EXPECT_TRUE(bcId >= 0);
 
     BroadcastParam bcParam = {};
@@ -875,7 +891,7 @@ HWTEST_F(SoftbusBroadcastMgrTest, SoftbusBroadcastUpdateBroadcasting002, TestSiz
     EXPECT_EQ(SOFTBUS_OK, InitBroadcastMgr());
 
     int32_t bcId = -1;
-    EXPECT_EQ(SOFTBUS_OK, RegisterBroadcaster(SRV_TYPE_DIS, &bcId, GetBroadcastCallback()));
+    EXPECT_EQ(SOFTBUS_OK, RegisterBroadcaster(BROADCAST_PROTOCOL_BLE, SRV_TYPE_DIS, &bcId, GetBroadcastCallback()));
     EXPECT_TRUE(bcId >= 0);
 
     BroadcastParam bcParam = {};
@@ -937,7 +953,7 @@ HWTEST_F(SoftbusBroadcastMgrTest, SoftbusBroadcastSetBroadcastingData002, TestSi
     EXPECT_EQ(SOFTBUS_OK, InitBroadcastMgr());
 
     int32_t bcId = -1;
-    EXPECT_EQ(SOFTBUS_OK, RegisterBroadcaster(SRV_TYPE_DIS, &bcId, GetBroadcastCallback()));
+    EXPECT_EQ(SOFTBUS_OK, RegisterBroadcaster(BROADCAST_PROTOCOL_BLE, SRV_TYPE_DIS, &bcId, GetBroadcastCallback()));
     EXPECT_TRUE(bcId >= 0);
 
     BroadcastPacket packet = {};
@@ -963,7 +979,7 @@ HWTEST_F(SoftbusBroadcastMgrTest, SoftbusBroadcastSetBroadcastingData003, TestSi
     EXPECT_EQ(SOFTBUS_OK, InitBroadcastMgr());
 
     int32_t bcId = -1;
-    EXPECT_EQ(SOFTBUS_OK, RegisterBroadcaster(SRV_TYPE_DIS, &bcId, GetBroadcastCallback()));
+    EXPECT_EQ(SOFTBUS_OK, RegisterBroadcaster(BROADCAST_PROTOCOL_BLE, SRV_TYPE_DIS, &bcId, GetBroadcastCallback()));
     EXPECT_TRUE(bcId >= 0);
 
     BroadcastParam bcParam = {};
@@ -1027,7 +1043,7 @@ HWTEST_F(SoftbusBroadcastMgrTest, SoftbusBroadcastSetBroadcastingParam002, TestS
     EXPECT_EQ(SOFTBUS_OK, InitBroadcastMgr());
 
     int32_t bcId = -1;
-    EXPECT_EQ(SOFTBUS_OK, RegisterBroadcaster(SRV_TYPE_DIS, &bcId, GetBroadcastCallback()));
+    EXPECT_EQ(SOFTBUS_OK, RegisterBroadcaster(BROADCAST_PROTOCOL_BLE, SRV_TYPE_DIS, &bcId, GetBroadcastCallback()));
     EXPECT_TRUE(bcId >= 0);
 
     BroadcastParam param = {};
@@ -1076,7 +1092,7 @@ HWTEST_F(SoftbusBroadcastMgrTest, SoftbusBroadcastStopBroadcasting002, TestSize.
 
     EXPECT_EQ(SOFTBUS_OK, InitBroadcastMgr());
     int32_t bcId = -1;
-    EXPECT_EQ(SOFTBUS_OK, RegisterBroadcaster(SRV_TYPE_DIS, &bcId, GetBroadcastCallback()));
+    EXPECT_EQ(SOFTBUS_OK, RegisterBroadcaster(BROADCAST_PROTOCOL_BLE, SRV_TYPE_DIS, &bcId, GetBroadcastCallback()));
     EXPECT_TRUE(bcId >= 0);
 
     EXPECT_EQ(SOFTBUS_OK, StopBroadcasting(bcId));
@@ -1132,7 +1148,8 @@ HWTEST_F(SoftbusBroadcastMgrTest, SoftbusBroadcastSetScanFilter002, TestSize.Lev
     uint8_t filterNum = 1;
     BcScanFilter *filter = GetBcScanFilter();
 
-    EXPECT_EQ(SOFTBUS_OK, RegisterScanListener(SRV_TYPE_DIS, &listenerId, GetScanCallback()));
+    EXPECT_EQ(SOFTBUS_OK, RegisterScanListener(BROADCAST_PROTOCOL_BLE,
+        SRV_TYPE_DIS, &listenerId, GetScanCallback()));
     EXPECT_TRUE(listenerId >= 0);
 
     EXPECT_EQ(SOFTBUS_OK, SetScanFilter(listenerId, filter, filterNum));
@@ -1160,7 +1177,8 @@ HWTEST_F(SoftbusBroadcastMgrTest, SoftbusBroadcastStartScan001, TestSize.Level1)
     BuildScanParam(&scanParam);
     EXPECT_EQ(SOFTBUS_BC_MGR_INVALID_LISN_ID, StartScan(listenerId, &scanParam));
 
-    EXPECT_EQ(SOFTBUS_OK, RegisterScanListener(SRV_TYPE_DIS, &listenerId, GetScanCallback()));
+    EXPECT_EQ(SOFTBUS_OK, RegisterScanListener(BROADCAST_PROTOCOL_BLE,
+        SRV_TYPE_DIS, &listenerId, GetScanCallback()));
     EXPECT_TRUE(listenerId >= 0);
     EXPECT_EQ(SOFTBUS_INVALID_PARAM, StartScan(listenerId, nullptr));
 
@@ -1186,7 +1204,8 @@ HWTEST_F(SoftbusBroadcastMgrTest, SoftbusBroadcastStartScan002, TestSize.Level1)
     BcScanParams scanParam = {};
     BuildScanParam(&scanParam);
 
-    EXPECT_EQ(SOFTBUS_OK, RegisterScanListener(SRV_TYPE_DIS, &listenerId, GetScanCallback()));
+    EXPECT_EQ(SOFTBUS_OK, RegisterScanListener(BROADCAST_PROTOCOL_BLE,
+        SRV_TYPE_DIS, &listenerId, GetScanCallback()));
     EXPECT_TRUE(listenerId >= 0);
     int32_t ret = StartScan(listenerId, &scanParam);
     EXPECT_EQ(ret == SOFTBUS_INVALID_PARAM || ret == SOFTBUS_BC_MGR_START_SCAN_NO_FILTER, true);
@@ -1215,7 +1234,8 @@ HWTEST_F(SoftbusBroadcastMgrTest, SoftbusBroadcastStartScan003, TestSize.Level1)
     BcScanParams scanParam = {};
     BuildScanParam(&scanParam);
 
-    EXPECT_EQ(SOFTBUS_OK, RegisterScanListener(SRV_TYPE_DIS, &listenerId, GetScanCallback()));
+    EXPECT_EQ(SOFTBUS_OK, RegisterScanListener(BROADCAST_PROTOCOL_BLE,
+        SRV_TYPE_DIS, &listenerId, GetScanCallback()));
     EXPECT_TRUE(listenerId >= 0);
 
     EXPECT_EQ(SOFTBUS_OK, SetScanFilter(listenerId, filter, filterNum));
@@ -1248,7 +1268,8 @@ HWTEST_F(SoftbusBroadcastMgrTest, SoftbusBroadcastStartScan004, TestSize.Level1)
     BcScanParams scanParam = {};
     BuildScanParam(&scanParam);
 
-    EXPECT_EQ(SOFTBUS_BC_MGR_FUNC_NULL, RegisterScanListener(SRV_TYPE_DIS, &listenerId, GetScanCallback()));
+    EXPECT_EQ(SOFTBUS_BC_MGR_FUNC_NULL, RegisterScanListener(BROADCAST_PROTOCOL_BLE,
+        SRV_TYPE_DIS, &listenerId, GetScanCallback()));
 
     EXPECT_EQ(SOFTBUS_BC_MGR_INVALID_LISN_ID, SetScanFilter(listenerId, filter, filterNum));
     EXPECT_EQ(SOFTBUS_BC_MGR_FUNC_NULL, StartScan(listenerId, &scanParam));
@@ -1281,7 +1302,8 @@ HWTEST_F(SoftbusBroadcastMgrTest, SoftbusBroadcastStartScan005, TestSize.Level1)
     // SCAN_FREQ_P2_30_1500
     scanParam.scanInterval = SOFTBUS_BC_SCAN_INTERVAL_P2_FAST;
     scanParam.scanWindow = SOFTBUS_BC_SCAN_WINDOW_P2_FAST;
-    EXPECT_EQ(SOFTBUS_OK, RegisterScanListener(SRV_TYPE_DIS, &listenerId, GetScanCallback()));
+    EXPECT_EQ(SOFTBUS_OK, RegisterScanListener(BROADCAST_PROTOCOL_BLE,
+        SRV_TYPE_DIS, &listenerId, GetScanCallback()));
     EXPECT_TRUE(listenerId >= 0);
 
     EXPECT_EQ(SOFTBUS_OK, SetScanFilter(listenerId, filter, filterNum));
@@ -1313,7 +1335,8 @@ HWTEST_F(SoftbusBroadcastMgrTest, SoftbusBroadcastStartScan006, TestSize.Level1)
     // SCAN_FREQ_LOW_POWER
     scanParam.scanInterval = 0;
     scanParam.scanWindow = 0;
-    EXPECT_EQ(SOFTBUS_OK, RegisterScanListener(SRV_TYPE_DIS, &listenerId, GetScanCallback()));
+    EXPECT_EQ(SOFTBUS_OK, RegisterScanListener(BROADCAST_PROTOCOL_BLE,
+        SRV_TYPE_DIS, &listenerId, GetScanCallback()));
     EXPECT_TRUE(listenerId >= 0);
 
     EXPECT_EQ(SOFTBUS_OK, SetScanFilter(listenerId, filter, filterNum));
@@ -1362,7 +1385,8 @@ HWTEST_F(SoftbusBroadcastMgrTest, SoftbusBroadcastStopScan002, TestSize.Level1)
 
     EXPECT_EQ(SOFTBUS_OK, InitBroadcastMgr());
     int32_t listenerId = -1;
-    EXPECT_EQ(SOFTBUS_OK, RegisterScanListener(SRV_TYPE_DIS, &listenerId, GetScanCallback()));
+    EXPECT_EQ(SOFTBUS_OK, RegisterScanListener(BROADCAST_PROTOCOL_BLE,
+        SRV_TYPE_DIS, &listenerId, GetScanCallback()));
     EXPECT_TRUE(listenerId >= 0);
     EXPECT_EQ(SOFTBUS_OK, StopScan(listenerId));
 
@@ -1394,11 +1418,14 @@ HWTEST_F(SoftbusBroadcastMgrTest, SoftbusBroadcastScannerTest001, TestSize.Level
     BcScanParams scanParam = {};
     BuildScanParam(&scanParam);
 
-    EXPECT_EQ(SOFTBUS_OK, RegisterScanListener(SRV_TYPE_DIS, &discListenerId, GetScanCallback()));
+    EXPECT_EQ(SOFTBUS_OK, RegisterScanListener(BROADCAST_PROTOCOL_BLE,
+        SRV_TYPE_DIS, &discListenerId, GetScanCallback()));
     EXPECT_TRUE(discListenerId >= 0);
-    EXPECT_EQ(SOFTBUS_OK, RegisterScanListener(SRV_TYPE_CONN, &connListenerId, GetScanCallback()));
+    EXPECT_EQ(SOFTBUS_OK, RegisterScanListener(BROADCAST_PROTOCOL_BLE,
+        SRV_TYPE_CONN, &connListenerId, GetScanCallback()));
     EXPECT_TRUE(connListenerId >= 0);
-    EXPECT_EQ(SOFTBUS_OK, RegisterScanListener(SRV_TYPE_LP_HB, &lpListenerId, GetScanCallback()));
+    EXPECT_EQ(SOFTBUS_OK, RegisterScanListener(BROADCAST_PROTOCOL_BLE,
+        SRV_TYPE_LP_HB, &lpListenerId, GetScanCallback()));
     EXPECT_TRUE(lpListenerId >= 0);
 
     EXPECT_EQ(SOFTBUS_OK, SetScanFilter(discListenerId, discFilter, filterNum));
@@ -1450,11 +1477,14 @@ HWTEST_F(SoftbusBroadcastMgrTest, SoftbusBroadcastScannerTest002, TestSize.Level
     BcScanParams scanParam = {};
     BuildScanParam(&scanParam);
 
-    EXPECT_EQ(SOFTBUS_OK, RegisterScanListener(SRV_TYPE_DIS, &discListenerId, GetScanCallback()));
+    EXPECT_EQ(SOFTBUS_OK, RegisterScanListener(BROADCAST_PROTOCOL_BLE,
+        SRV_TYPE_DIS, &discListenerId, GetScanCallback()));
     EXPECT_TRUE(discListenerId >= 0);
-    EXPECT_EQ(SOFTBUS_OK, RegisterScanListener(SRV_TYPE_CONN, &connListenerId, GetScanCallback()));
+    EXPECT_EQ(SOFTBUS_OK, RegisterScanListener(BROADCAST_PROTOCOL_BLE,
+        SRV_TYPE_CONN, &connListenerId, GetScanCallback()));
     EXPECT_TRUE(connListenerId >= 0);
-    EXPECT_EQ(SOFTBUS_OK, RegisterScanListener(SRV_TYPE_LP_HB, &lpListenerId, GetScanCallback()));
+    EXPECT_EQ(SOFTBUS_OK, RegisterScanListener(BROADCAST_PROTOCOL_BLE,
+        SRV_TYPE_LP_HB, &lpListenerId, GetScanCallback()));
     EXPECT_TRUE(lpListenerId >= 0);
 
     EXPECT_EQ(SOFTBUS_OK, SetScanFilter(discListenerId, discFilter, filterNum));
@@ -1503,7 +1533,8 @@ HWTEST_F(SoftbusBroadcastMgrTest, SoftbusBroadcastScannerTest003, TestSize.Level
     BcScanParams scanParam = {};
     BuildScanParam(&scanParam);
 
-    EXPECT_EQ(SOFTBUS_OK, RegisterScanListener(SRV_TYPE_DIS, &discListenerId, GetScanCallback()));
+    EXPECT_EQ(SOFTBUS_OK, RegisterScanListener(BROADCAST_PROTOCOL_BLE,
+        SRV_TYPE_DIS, &discListenerId, GetScanCallback()));
     EXPECT_TRUE(discListenerId >= 0);
 
     EXPECT_EQ(SOFTBUS_OK, SetScanFilter(discListenerId, discFilter, filterNum));
@@ -1541,7 +1572,8 @@ HWTEST_F(SoftbusBroadcastMgrTest, SoftbusBroadcastScannerTest004, TestSize.Level
     BcScanParams scanParam = {};
     BuildScanParam(&scanParam);
 
-    EXPECT_EQ(SOFTBUS_OK, RegisterScanListener(SRV_TYPE_DIS, &discListenerId, GetScanCallback()));
+    EXPECT_EQ(SOFTBUS_OK, RegisterScanListener(BROADCAST_PROTOCOL_BLE,
+        SRV_TYPE_DIS, &discListenerId, GetScanCallback()));
     EXPECT_TRUE(discListenerId >= 0);
 
     EXPECT_EQ(SOFTBUS_OK, SetScanFilter(discListenerId, discFilter, filterNum));
@@ -1581,7 +1613,8 @@ HWTEST_F(SoftbusBroadcastMgrTest, SoftbusBroadcastScannerTest005, TestSize.Level
     BcScanParams scanParam = {};
     BuildScanParam(&scanParam);
 
-    EXPECT_EQ(SOFTBUS_OK, RegisterScanListener(SRV_TYPE_DIS, &discListenerId, GetScanCallback()));
+    EXPECT_EQ(SOFTBUS_OK, RegisterScanListener(BROADCAST_PROTOCOL_BLE,
+        SRV_TYPE_DIS, &discListenerId, GetScanCallback()));
     EXPECT_TRUE(discListenerId >= 0);
 
     EXPECT_EQ(SOFTBUS_OK, SetScanFilter(discListenerId, discFilter, filterNum));
@@ -1630,7 +1663,8 @@ HWTEST_F(SoftbusBroadcastMgrTest, SoftbusBroadcastScannerTest006, TestSize.Level
     BcScanParams scanParam = {};
     BuildScanParam(&scanParam);
 
-    EXPECT_EQ(SOFTBUS_OK, RegisterScanListener(SRV_TYPE_DIS, &discListenerId, GetScanCallback()));
+    EXPECT_EQ(SOFTBUS_OK, RegisterScanListener(BROADCAST_PROTOCOL_BLE,
+        SRV_TYPE_DIS, &discListenerId, GetScanCallback()));
     EXPECT_TRUE(discListenerId >= 0);
     // First SetScanFilter call
     EXPECT_EQ(SOFTBUS_OK, SetScanFilter(discListenerId, firstDiscFilter, filterNum));
@@ -1684,7 +1718,8 @@ HWTEST_F(SoftbusBroadcastMgrTest, SoftbusBroadcastScannerTest007, TestSize.Level
     BcScanParams scanParam = {};
     BuildScanParam(&scanParam);
 
-    EXPECT_EQ(SOFTBUS_OK, RegisterScanListener(SRV_TYPE_DIS, &discListenerId, GetScanCallback()));
+    EXPECT_EQ(SOFTBUS_OK, RegisterScanListener(BROADCAST_PROTOCOL_BLE,
+        SRV_TYPE_DIS, &discListenerId, GetScanCallback()));
     EXPECT_TRUE(discListenerId >= 0);
     // First SetScanFilter call
     EXPECT_EQ(SOFTBUS_OK, SetScanFilter(discListenerId, firstDiscFilter, filterNum));
@@ -1752,7 +1787,8 @@ HWTEST_F(SoftbusBroadcastMgrTest, TestGetScanFilter002, TestSize.Level1)
     BcScanParams scanParam = {};
     BuildScanParam(&scanParam);
 
-    EXPECT_EQ(SOFTBUS_OK, RegisterScanListener(SRV_TYPE_DIS, &listenerId, GetScanCallback()));
+    EXPECT_EQ(SOFTBUS_OK, RegisterScanListener(BROADCAST_PROTOCOL_BLE,
+        SRV_TYPE_DIS, &listenerId, GetScanCallback()));
     EXPECT_TRUE(listenerId >= 0);
 
     EXPECT_EQ(SOFTBUS_OK, SetScanFilter(listenerId, filter, filterNum));
@@ -1779,7 +1815,7 @@ HWTEST_F(SoftbusBroadcastMgrTest, BroadcastGetBroadcastHandle001, TestSize.Level
 
     EXPECT_EQ(SOFTBUS_INVALID_PARAM, BroadcastGetBroadcastHandle(bcId, &Handle));
 
-    EXPECT_EQ(SOFTBUS_OK, RegisterBroadcaster(SRV_TYPE_DIS, &bcId, GetBroadcastCallback()));
+    EXPECT_EQ(SOFTBUS_OK, RegisterBroadcaster(BROADCAST_PROTOCOL_BLE, SRV_TYPE_DIS, &bcId, GetBroadcastCallback()));
     EXPECT_TRUE(bcId >= 0);
     EXPECT_EQ(SOFTBUS_OK, BroadcastGetBroadcastHandle(bcId, &Handle));
     EXPECT_EQ(SOFTBUS_OK, UnRegisterBroadcaster(bcId));
@@ -1829,7 +1865,8 @@ HWTEST_F(SoftbusBroadcastMgrTest, BroadcastSetScanReportChannelToLpDevice002, Te
     uint8_t filterNum = 1;
     BcScanFilter *filter = GetBcScanFilter();
 
-    EXPECT_EQ(SOFTBUS_OK, RegisterScanListener(SRV_TYPE_DIS, &listenerId, GetScanCallback()));
+    EXPECT_EQ(SOFTBUS_OK, RegisterScanListener(BROADCAST_PROTOCOL_BLE,
+        SRV_TYPE_DIS, &listenerId, GetScanCallback()));
     EXPECT_TRUE(listenerId >= 0);
 
     EXPECT_EQ(SOFTBUS_OK, SetScanFilter(listenerId, filter, filterNum));
@@ -1956,7 +1993,7 @@ HWTEST_F(SoftbusBroadcastMgrTest, PerformSetBroadcastingParam001, TestSize.Level
     EXPECT_EQ(SOFTBUS_OK, InitBroadcastMgr());
 
     int32_t bcId = -1;
-    EXPECT_EQ(SOFTBUS_OK, RegisterBroadcaster(SRV_TYPE_DIS, &bcId, GetBroadcastCallback()));
+    EXPECT_EQ(SOFTBUS_OK, RegisterBroadcaster(BROADCAST_PROTOCOL_BLE, SRV_TYPE_DIS, &bcId, GetBroadcastCallback()));
     EXPECT_TRUE(bcId >= 0);
 
     EXPECT_EQ(SOFTBUS_BC_MGR_NOT_BROADCASTING, PerformSetBroadcastingParam(bcId, &adapterParam));
@@ -1985,7 +2022,7 @@ HWTEST_F(SoftbusBroadcastMgrTest, PerformSetBroadcastingParam002, TestSize.Level
     EXPECT_EQ(SOFTBUS_OK, InitBroadcastMgr());
 
     int32_t bcId = -1;
-    EXPECT_EQ(SOFTBUS_OK, RegisterBroadcaster(SRV_TYPE_DIS, &bcId, GetBroadcastCallback()));
+    EXPECT_EQ(SOFTBUS_OK, RegisterBroadcaster(BROADCAST_PROTOCOL_BLE, SRV_TYPE_DIS, &bcId, GetBroadcastCallback()));
     EXPECT_TRUE(bcId >= 0);
     int32_t bcIdTest = bcId + 1;
 
@@ -2022,7 +2059,7 @@ HWTEST_F(SoftbusBroadcastMgrTest, PerformSetBroadcastingParam003, TestSize.Level
     EXPECT_EQ(SOFTBUS_OK, InitBroadcastMgr());
 
     int32_t bcId = -1;
-    EXPECT_EQ(SOFTBUS_OK, RegisterBroadcaster(SRV_TYPE_DIS, &bcId, GetBroadcastCallback()));
+    EXPECT_EQ(SOFTBUS_OK, RegisterBroadcaster(BROADCAST_PROTOCOL_BLE, SRV_TYPE_DIS, &bcId, GetBroadcastCallback()));
     EXPECT_TRUE(bcId >= 0);
     
     EXPECT_EQ(SOFTBUS_OK, StartBroadcasting(bcId, &bcParam, &packet));
@@ -2060,7 +2097,7 @@ HWTEST_F(SoftbusBroadcastMgrTest, PerformSetBroadcastingParam004, TestSize.Level
     EXPECT_EQ(SOFTBUS_OK, InitBroadcastMgr());
 
     int32_t bcId = -1;
-    EXPECT_EQ(SOFTBUS_OK, RegisterBroadcaster(SRV_TYPE_DIS, &bcId, GetBroadcastCallback()));
+    EXPECT_EQ(SOFTBUS_OK, RegisterBroadcaster(BROADCAST_PROTOCOL_BLE, SRV_TYPE_DIS, &bcId, GetBroadcastCallback()));
     EXPECT_TRUE(bcId >= 0);
     
     EXPECT_EQ(SOFTBUS_OK, StartBroadcasting(bcId, &bcParam, &packet));
@@ -2098,7 +2135,7 @@ HWTEST_F(SoftbusBroadcastMgrTest, EnableBroadcasting001, TestSize.Level1)
     EXPECT_EQ(SOFTBUS_OK, InitBroadcastMgr());
 
     int32_t bcId = -1;
-    EXPECT_EQ(SOFTBUS_OK, RegisterBroadcaster(SRV_TYPE_DIS, &bcId, GetBroadcastCallback()));
+    EXPECT_EQ(SOFTBUS_OK, RegisterBroadcaster(BROADCAST_PROTOCOL_BLE, SRV_TYPE_DIS, &bcId, GetBroadcastCallback()));
     EXPECT_TRUE(bcId >= 0);
     int32_t bcIdTest = bcId + 1;
     
@@ -2136,7 +2173,7 @@ HWTEST_F(SoftbusBroadcastMgrTest, EnableBroadcasting002, TestSize.Level1)
     EXPECT_EQ(SOFTBUS_OK, InitBroadcastMgr());
 
     int32_t bcId = -1;
-    EXPECT_EQ(SOFTBUS_OK, RegisterBroadcaster(SRV_TYPE_DIS, &bcId, GetBroadcastCallback()));
+    EXPECT_EQ(SOFTBUS_OK, RegisterBroadcaster(BROADCAST_PROTOCOL_BLE, SRV_TYPE_DIS, &bcId, GetBroadcastCallback()));
     EXPECT_TRUE(bcId >= 0);
     
     EXPECT_EQ(SOFTBUS_BC_MGR_NOT_BROADCASTING, EnableBroadcasting(bcId));
@@ -2183,7 +2220,7 @@ HWTEST_F(SoftbusBroadcastMgrTest, BroadcastSetAdvDeviceParam001, TestSize.Level1
 
     EXPECT_EQ(SOFTBUS_OK, InitBroadcastMgr());
     int32_t bcId = -1;
-    EXPECT_EQ(SOFTBUS_OK, RegisterBroadcaster(SRV_TYPE_DIS, &bcId, GetBroadcastCallback()));
+    EXPECT_EQ(SOFTBUS_OK, RegisterBroadcaster(BROADCAST_PROTOCOL_BLE, SRV_TYPE_DIS, &bcId, GetBroadcastCallback()));
     EXPECT_TRUE(bcId >= 0);
 
     EXPECT_FALSE(BroadcastSetAdvDeviceParam(static_cast<LpServerType>(type), &lpBcParam, &lpScanParam));
@@ -2206,7 +2243,8 @@ HWTEST_F(SoftbusBroadcastMgrTest, BroadcastSetAdvDeviceParam002, TestSize.Level1
 
     EXPECT_EQ(SOFTBUS_OK, InitBroadcastMgr());
     int32_t bcId = -1;
-    EXPECT_EQ(SOFTBUS_OK, RegisterScanListener(SRV_TYPE_DIS, &bcId, GetScanCallback()));
+    EXPECT_EQ(SOFTBUS_OK, RegisterScanListener(BROADCAST_PROTOCOL_BLE,
+        SRV_TYPE_DIS, &bcId, GetScanCallback()));
     EXPECT_TRUE(bcId >= 0);
 
     g_baseFuzzPos = 0;
