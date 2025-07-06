@@ -124,7 +124,7 @@ void MoveNodeTest(FuzzedDataProvider &provider)
 
 void TransTdcDecryptTest(FuzzedDataProvider &provider)
 {
-    std::string sessionKey = provider.ConsumeRandomLengthString(UINT8_MAX);
+    std::string sessionKey = provider.ConsumeRandomLengthString(SESSION_KEY_LENGTH);
     uint32_t inLen = provider.ConsumeIntegral<uint8_t>();
     std::string in = provider.ConsumeRandomLengthString(inLen);
     char out[UINT8_MAX] = { 0 };
@@ -165,7 +165,7 @@ void TransTdcUnPackAllDataTest(FuzzedDataProvider &provider)
 void TransTdcUnPackDataTest(FuzzedDataProvider &provider)
 {
     int32_t channelId = provider.ConsumeIntegral<int32_t>();
-    std::string sessionKey = provider.ConsumeRandomLengthString(UINT8_MAX);
+    std::string sessionKey = provider.ConsumeRandomLengthString(SESSION_KEY_LENGTH);
     char plain[UINT8_MAX] = { 0 };
     uint32_t plainLen = 0;
 
@@ -276,7 +276,7 @@ void BuildDataHeadTest(FuzzedDataProvider &provider)
 void TransTdcEncryptWithSeqTest(FuzzedDataProvider &provider)
 {
     int32_t seqNum = provider.ConsumeIntegral<int32_t>();
-    std::string sessionKey = provider.ConsumeRandomLengthString(UINT8_MAX);
+    std::string sessionKey = provider.ConsumeRandomLengthString(SESSION_KEY_LENGTH);
     EncrptyInfo info;
     (void)memset_s(&info, sizeof(EncrptyInfo), 0, sizeof(EncrptyInfo));
 
@@ -333,7 +333,7 @@ void TransTdcPackAllDataTest(FuzzedDataProvider &provider)
     DataLenInfo lenInfo;
     (void)memset_s(&lenInfo, sizeof(DataLenInfo), 0, sizeof(DataLenInfo));
     FillDataLenInfo(provider, &lenInfo);
-    std::string sessionKey = provider.ConsumeRandomLengthString(UINT8_MAX);
+    std::string sessionKey = provider.ConsumeRandomLengthString(SESSION_KEY_LENGTH);
     std::string data = provider.ConsumeRandomLengthString(UINT8_MAX);
     int32_t flags = provider.ConsumeIntegral<int32_t>();
 
