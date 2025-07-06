@@ -41,6 +41,10 @@ if (defined(ohos_lite)) {
     sources = [ "$dsoftbus_core_path/common/security/permission/softbus_trans_permission.json" ]
     outputs = [ "$root_out_dir/etc/softbus_trans_permission.json" ]
   }
+  copy("lnn_permission_json") {
+    sources = [ "$dsoftbus_core_path/common/security/permission/softbus_lnn_permission.json" ]
+    outputs = [ "$root_out_dir/etc/softbus_lnn_permission.json" ]
+  }
   if (ohos_kernel_type == "liteos_m") {
     static_library("softbus_server_frame") {
       defines += AUTH_SERVER_DEFINES
@@ -237,6 +241,7 @@ if (defined(ohos_lite)) {
       deps = dsoftbus_server_common_deps
       deps += [
         ":permission_json",
+        ":lnn_permission_json",
         "$dsoftbus_dfx_path/dumper/legacy:softbus_dfx_dump",
         "$dsoftbus_root_path/adapter:softbus_adapter",
         "$dsoftbus_root_path/core/common:softbus_utils",
@@ -294,6 +299,13 @@ if (defined(ohos_lite)) {
           "$dsoftbus_root_path/core/frame/$os_type/init/src/softbus_server.cfg"
     }
 
+    part_name = "dsoftbus"
+    subsystem_name = "communication"
+  }
+  ohos_prebuilt_etc("softbus_lnn_permission_json") {
+    source = "$dsoftbus_root_path/core/common/security/permission/softbus_lnn_permission.json"
+    install_enable = true
+    relative_install_dir = "communication/softbus"
     part_name = "dsoftbus"
     subsystem_name = "communication"
   }
@@ -385,6 +397,7 @@ if (defined(ohos_lite)) {
     deps = dsoftbus_server_common_deps
     deps += [
       ":softbus_permission_json",
+      ":softbus_lnn_permission_json",
       ":softbus_server.rc",
       "$dsoftbus_dfx_path/dumper/legacy:softbus_dfx_dump",
       "$dsoftbus_root_path/adapter:softbus_adapter",
