@@ -189,7 +189,9 @@ static int32_t InitServicesAndModules(void)
 
     COMM_CHECK_AND_RETURN_RET_LOGE(ConnBleDirectInitPacked() == SOFTBUS_OK,
         SOFTBUS_CONN_BLE_DIRECT_INIT_FAILED, COMM_SVC, "softbus ble direct init failed.");
-
+    if (ConnPagingConnectInitPacked() != SOFTBUS_OK) {
+        COMM_LOGE(COMM_SVC, "paging connect init failed.");
+    }
     if (InitSoftbusSysEvt() != SOFTBUS_OK || SoftBusHiDumperInit() != SOFTBUS_OK) {
         COMM_LOGE(COMM_SVC, "softbus dfx init failed.");
         return SOFTBUS_DFX_INIT_FAILED;

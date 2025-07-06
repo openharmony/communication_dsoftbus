@@ -30,8 +30,7 @@ int32_t SchedulerDeinitBroadcast(void)
 int32_t SchedulerRegisterBroadcaster(
     BroadcastProtocol protocol, BaseServiceType type, int32_t *bcId, const BroadcastCallback *cb)
 {
-    (void)protocol;
-    return RegisterBroadcaster(type, bcId, cb);
+    return RegisterBroadcaster(protocol, type, bcId, cb);
 }
 
 int32_t SchedulerUnregisterBroadcaster(int32_t bcId)
@@ -42,8 +41,7 @@ int32_t SchedulerUnregisterBroadcaster(int32_t bcId)
 int32_t SchedulerRegisterScanListener(
     BroadcastProtocol protocol, BaseServiceType type, int32_t *listenerId, const ScanCallback *cb)
 {
-    (void)protocol;
-    return RegisterScanListener(type, listenerId, cb);
+    return RegisterScanListener(protocol, type, listenerId, cb);
 }
 
 int32_t SchedulerUnregisterListener(int32_t listenerId)

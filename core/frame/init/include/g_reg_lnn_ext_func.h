@@ -244,14 +244,16 @@ typedef int32_t (*BroadcastDisableSyncDataToLpDeviceFunc)(void);
 typedef int32_t (*StartBroadcastingFunc)(int32_t bcId, const BroadcastParam *param, const BroadcastPacket *packet);
 typedef int32_t (*BroadcastEnableSyncDataToLpDeviceFunc)(void);
 typedef int32_t (*StartScanFunc)(int32_t listenerId, const BcScanParams *param);
-typedef int32_t (*RegisterScanListenerFunc)(BaseServiceType srvType, int32_t *listenerId, const ScanCallback *cb);
+typedef int32_t (*RegisterScanListenerFunc)(BroadcastProtocol protocol,
+    BaseServiceType srvType, int32_t *listenerId, const ScanCallback *cb);
 typedef int32_t (*AuthStartVerifyFunc)(const AuthConnInfo *connInfo, const AuthVerifyParam *authVerifyParam,
     const AuthVerifyCallback *callback);
 typedef AuthVerifyCallback *(*LnnGetReAuthVerifyCallbackFunc)(void);
 typedef void (*NotifyForegroundUseridChangeFunc)(char *networkId, uint32_t discoveryType, bool isChange);
 typedef int32_t (*LnnSetDLConnUserIdCheckSumFunc)(const char *networkId, int32_t userIdCheckSum);
 
-typedef int32_t (*RegisterBroadcasterFunc)(BaseServiceType srvType, int32_t *bcId, const BroadcastCallback *cb);
+typedef int32_t (*RegisterBroadcasterFunc)(BroadcastProtocol protocol,
+    BaseServiceType srvType, int32_t *bcId, const BroadcastCallback *cb);
 typedef int32_t (*UnRegisterScanListenerFunc)(int32_t listenerId);
 typedef int32_t (*UnRegisterBroadcasterFunc)(int32_t bcId);
 typedef int32_t (*StopBroadcastingFunc)(int32_t bcId);
