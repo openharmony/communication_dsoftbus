@@ -84,6 +84,20 @@ static void GetProxyChannelInfo(int32_t channelId, const AppInfo *appInfo, bool 
     info->linkType = appInfo->linkType;
     info->connectType = appInfo->connectType;
     info->osType = appInfo->osType;
+    info->isD2D = appInfo->isD2D;
+    if (appInfo->isD2D) {
+        info->businessFlag = appInfo->myData.businessFlag;
+        info->deviceTypeId = appInfo->peerData.devTypeId;
+        info->pagingNonce = (char *)appInfo->pagingNonce;
+        info->pagingSessionkey = (char *)appInfo->pagingSessionkey;
+        if (appInfo->peerData.dataLen > 0) {
+            info->dataLen = appInfo->peerData.dataLen;
+            info->extraData = (char *)appInfo->peerData.extraData;
+        }
+        if (info->isServer) {
+            info->pagingAccountId = (char *)appInfo->peerData.callerAccountId;
+        }
+    }
     TransGetLaneIdByChannelId(channelId, &info->laneId);
 }
 
@@ -94,6 +108,11 @@ static int32_t NotifyNormalChannelOpened(int32_t channelId, const AppInfo *appIn
     char buf[NETWORK_ID_BUF_LEN] = {0};
 
     GetProxyChannelInfo(channelId, appInfo, isServer, &info);
+    if (appInfo->isD2D) {
+        info.peerDeviceId = (char *)appInfo->peerData.deviceId;
+        return TransProxyOnChannelOpened(appInfo->myData.pkgName, appInfo->myData.pid,
+            appInfo->myData.sessionName, &info);
+    }
     if (appInfo->appType != APP_TYPE_AUTH) {
         ret = LnnGetNetworkIdByUuid(appInfo->peerData.deviceId, buf, NETWORK_ID_BUF_LEN);
         if (ret != SOFTBUS_OK) {

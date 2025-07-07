@@ -39,6 +39,7 @@
 
 #define CONVERSION_BASE 1000LL
 #define CAST_SESSION "CastPlusSessionName"
+#define D2D_FORK_NUM_MAX 1
 static void ClientTransSessionTimerProc(void);
 static void ClientTransAsyncSendBytesTimerProc(void);
 
@@ -203,6 +204,18 @@ static void ShowAllSessionInfo(void)
     }
 }
 
+int32_t GeneratePagingId(void)
+{
+    int32_t ret = LockClientSessionServerList();
+    if (ret != SOFTBUS_OK) {
+        TRANS_LOGE(TRANS_SDK, "lock failed");
+        return ret;
+    }
+    ret = GenerateSessionId();
+    UnlockClientSessionServerList();
+    return ret;
+}
+
 // need get g_clientSessionServerList->lock before call this function
 int32_t GenerateSessionId(void)
 {
@@ -226,6 +239,17 @@ int32_t GenerateSessionId(void)
     }
     TRANS_LOGE(TRANS_SDK, "generate id error");
     return id;
+}
+
+void DestroyPagingId(void)
+{
+    int32_t ret = LockClientSessionServerList();
+    if (ret != SOFTBUS_OK) {
+        TRANS_LOGE(TRANS_SDK, "lock failed");
+        return;
+    }
+    DestroySessionId();
+    UnlockClientSessionServerList();
 }
 
 // need get g_clientSessionServerList->lock before call this function
@@ -508,6 +532,9 @@ static int32_t AddSession(const char *sessionName, SessionInfo *session)
     if (session->sessionId < 0) {
         ShowAllSessionInfo();
         return SOFTBUS_TRANS_SESSION_CNT_EXCEEDS_LIMIT;
+    }
+    if (session->isD2D) {
+        session->isPagingRoot = false;
     }
     ClientSessionServer *serverNode = NULL;
     LIST_FOR_EACH_ENTRY(serverNode, &(g_clientSessionServerList->list), ClientSessionServer, node) {
@@ -1245,7 +1272,7 @@ int32_t ClientEnableSessionByChannelId(const ChannelInfo *channel, int32_t *sess
                 sessionNode->osType = channel->osType;
                 *sessionId = sessionNode->sessionId;
                 sessionNode->isSupportTlv = channel->isSupportTlv;
-                if (channel->channelType == CHANNEL_TYPE_AUTH || !sessionNode->isEncrypt) {
+                if (channel->channelType == CHANNEL_TYPE_AUTH || !sessionNode->isEncrypt || channel->isD2D) {
                     ClientSetAuthSessionTimer(serverNode, sessionNode);
                     if (memcpy_s(sessionNode->info.peerDeviceId, DEVICE_ID_SIZE_MAX,
                         channel->peerDeviceId, DEVICE_ID_SIZE_MAX) != EOK) {
@@ -1564,6 +1591,178 @@ int32_t ClientAddSocketServer(SoftBusSecType type, const char *pkgName, const ch
     return SOFTBUS_OK;
 }
 
+int32_t DeletePagingSession(int32_t sessionId, char *pkgName, char *sessionName)
+{
+    int32_t ret = LockClientSessionServerList();
+    if (ret != SOFTBUS_OK) {
+        TRANS_LOGE(TRANS_SDK, "lock failed");
+        return ret;
+    }
+    DestroySessionId();
+    ClientSessionServer *serverNode = NULL;
+    SessionInfo *sessionNode = NULL;
+    if (GetSessionById(sessionId, &serverNode, &sessionNode) != SOFTBUS_OK) {
+        UnlockClientSessionServerList();
+        TRANS_LOGE(TRANS_SDK, "session not found. sessionId=%{public}d", sessionId);
+        return SOFTBUS_TRANS_SESSION_INFO_NOT_FOUND;
+    }
+
+    if (strcpy_s(pkgName, PKG_NAME_SIZE_MAX, serverNode->pkgName) != EOK) {
+        UnlockClientSessionServerList();
+        TRANS_LOGE(TRANS_SDK, "strcpy pkgName failed");
+        return SOFTBUS_STRCPY_ERR;
+    }
+
+    if (strcpy_s(sessionName, SESSION_NAME_SIZE_MAX, serverNode->sessionName) != EOK) {
+        UnlockClientSessionServerList();
+        TRANS_LOGE(TRANS_SDK, "strcpy sessionName failed");
+        return SOFTBUS_STRCPY_ERR;
+    }
+
+    ListDelete(&(sessionNode->node));
+    TRANS_LOGI(TRANS_SDK, "delete session, sessionId=%{public}d", sessionId);
+    SoftBusFree(sessionNode);
+    UnlockClientSessionServerList();
+    return SOFTBUS_OK;
+}
+
+// need get g_clientSessionServerList->lock before call this function
+static int32_t ClientCheckForkIsPossible(char *socketName, char *peerDeviceId)
+{
+    int32_t count = 0;
+    ClientSessionServer *serverNode = NULL;
+    SessionInfo *sessionNode = NULL;
+    LIST_FOR_EACH_ENTRY(serverNode, &(g_clientSessionServerList->list), ClientSessionServer, node) {
+        if ((strcmp(serverNode->sessionName, socketName) != EOK) || IsListEmpty(&serverNode->sessionList)) {
+            continue;
+        }
+        LIST_FOR_EACH_ENTRY(sessionNode, &(serverNode->sessionList), SessionInfo, node) {
+            if (sessionNode->isPagingRoot || (strcmp(sessionNode->info.peerDeviceId, peerDeviceId) != EOK)) {
+                continue;
+            }
+            count++;
+        }
+    }
+    if (count > D2D_FORK_NUM_MAX) {
+        return SOFTBUS_TRANS_PAGING_SOCKET_IS_FORKED;
+    }
+    return SOFTBUS_OK;
+}
+
+int32_t ClientGetChannelIdAndTypeBySocketId(int32_t socketId, int32_t *type, int32_t *channelId, char *socketName)
+{
+    if (type == NULL || channelId == NULL || socketName == NULL) {
+        TRANS_LOGE(TRANS_SDK, "Invalid param");
+        return SOFTBUS_INVALID_PARAM;
+    }
+
+    int32_t ret = LockClientSessionServerList();
+    if (ret != SOFTBUS_OK) {
+        TRANS_LOGE(TRANS_SDK, "lock failed");
+        return ret;
+    }
+
+    bool existence = false;
+    bool isServer = false;
+    char peerDeviceId[DEVICE_ID_SIZE_MAX] = { 0 };
+    ClientSessionServer *serverNode = NULL;
+    SessionInfo *sessionNode = NULL;
+    LIST_FOR_EACH_ENTRY(serverNode, &(g_clientSessionServerList->list), ClientSessionServer, node) {
+        if (IsListEmpty(&serverNode->sessionList)) {
+            continue;
+        }
+        LIST_FOR_EACH_ENTRY(sessionNode, &(serverNode->sessionList), SessionInfo, node) {
+            if (sessionNode->sessionId != socketId) {
+                continue;
+            }
+            *type = sessionNode->businessType;
+            *channelId = sessionNode->channelId;
+            isServer = sessionNode->isServer;
+            existence = true;
+            if (strcpy_s(socketName, SESSION_NAME_SIZE_MAX, serverNode->sessionName) != EOK ||
+                strcpy_s(peerDeviceId, DEVICE_ID_SIZE_MAX, sessionNode->info.peerDeviceId) != EOK) {
+                UnlockClientSessionServerList();
+                TRANS_LOGE(TRANS_SDK, "strcpy sessionName or deviceId failed");
+                return SOFTBUS_STRCPY_ERR;
+            }
+            break;
+        }
+    }
+    if (!existence || isServer) {
+        UnlockClientSessionServerList();
+        TRANS_LOGE(TRANS_SDK, "not found or isServer, socketId=%{public}d", socketId);
+        return SOFTBUS_TRANS_SESSION_INFO_NOT_FOUND;
+    }
+    ret = ClientCheckForkIsPossible(socketName, peerDeviceId);
+    UnlockClientSessionServerList();
+    return ret;
+}
+
+static SessionType SessionTypeConvert(BusinessType type)
+{
+    switch (type) {
+        case BUSINESS_TYPE_BYTE:
+            return TYPE_BYTES;
+        case BUSINESS_TYPE_FILE:
+            return TYPE_FILE;
+        case BUSINESS_TYPE_D2D_MESSAGE:
+            return TYPE_D2D_MESSAGE;
+        case BUSINESS_TYPE_D2D_VOICE:
+            return TYPE_D2D_VOICE;
+        default:
+            return TYPE_MESSAGE;
+    }
+}
+
+int32_t ClientForkSocketById(int32_t socketId, BusinessType type, int32_t *newSocketId)
+{
+    if (newSocketId == NULL) {
+        TRANS_LOGE(TRANS_SDK, "newSocketId is null");
+        return SOFTBUS_INVALID_PARAM;
+    }
+    int32_t ret = LockClientSessionServerList();
+    if (ret != SOFTBUS_OK) {
+        TRANS_LOGE(TRANS_SDK, "lock failed");
+        return ret;
+    }
+
+    ClientSessionServer *serverNode = NULL;
+    SessionInfo *sessionNode = NULL;
+    ret = GetSessionById(socketId, &serverNode, &sessionNode);
+    if (ret != SOFTBUS_OK) {
+        UnlockClientSessionServerList();
+        TRANS_LOGE(TRANS_SDK, "session not found. socketId=%{public}d", socketId);
+        return ret;
+    }
+    SessionInfo *newSocket = (SessionInfo *)SoftBusCalloc(sizeof(SessionInfo));
+    if (newSocket == NULL) {
+        UnlockClientSessionServerList();
+        TRANS_LOGE(TRANS_SDK, "calloc sessionInfo failed. socketId=%{public}d", socketId);
+        return SOFTBUS_MEM_ERR;
+    }
+    newSocket->channelType = sessionNode->channelType;
+    newSocket->businessType = type;
+    newSocket->isServer = false;
+    newSocket->isD2D = true;
+    newSocket->info.flag = SessionTypeConvert(type);
+    if (strcpy_s(newSocket->info.peerDeviceId, DEVICE_ID_SIZE_MAX, sessionNode->info.peerDeviceId)) {
+        SoftBusFree(newSocket);
+        UnlockClientSessionServerList();
+        TRANS_LOGE(TRANS_SDK, "cpy deviceId failed. socketId=%{public}d", socketId);
+        return SOFTBUS_STRCPY_ERR;
+    }
+    ret = ClientAddNewSession(serverNode->sessionName, newSocket);
+    if (ret != SOFTBUS_OK) {
+        SoftBusFree(newSocket);
+        UnlockClientSessionServerList();
+        TRANS_LOGE(TRANS_SDK, "add session failed. socketId=%{public}d", socketId);
+        return ret;
+    }
+    *newSocketId = newSocket->sessionId;
+    UnlockClientSessionServerList();
+    return SOFTBUS_OK;
+}
+
 int32_t DeleteSocketSession(int32_t sessionId, char *pkgName, char *sessionName)
 {
     int32_t ret = LockClientSessionServerList();
@@ -1626,6 +1825,56 @@ static SessionInfo *GetSocketExistSession(const SessionParam *param, bool isEncy
         }
     }
     return NULL;
+}
+
+int32_t CreatePagingSession(const char *sessionName, int32_t businessType, int32_t socketId,
+    const ISocketListener *socketListener, bool isClient)
+{
+    if (socketId < 0 || sessionName == NULL) {
+        TRANS_LOGE(TRANS_SDK, "invalid param");
+        return SOFTBUS_INVALID_PARAM;
+    }
+    int32_t ret = LockClientSessionServerList();
+    if (ret != SOFTBUS_OK) {
+        TRANS_LOGE(TRANS_SDK, "lock failed");
+        return ret;
+    }
+    SessionInfo *session = (SessionInfo *)SoftBusCalloc(sizeof(SessionInfo));
+    if (session == NULL) {
+        UnlockClientSessionServerList();
+        TRANS_LOGE(TRANS_SDK, "calloc failed");
+        return SOFTBUS_STRCPY_ERR;
+    }
+    session->businessType = businessType;
+    session->sessionId = socketId;
+    session->isPagingRoot = true;
+    ClientSessionServer *serverNode = NULL;
+    ISocketListener *pagingListen = NULL;
+    LIST_FOR_EACH_ENTRY(serverNode, &(g_clientSessionServerList->list), ClientSessionServer, node) {
+        if (strcmp(serverNode->sessionName, sessionName) != 0) {
+            continue;
+        }
+        serverNode->listener.isSocketListener = true;
+        if (isClient) {
+            pagingListen = &(serverNode->listener.socketClient);
+            if (memcpy_s(pagingListen, sizeof(ISocketListener), socketListener, sizeof(ISocketListener))) {
+                TRANS_LOGE(TRANS_SDK, "cpy client listen failed, sessionId=%{public}d", socketId);
+                return SOFTBUS_MEM_ERR;
+            }
+        } else {
+            pagingListen = &(serverNode->listener.socketServer);
+            if (memcpy_s(pagingListen, sizeof(ISocketListener), socketListener, sizeof(ISocketListener))) {
+                TRANS_LOGE(TRANS_SDK, "cpy server listen failed, sessionId=%{public}d", socketId);
+                return SOFTBUS_MEM_ERR;
+            }
+        }
+        ListAdd(&serverNode->sessionList, &session->node);
+        TRANS_LOGI(TRANS_SDK, "add paging, sessionId=%{public}d", session->sessionId);
+        UnlockClientSessionServerList();
+        return SOFTBUS_OK;
+    }
+    UnlockClientSessionServerList();
+    return SOFTBUS_TRANS_PAGING_SERVER_NOT_CREATED;
 }
 
 int32_t ClientAddSocketSession(
@@ -2035,6 +2284,13 @@ int32_t ClientGetPeerSocketInfoById(int32_t socket, PeerSocketInfo *peerSocketIn
     peerSocketInfo->networkId = sessionNode->info.peerDeviceId;
     peerSocketInfo->pkgName = serverNode->pkgName;
     peerSocketInfo->dataType = (TransDataType)sessionNode->info.flag;
+    if (sessionNode->isD2D) {
+        peerSocketInfo->accountId = sessionNode->peerPagingAccountId;
+        peerSocketInfo->dataLen = sessionNode->dataLen;
+        if (sessionNode->dataLen > 0) {
+            peerSocketInfo->extraData = (void *)sessionNode->extraData;
+        }
+    }
     UnlockClientSessionServerList();
     return SOFTBUS_OK;
 }

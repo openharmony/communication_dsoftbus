@@ -186,6 +186,15 @@ int32_t GetIsAsyncAndTokenTypeBySessionId(int32_t sessionId, bool *isAsync, int3
 
 int32_t ClientSetLowLatencyBySocket(int32_t socket);
 
+int32_t DeletePagingSession(int32_t sessionId, char *pkgName, char *sessionName);
+
+int32_t CreatePagingSession(const char *sessionName, int32_t businessType, int32_t socketId,
+    const ISocketListener *socketListener, bool isClient);
+
+int32_t ClientGetChannelIdAndTypeBySocketId(int32_t socket, int32_t *type, int32_t *channelId, char *socketName);
+
+int32_t ClientForkSocketByChannelId(int32_t socketId, BusinessType type, int32_t *newSocket);
+
 #ifdef __cplusplus
 }
 #endif

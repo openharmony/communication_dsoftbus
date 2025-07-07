@@ -22,6 +22,7 @@
 #include "stdint.h"
 #include "softbus_server_proxy_frame_struct.h"
 #include "softbus_trans_def.h"
+#include "softbus_utils.h"
 #include "trans_type.h"
 
 #ifndef NULL
@@ -52,6 +53,19 @@ typedef int32_t (*ClientGetSessionIdByChannelIdFunc)(int32_t channelId, int32_t 
 typedef int (*GetMySessionNameFunc)(int sessionId, char *sessionName, unsigned int len);
 typedef int32_t (*ClientRegEnhanceFunc)(ClientEnhanceFuncList *functionList);
 typedef int32_t (*ClientSetLowLatencyBySocketFunc)(int32_t socket);
+typedef int32_t (*CreatePagingSessionFunc)(const char *sessionName, int32_t businessType, int32_t socketId,
+    const ISocketListener *socketListener, bool isPaging);
+typedef int32_t (*ClientDeletePagingSessionFunc)(int32_t socketId);
+typedef int32_t (*ClientGetChannelIdAndTypeBySocketIdFunc)(
+    int32_t socketId, int32_t *type, int32_t *channelId, char *socketName);
+typedef int32_t (*ClientForkSocketByIdFunc)(int32_t socketId, BusinessType type, int32_t *newSocketId);
+typedef int32_t (*ClientTransSetChannelInfoFunc)(const char *sessionName, int32_t sessionId,
+    int32_t channelId, int32_t channelType);
+typedef int32_t (*ClientAddSocketServerFunc)(SoftBusSecType type, const char *pkgName, const char *sessionName);
+typedef int32_t (*GeneratePagingIdFunc)(void);
+typedef void (*DestroyPagingIdFunc)(void);
+typedef void (*SocketServerStateUpdateFunc)(const char *sessionName);
+typedef int32_t (*RegisterTimeoutCallbackFunc)(int32_t timerFunId, TimerFunCallback callback);
 
 typedef struct TagClientOpenFuncList {
     CheckPackageNameFunc checkPackageName;
@@ -72,6 +86,16 @@ typedef struct TagClientOpenFuncList {
     ClientGetSessionIdByChannelIdFunc clientGetSessionIdByChannelId;
     GetMySessionNameFunc getMySessionName;
     ClientSetLowLatencyBySocketFunc clientSetLowLatencyBySocket;
+    CreatePagingSessionFunc createPagingSession;
+    ClientDeletePagingSessionFunc clientDeletePagingSession;
+    ClientGetChannelIdAndTypeBySocketIdFunc clientGetChannelIdAndTypeBySocketId;
+    ClientForkSocketByIdFunc clientForkSocketById;
+    ClientTransSetChannelInfoFunc clientTransSetChannelInfo;
+    ClientAddSocketServerFunc clientAddSocketServer;
+    GeneratePagingIdFunc generatePagingId;
+    DestroyPagingIdFunc destroyPagingId;
+    SocketServerStateUpdateFunc socketServerStateUpdate;
+    RegisterTimeoutCallbackFunc registerTimeoutCallback;
 } ClientOpenFuncList;
 
 #ifdef __cplusplus

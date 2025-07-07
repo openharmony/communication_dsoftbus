@@ -177,6 +177,7 @@ ohos_unittest("SoftbusTransProxyMessageTest") {
 
     "$dsoftbus_core_path/discovery/interface",
     "$dsoftbus_core_path/discovery/manager/include",
+    "$dsoftbus_core_path/frame/init/include",
     "$dsoftbus_core_path/transmission/interface",
 
     "$dsoftbus_core_path/transmission/session/cpp/include",

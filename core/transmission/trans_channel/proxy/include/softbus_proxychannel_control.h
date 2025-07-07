@@ -26,6 +26,8 @@ int32_t TransProxyAckHandshake(uint32_t connId, ProxyChannelInfo *chan, int32_t 
 void TransProxyKeepalive(uint32_t connId, const ProxyChannelInfo *info);
 int32_t TransProxyAckKeepalive(ProxyChannelInfo *info);
 int32_t TransProxyResetPeer(ProxyChannelInfo *info);
+int32_t TransPagingHandshake(int32_t channelId, uint8_t *authKey, uint32_t keyLen);
+int32_t TransPagingAckHandshake(ProxyChannelInfo *chan, int32_t retCode);
 #ifdef __cplusplus
 }
 #endif
