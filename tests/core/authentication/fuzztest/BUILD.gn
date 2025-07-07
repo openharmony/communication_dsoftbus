@@ -16,6 +16,10 @@ group("fuzztest") {
   deps = [
     "authdata_fuzzer:AuthDataFuzzTest",
     "authmanager_fuzzer:AuthManagerFuzzTest",
+    "authmanagercrypto_fuzzer:AuthManagerCryptoFuzzTest",
+    "authmanagerdevice_fuzzer:AuthManagerDeviceFuzzTest",
+    "authmanagerother_fuzzer:AuthManagerOtherFuzzTest",
+    "authmanagerstatus_fuzzer:AuthManagerStatusFuzzTest",
     "unpackauthdata_fuzzer:UnpackAuthDataFuzzTest",
   ]
 }

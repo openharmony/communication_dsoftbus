@@ -13,28 +13,27 @@
  * limitations under the License.
  */
 
-#include "authmanager_fuzzer.h"
-
+#include "authmanagerstatus_fuzzer.h"
 #include <cstddef>
 #include <cstring>
 #include <securec.h>
 #include <fuzzer/FuzzedDataProvider.h>
+
 #include "auth_manager.h"
+#include "auth_manager.c"
 #include "fuzz_environment.h"
 #include "softbus_access_token_test.h"
 
-#include "auth_manager.c"
-
 using namespace std;
 
+#define UDID_HASH_LEN 32
 #define AUTH_LINK_TYPE_MIN 1
 #define AUTH_LINK_TYPE_MAX 12
-#define DISC_TYPE_MIN 0
-#define DISC_TYPE_MAX 12
-#define MODE_MIN 30
-#define MODE_MAX 600
-#define LIST_LEN 2
+#define NORMAL_TYPE_MIN NORMALIZED_NOT_SUPPORT
+#define NORMAL_TYPE_MAX NORMALIZED_SUPPORT
+
 namespace {
+
 class TestEnv {
 public:
     TestEnv()
@@ -42,10 +41,10 @@ public:
         AuthCommonInit();
         isInited_ = true;
     }
-
     ~TestEnv()
     {
         AuthCommonDeinit();
+        LnnDeinitNetBuilder();
         isInited_ = false;
     }
 
@@ -53,7 +52,6 @@ public:
     {
         return isInited_;
     }
-
 private:
     volatile bool isInited_ = false;
 };
@@ -100,7 +98,67 @@ static void ProcessFuzzConnInfo(FuzzedDataProvider &provider, AuthSessionInfo *i
     }
 }
 
-bool NewAuthManagerFuzzTest(FuzzedDataProvider &provider)
+static void OnConnOpened(uint32_t requestId, AuthHandle authHandle)
+{
+    (void)requestId;
+    (void)authHandle;
+}
+
+static void OnConnOpenFailed(uint32_t requestId, int32_t reason)
+{
+    (void)requestId;
+    (void)reason;
+}
+
+static void OnVerifyFailed(uint32_t requestId, int32_t reason)
+{
+    (void)requestId;
+    (void)reason;
+}
+
+static void OnVerifyPassed(uint32_t requestId, AuthHandle authHandle, const NodeInfo *info)
+{
+    (void)requestId;
+    (void)authHandle;
+    (void)info;
+}
+
+static void ProcAuthRequest(FuzzedDataProvider &provider, AuthHandle *authHandle, AuthSessionInfo *info)
+{
+    AuthRequest request;
+    (void)memset_s(&request, sizeof(AuthRequest), 0, sizeof(AuthRequest));
+    AuthConnCallback connCb = {
+        .onConnOpened = OnConnOpened,
+        .onConnOpenFailed = OnConnOpenFailed,
+    };
+    AuthVerifyCallback verifyCb = {
+        .onVerifyFailed = OnVerifyFailed,
+        .onVerifyPassed = OnVerifyPassed,
+    };
+    request.authId = authHandle->authId;
+    request.connCb = connCb;
+    request.verifyCb = verifyCb;
+    request.connInfo = info->connInfo;
+    request.requestId = AuthGenRequestId();
+    uint8_t udidHash[UDID_HASH_LEN] = {0};
+    info->requestId = request.requestId;
+    GenerateUdidHash(info->udid, udidHash);
+    AddAuthRequest(&request);
+    BleDisconnectDelay(info->connId, 0);
+    AuthNotifyAuthPassed(authHandle->authId, info);
+    AuthManagerSetAuthPassed(authHandle->authId, info);
+    AuthManagerSetAuthFinished(authHandle->authId, info);
+    int32_t reason = provider.ConsumeIntegral<int32_t>();
+    AuthManagerSetAuthFailed(authHandle->authId, info, reason);
+    int32_t result = provider.ConsumeIntegral<int32_t>();
+    HandleReconnectResult(&request, info->connId, result, (int32_t)info->connInfo.type);
+    DfxRecordLnnConnectEnd(request.requestId, info->connId, &info->connInfo, result);
+    OnConnectResult(request.requestId, info->connId, result, &info->connInfo);
+    HandleBleDisconnectDelay(info->uuid);
+    DelAuthRequest(request.requestId);
+}
+
+bool AuthManagerStatusFuzzTest(FuzzedDataProvider &provider)
 {
     int64_t authSeq = provider.ConsumeIntegral<int64_t>();
     AuthSessionInfo info;
@@ -117,35 +175,30 @@ bool NewAuthManagerFuzzTest(FuzzedDataProvider &provider)
     info.connInfo.type = (AuthLinkType)provider.ConsumeIntegralInRange<uint32_t>(AUTH_LINK_TYPE_MIN,
         AUTH_LINK_TYPE_MAX);
     info.connId = (uint64_t)info.connInfo.type << INT32_BIT_NUM;
+    info.isConnectServer = provider.ConsumeBool();
+    info.normalizedType = (NormalizedType)provider.ConsumeIntegralInRange<uint32_t>(NORMAL_TYPE_MIN, NORMAL_TYPE_MAX);
+    SessionKey key;
+    (void)memset_s(&key, sizeof(SessionKey), 0, sizeof(SessionKey));
+    vector<uint8_t> value = provider.ConsumeRemainingBytes<uint8_t>();
+    if (memcpy_s(key.value, SESSION_KEY_LENGTH, value.data(), value.size()) != EOK) {
+        return false;
+    }
+    key.len = SESSION_KEY_LENGTH;
+    bool isConnect = provider.ConsumeBool();
+    bool isOldKey = provider.ConsumeBool();
     ProcessFuzzConnInfo(provider, &info);
     AuthManager *auth = NewAuthManager(authSeq, &info);
     if (auth != nullptr) {
         auth->hasAuthPassed[info.connInfo.type] = true;
     }
-    AuthManager *dupAuth = GetAuthManagerByConnInfo(&info.connInfo, info.isServer);
-    DelDupAuthManager(dupAuth);
-    AuthConnInfo connInfo;
-    (void)memset_s(&connInfo, sizeof(AuthConnInfo), 0, sizeof(AuthConnInfo));
-    TryGetBrConnInfo(uuid.c_str(), &connInfo);
-    int64_t seqList[LIST_LEN] = {0};
-    uint64_t verifyTime[LIST_LEN] = {0};
-    DiscoveryType type = (DiscoveryType)provider.ConsumeIntegralInRange<uint32_t>(DISC_TYPE_MIN,
-        DISC_TYPE_MAX);
-    AuthGetLatestAuthSeqListByType(udid.c_str(), seqList, verifyTime, type);
-    AuthGetLatestAuthSeqList(udid.c_str(), seqList, type);
-    int32_t num = 0;
-    AuthHandle *handle = nullptr;
-    GetHmlOrP2pAuthHandle(&handle, &num);
-    SoftBusFree(handle);
-    string p2pMac = provider.ConsumeRandomLengthString(MAC_LEN);
-    AuthDeviceSetP2pMac(authSeq, p2pMac.c_str());
-    ModeCycle cycle = (ModeCycle)provider.ConsumeIntegralInRange<uint32_t>(MODE_MIN, MODE_MAX);
-    AuthSendKeepaliveOption(uuid.c_str(), cycle);
-    AuthHandle authHandle;
-    (void)memset_s(&authHandle, sizeof(AuthHandle), 0, sizeof(AuthHandle));
-    authHandle.authId = authSeq;
-    authHandle.type = info.connInfo.type;
-    AuthHandleLeaveLNN(authHandle);
+    AuthManagerSetSessionKey(authSeq, &info, &key, isConnect, isOldKey);
+    AuthManagerGetSessionKey(authSeq, &info, &key);
+    AuthHandle authHandle = {
+        .authId = authSeq,
+        .type = info.connInfo.type,
+    };
+    ProcAuthRequest(provider, &authHandle, &info);
+    AuthManagerSetAuthFinished(authHandle.authId, &info);
     DelAuthManager(auth, info.connInfo.type);
     return true;
 }
@@ -160,7 +213,7 @@ extern "C" int32_t LLVMFuzzerTestOneInput(const uint8_t *data, size_t size)
     }
     FuzzedDataProvider provider(data, size);
     /* Run your code on data */
-    if (!OHOS::NewAuthManagerFuzzTest(provider)) {
+    if (!OHOS::AuthManagerStatusFuzzTest(provider)) {
         return -1;
     }
     return 0;
