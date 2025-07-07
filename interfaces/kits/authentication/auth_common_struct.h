@@ -49,7 +49,7 @@ typedef enum {
    /* data type for cancel auth */
    DATA_TYPE_CANCEL_AUTH = 0xFFFF0009,
    /* data type for uk connection */
-   DATA_TYPE_UK_CONNECTION = 0xFFFF0010,
+   DATA_TYPE_APPLY_KEY_CONNECTION = 0xFFFF0010,
 } AuthDataType;
 
 #define CLIENT_SIDE_FLAG 0
