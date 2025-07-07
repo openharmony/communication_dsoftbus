@@ -158,6 +158,41 @@ int32_t ProcessFileFrameData(int32_t sessionId, int32_t channelId, const char *d
 {
     return GetManagerInterface()->ProcessFileFrameData(sessionId, channelId, data, len, type);
 }
+
+int32_t ClientCacheQosEvent(int32_t socket, QoSEvent event, const QosTV *qos, uint32_t count)
+{
+    return GetManagerInterface()->ClientCacheQosEvent(socket, event, qos, count);
+}
+
+int32_t ClientGetChannelBusinessTypeBySessionId(int32_t sessionId, int32_t *businessType)
+{
+    return GetManagerInterface()->ClientGetChannelBusinessTypeBySessionId(sessionId, businessType);
+}
+
+int32_t ClientGetChannelOsTypeBySessionId(int32_t sessionId, int32_t *osType)
+{
+    return GetManagerInterface()->ClientGetChannelOsTypeBySessionId(sessionId, osType);
+}
+
+int32_t GetSupportTlvAndNeedAckById(int32_t channelId, int32_t channelType, bool *supportTlv, bool *needAck)
+{
+    return GetManagerInterface()->GetSupportTlvAndNeedAckById(channelId, channelType, supportTlv, needAck);
+}
+
+int32_t ClientGetSessionNameBySessionId(int32_t sessionId, char *sessionName)
+{
+    return GetManagerInterface()->ClientGetSessionNameBySessionId(sessionId, sessionName);
+}
+
+bool IsSessionExceedLimit(void)
+{
+    return GetManagerInterface()->IsSessionExceedLimit();
+}
+
+int32_t GetQosValue(const QosTV *qos, uint32_t qosCount, QosType type, int32_t *value, int32_t defVal)
+{
+    return GetManagerInterface()->GetQosValue(qos, qosCount, type, value, defVal);
+}
 #ifdef __cplusplus
 }
 #endif

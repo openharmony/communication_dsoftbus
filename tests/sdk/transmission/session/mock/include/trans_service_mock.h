@@ -18,7 +18,9 @@
 
 #include <gmock/gmock.h>
 
+#include "socket.h"
 #include "softbus_error_code.h"
+#include "trans_type.h"
 
 namespace OHOS {
 class TransServiceInterface {
@@ -27,6 +29,8 @@ public:
     virtual ~TransServiceInterface() {};
 
     virtual int32_t GetDefaultConfigType(int32_t channelType, int32_t businessType) = 0;
+    virtual int32_t ClientBind(
+        int32_t socket, const QosTV qos[], uint32_t qosCount, const ISocketListener *listener, bool isAsync) = 0;
 };
 
 class TransServiceInterfaceMock : public TransServiceInterface {
@@ -35,6 +39,8 @@ public:
     ~TransServiceInterfaceMock() override;
 
     MOCK_METHOD2(GetDefaultConfigType, int32_t(int32_t channelType, int32_t businessType));
+    MOCK_METHOD5(ClientBind, int32_t(
+        int32_t socket, const QosTV qos[], uint32_t qosCount, const ISocketListener *listener, bool isAsync));
 };
 
 } // namespace OHOS
