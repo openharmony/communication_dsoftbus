@@ -37,7 +37,7 @@ public:
 
 void BusCenterServerTest::SetUpTestCase()
 {
-    SetAccessTokenPermission("busCenterTest");
+    SetAccessTokenPermission("device_manager");
     int32_t ret = BusCenterServerProxyInit();
     EXPECT_TRUE(ret == SOFTBUS_OK);
 }
@@ -116,7 +116,7 @@ HWTEST_F(BusCenterServerTest, SERVER_IPC_ACTIVE_META_NODE_TEST_001, TestSize.Lev
     info.addrNum = 1;
     EXPECT_TRUE(strncpy_s(info.udid, UDID_BUF_LEN, udid, UDID_BUF_LEN) == EOK);
     int32_t ret = ServerIpcActiveMetaNode(pkgName, &info, metaNodeId);
-    EXPECT_TRUE(ret == SOFTBUS_OK);
+    EXPECT_EQ(ret, SOFTBUS_IPC_ERR);
 }
 
 /*
@@ -131,7 +131,7 @@ HWTEST_F(BusCenterServerTest, SERVER_IPC_DEACTIVE_META_NODE_TEST_001, TestSize.L
     char metaNodeId[NETWORK_ID_BUF_LEN] = { 0 };
 
     int32_t ret = ServerIpcDeactiveMetaNode(pkgName, metaNodeId);
-    EXPECT_TRUE(ret == SOFTBUS_OK);
+    EXPECT_EQ(ret, SOFTBUS_PERMISSION_DENIED);
 }
 
 /*
@@ -148,7 +148,7 @@ HWTEST_F(BusCenterServerTest, SERVER_IPC_GET_ALL_META_NODE_INFO_TEST_001, TestSi
 
     (void)memset_s(&infos, sizeof(MetaNodeInfo), 0, sizeof(MetaNodeInfo));
     int32_t ret = ServerIpcGetAllMetaNodeInfo(pkgName, &infos, &infoNum);
-    EXPECT_TRUE(ret == SOFTBUS_OK);
+    EXPECT_EQ(ret, SOFTBUS_PERMISSION_DENIED);
 }
 
 /*

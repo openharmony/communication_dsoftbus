@@ -176,4 +176,49 @@ HWTEST_F(PermissionEntryTest, DeleteDynamicPermissionTest001, TestSize.Level0)
     ret = DeleteDynamicPermission(sessionName);
     EXPECT_EQ(SOFTBUS_NOT_FIND, ret);
 }
+
+/**
+ * @tc.name: LoadLnnPermissionJsonTest001
+ * @tc.desc: fun param error.
+ * @tc.type: FUNC
+ * @tc.require:
+ */
+HWTEST_F(PermissionEntryTest, LoadLnnPermissionJsonTest001, TestSize.Level1)
+{
+    const char fileNameerror[] = "test";
+    int32_t ret = LoadLnnPermissionJson(nullptr);
+    EXPECT_EQ(ret, SOFTBUS_INVALID_PARAM);
+    ret = LoadLnnPermissionJson(fileNameerror);
+    EXPECT_EQ(ret, SOFTBUS_FILE_ERR);
+}
+
+/**
+ * @tc.name: CheckLnnPermissionEntryTest001
+ * @tc.desc: fun param error.
+ * @tc.type: FUNC
+ * @tc.require:
+ */
+HWTEST_F(PermissionEntryTest, CheckLnnPermissionEntryTest001, TestSize.Level1)
+{
+    const char permissionson[] = "/system/etc/communication/softbus/softbus_lnn_permission.json";
+    const char interfaceName[] = "SERVER_GET_NODE_KEY_INFO";
+    const char processName[] = "device_manager";
+    int32_t ret = CheckLnnPermissionEntry(nullptr, nullptr);
+    EXPECT_EQ(ret, SOFTBUS_INVALID_PARAM);
+    ret = CheckLnnPermissionEntry(interfaceName, nullptr);
+    EXPECT_EQ(ret, SOFTBUS_INVALID_PARAM);
+    ret = CheckLnnPermissionEntry(nullptr, processName);
+    EXPECT_EQ(ret, SOFTBUS_INVALID_PARAM);
+    ret = CheckLnnPermissionEntry(interfaceName, processName);
+    EXPECT_EQ(ret, SOFTBUS_INVALID_PARAM);
+    ret = LoadLnnPermissionJson(permissionson);
+    EXPECT_EQ(ret, SOFTBUS_OK);
+    ret = CheckLnnPermissionEntry(permissionson, processName);
+    EXPECT_EQ(ret, SOFTBUS_NOT_FIND);
+    ret = CheckLnnPermissionEntry(interfaceName, permissionson);
+    EXPECT_EQ(ret, SOFTBUS_PERMISSION_DENIED);
+    ret = CheckLnnPermissionEntry(interfaceName, processName);
+    EXPECT_EQ(ret, SOFTBUS_OK);
+    DeinitLnnPermissionJson();
+}
 } // namespace OHOS

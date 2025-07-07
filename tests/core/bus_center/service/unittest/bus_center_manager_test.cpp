@@ -225,4 +225,20 @@ HWTEST_F(BusCenterManagerTest, BusCenterManagerTest006, TestSize.Level1)
     ret = BusCenterServerInit();
     EXPECT_EQ(ret, SOFTBUS_OK);
 }
+
+/*
+* @tc.name: BusCenterServerInitTest001
+* @tc.desc: LnnInitPermission fun init error
+* @tc.type: FUNC
+* @tc.require: 1
+*/
+HWTEST_F(BusCenterManagerTest, BusCenterServerInitTest001, TestSize.Level1)
+{
+    NiceMock<BusCenterManagerDepsInterfaceMock> busCenterManagerMock;
+    SoftBusLooper loop;
+    EXPECT_CALL(busCenterManagerMock, CreateNewLooper(_)).WillRepeatedly(Return(&loop));
+    EXPECT_CALL(busCenterManagerMock, LnnInitPermission).WillRepeatedly(Return(SOFTBUS_INVALID_PARAM));
+    int ret = BusCenterServerInit();
+    EXPECT_EQ(ret, SOFTBUS_INVALID_PARAM);
+}
 }
