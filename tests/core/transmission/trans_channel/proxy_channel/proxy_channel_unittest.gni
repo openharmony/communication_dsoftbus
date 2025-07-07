@@ -17,15 +17,10 @@ import("../../common/mock/mock.gni")
 softbus_proxy_channel_manager_ut_sources = [ "$dsoftbus_test_path/core/transmission/trans_channel/proxy_channel/softbus_proxychannel_manager_test.cpp" ]
 
 softbus_proxy_channel_manager_ut_include_dirs = [
-  "unittest/common/",
-
-  "$softbus_adapter_common/include",
-
   "$dsoftbus_core_path/adapter/bus_center/include",
   "$dsoftbus_core_path/adapter/transmission/include",
   "$dsoftbus_core_path/authentication/include",
   "$dsoftbus_core_path/authentication/interface",
-
   "$dsoftbus_core_path/bus_center/interface",
   "$dsoftbus_core_path/bus_center/lnn/lane_hub/lane_manager/include",
   "$dsoftbus_core_path/bus_center/lnn/net_builder/include",
@@ -36,35 +31,33 @@ softbus_proxy_channel_manager_ut_include_dirs = [
   "$dsoftbus_core_path/bus_center/lnn/net_ledger/sync_ledger/include",
   "$dsoftbus_core_path/bus_center/service/include",
   "$dsoftbus_core_path/bus_center/utils/include",
-
   "$dsoftbus_core_path/common/include",
   "$dsoftbus_core_path/common/message_handler/include",
   "$dsoftbus_core_path/common/security/permission/include",
   "$dsoftbus_core_path/connection/interface",
   "$dsoftbus_core_path/connection/p2p/common/include",
   "$dsoftbus_core_path/connection/p2p/interface",
-
   "$dsoftbus_core_path/discovery/interface",
   "$dsoftbus_core_path/discovery/manager/include",
-
   "$dsoftbus_core_path/transmission/common/include",
   "$dsoftbus_core_path/transmission/interface",
   "$dsoftbus_core_path/transmission/pending_packet/include",
   "$dsoftbus_core_path/transmission/session/cpp/include",
   "$dsoftbus_core_path/transmission/session/include",
   "$dsoftbus_core_path/transmission/trans_channel/common/include",
-  "$dsoftbus_core_path/transmission/trans_channel/tcp_direct/include",
+  "$dsoftbus_core_path/transmission/trans_channel/manager/include",
   "$dsoftbus_core_path/transmission/trans_channel/proxy/include",
   "$dsoftbus_core_path/transmission/trans_channel/proxy/src",
-  "$dsoftbus_core_path/transmission/trans_channel/manager/include",
-
+  "$dsoftbus_core_path/transmission/trans_channel/tcp_direct/include",
+  "$dsoftbus_dfx_path/interface/include/form",
+  "$dsoftbus_dfx_path/interface/include/legacy",
   "$dsoftbus_root_path/interfaces/kits",
   "$dsoftbus_root_path/interfaces/kits/bus_center",
   "$dsoftbus_root_path/interfaces/kits/common",
   "$dsoftbus_root_path/interfaces/kits/transport",
   "$dsoftbus_root_path/third_party/dfinder/include",
-
   "$dsoftbus_test_path/core/transmission/trans_channel/proxy_channel",
-
+  "$softbus_adapter_common/include",
   "$trans_comm_mock_path/include",
+  "unittest/common/",
 ]
