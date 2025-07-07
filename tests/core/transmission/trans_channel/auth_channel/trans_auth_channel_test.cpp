@@ -708,6 +708,7 @@ HWTEST_F(TransAuthChannelTest, OnRequsetUpdateAuthChannelTest002, TestSize.Level
 HWTEST_F(TransAuthChannelTest, OnRecvAuthChannelRequestTest001, TestSize.Level1)
 {
     cJSON *msg = cJSON_CreateObject();
+    EXPECT_TRUE(msg != nullptr);
     AppInfo *appInfo = (AppInfo *)SoftBusCalloc(sizeof(AppInfo));
     ASSERT_TRUE(appInfo != nullptr);
     AuthChannelInterfaceMock authMock;
@@ -734,6 +735,7 @@ HWTEST_F(TransAuthChannelTest, OnRecvAuthChannelRequestTest001, TestSize.Level1)
 HWTEST_F(TransAuthChannelTest, OnRecvAuthChannelRequestTest002, TestSize.Level1)
 {
     cJSON *msg = cJSON_CreateObject();
+    EXPECT_TRUE(msg != nullptr);
     AppInfo *appInfo = (AppInfo *)SoftBusCalloc(sizeof(AppInfo));
     ASSERT_TRUE(appInfo != nullptr);
     int32_t ret = TestGenerateAppInfo(appInfo);
@@ -747,6 +749,7 @@ HWTEST_F(TransAuthChannelTest, OnRecvAuthChannelRequestTest002, TestSize.Level1)
     OnRecvAuthChannelRequest(TRANS_TEST_AUTH_ID, cJsonStr, strlen(cJsonStr));
     cJSON_Delete(msg);
     msg = cJSON_CreateObject();
+    EXPECT_TRUE(msg != nullptr);
     ret = TransAuthChannelMsgPack(msg, appInfo);
     EXPECT_EQ(ret, SOFTBUS_CREATE_JSON_ERR);
     char *data = cJSON_PrintUnformatted(msg);
@@ -757,6 +760,7 @@ HWTEST_F(TransAuthChannelTest, OnRecvAuthChannelRequestTest002, TestSize.Level1)
     cJSON_Delete(msg);
     cJSON_free(data);
     msg = cJSON_CreateObject();
+    EXPECT_TRUE(msg != nullptr);
     ret = TransAuthChannelMsgPack(msg, appInfo);
     EXPECT_EQ(ret, SOFTBUS_CREATE_JSON_ERR);
     data = cJSON_PrintUnformatted(msg);
@@ -784,6 +788,7 @@ HWTEST_F(TransAuthChannelTest, OnRecvAuthChannelRequestTest003, TestSize.Level1)
     ret = TransCreateSessionServer(g_pkgName, g_authSessionName, TRANS_TEST_UID, TRANS_TEST_PID);
     ASSERT_EQ(ret, SOFTBUS_OK);
     cJSON *msg = cJSON_CreateObject();
+    EXPECT_TRUE(msg != nullptr);
     AppInfo *appInfo = (AppInfo *)SoftBusCalloc(sizeof(AppInfo));
     ASSERT_TRUE(appInfo != nullptr);
     ret = TestGenerateAppInfo(appInfo);
@@ -803,11 +808,11 @@ HWTEST_F(TransAuthChannelTest, OnRecvAuthChannelRequestTest003, TestSize.Level1)
     ret = AddAuthChannelInfo(info);
     EXPECT_EQ(ret, SOFTBUS_OK);
     int32_t channelId = info->appInfo.myData.channelId;
-    OnRecvAuthChannelRequest(TRANS_TEST_AUTH_ID, data, strlen(data));
+    OnRecvAuthChannelRequest(TRANS_TEST_AUTH_ID, data, 0);
     DelAuthChannelInfoByChanId(channelId);
     ret = GetAuthIdByChannelId(channelId);
     EXPECT_NE(ret, SOFTBUS_OK);
-    OnRecvAuthChannelRequest(TRANS_TEST_AUTH_ID, data, strlen(data));
+    OnRecvAuthChannelRequest(TRANS_TEST_AUTH_ID, data, 0);
     DelAuthChannelInfoByAuthId(TRANS_TEST_AUTH_ID);
     SoftBusFree(appInfo);
     cJSON_free(data);
@@ -1173,6 +1178,7 @@ HWTEST_F(TransAuthChannelTest, OnRecvAuthChannelReply001, TestSize.Level1)
     EXPECT_CALL(authMock, AddNumberToJsonObject).WillRepeatedly(Return(true));
     OnRecvAuthChannelReply(TRANS_TEST_AUTH_ID, nullptr, DEVICE_ID_SIZE_MAX);
     cJSON *msg = cJSON_CreateObject();
+    EXPECT_TRUE(msg != nullptr);
     AppInfo *appInfo = (AppInfo *)SoftBusCalloc(sizeof(AppInfo));
     ASSERT_TRUE(appInfo != nullptr);
     ret = TestGenerateAppInfo(appInfo);

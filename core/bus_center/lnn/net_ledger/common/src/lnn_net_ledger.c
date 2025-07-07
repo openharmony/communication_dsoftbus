@@ -247,6 +247,9 @@ static void ProcessLocalDeviceInfo(void)
     LnnDumpNodeInfo(&info, "load local deviceInfo success");
     if (IsBleDirectlyOnlineFactorChange(&info)) {
         info.stateVersion++;
+        if (info.stateVersion > MAX_STATE_VERSION) {
+            info.stateVersion = 1;
+        }
         LnnSaveLocalDeviceInfoPacked(&info);
     }
     LNN_LOGI(LNN_LEDGER, "load local deviceInfo stateVersion=%{public}d", info.stateVersion);

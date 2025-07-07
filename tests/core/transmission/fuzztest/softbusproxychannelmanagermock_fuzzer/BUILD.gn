@@ -26,6 +26,7 @@ ohos_fuzztest("SoftBusProxyChannelManagerMockFuzzTest") {
   fuzz_config_file = "$dsoftbus_root_path/tests/core/transmission/fuzztest/softbusproxychannelmanagermock_fuzzer"
 
   include_dirs = softbus_proxy_channel_manager_ut_include_dirs
+  include_dirs += [ "$dsoftbus_root_path/tests/common/include" ]
 
   cflags = [
     "-g",
@@ -46,8 +47,8 @@ ohos_fuzztest("SoftBusProxyChannelManagerMockFuzzTest") {
   external_deps = [
     "c_utils:utils",
     "dsoftbus:softbus_client",
-    "googletest:gmock",
-    "googletest:gtest",
+    "googletest:gmock_rtti",
+    "googletest:gtest_rtti",
     "hilog:libhilog",
     "ipc:ipc_single",
   ]

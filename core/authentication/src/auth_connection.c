@@ -874,6 +874,9 @@ void DisconnectAuthDevice(uint64_t *connId)
     AUTH_LOGI(AUTH_CONN, "connType=%{public}d, connectionId=%{public}u", GetConnType(*connId), GetConnId(*connId));
     switch (GetConnType(*connId)) {
         case AUTH_LINK_TYPE_RAW_ENHANCED_P2P:
+            if (IsExistAuthTcpConnFdItemByConnId(GetFd(*connId))) {
+                DeleteAuthTcpConnFdItemByConnId(GetFd(*connId));
+            }
             SocketDisconnectDevice(AUTH_RAW_P2P_SERVER, GetFd(*connId));
             UpdateFd(connId, AUTH_INVALID_FD);
             break;
