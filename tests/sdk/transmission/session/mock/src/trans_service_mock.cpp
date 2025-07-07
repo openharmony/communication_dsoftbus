@@ -46,6 +46,10 @@ int32_t GetDefaultConfigType(int32_t channelType, int32_t businessType)
     return GetServiceInterface()->GetDefaultConfigType(channelType, businessType);
 }
 
+int32_t ClientBind(int32_t socket, const QosTV qos[], uint32_t qosCount, const ISocketListener *listener, bool isAsync)
+{
+    return GetServiceInterface()->ClientBind(socket, qos, qosCount, listener, isAsync);
+}
 #ifdef __cplusplus
 }
 #endif
