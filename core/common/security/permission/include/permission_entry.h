@@ -64,8 +64,22 @@ typedef struct {
     ListNode appInfo;
 } SoftBusPermissionEntry;
 
+typedef struct {
+    ListNode node;
+    char processName[PROCESS_NAME_SIZE_MAX];
+} LnnProcessList;
+
+typedef struct {
+    ListNode node;
+    char interfaceName[INTERFACE_NAME_SIZE_MAX];
+    LnnProcessList processlist;
+} LnnPermissionEntry;
+
 int32_t LoadPermissionJson(const char *fileName);
+int32_t LoadLnnPermissionJson(const char *fileName);
 void DeinitPermissionJson(void);
+void DeinitLnnPermissionJson(void);
+int32_t CheckLnnPermissionEntry(const char *interfaceName, const char *processName);
 int32_t CheckPermissionEntry(const char *sessionName, const SoftBusPermissionItem *pItem);
 int32_t IsValidPkgName(int32_t uid, const char *pkgName);
 SoftBusPermissionItem *CreatePermissionItem(int32_t permType, int32_t uid, int32_t pid,

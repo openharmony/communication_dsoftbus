@@ -92,9 +92,11 @@ private:
     int32_t SetBrProxyListenerStateInner(MessageParcel &data, MessageParcel &reply);
     int32_t GetBrProxyChannelStateInner(MessageParcel &data, MessageParcel &reply);
     int32_t RegisterPushHookInner(MessageParcel &data, MessageParcel &reply);
+    int32_t PermissionVerify(uint32_t code);
 
     void InitMemberFuncMap();
     void InitMemberPermissionMap();
+    void InitPackNameMap();
 
     using SoftbusServerStubFunc =
         int32_t (SoftBusServerStub::*)(MessageParcel &data, MessageParcel &reply);

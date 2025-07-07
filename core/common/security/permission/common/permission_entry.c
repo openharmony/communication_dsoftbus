@@ -42,6 +42,8 @@
 #define DEVID_STR "DEVID"
 #define SEC_LEVEL_STR "SEC_LEVEL"
 #define APP_INFO_STR "APP_INFO"
+#define INTERFACE_NAME "INTERFACE_NAME"
+#define PROCESS_NAME "PROCESS_NAME"
 
 /* app info key */
 #define APP_INFO_TYPE_STR "TYPE"
@@ -78,6 +80,7 @@
 #define DBINDER_BUS_NAME_PREFIX "DBinder"
 #define DBINDER_PACKAGE_NAME "DBinderBus"
 #define DYNAMIC_PERMISSION_MAX_SIZE 100
+#define PROCESS_MAX_SIZE 128
 
 typedef struct {
     const char *key;
@@ -85,8 +88,10 @@ typedef struct {
 } PeMap;
 
 static SoftBusList *g_permissionEntryList = NULL;
+static SoftBusList *g_lnnPermissionEntryList = NULL;
 static SoftBusList *g_dynamicPermissionList = NULL;
 static char g_permissonJson[PERMISSION_JSON_LEN];
+static char g_lnnPermissonJson[PERMISSION_JSON_LEN];
 
 static PeMap g_peMap[] = {
     {SYSTEM_APP_STR, SYSTEM_APP},
@@ -103,13 +108,13 @@ static PeMap g_peMap[] = {
     {FALSE_STR, 0},
 };
 
-static int32_t ReadConfigJson(const char* permissionFile)
+static int32_t ReadConfigJson(const char *permissionFile, char *permissonJson)
 {
-    if (memset_s(g_permissonJson, PERMISSION_JSON_LEN, 0, PERMISSION_JSON_LEN) != EOK) {
+    if (memset_s(permissonJson, PERMISSION_JSON_LEN, 0, PERMISSION_JSON_LEN) != EOK) {
         COMM_LOGE(COMM_PERM, "ReadConfigJson memset_s failed.");
         return SOFTBUS_MEM_ERR;
     }
-    if (SoftBusReadFullFile(permissionFile, g_permissonJson, PERMISSION_JSON_LEN - 1) != SOFTBUS_OK) {
+    if (SoftBusReadFullFile(permissionFile, permissonJson, PERMISSION_JSON_LEN - 1) != SOFTBUS_OK) {
         COMM_LOGE(COMM_PERM, "ReadConfigJson failed.");
         return SOFTBUS_FILE_ERR;
     }
@@ -435,7 +440,7 @@ int32_t LoadPermissionJson(const char *fileName)
         COMM_LOGE(COMM_PERM, "fileName is null.");
         return SOFTBUS_INVALID_PARAM;
     }
-    int ret = ReadConfigJson(fileName);
+    int32_t ret = ReadConfigJson(fileName, g_permissonJson);
     if (ret != SOFTBUS_OK) {
         return ret;
     }
@@ -475,6 +480,135 @@ int32_t LoadPermissionJson(const char *fileName)
     return SOFTBUS_OK;
 }
 
+static LnnPermissionEntry *ProcessLnnPermission(cJSON *object)
+{
+    if (object == NULL) {
+        COMM_LOGE(COMM_PERM, "object is null.");
+        return NULL;
+    }
+    LnnPermissionEntry *permissionEntry = (LnnPermissionEntry *)SoftBusCalloc(sizeof(LnnPermissionEntry));
+    if (permissionEntry == NULL) {
+        COMM_LOGE(COMM_PERM, "permission entry calloc fail.");
+        return NULL;
+    }
+    ListInit(&permissionEntry->node);
+    ListInit(&permissionEntry->processlist.node);
+    if (!GetJsonObjectStringItem(object, INTERFACE_NAME, permissionEntry->interfaceName, INTERFACE_NAME_SIZE_MAX)) {
+        SoftBusFree(permissionEntry);
+        return NULL;
+    }
+    cJSON *processNameArray = cJSON_GetObjectItem(object, PROCESS_NAME);
+    if (processNameArray != NULL) {
+        int32_t processNameSize = cJSON_GetArraySize(processNameArray);
+        for (int32_t processNameIndex = 0; processNameIndex < processNameSize; processNameIndex++) {
+            cJSON *item = GetArrayItemFromArray(processNameArray, processNameIndex);
+            if (item == NULL) {
+                COMM_LOGE(COMM_PERM, "get array item is null");
+                break;
+            }
+            char *processItem = cJSON_GetStringValue(item);
+            if (processItem == NULL) {
+                COMM_LOGE(COMM_PERM, "get credId string fail");
+                break;
+            }
+            LnnProcessList *processList = (LnnProcessList *)SoftBusCalloc(sizeof(LnnProcessList));
+            if (processList == NULL) {
+                COMM_LOGE(COMM_PERM, "processList calloc fail");
+                continue;
+            }
+            if (strcpy_s(processList->processName, PROCESS_NAME_SIZE_MAX, processItem) != EOK) {
+                COMM_LOGE(COMM_PERM, "strcpy processItem fail");
+                SoftBusFree(processList);
+                continue;
+            }
+            ListNodeInsert(&permissionEntry->processlist.node, &processList->node);
+        }
+    }
+    return permissionEntry;
+}
+
+int32_t LoadLnnPermissionJson(const char *fileName)
+{
+    if (fileName == NULL) {
+        COMM_LOGE(COMM_PERM, "fileName is null.");
+        return SOFTBUS_INVALID_PARAM;
+    }
+    int32_t ret = ReadConfigJson(fileName, g_lnnPermissonJson);
+    if (ret != SOFTBUS_OK) {
+        return ret;
+    }
+    if (g_lnnPermissionEntryList == NULL) {
+        g_lnnPermissionEntryList = CreateSoftBusList();
+        if (g_lnnPermissionEntryList == NULL) {
+            return SOFTBUS_MALLOC_ERR;
+        }
+    }
+    cJSON *jsonArray = cJSON_Parse(g_lnnPermissonJson);
+    if (jsonArray == NULL) {
+        COMM_LOGE(COMM_PERM, "parse failed. fileName=%{public}s", fileName);
+        return SOFTBUS_PARSE_JSON_ERR;
+    }
+    int32_t itemNum = cJSON_GetArraySize(jsonArray);
+    if (itemNum <= 0) {
+        cJSON_Delete(jsonArray);
+        COMM_LOGE(COMM_PERM, "joinarray is empty");
+        return SOFTBUS_PARSE_JSON_ERR;
+    }
+    LnnPermissionEntry *pe = NULL;
+    if (SoftBusMutexLock(&g_lnnPermissionEntryList->lock) != SOFTBUS_OK) {
+        COMM_LOGE(COMM_PERM, "lock fail.");
+        cJSON_Delete(jsonArray);
+        return SOFTBUS_LOCK_ERR;
+    }
+    for (int32_t index = 0; index < itemNum; index++) {
+        cJSON *permissionEntryObeject = cJSON_GetArrayItem(jsonArray, index);
+        pe = ProcessLnnPermission(permissionEntryObeject);
+        if (pe != NULL) {
+            ListNodeInsert(&g_lnnPermissionEntryList->list, &pe->node);
+            g_lnnPermissionEntryList->cnt++;
+        }
+    }
+    (void)SoftBusMutexUnlock(&g_lnnPermissionEntryList->lock);
+    cJSON_Delete(jsonArray);
+    return SOFTBUS_OK;
+}
+
+int32_t CheckLnnPermissionEntry(const char *interfaceName, const char *processName)
+{
+    if (interfaceName == NULL || processName == NULL) {
+        COMM_LOGE(COMM_PERM, "INVALID PARAM");
+        return SOFTBUS_INVALID_PARAM;
+    }
+    SoftBusList *permissionList = g_lnnPermissionEntryList;
+    if (permissionList == NULL) {
+        COMM_LOGE(COMM_PERM, "permissionList is NULL");
+        return SOFTBUS_INVALID_PARAM;
+    }
+    LnnPermissionEntry *item = NULL;
+    LnnProcessList *resultItem = NULL;
+    (void)SoftBusMutexLock(&permissionList->lock);
+    LIST_FOR_EACH_ENTRY(item, &permissionList->list, LnnPermissionEntry, node) {
+        if (item != NULL && strcmp(item->interfaceName, interfaceName) == EOK) {
+            resultItem = &(item->processlist);
+            break;
+        }
+    }
+    if (resultItem == NULL) {
+        COMM_LOGI(COMM_PERM, "not find interfaceName=%{public}s", interfaceName);
+        (void)SoftBusMutexUnlock(&permissionList->lock);
+        return SOFTBUS_NOT_FIND;
+    }
+    LnnProcessList *processItem = NULL;
+    LIST_FOR_EACH_ENTRY(processItem, &resultItem->node, LnnProcessList, node) {
+        if (processItem != NULL && strcmp(processItem->processName, processName) == 0) {
+            (void)SoftBusMutexUnlock(&permissionList->lock);
+            return SOFTBUS_OK;
+        }
+    }
+    (void)SoftBusMutexUnlock(&permissionList->lock);
+    return SOFTBUS_PERMISSION_DENIED;
+}
+
 void ClearAppInfo(const ListNode *appInfo)
 {
     if (appInfo == NULL) {
@@ -485,6 +619,37 @@ void ClearAppInfo(const ListNode *appInfo)
         ListDelete(&item->node);
         SoftBusFree(item);
     }
+}
+
+static void ClearProcessList(LnnProcessList *processlist)
+{
+    if (processlist == NULL) {
+        return;
+    }
+    LnnProcessList *item = NULL;
+    LnnProcessList *next = NULL;
+    LIST_FOR_EACH_ENTRY_SAFE(item, next, &(processlist->node), LnnProcessList, node) {
+        ListDelete(&item->node);
+        SoftBusFree(item);
+    }
+}
+
+void DeinitLnnPermissionJson(void)
+{
+    if (g_lnnPermissionEntryList == NULL) {
+        return;
+    }
+    SoftBusMutexLock(&g_lnnPermissionEntryList->lock);
+    LnnPermissionEntry *item = NULL;
+    LnnPermissionEntry *next = NULL;
+    LIST_FOR_EACH_ENTRY_SAFE(item, next, &(g_lnnPermissionEntryList->list), LnnPermissionEntry, node) {
+        ClearProcessList(&item->processlist);
+        ListDelete(&item->node);
+        SoftBusFree(item);
+    }
+    (void)SoftBusMutexUnlock(&g_lnnPermissionEntryList->lock);
+    DestroySoftBusList(g_lnnPermissionEntryList);
+    g_lnnPermissionEntryList = NULL;
 }
 
 void DeinitPermissionJson(void)

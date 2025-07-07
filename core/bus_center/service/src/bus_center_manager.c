@@ -39,6 +39,7 @@
 #include "softbus_feature_config.h"
 #include "softbus_utils.h"
 #include "softbus_init_common.h"
+#include "softbus_permission.h"
 
 #define WATCHDOG_TASK_NAME "LNN_WATCHDOG_TASK"
 #define WATCHDOG_INTERVAL_TIME 10000
@@ -182,6 +183,11 @@ static int32_t BusCenterServerInitFirstStep(void)
         LNN_LOGE(LNN_INIT, "init lane looper fail");
         return SOFTBUS_LOOPER_ERR;
     }
+    int32_t ret = LnnInitPermission();
+    if (ret != SOFTBUS_OK) {
+        LNN_LOGE(LNN_INIT, "Init lnn permission failed");
+        return ret;
+    }
     if (LnnInitNetLedger() != SOFTBUS_OK) {
         return SOFTBUS_NETWORK_LEDGER_INIT_FAILED;
     }
@@ -319,6 +325,7 @@ int32_t BusCenterServerInit(void)
 
 void BusCenterServerDeinit(void)
 {
+    LnnDeinitPermission();
     RouteLSDeinit();
     DeinitNodeAddrAllocator();
     LnnDeinitLaneHub();

@@ -357,6 +357,7 @@ typedef int32_t (*GetAllSupportReuseBandWidthFunc)(const char *peerNetworkId, La
     uint32_t **supportBw, uint8_t *bwCnt);
 typedef int32_t (*FindLaneResourceByLinkTypeFunc)(const char *peerUdid, LaneLinkType type, LaneResource *resource);
 typedef bool (*LnnIsNeedInterceptBroadcastFunc)(void);
+typedef int32_t (*CheckLnnPermissionFunc)(const char *interfaceName, const char *processName);
 
 #ifdef __cplusplus
 }
