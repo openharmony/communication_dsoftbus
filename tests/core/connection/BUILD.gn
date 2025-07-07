@@ -17,10 +17,11 @@ import("../../../dsoftbus.gni")
 group("unittest") {
   testonly = true
   deps = [
-    "common/unittest:SoftbusConnCommonTest",
-    "common/unittest:SoftbusRcTest",
+    "common/unittest:DataheadTransformTest",
     "common/unittest:SoftbusConnAsyncHelperTest",
+    "common/unittest:SoftbusConnCommonTest",
     "common/unittest:SoftbusConnQueueTest",
+    "common/unittest:SoftbusRcTest",
     "ipc:unittest",
     "manager:ConnectionManagerTest",
   ]

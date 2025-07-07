@@ -3139,3 +3139,35 @@ int32_t ClientSetLowLatencyBySocket(int32_t socket)
     UnlockClientSessionServerList();
     return SOFTBUS_OK;
 }
+
+
+int32_t ClientGetChannelBusinessTypeByChannelId(int32_t channelId, int32_t *businessType)
+{
+    if ((channelId < 0) || (businessType == NULL)) {
+        return SOFTBUS_INVALID_PARAM;
+    }
+    int32_t ret = LockClientSessionServerList();
+    if (ret != SOFTBUS_OK) {
+        TRANS_LOGE(TRANS_SDK, "lock failed");
+        return ret;
+    }
+
+    ClientSessionServer *serverNode = NULL;
+    SessionInfo *sessionNode = NULL;
+    LIST_FOR_EACH_ENTRY(serverNode, &(g_clientSessionServerList->list), ClientSessionServer, node) {
+        if (IsListEmpty(&serverNode->sessionList)) {
+            continue;
+        }
+        LIST_FOR_EACH_ENTRY(sessionNode, &(serverNode->sessionList), SessionInfo, node) {
+            if (sessionNode->channelId != channelId) {
+                continue;
+            }
+            *businessType = sessionNode->businessType;
+            UnlockClientSessionServerList();
+            return SOFTBUS_OK;
+        }
+    }
+    UnlockClientSessionServerList();
+    TRANS_LOGE(TRANS_SDK, "not found session with channelId=%{public}d", channelId);
+    return SOFTBUS_NOT_FIND;
+}

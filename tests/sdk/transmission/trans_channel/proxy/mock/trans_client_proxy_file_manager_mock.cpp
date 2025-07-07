@@ -135,5 +135,10 @@ int32_t AckResponseDataHandle(const SendListenerInfo *info, const char *data, ui
 {
     return GetTransClientProxyFileManagerInterface()->AckResponseDataHandle(info, data, len);
 }
+
+int32_t ClientGetChannelBusinessTypeByChannelId(int32_t channelId, int32_t *businessType)
+{
+    return GetTransClientProxyFileManagerInterface()->ClientGetChannelBusinessTypeByChannelId(channelId, businessType);
+}
 }
 }

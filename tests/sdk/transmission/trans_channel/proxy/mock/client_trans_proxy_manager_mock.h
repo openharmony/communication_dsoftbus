@@ -55,6 +55,7 @@ public:
     virtual int32_t TransProxyDecryptPacketData(int32_t seq, ProxyDataInfo *dataInfo, const char *sessionKey) = 0;
     virtual int32_t DataSeqInfoListAddItem(uint32_t dataSeq, int32_t channelId,
         int32_t socketId, int32_t channelType);
+    virtual int32_t ClientGetChannelBusinessTypeByChannelId(int32_t channelId, int32_t *businessType) = 0;
 };
 
 class ClientTransProxyManagerInterfaceMock : public ClientTransProxyManagerInterface {
@@ -86,6 +87,7 @@ public:
     MOCK_METHOD3(TransProxyDecryptPacketData, int32_t (int32_t seq, ProxyDataInfo *dataInfo, const char *sessionKey));
     MOCK_METHOD4(DataSeqInfoListAddItem, int32_t (uint32_t dataSeq, int32_t channelId,
         int32_t socketId, int32_t channelType));
+    MOCK_METHOD2(ClientGetChannelBusinessTypeByChannelId, int32_t(int32_t channelId, int32_t *businessType));
 };
 }
 #endif

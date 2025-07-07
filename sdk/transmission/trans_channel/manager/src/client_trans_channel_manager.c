@@ -220,3 +220,22 @@ int32_t ClientDisableSessionListener(int32_t channelId)
 {
     return TransDisableSessionListener(channelId);
 }
+
+int32_t ClientTransChannelAsyncSendMessage(int32_t channelId, int32_t channelType, const void *data, uint32_t len,
+    uint16_t dataSeq)
+{
+    if ((data == NULL) || (len == 0) || dataSeq == 0) {
+        TRANS_LOGW(TRANS_BYTES, "Invalid param");
+        return SOFTBUS_INVALID_PARAM;
+    }
+    int32_t ret = SOFTBUS_OK;
+    switch (channelType) {
+        case CHANNEL_TYPE_PROXY:
+            ret = TransProxyChannelAsyncSendMessage(channelId, data, len, dataSeq);
+            break;
+        default:
+            TRANS_LOGE(TRANS_SDK, "Invalid channelType=%{public}d", channelType);
+            return SOFTBUS_TRANS_INVALID_CHANNEL_TYPE;
+    }
+    return ret;
+}

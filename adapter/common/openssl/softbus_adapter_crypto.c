@@ -18,6 +18,8 @@
 #include <securec.h>
 
 #include <openssl/evp.h>
+#include <openssl/hmac.h>
+#include <openssl/kdf.h>
 #include <openssl/rand.h>
 
 #include "comm_log.h"
@@ -59,9 +61,9 @@ static EVP_CIPHER *GetCtrAlgorithmByKeyLen(uint32_t keyLen)
     return NULL;
 }
 
-static int32_t OpensslEvpInit(EVP_CIPHER_CTX **ctx, const AesGcmCipherKey *cipherkey, bool mode)
+static int32_t OpensslEvpInit(EVP_CIPHER_CTX **ctx, uint32_t keyLen, bool mode)
 {
-    EVP_CIPHER *cipher = GetGcmAlgorithmByKeyLen(cipherkey->keyLen);
+    EVP_CIPHER *cipher = GetGcmAlgorithmByKeyLen(keyLen);
     if (cipher == NULL) {
         COMM_LOGE(COMM_ADAPTER, "get cipher fail.");
         return SOFTBUS_DECRYPT_ERR;
@@ -132,7 +134,7 @@ static int32_t SslAesGcmEncrypt(const AesGcmCipherKey *cipherkey, const unsigned
     int32_t outlen = 0;
     int32_t outbufLen;
     EVP_CIPHER_CTX *ctx = NULL;
-    int32_t ret = OpensslEvpInit(&ctx, cipherkey, true);
+    int32_t ret = OpensslEvpInit(&ctx, cipherkey->keyLen, true);
     if (ret != SOFTBUS_OK) {
         COMM_LOGE(COMM_ADAPTER, "OpensslEvpInit fail.");
         return SOFTBUS_DECRYPT_ERR;
@@ -178,7 +180,7 @@ static int32_t SslAesGcmDecrypt(const AesGcmCipherKey *cipherkey, const unsigned
 
     int32_t outLen = 0;
     EVP_CIPHER_CTX *ctx = NULL;
-    int32_t ret = OpensslEvpInit(&ctx, cipherkey, false);
+    int32_t ret = OpensslEvpInit(&ctx, cipherkey->keyLen, false);
     if (ret != SOFTBUS_OK) {
         COMM_LOGE(COMM_ADAPTER, "OpensslEvpInit fail.");
         return SOFTBUS_DECRYPT_ERR;
@@ -538,3 +540,208 @@ int32_t SoftBusDecryptDataByCtr(
     EVP_CIPHER_CTX_free(ctx);
     return SOFTBUS_OK;
 }
+
+static int32_t PackTag(EVP_CIPHER_CTX *ctx, uint32_t dataLen, unsigned char *cipherText, uint32_t cipherTextLen)
+{
+    if ((dataLen + SHORT_TAG_LEN) > cipherTextLen) {
+        COMM_LOGE(COMM_ADAPTER, "Encrypt invalid para.");
+        return SOFTBUS_ENCRYPT_ERR;
+    }
+
+    char tagbuf[SHORT_TAG_LEN];
+    int ret = EVP_CIPHER_CTX_ctrl(ctx, EVP_CTRL_GCM_GET_TAG, SHORT_TAG_LEN, (void *)tagbuf);
+    if (ret != 1) {
+        COMM_LOGE(COMM_ADAPTER, "EVP_CIPHER_CTX_ctrl fail.");
+        return SOFTBUS_DECRYPT_ERR;
+    }
+    if (memcpy_s(cipherText + dataLen, cipherTextLen - dataLen, tagbuf, SHORT_TAG_LEN) != EOK) {
+        COMM_LOGE(COMM_ADAPTER, "EVP memcpy tag fail.");
+        return SOFTBUS_ENCRYPT_ERR;
+    }
+    return SOFTBUS_OK;
+}
+
+static int32_t SslAesGcm128Encrypt(const AesGcm128CipherKey *cipherkey, const unsigned char *plainText,
+    uint32_t plainTextSize, unsigned char *cipherText, uint32_t cipherTextLen)
+{
+    if ((cipherkey == NULL) || (plainText == NULL) || (plainTextSize == 0) || cipherText == NULL ||
+        (cipherTextLen < plainTextSize + SHORT_TAG_LEN)) {
+        COMM_LOGE(COMM_ADAPTER, "Encrypt invalid para.");
+        return SOFTBUS_INVALID_PARAM;
+    }
+
+    int32_t outlen = 0;
+    int32_t outbufLen;
+    EVP_CIPHER_CTX *ctx = NULL;
+    int32_t ret = OpensslEvpInit(&ctx, cipherkey->keyLen, true);
+    if (ret != SOFTBUS_OK) {
+        COMM_LOGE(COMM_ADAPTER, "OpensslEvpInit fail.");
+        return SOFTBUS_DECRYPT_ERR;
+    }
+    ret = EVP_EncryptInit_ex(ctx, NULL, NULL, cipherkey->key, cipherkey->iv);
+    if (ret != 1) {
+        COMM_LOGE(COMM_ADAPTER, "EVP_EncryptInit_ex fail.");
+        EVP_CIPHER_CTX_free(ctx);
+        return SOFTBUS_DECRYPT_ERR;
+    }
+    ret = EVP_EncryptUpdate(ctx, cipherText, (int32_t *)&outbufLen, plainText, plainTextSize);
+    if (ret != 1) {
+        COMM_LOGE(COMM_ADAPTER, "EVP_EncryptUpdate fail.");
+        EVP_CIPHER_CTX_free(ctx);
+        return SOFTBUS_DECRYPT_ERR;
+    }
+    outlen += outbufLen;
+    ret = EVP_EncryptFinal_ex(ctx, cipherText + outbufLen, (int32_t *)&outbufLen);
+    if (ret != 1) {
+        COMM_LOGE(COMM_ADAPTER, "EVP_EncryptFinal_ex fail.");
+        EVP_CIPHER_CTX_free(ctx);
+        return SOFTBUS_DECRYPT_ERR;
+    }
+    outlen += outbufLen;
+    ret = PackTag(ctx, outlen, cipherText, cipherTextLen);
+    if (ret != SOFTBUS_OK) {
+        COMM_LOGE(COMM_ADAPTER, "pack iv and tag fail.");
+        EVP_CIPHER_CTX_free(ctx);
+        return SOFTBUS_DECRYPT_ERR;
+    }
+    EVP_CIPHER_CTX_free(ctx);
+    return (outlen + SHORT_TAG_LEN);
+}
+
+int32_t SoftBusEncryptDataByGcm128(AesGcm128CipherKey *cipherKey, const unsigned char *input, uint32_t inLen,
+    unsigned char *encryptData, uint32_t *encryptLen)
+{
+    if (cipherKey == NULL || input == NULL || inLen == 0 || encryptData == NULL || encryptLen == NULL) {
+        COMM_LOGE(COMM_ADAPTER, "Encrypt invalid para.");
+        return SOFTBUS_INVALID_PARAM;
+    }
+    uint32_t outLen = inLen + SHORT_TAG_LEN;
+    int32_t result = SslAesGcm128Encrypt(cipherKey, input, inLen, encryptData, outLen);
+    if (result <= 0) {
+        COMM_LOGE(COMM_ADAPTER, "SslAesGcmEncrypt error.");
+        return SOFTBUS_ENCRYPT_ERR;
+    }
+    *encryptLen = result;
+    return SOFTBUS_OK;
+}
+
+static int32_t SslAesGcm128Decryp(const AesGcm128CipherKey *cipherkey, const unsigned char *cipherText,
+    uint32_t cipherTextSize, unsigned char *plain, uint32_t plainLen)
+{
+    if ((cipherkey == NULL) || (cipherText == NULL) || (cipherTextSize <= SHORT_TAG_LEN) || plain == NULL ||
+        (plainLen < cipherTextSize - SHORT_TAG_LEN)) {
+        COMM_LOGE(COMM_ADAPTER, "Decrypt invalid para.");
+        return SOFTBUS_INVALID_PARAM;
+    }
+
+    int32_t outLen = 0;
+    EVP_CIPHER_CTX *ctx = NULL;
+    int32_t ret = OpensslEvpInit(&ctx, cipherkey->keyLen, false);
+    if (ret != SOFTBUS_OK) {
+        COMM_LOGE(COMM_ADAPTER, "OpensslEvpInit fail.");
+        return SOFTBUS_DECRYPT_ERR;
+    }
+    ret = EVP_DecryptInit_ex(ctx, NULL, NULL, cipherkey->key, cipherkey->iv);
+    if (ret != 1) {
+        COMM_LOGE(COMM_ADAPTER, "EVP_EncryptInit_ex fail.");
+        goto EXIT;
+    }
+    ret = EVP_CIPHER_CTX_ctrl(ctx, EVP_CTRL_GCM_SET_TAG, SHORT_TAG_LEN,
+            (void *)(cipherText + (cipherTextSize - SHORT_TAG_LEN)));
+    if (ret != 1) {
+        COMM_LOGE(COMM_ADAPTER, "EVP_DecryptUpdate fail.");
+        goto EXIT;
+    }
+    ret = EVP_DecryptUpdate(ctx, plain, (int32_t *)&plainLen, cipherText, cipherTextSize - SHORT_TAG_LEN);
+    if (ret != 1) {
+        COMM_LOGE(COMM_ADAPTER, "EVP_DecryptUpdate fail.");
+        goto EXIT;
+    }
+    if (plainLen > INT32_MAX) {
+        COMM_LOGE(COMM_ADAPTER, "PlainLen convert overflow.");
+        goto EXIT;
+    }
+    outLen += (int32_t)plainLen;
+    ret = EVP_DecryptFinal_ex(ctx, plain + plainLen, (int32_t *)&plainLen);
+    if (ret != 1) {
+        COMM_LOGE(COMM_ADAPTER, "EVP_DecryptFinal_ex fail.");
+        goto EXIT;
+    }
+    if ((int32_t)plainLen > INT32_MAX - outLen) {
+        COMM_LOGE(COMM_ADAPTER, "outLen convert overflow.");
+        goto EXIT;
+    }
+    outLen += (int32_t)plainLen;
+    EVP_CIPHER_CTX_free(ctx);
+    return outLen;
+EXIT:
+    EVP_CIPHER_CTX_free(ctx);
+    return SOFTBUS_DECRYPT_ERR;
+}
+
+int32_t SoftBusDecryptDataByGcm128(AesGcm128CipherKey *cipherKey, const unsigned char *input, uint32_t inLen,
+    unsigned char *decryptData, uint32_t *decryptLen)
+{
+    if (cipherKey == NULL || input == NULL || inLen < SHORT_TAG_LEN || decryptData == NULL || decryptLen == NULL) {
+        return SOFTBUS_INVALID_PARAM;
+    }
+
+    uint32_t outLen = inLen - SHORT_TAG_LEN;
+    int32_t result = SslAesGcm128Decryp(cipherKey, input, inLen, decryptData, outLen);
+    if (result <= 0) {
+        return SOFTBUS_DECRYPT_ERR;
+    }
+    *decryptLen = (uint32_t)result;
+    return SOFTBUS_OK;
+}
+
+int32_t SoftBusCalcHKDF(const uint8_t *inData, uint32_t inLen, uint8_t *outData, uint32_t outLen)
+{
+    if (outLen > HKDF_BYTES_LEN || inData == NULL || outData == NULL) {
+        COMM_LOGE(COMM_ADAPTER, "calc HKDF invalid para.");
+        return SOFTBUS_INVALID_PARAM;
+    }
+    EVP_PKEY_CTX *pctx;
+    const EVP_MD *md = EVP_sha256();
+    if (md == NULL) {
+        COMM_LOGE(COMM_ADAPTER, "get EVP_sha256 fail.");
+        return SOFTBUS_CALC_HKDF_FAIL;
+    }
+    unsigned char tmp[HKDF_BYTES_LEN] = { 0 };
+    size_t tmpLen = sizeof(tmp);
+    pctx = EVP_PKEY_CTX_new_id(EVP_PKEY_HKDF, NULL);
+    if (pctx == NULL) {
+        COMM_LOGE(COMM_ADAPTER, "EVP_PKEY_CTX_new_id fail.");
+        return SOFTBUS_CALC_HKDF_FAIL;
+    }
+    int32_t ret = EVP_PKEY_derive_init(pctx);
+    if (ret <= 0) {
+        COMM_LOGE(COMM_ADAPTER, "EVP_PKEY_derive_init fail.");
+        return SOFTBUS_CALC_HKDF_FAIL;
+    }
+    ret = EVP_PKEY_CTX_set_hkdf_md(pctx, md);
+    if (ret <= 0) {
+        COMM_LOGE(COMM_ADAPTER, "EVP_PKEY_CTX_set_hkdf_md fail.");
+        return SOFTBUS_CALC_HKDF_FAIL;
+    }
+    ret = EVP_PKEY_CTX_set1_hkdf_key(pctx, inData, inLen);
+    if (ret <= 0) {
+        COMM_LOGE(COMM_ADAPTER, "EVP_PKEY_CTX_set1_hkdf_key fail.");
+        EVP_PKEY_CTX_free(pctx);
+        return SOFTBUS_CALC_HKDF_FAIL;
+    }
+    ret = EVP_PKEY_derive(pctx, tmp, &tmpLen);
+    if (ret <= 0) {
+        COMM_LOGE(COMM_ADAPTER, "EVP_PKEY_derive fail.");
+        EVP_PKEY_CTX_free(pctx);
+        return SOFTBUS_CALC_HKDF_FAIL;
+    }
+    if (memcpy_s(outData, outLen, tmp, outLen) != EOK) {
+        COMM_LOGE(COMM_ADAPTER, "memcpy_s fail.");
+        EVP_PKEY_CTX_free(pctx);
+        return SOFTBUS_CALC_HKDF_FAIL;
+    }
+    EVP_PKEY_CTX_free(pctx);
+    return SOFTBUS_OK;
+}
+

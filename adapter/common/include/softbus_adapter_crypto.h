@@ -26,8 +26,10 @@
 #define HUKS_AES_GCM_KEY_LEN 256
 #define GCM_IV_LEN 12
 #define AAD_LEN 16
+#define HKDF_BYTES_LEN 32
 
 #define TAG_LEN 16
+#define SHORT_TAG_LEN 8
 #define OVERHEAD_LEN (GCM_IV_LEN + TAG_LEN)
 
 #define GCM_KEY_BITS_LEN_128 128
@@ -55,6 +57,12 @@ typedef struct {
     unsigned char key[SESSION_KEY_LENGTH];
     unsigned char iv[GCM_IV_LEN];
 } AesGcmCipherKey;
+
+typedef struct {
+    uint32_t keyLen;
+    unsigned char key[SHORT_SESSION_KEY_LENGTH];
+    unsigned char iv[GCM_IV_LEN];
+} AesGcm128CipherKey;
 
 typedef struct {
     uint32_t keyLen;
@@ -93,6 +101,14 @@ int32_t SoftBusEncryptDataByCtr(AesCtrCipherKey *key, const unsigned char *input
 
 int32_t SoftBusDecryptDataByCtr(AesCtrCipherKey *key, const unsigned char *input, uint32_t inLen,
     unsigned char *decryptData, uint32_t *decryptLen);
+
+int32_t SoftBusEncryptDataByGcm128(AesGcm128CipherKey *cipherKey, const unsigned char *input, uint32_t inLen,
+    unsigned char *encryptData, uint32_t *encryptLen);
+
+int32_t SoftBusDecryptDataByGcm128(AesGcm128CipherKey *cipherKey, const unsigned char *input, uint32_t inLen,
+    unsigned char *decryptData, uint32_t *decryptLen);
+
+int32_t SoftBusCalcHKDF(const uint8_t *inData, uint32_t inLen, uint8_t *outData, uint32_t outLen);
 
 #endif
 
