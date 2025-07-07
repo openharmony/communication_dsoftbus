@@ -105,10 +105,10 @@ HWTEST_F(ClientTransProxyFileHelperMockTest, SendFileAckReqAndResData001, TestSi
 HWTEST_F(ClientTransProxyFileHelperMockTest, PackReadFileData001, TestSize.Level1)
 {
     int64_t ret = 0;
-    FileFrame *fileFrame = (FileFrame *)SoftBusCalloc(sizeof(FileFrame));
-    SendListenerInfo *info = (SendListenerInfo *)SoftBusCalloc(sizeof(SendListenerInfo));
-    fileFrame->data = (uint8_t *)SoftBusCalloc(sizeof(uint64_t) * 64);
-    fileFrame->fileData = (uint8_t *)SoftBusCalloc(sizeof(uint32_t) * 64);
+    FileFrame *fileFrame = reinterpret_cast<FileFrame*>(SoftBusCalloc(sizeof(FileFrame)));
+    SendListenerInfo *info = reinterpret_cast<SendListenerInfo*>(SoftBusCalloc(sizeof(SendListenerInfo)));
+    fileFrame->data = reinterpret_cast<uint8_t*>(SoftBusCalloc(sizeof(uint64_t) * 64));
+    fileFrame->fileData = reinterpret_cast<uint8_t*>(SoftBusCalloc(sizeof(uint32_t) * 64));
     info->crc = APP_INFO_FILE_FEATURES_SUPPORT;
     info->osType = OH_TYPE;
     info->packetSize = 0;
@@ -153,10 +153,10 @@ HWTEST_F(ClientTransProxyFileHelperMockTest, PackReadFileData001, TestSize.Level
 HWTEST_F(ClientTransProxyFileHelperMockTest, PackReadFileData002, TestSize.Level1)
 {
     int64_t ret = 0;
-    FileFrame *fileFrame = (FileFrame *)SoftBusCalloc(sizeof(FileFrame));
-    SendListenerInfo *info = (SendListenerInfo *)SoftBusCalloc(sizeof(SendListenerInfo));
-    fileFrame->data = (uint8_t *)SoftBusCalloc(sizeof(uint64_t) * 64);
-    fileFrame->fileData = (uint8_t *)SoftBusCalloc(sizeof(uint32_t) * 64);
+    FileFrame *fileFrame = reinterpret_cast<FileFrame*>(SoftBusCalloc(sizeof(FileFrame)));
+    SendListenerInfo *info = reinterpret_cast<SendListenerInfo*>(SoftBusCalloc(sizeof(SendListenerInfo)));
+    fileFrame->data = reinterpret_cast<uint8_t*>(SoftBusCalloc(sizeof(uint64_t) * 64));
+    fileFrame->fileData = reinterpret_cast<uint8_t*>(SoftBusCalloc(sizeof(uint32_t) * 64));
     info->crc = APP_INFO_FILE_FEATURES_SUPPORT;
     info->osType = 0;
     info->packetSize = 0;
@@ -189,10 +189,10 @@ HWTEST_F(ClientTransProxyFileHelperMockTest, PackReadFileData002, TestSize.Level
 HWTEST_F(ClientTransProxyFileHelperMockTest, PackReadFileRetransData001, TestSize.Level1)
 {
     int64_t ret = 0;
-    FileFrame *fileFrame = (FileFrame *)SoftBusCalloc(sizeof(FileFrame));
-    SendListenerInfo *info = (SendListenerInfo *)SoftBusCalloc(sizeof(SendListenerInfo));
-    fileFrame->data = (uint8_t *)SoftBusCalloc(sizeof(uint64_t) * 64);
-    fileFrame->fileData = (uint8_t *)SoftBusCalloc(sizeof(uint32_t) * 64);
+    FileFrame *fileFrame = reinterpret_cast<FileFrame*>(SoftBusCalloc(sizeof(FileFrame)));
+    SendListenerInfo *info = reinterpret_cast<SendListenerInfo*>(SoftBusCalloc(sizeof(SendListenerInfo)));
+    fileFrame->data = reinterpret_cast<uint8_t*>(SoftBusCalloc(sizeof(uint64_t) * 64));
+    fileFrame->fileData = reinterpret_cast<uint8_t*>(SoftBusCalloc(sizeof(uint32_t) * 64));
     info->crc = APP_INFO_FILE_FEATURES_SUPPORT;
     info->osType = OH_TYPE;
     info->packetSize = 0;
@@ -240,10 +240,10 @@ HWTEST_F(ClientTransProxyFileHelperMockTest, PackReadFileRetransData001, TestSiz
 HWTEST_F(ClientTransProxyFileHelperMockTest, UnpackFileDataFrame001, TestSize.Level1)
 {
     int32_t ret = 0;
-    FileFrame *fileFrame = (FileFrame *)SoftBusCalloc(sizeof(FileFrame));
-    FileRecipientInfo *info = (FileRecipientInfo *)SoftBusCalloc(sizeof(FileRecipientInfo));
-    uint32_t *fileDataLen = (uint32_t *)SoftBusCalloc(sizeof(uint32_t));
-    fileFrame->data = (uint8_t *)SoftBusCalloc(sizeof(uint64_t) * 64);
+    FileFrame *fileFrame = reinterpret_cast<FileFrame*>(SoftBusCalloc(sizeof(FileFrame)));
+    FileRecipientInfo *info = reinterpret_cast<FileRecipientInfo*>(SoftBusCalloc(sizeof(FileRecipientInfo)));
+    uint32_t *fileDataLen = reinterpret_cast<uint32_t *>(SoftBusCalloc(sizeof(uint32_t)));
+    fileFrame->data = reinterpret_cast<uint8_t*>(SoftBusCalloc(sizeof(uint64_t) * 64));
     fileFrame->frameLength = FRAME_HEAD_LEN + FRAME_CRC_LEN + 16;
     fileFrame->magic = FILE_MAGIC_NUMBER;
 
@@ -290,8 +290,8 @@ HWTEST_F(ClientTransProxyFileHelperMockTest, UnpackFileDataFrame001, TestSize.Le
 HWTEST_F(ClientTransProxyFileHelperMockTest, AckResponseDataHandle001, TestSize.Level1)
 {
     int32_t ret = 0;
-    SendListenerInfo *info = (SendListenerInfo *)SoftBusCalloc(sizeof(SendListenerInfo));
-    AckResponseData *resData = (AckResponseData *)SoftBusCalloc(sizeof(AckResponseData));
+    SendListenerInfo *info = reinterpret_cast<SendListenerInfo*>(SoftBusCalloc(sizeof(SendListenerInfo)));
+    AckResponseData *resData = reinterpret_cast<AckResponseData *>(SoftBusCalloc(sizeof(AckResponseData)));
     resData->startSeq = 0;
     resData->seqResult = FILE_SEND_ACK_RESULT_SUCCESS;
     char *data = (char *)resData;
@@ -322,7 +322,7 @@ HWTEST_F(ClientTransProxyFileHelperMockTest, AckResponseDataHandle001, TestSize.
 HWTEST_F(ClientTransProxyFileHelperMockTest, RetransFileFrameBySeq001, TestSize.Level1)
 {
     int32_t ret = 0;
-    SendListenerInfo *info = (SendListenerInfo *)SoftBusCalloc(sizeof(SendListenerInfo));
+    SendListenerInfo *info = reinterpret_cast<SendListenerInfo*>(SoftBusCalloc(sizeof(SendListenerInfo)));
     info->crc = APP_INFO_FILE_FEATURES_SUPPORT;
     info->packetSize = 64;
     info->fileSize = 1;
@@ -357,7 +357,7 @@ HWTEST_F(ClientTransProxyFileHelperMockTest, RetransFileFrameBySeq001, TestSize.
 HWTEST_F(ClientTransProxyFileHelperMockTest, GetAbsFullPath001, TestSize.Level1)
 {
     int32_t ret = 0;
-    SendListenerInfo *info = (SendListenerInfo *)SoftBusCalloc(sizeof(SendListenerInfo));
+    SendListenerInfo *info = reinterpret_cast<SendListenerInfo*>(SoftBusCalloc(sizeof(SendListenerInfo)));
     info->crc = APP_INFO_FILE_FEATURES_SUPPORT;
     info->packetSize = 64;
     info->fileSize = 1;

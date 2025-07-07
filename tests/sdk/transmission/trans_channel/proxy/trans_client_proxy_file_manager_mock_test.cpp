@@ -604,7 +604,7 @@ HWTEST_F(TransClientProxyFileManagerMockTest, DelRecipient001, TestSize.Level1)
     int32_t ret = ClinetTransProxyFileManagerInit();
     EXPECT_EQ(SOFTBUS_OK, ret);
 
-    FileRecipientInfo *info = (FileRecipientInfo *)SoftBusCalloc(sizeof(FileRecipientInfo));
+    FileRecipientInfo *info = reinterpret_cast<FileRecipientInfo *>(SoftBusCalloc(sizeof(FileRecipientInfo)));
     info->channelId = 1;
     info->sessionId = 1;
     info->osType = 0;
@@ -613,7 +613,7 @@ HWTEST_F(TransClientProxyFileManagerMockTest, DelRecipient001, TestSize.Level1)
     info->recvFileInfo.fileFd = INVALID_FD;
     ListTailInsert(&g_recvRecipientInfoList, &info->node);
 
-    FileRecipientInfo *tarinfo = (FileRecipientInfo *)SoftBusCalloc(sizeof(FileRecipientInfo));
+    FileRecipientInfo *tarinfo = reinterpret_cast<FileRecipientInfo *>(SoftBusCalloc(sizeof(FileRecipientInfo)));
     tarinfo->channelId = 2;
     tarinfo->sessionId = 2;
     tarinfo->osType = 10;
@@ -669,8 +669,8 @@ HWTEST_F(TransClientProxyFileManagerMockTest, UpdateFileReceivePath001, TestSize
  */
 HWTEST_F(TransClientProxyFileManagerMockTest, HandleFileTransferCompletion001, TestSize.Level1)
 {
-    FileRecipientInfo *recipient = (FileRecipientInfo *)SoftBusCalloc(sizeof(FileRecipientInfo));
-    SingleFileInfo *file = (SingleFileInfo *)SoftBusCalloc(sizeof(SingleFileInfo));
+    FileRecipientInfo *recipient = reinterpret_cast<FileRecipientInfo *>(SoftBusCalloc(sizeof(FileRecipientInfo)));
+    SingleFileInfo *file = reinterpret_cast<SingleFileInfo *>(SoftBusCalloc(sizeof(SingleFileInfo)));
 
     int32_t sessionId = 1;
 
@@ -697,8 +697,8 @@ HWTEST_F(TransClientProxyFileManagerMockTest, HandleFileTransferCompletion001, T
 HWTEST_F(TransClientProxyFileManagerMockTest, ProcessOneFrame001, TestSize.Level1)
 {
     int32_t ret = 0;
-    FileFrame *fileFrame = (FileFrame *)SoftBusCalloc(sizeof(FileFrame));
-    SingleFileInfo *fileInfo = (SingleFileInfo *)SoftBusCalloc(sizeof(SingleFileInfo));
+    FileFrame *fileFrame = reinterpret_cast<FileFrame *>(SoftBusCalloc(sizeof(FileFrame)));
+    SingleFileInfo *fileInfo = reinterpret_cast<SingleFileInfo *>(SoftBusCalloc(sizeof(SingleFileInfo)));
     uint32_t dataLen = MAX_FILE_SIZE + FRAME_DATA_SEQ_OFFSET + 1;
     int32_t crc = APP_INFO_FILE_FEATURES_SUPPORT;
     int32_t osType = OH_TYPE;
@@ -735,9 +735,9 @@ HWTEST_F(TransClientProxyFileManagerMockTest, ProcessOneFrame001, TestSize.Level
 HWTEST_F(TransClientProxyFileManagerMockTest, UpdateFileReceptionStatus001, TestSize.Level1)
 {
     int32_t ret = 0;
-    FileFrame *fileFrame = (FileFrame *)SoftBusCalloc(sizeof(FileFrame));
-    SingleFileInfo *fileInfo = (SingleFileInfo *)SoftBusCalloc(sizeof(SingleFileInfo));
-    FileRecipientInfo *recipient = (FileRecipientInfo *)SoftBusCalloc(sizeof(FileRecipientInfo));
+    FileFrame *fileFrame = reinterpret_cast<FileFrame *>(SoftBusCalloc(sizeof(FileFrame)));
+    SingleFileInfo *fileInfo = reinterpret_cast<SingleFileInfo *>(SoftBusCalloc(sizeof(SingleFileInfo)));
+    FileRecipientInfo *recipient = reinterpret_cast<FileRecipientInfo *>(SoftBusCalloc(sizeof(FileRecipientInfo)));
     int32_t sessionId = 1;
     NiceMock<TransClientProxyFileManagerInterfaceMock> TransProxyFileManagerMock;
 
