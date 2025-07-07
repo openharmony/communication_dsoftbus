@@ -54,6 +54,30 @@ int SoftbusGetConfig(ConfigType type, unsigned char *val, uint32_t len)
     return GetCommonInterface()->SoftbusGetConfig(type, val, len);
 }
 
+ClientEnhanceFuncList *ClientEnhanceFuncListGet(void)
+{
+    return GetCommonInterface()->ClientEnhanceFuncListGet();
+}
+
+int32_t WriteInt32ToBuf(uint8_t *buf, uint32_t dataLen, int32_t *offSet, int32_t data)
+{
+    return GetCommonInterface()->WriteInt32ToBuf(buf, dataLen, offSet, data);
+}
+
+int32_t WriteUint64ToBuf(uint8_t *buf, uint32_t bufLen, int32_t *offSet, uint64_t data)
+{
+    return GetCommonInterface()->WriteUint64ToBuf(buf, bufLen, offSet, data);
+}
+
+int32_t WriteStringToBuf(uint8_t *buf, uint32_t bufLen, int32_t *offSet, char *data, uint32_t dataLen)
+{
+    return GetCommonInterface()->WriteStringToBuf(buf, bufLen, offSet, data, dataLen);
+}
+
+int32_t ServerIpcProcessInnerEvent(int32_t eventType, uint8_t *buf, uint32_t len)
+{
+    return GetCommonInterface()->ServerIpcProcessInnerEvent(eventType, buf, len);
+}
 #ifdef __cplusplus
 }
 #endif

@@ -1078,6 +1078,7 @@ struct RegDeviceInfo {
     const NSTACKX_LocalDeviceInfoV2 *info;
     int registerType;
     int32_t err;
+    atomic_bool isPost;
     sem_t wait;
 };
 
@@ -1086,6 +1087,7 @@ static void RegisterDeviceV2(void *arg)
     struct RegDeviceInfo *regInfo = (struct RegDeviceInfo *)arg;
     regInfo->err = RegisterLocalDeviceV2(regInfo->info, regInfo->registerType);
     SemPost(&regInfo->wait);
+    regInfo->isPost = true;
 }
 
 #define NSTACKX_MAX_LOCAL_IFACE_NUM 10
@@ -1113,6 +1115,7 @@ static int32_t RegisterDeviceWithType(const NSTACKX_LocalDeviceInfoV2 *localDevi
     regInfo.info = localDeviceInfo;
     regInfo.registerType = registerType;
     regInfo.err = NSTACKX_EOK;
+    regInfo.isPost = false;
 
     if (PostEvent(&g_eventNodeChain, g_epollfd, RegisterDeviceV2, &regInfo) != NSTACKX_EOK) {
         DFINDER_LOGE(TAG, "Failed to configure local device info!");
@@ -1120,7 +1123,9 @@ static int32_t RegisterDeviceWithType(const NSTACKX_LocalDeviceInfoV2 *localDevi
         return NSTACKX_EBUSY;
     }
 
-    SemWait(&regInfo.wait);
+    if (!regInfo.isPost) {
+        SemWait(&regInfo.wait);
+    }
     SemDestroy(&regInfo.wait);
     return regInfo.err;
 }
@@ -1224,6 +1229,7 @@ int32_t NSTACKX_SetFilterCapability(uint32_t capabilityBitmapNum, uint32_t capab
 }
 typedef struct {
     uint32_t maxDeviceNum;
+    atomic_bool isPost;
     sem_t wait;
 } SetMaxDeviceNumMsg;
 
@@ -1232,12 +1238,14 @@ static void SetMaxDeviceNumInner(void *argument)
     SetMaxDeviceNumMsg *msg = (SetMaxDeviceNumMsg *)argument;
     SetMaxDeviceNum(msg->maxDeviceNum);
     SemPost(&msg->wait);
+    msg->isPost = true;
 }
 
 int32_t NSTACKX_SetMaxDeviceNum(uint32_t maxDeviceNum)
 {
     SetMaxDeviceNumMsg msg = {
         .maxDeviceNum = maxDeviceNum,
+        .isPost = false,
     };
     if (g_nstackInitState != NSTACKX_INIT_STATE_DONE) {
         DFINDER_LOGE(TAG, "NSTACKX_Ctrl is not initiated yet");
@@ -1256,7 +1264,9 @@ int32_t NSTACKX_SetMaxDeviceNum(uint32_t maxDeviceNum)
         SemDestroy(&msg.wait);
         return NSTACKX_EFAILED;
     }
-    SemWait(&msg.wait);
+    if (!msg.isPost) {
+        SemWait(&msg.wait);
+    }
     SemDestroy(&msg.wait);
     return NSTACKX_EOK;
 }
@@ -1334,6 +1344,7 @@ static bool RegisterServiceDataParamCheck(const struct NSTACKX_ServiceData *para
 struct ServiceDataInfo {
     const struct NSTACKX_ServiceData *param;
     uint32_t cnt;
+    atomic_bool isPost;
     sem_t wait;
 };
 
@@ -1345,6 +1356,7 @@ static int32_t ServiceDataInfoInit(struct ServiceDataInfo *info, const struct NS
     }
     info->param = param;
     info->cnt = cnt;
+    info->isPost = false;
     return NSTACKX_EOK;
 }
 
@@ -1355,6 +1367,7 @@ static void RegisterServiceDataV2(void *arg)
         DFINDER_LOGE(TAG, "register v2 info failed");
     }
     SemPost(&info->wait);
+    info->isPost = true;
 }
 
 int32_t NSTACKX_RegisterServiceDataV2(const struct NSTACKX_ServiceData *param, uint32_t cnt)
@@ -1383,7 +1396,9 @@ int32_t NSTACKX_RegisterServiceDataV2(const struct NSTACKX_ServiceData *param, u
         return NSTACKX_EFAILED;
     }
 
-    SemWait(&info.wait);
+    if (!info.isPost) {
+        SemWait(&info.wait);
+    }
     SemDestroy(&info.wait);
     return NSTACKX_EOK;
 }
@@ -1549,6 +1564,7 @@ static void SendMsgDirectInner(void *arg)
     DFINDER_LOGD(TAG, "Enter WifiDirect send");
     msg->msg.err = CoapSendServiceMsg(&msg->msg, msg->ipStr, &msg->ip);
     SemPost(&msg->msg.wait);
+    msg->msg.isPost = true;
 }
 
 static int32_t NSTACKX_SendMsgParamCheck(const char *moduleName, const char *deviceId, const uint8_t *data,
@@ -1583,7 +1599,22 @@ static int MsgCtxInit(MsgCtx *msg, const char *moduleName, const char *deviceId,
     msg->data = data;
     msg->len = len;
     msg->err = NSTACKX_EOK;
+    msg->isPost = false;
 
+    return NSTACKX_EOK;
+}
+
+static int32_t NSTACKX_AddrAndTypeCheck(const char *ipaddr, uint8_t type)
+{
+    if (ipaddr == NULL) {
+        DFINDER_LOGE(TAG, "ipaddr is null");
+        return NSTACKX_EINVAL;
+    }
+
+    if (type > SERVER_TYPE_USB) {
+        DFINDER_LOGE(TAG, "invalid type %hhu", type);
+        return NSTACKX_EINVAL;
+    }
     return NSTACKX_EOK;
 }
 #endif
@@ -1598,13 +1629,8 @@ int32_t NSTACKX_SendMsgDirect(const char *moduleName, const char *deviceId, cons
         DFINDER_LOGE(TAG, "NSTACKX_Ctrl is not initiated yet");
         return NSTACKX_EFAILED;
     }
-    if (ipaddr == NULL) {
-        DFINDER_LOGE(TAG, "ipaddr needed");
-        return NSTACKX_EINVAL;
-    }
 
-    if (type > SERVER_TYPE_USB) {
-        DFINDER_LOGE(TAG, "invalid type %hhu", type);
+    if (NSTACKX_AddrAndTypeCheck(ipaddr, type) != NSTACKX_EOK) {
         return NSTACKX_EINVAL;
     }
 
@@ -1628,7 +1654,9 @@ int32_t NSTACKX_SendMsgDirect(const char *moduleName, const char *deviceId, cons
         ret = NSTACKX_EFAILED;
     }
     if (ret == NSTACKX_EOK) {
-        SemWait(&directMsg.msg.wait);
+        if (!directMsg.msg.isPost) {
+            SemWait(&directMsg.msg.wait);
+        }
         ret = directMsg.msg.err;
     }
     SemDestroy(&directMsg.msg.wait);
@@ -1693,7 +1721,9 @@ int32_t NSTACKX_SendMsg(const char *moduleName, const char *deviceId, const uint
         ret = NSTACKX_EFAILED;
     }
     if (ret == NSTACKX_EOK) {
-        SemWait(&msg.wait);
+        if (!msg.isPost) {
+            SemWait(&msg.wait);
+        }
         ret = msg.err;
     }
     SemDestroy(&msg.wait);
@@ -1805,6 +1835,7 @@ static void GetDeviceListInner(void *argument)
 
     GetDeviceList(message->deviceList, message->deviceCountPtr, true);
     SemPost(&message->wait);
+    message->isPost = true;
 }
 #endif
 
@@ -1835,7 +1866,9 @@ int32_t NSTACKX_GetDeviceList(NSTACKX_DeviceInfo *deviceList, uint32_t *deviceCo
         SemDestroy(&message.wait);
         return NSTACKX_EFAILED;
     }
-    SemWait(&message.wait);
+    if (!message.isPost) {
+        SemWait(&message.wait);
+    }
     SemDestroy(&message.wait);
     return NSTACKX_EOK;
 #else

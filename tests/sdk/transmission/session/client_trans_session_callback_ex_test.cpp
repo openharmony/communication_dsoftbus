@@ -600,4 +600,186 @@ HWTEST_F(TransClientSessionCallbackExTest, TransOnDataReceivedTest001, TestSize.
     ret = TransOnDataReceived(0, CHANNEL_TYPE_UDP, nullptr, 0, TRANS_SESSION_MESSAGE);
     EXPECT_EQ(ret, SOFTBUS_OK);
 }
+
+void MyOnStream(int32_t socket, const StreamData *data, const StreamData *ext, const StreamFrameInfo *param)
+{
+    (void)socket;
+    (void)data;
+    (void)ext;
+    (void)param;
+    return;
+}
+
+/**
+ * @tc.name: TransOnOnStreamReceviedTest001
+ * @tc.desc: TransOnOnStreamRecevied param is invalid.
+ * @tc.type: FUNC
+ * @tc.require:
+ */
+HWTEST_F(TransClientSessionCallbackExTest, TransOnOnStreamReceviedTest001, TestSize.Level1)
+{
+    NiceMock<TransMgrInterfaceMock> transMgrInterfaceMock;
+    EXPECT_CALL(transMgrInterfaceMock, ClientGetSessionIdByChannelId).WillRepeatedly(Return(SOFTBUS_OK));
+    EXPECT_CALL(transMgrInterfaceMock, ClientResetIdleTimeoutById).WillRepeatedly(Return(SOFTBUS_OK));
+
+    EXPECT_CALL(transMgrInterfaceMock, ClientGetSessionCallbackAdapterById).WillRepeatedly(
+        [](int32_t sessionId, SessionListenerAdapter *callbackAdapter, bool *isServer) -> int32_t {
+        (void)sessionId;
+        (void)isServer;
+        static int32_t times = 0;
+        times++;
+        callbackAdapter->isSocketListener = true;
+        callbackAdapter->socketServer.OnStream = nullptr;
+        if (times == EXCUTE_IN_FIRST_TIME) {
+            return SOFTBUS_OK;
+        }
+        callbackAdapter->socketServer.OnStream = MyOnStream;
+        return SOFTBUS_OK;
+    });
+
+    int32_t ret = TransOnOnStreamRecevied(0, CHANNEL_TYPE_UDP, nullptr, nullptr, nullptr);
+    EXPECT_EQ(ret, SOFTBUS_OK);
+
+    ret = TransOnOnStreamRecevied(0, CHANNEL_TYPE_UDP, nullptr, nullptr, nullptr);
+    EXPECT_EQ(ret, SOFTBUS_OK);
+}
+
+void MyOnBind(int32_t socket, PeerSocketInfo info)
+{
+    (void)socket;
+    (void)info;
+    return;
+}
+
+/**
+ * @tc.name: ClientTransOnChannelBindTest001
+ * @tc.desc: ClientTransOnChannelBind param is invalid.
+ * @tc.type: FUNC
+ * @tc.require:
+ */
+HWTEST_F(TransClientSessionCallbackExTest, ClientTransOnChannelBindTest001, TestSize.Level1)
+{
+    NiceMock<TransMgrInterfaceMock> transMgrInterfaceMock;
+    EXPECT_CALL(transMgrInterfaceMock, ClientGetSessionIdByChannelId).WillRepeatedly(Return(SOFTBUS_OK));
+    EXPECT_CALL(transMgrInterfaceMock, ClientGetPeerSocketInfoById).WillRepeatedly(Return(SOFTBUS_OK));
+
+    EXPECT_CALL(transMgrInterfaceMock, ClientGetSessionCallbackAdapterById).WillRepeatedly(
+        [](int32_t sessionId, SessionListenerAdapter *callbackAdapter, bool *isServer) -> int32_t {
+        (void)sessionId;
+        static int32_t times = 0;
+        times++;
+        *isServer = true;
+        callbackAdapter->isSocketListener = true;
+        callbackAdapter->socketServer.OnBind = MyOnBind;
+        if (times == EXCUTE_IN_FIRST_TIME) {
+            callbackAdapter->isSocketListener = false;
+            return SOFTBUS_OK;
+        }
+        if (times == EXCUTE_IN_SECOND_TIME) {
+            *isServer = false;
+            return SOFTBUS_OK;
+        }
+        if (times == EXCUTE_IN_THIRD_TIME) {
+            callbackAdapter->socketServer.OnBind = nullptr;
+            return SOFTBUS_OK;
+        }
+        return SOFTBUS_OK;
+    });
+
+    int32_t ret = ClientTransOnChannelBind(0, CHANNEL_TYPE_UDP);
+    EXPECT_EQ(ret, SOFTBUS_NOT_NEED_UPDATE);
+
+    ret = ClientTransOnChannelBind(0, CHANNEL_TYPE_UDP);
+    EXPECT_EQ(ret, SOFTBUS_NOT_NEED_UPDATE);
+
+    ret = ClientTransOnChannelBind(0, CHANNEL_TYPE_UDP);
+    EXPECT_EQ(ret, SOFTBUS_INVALID_PARAM);
+
+    ret = ClientTransOnChannelBind(0, CHANNEL_TYPE_UDP);
+    EXPECT_EQ(ret, SOFTBUS_OK);
+}
+
+void MyOnQos(int32_t socket, QoSEvent eventId, const QosTV *qos, uint32_t qosCount)
+{
+    (void)socket;
+    (void)eventId;
+    (void)qos;
+    (void)qosCount;
+    return;
+}
+
+int32_t ActionOfClientCacheQosEvent(int32_t socket, QoSEvent event, const QosTV *qos, uint32_t count)
+{
+    (void)socket;
+    (void)event;
+    (void)qos;
+    (void)count;
+    static int32_t times = 0;
+    times++;
+    if (times == EXCUTE_IN_FIRST_TIME) {
+        return SOFTBUS_OK;
+    }
+    if (times == EXCUTE_IN_SECOND_TIME) {
+        return SOFTBUS_TRANS_NO_NEED_CACHE_QOS_EVENT;
+    }
+    if (times == EXCUTE_IN_THIRD_TIME) {
+        return SOFTBUS_INVALID_PARAM;
+    }
+    return SOFTBUS_OK;
+}
+
+/**
+ * @tc.name: ClientTransOnQosTest001
+ * @tc.desc: ClientTransOnQos param is invalid.
+ * @tc.type: FUNC
+ * @tc.require:
+ */
+HWTEST_F(TransClientSessionCallbackExTest, ClientTransOnQosTest001, TestSize.Level1)
+{
+    NiceMock<TransMgrInterfaceMock> transMgrInterfaceMock;
+    EXPECT_CALL(transMgrInterfaceMock, ClientGetSessionIdByChannelId).WillRepeatedly(Return(SOFTBUS_OK));
+
+    EXPECT_CALL(transMgrInterfaceMock, ClientGetSessionCallbackAdapterById).WillRepeatedly(
+        [](int32_t sessionId, SessionListenerAdapter *callbackAdapter, bool *isServer) -> int32_t {
+        (void)sessionId;
+        static int32_t times = 0;
+        times++;
+        *isServer = false;
+        callbackAdapter->isSocketListener = true;
+        callbackAdapter->socketClient.OnQos = MyOnQos;
+        if (times == EXCUTE_IN_FIRST_TIME) {
+            *isServer = true;
+            return SOFTBUS_OK;
+        }
+        if (times == EXCUTE_IN_SECOND_TIME) {
+            callbackAdapter->isSocketListener = false;
+            return SOFTBUS_OK;
+        }
+        if (times == EXCUTE_IN_THIRD_TIME) {
+            callbackAdapter->socketClient.OnQos = nullptr;
+            return SOFTBUS_OK;
+        }
+        return SOFTBUS_OK;
+    });
+    EXPECT_CALL(transMgrInterfaceMock, ClientCacheQosEvent).WillRepeatedly(ActionOfClientCacheQosEvent);
+
+    QosTV qos;
+    int32_t ret = ClientTransOnQos(0, CHANNEL_TYPE_UDP, QOS_SATISFIED, &qos, 0);
+    EXPECT_EQ(ret, SOFTBUS_OK);
+
+    ret = ClientTransOnQos(0, CHANNEL_TYPE_UDP, QOS_SATISFIED, &qos, 0);
+    EXPECT_EQ(ret, SOFTBUS_OK);
+
+    ret = ClientTransOnQos(0, CHANNEL_TYPE_UDP, QOS_SATISFIED, &qos, 0);
+    EXPECT_EQ(ret, SOFTBUS_OK);
+
+    ret = ClientTransOnQos(0, CHANNEL_TYPE_UDP, QOS_SATISFIED, &qos, 0);
+    EXPECT_EQ(ret, SOFTBUS_OK);
+
+    ret = ClientTransOnQos(0, CHANNEL_TYPE_UDP, QOS_SATISFIED, &qos, 0);
+    EXPECT_EQ(ret, SOFTBUS_OK);
+
+    ret = ClientTransOnQos(0, CHANNEL_TYPE_UDP, QOS_SATISFIED, &qos, 0);
+    EXPECT_EQ(ret, SOFTBUS_INVALID_PARAM);
+}
 }

@@ -19,6 +19,7 @@ group("fuzztest") {
     "softbusproxychannelmanager_fuzzer:fuzztest",
     "softbusproxychannelmanagermock_fuzzer:fuzztest",
     "softbusproxychannelnetwork_fuzzer:fuzztest",
+    "softbususbtcpsocket_fuzzer:fuzztest",
     "transnegotiationmessage_fuzzer:fuzztest",
     "transproxyonmessagereceived_fuzzer:fuzztest",
     "transproxyprocessdata_fuzzer:fuzztest",
