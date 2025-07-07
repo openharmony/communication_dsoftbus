@@ -1,4 +1,4 @@
-# Copyright (c) 2024 Huawei Device Co., Ltd.
+# Copyright (c) 2024-2025 Huawei Device Co., Ltd.
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
 # You may obtain a copy of the License at
@@ -27,22 +27,18 @@ ohos_unittest("SoftbusServerStubTest") {
 
   include_dirs = [
     "$dsoftbus_dfx_path/interface/include",
+    "$dsoftbus_dfx_path/interface/include/form",
     "$dsoftbus_root_path/adapter/common/include",
     "$dsoftbus_root_path/core/adapter/bus_center/include",
-    "$dsoftbus_root_path/interfaces/kits/authentication",
     "$dsoftbus_root_path/core/authentication/interface",
-    "$dsoftbus_root_path/interfaces/kits/bus_center",
     "$dsoftbus_root_path/core/bus_center/interface",
     "$dsoftbus_root_path/core/bus_center/ipc/include",
-    "$dsoftbus_root_path/interfaces/kits/lnn",
     "$dsoftbus_root_path/core/bus_center/lnn/lane_hub/lane_manager/include",
     "$dsoftbus_root_path/core/bus_center/lnn/net_ledger/common/include",
     "$dsoftbus_root_path/core/bus_center/lnn/net_ledger/distributed_ledger/include",
     "$dsoftbus_root_path/core/common/include",
     "$dsoftbus_root_path/core/common/security/permission/include",
-    "$dsoftbus_root_path/interfaces/kits/connect",
     "$dsoftbus_root_path/core/connection/interface",
-    "$dsoftbus_root_path/interfaces/kits/disc",
     "$dsoftbus_root_path/core/discovery/interface",
     "$dsoftbus_root_path/core/discovery/manager/include",
     "$dsoftbus_root_path/core/frame/common/include",
@@ -52,16 +48,20 @@ ohos_unittest("SoftbusServerStubTest") {
     "$dsoftbus_root_path/core/transmission/ipc/include",
     "$dsoftbus_root_path/core/transmission/session/cpp/include",
     "$dsoftbus_root_path/core/transmission/session/include",
-    "$dsoftbus_root_path/interfaces/kits/transport",
     "$dsoftbus_root_path/core/transmission/trans_channel/common/include",
     "$dsoftbus_root_path/core/transmission/trans_channel/manager/include",
     "$dsoftbus_root_path/core/transmission/trans_channel/tcp_direct/include",
+    "$dsoftbus_root_path/interfaces/kits/authentication",
+    "$dsoftbus_root_path/interfaces/kits/bus_center",
     "$dsoftbus_root_path/interfaces/kits/common",
+    "$dsoftbus_root_path/interfaces/kits/connect",
+    "$dsoftbus_root_path/interfaces/kits/connection",
+    "$dsoftbus_root_path/interfaces/kits/disc",
     "$dsoftbus_root_path/interfaces/kits/discovery",
+    "$dsoftbus_root_path/interfaces/kits/lnn",
     "$dsoftbus_root_path/interfaces/kits/transport",
     "$dsoftbus_root_path/tests/core/frame/unittest/mock",
     "$dsoftbus_root_path/tests/sdk/common/include",
-    "$dsoftbus_root_path/interfaces/kits/connection",
   ]
 
   deps = [
@@ -113,29 +113,29 @@ ohos_unittest("SoftbusServerTest") {
   ]
 
   include_dirs = [
-    "$dsoftbus_root_path/interfaces/kits/bus_center",
+    "$dsoftbus_root_path/core/bus_center/extend/include",
     "$dsoftbus_root_path/core/bus_center/interface",
-    "$dsoftbus_root_path/interfaces/kits/disc",
-    "$dsoftbus_root_path/core/discovery/manager/include",
+    "$dsoftbus_root_path/core/bus_center/ipc/include",
+    "$dsoftbus_root_path/core/bus_center/lnn/lane_hub/lane_manager/include",
+    "$dsoftbus_root_path/core/connection/general",
+    "$dsoftbus_root_path/core/connection/ipc/include",
     "$dsoftbus_root_path/core/discovery/interface",
+    "$dsoftbus_root_path/core/discovery/manager/include",
     "$dsoftbus_root_path/core/frame/standard/client_manager/include",
     "$dsoftbus_root_path/core/frame/standard/init/include",
-    "$dsoftbus_root_path/core/frame/standard/init/src",
     "$dsoftbus_root_path/core/frame/standard/init/include",
     "$dsoftbus_root_path/core/frame/standard/init/src",
-    "$dsoftbus_root_path/tests/core/frame/unittest/mock",
-    "$dsoftbus_root_path/interfaces/kits/connection",
     "$dsoftbus_root_path/core/frame/standard/init/src",
-    "$dsoftbus_root_path/core/bus_center/extend/include",
-    "$dsoftbus_root_path/interfaces/kits/bus_center/enhance",
-    "$dsoftbus_root_path/core/bus_center/ipc/include",
-    "$dsoftbus_root_path/core/transmission/trans_channel/manager/include",
-    "$dsoftbus_root_path/core/transmission/session/include",
+    "$dsoftbus_root_path/core/frame/standard/init/src",
     "$dsoftbus_root_path/core/transmission/broadcast/include",
-    "$dsoftbus_root_path/core/bus_center/lnn/lane_hub/lane_manager/include",
-    "$dsoftbus_root_path/core/connection/ipc/include",
-    "$dsoftbus_root_path/core/connection/general",
+    "$dsoftbus_root_path/core/transmission/session/include",
+    "$dsoftbus_root_path/core/transmission/trans_channel/manager/include",
+    "$dsoftbus_root_path/interfaces/kits/bus_center",
+    "$dsoftbus_root_path/interfaces/kits/bus_center/enhance",
+    "$dsoftbus_root_path/interfaces/kits/connection",
+    "$dsoftbus_root_path/interfaces/kits/disc",
     "$dsoftbus_root_path/interfaces/kits/transport/enhance",
+    "$dsoftbus_root_path/tests/core/frame/unittest/mock",
   ]
 
   deps = [
@@ -162,8 +162,8 @@ ohos_unittest("SoftbusClientInfoManagerTest") {
   sources = [ "softbus_client_info_manager_test.cpp" ]
 
   include_dirs = [
-    "$dsoftbus_root_path/core/transmission/ipc/include",
     "$dsoftbus_root_path/core/frame/standard/client_manager/include",
+    "$dsoftbus_root_path/core/transmission/ipc/include",
   ]
 
   deps = [
@@ -189,6 +189,8 @@ ohos_unittest("SoftbusGEnhanceTest") {
   sources = [ "softbus_g_enhance_test.cpp" ]
 
   include_dirs = [
+    "$dsoftbus_dfx_path/interface/include/form",
+    "$dsoftbus_dfx_path/interface/include/legacy",
     "$dsoftbus_root_path/adapter/common/net/bluetooth/broadcast/interface",
     "$dsoftbus_root_path/components/nstackx/nstackx_ctrl/interface",
     "$dsoftbus_root_path/core/broadcast/common/include",
