@@ -15,9 +15,6 @@
 
 #ifndef NSTACK_COMMON_H
 #define NSTACK_COMMON_H
-#ifdef DFINDER_SAVE_DEVICE_LIST
-#include <stdatomic.h>
-#endif
 #include "nstackx.h"
 #include "nstackx_list.h"
 #include "nstackx_epoll.h"
@@ -30,7 +27,6 @@ extern "C" {
 typedef struct {
     NSTACKX_DeviceInfo *deviceList;
     uint32_t *deviceCountPtr;
-    atomic_bool isPost;
     sem_t wait;
 } GetDeviceListMessage;
 #endif
