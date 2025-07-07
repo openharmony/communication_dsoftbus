@@ -55,6 +55,7 @@
 #define MAX_IP_LEN 48
 #define MAX_MAC_LEN 46
 #define MAX_HANDLE_TIMES 3600
+#define INT_TO_STRING_MAX_LEN 21
 
 #define ONE_BYTE_SIZE 8
 
@@ -950,4 +951,26 @@ void SoftbusDumpBytes(const char *message, const uint8_t *data, uint32_t dataLen
     }
     COMM_LOGI(COMM_UTILS, "%{public}s dump %{public}u bytes: %{public}s", message, dataLen, hex);
     SoftBusFree(hex);
+}
+
+int32_t AddNumberToSocketName(uint32_t num, const char *prefix, uint32_t preLen, char *socketName)
+{
+    if (socketName == NULL || preLen > (SESSION_NAME_SIZE_MAX - INT_TO_STRING_MAX_LEN)) {
+        COMM_LOGE(COMM_UTILS, "invalid param!");
+        return SOFTBUS_INVALID_PARAM;
+    }
+    if (strcpy_s(socketName, preLen, prefix) != EOK) {
+        COMM_LOGE(COMM_UTILS, "copy socketName prefix failed!");
+        return SOFTBUS_STRCPY_ERR;
+    }
+    char numStr[INT_TO_STRING_MAX_LEN];
+    if (sprintf_s(numStr, INT_TO_STRING_MAX_LEN, "%u", num) < 0) {
+        COMM_LOGE(COMM_UTILS, "sprintf_s fail!");
+        return SOFTBUS_SPRINTF_ERR;
+    }
+    if (strcat_s(socketName, INT_TO_STRING_MAX_LEN, numStr) != EOK) {
+        COMM_LOGE(COMM_UTILS, "strcat_s fail!");
+        return SOFTBUS_SPRINTF_ERR;
+    }
+    return SOFTBUS_OK;
 }

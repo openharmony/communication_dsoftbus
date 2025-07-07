@@ -29,6 +29,12 @@ typedef struct {
     char sessionKey[SESSION_KEY_LENGTH];
     int32_t linkType;
     int32_t osType;
+    bool isD2D;
+    uint32_t dataLen;
+    char extraData[EXTRA_DATA_MAX_LEN];
+    char pagingNonce[PAGING_NONCE_LEN];
+    char pagingSessionkey[SHORT_SESSION_KEY_LENGTH];
+    char pagingAccountId[ACCOUNT_UID_LEN_MAX];
 }ProxyChannelInfoDetail;
 
 typedef struct {

@@ -179,6 +179,58 @@ static int32_t MessageTcpParcelRead(MessageParcel &data, ChannelInfo *channel)
     return SOFTBUS_OK;
 }
 
+static int32_t MessageParcelReadEx(MessageParcel &data, ChannelInfo *channel)
+{
+    READ_PARCEL_WITH_RET(data, Int32, channel->routeType, SOFTBUS_IPC_ERR);
+    READ_PARCEL_WITH_RET(data, Int32, channel->encrypt, SOFTBUS_IPC_ERR);
+    READ_PARCEL_WITH_RET(data, Int32, channel->algorithm, SOFTBUS_IPC_ERR);
+    READ_PARCEL_WITH_RET(data, Int32, channel->crc, SOFTBUS_IPC_ERR);
+    READ_PARCEL_WITH_RET(data, Uint32, channel->dataConfig, SOFTBUS_IPC_ERR);
+    READ_PARCEL_WITH_RET(data, Int32, channel->linkType, SOFTBUS_IPC_ERR);
+    READ_PARCEL_WITH_RET(data, Int32, channel->osType, SOFTBUS_IPC_ERR);
+    READ_PARCEL_WITH_RET(data, Bool, channel->isSupportTlv, SOFTBUS_IPC_ERR);
+    channel->peerDeviceId = (char *)data.ReadCString();
+    COMM_CHECK_AND_RETURN_RET_LOGE(channel->peerDeviceId != nullptr,
+        SOFTBUS_IPC_ERR, COMM_SDK, "read peerDeviceId failed");
+    READ_PARCEL_WITH_RET(data, Bool, channel->isD2D, SOFTBUS_IPC_ERR);
+    if (channel->isD2D) {
+        READ_PARCEL_WITH_RET(data, Uint32, channel->businessFlag, SOFTBUS_IPC_ERR);
+        READ_PARCEL_WITH_RET(data, Uint32, channel->deviceTypeId, SOFTBUS_IPC_ERR);
+        channel->pagingNonce = (char *)data.ReadRawData(PAGING_NONCE_LEN);
+        COMM_CHECK_AND_RETURN_RET_LOGE(channel->pagingNonce != nullptr, SOFTBUS_IPC_ERR,
+            COMM_SDK, "read pagingNonce failed");
+        channel->pagingSessionkey = (char *)data.ReadRawData(SHORT_SESSION_KEY_LENGTH);
+        COMM_CHECK_AND_RETURN_RET_LOGE(channel->pagingSessionkey != nullptr, SOFTBUS_IPC_ERR,
+            COMM_SDK, "read pagingSessionkey failed");
+        READ_PARCEL_WITH_RET(data, Uint32, channel->dataLen, SOFTBUS_IPC_ERR);
+        if (channel->dataLen > 0) {
+            channel->extraData = (char *)data.ReadRawData(channel->dataLen);
+            COMM_CHECK_AND_RETURN_RET_LOGE(channel->extraData != nullptr, SOFTBUS_IPC_ERR,
+                COMM_SDK, "read extraData failed");
+        }
+        if (channel->isServer) {
+            channel->pagingAccountId = (char *)data.ReadCString();
+            COMM_CHECK_AND_RETURN_RET_LOGE(channel->pagingAccountId != nullptr,
+                SOFTBUS_IPC_ERR, COMM_SDK, "read pagingAccountId failed");
+        }
+    } else {
+        READ_PARCEL_WITH_RET(data, Int32, channel->tokenType, SOFTBUS_IPC_ERR);
+        if (channel->tokenType > ACCESS_TOKEN_TYPE_HAP && channel->channelType != CHANNEL_TYPE_AUTH &&
+            channel->isServer) {
+            READ_PARCEL_WITH_RET(data, Int32, channel->peerUserId, SOFTBUS_IPC_ERR);
+            READ_PARCEL_WITH_RET(data, Uint64, channel->peerTokenId, SOFTBUS_IPC_ERR);
+            channel->peerExtraAccessInfo = (char *)data.ReadCString();
+        }
+        channel->sessionKey = (char *)data.ReadRawData(channel->keyLen);
+        COMM_CHECK_AND_RETURN_RET_LOGE(channel->sessionKey != nullptr, SOFTBUS_IPC_ERR,
+            COMM_SDK, "read rawData failed");
+        channel->groupId = (char *)data.ReadCString();
+        COMM_CHECK_AND_RETURN_RET_LOGE(channel->groupId != nullptr,
+            SOFTBUS_IPC_ERR, COMM_SDK, "read groupId failed");
+    }
+    return SOFTBUS_OK;
+}
+
 static int32_t MessageParcelRead(MessageParcel &data, ChannelInfo *channel)
 {
     READ_PARCEL_WITH_RET(data, Int32, channel->sessionId, SOFTBUS_IPC_ERR);
@@ -193,19 +245,12 @@ static int32_t MessageParcelRead(MessageParcel &data, ChannelInfo *channel)
     READ_PARCEL_WITH_RET(data, Bool, channel->isEncrypt, SOFTBUS_IPC_ERR);
     READ_PARCEL_WITH_RET(data, Int32, channel->peerUid, SOFTBUS_IPC_ERR);
     READ_PARCEL_WITH_RET(data, Int32, channel->peerPid, SOFTBUS_IPC_ERR);
-    channel->groupId = (char *)data.ReadCString();
-    COMM_CHECK_AND_RETURN_RET_LOGE(channel->groupId != nullptr, SOFTBUS_IPC_ERR, COMM_SDK, "read groupId failed");
     COMM_CHECK_AND_RETURN_RET_LOGE(channel->keyLen <= SESSION_KEY_LENGTH, SOFTBUS_IPC_ERR, COMM_SDK,
         "channel->keyLen invalid");
     READ_PARCEL_WITH_RET(data, Uint32, channel->keyLen, SOFTBUS_IPC_ERR);
-    channel->sessionKey = (char *)data.ReadRawData(channel->keyLen);
-    COMM_CHECK_AND_RETURN_RET_LOGE(channel->sessionKey != nullptr, SOFTBUS_IPC_ERR, COMM_SDK, "read rawData failed");
     channel->peerSessionName = (char *)data.ReadCString();
     COMM_CHECK_AND_RETURN_RET_LOGE(
         channel->peerSessionName != nullptr, SOFTBUS_IPC_ERR, COMM_SDK, "read peerSessionName failed");
-    channel->peerDeviceId = (char *)data.ReadCString();
-    COMM_CHECK_AND_RETURN_RET_LOGE(
-        channel->peerDeviceId != nullptr, SOFTBUS_IPC_ERR, COMM_SDK, "read peerDeviceId failed");
     READ_PARCEL_WITH_RET(data, Int32, channel->businessType, SOFTBUS_IPC_ERR);
     if (channel->channelType == CHANNEL_TYPE_UDP) {
         channel->myIp = (char *)data.ReadCString();
@@ -219,21 +264,7 @@ static int32_t MessageParcelRead(MessageParcel &data, ChannelInfo *channel)
                 channel->peerIp != nullptr, SOFTBUS_IPC_ERR, COMM_SDK, "read channel.peerIp failed");
         }
     }
-    READ_PARCEL_WITH_RET(data, Int32, channel->routeType, SOFTBUS_IPC_ERR);
-    READ_PARCEL_WITH_RET(data, Int32, channel->encrypt, SOFTBUS_IPC_ERR);
-    READ_PARCEL_WITH_RET(data, Int32, channel->algorithm, SOFTBUS_IPC_ERR);
-    READ_PARCEL_WITH_RET(data, Int32, channel->crc, SOFTBUS_IPC_ERR);
-    READ_PARCEL_WITH_RET(data, Uint32, channel->dataConfig, SOFTBUS_IPC_ERR);
-    READ_PARCEL_WITH_RET(data, Int32, channel->linkType, SOFTBUS_IPC_ERR);
-    READ_PARCEL_WITH_RET(data, Int32, channel->osType, SOFTBUS_IPC_ERR);
-    READ_PARCEL_WITH_RET(data, Bool, channel->isSupportTlv, SOFTBUS_IPC_ERR);
-    READ_PARCEL_WITH_RET(data, Int32, channel->tokenType, SOFTBUS_IPC_ERR);
-    if (channel->tokenType > ACCESS_TOKEN_TYPE_HAP && channel->channelType != CHANNEL_TYPE_AUTH && channel->isServer) {
-        READ_PARCEL_WITH_RET(data, Int32, channel->peerUserId, SOFTBUS_IPC_ERR);
-        READ_PARCEL_WITH_RET(data, Uint64, channel->peerTokenId, SOFTBUS_IPC_ERR);
-        channel->peerExtraAccessInfo = (char *)data.ReadCString();
-    }
-    return SOFTBUS_OK;
+    return MessageParcelReadEx(data, channel);
 }
 
 int32_t SoftBusClientStub::OnChannelOpenedInner(MessageParcel &data, MessageParcel &reply)

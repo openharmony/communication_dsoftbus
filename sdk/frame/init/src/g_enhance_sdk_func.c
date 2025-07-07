@@ -37,6 +37,7 @@ int32_t ClientRegisterEnhanceFunc(void *soHandle)
     g_clientEnhanceFuncList.vtpSetSocketMultiLayer = dlsym(soHandle, "VtpSetSocketMultiLayer");
     g_clientEnhanceFuncList.isVtpFrameSentEvt = dlsym(soHandle, "IsVtpFrameSentEvt");
     g_clientEnhanceFuncList.handleVtpFrameEvt = dlsym(soHandle, "HandleVtpFrameEvt");
+    g_clientEnhanceFuncList.transOnPagingConnect = dlsym(soHandle, "TransOnPagingConnect");
 
     return SOFTBUS_OK;
 }

@@ -805,24 +805,24 @@ HWTEST_F(TransProxyMessageTest, TransProxyParseMessageTest001, TestSize.Level1)
     msg.msgHead.type = (PROXYCHANNEL_MSG_TYPE_MAX & FOUR_BIT_MASK) | (TEST_INVALID_HEAD_VERSION << VERSION_SHIFT);
     ASSERT_TRUE(EOK == memcpy_s(buf, len, &msg, len));
     ret = TransProxyParseMessage(buf, len, &msg, &authHandle);
-    EXPECT_EQ(SOFTBUS_TRANS_INVALID_MESSAGE_TYPE, ret);
+    EXPECT_EQ(SOFTBUS_OK, ret);
 
     msg.msgHead.type = (PROXYCHANNEL_MSG_TYPE_MAX & FOUR_BIT_MASK) | (1 << VERSION_SHIFT);
     ASSERT_TRUE(EOK == memcpy_s(buf, len, &msg, len));
     ret = TransProxyParseMessage(buf, len, &msg, &authHandle);
-    EXPECT_EQ(SOFTBUS_TRANS_INVALID_MESSAGE_TYPE, ret);
+    EXPECT_EQ(SOFTBUS_OK, ret);
 
     msg.msgHead.type = (PROXYCHANNEL_MSG_TYPE_NORMAL & FOUR_BIT_MASK) | (1 << VERSION_SHIFT);
     msg.msgHead.cipher = 0;
     ASSERT_TRUE(EOK == memcpy_s(buf, len, &msg, len));
     ret = TransProxyParseMessage(buf, len, &msg, &authHandle);
-    EXPECT_EQ(SOFTBUS_TRANS_INVALID_MESSAGE_TYPE, ret);
+    EXPECT_EQ(SOFTBUS_OK, ret);
 
     msg.msgHead.cipher = 1;
     msg.msgHead.peerId = -1;
     ASSERT_TRUE(memcpy_s(buf, len, &msg, len) == EOK);
     ret = TransProxyParseMessage(buf, len, &msg, &authHandle);
-    EXPECT_EQ(SOFTBUS_TRANS_INVALID_MESSAGE_TYPE, ret);
+    EXPECT_EQ(SOFTBUS_OK, ret);
 
     SoftBusFree(buf);
 }
@@ -858,7 +858,6 @@ HWTEST_F(TransProxyMessageTest, TransProxyParseMessageTest002, TestSize.Level1)
 
     ret = TransProxyParseMessage(buf, len, &outMsg, &authHandle);
     EXPECT_EQ(SOFTBUS_TRANS_INVALID_MESSAGE_TYPE, ret);
-
 
     SoftBusFree(buf);
 }

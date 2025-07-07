@@ -122,6 +122,7 @@ ohos_unittest("TransClientSessionCallbackTest") {
     "$dsoftbus_root_path/core/common/include",
     "$dsoftbus_root_path/core/frame/common/include",
     "$dsoftbus_root_path/core/transmission/common/include",
+    "$dsoftbus_root_path/components/nstackx/fillp/include",
     "$dsoftbus_root_path/sdk/transmission/session/include",
     "$dsoftbus_root_path/adapter/default_config/spec_config",
     "$dsoftbus_root_path/sdk/transmission/session/src",
@@ -193,6 +194,7 @@ ohos_unittest("TransClientSessionCallbackExTest") {
     "$dsoftbus_root_path/adapter/common/security/access_token/include",
     "$dsoftbus_root_path/tests/sdk/transmission/session/mock/include",
     "$dsoftbus_root_path/interfaces/inner_kits/transport",
+    "$dsoftbus_root_path/components/nstackx/fillp/include",
   ]
 
   deps = [
