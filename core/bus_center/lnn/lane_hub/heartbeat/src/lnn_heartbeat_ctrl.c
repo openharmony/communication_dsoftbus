@@ -1540,6 +1540,10 @@ int32_t LnnTriggerSleHeartbeat(void)
         LNN_LOGD(LNN_HEART_BEAT, "sle has started");
         return SOFTBUS_OK;
     }
+    if (LnnEnableHeartbeatByType(HEARTBEAT_TYPE_SLE, true) != SOFTBUS_OK) {
+        LNN_LOGE(LNN_HEART_BEAT, "ctrl enable sle heartbeat fail");
+        return SOFTBUS_NETWORK_HB_START_STRATEGY_FAIL;
+    }
     if (LnnStartHbByTypeAndStrategy(HEARTBEAT_TYPE_SLE, STRATEGY_HB_SEND_FIXED_PERIOD, false) != SOFTBUS_OK) {
         LNN_LOGE(LNN_HEART_BEAT, "start sle spark hb fail");
         return SOFTBUS_NETWORK_HB_START_STRATEGY_FAIL;
@@ -1554,6 +1558,10 @@ int32_t LnnStopSleHeartbeat(void)
     if (!g_hbConditionState.isSleEnable) {
         LNN_LOGD(LNN_HEART_BEAT, "sle has stoped");
         return SOFTBUS_OK;
+    }
+    if (LnnEnableHeartbeatByType(HEARTBEAT_TYPE_SLE, false) != SOFTBUS_OK) {
+        LNN_LOGE(LNN_HEART_BEAT, "ctrl disable sle heartbeat fail");
+        return SOFTBUS_NETWORK_HB_STOP_STRATEGY_FAIL;
     }
     if (LnnStopHeartbeatByType(HEARTBEAT_TYPE_SLE) != SOFTBUS_OK) {
         LNN_LOGE(LNN_HEART_BEAT, "stop sle spark hb fail");

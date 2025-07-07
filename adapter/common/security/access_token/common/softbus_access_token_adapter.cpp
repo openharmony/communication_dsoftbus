@@ -58,6 +58,11 @@ bool SoftBusCheckIsSystemService(uint64_t tokenId)
     return type == ATokenTypeEnum::TOKEN_NATIVE;
 }
 
+bool SoftBusCheckIsSystemApp(uint64_t tokenId)
+{
+    return TokenIdKit::IsSystemAppByFullTokenID(tokenId);
+}
+
 bool SoftBusCheckIsNormalApp(uint64_t fullTokenId, const char *sessionName)
 {
     if (sessionName == nullptr) {

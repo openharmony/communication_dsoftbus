@@ -13,7 +13,7 @@
  * limitations under the License.
  */
 #include "trans_tcp_direct_listener.h"
-
+#include <cstring>
 #include <gtest/gtest.h>
 #include "securec.h"
 
@@ -31,6 +31,10 @@
 #define INVALID_FD (-1)
 #define CHANID 123
 #define EVENTS 2
+#define PKG_NAME_SIZE_MAX_LEN 65
+static uint8_t TEST_SESSION_KEY[SESSION_KEY_LENGTH] = { 0x10, 0x2, 0x14, 0x08, 0x06 };
+static const char *g_pkgName = "dms";
+const char *Ipv6 = "::1%lo";
 
 using namespace testing;
 using namespace testing::ext;
@@ -55,6 +59,27 @@ void TransTcpDirectListenerTest::SetUpTestCase(void)
 
 void TransTcpDirectListenerTest::TearDownTestCase(void)
 {}
+
+SessionConn *TestSetSessionConn()
+{
+    SessionConn *conn = (SessionConn*)SoftBusCalloc(sizeof(SessionConn));
+    if (conn == nullptr) {
+        return nullptr;
+    }
+    conn->serverSide = true;
+    conn->channelId = 1;
+    conn->appInfo.fd = 1;
+    conn->status = TCP_DIRECT_CHANNEL_STATUS_INIT;
+    conn->timeout = 0;
+    conn->req = INVALID_FD;
+    conn->authHandle.authId = 1;
+    conn->requestId = 1;
+    conn->listenMod = DIRECT_CHANNEL_SERVER_WIFI;
+    conn->appInfo.myData.pid = 1;
+    (void)memcpy_s(conn->appInfo.myData.pkgName, PKG_NAME_SIZE_MAX_LEN, g_pkgName, (strlen(g_pkgName)+1));
+    (void)memcpy_s(conn->appInfo.sessionKey, SESSION_KEY_LENGTH, TEST_SESSION_KEY, SESSION_KEY_LENGTH);
+    return conn;
+}
 
 /**
  * @tc.name: SwitchAuthLinkTypeToFlagTypeTest001
@@ -100,6 +125,7 @@ HWTEST_F(TransTcpDirectListenerTest, StartVerifySessionTest001, TestSize.Level1)
 
     int32_t ret = StartVerifySession(conn);
     EXPECT_EQ(SOFTBUS_TRANS_GET_CIPHER_FAILED, ret);
+    TransProcDataRes(DIRECT_CHANNEL_SERVER_WIFI, SOFTBUS_OK, 1, 1);
 }
 
 /**
@@ -220,5 +246,25 @@ HWTEST_F(TransTcpDirectListenerTest, ProcessSocketInEvent001, TestSize.Level1)
     ret = ProcessSocketOutEvent(conn, fd);
     EXPECT_EQ(ret, SOFTBUS_TRANS_ADD_TRIGGER_FAILED);
     SoftBusFree(conn);
+}
+
+/**
+ * @tc.name: TransProcDataRes
+ * @tc.desc: test TransProcDataRes001
+ * @tc.type: FUNC
+ * @tc.require:
+ */
+
+HWTEST_F(TransTcpDirectListenerTest, TransProcDataRes001, TestSize.Level1)
+{
+    int32_t ret = CreatSessionConnList();
+    EXPECT_EQ(ret, SOFTBUS_OK);
+
+    SessionConn *conn = TestSetSessionConn();
+    ret = TransTdcAddSessionConn(conn);
+    EXPECT_EQ(ret, SOFTBUS_OK);
+ 
+    int32_t channelId = 1;
+    TransProcDataRes(DIRECT_CHANNEL_SERVER_WIFI, SOFTBUS_OK, channelId, 1);
 }
 }

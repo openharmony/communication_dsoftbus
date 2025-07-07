@@ -110,7 +110,7 @@ void TransProxyPackBytesTest(FuzzedDataProvider &provider)
     int32_t channelId = provider.ConsumeIntegral<int32_t>();
     SessionPktType flag = static_cast<SessionPktType>(
         provider.ConsumeIntegralInRange<uint16_t>(TRANS_SESSION_BYTES, TRANS_SESSION_ASYNC_MESSAGE));
-    std::string sessionKey = provider.ConsumeRandomLengthString();
+    std::string sessionKey = provider.ConsumeRandomLengthString(SESSION_KEY_LENGTH);
 
     TransProxyPackBytes(channelId, nullptr, nullptr, flag, 0);
 
@@ -142,7 +142,7 @@ void TransProxyPackTlvBytesTest(FuzzedDataProvider &provider)
 
     SessionPktType flag2 = static_cast<SessionPktType>(
         provider.ConsumeIntegralInRange<uint16_t>(TRANS_SESSION_BYTES, TRANS_SESSION_ASYNC_MESSAGE));
-    std::string sessionKey = provider.ConsumeRandomLengthString();
+    std::string sessionKey = provider.ConsumeRandomLengthString(SESSION_KEY_LENGTH);
     int32_t seq = provider.ConsumeIntegral<int32_t>();
     (void)TransProxyPackTlvBytes(nullptr, sessionKey.c_str(), flag2, seq, nullptr);
 
@@ -267,7 +267,7 @@ void TransProxyDecryptPacketDataTest(FuzzedDataProvider &provider)
     ProxyDataInfo dataInfo;
     (void)memset_s(&dataInfo, sizeof(ProxyDataInfo), 0, sizeof(ProxyDataInfo));
 
-    std::string sessionKey = provider.ConsumeRandomLengthString();
+    std::string sessionKey = provider.ConsumeRandomLengthString(SESSION_KEY_LENGTH);
     (void)TransProxyDecryptPacketData(seq, &dataInfo, sessionKey.c_str());
 }
 
