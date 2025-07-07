@@ -18,6 +18,7 @@
 
 #include <gmock/gmock.h>
 
+#include "g_enhance_sdk_func.h"
 #include "softbus_error_code.h"
 #include "softbus_config_type.h"
 
@@ -28,6 +29,11 @@ public:
     virtual ~TransCommInterface() {};
 
     virtual int SoftbusGetConfig(ConfigType type, unsigned char *val, uint32_t len) = 0;
+    virtual ClientEnhanceFuncList *ClientEnhanceFuncListGet(void) = 0;
+    virtual int32_t WriteInt32ToBuf(uint8_t *buf, uint32_t dataLen, int32_t *offSet, int32_t data) = 0;
+    virtual int32_t WriteUint64ToBuf(uint8_t *buf, uint32_t bufLen, int32_t *offSet, uint64_t data) = 0;
+    virtual int32_t WriteStringToBuf(uint8_t *buf, uint32_t bufLen, int32_t *offSet, char *data, uint32_t dataLen) = 0;
+    virtual int32_t ServerIpcProcessInnerEvent(int32_t eventType, uint8_t *buf, uint32_t len) = 0;
 };
 
 class TransCommInterfaceMock : public TransCommInterface {
@@ -36,6 +42,12 @@ public:
     ~TransCommInterfaceMock() override;
 
     MOCK_METHOD3(SoftbusGetConfig, int(ConfigType type, unsigned char *val, uint32_t len));
+    MOCK_METHOD0(ClientEnhanceFuncListGet, ClientEnhanceFuncList *(void));
+    MOCK_METHOD4(WriteInt32ToBuf, int32_t(uint8_t *buf, uint32_t dataLen, int32_t *offSet, int32_t data));
+    MOCK_METHOD4(WriteUint64ToBuf, int32_t(uint8_t *buf, uint32_t bufLen, int32_t *offSet, uint64_t data));
+    MOCK_METHOD5(WriteStringToBuf, int32_t(
+        uint8_t *buf, uint32_t bufLen, int32_t *offSet, char *data, uint32_t dataLen));
+    MOCK_METHOD3(ServerIpcProcessInnerEvent, int32_t(int32_t eventType, uint8_t *buf, uint32_t len));
 
     static int ActionOfSoftbusGetConfig(ConfigType type, unsigned char *val, uint32_t len);
 };
