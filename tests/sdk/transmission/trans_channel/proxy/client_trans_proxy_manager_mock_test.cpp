@@ -909,10 +909,11 @@ HWTEST_F(ClientTransProxyManagerMockTest, TransProxyChannelAsyncSendBytes001, Te
     int32_t channelId = 1;
     const void *data = SoftBusCalloc(sizeof(int32_t));
     uint32_t len = 1;
-    uint8_t *temSliceData = (uint8_t *)SoftBusCalloc(sizeof(uint8_t));
+    uint8_t *temSliceData = reinterpret_cast<uint8_t *>(SoftBusCalloc(sizeof(uint8_t)));
     uint32_t dataSeq = 0;
 
-    ClientProxyChannelInfo *info = (ClientProxyChannelInfo*)SoftBusMalloc(sizeof(ClientProxyChannelInfo));
+    ClientProxyChannelInfo *info =
+        reinterpret_cast<ClientProxyChannelInfo*>(SoftBusCalloc(sizeof(ClientProxyChannelInfo)));
     ProxyChannelInfoDetail detail = {0};
     detail.isEncrypted = true;
     detail.sequence = 1;
@@ -959,7 +960,8 @@ HWTEST_F(ClientTransProxyManagerMockTest, TransProxyChannelAsyncSendBytes002, Te
     uint32_t len = 1;
     uint32_t dataSeq = 0;
 
-    ClientProxyChannelInfo *info = (ClientProxyChannelInfo*)SoftBusMalloc(sizeof(ClientProxyChannelInfo));
+    ClientProxyChannelInfo *info =
+        reinterpret_cast<ClientProxyChannelInfo*>(SoftBusCalloc(sizeof(ClientProxyChannelInfo)));
     ProxyChannelInfoDetail detail = {0};
     detail.isEncrypted = false;
     detail.sequence = 1;
@@ -1000,10 +1002,11 @@ HWTEST_F(ClientTransProxyManagerMockTest, TransProxyChannelAsyncSendBytes003, Te
     int32_t channelId = 1;
     const void *data = SoftBusCalloc(sizeof(int32_t));
     uint32_t len = 1;
-    uint8_t *temSliceData = (uint8_t *)SoftBusCalloc(sizeof(uint8_t));
+    uint8_t *temSliceData = reinterpret_cast<uint8_t *>(SoftBusCalloc(sizeof(uint8_t)));
     uint32_t dataSeq = 0;
 
-    ClientProxyChannelInfo *info = (ClientProxyChannelInfo*)SoftBusMalloc(sizeof(ClientProxyChannelInfo));
+    ClientProxyChannelInfo *info =
+        reinterpret_cast<ClientProxyChannelInfo*>(SoftBusCalloc(sizeof(ClientProxyChannelInfo)));
     ProxyChannelInfoDetail detail = {0};
     detail.isEncrypted = true;
     detail.sequence = 1;
@@ -1033,7 +1036,7 @@ HWTEST_F(ClientTransProxyManagerMockTest, TransProxyChannelAsyncSendBytes003, Te
     ret = TransProxyChannelAsyncSendBytes(channelId, data, len, dataSeq);
     EXPECT_EQ(SOFTBUS_INVALID_PARAM, ret);
 
-    uint8_t *newSliceData = (uint8_t *)SoftBusCalloc(sizeof(uint8_t));
+    uint8_t *newSliceData = reinterpret_cast<uint8_t *>(SoftBusCalloc(sizeof(uint8_t)));
     const void *newdata = SoftBusCalloc(sizeof(int32_t));
     EXPECT_CALL(ClientProxyManagerMock, TransProxyPackTlvBytes).WillOnce(Return(SOFTBUS_OK));
     EXPECT_CALL(ClientProxyManagerMock, TransProxyPackData).WillRepeatedly(Return(newSliceData));
