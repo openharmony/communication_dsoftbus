@@ -714,7 +714,7 @@ static int32_t TransPagingParseHeadAndGetHash(
     char *data, int32_t len, ProxyMessage *msg, uint8_t *accountHash, uint8_t *udidHash)
 {
     if (msg->msgHead.type == PROXYCHANNEL_MSG_TYPE_PAGING_HANDSHAKE) {
-        return TransPagingParseHandshakeMessageHead(data, len, msg, accountHash, udidHash);;
+        return TransPagingParseHandshakeMessageHead(data, len, msg, accountHash, udidHash);
     }
     TransPagingParseMessageHead(data, len, msg);
     ProxyChannelInfo chan;
