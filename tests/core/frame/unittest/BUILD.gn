@@ -65,10 +65,10 @@ ohos_unittest("SoftbusServerStubTest") {
   ]
 
   deps = [
+    "$dsoftbus_root_path/adapter:softbus_adapter",
     "$dsoftbus_root_path/core/common:softbus_utils",
     "$dsoftbus_root_path/core/frame:softbus_server",
     "$dsoftbus_root_path/tests/sdk/common:softbus_access_token_test",
-    "$dsoftbus_root_path/adapter:softbus_adapter",
   ]
 
   if (is_standard_system) {
@@ -125,11 +125,23 @@ ohos_unittest("SoftbusServerTest") {
     "$dsoftbus_root_path/core/frame/standard/init/src",
     "$dsoftbus_root_path/tests/core/frame/unittest/mock",
     "$dsoftbus_root_path/interfaces/kits/connection",
+    "$dsoftbus_root_path/core/frame/standard/init/src",
+    "$dsoftbus_root_path/core/bus_center/extend/include",
+    "$dsoftbus_root_path/interfaces/kits/bus_center/enhance",
+    "$dsoftbus_root_path/core/bus_center/ipc/include",
+    "$dsoftbus_root_path/core/transmission/trans_channel/manager/include",
+    "$dsoftbus_root_path/core/transmission/session/include",
+    "$dsoftbus_root_path/core/transmission/broadcast/include",
+    "$dsoftbus_root_path/core/bus_center/lnn/lane_hub/lane_manager/include",
+    "$dsoftbus_root_path/core/connection/ipc/include",
+    "$dsoftbus_root_path/core/connection/general",
+    "$dsoftbus_root_path/interfaces/kits/transport/enhance",
   ]
 
   deps = [
     "$dsoftbus_root_path/core/common:softbus_utils",
     "$dsoftbus_root_path/core/frame:softbus_server",
+    "$dsoftbus_root_path/dfx/dumper/legacy:softbus_dfx_dump",
   ]
 
   if (is_standard_system) {

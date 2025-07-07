@@ -50,6 +50,14 @@ public:
     virtual int32_t ClientGetSessionDataById(int32_t sessionId, char *data, uint16_t len, TransSessionKey key) = 0;
     virtual int32_t ProcessFileFrameData(
         int32_t sessionId, int32_t channelId, const char *data, uint32_t len, int32_t type) = 0;
+    virtual int32_t ClientCacheQosEvent(int32_t socket, QoSEvent event, const QosTV *qos, uint32_t count) = 0;
+    virtual int32_t ClientGetChannelBusinessTypeBySessionId(int32_t sessionId, int32_t *businessType) = 0;
+    virtual int32_t ClientGetChannelOsTypeBySessionId(int32_t sessionId, int32_t *osType) = 0;
+    virtual int32_t GetSupportTlvAndNeedAckById(
+        int32_t channelId, int32_t channelType, bool *supportTlv, bool *needAck) = 0;
+    virtual int32_t ClientGetSessionNameBySessionId(int32_t sessionId, char *sessionName) = 0;
+    virtual bool IsSessionExceedLimit(void) = 0;
+    virtual int32_t GetQosValue(const QosTV *qos, uint32_t qosCount, QosType type, int32_t *value, int32_t defVal) = 0;
 };
 
 class TransMgrInterfaceMock : public TransManagerInterface {
@@ -81,6 +89,15 @@ public:
     MOCK_METHOD4(ClientGetSessionDataById, int32_t(int32_t sessionId, char *data, uint16_t len, TransSessionKey key));
     MOCK_METHOD5(ProcessFileFrameData, int32_t(
         int32_t sessionId, int32_t channelId, const char *data, uint32_t len, int32_t type));
+    MOCK_METHOD4(ClientCacheQosEvent, int32_t(int32_t socket, QoSEvent event, const QosTV *qos, uint32_t count));
+    MOCK_METHOD2(ClientGetChannelBusinessTypeBySessionId, int32_t(int32_t sessionId, int32_t *businessType));
+    MOCK_METHOD2(ClientGetChannelOsTypeBySessionId, int32_t(int32_t sessionId, int32_t *osType));
+    MOCK_METHOD4(GetSupportTlvAndNeedAckById, int32_t(
+        int32_t channelId, int32_t channelType, bool *supportTlv, bool *needAck));
+    MOCK_METHOD2(ClientGetSessionNameBySessionId, int32_t(int32_t sessionId, char *sessionName));
+    MOCK_METHOD0(IsSessionExceedLimit, bool(void));
+    MOCK_METHOD5(GetQosValue, int32_t(
+        const QosTV *qos, uint32_t qosCount, QosType type, int32_t *value, int32_t defVal));
 
     static int32_t ActionOfClientGetDataConfigByChannelId(
         int32_t channelId, int32_t channelType, uint32_t *dataConfig);
