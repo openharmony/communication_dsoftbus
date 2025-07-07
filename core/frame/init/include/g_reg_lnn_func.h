@@ -46,6 +46,7 @@ typedef struct TagLnnOpenFuncList {
     LnnCleanTriggerSparkInfoFunc lnnCleanTriggerSparkInfo;
     LnnOfflineTimingBySleHbFunc lnnOfflineTimingBySleHb;
     LnnStopSleHeartbeatFunc lnnStopSleHeartbeat;
+    LnnStopSleOfflineTimingStrategyFunc lnnStopSleOfflineTimingStrategy;
 
     // net_builder
     LnnRegSyncInfoHandlerFunc lnnRegSyncInfoHandler;

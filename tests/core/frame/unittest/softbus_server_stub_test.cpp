@@ -804,8 +804,11 @@ HWTEST_F(SoftbusServerStubTest, SoftbusServerStubTest021, TestSize.Level1)
     EXPECT_CALL(softbusServerStubMock, LnnIpcGetAllOnlineNodeInfo).WillRepeatedly(
         Return(SOFTBUS_NETWORK_GET_ALL_NODE_INFO_ERR)
     );
+    EXPECT_CALL(softbusServerStubMock, SoftBusCheckIsNormalApp).WillRepeatedly(
+        Return(false)
+    );
     ret = softBusServer->GetAllOnlineNodeInfoInner(datas, reply);
-    EXPECT_EQ(SOFTBUS_INVALID_PARAM, ret);
+    EXPECT_EQ(SOFTBUS_NETWORK_GET_ALL_NODE_INFO_ERR, ret);
 
     datas.WriteCString(test);
     datas.WriteUint32(infoTypeLen);
@@ -1069,6 +1072,7 @@ HWTEST_F(SoftbusServerStubTest, SoftbusServerStubTest029, TestSize.Level1)
     int32_t accuracy = 0;
     int32_t period = 0;
     MessageParcel datas;
+    MessageParcel datas2;
     MessageParcel reply;
 
     int32_t ret = softBusServer->StartTimeSyncInner(datas, reply);
@@ -1100,6 +1104,13 @@ HWTEST_F(SoftbusServerStubTest, SoftbusServerStubTest029, TestSize.Level1)
     datas.WriteCString(test);
     ret = softBusServer->StopTimeSyncInner(datas, reply);
     EXPECT_EQ(SOFTBUS_OK, ret);
+
+    ret = softBusServer->StopTimeSyncInner(datas2, reply);
+    EXPECT_EQ(SOFTBUS_IPC_ERR, ret);
+
+    datas.WriteCString(test);
+    ret = softBusServer->StartTimeSyncInner(datas, reply);
+    EXPECT_EQ(SOFTBUS_IPC_ERR, ret);
 }
 
 /**
@@ -2126,5 +2137,105 @@ HWTEST_F(SoftbusServerStubTest, SoftbusServerStubTest056, TestSize.Level1)
     datas.WriteCString(test);
     ret = softBusServer->RemoveSessionServerInner(datas, reply);
     EXPECT_EQ(SOFTBUS_OK, ret);
+}
+
+/**
+ * @tc.name: SoftbusServerStubTest057
+ * @tc.desc: GetBundleName error test
+ * @tc.type: FUNC
+ * @tc.require:
+ */
+HWTEST_F(SoftbusServerStubTest, SoftbusServerStubTest057, TestSize.Level1)
+{
+    std::string bundleName = "test";
+    int32_t ret = GetBundleName(0, bundleName);
+    EXPECT_EQ(ret, SOFTBUS_TRANS_GET_BUNDLENAME_FAILED);
+
+    ret = GetAppId(bundleName, bundleName);
+    EXPECT_NE(ret, SOFTBUS_OK);
+}
+
+/**
+ * @tc.name: SoftbusServerStubTest058
+ * @tc.desc: CheckNormalAppSessionName error test
+ * @tc.type: FUNC
+ * @tc.require:
+ */
+HWTEST_F(SoftbusServerStubTest, SoftbusServerStubTest058, TestSize.Level1)
+{
+    NiceMock<SoftbusServerStubTestInterfaceMock> softbusServerStubMock;
+    EXPECT_CALL(softbusServerStubMock, SoftBusCheckIsNormalApp)
+        .WillRepeatedly(Return(true));
+
+    std::string bundleName = "test";
+    MessageParcel data;
+    ReadSessionAttrs(data, nullptr);
+    int32_t ret = CheckNormalAppSessionName(nullptr, 0, bundleName);
+    EXPECT_EQ(ret, SOFTBUS_TRANS_GET_BUNDLENAME_FAILED);
+}
+
+/**
+ * @tc.name: SoftbusServerStubTest059
+ * @tc.desc: StopRangeForMsdpInner api test
+ * @tc.type: FUNC
+ * @tc.require:
+ */
+HWTEST_F(SoftbusServerStubTest, SoftbusServerStubTest059, TestSize.Level1)
+{
+    sptr<OHOS::SoftBusServerStub> softBusServer = new OHOS::SoftBusServer(SOFTBUS_SERVER_SA_ID, true);
+    ASSERT_NE(softBusServer, nullptr);
+
+    MessageParcel data;
+    MessageParcel reply;
+    char test[10] = "test";
+    ConnectionAddr addrInfo;
+    (void)memset_s(&addrInfo, sizeof(ConnectionAddr), 0, sizeof(ConnectionAddr));
+
+    int32_t ret = softBusServer->StopRangeForMsdpInner(data, reply);
+    EXPECT_EQ(ret, SOFTBUS_TRANS_PROXY_WRITECSTRING_FAILED);
+
+    data.WriteCString(test);
+    ret = softBusServer->StopRangeForMsdpInner(data, reply);
+    EXPECT_EQ(ret, SOFTBUS_TRANS_PROXY_READCSTRING_FAILED);
+
+    data.WriteCString(test);
+    data.WriteRawData(&addrInfo, sizeof(ConnectionAddr));
+    ret = softBusServer->StopRangeForMsdpInner(data, reply);
+    EXPECT_EQ(ret, SOFTBUS_TRANS_PROXY_READCSTRING_FAILED);
+}
+
+/**
+ * @tc.name: SoftbusServerStubTest060
+ * @tc.desc: CheckOpenSessionPermission error test
+ * @tc.type: FUNC
+ * @tc.require:
+ */
+HWTEST_F(SoftbusServerStubTest, SoftbusServerStubTest060, TestSize.Level1)
+{
+    sptr<OHOS::SoftBusServerStub> softBusServer = new OHOS::SoftBusServer(SOFTBUS_SERVER_SA_ID, true);
+    ASSERT_NE(softBusServer, nullptr);
+
+    NiceMock<SoftbusServerStubTestInterfaceMock> softbusServerStubMock;
+    EXPECT_CALL(softbusServerStubMock, CheckTransPermission)
+        .WillOnce(Return(SOFTBUS_INVALID_PARAM))
+        .WillRepeatedly(Return(SOFTBUS_OK));
+    EXPECT_CALL(softbusServerStubMock, CheckUidAndPid).WillRepeatedly(Return(false));
+
+    int32_t ret = TransSessionMgrInit();
+    EXPECT_EQ(SOFTBUS_OK, ret);
+    SessionServer *sessionServer = GenerateSessionServer();
+    EXPECT_NE(nullptr, sessionServer);
+    ret = TransSessionServerAddItem(sessionServer);
+    EXPECT_EQ(SOFTBUS_OK, ret);
+    SessionParam *sessionParam001 = GenerateSessionParam();
+    ASSERT_NE(sessionParam001, nullptr);
+
+    ret = softBusServer->CheckOpenSessionPermission(sessionParam001);
+    EXPECT_EQ(ret, SOFTBUS_PERMISSION_DENIED);
+
+
+    SoftbusReportPermissionFaultEvt(SERVER_OPEN_SESSION);
+    ret = softBusServer->CheckOpenSessionPermission(sessionParam001);
+    EXPECT_EQ(ret, SOFTBUS_TRANS_CHECK_PID_ERROR);
 }
 }

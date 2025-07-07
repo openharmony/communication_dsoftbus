@@ -110,7 +110,10 @@ bool SoftBusCheckIsSystemApp(uint64_t tokenId)
 {
     return GetSoftbusServerStubTestInterface()->SoftBusCheckIsSystemApp(tokenId);
 }
-
+bool SoftBusCheckIsNormalApp(uint64_t fullTokenId, const char *sessionName)
+{
+    return GetSoftbusServerStubTestInterface()->SoftBusCheckIsNormalApp(fullTokenId, sessionName);
+}
 int32_t CheckLnnPermission(const char *interfaceName, const char *processName)
 {
     return GetSoftbusServerStubTestInterface()->CheckLnnPermission(interfaceName, processName);
