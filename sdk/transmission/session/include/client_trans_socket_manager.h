@@ -31,6 +31,7 @@ typedef struct {
     int32_t seq;
     int32_t channelType;
     uint32_t timeout;
+    bool isMessage;
 } DataSeqInfo;
 
 int32_t GenerateSessionId(void);

@@ -128,5 +128,10 @@ int32_t DataSeqInfoListAddItem(uint32_t dataSeq, int32_t channelId, int32_t sock
 {
     return GetClientTransProxyManagerInterface()->DataSeqInfoListAddItem(dataSeq, channelId, socketId, channelType);
 }
+
+int32_t ClientGetChannelBusinessTypeByChannelId(int32_t channelId, int32_t *businessType)
+{
+    return GetClientTransProxyManagerInterface()->ClientGetChannelBusinessTypeByChannelId(channelId, businessType);
+}
 }
 }

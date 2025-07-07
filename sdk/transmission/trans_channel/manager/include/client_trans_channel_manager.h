@@ -48,6 +48,9 @@ int32_t ClientGetSessionKey(int32_t channelId, char *key, unsigned int len);
 int32_t ClientGetHandle(int32_t channelId, int *handle);
 
 int32_t ClientDisableSessionListener(int32_t channelId);
+
+int32_t ClientTransChannelAsyncSendMessage(int32_t channelId, int32_t channelType, const void *data, uint32_t len,
+    uint16_t dataSeq);
 #ifdef __cplusplus
 }
 #endif

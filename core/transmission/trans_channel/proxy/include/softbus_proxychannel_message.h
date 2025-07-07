@@ -52,6 +52,8 @@ void TransWaitListenResult(uint32_t businessFlag, int32_t reason);
 char *TransPagingPackHandshakeErrMsg(int32_t errCode, int32_t channelId);
 char *TransProxyPagingPackChannelId(int16_t channelId);
 
+int32_t TransProxyParseD2DData(const char *data, int32_t len);
+
 #ifdef __cplusplus
 #if __cplusplus
 }

@@ -61,3 +61,12 @@ void UnpackProxyMessageHead(ProxyMessageHead *msg)
     msg->myId = (int16_t)SoftBusLtoHs((uint16_t)msg->myId);
     msg->reserved = (int16_t)SoftBusLtoHs((uint16_t)msg->reserved);
 }
+
+void PackProxyMessageShortHead(ProxyMessageShortHead *msg)
+{
+    if (msg == NULL) {
+        return;
+    }
+    msg->myId = (int16_t)SoftBusLEtoBEs((uint16_t)msg->myId);
+    msg->peerId = (int16_t)SoftBusLEtoBEs((uint16_t)msg->peerId);
+}

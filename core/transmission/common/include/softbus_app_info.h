@@ -128,8 +128,8 @@ typedef struct {
     bool isD2D;
     uint16_t fastTransDataSize;
     RouteType routeType;
-    BusinessType businessType;
     StreamType streamType;
+    BusinessType businessType;
     UdpConnType udpConnType;
     UdpChannelOptType udpChannelOptType;
     BlePriority blePriority;

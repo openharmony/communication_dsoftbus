@@ -229,8 +229,7 @@ typedef struct {
     /**
      * @brief Registration during Bind link establishment.
      *
-     * This callback is invoked to notify that data is received.
-     *
+     * This callback is invoked to notify that message is received.
      *
      * @param socket Indicates the unique socket fd.
      * @param dataSeq Indicates the sequence number of the packet to be sent.

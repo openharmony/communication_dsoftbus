@@ -398,3 +398,109 @@ int32_t SoftBusDecryptDataByCtr(AesCtrCipherKey *key, const unsigned char *input
 {
     return SoftBusEncryptDataByCtr(key, input, inLen, decryptData, decryptLen);
 }
+
+// static int32_t MbedAes128GcmEncrypt(const AesGcm128CipherKey *cipherKey, const unsigned char *plainText,
+//     uint32_t plainTextSize, unsigned char *cipherText, uint32_t cipherTextLen)
+// {
+//     if ((cipherKey == NULL) || (plainText == NULL) || (plainTextSize == 0) || cipherText == NULL ||
+//         (cipherTextLen < plainTextSize + SHORT_TAG_LEN)) {
+//         COMM_LOGE(COMM_ADAPTER, "Encrypt invalid para");
+//         return SOFTBUS_INVALID_PARAM;
+//     }
+
+//     int32_t ret;
+//     unsigned char tagBuf[SHORT_TAG_LEN] = { 0 };
+//     mbedtls_gcm_context aesContext;
+//     mbedtls_gcm_init(&aesContext);
+
+//     ret = mbedtls_gcm_setkey(&aesContext, MBEDTLS_CIPHER_ID_AES, cipherKey->key, cipherKey->keyLen * KEY_BITS_UNIT);
+//     if (ret != 0) {
+//         mbedtls_gcm_free(&aesContext);
+//         return SOFTBUS_ENCRYPT_ERR;
+//     }
+
+//     ret = mbedtls_gcm_crypt_and_tag(&aesContext, MBEDTLS_GCM_ENCRYPT, plainTextSize, cipherKey->iv, GCM_IV_LEN, NULL, 0,
+//         plainText, cipherText, SHORT_TAG_LEN, tagBuf);
+//     if (ret != 0) {
+//         mbedtls_gcm_free(&aesContext);
+//         return SOFTBUS_ENCRYPT_ERR;
+//     }
+
+//     if (memcpy_s(cipherText+ plainTextSize, cipherTextLen - plainTextSize, tagBuf, SHORT_TAG_LEN) != 0) {
+//         mbedtls_gcm_free(&aesContext);
+//         return SOFTBUS_ENCRYPT_ERR;
+//     }
+
+//     mbedtls_gcm_free(&aesContext);
+//     return (plainTextSize + SHORT_TAG_LEN);
+// }
+
+// int32_t SoftBusEncryptDataByGcm128(AesGcm128CipherKey *cipherKey, const unsigned char *input, uint32_t inLen,
+//     unsigned char *encryptData, uint32_t *encryptLen)
+// {
+//     if (cipherKey == NULL || input == NULL || inLen == 0 || encryptData == NULL || encryptLen == NULL) {
+//         COMM_LOGE(COMM_ADAPTER, "Encrypt invalid para.");
+//         return SOFTBUS_INVALID_PARAM;
+//     }
+//     uint32_t outLen = inLen + SHORT_TAG_LEN;
+//     int32_t result = MbedAes128GcmEncrypt(cipherKey, input, inLen, encryptData, outLen);
+//     if (result <= 0) {
+//         COMM_LOGE(COMM_ADAPTER, "SslAesGcmEncrypt error.");
+//         return SOFTBUS_ENCRYPT_ERR;
+//     }
+//     *encryptLen = result;
+//     return SOFTBUS_OK;
+// }
+
+// static int32_t MbedAesGcm128Decrypt(const AesGcm128CipherKey *cipherKey, const unsigned char *cipherText,
+//     uint32_t cipherTextSize, unsigned char *plain, uint32_t plainLen)
+// {
+//     if ((cipherKey == NULL) || (cipherText == NULL) || (cipherTextSize <= SHORT_TAG_LEN) || plain == NULL ||
+//         (plainLen < cipherTextSize - SHORT_TAG_LEN)) {
+//         COMM_LOGE(COMM_ADAPTER, "Decrypt invalid para");
+//         return SOFTBUS_INVALID_PARAM;
+//     }
+
+//     mbedtls_gcm_context aesContext;
+//     mbedtls_gcm_init(&aesContext);
+//     int32_t ret =
+//         mbedtls_gcm_setkey(&aesContext, MBEDTLS_CIPHER_ID_AES, cipherKey->key, cipherKey->keyLen * KEY_BITS_UNIT);
+//     if (ret != 0) {
+//         COMM_LOGE(COMM_ADAPTER, "Decrypt mbedtls_gcm_setkey fail.");
+//         mbedtls_gcm_free(&aesContext);
+//         return SOFTBUS_DECRYPT_ERR;
+//     }
+
+//     int32_t actualPlainLen = (int32_t)(cipherTextSize - SHORT_TAG_LEN);
+//     ret = mbedtls_gcm_auth_decrypt(&aesContext, cipherTextSize - SHORT_TAG_LEN, cipherKey->iv, GCM_IV_LEN, NULL, 0,
+//         cipherText + actualPlainLen, SHORT_TAG_LEN, cipherText, plain);
+//     if (ret != 0) {
+//         COMM_LOGE(COMM_ADAPTER, "[TRANS] Decrypt mbedtls_gcm_auth_decrypt fail. ret=%{public}d", ret);
+//         mbedtls_gcm_free(&aesContext);
+//         return SOFTBUS_DECRYPT_ERR;
+//     }
+
+//     mbedtls_gcm_free(&aesContext);
+//     return actualPlainLen;
+// }
+
+// int32_t SoftBusDecryptDataByGcm128(AesGcm128CipherKey *cipherKey, const unsigned char *input, uint32_t inLen,
+//     unsigned char *decryptData, uint32_t *decryptLen)
+// {
+//     if (cipherKey == NULL || input == NULL || inLen < SHORT_TAG_LEN || decryptData == NULL || decryptLen == NULL) {
+//         return SOFTBUS_INVALID_PARAM;
+//     }
+
+//     uint32_t outLen = inLen - SHORT_TAG_LEN;
+//     int32_t result = MbedAesGcm128Decrypt(cipherKey, input, inLen, decryptData, outLen);
+//     if (result <= 0) {
+//         return SOFTBUS_DECRYPT_ERR;
+//     }
+//     *decryptLen = (uint32_t)result;
+//     return SOFTBUS_OK;
+// }
+
+// int32_t SoftBusCalcHKDF(const uint8_t *inData, uint32_t inLen, uint8_t *outData, uint32_t outLen)
+// {
+//     return SOFTBUS_OK;
+// }

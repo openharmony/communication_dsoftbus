@@ -971,6 +971,13 @@ static void TransProxyOnDataReceived(uint32_t connectionId, ConnModule moduleId,
     int32_t msgType = PROXYCHANNEL_MSG_TYPE_MAX;
     if (TransProxyParseMsgType(data, len, &msgType) != SOFTBUS_OK) {
         TRANS_LOGE(TRANS_CTRL, "parseMessage: unsupported message");
+    }
+    if (msgType == PROXYCHANNEL_MSG_TYPE_D2D) {
+        ret = TransProxyParseD2DData(data, len);
+        if (ret != SOFTBUS_OK) {
+            TRANS_LOGE(TRANS_CTRL, "parse d2d msg ret=%{public}d", ret);
+            return;
+        }
         return;
     }
     ProxyMessage msg;
@@ -997,8 +1004,8 @@ static void TransProxyOnDataReceived(uint32_t connectionId, ConnModule moduleId,
             TRANS_LOGE(TRANS_CTRL, "send bad key msg ret=%{public}d", ret);
             return;
         }
-        char peerBrMac[BT_MAC_LEN] = {0};
-        char udid[UDID_BUF_LEN] = {0};
+        char peerBrMac[BT_MAC_LEN] = { 0 };
+        char udid[UDID_BUF_LEN] = { 0 };
         if (GetBrMacFromConnInfo(connectionId, peerBrMac, BT_MAC_LEN) == SOFTBUS_OK) {
             if (LnnGetUdidByBrMacPacked(peerBrMac, udid, UDID_BUF_LEN) == SOFTBUS_OK) {
                 AuthRemoveDeviceKeyByUdidPacked(udid);

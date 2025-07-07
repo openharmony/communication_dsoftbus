@@ -35,6 +35,7 @@ namespace OHOS {
 
 #define TEST_STRING_IDENTITY "11"
 #define TEST_VALID_CHANNEL_ID 1
+#define TEST_DATALEN 10
 
 class SoftbusProxyTransceiverTest : public testing::Test {
 public:
@@ -918,6 +919,53 @@ HWTEST_F(SoftbusProxyTransceiverTest, TransProxyLoopMsgHandler001, TestSize.Leve
     TransProxyLoopMsgHandler(msg);
     msg->what = LOOP_AUTHSTATECHECK_MSG;
     TransProxyLoopMsgHandler(msg);
+}
+
+/**
+ * @tc.name: TransProxyParseMsgType001
+ * @tc.desc: test TransProxyParseMsgType.
+ * @tc.type: FUNC
+ * @tc.require:
+ */
+HWTEST_F(SoftbusProxyTransceiverTest, TransProxyParseMsgType001, TestSize.Level1)
+{
+    ProxyMessageShortHead msgHead = { 0 };
+    char data[TEST_DATALEN];
+    int32_t len = TEST_DATALEN;
+    int32_t msgType;
+    int32_t ret = TransProxyParseMsgType(data, len, &msgType);
+    EXPECT_NE(SOFTBUS_OK, ret);
+
+    msgHead.type = (PROXYCHANNEL_MSG_TYPE_D2D & FOUR_BIT_MASK) | (VERSION << VERSION_SHIFT);
+    msgHead.myId = 1;
+    msgHead.peerId = 1;
+    (void)memcpy_s(data, TEST_DATALEN, &msgHead, sizeof(ProxyMessageShortHead));
+    ret = TransProxyParseMsgType(data, len, &msgType);
+    EXPECT_EQ(SOFTBUS_OK, ret);
+}
+
+/**
+ * @tc.name: TransProxyOnDataReceived001
+ * @tc.desc: test TransProxyOnDataReceived.
+ * @tc.type: FUNC
+ * @tc.require:
+ */
+HWTEST_F(SoftbusProxyTransceiverTest, TransProxyOnDataReceived001, TestSize.Level1)
+{
+    ProxyMessageShortHead msgHead = { 0 };
+    char data[TEST_DATALEN];
+    int32_t len = TEST_DATALEN;
+    msgHead.type = (PROXYCHANNEL_MSG_TYPE_D2D & FOUR_BIT_MASK) | (VERSION << VERSION_SHIFT);
+    msgHead.myId = 1;
+    msgHead.peerId = 1;
+    (void)memcpy_s(data, TEST_DATALEN, &msgHead, sizeof(ProxyMessageShortHead));
+    uint32_t connectionId = 1;
+    ConnModule moduleId = MODULE_CONNECTION;
+    int64_t seq = 1;
+    EXPECT_NO_FATAL_FAILURE(TransProxyOnDataReceived(connectionId, moduleId, seq, data, len));
+
+    msgHead.type = (PROXYCHANNEL_MSG_TYPE_NORMAL & FOUR_BIT_MASK) | (VERSION << VERSION_SHIFT);
+    EXPECT_NO_FATAL_FAILURE(TransProxyOnDataReceived(connectionId, moduleId, seq, data, len));
 }
 
 } // namespace OHOS

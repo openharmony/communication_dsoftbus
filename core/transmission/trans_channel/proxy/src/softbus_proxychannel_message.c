@@ -1882,3 +1882,24 @@ char *TransProxyPackFastData(const AppInfo *appInfo, uint32_t *outLen)
     SoftBusFree(dataInfo.outData);
     return sliceData;
 }
+
+int32_t TransProxyParseD2DData(const char *data, int32_t len)
+{
+    if (data == NULL) {
+        TRANS_LOGE(TRANS_CTRL, "invalid param");
+        return SOFTBUS_INVALID_PARAM;
+    }
+    char *ptr = (char *)data;
+    ptr +=sizeof(uint16_t);
+    int16_t peerId = (int16_t)SoftBusBEtoLEs(*(uint16_t *)ptr);
+    ptr +=sizeof(uint16_t);
+    int16_t myId = (int16_t)SoftBusBEtoLEs(*(uint16_t *)ptr);
+    ptr +=sizeof(uint16_t);
+    ProxyChannelInfo info = { 0 };
+    if (TransProxyGetSendMsgChanInfo(myId, &info) != SOFTBUS_OK) {
+        TRANS_LOGE(TRANS_CTRL, "data recv get info fail, myId=%{public}d, peerId=%{public}d", myId, peerId);
+        return SOFTBUS_TRANS_NODE_NOT_FOUND;
+    }
+    return OnProxyChannelMsgReceived(myId, &(info.appInfo), data + PROXY_CHANNEL_D2D_HEAD_LEN,
+        len - PROXY_CHANNEL_D2D_HEAD_LEN);
+}
