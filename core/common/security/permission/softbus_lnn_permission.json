@@ -96,5 +96,47 @@
     "PROCESS_NAME": [
       "maintenance_service"
     ]
+  },
+  {
+    "INTERFACE_NAME": "EX_OBJ_CMD_SET_PRE_LINK_PARAM",
+    "PROCESS_NAME": [
+      "CollaborationFwk"
+    ]
+  },
+  {
+    "INTERFACE_NAME": "EX_OBJ_CMD_GET_PRE_LINK_PARAM",
+    "PROCESS_NAME": [
+      "CollaborationFwk"
+    ]
+  },
+  {
+    "INTERFACE_NAME": "EX_OBJ_CMD_REG_PRE_LINK_PARAM_CHANGE",
+    "PROCESS_NAME": [
+      "CollaborationFwk"
+    ]
+  },
+  {
+    "INTERFACE_NAME": "EX_OBJ_CMD_RESOURCE_CONFLICT_CHECK",
+    "PROCESS_NAME": [
+      "CollaborationFwk"
+    ]
+  },
+  {
+    "INTERFACE_NAME": "EX_OBJ_CMD_CONFLICT_LISTENER",
+    "PROCESS_NAME": [
+      "CollaborationFwk"
+    ]
+  },
+  {
+    "INTERFACE_NAME": "EX_OBJ_CMD_RESOLVE_CONFLICT",
+    "PROCESS_NAME": [
+      "CollaborationFwk"
+    ]
+  },
+  {
+    "INTERFACE_NAME": "EX_OBJ_CMD_QUERY_VALID_QOS",
+    "PROCESS_NAME": [
+      "distributedsched"
+    ]
   }
 ]
