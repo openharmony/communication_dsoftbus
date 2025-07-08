@@ -1710,7 +1710,7 @@ static void OnDataReceived(
         case DATA_TYPE_CANCEL_AUTH:
             HandleCancelAuthData(connId, connInfo, fromServer, head, data);
             break;
-        case DATA_TYPE_UK_CONNECTION:
+        case DATA_TYPE_APPLY_KEY_CONNECTION:
             HandleUkConnectionData(connId, connInfo, fromServer, head, data);
             break;
         default:

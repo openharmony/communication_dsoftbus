@@ -1493,6 +1493,23 @@ int32_t LnnDumpControlLaneGroupInfoPacked(int32_t fd)
     return pfnLnnEnhanceFuncList->lnnDumpControlLaneGroupInfo(fd);
 }
 
+int32_t LnnAsyncSaveDeviceDataPacked(const char *data, LnnDataType dataType)
+{
+    LnnEnhanceFuncList *pfnLnnEnhanceFuncList = LnnEnhanceFuncListGet();
+    if (LnnCheckFuncPointer((void *)pfnLnnEnhanceFuncList->lnnAsyncSaveDeviceData) != SOFTBUS_OK) {
+        return SOFTBUS_NOT_IMPLEMENT;
+    }
+    return pfnLnnEnhanceFuncList->lnnAsyncSaveDeviceData(data, dataType);
+}
+
+int32_t LnnDeletaDeviceDataPacked(LnnDataType dataType)
+{
+    LnnEnhanceFuncList *pfnLnnEnhanceFuncList = LnnEnhanceFuncListGet();
+    if (LnnCheckFuncPointer((void *)pfnLnnEnhanceFuncList->lnnDeletaDeviceData) != SOFTBUS_OK) {
+        return SOFTBUS_NOT_IMPLEMENT;
+    }
+    return pfnLnnEnhanceFuncList->lnnDeletaDeviceData(dataType);
+}
 void CheckNeedCloudSyncOfflinePacked(DiscoveryType type)
 {
     LnnEnhanceFuncList *pfnLnnEnhanceFuncList = LnnEnhanceFuncListGet();
@@ -1500,4 +1517,13 @@ void CheckNeedCloudSyncOfflinePacked(DiscoveryType type)
         return;
     }
     pfnLnnEnhanceFuncList->checkNeedCloudSyncOffline(type);
+}
+
+int32_t LnnRetrieveDeviceDataPacked(LnnDataType dataType, char **data, uint32_t *dataLen)
+{
+    LnnEnhanceFuncList *pfnLnnEnhanceFuncList = LnnEnhanceFuncListGet();
+    if (LnnCheckFuncPointer((void *)pfnLnnEnhanceFuncList->lnnRetrieveDeviceData) != SOFTBUS_OK) {
+        return SOFTBUS_NOT_IMPLEMENT;
+    }
+    return pfnLnnEnhanceFuncList->lnnRetrieveDeviceData(dataType, data, dataLen);
 }

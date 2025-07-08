@@ -799,7 +799,7 @@ HWTEST_F(AuthConnectionTest, IS_AUTH_SESSION_KEY_MODULE_TEST_001, TestSize.Level
     ret = IsAuthSessionKeyModule(&head);
     EXPECT_TRUE(ret);
 
-    head.dataType = DATA_TYPE_UK_CONNECTION;
+    head.dataType = DATA_TYPE_APPLY_KEY_CONNECTION;
     ret = IsAuthSessionKeyModule(&head);
     EXPECT_FALSE(ret);
 }
@@ -824,7 +824,7 @@ HWTEST_F(AuthConnectionTest, POST_BYTES_FOR_SESSION_KEY_TEST_001, TestSize.Level
     int32_t ret = PostBytesForSessionKey(fd, &head, &data);
     EXPECT_EQ(ret, SOFTBUS_OK);
 
-    head.dataType = DATA_TYPE_UK_CONNECTION;
+    head.dataType = DATA_TYPE_APPLY_KEY_CONNECTION;
     ret = IsAuthSessionKeyModule(&head);
     EXPECT_EQ(ret, SOFTBUS_OK);
 }
