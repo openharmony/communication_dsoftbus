@@ -26,35 +26,43 @@ using namespace testing;
 using namespace testing::ext;
 
 namespace OHOS {
-static int32_t DefaultOnChannelOpened(const char *, int32_t, const char *, const ChannelInfo *) {
+static int32_t DefaultOnChannelOpened(const char *, int32_t, const char *, const ChannelInfo *) 
+{
     return SOFTBUS_OK;
 }
 
-static int32_t DefaultOnChannelClosed(const char *, int32_t, int32_t, int32_t, int32_t) {
+static int32_t DefaultOnChannelClosed(const char *, int32_t, int32_t, int32_t, int32_t) 
+{
     return SOFTBUS_OK;
 }
 
-static int32_t DefaultOnChannelOpenFailed(const char *, int32_t, int32_t, int32_t, int32_t) {
+static int32_t DefaultOnChannelOpenFailed(const char *, int32_t, int32_t, int32_t, int32_t) 
+{
     return SOFTBUS_OK;
 }
 
-static int32_t DefaultOnDataReceived(const char *, int32_t, int32_t, int32_t, TransReceiveData *) {
+static int32_t DefaultOnDataReceived(const char *, int32_t, int32_t, int32_t, TransReceiveData *) 
+{
     return SOFTBUS_OK;
 }
 
-static int32_t DefaultOnQosEvent(const char *, const QosParam *) {
+static int32_t DefaultOnQosEvent(const char *, const QosParam *) 
+{
     return SOFTBUS_OK;
 }
 
-static int32_t DefaultGetPkgNameBySessionName(const char *, char *, uint16_t) {
+static int32_t DefaultGetPkgNameBySessionName(const char *, char *, uint16_t) 
+{
     return SOFTBUS_OK;
 }
 
-static int32_t DefaultGetUidAndPidBySessionName(const char *, int32_t *, int32_t *) {
+static int32_t DefaultGetUidAndPidBySessionName(const char *, int32_t *, int32_t *) 
+{
     return SOFTBUS_OK;
 }
 
-static int32_t DefaultOnChannelBind(const char *, int32_t, int32_t, int32_t) {
+static int32_t DefaultOnChannelBind(const char *, int32_t, int32_t, int32_t) 
+{
     return SOFTBUS_OK;
 }
 
@@ -529,7 +537,6 @@ HWTEST_F(TransUdpStaticMockTest, AcceptUdpChannelAsServerTest001, TestSize.Level
     ret = AcceptUdpChannelAsServer(appInfo, authHandle, seq);
     EXPECT_EQ(SOFTBUS_TRANS_UDP_SERVER_ADD_CHANNEL_FAILED, ret);
 
-
     EXPECT_CALL(TransUdpStaticMock, LnnGetNetworkIdByUuid).WillOnce(Return(SOFTBUS_OK)).WillOnce(Return(SOFTBUS_ERR));
     EXPECT_CALL(TransUdpStaticMock, SoftBusGenerateSessionKey).WillRepeatedly(Return(SOFTBUS_OK));
     EXPECT_CALL(TransUdpStaticMock, TransAddUdpChannel).WillOnce(Return(SOFTBUS_OK));
@@ -554,7 +561,6 @@ HWTEST_F(TransUdpStaticMockTest, NotifyWifiByDelScenarioTest001, TestSize.Level1
     StreamType streamType = COMMON_VIDEO_STREAM;
 
     NiceMock<TransUdpNegoStaticInterfaceMock> TransUdpStaticMock;
-
     EXPECT_CALL(TransUdpStaticMock, DelScenario).WillOnce(Return(SOFTBUS_INVALID_PARAM));
     NotifyWifiByDelScenario(streamType, pid);
     EXPECT_EQ(SOFTBUS_OK, pid);
@@ -562,7 +568,6 @@ HWTEST_F(TransUdpStaticMockTest, NotifyWifiByDelScenarioTest001, TestSize.Level1
     EXPECT_CALL(TransUdpStaticMock, DelScenario).WillOnce(Return(SOFTBUS_OK));
     streamType = COMMON_VIDEO_STREAM;
     NotifyWifiByDelScenario(streamType, pid);
-    
 }
 
 /**
@@ -597,13 +602,13 @@ HWTEST_F(TransUdpStaticMockTest, UdpModuleCbTest002, TestSize.Level1)
 {
     AuthHandle authHandle = {0};
     authHandle.type = AUTH_LINK_TYPE_P2P;
-    const char *tem_str = "{\"key1\": \"value1\", \"key2\": 12345}";
-    const uint8_t *str = (const uint8_t *)tem_str;
+    const char *temStr = "{\"key1\": \"value1\", \"key2\": 12345}";
+    const uint8_t *str = (const uint8_t *)temStr;
 
     AuthTransData *data = reinterpret_cast<AuthTransData*>(SoftBusCalloc(sizeof(AuthTransData)));
     ASSERT_TRUE(data != nullptr);
     data->data = str;
-    data->len = strlen(tem_str);
+    data->len = strlen(temStr);
     data->flag = 1;
 
     NiceMock<TransUdpNegoStaticInterfaceMock> TransUdpStaticMock;
