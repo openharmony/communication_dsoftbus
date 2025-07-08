@@ -19,8 +19,8 @@
 #include "softbus_adapter_mem.h"
 #include "softbus_app_info.h"
 #include "trans_channel_callback.h"
-#include "trans_udp_negotiation.c"
 #include "trans_udp_nego_static_test_mock.h"
+#include "trans_udp_negotiation.c"
 
 using namespace testing;
 using namespace testing::ext;
