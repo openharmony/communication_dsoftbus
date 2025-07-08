@@ -42,6 +42,8 @@ public:
     void ReleaseIpv4(
         const std::string &interface, const Ipv4Info &local, const Ipv4Info &remote, const std::string &remoteMac);
     static void ClearAllIpv4();
+    int32_t ConfigStaticIpv6(const std::string &ipv6Addr, const std::string &macAddr, const std::string &interface);
+    int32_t ReleaseStaticIpv6(const std::string &ipv6Addr, const std::string &macAddr, const std::string &interface);
 
     void Lock()
     {

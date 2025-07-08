@@ -191,6 +191,13 @@ int32_t SetIpTos(int fd, uint32_t tos)
     return SOFTBUS_OK;
 }
 
+static int32_t SetIpv6Tos(int fd, uint32_t tos)
+{
+    int32_t ret = SoftBusSocketSetOpt(fd, SOFTBUS_IPPROTO_IPV6, SOFTBUS_IPV6_TCLASS, &tos, sizeof(tos));
+    CONN_CHECK_AND_RETURN_RET_LOGE(ret == SOFTBUS_ADAPTER_OK, ret, CONN_COMMON, "set tos failed, fd=%{public}d", fd);
+    return SOFTBUS_OK;
+}
+
 static int32_t OpenTcpServerSocket(const LocalListenerInfo *option)
 {
     if (option == NULL) {
@@ -292,11 +299,10 @@ static int32_t OpenTcpClientSocket(const ConnectOption *option, const char *myIp
     int32_t fd = -1;
     int32_t domain = GetDomainByAddr(option->socketOption.addr);
     int32_t ret = SoftBusSocketCreate(domain, SOFTBUS_SOCK_STREAM, 0, &fd);
-    if (ret != SOFTBUS_OK) {
-        CONN_LOGE(CONN_COMMON, "create socket failed, serverIp=%{public}s, serverPort=%{public}d, error=%{public}d",
-            animizedIp, option->socketOption.port, ret);
-        return ret;
-    }
+    CONN_CHECK_AND_RETURN_RET_LOGE(ret == SOFTBUS_OK, ret, CONN_COMMON,
+        "create socket failed, serverIp=%{public}s, serverPort=%{public}d, error=%{public}d", animizedIp,
+        option->socketOption.port, ret);
+
     if (isNonBlock && ConnToggleNonBlockMode(fd, true) != SOFTBUS_OK) {
         CONN_LOGE(CONN_COMMON, "set nonblock failed, serverIp=%{public}s, serverPort=%{public}d, fd=%{public}d",
             animizedIp, option->socketOption.port, fd);
@@ -307,6 +313,8 @@ static int32_t OpenTcpClientSocket(const ConnectOption *option, const char *myIp
     // tcp user timeout on the Client
     if (option->socketOption.moduleId >= AUTH_P2P && option->socketOption.moduleId <= AUTH_ENHANCED_P2P_END) {
         (void)ConnSetTcpUserTimeOut(fd, SOFTBUS_CONN_TCP_USER_TIME);
+        ret = SetIpv6Tos(fd, IPV6_MESSAGE_TOS);
+        CONN_LOGE(CONN_WIFI_DIRECT, "set ip tos ret=%{public}d, fd=%{public}d", ret, fd);
     }
     ret = BindTcpClientAddr(domain, fd, myIp);
     if (ret != SOFTBUS_OK) {
