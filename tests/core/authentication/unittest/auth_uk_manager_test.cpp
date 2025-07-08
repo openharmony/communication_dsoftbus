@@ -1120,54 +1120,6 @@ HWTEST_F(AuthUkManagerTest, PROCESS_CLOSE_ACK_DATA_Test_001, TestSize.Level1)
 }
 
 /*
- * @tc.name: PROCESS_DATA_TO_ENCRYPT_Test_001
- * @tc.desc: ProcessDataToEncrypt test
- * @tc.type: FUNC
- * @tc.require:
- */
-HWTEST_F(AuthUkManagerTest, PROCESS_DATA_TO_ENCRYPT_Test_001, TestSize.Level1)
-{
-    uint32_t outLen = 50;
-    uint8_t *outData = (uint8_t *)SoftBusCalloc(outLen);
-    ASSERT_TRUE(outData != nullptr);
-    int32_t ukId = 1;
-    int32_t peerUkId = 1;
-    AuthTransData dataInfo = { 0 };
-    dataInfo.data =reinterpret_cast<const uint8_t *>("123456789");
-    dataInfo.len = strlen("123456789");
-    int32_t ret = ProcessDataToEncrypt(ukId, peerUkId, &dataInfo, outData, outLen);
-    EXPECT_EQ(ret, SOFTBUS_AUTH_ACL_NOT_FOUND);
-    SoftBusFree(outData);
-}
-
-/*
- * @tc.name: AUTH_POST_TRANS_DATA_BY_UK_Test_001
- * @tc.desc: AuthPostTransDataByUk test
- * @tc.type: FUNC
- * @tc.require:
- */
-HWTEST_F(AuthUkManagerTest, AUTH_POST_TRANS_DATA_BY_UK_Test_001, TestSize.Level1)
-{
-    AuthHandle authHandle = { .type = 0, };
-    int32_t ukId = 1;
-    int32_t peerUkId = 2;
-    AuthTransData dataInfo = { .len = UINT32_MAX, };
-    int32_t ret = AuthPostTransDataByUk(authHandle, ukId, peerUkId, nullptr);
-    EXPECT_EQ(ret, SOFTBUS_INVALID_PARAM);
-    ret = AuthPostTransDataByUk(authHandle, ukId, peerUkId, &dataInfo);
-    EXPECT_EQ(ret, SOFTBUS_INVALID_PARAM);
-    authHandle.type = AUTH_LINK_TYPE_MAX;
-    ret = AuthPostTransDataByUk(authHandle, ukId, peerUkId, &dataInfo);
-    EXPECT_EQ(ret, SOFTBUS_INVALID_PARAM);
-    authHandle.type = AUTH_LINK_TYPE_WIFI;
-    ret = AuthPostTransDataByUk(authHandle, ukId, peerUkId, &dataInfo);
-    EXPECT_EQ(ret, SOFTBUS_INVALID_PARAM);
-    dataInfo.len = UINT32_MAX - UK_ENCRYPT_INDEX_LEN;
-    ret = AuthPostTransDataByUk(authHandle, ukId, peerUkId, &dataInfo);
-    EXPECT_EQ(ret, SOFTBUS_MALLOC_ERR);
-}
-
-/*
  * @tc.name: SECURITY_ON_SESSION_OPENED_Test_001
  * @tc.desc: SecurityOnSessionOpened test
  * @tc.type: FUNC

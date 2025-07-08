@@ -150,8 +150,8 @@ static uint32_t ModuleToDataType(int32_t module)
             return DATA_TYPE_DEVICE_INFO;
         case MODULE_AUTH_CANCEL:
             return DATA_TYPE_CANCEL_AUTH;
-        case MODULE_USER_KEY_CONNECTION:
-            return DATA_TYPE_UK_CONNECTION;
+        case MODULE_APPLY_KEY_CONNECTION:
+            return DATA_TYPE_APPLY_KEY_CONNECTION;
         default:
             break;
     }
