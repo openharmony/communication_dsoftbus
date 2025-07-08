@@ -16,7 +16,6 @@
 #ifndef COAP_DISCOVER_H
 #define COAP_DISCOVER_H
 #include <coap3/coap.h>
-#include <stdatomic.h>
 #include "nstackx_common.h"
 
 #ifdef __cplusplus
@@ -49,7 +48,6 @@ typedef struct {
     uint8_t type;
     int32_t err;
     sem_t wait;
-    atomic_bool isPost;
 } MsgCtx;
 
 typedef struct CoapRequest {

@@ -193,6 +193,11 @@ int32_t GetQosValue(const QosTV *qos, uint32_t qosCount, QosType type, int32_t *
 {
     return GetManagerInterface()->GetQosValue(qos, qosCount, type, value, defVal);
 }
+
+int32_t ClientCheckIsD2DypeBySessionId(int32_t sessionId, bool *isD2D)
+{
+    return GetManagerInterface()->ClientCheckIsD2DypeBySessionId(sessionId, isD2D);
+}
 #ifdef __cplusplus
 }
 #endif

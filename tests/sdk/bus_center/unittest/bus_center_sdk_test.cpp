@@ -55,7 +55,7 @@ public:
 
 void BusCenterSdkTest::SetUpTestCase()
 {
-    SetAccessTokenPermission("busCenterTest");
+    SetAccessTokenPermission("device_manager");
 }
 
 void BusCenterSdkTest::TearDownTestCase() { }

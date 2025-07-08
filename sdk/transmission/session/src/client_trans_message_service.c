@@ -88,9 +88,16 @@ static int32_t CheckBusinessTypeAndOsTypeBySessionId(int32_t sessionId, int32_t 
         TRANS_BYTES, "ClientGetChannelOsTypeBySessionId fail, sessionId=%{public}d", sessionId);
 
     if ((osType == OH_OS_TYPE) && (businessType != BUSINESS_TYPE_BYTE) && (businessType != BUSINESS_TYPE_NOT_CARE) &&
-        (businessType != BUSINESS_TYPE_D2D_VOICE) && (channelType != CHANNEL_TYPE_AUTH)) {
+        (channelType != CHANNEL_TYPE_AUTH)) {
         TRANS_LOGE(TRANS_BYTES,
             "BusinessType no match, businessType=%{public}d, sessionId=%{public}d", businessType, sessionId);
+        return SOFTBUS_TRANS_BUSINESS_TYPE_NOT_MATCH;
+    }
+    bool isD2D = false;
+    ClientCheckIsD2DypeBySessionId(sessionId, &isD2D);
+    if (isD2D && (businessType != BUSINESS_TYPE_D2D_VOICE)) {
+        TRANS_LOGE(TRANS_BYTES,
+            "businessType no match d2d, businessType=%{public}d, sessionId=%{public}d", businessType, sessionId);
         return SOFTBUS_TRANS_BUSINESS_TYPE_NOT_MATCH;
     }
     if (osType != OH_OS_TYPE && businessType == BUSINESS_TYPE_MESSAGE) {
@@ -230,6 +237,10 @@ int32_t SendMessageAsync(int32_t socket, uint16_t dataSeq, const void *data, uin
     ret = CheckBusinessTypeBySessionId(socket, channelId, channelType, len);
     TRANS_CHECK_AND_RETURN_RET_LOGE(ret == SOFTBUS_OK, ret,
         TRANS_BYTES, "CheckBusinessTypeAndOsTypeBySessionId fail, socket=%{public}d", socket);
+    ret = CheckSendLen(channelId, channelType, len, BUSINESS_TYPE_MESSAGE);
+    if (ret != SOFTBUS_OK) {
+        return ret;
+    }
     if (enableStatus != ENABLE_STATUS_SUCCESS) {
         TRANS_LOGE(TRANS_BYTES,
             "session is not enable, len=%{public}u, socket=%{public}d", len, socket);

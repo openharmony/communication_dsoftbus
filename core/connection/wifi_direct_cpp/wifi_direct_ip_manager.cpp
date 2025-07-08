@@ -256,4 +256,16 @@ int32_t WifiDirectIpManager::GetNetworkDestination(const std::string &ipString, 
     CONN_LOGI(CONN_WIFI_DIRECT, "destination=%{public}s", WifiDirectAnonymizeIp(destination).c_str());
     return SOFTBUS_OK;
 }
+
+int32_t WifiDirectIpManager::ConfigStaticIpv6(
+    const std::string &ipv6Addr, const std::string &macAddr, const std::string &interface)
+{
+    return OHOS::NetManagerStandard::NetConnClient::GetInstance().AddStaticIpv6Addr(ipv6Addr, macAddr, interface);
+}
+
+int32_t WifiDirectIpManager::ReleaseStaticIpv6(
+    const std::string &ipv6Addr, const std::string &macAddr, const std::string &interface)
+{
+    return OHOS::NetManagerStandard::NetConnClient::GetInstance().DelStaticIpv6Addr(ipv6Addr, macAddr, interface);
+}
 } // namespace OHOS::SoftBus

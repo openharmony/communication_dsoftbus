@@ -889,7 +889,7 @@ int32_t TransProxyPackD2DBytes(
         SoftBusFree(dataInfo->outData);
         return SOFTBUS_MEM_ERR;
     }
-    if (memcpy_s(cipherKey.iv, GCM_IV_LEN, sessionIv, GCM_IV_LEN) != EOK) {
+    if (memcpy_s(cipherKey.iv, BLE_BROADCAST_IV_LEN, sessionIv, PAGING_NONCE_LEN) != EOK) {
         TRANS_LOGE(TRANS_CTRL, "memcpy key failed");
         (void)memset_s(cipherKey.key, SHORT_SESSION_KEY_LENGTH, 0, SHORT_SESSION_KEY_LENGTH);
         SoftBusFree(dataInfo->outData);

@@ -108,6 +108,10 @@ typedef struct {
     uint8_t advData[MAX_SLG_ADV_DATA_LEN];
 } SlgRecordAdvData;
 
+typedef struct {
+    void (*onSendResult)(const char *networkId, LinkBroadcastType type, int32_t resultCode);
+} AdvSendListener;
+
 typedef void (*LinkBroadcastListener)(const char *networkId,
     const LinkBroadcastOption *option, const char *remoteMac);
 

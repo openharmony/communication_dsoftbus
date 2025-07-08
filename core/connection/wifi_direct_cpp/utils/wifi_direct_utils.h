@@ -113,6 +113,7 @@ public:
     static std::string RemoteDeviceIdToMac(const std::string &remoteDeviceId);
     static std::string RemoteMacToDeviceId(const std::string &remoteMac);
     static int GetChload();
+    static std::string RemoveSubstring(const std::string &str, const std::string &substr);
 
 private:
     static inline std::mutex serialParallelLock_;

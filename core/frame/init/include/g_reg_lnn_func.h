@@ -306,6 +306,7 @@ typedef struct TagLnnOpenFuncList {
     SoftBusGetBrStateFunc softBusGetBrState;
     SoftBusGetBtStateFunc softBusGetBtState;
     LnnIsLinkReadyFunc lnnIsLinkReady;
+    CheckLnnPermissionFunc checkLnnPermission;
 } LnnOpenFuncList;
 
 #ifdef __cplusplus
