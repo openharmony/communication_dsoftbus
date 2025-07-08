@@ -26,42 +26,46 @@ using namespace testing;
 using namespace testing::ext;
 
 namespace OHOS {
-static int32_t DefaultOnChannelOpened(const char *, int32_t, const char *, const ChannelInfo *) 
+static int32_t DefaultOnChannelOpened(
+    const char *pkgName, int32_t pid, const char *sessionName, const ChannelInfo *channel)
 {
     return SOFTBUS_OK;
 }
 
-static int32_t DefaultOnChannelClosed(const char *, int32_t, int32_t, int32_t, int32_t) 
+static int32_t DefaultOnChannelClosed(
+    const char *pkgName, int32_t pid, int32_t channelId, int32_t channelType, int32_t messageType)
 {
     return SOFTBUS_OK;
 }
 
-static int32_t DefaultOnChannelOpenFailed(const char *, int32_t, int32_t, int32_t, int32_t) 
+static int32_t DefaultOnChannelOpenFailed(
+    const char *pkgName, int32_t pid, int32_t channelId, int32_t channelType, int32_t errCode)
 {
     return SOFTBUS_OK;
 }
 
-static int32_t DefaultOnDataReceived(const char *, int32_t, int32_t, int32_t, TransReceiveData *) 
+static int32_t DefaultOnDataReceived(const char *pkgName, int32_t pid, int32_t channelId, int32_t channelType,
+    TransReceiveData* receiveData)
 {
     return SOFTBUS_OK;
 }
 
-static int32_t DefaultOnQosEvent(const char *, const QosParam *) 
+static int32_t DefaultOnQosEvent(const char *pkgName, const QosParam *param)
 {
     return SOFTBUS_OK;
 }
 
-static int32_t DefaultGetPkgNameBySessionName(const char *, char *, uint16_t) 
+static int32_t DefaultGetPkgNameBySessionName(const char *sessionName, char *pkgName, uint16_t len)
 {
     return SOFTBUS_OK;
 }
 
-static int32_t DefaultGetUidAndPidBySessionName(const char *, int32_t *, int32_t *) 
+static int32_t DefaultGetUidAndPidBySessionName(const char *sessionName, int32_t *uid, int32_t *pid)
 {
     return SOFTBUS_OK;
 }
 
-static int32_t DefaultOnChannelBind(const char *, int32_t, int32_t, int32_t) 
+static int32_t DefaultOnChannelBind(const char *pkgName, int32_t pid, int32_t channelId, int32_t channelType)
 {
     return SOFTBUS_OK;
 }
