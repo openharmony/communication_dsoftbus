@@ -49,6 +49,8 @@ void BusCenterSdkRefresh::SetUpTestCase(void)
 {
     InitSoftBusServer();
     SetAccessTokenPermission("busCenterTest");
+    uint64_t tokenId = SetTokenIdByProcessName("device_manager");
+    printf("SetTokenIdByProcessName tokenId:%ju\n", tokenId);
 }
 
 void BusCenterSdkRefresh::TearDownTestCase(void) { }
