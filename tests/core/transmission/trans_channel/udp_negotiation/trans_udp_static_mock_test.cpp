@@ -220,7 +220,7 @@ HWTEST_F(TransUdpStaticMockTest, SetChannelInfoBySideTest003, TestSize.Level1)
     appInfo->routeType = WIFI_USB;
     strcpy_s(info->myIp, sizeof(info->myIp), ip);
     ret = SetChannelInfoBySide(info, isServerSide, appInfo);
-    EXPECT_EQ(SOFTBUSOFTBUS_NETWORK_GET_NODE_INFO_ERRS_OK, ret);
+    EXPECT_EQ(SOFTBUS_NETWORK_GET_NODE_INFO_ERR, ret);
 
     SoftBusFree(info);
     SoftBusFree(appInfo);
