@@ -18,7 +18,7 @@
 
 #include <gmock/gmock.h>
 #include <gtest/gtest.h>
-#include "stdint.h"
+#include <cstdint>
 
 #include "auth_interface_struct.h"
 #include "bus_center_manager.h"
