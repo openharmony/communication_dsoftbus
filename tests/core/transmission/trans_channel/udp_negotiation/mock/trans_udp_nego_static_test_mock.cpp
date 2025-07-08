@@ -46,6 +46,11 @@ int32_t AddScenario(const char *localMac, const char *peerMac, int32_t localPid,
     return GetTransUdpNegoStaticInterface()->AddScenario(localMac, peerMac, localPid, businessType);
 }
 
+int32_t DelScenario(const char *localMac, const char *peerMac, int32_t localPid, int32_t businessType)
+{
+    return GetTransUdpNegoStaticInterface()->DelScenario(localMac, peerMac, localPid, businessType);
+}
+
 int32_t TransUnpackRequestUdpInfo(const cJSON *msg, AppInfo *appInfo)
 {
     return GetTransUdpNegoStaticInterface()->TransUnpackRequestUdpInfo(msg, appInfo);
@@ -114,6 +119,61 @@ int32_t TransGetUdpChannelByRequestId(uint32_t requestId, UdpChannelInfo *channe
 int32_t TransGetUdpChannelById(int32_t channelId, UdpChannelInfo *channel)
 {
     return GetTransUdpNegoStaticInterface()->TransGetUdpChannelById(channelId, channel);
+}
+
+int32_t LnnGetNetworkIdByUuid(const char *uuid, char *buf, uint32_t len)
+{
+    return GetTransUdpNegoStaticInterface()->LnnGetNetworkIdByUuid(uuid, buf, len);
+}
+
+int32_t TransGetLaneIdByChannelId(int32_t channelId, uint64_t *laneId)
+{
+    return GetTransUdpNegoStaticInterface()->TransGetLaneIdByChannelId(channelId, laneId);
+}
+
+TransDeviceState TransGetDeviceState(const char *networkId)
+{
+    return GetTransUdpNegoStaticInterface()->TransGetDeviceState(networkId);
+}
+
+int32_t SoftBusGenerateSessionKey(char *key, uint32_t len)
+{
+    return GetTransUdpNegoStaticInterface()->SoftBusGenerateSessionKey(key, len);
+}
+
+int32_t TransAddUdpChannel(UdpChannelInfo *channel)
+{
+    return GetTransUdpNegoStaticInterface()->TransAddUdpChannel(channel);
+}
+
+int32_t CheckCollabRelation(const AppInfo *appInfo, int32_t channelId, int32_t channelType)
+{
+    return GetTransUdpNegoStaticInterface()->CheckCollabRelation(appInfo, channelId, channelType);
+}
+
+int32_t TransUkRequestGetRequestInfoByRequestId(uint32_t requestId, UkRequestNode *ukRequest)
+{
+    return GetTransUdpNegoStaticInterface()->TransUkRequestGetRequestInfoByRequestId(requestId, ukRequest);
+}
+
+int32_t TransUkRequestDeleteItem(uint32_t requestId)
+{
+    return GetTransUdpNegoStaticInterface()->TransUkRequestDeleteItem(requestId);
+}
+
+int32_t TransUdpUpdateUdpPort(int32_t channelId, int32_t udpPort)
+{
+    return GetTransUdpNegoStaticInterface()->TransUdpUpdateUdpPort(channelId, udpPort);
+}
+
+int32_t TransUdpUpdateReplyCnt(int32_t channelId)
+{
+    return GetTransUdpNegoStaticInterface()->TransUdpUpdateReplyCnt(channelId);
+}
+
+int32_t TransDelUdpChannel(int32_t channelId)
+{
+    return GetTransUdpNegoStaticInterface()->TransDelUdpChannel(channelId);
 }
 }
 }

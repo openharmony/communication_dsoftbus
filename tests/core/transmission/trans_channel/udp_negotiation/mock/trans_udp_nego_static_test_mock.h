@@ -34,6 +34,7 @@ public:
     virtual ~TransUdpNegoStaticInterface() {};
     virtual int32_t LnnGetLocalStrInfoByIfnameIdx(InfoKey key, char *info, uint32_t len, int32_t ifIdx) = 0;
     virtual int32_t AddScenario(const char *localMac, const char *peerMac, int32_t localPid, int32_t businessType)= 0;
+    virtual int32_t DelScenario(const char *localMac, const char *peerMac, int32_t localPid, int32_t businessType)= 0;
     virtual int32_t TransUnpackRequestUdpInfo(const cJSON *msg, AppInfo *appInfo) = 0;
     virtual int32_t AuthGetDeviceUuid(int64_t authId, char *uuid, uint16_t size) = 0;
     virtual int32_t TransSetUdpChannelStatus(int64_t seq, UdpChannelStatus status, bool isReply) = 0;
@@ -48,7 +49,18 @@ public:
     virtual int32_t AuthOpenConn(
         const AuthConnInfo *info, uint32_t requestId, const AuthConnCallback *callback, bool isMeta) = 0;
     virtual int32_t TransGetUdpChannelByRequestId(uint32_t requestId, UdpChannelInfo *channel) = 0;
-    virtual int32_t TransGetUdpChannelById(int32_t channelId, UdpChannelInfo *channel);
+    virtual int32_t TransGetUdpChannelById(int32_t channelId, UdpChannelInfo *channel) = 0;
+    virtual int32_t LnnGetNetworkIdByUuid(const char *uuid, char *buf, uint32_t len) = 0;
+    virtual int32_t TransGetLaneIdByChannelId(int32_t channelId, uint64_t *laneId) = 0;
+    virtual TransDeviceState TransGetDeviceState(const char *networkId) = 0;
+    virtual int32_t SoftBusGenerateSessionKey(char *key, uint32_t len) = 0;
+    virtual int32_t TransAddUdpChannel(UdpChannelInfo *channel) = 0;
+    virtual int32_t CheckCollabRelation(const AppInfo *appInfo, int32_t channelId, int32_t channelType) = 0;
+    virtual int32_t TransUkRequestGetRequestInfoByRequestId(uint32_t requestId, UkRequestNode *ukRequest) = 0;
+    virtual int32_t TransUkRequestDeleteItem(uint32_t requestId) = 0;
+    virtual int32_t TransUdpUpdateUdpPort(int32_t channelId, int32_t udpPort) = 0;
+    virtual int32_t TransUdpUpdateReplyCnt(int32_t channelId) = 0;
+    virtual int32_t TransDelUdpChannel(int32_t channelId) = 0;
 };
 
 class TransUdpNegoStaticInterfaceMock : public TransUdpNegoStaticInterface {
@@ -57,6 +69,8 @@ public:
     ~TransUdpNegoStaticInterfaceMock() override;
     MOCK_METHOD4(LnnGetLocalStrInfoByIfnameIdx, int32_t (InfoKey key, char *info, uint32_t len, int32_t ifIdx));
     MOCK_METHOD4(AddScenario, int32_t (
+        const char *localMac, const char *peerMac, int32_t localPid, int32_t businessType));
+    MOCK_METHOD4(DelScenario, int32_t (
         const char *localMac, const char *peerMac, int32_t localPid, int32_t businessType));
     MOCK_METHOD2(TransUnpackRequestUdpInfo, int32_t (const cJSON *msg, AppInfo *appInfo));
     MOCK_METHOD3(AuthGetDeviceUuid, int32_t (int64_t authId, char *uuid, uint16_t size));
@@ -74,6 +88,17 @@ public:
         const AuthConnInfo *info, uint32_t requestId, const AuthConnCallback *callback, bool isMeta));
     MOCK_METHOD2(TransGetUdpChannelByRequestId, int32_t (uint32_t requestId, UdpChannelInfo *channel));
     MOCK_METHOD2(TransGetUdpChannelById, int32_t (int32_t channelId, UdpChannelInfo *channel));
+    MOCK_METHOD3(LnnGetNetworkIdByUuid, int32_t (const char *uuid, char *buf, uint32_t len));
+    MOCK_METHOD2(TransGetLaneIdByChannelId, int32_t (int32_t channelId, uint64_t *laneId));
+    MOCK_METHOD1(TransGetDeviceState, TransDeviceState (const char *networkId));
+    MOCK_METHOD2(SoftBusGenerateSessionKey, int32_t (char *key, uint32_t len));
+    MOCK_METHOD1(TransAddUdpChannel, int32_t (UdpChannelInfo *channel));
+    MOCK_METHOD3(CheckCollabRelation, int32_t (const AppInfo *appInfo, int32_t channelId, int32_t channelType));
+    MOCK_METHOD2(TransUkRequestGetRequestInfoByRequestId, int32_t (uint32_t requestId, UkRequestNode *ukRequest));
+    MOCK_METHOD1(TransUkRequestDeleteItem, int32_t (uint32_t requestId));
+    MOCK_METHOD2(TransUdpUpdateUdpPort, int32_t (int32_t channelId, int32_t udpPort));
+    MOCK_METHOD1(TransUdpUpdateReplyCnt, int32_t (int32_t channelId));
+    MOCK_METHOD1(TransDelUdpChannel, int32_t (int32_t channelId));
 };
 } // namespace OHOS
 #endif // TRANS_UDP_NEGO_STATIC_TEST_MOCK_H

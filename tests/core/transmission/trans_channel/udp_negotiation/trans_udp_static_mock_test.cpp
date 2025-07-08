@@ -385,4 +385,362 @@ HWTEST_F(TransUdpStaticMockTest, TransDealUdpCheckCollabResultTest001, TestSize.
     ret = TransDealUdpCheckCollabResult(channelId, checkResult, callingPid);
     EXPECT_EQ(SOFTBUS_INVALID_PARAM, ret);
 }
+
+/**
+ * @tc.name: NotifyUdpChannelOpenedTest001
+ * @tc.desc: use nomal parameter
+ * @tc.type: FUNC
+ * @tc.require:
+ */
+HWTEST_F(TransUdpStaticMockTest, NotifyUdpChannelOpenedTest001, TestSize.Level1)
+{
+    int32_t ret = 0;
+    AppInfo *appInfo = reinterpret_cast<AppInfo*>(SoftBusCalloc(sizeof(AppInfo)));
+    ASSERT_TRUE(appInfo != nullptr);
+    bool isServerSide = false;
+    (void)TransUdpChannelInit(&g_callbacks);
+
+    NiceMock<TransUdpNegoStaticInterfaceMock> TransUdpStaticMock;
+    EXPECT_CALL(TransUdpStaticMock, LnnGetNetworkIdByUuid).WillOnce(Return(SOFTBUS_OK));
+    EXPECT_CALL(TransUdpStaticMock, TransGetLaneIdByChannelId).WillOnce(Return(SOFTBUS_OK));
+    ret = NotifyUdpChannelOpened(appInfo, isServerSide);
+    EXPECT_EQ(SOFTBUS_OK, ret);
+
+    SoftBusFree(appInfo);
+    TransUdpChannelDeinit();
+}
+
+/**
+ * @tc.name: NotifyUdpChannelOpenedTest002
+ * @tc.desc: use abnomal parameter
+ * @tc.type: FUNC
+ * @tc.require:
+ */
+HWTEST_F(TransUdpStaticMockTest, NotifyUdpChannelOpenedTest002, TestSize.Level1)
+{
+    int32_t ret = 0;
+    AppInfo *appInfo = reinterpret_cast<AppInfo*>(SoftBusCalloc(sizeof(AppInfo)));
+    ASSERT_TRUE(appInfo != nullptr);
+    bool isServerSide = false;
+    IServerChannelCallBack temCallbacks = g_callbacks;
+    temCallbacks.GetPkgNameBySessionName = [](const char *sessionName, char *pkgName, uint16_t len) -> int32_t {
+        return SOFTBUS_INVALID_PARAM;
+    };
+    (void)TransUdpChannelInit(&temCallbacks);
+
+    NiceMock<TransUdpNegoStaticInterfaceMock> TransUdpStaticMock;
+    EXPECT_CALL(TransUdpStaticMock, LnnGetNetworkIdByUuid).WillOnce(Return(SOFTBUS_OK));
+    EXPECT_CALL(TransUdpStaticMock, TransGetLaneIdByChannelId).WillOnce(Return(SOFTBUS_OK));
+    ret = NotifyUdpChannelOpened(appInfo, isServerSide);
+    EXPECT_EQ(SOFTBUS_INVALID_PARAM, ret);
+
+    EXPECT_CALL(TransUdpStaticMock, LnnGetNetworkIdByUuid).WillOnce(Return(SOFTBUS_OK));
+    EXPECT_CALL(TransUdpStaticMock, LnnGetLocalStrInfoByIfnameIdx).WillOnce(Return(SOFTBUS_ERR));
+    appInfo->udpConnType = UDP_CONN_TYPE_USB;
+    appInfo->routeType = WIFI_USB;
+    ret = NotifyUdpChannelOpened(appInfo, isServerSide);
+    EXPECT_EQ(SOFTBUS_NETWORK_GET_NODE_INFO_ERR, ret);
+
+    SoftBusFree(appInfo);
+    TransUdpChannelDeinit();
+}
+
+/**
+ * @tc.name: NotifyUdpChannelBindTest001
+ * @tc.desc: use nomal parameter
+ * @tc.type: FUNC
+ * @tc.require:
+ */
+HWTEST_F(TransUdpStaticMockTest, NotifyUdpChannelBindTest001, TestSize.Level1)
+{
+    int32_t ret = 0;
+    AppInfo *info = reinterpret_cast<AppInfo*>(SoftBusCalloc(sizeof(AppInfo)));
+    ASSERT_TRUE(info != nullptr);
+    (void)TransUdpChannelInit(&g_callbacks);
+
+    ret = NotifyUdpChannelBind(info);
+    EXPECT_EQ(SOFTBUS_OK, ret);
+
+    SoftBusFree(info);
+    TransUdpChannelDeinit();
+}
+
+/**
+ * @tc.name: NotifyUdpChannelOpenFailedTest001
+ * @tc.desc: use abnomal parameter
+ * @tc.type: FUNC
+ * @tc.require:
+ */
+HWTEST_F(TransUdpStaticMockTest, NotifyUdpChannelOpenFailedTest001, TestSize.Level1)
+{
+    int32_t ret = 0;
+    AppInfo *info = reinterpret_cast<AppInfo*>(SoftBusCalloc(sizeof(AppInfo)));
+    ASSERT_TRUE(info != nullptr);
+    int32_t errCode = 0;
+    IServerChannelCallBack temCallbacks = g_callbacks;
+    temCallbacks.OnChannelOpenFailed = [](
+        const char *pkgName, int32_t pid, int32_t channelId, int32_t channelType, int32_t errCode) -> int32_t {
+            return SOFTBUS_INVALID_PARAM;
+        };
+    (void)TransUdpChannelInit(&temCallbacks);
+
+    NiceMock<TransUdpNegoStaticInterfaceMock> TransUdpStaticMock;
+    EXPECT_CALL(TransUdpStaticMock, LnnGetLocalStrInfo).WillOnce(Return(SOFTBUS_OK));
+    EXPECT_CALL(TransUdpStaticMock, TransGetDeviceState).WillOnce(Return(DEVICE_STATE_BUTT));
+    info->isClient = true;
+    ret = NotifyUdpChannelOpenFailed(info, errCode);
+    EXPECT_EQ(SOFTBUS_INVALID_PARAM, ret);
+
+    SoftBusFree(info);
+    TransUdpChannelDeinit();
+}
+
+/**
+ * @tc.name: AcceptUdpChannelAsServerTest001
+ * @tc.desc: use abnomal parameter
+ * @tc.type: FUNC
+ * @tc.require:
+ */
+HWTEST_F(TransUdpStaticMockTest, AcceptUdpChannelAsServerTest001, TestSize.Level1)
+{
+    int32_t ret = 0;
+    AppInfo *appInfo = reinterpret_cast<AppInfo*>(SoftBusCalloc(sizeof(AppInfo)));
+    ASSERT_TRUE(appInfo != nullptr);
+    AuthHandle *authHandle = reinterpret_cast<AuthHandle*>(SoftBusCalloc(sizeof(AuthHandle)));
+    ASSERT_TRUE(authHandle != nullptr);
+    int64_t seq = 0;
+    (void)TransUdpChannelInit(&g_callbacks);
+
+    NiceMock<TransUdpNegoStaticInterfaceMock> TransUdpStaticMock;
+    g_channelIdFlagBitsMap = 0xFFFFFFFFFFFFFFFF;
+    ret = AcceptUdpChannelAsServer(appInfo, authHandle, seq);
+    EXPECT_EQ(SOFTBUS_TRANS_UDP_INVALID_CHANNEL_ID, ret);
+    g_channelIdFlagBitsMap = 0;
+
+    EXPECT_CALL(TransUdpStaticMock, LnnGetNetworkIdByUuid).WillOnce(Return(SOFTBUS_OK));
+    appInfo->channelCapability = 0xFFFFFFFF;
+    ret = AcceptUdpChannelAsServer(appInfo, authHandle, seq);
+    EXPECT_EQ(SOFTBUS_OK, ret);
+    appInfo->channelCapability = 0;
+
+    EXPECT_CALL(TransUdpStaticMock, LnnGetNetworkIdByUuid).WillOnce(Return(SOFTBUS_OK));
+    EXPECT_CALL(TransUdpStaticMock, SoftBusGenerateSessionKey).WillRepeatedly(Return(SOFTBUS_OK));
+    EXPECT_CALL(TransUdpStaticMock, TransAddUdpChannel).WillOnce(Return(SOFTBUS_ERR));
+    ret = AcceptUdpChannelAsServer(appInfo, authHandle, seq);
+    EXPECT_EQ(SOFTBUS_TRANS_UDP_SERVER_ADD_CHANNEL_FAILED, ret);
+
+
+    EXPECT_CALL(TransUdpStaticMock, LnnGetNetworkIdByUuid).WillOnce(Return(SOFTBUS_OK)).WillOnce(Return(SOFTBUS_ERR));
+    EXPECT_CALL(TransUdpStaticMock, SoftBusGenerateSessionKey).WillRepeatedly(Return(SOFTBUS_OK));
+    EXPECT_CALL(TransUdpStaticMock, TransAddUdpChannel).WillOnce(Return(SOFTBUS_OK));
+    EXPECT_CALL(TransUdpStaticMock, CheckCollabRelation).WillOnce(Return(SOFTBUS_TRANS_NOT_NEED_CHECK_RELATION));
+    ret = AcceptUdpChannelAsServer(appInfo, authHandle, seq);
+    EXPECT_EQ(SOFTBUS_ERR, ret);
+    
+    SoftBusFree(appInfo);
+    SoftBusFree(authHandle);
+    TransUdpChannelDeinit();
+}
+
+/**
+ * @tc.name: NotifyWifiByDelScenarioTest001
+ * @tc.desc: use nomal parameter
+ * @tc.type: FUNC
+ * @tc.require:
+ */
+HWTEST_F(TransUdpStaticMockTest, NotifyWifiByDelScenarioTest001, TestSize.Level1)
+{
+    int32_t pid = 0;
+    StreamType streamType = COMMON_VIDEO_STREAM;
+
+    NiceMock<TransUdpNegoStaticInterfaceMock> TransUdpStaticMock;
+
+    EXPECT_CALL(TransUdpStaticMock, DelScenario).WillOnce(Return(SOFTBUS_INVALID_PARAM));
+    NotifyWifiByDelScenario(streamType, pid);
+    EXPECT_EQ(SOFTBUS_OK, pid);
+
+    EXPECT_CALL(TransUdpStaticMock, DelScenario).WillOnce(Return(SOFTBUS_OK));
+    streamType = COMMON_VIDEO_STREAM;
+    NotifyWifiByDelScenario(streamType, pid);
+    
+}
+
+/**
+ * @tc.name: UdpModuleCbTest001
+ * @tc.desc: use abnomal parameter
+ * @tc.type: FUNC
+ * @tc.require:
+ */
+HWTEST_F(TransUdpStaticMockTest, UdpModuleCbTest001, TestSize.Level1)
+{
+    AuthHandle authHandle = {0};
+    authHandle.type = 0;
+    AuthTransData *data = reinterpret_cast<AuthTransData*>(SoftBusCalloc(sizeof(AuthTransData)));
+    ASSERT_TRUE(data != nullptr);
+    data->data = (const uint8_t *)"{\"name\":\"John\", \"age\":30}";
+    data->len = 24;
+    UdpModuleCb(authHandle, data);
+
+    authHandle.type = 16;
+    UdpModuleCb(authHandle, data);
+    SoftBusFree(data);
+}
+
+
+/**
+ * @tc.name: UdpModuleCbTest002
+ * @tc.desc: use abnomal parameter
+ * @tc.type: FUNC
+ * @tc.require:
+ */
+HWTEST_F(TransUdpStaticMockTest, UdpModuleCbTest002, TestSize.Level1)
+{
+    AuthHandle authHandle = {0};
+    authHandle.type = AUTH_LINK_TYPE_P2P;
+    const char *tem_str = "{\"key1\": \"value1\", \"key2\": 12345}";
+    const uint8_t *str = (const uint8_t *)tem_str;
+
+    AuthTransData *data = reinterpret_cast<AuthTransData*>(SoftBusCalloc(sizeof(AuthTransData)));
+    ASSERT_TRUE(data != nullptr);
+    data->data = str;
+    data->len = strlen(tem_str);
+    data->flag = 1;
+
+    NiceMock<TransUdpNegoStaticInterfaceMock> TransUdpStaticMock;
+    EXPECT_CALL(TransUdpStaticMock, TransSetUdpChannelStatus).WillOnce(Return(SOFTBUS_INVALID_PARAM));
+    UdpModuleCb(authHandle, data);
+
+    data->flag = 0;
+    EXPECT_CALL(TransUdpStaticMock, TransUnpackRequestUdpInfo).WillOnce(Return(SOFTBUS_INVALID_PARAM));
+    UdpModuleCb(authHandle, data);
+
+    SoftBusFree(data);
+}
+
+/**
+ * @tc.name: TransProcessAsyncOpenUdpChannelSuccessTest001
+ * @tc.desc: use abnomal parameter
+ * @tc.type: FUNC
+ * @tc.require:
+ */
+HWTEST_F(TransUdpStaticMockTest, TransProcessAsyncOpenUdpChannelSuccessTest001, TestSize.Level1)
+{
+    int32_t ret = 0;
+    int32_t channelId = 0;
+    UdpChannelInfo *channel = reinterpret_cast<UdpChannelInfo*>(SoftBusCalloc(sizeof(UdpChannelInfo)));
+    ASSERT_TRUE(channel != nullptr);
+    channel->info.udpChannelOptType = TYPE_UDP_CHANNEL_OPEN;
+    (void)TransUdpChannelInit(&g_callbacks);
+
+    NiceMock<TransUdpNegoStaticInterfaceMock> TransUdpStaticMock;
+    EXPECT_CALL(TransUdpStaticMock, LnnGetLocalStrInfo).WillOnce(Return(SOFTBUS_OK));
+    EXPECT_CALL(TransUdpStaticMock, TransGetDeviceState).WillOnce(Return(DEVICE_STATE_BUTT));
+    EXPECT_CALL(TransUdpStaticMock, TransDelUdpChannel).WillOnce(Return(SOFTBUS_OK));
+    ret = TransProcessAsyncOpenUdpChannelSuccess(channel, channelId);
+    EXPECT_EQ(SOFTBUS_INVALID_PARAM, ret);
+
+    SoftBusFree(channel);
+    TransUdpChannelDeinit();
+}
+
+/**
+ * @tc.name: HandleUdpGenUkResultTest001
+ * @tc.desc: use nomal parameter
+ * @tc.type: FUNC
+ * @tc.require:
+ */
+HWTEST_F(TransUdpStaticMockTest, HandleUdpGenUkResultTest001, TestSize.Level1)
+{
+    uint32_t requestId = 0;
+    int32_t ukId = 0;
+    int32_t reason = SOFTBUS_OK;
+    (void)TransUdpChannelInit(&g_callbacks);
+
+    NiceMock<TransUdpNegoStaticInterfaceMock> TransUdpStaticMock;
+    EXPECT_CALL(TransUdpStaticMock, TransUkRequestGetRequestInfoByRequestId).WillOnce(Return(SOFTBUS_OK));
+    EXPECT_CALL(TransUdpStaticMock, TransGetUdpChannelById).WillOnce(Return(SOFTBUS_OK));
+    EXPECT_CALL(TransUdpStaticMock, TransUkRequestDeleteItem).WillRepeatedly(Return(SOFTBUS_OK));
+    HandleUdpGenUkResult(requestId, ukId, reason);
+    EXPECT_EQ(SOFTBUS_OK, reason);
+
+    TransUdpChannelDeinit();
+}
+
+/**
+ * @tc.name: HandleUdpGenUkResultTest002
+ * @tc.desc: use abnomal parameter
+ * @tc.type: FUNC
+ * @tc.require:
+ */
+HWTEST_F(TransUdpStaticMockTest, HandleUdpGenUkResultTest002, TestSize.Level1)
+{
+    uint32_t requestId = 0;
+    int32_t ukId = 0;
+    int32_t reason = SOFTBUS_OK;
+    (void)TransUdpChannelInit(&g_callbacks);
+
+    NiceMock<TransUdpNegoStaticInterfaceMock> TransUdpStaticMock;
+    EXPECT_CALL(TransUdpStaticMock, TransUkRequestGetRequestInfoByRequestId).WillOnce(Return(SOFTBUS_ERR));
+    EXPECT_CALL(TransUdpStaticMock, TransUkRequestDeleteItem).WillRepeatedly(Return(SOFTBUS_OK));
+    HandleUdpGenUkResult(requestId, ukId, reason);
+
+    EXPECT_CALL(TransUdpStaticMock, TransUkRequestGetRequestInfoByRequestId).WillRepeatedly(Return(SOFTBUS_OK));
+    EXPECT_CALL(TransUdpStaticMock, TransGetUdpChannelById).WillOnce(Return(SOFTBUS_ERR));
+    HandleUdpGenUkResult(requestId, ukId, reason);
+    EXPECT_EQ(SOFTBUS_OK, reason);
+
+    TransUdpChannelDeinit();
+}
+
+/**
+ * @tc.name: TransDealUdpChannelOpenResultTest001
+ * @tc.desc: use abnomal parameter
+ * @tc.type: FUNC
+ * @tc.require:
+ */
+HWTEST_F(TransUdpStaticMockTest, TransDealUdpChannelOpenResultTest001, TestSize.Level1)
+{
+    int32_t ret = 0;
+    int32_t channelId = 0;
+    int32_t openResult = SOFTBUS_OK;
+    int32_t udpPort = 0;
+    AccessInfo *accessInfo = reinterpret_cast<AccessInfo*>(SoftBusCalloc(sizeof(AccessInfo)));
+    pid_t callingPid = 0;
+    (void)TransUdpChannelInit(&g_callbacks);
+
+    NiceMock<TransUdpNegoStaticInterfaceMock> TransUdpStaticMock;
+    EXPECT_CALL(TransUdpStaticMock, TransGetUdpChannelById).WillRepeatedly(Return(SOFTBUS_OK));
+    EXPECT_CALL(TransUdpStaticMock, TransUdpUpdateUdpPort).WillOnce(Return(SOFTBUS_OK));
+    EXPECT_CALL(TransUdpStaticMock, TransUdpUpdateReplyCnt).WillOnce(Return(SOFTBUS_OK));
+    ret = TransDealUdpChannelOpenResult(channelId, openResult, udpPort, accessInfo, callingPid);
+    EXPECT_EQ(SOFTBUS_TRANS_INVALID_CHANNEL_TYPE, ret);
+
+    TransUdpChannelDeinit();
+}
+
+/**
+ * @tc.name: TransDealUdpChannelOpenResultTest002
+ * @tc.desc: use abnomal parameter
+ * @tc.type: FUNC
+ * @tc.require:
+ */
+HWTEST_F(TransUdpStaticMockTest, TransDealUdpChannelOpenResultTest002, TestSize.Level1)
+{
+    int32_t ret = 0;
+    int32_t channelId = 0;
+    int32_t openResult = SOFTBUS_INVALID_PARAM;
+    int32_t udpPort = 0;
+    AccessInfo *accessInfo = reinterpret_cast<AccessInfo*>(SoftBusCalloc(sizeof(AccessInfo)));
+    pid_t callingPid = 0;
+    (void)TransUdpChannelInit(&g_callbacks);
+
+    NiceMock<TransUdpNegoStaticInterfaceMock> TransUdpStaticMock;
+    EXPECT_CALL(TransUdpStaticMock, TransGetUdpChannelById).WillRepeatedly(Return(SOFTBUS_OK));
+    EXPECT_CALL(TransUdpStaticMock, TransUdpUpdateUdpPort).WillOnce(Return(SOFTBUS_OK));
+    EXPECT_CALL(TransUdpStaticMock, TransUdpUpdateReplyCnt).WillOnce(Return(SOFTBUS_OK));
+    ret = TransDealUdpChannelOpenResult(channelId, openResult, udpPort, accessInfo, callingPid);
+    EXPECT_EQ(SOFTBUS_OK, ret);
+
+    TransUdpChannelDeinit();
+}
 }
