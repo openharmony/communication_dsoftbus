@@ -27,6 +27,7 @@
 #include <sys/ioctl.h>
 #include <sys/socket.h>
 #include <unistd.h>
+#include <regex>
 
 #include "bus_center_manager.h"
 #include "conn_log.h"
@@ -822,5 +823,12 @@ int WifiDirectUtils::GetChload()
     auto chload = wifiLinkedInfo->chload;
     CONN_LOGI(CONN_WIFI_DIRECT, "current sta chload=%{public}d", chload);
     return chload;
+}
+
+std::string WifiDirectUtils::RemoveSubstring(const std::string &str, const std::string &substr)
+{
+    std::string escapedSubstr = std::regex_replace(substr, std::regex(R"([\.\^\$\|\(\)\[\]\{\}\*\+\?\\])"), R"(\$&)");
+    std::regex pattern(escapedSubstr);
+    return std::regex_replace(str, pattern, "");
 }
 } // namespace OHOS::SoftBus
