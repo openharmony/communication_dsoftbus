@@ -18,8 +18,9 @@
 #include "softbus_error_code.h"
 #include "trans_type.h"
 #include "trans_common_mock.h"
-#include "trans_manager_mock.h"
-#include "trans_service_mock.h"
+#include "trans_session_mgr_mock.h"
+#include "trans_session_svc_mock.h"
+#include "trans_socket_mgr_mock.h"
 
 using namespace std;
 using namespace testing;
@@ -192,8 +193,8 @@ HWTEST_F(ClientTransSocketExTest, WriteAcessInfoToBufTest001, TestSize.Level1)
  */
 HWTEST_F(ClientTransSocketExTest, SetAccessInfoTest001, TestSize.Level1)
 {
-    NiceMock<TransMgrInterfaceMock> transMgrInterfaceMock;
-    EXPECT_CALL(transMgrInterfaceMock, ClientGetSessionNameBySessionId).WillRepeatedly(Return(SOFTBUS_OK));
+    NiceMock<TransSessionMgrMock> transSessionMgrMock;
+    EXPECT_CALL(transSessionMgrMock, ClientGetSessionNameBySessionId).WillRepeatedly(Return(SOFTBUS_OK));
 
     SocketAccessInfo accessInfo = {
         .extraAccessInfo = nullptr,
@@ -240,8 +241,8 @@ HWTEST_F(ClientTransSocketExTest, SetAccessInfoTest001, TestSize.Level1)
  */
 HWTEST_F(ClientTransSocketExTest, BindAsyncTest001, TestSize.Level1)
 {
-    NiceMock<TransMgrInterfaceMock> transMgrInterfaceMock;
-    EXPECT_CALL(transMgrInterfaceMock, IsSessionExceedLimit).WillOnce(Return(true))
+    NiceMock<TransSessionMgrMock> transSessionMgrMock;
+    EXPECT_CALL(transSessionMgrMock, IsSessionExceedLimit).WillOnce(Return(true))
         .WillRepeatedly(Return(false));
 
     QosTV qos[1];
@@ -249,7 +250,8 @@ HWTEST_F(ClientTransSocketExTest, BindAsyncTest001, TestSize.Level1)
     int32_t ret = BindAsync(0, qos, 0, &listener);
     EXPECT_EQ(ret, SOFTBUS_TRANS_SESSION_CNT_EXCEEDS_LIMIT);
 
-    EXPECT_CALL(transMgrInterfaceMock, GetQosValue).WillRepeatedly(
+    NiceMock<TransSocketMgrMock> transSocketMgrMock;
+    EXPECT_CALL(transSocketMgrMock, GetQosValue).WillRepeatedly(
         [](const QosTV *qos, uint32_t qosCount, QosType type, int32_t *value, int32_t defVal) -> int32_t {
         (void)qos;
         (void)qosCount;
@@ -258,7 +260,7 @@ HWTEST_F(ClientTransSocketExTest, BindAsyncTest001, TestSize.Level1)
         *value = DEFAULT_MAX_WAIT_TIMEOUT;
         return SOFTBUS_OK;
     });
-    EXPECT_CALL(transMgrInterfaceMock, ClientHandleBindWaitTimer).WillOnce(Return(SOFTBUS_ALREADY_TRIGGERED))
+    EXPECT_CALL(transSessionMgrMock, ClientHandleBindWaitTimer).WillOnce(Return(SOFTBUS_ALREADY_TRIGGERED))
         .WillOnce(Return(SOFTBUS_INVALID_PARAM)).WillRepeatedly(Return(SOFTBUS_OK));
     ret = BindAsync(0, qos, 0, &listener);
     EXPECT_EQ(ret, SOFTBUS_OK);
@@ -266,9 +268,9 @@ HWTEST_F(ClientTransSocketExTest, BindAsyncTest001, TestSize.Level1)
     ret = BindAsync(0, qos, 0, &listener);
     EXPECT_EQ(ret, SOFTBUS_INVALID_PARAM);
 
-    EXPECT_CALL(transMgrInterfaceMock, SetSessionStateBySessionId).WillRepeatedly(Return(SOFTBUS_OK));
-    NiceMock<TransServiceInterfaceMock> transServiceInterfaceMock;
-    EXPECT_CALL(transServiceInterfaceMock, ClientBind).WillOnce(Return(SOFTBUS_INVALID_PARAM))
+    EXPECT_CALL(transSessionMgrMock, SetSessionStateBySessionId).WillRepeatedly(Return(SOFTBUS_OK));
+    NiceMock<TransSessionSvcMock> transSessionSvcMock;
+    EXPECT_CALL(transSessionSvcMock, ClientBind).WillOnce(Return(SOFTBUS_INVALID_PARAM))
         .WillRepeatedly(Return(SOFTBUS_OK));
     ret = BindAsync(0, qos, 0, &listener);
     EXPECT_EQ(ret, SOFTBUS_INVALID_PARAM);

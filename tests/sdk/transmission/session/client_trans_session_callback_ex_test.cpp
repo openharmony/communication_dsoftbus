@@ -33,7 +33,7 @@
 #include "softbus_feature_config.h"
 #include "softbus_conn_interface.h"
 #include "trans_log.h"
-#include "trans_manager_mock.h"
+#include "trans_session_mgr_mock.h"
 
 using namespace std;
 using namespace testing;
@@ -129,9 +129,9 @@ HWTEST_F(TransClientSessionCallbackExTest, TransOnBindFailedTest001, TestSize.Le
     ISocketListener listener = {
         .OnError = MyOnError,
     };
-    NiceMock<TransMgrInterfaceMock> transMgrInterfaceMock;
-    EXPECT_CALL(transMgrInterfaceMock, ClientGetSessionIsAsyncBySessionId).WillOnce(Return(SOFTBUS_INVALID_PARAM))
-    .WillOnce(TransMgrInterfaceMock::ActionOfClientGetSessionIsAsyncBySessionId).WillRepeatedly(Return(SOFTBUS_OK));
+    NiceMock<TransSessionMgrMock> transSessionMgrMock;
+    EXPECT_CALL(transSessionMgrMock, ClientGetSessionIsAsyncBySessionId).WillOnce(Return(SOFTBUS_INVALID_PARAM))
+    .WillOnce(TransSessionMgrMock::ActionOfClientGetSessionIsAsyncBySessionId).WillRepeatedly(Return(SOFTBUS_OK));
 
     int32_t ret = TransOnBindFailed(0, &listener, 0);
     EXPECT_EQ(ret, SOFTBUS_INVALID_PARAM);
@@ -147,10 +147,10 @@ HWTEST_F(TransClientSessionCallbackExTest, TransOnBindFailedTest001, TestSize.Le
     EXPECT_EQ(ret, SOFTBUS_INVALID_PARAM);
     listener.OnError = MyOnError;
 
-    EXPECT_CALL(transMgrInterfaceMock, GetSocketLifecycleAndSessionNameBySessionId)
+    EXPECT_CALL(transSessionMgrMock, GetSocketLifecycleAndSessionNameBySessionId)
         .WillOnce(Return(SOFTBUS_INVALID_PARAM))
         .WillOnce(Return(SOFTBUS_OK))
-        .WillRepeatedly(TransMgrInterfaceMock::ActionOfGetSocketLifecycleAndSessionNameBySessionId);
+        .WillRepeatedly(TransSessionMgrMock::ActionOfGetSocketLifecycleAndSessionNameBySessionId);
 
     ret = TransOnBindFailed(0, &listener, 0);
     EXPECT_EQ(ret, SOFTBUS_OK);
@@ -173,15 +173,15 @@ HWTEST_F(TransClientSessionCallbackExTest, HandleAsyncBindSuccessTest001, TestSi
     SocketLifecycleData lifecycle = {
         .sessionState = SESSION_STATE_OPENING,
     };
-    NiceMock<TransMgrInterfaceMock> transMgrInterfaceMock;
-    EXPECT_CALL(transMgrInterfaceMock, ClientHandleBindWaitTimer).WillRepeatedly(Return(SOFTBUS_OK));
+    NiceMock<TransSessionMgrMock> transSessionMgrMock;
+    EXPECT_CALL(transSessionMgrMock, ClientHandleBindWaitTimer).WillRepeatedly(Return(SOFTBUS_OK));
 
     lifecycle.sessionState = SESSION_STATE_CANCELLING;
     int32_t ret = HandleAsyncBindSuccess(0, nullptr, &lifecycle);
     EXPECT_EQ(ret, SOFTBUS_OK);
     lifecycle.sessionState = SESSION_STATE_OPENING;
 
-    EXPECT_CALL(transMgrInterfaceMock, SetSessionStateBySessionId).WillOnce(Return(SOFTBUS_TRANS_INVALID_SESSION_ID))
+    EXPECT_CALL(transSessionMgrMock, SetSessionStateBySessionId).WillOnce(Return(SOFTBUS_TRANS_INVALID_SESSION_ID))
         .WillRepeatedly(Return(SOFTBUS_OK));
 
     ret = HandleAsyncBindSuccess(0, nullptr, &lifecycle);
@@ -216,8 +216,8 @@ HWTEST_F(TransClientSessionCallbackExTest, TransOnNegotiateTest001, TestSize.Lev
     ISocketListener socketCallback = {
         .OnNegotiate = MyOnNegotiateFailed,
     };
-    NiceMock<TransMgrInterfaceMock> transMgrInterfaceMock;
-    EXPECT_CALL(transMgrInterfaceMock, ClientGetPeerSocketInfoById).WillOnce(Return(SOFTBUS_INVALID_PARAM))
+    NiceMock<TransSessionMgrMock> transSessionMgrMock;
+    EXPECT_CALL(transSessionMgrMock, ClientGetPeerSocketInfoById).WillOnce(Return(SOFTBUS_INVALID_PARAM))
         .WillRepeatedly(Return(SOFTBUS_OK));
 
     int32_t ret = TransOnNegotiate(0, &socketCallback);
@@ -273,8 +273,8 @@ HWTEST_F(TransClientSessionCallbackExTest, TransOnNegotiateTest002, TestSize.Lev
     ret = TransOnNegotiate2(0, &socketCallback, &channel, nullptr);
     EXPECT_EQ(ret, SOFTBUS_OK);
 
-    NiceMock<TransMgrInterfaceMock> transMgrInterfaceMock;
-    EXPECT_CALL(transMgrInterfaceMock, ClientGetPeerSocketInfoById).WillOnce(Return(SOFTBUS_INVALID_PARAM))
+    NiceMock<TransSessionMgrMock> transSessionMgrMock;
+    EXPECT_CALL(transSessionMgrMock, ClientGetPeerSocketInfoById).WillOnce(Return(SOFTBUS_INVALID_PARAM))
         .WillRepeatedly(Return(SOFTBUS_OK));
     socketCallback.OnNegotiate2 = MyOnNegotiate2Failed;
     channel.peerUserId = 0;
@@ -297,8 +297,8 @@ HWTEST_F(TransClientSessionCallbackExTest, TransOnNegotiateTest002, TestSize.Lev
  */
 HWTEST_F(TransClientSessionCallbackExTest, HandleServerOnNegotiateTest001, TestSize.Level1)
 {
-    NiceMock<TransMgrInterfaceMock> transMgrInterfaceMock;
-    EXPECT_CALL(transMgrInterfaceMock, ClientDeleteSocketSession).WillRepeatedly(Return(SOFTBUS_OK));
+    NiceMock<TransSessionMgrMock> transSessionMgrMock;
+    EXPECT_CALL(transSessionMgrMock, ClientDeleteSocketSession).WillRepeatedly(Return(SOFTBUS_OK));
     ISocketListener socketCallback = {
         .OnNegotiate = nullptr,
         .OnNegotiate2 = nullptr,
@@ -345,9 +345,9 @@ int32_t ActionOfGetIsAsyncAndTokenTypeBySessionId(int32_t sessionId, bool *isAsy
  */
 HWTEST_F(TransClientSessionCallbackExTest, HandleOnBindSuccessTest001, TestSize.Level1)
 {
-    NiceMock<TransMgrInterfaceMock> transMgrInterfaceMock;
-    EXPECT_CALL(transMgrInterfaceMock, ClientDeleteSocketSession).WillRepeatedly(Return(SOFTBUS_OK));
-    EXPECT_CALL(transMgrInterfaceMock, GetIsAsyncAndTokenTypeBySessionId).WillRepeatedly(
+    NiceMock<TransSessionMgrMock> transSessionMgrMock;
+    EXPECT_CALL(transSessionMgrMock, ClientDeleteSocketSession).WillRepeatedly(Return(SOFTBUS_OK));
+    EXPECT_CALL(transSessionMgrMock, GetIsAsyncAndTokenTypeBySessionId).WillRepeatedly(
         [](int32_t sessionId, bool *isAsync, int32_t *tokenType) -> int32_t {
         static int32_t times = 0;
         times++;
@@ -364,7 +364,7 @@ HWTEST_F(TransClientSessionCallbackExTest, HandleOnBindSuccessTest001, TestSize.
     };
     SocketAccessInfo sinkAccessInfo;
 
-    EXPECT_CALL(transMgrInterfaceMock, GetSocketLifecycleAndSessionNameBySessionId)
+    EXPECT_CALL(transSessionMgrMock, GetSocketLifecycleAndSessionNameBySessionId)
         .WillOnce(Return(SOFTBUS_INVALID_PARAM)).WillRepeatedly(Return(SOFTBUS_OK));
     int32_t ret = HandleOnBindSuccess(0, sessionCallback, &channel, &sinkAccessInfo);
     EXPECT_EQ(ret, SOFTBUS_INVALID_PARAM);
@@ -373,7 +373,7 @@ HWTEST_F(TransClientSessionCallbackExTest, HandleOnBindSuccessTest001, TestSize.
     EXPECT_EQ(ret, SOFTBUS_OK);
 
     channel.isServer = false;
-    EXPECT_CALL(transMgrInterfaceMock, ClientHandleBindWaitTimer).WillRepeatedly(Return(SOFTBUS_OK));
+    EXPECT_CALL(transSessionMgrMock, ClientHandleBindWaitTimer).WillRepeatedly(Return(SOFTBUS_OK));
     ret = HandleOnBindSuccess(0, sessionCallback, &channel, &sinkAccessInfo);
     EXPECT_EQ(ret, SOFTBUS_OK);
 
@@ -396,17 +396,17 @@ int MyOnSessionOpened(int sessionId, int result)
  */
 HWTEST_F(TransClientSessionCallbackExTest, TransOnSessionOpenFailedTest001, TestSize.Level1)
 {
-    NiceMock<TransMgrInterfaceMock> transMgrInterfaceMock;
-    EXPECT_CALL(transMgrInterfaceMock, ClientGetSessionIdByChannelId).WillRepeatedly(Return(SOFTBUS_OK));
-    EXPECT_CALL(transMgrInterfaceMock, ClientDeleteSession).WillRepeatedly(Return(SOFTBUS_OK));
-    EXPECT_CALL(transMgrInterfaceMock, ClientSetEnableStatusBySocket).WillRepeatedly(Return(SOFTBUS_OK));
-    EXPECT_CALL(transMgrInterfaceMock, ClientDeleteSocketSession).WillRepeatedly(Return(SOFTBUS_OK));
-    EXPECT_CALL(transMgrInterfaceMock, ClientHandleBindWaitTimer).WillRepeatedly(Return(SOFTBUS_OK));
-    EXPECT_CALL(transMgrInterfaceMock, ClientSignalSyncBind).WillRepeatedly(Return(SOFTBUS_OK));
+    NiceMock<TransSessionMgrMock> transSessionMgrMock;
+    EXPECT_CALL(transSessionMgrMock, ClientGetSessionIdByChannelId).WillRepeatedly(Return(SOFTBUS_OK));
+    EXPECT_CALL(transSessionMgrMock, ClientDeleteSession).WillRepeatedly(Return(SOFTBUS_OK));
+    EXPECT_CALL(transSessionMgrMock, ClientSetEnableStatusBySocket).WillRepeatedly(Return(SOFTBUS_OK));
+    EXPECT_CALL(transSessionMgrMock, ClientDeleteSocketSession).WillRepeatedly(Return(SOFTBUS_OK));
+    EXPECT_CALL(transSessionMgrMock, ClientHandleBindWaitTimer).WillRepeatedly(Return(SOFTBUS_OK));
+    EXPECT_CALL(transSessionMgrMock, ClientSignalSyncBind).WillRepeatedly(Return(SOFTBUS_OK));
 
-    EXPECT_CALL(transMgrInterfaceMock, ClientGetSessionIsAsyncBySessionId).WillOnce(Return(SOFTBUS_INVALID_PARAM))
-    .WillOnce(TransMgrInterfaceMock::ActionOfClientGetSessionIsAsyncBySessionId).WillRepeatedly(Return(SOFTBUS_OK));
-    EXPECT_CALL(transMgrInterfaceMock, ClientGetSessionCallbackAdapterById).WillRepeatedly(
+    EXPECT_CALL(transSessionMgrMock, ClientGetSessionIsAsyncBySessionId).WillOnce(Return(SOFTBUS_INVALID_PARAM))
+    .WillOnce(TransSessionMgrMock::ActionOfClientGetSessionIsAsyncBySessionId).WillRepeatedly(Return(SOFTBUS_OK));
+    EXPECT_CALL(transSessionMgrMock, ClientGetSessionCallbackAdapterById).WillRepeatedly(
         [](int32_t sessionId, SessionListenerAdapter *callbackAdapter, bool *isServer) -> int32_t {
         (void)sessionId;
         static int32_t times = 0;
@@ -485,14 +485,14 @@ int32_t ActionOfClientGetChannelBySessionId(
  */
 HWTEST_F(TransClientSessionCallbackExTest, TransOnSessionClosedTest001, TestSize.Level1)
 {
-    NiceMock<TransMgrInterfaceMock> transMgrInterfaceMock;
-    EXPECT_CALL(transMgrInterfaceMock, ClientGetSessionIdByChannelId).WillRepeatedly(Return(SOFTBUS_OK));
-    EXPECT_CALL(transMgrInterfaceMock, ClientDeleteSocketSession).WillRepeatedly(Return(SOFTBUS_OK));
-    EXPECT_CALL(transMgrInterfaceMock, ClientDeleteSession).WillRepeatedly(Return(SOFTBUS_INVALID_PARAM));
+    NiceMock<TransSessionMgrMock> transSessionMgrMock;
+    EXPECT_CALL(transSessionMgrMock, ClientGetSessionIdByChannelId).WillRepeatedly(Return(SOFTBUS_OK));
+    EXPECT_CALL(transSessionMgrMock, ClientDeleteSocketSession).WillRepeatedly(Return(SOFTBUS_OK));
+    EXPECT_CALL(transSessionMgrMock, ClientDeleteSession).WillRepeatedly(Return(SOFTBUS_INVALID_PARAM));
 
-    EXPECT_CALL(transMgrInterfaceMock, ClientGetChannelBySessionId)
+    EXPECT_CALL(transSessionMgrMock, ClientGetChannelBySessionId)
         .WillRepeatedly(ActionOfClientGetChannelBySessionId);
-    EXPECT_CALL(transMgrInterfaceMock, ClientGetSessionCallbackAdapterById).WillRepeatedly(
+    EXPECT_CALL(transSessionMgrMock, ClientGetSessionCallbackAdapterById).WillRepeatedly(
         [](int32_t sessionId, SessionListenerAdapter *callbackAdapter, bool *isServer) -> int32_t {
         (void)sessionId;
         static int32_t times = 0;
@@ -555,11 +555,11 @@ void MyOnMessage(int32_t socket, const void *data, uint32_t dataLen)
  */
 HWTEST_F(TransClientSessionCallbackExTest, TransOnDataReceivedTest001, TestSize.Level1)
 {
-    NiceMock<TransMgrInterfaceMock> transMgrInterfaceMock;
-    EXPECT_CALL(transMgrInterfaceMock, ClientGetSessionIdByChannelId).WillRepeatedly(Return(SOFTBUS_OK));
-    EXPECT_CALL(transMgrInterfaceMock, ClientResetIdleTimeoutById).WillRepeatedly(Return(SOFTBUS_OK));
+    NiceMock<TransSessionMgrMock> transSessionMgrMock;
+    EXPECT_CALL(transSessionMgrMock, ClientGetSessionIdByChannelId).WillRepeatedly(Return(SOFTBUS_OK));
+    EXPECT_CALL(transSessionMgrMock, ClientResetIdleTimeoutById).WillRepeatedly(Return(SOFTBUS_OK));
 
-    EXPECT_CALL(transMgrInterfaceMock, ClientGetSessionCallbackAdapterById).WillRepeatedly(
+    EXPECT_CALL(transSessionMgrMock, ClientGetSessionCallbackAdapterById).WillRepeatedly(
         [](int32_t sessionId, SessionListenerAdapter *callbackAdapter, bool *isServer) -> int32_t {
         (void)sessionId;
         static int32_t times = 0;
@@ -618,11 +618,11 @@ void MyOnStream(int32_t socket, const StreamData *data, const StreamData *ext, c
  */
 HWTEST_F(TransClientSessionCallbackExTest, TransOnOnStreamReceviedTest001, TestSize.Level1)
 {
-    NiceMock<TransMgrInterfaceMock> transMgrInterfaceMock;
-    EXPECT_CALL(transMgrInterfaceMock, ClientGetSessionIdByChannelId).WillRepeatedly(Return(SOFTBUS_OK));
-    EXPECT_CALL(transMgrInterfaceMock, ClientResetIdleTimeoutById).WillRepeatedly(Return(SOFTBUS_OK));
+    NiceMock<TransSessionMgrMock> transSessionMgrMock;
+    EXPECT_CALL(transSessionMgrMock, ClientGetSessionIdByChannelId).WillRepeatedly(Return(SOFTBUS_OK));
+    EXPECT_CALL(transSessionMgrMock, ClientResetIdleTimeoutById).WillRepeatedly(Return(SOFTBUS_OK));
 
-    EXPECT_CALL(transMgrInterfaceMock, ClientGetSessionCallbackAdapterById).WillRepeatedly(
+    EXPECT_CALL(transSessionMgrMock, ClientGetSessionCallbackAdapterById).WillRepeatedly(
         [](int32_t sessionId, SessionListenerAdapter *callbackAdapter, bool *isServer) -> int32_t {
         (void)sessionId;
         (void)isServer;
@@ -659,11 +659,11 @@ void MyOnBind(int32_t socket, PeerSocketInfo info)
  */
 HWTEST_F(TransClientSessionCallbackExTest, ClientTransOnChannelBindTest001, TestSize.Level1)
 {
-    NiceMock<TransMgrInterfaceMock> transMgrInterfaceMock;
-    EXPECT_CALL(transMgrInterfaceMock, ClientGetSessionIdByChannelId).WillRepeatedly(Return(SOFTBUS_OK));
-    EXPECT_CALL(transMgrInterfaceMock, ClientGetPeerSocketInfoById).WillRepeatedly(Return(SOFTBUS_OK));
+    NiceMock<TransSessionMgrMock> transSessionMgrMock;
+    EXPECT_CALL(transSessionMgrMock, ClientGetSessionIdByChannelId).WillRepeatedly(Return(SOFTBUS_OK));
+    EXPECT_CALL(transSessionMgrMock, ClientGetPeerSocketInfoById).WillRepeatedly(Return(SOFTBUS_OK));
 
-    EXPECT_CALL(transMgrInterfaceMock, ClientGetSessionCallbackAdapterById).WillRepeatedly(
+    EXPECT_CALL(transSessionMgrMock, ClientGetSessionCallbackAdapterById).WillRepeatedly(
         [](int32_t sessionId, SessionListenerAdapter *callbackAdapter, bool *isServer) -> int32_t {
         (void)sessionId;
         static int32_t times = 0;
@@ -736,10 +736,10 @@ int32_t ActionOfClientCacheQosEvent(int32_t socket, QoSEvent event, const QosTV 
  */
 HWTEST_F(TransClientSessionCallbackExTest, ClientTransOnQosTest001, TestSize.Level1)
 {
-    NiceMock<TransMgrInterfaceMock> transMgrInterfaceMock;
-    EXPECT_CALL(transMgrInterfaceMock, ClientGetSessionIdByChannelId).WillRepeatedly(Return(SOFTBUS_OK));
+    NiceMock<TransSessionMgrMock> transSessionMgrMock;
+    EXPECT_CALL(transSessionMgrMock, ClientGetSessionIdByChannelId).WillRepeatedly(Return(SOFTBUS_OK));
 
-    EXPECT_CALL(transMgrInterfaceMock, ClientGetSessionCallbackAdapterById).WillRepeatedly(
+    EXPECT_CALL(transSessionMgrMock, ClientGetSessionCallbackAdapterById).WillRepeatedly(
         [](int32_t sessionId, SessionListenerAdapter *callbackAdapter, bool *isServer) -> int32_t {
         (void)sessionId;
         static int32_t times = 0;
@@ -761,7 +761,7 @@ HWTEST_F(TransClientSessionCallbackExTest, ClientTransOnQosTest001, TestSize.Lev
         }
         return SOFTBUS_OK;
     });
-    EXPECT_CALL(transMgrInterfaceMock, ClientCacheQosEvent).WillRepeatedly(ActionOfClientCacheQosEvent);
+    EXPECT_CALL(transSessionMgrMock, ClientCacheQosEvent).WillRepeatedly(ActionOfClientCacheQosEvent);
 
     QosTV qos;
     int32_t ret = ClientTransOnQos(0, CHANNEL_TYPE_UDP, QOS_SATISFIED, &qos, 0);

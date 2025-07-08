@@ -78,6 +78,46 @@ int32_t ServerIpcProcessInnerEvent(int32_t eventType, uint8_t *buf, uint32_t len
 {
     return GetCommonInterface()->ServerIpcProcessInnerEvent(eventType, buf, len);
 }
+
+SoftBusList *CreateSoftBusList(void)
+{
+    return GetCommonInterface()->CreateSoftBusList();
+}
+
+int32_t TransServerProxyInit(void)
+{
+    return GetCommonInterface()->TransServerProxyInit();
+}
+
+int32_t ClientTransChannelInit(void)
+{
+    return GetCommonInterface()->ClientTransChannelInit();
+}
+
+int32_t RegisterTimeoutCallback(int32_t timerFunId, TimerFunCallback callback)
+{
+    return GetCommonInterface()->RegisterTimeoutCallback(timerFunId, callback);
+}
+
+int32_t RegNodeDeviceStateCbInner(const char *pkgName, INodeStateCb *callback)
+{
+    return GetCommonInterface()->RegNodeDeviceStateCbInner(pkgName, callback);
+}
+
+int32_t SoftBusCondSignal(SoftBusCond *cond)
+{
+    return GetCommonInterface()->SoftBusCondSignal(cond);
+}
+
+int32_t SoftBusGetTime(SoftBusSysTime *sysTime)
+{
+    return GetCommonInterface()->SoftBusGetTime(sysTime);
+}
+
+int32_t SoftBusCondWait(SoftBusCond *cond, SoftBusMutex *mutex, SoftBusSysTime *time)
+{
+    return GetCommonInterface()->SoftBusCondWait(cond, mutex, time);
+}
 #ifdef __cplusplus
 }
 #endif

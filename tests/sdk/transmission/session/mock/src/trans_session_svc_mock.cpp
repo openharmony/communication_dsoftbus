@@ -13,7 +13,7 @@
  * limitations under the License.
  */
 
-#include "trans_service_mock.h"
+#include "trans_session_svc_mock.h"
 
 using namespace testing;
 using namespace testing::ext;
@@ -22,19 +22,19 @@ namespace OHOS {
 
 void *g_serviceInterface = nullptr;
 
-TransServiceInterfaceMock::TransServiceInterfaceMock()
+TransSessionSvcMock::TransSessionSvcMock()
 {
     g_serviceInterface = reinterpret_cast<void *>(this);
 }
 
-TransServiceInterfaceMock::~TransServiceInterfaceMock()
+TransSessionSvcMock::~TransSessionSvcMock()
 {
     g_serviceInterface = nullptr;
 }
 
-static TransServiceInterface *GetServiceInterface()
+static TransSessionSvcInterface *GetServiceInterface()
 {
-    return reinterpret_cast<TransServiceInterface *>(g_serviceInterface);
+    return reinterpret_cast<TransSessionSvcInterface *>(g_serviceInterface);
 }
 
 #ifdef __cplusplus
