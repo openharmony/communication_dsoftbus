@@ -19,3 +19,9 @@ void SetAccessTokenPermission(const char *processName)
     (void)processName;
     return;
 }
+
+uint64_t SetTokenIdByProcessName(const char *processName)
+{
+    (void)processName;
+    return 0;
+}

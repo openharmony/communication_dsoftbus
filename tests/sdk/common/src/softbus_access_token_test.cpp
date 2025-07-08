@@ -39,3 +39,15 @@ void SetAccessTokenPermission(const char *processName)
     SetSelfTokenID(tokenId);
     OHOS::Security::AccessToken::AccessTokenKit::ReloadNativeTokenInfo();
 }
+
+uint64_t SetTokenIdByProcessName(const char *processName)
+{
+    if (processName == nullptr) {
+        return 0;
+    }
+    uint64_t tokenId = OHOS::Security::AccessToken::AccessTokenKit::GetNativeTokenId(processName);
+    if (tokenId != 0) {
+        SetSelfTokenID(tokenId);
+    }
+    return tokenId;
+}
