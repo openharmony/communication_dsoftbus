@@ -14,6 +14,7 @@
  */
 
 #include "softbus_aes_encrypt.h"
+#include "softbus_adapter_crypto.h"
 #include "softbus_error_code.h"
 
 int32_t SoftBusGenerateHmacHash(

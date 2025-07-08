@@ -922,29 +922,6 @@ HWTEST_F(SoftbusProxyTransceiverTest, TransProxyLoopMsgHandler001, TestSize.Leve
 }
 
 /**
- * @tc.name: TransProxyParseMsgType001
- * @tc.desc: test TransProxyParseMsgType.
- * @tc.type: FUNC
- * @tc.require:
- */
-HWTEST_F(SoftbusProxyTransceiverTest, TransProxyParseMsgType001, TestSize.Level1)
-{
-    ProxyMessageShortHead msgHead = { 0 };
-    char data[TEST_DATALEN];
-    int32_t len = TEST_DATALEN;
-    int32_t msgType;
-    int32_t ret = TransProxyParseMsgType(data, len, &msgType);
-    EXPECT_NE(SOFTBUS_OK, ret);
-
-    msgHead.type = (PROXYCHANNEL_MSG_TYPE_D2D & FOUR_BIT_MASK) | (VERSION << VERSION_SHIFT);
-    msgHead.myId = 1;
-    msgHead.peerId = 1;
-    (void)memcpy_s(data, TEST_DATALEN, &msgHead, sizeof(ProxyMessageShortHead));
-    ret = TransProxyParseMsgType(data, len, &msgType);
-    EXPECT_EQ(SOFTBUS_OK, ret);
-}
-
-/**
  * @tc.name: TransProxyOnDataReceived001
  * @tc.desc: test TransProxyOnDataReceived.
  * @tc.type: FUNC

@@ -1,0 +1,100 @@
+[
+  {
+    "INTERFACE_NAME": "SERVER_JOIN_LNN",
+    "PROCESS_NAME": [
+      "device_manager",
+      "cast_engine_service",
+      "CollaborationFwk",
+      "collaboration_service"
+    ]
+  },
+  {
+    "INTERFACE_NAME": "SERVER_LEAVE_LNN",
+    "PROCESS_NAME": [
+      "device_manager",
+      "car_distributed_engine"
+    ]
+  },
+  {
+    "INTERFACE_NAME": "SERVER_SET_NODE_DATA_CHANGE_FLAG",
+    "PROCESS_NAME": []
+  },
+  {
+    "INTERFACE_NAME": "SERVER_GET_NODE_KEY_INFO",
+    "PROCESS_NAME": [
+      "device_manager",
+      "device_security_level",
+      "CollaborationFwk",
+      "collaboration_service",
+      "car_distributed_engine",
+      "distributed_input"
+    ]
+  },
+  {
+    "INTERFACE_NAME": "SERVER_ACTIVE_META_NODE",
+    "PROCESS_NAME": []
+  },
+  {
+    "INTERFACE_NAME": "SERVER_DEACTIVE_META_NODE",
+    "PROCESS_NAME": []
+  },
+  {
+    "INTERFACE_NAME": "SERVER_GET_ALL_META_NODE_INFO",
+    "PROCESS_NAME": []
+  },
+  {
+    "INTERFACE_NAME": "SERVER_SHIFT_LNN_GEAR",
+    "PROCESS_NAME": [
+      "device_manager",
+      "CollaborationFwk"
+    ]
+  },
+  {
+    "INTERFACE_NAME": "SERVER_SYNC_TRUSTED_RELATION",
+    "PROCESS_NAME": [
+      "device_manager"
+    ]
+  },
+  {
+    "INTERFACE_NAME": "SERVER_SET_DISPLAY_NAME",
+    "PROCESS_NAME": [
+      "device_manager"
+    ]
+  },
+  {
+    "INTERFACE_NAME": "EX_OBJ_CMD_SERVER_JOIN_METANODE",
+    "PROCESS_NAME": [
+      "CollaborationFwk",
+      "car_distributed_engine",
+      "wear_link_service",
+      "device_manager"
+    ]
+  },
+  {
+    "INTERFACE_NAME": "EX_OBJ_CMD_SERVER_LEAVE_METANODE",
+    "PROCESS_NAME": [
+      "CollaborationFwk",
+      "car_distributed_engine",
+      "wear_link_service",
+      "device_manager"
+    ]
+  },
+  {
+    "INTERFACE_NAME": "EX_OBJ_CMD_CTRL_BLE_HB",
+    "PROCESS_NAME": [
+      "device_manager"
+    ]
+  },
+  {
+    "INTERFACE_NAME": "EX_OBJ_CMD_SERVER_START_USB_NCM",
+    "PROCESS_NAME": [
+      "CollaborationFwk"
+    ]
+  },
+  {
+    "INTERFACE_NAME": "EX_OBJ_CMD_SERVER_GET_HISTORY_NODE_INFO",
+    "PROCESS_NAME": [
+      "maintenance_service"
+    ]
+  }
+]

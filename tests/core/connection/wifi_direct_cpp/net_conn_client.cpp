@@ -74,6 +74,26 @@ int32_t OHOS::NetManagerStandard::NetConnClient::DelInterfaceAddress(
     return mock->DelInterfaceAddress(ifName, ipAddr, prefixLength);
 }
 
+int32_t OHOS::NetManagerStandard::NetConnClient::AddStaticIpv6Addr(
+    const std::string &ipv6Addr, const std::string &macAddr, const std::string &interface)
+{
+    auto mock = OHOS::NetManagerStandard::MockNetConnClient::GetMock();
+    if (mock == nullptr) {
+        return -1;
+    }
+    return mock->AddStaticIpv6Addr(ipv6Addr, macAddr, interface);
+}
+
+int32_t OHOS::NetManagerStandard::NetConnClient::DelStaticIpv6Addr(
+    const std::string &ipv6Addr, const std::string &macAddr, const std::string &interface)
+{
+    auto mock = OHOS::NetManagerStandard::MockNetConnClient::GetMock();
+    if (mock == nullptr) {
+        return -1;
+    }
+    return mock->DelStaticIpv6Addr(ipv6Addr, macAddr, interface);
+}
+
 namespace OHOS::NetManagerStandard {
 MockNetConnClient::MockNetConnClient()
 {
