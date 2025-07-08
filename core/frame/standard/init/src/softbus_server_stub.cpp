@@ -57,10 +57,13 @@ namespace OHOS {
         static const char *DM_PACKAGE_NAME = "ohos.distributedhardware.devicemanager";
         static const char *MSDP_PACKAGE_NAME = "ohos.msdp.spatialawareness";
 #ifdef SUPPORT_BUNDLENAME
-        static constexpr std::array systemAppWhitelist = {
+        constexpr int32_t SYSTEM_APP_NUMS = 5;
+        static constexpr std::array<const char*, SYSTEM_APP_NUMS> systemAppWhitelist = {
             "com.huawei.hmos.hiviewcare",
             "com.ohos.plrdtest.hongyan",
             "com.huawei.hmos.aibase",
+            "ohos.samples.distributedmusicplayer",
+            "com.huawei.hmos.camera"
         };
 #endif // SUPPORT_BUNDLENAME
     }
