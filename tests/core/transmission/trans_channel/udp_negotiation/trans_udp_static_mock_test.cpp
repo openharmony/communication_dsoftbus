@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2024-2025 Huawei Device Co., Ltd.
+ * Copyright (c) 2025 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -29,44 +29,75 @@ namespace OHOS {
 static int32_t DefaultOnChannelOpened(
     const char *pkgName, int32_t pid, const char *sessionName, const ChannelInfo *channel)
 {
+    (void)pkgName;
+    (void)pid;
+    (void)sessionName;
+    (void)channel;
     return SOFTBUS_OK;
 }
 
 static int32_t DefaultOnChannelClosed(
     const char *pkgName, int32_t pid, int32_t channelId, int32_t channelType, int32_t messageType)
 {
+    (void)pkgName;
+    (void)pid;
+    (void)channelId;
+    (void)channelType;
+    (void)messageType;
     return SOFTBUS_OK;
 }
 
 static int32_t DefaultOnChannelOpenFailed(
     const char *pkgName, int32_t pid, int32_t channelId, int32_t channelType, int32_t errCode)
 {
+    (void)pkgName;
+    (void)pid;
+    (void)channelId;
+    (void)channelType;
+    (void)errCode;
     return SOFTBUS_OK;
 }
 
 static int32_t DefaultOnDataReceived(const char *pkgName, int32_t pid, int32_t channelId, int32_t channelType,
     TransReceiveData* receiveData)
 {
+    (void)pkgName;
+    (void)pid;
+    (void)channelId;
+    (void)channelType;
+    (void)receiveData;
     return SOFTBUS_OK;
 }
 
 static int32_t DefaultOnQosEvent(const char *pkgName, const QosParam *param)
 {
+    (void)pkgName;
+    (void)param;
     return SOFTBUS_OK;
 }
 
 static int32_t DefaultGetPkgNameBySessionName(const char *sessionName, char *pkgName, uint16_t len)
 {
+    (void)sessionName;
+    (void)pkgName;
+    (void)len;
     return SOFTBUS_OK;
 }
 
 static int32_t DefaultGetUidAndPidBySessionName(const char *sessionName, int32_t *uid, int32_t *pid)
 {
+    (void)sessionName;
+    (void)uid;
+    (void)pid;
     return SOFTBUS_OK;
 }
 
 static int32_t DefaultOnChannelBind(const char *pkgName, int32_t pid, int32_t channelId, int32_t channelType)
 {
+    (void)pkgName;
+    (void)pid;
+    (void)channelId;
+    (void)channelType;
     return SOFTBUS_OK;
 }
 
@@ -140,11 +171,11 @@ HWTEST_F(TransUdpStaticMockTest, SetChannelInfoBySideTest001, TestSize.Level1)
     ASSERT_TRUE(info != nullptr);
     bool isServerSide = false;
     AppInfo *appInfo = reinterpret_cast<AppInfo*>(SoftBusCalloc(sizeof(AppInfo)));
-    ASSERT_TRUE(info != nullptr);
+    ASSERT_TRUE(appInfo != nullptr);
 
-    ret = SetChannelInfoBySide(NULL, isServerSide, appInfo);
+    ret = SetChannelInfoBySide(nullptr, isServerSide, appInfo);
     EXPECT_EQ(SOFTBUS_ERR, ret);
-    ret = SetChannelInfoBySide(info, isServerSide, NULL);
+    ret = SetChannelInfoBySide(info, isServerSide, nullptr);
     EXPECT_EQ(SOFTBUS_ERR, ret);
 
     SoftBusFree(info);
@@ -164,7 +195,7 @@ HWTEST_F(TransUdpStaticMockTest, SetChannelInfoBySideTest002, TestSize.Level1)
     ASSERT_TRUE(info != nullptr);
     bool isServerSide = false;
     AppInfo *appInfo = reinterpret_cast<AppInfo*>(SoftBusCalloc(sizeof(AppInfo)));
-    ASSERT_TRUE(info != nullptr);
+    ASSERT_TRUE(appInfo != nullptr);
     char ip[] = "192.168.1,1";
 
     NiceMock<TransUdpNegoStaticInterfaceMock> TransUdpStaticMock;
@@ -172,7 +203,7 @@ HWTEST_F(TransUdpStaticMockTest, SetChannelInfoBySideTest002, TestSize.Level1)
 
     appInfo->udpConnType = UDP_CONN_TYPE_USB;
     appInfo->routeType = WIFI_USB;
-    strcpy_s(info->peerIp, sizeof(info->peerIp), ip);
+    (void)strcpy_s(info->peerIp, sizeof(info->peerIp), ip);
     ret = SetChannelInfoBySide(info, isServerSide, appInfo);
     EXPECT_EQ(SOFTBUS_NETWORK_GET_NODE_INFO_ERR, ret);
 
@@ -203,7 +234,7 @@ HWTEST_F(TransUdpStaticMockTest, SetChannelInfoBySideTest003, TestSize.Level1)
     ASSERT_TRUE(info != nullptr);
     bool isServerSide = true;
     AppInfo *appInfo = reinterpret_cast<AppInfo*>(SoftBusCalloc(sizeof(AppInfo)));
-    ASSERT_TRUE(info != nullptr);
+    ASSERT_TRUE(appInfo != nullptr);
     char ip[] = "192.168.1,1";
 
     NiceMock<TransUdpNegoStaticInterfaceMock> TransUdpStaticMock;
@@ -230,7 +261,7 @@ HWTEST_F(TransUdpStaticMockTest, SetChannelInfoBySideTest003, TestSize.Level1)
     appInfo->myData.tokenType = ACCESS_TOKEN_TYPE_SHELL;
     appInfo->udpConnType = UDP_CONN_TYPE_USB;
     appInfo->routeType = WIFI_USB;
-    strcpy_s(info->myIp, sizeof(info->myIp), ip);
+    (void)strcpy_s(info->myIp, sizeof(info->myIp), ip);
     ret = SetChannelInfoBySide(info, isServerSide, appInfo);
     EXPECT_EQ(SOFTBUS_NETWORK_GET_NODE_INFO_ERR, ret);
 
@@ -280,10 +311,10 @@ HWTEST_F(TransUdpStaticMockTest, ParseRequestAppInfoTest001, TestSize.Level1)
     EXPECT_CALL(TransUdpStaticMock, TransUnpackRequestUdpInfo).WillRepeatedly(Return(SOFTBUS_OK));
 
     appInfo->callingTokenId = 1;
-    strcpy_s(appInfo->myData.sessionName, sizeof(appInfo->myData.sessionName), "123");
-    strcpy_s(appInfo->peerData.sessionName, sizeof(appInfo->peerData.sessionName), "");
+    (void)strcpy_s(appInfo->myData.sessionName, sizeof(appInfo->myData.sessionName), "123");
+    (void)strcpy_s(appInfo->peerData.sessionName, sizeof(appInfo->peerData.sessionName), "");
     appInfo->udpChannelOptType = TYPE_UDP_CHANNEL_CLOSE;
-    ret = ParseRequestAppInfo(*authHandle, NULL, appInfo);
+    ret = ParseRequestAppInfo(*authHandle, nullptr, appInfo);
     EXPECT_EQ(SOFTBUS_OK, ret);
 
     EXPECT_CALL(TransUdpStaticMock, AuthGetDeviceUuid).WillOnce(Return(SOFTBUS_OK));
@@ -292,13 +323,13 @@ HWTEST_F(TransUdpStaticMockTest, ParseRequestAppInfoTest001, TestSize.Level1)
     authHandle->type = AUTH_LINK_TYPE_P2P;
     appInfo->udpChannelOptType = TYPE_UDP_CHANNEL_OPEN;
     appInfo->udpConnType = UDP_CONN_TYPE_WIFI;
-    ret = ParseRequestAppInfo(*authHandle, NULL, appInfo);
+    ret = ParseRequestAppInfo(*authHandle, nullptr, appInfo);
     EXPECT_EQ(SOFTBUS_INVALID_PARAM, ret);
 
     EXPECT_CALL(TransUdpStaticMock, AuthGetDeviceUuid).WillOnce(Return(SOFTBUS_OK));
     EXPECT_CALL(TransUdpStaticMock, LnnGetLocalStrInfoByIfnameIdx).WillOnce(Return(SOFTBUS_INVALID_PARAM));
     appInfo->udpConnType = UDP_CONN_TYPE_USB;
-    ret = ParseRequestAppInfo(*authHandle, NULL, appInfo);
+    ret = ParseRequestAppInfo(*authHandle, nullptr, appInfo);
     EXPECT_EQ(SOFTBUS_INVALID_PARAM, ret);
 
     SoftBusFree(authHandle);
@@ -321,10 +352,10 @@ HWTEST_F(TransUdpStaticMockTest, TransOnExchangeUdpInfoReplyTest001, TestSize.Le
     NiceMock<TransUdpNegoStaticInterfaceMock> TransUdpStaticMock;
     EXPECT_CALL(TransUdpStaticMock, TransSetUdpChannelStatus).WillOnce(Return(SOFTBUS_OK));
     EXPECT_CALL(TransUdpStaticMock, TransGetUdpChannelBySeq).WillOnce(Return(SOFTBUS_INVALID_PARAM));
-    TransOnExchangeUdpInfoReply(*authHandle, seq, NULL);
+    TransOnExchangeUdpInfoReply(*authHandle, seq, nullptr);
 
     EXPECT_CALL(TransUdpStaticMock, TransSetUdpChannelStatus).WillOnce(Return(SOFTBUS_INVALID_PARAM));
-    TransOnExchangeUdpInfoReply(*authHandle, seq, NULL);
+    TransOnExchangeUdpInfoReply(*authHandle, seq, nullptr);
 
     SoftBusFree(authHandle);
 }
@@ -714,6 +745,7 @@ HWTEST_F(TransUdpStaticMockTest, TransDealUdpChannelOpenResultTest001, TestSize.
     int32_t openResult = SOFTBUS_OK;
     int32_t udpPort = 0;
     AccessInfo *accessInfo = reinterpret_cast<AccessInfo*>(SoftBusCalloc(sizeof(AccessInfo)));
+    ASSERT_TRUE(accessInfo != nullptr);
     pid_t callingPid = 0;
     (void)TransUdpChannelInit(&g_callbacks);
 
@@ -740,6 +772,7 @@ HWTEST_F(TransUdpStaticMockTest, TransDealUdpChannelOpenResultTest002, TestSize.
     int32_t openResult = SOFTBUS_INVALID_PARAM;
     int32_t udpPort = 0;
     AccessInfo *accessInfo = reinterpret_cast<AccessInfo*>(SoftBusCalloc(sizeof(AccessInfo)));
+    ASSERT_TRUE(accessInfo != nullptr);
     pid_t callingPid = 0;
     (void)TransUdpChannelInit(&g_callbacks);
 
