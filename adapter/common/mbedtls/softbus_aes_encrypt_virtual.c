@@ -14,6 +14,7 @@
  */
 
 #include "softbus_aes_encrypt.h"
+#include "softbus_adapter_crypto.h"
 #include "softbus_error_code.h"
 
 int32_t SoftBusGenerateHmacHash(
@@ -55,6 +56,37 @@ int32_t SoftBusAesGcmEncrypt(
     (void)cipherKey;
     (void)encMode;
     (void)outData;
+    return SOFTBUS_NOT_IMPLEMENT;
+}
+
+int32_t SoftBusEncryptDataByGcm128(AesGcm128CipherKey *cipherKey, const unsigned char *input, uint32_t inLen,
+    unsigned char *encryptData, uint32_t *encryptLen)
+{
+    (void)cipherKey;
+    (void)input;
+    (void)inLen;
+    (void)encryptData;
+    (void)encryptLen;
+    return SOFTBUS_NOT_IMPLEMENT;
+}
+
+int32_t SoftBusDecryptDataByGcm128(AesGcm128CipherKey *cipherKey, const unsigned char *input, uint32_t inLen,
+    unsigned char *decryptData, uint32_t *decryptLen)
+{
+    (void)cipherKey;
+    (void)input;
+    (void)inLen;
+    (void)decryptData;
+    (void)decryptLen;
+    return SOFTBUS_NOT_IMPLEMENT;
+}
+
+int32_t SoftBusCalcHKDF(const uint8_t *inData, uint32_t inLen, uint8_t *outData, uint32_t outLen)
+{
+    (void)inData;
+    (void)inLen;
+    (void)outData;
+    (void)outLen;
     return SOFTBUS_NOT_IMPLEMENT;
 }
 

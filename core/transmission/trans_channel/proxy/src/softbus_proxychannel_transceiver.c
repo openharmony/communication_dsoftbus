@@ -946,21 +946,6 @@ static int32_t TransProxySendBadKeyMessage(ProxyMessage *msg, const AuthHandle *
     return SOFTBUS_OK;
 }
 
-static int32_t TransProxyParseMsgType(char *data, int32_t len, int32_t *msgType)
-{
-    char *ptr = data;
-    uint8_t firstBytes = *ptr;
-    ptr += sizeof(uint8_t);
-    int8_t version = (firstBytes >> VERSION_SHIFT) & FOUR_BIT_MASK;
-    *msgType = firstBytes & FOUR_BIT_MASK;
-    if (version != VERSION || *msgType >= PROXYCHANNEL_MSG_TYPE_MAX) {
-        TRANS_LOGE(TRANS_CTRL, "parseMessage: unsupported message, version=%{public}d, type=%{public}d",
-            version, *msgType);
-        return SOFTBUS_TRANS_INVALID_MESSAGE_TYPE;
-    }
-    return SOFTBUS_OK;
-}
-
 static void TransProxyOnDataReceived(uint32_t connectionId, ConnModule moduleId, int64_t seq, char *data, int32_t len)
 {
     TRANS_LOGI(TRANS_CTRL, "recv data connId=%{public}u, moduleId=%{public}d, seq=%{public}" PRId64 ", len=%{public}d",
@@ -968,17 +953,17 @@ static void TransProxyOnDataReceived(uint32_t connectionId, ConnModule moduleId,
     TRANS_CHECK_AND_RETURN_LOGE(data != NULL && moduleId == MODULE_PROXY_CHANNEL, TRANS_CTRL, "invalid param");
 
     int32_t ret = SOFTBUS_TRANS_INVALID_MESSAGE_TYPE;
-    int32_t msgType = PROXYCHANNEL_MSG_TYPE_MAX;
-    if (TransProxyParseMsgType(data, len, &msgType) != SOFTBUS_OK) {
-        TRANS_LOGE(TRANS_CTRL, "parseMessage: unsupported message");
-        return;
-    }
     ProxyMessage msg;
     (void)memset_s(&msg, sizeof(ProxyMessage), 0, sizeof(ProxyMessage));
     msg.connId = connectionId;
     ret = TransParseMessageHeadType(data, len, &msg);
     if (ret != SOFTBUS_OK) {
         TRANS_LOGE(TRANS_CTRL, "invalid msg head");
+        return;
+    }
+    TRANS_LOGI(TRANS_CTRL, "recv data msgType=%{public}d", msg.msgHead.type);
+    if (msg.msgHead.type == PROXYCHANNEL_MSG_TYPE_D2D) {
+        TransProxyParseD2DData(data, len);
         return;
     }
     if (msg.msgHead.type >= PROXYCHANNEL_MSG_TYPE_PAGING_HANDSHAKE) {
@@ -997,8 +982,8 @@ static void TransProxyOnDataReceived(uint32_t connectionId, ConnModule moduleId,
             TRANS_LOGE(TRANS_CTRL, "send bad key msg ret=%{public}d", ret);
             return;
         }
-        char peerBrMac[BT_MAC_LEN] = {0};
-        char udid[UDID_BUF_LEN] = {0};
+        char peerBrMac[BT_MAC_LEN] = { 0 };
+        char udid[UDID_BUF_LEN] = { 0 };
         if (GetBrMacFromConnInfo(connectionId, peerBrMac, BT_MAC_LEN) == SOFTBUS_OK) {
             if (LnnGetUdidByBrMacPacked(peerBrMac, udid, UDID_BUF_LEN) == SOFTBUS_OK) {
                 AuthRemoveDeviceKeyByUdidPacked(udid);

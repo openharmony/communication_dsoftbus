@@ -493,4 +493,46 @@ HWTEST_F(TransClientMsgServiceTest, SendBytesAsyncTest01, TestSize.Level1)
     EXPECT_EQ(ret, SOFTBUS_TRANS_NOT_SUPPORT_ASYNC_SEND_BYTES);
     DeleteSessionServerAndSession(g_sessionName, sessionId);
 }
+
+/**
+ * @tc.name: SendMessageAsyncTest01
+ * @tc.desc: SendMessageAsync with different parameters.
+ * @tc.type: FUNC
+ * @tc.require:
+ */
+HWTEST_F(TransClientMsgServiceTest, SendMessageAsyncTest01, TestSize.Level1)
+{
+    int32_t socket = TRANS_TEST_SESSION_ID;
+    uint16_t dataSeq = 0;
+    const void *data = "testdata";
+    uint32_t len = 0;
+    int32_t ret = SendMessageAsync(socket, dataSeq, nullptr, len);
+    EXPECT_EQ(ret, SOFTBUS_INVALID_PARAM);
+
+    len = TRANS_TEST_SEND_LEN;
+    ret = SendMessageAsync(socket, dataSeq, data, len);
+    EXPECT_EQ(ret, SOFTBUS_INVALID_PARAM);
+
+    dataSeq = 1;
+    ret = SendMessageAsync(socket, dataSeq, data, len);
+    EXPECT_EQ(ret, SOFTBUS_TRANS_SESSION_INFO_NOT_FOUND);
+
+    int32_t sessionId = AddSessionServerAndSession(
+        g_sessionName, CHANNEL_TYPE_PROXY, BUSINESS_TYPE_MESSAGE, false, ENABLE_STATUS_SUCCESS);
+    ASSERT_GT(sessionId, 0);
+    ret = SendMessageAsync(sessionId, dataSeq, data, len);
+    EXPECT_EQ(ret, SOFTBUS_TRANS_BUSINESS_TYPE_NOT_MATCH);
+    DeleteSessionServerAndSession(g_sessionName, sessionId);
+
+    sessionId = AddSessionServerAndSession(
+        g_sessionName, CHANNEL_TYPE_PROXY, BUSINESS_TYPE_D2D_MESSAGE, false, ENABLE_STATUS_SUCCESS);
+    ASSERT_GT(sessionId, 0);
+    ret = SendMessageAsync(sessionId, dataSeq, data, len);
+    EXPECT_EQ(ret, SOFTBUS_TRANS_BUSINESS_TYPE_NOT_MATCH);
+
+    len = TRANS_TEST_BEYOND_MAX_MSG_LEN;
+    ret = SendMessageAsync(sessionId, dataSeq, data, len);
+    EXPECT_EQ(ret, SOFTBUS_TRANS_BUSINESS_TYPE_NOT_MATCH);
+    DeleteSessionServerAndSession(g_sessionName, sessionId);
+}
 }

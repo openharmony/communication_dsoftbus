@@ -19,6 +19,8 @@
 #include "client_trans_session_callback.h"
 #include "trans_proxy_process_data.h"
 
+#define PAGING_NONCE_LEN 16
+
 #ifdef __cplusplus
 extern "C" {
 #endif
@@ -85,7 +87,13 @@ int32_t TransProxyChannelSendFile(int32_t channelId, const char *sFileList[], co
     uint32_t fileCnt);
 
 int32_t ProcessFileFrameData(int32_t sessionId, int32_t channelId, const char *data, uint32_t len, int32_t type);
+
 int32_t ClientTransProxyOnChannelBind(int32_t channelId, int32_t channelType);
+
+int32_t TransProxyChannelAsyncSendMessage(int32_t channelId, const void *data, uint32_t len, uint16_t dataSeq);
+
+int32_t TransProxyAsyncPackAndSendMessage(
+    int32_t channelId, const void *data, uint32_t len, uint16_t dataSeq, SessionPktType pktType);
 #ifdef __cplusplus
 }
 #endif
