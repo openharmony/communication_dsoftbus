@@ -37,7 +37,6 @@ extern "C" int32_t LLVMFuzzerTestOneInput(const uint8_t *data, size_t size)
 
     if (isFirst) {
         testing::InitGoogleTest();
-        testing::GTEST_FLAG(filter) = "*Fuzz*";
         FuzzedDataProvider provider(data, size);
         OHOS::TransRunAllTest(provider);
         isFirst = false;
