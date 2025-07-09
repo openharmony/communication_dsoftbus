@@ -287,9 +287,9 @@ void TransPagingBadKeyRetry(int32_t channelId)
         .onGenSuccess = TransOnGenSuccess,
         .onGenFailed = TransOnGenFailed,
     };
-    ret = AuthGenApplyKeyId(&businessInfo, authReqId, chan.connId, &callback);
+    ret = AuthGenApplyKey(&businessInfo, authReqId, chan.connId, &callback);
     if (ret != SOFTBUS_OK) {
-        TRANS_LOGE(TRANS_CTRL, "AuthGenApplyKeyId fail, ret=%{public}d", ret);
+        TRANS_LOGE(TRANS_CTRL, "AuthGenApplyKey fail, ret=%{public}d", ret);
     }
 }
 

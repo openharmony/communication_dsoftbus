@@ -36,6 +36,8 @@ public:
 void BusCenterMetaNodeSdkTest::SetUpTestCase()
 {
     SetAccessTokenPermission("device_manager");
+    uint64_t tokenId = SetTokenIdByProcessName("device_manager");
+    printf("SetTokenIdByProcessName tokenId:%ju\n", tokenId);
 }
 
 void BusCenterMetaNodeSdkTest::TearDownTestCase() { }

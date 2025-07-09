@@ -521,7 +521,7 @@ HWTEST_F(TransClientMsgServiceTest, SendMessageAsyncTest01, TestSize.Level1)
         g_sessionName, CHANNEL_TYPE_PROXY, BUSINESS_TYPE_MESSAGE, false, ENABLE_STATUS_SUCCESS);
     ASSERT_GT(sessionId, 0);
     ret = SendMessageAsync(sessionId, dataSeq, data, len);
-    EXPECT_EQ(ret, SOFTBUS_TRANS_NOT_SUPPORT_ASYNC_SEND_BYTES);
+    EXPECT_EQ(ret, SOFTBUS_TRANS_BUSINESS_TYPE_NOT_MATCH);
     DeleteSessionServerAndSession(g_sessionName, sessionId);
 
     sessionId = AddSessionServerAndSession(

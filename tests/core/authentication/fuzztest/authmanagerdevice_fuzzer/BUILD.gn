@@ -33,14 +33,15 @@ ohos_fuzztest("AuthManagerDeviceFuzzTest") {
   ]
   include_dirs = auth_manager_include
   include_dirs += [
-    "$dsoftbus_root_path/interfaces/inner_kits/lnn",
-    "$dsoftbus_root_path/interfaces/kits/discovery",
-    "$dsoftbus_root_path/interfaces/kits/adapter",
-    "$dsoftbus_root_path/interfaces/kits/authentication",
     "$dsoftbus_root_path/core/authentication/include",
     "$dsoftbus_root_path/core/authentication/interface",
-    "$dsoftbus_root_path/tests/common/include",
     "$dsoftbus_root_path/core/bus_center/monitor/include",
+    "$dsoftbus_root_path/interfaces/inner_kits/lnn",
+    "$dsoftbus_root_path/interfaces/inner_kits/transport",
+    "$dsoftbus_root_path/interfaces/kits/adapter",
+    "$dsoftbus_root_path/interfaces/kits/authentication",
+    "$dsoftbus_root_path/interfaces/kits/discovery",
+    "$dsoftbus_root_path/tests/common/include",
   ]
 
   sources = [

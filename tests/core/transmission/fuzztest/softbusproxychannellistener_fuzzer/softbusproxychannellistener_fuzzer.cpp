@@ -14,26 +14,26 @@
  */
 
 #include "softbusproxychannellistener_fuzzer.h"
+#include "softbus_transmission_interface.h"
 #include <cstddef>
 #include <cstdint>
-#include <securec.h>
 #include <fuzzer/FuzzedDataProvider.h>
+#include <securec.h>
 #include <vector>
-#include "softbus_transmission_interface.h"
 
 namespace OHOS {
 #define SESSION_NAME_SIZE_MAX 256
-#define DEVICE_ID_SIZE_MAX 65
-#define TEST_PEER_NETWORK_ID "com.test.trans.demo.peerNetworkId"
-#define TEST_SESSION_NAME "com.test.trans.demo.sessionname"
+#define DEVICE_ID_SIZE_MAX    65
+#define TEST_PEER_NETWORK_ID  "com.test.trans.demo.peerNetworkId"
+#define TEST_SESSION_NAME     "com.test.trans.demo.sessionname"
 
-void TransOpenNetWorkingChannelSessionNameTest(const uint8_t* data, size_t size)
+void TransOpenNetWorkingChannelSessionNameTest(const uint8_t *data, size_t size)
 {
     if ((data == nullptr) || (size >= SESSION_NAME_SIZE_MAX)) {
         return;
     }
 
-    char mySessionName[SESSION_NAME_SIZE_MAX] = {0};
+    char mySessionName[SESSION_NAME_SIZE_MAX] = { 0 };
     if (memcpy_s(mySessionName, SESSION_NAME_SIZE_MAX, data, size)) {
         return;
     }
@@ -45,19 +45,23 @@ void TransOpenNetWorkingChannelSessionNameTest(const uint8_t* data, size_t size)
 
 void TransOpenNetWorkingChannelSessionNameTest(FuzzedDataProvider &provider)
 {
-    std::string mySessionName =  provider.ConsumeRandomLengthString(SESSION_NAME_SIZE_MAX);
+    std::string providerSessionName = provider.ConsumeBytesAsString(SESSION_NAME_SIZE_MAX);
+    char sessionName[SESSION_NAME_SIZE_MAX] = { 0 };
+    if (strcpy_s(sessionName, SESSION_NAME_SIZE_MAX, providerSessionName.c_str()) != EOK) {
+        return;
+    }
     char peerNetworkId[DEVICE_ID_SIZE_MAX] = TEST_PEER_NETWORK_ID;
 
-    TransOpenNetWorkingChannel(mySessionName.c_str(), peerNetworkId, nullptr);
+    TransOpenNetWorkingChannel(sessionName, peerNetworkId, nullptr);
 }
 
-void TransOpenNetWorkingChannelPeerNetworkIdTest(const uint8_t* data, size_t size)
+void TransOpenNetWorkingChannelPeerNetworkIdTest(const uint8_t *data, size_t size)
 {
     if ((data == nullptr) || (size >= DEVICE_ID_SIZE_MAX) || (size < 0)) {
         return;
     }
 
-    char peerNetworkId[DEVICE_ID_SIZE_MAX] = {0};
+    char peerNetworkId[DEVICE_ID_SIZE_MAX] = { 0 };
     if (memcpy_s(peerNetworkId, DEVICE_ID_SIZE_MAX, data, size)) {
         return;
     }
@@ -68,13 +72,17 @@ void TransOpenNetWorkingChannelPeerNetworkIdTest(const uint8_t* data, size_t siz
 
 void TransOpenNetWorkingChannelPeerNetworkIdTest(FuzzedDataProvider &provider)
 {
-    std::string peerNetworkId =  provider.ConsumeRandomLengthString(DEVICE_ID_SIZE_MAX);
+    std::string providerPeerNetworkId = provider.ConsumeBytesAsString(DEVICE_ID_SIZE_MAX);
+    char peerNetworkId[DEVICE_ID_SIZE_MAX] = { 0 };
+    if (strcpy_s(peerNetworkId, DEVICE_ID_SIZE_MAX, providerPeerNetworkId.c_str()) != EOK) {
+        return;
+    }
     const char *mySessionName = TEST_SESSION_NAME;
 
-    TransOpenNetWorkingChannel(mySessionName, peerNetworkId.c_str(), nullptr);
+    TransOpenNetWorkingChannel(mySessionName, peerNetworkId, nullptr);
 }
 
-void TransCloseNetWorkingChannelTest(const uint8_t* data, size_t size)
+void TransCloseNetWorkingChannelTest(const uint8_t *data, size_t size)
 {
     if ((data == nullptr) || (size < sizeof(int32_t))) {
         return;
@@ -95,7 +103,7 @@ void TransCloseNetWorkingChannelTest(FuzzedDataProvider &provider)
     TransCloseNetWorkingChannel(channelId);
 }
 
-void TransSendNetworkingMessageTest(const uint8_t* data, size_t size)
+void TransSendNetworkingMessageTest(const uint8_t *data, size_t size)
 {
     if ((data == nullptr) || (size < sizeof(int32_t))) {
         return;
@@ -131,15 +139,19 @@ void TransSendNetworkingMessageTest(FuzzedDataProvider &provider)
 {
     int32_t channelId = provider.ConsumeIntegral<int32_t>();
     int32_t priority = provider.ConsumeIntegral<int32_t>();
-    std::string myData =  provider.ConsumeRandomLengthString(SESSION_NAME_SIZE_MAX);
+    std::string providerData = provider.ConsumeBytesAsString(SESSION_NAME_SIZE_MAX);
+    char data[SESSION_NAME_SIZE_MAX] = { 0 };
+    if (strcpy_s(data, SESSION_NAME_SIZE_MAX, providerData.c_str()) != EOK) {
+        return;
+    }
     uint32_t dataLen = SESSION_NAME_SIZE_MAX;
 
-    TransSendNetworkingMessage(channelId, myData.c_str(), dataLen, priority);
+    TransSendNetworkingMessage(channelId, data, dataLen, priority);
 }
 } // namespace OHOS
 
 /* Fuzzer entry point */
-extern "C" int32_t LLVMFuzzerTestOneInput(const uint8_t* data, size_t size)
+extern "C" int32_t LLVMFuzzerTestOneInput(const uint8_t *data, size_t size)
 {
     /* Run your code on data */
     FuzzedDataProvider provider(data, size);

@@ -698,7 +698,7 @@ static int32_t PagingParseMsgGetAuthKey(uint8_t *accountHash, uint8_t *udidHash,
         return SOFTBUS_NETWORK_BYTES_TO_HEX_STR_ERR;
     }
     uint8_t applyKey[SESSION_KEY_LENGTH] = { 0 };
-    int32_t ret = AuthFindApplyKeyId(&businessInfo, applyKey);
+    int32_t ret = AuthFindApplyKey(&businessInfo, applyKey);
     if (ret != SOFTBUS_OK) {
         TRANS_LOGE(TRANS_CTRL, "get auth key fail");
         return ret;

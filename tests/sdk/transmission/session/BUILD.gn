@@ -66,6 +66,53 @@ ohos_unittest("TransClientSessionManagerTest") {
   }
 }
 
+ohos_unittest("TransClientSessionManagerExTest") {
+  sanitize = {
+    cfi = true
+    cfi_cross_dso = true
+    debug = true
+  }
+  module_out_path = module_output_path
+  sources = [
+    "client_trans_session_manager_ex_test.cpp",
+    "$dsoftbus_root_path/tests/sdk/transmission/session/mock/src/trans_common_mock.cpp",
+    "$dsoftbus_root_path/tests/sdk/transmission/session/mock/src/trans_socket_mgr_mock.cpp",
+  ]
+
+  include_dirs = [
+    "$dsoftbus_root_path/core/common/include",
+    "$dsoftbus_root_path/core/frame/common/include",
+    "$dsoftbus_root_path/core/transmission/common/include",
+    "$dsoftbus_root_path/sdk/transmission/session/include",
+    "$dsoftbus_root_path/sdk/transmission/session/src",
+    "$dsoftbus_root_path/sdk/bus_center/manager/include",
+    "$dsoftbus_root_path/sdk/transmission/trans_channel/manager/include",
+    "$dsoftbus_root_path/components/nstackx/fillp/include",
+    "$dsoftbus_root_path/sdk/transmission/trans_channel/udp/file/include",
+    "$dsoftbus_root_path/sdk/transmission/trans_channel/proxy/include",
+    "$dsoftbus_root_path/sdk/transmission/trans_channel/tcp_direct/include",
+    "$dsoftbus_root_path/sdk/transmission/trans_channel/udp/common/include",
+    "$dsoftbus_root_path/sdk/transmission/ipc/include",
+    "$dsoftbus_root_path/interfaces/inner_kits/transport",
+    "$dsoftbus_root_path/sdk/transmission/session/cpp/include",
+    "$dsoftbus_root_path/tests/sdk/transmission/session/mock/include",
+  ]
+
+  deps = [
+    "$dsoftbus_dfx_path:softbus_dfx",
+    "$dsoftbus_root_path/core/common:softbus_utils",
+    "$dsoftbus_root_path/core/frame:softbus_server",
+    "$dsoftbus_root_path/adapter:softbus_adapter",
+  ]
+
+  external_deps = [
+    "c_utils:utils",
+    "hilog:libhilog",
+    "googletest:gmock",
+    "googletest:gtest_main",
+  ]
+}
+
 ohos_unittest("TransClientSessionServiceTest") {
   module_out_path = module_output_path
   sources = [ "client_trans_session_service_test.cpp" ]
@@ -169,7 +216,7 @@ ohos_unittest("TransClientSessionCallbackExTest") {
   module_out_path = module_output_path
   sources = [
     "client_trans_session_callback_ex_test.cpp",
-    "$dsoftbus_root_path/tests/sdk/transmission/session/mock/src/trans_manager_mock.cpp",
+    "$dsoftbus_root_path/tests/sdk/transmission/session/mock/src/trans_session_mgr_mock.cpp",
   ]
 
   include_dirs = [
@@ -316,8 +363,8 @@ ohos_unittest("TransClientMsgServiceExTest") {
   sources = [
     "client_trans_message_service_ex_test.cpp",
     "$dsoftbus_root_path/tests/sdk/transmission/session/mock/src/trans_common_mock.cpp",
-    "$dsoftbus_root_path/tests/sdk/transmission/session/mock/src/trans_manager_mock.cpp",
-    "$dsoftbus_root_path/tests/sdk/transmission/session/mock/src/trans_service_mock.cpp",
+    "$dsoftbus_root_path/tests/sdk/transmission/session/mock/src/trans_session_mgr_mock.cpp",
+    "$dsoftbus_root_path/tests/sdk/transmission/session/mock/src/trans_session_svc_mock.cpp",
   ]
 
   deps = [
@@ -468,8 +515,9 @@ ohos_unittest("TransClientSocketServiceExTest") {
   sources = [
     "client_trans_socket_service_ex_test.cpp",
     "$dsoftbus_root_path/tests/sdk/transmission/session/mock/src/trans_common_mock.cpp",
-    "$dsoftbus_root_path/tests/sdk/transmission/session/mock/src/trans_manager_mock.cpp",
-    "$dsoftbus_root_path/tests/sdk/transmission/session/mock/src/trans_service_mock.cpp",
+    "$dsoftbus_root_path/tests/sdk/transmission/session/mock/src/trans_session_mgr_mock.cpp",
+    "$dsoftbus_root_path/tests/sdk/transmission/session/mock/src/trans_session_svc_mock.cpp",
+    "$dsoftbus_root_path/tests/sdk/transmission/session/mock/src/trans_socket_mgr_mock.cpp",
   ]
 
   deps = [
@@ -493,6 +541,7 @@ group("unittest") {
     ":TransClientMsgServiceTest",
     ":TransClientSessionCallbackTest",
     ":TransClientSessionManagerTest",
+    ":TransClientSessionManagerExTest",
     ":TransClientSessionServiceTest",
     ":TransClientSocketServiceTest",
     ":TransClientMsgServiceExTest",
