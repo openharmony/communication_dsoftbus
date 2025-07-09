@@ -124,14 +124,20 @@ void MoveNodeTest(FuzzedDataProvider &provider)
 
 void TransTdcDecryptTest(FuzzedDataProvider &provider)
 {
-    std::string sessionKey = provider.ConsumeRandomLengthString(SESSION_KEY_LENGTH);
+    std::string providerSessionKey = provider.ConsumeBytesAsString(SESSION_KEY_LENGTH);
+    char sessionKey[SESSION_KEY_LENGTH] = { 0 };
+    if (strcpy_s(sessionKey, SESSION_KEY_LENGTH, providerSessionKey.c_str()) != EOK) {
+        return;
+    }
     uint32_t inLen = provider.ConsumeIntegral<uint8_t>();
-    std::string in = provider.ConsumeRandomLengthString(inLen);
+    std::string providerIn = provider.ConsumeBytesAsString(SESSION_KEY_LENGTH);
+    char in[SESSION_KEY_LENGTH] = { 0 };
+    if (strcpy_s(in, SESSION_KEY_LENGTH, providerIn.c_str()) != EOK) {
+        return;
+    }
     char out[UINT8_MAX] = { 0 };
-    uint32_t outLen = 0;
 
-    (void)TransTdcDecrypt(nullptr, nullptr, inLen, nullptr, nullptr);
-    (void)TransTdcDecrypt(sessionKey.c_str(), in.c_str(), inLen, out, &outLen);
+    (void)TransTdcDecrypt(sessionKey, in, inLen, out, nullptr);
 }
 
 void TransTdcRecvFirstDataTest(FuzzedDataProvider &provider)
@@ -165,11 +171,15 @@ void TransTdcUnPackAllDataTest(FuzzedDataProvider &provider)
 void TransTdcUnPackDataTest(FuzzedDataProvider &provider)
 {
     int32_t channelId = provider.ConsumeIntegral<int32_t>();
-    std::string sessionKey = provider.ConsumeRandomLengthString(SESSION_KEY_LENGTH);
+    std::string providerSessionKey = provider.ConsumeBytesAsString(SESSION_KEY_LENGTH);
+    char sessionKey[SESSION_KEY_LENGTH] = { 0 };
+    if (strcpy_s(sessionKey, SESSION_KEY_LENGTH, providerSessionKey.c_str()) != EOK) {
+        return;
+    }
     char plain[UINT8_MAX] = { 0 };
     uint32_t plainLen = 0;
 
-    (void)TransTdcUnPackData(channelId, sessionKey.c_str(), plain, &plainLen, nullptr);
+    (void)TransTdcUnPackData(channelId, sessionKey, plain, &plainLen, nullptr);
 }
 
 void CheckBufLenAndCopyDataTest(FuzzedDataProvider &provider)
@@ -276,12 +286,16 @@ void BuildDataHeadTest(FuzzedDataProvider &provider)
 void TransTdcEncryptWithSeqTest(FuzzedDataProvider &provider)
 {
     int32_t seqNum = provider.ConsumeIntegral<int32_t>();
-    std::string sessionKey = provider.ConsumeRandomLengthString(SESSION_KEY_LENGTH);
+    std::string providerSessionKey = provider.ConsumeBytesAsString(SESSION_KEY_LENGTH);
+    char sessionKey[SESSION_KEY_LENGTH] = { 0 };
+    if (strcpy_s(sessionKey, SESSION_KEY_LENGTH, providerSessionKey.c_str()) != EOK) {
+        return;
+    }
     EncrptyInfo info;
     (void)memset_s(&info, sizeof(EncrptyInfo), 0, sizeof(EncrptyInfo));
 
-    (void)TransTdcEncryptWithSeq(sessionKey.c_str(), seqNum, nullptr);
-    (void)TransTdcEncryptWithSeq(sessionKey.c_str(), seqNum, &info);
+    (void)TransTdcEncryptWithSeq(sessionKey, seqNum, nullptr);
+    (void)TransTdcEncryptWithSeq(sessionKey, seqNum, &info);
 }
 
 void PackTcpDataPacketHeadTest(FuzzedDataProvider &provider)
@@ -333,17 +347,25 @@ void TransTdcPackAllDataTest(FuzzedDataProvider &provider)
     DataLenInfo lenInfo;
     (void)memset_s(&lenInfo, sizeof(DataLenInfo), 0, sizeof(DataLenInfo));
     FillDataLenInfo(provider, &lenInfo);
-    std::string sessionKey = provider.ConsumeRandomLengthString(SESSION_KEY_LENGTH);
-    std::string data = provider.ConsumeRandomLengthString(UINT8_MAX);
+    std::string providerSessionKey = provider.ConsumeBytesAsString(SESSION_KEY_LENGTH);
+    char sessionKey[SESSION_KEY_LENGTH] = { 0 };
+    if (strcpy_s(sessionKey, SESSION_KEY_LENGTH, providerSessionKey.c_str()) != EOK) {
+        return;
+    }
+    std::string providerData = provider.ConsumeBytesAsString(UINT8_MAX);
+    char data[UINT8_MAX] = { 0 };
+    if (strcpy_s(data, UINT8_MAX, providerData.c_str()) != EOK) {
+        return;
+    }
     int32_t flags = provider.ConsumeIntegral<int32_t>();
 
     (void)TransTdcPackAllData(nullptr, nullptr, nullptr, flags, nullptr);
     info.len = 0;
-    (void)TransTdcPackAllData(&info, sessionKey.c_str(), data.c_str(), flags, &lenInfo);
+    (void)TransTdcPackAllData(&info, sessionKey, data, flags, &lenInfo);
     flags = FLAG_ACK;
-    (void)TransTdcPackAllData(&info, sessionKey.c_str(), data.c_str(), flags, &lenInfo);
+    (void)TransTdcPackAllData(&info, sessionKey, data, flags, &lenInfo);
     info.supportTlv = true;
-    (void)TransTdcPackAllData(&info, sessionKey.c_str(), data.c_str(), flags, &lenInfo);
+    (void)TransTdcPackAllData(&info, sessionKey, data, flags, &lenInfo);
 }
 
 void TransTdcSendDataTest(FuzzedDataProvider &provider)

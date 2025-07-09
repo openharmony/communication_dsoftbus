@@ -72,9 +72,9 @@ void OpenUsbClientSocketTest(FuzzedDataProvider &provider)
     (void)memset_s(&option, sizeof(ConnectOption), 0, sizeof(ConnectOption));
     option.type = static_cast<ConnectType>(provider.ConsumeIntegralInRange<uint8_t>(CONNECT_TCP, CONNECT_TYPE_MAX));
     bool isNonBlock = provider.ConsumeBool();
-    std::string myIp = provider.ConsumeBytesAsString(IP_LEN);
+    char myIp[IP_LEN] = "127.0.0.1";
 
-    (void)OpenUsbClientSocket(&option, myIp.c_str(), isNonBlock);
+    (void)OpenUsbClientSocket(&option, myIp, isNonBlock);
 
     ConnectOption option2 = {
         .type = CONNECT_TCP,
@@ -83,9 +83,8 @@ void OpenUsbClientSocketTest(FuzzedDataProvider &provider)
                          .moduleId = DIRECT_CHANNEL_SERVER_WIFI,
                          .protocol = LNN_PROTOCOL_IP}
     };
-    myIp = "127.0.0.1";
     isNonBlock = false;
-    (void)OpenUsbClientSocket(&option2, myIp.c_str(), isNonBlock);
+    (void)OpenUsbClientSocket(&option2, myIp, isNonBlock);
 }
 
 void AcceptUsbClientTest(FuzzedDataProvider &provider)
