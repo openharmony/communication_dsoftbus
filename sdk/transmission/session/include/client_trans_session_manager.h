@@ -195,6 +195,10 @@ int32_t ClientGetChannelIdAndTypeBySocketId(int32_t socket, int32_t *type, int32
 
 int32_t ClientForkSocketByChannelId(int32_t socketId, BusinessType type, int32_t *newSocket);
 
+int32_t ClientGetChannelBusinessTypeByChannelId(int32_t channelId, int32_t *businessType);
+
+int32_t ClientCheckIsD2DypeBySessionId(int32_t sessionId, bool *isD2D);
+
 #ifdef __cplusplus
 }
 #endif

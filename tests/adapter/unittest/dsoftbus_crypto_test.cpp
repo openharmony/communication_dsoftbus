@@ -610,4 +610,79 @@ HWTEST_F(AdaptorDsoftbusCryptTest, SoftBusDecryptDataWithSeq004, TestSize.Level0
         &cipherKey, (unsigned char *)encryptData, encryptLen, (unsigned char *)decryptData, nullptr, seqNum);
     EXPECT_EQ(SOFTBUS_INVALID_PARAM, ret);
 }
+
+/*
+ * @tc.name: SoftBusEncryptDataByGcm128001
+ * @tc.desc: encrypt invalid param
+ * @tc.type: FUNC
+ * @tc.require: I5OHDE
+ */
+HWTEST_F(AdaptorDsoftbusCryptTest, SoftBusEncryptDataByGcm128001, TestSize.Level0)
+{
+    AesGcm128CipherKey cipherKey;
+    cipherKey.keyLen = SHORT_SESSION_KEY_LENGTH;
+    int32_t ret = SoftBusGenerateRandomArray(cipherKey.key, SHORT_SESSION_KEY_LENGTH);
+    EXPECT_EQ(SOFTBUS_OK, ret);
+
+    char input[SESSION_KEY_LENGTH];
+    uint32_t inLen = SESSION_KEY_LENGTH;
+    char encryptData[SESSION_KEY_LENGTH + SHORT_TAG_LEN];
+    uint32_t encryptLen = SESSION_KEY_LENGTH + SHORT_TAG_LEN;
+    ret = SoftBusEncryptDataByGcm128(nullptr, (unsigned char *)input, inLen, (unsigned char *)encryptData, &encryptLen);
+    EXPECT_EQ(SOFTBUS_INVALID_PARAM, ret);
+
+    ret = SoftBusEncryptDataByGcm128(&cipherKey, nullptr, inLen, (unsigned char *)encryptData, &encryptLen);
+    EXPECT_EQ(SOFTBUS_INVALID_PARAM, ret);
+
+    ret = SoftBusEncryptDataByGcm128(&cipherKey, (unsigned char *)input, 0, (unsigned char *)encryptData, &encryptLen);
+    EXPECT_EQ(SOFTBUS_INVALID_PARAM, ret);
+
+    ret = SoftBusEncryptDataByGcm128(&cipherKey, (unsigned char *)input, inLen, nullptr, &encryptLen);
+    EXPECT_EQ(SOFTBUS_INVALID_PARAM, ret);
+
+    ret = SoftBusEncryptDataByGcm128(&cipherKey, (unsigned char *)input, inLen, (unsigned char *)encryptData, nullptr);
+    EXPECT_EQ(SOFTBUS_INVALID_PARAM, ret);
+
+    ret = SoftBusEncryptDataByGcm128(&cipherKey, (unsigned char *)input, inLen,
+        (unsigned char *)encryptData, &encryptLen);
+    EXPECT_EQ(SOFTBUS_OK, ret);
+}
+
+/*
+ * @tc.name: SoftBusDecryptDataByGcm128002
+ * @tc.desc: decrypt invalid param
+ * @tc.type: FUNC
+ * @tc.require: I5OHDE
+ */
+HWTEST_F(AdaptorDsoftbusCryptTest, SoftBusDecryptDataByGcm128002, TestSize.Level0)
+{
+    AesGcm128CipherKey cipherKey;
+    cipherKey.keyLen = SHORT_SESSION_KEY_LENGTH;
+    int32_t ret = SoftBusGenerateRandomArray(cipherKey.key, SHORT_SESSION_KEY_LENGTH);
+    EXPECT_EQ(SOFTBUS_OK, ret);
+
+    char input[SESSION_KEY_LENGTH];
+    uint32_t inLen = SESSION_KEY_LENGTH;
+    char decryptData[SESSION_KEY_LENGTH];
+    uint32_t decryptLen = SESSION_KEY_LENGTH;
+
+    ret = SoftBusDecryptDataByGcm128(nullptr, (unsigned char *)input, inLen, (unsigned char *)decryptData, &decryptLen);
+    EXPECT_EQ(SOFTBUS_INVALID_PARAM, ret);
+
+    ret = SoftBusDecryptDataByGcm128(&cipherKey, nullptr, inLen, (unsigned char *)decryptData, &decryptLen);
+    EXPECT_EQ(SOFTBUS_INVALID_PARAM, ret);
+
+    ret = SoftBusDecryptDataByGcm128(&cipherKey, (unsigned char *)input, 0, (unsigned char *)decryptData, &decryptLen);
+    EXPECT_EQ(SOFTBUS_INVALID_PARAM, ret);
+
+    ret = SoftBusDecryptDataByGcm128(&cipherKey, (unsigned char *)input, inLen, nullptr, &decryptLen);
+    EXPECT_EQ(SOFTBUS_INVALID_PARAM, ret);
+
+    ret = SoftBusDecryptDataByGcm128(&cipherKey, (unsigned char *)input, inLen, (unsigned char *)decryptData, nullptr);
+    EXPECT_EQ(SOFTBUS_INVALID_PARAM, ret);
+
+    ret = SoftBusEncryptDataByGcm128(&cipherKey, (unsigned char *)input, inLen,
+        (unsigned char *)decryptData, &decryptLen);
+    EXPECT_EQ(SOFTBUS_OK, ret);
+}
 } // namespace OHOS

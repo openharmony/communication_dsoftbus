@@ -35,9 +35,9 @@ ohos_unittest("SoftbusConnCommonTest") {
     "softbus_conn_common_test.cpp",
   ]
   deps = [
+    "$dsoftbus_root_path/adapter:softbus_adapter",
     "$dsoftbus_root_path/core/common:softbus_utils",
     "$dsoftbus_root_path/core/frame:softbus_server",
-    "$dsoftbus_root_path/adapter:softbus_adapter",
   ]
   external_deps = [
     "bounds_checking_function:libsec_static",
@@ -118,6 +118,27 @@ ohos_unittest("SoftbusConnQueueTest") {
     "softbus_conn_bytes_delivery_test.cpp",
     "softbus_conn_fair_priority_queue_test.cpp",
   ]
+
+  deps = [
+    "$dsoftbus_dfx_path:softbus_dfx",
+    "$dsoftbus_root_path/adapter:softbus_adapter",
+    "$dsoftbus_root_path/core/common:softbus_utils",
+  ]
+
+  external_deps = [
+    "googletest:gmock",
+    "googletest:gtest",
+    "googletest:gtest_main",
+    "hilog:libhilog",
+  ]
+}
+
+ohos_unittest("DataheadTransformTest") {
+  module_out_path = module_output_path
+
+  include_dirs = [ "$dsoftbus_root_path/core/connection/common/include" ]
+
+  sources = [ "softbus_datahead_transform_test.cpp" ]
 
   deps = [
     "$dsoftbus_dfx_path:softbus_dfx",

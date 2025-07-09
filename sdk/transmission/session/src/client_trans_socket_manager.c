@@ -1099,12 +1099,15 @@ int32_t DataSeqInfoListAddItem(uint32_t dataSeq, int32_t channelId, int32_t sock
             return SOFTBUS_OK;
         }
     }
+    int32_t businessType;
+    (void)ClientGetChannelBusinessTypeByChannelId(channelId, &businessType);
     DataSeqInfo *item = (DataSeqInfo *)SoftBusCalloc(sizeof(DataSeqInfo));
     TRANS_CHECK_AND_RETURN_RET_LOGE(item != NULL, SOFTBUS_MALLOC_ERR, TRANS_CTRL, "calloc failed");
     item->channelId = channelId;
     item->seq = (int32_t)dataSeq;
     item->socketId = socketId;
     item->channelType = channelType;
+    item->isMessage = (businessType == BUSINESS_TYPE_D2D_MESSAGE) ? true :false;
     ListInit(&item->node);
     ListAdd(&(g_clientDataSeqInfoList->list), &(item->node));
     TRANS_LOGI(TRANS_SDK, "add DataSeqInfo success, channelId=%{public}d, dataSeq=%{public}u", channelId, dataSeq);
@@ -1155,7 +1158,19 @@ static void TransOnBindSentProc(ListNode *timeoutItemList)
             SoftBusFree(item);
             continue;
         }
-        sessionCallback.socketClient.OnBytesSent(item->socketId, item->seq, SOFTBUS_TRANS_ASYNC_SEND_TIMEOUT);
+        if (item->isMessage) {
+            if (sessionCallback.socketClient.OnMessageSent == NULL) {
+                TRANS_LOGE(TRANS_SDK, "OnMessageSent not implement");
+                continue;
+            }
+            sessionCallback.socketClient.OnMessageSent(item->socketId, item->seq, SOFTBUS_TRANS_ASYNC_SEND_TIMEOUT);
+        } else {
+            if (sessionCallback.socketClient.OnBytesSent == NULL) {
+                TRANS_LOGE(TRANS_SDK, "OnBytesSent not implement");
+                continue;
+            }
+            sessionCallback.socketClient.OnBytesSent(item->socketId, item->seq, SOFTBUS_TRANS_ASYNC_SEND_TIMEOUT);
+        }
         TRANS_LOGI(TRANS_SDK, "async sendbytes recv ack timeout, socket=%{public}d, dataSeq=%{public}u",
             item->socketId, item->seq);
         ListDelete(&(item->node));
@@ -1183,6 +1198,7 @@ void TransAsyncSendBytesTimeoutProc(void)
             }
             timeoutItem->socketId = item->socketId;
             timeoutItem->seq = item->seq;
+            timeoutItem->isMessage = item->isMessage;
             ListDelete(&(item->node));
             ListAdd(&timeoutItemList, &(timeoutItem->node));
             SoftBusFree(item);

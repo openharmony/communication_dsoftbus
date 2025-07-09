@@ -188,6 +188,11 @@ bool IsSessionExceedLimit(void)
 {
     return GetManagerInterface()->IsSessionExceedLimit();
 }
+
+int32_t ClientCheckIsD2DypeBySessionId(int32_t sessionId, bool *isD2D)
+{
+    return GetManagerInterface()->ClientCheckIsD2DypeBySessionId(sessionId, isD2D);
+}
 #ifdef __cplusplus
 }
 #endif

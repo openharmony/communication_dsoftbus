@@ -1221,4 +1221,22 @@ HWTEST_F(SoftbusProxyChannelMessageTest, TransProxyUnpackInnerHandshakeMsgTest00
     EXPECT_EQ(SOFTBUS_DECRYPT_ERR, ret);
     cJSON_Delete(msg);
 }
+
+/**
+  * @tc.name: TransProxyParseD2DDataTest001
+  * @tc.desc: test trans proxy parse .
+  * @tc.type: FUNC
+  * @tc.require:
+  */
+HWTEST_F(SoftbusProxyChannelMessageTest, TransProxyParseD2DDataTest001, TestSize.Level1)
+{
+    int32_t len = 0;
+    int32_t ret = TransProxyParseD2DData(nullptr, len);
+    EXPECT_EQ(SOFTBUS_INVALID_PARAM, ret);
+
+    char data[] = "111111111";
+    len = 10;
+    ret = TransProxyParseD2DData(data, len);
+    EXPECT_EQ(SOFTBUS_INVALID_PARAM, ret);
+}
 } // namespace OHOS

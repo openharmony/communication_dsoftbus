@@ -30,6 +30,8 @@ void UnpackConnPktHead(ConnPktHead *data);
 void UnpackProxyMessageHead(ProxyMessageHead *msg);
 void PackProxyMessageHead(ProxyMessageHead *msg);
 
+void PackProxyMessageShortHead(ProxyMessageShortHead *msg);
+
 #ifdef __cplusplus
 #if __cplusplus
 }
