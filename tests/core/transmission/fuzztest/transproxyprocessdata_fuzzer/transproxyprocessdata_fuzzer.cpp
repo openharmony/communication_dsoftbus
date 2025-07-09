@@ -110,14 +110,18 @@ void TransProxyPackBytesTest(FuzzedDataProvider &provider)
     int32_t channelId = provider.ConsumeIntegral<int32_t>();
     SessionPktType flag = static_cast<SessionPktType>(
         provider.ConsumeIntegralInRange<uint16_t>(TRANS_SESSION_BYTES, TRANS_SESSION_ASYNC_MESSAGE));
-    std::string sessionKey = provider.ConsumeRandomLengthString(SESSION_KEY_LENGTH);
+    std::string providerSessionKey = provider.ConsumeBytesAsString(SESSION_KEY_LENGTH);
+    char sessionKey[SESSION_KEY_LENGTH] = { 0 };
+    if (strcpy_s(sessionKey, SESSION_KEY_LENGTH, providerSessionKey.c_str()) != EOK) {
+        return;
+    }
 
     TransProxyPackBytes(channelId, nullptr, nullptr, flag, 0);
 
     ProxyDataInfo dataInfo;
     (void)memset_s(&dataInfo, sizeof(ProxyDataInfo), 0, sizeof(ProxyDataInfo));
 
-    TransProxyPackBytes(channelId, &dataInfo, sessionKey.c_str(), flag, 0);
+    TransProxyPackBytes(channelId, &dataInfo, sessionKey, flag, 0);
 }
 
 void TransProxyPackTlvBytesTest(FuzzedDataProvider &provider)
@@ -142,9 +146,13 @@ void TransProxyPackTlvBytesTest(FuzzedDataProvider &provider)
 
     SessionPktType flag2 = static_cast<SessionPktType>(
         provider.ConsumeIntegralInRange<uint16_t>(TRANS_SESSION_BYTES, TRANS_SESSION_ASYNC_MESSAGE));
-    std::string sessionKey = provider.ConsumeRandomLengthString(SESSION_KEY_LENGTH);
+    std::string providerSessionKey = provider.ConsumeBytesAsString(SESSION_KEY_LENGTH);
+    char sessionKey[SESSION_KEY_LENGTH] = { 0 };
+    if (strcpy_s(sessionKey, SESSION_KEY_LENGTH, providerSessionKey.c_str()) != EOK) {
+        return;
+    }
     int32_t seq = provider.ConsumeIntegral<int32_t>();
-    (void)TransProxyPackTlvBytes(nullptr, sessionKey.c_str(), flag2, seq, nullptr);
+    (void)TransProxyPackTlvBytes(nullptr, sessionKey, flag2, seq, nullptr);
 
     ProxyDataInfo dataInfo;
     (void)memset_s(&dataInfo, sizeof(ProxyDataInfo), 0, sizeof(ProxyDataInfo));
@@ -152,7 +160,7 @@ void TransProxyPackTlvBytesTest(FuzzedDataProvider &provider)
     DataHeadTlvPacketHead info;
     (void)memset_s(&info, sizeof(DataHeadTlvPacketHead), 0, sizeof(DataHeadTlvPacketHead));
     FillDataHeadTlvPacketHead(provider, &info);
-    TransProxyPackTlvBytes(&dataInfo, sessionKey.c_str(), flag2, seq, &info);
+    TransProxyPackTlvBytes(&dataInfo, sessionKey, flag2, seq, &info);
 }
 
 void TransProxyPackDataTest(FuzzedDataProvider &provider)
@@ -171,11 +179,6 @@ void TransProxyPackDataTest(FuzzedDataProvider &provider)
     uint32_t cnt = provider.ConsumeIntegral<uint32_t>();
     uint32_t dataLen = 0;
     (void)TransProxyPackData(nullptr, sliceNum, packetType, cnt, &dataLen);
-
-    ProxyDataInfo dataInfo;
-    (void)memset_s(&dataInfo, sizeof(ProxyDataInfo), 0, sizeof(ProxyDataInfo));
-
-    (void)TransProxyPackData(&dataInfo, sliceNum, packetType, cnt, &dataLen);
 }
 
 void TransProxyCheckSliceHeadTest(FuzzedDataProvider &provider)
@@ -208,17 +211,21 @@ void TransProxyNoSubPacketProcTest(FuzzedDataProvider &provider)
     PacketHead head;
     (void)memset_s(&head, sizeof(PacketHead), 0, sizeof(PacketHead));
     FillPacketHead(provider, &head);
-    std::string data = provider.ConsumeRandomLengthString();
-    (void)TransProxyNoSubPacketProc(&head, len, data.c_str(), channelId);
+    std::string providerData = provider.ConsumeBytesAsString(UINT8_MAX);
+    char data[UINT8_MAX] = { 0 };
+    if (strcpy_s(data, UINT8_MAX, providerData.c_str()) != EOK) {
+        return;
+    }
+    (void)TransProxyNoSubPacketProc(&head, len, data, channelId);
     len = provider.ConsumeIntegral<uint32_t>();
-    (void)TransProxyNoSubPacketProc(&head, len, data.c_str(), channelId);
+    (void)TransProxyNoSubPacketProc(&head, len, data, channelId);
 
     head.magicNumber = MAGIC_NUMBER;
-    (void)TransProxyNoSubPacketProc(&head, len, data.c_str(), channelId);
+    (void)TransProxyNoSubPacketProc(&head, len, data, channelId);
     head.dataLen = -1;
-    (void)TransProxyNoSubPacketProc(&head, len, data.c_str(), channelId);
+    (void)TransProxyNoSubPacketProc(&head, len, data, channelId);
     len = sizeof(PacketHead);
-    (void)TransProxyNoSubPacketProc(&head, len, data.c_str(), channelId);
+    (void)TransProxyNoSubPacketProc(&head, len, data, channelId);
 }
 
 void TransProxyProcessSessionDataTest(FuzzedDataProvider &provider)
@@ -230,13 +237,17 @@ void TransProxyProcessSessionDataTest(FuzzedDataProvider &provider)
     PacketHead dataHead;
     (void)memset_s(&dataHead, sizeof(PacketHead), 0, sizeof(PacketHead));
     FillPacketHead(provider, &dataHead);
-    std::string data = provider.ConsumeRandomLengthString();
-    (void)TransProxyProcessSessionData(&dataInfo, &dataHead, data.c_str());
+    std::string providerData = provider.ConsumeBytesAsString(UINT8_MAX);
+    char data[UINT8_MAX] = { 0 };
+    if (strcpy_s(data, UINT8_MAX, providerData.c_str()) != EOK) {
+        return;
+    }
+    (void)TransProxyProcessSessionData(&dataInfo, &dataHead, data);
 
     dataHead.dataLen = OVERHEAD_LEN;
-    (void)TransProxyProcessSessionData(&dataInfo, &dataHead, data.c_str());
+    (void)TransProxyProcessSessionData(&dataInfo, &dataHead, data);
     dataHead.dataLen = OVERHEAD_LEN + 1;
-    (void)TransProxyProcessSessionData(&dataInfo, &dataHead, data.c_str());
+    (void)TransProxyProcessSessionData(&dataInfo, &dataHead, data);
 }
 
 static void FillSliceProcessor(FuzzedDataProvider &provider, SliceProcessor *processor)
@@ -267,8 +278,12 @@ void TransProxyDecryptPacketDataTest(FuzzedDataProvider &provider)
     ProxyDataInfo dataInfo;
     (void)memset_s(&dataInfo, sizeof(ProxyDataInfo), 0, sizeof(ProxyDataInfo));
 
-    std::string sessionKey = provider.ConsumeRandomLengthString(SESSION_KEY_LENGTH);
-    (void)TransProxyDecryptPacketData(seq, &dataInfo, sessionKey.c_str());
+    std::string providerSessionKey = provider.ConsumeBytesAsString(SESSION_KEY_LENGTH);
+    char sessionKey[SESSION_KEY_LENGTH] = { 0 };
+    if (strcpy_s(sessionKey, SESSION_KEY_LENGTH, providerSessionKey.c_str()) != EOK) {
+        return;
+    }
+    (void)TransProxyDecryptPacketData(seq, &dataInfo, sessionKey);
 }
 
 void TransProxySessionDataLenCheckTest(FuzzedDataProvider &provider)
@@ -297,15 +312,19 @@ void TransProxyFirstSliceProcessTest(FuzzedDataProvider &provider)
     SliceHead head;
     (void)memset_s(&head, sizeof(SliceHead), 0, sizeof(SliceHead));
     FillSliceHead(provider, &head);
-    std::string data = provider.ConsumeRandomLengthString();
+    std::string providerData = provider.ConsumeBytesAsString(UINT8_MAX);
+    char data[UINT8_MAX] = { 0 };
+    if (strcpy_s(data, UINT8_MAX, providerData.c_str()) != EOK) {
+        return;
+    }
     uint32_t len = provider.ConsumeIntegral<uint32_t>();
     bool supportTlv = provider.ConsumeBool();
 
     (void)TransProxyFirstSliceProcess(nullptr, nullptr, nullptr, len, supportTlv);
-    (void)TransProxyFirstSliceProcess(&processor, &head, data.c_str(), len, supportTlv);
+    (void)TransProxyFirstSliceProcess(&processor, &head, data, len, supportTlv);
 
     head.sliceNum = -1;
-    (void)TransProxyFirstSliceProcess(&processor, &head, data.c_str(), len, supportTlv);
+    (void)TransProxyFirstSliceProcess(&processor, &head, data, len, supportTlv);
 }
 
 void TransProxySliceProcessChkPkgIsValidTest(FuzzedDataProvider &provider)
@@ -316,23 +335,27 @@ void TransProxySliceProcessChkPkgIsValidTest(FuzzedDataProvider &provider)
     SliceHead head;
     (void)memset_s(&head, sizeof(SliceHead), 0, sizeof(SliceHead));
     FillSliceHead(provider, &head);
-    std::string data = provider.ConsumeRandomLengthString();
+    std::string providerData = provider.ConsumeBytesAsString(UINT8_MAX);
+    char data[UINT8_MAX] = { 0 };
+    if (strcpy_s(data, UINT8_MAX, providerData.c_str()) != EOK) {
+        return;
+    }
     uint32_t len = provider.ConsumeIntegral<uint32_t>();
 
-    (void)TransProxySliceProcessChkPkgIsValid(nullptr, nullptr, data.c_str(), len);
-    (void)TransProxySliceProcessChkPkgIsValid(&processor, &head, data.c_str(), len);
+    (void)TransProxySliceProcessChkPkgIsValid(nullptr, nullptr, data, len);
+    (void)TransProxySliceProcessChkPkgIsValid(&processor, &head, data, len);
     head.sliceNum = processor.sliceNumber;
     head.sliceSeq = processor.expectedSeq;
-    (void)TransProxySliceProcessChkPkgIsValid(&processor, &head, data.c_str(), len);
+    (void)TransProxySliceProcessChkPkgIsValid(&processor, &head, data, len);
     processor.bufLen = processor.dataLen;
     len = 0;
-    (void)TransProxySliceProcessChkPkgIsValid(&processor, &head, data.c_str(), len);
+    (void)TransProxySliceProcessChkPkgIsValid(&processor, &head, data, len);
     processor.data = nullptr;
-    (void)TransProxySliceProcessChkPkgIsValid(&processor, &head, data.c_str(), len);
+    (void)TransProxySliceProcessChkPkgIsValid(&processor, &head, data, len);
     processor.dataLen += processor.bufLen;
-    (void)TransProxySliceProcessChkPkgIsValid(&processor, &head, data.c_str(), len);
+    (void)TransProxySliceProcessChkPkgIsValid(&processor, &head, data, len);
     head.sliceNum += processor.sliceNumber;
-    (void)TransProxySliceProcessChkPkgIsValid(&processor, &head, data.c_str(), len);
+    (void)TransProxySliceProcessChkPkgIsValid(&processor, &head, data, len);
 }
 
 void TransGetActualDataLenTest(FuzzedDataProvider &provider)
@@ -357,57 +380,69 @@ void TransProxyNormalSliceProcessTest(FuzzedDataProvider &provider)
     SliceHead head;
     (void)memset_s(&head, sizeof(SliceHead), 0, sizeof(SliceHead));
     FillSliceHead(provider, &head);
-    std::string data = provider.ConsumeRandomLengthString();
+    std::string providerData = provider.ConsumeBytesAsString(UINT8_MAX);
+    char data[UINT8_MAX] = { 0 };
+    if (strcpy_s(data, UINT8_MAX, providerData.c_str()) != EOK) {
+        return;
+    }
     uint32_t len = provider.ConsumeIntegral<uint32_t>();
 
     (void)TransProxyNormalSliceProcess(nullptr, nullptr, nullptr, len);
-    (void)TransProxyNormalSliceProcess(&processor, &head, data.c_str(), len);
+    (void)TransProxyNormalSliceProcess(&processor, &head, data, len);
     head.sliceNum = processor.sliceNumber;
     head.sliceSeq = processor.expectedSeq;
     processor.bufLen = processor.dataLen;
     len = 0;
-    (void)TransProxyNormalSliceProcess(&processor, &head, data.c_str(), len);
+    (void)TransProxyNormalSliceProcess(&processor, &head, data, len);
 }
 
 void TransProxyParseTlvTest(FuzzedDataProvider &provider)
 {
     uint32_t len = provider.ConsumeIntegral<uint32_t>();
     uint32_t headSize = provider.ConsumeIntegral<uint32_t>();
-    std::string data = provider.ConsumeRandomLengthString();
+    std::string providerData = provider.ConsumeBytesAsString(UINT8_MAX);
+    char data[UINT8_MAX] = { 0 };
+    if (strcpy_s(data, UINT8_MAX, providerData.c_str()) != EOK) {
+        return;
+    }
     DataHeadTlvPacketHead head;
     (void)memset_s(&head, sizeof(DataHeadTlvPacketHead), 0, sizeof(DataHeadTlvPacketHead));
     FillDataHeadTlvPacketHead(provider, &head);
-    (void)CheckLenAndCopyData(len, headSize, data.c_str(), &head);
+    (void)CheckLenAndCopyData(len, headSize, data, &head);
     len = headSize;
-    (void)CheckLenAndCopyData(len, headSize, data.c_str(), &head);
+    (void)CheckLenAndCopyData(len, headSize, data, &head);
     len += headSize;
-    (void)CheckLenAndCopyData(len, headSize, data.c_str(), &head);
+    (void)CheckLenAndCopyData(len, headSize, data, &head);
 
     (void)TransProxyParseTlv(len, nullptr, nullptr, nullptr);
-    (void)TransProxyParseTlv(len, data.c_str(), &head, &headSize);
+    (void)TransProxyParseTlv(len, data, &head, &headSize);
 }
 
 void TransProxyNoSubPacketTlvProcTest(FuzzedDataProvider &provider)
 {
     int32_t channelId = provider.ConsumeIntegral<int32_t>();
     uint32_t len = provider.ConsumeIntegral<uint32_t>();
-    std::string data = provider.ConsumeRandomLengthString();
+    std::string providerData = provider.ConsumeBytesAsString(UINT8_MAX);
+    char data[UINT8_MAX] = { 0 };
+    if (strcpy_s(data, UINT8_MAX, providerData.c_str()) != EOK) {
+        return;
+    }
     uint32_t newPktHeadSize = provider.ConsumeIntegral<uint32_t>();
     DataHeadTlvPacketHead pktHead;
     (void)memset_s(&pktHead, sizeof(DataHeadTlvPacketHead), 0, sizeof(DataHeadTlvPacketHead));
     FillDataHeadTlvPacketHead(provider, &pktHead);
 
-    (void)TransProxyNoSubPacketTlvProc(channelId, data.c_str(), len, nullptr, newPktHeadSize);
-    (void)TransProxyNoSubPacketTlvProc(channelId, data.c_str(), len, &pktHead, newPktHeadSize);
+    (void)TransProxyNoSubPacketTlvProc(channelId, data, len, nullptr, newPktHeadSize);
+    (void)TransProxyNoSubPacketTlvProc(channelId, data, len, &pktHead, newPktHeadSize);
     pktHead.magicNumber = MAGIC_NUMBER;
-    (void)TransProxyNoSubPacketTlvProc(channelId, data.c_str(), len, &pktHead, newPktHeadSize);
+    (void)TransProxyNoSubPacketTlvProc(channelId, data, len, &pktHead, newPktHeadSize);
     pktHead.dataLen = 0;
-    (void)TransProxyNoSubPacketTlvProc(channelId, data.c_str(), len, &pktHead, newPktHeadSize);
+    (void)TransProxyNoSubPacketTlvProc(channelId, data, len, &pktHead, newPktHeadSize);
     len = newPktHeadSize;
-    (void)TransProxyNoSubPacketTlvProc(channelId, data.c_str(), len, &pktHead, newPktHeadSize);
+    (void)TransProxyNoSubPacketTlvProc(channelId, data, len, &pktHead, newPktHeadSize);
     pktHead.dataLen = len;
     len += newPktHeadSize;
-    (void)TransProxyNoSubPacketTlvProc(channelId, data.c_str(), len, &pktHead, newPktHeadSize);
+    (void)TransProxyNoSubPacketTlvProc(channelId, data, len, &pktHead, newPktHeadSize);
 }
 
 void TransProxyProcDataTest(FuzzedDataProvider &provider)
@@ -418,13 +453,17 @@ void TransProxyProcDataTest(FuzzedDataProvider &provider)
     DataHeadTlvPacketHead dataHead;
     (void)memset_s(&dataHead, sizeof(DataHeadTlvPacketHead), 0, sizeof(DataHeadTlvPacketHead));
     FillDataHeadTlvPacketHead(provider, &dataHead);
-    std::string data = provider.ConsumeRandomLengthString();
+    std::string providerData = provider.ConsumeBytesAsString(UINT8_MAX);
+    char data[UINT8_MAX] = { 0 };
+    if (strcpy_s(data, UINT8_MAX, providerData.c_str()) != EOK) {
+        return;
+    }
 
-    (void)TransProxyProcData(&dataInfo, &dataHead, data.c_str());
+    (void)TransProxyProcData(&dataInfo, &dataHead, data);
     dataHead.dataLen = OVERHEAD_LEN;
-    (void)TransProxyProcData(&dataInfo, &dataHead, data.c_str());
+    (void)TransProxyProcData(&dataInfo, &dataHead, data);
     dataHead.dataLen += 1;
-    (void)TransProxyProcData(&dataInfo, &dataHead, data.c_str());
+    (void)TransProxyProcData(&dataInfo, &dataHead, data);
 }
 } // namespace OHOS
 

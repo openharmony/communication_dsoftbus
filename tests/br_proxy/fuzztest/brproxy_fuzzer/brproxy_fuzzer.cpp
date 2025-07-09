@@ -88,7 +88,7 @@ void SendBrProxyDataTest(FuzzedDataProvider &provider)
 {
     int32_t channelId = provider.ConsumeIntegral<int32_t>();
     uint32_t dataLen = provider.ConsumeIntegralInRange<uint32_t>(0, BR_PROXY_SEND_MAX_LEN);
-    std::string data = provider.ConsumeRandomLengthString(dataLen);
+    std::string data = provider.ConsumeRandomLengthString(BR_PROXY_SEND_MAX_LEN);
     char myData[BR_PROXY_SEND_MAX_LEN + 1];
     if (strcpy_s(myData, sizeof(myData), data.c_str()) != 0) {
         return;
