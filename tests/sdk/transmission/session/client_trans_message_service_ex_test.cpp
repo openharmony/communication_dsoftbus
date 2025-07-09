@@ -31,8 +31,8 @@
 #include "softbus_trans_def.h"
 #include "trans_log.h"
 #include "trans_common_mock.h"
-#include "trans_manager_mock.h"
-#include "trans_service_mock.h"
+#include "trans_session_mgr_mock.h"
+#include "trans_session_svc_mock.h"
 
 #define TRANS_TEST_BEYOND_MAX_BYTES_LEN (6 * 1024 * 1024)
 #define TRANS_TEST_INVALID_SEND_LEN (1024 * 1024)
@@ -101,9 +101,9 @@ HWTEST_F(TransClientMsgServiceExTest, CheckSendLenForBoosterTest01, TestSize.Lev
  */
 HWTEST_F(TransClientMsgServiceExTest, TransClientMsgServiceTest01, TestSize.Level1)
 {
-    NiceMock<TransMgrInterfaceMock> transMgrInterfaceMock;
-    EXPECT_CALL(transMgrInterfaceMock, ClientGetDataConfigByChannelId).WillOnce(Return(SOFTBUS_INVALID_PARAM))
-        .WillOnce(TransMgrInterfaceMock::ActionOfClientGetDataConfigByChannelId).WillRepeatedly(Return(SOFTBUS_OK));
+    NiceMock<TransSessionMgrMock> transSessionMgrMock;
+    EXPECT_CALL(transSessionMgrMock, ClientGetDataConfigByChannelId).WillOnce(Return(SOFTBUS_INVALID_PARAM))
+        .WillOnce(TransSessionMgrMock::ActionOfClientGetDataConfigByChannelId).WillRepeatedly(Return(SOFTBUS_OK));
     
     int32_t ret = CheckSendLen(CHANNEL_TYPE_AUTH, BUSINESS_TYPE_MESSAGE, TRANS_TEST_SEND_LEN, BUSINESS_TYPE_MESSAGE);
     EXPECT_EQ(ret, SOFTBUS_GET_CONFIG_VAL_ERR);
@@ -111,8 +111,8 @@ HWTEST_F(TransClientMsgServiceExTest, TransClientMsgServiceTest01, TestSize.Leve
     ret = CheckSendLen(CHANNEL_TYPE_AUTH, BUSINESS_TYPE_MESSAGE, TRANS_TEST_SEND_LEN, BUSINESS_TYPE_MESSAGE);
     EXPECT_EQ(ret, SOFTBUS_TRANS_SEND_LEN_BEYOND_LIMIT);
 
-    NiceMock<TransServiceInterfaceMock> transServiceInterfaceMock;
-    EXPECT_CALL(transServiceInterfaceMock, GetDefaultConfigType).WillOnce(Return(SOFTBUS_CONFIG_TYPE_MAX))
+    NiceMock<TransSessionSvcMock> transSessionSvcMock;
+    EXPECT_CALL(transSessionSvcMock, GetDefaultConfigType).WillOnce(Return(SOFTBUS_CONFIG_TYPE_MAX))
         .WillRepeatedly(Return(SOFTBUS_INT_STATIC_NET_CAPABILITY));
     
     ret = CheckSendLen(CHANNEL_TYPE_AUTH, BUSINESS_TYPE_MESSAGE, TRANS_TEST_SEND_LEN, BUSINESS_TYPE_MESSAGE);
@@ -137,9 +137,9 @@ HWTEST_F(TransClientMsgServiceExTest, TransClientMsgServiceTest01, TestSize.Leve
  */
 HWTEST_F(TransClientMsgServiceExTest, CheckBusinessTypeAndOsTypeBySessionIdTest01, TestSize.Level1)
 {
-    NiceMock<TransMgrInterfaceMock> transMgrInterfaceMock;
-    EXPECT_CALL(transMgrInterfaceMock, ClientGetDataConfigByChannelId).WillRepeatedly(Return(SOFTBUS_INVALID_PARAM));
-    EXPECT_CALL(transMgrInterfaceMock, ClientGetChannelOsTypeBySessionId).WillRepeatedly(
+    NiceMock<TransSessionMgrMock> transSessionMgrMock;
+    EXPECT_CALL(transSessionMgrMock, ClientGetDataConfigByChannelId).WillRepeatedly(Return(SOFTBUS_INVALID_PARAM));
+    EXPECT_CALL(transSessionMgrMock, ClientGetChannelOsTypeBySessionId).WillRepeatedly(
         [](int32_t sessionId, int32_t *osType) -> int32_t {
         (void)sessionId;
         static int32_t times = 0;
@@ -151,7 +151,7 @@ HWTEST_F(TransClientMsgServiceExTest, CheckBusinessTypeAndOsTypeBySessionIdTest0
         }
         return SOFTBUS_OK;
     });
-    EXPECT_CALL(transMgrInterfaceMock, ClientGetChannelBusinessTypeBySessionId).WillRepeatedly(
+    EXPECT_CALL(transSessionMgrMock, ClientGetChannelBusinessTypeBySessionId).WillRepeatedly(
         [](int32_t sessionId, int32_t *businessType) -> int32_t {
         (void)sessionId;
         static int32_t times = 0;
@@ -227,8 +227,8 @@ int32_t ActionOfGetSupportTlvAndNeedAckById(int32_t channelId, int32_t channelTy
  */
 HWTEST_F(TransClientMsgServiceExTest, CheckAsyncSendBytesFuncTest01, TestSize.Level1)
 {
-    NiceMock<TransMgrInterfaceMock> transMgrInterfaceMock;
-    EXPECT_CALL(transMgrInterfaceMock, GetSupportTlvAndNeedAckById)
+    NiceMock<TransSessionMgrMock> transSessionMgrMock;
+    EXPECT_CALL(transSessionMgrMock, GetSupportTlvAndNeedAckById)
         .WillRepeatedly(ActionOfGetSupportTlvAndNeedAckById);
 
     int32_t ret = CheckAsyncSendBytesFunc(0, CHANNEL_TYPE_UDP);

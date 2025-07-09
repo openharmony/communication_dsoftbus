@@ -13,31 +13,31 @@
  * limitations under the License.
  */
 
-#include "trans_manager_mock.h"
+#include "trans_session_mgr_mock.h"
 
 using namespace testing;
 using namespace testing::ext;
 
 namespace OHOS {
 
-void *g_managerInterface = nullptr;
+void *g_sessionMgrInterface = nullptr;
 
-TransMgrInterfaceMock::TransMgrInterfaceMock()
+TransSessionMgrMock::TransSessionMgrMock()
 {
-    g_managerInterface = reinterpret_cast<void *>(this);
+    g_sessionMgrInterface = reinterpret_cast<void *>(this);
 }
 
-TransMgrInterfaceMock::~TransMgrInterfaceMock()
+TransSessionMgrMock::~TransSessionMgrMock()
 {
-    g_managerInterface = nullptr;
+    g_sessionMgrInterface = nullptr;
 }
 
-static TransManagerInterface *GetManagerInterface()
+static TransSessionMgrInterface *GetManagerInterface()
 {
-    return reinterpret_cast<TransManagerInterface *>(g_managerInterface);
+    return reinterpret_cast<TransSessionMgrInterface *>(g_sessionMgrInterface);
 }
 
-int32_t TransMgrInterfaceMock::ActionOfClientGetDataConfigByChannelId(
+int32_t TransSessionMgrMock::ActionOfClientGetDataConfigByChannelId(
     int32_t channelId, int32_t channelType, uint32_t *dataConfig)
 {
     (void)channelId;
@@ -46,14 +46,14 @@ int32_t TransMgrInterfaceMock::ActionOfClientGetDataConfigByChannelId(
     return SOFTBUS_OK;
 }
 
-int32_t TransMgrInterfaceMock::ActionOfClientGetSessionIsAsyncBySessionId(int32_t sessionId, bool *isAsync)
+int32_t TransSessionMgrMock::ActionOfClientGetSessionIsAsyncBySessionId(int32_t sessionId, bool *isAsync)
 {
     (void)sessionId;
     *isAsync = false;
     return SOFTBUS_OK;
 }
 
-int32_t TransMgrInterfaceMock::ActionOfGetSocketLifecycleAndSessionNameBySessionId(
+int32_t TransSessionMgrMock::ActionOfGetSocketLifecycleAndSessionNameBySessionId(
     int32_t sessionId, char *sessionName, SocketLifecycleData *lifecycle)
 {
     (void)sessionId;
@@ -187,11 +187,6 @@ int32_t ClientGetSessionNameBySessionId(int32_t sessionId, char *sessionName)
 bool IsSessionExceedLimit(void)
 {
     return GetManagerInterface()->IsSessionExceedLimit();
-}
-
-int32_t GetQosValue(const QosTV *qos, uint32_t qosCount, QosType type, int32_t *value, int32_t defVal)
-{
-    return GetManagerInterface()->GetQosValue(qos, qosCount, type, value, defVal);
 }
 
 int32_t ClientCheckIsD2DypeBySessionId(int32_t sessionId, bool *isD2D)

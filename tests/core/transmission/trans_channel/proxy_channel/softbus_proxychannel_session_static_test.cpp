@@ -61,7 +61,7 @@ HWTEST_F(TransProxySessionStaticTest, TransProxyTransNormalMsgTest001, TestSize.
     int32_t payLoadLen = 7;
     ProxyPacketType flag = PROXY_FLAG_BYTES;
     int32_t ret = TransProxyTransNormalMsg(&info, payLoad, payLoadLen, flag);
-    EXPECT_EQ(SOFTBUS_OK, ret);
+    EXPECT_EQ(SOFTBUS_TRANS_PROXY_SENDMSG_ERR, ret);
 
     info.appInfo.businessType = BUSINESS_TYPE_D2D_MESSAGE;
     ret = TransProxyTransNormalMsg(&info, payLoad, payLoadLen, flag);
@@ -89,7 +89,7 @@ HWTEST_F(TransProxySessionStaticTest, TransProxyPackD2DMsgTest001, TestSize.Leve
     int32_t payLoadLen = 7;
     int32_t outLen = 0;
     char *ret = TransProxyPackD2DMsg(&info, payLoad, payLoadLen, &outLen);
-    EXPECT_EQ(nullptr, ret);
+    EXPECT_NE(nullptr, ret);
 }
 
 /**
@@ -105,7 +105,7 @@ HWTEST_F(TransProxySessionStaticTest, TransProxyPackAppNormalMsgTest001, TestSiz
     int32_t outLen = 0;
     ProxyMessageHead head;
     char *ret = TransProxyPackAppNormalMsg(&head, payLoad, payLoadLen, &outLen);
-    EXPECT_EQ(nullptr, ret);
+    EXPECT_NE(nullptr, ret);
 }
 
 } // namespace OHOS

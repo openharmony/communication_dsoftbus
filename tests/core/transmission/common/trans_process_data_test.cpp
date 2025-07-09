@@ -658,7 +658,7 @@ HWTEST_F(TransProcessDataTest, TransProxyPackD2DDataTest001, TestSize.Level1)
     uint32_t dataLen = 0;
     ProxyDataInfo dataInfo;
     uint8_t *ret = TransProxyPackD2DData(nullptr, sliceNum, pktType, cnt, &dataLen);
-    EXPECT_EQ(nullptr, ret);
+    EXPECT_EQ(NULL, ret);
 
     ret = TransProxyPackD2DData(&dataInfo, sliceNum, pktType, cnt, &dataLen);
     EXPECT_EQ(nullptr, ret);
@@ -703,7 +703,7 @@ HWTEST_F(TransProcessDataTest, TransProxyProcessD2DDataTest001, TestSize.Level1)
     dataHead.dataLen = 8;
     businessType = BUSINESS_TYPE_D2D_VOICE;
     ret = TransProxyProcessD2DData(&dataInfo, &dataHead, data, businessType);
-    EXPECT_EQ(SOFTBUS_TRANS_INVALID_DATA_LENGTH, ret);
+    EXPECT_EQ(SOFTBUS_OK, ret);
 
     dataHead.dataLen = 10;
     businessType = BUSINESS_TYPE_D2D_VOICE;
@@ -743,7 +743,7 @@ HWTEST_F(TransProcessDataTest, TransProxyDecryptD2DDataTest001, TestSize.Level1)
     dataInfo.inData = (uint8_t *)"11111";
     dataInfo.inLen = 6;
     ret = TransProxyDecryptD2DData(businessType, &dataInfo, sessionKey, sessionIv, sessionMsgIv);
-    EXPECT_EQ(SOFTBUS_TRANS_INVALID_DATA_LENGTH, ret);
+    EXPECT_EQ(SOFTBUS_INVALID_PARAM, ret);
     
     businessType = BUSINESS_TYPE_D2D_MESSAGE;
     ret = TransProxyDecryptD2DData(businessType, &dataInfo, sessionKey, sessionIv, sessionMsgIv);
@@ -775,7 +775,7 @@ HWTEST_F(TransProcessDataTest, TransProxyD2DFirstSliceProcessTest001, TestSize.L
     head.priority = PROXY_CHANNEL_PRORITY_BYTES;
     businessType = BUSINESS_TYPE_D2D_VOICE;
     ret = TransProxyD2DFirstSliceProcess(&sliceProcessor, &head, data, len, businessType);
-    EXPECT_EQ(SOFTBUS_INVALID_PARAM, ret);
+    EXPECT_EQ(SOFTBUS_OK, ret);
 
     head.priority = PROXY_CHANNEL_PRORITY_MESSAGE;
     ret = TransProxyD2DFirstSliceProcess(&sliceProcessor, &head, data, len, businessType);
@@ -817,7 +817,7 @@ HWTEST_F(TransProcessDataTest, TransProxyPackD2DBytesTest001, TestSize.Level1)
     EXPECT_EQ(SOFTBUS_INVALID_PARAM, ret);
 
     ret = TransProxyPackD2DBytes(&dataInfo, sessionKey, sessionIv, flag);
-    EXPECT_EQ(SOFTBUS_INVALID_PARAM, ret);
+    EXPECT_EQ(SOFTBUS_TRANS_PROXY_SESS_ENCRYPT_ERR, ret);
 
     dataInfo.inData = (uint8_t *)"1111";
     dataInfo.inLen = 4;

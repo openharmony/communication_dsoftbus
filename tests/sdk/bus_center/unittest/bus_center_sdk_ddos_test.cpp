@@ -55,6 +55,8 @@ public:
 void BusCenterSdkDdosTest::SetUpTestCase()
 {
     SetAccessTokenPermission("busCenterTest");
+    uint64_t tokenId = SetTokenIdByProcessName("device_manager");
+    printf("SetTokenIdByProcessName tokenId:%ju\n", tokenId);
     if (BusCenterClientInit() != SOFTBUS_OK) {
         GTEST_LOG_(INFO) << "bus center client init failed";
     }

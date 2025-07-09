@@ -552,7 +552,7 @@ static int32_t PackTag(EVP_CIPHER_CTX *ctx, uint32_t dataLen, unsigned char *cip
     int ret = EVP_CIPHER_CTX_ctrl(ctx, EVP_CTRL_GCM_GET_TAG, SHORT_TAG_LEN, (void *)tagbuf);
     if (ret != 1) {
         COMM_LOGE(COMM_ADAPTER, "EVP_CIPHER_CTX_ctrl fail.");
-        return SOFTBUS_DECRYPT_ERR;
+        return SOFTBUS_ENCRYPT_ERR;
     }
     if (memcpy_s(cipherText + dataLen, cipherTextLen - dataLen, tagbuf, SHORT_TAG_LEN) != EOK) {
         COMM_LOGE(COMM_ADAPTER, "EVP memcpy tag fail.");
@@ -576,33 +576,33 @@ static int32_t SslAesGcm128Encrypt(const AesGcm128CipherKey *cipherkey, const un
     int32_t ret = OpensslEvpInit(&ctx, cipherkey->keyLen, true);
     if (ret != SOFTBUS_OK) {
         COMM_LOGE(COMM_ADAPTER, "OpensslEvpInit fail.");
-        return SOFTBUS_DECRYPT_ERR;
+        return SOFTBUS_ENCRYPT_ERR;
     }
     ret = EVP_EncryptInit_ex(ctx, NULL, NULL, cipherkey->key, cipherkey->iv);
     if (ret != 1) {
         COMM_LOGE(COMM_ADAPTER, "EVP_EncryptInit_ex fail.");
         EVP_CIPHER_CTX_free(ctx);
-        return SOFTBUS_DECRYPT_ERR;
+        return SOFTBUS_ENCRYPT_ERR;
     }
     ret = EVP_EncryptUpdate(ctx, cipherText, (int32_t *)&outbufLen, plainText, plainTextSize);
     if (ret != 1) {
         COMM_LOGE(COMM_ADAPTER, "EVP_EncryptUpdate fail.");
         EVP_CIPHER_CTX_free(ctx);
-        return SOFTBUS_DECRYPT_ERR;
+        return SOFTBUS_ENCRYPT_ERR;
     }
     outlen += outbufLen;
     ret = EVP_EncryptFinal_ex(ctx, cipherText + outbufLen, (int32_t *)&outbufLen);
     if (ret != 1) {
         COMM_LOGE(COMM_ADAPTER, "EVP_EncryptFinal_ex fail.");
         EVP_CIPHER_CTX_free(ctx);
-        return SOFTBUS_DECRYPT_ERR;
+        return SOFTBUS_ENCRYPT_ERR;
     }
     outlen += outbufLen;
     ret = PackTag(ctx, outlen, cipherText, cipherTextLen);
     if (ret != SOFTBUS_OK) {
         COMM_LOGE(COMM_ADAPTER, "pack iv and tag fail.");
         EVP_CIPHER_CTX_free(ctx);
-        return SOFTBUS_DECRYPT_ERR;
+        return SOFTBUS_ENCRYPT_ERR;
     }
     EVP_CIPHER_CTX_free(ctx);
     return (outlen + SHORT_TAG_LEN);
@@ -647,7 +647,7 @@ static int32_t SslAesGcm128Decryp(const AesGcm128CipherKey *cipherkey, const uns
         goto EXIT;
     }
     ret = EVP_CIPHER_CTX_ctrl(ctx, EVP_CTRL_GCM_SET_TAG, SHORT_TAG_LEN,
-            (void *)(cipherText + (cipherTextSize - SHORT_TAG_LEN)));
+        (void *)(cipherText + (cipherTextSize - SHORT_TAG_LEN)));
     if (ret != 1) {
         COMM_LOGE(COMM_ADAPTER, "EVP_DecryptUpdate fail.");
         goto EXIT;

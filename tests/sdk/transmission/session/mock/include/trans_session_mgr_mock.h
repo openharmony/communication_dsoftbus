@@ -13,8 +13,8 @@
  * limitations under the License.
  */
 
-#ifndef TRANS_MANAGER_MOCK_H
-#define TRANS_MANAGER_MOCK_H
+#ifndef TRANS_SESSION_MGR_MOCK_H
+#define TRANS_SESSION_MGR_MOCK_H
 
 #include <gmock/gmock.h>
 
@@ -22,10 +22,10 @@
 #include "client_trans_session_manager_struct.h"
 
 namespace OHOS {
-class TransManagerInterface {
+class TransSessionMgrInterface {
 public:
-    TransManagerInterface() {};
-    virtual ~TransManagerInterface() {};
+    TransSessionMgrInterface() {};
+    virtual ~TransSessionMgrInterface() {};
 
     virtual int32_t ClientGetDataConfigByChannelId(int32_t channelId, int32_t channelType, uint32_t *dataConfig) = 0;
     virtual int32_t ClientGetSessionIsAsyncBySessionId(int32_t sessionId, bool *isAsync) = 0;
@@ -57,14 +57,13 @@ public:
         int32_t channelId, int32_t channelType, bool *supportTlv, bool *needAck) = 0;
     virtual int32_t ClientGetSessionNameBySessionId(int32_t sessionId, char *sessionName) = 0;
     virtual bool IsSessionExceedLimit(void) = 0;
-    virtual int32_t GetQosValue(const QosTV *qos, uint32_t qosCount, QosType type, int32_t *value, int32_t defVal) = 0;
     virtual int32_t ClientCheckIsD2DypeBySessionId(int32_t sessionId, bool *isD2D) = 0;
 };
 
-class TransMgrInterfaceMock : public TransManagerInterface {
+class TransSessionMgrMock : public TransSessionMgrInterface {
 public:
-    TransMgrInterfaceMock();
-    ~TransMgrInterfaceMock() override;
+    TransSessionMgrMock();
+    ~TransSessionMgrMock() override;
 
     MOCK_METHOD3(ClientGetDataConfigByChannelId, int32_t(
         int32_t channelId, int32_t channelType, uint32_t *dataConfig));
@@ -97,8 +96,6 @@ public:
         int32_t channelId, int32_t channelType, bool *supportTlv, bool *needAck));
     MOCK_METHOD2(ClientGetSessionNameBySessionId, int32_t(int32_t sessionId, char *sessionName));
     MOCK_METHOD0(IsSessionExceedLimit, bool(void));
-    MOCK_METHOD5(GetQosValue, int32_t(
-        const QosTV *qos, uint32_t qosCount, QosType type, int32_t *value, int32_t defVal));
     MOCK_METHOD2(ClientCheckIsD2DypeBySessionId, int32_t(int32_t sessionId, bool *isD2D));
 
     static int32_t ActionOfClientGetDataConfigByChannelId(
@@ -109,4 +106,4 @@ public:
 };
 
 } // namespace OHOS
-#endif // TRANS_MANAGER_MOCK_H
+#endif // TRANS_SESSION_MGR_MOCK_H

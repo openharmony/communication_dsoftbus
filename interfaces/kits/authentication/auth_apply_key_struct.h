@@ -29,9 +29,11 @@ extern "C" {
 #endif
 #endif
 
-#define D2D_UDID_HASH_STR_LEN    11
-#define D2D_ACCOUNT_HASH_STR_LEN 11
-#define D2D_APPLY_KEY_LEN        32
+#define D2D_UDID_HASH_STR_LEN      11
+#define D2D_ACCOUNT_HASH_STR_LEN   11
+#define D2D_UDID_SHORT_HASH_LEN    (D2D_UDID_HASH_STR_LEN / 2)
+#define D2D_ACCOUNT_SHORT_HASH_LEN (D2D_ACCOUNT_HASH_STR_LEN / 2)
+#define D2D_APPLY_KEY_LEN          32
 
 typedef enum {
     BUSINESS_TYPE_D2D = 0,

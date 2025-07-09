@@ -18,6 +18,7 @@
 #include <stdbool.h>
 #include <stdint.h>
 
+#include "auth_apply_key_process.h"
 #include "auth_deviceprofile.h"
 #include "auth_hichain.h"
 #include "auth_hichain_adapter.h"
@@ -84,7 +85,7 @@ static ModuleListener g_moduleListener[] = {
         .listener = { NULL, NULL },
     },
     {
-        .module = MODULE_USER_KEY_CONNECTION,
+        .module = MODULE_APPLY_KEY_CONNECTION,
         .listener = { NULL, NULL },
     }
 };
@@ -810,6 +811,7 @@ int32_t AuthInit(void)
         AUTH_LOGE(AUTH_INIT, "user key nego init failed, ret=%{public}d", ret);
         return ret;
     }
+    ApplyKeyNegoInit();
     AuthLoadDeviceKeyPacked();
     return AuthMetaInitPacked(&callBack);
 }
@@ -819,6 +821,7 @@ void AuthDeinit(void)
     AuthDeviceDeinit();
     CustomizedSecurityProtocolDeinitPacked();
     UkNegotiateDeinit();
+    ApplyKeyNegoDeinit();
     AuthMetaDeinitPacked();
 }
 

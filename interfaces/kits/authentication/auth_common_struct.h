@@ -1,5 +1,5 @@
 /*
-* Copyright (c) 2022 Huawei Device Co., Ltd.
+* Copyright (c) 2022-2025 Huawei Device Co., Ltd.
 * Licensed under the Apache License, Version 2.0 (the "License");
 * you may not use this file except in compliance with the License.
 * You may obtain a copy of the License at
@@ -21,7 +21,7 @@
 
 #include "auth_interface_struct.h"
 #include "softbus_common.h"
-#include "../connect/softbus_conn_interface_struct.h"
+#include "softbus_conn_interface_struct.h"
 
 #ifdef __cplusplus
 #if __cplusplus
@@ -49,7 +49,7 @@ typedef enum {
    /* data type for cancel auth */
    DATA_TYPE_CANCEL_AUTH = 0xFFFF0009,
    /* data type for uk connection */
-   DATA_TYPE_UK_CONNECTION = 0xFFFF0010,
+   DATA_TYPE_APPLY_KEY_CONNECTION = 0xFFFF0010,
 } AuthDataType;
 
 #define CLIENT_SIDE_FLAG 0

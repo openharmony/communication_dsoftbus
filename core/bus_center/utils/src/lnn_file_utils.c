@@ -40,6 +40,7 @@ static FilePathInfo g_filePath[LNN_FILE_ID_MAX] = {
     { LNN_FILE_ID_COMM_KEY, "/dsoftbus/devicecommkey" },
     { LNN_FILE_ID_BROADCAST_KEY, "/dsoftbus/broadcastkey" },
     { LNN_FILE_ID_PTK_KEY, "/dsoftbus/ptkkey" },
+    { LNN_FILE_ID_APPLY_KEY, "/dsoftbus/applykey" },
     { LNN_FILE_ID_IRK_KEY, "/dsoftbus/irk" },
     { LNN_FILE_ID_BROADCAST_CIPHER, "/dsoftbus/cipher" },
 };

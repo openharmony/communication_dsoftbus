@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2024 Huawei Device Co., Ltd.
+ * Copyright (c) 2025 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -29,7 +29,7 @@ using namespace std;
 #define FEATURE_MIN 1
 #define FEATURE_MAX 10
 #define TYPE_MIN DATA_TYPE_AUTH
-#define TYPE_MAX DATA_TYPE_UK_CONNECTION
+#define TYPE_MAX DATA_TYPE_APPLY_KEY_CONNECTION
 #define MODULE_MIN MODULE_TRUST_ENGINE
 #define MODULE_MAX MODULE_OLD_NEARBY
 
