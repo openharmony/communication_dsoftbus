@@ -13,8 +13,8 @@
  * limitations under the License.
  */
 
-#ifndef TRANS_SERVICE_MOCK_H
-#define TRANS_SERVICE_MOCK_H
+#ifndef TRANS_SESSION_SVC_MOCK_H
+#define TRANS_SESSION_SVC_MOCK_H
 
 #include <gmock/gmock.h>
 
@@ -23,20 +23,20 @@
 #include "trans_type.h"
 
 namespace OHOS {
-class TransServiceInterface {
+class TransSessionSvcInterface {
 public:
-    TransServiceInterface() {};
-    virtual ~TransServiceInterface() {};
+    TransSessionSvcInterface() {};
+    virtual ~TransSessionSvcInterface() {};
 
     virtual int32_t GetDefaultConfigType(int32_t channelType, int32_t businessType) = 0;
     virtual int32_t ClientBind(
         int32_t socket, const QosTV qos[], uint32_t qosCount, const ISocketListener *listener, bool isAsync) = 0;
 };
 
-class TransServiceInterfaceMock : public TransServiceInterface {
+class TransSessionSvcMock : public TransSessionSvcInterface {
 public:
-    TransServiceInterfaceMock();
-    ~TransServiceInterfaceMock() override;
+    TransSessionSvcMock();
+    ~TransSessionSvcMock() override;
 
     MOCK_METHOD2(GetDefaultConfigType, int32_t(int32_t channelType, int32_t businessType));
     MOCK_METHOD5(ClientBind, int32_t(
@@ -44,4 +44,4 @@ public:
 };
 
 } // namespace OHOS
-#endif // TRANS_SERVICE_MOCK_H
+#endif // TRANS_SESSION_SVC_MOCK_H
