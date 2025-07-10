@@ -20,6 +20,7 @@ group("fuzztest") {
     "authmanagerdevice_fuzzer:AuthManagerDeviceFuzzTest",
     "authmanagerother_fuzzer:AuthManagerOtherFuzzTest",
     "authmanagerstatus_fuzzer:AuthManagerStatusFuzzTest",
+    "authukmanager_fuzzer:AuthUkManagerFuzzTest",
     "unpackauthdata_fuzzer:UnpackAuthDataFuzzTest",
   ]
 }
