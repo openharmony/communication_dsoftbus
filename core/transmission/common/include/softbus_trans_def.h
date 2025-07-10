@@ -17,6 +17,8 @@
 #define SOFTBUS_TRANS_DEF_H
 
 #include <stdbool.h>
+
+#include "inner_socket.h"
 #include "session.h"
 
 #ifdef __cplusplus
@@ -36,6 +38,7 @@ typedef struct {
     const char *peerDeviceId;
     const char *groupId;
     const SessionAttribute *attr;
+    TransFlowInfo flowInfo;
     QosTV qos[QOS_TYPE_BUTT];
     uint32_t qosCount;
     int32_t sessionId;

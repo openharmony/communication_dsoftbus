@@ -28,7 +28,7 @@ class TransTcpDirectListenerInterface {
 public:
     TransTcpDirectListenerInterface() {};
     virtual ~TransTcpDirectListenerInterface() {};
-    virtual char *PackRequest(const AppInfo *appInfo) = 0;
+    virtual char *PackRequest(const AppInfo *appInfo, int64_t requestId) = 0;
     virtual int32_t TransTdcPostBytes(int32_t channelId, TdcPacketHead *packetHead, const char *data) = 0;
     virtual int32_t AuthGetServerSide(int64_t authId, bool *isServer) = 0;
     virtual int32_t AuthGetConnInfo(AuthHandle authHandle, AuthConnInfo *connInfo) = 0;
@@ -38,7 +38,7 @@ class TransTcpDirectListenerInterfaceMock : public TransTcpDirectListenerInterfa
 public:
     TransTcpDirectListenerInterfaceMock();
     ~TransTcpDirectListenerInterfaceMock() override;
-    MOCK_METHOD1(PackRequest, char *(const AppInfo *appInfo));
+    MOCK_METHOD2(PackRequest, char *(const AppInfo *appInfo, int64_t requestId));
     MOCK_METHOD3(TransTdcPostBytes, int32_t(int32_t channelId, TdcPacketHead *packetHead, const char *data));
     MOCK_METHOD2(AuthGetServerSide, int32_t(int64_t authId, bool *isServer));
     MOCK_METHOD2(AuthGetConnInfo, int32_t(AuthHandle authHandle, AuthConnInfo *connInfo));

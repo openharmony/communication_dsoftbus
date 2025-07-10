@@ -66,6 +66,8 @@ typedef int32_t (*GeneratePagingIdFunc)(void);
 typedef void (*DestroyPagingIdFunc)(void);
 typedef void (*SocketServerStateUpdateFunc)(const char *sessionName);
 typedef int32_t (*RegisterTimeoutCallbackFunc)(int32_t timerFunId, TimerFunCallback callback);
+typedef int32_t (*ClientGetSessionTypeBySocketFunc)(int32_t socket, int32_t *sessionType);
+typedef int32_t (*ClientSetFLTosFunc)(int32_t socket, TransFlowInfo *flowInfo);
 
 typedef struct TagClientOpenFuncList {
     CheckPackageNameFunc checkPackageName;
@@ -96,6 +98,8 @@ typedef struct TagClientOpenFuncList {
     DestroyPagingIdFunc destroyPagingId;
     SocketServerStateUpdateFunc socketServerStateUpdate;
     RegisterTimeoutCallbackFunc registerTimeoutCallback;
+    ClientGetSessionTypeBySocketFunc clientGetSessionTypeBySocket;
+    ClientSetFLTosFunc clientSetFLTos;
 } ClientOpenFuncList;
 
 #ifdef __cplusplus
