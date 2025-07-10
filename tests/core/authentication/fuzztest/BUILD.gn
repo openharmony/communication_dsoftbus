@@ -21,5 +21,6 @@ group("fuzztest") {
     "authmanagerother_fuzzer:AuthManagerOtherFuzzTest",
     "authmanagerstatus_fuzzer:AuthManagerStatusFuzzTest",
     "unpackauthdata_fuzzer:UnpackAuthDataFuzzTest",
+    "authusercommonkey_fuzzer:AuthUserCommonKeyFuzzTest",
   ]
 }
