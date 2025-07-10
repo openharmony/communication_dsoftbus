@@ -40,6 +40,8 @@ typedef bool (*TransHasAndUpdatePagingListenFunc)(ProxyChannelInfo *info);
 typedef int32_t (*TransPagingGetPidAndDataByFlgFunc)(bool isClient, uint32_t businessFlag, int32_t *pid,
     char *data, uint32_t *len);
 typedef int32_t (*TransDelPagingInfoByBusinessFlagFunc)(uint32_t businessFlag);
+typedef int32_t (*InitSoftbusPagingResPullFunc)(void);
+typedef void (*DeInitSoftbusPagingResPullFunc)(void);
 typedef struct TagTransEnhanceFuncList {
     InitQosFunc initQos;
     NotifyQosChannelOpenedFunc notifyQosChannelOpened;
@@ -54,6 +56,8 @@ typedef struct TagTransEnhanceFuncList {
     TransHasAndUpdatePagingListenFunc transHasAndUpdatePagingListen;
     TransPagingGetPidAndDataByFlgFunc transPagingGetPidAndDataByFlg;
     TransDelPagingInfoByBusinessFlagFunc transDelPagingInfoByBusinessFlag;
+    InitSoftbusPagingResPullFunc initSoftbusPagingResPull;
+    DeInitSoftbusPagingResPullFunc deInitSoftbusPagingResPull;
 } TransEnhanceFuncList;
 
 TransEnhanceFuncList *TransEnhanceFuncListGet(void);

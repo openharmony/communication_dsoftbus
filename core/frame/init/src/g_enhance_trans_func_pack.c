@@ -135,3 +135,21 @@ int32_t TransDelPagingInfoByBusinessFlagPacked(uint32_t businessFlag)
     }
     return pfnTransEnhanceFuncList->transDelPagingInfoByBusinessFlag(businessFlag);
 }
+
+int32_t InitSoftbusPagingResPullPacked(void)
+{
+    TransEnhanceFuncList *pfnTransEnhanceFuncList = TransEnhanceFuncListGet();
+    if (TransCheckFuncPointer((void *)pfnTransEnhanceFuncList->initSoftbusPagingResPull) != SOFTBUS_OK) {
+        return SOFTBUS_OK;
+    }
+    return pfnTransEnhanceFuncList->initSoftbusPagingResPull();
+}
+
+void DeInitSoftbusPagingResPullPacked(void)
+{
+    TransEnhanceFuncList *pfnTransEnhanceFuncList = TransEnhanceFuncListGet();
+    if (TransCheckFuncPointer((void *)pfnTransEnhanceFuncList->deInitSoftbusPagingResPull) != SOFTBUS_OK) {
+        return;
+    }
+    return pfnTransEnhanceFuncList->deInitSoftbusPagingResPull();
+}

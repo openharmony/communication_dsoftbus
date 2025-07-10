@@ -40,7 +40,8 @@ bool TransHasAndUpdatePagingListenPacked(ProxyChannelInfo *info);
 int32_t TransPagingGetPidAndDataByFlgPacked(bool isClient, uint32_t businessFlag, int32_t *pid,
     char *data, uint32_t *len);
 int32_t TransDelPagingInfoByBusinessFlagPacked(uint32_t businessFlag);
-
+int32_t InitSoftbusPagingResPullPacked(void);
+void DeInitSoftbusPagingResPullPacked(void);
 #ifdef __cplusplus
 }
 #endif
