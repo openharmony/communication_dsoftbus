@@ -76,10 +76,11 @@ int32_t TransServerInit(void)
         TRANS_LOGE(TRANS_INIT, "ScenarioManager init Failed");
         return ret;
     }
-    ret = InitSoftbusPagingPacked();
-    if (ret != SOFTBUS_OK) {
+    if (InitSoftbusPagingPacked() != SOFTBUS_OK) {
         TRANS_LOGE(TRANS_INIT, "InitSoftbusPagingPacked Failed");
-        return ret;
+    }
+    if (InitSoftbusPagingResPullPacked() != SOFTBUS_OK) {
+        TRANS_LOGE(TRANS_INIT, "InitSoftbusPagingResPullPacked Failed");
     }
     RegisterPermissionChangeCallback();
     atomic_store_explicit(&g_transSessionInitFlag, true, memory_order_release);
@@ -99,6 +100,7 @@ void TransServerDeinit(void)
     TransPermissionDeinit();
     ScenarioManagerdestroyInstance();
     DeInitSoftbusPagingPacked();
+    DeInitSoftbusPagingResPullPacked();
     atomic_store_explicit(&g_transSessionInitFlag, false, memory_order_release);
 }
 
