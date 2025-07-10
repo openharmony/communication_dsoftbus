@@ -15,7 +15,8 @@ import("//build/test.gni")
 import("../../../../../../../dsoftbus.gni")
 
 module_output_path = "dsoftbus/soft_bus/transmission"
-trans_comm_mock_path = "$dsoftbus_test_path/core/transmission/trans_channel/common/mock"
+trans_comm_mock_path =
+    "$dsoftbus_test_path/core/transmission/trans_channel/common/mock"
 
 ohos_unittest("SoftBusMessageOpenChannelTest") {
   module_out_path = module_output_path
@@ -26,6 +27,7 @@ ohos_unittest("SoftBusMessageOpenChannelTest") {
 
     "$dsoftbus_core_path/transmission/trans_channel/common/src",
     "$dsoftbus_core_path/transmission/trans_channel/auth/include",
+    "$dsoftbus_core_path/transmission/trans_channel/tcp_direct/include",
   ]
 
   deps = [
@@ -58,6 +60,7 @@ ohos_unittest("SoftBusMessageOpenChannelMockTest") {
     "$dsoftbus_core_path/transmission/trans_channel/common/src",
     "$dsoftbus_core_path/transmission/trans_channel/common/include",
     "$dsoftbus_core_path/transmission/trans_channel/auth/include",
+    "$dsoftbus_core_path/transmission/trans_channel/tcp_direct/include",
     "$trans_comm_mock_path",
   ]
 

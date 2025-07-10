@@ -671,6 +671,9 @@ void FillSessionParam(SessionParam *param, SessionAttribute *tmpAttr,
     param->isQosLane = true;
     param->actionId = sessionNode->actionId;
     param->isLowLatency = sessionNode->isLowLatency;
+    param->flowInfo.flowSize = sessionNode->flowInfo.flowSize;
+    param->flowInfo.sessionType = sessionNode->flowInfo.sessionType;
+    param->flowInfo.flowQosType = sessionNode->flowInfo.flowQosType;
 }
 
 void ClientConvertRetVal(int32_t socket, int32_t *retOut)
