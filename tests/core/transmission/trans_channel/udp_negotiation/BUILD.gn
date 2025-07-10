@@ -138,7 +138,7 @@ ohos_unittest("TransUdpNegoStaticTest") {
   module_out_path = module_output_path
   sources = [
     "trans_udp_static_mock_test.cpp",
-    "mock\trans_udp_nego_static_test_mock.cpp",
+    "mock/trans_udp_nego_static_test_mock.cpp",
     "$dsoftbus_root_path/core/frame/init/src/g_enhance_lnn_func.c",
   ]
 
