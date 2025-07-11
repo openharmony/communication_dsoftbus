@@ -1410,6 +1410,7 @@ int32_t LnnRequestLeaveSpecific(const char *networkId, ConnectionAddrType addrTy
         return SOFTBUS_STRCPY_ERR;
     }
     para->addrType = addrType;
+    para->rootState = DEVICE_STATE_NOT_TRUST;
     if (PostBuildMessageToHandler(MSG_TYPE_LEAVE_SPECIFIC, para) != SOFTBUS_OK) {
         LNN_LOGE(LNN_BUILDER, "post leave specific msg failed");
         SoftBusFree(para);
