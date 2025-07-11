@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021-2024 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2025 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -198,6 +198,10 @@ int32_t ClientForkSocketByChannelId(int32_t socketId, BusinessType type, int32_t
 int32_t ClientGetChannelBusinessTypeByChannelId(int32_t channelId, int32_t *businessType);
 
 int32_t ClientCheckIsD2DypeBySessionId(int32_t sessionId, bool *isD2D);
+
+int32_t ClientGetSessionTypeBySocket(int32_t socket, int32_t *sessionType);
+
+int32_t ClientSetFLTos(int32_t socket, TransFlowInfo *flowInfo);
 
 #ifdef __cplusplus
 }

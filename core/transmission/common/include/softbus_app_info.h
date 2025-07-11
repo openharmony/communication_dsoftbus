@@ -16,6 +16,7 @@
 #ifndef SOFTBUS_APP_INFO_H
 #define SOFTBUS_APP_INFO_H
 
+#include "inner_socket.h"
 #include "session.h"
 #include "softbus_common.h"
 #include "softbus_def.h"
@@ -90,6 +91,7 @@ typedef struct {
     char sessionName[SESSION_NAME_SIZE_MAX];
     char authState[AUTH_STATE_SIZE_MAX];
     char addr[IP_LEN];
+    char mac[MAC_MAX_LEN];
     char accountId[ACCOUNT_UID_LEN_MAX];
     char callerAccountId[ACCOUNT_UID_LEN_MAX];
     char calleeAccountId[ACCOUNT_UID_LEN_MAX];
@@ -126,6 +128,8 @@ typedef struct {
     char pagingSessionkey[SHORT_SESSION_KEY_LENGTH];
     bool isClient;
     bool isD2D;
+    bool isLowLatency;
+    bool isFlashLight;
     uint16_t fastTransDataSize;
     RouteType routeType;
     StreamType streamType;
@@ -133,6 +137,7 @@ typedef struct {
     UdpConnType udpConnType;
     UdpChannelOptType udpChannelOptType;
     BlePriority blePriority;
+    TransFlowInfo flowInfo;
     int fd;
     AppType appType;
     ProtocolType protocol;
@@ -158,7 +163,6 @@ typedef struct {
     int64_t authSeq;
     AppInfoData myData;
     AppInfoData peerData;
-    bool isLowLatency;
     ProtocolType fdProtocol;
 } AppInfo;
 

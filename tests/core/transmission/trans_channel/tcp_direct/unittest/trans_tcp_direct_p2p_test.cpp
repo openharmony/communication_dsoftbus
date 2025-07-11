@@ -381,14 +381,14 @@ HWTEST_F(TransTcpDirectP2pTest, OnVerifyP2pRequestTest001, TestSize.Level1)
 }
 
 /**
- * @tc.name: ConnectTcpDirectPeerTest004
- * @tc.desc: ConnectTcpDirectPeer, use the wrong parameter.sss
+ * @tc.name: ConnectSocketDirectPeerTest004
+ * @tc.desc: ConnectSocketDirectPeer, use the wrong parameter.sss
  * @tc.type: FUNC
  * @tc.require:
  */
-HWTEST_F(TransTcpDirectP2pTest, ConnectTcpDirectPeerTest001, TestSize.Level1)
+HWTEST_F(TransTcpDirectP2pTest, ConnectSocketDirectPeerTest001, TestSize.Level1)
 {
-    int32_t ret = ConnectTcpDirectPeer(g_addr, g_port, g_ip);
+    int32_t ret = ConnectSocketDirectPeer(g_addr, g_port, g_ip, 0);
     EXPECT_NE(ret, SOFTBUS_OK);
 }
 
@@ -902,7 +902,7 @@ HWTEST_F(TransTcpDirectP2pTest, OnVerifyP2pRequestTest002, TestSize.Level1)
     EXPECT_CALL(TransTcpDirectP2pMock, AuthMetaPostTransData).WillRepeatedly(Return(SOFTBUS_LOCK_ERR));
     AuthHandle authHandle = { .authId = AUTH_INVALID_ID, .type = AUTH_LINK_TYPE_BLE };
     int64_t seq = 0;
-    char *data = VerifyP2pPack(g_ip, g_port, g_ip);
+    char *data = VerifyP2pPack(g_ip, g_port, g_ip, 0);
     ASSERT_TRUE(data != nullptr);
     int32_t len = strlen(data);
     cJSON *json = cJSON_ParseWithLength((const char *)(data), len);
@@ -926,7 +926,7 @@ HWTEST_F(TransTcpDirectP2pTest, OnVerifyP2pRequestTest002, TestSize.Level1)
 HWTEST_F(TransTcpDirectP2pTest, OnP2pVerifyMsgReceivedTest001, TestSize.Level1)
 {
     int32_t channelId = 0;
-    char *data = VerifyP2pPack(g_ip, g_port, g_ip);
+    char *data = VerifyP2pPack(g_ip, g_port, g_ip, 0);
     ASSERT_TRUE(data != nullptr);
     int32_t len = strlen(data);
     OnP2pVerifyMsgReceived(channelId, data, len);
@@ -997,14 +997,14 @@ HWTEST_F(TransTcpDirectP2pTest, GetModuleByHmlIp001, TestSize.Level1)
 }
 
 /**
- * @tc.name: ConnectTcpDirectPeerTest002
- * @tc.desc: ConnectTcpDirectPeer
+ * @tc.name: ConnectSocketDirectPeerTest002
+ * @tc.desc: ConnectSocketDirectPeer
  * @tc.type: FUNC
  * @tc.require:
  */
-HWTEST_F(TransTcpDirectP2pTest, ConnectTcpDirectPeerTest002, TestSize.Level1)
+HWTEST_F(TransTcpDirectP2pTest, ConnectSocketDirectPeerTest002, TestSize.Level1)
 {
-    int32_t ret = ConnectTcpDirectPeer(hmlAddr, g_port, g_localIp);
+    int32_t ret = ConnectSocketDirectPeer(hmlAddr, g_port, g_localIp, 0);
     EXPECT_EQ(ret, 17);
 }
 
