@@ -118,7 +118,7 @@ HWTEST_F(SoftBusMessageOpenChannelMockTest, PackRequest001, TestSize.Level3)
     (void)memset_s(appInfo, sizeof(AppInfo), 0, sizeof(AppInfo));
     OHOS::SoftbusMessageOpenChannelInterfaceMock softbusMOpenChannelMock;
     EXPECT_CALL(softbusMOpenChannelMock, cJSON_CreateObject).WillOnce(Return(nullptr));
-    char *ret = PackRequest(appInfo);
+    char *ret = PackRequest(appInfo, 0);
     EXPECT_EQ(nullptr, ret);
 
     if (appInfo != nullptr) {
@@ -141,7 +141,7 @@ HWTEST_F(SoftBusMessageOpenChannelMockTest, PackRequest002, TestSize.Level3)
     OHOS::SoftbusMessageOpenChannelInterfaceMock softbusMOpenChannelMock;
     EXPECT_CALL(softbusMOpenChannelMock, cJSON_CreateObject).WillOnce(Return(&json));
     EXPECT_CALL(softbusMOpenChannelMock, AddNumber16ToJsonObject).WillOnce(Return(false));
-    char *ret = PackRequest(appInfo);
+    char *ret = PackRequest(appInfo, 0);
     EXPECT_EQ(nullptr, ret);
 
     if (appInfo != nullptr) {
@@ -169,7 +169,7 @@ HWTEST_F(SoftBusMessageOpenChannelMockTest, PackRequest003, TestSize.Level3)
     EXPECT_CALL(softbusMOpenChannelMock, cJSON_PrintUnformatted).WillRepeatedly(Return(nullptr));
     EXPECT_CALL(softbusMOpenChannelMock, SoftBusBase64Encode).WillOnce(Return(TEMP_NUM));
 
-    char *ret = PackRequest(appInfo);
+    char *ret = PackRequest(appInfo, 0);
     EXPECT_EQ(nullptr, ret);
 
     if (appInfo != nullptr) {
@@ -196,7 +196,7 @@ HWTEST_F(SoftBusMessageOpenChannelMockTest, PackRequest004, TestSize.Level3)
     EXPECT_CALL(softbusMOpenChannelMock, AddStringToJsonObject).WillRepeatedly(Return(true));
     EXPECT_CALL(softbusMOpenChannelMock, cJSON_PrintUnformatted).WillRepeatedly(Return(nullptr));
     EXPECT_CALL(softbusMOpenChannelMock, SoftBusBase64Encode).WillRepeatedly(Return(SOFTBUS_OK));
-    char *ret = PackRequest(appInfo);
+    char *ret = PackRequest(appInfo, 0);
     EXPECT_EQ(nullptr, ret);
 
     if (appInfo != nullptr) {

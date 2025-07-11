@@ -18,9 +18,9 @@
 #include <stdint.h>
 
 #include "lnn_lane_interface_struct.h"
+#include "softbus_def.h"
 #include "softbus_proxychannel_message_struct.h"
 #include "softbus_trans_def.h"
-#include "softbus_def.h"
 
 #ifdef __cplusplus
 extern "C" {
@@ -42,6 +42,11 @@ int32_t TransPagingGetPidAndDataByFlgPacked(bool isClient, uint32_t businessFlag
 int32_t TransDelPagingInfoByBusinessFlagPacked(uint32_t businessFlag);
 int32_t InitSoftbusPagingResPullPacked(void);
 void DeInitSoftbusPagingResPullPacked(void);
+int32_t ClientOpenHtpChannelPacked(int32_t channelId, int64_t requestId, const char *localMac, const char *remoteMac);
+int32_t ServerOpenHtpChannelPacked(const char *remoteIp, int64_t flIdentity);
+int32_t CloseHtpChannelPacked(int32_t channelId);
+void ServerUpdateHtpChannelPacked(int64_t flIdentity, int32_t channelId);
+
 #ifdef __cplusplus
 }
 #endif

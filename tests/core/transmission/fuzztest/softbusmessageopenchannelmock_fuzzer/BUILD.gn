@@ -29,6 +29,7 @@ ohos_fuzztest("SoftBusMessageOpenChannelMockFuzzTest") {
     "unittest/common/",
     "$dsoftbus_core_path/transmission/trans_channel/common/src",
     "$dsoftbus_core_path/transmission/trans_channel/auth/include",
+    "$dsoftbus_core_path/transmission/trans_channel/tcp_direct/include",
   ]
 
   cflags = [

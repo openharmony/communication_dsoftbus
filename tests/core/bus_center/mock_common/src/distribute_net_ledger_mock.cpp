@@ -107,5 +107,10 @@ int32_t LnnGetDLSleHbTimestamp(const char *networkId, uint64_t *timestamp)
 {
     return GetDistriLedgerInterface()->LnnGetDLSleHbTimestamp(networkId, timestamp);
 }
+
+int32_t LnnSetDLSleHbTimestamp(const char *networkId, const uint64_t timestamp)
+{
+    return GetDistriLedgerInterface()->LnnSetDLSleHbTimestamp(networkId, timestamp);
+}
 }
 } // namespace OHOS

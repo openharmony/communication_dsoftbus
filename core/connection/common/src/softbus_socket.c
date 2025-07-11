@@ -26,6 +26,7 @@
 #include "softbus_def.h"
 #include "softbus_error_code.h"
 #include "softbus_mintp_socket.h"
+#include "softbus_htp_socket.h"
 #include "softbus_tcp_socket.h"
 #include "softbus_usb_tcp_socket.h"
 #include "softbus_watch_event_interface.h"
@@ -134,6 +135,12 @@ int32_t ConnInitSockets(void)
     }
     CONN_LOGD(CONN_INIT, "mintp registed!");
 
+    ret = RegistSocketProtocol(GetHtpProtocol());
+    if (ret != SOFTBUS_OK) {
+        CONN_LOGE(CONN_INIT, "regist htp failed!! ret=%{public}" PRId32, ret);
+        (void)SoftBusMutexDestroy(&g_socketsMutex);
+        return ret;
+    }
     return ret;
 }
 
