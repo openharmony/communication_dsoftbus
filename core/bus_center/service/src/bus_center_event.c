@@ -690,6 +690,15 @@ void LnnNotifyVapInfoChangeEvent(int32_t preferChannel)
     NotifyEvent((const LnnEventBasicInfo *)&event);
 }
 
+void LnnNotifyDeviceRootStateChangeEvent(void)
+{
+    // waiting for dm search api
+    SoftBusDeviceRootState state = SOFTBUS_DEVICE_IS_ROOT;
+    LnnDeviceRootStateChangeEvent event = {.basic.event = LNN_EVENT_DEVICE_ROOT_STATE_CHANGED,
+        .status = (uint8_t)state};
+    NotifyEvent((const LnnEventBasicInfo *)&event);
+}
+
 void LnnNotifySysTimeChangeEvent(void)
 {
     LnnEventBasicInfo event = {.event = LNN_EVENT_SYS_TIME_CHANGE};
