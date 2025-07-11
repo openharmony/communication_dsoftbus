@@ -247,5 +247,10 @@ bool RawLinkNeedUpdateAuthManager(const char *uuid, bool isServer)
 {
     return GetLnnConnInterface()->RawLinkNeedUpdateAuthManager(uuid, isServer);
 }
+
+void FsmStateMsgHandler(SoftBusMessage *msg)
+{
+    return GetLnnConnInterface()->FsmStateMsgHandler(msg);
+}
 }
 } // namespace OHOS
