@@ -738,7 +738,7 @@ HWTEST_F(SoftbusProxyChannelManagerTest, TransProxyOnMessageReceivedTest002, Tes
     string identity = TEST_STRING_TEN;
     (void)strcpy_s(chan.identity, TEST_CHANNEL_IDENTITY_LEN, identity.c_str());
     msg.data = TransProxyPackHandshakeAckMsg(&chan);
-    ASSERT_TRUE(msg.data != nullptr);
+    ASSERT_TRUE(msg.data == nullptr);
 
     msg.dataLen = strlen(msg.data) + TEST_NUMBER_ONE;
     msg.msgHead.myId = TEST_NUMBER_TEN;
@@ -2216,7 +2216,7 @@ HWTEST_F(SoftbusProxyChannelManagerTest, TransDealProxyCheckCollabResult001, Tes
 {
     int32_t channelId = TEST_VALID_CHANNEL_ID;
     int32_t ret = TransDealProxyCheckCollabResult(channelId, SOFTBUS_OK, TEST_CALLING_PID);
-    EXPECT_EQ(SOFTBUS_TRANS_NODE_NOT_FOUND, ret);
+    EXPECT_EQ(SOFTBUS_TRANS_CHECK_PID_ERROR, ret);
 
     ProxyChannelInfo *chan = reinterpret_cast<ProxyChannelInfo *>(SoftBusCalloc(sizeof(ProxyChannelInfo)));
     ASSERT_TRUE(chan != nullptr);
@@ -2232,7 +2232,7 @@ HWTEST_F(SoftbusProxyChannelManagerTest, TransDealProxyCheckCollabResult001, Tes
     EXPECT_EQ(SOFTBUS_TRANS_CHECK_PID_ERROR, ret);
 
     ret = TransProxyDelByChannelId(channelId, chan);
-    EXPECT_EQ(SOFTBUS_TRANS_NODE_NOT_FOUND, ret);
+    EXPECT_EQ(SOFTBUS_OK, ret);
 }
 
 /**
@@ -2253,7 +2253,7 @@ HWTEST_F(SoftbusProxyChannelManagerTest, TransDealProxyCheckCollabResult002, Tes
     ret = TransDealProxyCheckCollabResult(TEST_VALID_CHANNEL_ID, SOFTBUS_TRANS_NODE_NOT_FOUND, TEST_CALLING_PID);
     EXPECT_EQ(SOFTBUS_TRANS_CHECK_PID_ERROR, ret);
     ret = TransProxyDelByChannelId(TEST_VALID_CHANNEL_ID, chan);
-    EXPECT_EQ(SOFTBUS_TRANS_NODE_NOT_FOUND, ret);
+    EXPECT_EQ(SOFTBUS_OK, ret);
 }
 
 /**

@@ -46,6 +46,7 @@ typedef struct TagLnnOpenFuncList {
     LnnCleanTriggerSparkInfoFunc lnnCleanTriggerSparkInfo;
     LnnOfflineTimingBySleHbFunc lnnOfflineTimingBySleHb;
     LnnStopSleHeartbeatFunc lnnStopSleHeartbeat;
+    LnnStopSleOfflineTimingStrategyFunc lnnStopSleOfflineTimingStrategy;
 
     // net_builder
     LnnRegSyncInfoHandlerFunc lnnRegSyncInfoHandler;
@@ -123,6 +124,7 @@ typedef struct TagLnnOpenFuncList {
     LnnGetLocalNumU32InfoFunc lnnGetLocalNumU32Info;
     LnnGetLocalByteInfoFunc lnnGetLocalByteInfo;
     LnnGetAllOnlineNodeInfoFunc lnnGetAllOnlineNodeInfo;
+    LnnGetOnlineAndOfflineWithinTimeUdidsFunc lnnGetOnlineAndOfflineWithinTimeUdids;
     LnnGetNodeKeyInfoFunc lnnGetNodeKeyInfo;
     LnnGetNetworkIdByUdidFunc lnnGetNetworkIdByUdid;
     LnnGetNetworkIdByUdidHashFunc lnnGetNetworkIdByUdidHash;
@@ -304,6 +306,7 @@ typedef struct TagLnnOpenFuncList {
     SoftBusGetBrStateFunc softBusGetBrState;
     SoftBusGetBtStateFunc softBusGetBtState;
     LnnIsLinkReadyFunc lnnIsLinkReady;
+    CheckLnnPermissionFunc checkLnnPermission;
 } LnnOpenFuncList;
 
 #ifdef __cplusplus

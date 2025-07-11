@@ -27,6 +27,7 @@
 #include "lnn_sync_info_manager_struct.h"
 #include "lnn_lane_interface_struct.h"
 #include "lnn_ble_lpdevice_struct.h"
+#include "lnn_node_info_struct.h"
 #include "lnn_cipherkey_manager_struct.h"
 #include "lnn_decision_center_struct.h"
 #include "lnn_device_info_recovery_struct.h"
@@ -171,6 +172,7 @@ typedef void (*LnnClearAuthExchangeUdidFunc)(const char *networkId);
 
 /* lnn_fast_offline.h */
 typedef int32_t (*LnnInitFastOfflineFunc)(void);
+typedef int32_t (*LnnDeviceCloudConvergenceInitFunc)(void);
 typedef void (*LnnDeinitFastOfflineFunc)(void);
 typedef int32_t (*LnnSendNotTrustedInfoFunc)(const NotTrustedDelayInfo *info, uint32_t num, LnnSyncInfoMsgComplete complete);
 typedef int32_t (*LnnBleFastOfflineOnceBeginFunc)(void);
@@ -264,6 +266,7 @@ typedef int32_t (*UnregistAuthTransListenerFunc)(void);
 typedef void (*SleRangeDeathCallbackFunc)(void);
 typedef int32_t (*LnnInitUsbChannelManagerFunc)(void);
 typedef void (*LnnDeinitUsbChannelManagerFunc)(void);
+typedef void (*CheckNeedCloudSyncOfflineFunc)(DiscoveryType type);
 
 typedef struct TagLnnEnhanceFuncList {
     // time_sync
@@ -397,6 +400,7 @@ typedef struct TagLnnEnhanceFuncList {
     LnnUpdateAuthExchangeUdidFunc lnnUpdateAuthExchangeUdid;
     LnnClearAuthExchangeUdidFunc lnnClearAuthExchangeUdid;
     LnnInitFastOfflineFunc lnnInitFastOffline;
+    LnnDeviceCloudConvergenceInitFunc lnnDeviceCloudConvergenceInit;
     LnnDeinitFastOfflineFunc lnnDeinitFastOffline;
     LnnSendNotTrustedInfoFunc lnnSendNotTrustedInfo;
     LnnBleFastOfflineOnceBeginFunc lnnBleFastOfflineOnceBegin;
@@ -481,6 +485,7 @@ typedef struct TagLnnEnhanceFuncList {
     //usb
     LnnInitUsbChannelManagerFunc lnnInitUsbChannelManager;
     LnnDeinitUsbChannelManagerFunc lnnDeinitUsbChannelManager;
+    CheckNeedCloudSyncOfflineFunc checkNeedCloudSyncOffline;
 } LnnEnhanceFuncList;
 
 LnnEnhanceFuncList *LnnEnhanceFuncListGet(void);

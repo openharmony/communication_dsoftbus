@@ -17,6 +17,7 @@
 
 #include "securec.h"
 
+#include "accesstoken_kit.h"
 #include "access_control.h"
 #include "ipc_skeleton.h"
 #include "legacy/softbus_hisysevt_transreporter.h"
@@ -39,6 +40,17 @@
 #include "system_ability_definition.h"
 #endif
 
+#define SERVER_JOIN_LNN_NAME "SERVER_JOIN_LNN"
+#define SERVER_LEAVE_LNN_NAME "SERVER_LEAVE_LNN"
+#define SERVER_GET_NODE_KEY_INFO_NMAE "SERVER_GET_NODE_KEY_INFO"
+#define SERVER_SET_NODE_DATA_CHANGE_FLAG_NAME "SERVER_SET_NODE_DATA_CHANGE_FLAG"
+#define SERVER_ACTIVE_META_NODE_NAME "SERVER_ACTIVE_META_NODE"
+#define SERVER_DEACTIVE_META_NODE_NAME "SERVER_DEACTIVE_META_NODE"
+#define SERVER_GET_ALL_META_NODE_INFO_NAME "SERVER_GET_ALL_META_NODE_INFO"
+#define SERVER_SHIFT_LNN_GEAR_NAME "SERVER_SHIFT_LNN_GEAR"
+#define SERVER_SYNC_TRUSTED_RELATION_NAME "SERVER_SYNC_TRUSTED_RELATION"
+#define SERVER_SET_DISPLAY_NAME_NAME "SERVER_SET_DISPLAY_NAME"
+
 const char *g_limitPkgName = "ohos.distributedschedule.dms";
 
 #define READ_PARCEL_WITH_RET(parcel, type, data, retVal)        \
@@ -56,6 +68,16 @@ namespace OHOS {
         static const char *DB_PACKAGE_NAME = "distributeddata-default";
         static const char *DM_PACKAGE_NAME = "ohos.distributedhardware.devicemanager";
         static const char *MSDP_PACKAGE_NAME = "ohos.msdp.spatialawareness";
+#ifdef SUPPORT_BUNDLENAME
+        constexpr int32_t SYSTEM_APP_NUMS = 5;
+        static constexpr std::array<const char*, SYSTEM_APP_NUMS> systemAppWhitelist = {
+            "com.huawei.hmos.hiviewcare",
+            "com.ohos.plrdtest.hongyan",
+            "com.huawei.hmos.aibase",
+            "ohos.samples.distributedmusicplayer",
+            "com.huawei.hmos.camera"
+        };
+#endif // SUPPORT_BUNDLENAME
     }
 
 int32_t SoftBusServerStub::CheckOpenSessionPermission(const SessionParam *param)
@@ -425,6 +447,28 @@ static int32_t CheckNormalAppSessionName(
     }
     return SOFTBUS_OK;
 }
+
+static bool IsInWhitelist(std::string_view app)
+{
+    return std::find(systemAppWhitelist.begin(), systemAppWhitelist.end(), app) != systemAppWhitelist.end();
+}
+
+static int32_t TransCheckSystemAppList(pid_t callingUid)
+{
+    uint64_t callingFullTokenId = IPCSkeleton::GetCallingFullTokenID();
+    if (SoftBusCheckIsSystemApp(callingFullTokenId) == false) {
+        return SOFTBUS_OK;
+    }
+    std::string bundleName;
+    int32_t ret = GetBundleName(callingUid, bundleName);
+    COMM_CHECK_AND_RETURN_RET_LOGE(ret == SOFTBUS_OK, ret, COMM_SVC, "get bundle name failed.");
+
+    if (!IsInWhitelist(bundleName)) {
+        COMM_LOGE(COMM_SVC, "not found bundleName in system app whitelist.");
+        return SOFTBUS_TRANS_NOT_FIND_BUNDLENAME;
+    }
+    return SOFTBUS_OK;
+}
 #endif
 
 int32_t SoftBusServerStub::CreateSessionServerInner(MessageParcel &data, MessageParcel &reply)
@@ -455,6 +499,10 @@ int32_t SoftBusServerStub::CreateSessionServerInner(MessageParcel &data, Message
         goto EXIT;
     }
 #ifdef SUPPORT_BUNDLENAME
+    if (TransCheckSystemAppList(callingUid) != SOFTBUS_OK) {
+        retReply = SOFTBUS_PERMISSION_DENIED;
+        goto EXIT;
+    }
     if (CheckNormalAppSessionName(sessionName, callingUid, strName) != SOFTBUS_OK) {
         retReply = SOFTBUS_PERMISSION_DENIED;
         goto EXIT;
@@ -590,6 +638,9 @@ static void ReadSessionInfo(MessageParcel &data, SessionParam &param)
     param.actionId = data.ReadUint32();
     param.pid = OHOS::IPCSkeleton::GetCallingPid();
     param.isLowLatency = data.ReadBool();
+    param.flowInfo.flowSize = data.ReadUint64();
+    param.flowInfo.sessionType = (FlowSessionType)data.ReadUint32();
+    param.flowInfo.flowQosType = (FlowQosType)data.ReadUint32();
 }
 
 int32_t SoftBusServerStub::OpenSessionInner(MessageParcel &data, MessageParcel &reply)
@@ -904,6 +955,11 @@ int32_t SoftBusServerStub::EvaluateQosInner(MessageParcel &data, MessageParcel &
 int32_t SoftBusServerStub::JoinLNNInner(MessageParcel &data, MessageParcel &reply)
 {
     COMM_LOGD(COMM_SVC, "enter");
+    int32_t ret = PermissionVerify(SERVER_JOIN_LNN);
+    if (ret != SOFTBUS_OK) {
+        COMM_LOGE(COMM_SVC, "permission verification failed");
+        return ret;
+    }
     const char *clientName = data.ReadCString();
     if (clientName == nullptr) {
         COMM_LOGE(COMM_SVC, "SoftbusJoinLNNInner read clientName failed!");
@@ -934,6 +990,11 @@ int32_t SoftBusServerStub::JoinLNNInner(MessageParcel &data, MessageParcel &repl
 int32_t SoftBusServerStub::LeaveLNNInner(MessageParcel &data, MessageParcel &reply)
 {
     COMM_LOGD(COMM_SVC, "enter");
+    int32_t ret = PermissionVerify(SERVER_LEAVE_LNN);
+    if (ret != SOFTBUS_OK) {
+        COMM_LOGE(COMM_SVC, "permission verification failed");
+        return ret;
+    }
     const char *clientName = data.ReadCString();
     if (clientName == nullptr) {
         COMM_LOGE(COMM_SVC, "SoftbusLeaveLNNInner read clientName failed!");
@@ -1033,8 +1094,34 @@ int32_t SoftBusServerStub::GetNodeKeyInfoLen(int32_t key)
     return LnnGetNodeKeyInfoLen(key);
 }
 
+static int32_t GetNodeKeyWriteInfo(MessageParcel &reply, void *buf, int32_t infoLen, int32_t ret)
+{
+    if (buf == nullptr) {
+        COMM_LOGE(COMM_SVC, "invalid param");
+        return SOFTBUS_INVALID_PARAM;
+    }
+    if (!reply.WriteInt32(infoLen)) {
+        COMM_LOGE(COMM_SVC, "write info length failed!");
+        return SOFTBUS_IPC_ERR;
+    }
+    if (!reply.WriteRawData(buf, infoLen)) {
+        COMM_LOGE(COMM_SVC, "write key info failed!");
+        return SOFTBUS_IPC_ERR;
+    }
+    if (!reply.WriteInt32(ret)) {
+        COMM_LOGE(COMM_SVC, "write info length failed!");
+        return SOFTBUS_IPC_ERR;
+    }
+    return SOFTBUS_OK;
+}
+
 int32_t SoftBusServerStub::GetNodeKeyInfoInner(MessageParcel &data, MessageParcel &reply)
 {
+    int32_t ret = PermissionVerify(SERVER_GET_NODE_KEY_INFO);
+    if (ret != SOFTBUS_OK) {
+        COMM_LOGE(COMM_SVC, "permission verification failed");
+        return ret;
+    }
     const char *clientName = data.ReadCString();
     const char *networkId = data.ReadCString();
     if (clientName == nullptr || networkId == nullptr) {
@@ -1064,19 +1151,8 @@ int32_t SoftBusServerStub::GetNodeKeyInfoInner(MessageParcel &data, MessageParce
         COMM_LOGE(COMM_SVC, "malloc buffer failed!");
         return SOFTBUS_MALLOC_ERR;
     }
-    int32_t ret = GetNodeKeyInfo(clientName, networkId, key, static_cast<unsigned char *>(buf), infoLen);
-    if (!reply.WriteInt32(infoLen)) {
-        COMM_LOGE(COMM_SVC, "write info length failed!");
-        SoftBusFree(buf);
-        return SOFTBUS_IPC_ERR;
-    }
-    if (!reply.WriteRawData(buf, infoLen)) {
-        COMM_LOGE(COMM_SVC, "write key info failed!");
-        SoftBusFree(buf);
-        return SOFTBUS_IPC_ERR;
-    }
-    if (!reply.WriteInt32(ret)) {
-        COMM_LOGE(COMM_SVC, "write info length failed!");
+    ret = GetNodeKeyInfo(clientName, networkId, key, static_cast<unsigned char *>(buf), infoLen);
+    if (GetNodeKeyWriteInfo(reply, buf, infoLen, ret) != SOFTBUS_OK) {
         SoftBusFree(buf);
         return SOFTBUS_IPC_ERR;
     }
@@ -1086,6 +1162,11 @@ int32_t SoftBusServerStub::GetNodeKeyInfoInner(MessageParcel &data, MessageParce
 
 int32_t SoftBusServerStub::SetNodeDataChangeFlagInner(MessageParcel &data, MessageParcel &reply)
 {
+    int32_t ret = PermissionVerify(SERVER_SET_NODE_DATA_CHANGE_FLAG);
+    if (ret != SOFTBUS_OK) {
+        COMM_LOGE(COMM_SVC, "permission verification failed");
+        return ret;
+    }
     const char *clientName = data.ReadCString();
     if (clientName == nullptr) {
         COMM_LOGE(COMM_SVC, "SetNodeDataChangeFlag read clientName failed!");
@@ -1512,6 +1593,11 @@ int32_t SoftBusServerStub::StopRefreshLNNInner(MessageParcel &data, MessageParce
 int32_t SoftBusServerStub::ActiveMetaNodeInner(MessageParcel &data, MessageParcel &reply)
 {
     COMM_LOGD(COMM_SVC, "enter");
+    int32_t ret = PermissionVerify(SERVER_ACTIVE_META_NODE);
+    if (ret != SOFTBUS_OK) {
+        COMM_LOGE(COMM_SVC, "permission verification failed");
+        return ret;
+    }
     MetaNodeConfigInfo *info = const_cast<MetaNodeConfigInfo *>(
         reinterpret_cast<const MetaNodeConfigInfo *>(data.ReadRawData(sizeof(MetaNodeConfigInfo))));
     if (info == nullptr) {
@@ -1532,12 +1618,17 @@ int32_t SoftBusServerStub::ActiveMetaNodeInner(MessageParcel &data, MessageParce
 int32_t SoftBusServerStub::DeactiveMetaNodeInner(MessageParcel &data, MessageParcel &reply)
 {
     COMM_LOGD(COMM_SVC, "enter");
+    int32_t ret = PermissionVerify(SERVER_DEACTIVE_META_NODE);
+    if (ret != SOFTBUS_OK) {
+        COMM_LOGE(COMM_SVC, "permission verification failed");
+        return ret;
+    }
     const char *metaNodeId = reinterpret_cast<const char *>(data.ReadCString());
     if (metaNodeId == nullptr) {
         COMM_LOGE(COMM_SVC, "DeactiveMetaNode read meta node id failed!");
         return SOFTBUS_IPC_ERR;
     }
-    int32_t ret = DeactiveMetaNode(metaNodeId);
+    ret = DeactiveMetaNode(metaNodeId);
     if (ret != SOFTBUS_OK) {
         return ret;
     }
@@ -1549,7 +1640,11 @@ int32_t SoftBusServerStub::GetAllMetaNodeInfoInner(MessageParcel &data, MessageP
     COMM_LOGD(COMM_SVC, "enter");
     int32_t infoNum;
     MetaNodeInfo infos[MAX_META_NODE_NUM];
-
+    int32_t ret = PermissionVerify(SERVER_GET_ALL_META_NODE_INFO);
+    if (ret != SOFTBUS_OK) {
+        COMM_LOGE(COMM_SVC, "permission verification failed");
+        return ret;
+    }
     if (!data.ReadInt32(infoNum)) {
         COMM_LOGE(COMM_SVC, "GetAllMetaNodeInfo read infoNum failed!");
         return SOFTBUS_IPC_ERR;
@@ -1558,7 +1653,7 @@ int32_t SoftBusServerStub::GetAllMetaNodeInfoInner(MessageParcel &data, MessageP
         COMM_LOGE(COMM_SVC, "invalid param, infoNum=%{public}d, maxNum=%{public}d", infoNum, MAX_META_NODE_NUM);
         return SOFTBUS_IPC_ERR;
     }
-    int32_t ret = GetAllMetaNodeInfo(infos, &infoNum);
+    ret = GetAllMetaNodeInfo(infos, &infoNum);
     if (ret != SOFTBUS_OK) {
         return ret;
     }
@@ -1578,7 +1673,11 @@ int32_t SoftBusServerStub::ShiftLNNGearInner(MessageParcel &data, MessageParcel 
     COMM_LOGD(COMM_SVC, "enter");
     const char *targetNetworkId = nullptr;
     const GearMode *mode = nullptr;
-
+    int32_t ret = PermissionVerify(SERVER_SHIFT_LNN_GEAR);
+    if (ret != SOFTBUS_OK) {
+        COMM_LOGE(COMM_SVC, "permission verification failed");
+        return ret;
+    }
     const char *pkgName = data.ReadCString();
     if (pkgName == nullptr || strnlen(pkgName, PKG_NAME_SIZE_MAX) >= PKG_NAME_SIZE_MAX) {
         COMM_LOGE(COMM_SVC, "ShiftLNNGearInner read pkgName failed!");
@@ -1718,7 +1817,11 @@ int32_t SoftBusServerStub::UnregRangeCbForMsdpInner(MessageParcel &data, Message
 int32_t SoftBusServerStub::SyncTrustedRelationShipInner(MessageParcel &data, MessageParcel &reply)
 {
     COMM_LOGD(COMM_SVC, "enter");
-
+    int32_t ret = PermissionVerify(SERVER_SYNC_TRUSTED_RELATION);
+    if (ret != SOFTBUS_OK) {
+        COMM_LOGE(COMM_SVC, "permission verification failed");
+        return ret;
+    }
     const char *pkgName = data.ReadCString();
     if (pkgName == nullptr || strnlen(pkgName, PKG_NAME_SIZE_MAX) >= PKG_NAME_SIZE_MAX) {
         COMM_LOGE(COMM_SVC, "read pkgName failed!");
@@ -1849,6 +1952,11 @@ int32_t SoftBusServerStub::PrivilegeCloseChannelInner(MessageParcel &data, Messa
 int32_t SoftBusServerStub::SetDisplayNameInner(MessageParcel &data, MessageParcel &reply)
 {
     COMM_LOGD(COMM_SVC, "enter");
+    int32_t ret = PermissionVerify(SERVER_SET_DISPLAY_NAME);
+    if (ret != SOFTBUS_OK) {
+        COMM_LOGE(COMM_SVC, "permission verification failed");
+        return ret;
+    }
     const char *pkgName = data.ReadCString();
     if (pkgName == nullptr || strnlen(pkgName, PKG_NAME_SIZE_MAX) >= PKG_NAME_SIZE_MAX) {
         COMM_LOGE(COMM_SVC, "read pkgName failed!");
@@ -2201,6 +2309,60 @@ int32_t SoftBusServerStub::RegisterPushHookInner(MessageParcel &data, MessagePar
     if (!reply.WriteInt32(ret)) {
         COMM_LOGE(COMM_SVC, "[br_proxy] write reply failed!");
         return SOFTBUS_TRANS_PROXY_WRITEINT_FAILED;
+    }
+    return SOFTBUS_OK;
+}
+
+static const char* LabelTransformation(uint32_t code)
+{
+    if (code == SERVER_JOIN_LNN) {
+        return SERVER_JOIN_LNN_NAME;
+    } else if (code == SERVER_LEAVE_LNN) {
+        return SERVER_LEAVE_LNN_NAME;
+    } else if (code == SERVER_GET_NODE_KEY_INFO) {
+        return SERVER_GET_NODE_KEY_INFO_NMAE;
+    } else if (code == SERVER_SET_NODE_DATA_CHANGE_FLAG) {
+        return SERVER_SET_NODE_DATA_CHANGE_FLAG_NAME;
+    } else if (code == SERVER_ACTIVE_META_NODE) {
+        return SERVER_ACTIVE_META_NODE_NAME;
+    } else if (code == SERVER_DEACTIVE_META_NODE) {
+        return SERVER_DEACTIVE_META_NODE_NAME;
+    } else if (code == SERVER_GET_ALL_META_NODE_INFO) {
+        return SERVER_GET_ALL_META_NODE_INFO_NAME;
+    } else if (code == SERVER_SHIFT_LNN_GEAR) {
+        return SERVER_SHIFT_LNN_GEAR_NAME;
+    } else if (code == SERVER_SYNC_TRUSTED_RELATION) {
+        return SERVER_SYNC_TRUSTED_RELATION_NAME;
+    } else if (code == SERVER_SET_DISPLAY_NAME) {
+        return SERVER_SET_DISPLAY_NAME_NAME;
+    }
+    return nullptr;
+}
+
+int32_t SoftBusServerStub::PermissionVerify(uint32_t code)
+{
+    uint32_t tokenId = IPCSkeleton::GetCallingTokenID();
+    auto tokenType = OHOS::Security::AccessToken::AccessTokenKit::GetTokenTypeFlag(
+        static_cast<OHOS::Security::AccessToken::AccessTokenID>(tokenId));
+    if (tokenType != OHOS::Security::AccessToken::ATokenTypeEnum::TOKEN_NATIVE) {
+        COMM_LOGE(COMM_SVC, "not native call");
+        return SOFTBUS_PERMISSION_DENIED;
+    }
+    OHOS::Security::AccessToken::NativeTokenInfo nativeTokenInfo;
+    int32_t ret = OHOS::Security::AccessToken::AccessTokenKit::GetNativeTokenInfo(tokenId, nativeTokenInfo);
+    if (ret != SOFTBUS_OK) {
+        COMM_LOGE(COMM_SVC, "get nativeTokenInfo fail, ret=%{public}d", ret);
+        return SOFTBUS_PERMISSION_DENIED;
+    }
+    const char* tagName = LabelTransformation(code);
+    if (tagName == nullptr) {
+        COMM_LOGE(COMM_SVC, "the tag does not add process verification, code=%{public}d", code);
+        return SOFTBUS_PERMISSION_DENIED;
+    }
+    if (CheckLnnPermission(tagName, nativeTokenInfo.processName.c_str()) != SOFTBUS_OK) {
+        COMM_LOGE(COMM_SVC, "the process does not have permission, code=%{public}u, processName=%{public}s",
+            code, nativeTokenInfo.processName.c_str());
+        return SOFTBUS_PERMISSION_DENIED;
     }
     return SOFTBUS_OK;
 }

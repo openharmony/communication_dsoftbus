@@ -379,7 +379,7 @@ int32_t ConnBlePostBytesInner(uint32_t connectionId, uint8_t *data, uint32_t dat
     node->onPostBytesFinished = postBytesFinishAction;
 
     if (SoftBusMutexLock(&g_startBleSendLPInfo.lock) != SOFTBUS_OK) {
-        CONN_LOGE(CONN_BLE, "lock fail!", status);
+        CONN_LOGE(CONN_BLE, "lock fail!");
         ConnBleReturnConnection(&connection);
         FreeSendNode(node);
         return SOFTBUS_LOCK_ERR;

@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2023-2024 Huawei Device Co., Ltd.
+ * Copyright (c) 2023-2025 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -225,6 +225,19 @@ typedef struct {
      * @version 2.0
      */
     bool (*OnNegotiate2)(int32_t socket, PeerSocketInfo info, SocketAccessInfo *peerInfo, SocketAccessInfo *localInfo);
+
+    /**
+     * @brief Registration during Bind link establishment.
+     *
+     * This callback is invoked to notify that message is received.
+     *
+     * @param socket Indicates the unique socket fd.
+     * @param dataSeq Indicates the sequence number of the packet to be sent.
+     * @param errCode Indicates the error for the async bind socket.
+     * @since 2.0
+     * @version 2.0
+     */
+    void (*OnMessageSent)(int32_t socket, uint16_t dataSeq, int32_t errCode);
 } ISocketListener;
 
 /**
@@ -351,6 +364,24 @@ int32_t SendBytesAsync(int32_t socket, uint32_t dataSeq, const void *data, uint3
  * @version 2.0
  */
 int32_t SendMessage(int32_t socket, const void *data, uint32_t len);
+
+/**
+ * @brief Async Sends message data.
+ *
+ * @param socket Indicates the unique socket fd.
+ * @param dataSeq Indicates the unique seq number of the packet to be send. which cannot be zero.
+ * @param data Indicates the pointer to the bytes data to send, which cannot be <b>NULL</b>.
+ * @param len Indicates the length of the bytes data to send.
+ *
+ * @return Returns <b>SOFTBUS_INVALID_PARAM</b> if invalid parameters are detected.
+ * @return Returns <b>SOFTBUS_TRANS_SEND_LEN_BEYOND_LIMIT</b> if the bytes data exceeds the maximum limit.
+ * @return Returns <b>SOFTBUS_TRANS_INVALID_SOCKET</b> if <b>socket</b> is invalid.
+ * @return Returns <b>SOFTBUS_TRANS_SOCKET_NO_ENABLE</b> if the socket is not bind.
+ * @return Returns <b>SOFTBUS_OK</b> if the operation is successful; returns an error code otherwise.
+ * @since 2.0
+ * @version 2.0
+ */
+int32_t SendMessageAsync(int32_t socket, uint16_t dataSeq, const void *data, uint32_t dataLen);
 
 /**
  * @example sendstream_demo.c

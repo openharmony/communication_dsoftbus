@@ -1,4 +1,4 @@
-# Copyright (c) 2021-2024 Huawei Device Co., Ltd.
+# Copyright (c) 2021-2025 Huawei Device Co., Ltd.
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
 # You may obtain a copy of the License at
@@ -20,39 +20,35 @@ softbus_adapter_common = "${dsoftbus_root_path}/adapter/common"
 
 config("softbus_connection_br_test_config") {
   include_dirs = [
-    "$dsoftbus_root_path/core/common/include",
     "$dsoftbus_root_path/core/adapter/br/include",
-    "$softbus_adapter_common/include",
-    "$dsoftbus_root_path/interfaces/kits/common",
-    "$dsoftbus_root_path/core/connection/interface",
-    "$dsoftbus_root_path/core/connection/manager",
-    "$dsoftbus_root_path/core/connection/tcp/include",
-    "$dsoftbus_root_path/core/connection/br/include",
-    "$dsoftbus_root_path/core/connection/br/src",
-    "$dsoftbus_root_path/interfaces/kits/common",
-    "$dsoftbus_root_path/interfaces/kits/discovery",
-    "$dsoftbus_root_path/interfaces/kits/bus_center",
-    "$dsoftbus_root_path/interfaces/kits/connect",
-    "$dsoftbus_root_path/interfaces/kits/disc",
-    "$dsoftbus_root_path/interfaces/kits/authentication",
-    "$dsoftbus_root_path/interfaces/kits/lnn",
-
-    "$dsoftbus_root_path/core/frame/init/include",
-    "$dsoftbus_root_path/core/frame/common/include",
-    "$dsoftbus_root_path/tests/interfaces/enhance",
-
-    "$softbus_adapter_common/net/bluetooth/include",
-    "$dsoftbus_root_path/core/common/include",
-    "$dsoftbus_root_path/core/common/softbus_property",
-    "$dsoftbus_root_path/core/connection/ble/include",
-    "$dsoftbus_root_path/core/discovery/interface",
-    "$dsoftbus_root_path/core/discovery/manager/include",
     "$dsoftbus_root_path/core/authentication/interface",
     "$dsoftbus_root_path/core/bus_center/interface",
     "$dsoftbus_root_path/core/bus_center/lnn/net_ledger/common/include",
     "$dsoftbus_root_path/core/bus_center/lnn/net_ledger/distributed_ledger/include",
     "$dsoftbus_root_path/core/bus_center/service/include",
+    "$dsoftbus_root_path/core/common/include",
+    "$dsoftbus_root_path/core/common/softbus_property",
+    "$dsoftbus_root_path/core/connection/ble/include",
+    "$dsoftbus_root_path/core/connection/br/include",
+    "$dsoftbus_root_path/core/connection/br/src",
+    "$dsoftbus_root_path/core/connection/interface",
+    "$dsoftbus_root_path/core/connection/manager",
+    "$dsoftbus_root_path/core/connection/tcp/include",
+    "$dsoftbus_root_path/core/discovery/interface",
+    "$dsoftbus_root_path/core/discovery/manager/include",
+    "$dsoftbus_root_path/core/frame/common/include",
+    "$dsoftbus_root_path/core/frame/init/include",
+    "$dsoftbus_root_path/interfaces/kits/authentication",
+    "$dsoftbus_root_path/interfaces/kits/bus_center",
+    "$dsoftbus_root_path/interfaces/kits/common",
+    "$dsoftbus_root_path/interfaces/kits/connect",
+    "$dsoftbus_root_path/interfaces/kits/disc",
+    "$dsoftbus_root_path/interfaces/kits/discovery",
+    "$dsoftbus_root_path/interfaces/kits/lnn",
     "$dsoftbus_root_path/tests/core/connection/br/mock",
+    "$dsoftbus_root_path/tests/interfaces/enhance",
+    "$softbus_adapter_common/include",
+    "$softbus_adapter_common/net/bluetooth/include",
   ]
 }
 
@@ -77,7 +73,10 @@ ohos_unittest("BrConnTest") {
     "$dsoftbus_root_path/tests/core/connection/br/mock/softbus_conn_br_manager_mock.cpp",
     "softbus_conn_br_manager_test.cpp",
   ]
-  include_dirs = [ "$dsoftbus_root_path/core/frame/common/include", ]
+  include_dirs = [
+    "$dsoftbus_dfx_path/interface/include/form",
+    "$dsoftbus_root_path/core/frame/common/include",
+  ]
 }
 
 ohos_unittest("ConnectionBrTest") {
@@ -106,22 +105,22 @@ ohos_unittest("BrConnectionTest") {
   module_out_path = module_output_path
 
   include_dirs = [
+    "$dsoftbus_dfx_path/interface/include/form",
     "$dsoftbus_root_path/adapter/common/net/bluetooth/include",
-    "$dsoftbus_root_path/interfaces/kits/adapter",
-    "$dsoftbus_root_path/interfaces/kits/authentication",
-    "$dsoftbus_root_path/interfaces/kits/lnn",
-    "$dsoftbus_root_path/interfaces/kits/connect",
-
     "$dsoftbus_root_path/core/adapter/br/include",
     "$dsoftbus_root_path/core/authentication/interface",
-    "$dsoftbus_root_path/core/bus_center/service/include",
     "$dsoftbus_root_path/core/bus_center/interface",
     "$dsoftbus_root_path/core/bus_center/lnn/net_ledger/common/include",
     "$dsoftbus_root_path/core/bus_center/lnn/net_ledger/distributed_ledger/include",
-    "$dsoftbus_root_path/core/connection/br/include",
+    "$dsoftbus_root_path/core/bus_center/service/include",
     "$dsoftbus_root_path/core/connection/ble/include",
+    "$dsoftbus_root_path/core/connection/br/include",
     "$dsoftbus_root_path/core/connection/common/include",
+    "$dsoftbus_root_path/interfaces/kits/adapter",
+    "$dsoftbus_root_path/interfaces/kits/authentication",
     "$dsoftbus_root_path/interfaces/kits/bus_center",
+    "$dsoftbus_root_path/interfaces/kits/connect",
+    "$dsoftbus_root_path/interfaces/kits/lnn",
     "$dsoftbus_root_path/tests/core/connection/br/mock",
   ]
 
@@ -154,15 +153,16 @@ ohos_unittest("BrHidumperTest") {
   public_configs = [ ":softbus_connection_br_test_config" ]
 
   include_dirs = [
+    "$dsoftbus_dfx_path/interface/include/form",
     "$dsoftbus_root_path/adapter/common/net/bluetooth/include",
     "$dsoftbus_root_path/core/adapter/br/include",
     "$dsoftbus_root_path/core/authentication/interface",
-    "$dsoftbus_root_path/core/bus_center/service/include",
     "$dsoftbus_root_path/core/bus_center/interface",
     "$dsoftbus_root_path/core/bus_center/lnn/net_ledger/common/include",
     "$dsoftbus_root_path/core/bus_center/lnn/net_ledger/distributed_ledger/include",
-    "$dsoftbus_root_path/core/connection/br/include",
+    "$dsoftbus_root_path/core/bus_center/service/include",
     "$dsoftbus_root_path/core/connection/ble/include",
+    "$dsoftbus_root_path/core/connection/br/include",
     "$dsoftbus_root_path/core/connection/common/include",
     "$dsoftbus_root_path/interfaces/kits/bus_center",
     "$dsoftbus_root_path/tests/core/connection/br/mock",

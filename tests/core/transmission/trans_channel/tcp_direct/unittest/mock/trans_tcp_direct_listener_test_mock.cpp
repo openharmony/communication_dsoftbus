@@ -36,9 +36,9 @@ static TransTcpDirectListenerInterface *GetTransTcpDirectListenerInterface()
 }
 
 extern "C" {
-char *PackRequest(const AppInfo *appInfo)
+char *PackRequest(const AppInfo *appInfo, int64_t requestId)
 {
-    return GetTransTcpDirectListenerInterface()->PackRequest(appInfo);
+    return GetTransTcpDirectListenerInterface()->PackRequest(appInfo, requestId);
 }
 
 int32_t TransTdcPostBytes(int32_t channelId, TdcPacketHead *packetHead, const char *data)

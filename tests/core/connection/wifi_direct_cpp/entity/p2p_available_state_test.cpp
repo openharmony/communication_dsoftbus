@@ -46,7 +46,7 @@ public:
 
 void P2pAvailableStateTest::InjectData()
 {
-    P2pEntity::GetInstance().NotifyNewClientJoining("00:01:01:01:02:02");
+    P2pEntity::GetInstance().NotifyNewClientJoining("00:01:01:01:02:02", P2P_V1_WAITING_CLIENT_JOIN_MS);
     EXPECT_TRUE(P2pEntity::GetInstance().GetJoiningClientCount() >= 0);
 }
 

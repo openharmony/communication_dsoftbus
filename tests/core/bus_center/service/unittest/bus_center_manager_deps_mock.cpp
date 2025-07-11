@@ -167,5 +167,10 @@ int32_t InitUdidChangedEvent(void)
 {
     return GetBusCenterManagerDepsInterface()->InitUdidChangedEvent();
 }
+
+int32_t LnnInitPermission(void)
+{
+    return GetBusCenterManagerDepsInterface()->LnnInitPermission();
+}
 }
 } // namespace OHOS

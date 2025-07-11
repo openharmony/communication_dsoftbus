@@ -80,6 +80,9 @@ extern "C" {
 #define SOFTBUS_IPPROTO_IP SOFTBUS_IPPROTO_IP_
 #define SOFTBUS_IPPROTO_TCP SOFTBUS_IPPROTO_TCP_
 
+#define SOFTBUS_IPPROTO_IPV6 SOFTBUS_IPPROTO_IPV6_
+#define SOFTBUS_IPV6_TCLASS SOFTBUS_IPV6_TCLASS_
+
 #define SOFTBUS_IP_TOS SOFTBUS_IP_TOS_
 
 /* netinet/tcp.h */
@@ -95,6 +98,7 @@ extern "C" {
 /* linux support 1024, liteos support 640 */
 #define SOFTBUS_FD_SETSIZE SOFTBUS_FD_SETSIZE_
 
+#define IPV6_MESSAGE_TOS 0x28
 typedef SoftBusSysTime SoftBusSockTimeOut;
 /* netinet/in.h */
 typedef struct {

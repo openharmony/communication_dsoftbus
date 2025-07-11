@@ -20,6 +20,7 @@
 #include "bus_center_manager.h"
 #include "g_enhance_trans_func.h"
 #include "g_enhance_trans_func_pack.h"
+#include "legacy/softbus_hisysevt_transreporter.h"
 #include "lnn_distributed_net_ledger.h"
 #include "lnn_lane_interface.h"
 #include "lnn_network_manager.h"
@@ -29,13 +30,13 @@
 #include "softbus_config_type.h"
 #include "softbus_error_code.h"
 #include "softbus_feature_config.h"
-#include "legacy/softbus_hisysevt_transreporter.h"
+#include "softbus_init_common.h"
 #include "softbus_proxychannel_manager.h"
 #include "softbus_wifi_api_adapter.h"
-#include "softbus_init_common.h"
 #include "trans_auth_manager.h"
 #include "trans_client_proxy.h"
 #include "trans_event.h"
+#include "g_enhance_trans_func_pack.h"
 #include "trans_ipc_adapter.h"
 #include "trans_lane_manager.h"
 #include "trans_lane_pending_ctl.h"
@@ -189,11 +190,26 @@ void FillAppInfo(AppInfo *appInfo, const SessionParam *param, TransInfo *transIn
         TRANS_LOGE(TRANS_CTRL, "Invalid param");
         return;
     }
-    int32_t ret;
+    int32_t ret = SOFTBUS_OK;
     transInfo->channelType = TransGetChannelType(param, connInfo->type);
     appInfo->linkType = connInfo->type;
     appInfo->channelType = transInfo->channelType;
+    appInfo->isFlashLight = connInfo->isLowLatency;
+    appInfo->flowInfo.flowSize = param->flowInfo.flowSize;
+    appInfo->flowInfo.sessionType = param->flowInfo.sessionType;
+    appInfo->flowInfo.flowQosType = param->flowInfo.flowQosType;
     (void)TransCommonGetLocalConfig(appInfo->channelType, appInfo->businessType, &appInfo->myData.dataConfig);
+    if (connInfo->isLowLatency) {
+        struct WifiDirectManager *mgr = GetWifiDirectManager();
+        if (mgr != NULL && mgr->getLocalAndRemoteMacByRemoteIp != NULL) {
+            ret = mgr->getLocalAndRemoteMacByRemoteIp(
+                connInfo->connInfo.p2p.peerIp, appInfo->myData.mac, MAC_LEN, appInfo->peerData.mac, MAC_LEN);
+            if (ret != SOFTBUS_OK) {
+                TRANS_LOGE(TRANS_CTRL, "get local and remote mac by local ip failed, ret=%{public}d", ret);
+                return;
+            }
+        }
+    }
     if (connInfo->type == LANE_P2P || connInfo->type == LANE_HML) {
         if (strcpy_s(appInfo->myData.addr, IP_LEN, connInfo->connInfo.p2p.localIp) != EOK) {
             TRANS_LOGE(TRANS_CTRL, "copy local ip failed");
@@ -203,7 +219,7 @@ void FillAppInfo(AppInfo *appInfo, const SessionParam *param, TransInfo *transIn
         if (mgr != NULL && mgr->getLocalIpByRemoteIp != NULL) {
             ret = mgr->getLocalIpByRemoteIp(connInfo->connInfo.wlan.addr, appInfo->myData.addr, IP_LEN);
             if (ret != SOFTBUS_OK) {
-                TRANS_LOGE(TRANS_CTRL, "get Local Ip fail, ret = %{public}d", ret);
+                TRANS_LOGE(TRANS_CTRL, "get Local Ip fail, ret=%{public}d", ret);
                 return;
             }
         }
@@ -455,6 +471,7 @@ int32_t TransCommonCloseChannel(const char *sessionName, int32_t channelId, int3
                 (void)TransLaneMgrDelLane(channelId, channelType, false);
                 break;
             case CHANNEL_TYPE_TCP_DIRECT:
+                CloseHtpChannelPacked(channelId);
                 (void)TransDelTcpChannelInfoByChannelId(channelId);
                 TransDelSessionConnById(channelId); // socket Fd will be shutdown when recv peer reply
                 (void)TransLaneMgrDelLane(channelId, channelType, false);

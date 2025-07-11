@@ -16,9 +16,11 @@
 #ifndef G_ENHANCE_TRANS_FUNC_H
 #define G_ENHANCE_TRANS_FUNC_H
 
-#include "lnn_lane_interface_struct.h"
 #include "stdint.h"
+
+#include "lnn_lane_interface_struct.h"
 #include "softbus_def.h"
+#include "softbus_proxychannel_message_struct.h"
 #include "softbus_trans_def.h"
 
 #ifdef __cplusplus
@@ -30,12 +32,39 @@ typedef int32_t (*NotifyQosChannelOpenedFunc)(const ChannelInfo *chanInfo);
 typedef void (*NotifyQosChannelClosedFunc)(int32_t channelId, int32_t channelType);
 typedef void (*GetExtQosInfoFunc)(const SessionParam *param, QosInfo *qosInfo, uint32_t index, AllocExtendInfo *extendInfo);
 typedef int32_t (*SetDefaultQdiscFunc)(void);
+typedef int32_t (*TransReversePullUpFunc)(const uint32_t chatMode, const uint32_t businessFlag, const char *pkgName);
+typedef int32_t (*TransGetPkgnameByBusinessFlagFunc)(const uint32_t businessFlag, char *pkgName, const uint32_t pkgLen);
+typedef int32_t (*InitSoftbusPagingFunc)(void);
+typedef void (*DeInitSoftbusPagingFunc)(void);
+typedef void (*TransPagingDeathCallbackFunc)(const char *pkgName, int32_t pid);
+typedef bool (*TransHasAndUpdatePagingListenFunc)(ProxyChannelInfo *info);
+typedef int32_t (*TransPagingGetPidAndDataByFlgFunc)(
+    bool isClient, uint32_t businessFlag, int32_t *pid, char *data, uint32_t *len);
+typedef int32_t (*TransDelPagingInfoByBusinessFlagFunc)(uint32_t businessFlag);
+typedef int32_t (*ClientOpenHtpChannelFunc)(
+    int32_t channelId, int64_t requestId, const char *localMac, const char *remoteMac);
+typedef int32_t (*ServerOpenHtpChannelFunc)(const char *remoteIp, int64_t flIdentity);
+typedef int32_t (*CloseHtpChannelFunc)(int32_t channelId);
+typedef void (*ServerUpdateHtpChannelFunc)(int64_t flIdentity, int32_t channelId);
+
 typedef struct TagTransEnhanceFuncList {
     InitQosFunc initQos;
     NotifyQosChannelOpenedFunc notifyQosChannelOpened;
     NotifyQosChannelClosedFunc notifyQosChannelClosed;
     GetExtQosInfoFunc getExtQosInfo;
     SetDefaultQdiscFunc setDefaultQdisc;
+    TransReversePullUpFunc transReversePullUp;
+    TransGetPkgnameByBusinessFlagFunc transGetPkgnameByBusinessFlag;
+    InitSoftbusPagingFunc initSoftbusPaging;
+    DeInitSoftbusPagingFunc deInitSoftbusPaging;
+    TransPagingDeathCallbackFunc transPagingDeathCallback;
+    TransHasAndUpdatePagingListenFunc transHasAndUpdatePagingListen;
+    TransPagingGetPidAndDataByFlgFunc transPagingGetPidAndDataByFlg;
+    TransDelPagingInfoByBusinessFlagFunc transDelPagingInfoByBusinessFlag;
+    ClientOpenHtpChannelFunc clientOpenHtpChannel;
+    ServerOpenHtpChannelFunc serverOpenHtpChannel;
+    CloseHtpChannelFunc closeHtpChannel;
+    ServerUpdateHtpChannelFunc serverUpdateHtpChannel;
 } TransEnhanceFuncList;
 
 TransEnhanceFuncList *TransEnhanceFuncListGet(void);

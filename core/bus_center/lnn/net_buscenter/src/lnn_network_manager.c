@@ -55,7 +55,8 @@
 #define LNN_DEFAULT_IF_NAME_USB_NCM  "ncm0"
 #define LNN_DEFAULT_IF_NAME_USB_WWAN  "wwan0"
 
-#define LNN_CHECK_OOBE_DELAY_LEN (5 * 60 * 1000LL)
+#define LNN_CHECK_OOBE_DELAY_LEN        (5 * 60 * 1000LL)
+#define LNN_RESTART_DISCOVERY_DELAY_LEN (5 * 1000LL)
 
 static SoftBusMutex g_dataShareLock;
 static bool g_isDataShareInit = false;
@@ -564,6 +565,12 @@ static void OnGroupDeleted(const char *groupId, int32_t groupType)
     LnnHbOnTrustedRelationReduced();
 }
 
+static void RestartCoapDiscoveryDelay(void *para)
+{
+    (void)para;
+    RestartCoapDiscovery();
+}
+
 static void OnDeviceBound(const char *udid, const char *groupInfo)
 {
     (void)groupInfo;
@@ -573,7 +580,10 @@ static void OnDeviceBound(const char *udid, const char *groupInfo)
     }
     LnnHbOnTrustedRelationIncreased(AUTH_PEER_TO_PEER_GROUP);
     LNN_LOGD(LNN_BUILDER, "wifi handle OnDeviceBound");
-    RestartCoapDiscovery();
+    if (LnnAsyncCallbackDelayHelper(GetLooper(LOOP_TYPE_DEFAULT), RestartCoapDiscoveryDelay, NULL,
+        LNN_RESTART_DISCOVERY_DELAY_LEN) != SOFTBUS_OK) {
+        LNN_LOGE(LNN_HEART_BEAT, "restart coap discovery delay fail");
+    }
     DfxRecordWifiTriggerTimestamp(WIFI_DEVICE_BOUND);
 }
 

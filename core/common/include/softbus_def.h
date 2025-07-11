@@ -48,6 +48,8 @@ extern "C" {
 
 #define PKG_NAME_SIZE_MAX 65
 #define SESSION_NAME_SIZE_MAX 256
+#define INTERFACE_NAME_SIZE_MAX 64
+#define PROCESS_NAME_SIZE_MAX 64
 #define DEVICE_ID_SIZE_MAX 65
 #define DEVICE_VERSION_SIZE_MAX 128
 #define PRODUCT_ID_SIZE_MAX 128
@@ -64,9 +66,15 @@ extern "C" {
 #define MAX_DEV_INFO_COUNT 32
 #define MAX_PUBLISH_INFO_COUNT 32
 #define IP_LEN 46
+#define MAC_MAX_LEN 18
 #define MAX_PEERS_NUM 32
 #define MAX_OPERATION_CODE_LEN 32
 #define SESSION_KEY_LENGTH 32
+#define SHORT_SESSION_KEY_LENGTH 16
+#define SHROT_SESSION_IV_LENGTH 4
+#define ORIGIN_LEN_16_BASE64_LENGTH 25
+#define D2D_SHORT_UDID_HASH_LEN 5
+#define D2D_SHORT_ACCOUNT_HASH_LEN 5
 #define DEVICE_KEY_LEN 16
 
 #define MAX_SOCKET_ADDR_LEN 46
@@ -77,10 +85,17 @@ extern "C" {
 #define WAIT_SERVER_READY_INTERVAL 200
 #define WAIT_SERVER_READY_SHORT_INTERVAL 50
 
+#define EXTRA_DATA_MAX_LEN 5
+#define EXTRA_DATA_STR_MAX_LEN 11
+#define SHORT_DEVICE_LEN 9
+#define PAGING_SOCKET_NAME_PREFIX "Paging_"
+
 #define NODE_ADDR_LOOPBACK "0"
 
 #define MAX_UDP_CHANNEL_ID_COUNT 20
 #define ACCOUNT_UID_STR_LEN 65
+
+#define ACCOUNT_ID_SIZE_MAX 65
 
 #ifndef ARRAY_SIZE
 #define ARRAY_SIZE(a) (sizeof(a) / sizeof((a)[0]))
@@ -148,7 +163,8 @@ typedef enum {
     BUSINESS_TYPE_BYTE = 2,
     BUSINESS_TYPE_FILE = 3,
     BUSINESS_TYPE_STREAM = 4,
-
+    BUSINESS_TYPE_D2D_MESSAGE = 10,
+    BUSINESS_TYPE_D2D_VOICE = 11,
     BUSINESS_TYPE_NOT_CARE,
     BUSINESS_TYPE_BUTT,
 } BusinessType;
@@ -167,6 +183,7 @@ typedef struct {
     bool isUdpFile;
     bool isFastData;
     bool isSupportTlv;
+    bool isD2D;
     int32_t sessionId;
     int32_t channelId;
     int32_t channelType;
@@ -191,6 +208,8 @@ typedef struct {
     int32_t osType;
     int64_t timeStart;
     uint64_t laneId;
+    uint32_t dataLen;
+    uint32_t businessFlag;
     char *groupId;
     char *sessionKey;
     char *peerSessionName;
@@ -201,8 +220,13 @@ typedef struct {
     int32_t tokenType;
     int32_t peerUserId;
     uint64_t peerTokenId;
+    uint32_t deviceTypeId;
     char *peerBusinessAccountId;
     char *peerExtraAccessInfo;
+    char *extraData;
+    char *pagingNonce;
+    char *pagingSessionkey;
+    char *pagingAccountId;
     bool isLowLatency;
     ProtocolType fdProtocol;
     char *pkgName;

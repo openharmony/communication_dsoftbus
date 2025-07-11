@@ -80,6 +80,17 @@ int32_t TransProxyGetProxyChannelInfoByChannelId(int32_t channelId, ProxyChannel
 
 int32_t TransDealProxyCheckCollabResult(int32_t channelId, int32_t checkResult, pid_t callingPid);
 int32_t TransProxyGetAppInfoById(int16_t channelId, AppInfo *appInfo);
+
+int32_t TransProxyCreatePagingChanInfo(ProxyChannelInfo *chan);
+int32_t TransProxyGetProxyChannelIdByAuthReq(uint32_t reqId, int32_t *channelId);
+int32_t TransPagingResetChan(ProxyChannelInfo *chanInfo);
+char *TransPagingPackHandshakeMsg(ProxyChannelInfo *info);
+int32_t TransPagingHandshakeUnPackErrMsg(ProxyChannelInfo *chan, const ProxyMessage *msg, int32_t *errCode);
+int32_t TransProxyGetChannelByFlag(uint32_t businessFlag, ProxyChannelInfo *chan, bool isClient);
+void TransProxyProcessErrMsg(ProxyChannelInfo *info, int32_t errCode);
+int32_t TransPagingUpdatePagingChannelInfo(ProxyChannelInfo *info);
+int32_t TransPagingUpdatePidAndData(int32_t channelId, int32_t pid, char *data, uint32_t len);
+void TransPagingBadKeyRetry(int32_t channelId);
 #ifdef __cplusplus
 }
 #endif

@@ -1,5 +1,5 @@
 /*
-* Copyright (c) 2021 Huawei Device Co., Ltd.
+* Copyright (c) 2021-2025 Huawei Device Co., Ltd.
 * Licensed under the Apache License, Version 2.0 (the "License");
 * you may not use this file except in compliance with the License.
 * You may obtain a copy of the License at
@@ -20,7 +20,7 @@
 #include <stdint.h>
 #include "lnn_node_info_struct.h"
 #include "softbus_common.h"
-#include "../connect/softbus_conn_interface_struct.h"
+#include "softbus_conn_interface_struct.h"
 #include "softbus_def.h"
 
 #ifdef __cplusplus

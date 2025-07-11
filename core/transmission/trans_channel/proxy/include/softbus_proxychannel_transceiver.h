@@ -32,6 +32,14 @@ typedef struct {
     ConnectOption connInfo;
 } ProxyConnInfo;
 
+typedef struct {
+    ListNode node;
+    uint32_t businessFlag;
+    bool isListened;
+    bool isLoadFailed;
+    int32_t retryTime;
+} ProxyPagingWaitInfo;
+
 void TransProxyPostResetPeerMsgToLoop(const ProxyChannelInfo *chan);
 void TransProxyPostHandshakeMsgToLoop(int32_t channelId);
 void TransProxyPostDisConnectMsgToLoop(uint32_t connId, bool isServer, const ProxyChannelInfo *chan);
@@ -39,6 +47,7 @@ void TransProxyPostOpenClosedMsgToLoop(const ProxyChannelInfo *chan);
 void TransProxyPostOpenFailMsgToLoop(const ProxyChannelInfo *chan, int32_t errCode);
 void TransProxyPostKeepAliveMsgToLoop(const ProxyChannelInfo *chan);
 void TransProxyPostAuthNegoMsgToLooperDelay(uint32_t authRequestId, int32_t channelId, uint32_t delayTime);
+void TransProxyPagingHandshakeMsgToLoop(int32_t channelId, uint8_t *authKey, uint32_t keyLen);
 int32_t TransProxyTransInit(void);
 int32_t TransProxyCloseConnChannel(uint32_t connectionId, bool isServer);
 int32_t TransProxyCloseConnChannelReset(uint32_t connectionId, bool isDisconnect, bool isServer, bool deviceType);
@@ -53,6 +62,9 @@ int32_t CheckIsProxyAuthChannel(ConnectOption *connInfo);
 void TransProxyNegoSessionKeySucc(int32_t channelId);
 void TransProxyNegoSessionKeyFail(int32_t channelId, int32_t errCode);
 int32_t TransProxyGetConnOptionByChanId(int32_t channelId, ConnectOption *connOpt);
+int32_t TransCheckPagingListenState(uint32_t businessFlag);
+int32_t TransPagingWaitListenStatus(const uint32_t businessFlag, PagingWaitListenStatus status);
+int32_t TransAddConnItem(ProxyConnInfo *conn);
 
 #ifdef __cplusplus
 }

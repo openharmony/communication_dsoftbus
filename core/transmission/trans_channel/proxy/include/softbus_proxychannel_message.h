@@ -42,6 +42,17 @@ int32_t TransProxyUnpackIdentity(const char *msg, char *identity, uint32_t ident
 char *TransProxyPackFastData(const AppInfo *appInfo, uint32_t *outLen);
 int32_t PackPlaintextMessage(ProxyMessageHead *msg, ProxyDataInfo *dataInfo);
 int32_t GetBrMacFromConnInfo(uint32_t connId, char *peerBrMac, uint32_t len);
+int32_t TransPagingPackMessage(PagingProxyMessage *msg, ProxyDataInfo *dataInfo,
+    ProxyChannelInfo *chan, bool needHash);
+int32_t TransParseMessageHeadType(char *data, int32_t len, ProxyMessage *msg);
+char *TransPagingPackHandshakeAckMsg(ProxyChannelInfo *chan);
+void TransPagingProcessHandshakeMsg(const ProxyMessage *msg, uint8_t *accountHash, uint8_t *udidHash);
+int32_t TransPagingParseMessage(char *data, int32_t len, ProxyMessage *msg);
+void TransWaitListenResult(uint32_t businessFlag, int32_t reason);
+char *TransPagingPackHandshakeErrMsg(int32_t errCode, int32_t channelId);
+char *TransProxyPagingPackChannelId(int16_t channelId);
+
+int32_t TransProxyParseD2DData(const char *data, int32_t len);
 
 #ifdef __cplusplus
 #if __cplusplus

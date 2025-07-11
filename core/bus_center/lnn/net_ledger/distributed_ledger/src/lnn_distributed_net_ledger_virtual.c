@@ -210,6 +210,14 @@ int32_t LnnGetAllOnlineNodeNum(int32_t *nodeNum)
     return SOFTBUS_NOT_IMPLEMENT;
 }
 
+int32_t LnnGetOnlineAndOfflineWithinTimeUdids(char **udids, int32_t *udidNum, uint64_t timeRange)
+{
+    (void)udids;
+    (void)udidNum;
+    (void)timeRange;
+    return SOFTBUS_NOT_IMPLEMENT;
+}
+
 int32_t LnnGetConnSubFeatureByUdidHashStr(const char *udidHashStr, uint64_t *connSubFeature)
 {
     (void)udidHashStr;

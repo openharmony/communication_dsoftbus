@@ -33,5 +33,17 @@ int32_t TransRegisterEnhanceFunc(void *soHandle)
     g_transEnhanceFuncList.getExtQosInfo = dlsym(soHandle, "GetExtQosInfo");
     g_transEnhanceFuncList.setDefaultQdisc = dlsym(soHandle, "SetDefaultQdisc");
 
+    g_transEnhanceFuncList.transReversePullUp = dlsym(soHandle, "TransReversePullUp");
+    g_transEnhanceFuncList.transGetPkgnameByBusinessFlag = dlsym(soHandle, "TransGetPkgnameByBusinessFlag");
+    g_transEnhanceFuncList.initSoftbusPaging = dlsym(soHandle, "InitSoftbusPaging");
+    g_transEnhanceFuncList.deInitSoftbusPaging = dlsym(soHandle, "DeInitSoftbusPaging");
+    g_transEnhanceFuncList.transPagingDeathCallback = dlsym(soHandle, "TransPagingDeathCallback");
+    g_transEnhanceFuncList.transHasAndUpdatePagingListen = dlsym(soHandle, "TransHasAndUpdatePagingListen");
+    g_transEnhanceFuncList.transPagingGetPidAndDataByFlg = dlsym(soHandle, "TransPagingGetPidAndDataByFlg");
+    g_transEnhanceFuncList.transDelPagingInfoByBusinessFlag = dlsym(soHandle, "TransDelPagingInfoByBusinessFlag");
+    g_transEnhanceFuncList.clientOpenHtpChannel = dlsym(soHandle, "ClientOpenHtpChannel");
+    g_transEnhanceFuncList.serverOpenHtpChannel = dlsym(soHandle, "ServerOpenHtpChannel");
+    g_transEnhanceFuncList.closeHtpChannel = dlsym(soHandle, "CloseHtpChannel");
+    g_transEnhanceFuncList.serverUpdateHtpChannel = dlsym(soHandle, "ServerUpdateHtpChannel");
     return SOFTBUS_OK;
 }

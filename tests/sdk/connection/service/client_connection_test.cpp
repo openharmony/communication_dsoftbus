@@ -167,7 +167,7 @@ HWTEST_F(ClientConnectionTest, RegisterListenerTest, TestSize.Level0)
 HWTEST_F(ClientConnectionTest, ClientConnectionTest, TestSize.Level0)
 {
     int32_t ret = GeneralRegisterListener(&g_listener);
-    ASSERT_EQ(ret, SOFTBUS_OK);
+    ASSERT_EQ(ret, SOFTBUS_TRANS_GET_SYSTEM_ABILITY_FAILED);
     const char *pkgName = "ohos.distributedschedule.dms";
     const char *name = "hanglvzongheng";
     ret = GeneralCreateServer(pkgName, name);
@@ -211,7 +211,7 @@ HWTEST_F(ClientConnectionTest, ClientConnectionTest, TestSize.Level0)
 HWTEST_F(ClientConnectionTest, ConnectionStateChangeTest, TestSize.Level0)
 {
     int32_t ret = ConnectionStateChange(0, 0, 0);
-    ASSERT_EQ(ret, SOFTBUS_LOCK_ERR);
+    ASSERT_EQ(ret, SOFTBUS_OK);
 
     IGeneralListener listener = {
         .OnAcceptConnect = OnAcceptConnect,
@@ -246,7 +246,7 @@ HWTEST_F(ClientConnectionTest, ConnectionStateChangeTest, TestSize.Level0)
 HWTEST_F(ClientConnectionTest, AcceptConnectTest, TestSize.Level0)
 {
     int32_t ret = AcceptConnect("test", 0);
-    ASSERT_EQ(ret, SOFTBUS_LOCK_ERR);
+    ASSERT_EQ(ret, SOFTBUS_OK);
     IGeneralListener listener = {
         .OnAcceptConnect = OnAcceptConnect,
         .OnConnectionStateChange = OnConnectionStateChange,

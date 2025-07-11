@@ -42,17 +42,21 @@ extern "C"{
 #define SOFTBUS_BC_SCAN_INTERVAL_P2              3000
 #define SOFTBUS_BC_SCAN_INTERVAL_P2_FAST         1500
 #define SOFTBUS_BC_SCAN_INTERVAL_P10             300
+#define SOFTBUS_BC_SCAN_INTERVAL_P10_LONG_RANGE  400
 #define SOFTBUS_BC_SCAN_INTERVAL_P25             240
 #define SOFTBUS_BC_SCAN_INTERVAL_P50             60
 #define SOFTBUS_BC_SCAN_INTERVAL_P75             40
+#define SOFTBUS_BC_SCAN_INTERVAL_P100_LONG_RANGE 30
 #define SOFTBUS_BC_SCAN_INTERVAL_P100            1000
 #define SOFTBUS_BC_SCAN_WINDOW_P2                60
 #define SOFTBUS_BC_SCAN_WINDOW_P2_FAST           30
 #define SOFTBUS_BC_SCAN_WINDOW_P10               30
+#define SOFTBUS_BC_SCAN_WINDOW_P10_LONG_RANGE    40
 #define SOFTBUS_BC_SCAN_WINDOW_P25               60
 #define SOFTBUS_BC_SCAN_WINDOW_P50               30
 #define SOFTBUS_BC_SCAN_WINDOW_P75               30
 #define SOFTBUS_BC_SCAN_WINDOW_P100              1000
+#define SOFTBUS_BC_SCAN_WINDOW_P100_LONG_RANGE   30
 
 /**
  * @brief Defines the maxium lenght of irk information.
@@ -79,6 +83,18 @@ extern "C"{
 #define BC_LOCAL_NAME_LEN_MAX                    30
 
 /**
+ * @brief Defines the broadcast protocol.
+ *
+ * @since 6.0
+ * @version 1.0
+ */
+typedef enum {
+    BROADCAST_PROTOCOL_BLE,
+    BROADCAST_PROTOCOL_SLE,
+    BROADCAST_PROTOCOL_BUTT,
+} BroadcastProtocol;
+
+/**
  * @brief Defines the broadcast service type.
  *
  * @since 4.1
@@ -99,6 +115,8 @@ typedef enum {
     SRV_TYPE_OOP, // The service type is oop discovery.
     SRV_TYPE_AUTH_CONN, // The service type is auth connection.
     SRV_TYPE_OH_APPROACH, // The service type is oh approach discovery.
+    SRV_TYPE_D2D_PAGING, // The service type is D2D 1v1 communication.
+    SRV_TYPE_D2D_GROUP_TALKIE, // The service type is D2D group talkie.
     SRV_TYPE_BUTT,
 } BaseServiceType;
 
@@ -137,7 +155,9 @@ static const SrvTypeMap g_srvTypeMap[] = {
     {SRV_TYPE_TOUCH, (char *)"touch"},
     {SRV_TYPE_OOP, (char *)"oop"},
     {SRV_TYPE_AUTH_CONN, (char *)"authConn"},
-    {SRV_TYPE_OH_APPROACH, (char *)"oh_approach"}
+    {SRV_TYPE_OH_APPROACH, (char *)"oh_approach"},
+    {SRV_TYPE_D2D_PAGING, (char *)"d2d paging"},
+    {SRV_TYPE_D2D_GROUP_TALKIE, (char *)"d2d group talkie"},
 };
 
 /**
@@ -405,6 +425,8 @@ typedef struct {
     int32_t duration;
     int32_t minInterval;
     int32_t maxInterval;
+    uint8_t linkRole;
+    uint8_t frameType;
 } BroadcastParam;
 
 /**
@@ -438,6 +460,7 @@ typedef struct {
     uint8_t scanType;
     uint8_t scanPhy;
     uint8_t scanFilterPolicy;
+    uint8_t frameType;
     uint16_t scanInterval;
     uint16_t scanWindow;
 } BcScanParams;

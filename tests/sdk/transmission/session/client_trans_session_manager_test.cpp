@@ -1989,4 +1989,23 @@ HWTEST_F(TransClientSessionManagerTest, ClientSetLowLatencyBySocketTest65, TestS
     SoftBusFree(sessionParam);
     TransClientDeinit();
 }
+
+/**
+ * @tc.name: TransClientSessionManagerTest66
+ * @tc.desc: Transmission sdk session manager get business type by channel id.
+ * @tc.type: FUNC
+ * @tc.require:
+ */
+HWTEST_F(TransClientSessionManagerTest, TransClientSessionManagerTest66, TestSize.Level1)
+{
+    int32_t businessType = 0;
+    int32_t ret = ClientGetChannelBusinessTypeByChannelId(TRANS_TEST_INVALID_CHANNEL_ID, &businessType);
+    EXPECT_EQ(ret,  SOFTBUS_INVALID_PARAM);
+
+    ret = ClientGetChannelBusinessTypeByChannelId(TRANS_TEST_CHANNEL_ID, nullptr);
+    EXPECT_EQ(ret,  SOFTBUS_INVALID_PARAM);
+
+    ret = ClientGetChannelBusinessTypeByChannelId(TRANS_TEST_CHANNEL_ID, &businessType);
+    EXPECT_EQ(ret,  SOFTBUS_TRANS_SESSION_SERVER_NOINIT);
+}
 }

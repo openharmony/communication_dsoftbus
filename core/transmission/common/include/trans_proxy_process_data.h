@@ -29,6 +29,8 @@ extern "C" {
 #define MAGIC_NUMBER 0xBABEFACE
 
 #define DC_DATA_HEAD_SIZE 16
+#define DATA_SEQ_LEN 2
+#define NONCE_LEN 2
 #endif
 
 typedef struct {
@@ -61,6 +63,16 @@ typedef struct {
     int32_t flags;
     int32_t dataLen;
 } PacketHead;
+
+typedef struct {
+    int32_t flags;
+    int32_t dataLen;
+} PacketD2DHead;
+
+typedef struct {
+    uint16_t nonce;
+    uint16_t dataSeq;
+} PacketD2DIvSource;
 
 typedef struct {
     uint32_t magicNumber;
@@ -109,6 +121,17 @@ int32_t TransProxyParseTlv(uint32_t len, const char *data, DataHeadTlvPacketHead
 int32_t TransProxyNoSubPacketTlvProc(
     int32_t channelId, const char *data, uint32_t len, DataHeadTlvPacketHead *pktHead, uint32_t newPktHeadSize);
 int32_t TransProxyProcData(ProxyDataInfo *dataInfo, const DataHeadTlvPacketHead *pktHead, const char *data);
+
+uint8_t *TransProxyPackD2DData(
+    ProxyDataInfo *dataInfo, uint32_t sliceNum, SessionPktType pktType, uint32_t cnt, uint32_t *dataLen);
+int32_t TransProxyProcessD2DData(ProxyDataInfo *dataInfo, const PacketD2DHead *dataHead,
+    const char *data, int32_t businessType);
+int32_t TransProxyDecryptD2DData(int32_t businessType, ProxyDataInfo *dataInfo, const char *sessionKey,
+    const char *sessionBytesIv, const unsigned char *sessionMsgIv);
+int32_t TransProxyD2DFirstSliceProcess(
+    SliceProcessor *processor, const SliceHead *head, const char *data, uint32_t len, int32_t busineseeTye);
+int32_t TransProxyPackD2DBytes(ProxyDataInfo *dataInfo, const char *sessionKey, const char *sessionIv,
+    SessionPktType flag);
 
 #ifdef __cplusplus
 }

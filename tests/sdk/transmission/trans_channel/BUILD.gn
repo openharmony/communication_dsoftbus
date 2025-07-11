@@ -11,8 +11,8 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-import("../../../../dsoftbus.gni")
 import("//build/test.gni")
+import("../../../../dsoftbus.gni")
 import("../../../../sdk/transmission/trans_channel/udp/trans_udp_sdk.gni")
 
 dsoftbus_root_path = "../../../.."
@@ -150,6 +150,7 @@ if (defined(ohos_lite)) {
       "$dsoftbus_root_path/sdk/transmission/trans_channel/common/include",
       "$dsoftbus_root_path/core/transmission/common/include",
       "$dsoftbus_root_path/core/transmission/common/src",
+
       # "$dsoftbus_root_path/adapter/common/include/OS_adapter_define/linux",
       # "$dsoftbus_root_path/adapter/default_config/spec_config",
     ]
@@ -161,6 +162,78 @@ if (defined(ohos_lite)) {
     } else {
       external_deps = [ "hilog:libhilog" ]
     }
+  }
+
+  module_output_path = "dsoftbus/soft_bus/transmission"
+  ohos_unittest("ClientTransProxyManagerMockTest") {
+    module_out_path = module_output_path
+    sources = [
+      "proxy/client_trans_proxy_manager_mock_test.cpp",
+      "proxy/mock/client_trans_proxy_manager_mock.cpp",
+    ]
+    include_dirs = trans_sdk_test_common_inc
+    include_dirs += [
+      "$dsoftbus_root_path/sdk/transmission/trans_channel/common/include",
+      "$dsoftbus_root_path/sdk/transmission/trans_channel/proxy/include",
+      "$dsoftbus_root_path/core/transmission/common/src",
+      "$dsoftbus_root_path/sdk/transmission/trans_channel/proxy/src",
+      "$dsoftbus_root_path/sdk/transmission/trans_channel/manager/include",
+      "$dsoftbus_root_path/core/frame/common/include",
+      "$dsoftbus_root_path/core/transmission/common/include",
+      "$dsoftbus_root_path/sdk/transmission/ipc/include",
+      "$dsoftbus_root_path/interfaces/kits/lnn",
+      "$dsoftbus_root_path/core/bus_center/lnn/lane_hub/lane_manager/include",
+      "$dsoftbus_root_path/interfaces/inner_kits/lnn",
+      "$dsoftbus_root_path/sdk/transmission/session/include",
+      "$dsoftbus_root_path/tests/sdk/transmission/trans_channel/proxy/mock",
+      "$dsoftbus_root_path/adapter/common/include/OS_adapter_define/linux",
+      "$dsoftbus_root_path/adapter/default_config/spec_config",
+    ]
+    deps = trans_sdk_test_common_deps
+    deps += [
+      "$dsoftbus_root_path/adapter:softbus_adapter",
+      "$dsoftbus_root_path/dfx:softbus_dfx",
+    ]
+    external_deps = [
+      "googletest:gmock",
+      "hilog:libhilog",
+    ]
+  }
+
+  module_output_path = "dsoftbus/soft_bus/transmission"
+  ohos_unittest("ClientTransProxyFileHelperMockTest") {
+    module_out_path = module_output_path
+    sources = [
+      "proxy/client_trans_proxy_file_helper_mock_test.cpp",
+      "proxy/mock/client_trans_proxy_file_helper_mock.cpp",
+    ]
+    include_dirs = trans_sdk_test_common_inc
+    include_dirs += [
+      "$dsoftbus_root_path/sdk/transmission/trans_channel/common/include",
+      "$dsoftbus_root_path/sdk/transmission/trans_channel/proxy/include",
+      "$dsoftbus_root_path/core/transmission/common/src",
+      "$dsoftbus_root_path/sdk/transmission/trans_channel/proxy/src",
+      "$dsoftbus_root_path/sdk/transmission/trans_channel/manager/include",
+      "$dsoftbus_root_path/core/frame/common/include",
+      "$dsoftbus_root_path/core/transmission/common/include",
+      "$dsoftbus_root_path/sdk/transmission/ipc/include",
+      "$dsoftbus_root_path/interfaces/kits/lnn",
+      "$dsoftbus_root_path/core/bus_center/lnn/lane_hub/lane_manager/include",
+      "$dsoftbus_root_path/interfaces/inner_kits/lnn",
+      "$dsoftbus_root_path/sdk/transmission/session/include",
+      "$dsoftbus_root_path/tests/sdk/transmission/trans_channel/proxy/mock",
+      "$dsoftbus_root_path/adapter/common/include/OS_adapter_define/linux",
+      "$dsoftbus_root_path/adapter/default_config/spec_config",
+    ]
+    deps = trans_sdk_test_common_deps
+    deps += [
+      "$dsoftbus_root_path/adapter:softbus_adapter",
+      "$dsoftbus_root_path/dfx:softbus_dfx",
+    ]
+    external_deps = [
+      "googletest:gmock",
+      "hilog:libhilog",
+    ]
   }
 
   module_output_path = "dsoftbus/soft_bus/transmission"
@@ -189,8 +262,8 @@ if (defined(ohos_lite)) {
     dep_file = "components/nstackx_enhanced/nstackx_core/dfile/BUILD.gn"
     enhanced = exec_script("$dsoftbus_root_path/check_sub_module.py",
                            [
-                              "$native_source_path",
-                              "$dep_file",
+                             "$native_source_path",
+                             "$dep_file",
                            ],
                            "value")
     if (enhanced) {
@@ -329,8 +402,8 @@ if (defined(ohos_lite)) {
   ohos_unittest("TransClientProxyFileManagerMockTest") {
     module_out_path = module_output_path
     sources = [
-      "proxy/trans_client_proxy_file_manager_mock_test.cpp",
       "proxy/mock/trans_client_proxy_file_manager_mock.cpp",
+      "proxy/trans_client_proxy_file_manager_mock_test.cpp",
     ]
     include_dirs = trans_sdk_test_common_inc
     include_dirs += [
@@ -467,19 +540,76 @@ if (defined(ohos_lite)) {
     }
   }
 
+  module_output_path = "dsoftbus/soft_bus/transmission"
+  ohos_unittest("ClientTransProxyD2DTest") {
+    sanitize = {
+      cfi = true
+      cfi_cross_dso = true
+      debug = false
+    }
+    module_out_path = module_output_path
+    sources = [
+      "proxy/client_trans_proxy_manager_d2d_test.cpp",
+      "proxy/mock/client_trans_proxy_manager_d2d_mock.cpp",
+      "$dsoftbus_root_path/sdk/transmission/trans_channel/proxy/src/client_trans_proxy_file_manager_virtual.c",
+    ]
+    include_dirs = trans_sdk_test_common_inc
+    include_dirs += [
+      "$dsoftbus_root_path/sdk/frame/common/include",
+      "$dsoftbus_root_path/sdk/transmission/trans_channel/common/include",
+      "$dsoftbus_root_path/sdk/transmission/trans_channel/proxy/include",
+      "$dsoftbus_root_path/sdk/transmission/ipc/include",
+      "$dsoftbus_root_path/sdk/bus_center/manager/include",
+      "$dsoftbus_root_path/sdk/transmission/trans_channel/proxy/src",
+      "$dsoftbus_root_path/sdk/transmission/trans_channel/udp/file/include",
+      "$dsoftbus_root_path/sdk/transmission/trans_channel/manager/include",
+      "$dsoftbus_root_path/core/frame/common/include",
+      "$dsoftbus_root_path/core/transmission/common/include",
+      "$dsoftbus_root_path/interfaces/kits/lnn",
+      "$dsoftbus_root_path/core/bus_center/lnn/lane_hub/lane_manager/include",
+      "$dsoftbus_root_path/interfaces/inner_kits/lnn",
+      "$dsoftbus_root_path/adapter/common/include/OS_adapter_define/linux",
+      "$dsoftbus_root_path/adapter/default_config/spec_config",
+      "$dsoftbus_root_path/common/security/access_token/include",
+      "$dsoftbus_root_path/adapter/common/security/access_token/include",
+      "$dsoftbus_root_path/tests/sdk/transmission/trans_channel/proxy/mock",
+    ]
+    deps = [
+      "$dsoftbus_root_path/adapter:softbus_adapter",
+      "$dsoftbus_root_path/core/common:softbus_utils",
+      "$dsoftbus_root_path/tests/sdk/common:softbus_access_token_test",
+    ]
+    if (is_standard_system) {
+      external_deps = [
+        "googletest:gmock",
+        "googletest:gtest_main",
+        "hilog:libhilog",
+      ]
+    } else {
+      external_deps = [
+        "googletest:gmock",
+        "googletest:gtest_main",
+        "hilog:libhilog",
+      ]
+    }
+  }
+
   group("unittest") {
     testonly = true
     deps = [
       ":ClientTransChannelCallbackTest",
       ":ClientTransChannelManagerTest",
       ":ClientTransPendingTest",
+      ":ClientTransProxyD2DTest",
       ":ClientTransProxyFileCommonTest",
       ":ClientTransProxyFileManagerMockTest",
       ":ClientTransProxyFileManagerTest",
+      ":ClientTransProxyManagerMockTest",
       ":ClientTransProxyManagerTest",
       ":ClientTransUdpManagerStaticTest",
       ":ClientTransUdpManagerTest",
       ":TransClientProxyFileManagerMockTest",
+      ":ClientTransProxyFileHelperMockTest",
       ":TransSdkCommStreamTest",
       ":TransSdkStreamTest",
       "auth:unittest",

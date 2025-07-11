@@ -1086,14 +1086,8 @@ static bool IsNeedTriggerSparkGroup(const NodeInfo *remoteInfo, LnnHeartbeatRecv
         return false;
     }
     if (oldTriggerCnt > SLE_JOIN_SPARK_TIMES) {
-        LNN_LOGW(LNN_HEART_BEAT, "target dev has exceeded limt, TriggerCnt=%{public}d, networkId=%{public}s",
+        LNN_LOGD(LNN_HEART_BEAT, "target dev has exceeded limt, TriggerCnt=%{public}d, networkId=%{public}s",
             oldTriggerCnt, AnonymizeWrapper(anonyNetworkId));
-        AnonymizeFree(anonyNetworkId);
-        return false;
-    }
-    if ((storedInfo->triggerSparkTime != 0) &&
-        (nowTime - storedInfo->triggerSparkTime <= LOW_FREQ_CYCLE * HB_TIME_FACTOR)) {
-        LNN_LOGW(LNN_HEART_BEAT, "repeta request, networkId=%{public}s", AnonymizeWrapper(anonyNetworkId));
         AnonymizeFree(anonyNetworkId);
         return false;
     }
@@ -1103,9 +1097,15 @@ static bool IsNeedTriggerSparkGroup(const NodeInfo *remoteInfo, LnnHeartbeatRecv
         AnonymizeFree(anonyNetworkId);
         return false;
     }
+    if ((storedInfo->triggerSparkTime != 0) &&
+        (nowTime - storedInfo->triggerSparkTime <= LOW_FREQ_CYCLE * HB_TIME_FACTOR)) {
+        LNN_LOGD(LNN_HEART_BEAT, "need trigger spark group, networkId=%{public}s", AnonymizeWrapper(anonyNetworkId));
+        AnonymizeFree(anonyNetworkId);
+        return true;
+    }
     storedInfo->triggerSparkCount++;
     storedInfo->triggerSparkTime = nowTime;
-    LNN_LOGW(LNN_HEART_BEAT, "need trigger spark group, networkId=%{public}s", AnonymizeWrapper(anonyNetworkId));
+    LNN_LOGW(LNN_HEART_BEAT, "try trigger spark, networkId=%{public}s", AnonymizeWrapper(anonyNetworkId));
     AnonymizeFree(anonyNetworkId);
     return true;
 }
@@ -1119,7 +1119,7 @@ int32_t LnnCleanTriggerSparkInfo(const char *udid, ConnectionAddrType addrType)
     char *anonyUdid = NULL;
     Anonymize(udid, &anonyUdid);
     uint8_t udidHash[SHA_256_HASH_LEN] = { 0 };
-    char udidHashStr[UDID_SHORT_HASH_HEX_STR + 1] = { 0 };
+    char udidHashStr[DISC_MAX_DEVICE_ID_LEN] = { 0 };
     if (SoftBusGenerateStrHash((uint8_t *)udid, strlen(udid), udidHash) != SOFTBUS_OK) {
         LNN_LOGE(LNN_HEART_BEAT, "generate udiahash fail, udid=%{public}s", AnonymizeWrapper(anonyUdid));
         AnonymizeFree(anonyUdid);
@@ -1131,15 +1131,18 @@ int32_t LnnCleanTriggerSparkInfo(const char *udid, ConnectionAddrType addrType)
         AnonymizeFree(anonyUdid);
         return SOFTBUS_NETWORK_BYTES_TO_HEX_STR_ERR;
     }
-    LNN_CHECK_AND_RETURN_RET_LOGE(SoftBusMutexLock(&g_hbRecvList->lock) == SOFTBUS_OK, SOFTBUS_LOCK_ERR,
-        LNN_HEART_BEAT, "try to lock failed");
+    if (SoftBusMutexLock(&g_hbRecvList->lock) != SOFTBUS_OK) {
+        LNN_LOGE(LNN_HEART_BEAT, "try to lock failed, udid=%{public}s", AnonymizeWrapper(anonyUdid));
+        AnonymizeFree(anonyUdid);
+        return SOFTBUS_LOCK_ERR;
+    }
     LnnHeartbeatRecvInfo *storedInfo = HbGetStoredRecvInfo(udidHashStr, CONNECTION_ADDR_BLE, nowTime);
     if (storedInfo != NULL) {
         storedInfo->triggerSparkCount = 0;
         storedInfo->triggerSparkTime = 0;
         LNN_LOGI(LNN_HEART_BEAT, "clean trigger info done, udid=%{public}s", AnonymizeWrapper(anonyUdid));
-        AnonymizeFree(anonyUdid);
     }
+    AnonymizeFree(anonyUdid);
     (void)SoftBusMutexUnlock(&g_hbRecvList->lock);
     return SOFTBUS_OK;
 }
