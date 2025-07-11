@@ -43,6 +43,7 @@ bool SoftBusIsWifiActive(void);
 bool SoftBusIsHotspotActive(void);
 SoftBusWifiDetailState SoftBusGetWifiState(void);
 bool SoftBusIsWifiP2pEnabled(void);
+int32_t SoftBusGetHotspotConfig(int32_t *apChannel);
 
 #ifdef __cplusplus
 }
