@@ -48,6 +48,7 @@ typedef int32_t (*ClientOpenHtpChannelFunc)(
 typedef int32_t (*ServerOpenHtpChannelFunc)(const char *remoteIp, int64_t flIdentity);
 typedef int32_t (*CloseHtpChannelFunc)(int32_t channelId);
 typedef void (*ServerUpdateHtpChannelFunc)(int64_t flIdentity, int32_t channelId);
+typedef void (*TransProcessGroupTalkieInfoFunc)(const char *pkgName);
 
 typedef struct TagTransEnhanceFuncList {
     InitQosFunc initQos;
@@ -69,6 +70,7 @@ typedef struct TagTransEnhanceFuncList {
     ServerOpenHtpChannelFunc serverOpenHtpChannel;
     CloseHtpChannelFunc closeHtpChannel;
     ServerUpdateHtpChannelFunc serverUpdateHtpChannel;
+    TransProcessGroupTalkieInfoFunc transProcessGroupTalkieInfo;
 } TransEnhanceFuncList;
 
 TransEnhanceFuncList *TransEnhanceFuncListGet(void);

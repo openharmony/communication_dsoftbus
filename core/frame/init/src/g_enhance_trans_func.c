@@ -47,5 +47,6 @@ int32_t TransRegisterEnhanceFunc(void *soHandle)
     g_transEnhanceFuncList.serverOpenHtpChannel = dlsym(soHandle, "ServerOpenHtpChannel");
     g_transEnhanceFuncList.closeHtpChannel = dlsym(soHandle, "CloseHtpChannel");
     g_transEnhanceFuncList.serverUpdateHtpChannel = dlsym(soHandle, "ServerUpdateHtpChannel");
+    g_transEnhanceFuncList.transProcessGroupTalkieInfo = dlsym(soHandle, "TransProcessGroupTalkieInfo");
     return SOFTBUS_OK;
 }
