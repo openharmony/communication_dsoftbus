@@ -46,6 +46,7 @@ int32_t ClientOpenHtpChannelPacked(int32_t channelId, int64_t requestId, const c
 int32_t ServerOpenHtpChannelPacked(const char *remoteIp, int64_t flIdentity);
 int32_t CloseHtpChannelPacked(int32_t channelId);
 void ServerUpdateHtpChannelPacked(int64_t flIdentity, int32_t channelId);
+void TransProcessGroupTalkieInfoPacked(const char *pkgName);
 
 #ifdef __cplusplus
 }

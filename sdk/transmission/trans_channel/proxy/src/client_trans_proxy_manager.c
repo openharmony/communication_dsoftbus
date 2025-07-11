@@ -631,16 +631,16 @@ static int32_t ClientTransProxyNoSubPacketTlvProc(int32_t channelId, const char 
 
 static int32_t TransGenerateRandIv(unsigned char *sessionIv, const uint16_t *nonce, const uint16_t *dataSeq)
 {
-    uint8_t shortIv[SHROT_SESSION_IV_LENGTH];
+    uint8_t shortIv[SHORT_SESSION_IV_LENGTH];
     if (memcpy_s(shortIv, NONCE_LEN, nonce, NONCE_LEN) != EOK) {
         TRANS_LOGE(TRANS_CTRL, "memcpy_s nonce fail");
         return SOFTBUS_MEM_ERR;
     }
-    if (memcpy_s(shortIv, DATA_SEQ_LEN, dataSeq, DATA_SEQ_LEN) != EOK) {
+    if (memcpy_s(shortIv + NONCE_LEN, DATA_SEQ_LEN, dataSeq, DATA_SEQ_LEN) != EOK) {
         TRANS_LOGE(TRANS_CTRL, "memcpy_s nonce fail");
         return SOFTBUS_MEM_ERR;
     }
-    if (SoftBusCalcHKDF(shortIv, SHROT_SESSION_IV_LENGTH, sessionIv, GCM_IV_LEN) != SOFTBUS_OK) {
+    if (SoftBusCalcHKDF(shortIv, SHORT_SESSION_IV_LENGTH, sessionIv, GCM_IV_LEN) != SOFTBUS_OK) {
         TRANS_LOGE(TRANS_CTRL, "calc HKDF fail");
         return SOFTBUS_CALC_HKDF_FAIL;
     }
@@ -673,7 +673,7 @@ static int32_t TransProxyPackAsyncMessage(int32_t channelId, const ProxyChannelI
         return SOFTBUS_INVALID_PARAM;
     }
     uint16_t nonce = 0;
-    if (SoftBusGenerateRandomArray((unsigned char *)&nonce, sizeof(uint16_t) != SOFTBUS_OK)) {
+    if (SoftBusGenerateRandomArray((unsigned char *)&nonce, sizeof(uint16_t)) != SOFTBUS_OK) {
         TRANS_LOGE(TRANS_CTRL, "generate nonce fail");
         return SOFTBUS_GENERATE_RANDOM_ARRAY_FAIL;
     }
