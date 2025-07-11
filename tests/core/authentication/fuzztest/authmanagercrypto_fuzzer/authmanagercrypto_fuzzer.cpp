@@ -26,8 +26,8 @@
 #include "fuzz_environment.h"
 #include "softbus_access_token_test.h"
 
-#define FEATURE_MIN 1
-#define FEATURE_MAX 12
+#define AUTH_TYPE_MIN AUTH_LINK_TYPE_WIFI
+#define AUTH_TYPE_MAX AUTH_LINK_TYPE_MAX
 #define TYPE_MIN DATA_TYPE_AUTH
 #define TYPE_MAX DATA_TYPE_APPLY_KEY_CONNECTION
 #define MODULE_MIN MODULE_TRUST_ENGINE
@@ -106,7 +106,8 @@ bool AuthEncryptFuzzTest(FuzzedDataProvider &provider)
     AuthSessionInfo info;
     (void)memset_s(&info, sizeof(AuthSessionInfo), 0, sizeof(AuthSessionInfo));
     info.isServer = provider.ConsumeBool();
-    info.connInfo.type = (AuthLinkType)provider.ConsumeIntegralInRange<uint32_t>(FEATURE_MIN, FEATURE_MAX);
+    info.connInfo.type = (AuthLinkType)provider.ConsumeIntegralInRange<uint32_t>(AUTH_TYPE_MIN,
+        AUTH_TYPE_MAX);
     info.connId = (uint64_t)info.connInfo.type << INT32_BIT_NUM;
     ProcessFuzzConnInfo(provider, &info);
     AuthManager *auth = NewAuthManager(authSeq, &info);
@@ -142,8 +143,9 @@ bool AuthEncryptFuzzTest(FuzzedDataProvider &provider)
     DeviceMessageParse messageParse = { CODE_VERIFY_DEVICE, cycle };
     FlushDeviceProcess(&info.connInfo, info.isServer, &messageParse);
     HandleDisconnectedEvent((void *)&info.connId);
-    if (auth != nullptr && auth->hasAuthPassed[info.connInfo.type]) {
-        DelAuthManager(auth, info.connInfo.type);
+    auth = FindAuthManagerByAuthId(authSeq);
+    if (auth != nullptr) {
+        DelAuthManager(auth, AUTH_LINK_TYPE_MAX);
     }
     return true;
 }

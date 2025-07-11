@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021-2024 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2025 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -25,10 +25,12 @@
 #include "softbus_error_code.h"
 #include "softbus_json_utils.h"
 #include "softbus_utils.h"
+#include "g_enhance_trans_func_pack.h"
 #include "trans_log.h"
 #include "trans_uk_manager.h"
 
-#define BASE64KEY 45 // Base64 encrypt SessionKey length
+#define FL_IDENTITY          "FL_IDENTITY"
+#define BASE64KEY       45 // Base64 encrypt SessionKey length
 #define INVALID_USER_ID (-1)
 
 char *PackError(int32_t errCode, const char *errDesc)
@@ -117,7 +119,8 @@ static int32_t JsonObjectPackRequestEx(const AppInfo *appInfo, cJSON *json, unsi
     }
 
     char *authState = (char *)appInfo->myData.authState;
-    if (appInfo->myData.apiVersion != API_V1 && (!AddStringToJsonObject(json, PKG_NAME, appInfo->myData.pkgName) ||
+    if (appInfo->myData.apiVersion != API_V1 &&
+        (!AddStringToJsonObject(json, PKG_NAME, appInfo->myData.pkgName) ||
         !AddStringToJsonObject(json, CLIENT_BUS_NAME, appInfo->myData.sessionName) ||
         !AddStringToJsonObject(json, AUTH_STATE, authState) ||
         !AddNumberToJsonObject(json, MSG_ROUTE_TYPE, appInfo->routeType))) {
@@ -137,7 +140,7 @@ static int32_t JsonObjectPackRequestEx(const AppInfo *appInfo, cJSON *json, unsi
     return SOFTBUS_OK;
 }
 
-char *PackRequest(const AppInfo *appInfo)
+char *PackRequest(const AppInfo *appInfo, int64_t requestId)
 {
     if (appInfo == NULL) {
         TRANS_LOGW(TRANS_CTRL, "invalid param.");
@@ -172,6 +175,9 @@ char *PackRequest(const AppInfo *appInfo)
     if (ret != SOFTBUS_OK) {
         cJSON_Delete(json);
         return NULL;
+    }
+    if (appInfo->fdProtocol == LNN_PROTOCOL_HTP) {
+        (void)AddNumber64ToJsonObject(json, FL_IDENTITY, requestId);
     }
     char *data = cJSON_PrintUnformatted(json);
     if (data == NULL) {
@@ -221,7 +227,7 @@ static int32_t UnpackFirstData(AppInfo *appInfo, const cJSON *json)
 
 static int32_t ParseMessageToAppInfo(const cJSON *msg, AppInfo *appInfo)
 {
-    char sessionKey[BASE64KEY] = {0};
+    char sessionKey[BASE64KEY] = { 0 };
     (void)GetJsonObjectStringItem(msg, SESSION_KEY, sessionKey, sizeof(sessionKey));
     if (!GetJsonObjectStringItem(msg, BUS_NAME, (appInfo->myData.sessionName), SESSION_NAME_SIZE_MAX) ||
         !GetJsonObjectStringItem(msg, GROUP_ID, (appInfo->groupId), GROUP_ID_SIZE_MAX)) {
@@ -245,8 +251,8 @@ static int32_t ParseMessageToAppInfo(const cJSON *msg, AppInfo *appInfo)
     appInfo->peerHandleId = -1;
     if (!GetJsonObjectInt32Item(msg, MY_HANDLE_ID, &(appInfo->peerHandleId)) ||
         !GetJsonObjectInt32Item(msg, PEER_HANDLE_ID, &(appInfo->myHandleId))) {
-            appInfo->myHandleId = -1;
-            appInfo->peerHandleId = -1;
+        appInfo->myHandleId = -1;
+        appInfo->peerHandleId = -1;
     }
 
     size_t len = 0;

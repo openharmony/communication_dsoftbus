@@ -102,7 +102,7 @@ static int32_t TransPostBytes(SessionConn *conn, bool isAuthServer, uint32_t cip
         seq |= AUTH_CONN_SERVER_SIDE;
     }
 
-    char *bytes = PackRequest(&conn->appInfo);
+    char *bytes = PackRequest(&conn->appInfo, conn->req);
     if (bytes == NULL) {
         TRANS_LOGE(TRANS_CTRL,
             "Pack Request failed channelId=%{public}d, fd=%{public}d",
@@ -207,7 +207,7 @@ static int32_t CreateSessionConnNode(ListenerModule module, int fd, int32_t chan
         SoftBusFree(conn);
         return ret;
     }
-    if (clientAddr->socketOption.protocol == LNN_PROTOCOL_MINTP) {
+    if (clientAddr->socketOption.protocol == LNN_PROTOCOL_MINTP || clientAddr->socketOption.protocol == LNN_PROTOCOL_HTP) {
         struct WifiDirectManager *mgr = GetWifiDirectManager();
         if (mgr == NULL || mgr->getRemoteIpByRemoteMac == NULL) {
             TRANS_LOGE(TRANS_CTRL, "get remote ip by remote mac failed.");

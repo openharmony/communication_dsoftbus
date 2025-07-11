@@ -115,8 +115,8 @@ static int32_t TransTcpSetTos(TcpDirectChannelInfo *channel, int32_t flags)
         return SOFTBUS_INVALID_PARAM;
     }
     char sessionName[SESSION_NAME_SIZE_MAX + 1] = { 0 };
-    if (ClientGetSessionNameByChannelId(channel->channelId, channel->detail.channelType,
-        sessionName, SESSION_NAME_SIZE_MAX) != SOFTBUS_OK) {
+    if (ClientGetSessionNameByChannelId(
+        channel->channelId, channel->detail.channelType, sessionName, SESSION_NAME_SIZE_MAX) != SOFTBUS_OK) {
         TRANS_LOGE(TRANS_SDK, "failed to get sessionName, channelId=%{public}d", channel->channelId);
         return SOFTBUS_TRANS_SESSION_NAME_NO_EXIST;
     }
@@ -128,7 +128,7 @@ static int32_t TransTcpSetTos(TcpDirectChannelInfo *channel, int32_t flags)
         if (SetMintpSocketTos(channel->detail.fd, tos) != SOFTBUS_OK) {
             return SOFTBUS_SOCKET_ERR;
         }
-    } else {
+    } else if (channel->detail.fdProtocol != LNN_PROTOCOL_HTP) {
         if (SetIpTos(channel->detail.fd, tos) != SOFTBUS_OK) {
             return SOFTBUS_TCP_SOCKET_ERR;
         }

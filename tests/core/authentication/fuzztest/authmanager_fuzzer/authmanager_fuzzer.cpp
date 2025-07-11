@@ -27,13 +27,13 @@
 
 using namespace std;
 
-#define AUTH_LINK_TYPE_MIN 1
-#define AUTH_LINK_TYPE_MAX 12
-#define DISC_TYPE_MIN 0
-#define DISC_TYPE_MAX 12
+#define AUTH_TYPE_MIN AUTH_LINK_TYPE_WIFI
+#define AUTH_TYPE_MAX AUTH_LINK_TYPE_MAX
+#define DISC_TYPE_MIN DISCOVERY_TYPE_UNKNOWN
+#define DISC_TYPE_MAX DISCOVERY_TYPE_COUNT
 #define MODE_MIN 30
 #define MODE_MAX 600
-#define LIST_LEN 2
+#define LIST_LEN DISCOVERY_TYPE_COUNT
 namespace {
 class TestEnv {
 public:
@@ -114,8 +114,7 @@ bool NewAuthManagerFuzzTest(FuzzedDataProvider &provider)
     if (strcpy_s(info.uuid, UUID_BUF_LEN, uuid.c_str()) != EOK) {
         return false;
     }
-    info.connInfo.type = (AuthLinkType)provider.ConsumeIntegralInRange<uint32_t>(AUTH_LINK_TYPE_MIN,
-        AUTH_LINK_TYPE_MAX);
+    info.connInfo.type = (AuthLinkType)provider.ConsumeIntegralInRange<uint32_t>(AUTH_TYPE_MIN, AUTH_TYPE_MAX);
     info.connId = (uint64_t)info.connInfo.type << INT32_BIT_NUM;
     ProcessFuzzConnInfo(provider, &info);
     AuthManager *auth = NewAuthManager(authSeq, &info);
@@ -129,8 +128,7 @@ bool NewAuthManagerFuzzTest(FuzzedDataProvider &provider)
     TryGetBrConnInfo(uuid.c_str(), &connInfo);
     int64_t seqList[LIST_LEN] = {0};
     uint64_t verifyTime[LIST_LEN] = {0};
-    DiscoveryType type = (DiscoveryType)provider.ConsumeIntegralInRange<uint32_t>(DISC_TYPE_MIN,
-        DISC_TYPE_MAX);
+    DiscoveryType type = (DiscoveryType)provider.ConsumeIntegralInRange<uint32_t>(DISC_TYPE_MIN, DISC_TYPE_MAX);
     AuthGetLatestAuthSeqListByType(udid.c_str(), seqList, verifyTime, type);
     AuthGetLatestAuthSeqList(udid.c_str(), seqList, type);
     int32_t num = 0;
@@ -146,8 +144,9 @@ bool NewAuthManagerFuzzTest(FuzzedDataProvider &provider)
     authHandle.authId = authSeq;
     authHandle.type = info.connInfo.type;
     AuthHandleLeaveLNN(authHandle);
-    if (auth != nullptr && auth->hasAuthPassed[info.connInfo.type]) {
-        DelAuthManager(auth, info.connInfo.type);
+    auth = FindAuthManagerByAuthId(authSeq);
+    if (auth != nullptr) {
+        DelAuthManager(auth, AUTH_LINK_TYPE_MAX);
     }
     return true;
 }

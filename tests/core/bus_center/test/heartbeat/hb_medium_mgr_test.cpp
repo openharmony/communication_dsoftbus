@@ -21,6 +21,7 @@
 #include "ble_mock.h"
 #include "bus_center_adapter.h"
 #include "distribute_net_ledger_mock.h"
+#include "hb_medium_mgr_mock.h"
 #include "hb_strategy_mock.h"
 #include "dsoftbus_enhance_interface.h"
 #include "lnn_connection_fsm_mock.h"
@@ -1014,5 +1015,90 @@ HWTEST_F(HeartBeatMediumTest, HbIsValidJoinLnnRequest_TEST01, TestSize.Level1)
     EXPECT_CALL(bleMock, SoftBusGetBrState).WillOnce(Return(BR_DISABLE));
     ret = HbIsValidJoinLnnRequest(nullptr, nullptr);
     EXPECT_TRUE(ret == false);
+}
+
+/*
+ * @tc.name: IsNeedTriggerSparkGroup_TEST01
+ * @tc.desc: three state test
+ * @tc.type: FUNC
+ * @tc.require:
+ */
+HWTEST_F(HeartBeatMediumTest, IsNeedTriggerSparkGroup_TEST01, TestSize.Level1)
+{
+    NodeInfo nodeInfo;
+    (void)memset_s(&nodeInfo, sizeof(NodeInfo), 0, sizeof(NodeInfo));
+    LnnHeartbeatRecvInfo storedInfo = {
+        .triggerSparkCount = SLE_JOIN_SPARK_TIMES + 1,
+        .triggerSparkTime = SLE_JOIN_SPARK_TIMES,
+    };
+    uint64_t nowTime = GetNowTime();
+    bool ret = IsNeedTriggerSparkGroup(nullptr, nullptr, nowTime);
+    EXPECT_EQ(ret, false);
+    ret = IsNeedTriggerSparkGroup(&nodeInfo, nullptr, nowTime);
+    EXPECT_EQ(ret, false);
+
+    NiceMock<LnnNetLedgertInterfaceMock> netLedgertMock;
+    EXPECT_CALL(netLedgertMock, LnnHasDiscoveryType).WillOnce(Return(false))
+        .WillRepeatedly(Return(true));
+    ret = IsNeedTriggerSparkGroup(&nodeInfo, &storedInfo, nowTime);
+    EXPECT_EQ(ret, false);
+
+    ret = IsNeedTriggerSparkGroup(&nodeInfo, &storedInfo, nowTime); // triggerSparkCount > SLE_JOIN_SPARK_TIMES
+    EXPECT_EQ(ret, false);
+
+    storedInfo.triggerSparkCount = SLE_JOIN_SPARK_TIMES;
+    nowTime = LOW_FREQ_CYCLE * HB_TIME_FACTOR + storedInfo.triggerSparkTime;
+    ret = IsNeedTriggerSparkGroup(&nodeInfo, &storedInfo, nowTime);
+    EXPECT_EQ(ret, false);
+
+    storedInfo.triggerSparkTime = 0;
+    nowTime = GetNowTime();
+    ret = IsNeedTriggerSparkGroup(&nodeInfo, &storedInfo, nowTime);
+    EXPECT_EQ(ret, true);
+}
+
+/*
+ * @tc.name: LnnCleanTriggerSparkInfo_TEST01
+ * @tc.desc: three state test
+ * @tc.type: FUNC
+ * @tc.require:
+ */
+HWTEST_F(HeartBeatMediumTest, LnnCleanTriggerSparkInfo_TEST01, TestSize.Level1)
+{
+    char udid[] = "testUdid";
+    int32_t ret = LnnCleanTriggerSparkInfo(nullptr, CONNECTION_ADDR_BLE);
+    EXPECT_EQ(ret, SOFTBUS_INVALID_PARAM);
+    ret = LnnCleanTriggerSparkInfo(udid, CONNECTION_ADDR_BLE);
+    EXPECT_EQ(ret, SOFTBUS_OK);
+    ret = LnnCleanTriggerSparkInfo(udid, CONNECTION_ADDR_ETH);
+    EXPECT_EQ(ret, SOFTBUS_OK);
+}
+
+/*
+ * @tc.name: HbMediumMgrRecvSleInfo_TEST01
+ * @tc.desc: three state test
+ * @tc.type: FUNC
+ * @tc.require:
+ */
+HWTEST_F(HeartBeatMediumTest, HbMediumMgrRecvSleInfo_TEST01, TestSize.Level1)
+{
+    char networkId[] = TEST_NETWORK_ID;
+    SleDeviceInfo info = {
+        .isOffline = 1,
+    };
+    EXPECT_NO_FATAL_FAILURE(HbMediumMgrRecvSleInfo(nullptr, nullptr));
+    EXPECT_NO_FATAL_FAILURE(HbMediumMgrRecvSleInfo(networkId, nullptr));
+    NiceMock<DistributeLedgerInterfaceMock> disLedgerMock;
+    EXPECT_CALL(disLedgerMock, LnnGetDLSleHbTimestamp).WillOnce(Return(SOFTBUS_NETWORK_GENERATE_STR_HASH_ERR))
+        .WillRepeatedly(Return(SOFTBUS_OK));
+    EXPECT_NO_FATAL_FAILURE(HbMediumMgrRecvSleInfo(networkId, &info));
+
+    EXPECT_CALL(disLedgerMock, LnnSetDLSleHbTimestamp).WillOnce(Return(SOFTBUS_NETWORK_GENERATE_STR_HASH_ERR))
+        .WillRepeatedly(Return(SOFTBUS_OK));
+    EXPECT_NO_FATAL_FAILURE(HbMediumMgrRecvSleInfo(networkId, &info));
+    NiceMock<HbMediumMgrExtInterfaceMock> hbStrateMock;
+    EXPECT_CALL(hbStrateMock, LnnStartSleOfflineTimingStrategy).WillOnce(Return(SOFTBUS_NETWORK_GENERATE_STR_HASH_ERR))
+        .WillRepeatedly(Return(SOFTBUS_OK));
+    EXPECT_NO_FATAL_FAILURE(HbMediumMgrRecvSleInfo(networkId, &info));
 }
 } // namespace OHOS

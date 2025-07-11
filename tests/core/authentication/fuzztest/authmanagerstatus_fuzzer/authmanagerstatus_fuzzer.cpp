@@ -27,8 +27,8 @@
 using namespace std;
 
 #define UDID_HASH_LEN 32
-#define AUTH_LINK_TYPE_MIN 1
-#define AUTH_LINK_TYPE_MAX 12
+#define AUTH_TYPE_MIN AUTH_LINK_TYPE_WIFI
+#define AUTH_TYPE_MAX AUTH_LINK_TYPE_MAX
 #define NORMAL_TYPE_MIN NORMALIZED_NOT_SUPPORT
 #define NORMAL_TYPE_MAX NORMALIZED_SUPPORT
 
@@ -98,18 +98,6 @@ static void ProcessFuzzConnInfo(FuzzedDataProvider &provider, AuthSessionInfo *i
     }
 }
 
-static void OnConnOpened(uint32_t requestId, AuthHandle authHandle)
-{
-    (void)requestId;
-    (void)authHandle;
-}
-
-static void OnConnOpenFailed(uint32_t requestId, int32_t reason)
-{
-    (void)requestId;
-    (void)reason;
-}
-
 static void OnVerifyFailed(uint32_t requestId, int32_t reason)
 {
     (void)requestId;
@@ -127,16 +115,11 @@ static void ProcAuthRequest(FuzzedDataProvider &provider, AuthHandle *authHandle
 {
     AuthRequest request;
     (void)memset_s(&request, sizeof(AuthRequest), 0, sizeof(AuthRequest));
-    AuthConnCallback connCb = {
-        .onConnOpened = OnConnOpened,
-        .onConnOpenFailed = OnConnOpenFailed,
-    };
     AuthVerifyCallback verifyCb = {
         .onVerifyFailed = OnVerifyFailed,
         .onVerifyPassed = OnVerifyPassed,
     };
     request.authId = authHandle->authId;
-    request.connCb = connCb;
     request.verifyCb = verifyCb;
     request.connInfo = info->connInfo;
     request.requestId = AuthGenRequestId();
@@ -172,8 +155,8 @@ bool AuthManagerStatusFuzzTest(FuzzedDataProvider &provider)
     if (strcpy_s(info.uuid, UUID_BUF_LEN, uuid.c_str()) != EOK) {
         return false;
     }
-    info.connInfo.type = (AuthLinkType)provider.ConsumeIntegralInRange<uint32_t>(AUTH_LINK_TYPE_MIN,
-        AUTH_LINK_TYPE_MAX);
+    info.connInfo.type = (AuthLinkType)provider.ConsumeIntegralInRange<uint32_t>(AUTH_TYPE_MIN,
+        AUTH_TYPE_MAX);
     info.connId = (uint64_t)info.connInfo.type << INT32_BIT_NUM;
     info.isConnectServer = provider.ConsumeBool();
     info.normalizedType = (NormalizedType)provider.ConsumeIntegralInRange<uint32_t>(NORMAL_TYPE_MIN, NORMAL_TYPE_MAX);
@@ -199,7 +182,10 @@ bool AuthManagerStatusFuzzTest(FuzzedDataProvider &provider)
     };
     ProcAuthRequest(provider, &authHandle, &info);
     AuthManagerSetAuthFinished(authHandle.authId, &info);
-    DelAuthManager(auth, info.connInfo.type);
+    auth = FindAuthManagerByAuthId(authSeq);
+    if (auth != nullptr) {
+        DelAuthManager(auth, AUTH_LINK_TYPE_MAX);
+    }
     return true;
 }
 }

@@ -35,6 +35,7 @@ typedef uint32_t LnnProtocolAbility;
 #define LNN_PROTOCOL_NIP   (1L << 7)
 #define LNN_PROTOCOL_USB   (1L << 8)
 #define LNN_PROTOCOL_MINTP (1L << 9)
+#define LNN_PROTOCOL_HTP   (1L << 10)
 #define LNN_PROTOCOL_ALL   ((uint32_t)-1)
 typedef uint32_t ProtocolType;
 

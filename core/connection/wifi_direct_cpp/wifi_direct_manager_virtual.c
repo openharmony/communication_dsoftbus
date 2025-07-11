@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2024 Huawei Device Co., Ltd.
+ * Copyright (c) 2024-2025 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -83,6 +83,28 @@ static int32_t GetRemoteUuidByIp(const char *remoteIp, char *uuid, int32_t uuidS
     (void)remoteIp;
     (void)uuid;
     (void)uuidSize;
+    return SOFTBUS_NOT_IMPLEMENT;
+}
+
+static int32_t GetLocalAndRemoteMacByLocalIp(
+    const char *localIp, char *localMac, size_t localMacSize, char *remoteMac, size_t remoteMacSize)
+{
+    (void)localIp;
+    (void)localMac;
+    (void)localMacSize;
+    (void)remoteMac;
+    (void)remoteMacSize;
+    return SOFTBUS_NOT_IMPLEMENT;
+}
+
+static int32_t GetLocalAndRemoteMacByRemoteIp(
+    const char *remoteIp, char *localMac, size_t localMacSize, char *remoteMac, size_t remoteMacSize)
+{
+    (void)remoteIp;
+    (void)localMac;
+    (void)localMacSize;
+    (void)remoteMac;
+    (void)remoteMacSize;
     return SOFTBUS_NOT_IMPLEMENT;
 }
 
@@ -224,6 +246,8 @@ static struct WifiDirectManager g_manager = {
     .getLocalIpByUuid = GetLocalIpByUuid,
     .getLocalIpByRemoteIp = GetLocalIpByRemoteIp,
     .getRemoteUuidByIp = GetRemoteUuidByIp,
+    .getLocalAndRemoteMacByLocalIp = GetLocalAndRemoteMacByLocalIp,
+    .getLocalAndRemoteMacByRemoteIp = GetLocalAndRemoteMacByRemoteIp,
 
     .supportHmlTwo = SupportHmlTwo,
     .isWifiP2pEnabled = IsWifiP2pEnabled,
