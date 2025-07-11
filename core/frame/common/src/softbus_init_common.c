@@ -58,7 +58,7 @@ bool SoftbusServerPluginLoadedFlagGet(void)
 
 bool SoftbusClientPluginLoadedFlagGet(void)
 {
-    return (g_soHandle[SOFTBUS_HANDLE_CLIENT_PLGUIN] != NULL);
+    return (g_soHandle[SOFTBUS_HANDLE_CLIENT_PLUGIN] != NULL);
 }
 
 int32_t SoftBusDlopen(SoftBusHandleType type, void **dllHandle)
