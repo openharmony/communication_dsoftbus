@@ -27,6 +27,7 @@ extern "C" {
 
 typedef struct {
     bool isSupportIpv6;
+    bool isVirtualLink;
     uint32_t actionAddr;
     TransOption info;
     ILaneListener listener;

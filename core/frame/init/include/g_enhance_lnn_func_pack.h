@@ -212,6 +212,11 @@ int32_t LnnDumpControlLaneGroupInfoPacked(int32_t fd);
 void CheckNeedCloudSyncOfflinePacked(DiscoveryType type);
 int32_t LnnAsyncSaveDeviceDataPacked(const char *data, LnnDataType dataType);
 int32_t LnnDeletaDeviceDataPacked(LnnDataType dataType);
+int32_t LnnGetLocalChannelInfoPacked(VapChannelInfo *channelInfo);
+int32_t LnnSetLocalChannelInfoPacked(LnnVapType type, int32_t channelId);
+int32_t LnnVirtualLinkInitPacked(void);
+void LnnVirtualLinkDeinitPacked(void);
+int32_t DcTriggerVirtualLinkPacked(const char *peerNetworkId);
 
 #ifdef __cplusplus
 }

@@ -208,6 +208,10 @@ int32_t InitDecisionCenter(void)
         return SOFTBUS_SLE_RANGING_REGIST_TRANS_ERROR;
     }
     g_exceptionConnMgr.initFlag = true;
+    if (LnnVirtualLinkInitPacked() != SOFTBUS_OK) {
+        /* optional case, ignore result */
+        LNN_LOGW(LNN_LANE, "init virtual link err");
+    }
     LNN_LOGD(LNN_INIT, "init ok");
     return SOFTBUS_OK;
 }
@@ -219,6 +223,7 @@ void DeinitDecisionCenter(void)
         DestroySoftBusList(g_exceptionConnMgr.connections);
         g_exceptionConnMgr.connections = NULL;
     }
+    LnnVirtualLinkDeinitPacked();
     if (UnregistAuthTransListenerPacked() != SOFTBUS_OK) {
         LNN_LOGE(LNN_INIT, "unregist auth trans failed");
     }

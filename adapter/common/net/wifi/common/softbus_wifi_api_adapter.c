@@ -17,15 +17,15 @@
 
 #include <string.h>
 
-#include "lnn_log.h"
-#include "securec.h"
-#include "softbus_adapter_mem.h"
-#include "softbus_error_code.h"
 #include "kits/c/wifi_device.h"
 #include "kits/c/wifi_hid2d.h"
 #include "kits/c/wifi_hotspot.h"
 #include "kits/c/wifi_p2p.h"
 #include "kits/c/wifi_state.h"
+#include "lnn_log.h"
+#include "securec.h"
+#include "softbus_adapter_mem.h"
+#include "softbus_error_code.h"
 
 static int32_t ConvertSoftBusWifiConfFromWifiDev(const WifiDeviceConfig *sourceWifiConf, SoftBusWifiDevConf *wifiConf)
 {
@@ -385,10 +385,11 @@ int32_t SoftBusGetCurrentGroup(SoftBusWifiP2pGroupInfo *groupInfo)
     }
     WifiP2pGroupInfo result;
     if (GetCurrentGroup(&result) != WIFI_SUCCESS) {
-        LNN_LOGD(LNN_STATE, "get SoftBusGetCurrentGroup failed");
+        LNN_LOGE(LNN_STATE, "get SoftBusGetCurrentGroup failed");
         return SOFTBUS_ERR;
     }
     if (memcpy_s(groupInfo, sizeof(SoftBusWifiP2pGroupInfo), &result, sizeof(WifiP2pGroupInfo)) != EOK) {
+        LNN_LOGE(LNN_STATE, "memcpy_s failed");
         return SOFTBUS_MEM_ERR;
     }
     return SOFTBUS_OK;
@@ -466,4 +467,21 @@ bool SoftBusIsWifiP2pEnabled(void)
     LNN_LOGI(LNN_STATE, "P2pState=%{public}d", state);
 
     return state == P2P_STATE_STARTED;
+}
+
+int32_t SoftBusGetHotspotConfig(int32_t *apChannel)
+{
+    if (apChannel == NULL) {
+        LNN_LOGE(LNN_STATE, "para apChannel is NULL");
+        return SOFTBUS_INVALID_PARAM;
+    }
+    HotspotConfig hotspotConfig;
+    int32_t ret = GetHotspotConfig(&hotspotConfig);
+    if (ret != WIFI_SUCCESS) {
+        LNN_LOGE(LNN_STATE, "GetHotspotConfig failed");
+        return SOFTBUS_WIFI_STATE_UNKNOWN;
+    }
+    LNN_LOGI(LNN_STATE, "apChannel=%{public}d", hotspotConfig.channelNum);
+    *apChannel = hotspotConfig.channelNum;
+    return SOFTBUS_OK;
 }

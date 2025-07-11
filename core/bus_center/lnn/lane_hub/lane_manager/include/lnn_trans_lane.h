@@ -38,6 +38,7 @@ int32_t UpdateNotifyInfoBylaneReqId(uint32_t laneReqId, bool isNotifyFree);
 int32_t HandleLaneQosChange(const LaneLinkInfo *laneLinkInfo);
 int32_t UpdateFreeLaneStatus(uint32_t laneReqId);
 int32_t DeleteRequestNode(uint32_t laneReqId);
+bool CheckVirtualLinkByLaneReqId(uint32_t laneReqId);
 
 #ifdef __cplusplus
 }
