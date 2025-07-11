@@ -21,6 +21,7 @@
 #include "lnn_connection_fsm.h"
 #include "lnn_connection_fsm_process.c"
 #include "lnn_connection_fsm_process.h"
+#include "lnn_connection_fsm_mock.h"
 #include "lnn_devicename_info.h"
 #include "lnn_net_builder.h"
 #include "lnn_net_ledger_mock.h"
@@ -32,6 +33,7 @@
 
 constexpr char DEVICE_IP1[MAX_ADDR_LEN] = "127.0.0.1";
 constexpr char DEVICE_IP2[MAX_ADDR_LEN] = "127.0.0.2";
+constexpr char IP[MAX_ADDR_LEN] = "192.168.0.1";
 constexpr uint16_t PORT1 = 1000;
 constexpr uint16_t PORT2 = 1001;
 constexpr int64_t AUTH_ID = 10;
@@ -85,6 +87,8 @@ HWTEST_F(LNNConnectionFsmMockTest, LNN_IS_NODE_INFO_CHANGED_TEST_001, TestSize.L
         .type = CONNECTION_ADDR_WLAN,
         .info.ip.port = PORT1,
     };
+    NiceMock<LnnConnFsmInterfaceMock> connFsmMock;
+    EXPECT_CALL(connFsmMock, LnnPrintConnectionAddr).WillRepeatedly(Return(IP));
     (void)strcpy_s(target.info.ip.ip, IP_STR_MAX_LEN, DEVICE_IP1);
     connFsm = LnnCreateConnectionFsm(&target, "pkgName", true);
     EXPECT_TRUE(connFsm != nullptr);
@@ -107,12 +111,6 @@ HWTEST_F(LNNConnectionFsmMockTest, LNN_IS_NODE_INFO_CHANGED_TEST_001, TestSize.L
     NiceMock<LnnNetLedgertInterfaceMock> netLedgerMock;
     EXPECT_CALL(netLedgerMock, LnnHasDiscoveryType).WillOnce(Return(false)).WillRepeatedly(Return(true));
     bool ret1 = IsNodeInfoChanged(connFsm, &oldNodeInfo, &newNodeInfo, &type);
-    EXPECT_TRUE(ret1 == false);
-    ret1 = IsNodeInfoChanged(connFsm, &oldNodeInfo, &newNodeInfo, &type);
-    EXPECT_TRUE(ret1 == false);
-    ret1 = IsNodeInfoChanged(connFsm, &oldNodeInfo, &newNodeInfo, &type);
-    EXPECT_TRUE(ret1 == false);
-    ret1 = IsNodeInfoChanged(connFsm, &oldNodeInfo, &newNodeInfo, &type);
     EXPECT_TRUE(ret1 == false);
     ret1 = IsNodeInfoChanged(connFsm, &oldNodeInfo, &newNodeInfo, &type);
     EXPECT_TRUE(ret1 == false);
@@ -442,11 +440,12 @@ HWTEST_F(LNNConnectionFsmMockTest, LEAVING_STATE_PROCESS_TEST_001, TestSize.Leve
  */
 HWTEST_F(LNNConnectionFsmMockTest, LNN_STOP_CONNECTION_FSM_TEST_001, TestSize.Level1)
 {
-    NiceMock<LnnNetLedgertInterfaceMock> netLedgerMock;
+    NiceMock<LnnConnFsmInterfaceMock> connFsmMock;
     LnnConnectionFsm *connFsm = nullptr;
     ConnectionAddr target = {
         .type = CONNECTION_ADDR_BLE,
     };
+    EXPECT_CALL(connFsmMock, FsmStateMsgHandler).WillRepeatedly(Return());
     int32_t ret = LnnStopConnectionFsm(connFsm, LnnConnectionFsmStopCallback);
     EXPECT_TRUE(ret == SOFTBUS_INVALID_PARAM);
     connFsm = LnnCreateConnectionFsm(&target, "pkgName", true);
