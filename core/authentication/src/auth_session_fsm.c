@@ -537,7 +537,10 @@ static void UpdateDpAclSKId(AuthFsm *authFsm)
         .deviceId = info->udid,
         .peerUserId = info->userId
     };
-    bool isNeedUpdateDk = info->nodeInfo.aclState == ACL_CAN_WRITE;
+    bool isNeedUpdateDk = (info->nodeInfo.aclState == ACL_CAN_WRITE) &&
+        IsSupportFeatureByCapaBit(info->nodeInfo.authCapacity, BIT_SUPPORT_USERKEY_NEGO);
+    AUTH_LOGI(AUTH_FSM, "judge insert user key aclState=%{public}d, authCapacity=%{public}d", info->nodeInfo.aclState,
+        info->nodeInfo.authCapacity);
     UpdateDpSameAccount(&aclParams, sessionKey, isNeedUpdateDk, info->nodeInfo.aclState);
     (void)memset_s(&sessionKey, sizeof(SessionKey), 0, sizeof(SessionKey));
 }
