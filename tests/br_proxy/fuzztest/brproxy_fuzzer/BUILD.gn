@@ -22,12 +22,15 @@ import("../../../../dsoftbus.gni")
 ohos_fuzztest("BrProxyFuzzTest") {
   module_out_path = dsoftbus_fuzz_out_path
 
-  fuzz_config_file = "$dsoftbus_root_path/tests/br_proxy/fuzztest/brproxy_fuzzer"
+  fuzz_config_file =
+      "$dsoftbus_root_path/tests/br_proxy/fuzztest/brproxy_fuzzer"
 
   include_dirs = [
     "$dsoftbus_root_path/br_proxy",
     "$dsoftbus_root_path/br_proxy/common/include",
     "$dsoftbus_root_path/interfaces/kits/common",
+    "$dsoftbus_root_path/sdk/frame/common/include",
+    "$dsoftbus_root_path/sdk/transmission/ipc/include",
   ]
 
   cflags = [
@@ -40,9 +43,13 @@ ohos_fuzztest("BrProxyFuzzTest") {
   sources = [ "brproxy_fuzzer.cpp" ]
 
   deps = [
+    "$dsoftbus_dfx_path:softbus_dfx",
+    "$dsoftbus_dfx_path/dumper/legacy:softbus_dfx_dump",
     "$dsoftbus_root_path/adapter:softbus_adapter",
     "$dsoftbus_root_path/core/common:softbus_utils",
     "$dsoftbus_root_path/core/frame:softbus_server",
+    "$dsoftbus_root_path/sdk:softbus_client",
+    "$dsoftbus_root_path/tests/sdk:softbus_client_static",
   ]
 
   if (is_standard_system) {
