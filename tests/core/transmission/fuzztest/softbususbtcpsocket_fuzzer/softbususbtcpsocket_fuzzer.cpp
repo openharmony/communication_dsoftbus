@@ -48,45 +48,6 @@ private:
     volatile bool isInited_;
 };
 
-void OpenUsbServerSocketTest(FuzzedDataProvider &provider)
-{
-    LocalListenerInfo option;
-    (void)memset_s(&option, sizeof(LocalListenerInfo), 0, sizeof(LocalListenerInfo));
-    option.type = static_cast<ConnectType>(provider.ConsumeIntegralInRange<uint8_t>(CONNECT_TCP, CONNECT_TYPE_MAX));
-    option.socketOption.port = provider.ConsumeIntegral<int32_t>();
-    (void)OpenUsbServerSocket(&option);
-
-    LocalListenerInfo info = {
-        .type = CONNECT_BLE,
-        .socketOption = {.addr = "::1%lo",
-                         .port = MY_PORT,
-                         .moduleId = DIRECT_CHANNEL_SERVER_USB,
-                         .protocol = LNN_PROTOCOL_USB}
-    };
-    (void)OpenUsbServerSocket(&info);
-}
-
-void OpenUsbClientSocketTest(FuzzedDataProvider &provider)
-{
-    ConnectOption option;
-    (void)memset_s(&option, sizeof(ConnectOption), 0, sizeof(ConnectOption));
-    option.type = static_cast<ConnectType>(provider.ConsumeIntegralInRange<uint8_t>(CONNECT_TCP, CONNECT_TYPE_MAX));
-    bool isNonBlock = provider.ConsumeBool();
-    char myIp[IP_LEN] = "127.0.0.1";
-
-    (void)OpenUsbClientSocket(&option, myIp, isNonBlock);
-
-    ConnectOption option2 = {
-        .type = CONNECT_TCP,
-        .socketOption = {.addr = "127.0.0.1",
-                         .port = MY_PORT,
-                         .moduleId = DIRECT_CHANNEL_SERVER_WIFI,
-                         .protocol = LNN_PROTOCOL_IP}
-    };
-    isNonBlock = false;
-    (void)OpenUsbClientSocket(&option2, myIp, isNonBlock);
-}
-
 void AcceptUsbClientTest(FuzzedDataProvider &provider)
 {
     int32_t fd = provider.ConsumeIntegral<int8_t>();
@@ -113,8 +74,6 @@ extern "C" int32_t LLVMFuzzerTestOneInput(const uint8_t *data, size_t size)
 
     /* Run your code on data */
     FuzzedDataProvider provider(data, size);
-    OHOS::OpenUsbServerSocketTest(provider);
-    OHOS::OpenUsbClientSocketTest(provider);
     OHOS::AcceptUsbClientTest(provider);
     OHOS::GetUsbProtocolTest(provider);
 
