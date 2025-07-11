@@ -33,6 +33,10 @@ typedef uint32_t (*GetDiscCapabilityFunc)(void);
 typedef uint16_t (*DiscBleGetDeviceType)(void);
 typedef int32_t (*DiscBleGetDeviceIdHash)(uint8_t *devIdHash, uint32_t len);
 typedef int32_t (*DiscBleGetShortUserIdHash)(uint8_t *hashStr, uint32_t len);
+typedef void (*DiscVirlinkLinklessRegisterListenerFunc)(
+    const struct DiscVirlinkConnStatusListener *listener);
+typedef int (*DiscVirlinkLinklessVirtualSendFunc)(const char *networkId, const uint8_t *data, uint32_t dataLen);
+typedef int (*DiscVirlinkLinklessRegisterRecvCallbackFunc)(DiscVirlinkLinklessRecvCb recvCb);
 
 typedef struct TagDiscOpenFuncList {
     DiscCoapSendRspFunc discCoapSendRsp;
@@ -44,6 +48,9 @@ typedef struct TagDiscOpenFuncList {
     DiscBleGetDeviceType discBleGetDeviceType;
     DiscBleGetDeviceIdHash discBleGetDeviceIdHash;
     DiscBleGetShortUserIdHash discBleGetShortUserIdHash;
+    DiscVirlinkLinklessRegisterListenerFunc discVirlinkLinklessRegisterListener;
+    DiscVirlinkLinklessVirtualSendFunc discVirlinkLinklessVirtualSend;
+    DiscVirlinkLinklessRegisterRecvCallbackFunc discVirlinkLinklessRegisterRecvCallback;
 } DiscOpenFuncList;
 
 #ifdef __cplusplus
