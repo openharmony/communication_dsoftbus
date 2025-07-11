@@ -22,6 +22,7 @@
 #include "disc_interface_struct.h"
 #include "disc_manager_struct.h"
 #include "disc_usb_dispatcher_struct.h"
+#include "disc_virlink_adapter_struct.h"
 #include "nstackx_struct.h"
 #include "softbus_common.h"
 #include "softbus_adapter_thread.h"

@@ -305,8 +305,154 @@ typedef struct {
 
 #ifdef ENABLE_USER_LOG
 typedef void (*DFinderLogCallback)(const char *moduleName, uint32_t logLevel, const char *format, ...);
-
 #endif
+
+#define LINKLESS_MAC_LEN                        6
+#define LINKLESS_NETWORK_ID_BUF_LEN             65 /* include '\0' */
+#define LINKLESS_INVALID_ACTION_LISTEN_CHANNEL  0
+
+typedef enum {
+    LINKLESS_APP_SHARE,
+    LINKLESS_APP_TOUCH,
+    LINKLESS_APP_CAST,
+    LINKLESS_APP_SERVICE_DISC,
+    LINKLESS_APP_VIRTUAL = 256,
+    LINKLESS_APP_MAX,
+} LinklessAppId;
+
+typedef enum {
+    LINKLESS_LINK_TYPE_AUTO,
+    LINKLESS_LINK_TYPE_DIRECT,
+    LINKLESS_LINK_TYPE_VIRTUAL,
+    LINKLESS_LINK_TYPE_MAX,
+} LinklessLinkType;
+
+typedef enum {
+    LINKLESS_MODE_PUSH,
+    LINKLESS_MODE_PULL,
+    LINKLESS_MODE_MAX,
+} LinklessMode;
+
+typedef enum {
+    LINKLESS_PRIORITY_NORMAL,
+    LINKLESS_PRIORITY_HIGH,
+    LINKLESS_PRIORITY_MAX,
+} LinklessPriority;
+
+typedef enum {
+    LINKLESS_LOG_LEVEL_OFF,
+    LINKLESS_LOG_LEVEL_FATAL,
+    LINKLESS_LOG_LEVEL_ERROR,
+    LINKLESS_LOG_LEVEL_WARNING,
+    LINKLESS_LOG_LEVEL_INFO,
+    LINKLESS_LOG_LEVEL_DEBUG,
+    LINKLESS_LOG_LEVEL_END,
+} LinklessLogLevel;
+
+typedef enum {
+    LINKLESS_MSG_TYPE_REQ,
+    LINKLESS_MSG_TYPE_RESP,
+    LINKLESS_MSG_TYPE_MAX,
+} LinklessMsgType;
+
+typedef enum {
+    LINKLESS_WIFI_STATUS_DEFAULT,
+    LINKLESS_WIFI_STATUS_BUSY,
+    LINKLESS_WIFI_STATUS_MAX,
+} LinklessWifiStatus;
+
+typedef enum {
+    LINKLESS_VIRTUAL_CONNECTED,
+    LINKLESS_VIRTUAL_DISCONNECTED,
+    LINKLESS_VIRTUAL_CONN_MAX,
+} LinklessVirtualConnStatus;
+
+typedef struct {
+    uint16_t appId;
+    uint8_t linkType;
+    uint8_t priority;
+    uint8_t mode;
+    bool proxy;
+    bool enableListen;
+    uint8_t channel;
+    uint8_t mac[LINKLESS_MAC_LEN];
+    bool encrypt;
+    bool needAck;
+    uint8_t *data;
+    uint16_t dataLen;
+    char peerNetworkId[LINKLESS_NETWORK_ID_BUF_LEN];
+} LinklessParam;
+
+typedef struct {
+    int32_t txChannel;
+    uint8_t mac[LINKLESS_MAC_LEN];
+    char peerNetworkId[LINKLESS_NETWORK_ID_BUF_LEN];
+    uint8_t *payload;
+    uint16_t payloadLen;
+} LinklessActionSendParam;
+
+typedef int32_t (*LinklessDirectlySendCb)(const LinklessActionSendParam *param);
+typedef int32_t (*LinklessStartActionListenCb)(uint8_t *mac, int32_t len, int32_t *channel);
+typedef int32_t (*LinklessStopActionListenCb)(void);
+typedef void (*LinklessSendCompleteCb)(int32_t transactionId, uint32_t status);
+typedef void (*LinklessRecvCb)(const LinklessParam *info);
+typedef int32_t (*LinklessVirtualSendCb)(const LinklessActionSendParam *param);
+
+typedef struct {
+    LinklessStartActionListenCb startListenCb;
+    LinklessStopActionListenCb stopListenCb;
+    LinklessDirectlySendCb directlySendCb;
+    LinklessVirtualSendCb virtualSendCb;
+} LinklessInitParam;
+
+typedef struct {
+    uint16_t appId;
+    LinklessSendCompleteCb onSendComplete;
+    LinklessRecvCb onRecv;
+} LinklessRegisterCbParam;
+
+typedef struct {
+    uint16_t appId;
+    uint8_t channel;
+    uint8_t mac[LINKLESS_MAC_LEN];
+} LinklessRecvParam;
+
+typedef struct {
+    uint8_t txChannel;
+    uint8_t rxChannel;
+    uint8_t peerMac[LINKLESS_MAC_LEN];
+    uint8_t *payload;
+    int32_t payloadLen;
+    char peerNetworkId[LINKLESS_NETWORK_ID_BUF_LEN];
+} LinklessActionRecvParam;
+
+typedef struct {
+    uint8_t channel;
+    uint8_t mac[LINKLESS_MAC_LEN];
+} LinklessActionStateChangeParam;
+
+typedef struct {
+    char *networkId;
+    char *mac;
+    char *ip;
+} LinklessVirtualConn;
+
+enum LinklessErrorCode {
+    LINKLESS_ERRNO_SUCCESS = 0,
+    LINKLESS_ERRNO_FAIL = -101,
+    LINKLESS_ERRNO_INVALID_PARAM = -102,
+    LINKLESS_ERRNO_MODULE_NOT_INIT = -103,
+    LINKLESS_ERRNO_MODULE_ALREADY_INITED = -104,
+    LINKLESS_ERRNO_FEATURE_NOT_IMPLEMENTED = -105,
+    LINKLESS_ERRNO_USER_CALLBACK_NOT_FOUND = -106,
+    LINKLESS_ERRNO_USER_CALLBACK_NOT_REGISTERED = -107,
+    LINKLESS_ERRNO_NO_TRANSACTION_ONGOING = -108,
+    LINKLESS_ERRNO_LISTEN_CHANNEL_CONFLICT = -109,
+    LINKLESS_ERRNO_UNPACK_ACTION_DATA_FAIL = -110,
+    LINKLESS_ERRNO_CREATE_TIMER_FAIL = -111,
+    LINKLESS_ERRNO_START_ACTION_LISTEN_FAIL = -112,
+    LINKLESS_ERRNO_STOP_ACTION_LISTEN_FAIL = -113,
+};
 
 #ifdef __cplusplus
 }
