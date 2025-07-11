@@ -31,6 +31,7 @@
 #include "softbus_server_ipc_interface_code.h"
 #include "softbus_server_proxy_standard.h"
 #include "trans_server_proxy.h"
+#include "g_enhance_sdk_func.h"
 
 namespace {
 OHOS::sptr<OHOS::IRemoteObject> g_serverProxy = nullptr;
@@ -169,6 +170,7 @@ static int32_t ClientCheckFuncPointer(void *func)
 static int32_t DiscRecoveryPolicyPacked(void)
 {
     ClientEnhanceFuncList *pfnClientEnhanceFuncList = ClientEnhanceFuncListGet();
+    ClientRegisterEnhanceFuncCheck((void *)pfnClientEnhanceFuncList->discRecoveryPolicy);
     if (ClientCheckFuncPointer((void *)pfnClientEnhanceFuncList->discRecoveryPolicy) != SOFTBUS_OK) {
         return SOFTBUS_OK;
     }
@@ -290,7 +292,7 @@ int32_t ClientRegisterBrProxyService(const char *pkgName)
             return ret;
         }
     }
- 
+
     COMM_LOGD(COMM_SDK, "softbus server register service success! pkgName=%{public}s", pkgName);
     return SOFTBUS_OK;
 }

@@ -14,6 +14,7 @@
  */
 
 #include "g_enhance_sdk_func.h"
+#include "softbus_init_common.h"
 
 #include <dlfcn.h>
 
@@ -40,4 +41,18 @@ int32_t ClientRegisterEnhanceFunc(void *soHandle)
     g_clientEnhanceFuncList.transOnPagingConnect = dlsym(soHandle, "TransOnPagingConnect");
 
     return SOFTBUS_OK;
+}
+
+void ClientRegisterEnhanceFuncCheck(void *sdkFunc)
+{
+    if (sdkFunc != NULL) {
+        return;
+    }
+    void *soHandle = NULL;
+    (void)SoftBusDlopen(SOFTBUS_HANDLE_CLIENT_PLUGIN, &soHandle);
+    if (soHandle == NULL) {
+        COMM_LOGE(COMM_SDK, "dlopen libdsoftbus_client_plugin.z.so failed.");
+        return;
+    }
+    ClientRegisterEnhanceFunc(soHandle);
 }
