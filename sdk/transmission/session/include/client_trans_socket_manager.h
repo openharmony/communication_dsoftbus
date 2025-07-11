@@ -31,6 +31,7 @@ typedef struct {
     int32_t seq;
     int32_t channelType;
     uint32_t timeout;
+    bool isMessage;
 } DataSeqInfo;
 
 int32_t GenerateSessionId(void);
@@ -120,6 +121,13 @@ int32_t DataSeqInfoListAddItem(uint32_t dataSeq, int32_t channelId, int32_t sock
 int32_t DeleteDataSeqInfoList(uint32_t dataSeq, int32_t channelId);
 
 void TransAsyncSendBytesTimeoutProc(void);
+
+int32_t GeneratePagingId(void);
+
+void DestroyPagingId(void);
+
+int32_t ClientDeletePagingSession(int32_t sessionId);
+
 #ifdef __cplusplus
 }
 #endif

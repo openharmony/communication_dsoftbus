@@ -1632,6 +1632,7 @@ ReportCategory LnnSetNodeOffline(const char *udid, ConnectionAddrType type, int3
     }
     LnnSetNodeConnStatus(info, STATUS_OFFLINE);
     LnnClearAuthTypeValue(&info->AuthTypeValue, ONLINE_HICHAIN);
+    info->offlineTimestamp = (uint64_t)LnnUpTimeMs();
     SoftBusMutexUnlock(&g_distributedNetLedger.lock);
     LNN_LOGI(LNN_LEDGER, "need to report offline");
     DfxRecordLnnSetNodeOfflineEnd(udid, (int32_t)MapGetSize(&map->udidMap), SOFTBUS_OK);
@@ -1975,6 +1976,116 @@ int32_t LnnGetAllOnlineNodeNum(int32_t *nodeNum)
     }
     (void)SoftBusMutexUnlock(&g_distributedNetLedger.lock);
     return SOFTBUS_OK;
+}
+
+/* use after locking */
+static int32_t GetOnlineAndOfflineWithinTimeNumLocked(int32_t *udidNum, uint64_t currentTime, uint64_t timeRange)
+{
+    NodeInfo *info = NULL;
+    DoubleHashMap *map = &g_distributedNetLedger.distributedInfo;
+    MapIterator *it = LnnMapInitIterator(&map->udidMap);
+    if (it == NULL) {
+        LNN_LOGE(LNN_LEDGER, "it is null");
+        return SOFTBUS_NETWORK_MAP_INIT_FAILED;
+    }
+    *udidNum = 0;
+    while (LnnMapHasNext(it)) {
+        it = LnnMapNext(it);
+        if (it == NULL) {
+            return SOFTBUS_NETWORK_MAP_INIT_FAILED;
+        }
+        info = (NodeInfo *)it->node->value;
+        if (IsMetaNode(info)) {
+            continue;
+        }
+        if (!LnnIsNodeOnline(info) && ((currentTime < info->offlineTimestamp) ||
+            ((currentTime - info->offlineTimestamp) > timeRange))) {
+            continue;
+        }
+        (*udidNum)++;
+    }
+    LnnMapDeinitIterator(it);
+    return SOFTBUS_OK;
+}
+
+static int32_t FillOnlineAndOfflineWithinTimeUdidsLocked(
+    char *udids, int32_t udidNum, uint64_t currentTime, uint64_t timeRange)
+{
+    NodeInfo *nodeInfo = NULL;
+    DoubleHashMap *map = &g_distributedNetLedger.distributedInfo;
+    MapIterator *it = LnnMapInitIterator(&map->udidMap);
+    int32_t i = 0;
+    if (it == NULL) {
+        LNN_LOGE(LNN_LEDGER, "it is null");
+        return SOFTBUS_NETWORK_MAP_INIT_FAILED;
+    }
+    while (LnnMapHasNext(it) && i < udidNum) {
+        it = LnnMapNext(it);
+        if (it == NULL) {
+            return SOFTBUS_NETWORK_MAP_INIT_FAILED;
+        }
+        nodeInfo = (NodeInfo *)it->node->value;
+        if (IsMetaNode(nodeInfo)) {
+            continue;
+        }
+        if (!LnnIsNodeOnline(nodeInfo) && ((currentTime < nodeInfo->offlineTimestamp) ||
+            ((currentTime - nodeInfo->offlineTimestamp) > timeRange))) {
+            continue;
+        }
+        if (strcpy_s(udids + i * UDID_BUF_LEN, UDID_BUF_LEN, nodeInfo->deviceInfo.deviceUdid) != EOK) {
+            LNN_LOGE(LNN_LEDGER, "strcpy fail");
+            LnnMapDeinitIterator(it);
+            return SOFTBUS_STRCPY_ERR;
+        }
+        ++i;
+    }
+    LnnMapDeinitIterator(it);
+    return SOFTBUS_OK;
+}
+
+int32_t LnnGetOnlineAndOfflineWithinTimeUdids(char **udids, int32_t *udidNum, uint64_t timeRange)
+{
+    if (udids == NULL || udidNum == NULL) {
+        LNN_LOGE(LNN_LEDGER, "key params are null");
+        return SOFTBUS_INVALID_PARAM;
+    }
+    if (SoftBusMutexLock(&g_distributedNetLedger.lock) != SOFTBUS_OK) {
+        LNN_LOGE(LNN_LEDGER, "lock mutex fail!");
+        return SOFTBUS_LOCK_ERR;
+    }
+    uint64_t currentTime = (uint64_t)LnnUpTimeMs();
+    int32_t ret = SOFTBUS_NETWORK_GET_ALL_NODE_INFO_ERR;
+    do {
+        *udids = NULL;
+        if (GetOnlineAndOfflineWithinTimeNumLocked(udidNum, currentTime, timeRange) != SOFTBUS_OK) {
+            LNN_LOGE(LNN_LEDGER, "get online node num failed");
+            break;
+        }
+        if (*udidNum == 0) {
+            LNN_LOGE(LNN_LEDGER, "get node num 0");
+            ret = SOFTBUS_OK;
+            break;
+        }
+        *udids = (char *)SoftBusCalloc((*udidNum) * UDID_BUF_LEN);
+        if (*udids == NULL) {
+            LNN_LOGE(LNN_LEDGER, "malloc node info buffer failed");
+            break;
+        }
+        if (FillOnlineAndOfflineWithinTimeUdidsLocked(*udids, *udidNum, currentTime, timeRange) != SOFTBUS_OK) {
+            LNN_LOGE(LNN_LEDGER, "fill online node udids failed");
+            break;
+        }
+        ret = SOFTBUS_OK;
+    } while (false);
+    if (ret != SOFTBUS_OK) {
+        if (*udids != NULL) {
+            SoftBusFree(*udids);
+            *udids = NULL;
+        }
+        *udidNum = 0;
+    }
+    (void)SoftBusMutexUnlock(&g_distributedNetLedger.lock);
+    return ret;
 }
 
 int32_t LnnGetAllOnlineNodeInfo(NodeBasicInfo **info, int32_t *infoNum)

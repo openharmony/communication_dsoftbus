@@ -502,4 +502,268 @@ HWTEST_F(TransClientProxyFileManagerMockTest, TransProxyAsyncPackAndSendDataTest
     int32_t ret = TransProxyChannelSendBytes(TEST_CHANNEL_ID, nullptr, TEST_DATA_LENGTH, false);
     EXPECT_EQ(SOFTBUS_INVALID_PARAM, ret);
 }
+
+/**
+ * @tc.name: SendOneFrame001
+ * @tc.desc: use abnormal parameter.
+ * @tc.type: FUNC
+ * @tc.require:
+ */
+HWTEST_F(TransClientProxyFileManagerMockTest, SendOneFrame001, TestSize.Level1)
+{
+    int32_t ret = 0;
+    SendListenerInfo *sendInfo = reinterpret_cast<SendListenerInfo *>(SoftBusCalloc(sizeof(SendListenerInfo)));
+    FileFrame *fileFrame = reinterpret_cast<FileFrame *>(SoftBusCalloc(sizeof(FileFrame)));
+    sendInfo->osType = OH_TYPE;
+    sendInfo->crc = 0;
+
+    NiceMock<TransClientProxyFileManagerInterfaceMock> TransProxyFileManagerMock;
+    ret = SendOneFrame(sendInfo, NULL);
+    EXPECT_EQ(SOFTBUS_INVALID_PARAM, ret);
+
+    ret = SendOneFrame(sendInfo, fileFrame);
+    EXPECT_EQ(SOFTBUS_OK, ret);
+
+    sendInfo->osType = 0;
+    EXPECT_CALL(TransProxyFileManagerMock, ProxyChannelSendFileStream).WillOnce(Return(SOFTBUS_OK));
+    ret = SendOneFrame(sendInfo, fileFrame);
+    EXPECT_EQ(SOFTBUS_OK, ret);
+
+    SoftBusFree(sendInfo);
+    SoftBusFree(fileFrame);
+}
+/**
+ * @tc.name: SendFileCrcCheckSum001
+ * @tc.desc: use abnormal parameter.
+ * @tc.type: FUNC
+ * @tc.require:
+ */
+HWTEST_F(TransClientProxyFileManagerMockTest, SendFileCrcCheckSum001, TestSize.Level1)
+{
+    int32_t ret = 0;
+    SendListenerInfo *sendInfo = reinterpret_cast<SendListenerInfo *>(SoftBusCalloc(sizeof(SendListenerInfo)));
+    sendInfo->crc = APP_INFO_FILE_FEATURES_SUPPORT;
+
+    NiceMock<TransClientProxyFileManagerInterfaceMock> TransProxyFileManagerMock;
+    EXPECT_CALL(TransProxyFileManagerMock, CreatePendingPacket).WillRepeatedly(Return(SOFTBUS_OK));
+    EXPECT_CALL(TransProxyFileManagerMock, ProxyChannelSendFileStream).WillRepeatedly(Return(SOFTBUS_OK));
+    EXPECT_CALL(TransProxyFileManagerMock, GetPendingPacketData).WillOnce(Return(SOFTBUS_ALREADY_TRIGGERED));
+    ret = SendFileCrcCheckSum(sendInfo);
+    EXPECT_EQ(SOFTBUS_OK, ret);
+
+    EXPECT_CALL(TransProxyFileManagerMock, GetPendingPacketData).WillOnce(Return(SOFTBUS_OK));
+    ret = SendFileCrcCheckSum(sendInfo);
+    EXPECT_EQ(SOFTBUS_OK, ret);
+
+    EXPECT_CALL(TransProxyFileManagerMock, GetPendingPacketData).WillOnce(Return(SOFTBUS_INVALID_PARAM));
+    ret = SendFileCrcCheckSum(sendInfo);
+    EXPECT_EQ(SOFTBUS_INVALID_PARAM, ret);
+
+    SoftBusFree(sendInfo);
+}
+
+/**
+ * @tc.name: HandleSendProgress001
+ * @tc.desc: use normal parameter.
+ * @tc.type: FUNC
+ * @tc.require:
+ */
+HWTEST_F(TransClientProxyFileManagerMockTest, HandleSendProgress001, TestSize.Level1)
+{
+    uint64_t fileOffset = 0;
+    uint64_t fileSize = 0;
+    SendListenerInfo *sendInfo = reinterpret_cast<SendListenerInfo *>(SoftBusCalloc(sizeof(SendListenerInfo)));
+    FileListener *fileListener = reinterpret_cast<FileListener *>(SoftBusCalloc(sizeof(FileListener)));
+
+    (void)HandleSendProgress(sendInfo, fileOffset, fileSize);
+
+    sendInfo->fileListener.sendListener.OnSendFileProcess = [](
+        int sessionId, uint64_t bytesUpload, uint64_t bytesTotal) -> int {return SOFTBUS_OK;};
+    sendInfo->fileListener = *fileListener;
+    (void)HandleSendProgress(sendInfo, fileOffset, fileSize);
+
+    fileListener->socketSendCallback = [](int32_t socket, FileEvent *event) {};
+    sendInfo->fileListener = *fileListener;
+    (void)HandleSendProgress(sendInfo, fileOffset, fileSize);
+    EXPECT_EQ(0, fileSize);
+
+    SoftBusFree(sendInfo);
+    SoftBusFree(fileListener);
+}
+
+/**
+ * @tc.name: DelRecipient001
+ * @tc.desc: use normal parameter.
+ * @tc.type: FUNC
+ * @tc.require:
+ */
+HWTEST_F(TransClientProxyFileManagerMockTest, DelRecipient001, TestSize.Level1)
+{
+    NiceMock<TransClientProxyFileManagerInterfaceMock> TransProxyFileManagerMock;
+    EXPECT_CALL(TransProxyFileManagerMock, InitPendingPacket).WillRepeatedly(Return(SOFTBUS_OK));
+    int32_t ret = ClinetTransProxyFileManagerInit();
+    EXPECT_EQ(SOFTBUS_OK, ret);
+
+    FileRecipientInfo *info = reinterpret_cast<FileRecipientInfo *>(SoftBusCalloc(sizeof(FileRecipientInfo)));
+    info->channelId = 1;
+    info->sessionId = 1;
+    info->osType = 0;
+    ListInit(&info->node);
+    info->objRefCount = 1;
+    info->recvFileInfo.fileFd = INVALID_FD;
+    ListTailInsert(&g_recvRecipientInfoList, &info->node);
+
+    FileRecipientInfo *tarinfo = reinterpret_cast<FileRecipientInfo *>(SoftBusCalloc(sizeof(FileRecipientInfo)));
+    tarinfo->channelId = 2;
+    tarinfo->sessionId = 2;
+    tarinfo->osType = 10;
+    ListInit(&tarinfo->node);
+    tarinfo->objRefCount = 2;
+    tarinfo->recvFileInfo.fileFd = INVALID_FD;
+    ListTailInsert(&g_recvRecipientInfoList, &tarinfo->node);
+
+    (void)DelRecipient(info->sessionId);
+    (void)DelRecipient(tarinfo->sessionId);
+    (void)DelRecipient(tarinfo->sessionId);
+    ClinetTransProxyFileManagerDeinit();
+}
+
+/**
+ * @tc.name: ClientDeleteRecvFileList001
+ * @tc.desc: use abnormal parameter.
+ * @tc.type: FUNC
+ * @tc.require:
+ */
+HWTEST_F(TransClientProxyFileManagerMockTest, ClientDeleteRecvFileList001, TestSize.Level1)
+{
+    int32_t sessionId = -1;
+    (void)ClientDeleteRecvFileList(sessionId);
+    EXPECT_EQ(-1, sessionId);
+}
+
+/**
+ * @tc.name: UpdateFileReceivePath001
+ * @tc.desc: use abnormal parameter.
+ * @tc.type: FUNC
+ * @tc.require:
+ */
+HWTEST_F(TransClientProxyFileManagerMockTest, UpdateFileReceivePath001, TestSize.Level1)
+{
+    int32_t ret = 0;
+    FileListener *fileListener = reinterpret_cast<FileListener *>(SoftBusCalloc(sizeof(FileListener)));
+    fileListener->socketRecvCallback = [] (int32_t socket, FileEvent *event){return;};
+
+    int32_t sessionId = 1;
+
+    ret = UpdateFileReceivePath(sessionId, fileListener);
+    EXPECT_EQ(SOFTBUS_FILE_ERR, ret);
+
+    SoftBusFree(fileListener);
+}
+
+/**
+ * @tc.name: HandleFileTransferCompletion001
+ * @tc.desc: use abnormal parameter.
+ * @tc.type: FUNC
+ * @tc.require:
+ */
+HWTEST_F(TransClientProxyFileManagerMockTest, HandleFileTransferCompletion001, TestSize.Level1)
+{
+    FileRecipientInfo *recipient = reinterpret_cast<FileRecipientInfo *>(SoftBusCalloc(sizeof(FileRecipientInfo)));
+    SingleFileInfo *file = reinterpret_cast<SingleFileInfo *>(SoftBusCalloc(sizeof(SingleFileInfo)));
+
+    int32_t sessionId = 1;
+
+    HandleFileTransferCompletion(recipient, sessionId, file);
+
+    recipient->fileListener.recvListener.OnReceiveFileStarted = [](int sessionId, const char *files, int fileCnt)
+        -> int {return 0;};
+    HandleFileTransferCompletion(recipient, sessionId, file);
+
+    recipient->fileListener.socketRecvCallback = [] (int32_t socket, FileEvent *event){return;};
+    HandleFileTransferCompletion(recipient, sessionId, file);
+    EXPECT_EQ(1, sessionId);
+
+    SoftBusFree(recipient);
+    SoftBusFree(file);
+}
+
+/**
+ * @tc.name: ProcessOneFrame001
+ * @tc.desc: use abnormal parameter.
+ * @tc.type: FUNC
+ * @tc.require:
+ */
+HWTEST_F(TransClientProxyFileManagerMockTest, ProcessOneFrame001, TestSize.Level1)
+{
+    int32_t ret = 0;
+    FileFrame *fileFrame = reinterpret_cast<FileFrame *>(SoftBusCalloc(sizeof(FileFrame)));
+    SingleFileInfo *fileInfo = reinterpret_cast<SingleFileInfo *>(SoftBusCalloc(sizeof(SingleFileInfo)));
+    uint32_t dataLen = MAX_FILE_SIZE + FRAME_DATA_SEQ_OFFSET + 1;
+    int32_t crc = APP_INFO_FILE_FEATURES_SUPPORT;
+    int32_t osType = OH_TYPE;
+    NiceMock<TransClientProxyFileManagerInterfaceMock> TransProxyFileManagerMock;
+
+    ret = ProcessOneFrame(fileFrame, dataLen, crc, fileInfo, osType);
+    EXPECT_EQ(SOFTBUS_FILE_ERR, ret);
+
+    osType = 0;
+    ret = ProcessOneFrame(fileFrame, dataLen, crc, fileInfo, osType);
+    EXPECT_EQ(SOFTBUS_FILE_ERR, ret);
+
+    dataLen = FRAME_DATA_SEQ_OFFSET + 1;
+    fileInfo->fileOffset = MAX_FILE_SIZE + 1;
+    ret = ProcessOneFrame(fileFrame, dataLen, crc, fileInfo, osType);
+    EXPECT_EQ(SOFTBUS_FILE_ERR, ret);
+
+    int64_t writeLength = dataLen - FRAME_DATA_SEQ_OFFSET;
+    fileInfo->fileOffset = MAX_FILE_SIZE - FRAME_DATA_SEQ_OFFSET;
+    EXPECT_CALL(TransProxyFileManagerMock, SoftBusPwriteFile).WillOnce(Return(writeLength));
+    ret = ProcessOneFrame(fileFrame, dataLen, crc, fileInfo, osType);
+    EXPECT_EQ(SOFTBUS_OK, ret);
+
+    SoftBusFree(fileFrame);
+    SoftBusFree(fileInfo);
+}
+
+/**
+ * @tc.name: UpdateFileReceptionStatus001
+ * @tc.desc: use abnormal parameter.
+ * @tc.type: FUNC
+ * @tc.require:
+ */
+HWTEST_F(TransClientProxyFileManagerMockTest, UpdateFileReceptionStatus001, TestSize.Level1)
+{
+    int32_t ret = 0;
+    FileFrame *fileFrame = reinterpret_cast<FileFrame *>(SoftBusCalloc(sizeof(FileFrame)));
+    SingleFileInfo *fileInfo = reinterpret_cast<SingleFileInfo *>(SoftBusCalloc(sizeof(SingleFileInfo)));
+    FileRecipientInfo *recipient = reinterpret_cast<FileRecipientInfo *>(SoftBusCalloc(sizeof(FileRecipientInfo)));
+    int32_t sessionId = 1;
+    NiceMock<TransClientProxyFileManagerInterfaceMock> TransProxyFileManagerMock;
+
+    recipient->crc = APP_INFO_FILE_FEATURES_SUPPORT;
+    ret = UpdateFileReceptionStatus(fileInfo, recipient, fileFrame, sessionId);
+    EXPECT_EQ(SOFTBUS_OK, ret);
+
+    recipient->crc = APP_INFO_FILE_FEATURES_NO_SUPPORT;
+    fileFrame->frameType = TRANS_SESSION_ACK;
+    ret = UpdateFileReceptionStatus(fileInfo, recipient, fileFrame, sessionId);
+    EXPECT_EQ(SOFTBUS_OK, ret);
+
+    recipient->fileListener.recvListener.OnReceiveFileProcess = [](int sessionId, const char *firstFile,
+        uint64_t bytesUpload, uint64_t bytesTotal) -> int {return 0;};
+    recipient->crc = APP_INFO_FILE_FEATURES_SUPPORT;
+    ret = UpdateFileReceptionStatus(fileInfo, recipient, fileFrame, sessionId);
+    EXPECT_EQ(SOFTBUS_OK, ret);
+
+    recipient->fileListener.socketRecvCallback = [] (int32_t socket, FileEvent *event){return;};
+    ret = UpdateFileReceptionStatus(fileInfo, recipient, fileFrame, sessionId);
+    EXPECT_EQ(SOFTBUS_OK, ret);
+
+    SoftBusFree(fileFrame);
+    SoftBusFree(fileInfo);
+    SoftBusFree(recipient);
+}
+
+
 } // namespace OHOS

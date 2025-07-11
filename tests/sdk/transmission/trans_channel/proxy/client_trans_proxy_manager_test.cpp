@@ -16,18 +16,18 @@
 #include <gtest/gtest.h>
 #include "securec.h"
 
+#include "client_trans_proxy_file_manager.h"
+#include "client_trans_proxy_manager.c"
 #include "client_trans_proxy_manager.h"
 #include "client_trans_session_manager.h"
 #include "client_trans_socket_manager.h"
+#include "client_trans_tcp_direct_message.h"
 #include "session.h"
+#include "softbus_access_token_test.h"
 #include "softbus_def.h"
 #include "softbus_error_code.h"
-#include "softbus_access_token_test.h"
-#include "client_trans_proxy_file_manager.h"
-#include "client_trans_proxy_manager.c"
-#include "client_trans_tcp_direct_message.h"
-#include "trans_proxy_process_data.h"
 #include "trans_proxy_process_data.c"
+#include "trans_proxy_process_data.h"
 
 #define TEST_CHANNEL_ID (-10)
 #define TEST_ERR_CODE (-1)

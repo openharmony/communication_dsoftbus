@@ -25,6 +25,7 @@
 #include "g_enhance_conn_func_pack.h"
 #include "legacy/softbus_adapter_hitrace.h"
 #include "legacy/softbus_hisysevt_transreporter.h"
+#include "lnn_async_callback_utils.h"
 #include "softbus_adapter_mem.h"
 #include "softbus_adapter_thread.h"
 #include "softbus_conn_interface.h"
@@ -44,8 +45,11 @@
 #include "trans_log.h"
 
 #define ID_OFFSET (0xABAB0000)
+#define WAIT_LISTEN_CHECK_DELAY     (200)
+#define WAIT_LISTEN_CHECK_NUM       (50)
 
 static SoftBusList *g_proxyConnectionList = NULL;
+static SoftBusList *g_proxyPagingWaitList = NULL;
 const char *g_transProxyLoopName = "transProxyLoopName";
 SoftBusHandler g_transLoopHandler = { 0 };
 
@@ -57,7 +61,16 @@ typedef enum {
     LOOP_KEEPALIVE_MSG,
     LOOP_RESETPEER_MSG,
     LOOP_AUTHSTATECHECK_MSG,
+    LOOP_PAGINGHANDSHAKE_MSG,
 } LoopMsg;
+
+typedef enum {
+    WAIT_LISTEN_CHECK_INVALID = -1,
+    WAIT_LISTEN_CHECK_SUCCESS = 0,
+    WAIT_LISTEN_CHECK_LOAD_FAIL,
+    WAIT_LISTEN_CHECK_RETRY,
+    WAIT_LISTEN_CHECK_TIMEOUT,
+} CheckResultType;
 
 int32_t TransDelConnByReqId(uint32_t requestId)
 {
@@ -240,6 +253,14 @@ static void TransProxyLoopMsgHandler(SoftBusMessage *msg)
             TransAuthNegoTaskManager(authRequestId, channelId);
             break;
         }
+        case LOOP_PAGINGHANDSHAKE_MSG: {
+            channelId = (int32_t)msg->arg1;
+            uint32_t keyLen = (uint32_t)msg->arg2;
+            uint8_t *authKey = (uint8_t *)msg->obj;
+            TRANS_CHECK_AND_RETURN_LOGE(authKey != NULL, TRANS_MSG, "LOOP_PAGINGHANDSHAKE_MSG, authKey is null");
+            TransPagingHandshake(channelId, authKey, keyLen);
+            break;
+        }
         default:
             break;
     }
@@ -373,6 +394,23 @@ void TransProxyPostOpenClosedMsgToLoop(const ProxyChannelInfo *chan)
     g_transLoopHandler.looper->PostMessage(g_transLoopHandler.looper, msg);
 }
 
+void TransProxyPagingHandshakeMsgToLoop(int32_t channelId, uint8_t *authKey, uint32_t keyLen)
+{
+    if (authKey == NULL) {
+        TRANS_LOGE(TRANS_MSG, "param invalid");
+        return;
+    }
+    SoftBusMessage *msg = TransProxyCreateLoopMsg(LOOP_PAGINGHANDSHAKE_MSG, channelId, keyLen, (char *)authKey);
+    if (msg == NULL) {
+        TRANS_LOGE(TRANS_MSG, "msg create failed");
+        if (authKey != NULL) {
+            SoftBusFree((void *)authKey);
+        }
+        return;
+    }
+    g_transLoopHandler.looper->PostMessage(g_transLoopHandler.looper, msg);
+}
+
 static int32_t TransProxyLoopInit(void)
 {
     g_transLoopHandler.name = (char *)g_transProxyLoopName;
@@ -464,9 +502,9 @@ static bool CompareConnectOption(const ConnectOption *itemConnInfo, const Connec
     return false;
 }
 
-int32_t TransAddConnItem(ProxyConnInfo *chan)
+int32_t TransAddConnItem(ProxyConnInfo *conn)
 {
-    if (chan == NULL) {
+    if (conn == NULL) {
         TRANS_LOGE(TRANS_CTRL, "param invalid");
         return SOFTBUS_INVALID_PARAM;
     }
@@ -484,15 +522,15 @@ int32_t TransAddConnItem(ProxyConnInfo *chan)
     }
 
     LIST_FOR_EACH_ENTRY_SAFE(item, tmpItem, &g_proxyConnectionList->list, ProxyConnInfo, node) {
-        if (item->isServerSide == chan->isServerSide &&
-            item->connInfo.type == chan->connInfo.type &&
-            CompareConnectOption(&item->connInfo, &chan->connInfo) == true) {
+        if (item->isServerSide == conn->isServerSide &&
+            item->connInfo.type == conn->connInfo.type &&
+            CompareConnectOption(&item->connInfo, &conn->connInfo) == true) {
             (void)SoftBusMutexUnlock(&g_proxyConnectionList->lock);
             return SOFTBUS_TRANS_NOT_MATCH;
         }
     }
-    ListAdd(&(g_proxyConnectionList->list), &(chan->node));
-    TRANS_LOGI(TRANS_CTRL, "add requestId=%{public}u", chan->requestId);
+    ListAdd(&(g_proxyConnectionList->list), &(conn->node));
+    TRANS_LOGI(TRANS_CTRL, "add requestId=%{public}u", conn->requestId);
     g_proxyConnectionList->cnt++;
     (void)SoftBusMutexUnlock(&g_proxyConnectionList->lock);
     return SOFTBUS_OK;
@@ -914,12 +952,29 @@ static void TransProxyOnDataReceived(uint32_t connectionId, ConnModule moduleId,
         connectionId, moduleId, seq, len);
     TRANS_CHECK_AND_RETURN_LOGE(data != NULL && moduleId == MODULE_PROXY_CHANNEL, TRANS_CTRL, "invalid param");
 
+    int32_t ret = SOFTBUS_TRANS_INVALID_MESSAGE_TYPE;
     ProxyMessage msg;
     (void)memset_s(&msg, sizeof(ProxyMessage), 0, sizeof(ProxyMessage));
     msg.connId = connectionId;
-
+    ret = TransParseMessageHeadType(data, len, &msg);
+    if (ret != SOFTBUS_OK) {
+        TRANS_LOGE(TRANS_CTRL, "invalid msg head");
+        return;
+    }
+    TRANS_LOGI(TRANS_CTRL, "recv data msgType=%{public}d", msg.msgHead.type);
+    if (msg.msgHead.type == PROXYCHANNEL_MSG_TYPE_D2D) {
+        TransProxyParseD2DData(data, len);
+        return;
+    }
+    if (msg.msgHead.type >= PROXYCHANNEL_MSG_TYPE_PAGING_HANDSHAKE) {
+        ret = TransPagingParseMessage(data, len, &msg);
+        if (ret != SOFTBUS_OK) {
+            TRANS_LOGE(TRANS_CTRL, "parse paging data failed.");
+        }
+        return;
+    }
     AuthHandle authHandle = { .authId = AUTH_INVALID_ID };
-    int32_t ret = TransProxyParseMessage((char *)data, len, &msg, &authHandle);
+    ret = TransProxyParseMessage((char *)data, len, &msg, &authHandle);
     if (((ret == SOFTBUS_AUTH_NOT_FOUND) || (ret == SOFTBUS_DECRYPT_ERR)) &&
         (msg.msgHead.type == PROXYCHANNEL_MSG_TYPE_HANDSHAKE)) {
         TransReportBadKeyEvent(ret, connectionId, seq, len);
@@ -927,8 +982,8 @@ static void TransProxyOnDataReceived(uint32_t connectionId, ConnModule moduleId,
             TRANS_LOGE(TRANS_CTRL, "send bad key msg ret=%{public}d", ret);
             return;
         }
-        char peerBrMac[BT_MAC_LEN] = {0};
-        char udid[UDID_BUF_LEN] = {0};
+        char peerBrMac[BT_MAC_LEN] = { 0 };
+        char udid[UDID_BUF_LEN] = { 0 };
         if (GetBrMacFromConnInfo(connectionId, peerBrMac, BT_MAC_LEN) == SOFTBUS_OK) {
             if (LnnGetUdidByBrMacPacked(peerBrMac, udid, UDID_BUF_LEN) == SOFTBUS_OK) {
                 AuthRemoveDeviceKeyByUdidPacked(udid);
@@ -956,6 +1011,11 @@ int32_t TransProxyTransInit(void)
     g_proxyConnectionList = CreateSoftBusList();
     if (g_proxyConnectionList == NULL) {
         TRANS_LOGE(TRANS_INIT, "create observer list failed");
+        return SOFTBUS_MALLOC_ERR;
+    }
+    g_proxyPagingWaitList = CreateSoftBusList();
+    if (g_proxyPagingWaitList == NULL) {
+        TRANS_LOGE(TRANS_INIT, "create paging handshake list failed");
         return SOFTBUS_MALLOC_ERR;
     }
 
@@ -1154,4 +1214,192 @@ void TransProxyNegoSessionKeySucc(int32_t channelId)
     (void)memset_s(channelInfo->appInfo.sessionKey, sizeof(channelInfo->appInfo.sessionKey), 0,
         sizeof(channelInfo->appInfo.sessionKey));
     SoftBusFree(channelInfo);
+}
+
+int32_t TransPagingLoadSaFail(const uint32_t businessFlag)
+{
+    if (SoftBusMutexLock(&g_proxyPagingWaitList->lock) != SOFTBUS_OK) {
+        TRANS_LOGE(TRANS_CTRL, "lock mutex fail!");
+        return SOFTBUS_LOCK_ERR;
+    }
+    ProxyPagingWaitInfo *item = NULL;
+    LIST_FOR_EACH_ENTRY(item, &g_proxyPagingWaitList->list, ProxyPagingWaitInfo, node) {
+        if (item->businessFlag == businessFlag) {
+            item->isLoadFailed = true;
+            (void)SoftBusMutexUnlock(&g_proxyPagingWaitList->lock);
+            return SOFTBUS_OK;
+        }
+    }
+    TRANS_LOGE(TRANS_CTRL, "not found wait listen, businessFlag=%{public}u", businessFlag);
+    (void)SoftBusMutexUnlock(&g_proxyPagingWaitList->lock);
+    return SOFTBUS_TRANS_PAGING_WAIT_LISTEN_NOT_FOUND;
+}
+
+int32_t TransPagingWaitListenStatus(const uint32_t businessFlag, PagingWaitListenStatus status)
+{
+    if (status < PAGING_WAIT_LISTEN_DONE || status > PAGING_WAIT_LISTEN_LOAD_SA_FAIL) {
+        TRANS_LOGE(TRANS_CTRL, "invalid param! status=%{public}d", status);
+        return SOFTBUS_INVALID_PARAM;
+    }
+    if (SoftBusMutexLock(&g_proxyPagingWaitList->lock) != SOFTBUS_OK) {
+        TRANS_LOGE(TRANS_CTRL, "lock mutex fail!");
+        return SOFTBUS_LOCK_ERR;
+    }
+    ProxyPagingWaitInfo *item = NULL;
+    LIST_FOR_EACH_ENTRY(item, &g_proxyPagingWaitList->list, ProxyPagingWaitInfo, node) {
+        if (item->businessFlag == businessFlag) {
+            switch (status) {
+                case PAGING_WAIT_LISTEN_DONE:
+                    item->isListened = true;
+                    break;
+                case PAGING_WAIT_LISTEN_LOAD_SA_FAIL:
+                    item->isLoadFailed = true;
+                    break;
+                default:
+                    TRANS_LOGE(TRANS_CTRL, "unknown status=%{public}d", status);
+                    break;
+            }
+            (void)SoftBusMutexUnlock(&g_proxyPagingWaitList->lock);
+            return SOFTBUS_OK;
+        }
+    }
+    TRANS_LOGE(TRANS_CTRL, "not found wait listen, businessFlag=%{public}u", businessFlag);
+    (void)SoftBusMutexUnlock(&g_proxyPagingWaitList->lock);
+    return SOFTBUS_TRANS_PAGING_WAIT_LISTEN_NOT_FOUND;
+}
+
+static int32_t AddWaitListInfo(const uint32_t businessFlag)
+{
+    ProxyPagingWaitInfo *info = (ProxyPagingWaitInfo *)SoftBusCalloc(sizeof(ProxyPagingWaitInfo));
+    if (info == NULL) {
+        TRANS_LOGE(TRANS_CTRL, "calloc ProxyPagingWaitInfo fail");
+        return SOFTBUS_MALLOC_ERR;
+    }
+    info->businessFlag = businessFlag;
+    info->isListened = false;
+    info->isLoadFailed = false;
+    info->retryTime = WAIT_LISTEN_CHECK_NUM;
+    if (SoftBusMutexLock(&g_proxyPagingWaitList->lock) != SOFTBUS_OK) {
+        TRANS_LOGE(TRANS_CTRL, "lock mutex fail!");
+        SoftBusFree(info);
+        return SOFTBUS_LOCK_ERR;
+    }
+    ListAdd(&(g_proxyPagingWaitList->list), &(info->node));
+    TRANS_LOGE(TRANS_CTRL, "add wait listen success, businessFlag=%{public}u", businessFlag);
+    (void)SoftBusMutexUnlock(&g_proxyPagingWaitList->lock);
+    return SOFTBUS_OK;
+}
+
+static int32_t DelWaitListenByFlag(uint32_t businessFlag)
+{
+    if (SoftBusMutexLock(&g_proxyPagingWaitList->lock) != SOFTBUS_OK) {
+        TRANS_LOGE(TRANS_CTRL, "lock mutex fail!");
+        return SOFTBUS_LOCK_ERR;
+    }
+    ProxyPagingWaitInfo *item = NULL;
+    LIST_FOR_EACH_ENTRY(item, &g_proxyPagingWaitList->list, ProxyPagingWaitInfo, node) {
+        if (item->businessFlag == businessFlag) {
+            ListDelete(&item->node);
+            SoftBusFree(item);
+            (void)SoftBusMutexUnlock(&g_proxyPagingWaitList->lock);
+            return SOFTBUS_OK;
+        }
+    }
+    TRANS_LOGE(TRANS_CTRL, "not found wait listen, businessFlag=%{public}u", businessFlag);
+    (void)SoftBusMutexUnlock(&g_proxyPagingWaitList->lock);
+    return SOFTBUS_TRANS_PAGING_WAIT_LISTEN_NOT_FOUND;
+}
+
+static CheckResultType CheckListenResult(uint32_t businessFlag)
+{
+    if (SoftBusMutexLock(&g_proxyPagingWaitList->lock) != SOFTBUS_OK) {
+        TRANS_LOGE(TRANS_CTRL, "lock mutex fail!");
+        return WAIT_LISTEN_CHECK_INVALID;
+    }
+    ProxyPagingWaitInfo *item = NULL;
+    LIST_FOR_EACH_ENTRY(item, &g_proxyPagingWaitList->list, ProxyPagingWaitInfo, node) {
+        if (item->businessFlag == businessFlag) {
+            if (item->isListened) {
+                (void)SoftBusMutexUnlock(&g_proxyPagingWaitList->lock);
+                return WAIT_LISTEN_CHECK_SUCCESS;
+            }
+            if (item->isLoadFailed) {
+                (void)SoftBusMutexUnlock(&g_proxyPagingWaitList->lock);
+                return WAIT_LISTEN_CHECK_LOAD_FAIL;
+            }
+            if (item->retryTime > 0) {
+                item->retryTime--;
+                (void)SoftBusMutexUnlock(&g_proxyPagingWaitList->lock);
+                return WAIT_LISTEN_CHECK_RETRY;
+            }
+            if (item->retryTime <= 0) {
+                (void)SoftBusMutexUnlock(&g_proxyPagingWaitList->lock);
+                return WAIT_LISTEN_CHECK_TIMEOUT;
+            }
+        }
+    }
+    (void)SoftBusMutexUnlock(&g_proxyPagingWaitList->lock);
+    return WAIT_LISTEN_CHECK_INVALID;
+}
+
+static void CheckPagingListen(void *para)
+{
+    uint32_t *businessFlag = (uint32_t *)para;
+    if (businessFlag == NULL) {
+        TRANS_LOGE(TRANS_CTRL, "para invalid");
+        return;
+    }
+    CheckResultType ret = CheckListenResult(*businessFlag);
+    if (ret == WAIT_LISTEN_CHECK_RETRY) {
+        if (LnnAsyncCallbackDelayHelper(GetLooper(LOOP_TYPE_DEFAULT), CheckPagingListen, (void *)businessFlag,
+            WAIT_LISTEN_CHECK_DELAY) != SOFTBUS_OK) {
+            TRANS_LOGE(TRANS_CTRL, "lnn async fail.");
+            TransWaitListenResult(*businessFlag, SOFTBUS_TRANS_PAGING_ASYNC_FAIL);
+            goto EXIT_ERR;
+        }
+        return;
+    }
+    if (ret == WAIT_LISTEN_CHECK_SUCCESS) {
+        TransWaitListenResult(*businessFlag, SOFTBUS_OK);
+        goto EXIT_ERR;
+    }
+    if (ret == WAIT_LISTEN_CHECK_LOAD_FAIL) {
+        TransWaitListenResult(*businessFlag, SOFTBUS_TRANS_PAGING_WAIT_LISTEN_LOAD_FAIL);
+        goto EXIT_ERR;
+    }
+    if (ret == WAIT_LISTEN_CHECK_TIMEOUT) {
+        TRANS_LOGE(TRANS_CTRL, "check wait listen time out");
+        TransWaitListenResult(*businessFlag, SOFTBUS_TRANS_PAGING_WAIT_LISTEN_TIMEOUT);
+        goto EXIT_ERR;
+    }
+    TRANS_LOGE(TRANS_CTRL, "wait listen check fail, requestId=%{public}u", *businessFlag);
+    TransWaitListenResult(*businessFlag, ret);
+    goto EXIT_ERR;
+EXIT_ERR:
+    (void)DelWaitListenByFlag(*businessFlag);
+    SoftBusFree(businessFlag);
+}
+
+int32_t TransCheckPagingListenState(uint32_t businessFlag)
+{
+    if (AddWaitListInfo(businessFlag) != SOFTBUS_OK) {
+        TRANS_LOGE(TRANS_CTRL, "linkInfo memcpy fail");
+        return SOFTBUS_MEM_ERR;
+    }
+    uint32_t *flag = (uint32_t *)SoftBusCalloc(sizeof(uint32_t));
+    if (flag == NULL) {
+        TRANS_LOGE(TRANS_CTRL, "calloc flag fail");
+        (void)DelWaitListenByFlag(businessFlag);
+        TransWaitListenResult(businessFlag, SOFTBUS_MALLOC_ERR);
+        return SOFTBUS_MALLOC_ERR;
+    }
+    *flag = businessFlag;
+    if (LnnAsyncCallbackDelayHelper(GetLooper(LOOP_TYPE_DEFAULT), CheckPagingListen, (void *)flag,
+                                    WAIT_LISTEN_CHECK_DELAY) != SOFTBUS_OK) {
+        TRANS_LOGE(TRANS_CTRL, "lnn async fail.");
+        (void)DelWaitListenByFlag(businessFlag);
+        SoftBusFree(flag);
+        return SOFTBUS_TRANS_PAGING_ASYNC_FAIL;
+    }
+    return SOFTBUS_OK;
 }

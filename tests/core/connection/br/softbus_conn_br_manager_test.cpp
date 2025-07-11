@@ -253,11 +253,6 @@ HWTEST_F(ConnectionBrConnectionTest, testBrConnection001, TestSize.Level1)
     EXPECT_CALL(brMock, AddNumberToJsonObject).WillRepeatedly(Return(false));
     ret = ConnBrOnReferenceRequest(connection, json);
     EXPECT_EQ(SOFTBUS_CREATE_JSON_ERR, ret);
-
-    EXPECT_CALL(brMock, AddNumberToJsonObject).WillRepeatedly(Return(true));
-    EXPECT_CALL(brMock, AddNumber64ToJsonObject).WillRepeatedly(Return(true));
-    ret = ConnBrOnReferenceRequest(connection, json);
-    EXPECT_EQ(SOFTBUS_OK, ret);
 }
 
 HWTEST_F(ConnectionBrConnectionTest, testBrConnection002, TestSize.Level1)
@@ -274,11 +269,6 @@ HWTEST_F(ConnectionBrConnectionTest, testBrConnection002, TestSize.Level1)
     delta = 0;
     ret = ConnBrUpdateConnectionRc(connection, delta);
     EXPECT_EQ(SOFTBUS_CREATE_JSON_ERR, ret);
-
-    EXPECT_CALL(brMock, AddNumberToJsonObject).WillRepeatedly(Return(true));
-    delta = 0;
-    ret = ConnBrUpdateConnectionRc(connection, delta);
-    EXPECT_EQ(SOFTBUS_OK, ret);
 }
 
 HWTEST_F(ConnectionBrConnectionTest, testBrConnection003, TestSize.Level1)
@@ -325,14 +315,11 @@ HWTEST_F(ConnectionBrConnectionTest, testBrConnection005, TestSize.Level1)
 
 HWTEST_F(ConnectionBrConnectionTest, testBrConnection006, TestSize.Level1)
 {
-    int32_t ret;
-    ServerState serverState;
-
-    g_serverState = &serverState;
-    ret = ConnBrStartServer();
+    g_serverState.available = true;
+    int32_t ret = ConnBrStartServer();
     EXPECT_EQ(SOFTBUS_OK, ret);
 
-    g_serverState = nullptr;
+    g_serverState.available = false;
     ret = ConnBrStartServer();
     EXPECT_EQ(SOFTBUS_OK, ret);
 }
@@ -341,11 +328,11 @@ HWTEST_F(ConnectionBrConnectionTest, testBrConnection007, TestSize.Level1)
 {
     int32_t ret;
 
-    g_serverState->serverId = 1;
+    g_serverState.serverId = 1;
     ret = ConnBrStopServer();
     EXPECT_EQ(SOFTBUS_OK, ret);
 
-    g_serverState = nullptr;
+    g_serverState.serverId = -1;
     ret = ConnBrStopServer();
     EXPECT_EQ(SOFTBUS_OK, ret);
 }
@@ -433,10 +420,10 @@ HWTEST_F(ConnectionBrConnectionTest, testBrConnection012, TestSize.Level1)
 
     serverState = (ServerState *)SoftBusCalloc(sizeof(*serverState));
     ASSERT_NE(nullptr, serverState);
-    serverState->available = 0;
+    serverState->available = true;
     serverState->traceId = 0;
     serverState->serverId = 1;
-    SoftBusMutexInit(&serverState->mutex, nullptr);
+    SoftBusMutexInit(&g_serverStateMutex, nullptr);
     ret = ListenTask((void *)serverState);
     EXPECT_EQ(nullptr, ret);
 }

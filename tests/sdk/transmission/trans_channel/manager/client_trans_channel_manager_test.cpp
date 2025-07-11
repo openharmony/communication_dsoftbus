@@ -232,4 +232,32 @@ HWTEST_F(ClientTransChannelManagerTest, ClientTransChannelSendFileTest001, TestS
     ret = ClientTransChannelSendFile(channelId, CHANNEL_TYPE_BUTT, sFileList, dFileList, fileCnt);
     EXPECT_EQ(SOFTBUS_TRANS_CHANNEL_TYPE_INVALID, ret);
 }
+
+/**
+ * @tc.name: ClientTransChannelAsyncSendMessageTest001
+ * @tc.desc: client trans channel send async message test, use the wrong or normal parameter.
+ * @tc.type: FUNC
+ * @tc.require:
+ */
+HWTEST_F(ClientTransChannelManagerTest, ClientTransChannelAsyncSendMessageTest001, TestSize.Level1)
+{
+    int32_t channelId = 1;
+    const char *data = "test";
+    uint16_t dataSeq = 1;
+
+    int32_t ret = ClientTransChannelAsyncSendMessage(channelId, CHANNEL_TYPE_AUTH, nullptr, TEST_DATA_LENGTH, dataSeq);
+    EXPECT_EQ(SOFTBUS_INVALID_PARAM, ret);
+
+    ret = ClientTransChannelAsyncSendMessage(channelId, CHANNEL_TYPE_AUTH, data, 0, dataSeq);
+    EXPECT_EQ(SOFTBUS_INVALID_PARAM, ret);
+
+    ret = ClientTransChannelAsyncSendMessage(channelId, CHANNEL_TYPE_AUTH, data, TEST_DATA_LENGTH, 0);
+    EXPECT_EQ(SOFTBUS_INVALID_PARAM, ret);
+
+    ret = ClientTransChannelAsyncSendMessage(channelId, CHANNEL_TYPE_PROXY, data, TEST_DATA_LENGTH, dataSeq);
+    EXPECT_EQ(SOFTBUS_TRANS_PROXY_CHANNEL_NOT_FOUND, ret);
+
+    ret = ClientTransChannelAsyncSendMessage(channelId, CHANNEL_TYPE_TCP_DIRECT, data, TEST_DATA_LENGTH, dataSeq);
+    EXPECT_EQ(SOFTBUS_TRANS_INVALID_CHANNEL_TYPE, ret);
+}
 } // namespace OHOS

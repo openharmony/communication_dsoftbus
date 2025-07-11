@@ -45,8 +45,6 @@ typedef struct {
 
 typedef struct {
     uint32_t traceId;
-    // protect variable access below
-    SoftBusMutex mutex;
     bool available;
     int32_t serverId;
 } ServerState;
@@ -66,7 +64,9 @@ static int BrCompareConnectionLooperEventFunc(const SoftBusMessage *msg, void *a
 
 static ConnBrEventListener g_eventListener = { 0 };
 static SppSocketDriver *g_sppDriver = NULL;
-static ServerState *g_serverState = NULL;
+static ServerState g_serverState = {0, false, -1};
+static SoftBusMutex g_serverStateMutex = {0};
+
 static SoftBusHandlerWrapper g_brConnectionAsyncHandler = {
     .handler = {
         .name = (char *)"BrConnectionAsyncHandler",
@@ -684,52 +684,70 @@ int32_t ConnBrOnReferenceResponse(ConnBrConnection *connection, const cJSON *jso
     return SOFTBUS_OK;
 }
 
-static int32_t CheckBrServerStateAndOpenSppServer(ServerState *serverState)
+static void ResetServerState(uint32_t traceId)
+{
+    int32_t status = SoftBusMutexLock(&g_serverStateMutex);
+    CONN_CHECK_AND_RETURN_LOGE(status == SOFTBUS_OK,
+        CONN_BR, "lock failed, traceId=%{public}u", traceId);
+    if (traceId != g_serverState.traceId) {
+        CONN_LOGE(CONN_BR, "not reset, traceId=%{public}u, globalTraceId=%{public}u",
+            traceId, g_serverState.traceId);
+        (void)SoftBusMutexUnlock(&g_serverStateMutex);
+        return;
+    }
+    g_serverState.traceId = 0;
+    g_serverState.available = false;
+    g_serverState.serverId = -1;
+    (void)SoftBusMutexUnlock(&g_serverStateMutex);
+}
+
+static int32_t CheckBrServerStateAndOpenSppServer(int32_t *serverId, uint32_t traceId)
 {
 #define BR_ACCEPET_WAIT_TIME 1000
     const char *name = "BrManagerInsecure";
-    int32_t status = SoftBusMutexLock(&serverState->mutex);
+    int32_t status = SoftBusMutexLock(&g_serverStateMutex);
     if (status != SOFTBUS_OK) {
         CONN_LOGE(CONN_BR, "lock failed, exit listen task, traceId=%{public}u, error=%{public}d",
-            serverState->traceId, status);
+            traceId, status);
         return SOFTBUS_LOCK_ERR;
     }
-    if (!serverState->available) {
-        CONN_LOGW(CONN_BR, "server closed, exit listen task, traceId=%{public}u", serverState->traceId);
-        SoftBusMutexUnlock(&serverState->mutex);
+    if (!g_serverState.available || traceId != g_serverState.traceId) {
+        CONN_LOGW(CONN_BR, "available=%{public}d, traceId=%{public}u, globalTraceId=%{public}u,"
+            " exit listen task", g_serverState.available, traceId, g_serverState.traceId);
+        (void)SoftBusMutexUnlock(&g_serverStateMutex);
         return SOFTBUS_INVALID_PARAM;
     }
-    if (serverState->serverId != -1) {
-        g_sppDriver->CloseSppServer(serverState->serverId);
-        serverState->serverId = -1;
+    if (g_serverState.serverId != -1) {
+        g_sppDriver->CloseSppServer(g_serverState.serverId);
+        g_serverState.serverId = -1;
     }
-    (void)SoftBusMutexUnlock(&serverState->mutex);
-    int32_t serverId = g_sppDriver->OpenSppServer(name, (int32_t)strlen(name), UUID, 0);
-    if (serverId == -1) {
+    (void)SoftBusMutexUnlock(&g_serverStateMutex);
+    int32_t serverFd = g_sppDriver->OpenSppServer(name, (int32_t)strlen(name), UUID, 0);
+    if (serverFd == -1) {
         CONN_LOGE(CONN_BR,
             "open br server failed, retry after some times, retryDelay=%{public}d, traceId=%{public}u",
-            BR_ACCEPET_WAIT_TIME, serverState->traceId);
+            BR_ACCEPET_WAIT_TIME, traceId);
         SoftBusSleepMs(BR_ACCEPET_WAIT_TIME);
         return SOFTBUS_CONN_BR_RETRY_OPEN_SERVER;
     }
-    CONN_LOGI(CONN_BR, "open br server ok, traceId=%{public}u, serverId=%{public}d", serverState->traceId,
-        serverId);
-    status = SoftBusMutexLock(&serverState->mutex);
+    CONN_LOGI(CONN_BR, "open br server ok, traceId=%{public}u, serverId=%{public}d", traceId, serverFd);
+    status = SoftBusMutexLock(&g_serverStateMutex);
     if (status != SOFTBUS_OK) {
         CONN_LOGE(CONN_BR, "lock failed, exit listen task, traceId=%{public}u, error=%{public}d",
-            serverState->traceId, status);
-        g_sppDriver->CloseSppServer(serverId);
+            traceId, status);
+        g_sppDriver->CloseSppServer(serverFd);
         return SOFTBUS_LOCK_ERR;
     }
-    if (!serverState->available) {
+    if (!g_serverState.available) {
         CONN_LOGW(CONN_BR, "server closed during create socket period, exit listen task. traceId=%{public}u",
-            serverState->traceId);
-        g_sppDriver->CloseSppServer(serverId);
-        (void)SoftBusMutexUnlock(&serverState->mutex);
+            traceId);
+        g_sppDriver->CloseSppServer(serverFd);
+        (void)SoftBusMutexUnlock(&g_serverStateMutex);
         return SOFTBUS_INVALID_PARAM;
     }
-    serverState->serverId = serverId;
-    (void)SoftBusMutexUnlock(&serverState->mutex);
+    g_serverState.serverId = serverFd;
+    *serverId = serverFd;
+    (void)SoftBusMutexUnlock(&g_serverStateMutex);
     return SOFTBUS_OK;
 }
 
@@ -738,31 +756,30 @@ static void *ListenTask(void *arg)
     CONN_CHECK_AND_RETURN_RET_LOGW(arg != NULL, NULL, CONN_BR, "invalid param");
     ServerState *serverState = (ServerState *)arg;
     CONN_CHECK_AND_RETURN_RET_LOGE(serverState != NULL, NULL, CONN_BLE, "serverState is null");
-    CONN_LOGI(CONN_BR, "traceId=%{public}u", serverState->traceId);
+    uint32_t traceId = serverState->traceId;
+    SoftBusFree(serverState);
+    CONN_LOGI(CONN_BR, "traceId=%{public}u", traceId);
     int32_t status = SOFTBUS_OK;
     while (true) {
-        status= CheckBrServerStateAndOpenSppServer(serverState);
+        int32_t serverId = -1;
+        status= CheckBrServerStateAndOpenSppServer(&serverId, traceId);
         if (status == SOFTBUS_CONN_BR_RETRY_OPEN_SERVER) {
             continue;
         }
         if (status != SOFTBUS_OK) {
             break;
         }
-        CONN_CHECK_AND_RETURN_RET_LOGE(SoftBusMutexLock(&serverState->mutex) == SOFTBUS_OK,
-            NULL, CONN_BLE, "lock failed");
-        int32_t serverId = serverState->serverId;
-        (void)SoftBusMutexUnlock(&serverState->mutex);
         while (true) {
             int32_t socketHandle = g_sppDriver->Accept(serverId);
             if (socketHandle == SOFTBUS_CONN_BR_SPP_SERVER_ERR) {
-                CONN_LOGE(CONN_BR, "accept failed, traceId=%{public}u, serverId=%{public}d", serverState->traceId,
+                CONN_LOGE(CONN_BR, "accept failed, traceId=%{public}u, serverId=%{public}d", traceId,
                     serverId);
                 break;
             }
             ServerServeContext *ctx = (ServerServeContext *)SoftBusCalloc(sizeof(ServerServeContext));
             if (ctx == NULL) {
                 CONN_LOGE(CONN_BR, "calloc serve context failed, traceId=%{public}u, serverId=%{public}d, "
-                    "socketHandle=%{public}d", serverState->traceId, serverId, socketHandle);
+                    "socketHandle=%{public}d", traceId, serverId, socketHandle);
                 g_sppDriver->DisConnect(socketHandle);
                 continue;
             }
@@ -770,71 +787,69 @@ static void *ListenTask(void *arg)
             status = ConnStartActionAsync(ctx, StartServerServe, NULL);
             if (status != SOFTBUS_OK) {
                 CONN_LOGE(CONN_BR, "start serve thread failed, traceId=%{public}u, serverId=%{public}d, "
-                    "socket=%{public}d, error=%{public}d", serverState->traceId, serverId, socketHandle, status);
+                    "socket=%{public}d, error=%{public}d", traceId, serverId, socketHandle, status);
                 SoftBusFree(ctx);
                 g_sppDriver->DisConnect(socketHandle);
                 continue;
             }
             CONN_LOGI(CONN_BR, "accept incoming connection, traceId=%{public}u, serverId=%{public}d, socket=%{public}d",
-                serverState->traceId, serverId, socketHandle);
+                traceId, serverId, socketHandle);
         }
     }
-    CONN_LOGI(CONN_BR, "br server listen exit, traceId=%{public}u", serverState->traceId);
-    (void)SoftBusMutexDestroy(&serverState->mutex);
-    SoftBusFree(serverState);
+    CONN_LOGI(CONN_BR, "br server listen exit, traceId=%{public}u", traceId);
+    ResetServerState(traceId);
     return NULL;
 }
 
 int32_t ConnBrStartServer(void)
 {
     static uint32_t traceIdGenerator = 0;
-
-    if (g_serverState != NULL) {
-        CONN_LOGW(CONN_BR, "server already started, skip");
+    uint32_t traceId = 0;
+    int32_t status = SoftBusMutexLock(&g_serverStateMutex);
+    CONN_CHECK_AND_RETURN_RET_LOGE(status == SOFTBUS_OK, SOFTBUS_LOCK_ERR, CONN_BR,
+        "lock failed, err=%{public}d", status);
+    if (g_serverState.available) {
+        CONN_LOGI(CONN_BR, "already start service, traceId=%{public}u", g_serverState.traceId);
+        (void)SoftBusMutexUnlock(&g_serverStateMutex);
         return SOFTBUS_OK;
     }
+    g_serverState.available = true;
+    g_serverState.serverId = -1;
+    g_serverState.traceId = traceIdGenerator++;
+    traceId = g_serverState.traceId;
+    (void)SoftBusMutexUnlock(&g_serverStateMutex);
+
     ServerState *serverState = (ServerState *)SoftBusCalloc(sizeof(ServerState));
-    CONN_CHECK_AND_RETURN_RET_LOGE(serverState != NULL, SOFTBUS_MEM_ERR, CONN_BR, "calloc server state failed");
-    serverState->traceId = traceIdGenerator++;
-    int32_t status = SoftBusMutexInit(&serverState->mutex, NULL);
-    if (status != SOFTBUS_OK) {
-        CONN_LOGE(CONN_BR, "init mutex failed, error=%{public}d", status);
-        SoftBusFree(serverState);
-        return status;
+    if (serverState == NULL) {
+        CONN_LOGE(CONN_BR, "malloc serverState failed");
+        ResetServerState(traceId);
+        return SOFTBUS_MALLOC_ERR;
     }
-    serverState->available = true;
-    serverState->serverId = -1;
+    serverState->traceId = traceId;
     status = ConnStartActionAsync(serverState, ListenTask, "BrListen_Tsk");
     if (status != SOFTBUS_OK) {
         CONN_LOGE(CONN_BR, "start br server failed: error=%{public}d", status);
-        (void)SoftBusMutexDestroy(&serverState->mutex);
         SoftBusFree(serverState);
+        ResetServerState(traceId);
         return status;
     }
-    g_serverState = serverState;
-    CONN_LOGI(CONN_BR, "start ok, traceId=%{public}u", serverState->traceId);
+    CONN_LOGI(CONN_BR, "start ok, traceId=%{public}u", traceId);
     return SOFTBUS_OK;
 }
 
 int32_t ConnBrStopServer(void)
 {
-    if (g_serverState == NULL) {
-        CONN_LOGE(CONN_BR, "server not started yet, skip");
-        return SOFTBUS_OK;
+    int32_t status = SoftBusMutexLock(&g_serverStateMutex);
+    CONN_CHECK_AND_RETURN_RET_LOGE(status == SOFTBUS_OK, SOFTBUS_LOCK_ERR, CONN_BR,
+        "lock failed, err=%{public}d", status);
+    CONN_LOGI(CONN_BR, "traceId=%{public}u", g_serverState.traceId);
+    g_serverState.available = false;
+    g_serverState.traceId = 0;
+    if (g_serverState.serverId != -1) {
+        g_sppDriver->CloseSppServer(g_serverState.serverId);
+        g_serverState.serverId = -1;
     }
-    int32_t status = SoftBusMutexLock(&g_serverState->mutex);
-    if (status != SOFTBUS_OK) {
-        CONN_LOGE(CONN_BR, "lock failed, error=%{public}d", status);
-        return status;
-    }
-    CONN_LOGI(CONN_BR, "traceId=%{public}u", g_serverState->traceId);
-    g_serverState->available = false;
-    if (g_serverState->serverId != -1) {
-        g_sppDriver->CloseSppServer(g_serverState->serverId);
-        g_serverState->serverId = -1;
-    }
-    (void)SoftBusMutexUnlock(&g_serverState->mutex);
-    g_serverState = NULL;
+    (void)SoftBusMutexUnlock(&g_serverStateMutex);
     return SOFTBUS_OK;
 }
 
@@ -1013,6 +1028,9 @@ int32_t ConnBrConnectionMuduleInit(SoftBusLooper *looper, SppSocketDriver *sppDr
     int32_t status = InitProperty();
     CONN_CHECK_AND_RETURN_RET_LOGE(status == SOFTBUS_OK, SOFTBUS_INVALID_PARAM, CONN_INIT,
         "br connection init failed: init property failed");
+    status = SoftBusMutexInit(&g_serverStateMutex, NULL);
+    CONN_CHECK_AND_RETURN_RET_LOGE(status == SOFTBUS_OK, SOFTBUS_LOCK_ERR, CONN_INIT,
+        "br connection init failed: init lock failed");
     g_brConnectionAsyncHandler.handler.looper = looper;
     g_sppDriver = sppDriver;
     g_eventListener = *listener;

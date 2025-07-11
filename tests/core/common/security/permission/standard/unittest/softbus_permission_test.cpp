@@ -442,4 +442,36 @@ HWTEST_F(SoftbusPermissionTest, SoftBusCheckIsCollabApp003, TestSize.Level0)
     EXPECT_FALSE(result);
 }
 
+/**
+ * @tc.name:CheckLnnPermissionTest001
+ * @tc.desc: CheckLnnPermission param error
+ * @tc.type: FUNC
+ * @tc.require:
+ */
+HWTEST_F(SoftbusPermissionTest, CheckLnnPermissionTest001, TestSize.Level1)
+{
+    const char interfaceName[] = "SERVER_GET_NODE_KEY_INFO";
+    const char processName[] = "device_manager";
+    int32_t ret = CheckLnnPermission(nullptr, nullptr);
+    EXPECT_EQ(ret, SOFTBUS_INVALID_PARAM);
+    ret = CheckLnnPermission(interfaceName, nullptr);
+    EXPECT_EQ(ret, SOFTBUS_INVALID_PARAM);
+    ret = CheckLnnPermission(nullptr, processName);
+    EXPECT_EQ(ret, SOFTBUS_INVALID_PARAM);
+    ret = CheckLnnPermission(interfaceName, processName);
+    EXPECT_EQ(ret, SOFTBUS_INVALID_PARAM);
+    LnnDeinitPermission();
+}
+
+/**
+ * @tc.name:LnnInitPermissionTest001
+ * @tc.desc: LnnInitPermission func test
+ * @tc.type: FUNC
+ * @tc.require:
+ */
+HWTEST_F(SoftbusPermissionTest, LnnInitPermissionTest001, TestSize.Level1)
+{
+    int32_t ret = LnnInitPermission();
+    EXPECT_EQ(ret, SOFTBUS_OK);
+}
 } // namespace OHOS

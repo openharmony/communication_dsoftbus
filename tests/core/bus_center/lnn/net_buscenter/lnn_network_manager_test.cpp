@@ -348,9 +348,12 @@ HWTEST_F(LNNNetworkManagerMockTest, ON_DEVICE_BOUND_TEST_001, TestSize.Level1)
     EXPECT_CALL(managerMock, SoftbusGetConfig).WillRepeatedly(Return(SOFTBUS_OK));
     EXPECT_CALL(managerMock, DfxRecordTriggerTime(_, _)).WillRepeatedly(Return());
     EXPECT_CALL(managerMock, LnnGetOnlineStateById).WillRepeatedly(Return(true));
-    (void)OnDeviceBound(udid, groupInfo);
+    EXPECT_CALL(managerMock, LnnAsyncCallbackDelayHelper).WillRepeatedly(Return(SOFTBUS_OK));
+    EXPECT_NO_FATAL_FAILURE(OnDeviceBound(udid, groupInfo));
+    EXPECT_CALL(managerMock, LnnAsyncCallbackDelayHelper).WillRepeatedly(Return(SOFTBUS_ERR));
+    EXPECT_NO_FATAL_FAILURE(OnDeviceBound(udid, groupInfo));
     EXPECT_CALL(managerMock, LnnGetOnlineStateById).WillRepeatedly(Return(false));
-    (void)OnDeviceBound(udid, groupInfo);
+    EXPECT_NO_FATAL_FAILURE(OnDeviceBound(udid, groupInfo));
 }
 
 HWTEST_F(LNNNetworkManagerMockTest, CREAT_NETIFMGR_TEST_001, TestSize.Level1)

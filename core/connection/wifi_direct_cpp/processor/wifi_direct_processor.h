@@ -18,6 +18,7 @@
 #include "conn_log.h"
 #include "dfx/processor_snapshot.h"
 
+#include "event/wifi_direct_event_dispatcher.h"
 #include "wifi_direct_types.h"
 
 namespace OHOS::SoftBus {
@@ -34,7 +35,11 @@ public:
         executor_ = executor;
     }
 
-    virtual void Run() = 0;
+    virtual void Run()
+    {
+        CONN_LOGI(CONN_WIFI_DIRECT, "base class run");
+        throw ProcessorTerminate();
+    }
 
     void SetRejectNegotiateData()
     {

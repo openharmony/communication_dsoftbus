@@ -25,6 +25,116 @@ ohos_unittest("TransUdpNegoTest") {
   ]
 
   include_dirs = [
+    "$dsoftbus_core_path/adapter/bus_center/include",
+    "$dsoftbus_core_path/authentication/include",
+    "$dsoftbus_core_path/authentication/interface",
+    "$dsoftbus_core_path/bus_center/interface",
+    "$dsoftbus_core_path/bus_center/lnn/lane_hub/lane_manager/include",
+    "$dsoftbus_core_path/bus_center/lnn/net_builder/include",
+    "$dsoftbus_core_path/bus_center/lnn/net_ledger/common/include",
+    "$dsoftbus_core_path/bus_center/lnn/net_ledger/distributed_ledger/include",
+    "$dsoftbus_core_path/bus_center/service/include",
+    "$dsoftbus_core_path/bus_center/utils/include",
+    "$dsoftbus_core_path/common/security/permission/include",
+    "$dsoftbus_core_path/connection/wifi_direct_cpp",
+    "$dsoftbus_core_path/discovery/interface",
+    "$dsoftbus_core_path/discovery/manager/include",
+    "$dsoftbus_core_path/transmission/common/include",
+    "$dsoftbus_core_path/transmission/session/cpp/include",
+    "$dsoftbus_core_path/transmission/session/include",
+    "$dsoftbus_core_path/transmission/trans_channel/common/include",
+    "$dsoftbus_core_path/transmission/trans_channel/manager/include",
+    "$dsoftbus_core_path/transmission/trans_channel/qos/interface",
+    "$dsoftbus_core_path/transmission/trans_channel/udp_negotiation/include",
+    "$dsoftbus_core_path/transmission/trans_channel/udp_negotiation/src",
+    "$dsoftbus_dfx_path/interface/include/form",
+    "$dsoftbus_root_path/core/adapter/bus_center/include",
+    "$dsoftbus_root_path/core/frame/init/include",
+    "$dsoftbus_root_path/interfaces/kits/connect",
+    "$dsoftbus_root_path/tests/core/transmission/trans_channel/udp_negotiation/mock",
+    "$dsoftbus_root_path/tests/interface/enhance",
+    "unittest/common/",
+  ]
+
+  deps = [
+    "$dsoftbus_core_path/common:softbus_utils",
+    "$dsoftbus_core_path/frame:softbus_server",
+    "$dsoftbus_root_path/adapter:softbus_adapter",
+    "$dsoftbus_root_path/core/connection/wifi_direct_cpp:wifi_direct",
+  ]
+
+  external_deps = [
+    "c_utils:utils",
+    "dsoftbus:softbus_client",
+    "hilog:libhilog",
+    "googletest:gmock_main",
+    "googletest:gtest_main",
+  ]
+}
+
+ohos_unittest("TransUdpNegotiationTest") {
+  module_out_path = module_output_path
+  sources = [ "trans_udp_negotiation_test.cpp" ]
+
+  include_dirs = [
+    "$dsoftbus_core_path/authentication/interface",
+    "$dsoftbus_core_path/bus_center/interface",
+    "$dsoftbus_core_path/bus_center/lnn/lane_hub/lane_manager/include",
+    "$dsoftbus_core_path/bus_center/lnn/net_ledger/common/include",
+    "$dsoftbus_core_path/discovery/event_manager/include",
+    "$dsoftbus_core_path/discovery/interface",
+    "$dsoftbus_core_path/discovery/manager/include",
+    "$dsoftbus_core_path/transmission/session/include",
+    "$dsoftbus_core_path/transmission/trans_channel/manager/include",
+    "$dsoftbus_core_path/transmission/trans_channel/udp_negotiation/include",
+    "$dsoftbus_dfx_path/interface/include/form",
+    "$dsoftbus_sdk_path/transmission/session/include",
+    "$dsoftbus_test_path/sdk/common/include",
+  ]
+
+  deps = [
+    "$dsoftbus_core_path/common:softbus_utils",
+    "$dsoftbus_core_path/frame:softbus_server",
+    "$dsoftbus_root_path/adapter:softbus_adapter",
+    "$dsoftbus_test_path/sdk:softbus_client_static",
+    "$dsoftbus_test_path/sdk/common:softbus_access_token_test",
+  ]
+
+  external_deps = [
+    "c_utils:utils",
+    "hilog:libhilog",
+  ]
+}
+
+ohos_unittest("TransUdpNegotiationExchangeTest") {
+  module_out_path = module_output_path
+  sources = [ "trans_udp_negotiation_exchange_test.cpp" ]
+
+  include_dirs = [
+    "$dsoftbus_core_path/transmission/trans_channel/udp_negotiation/include",
+  ]
+
+  deps = [
+    "$dsoftbus_core_path/common:softbus_utils",
+    "$dsoftbus_core_path/frame:softbus_server",
+    "$dsoftbus_root_path/adapter:softbus_adapter",
+  ]
+
+  external_deps = [
+    "c_utils:utils",
+    "hilog:libhilog",
+  ]
+}
+
+ohos_unittest("TransUdpNegoStaticTest") {
+  module_out_path = module_output_path
+  sources = [
+    "trans_udp_static_mock_test.cpp",
+    "mock/trans_udp_nego_static_test_mock.cpp",
+    "$dsoftbus_root_path/core/frame/init/src/g_enhance_lnn_func.c",
+  ]
+
+  include_dirs = [
     "unittest/common/",
 
     "$dsoftbus_core_path/adapter/bus_center/include",
@@ -76,85 +186,22 @@ ohos_unittest("TransUdpNegoTest") {
   ]
 }
 
-ohos_unittest("TransUdpNegotiationTest") {
-  module_out_path = module_output_path
-  sources = [ "trans_udp_negotiation_test.cpp" ]
-
-  include_dirs = [
-    "$dsoftbus_core_path/authentication/interface",
-
-    "$dsoftbus_core_path/bus_center/interface",
-    "$dsoftbus_core_path/bus_center/lnn/lane_hub/lane_manager/include",
-    "$dsoftbus_core_path/bus_center/lnn/net_ledger/common/include",
-
-    "$dsoftbus_core_path/discovery/manager/include",
-    "$dsoftbus_core_path/discovery/interface",
-    "$dsoftbus_core_path/discovery/event_manager/include",
-
-    "$dsoftbus_core_path/transmission/session/include",
-    "$dsoftbus_core_path/transmission/trans_channel/manager/include",
-    "$dsoftbus_core_path/transmission/trans_channel/udp_negotiation/include",
-
-    "$dsoftbus_sdk_path/transmission/session/include",
-
-    "$dsoftbus_test_path/sdk/common/include",
-  ]
-
-  deps = [
-    "$dsoftbus_core_path/common:softbus_utils",
-    "$dsoftbus_core_path/frame:softbus_server",
-    "$dsoftbus_root_path/adapter:softbus_adapter",
-    "$dsoftbus_test_path/sdk:softbus_client_static",
-    "$dsoftbus_test_path/sdk/common:softbus_access_token_test",
-  ]
-
-  external_deps = [
-    "c_utils:utils",
-    "hilog:libhilog",
-  ]
-}
-
-ohos_unittest("TransUdpNegotiationExchangeTest") {
-  module_out_path = module_output_path
-  sources = [ "trans_udp_negotiation_exchange_test.cpp" ]
-
-  include_dirs = [
-    "$dsoftbus_core_path/transmission/trans_channel/udp_negotiation/include",
-  ]
-
-  deps = [
-    "$dsoftbus_core_path/common:softbus_utils",
-    "$dsoftbus_core_path/frame:softbus_server",
-    "$dsoftbus_root_path/adapter:softbus_adapter",
-  ]
-
-  external_deps = [
-    "c_utils:utils",
-    "hilog:libhilog",
-  ]
-}
-
 ohos_unittest("TransUdpStaticTest") {
   module_out_path = module_output_path
   sources = [ "trans_udp_static_test.cpp" ]
 
   include_dirs = [
-    "$dsoftbus_core_path/interfaces/kits/connect",
     "$dsoftbus_core_path/authentication/interface",
-
     "$dsoftbus_core_path/bus_center/interface",
     "$dsoftbus_core_path/bus_center/lnn/lane_hub/lane_manager/include",
     "$dsoftbus_core_path/bus_center/lnn/net_ledger/common/include",
     "$dsoftbus_core_path/bus_center/lnn/net_ledger/distributed_ledger/include",
     "$dsoftbus_core_path/bus_center/service/include",
-
     "$dsoftbus_core_path/common/security/permission/include",
-
     "$dsoftbus_core_path/connection/wifi_direct_cpp",
-
     "$dsoftbus_core_path/discovery/interface",
     "$dsoftbus_core_path/discovery/manager/include",
-
+    "$dsoftbus_core_path/interfaces/kits/connect",
     "$dsoftbus_core_path/transmission/common/include",
     "$dsoftbus_core_path/transmission/session/cpp/include",
     "$dsoftbus_core_path/transmission/session/include",
@@ -162,6 +209,7 @@ ohos_unittest("TransUdpStaticTest") {
     "$dsoftbus_core_path/transmission/trans_channel/manager/include",
     "$dsoftbus_core_path/transmission/trans_channel/udp_negotiation/include",
     "$dsoftbus_core_path/transmission/trans_channel/udp_negotiation/src",
+    "$dsoftbus_dfx_path/interface/include/form",
     "$dsoftbus_root_path/core/transmission/session/cpp/include",
   ]
 
@@ -186,22 +234,20 @@ ohos_unittest("TransUdpManagerTest") {
   sources = [ "trans_udp_manager_test.cpp" ]
 
   include_dirs = [
-    "unittest/common/",
-
+    "$dsoftbus_core_path/adapter/bus_center/include",
     "$dsoftbus_core_path/authentication/include",
     "$dsoftbus_core_path/authentication/interface",
-
     "$dsoftbus_core_path/bus_center/interface",
     "$dsoftbus_core_path/bus_center/lnn/net_builder/include",
     "$dsoftbus_core_path/bus_center/lnn/net_ledger/common/include",
     "$dsoftbus_core_path/bus_center/service/include",
     "$dsoftbus_core_path/bus_center/utils/include",
-
     "$dsoftbus_core_path/transmission/ipc/include",
     "$dsoftbus_core_path/transmission/trans_channel/manager/include",
     "$dsoftbus_core_path/transmission/trans_channel/udp_negotiation/include",
     "$dsoftbus_core_path/transmission/trans_channel/udp_negotiation/src",
-    "$dsoftbus_core_path/adapter/bus_center/include",
+    "$dsoftbus_dfx_path/interface/include/form",
+    "unittest/common/",
   ]
 
   deps = [
@@ -229,5 +275,6 @@ group("unittest") {
     ":TransUdpNegotiationExchangeTest",
     ":TransUdpNegotiationTest",
     ":TransUdpStaticTest",
+    ":TransUdpNegoStaticTest",
   ]
 }

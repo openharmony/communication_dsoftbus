@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2025 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -52,11 +52,12 @@ typedef enum {
     MODULE_SESSION_AUTH = 25,
     MODULE_SESSION_KEY_AUTH = 26,
     MODULE_SLE_AUTH_CMD = 27,
-    MODULE_USER_KEY_CONNECTION = 28,
+    MODULE_APPLY_KEY_CONNECTION = 28,
     MODULE_LANE_SELECT = 29,
     MODULE_BLE_NET = 100,
     MODULE_BLE_CONN = 101,
     MODULE_BLE_GENERAL = 102,
+    MODULE_PAGING_CONN = 103,
     MODULE_NIP_BR_CHANNEL = 201,
     MODULE_OLD_NEARBY = 300,
 } ConnModule;
@@ -75,6 +76,7 @@ typedef enum {
     CONNECT_BLE_GENERAL,
     CONNECT_TRIGGER_HML_V2C,
     CONNECT_PROXY_CHANNEL,
+    CONNECT_PAGING,
     CONNECT_TYPE_MAX
 } ConnectType;
 
@@ -100,6 +102,7 @@ typedef enum {
     DIRECT_CHANNEL_SERVER_USB,
     DIRECT_CHANNEL_SERVER_HML_START,
     DIRECT_CHANNEL_SERVER_HML_END = DIRECT_CHANNEL_SERVER_HML_START + HML_NUM * 2 - 1,
+    DIRECT_LOWLATENCY,
     LANE,
     NETLINK,
     AUTH_RAW_P2P_SERVER,
@@ -129,6 +132,9 @@ struct SleInfo {
     uint16_t challengeCode;
     SleProtocolType protocol;
     char networkId[NETWORK_ID_BUF_LEN];
+
+    uint8_t deviceIdHash[SHA_256_HASH_LEN];
+    uint8_t deviceIdHashLen;
 };
 
 struct ConnSocketInfo {
@@ -218,13 +224,20 @@ struct SocketOption {
     int32_t moduleId; /* For details, see {@link ListenerModule}. */
     ProtocolType protocol;
     int32_t keepAlive;
+    char localMac[MAC_MAX_LEN];
+    char remoteMac[MAC_MAX_LEN];
 };
 
 struct SleOption {
     char networkId[NETWORK_ID_BUF_LEN];
     char address[BT_MAC_LEN];
     uint16_t challengeCode;
+    bool isHighPower;
     SleProtocolType protocol;
+};
+
+struct PagingOption {
+    char accountId[ACCOUNT_ID_SIZE_MAX];
 };
 
 typedef struct {
@@ -236,6 +249,7 @@ typedef struct {
         struct BleDirectOption bleDirectOption;
         struct SleOption sleOption;
         struct SleDirectOption sleDirectOption;
+        struct PagingOption pagingOption;
     };
 } ConnectOption;
 
@@ -260,6 +274,8 @@ struct ListenerSocketOption {
     ListenerModule moduleId; /* For details, see {@link ListenerModule}. */
     ProtocolType protocol;
     char ifName[NETIF_NAME_LEN];
+    char localMac[MAC_MAX_LEN];
+    char remoteMac[MAC_MAX_LEN];
 };
 
 typedef struct {

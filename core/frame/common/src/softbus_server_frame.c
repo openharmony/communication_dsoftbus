@@ -16,6 +16,7 @@
 #include "softbus_server_frame.h"
 
 #include <dlfcn.h>
+#include "auth_apply_key_manager.h"
 #include "auth_interface.h"
 #include "auth_uk_manager.h"
 #include "br_proxy_server_manager.h"
@@ -242,6 +243,7 @@ void InitSoftBusServer(void)
     LnnInitModuleStatusSet(INIT_DEPS_BLUETOOTH, DEPS_STATUS_SUCCESS);
     LnnModuleInitMonitorCheckStart();
     UkNegotiateSessionInit();
+    AuthRecoveryApplyKey();
     g_isInit = true;
     COMM_LOGI(COMM_SVC, "softbus framework init success.");
 }

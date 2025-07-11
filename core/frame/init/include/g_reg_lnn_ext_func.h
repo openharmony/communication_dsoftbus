@@ -186,6 +186,7 @@ typedef int32_t (*LnnGetLocalNumU16InfoFunc)(InfoKey key, uint16_t *info);
 typedef int32_t (*LnnGetLocalNumU32InfoFunc)(InfoKey key, uint32_t *info);
 typedef int32_t (*LnnGetLocalByteInfoFunc)(InfoKey key, uint8_t *info, uint32_t len);
 typedef int32_t (*LnnGetAllOnlineNodeInfoFunc)(NodeBasicInfo **info, int32_t *infoNum);
+typedef int32_t (*LnnGetOnlineAndOfflineWithinTimeUdidsFunc)(char **udids, int32_t *udidNum, uint64_t timeRange);
 typedef int32_t (*LnnGetNodeKeyInfoFunc)(const char *networkId, int key, uint8_t *info, uint32_t infoLen);
 typedef int32_t (*LnnGetNetworkIdByUdidFunc)(const char *udid, char *buf, uint32_t len);
 typedef int32_t (*LnnGetNetworkIdByUdidHashFunc)(const uint8_t *udidHash, uint32_t udidHashLen, char *buf, uint32_t len,
@@ -221,6 +222,12 @@ typedef int32_t (*AuthGetLatestAuthSeqListFunc)(const char *udid, int64_t *seqLi
 typedef int (*SoftBusGetBtStateFunc)(void);
 typedef TrustedReturnType (*AuthHasTrustedRelationFunc)(void);
 typedef SoftBusScreenState (*GetScreenStateFunc)(void);
+typedef SoftBusScreenLockState (*GetScreenLockStateFunc)(void);
+typedef int32_t (*LnnTriggerSleHeartbeatFunc)(void);
+typedef int32_t (*LnnCleanTriggerSparkInfoFunc)(const char *udid, ConnectionAddrType addrType);
+typedef int32_t (*LnnOfflineTimingBySleHbFunc)(const char *networkId, ConnectionAddrType addrType);
+typedef int32_t (*LnnStopSleHeartbeatFunc)(void);
+typedef sint32_t (*LnnStopSleOfflineTimingStrategyFunc)(const char *networkId);
 typedef int32_t (*SocketGetConnInfoFunc)(int32_t fd, AuthConnInfo *connInfo, bool *isServer, int32_t ifnameIdx);
 typedef int32_t (*GetConnInfoByConnectionIdFunc)(uint32_t connectionId, AuthConnInfo *connInfo);
 typedef uint32_t (*AuthGenRequestIdFunc)(void);
@@ -335,7 +342,8 @@ typedef LinkConflictType (*GetConflictTypeWithErrcodeFunc)(int32_t conflictErrco
 typedef LnnLaneManager* (*GetLaneManagerFunc)(void);
 typedef void (*AddChannelStatisticsInfoFunc)(int32_t channelId, int32_t channelType);
 typedef int32_t (*AddLinkConflictInfoFunc)(const LinkConflictInfo *inputInfo);
-typedef int32_t (*SchedulerRegisterScanListenerFunc)(BaseServiceType type, int32_t *listenerId, const ScanCallback *cb);
+typedef int32_t (*SchedulerRegisterScanListenerFunc)(BroadcastProtocol protocol,
+    BaseServiceType type, int32_t *listenerId, const ScanCallback *cb);
 typedef int32_t (*SchedulerUnregisterListenerFunc)(int32_t listenerId);
 typedef const NodeInfo *(*LnnGetOnlineNodeByUdidHashFunc)(const char *recvUdidHash);
 typedef int32_t (*LnnGetLocalStrInfoByIfnameIdxFunc)(InfoKey key, char *info, uint32_t len, int32_t ifIdx);
@@ -349,6 +357,7 @@ typedef int32_t (*GetAllSupportReuseBandWidthFunc)(const char *peerNetworkId, La
     uint32_t **supportBw, uint8_t *bwCnt);
 typedef int32_t (*FindLaneResourceByLinkTypeFunc)(const char *peerUdid, LaneLinkType type, LaneResource *resource);
 typedef bool (*LnnIsNeedInterceptBroadcastFunc)(void);
+typedef int32_t (*CheckLnnPermissionFunc)(const char *interfaceName, const char *processName);
 
 #ifdef __cplusplus
 }

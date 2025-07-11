@@ -18,9 +18,12 @@
 
 #include <gmock/gmock.h>
 
+#include "client_trans_pending.h"
+#include "client_trans_proxy_file_manager.h"
 #include "softbus_def.h"
 #include "softbus_utils.h"
 #include "trans_proxy_process_data.h"
+#include "client_trans_session_manager.h"
 
 namespace OHOS {
 class TransClientProxyFileManagerInterface {
@@ -43,6 +46,15 @@ public:
     virtual int32_t SendFileTransResult(int32_t channelId, uint32_t seq, int32_t result, uint32_t side) = 0;
     virtual int32_t ServerIpcSendMessage(
         int32_t channelId, int32_t channelType, const void *data, uint32_t len, int32_t msgType) = 0;
+    virtual int32_t CreatePendingPacket(uint32_t id, uint64_t seq) = 0;
+    virtual int32_t ProxyChannelSendFileStream(int32_t channelId, const char *data, uint32_t len, int32_t type) = 0;
+    virtual int32_t GetPendingPacketData(
+        uint32_t id, uint64_t seq, uint32_t waitMillis, bool isDelete, TransPendData *data) = 0;
+    virtual int64_t SoftBusPwriteFile(int32_t fd, const void *buf, uint64_t writeBytes, uint64_t offset) = 0;
+    virtual int32_t SendFileAckReqAndResData(int32_t channelId, uint32_t startSeq, uint32_t value, int32_t type) = 0;
+    virtual void DeletePendingPacket(uint32_t id, uint64_t seq) = 0;
+    virtual int32_t AckResponseDataHandle(const SendListenerInfo *info, const char *data, uint32_t len) = 0;
+    virtual int32_t ClientGetChannelBusinessTypeByChannelId(int32_t channelId, int32_t *businessType) = 0;
 };
 
 class TransClientProxyFileManagerInterfaceMock : public TransClientProxyFileManagerInterface {
@@ -65,6 +77,17 @@ public:
     MOCK_METHOD4(SendFileTransResult, int32_t (int32_t channelId, uint32_t seq, int32_t result, uint32_t side));
     MOCK_METHOD5(ServerIpcSendMessage, int32_t (
         int32_t channelId, int32_t channelType, const void *data, uint32_t len, int32_t msgType));
+    MOCK_METHOD2(CreatePendingPacket, int32_t (uint32_t id, uint64_t seq));
+    MOCK_METHOD4(ProxyChannelSendFileStream, int32_t (
+        int32_t channelId, const char *data, uint32_t len, int32_t type));
+    MOCK_METHOD5(GetPendingPacketData, int32_t (
+        uint32_t id, uint64_t seq, uint32_t waitMillis, bool isDelete, TransPendData *data));
+    MOCK_METHOD4(SoftBusPwriteFile, int64_t (int32_t fd, const void *buf, uint64_t writeBytes, uint64_t offset));
+    MOCK_METHOD4(SendFileAckReqAndResData, int32_t (int32_t channelId, uint32_t startSeq,
+        uint32_t value, int32_t type));
+    MOCK_METHOD2(DeletePendingPacket, void (uint32_t id, uint64_t seq));
+    MOCK_METHOD3(AckResponseDataHandle, int32_t (const SendListenerInfo *info, const char *data, uint32_t len));
+    MOCK_METHOD2(ClientGetChannelBusinessTypeByChannelId, int32_t(int32_t channelId, int32_t *businessType));
 };
 } // namespace OHOS
 #endif // TRANS_CLIENT_PROXY_FILE_MANAGER_MOCK_H

@@ -23,6 +23,7 @@
 #include "lnn_log.h"
 #include "softbus_error_code.h"
 #include "softbus_server_ipc_interface_code.h"
+#include "g_enhance_sdk_func.h"
 
 using namespace OHOS;
 
@@ -96,6 +97,7 @@ static int32_t ClientCheckFuncPointer(void *func)
 static void BusCenterExProxyDeInitPacked(void)
 {
     ClientEnhanceFuncList *pfnClientEnhanceFuncList = ClientEnhanceFuncListGet();
+    ClientRegisterEnhanceFuncCheck((void *)pfnClientEnhanceFuncList->busCenterExProxyDeInit);
     if (ClientCheckFuncPointer((void *)pfnClientEnhanceFuncList->busCenterExProxyDeInit) != SOFTBUS_OK) {
         return;
     }

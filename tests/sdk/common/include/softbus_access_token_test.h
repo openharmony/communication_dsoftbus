@@ -12,15 +12,17 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-
 #ifndef SOFTBUS_ACCESS_TOKEN_TEST_H
 #define SOFTBUS_ACCESS_TOKEN_TEST_H
+
+#include <stdint.h>
 
 #ifdef __cplusplus
 extern "C" {
 #endif
 
 void SetAccessTokenPermission(const char *processName);
+uint64_t SetTokenIdByProcessName(const char *processName);
 
 #ifdef __cplusplus
 }

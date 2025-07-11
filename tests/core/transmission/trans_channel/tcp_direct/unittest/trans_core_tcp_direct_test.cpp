@@ -23,6 +23,7 @@
 #include "trans_session_service.h"
 #include "trans_tcp_direct_callback.h"
 #include "trans_tcp_direct_manager.h"
+#include "trans_tcp_direct_manager.c"
 #include "trans_tcp_direct_test.h"
 #include "dsoftbus_enhance_interface.h"
 #include "g_enhance_lnn_func.h"
@@ -35,6 +36,7 @@ namespace OHOS {
 
 #define PID 2024
 #define UID 4000
+#define HANDSHAKE_TIMEOUT 19
 
 static const char *g_pkgName = "dms";
 static const char *g_sessionName = "com.test.trans.auth.demo";
@@ -233,6 +235,14 @@ HWTEST_F(TransCoreTcpDirectTest, TransOpenDirectChannelTest003, TestSize.Level1)
     ret = TransOpenDirectChannel(appInfo, &connOpt, &channelId);
     EXPECT_EQ(ret, SOFTBUS_TRANS_TDC_START_SESSION_LISTENER_FAILED);
 
+    connOpt.type = CONNECT_P2P_REUSE;
+    ret = TransOpenDirectChannel(appInfo, &connOpt, &channelId);
+    EXPECT_EQ(ret, SOFTBUS_TRANS_TCP_UNUSE_LISTENER_MODE);
+
+    connOpt.type = CONNECT_HML;
+    ret = TransOpenDirectChannel(appInfo, &connOpt, &channelId);
+    EXPECT_EQ(ret, SOFTBUS_TRANS_TDC_START_SESSION_LISTENER_FAILED);
+
     ret = TransOpenDirectChannel(nullptr, &connOpt, &channelId);
     EXPECT_EQ(ret, SOFTBUS_INVALID_PARAM);
     SoftBusFree(appInfo);
@@ -318,10 +328,10 @@ HWTEST_F(TransCoreTcpDirectTest, TransSrvDelDataBufNodeTest007, TestSize.Level1)
  */
 HWTEST_F(TransCoreTcpDirectTest, VerifyP2pPackTest008, TestSize.Level1)
 {
-    char *ret = VerifyP2pPack(g_ip, g_port, nullptr);
+    char *ret = VerifyP2pPack(g_ip, g_port, nullptr, 0);
     EXPECT_TRUE(ret != nullptr);
 
-    ret = VerifyP2pPack(nullptr, g_port, nullptr);
+    ret = VerifyP2pPack(nullptr, g_port, nullptr, 0);
     EXPECT_TRUE(ret == nullptr);
 }
 
@@ -339,16 +349,16 @@ HWTEST_F(TransCoreTcpDirectTest, VerifyP2pUnPackTest009, TestSize.Level1)
     cJSON *json = cJSON_Parse(msg.c_str());
     EXPECT_TRUE(json != nullptr);
 
-    char *pack = VerifyP2pPack(g_ip, g_port, nullptr);
+    char *pack = VerifyP2pPack(g_ip, g_port, nullptr, 0);
     EXPECT_TRUE(pack != nullptr);
-
-    int32_t ret = VerifyP2pUnPack(json, peerIp, IP_LEN, &peerPort);
+    ProtocolType protocol = 0;
+    int32_t ret = VerifyP2pUnPack(json, peerIp, IP_LEN, &peerPort, nullptr);
     EXPECT_EQ(ret, SOFTBUS_PARSE_JSON_ERR);
 
-    ret = VerifyP2pUnPack(json, const_cast<char *>(g_ip), IP_LEN, &g_port);
+    ret = VerifyP2pUnPack(json, const_cast<char *>(g_ip), IP_LEN, &g_port, &protocol);
     EXPECT_EQ(ret, SOFTBUS_PARSE_JSON_ERR);
 
-    ret = VerifyP2pUnPack(nullptr, const_cast<char *>(g_ip), IP_LEN, &g_port);
+    ret = VerifyP2pUnPack(nullptr, const_cast<char *>(g_ip), IP_LEN, &g_port, &protocol);
     EXPECT_EQ(ret, SOFTBUS_INVALID_PARAM);
     cJSON_Delete(json);
 }
@@ -714,5 +724,200 @@ HWTEST_F(TransCoreTcpDirectTest, TransDelTcpChannelInfoByChannelId001, TestSize.
     EXPECT_EQ(SOFTBUS_OK, ret);
     ret = TransDelTcpChannelInfoByChannelId(info->channelId);
     EXPECT_EQ(SOFTBUS_OK, ret);
+}
+
+/**
+ * @tc.name: OnSessionOpenFailProc001
+ * @tc.desc: test OnSessionOpenFailProc and NotifyTdcChannelTimeOut.
+ * @tc.type: FUNC
+ * @tc.require:
+ */
+HWTEST_F(TransCoreTcpDirectTest, OnSessionOpenFailProc001, TestSize.Level1)
+{
+    SessionConn *conn = (SessionConn*)SoftBusCalloc(sizeof(SessionConn));
+    EXPECT_NE(nullptr, conn);
+    conn->serverSide = false;
+    conn->channelId = 1;
+    conn->status = TCP_DIRECT_CHANNEL_STATUS_TIMEOUT;
+    conn->timeout = 0;
+    conn->req = INVALID_VALUE;
+    conn->authHandle.authId = 1;
+    conn->requestId = 0;
+    conn->appInfo.timeStart = 12345;
+    conn->appInfo.myData.pid = 1;
+    (void)memcpy_s(conn->appInfo.myData.pkgName, PKG_NAME_SIZE_MAX_LEN, g_pkgName, (strlen(g_pkgName)+1));
+    (void)memcpy_s(conn->appInfo.peerNetWorkId, DEVICE_ID_SIZE_MAX, "1234567789", (strlen("1234567789")+1));
+    NotifyTdcChannelTimeOut(nullptr);
+    OnSessionOpenFailProc(conn, TCP_DIRECT_CHANNEL_STATUS_TIMEOUT);
+    SoftBusFree(conn);
+}
+
+/**
+ * @tc.name: OnSessionOpenFailProc002
+ * @tc.desc: test OnSessionOpenFailProc and TransTdcTimerProc.
+ * @tc.type: FUNC
+ * @tc.require:
+ */
+HWTEST_F(TransCoreTcpDirectTest, OnSessionOpenFailProc002, TestSize.Level1)
+{
+    SessionConn *conn = (SessionConn*)SoftBusCalloc(sizeof(SessionConn));
+    EXPECT_NE(nullptr, conn);
+    conn->serverSide = true;
+    conn->channelId = 1;
+    conn->status = TCP_DIRECT_CHANNEL_STATUS_TIMEOUT;
+    conn->appInfo.timeStart = 12345;
+    conn->appInfo.myData.pid = 1;
+    (void)memcpy_s(conn->appInfo.myData.pkgName, PKG_NAME_SIZE_MAX_LEN, g_pkgName, (strlen(g_pkgName)+1));
+    (void)memcpy_s(conn->appInfo.peerNetWorkId, DEVICE_ID_SIZE_MAX, "1234567789", (strlen("1234567789")+1));
+    TransTdcTimerProc();
+    OnSessionOpenFailProc(conn, TCP_DIRECT_CHANNEL_STATUS_TIMEOUT);
+    SoftBusFree(conn);
+}
+
+/**
+ * @tc.name: TransTdcTimerProc001
+ * @tc.desc: test TransTdcTimerProc.
+ * @tc.type: FUNC
+ * @tc.require:
+ */
+HWTEST_F(TransCoreTcpDirectTest, TransTdcTimerProc001, TestSize.Level1)
+{
+    SessionConn *conn = (SessionConn*)SoftBusCalloc(sizeof(SessionConn));
+    EXPECT_NE(nullptr, conn);
+    conn->channelId = 1;
+    conn->status = TCP_DIRECT_CHANNEL_STATUS_CONNECTING;
+    conn->timeout = HANDSHAKE_TIMEOUT;
+    conn->appInfo.fd = -1;
+    TransTdcAddSessionConn(conn);
+    TransTdcTimerProc();
+    TransDelSessionConnById(1);
+}
+
+/**
+ * @tc.name: TransTdcStopSessionProc001
+ * @tc.desc: test TransTdcStopSessionProc.
+ * @tc.type: FUNC
+ * @tc.require:
+ */
+HWTEST_F(TransCoreTcpDirectTest, TransTdcStopSessionProc001, TestSize.Level1)
+{
+    SessionConn *conn = (SessionConn*)SoftBusCalloc(sizeof(SessionConn));
+    EXPECT_NE(nullptr, conn);
+    conn->channelId = 1;
+    conn->status = TCP_DIRECT_CHANNEL_STATUS_CONNECTING;
+    conn->timeout = HANDSHAKE_TIMEOUT;
+    conn->appInfo.fd = -1;
+    conn->listenMod = DIRECT_CHANNEL_CLIENT;
+    TransTdcAddSessionConn(conn);
+    TransTdcStopSessionProc(DIRECT_CHANNEL_CLIENT);
+    TransDelSessionConnById(1);
+}
+
+/**
+ * @tc.name: TransTdcStopSessionProc002
+ * @tc.desc: test TransTdcStopSessionProc.
+ * @tc.type: FUNC
+ * @tc.require:
+ */
+HWTEST_F(TransCoreTcpDirectTest, TransTdcStopSessionProc002, TestSize.Level1)
+{
+    SessionConn *conn = (SessionConn*)SoftBusCalloc(sizeof(SessionConn));
+    EXPECT_NE(nullptr, conn);
+    conn->channelId = 1;
+    conn->status = TCP_DIRECT_CHANNEL_STATUS_CONNECTING;
+    conn->timeout = HANDSHAKE_TIMEOUT;
+    conn->appInfo.fd = 1;
+    conn->listenMod = DIRECT_CHANNEL_CLIENT;
+    TransTdcAddSessionConn(conn);
+    TransTdcStopSessionProc(DIRECT_CHANNEL_SERVER_P2P);
+    TransDelSessionConnById(1);
+}
+
+/**
+ * @tc.name: TransTdcStopSessionProc003
+ * @tc.desc: test TransTdcStopSessionProc.
+ * @tc.type: FUNC
+ * @tc.require:
+ */
+HWTEST_F(TransCoreTcpDirectTest, TransTdcStopSessionProc003, TestSize.Level1)
+{
+    SessionConn *conn = (SessionConn*)SoftBusCalloc(sizeof(SessionConn));
+    EXPECT_NE(nullptr, conn);
+    conn->channelId = 1;
+    conn->status = TCP_DIRECT_CHANNEL_STATUS_CONNECTING;
+    conn->timeout = HANDSHAKE_TIMEOUT;
+    conn->appInfo.fd = 1;
+    conn->listenMod = DIRECT_CHANNEL_CLIENT;
+    TransTdcAddSessionConn(conn);
+    TransTdcStopSessionProc(DIRECT_CHANNEL_SERVER_P2P);
+    TransDelSessionConnById(1);
+}
+
+/**
+ * @tc.name: TransUpdateAppInfo001
+ * @tc.desc: test TransUpdateAppInfo.
+ * @tc.type: FUNC
+ * @tc.require:
+ */
+HWTEST_F(TransCoreTcpDirectTest, TransUpdateAppInfo001, TestSize.Level1)
+{
+    AppInfo *appInfo = (AppInfo *)SoftBusCalloc(sizeof(AppInfo));
+    ASSERT_TRUE(appInfo != nullptr);
+    (void)memcpy_s(appInfo->myData.addr, IP_LEN, g_ip, strlen(g_ip));
+    ConnectOption *connInfo = (ConnectOption *)SoftBusCalloc(sizeof(ConnectOption));
+    ASSERT_TRUE(connInfo != nullptr);
+    connInfo->socketOption.port = 35586;
+    connInfo->type = CONNECT_TCP;
+    connInfo->socketOption.protocol = LNN_PROTOCOL_NIP;
+    connInfo->socketOption.moduleId = DIRECT_CHANNEL_SERVER_USB;
+    int32_t ret = TransUpdateAppInfo(appInfo, connInfo);
+    EXPECT_EQ(SOFTBUS_OK, ret);
+    SoftBusFree(appInfo);
+    SoftBusFree(connInfo);
+}
+/**
+ * @tc.name: TransUpdateAppInfo002
+ * @tc.desc: test TransUpdateAppInfo.
+ * @tc.type: FUNC
+ * @tc.require:
+ */
+HWTEST_F(TransCoreTcpDirectTest, TransUpdateAppInfo002, TestSize.Level1)
+{
+    AppInfo *appInfo = (AppInfo *)SoftBusCalloc(sizeof(AppInfo));
+    ASSERT_TRUE(appInfo != nullptr);
+    (void)memcpy_s(appInfo->myData.addr, IP_LEN, g_ip, strlen(g_ip));
+    ConnectOption *connInfo = (ConnectOption *)SoftBusCalloc(sizeof(ConnectOption));
+    ASSERT_TRUE(connInfo != nullptr);
+    connInfo->socketOption.port = 35586;
+    connInfo->socketOption.moduleId = DIRECT_CHANNEL_SERVER_USB;
+    connInfo->socketOption.protocol = LNN_PROTOCOL_USB;
+    connInfo->type = CONNECT_TCP;
+    int32_t ret = TransUpdateAppInfo(appInfo, connInfo);
+    EXPECT_EQ(SOFTBUS_OK, ret);
+    SoftBusFree(appInfo);
+    SoftBusFree(connInfo);
+}
+
+/**
+ * @tc.name: TransUpdateAppInfo003
+ * @tc.desc: test TransUpdateAppInfo.
+ * @tc.type: FUNC
+ * @tc.require:
+ */
+HWTEST_F(TransCoreTcpDirectTest, TransUpdateAppInfo003, TestSize.Level1)
+{
+    AppInfo *appInfo = (AppInfo *)SoftBusCalloc(sizeof(AppInfo));
+    ASSERT_TRUE(appInfo != nullptr);
+    (void)memcpy_s(appInfo->myData.addr, IP_LEN, g_ip, strlen(g_ip));
+    ConnectOption *connInfo = (ConnectOption *)SoftBusCalloc(sizeof(ConnectOption));
+    ASSERT_TRUE(connInfo != nullptr);
+    connInfo->socketOption.port = 35586;
+    connInfo->socketOption.moduleId = DIRECT_CHANNEL_SERVER_USB;
+    connInfo->socketOption.protocol = LNN_PROTOCOL_BR;
+    connInfo->type = CONNECT_BR;
+    int32_t ret = TransUpdateAppInfo(appInfo, connInfo);
+    EXPECT_EQ(SOFTBUS_OK, ret);
+    SoftBusFree(appInfo);
+    SoftBusFree(connInfo);
 }
 }

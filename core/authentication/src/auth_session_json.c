@@ -1455,12 +1455,14 @@ static void GetAndSetLocalUnifiedName(JsonObj *json)
         (void)JSON_AddStringToObject(json, UNIFIED_DEVICE_NAME, unified);
         return;
     }
-
     if (strlen(unified) != 0) {
         if (LnnSetLocalStrInfo(STRING_KEY_DEV_UNIFIED_NAME, unified) != SOFTBUS_OK) {
             AUTH_LOGE(AUTH_FSM, "set device unifiedDefaultName fail");
         }
-        AUTH_LOGI(AUTH_FSM, "unifed length is not zero, unified=%{public}s", unified);
+        char *anonyUniFiedName = NULL;
+        AnonymizeDeviceName(unified, &anonyUniFiedName);
+        AUTH_LOGI(AUTH_FSM, "unifed length is not zero, unified=%{public}s", AnonymizeWrapper(anonyUniFiedName));
+        AnonymizeFree(anonyUniFiedName);
     }
     (void)JSON_AddStringToObject(json, UNIFIED_DEVICE_NAME, unified);
 }

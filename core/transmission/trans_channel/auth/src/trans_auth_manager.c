@@ -262,11 +262,22 @@ static int32_t InitAuthChannelInfo(int32_t authId, AuthChannelInfo *item, AppInf
     appInfo->myData.channelId = item->appInfo.myData.channelId;
     appInfo->myData.dataConfig = item->appInfo.myData.dataConfig;
     item->connOpt.socketOption.moduleId = AUTH_RAW_P2P_SERVER;
+    if (memcpy_s(item->appInfo.reqId, REQ_ID_SIZE_MAX, appInfo->reqId, REQ_ID_SIZE_MAX) != EOK) {
+        TRANS_LOGE(TRANS_SVC, "copy serverReqId fail, reqId=%{public}s", appInfo->reqId);
+        return SOFTBUS_MEM_ERR;
+    }
     if (appInfo->linkType == LANE_HML_RAW) {
         item->appInfo.linkType = appInfo->linkType;
         if (memcpy_s(item->appInfo.peerData.addr, IP_LEN, appInfo->peerData.addr, IP_LEN) != EOK ||
             memcpy_s(item->appInfo.myData.addr, IP_LEN, appInfo->myData.addr, IP_LEN) != EOK) {
-            TRANS_LOGE(TRANS_SVC, "copy clientIp and serverIp fail, authId=%{public}d", authId);
+            char *localIp = NULL;
+            char *remoteIp = NULL;
+            Anonymize(appInfo->myData.addr, &localIp);
+            Anonymize(appInfo->peerData.addr, &remoteIp);
+            TRANS_LOGE(TRANS_CTRL, "copy localIp and remoteIp fail localIp=%{public}s, remoteIp=%{public}s",
+                AnonymizeWrapper(localIp), AnonymizeWrapper(remoteIp));
+            AnonymizeFree(localIp);
+            AnonymizeFree(remoteIp);
             return SOFTBUS_MEM_ERR;
         }
     }

@@ -219,7 +219,8 @@ void P2pV1ProcessorTest::InjectEntityMock(P2pEntity &mock)
         result.errorCode_ = SOFTBUS_OK;
         return result;
     });
-    EXPECT_CALL(mock, NotifyNewClientJoining(_)).WillRepeatedly([](const std::string &remoteMac) {});
+    EXPECT_CALL(mock, NotifyNewClientJoining(_, _))
+        .WillRepeatedly([this](const std::string &remoteMac, int waitTime) {});
     EXPECT_CALL(mock, CancelNewClientJoining(_)).WillRepeatedly([](const std::string &remoteMac) {});
 }
 
@@ -556,7 +557,8 @@ HWTEST_F(P2pV1ProcessorTest, CreateWhenNoneAsGo, TestSize.Level1)
         })
         .WillRepeatedly(Return(context_.Get(TestContextKey::CHANNEL_SEND_MESSAGE, int(0))));
 
-    EXPECT_CALL(entityMock, NotifyNewClientJoining(_)).WillRepeatedly([this](const std::string &remoteMac) {
+    EXPECT_CALL(entityMock, NotifyNewClientJoining(_, _))
+        .WillRepeatedly([this](const std::string &remoteMac, int waitTime) {
         auto remoteDeviceId = context_.Get(TestContextKey::REMOTE_UUID, std::string(""));
         ClientJoinEvent event { SOFTBUS_OK, remoteDeviceId, remoteMac };
         WifiDirectSchedulerFactory::GetInstance().GetScheduler().ProcessEvent(remoteDeviceId, event);
@@ -604,7 +606,8 @@ HWTEST_F(P2pV1ProcessorTest, CreateWhenGoTimeout, TestSize.Level1)
     InjectEntityMock(entityMock);
     InjectChannel(mock);
 
-    EXPECT_CALL(entityMock, NotifyNewClientJoining(_)).WillRepeatedly([this](const std::string &remoteMac) {
+    EXPECT_CALL(entityMock, NotifyNewClientJoining(_, _))
+        .WillRepeatedly([this](const std::string &remoteMac, int waitTime) {
         auto remoteDeviceId = context_.Get(TestContextKey::REMOTE_UUID, std::string(""));
         ClientJoinEvent event { SOFTBUS_CONN_PV1_CONNECT_GROUP_TIMEOUT, remoteDeviceId, remoteMac };
         WifiDirectSchedulerFactory::GetInstance().GetScheduler().ProcessEvent(remoteDeviceId, event);
@@ -879,7 +882,8 @@ HWTEST_F(P2pV1ProcessorTest, PassiveConnectTimeoutWhenGo, TestSize.Level1)
     InjectEntityMock(entityMock);
     InjectChannel(mock);
 
-    EXPECT_CALL(entityMock, NotifyNewClientJoining(_)).WillRepeatedly([this](const std::string &remoteMac) {
+    EXPECT_CALL(entityMock, NotifyNewClientJoining(_, _))
+        .WillRepeatedly([this](const std::string &remoteMac, int waitTime) {
         // sleep 100ms to make sure processor state can be inspected by InspectProcessorState
         SoftBusSleepMs(100);
         auto remoteDeviceId = context_.Get(TestContextKey::REMOTE_UUID, std::string(""));

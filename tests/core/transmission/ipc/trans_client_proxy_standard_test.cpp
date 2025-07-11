@@ -197,4 +197,124 @@ HWTEST_F(TransClientProxyStandardTest, TransClientProxyStandardTest005, TestSize
     ret = clientProxy->SetChannelInfo(nullptr, 1, 1, 1);
     EXPECT_EQ(SOFTBUS_INVALID_PARAM, ret);
 }
+
+/**
+ * @tc.name: OnClientChannelOnQos001
+ * @tc.desc: OnClientChannelOnQos test
+ * @tc.type: FUNC
+ * @tc.require:
+ */
+HWTEST_F(TransClientProxyStandardTest, TransClientProxyStandardTest006, TestSize.Level1)
+{
+    sptr<ISystemAbilityManager> saManager = SystemAbilityManagerClient::GetInstance().GetSystemAbilityManager();
+    sptr<IRemoteObject> remoteObject = saManager->GetSystemAbility(SOFTBUS_SA_ID);
+    ASSERT_TRUE(remoteObject != nullptr);
+    sptr<TransClientProxy> clientProxy = new (std::nothrow) TransClientProxy(remoteObject);
+    ASSERT_TRUE(clientProxy != nullptr);
+
+    int32_t channelId = 1;
+    int32_t channelType = 1;
+    QoSEvent event = QOS_SATISFIED;
+    const QosTV *qos = nullptr;
+    uint32_t count = 1;
+
+    int32_t ret = clientProxy->OnClientChannelOnQos(channelId, channelType, event, qos, count);
+    EXPECT_NE(SOFTBUS_OK, ret);
+}
+
+/**
+ * @tc.name: OnBrProxyOpenedQos001
+ * @tc.desc: OnBrProxyOpened test
+ * @tc.type: FUNC
+ * @tc.require:
+ */
+HWTEST_F(TransClientProxyStandardTest, TransClientProxyStandardTest007, TestSize.Level1)
+{
+    sptr<ISystemAbilityManager> saManager = SystemAbilityManagerClient::GetInstance().GetSystemAbilityManager();
+    sptr<IRemoteObject> remoteObject = saManager->GetSystemAbility(SOFTBUS_SA_ID);
+    ASSERT_TRUE(remoteObject != nullptr);
+    sptr<TransClientProxy> clientProxy = new (std::nothrow) TransClientProxy(remoteObject);
+    ASSERT_TRUE(clientProxy != nullptr);
+
+    int32_t channelId = 1;
+    int32_t reason = 1;
+
+    int32_t ret = clientProxy->OnBrProxyOpened(channelId, nullptr, nullptr, reason);
+    EXPECT_EQ(SOFTBUS_INVALID_PARAM, ret);
+
+    const char *brMac = "11:22:33"; // test value
+    const char *uuid = "111111"; // test value
+    ret = clientProxy->OnBrProxyOpened(channelId, brMac, uuid, reason);
+    EXPECT_NE(SOFTBUS_INVALID_PARAM, ret);
+}
+
+/**
+ * @tc.name: OnBrProxyDataRecv001
+ * @tc.desc: OnBrProxyDataRecv test
+ * @tc.type: FUNC
+ * @tc.require:
+ */
+HWTEST_F(TransClientProxyStandardTest, TransClientProxyStandardTest008, TestSize.Level1)
+{
+    sptr<ISystemAbilityManager> saManager = SystemAbilityManagerClient::GetInstance().GetSystemAbilityManager();
+    sptr<IRemoteObject> remoteObject = saManager->GetSystemAbility(SOFTBUS_SA_ID);
+    ASSERT_TRUE(remoteObject != nullptr);
+    sptr<TransClientProxy> clientProxy = new (std::nothrow) TransClientProxy(remoteObject);
+    ASSERT_TRUE(clientProxy != nullptr);
+
+    int32_t channelId = 1;
+    int32_t len = 1;
+
+    int32_t ret = clientProxy->OnBrProxyDataRecv(channelId, nullptr, len);
+    EXPECT_EQ(SOFTBUS_INVALID_PARAM, ret);
+
+    uint8_t data = 1;
+    ret = clientProxy->OnBrProxyDataRecv(channelId, &data, len);
+    EXPECT_NE(SOFTBUS_INVALID_PARAM, ret);
+}
+
+/**
+ * @tc.name: OnBrProxyStateChanged001
+ * @tc.desc: OnBrProxyStateChanged test
+ * @tc.type: FUNC
+ * @tc.require:
+ */
+HWTEST_F(TransClientProxyStandardTest, TransClientProxyStandardTest009, TestSize.Level1)
+{
+    sptr<ISystemAbilityManager> saManager = SystemAbilityManagerClient::GetInstance().GetSystemAbilityManager();
+    sptr<IRemoteObject> remoteObject = saManager->GetSystemAbility(SOFTBUS_SA_ID);
+    ASSERT_TRUE(remoteObject != nullptr);
+    sptr<TransClientProxy> clientProxy = new (std::nothrow) TransClientProxy(remoteObject);
+    ASSERT_TRUE(clientProxy != nullptr);
+
+    int32_t channelId = 1;
+    int32_t channelState = 1;
+
+    int32_t ret = clientProxy->OnBrProxyStateChanged(channelId, channelState);
+    EXPECT_NE(SOFTBUS_OK, ret);
+}
+
+/**
+ * @tc.name: OnBrProxyQueryPermission001
+ * @tc.desc: OnBrProxyQueryPermission test
+ * @tc.type: FUNC
+ * @tc.require:
+ */
+HWTEST_F(TransClientProxyStandardTest, TransClientProxyStandardTest010, TestSize.Level1)
+{
+    sptr<ISystemAbilityManager> saManager = SystemAbilityManagerClient::GetInstance().GetSystemAbilityManager();
+    sptr<IRemoteObject> remoteObject = saManager->GetSystemAbility(SOFTBUS_SA_ID);
+    ASSERT_TRUE(remoteObject != nullptr);
+    sptr<TransClientProxy> clientProxy = new (std::nothrow) TransClientProxy(remoteObject);
+    ASSERT_TRUE(clientProxy != nullptr);
+
+    const char *bundleName = "testName";
+    bool isEmpowered = true;
+
+    int32_t ret = clientProxy->OnBrProxyQueryPermission(bundleName, &isEmpowered);
+    EXPECT_NE(SOFTBUS_OK, ret);
+
+    clientProxy->OnDataLevelChanged(nullptr, nullptr);
+    clientProxy->OnMsdpRangeResult(nullptr);
+}
 } // namespace OHOS

@@ -40,15 +40,16 @@ ohos_unittest("LnnKVAdapterWrapperTest") {
     "$dsoftbus_root_path/core/frame/init/src/g_enhance_lnn_func.c",
   ]
   include_dirs = [
-    "$dsoftbus_root_path/core/adapter/kv_store/include",
+    "$dsoftbus_dfx_path/interface/include/form",
     "$dsoftbus_root_path/core/adapter/bus_center/include",
-    "$dsoftbus_root_path/core/common/include",
+    "$dsoftbus_root_path/core/adapter/kv_store/include",
+    "$dsoftbus_root_path/core/bus_center/interface",
     "$dsoftbus_root_path/core/bus_center/lnn/net_builder/include",
     "$dsoftbus_root_path/core/bus_center/lnn/net_ledger/common/include",
-    "$dsoftbus_root_path/core/bus_center/interface",
+    "$dsoftbus_root_path/core/common/include",
+    "$dsoftbus_root_path/core/frame/init/include",
     "$dsoftbus_root_path/tests/core/adapter/unittest",
     "$dsoftbus_root_path/tests/interface/enhance",
-    "$dsoftbus_root_path/core/frame/init/include",
   ]
   deps = [
     "$dsoftbus_root_path/core/common:softbus_utils",
@@ -66,20 +67,21 @@ ohos_unittest("LnnSettingDataEventMonitorTest") {
   module_out_path = module_output_path
   sources = [ "unittest/lnn_settingdata_event_monitor_test.cpp" ]
   include_dirs = [
-    "$dsoftbus_root_path/core/adapter/kv_store/include",
+    "$dsoftbus_dfx_path/interface/include/form",
     "$dsoftbus_root_path/core/adapter/bus_center/include",
     "$dsoftbus_root_path/core/adapter/bus_center/src",
-    "$dsoftbus_root_path/core/common/include",
+    "$dsoftbus_root_path/core/adapter/kv_store/include",
+    "$dsoftbus_root_path/core/bus_center/interface",
     "$dsoftbus_root_path/core/bus_center/lnn/net_builder/include",
     "$dsoftbus_root_path/core/bus_center/lnn/net_ledger/common/include",
     "$dsoftbus_root_path/core/bus_center/lnn/net_ledger/local_ledger/include",
-    "$dsoftbus_root_path/core/bus_center/interface",
-    "$dsoftbus_root_path/core/bus_center/utils/include",
     "$dsoftbus_root_path/core/bus_center/service/include/",
-    "$dsoftbus_root_path/tests/core/bus_center/lnn/net_builder/include",
-    "$dsoftbus_root_path/tests/core/adapter/unittest/",
+    "$dsoftbus_root_path/core/bus_center/utils/include",
+    "$dsoftbus_root_path/core/common/include",
     "$dsoftbus_root_path/interfaces/kits/bus_center",
     "$dsoftbus_root_path/interfaces/kits/common",
+    "$dsoftbus_root_path/tests/core/adapter/unittest/",
+    "$dsoftbus_root_path/tests/core/bus_center/lnn/net_builder/include",
   ]
   deps = [
     "$dsoftbus_root_path/core/common:softbus_utils",
@@ -145,12 +147,10 @@ ohos_unittest("LNNOhosAccountTest") {
   ]
   include_dirs = [
     "$dsoftbus_root_path/core/adapter/bus_center/include",
-    "$dsoftbus_root_path/core/adapter/bus_center/include",
     "$dsoftbus_root_path/core/adapter/kv_store/include",
     "$dsoftbus_root_path/core/authentication/interface",
     "$dsoftbus_root_path/core/bus_center/interface",
     "$dsoftbus_root_path/core/bus_center/lnn/lane_hub/heartbeat/include",
-    "$dsoftbus_root_path/core/bus_center/lnn/net_builder/include",
     "$dsoftbus_root_path/core/bus_center/lnn/net_builder/include",
     "$dsoftbus_root_path/core/bus_center/lnn/net_buscenter/include",
     "$dsoftbus_root_path/core/bus_center/lnn/net_ledger/common/include",
@@ -185,13 +185,14 @@ ohos_unittest("LNNKvStoreLaunchListenerTest") {
     "unittest/lnn_kv_store_launch_listener_test.cpp",
   ]
   include_dirs = [
+    "$dsoftbus_dfx_path/interface/include/form",
+    "$dsoftbus_root_path/core/adapter/bus_center/include",
     "$dsoftbus_root_path/core/adapter/kv_store/include",
     "$dsoftbus_root_path/core/adapter/subscribe_kv_store_sa/include",
-    "$dsoftbus_root_path/core/adapter/bus_center/include",
-    "$dsoftbus_root_path/core/common/include",
+    "$dsoftbus_root_path/core/bus_center/interface",
     "$dsoftbus_root_path/core/bus_center/lnn/net_builder/include",
     "$dsoftbus_root_path/core/bus_center/lnn/net_ledger/common/include",
-    "$dsoftbus_root_path/core/bus_center/interface",
+    "$dsoftbus_root_path/core/common/include",
     "$dsoftbus_root_path/interfaces/kits/bus_center",
     "$dsoftbus_root_path/interfaces/kits/common",
   ]
@@ -217,10 +218,10 @@ ohos_unittest("LnnOhosAccountAdapterTest") {
   ]
 
   include_dirs = [
-    "unittest",
     "$dsoftbus_root_path/core/adapter/bus_center/include",
     "$dsoftbus_root_path/core/authentication/include",
     "$dsoftbus_root_path/interfaces/kits/common",
+    "unittest",
   ]
 
   deps = [

@@ -310,6 +310,7 @@ typedef enum  {
 typedef enum  {
     SLE_PROTOCOL_ANY = -1,
     SLE_SSAP = 0,
+    SLE_PORT = 1,
     SLE_PROTOCOL_MAX
 } SleProtocolType;
 

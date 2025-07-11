@@ -77,11 +77,11 @@ void TransTcpDirectP2pMockTest::SetUpTestCase(void)
     SoftBusMutexInit(&list->lock, nullptr);
     ListInit(&list->list);
     NiceMock<TransTcpDirectP2pInterfaceMock> TcpP2pDirectMock;
-    EXPECT_CALL(TcpP2pDirectMock, CreateSoftBusList).WillOnce(Return(nullptr));
-    int32_t ret = CreatHmlListenerList();
-    EXPECT_EQ(SOFTBUS_MALLOC_ERR, ret);
     EXPECT_CALL(TcpP2pDirectMock, CreateSoftBusList).WillOnce(Return(list));
-    EXPECT_CALL(TcpP2pDirectMock, RegAuthTransListener).WillOnce(Return(SOFTBUS_OK));
+    int32_t ret = CreatHmlListenerList();
+    EXPECT_EQ(SOFTBUS_OK, ret);
+    EXPECT_CALL(TcpP2pDirectMock, CreateSoftBusList).WillRepeatedly(Return(list));
+    EXPECT_CALL(TcpP2pDirectMock, RegAuthTransListener).WillRepeatedly(Return(SOFTBUS_OK));
     EXPECT_CALL(TcpP2pDirectMock, TransProxyPipelineRegisterListener).WillOnce(Return(SOFTBUS_OK));
     ret = P2pDirectChannelInit();
     EXPECT_EQ(SOFTBUS_OK, ret);
@@ -124,6 +124,7 @@ SessionConn *TestSetSessionConn()
     testConn->status = TCP_DIRECT_CHANNEL_STATUS_VERIFY_P2P;
     testConn->timeout = 0;
     testConn->req = TEST_SEQ;
+    testConn->appInfo.myData.port = TEST_PORT;
     testConn->authHandle.authId = 1;
     testConn->appInfo.callingTokenId = 1;
     testConn->requestId = TEST_REQ_ID;
@@ -142,6 +143,7 @@ SessionConn *TestSetSessionConn()
     (void)memcpy_s(testConn->appInfo.sessionKey, SESSION_KEY_LENGTH, TEST_SESSION_KEY, (strlen(TEST_SESSION_KEY) + 1));
     (void)memcpy_s(testConn->appInfo.groupId, GROUP_ID_SIZE_MAX, TEST_GROUP_ID, (strlen(TEST_GROUP_ID) + 1));
     (void)memcpy_s(testConn->appInfo.peerData.addr, IP_LEN, IP, (strlen(IP) + 1));
+    (void)memcpy_s(testConn->appInfo.myData.addr, IP_LEN, IP, (strlen(IP) + 1));
     return testConn;
 }
 
@@ -525,22 +527,22 @@ HWTEST_F(TransTcpDirectP2pMockTest, OnVerifyP2pRequestTest001, TestSize.Level1)
 }
 
 /**
- * @tc.name: ConnectTcpDirectPeerTest001
+ * @tc.name: ConnectSocketDirectPeerTest001
  * @tc.desc: Should return SOFTBUS_OK when ConnOpenClientSocket return SOFTBUS_OK.
  * @tc.desc: Should return error when ConnOpenClientSocket return SOFTBUS_OK.
  * @tc.type: FUNC
  * @tc.require:
  */
-HWTEST_F(TransTcpDirectP2pMockTest, ConnectTcpDirectPeerTest001, TestSize.Level1)
+HWTEST_F(TransTcpDirectP2pMockTest, ConnectSocketDirectPeerTest001, TestSize.Level1)
 {
     NiceMock<TransTcpDirectP2pInterfaceMock> TcpP2pDirectMock;
     EXPECT_CALL(TcpP2pDirectMock, IsHmlIpAddr).WillOnce(Return(false));
     EXPECT_CALL(TcpP2pDirectMock, ConnOpenClientSocket).WillOnce(Return(SOFTBUS_NO_INIT));
-    int32_t ret = ConnectTcpDirectPeer(IP, TEST_PORT, MY_IP);
+    int32_t ret = ConnectSocketDirectPeer(IP, TEST_PORT, MY_IP, 0);
     EXPECT_EQ(SOFTBUS_NO_INIT, ret);
     EXPECT_CALL(TcpP2pDirectMock, IsHmlIpAddr).WillOnce(Return(true));
     EXPECT_CALL(TcpP2pDirectMock, ConnOpenClientSocket).WillOnce(Return(SOFTBUS_OK));
-    ret = ConnectTcpDirectPeer(IP, TEST_PORT, MY_IP);
+    ret = ConnectSocketDirectPeer(IP, TEST_PORT, MY_IP, 0);
     EXPECT_EQ(SOFTBUS_OK, ret);
 }
 
@@ -556,18 +558,18 @@ HWTEST_F(TransTcpDirectP2pMockTest, AddHmlTriggerTest001, TestSize.Level1)
     int32_t port = TEST_PORT;
     int32_t fd = TEST_FD;
     int64_t seq = TEST_SEQ;
-    int32_t ret = AddHmlTrigger(fd, IP, seq, port);
+    int32_t ret = AddHmlTrigger(fd, IP, seq, port, nullptr);
     EXPECT_EQ(SOFTBUS_TRANS_ADD_HML_TRIGGER_FAILED, ret);
     NiceMock<TransTcpDirectP2pInterfaceMock> TcpP2pDirectMock;
     EXPECT_CALL(TcpP2pDirectMock, TransTdcStartSessionListener).WillOnce(Return(port));
     ret = StartHmlListener(IP, &port, TEST_UDID, LNN_PROTOCOL_IP);
     EXPECT_EQ(SOFTBUS_OK, ret);
     EXPECT_CALL(TcpP2pDirectMock, AddTrigger).WillOnce(Return(SOFTBUS_NO_INIT));
-    ret = AddHmlTrigger(fd, IP, seq, port);
+    ret = AddHmlTrigger(fd, IP, seq, port, nullptr);
     EXPECT_EQ(SOFTBUS_NO_INIT, ret);
 
     EXPECT_CALL(TcpP2pDirectMock, AddTrigger).WillOnce(Return(SOFTBUS_OK));
-    ret = AddHmlTrigger(fd, IP, seq, port);
+    ret = AddHmlTrigger(fd, IP, seq, port, nullptr);
     EXPECT_EQ(SOFTBUS_NOT_FIND, ret);
 
     SessionConn *conn = TestSetSessionConn();
@@ -576,7 +578,7 @@ HWTEST_F(TransTcpDirectP2pMockTest, AddHmlTriggerTest001, TestSize.Level1)
     EXPECT_EQ(SOFTBUS_OK, ret);
 
     EXPECT_CALL(TcpP2pDirectMock, AddTrigger).WillOnce(Return(SOFTBUS_OK));
-    ret = AddHmlTrigger(fd, IP, seq, port);
+    ret = AddHmlTrigger(fd, IP, seq, port, nullptr);
     EXPECT_EQ(SOFTBUS_OK, ret);
     TransDelSessionConnById(conn->channelId);
 }
@@ -594,7 +596,7 @@ HWTEST_F(TransTcpDirectP2pMockTest, AddP2pOrHmlTriggerTest001, TestSize.Level1)
     NiceMock<TransTcpDirectP2pInterfaceMock> TcpP2pDirectMock;
     EXPECT_CALL(TcpP2pDirectMock, IsHmlIpAddr).WillOnce(Return(false));
     EXPECT_CALL(TcpP2pDirectMock, AddTrigger).WillOnce(Return(SOFTBUS_OK));
-    int32_t ret = AddP2pOrHmlTrigger(fd, IP, seq, 0);
+    int32_t ret = AddP2pOrHmlTrigger(fd, IP, seq, 0, nullptr);
     EXPECT_EQ(SOFTBUS_OK, ret);
 }
 
@@ -867,6 +869,73 @@ HWTEST_F(TransTcpDirectP2pMockTest, StartVerifyP2pInfoTest002, TestSize.Level1)
 }
 
 /**
+ * @tc.name: StartVerifyP2pInfoTest003
+ * @tc.desc: Test StartVerifyP2pInfo
+ * @tc.type: FUNC
+ * @tc.require:
+ */
+HWTEST_F(TransTcpDirectP2pMockTest, StartVerifyP2pInfoTest003, TestSize.Level1)
+{
+    SessionConn *conn = TestSetSessionConn();
+    ASSERT_TRUE(conn != nullptr);
+    ConnectType type = CONNECT_P2P_REUSE;
+    AppInfo *appInfo = (AppInfo *)SoftBusCalloc(sizeof(AppInfo));
+    ASSERT_TRUE(appInfo != nullptr);
+    (void)memcpy_s(appInfo, sizeof(AppInfo), &conn->appInfo, sizeof(AppInfo));
+    NiceMock<TransTcpDirectP2pInterfaceMock> TcpP2pDirectMock;
+    EXPECT_CALL(TcpP2pDirectMock, TransProxyPipelineGetChannelIdByNetworkId).WillOnce(Return(INVALID_CHANNEL_ID));
+    int32_t ret = StartVerifyP2pInfo(appInfo, conn, type);
+    EXPECT_EQ(SOFTBUS_OK, ret);
+    SoftBusFree(conn);
+    SoftBusFree(appInfo);
+}
+
+/**
+ * @tc.name: StartVerifyP2pInfoTest004
+ * @tc.desc: Test StartVerifyP2pInfo
+ * @tc.type: FUNC
+ * @tc.require:
+ */
+HWTEST_F(TransTcpDirectP2pMockTest, StartVerifyP2pInfoTest004, TestSize.Level1)
+{
+    SessionConn *conn = TestSetSessionConn();
+    ASSERT_TRUE(conn != nullptr);
+    ConnectType type = CONNECT_HML;
+    AppInfo *appInfo = (AppInfo *)SoftBusCalloc(sizeof(AppInfo));
+    ASSERT_TRUE(appInfo != nullptr);
+    (void)memcpy_s(appInfo, sizeof(AppInfo), &conn->appInfo, sizeof(AppInfo));
+    NiceMock<TransTcpDirectP2pInterfaceMock> TcpP2pDirectMock;
+    EXPECT_CALL(TcpP2pDirectMock, TransProxyPipelineGetChannelIdByNetworkId).WillOnce(Return(INVALID_CHANNEL_ID));
+    int32_t ret = StartVerifyP2pInfo(appInfo, conn, type);
+    EXPECT_EQ(SOFTBUS_OK, ret);
+    SoftBusFree(conn);
+    SoftBusFree(appInfo);
+}
+
+/**
+ * @tc.name: StartVerifyP2pInfoTest005
+ * @tc.desc: Test StartVerifyP2pInfo
+ * @tc.type: FUNC
+ * @tc.require:
+ */
+HWTEST_F(TransTcpDirectP2pMockTest, StartVerifyP2pInfoTest005, TestSize.Level1)
+{
+    SessionConn *conn = TestSetSessionConn();
+    ASSERT_TRUE(conn != nullptr);
+    ConnectType type = CONNECT_HML;
+    AppInfo *appInfo = (AppInfo *)SoftBusCalloc(sizeof(AppInfo));
+    ASSERT_TRUE(appInfo != nullptr);
+    (void)memcpy_s(appInfo, sizeof(AppInfo), &conn->appInfo, sizeof(AppInfo));
+    NiceMock<TransTcpDirectP2pInterfaceMock> TcpP2pDirectMock;
+    EXPECT_CALL(TcpP2pDirectMock, TransProxyPipelineGetChannelIdByNetworkId).WillOnce(Return(TEST_CHANNEL_ID));
+    EXPECT_CALL(TcpP2pDirectMock, TransProxyReuseByChannelId).WillOnce(Return(SOFTBUS_OK));
+    int32_t ret = StartVerifyP2pInfo(appInfo, conn, type);
+    EXPECT_EQ(SOFTBUS_TRANS_TCP_GET_AUTHID_FAILED, ret);
+    SoftBusFree(conn);
+    SoftBusFree(appInfo);
+}
+
+/**
  * @tc.name: CopyAppInfoFastTransDataTest001
  * @tc.desc: Test OnP2pVerifyMsgReceived when TransProxyPipelineGetChannelIdByNetworkId return VALID_CHANNEL_ID
  * @tc.type: FUNC
@@ -894,6 +963,71 @@ HWTEST_F(TransTcpDirectP2pMockTest, CopyAppInfoFastTransDataTest001, TestSize.Le
     FreeFastTransData(appInfo);
     FreeFastTransData(nullptr);
 
+    SoftBusFree(conn);
+    SoftBusFree(appInfo);
+}
+
+/**
+ * @tc.name: CopyAppInfoFastTransDataTest
+ * @tc.desc: Test CopyAppInfoFastTransDataTest002
+ * @tc.type: FUNC
+ * @tc.require:
+ */
+HWTEST_F(TransTcpDirectP2pMockTest, CopyAppInfoFastTransDataTest002, TestSize.Level1)
+{
+    SessionConn *conn = TestSetSessionConn();
+    ASSERT_TRUE(conn != nullptr);
+    AppInfo *appInfo = (AppInfo *)SoftBusCalloc(sizeof(AppInfo));
+    ASSERT_TRUE(appInfo != nullptr);
+    (void)memcpy_s(appInfo, sizeof(AppInfo), &conn->appInfo, sizeof(AppInfo));
+    uint8_t data = 1;
+    appInfo->fastTransData = &data;
+    appInfo->fastTransDataSize = 1;
+    int32_t ret = CopyAppInfoFastTransData(conn, appInfo);
+    EXPECT_EQ(SOFTBUS_OK, ret);
+    SoftBusFree(conn);
+    SoftBusFree(appInfo);
+}
+
+/**
+ * @tc.name: CopyAppInfoFastTransDataTest
+ * @tc.desc: Test CopyAppInfoFastTransDataTest003
+ * @tc.type: FUNC
+ * @tc.require:
+ */
+HWTEST_F(TransTcpDirectP2pMockTest, CopyAppInfoFastTransDataTest003, TestSize.Level1)
+{
+    SessionConn *conn = TestSetSessionConn();
+    ASSERT_TRUE(conn != nullptr);
+    AppInfo *appInfo = (AppInfo *)SoftBusCalloc(sizeof(AppInfo));
+    ASSERT_TRUE(appInfo != nullptr);
+    (void)memcpy_s(appInfo, sizeof(AppInfo), &conn->appInfo, sizeof(AppInfo));
+    appInfo->fastTransData = nullptr;
+    appInfo->fastTransDataSize = 1;
+    int32_t ret = CopyAppInfoFastTransData(conn, appInfo);
+    EXPECT_EQ(SOFTBUS_OK, ret);
+    SoftBusFree(conn);
+    SoftBusFree(appInfo);
+}
+
+/**
+ * @tc.name: CopyAppInfoFastTransDataTest
+ * @tc.desc: Test CopyAppInfoFastTransDataTest003
+ * @tc.type: FUNC
+ * @tc.require:
+ */
+HWTEST_F(TransTcpDirectP2pMockTest, CopyAppInfoFastTransDataTest004, TestSize.Level1)
+{
+    SessionConn *conn = TestSetSessionConn();
+    ASSERT_TRUE(conn != nullptr);
+    AppInfo *appInfo = (AppInfo *)SoftBusCalloc(sizeof(AppInfo));
+    ASSERT_TRUE(appInfo != nullptr);
+    (void)memcpy_s(appInfo, sizeof(AppInfo), &conn->appInfo, sizeof(AppInfo));
+    uint8_t data = 1;
+    appInfo->fastTransData = &data;
+    appInfo->fastTransDataSize = 0;
+    int32_t ret = CopyAppInfoFastTransData(conn, appInfo);
+    EXPECT_EQ(SOFTBUS_OK, ret);
     SoftBusFree(conn);
     SoftBusFree(appInfo);
 }

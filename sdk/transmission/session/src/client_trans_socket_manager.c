@@ -671,6 +671,9 @@ void FillSessionParam(SessionParam *param, SessionAttribute *tmpAttr,
     param->isQosLane = true;
     param->actionId = sessionNode->actionId;
     param->isLowLatency = sessionNode->isLowLatency;
+    param->flowInfo.flowSize = sessionNode->flowInfo.flowSize;
+    param->flowInfo.sessionType = sessionNode->flowInfo.sessionType;
+    param->flowInfo.flowQosType = sessionNode->flowInfo.flowQosType;
 }
 
 void ClientConvertRetVal(int32_t socket, int32_t *retOut)
@@ -939,6 +942,25 @@ int32_t ClientRemovePermission(const char *busName)
     return ret;
 }
 
+int32_t ClientDeletePagingSession(int32_t sessionId)
+{
+    if (sessionId <= 0) {
+        TRANS_LOGE(TRANS_SDK, "invalid sessionId=%{public}d", sessionId);
+        return SOFTBUS_INVALID_PARAM;
+    }
+
+    char pkgName[PKG_NAME_SIZE_MAX] = { 0 };
+    char sessionName[SESSION_NAME_SIZE_MAX] = { 0 };
+    int32_t ret = DeletePagingSession(sessionId, pkgName, sessionName);
+    if (ret != SOFTBUS_OK) {
+        TRANS_LOGE(TRANS_SDK, "failed delete session");
+        return ret;
+    }
+
+    (void)TryDeleteEmptySessionServer(pkgName, sessionName);
+    return SOFTBUS_OK;
+}
+
 int32_t ClientDeleteSocketSession(int32_t sessionId)
 {
     if (sessionId <= 0) {
@@ -1080,12 +1102,15 @@ int32_t DataSeqInfoListAddItem(uint32_t dataSeq, int32_t channelId, int32_t sock
             return SOFTBUS_OK;
         }
     }
+    int32_t businessType;
+    (void)ClientGetChannelBusinessTypeByChannelId(channelId, &businessType);
     DataSeqInfo *item = (DataSeqInfo *)SoftBusCalloc(sizeof(DataSeqInfo));
     TRANS_CHECK_AND_RETURN_RET_LOGE(item != NULL, SOFTBUS_MALLOC_ERR, TRANS_CTRL, "calloc failed");
     item->channelId = channelId;
     item->seq = (int32_t)dataSeq;
     item->socketId = socketId;
     item->channelType = channelType;
+    item->isMessage = (businessType == BUSINESS_TYPE_D2D_MESSAGE) ? true :false;
     ListInit(&item->node);
     ListAdd(&(g_clientDataSeqInfoList->list), &(item->node));
     TRANS_LOGI(TRANS_SDK, "add DataSeqInfo success, channelId=%{public}d, dataSeq=%{public}u", channelId, dataSeq);
@@ -1136,7 +1161,19 @@ static void TransOnBindSentProc(ListNode *timeoutItemList)
             SoftBusFree(item);
             continue;
         }
-        sessionCallback.socketClient.OnBytesSent(item->socketId, item->seq, SOFTBUS_TRANS_ASYNC_SEND_TIMEOUT);
+        if (item->isMessage) {
+            if (sessionCallback.socketClient.OnMessageSent == NULL) {
+                TRANS_LOGE(TRANS_SDK, "OnMessageSent not implement");
+                continue;
+            }
+            sessionCallback.socketClient.OnMessageSent(item->socketId, item->seq, SOFTBUS_TRANS_ASYNC_SEND_TIMEOUT);
+        } else {
+            if (sessionCallback.socketClient.OnBytesSent == NULL) {
+                TRANS_LOGE(TRANS_SDK, "OnBytesSent not implement");
+                continue;
+            }
+            sessionCallback.socketClient.OnBytesSent(item->socketId, item->seq, SOFTBUS_TRANS_ASYNC_SEND_TIMEOUT);
+        }
         TRANS_LOGI(TRANS_SDK, "async sendbytes recv ack timeout, socket=%{public}d, dataSeq=%{public}u",
             item->socketId, item->seq);
         ListDelete(&(item->node));
@@ -1164,6 +1201,7 @@ void TransAsyncSendBytesTimeoutProc(void)
             }
             timeoutItem->socketId = item->socketId;
             timeoutItem->seq = item->seq;
+            timeoutItem->isMessage = item->isMessage;
             ListDelete(&(item->node));
             ListAdd(&timeoutItemList, &(timeoutItem->node));
             SoftBusFree(item);

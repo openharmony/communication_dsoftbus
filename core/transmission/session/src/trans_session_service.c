@@ -76,6 +76,11 @@ int32_t TransServerInit(void)
         TRANS_LOGE(TRANS_INIT, "ScenarioManager init Failed");
         return ret;
     }
+    ret = InitSoftbusPagingPacked();
+    if (ret != SOFTBUS_OK) {
+        TRANS_LOGE(TRANS_INIT, "InitSoftbusPagingPacked Failed");
+        return ret;
+    }
     RegisterPermissionChangeCallback();
     atomic_store_explicit(&g_transSessionInitFlag, true, memory_order_release);
     TRANS_LOGI(TRANS_INIT, "trans session server list init succ");
@@ -93,6 +98,7 @@ void TransServerDeinit(void)
     InnerListDeinit();
     TransPermissionDeinit();
     ScenarioManagerdestroyInstance();
+    DeInitSoftbusPagingPacked();
     atomic_store_explicit(&g_transSessionInitFlag, false, memory_order_release);
 }
 
@@ -100,6 +106,7 @@ void TransServerDeathCallback(const char *pkgName, int32_t pid)
 {
     TransChannelDeathCallback(pkgName, pid);
     TransDelItemByPackageName(pkgName, pid);
+    TransPagingDeathCallbackPacked(pkgName, pid);
 }
 
 static void TransSetUserId(CallerType callerType, SessionServer *newNode)

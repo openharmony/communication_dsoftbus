@@ -152,9 +152,9 @@ int32_t AuthGetConnInfo(AuthHandle authHandle, AuthConnInfo *connInfo)
     return GetTransTcpDirectMessageInterface()->AuthGetConnInfo(authHandle, connInfo);
 }
 
-char *PackRequest(const AppInfo *appInfo)
+char *PackRequest(const AppInfo *appInfo, int64_t requestId)
 {
-    return GetTransTcpDirectMessageInterface()->PackRequest(appInfo);
+    return GetTransTcpDirectMessageInterface()->PackRequest(appInfo, requestId);
 }
 
 int32_t LnnSetLocalStrInfo(InfoKey key, const char *info)

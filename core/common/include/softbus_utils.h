@@ -63,6 +63,7 @@ typedef enum {
     SOFTBUS_TRNAS_IDLE_TIMEOUT_TIMER_FUN,
     SOFTBUS_TRNAS_REQUEST_TIMEOUT_TIMER_FUN,
     SOFTBUS_TRANS_ASYNC_SENDBYTES_TIMER_FUN,
+    SOFTBUS_TRANS_PAGING_TIMER_FUN,
     SOFTBUS_DDOS_TIMER_FUN,
     SOFTBUS_MAX_TIMER_FUN_NUM
 } SoftBusTimerFunEnum;
@@ -151,6 +152,11 @@ void EnableCapabilityBit(uint32_t *value, uint32_t offSet);
 void DisableCapabilityBit(uint32_t *value, uint32_t offSet);
 
 bool GetCapabilityBit(uint32_t value, uint32_t offSet);
+
+void SoftbusDumpBytes(const char *message, const uint8_t *data, uint32_t dataLen);
+
+int32_t AddNumberToSocketName(uint32_t num, const char *prefix, uint32_t preLen, char *socketName);
+
 #ifdef __cplusplus
 #if __cplusplus
 }

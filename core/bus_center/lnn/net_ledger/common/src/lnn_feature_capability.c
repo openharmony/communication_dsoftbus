@@ -73,6 +73,10 @@ uint64_t LnnGetFeatureCapabilty(void)
     LnnClearFeatureCapability(&configValue, BIT_SUPPORT_NEGO_P2P_BY_CHANNEL_CAPABILITY);
     LNN_LOGI(LNN_LEDGER, "clear feature CONN_BLE_DIRECT configValue=%{public}" PRIu64, configValue);
 #endif
+#ifndef DSOFTBUS_DEVICE_CLOUD_CONVERGENCE
+    LnnClearFeatureCapability(&configValue, BIT_DEVICE_CLOUD_CONVERGENCE_CAPABILITY);
+    LNN_LOGI(LNN_LEDGER, "clear feature DEVICE_CLOUD_CONVERGENCE configValue=%{public}" PRIu64, configValue);
+#endif
     LNN_LOGI(LNN_LEDGER, "lnn feature configValue=%{public}" PRIu64, configValue);
     return configValue;
 }

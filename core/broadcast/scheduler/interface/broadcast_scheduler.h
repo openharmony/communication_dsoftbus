@@ -46,6 +46,7 @@ int32_t SchedulerDeinitBroadcast(void);
 /**
  * @brief Register the service to the broadcast scheduler.
  *
+ * @param  protocol Indicates the protocol type {@link BroadcastProtocol}.
  * @param type Indicates the service type {@link BaseServiceType}.
  * @param bcId Indicates the service broadcast ID.
  * @param cb Indicates the service broadcast callback {@link BroadcastCallback}.
@@ -56,7 +57,8 @@ int32_t SchedulerDeinitBroadcast(void);
  * @since 5.0
  * @version 1.0
  */
-int32_t SchedulerRegisterBroadcaster(BaseServiceType type, int32_t *bcId, const BroadcastCallback *cb);
+int32_t SchedulerRegisterBroadcaster(
+    BroadcastProtocol protocol, BaseServiceType type, int32_t *bcId, const BroadcastCallback *cb);
 
 /**
  * @brief Unregister the service to the broadcast scheduler.
@@ -74,6 +76,7 @@ int32_t SchedulerUnregisterBroadcaster(int32_t bcId);
 /**
  * @brief Register the service listener to the broadcast scheduler.
  *
+ * @param protocol Indicates the protocol type {@link BroadcastProtocol}.
  * @param type Indicates the service type {@link BaseServiceType}.
  * @param listenerId Indicates the service listener ID.
  * @param cb Indicates the service listener callback {@link ScanCallback}.
@@ -84,7 +87,8 @@ int32_t SchedulerUnregisterBroadcaster(int32_t bcId);
  * @since 5.0
  * @version 1.0
  */
-int32_t SchedulerRegisterScanListener(BaseServiceType type, int32_t *listenerId, const ScanCallback *cb);
+int32_t SchedulerRegisterScanListener(
+    BroadcastProtocol protocol, BaseServiceType type, int32_t *listenerId, const ScanCallback *cb);
 
 /**
  * @brief Unregister the service listener to the broadcast scheduler.

@@ -75,6 +75,8 @@ extern "C" {
 
 #define SOFTBUS_IP_TOS_ IP_TOS
 
+#define SOFTBUS_IPPROTO_IPV6_ IPPROTO_IPV6
+#define SOFTBUS_IPV6_TCLASS_ IPV6_TCLASS
 /* netinet/tcp.h */
 #define SOFTBUS_TCP_NODELAY_ TCP_NODELAY
 

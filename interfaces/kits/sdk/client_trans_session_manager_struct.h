@@ -18,6 +18,7 @@
 
 #include "session.h"
 #include "socket.h"
+#include "softbus_app_info.h"
 #include "softbus_def.h"
 #include "softbus_trans_def.h"
 
@@ -85,9 +86,11 @@ typedef struct {
     ChannelType channelType;
     SessionTag info;
     bool isServer;
+    bool isD2D;
     bool isEncyptedRawStream;
     bool isAsync;
     bool isClosing;
+    bool isPagingRoot;
     SessionRole role;
     uint32_t maxIdleTime;
     uint32_t timeout;
@@ -111,9 +114,13 @@ typedef struct {
     int32_t tokenType;
     int32_t peerUserId;
     uint64_t peerTokenId;
+    uint32_t dataLen;
+    char extraData[EXTRA_DATA_MAX_LEN];
     char peerBusinessAccountId[ACCOUNT_UID_LEN_MAX];
     char peerExtraAccessInfo[EXTRA_ACCESS_INFO_LEN_MAX];
+    char peerPagingAccountId[ACCOUNT_UID_LEN_MAX];
     bool isLowLatency;
+    TransFlowInfo flowInfo;
 } SessionInfo;
 
 typedef struct {
