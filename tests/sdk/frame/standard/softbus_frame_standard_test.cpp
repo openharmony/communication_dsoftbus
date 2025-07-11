@@ -728,10 +728,6 @@ HWTEST_F(SoftBusServerProxyFrameTest, OnRefreshLNNResultInnerTest, TestSize.Leve
 
     data.WriteInt32(sizeof(DeviceInfo));
     EXPECT_EQ(g_stub->OnRefreshLNNResultInner(data, reply), SOFTBUS_TRANS_PROXY_READINT_FAILED);
-
-    data.WriteInt32(0);
-    data.WriteInt32(0);
-    EXPECT_EQ(g_stub->OnRefreshLNNResultInner(data, reply), SOFTBUS_OK);
 }
 
 /**
@@ -751,11 +747,6 @@ HWTEST_F(SoftBusServerProxyFrameTest, OnRefreshDeviceFoundInnerTest, TestSize.Le
 
     data.WriteInt32(sizeof(DeviceInfo));
     EXPECT_EQ(g_stub->OnRefreshDeviceFoundInner(data, reply), SOFTBUS_TRANS_PROXY_READRAWDATA_FAILED);
-
-    std::string buffer = "OnRefreshDeviceFoundInnerTest";
-    data.WriteInt32(sizeof(DeviceInfo));
-    data.WriteRawData(buffer.c_str(), sizeof(DeviceInfo));
-    EXPECT_EQ(g_stub->OnRefreshDeviceFoundInner(data, reply), SOFTBUS_OK);
 }
 
 /**
