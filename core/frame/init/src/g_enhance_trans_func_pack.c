@@ -189,3 +189,12 @@ void ServerUpdateHtpChannelPacked(int64_t flIdentity, int32_t channelId)
     }
     return pfnTransEnhanceFuncList->serverUpdateHtpChannel(flIdentity, channelId);
 }
+
+void TransProcessGroupTalkieInfoPacked(const char *pkgName)
+{
+    TransEnhanceFuncList *pfnTransEnhanceFuncList = TransEnhanceFuncListGet();
+    if (TransCheckFuncPointer((void *)pfnTransEnhanceFuncList->transProcessGroupTalkieInfo) != SOFTBUS_OK) {
+        return;
+    }
+    return pfnTransEnhanceFuncList->transProcessGroupTalkieInfo(pkgName);
+}

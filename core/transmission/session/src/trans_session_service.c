@@ -109,6 +109,7 @@ void TransServerDeathCallback(const char *pkgName, int32_t pid)
     TransChannelDeathCallback(pkgName, pid);
     TransDelItemByPackageName(pkgName, pid);
     TransPagingDeathCallbackPacked(pkgName, pid);
+    TransProcessGroupTalkieInfoPacked(pkgName);
 }
 
 static void TransSetUserId(CallerType callerType, SessionServer *newNode)
