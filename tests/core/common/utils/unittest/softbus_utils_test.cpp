@@ -25,6 +25,8 @@ constexpr uint32_t ERROR_CODE_SUB_SYSTEM_INDEX = 21;
 constexpr uint32_t ERROR_CODE_MODULE_INDEX = 16;
 constexpr uint32_t ERROR_CODE_SUB_SYSTEM_AND = 0x1FE00000;
 constexpr uint32_t ERROR_CODE_MODULE_AND = 0x1F0000;
+constexpr uint32_t TEST_MAX_LEN = 256;
+constexpr uint32_t TEST_LEN = 8;
 
 class SoftBusUtilsTest : public testing::Test {
 public:
@@ -490,5 +492,31 @@ HWTEST_F(SoftBusUtilsTest, SoftBusUtilsTest_SoftbusErrorCodeStandard_006, TestSi
         EXPECT_EQ(ret, SOFTBUS_OK);
         EXPECT_EQ(truncatedSize, exceptSize[capacity]);
     }
+}
+
+/**
+ * @tc.name: AddNumberToSocketName001
+ * @tc.desc: Test Add Number To Socket Name
+ * @tc.type: FUNC
+ * @tc.require:
+ */
+ HWTEST_F(SoftBusUtilsTest, AddNumberToSocketName001, TestSize.Level1)
+{
+    uint32_t num = 1;
+    uint32_t preLen = TEST_MAX_LEN;
+    const char *testName = "socket_";
+    char socketName[SESSION_NAME_SIZE_MAX] = { 0 };
+    int32_t ret = AddNumberToSocketName(num, testName, preLen, nullptr);
+    EXPECT_EQ(ret, SOFTBUS_INVALID_PARAM);
+    ret = AddNumberToSocketName(num, nullptr, preLen, socketName);
+    EXPECT_EQ(ret, SOFTBUS_INVALID_PARAM);
+    ret = AddNumberToSocketName(num, testName, preLen, socketName);
+    EXPECT_EQ(ret, SOFTBUS_INVALID_PARAM);
+    preLen = 1;
+    ret = AddNumberToSocketName(num, testName, preLen, socketName);
+    EXPECT_EQ(ret, SOFTBUS_STRCPY_ERR);
+    preLen = TEST_LEN;
+    ret = AddNumberToSocketName(num, testName, preLen, socketName);
+    EXPECT_EQ(ret, SOFTBUS_OK);
 }
 } // namespace OHOS

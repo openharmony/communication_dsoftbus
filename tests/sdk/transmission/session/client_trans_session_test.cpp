@@ -101,7 +101,6 @@ void TransClientSessionTest::SetUpTestCase(void)
 void TransClientSessionTest::TearDownTestCase(void)
 {
     ConnServerDeinit();
-    AuthDeinit();
     BusCenterServerDeinit();
     TransServerDeinit();
 }
@@ -1396,5 +1395,37 @@ HWTEST_F(TransClientSessionTest, TransClientSessionTest42, TestSize.Level1)
     ClientUpdateIdleTimeout(&serverNode, info, nullptr);
     SoftBusFree(sessionParam);
     SoftBusFree(info);
+}
+
+/**
+ * @tc.name: TransClientSessionTest43
+ * @tc.desc: Transmission sdk session manager get exist session.
+ * @tc.type: FUNC
+ * @tc.require:
+ */
+HWTEST_F(TransClientSessionTest, TransClientSessionTest43, TestSize.Level1)
+{
+    int32_t sessionId = 0;
+    int32_t ret = ClientDeletePagingSession(sessionId);
+    EXPECT_EQ(ret, SOFTBUS_INVALID_PARAM);
+    sessionId = 1;
+    ret = ClientDeletePagingSession(sessionId);
+    EXPECT_EQ(ret, SOFTBUS_TRANS_SESSION_INFO_NOT_FOUND);
+}
+
+/**
+ * @tc.name: TransClientSessionTest44
+ * @tc.desc: Transmission sdk session manager get exist session.
+ * @tc.type: FUNC
+ * @tc.require:
+ */
+HWTEST_F(TransClientSessionTest, TransClientSessionTest44, TestSize.Level1)
+{
+    int32_t sessionId = 0;
+    int32_t ret = ClientDeletePagingSession(sessionId);
+    EXPECT_EQ(ret, SOFTBUS_INVALID_PARAM);
+    sessionId = 1;
+    ret = ClientDeletePagingSession(sessionId);
+    EXPECT_EQ(ret, SOFTBUS_TRANS_SESSION_INFO_NOT_FOUND);
 }
 }
