@@ -61,6 +61,7 @@ typedef struct TagClientEnhanceFuncList {
 
 ClientEnhanceFuncList *ClientEnhanceFuncListGet(void);
 int32_t ClientRegisterEnhanceFunc(void *soHandle);
+void ClientRegisterEnhanceFuncCheck(void *sdkFunc);
 
 #ifdef __cplusplus
 }
