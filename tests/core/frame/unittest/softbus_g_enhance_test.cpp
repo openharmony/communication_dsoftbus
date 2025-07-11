@@ -46,6 +46,9 @@ namespace OHOS {
 
 #define TEST_SHORT_UDID_HASH_HEX_LEN 16
 #define VIRTUAL_DEFAULT_SCORE 60
+#define TEST_PID 1570
+
+static const char *TEST_PKG_NAME = "TEST_PKG_NAME";
 
 class SoftbusGEnhanceTest : public testing::Test {
 public:
@@ -62,6 +65,69 @@ public:
     void TearDown() override
     {}
 };
+
+/**
+ * @tc.name: InitSoftbusPagingPacked001
+ * @tc.desc: AdapterRegisterEnhanceFunc function test
+ * @tc.type: FUNC
+ * @tc.require:
+ */
+HWTEST_F(SoftbusGEnhanceTest, InitSoftbusPagingPacked001, TestSize.Level1)
+{
+    ProxyChannelInfo info;
+    int32_t ret = InitSoftbusPagingPacked();
+    EXPECT_EQ(ret, SOFTBUS_OK);
+    DeInitSoftbusPagingPacked();
+    TransPagingDeathCallbackPacked(TEST_PKG_NAME, TEST_PID);
+    TransHasAndUpdatePagingListenPacked(&info);
+}
+
+/**
+ * @tc.name: TransReversePullUpPackedTest001
+ * @tc.desc: AdapterRegisterEnhanceFunc function test
+ * @tc.type: FUNC
+ * @tc.require:
+ */
+HWTEST_F(SoftbusGEnhanceTest, TransReversePullUpPackedTest001, TestSize.Level1)
+{
+    uint32_t chatMode = 1;
+    uint32_t businessFlag = 1;
+    char *pkgName = const_cast<char *>(TEST_PKG_NAME);
+    int32_t ret = TransReversePullUpPacked(chatMode, businessFlag, pkgName);
+    EXPECT_EQ(ret, SOFTBUS_OK);
+}
+
+/**
+ * @tc.name: TransGetPkgnameByBusinessFlagPackedTest001
+ * @tc.desc: AdapterRegisterEnhanceFunc function test
+ * @tc.type: FUNC
+ * @tc.require:
+ */
+HWTEST_F(SoftbusGEnhanceTest, TransGetPkgnameByBusinessFlagPackedTest001, TestSize.Level1)
+{
+    uint32_t pkgLen = 1;
+    uint32_t businessFlag = 1;
+    char *pkgName = const_cast<char *>(TEST_PKG_NAME);
+    int32_t ret = TransGetPkgnameByBusinessFlagPacked(businessFlag, pkgName, pkgLen);
+    EXPECT_EQ(ret, SOFTBUS_OK);
+}
+
+/**
+ * @tc.name: TransPagingGetPidAndDataByFlgPackedTest001
+ * @tc.desc: AdapterRegisterEnhanceFunc function test
+ * @tc.type: FUNC
+ * @tc.require:
+ */
+HWTEST_F(SoftbusGEnhanceTest, TransPagingGetPidAndDataByFlgPackedTest001, TestSize.Level1)
+{
+    bool isClient = true;
+    uint32_t businessFlag = 1;
+    int32_t pid = 1;
+    uint32_t len = 1;
+    char *data = const_cast<char *>(TEST_PKG_NAME);
+    int32_t ret = TransPagingGetPidAndDataByFlgPacked(isClient, businessFlag, &pid, data, &len);
+    EXPECT_EQ(ret, SOFTBUS_OK);
+}
 
 /**
  * @tc.name: SoftbusGEnhanceTest001
@@ -521,5 +587,87 @@ HWTEST_F(SoftbusGEnhanceTest, SoftbusGEnhanceTest016, TestSize.Level1)
     EXPECT_EQ(ret, SOFTBUS_OK);
     EXPECT_NO_FATAL_FAILURE(CheckNeedCloudSyncOfflinePacked(DISCOVERY_TYPE_BLE));
     EXPECT_NO_FATAL_FAILURE(CheckNeedCloudSyncOfflinePacked(DISCOVERY_TYPE_WIFI));
+}
+
+/**
+ * @tc.name: SoftbusGEnhanceTest017
+ * @tc.desc: AdapterRegisterEnhanceFunc function test
+ * @tc.type: FUNC
+ * @tc.require:
+ */
+HWTEST_F(SoftbusGEnhanceTest, SoftbusGEnhanceTest017, TestSize.Level1)
+{
+    ProxyChannelInfo info;
+    int32_t ret = InitSoftbusPagingPacked();
+    EXPECT_EQ(ret, SOFTBUS_OK);
+    DeInitSoftbusPagingPacked();
+    TransPagingDeathCallbackPacked(TEST_PKG_NAME, TEST_PID);
+    TransHasAndUpdatePagingListenPacked(&info);
+}
+
+/**
+ * @tc.name: SoftbusGEnhanceTest018
+ * @tc.desc: AdapterRegisterEnhanceFunc function test
+ * @tc.type: FUNC
+ * @tc.require:
+ */
+HWTEST_F(SoftbusGEnhanceTest, SoftbusGEnhanceTest018, TestSize.Level1)
+{
+    bool isClient = true;
+    uint32_t businessFlag = 1;
+    int32_t pid = 1;
+    uint32_t len = 1;
+    char data[EXTRA_DATA_MAX_LEN] = { 0 };
+    int32_t ret = TransPagingGetPidAndDataByFlgPacked(isClient, businessFlag, &pid, data, &len);
+    EXPECT_EQ(ret, SOFTBUS_OK);
+    ret = TransDelPagingInfoByBusinessFlagPacked(businessFlag);
+    EXPECT_EQ(ret, SOFTBUS_OK);
+}
+
+/**
+ * @tc.name: SoftbusGEnhanceTest019
+ * @tc.desc: AdapterRegisterEnhanceFunc function test
+ * @tc.type: FUNC
+ * @tc.require:
+ */
+HWTEST_F(SoftbusGEnhanceTest, SoftbusGEnhanceTest019, TestSize.Level1)
+{
+    uint32_t chatMode = 1;
+    uint32_t businessFlag = 1;
+    char *pkgName = const_cast<char *>(TEST_PKG_NAME);
+    int32_t ret = TransReversePullUpPacked(chatMode, businessFlag, pkgName);
+    EXPECT_EQ(ret, SOFTBUS_OK);
+}
+
+/**
+ * @tc.name: SoftbusGEnhanceTest020
+ * @tc.desc: AdapterRegisterEnhanceFunc function test
+ * @tc.type: FUNC
+ * @tc.require:
+ */
+HWTEST_F(SoftbusGEnhanceTest, SoftbusGEnhanceTest020, TestSize.Level1)
+{
+    uint32_t pkgLen = 1;
+    uint32_t businessFlag = 1;
+    char *pkgName = const_cast<char *>(TEST_PKG_NAME);
+    int32_t ret = TransGetPkgnameByBusinessFlagPacked(businessFlag, pkgName, pkgLen);
+    EXPECT_EQ(ret, SOFTBUS_OK);
+}
+
+/**
+ * @tc.name: SoftbusGEnhanceTest021
+ * @tc.desc: AdapterRegisterEnhanceFunc function test
+ * @tc.type: FUNC
+ * @tc.require:
+ */
+HWTEST_F(SoftbusGEnhanceTest, SoftbusGEnhanceTest021, TestSize.Level1)
+{
+    bool isClient = true;
+    uint32_t businessFlag = 1;
+    int32_t pid = 1;
+    uint32_t len = 1;
+    char *data = const_cast<char *>(TEST_PKG_NAME);
+    int32_t ret = TransPagingGetPidAndDataByFlgPacked(isClient, businessFlag, &pid, data, &len);
+    EXPECT_EQ(ret, SOFTBUS_OK);
 }
 }

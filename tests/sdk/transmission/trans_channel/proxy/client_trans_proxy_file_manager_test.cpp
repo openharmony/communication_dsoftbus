@@ -304,6 +304,43 @@ HWTEST_F(ClientTransProxyFileManagerTest, ClinetTransRecvFileFrameDataTest001, T
 }
 
 /**
+ * @tc.name: ClientTransProxyCreateChannelInfoTest001
+ * @tc.desc: clent trans recv file frame data test, use the wrong parameter.
+ * @tc.type: FUNC
+ * @tc.require:
+ */
+HWTEST_F(ClientTransProxyFileManagerTest, ClientTransProxyCreateChannelInfoTest001, TestSize.Level1)
+{
+    ChannelInfo *channel = (ChannelInfo *)SoftBusMalloc(sizeof(ChannelInfo));
+    ASSERT_TRUE(channel != nullptr);
+    channel->channelId = 1;
+    channel->isEncrypt = 0;
+    channel->linkType = LANE_BR;
+    channel->sessionKey = (char *)g_sessionKey;
+    channel->osType = OH_TYPE;
+    channel->isD2D = 1;
+    channel->dataLen = 0;
+    channel->isServer = 1;
+    channel->pagingNonce = (char *)g_sessionKey;
+    channel->pagingSessionkey = (char *)g_sessionKey;
+    channel->extraData = (char *)g_sessionKey;
+    channel->pagingAccountId = (char *)g_sessionKey;
+    ClientProxyChannelInfo *info = ClientTransProxyCreateChannelInfo(channel);
+    ASSERT_TRUE(info != nullptr);
+    SoftBusFree(info);
+    channel->dataLen = EXTRA_DATA_MAX_LEN + 1;
+    channel->isServer = 0;
+    ClientProxyChannelInfo *testInfo = ClientTransProxyCreateChannelInfo(channel);
+    ASSERT_TRUE(testInfo != nullptr);
+    SoftBusFree(testInfo);
+    channel->dataLen = EXTRA_DATA_MAX_LEN - 1;
+    ClientProxyChannelInfo *testInfoTest = ClientTransProxyCreateChannelInfo(channel);
+    ASSERT_TRUE(testInfoTest != nullptr);
+    SoftBusFree(testInfoTest);
+    SoftBusFree(channel);
+}
+
+/**
  * @tc.name: ClinetTransRecvFileFrameDataTest002
  * @tc.desc: client trans recv file frame data test, use the wrong parameter.
  * @tc.type: FUNC
@@ -325,7 +362,7 @@ HWTEST_F(ClientTransProxyFileManagerTest, ClinetTransRecvFileFrameDataTest002, T
     SoftBusFree(channel);
     FileFrame fileFrame;
     fileFrame.frameLength = PROXY_BR_MAX_PACKET_SIZE - 1;
- 
+
     fileFrame.frameType = TRANS_SESSION_FILE_FIRST_FRAME;
     ret = ProcessRecvFileFrameData(sessionId, channelId, &fileFrame);
     EXPECT_EQ(SOFTBUS_NO_INIT, ret);

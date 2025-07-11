@@ -41,7 +41,7 @@ ohos_executable("softbus_test") {
     defines += [ "STANDARD_SYSTEM_ENABLE" ]
 
     deps = [ "$dsoftbus_root_path/tests/sdk:softbus_client_static" ]
-    part_name = "softbus_L2"
+    part_name = "softbus"
   }
   subsystem_name = "communication"
 }
