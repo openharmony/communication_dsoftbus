@@ -633,13 +633,13 @@ static int32_t TransProxyDelByChannelId(int32_t channelId, ProxyChannelInfo *cha
 
 int32_t TransPagingResetChan(ProxyChannelInfo *chanInfo)
 {
-    ProxyChannelInfo *removeNode = NULL;
-    ProxyChannelInfo *nextNode = NULL;
-
-    TRANS_CHECK_AND_RETURN_RET_LOGE((g_proxyChannelList != NULL && chanInfo == NULL),
+    TRANS_CHECK_AND_RETURN_RET_LOGE(chanInfo != NULL, SOFTBUS_INVALID_PARAM, TRANS_CTRL, "chanInfo is null");
+    TRANS_CHECK_AND_RETURN_RET_LOGE(g_proxyChannelList != NULL,
         SOFTBUS_NO_INIT, TRANS_CTRL, "g_proxyChannelList is null");
     TRANS_CHECK_AND_RETURN_RET_LOGE(
         SoftBusMutexLock(&g_proxyChannelList->lock) == SOFTBUS_OK, SOFTBUS_LOCK_ERR, TRANS_CTRL, "lock mutex fail!");
+    ProxyChannelInfo *removeNode = NULL;
+    ProxyChannelInfo *nextNode = NULL;
     LIST_FOR_EACH_ENTRY_SAFE(removeNode, nextNode, &g_proxyChannelList->list, ProxyChannelInfo, node) {
         if (removeNode->myId == chanInfo->myId && removeNode->peerId == chanInfo->peerId) {
             if (memcpy_s(chanInfo, sizeof(ProxyChannelInfo), removeNode, sizeof(ProxyChannelInfo)) != EOK) {
