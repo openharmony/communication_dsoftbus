@@ -26,8 +26,8 @@
 
 using namespace std;
 
-#define FEATURE_MIN 1
-#define FEATURE_MAX 10
+#define AUTH_TYPE_MIN AUTH_LINK_TYPE_WIFI
+#define AUTH_TYPE_MAX AUTH_LINK_TYPE_MAX
 #define TYPE_MIN DATA_TYPE_AUTH
 #define TYPE_MAX DATA_TYPE_APPLY_KEY_CONNECTION
 #define MODULE_MIN MODULE_TRUST_ENGINE
@@ -70,7 +70,7 @@ static bool ProcSessionKeyInfo(FuzzedDataProvider &provider, AuthSessionInfo *in
     RawLinkNeedUpdateAuthManager(info->uuid, info->isServer);
     RawLinkNeedUpdateAuthManager(nullptr, info->isServer);
     FindNormalizedKeyAuthManagerByUdid(info->udid, info->isServer);
-    DelAuthManager(auth, info->connInfo.type);
+    DelAuthManager(auth, AUTH_LINK_TYPE_MAX);
     return true;
 }
 
@@ -91,7 +91,7 @@ bool AuthManagerOtherFuzzTest(FuzzedDataProvider &provider)
     if (!ProcSessionKeyInfo(provider, &info, authSeq)) {
         return false;
     }
-    info.connInfo.type = (AuthLinkType)provider.ConsumeIntegralInRange<uint32_t>(FEATURE_MIN, FEATURE_MAX);
+    info.connInfo.type = (AuthLinkType)provider.ConsumeIntegralInRange<uint32_t>(AUTH_TYPE_MIN, AUTH_TYPE_MAX);
     info.connId = (uint64_t)info.connInfo.type << INT32_BIT_NUM;
     info.isConnectServer = provider.ConsumeBool();
     AuthManager *auth = NewAuthManager(authSeq, &info);
