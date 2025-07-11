@@ -19,7 +19,7 @@
 #include "softbus_def.h"
 
 #define LNN_SUPPORT_ENHANCE_FEATURE 0x14FF7EA
-#define ENHANCE_SUPPORT_AUTH_CAPACITY 0x7F
+#define ENHANCE_SUPPORT_AUTH_CAPACITY 0xFF
 #define ENHANCE_LNN_NET_IF_NAME "0:eth0,1:wlan0,2:br0,3:ble0,4:ncm0,4:wwan0"
 
 void SoftbusConfigAdapterInit(const ConfigSetProc *sets)
