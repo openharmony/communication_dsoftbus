@@ -33,13 +33,17 @@ extern "C"{
 #define MEDIUM_NUM_MAX                   2
 
 // max broadcasting and scan limit
-#define BC_NUM_MAX                      20
-#define SCAN_NUM_MAX                    16
+#define BC_NUM_MAX                      28 // ble for 20 sle for 8
+#define SCAN_NUM_MAX                    24 // ble for 16 sle for 8
 
 #define BC_DATA_MAX_LEN                 24
 #define RSP_DATA_MAX_LEN                27
 #define BC_BYTE_MASK                    0xFF
 #define BC_SHIFT_BIT                    8
+
+#define SLE_SCAN_NUM_MAX                8
+#define SLE_DATA_MAX_LEN                247
+#define SLE_RSP_DATA_MAX_LEN            250
 
 // adv broadcast head
 #define BC_HEAD_LEN                     7

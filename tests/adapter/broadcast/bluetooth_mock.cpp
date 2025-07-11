@@ -50,7 +50,7 @@ static int32_t ActionBleDeregisterScanCallbacks(int32_t scannerId)
 }
 
 static int32_t ActionRegisterBroadcastMediumFunction(
-    SoftbusMediumType type, const SoftbusBroadcastMediumInterface *func)
+    BroadcastProtocol type, const SoftbusBroadcastMediumInterface *func)
 {
     MockBluetooth::interface = func;
     return OHOS_BT_STATUS_SUCCESS;
@@ -318,7 +318,7 @@ int32_t SoftBusAddBtStateListener(const SoftBusBtStateListener *listener, int32_
     return MockBluetooth::GetMocker()->SoftBusAddBtStateListener(listener, listenerId);
 }
 
-int32_t RegisterBroadcastMediumFunction(SoftbusMediumType type, const SoftbusBroadcastMediumInterface *interface)
+int32_t RegisterBroadcastMediumFunction(BroadcastProtocol type, const SoftbusBroadcastMediumInterface *interface)
 {
     DISC_LOGI(DISC_TEST, "begin to register func");
     int32_t ret = MockBluetooth::GetMocker()->RegisterBroadcastMediumFunction(type, interface);
