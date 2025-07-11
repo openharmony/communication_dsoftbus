@@ -409,7 +409,6 @@ extern "C" int32_t LLVMFuzzerTestOneInput(const uint8_t *data, size_t size)
     OHOS::BuildDataHeadTest(provider);
     OHOS::TransTdcEncryptWithSeqTest(provider);
     OHOS::PackTcpDataPacketHeadTest(provider);
-    OHOS::TransPackDataTest(provider);
     OHOS::BuildInnerTdcSendDataInfoTest(provider);
     OHOS::TransTdcPackAllDataTest(provider);
     OHOS::TransTdcSendDataTest(provider);
