@@ -328,10 +328,10 @@ HWTEST_F(TransCoreTcpDirectTest, TransSrvDelDataBufNodeTest007, TestSize.Level1)
  */
 HWTEST_F(TransCoreTcpDirectTest, VerifyP2pPackTest008, TestSize.Level1)
 {
-    char *ret = VerifyP2pPack(g_ip, g_port, nullptr);
+    char *ret = VerifyP2pPack(g_ip, g_port, nullptr, 0);
     EXPECT_TRUE(ret != nullptr);
 
-    ret = VerifyP2pPack(nullptr, g_port, nullptr);
+    ret = VerifyP2pPack(nullptr, g_port, nullptr, 0);
     EXPECT_TRUE(ret == nullptr);
 }
 
@@ -349,16 +349,16 @@ HWTEST_F(TransCoreTcpDirectTest, VerifyP2pUnPackTest009, TestSize.Level1)
     cJSON *json = cJSON_Parse(msg.c_str());
     EXPECT_TRUE(json != nullptr);
 
-    char *pack = VerifyP2pPack(g_ip, g_port, nullptr);
+    char *pack = VerifyP2pPack(g_ip, g_port, nullptr, 0);
     EXPECT_TRUE(pack != nullptr);
-
-    int32_t ret = VerifyP2pUnPack(json, peerIp, IP_LEN, &peerPort);
+    ProtocolType protocol = 0;
+    int32_t ret = VerifyP2pUnPack(json, peerIp, IP_LEN, &peerPort, nullptr);
     EXPECT_EQ(ret, SOFTBUS_PARSE_JSON_ERR);
 
-    ret = VerifyP2pUnPack(json, const_cast<char *>(g_ip), IP_LEN, &g_port);
+    ret = VerifyP2pUnPack(json, const_cast<char *>(g_ip), IP_LEN, &g_port, &protocol);
     EXPECT_EQ(ret, SOFTBUS_PARSE_JSON_ERR);
 
-    ret = VerifyP2pUnPack(nullptr, const_cast<char *>(g_ip), IP_LEN, &g_port);
+    ret = VerifyP2pUnPack(nullptr, const_cast<char *>(g_ip), IP_LEN, &g_port, &protocol);
     EXPECT_EQ(ret, SOFTBUS_INVALID_PARAM);
     cJSON_Delete(json);
 }

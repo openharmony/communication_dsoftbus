@@ -15,6 +15,7 @@
 
 #include "trans_tcp_direct_message.h"
 
+#include "cJSON.h"
 #include <securec.h>
 #include <string.h>
 
@@ -23,8 +24,8 @@
 #include "auth_interface.h"
 #include "auth_uk_manager.h"
 #include "bus_center_manager.h"
-#include "cJSON.h"
 #include "data_bus_native.h"
+#include "legacy/softbus_hisysevt_transreporter.h"
 #include "lnn_distributed_net_ledger.h"
 #include "lnn_lane_link.h"
 #include "lnn_net_builder.h"
@@ -38,23 +39,24 @@
 #include "softbus_app_info.h"
 #include "softbus_error_code.h"
 #include "softbus_feature_config.h"
-#include "softbus_utils.h"
-#include "legacy/softbus_hisysevt_transreporter.h"
+#include "softbus_json_utils.h"
 #include "softbus_message_open_channel.h"
 #include "softbus_socket.h"
 #include "softbus_tcp_socket.h"
+#include "softbus_utils.h"
 #include "trans_bind_request_manager.h"
 #include "trans_channel_common.h"
 #include "trans_channel_manager.h"
 #include "trans_event.h"
+#include "g_enhance_trans_func_pack.h"
 #include "trans_lane_manager.h"
 #include "trans_log.h"
-#include "trans_tcp_process_data.h"
 #include "trans_session_manager.h"
 #include "trans_tcp_direct_callback.h"
+#include "trans_tcp_direct_listener.h"
 #include "trans_tcp_direct_manager.h"
 #include "trans_tcp_direct_sessionconn.h"
-#include "trans_tcp_direct_listener.h"
+#include "trans_tcp_process_data.h"
 #include "trans_uk_manager.h"
 #include "wifi_direct_manager.h"
 
@@ -822,6 +824,10 @@ static SessionConn *GetSessionConnFromDataBusRequest(int32_t channelId, const cJ
         SoftBusFree(conn);
         TRANS_LOGE(TRANS_CTRL, "UnpackRequest error");
         return NULL;
+    }
+    int64_t flIdentity = 0;
+    if (GetJsonObjectNumber64Item(request, "FL_IDENTITY", (int64_t *)&flIdentity)) {
+        ServerUpdateHtpChannelPacked(flIdentity, channelId);
     }
     (void)LnnGetNetworkIdByUuid(conn->appInfo.peerData.deviceId, conn->appInfo.peerNetWorkId, NETWORK_ID_BUF_LEN);
     int32_t osType = 0;

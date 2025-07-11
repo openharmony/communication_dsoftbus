@@ -393,8 +393,8 @@ static int32_t CopyAsyncReqItemSessionParam(const SessionParam *source, SessionP
     return CopyAsyncReqItemSessionParamIds(source, target);
 }
 
-static int32_t TransAddAsyncLaneReqFromPendingList(uint32_t laneHandle, const SessionParam *param,
-    uint64_t callingTokenId, int64_t timeStart)
+static int32_t TransAddAsyncLaneReqFromPendingList(
+    uint32_t laneHandle, const SessionParam *param, uint64_t callingTokenId, int64_t timeStart)
 {
     if (g_asyncReqLanePendingList == NULL) {
         TRANS_LOGE(TRANS_SVC, "lane pending list no init.");
@@ -413,6 +413,9 @@ static int32_t TransAddAsyncLaneReqFromPendingList(uint32_t laneHandle, const Se
     item->callingTokenId = callingTokenId;
     item->firstTokenId = TransAclGetFirstTokenID();
     item->timeStart = timeStart;
+    item->param.flowInfo.flowSize = param->flowInfo.flowSize;
+    item->param.flowInfo.sessionType = param->flowInfo.sessionType;
+    item->param.flowInfo.flowQosType = param->flowInfo.flowQosType;
     if (CopyAsyncReqItemSessionParam(param, &(item->param)) != SOFTBUS_OK) {
         DestroyAsyncReqItemParam(&(item->param));
         SoftBusFree(item);
@@ -435,8 +438,8 @@ static int32_t TransAddAsyncLaneReqFromPendingList(uint32_t laneHandle, const Se
     ListAdd(&(g_asyncReqLanePendingList->list), &(item->node));
     g_asyncReqLanePendingList->cnt++;
     (void)SoftBusMutexUnlock(&g_asyncReqLanePendingList->lock);
-    TRANS_LOGI(TRANS_SVC, "add async request to pending list laneHandle=%{public}u, socket=%{public}d",
-        laneHandle, param->sessionId);
+    TRANS_LOGI(TRANS_SVC, "add async request to pending list laneHandle=%{public}u, socket=%{public}d", laneHandle,
+        param->sessionId);
     return SOFTBUS_OK;
 }
 
@@ -1244,6 +1247,9 @@ static int32_t GetAllocInfoBySessionParam(const SessionParam *param, LaneAllocIn
     if (transType == LANE_T_BUTT) {
         return SOFTBUS_TRANS_INVALID_SESSION_TYPE;
     }
+    allocInfo->extendInfo.flowInfo.flowSize = param->flowInfo.flowSize;
+    allocInfo->extendInfo.flowInfo.sessionType = param->flowInfo.sessionType;
+    allocInfo->extendInfo.flowInfo.flowQosType = param->flowInfo.flowQosType;
     allocInfo->extendInfo.actionAddr = param->actionId;
     allocInfo->extendInfo.isSupportIpv6 = (param->attr->dataType != TYPE_STREAM && param->actionId > 0);
     allocInfo->extendInfo.networkDelegate = false;

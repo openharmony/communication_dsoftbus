@@ -66,6 +66,7 @@ extern "C" {
 #define MAX_DEV_INFO_COUNT 32
 #define MAX_PUBLISH_INFO_COUNT 32
 #define IP_LEN 46
+#define MAC_MAX_LEN 18
 #define MAX_PEERS_NUM 32
 #define MAX_OPERATION_CODE_LEN 32
 #define SESSION_KEY_LENGTH 32

@@ -3196,3 +3196,51 @@ int32_t ClientCheckIsD2DypeBySessionId(int32_t sessionId, bool *isD2D)
     UnlockClientSessionServerList();
     return SOFTBUS_OK;
 }
+
+int32_t ClientGetSessionTypeBySocket(int32_t socket, int32_t *sessionType)
+{
+    if (socket < 0 || sessionType == NULL) {
+        TRANS_LOGE(TRANS_SDK, "invalid param");
+        return SOFTBUS_INVALID_PARAM;
+    }
+    int32_t ret = LockClientSessionServerList();
+    if (ret != SOFTBUS_OK) {
+        TRANS_LOGE(TRANS_SDK, "lock failed");
+        return ret;
+    }
+    ClientSessionServer *serverNode = NULL;
+    SessionInfo *sessionNode = NULL;
+    if (GetSessionById(socket, &serverNode, &sessionNode) != SOFTBUS_OK) {
+        UnlockClientSessionServerList();
+        TRANS_LOGE(TRANS_SDK, "socket not found. socket=%{public}d", socket);
+        return SOFTBUS_TRANS_SESSION_INFO_NOT_FOUND;
+    }
+    *sessionType = sessionNode->info.flag;
+    UnlockClientSessionServerList();
+    return SOFTBUS_OK;
+}
+
+int32_t ClientSetFLTos(int32_t socket, TransFlowInfo *flowInfo)
+{
+    if (socket < 0) {
+        TRANS_LOGE(TRANS_SDK, "invalid param");
+        return SOFTBUS_INVALID_PARAM;
+    }
+    int32_t ret = LockClientSessionServerList();
+    if (ret != SOFTBUS_OK) {
+        TRANS_LOGE(TRANS_SDK, "lock failed");
+        return ret;
+    }
+    ClientSessionServer *serverNode = NULL;
+    SessionInfo *sessionNode = NULL;
+    if (GetSessionById(socket, &serverNode, &sessionNode) != SOFTBUS_OK) {
+        UnlockClientSessionServerList();
+        TRANS_LOGE(TRANS_SDK, "socket not found. socket=%{public}d", socket);
+        return SOFTBUS_TRANS_SESSION_INFO_NOT_FOUND;
+    }
+    sessionNode->flowInfo.flowSize = flowInfo->flowSize;
+    sessionNode->flowInfo.sessionType = flowInfo->sessionType;
+    sessionNode->flowInfo.flowQosType = flowInfo->flowQosType;
+    UnlockClientSessionServerList();
+    return SOFTBUS_OK;
+}

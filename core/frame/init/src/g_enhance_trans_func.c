@@ -41,5 +41,9 @@ int32_t TransRegisterEnhanceFunc(void *soHandle)
     g_transEnhanceFuncList.transHasAndUpdatePagingListen = dlsym(soHandle, "TransHasAndUpdatePagingListen");
     g_transEnhanceFuncList.transPagingGetPidAndDataByFlg = dlsym(soHandle, "TransPagingGetPidAndDataByFlg");
     g_transEnhanceFuncList.transDelPagingInfoByBusinessFlag = dlsym(soHandle, "TransDelPagingInfoByBusinessFlag");
+    g_transEnhanceFuncList.clientOpenHtpChannel = dlsym(soHandle, "ClientOpenHtpChannel");
+    g_transEnhanceFuncList.serverOpenHtpChannel = dlsym(soHandle, "ServerOpenHtpChannel");
+    g_transEnhanceFuncList.closeHtpChannel = dlsym(soHandle, "CloseHtpChannel");
+    g_transEnhanceFuncList.serverUpdateHtpChannel = dlsym(soHandle, "ServerUpdateHtpChannel");
     return SOFTBUS_OK;
 }
