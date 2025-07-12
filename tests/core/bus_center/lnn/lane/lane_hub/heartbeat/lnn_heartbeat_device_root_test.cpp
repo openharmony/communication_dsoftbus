@@ -36,7 +36,7 @@ using namespace testing::ext;
 
 NodeInfo nodeinfo1;
 
-class LnnHeartBeatStaticTest : public testing::Test {
+class LnnHeartBeatDeviceRootTest : public testing::Test {
 public:
     static void SetUpTestCase();
 
@@ -47,18 +47,18 @@ public:
     void TearDown();
 };
 
-void LnnHeartBeatStaticTest::SetUpTestCase()
+void LnnHeartBeatDeviceRootTest::SetUpTestCase()
 {
 }
 
-void LnnHeartBeatStaticTest::TearDownTestCase()
+void LnnHeartBeatDeviceRootTest::TearDownTestCase()
 {
 }
 
-void LnnHeartBeatStaticTest::SetUp()
+void LnnHeartBeatDeviceRootTest::SetUp()
 {}
 
-void LnnHeartBeatStaticTest::TearDown()
+void LnnHeartBeatDeviceRootTest::TearDown()
 {}
 
 /*
@@ -67,7 +67,7 @@ void LnnHeartBeatStaticTest::TearDown()
  * @tc.type: FUNC
  * @tc.require:
  */
-HWTEST_F(LnnHeartBeatStaticTest, HbRootDeviceLeaveLnnTest01, TestSize.Level1)
+HWTEST_F(LnnHeartBeatDeviceRootTest, HbRootDeviceLeaveLnnTest001, TestSize.Level1)
 {
     int ret = 0;
     NiceMock<LnnHeatbeatStaticInterfaceMock> LnnMock;
@@ -87,7 +87,7 @@ HWTEST_F(LnnHeartBeatStaticTest, HbRootDeviceLeaveLnnTest01, TestSize.Level1)
  * @tc.type: FUNC
  * @tc.require:
  */
-HWTEST_F(LnnHeartBeatStaticTest, HbDeviceRootStateEventHandlerTest01, TestSize.Level1)
+HWTEST_F(LnnHeartBeatDeviceRootTest, HbDeviceRootStateEventHandlerTest001, TestSize.Level1)
 {
     LnnDeviceRootStateChangeEvent *event =
         reinterpret_cast<LnnDeviceRootStateChangeEvent*>(SoftBusCalloc(sizeof(LnnDeviceRootStateChangeEvent)));
