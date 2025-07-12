@@ -20,6 +20,7 @@
 
 #include "auth_interface.h"
 #include "bus_center_manager.h"
+#include "g_enhance_trans_func_pack.h"
 #include "legacy/softbus_adapter_hitrace.h"
 #include "lnn_bus_center_ipc.h"
 #include "lnn_distributed_net_ledger.h"
@@ -35,7 +36,6 @@
 #include "softbus_proxychannel_manager.h"
 #include "softbus_proxychannel_pipeline.h"
 #include "softbus_socket.h"
-#include "g_enhance_trans_func_pack.h"
 #include "trans_lane_pending_ctl.h"
 #include "trans_log.h"
 #include "trans_tcp_direct_json.h"
@@ -117,7 +117,7 @@ static int32_t StartNewHmlListener(const char *ip, ProtocolType protocol, int32_
     }
     if (protocol == LNN_PROTOCOL_HTP) {
         struct WifiDirectManager *pManager = GetWifiDirectManager();
-        if (pManager != NULL || pManager->getLocalAndRemoteMacByLocalIp != NULL) {
+        if (pManager != NULL && pManager->getLocalAndRemoteMacByLocalIp != NULL) {
             int32_t ret = pManager->getLocalAndRemoteMacByLocalIp(
                 ip, info.socketOption.localMac, MAX_MAC_LEN, info.socketOption.remoteMac, MAX_MAC_LEN);
             if (ret != SOFTBUS_OK) {
