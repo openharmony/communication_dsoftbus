@@ -13,3 +13,15 @@
  * limitations under the License.
  */
 
+#ifndef LNN_CHECK_RISK_FACTOR_H
+#define LNN_CHECK_RISK_FACTOR_H
+
+#ifdef __cplusplus
+extern "C" {
+#endif
+bool IsDeviceHasRiskFactor(void);
+
+#ifdef __cplusplus
+}
+#endif
+#endif // LNN_CHECK_RISK_FACTOR_H
