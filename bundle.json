@@ -117,8 +117,7 @@
         "usb_manager",
         "selinux_adapter",
         "time_service",
-        "napi",
-        "security_guard_ext"
+        "napi"
       ],
       "third_party": [
         "cJSON",

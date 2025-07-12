@@ -824,7 +824,7 @@ static int32_t LnnRegisterEvent(void)
         LNN_LOGE(LNN_BUILDER, "Net regist data share evt handler fail");
         return SOFTBUS_NETWORK_REG_EVENT_HANDLER_ERR;
     }
-    if (LnnRegisterEventHandler(LNN_EVENT_DEVICE_ROOT_STATE_CHANGE, NetDeviceRootStateEventHandler) != SOFTBUS_OK) {
+    if (LnnRegisterEventHandler(LNN_EVENT_DEVICE_ROOT_STATE_CHANGED, NetDeviceRootStateEventHandler) != SOFTBUS_OK) {
         LNN_LOGE(LNN_BUILDER, "Net regist device root evt handler fail");
         return SOFTBUS_NETWORK_REG_EVENT_HANDLER_ERR;
     }
