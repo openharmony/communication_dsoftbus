@@ -739,7 +739,8 @@ static int32_t ProcessAuthHichainParam(uint32_t requestId, const DeviceAuthCallb
     return SOFTBUS_OK;
 }
 
-static int32_t GetUdidAndAccountShortHash(char *localUdidShortHash, char *localAccountShortHash)
+static int32_t GetUdidAndAccountShortHash(
+    char *localUdidShortHash, uint32_t udidHashLen, char *localAccountShortHash, uint32_t accountHashLen)
 {
     if (localUdidShortHash == NULL || localAccountShortHash == NULL) {
         AUTH_LOGE(AUTH_CONN, "invalid param");
@@ -758,7 +759,7 @@ static int32_t GetUdidAndAccountShortHash(char *localUdidShortHash, char *localA
         AUTH_LOGE(AUTH_CONN, "generate strhash fail");
         return SOFTBUS_NETWORK_GENERATE_STR_HASH_ERR;
     }
-    if (ConvertBytesToHexString(localUdidShortHash, D2D_UDID_HASH_STR_LEN, hash, D2D_UDID_SHORT_HASH_LEN) !=
+    if (ConvertBytesToHexString(localUdidShortHash, udidHashLen, hash, D2D_UDID_SHORT_HASH_LEN) !=
         SOFTBUS_OK) {
         AUTH_LOGE(AUTH_CONN, "convert bytes to string fail");
         return SOFTBUS_NETWORK_BYTES_TO_HEX_STR_ERR;
@@ -767,7 +768,7 @@ static int32_t GetUdidAndAccountShortHash(char *localUdidShortHash, char *localA
         AUTH_LOGE(AUTH_CONN, "get local account hash fail");
         return SOFTBUS_NETWORK_GET_LOCAL_NODE_INFO_ERR;
     }
-    if (ConvertBytesToHexString(localAccountShortHash, D2D_ACCOUNT_HASH_STR_LEN, localAccountHash,
+    if (ConvertBytesToHexString(localAccountShortHash, accountHashLen, localAccountHash,
         D2D_ACCOUNT_SHORT_HASH_LEN) != SOFTBUS_OK) {
         AUTH_LOGE(AUTH_CONN, "convert local account hash to string fail");
         return SOFTBUS_NETWORK_BYTES_TO_HEX_STR_ERR;
@@ -787,7 +788,8 @@ static char *PackApplyKeyAclParam(RequestBusinessType type)
 {
     char localUdidShortHash[D2D_UDID_HASH_STR_LEN] = { 0 };
     char localAccountShortHash[D2D_ACCOUNT_HASH_STR_LEN] = { 0 };
-    if (GetUdidAndAccountShortHash(localUdidShortHash, localAccountShortHash)) {
+    if (GetUdidAndAccountShortHash(
+        localUdidShortHash, D2D_UDID_HASH_STR_LEN, localAccountShortHash, D2D_ACCOUNT_HASH_STR_LEN)) {
         AUTH_LOGE(AUTH_CONN, "generate short hash fail");
         return NULL;
     }
@@ -872,7 +874,8 @@ static int32_t ProcessApplyKeyNegoState(const RequestBusinessInfo *info, bool *i
     }
     char localUdidShortHash[D2D_UDID_HASH_STR_LEN] = { 0 };
     char localAccountShortHash[D2D_ACCOUNT_HASH_STR_LEN] = { 0 };
-    if (GetUdidAndAccountShortHash(localUdidShortHash, localAccountShortHash) != SOFTBUS_OK) {
+    if (GetUdidAndAccountShortHash(
+        localUdidShortHash, D2D_UDID_HASH_STR_LEN, localAccountShortHash, D2D_ACCOUNT_HASH_STR_LEN) != SOFTBUS_OK) {
         AUTH_LOGE(AUTH_CONN, "get local udid and account hash fail");
         return SOFTBUS_NETWORK_GET_NODE_INFO_ERR;
     }
