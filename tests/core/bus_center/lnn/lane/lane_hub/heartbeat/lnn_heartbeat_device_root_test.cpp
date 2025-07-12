@@ -13,7 +13,7 @@
  * limitations under the License.
  */
 
- #include <gtest/gtest.h>
+#include <gtest/gtest.h>
 #include <gmock/gmock.h>
 #include <securec.h>
 #include <thread>
@@ -23,7 +23,7 @@
 #include "lnn_connection_fsm.h"
 #include "lnn_device_info.h"
 #include "lnn_heartbeat_ctrl.c"
-#include "lnn_heartbeat_satic_mock.h"
+#include "lnn_heartbeat_device_root_mock.h"
 #include "lnn_heartbeat_strategy.h"
 #include "lnn_node_info.h"
 #include "message_handler.h"
