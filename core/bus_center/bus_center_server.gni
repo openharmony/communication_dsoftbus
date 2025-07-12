@@ -107,6 +107,6 @@ if (defined(ohos_lite)) {
   bus_center_server_external_deps +=
       bus_center_adapter_external_deps + bus_center_ledger_external_deps +
       bus_center_core_adapter_external_deps + adapter_wifi_external_deps +
-      adapter_hdi_external_deps
+      adapter_hdi_external_deps + bus_center_builder_external_deps
   bus_center_server_external_deps += [ "c_utils:utils" ]
 }

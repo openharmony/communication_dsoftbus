@@ -692,8 +692,12 @@ void LnnNotifyVapInfoChangeEvent(int32_t preferChannel)
 
 void LnnNotifyDeviceRootStateChangeEvent(void)
 {
-    // waiting for dm search api
-    SoftBusDeviceRootState state = SOFTBUS_DEVICE_IS_ROOT;
+    SoftBusDeviceRootState state = SOFTBUS_DEVICE_ROOT_UNKNOWN;
+    if (IsDeviceHasRiskFactor()) {
+        state = SOFTBUS_DEVICE_IS_ROOT;
+    } else {
+        state = SOFTBUS_DEVICE_NOT_ROOT;
+    }
     LnnDeviceRootStateChangeEvent event = {.basic.event = LNN_EVENT_DEVICE_ROOT_STATE_CHANGED,
         .status = (uint8_t)state};
     NotifyEvent((const LnnEventBasicInfo *)&event);

@@ -631,4 +631,6 @@ HWTEST_F(LNNNetworkManagerMockTest, LNN_REGISTER_EVENT_001, TestSize.Level1)
     EXPECT_EQ(ret, SOFTBUS_OK);
 }
 
+HWTEST_F(LNNNetworkManagerMockTest, NetRootDeviceLeaveLnnTest_001, TestSize.Level1)
+
 } // namespace OHOS
