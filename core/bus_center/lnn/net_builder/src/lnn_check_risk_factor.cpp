@@ -66,5 +66,11 @@ bool IsDeviceHasRiskFactor(void)
     }
     JSON_Delete(paramObj);
     JSON_Delete(resultObj);
+    if ((riskResult["efuse"] == "risk") || (riskResult["efuse"] == "safe" && riskResult["fastbootlock"] == "risk")) {
+        return false;
+    } else if ((riskResult["processPrivilege"] == "risk") || (riskResult["rootPackage"] == "risk")) {
+        return true;
+    }
+    return false;
 }
 }
