@@ -693,7 +693,7 @@ void LnnNotifyVapInfoChangeEvent(int32_t preferChannel)
 void LnnNotifyDeviceRootStateChangeEvent(void)
 {
     SoftBusDeviceRootState state = SOFTBUS_DEVICE_ROOT_UNKNOWN;
-    if (IsDeviceHasRiskFactor()) {
+    if (IsDeviceHasRiskFactorPacked()) {
         state = SOFTBUS_DEVICE_IS_ROOT;
     } else {
         state = SOFTBUS_DEVICE_NOT_ROOT;

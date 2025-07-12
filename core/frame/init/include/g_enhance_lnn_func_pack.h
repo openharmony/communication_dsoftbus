@@ -212,6 +212,7 @@ int32_t LnnDumpControlLaneGroupInfoPacked(int32_t fd);
 void CheckNeedCloudSyncOfflinePacked(DiscoveryType type);
 int32_t LnnAsyncSaveDeviceDataPacked(const char *data, LnnDataType dataType);
 int32_t LnnDeletaDeviceDataPacked(LnnDataType dataType);
+bool IsDeviceHasRiskFactorPacked(void);
 
 #ifdef __cplusplus
 }
