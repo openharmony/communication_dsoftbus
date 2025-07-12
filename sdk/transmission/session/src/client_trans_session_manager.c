@@ -3222,7 +3222,7 @@ int32_t ClientGetSessionTypeBySocket(int32_t socket, int32_t *sessionType)
 
 int32_t ClientSetFLTos(int32_t socket, TransFlowInfo *flowInfo)
 {
-    if (socket < 0) {
+    if (socket < 0 || flowInfo == NULL) {
         TRANS_LOGE(TRANS_SDK, "invalid param");
         return SOFTBUS_INVALID_PARAM;
     }

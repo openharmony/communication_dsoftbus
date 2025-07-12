@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021-2024 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2025 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -17,19 +17,19 @@
 
 #include <securec.h>
 
+#include "client_bus_center_manager.h"
 #include "client_trans_tcp_direct_callback.h"
 #include "client_trans_tcp_direct_listener.h"
 #include "softbus_adapter_mem.h"
 #include "softbus_base_listener.h"
 #include "softbus_def.h"
 #include "softbus_error_code.h"
+#include "softbus_mintp_socket.h"
 #include "softbus_socket.h"
 #include "softbus_utils.h"
 #include "trans_log.h"
 #include "trans_pending_pkt.h"
 #include "trans_server_proxy.h"
-#include "client_bus_center_manager.h"
-#include "softbus_mintp_socket.h"
 
 #define HEART_TIME             300
 #define TCP_KEEPALIVE_INTERVAL 4
@@ -87,8 +87,8 @@ int32_t TransTdcSetListenerStateById(int32_t channelId, bool needStopListener)
         if (item->channelId == channelId) {
             item->detail.needStopListener = needStopListener;
             (void)SoftBusMutexUnlock(&g_tcpDirectChannelInfoList->lock);
-            TRANS_LOGI(TRANS_SDK, "succ, channelId=%{public}d, needStopListener=%{public}d", channelId,
-                needStopListener);
+            TRANS_LOGI(
+                TRANS_SDK, "succ, channelId=%{public}d, needStopListener=%{public}d", channelId, needStopListener);
             return SOFTBUS_OK;
         }
     }
@@ -138,17 +138,16 @@ int32_t TransTdcGetInfoByFd(int32_t fd, TcpDirectChannelInfo *info)
     return SOFTBUS_NOT_FIND;
 }
 
-void TransTdcCloseChannel(int32_t channelId)
+static void TransTdcDeleteChannelInfo(int32_t channelId)
 {
-    TRANS_LOGI(TRANS_SDK, "Close tdc Channel, channelId=%{public}d.", channelId);
-
-    TcpDirectChannelInfo *item = NULL;
     if (SoftBusMutexLock(&g_tcpDirectChannelInfoList->lock) != SOFTBUS_OK) {
         TRANS_LOGE(TRANS_SDK, "lock failed");
         return;
     }
 
-    LIST_FOR_EACH_ENTRY(item, &(g_tcpDirectChannelInfoList->list), TcpDirectChannelInfo, node) {
+    TcpDirectChannelInfo *item = NULL;
+    TcpDirectChannelInfo *next = NULL;
+    LIST_FOR_EACH_ENTRY_SAFE(item, next, &(g_tcpDirectChannelInfoList->list), TcpDirectChannelInfo, node) {
         if (item->channelId != channelId) {
             continue;
         }
@@ -169,7 +168,13 @@ void TransTdcCloseChannel(int32_t channelId)
 
     TRANS_LOGE(TRANS_SDK, "Target item not exist. channelId=%{public}d", channelId);
     (void)SoftBusMutexUnlock(&g_tcpDirectChannelInfoList->lock);
+}
 
+void TransTdcCloseChannel(int32_t channelId)
+{
+    TRANS_LOGI(TRANS_SDK, "Close tdc Channel, channelId=%{public}d.", channelId);
+
+    TransTdcDeleteChannelInfo(channelId);
     if (ServerIpcCloseChannel(NULL, channelId, CHANNEL_TYPE_TCP_DIRECT) != SOFTBUS_OK) {
         TRANS_LOGE(TRANS_SDK, "close server tdc channelId=%{public}d err.", channelId);
     }
@@ -252,8 +257,7 @@ static void TransTdcReleaseFdResources(int32_t fd, int32_t errCode)
 {
     if (errCode == SOFTBUS_TRANS_NEGOTIATE_REJECTED) {
         TransTdcCloseFd(fd);
-        TRANS_LOGI(
-            TRANS_SDK, "Server reject conn, fd=%{public}d", fd);
+        TRANS_LOGI(TRANS_SDK, "Server reject conn, fd=%{public}d", fd);
     } else {
         TransTdcReleaseFd(fd);
     }
