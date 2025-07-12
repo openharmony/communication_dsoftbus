@@ -18,6 +18,7 @@ native_source_path = rebase_path("$dsoftbus_root_path")
 if (dsoftbus_feature_lnn_frame) {
   bus_center_builder_src = [
     "$dsoftbus_root_path/core/bus_center/lnn/net_builder/src/lnn_battery_info.c",
+    "$dsoftbus_root_path/core/bus_center/lnn/net_builder/src/lnn_check_risk_factor.cpp",
     "$dsoftbus_root_path/core/bus_center/lnn/net_builder/src/lnn_connection_fsm.c",
     "$dsoftbus_root_path/core/bus_center/lnn/net_builder/src/lnn_connection_fsm_process.c",
     "$dsoftbus_root_path/core/bus_center/lnn/net_builder/src/lnn_connId_callback_manager.c",
@@ -50,6 +51,7 @@ bus_center_builder_inc = [
   "$dsoftbus_root_path/adapter/common/net/bluetooth/broadcast/interface",
 ]
 bus_center_builder_deps = []
+bus_center_builder_external_deps = [ "security_guard_ext:libsg_safety_detect_sdk" ]
 
 if (dsoftbus_feature_lnn_cloud_sync) {
   bus_center_builder_src += [ "$dsoftbus_root_path/core/bus_center/lnn/net_builder/src/lnn_data_cloud_sync.c" ]

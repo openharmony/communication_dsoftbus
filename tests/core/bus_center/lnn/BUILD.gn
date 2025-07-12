@@ -2322,6 +2322,8 @@ ohos_unittest("LNNHeartBeatTest") {
   ]
 }
 
+ohos_unittest("LNNHeartBeatDeviceRootTest")
+
 ohos_unittest("LNNLaneQueryTest") {
   module_out_path = module_output_path
   sources = [
