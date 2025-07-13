@@ -464,7 +464,7 @@ int32_t ConnSetKeepAliveByConnectionId(uint32_t connectionId, bool needKeepalive
         SOFTBUS_CONN_MANAGER_TYPE_NOT_SUPPORT, CONN_COMMON, "get connect type failed");
     CONN_CHECK_AND_RETURN_RET_LOGE(type == CONNECT_TCP || type == CONNECT_P2P || type == CONNECT_P2P_REUSE ||
         type == CONNECT_HML, SOFTBUS_INVALID_PARAM, CONN_COMMON, "connect type is not tcp");
-    int32_t ret = ConnGetConnectionInfo(connectionId, &info);
+    ret = ConnGetConnectionInfo(connectionId, &info);
     CONN_CHECK_AND_RETURN_RET_LOGW(ret == SOFTBUS_OK, ret, CONN_COMMON, "set keepalive failed, ret=%{public}d", ret);
     return TcpConnSetKeepalive(info.socketInfo.fd, needKeepalive);
 }
