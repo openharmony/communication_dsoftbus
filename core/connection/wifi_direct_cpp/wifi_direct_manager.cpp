@@ -720,7 +720,7 @@ static int32_t GetHmlLinkCount(void)
     int32_t ret = 0;
     OHOS::SoftBus::LinkManager::GetInstance().ForEach([&ret](const OHOS::SoftBus::InnerLink &link) {
         if (link.GetLinkType() == OHOS::SoftBus::InnerLink::LinkType::HML &&
-            link.GetState() == InnerLink::LinkState::CONNECTED) {
+            link.GetState() == OHOS::SoftBus::InnerLink::LinkState::CONNECTED) {
             ret += 1;
         }
         return false;
