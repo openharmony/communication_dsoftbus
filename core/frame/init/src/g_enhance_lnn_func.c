@@ -255,6 +255,7 @@ void Register5thPartFunc(void *soHandle)
     g_lnnEnhanceFuncList.lnnRegisterSleHeartbeatMediumMgr = dlsym(soHandle, "LnnRegisterSleHeartbeatMediumMgr");
     g_lnnEnhanceFuncList.checkNeedCloudSyncOffline = dlsym(soHandle, "CheckNeedCloudSyncOffline");
     g_lnnEnhanceFuncList.lnnDeviceCloudConvergenceInit = dlsym(soHandle, "LnnDeviceCloudConvergenceInit");
+    g_lnnEnhanceFuncList.isDeviceHasRiskFactor = dlsym(soHandle, "IsDeviceHasRiskFactor");
 }
 
 int32_t LnnRegisterEnhanceFunc(void *soHandle)
