@@ -31,12 +31,10 @@
 #include "softbus_conn_interface.h"
 #include "softbus_datahead_transform.h"
 #include "softbus_def.h"
-#include "softbus_error_code.h"
 #include "softbus_feature_config.h"
 #include "softbus_socket.h"
 #include "softbus_tcp_connect_manager.h"
 #include "softbus_utils.h"
-#include "conn_sle.h"
 #include "softbus_conn_ipc.h"
 
 ConnectFuncInterface *g_connManager[CONNECT_TYPE_MAX] = { 0 };
@@ -455,6 +453,20 @@ int32_t ConnDisconnectDeviceAllConn(const ConnectOption *option)
         return SOFTBUS_CONN_MANAGER_OP_NOT_SUPPORT;
     }
     return g_connManager[option->type]->DisconnectDeviceNow(option);
+}
+
+int32_t ConnSetKeepAliveByConnectionId(uint32_t connectionId, bool needKeepalive)
+{
+    ConnectionInfo info = { 0 };
+    ConnectType type;
+    int32_t ret = ConnGetTypeByConnectionId(connectionId, &type);
+    CONN_CHECK_AND_RETURN_RET_LOGE(ret == SOFTBUS_OK,
+        SOFTBUS_CONN_MANAGER_TYPE_NOT_SUPPORT, CONN_COMMON, "get connect type failed");
+    CONN_CHECK_AND_RETURN_RET_LOGE(type == CONNECT_TCP || type == CONNECT_P2P || type == CONNECT_P2P_REUSE ||
+        type == CONNECT_HML, SOFTBUS_INVALID_PARAM, CONN_COMMON, "connect type is not tcp");
+    ret = ConnGetConnectionInfo(connectionId, &info);
+    CONN_CHECK_AND_RETURN_RET_LOGW(ret == SOFTBUS_OK, ret, CONN_COMMON, "set keepalive failed, ret=%{public}d", ret);
+    return TcpConnSetKeepalive(info.socketInfo.fd, needKeepalive);
 }
 
 int32_t ConnGetConnectionInfo(uint32_t connectionId, ConnectionInfo *info)

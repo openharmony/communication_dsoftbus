@@ -750,4 +750,86 @@ int32_t DBinderSoftbusServer::LnnRegisterEventHandler(LnnEventType event, LnnEve
 
     return lnnRegisterEventHandlerFunc_(event, handler);
 }
+
+int32_t DBinderSoftbusServer::LnnGetLocalBoolInfo(InfoKey key, bool *info, uint32_t len)
+{
+    CHECK_INSTANCE_EXIT_WITH_RETVAL(exitFlag_, SOFTBUS_WIFI_DIRECT_INSTANCE_EXIT);
+    if (lnnGetLocalBoolInfoFunc_ != nullptr) {
+        return lnnGetLocalBoolInfoFunc_(key, info, len);
+    }
+
+    if (!OpenSoftbusServerSo()) {
+        return SOFTBUS_WIFI_DIRECT_DLOPEN_FAILED;
+    }
+
+    lnnGetLocalBoolInfoFunc_ = (LnnGetLocalBoolInfoFunc)dlsym(soHandle_, "LnnGetLocalBoolInfo");
+    if (lnnGetLocalBoolInfoFunc_ == nullptr) {
+        CONN_LOGE(CONN_EVENT, "[wifi_direct_init] dlsym LnnGetLocalBoolInfo failed.");
+        return SOFTBUS_WIFI_DIRECT_DLSYM_FAILED;
+    }
+
+    return lnnGetLocalBoolInfoFunc_(key, info, len);
+}
+
+int32_t DBinderSoftbusServer::LnnConvertDlId(
+    const char *srcId, IdCategory srcIdType, IdCategory dstIdType, char *dstIdBuf, uint32_t dstIdBufLen)
+{
+    CHECK_INSTANCE_EXIT_WITH_RETVAL(exitFlag_, SOFTBUS_WIFI_DIRECT_INSTANCE_EXIT);
+    if (lnnConvertDlIdFunc_ != nullptr) {
+        return lnnConvertDlIdFunc_(srcId, srcIdType, dstIdType, dstIdBuf, dstIdBufLen);
+    }
+
+    if (!OpenSoftbusServerSo()) {
+        return SOFTBUS_WIFI_DIRECT_DLOPEN_FAILED;
+    }
+
+    lnnConvertDlIdFunc_ = (LnnConvertDlIdFunc)dlsym(soHandle_, "LnnConvertDlId");
+    if (lnnConvertDlIdFunc_ == nullptr) {
+        CONN_LOGE(CONN_EVENT, "[wifi_direct_init] dlsym LnnConvertDlId failed.");
+        return SOFTBUS_WIFI_DIRECT_DLSYM_FAILED;
+    }
+
+    return lnnConvertDlIdFunc_(srcId, srcIdType, dstIdType, dstIdBuf, dstIdBufLen);
+}
+
+int32_t DBinderSoftbusServer::GetConnectionIdByHandle(AuthHandle handle)
+{
+    CHECK_INSTANCE_EXIT_WITH_RETVAL(exitFlag_, SOFTBUS_WIFI_DIRECT_INSTANCE_EXIT);
+    if (getConnectionIdByHandleFunc_ != nullptr) {
+        return getConnectionIdByHandleFunc_(handle);
+    }
+
+    if (!OpenSoftbusServerSo()) {
+        return SOFTBUS_WIFI_DIRECT_DLOPEN_FAILED;
+    }
+
+    getConnectionIdByHandleFunc_ = (GetConnectionIdByHandleFunc)dlsym(soHandle_, "GetConnectionIdByHandle");
+    if (getConnectionIdByHandleFunc_ == nullptr) {
+        CONN_LOGE(CONN_EVENT, "[wifi_direct_init] dlsym GetConnectionIdByHandle failed.");
+        return SOFTBUS_WIFI_DIRECT_DLSYM_FAILED;
+    }
+
+    return getConnectionIdByHandleFunc_(handle);
+}
+
+int32_t DBinderSoftbusServer::ConnSetKeepaliveByConnectionId(uint32_t connectionId, bool needKeepAlive)
+{
+    CHECK_INSTANCE_EXIT_WITH_RETVAL(exitFlag_, SOFTBUS_WIFI_DIRECT_INSTANCE_EXIT);
+    if (connSetKeepaliveByConnectionIdFunc_ != nullptr) {
+        return connSetKeepaliveByConnectionIdFunc_(connectionId, needKeepAlive);
+    }
+
+    if (!OpenSoftbusServerSo()) {
+        return SOFTBUS_WIFI_DIRECT_DLOPEN_FAILED;
+    }
+
+    connSetKeepaliveByConnectionIdFunc_ =
+        (ConnSetKeepaliveByConnectionIdFunc)dlsym(soHandle_, "ConnSetKeepaliveByConnectionId");
+    if (connSetKeepaliveByConnectionIdFunc_ == nullptr) {
+        CONN_LOGE(CONN_EVENT, "[wifi_direct_init] dlsym ConnSetKeepaliveByConnectionId failed.");
+        return SOFTBUS_WIFI_DIRECT_DLSYM_FAILED;
+    }
+
+    return connSetKeepaliveByConnectionIdFunc_(connectionId, needKeepAlive);
+}
 }

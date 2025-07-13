@@ -182,7 +182,7 @@ void P2pV1ProcessorTest::InjectData(WifiDirectInterfaceMock &mock)
                 link.SetLocalBaseMac(context_.Get(TestContextKey::LOCAL_MAC, std::string("")));
                 link.SetRemoteBaseMac(context_.Get(TestContextKey::REMOTE_MAC, std::string("")));
                 if (injectLocal) {
-                    link.AddId(1, 1, 1);
+                    link.AddId(1, 1, 1, false);
                 }
                 if (injectRemote) {
                     link.SetBeingUsedByRemote(true);

@@ -82,6 +82,11 @@ public:
     int32_t LnnGetRemoteNodeInfoByKey(const char *key, NodeInfo *info);
     int32_t LnnGetAllOnlineNodeInfo(NodeBasicInfo **info, int32_t *infoNum);
     int32_t LnnRegisterEventHandler(LnnEventType event, LnnEventHandler handler);
+    int32_t LnnGetLocalBoolInfo(InfoKey key, bool *info, uint32_t len);
+    int32_t LnnConvertDlId(
+        const char *srcId, IdCategory srcIdType, IdCategory dstIdType, char *dstIdBuf, uint32_t dstIdBufLen);
+    int32_t GetConnectionIdByHandle(AuthHandle handle);
+    int32_t ConnSetKeepaliveByConnectionId(uint32_t connectionId, bool needKeepAlive);
 
 private:
     bool OpenSoftbusServerSo();
@@ -126,6 +131,11 @@ private:
     using LnnGetRemoteNodeInfoByKeyFunc = int32_t (*)(const char *key, NodeInfo *info);
     using LnnGetAllOnlineNodeInfoFunc = int32_t (*)(NodeBasicInfo **info, int32_t *infoNum);
     using LnnRegisterEventHandlerFunc = int32_t (*)(LnnEventType event, LnnEventHandler handler);
+    using LnnGetLocalBoolInfoFunc = int32_t (*)(InfoKey key, bool *info, uint32_t len);
+    using LnnConvertDlIdFunc = int32_t (*)(
+        const char *srcId, IdCategory srcIdType, IdCategory dstIdType, char *dstIdBuf, uint32_t dstIdBufLen);
+    using GetConnectionIdByHandleFunc = int32_t (*)(AuthHandle handle);
+    using ConnSetKeepaliveByConnectionIdFunc = int32_t (*)(uint32_t connectionId, bool needKeepAlive);
 
     RegAuthTransListenerFunc regAuthTransListenerFunc_ = nullptr;
     AuthGetDeviceUuidFunc authGetDeviceUuidFunc_ = nullptr;
@@ -162,6 +172,10 @@ private:
     LnnGetRemoteNodeInfoByKeyFunc lnnGetRemoteNodeInfoByKeyFunc_ = nullptr;
     LnnGetAllOnlineNodeInfoFunc lnnGetAllOnlineNodeInfoFunc_ = nullptr;
     LnnRegisterEventHandlerFunc lnnRegisterEventHandlerFunc_ = nullptr;
+    LnnGetLocalBoolInfoFunc lnnGetLocalBoolInfoFunc_ = nullptr;
+    LnnConvertDlIdFunc lnnConvertDlIdFunc_ = nullptr;
+    GetConnectionIdByHandleFunc getConnectionIdByHandleFunc_ = nullptr;
+    ConnSetKeepaliveByConnectionIdFunc connSetKeepaliveByConnectionIdFunc_ = nullptr;
 
     std::mutex loadSoMutex_;
     std::atomic<bool> exitFlag_ = false;
