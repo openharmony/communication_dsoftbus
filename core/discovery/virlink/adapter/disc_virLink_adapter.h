@@ -13,9 +13,21 @@
  * limitations under the License.
  */
 
-#ifndef SOFTBUSMESSAGEOPENCHANNELMOCK_FUZZER_H
-#define SOFTBUSMESSAGEOPENCHANNELMOCK_FUZZER_H
+#ifndef DISC_VIRLINK_ADAPTER_H
+#define DISC_VIRLINK_ADAPTER_H
 
-#define FUZZ_PROJECT_NAME "softbusmessageopenchannelmock_fuzzer"
+#include "disc_virlink_adapter_struct.h"
 
-#endif // SOFTBUSMESSAGEOPENCHANNELMOCK_FUZZER_H
+#ifdef __cplusplus
+extern "C" {
+#endif /* __cplusplus */
+
+void DiscVirlinkLinklessRegisterListener(const struct DiscVirlinkConnStatusListener *listener);
+int DiscVirlinkLinklessVirtualSend(const char *networkId, const uint8_t *data, uint32_t dataLen);
+int DiscVirlinkLinklessRegisterRecvCallback(DiscVirlinkLinklessRecvCb recvCb);
+
+#ifdef __cplusplus
+}
+#endif /* __cplusplus */
+
+#endif // DISC_VIRLINK_ADAPTER_H

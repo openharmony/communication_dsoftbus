@@ -527,22 +527,22 @@ HWTEST_F(TransTcpDirectP2pMockTest, OnVerifyP2pRequestTest001, TestSize.Level1)
 }
 
 /**
- * @tc.name: ConnectTcpDirectPeerTest001
+ * @tc.name: ConnectSocketDirectPeerTest001
  * @tc.desc: Should return SOFTBUS_OK when ConnOpenClientSocket return SOFTBUS_OK.
  * @tc.desc: Should return error when ConnOpenClientSocket return SOFTBUS_OK.
  * @tc.type: FUNC
  * @tc.require:
  */
-HWTEST_F(TransTcpDirectP2pMockTest, ConnectTcpDirectPeerTest001, TestSize.Level1)
+HWTEST_F(TransTcpDirectP2pMockTest, ConnectSocketDirectPeerTest001, TestSize.Level1)
 {
     NiceMock<TransTcpDirectP2pInterfaceMock> TcpP2pDirectMock;
     EXPECT_CALL(TcpP2pDirectMock, IsHmlIpAddr).WillOnce(Return(false));
     EXPECT_CALL(TcpP2pDirectMock, ConnOpenClientSocket).WillOnce(Return(SOFTBUS_NO_INIT));
-    int32_t ret = ConnectTcpDirectPeer(IP, TEST_PORT, MY_IP);
+    int32_t ret = ConnectSocketDirectPeer(IP, TEST_PORT, MY_IP, 0);
     EXPECT_EQ(SOFTBUS_NO_INIT, ret);
     EXPECT_CALL(TcpP2pDirectMock, IsHmlIpAddr).WillOnce(Return(true));
     EXPECT_CALL(TcpP2pDirectMock, ConnOpenClientSocket).WillOnce(Return(SOFTBUS_OK));
-    ret = ConnectTcpDirectPeer(IP, TEST_PORT, MY_IP);
+    ret = ConnectSocketDirectPeer(IP, TEST_PORT, MY_IP, 0);
     EXPECT_EQ(SOFTBUS_OK, ret);
 }
 

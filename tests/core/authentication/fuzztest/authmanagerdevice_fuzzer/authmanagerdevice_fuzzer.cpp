@@ -25,10 +25,8 @@
 
 using namespace std;
 
-#define FEATURE_MIN 1
-#define FEATURE_MAX 10
-#define NORMALIZED_TYPE_MIN 0
-#define NORMALIZED_TYPE_MAX 2
+#define AUTH_TYPE_MIN AUTH_LINK_TYPE_WIFI
+#define AUTH_TYPE_MAX AUTH_LINK_TYPE_MAX
 
 namespace {
 static void AuthOnDataReceivedTest(AuthHandle authHandle, const AuthDataHead *head, const uint8_t *data,
@@ -130,7 +128,7 @@ bool AuthDeviceManagerFuzzTest(FuzzedDataProvider &provider)
     if (strcpy_s(info.uuid, UUID_BUF_LEN, uuid.c_str()) != EOK) {
         return false;
     }
-    info.connInfo.type = (AuthLinkType)provider.ConsumeIntegralInRange<uint32_t>(FEATURE_MIN, FEATURE_MAX);
+    info.connInfo.type = (AuthLinkType)provider.ConsumeIntegralInRange<uint32_t>(AUTH_TYPE_MIN, AUTH_TYPE_MAX);
     info.connId = (uint64_t)info.connInfo.type << INT32_BIT_NUM;
     info.isConnectServer = provider.ConsumeBool();
     ProcessFuzzConnInfo(provider, &info);
@@ -163,7 +161,7 @@ bool AuthDeviceManagerFuzzTest(FuzzedDataProvider &provider)
     OnDisconnected(info.connId, &connInfo);
     AuthFlushDevice(uuid.c_str());
     DelAuthManagerByConnectionId(info.connId);
-    DelAuthManager(auth, info.connInfo.type);
+    DelAuthManager(auth, AUTH_LINK_TYPE_MAX);
     return true;
 }
 }

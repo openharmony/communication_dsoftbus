@@ -141,7 +141,7 @@ HWTEST_F(SoftBusMessageOpenChannelTest, PackRequest001, TestSize.Level1)
     ASSERT_TRUE(appInfo != nullptr);
     (void)memset_s(appInfo, sizeof(AppInfo), 0, sizeof(AppInfo));
 
-    char *msg = PackRequest(nullptr);
+    char *msg = PackRequest(nullptr, 0);
     EXPECT_EQ(nullptr, msg);
 
     int32_t res = strcpy_s(appInfo->myData.pkgName, sizeof(appInfo->myData.pkgName), g_sessionName);
@@ -151,7 +151,7 @@ HWTEST_F(SoftBusMessageOpenChannelTest, PackRequest001, TestSize.Level1)
     res = strcpy_s(appInfo->myData.authState, sizeof(appInfo->myData.authState), g_sessionName);
     EXPECT_EQ(EOK, res);
 
-    msg = PackRequest(appInfo);
+    msg = PackRequest(appInfo, 0);
     // return data
     EXPECT_NE(msg, nullptr);
 

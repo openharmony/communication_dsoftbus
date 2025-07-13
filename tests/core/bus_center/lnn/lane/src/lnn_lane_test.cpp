@@ -1412,6 +1412,8 @@ HWTEST_F(LNNLaneMockTest, LNN_BUILD_LINK_001, TestSize.Level1)
         .onLaneLinkFail = OnLaneLinkFail,
     };
     int32_t ret;
+    NiceMock<LaneDepsInterfaceMock> mock;
+    EXPECT_CALL(mock, GetWifiDirectManager).WillRepeatedly(Return(&g_manager));
     NiceMock<LnnWifiAdpterInterfaceMock> wifiMock;
     EXPECT_CALL(wifiMock, LnnDisconnectP2p).WillRepeatedly(Return(SOFTBUS_OK));
     EXPECT_CALL(wifiMock, LnnConnectP2p)

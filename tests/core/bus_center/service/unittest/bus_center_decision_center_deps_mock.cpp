@@ -41,5 +41,10 @@ SoftBusList *CreateSoftBusList()
 {
     return GetBusCenterDecisionCenterDepsInterface()->CreateSoftBusList();
 }
+
+LnnEnhanceFuncList *LnnEnhanceFuncListGet(void)
+{
+    return GetBusCenterDecisionCenterDepsInterface()->LnnEnhanceFuncListGet();
+}
 }
 } // namespace OHOS

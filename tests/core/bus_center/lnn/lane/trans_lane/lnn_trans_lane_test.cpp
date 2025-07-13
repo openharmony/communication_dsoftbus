@@ -33,6 +33,7 @@ using namespace testing;
 constexpr uint32_t LANE_REQ_ID_ONE = 111;
 constexpr uint32_t LANE_REQ_ID_TWO = 222;
 constexpr uint32_t LANE_REQ_ID_THREE = 333;
+constexpr uint32_t VIRTUAL_LINK_LANE_REQ_ID = 10;
 constexpr char PEER_UDID[] = "111122223333abcdef";
 constexpr char PEER_IP[] = "127.30.0.1";
 constexpr char NODE_NETWORK_ID[] = "123456789";
@@ -1039,5 +1040,57 @@ HWTEST_F(LNNTransLaneMockTest, LNN_HANDLE_LANE_FREE_UNUSED_LINK_005, TestSize.Le
     EXPECT_CALL(laneMock, LnnGetNetworkIdByUdid).WillRepeatedly(Return(SOFTBUS_OK));
     EXPECT_CALL(lnnMock, LnnDisconnectP2p).WillRepeatedly(Return(SOFTBUS_OK));
     EXPECT_NO_FATAL_FAILURE(FreeUnusedLink(laneReqId, &info));
+}
+
+/*
+* @tc.name: CHECK_VIRTUAL_LINK_BY_LANE_REQ_ID_TEST_001
+* @tc.desc: check virtual link by lane req id test
+* @tc.type: FUNC
+* @tc.require:
+*/
+HWTEST_F(LNNTransLaneMockTest, CHECK_VIRTUAL_LINK_BY_LANE_REQ_ID_TEST_001, TestSize.Level1)
+{
+    uint32_t laneReqId = INVALID_LANE_REQ_ID;
+    bool ret = CheckVirtualLinkByLaneReqId(laneReqId);
+    EXPECT_FALSE(ret);
+    laneReqId = VIRTUAL_LINK_LANE_REQ_ID;
+    ret = CheckVirtualLinkByLaneReqId(laneReqId);
+    EXPECT_FALSE(ret);
+}
+
+/*
+* @tc.name: CHECK_VIRTUAL_LINK_BY_LANE_REQ_ID_TEST_002
+* @tc.desc: check virtual link by lane req id test
+* @tc.type: FUNC
+* @tc.require:
+*/
+HWTEST_F(LNNTransLaneMockTest, CHECK_VIRTUAL_LINK_BY_LANE_REQ_ID_TEST_002, TestSize.Level1)
+{
+    NiceMock<LaneDepsInterfaceMock> mock;
+    EXPECT_CALL(mock, StartBaseClient).WillRepeatedly(Return(SOFTBUS_OK));
+    NiceMock<TransLaneDepsInterfaceMock> laneMock;
+    LaneInterface *transObj = TransLaneGetInstance();
+    EXPECT_TRUE(transObj != nullptr);
+    uint32_t laneReqId = VIRTUAL_LINK_LANE_REQ_ID;
+    LaneAllocInfo allocInfo = {
+        .type = LANE_TYPE_TRANS,
+        .extendInfo.isSpecifiedLink = true,
+        .extendInfo.linkType = LANE_LINK_TYPE_WIFI_WLAN,
+        .extendInfo.isVirtualLink = true,
+    };
+    EXPECT_EQ(EOK, strcpy_s(allocInfo.networkId, NETWORK_ID_BUF_LEN, NODE_NETWORK_ID));
+    LanePreferredLinkList recommendLinkList;
+    (void)memset_s(&recommendLinkList, sizeof(LanePreferredLinkList), 0, sizeof(LanePreferredLinkList));
+    recommendLinkList.linkTypeNum = 0;
+    recommendLinkList.linkType[(recommendLinkList.linkTypeNum)++] = LANE_WLAN_2P4G;
+    EXPECT_CALL(laneMock, SelectExpectLanesByQos)
+        .WillRepeatedly(DoAll(SetArgPointee<LANE_MOCK_PARAM3>(recommendLinkList), Return(SOFTBUS_OK)));
+    EXPECT_CALL(laneMock, BuildLink).WillRepeatedly(Return(SOFTBUS_OK));
+    SetIsNeedCondWait();
+    int32_t ret = transObj->allocLaneByQos(laneReqId, (const LaneAllocInfo *)&allocInfo, &g_listenerCb);
+    EXPECT_EQ(ret, SOFTBUS_OK);
+    CondWait();
+    bool isVirtualLink = CheckVirtualLinkByLaneReqId(laneReqId);
+    EXPECT_FALSE(isVirtualLink);
 }
 } // namespace OHOS

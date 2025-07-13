@@ -45,7 +45,7 @@ void TransOpenNetWorkingChannelSessionNameTest(const uint8_t *data, size_t size)
 
 void TransOpenNetWorkingChannelSessionNameTest(FuzzedDataProvider &provider)
 {
-    std::string providerSessionName = provider.ConsumeBytesAsString(SESSION_NAME_SIZE_MAX);
+    std::string providerSessionName = provider.ConsumeBytesAsString(SESSION_NAME_SIZE_MAX - 1);
     char sessionName[SESSION_NAME_SIZE_MAX] = { 0 };
     if (strcpy_s(sessionName, SESSION_NAME_SIZE_MAX, providerSessionName.c_str()) != EOK) {
         return;
@@ -72,7 +72,7 @@ void TransOpenNetWorkingChannelPeerNetworkIdTest(const uint8_t *data, size_t siz
 
 void TransOpenNetWorkingChannelPeerNetworkIdTest(FuzzedDataProvider &provider)
 {
-    std::string providerPeerNetworkId = provider.ConsumeBytesAsString(DEVICE_ID_SIZE_MAX);
+    std::string providerPeerNetworkId = provider.ConsumeBytesAsString(DEVICE_ID_SIZE_MAX - 1);
     char peerNetworkId[DEVICE_ID_SIZE_MAX] = { 0 };
     if (strcpy_s(peerNetworkId, DEVICE_ID_SIZE_MAX, providerPeerNetworkId.c_str()) != EOK) {
         return;
@@ -139,7 +139,7 @@ void TransSendNetworkingMessageTest(FuzzedDataProvider &provider)
 {
     int32_t channelId = provider.ConsumeIntegral<int32_t>();
     int32_t priority = provider.ConsumeIntegral<int32_t>();
-    std::string providerData = provider.ConsumeBytesAsString(SESSION_NAME_SIZE_MAX);
+    std::string providerData = provider.ConsumeBytesAsString(SESSION_NAME_SIZE_MAX - 1);
     char data[SESSION_NAME_SIZE_MAX] = { 0 };
     if (strcpy_s(data, SESSION_NAME_SIZE_MAX, providerData.c_str()) != EOK) {
         return;

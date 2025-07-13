@@ -46,6 +46,7 @@ static WifiDirectEnhanceManager g_enhanceManager;
 static SyncPtkListener g_syncPtkListener;
 static PtkMismatchListener g_ptkMismatchListener;
 static HmlStateListener g_hmlStateListener;
+static FrequencyChangedListener g_frequencyChangedListener;
 
 static uint32_t GetRequestId(void)
 {
@@ -435,25 +436,24 @@ static int32_t GetRemoteUuidByIp(const char *remoteIp, char *uuid, int32_t uuidS
     return SOFTBUS_OK;
 }
 
-static int32_t GetLocalAndRemoteMacByLocalIp(const char *localIp, char *localMac, size_t localMacSize, char *remoteMac,
-    size_t remoteMacSize)
+static int32_t GetLocalAndRemoteMacByLocalIp(
+    const char *localIp, char *localMac, size_t localMacSize, char *remoteMac, size_t remoteMacSize)
 {
     bool found = false;
-    OHOS::SoftBus::LinkManager::GetInstance().ForEach(
-        [&localMac, localMacSize, &remoteMac, remoteMacSize, &found, localIp](
-            const OHOS::SoftBus::InnerLink &innerLink) {
-            if (innerLink.GetLocalIpv4() == localIp || innerLink.GetLocalIpv6() == localIp) {
-                found = true;
-                if (strcpy_s(localMac, localMacSize, innerLink.GetLocalDynamicMac().c_str()) != EOK) {
-                    found = false;
-                }
-                if (strcpy_s(remoteMac, remoteMacSize, innerLink.GetRemoteDynamicMac().c_str()) != EOK) {
-                    found = false;
-                }
-                return true;
-            } else {
-                return false;
+    OHOS::SoftBus::LinkManager::GetInstance().ForEach([&localMac, localMacSize, &remoteMac, remoteMacSize, &found,
+                                                          localIp](const OHOS::SoftBus::InnerLink &innerLink) {
+        if (innerLink.GetLocalIpv4() == localIp || innerLink.GetLocalIpv6() == localIp) {
+            found = true;
+            if (strcpy_s(localMac, localMacSize, innerLink.GetLocalDynamicMac().c_str()) != EOK) {
+                found = false;
             }
+            if (strcpy_s(remoteMac, remoteMacSize, innerLink.GetRemoteDynamicMac().c_str()) != EOK) {
+                found = false;
+            }
+            return true;
+        } else {
+            return false;
+        }
     });
 
     if (!found) {
@@ -462,6 +462,36 @@ static int32_t GetLocalAndRemoteMacByLocalIp(const char *localIp, char *localMac
     }
     CONN_LOGI(CONN_WIFI_DIRECT, "localIp=%{public}s localMac=%{public}s remoteMac=%{public}s",
         OHOS::SoftBus::WifiDirectAnonymizeIp(localIp).c_str(), OHOS::SoftBus::WifiDirectAnonymizeMac(localMac).c_str(),
+        OHOS::SoftBus::WifiDirectAnonymizeMac(remoteMac).c_str());
+    return SOFTBUS_OK;
+}
+
+static int32_t GetLocalAndRemoteMacByRemoteIp(
+    const char *remoteIp, char *localMac, size_t localMacSize, char *remoteMac, size_t remoteMacSize)
+{
+    bool found = false;
+    OHOS::SoftBus::LinkManager::GetInstance().ForEach([&localMac, localMacSize, &remoteMac, remoteMacSize, &found,
+                                                          remoteIp](const OHOS::SoftBus::InnerLink &innerLink) {
+        if (innerLink.GetRemoteIpv4() == remoteIp || innerLink.GetRemoteIpv6() == remoteIp) {
+            found = true;
+            if (strcpy_s(localMac, localMacSize, innerLink.GetLocalDynamicMac().c_str()) != EOK) {
+                found = false;
+            }
+            if (strcpy_s(remoteMac, remoteMacSize, innerLink.GetRemoteDynamicMac().c_str()) != EOK) {
+                found = false;
+            }
+            return true;
+        } else {
+            return false;
+        }
+    });
+
+    if (!found) {
+        CONN_LOGI(CONN_WIFI_DIRECT, "not found %{public}s", OHOS::SoftBus::WifiDirectAnonymizeIp(remoteIp).c_str());
+        return SOFTBUS_CONN_NOT_FOUND_FAILED;
+    }
+    CONN_LOGI(CONN_WIFI_DIRECT, "remoteIp=%{public}s localMac=%{public}s remoteMac=%{public}s",
+        OHOS::SoftBus::WifiDirectAnonymizeIp(remoteIp).c_str(), OHOS::SoftBus::WifiDirectAnonymizeMac(localMac).c_str(),
         OHOS::SoftBus::WifiDirectAnonymizeMac(remoteMac).c_str());
     return SOFTBUS_OK;
 }
@@ -659,6 +689,45 @@ static int32_t GetRemoteIpByRemoteMac(const char *remoteMac, char *remoteIp, int
     return SOFTBUS_OK;
 }
 
+static void AddFrequencyChangedListener(FrequencyChangedListener listener)
+{
+    g_frequencyChangedListener = listener;
+}
+
+static void NotifyFrequencyChanged(int32_t frequency)
+{
+    CONN_LOGI(CONN_WIFI_DIRECT, "NotifyFrequencyChanged enter");
+    if (g_frequencyChangedListener != nullptr) {
+        g_frequencyChangedListener(frequency);
+    }
+}
+
+static bool CheckOnlyVirtualLink(void)
+{
+    return OHOS::SoftBus::LinkManager::GetInstance().CheckOnlyVirtualLink();
+}
+
+static void CheckAndForceDisconnectVirtualLink(void)
+{
+    struct WifiDirectManager *wifiDirectManager = GetWifiDirectManager();
+    if (wifiDirectManager->checkOnlyVirtualLink()) {
+        (void)wifiDirectManager->forceDisconnectDeviceSync(WIFI_DIRECT_LINK_TYPE_HML);
+    }
+}
+
+static int32_t GetHmlLinkCount(void)
+{
+    int32_t ret = 0;
+    OHOS::SoftBus::LinkManager::GetInstance().ForEach([&ret](const OHOS::SoftBus::InnerLink &link) {
+        if (link.GetLinkType() == OHOS::SoftBus::InnerLink::LinkType::HML &&
+            link.GetState() == OHOS::SoftBus::InnerLink::LinkState::CONNECTED) {
+            ret += 1;
+        }
+        return false;
+    });
+    return ret;
+}
+
 static struct WifiDirectManager g_manager = {
     .getRequestId = GetRequestId,
     .allocateListenerModuleId = AllocateListenerModuleId,
@@ -686,6 +755,7 @@ static struct WifiDirectManager g_manager = {
     .getLocalIpByRemoteIp = GetLocalIpByRemoteIp,
     .getRemoteUuidByIp = GetRemoteUuidByIp,
     .getLocalAndRemoteMacByLocalIp = GetLocalAndRemoteMacByLocalIp,
+    .getLocalAndRemoteMacByRemoteIp = GetLocalAndRemoteMacByRemoteIp,
 
     .supportHmlTwo = SupportHmlTwo,
     .isWifiP2pEnabled = IsWifiP2pEnabled,
@@ -705,6 +775,12 @@ static struct WifiDirectManager g_manager = {
     .notifyPtkMismatch = NotifyPtkMismatch,
     .notifyHmlState = NotifyHmlState,
     .getRemoteIpByRemoteMac = GetRemoteIpByRemoteMac,
+
+    .addFrequencyChangedListener = AddFrequencyChangedListener,
+    .notifyFrequencyChanged = NotifyFrequencyChanged,
+    .checkOnlyVirtualLink = CheckOnlyVirtualLink,
+    .checkAndForceDisconnectVirtualLink = CheckAndForceDisconnectVirtualLink,
+    .getHmlLinkCount = GetHmlLinkCount,
 };
 
 struct WifiDirectManager *GetWifiDirectManager(void)

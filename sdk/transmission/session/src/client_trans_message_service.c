@@ -209,9 +209,6 @@ static int32_t CheckBusinessTypeBySessionId(int32_t sessionId, int32_t channelId
             sessionId);
         return SOFTBUS_TRANS_BUSINESS_TYPE_NOT_MATCH;
     }
-    ret = CheckSendLenForBooster(len);
-    TRANS_CHECK_AND_RETURN_RET_LOGE(ret == SOFTBUS_OK, ret, TRANS_BYTES,
-        "CheckSendLenForBooster fail, len=%{public}u, sessionId=%{public}d", len, sessionId);
     return SOFTBUS_OK;
 }
 

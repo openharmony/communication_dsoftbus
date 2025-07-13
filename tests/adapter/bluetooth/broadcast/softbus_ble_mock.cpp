@@ -17,6 +17,7 @@
 
 #include "disc_log.h"
 #include "softbus_error_code.h"
+#include "softbus_adapter_sle_common_struct.h"
 
 ManagerMock *ManagerMock::managerMock = nullptr;
 const SoftbusBroadcastCallback *ManagerMock::broadcastCallback = nullptr;
@@ -120,46 +121,53 @@ static int32_t MockUnRegisterScanListener(int32_t scanerId)
     return SOFTBUS_OK;
 }
 
-static int32_t MockStartBroadcasting(int32_t bcId, const SoftbusBroadcastParam *param, const SoftbusBroadcastData *data)
+static int32_t MockStartBroadcasting(int32_t bcId, const SoftbusBroadcastParam *param, SoftbusBroadcastData *data)
 {
-    ManagerMock::broadcastCallback->OnStartBroadcastingCallback(bcId, (int32_t)SOFTBUS_BC_STATUS_SUCCESS);
+    ManagerMock::broadcastCallback->OnStartBroadcastingCallback(BROADCAST_PROTOCOL_BLE,
+        bcId, (int32_t)SOFTBUS_BC_STATUS_SUCCESS);
     return SOFTBUS_OK;
 }
 
 static int32_t MockStopBroadcasting(int32_t bcId)
 {
-    ManagerMock::broadcastCallback->OnStopBroadcastingCallback(bcId, (int32_t)SOFTBUS_BC_STATUS_SUCCESS);
+    ManagerMock::broadcastCallback->OnStopBroadcastingCallback(BROADCAST_PROTOCOL_BLE,
+        bcId, (int32_t)SOFTBUS_BC_STATUS_SUCCESS);
     return SOFTBUS_OK;
 }
 
 static int32_t MockSetBroadcastingData(int32_t bcId, const SoftbusBroadcastData *data)
 {
-    ManagerMock::broadcastCallback->OnSetBroadcastingCallback(bcId, (int32_t)SOFTBUS_BC_STATUS_SUCCESS);
+    ManagerMock::broadcastCallback->OnSetBroadcastingCallback(BROADCAST_PROTOCOL_BLE,
+        bcId, (int32_t)SOFTBUS_BC_STATUS_SUCCESS);
     return SOFTBUS_OK;
 }
 
 static int32_t MockSetBroadcastingParam(int32_t bcId, const SoftbusBroadcastParam *param)
 {
-    ManagerMock::broadcastCallback->OnSetBroadcastingParamCallback(bcId, (int32_t)SOFTBUS_BC_STATUS_SUCCESS);
+    ManagerMock::broadcastCallback->OnSetBroadcastingParamCallback(BROADCAST_PROTOCOL_BLE,
+        bcId, (int32_t)SOFTBUS_BC_STATUS_SUCCESS);
     return SOFTBUS_OK;
 }
 
 static int32_t MockEnableBroadcasting(int32_t bcId)
 {
-    ManagerMock::broadcastCallback->OnEnableBroadcastingCallback(bcId, (int32_t)SOFTBUS_BC_STATUS_SUCCESS);
+    ManagerMock::broadcastCallback->OnEnableBroadcastingCallback(BROADCAST_PROTOCOL_BLE,
+        bcId, (int32_t)SOFTBUS_BC_STATUS_SUCCESS);
     return SOFTBUS_OK;
 }
 
 static int32_t MockDisableBroadcasting(int32_t bcId)
 {
-    ManagerMock::broadcastCallback->OnDisableBroadcastingCallback(bcId, (int32_t)SOFTBUS_BC_STATUS_SUCCESS);
+    ManagerMock::broadcastCallback->OnDisableBroadcastingCallback(BROADCAST_PROTOCOL_BLE,
+        bcId, (int32_t)SOFTBUS_BC_STATUS_SUCCESS);
     return SOFTBUS_OK;
 }
 
 static int32_t MockUpdateBroadcasting(
-    int32_t bcId, const SoftbusBroadcastParam *param, const SoftbusBroadcastData *data)
+    int32_t bcId, const SoftbusBroadcastParam *param, SoftbusBroadcastData *data)
 {
-    ManagerMock::broadcastCallback->OnUpdateBroadcastingCallback(bcId, (int32_t)SOFTBUS_BC_STATUS_SUCCESS);
+    ManagerMock::broadcastCallback->OnUpdateBroadcastingCallback(BROADCAST_PROTOCOL_BLE,
+        bcId, (int32_t)SOFTBUS_BC_STATUS_SUCCESS);
     return SOFTBUS_OK;
 }
 
@@ -245,7 +253,7 @@ static void ActionOfSoftbusBleAdapterInit()
         .SetScanReportChannelToLpDevice = MockSetScanReportChannelToLpDevice,
         .SetLpDeviceParam = MockSetLpDeviceParam,
     };
-    if (RegisterBroadcastMediumFunction(BROADCAST_MEDIUM_TYPE_BLE, &interface) != 0) {
+    if (RegisterBroadcastMediumFunction(BROADCAST_PROTOCOL_BLE, &interface) != 0) {
         DISC_LOGE(DISC_TEST, "Register gatt interface failed.");
     }
 }
@@ -253,4 +261,30 @@ static void ActionOfSoftbusBleAdapterInit()
 void SoftbusBleAdapterDeInit(void)
 {
     DISC_LOGI(DISC_TEST, "enter");
+}
+
+extern "C" {
+void SoftbusSleAdapterInitPacked(void)
+{
+    DISC_LOGI(DISC_TEST, "enter");
+}
+
+void SoftbusSleAdapterDeInitPacked(void)
+{
+    DISC_LOGI(DISC_TEST, "enter");
+}
+
+int32_t SoftBusAddSleStateListenerPacked(const SoftBusSleStateListener *listener, int32_t *listenerId)
+{
+    DISC_LOGI(DISC_TEST, "enter");
+    (void)listener;
+    (void)listenerId;
+    return SOFTBUS_OK;
+}
+
+void SoftBusRemoveSleStateListenerPacked(int listenerId)
+{
+    DISC_LOGI(DISC_TEST, "enter");
+    (void)listenerId;
+}
 }

@@ -280,6 +280,7 @@ typedef struct {
     LaneSpecifiedLink linkType;
     uint32_t actionAddr;
     TransFlowInfo flowInfo;
+    bool isVirtualLink;
 } AllocExtendInfo;
 
 typedef struct {
@@ -297,6 +298,7 @@ typedef struct {
     bool isSupportIpv6;
     LaneTransType transType;
     uint32_t actionAddr;
+    bool isVirtualLink;
 } LaneAllocCommInfo;
 
 typedef struct {

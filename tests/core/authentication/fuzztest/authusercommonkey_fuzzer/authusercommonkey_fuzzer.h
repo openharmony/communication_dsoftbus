@@ -13,4 +13,9 @@
  * limitations under the License.
  */
 
-FUZZ
+#ifndef TEST_FUZZTEST_AUTHUSERCOMMONKEY_FUZZER_H
+#define TEST_FUZZTEST_AUTHUSERCOMMONKEY_FUZZER_H
+
+#define FUZZ_PROJECT_NAME "authusercommonkey_fuzzer"
+
+#endif /* TEST_FUZZTEST_AUTHUSERCOMMONKEY_FUZZER_H */

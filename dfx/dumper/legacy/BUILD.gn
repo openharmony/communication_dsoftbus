@@ -42,6 +42,7 @@ if (defined(ohos_lite)) {
       "$dsoftbus_dfx_path/interface/include/form",
       "$dsoftbus_root_path/core/transmission/common/include",
       "$dsoftbus_root_path/interfaces/kits/transport",
+      "$dsoftbus_root_path/interfaces/inner_kits/transport",
       "$hilog_lite_include_path",
     ]
     sources = [
@@ -106,6 +107,7 @@ if (defined(ohos_lite)) {
       "$dsoftbus_root_path/interfaces/kits/lnn",
       "$dsoftbus_root_path/interfaces/kits/nstackx",
       "$dsoftbus_root_path/interfaces/kits/transport",
+      "$dsoftbus_root_path/interfaces/inner_kits/transport",
     ]
     include_dirs += trans_common_inc
     sources = [
