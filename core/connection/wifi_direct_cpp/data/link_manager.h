@@ -50,6 +50,7 @@ public:
     std::string GetRemoteMacByRemoteDeviceId(const std::string &remoteDeviceId);
     void RefreshRelationShip(const std::string &remoteDeviceId, const std::string &remoteMac);
     bool RefreshAuthHandle(std::string remoteDeviceId, const std::shared_ptr<NegotiateChannel> &channel);
+    bool CheckOnlyVirtualLink(void);
 
     void Dump() const;
     

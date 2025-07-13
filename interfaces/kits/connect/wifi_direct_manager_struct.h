@@ -33,6 +33,7 @@ struct WifiDirectStatusListener {
 typedef void (*SyncPtkListener)(const char *remoteDeviceId, int result);
 typedef void (*PtkMismatchListener)(const char *remoteNetworkId, uint32_t len, int32_t reason);
 typedef void (*HmlStateListener)(SoftBusHmlState state);
+typedef void (*FrequencyChangedListener)(int32_t frequency);
 struct WifiDirectEnhanceManager {
     int32_t (*savePTK)(const char *remoteDeviceId, const char *ptk);
     int32_t (*syncPTK)(const char *remoteDeviceId);
@@ -91,6 +92,13 @@ struct WifiDirectManager {
     void (*notifyPtkMismatch)(const char *remoteNetworkId, uint32_t len, int32_t reason);
     void (*notifyHmlState)(SoftBusHmlState state);
     int32_t (*getRemoteIpByRemoteMac)(const char *remoteMac, char *remoteIp, int32_t remoteIpSize);
+
+    /* for virtual connection */
+    void (*addFrequencyChangedListener)(FrequencyChangedListener listener);
+    void (*notifyFrequencyChanged)(int32_t frequency);
+    bool (*checkOnlyVirtualLink)(void);
+    void (*checkAndForceDisconnectVirtualLink)(void);
+    int32_t (*getHmlLinkCount)(void);
 };
 
 #ifdef __cplusplus

@@ -100,6 +100,12 @@ typedef enum {
     CONN_HML_STATE_MAX,
 } SoftBusHmlState;
 
+typedef enum {
+    INVALID_POWER,
+    LOW_POWER,
+    DEFAULT_POWER,
+} LinkPowerMode;
+
 struct WifiDirectLink {
     int32_t linkId;
     char localIp[IP_STR_MAX_LEN];
@@ -199,6 +205,7 @@ struct WifiDirectConnectInfo {
     enum IpAddrType ipAddrType;
 
     struct WifiDirectDfxInfo dfxInfo;
+    bool isVirtualLink;
 };
 
 struct WifiDirectDisconnectInfo {

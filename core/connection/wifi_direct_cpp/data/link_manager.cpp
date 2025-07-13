@@ -349,6 +349,11 @@ bool LinkManager::RefreshAuthHandle(std::string remoteDeviceId, const std::share
     return true;
 }
 
+bool LinkManager::CheckOnlyVirtualLink(void)
+{
+    return false;
+}
+
 void LinkManager::Dump() const
 {
     CONN_LOGD(CONN_WIFI_DIRECT, "enter");
