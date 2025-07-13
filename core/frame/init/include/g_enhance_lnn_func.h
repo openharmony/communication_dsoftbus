@@ -114,6 +114,8 @@ typedef int32_t (*LnnGetLocalPreferChannelFunc)(void);
 typedef int32_t (*LnnGetLocalChannelCodeFunc)(void);
 typedef int32_t (*LnnAddRemoteChannelCodeFunc)(const char *udid, int32_t channelCode);
 typedef int32_t (*LnnGetRecommendChannelFunc)(const char *udid, int32_t *preferChannel);
+typedef int32_t (*LnnGetLocalChannelInfoFunc)(VapChannelInfo *channelInfo);
+typedef int32_t (*LnnSetLocalChannelInfoFunc)(LnnVapType type, int32_t channelId);
 typedef bool (*IsCloudSyncEnabledFunc)(void);
 typedef bool (*IsPowerControlEnabledFunc)(void);
 typedef int32_t (*LnnRequestCheckOnlineStatusFunc)(const char *networkId, uint64_t timeout);
@@ -267,6 +269,9 @@ typedef void (*SleRangeDeathCallbackFunc)(void);
 typedef int32_t (*LnnInitUsbChannelManagerFunc)(void);
 typedef void (*LnnDeinitUsbChannelManagerFunc)(void);
 typedef void (*CheckNeedCloudSyncOfflineFunc)(DiscoveryType type);
+typedef int32_t (*LnnVirtualLinkInitFunc)(void);
+typedef void (*LnnVirtualLinkDeinitFunc)(void);
+typedef int32_t (*DcTriggerVirtualLinkFunc)(const char *peerNetworkId);
 
 typedef struct TagLnnEnhanceFuncList {
     // time_sync
@@ -486,6 +491,13 @@ typedef struct TagLnnEnhanceFuncList {
     LnnInitUsbChannelManagerFunc lnnInitUsbChannelManager;
     LnnDeinitUsbChannelManagerFunc lnnDeinitUsbChannelManager;
     CheckNeedCloudSyncOfflineFunc checkNeedCloudSyncOffline;
+    
+    // virtual link
+    LnnGetLocalChannelInfoFunc lnnGetLocalChannelInfo;
+    LnnSetLocalChannelInfoFunc lnnSetLocalChannelInfo;
+    LnnVirtualLinkInitFunc lnnVirtualLinkInit;
+    LnnVirtualLinkDeinitFunc lnnVirtualLinkDeinit;
+    DcTriggerVirtualLinkFunc dcTriggerVirtualLink;
 } LnnEnhanceFuncList;
 
 LnnEnhanceFuncList *LnnEnhanceFuncListGet(void);

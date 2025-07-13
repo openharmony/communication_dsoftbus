@@ -97,5 +97,10 @@ WifiErrorCode GetP2pEnableStatus(P2pState *state)
 {
     return GetWifiInterface()->GetP2pEnableStatus(state);
 }
+
+WifiErrorCode GetHotspotConfig(HotspotConfig *result)
+{
+    return GetWifiInterface()->GetHotspotConfig(result);
+}
 }
 } // namespace OHOS
