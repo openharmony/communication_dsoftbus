@@ -39,6 +39,13 @@ typedef struct {
     uint32_t availableLinkNums; /* reserved */
 } LnnVapAttr;
 
+typedef struct {
+    int32_t staChannel;
+    int32_t apChannel;
+    int32_t p2pChannel;
+    int32_t hmlChannel;
+} VapChannelInfo;
+
 #ifdef __cplusplus
 }
 #endif

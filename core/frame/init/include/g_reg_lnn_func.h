@@ -162,6 +162,8 @@ typedef struct TagLnnOpenFuncList {
     UpdateReqListLaneIdFunc updateReqListLaneId;
     HandleForceDownWifiDirectTransFunc handleForceDownWifiDirectTrans;
     GetConflictTypeWithErrcodeFunc getConflictTypeWithErrcode;
+    HandleForceDownVirtualLinkFunc handleForceDownVirtualLink;
+    CheckVirtualLinkOnlyFunc checkVirtualLinkOnly;
     GetLaneManagerFunc getLaneManager;
     AddLinkConflictInfoFunc addLinkConflictInfo;
     GetSupportBandWidthFunc getSupportBandWidth;
@@ -266,6 +268,7 @@ typedef struct TagLnnOpenFuncList {
 
     // adapter
     SoftBusGetCurrentGroupFunc softBusGetCurrentGroup;
+    SoftBusGetHotspotConfigFunc softBusGetHotspotConfig;
     SoftBusAccessFileFunc softBusAccessFile;
     SoftBusRemoveFileFunc softBusRemoveFile;
     SoftBusWriteFileFunc softBusWriteFile;

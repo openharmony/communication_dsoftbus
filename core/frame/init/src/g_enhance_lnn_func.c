@@ -240,6 +240,11 @@ void Register5thPartFunc(void *soHandle)
     g_lnnEnhanceFuncList.lnnRetrieveDeviceInfoByNetworkId = dlsym(soHandle, "LnnRetrieveDeviceInfoByNetworkId");
     g_lnnEnhanceFuncList.lnnTimeChangeNotify = dlsym(soHandle, "LnnTimeChangeNotify");
     g_lnnEnhanceFuncList.isSupportLowLatency = dlsym(soHandle, "IsSupportLowLatency");
+    g_lnnEnhanceFuncList.lnnVirtualLinkInit = dlsym(soHandle, "LnnVirtualLinkInit");
+    g_lnnEnhanceFuncList.lnnVirtualLinkDeinit = dlsym(soHandle, "LnnVirtualLinkDeinit");
+    g_lnnEnhanceFuncList.dcTriggerVirtualLink = dlsym(soHandle, "DcTriggerVirtualLink");
+    g_lnnEnhanceFuncList.lnnGetLocalChannelInfo = dlsym(soHandle, "LnnGetLocalChannelInfo");
+    g_lnnEnhanceFuncList.lnnSetLocalChannelInfo = dlsym(soHandle, "LnnSetLocalChannelInfo");
     g_lnnEnhanceFuncList.triggerSparkGroupBuild = dlsym(soHandle, "TriggerSparkGroupBuild");
     g_lnnEnhanceFuncList.triggerSparkGroupClear = dlsym(soHandle, "TriggerSparkGroupClear");
     g_lnnEnhanceFuncList.triggerSparkGroupJoinAgain = dlsym(soHandle, "TriggerSparkGroupJoinAgain");

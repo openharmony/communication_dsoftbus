@@ -19,11 +19,12 @@
 #include "common_event_support.h"
 #include "lnn_async_callback_utils.h"
 #include "lnn_log.h"
-#include "wifi_msg.h"
 #include "softbus_adapter_mem.h"
 #include "softbus_error_code.h"
-#include "wifi_ap_msg.h"
 #include "softbus_wifi_api_adapter.h"
+#include "wifi_ap_msg.h"
+#include "wifi_msg.h"
+#include "wifi_p2p_msg.h"
 
 static const int32_t DELAY_LEN = 1000;
 static const int32_t RETRY_MAX = 20;
@@ -104,6 +105,21 @@ static void SetSoftBusWifiSemiState(const int code, SoftBusWifiState *state)
     }
 }
 
+static void SetSoftBusWifiP2pConnState(const int code, SoftBusWifiState *state)
+{
+    switch (code) {
+        case int(OHOS::Wifi::P2pConnectedState::P2P_CONNECTED):
+            *state = SOFTBUS_WIFI_P2P_CONNECTED;
+            break;
+        case int(OHOS::Wifi::P2pConnectedState::P2P_DISCONNECTED):
+            *state = SOFTBUS_WIFI_P2P_DISCONNECTED;
+            break;
+        default: {
+            break;
+        }
+    }
+}
+
 void WifiServiceMonitor::OnReceiveEvent(const CommonEventData &data)
 {
     int code = data.GetCode();
@@ -121,6 +137,9 @@ void WifiServiceMonitor::OnReceiveEvent(const CommonEventData &data)
     }
     if (action.compare(COMMON_EVENT_WIFI_SEMI_STATE) == 0) {
         SetSoftBusWifiSemiState(code, &state);
+    }
+    if (action == CommonEventSupport::COMMON_EVENT_WIFI_P2P_CONN_STATE) {
+        SetSoftBusWifiP2pConnState(code, &state);
     }
     if (state != SOFTBUS_WIFI_UNKNOWN) {
         SoftBusWifiState *notifyState = (SoftBusWifiState *)SoftBusMalloc(sizeof(SoftBusWifiState));
@@ -144,6 +163,7 @@ public:
     int32_t SubscribeWifiPowerStateEvent();
     int32_t SubscribeAPConnStateEvent();
     int32_t SubscribeWifiSemiStateEvent();
+    int32_t SubscribeWifiP2pConnStateEvent();
 };
 
 int32_t SubscribeEvent::SubscribeAPConnStateEvent()
@@ -192,6 +212,20 @@ int32_t SubscribeEvent::SubscribeWifiSemiStateEvent()
     if (!CommonEventManager::SubscribeCommonEvent(subscriberPtr)) {
         return SOFTBUS_NETWORK_SUBSCRIBE_COMMON_EVENT_FAILED;
     }
+    return SOFTBUS_OK;
+}
+
+int32_t SubscribeEvent::SubscribeWifiP2pConnStateEvent()
+{
+    MatchingSkills matchingSkills;
+    matchingSkills.AddEvent(CommonEventSupport::COMMON_EVENT_WIFI_P2P_CONN_STATE);
+    CommonEventSubscribeInfo subscriberInfo(matchingSkills);
+    std::shared_ptr<WifiServiceMonitor> subscriberPtr = std::make_shared<WifiServiceMonitor>(subscriberInfo);
+    if (!CommonEventManager::SubscribeCommonEvent(subscriberPtr)) {
+        LNN_LOGE(LNN_BUILDER, "fail");
+        return SOFTBUS_NETWORK_SUBSCRIBE_COMMON_EVENT_FAILED;
+    }
+    LNN_LOGI(LNN_BUILDER, "success");
     return SOFTBUS_OK;
 }
 } // namespace EventFwk
@@ -261,7 +295,8 @@ static void LnnSubscribeWifiService(void *para)
     if (subscriberPtr->SubscribeWifiConnStateEvent() == SOFTBUS_OK &&
         subscriberPtr->SubscribeWifiPowerStateEvent() == SOFTBUS_OK &&
         subscriberPtr->SubscribeAPConnStateEvent() == SOFTBUS_OK &&
-        subscriberPtr->SubscribeWifiSemiStateEvent() == SOFTBUS_OK) {
+        subscriberPtr->SubscribeWifiSemiStateEvent() == SOFTBUS_OK &&
+        subscriberPtr->SubscribeWifiP2pConnStateEvent() == SOFTBUS_OK) {
         LNN_LOGI(LNN_BUILDER, "subscribe wifiservice conn and power state success");
         UpdateLocalWifiActiveCapability();
         UpdateLocalWifiConnCapability();

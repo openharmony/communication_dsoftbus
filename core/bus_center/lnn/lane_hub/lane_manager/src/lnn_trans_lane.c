@@ -103,6 +103,7 @@ typedef struct {
     bool isCompleted;
     uint32_t actionAddr;
     bool isSupportIpv6;
+    bool isVirtualLink;
     bool isInnerCalled; // Indicates whether to select a link for TransOpenNetWorkingChannel
 } LaneLinkNodeInfo;
 
@@ -372,6 +373,30 @@ int32_t DeleteRequestNode(uint32_t laneReqId)
     return SOFTBUS_LANE_NOT_FOUND;
 }
 
+bool CheckVirtualLinkByLaneReqId(uint32_t laneReqId)
+{
+    if (laneReqId == INVALID_LANE_REQ_ID) {
+        LNN_LOGE(LNN_LANE, "laneHandle is invalid parameter");
+        return false;
+    }
+    if (Lock() != SOFTBUS_OK) {
+        LNN_LOGE(LNN_LANE, "get lock fail");
+        return false;
+    }
+    TransReqInfo *item = NULL;
+    TransReqInfo *next = NULL;
+    LIST_FOR_EACH_ENTRY_SAFE(item, next, &g_requestList->list, TransReqInfo, node) {
+        if (item->laneReqId == laneReqId) {
+            Unlock();
+            LNN_LOGE(LNN_LANE, "found virtual request node, laneReqId=%{public}d", laneReqId);
+            return item->allocInfo.extendInfo.isVirtualLink;
+        }
+    }
+    Unlock();
+    LNN_LOGE(LNN_LANE, "not found request node, laneReqId=%{public}d", laneReqId);
+    return false;
+}
+
 static TransReqInfo *CreateReqNodeWithQos(uint32_t laneReqId, const LaneAllocInfo *allocInfo,
     const LaneAllocListener *listener)
 {
@@ -392,6 +417,7 @@ static TransReqInfo *CreateReqNodeWithQos(uint32_t laneReqId, const LaneAllocInf
     }
     newNode->extraInfo.actionAddr = allocInfo->extendInfo.actionAddr;
     newNode->extraInfo.isSupportIpv6 = allocInfo->extendInfo.isSupportIpv6;
+    newNode->extraInfo.isVirtualLink = allocInfo->extendInfo.isVirtualLink;
     newNode->laneReqId = laneReqId;
     newNode->isWithQos = true;
     newNode->isCanceled = false;
@@ -429,6 +455,7 @@ static int32_t TriggerLinkWithQos(uint32_t laneReqId, const LaneAllocInfo *alloc
     linkNode->acceptableProtocols = allocInfo->acceptableProtocols;
     linkNode->actionAddr = allocInfo->extendInfo.actionAddr;
     linkNode->isSupportIpv6 = allocInfo->extendInfo.isSupportIpv6;
+    linkNode->isVirtualLink = allocInfo->extendInfo.isVirtualLink;
     linkNode->bandWidth = allocInfo->qosRequire.minBW;
     linkNode->triggerLinkTime = SoftBusGetSysTimeMs();
     linkNode->availableLinkTime = allocInfo->qosRequire.maxLaneLatency != 0 ?
@@ -555,6 +582,7 @@ static int32_t LaneAllocInfoConvert(const LaneAllocInfoExt *allocInfoExt, LaneAl
     allocInfo->transType = allocInfoExt->commInfo.transType;
     allocInfo->extendInfo.isSupportIpv6 = allocInfoExt->commInfo.isSupportIpv6;
     allocInfo->extendInfo.actionAddr = allocInfoExt->commInfo.actionAddr;
+    allocInfo->extendInfo.isVirtualLink = allocInfoExt->commInfo.isVirtualLink;
     if (strcpy_s(allocInfo->networkId, NETWORK_ID_BUF_LEN, allocInfoExt->commInfo.networkId) != EOK) {
         return SOFTBUS_STRCPY_ERR;
     }
@@ -1142,6 +1170,7 @@ static int32_t CreateLinkRequestNode(const LaneLinkNodeInfo *nodeInfo, LinkReque
     requestInfo->psm = nodeInfo->psm;
     requestInfo->actionAddr = nodeInfo->actionAddr;
     requestInfo->isSupportIpv6 = nodeInfo->isSupportIpv6;
+    requestInfo->isVirtualLink = nodeInfo->isVirtualLink;
     requestInfo->isInnerCalled = nodeInfo->isInnerCalled;
     if (memcpy_s(requestInfo->peerNetworkId, NETWORK_ID_BUF_LEN, nodeInfo->networkId, NETWORK_ID_BUF_LEN) != EOK) {
         LNN_LOGE(LNN_LANE, "memcpy networkId fail");

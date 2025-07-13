@@ -127,6 +127,7 @@ typedef int32_t (*LnnCreateDataFunc)(Map *map, uint32_t key, const void *value, 
 typedef void (*LnnDeleteDataFunc)(Map *map, uint32_t key);
 typedef int32_t (*LnnDeleteDevInfoSyncToDBFunc)(const char *udid, int64_t accountId);
 typedef int32_t (*SoftBusGetCurrentGroupFunc)(SoftBusWifiP2pGroupInfo *groupInfo);
+typedef int32_t (*SoftBusGetHotspotConfigFunc)(int32_t *apChannel);
 typedef uint64_t (*LnnGetSysTimeMsFunc)(void);
 typedef int32_t (*LnnGetRemoteStrInfoFunc)(const char *networkId, InfoKey key, char *info, uint32_t len);
 typedef int32_t (*AuthGetHmlConnInfoFunc)(const char *uuid, AuthConnInfo *connInfo, bool isMeta);
@@ -341,6 +342,8 @@ typedef void (*LnnUpdateNodeBleMacFunc)(const char *networkId, char *bleMac, uin
 typedef int32_t (*HandleForceDownWifiDirectTransFunc)(const char *udidhashStr, LinkConflictType conflictType);
 
 typedef LinkConflictType (*GetConflictTypeWithErrcodeFunc)(int32_t conflictErrcode);
+typedef int32_t (*HandleForceDownVirtualLinkFunc)(void);
+typedef bool (*CheckVirtualLinkOnlyFunc)(void);
 typedef LnnLaneManager* (*GetLaneManagerFunc)(void);
 typedef void (*AddChannelStatisticsInfoFunc)(int32_t channelId, int32_t channelType);
 typedef int32_t (*AddLinkConflictInfoFunc)(const LinkConflictInfo *inputInfo);
