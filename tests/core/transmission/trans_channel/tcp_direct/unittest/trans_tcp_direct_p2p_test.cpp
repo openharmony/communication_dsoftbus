@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2022-2024 Huawei Device Co., Ltd.
+ * Copyright (c) 2022-2025 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -12,26 +12,28 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+
+#include "gtest/gtest.h"
+#include <arpa/inet.h>
 #include <cstdint>
 #include <cstring>
-#include <arpa/inet.h>
-#include <unistd.h>
 #include <securec.h>
+#include <unistd.h>
+
 #include "auth_interface.h"
-#include "gtest/gtest.h"
-#include "trans_auth_message.h"
-#include "trans_tcp_direct_callback.h"
-#include "trans_tcp_direct_p2p.h"
-#include "trans_tcp_direct_p2p.c"
-#include "trans_tcp_direct_sessionconn.h"
-#include "softbus_def.h"
-#include "softbus_trans_def.h"
-#include "softbus_app_info.h"
-#include "softbus_conn_interface.h"
-#include "softbus_error_code.h"
 #include "dsoftbus_enhance_interface.h"
 #include "g_enhance_lnn_func.h"
+#include "softbus_app_info.h"
+#include "softbus_conn_interface.h"
+#include "softbus_def.h"
+#include "softbus_error_code.h"
+#include "softbus_trans_def.h"
+#include "trans_auth_message.h"
+#include "trans_tcp_direct_callback.h"
 #include "trans_tcp_direct_common_mock.h"
+#include "trans_tcp_direct_p2p.c"
+#include "trans_tcp_direct_p2p.h"
+#include "trans_tcp_direct_sessionconn.h"
 
 using namespace testing;
 using namespace testing::ext;
@@ -1005,7 +1007,7 @@ HWTEST_F(TransTcpDirectP2pTest, GetModuleByHmlIp001, TestSize.Level1)
 HWTEST_F(TransTcpDirectP2pTest, ConnectSocketDirectPeerTest002, TestSize.Level1)
 {
     int32_t ret = ConnectSocketDirectPeer(hmlAddr, g_port, g_localIp, 0);
-    EXPECT_EQ(ret, 17);
+    EXPECT_EQ(ret, SOFTBUS_TRANS_GET_P2P_INFO_FAILED);
 }
 
 /**
