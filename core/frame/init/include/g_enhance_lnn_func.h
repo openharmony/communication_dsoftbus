@@ -269,6 +269,7 @@ typedef void (*SleRangeDeathCallbackFunc)(void);
 typedef int32_t (*LnnInitUsbChannelManagerFunc)(void);
 typedef void (*LnnDeinitUsbChannelManagerFunc)(void);
 typedef void (*CheckNeedCloudSyncOfflineFunc)(DiscoveryType type);
+typedef bool (*IsDeviceHasRiskFactorFunc)(void);
 typedef int32_t (*LnnVirtualLinkInitFunc)(void);
 typedef void (*LnnVirtualLinkDeinitFunc)(void);
 typedef int32_t (*DcTriggerVirtualLinkFunc)(const char *peerNetworkId);
@@ -428,6 +429,7 @@ typedef struct TagLnnEnhanceFuncList {
     LnnDeinitBroadcastLinkKeyFunc lnnDeinitBroadcastLinkKey;
     IsNeedSyncBroadcastLinkKeyFunc isNeedSyncBroadcastLinkKey;
     LnnSyncBroadcastLinkKeyFunc lnnSyncBroadcastLinkKey;
+    IsDeviceHasRiskFactorFunc isDeviceHasRiskFactor;
     // bus_center
     LnnSaveDeviceDataFunc lnnSaveDeviceData;
     LnnAsyncSaveDeviceDataFunc lnnAsyncSaveDeviceData;

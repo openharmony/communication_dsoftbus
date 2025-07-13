@@ -85,6 +85,7 @@ typedef struct {
 static bool g_isNightMode = false;
 static bool g_isOOBEEnd = false;
 static bool g_isUnLock = false;
+static bool g_isDeviceRoot = false;
 static SoftBusUserState g_backgroundState = SOFTBUS_USER_FOREGROUND;
 
 int32_t RegistIPProtocolManager(void);
@@ -296,6 +297,60 @@ static void NetUserStateEventHandler(const LnnEventBasicInfo *info)
             break;
         default:
             return;
+    }
+}
+
+static int32_t NetRootDeviceLeaveLnn(void)
+{
+    LNN_LOGI(LNN_BUILDER, "enter NetRootDeviceLeaveLnn");
+    int32_t i = 0;
+    int32_t infoNum = 0;
+    NodeBasicInfo *info = NULL;
+    if (LnnGetAllOnlineNodeInfo(&info, &infoNum) != SOFTBUS_OK) {
+        LNN_LOGE(LNN_BUILDER, "get online node info failed");
+        return SOFTBUS_NETWORK_GET_ALL_NODE_INFO_ERR;
+    }
+    if (info == NULL || infoNum == 0) {
+        LNN_LOGE(LNN_BUILDER, "get online node is 0");
+        return SOFTBUS_NO_ONLINE_DEVICE;
+    }
+    int32_t ret;
+    NodeInfo nodeInfo;
+    (void)memset_s(&nodeInfo, sizeof(NodeInfo), 0, sizeof(NodeInfo));
+    for (i = 0; i < infoNum; ++i) {
+        ret = LnnGetRemoteNodeInfoById(info[i].networkId, CATEGORY_NETWORK_ID, &nodeInfo);
+        if (ret != SOFTBUS_OK) {
+            continue;
+        }
+        LNN_LOGI(LNN_BUILDER, "device is root, need to offline");
+        LnnRequestLeaveSpecific(info[i].networkId, CONNECTION_ADDR_MAX);
+        AuthRemoveDeviceKeyByUdidPacked(nodeInfo.deviceInfo.deviceUdid);
+    }
+    SoftBusFree(info);
+    return SOFTBUS_OK;
+}
+
+static void NetDeviceRootStateEventHandler(const LnnEventBasicInfo *info)
+{
+    if (info == NULL || info->event != LNN_EVENT_DEVICE_ROOT_STATE_CHANGED) {
+        LNN_LOGE(LNN_BUILDER, "device root state change evt handler get invalid param");
+        return;
+    }
+    const LnnDeviceRootStateChangeEvent *event = (const LnnDeviceRootStateChangeEvent *)info;
+    SoftBusDeviceRootState deviceRootState = (SoftBusDeviceRootState)event->status;
+    LNN_LOGI(LNN_BUILDER, "device root state=%{public}d", deviceRootState);
+    switch (deviceRootState) {
+        case SOFTBUS_DEVICE_IS_ROOT:
+            g_isDeviceRoot = true;
+            AuthStopListening(AUTH_LINK_TYPE_WIFI);
+            LnnStopPublish();
+            LnnStopDiscovery();
+            NetRootDeviceLeaveLnn();
+            break;
+        case SOFTBUS_DEVICE_NOT_ROOT:
+            break;
+        default:
+            break;
     }
 }
 
@@ -774,6 +829,10 @@ static int32_t LnnRegisterEvent(void)
         LNN_LOGE(LNN_BUILDER, "Net regist data share evt handler fail");
         return SOFTBUS_NETWORK_REG_EVENT_HANDLER_ERR;
     }
+    if (LnnRegisterEventHandler(LNN_EVENT_DEVICE_ROOT_STATE_CHANGED, NetDeviceRootStateEventHandler) != SOFTBUS_OK) {
+        LNN_LOGE(LNN_BUILDER, "Net regist device root evt handler fail");
+        return SOFTBUS_NETWORK_REG_EVENT_HANDLER_ERR;
+    }
     return SOFTBUS_OK;
 }
 
@@ -885,11 +944,11 @@ bool LnnIsAutoNetWorkingEnabled(void)
     }
     LNN_LOGI(LNN_BUILDER,
         "wifi condition state:config=%{public}d, background=%{public}d, nightMode=%{public}d, OOBEEnd=%{public}d, "
-        "unlock=%{public}d, init check=%{public}d",
+        "unlock=%{public}d, init check=%{public}d, deviceRoot=%{public}d",
         isConfigEnabled, g_backgroundState == SOFTBUS_USER_BACKGROUND, g_isNightMode, g_isOOBEEnd, g_isUnLock,
-        isInitCheckSuc);
+        isInitCheckSuc, g_isDeviceRoot);
     return isConfigEnabled && (g_backgroundState == SOFTBUS_USER_FOREGROUND) && !g_isNightMode &&
-        g_isOOBEEnd && g_isUnLock && isInitCheckSuc;
+        g_isOOBEEnd && g_isUnLock && isInitCheckSuc && !g_isDeviceRoot;
 }
 
 void LnnDeinitNetworkManager(void)
@@ -925,6 +984,7 @@ void LnnDeinitNetworkManager(void)
     LnnUnregisterEventHandler(LNN_EVENT_OOBE_STATE_CHANGED, NetOOBEStateEventHandler);
     LnnUnregisterEventHandler(LNN_EVENT_ACCOUNT_CHANGED, NetAccountStateChangeEventHandler);
     LnnUnregisterEventHandler(LNN_EVENT_DATA_SHARE_STATE_CHANGE, DataShareStateEventHandler);
+    LnnUnregisterEventHandler(LNN_EVENT_DEVICE_ROOT_STATE_CHANGED, NetDeviceRootStateEventHandler);
     (void)SoftBusMutexDestroy(&g_dataShareLock);
 }
 
