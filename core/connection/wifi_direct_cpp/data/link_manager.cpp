@@ -351,20 +351,7 @@ bool LinkManager::RefreshAuthHandle(std::string remoteDeviceId, const std::share
 
 bool LinkManager::CheckOnlyVirtualLink(void)
 {
-    bool hasRealLink = false;
-    bool hasVirtualLink = false;
-    LinkManager::GetInstance().ForEach([&hasRealLink, &hasVirtualLink] (const InnerLink &link) {
-        if (link.GetLinkType() == InnerLink::LinkType::HML) {
-            if (link.GetLinkPowerMode() != LOW_POWER) {
-                hasRealLink = true;
-                return true;
-            } else {
-                hasVirtualLink = true;
-            }
-        }
-        return false;
-    });
-    return hasVirtualLink && !hasRealLink;
+    return false;
 }
 
 void LinkManager::Dump() const
