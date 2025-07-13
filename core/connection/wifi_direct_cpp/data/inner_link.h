@@ -55,12 +55,14 @@ enum class InnerLinKey {
     REMOTE_CUSTOM_PORT = 25,
     IS_LEGACY_REUSED = 26,
     REMOTE_PORT = 27,
+    VIRTUAL_FLAG = 28,
 };
 
 struct LinkIdStruct {
     int id;
     int pid;
     uint32_t requestId;
+    bool isVirtualLink;
 };
 
 class InnerLink : public InfoContainer<InnerLinKey> {
@@ -159,12 +161,18 @@ public:
     bool GetLegacyReused() const;
     void SetLegacyReused(bool value);
 
-    void GenerateLink(uint32_t requestId, int pid, WifiDirectLink &link, bool ipv4);
+    void GenerateLink(uint32_t requestId, int pid, WifiDirectLink &link, bool ipv4, bool isVirtualLink = false);
     void RemoveId(int linkId);
     bool IsContainId(int linkId) const;
 
     size_t GetReference() const;
     bool IsProtected() const;
+
+    void SetLinkPowerMode(int powerMode);
+    int GetLinkPowerMode() const;
+
+    int32_t SetKeepaliveState(bool isKeepalive);
+    bool CheckOnlyVirtualLinks() const;
 
     void Dump() const;
 
@@ -172,7 +180,7 @@ public:
     static std::string ToString(InnerLink::LinkState state);
 
 private:
-    void AddId(int linkId, uint32_t requestId, int pid);
+    void AddId(int linkId, uint32_t requestId, int pid, bool isVirtualLink);
     std::map<int, std::shared_ptr<LinkIdStruct>> linkIds_;
     std::shared_ptr<NegotiateChannel> channel_;
 };
