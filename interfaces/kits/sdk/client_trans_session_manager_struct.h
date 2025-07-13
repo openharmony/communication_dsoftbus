@@ -120,6 +120,7 @@ typedef struct {
     char peerExtraAccessInfo[EXTRA_ACCESS_INFO_LEN_MAX];
     char peerPagingAccountId[ACCOUNT_UID_LEN_MAX];
     bool isLowLatency;
+    TransFlowInfo flowInfo;
 } SessionInfo;
 
 typedef struct {

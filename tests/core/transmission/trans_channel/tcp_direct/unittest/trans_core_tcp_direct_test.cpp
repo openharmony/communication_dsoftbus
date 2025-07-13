@@ -12,7 +12,10 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+
 #include "disc_event_manager.h"
+#include "dsoftbus_enhance_interface.h"
+#include "g_enhance_lnn_func.h"
 #include "message_handler.h"
 #include "softbus_conn_ble_direct.h"
 #include "softbus_feature_config.h"
@@ -22,12 +25,10 @@
 #include "trans_log.h"
 #include "trans_session_service.h"
 #include "trans_tcp_direct_callback.h"
-#include "trans_tcp_direct_manager.h"
-#include "trans_tcp_direct_manager.c"
-#include "trans_tcp_direct_test.h"
-#include "dsoftbus_enhance_interface.h"
-#include "g_enhance_lnn_func.h"
 #include "trans_tcp_direct_common_mock.h"
+#include "trans_tcp_direct_manager.c"
+#include "trans_tcp_direct_manager.h"
+#include "trans_tcp_direct_test.h"
 
 using namespace testing;
 using namespace testing::ext;
@@ -328,10 +329,10 @@ HWTEST_F(TransCoreTcpDirectTest, TransSrvDelDataBufNodeTest007, TestSize.Level1)
  */
 HWTEST_F(TransCoreTcpDirectTest, VerifyP2pPackTest008, TestSize.Level1)
 {
-    char *ret = VerifyP2pPack(g_ip, g_port, nullptr);
+    char *ret = VerifyP2pPack(g_ip, g_port, nullptr, 0);
     EXPECT_TRUE(ret != nullptr);
 
-    ret = VerifyP2pPack(nullptr, g_port, nullptr);
+    ret = VerifyP2pPack(nullptr, g_port, nullptr, 0);
     EXPECT_TRUE(ret == nullptr);
 }
 
@@ -343,22 +344,22 @@ HWTEST_F(TransCoreTcpDirectTest, VerifyP2pPackTest008, TestSize.Level1)
  */
 HWTEST_F(TransCoreTcpDirectTest, VerifyP2pUnPackTest009, TestSize.Level1)
 {
-    char peerIp[IP_LEN] = {0};
+    char peerIp[IP_LEN] = { 0 };
     int32_t peerPort;
     string msg = TestGetMsgPack();
     cJSON *json = cJSON_Parse(msg.c_str());
     EXPECT_TRUE(json != nullptr);
 
-    char *pack = VerifyP2pPack(g_ip, g_port, nullptr);
+    char *pack = VerifyP2pPack(g_ip, g_port, nullptr, 0);
     EXPECT_TRUE(pack != nullptr);
+    ProtocolType protocol = 0;
+    int32_t ret = VerifyP2pUnPack(json, peerIp, IP_LEN, &peerPort, nullptr);
+    EXPECT_EQ(ret, SOFTBUS_INVALID_PARAM);
 
-    int32_t ret = VerifyP2pUnPack(json, peerIp, IP_LEN, &peerPort);
+    ret = VerifyP2pUnPack(json, const_cast<char *>(g_ip), IP_LEN, &g_port, &protocol);
     EXPECT_EQ(ret, SOFTBUS_PARSE_JSON_ERR);
 
-    ret = VerifyP2pUnPack(json, const_cast<char *>(g_ip), IP_LEN, &g_port);
-    EXPECT_EQ(ret, SOFTBUS_PARSE_JSON_ERR);
-
-    ret = VerifyP2pUnPack(nullptr, const_cast<char *>(g_ip), IP_LEN, &g_port);
+    ret = VerifyP2pUnPack(nullptr, const_cast<char *>(g_ip), IP_LEN, &g_port, &protocol);
     EXPECT_EQ(ret, SOFTBUS_INVALID_PARAM);
     cJSON_Delete(json);
 }

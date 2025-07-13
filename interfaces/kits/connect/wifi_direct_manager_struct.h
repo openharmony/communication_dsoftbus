@@ -33,6 +33,7 @@ struct WifiDirectStatusListener {
 typedef void (*SyncPtkListener)(const char *remoteDeviceId, int result);
 typedef void (*PtkMismatchListener)(const char *remoteNetworkId, uint32_t len, int32_t reason);
 typedef void (*HmlStateListener)(SoftBusHmlState state);
+typedef void (*FrequencyChangedListener)(int32_t frequency);
 struct WifiDirectEnhanceManager {
     int32_t (*savePTK)(const char *remoteDeviceId, const char *ptk);
     int32_t (*syncPTK)(const char *remoteDeviceId);
@@ -66,8 +67,10 @@ struct WifiDirectManager {
     int32_t (*getLocalIpByUuid)(const char *uuid, char *localIp, int32_t localIpSize);
     int32_t (*getLocalIpByRemoteIp)(const char *remoteIp, char *localIp, int32_t localIpSize);
     int32_t (*getRemoteUuidByIp)(const char *remoteIp, char *uuid, int32_t uuidSize);
-    int32_t (*getLocalAndRemoteMacByLocalIp)(const char *localIp, char *localMac, size_t localMacSize, char *remoteMac,
-        size_t remoteMacSize);
+    int32_t (*getLocalAndRemoteMacByLocalIp)(
+        const char *localIp, char *localMac, size_t localMacSize, char *remoteMac, size_t remoteMacSize);
+    int32_t (*getLocalAndRemoteMacByRemoteIp)(
+        const char *remoteIp, char *localMac, size_t localMacSize, char *remoteMac, size_t remoteMacSize);
 
     bool (*supportHmlTwo)(void);
     bool (*isWifiP2pEnabled)(void);
@@ -89,6 +92,13 @@ struct WifiDirectManager {
     void (*notifyPtkMismatch)(const char *remoteNetworkId, uint32_t len, int32_t reason);
     void (*notifyHmlState)(SoftBusHmlState state);
     int32_t (*getRemoteIpByRemoteMac)(const char *remoteMac, char *remoteIp, int32_t remoteIpSize);
+
+    /* for virtual connection */
+    void (*addFrequencyChangedListener)(FrequencyChangedListener listener);
+    void (*notifyFrequencyChanged)(int32_t frequency);
+    bool (*checkOnlyVirtualLink)(void);
+    void (*checkAndForceDisconnectVirtualLink)(void);
+    int32_t (*getHmlLinkCount)(void);
 };
 
 #ifdef __cplusplus

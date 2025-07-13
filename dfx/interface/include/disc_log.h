@@ -36,6 +36,7 @@ typedef enum {
     DISC_BROADCAST,
     DISC_ACTION,
     DISC_EVENT,
+    DISC_VIRLINK,
     DISC_TEST,
 } DiscLogLabelEnum;
 
@@ -55,6 +56,7 @@ static const SoftBusLogLabel DISC_LABELS[MODULE_DOMAIN_MAX_LEN] = {
     { DISC_BROADCAST,   0xd0057ab,      "DiscBroadcast" },
     { DISC_ACTION,      0xd0057ac,      "DiscAction"    },
     { DISC_EVENT,       0xd0057ad,      "DiscEvent"     },
+    { DISC_VIRLINK,     0xd0057ae,      "DiscVirlink"   },
     { DISC_TEST,        DOMAIN_ID_TEST, "DiscTest"      },
 };
 

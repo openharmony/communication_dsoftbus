@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021-2024 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2025 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -17,19 +17,19 @@
 
 #include <securec.h>
 
+#include "client_bus_center_manager.h"
 #include "client_trans_tcp_direct_callback.h"
 #include "client_trans_tcp_direct_listener.h"
 #include "softbus_adapter_mem.h"
 #include "softbus_base_listener.h"
 #include "softbus_def.h"
 #include "softbus_error_code.h"
+#include "softbus_mintp_socket.h"
 #include "softbus_socket.h"
 #include "softbus_utils.h"
 #include "trans_log.h"
 #include "trans_pending_pkt.h"
 #include "trans_server_proxy.h"
-#include "client_bus_center_manager.h"
-#include "softbus_mintp_socket.h"
 
 #define HEART_TIME             300
 #define TCP_KEEPALIVE_INTERVAL 4
@@ -87,8 +87,8 @@ int32_t TransTdcSetListenerStateById(int32_t channelId, bool needStopListener)
         if (item->channelId == channelId) {
             item->detail.needStopListener = needStopListener;
             (void)SoftBusMutexUnlock(&g_tcpDirectChannelInfoList->lock);
-            TRANS_LOGI(TRANS_SDK, "succ, channelId=%{public}d, needStopListener=%{public}d", channelId,
-                needStopListener);
+            TRANS_LOGI(
+                TRANS_SDK, "succ, channelId=%{public}d, needStopListener=%{public}d", channelId, needStopListener);
             return SOFTBUS_OK;
         }
     }
@@ -138,20 +138,16 @@ int32_t TransTdcGetInfoByFd(int32_t fd, TcpDirectChannelInfo *info)
     return SOFTBUS_NOT_FIND;
 }
 
-void TransTdcCloseChannel(int32_t channelId)
+static void TransTdcDeleteChannelInfo(int32_t channelId)
 {
-    TRANS_LOGI(TRANS_SDK, "Close tdc Channel, channelId=%{public}d.", channelId);
-    if (ServerIpcCloseChannel(NULL, channelId, CHANNEL_TYPE_TCP_DIRECT) != SOFTBUS_OK) {
-        TRANS_LOGE(TRANS_SDK, "close server tdc channelId=%{public}d err.", channelId);
-    }
-
-    TcpDirectChannelInfo *item = NULL;
     if (SoftBusMutexLock(&g_tcpDirectChannelInfoList->lock) != SOFTBUS_OK) {
         TRANS_LOGE(TRANS_SDK, "lock failed");
         return;
     }
 
-    LIST_FOR_EACH_ENTRY(item, &(g_tcpDirectChannelInfoList->list), TcpDirectChannelInfo, node) {
+    TcpDirectChannelInfo *item = NULL;
+    TcpDirectChannelInfo *next = NULL;
+    LIST_FOR_EACH_ENTRY_SAFE(item, next, &(g_tcpDirectChannelInfoList->list), TcpDirectChannelInfo, node) {
         if (item->channelId != channelId) {
             continue;
         }
@@ -172,6 +168,16 @@ void TransTdcCloseChannel(int32_t channelId)
 
     TRANS_LOGE(TRANS_SDK, "Target item not exist. channelId=%{public}d", channelId);
     (void)SoftBusMutexUnlock(&g_tcpDirectChannelInfoList->lock);
+}
+
+void TransTdcCloseChannel(int32_t channelId)
+{
+    TRANS_LOGI(TRANS_SDK, "Close tdc Channel, channelId=%{public}d.", channelId);
+
+    TransTdcDeleteChannelInfo(channelId);
+    if (ServerIpcCloseChannel(NULL, channelId, CHANNEL_TYPE_TCP_DIRECT) != SOFTBUS_OK) {
+        TRANS_LOGE(TRANS_SDK, "close server tdc channelId=%{public}d err.", channelId);
+    }
 }
 
 static TcpDirectChannelInfo *TransGetNewTcpChannel(const ChannelInfo *channel)
@@ -251,8 +257,7 @@ static void TransTdcReleaseFdResources(int32_t fd, int32_t errCode)
 {
     if (errCode == SOFTBUS_TRANS_NEGOTIATE_REJECTED) {
         TransTdcCloseFd(fd);
-        TRANS_LOGI(
-            TRANS_SDK, "Server reject conn, fd=%{public}d", fd);
+        TRANS_LOGI(TRANS_SDK, "Server reject conn, fd=%{public}d", fd);
     } else {
         TransTdcReleaseFd(fd);
     }
@@ -433,15 +438,15 @@ static int32_t TransStartTimeSync(const ChannelInfo *channel)
 
 int32_t ClientTransTdcOnChannelOpened(const char *sessionName, const ChannelInfo *channel, SocketAccessInfo *accessInfo)
 {
-    TRANS_CHECK_AND_RETURN_RET_LOGE(sessionName != NULL && channel != NULL,
-        SOFTBUS_INVALID_PARAM, TRANS_SDK, "param invalid");
+    TRANS_CHECK_AND_RETURN_RET_LOGE(
+        sessionName != NULL && channel != NULL, SOFTBUS_INVALID_PARAM, TRANS_SDK, "param invalid");
 
     int32_t ret = ClientTransCheckTdcChannelExist(channel->channelId);
     TRANS_CHECK_AND_RETURN_RET_LOGE(ret == SOFTBUS_OK, ret, TRANS_FILE, "check tdc channel fail!");
 
     TcpDirectChannelInfo *item = TransGetNewTcpChannel(channel);
-    TRANS_CHECK_AND_RETURN_RET_LOGE(item != NULL, SOFTBUS_MEM_ERR,
-        TRANS_SDK, "get new tcp channel err. channelId=%{public}d", channel->channelId);
+    TRANS_CHECK_AND_RETURN_RET_LOGE(
+        item != NULL, SOFTBUS_MEM_ERR, TRANS_SDK, "get new tcp channel err. channelId=%{public}d", channel->channelId);
     ret = TransAddDataBufNode(channel->channelId, channel->fd);
     if (ret != SOFTBUS_OK) {
         TRANS_LOGE(TRANS_SDK, "add node fail. channelId=%{public}d, fd=%{public}d", channel->channelId, channel->fd);
@@ -451,13 +456,17 @@ int32_t ClientTransTdcOnChannelOpened(const char *sessionName, const ChannelInfo
     if (channel->fdProtocol != LNN_PROTOCOL_MINTP) {
         ret = ClientTransSetTcpOption(channel->fd);
         if (ret != SOFTBUS_OK) {
-            goto EXIT_ERR;
+            TRANS_LOGW(TRANS_SDK,
+                "Failed to set keep-alive, warning but do not terminate. channelId=%{public}d, fd=%{public}d",
+                channel->channelId, channel->fd);
         }
     }
     ret = SoftBusMutexLock(&g_tcpDirectChannelInfoList->lock);
     if (ret != SOFTBUS_OK) {
         TRANS_LOGE(TRANS_SDK, "lock failed.");
-        goto EXIT_ERR;
+        TransDelDataBufNode(channel->channelId);
+        SoftBusFree(item);
+        return ret;
     }
     ListAdd(&g_tcpDirectChannelInfoList->list, &item->node);
     TRANS_LOGI(TRANS_SDK, "add channelId=%{public}d, fd=%{public}d", item->channelId, channel->fd);
@@ -482,10 +491,6 @@ int32_t ClientTransTdcOnChannelOpened(const char *sessionName, const ChannelInfo
     }
 
     return SOFTBUS_OK;
-EXIT_ERR:
-    TransDelDataBufNode(channel->channelId);
-    SoftBusFree(item);
-    return ret;
 }
 
 int32_t TransTdcManagerInit(const IClientSessionCallBack *callback)

@@ -192,7 +192,7 @@ static void ClientFuncInit(void)
 {
     int ret = SOFTBUS_OK;
     void *soHandle = NULL;
-    (void)SoftBusDlopen(SOFTBUS_HANDLE_CLIENT_PLGUIN, &soHandle);
+    (void)SoftBusDlopen(SOFTBUS_HANDLE_CLIENT_PLUGIN, &soHandle);
     if (soHandle == NULL) {
         COMM_LOGE(COMM_SDK, "dlopen libdsoftbus_client_plugin.z.so failed.");
         return;

@@ -75,9 +75,9 @@ void InitBTMock(SoftbusBroadcastMgrMock &bcMgrMock)
     ON_CALL(bcMgrMock, SoftBusGetBtState()).WillByDefault(Return(BLE_ENABLE));
     ON_CALL(bcMgrMock, InitBroadcastMgr()).WillByDefault(Return(SOFTBUS_OK));
     ON_CALL(bcMgrMock, DeInitBroadcastMgr()).WillByDefault(Return(SOFTBUS_OK));
-    ON_CALL(bcMgrMock, RegisterScanListener(_, _, _)).WillByDefault(Return(SOFTBUS_OK));
+    ON_CALL(bcMgrMock, RegisterScanListener(_, _, _, _)).WillByDefault(Return(SOFTBUS_OK));
     ON_CALL(bcMgrMock, UnRegisterScanListener(_)).WillByDefault(Return(SOFTBUS_OK));
-    ON_CALL(bcMgrMock, RegisterBroadcaster(_, _, _)).WillByDefault(Return(SOFTBUS_OK));
+    ON_CALL(bcMgrMock, RegisterBroadcaster(_, _, _, _)).WillByDefault(Return(SOFTBUS_OK));
     ON_CALL(bcMgrMock, UnRegisterBroadcaster(_)).WillByDefault(Return(SOFTBUS_OK));
     ON_CALL(bcMgrMock, StartScan(_, _)).WillByDefault(Return(SOFTBUS_OK));
     ON_CALL(bcMgrMock, StopScan(_)).WillByDefault(Return(SOFTBUS_OK));

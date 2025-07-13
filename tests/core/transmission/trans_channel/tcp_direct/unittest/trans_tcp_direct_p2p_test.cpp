@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2022-2024 Huawei Device Co., Ltd.
+ * Copyright (c) 2022-2025 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -12,26 +12,28 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+
+#include "gtest/gtest.h"
+#include <arpa/inet.h>
 #include <cstdint>
 #include <cstring>
-#include <arpa/inet.h>
-#include <unistd.h>
 #include <securec.h>
+#include <unistd.h>
+
 #include "auth_interface.h"
-#include "gtest/gtest.h"
-#include "trans_auth_message.h"
-#include "trans_tcp_direct_callback.h"
-#include "trans_tcp_direct_p2p.h"
-#include "trans_tcp_direct_p2p.c"
-#include "trans_tcp_direct_sessionconn.h"
-#include "softbus_def.h"
-#include "softbus_trans_def.h"
-#include "softbus_app_info.h"
-#include "softbus_conn_interface.h"
-#include "softbus_error_code.h"
 #include "dsoftbus_enhance_interface.h"
 #include "g_enhance_lnn_func.h"
+#include "softbus_app_info.h"
+#include "softbus_conn_interface.h"
+#include "softbus_def.h"
+#include "softbus_error_code.h"
+#include "softbus_trans_def.h"
+#include "trans_auth_message.h"
+#include "trans_tcp_direct_callback.h"
 #include "trans_tcp_direct_common_mock.h"
+#include "trans_tcp_direct_p2p.c"
+#include "trans_tcp_direct_p2p.h"
+#include "trans_tcp_direct_sessionconn.h"
 
 using namespace testing;
 using namespace testing::ext;
@@ -381,14 +383,14 @@ HWTEST_F(TransTcpDirectP2pTest, OnVerifyP2pRequestTest001, TestSize.Level1)
 }
 
 /**
- * @tc.name: ConnectTcpDirectPeerTest004
- * @tc.desc: ConnectTcpDirectPeer, use the wrong parameter.sss
+ * @tc.name: ConnectSocketDirectPeerTest004
+ * @tc.desc: ConnectSocketDirectPeer, use the wrong parameter.sss
  * @tc.type: FUNC
  * @tc.require:
  */
-HWTEST_F(TransTcpDirectP2pTest, ConnectTcpDirectPeerTest001, TestSize.Level1)
+HWTEST_F(TransTcpDirectP2pTest, ConnectSocketDirectPeerTest001, TestSize.Level1)
 {
-    int32_t ret = ConnectTcpDirectPeer(g_addr, g_port, g_ip);
+    int32_t ret = ConnectSocketDirectPeer(g_addr, g_port, g_ip, 0);
     EXPECT_NE(ret, SOFTBUS_OK);
 }
 
@@ -902,7 +904,7 @@ HWTEST_F(TransTcpDirectP2pTest, OnVerifyP2pRequestTest002, TestSize.Level1)
     EXPECT_CALL(TransTcpDirectP2pMock, AuthMetaPostTransData).WillRepeatedly(Return(SOFTBUS_LOCK_ERR));
     AuthHandle authHandle = { .authId = AUTH_INVALID_ID, .type = AUTH_LINK_TYPE_BLE };
     int64_t seq = 0;
-    char *data = VerifyP2pPack(g_ip, g_port, g_ip);
+    char *data = VerifyP2pPack(g_ip, g_port, g_ip, 0);
     ASSERT_TRUE(data != nullptr);
     int32_t len = strlen(data);
     cJSON *json = cJSON_ParseWithLength((const char *)(data), len);
@@ -926,7 +928,7 @@ HWTEST_F(TransTcpDirectP2pTest, OnVerifyP2pRequestTest002, TestSize.Level1)
 HWTEST_F(TransTcpDirectP2pTest, OnP2pVerifyMsgReceivedTest001, TestSize.Level1)
 {
     int32_t channelId = 0;
-    char *data = VerifyP2pPack(g_ip, g_port, g_ip);
+    char *data = VerifyP2pPack(g_ip, g_port, g_ip, 0);
     ASSERT_TRUE(data != nullptr);
     int32_t len = strlen(data);
     OnP2pVerifyMsgReceived(channelId, data, len);
@@ -997,15 +999,15 @@ HWTEST_F(TransTcpDirectP2pTest, GetModuleByHmlIp001, TestSize.Level1)
 }
 
 /**
- * @tc.name: ConnectTcpDirectPeerTest002
- * @tc.desc: ConnectTcpDirectPeer
+ * @tc.name: ConnectSocketDirectPeerTest002
+ * @tc.desc: ConnectSocketDirectPeer
  * @tc.type: FUNC
  * @tc.require:
  */
-HWTEST_F(TransTcpDirectP2pTest, ConnectTcpDirectPeerTest002, TestSize.Level1)
+HWTEST_F(TransTcpDirectP2pTest, ConnectSocketDirectPeerTest002, TestSize.Level1)
 {
-    int32_t ret = ConnectTcpDirectPeer(hmlAddr, g_port, g_localIp);
-    EXPECT_EQ(ret, 17);
+    int32_t ret = ConnectSocketDirectPeer(hmlAddr, g_port, g_localIp, 0);
+    EXPECT_EQ(ret, SOFTBUS_TRANS_GET_P2P_INFO_FAILED);
 }
 
 /**

@@ -13,4 +13,9 @@
  * limitations under the License.
  */
 
-FUZZ
+#ifndef TEST_FUZZTEST_AUTHUKMANAGER_FUZZER_H
+#define TEST_FUZZTEST_AUTHUKMANAGER_FUZZER_H
+
+#define FUZZ_PROJECT_NAME "authukmanager_fuzzer"
+
+#endif /* TEST_FUZZTEST_AUTHUKMANAGER_FUZZER_H */

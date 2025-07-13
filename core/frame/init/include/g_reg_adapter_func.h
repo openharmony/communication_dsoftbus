@@ -80,7 +80,7 @@ typedef uint8_t *(*AssembleAdvDataFunc)(const SoftbusBroadcastData *data, uint16
 typedef uint8_t *(*AssembleRspDataFunc)(const SoftbusBroadcastPayload *data, uint16_t *dataLen);
 typedef int32_t (*ParseScanResultFunc)(const uint8_t *advData, uint8_t advLen, SoftBusBcScanResult *dst);
 
-typedef int32_t (*RegisterBroadcastMediumFunctionFunc)(SoftbusMediumType type,
+typedef int32_t (*RegisterBroadcastMediumFunctionFunc)(BroadcastProtocol type,
     const SoftbusBroadcastMediumInterface *interface);
 typedef void (*FreeBtFilterFunc)(BleScanNativeFilter *nativeFilter, int32_t filterSize);
 typedef void (*SoftbusSetManufactureFilterFunc)(BleScanNativeFilter *nativeFilter, uint8_t filterSize);

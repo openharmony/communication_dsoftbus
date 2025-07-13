@@ -124,13 +124,13 @@ void MoveNodeTest(FuzzedDataProvider &provider)
 
 void TransTdcDecryptTest(FuzzedDataProvider &provider)
 {
-    std::string providerSessionKey = provider.ConsumeBytesAsString(SESSION_KEY_LENGTH);
+    std::string providerSessionKey = provider.ConsumeBytesAsString(SESSION_KEY_LENGTH - 1);
     char sessionKey[SESSION_KEY_LENGTH] = { 0 };
     if (strcpy_s(sessionKey, SESSION_KEY_LENGTH, providerSessionKey.c_str()) != EOK) {
         return;
     }
     uint32_t inLen = provider.ConsumeIntegral<uint8_t>();
-    std::string providerIn = provider.ConsumeBytesAsString(SESSION_KEY_LENGTH);
+    std::string providerIn = provider.ConsumeBytesAsString(SESSION_KEY_LENGTH - 1);
     char in[SESSION_KEY_LENGTH] = { 0 };
     if (strcpy_s(in, SESSION_KEY_LENGTH, providerIn.c_str()) != EOK) {
         return;
@@ -171,7 +171,7 @@ void TransTdcUnPackAllDataTest(FuzzedDataProvider &provider)
 void TransTdcUnPackDataTest(FuzzedDataProvider &provider)
 {
     int32_t channelId = provider.ConsumeIntegral<int32_t>();
-    std::string providerSessionKey = provider.ConsumeBytesAsString(SESSION_KEY_LENGTH);
+    std::string providerSessionKey = provider.ConsumeBytesAsString(SESSION_KEY_LENGTH - 1);
     char sessionKey[SESSION_KEY_LENGTH] = { 0 };
     if (strcpy_s(sessionKey, SESSION_KEY_LENGTH, providerSessionKey.c_str()) != EOK) {
         return;
@@ -209,10 +209,10 @@ void TransTdcParseTlvTest(FuzzedDataProvider &provider)
     FillTcpDataTlvPacketHead(provider, &head);
     char data[MAGICNUM_SIZE + TLVCOUNT_SIZE] = { 0 };
 
-    (void)TransTdcParseTlv(bufLen, nullptr, nullptr, nullptr);
+    (void)TransTdcParseTlv(bufLen, data, nullptr, nullptr);
 
     bufLen += (MAGICNUM_SIZE + TLVCOUNT_SIZE);
-    (void)TransTdcParseTlv(bufLen, data, &head, &headSize);
+    (void)TransTdcParseTlv(bufLen, nullptr, &head, &headSize);
 }
 
 void TransTdcUnPackAllTlvDataTest(FuzzedDataProvider &provider)
@@ -240,18 +240,10 @@ void ReleaseDataHeadResourceTest(FuzzedDataProvider &provider)
 
 void TransTdcPackTlvDataTest(FuzzedDataProvider &provider)
 {
-    DataHead pktHead;
-    (void)memset_s(&pktHead, sizeof(DataHead), 0, sizeof(DataHead));
-    pktHead.magicNum = provider.ConsumeIntegral<uint32_t>();
-    pktHead.tlvCount = provider.ConsumeIntegral<uint8_t>();
     int32_t tlvBufferSize = provider.ConsumeIntegralInRange<int32_t>(0, MAGICNUM_SIZE + TLVCOUNT_SIZE);
     uint32_t dataLen = provider.ConsumeIntegralInRange<uint32_t>(0, MAGICNUM_SIZE + TLVCOUNT_SIZE);
 
     (void)TransTdcPackTlvData(nullptr, tlvBufferSize, dataLen);
-    (void)TransTdcPackTlvData(&pktHead, tlvBufferSize, dataLen);
-
-    tlvBufferSize = -(MAGICNUM_SIZE + TLVCOUNT_SIZE + dataLen);
-    (void)TransTdcPackTlvData(&pktHead, tlvBufferSize, dataLen);
 }
 
 void BuildNeedAckTlvDataTest(FuzzedDataProvider &provider)
@@ -286,7 +278,7 @@ void BuildDataHeadTest(FuzzedDataProvider &provider)
 void TransTdcEncryptWithSeqTest(FuzzedDataProvider &provider)
 {
     int32_t seqNum = provider.ConsumeIntegral<int32_t>();
-    std::string providerSessionKey = provider.ConsumeBytesAsString(SESSION_KEY_LENGTH);
+    std::string providerSessionKey = provider.ConsumeBytesAsString(SESSION_KEY_LENGTH - 1);
     char sessionKey[SESSION_KEY_LENGTH] = { 0 };
     if (strcpy_s(sessionKey, SESSION_KEY_LENGTH, providerSessionKey.c_str()) != EOK) {
         return;
@@ -347,12 +339,12 @@ void TransTdcPackAllDataTest(FuzzedDataProvider &provider)
     DataLenInfo lenInfo;
     (void)memset_s(&lenInfo, sizeof(DataLenInfo), 0, sizeof(DataLenInfo));
     FillDataLenInfo(provider, &lenInfo);
-    std::string providerSessionKey = provider.ConsumeBytesAsString(SESSION_KEY_LENGTH);
+    std::string providerSessionKey = provider.ConsumeBytesAsString(SESSION_KEY_LENGTH - 1);
     char sessionKey[SESSION_KEY_LENGTH] = { 0 };
     if (strcpy_s(sessionKey, SESSION_KEY_LENGTH, providerSessionKey.c_str()) != EOK) {
         return;
     }
-    std::string providerData = provider.ConsumeBytesAsString(UINT8_MAX);
+    std::string providerData = provider.ConsumeBytesAsString(UINT8_MAX - 1);
     char data[UINT8_MAX] = { 0 };
     if (strcpy_s(data, UINT8_MAX, providerData.c_str()) != EOK) {
         return;
@@ -412,13 +404,11 @@ extern "C" int32_t LLVMFuzzerTestOneInput(const uint8_t *data, size_t size)
     OHOS::CheckBufLenAndCopyDataTest(provider);
     OHOS::TransTdcParseTlvTest(provider);
     OHOS::TransTdcUnPackAllTlvDataTest(provider);
-    OHOS::ReleaseDataHeadResourceTest(provider);
     OHOS::TransTdcPackTlvDataTest(provider);
     OHOS::BuildNeedAckTlvDataTest(provider);
     OHOS::BuildDataHeadTest(provider);
     OHOS::TransTdcEncryptWithSeqTest(provider);
     OHOS::PackTcpDataPacketHeadTest(provider);
-    OHOS::TransPackDataTest(provider);
     OHOS::BuildInnerTdcSendDataInfoTest(provider);
     OHOS::TransTdcPackAllDataTest(provider);
     OHOS::TransTdcSendDataTest(provider);

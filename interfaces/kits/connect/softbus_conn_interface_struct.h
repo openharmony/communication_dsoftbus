@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2025 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -54,6 +54,7 @@ typedef enum {
     MODULE_SLE_AUTH_CMD = 27,
     MODULE_APPLY_KEY_CONNECTION = 28,
     MODULE_LANE_SELECT = 29,
+    MODULE_VIRTUAL_LINK = 30,
     MODULE_BLE_NET = 100,
     MODULE_BLE_CONN = 101,
     MODULE_BLE_GENERAL = 102,
@@ -102,6 +103,7 @@ typedef enum {
     DIRECT_CHANNEL_SERVER_USB,
     DIRECT_CHANNEL_SERVER_HML_START,
     DIRECT_CHANNEL_SERVER_HML_END = DIRECT_CHANNEL_SERVER_HML_START + HML_NUM * 2 - 1,
+    DIRECT_LOWLATENCY,
     LANE,
     NETLINK,
     AUTH_RAW_P2P_SERVER,
@@ -223,6 +225,8 @@ struct SocketOption {
     int32_t moduleId; /* For details, see {@link ListenerModule}. */
     ProtocolType protocol;
     int32_t keepAlive;
+    char localMac[MAC_MAX_LEN];
+    char remoteMac[MAC_MAX_LEN];
 };
 
 struct SleOption {
@@ -271,6 +275,8 @@ struct ListenerSocketOption {
     ListenerModule moduleId; /* For details, see {@link ListenerModule}. */
     ProtocolType protocol;
     char ifName[NETIF_NAME_LEN];
+    char localMac[MAC_MAX_LEN];
+    char remoteMac[MAC_MAX_LEN];
 };
 
 typedef struct {

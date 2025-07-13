@@ -48,6 +48,8 @@ int32_t InitLinkWifiDirect(void);
 void DeInitLinkWifiDirect(void);
 int32_t HandleForceDownWifiDirect(const char *networkId, LinkConflictType conflictType, uint32_t p2pRequestId);
 int32_t HandleForceDownWifiDirectTrans(const char *udidhashStr, LinkConflictType conflictType);
+int32_t HandleForceDownVirtualLink(void);
+bool CheckVirtualLinkOnly(void);
 
 #ifdef __cplusplus
 }

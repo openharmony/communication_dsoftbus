@@ -23,11 +23,13 @@
 #include <ifaddrs.h>
 #include <net/if.h>
 #include <netinet/in.h>
+#include <regex>
 #include <sstream>
+#include <string>
 #include <sys/ioctl.h>
 #include <sys/socket.h>
 #include <unistd.h>
-#include <regex>
+#include <vector>
 
 #include "bus_center_manager.h"
 #include "conn_log.h"
@@ -808,6 +810,25 @@ std::string WifiDirectUtils::RemoteMacToDeviceId(const std::string &remoteMac)
     }
     SoftBusFree(basicInfo);
     return "";
+}
+
+int WifiDirectUtils::GetLocalScreenStatus()
+{
+    bool result = false;
+    auto ret = DBinderSoftbusServer::GetInstance().LnnGetLocalBoolInfo(
+        BOOL_KEY_SCREEN_STATUS, &result, NODE_SCREEN_STATUS_LEN);
+    CONN_CHECK_AND_RETURN_RET_LOGE(ret == SOFTBUS_OK, ret,
+        CONN_WIFI_DIRECT, "get screen state failed, ret=%{public}d", ret);
+    return result;
+}
+
+int WifiDirectUtils::GetUdidByNetWorkId(const char *networkId, char *output)
+{
+    auto ret = DBinderSoftbusServer::GetInstance().LnnConvertDlId(
+        networkId, CATEGORY_NETWORK_ID, CATEGORY_UDID, output, UDID_BUF_LEN);
+    CONN_CHECK_AND_RETURN_RET_LOGE(ret == SOFTBUS_OK, SOFTBUS_INVALID_PARAM,
+        CONN_WIFI_DIRECT, "convert networkId to udid fail, ret=%{public}d", ret);
+    return SOFTBUS_OK;
 }
 
 int WifiDirectUtils::GetChload()

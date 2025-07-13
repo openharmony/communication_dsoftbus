@@ -72,12 +72,18 @@ public:
     bool operator==(const AuthHandle &otherHandle) const;
     bool IsMeta() const;
     void SetClose();
+    AuthHandle GetAuthHandle();
 
     static void AddAuthConnection(const LnnEventBasicInfo *info);
     static void RefreshAuthConnection(std::string remoteUuid);
     int SendMessage(const NegotiateMessage &msg) const override;
     NegotiateMessage SendMessageAndWaitResponse(const NegotiateMessage &msg);
     std::string GetRemoteDeviceId() const override;
+
+    using SyncDBACDataHook = std::function<void(const std::vector<uint8_t> &data)>;
+    static void Register(const SyncDBACDataHook &syncDBACDataHook);
+    static void SyncDBACData(const std::vector<uint8_t> &data);
+
     NegotiateChannelType GetType() const override
     {
         return NegotiateChannelType::AUTH_CHANNEL;
@@ -108,6 +114,8 @@ private:
     std::shared_ptr<std::promise<NegotiateMessage>> promise_;
     uint32_t timerId_;
     bool close_;
+
+    static inline SyncDBACDataHook syncDBACDataHook_;
 };
 } // namespace OHOS::SoftBus
 #endif

@@ -71,9 +71,9 @@ int32_t AuthPostTransData(AuthHandle authHandle, const AuthTransData *dataInfo)
     return GetTransTcpDirectP2pInterface()->AuthPostTransData(authHandle, dataInfo);
 }
 
-char *VerifyP2pPack(const char *myIp, int32_t myPort, const char *peerIp)
+char *VerifyP2pPack(const char *myIp, int32_t myPort, const char *peerIp, ProtocolType protocol)
 {
-    return GetTransTcpDirectP2pInterface()->VerifyP2pPack(myIp, myPort, peerIp);
+    return GetTransTcpDirectP2pInterface()->VerifyP2pPack(myIp, myPort, peerIp, protocol);
 }
 
 int32_t NotifyChannelOpenFailed(int32_t channelId, int32_t errCode)

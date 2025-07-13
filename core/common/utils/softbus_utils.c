@@ -955,7 +955,7 @@ void SoftbusDumpBytes(const char *message, const uint8_t *data, uint32_t dataLen
 
 int32_t AddNumberToSocketName(uint32_t num, const char *prefix, uint32_t preLen, char *socketName)
 {
-    if (socketName == NULL || preLen > (SESSION_NAME_SIZE_MAX - INT_TO_STRING_MAX_LEN)) {
+    if (prefix == NULL || socketName == NULL || preLen > (SESSION_NAME_SIZE_MAX - INT_TO_STRING_MAX_LEN)) {
         COMM_LOGE(COMM_UTILS, "invalid param!");
         return SOFTBUS_INVALID_PARAM;
     }

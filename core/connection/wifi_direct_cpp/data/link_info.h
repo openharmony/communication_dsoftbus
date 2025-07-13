@@ -51,6 +51,8 @@ enum class LinkInfoKey {
     CUSTOM_PORT = 23,
     IPADDR_TYPE = 24,
     RATE_PREFERENCE =25,
+    ENABLE_POWER_MODE = 26,
+    IS_BEING_USED_BY_REMOTE = 27,
 };
 
 class LinkInfo : public Serializable, public InfoContainer<LinkInfoKey> {
@@ -149,6 +151,12 @@ public:
 
     void SetRatePreference(bool ratePreference);
     bool IsRatePreference() const;
+
+    void SetLinkPowerMode(int mode);
+    int GetLinkPowerMode() const;
+
+    void SetIsBeingUsedByRemote(bool isUsed);
+    bool GetIsBeingUsedByRemote() const;
 
     static std::string ToString(LinkMode mode);
 };

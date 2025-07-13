@@ -63,7 +63,7 @@ public:
     virtual int32_t SoftBusGenerateSessionKey(char *key, uint32_t len) = 0;
     virtual int32_t AuthGetServerSide(int64_t authId, bool *isServer) = 0;
     virtual int32_t AuthGetConnInfo(AuthHandle authHandle, AuthConnInfo *connInfo) = 0;
-    virtual char *PackRequest(const AppInfo *appInfo) = 0;
+    virtual char *PackRequest(const AppInfo *appInfo, int64_t requestId) = 0;
     virtual int32_t LnnSetLocalStrInfo(InfoKey key, const char *info) = 0;
     virtual int32_t LnnSetDLP2pIp(const char *id, IdCategory type, const char *p2pIp) = 0;
     virtual int32_t LnnGetNetworkIdByUuid(const char *uuid, char *buf, uint32_t len) = 0;
@@ -120,7 +120,7 @@ public:
     MOCK_METHOD2(SoftBusGenerateSessionKey, int32_t (char *key, uint32_t len));
     MOCK_METHOD2(AuthGetServerSide, int32_t (int64_t authId, bool *isServer));
     MOCK_METHOD2(AuthGetConnInfo, int32_t (AuthHandle authHandle, AuthConnInfo *connInfo));
-    MOCK_METHOD1(PackRequest, char *(const AppInfo *appInfo));
+    MOCK_METHOD2(PackRequest, char *(const AppInfo *appInfo, int64_t requestId));
     MOCK_METHOD2(LnnSetLocalStrInfo, int32_t (InfoKey key, const char *info));
     MOCK_METHOD3(LnnSetDLP2pIp, int32_t (const char *id, IdCategory type, const char *p2pIp));
     MOCK_METHOD3(LnnGetNetworkIdByUuid, int32_t (const char *uuid, char *buf, uint32_t len));

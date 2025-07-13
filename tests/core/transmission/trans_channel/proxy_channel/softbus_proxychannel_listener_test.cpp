@@ -236,6 +236,10 @@ HWTEST_F(SoftbusProxyChannelListenerTest, NotifyNormalChannelOpenedTest002, Test
     EXPECT_CALL(authMock, LnnGetNetworkIdByUuid).WillRepeatedly(Return(SOFTBUS_OK));
     ret = NotifyNormalChannelOpened(TEST_NUMBER_25, appInfo, 0);
     EXPECT_EQ(SOFTBUS_OK, ret);
+
+    appInfo->isD2D = true;
+    ret = NotifyNormalChannelOpened(TEST_NUMBER_25, appInfo, 0);
+    EXPECT_EQ(SOFTBUS_OK, ret);
     SoftBusFree(appInfo);
 }
 
@@ -530,6 +534,31 @@ HWTEST_F(SoftbusProxyChannelListenerTest, FillExtraByProxyChannelErrorEnd002, Te
     FillExtraByProxyChannelErrorEnd(extra, appInfo, localUdid, 1);
     SoftBusFree(appInfo);
     SoftBusFree(extra);
+}
+
+/**
+ * @tc.name: GetProxyChannelInfo001
+ * @tc.desc: test fill extra by proxy channel.
+ * @tc.type: FUNC
+ * @tc.require:
+ */
+HWTEST_F(SoftbusProxyChannelListenerTest, GetProxyChannelInfo001, TestSize.Level1)
+{
+    int32_t channelId = TEST_NUMBER_5000;
+    AppInfo *appInfo = reinterpret_cast<AppInfo *>(SoftBusCalloc(sizeof(AppInfo)));
+    ASSERT_TRUE(appInfo != nullptr);
+    appInfo->isD2D = true;
+    appInfo->peerData.dataLen = 1;
+    appInfo->isClient = false;
+    bool isClient = false;
+    ChannelInfo info;
+    GetProxyChannelInfo(channelId, appInfo, isClient, &info);
+    appInfo->peerData.dataLen = -1;
+    appInfo->isClient = false;
+    GetProxyChannelInfo(channelId, appInfo, isClient, &info);
+    appInfo->isD2D = false;
+    GetProxyChannelInfo(channelId, appInfo, isClient, &info);
+    SoftBusFree(appInfo);
 }
 } // namespace OHOS
 

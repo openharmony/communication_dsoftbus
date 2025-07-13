@@ -30,8 +30,11 @@
 #include "softbus_json_utils.h"
 #include "softbus_utils.h"
 
+#ifndef UDID_SHORT_HASH_HEX_STR
+#define UDID_SHORT_HASH_HEX_STR 17
+#endif
+
 #define UDID_SHORT_HASH          8
-#define UDID_SHORT_HASH_HEX_STR  17
 #define MAP_KEY_LEN              21
 #define USER_KEY_INFO_MAX        100
 

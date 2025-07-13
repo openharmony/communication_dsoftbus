@@ -87,7 +87,11 @@ static ModuleListener g_moduleListener[] = {
     {
         .module = MODULE_APPLY_KEY_CONNECTION,
         .listener = { NULL, NULL },
-    }
+    },
+    {
+        .module = MODULE_VIRTUAL_LINK,
+        .listener = { NULL, NULL },
+    },
 };
 
 int32_t RegAuthTransListener(int32_t module, const AuthTransListener *listener)

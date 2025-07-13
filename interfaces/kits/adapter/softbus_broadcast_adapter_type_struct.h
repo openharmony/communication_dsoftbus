@@ -51,18 +51,6 @@ extern "C"{
 #define SOFTBUS_LOCAL_NAME_LEN_MAX    30
 
 /**
- * @brief Defines different broadcast media protocol stacks
- *
- * @since 4.1
- * @version 1.0
- */
-typedef enum {
-    BROADCAST_MEDIUM_TYPE_BLE,
-    BROADCAST_MEDIUM_TYPE_SLE,
-    BROADCAST_MEDIUM_TYPE_BUTT,
-} SoftbusMediumType;
-
-/**
  * @brief Defines the broadcast service type.
  *
  * @since 4.1
@@ -163,6 +151,7 @@ typedef struct {
     uint8_t ownAddrType;
     uint8_t peerAddrType;
     uint8_t linkRole;
+    uint8_t frameType;
     int8_t txPower;
     bool isSupportRpa;
     uint8_t ownIrk[SOFTBUS_IRK_LEN];
@@ -206,6 +195,7 @@ typedef struct {
     uint8_t scanType;
     uint8_t scanPhy;
     uint8_t scanFilterPolicy;
+    uint8_t frameType;
     uint16_t scanInterval;
     uint16_t scanWindow;
 } SoftBusBcScanParams;

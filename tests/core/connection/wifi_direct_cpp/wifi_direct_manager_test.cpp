@@ -442,4 +442,56 @@ HWTEST_F(WifiDirectManagerCppTest, ForceDisconnectDeviceSync001, TestSize.Level1
     CONN_LOGI(CONN_WIFI_DIRECT, "RefreshRelationShipTest001 exit");
 }
 
+static int g_frequency = -1;
+static void FrequencyChangedListener(int32_t frequency)
+{
+    g_frequency = frequency;
+}
+
+/*
+ * @tc.name: NotifyFrequencyChanged
+ * @tc.desc: check NotifyFrequencyChanged method
+ * @tc.type: FUNC
+ * @tc.require:
+ */
+HWTEST_F(WifiDirectManagerCppTest, NotifyFrequencyChanged, TestSize.Level1)
+{
+    CONN_LOGI(CONN_WIFI_DIRECT, "NotifyFrequencyChanged enter");
+    NotifyFrequencyChanged(0);
+    EXPECT_EQ(g_frequency, -1);
+
+    AddFrequencyChangedListener(FrequencyChangedListener);
+    NotifyFrequencyChanged(0);
+    EXPECT_EQ(g_frequency, 0);
+    CONN_LOGI(CONN_WIFI_DIRECT, "NotifyFrequencyChanged exit");
+}
+
+/*
+ * @tc.name: GetHmlLinkCount
+ * @tc.desc: check GetHmlLinkCount method
+ * @tc.type: FUNC
+ * @tc.require:
+ */
+HWTEST_F(WifiDirectManagerCppTest, GetHmlLinkCount, TestSize.Level1)
+{
+    CONN_LOGI(CONN_WIFI_DIRECT, "GetHmlLinkCount enter");
+    std::string remoteDeviceIdConnected("0123456789ABCDEF");
+    LinkManager::GetInstance().ProcessIfAbsent(
+        InnerLink::LinkType::HML, remoteDeviceIdConnected, [](InnerLink &link) {
+        link.SetState(OHOS::SoftBus::InnerLink::LinkState::CONNECTED);
+    });
+    std::string remoteDeviceIdConnecting("012");
+    LinkManager::GetInstance().ProcessIfAbsent(
+        InnerLink::LinkType::HML, remoteDeviceIdConnecting, [](InnerLink &link) {
+        link.SetState(OHOS::SoftBus::InnerLink::LinkState::CONNECTING);
+    });
+    std::string remoteUuid("123");
+    LinkManager::GetInstance().ProcessIfAbsent(InnerLink::LinkType::P2P, remoteUuid, [](InnerLink &link) {
+        link.SetState(OHOS::SoftBus::InnerLink::LinkState::CONNECTING);
+    });
+
+    auto ret = GetHmlLinkCount();
+    EXPECT_EQ(ret, 1);
+    CONN_LOGI(CONN_WIFI_DIRECT, "GetHmlLinkCount exit");
+}
 } // namespace OHOS::SoftBus

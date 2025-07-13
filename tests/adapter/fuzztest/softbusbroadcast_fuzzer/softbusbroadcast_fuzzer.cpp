@@ -601,8 +601,8 @@ extern "C" int32_t LLVMFuzzerTestOneInput(const uint8_t* data, size_t size)
     int32_t bcId = -1;
 
     InitBroadcastMgr();
-    RegisterBroadcaster(SRV_TYPE_DIS, &bcId, &OHOS::g_advCallback);
-    RegisterScanListener(SRV_TYPE_DIS, &listenerId, &OHOS::g_scanListener);
+    RegisterBroadcaster(BROADCAST_PROTOCOL_BLE, SRV_TYPE_DIS, &bcId, &OHOS::g_advCallback);
+    RegisterScanListener(BROADCAST_PROTOCOL_BLE, SRV_TYPE_DIS, &listenerId, &OHOS::g_scanListener);
 
     OHOS::StartBroadcastingFuzzTest(bcId, data, size);
     OHOS::UpdateBroadcastingFuzzTest(bcId, data, size);

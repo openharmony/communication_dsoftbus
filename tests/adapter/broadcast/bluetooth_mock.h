@@ -88,7 +88,7 @@ public:
     virtual int BleChangeScanParams(int32_t scannerId, const BleScanConfigs *config, const BleScanNativeFilter *filter,
     uint32_t filterSize, uint32_t filterAction) = 0;
     virtual int32_t RegisterBroadcastMediumFunction(
-        SoftbusMediumType type, const SoftbusBroadcastMediumInterface *interface) = 0;
+        BroadcastProtocol type, const SoftbusBroadcastMediumInterface *interface) = 0;
     virtual int32_t SoftBusAddBtStateListener(const SoftBusBtStateListener *listener, int32_t *listenerId) = 0;
 };
 
@@ -164,7 +164,7 @@ public:
     MOCK_METHOD(int32_t, BleGattsSendResponse, (int32_t serverId, GattsSendRspParam *param), (override));
     MOCK_METHOD(int32_t, BleGattsSendIndication, (int32_t serverId, GattsSendIndParam *param), (override));
     MOCK_METHOD(int32_t, RegisterBroadcastMediumFunction,
-        (SoftbusMediumType type, const SoftbusBroadcastMediumInterface *interface), (override));
+        (BroadcastProtocol type, const SoftbusBroadcastMediumInterface *interface), (override));
     MOCK_METHOD(int32_t, SoftBusAddBtStateListener,
         (const SoftBusBtStateListener *listener, int32_t *listenerId), (override));
     static int32_t ActionBleStartAdvEx(int32_t *advId, const StartAdvRawData rawData, BleAdvParams advParam);

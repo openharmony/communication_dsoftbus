@@ -30,6 +30,7 @@ ohos_unittest("SoftbusBroadcastMgrTest") {
     "$softbus_adapter_common/net/bluetooth/broadcast/interface",
     "$softbus_adapter_common/net/bluetooth/broadcast/adapter/include",
     "$softbus_adapter_common/net/bluetooth/broadcast/adapter/ble/include",
+    "$dsoftbus_root_path/interfaces/kits/adapter/enhance",
     "$softbus_adapter_common/net/bluetooth/include",
     "$dsoftbus_root_path/interfaces/kits/broadcast",
     "$dsoftbus_root_path/core/broadcast/common/include",

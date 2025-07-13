@@ -21,8 +21,7 @@
 #include <securec.h>
 #include <vector>
 
-#include "br_proxy.h"
-#include "softbus_error_code.h"
+#include "br_proxy.c"
 
 namespace OHOS {
 static void FillBrProxyChannelInfo(FuzzedDataProvider &provider, BrProxyChannelInfo *channelInfo)
@@ -88,7 +87,7 @@ void SendBrProxyDataTest(FuzzedDataProvider &provider)
 {
     int32_t channelId = provider.ConsumeIntegral<int32_t>();
     uint32_t dataLen = provider.ConsumeIntegralInRange<uint32_t>(0, BR_PROXY_SEND_MAX_LEN);
-    std::string data = provider.ConsumeRandomLengthString(BR_PROXY_SEND_MAX_LEN);
+    std::string data = provider.ConsumeBytesAsString(BR_PROXY_SEND_MAX_LEN);
     char myData[BR_PROXY_SEND_MAX_LEN + 1];
     if (strcpy_s(myData, sizeof(myData), data.c_str()) != 0) {
         return;
@@ -101,7 +100,8 @@ void SetListenerStateTest(FuzzedDataProvider &provider)
 {
     int32_t channelId = provider.ConsumeIntegral<int32_t>();
     bool isEnable = provider.ConsumeBool();
-    ListenerType type = static_cast<ListenerType>(provider.ConsumeIntegralInRange<uint32_t>(0, 2));
+    ListenerType type =
+        static_cast<ListenerType>(provider.ConsumeIntegralInRange<uint32_t>(DATA_RECEIVE, LISTENER_TYPE_MAX));
 
     (void)SetListenerState(channelId, type, isEnable);
 }
@@ -111,6 +111,138 @@ void IsProxyChannelEnabledTest(FuzzedDataProvider &provider)
     int32_t uid = provider.ConsumeIntegral<int32_t>();
 
     (void)IsProxyChannelEnabled(uid);
+}
+
+void TransClientInitTest(FuzzedDataProvider &provider)
+{
+    (void)provider;
+    (void)TransClientInit();
+}
+
+void ClientAddChannelToListTest(FuzzedDataProvider &provider)
+{
+    int32_t sessionId = provider.ConsumeIntegral<int32_t>();
+    BrProxyChannelInfo channelInfo;
+    IBrProxyListener listener = {
+        .onChannelOpened = onChannelOpened,
+        .onDataReceived = onDataReceived,
+        .onChannelStatusChanged = onChannelStatusChanged,
+    };
+    (void)memset_s(&channelInfo, sizeof(BrProxyChannelInfo), 0, sizeof(BrProxyChannelInfo));
+    FillBrProxyChannelInfo(provider, &channelInfo);
+
+    (void)ClientAddChannelToList(sessionId, nullptr, nullptr);
+    (void)ClientAddChannelToList(sessionId, &channelInfo, &listener);
+}
+
+void ClientDeleteChannelFromListTest(FuzzedDataProvider &provider)
+{
+    int32_t channelId = provider.ConsumeIntegral<int32_t>();
+    std::string providerBrMac = provider.ConsumeBytesAsString(UINT8_MAX - 1);
+    std::string providerUuid = provider.ConsumeBytesAsString(UINT8_MAX - 1);
+    char brMac[UINT8_MAX] = { 0 };
+    char uuid[UINT8_MAX] = { 0 };
+    if (strcpy_s(brMac, UINT8_MAX, providerBrMac.c_str()) != EOK ||
+        strcpy_s(uuid, UINT8_MAX, providerUuid.c_str()) != EOK) {
+        return;
+    }
+
+    (void)ClientDeleteChannelFromList(channelId, brMac, uuid);
+}
+
+void ClientUpdateListtTest(FuzzedDataProvider &provider)
+{
+    int32_t channelId = provider.ConsumeIntegral<int32_t>();
+    std::string providerMac = provider.ConsumeBytesAsString(UINT8_MAX - 1);
+    std::string providerUuid = provider.ConsumeBytesAsString(UINT8_MAX - 1);
+    char mac[UINT8_MAX] = { 0 };
+    char uuid[UINT8_MAX] = { 0 };
+    if (strcpy_s(mac, UINT8_MAX, providerMac.c_str()) != EOK ||
+        strcpy_s(uuid, UINT8_MAX, providerUuid.c_str()) != EOK) {
+        return;
+    }
+
+    (void)ClientUpdateList(mac, uuid, channelId);
+}
+
+void ClientQueryListTest(FuzzedDataProvider &provider)
+{
+    int32_t channelId = provider.ConsumeIntegral<int32_t>();
+    std::string providerPeerBRMacAddr = provider.ConsumeBytesAsString(UINT8_MAX - 1);
+    std::string providerUuid = provider.ConsumeBytesAsString(UINT8_MAX - 1);
+    char peerBRMacAddr[UINT8_MAX] = { 0 };
+    char uuid[UINT8_MAX] = { 0 };
+    if (strcpy_s(peerBRMacAddr, UINT8_MAX, providerPeerBRMacAddr.c_str()) != EOK ||
+        strcpy_s(uuid, UINT8_MAX, providerUuid.c_str()) != EOK) {
+        return;
+    }
+    ClientBrProxyChannelInfo info;
+    (void)memset_s(&info, sizeof(ClientBrProxyChannelInfo), 0, sizeof(ClientBrProxyChannelInfo));
+
+    (void)ClientQueryList(channelId, peerBRMacAddr, uuid, &info);
+}
+
+void ClientRecordListenerStateTest(FuzzedDataProvider &provider)
+{
+    int32_t channelId = provider.ConsumeIntegral<int32_t>();
+    ListenerType type =
+        static_cast<ListenerType>(provider.ConsumeIntegralInRange<uint32_t>(DATA_RECEIVE, LISTENER_TYPE_MAX));
+    bool isEnable = provider.ConsumeBool();
+
+    (void)ClientRecordListenerState(channelId, type, isEnable);
+}
+
+void ClientTransBrProxyDataReceivedTest(FuzzedDataProvider &provider)
+{
+    int32_t channelId = provider.ConsumeIntegral<int32_t>();
+    uint32_t len = provider.ConsumeIntegral<uint32_t>();
+
+    (void)ClientTransBrProxyDataReceived(channelId, nullptr, len);
+}
+
+void SoftbusErrConvertChannelStateTest(FuzzedDataProvider &provider)
+{
+    int32_t err = provider.ConsumeIntegral<int32_t>();
+
+    (void)SoftbusErrConvertChannelState(err);
+}
+
+void ClientTransBrProxyChannelChangeTest(FuzzedDataProvider &provider)
+{
+    int32_t channelId = provider.ConsumeIntegral<int32_t>();
+    int32_t errCode = provider.ConsumeIntegral<int32_t>();
+
+    (void)ClientTransBrProxyChannelChange(channelId, errCode);
+}
+
+void ClientTransOnBrProxyOpenedTest(FuzzedDataProvider &provider)
+{
+    int32_t channelId = provider.ConsumeIntegral<int32_t>();
+    int32_t result = provider.ConsumeIntegral<int32_t>();
+    std::string providerBrMac = provider.ConsumeBytesAsString(UINT8_MAX - 1);
+    std::string providerUuid = provider.ConsumeBytesAsString(UINT8_MAX - 1);
+    char brMac[UINT8_MAX] = { 0 };
+    char uuid[UINT8_MAX] = { 0 };
+    if (strcpy_s(brMac, UINT8_MAX, providerBrMac.c_str()) != EOK ||
+        strcpy_s(uuid, UINT8_MAX, providerUuid.c_str()) != EOK) {
+        return;
+    }
+
+    (void)ClientTransOnBrProxyOpened(channelId, nullptr, nullptr, result);
+    (void)ClientTransOnBrProxyOpened(channelId, brMac, uuid, result);
+}
+
+void ClientTransBrProxyQueryPermissionTest(FuzzedDataProvider &provider)
+{
+    std::string providerBundleName = provider.ConsumeBytesAsString(UINT8_MAX - 1);
+    char bundleName[UINT8_MAX] = { 0 };
+    if (strcpy_s(bundleName, UINT8_MAX, providerBundleName.c_str()) != EOK) {
+        return;
+    }
+    bool isEmpowered;
+
+    (void)ClientTransBrProxyQueryPermission(nullptr, nullptr);
+    (void)ClientTransBrProxyQueryPermission(bundleName, &isEmpowered);
 }
 } // namespace OHOS
 
@@ -124,6 +256,17 @@ extern "C" int32_t LLVMFuzzerTestOneInput(const uint8_t *data, size_t size)
     OHOS::SendBrProxyDataTest(provider);
     OHOS::SetListenerStateTest(provider);
     OHOS::IsProxyChannelEnabledTest(provider);
+    OHOS::TransClientInitTest(provider);
+    OHOS::ClientAddChannelToListTest(provider);
+    OHOS::ClientDeleteChannelFromListTest(provider);
+    OHOS::ClientUpdateListtTest(provider);
+    OHOS::ClientQueryListTest(provider);
+    OHOS::ClientRecordListenerStateTest(provider);
+    OHOS::ClientTransBrProxyDataReceivedTest(provider);
+    OHOS::SoftbusErrConvertChannelStateTest(provider);
+    OHOS::ClientTransBrProxyChannelChangeTest(provider);
+    OHOS::ClientTransOnBrProxyOpenedTest(provider);
+    OHOS::ClientTransBrProxyQueryPermissionTest(provider);
 
     return 0;
 }
