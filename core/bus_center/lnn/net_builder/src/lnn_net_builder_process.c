@@ -772,9 +772,6 @@ static int32_t ProcessLeaveSpecific(const void *para)
             continue;
         }
         deviceLeave = true;
-        if (msgPara->rootState == DEVICE_STATE_NOT_TRUST) {
-            item->connInfo.flag |= LNN_CONN_INFO_FLAG_LEAVE_PASSIVE;
-        }
         rc = LnnSendLeaveRequestToConnFsm(item);
         if (rc == SOFTBUS_OK) {
             item->connInfo.flag |= LNN_CONN_INFO_FLAG_LEAVE_AUTO;

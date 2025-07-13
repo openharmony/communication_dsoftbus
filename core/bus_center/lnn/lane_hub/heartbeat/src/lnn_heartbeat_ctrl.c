@@ -388,8 +388,9 @@ void LnnRequestBleDiscoveryProcess(int32_t strategy, int64_t timeout)
 
 static int32_t HbRootDeviceLeaveLnn(void)
 {
-    int32_t i;
-    int32_t infoNum;
+    LNN_LOGI(LNN_HEART_BEAT, "enter HbRootDeviceLeaveLnn");
+    int32_t i = 0;
+    int32_t infoNum = 0;
     NodeBasicInfo *info = NULL;
     if (LnnGetAllOnlineNodeInfo(&info, &infoNum) != SOFTBUS_OK) {
         LNN_LOGE(LNN_HEART_BEAT, "get online node info failed");
@@ -407,6 +408,7 @@ static int32_t HbRootDeviceLeaveLnn(void)
         if (ret != SOFTBUS_OK) {
             continue;
         }
+        LNN_LOGI(LNN_HEART_BEAT, "device is root, need to offline");
         LnnRequestLeaveSpecific(info[i].networkId, CONNECTION_ADDR_MAX);
         AuthRemoveDeviceKeyByUdidPacked(nodeInfo.deviceInfo.deviceUdid);
     }
@@ -703,6 +705,7 @@ static void HbDeviceRootStateEventHandler(const LnnEventBasicInfo *info)
     }
     const LnnDeviceRootStateChangeEvent *event = (const LnnDeviceRootStateChangeEvent *)info;
     SoftBusDeviceRootState deviceRootState = (SoftBusDeviceRootState)event->status;
+    LNN_LOGI(LNN_HEART_BEAT, "HB handle deviceRootState=%{public}d", deviceRootState);
     switch (deviceRootState) {
         case SOFTBUS_DEVICE_IS_ROOT:
             if (g_hbConditionState.deviceRootState != SOFTBUS_DEVICE_IS_ROOT) {
@@ -717,9 +720,9 @@ static void HbDeviceRootStateEventHandler(const LnnEventBasicInfo *info)
             }
             break;
         default:
-            return;
+            LNN_LOGE(LNN_HEART_BEAT, "error deviceRootState");
+            break;
     }
-
 }
 
 static void HbScreenOnChangeEventHandler(int64_t nowTime)

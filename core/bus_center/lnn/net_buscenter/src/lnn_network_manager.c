@@ -302,15 +302,16 @@ static void NetUserStateEventHandler(const LnnEventBasicInfo *info)
 
 static int32_t NetRootDeviceLeaveLnn(void)
 {
-    int32_t i;
-    int32_t infoNum;
+    LNN_LOGI(LNN_BUILDER, "enter NetRootDeviceLeaveLnn");
+    int32_t i = 0;
+    int32_t infoNum = 0;
     NodeBasicInfo *info = NULL;
     if (LnnGetAllOnlineNodeInfo(&info, &infoNum) != SOFTBUS_OK) {
-        LNN_LOGE(LNN_HEART_BEAT, "get online node info failed");
+        LNN_LOGE(LNN_BUILDER, "get online node info failed");
         return SOFTBUS_NETWORK_GET_ALL_NODE_INFO_ERR;
     }
     if (info == NULL || infoNum == 0) {
-        LNN_LOGE(LNN_HEART_BEAT, "get online node is 0");
+        LNN_LOGE(LNN_BUILDER, "get online node is 0");
         return SOFTBUS_NO_ONLINE_DEVICE;
     }
     int32_t ret;
@@ -321,6 +322,7 @@ static int32_t NetRootDeviceLeaveLnn(void)
         if (ret != SOFTBUS_OK) {
             continue;
         }
+        LNN_LOGI(LNN_BUILDER, "device is root, need to offline");
         LnnRequestLeaveSpecific(info[i].networkId, CONNECTION_ADDR_MAX);
         AuthRemoveDeviceKeyByUdidPacked(nodeInfo.deviceInfo.deviceUdid);
     }
@@ -336,16 +338,19 @@ static void NetDeviceRootStateEventHandler(const LnnEventBasicInfo *info)
     }
     const LnnDeviceRootStateChangeEvent *event = (const LnnDeviceRootStateChangeEvent *)info;
     SoftBusDeviceRootState deviceRootState = (SoftBusDeviceRootState)event->status;
+    LNN_LOGI(LNN_BUILDER, "device root state=%{public}d", deviceRootState);
     switch (deviceRootState) {
         case SOFTBUS_DEVICE_IS_ROOT:
             g_isDeviceRoot = true;
+            AuthStopListening(AUTH_LINK_TYPE_WIFI);
+            LnnStopPublish();
+            LnnStopDiscovery();
             NetRootDeviceLeaveLnn();
-            LNN_LOGI(LNN_BUILDER, "device root state = %{public}d", deviceRootState);
             break;
         case SOFTBUS_DEVICE_NOT_ROOT:
-            LNN_LOGI(LNN_BUILDER, "device root state = %{public}d", deviceRootState);
+            break;
         default:
-            return;
+            break;
     }
 }
 
