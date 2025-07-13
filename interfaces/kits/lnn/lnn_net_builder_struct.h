@@ -127,16 +127,9 @@ typedef struct {
     ConnectionAddrType addrType;
 } LeaveInvalidConnMsgPara;
 
-typedef enum {
-    DEVICE_STATE_DEFAULT = 0,
-    DEVICE_STATE_NOT_TRUST,
-    DEVICE_STATE_MAX,
-} DeviceRootStateType;
-
 typedef struct {
     char networkId[NETWORK_ID_BUF_LEN];
     ConnectionAddrType addrType;
-    DeviceRootStateType rootState;
 } SpecificLeaveMsgPara;
 
 typedef struct {
