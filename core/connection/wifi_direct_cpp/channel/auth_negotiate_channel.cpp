@@ -270,6 +270,9 @@ static void OnAuthDataReceived(AuthHandle handle, const AuthTransData *data)
     } else if (msg.GetMessageType() == NegotiateMessageType::CMD_REFRESH_AUTH_HANDLE) {
         LinkManager::GetInstance().RefreshAuthHandle(remoteDeviceId, channel);
         return;
+    } else if (msg.GetMessageType() == NegotiateMessageType::CMD_DBAC_SYNC_DATA) {
+        auto extraData = msg.GetExtraData();
+        AuthNegotiateChannel::SyncDBACData(extraData);
     }
 
     msg.SetRemoteDeviceId(remoteDeviceId);
@@ -527,5 +530,21 @@ void AuthNegotiateChannel::RemovePendingAuthReq(uint32_t authReqId)
 {
     std::lock_guard lock(lock_);
     requestIdToDeviceIdMap_.erase(authReqId);
+}
+
+AuthHandle AuthNegotiateChannel::GetAuthHandle()
+{
+    return handle_;
+}
+
+void AuthNegotiateChannel::Register(const SyncDBACDataHook &syncDBACDataHook)
+{
+    syncDBACDataHook_ = syncDBACDataHook;
+}
+
+void AuthNegotiateChannel::SyncDBACData(const std::vector<uint8_t> &data)
+{
+    CONN_CHECK_AND_RETURN_LOGE(syncDBACDataHook_ != nullptr, CONN_WIFI_DIRECT, "syncDBACData not support");
+    syncDBACDataHook_(data);
 }
 } // namespace OHOS::SoftBus

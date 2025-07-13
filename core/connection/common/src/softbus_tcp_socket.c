@@ -353,6 +353,18 @@ int32_t GetTcpSockPort(int32_t fd)
     return SoftBusNtoHs(((SoftBusSockAddrIn *)&addr)->sinPort);
 }
 
+int32_t ConnSetTcpKeepaliveState(int32_t fd, bool needKeepalive)
+{
+    CONN_CHECK_AND_RETURN_RET_LOGE(fd > 0, SOFTBUS_NOT_FIND, CONN_COMMON, "invalid param");
+    int32_t enable = needKeepalive ? 1 : 0;
+    int32_t ret = SoftBusSocketSetOpt(fd, SOFTBUS_SOL_SOCKET, SOFTBUS_SO_KEEPALIVE, &enable, sizeof(enable));
+    if (ret != SOFTBUS_ADAPTER_OK) {
+        CONN_LOGE(CONN_COMMON, "set SO_KEEPALIVE failed, ret=%{public}d", ret);
+        return SOFTBUS_ADAPTER_ERR;
+    }
+    return SOFTBUS_ADAPTER_OK;
+}
+
 int32_t ConnSetTcpKeepalive(int32_t fd, int32_t seconds, int32_t keepAliveIntvl, int32_t keepAliveCount)
 {
     if (fd <= 0 || seconds <= 0 || keepAliveIntvl <= 0 || keepAliveCount <= 0) {
@@ -379,13 +391,7 @@ int32_t ConnSetTcpKeepalive(int32_t fd, int32_t seconds, int32_t keepAliveIntvl,
         return SOFTBUS_ADAPTER_ERR;
     }
 
-    int32_t enable = 1;
-    rc = SoftBusSocketSetOpt(fd, SOFTBUS_SOL_SOCKET, SOFTBUS_SO_KEEPALIVE, &enable, sizeof(enable));
-    if (rc != SOFTBUS_ADAPTER_OK) {
-        CONN_LOGE(CONN_COMMON, "set SO_KEEPALIVE failed");
-        return SOFTBUS_ADAPTER_ERR;
-    }
-    return SOFTBUS_OK;
+    return ConnSetTcpKeepaliveState(fd, true);
 }
 
 #ifdef TCP_USER_TIMEOUT
