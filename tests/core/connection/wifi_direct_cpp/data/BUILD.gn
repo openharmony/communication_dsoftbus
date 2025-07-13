@@ -210,7 +210,9 @@ ohos_unittest("InnerLinkTest") {
     "inner_link_test.cpp",
   ]
 
-  include_dirs = [ "$dsoftbus_root_path/core/frame/common/include" ]
+  include_dirs = [ "$dsoftbus_root_path/core/frame/common/include",
+                   "$dsoftbus_root_path/interfaces/kits/connect",
+  ]
 
   deps = [
     "$dsoftbus_dfx_path:softbus_dfx",

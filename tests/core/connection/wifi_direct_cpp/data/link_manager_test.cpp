@@ -48,6 +48,48 @@ HWTEST_F(LinkManagerTest, AllocateLinkId, TestSize.Level1)
 }
 
 /*
+ * @tc.name: CheckOnlyVirtualLink
+ * @tc.desc: test CheckOnlyVirtualLink method
+ * @tc.type: FUNC
+ * @tc.require:
+ */
+HWTEST_F(LinkManagerTest, CheckOnlyVirtualLink, TestSize.Level1)
+{
+    CONN_LOGI(CONN_WIFI_DIRECT, "CheckOnlyVirtualLink enter");
+    std::string remoteDeviceId("0123456789ABCDEF");
+    auto ret = LinkManager::GetInstance().ProcessIfAbsent(
+        InnerLink::LinkType::HML, remoteDeviceId, [](InnerLink &link) {
+        link.SetLinkPowerMode(DEFAULT_POWER);
+    });
+    ret = LinkManager::GetInstance().CheckOnlyVirtualLink();
+    EXPECT_FALSE(ret);
+
+    LinkManager::GetInstance().ProcessIfPresent(
+        InnerLink::LinkType::HML, remoteDeviceId, [](InnerLink &link) {
+            link.SetLinkPowerMode(LOW_POWER);
+    });
+    ret = LinkManager::GetInstance().CheckOnlyVirtualLink();
+    EXPECT_TRUE(ret);
+
+    std::string remoteUuid("123");
+    LinkManager::GetInstance().ProcessIfAbsent(InnerLink::LinkType::P2P, remoteUuid, [](InnerLink &link) {
+        link.SetLinkPowerMode(INVALID_POWER);
+    });
+    ret = LinkManager::GetInstance().CheckOnlyVirtualLink();
+    EXPECT_TRUE(ret);
+
+    std::string remoteDeviceIdRealLink("012");
+    LinkManager::GetInstance().ProcessIfAbsent(InnerLink::LinkType::HML, remoteDeviceIdRealLink, [](InnerLink &link) {
+        link.SetLinkPowerMode(INVALID_POWER);
+    });
+    ret = LinkManager::GetInstance().CheckOnlyVirtualLink();
+    EXPECT_FALSE(ret);
+    LinkManager::GetInstance().RemoveLinks(InnerLink::LinkType::HML);
+    LinkManager::GetInstance().RemoveLinks(InnerLink::LinkType::P2P);
+    CONN_LOGI(CONN_WIFI_DIRECT, "CheckOnlyVirtualLink exit");
+}
+
+/*
  * @tc.name: ProcessIfXXXByRemoteDeviceId
  * @tc.desc: check ProcessIfAbsent and ProcessIfPresent by remote device id
  * @tc.type: FUNC

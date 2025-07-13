@@ -47,6 +47,8 @@ ConnectFuncInterface *ConnInitTcp(const ConnectCallback *callback);
 
 int32_t ConnGetSocketError(int32_t fd);
 
+int32_t TcpConnSetKeepalive(int32_t fd, bool needKeepalive);
+
 #ifdef __cplusplus
 #if __cplusplus
 }
