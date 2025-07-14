@@ -21,6 +21,7 @@
 #include "auth_interface.h"
 #include "bus_center_manager.h"
 #include "common_list.h"
+#include "g_enhance_lnn_func_pack.h"
 #include "g_enhance_trans_func.h"
 #include "g_enhance_trans_func_pack.h"
 #include "lnn_distributed_net_ledger.h"
@@ -51,6 +52,7 @@
 #define SESSION_NAME_PHONEPAD "com.huawei.pcassistant.phonepad-connect-channel"
 #define SESSION_NAME_CASTPLUS "CastPlusSessionName"
 #define SESSION_NAME_DISTRIBUTE_COMMUNICATION "com.huawei.boosterd.user"
+#define SESSION_NAME_TRIGGER_VIRTUAL_LINK "com.huawei.boosterd.signal"
 #define SESSION_NAME_ISHARE "IShare"
 #define ISHARE_MIN_NAME_LEN 6
 #define SESSION_NAME_DBD "distributeddata-default"
@@ -1545,6 +1547,10 @@ int32_t TransAsyncGetLaneInfoByOption(const SessionParam *param, const LaneReque
         TRANS_LOGE(TRANS_SVC, "trans request lane failed, laneHandle=%{public}u, ret=%{public}d", *laneHandle, ret);
         (void)TransDelLaneReqFromPendingList(*laneHandle, true);
         return ret;
+    }
+    if (strcmp(param->sessionName, SESSION_NAME_DISTRIBUTE_COMMUNICATION) == 0 ||
+        strcmp(param->sessionName, SESSION_NAME_TRIGGER_VIRTUAL_LINK) == 0) {
+        DcTriggerVirtualLinkPacked(param->peerDeviceId);
     }
     CoreSessionState state = CORE_SESSION_STATE_INIT;
     TransGetSocketChannelStateBySession(param->sessionName, param->sessionId, &state);
