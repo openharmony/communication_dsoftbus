@@ -150,12 +150,25 @@ HWTEST_F(BrProxyServerManagerTest, BrProxyServerManagerTest003, TestSize.Level1)
  */
 HWTEST_F(BrProxyServerManagerTest, BrProxyServerManagerTest004, TestSize.Level1)
 {
-    int32_t ret = GetChannelIdFromServerList(nullptr);
-    EXPECT_EQ(SOFTBUS_INVALID_PARAM, ret);
     g_serverList = NULL;
     int32_t channelId = 0;
-    ret = GetChannelIdFromServerList(&channelId);
+    int32_t ret = GetChannelIdFromServerList(&channelId);
     EXPECT_EQ(SOFTBUS_TRANS_SESSION_SERVER_NOINIT, ret);
+    ret = BrProxyServerInit();
+    EXPECT_EQ(SOFTBUS_OK, ret);
+    BrProxyChannelInfo info;
+    (void) strcpy_s(info.peerBRMacAddr, sizeof(info.peerBRMacAddr), VALID_BR_MAC);
+    (void) strcpy_s(info.peerBRUuid, sizeof(info.peerBRUuid), TEST_UUID);
+    NiceMock<BrProxyServerManagerInterfaceMock> brProxyServerManagerMock;
+    EXPECT_CALL(brProxyServerManagerMock, GetCallerPid).WillRepeatedly(Return(PID_TEST));
+    EXPECT_CALL(brProxyServerManagerMock, GetCallerUid).WillRepeatedly(Return(UID_TEST));
+    EXPECT_CALL(brProxyServerManagerMock, GetCallerTokenId).WillRepeatedly(Return(TOKENID_TEST));
+    ret = ServerAddChannelToList(info.peerBRMacAddr, info.peerBRUuid, CHANNEL_ID, REQUEST_ID);
+    EXPECT_EQ(SOFTBUS_OK, ret);
+    ret = GetChannelIdFromServerList(&channelId);
+    EXPECT_EQ(SOFTBUS_OK, ret);
+    ret = GetChannelIdFromServerList(nullptr);
+    EXPECT_EQ(SOFTBUS_INVALID_PARAM, ret);
 }
 
 /**
@@ -166,9 +179,29 @@ HWTEST_F(BrProxyServerManagerTest, BrProxyServerManagerTest004, TestSize.Level1)
  */
 HWTEST_F(BrProxyServerManagerTest, BrProxyServerManagerTest005, TestSize.Level1)
 {
-    g_serverList = NULL;
+    g_proxyList = NULL;
     int32_t ret = CloseAllBrProxy();
     EXPECT_EQ(SOFTBUS_TRANS_SESSION_SERVER_NOINIT, ret);
+    ret = BrProxyServerInit();
+    EXPECT_EQ(SOFTBUS_OK, ret);
+    ret = CloseAllBrProxy();
+    EXPECT_EQ(SOFTBUS_OK, ret);
+    BrProxyChannelInfo info1;
+    (void) strcpy_s(info1.peerBRMacAddr, sizeof(info1.peerBRMacAddr), VALID_BR_MAC);
+    (void) strcpy_s(info1.peerBRUuid, sizeof(info1.peerBRUuid), TEST_UUID);
+    NiceMock<BrProxyServerManagerInterfaceMock> brProxyServerManagerMock;
+    EXPECT_CALL(brProxyServerManagerMock, GetCallerPid).WillRepeatedly(Return(PID_TEST));
+    EXPECT_CALL(brProxyServerManagerMock, GetCallerUid).WillRepeatedly(Return(UID_TEST));
+    EXPECT_CALL(brProxyServerManagerMock, GetCallerTokenId).WillRepeatedly(Return(TOKENID_TEST));
+    ret = ServerAddChannelToList(info1.peerBRMacAddr, info1.peerBRUuid, CHANNEL_ID, REQUEST_ID);
+    EXPECT_EQ(SOFTBUS_OK, ret);
+    BrProxyChannelInfo info2;
+    (void) strcpy_s(info2.peerBRMacAddr, sizeof(info2.peerBRMacAddr), "FF:AA:CC:AA:BB:DD");
+    (void) strcpy_s(info2.peerBRUuid, sizeof(info2.peerBRUuid), "BBBBBBBB-0000-0000-8888-BBBBBBBBBBBB");
+    ret = ServerAddChannelToList(info2.peerBRMacAddr, info2.peerBRUuid, CHANNEL_ID + 1, REQUEST_ID + 1);
+    EXPECT_EQ(SOFTBUS_OK, ret);
+    ret = CloseAllBrProxy();
+    EXPECT_EQ(SOFTBUS_OK, ret);
 }
 
 /**
@@ -191,8 +224,11 @@ HWTEST_F(BrProxyServerManagerTest, BrProxyServerManagerTest006, TestSize.Level1)
  */
 HWTEST_F(BrProxyServerManagerTest, BrProxyServerManagerTest007, TestSize.Level1)
 {
+    int32_t channelId = 0;
     int32_t ret = GetNewChannelId(nullptr);
     EXPECT_EQ(SOFTBUS_INVALID_PARAM, ret);
+    ret = GetNewChannelId(&channelId);
+    EXPECT_EQ(SOFTBUS_OK, ret);
 }
 
 /**
@@ -296,14 +332,26 @@ HWTEST_F(BrProxyServerManagerTest, BrProxyServerManagerTest013, TestSize.Level1)
  */
 HWTEST_F(BrProxyServerManagerTest, BrProxyServerManagerTest014, TestSize.Level1)
 {
-    bool ret;
-    ret = IsSessionExist(nullptr, TEST_UUID);
-    EXPECT_FALSE(ret);
-    ret = IsSessionExist(VALID_BR_MAC, nullptr);
-    EXPECT_FALSE(ret);
-    g_proxyList = NULL;
-    ret = IsSessionExist(VALID_BR_MAC, TEST_UUID);
-    EXPECT_FALSE(ret);
+    int32_t ret = BrProxyServerInit();
+    EXPECT_EQ(SOFTBUS_OK, ret);
+    BrProxyChannelInfo info;
+    (void) strcpy_s(info.peerBRMacAddr, sizeof(info.peerBRMacAddr), VALID_BR_MAC);
+    (void) strcpy_s(info.peerBRUuid, sizeof(info.peerBRUuid), TEST_UUID);
+    ret = ServerAddChannelToList(info.peerBRMacAddr, info.peerBRUuid, CHANNEL_ID, REQUEST_ID);
+    EXPECT_EQ(SOFTBUS_OK, ret);
+    bool result = IsSessionExist(nullptr, TEST_UUID);
+    EXPECT_FALSE(result);
+    result = IsSessionExist(VALID_BR_MAC, nullptr);
+    EXPECT_FALSE(result);
+    SoftBusList* temp = g_serverList;
+    g_serverList = NULL;
+    result = IsSessionExist(VALID_BR_MAC, TEST_UUID);
+    EXPECT_FALSE(result);
+    g_serverList = temp;
+    result = IsSessionExist(VALID_BR_MAC, TEST_UUID);
+    EXPECT_TRUE(result);
+    ret = ServerDeleteChannelFromList(CHANNEL_ID);
+    EXPECT_EQ(SOFTBUS_OK, ret);
 }
 
 /**
@@ -647,5 +695,303 @@ HWTEST_F(BrProxyServerManagerTest, BrProxyServerManagerTest031, TestSize.Level1)
     g_proxyList = NULL;
     bool ret = IsBrProxyEnable(uid);
     EXPECT_FALSE(ret);
+}
+
+/**
+ * @tc.name: BrProxyServerManagerTest032
+ * @tc.desc: BrProxyServerManagerTest032
+ * @tc.type: FUNC
+ * @tc.require:
+ */
+HWTEST_F(BrProxyServerManagerTest, BrProxyServerManagerTest032, TestSize.Level1)
+{
+    g_serverList = NULL;
+    int32_t ret = BrProxyServerInit();
+    ASSERT_TRUE(ret == SOFTBUS_OK);
+    BrProxyChannelInfo info = {
+        .peerBRMacAddr = "FF:AA:CC:AA:BB:CC",
+        .peerBRUuid = "AAAAAAAA-0000-0000-8888-BBBBBBBBBBBB",
+    };
+    NiceMock<BrProxyServerManagerInterfaceMock> brProxyServerManagerMock;
+    EXPECT_CALL(brProxyServerManagerMock, GetCallerPid).WillRepeatedly(Return(PID_TEST));
+    EXPECT_CALL(brProxyServerManagerMock, GetCallerUid).WillRepeatedly(Return(UID_TEST));
+    EXPECT_CALL(brProxyServerManagerMock, GetCallerTokenId).WillRepeatedly(Return(TOKENID_TEST));
+    ret = ServerAddChannelToList(info.peerBRMacAddr, info.peerBRUuid, CHANNEL_ID, REQUEST_ID);
+    EXPECT_EQ(SOFTBUS_OK, ret);
+    ret = ServerDeleteChannelFromList(CHANNEL_ID);
+    EXPECT_EQ(SOFTBUS_OK, ret);
+}
+
+/**
+ * @tc.name: BrProxyServerManagerTest033
+ * @tc.desc: BrProxyServerManagerTest033
+ * @tc.type: FUNC
+ * @tc.require:
+ */
+HWTEST_F(BrProxyServerManagerTest, BrProxyServerManagerTest033, TestSize.Level1)
+{
+    g_serverList = NULL;
+    int32_t ret = BrProxyServerInit();
+    ASSERT_TRUE(ret == SOFTBUS_OK);
+    BrProxyChannelInfo info = {
+        .peerBRMacAddr = "FF:AA:CC:AA:BB:CC",
+        .peerBRUuid = "AAAAAAAA-0000-0000-8888-BBBBBBBBBBBB",
+    };
+    NiceMock<BrProxyServerManagerInterfaceMock> brProxyServerManagerMock;
+    EXPECT_CALL(brProxyServerManagerMock, GetCallerPid).WillRepeatedly(Return(PID_TEST));
+    EXPECT_CALL(brProxyServerManagerMock, GetCallerUid).WillRepeatedly(Return(UID_TEST));
+    EXPECT_CALL(brProxyServerManagerMock, GetCallerTokenId).WillRepeatedly(Return(TOKENID_TEST));
+    ret = ServerAddChannelToList(info.peerBRMacAddr, info.peerBRUuid, CHANNEL_ID, REQUEST_ID);
+    EXPECT_EQ(SOFTBUS_OK, ret);
+    ServerDeleteChannelByPid(PID_TEST);
+    EXPECT_EQ(g_serverList->cnt, 0);
+}
+
+/**
+ * @tc.name: BrProxyServerManagerTest034
+ * @tc.desc: BrProxyServerManagerTest034
+ * @tc.type: FUNC
+ * @tc.require:
+ */
+HWTEST_F(BrProxyServerManagerTest, BrProxyServerManagerTest034, TestSize.Level1)
+{
+    g_proxyList = NULL;
+    bool result = CheckSessionExistByUid(UID_TEST);
+    EXPECT_EQ(false, result);
+    int32_t ret = BrProxyServerInit();
+    ASSERT_TRUE(ret == SOFTBUS_OK);
+    NiceMock<BrProxyServerManagerInterfaceMock> brProxyServerManagerMock;
+    EXPECT_CALL(brProxyServerManagerMock, GetCallerUid).WillRepeatedly(Return(UID_TEST));
+    ret = ServerAddProxyToList(VALID_BR_MAC, TEST_UUID);
+    EXPECT_NE(SOFTBUS_OK, ret);
+    result = CheckSessionExistByUid(UID_TEST);
+    EXPECT_EQ(result, IS_DISCONNECTED);
+}
+
+/**
+ * @tc.name: BrProxyServerManagerTest035
+ * @tc.desc: BrProxyServerManagerTest035
+ * @tc.type: FUNC
+ * @tc.require:
+ */
+HWTEST_F(BrProxyServerManagerTest, BrProxyServerManagerTest035, TestSize.Level1)
+{
+    g_serverList = NULL;
+    int32_t ret = TransSetListenerState(CHANNEL_ID, 0, false);
+    EXPECT_EQ(ret, SOFTBUS_TRANS_SESSION_SERVER_NOINIT);
+    ret = BrProxyServerInit();
+    ASSERT_TRUE(ret == SOFTBUS_OK);
+    BrProxyChannelInfo info = {
+        .peerBRMacAddr = "FF:AA:CC:AA:BB:CC",
+        .peerBRUuid = "AAAAAAAA-0000-0000-8888-BBBBBBBBBBBB",
+    };
+    NiceMock<BrProxyServerManagerInterfaceMock> brProxyServerManagerMock;
+    EXPECT_CALL(brProxyServerManagerMock, GetCallerPid).WillRepeatedly(Return(PID_TEST));
+    EXPECT_CALL(brProxyServerManagerMock, GetCallerUid).WillRepeatedly(Return(UID_TEST));
+    EXPECT_CALL(brProxyServerManagerMock, GetCallerTokenId).WillRepeatedly(Return(TOKENID_TEST));
+    ret = ServerAddChannelToList(info.peerBRMacAddr, info.peerBRUuid, CHANNEL_ID, REQUEST_ID);
+    EXPECT_EQ(SOFTBUS_OK, ret);
+    ret = TransSetListenerState(CHANNEL_ID, 0, false);
+    EXPECT_EQ(SOFTBUS_OK, ret);
+}
+
+/**
+ * @tc.name: BrProxyServerManagerTest036
+ * @tc.desc: BrProxyServerManagerTest036
+ * @tc.type: FUNC
+ * @tc.require:
+ */
+HWTEST_F(BrProxyServerManagerTest, BrProxyServerManagerTest036, TestSize.Level1)
+{
+    g_serverList = NULL;
+    int32_t ret = BrProxyServerInit();
+    ASSERT_TRUE(ret == SOFTBUS_OK);
+    BrProxyChannelInfo info = {
+        .peerBRMacAddr = "FF:AA:CC:AA:BB:CC",
+        .peerBRUuid = "AAAAAAAA-0000-0000-8888-BBBBBBBBBBBB",
+    };
+    NiceMock<BrProxyServerManagerInterfaceMock> brProxyServerManagerMock;
+    EXPECT_CALL(brProxyServerManagerMock, GetCallerPid).WillRepeatedly(Return(PID_TEST));
+    EXPECT_CALL(brProxyServerManagerMock, GetCallerUid).WillRepeatedly(Return(UID_TEST));
+    EXPECT_CALL(brProxyServerManagerMock, GetCallerTokenId).WillRepeatedly(Return(TOKENID_TEST));
+    ret = ServerAddChannelToList(info.peerBRMacAddr, info.peerBRUuid, CHANNEL_ID, REQUEST_ID);
+    EXPECT_EQ(SOFTBUS_OK, ret);
+    ret = SetListenerStateByChannelId(CHANNEL_ID, DATA_RECEIVE, true);
+    EXPECT_EQ(SOFTBUS_OK, ret);
+    pid_t result = PID_TEST;
+    ProxyBaseInfo info2 = {
+        .brMac = "FF:AA:CC:AA:BB:CC",
+        .uuid = "AAAAAAAA-0000-0000-8888-BBBBBBBBBBBB",
+    };
+    int32_t channelId = CHANNEL_ID;
+    ret = SelectClient(&info2, &result, &channelId);
+    EXPECT_EQ(SOFTBUS_OK, ret);
+}
+
+/**
+ * @tc.name: BrProxyServerManagerTest037
+ * @tc.desc: BrProxyServerManagerTest037
+ * @tc.type: FUNC
+ * @tc.require:
+ */
+HWTEST_F(BrProxyServerManagerTest, BrProxyServerManagerTest037, TestSize.Level1)
+{
+    g_serverList = NULL;
+    int32_t ret = BrProxyServerInit();
+    ASSERT_TRUE(ret == SOFTBUS_OK);
+    BrProxyChannelInfo info = {
+        .peerBRMacAddr = "FF:AA:CC:AA:BB:CC",
+        .peerBRUuid = "AAAAAAAA-0000-0000-8888-BBBBBBBBBBBB",
+    };
+    NiceMock<BrProxyServerManagerInterfaceMock> brProxyServerManagerMock;
+    EXPECT_CALL(brProxyServerManagerMock, GetCallerPid).WillRepeatedly(Return(PID_TEST));
+    EXPECT_CALL(brProxyServerManagerMock, GetCallerUid).WillRepeatedly(Return(UID_TEST));
+    EXPECT_CALL(brProxyServerManagerMock, GetCallerTokenId).WillRepeatedly(Return(TOKENID_TEST));
+    ret = ServerAddChannelToList(info.peerBRMacAddr, info.peerBRUuid, CHANNEL_ID, REQUEST_ID);
+    EXPECT_EQ(SOFTBUS_OK, ret);
+    pid_t result = PID_TEST;
+    ProxyBaseInfo info2 = {
+        .brMac = "FF:AA:CC:AA:BB:CC",
+        .uuid = "AAAAAAAA-0000-0000-8888-BBBBBBBBBBBB",
+    };
+    int32_t channelId = CHANNEL_ID;
+    ret = SelectClient(&info2, &result, &channelId);
+    EXPECT_EQ(SOFTBUS_NOT_FIND, ret);
+}
+
+/**
+ * @tc.name: BrProxyServerManagerTest038
+ * @tc.desc: BrProxyServerManagerTest038
+ * @tc.type: FUNC
+ * @tc.require:
+ */
+HWTEST_F(BrProxyServerManagerTest, BrProxyServerManagerTest038, TestSize.Level1)
+{
+    g_serverList = NULL;
+    int32_t ret = BrProxyServerInit();
+    ASSERT_TRUE(ret == SOFTBUS_OK);
+    BrProxyChannelInfo info = {
+        .peerBRMacAddr = "FF:AA:CC:AA:BB:CC",
+        .peerBRUuid = "AAAAAAAA-0000-0000-8888-BBBBBBBBBBBB",
+    };
+    NiceMock<BrProxyServerManagerInterfaceMock> brProxyServerManagerMock;
+    EXPECT_CALL(brProxyServerManagerMock, GetCallerPid).WillRepeatedly(Return(PID_TEST));
+    EXPECT_CALL(brProxyServerManagerMock, GetCallerUid).WillRepeatedly(Return(UID_TEST));
+    EXPECT_CALL(brProxyServerManagerMock, GetCallerTokenId).WillRepeatedly(Return(TOKENID_TEST));
+    ret = ServerAddChannelToList(info.peerBRMacAddr, info.peerBRUuid, CHANNEL_ID, REQUEST_ID);
+    EXPECT_EQ(SOFTBUS_OK, ret);
+    ret = SetListenerStateByChannelId(CHANNEL_ID, DATA_RECEIVE, true);
+    EXPECT_EQ(SOFTBUS_OK, ret);
+    pid_t result = PID_TEST;
+    ProxyBaseInfo info2 = {
+        .brMac = "a",
+        .uuid = "AAAAAAAA-0000-0000-8888-BBBBBBBBBBBB",
+    };
+    int32_t channelId = CHANNEL_ID;
+    ret = SelectClient(&info2, &result, &channelId);
+    EXPECT_EQ(SOFTBUS_NOT_FIND, ret);
+    info2 = {
+        .brMac = "FF:AA:CC:AA:BB:CC",
+        .uuid = "b",
+    };
+    ret = SelectClient(&info2, &result, &channelId);
+    EXPECT_EQ(SOFTBUS_NOT_FIND, ret);
+}
+
+/**
+ * @tc.name: BrProxyServerManagerTest039
+ * @tc.desc: BrProxyServerManagerTest039
+ * @tc.type: FUNC
+ * @tc.require:
+ */
+HWTEST_F(BrProxyServerManagerTest, BrProxyServerManagerTest039, TestSize.Level1)
+{
+    bool isEnable = true;
+    int32_t ret = BrProxyServerInit();
+    EXPECT_EQ(SOFTBUS_OK, ret);
+    ListenerType type = LISTENER_TYPE_MAX;
+    ret = SetListenerStateByChannelId(CHANNEL_ID, type, isEnable);
+    EXPECT_EQ(SOFTBUS_INVALID_PARAM, ret);
+    g_serverList = NULL;
+    ret = SetListenerStateByChannelId(CHANNEL_ID, type, isEnable);
+    EXPECT_EQ(SOFTBUS_TRANS_SESSION_SERVER_NOINIT, ret);
+    ret = BrProxyServerInit();
+    EXPECT_EQ(SOFTBUS_OK, ret);
+    BrProxyChannelInfo info = {
+        .peerBRMacAddr = "FF:AA:CC:AA:BB:CC",
+        .peerBRUuid = "AAAAAAAA-0000-0000-8888-BBBBBBBBBBBB",
+    };
+    NiceMock<BrProxyServerManagerInterfaceMock> brProxyServerManagerMock;
+    EXPECT_CALL(brProxyServerManagerMock, GetCallerPid).WillRepeatedly(Return(PID_TEST));
+    EXPECT_CALL(brProxyServerManagerMock, GetCallerUid).WillRepeatedly(Return(UID_TEST));
+    EXPECT_CALL(brProxyServerManagerMock, GetCallerTokenId).WillRepeatedly(Return(TOKENID_TEST));
+    ret = ServerAddChannelToList(info.peerBRMacAddr, info.peerBRUuid, CHANNEL_ID, REQUEST_ID);
+    EXPECT_EQ(SOFTBUS_OK, ret);
+    type = DATA_RECEIVE;
+    ret = SetListenerStateByChannelId(CHANNEL_ID, type, isEnable);
+    EXPECT_EQ(SOFTBUS_OK, ret);
+    type = CHANNEL_STATE;
+    ret = SetListenerStateByChannelId(CHANNEL_ID, type, isEnable);
+    EXPECT_EQ(SOFTBUS_OK, ret);
+    ret = SetListenerStateByChannelId(CHANNEL_ID_ERR, type, isEnable);
+    EXPECT_EQ(SOFTBUS_NOT_FIND, ret);
+}
+
+/**
+ * @tc.name: BrProxyServerManagerTest040
+ * @tc.desc: BrProxyServerManagerTest040
+ * @tc.type: FUNC
+ * @tc.require:
+ */
+HWTEST_F(BrProxyServerManagerTest, BrProxyServerManagerTest040, TestSize.Level1)
+{
+    int32_t ret = BrProxyServerInit();
+    ASSERT_EQ(SOFTBUS_OK, ret);
+    ret = TransSendBrProxyData(CHANNEL_ID, nullptr, 0);
+    EXPECT_EQ(SOFTBUS_INVALID_PARAM, ret);
+}
+
+/**
+ * @tc.name: BrProxyServerManagerTest041
+ * @tc.desc: BrProxyServerManagerTest041
+ * @tc.type: FUNC
+ * @tc.require:
+ */
+HWTEST_F(BrProxyServerManagerTest, BrProxyServerManagerTest041, TestSize.Level1)
+{
+    g_serverList = nullptr;
+    ProxyBaseInfo baseInfo;
+    (void) strcpy_s(baseInfo.brMac, sizeof(baseInfo.brMac), VALID_BR_MAC);
+    (void) strcpy_s(baseInfo.uuid, sizeof(baseInfo.uuid), TEST_UUID);
+    bool result = IsForegroundProcess(&baseInfo);
+    EXPECT_FALSE(result);
+    int32_t ret = BrProxyServerInit();
+    ASSERT_EQ(SOFTBUS_OK, ret);
+    result = IsForegroundProcess(&baseInfo);
+    EXPECT_FALSE(result);
+    BrProxyChannelInfo info;
+    (void) strcpy_s(info.peerBRMacAddr, sizeof(info.peerBRMacAddr), VALID_BR_MAC);
+    (void) strcpy_s(info.peerBRUuid, sizeof(info.peerBRUuid), TEST_UUID);
+    NiceMock<BrProxyServerManagerInterfaceMock> brProxyServerManagerMock;
+    EXPECT_CALL(brProxyServerManagerMock, GetCallerPid).WillRepeatedly(Return(PID_TEST));
+    EXPECT_CALL(brProxyServerManagerMock, GetCallerUid).WillRepeatedly(Return(UID_TEST));
+    EXPECT_CALL(brProxyServerManagerMock, GetCallerTokenId).WillRepeatedly(Return(TOKENID_TEST));
+    ret = ServerAddChannelToList(info.peerBRMacAddr, info.peerBRUuid, CHANNEL_ID, REQUEST_ID);
+    ASSERT_EQ(SOFTBUS_OK, ret);
+    result = IsForegroundProcess(&baseInfo);
+    EXPECT_TRUE(result);
+    BrProxyChannelInfo infoMismatch;
+    (void) strcpy_s(infoMismatch.peerBRMacAddr, sizeof(infoMismatch.peerBRMacAddr), "FF:AA:CC:AA:BB:DD");
+    (void) strcpy_s(infoMismatch.peerBRUuid, sizeof(infoMismatch.peerBRUuid), "BBBBBBBB-0000-0000-8888-BBBBBBBBBBBB");
+    ret = ServerAddChannelToList(infoMismatch.peerBRMacAddr, infoMismatch.peerBRUuid, CHANNEL_ID + 1, REQUEST_ID + 1);
+    ASSERT_EQ(SOFTBUS_OK, ret);
+    result = IsForegroundProcess(&baseInfo);
+    EXPECT_TRUE(result);
+    ret = ServerDeleteChannelFromList(CHANNEL_ID);
+    ASSERT_EQ(SOFTBUS_OK, ret);
+    ret = ServerDeleteChannelFromList(CHANNEL_ID + 1);
+    ASSERT_EQ(SOFTBUS_OK, ret);
+    result = IsForegroundProcess(&baseInfo);
+    EXPECT_FALSE(result);
 }
 }
