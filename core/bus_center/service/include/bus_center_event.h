@@ -94,8 +94,6 @@ void LnnNotifyWifiServiceStart(void *para);
 
 void LnnNotifyAddRawEnhanceP2pEvent(LnnNotifyRawEnhanceP2pEvent *event);
 
-void LnnNotifyDeviceRootStateChangeEvent(void);
-
 #ifdef __cplusplus
 }
 #endif

@@ -70,7 +70,6 @@ typedef struct {
     SoftBusUserState backgroundState;
     SoftBusNightModeState nightModeState;
     SoftBusOOBEState OOBEState;
-    SoftBusDeviceRootState deviceRootState;
     bool hasTrustedRelation;
     bool heartbeatEnable;
     bool isRequestDisable;
@@ -102,7 +101,6 @@ static void InitHbConditionState(void)
     g_hbConditionState.isRequestDisable = false;
     g_hbConditionState.heartbeatEnable = false;
     g_hbConditionState.OOBEState = SOFTBUS_OOBE_UNKNOWN;
-    g_hbConditionState.deviceRootState = SOFTBUS_DEVICE_ROOT_UNKNOWN;
     LNN_LOGI(LNN_INIT, "condition state:heartbeat=%{public}d", g_hbConditionState.heartbeatEnable);
 }
 
@@ -132,17 +130,16 @@ bool IsHeartbeatEnable(void)
     bool isOOBEEnd =
         g_hbConditionState.OOBEState == SOFTBUS_OOBE_END || g_hbConditionState.OOBEState == SOFTBUS_FACK_OOBE_END;
     bool isInitCheckSuc = IsLnnInitCheckSucceed(MONITOR_BLE_NET);
-    bool isDeviceRoot = g_hbConditionState.deviceRootState == SOFTBUS_DEVICE_IS_ROOT;
 
     LNN_LOGI(LNN_HEART_BEAT,
         "HB condition state: bt=%{public}d, screenUnlock=%{public}d, account=%{public}d, trustedRelation=%{public}d, "
         "background=%{public}d, nightMode=%{public}d, OOBEEnd=%{public}d, heartbeatEnable=%{public}d, "
-        "request=%{public}d, init check=%{public}d, deviceRoot=%{public}d",
+        "request=%{public}d, init check=%{public}d",
         isBtOn, isScreenUnlock, isLogIn, g_hbConditionState.hasTrustedRelation, isBackground, isNightMode, isOOBEEnd,
-        g_hbConditionState.heartbeatEnable, g_hbConditionState.isRequestDisable, isInitCheckSuc, isDeviceRoot);
+        g_hbConditionState.heartbeatEnable, g_hbConditionState.isRequestDisable, isInitCheckSuc);
     return g_hbConditionState.heartbeatEnable && isBtOn && isScreenUnlock && !g_hbConditionState.isRequestDisable &&
         (isLogIn || g_hbConditionState.hasTrustedRelation) && !isBackground && !isNightMode && isOOBEEnd &&
-        isInitCheckSuc && !isDeviceRoot;
+        isInitCheckSuc;
 }
 
 SoftBusScreenState GetScreenState(void)
@@ -384,36 +381,6 @@ void LnnRequestBleDiscoveryProcess(int32_t strategy, int64_t timeout)
         default:
             LNN_LOGE(LNN_HEART_BEAT, "error strategy, not need to deal. strategy=%{public}d", strategy);
     }
-}
-
-static int32_t HbRootDeviceLeaveLnn(void)
-{
-    LNN_LOGI(LNN_HEART_BEAT, "enter HbRootDeviceLeaveLnn");
-    int32_t i = 0;
-    int32_t infoNum = 0;
-    NodeBasicInfo *info = NULL;
-    if (LnnGetAllOnlineNodeInfo(&info, &infoNum) != SOFTBUS_OK) {
-        LNN_LOGE(LNN_HEART_BEAT, "get online node info failed");
-        return SOFTBUS_NETWORK_GET_ALL_NODE_INFO_ERR;
-    }
-    if (info == NULL || infoNum == 0) {
-        LNN_LOGE(LNN_HEART_BEAT, "get online node is 0");
-        return SOFTBUS_NO_ONLINE_DEVICE;
-    }
-    int32_t ret;
-    NodeInfo nodeInfo;
-    (void)memset_s(&nodeInfo, sizeof(NodeInfo), 0, sizeof(NodeInfo));
-    for (i = 0; i < infoNum; ++i) {
-        ret = LnnGetRemoteNodeInfoById(info[i].networkId, CATEGORY_NETWORK_ID, &nodeInfo);
-        if (ret != SOFTBUS_OK) {
-            continue;
-        }
-        LNN_LOGI(LNN_HEART_BEAT, "device is root, need to offline");
-        LnnRequestLeaveSpecific(info[i].networkId, CONNECTION_ADDR_MAX);
-        AuthRemoveDeviceKeyByUdidPacked(nodeInfo.deviceInfo.deviceUdid);
-    }
-    SoftBusFree(info);
-    return SOFTBUS_OK;
 }
 
 static int32_t HbHandleLeaveLnn(void)
@@ -695,34 +662,6 @@ static void HbScreenOnOnceTryCloudSync(void)
 static void DfxRecordScreenChangeTimestamp(LnnTriggerReason reason)
 {
     DfxRecordTriggerTime(reason, EVENT_STAGE_LNN_SCREEN_STATE_CHANGED);
-}
-
-static void HbDeviceRootStateEventHandler(const LnnEventBasicInfo *info)
-{
-    if (info == NULL || info->event != LNN_EVENT_DEVICE_ROOT_STATE_CHANGED) {
-        LNN_LOGE(LNN_HEART_BEAT, "device root state change evt handler get invalid param");
-        return;
-    }
-    const LnnDeviceRootStateChangeEvent *event = (const LnnDeviceRootStateChangeEvent *)info;
-    SoftBusDeviceRootState deviceRootState = (SoftBusDeviceRootState)event->status;
-    LNN_LOGI(LNN_HEART_BEAT, "HB handle deviceRootState=%{public}d", deviceRootState);
-    switch (deviceRootState) {
-        case SOFTBUS_DEVICE_IS_ROOT:
-            if (g_hbConditionState.deviceRootState != SOFTBUS_DEVICE_IS_ROOT) {
-                g_hbConditionState.deviceRootState = deviceRootState;
-            }
-            HbConditionChanged(false);
-            HbRootDeviceLeaveLnn();
-            break;
-        case SOFTBUS_DEVICE_NOT_ROOT:
-            if (g_hbConditionState.deviceRootState != SOFTBUS_DEVICE_NOT_ROOT) {
-                g_hbConditionState.deviceRootState = deviceRootState;
-            }
-            break;
-        default:
-            LNN_LOGE(LNN_HEART_BEAT, "error deviceRootState");
-            break;
-    }
 }
 
 static void HbScreenOnChangeEventHandler(int64_t nowTime)
@@ -1396,8 +1335,6 @@ static int32_t LnnRegisterCommonEvent(void)
     LNN_CHECK_AND_RETURN_RET_LOGE(ret == SOFTBUS_OK, ret, LNN_INIT, "regist user switch evt handler fail");
     ret = LnnRegisterEventHandler(LNN_EVENT_SLE_STATE_CHANGED, HbSleStateEventHandler);
     LNN_CHECK_AND_RETURN_RET_LOGE(ret == SOFTBUS_OK, ret, LNN_INIT, "regist sle state change evt handler fail");
-    ret = LnnRegisterEventHandler(LNN_EVENT_DEVICE_ROOT_STATE_CHANGED, HbDeviceRootStateEventHandler);
-    LNN_CHECK_AND_RETURN_RET_LOGE(ret == SOFTBUS_OK, ret, LNN_INIT, "regist sle state change evt handler fail");
     return SOFTBUS_OK;
 }
 
@@ -1522,7 +1459,6 @@ void LnnDeinitHeartbeat(void)
     LnnUnregisterEventHandler(LNN_EVENT_LP_EVENT_REPORT, HbLpEventHandler);
     LnnUnregisterEventHandler(LNN_EVENT_USER_SWITCHED, HbUserSwitchedHandler);
     LnnUnregisterEventHandler(LNN_EVENT_SLE_STATE_CHANGED, HbSleStateEventHandler);
-    LnnUnregisterEventHandler(LNN_EVENT_DEVICE_ROOT_STATE_CHANGED, HbDeviceRootStateEventHandler);
 }
 
 int32_t LnnTriggerDataLevelHeartbeat(void)
