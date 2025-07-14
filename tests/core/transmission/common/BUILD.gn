@@ -68,12 +68,80 @@ ohos_unittest("TransMintpSocketTest") {
   ]
 }
 
+ohos_unittest("SoftBusHtpSocketTest") {
+  module_out_path = module_output_path
+  sources = [
+    "softbus_htp_socket_test.cpp"
+  ]
+
+  include_dirs = [
+    "$dsoftbus_root_path/core/authentication/include",
+    "$dsoftbus_root_path/core/authentication/interface",
+    "$dsoftbus_root_path/interfaces/kits/connect",
+    "$dsoftbus_root_path/core/connection/interface",
+    "$dsoftbus_root_path/core/connection/common/include",
+    "$dsoftbus_root_path/core/connection/manager",
+    "$dsoftbus_root_path/core/transmission/trans_channel/common/include",
+    "$dsoftbus_root_path/core/transmission/trans_channel/proxy/include",
+    "$dsoftbus_root_path/core/connection/common/src",
+  ]
+
+  deps = [
+    "$dsoftbus_core_path/common:softbus_utils",
+    "$dsoftbus_core_path/frame:softbus_server",
+    "$dsoftbus_root_path/adapter:softbus_adapter",
+  ]
+
+  external_deps = [
+    "c_utils:utils",
+    "dsoftbus:softbus_client",
+    "googletest:gmock",
+    "hilog:libhilog",
+  ]
+}
+
+ohos_unittest("SoftbusHtpSocketMockTest") {
+  module_out_path = module_output_path
+  sources = [
+    "softbus_htp_socket_mock_test.cpp",
+    "mock/src/softbus_htp_socket_mock.cpp",
+  ]
+
+  include_dirs = [
+    "mock/include",
+    "$dsoftbus_root_path/core/authentication/include",
+    "$dsoftbus_root_path/core/authentication/interface",
+    "$dsoftbus_root_path/interfaces/kits/connect",
+    "$dsoftbus_root_path/core/connection/interface",
+    "$dsoftbus_root_path/core/connection/common/include",
+    "$dsoftbus_root_path/core/connection/manager",
+    "$dsoftbus_root_path/core/transmission/trans_channel/common/include",
+    "$dsoftbus_root_path/core/transmission/trans_channel/proxy/include",
+    "$dsoftbus_root_path/core/connection/common/src",
+  ]
+
+  deps = [
+    "$dsoftbus_core_path/common:softbus_utils",
+    "$dsoftbus_core_path/frame:softbus_server",
+    "$dsoftbus_root_path/adapter:softbus_adapter",
+  ]
+
+  external_deps = [
+    "c_utils:utils",
+    "dsoftbus:softbus_client",
+    "googletest:gmock",
+    "hilog:libhilog",
+  ]
+}
+
 group("unittest") {
   testonly = true
 
   deps = [
     ":TransMintpSocketTest",
     ":TransProcessDataTest",
+    ":SoftBusHtpSocketTest",
+    ":SoftbusHtpSocketMockTest",
     "trans_pending_pkt_test:unittest",
   ]
 }
