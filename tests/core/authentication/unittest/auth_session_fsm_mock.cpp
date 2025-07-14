@@ -52,5 +52,19 @@ bool IsSupportFeatureByCapaBit(uint32_t feature, AuthCapability capaBit)
 {
     return GetAuthSessionFsmInterface()->IsSupportFeatureByCapaBit(feature, capaBit);
 }
+
+int32_t GetAuthRequest(uint32_t requestId, AuthRequest *request)
+{
+    return GetAuthSessionFsmInterface()->GetAuthRequest(requestId, request);
+}
+
+int32_t LnnRetrieveDeviceInfoByUdidPacked(const char *udid, NodeInfo *deviceInfo)
+{
+    return GetAuthSessionFsmInterface()->LnnRetrieveDeviceInfoByUdidPacked(udid, deviceInfo);
+}
+int32_t LnnGetRemoteNodeInfoById(const char *id, IdCategory type, NodeInfo *info)
+{
+    return GetAuthSessionFsmInterface()->LnnGetRemoteNodeInfoById(id, type, info);
+}
 }
 }
