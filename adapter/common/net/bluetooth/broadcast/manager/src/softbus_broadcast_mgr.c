@@ -2892,7 +2892,6 @@ int32_t BroadcastGetBroadcastHandle(int32_t bcId, int32_t *bcHandle)
         SoftBusMutexUnlock(&g_bcLock);
         return SOFTBUS_INVALID_PARAM;
     }
-    StartBroadcastingWaitSignal(bcId, &g_bcLock, WAIT_ADV_HANDLE_TIME_SEC);
     SoftBusMutexUnlock(&g_bcLock);
 
     ret = g_interface[protocol]->GetBroadcastHandle(g_bcManager[bcId].adapterBcId, bcHandle);
