@@ -641,6 +641,7 @@ void TransPagingProcessHandshakeMsg(const ProxyMessage *msg, uint8_t *accountHas
         TransPagingAckHandshake(chan, SOFTBUS_TRANS_PAGING_SAVE_CHANNEL);
         ReleaseProxyChannelId(chan->channelId);
         SoftBusFree(chan);
+        return;
     }
     ProxyChannelInfo channel = { 0 };
     if (memcpy_s(&channel, sizeof(ProxyChannelInfo), chan, sizeof(ProxyChannelInfo)) != EOK) {
