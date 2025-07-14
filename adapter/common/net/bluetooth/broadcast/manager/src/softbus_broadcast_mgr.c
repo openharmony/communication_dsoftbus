@@ -122,22 +122,14 @@ static ScanManager g_scanManager[SCAN_NUM_MAX];
 static bool g_firstSetIndex[MAX_FILTER_SIZE + 1] = {false};
 
 static AdapterScannerControl g_AdapterStatusControl[GATT_SCAN_MAX_NUM] = {
-    {
-        .adapterScannerId = -1,
-        .isAdapterScanCbReg = false
-    },
-    {
-        .adapterScannerId = -1,
-        .isAdapterScanCbReg = false
-    },
-    {
-        .adapterScannerId = -1,
-        .isAdapterScanCbReg = false
-    },
-    {
-        .adapterScannerId = -1,
-        .isAdapterScanCbReg = false
-    }
+    { .adapterScannerId = -1, .isAdapterScanCbReg = false},
+    { .adapterScannerId = -1, .isAdapterScanCbReg = false},
+    { .adapterScannerId = -1, .isAdapterScanCbReg = false},
+    { .adapterScannerId = -1, .isAdapterScanCbReg = false},
+    { .adapterScannerId = -1, .isAdapterScanCbReg = false},
+    { .adapterScannerId = -1, .isAdapterScanCbReg = false},
+    { .adapterScannerId = -1, .isAdapterScanCbReg = false},
+    { .adapterScannerId = -1, .isAdapterScanCbReg = false},
  };
 
 static SoftbusBroadcastMediumInterface *g_interface[MEDIUM_NUM_MAX];
@@ -1190,6 +1182,8 @@ static int32_t RegisterScanListenerSub(
         case CHANEL_STEADY:
         case CHANEL_SHARE:
         case CHANEL_UNSTEADY:
+        case CHANEL_SLE_D2D_PAGING:
+        case CHANEL_SLE_D2D_TALKIE:
             return RegisterScanListenerForChannel(protocol, channel, adapterScanId, cb);
         default:
             DISC_LOGI(DISC_BROADCAST, "no server type channel srvType=%{public}s",
@@ -2320,7 +2314,6 @@ int32_t StopBroadcasting(int32_t bcId)
     DISC_LOGI(DISC_BROADCAST, "stop srvType=%{public}s, bcId=%{public}d, adapterId=%{public}d",
         GetSrvType(g_bcManager[bcId].srvType), bcId, g_bcManager[bcId].adapterBcId);
     BroadcastCallback callback = *(g_bcManager[bcId].bcCallback);
-    StartBroadcastingWaitSignal(bcId, &g_bcLock, BC_WAIT_TIME_SEC);
     SoftBusMutexUnlock(&g_bcLock);
     ret = g_interface[protocol]->StopBroadcasting(g_bcManager[bcId].adapterBcId);
     if (ret != SOFTBUS_OK) {
