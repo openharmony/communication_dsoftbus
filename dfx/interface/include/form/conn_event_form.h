@@ -115,6 +115,7 @@ typedef struct {
     int32_t apChannel;            // HOTSPOT_CHAN
     const char *peerDevVer;       // REMOTE_OS_VERSION
     int32_t remoteScreenStatus;   // REMOTE_SCREEN_STATUS
+    int32_t localScreenStatus;    // LOCAL_SCREEN_STATUS
     int32_t businessType;         // BUSINESS_TYPE
     int32_t businessId;           // BUSINESS_ID
     int32_t timeout;              // TIME_OUT
