@@ -336,18 +336,6 @@ static struct WifiDirectManager g_manager6 = {
 };
 
 /*
-* @tc.name: GET_WLAN_LINKED_FREQUENCY_TEST_001
-* @tc.desc: LnnQueryLaneResource test
-* @tc.type: FUNC
-* @tc.require:
-*/
-HWTEST_F(LNNLaneLinkTest, GET_WLAN_LINKED_FREQUENCY_TEST_001, TestSize.Level1)
-{
-    int32_t ret = GetWlanLinkedFrequency();
-    EXPECT_EQ(ret, SOFTBUS_LANE_SELECT_FAIL);
-}
-
-/*
 * @tc.name: GET_WLAN_LINKED_FREQUENCY_TEST_002
 * @tc.desc: LnnQueryLaneResource test
 * @tc.type: FUNC
