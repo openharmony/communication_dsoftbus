@@ -125,7 +125,6 @@ public:
     static int32_t ActionOfUnRegisterBroadcaster(int32_t bcId);
     static int32_t ActionOfGetBtMacAddr(SoftBusBtAddr *mac);
     static int32_t ActionOfGetBtState();
-    static void SetListenerId(int32_t btStateListenerId, int32_t scanListenerId);
 
     static inline const ScanCallback *scanListener_ {};
     static inline const SoftBusBtStateListener *btStateListener_ {};
