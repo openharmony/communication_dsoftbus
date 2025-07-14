@@ -727,4 +727,9 @@ bool WifiDirectUtils::StringToInt(const std::string &channelString, int32_t &res
     result = WIFI_5G_FREQ;
     return true;
 }
+
+int WifiDirectUtils::GetLocalScreenStatus()
+{
+    return SOFTBUS_OK;
+}
 } // namespace OHOS::SoftBus

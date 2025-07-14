@@ -627,6 +627,12 @@ int32_t OHOS::DBinderSoftbusServer::LnnGetAllOnlineNodeInfo(NodeBasicInfo **info
     (void)lnnGetAllOnlineNodeInfoFunc_;
     return OHOS::SoftBus::WifiDirectInterfaceMock::GetMock()->LnnGetAllOnlineNodeInfo(info, infoNum);
 }
+
+int32_t OHOS::DBinderSoftbusServer::LnnGetLocalBoolInfo(InfoKey key, bool *info, uint32_t len)
+{
+    (void)lnnGetLocalBoolInfoFunc_;
+    return OHOS::SoftBus::WifiDirectInterfaceMock::GetMock()->LnnGetLocalBoolInfo(key, info, len);
+}
 }
 
 namespace OHOS::SoftBus {
