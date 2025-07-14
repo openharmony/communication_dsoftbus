@@ -160,6 +160,9 @@ HWTEST_F(BusCenterDecisionTest, BusCenterDecisionTest005, TestSize.Level1)
     int32_t ret = InitDecisionCenter();
     EXPECT_EQ(SOFTBUS_OK, ret);
     EXPECT_NO_FATAL_FAILURE(DeinitDecisionCenter());
+    if (list != nullptr) {
+        SoftBusFree(list);
+    }
 }
 
 /*
@@ -185,6 +188,9 @@ HWTEST_F(BusCenterDecisionTest, BusCenterDecisionTest006, TestSize.Level1)
     int32_t ret = InitDecisionCenter();
     EXPECT_EQ(SOFTBUS_OK, ret);
     EXPECT_NO_FATAL_FAILURE(DeinitDecisionCenter());
+    if (list != nullptr) {
+        SoftBusFree(list);
+    }
 }
 
 /*
@@ -208,6 +214,9 @@ HWTEST_F(BusCenterDecisionTest, BusCenterDecisionTest007, TestSize.Level1)
     int32_t ret = InitDecisionCenter();
     EXPECT_EQ(SOFTBUS_OK, ret);
     EXPECT_NO_FATAL_FAILURE(DeinitDecisionCenter());
+    if (list != nullptr) {
+        SoftBusFree(list);
+    }
 }
 }
        
