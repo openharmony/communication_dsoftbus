@@ -62,7 +62,6 @@ typedef enum {
     /* event from sa monitor */
     LNN_EVENT_WIFI_SERVICE_START,
     LNN_EVENT_NOTIFY_RAW_ENHANCE_P2P,
-    LNN_EVENT_DEVICE_ROOT_STATE_CHANGED,
     LNN_EVENT_TYPE_MAX,
 } LnnEventType;
 
@@ -200,12 +199,6 @@ typedef enum {
     SOFTBUS_NETMANAGER_IFNAME_UNKNOWN,
 } NetManagerIfNameState;
 
-typedef enum {
-    SOFTBUS_DEVICE_NOT_ROOT,
-    SOFTBUS_DEVICE_IS_ROOT,
-    SOFTBUS_DEVICE_ROOT_UNKNOWN,
-} SoftBusDeviceRootState;
-
 typedef struct {
     LnnEventBasicInfo basic;
     uint8_t status;
@@ -309,11 +302,6 @@ typedef struct {
     uint8_t status;
     char ifName[NET_IF_NAME_LEN];
 } LnnMonitorNetlinkStateInfo;
-
-typedef struct {
-    LnnEventBasicInfo basic;
-    uint8_t status;
-} LnnDeviceRootStateChangeEvent;
 
 typedef void (*LnnEventHandler)(const LnnEventBasicInfo *info);
 
