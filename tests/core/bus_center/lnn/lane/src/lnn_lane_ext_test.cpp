@@ -20,27 +20,26 @@
 
 #include "bus_center_info_key.h"
 #include "dsoftbus_enhance_interface.h"
-#include "g_enhance_lnn_func_pack.h"
 #include "g_enhance_lnn_func.h"
+#include "g_enhance_lnn_func_pack.h"
 #include "lnn_lane.h"
 #include "lnn_lane_common.h"
 #include "lnn_lane_def.h"
 #include "lnn_lane_deps_mock.h"
 #include "lnn_lane_interface.h"
 #include "lnn_lane_link.h"
+#include "lnn_lane_link_ledger.h"
 #include "lnn_lane_model.h"
 #include "lnn_lane_power_ctrl_deps_mock.h"
 #include "lnn_lane_reliability.c"
 #include "lnn_lane_select.h"
 #include "lnn_select_rule.h"
 #include "lnn_wifi_adpter_mock.h"
-#include "lnn_lane_link_ledger.h"
 #include "message_handler.h"
 #include "softbus_adapter_mem.h"
 #include "softbus_error_code.h"
 #include "softbus_wifi_api_adapter.h"
 #include "wifi_direct_error_code.h"
-
 namespace OHOS {
 using namespace testing::ext;
 using namespace testing;
@@ -70,8 +69,6 @@ public:
 
 void LNNLaneExtMockTest::SetUpTestCase()
 {
-    LnnEnhanceFuncList *pfnLnnEnhanceFuncList = LnnEnhanceFuncListGet();
-    pfnLnnEnhanceFuncList->enablePowerControl = EnablePowerControl;
     int32_t ret = LnnInitLnnLooper();
     EXPECT_EQ(ret, SOFTBUS_OK);
     ret = LooperInit();
@@ -852,6 +849,8 @@ HWTEST_F(LNNLaneExtMockTest, LNN_LANE_UPDATE_LANE_ID_001, TestSize.Level1)
 */
 HWTEST_F(LNNLaneExtMockTest, LNN_LANE_DETECT_WIFI_DIRECT_APPLY_001, TestSize.Level1)
 {
+    LnnEnhanceFuncList *pfnLnnEnhanceFuncList = LnnEnhanceFuncListGet();
+    pfnLnnEnhanceFuncList->enablePowerControl = EnablePowerControl;
     LaneLinkInfo linkInfo = {};
     linkInfo.type = LANE_HML;
     linkInfo.linkInfo.p2p.bw = LANE_BW_160M;
@@ -861,11 +860,14 @@ HWTEST_F(LNNLaneExtMockTest, LNN_LANE_DETECT_WIFI_DIRECT_APPLY_001, TestSize.Lev
     NiceMock<LanePowerCtrlDepsInterfaceMock> powerCtrlMock;
     struct WifiDirectManager manager = g_manager;
     manager.getLocalAndRemoteMacByLocalIp = GetLocalAndRemoteMacByLocalIpError;
-    EXPECT_CALL(laneDepMock, GetWifiDirectManager).WillOnce(Return(nullptr)).WillOnce(Return(&manager))
+    EXPECT_CALL(laneDepMock, GetWifiDirectManager)
+        .WillOnce(Return(nullptr))
+        .WillOnce(Return(&manager))
         .WillRepeatedly(Return(&g_manager));
     EXPECT_CALL(laneDepMock, LnnGetLocalStrInfo).WillRepeatedly(Return(SOFTBUS_OK));
     EXPECT_CALL(powerCtrlMock, IsPowerControlEnabled).WillRepeatedly(Return(true));
-    EXPECT_CALL(powerCtrlMock, EnablePowerControl).WillOnce(Return(SOFTBUS_INVALID_PARAM))
+    EXPECT_CALL(powerCtrlMock, EnablePowerControl)
+        .WillOnce(Return(SOFTBUS_INVALID_PARAM))
         .WillRepeatedly(Return(SOFTBUS_OK));
 
     uint64_t laneId = LANE_ID_BASE;
@@ -990,10 +992,8 @@ HWTEST_F(LNNLaneExtMockTest, LNN_ADD_LANE_IS_VALID_LINK_ADDR_002, TestSize.Level
 
     LaneLinkInfo linkInfo = {};
     linkInfo.type = LANE_COC_DIRECT;
-    ASSERT_EQ(strcpy_s(linkInfo.linkInfo.wlan.connInfo.addr, MAX_SOCKET_ADDR_LEN,
-        PEER_WLAN_ADDR), EOK);
-    ASSERT_EQ(strcpy_s(linkInfo.linkInfo.bleDirect.networkId, NETWORK_ID_BUF_LEN,
-        NODE_NETWORK_ID), EOK);
+    ASSERT_EQ(strcpy_s(linkInfo.linkInfo.wlan.connInfo.addr, MAX_SOCKET_ADDR_LEN, PEER_WLAN_ADDR), EOK);
+    ASSERT_EQ(strcpy_s(linkInfo.linkInfo.bleDirect.networkId, NETWORK_ID_BUF_LEN, NODE_NETWORK_ID), EOK);
     ASSERT_EQ(strcpy_s(linkInfo.peerUdid, UDID_BUF_LEN, PEER_UDID), EOK);
     uint64_t laneId = LANE_ID_BASE;
     int32_t ret = AddLaneResourceToPool(&linkInfo, laneId, false);

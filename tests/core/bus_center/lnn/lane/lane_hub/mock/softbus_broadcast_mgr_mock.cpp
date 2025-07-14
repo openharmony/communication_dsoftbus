@@ -306,10 +306,4 @@ bool SoftbusBroadcastMgrMock::IsDeInitSuccess()
 {
     return advCallback_ == nullptr;
 }
-
-void SoftbusBroadcastMgrMock::SetListenerId(const int32_t btStateListenerId, const int32_t scanListenerId)
-{
-    btStateListenerId_ = btStateListenerId;
-    scanListenerId_ = scanListenerId;
-}
 } // namespace OHOS
