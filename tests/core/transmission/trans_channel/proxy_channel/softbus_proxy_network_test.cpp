@@ -19,9 +19,10 @@
 #include "gtest/gtest.h"
 #include "softbus_error_code.h"
 #include "softbus_protocol_def.h"
+#include "softbus_proxy_network_mock_test.h"
 #include "softbus_proxychannel_callback.h"
 #include "softbus_proxychannel_listener.h"
-#include "softbus_proxychannel_network.h"
+#include "softbus_proxychannel_network.c"
 #include "softbus_transmission_interface.h"
 
 using namespace testing;
@@ -33,6 +34,7 @@ namespace OHOS {
 #define TEST_VALID_SESSIONNAME "com.test.sessionname"
 #define TEST_VALID_PEER_NETWORKID "12345678"
 #define TEST_NUMBER_256 256
+#define TEST_CHANNEL_ID 1314
 
 class SoftbusProxyNetworkTest : public testing::Test {
 public:
@@ -312,5 +314,23 @@ HWTEST_F(SoftbusProxyNetworkTest, TransOpenNetWorkingChannelTest001, TestSize.Le
     EXPECT_EQ(INVALID_CHANNEL_ID, ret);
     ret = TransOpenNetWorkingChannel(sessionName, nullptr, &preferred);
     EXPECT_EQ(INVALID_CHANNEL_ID, ret);
+}
+
+/**
+ * @tc.name: NotifyNetworkingMsgReceived001
+ * @tc.desc: NotifyNetworkingMsgReceived
+ * @tc.type: FUNC
+ * @tc.require:
+ */
+HWTEST_F(SoftbusProxyNetworkTest, NotifyNetworkingMsgReceived001, TestSize.Level1)
+{
+    const char *data = "njfejfjpfjewpfqpFHEQWP";
+    uint32_t channelCapability = 3u;
+
+    SoftbusTransProxyNetworkMock networkObj;
+    EXPECT_CALL(networkObj, TransProxyGetSessionKeyByChanId)
+        .WillRepeatedly(DoAll(SetArgPointee<1>(channelCapability), Return(SOFTBUS_OK)));
+
+    EXPECT_NO_FATAL_FAILURE(NotifyNetworkingMsgReceived(TEST_VALID_SESSIONNAME, 1024, data, 256));
 }
 } // namespace OHOS
