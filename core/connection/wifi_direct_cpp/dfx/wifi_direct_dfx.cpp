@@ -102,6 +102,7 @@ void WifiDirectDfx::ReportConnEventExtra(ConnEventExtra &extra, const WifiDirect
     auto remoteOsVersion = WifiDirectUtils::GetRemoteOsVersion(wifiDirectConnectInfo.remoteNetworkId);
     extra.peerDevVer = remoteOsVersion.c_str();
     extra.remoteScreenStatus = WifiDirectUtils::GetRemoteScreenStatus(wifiDirectConnectInfo.remoteNetworkId);
+    extra.localScreenStatus = WifiDirectUtils::GetLocalScreenStatus();
     extra.isReuse = IsReuse(requestId);
     extra.staChload = WifiDirectUtils::GetChload();
     extra.sameAccount =

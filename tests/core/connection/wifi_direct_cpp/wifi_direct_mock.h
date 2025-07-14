@@ -76,6 +76,7 @@ public:
     virtual int32_t LnnGetLocalDefaultPtkByUuid(const char *uuid, char *localPtk, uint32_t len) = 0;
     virtual int32_t LnnGetRemoteByteInfo(const char *networkId, InfoKey key, uint8_t *info, uint32_t len) = 0;
     virtual int32_t LnnGetRemoteDefaultPtkByUuid(const char *uuid, char *remotePtk, uint32_t len) = 0;
+    virtual int32_t LnnGetLocalBoolInfo(InfoKey key, bool *info, uint32_t len) = 0;
 
     // Defines dependencies short-reach interface here
     virtual int IsWifiActive() = 0;
@@ -226,6 +227,7 @@ public:
 
     MOCK_METHOD(int32_t, LnnRegisterEventHandler, (LnnEventType event, LnnEventHandler handler), (override));
     MOCK_METHOD(int32_t, LnnGetAllOnlineNodeInfo, (NodeBasicInfo **info, int32_t *infoNum), (override));
+    MOCK_METHOD(int32_t, LnnGetLocalBoolInfo, (InfoKey key, bool *info, uint32_t len), (override));
 
     static void InjectWifiDirectConnectCallbackMock(WifiDirectConnectCallback &callback);
     static void InjectWifiDirectDisconnectCallbackMock(WifiDirectDisconnectCallback &callback);

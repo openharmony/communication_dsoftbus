@@ -82,6 +82,7 @@ CONN_ASSIGNER(Errcode, StaChannel, staChannel)
 CONN_ASSIGNER(Errcode, ApChannel, apChannel)
 CONN_ASSIGNER(String, PeerDevVer, peerDevVer)
 CONN_ASSIGNER(Errcode, RemoteScreenStatus, remoteScreenStatus)
+CONN_ASSIGNER(Errcode, LocalScreenStatus, localScreenStatus)
 CONN_ASSIGNER(Errcode, BusinessType, businessType)
 CONN_ASSIGNER(Int32, BusinessId, businessId)
 CONN_ASSIGNER(Errcode, Timeout, timeout)
@@ -94,7 +95,7 @@ CONN_ASSIGNER(String, BusinessTag, businessTag)
 CONN_ASSIGNER(Errcode, StaChload, staChload)
 CONN_ASSIGNER(Errcode, SameAccount, sameAccount)
 
-#define CONN_ASSIGNER_SIZE 59 // Size of g_connAssigners
+#define CONN_ASSIGNER_SIZE 60 // Size of g_connAssigners
 static HiSysEventParamAssigner g_connAssigners[] = {
     { "STAGE_RES",         HISYSEVENT_INT32,  ConnAssignerResult        },
     { "ERROR_CODE",        HISYSEVENT_INT32,  ConnAssignerErrcode       },
@@ -144,6 +145,7 @@ static HiSysEventParamAssigner g_connAssigners[] = {
     { "AP_CHANNEL",        HISYSEVENT_INT32,  ConnAssignerApChannel       },
     { "PEER_DEV_VER",         HISYSEVENT_STRING, ConnAssignerPeerDevVer        },
     { "REMOTE_SCREEN_STATUS", HISYSEVENT_INT32,  ConnAssignerRemoteScreenStatus},
+    { "LOCAL_SCREEN_STATUS",    HISYSEVENT_INT32,  ConnAssignerLocalScreenStatus   },
     { "BUSINESS_TYPE",          HISYSEVENT_INT32,  ConnAssignerBusinessType        },
     { "BUSINESS_ID",            HISYSEVENT_INT32,  ConnAssignerBusinessId          },
     { "TIME_OUT",               HISYSEVENT_INT32,  ConnAssignerTimeout             },
