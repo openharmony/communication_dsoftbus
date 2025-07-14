@@ -1434,7 +1434,7 @@ int32_t LnnVirtualLinkInitPacked(void)
 {
     LnnEnhanceFuncList *pfnLnnEnhanceFuncList = LnnEnhanceFuncListGet();
     if (pfnLnnEnhanceFuncList == NULL) {
-        return SOFTBUS_NOT_IMPLEMENT;
+        return SOFTBUS_OK;
     }
     if (LnnCheckFuncPointer((void *)pfnLnnEnhanceFuncList->lnnVirtualLinkInit) != SOFTBUS_OK) {
         LNN_LOGI(LNN_LANE, "init packed, func pointer is NULL");
@@ -1464,7 +1464,7 @@ int32_t DcTriggerVirtualLinkPacked(const char *peerNetworkId)
     }
     if (LnnCheckFuncPointer((void *)pfnLnnEnhanceFuncList->dcTriggerVirtualLink) != SOFTBUS_OK) {
         LNN_LOGI(LNN_LANE, "trigger virtual link, func pointer is NULL");
-        return SOFTBUS_OK;
+        return SOFTBUS_NOT_IMPLEMENT;
     }
     return pfnLnnEnhanceFuncList->dcTriggerVirtualLink(peerNetworkId);
 }
@@ -1477,7 +1477,7 @@ int32_t LnnGetLocalChannelInfoPacked(VapChannelInfo *channelInfo)
     }
     if (LnnCheckFuncPointer((void *)pfnLnnEnhanceFuncList->lnnGetLocalChannelInfo) != SOFTBUS_OK) {
         LNN_LOGI(LNN_LANE, "lnn get local channel info, func pointer is NULL");
-        return SOFTBUS_OK;
+        return SOFTBUS_NOT_IMPLEMENT;
     }
     return pfnLnnEnhanceFuncList->lnnGetLocalChannelInfo(channelInfo);
 }
@@ -1490,7 +1490,7 @@ int32_t LnnSetLocalChannelInfoPacked(LnnVapType type, int32_t channelId)
     }
     if (LnnCheckFuncPointer((void *)pfnLnnEnhanceFuncList->lnnSetLocalChannelInfo) != SOFTBUS_OK) {
         LNN_LOGI(LNN_LANE, "lnn set local channel info, func pointer is NULL");
-        return SOFTBUS_OK;
+        return SOFTBUS_NOT_IMPLEMENT;
     }
     return pfnLnnEnhanceFuncList->lnnSetLocalChannelInfo(type, channelId);
 }
