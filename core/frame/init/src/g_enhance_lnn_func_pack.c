@@ -1597,7 +1597,7 @@ bool IsDeviceHasRiskFactorPacked(void)
 {
     LnnEnhanceFuncList *pfnLnnEnhanceFuncList = LnnEnhanceFuncListGet();
     if (LnnCheckFuncPointer((void *)pfnLnnEnhanceFuncList->isDeviceHasRiskFactor) != SOFTBUS_OK) {
-        return SOFTBUS_NOT_IMPLEMENT;
+        return false;
     }
     return pfnLnnEnhanceFuncList->isDeviceHasRiskFactor();
 }
