@@ -393,9 +393,16 @@ std::string P2pAdapter::GetMacAddress()
     std::vector<uint8_t> macArray = WifiDirectUtils::GetInterfaceMacAddr(IF_NAME_P2P);
     std::string macString = WifiDirectUtils::MacArrayToString(macArray);
     if (macString.empty()) {
-        macArray = WifiDirectUtils::GetInterfaceMacAddr(IF_NAME_WLAN);
-        macString = WifiDirectUtils::MacArrayToString(macArray);
-        CONN_LOGI(CONN_WIFI_DIRECT, "wlan0");
+        WifiP2pDevice device;
+        auto ret = QueryP2pLocalDevice(&device);
+        if (ret != WIFI_SUCCESS) {
+            macArray = WifiDirectUtils::GetInterfaceMacAddr(IF_NAME_WLAN);
+            macString = WifiDirectUtils::MacArrayToString(macArray);
+            CONN_LOGI(CONN_WIFI_DIRECT, "wlan0");
+            return macString;
+        }
+        macString = WifiDirectUtils::MacArrayToString(device.devAddr, COMMON_MAC_LEN);
+        CONN_LOGI(CONN_WIFI_DIRECT, "Get p2p mac by QueryP2pLocalDevice");
         return macString;
     }
     CONN_LOGI(CONN_WIFI_DIRECT, "p2p0");
