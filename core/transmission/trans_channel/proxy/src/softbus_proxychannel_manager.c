@@ -1626,7 +1626,6 @@ int32_t TransDealProxyChannelOpenResult(
     int32_t ret = TransProxyGetChanByChanId(channelId, &chan);
     TRANS_CHECK_AND_RETURN_RET_LOGE(ret == SOFTBUS_OK, ret, TRANS_CTRL,
         "get proxy channelInfo failed, channelId=%{public}d, ret=%{public}d", channelId, ret);
-
     if (callingPid != 0 && chan.appInfo.myData.pid != callingPid) {
         TRANS_LOGE(TRANS_CTRL,
             "pid does not match callingPid, pid=%{public}d, callingPid=%{public}d, channelId=%{public}d",
@@ -1634,6 +1633,13 @@ int32_t TransDealProxyChannelOpenResult(
         return SOFTBUS_TRANS_CHECK_PID_ERROR;
     }
     if (chan.isD2D) {
+        ret = TransProxyUpdateReplyCnt(channelId);
+        if (ret != SOFTBUS_OK) {
+            TRANS_LOGE(TRANS_CTRL, "TransProxyUpdateReplyCnt fail channelId=%{public}d", chan.channelId);
+            (void)OnProxyChannelClosed(chan.channelId, &(chan.appInfo));
+            TransProxyDelChanByChanId(chan.channelId);
+            return ret;
+        }
         ret = TransPagingAckHandshake(&chan, openResult);
         if (ret != SOFTBUS_OK) {
             TRANS_LOGE(TRANS_CTRL,
@@ -1657,7 +1663,6 @@ int32_t TransDealProxyChannelOpenResult(
         TransProxyDelChanByChanId(channelId);
         return SOFTBUS_OK;
     }
-
     if (chan.appInfo.fastTransData != NULL && chan.appInfo.fastTransDataSize > 0) {
         TransProxyFastDataRecv(&chan);
     }
