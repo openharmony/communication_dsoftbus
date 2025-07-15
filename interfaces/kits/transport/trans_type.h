@@ -43,6 +43,7 @@ typedef enum {
     DATA_TYPE_SLICE_STREAM,        /**< Video slice stream */
     DATA_TYPE_RAW_STREAM_ENCRYPED, /**< Encryped raw stream data */
     DATA_TYPE_D2D_MESSAGE = 10,    /**< D2D Message */
+    DATA_TYPE_D2D_VOICE = 11,      /**< D2D Voice */
     DATA_TYPE_BUTT,
 } TransDataType;
 
