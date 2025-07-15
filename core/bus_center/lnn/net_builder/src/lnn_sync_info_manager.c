@@ -828,10 +828,10 @@ static void OnWifiDirectSyncMsgRecv(AuthHandle authHandle, const AuthTransData *
     AnonymizeFree(anonyUdid);
     if (LnnGetNetworkIdByUdid(auth->udid, networkId, sizeof(networkId)) != SOFTBUS_OK) {
         LNN_LOGE(LNN_BUILDER, "LnnGetNetworkIdByUdid fail");
-        DelAuthManager(auth, false);
+        DelDupAuthManager(auth);
         return;
     }
-    DelAuthManager(auth, false);
+    DelDupAuthManager(auth);
     type = (LnnSyncInfoType)(*(int32_t *)data->data);
     if (type < 0 || type >= LNN_INFO_TYPE_COUNT) {
         LNN_LOGE(LNN_BUILDER, "received data is exception, type=%{public}d", type);
