@@ -247,6 +247,7 @@ static void TransOnGenSuccess(uint32_t requestId, uint8_t *applyKey, uint32_t ap
     }
     if (memcpy_s(authKey, applyKeyLen, applyKey, applyKeyLen) != EOK) {
         TRANS_LOGE(TRANS_CTRL, "memcpy_s authKey failed");
+        SoftBusFree(authKey);
         return;
     }
     TransProxyPagingHandshakeMsgToLoop(channelId, authKey, applyKeyLen);
