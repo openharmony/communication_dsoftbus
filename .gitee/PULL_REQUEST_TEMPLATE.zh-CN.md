@@ -55,7 +55,7 @@
 - [ ] 【常见问题】函数返回值需与函数签名相同，参数定义需在同一范畴，或同一枚举类型；
 - [ ] 【常见问题】格式化打印类型需匹配，例如：int32_t %d; uint32_t %u; long %ld; unsigned long %lu; long long PRId64(%lld); unsigned long long PRIu64(%llu); int16_t(short) %hd; uint16_t(unsigned short) %hu; int8_t %hhd; uint8_t %hhu；
 
-### L0新增用例自检结果
-- [ ] 是，有新增L0用例，且完成自检
-- [ ] 否
+### 是否已执行L0用例
+- [ ] 已验证
+- [ ] 不涉及。如不涉及，请写明理由
 
