@@ -55,7 +55,7 @@ public:
 
 void BusCenterSdkTest::SetUpTestCase()
 {
-    SetAccessTokenPermission("device_manager");
+    SetAccessTokenPermission("msdp_sa");
     uint64_t tokenId = SetTokenIdByProcessName("device_manager");
     printf("SetTokenIdByProcessName tokenId:%ju\n", tokenId);
 }

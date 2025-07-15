@@ -20,27 +20,31 @@
     "PROCESS_NAME": []
   },
   {
-    "INTERFACE_NAME": "SERVER_GET_NODE_KEY_INFO",
+    "INTERFACE_NAME": "SERVER_ACTIVE_META_NODE",
     "PROCESS_NAME": [
-      "device_manager",
-      "device_security_level",
       "CollaborationFwk",
-      "collaboration_service",
       "car_distributed_engine",
-      "distributed_input"
+      "wear_link_service",
+      "device_manager"
     ]
   },
   {
-    "INTERFACE_NAME": "SERVER_ACTIVE_META_NODE",
-    "PROCESS_NAME": []
-  },
-  {
     "INTERFACE_NAME": "SERVER_DEACTIVE_META_NODE",
-    "PROCESS_NAME": []
+    "PROCESS_NAME": [
+      "CollaborationFwk",
+      "car_distributed_engine",
+      "wear_link_service",
+      "device_manager"
+    ]
   },
   {
     "INTERFACE_NAME": "SERVER_GET_ALL_META_NODE_INFO",
-    "PROCESS_NAME": []
+    "PROCESS_NAME": [
+      "CollaborationFwk",
+      "car_distributed_engine",
+      "wear_link_service",
+      "device_manager"
+    ]
   },
   {
     "INTERFACE_NAME": "SERVER_SHIFT_LNN_GEAR",
@@ -137,6 +141,48 @@
     "INTERFACE_NAME": "EX_OBJ_CMD_QUERY_VALID_QOS",
     "PROCESS_NAME": [
       "distributedsched"
+    ]
+  },
+  {
+    "INTERFACE_NAME": "SERVER_SET_DATA_LEVEL",
+    "PROCESS_NAME": [
+      "distributeddata"
+    ]
+  },
+  {
+    "INTERFACE_NAME": "SERVER_REG_DATA_LEVEL_CHANGE_CB",
+    "PROCESS_NAME": [
+      "distributeddata"
+    ]
+  },
+  {
+    "INTERFACE_NAME": "SERVER_UNREG_DATA_LEVEL_CHANGE_CB",
+    "PROCESS_NAME": [
+      "distributeddata"
+    ]
+  },
+  {
+    "INTERFACE_NAME": "SERVER_TRIGGER_RANGE_FOR_MSDP",
+    "PROCESS_NAME": [
+      "msdp_sa"
+    ]
+  },
+  {
+    "INTERFACE_NAME": "SERVER_STOP_RANGE_FOR_MSDP",
+    "PROCESS_NAME": [
+      "msdp_sa"
+    ]
+  },
+  {
+    "INTERFACE_NAME": "SERVER_REG_RANGE_CB_FOR_MSDP",
+    "PROCESS_NAME": [
+      "msdp_sa"
+    ]
+  },
+  {
+    "INTERFACE_NAME": "SERVER_UNREG_RANGE_CB_FOR_MSDP",
+    "PROCESS_NAME": [
+      "msdp_sa"
     ]
   }
 ]
