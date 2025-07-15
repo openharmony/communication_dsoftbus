@@ -1548,10 +1548,6 @@ int32_t TransAsyncGetLaneInfoByOption(const SessionParam *param, const LaneReque
         (void)TransDelLaneReqFromPendingList(*laneHandle, true);
         return ret;
     }
-    if (strcmp(param->sessionName, SESSION_NAME_DISTRIBUTE_COMMUNICATION) == 0 ||
-        strcmp(param->sessionName, SESSION_NAME_TRIGGER_VIRTUAL_LINK) == 0) {
-        DcTriggerVirtualLinkPacked(param->peerDeviceId);
-    }
     CoreSessionState state = CORE_SESSION_STATE_INIT;
     TransGetSocketChannelStateBySession(param->sessionName, param->sessionId, &state);
     if (state == CORE_SESSION_STATE_CANCELLING) {
@@ -1597,6 +1593,10 @@ int32_t TransAsyncGetLaneInfoByQos(const SessionParam *param, const LaneAllocInf
         TRANS_LOGE(TRANS_SVC, "trans request lane failed, ret=%{public}d", ret);
         (void)TransDelLaneReqFromPendingList(*laneHandle, true);
         return ret;
+    }
+    if (strcmp(param->sessionName, SESSION_NAME_DISTRIBUTE_COMMUNICATION) == 0 ||
+        strcmp(param->sessionName, SESSION_NAME_TRIGGER_VIRTUAL_LINK) == 0) {
+        DcTriggerVirtualLinkPacked(param->peerDeviceId);
     }
     CoreSessionState state = CORE_SESSION_STATE_INIT;
     TransGetSocketChannelStateBySession(param->sessionName, param->sessionId, &state);
