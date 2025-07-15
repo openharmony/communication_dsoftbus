@@ -134,6 +134,7 @@ typedef int32_t (*AuthGetHmlConnInfoFunc)(const char *uuid, AuthConnInfo *connIn
 typedef int64_t (*AuthGetIdByConnInfoFunc)(const AuthConnInfo *connInfo, bool isServer, bool isMeta);
 typedef int32_t (*AuthOpenConnFunc)(const AuthConnInfo *info, uint32_t requestId,
     const AuthConnCallback *callback, bool isMeta);
+typedef void (*AuthCloseConnFunc)(AuthHandle authHandle);
 typedef int32_t (*AuthPostTransDataFunc)(AuthHandle authHandle, const AuthTransData *dataInfo);
 typedef int32_t (*LnnGetRemoteNodeInfoByIdFunc)(const char *id, IdCategory type, NodeInfo *info);
 

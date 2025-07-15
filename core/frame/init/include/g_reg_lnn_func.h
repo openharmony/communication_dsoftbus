@@ -246,6 +246,7 @@ typedef struct TagLnnOpenFuncList {
     AuthPostTransDataFunc authPostTransData;
     AuthGetHmlConnInfoFunc authGetHmlConnInfo;
     AuthOpenConnFunc authOpenConn;
+    AuthCloseConnFunc authCloseConn;
     SocketGetConnInfoFunc socketGetConnInfo;
     GetConnInfoByConnectionIdFunc getConnInfoByConnectionId;
     AuthGenRequestIdFunc authGenRequestId;
