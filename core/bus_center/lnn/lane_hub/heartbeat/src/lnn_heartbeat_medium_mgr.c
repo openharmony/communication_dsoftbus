@@ -845,10 +845,6 @@ static void DfxRecordHeartBeatAuthStart(const AuthConnInfo *connInfo, const char
 
 static int32_t HbOnlineNodeAuth(DeviceInfo *device, LnnHeartbeatRecvInfo *storedInfo, uint64_t nowTime)
 {
-    if (!device->isOnline) {
-        LNN_LOGW(LNN_HEART_BEAT, "ignore lnn request, not support connect");
-        return SOFTBUS_OK;
-    }
     if (HbIsRepeatedReAuthRequest(storedInfo, nowTime)) {
         LNN_LOGE(LNN_HEART_BEAT, "reauth request repeated");
         return SOFTBUS_NETWORK_HEARTBEAT_REPEATED;
@@ -1184,9 +1180,15 @@ static int32_t HbNotifyReceiveDevice(DeviceInfo *device, const LnnHeartbeatWeigh
             (void)SoftBusMutexUnlock(&g_hbRecvList->lock);
             return HbUpdateOfflineTimingByRecvInfo(nodeInfo.networkId, device->addr[0].type, hbType, nowTime);
         }
-        res = HbOnlineNodeAuth(device, storedInfo, nowTime);
-        (void)SoftBusMutexUnlock(&g_hbRecvList->lock);
-        return res;
+        if (!device->isOnline) {
+            LNN_LOGW(LNN_HEART_BEAT, "ignore lnn request, not support connect");
+            (void)SoftBusMutexUnlock(&g_hbRecvList->lock);
+            return HbUpdateOfflineTimingByRecvInfo(nodeInfo.networkId, device->addr[0].type, hbType, nowTime);
+        } else {
+            res = HbOnlineNodeAuth(device, storedInfo, nowTime);
+            (void)SoftBusMutexUnlock(&g_hbRecvList->lock);
+            return res;
+        }
     }
     res = CheckJoinLnnConnectResult(device, hbResp, isDirectlyHb, storedInfo, nowTime);
     (void)SoftBusMutexUnlock(&g_hbRecvList->lock);
