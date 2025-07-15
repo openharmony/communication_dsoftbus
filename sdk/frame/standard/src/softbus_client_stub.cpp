@@ -882,7 +882,7 @@ int32_t SoftBusClientStub::OnBrProxyOpenedInner(MessageParcel &data, MessageParc
     char *brMac = (char *)data.ReadCString();
     COMM_CHECK_AND_RETURN_RET_LOGE(brMac != nullptr, SOFTBUS_IPC_ERR, COMM_SDK, "read brMac failed");
     char *uuid = (char *)data.ReadCString();
-    COMM_CHECK_AND_RETURN_RET_LOGE(uuid != nullptr, SOFTBUS_IPC_ERR, COMM_SDK, "read uuid failed");
+    COMM_CHECK_AND_RETURN_RET_LOGE(brMac != nullptr, SOFTBUS_IPC_ERR, COMM_SDK, "read uuid failed");
     int32_t reason;
     COMM_CHECK_AND_RETURN_RET_LOGE(data.ReadInt32(reason), SOFTBUS_IPC_ERR, COMM_SDK, "read reason failed");
  
