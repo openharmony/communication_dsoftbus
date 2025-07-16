@@ -41,6 +41,8 @@ typedef enum {
     SHIFT_LNN_GEAR,
     START_REFRESH_LNN,
     START_PUBLISH_LNN,
+    STOP_DISCOVERY_LNN,
+    STOP_PUBLISH_LNN,
 } FunID;
 
 typedef struct {
@@ -67,6 +69,8 @@ static int32_t OnAllMetaNode(Reply *info, IpcIo *reply, uint32_t infoSize);
 static int32_t OnShiftLnnGear(Reply *info, IpcIo *reply, uint32_t infoSize);
 static int32_t OnStartRefreshLnn(Reply *info, IpcIo *reply, uint32_t infoSize);
 static int32_t OnStartPublishLnn(Reply *info, IpcIo *reply, uint32_t infoSize);
+static int32_t OnStopDiscoveryLnn(Reply *info, IpcIo *reply, uint32_t infoSize);
+static int32_t OnStopPublishLnn(Reply *info, IpcIo *reply, uint32_t infoSize);
 
 static ClientBusCenterStateHandler g_busCenterStateHandler[] = {
     {GET_ALL_ONLINE_NODE_INFO, OnOnlineNodeInfo  },
@@ -78,6 +82,8 @@ static ClientBusCenterStateHandler g_busCenterStateHandler[] = {
     { SHIFT_LNN_GEAR,          OnShiftLnnGear    },
     { START_REFRESH_LNN,       OnStartRefreshLnn },
     { START_PUBLISH_LNN,       OnStartPublishLnn },
+    { STOP_DISCOVERY_LNN,      OnStopDiscoveryLnn},
+    { STOP_PUBLISH_LNN,        OnStopPublishLnn  },
 };
 
 static IClientProxy *g_serverProxy = NULL;
@@ -153,6 +159,18 @@ static int32_t OnStartRefreshLnn(Reply *info, IpcIo *reply, uint32_t infoSize)
 }
 
 static int32_t OnStartPublishLnn(Reply *info, IpcIo *reply, uint32_t infoSize)
+{
+    ReadInt32(reply, &(info->retCode));
+    return SOFTBUS_OK;
+}
+
+static int32_t OnStopDiscoveryLnn(Reply *info, IpcIo *reply, uint32_t infoSize)
+{
+    ReadInt32(reply, &(info->retCode));
+    return SOFTBUS_OK;
+}
+
+static int32_t OnStopPublishLnn(Reply *info, IpcIo *reply, uint32_t infoSize)
 {
     ReadInt32(reply, &(info->retCode));
     return SOFTBUS_OK;
@@ -620,13 +638,17 @@ int32_t ServerIpcStopPublishLNN(const char *pkgName, int32_t publishId)
 
     uint8_t data[MAX_SOFT_BUS_IPC_LEN] = {0};
     IpcIo request = {0};
+    Reply reply = {0};
+    reply.id = STOP_PUBLISH_LNN;
     IpcIoInit(&request, data, MAX_SOFT_BUS_IPC_LEN, 0);
     WriteString(&request, pkgName);
     WriteInt32(&request, publishId);
     /* asynchronous invocation */
-    int32_t ans = g_serverProxy->Invoke(g_serverProxy, SERVER_STOP_PUBLISH_LNN, &request, NULL, NULL);
-    if (ans != SOFTBUS_OK) {
-        LNN_LOGE(LNN_EVENT, "ServerIpcStopPublishLNN invoke failed. ans=%{public}d", ans);
+    int32_t ans = g_serverProxy->Invoke(g_serverProxy, SERVER_STOP_PUBLISH_LNN, &request, &reply,
+        ClientBusCenterResultCb);
+    if (ans != SOFTBUS_OK || reply.retCode != SOFTBUS_OK) {
+        LNN_LOGE(LNN_EVENT, "ServerIpcStopPublishLNN invoke failed. ans=%{public}d, retCode=%{public}d",
+            ans, reply.retCode);
         return SOFTBUS_NETWORK_PROXY_INVOKE_FAILED;
     }
     return SOFTBUS_OK;
@@ -683,13 +705,17 @@ int32_t ServerIpcStopRefreshLNN(const char *pkgName, int32_t refreshId)
 
     uint8_t data[MAX_SOFT_BUS_IPC_LEN] = {0};
     IpcIo request = {0};
+    Reply reply = {0};
+    reply.id = STOP_DISCOVERY_LNN;
     IpcIoInit(&request, data, MAX_SOFT_BUS_IPC_LEN, 0);
     WriteString(&request, pkgName);
     WriteInt32(&request, refreshId);
     /* asynchronous invocation */
-    int32_t ans = g_serverProxy->Invoke(g_serverProxy, SERVER_STOP_REFRESH_LNN, &request, NULL, NULL);
-    if (ans != SOFTBUS_OK) {
-        LNN_LOGE(LNN_EVENT, "invoke failed=%{public}d", ans);
+    int32_t ans = g_serverProxy->Invoke(g_serverProxy, SERVER_STOP_REFRESH_LNN, &request, &reply,
+        ClientBusCenterResultCb);
+    if (ans != SOFTBUS_OK || reply.retCode != SOFTBUS_OK) {
+        LNN_LOGE(LNN_EVENT, "ServerIpcStopRefreshLNN invoke failed. ans=%{public}d, retCode=%{public}d",
+            ans, reply.retCode);
         return SOFTBUS_NETWORK_PROXY_INVOKE_FAILED;
     }
     return SOFTBUS_OK;
