@@ -40,13 +40,13 @@ extern "C"{
  * @version 1.0
  */
 typedef struct {
-    void (*OnStartBroadcastingCallback)(int32_t advId, int32_t status);
-    void (*OnStopBroadcastingCallback)(int32_t advId, int32_t status);
-    void (*OnUpdateBroadcastingCallback)(int32_t advId, int32_t status);
-    void (*OnSetBroadcastingCallback)(int32_t advId, int32_t status);
-    void (*OnSetBroadcastingParamCallback)(int32_t advId, int32_t status);
-    void (*OnEnableBroadcastingCallback)(int32_t advId, int32_t status);
-    void (*OnDisableBroadcastingCallback)(int32_t advId, int32_t status);
+    void (*OnStartBroadcastingCallback)(BroadcastProtocol protocol, int32_t advId, int32_t status);
+    void (*OnStopBroadcastingCallback)(BroadcastProtocol protocol, int32_t advId, int32_t status);
+    void (*OnUpdateBroadcastingCallback)(BroadcastProtocol protocol, int32_t advId, int32_t status);
+    void (*OnSetBroadcastingCallback)(BroadcastProtocol protocol, int32_t advId, int32_t status);
+    void (*OnSetBroadcastingParamCallback)(BroadcastProtocol protocol, int32_t advId, int32_t status);
+    void (*OnEnableBroadcastingCallback)(BroadcastProtocol protocol, int32_t advId, int32_t status);
+    void (*OnDisableBroadcastingCallback)(BroadcastProtocol protocol, int32_t advId, int32_t status);
 } SoftbusBroadcastCallback;
 
 /**
@@ -56,11 +56,13 @@ typedef struct {
  * @version 1.0
  */
 typedef struct {
-    void (*OnStartScanCallback)(int32_t scannerId, int32_t status);
-    void (*OnStopScanCallback)(int32_t scannerId, int32_t status);
-    void (*OnReportScanDataCallback)(int32_t scannerId, const SoftBusBcScanResult *reportData);
-    void (*OnScanStateChanged)(int32_t resultCode, bool isStartScan);
-    void (*OnLpDeviceInfoCallback)(const SoftbusBroadcastUuid *uuid, int32_t type, uint8_t *data, uint32_t dataSize);
+    void (*OnStartScanCallback)(BroadcastProtocol protocol, int32_t scannerId, int32_t status);
+    void (*OnStopScanCallback)(BroadcastProtocol protocol, int32_t scannerId, int32_t status);
+    void (*OnReportScanDataCallback)(BroadcastProtocol protocol, int32_t scannerId,
+        const SoftBusBcScanResult *reportData);
+    void (*OnScanStateChanged)(BroadcastProtocol protocol, int32_t resultCode, bool isStartScan);
+    void (*OnLpDeviceInfoCallback)(BroadcastProtocol protocol, const SoftbusBroadcastUuid *uuid,
+        int32_t type, uint8_t *data, uint32_t dataSize);
 } SoftbusScanCallback;
 
 /**
@@ -76,7 +78,7 @@ typedef struct {
     int32_t (*UnRegisterBroadcaster)(int32_t advId);
     int32_t (*RegisterScanListener)(int32_t *scannerId, const SoftbusScanCallback *cb);
     int32_t (*UnRegisterScanListener)(int32_t scannerId);
-    int32_t (*StartBroadcasting)(int32_t advId, const SoftbusBroadcastParam *param, const SoftbusBroadcastData *data);
+    int32_t (*StartBroadcasting)(int32_t advId, const SoftbusBroadcastParam *param, SoftbusBroadcastData *data);
     int32_t (*SetScanParams)(int32_t scannerId, const SoftBusBcScanParams *param, const SoftBusBcScanFilter *scanFilter,
         int32_t filterSize, SoftbusSetFilterCmd cmdId);
     int32_t (*StopBroadcasting)(int32_t advId);
@@ -86,7 +88,7 @@ typedef struct {
     int32_t (*SetBroadcastingParam)(int32_t advId, const SoftbusBroadcastParam *param);
     int32_t (*EnableBroadcasting)(int32_t advId);
     int32_t (*DisableBroadcasting)(int32_t advId);
-    int32_t (*UpdateBroadcasting)(int32_t advId, const SoftbusBroadcastParam *param, const SoftbusBroadcastData *data);
+    int32_t (*UpdateBroadcasting)(int32_t advId, const SoftbusBroadcastParam *param, SoftbusBroadcastData *data);
     int32_t (*StartScan)(int32_t scannerId, const SoftBusBcScanParams *param, const SoftBusBcScanFilter *scanFilter,
         int32_t filterSize);
     int32_t (*StopScan)(int32_t scannerId);

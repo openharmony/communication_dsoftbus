@@ -537,7 +537,10 @@ static void UpdateDpAclSKId(AuthFsm *authFsm)
         .deviceId = info->udid,
         .peerUserId = info->userId
     };
-    bool isNeedUpdateDk = info->nodeInfo.aclState == ACL_CAN_WRITE;
+    bool isNeedUpdateDk = (info->nodeInfo.aclState == ACL_CAN_WRITE) &&
+        IsSupportFeatureByCapaBit(info->nodeInfo.authCapacity, BIT_SUPPORT_USERKEY_NEGO);
+    AUTH_LOGI(AUTH_FSM, "judge insert user key aclState=%{public}d, authCapacity=%{public}d", info->nodeInfo.aclState,
+        info->nodeInfo.authCapacity);
     UpdateDpSameAccount(&aclParams, sessionKey, isNeedUpdateDk, info->nodeInfo.aclState);
     (void)memset_s(&sessionKey, sizeof(SessionKey), 0, sizeof(SessionKey));
 }
@@ -1299,12 +1302,21 @@ static void PopulateDeviceTypeId(HiChainAuthParam *authParam, uint32_t requestId
             return;
         }
     }
-    NodeInfo nodeInfo;
-    (void)memset_s(&nodeInfo, sizeof(NodeInfo), 0, sizeof(NodeInfo));
-    if (LnnRetrieveDeviceInfoByUdidPacked(authParam->udid, &nodeInfo) == SOFTBUS_OK) {
-        if (nodeInfo.deviceInfo.deviceTypeId == TYPE_PC_ID) {
-            authParam->deviceTypeId = nodeInfo.deviceInfo.deviceTypeId;
+    NodeInfo nodeInfoLedger;
+    (void)memset_s(&nodeInfoLedger, sizeof(NodeInfo), 0, sizeof(NodeInfo));
+    if (LnnGetRemoteNodeInfoById(authParam->udid, CATEGORY_UDID, &nodeInfoLedger) == SOFTBUS_OK) {
+        if (nodeInfoLedger.deviceInfo.deviceTypeId == TYPE_PC_ID) {
+            authParam->deviceTypeId = nodeInfoLedger.deviceInfo.deviceTypeId;
             AUTH_LOGI(AUTH_FSM, "get deviceTypeId from deviceInfo success");
+            return;
+        }
+    }
+    NodeInfo nodeInfoPersistent;
+    (void)memset_s(&nodeInfoPersistent, sizeof(NodeInfo), 0, sizeof(NodeInfo));
+    if (LnnRetrieveDeviceInfoByUdidPacked(authParam->udid, &nodeInfoPersistent) == SOFTBUS_OK) {
+        if (nodeInfoPersistent.deviceInfo.deviceTypeId == TYPE_PC_ID) {
+            authParam->deviceTypeId = nodeInfoPersistent.deviceInfo.deviceTypeId;
+            AUTH_LOGI(AUTH_FSM, "get deviceTypeId from persistent deviceInfo success");
             return;
         }
     }

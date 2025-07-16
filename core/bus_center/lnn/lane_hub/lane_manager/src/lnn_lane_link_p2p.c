@@ -61,6 +61,7 @@ typedef struct {
 typedef struct {
     char networkId[NETWORK_ID_BUF_LEN];
     bool isSupportIpv6;
+    bool isVirtualLink;
     uint32_t laneReqId;
     int32_t pid;
     LaneLinkType linkType;
@@ -673,6 +674,7 @@ static int32_t GetP2pLinkReqParamByChannelRequetId(
             return SOFTBUS_STRCPY_ERR;
         }
         wifiDirectInfo->ipAddrType = item->laneRequestInfo.isSupportIpv6 ? IPV6 : IPV4;
+        wifiDirectInfo->isVirtualLink = item->laneRequestInfo.isVirtualLink;
         wifiDirectInfo->isNetworkDelegate = item->p2pInfo.networkDelegate;
         wifiDirectInfo->connectType = item->laneRequestInfo.linkType == LANE_HML ?
             WIFI_DIRECT_CONNECT_TYPE_AUTH_NEGO_HML : WIFI_DIRECT_CONNECT_TYPE_AUTH_NEGO_P2P;
@@ -712,6 +714,7 @@ static int32_t GetP2pLinkReqParamByAuthHandle(uint32_t authRequestId, uint32_t p
         }
         wifiDirectInfo->pid = item->laneRequestInfo.pid;
         wifiDirectInfo->ipAddrType = item->laneRequestInfo.isSupportIpv6 ? IPV6 : IPV4;
+        wifiDirectInfo->isVirtualLink = item->laneRequestInfo.isVirtualLink;
         if (strcpy_s(wifiDirectInfo->remoteNetworkId, sizeof(wifiDirectInfo->remoteNetworkId),
             item->laneRequestInfo.networkId) != EOK) {
             LNN_LOGE(LNN_LANE, "copy networkId failed");
@@ -1547,6 +1550,10 @@ static int32_t HandleWifiDirectConflict(uint32_t p2pRequestId, LinkConflictType 
             ASYNC_RESULT_P2P, p2pRequestId);
         return SOFTBUS_LANE_NOT_FOUND;
     }
+    if (conflictType == CONFLICT_THREE_VAP && reqInfo.laneRequestInfo.isVirtualLink) {
+        LNN_LOGE(LNN_LANE, "no need force disconnect");
+        return SOFTBUS_LANE_CHECK_CONFLICT_FAIL;
+    }
     int32_t ret = HandleForceDownWifiDirect(reqInfo.laneRequestInfo.networkId, conflictType, p2pRequestId);
     if (ret != SOFTBUS_OK) {
         LNN_LOGE(LNN_LANE, "force disconnect wifidirect fail, reason=%{public}d", ret);
@@ -1779,6 +1786,7 @@ static int32_t AddP2pLinkReqItem(AsyncResultType type, uint32_t requestId, uint3
     item->laneRequestInfo.isSupportIpv6 = request->isSupportIpv6 ? IPV6 : IPV4;
     item->p2pInfo.actionAddr = request->actionAddr;
     item->p2pInfo.reconnectTimes = 0;
+    item->laneRequestInfo.isVirtualLink = request->isVirtualLink;
     if (LinkLock() != 0) {
         SoftBusFree(item);
         LNN_LOGE(LNN_LANE, "lock fail, add conn request fail");
@@ -1951,15 +1959,15 @@ static int32_t GetAuthTriggerLinkReqParamByAuthHandle(uint32_t authRequestId, ui
             }
         }
         wifiDirectInfo->pid = item->laneRequestInfo.pid;
-        int32_t ret = strcpy_s(wifiDirectInfo->remoteNetworkId, sizeof(wifiDirectInfo->remoteNetworkId),
-            item->laneRequestInfo.networkId);
-        if (ret != EOK) {
+        if (strcpy_s(wifiDirectInfo->remoteNetworkId, sizeof(wifiDirectInfo->remoteNetworkId),
+            item->laneRequestInfo.networkId) != EOK) {
             LNN_LOGE(LNN_LANE, "copy remote networkId fail");
             LinkUnlock();
             return SOFTBUS_STRCPY_ERR;
         }
         wifiDirectInfo->bandWidth = (int32_t)item->p2pInfo.bandWidth;
         wifiDirectInfo->ipAddrType = item->laneRequestInfo.isSupportIpv6 ? IPV6 : IPV4;
+        wifiDirectInfo->isVirtualLink = item->laneRequestInfo.isVirtualLink;
         wifiDirectInfo->isNetworkDelegate = item->p2pInfo.networkDelegate;
         wifiDirectInfo->connectType = WIFI_DIRECT_CONNECT_TYPE_AUTH_TRIGGER_HML;
         GenerateWifiDirectExtParam(item->laneRequestInfo.networkId, item->laneRequestInfo.linkType,
@@ -2369,6 +2377,7 @@ static int32_t OpenHmlTriggerToConn(
     wifiDirectInfo.connectType = connectType;
     wifiDirectInfo.reuseOnly = false;
     wifiDirectInfo.ipAddrType = request->isSupportIpv6 ? IPV6 : IPV4;
+    wifiDirectInfo.isVirtualLink = request->isVirtualLink;
     TryConcurrencyPreLinkConn(request, laneReqId, &wifiDirectInfo);
     if (strcpy_s(wifiDirectInfo.remoteNetworkId, NETWORK_ID_BUF_LEN, request->peerNetworkId) != EOK) {
         LNN_LOGE(LNN_LANE, "copy networkId failed");
@@ -2440,6 +2449,7 @@ static int32_t OpenActionToConn(const LinkRequest *request, uint32_t laneLinkReq
     wifiDirectInfo.negoChannel.type = NEGO_CHANNEL_ACTION;
     wifiDirectInfo.negoChannel.handle.actionAddr = request->actionAddr;
     wifiDirectInfo.ipAddrType = request->isSupportIpv6 ? IPV6 : IPV4;
+    wifiDirectInfo.isVirtualLink = request->isVirtualLink;
     TryConcurrencyToConn(request, laneLinkReqId, &wifiDirectInfo);
     wifiDirectInfo.bandWidth = (int32_t)reqInfo.allocInfo.qosRequire.minBW;
     if (strcpy_s(wifiDirectInfo.remoteNetworkId, NETWORK_ID_BUF_LEN, request->peerNetworkId) != EOK) {
@@ -2562,6 +2572,7 @@ static int32_t GetWifiDirectParamWithReuse(const LinkRequest *request, uint32_t 
     }
     wifiDirectInfo->isNetworkDelegate = request->networkDelegate;
     wifiDirectInfo->ipAddrType = request->isSupportIpv6 ? IPV6 : IPV4;
+    wifiDirectInfo->isVirtualLink = request->isVirtualLink;
     GenerateWifiDirectExtParam(request->peerNetworkId, request->linkType, laneReqId, wifiDirectInfo);
     return SOFTBUS_OK;
 }

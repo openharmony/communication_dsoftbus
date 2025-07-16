@@ -207,7 +207,8 @@ static int32_t CreateSessionConnNode(ListenerModule module, int fd, int32_t chan
         SoftBusFree(conn);
         return ret;
     }
-    if (clientAddr->socketOption.protocol == LNN_PROTOCOL_MINTP || clientAddr->socketOption.protocol == LNN_PROTOCOL_HTP) {
+    if (clientAddr->socketOption.protocol == LNN_PROTOCOL_MINTP ||
+        clientAddr->socketOption.protocol == LNN_PROTOCOL_HTP) {
         struct WifiDirectManager *mgr = GetWifiDirectManager();
         if (mgr == NULL || mgr->getRemoteIpByRemoteMac == NULL) {
             TRANS_LOGE(TRANS_CTRL, "get remote ip by remote mac failed.");

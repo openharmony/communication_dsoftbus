@@ -413,6 +413,7 @@ static int32_t TransPagingUnPackHandshakeAckMsg(const ProxyMessage *msg, AppInfo
             sizeof(appInfo->pagingSessionkey), &len, (uint8_t *)sessionKey, strlen(sessionKey));
         if (len != sizeof(appInfo->pagingSessionkey) || ret != SOFTBUS_OK) {
             TRANS_LOGE(TRANS_CTRL, "decode session key fail ret=%{public}d, len=%{public}zu", ret, len);
+            cJSON_Delete(root);
             return SOFTBUS_DECRYPT_ERR;
         }
     }
@@ -422,6 +423,7 @@ static int32_t TransPagingUnPackHandshakeAckMsg(const ProxyMessage *msg, AppInfo
             &len, (uint8_t *)nonce, strlen(nonce));
         if (len != sizeof(appInfo->pagingNonce) || ret != SOFTBUS_OK) {
             TRANS_LOGE(TRANS_CTRL, "decode nonce fail ret=%{public}d, len=%{public}zu", ret, len);
+            cJSON_Delete(root);
             return SOFTBUS_DECRYPT_ERR;
         }
     }
@@ -641,6 +643,7 @@ void TransPagingProcessHandshakeMsg(const ProxyMessage *msg, uint8_t *accountHas
         TransPagingAckHandshake(chan, SOFTBUS_TRANS_PAGING_SAVE_CHANNEL);
         ReleaseProxyChannelId(chan->channelId);
         SoftBusFree(chan);
+        return;
     }
     ProxyChannelInfo channel = { 0 };
     if (memcpy_s(&channel, sizeof(ProxyChannelInfo), chan, sizeof(ProxyChannelInfo)) != EOK) {
@@ -954,11 +957,13 @@ int32_t TransPagingPackMessage(PagingProxyMessage *msg, ProxyDataInfo *dataInfo,
     cipherKey.keyLen = SESSION_KEY_LENGTH;
     if (memcpy_s(cipherKey.key, SESSION_KEY_LENGTH, msg->authKey, SESSION_KEY_LENGTH) != EOK) {
         TRANS_LOGE(TRANS_CTRL, "set key fail");
+        SoftBusFree(buf);
         return SOFTBUS_MEM_ERR;
     }
     int32_t ret = SoftBusEncryptData(&cipherKey, dataInfo->inData, dataInfo->inLen, encData, &encDataLen);
     if (ret != SOFTBUS_OK) {
         TRANS_LOGE(TRANS_CTRL, "encrypt buf fail, myChannelId=%{public}d", msg->msgHead.channelId);
+        SoftBusFree(buf);
         return SOFTBUS_ENCRYPT_ERR;
     }
     dataInfo->outData = buf;

@@ -1191,4 +1191,32 @@ HWTEST_F(SoftbusConnCommonTest, ConnGetPeerSocketAddr6003, TestSize.Level1)
     ret = ConnGetPeerSocketAddr6(TEST_FD, &g_socketAddr6);
     EXPECT_EQ(SOFTBUS_TCP_SOCKET_ERR, ret);
 };
+
+/*
+* @tc.name: ConnSetTcpKeepaliveStateSucc
+* @tc.desc: test ConnSetTcpKeepaliveState set succ
+* @tc.type: FUNC
+* @tc.require: I5PC1B
+*/
+HWTEST_F(SoftbusConnCommonTest, ConnSetTcpKeepaliveStateSucc, TestSize.Level1)
+{
+    SoftbusAdapterMock mock;
+    EXPECT_CALL(mock, SoftBusSocketSetOpt).WillRepeatedly(Return(SOFTBUS_ADAPTER_OK));
+    auto ret = ConnSetTcpKeepaliveState(TEST_FD, true);
+    EXPECT_EQ(SOFTBUS_ADAPTER_OK, ret);
+};
+
+/*
+* @tc.name: ConnSetTcpKeepaliveStateFail
+* @tc.desc: test ConnSetTcpKeepaliveState set fail
+* @tc.type: FUNC
+* @tc.require: I5PC1B
+*/
+HWTEST_F(SoftbusConnCommonTest, ConnSetTcpKeepaliveStateFail, TestSize.Level1)
+{
+    SoftbusAdapterMock mock;
+    EXPECT_CALL(mock, SoftBusSocketSetOpt).WillRepeatedly(Return(SOFTBUS_ADAPTER_ERR));
+    auto ret = ConnSetTcpKeepaliveState(TEST_FD, true);
+    EXPECT_EQ(SOFTBUS_ADAPTER_ERR, ret);
+};
 }

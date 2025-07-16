@@ -78,6 +78,13 @@ int32_t TcpStopListening(const LocalListenerInfo *info)
     return SOFTBUS_OK;
 }
 
+int32_t TcpConnSetKeepalive(int32_t fd, bool needKeepalive)
+{
+    (void)fd;
+    (void)needKeepalive;
+    return SOFTBUS_OK;
+}
+
 ConnectFuncInterface *ConnInitTcp(const ConnectCallback *callback)
 {
     (void)callback;

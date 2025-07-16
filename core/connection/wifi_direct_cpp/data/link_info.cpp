@@ -44,6 +44,8 @@ template<> InfoContainer<LinkInfoKey>::KeyTypeTable InfoContainer<LinkInfoKey>::
     { LinkInfoKey::REMOTE_IPV6, Serializable::ValueType::STRING },
     { LinkInfoKey::CUSTOM_PORT, Serializable::ValueType::INT },
     { LinkInfoKey::IPADDR_TYPE, Serializable::ValueType::INT },
+    { LinkInfoKey::ENABLE_POWER_MODE, Serializable::ValueType::INT },
+    { LinkInfoKey::IS_BEING_USED_BY_REMOTE, Serializable::ValueType::BOOL },
 };
 
 LinkInfo::LinkInfo(const std::string &localInterface, const std::string &remoteInterface, LinkMode localMode,
@@ -394,6 +396,26 @@ void LinkInfo::SetRatePreference(bool ratePreference)
 bool LinkInfo::IsRatePreference() const
 {
     return Get(LinkInfoKey::RATE_PREFERENCE, false);
+}
+
+void LinkInfo::SetLinkPowerMode(int mode)
+{
+    Set(LinkInfoKey::ENABLE_POWER_MODE, mode);
+}
+
+int LinkInfo::GetLinkPowerMode() const
+{
+    return Get(LinkInfoKey::ENABLE_POWER_MODE, static_cast<int>(INVALID_POWER));
+}
+
+void LinkInfo::SetIsBeingUsedByRemote(bool isUsed)
+{
+    Set(LinkInfoKey::IS_BEING_USED_BY_REMOTE, isUsed);
+}
+
+bool LinkInfo::GetIsBeingUsedByRemote() const
+{
+    return Get(LinkInfoKey::IS_BEING_USED_BY_REMOTE, false);
 }
 
 std::string LinkInfo::ToString(LinkMode mode)

@@ -121,6 +121,7 @@ MATCHER_P2(TransValidParamArrayMatcher, inExtra, validSize, "trans valid param a
     MatchTransEventNameTypeExtraInt32Param(params, ++index, extra.remoteIsDbac);
     MatchTransEventNameTypeExtraInt32Param(params, ++index, extra.localIsDbdc);
     MatchTransEventNameTypeExtraInt32Param(params, ++index, extra.remoteIsDbdc);
+    MatchTransEventNameTypeExtraStrParam(params, ++index, extra.conCurrentId);
     EXPECT_EQ(++index, validSize);
     return true;
 }

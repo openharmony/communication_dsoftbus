@@ -247,6 +247,7 @@ static void TransOnGenSuccess(uint32_t requestId, uint8_t *applyKey, uint32_t ap
     }
     if (memcpy_s(authKey, applyKeyLen, applyKey, applyKeyLen) != EOK) {
         TRANS_LOGE(TRANS_CTRL, "memcpy_s authKey failed");
+        SoftBusFree(authKey);
         return;
     }
     TransProxyPagingHandshakeMsgToLoop(channelId, authKey, applyKeyLen);
@@ -633,13 +634,13 @@ static int32_t TransProxyDelByChannelId(int32_t channelId, ProxyChannelInfo *cha
 
 int32_t TransPagingResetChan(ProxyChannelInfo *chanInfo)
 {
-    ProxyChannelInfo *removeNode = NULL;
-    ProxyChannelInfo *nextNode = NULL;
-
-    TRANS_CHECK_AND_RETURN_RET_LOGE((g_proxyChannelList != NULL && chanInfo == NULL),
+    TRANS_CHECK_AND_RETURN_RET_LOGE(chanInfo != NULL, SOFTBUS_INVALID_PARAM, TRANS_CTRL, "chanInfo is null");
+    TRANS_CHECK_AND_RETURN_RET_LOGE(g_proxyChannelList != NULL,
         SOFTBUS_NO_INIT, TRANS_CTRL, "g_proxyChannelList is null");
     TRANS_CHECK_AND_RETURN_RET_LOGE(
         SoftBusMutexLock(&g_proxyChannelList->lock) == SOFTBUS_OK, SOFTBUS_LOCK_ERR, TRANS_CTRL, "lock mutex fail!");
+    ProxyChannelInfo *removeNode = NULL;
+    ProxyChannelInfo *nextNode = NULL;
     LIST_FOR_EACH_ENTRY_SAFE(removeNode, nextNode, &g_proxyChannelList->list, ProxyChannelInfo, node) {
         if (removeNode->myId == chanInfo->myId && removeNode->peerId == chanInfo->peerId) {
             if (memcpy_s(chanInfo, sizeof(ProxyChannelInfo), removeNode, sizeof(ProxyChannelInfo)) != EOK) {
@@ -1625,7 +1626,6 @@ int32_t TransDealProxyChannelOpenResult(
     int32_t ret = TransProxyGetChanByChanId(channelId, &chan);
     TRANS_CHECK_AND_RETURN_RET_LOGE(ret == SOFTBUS_OK, ret, TRANS_CTRL,
         "get proxy channelInfo failed, channelId=%{public}d, ret=%{public}d", channelId, ret);
-
     if (callingPid != 0 && chan.appInfo.myData.pid != callingPid) {
         TRANS_LOGE(TRANS_CTRL,
             "pid does not match callingPid, pid=%{public}d, callingPid=%{public}d, channelId=%{public}d",
@@ -1633,6 +1633,13 @@ int32_t TransDealProxyChannelOpenResult(
         return SOFTBUS_TRANS_CHECK_PID_ERROR;
     }
     if (chan.isD2D) {
+        ret = TransProxyUpdateReplyCnt(channelId);
+        if (ret != SOFTBUS_OK) {
+            TRANS_LOGE(TRANS_CTRL, "TransProxyUpdateReplyCnt fail channelId=%{public}d", chan.channelId);
+            (void)OnProxyChannelClosed(chan.channelId, &(chan.appInfo));
+            TransProxyDelChanByChanId(chan.channelId);
+            return ret;
+        }
         ret = TransPagingAckHandshake(&chan, openResult);
         if (ret != SOFTBUS_OK) {
             TRANS_LOGE(TRANS_CTRL,
@@ -1656,7 +1663,6 @@ int32_t TransDealProxyChannelOpenResult(
         TransProxyDelChanByChanId(channelId);
         return SOFTBUS_OK;
     }
-
     if (chan.appInfo.fastTransData != NULL && chan.appInfo.fastTransDataSize > 0) {
         TransProxyFastDataRecv(&chan);
     }

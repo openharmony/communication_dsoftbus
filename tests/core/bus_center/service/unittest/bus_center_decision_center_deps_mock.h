@@ -18,6 +18,7 @@
 
 #include <gmock/gmock.h>
 
+#include "g_enhance_lnn_func.h"
 #include "softbus_utils.h"
 
 namespace OHOS {
@@ -27,6 +28,7 @@ public:
     virtual ~BusCenterDecisionCenterDepsInterface() {};
 
     virtual SoftBusList *CreateSoftBusList() = 0;
+    virtual LnnEnhanceFuncList *LnnEnhanceFuncListGet(void) = 0;
 };
 
 class BusCenterDecisionCenterDepsInterfaceMock : public BusCenterDecisionCenterDepsInterface {
@@ -35,6 +37,7 @@ public:
     ~BusCenterDecisionCenterDepsInterfaceMock() override;
 
     MOCK_METHOD0(CreateSoftBusList, SoftBusList * ());
+    MOCK_METHOD0(LnnEnhanceFuncListGet, LnnEnhanceFuncList * ());
 };
 } // namespace OHOS
 #endif // BUS_CENTER_DECISION_CENTER_DEPS_MOCK_H

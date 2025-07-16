@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2022 Huawei Device Co., Ltd.
+ * Copyright (c) 2022-2025 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -251,5 +251,154 @@ HWTEST_F(NetLedgerTest, LNN_GET_ONLINE_AND_OFFLINE_WITHIN_TIME_UDIDS_Test_001, T
     udidNum = DEFAULT_SIZE;
     EXPECT_EQ(LnnGetOnlineAndOfflineWithinTimeUdids(&udids, &udidNum, 0), SOFTBUS_OK);
     SoftBusFree(udids);
+}
+
+/*
+ * @tc.name: LNN_FIND_DEVICE_UDIDT_RUSTED_INFO_FROMDB_Test_001
+ * @tc.desc: Param is illegal and legal
+ * @tc.type: FUNC
+ * @tc.require:
+ */
+HWTEST_F(NetLedgerTest, LNN_FIND_DEVICE_UDIDT_RUSTED_INFO_FROMDB_Test_001, TestSize.Level1)
+{
+    int32_t ret;
+    constexpr char *strUdid = nullptr;
+    ret = LnnFindDeviceUdidTrustedInfoFromDb(strUdid);
+    EXPECT_EQ(ret, SOFTBUS_INVALID_PARAM);
+    ret = LnnFindDeviceUdidTrustedInfoFromDb(NODE1_UDID);
+    EXPECT_EQ(ret, SOFTBUS_NOT_FIND);
+}
+
+/*
+ * @tc.name: LNN_INIT_DECISION_DB_DELAY_Test_001
+ * @tc.desc: Lnn init decision db delay fail
+ * @tc.type: FUNC
+ * @tc.require:
+ */
+HWTEST_F(NetLedgerTest, LNN_INIT_DECISION_DB_DELAY_Test_001, TestSize.Level1)
+{
+    int32_t ret;
+    bool retVal = DeviceDbRecoveryInit();
+    EXPECT_TRUE(retVal);
+    ret = LnnInitDecisionDbDelay();
+    EXPECT_EQ(ret, SOFTBUS_GENERATE_KEY_FAIL);
+}
+
+/*
+ * @tc.name: LNN_CHECK_GENERATE_SOFTBUS_KEY_BY_HUKS_Test_001
+ * @tc.desc: Lnn check generate softbus key by huks is fail
+ * @tc.type: FUNC
+ * @tc.require:
+ */
+HWTEST_F(NetLedgerTest, LNN_CHECK_GENERATE_SOFTBUS_KEY_BY_HUKS_Test_001, TestSize.Level1)
+{
+    int32_t ret;
+    ret = LnnCheckGenerateSoftBusKeyByHuks();
+    EXPECT_EQ(ret, SOFTBUS_GENERATE_KEY_FAIL);
+}
+
+/*
+ * @tc.name: LNN_IS_POTENTIAL_HOME_GROUP_Test_001
+ * @tc.desc: Lnn is potential home group false
+ * @tc.type: FUNC
+ * @tc.require:
+ */
+HWTEST_F(NetLedgerTest, LNN_IS_POTENTIAL_HOME_GROUP_Test_001, TestSize.Level1)
+{
+    bool ret;
+    ret = LnnIsPotentialHomeGroup(NODE1_UDID);
+    EXPECT_FALSE(ret);
+}
+
+/*
+ * @tc.name: IS_DEVICE_TRUSTED_Test_001
+ * @tc.desc: Device trusted test is false
+ * @tc.type: FUNC
+ * @tc.require:
+ */
+HWTEST_F(NetLedgerTest, IS_DEVICE_TRUSTED_Test_001, TestSize.Level1)
+{
+    bool ret;
+    int32_t userId = 12345;
+    const char udid[] = "";
+    ret = IsDeviceTrusted(udid, userId);
+    EXPECT_FALSE(ret);
+    ret = IsDeviceTrusted(NODE1_UDID, userId);
+    EXPECT_FALSE(ret);
+}
+
+/*
+ * @tc.name: TRY_RECOVERY_TRUST_DEVINFOTABLE_Test_001
+ * @tc.desc: Try recovery trusted devInfotable is failed
+ * @tc.type: FUNC
+ * @tc.require:
+ */
+HWTEST_F(NetLedgerTest, TRY_RECOVERY_TRUST_DEVINFOTABLE_Test_001, TestSize.Level1)
+{
+    bool ret;
+    int32_t retVal = InitTrustedDevInfoTable();
+    EXPECT_EQ(retVal, SOFTBUS_NETWORK_INIT_TRUST_DEV_INFO_FAILED);
+    RecoveryTrustedDevInfoProcess();
+    ret = TryRecoveryTrustedDevInfoTable();
+    ClearRecoveryDeviceList();
+    EXPECT_TRUE(ret);
+}
+
+/*
+ * @tc.name: GET_ALL_DEV_NUM_Test_001
+ * @tc.desc: Get all dev nums is ok
+ * @tc.type: FUNC
+ * @tc.require:
+ */
+HWTEST_F(NetLedgerTest, GET_ALL_DEV_NUM_Test_001, TestSize.Level1)
+{
+    uint32_t num = 0;
+    int32_t ret;
+    int32_t userId = 123;
+    ret = GetAllDevNums(&num, userId);
+    EXPECT_EQ(ret, SOFTBUS_OK);
+}
+
+/*
+ * @tc.name: LNN_DELETE_SPECIFIC_TRUSTED_DEV_INFO_Test_001
+ * @tc.desc: Delete specific trusted dev info ok
+ * @tc.type: FUNC
+ * @tc.require:
+ */
+HWTEST_F(NetLedgerTest, LNN_DELETE_SPECIFIC_TRUSTED_DEV_INFO_Test_001, TestSize.Level1)
+{
+    const char *udid = "672392378745";
+    int32_t localUserId = 123;
+    int32_t ret;
+    ret = LnnDeleteSpecificTrustedDevInfo(udid, localUserId);
+    EXPECT_EQ(ret, SOFTBUS_OK);
+}
+
+/*
+ * @tc.name: LNN_INSERT_SPECIFIC_TRUSTED_DEV_INFO_Test_001
+ * @tc.desc: Delete specific trusted dev info is ok
+ * @tc.type: FUNC
+ * @tc.require:
+ */
+HWTEST_F(NetLedgerTest, LNN_INSERT_SPECIFIC_TRUSTED_DEV_INFO_Test_001, TestSize.Level1)
+{
+    int32_t ret;
+    const char *udid = "672392378745";
+    ret = LnnInsertSpecificTrustedDevInfo(udid);
+    EXPECT_EQ(ret, SOFTBUS_OK);
+}
+
+/*
+ * @tc.name: UPDATE_RECOVERY_DEVICE_INFO_FROM_DB_Test_001
+ * @tc.desc: Update recovery device info from db error
+ * @tc.type: FUNC
+ * @tc.require:
+ */
+HWTEST_F(NetLedgerTest, UPDATE_RECOVERY_DEVICE_INFO_FROM_DB_Test_001, TestSize.Level1)
+{
+    int32_t retVal = InitDbListDelay();
+    EXPECT_EQ(retVal, SOFTBUS_NETWORK_GET_DEVICE_INFO_ERR);
+    retVal = UpdateRecoveryDeviceInfoFromDb();
+    EXPECT_EQ(retVal, SOFTBUS_NETWORK_GET_DEVICE_INFO_ERR);
 }
 } // namespace OHOS

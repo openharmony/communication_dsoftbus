@@ -29,9 +29,8 @@
 #include "lnn_lane_interface.h"
 #include "lnn_lane_link.h"
 #include "lnn_lane_link_p2p.h"
-
+#include "lnn_lane_link_wifi_direct.h"
 #include "lnn_lane_reliability.h"
-
 #include "lnn_local_net_ledger.h"
 #include "lnn_log.h"
 #include "lnn_net_capability.h"
@@ -308,6 +307,11 @@ static void AddVapInfo(const LaneLinkInfo *linkInfo)
     if (ret != SOFTBUS_OK) {
         LNN_LOGE(LNN_LANE, "add vapInfo err, ret=%{public}d", ret);
     }
+    if (linkInfo->type == LANE_HML) {
+        LnnSetLocalChannelInfoPacked(LNN_VAP_HML, linkInfo->linkInfo.p2p.channel);
+    } else {
+        LnnSetLocalChannelInfoPacked(LNN_VAP_P2P, linkInfo->linkInfo.p2p.channel);
+    }
 }
 
 static void DeleteVapInfo(LaneLinkType linkType)
@@ -320,6 +324,11 @@ static void DeleteVapInfo(LaneLinkType linkType)
     int32_t ret = LnnDeleteLocalVapInfoPacked(vapType);
     if (ret != SOFTBUS_OK) {
         LNN_LOGE(LNN_LANE, "delete vapInfo fail=%{public}d", linkType);
+    }
+    if (linkType == LANE_HML) {
+        LnnSetLocalChannelInfoPacked(LNN_VAP_HML, 0);
+    } else {
+        LnnSetLocalChannelInfoPacked(LNN_VAP_P2P, 0);
     }
 }
 
@@ -1451,6 +1460,10 @@ static int32_t LaneLinkOfP2p(uint32_t reqId, const LinkRequest *reqInfo, const L
         return SOFTBUS_MEM_ERR;
     }
     linkInfo.linkType = LANE_P2P;
+
+    if (CheckVirtualLinkOnly()) {
+        (void)HandleForceDownVirtualLink();
+    }
     return LnnConnectP2p(&linkInfo, reqId, callback);
 }
 

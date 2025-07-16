@@ -23,6 +23,7 @@
 #include "softbus_ble_gatt_public.h"
 #include "softbus_ble_utils.h"
 #include "softbus_broadcast_adapter_interface.h"
+#include "softbus_broadcast_utils_struct.h"
 #include "softbus_broadcast_type.h"
 #include "softbus_error_code.h"
 
@@ -111,7 +112,7 @@ static void WrapperAdvEnableCb(int advId, int status)
         DISC_LOGI(DISC_BLE_ADAPTER, "advId=%{public}u, bt-advId=%{public}d, status=%{public}d", channelId, advId, ret);
         SoftbusBroadcastCallback callback = *(advChannel->advCallback);
         SoftBusMutexUnlock(&g_advLock);
-        callback.OnStartBroadcastingCallback(channelId, ret);
+        callback.OnStartBroadcastingCallback(BROADCAST_PROTOCOL_BLE, channelId, ret);
         break;
     }
 }
@@ -135,7 +136,7 @@ static void WrapperAdvDisableCb(int advId, int status)
         DISC_LOGI(DISC_BLE_ADAPTER, "advId=%{public}u, bt-advId=%{public}d, status=%{public}d", channelId, advId, ret);
         SoftbusBroadcastCallback callback = *(advChannel->advCallback);
         SoftBusMutexUnlock(&g_advLock);
-        callback.OnStopBroadcastingCallback(channelId, ret);
+        callback.OnStopBroadcastingCallback(BROADCAST_PROTOCOL_BLE, channelId, ret);
         break;
     }
 }
@@ -157,7 +158,7 @@ static void WrapperAdvSetDataCb(int advId, int status)
         DISC_LOGI(DISC_BLE_ADAPTER, "advId=%{public}u, bt-advId=%{public}d, status=%{public}d", channelId, advId, ret);
         SoftbusBroadcastCallback callback = *(advChannel->advCallback);
         SoftBusMutexUnlock(&g_advLock);
-        callback.OnSetBroadcastingCallback(channelId, ret);
+        callback.OnSetBroadcastingCallback(BROADCAST_PROTOCOL_BLE, channelId, ret);
         break;
     }
 }
@@ -179,7 +180,7 @@ static void WrapperAdvUpdateDataCb(int advId, int status)
         DISC_LOGI(DISC_BLE_ADAPTER, "advId=%{public}u, bt-advId=%{public}d, status=%{public}d", channelId, advId, ret);
         SoftbusBroadcastCallback callback = *(advChannel->advCallback);
         SoftBusMutexUnlock(&g_advLock);
-        callback.OnUpdateBroadcastingCallback(channelId, ret);
+        callback.OnUpdateBroadcastingCallback(BROADCAST_PROTOCOL_BLE, channelId, ret);
         break;
     }
 }
@@ -201,7 +202,7 @@ static void WrapperAdvUpdateParamCb(int advId, int status)
         DISC_LOGI(DISC_BLE_ADAPTER, "advId=%{public}u, bt-advId=%{public}d, status=%{public}d", channelId, advId, ret);
         SoftbusBroadcastCallback callback = *(advChannel->advCallback);
         SoftBusMutexUnlock(&g_advLock);
-        callback.OnSetBroadcastingParamCallback(channelId, ret);
+        callback.OnSetBroadcastingParamCallback(BROADCAST_PROTOCOL_BLE, channelId, ret);
         break;
     }
 }
@@ -223,7 +224,7 @@ static void WrapperOnAdvEnableExCb(int advId, int status)
         DISC_LOGI(DISC_BLE_ADAPTER, "advId=%{public}u, bt-advId=%{public}d, status=%{public}d", channelId, advId, ret);
         SoftbusBroadcastCallback callback = *(advChannel->advCallback);
         SoftBusMutexUnlock(&g_advLock);
-        callback.OnEnableBroadcastingCallback(channelId, ret);
+        callback.OnEnableBroadcastingCallback(BROADCAST_PROTOCOL_BLE, channelId, ret);
         break;
     }
 }
@@ -245,7 +246,7 @@ static void WrapperOnAdvDisableExCb(int advId, int status)
         DISC_LOGI(DISC_BLE_ADAPTER, "advId=%{public}u, bt-advId=%{public}d, status=%{public}d", channelId, advId, ret);
         SoftbusBroadcastCallback callback = *(advChannel->advCallback);
         SoftBusMutexUnlock(&g_advLock);
-        callback.OnDisableBroadcastingCallback(channelId, ret);
+        callback.OnDisableBroadcastingCallback(BROADCAST_PROTOCOL_BLE, channelId, ret);
         break;
     }
 }
@@ -359,7 +360,16 @@ static void WrapperScanResultCb(uint8_t channelId, BtScanResultData *data)
     }
     SoftbusScanCallback callback = *(scanChannel->scanCallback);
     SoftBusMutexUnlock(&g_scannerLock);
-    callback.OnReportScanDataCallback(channelId, &scanResult);
+    uint32_t maxPayloadLen = (scanResult.data.isSupportFlag) ? BC_DATA_MAX_LEN : (BC_DATA_MAX_LEN + BC_FLAG_LEN) ;
+    if (scanResult.data.bcData.payloadLen > maxPayloadLen) {
+        DISC_LOGE(DISC_BLE_ADAPTER, "bc payloadLen=%{public}u is too long", scanResult.data.bcData.payloadLen);
+        scanResult.data.bcData.payloadLen = maxPayloadLen;
+    }
+    if (scanResult.data.rspData.payload != NULL && scanResult.data.rspData.payloadLen > RSP_DATA_MAX_LEN) {
+        DISC_LOGE(DISC_BLE_ADAPTER, "rsp payloadLen=%{public}u is too long", scanResult.data.rspData.payloadLen);
+        scanResult.data.bcData.payloadLen = RSP_DATA_MAX_LEN;
+    }
+    callback.OnReportScanDataCallback(BROADCAST_PROTOCOL_BLE, channelId, &scanResult);
     SoftBusFree(scanResult.data.bcData.payload);
     SoftBusFree(scanResult.data.rspData.payload);
 }
@@ -387,7 +397,7 @@ static void WrapperScanStateChangeCb(uint8_t channelId, int32_t resultCode, bool
     }
     SoftbusScanCallback callback = *(scanChannel->scanCallback);
     SoftBusMutexUnlock(&g_scannerLock);
-    callback.OnScanStateChanged(resultCode, isStartScan);
+    callback.OnScanStateChanged(BROADCAST_PROTOCOL_BLE, resultCode, isStartScan);
 }
 
 static void WrapperLpDeviceInfoCb(uint8_t channelId, BtUuid *uuid, int32_t type, uint8_t *data, uint32_t dataSize)
@@ -416,7 +426,7 @@ static void WrapperLpDeviceInfoCb(uint8_t channelId, BtUuid *uuid, int32_t type,
     SoftbusBroadcastUuid bcUuid;
     bcUuid.uuid = (uint8_t *)uuid->uuid;
     bcUuid.uuidLen = (uint8_t)uuid->uuidLen;
-    callback.OnLpDeviceInfoCallback(&bcUuid, type, data, dataSize);
+    callback.OnLpDeviceInfoCallback(BROADCAST_PROTOCOL_BLE, &bcUuid, type, data, dataSize);
 }
 
 static void WrapperScanResultCb0(BtScanResultData *data)
@@ -626,7 +636,7 @@ static int32_t StartBleAdv(int32_t advId, int32_t *btAdvId, const SoftbusBroadca
     return (ret == OHOS_BT_STATUS_SUCCESS) ? SOFTBUS_OK : ret;
 }
 
-static int32_t SoftbusStartAdv(int32_t advId, const SoftbusBroadcastParam *param, const SoftbusBroadcastData *data)
+static int32_t SoftbusStartAdv(int32_t advId, const SoftbusBroadcastParam *param, SoftbusBroadcastData *data)
 {
     if (param == NULL || data == NULL || data->bcData.payloadLen == 0 || data->bcData.payload == NULL) {
         DISC_LOGE(DISC_BLE_ADAPTER, "invalid adv param, advId=%{public}d", advId);
@@ -841,7 +851,7 @@ static int32_t SoftbusDisableBroadcasting(int32_t advId)
     return SOFTBUS_OK;
 }
 
-static int32_t SoftbusUpdateAdvData(int32_t advId, const SoftbusBroadcastParam *param, const SoftbusBroadcastData *data)
+static int32_t SoftbusUpdateAdvData(int32_t advId, const SoftbusBroadcastParam *param, SoftbusBroadcastData *data)
 {
     int32_t ret = SoftbusStopAdv(advId);
     if (ret != SOFTBUS_OK) {
@@ -1199,7 +1209,7 @@ void SoftbusBleAdapterInit(void)
         .SetScanReportChannelToLpDevice = SoftbusSetScanReportChanToLp,
         .SetLpDeviceParam = SoftbusSetLpAdvParam,
     };
-    if (RegisterBroadcastMediumFunction(BROADCAST_MEDIUM_TYPE_BLE, &interface) != 0) {
+    if (RegisterBroadcastMediumFunction(BROADCAST_PROTOCOL_BLE, &interface) != 0) {
         DISC_LOGE(DISC_BLE_ADAPTER, "register gatt interface failed");
     }
     int32_t ret = SoftBusAddBtStateListener(&g_softbusBcAdapterBtStateListener, &g_adapterBtStateListenerId);

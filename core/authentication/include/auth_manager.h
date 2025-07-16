@@ -98,6 +98,7 @@ void AuthDeviceDeinit(void);
 int64_t GetActiveAuthIdByConnInfo(const AuthConnInfo *connInfo, bool judgeTimeOut);
 int64_t GetLatestIdByConnInfo(const AuthConnInfo *connInfo);
 int32_t GetAuthConnInfoByUuid(const char *uuid, AuthLinkType type, AuthConnInfo *connInfo);
+int32_t GetConnectionIdByHandle(AuthHandle handle);
 int32_t TryGetBrConnInfo(const char *uuid, AuthConnInfo *connInfo);
 void RemoveNotPassedAuthManagerByUdid(const char *udid);
 AuthManager *GetDeviceAuthManager(int64_t authSeq, const AuthSessionInfo *info, bool *isNewCreated,
