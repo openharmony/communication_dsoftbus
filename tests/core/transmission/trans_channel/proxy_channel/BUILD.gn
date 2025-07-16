@@ -274,50 +274,18 @@ ohos_unittest("SoftbusProxyChannelMessageTest") {
 
 ohos_unittest("SoftbusProxyNetworkTest") {
   module_out_path = module_output_path
-  sources = [ "softbus_proxy_network_test.cpp" ]
+  sources = [
+    "mock/softbus_proxy_network_mock_test.cpp",
+    "softbus_proxy_network_test.cpp",
+  ]
 
   include_dirs = [
-    "$dsoftbus_root_path/core/adapter/bus_center/include",
-    "$dsoftbus_root_path/core/adapter/transmission/include",
-    "$dsoftbus_root_path/core/authentication/include",
-    "$dsoftbus_root_path/core/authentication/interface",
-    "$dsoftbus_root_path/core/bus_center/interface",
     "$dsoftbus_root_path/core/bus_center/lnn/lane_hub/lane_manager/include",
-    "$dsoftbus_root_path/core/bus_center/lnn/net_builder/include",
-    "$dsoftbus_root_path/core/bus_center/lnn/net_buscenter/include",
-    "$dsoftbus_root_path/core/bus_center/lnn/net_ledger/common/include",
-    "$dsoftbus_root_path/core/bus_center/lnn/net_ledger/distributed_ledger/include",
-    "$dsoftbus_root_path/core/bus_center/lnn/net_ledger/local_ledger/include",
-    "$dsoftbus_root_path/core/bus_center/lnn/net_ledger/sync_ledger/include",
-    "$dsoftbus_root_path/core/bus_center/service/include",
-    "$dsoftbus_root_path/core/bus_center/utils/include",
-    "$dsoftbus_root_path/core/common/include",
-    "$dsoftbus_root_path/core/common/message_handler/include",
-    "$dsoftbus_root_path/core/connection/interface",
-    "$dsoftbus_root_path/core/connection/p2p/common/include",
-    "$dsoftbus_root_path/core/connection/p2p/interface",
-    "$dsoftbus_root_path/core/discovery/interface",
-    "$dsoftbus_root_path/core/discovery/manager/include",
-    "$dsoftbus_root_path/core/transmission/common/include",
-    "$dsoftbus_root_path/core/transmission/interface",
-    "$dsoftbus_root_path/core/transmission/pending_packet/include",
-    "$dsoftbus_root_path/core/transmission/session/include",
-    "$dsoftbus_root_path/core/transmission/trans_channel/common/include",
-    "$dsoftbus_root_path/core/transmission/trans_channel/manager/include",
-    "$dsoftbus_root_path/core/transmission/trans_channel/proxy/include",
     "$dsoftbus_root_path/core/transmission/trans_channel/proxy/src",
-    "$dsoftbus_root_path/core/transmission/trans_channel/tcp_direct/include",
-    "$dsoftbus_root_path/interfaces/inner_kits/transport",
-    "$dsoftbus_root_path/interfaces/kits",
-    "$dsoftbus_root_path/interfaces/kits/bus_center",
-    "$dsoftbus_root_path/interfaces/kits/common",
-    "$dsoftbus_root_path/interfaces/kits/connect",
-    "$dsoftbus_root_path/interfaces/kits/disc",
-    "$dsoftbus_root_path/interfaces/kits/transport",
-    "$dsoftbus_root_path/third_party/dfinder/include",
-    "$softbus_adapter_common/include",
-    "$trans_comm_mock_path/include",
-    "unittest/common/",
+    "$dsoftbus_root_path/core/transmission/interface",
+    "$dsoftbus_root_path/core/transmission/trans_channel/manager/include",
+    "$dsoftbus_root_path/tests/core/transmission/trans_channel/proxy_channel/mock",
+    "$dsoftbus_root_path/core/bus_center/lnn/net_ledger/common/include",
   ]
 
   deps = [
@@ -327,9 +295,7 @@ ohos_unittest("SoftbusProxyNetworkTest") {
   ]
 
   external_deps = [
-    "cJSON:cjson",
     "c_utils:utils",
-    "device_auth:deviceauth_sdk",
     "googletest:gmock",
     "hilog:libhilog",
   ]
@@ -790,9 +756,9 @@ ohos_unittest("SoftbusProxyChannelControlPagingTest") {
   ]
 
   deps = [
+    "$dsoftbus_root_path/adapter:softbus_adapter",
     "$dsoftbus_root_path/core/common:softbus_utils",
     "$dsoftbus_root_path/core/frame:softbus_server",
-    "$dsoftbus_root_path/adapter:softbus_adapter",
   ]
 
   external_deps = [
@@ -841,9 +807,9 @@ ohos_unittest("SoftbusProxyChannelManagerPagingTest") {
   ]
 
   deps = [
+    "$dsoftbus_root_path/adapter:softbus_adapter",
     "$dsoftbus_root_path/core/common:softbus_utils",
     "$dsoftbus_root_path/core/frame:softbus_server",
-    "$dsoftbus_root_path/adapter:softbus_adapter",
   ]
 
   external_deps = [
@@ -892,9 +858,9 @@ ohos_unittest("SoftbusProxyChannelMessagePagingTest") {
   ]
 
   deps = [
+    "$dsoftbus_root_path/adapter:softbus_adapter",
     "$dsoftbus_root_path/core/common:softbus_utils",
     "$dsoftbus_root_path/core/frame:softbus_server",
-    "$dsoftbus_root_path/adapter:softbus_adapter",
   ]
 
   external_deps = [
@@ -944,9 +910,9 @@ ohos_unittest("SoftbusProxyChannelTransceiverPagingTest") {
   ]
 
   deps = [
+    "$dsoftbus_root_path/adapter:softbus_adapter",
     "$dsoftbus_root_path/core/common:softbus_utils",
     "$dsoftbus_root_path/core/frame:softbus_server",
-    "$dsoftbus_root_path/adapter:softbus_adapter",
   ]
 
   external_deps = [
@@ -959,25 +925,58 @@ ohos_unittest("SoftbusProxyChannelTransceiverPagingTest") {
   ]
 }
 
+ohos_unittest("TransProxySessionTest") {
+  module_out_path = module_output_path
+  sources = [
+    "mock/softbus_proxy_network_mock_test.cpp",
+    "trans_proxy_session_test.cpp",
+  ]
+
+  include_dirs = [
+    "$dsoftbus_root_path/core/bus_center/lnn/lane_hub/lane_manager/include",
+    "$dsoftbus_root_path/core/transmission/interface",
+    "$dsoftbus_root_path/core/transmission/trans_channel/manager/include",
+    "$dsoftbus_root_path/tests/core/transmission/trans_channel/proxy_channel/mock",
+    "$dsoftbus_root_path/core/transmission/trans_channel/proxy/src",
+    "$dsoftbus_root_path/interfaces/kits/transport",
+    "$dsoftbus_root_path/core/transmission/common/include",
+    "$dsoftbus_root_path/core/bus_center/lnn/net_ledger/common/include",
+    "$dsoftbus_root_path/core/authentication/interface",
+  ]
+
+  deps = [
+    "$dsoftbus_root_path/adapter:softbus_adapter",
+    "$dsoftbus_root_path/core/common:softbus_utils",
+    "$dsoftbus_root_path/core/frame:softbus_server",
+  ]
+
+  external_deps = [
+    "c_utils:utils",
+    "googletest:gmock",
+    "hilog:libhilog",
+  ]
+}
+
 group("unittest") {
   testonly = true
   deps = [
+    ":SoftbusProxyChannelControlPagingTest",
     ":SoftbusProxyChannelListenerTest",
+    ":SoftbusProxyChannelManagerPagingTest",
     ":SoftbusProxyChannelManagerTest",
+    ":SoftbusProxyChannelMessagePagingTest",
     ":SoftbusProxyChannelMessageTest",
     ":SoftbusProxyChannelPipelineTest",
+    ":SoftbusProxyChannelTransceiverPagingTest",
     ":SoftbusProxyNetworkTest",
     ":SoftbusProxySessionTest",
     ":SoftbusProxyTransceiverTest",
     ":SoftbusTransProxyChannelManagerTest",
     ":SoftbusTransProxyManagerTest",
     ":SoftbusTransProxyMessageTest",
-    ":SoftbusProxyChannelControlPagingTest",
-    ":SoftbusProxyChannelManagerPagingTest",
-    ":SoftbusProxyChannelMessagePagingTest",
-    ":SoftbusProxyChannelTransceiverPagingTest",
     ":TransProxyChannelTest",
     ":TransProxyNetworkTest",
     ":TransProxySessionStaticTest",
+    ":TransProxySessionTest",
   ]
 }
