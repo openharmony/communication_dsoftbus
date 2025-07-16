@@ -978,7 +978,7 @@ static bool IsSupportCloudSync(DeviceInfo *device)
 static bool IsDirectlyHeartBeat(DeviceInfo *device, HbRespData *hbResp)
 {
     if (device == NULL || hbResp == NULL) {
-        LNN_LOGE(LNN_HEART_BEAT, "device or resp is null");
+        LNN_LOGD(LNN_HEART_BEAT, "device or resp is null");
         return false;
     }
     if (hbResp->hbVersion == HB_VERSION_V2) {
