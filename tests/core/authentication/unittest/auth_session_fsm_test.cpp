@@ -648,7 +648,6 @@ HWTEST_F(AuthSessionFsmTest, AUTH_SESSION_GET_IS_SAME_TEST_001, TestSize.Level1)
     EXPECT_FALSE(ret);
 }
 
-
 /*
  * @tc.name: AUTH_SESSION_HANDLE_AUTH_ERROR_TEST_001
  * @tc.desc:
@@ -661,5 +660,100 @@ HWTEST_F(AuthSessionFsmTest, AUTH_SESSION_HANDLE_AUTH_ERROR_TEST_001, TestSize.L
     int32_t reason = 0;
     int32_t ret = AuthSessionHandleAuthError(authSeq, reason);
     EXPECT_EQ(ret, SOFTBUS_AUTH_GET_FSM_FAIL);
+}
+
+/*
+ * @tc.name: POPULATE_DEVICE_TYPE_ID_TEST_001
+ * @tc.desc: PopulateDeviceTypeId test
+ * @tc.type: FUNC
+ * @tc.require:
+ */
+HWTEST_F(AuthSessionFsmTest, POPULATE_DEVICE_TYPE_ID_TEST_001, TestSize.Level1)
+{
+    AuthSessionFsmInterfaceMock mock;
+    HiChainAuthParam authParam;
+    (void)memset_s(&authParam, sizeof(HiChainAuthParam), 0, sizeof(HiChainAuthParam));
+    uint32_t requestId = REQUEST_ID_1;
+    EXPECT_NO_FATAL_FAILURE(PopulateDeviceTypeId(&authParam, requestId));
+    ClearAuthRequest();
+    AuthRequest request;
+    (void)memset_s(&request, sizeof(AuthRequest), 0, sizeof(AuthRequest));
+    request.authId = REQUEST_ID;
+    request.deviceTypeId = REQUEST_TYPE_RECONNECT;
+    EXPECT_TRUE(AddAuthRequest(&request) == SOFTBUS_OK);
+    requestId = REQUEST_ID;
+    EXPECT_CALL(mock, GetAuthRequest).WillOnce(Return(SOFTBUS_OK));
+    EXPECT_CALL(mock, LnnRetrieveDeviceInfoPacked).WillOnce(Return(SOFTBUS_OK));
+    EXPECT_NO_FATAL_FAILURE(PopulateDeviceTypeId(&authParam, requestId));
+}
+
+/*
+ * @tc.name: POPULATE_DEVICE_TYPE_ID_TEST_002
+ * @tc.desc: PopulateDeviceTypeId test
+ * @tc.type: FUNC
+ * @tc.require:
+ */
+HWTEST_F(AuthSessionFsmTest, POPULATE_DEVICE_TYPE_ID_TEST_002, TestSize.Level1)
+{
+    AuthSessionFsmInterfaceMock mock;
+    HiChainAuthParam authParam;
+    (void)memset_s(&authParam, sizeof(HiChainAuthParam), 0, sizeof(HiChainAuthParam));
+    uint32_t requestId = REQUEST_ID_1;
+    EXPECT_NO_FATAL_FAILURE(PopulateDeviceTypeId(&authParam, requestId));
+    ClearAuthRequest();
+    AuthRequest request;
+    (void)memset_s(&request, sizeof(AuthRequest), 0, sizeof(AuthRequest));
+    request.authId = REQUEST_ID;
+    request.deviceTypeId = TYPE_PC_ID;
+    EXPECT_TRUE(AddAuthRequest(&request) == SOFTBUS_OK);
+    requestId = REQUEST_ID;
+    EXPECT_CALL(mock, GetAuthRequest).WillOnce(DoAll(SetArgPointee<1>(request), Return(SOFTBUS_OK)));
+    EXPECT_CALL(mock, LnnGetRemoteNodeInfoById).Times(0);
+    EXPECT_CALL(mock, LnnRetrieveDeviceInfoPacked).Times(0);
+    EXPECT_NO_FATAL_FAILURE(PopulateDeviceTypeId(&authParam, requestId));
+}
+
+/*
+ * @tc.name: POPULATE_DEVICE_TYPE_ID_TEST_003
+ * @tc.desc: PopulateDeviceTypeId test
+ * @tc.type: FUNC
+ * @tc.require:
+ */
+HWTEST_F(AuthSessionFsmTest, POPULATE_DEVICE_TYPE_ID_TEST_003, TestSize.Level1)
+{
+    HiChainAuthParam authParam;
+    (void)memset_s(&authParam, sizeof(HiChainAuthParam), 0, sizeof(HiChainAuthParam));
+    uint32_t requestId = 123;
+    AuthRequest request;
+    (void)memset_s(&request, sizeof(AuthRequest), 0, sizeof(AuthRequest));
+    request.deviceTypeId = 0;
+    NodeInfo infoPc;
+    infoPc.deviceInfo.deviceTypeId = TYPE_PC_ID;
+    NodeInfo infoOther;
+    infoOther.deviceInfo.deviceTypeId = 0;
+    AuthSessionFsmInterfaceMock mock;
+    EXPECT_CALL(mock, GetAuthRequest).WillOnce(DoAll(SetArgPointee<1>(request), Return(SOFTBUS_OK)));
+    EXPECT_CALL(mock, LnnGetRemoteNodeInfoById).WillOnce(Return(SOFTBUS_NOT_FIND));
+    EXPECT_CALL(mock, LnnRetrieveDeviceInfoPacked).WillOnce(DoAll(SetArgPointee<1>(infoPc), Return(SOFTBUS_OK)));
+    PopulateDeviceTypeId(&authParam, requestId);
+    EXPECT_EQ(authParam.deviceTypeId, TYPE_PC_ID);
+    authParam.deviceTypeId = 0;
+    EXPECT_CALL(mock, GetAuthRequest).WillOnce(DoAll(SetArgPointee<1>(request), Return(SOFTBUS_OK)));
+    EXPECT_CALL(mock, LnnGetRemoteNodeInfoById).WillOnce(DoAll(SetArgPointee<2>(infoPc), Return(SOFTBUS_OK)));
+    EXPECT_CALL(mock, LnnRetrieveDeviceInfoPacked).Times(0);
+    PopulateDeviceTypeId(&authParam, requestId);
+    EXPECT_EQ(authParam.deviceTypeId, TYPE_PC_ID);
+    authParam.deviceTypeId = 0;
+    EXPECT_CALL(mock, GetAuthRequest).WillOnce(DoAll(SetArgPointee<1>(request), Return(SOFTBUS_NOT_FIND)));
+    EXPECT_CALL(mock, LnnGetRemoteNodeInfoById).WillOnce(DoAll(SetArgPointee<2>(infoOther), Return(SOFTBUS_OK)));
+    EXPECT_CALL(mock, LnnRetrieveDeviceInfoPacked).WillOnce(DoAll(SetArgPointee<1>(infoPc), Return(SOFTBUS_OK)));
+    PopulateDeviceTypeId(&authParam, requestId);
+    EXPECT_EQ(authParam.deviceTypeId, TYPE_PC_ID);
+    authParam.deviceTypeId = 0;
+    EXPECT_CALL(mock, GetAuthRequest).WillOnce(DoAll(SetArgPointee<1>(request), Return(SOFTBUS_NOT_FIND)));
+    EXPECT_CALL(mock, LnnGetRemoteNodeInfoById).WillOnce(DoAll(SetArgPointee<2>(infoOther), Return(SOFTBUS_OK)));
+    EXPECT_CALL(mock, LnnRetrieveDeviceInfoPacked).WillOnce(DoAll(SetArgPointee<1>(infoOther), Return(SOFTBUS_OK)));
+    PopulateDeviceTypeId(&authParam, requestId);
+    EXPECT_EQ(authParam.deviceTypeId, 0);
 }
 } // namespace OHOS

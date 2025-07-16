@@ -18,9 +18,10 @@
 
 #include <gmock/gmock.h>
 
+#include "auth_request.h"
 #include "auth_session_fsm_struct.h"
+#include "lnn_distributed_net_ledger.h"
 #include "lnn_node_info_struct.h"
-
 
 namespace OHOS {
 class AuthSessionFsmInterface {
@@ -32,6 +33,9 @@ public:
     virtual bool GetUdidShortHash(const AuthSessionInfo *info, char *udidBuf, uint32_t bufLen) = 0;
     virtual int32_t LnnRetrieveDeviceInfoPacked(const char *udid, NodeInfo *deviceInfo) = 0;
     virtual bool IsSupportFeatureByCapaBit(uint32_t feature, AuthCapability capaBit) = 0;
+    virtual int32_t GetAuthRequest(uint32_t requestId, AuthRequest *request) = 0;
+    virtual int32_t LnnRetrieveDeviceInfoByUdidPacked(const char *udid, NodeInfo *deviceInfo) = 0;
+    virtual int32_t LnnGetRemoteNodeInfoById(const char *id, IdCategory type, NodeInfo *info) = 0;
 };
 
 class AuthSessionFsmInterfaceMock : public AuthSessionFsmInterface {
@@ -43,6 +47,9 @@ public:
     MOCK_METHOD3(GetUdidShortHash, bool (const AuthSessionInfo *, char *, uint32_t));
     MOCK_METHOD2(LnnRetrieveDeviceInfoPacked, int32_t (const char *, NodeInfo *));
     MOCK_METHOD2(IsSupportFeatureByCapaBit, bool (uint32_t, AuthCapability));
+    MOCK_METHOD2(GetAuthRequest, int32_t (uint32_t, AuthRequest *));
+    MOCK_METHOD2(LnnRetrieveDeviceInfoByUdidPacked, int32_t (const char *, NodeInfo *));
+    MOCK_METHOD3(LnnGetRemoteNodeInfoById, int32_t (const char *, IdCategory, NodeInfo *));
 };
 }
 #endif // AUTH_AUTH_SESSION_FSM_MOCK_H

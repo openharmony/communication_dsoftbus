@@ -79,6 +79,7 @@ static int32_t MatchConnEventNameTypeExtraForAddMsg(const HiSysEventParam *param
     MatchConnEventNameTypeExtraInt32Param(params, ++index, extra.apChannel);
     MatchConnEventNameTypeExtraStrParam(params, ++index, extra.peerDevVer);
     MatchConnEventNameTypeExtraInt32Param(params, ++index, extra.remoteScreenStatus);
+    MatchConnEventNameTypeExtraInt32Param(params, ++index, extra.localScreenStatus);
     MatchConnEventNameTypeExtraInt32Param(params, ++index, extra.businessType);
     MatchConnEventNameTypeExtraInt32Param(params, ++index, extra.businessId);
     MatchConnEventNameTypeExtraInt32Param(params, ++index, extra.timeout);

@@ -92,6 +92,15 @@ int32_t ConnTypeIsSupport(ConnectType type);
 
 /**
  * @ingroup Softbus_conn_manager
+ * @brief set keep alive by connectionId.
+ * @param[in] connectionId Connection Id.
+ * @param[in] needKeepalive tcp need keepalive.
+ * @return <b>SOFTBUS_OK</b> set keepalive success.
+ */
+int32_t ConnSetKeepAliveByConnectionId(uint32_t connectionId, bool needKeepalive);
+
+/**
+ * @ingroup Softbus_conn_manager
  * @brief Get inner object based on connection id.
  * @param[in] connectionId Connection ID.
  * @param[in] info Indicates a pointer to the connection information. For details, see {@link ConnectionInfo}.

@@ -130,6 +130,7 @@ typedef struct {
     int32_t remoteIsDbac;      // REMOTE_IS_DBAC
     int32_t localIsDbdc;       // LOCAL_IS_DBDC
     int32_t remoteIsDbdc;      // REMOTE_IS_DBDC
+    const char *conCurrentId;  // CONCURRENT_ID
 } TransEventExtra;
 
 typedef enum {

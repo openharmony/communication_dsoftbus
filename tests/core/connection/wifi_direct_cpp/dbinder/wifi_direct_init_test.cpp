@@ -494,6 +494,62 @@ HWTEST_F(WifiDirectInitTest, LnnRegisterEventHandler032, TestSize.Level1)
     int32_t ret =
         DBinderSoftbusServer::GetInstance().LnnRegisterEventHandler(LNN_EVENT_IP_ADDR_CHANGED, AddAuthConnectionTest);
     EXPECT_EQ(ret, SOFTBUS_WIFI_DIRECT_DLSYM_FAILED);
+}
+
+/*
+ * @tc.name: LnnGetLocalBoolInfo
+ * @tc.desc: test LnnGetLocalBoolInfo
+ * @tc.type: FUNC
+ * @tc.require:
+ */
+HWTEST_F(WifiDirectInitTest, LnnGetLocalBoolInfo, TestSize.Level1)
+{
+    EXPECT_CALL(*mockDlsym, dlsym(_, _)).WillRepeatedly(Return(nullptr));
+    int32_t ret = DBinderSoftbusServer::GetInstance().LnnGetLocalBoolInfo(BOOL_KEY_SCREEN_STATUS, nullptr, 0);
+    EXPECT_EQ(ret, SOFTBUS_WIFI_DIRECT_DLSYM_FAILED);
+}
+
+/*
+ * @tc.name: LnnConvertDlId
+ * @tc.desc: test LnnConvertDlId
+ * @tc.type: FUNC
+ * @tc.require:
+ */
+HWTEST_F(WifiDirectInitTest, LnnConvertDlId, TestSize.Level1)
+{
+    EXPECT_CALL(*mockDlsym, dlsym(_, _)).WillRepeatedly(Return(nullptr));
+    int32_t ret = DBinderSoftbusServer::GetInstance().LnnConvertDlId(nullptr, CATEGORY_UDID, CATEGORY_UDID, nullptr, 0);
+    EXPECT_EQ(ret, SOFTBUS_WIFI_DIRECT_DLSYM_FAILED);
+}
+
+/*
+ * @tc.name: GetConnectionIdByHandle
+ * @tc.desc: test GetConnectionIdByHandle.
+ * @tc.type: FUNC
+ * @tc.require:
+ */
+HWTEST_F(WifiDirectInitTest, GetConnectionIdByHandle, TestSize.Level1)
+{
+    AuthHandle handle = {
+        .authId = 1,
+        .type = 1,
+    };
+    EXPECT_CALL(*mockDlsym, dlsym(_, _)).WillRepeatedly(Return(nullptr));
+    int32_t ret = DBinderSoftbusServer::GetInstance().GetConnectionIdByHandle(handle);
+    EXPECT_EQ(ret, SOFTBUS_WIFI_DIRECT_DLSYM_FAILED);
+}
+
+/*
+ * @tc.name: ConnSetKeepaliveByConnectionId
+ * @tc.desc: test ConnSetKeepaliveByConnectionId
+ * @tc.type: FUNC
+ * @tc.require:
+ */
+HWTEST_F(WifiDirectInitTest, ConnSetKeepaliveByConnectionId, TestSize.Level1)
+{
+    EXPECT_CALL(*mockDlsym, dlsym(_, _)).WillRepeatedly(Return(nullptr));
+    int32_t ret = DBinderSoftbusServer::GetInstance().ConnSetKeepaliveByConnectionId(1, false);
+    EXPECT_EQ(ret, SOFTBUS_WIFI_DIRECT_DLSYM_FAILED);
     delete mockDlsym;
     mockDlsym = nullptr;
 }

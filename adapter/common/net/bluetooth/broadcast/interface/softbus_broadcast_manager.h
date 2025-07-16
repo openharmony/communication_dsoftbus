@@ -54,6 +54,7 @@ int32_t DeInitBroadcastMgr(void);
 /**
  * @brief Register the service to the broadcast manager.
  *
+ * @param protocol Indicates the broadcast protocol {@link BroadcastProtocol}.
  * @param type Indicates the service type {@link BaseServiceType}.
  * @param bcId Indicates the service broadcast ID.
  * @param cb Indicates the service broadcast callback {@link BroadcastCallback}.
@@ -64,7 +65,8 @@ int32_t DeInitBroadcastMgr(void);
  * @since 4.1
  * @version 1.0
  */
-int32_t RegisterBroadcaster(BaseServiceType type, int32_t *bcId, const BroadcastCallback *cb);
+int32_t RegisterBroadcaster(BroadcastProtocol protocol,
+    BaseServiceType type, int32_t *bcId, const BroadcastCallback *cb);
 
 /**
  * @brief UnRegister the service to the broadcast manager.
@@ -82,6 +84,7 @@ int32_t UnRegisterBroadcaster(int32_t bcId);
 /**
  * @brief Register the service listener to the broadcast manager.
  *
+ * @param protocol Indicates the broadcast protocol {@link BroadcastProtocol}.
  * @param type Indicates the service type {@link BaseServiceType}.
  * @param listenerId Indicates the service listener ID.
  * @param cb Indicates the service listener callback {@link ScanCallback}.
@@ -92,7 +95,8 @@ int32_t UnRegisterBroadcaster(int32_t bcId);
  * @since 4.1
  * @version 1.0
  */
-int32_t RegisterScanListener(BaseServiceType type, int32_t *listenerId, const ScanCallback *cb);
+int32_t RegisterScanListener(BroadcastProtocol protocol,
+    BaseServiceType type, int32_t *listenerId, const ScanCallback *cb);
 
 /**
  * @brief UnRegister the service listener to the broadcast manager.

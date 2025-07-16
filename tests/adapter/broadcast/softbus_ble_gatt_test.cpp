@@ -77,8 +77,9 @@ void SoftbusBleGattTest::SetUpTestCase()
     MockBluetooth::interface->Init();
 }
 
-static void StubOnScanResult(int32_t scannerId, const SoftBusBcScanResult *reportData)
+static void StubOnScanResult(BroadcastProtocol protocol, int32_t scannerId, const SoftBusBcScanResult *reportData)
 {
+    (void)protocol;
     SoftbusBleGattTest::scanResultCtx.Update(scannerId, reportData);
 }
 
@@ -91,23 +92,27 @@ static SoftbusScanCallback *GetStubScanListener()
     return &listener;
 }
 
-static void StubAdvEnableCallback(int32_t advId, int32_t status)
+static void StubAdvEnableCallback(BroadcastProtocol protocol, int32_t advId, int32_t status)
 {
+    (void)protocol;
     SoftbusBleGattTest::advEnableCtx.Update(advId, status);
 }
 
-static void StubAdvDisableCallback(int32_t advId, int32_t status)
+static void StubAdvDisableCallback(BroadcastProtocol protocol, int32_t advId, int32_t status)
 {
+    (void)protocol;
     SoftbusBleGattTest::advDisableCtx.Update(advId, status);
 }
 
-static void StubAdvUpdateCallback(int32_t advId, int32_t status)
+static void StubAdvUpdateCallback(BroadcastProtocol protocol, int32_t advId, int32_t status)
 {
+    (void)protocol;
     SoftbusBleGattTest::advUpdateCtx.Update(advId, status);
 }
 
-static void StubAdvDataCallback(int32_t advId, int32_t status)
+static void StubAdvDataCallback(BroadcastProtocol protocol, int32_t advId, int32_t status)
 {
+    (void)protocol;
     SoftbusBleGattTest::advDataCtx.Update(advId, status);
 }
 
@@ -205,8 +210,9 @@ HWTEST_F(SoftbusBleGattTest, SoftbusRegisterAdvCb001, TestSize.Level1)
 }
 
 // 充当参数
-static void FakeBcBleCallback(int32_t adapterBcld, int32_t status)
+static void FakeBcBleCallback(BroadcastProtocol protocol, int32_t adapterBcld, int32_t status)
 {
+    (void)protocol;
     SoftbusBleGattTest::g_adapterBcld = adapterBcld;
     SoftbusBleGattTest::g_status = status;
 }
@@ -339,26 +345,32 @@ HWTEST_F(SoftbusBleGattTest, SoftbusRegisterScanCb001, TestSize.Level1)
 }
 
 // 充当参数
-static void FakeScanCallback(int32_t adapterScanld, int32_t status)
+static void FakeScanCallback(BroadcastProtocol protocol, int32_t adapterScanld, int32_t status)
 {
+    (void)protocol;
     (void)adapterScanld;
     (void)status;
 }
 
-static void FakeReportScanDataCallback(int32_t adapterScanld, const SoftBusBcScanResult *reportData)
+static void FakeReportScanDataCallback(BroadcastProtocol protocol,
+    int32_t adapterScanld, const SoftBusBcScanResult *reportData)
 {
+    (void)protocol;
     (void)adapterScanld;
     (void)reportData;
 }
 
-static void FakeScanStateChanged(int32_t resultCode, bool isStartScan)
+static void FakeScanStateChanged(BroadcastProtocol protocol, int32_t resultCode, bool isStartScan)
 {
+    (void)protocol;
     (void)resultCode;
     (void)isStartScan;
 }
 
-static void FakeLpDeviceInfoCallback(const SoftbusBroadcastUuid *uuid, int32_t type, uint8_t *data, uint32_t dataSize)
+static void FakeLpDeviceInfoCallback(BroadcastProtocol protocol,
+    const SoftbusBroadcastUuid *uuid, int32_t type, uint8_t *data, uint32_t dataSize)
 {
+    (void)protocol;
     (void)uuid;
     (void)type;
     (void)data;

@@ -42,9 +42,10 @@ int32_t DeInitBroadcastMgr()
     return BleMock::GetMock()->DeInitBroadcastMgr();
 }
 
-int32_t RegisterScanListener(BaseServiceType type, int32_t *listenerId, const ScanCallback *cb)
+int32_t RegisterScanListener(BroadcastProtocol protocol,
+    BaseServiceType type, int32_t *listenerId, const ScanCallback *cb)
 {
-    return BleMock::GetMock()->RegisterScanListener(type, listenerId, cb);
+    return BleMock::GetMock()->RegisterScanListener(protocol, type, listenerId, cb);
 }
 
 int32_t SetScanFilter(int32_t listenerId, const BcScanFilter *scanFilter, uint8_t filterNum)
@@ -52,9 +53,10 @@ int32_t SetScanFilter(int32_t listenerId, const BcScanFilter *scanFilter, uint8_
     return BleMock::GetMock()->SetScanFilter(listenerId, scanFilter, filterNum);
 }
 
-int32_t RegisterBroadcaster(BaseServiceType type, int32_t *bcId, const BroadcastCallback *cb)
+int32_t RegisterBroadcaster(BroadcastProtocol protocol,
+    BaseServiceType type, int32_t *bcId, const BroadcastCallback *cb)
 {
-    return BleMock::GetMock()->RegisterBroadcaster(type, bcId, cb);
+    return BleMock::GetMock()->RegisterBroadcaster(protocol, type, bcId, cb);
 }
 
 int32_t UnRegisterBroadcaster(int32_t bcId)
@@ -152,8 +154,10 @@ int32_t BleMock::ActionOfRemoveBtStateListener(int32_t listenerId)
     return SOFTBUS_OK;
 }
 
-int32_t BleMock::ActionOfRegisterScanListener(BaseServiceType type, int32_t *listenerId, const ScanCallback *cb)
+int32_t BleMock::ActionOfRegisterScanListener(BroadcastProtocol protocol,
+    BaseServiceType type, int32_t *listenerId, const ScanCallback *cb)
 {
+    (void)protocol;
     *listenerId = SCAN_LISTENER_ID;
     scanListener = cb;
     return SOFTBUS_OK;
@@ -171,8 +175,10 @@ int32_t BleMock::ActionOfSetScanFilter(int32_t listenerId, const BcScanFilter *s
     return SOFTBUS_OK;
 }
 
-int32_t BleMock::ActionOfRegisterBroadcaster(BaseServiceType type, int32_t *bcId, const BroadcastCallback *cb)
+int32_t BleMock::ActionOfRegisterBroadcaster(BroadcastProtocol protocol,
+    BaseServiceType type, int32_t *bcId, const BroadcastCallback *cb)
 {
+    (void)protocol;
     static int32_t advChannel = 0;
     *bcId = advChannel;
     advChannel++;

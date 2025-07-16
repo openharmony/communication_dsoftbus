@@ -110,6 +110,7 @@ HWTEST_F(TransEventTest, TransEventTest002, TestSize.Level0)
         .remoteIsDbac = 1,
         .localIsDbdc = 1,
         .remoteIsDbdc = 1,
+        .conCurrentId = "testConCurrentId",
     };
     constexpr int32_t VALID_EXTRA_SIZE = TRANS_ASSIGNER_SIZE;
 

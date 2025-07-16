@@ -13,4 +13,24 @@
  * limitations under the License.
  */
 
-FUZZ
+#ifndef VIRLINK_LINKLESS_ADAPTER_MOCK_H
+#define VIRLINK_LINKLESS_ADAPTER_MOCK_H
+
+#include <cstdint>
+
+#ifdef __cplusplus
+extern "C" {
+#endif
+
+void VirlinkTestRecv(uint8_t *data, uint32_t dataLen);
+void VirlinkTestAuthClose(void);
+void VirlinkTestDeviceOnline(const char *remoteMac, const char *remoteIp,
+    const char *remoteUuid, bool isSource);
+void VirlinkTestDeviceOffline(const char *remoteMac, const char *remoteIp,
+    const char *remoteUuid, const char *localIp);
+
+#ifdef __cplusplus
+}
+#endif
+
+#endif

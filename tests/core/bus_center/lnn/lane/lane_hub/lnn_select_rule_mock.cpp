@@ -49,9 +49,9 @@ int32_t LnnGetRemoteNumU32Info(const char *networkId, InfoKey key, uint32_t *inf
     return GetLnnSelectRuleInterface()->LnnGetRemoteNumU32Info(networkId, key, info);
 }
 
-int32_t LnnGetRemoteStrInfo(const char *netWorkId, InfoKey key, char *info, uint32_t len)
+int32_t LnnGetRemoteStrInfo(const char *networkId, InfoKey key, char *info, uint32_t len)
 {
-    return GetLnnSelectRuleInterface()->LnnGetRemoteStrInfo(netWorkId, key, info, len);
+    return GetLnnSelectRuleInterface()->LnnGetRemoteStrInfo(networkId, key, info, len);
 }
 
 int32_t LnnGetCurrChannelScorePacked(int32_t channelId)
@@ -89,9 +89,9 @@ int32_t LnnGetLocalNumInfo(InfoKey key, int32_t *info)
     return GetLnnSelectRuleInterface()->LnnGetLocalNumInfo(key, info);
 }
 
-int32_t LnnGetRemoteNumInfo(const char *netWorkId, InfoKey key, int32_t *info)
+int32_t LnnGetRemoteNumInfo(const char *networkId, InfoKey key, int32_t *info)
 {
-    return GetLnnSelectRuleInterface()->LnnGetRemoteNumInfo(netWorkId, key, info);
+    return GetLnnSelectRuleInterface()->LnnGetRemoteNumInfo(networkId, key, info);
 }
 
 bool LnnGetOnlineStateById(const char *id, IdCategory type)
@@ -104,14 +104,44 @@ int32_t LnnGetRemoteNodeInfoById(const char *id, IdCategory type, NodeInfo *info
     return GetLnnSelectRuleInterface()->LnnGetRemoteNodeInfoById(id, type, info);
 }
 
-int32_t SoftBusGetBtState(void)
-{
-    return GetLnnSelectRuleInterface()->SoftBusGetBtState();
-}
-
 SoftBusWifiDetailState SoftBusGetWifiState(void)
 {
     return GetLnnSelectRuleInterface()->SoftBusGetWifiState();
+}
+
+bool LnnHasDiscoveryType(const NodeInfo *info, DiscoveryType type)
+{
+    return GetLnnSelectRuleInterface()->LnnHasDiscoveryType(info, type);
+}
+
+int32_t LnnSetNetCapability(uint32_t *capability, NetCapability type)
+{
+    return GetLnnSelectRuleInterface()->LnnSetNetCapability(capability, type);
+}
+
+int32_t LnnSetLocalNumU32Info(InfoKey key, uint32_t info)
+{
+    return GetLnnSelectRuleInterface()->LnnSetLocalNumU32Info(key, info);
+}
+
+int32_t FindLaneResourceByLaneId(uint64_t laneId, LaneResource *resource)
+{
+    return GetLnnSelectRuleInterface()->FindLaneResourceByLaneId(laneId, resource);
+}
+
+int32_t LnnAddLinkLedgerInfo(const char *udid, const LinkLedgerInfo *info)
+{
+    return GetLnnSelectRuleInterface()->LnnAddLinkLedgerInfo(udid, info);
+}
+
+int32_t GetAllLinkWithDevId(const char *peerUdid, LaneLinkType **linkList, uint8_t *linkCnt)
+{
+    return GetLnnSelectRuleInterface()->GetAllLinkWithDevId(peerUdid, linkList, linkCnt);
+}
+
+int32_t LnnGetWlanLinkedInfoPacked(LnnWlanLinkedInfo *info)
+{
+    return GetLnnSelectRuleInterface()->LnnGetWlanLinkedInfoPacked(info);
 }
 }
 } // namespace OHOS

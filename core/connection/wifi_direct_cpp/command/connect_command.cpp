@@ -78,10 +78,11 @@ void ConnectCommand::OnSuccess(const WifiDirectLink &link) const
 {
     CONN_LOGI(CONN_WIFI_DIRECT,
         "requestId=%{public}u, linkId=%{public}d, localIp=%{public}s, remoteIp=%{public}s, remotePort=%{public}d, "
-        "linkType=%{public}d, isReuse=%{public}d, bw=%{public}d, channelId=%{public}d, remoteDeviceId=%{public}s",
+        "linkType=%{public}d, isReuse=%{public}d, bw=%{public}d, channelId=%{public}d, remoteDeviceId=%{public}s "
+        "isVirtualLink=%{public}d",
         info_.info_.requestId, link.linkId, WifiDirectAnonymizeIp(link.localIp).c_str(),
         WifiDirectAnonymizeIp(link.remoteIp).c_str(), link.remotePort, link.linkType, link.isReuse, link.bandWidth,
-        link.channelId, WifiDirectAnonymizeDeviceId(remoteDeviceId_).c_str());
+        link.channelId, WifiDirectAnonymizeDeviceId(remoteDeviceId_).c_str(), info_.info_.isVirtualLink);
     if (successCallback_ != nullptr) {
         successCallback_(link);
         return;

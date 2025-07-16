@@ -1888,6 +1888,16 @@ int32_t AuthSendKeepaliveOption(const char *uuid, ModeCycle cycle)
     return SOFTBUS_OK;
 }
 
+int32_t GetConnectionIdByHandle(AuthHandle handle)
+{
+    AuthManager *auth = GetAuthManagerByAuthId(handle.authId);
+    AUTH_CHECK_AND_RETURN_RET_LOGE(auth != NULL, SOFTBUS_NOT_FIND, AUTH_CONN, "auth manager not found");
+    int32_t connectionId = GetConnId(auth->connId[handle.type]);
+    AUTH_LOGI(AUTH_CONN, "connectionId=%{public}d", connectionId);
+    DelDupAuthManager(auth);
+    return connectionId <= 0 ? SOFTBUS_NOT_FIND : connectionId;
+}
+
 int32_t TryGetBrConnInfo(const char *uuid, AuthConnInfo *connInfo)
 {
     AUTH_CHECK_AND_RETURN_RET_LOGE(uuid != NULL, AUTH_INVALID_ID, AUTH_CONN, "uuid is null");

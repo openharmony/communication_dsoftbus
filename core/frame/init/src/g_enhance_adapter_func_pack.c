@@ -101,3 +101,21 @@ int32_t GetLocalSleAddrPacked(char *sleAddr, uint32_t sleAddrLen)
     }
     return pfnAdapterEnhanceFuncList->getLocalSleAddr(sleAddr, sleAddrLen);
 }
+
+void SoftbusSleAdapterInitPacked(void)
+{
+    AdapterEnhanceFuncList *pfnAdapterEnhanceFuncList = AdapterEnhanceFuncListGet();
+    if (AdapterCheckFuncPointer((void *)pfnAdapterEnhanceFuncList->softbusSleAdapterInit) != SOFTBUS_OK) {
+        return;
+    }
+    return pfnAdapterEnhanceFuncList->softbusSleAdapterInit();
+}
+
+void SoftbusSleAdapterDeInitPacked(void)
+{
+    AdapterEnhanceFuncList *pfnAdapterEnhanceFuncList = AdapterEnhanceFuncListGet();
+    if (AdapterCheckFuncPointer((void *)pfnAdapterEnhanceFuncList->softbusSleAdapterDeInit) != SOFTBUS_OK) {
+        return;
+    }
+    return pfnAdapterEnhanceFuncList->softbusSleAdapterDeInit();
+}

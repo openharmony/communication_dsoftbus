@@ -12,10 +12,4 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-
-#ifndef TRANSPROXYPROCESSDATAMOCK_FUZZER_H
-#define TRANSPROXYPROCESSDATAMOCK_FUZZER_H
-
-#define FUZZ_PROJECT_NAME "transproxyprocessdatamock_fuzzer"
-
-#endif // TRANSPROXYPROCESSDATAMOCK_FUZZER_H
+FUZZ

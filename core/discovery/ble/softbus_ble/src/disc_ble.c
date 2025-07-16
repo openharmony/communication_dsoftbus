@@ -85,7 +85,7 @@ typedef enum {
     CON_FILTER_TYPE = 1,
     NON_FILTER_TYPE = 2,
     MAX_FILTER_TYPE,
-} DicsBleFilterType;
+} DiscBleFilterType;
 
 typedef enum {
     PUBLISH_ACTIVE_SERVICE,
@@ -136,16 +136,16 @@ typedef struct {
 } DiscBleAdvertiser;
 
 typedef struct {
-    bool needUpdate;
-    bool needUpdateCap;
-    int16_t capCount[CAPABILITY_MAX_BITNUM];
-    uint32_t capBitMap[CAPABILITY_NUM];
     uint8_t *capabilityData[CAPABILITY_MAX_BITNUM];
     uint32_t capDataLen[CAPABILITY_MAX_BITNUM];
-    bool isSameAccount[CAPABILITY_MAX_BITNUM];
-    bool isWakeRemote[CAPABILITY_MAX_BITNUM];
+    uint32_t capBitMap[CAPABILITY_NUM];
     int32_t freq[CAPABILITY_MAX_BITNUM];
     int32_t rangingRefCnt;
+    int16_t capCount[CAPABILITY_MAX_BITNUM];
+    bool needUpdate;
+    bool needUpdateCap;
+    bool isSameAccount[CAPABILITY_MAX_BITNUM];
+    bool isWakeRemote[CAPABILITY_MAX_BITNUM];
 } DiscBleInfo;
 
 typedef struct {
@@ -293,7 +293,7 @@ static void DeConvertBitMap(uint32_t *dstCap, uint32_t *srcCap, int nums)
             SoftbusBitmapSet(dstCap, bleCapability);
         }
     }
-    DISC_LOGD(DISC_BLE, "old=%{public}u, new=%{public}u", *srcCap, *dstCap);
+    DISC_LOGD(DISC_BLE, "srcCap=%{public}u, dstCap=%{public}u", *srcCap, *dstCap);
 }
 
 static void UpdateInfoManager(int adv, bool needUpdate)

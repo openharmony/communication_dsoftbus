@@ -92,6 +92,23 @@ static LaneLinkCb g_linkCb = {
     .onLaneLinkFail = OnLaneLinkFail,
 };
 
+static bool MockCheckOnlyVirtualLink(void)
+{
+    return true;
+}
+
+static int32_t MockForceDisconnectDeviceSyncFailed(enum WifiDirectLinkType wifiDirectLinkType)
+{
+    (void)wifiDirectLinkType;
+    return SOFTBUS_NOT_FIND;
+}
+
+static int32_t MockForceDisconnectDeviceSyncSuccess(enum WifiDirectLinkType wifiDirectLinkType)
+{
+    (void)wifiDirectLinkType;
+    return SOFTBUS_OK;
+}
+
 static bool IsNegotiateChannelNeeded(const char *remoteNetworkId, enum WifiDirectLinkType linkType)
 {
     return g_isNeedNegotiateChannel;
@@ -873,5 +890,43 @@ HWTEST_F(LNNLaneLinkWifiDirectTest, HandleForceDownWifiDirectTrans_003, TestSize
     int32_t ret = HandleForceDownWifiDirectTrans(UDID_HASH_STR, CONFLICT_THREE_VAP);
     EXPECT_EQ(ret, SOFTBUS_OK);
     g_manager.forceDisconnectDevice = ForceDisconnectDeviceSucc;
+}
+
+/*
+* @tc.name: CheckVirtualLinkOnlyTest_001
+* @tc.desc: CheckVirtualLinkOnly test
+* @tc.type: FUNC
+* @tc.require:
+*/
+HWTEST_F(LNNLaneLinkWifiDirectTest, CheckVirtualLinkOnlyTest_001, TestSize.Level1)
+{
+    NiceMock<LaneDepsInterfaceMock> linkMock;
+    EXPECT_CALL(linkMock, GetWifiDirectManager).WillRepeatedly(Return(nullptr));
+    EXPECT_FALSE(CheckVirtualLinkOnly());
+    g_manager.checkOnlyVirtualLink = nullptr;
+    EXPECT_CALL(linkMock, GetWifiDirectManager).WillRepeatedly(Return(&g_manager));
+    EXPECT_FALSE(CheckVirtualLinkOnly());
+    g_manager.checkOnlyVirtualLink = MockCheckOnlyVirtualLink;
+    EXPECT_TRUE(CheckVirtualLinkOnly());
+}
+
+/*
+* @tc.name: HandleForceDownVirtualLinkTest_001
+* @tc.desc: HandleForceDownVirtualLink test
+* @tc.type: FUNC
+* @tc.require:
+*/
+HWTEST_F(LNNLaneLinkWifiDirectTest, HandleForceDownVirtualLinkTest_001, TestSize.Level1)
+{
+    NiceMock<LaneDepsInterfaceMock> linkMock;
+    EXPECT_CALL(linkMock, GetWifiDirectManager).WillRepeatedly(Return(nullptr));
+    EXPECT_EQ(HandleForceDownVirtualLink(), SOFTBUS_INVALID_PARAM);
+    g_manager.forceDisconnectDeviceSync = nullptr;
+    EXPECT_CALL(linkMock, GetWifiDirectManager).WillRepeatedly(Return(&g_manager));
+    EXPECT_EQ(HandleForceDownVirtualLink(), SOFTBUS_INVALID_PARAM);
+    g_manager.forceDisconnectDeviceSync = MockForceDisconnectDeviceSyncFailed;
+    EXPECT_EQ(HandleForceDownVirtualLink(), SOFTBUS_NOT_FIND);
+    g_manager.forceDisconnectDeviceSync = MockForceDisconnectDeviceSyncSuccess;
+    EXPECT_EQ(HandleForceDownVirtualLink(), SOFTBUS_OK);
 }
 } // namespace OHOS

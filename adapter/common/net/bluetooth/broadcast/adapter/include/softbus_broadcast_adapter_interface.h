@@ -38,7 +38,7 @@ extern "C"{
  * @since 4.1
  * @version 1.0
  */
-int32_t RegisterBroadcastMediumFunction(SoftbusMediumType type, const SoftbusBroadcastMediumInterface *interface);
+int32_t RegisterBroadcastMediumFunction(BroadcastProtocol type, const SoftbusBroadcastMediumInterface *interface);
 
 /**
  * @brief Defines interface functions for unregistering different media
@@ -46,7 +46,7 @@ int32_t RegisterBroadcastMediumFunction(SoftbusMediumType type, const SoftbusBro
  * @since 4.1
  * @version 1.0
  */
-int32_t UnRegisterBroadcastMediumFunction(SoftbusMediumType type);
+int32_t UnRegisterBroadcastMediumFunction(BroadcastProtocol type);
 
 #ifdef __cplusplus
 }
