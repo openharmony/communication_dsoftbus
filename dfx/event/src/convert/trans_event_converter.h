@@ -85,8 +85,9 @@ TRANS_ASSIGNER(Int32,  LocalIsDbac, localIsDbac)
 TRANS_ASSIGNER(Int32,  RemoteIsDbac, remoteIsDbac)
 TRANS_ASSIGNER(Int32,  LocalIsDbdc, localIsDbdc)
 TRANS_ASSIGNER(Int32,  RemoteIsDbdc, remoteIsDbdc)
+TRANS_ASSIGNER(String, ConCurrentId, conCurrentId)
 
-#define TRANS_ASSIGNER_SIZE 51 // Size of TRANS_ASSIGNERS
+#define TRANS_ASSIGNER_SIZE 52 // Size of TRANS_ASSIGNERS
 static const HiSysEventParamAssigner TRANS_ASSIGNERS[] = {
     { "STAGE_RES",           HISYSEVENT_INT32,    TransAssignerResult          },
     { "ERROR_CODE",          HISYSEVENT_INT32,    TransAssignerErrcode         },
@@ -139,6 +140,7 @@ static const HiSysEventParamAssigner TRANS_ASSIGNERS[] = {
     { "REMOTE_IS_DBAC",      HISYSEVENT_INT32,    TransAssignerRemoteIsDbac    },
     { "LOCAL_IS_DBDC",       HISYSEVENT_INT32,    TransAssignerLocalIsDbdc     },
     { "REMOTE_IS_DBDC",      HISYSEVENT_INT32,    TransAssignerRemoteIsDbdc    },
+    { "CONCURRENT_ID",       HISYSEVENT_STRING,   TransAssignerConCurrentId    },
     // Modification Note: remember updating TRANS_ASSIGNER_SIZE
 };
 
