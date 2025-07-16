@@ -106,7 +106,7 @@ bool IsNeedAuthLimit(const char *udidHash)
         return false;
     }
     if (time == 0) {
-        AUTH_LOGI(AUTH_FSM, "no need delay authentication");
+        AUTH_LOGD(AUTH_FSM, "no need delay authentication");
         return false;
     }
     currentTime = GetCurrentTimeMs();
