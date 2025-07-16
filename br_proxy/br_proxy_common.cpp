@@ -21,6 +21,13 @@
 #include "lnn_ohos_account_adapter.h"
 #include "softbus_error_code.h"
 #include "trans_log.h"
+
+#ifdef __aarch64__
+#define BR_PROXY_ADAPTER_PATH "/system/lib64/libbr_proxy_adapter.z.so"
+#else
+#define BR_PROXY_ADAPTER_PATH "/system/lib/libbr_proxy_adapter.z.so"
+#endif
+
  
 using namespace OHOS;
 
@@ -38,7 +45,7 @@ static int32_t AbilityManagerClientDynamicLoader(const char *bundleName, const c
         return SOFTBUS_INVALID_PARAM;
     }
 
-    g_abilityMgrHandle = dlopen("/system/lib64/libbr_proxy_adapter.z.so", RTLD_LAZY);
+    g_abilityMgrHandle = dlopen(BR_PROXY_ADAPTER_PATH, RTLD_LAZY);
     if (g_abilityMgrHandle == nullptr) {
         TRANS_LOGE(TRANS_SVC, "[br_proxy] dlopen failed!");
         return SOFTBUS_INVALID_PARAM;
@@ -62,7 +69,7 @@ static int32_t GetAbilityName(char *abilityName, int32_t userId, uint32_t abilit
         return SOFTBUS_INVALID_PARAM;
     }
 
-    g_abilityMgrHandle = dlopen("/system/lib64/libbr_proxy_adapter.z.so", RTLD_LAZY);
+    g_abilityMgrHandle = dlopen(BR_PROXY_ADAPTER_PATH, RTLD_LAZY);
     if (g_abilityMgrHandle == nullptr) {
         TRANS_LOGE(TRANS_SVC, "[br_proxy] dlopen failed!");
         return SOFTBUS_INVALID_PARAM;
