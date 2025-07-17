@@ -129,6 +129,8 @@ static void *DeliverTask(void *arg)
 {
     ConnBytesDelivery *delivery = (ConnBytesDelivery *)arg;
     CONN_LOGI(CONN_COMMON, "%{public}s, deliver task start", delivery->config.name);
+    SoftBusThread threadSelf = SoftBusThreadGetSelf();
+    SoftBusThreadSetName(threadSelf, delivery->config.name);
     do {
         struct ConnBytesDeliveryItem *item = NULL;
         int32_t ret = ConnDequeue(delivery->queue, (struct ConnQueueItem **)&item, delivery->config.idleTimeoutMs);
@@ -167,7 +169,7 @@ static int32_t PullDeliverTaskIfNeed(ConnBytesDelivery *delivery)
         if (delivery->deliveryTaskRunning) {
             break;
         }
-        ret = ConnStartActionAsync(delivery, DeliverTask, delivery->config.name);
+        ret = ConnStartActionAsync(delivery, DeliverTask, NULL);
         if (ret != SOFTBUS_OK) {
             CONN_LOGE(
                 CONN_COMMON, "%{public}s, pull deliver task failed: error=%{public}d", delivery->config.name, ret);
