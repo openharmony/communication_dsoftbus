@@ -564,7 +564,7 @@ int32_t TransTdcSendData(DataLenInfo *lenInfo, bool supportTlv, int32_t fd, uint
     }
     uint32_t tmpHeadLen = DC_DATA_HEAD_SIZE;
     if (supportTlv) {
-        TRANS_LOGI(TRANS_CTRL, "supportTlv is true");
+        TRANS_LOGD(TRANS_CTRL, "supportTlv is true");
         tmpHeadLen = lenInfo->tlvHeadLen;
     }
     ssize_t ret = ConnSendSocketData(fd, buf, outLen + tmpHeadLen, 0);
