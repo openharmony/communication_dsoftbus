@@ -57,7 +57,7 @@
 #define SINGLE_NIC_CNT 1
 #define TAG "nStackXDFinder"
 #define DFINDER_THREAD_NAME TAG
-#define RETRY_WAIT_TIME 10 /* us */
+#define RETRY_WAIT_TIME 500 /* us */
 #define DFINDER_POSE_EVENT_MAX_BLOCK_SECONDS 3
 #define NSEC_TICKS_PER_SEC (1000000000)
 
@@ -1106,6 +1106,7 @@ static void NSTACKX_PostEventBlockHander(void *argument)
     if (!arg->timeout && arg->wait != NULL) {
         SemPost(arg->wait);
         arg->isPost = true;
+        DFINDER_LOGI(TAG, "post event is done");
     }
     usleep(RETRY_WAIT_TIME);
     arg->arg = NULL;
@@ -1128,10 +1129,7 @@ int SemTimedWait(sem_t *sem, struct timespec expire)
         timeout.tv_nsec -= NSEC_TICKS_PER_SEC;
     }
     int ret = sem_timedwait(sem, &timeout);
-    if (ret == NSTACKX_EFAILED) {
-        if (GetErrno() == ETIMEDOUT || GetErrno() == EINTR) {
-            return NSTACKX_EAGAIN;
-        }
+    if (ret != 0) {
         return NSTACKX_EFAILED;
     }
 
@@ -1146,23 +1144,12 @@ static int32_t NSTACKX_BlockEvtWaitFinish(struct PostEvtBlockArgs *arg)
         .tv_nsec = 0,
     };
 
-    while (1) {
-        ret = SemTimedWait(arg->wait, expire);
-        if (ret == NSTACKX_EAGAIN) {
-            if (GetErrno() == EINTR) {
-                DFINDER_LOGE(TAG, "SemTimeWait eintr, try again");
-                continue;
-            } else if (GetErrno() == ETIMEDOUT) {
-                arg->timeout = true;
-                DFINDER_LOGE(TAG, "SemTimeWait timeout");
-            }
-            break;
+    ret = SemTimedWait(arg->wait, expire);
+    if (ret != NSTACKX_EOK) {
+        if (!arg->isPost) {
+            arg->timeout = true;
         }
-
-        if (ret != NSTACKX_EOK) {
-            DFINDER_LOGE(TAG, "SemTimeWait failed errno %d", GetErrno());
-        }
-        break;
+        DFINDER_LOGE(TAG, "SemTimeWait failed errno %d", GetErrno());
     }
     return ret;
 }

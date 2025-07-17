@@ -17,6 +17,7 @@
 #include "nstackx_device_remote.h"
 #include <securec.h>
 #include <stdatomic.h>
+#include <limits.h>
 #include "nstackx_device.h"
 #include "nstackx_dfinder_log.h"
 #include "nstackx_error.h"
@@ -871,7 +872,11 @@ static int DumpRemoteNode(const RemoteDevice *dev, char *buf, size_t len)
         }
     }
 
-    return index;
+    if (index > INT_MAX) {
+        DFINDER_LOGE(TAG, "dump node msg exceed");
+        return NSTACKX_EFAILED;
+    }
+    return (int)index;
 }
 
 int DumpRemoteDevice(char *buf, size_t len)
@@ -889,7 +894,11 @@ int DumpRemoteDevice(char *buf, size_t len)
         index += (size_t)ret;
     }
 
-    return index;
+    if (index > INT_MAX) {
+        DFINDER_LOGE(TAG, "dump remote device exceed");
+        return NSTACKX_EFAILED;
+    }
+    return (int)index;
 }
 #endif
 
