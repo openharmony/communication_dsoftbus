@@ -576,10 +576,10 @@ HWTEST_F(LNNLaneSelectTest, LNN_LANE_ADJUST_LINK_PRIORITY_FOR_RTT_001, TestSize.
         .qosRequire.minBW = HIGH_BW,
         .qosRequire.rttLevel = LANE_RTT_LEVEL_LOW,
     };
+    EXPECT_CALL(laneMock, SoftBusGetSysTimeMs).WillOnce(Return(0))
+        .WillOnce(Return(WIFI_DIRECT_EXT_CAP_VALID_TIME));
     EXPECT_EQ(SOFTBUS_OK, SelectExpectLanesByQos(NODE_NETWORK_ID, &selectParam, &linkList));
     EXPECT_EQ(LANE_P2P, linkList.linkType[linkList.linkTypeNum - 1]);
-    GTEST_LOG_(INFO) << "wait wifidirect ext cap exceed timeliness with 10s";
-    std::this_thread::sleep_for(std::chrono::milliseconds(WIFI_DIRECT_EXT_CAP_VALID_TIME));
     EXPECT_EQ(SOFTBUS_OK, SelectExpectLanesByQos(NODE_NETWORK_ID, &selectParam, &linkList));
     EXPECT_EQ(LANE_P2P, linkList.linkType[0]);
 }

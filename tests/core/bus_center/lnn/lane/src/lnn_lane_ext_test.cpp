@@ -331,6 +331,7 @@ HWTEST_F(LNNLaneExtMockTest, LNN_LANE_PROFILE_002, TestSize.Level1)
 
     ret = BindLaneIdToProfile(laneId, &profile);
     EXPECT_EQ(ret, SOFTBUS_OK);
+    SoftBusFree(laneReqIdList);
     (void)UnbindLaneIdFromProfile(laneId, profileId);
 }
 
@@ -799,7 +800,7 @@ HWTEST_F(LNNLaneExtMockTest, LNN_LANE_MAC_INFO_TEST_02, TestSize.Level1)
     ASSERT_EQ(strcpy_s(linkInfo.peerUdid, UDID_BUF_LEN, PEER_UDID), EOK);
     uint64_t laneId = LANE_ID_BASE;
     EXPECT_CALL(laneDepMock, LnnGetLocalStrInfo).WillRepeatedly(Return(SOFTBUS_OK));
-    uint32_t ret = AddLaneResourceToPool(&linkInfo, laneId, false);
+    int32_t ret = AddLaneResourceToPool(&linkInfo, laneId, false);
     EXPECT_EQ(ret, SOFTBUS_OK);
     EXPECT_CALL(laneDepMock, GetWifiDirectManager).WillRepeatedly(Return(&g_manager));
     ret = GetMacInfoByLaneId(LANE_ID_BASE, &macInfo);
