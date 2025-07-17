@@ -118,5 +118,10 @@ int32_t CheckLnnPermission(const char *interfaceName, const char *processName)
 {
     return GetSoftbusServerStubTestInterface()->CheckLnnPermission(interfaceName, processName);
 }
+
+int32_t UnregChangeListener(const char *appId)
+{
+    return GetSoftbusServerStubTestInterface()->UnregChangeListener(appId);
+}
 }
 }

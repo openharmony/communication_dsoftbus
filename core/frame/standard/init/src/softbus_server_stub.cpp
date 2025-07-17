@@ -42,7 +42,6 @@
 
 #define SERVER_JOIN_LNN_NAME "SERVER_JOIN_LNN"
 #define SERVER_LEAVE_LNN_NAME "SERVER_LEAVE_LNN"
-#define SERVER_GET_NODE_KEY_INFO_NMAE "SERVER_GET_NODE_KEY_INFO"
 #define SERVER_SET_NODE_DATA_CHANGE_FLAG_NAME "SERVER_SET_NODE_DATA_CHANGE_FLAG"
 #define SERVER_ACTIVE_META_NODE_NAME "SERVER_ACTIVE_META_NODE"
 #define SERVER_DEACTIVE_META_NODE_NAME "SERVER_DEACTIVE_META_NODE"
@@ -50,6 +49,13 @@
 #define SERVER_SHIFT_LNN_GEAR_NAME "SERVER_SHIFT_LNN_GEAR"
 #define SERVER_SYNC_TRUSTED_RELATION_NAME "SERVER_SYNC_TRUSTED_RELATION"
 #define SERVER_SET_DISPLAY_NAME_NAME "SERVER_SET_DISPLAY_NAME"
+#define SERVER_SET_DATA_LEVEL_NAME "SERVER_SET_DATA_LEVEL"
+#define SERVER_REG_DATA_LEVEL_CHANGE_CB_NAME "SERVER_REG_DATA_LEVEL_CHANGE_CB"
+#define SERVER_UNREG_DATA_LEVEL_CHANGE_CB_NAME "SERVER_UNREG_DATA_LEVEL_CHANGE_CB"
+#define SERVER_TRIGGER_RANGE_FOR_MSDP_NAME "SERVER_TRIGGER_RANGE_FOR_MSDP"
+#define SERVER_STOP_RANGE_FOR_MSDP_NAME "SERVER_STOP_RANGE_FOR_MSDP"
+#define SERVER_REG_RANGE_CB_FOR_MSDP_NAME "SERVER_REG_RANGE_CB_FOR_MSDP"
+#define SERVER_UNREG_RANGE_CB_FOR_MSDP_NAME "SERVER_UNREG_RANGE_CB_FOR_MSDP"
 
 const char *g_limitPkgName = "ohos.distributedschedule.dms";
 
@@ -1094,34 +1100,8 @@ int32_t SoftBusServerStub::GetNodeKeyInfoLen(int32_t key)
     return LnnGetNodeKeyInfoLen(key);
 }
 
-static int32_t GetNodeKeyWriteInfo(MessageParcel &reply, void *buf, int32_t infoLen, int32_t ret)
-{
-    if (buf == nullptr) {
-        COMM_LOGE(COMM_SVC, "invalid param");
-        return SOFTBUS_INVALID_PARAM;
-    }
-    if (!reply.WriteInt32(infoLen)) {
-        COMM_LOGE(COMM_SVC, "write info length failed!");
-        return SOFTBUS_IPC_ERR;
-    }
-    if (!reply.WriteRawData(buf, infoLen)) {
-        COMM_LOGE(COMM_SVC, "write key info failed!");
-        return SOFTBUS_IPC_ERR;
-    }
-    if (!reply.WriteInt32(ret)) {
-        COMM_LOGE(COMM_SVC, "write info length failed!");
-        return SOFTBUS_IPC_ERR;
-    }
-    return SOFTBUS_OK;
-}
-
 int32_t SoftBusServerStub::GetNodeKeyInfoInner(MessageParcel &data, MessageParcel &reply)
 {
-    int32_t ret = PermissionVerify(SERVER_GET_NODE_KEY_INFO);
-    if (ret != SOFTBUS_OK) {
-        COMM_LOGE(COMM_SVC, "permission verification failed");
-        return ret;
-    }
     const char *clientName = data.ReadCString();
     const char *networkId = data.ReadCString();
     if (clientName == nullptr || networkId == nullptr) {
@@ -1151,8 +1131,19 @@ int32_t SoftBusServerStub::GetNodeKeyInfoInner(MessageParcel &data, MessageParce
         COMM_LOGE(COMM_SVC, "malloc buffer failed!");
         return SOFTBUS_MALLOC_ERR;
     }
-    ret = GetNodeKeyInfo(clientName, networkId, key, static_cast<unsigned char *>(buf), infoLen);
-    if (GetNodeKeyWriteInfo(reply, buf, infoLen, ret) != SOFTBUS_OK) {
+    int32_t ret = GetNodeKeyInfo(clientName, networkId, key, static_cast<unsigned char *>(buf), infoLen);
+    if (!reply.WriteInt32(infoLen)) {
+        COMM_LOGE(COMM_SVC, "write info length failed!");
+        SoftBusFree(buf);
+        return SOFTBUS_IPC_ERR;
+    }
+    if (!reply.WriteRawData(buf, infoLen)) {
+        COMM_LOGE(COMM_SVC, "write key info failed!");
+        SoftBusFree(buf);
+        return SOFTBUS_IPC_ERR;
+    }
+    if (!reply.WriteInt32(ret)) {
+        COMM_LOGE(COMM_SVC, "write info length failed!");
         SoftBusFree(buf);
         return SOFTBUS_IPC_ERR;
     }
@@ -1198,6 +1189,11 @@ int32_t SoftBusServerStub::RegDataLevelChangeCbInner(MessageParcel &data, Messag
     (void)DB_PACKAGE_NAME;
     return SOFTBUS_FUNC_NOT_SUPPORT;
 #else
+    int32_t ret = PermissionVerify(SERVER_REG_DATA_LEVEL_CHANGE_CB);
+    if (ret != SOFTBUS_OK) {
+        COMM_LOGE(COMM_SVC, "permission verification failed");
+        return ret;
+    }
     const char *pkgName = data.ReadCString();
     if (pkgName == nullptr) {
         COMM_LOGE(COMM_SVC, "RegDataLevelChangeCbInner read pkgName failed!");
@@ -1224,6 +1220,11 @@ int32_t SoftBusServerStub::UnregDataLevelChangeCbInner(MessageParcel &data, Mess
     (void)DB_PACKAGE_NAME;
     return SOFTBUS_FUNC_NOT_SUPPORT;
 #else
+    int32_t ret = PermissionVerify(SERVER_UNREG_DATA_LEVEL_CHANGE_CB);
+    if (ret != SOFTBUS_OK) {
+        COMM_LOGE(COMM_SVC, "permission verification failed");
+        return ret;
+    }
     const char *pkgName = data.ReadCString();
     if (pkgName == nullptr) {
         COMM_LOGE(COMM_SVC, "UnregDataLevelChangeCbInner read pkgName failed!");
@@ -1249,6 +1250,11 @@ int32_t SoftBusServerStub::SetDataLevelInner(MessageParcel &data, MessageParcel 
     (void)reply;
     return SOFTBUS_FUNC_NOT_SUPPORT;
 #else
+    int32_t ret = PermissionVerify(SERVER_SET_DATA_LEVEL);
+    if (ret != SOFTBUS_OK) {
+        COMM_LOGE(COMM_SVC, "permission verification failed");
+        return ret;
+    }
     DataLevel *dataLevel = (DataLevel*)data.ReadRawData(sizeof(DataLevel));
     if (dataLevel == nullptr) {
         COMM_LOGE(COMM_SVC, "SetDataLevelInner read networkid failed!");
@@ -1714,7 +1720,11 @@ int32_t SoftBusServerStub::TriggerRangeForMsdpInner(MessageParcel &data, Message
 {
     COMM_LOGD(COMM_SVC, "enter");
     const RangeConfig *config = nullptr;
-
+    int32_t ret = PermissionVerify(SERVER_TRIGGER_RANGE_FOR_MSDP);
+    if (ret != SOFTBUS_OK) {
+        COMM_LOGE(COMM_SVC, "permission verification failed");
+        return ret;
+    }
     const char *pkgName = data.ReadCString();
     if (pkgName == nullptr || strnlen(pkgName, PKG_NAME_SIZE_MAX) >= PKG_NAME_SIZE_MAX) {
         COMM_LOGE(COMM_SVC, "read pkgName failed!");
@@ -1739,7 +1749,11 @@ int32_t SoftBusServerStub::StopRangeForMsdpInner(MessageParcel &data, MessagePar
 {
     COMM_LOGD(COMM_SVC, "enter");
     const RangeConfig *config = nullptr;
-
+    int32_t ret = PermissionVerify(SERVER_STOP_RANGE_FOR_MSDP);
+    if (ret != SOFTBUS_OK) {
+        COMM_LOGE(COMM_SVC, "permission verification failed");
+        return ret;
+    }
     const char *pkgName = data.ReadCString();
     if (pkgName == nullptr || strnlen(pkgName, PKG_NAME_SIZE_MAX) >= PKG_NAME_SIZE_MAX) {
         COMM_LOGE(COMM_SVC, "read pkgName failed!");
@@ -1769,6 +1783,11 @@ int32_t SoftBusServerStub::RegRangeCbForMsdpInner(MessageParcel &data, MessagePa
     (void)MSDP_PACKAGE_NAME;
     return SOFTBUS_FUNC_NOT_SUPPORT;
 #else
+    int32_t ret = PermissionVerify(SERVER_REG_RANGE_CB_FOR_MSDP);
+    if (ret != SOFTBUS_OK) {
+        COMM_LOGE(COMM_SVC, "permission verification failed");
+        return ret;
+    }
     const char *pkgName = data.ReadCString();
     if (pkgName == nullptr) {
         COMM_LOGE(COMM_SVC, "read pkgName failed");
@@ -1796,6 +1815,11 @@ int32_t SoftBusServerStub::UnregRangeCbForMsdpInner(MessageParcel &data, Message
     (void)MSDP_PACKAGE_NAME;
     return SOFTBUS_FUNC_NOT_SUPPORT;
 #else
+    int32_t ret = PermissionVerify(SERVER_UNREG_RANGE_CB_FOR_MSDP);
+    if (ret != SOFTBUS_OK) {
+        COMM_LOGE(COMM_SVC, "permission verification failed");
+        return ret;
+    }
     const char *pkgName = data.ReadCString();
     if (pkgName == nullptr) {
         COMM_LOGE(COMM_SVC, "read pkgName failed");
@@ -2319,8 +2343,6 @@ static const char* LabelTransformation(uint32_t code)
         return SERVER_JOIN_LNN_NAME;
     } else if (code == SERVER_LEAVE_LNN) {
         return SERVER_LEAVE_LNN_NAME;
-    } else if (code == SERVER_GET_NODE_KEY_INFO) {
-        return SERVER_GET_NODE_KEY_INFO_NMAE;
     } else if (code == SERVER_SET_NODE_DATA_CHANGE_FLAG) {
         return SERVER_SET_NODE_DATA_CHANGE_FLAG_NAME;
     } else if (code == SERVER_ACTIVE_META_NODE) {
@@ -2335,6 +2357,20 @@ static const char* LabelTransformation(uint32_t code)
         return SERVER_SYNC_TRUSTED_RELATION_NAME;
     } else if (code == SERVER_SET_DISPLAY_NAME) {
         return SERVER_SET_DISPLAY_NAME_NAME;
+    } else if (code == SERVER_SET_DATA_LEVEL) {
+        return SERVER_SET_DATA_LEVEL_NAME;
+    } else if (code == SERVER_REG_DATA_LEVEL_CHANGE_CB) {
+        return SERVER_REG_DATA_LEVEL_CHANGE_CB_NAME;
+    } else if (code == SERVER_UNREG_DATA_LEVEL_CHANGE_CB) {
+        return SERVER_UNREG_DATA_LEVEL_CHANGE_CB_NAME;
+    } else if (code == SERVER_TRIGGER_RANGE_FOR_MSDP) {
+        return SERVER_TRIGGER_RANGE_FOR_MSDP_NAME;
+    } else if (code == SERVER_STOP_RANGE_FOR_MSDP) {
+        return SERVER_STOP_RANGE_FOR_MSDP_NAME;
+    } else if (code == SERVER_REG_RANGE_CB_FOR_MSDP) {
+        return SERVER_REG_RANGE_CB_FOR_MSDP_NAME;
+    } else if (code == SERVER_UNREG_RANGE_CB_FOR_MSDP) {
+        return SERVER_UNREG_RANGE_CB_FOR_MSDP_NAME;
     }
     return nullptr;
 }

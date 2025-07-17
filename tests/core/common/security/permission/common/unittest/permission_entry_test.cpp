@@ -201,7 +201,7 @@ HWTEST_F(PermissionEntryTest, LoadLnnPermissionJsonTest001, TestSize.Level1)
 HWTEST_F(PermissionEntryTest, CheckLnnPermissionEntryTest001, TestSize.Level1)
 {
     const char permissionson[] = "/system/etc/communication/softbus/softbus_lnn_permission.json";
-    const char interfaceName[] = "SERVER_GET_NODE_KEY_INFO";
+    const char interfaceName[] = "SERVER_LEAVE_LNN";
     const char processName[] = "device_manager";
     int32_t ret = CheckLnnPermissionEntry(nullptr, nullptr);
     EXPECT_EQ(ret, SOFTBUS_INVALID_PARAM);

@@ -29,7 +29,7 @@ typedef struct {
     INetworkingListener listener;
 } INetworkingListenerEntry;
 
-static INetworkingListenerEntry g_listeners[MAX_LISTENER_CNT] = { 0 };
+static INetworkingListenerEntry g_listeners[MAX_LISTENER_CNT];
 
 static INetworkingListenerEntry *FindListenerEntry(const char *sessionName)
 {

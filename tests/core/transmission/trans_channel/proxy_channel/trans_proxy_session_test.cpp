@@ -16,64 +16,62 @@
 #include <securec.h>
 
 #include "gtest/gtest.h"
-#include "message_handler.h"
-#include "session.h"
-#include "softbus_adapter_mem.h"
 #include "softbus_error_code.h"
-#include "softbus_error_code.h"
-#include "softbus_feature_config.h"
-#include "softbus_json_utils.h"
-#include "softbus_protocol_def.h"
-#include "softbus_proxychannel_session.h"
-#include "softbus_proxychannel_manager.h"
-#include "softbus_utils.h"
-#include "trans_auth_mock.h"
-#include "trans_conn_mock.h"
-#include "trans_common_mock.h"
+#include "softbus_proxychannel_control.c"
+#include "softbus_proxychannel_message_struct.h"
+#include "softbus_proxy_network_mock_test.h"
+#include "softbus_proxychannel_network.c"
+#include "softbus_transmission_interface.h"
+#include "trans_proxy_process_data.h"
 
 using namespace testing;
 using namespace testing::ext;
 
+#define TEST_VALID_SESSIONNAME "com.test.sessionname"
+#define TEST_NUMBER_256 256
+
+class SoftbusTransProxySessionInterface {
+public:
+    
+    virtual int32_t TransProxyGetChannelCapaByChanId(int32_t channelId, uint32_t *channelCapability) = 0;
+};
+
+class SoftbusTransProxySessionMock : public SoftbusTransProxySessionInterface {
+public:
+    static SoftbusTransProxySessionMock &GetMockObj(void)
+    {
+        return *gmock_;
+    }
+    SoftbusTransProxySessionMock();
+    ~SoftbusTransProxySessionMock();
+    
+    MOCK_METHOD(int32_t, TransProxyGetChannelCapaByChanId,
+        (int32_t channelId, uint32_t *channelCapability), (override));
+
+private:
+    static SoftbusTransProxySessionMock *gmock_;
+};
+
+SoftbusTransProxySessionMock *SoftbusTransProxySessionMock::gmock_;
+
+SoftbusTransProxySessionMock::SoftbusTransProxySessionMock()
+{
+    gmock_ = this;
+}
+
+SoftbusTransProxySessionMock::~SoftbusTransProxySessionMock()
+{
+    gmock_ = nullptr;
+}
+
+
+int32_t TransProxyGetChannelCapaByChanId(int32_t channelId, uint32_t *channelCapability)
+{
+    std::cout << "TransProxyGetChannelCapaByChanId mock calling enter" << std::endl;
+    return SoftbusTransProxySessionMock::GetMockObj().TransProxyGetChannelCapaByChanId(channelId, channelCapability);
+}
+
 namespace OHOS {
-
-#define TEST_INVALID_DATA_LEN (70 * 1024)
-#define TEST_CHANNEL_IDENTITY_LEN 33
-#define TEST_BUFFER_SIZE 100
-#define TEST_CONN_HEAD_SIZE 24
-#define TEST_MAGIC_NUMBER 0xBABEFACE
-
-#define TEST_DEFAULT_DATA_LEN 10
-#define TEST_VALID_DATA_LEN 20
-#define TEST_VALID_LARGE_DATA_LEN 60
-#define TEST_VALID_NO_SLICE_DATALEN 40
-#define TEST_VALID_NO_SLICE_DEFAULT_LEN 30
-#define TEST_INVALID_NO_SLICE_DATASLEN 20
-#define TEST_ACK_DATA_LEN 32
-#define TEST_ACK_DATA_LEN_ONE_BYTES 8
-
-#define TEST_INVALID_PRIORITY 3
-#define TEST_VALID_PRIORITY 2
-#define TEST_SLICENUM_TWO 2
-#define TEST_SLICESEQ_TWO 2
-#define TEST_SLICESEQ_THREE 3
-
-#define TEST_VALID_CHANNELIDA 50
-#define TEST_VALID_CHANNELIDB 51
-#define TEST_VALID_CHANNELIDC 2
-
-typedef struct {
-    int32_t priority;
-    int32_t sliceNum;
-    int32_t sliceSeq;
-    int32_t reserved;
-} TestSliceHead;
-
-typedef struct  {
-    int32_t magicNumber;
-    int32_t seq;
-    int32_t flags;
-    int32_t dataLen;
-} TestPacketHead;
 
 class TransProxySessionTest : public testing::Test {
 public:
@@ -87,423 +85,553 @@ public:
     {}
     void TearDown() override
     {}
-};
 
-int32_t TestSessionDataReceived(const char *pkgName, int32_t pid, int32_t channelId, int32_t channelType,
-    TransReceiveData* receiveData)
-{
-    (void)pkgName;
-    (void)pid;
-    (void)channelId;
-    (void)channelType;
-    (void)receiveData;
-    printf("test session data received.\n");
-    return SOFTBUS_OK;
-}
+    static void TestOnNetworkMessageReceived(int32_t channelId, const char *data, uint32_t len);
+    static void TestRegisterNetworkingChannelListener(void);
+};
 
 void TransProxySessionTest::SetUpTestCase(void)
 {
-    TransCommInterfaceMock commMock;
-    EXPECT_CALL(commMock, GenerateRandomStr).WillRepeatedly(Return(SOFTBUS_OK));
-
-    SoftbusConfigInit();
-    ASSERT_EQ(SOFTBUS_OK, LooperInit());
-    ASSERT_EQ(SOFTBUS_OK, SoftBusTimerInit());
-
-    IServerChannelCallBack callBack;
-    callBack.OnDataReceived = TestSessionDataReceived;
-    TransConnInterfaceMock connMock;
-    EXPECT_CALL(connMock, ConnSetConnectCallback).WillRepeatedly(Return(SOFTBUS_OK));
-    ASSERT_EQ(SOFTBUS_OK, TransProxyManagerInit(&callBack));
 }
 
 void TransProxySessionTest::TearDownTestCase(void)
 {
-    TransProxyManagerDeinit();
 }
 
-void TestAddProxyChannel(int32_t channelId, AppType appType, ProxyChannelStatus status)
+void TransProxySessionTest::TestOnNetworkMessageReceived(int32_t channelId, const char *data, uint32_t len)
 {
-    TransCommInterfaceMock commMock;
-    TransAuthInterfaceMock authMock;
-    EXPECT_CALL(commMock, GenerateRandomStr)
-        .WillRepeatedly(Return(SOFTBUS_OK));
-    EXPECT_CALL(commMock, SoftBusGenerateRandomArray)
-        .WillRepeatedly(Return(SOFTBUS_OK));
-    EXPECT_CALL(authMock, AuthGetLatestIdByUuid)
-        .WillRepeatedly(Return(SOFTBUS_OK));
+    (void)channelId;
+    (void)data;
+    (void)len;
+}
 
-    AppInfo appInfo;
-    ProxyChannelInfo *chan = (ProxyChannelInfo *)SoftBusCalloc(sizeof(ProxyChannelInfo));
-    ASSERT_TRUE(chan != nullptr);
-    chan->authId = channelId;
-    chan->connId = channelId;
-    chan->myId = channelId;
-    chan->peerId = channelId;
-    chan->reqId = channelId;
-    chan->channelId = channelId;
-    chan->seq = channelId;
-    (void)strcpy_s(chan->identity, TEST_CHANNEL_IDENTITY_LEN, std::to_string(channelId).c_str());
-    chan->status = status;
-    appInfo.appType = appType;
-    int32_t ret = TransProxyCreateChanInfo(chan, chan->channelId, &appInfo);
+void TransProxySessionTest::TestRegisterNetworkingChannelListener(void)
+{
+    INetworkingListener listener;
+    char sessionName[TEST_NUMBER_256] = {0};
+    strcpy_s(sessionName, TEST_NUMBER_256, TEST_VALID_SESSIONNAME);
+    listener.onMessageReceived = TransProxySessionTest::TestOnNetworkMessageReceived;
+    int32_t ret = TransRegisterNetworkingChannelListener(sessionName, &listener);
+    EXPECT_EQ(SOFTBUS_OK, ret);
+}
+
+/**
+ * @tc.name: NotifyNetworkingMsgReceived002
+ * @tc.desc: TransNotifyDecryptNetworkingMsg
+ * @tc.type: FUNC
+ * @tc.require:
+ */
+HWTEST_F(TransProxySessionTest, NotifyNetworkingMsgReceived002, TestSize.Level1)
+{
+    const char *data = "njfejfjpfjewpfqpFHEQWP";
+    uint32_t channelCapability = 1u;
+
+    SoftbusTransProxySessionMock networkObj;
+    EXPECT_CALL(networkObj, TransProxyGetChannelCapaByChanId)
+        .WillRepeatedly(DoAll(SetArgPointee<1>(channelCapability), Return(SOFTBUS_OK)));
+
+    TransProxySessionTest::TestRegisterNetworkingChannelListener();
+    EXPECT_NO_FATAL_FAILURE(NotifyNetworkingMsgReceived("test.com.session", 1024, data, 256));
+}
+
+/**
+ * @tc.name: NotifyNetworkingMsgReceived003
+ * @tc.desc: TransNotifyDecryptNetworkingMsg
+ * @tc.type: FUNC
+ * @tc.require:
+ */
+HWTEST_F(TransProxySessionTest, NotifyNetworkingMsgReceived003, TestSize.Level1)
+{
+    const char *data = "njfejfjpfjewpfqpFHEQWP";
+    uint32_t channelCapability = 1u;
+
+    SoftbusTransProxySessionMock networkObj;
+    EXPECT_CALL(networkObj, TransProxyGetChannelCapaByChanId)
+        .WillRepeatedly(DoAll(SetArgPointee<1>(channelCapability), Return(SOFTBUS_OK)));
+
+    TransProxySessionTest::TestRegisterNetworkingChannelListener();
+    EXPECT_NO_FATAL_FAILURE(NotifyNetworkingMsgReceived(TEST_VALID_SESSIONNAME, 1024, data, 256));
+}
+
+/**
+  * @tc.name: TransProxySendEncryptInnerMessage001
+  * @tc.desc: TransProxySendEncryptInnerMessage
+  * @tc.type: FUNC
+  * @tc.require:
+  */
+HWTEST_F(TransProxySessionTest, TransProxySendEncryptInnerMessage001, TestSize.Level1)
+{
+    ProxyChannelInfo info;
+    (void)strcpy_s(info.appInfo.sessionKey, SESSION_KEY_LENGTH, "testsessionkey");
+    const char *inData = "nwq4";
+    ProxyMessageHead proxyMsgHead;
+    ProxyDataInfo proxyDataInfo;
+    uint32_t outPayLoadLen = 35;
+
+    SoftbusTransProxyNetworkMock networkObj;
+
+    EXPECT_CALL(networkObj, SoftBusEncryptData).WillRepeatedly(
+        DoAll(SetArgPointee<4>(outPayLoadLen), Return(SOFTBUS_ENCRYPT_ERR)));
+
+    int32_t ret = TransProxySendEncryptInnerMessage(&info, inData, 5, &proxyMsgHead, &proxyDataInfo);
+    EXPECT_EQ(ret, SOFTBUS_ENCRYPT_ERR);
+}
+
+/**
+  * @tc.name: TransProxySendEncryptInnerMessage002
+  * @tc.desc: TransProxySendEncryptInnerMessage
+  * @tc.type: FUNC
+  * @tc.require:
+  */
+HWTEST_F(TransProxySessionTest, TransProxySendEncryptInnerMessage002, TestSize.Level1)
+{
+    ProxyChannelInfo info;
+    (void)strcpy_s(info.appInfo.sessionKey, SESSION_KEY_LENGTH, "testsessionkey");
+    const char *inData = "nwq4";
+    ProxyMessageHead proxyMsgHead;
+    ProxyDataInfo proxyDataInfo;
+    uint32_t outPayLoadLen = 35;
+
+    SoftbusTransProxyNetworkMock networkObj;
+    EXPECT_CALL(networkObj, SoftBusEncryptData).WillRepeatedly(
+        DoAll(SetArgPointee<4>(outPayLoadLen), Return(SOFTBUS_OK)));
+    EXPECT_CALL(networkObj, TransProxyPackMessage).WillOnce(Return(SOFTBUS_TRANS_PROXY_PACKMSG_ERR));
+
+    int32_t ret = TransProxySendEncryptInnerMessage(&info, inData, 5, &proxyMsgHead, &proxyDataInfo);
+    EXPECT_EQ(ret, SOFTBUS_TRANS_PROXY_PACKMSG_ERR);
+}
+
+/**
+  * @tc.name: TransProxySendEncryptInnerMessage003
+  * @tc.desc: TransProxySendEncryptInnerMessage
+  * @tc.type: FUNC
+  * @tc.require:
+  */
+HWTEST_F(TransProxySessionTest, TransProxySendEncryptInnerMessage003, TestSize.Level1)
+{
+    ProxyChannelInfo info;
+    (void)strcpy_s(info.appInfo.sessionKey, SESSION_KEY_LENGTH, "testsessionkey");
+    const char *inData = "nwq4";
+    ProxyMessageHead proxyMsgHead;
+    ProxyDataInfo proxyDataInfo;
+    uint32_t outPayLoadLen = 35;
+
+    SoftbusTransProxyNetworkMock networkObj;
+    EXPECT_CALL(networkObj, SoftBusEncryptData).WillRepeatedly(
+        DoAll(SetArgPointee<4>(outPayLoadLen), Return(SOFTBUS_OK)));
+    EXPECT_CALL(networkObj, TransProxyPackMessage).WillOnce(Return(SOFTBUS_OK));
+    EXPECT_CALL(networkObj, TransProxyTransSendMsg).WillOnce(Return(SOFTBUS_CONN_MANAGER_PKT_LEN_INVALID));
+
+    int32_t ret = TransProxySendEncryptInnerMessage(&info, inData, 5, &proxyMsgHead, &proxyDataInfo);
+    EXPECT_EQ(ret, SOFTBUS_CONN_MANAGER_PKT_LEN_INVALID);
+}
+
+/**
+  * @tc.name: TransProxySendEncryptInnerMessage004
+  * @tc.desc: TransProxySendEncryptInnerMessage
+  * @tc.type: FUNC
+  * @tc.require:
+  */
+HWTEST_F(TransProxySessionTest, TransProxySendEncryptInnerMessage004, TestSize.Level1)
+{
+    ProxyChannelInfo info;
+    (void)strcpy_s(info.appInfo.sessionKey, SESSION_KEY_LENGTH, "testsessionkey");
+    const char *inData = "nwq4";
+    ProxyMessageHead proxyMsgHead;
+    ProxyDataInfo proxyDataInfo;
+    uint32_t outPayLoadLen = 35;
+
+    SoftbusTransProxyNetworkMock networkObj;
+    EXPECT_CALL(networkObj, SoftBusEncryptData).WillRepeatedly(
+        DoAll(SetArgPointee<4>(outPayLoadLen), Return(SOFTBUS_OK)));
+    EXPECT_CALL(networkObj, TransProxyPackMessage).WillOnce(Return(SOFTBUS_OK));
+    EXPECT_CALL(networkObj, TransProxyTransSendMsg).WillOnce(Return(SOFTBUS_OK));
+
+    int32_t ret = TransProxySendEncryptInnerMessage(&info, inData, 5, &proxyMsgHead, &proxyDataInfo);
     EXPECT_EQ(ret, SOFTBUS_OK);
 }
 
 /**
- * @tc.name: TransProxyPostSessionDataTest001
- * @tc.desc: test proxy post session data.
- * @tc.type: FUNC
- * @tc.require:
- */
-HWTEST_F(TransProxySessionTest, TransProxyPostSessionDataTest001, TestSize.Level1)
+  * @tc.name: TransProxySendInnerMessageTest001
+  * @tc.desc: TransProxySendInnerMessage
+  * @tc.type: FUNC
+  * @tc.require:
+  */
+HWTEST_F(TransProxySessionTest, TransProxySendInnerMessageTest001, TestSize.Level1)
 {
-    int32_t channelId = -1;
-    int32_t ret = SOFTBUS_MEM_ERR;
+    ProxyChannelInfo info = {
+        .myId = 1925,
+        .peerId = 1524,
+        .appInfo.channelCapability = 1
+    };
+    uint32_t payLoadLen = 12;
+    int32_t priority = 1;
 
-    for (uint32_t flags = TRANS_SESSION_BYTES; flags <= TRANS_SESSION_FILE_ACK_RESPONSE_SENT; ++flags) {
-        ret = TransProxyPostSessionData(channelId, nullptr, 0, (SessionPktType)flags);
-        EXPECT_NE(SOFTBUS_OK, ret);
-    }
+    SoftbusTransProxyNetworkMock networkObj;
+    EXPECT_CALL(networkObj, TransProxyPackMessage).WillOnce(Return(SOFTBUS_OK));
+    EXPECT_CALL(networkObj, TransProxyTransSendMsg).WillOnce(Return(SOFTBUS_OK));
 
-    const char *data = "test data";
-    uint32_t len = strlen(data);
-    ret = TransProxyPostSessionData(channelId, (const unsigned char *)data, len, TRANS_SESSION_MESSAGE);
-    EXPECT_NE(SOFTBUS_OK, ret);
+    int32_t ret = TransProxySendInnerMessage(&info, "testPayLoad", payLoadLen, priority);
+    EXPECT_EQ(ret, SOFTBUS_OK);
 }
 
 /**
- * @tc.name: TransProxyPostSessionDataTest002
- * @tc.desc: test proxy post session data.
- * @tc.type: FUNC
- * @tc.require:
- */
-HWTEST_F(TransProxySessionTest, TransProxyPostSessionDataTest002, TestSize.Level1)
+  * @tc.name: ConvertConnectType2AuthLinkTypeTest001
+  * @tc.desc: ConvertConnectType2AuthLinkType
+  * @tc.type: FUNC
+  * @tc.require:
+  */
+HWTEST_F(TransProxySessionTest, ConvertConnectType2AuthLinkTypeTest001, TestSize.Level1)
 {
-    int32_t channelId = TEST_VALID_CHANNELIDA;
-    TestAddProxyChannel(channelId, APP_TYPE_AUTH, PROXY_CHANNEL_STATUS_COMPLETED);
+    ConnectType type = CONNECT_SLE;
+    AuthLinkType ret = ConvertConnectType2AuthLinkType(type);
+    EXPECT_EQ(ret, AUTH_LINK_TYPE_SLE);
 
-    const char *data = "test data";
-    uint32_t len = strlen(data);
-
-    TransConnInterfaceMock connMock;
-    EXPECT_CALL(connMock, ConnGetHeadSize)
-        .WillRepeatedly(Return(TEST_CONN_HEAD_SIZE));
-    EXPECT_CALL(connMock, ConnPostBytes)
-        .WillOnce(Return(SOFTBUS_MEM_ERROR))
-        .WillOnce(Return(SOFTBUS_CONNECTION_ERR_SENDQUEUE_FULL))
-        .WillRepeatedly(Return(SOFTBUS_OK));
-
-    int32_t ret = TransProxyPostSessionData(channelId, (const unsigned char *)data, len, TRANS_SESSION_MESSAGE);
-    EXPECT_NE(SOFTBUS_OK, ret);
-    ret = TransProxyPostSessionData(channelId, (const unsigned char *)data, len, TRANS_SESSION_MESSAGE);
-    EXPECT_NE(SOFTBUS_OK, ret);
-    ret = TransProxyPostSessionData(channelId, (const unsigned char *)data, len, TRANS_SESSION_BYTES);
-    EXPECT_EQ(SOFTBUS_OK, ret);
+    type = CONNECT_SLE_DIRECT;
+    ret = ConvertConnectType2AuthLinkType(type);
+    EXPECT_EQ(ret, AUTH_LINK_TYPE_SLE);
 }
 
 /**
- * @tc.name: TransProxyPostSessionDataTest003
- * @tc.desc: test proxy post session data.
- * @tc.type: FUNC
- * @tc.require:
- */
-HWTEST_F(TransProxySessionTest, TransProxyPostSessionDataTest003, TestSize.Level1)
+  * @tc.name: SetCipherOfHandshakeMsgTest001
+  * @tc.desc: SetCipherOfHandshakeMsg
+  * @tc.type: FUNC
+  * @tc.require:
+  */
+HWTEST_F(TransProxySessionTest, SetCipherOfHandshakeMsgTest001, TestSize.Level1)
 {
-    int32_t ret = SOFTBUS_OK;
-    int32_t channelId = TEST_VALID_CHANNELIDB;
-    TestAddProxyChannel(channelId, APP_TYPE_NORMAL, PROXY_CHANNEL_STATUS_COMPLETED);
+    uint8_t cipher;
+    ProxyChannelInfo proxyChannelInfo;
+    proxyChannelInfo.authHandle = { AUTH_LINK_TYPE_BR, CONNECT_TCP };
 
-    const char *data = "test data";
-    uint32_t len = strlen(data);
+    SoftbusTransProxyNetworkMock networkObj;
+    EXPECT_CALL(networkObj, AuthGetLatestIdByUuid)
+        .WillRepeatedly(DoAll(SetArgPointee<3>(proxyChannelInfo.authHandle)));
+    EXPECT_CALL(networkObj, TransProxySetAuthHandleByChanId).WillOnce(Return(SOFTBUS_TRANS_PROXY_CHANNEL_NOT_FOUND));
 
-    TransConnInterfaceMock connMock;
-    TransCommInterfaceMock commMock;
-    EXPECT_CALL(connMock, ConnGetHeadSize)
-        .WillRepeatedly(Return(TEST_CONN_HEAD_SIZE));
-    EXPECT_CALL(connMock, ConnPostBytes)
-        .WillRepeatedly(Return(SOFTBUS_OK));
-    EXPECT_CALL(commMock, SoftBusEncryptDataWithSeq)
-        .WillOnce(Return(SOFTBUS_MEM_ERR))
-        .WillOnce(DoAll(SetArgPointee<4>(0), Return(SOFTBUS_OK)))
-        .WillRepeatedly(Return(SOFTBUS_OK));
-
-    ret = TransProxyPostSessionData(channelId, (const unsigned char *)data, len, TRANS_SESSION_MESSAGE);
-    EXPECT_NE(SOFTBUS_OK, ret);
-    ret = TransProxyPostSessionData(channelId, (const unsigned char *)data, len, TRANS_SESSION_MESSAGE);
-    EXPECT_NE(SOFTBUS_OK, ret);
-    ret = TransProxyPostSessionData(channelId, (const unsigned char *)data, len, TRANS_SESSION_MESSAGE);
-    EXPECT_NE(SOFTBUS_OK, ret);
-
-    ret = TransProxyPostSessionData(channelId, (const unsigned char *)data, len, TRANS_SESSION_BYTES);
-    EXPECT_EQ(SOFTBUS_OK, ret);
+    int32_t ret = SetCipherOfHandshakeMsg(&proxyChannelInfo, &cipher);
+    EXPECT_EQ(ret, SOFTBUS_TRANS_PROXY_CHANNEL_NOT_FOUND);
 }
 
 /**
- * @tc.name: TransOnNormalMsgReceivedTest001
- * @tc.desc: test proxy on normal msg received input wrong param.
- * @tc.type: FUNC
- * @tc.require:
- */
-HWTEST_F(TransProxySessionTest, TransOnNormalMsgReceivedTest001, TestSize.Level1)
+  * @tc.name: SetCipherOfHandshakeMsgTest002
+  * @tc.desc: SetCipherOfHandshakeMsg
+  * @tc.type: FUNC
+  * @tc.require:
+  */
+HWTEST_F(TransProxySessionTest, SetCipherOfHandshakeMsgTest002, TestSize.Level1)
 {
-    const char *pkgName = "com.test.trans.proxysession";
-    int32_t pid = 0;
-    int32_t channelId = -1;
-    char buf[TEST_BUFFER_SIZE] = {0};
-    TestSliceHead head;
-    uint32_t len = TEST_DEFAULT_DATA_LEN;
-    int32_t ret = TransOnNormalMsgReceived(pkgName, pid, channelId, nullptr, len);
-    EXPECT_NE(SOFTBUS_OK, ret);
-    ret = TransOnNormalMsgReceived(pkgName, pid, channelId, buf, len);
-    EXPECT_NE(SOFTBUS_OK, ret);
-    head.priority  = -1;
-    len = TEST_VALID_LARGE_DATA_LEN;
-    (void)memcpy_s(buf, TEST_BUFFER_SIZE, &head, sizeof(TestSliceHead));
-    ret = TransOnNormalMsgReceived(pkgName, pid, channelId, buf, len);
-    EXPECT_NE(SOFTBUS_OK, ret);
+    uint8_t cipher;
+    ProxyChannelInfo proxyChannelInfo;
+    proxyChannelInfo.authHandle = { AUTH_LINK_TYPE_BR, CONNECT_TCP };
 
-    head.priority  = TEST_INVALID_PRIORITY;
-    (void)memcpy_s(buf, TEST_BUFFER_SIZE, &head, sizeof(TestSliceHead));
-    ret = TransOnNormalMsgReceived(pkgName, pid, channelId, buf, len);
-    EXPECT_NE(SOFTBUS_OK, ret);
-    head.priority  = TEST_VALID_PRIORITY;
-    head.sliceNum = TEST_SLICENUM_TWO;
-    head.sliceSeq = TEST_SLICESEQ_TWO;
-    (void)memcpy_s(buf, TEST_BUFFER_SIZE, &head, sizeof(TestSliceHead));
-    ret = TransOnNormalMsgReceived(pkgName, pid, channelId, buf, len);
-    EXPECT_NE(SOFTBUS_OK, ret);
+    SoftbusTransProxyNetworkMock networkObj;
+    EXPECT_CALL(networkObj, AuthGetLatestIdByUuid)
+        .WillRepeatedly(DoAll(SetArgPointee<3>(proxyChannelInfo.authHandle)));
+    EXPECT_CALL(networkObj, TransProxySetAuthHandleByChanId).WillOnce(Return(SOFTBUS_OK));
+    EXPECT_CALL(networkObj, AuthGetConnInfo).WillOnce(Return(SOFTBUS_AUTH_NOT_FOUND));
+
+    int32_t ret = SetCipherOfHandshakeMsg(&proxyChannelInfo, &cipher);
+    EXPECT_EQ(ret, SOFTBUS_AUTH_NOT_FOUND);
 }
 
 /**
- * @tc.name: TransOnNormalMsgReceivedTest002
- * @tc.desc: test proxy on normal msg received, and test no sub packet proc with worng param.
- * @tc.type: FUNC
- * @tc.require:
- */
-HWTEST_F(TransProxySessionTest, TransOnNormalMsgReceivedTest002, TestSize.Level1)
+  * @tc.name: SetCipherOfHandshakeMsgTest003
+  * @tc.desc: SetCipherOfHandshakeMsg
+  * @tc.type: FUNC
+  * @tc.require:
+  */
+HWTEST_F(TransProxySessionTest, SetCipherOfHandshakeMsgTest003, TestSize.Level1)
 {
-    int32_t ret = SOFTBUS_OK;
-    char data[TEST_BUFFER_SIZE] = {0};
-    char *buf = data;
-    int32_t channelId = TEST_VALID_CHANNELIDC;
-    int32_t pid = 0;
-    int32_t len = sizeof(TestSliceHead) + sizeof(TestPacketHead) + TEST_VALID_NO_SLICE_DEFAULT_LEN;
-    const char *pkgName = "com.test.trans.proxysession";
-    TestSliceHead head;
-    head.priority  = TEST_VALID_PRIORITY;
-    head.sliceNum = 1;
-    (void)memcpy_s(buf, TEST_BUFFER_SIZE, &head, sizeof(TestSliceHead));
-    buf += sizeof(TestSliceHead);
+    uint8_t cipher;
+    ProxyChannelInfo proxyChannelInfo;
+    proxyChannelInfo.authHandle = { AUTH_LINK_TYPE_BR, CONNECT_TCP };
 
-    TestPacketHead packHead;
-    /* test msgicNum error */
-    packHead.magicNumber = 1;
-    (void)memcpy_s(buf, (TEST_BUFFER_SIZE - sizeof(TestSliceHead)), &packHead, sizeof(TestPacketHead));
-    ret = TransOnNormalMsgReceived(pkgName, pid, channelId, data, len);
-    EXPECT_NE(SOFTBUS_OK, ret);
+    SoftbusTransProxyNetworkMock networkObj;
+    EXPECT_CALL(networkObj, AuthGetLatestIdByUuid)
+        .WillRepeatedly(DoAll(SetArgPointee<3>(proxyChannelInfo.authHandle)));
 
-    /* test packet head len is zero */
-    packHead.magicNumber = TEST_MAGIC_NUMBER;
-    packHead.dataLen = 0;
-    (void)memcpy_s(buf, (TEST_BUFFER_SIZE - sizeof(TestSliceHead)), &packHead, sizeof(TestPacketHead));
-    ret = TransOnNormalMsgReceived(pkgName, pid, channelId, data, len);
-    EXPECT_NE(SOFTBUS_OK, ret);
+    EXPECT_CALL(networkObj, TransProxySetAuthHandleByChanId).WillOnce(Return(SOFTBUS_OK));
+    EXPECT_CALL(networkObj, AuthGetConnInfo).WillOnce(Return(SOFTBUS_OK));
+    EXPECT_CALL(networkObj, AuthGetServerSide).WillOnce(Return(SOFTBUS_INVALID_PARAM));
 
-    /* test packet head len invalid */
-    packHead.dataLen = TEST_INVALID_NO_SLICE_DATASLEN;
-    (void)memcpy_s(buf, (TEST_BUFFER_SIZE - sizeof(TestSliceHead)), &packHead, sizeof(TestPacketHead));
-    ret = TransOnNormalMsgReceived(pkgName, pid, channelId, data, len);
-    EXPECT_NE(SOFTBUS_OK, ret);
-
-    /* test dataHead dataLen <= OVERHEAD_LEN */
-    packHead.dataLen = TEST_INVALID_NO_SLICE_DATASLEN;
-    len -= TEST_DEFAULT_DATA_LEN;
-    (void)memcpy_s(buf, (TEST_BUFFER_SIZE - sizeof(TestSliceHead)), &packHead, sizeof(TestPacketHead));
-    ret = TransOnNormalMsgReceived(pkgName, pid, channelId, data, len);
-    EXPECT_NE(SOFTBUS_OK, ret);
-
-    /* test proxy channel not exists */
-    len  += TEST_INVALID_NO_SLICE_DATASLEN;
-    packHead.dataLen = TEST_VALID_NO_SLICE_DATALEN;
-    (void)memcpy_s(buf, (TEST_BUFFER_SIZE - sizeof(TestSliceHead)), &packHead, sizeof(TestPacketHead));
-    ret = TransOnNormalMsgReceived(pkgName, pid, channelId, data, len);
-    EXPECT_NE(SOFTBUS_OK, ret);
-
-    /* test decrypt fail */
-    TransCommInterfaceMock commMock;
-    EXPECT_CALL(commMock, SoftBusDecryptDataWithSeq)
-        .WillRepeatedly(Return(SOFTBUS_MEM_ERR));
-    ret = TransOnNormalMsgReceived(pkgName, 0, TEST_VALID_CHANNELIDA, data, len);
-    EXPECT_NE(SOFTBUS_OK, ret);
+    int32_t ret = SetCipherOfHandshakeMsg(&proxyChannelInfo, &cipher);
+    EXPECT_EQ(ret, SOFTBUS_INVALID_PARAM);
 }
 
 /**
- * @tc.name: TransOnNormalMsgReceivedTest003
- * @tc.desc: test proxy on normal msg received, and test no sub packet proc.
- * @tc.type: FUNC
- * @tc.require:
- */
-HWTEST_F(TransProxySessionTest, TransOnNormalMsgReceivedTest003, TestSize.Level1)
+  * @tc.name: SetCipherOfHandshakeMsgTest004
+  * @tc.desc: SetCipherOfHandshakeMsg
+  * @tc.type: FUNC
+  * @tc.require:
+  */
+HWTEST_F(TransProxySessionTest, SetCipherOfHandshakeMsgTest004, TestSize.Level1)
 {
-    int32_t ret = SOFTBUS_OK;
-    int32_t channelId = TEST_VALID_CHANNELIDA;
-    char data[TEST_BUFFER_SIZE] = {0};
-    char *buf = data;
-    int32_t len = sizeof(TestSliceHead) + sizeof(TestPacketHead) + TEST_VALID_NO_SLICE_DATALEN;
-    const char *pkgName = "com.test.trans.proxysession";
-    TransCommInterfaceMock commMock;
-    TransConnInterfaceMock connMock;
-    EXPECT_CALL(commMock, SoftBusDecryptDataWithSeq)
-        .WillRepeatedly(Return(SOFTBUS_OK));
-    EXPECT_CALL(commMock, SoftBusEncryptDataWithSeq)
-        .WillRepeatedly(Return(SOFTBUS_OK));
-    EXPECT_CALL(connMock, ConnGetHeadSize)
-        .WillRepeatedly(Return(TEST_CONN_HEAD_SIZE));
-    EXPECT_CALL(connMock, ConnPostBytes)
-        .WillRepeatedly(Return(SOFTBUS_OK));
+    ProxyChannelInfo proxyChannelInfo;
+    proxyChannelInfo.authHandle = { AUTH_LINK_TYPE_BR, CONNECT_TCP };
 
-    TestSliceHead head;
-    head.priority  = TEST_VALID_PRIORITY;
-    head.sliceNum = 1;
-    (void)memcpy_s(buf, TEST_BUFFER_SIZE, &head, sizeof(TestSliceHead));
-    buf += sizeof(TestSliceHead);
-    TestPacketHead packHead;
-    packHead.magicNumber = TEST_MAGIC_NUMBER;
-    packHead.dataLen = TEST_VALID_NO_SLICE_DATALEN;
+    SoftbusTransProxyNetworkMock networkObj;
+    EXPECT_CALL(networkObj, AuthGetLatestIdByUuid)
+        .WillRepeatedly(DoAll(SetArgPointee<3>(proxyChannelInfo.authHandle)));
 
-    /* test flag=bytes success */
-    packHead.flags = PROXY_FLAG_BYTES;
-    (void)memcpy_s(buf, (TEST_BUFFER_SIZE - sizeof(TestSliceHead)), &packHead, sizeof(TestPacketHead));
-    ret = TransOnNormalMsgReceived(pkgName, 0, channelId, data, len);
-    EXPECT_EQ(SOFTBUS_OK, ret);
-    /* test flag=async message success */
-    packHead.flags = PROXY_FLAG_ASYNC_MESSAGE;
-    (void)memcpy_s(buf, (TEST_BUFFER_SIZE - sizeof(TestSliceHead)), &packHead, sizeof(TestPacketHead));
-    ret = TransOnNormalMsgReceived(pkgName, 0, channelId, data, len);
-    EXPECT_EQ(SOFTBUS_OK, ret);
-    /* test flag=message success */
-    packHead.flags = PROXY_FLAG_MESSAGE;
-    (void)memcpy_s(buf, (TEST_BUFFER_SIZE - sizeof(TestSliceHead)), &packHead, sizeof(TestPacketHead));
-    ret = TransOnNormalMsgReceived(pkgName, 0, channelId, data, len);
-    EXPECT_EQ(SOFTBUS_OK, ret);
-    /* pending status need multi thread, so test flag=ack fail */
-    len -= TEST_ACK_DATA_LEN_ONE_BYTES;
-    packHead.dataLen = TEST_ACK_DATA_LEN;
-    packHead.flags = PROXY_FLAG_ACK;
-    (void)memcpy_s(buf, (TEST_BUFFER_SIZE - sizeof(TestSliceHead)), &packHead, sizeof(TestPacketHead));
-    ret = TransOnNormalMsgReceived(pkgName, 0, channelId, data, len);
-    EXPECT_NE(SOFTBUS_OK, ret);
+    EXPECT_CALL(networkObj, TransProxySetAuthHandleByChanId).WillOnce(Return(SOFTBUS_OK));
+
+    AuthConnInfo connInfo;
+    connInfo.type = AUTH_LINK_TYPE_BLE;
+    EXPECT_CALL(networkObj, AuthGetConnInfo)
+        .WillRepeatedly(DoAll(SetArgPointee<1>(connInfo), Return(SOFTBUS_OK)));
+
+    bool isAuthServer = true;
+    EXPECT_CALL(networkObj, AuthGetServerSide)
+        .WillRepeatedly(DoAll(SetArgPointee<1>(isAuthServer), Return(SOFTBUS_OK)));
+
+    uint8_t cipher;
+    int32_t ret = SetCipherOfHandshakeMsg(&proxyChannelInfo, &cipher);
+    EXPECT_EQ(ret, SOFTBUS_OK);
 }
 
 /**
- * @tc.name: TransOnNormalMsgReceivedTest004
- * @tc.desc: test proxy on normal msg received, and test no sub packet proc.
- * @tc.type: FUNC
- * @tc.require:
- */
-HWTEST_F(TransProxySessionTest, TransOnNormalMsgReceivedTest004, TestSize.Level1)
+  * @tc.name: SetCipherOfHandshakeMsgTest005
+  * @tc.desc: SetCipherOfHandshakeMsg
+  * @tc.type: FUNC
+  * @tc.require:
+  */
+HWTEST_F(TransProxySessionTest, SetCipherOfHandshakeMsgTest005, TestSize.Level1)
 {
-    int32_t ret = SOFTBUS_OK;
-    int32_t channelId = TEST_VALID_CHANNELIDA;
-    char data[TEST_BUFFER_SIZE] = {0};
-    char *buf = data;
-    int32_t len = sizeof(TestSliceHead) + sizeof(TestPacketHead) + TEST_VALID_NO_SLICE_DATALEN;
-    const char *pkgName = "com.test.trans.proxysession";
-    TransCommInterfaceMock commMock;
-    EXPECT_CALL(commMock, SoftBusDecryptDataWithSeq)
-        .WillRepeatedly(Return(SOFTBUS_OK));
+    ProxyChannelInfo proxyChannelInfo;
+    proxyChannelInfo.authHandle = { AUTH_LINK_TYPE_BR, CONNECT_TCP };
 
-    TestSliceHead head;
-    head.priority  = TEST_VALID_PRIORITY;
-    head.sliceNum = 1;
-    (void)memcpy_s(buf, TEST_BUFFER_SIZE, &head, sizeof(TestSliceHead));
-    buf += sizeof(TestSliceHead);
-    TestPacketHead packHead;
-    packHead.magicNumber = TEST_MAGIC_NUMBER;
-    packHead.dataLen = TEST_VALID_NO_SLICE_DATALEN;
+    SoftbusTransProxyNetworkMock networkObj;
+    EXPECT_CALL(networkObj, AuthGetLatestIdByUuid)
+        .WillRepeatedly(DoAll(SetArgPointee<3>(proxyChannelInfo.authHandle)));
 
-    /* test flag = PROXY_FILE_FIRST_FRAME to PROXY_FILE_ACK_RESPONSE_SENT */
-    for (uint32_t flag = PROXY_FILE_FIRST_FRAME; flag <= PROXY_FILE_ACK_RESPONSE_SENT; ++flag) {
-        packHead.flags = (ProxyPacketType)flag;
-        (void)memcpy_s(buf, (TEST_BUFFER_SIZE - sizeof(TestSliceHead)), &packHead, sizeof(TestPacketHead));
-        ret = TransOnNormalMsgReceived(pkgName, 0, channelId, data, len);
-        EXPECT_EQ(SOFTBUS_OK, ret);
-    }
+    EXPECT_CALL(networkObj, TransProxySetAuthHandleByChanId).WillOnce(Return(SOFTBUS_OK));
+
+    AuthConnInfo connInfo;
+    connInfo.type = AUTH_LINK_TYPE_WIFI;
+    EXPECT_CALL(networkObj, AuthGetConnInfo)
+        .WillRepeatedly(DoAll(SetArgPointee<1>(connInfo), Return(SOFTBUS_OK)));
+
+    bool isAuthServer = true;
+    EXPECT_CALL(networkObj, AuthGetServerSide)
+        .WillRepeatedly(DoAll(SetArgPointee<1>(isAuthServer), Return(SOFTBUS_OK)));
+
+    uint8_t cipher;
+    int32_t ret = SetCipherOfHandshakeMsg(&proxyChannelInfo, &cipher);
+    EXPECT_EQ(ret, SOFTBUS_OK);
 }
 
 /**
- * @tc.name: TransOnNormalMsgReceivedTest005
- * @tc.desc: test proxy on normal msg received, and test sub packet proc.
- * @tc.type: FUNC
- * @tc.require:
- */
-HWTEST_F(TransProxySessionTest, TransOnNormalMsgReceivedTest005, TestSize.Level1)
+  * @tc.name: SetCipherOfHandshakeMsgTest006
+  * @tc.desc: SetCipherOfHandshakeMsg
+  * @tc.type: FUNC
+  * @tc.require:
+  */
+HWTEST_F(TransProxySessionTest, SetCipherOfHandshakeMsgTest006, TestSize.Level1)
 {
-    char buf[TEST_BUFFER_SIZE] = {0};
-    int32_t channelId = 1;
-    int32_t pid = 0;
-    int32_t len = sizeof(TestSliceHead) + TEST_VALID_DATA_LEN;
-    const char *pkgName = "com.test.trans.proxysession";
-    TestSliceHead head;
-    head.priority  = TEST_VALID_PRIORITY;
-    head.sliceNum = TEST_SLICENUM_TWO;
+    ProxyChannelInfo proxyChannelInfo;
+    proxyChannelInfo.authHandle = { AUTH_LINK_TYPE_BR, CONNECT_TCP };
 
-    /* test first slice process */
-    head.sliceSeq = 0;
-    (void)memcpy_s(buf, TEST_BUFFER_SIZE, &head, sizeof(TestSliceHead));
-    int32_t ret = TransOnNormalMsgReceived(pkgName, pid, channelId, buf, len);
-    EXPECT_EQ(SOFTBUS_OK, ret);
-    /* test last slice process */
-    head.sliceSeq = 1;
-    (void)memcpy_s(buf, TEST_BUFFER_SIZE, &head, sizeof(TestSliceHead));
-    ret = TransOnNormalMsgReceived(pkgName, pid, channelId, buf, len);
-    EXPECT_NE(SOFTBUS_OK, ret);
-    /* test normal slice process */
-    head.sliceSeq = TEST_SLICESEQ_THREE;
-    (void)memcpy_s(buf, TEST_BUFFER_SIZE, &head, sizeof(TestSliceHead));
-    ret = TransOnNormalMsgReceived(pkgName, pid, channelId, buf, len);
-    EXPECT_NE(SOFTBUS_OK, ret);
+    SoftbusTransProxyNetworkMock networkObj;
+    EXPECT_CALL(networkObj, AuthGetLatestIdByUuid)
+        .WillRepeatedly(DoAll(SetArgPointee<3>(proxyChannelInfo.authHandle)));
+
+    EXPECT_CALL(networkObj, TransProxySetAuthHandleByChanId).WillOnce(Return(SOFTBUS_OK));
+
+    AuthConnInfo connInfo;
+    connInfo.type = AUTH_LINK_TYPE_WIFI;
+    EXPECT_CALL(networkObj, AuthGetConnInfo)
+        .WillRepeatedly(DoAll(SetArgPointee<1>(connInfo), Return(SOFTBUS_OK)));
+
+    bool isAuthServer = false;
+    EXPECT_CALL(networkObj, AuthGetServerSide)
+        .WillRepeatedly(DoAll(SetArgPointee<1>(isAuthServer), Return(SOFTBUS_OK)));
+
+    uint8_t cipher;
+    int32_t ret = SetCipherOfHandshakeMsg(&proxyChannelInfo, &cipher);
+    EXPECT_EQ(ret, SOFTBUS_OK);
 }
 
 /**
- * @tc.name: TransOnAuthMsgReceivedTest001
- * @tc.desc: test proxy on auth msg received.
- * @tc.type: FUNC
- * @tc.require:
- */
-HWTEST_F(TransProxySessionTest, TransOnAuthMsgReceivedTest001, TestSize.Level1)
+  * @tc.name: TransProxyHandshakeTest001
+  * @tc.desc: TransProxyHandshake
+  * @tc.type: FUNC
+  * @tc.require:
+  */
+HWTEST_F(TransProxySessionTest, TransProxyHandshakeTest001, TestSize.Level1)
 {
-    const char *pkgName = "com.test.trans.proxysession";
-    int32_t pid = 0;
-    int32_t channelId = -1;
-    const char * data = "test data";
-    int32_t ret = TransOnAuthMsgReceived(pkgName, pid, channelId, nullptr, 0);
-    EXPECT_NE(SOFTBUS_OK, ret);
+    ProxyChannelInfo proxyChannelInfo;
+    proxyChannelInfo.appInfo.appType = APP_TYPE_AUTH;
 
-    uint32_t len = TEST_INVALID_DATA_LEN;
-    ret = TransOnAuthMsgReceived(pkgName, pid, channelId, data, len);
-    EXPECT_NE(SOFTBUS_OK, ret);
-    len = TEST_VALID_DATA_LEN;
-    ret = TransOnAuthMsgReceived(pkgName, pid, channelId, data, len);
-    EXPECT_EQ(SOFTBUS_OK, ret);
+    SoftbusTransProxyNetworkMock networkObj;
+    EXPECT_CALL(networkObj, TransProxyPackHandshakeMsg).WillOnce(Return(nullptr));
+
+    int32_t ret = TransProxyHandshake(&proxyChannelInfo);
+    EXPECT_EQ(ret, SOFTBUS_TRANS_PROXY_PACK_HANDSHAKE_ERR);
 }
 
 /**
- * @tc.name: TransProxyDelSliceProcessorByChannelIdTest001
- * @tc.desc: test del slice processor by channelId.
- * @tc.type: FUNC
- * @tc.require:
- */
-HWTEST_F(TransProxySessionTest, TransProxyDelSliceProcessorByChannelIdTest001, TestSize.Level1)
+  * @tc.name: TransProxyHandshakeTest002
+  * @tc.desc: TransProxyHandshake
+  * @tc.type: FUNC
+  * @tc.require:
+  */
+HWTEST_F(TransProxySessionTest, TransProxyHandshakeTest002, TestSize.Level1)
 {
-    int32_t channelId = -1;
-    int32_t ret = TransProxyDelSliceProcessorByChannelId(channelId);
-    EXPECT_EQ(SOFTBUS_OK, ret);
+    ProxyChannelInfo proxyChannelInfo;
+    proxyChannelInfo.appInfo.appType = APP_TYPE_AUTH;
 
-    channelId = 1;
-    ret = TransProxyDelSliceProcessorByChannelId(channelId);
-    EXPECT_EQ(SOFTBUS_OK, ret);
+    char *payLoad = static_cast<char *>(SoftBusCalloc(32));
+    ASSERT_TRUE(payLoad != nullptr);
+    (void)strcpy_s(payLoad, 32, "testpayload");
+
+    SoftbusTransProxyNetworkMock networkObj;
+    EXPECT_CALL(networkObj, TransProxyPackHandshakeMsg).WillOnce(Return(payLoad));
+    EXPECT_CALL(networkObj, TransProxyPackMessage).WillOnce(Return(SOFTBUS_TRANS_PROXY_PACK_HANDSHAKE_HEAD_ERR));
+
+    int32_t ret = TransProxyHandshake(&proxyChannelInfo);
+    EXPECT_EQ(ret, SOFTBUS_TRANS_PROXY_PACK_HANDSHAKE_HEAD_ERR);
+}
+
+/**
+  * @tc.name: TransProxyHandshakeTest003
+  * @tc.desc: TransProxyHandshake
+  * @tc.type: FUNC
+  * @tc.require:
+  */
+HWTEST_F(TransProxySessionTest, TransProxyHandshakeTest003, TestSize.Level1)
+{
+    ProxyChannelInfo proxyChannelInfo;
+    proxyChannelInfo.appInfo.appType = APP_TYPE_AUTH;
+
+    char *payLoad = static_cast<char *>(SoftBusCalloc(32));
+    ASSERT_TRUE(payLoad != nullptr);
+    (void)strcpy_s(payLoad, 32, "testpayload");
+
+    SoftbusTransProxyNetworkMock networkObj;
+    EXPECT_CALL(networkObj, TransProxyPackHandshakeMsg).WillOnce(Return(payLoad));
+    EXPECT_CALL(networkObj, TransProxyPackMessage).WillOnce(Return(SOFTBUS_OK));
+    EXPECT_CALL(networkObj, TransProxyTransSendMsg).WillOnce(Return(SOFTBUS_CONN_MANAGER_OP_NOT_SUPPORT));
+
+    int32_t ret = TransProxyHandshake(&proxyChannelInfo);
+    EXPECT_EQ(ret, SOFTBUS_CONN_MANAGER_OP_NOT_SUPPORT);
+}
+
+/**
+  * @tc.name: TransProxyHandshakeTest004
+  * @tc.desc: TransProxyHandshake
+  * @tc.type: FUNC
+  * @tc.require:
+  */
+HWTEST_F(TransProxySessionTest, TransProxyHandshakeTest004, TestSize.Level1)
+{
+    ProxyChannelInfo proxyChannelInfo = {
+        .appInfo.appType = APP_TYPE_AUTH,
+        .myId = 1916,
+        .connId = 131041
+    };
+
+    char *payLoad = static_cast<char *>(SoftBusCalloc(32));
+    ASSERT_TRUE(payLoad != nullptr);
+    (void)strcpy_s(payLoad, 32, "testpayload");
+
+    SoftbusTransProxyNetworkMock networkObj;
+    EXPECT_CALL(networkObj, TransProxyPackHandshakeMsg).WillOnce(Return(payLoad));
+    EXPECT_CALL(networkObj, TransProxyPackMessage).WillOnce(Return(SOFTBUS_OK));
+    EXPECT_CALL(networkObj, TransProxyTransSendMsg).WillOnce(Return(SOFTBUS_OK));
+
+    int32_t ret = TransProxyHandshake(&proxyChannelInfo);
+    EXPECT_EQ(ret, SOFTBUS_OK);
+}
+
+/**
+  * @tc.name: TransProxyKeepaliveTest001
+  * @tc.desc: TransProxyKeepalive
+  * @tc.type: FUNC
+  * @tc.require:
+  */
+HWTEST_F(TransProxySessionTest, TransProxyKeepaliveTest001, TestSize.Level1)
+{
+    ProxyChannelInfo proxyChannelInfo = {
+        .appInfo.appType = APP_TYPE_AUTH,
+        .myId = 1916,
+        .peerId = 3035,
+        .connId = 131041
+    };
+
+    SoftbusTransProxyNetworkMock networkObj;
+    EXPECT_CALL(networkObj, TransProxyPackIdentity).WillOnce(Return(nullptr));
+
+    EXPECT_NO_FATAL_FAILURE(TransProxyKeepalive(1234, &proxyChannelInfo));
+}
+
+/**
+  * @tc.name: TransProxyAckKeepaliveTest001
+  * @tc.desc: TransProxyAckKeepalive
+  * @tc.type: FUNC
+  * @tc.require:
+  */
+HWTEST_F(TransProxySessionTest, TransProxyAckKeepaliveTest001, TestSize.Level1)
+{
+    ProxyChannelInfo proxyChannelInfo = {
+        .appInfo.appType = APP_TYPE_AUTH,
+        .myId = 1916,
+        .peerId = 3035
+    };
+
+    SoftbusTransProxyNetworkMock networkObj;
+    EXPECT_CALL(networkObj, TransProxyPackIdentity).WillOnce(Return(nullptr));
+
+    int32_t ret = TransProxyAckKeepalive(&proxyChannelInfo);
+    EXPECT_EQ(ret, SOFTBUS_TRANS_PACK_LEEPALIVE_ACK_FAILED);
+}
+
+/**
+  * @tc.name: TransProxyAckKeepaliveTest002
+  * @tc.desc: TransProxyAckKeepalive
+  * @tc.type: FUNC
+  * @tc.require:
+  */
+HWTEST_F(TransProxySessionTest, TransProxyAckKeepaliveTest002, TestSize.Level1)
+{
+    ProxyChannelInfo proxyChannelInfo = {
+        .appInfo.appType = APP_TYPE_AUTH,
+        .myId = 1916,
+        .peerId = 3035
+    };
+
+    char *payLoad = static_cast<char *>(SoftBusCalloc(32));
+    ASSERT_TRUE(payLoad != nullptr);
+    (void)strcpy_s(payLoad, 32, "testpayload");
+
+    SoftbusTransProxyNetworkMock networkObj;
+    EXPECT_CALL(networkObj, TransProxyPackIdentity).WillOnce(Return(payLoad));
+    EXPECT_CALL(networkObj, TransProxyPackMessage).WillOnce(Return(SOFTBUS_OK));
+    EXPECT_CALL(networkObj, TransProxyTransSendMsg).WillOnce(Return(SOFTBUS_OK));
+
+    int32_t ret = TransProxyAckKeepalive(&proxyChannelInfo);
+    EXPECT_EQ(ret, SOFTBUS_OK);
+}
+
+/**
+  * @tc.name: TransProxyResetPeerTest001
+  * @tc.desc: TransProxyResetPeer
+  * @tc.type: FUNC
+  * @tc.require:
+  */
+HWTEST_F(TransProxySessionTest, TransProxyResetPeerTest001, TestSize.Level1)
+{
+    ProxyChannelInfo proxyChannelInfo = {
+        .appInfo.appType = APP_TYPE_AUTH,
+        .myId = 1916,
+        .peerId = 3035
+    };
+
+    SoftbusTransProxyNetworkMock networkObj;
+    EXPECT_CALL(networkObj, TransProxyPackIdentity).WillOnce(Return(nullptr));
+
+    int32_t ret = TransProxyAckKeepalive(&proxyChannelInfo);
+    EXPECT_EQ(ret, SOFTBUS_TRANS_PACK_LEEPALIVE_ACK_FAILED);
 }
 
 } // namespace OHOS
