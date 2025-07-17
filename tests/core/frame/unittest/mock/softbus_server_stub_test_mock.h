@@ -58,6 +58,7 @@ public:
     virtual bool SoftBusCheckIsSystemApp(uint64_t tokenId) = 0;
     virtual bool SoftBusCheckIsNormalApp(uint64_t fullTokenId, const char *sessionName) = 0;
     virtual int32_t CheckLnnPermission(const char *interfaceName, const char *processName) = 0;
+    virtual int32_t UnregChangeListener(const char *appId) = 0;
 };
 class SoftbusServerStubTestInterfaceMock : public SoftbusServerStubTestInterface {
 public:
@@ -86,6 +87,7 @@ public:
     MOCK_METHOD1(SoftBusCheckIsSystemApp, bool (uint64_t tokenId));
     MOCK_METHOD2(SoftBusCheckIsNormalApp, bool (uint64_t fullTokenId, const char *sessionName));
     MOCK_METHOD2(CheckLnnPermission, int32_t (const char *interfaceName, const char *processName));
+    MOCK_METHOD1(UnregChangeListener, int32_t (const char *appId));
 };
 }
 

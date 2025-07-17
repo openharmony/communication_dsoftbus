@@ -664,6 +664,27 @@ HWTEST_F(TransProxyChannelTest, TransProxySendInnerMessageTest001, TestSize.Leve
 }
 
 /**
+ * @tc.name: TransProxySendInnerMessageTest002
+ * @tc.desc: TransProxySendInnerMessage
+ * @tc.type: FUNC
+ * @tc.require:
+ */
+HWTEST_F(TransProxyChannelTest, TransProxySendInnerMessageTest002, TestSize.Level1)
+{
+    ProxyChannelInfo info = {
+        .myId = 1925,
+        .peerId = 1524,
+        .authHandle.authId = 1,
+        .appInfo.channelCapability = 3
+    };
+    uint32_t payLoadLen = 12;
+    int32_t priority = 1;
+
+    int32_t ret = TransProxySendInnerMessage(&info, TEST_PAY_LOAD, payLoadLen, priority);
+    EXPECT_EQ(ret, SOFTBUS_TRANS_PROXY_PACKMSG_ERR);
+}
+
+/**
  * @tc.name: ConvertConnectType2AuthLinkTypeTest001
  * @tc.desc: Should return corresponding link type when given different connect types.
  * @tc.type: FUNC
