@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2025 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -207,6 +207,7 @@ int32_t SoftbusGattcRegisterCallback(SoftBusGattcCallback *cb, int32_t clientId)
 
 static void GetGattcCallback(int32_t clientId, SoftBusGattcCallback *cb)
 {
+    CONN_CHECK_AND_RETURN_LOGE(g_softBusGattcManager != NULL, CONN_BLE, "GattcManager is null.");
     CONN_CHECK_AND_RETURN_LOGE(SoftBusMutexLock(&g_softBusGattcManager->lock) == SOFTBUS_OK,
         CONN_BLE, "try to lock failed, clientId=%{public}d", clientId);
     SoftBusGattcManager *it = NULL;
@@ -243,6 +244,8 @@ int32_t SoftbusGattcUnRegister(int32_t clientId)
         CONN_LOGE(CONN_BLE, "BleGattcUnRegister error");
         ret = SOFTBUS_GATTC_INTERFACE_FAILED;
     }
+    CONN_CHECK_AND_RETURN_RET_LOGE(g_softBusGattcManager != NULL, SOFTBUS_INVALID_PARAM,
+        CONN_BLE, "GattcManager is null");
     CONN_CHECK_AND_RETURN_RET_LOGE(SoftBusMutexLock(&g_softBusGattcManager->lock) == SOFTBUS_OK,
         SOFTBUS_LOCK_ERR, CONN_BLE, "try to lock failed, clientId=%{public}d", clientId);
     SoftBusGattcManager *it = NULL;
@@ -268,6 +271,8 @@ bool SoftbusGattcCheckExistConnectionByAddr(const SoftBusBtAddr *btAddr)
         CONN_LOGE(CONN_BLE, "convert bt mac to str fail!");
         return isExist;
     }
+    CONN_CHECK_AND_RETURN_RET_LOGE(g_btAddrs != NULL, SOFTBUS_INVALID_PARAM,
+        CONN_BLE, "BtAddrs is null");
     CONN_CHECK_AND_RETURN_RET_LOGE(SoftBusMutexLock(&g_btAddrs->lock) == SOFTBUS_OK,
         false, CONN_BLE, "try to lock failed");
     BleConnMac *it = NULL;
@@ -287,6 +292,7 @@ bool SoftbusGattcCheckExistConnectionByAddr(const SoftBusBtAddr *btAddr)
 
 static int32_t SoftbusGattcAddMacAddrToList(int32_t clientId, const SoftBusBtAddr *addr)
 {
+    CONN_CHECK_AND_RETURN_RET_LOGE(addr != NULL, SOFTBUS_INVALID_PARAM, CONN_BLE, "addr is NULL");
     BleConnMac *bleConnAddr = (BleConnMac *)SoftBusCalloc(sizeof(BleConnMac));
     CONN_CHECK_AND_RETURN_RET_LOGE(bleConnAddr != NULL, SOFTBUS_MALLOC_ERR, CONN_BLE,
         "calloc failed, clientId=%{public}d", clientId);
@@ -299,6 +305,8 @@ static int32_t SoftbusGattcAddMacAddrToList(int32_t clientId, const SoftBusBtAdd
     }
     bleConnAddr->clientId = clientId;
 
+    CONN_CHECK_AND_RETURN_RET_LOGE(g_btAddrs != NULL, SOFTBUS_INVALID_PARAM,
+        CONN_BLE, "BtAddrs is null");
     if (SoftBusMutexLock(&g_btAddrs->lock) != SOFTBUS_OK) {
         SoftBusFree(bleConnAddr);
         CONN_LOGE(CONN_BLE, "try to lock failed");
@@ -311,6 +319,7 @@ static int32_t SoftbusGattcAddMacAddrToList(int32_t clientId, const SoftBusBtAdd
 
 static void SoftbusGattcDeleteMacAddrFromList(int32_t clientId)
 {
+    CONN_CHECK_AND_RETURN_LOGE(g_btAddrs != NULL, CONN_BLE, "BtAddrs is null");
     CONN_CHECK_AND_RETURN_LOGE(SoftBusMutexLock(&g_btAddrs->lock) == SOFTBUS_OK,
         CONN_BLE, "try to lock failed, clientId=%{public}d", clientId);
     BleConnMac *it = NULL;
@@ -327,6 +336,7 @@ static void SoftbusGattcDeleteMacAddrFromList(int32_t clientId)
 
 int32_t SoftbusGattcConnect(int32_t clientId, SoftBusBtAddr *addr)
 {
+    CONN_CHECK_AND_RETURN_RET_LOGE(addr != NULL, SOFTBUS_INVALID_PARAM, CONN_BLE, "addr is NULL");
     BdAddr bdAddr = {0};
     if (memcpy_s(bdAddr.addr, OHOS_BD_ADDR_LEN, addr->addr, BT_ADDR_LEN) != EOK) {
         CONN_LOGE(CONN_BLE, "memcpy error");
@@ -376,7 +386,7 @@ int32_t SoftbusGattcRefreshServices(int32_t clientId)
 
 int32_t SoftbusGattcGetService(int32_t clientId, SoftBusBtUuid *serverUuid)
 {
-    if (clientId <= 0) {
+    if (clientId <= 0 || serverUuid == NULL) {
         CONN_LOGE(CONN_BLE, "invalid param");
         return SOFTBUS_INVALID_PARAM;
     }
@@ -395,6 +405,10 @@ int32_t SoftbusGattcRegisterNotification(
     int32_t clientId, SoftBusBtUuid *serverUuid, SoftBusBtUuid *charaUuid, SoftBusBtUuid *descriptorUuid)
 {
     (void)descriptorUuid;
+    if (serverUuid == NULL || charaUuid == NULL) {
+        CONN_LOGE(CONN_BLE, "Uuid is null.");
+        return SOFTBUS_INVALID_PARAM;
+    }
     BtGattCharacteristic btCharaUuid;
     btCharaUuid.serviceUuid.uuid = serverUuid->uuid;
     btCharaUuid.serviceUuid.uuidLen = serverUuid->uuidLen;
