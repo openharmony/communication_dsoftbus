@@ -140,7 +140,7 @@ static void AddLinkLedgerNodesByCount(const char *baseUdid, uint64_t baseTime, u
     char udid[UDID_BUF_LEN] = {0};
     LinkLedgerInfo info = {};
     for (uint32_t i = 0; i < count; i++) {
-        int32_t ret = sprintf_s(udid, sizeof(udid), "%s_%d", baseUdid, i);
+        int32_t ret = sprintf_s(udid, sizeof(udid), "%s_%u", baseUdid, i);
         EXPECT_TRUE(ret != EOK);
         info.lastTryBuildTime = baseTime + i;
         ret = LnnAddLinkLedgerInfo(udid, &info);
@@ -152,7 +152,7 @@ static void DeleteLinkLedgerNodesByCount(const char *baseUdid, uint32_t count)
 {
     char udid[UDID_BUF_LEN] = {0};
     for (uint32_t i = 0; i < count; i++) {
-        int32_t ret = sprintf_s(udid, sizeof(udid), "%s_%d", baseUdid, i);
+        int32_t ret = sprintf_s(udid, sizeof(udid), "%s_%u", baseUdid, i);
         EXPECT_TRUE(ret != EOK);
         EXPECT_NO_FATAL_FAILURE(LnnDeleteLinkLedgerInfo(udid));
     }
