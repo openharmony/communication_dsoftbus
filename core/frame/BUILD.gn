@@ -128,9 +128,13 @@ if (defined(ohos_lite)) {
       }
       deps = dsoftbus_server_common_deps
       deps += [
+
+        # softbus_utils need to be depended first cause softbus_utils and softbus_dfx_dump compiles the same file softbus_utils.c
+        # close src just depends softbus_utils therefore softbus_server should use the global variable of softbus_utils
+        "$dsoftbus_root_path/core/common:softbus_utils",
+
         "$dsoftbus_dfx_path/dumper/legacy:softbus_dfx_dump",
         "$dsoftbus_root_path/adapter:softbus_adapter",
-        "$dsoftbus_root_path/core/common:softbus_utils",
         "$dsoftbus_root_path/core/connection/wifi_direct_cpp:wifi_direct",
         "//build/lite/config/component/cJSON:cjson_static",
       ]
@@ -246,9 +250,13 @@ if (defined(ohos_lite)) {
       deps += [
         ":permission_json",
         ":lnn_permission_json",
+
+        # softbus_utils need to be depended first cause softbus_utils and softbus_dfx_dump compiles the same file softbus_utils.c
+        # close src just depends softbus_utils therefore softbus_server should use the global variable of softbus_utils
+        "$dsoftbus_root_path/core/common:softbus_utils",
+
         "$dsoftbus_dfx_path/dumper/legacy:softbus_dfx_dump",
         "$dsoftbus_root_path/adapter:softbus_adapter",
-        "$dsoftbus_root_path/core/common:softbus_utils",
         "//build/lite/config/component/cJSON:cjson_shared",
         "//foundation/communication/ipc/interfaces/innerkits/c/ipc:ipc_single",
         "//foundation/systemabilitymgr/samgr_lite/samgr:samgr",
@@ -404,9 +412,13 @@ if (defined(ohos_lite)) {
       ":softbus_permission_json",
       ":softbus_lnn_permission_json",
       ":softbus_server.rc",
+
+      # softbus_utils need to be depended first cause softbus_utils and softbus_dfx_dump compiles the same file softbus_utils.c
+      # close src just depends softbus_utils therefore softbus_server should use the global variable of softbus_utils
+      "$dsoftbus_root_path/core/common:softbus_utils",
+
       "$dsoftbus_dfx_path/dumper/legacy:softbus_dfx_dump",
       "$dsoftbus_root_path/adapter:softbus_adapter",
-      "$dsoftbus_root_path/core/common:softbus_utils",
       "$dsoftbus_root_path/core/connection/wifi_direct_cpp:wifi_direct",
     ]
     external_deps = [ "cJSON:cjson" ]
