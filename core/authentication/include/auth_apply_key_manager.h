@@ -32,6 +32,7 @@ int32_t AuthInsertApplyKey(const RequestBusinessInfo *info, const uint8_t *uk, u
 int32_t GetApplyKeyByBusinessInfo(const RequestBusinessInfo *info, uint8_t *uk, uint32_t ukLen);
 int32_t AuthDeleteApplyKey(const RequestBusinessInfo *info);
 void AuthRecoveryApplyKey(void);
+void AuthClearAccountApplyKey(void);
 
 #ifdef __cplusplus
 }
