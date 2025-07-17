@@ -1567,13 +1567,13 @@ int32_t LnnAsyncSaveDeviceDataPacked(const char *data, LnnDataType dataType)
     return pfnLnnEnhanceFuncList->lnnAsyncSaveDeviceData(data, dataType);
 }
 
-int32_t LnnDeletaDeviceDataPacked(LnnDataType dataType)
+int32_t LnnDeleteDeviceDataPacked(LnnDataType dataType)
 {
     LnnEnhanceFuncList *pfnLnnEnhanceFuncList = LnnEnhanceFuncListGet();
-    if (LnnCheckFuncPointer((void *)pfnLnnEnhanceFuncList->lnnDeletaDeviceData) != SOFTBUS_OK) {
+    if (LnnCheckFuncPointer((void *)pfnLnnEnhanceFuncList->lnnDeleteDeviceData) != SOFTBUS_OK) {
         return SOFTBUS_NOT_IMPLEMENT;
     }
-    return pfnLnnEnhanceFuncList->lnnDeletaDeviceData(dataType);
+    return pfnLnnEnhanceFuncList->lnnDeleteDeviceData(dataType);
 }
 void CheckNeedCloudSyncOfflinePacked(DiscoveryType type)
 {

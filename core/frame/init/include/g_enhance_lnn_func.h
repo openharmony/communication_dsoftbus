@@ -196,7 +196,7 @@ typedef int32_t (*LnnSaveDeviceDataFunc)(const char *data, LnnDataType dataType)
 typedef int32_t (*LnnAsyncSaveDeviceDataFunc)(const char *data, LnnDataType dataType);
 typedef int32_t (*LnnRetrieveDeviceDataFunc)(LnnDataType dataType, char **data, uint32_t *dataLen);
 typedef int32_t (*LnnUpdateDeviceDataFunc)(const char *data, LnnDataType dataType);
-typedef int32_t (*LnnDeletaDeviceDataFunc)(LnnDataType dataType);
+typedef int32_t (*LnnDeleteDeviceDataFunc)(LnnDataType dataType);
 typedef int32_t (*LnnLinkFinderInitFunc)(void);
 typedef int32_t (*LnnUpdateLinkFinderInfoFunc)(void);
 typedef int32_t (*LnnRemoveLinkFinderInfoFunc)(const char *networkId);
@@ -448,7 +448,7 @@ typedef struct TagLnnEnhanceFuncList {
     InitActionBleConcurrencyFunc initActionBleConcurrency;
     InitActionStateAdapterFunc initActionStateAdapter;
     // adapter bus_center
-    LnnDeletaDeviceDataFunc lnnDeletaDeviceData;
+    LnnDeleteDeviceDataFunc lnnDeleteDeviceData;
     LnnLinkFinderInitFunc lnnLinkFinderInit;
     LnnUpdateLinkFinderInfoFunc lnnUpdateLinkFinderInfo;
     LnnRemoveLinkFinderInfoFunc lnnRemoveLinkFinderInfo;
