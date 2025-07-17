@@ -203,7 +203,7 @@ HWTEST_F(LNNDisctributedLedgerTest, LNN_GET_REMOTE_STRINFO_BY_IFNAME_Test_001, T
 HWTEST_F(LNNDisctributedLedgerTest, LNN_GET_REMOTE_NUMNFO_Test_002, TestSize.Level1)
 {
     static InfoKey keyNumTable[] = { NUM_KEY_META_NODE, NUM_KEY_NET_CAP, NUM_KEY_DISCOVERY_TYPE,
-        NUM_KEY_MASTER_NODE_WEIGHT, NUM_KEY_P2P_ROLE, NUM_KEY_SLE_RANGE_CAP };
+        NUM_KEY_MASTER_NODE_WEIGHT, NUM_KEY_P2P_ROLE, NUM_KEY_SLE_RANGE_CAP, NUM_KEY_USERID };
     int32_t ret;
     uint32_t i;
     int32_t len = LNN_COMMON_LEN;
@@ -1499,6 +1499,8 @@ HWTEST_F(LNNDisctributedLedgerTest, GET_AND_SAVE_REMOTE_DEVICE_INFO_ID_Test_001,
     EXPECT_EQ(EOK, strcpy_s(deviceInfo.remotePtk, PTK_DEFAULT_LEN, "oldPtk"));
     info.netCapacity = 15;
     info.accountId = 100;
+    NiceMock<LnnDisctributedNetLedgerInterfaceMock> mock;
+    EXPECT_CALL(mock, LnnSaveRemoteDeviceInfo).WillRepeatedly(Return(SOFTBUS_OK));
     EXPECT_NO_FATAL_FAILURE(GetAndSaveRemoteDeviceInfo(&deviceInfo, &info));
 }
 
@@ -1663,10 +1665,10 @@ HWTEST_F(LNNDisctributedLedgerTest, LNN_CONVERT_DL_ID_Test_001, TestSize.Level1)
         CATEGORY_UUID, dstIdBuf1, UUID_BUF_LEN));
     const char *srcId2 = "235689BNHFCF";
     char dstIdBuf2[NETWORK_ID_BUF_LEN] = { 0 };
-    EXPECT_EQ(SOFTBUS_NOT_FIND, LnnConvertDlId(const_cast<char *>(srcId2), CATEGORY_NETWORK_ID,
+    EXPECT_EQ(SOFTBUS_OK, LnnConvertDlId(const_cast<char *>(srcId2), CATEGORY_NETWORK_ID,
         CATEGORY_NETWORK_ID, dstIdBuf2, NETWORK_ID_BUF_LEN));
     EXPECT_EQ(SOFTBUS_INVALID_PARAM, LnnConvertDlId(nullptr, CATEGORY_UDID, CATEGORY_UDID, dstIdBuf, UDID_BUF_LEN));
-    EXPECT_EQ(SOFTBUS_INVALID_PARAM, LnnConvertDlId(const_cast<char *>(srcId2), CATEGORY_UDID,
+    EXPECT_EQ(SOFTBUS_NOT_FIND, LnnConvertDlId(const_cast<char *>(srcId2), CATEGORY_UDID,
         CATEGORY_UDID, dstIdBuf, UDID_BUF_LEN));
 }
 

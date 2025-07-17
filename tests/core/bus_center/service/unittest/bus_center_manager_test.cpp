@@ -123,8 +123,11 @@ HWTEST_F(BusCenterManagerTest, BusCenterManagerTest004, TestSize.Level1)
 
     NiceMock<BusCenterManagerDepsInterfaceMock> BusCenterManagerMock;
     SoftBusLooper loop;
-    EXPECT_CALL(BusCenterManagerMock, CreateNewLooper(_)).WillOnce(Return(&loop));
+    SoftBusLooper laneLoop;
+    EXPECT_CALL(BusCenterManagerMock, CreateNewLooper(_)).WillOnce(Return(&loop))
+        .WillOnce(Return(&laneLoop));
     EXPECT_CALL(BusCenterManagerMock, LnnInitNetLedger()).WillOnce(Return(SOFTBUS_OK));
+    EXPECT_CALL(BusCenterManagerMock, LnnInitDecisionCenter(_)).WillRepeatedly(Return(SOFTBUS_OK));
     EXPECT_CALL(BusCenterManagerMock, LnnInitBusCenterEvent()).WillOnce(Return(SOFTBUS_OK));
     EXPECT_CALL(BusCenterManagerMock, LnnInitEventMonitor()).WillOnce(Return(SOFTBUS_OK));
     EXPECT_CALL(BusCenterManagerMock, LnnInitDiscoveryManager()).WillOnce(Return(SOFTBUS_OK));
@@ -224,6 +227,39 @@ HWTEST_F(BusCenterManagerTest, BusCenterManagerTest006, TestSize.Level1)
     EXPECT_CALL(BusCenterManagerMock, InitUdidChangedEvent()).WillOnce(Return(SOFTBUS_OK));
     ret = BusCenterServerInit();
     EXPECT_EQ(ret, SOFTBUS_OK);
+}
+
+/*
+* @tc.name: BusCenterManagerTest007
+* @tc.desc: test BusCenterServerInit
+* @tc.type: FUNC
+* @tc.require: 1
+*/
+HWTEST_F(BusCenterManagerTest, BusCenterManagerTest007, TestSize.Level1)
+{
+    NiceMock<BusCenterManagerDepsInterfaceMock> BusCenterManagerMock;
+    SoftBusLooper loop;
+    EXPECT_CALL(BusCenterManagerMock, CreateNewLooper(_)).WillOnce(Return(&loop))
+        .WillOnce(Return(nullptr));
+    EXPECT_NE(BusCenterServerInit(), SOFTBUS_OK);
+}
+
+/*
+* @tc.name: BusCenterManagerTest008
+* @tc.desc: test LnnInitLaneLooper
+* @tc.type: FUNC
+* @tc.require: 1
+*/
+HWTEST_F(BusCenterManagerTest, BusCenterManagerTest008, TestSize.Level1)
+{
+    NiceMock<BusCenterManagerDepsInterfaceMock> busCenterManagerMock;
+    SoftBusLooper loop;
+    EXPECT_CALL(busCenterManagerMock, CreateNewLooper(_)).WillOnce(Return(nullptr))
+        .WillRepeatedly(Return(&loop));
+    EXPECT_EQ(LnnInitLaneLooper(), SOFTBUS_LOOPER_ERR);
+    EXPECT_NO_FATAL_FAILURE(LnnDeinitLaneLooper());
+    EXPECT_EQ(LnnInitLaneLooper(), SOFTBUS_OK);
+    EXPECT_NO_FATAL_FAILURE(LnnDeinitLaneLooper());
 }
 
 /*

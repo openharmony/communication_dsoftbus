@@ -1382,6 +1382,8 @@ HWTEST_F(LNNLaneMockTest, LANE_CANCEL_Test_003, TestSize.Level1)
 */
 HWTEST_F(LNNLaneMockTest, LANE_FREE_001, TestSize.Level1)
 {
+    NiceMock<LaneDepsInterfaceMock> laneMock;
+    EXPECT_CALL(laneMock, SoftBusGetSysTimeMs).WillRepeatedly(Return(0));
     const LnnLaneManager *laneManager = GetLaneManager();
     LaneType laneType = LANE_TYPE_BUTT;
     uint32_t laneReqId = laneManager->lnnGetLaneHandle(laneType);
@@ -1505,13 +1507,12 @@ HWTEST_F(LNNLaneMockTest, LNN_BUILD_LINK_003, TestSize.Level1)
     NiceMock<LnnWifiAdpterInterfaceMock> wifiMock;
 
     ConnBleConnection *connection = (ConnBleConnection*)SoftBusCalloc(sizeof(ConnBleConnection));
-    if (connection == nullptr) {
-        return;
-    }
+    ASSERT_NE(connection, nullptr);
     const char *udid = "testuuid";
     NodeInfo *nodeInfo = (NodeInfo*)SoftBusCalloc(sizeof(NodeInfo));
     if (nodeInfo == nullptr) {
-        return;
+        SoftBusFree(connection);
+        ASSERT_NE(nodeInfo, nullptr);
     }
     connection->state = BLE_CONNECTION_STATE_EXCHANGED_BASIC_INFO;
     EXPECT_CALL(mock, LnnConvertDLidToUdid).WillRepeatedly(Return(udid));
@@ -1720,23 +1721,16 @@ HWTEST_F(LNNLaneMockTest, LNN_BUILD_LINK_009, TestSize.Level1)
     };
     NiceMock<LaneDepsInterfaceMock> mock;
     EXPECT_CALL(mock, LnnGetRemoteStrInfo).WillRepeatedly(Return(SOFTBUS_OK));
-    LinkRequest *request = (LinkRequest *)SoftBusCalloc(sizeof(LinkRequest));
-    if (request == nullptr) {
-        return;
-    }
-    request->linkType = LANE_COC_DIRECT;
-    if (strcpy_s(request->peerNetworkId, NETWORK_ID_BUF_LEN, networkId) != EOK) {
-        return;
-    }
-    int32_t ret = BuildLink(request, reqId, &cb);
+    LinkRequest request = {
+        .linkType = LANE_COC_DIRECT,
+    };
+    ASSERT_EQ(strcpy_s(request.peerNetworkId, NETWORK_ID_BUF_LEN, networkId), EOK);
+    int32_t ret = BuildLink(&request, reqId, &cb);
     EXPECT_TRUE(ret == SOFTBUS_OK);
 
-    if (strcpy_s(request->peerNetworkId, NETWORK_ID_BUF_LEN, networkIdNotFound) != EOK) {
-        return;
-    }
-    ret = BuildLink(request, reqId, &cb);
+    ASSERT_EQ(strcpy_s(request.peerNetworkId, NETWORK_ID_BUF_LEN, networkIdNotFound), EOK);
+    ret = BuildLink(&request, reqId, &cb);
     EXPECT_TRUE(ret == SOFTBUS_OK);
-    SoftBusFree(request);
     LaneDeleteP2pAddress(networkId, true);
 }
 
@@ -1761,13 +1755,13 @@ HWTEST_F(LNNLaneMockTest, LNN_BUILD_LINK_010, TestSize.Level1)
         .onLaneLinkFail = OnLaneLinkFail,
     };
     ConnBleConnection *connection = (ConnBleConnection *)SoftBusCalloc(sizeof(ConnBleConnection));
-    if (connection == nullptr) {
-        return;
-    }
+    ASSERT_NE(connection, nullptr);
     connection->state = BLE_CONNECTION_STATE_EXCHANGED_BASIC_INFO;
     reqInfo.linkType = LANE_BLE_REUSE;
-    if (strcpy_s(reqInfo.peerBleMac, MAX_MAC_LEN, bleMac) != EOK) {
-        return;
+    int32_t res = strcpy_s(reqInfo.peerBleMac, MAX_MAC_LEN, bleMac);
+    if (res != EOK) {
+        SoftBusFree(connection);
+        ASSERT_EQ(res, EOK);
     }
     LaneAddP2pAddress(networkId, ipAddr, port);
     LaneAddP2pAddressByIp(ipAddr, port);
@@ -1887,7 +1881,7 @@ HWTEST_F(LNNLaneMockTest, LANE_DETECT_RELIABILITY_001, TestSize.Level1)
     linkInfo.type = LANE_WLAN_2P4G;
     const LnnLaneManager *laneManager = GetLaneManager();
     LaneType laneType = LANE_TYPE_TRANS;
-    int32_t laneReqId = laneManager->lnnGetLaneHandle(laneType);
+    uint32_t laneReqId = laneManager->lnnGetLaneHandle(laneType);
     EXPECT_TRUE(laneReqId != INVALID_LANE_REQ_ID);
 
     uint64_t laneId = LANE_ID_BASE;
@@ -1922,7 +1916,7 @@ HWTEST_F(LNNLaneMockTest, LANE_DETECT_RELIABILITY_002, TestSize.Level1)
     linkInfo.type = LANE_WLAN_5G;
     const LnnLaneManager *laneManager = GetLaneManager();
     LaneType laneType = LANE_TYPE_TRANS;
-    int32_t laneReqId = laneManager->lnnGetLaneHandle(laneType);
+    uint32_t laneReqId = laneManager->lnnGetLaneHandle(laneType);
     EXPECT_TRUE(laneReqId != INVALID_LANE_REQ_ID);
 
     uint64_t laneId = LANE_ID_BASE;
@@ -1980,7 +1974,7 @@ HWTEST_F(LNNLaneMockTest, LANE_DETECT_RELIABILITY_003, TestSize.Level1)
     }
     const LnnLaneManager *laneManager = GetLaneManager();
     LaneType laneType = LANE_TYPE_TRANS;
-    int32_t laneReqId = laneManager->lnnGetLaneHandle(laneType);
+    uint32_t laneReqId = laneManager->lnnGetLaneHandle(laneType);
     EXPECT_TRUE(laneReqId != INVALID_LANE_REQ_ID);
 
     uint64_t laneId = LANE_ID_BASE;
@@ -2022,7 +2016,7 @@ HWTEST_F(LNNLaneMockTest, LANE_DETECT_RELIABILITY_004, TestSize.Level1)
     EXPECT_EQ(strcpy_s(linkInfo.linkInfo.wlan.connInfo.addr, MAX_SOCKET_ADDR_LEN, ipAddr), EOK);
     const LnnLaneManager *laneManager = GetLaneManager();
     LaneType laneType = LANE_TYPE_TRANS;
-    int32_t laneReqId = laneManager->lnnGetLaneHandle(laneType);
+    uint32_t laneReqId = laneManager->lnnGetLaneHandle(laneType);
     EXPECT_TRUE(laneReqId != INVALID_LANE_REQ_ID);
 
     NiceMock<LaneDepsInterfaceMock> mock;
@@ -2064,7 +2058,7 @@ HWTEST_F(LNNLaneMockTest, LANE_DETECT_RELIABILITY_005, TestSize.Level1)
     EXPECT_EQ(strcpy_s(linkInfo.linkInfo.wlan.connInfo.addr, MAX_SOCKET_ADDR_LEN, ipAddr), EOK);
     const LnnLaneManager *laneManager = GetLaneManager();
     LaneType laneType = LANE_TYPE_TRANS;
-    int32_t laneReqId = laneManager->lnnGetLaneHandle(laneType);
+    uint32_t laneReqId = laneManager->lnnGetLaneHandle(laneType);
     EXPECT_TRUE(laneReqId != INVALID_LANE_REQ_ID);
     LaneDepsInterfaceMock::socketEvent = SOFTBUS_SOCKET_EXCEPTION;
     NiceMock<LaneDepsInterfaceMock> mock;
@@ -2097,7 +2091,7 @@ HWTEST_F(LNNLaneMockTest, LANE_DETECT_RELIABILITY_006, TestSize.Level1)
     EXPECT_EQ(strcpy_s(linkInfo.linkInfo.wlan.connInfo.addr, MAX_SOCKET_ADDR_LEN, ipAddr), EOK);
     const LnnLaneManager *laneManager = GetLaneManager();
     LaneType laneType = LANE_TYPE_TRANS;
-    int32_t laneReqId = laneManager->lnnGetLaneHandle(laneType);
+    uint32_t laneReqId = laneManager->lnnGetLaneHandle(laneType);
     EXPECT_TRUE(laneReqId != INVALID_LANE_REQ_ID);
 
     NiceMock<LaneDepsInterfaceMock> mock;
