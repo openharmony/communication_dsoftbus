@@ -191,7 +191,7 @@ static int32_t AcceptHtpClient(int32_t fd, ConnectOption *clientAddr, int32_t *c
         CONN_LOGE(CONN_COMMON, "snprintf_s failed. ret=%{public}d", ret);
         return SOFTBUS_STRCPY_ERR;
     }
-    for (int32_t i = 0; i < strlen(clientAddr->socketOption.addr); i++) {
+    for (uint32_t i = 0; i < strlen(clientAddr->socketOption.addr); i++) {
         if (isalpha(clientAddr->socketOption.addr[i])) {
             clientAddr->socketOption.addr[i] = tolower(clientAddr->socketOption.addr[i]);
         }
