@@ -509,6 +509,9 @@ HWTEST_F(TransClientMsgServiceTest, SendMessageAsyncTest01, TestSize.Level1)
     int32_t ret = SendMessageAsync(socket, dataSeq, nullptr, len);
     EXPECT_EQ(ret, SOFTBUS_INVALID_PARAM);
 
+    ret = SendMessageAsync(socket, dataSeq, data, len);
+    EXPECT_EQ(ret, SOFTBUS_INVALID_PARAM);
+
     len = TRANS_TEST_SEND_LEN;
     ret = SendMessageAsync(socket, dataSeq, data, len);
     EXPECT_EQ(ret, SOFTBUS_INVALID_PARAM);
@@ -528,11 +531,11 @@ HWTEST_F(TransClientMsgServiceTest, SendMessageAsyncTest01, TestSize.Level1)
         g_sessionName, CHANNEL_TYPE_PROXY, BUSINESS_TYPE_D2D_MESSAGE, false, ENABLE_STATUS_SUCCESS);
     ASSERT_GT(sessionId, 0);
     ret = SendMessageAsync(sessionId, dataSeq, data, len);
-    EXPECT_EQ(ret, SOFTBUS_TRANS_BUSINESS_TYPE_NOT_MATCH);
+    EXPECT_EQ(ret, SOFTBUS_TRANS_PROXY_CHANNEL_NOT_FOUND);
 
     len = TRANS_TEST_BEYOND_MAX_MSG_LEN;
     ret = SendMessageAsync(sessionId, dataSeq, data, len);
-    EXPECT_EQ(ret, SOFTBUS_TRANS_BUSINESS_TYPE_NOT_MATCH);
+    EXPECT_EQ(ret, SOFTBUS_TRANS_SEND_LEN_BEYOND_LIMIT);
     DeleteSessionServerAndSession(g_sessionName, sessionId);
 }
 }
