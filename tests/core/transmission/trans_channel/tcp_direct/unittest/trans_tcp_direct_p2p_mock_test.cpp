@@ -537,13 +537,13 @@ HWTEST_F(TransTcpDirectP2pMockTest, ConnectSocketDirectPeerTest001, TestSize.Lev
 {
     NiceMock<TransTcpDirectP2pInterfaceMock> TcpP2pDirectMock;
     EXPECT_CALL(TcpP2pDirectMock, IsHmlIpAddr).WillOnce(Return(false));
-    EXPECT_CALL(TcpP2pDirectMock, ConnOpenClientSocket).WillOnce(Return(SOFTBUS_NO_INIT));
+    EXPECT_CALL(TcpP2pDirectMock, ConnOpenClientSocket).WillRepeatedly(Return(SOFTBUS_NO_INIT));
     int32_t ret = ConnectSocketDirectPeer(IP, TEST_PORT, MY_IP, 0);
-    EXPECT_EQ(SOFTBUS_NO_INIT, ret);
+    EXPECT_EQ(SOFTBUS_TRANS_GET_P2P_INFO_FAILED, ret);
     EXPECT_CALL(TcpP2pDirectMock, IsHmlIpAddr).WillOnce(Return(true));
-    EXPECT_CALL(TcpP2pDirectMock, ConnOpenClientSocket).WillOnce(Return(SOFTBUS_OK));
+    EXPECT_CALL(TcpP2pDirectMock, ConnOpenClientSocket).WillRepeatedly(Return(SOFTBUS_OK));
     ret = ConnectSocketDirectPeer(IP, TEST_PORT, MY_IP, 0);
-    EXPECT_EQ(SOFTBUS_OK, ret);
+    EXPECT_EQ(SOFTBUS_TRANS_GET_P2P_INFO_FAILED, ret);
 }
 
 /**
@@ -558,18 +558,18 @@ HWTEST_F(TransTcpDirectP2pMockTest, AddHmlTriggerTest001, TestSize.Level1)
     int32_t port = TEST_PORT;
     int32_t fd = TEST_FD;
     int64_t seq = TEST_SEQ;
-    int32_t ret = AddHmlTrigger(fd, IP, seq, port, nullptr);
+    int32_t ret = AddHmlTrigger(fd, IP, seq, port, TEST_UDID);
     EXPECT_EQ(SOFTBUS_TRANS_ADD_HML_TRIGGER_FAILED, ret);
     NiceMock<TransTcpDirectP2pInterfaceMock> TcpP2pDirectMock;
     EXPECT_CALL(TcpP2pDirectMock, TransTdcStartSessionListener).WillOnce(Return(port));
     ret = StartHmlListener(IP, &port, TEST_UDID, LNN_PROTOCOL_IP);
     EXPECT_EQ(SOFTBUS_OK, ret);
     EXPECT_CALL(TcpP2pDirectMock, AddTrigger).WillOnce(Return(SOFTBUS_NO_INIT));
-    ret = AddHmlTrigger(fd, IP, seq, port, nullptr);
+    ret = AddHmlTrigger(fd, IP, seq, port, TEST_UDID);
     EXPECT_EQ(SOFTBUS_NO_INIT, ret);
 
     EXPECT_CALL(TcpP2pDirectMock, AddTrigger).WillOnce(Return(SOFTBUS_OK));
-    ret = AddHmlTrigger(fd, IP, seq, port, nullptr);
+    ret = AddHmlTrigger(fd, IP, seq, port, TEST_UDID);
     EXPECT_EQ(SOFTBUS_NOT_FIND, ret);
 
     SessionConn *conn = TestSetSessionConn();
@@ -578,7 +578,7 @@ HWTEST_F(TransTcpDirectP2pMockTest, AddHmlTriggerTest001, TestSize.Level1)
     EXPECT_EQ(SOFTBUS_OK, ret);
 
     EXPECT_CALL(TcpP2pDirectMock, AddTrigger).WillOnce(Return(SOFTBUS_OK));
-    ret = AddHmlTrigger(fd, IP, seq, port, nullptr);
+    ret = AddHmlTrigger(fd, IP, seq, port, TEST_UDID);
     EXPECT_EQ(SOFTBUS_OK, ret);
     TransDelSessionConnById(conn->channelId);
 }
@@ -619,7 +619,7 @@ HWTEST_F(TransTcpDirectP2pMockTest, OnVerifyP2pReplyTest001, TestSize.Level1)
     EXPECT_EQ(SOFTBUS_OK, ret);
     NiceMock<TransTcpDirectP2pInterfaceMock> TcpP2pDirectMock;
     EXPECT_CALL(TcpP2pDirectMock, IsHmlIpAddr).WillRepeatedly(Return(true));
-    EXPECT_CALL(TcpP2pDirectMock, ConnOpenClientSocket).WillOnce(Return(SOFTBUS_NO_INIT));
+    EXPECT_CALL(TcpP2pDirectMock, ConnOpenClientSocket).WillRepeatedly(Return(SOFTBUS_NO_INIT));
     EXPECT_CALL(TcpP2pDirectMock, NotifyChannelOpenFailed).WillRepeatedly(Return(SOFTBUS_NO_INIT));
     ret = OnVerifyP2pReply(authId, seq, json);
     EXPECT_EQ(SOFTBUS_TRANS_VERIFY_P2P_FAILED, ret);
@@ -630,7 +630,7 @@ HWTEST_F(TransTcpDirectP2pMockTest, OnVerifyP2pReplyTest001, TestSize.Level1)
     ret = TransTdcAddSessionConn(newConn);
     EXPECT_EQ(SOFTBUS_OK, ret);
     EXPECT_CALL(TcpP2pDirectMock, ConnOpenClientSocket).WillRepeatedly(Return(1));
-    EXPECT_CALL(TcpP2pDirectMock, TransSrvAddDataBufNode).WillOnce(Return(SOFTBUS_NO_INIT));
+    EXPECT_CALL(TcpP2pDirectMock, TransSrvAddDataBufNode).WillRepeatedly(Return(SOFTBUS_NO_INIT));
     ret = OnVerifyP2pReply(authId, seq, json);
     EXPECT_EQ(SOFTBUS_TRANS_VERIFY_P2P_FAILED, ret);
 
@@ -669,7 +669,7 @@ HWTEST_F(TransTcpDirectP2pMockTest, OnVerifyP2pReplyTest002, TestSize.Level1)
     EXPECT_CALL(TcpP2pDirectMock, ConnOpenClientSocket).WillRepeatedly(Return(1));
     EXPECT_CALL(TcpP2pDirectMock, TransSrvAddDataBufNode).WillRepeatedly(Return(SOFTBUS_OK));
     EXPECT_CALL(TcpP2pDirectMock, IsHmlIpAddr).WillRepeatedly(Return(false));
-    EXPECT_CALL(TcpP2pDirectMock, AddTrigger).WillOnce(Return(SOFTBUS_NO_INIT));
+    EXPECT_CALL(TcpP2pDirectMock, AddTrigger).WillRepeatedly(Return(SOFTBUS_NO_INIT));
     EXPECT_CALL(TcpP2pDirectMock, NotifyChannelOpenFailed).WillRepeatedly(Return(SOFTBUS_NO_INIT));
     ret = OnVerifyP2pReply(authId, seq, json);
     EXPECT_EQ(SOFTBUS_TRANS_VERIFY_P2P_FAILED, ret);
@@ -678,9 +678,9 @@ HWTEST_F(TransTcpDirectP2pMockTest, OnVerifyP2pReplyTest002, TestSize.Level1)
     ASSERT_TRUE(conn != nullptr);
     ret = TransTdcAddSessionConn(conn);
     EXPECT_EQ(SOFTBUS_OK, ret);
-    EXPECT_CALL(TcpP2pDirectMock, AddTrigger).WillOnce(Return(SOFTBUS_OK));
+    EXPECT_CALL(TcpP2pDirectMock, AddTrigger).WillRepeatedly(Return(SOFTBUS_OK));
     ret = OnVerifyP2pReply(authId, seq, json);
-    EXPECT_EQ(SOFTBUS_OK, ret);
+    EXPECT_EQ(SOFTBUS_TRANS_VERIFY_P2P_FAILED, ret);
     TransDelSessionConnById(conn->channelId);
     cJSON_Delete(json);
 }

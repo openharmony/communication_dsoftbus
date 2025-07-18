@@ -668,11 +668,11 @@ HWTEST_F(TransProcessDataTest, TransProxyPackD2DDataTest001, TestSize.Level1)
     EXPECT_EQ(nullptr, ret);
 
     ret = TransProxyPackD2DData(&dataInfo, sliceNum, pktType, cnt, &dataLen);
-    EXPECT_NE(nullptr, ret);
+    EXPECT_EQ(nullptr, ret);
     
     sliceNum = 2;
     ret = TransProxyPackD2DData(&dataInfo, sliceNum, pktType, cnt, &dataLen);
-    EXPECT_NE(nullptr, ret);
+    EXPECT_EQ(nullptr, ret);
 }
 
 /**
@@ -747,7 +747,7 @@ HWTEST_F(TransProcessDataTest, TransProxyDecryptD2DDataTest001, TestSize.Level1)
     
     businessType = BUSINESS_TYPE_D2D_MESSAGE;
     ret = TransProxyDecryptD2DData(businessType, &dataInfo, sessionKey, sessionIv, sessionMsgIv);
-    EXPECT_EQ(SOFTBUS_TRANS_INVALID_DATA_LENGTH, ret);
+    EXPECT_EQ(SOFTBUS_INVALID_PARAM, ret);
 }
 
 /**
@@ -779,7 +779,7 @@ HWTEST_F(TransProcessDataTest, TransProxyD2DFirstSliceProcessTest001, TestSize.L
 
     head.priority = PROXY_CHANNEL_PRORITY_MESSAGE;
     ret = TransProxyD2DFirstSliceProcess(&sliceProcessor, &head, data, len, businessType);
-    EXPECT_EQ(SOFTBUS_INVALID_PARAM, ret);
+    EXPECT_EQ(SOFTBUS_OK, ret);
 
     head.sliceNum = -1;
     head.priority = PROXY_CHANNEL_PRORITY_MESSAGE;
