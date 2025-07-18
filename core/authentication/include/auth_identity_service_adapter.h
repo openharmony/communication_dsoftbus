@@ -39,6 +39,8 @@ bool IdServiceIsPotentialTrustedDevice(const char *udidHash, const char *account
 
 int32_t IdServiceQueryCredential(int32_t userId, const char *udidHash, const char *accountidHash,
     bool isSameAccount, char **credList);
+int32_t AuthIdServiceQueryCredential(int32_t peerUserId, const char *udidHash, const char *accountidHash,
+    bool isSameAccount, char **credList);
 char *IdServiceGenerateAuthParam(HiChainAuthParam *hiChainParam);
 int32_t IdServiceAuthCredential(int32_t userId, int64_t authReqId, const char *authParams,
     const DeviceAuthCallback *cb);

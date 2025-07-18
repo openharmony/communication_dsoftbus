@@ -76,6 +76,8 @@ public:
     virtual bool LnnIsDefaultOhosAccount(void) = 0;
     virtual int32_t IdServiceQueryCredential(int32_t userId, const char *udidHash, const char *accountidHash,
         bool isSameAccount, char **credList) = 0;
+    virtual int32_t AuthIdServiceQueryCredential(int32_t peerUserId, const char *udidHash, const char *accountidHash,
+        bool isSameAccount, char **credList) = 0;
     virtual char *IdServiceGetCredIdFromCredList(int32_t userId, const char *credList) = 0;
     virtual char *AuthSessionGetCredId(int64_t authSeq) = 0;
     virtual char *IdServiceGenerateAuthParam(HiChainAuthParam *hiChainParam) = 0;
@@ -127,6 +129,7 @@ public:
     MOCK_METHOD1(LnnGetLocalNodeInfoSafe, int32_t (NodeInfo *info));
     MOCK_METHOD0(LnnIsDefaultOhosAccount, bool (void));
     MOCK_METHOD5(IdServiceQueryCredential, int32_t (int32_t, const char *, const char *, bool, char **));
+    MOCK_METHOD5(AuthIdServiceQueryCredential, int32_t (int32_t, const char *, const char *, bool, char **));
     MOCK_METHOD2(IdServiceGetCredIdFromCredList, char * (int32_t, const char *));
     MOCK_METHOD1(AuthSessionGetCredId, char * (int64_t));
     MOCK_METHOD1(IdServiceGenerateAuthParam, char * (HiChainAuthParam *));

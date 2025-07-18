@@ -28,6 +28,17 @@ int32_t IdServiceQueryCredential(int32_t userId, const char *udidHash, const cha
     return SOFTBUS_NOT_IMPLEMENT;
 }
 
+int32_t AuthIdServiceQueryCredential(int32_t peerUserId, const char *udidHash, const char *accountidHash,
+    bool isSameAccount, char **credList)
+{
+    (void)peerUserId;
+    (void)udidHash;
+    (void)accountidHash;
+    (void)isSameAccount;
+    (void)credList;
+    return SOFTBUS_NOT_IMPLEMENT;
+}
+
 void IdServiceDestroyCredentialList(char **returnData)
 {
     (void)returnData;
