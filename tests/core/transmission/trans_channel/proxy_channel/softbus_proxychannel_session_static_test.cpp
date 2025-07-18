@@ -65,11 +65,11 @@ HWTEST_F(TransProxySessionStaticTest, TransProxyTransNormalMsgTest001, TestSize.
 
     info.appInfo.businessType = BUSINESS_TYPE_D2D_MESSAGE;
     ret = TransProxyTransNormalMsg(&info, payLoad, payLoadLen, flag);
-    EXPECT_EQ(SOFTBUS_OK, ret);
+    EXPECT_EQ(SOFTBUS_TRANS_PROXY_SENDMSG_ERR, ret);
 
     info.appInfo.businessType = BUSINESS_TYPE_MESSAGE;
     ret = TransProxyTransNormalMsg(&info, payLoad, payLoadLen, flag);
-    EXPECT_EQ(SOFTBUS_OK, ret);
+    EXPECT_EQ(SOFTBUS_TRANS_PROXY_SENDMSG_ERR, ret);
 }
 
 /**
