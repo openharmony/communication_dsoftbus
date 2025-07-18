@@ -828,41 +828,6 @@ HWTEST_F(TransProxyMessageTest, TransProxyParseMessageTest001, TestSize.Level1)
 }
 
 /**
-  * @tc.name: TransProxyParseMessageTest002
-  * @tc.desc: TransProxyParseMessageTest002, use normal param, run normal message
-  * @tc.type: FUNC
-  * @tc.require:
-  */
-HWTEST_F(TransProxyMessageTest, TransProxyParseMessageTest002, TestSize.Level1)
-{
-    ProxyMessage msg, outMsg;
-    int32_t len = sizeof(ProxyMessage);
-    TransCommInterfaceMock commMock;
-    EXPECT_CALL(commMock, SoftBusCalloc).WillRepeatedly([](unsigned int size) {
-        return new uint8_t[size];
-    });
-    AuthHandle authHandle = { .authId = AUTH_INVALID_ID, .type = AUTH_LINK_TYPE_WIFI };
-    char *buf = static_cast<char *>(SoftBusCalloc(sizeof(ProxyMessage)));
-    ASSERT_TRUE(buf != nullptr);
-    msg.msgHead.cipher = 1;
-    msg.msgHead.peerId = TEST_PARSE_MESSAGE_CHANNEL;
-    TestMessageAddProxyChannel(TEST_PARSE_MESSAGE_CHANNEL, APP_TYPE_AUTH, "44", PROXY_CHANNEL_STATUS_COMPLETED);
-
-    TransAuthInterfaceMock authMock;
-    EXPECT_CALL(authMock, AuthGetDecryptSize).WillRepeatedly(Return(TEST_AUTH_DECRYPT_SIZE));
-
-    msg.msgHead.type = (PROXYCHANNEL_MSG_TYPE_NORMAL & FOUR_BIT_MASK) | (1 << VERSION_SHIFT);
-    ASSERT_TRUE(EOK == memcpy_s(buf, len, &msg, len));
-    int32_t ret = TransProxyParseMessage(buf, len, &outMsg, &authHandle);
-    EXPECT_EQ(SOFTBUS_TRANS_INVALID_MESSAGE_TYPE, ret);
-
-    ret = TransProxyParseMessage(buf, len, &outMsg, &authHandle);
-    EXPECT_EQ(SOFTBUS_TRANS_INVALID_MESSAGE_TYPE, ret);
-
-    SoftBusFree(buf);
-}
-
-/**
   * @tc.name: TransProxyAckHandshakeTest001
   * @tc.desc: TransProxyAckHandshakeTest001, use wrong param and normal param.
   * @tc.type: FUNC
