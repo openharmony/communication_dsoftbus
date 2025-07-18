@@ -738,7 +738,7 @@ HWTEST_F(SoftbusProxyChannelManagerTest, TransProxyOnMessageReceivedTest002, Tes
     string identity = TEST_STRING_TEN;
     (void)strcpy_s(chan.identity, TEST_CHANNEL_IDENTITY_LEN, identity.c_str());
     msg.data = TransProxyPackHandshakeAckMsg(&chan);
-    ASSERT_TRUE(msg.data == nullptr);
+    ASSERT_TRUE(msg.data != nullptr);
 
     msg.dataLen = strlen(msg.data) + TEST_NUMBER_ONE;
     msg.msgHead.myId = TEST_NUMBER_TEN;

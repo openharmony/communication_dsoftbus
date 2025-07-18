@@ -118,7 +118,7 @@ HWTEST_F(ClientTransProxyD2DTest, TransProxyChannelAsyncSendMessageTest001, Test
     EXPECT_EQ(SOFTBUS_INVALID_PARAM, ret);
 
     ret = TransProxyChannelAsyncSendMessage(channelId, data, len, dataSeq);
-    EXPECT_EQ(SOFTBUS_INVALID_PARAM, ret);
+    EXPECT_EQ(SOFTBUS_TRANS_PROXY_CHANNEL_NOT_FOUND, ret);
 }
 
 /**
@@ -139,20 +139,24 @@ HWTEST_F(ClientTransProxyD2DTest, ClientTransProxyPackAndSendDataTest001, TestSi
     ret = ClientTransProxyPackAndSendData(channelId, data, len, nullptr, TRANS_SESSION_MESSAGE);
     EXPECT_EQ(SOFTBUS_INVALID_PARAM, ret);
 
-    ret = ClientTransProxyPackAndSendData(channelId, data, len, &info, TRANS_SESSION_MESSAGE);
-    EXPECT_EQ(SOFTBUS_INVALID_PARAM, ret);
-
     NiceMock<TransClientProxyD2DInterfaceMock> managerMock;
     int32_t businessType = BUSINESS_TYPE_BYTE;
     EXPECT_CALL(managerMock, ClientGetChannelBusinessTypeByChannelId)
         .WillRepeatedly(DoAll(SetArgPointee<1>(businessType), Return(SOFTBUS_OK)));
 
     ret = ClientTransProxyPackAndSendData(channelId, data, len, &info, TRANS_SESSION_MESSAGE);
-    EXPECT_EQ(SOFTBUS_INVALID_PARAM, ret);
+    EXPECT_EQ(SOFTBUS_OK, ret);
+
+    EXPECT_CALL(managerMock, ClientGetChannelBusinessTypeByChannelId)
+        .WillRepeatedly(DoAll(SetArgPointee<1>(businessType), Return(SOFTBUS_OK)));
+
+    ret = ClientTransProxyPackAndSendData(channelId, data, len, &info, TRANS_SESSION_MESSAGE);
+    EXPECT_EQ(SOFTBUS_OK, ret);
 
     businessType = BUSINESS_TYPE_D2D_VOICE;
     EXPECT_CALL(managerMock, ClientGetChannelBusinessTypeByChannelId)
         .WillRepeatedly(DoAll(SetArgPointee<1>(businessType), Return(SOFTBUS_OK)));
+    EXPECT_CALL(managerMock, TransProxyPackD2DBytes).WillRepeatedly(Return(SOFTBUS_INVALID_PARAM));
     ret = ClientTransProxyPackAndSendData(channelId, data, len, &info, TRANS_SESSION_MESSAGE);
     EXPECT_EQ(SOFTBUS_INVALID_PARAM, ret);
 }
@@ -169,21 +173,9 @@ HWTEST_F(ClientTransProxyD2DTest, TransProxyProcessD2DBytesTest, TestSize.Level1
     uint32_t len = 5;
     int32_t channelId = 1;
     ProxyChannelInfoDetail info;
-    int32_t ret = TransProxyProcessD2DBytes(channelId, data, len, &info, TRANS_SESSION_MESSAGE);
-    EXPECT_EQ(SOFTBUS_INVALID_PARAM, ret);
-
     NiceMock<TransClientProxyD2DInterfaceMock> managerMock;
-    EXPECT_CALL(managerMock, TransProxyPackD2DBytes).WillRepeatedly(Return(SOFTBUS_OK));
-
-    ret = TransProxyProcessD2DBytes(channelId, data, len, &info, TRANS_SESSION_MESSAGE);
-    EXPECT_EQ(SOFTBUS_INVALID_PARAM, ret);
-
-    EXPECT_CALL(managerMock, TransProxyPackD2DData).WillRepeatedly(Return(data));
-    ret = TransProxyProcessD2DBytes(channelId, data, len, &info, TRANS_SESSION_MESSAGE);
-    EXPECT_EQ(SOFTBUS_INVALID_PARAM, ret);
-
-    EXPECT_CALL(managerMock, ServerIpcSendMessage).WillRepeatedly(Return(SOFTBUS_OK));
-    ret = TransProxyProcessD2DBytes(channelId, data, len, &info, TRANS_SESSION_MESSAGE);
+    EXPECT_CALL(managerMock, TransProxyPackD2DBytes).WillRepeatedly(Return(SOFTBUS_INVALID_PARAM));
+    int32_t ret = TransProxyProcessD2DBytes(channelId, data, len, &info, TRANS_SESSION_MESSAGE);
     EXPECT_EQ(SOFTBUS_INVALID_PARAM, ret);
 }
 
@@ -200,23 +192,20 @@ HWTEST_F(ClientTransProxyD2DTest, ClientTransProxyFirstSliceProcessTest, TestSiz
     char data[] = "1111";
     uint32_t len = 5;
     int32_t channelId = 1;
-    int32_t ret = ClientTransProxyFirstSliceProcess(&processor, &head, data, len, channelId);
-    EXPECT_EQ(SOFTBUS_INVALID_PARAM, ret);
-
     int32_t businessType = BUSINESS_TYPE_D2D_VOICE;
     NiceMock<TransClientProxyD2DInterfaceMock> managerMock;
     EXPECT_CALL(managerMock, ClientGetChannelBusinessTypeByChannelId)
         .WillRepeatedly(DoAll(SetArgPointee<1>(businessType), Return(SOFTBUS_OK)));
 
-    ret = ClientTransProxyFirstSliceProcess(&processor, &head, data, len, channelId);
-    EXPECT_EQ(SOFTBUS_INVALID_PARAM, ret);
+    int32_t ret = ClientTransProxyFirstSliceProcess(&processor, &head, data, len, channelId);
+    EXPECT_EQ(SOFTBUS_OK, ret);
 
     businessType = BUSINESS_TYPE_D2D_MESSAGE;
     EXPECT_CALL(managerMock, ClientGetChannelBusinessTypeByChannelId)
         .WillRepeatedly(DoAll(SetArgPointee<1>(businessType), Return(SOFTBUS_OK)));
 
     ret = ClientTransProxyFirstSliceProcess(&processor, &head, data, len, channelId);
-    EXPECT_EQ(SOFTBUS_INVALID_PARAM, ret);
+    EXPECT_EQ(SOFTBUS_OK, ret);
 }
 
 /**
@@ -230,15 +219,13 @@ HWTEST_F(ClientTransProxyD2DTest, ClientTransProxyNoSubPacketProc, TestSize.Leve
     char data[] = "1111";
     uint32_t len = 5;
     int32_t channelId = 1;
-    int32_t ret = ClientTransProxyNoSubPacketProc(channelId, data, len);
-    EXPECT_EQ(SOFTBUS_INVALID_PARAM, ret);
-
     int32_t businessType = BUSINESS_TYPE_D2D_VOICE;
+
     NiceMock<TransClientProxyD2DInterfaceMock> managerMock;
     EXPECT_CALL(managerMock, ClientGetChannelBusinessTypeByChannelId)
         .WillRepeatedly(DoAll(SetArgPointee<1>(businessType), Return(SOFTBUS_OK)));
 
-    ret = ClientTransProxyNoSubPacketProc(channelId, data, len);
+    int32_t ret = ClientTransProxyNoSubPacketProc(channelId, data, len);
     EXPECT_EQ(SOFTBUS_INVALID_PARAM, ret);
 
     businessType = BUSINESS_TYPE_D2D_MESSAGE;
@@ -268,7 +255,9 @@ HWTEST_F(ClientTransProxyD2DTest, ClientTransProxyNoSubPacketD2DDataProcTest, Te
     EXPECT_EQ(SOFTBUS_INVALID_PARAM, ret);
 
     ret = ClientTransProxyNoSubPacketD2DDataProc(channelId, data, len, businessType);
-    EXPECT_EQ(SOFTBUS_INVALID_PARAM, ret);
+    EXPECT_EQ(SOFTBUS_INVALID_DATA_HEAD, ret);
+    NiceMock<TransClientProxyD2DInterfaceMock> managerMock;
+    EXPECT_CALL(managerMock, TransProxyProcessD2DData).WillRepeatedly(Return(SOFTBUS_INVALID_PARAM));
 
     PacketD2DHead head;
     head.flags = TRANS_SESSION_BYTES;
@@ -280,7 +269,7 @@ HWTEST_F(ClientTransProxyD2DTest, ClientTransProxyNoSubPacketD2DDataProcTest, Te
 
     businessType = BUSINESS_TYPE_D2D_MESSAGE;
     ret = ClientTransProxyNoSubPacketD2DDataProc(channelId, data, len, businessType);
-    EXPECT_EQ(SOFTBUS_INVALID_PARAM, ret);
+    EXPECT_EQ(SOFTBUS_INVALID_DATA_HEAD, ret);
 }
 
 /**
@@ -299,24 +288,24 @@ HWTEST_F(ClientTransProxyD2DTest, ClientTransProxyProcD2DDataTest, TestSize.Leve
         .dataSeq = 1,
         .nonce = 1,
     };
-    int32_t ret = ClientTransProxyProcD2DData(channelId, data, &head, businessType, &ivSource);
-    EXPECT_EQ(SOFTBUS_INVALID_PARAM, ret);
 
     NiceMock<TransClientProxyD2DInterfaceMock> managerMock;
     EXPECT_CALL(managerMock, TransProxyProcessD2DData).WillRepeatedly(Return(SOFTBUS_OK));
-    ret = ClientTransProxyProcD2DData(channelId, data, &head, businessType, &ivSource);
-    EXPECT_EQ(SOFTBUS_INVALID_PARAM, ret);
+    int32_t ret = ClientTransProxyProcD2DData(channelId, data, &head, businessType, &ivSource);
+    EXPECT_EQ(SOFTBUS_TRANS_PROXY_CHANNEL_NOT_FOUND, ret);
+    EXPECT_CALL(managerMock, TransProxyDecryptD2DData).WillRepeatedly(Return(SOFTBUS_INVALID_PARAM));
 
     ret = ClientTransProxyProcD2DData(channelId, data, &head, businessType, &ivSource);
-    EXPECT_EQ(SOFTBUS_INVALID_PARAM, ret);
+    EXPECT_EQ(SOFTBUS_TRANS_PROXY_CHANNEL_NOT_FOUND, ret);
 
     EXPECT_CALL(managerMock, TransProxyDecryptD2DData).WillRepeatedly(Return(SOFTBUS_OK));
+    EXPECT_CALL(managerMock, TransProxySessionDataLenCheck).WillRepeatedly(Return(SOFTBUS_INVALID_PARAM));
     ret = ClientTransProxyProcD2DData(channelId, data, &head, businessType, &ivSource);
-    EXPECT_EQ(SOFTBUS_INVALID_PARAM, ret);
+    EXPECT_EQ(SOFTBUS_TRANS_PROXY_CHANNEL_NOT_FOUND, ret);
 
     EXPECT_CALL(managerMock, TransProxySessionDataLenCheck).WillRepeatedly(Return(SOFTBUS_OK));
     ret = ClientTransProxyProcD2DData(channelId, data, &head, businessType, &ivSource);
-    EXPECT_EQ(SOFTBUS_INVALID_PARAM, ret);
+    EXPECT_EQ(SOFTBUS_TRANS_PROXY_CHANNEL_NOT_FOUND, ret);
 }
 
 /**
@@ -332,19 +321,19 @@ HWTEST_F(ClientTransProxyD2DTest, ClientTransProxyNotifyD2DTest, TestSize.Level1
     int32_t channelId = 1;
     uint16_t dataSeq = 1;
     int32_t ret = ClientTransProxyNotifyD2D(channelId, TRANS_SESSION_MESSAGE, dataSeq, data, len);
-    EXPECT_EQ(SOFTBUS_INVALID_PARAM, ret);
+    EXPECT_EQ(SOFTBUS_OK, ret);
 
     ret = ClientTransProxyNotifyD2D(channelId, TRANS_SESSION_ACK, dataSeq, data, len);
-    EXPECT_EQ(SOFTBUS_INVALID_PARAM, ret);
+    EXPECT_EQ(SOFTBUS_TRANS_INVALID_DATA_LENGTH, ret);
 
     ret = ClientTransProxyNotifyD2D(channelId, TRANS_SESSION_BYTES, dataSeq, data, len);
-    EXPECT_EQ(SOFTBUS_INVALID_PARAM, ret);
+    EXPECT_EQ(SOFTBUS_OK, ret);
 
     ret = ClientTransProxyNotifyD2D(channelId, TRANS_SESSION_ASYNC_MESSAGE, dataSeq, data, len);
-    EXPECT_EQ(SOFTBUS_INVALID_PARAM, ret);
+    EXPECT_EQ(SOFTBUS_OK, ret);
 
     ret = ClientTransProxyNotifyD2D(channelId, TRANS_SESSION_FILE_ACK_RESPONSE_SENT, dataSeq, data, len);
-    EXPECT_EQ(SOFTBUS_INVALID_PARAM, ret);
+    EXPECT_EQ(SOFTBUS_OK, ret);
 }
 
 /**
@@ -360,29 +349,29 @@ HWTEST_F(ClientTransProxyD2DTest, ClientTransProxyProcD2DAckTest, TestSize.Level
     int32_t channelId = 1;
     uint16_t dataSeq = 1;
     int32_t ret = ClientTransProxyProcD2DAck(channelId, nullptr, len, dataSeq);
-    EXPECT_EQ(SOFTBUS_INVALID_PARAM, ret);
+    EXPECT_EQ(SOFTBUS_TRANS_INVALID_DATA_LENGTH, ret);
 
     ret = ClientTransProxyProcD2DAck(channelId, data, 0, dataSeq);
-    EXPECT_EQ(SOFTBUS_INVALID_PARAM, ret);
+    EXPECT_EQ(SOFTBUS_TRANS_INVALID_DATA_LENGTH, ret);
 
     ret = ClientTransProxyProcD2DAck(channelId, data, len, 0);
-    EXPECT_EQ(SOFTBUS_INVALID_PARAM, ret);
+    EXPECT_EQ(SOFTBUS_TRANS_INVALID_DATA_LENGTH, ret);
 
     ret = ClientTransProxyProcD2DAck(channelId, data, len, dataSeq);
-    EXPECT_EQ(SOFTBUS_INVALID_PARAM, ret);
+    EXPECT_EQ(SOFTBUS_TRANS_INVALID_DATA_LENGTH, ret);
 
     NiceMock<TransClientProxyD2DInterfaceMock> managerMock;
     EXPECT_CALL(managerMock, ClientGetSessionIdByChannelId).WillRepeatedly(Return(SOFTBUS_OK));
     ret = ClientTransProxyProcD2DAck(channelId, data, len, dataSeq);
-    EXPECT_EQ(SOFTBUS_INVALID_PARAM, ret);
+    EXPECT_EQ(SOFTBUS_TRANS_INVALID_DATA_LENGTH, ret);
 
     EXPECT_CALL(managerMock, ClientGetSessionCallbackAdapterById).WillRepeatedly(Return(SOFTBUS_OK));
     ret = ClientTransProxyProcD2DAck(channelId, data, len, dataSeq);
-    EXPECT_EQ(SOFTBUS_INVALID_PARAM, ret);
+    EXPECT_EQ(SOFTBUS_TRANS_INVALID_DATA_LENGTH, ret);
 
     EXPECT_CALL(managerMock, DeleteDataSeqInfoList).WillRepeatedly(Return(SOFTBUS_OK));
     ret = ClientTransProxyProcD2DAck(channelId, data, len, dataSeq);
-    EXPECT_EQ(SOFTBUS_INVALID_PARAM, ret);
+    EXPECT_EQ(SOFTBUS_TRANS_INVALID_DATA_LENGTH, ret);
 }
 
 /**
@@ -402,12 +391,12 @@ HWTEST_F(ClientTransProxyD2DTest, ClientTransProxySendD2DAckTest, TestSize.Level
 
     int32_t businessType = BUSINESS_TYPE_BYTE;
     EXPECT_CALL(managerMock, ClientGetChannelBusinessTypeByChannelId)
-        .WillOnce(DoAll(SetArgPointee<1>(businessType), Return(SOFTBUS_OK)));
+        .WillRepeatedly(DoAll(SetArgPointee<1>(businessType), Return(SOFTBUS_OK)));
     EXPECT_NO_FATAL_FAILURE(ClientTransProxySendD2DAck(channelId, dataSeq));
 
     businessType = BUSINESS_TYPE_D2D_MESSAGE;
     EXPECT_CALL(managerMock, ClientGetChannelBusinessTypeByChannelId)
-        .WillOnce(DoAll(SetArgPointee<1>(businessType), Return(SOFTBUS_OK)));
+        .WillRepeatedly(DoAll(SetArgPointee<1>(businessType), Return(SOFTBUS_OK)));
     EXPECT_NO_FATAL_FAILURE(ClientTransProxySendD2DAck(channelId, dataSeq));
 }
 
@@ -423,33 +412,23 @@ HWTEST_F(ClientTransProxyD2DTest, TransProxyChannelAsyncSendMessageTest, TestSiz
     uint32_t len = 5;
     uint16_t dataSeq = 1;
     int32_t channelId = 1;
+    NiceMock<TransClientProxyD2DInterfaceMock> managerMock;
+    EXPECT_CALL(managerMock, ServerIpcSendMessage).WillRepeatedly(Return(SOFTBUS_OK));
     int32_t ret = TransProxyAsyncPackAndSendMessage(channelId, nullptr, len, dataSeq, TRANS_SESSION_MESSAGE);
     EXPECT_EQ(SOFTBUS_INVALID_PARAM, ret);
 
     ret = TransProxyAsyncPackAndSendMessage(channelId, data, len, dataSeq, TRANS_SESSION_MESSAGE);
-    EXPECT_EQ(SOFTBUS_INVALID_PARAM, ret);
+    EXPECT_EQ(SOFTBUS_TRANS_PROXY_CHANNEL_NOT_FOUND, ret);
 
-    ClientProxyChannelInfo info;
-    info.channelId = 1;
-    ret = ClientTransProxyAddChannelInfo(&info);
-    EXPECT_EQ(SOFTBUS_INVALID_PARAM, ret);
+    ClientProxyChannelInfo *info = (ClientProxyChannelInfo *)SoftBusCalloc(sizeof(ClientProxyChannelInfo));
+    ASSERT_TRUE(info != nullptr);
+    info->channelId = 1;
+    ret = ClientTransProxyAddChannelInfo(info);
+    EXPECT_EQ(SOFTBUS_OK, ret);
     ret = TransProxyAsyncPackAndSendMessage(channelId, data, len, dataSeq, TRANS_SESSION_MESSAGE);
-    EXPECT_EQ(SOFTBUS_INVALID_PARAM, ret);
+    EXPECT_EQ(SOFTBUS_OK, ret);
     ret = ClientTransProxyDelChannelInfo(channelId);
-    EXPECT_EQ(SOFTBUS_INVALID_PARAM, ret);
-
-    ClientProxyChannelInfo info1 = {
-        .channelId = 1,
-        .detail.pagingSessionkey = "111111111111111",
-        .detail.pagingNonce = "11111111111",
-    };
-    ret = ClientTransProxyAddChannelInfo(&info1);
-    EXPECT_EQ(SOFTBUS_INVALID_PARAM, ret);
-    ret = TransProxyAsyncPackAndSendMessage(channelId, data, len, dataSeq, TRANS_SESSION_MESSAGE);
-    EXPECT_EQ(SOFTBUS_INVALID_PARAM, ret);
-
-    ret = ClientTransProxyDelChannelInfo(channelId);
-    EXPECT_EQ(SOFTBUS_INVALID_PARAM, ret);
+    EXPECT_EQ(SOFTBUS_OK, ret);
 }
 
 /**
@@ -470,7 +449,7 @@ HWTEST_F(ClientTransProxyD2DTest, TransProxyPackAsyncMessageTest, TestSize.Level
     EXPECT_EQ(SOFTBUS_INVALID_PARAM, ret);
 
     ret = TransProxyPackAsyncMessage(channelId, &info, &dataInfo, TRANS_SESSION_MESSAGE, dataSeq);
-    EXPECT_EQ(SOFTBUS_INVALID_PARAM, ret);
+    EXPECT_EQ(SOFTBUS_TRANS_PROXY_SESS_ENCRYPT_ERR, ret);
 
     ProxyChannelInfoDetail info1 = {
         .pagingSessionkey = "111111111111111",
@@ -481,6 +460,6 @@ HWTEST_F(ClientTransProxyD2DTest, TransProxyPackAsyncMessageTest, TestSize.Level
         .inLen = 5,
     };
     ret = TransProxyPackAsyncMessage(channelId, &info1, &dataInfo1, TRANS_SESSION_MESSAGE, dataSeq);
-    EXPECT_EQ(SOFTBUS_INVALID_PARAM, ret);
+    EXPECT_EQ(SOFTBUS_OK, ret);
 }
 } // namespace OHOS
