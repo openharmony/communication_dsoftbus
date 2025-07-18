@@ -425,6 +425,12 @@ int32_t IdServiceQueryCredential(int32_t userId, const char *udidHash, const cha
     return GetInterface()->IdServiceQueryCredential(userId, udidHash, accountidHash, isSameAccount, credList);
 }
 
+int32_t AuthIdServiceQueryCredential(int32_t peerUserId, const char *udidHash, const char *accountidHash,
+    bool isSameAccount, char **credList)
+{
+    return GetInterface()->AuthIdServiceQueryCredential(peerUserId, udidHash, accountidHash, isSameAccount, credList);
+}
+
 char *IdServiceGetCredIdFromCredList(int32_t userId, const char *credList)
 {
     return GetInterface()->IdServiceGetCredIdFromCredList(userId, credList);
