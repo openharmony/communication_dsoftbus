@@ -46,6 +46,7 @@ template<> InfoContainer<LinkInfoKey>::KeyTypeTable InfoContainer<LinkInfoKey>::
     { LinkInfoKey::IPADDR_TYPE, Serializable::ValueType::INT },
     { LinkInfoKey::ENABLE_POWER_MODE, Serializable::ValueType::INT },
     { LinkInfoKey::IS_BEING_USED_BY_REMOTE, Serializable::ValueType::BOOL },
+    { LinkInfoKey::IS_DBAC, Serializable::ValueType::BOOL },
 };
 
 LinkInfo::LinkInfo(const std::string &localInterface, const std::string &remoteInterface, LinkMode localMode,
@@ -416,6 +417,16 @@ void LinkInfo::SetIsBeingUsedByRemote(bool isUsed)
 bool LinkInfo::GetIsBeingUsedByRemote() const
 {
     return Get(LinkInfoKey::IS_BEING_USED_BY_REMOTE, false);
+}
+
+void LinkInfo::SetIsDBAC(bool isDBAC)
+{
+    Set(LinkInfoKey::IS_DBAC, isDBAC);
+}
+
+bool LinkInfo::GetIsDBAC() const
+{
+    return Get(LinkInfoKey::IS_DBAC, false);
 }
 
 std::string LinkInfo::ToString(LinkMode mode)
