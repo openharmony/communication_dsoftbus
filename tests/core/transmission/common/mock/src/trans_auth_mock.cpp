@@ -259,5 +259,10 @@ int32_t AuthFindUkIdByAclInfo(const AuthACLInfo *acl, int32_t *ukId)
 {
     return GetTransAuthInterface()->AuthFindUkIdByAclInfo(acl, ukId);
 }
+
+int32_t AuthGetAuthHandleByIndex(const AuthConnInfo *connInfo, bool isServer, int32_t index, AuthHandle *authHandle)
+{
+    return GetTransAuthInterface()->AuthGetAuthHandleByIndex(connInfo, isServer, index, authHandle);
+}
 }
 }

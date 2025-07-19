@@ -13,9 +13,10 @@
  * limitations under the License.
  */
 
+#include <gmock/gmock.h>
 #include <securec.h>
 
-#include "gtest/gtest.h"
+#include "cJSON.h"
 #include "lnn_lane_link.h"
 #include "message_handler.h"
 #include "session.h"
@@ -27,7 +28,7 @@
 #include "softbus_protocol_def.h"
 #include "softbus_proxychannel_common.h"
 #include "softbus_proxychannel_control.h"
-#include "softbus_proxychannel_pipeline.h"
+#include "softbus_proxychannel_message.h"
 #include "softbus_proxychannel_pipeline.c"
 #include "softbus_proxychannel_session.h"
 #include "softbus_proxychannel_transceiver.h"
@@ -40,6 +41,44 @@
 using namespace testing;
 using namespace testing::ext;
 using namespace std;
+
+class SoftbusTransProxyPipelineInterface {
+public:
+
+    virtual cJSON *cJSON_CreateObject(void) = 0;
+};
+
+class SoftbusTransProxyPipelineMock : public SoftbusTransProxyPipelineInterface {
+public:
+    static SoftbusTransProxyPipelineMock &GetMockObj(void)
+    {
+        return *gmock_;
+    }
+    SoftbusTransProxyPipelineMock();
+    ~SoftbusTransProxyPipelineMock();
+
+    MOCK_METHOD(cJSON *, cJSON_CreateObject, (), (override));
+
+private:
+    static SoftbusTransProxyPipelineMock *gmock_;
+};
+
+SoftbusTransProxyPipelineMock *SoftbusTransProxyPipelineMock::gmock_;
+
+SoftbusTransProxyPipelineMock::SoftbusTransProxyPipelineMock()
+{
+    gmock_ = this;
+}
+
+SoftbusTransProxyPipelineMock::~SoftbusTransProxyPipelineMock()
+{
+    gmock_ = nullptr;
+}
+
+cJSON *cJSON_CreateObject()
+{
+    return SoftbusTransProxyPipelineMock::GetMockObj().cJSON_CreateObject();
+}
 
 namespace OHOS {
 
@@ -414,5 +453,32 @@ HWTEST_F(SoftbusProxyChannelPipelineTest, TransProxyPipelineOpenChannelTest002, 
     int32_t ret = TransProxyPipelineOpenChannel(TEST_NUMBER_THREE, networkId, &option, &channelCallback);
     EXPECT_EQ(ret, SOFTBUS_OK);
     sleep(SLEEP_TIME);
+}
+
+/**
+  * @tc.name: TransProxyPipelineOnChannelOpenFailedTest001
+  * @tc.desc: TransProxyPipelineOnChannelOpenFailed
+  * @tc.type: FUNC
+  * @tc.require:
+  */
+HWTEST_F(SoftbusProxyChannelPipelineTest, TransProxyPipelineOnChannelOpenFailedTest001, TestSize.Level1)
+{
+    const char *uuid = "nfnwo385487wnfo2901";
+    EXPECT_NO_FATAL_FAILURE(TransProxyPipelineOnChannelOpenFailed(3088, uuid));
+}
+
+/**
+  * @tc.name: TransProxyPackHandshakeMsgTest001
+  * @tc.desc: TransProxyPackHandshakeMsg
+  * @tc.type: FUNC
+  * @tc.require:
+  */
+HWTEST_F(SoftbusProxyChannelPipelineTest, TransProxyPackHandshakeMsgTest001, TestSize.Level1)
+{
+    SoftbusTransProxyPipelineMock networkObj;
+    EXPECT_CALL(networkObj, cJSON_CreateObject).WillOnce(Return(nullptr));
+
+    char *ret = TransProxyPackHandshakeErrMsg(SOFTBUS_OK);
+    EXPECT_EQ(ret, nullptr);
 }
 } // namespace OHOS
