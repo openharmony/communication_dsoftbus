@@ -1723,7 +1723,7 @@ static int32_t LlGetStaticCapLen(void *buf, uint32_t len)
         LNN_LOGE(LNN_LEDGER, "invalid param");
         return SOFTBUS_INVALID_PARAM;
     }
-    *((int64_t *)buf) = g_localNetLedger.localInfo.staticCapLen;
+    *((int32_t *)buf) = g_localNetLedger.localInfo.staticCapLen;
     return SOFTBUS_OK;
 }
 
