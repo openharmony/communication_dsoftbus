@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021-2024 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2025 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -20,11 +20,10 @@
 #include "session.h"
 #include "softbus_adapter_mem.h"
 #include "softbus_error_code.h"
-#include "softbus_error_code.h"
 #include "softbus_feature_config.h"
 #include "softbus_json_utils.h"
 #include "softbus_protocol_def.h"
-#include "softbus_proxychannel_session.h"
+#include "softbus_proxychannel_session.c"
 #include "softbus_proxychannel_manager.h"
 #include "softbus_utils.h"
 
@@ -57,6 +56,8 @@ namespace OHOS {
 #define TEST_VALID_CHANNELIDA 50
 #define TEST_VALID_CHANNELIDB 51
 #define TEST_VALID_CHANNELIDC 2
+#define TEST_PAY_LOAD "test.pay.laod"
+#define TEST_PAY_LOAD_LEN 32
 
 typedef struct {
     int32_t priority;
@@ -446,4 +447,158 @@ HWTEST_F(SoftbusProxySessionTest, NotifyClientMsgReceivedTest001, TestSize.Level
     int32_t ret = NotifyClientMsgReceived(pkgName, pid, channelId, &receiveData);
     EXPECT_EQ(SOFTBUS_OK, ret);
 }
+
+/**
+ * @tc.name: NotifyClientMsgReceivedTest002
+ * @tc.desc: NotifyClientMsgReceived
+ * @tc.type: FUNC
+ * @tc.require:
+ */
+HWTEST_F(SoftbusProxySessionTest, NotifyClientMsgReceivedTest002, TestSize.Level1)
+{
+    int32_t channelId = 1500;
+    int32_t pid = 880;
+    TransReceiveData receiveData;
+
+    int32_t ret = NotifyClientMsgReceived(nullptr, pid, channelId, &receiveData);
+    EXPECT_EQ(ret, SOFTBUS_INVALID_PARAM);
+}
+
+/**
+ * @tc.name: TransProxyTransNormalMsgTest001
+ * @tc.desc: TransProxyTransNormalMsg
+ * @tc.type: FUNC
+ * @tc.require:
+ */
+HWTEST_F(SoftbusProxySessionTest, TransProxyTransNormalMsgTest001, TestSize.Level1)
+{
+    ProxyChannelInfo info = {
+        .myId = 1034,
+        .peerId = 3035
+    };
+
+    int32_t ret = TransProxyTransNormalMsg(&info, nullptr, TEST_PAY_LOAD_LEN, PROXY_FLAG_BYTES);
+    EXPECT_EQ(ret, SOFTBUS_TRANS_PROXY_PACKMSG_ERR);
+}
+
+/**
+ * @tc.name: TransProxyTransDataSendMsgTest001
+ * @tc.desc: TransProxyTransDataSendMsg
+ * @tc.type: FUNC
+ * @tc.require:
+ */
+HWTEST_F(SoftbusProxySessionTest, TransProxyTransDataSendMsgTest001, TestSize.Level1)
+{
+    const unsigned char *payLoad = reinterpret_cast<const unsigned char *>(TEST_PAY_LOAD);
+
+    int32_t ret = TransProxyTransDataSendMsg(nullptr, payLoad, TEST_PAY_LOAD_LEN, PROXY_FLAG_BYTES);
+    EXPECT_EQ(ret, SOFTBUS_INVALID_PARAM);
+}
+
+/**
+ * @tc.name: TransProxyTransDataSendMsgTest002
+ * @tc.desc: TransProxyTransDataSendMsg
+ * @tc.type: FUNC
+ * @tc.require:
+ */
+HWTEST_F(SoftbusProxySessionTest, TransProxyTransDataSendMsgTest002, TestSize.Level1)
+{
+    ProxyChannelInfo info;
+    int32_t ret = TransProxyTransDataSendMsg(&info, nullptr, TEST_PAY_LOAD_LEN, PROXY_FLAG_BYTES);
+    EXPECT_EQ(ret, SOFTBUS_INVALID_PARAM);
+}
+
+/**
+ * @tc.name: TransProxyTransDataSendMsgTest003
+ * @tc.desc: TransProxyTransDataSendMsg
+ * @tc.type: FUNC
+ * @tc.require:
+ */
+HWTEST_F(SoftbusProxySessionTest, TransProxyTransDataSendMsgTest003, TestSize.Level1)
+{
+    ProxyChannelInfo info;
+    info.status = PROXY_CHANNEL_STATUS_HANDSHAKEING;
+    const unsigned char *payLoad = reinterpret_cast<const unsigned char *>(TEST_PAY_LOAD);
+
+    int32_t ret = TransProxyTransDataSendMsg(&info, payLoad, TEST_PAY_LOAD_LEN, PROXY_FLAG_BYTES);
+    EXPECT_EQ(ret, SOFTBUS_TRANS_PROXY_CHANNLE_STATUS_INVALID);
+}
+
+/**
+ * @tc.name: TransProxyTransDataSendMsgTest004
+ * @tc.desc: TransProxyTransDataSendMsg
+ * @tc.type: FUNC
+ * @tc.require:
+ */
+HWTEST_F(SoftbusProxySessionTest, TransProxyTransDataSendMsgTest004, TestSize.Level1)
+{
+    ProxyChannelInfo info;
+    info.status = PROXY_CHANNEL_STATUS_COMPLETED;
+    info.appInfo.appType = APP_TYPE_INNER;
+    const unsigned char *payLoad = reinterpret_cast<const unsigned char *>(TEST_PAY_LOAD);
+
+    int32_t ret = TransProxyTransDataSendMsg(&info, payLoad, TEST_PAY_LOAD_LEN, PROXY_FLAG_BYTES);
+    EXPECT_EQ(ret, SOFTBUS_TRANS_PROXY_ERROR_APP_TYPE);
+}
+
+/**
+ * @tc.name: TransProxyTransDataSendMsgTest005
+ * @tc.desc: TransProxyTransDataSendMsg
+ * @tc.type: FUNC
+ * @tc.require:
+ */
+HWTEST_F(SoftbusProxySessionTest, TransProxyTransDataSendMsgTest005, TestSize.Level1)
+{
+    ProxyChannelInfo info;
+    info.status = PROXY_CHANNEL_STATUS_KEEPLIVEING;
+    info.appInfo.appType = APP_TYPE_INNER;
+    const unsigned char *payLoad = reinterpret_cast<const unsigned char *>(TEST_PAY_LOAD);
+
+    int32_t ret = TransProxyTransDataSendMsg(&info, payLoad, TEST_PAY_LOAD_LEN, PROXY_FLAG_BYTES);
+    EXPECT_EQ(ret, SOFTBUS_TRANS_PROXY_ERROR_APP_TYPE);
+}
+
+/**
+ * @tc.name: TransProxyPackAppNormalMsgTest001
+ * @tc.desc: TransProxyPackAppNormalMsg
+ * @tc.type: FUNC
+ * @tc.require:
+ */
+HWTEST_F(SoftbusProxySessionTest, TransProxyPackAppNormalMsgTest001, TestSize.Level1)
+{
+    int32_t outLen;
+
+    char *ret = TransProxyPackAppNormalMsg(nullptr, TEST_PAY_LOAD, TEST_PAY_LOAD_LEN, &outLen);
+    EXPECT_EQ(ret, nullptr);
+}
+
+/**
+ * @tc.name: TransProxyPackAppNormalMsgTest002
+ * @tc.desc: TransProxyPackAppNormalMsg
+ * @tc.type: FUNC
+ * @tc.require:
+ */
+HWTEST_F(SoftbusProxySessionTest, TransProxyPackAppNormalMsgTest002, TestSize.Level1)
+{
+    ProxyMessageHead msg;
+    int32_t outLen;
+
+    char *ret = TransProxyPackAppNormalMsg(&msg, nullptr, TEST_PAY_LOAD_LEN, &outLen);
+    EXPECT_EQ(ret, nullptr);
+}
+
+/**
+ * @tc.name: TransProxyPackAppNormalMsgTest003
+ * @tc.desc: TransProxyPackAppNormalMsg
+ * @tc.type: FUNC
+ * @tc.require:
+ */
+HWTEST_F(SoftbusProxySessionTest, TransProxyPackAppNormalMsgTest003, TestSize.Level1)
+{
+    ProxyMessageHead msg;
+
+    char *ret = TransProxyPackAppNormalMsg(&msg, TEST_PAY_LOAD, TEST_PAY_LOAD_LEN, nullptr);
+    EXPECT_EQ(ret, nullptr);
+}
+
 } // namespace OHOS
