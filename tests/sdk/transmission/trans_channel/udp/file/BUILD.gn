@@ -107,17 +107,12 @@ if (defined(ohos_lite)) {
       "$dsoftbus_root_path/components/nstackx/fillp:FillpSo.open",
       "$dsoftbus_root_path/tests/sdk:softbus_client_static",
     ]
-
-    native_source_path = rebase_path("$dsoftbus_root_path")
     dep_file = "components/nstackx_enhanced/nstackx_core/dfile/BUILD.gn"
-    enhanced = exec_script("$dsoftbus_root_path/check_sub_module.py",
-                           [
-                             "$native_source_path",
-                             "$dep_file",
-                           ],
-                           "value")
+    native_source_path = rebase_path(dep_file, "$dsoftbus_root_path")
+    
+    enhanced_path = get_path_info(native_source_path, "name")
 
-    if (enhanced) {
+    if (enhanced_path == "BUILD.gn") {
       deps += [ "$dsoftbus_root_path/components/nstackx_enhanced/nstackx_core/dfile:nstackx_dfile" ]
     } else {
       deps += [ "$dsoftbus_root_path/components/nstackx/nstackx_core/dfile:nstackx_dfile.open" ]
