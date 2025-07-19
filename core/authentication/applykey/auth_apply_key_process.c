@@ -42,6 +42,7 @@
 #define D2D_UDID_HASH                   "udid_auth"
 #define BUSINESS_TYPE                   "business_type"
 #define D2D_APPID                       "d2d_appid"
+#define D2D_CLOSE_ACK                   "d2d_close_ack"
 #define APPLY_KEY_MAX_INSTANCE_CNT      0x2000000
 #define APPLY_KEY_NEGO_PROCESS_TIMEOUT  (10 * 1000LL)
 #define APPLY_KEY_SEQ_NETWORK_ID_BITS   16
@@ -71,6 +72,7 @@ typedef enum {
 typedef struct {
     bool isRecvSessionKeyEvent;
     bool isRecvFinishEvent;
+    bool isRecvCloseAckEvent;
 } ApplyKeyNegoInfo;
 
 typedef struct {
@@ -281,6 +283,30 @@ static int32_t SetApplyKeyNegoInfoRecvFinish(uint32_t requestId, bool isRecv)
     return SOFTBUS_AUTH_APPLY_KEY_INSTANCE_NOT_FOUND;
 }
 
+static int32_t SetApplyKeyNegoInfoRecvCloseAck(uint32_t requestId, bool isRecv)
+{
+    if (g_applyKeyNegoList == NULL) {
+        AUTH_LOGE(AUTH_INIT, "applyKeynego instance is null");
+        return SOFTBUS_NO_INIT;
+    }
+
+    ApplyKeyNegoInstance *item = NULL;
+    ApplyKeyNegoInstance *nextItem = NULL;
+    if (!RequireApplyKeyNegoListLock()) {
+        AUTH_LOGE(AUTH_CONN, "RequireApplyKeyNegoListLock fail");
+        return SOFTBUS_LOCK_ERR;
+    }
+    LIST_FOR_EACH_ENTRY_SAFE(item, nextItem, &g_applyKeyNegoList->list, ApplyKeyNegoInstance, node) {
+        if (item->requestId == requestId) {
+            item->negoInfo.isRecvCloseAckEvent = isRecv;
+            ReleaseApplyKeyNegoListLock();
+            return SOFTBUS_OK;
+        }
+    }
+    ReleaseApplyKeyNegoListLock();
+    return SOFTBUS_AUTH_APPLY_KEY_INSTANCE_NOT_FOUND;
+}
+
 static int32_t SetApplyKeyStartState(uint32_t requestId, const GenApplyKeyStartState state)
 {
     if (g_applyKeyNegoList == NULL) {
@@ -354,13 +380,14 @@ static void AsyncCallGenApplyKeyResultReceived(void *para)
             AUTH_LOGI(AUTH_CONN, "onGenSuccess callback");
             uint8_t applyKey[D2D_APPLY_KEY_LEN] = { 0 };
             if (GetApplyKeyByBusinessInfo(&instance.info, applyKey, D2D_APPLY_KEY_LEN) != SOFTBUS_OK) {
+                DeleteApplyKeyNegoInstance(instance.requestId);
                 SoftBusFree(res);
                 AUTH_LOGE(AUTH_CONN, "get apply key by instance fail");
                 return;
             }
             instance.genCb.onGenSuccess(instance.requestId, applyKey, D2D_APPLY_KEY_LEN);
-            DeleteApplyKeyNegoInstance(instance.requestId);
         }
+        DeleteApplyKeyNegoInstance(instance.requestId);
     } else {
         AUTH_LOGI(
             AUTH_CONN, "recv genapplyKey fail, requestId=%{public}u, reason=%{public}d", res->requestId, res->reason);
@@ -398,6 +425,7 @@ static void UpdateAllGenCbCallback(const RequestBusinessInfo *info, bool isSucce
         if (isSuccess) {
             item->negoInfo.isRecvSessionKeyEvent = true;
             item->negoInfo.isRecvFinishEvent = true;
+            item->negoInfo.isRecvCloseAckEvent = true;
         }
         SyncGenApplyKeyResult *result = (SyncGenApplyKeyResult *)SoftBusCalloc(sizeof(SyncGenApplyKeyResult));
         if (result == NULL) {
@@ -427,9 +455,12 @@ static void OnGenSuccess(uint32_t requestId)
         AUTH_LOGE(AUTH_CONN, "get instance failed! ret=%{public}d", ret);
         return;
     }
-    if (!instance.negoInfo.isRecvSessionKeyEvent || !instance.negoInfo.isRecvFinishEvent) {
-        AUTH_LOGI(AUTH_CONN, "applyKeynego is not complete, recvsession=%{public}d, recvfinish=%{public}d",
-            instance.negoInfo.isRecvSessionKeyEvent, instance.negoInfo.isRecvFinishEvent);
+    if (!instance.negoInfo.isRecvSessionKeyEvent || !instance.negoInfo.isRecvFinishEvent ||
+        !instance.negoInfo.isRecvCloseAckEvent) {
+        AUTH_LOGI(AUTH_CONN,
+            "applyKeynego is not complete, recvsession=%{public}d, recvfinish=%{public}d, recvcloseack=%{public}d",
+            instance.negoInfo.isRecvSessionKeyEvent, instance.negoInfo.isRecvFinishEvent,
+            instance.negoInfo.isRecvCloseAckEvent);
         return;
     }
     UpdateAllGenCbCallback(&instance.info, true, SOFTBUS_OK);
@@ -486,6 +517,7 @@ static int32_t CreateApplyKeyNegoInstance(const RequestBusinessInfo *info, uint3
     instance->genCb = *genCb;
     instance->negoInfo.isRecvSessionKeyEvent = false;
     instance->negoInfo.isRecvFinishEvent = false;
+    instance->negoInfo.isRecvCloseAckEvent = false;
     ListInit(&instance->node);
     ListAdd(&g_applyKeyNegoList->list, &instance->node);
     char *anonyAccountHash = NULL;
@@ -613,6 +645,34 @@ static int32_t GenerateAccountHash(char *accountString, char *accountHashBuf, ui
     return SOFTBUS_OK;
 }
 
+static int32_t SendApplyKeyNegoCloseAckEvent(int32_t channelId, uint32_t requestId, bool isServer)
+{
+    char *msg = (char *)SoftBusCalloc(strlen(D2D_CLOSE_ACK) + 1);
+    if (msg == NULL) {
+        AUTH_LOGE(AUTH_CONN, "malloc fail");
+        return SOFTBUS_MEM_ERR;
+    }
+    if (strcpy_s(msg, strlen(D2D_CLOSE_ACK) + 1, D2D_CLOSE_ACK) != EOK) {
+        AUTH_LOGE(AUTH_CONN, "strcpy cred id fail");
+        SoftBusFree(msg);
+        return SOFTBUS_STRCPY_ERR;
+    }
+    AuthDataHead head = {
+        .dataType = DATA_TYPE_CLOSE_ACK,
+        .module = MODULE_APPLY_KEY_CONNECTION,
+        .seq = requestId,
+        .flag = isServer ? SERVER_SIDE_FLAG : CLIENT_SIDE_FLAG,
+        .len = strlen(msg),
+    };
+    if (PostApplyKeyData(channelId, false, &head, (uint8_t *)msg) != SOFTBUS_OK) {
+        AUTH_LOGE(AUTH_CONN, "post apply key data fail");
+        SoftBusFree(msg);
+        return SOFTBUS_AUTH_SEND_FAIL;
+    }
+    SoftBusFree(msg);
+    return SOFTBUS_OK;
+}
+
 static void OnFinished(int64_t authSeq, int32_t operationCode, const char *returnData)
 {
     AUTH_LOGI(AUTH_CONN, "applyKeynego OnFinish: authSeq=%{public}" PRId64, authSeq);
@@ -656,6 +716,9 @@ static void OnFinished(int64_t authSeq, int32_t operationCode, const char *retur
     if (SetApplyKeyNegoInfoRecvFinish(instance.requestId, true) != SOFTBUS_OK) {
         AUTH_LOGE(AUTH_CONN, "applyKeynego info not found, requestId=%{public}u", instance.requestId);
         return;
+    }
+    if (instance.isServer) {
+        (void)SendApplyKeyNegoCloseAckEvent(instance.connId, instance.requestId, instance.isServer);
     }
     OnGenSuccess((uint32_t)authSeq);
 }
@@ -976,6 +1039,28 @@ static int32_t ProcessApplyKeyData(uint32_t requestId, const uint8_t *data, uint
     return SOFTBUS_OK;
 }
 
+static int32_t ProcessApplyKeyCloseAckData(uint32_t requestId, const uint8_t *data, uint32_t dataLen)
+{
+    AUTH_LOGI(AUTH_CONN, "applykeynego close ack, requestId=%{public}u, len=%{public}u", requestId, dataLen);
+    ApplyKeyNegoInstance instance;
+    (void)memset_s(&instance, sizeof(ApplyKeyNegoInstance), 0, sizeof(ApplyKeyNegoInstance));
+    int32_t ret = GetGenApplyKeyInstanceByReq(requestId, &instance);
+    if (ret != SOFTBUS_OK) {
+        AUTH_LOGE(AUTH_CONN, "get instance failed! ret=%{public}d", ret);
+        return ret;
+    }
+    ret = SetApplyKeyNegoInfoRecvCloseAck(instance.requestId, true);
+    if (ret != SOFTBUS_OK) {
+        AUTH_LOGE(AUTH_CONN, "applyKeynego info not found, requestId=%{public}u", instance.requestId);
+        return ret;
+    }
+    if (!instance.isServer) {
+        (void)SendApplyKeyNegoCloseAckEvent(instance.connId, instance.requestId, instance.isServer);
+    }
+    OnGenSuccess(requestId);
+    return SOFTBUS_OK;
+}
+
 static int32_t ApplyKeyMsgHandler(
     int32_t channelId, uint32_t requestId, const AuthDataHead *head, const void *data, uint32_t dataLen)
 {
@@ -990,6 +1075,9 @@ static int32_t ApplyKeyMsgHandler(
             break;
         case DATA_TYPE_AUTH:
             ret = ProcessApplyKeyData(requestId, (const uint8_t *)data, dataLen);
+            break;
+        case DATA_TYPE_CLOSE_ACK:
+            ret = ProcessApplyKeyCloseAckData(requestId, (const uint8_t *)data, dataLen);
             break;
         default:
             ret = SOFTBUS_CHANNEL_AUTH_HANDLE_DATA_FAIL;
