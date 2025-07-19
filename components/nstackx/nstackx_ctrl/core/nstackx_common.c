@@ -1085,11 +1085,15 @@ int32_t NSTACKX_RegisterDeviceAn(const NSTACKX_LocalDeviceInfo *localDeviceInfo,
     return RegisterDeviceWithDeviceHash(localDeviceInfo, NSTACKX_TRUE, deviceHash);
 }
 
+struct NSTACKX_Sem {
+    sem_t wait;
+    atomic_bool isPost;
+};
+
 struct PostEvtBlockArgs {
     void *arg;
     EventHandle handle;
-    sem_t *wait;
-    atomic_bool isPost;
+    struct NSTACKX_Sem *sem;
     atomic_bool timeout;
 };
 
@@ -1103,10 +1107,12 @@ static void NSTACKX_PostEventBlockHander(void *argument)
     if (!arg->timeout && arg->arg != NULL && arg->handle != NULL) {
         arg->handle(arg->arg);
     }
-    if (!arg->timeout && arg->wait != NULL) {
-        SemPost(arg->wait);
-        arg->isPost = true;
-        DFINDER_LOGI(TAG, "post event is done");
+    if (!arg->timeout) {
+        if (arg->sem != NULL) {
+            SemPost(&arg->sem->wait);
+            arg->sem->isPost = true;
+            DFINDER_LOGI(TAG, "post event is done");
+        }
     }
     usleep(RETRY_WAIT_TIME);
     arg->arg = NULL;
@@ -1136,7 +1142,7 @@ int SemTimedWait(sem_t *sem, struct timespec expire)
     return NSTACKX_EOK;
 }
 
-static int32_t NSTACKX_BlockEvtWaitFinish(struct PostEvtBlockArgs *arg)
+static int32_t NSTACKX_BlockEvtWaitFinish(struct PostEvtBlockArgs *arg, struct NSTACKX_Sem *sem)
 {
     int ret = NSTACKX_EFAILED;
     struct timespec expire = {
@@ -1144,10 +1150,11 @@ static int32_t NSTACKX_BlockEvtWaitFinish(struct PostEvtBlockArgs *arg)
         .tv_nsec = 0,
     };
 
-    ret = SemTimedWait(arg->wait, expire);
+    ret = SemTimedWait(&sem->wait, expire);
     if (ret != NSTACKX_EOK) {
-        if (!arg->isPost) {
+        if (!sem->isPost) {
             arg->timeout = true;
+            arg->sem = NULL;
         }
         DFINDER_LOGE(TAG, "SemTimeWait failed errno %d", GetErrno());
     }
@@ -1162,30 +1169,30 @@ static int32_t NSTACKX_PostEventBlock(EventHandle handle, void *arg)
         return NSTACKX_EFAILED;
     }
 
-    sem_t wait;
-    if (SemInit(&wait, 0, 0)) {
+    struct NSTACKX_Sem sem;
+    sem.isPost = false;
+    if (SemInit(&sem.wait, 0, 0)) {
         DFINDER_LOGE(TAG, "Failed to init sem!");
         free(blockEvtArg);
         return NSTACKX_EFAILED;
     }
 
     blockEvtArg->arg = arg;
-    blockEvtArg->wait = &wait;
+    blockEvtArg->sem = &sem;
     blockEvtArg->handle = handle;
-    blockEvtArg->isPost = false;
     blockEvtArg->timeout = false;
     if (PostEvent(&g_eventNodeChain, g_epollfd, NSTACKX_PostEventBlockHander, blockEvtArg) != NSTACKX_EOK) {
-        SemDestroy(&wait);
+        SemDestroy(&sem.wait);
         free(blockEvtArg);
         DFINDER_LOGE(TAG, "PostEvent failed");
         return NSTACKX_EFAILED;
     }
 
     int32_t ret = NSTACKX_EOK;
-    if (!blockEvtArg->isPost) {
-        ret = NSTACKX_BlockEvtWaitFinish(blockEvtArg);
+    if (!sem.isPost) {
+        ret = NSTACKX_BlockEvtWaitFinish(blockEvtArg, &sem);
     }
-    SemDestroy(&wait);
+    SemDestroy(&sem.wait);
     return ret;
 }
 
