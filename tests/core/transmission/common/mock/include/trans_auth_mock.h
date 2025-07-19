@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2022 Huawei Device Co., Ltd.
+ * Copyright (c) 2022-2025 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -93,6 +93,8 @@ public:
     virtual int32_t AuthDecryptByUkId(
         int32_t ukId, const uint8_t *inData, uint32_t inLen, uint8_t *outData, uint32_t *outLen) = 0;
     virtual int32_t AuthFindUkIdByAclInfo(const AuthACLInfo *acl, int32_t *ukId) = 0;
+    virtual int32_t AuthGetAuthHandleByIndex(
+        const AuthConnInfo *connInfo, bool isServer, int32_t index, AuthHandle *authHandle) = 0;
 };
 
 class TransAuthInterfaceMock : public TransAuthInterface {
@@ -157,6 +159,9 @@ public:
     MOCK_METHOD5(AuthDecryptByUkId,
         int32_t (int32_t ukId, const uint8_t *inData, uint32_t inLen, uint8_t *outData, uint32_t *outLen));
     MOCK_METHOD2(AuthFindUkIdByAclInfo, int32_t (const AuthACLInfo *acl, int32_t *ukId));
+
+    MOCK_METHOD4(AuthGetAuthHandleByIndex,
+        int32_t (const AuthConnInfo *connInfo, bool isServer, int32_t index, AuthHandle *authHandle));
 };
 } // namespace OHOS
 #endif // TRANS_AUTH_MOCK_H
