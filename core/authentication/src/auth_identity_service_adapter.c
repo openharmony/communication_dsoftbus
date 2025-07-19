@@ -31,13 +31,14 @@
 #define FIELD_AUTHORIZED_SCOPE "authorizedScope"
 #define AUTH_APPID "softbus_auth"
 #define SCOPE_USER 2
+#define INT32_T_TO_STRING_MAX_LEN 21
 
-enum SoftbusCredType {
+typedef enum {
     ACCOUNT_RELATED = 1,
     ACCOUNT_UNRELATED = 2,
     ACCOUNT_SHARE = 3,
-    ACCOUNT_BUTT
-};
+    ACCOUNT_BUTT,
+} SoftbusCredType;
 
 static char *IdServiceGenerateQueryParam(const char *udidHash, const char *accountHash, bool isSameAccount)
 {
@@ -52,6 +53,38 @@ static char *IdServiceGenerateQueryParam(const char *udidHash, const char *accou
 
     if (!AddStringToJsonObject(msg, FIELD_DEVICE_ID_HASH, udidHash) ||
         (isSameAccount && !AddNumberToJsonObject(msg, FIELD_CRED_TYPE, credType))) {
+        AUTH_LOGE(AUTH_HICHAIN, "add json object fail");
+        cJSON_Delete(msg);
+        return NULL;
+    }
+
+    AUTH_LOGD(AUTH_HICHAIN, "hichain identity service cred type=%{public}d", credType);
+
+    char *data = cJSON_PrintUnformatted(msg);
+    if (data == NULL) {
+        AUTH_LOGE(AUTH_HICHAIN, "json transform unformatted fail");
+    }
+    cJSON_Delete(msg);
+    return data;
+}
+
+static char *IdServiceGenerateQueryParamByCredType(int32_t peerUserId, const char *udidHash, SoftbusCredType credType)
+{
+    char peerUserIdString[INT32_T_TO_STRING_MAX_LEN] = {0};
+    if (sprintf_s(peerUserIdString, INT32_T_TO_STRING_MAX_LEN, "%d", peerUserId) == -1) {
+        AUTH_LOGE(AUTH_HICHAIN, "int32_t to string fail");
+        return NULL;
+    }
+
+    cJSON *msg = cJSON_CreateObject();
+    if (msg == NULL) {
+        AUTH_LOGE(AUTH_HICHAIN, "create json fail");
+        return NULL;
+    }
+
+    if (!AddStringToJsonObject(msg, FIELD_DEVICE_ID_HASH, udidHash) ||
+        !AddNumberToJsonObject(msg, FIELD_CRED_TYPE, credType) ||
+        (credType == ACCOUNT_UNRELATED && !AddStringToJsonObject(msg, FIELD_PEER_USER_SPACE_ID, peerUserIdString))) {
         AUTH_LOGE(AUTH_HICHAIN, "add json object fail");
         cJSON_Delete(msg);
         return NULL;
@@ -112,6 +145,80 @@ int32_t IdServiceQueryCredential(int32_t userId, const char *udidHash, const cha
     }
     AUTH_LOGD(AUTH_HICHAIN, "hichain identity service get credential list");
 
+    return SOFTBUS_OK;
+}
+
+static bool IsInvalidCredList(const char *credList)
+{
+    if (credList == NULL) {
+        AUTH_LOGE(AUTH_HICHAIN, "parameter is null");
+        return true;
+    }
+
+    cJSON *credIdJson = CreateJsonObjectFromString(credList);
+    if (credIdJson == NULL) {
+        AUTH_LOGE(AUTH_HICHAIN, "create json fail");
+        return true;
+    }
+
+    int32_t arraySize = GetArrayItemNum(credIdJson);
+    cJSON_Delete(credIdJson);
+    if (arraySize == 0) {
+        AUTH_LOGE(AUTH_HICHAIN, "array size is 0");
+        return true;
+    }
+    return false;
+}
+
+int32_t AuthIdServiceQueryCredential(int32_t peerUserId, const char *udidHash, const char *accountidHash,
+    bool isSameAccount, char **credList)
+{
+    AUTH_CHECK_AND_RETURN_RET_LOGE(udidHash != NULL && accountidHash != NULL && credList != NULL,
+        SOFTBUS_INVALID_PARAM, AUTH_HICHAIN, "invalid param");
+    const CredManager *credManger = IdServiceGetCredMgrInstance();
+    AUTH_CHECK_AND_RETURN_RET_LOGE(credManger != NULL, SOFTBUS_AUTH_GET_CRED_INSTANCE_FALI,
+        AUTH_HICHAIN, "hichain identity service not initialized");
+    int32_t localUserId = GetActiveOsAccountIds();
+    if (isSameAccount) {
+        char *authParams = IdServiceGenerateQueryParamByCredType(peerUserId, udidHash, ACCOUNT_RELATED);
+        AUTH_CHECK_AND_RETURN_RET_LOGE(authParams != NULL, SOFTBUS_CREATE_JSON_ERR,
+            AUTH_HICHAIN, "hichain identity service generate query parameter fail");
+        int32_t ret = credManger->queryCredentialByParams(localUserId, authParams, credList);
+        cJSON_free(authParams);
+        if (ret != HC_SUCCESS) {
+            uint32_t authErrCode = 0;
+            (void)GetSoftbusHichainAuthErrorCode((uint32_t)ret, &authErrCode);
+            AUTH_LOGE(AUTH_HICHAIN,
+                "hichain identity service query credential list fail err=%{public}d, authErrCode=%{public}d",
+                ret, authErrCode);
+            return authErrCode;
+        }
+        return SOFTBUS_OK;
+    }
+
+    char *authParams = IdServiceGenerateQueryParamByCredType(peerUserId, udidHash, ACCOUNT_SHARE);
+    AUTH_CHECK_AND_RETURN_RET_LOGE(authParams != NULL, SOFTBUS_CREATE_JSON_ERR,
+        AUTH_HICHAIN, "hichain identity service generate query parameter fail");
+    int32_t ret = credManger->queryCredentialByParams(localUserId, authParams, credList);
+    cJSON_free(authParams);
+    if (ret != HC_SUCCESS || IsInvalidCredList(*credList)) {
+        IdServiceDestroyCredentialList(credList);
+        *credList = NULL;
+        authParams = IdServiceGenerateQueryParamByCredType(peerUserId, udidHash, ACCOUNT_UNRELATED);
+        AUTH_CHECK_AND_RETURN_RET_LOGE(authParams != NULL, SOFTBUS_CREATE_JSON_ERR,
+            AUTH_HICHAIN, "hichain identity service generate query parameter fail");
+
+        ret = credManger->queryCredentialByParams(localUserId, authParams, credList);
+        cJSON_free(authParams);
+    }
+    if (ret != HC_SUCCESS) {
+        uint32_t authErrCode = 0;
+        (void)GetSoftbusHichainAuthErrorCode((uint32_t)ret, &authErrCode);
+        AUTH_LOGE(AUTH_HICHAIN,
+            "hichain identity service query credential list fail err=%{public}d, authErrCode=%{public}d",
+            ret, authErrCode);
+        return authErrCode;
+    }
     return SOFTBUS_OK;
 }
 

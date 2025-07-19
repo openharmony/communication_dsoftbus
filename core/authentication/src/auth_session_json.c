@@ -940,7 +940,7 @@ static void UnpackExternalAuthInfo(JsonObj *obj, AuthSessionInfo *info)
     }
     char *udidShortHash = info->isSameAccount ? localUdidHash : info->udidShortHash;
     char *credList = NULL;
-    ret = IdServiceQueryCredential(nodeInfo.userId, udidShortHash, info->accountHash, info->isSameAccount, &credList);
+    ret = AuthIdServiceQueryCredential(info->userId, udidShortHash, info->accountHash, info->isSameAccount, &credList);
     if (ret != SOFTBUS_OK) {
         AUTH_LOGE(AUTH_FSM, "query credential fail");
         return;
