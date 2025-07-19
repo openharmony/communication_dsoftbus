@@ -324,9 +324,19 @@ HWTEST_F(TransProxyMessageTest, GetAuthIdReDecrypt002, TestSize.Level1)
     ConnectionInfo mockInfo;
     mockInfo.type = CONNECT_SLE;
     TransConnInterfaceMock connMock;
-    EXPECT_CALL(connMock, ConnGetConnectionInfo).WillOnce(DoAll(SetArgPointee<1>(mockInfo), Return(SOFTBUS_OK)));
+    EXPECT_CALL(connMock, ConnGetConnectionInfo).WillRepeatedly(DoAll(SetArgPointee<1>(mockInfo), Return(SOFTBUS_OK)));
+
+    TransAuthInterfaceMock authMock;
+    EXPECT_CALL(authMock, AuthGetAuthHandleByIndex).Times(2)
+        .WillOnce(Return(SOFTBUS_AUTH_NOT_SUPPORT_NORMALIZE))
+        .WillOnce(Return(SOFTBUS_INVALID_PARAM));
     int32_t ret = GetAuthIdReDecrypt(&authHandle, &msg, &decData, &decDataLen);
     EXPECT_EQ(ret, SOFTBUS_NOT_FIND);
+
+    EXPECT_CALL(authMock, AuthGetAuthHandleByIndex).WillOnce(Return(SOFTBUS_OK));
+    EXPECT_CALL(authMock, AuthDecrypt).WillOnce(Return(SOFTBUS_OK));
+    ret = GetAuthIdReDecrypt(&authHandle, &msg, &decData, &decDataLen);
+    EXPECT_EQ(ret, SOFTBUS_OK);
 }
 
 /**
@@ -901,4 +911,75 @@ HWTEST_F(TransProxyMessageTest, TransProxyResetPeerTest001, TestSize.Level1)
     ret = TransProxyResetPeer(&chanInfo);
     EXPECT_EQ(SOFTBUS_OK, ret);
 }
+
+/**
+  * @tc.name: GetAuthIdByHandshakeMsgTest001
+  * @tc.desc: GetAuthIdByHandshakeMsg
+  * @tc.type: FUNC
+  * @tc.require:
+  */
+HWTEST_F(TransProxyMessageTest, GetAuthIdByHandshakeMsgTest001, TestSize.Level1)
+{
+    ConnectionInfo info = {
+        .type = CONNECT_TCP,
+    };
+    (void)strcpy_s(info.socketInfo.addr, IP_LEN, "123.45.6.78");
+
+    TransConnInterfaceMock connMock;
+    EXPECT_CALL(connMock, ConnGetConnectionInfo).WillRepeatedly(DoAll(SetArgPointee<1>(info), Return(SOFTBUS_OK)));
+
+    uint32_t connId = 207851;
+    uint8_t cipher = 0x6;
+    int32_t index = 3;
+    AuthHandle authHandle;
+    authHandle.authId = 7448763123;
+
+    TransAuthInterfaceMock authMock;
+    EXPECT_CALL(authMock, AuthGetIdByConnInfo).WillOnce(Return(authHandle.authId));
+
+    int32_t ret = GetAuthIdByHandshakeMsg(connId, cipher, &authHandle, index);
+    EXPECT_EQ(ret, SOFTBUS_OK);
+
+    EXPECT_CALL(authMock, AuthGetIdByConnInfo).WillRepeatedly(Return(AUTH_INVALID_ID));
+    EXPECT_CALL(authMock, AuthGetAuthHandleByIndex).Times(2)
+        .WillOnce(Return(SOFTBUS_AUTH_NOT_SUPPORT_NORMALIZE))
+        .WillOnce(Return(SOFTBUS_INVALID_PARAM));
+    ret = GetAuthIdByHandshakeMsg(connId, cipher, &authHandle, index);
+    EXPECT_EQ(ret, SOFTBUS_NOT_FIND);
+
+    EXPECT_CALL(authMock, AuthGetAuthHandleByIndex).Times(2)
+        .WillOnce(Return(SOFTBUS_AUTH_NOT_SUPPORT_NORMALIZE))
+        .WillOnce(Return(SOFTBUS_OK));
+    ret = GetAuthIdByHandshakeMsg(connId, cipher, &authHandle, index);
+    EXPECT_EQ(ret, SOFTBUS_OK);
+
+    EXPECT_CALL(authMock, AuthGetAuthHandleByIndex).WillOnce(Return(SOFTBUS_OK));
+    ret = GetAuthIdByHandshakeMsg(connId, cipher, &authHandle, index);
+    EXPECT_EQ(ret, SOFTBUS_OK);
+}
+
+/**
+  * @tc.name: GetBrMacFromConnInfoTest001
+  * @tc.desc: GetBrMacFromConnInfo
+  * @tc.type: FUNC
+  * @tc.require:
+  */
+HWTEST_F(TransProxyMessageTest, GetBrMacFromConnInfoTest001, TestSize.Level1)
+{
+    ConnectionInfo info = {
+        .type = CONNECT_BR,
+    };
+    (void)strcpy_s(info.brInfo.brMac, BT_MAC_LEN, "98.76.54.321");
+
+    TransConnInterfaceMock connMock;
+    EXPECT_CALL(connMock, ConnGetConnectionInfo).WillRepeatedly(DoAll(SetArgPointee<1>(info), Return(SOFTBUS_OK)));
+
+    uint32_t connId = 101011;
+    char peerBrMac[BT_MAC_LEN] = { 0 };
+
+    int32_t ret = GetBrMacFromConnInfo(connId, peerBrMac, BT_MAC_LEN);
+    EXPECT_EQ(ret, SOFTBUS_OK);
+}
+
+
 } // namespace OHOS
