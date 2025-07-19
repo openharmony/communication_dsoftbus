@@ -459,8 +459,17 @@ static bool IsInWhitelist(std::string_view app)
     return std::find(systemAppWhitelist.begin(), systemAppWhitelist.end(), app) != systemAppWhitelist.end();
 }
 
-static int32_t TransCheckSystemAppList(pid_t callingUid)
+static int32_t TransCheckSystemAppList(pid_t callingUid, const char *sessionName)
 {
+    // if sessionName is DBinder or DMS should be return
+    #define DBINDER_BUS_NAME_PREFIX "DBinder"
+    if (strncmp(sessionName, DBINDER_BUS_NAME_PREFIX, strlen(DBINDER_BUS_NAME_PREFIX)) == 0) {
+        return SOFTBUS_OK;
+    }
+    #define DMS_COLLABATION_NAME_PREFIX "ohos.dtbcollab.dms"
+    if (strncmp(sessionName, DMS_COLLABATION_NAME_PREFIX, strlen(DMS_COLLABATION_NAME_PREFIX)) == 0) {
+        return SOFTBUS_OK;
+    }
     uint64_t callingFullTokenId = IPCSkeleton::GetCallingFullTokenID();
     if (SoftBusCheckIsSystemApp(callingFullTokenId) == false) {
         return SOFTBUS_OK;
@@ -505,7 +514,7 @@ int32_t SoftBusServerStub::CreateSessionServerInner(MessageParcel &data, Message
         goto EXIT;
     }
 #ifdef SUPPORT_BUNDLENAME
-    if (TransCheckSystemAppList(callingUid) != SOFTBUS_OK) {
+    if (TransCheckSystemAppList(callingUid, sessionName) != SOFTBUS_OK) {
         retReply = SOFTBUS_PERMISSION_DENIED;
         goto EXIT;
     }
