@@ -425,7 +425,7 @@ HWTEST_F(AuthHichainMockTest, UNPACK_EXTERNAL_AUTH_INFO_001, TestSize.Level1)
     EXPECT_CALL(hichainMock, LnnIsDefaultOhosAccount).WillRepeatedly(Return(false));
     EXPECT_CALL(hichainMock, LnnGetLocalStrInfo).WillOnce(Return(SOFTBUS_INVALID_PARAM))
         .WillRepeatedly(Return(SOFTBUS_OK));
-    EXPECT_CALL(hichainMock, IdServiceQueryCredential).WillOnce(Return(SOFTBUS_INVALID_PARAM))
+    EXPECT_CALL(hichainMock, AuthIdServiceQueryCredential).WillOnce(Return(SOFTBUS_INVALID_PARAM))
         .WillRepeatedly(Return(SOFTBUS_OK));
     EXPECT_CALL(hichainMock, IdServiceGetCredIdFromCredList).WillOnce(Return(NULL))
         .WillRepeatedly(Return((char *)credID));
