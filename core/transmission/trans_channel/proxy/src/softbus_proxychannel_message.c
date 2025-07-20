@@ -39,6 +39,7 @@
 #include "softbus_proxychannel_manager.h"
 #include "softbus_proxychannel_transceiver.h"
 #include "softbus_utils.h"
+#include "trans_channel_common.h"
 #include "trans_channel_manager.h"
 #include "trans_log.h"
 #include "trans_proxy_process_data.h"
@@ -1474,6 +1475,13 @@ int32_t TransProxyUnpackHandshakeAckMsg(const char *msg, ProxyChannelInfo *chanI
 
 static int32_t UnpackPackHandshakeMsgForFastData(AppInfo *appInfo, cJSON *root)
 {
+    (void)LnnGetNetworkIdByUuid(appInfo->peerData.deviceId, appInfo->peerNetWorkId, NETWORK_ID_BUF_LEN);
+    int32_t osType = 0;
+    (void)GetOsTypeByNetworkId(appInfo->peerNetWorkId, &osType);
+    if (osType == OH_OS_TYPE) {
+        TRANS_LOGW(TRANS_CTRL, "no need get fastData osType=%{public}d", osType);
+        return SOFTBUS_OK;
+    }
     if (!GetJsonObjectNumber16Item(root, JSON_KEY_FIRST_DATA_SIZE, &(appInfo->fastTransDataSize))) {
         TRANS_LOGW(TRANS_CTRL, "Failed to get handshake msg fast data size");
         appInfo->fastTransDataSize = 0;

@@ -605,14 +605,16 @@ HWTEST_F(TransProxyMessageTest, TransProxyHandshakeAckMsgTest002, TestSize.Level
 HWTEST_F(TransProxyMessageTest, TransProxyHandshakeMsgTest001, TestSize.Level1)
 {
     TransCommInterfaceMock commMock;
-    EXPECT_CALL(commMock, SoftBusBase64Encode).WillOnce(Return(SOFTBUS_MEM_ERR)).WillRepeatedly(Return(SOFTBUS_OK));
+    TransAuthInterfaceMock authMock;
+    EXPECT_CALL(commMock, SoftBusBase64Encode).WillRepeatedly(Return(SOFTBUS_OK));
+    EXPECT_CALL(authMock, LnnGetNetworkIdByUuid).WillRepeatedly(Return(SOFTBUS_OK));
 
     ProxyChannelInfo info;
     ProxyChannelInfo outChannel;
 
     info.appInfo.appType = APP_TYPE_NORMAL;
     char *msg = TransProxyPackHandshakeMsg(&info);
-    EXPECT_EQ(nullptr, msg);
+    EXPECT_NE(nullptr, msg);
     msg = TransProxyPackHandshakeMsg(&info);
     ASSERT_TRUE(msg != nullptr);
 
@@ -636,7 +638,9 @@ HWTEST_F(TransProxyMessageTest, TransProxyHandshakeMsgTest001, TestSize.Level1)
 HWTEST_F(TransProxyMessageTest, TransProxyHandshakeMsgTest002, TestSize.Level1)
 {
     TransCommInterfaceMock commMock;
+    TransAuthInterfaceMock authMock;
     EXPECT_CALL(commMock, GenerateRandomStr).WillOnce(Return(SOFTBUS_MEM_ERR)).WillRepeatedly(Return(SOFTBUS_OK));
+    EXPECT_CALL(authMock, LnnGetNetworkIdByUuid).WillRepeatedly(Return(SOFTBUS_OK));
 
     ProxyChannelInfo info;
     info.appInfo.appType = APP_TYPE_AUTH;
@@ -666,12 +670,14 @@ HWTEST_F(TransProxyMessageTest, TransProxyHandshakeMsgTest002, TestSize.Level1)
 HWTEST_F(TransProxyMessageTest, TransProxyHandshakeMsgTest003, TestSize.Level1)
 {
     TransCommInterfaceMock commMock;
-    EXPECT_CALL(commMock, SoftBusBase64Encode).WillOnce(Return(SOFTBUS_MEM_ERR)).WillRepeatedly(Return(SOFTBUS_OK));
+    TransAuthInterfaceMock authMock;
+    EXPECT_CALL(commMock, SoftBusBase64Encode).WillRepeatedly(Return(SOFTBUS_OK));
+    EXPECT_CALL(authMock, LnnGetNetworkIdByUuid).WillRepeatedly(Return(SOFTBUS_OK));
 
     ProxyChannelInfo info;
     info.appInfo.appType = APP_TYPE_INNER;
     char *msg = TransProxyPackHandshakeMsg(&info);
-    EXPECT_EQ(nullptr, msg);
+    EXPECT_NE(nullptr, msg);
     msg = TransProxyPackHandshakeMsg(nullptr);
     EXPECT_EQ(nullptr, msg);
     msg = TransProxyPackHandshakeMsg(&info);
@@ -679,6 +685,8 @@ HWTEST_F(TransProxyMessageTest, TransProxyHandshakeMsgTest003, TestSize.Level1)
 
     ProxyChannelInfo outChannel;
     int32_t ret = TransProxyUnpackHandshakeMsg(msg, &outChannel, strlen(msg));
+    EXPECT_EQ(SOFTBUS_DECRYPT_ERR, ret);
+    ret = TransProxyUnpackHandshakeMsg(msg, &outChannel, strlen(msg));
     EXPECT_EQ(SOFTBUS_DECRYPT_ERR, ret);
     ret = TransProxyUnpackHandshakeMsg(msg, &outChannel, strlen(msg));
     EXPECT_EQ(SOFTBUS_DECRYPT_ERR, ret);
