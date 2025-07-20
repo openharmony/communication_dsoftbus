@@ -51,6 +51,10 @@ static int OpenSessionProxyCallback(IOwner owner, int code, IpcIo *reply)
     }
     uint32_t size;
     ReadUint32(reply, &size);
+    if (size > sizeof(TransSerializer)) {
+        TRANS_LOGE(TRANS_SDK, "pop data size err.");
+        return SOFTBUS_MEM_ERR;
+    }
     void *data = (void *)ReadBuffer(reply, size);
     if (data == NULL) {
         TRANS_LOGE(TRANS_SDK, "pop data is null.");

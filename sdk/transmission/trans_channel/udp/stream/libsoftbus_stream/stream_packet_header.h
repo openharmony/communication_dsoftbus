@@ -236,6 +236,7 @@ public:
     static constexpr uint32_t FLAG_OFFSET = 22;
     static constexpr uint32_t LEVEL_OFFSET = 18;
     static constexpr uint32_t SEQ_NUM_OFFSET = 0;
+    static constexpr uint32_t MAX_LEVEL = 15;
 
     static constexpr uint32_t WORD_SIZE = 16;
 
@@ -257,7 +258,9 @@ public:
         commonHeader_.streamType = streamType;
         commonHeader_.marker = 0;
         commonHeader_.flag = 0;
-        commonHeader_.level = streamFrameInfo->level;
+        if (streamFrameInfo->level <= MAX_LEVEL) {
+            commonHeader_.level = streamFrameInfo->level;
+        }
         commonHeader_.pad = 0;
         commonHeader_.streamId = streamFrameInfo->streamId;
         commonHeader_.timestamp = ts;
