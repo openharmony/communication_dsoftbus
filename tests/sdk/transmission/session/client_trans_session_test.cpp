@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2022 Huawei Device Co., Ltd.
+ * Copyright (c) 2022-2025 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -868,6 +868,8 @@ HWTEST_F(TransClientSessionTest, TransClientSessionTest22, TestSize.Level1)
     uint32_t value = 0;
     int32_t ret = ReadMaxSendBytesSize(TRANS_TEST_CHANNEL_ID, CHANNEL_TYPE_TCP_DIRECT,
                                    &value, TRANS_TEST_INVALID_VALUE_SIZE);
+    EXPECT_EQ(ret, SOFTBUS_INVALID_PARAM);
+    ret = ReadMaxSendBytesSize(TRANS_TEST_CHANNEL_ID, CHANNEL_TYPE_TCP_DIRECT, nullptr, TRANS_TEST_INVALID_VALUE_SIZE);
     EXPECT_EQ(ret, SOFTBUS_INVALID_PARAM);
     ret = ReadMaxSendBytesSize(TRANS_TEST_CHANNEL_ID, CHANNEL_TYPE_BUTT, &value, sizeof(value));
     EXPECT_EQ(ret, SOFTBUS_GET_CONFIG_VAL_ERR);
