@@ -27,6 +27,7 @@ extern "C" {
 typedef struct {
     NSTACKX_DeviceInfo *deviceList;
     uint32_t *deviceCountPtr;
+    sem_t wait;
 } GetDeviceListMessage;
 #endif
 
