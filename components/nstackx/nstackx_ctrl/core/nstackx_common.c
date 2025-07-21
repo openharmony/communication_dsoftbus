@@ -57,9 +57,6 @@
 #define SINGLE_NIC_CNT 1
 #define TAG "nStackXDFinder"
 #define DFINDER_THREAD_NAME TAG
-#define RETRY_WAIT_TIME 500 /* us */
-#define DFINDER_POSE_EVENT_MAX_BLOCK_SECONDS 3
-#define NSEC_TICKS_PER_SEC (1000000000)
 
 enum {
     NSTACKX_INIT_STATE_START = 0,
@@ -1051,10 +1048,6 @@ int32_t NSTACKX_RegisterDeviceName(const char *devName)
         DFINDER_LOGE(TAG, "register local device name is invalid");
         return NSTACKX_EINVAL;
     }
-    if (g_nstackInitState != NSTACKX_INIT_STATE_DONE) {
-        DFINDER_LOGE(TAG, "NSTACKX_CTRL is not initiated yet");
-        return NSTACKX_EFAILED;
-    }
     char *dupDevName = (char *)malloc(sizeof(char) * NSTACKX_MAX_DEVICE_NAME_LEN);
     if (dupDevName == NULL) {
         return NSTACKX_ENOMEM;
@@ -1063,10 +1056,6 @@ int32_t NSTACKX_RegisterDeviceName(const char *devName)
         DFINDER_LOGE(TAG, "strncpy dupDevName failed");
         free(dupDevName);
         return NSTACKX_EFAILED;
-    }
-    if (g_nstackThreadInitState != NSTACKX_INIT_STATE_DONE) {
-        ConfigureLocalDeviceNameInner((void *)dupDevName);
-        return NSTACKX_EOK;
     }
     if (PostEvent(&g_eventNodeChain, g_epollfd, ConfigureLocalDeviceNameInner, dupDevName) != NSTACKX_EOK) {
         DFINDER_LOGE(TAG, "Failed to configure local device name!");
@@ -1085,127 +1074,19 @@ int32_t NSTACKX_RegisterDeviceAn(const NSTACKX_LocalDeviceInfo *localDeviceInfo,
     return RegisterDeviceWithDeviceHash(localDeviceInfo, NSTACKX_TRUE, deviceHash);
 }
 
-struct NSTACKX_Sem {
-    sem_t wait;
-    atomic_bool isPost;
-};
-
-struct PostEvtBlockArgs {
-    void *arg;
-    EventHandle handle;
-    struct NSTACKX_Sem *sem;
-    atomic_bool timeout;
-};
-
-static void NSTACKX_PostEventBlockHander(void *argument)
-{
-    if (argument == NULL) {
-        return;
-    }
-
-    struct PostEvtBlockArgs *arg = (struct PostEvtBlockArgs *)argument;
-    if (!arg->timeout && arg->arg != NULL && arg->handle != NULL) {
-        arg->handle(arg->arg);
-    }
-    if (!arg->timeout) {
-        if (arg->sem != NULL) {
-            SemPost(&arg->sem->wait);
-            arg->sem->isPost = true;
-            DFINDER_LOGI(TAG, "post event is done");
-        }
-    }
-    usleep(RETRY_WAIT_TIME);
-    arg->arg = NULL;
-    free(arg);
-}
-
-int SemTimedWait(sem_t *sem, struct timespec expire)
-{
-    struct timespec timeout;
-
-    if (clock_gettime(CLOCK_REALTIME, &timeout) != NSTACKX_EOK) {
-        DFINDER_LOGE(TAG, "clock_gettime fail");
-        return NSTACKX_EFAILED;
-    }
-
-    timeout.tv_sec += expire.tv_sec;
-    timeout.tv_nsec += expire.tv_nsec;
-    if (timeout.tv_nsec >= NSEC_TICKS_PER_SEC) {
-        timeout.tv_sec += 1;
-        timeout.tv_nsec -= NSEC_TICKS_PER_SEC;
-    }
-    int ret = sem_timedwait(sem, &timeout);
-    if (ret != 0) {
-        return NSTACKX_EFAILED;
-    }
-
-    return NSTACKX_EOK;
-}
-
-static int32_t NSTACKX_BlockEvtWaitFinish(struct PostEvtBlockArgs *arg, struct NSTACKX_Sem *sem)
-{
-    int ret = NSTACKX_EFAILED;
-    struct timespec expire = {
-        .tv_sec = DFINDER_POSE_EVENT_MAX_BLOCK_SECONDS,
-        .tv_nsec = 0,
-    };
-
-    ret = SemTimedWait(&sem->wait, expire);
-    if (ret != NSTACKX_EOK) {
-        if (!sem->isPost) {
-            arg->timeout = true;
-            arg->sem = NULL;
-        }
-        DFINDER_LOGE(TAG, "SemTimeWait failed errno %d", GetErrno());
-    }
-    return ret;
-}
-
-static int32_t NSTACKX_PostEventBlock(EventHandle handle, void *arg)
-{
-    struct PostEvtBlockArgs *blockEvtArg = (struct PostEvtBlockArgs *)calloc(1U, sizeof(struct PostEvtBlockArgs));
-    if (blockEvtArg == NULL) {
-        DFINDER_LOGE(TAG, "calloc failed");
-        return NSTACKX_EFAILED;
-    }
-
-    struct NSTACKX_Sem sem;
-    sem.isPost = false;
-    if (SemInit(&sem.wait, 0, 0)) {
-        DFINDER_LOGE(TAG, "Failed to init sem!");
-        free(blockEvtArg);
-        return NSTACKX_EFAILED;
-    }
-
-    blockEvtArg->arg = arg;
-    blockEvtArg->sem = &sem;
-    blockEvtArg->handle = handle;
-    blockEvtArg->timeout = false;
-    if (PostEvent(&g_eventNodeChain, g_epollfd, NSTACKX_PostEventBlockHander, blockEvtArg) != NSTACKX_EOK) {
-        SemDestroy(&sem.wait);
-        free(blockEvtArg);
-        DFINDER_LOGE(TAG, "PostEvent failed");
-        return NSTACKX_EFAILED;
-    }
-
-    int32_t ret = NSTACKX_EOK;
-    if (!sem.isPost) {
-        ret = NSTACKX_BlockEvtWaitFinish(blockEvtArg, &sem);
-    }
-    SemDestroy(&sem.wait);
-    return ret;
-}
-
 struct RegDeviceInfo {
     const NSTACKX_LocalDeviceInfoV2 *info;
     int registerType;
     int32_t err;
+    sem_t wait;
 };
 
-static inline void RegisterDeviceV2(void *arg)
+static void RegisterDeviceV2(void *arg)
 {
     struct RegDeviceInfo *regInfo = (struct RegDeviceInfo *)arg;
     regInfo->err = RegisterLocalDeviceV2(regInfo->info, regInfo->registerType);
+    SemPost(&regInfo->wait);
+    DFINDER_LOGI(TAG, "RegisterDeviceV2 post event is done");
 }
 
 #define NSTACKX_MAX_LOCAL_IFACE_NUM 10
@@ -1224,12 +1105,24 @@ static int32_t RegisterDeviceWithType(const NSTACKX_LocalDeviceInfoV2 *localDevi
         return (int32_t)RegisterLocalDeviceV2(localDeviceInfo, registerType);
     }
 
-    struct RegDeviceInfo regInfo = {.info = localDeviceInfo, .registerType = registerType, .err = NSTACKX_EOK};
-    if (NSTACKX_PostEventBlock(RegisterDeviceV2, &regInfo) != NSTACKX_EOK) {
-        DFINDER_LOGE(TAG, "Failed to configure local device info!");
+    struct RegDeviceInfo regInfo;
+    if (SemInit(&regInfo.wait, 0, 0)) {
+        DFINDER_LOGE(TAG, "sem init fail");
         return NSTACKX_EBUSY;
     }
 
+    regInfo.info = localDeviceInfo;
+    regInfo.registerType = registerType;
+    regInfo.err = NSTACKX_EOK;
+
+    if (PostEvent(&g_eventNodeChain, g_epollfd, RegisterDeviceV2, &regInfo) != NSTACKX_EOK) {
+        DFINDER_LOGE(TAG, "Failed to configure local device info!");
+        SemDestroy(&regInfo.wait);
+        return NSTACKX_EBUSY;
+    }
+
+    SemWait(&regInfo.wait);
+    SemDestroy(&regInfo.wait);
     return regInfo.err;
 }
 
@@ -1331,14 +1224,23 @@ int32_t NSTACKX_SetFilterCapability(uint32_t capabilityBitmapNum, uint32_t capab
     DFINDER_LOGI(TAG, "Set Filter Capability");
     return NSTACKX_CapabilityHandle(capabilityBitmapNum, capabilityBitmap, SetFilterCapabilityInner);
 }
+typedef struct {
+    uint32_t maxDeviceNum;
+    sem_t wait;
+} SetMaxDeviceNumMsg;
 
-static inline void SetMaxDeviceNumInner(void *arg)
+static void SetMaxDeviceNumInner(void *argument)
 {
-    SetMaxDeviceNum((uint32_t)(uintptr_t)(arg));
+    SetMaxDeviceNumMsg *msg = (SetMaxDeviceNumMsg *)argument;
+    SetMaxDeviceNum(msg->maxDeviceNum);
+    SemPost(&msg->wait);
 }
 
 int32_t NSTACKX_SetMaxDeviceNum(uint32_t maxDeviceNum)
 {
+    SetMaxDeviceNumMsg msg = {
+        .maxDeviceNum = maxDeviceNum,
+    };
     if (g_nstackInitState != NSTACKX_INIT_STATE_DONE) {
         DFINDER_LOGE(TAG, "NSTACKX_Ctrl is not initiated yet");
         return NSTACKX_EFAILED;
@@ -1347,10 +1249,17 @@ int32_t NSTACKX_SetMaxDeviceNum(uint32_t maxDeviceNum)
         SetMaxDeviceNum(maxDeviceNum);
         return NSTACKX_EOK;
     }
-    if (NSTACKX_PostEventBlock(SetMaxDeviceNumInner, (void *)(uintptr_t)maxDeviceNum) != NSTACKX_EOK) {
-        DFINDER_LOGE(TAG, "Failed to set max device num!");
+    if (SemInit(&msg.wait, 0, 0)) {
+        DFINDER_LOGE(TAG, "Failed to init sem!");
         return NSTACKX_EFAILED;
     }
+    if (PostEvent(&g_eventNodeChain, g_epollfd, SetMaxDeviceNumInner, &msg) != NSTACKX_EOK) {
+        DFINDER_LOGE(TAG, "Failed to set max device num!");
+        SemDestroy(&msg.wait);
+        return NSTACKX_EFAILED;
+    }
+    SemWait(&msg.wait);
+    SemDestroy(&msg.wait);
     return NSTACKX_EOK;
 }
 
@@ -1427,13 +1336,28 @@ static bool RegisterServiceDataParamCheck(const struct NSTACKX_ServiceData *para
 struct ServiceDataInfo {
     const struct NSTACKX_ServiceData *param;
     uint32_t cnt;
-    int32_t err;
+    sem_t wait;
 };
 
-static inline void RegisterServiceDataV2(void *arg)
+static int32_t ServiceDataInfoInit(struct ServiceDataInfo *info, const struct NSTACKX_ServiceData *param, uint32_t cnt)
+{
+    if (SemInit(&info->wait, 0, 0)) {
+        DFINDER_LOGE(TAG, "Failed to init sem!");
+        return NSTACKX_EFAILED;
+    }
+    info->param = param;
+    info->cnt = cnt;
+    return NSTACKX_EOK;
+}
+
+static void RegisterServiceDataV2(void *arg)
 {
     struct ServiceDataInfo *info = (struct ServiceDataInfo *)arg;
-    info->err = SetLocalDeviceServiceDataV2(info->param, info->cnt);
+    if (SetLocalDeviceServiceDataV2(info->param, info->cnt) != NSTACKX_EOK) {
+        DFINDER_LOGE(TAG, "register v2 info failed");
+    }
+    SemPost(&info->wait);
+    DFINDER_LOGI(TAG, "RegisterServiceDataV2 post event is done");
 }
 
 int32_t NSTACKX_RegisterServiceDataV2(const struct NSTACKX_ServiceData *param, uint32_t cnt)
@@ -1452,14 +1376,21 @@ int32_t NSTACKX_RegisterServiceDataV2(const struct NSTACKX_ServiceData *param, u
         return SetLocalDeviceServiceDataV2(param, cnt);
     }
 
-    struct ServiceDataInfo info = {.param = param, .cnt = cnt, .err = NSTACKX_EOK};
-    if (NSTACKX_PostEventBlock(RegisterServiceDataV2, (void *)&info) != NSTACKX_EOK) {
+    struct ServiceDataInfo info;
+    if (ServiceDataInfoInit(&info, param, cnt) != NSTACKX_EOK) {
+        return NSTACKX_EFAILED;
+    }
+    if (PostEvent(&g_eventNodeChain, g_epollfd, RegisterServiceDataV2, (void *)&info) != NSTACKX_EOK) {
         DFINDER_LOGE(TAG, "Failed to register serviceDatav2!");
+        SemDestroy(&info.wait);
         return NSTACKX_EFAILED;
     }
 
-    return info.err;
+    SemWait(&info.wait);
+    SemDestroy(&info.wait);
+    return NSTACKX_EOK;
 }
+
 
 int32_t NSTACKX_RegisterServiceData(const char *serviceData)
 {
@@ -1615,11 +1546,12 @@ struct DirectMsgCtx {
     struct in_addr ip;
 };
 
-static inline void SendMsgDirectInner(void *arg)
+static void SendMsgDirectInner(void *arg)
 {
     struct DirectMsgCtx *msg = arg;
     DFINDER_LOGD(TAG, "Enter WifiDirect send");
     msg->msg.err = CoapSendServiceMsg(&msg->msg, msg->ipStr, &msg->ip);
+    SemPost(&msg->msg.wait);
 }
 
 static int32_t NSTACKX_SendMsgParamCheck(const char *moduleName, const char *deviceId, const uint8_t *data,
@@ -1642,14 +1574,20 @@ static int32_t NSTACKX_SendMsgParamCheck(const char *moduleName, const char *dev
     return NSTACKX_EOK;
 }
 
-static inline void MsgCtxInit(MsgCtx *msg, const char *moduleName,
-    const char *deviceId, const uint8_t *data, uint32_t len)
+static int MsgCtxInit(MsgCtx *msg, const char *moduleName, const char *deviceId, const uint8_t *data, uint32_t len)
 {
+    if (SemInit(&msg->wait, 0, 0)) {
+        DFINDER_LOGE(TAG, "sem init fail");
+        return NSTACKX_EFAILED;
+    }
+
     msg->deviceId = deviceId;
     msg->moduleName = moduleName;
     msg->data = data;
     msg->len = len;
     msg->err = NSTACKX_EOK;
+
+    return NSTACKX_EOK;
 }
 #endif
 
@@ -1657,6 +1595,7 @@ int32_t NSTACKX_SendMsgDirect(const char *moduleName, const char *deviceId, cons
     uint32_t len, const char *ipaddr, uint8_t type)
 {
 #ifndef DFINDER_USE_MINI_NSTACKX
+    int32_t ret = NSTACKX_EOK;
     DFINDER_LOGD(TAG, "NSTACKX_SendMsgDirect");
     if (g_nstackThreadInitState != NSTACKX_INIT_STATE_DONE) {
         DFINDER_LOGE(TAG, "NSTACKX_Ctrl is not initiated yet");
@@ -1681,16 +1620,22 @@ int32_t NSTACKX_SendMsgDirect(const char *moduleName, const char *deviceId, cons
         DFINDER_LOGE(TAG, "invalid ip addr");
         return NSTACKX_EINVAL;
     }
-
     directMsg.ipStr = ipaddr;
     directMsg.msg.type = type;
-    MsgCtxInit(&directMsg.msg, moduleName, deviceId, data, len);
-    if (NSTACKX_PostEventBlock(SendMsgDirectInner, &directMsg) != NSTACKX_EOK) {
-        DFINDER_LOGE(TAG, "Failed to send msg");
+    if (MsgCtxInit(&directMsg.msg, moduleName, deviceId, data, len) != NSTACKX_EOK) {
         return NSTACKX_EFAILED;
     }
 
-    return directMsg.msg.err;
+    if (PostEvent(&g_eventNodeChain, g_epollfd, SendMsgDirectInner, &directMsg) != NSTACKX_EOK) {
+        DFINDER_LOGE(TAG, "Failed to send msg");
+        ret = NSTACKX_EFAILED;
+    }
+    if (ret == NSTACKX_EOK) {
+        SemWait(&directMsg.msg.wait);
+        ret = directMsg.msg.err;
+    }
+    SemDestroy(&directMsg.msg.wait);
+    return ret;
 #else
     (void)moduleName;
     (void)deviceId;
@@ -1706,7 +1651,7 @@ int32_t NSTACKX_SendMsgDirect(const char *moduleName, const char *deviceId, cons
 #if defined(DFINDER_SAVE_DEVICE_LIST) && !defined(DFINDER_USE_MINI_NSTACKX)
 static void SendMsgInner(void *arg)
 {
-    MsgCtx *msg = (MsgCtx *)arg;
+    MsgCtx *msg = arg;
     const struct in_addr *remoteIp = GetRemoteDeviceIp(msg->deviceId);
     if (remoteIp == NULL) {
         DFINDER_LOGE(TAG, "no device found");
@@ -1719,6 +1664,8 @@ static void SendMsgInner(void *arg)
             DFINDER_LOGE(TAG, "ip format failed");
         }
     }
+
+    SemPost(&msg->wait);
 }
 #endif
 
@@ -1729,6 +1676,7 @@ int32_t NSTACKX_SendMsg(const char *moduleName, const char *deviceId, const uint
     Coverity_Tainted_Set((void *)data);
     Coverity_Tainted_Set((void *)&len);
 #if defined(DFINDER_SAVE_DEVICE_LIST) && !defined(DFINDER_USE_MINI_NSTACKX)
+    int32_t ret = NSTACKX_EOK;
     if (g_nstackThreadInitState != NSTACKX_INIT_STATE_DONE) {
         DFINDER_LOGE(TAG, "NSTACKX_Ctrl is not initiated yet");
         return NSTACKX_EFAILED;
@@ -1737,13 +1685,22 @@ int32_t NSTACKX_SendMsg(const char *moduleName, const char *deviceId, const uint
         return NSTACKX_EINVAL;
     }
 
-    MsgCtx msg = {.data = data, .len = len, .deviceId = deviceId, .moduleName = moduleName,
-                  .type = INVALID_TYPE, .err = NSTACKX_EOK};
-    if (NSTACKX_PostEventBlock(SendMsgInner, &msg) != NSTACKX_EOK) {
-        DFINDER_LOGE(TAG, "failed to send msg");
+    MsgCtx msg;
+    msg.type = INVALID_TYPE;
+    if (MsgCtxInit(&msg, moduleName, deviceId, data, len) != NSTACKX_EOK) {
         return NSTACKX_EFAILED;
     }
-    return msg.err;
+
+    if (PostEvent(&g_eventNodeChain, g_epollfd, SendMsgInner, &msg) != NSTACKX_EOK) {
+        DFINDER_LOGE(TAG, "failed to send msg");
+        ret = NSTACKX_EFAILED;
+    }
+    if (ret == NSTACKX_EOK) {
+        SemWait(&msg.wait);
+        ret = msg.err;
+    }
+    SemDestroy(&msg.wait);
+    return ret;
 #else
     (void)moduleName;
     (void)deviceId;
@@ -1845,10 +1802,12 @@ int32_t NSTACKX_SendDiscoveryRsp(const NSTACKX_ResponseSettings *responseSetting
 }
 
 #ifdef DFINDER_SAVE_DEVICE_LIST
-static inline void GetDeviceListInner(void *argument)
+static void GetDeviceListInner(void *argument)
 {
     GetDeviceListMessage *message = argument;
+
     GetDeviceList(message->deviceList, message->deviceCountPtr, true);
+    SemPost(&message->wait);
 }
 #endif
 
@@ -1871,10 +1830,16 @@ int32_t NSTACKX_GetDeviceList(NSTACKX_DeviceInfo *deviceList, uint32_t *deviceCo
         GetDeviceList(deviceList, deviceCountPtr, true);
         return NSTACKX_EOK;
     }
-    if (NSTACKX_PostEventBlock(GetDeviceListInner, &message) != NSTACKX_EOK) {
-        DFINDER_LOGE(TAG, "Failed to get device list");
+    if (SemInit(&message.wait, 0, 0)) {
         return NSTACKX_EFAILED;
     }
+    if (PostEvent(&g_eventNodeChain, g_epollfd, GetDeviceListInner, &message) != NSTACKX_EOK) {
+        DFINDER_LOGE(TAG, "Failed to get device list");
+        SemDestroy(&message.wait);
+        return NSTACKX_EFAILED;
+    }
+    SemWait(&message.wait);
+    SemDestroy(&message.wait);
     return NSTACKX_EOK;
 #else
     (void)deviceList;
