@@ -17,6 +17,7 @@
 
 #include <stdint.h>
 
+#include "g_enhance_lnn_func_pack.h"
 #include "lnn_log.h"
 #include "softbus_error_code.h"
 #include "softbus_feature_config.h"
@@ -77,6 +78,11 @@ uint64_t LnnGetFeatureCapabilty(void)
     LnnClearFeatureCapability(&configValue, BIT_DEVICE_CLOUD_CONVERGENCE_CAPABILITY);
     LNN_LOGI(LNN_LEDGER, "clear feature DEVICE_CLOUD_CONVERGENCE configValue=%{public}" PRIu64, configValue);
 #endif
+    if (IsSparkGroupEnabledPacked()) {
+        LnnSetFeatureCapability(&configValue, BIT_SUPPORT_SPARK_GROUP_CAPABILITY);
+        LNN_LOGI(LNN_LEDGER, "set feature BIT_SUPPORT_SPARK_GROUP_CAPABILITY configValue=%{public}" PRIu64,
+            configValue);
+    }
     LNN_LOGI(LNN_LEDGER, "lnn feature configValue=%{public}" PRIu64, configValue);
     return configValue;
 }
