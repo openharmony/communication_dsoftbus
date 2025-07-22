@@ -291,7 +291,6 @@ bool SoftbusGattcCheckExistConnectionByAddr(const SoftBusBtAddr *btAddr)
 
 static int32_t SoftbusGattcAddMacAddrToList(int32_t clientId, const SoftBusBtAddr *addr)
 {
-    CONN_CHECK_AND_RETURN_RET_LOGE(addr != NULL, SOFTBUS_INVALID_PARAM, CONN_BLE, "addr is NULL");
     BleConnMac *bleConnAddr = (BleConnMac *)SoftBusCalloc(sizeof(BleConnMac));
     CONN_CHECK_AND_RETURN_RET_LOGE(bleConnAddr != NULL, SOFTBUS_MALLOC_ERR, CONN_BLE,
         "calloc failed, clientId=%{public}d", clientId);
