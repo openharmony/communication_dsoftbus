@@ -229,7 +229,7 @@ void Register4thPartFunc(void *soHandle)
     g_lnnEnhanceFuncList.lnnGetAllChannelScore = dlsym(soHandle, "LnnGetAllChannelScore");
     g_lnnEnhanceFuncList.initActionBleConcurrency = dlsym(soHandle, "InitActionBleConcurrency");
     g_lnnEnhanceFuncList.initActionStateAdapter = dlsym(soHandle, "InitActionStateAdapter");
-    g_lnnEnhanceFuncList.lnnDeletaDeviceData = dlsym(soHandle, "LnnDeletaDeviceData");
+    g_lnnEnhanceFuncList.lnnDeleteDeviceData = dlsym(soHandle, "LnnDeleteDeviceData");
     g_lnnEnhanceFuncList.haveConcurrencyPreLinkNodeByLaneReqId = dlsym(soHandle,
         "HaveConcurrencyPreLinkNodeByLaneReqId");
 }
