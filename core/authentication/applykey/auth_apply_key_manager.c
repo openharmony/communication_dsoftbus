@@ -328,7 +328,7 @@ void AuthRecoveryApplyKey(void)
     }
     if (!AuthPraseApplyKey(applyKey)) {
         AUTH_LOGE(AUTH_CONN, "prase applyKey fail");
-        (void)LnnDeletaDeviceDataPacked((LnnDataType)LNN_DATA_TYPE_APPLY_KEY);
+        (void)LnnDeleteDeviceDataPacked((LnnDataType)LNN_DATA_TYPE_APPLY_KEY);
     }
     (void)memset_s(applyKey, applyKeyLen, 0, applyKeyLen);
     SoftBusFree(applyKey);
