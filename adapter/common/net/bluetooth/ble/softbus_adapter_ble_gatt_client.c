@@ -271,8 +271,7 @@ bool SoftbusGattcCheckExistConnectionByAddr(const SoftBusBtAddr *btAddr)
         CONN_LOGE(CONN_BLE, "convert bt mac to str fail!");
         return isExist;
     }
-    CONN_CHECK_AND_RETURN_RET_LOGE(g_btAddrs != NULL, SOFTBUS_INVALID_PARAM,
-        CONN_BLE, "BtAddrs is null");
+    CONN_CHECK_AND_RETURN_RET_LOGE(g_btAddrs != NULL, false, CONN_BLE, "BtAddrs is null");
     CONN_CHECK_AND_RETURN_RET_LOGE(SoftBusMutexLock(&g_btAddrs->lock) == SOFTBUS_OK,
         false, CONN_BLE, "try to lock failed");
     BleConnMac *it = NULL;
@@ -305,8 +304,7 @@ static int32_t SoftbusGattcAddMacAddrToList(int32_t clientId, const SoftBusBtAdd
     }
     bleConnAddr->clientId = clientId;
 
-    CONN_CHECK_AND_RETURN_RET_LOGE(g_btAddrs != NULL, SOFTBUS_INVALID_PARAM,
-        CONN_BLE, "BtAddrs is null");
+    CONN_CHECK_AND_RETURN_RET_LOGE(g_btAddrs != NULL, SOFTBUS_INVALID_PARAM, CONN_BLE, "BtAddrs is null");
     if (SoftBusMutexLock(&g_btAddrs->lock) != SOFTBUS_OK) {
         SoftBusFree(bleConnAddr);
         CONN_LOGE(CONN_BLE, "try to lock failed");

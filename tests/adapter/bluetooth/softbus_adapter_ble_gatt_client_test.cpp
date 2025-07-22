@@ -116,7 +116,7 @@ HWTEST_F(AdapterBleGattClientTest, SoftbusGattcRegister001, TestSize.Level3)
 }
 
 /**
- * @tc.name: AdapterBleGattClientTest_SoftbusGattcCheckExistConnectionByAddr002
+ * @tc.name: AdapterBleGattClientTest_SoftbusGattcRegister002
  * @tc.desc: test gatt client register.
  * @tc.type: FUNC
  * @tc.require: NONE

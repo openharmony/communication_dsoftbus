@@ -646,7 +646,7 @@ void LnnDumpRemotePtk(const char *oldPtk, const char *newPtk, const char *log)
 
 void LnnDumpNodeInfo(const NodeInfo *deviceInfo, const char *log)
 {
-    if (deviceInfo == NULL) {
+    if (deviceInfo == NULL || log == NULL) {
         LNN_LOGE(LNN_LEDGER, "invalid param");
         return;
     }
