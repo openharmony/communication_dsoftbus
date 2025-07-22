@@ -505,6 +505,8 @@ HWTEST_F(AuthTcpConnectionTest, IS_EXIST_AUTH_TCP_CONN_FD_ITEM_BY_COON_ID_TEST_0
     int32_t fd = 1;
     bool ret = IsExistAuthTcpConnFdItemByConnId(fd);
     EXPECT_FALSE(ret);
+    ret = IsExistAuthTcpConnFdItemWithoutLock(fd);
+    EXPECT_FALSE(ret);
     int32_t result = AuthTcpConnFdLockInit();
     EXPECT_EQ(result, SOFTBUS_OK);
     ret = IsExistAuthTcpConnFdItemByConnId(fd);
@@ -512,6 +514,8 @@ HWTEST_F(AuthTcpConnectionTest, IS_EXIST_AUTH_TCP_CONN_FD_ITEM_BY_COON_ID_TEST_0
     result = AddAuthTcpConnFdItem(fd);
     EXPECT_EQ(result, SOFTBUS_OK);
     ret = IsExistAuthTcpConnFdItemByConnId(fd);
+    EXPECT_TRUE(ret);
+    ret = IsExistAuthTcpConnFdItemWithoutLock(fd);
     EXPECT_TRUE(ret);
     DeleteAuthTcpConnFdItemByConnId(fd);
     AuthTcpConnFdLockDeinit();
