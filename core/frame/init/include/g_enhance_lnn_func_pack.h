@@ -209,6 +209,7 @@ int32_t InitSparkGroupManagerPacked(void);
 void DeinitSparkGroupManagerPacked(void);
 int32_t QueryControlPlaneNodeValidPacked(const char *deviceId);
 int32_t LnnDumpControlLaneGroupInfoPacked(int32_t fd);
+bool IsSparkGroupEnabledPacked(void);
 void CheckNeedCloudSyncOfflinePacked(DiscoveryType type);
 int32_t LnnAsyncSaveDeviceDataPacked(const char *data, LnnDataType dataType);
 int32_t LnnDeletaDeviceDataPacked(LnnDataType dataType);
