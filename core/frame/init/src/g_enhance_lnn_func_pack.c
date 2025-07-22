@@ -1558,6 +1558,18 @@ int32_t LnnDumpControlLaneGroupInfoPacked(int32_t fd)
     return pfnLnnEnhanceFuncList->lnnDumpControlLaneGroupInfo(fd);
 }
 
+bool IsSparkGroupEnabledPacked(void)
+{
+    LnnEnhanceFuncList *pfnLnnEnhanceFuncList = LnnEnhanceFuncListGet();
+    if (pfnLnnEnhanceFuncList == NULL) {
+        return false;
+    }
+    if (LnnCheckFuncPointer((void *)pfnLnnEnhanceFuncList->isSparkGroupEnabled) != SOFTBUS_OK) {
+        return false;
+    }
+    return pfnLnnEnhanceFuncList->isSparkGroupEnabled();
+}
+
 int32_t LnnAsyncSaveDeviceDataPacked(const char *data, LnnDataType dataType)
 {
     LnnEnhanceFuncList *pfnLnnEnhanceFuncList = LnnEnhanceFuncListGet();

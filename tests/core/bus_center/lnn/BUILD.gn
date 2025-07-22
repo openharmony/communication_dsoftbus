@@ -3805,6 +3805,34 @@ ohos_unittest("LNNFeatureCapabilityTest") {
   }
 }
 
+ohos_unittest("LNNFeatureCapabilityMockTest") {
+  module_out_path = module_output_path
+  sources = [
+    "$dsoftbus_root_path/core/bus_center/lnn/net_ledger/common/src/lnn_feature_capability.c",
+    "$dsoftbus_root_path/tests/core/bus_center/lnn/net_ledger/lnn_feature_capability_mock.cpp",
+    "$dsoftbus_root_path/tests/core/bus_center/lnn/net_ledger/lnn_feature_capability_mock_test.cpp",
+  ]
+
+  include_dirs = [
+    "$dsoftbus_root_path/adapter/default_config/spec_config",
+    "$dsoftbus_root_path/core/bus_center/lnn/net_ledger/common/include",
+  ]
+
+  deps = [
+    "$dsoftbus_dfx_path:softbus_dfx",
+    "$dsoftbus_root_path/adapter:softbus_adapter",
+    "$dsoftbus_root_path/core/common:softbus_utils",
+    "$dsoftbus_root_path/core/frame:softbus_server",
+  ]
+
+  external_deps = [
+    "cJSON:cjson",
+    "c_utils:utils",
+    "googletest:gmock",
+    "hilog:libhilog",
+  ]
+}
+
 group("unittest") {
   testonly = true
   deps = [
@@ -3820,6 +3848,7 @@ group("unittest") {
     ":LNNDiscoveryInterfaceTest",
     ":LNNDisctributedLedgerTest",
     ":LNNDistributedNetLedgerManagerTest",
+    ":LNNFeatureCapabilityMockTest",
     ":LNNFeatureCapabilityTest",
     ":LNNHuksUtilsTest",
     ":LNNIpNetworkImplMockTest",

@@ -68,6 +68,7 @@ typedef int32_t (*InitSparkGroupManagerFunc)(void);
 typedef void (*DeinitSparkGroupManagerFunc)(void);
 typedef int32_t (*QueryControlPlaneNodeValidFunc)(const char *deviceId);
 typedef int32_t (*LnnDumpControlLaneGroupInfoFunc)(int32_t fd);
+typedef bool (*IsSparkGroupEnabledFunc)(void);
 typedef void (*LnnDestroyCoapConnectListFunc)(void);
 typedef void (*LnnCoapConnectFunc)(const char *ip);
 typedef void (*LnnCoapConnectInitFunc)(void);
@@ -294,6 +295,7 @@ typedef struct TagLnnEnhanceFuncList {
     DeinitSparkGroupManagerFunc deinitSparkGroupManager;
     QueryControlPlaneNodeValidFunc queryControlPlaneNodeValid;
     LnnDumpControlLaneGroupInfoFunc lnnDumpControlLaneGroupInfo;
+    IsSparkGroupEnabledFunc isSparkGroupEnabled;
     // sle range
     RegistAuthTransListenerFunc registAuthTransListener;
     UnregistAuthTransListenerFunc unregistAuthTransListener;

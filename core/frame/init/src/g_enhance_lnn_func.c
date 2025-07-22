@@ -252,6 +252,7 @@ void Register5thPartFunc(void *soHandle)
     g_lnnEnhanceFuncList.deinitSparkGroupManager = dlsym(soHandle, "DeinitSparkGroupManager");
     g_lnnEnhanceFuncList.queryControlPlaneNodeValid = dlsym(soHandle, "QueryControlPlaneNodeValid");
     g_lnnEnhanceFuncList.lnnDumpControlLaneGroupInfo = dlsym(soHandle, "LnnDumpControlLaneGroupInfo");
+    g_lnnEnhanceFuncList.isSparkGroupEnabled = dlsym(soHandle, "IsSparkGroupEnabled");
     g_lnnEnhanceFuncList.lnnRegisterSleHeartbeatMediumMgr = dlsym(soHandle, "LnnRegisterSleHeartbeatMediumMgr");
     g_lnnEnhanceFuncList.checkNeedCloudSyncOffline = dlsym(soHandle, "CheckNeedCloudSyncOffline");
     g_lnnEnhanceFuncList.lnnDeviceCloudConvergenceInit = dlsym(soHandle, "LnnDeviceCloudConvergenceInit");
