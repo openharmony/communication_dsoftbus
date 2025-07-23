@@ -248,8 +248,8 @@ void Register5thPartFunc(void *soHandle)
     g_lnnEnhanceFuncList.triggerSparkGroupBuild = dlsym(soHandle, "TriggerSparkGroupBuild");
     g_lnnEnhanceFuncList.triggerSparkGroupClear = dlsym(soHandle, "TriggerSparkGroupClear");
     g_lnnEnhanceFuncList.triggerSparkGroupJoinAgain = dlsym(soHandle, "TriggerSparkGroupJoinAgain");
-    g_lnnEnhanceFuncList.initSparkGroupManager = dlsym(soHandle, "InitSparkGroupManager");
-    g_lnnEnhanceFuncList.deinitSparkGroupManager = dlsym(soHandle, "DeinitSparkGroupManager");
+    g_lnnEnhanceFuncList.initControlPlane = dlsym(soHandle, "InitControlPlane");
+    g_lnnEnhanceFuncList.deinitControlPlane = dlsym(soHandle, "DeinitControlPlane");
     g_lnnEnhanceFuncList.queryControlPlaneNodeValid = dlsym(soHandle, "QueryControlPlaneNodeValid");
     g_lnnEnhanceFuncList.lnnDumpControlLaneGroupInfo = dlsym(soHandle, "LnnDumpControlLaneGroupInfo");
     g_lnnEnhanceFuncList.isSparkGroupEnabled = dlsym(soHandle, "IsSparkGroupEnabled");
@@ -257,6 +257,7 @@ void Register5thPartFunc(void *soHandle)
     g_lnnEnhanceFuncList.checkNeedCloudSyncOffline = dlsym(soHandle, "CheckNeedCloudSyncOffline");
     g_lnnEnhanceFuncList.lnnDeviceCloudConvergenceInit = dlsym(soHandle, "LnnDeviceCloudConvergenceInit");
     g_lnnEnhanceFuncList.isDeviceHasRiskFactor = dlsym(soHandle, "IsDeviceHasRiskFactor");
+    g_lnnEnhanceFuncList.lnnIsSupportLpSparkFeature = dlsym(soHandle, "LnnIsSupportLpSparkFeature");
 }
 
 int32_t LnnRegisterEnhanceFunc(void *soHandle)

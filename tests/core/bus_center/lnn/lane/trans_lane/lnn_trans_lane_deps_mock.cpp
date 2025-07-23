@@ -175,5 +175,10 @@ int32_t FindLaneResourceByLinkType(const char *peerUdid, LaneLinkType type, Lane
 {
     return GetTransLaneIf()->FindLaneResourceByLinkType(peerUdid, type, resource);
 }
+
+LnnEnhanceFuncList *LnnEnhanceFuncListGet(void)
+{
+    return GetTransLaneIf()->LnnEnhanceFuncListGet();
+}
 }
 } // namespace OHOS
