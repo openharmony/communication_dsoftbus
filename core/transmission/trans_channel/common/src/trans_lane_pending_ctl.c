@@ -1594,8 +1594,7 @@ int32_t TransAsyncGetLaneInfoByQos(const SessionParam *param, const LaneAllocInf
         (void)TransDelLaneReqFromPendingList(*laneHandle, true);
         return ret;
     }
-    if (strcmp(param->sessionName, SESSION_NAME_DISTRIBUTE_COMMUNICATION) == 0 ||
-        strcmp(param->sessionName, SESSION_NAME_TRIGGER_VIRTUAL_LINK) == 0) {
+    if (strcmp(param->sessionName, SESSION_NAME_TRIGGER_VIRTUAL_LINK) == 0) {
         DcTriggerVirtualLinkPacked(param->peerDeviceId);
     }
     CoreSessionState state = CORE_SESSION_STATE_INIT;
