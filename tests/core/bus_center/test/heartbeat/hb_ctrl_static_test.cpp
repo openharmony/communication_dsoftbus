@@ -283,27 +283,144 @@ HWTEST_F(HeartBeatCtrlStaticTest, LNN_REGISTER_COMMON_EVENT_TEST_001, TestSize.L
         .WillRepeatedly(Return(SOFTBUS_OK));
     int32_t ret = LnnRegisterCommonEvent();
     EXPECT_NE(ret, SOFTBUS_OK);
+}
 
+/*
+ * @tc.name: LNN_REGISTER_COMMON_EVENT_TEST_002
+ * @tc.desc:
+ * @tc.type: FUNC
+ * @tc.require:
+ */
+HWTEST_F(HeartBeatCtrlStaticTest, LNN_REGISTER_COMMON_EVENT_TEST_002, TestSize.Level1)
+{
+    NiceMock<HeartBeatCtrlStaticInterfaceMock> hbStaticMock;
+    EXPECT_CALL(hbStaticMock, DfxRecordTriggerTime(_, _)).WillRepeatedly(Return());
+    EXPECT_CALL(hbStaticMock, LnnRegisterEventHandler(Eq(LNN_EVENT_SCREEN_STATE_CHANGED), _))
+        .WillRepeatedly(Return(SOFTBUS_OK));
+    EXPECT_CALL(hbStaticMock, LnnRegisterEventHandler(Eq(LNN_EVENT_SCREEN_LOCK_CHANGED), _))
+        .WillRepeatedly(Return(SOFTBUS_INVALID_PARAM));
+    int32_t ret = LnnRegisterCommonEvent();
+    EXPECT_NE(ret, SOFTBUS_OK);
+}
+
+/*
+ * @tc.name: LNN_REGISTER_COMMON_EVENT_TEST_003
+ * @tc.desc:
+ * @tc.type: FUNC
+ * @tc.require:
+ */
+HWTEST_F(HeartBeatCtrlStaticTest, LNN_REGISTER_COMMON_EVENT_TEST_003, TestSize.Level1)
+{
+    NiceMock<HeartBeatCtrlStaticInterfaceMock> hbStaticMock;
+    EXPECT_CALL(hbStaticMock, DfxRecordTriggerTime(_, _)).WillRepeatedly(Return());
+    EXPECT_CALL(hbStaticMock, LnnRegisterEventHandler(Eq(LNN_EVENT_SCREEN_STATE_CHANGED), _))
+        .WillRepeatedly(Return(SOFTBUS_OK));
+    EXPECT_CALL(hbStaticMock, LnnRegisterEventHandler(Eq(LNN_EVENT_SCREEN_LOCK_CHANGED), _))
+        .WillRepeatedly(Return(SOFTBUS_OK));
+    EXPECT_CALL(hbStaticMock, LnnRegisterEventHandler(Eq(LNN_EVENT_NIGHT_MODE_CHANGED), _))
+        .WillRepeatedly(Return(SOFTBUS_INVALID_PARAM));
+    int32_t ret = LnnRegisterCommonEvent();
+    EXPECT_NE(ret, SOFTBUS_OK);
+}
+
+/*
+ * @tc.name: LNN_REGISTER_COMMON_EVENT_TEST_004
+ * @tc.desc:
+ * @tc.type: FUNC
+ * @tc.require:
+ */
+HWTEST_F(HeartBeatCtrlStaticTest, LNN_REGISTER_COMMON_EVENT_TEST_004, TestSize.Level1)
+{
+    NiceMock<HeartBeatCtrlStaticInterfaceMock> hbStaticMock;
+    EXPECT_CALL(hbStaticMock, DfxRecordTriggerTime(_, _)).WillRepeatedly(Return());
+    EXPECT_CALL(hbStaticMock, LnnRegisterEventHandler(Eq(LNN_EVENT_SCREEN_STATE_CHANGED), _))
+        .WillRepeatedly(Return(SOFTBUS_OK));
+    EXPECT_CALL(hbStaticMock, LnnRegisterEventHandler(Eq(LNN_EVENT_SCREEN_LOCK_CHANGED), _))
+        .WillRepeatedly(Return(SOFTBUS_OK));
+    EXPECT_CALL(hbStaticMock, LnnRegisterEventHandler(Eq(LNN_EVENT_NIGHT_MODE_CHANGED), _))
+        .WillRepeatedly(Return(SOFTBUS_OK));
     EXPECT_CALL(hbStaticMock, LnnRegisterEventHandler(Eq(LNN_EVENT_OOBE_STATE_CHANGED), _))
-        .WillOnce(Return(SOFTBUS_INVALID_PARAM))
-        .WillRepeatedly(Return(SOFTBUS_OK));
-    ret = LnnRegisterCommonEvent();
+        .WillRepeatedly(Return(SOFTBUS_INVALID_PARAM));
+    int32_t ret = LnnRegisterCommonEvent();
     EXPECT_NE(ret, SOFTBUS_OK);
+}
 
+/*
+ * @tc.name: LNN_REGISTER_COMMON_EVENT_TEST_005
+ * @tc.desc:
+ * @tc.type: FUNC
+ * @tc.require:
+ */
+HWTEST_F(HeartBeatCtrlStaticTest, LNN_REGISTER_COMMON_EVENT_TEST_005, TestSize.Level1)
+{
+    NiceMock<HeartBeatCtrlStaticInterfaceMock> hbStaticMock;
+    EXPECT_CALL(hbStaticMock, DfxRecordTriggerTime(_, _)).WillRepeatedly(Return());
+    EXPECT_CALL(hbStaticMock, LnnRegisterEventHandler(Eq(LNN_EVENT_SCREEN_STATE_CHANGED), _))
+        .WillRepeatedly(Return(SOFTBUS_OK));
+    EXPECT_CALL(hbStaticMock, LnnRegisterEventHandler(Eq(LNN_EVENT_SCREEN_LOCK_CHANGED), _))
+        .WillRepeatedly(Return(SOFTBUS_OK));
+    EXPECT_CALL(hbStaticMock, LnnRegisterEventHandler(Eq(LNN_EVENT_NIGHT_MODE_CHANGED), _))
+        .WillRepeatedly(Return(SOFTBUS_OK));
+    EXPECT_CALL(hbStaticMock, LnnRegisterEventHandler(Eq(LNN_EVENT_OOBE_STATE_CHANGED), _))
+        .WillRepeatedly(Return(SOFTBUS_OK));
     EXPECT_CALL(hbStaticMock, LnnRegisterEventHandler(Eq(LNN_EVENT_USER_SWITCHED), _))
-        .WillOnce(Return(SOFTBUS_INVALID_PARAM))
-        .WillRepeatedly(Return(SOFTBUS_OK));
-    ret = LnnRegisterCommonEvent();
+        .WillRepeatedly(Return(SOFTBUS_INVALID_PARAM));
+    int32_t ret = LnnRegisterCommonEvent();
     EXPECT_NE(ret, SOFTBUS_OK);
+}
 
+/*
+ * @tc.name: LNN_REGISTER_COMMON_EVENT_TEST_006
+ * @tc.desc:
+ * @tc.type: FUNC
+ * @tc.require:
+ */
+HWTEST_F(HeartBeatCtrlStaticTest, LNN_REGISTER_COMMON_EVENT_TEST_006, TestSize.Level1)
+{
+    NiceMock<HeartBeatCtrlStaticInterfaceMock> hbStaticMock;
+    EXPECT_CALL(hbStaticMock, DfxRecordTriggerTime(_, _)).WillRepeatedly(Return());
+    EXPECT_CALL(hbStaticMock, LnnRegisterEventHandler(Eq(LNN_EVENT_SCREEN_STATE_CHANGED), _))
+        .WillRepeatedly(Return(SOFTBUS_OK));
+    EXPECT_CALL(hbStaticMock, LnnRegisterEventHandler(Eq(LNN_EVENT_SCREEN_LOCK_CHANGED), _))
+        .WillRepeatedly(Return(SOFTBUS_OK));
+    EXPECT_CALL(hbStaticMock, LnnRegisterEventHandler(Eq(LNN_EVENT_NIGHT_MODE_CHANGED), _))
+        .WillRepeatedly(Return(SOFTBUS_OK));
+    EXPECT_CALL(hbStaticMock, LnnRegisterEventHandler(Eq(LNN_EVENT_OOBE_STATE_CHANGED), _))
+        .WillRepeatedly(Return(SOFTBUS_OK));
+    EXPECT_CALL(hbStaticMock, LnnRegisterEventHandler(Eq(LNN_EVENT_USER_SWITCHED), _))
+        .WillRepeatedly(Return(SOFTBUS_OK));
     EXPECT_CALL(hbStaticMock, LnnRegisterEventHandler(Eq(LNN_EVENT_SLE_STATE_CHANGED), _))
-        .WillOnce(Return(SOFTBUS_INVALID_PARAM))
-        .WillRepeatedly(Return(SOFTBUS_OK));
-    ret = LnnRegisterCommonEvent();
+        .WillRepeatedly(Return(SOFTBUS_INVALID_PARAM));
+    int32_t ret = LnnRegisterCommonEvent();
     EXPECT_NE(ret, SOFTBUS_OK);
+}
 
-    ret = LnnRegisterCommonEvent();
-    EXPECT_EQ(ret, SOFTBUS_OK);
+/*
+ * @tc.name: LNN_REGISTER_COMMON_EVENT_TEST_007
+ * @tc.desc:
+ * @tc.type: FUNC
+ * @tc.require:
+ */
+HWTEST_F(HeartBeatCtrlStaticTest, LNN_REGISTER_COMMON_EVENT_TEST_007, TestSize.Level1)
+{
+    NiceMock<HeartBeatCtrlStaticInterfaceMock> hbStaticMock;
+    EXPECT_CALL(hbStaticMock, DfxRecordTriggerTime(_, _)).WillRepeatedly(Return());
+    EXPECT_CALL(hbStaticMock, LnnRegisterEventHandler(Eq(LNN_EVENT_SCREEN_STATE_CHANGED), _))
+        .WillRepeatedly(Return(SOFTBUS_OK));
+    EXPECT_CALL(hbStaticMock, LnnRegisterEventHandler(Eq(LNN_EVENT_SCREEN_LOCK_CHANGED), _))
+        .WillRepeatedly(Return(SOFTBUS_OK));
+    EXPECT_CALL(hbStaticMock, LnnRegisterEventHandler(Eq(LNN_EVENT_NIGHT_MODE_CHANGED), _))
+        .WillRepeatedly(Return(SOFTBUS_OK));
+    EXPECT_CALL(hbStaticMock, LnnRegisterEventHandler(Eq(LNN_EVENT_OOBE_STATE_CHANGED), _))
+        .WillRepeatedly(Return(SOFTBUS_OK));
+    EXPECT_CALL(hbStaticMock, LnnRegisterEventHandler(Eq(LNN_EVENT_USER_SWITCHED), _))
+        .WillRepeatedly(Return(SOFTBUS_OK));
+    EXPECT_CALL(hbStaticMock, LnnRegisterEventHandler(Eq(LNN_EVENT_SLE_STATE_CHANGED), _))
+        .WillRepeatedly(Return(SOFTBUS_OK));
+    EXPECT_CALL(hbStaticMock, LnnRegisterEventHandler(Eq(LNN_EVENT_DEVICE_ROOT_STATE_CHANGED), _))
+        .WillRepeatedly(Return(SOFTBUS_INVALID_PARAM));
+    int32_t ret = LnnRegisterCommonEvent();
+    EXPECT_NE(ret, SOFTBUS_OK);
 }
 
 /*
@@ -573,27 +690,9 @@ HWTEST_F(HeartBeatCtrlStaticTest, LNN_INIT_HEARTBEAT_TEST_001, TestSize.Level1)
     EXPECT_CALL(hbStaticMock, LnnHbStrategyInit).WillOnce(Return(SOFTBUS_LOCK_ERR)).WillRepeatedly(Return(SOFTBUS_OK));
     int32_t ret = LnnInitHeartbeat();
     EXPECT_NE(ret, SOFTBUS_OK);
-    EXPECT_CALL(hbStaticMock, LnnRegisterEventHandler(Eq(LNN_EVENT_SCREEN_STATE_CHANGED), _))
-        .WillRepeatedly(Return(SOFTBUS_OK));
-    EXPECT_CALL(hbStaticMock, LnnRegisterEventHandler(Eq(LNN_EVENT_SCREEN_LOCK_CHANGED), _))
-        .WillRepeatedly(Return(SOFTBUS_OK));
-    EXPECT_CALL(hbStaticMock, LnnRegisterEventHandler(Eq(LNN_EVENT_NIGHT_MODE_CHANGED), _))
-        .WillRepeatedly(Return(SOFTBUS_OK));
-    EXPECT_CALL(hbStaticMock, LnnRegisterEventHandler(Eq(LNN_EVENT_OOBE_STATE_CHANGED), _))
-        .WillRepeatedly(Return(SOFTBUS_OK));
-    EXPECT_CALL(hbStaticMock, LnnRegisterEventHandler(Eq(LNN_EVENT_USER_SWITCHED), _))
-        .WillRepeatedly(Return(SOFTBUS_OK));
-    EXPECT_CALL(hbStaticMock, LnnRegisterEventHandler(Eq(LNN_EVENT_SLE_STATE_CHANGED), _))
-        .WillRepeatedly(Return(SOFTBUS_OK));
-    EXPECT_CALL(hbStaticMock, LnnRegisterEventHandler(Eq(LNN_EVENT_IP_ADDR_CHANGED), _))
-        .WillRepeatedly(Return(SOFTBUS_OK));
-    EXPECT_CALL(hbStaticMock, LnnRegisterEventHandler(Eq(LNN_EVENT_BT_STATE_CHANGED), _))
-        .WillRepeatedly(Return(SOFTBUS_OK));
-    EXPECT_CALL(hbStaticMock, LnnRegisterEventHandler(Eq(LNN_EVENT_LANE_VAP_CHANGE), _))
-        .WillOnce(Return(SOFTBUS_INVALID_PARAM))
-        .WillRepeatedly(Return(SOFTBUS_OK));
+    EXPECT_CALL(hbStaticMock, LnnRegisterEventHandler(_, _)).WillRepeatedly(Return(SOFTBUS_OK));
     ret = LnnInitHeartbeat();
-    EXPECT_NE(ret, SOFTBUS_OK);
+    EXPECT_EQ(ret, SOFTBUS_OK);
     LnnMonitorHbStateChangedEvent userSwitchEvent = { .basic.event = LNN_EVENT_NIGHT_MODE_CHANGED,
         .status = (uint8_t)SOFTBUS_USER_SWITCHED };
     HbUserSwitchedHandler((const LnnEventBasicInfo *)&userSwitchEvent);
