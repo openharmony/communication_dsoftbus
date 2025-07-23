@@ -685,8 +685,8 @@ HWTEST_F(SoftbusGEnhanceTest, SoftbusGEnhanceTest022, TestSize.Level1)
     EXPECT_NO_FATAL_FAILURE(TriggerSparkGroupClearPacked(0, 0));
     char *udid = const_cast<char *>(TEST_UDID);
     EXPECT_NO_FATAL_FAILURE(TriggerSparkGroupJoinAgainPacked(udid, 0));
-    EXPECT_EQ(InitSparkGroupManagerPacked(), SOFTBUS_OK);
-    EXPECT_NO_FATAL_FAILURE(DeinitSparkGroupManagerPacked());
+    EXPECT_EQ(InitControlPlanePacked(), SOFTBUS_OK);
+    EXPECT_NO_FATAL_FAILURE(DeinitControlPlanePacked());
     char *networkId = const_cast<char *>(TEST_NETWORK_ID);
     EXPECT_EQ(QueryControlPlaneNodeValidPacked(networkId), SOFTBUS_NOT_IMPLEMENT);
     EXPECT_EQ(LnnDumpControlLaneGroupInfoPacked(0), SOFTBUS_OK);
