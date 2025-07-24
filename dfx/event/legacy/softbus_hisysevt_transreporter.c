@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2022-2024 Huawei Device Co., Ltd.
+ * Copyright (c) 2022-2025 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -458,7 +458,7 @@ void SoftbusRecordOpenSession(SoftBusOpenSessionStatus isSucc, uint32_t time)
     }
 
     if (g_openSessionCnt.successCnt != 0) {
-        uint64_t totalTimeCost = (g_openSessionTime.aveTimeCost) * (g_openSessionCnt.successCnt - 1) + time;
+        uint64_t totalTimeCost = (uint64_t)(g_openSessionTime.aveTimeCost) * (g_openSessionCnt.successCnt - 1) + time;
         g_openSessionTime.aveTimeCost = (uint32_t)(totalTimeCost / g_openSessionCnt.successCnt);
     }
 
