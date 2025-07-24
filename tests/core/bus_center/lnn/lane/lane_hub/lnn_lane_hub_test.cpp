@@ -69,7 +69,7 @@ HWTEST_F(LNNLaneHubTest, LNN_INIT_LANE_HUB_TEST_001, TestSize.Level1)
     EXPECT_CALL(laneHubMock, LnnInitQos).WillOnce(Return(SOFTBUS_OK));
     EXPECT_CALL(laneHubMock, LnnInitTimeSync).WillOnce(Return(SOFTBUS_OK));
     EXPECT_CALL(laneHubMock, LnnInitHeartbeat).WillOnce(Return(SOFTBUS_OK));
-    EXPECT_CALL(laneHubMock, InitSparkGroupManagerPacked).WillOnce(Return(SOFTBUS_OK));
+    EXPECT_CALL(laneHubMock, InitControlPlanePacked).WillOnce(Return(SOFTBUS_OK));
     EXPECT_CALL(laneHubMock, SoftBusRegBusCenterVarDump).WillOnce(Return(SOFTBUS_OK));
 
     int32_t ret = LnnInitLaneHub();
@@ -164,7 +164,7 @@ HWTEST_F(LNNLaneHubTest, LNN_INIT_LANE_HUB_TEST_006, TestSize.Level1)
     EXPECT_CALL(laneHubMock, LnnInitQos).WillOnce(Return(SOFTBUS_OK));
     EXPECT_CALL(laneHubMock, LnnInitTimeSync).WillOnce(Return(SOFTBUS_OK));
     EXPECT_CALL(laneHubMock, LnnInitHeartbeat).WillOnce(Return(SOFTBUS_OK));
-    EXPECT_CALL(laneHubMock, InitSparkGroupManagerPacked).WillOnce(Return(SOFTBUS_NO_INIT));
+    EXPECT_CALL(laneHubMock, InitControlPlanePacked).WillOnce(Return(SOFTBUS_NO_INIT));
 
     int32_t ret = LnnInitLaneHub();
     EXPECT_EQ(SOFTBUS_NO_INIT, ret);
@@ -185,7 +185,7 @@ HWTEST_F(LNNLaneHubTest, LNN_INIT_LANE_HUB_TEST_007, TestSize.Level1)
     EXPECT_CALL(laneHubMock, LnnInitQos).WillOnce(Return(SOFTBUS_OK));
     EXPECT_CALL(laneHubMock, LnnInitTimeSync).WillOnce(Return(SOFTBUS_OK));
     EXPECT_CALL(laneHubMock, LnnInitHeartbeat).WillOnce(Return(SOFTBUS_OK));
-    EXPECT_CALL(laneHubMock, InitSparkGroupManagerPacked).WillOnce(Return(SOFTBUS_OK));
+    EXPECT_CALL(laneHubMock, InitControlPlanePacked).WillOnce(Return(SOFTBUS_OK));
     EXPECT_CALL(laneHubMock, SoftBusRegBusCenterVarDump).WillOnce(Return(SOFTBUS_INVALID_PARAM));
 
     int32_t ret = LnnInitLaneHub();

@@ -83,6 +83,7 @@ static void UpdateStateVersionAndStore(StateVersionChangeReason reason)
     if ((ret = LnnSaveLocalDeviceInfoPacked(&g_localNetLedger.localInfo)) != SOFTBUS_OK) {
         LNN_LOGE(LNN_LEDGER, "update local store fail");
     }
+    UpdateLocalDeviceInfoToMlpsPacked(&g_localNetLedger.localInfo);
 }
 
 static int32_t LlGetNodeSoftBusVersion(void *buf, uint32_t len)
@@ -95,6 +96,7 @@ static int32_t LlGetNodeSoftBusVersion(void *buf, uint32_t len)
         LNN_LOGE(LNN_LEDGER, "STR COPY ERROR");
         return SOFTBUS_MEM_ERR;
     }
+    UpdateLocalDeviceInfoToMlpsPacked(&g_localNetLedger.localInfo);
     return SOFTBUS_OK;
 }
 

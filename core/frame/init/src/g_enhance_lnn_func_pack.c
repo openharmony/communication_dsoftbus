@@ -1027,6 +1027,18 @@ bool IsSupportLpFeaturePacked(void)
     return pfnLnnEnhanceFuncList->isSupportLpFeature();
 }
 
+bool LnnIsSupportLpSparkFeaturePacked(void)
+{
+    LnnEnhanceFuncList *pfnLnnEnhanceFuncList = LnnEnhanceFuncListGet();
+    if (pfnLnnEnhanceFuncList == NULL) {
+        return false;
+    }
+    if (LnnCheckFuncPointer((void *)pfnLnnEnhanceFuncList->lnnIsSupportLpSparkFeature) != SOFTBUS_OK) {
+        return false;
+    }
+    return pfnLnnEnhanceFuncList->lnnIsSupportLpSparkFeature();
+}
+
 void AuthLoadDeviceKeyPacked(void)
 {
     LnnEnhanceFuncList *pfnLnnEnhanceFuncList = LnnEnhanceFuncListGet();
@@ -1034,6 +1046,18 @@ void AuthLoadDeviceKeyPacked(void)
         return;
     }
     return pfnLnnEnhanceFuncList->authLoadDeviceKey();
+}
+
+void UpdateLocalDeviceInfoToMlpsPacked(const NodeInfo *localInfo)
+{
+    LnnEnhanceFuncList *pfnLnnEnhanceFuncList = LnnEnhanceFuncListGet();
+    if (pfnLnnEnhanceFuncList == NULL) {
+        return;
+    }
+    if (LnnCheckFuncPointer((void *)pfnLnnEnhanceFuncList->updateLocalDeviceInfoToMlps) != SOFTBUS_OK) {
+        return;
+    }
+    return pfnLnnEnhanceFuncList->updateLocalDeviceInfoToMlps(localInfo);
 }
 
 int32_t LnnLoadLocalDeviceInfoPacked(void)
@@ -1522,22 +1546,22 @@ void TriggerSparkGroupJoinAgainPacked(const char *udid, uint32_t delayTime)
     return pfnLnnEnhanceFuncList->triggerSparkGroupJoinAgain(udid, delayTime);
 }
 
-int32_t InitSparkGroupManagerPacked(void)
+int32_t InitControlPlanePacked(void)
 {
     LnnEnhanceFuncList *pfnLnnEnhanceFuncList = LnnEnhanceFuncListGet();
-    if (LnnCheckFuncPointer((void *)pfnLnnEnhanceFuncList->initSparkGroupManager) != SOFTBUS_OK) {
+    if (LnnCheckFuncPointer((void *)pfnLnnEnhanceFuncList->initControlPlane) != SOFTBUS_OK) {
         return SOFTBUS_OK;
     }
-    return pfnLnnEnhanceFuncList->initSparkGroupManager();
+    return pfnLnnEnhanceFuncList->initControlPlane();
 }
 
-void DeinitSparkGroupManagerPacked(void)
+void DeinitControlPlanePacked(void)
 {
     LnnEnhanceFuncList *pfnLnnEnhanceFuncList = LnnEnhanceFuncListGet();
-    if (LnnCheckFuncPointer((void *)pfnLnnEnhanceFuncList->deinitSparkGroupManager) != SOFTBUS_OK) {
+    if (LnnCheckFuncPointer((void *)pfnLnnEnhanceFuncList->deinitControlPlane) != SOFTBUS_OK) {
         return;
     }
-    return pfnLnnEnhanceFuncList->deinitSparkGroupManager();
+    return pfnLnnEnhanceFuncList->deinitControlPlane();
 }
 
 int32_t QueryControlPlaneNodeValidPacked(const char *deviceId)
