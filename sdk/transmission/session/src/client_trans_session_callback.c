@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021-2024 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2025 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -598,7 +598,6 @@ NO_SANITIZE("cfi") int32_t TransOnSessionClosed(int32_t channelId, int32_t chann
     int32_t sessionId = INVALID_SESSION_ID;
     int32_t ret = SOFTBUS_NO_INIT;
     SessionListenerAdapter sessionCallback;
-    SessionEnableStatus enableStatus;
     bool isServer = false;
     bool isUdpType = (channelType == CHANNEL_TYPE_UDP ? true : false);
     (void)memset_s(&sessionCallback, sizeof(SessionListenerAdapter), 0, sizeof(SessionListenerAdapter));
@@ -608,6 +607,7 @@ NO_SANITIZE("cfi") int32_t TransOnSessionClosed(int32_t channelId, int32_t chann
         (void)GetSocketCallbackAdapterByChannelId(channelId, channelType, &sessionId, &sessionCallback, &isServer);
     }
 
+    SessionEnableStatus enableStatus = ENABLE_STATUS_INIT;
     (void)ClientGetChannelBySessionId(sessionId, NULL, NULL, &enableStatus);
     TRANS_LOGI(TRANS_SDK, "trigger session close callback");
     if (sessionCallback.isSocketListener && enableStatus == ENABLE_STATUS_SUCCESS) {

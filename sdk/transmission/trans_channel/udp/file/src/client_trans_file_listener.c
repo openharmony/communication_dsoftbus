@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2022-2023 Huawei Device Co., Ltd.
+ * Copyright (c) 2022-2025 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -158,7 +158,10 @@ int32_t TransSetFileSendListener(const char *sessionName, const IFileSendListene
         return SOFTBUS_MEM_ERR;
     }
     ListAdd(&(g_fileListener->list), &(fileNode->node));
-    TRANS_LOGI(TRANS_FILE, "add sessionName = %{public}s", sessionName);
+    char *tmpName = NULL;
+    Anonymize(sessionName, &tmpName);
+    TRANS_LOGI(TRANS_FILE, "add sessionName=%{public}s", AnonymizeWrapper(tmpName));
+    AnonymizeFree(tmpName);
     (void)SoftBusMutexUnlock(&(g_fileListener->lock));
     return SOFTBUS_OK;
 }
@@ -240,6 +243,10 @@ int32_t TransSetSocketFileListener(const char *sessionName, SocketFileCallbackFu
 
 int32_t TransGetFileListener(const char *sessionName, FileListener *fileListener)
 {
+    if (sessionName == NULL || fileListener == NULL) {
+        TRANS_LOGE(TRANS_FILE, "invalid param.");
+        return SOFTBUS_INVALID_PARAM;
+    }
     if (g_fileListener == NULL) {
         TRANS_LOGE(TRANS_FILE, "file listener hasn't init.");
         return SOFTBUS_TRANS_FILE_LISTENER_NOT_INIT;

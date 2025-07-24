@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021-2024 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2025 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -797,9 +797,9 @@ int32_t GetDefaultConfigType(int32_t channelType, int32_t businessType)
     return SOFTBUS_CONFIG_TYPE_MAX;
 }
 
-int ReadMaxSendBytesSize(int32_t channelId, int32_t type, void* value, uint32_t valueSize)
+int32_t ReadMaxSendBytesSize(int32_t channelId, int32_t type, void *value, uint32_t valueSize)
 {
-    if (valueSize != sizeof(uint32_t)) {
+    if (value == NULL || valueSize != sizeof(uint32_t)) {
         TRANS_LOGE(TRANS_SDK, "valueSize not match. valueSize=%{public}d", valueSize);
         return SOFTBUS_INVALID_PARAM;
     }
