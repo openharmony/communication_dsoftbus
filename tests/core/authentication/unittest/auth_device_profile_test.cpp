@@ -640,6 +640,13 @@ HWTEST_F(AuthDeviceProfileTest, COMPARE_ACL_WITH_PEER_DEVICE_INFO_TEST_002, Test
     EXPECT_CALL(mock, SoftBusGenerateStrHash).WillRepeatedly(Return(SOFTBUS_OK));
     bool result = CompareAclWithPeerDeviceInfo(aclProfile, peerAccountHash, peerUdid, peerUserId);
     EXPECT_FALSE(result);
+    std::string accountId1 = "8bb0cf6eb9b17d0f";
+    accessee.SetAccesseeAccountId(accountId);
+    aclProfile.SetAccessee(accessee);
+    accesser.SetAccesserAccountId(accountId);
+    aclProfile.SetAccesser(accesser);
+    result = CompareAclWithPeerDeviceInfo(aclProfile, peerAccountHash, peerUdid, peerUserId);
+    EXPECT_FALSE(result);
 }
 
 /*
