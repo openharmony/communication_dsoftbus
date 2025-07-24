@@ -181,23 +181,22 @@ static bool CompareAclWithPeerDeviceInfo(const OHOS::DistributedDeviceProfile::A
     std::string localUdid(udid);
     std::string sourceAccountId = aclProfile.GetAccesser().GetAccesserAccountId();
     std::string sinkAccountId = aclProfile.GetAccessee().GetAccesseeAccountId();
-    char aclAccountHash[SHA_256_HEX_HASH_LEN] = { 0 };
-    if (strcmp(DEFAULT_ACCOUNT_UID, sourceAccountId.c_str()) == 0) {
-        (void)GetStringHash(DEFAULT_ACCOUNT_VALUE, aclAccountHash, SHA_256_HEX_HASH_LEN - 1);
-        sourceAccountId = aclAccountHash;
+    if (strcmp(DEFAULT_ACCOUNT_UID, sourceAccountId.c_str()) != 0) {
+        if (StrCmpIgnoreCase(sourceAccountId.c_str(), peerAccountHash) != 0 &&
+            StrCmpIgnoreCase(sourceAccountId.c_str(), localAccountString) != 0) {
+            return false;
+        }
     }
-    if (strcmp(DEFAULT_ACCOUNT_UID, sinkAccountId.c_str()) == 0) {
-        (void)GetStringHash(DEFAULT_ACCOUNT_VALUE, aclAccountHash, SHA_256_HEX_HASH_LEN - 1);
-        sinkAccountId = aclAccountHash;
+    if (strcmp(DEFAULT_ACCOUNT_UID, sinkAccountId.c_str()) != 0) {
+        if (StrCmpIgnoreCase(sinkAccountId.c_str(), peerAccountHash) != 0 &&
+            StrCmpIgnoreCase(sinkAccountId.c_str(), localAccountString) != 0) {
+            return false;
+        }
     }
     if (((aclProfile.GetAccessee().GetAccesseeDeviceId() != peerUdid ||
-        aclProfile.GetAccesser().GetAccesserDeviceId() != localUdid ||
-        StrCmpIgnoreCase(sinkAccountId.c_str(), peerAccountHash) != 0 ||
-        StrCmpIgnoreCase(sourceAccountId.c_str(), localAccountString) != 0) &&
+        aclProfile.GetAccesser().GetAccesserDeviceId() != localUdid) &&
         (aclProfile.GetAccesser().GetAccesserDeviceId() != peerUdid ||
-        aclProfile.GetAccessee().GetAccesseeDeviceId() != localUdid ||
-        StrCmpIgnoreCase(sinkAccountId.c_str(), localAccountString) != 0 ||
-        StrCmpIgnoreCase(sourceAccountId.c_str(), peerAccountHash) != 0)) ||
+        aclProfile.GetAccessee().GetAccesseeDeviceId() != localUdid)) ||
         GetAclLocalUserId(aclProfile) != localUserId || GetAclPeerUserId(aclProfile) != peerUserId) {
         return false;
     }
@@ -221,6 +220,8 @@ bool IsTrustedDeviceFromAccess(const char *peerAccountHash, const char *peerUdid
         return false;
     }
     for (auto &aclProfile : aclProfiles) {
+        LNN_LOGI(LNN_STATE, "GetAccesser=%{public}s, GetAccessee=%{public}s", aclProfile.GetAccesser().dump().c_str(),
+            aclProfile.GetAccessee().dump().c_str());
         if (aclProfile.GetDeviceIdType() != (uint32_t)OHOS::DistributedDeviceProfile::DeviceIdType::UDID ||
             aclProfile.GetTrustDeviceId().empty() || aclProfile.GetTrustDeviceId() != peerUdid) {
             continue;
