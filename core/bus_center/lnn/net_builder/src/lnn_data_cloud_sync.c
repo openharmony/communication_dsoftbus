@@ -76,7 +76,10 @@ static int32_t DBCipherInfoSyncToCache(
     } else if (strcmp(fieldName, DEVICE_INFO_DISTRIBUTED_SWITCH) == 0) {
         LNN_LOGD(LNN_BUILDER, "distributed switch info no need update into nodeinfo");
     } else {
-        LNN_LOGE(LNN_BUILDER, "fail:cipher info %{public}s valuelength over range", fieldName);
+        char *anonyFieldName = NULL;
+        Anonymize(fieldName, &anonyFieldName);
+        LNN_LOGE(LNN_BUILDER, "fail:cipher info %{public}s valuelength over range", AnonymizeWrapper(anonyFieldName));
+        AnonymizeFree(anonyFieldName);
         return SOFTBUS_INVALID_PARAM;
     }
     LNN_LOGD(LNN_BUILDER, "success.");
@@ -217,7 +220,10 @@ static int32_t DBConnectMacInfoSyncToCache(NodeInfo *cacheInfo, char *fieldName,
             return SOFTBUS_STRCPY_ERR;
         }
     } else {
-        LNN_LOGE(LNN_BUILDER, "fail:connect info %{public}s valuelength over range", fieldName);
+        char *anonyFieldName = NULL;
+        Anonymize(fieldName, &anonyFieldName);
+        LNN_LOGE(LNN_BUILDER, "fail:connect info %{public}s valuelength over range", AnonymizeWrapper(anonyFieldName));
+        AnonymizeFree(anonyFieldName);
         return SOFTBUS_INVALID_PARAM;
     }
     return SOFTBUS_OK;
@@ -505,7 +511,10 @@ static int32_t SetDBNameDataToDLedger(NodeInfo *cacheInfo, char *deviceUdid, cha
             return SOFTBUS_NETWORK_SET_LEDGER_INFO_ERR;
         }
     } else {
-        LNN_LOGD(LNN_BUILDER, "%{public}s no need update to DLedger", fieldName);
+        char *anonyFieldName = NULL;
+        Anonymize(fieldName, &anonyFieldName);
+        LNN_LOGD(LNN_BUILDER, "%{public}s no need update to DLedger", AnonymizeWrapper(anonyFieldName));
+        AnonymizeFree(anonyFieldName);
         return SOFTBUS_OK;
     }
     return SOFTBUS_OK;

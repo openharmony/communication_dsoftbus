@@ -1276,15 +1276,15 @@ static int32_t VerifyExchangeIdTypeAndInfo(AuthSessionInfo *info, int32_t idType
     bool isExchangeUdid = true;
     if (idType == EXCHANGE_NETWORKID) {
         if (GetPeerUdidByNetworkId(info->udid, peerUdid, UDID_BUF_LEN) != SOFTBUS_OK) {
-            AUTH_LOGE(AUTH_FSM, "get peer udid fail, peer networkId=%{public}s", anonyUdid);
+            AUTH_LOGE(AUTH_FSM, "get peer udid fail, peer networkId=%{public}s", AnonymizeWrapper(anonyUdid));
             info->idType = EXCHANGE_FAIL;
             (void)memset_s(info->udid, sizeof(info->udid), 0, sizeof(info->udid));
         } else {
             if (GetIsExchangeUdidByNetworkId(info->udid, &isExchangeUdid) == SOFTBUS_OK && isExchangeUdid) {
-                AUTH_LOGE(AUTH_FSM, "need exchange udid, peer udid=%{public}s", anonyUdid);
+                AUTH_LOGE(AUTH_FSM, "need exchange udid, peer udid=%{public}s", AnonymizeWrapper(anonyUdid));
                 info->idType = EXCHANGE_UDID;
             } else {
-                AUTH_LOGE(AUTH_FSM, "get peer udid success, peer udid=%{public}s", anonyUdid);
+                AUTH_LOGE(AUTH_FSM, "get peer udid success, peer udid=%{public}s", AnonymizeWrapper(anonyUdid));
                 info->idType = EXCHANGE_NETWORKID;
             }
             if (memcpy_s(info->udid, UDID_BUF_LEN, peerUdid, UDID_BUF_LEN) != EOK) {
