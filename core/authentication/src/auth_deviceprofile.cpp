@@ -509,8 +509,8 @@ void UpdateDpSameAccount(UpdateDpAclParams *aclParams, SessionKey sessionKey, bo
 
 bool GetSessionKeyProfile(int32_t sessionKeyId, uint8_t *sessionKey, uint32_t *length)
 {
-    LNN_CHECK_AND_RETURN_RET_LOGE(sessionKey != NULL, SOFTBUS_INVALID_PARAM, LNN_EVENT, "sessionKey is null");
-    LNN_CHECK_AND_RETURN_RET_LOGE(length != NULL, SOFTBUS_INVALID_PARAM, LNN_EVENT, "length is null");
+    LNN_CHECK_AND_RETURN_RET_LOGE(sessionKey != NULL, false, LNN_EVENT, "sessionKey is null");
+    LNN_CHECK_AND_RETURN_RET_LOGE(length != NULL, false, LNN_EVENT, "length is null");
     std::vector<uint8_t> vecSessionKey;
     int32_t localUserId = GetActiveOsAccountIds();
     if (localUserId < 0) {
