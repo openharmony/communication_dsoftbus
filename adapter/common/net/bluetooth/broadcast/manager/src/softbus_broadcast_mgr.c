@@ -2498,7 +2498,8 @@ static int32_t StartScanSub(int32_t listenerId, BroadcastProtocol protocol)
     int32_t adapterScanId = g_scanManager[listenerId].adapterScanId;
 
     for (int32_t managerId = 0; managerId < SCAN_NUM_MAX; managerId++) {
-        if (g_scanManager[managerId].adapterScanId != adapterScanId) {
+        if (g_scanManager[managerId].adapterScanId != adapterScanId ||
+            protocol != g_scanManager[managerId].protocol) {
             continue;
         }
         if (g_scanManager[managerId].isScanning) {
@@ -2543,7 +2544,6 @@ static int32_t GetFilterIndex(uint8_t *index)
 int32_t StartScan(int32_t listenerId, const BcScanParams *param)
 {
     static uint32_t callCount = 0;
-    DISC_LOGI(DISC_BROADCAST, "enter start scan, listenerId=%{public}d, callCount=%{public}u", listenerId, callCount++);
     DISC_CHECK_AND_RETURN_RET_LOGE(param != NULL, SOFTBUS_INVALID_PARAM, DISC_BROADCAST, "invalid param!");
 
     int32_t ret = SoftBusMutexLock(&g_scanLock);
@@ -2554,6 +2554,8 @@ int32_t StartScan(int32_t listenerId, const BcScanParams *param)
         SoftBusMutexUnlock(&g_scanLock);
         return SOFTBUS_BC_MGR_INVALID_LISN_ID;
     }
+    DISC_LOGI(DISC_BROADCAST, "enter start scan, listenerId=%{public}d, callCount=%{public}u, srvType=%{public}s",
+        listenerId, callCount++, GetSrvType(g_scanManager[listenerId].srvType));
 
     BroadcastProtocol protocol = g_scanManager[listenerId].protocol;
 
