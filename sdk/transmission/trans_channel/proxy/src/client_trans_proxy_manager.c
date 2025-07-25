@@ -280,7 +280,7 @@ static ClientProxyChannelInfo *ClientTransProxyCreateChannelInfo(const ChannelIn
             return NULL;
         }
     } else {
-        if (memcpy_s(info->detail.sessionKey, SESSION_KEY_LENGTH, channel->sessionKey, SESSION_KEY_LENGTH) != EOK) {
+        if (memcpy_s(info->detail.sessionKey, SESSION_KEY_LENGTH, channel->sessionKey, channel->keyLen) != EOK) {
             SoftBusFree(info);
             TRANS_LOGE(TRANS_SDK, "sessionKey memcpy fail");
             return NULL;
