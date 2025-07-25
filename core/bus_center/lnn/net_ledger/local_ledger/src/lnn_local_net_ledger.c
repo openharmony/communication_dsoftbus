@@ -96,7 +96,6 @@ static int32_t LlGetNodeSoftBusVersion(void *buf, uint32_t len)
         LNN_LOGE(LNN_LEDGER, "STR COPY ERROR");
         return SOFTBUS_MEM_ERR;
     }
-    UpdateLocalDeviceInfoToMlpsPacked(&g_localNetLedger.localInfo);
     return SOFTBUS_OK;
 }
 
@@ -1974,6 +1973,7 @@ static int32_t UpdateLocalUserId(const void *userId)
         return SOFTBUS_INVALID_PARAM;
     }
     g_localNetLedger.localInfo.userId = *(int32_t *)userId;
+    UpdateLocalDeviceInfoToMlpsPacked(&g_localNetLedger.localInfo);
     return SOFTBUS_OK;
 }
 
