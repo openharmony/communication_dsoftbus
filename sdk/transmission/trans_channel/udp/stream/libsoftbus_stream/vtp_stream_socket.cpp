@@ -32,9 +32,10 @@
 namespace Communication {
 namespace SoftBus {
 bool g_logOn = false;
-const int FEED_BACK_PERIOD = 1;  /* feedback period of fillp stream traffic statistics is 1s */
-const int MS_PER_SECOND = 1000;
-const int US_PER_MS = 1000;
+const int32_t FEED_BACK_PERIOD = 1;  /* feedback period of fillp stream traffic statistics is 1s */
+const int32_t MS_PER_SECOND = 1000;
+const int32_t US_PER_MS = 1000;
+static constexpr int32_t MAX_PORT = 65535;
 
 namespace {
 void PrintOptionInfo(int type, const StreamAttr &value)
@@ -787,6 +788,9 @@ int VtpStreamSocket::CreateAndBindSocket(IpAndPort &local, bool isServer)
         streamFd_ = sockFd;
     }
     SetDefaultConfig(sockFd);
+    if (local.port < 0 || local.port > MAX_PORT) {
+        return -1;
+    }
 
     // bind
     sockaddr_in localSockAddr = { 0 };

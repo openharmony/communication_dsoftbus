@@ -384,6 +384,8 @@ HWTEST_F(SoftBusMessageOpenChannelTest, UnpackFirstData001, TestSize.Level1)
 
     int32_t ret = UnpackFirstData(appInfo, nullptr);
     EXPECT_EQ(SOFTBUS_OK, ret);
+    ret = UnpackFirstData(appInfo, json);
+    EXPECT_EQ(SOFTBUS_DECRYPT_ERR, ret);
 
     ret = UnpackFirstData(appInfo, json);
     EXPECT_EQ(SOFTBUS_DECRYPT_ERR, ret);

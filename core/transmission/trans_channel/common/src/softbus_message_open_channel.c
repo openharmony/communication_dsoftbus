@@ -18,6 +18,8 @@
 #include <securec.h>
 #include <stdatomic.h>
 
+#include "bus_center_manager.h"
+#include "g_enhance_trans_func_pack.h"
 #include "softbus_access_token_adapter.h"
 #include "softbus_adapter_crypto.h"
 #include "softbus_adapter_mem.h"
@@ -25,7 +27,7 @@
 #include "softbus_error_code.h"
 #include "softbus_json_utils.h"
 #include "softbus_utils.h"
-#include "g_enhance_trans_func_pack.h"
+#include "trans_channel_common.h"
 #include "trans_log.h"
 #include "trans_uk_manager.h"
 
@@ -189,6 +191,13 @@ char *PackRequest(const AppInfo *appInfo, int64_t requestId)
 
 static int32_t UnpackFirstData(AppInfo *appInfo, const cJSON *json)
 {
+    (void)LnnGetNetworkIdByUuid(appInfo->peerData.deviceId, appInfo->peerNetWorkId, NETWORK_ID_BUF_LEN);
+    int32_t osType = 0;
+    (void)GetOsTypeByNetworkId(appInfo->peerNetWorkId, &osType);
+    if (osType == OH_OS_TYPE) {
+        TRANS_LOGW(TRANS_CTRL, "no need get fastData osType=%{public}d", osType);
+        return SOFTBUS_OK;
+    }
     if (!GetJsonObjectNumber16Item(json, FIRST_DATA_SIZE, &(appInfo->fastTransDataSize))) {
         appInfo->fastTransDataSize = 0;
     }
@@ -274,6 +283,7 @@ int32_t UnpackRequest(const cJSON *msg, AppInfo *appInfo)
         TRANS_LOGW(TRANS_CTRL, "invalid param");
         return SOFTBUS_INVALID_PARAM;
     }
+    (void)GetJsonObjectStringItem(msg, DEVICE_ID, appInfo->peerData.deviceId, DEVICE_ID_SIZE_MAX);
     int32_t ret = UnpackFirstData(appInfo, msg);
     if (ret != SOFTBUS_OK) {
         TRANS_LOGE(TRANS_CTRL, "unpack first data failed");
@@ -304,7 +314,6 @@ int32_t UnpackRequest(const cJSON *msg, AppInfo *appInfo)
         TRANS_LOGW(TRANS_CTRL, "Failed to get route type");
     }
     appInfo->routeType = (RouteType)routeType;
-    (void)GetJsonObjectStringItem(msg, DEVICE_ID, appInfo->peerData.deviceId, DEVICE_ID_SIZE_MAX);
     if (!GetJsonObjectNumberItem(msg, BUSINESS_TYPE, (int32_t *)&appInfo->businessType)) {
         appInfo->businessType = BUSINESS_TYPE_NOT_CARE;
     }

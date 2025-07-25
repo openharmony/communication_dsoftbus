@@ -802,6 +802,7 @@ ohos_unittest("SoftbusProxyChannelMessagePagingTest") {
     "$dsoftbus_core_path/bus_center/lnn/net_builder/common/include",
     "$dsoftbus_core_path/bus_center/lnn/lane_hub/lane_manager/include",
     "$dsoftbus_core_path/bus_center/lnn/net_ledger/common/include",
+    "$dsoftbus_core_path/bus_center/lnn/net_ledger/distributed_ledger/include",
     "$dsoftbus_core_path/bus_center/lnn/net_builder/include",
     "$dsoftbus_core_path/adapter/bus_center/include",
     "$dsoftbus_core_path/bus_center/utils/include",

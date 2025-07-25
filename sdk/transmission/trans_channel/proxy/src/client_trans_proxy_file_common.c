@@ -258,7 +258,7 @@ char *BufferToFileList(uint8_t *buffer, uint32_t bufferSize, int32_t *fileCount)
     }
     uint32_t offset = 0;
     int32_t count = 0;
-    while (offset < bufferSize - sizeof(struct FileListItem)) {
+    while (offset <= bufferSize - sizeof(struct FileListItem)) {
         const struct FileListItem *fileListItem = (const struct FileListItem *)(buffer + offset);
         offset += sizeof(struct FileListItem);
 
