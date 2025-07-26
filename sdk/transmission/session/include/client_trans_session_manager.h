@@ -58,6 +58,8 @@ int32_t ClientGetSessionStateByChannelId(int32_t channelId, int32_t channelType,
 
 int32_t ClientGetSessionIdByChannelId(int32_t channelId, int32_t channelType, int32_t *sessionId, bool isClosing);
 
+int32_t ClientGetSessionIsD2DByChannelId(int32_t channelId, int32_t channelType, bool *isD2D);
+
 int32_t ClientGetSessionIsAsyncBySessionId(int32_t sessionId, bool *isAsync);
 
 int32_t ClientGetRouteTypeByChannelId(int32_t channelId, int32_t channelType, int32_t *routeType);
@@ -197,7 +199,7 @@ int32_t ClientForkSocketByChannelId(int32_t socketId, BusinessType type, int32_t
 
 int32_t ClientGetChannelBusinessTypeByChannelId(int32_t channelId, int32_t *businessType);
 
-int32_t ClientCheckIsD2DypeBySessionId(int32_t sessionId, bool *isD2D);
+int32_t ClientCheckIsD2DBySessionId(int32_t sessionId, bool *isD2D);
 
 int32_t ClientGetSessionTypeBySocket(int32_t socket, int32_t *sessionType);
 
