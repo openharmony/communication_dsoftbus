@@ -2404,14 +2404,13 @@ static int32_t PerformNormalStartScan(BroadcastProtocol protocol,
         adapterParam->scanWindow, (*callCount)++);
     ret = g_interface[protocol]->StartScan(g_scanManager[listenerId].adapterScanId, adapterParam,
         adapterFilter, filterSize);
-    g_scanManager[listenerId].isFliterChanged = false;
     ReleaseSoftBusBcScanFilter(adapterFilter, filterSize);
     if (ret != SOFTBUS_OK) {
         g_scanManager[listenerId].scanCallback->OnStartScanCallback(listenerId, (int32_t)SOFTBUS_BC_STATUS_FAIL);
         DISC_LOGE(DISC_BROADCAST, "call from adapter failed");
         return ret;
     }
-
+    g_scanManager[listenerId].isFliterChanged = false;
     return SOFTBUS_OK;
 }
 
