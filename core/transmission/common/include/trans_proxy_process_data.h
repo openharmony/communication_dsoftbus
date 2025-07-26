@@ -126,12 +126,13 @@ uint8_t *TransProxyPackD2DData(
     ProxyDataInfo *dataInfo, uint32_t sliceNum, SessionPktType pktType, uint32_t cnt, uint32_t *dataLen);
 int32_t TransProxyProcessD2DData(ProxyDataInfo *dataInfo, const PacketD2DHead *dataHead,
     const char *data, int32_t businessType);
-int32_t TransProxyDecryptD2DData(int32_t businessType, ProxyDataInfo *dataInfo, const char *sessionKey,
-    const char *sessionBytesIv, const unsigned char *sessionMsgIv);
+int32_t TransProxyDecryptD2DData(
+    int32_t businessType, ProxyDataInfo *dataInfo, const char *sessionKey, const unsigned char *sessionCommonIv);
 int32_t TransProxyD2DFirstSliceProcess(
     SliceProcessor *processor, const SliceHead *head, const char *data, uint32_t len, int32_t busineseeTye);
 int32_t TransProxyPackD2DBytes(ProxyDataInfo *dataInfo, const char *sessionKey, const char *sessionIv,
     SessionPktType flag);
+int32_t TransGenerateToBytesRandIv(unsigned char *sessionIv, const uint32_t *nonce);
 
 #ifdef __cplusplus
 }
