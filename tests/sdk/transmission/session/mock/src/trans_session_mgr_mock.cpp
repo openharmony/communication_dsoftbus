@@ -128,6 +128,11 @@ int32_t ClientGetSessionIdByChannelId(int32_t channelId, int32_t channelType, in
     return GetManagerInterface()->ClientGetSessionIdByChannelId(channelId, channelType, sessionId, isClosing);
 }
 
+int32_t ClientGetSessionIsD2DByChannelId(int32_t channelId, int32_t channelType, bool *isD2D)
+{
+    return GetManagerInterface()->ClientGetSessionIsD2DByChannelId(channelId, channelType, isD2D);
+}
+
 int32_t ClientGetSessionCallbackAdapterById(int32_t sessionId, SessionListenerAdapter *callbackAdapter, bool *isServer)
 {
     return GetManagerInterface()->ClientGetSessionCallbackAdapterById(sessionId, callbackAdapter, isServer);
@@ -189,9 +194,9 @@ bool IsSessionExceedLimit(void)
     return GetManagerInterface()->IsSessionExceedLimit();
 }
 
-int32_t ClientCheckIsD2DypeBySessionId(int32_t sessionId, bool *isD2D)
+int32_t ClientCheckIsD2DBySessionId(int32_t sessionId, bool *isD2D)
 {
-    return GetManagerInterface()->ClientCheckIsD2DypeBySessionId(sessionId, isD2D);
+    return GetManagerInterface()->ClientCheckIsD2DBySessionId(sessionId, isD2D);
 }
 #ifdef __cplusplus
 }
