@@ -73,6 +73,7 @@ public:
     virtual int32_t SoftBusBase64Encode(unsigned char *dst, size_t dlen,
         size_t *olen, const unsigned char *src, size_t slen) = 0;
     virtual int32_t LnnGetLocalStrInfo(InfoKey key, char *info, uint32_t len) = 0;
+    virtual int32_t SoftBusGenerateStrHash(const unsigned char *str, uint32_t len, unsigned char *hash) = 0;
 };
 
 class SoftbusProxychannelMessagePagingInterfaceMock : public SoftbusProxychannelMessagePagingInterface {
@@ -122,6 +123,7 @@ public:
     MOCK_METHOD5(SoftBusBase64Encode, int32_t (unsigned char *dst, size_t dlen,
         size_t *olen, const unsigned char *src, size_t slen));
     MOCK_METHOD3(LnnGetLocalStrInfo, int32_t (InfoKey key, char *info, uint32_t len));
+    MOCK_METHOD3(SoftBusGenerateStrHash, int32_t (const unsigned char *str, uint32_t len, unsigned char *hash));
 };
 } // namespace OHOS
 #endif // SOFTBUS_PROXYCHANNEL_MESSAGE_PAGING_TEST_H

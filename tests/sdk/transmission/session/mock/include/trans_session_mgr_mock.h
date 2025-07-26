@@ -41,6 +41,7 @@ public:
     virtual int32_t ClientDeleteSession(int32_t sessionId) = 0;
     virtual int32_t ClientGetSessionIdByChannelId(
         int32_t channelId, int32_t channelType, int32_t *sessionId, bool isClosing) = 0;
+    virtual int32_t ClientGetSessionIsD2DByChannelId(int32_t channelId, int32_t channelType, bool *isD2D) = 0;
     virtual int32_t ClientGetSessionCallbackAdapterById(
         int32_t sessionId, SessionListenerAdapter *callbackAdapter, bool *isServer) = 0;
     virtual int32_t ClientSetEnableStatusBySocket(int32_t socket, SessionEnableStatus enableStatus) = 0;
@@ -57,7 +58,7 @@ public:
         int32_t channelId, int32_t channelType, bool *supportTlv, bool *needAck) = 0;
     virtual int32_t ClientGetSessionNameBySessionId(int32_t sessionId, char *sessionName) = 0;
     virtual bool IsSessionExceedLimit(void) = 0;
-    virtual int32_t ClientCheckIsD2DypeBySessionId(int32_t sessionId, bool *isD2D) = 0;
+    virtual int32_t ClientCheckIsD2DBySessionId(int32_t sessionId, bool *isD2D) = 0;
 };
 
 class TransSessionMgrMock : public TransSessionMgrInterface {
@@ -80,6 +81,7 @@ public:
     MOCK_METHOD1(ClientDeleteSession, int32_t(int32_t sessionId));
     MOCK_METHOD4(ClientGetSessionIdByChannelId, int32_t(
         int32_t channelId, int32_t channelType, int32_t *sessionId, bool isClosing));
+    MOCK_METHOD3(ClientGetSessionIsD2DByChannelId, int32_t(int32_t channelId, int32_t channelType, bool *isD2D));
     MOCK_METHOD3(ClientGetSessionCallbackAdapterById, int32_t(
         int32_t sessionId, SessionListenerAdapter *callbackAdapter, bool *isServer));
     MOCK_METHOD2(ClientSetEnableStatusBySocket, int32_t(int32_t socket, SessionEnableStatus enableStatus));
@@ -96,7 +98,7 @@ public:
         int32_t channelId, int32_t channelType, bool *supportTlv, bool *needAck));
     MOCK_METHOD2(ClientGetSessionNameBySessionId, int32_t(int32_t sessionId, char *sessionName));
     MOCK_METHOD0(IsSessionExceedLimit, bool(void));
-    MOCK_METHOD2(ClientCheckIsD2DypeBySessionId, int32_t(int32_t sessionId, bool *isD2D));
+    MOCK_METHOD2(ClientCheckIsD2DBySessionId, int32_t(int32_t sessionId, bool *isD2D));
 
     static int32_t ActionOfClientGetDataConfigByChannelId(
         int32_t channelId, int32_t channelType, uint32_t *dataConfig);

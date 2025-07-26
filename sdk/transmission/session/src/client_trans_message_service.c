@@ -94,7 +94,7 @@ static int32_t CheckBusinessTypeAndOsTypeBySessionId(int32_t sessionId, int32_t 
         return SOFTBUS_TRANS_BUSINESS_TYPE_NOT_MATCH;
     }
     bool isD2D = false;
-    ClientCheckIsD2DypeBySessionId(sessionId, &isD2D);
+    ClientCheckIsD2DBySessionId(sessionId, &isD2D);
     if (isD2D && (businessType != BUSINESS_TYPE_D2D_VOICE)) {
         TRANS_LOGE(TRANS_BYTES,
             "businessType no match d2d, businessType=%{public}d, sessionId=%{public}d", businessType, sessionId);

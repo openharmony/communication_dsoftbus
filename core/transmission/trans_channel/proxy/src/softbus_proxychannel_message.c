@@ -506,6 +506,10 @@ static void TransPagingProcessResetMsg(const ProxyMessage *msg)
         SoftBusFree(info);
         return;
     }
+    if (TransDecConnRefByConnId(msg->connId, false) == SOFTBUS_OK) {
+        TRANS_LOGE(TRANS_CTRL, "recv reset dis connect, connId=%{public}u", msg->connId);
+        (void)ConnDisconnectDevice(msg->connId);
+    }
     if (TransPagingResetChan(info) != SOFTBUS_OK) {
         TRANS_LOGE(TRANS_CTRL, "reset chan fail mychannelId=%{public}d, peerChannelId=%{public}d", info->myId,
             info->peerId);
@@ -516,6 +520,43 @@ EXIT:
     (void)memset_s(info->appInfo.sessionKey, sizeof(info->appInfo.sessionKey), 0, sizeof(info->appInfo.sessionKey));
     SoftBusFree(info);
     return;
+}
+
+static int32_t TransProxyFillPagingLocalInfo(ProxyChannelInfo *chan)
+{
+    if (strcpy_s(chan->appInfo.myData.callerAccountId, sizeof(chan->appInfo.myData.callerAccountId),
+        chan->appInfo.peerData.calleeAccountId) != EOK ||
+        strcpy_s(chan->appInfo.myData.calleeAccountId, sizeof(chan->appInfo.myData.calleeAccountId),
+        chan->appInfo.peerData.callerAccountId) != EOK) {
+        TRANS_LOGE(TRANS_CTRL, "fill local account id failed.");
+        return SOFTBUS_STRCMP_ERR;
+    }
+    char localUdid[UDID_BUF_LEN] = { 0 };
+    int32_t ret = LnnGetLocalStrInfo(STRING_KEY_DEV_UDID, localUdid, UDID_BUF_LEN);
+    if (ret != SOFTBUS_OK) {
+        TRANS_LOGE(TRANS_CTRL, "get local udid fail.");
+        return ret;
+    }
+    uint8_t udidHash[SHA_256_HASH_LEN] = { 0 };
+    ret = SoftBusGenerateStrHash((unsigned char *)localUdid, strlen(localUdid), (unsigned char *)udidHash);
+    if (ret != SOFTBUS_OK) {
+        TRANS_LOGE(TRANS_CTRL, "generate udid hash fail.");
+        return ret;
+    }
+    uint8_t callerHash[SHA_256_HASH_LEN] = { 0 };
+    if (ConvertHexStringToBytes((unsigned char *)callerHash, SHA_256_HASH_LEN, chan->appInfo.myData.callerAccountId,
+        strlen(chan->appInfo.myData.callerAccountId)) != SOFTBUS_OK) {
+        TRANS_LOGE(TRANS_CTRL, "account hash str to bytes failed");
+        return SOFTBUS_TRANS_HEX_STR_TO_BYTES_FAIL;
+    }
+    if (memcpy_s(chan->appInfo.myData.shortAccountHash, sizeof(chan->appInfo.myData.shortAccountHash),
+        callerHash, D2D_SHORT_ACCOUNT_HASH_LEN) != EOK ||
+        memcpy_s(chan->appInfo.myData.shortUdidHash, sizeof(chan->appInfo.myData.shortUdidHash),
+        udidHash, D2D_SHORT_UDID_HASH_LEN) != EOK) {
+        TRANS_LOGE(TRANS_CTRL, "cpy accounthash or devicehash failed");
+        return SOFTBUS_MEM_ERR;
+    }
+    return SOFTBUS_OK;
 }
 
 static int32_t TransProxyFillPagingChannelInfo(const ProxyMessage *msg, ProxyChannelInfo *chan,
@@ -559,7 +600,7 @@ static int32_t TransProxyFillPagingChannelInfo(const ProxyMessage *msg, ProxyCha
     chan->status = PROXY_CHANNEL_STATUS_COMPLETED;
     chan->appInfo.channelType = CHANNEL_TYPE_PROXY;
     chan->appInfo.appType = APP_TYPE_NORMAL;
-    return SOFTBUS_OK;
+    return TransProxyFillPagingLocalInfo(chan);
 }
 
 static int32_t TransProxyPagingChannelOpened(ProxyChannelInfo *chan)
@@ -646,6 +687,7 @@ void TransPagingProcessHandshakeMsg(const ProxyMessage *msg, uint8_t *accountHas
         SoftBusFree(chan);
         return;
     }
+    TransCreateConnByConnId(chan->connId, false);
     ProxyChannelInfo channel = { 0 };
     if (memcpy_s(&channel, sizeof(ProxyChannelInfo), chan, sizeof(ProxyChannelInfo)) != EOK) {
         TRANS_LOGE(TRANS_CTRL, "memcpy failed");

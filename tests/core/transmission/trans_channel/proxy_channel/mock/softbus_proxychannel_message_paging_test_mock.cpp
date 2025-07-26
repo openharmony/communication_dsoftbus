@@ -209,5 +209,10 @@ int32_t LnnGetLocalStrInfo(InfoKey key, char *info, uint32_t len)
 {
     return GetSoftbusProxychannelMessagePagingInterface()->LnnGetLocalStrInfo(key, info, len);
 }
+
+int32_t SoftBusGenerateStrHash(const unsigned char *str, uint32_t len, unsigned char *hash)
+{
+    return GetSoftbusProxychannelMessagePagingInterface()->SoftBusGenerateStrHash(str, len, hash);
+}
 }
 }
