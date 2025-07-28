@@ -178,7 +178,7 @@ static int32_t AdjustLanePriority(const char *networkId, const LaneSelectParam *
             break;
         }
     }
-    if (resListScore[resList[idxWlan]] >= UNACCEPT_SCORE) {
+    if (idxWlan < resNum && resListScore[resList[idxWlan]] >= UNACCEPT_SCORE) {
         return SOFTBUS_OK;
     }
     for (uint32_t j = idxWlan; j < resNum; ++j) {
@@ -346,7 +346,8 @@ static bool IsAuthReuseWifiDirect(const char *networkId, LaneLinkType linkType)
 
 int32_t SelectAuthLane(const char *networkId, LanePreferredLinkList *request, LanePreferredLinkList *recommendList)
 {
-    if ((networkId == NULL) || (request == NULL) || (recommendList == NULL)) {
+    if ((networkId == NULL) || (request == NULL) || (recommendList == NULL) ||
+        (request->linkTypeNum > LANE_LINK_TYPE_BUTT)) {
         return SOFTBUS_INVALID_PARAM;
     }
     recommendList->linkTypeNum = 0;
