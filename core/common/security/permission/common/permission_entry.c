@@ -452,7 +452,7 @@ int32_t LoadPermissionJson(const char *fileName)
     }
     cJSON *jsonArray = cJSON_Parse(g_permissonJson);
     if (jsonArray == NULL) {
-        COMM_LOGE(COMM_PERM, "parse failed. fileName=%{public}s", fileName);
+        COMM_LOGE(COMM_PERM, "parse failed. fileName=%{private}s", fileName);
         return SOFTBUS_PARSE_JSON_ERR;
     }
     int itemNum = cJSON_GetArraySize(jsonArray);
