@@ -1569,6 +1569,7 @@ ohos_unittest("LNNDistributedNetLedgerManagerTest") {
     "$dsoftbus_dfx_path/interface/include/form",
     "$dsoftbus_root_path/adapter/common/bus_center/include",
     "$dsoftbus_root_path/adapter/common/include",
+    "$dsoftbus_root_path/adapter/common/net/bluetooth/broadcast/interface",
     "$dsoftbus_root_path/core/adapter/bus_center/include",
     "$dsoftbus_root_path/core/authentication/include",
     "$dsoftbus_root_path/core/authentication/interface",
@@ -1589,6 +1590,7 @@ ohos_unittest("LNNDistributedNetLedgerManagerTest") {
     "$dsoftbus_root_path/core/common/include",
     "$dsoftbus_root_path/core/discovery/interface",
     "$dsoftbus_root_path/core/discovery/manager/include",
+    "$dsoftbus_root_path/core/frame/init/include",
     "$dsoftbus_root_path/interfaces/inner_kits/lnn",
     "$dsoftbus_root_path/interfaces/kits/bus_center",
     "$dsoftbus_root_path/interfaces/kits/common",
@@ -1605,6 +1607,7 @@ ohos_unittest("LNNDistributedNetLedgerManagerTest") {
   external_deps = [
     "cJSON:cjson",
     "c_utils:utils",
+    "device_auth:deviceauth_sdk",
     "googletest:gmock_main",
     "hilog:libhilog",
   ]

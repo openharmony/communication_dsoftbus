@@ -35,18 +35,16 @@ public:
     void TearDown();
 };
 
-void BusCenterServerTest::SetUpTestCase()
-{
-    SetAccessTokenPermission("device_manager");
-    uint64_t tokenId = SetTokenIdByProcessName("device_manager");
-    printf("SetTokenIdByProcessName tokenId:%ju\n", tokenId);
-    int32_t ret = BusCenterServerProxyInit();
-    EXPECT_TRUE(ret == SOFTBUS_OK);
-}
+void BusCenterServerTest::SetUpTestCase() { }
 
 void BusCenterServerTest::TearDownTestCase() { }
 
-void BusCenterServerTest::SetUp() { }
+void BusCenterServerTest::SetUp()
+{
+    SetAccessTokenPermission("device_manager");
+    int32_t ret = BusCenterServerProxyInit();
+    EXPECT_TRUE(ret == SOFTBUS_OK);
+}
 
 void BusCenterServerTest::TearDown() { }
 
@@ -81,7 +79,7 @@ HWTEST_F(BusCenterServerTest, SERVER_IPC_LEAVE_LNN_TEST_001, TestSize.Level1)
     const char *networkId = "1234";
 
     int32_t ret = ServerIpcLeaveLNN(pkgName, networkId);
-    EXPECT_TRUE(ret == SOFTBUS_OK);
+    EXPECT_EQ(ret, SOFTBUS_OK);
 }
 
 /*
