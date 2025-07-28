@@ -816,6 +816,7 @@ int32_t TransPagingParseMessage(char *data, int32_t len, ProxyMessage *msg)
     }
     uint32_t decDataLen = (uint32_t)msg->dataLen - OVERHEAD_LEN;
     uint8_t *decData = (uint8_t *)SoftBusCalloc(decDataLen);
+    TRANS_CHECK_AND_RETURN_RET_LOGE(decData != NULL, SOFTBUS_MALLOC_ERR, TRANS_CTRL, "calloc fail.");
     if (SoftBusDecryptData(&cipherKey, (uint8_t *)msg->data, (uint32_t)msg->dataLen,
         decData, &decDataLen) != SOFTBUS_OK) {
         TRANS_LOGE(TRANS_CTRL, "parse msg decrypt fail");
@@ -867,10 +868,6 @@ int32_t TransProxyParseMessage(char *data, int32_t len, ProxyMessage *msg, AuthH
         msg->authHandle = (*auth);
         uint32_t decDataLen = AuthGetDecryptSize((uint32_t)msg->dataLen);
         uint8_t *decData = (uint8_t *)SoftBusCalloc(decDataLen);
-        if (decData == NULL) {
-            TRANS_LOGE(TRANS_CTRL, "decData calloc failed");
-            return SOFTBUS_MALLOC_ERR;
-        }
         TRANS_CHECK_AND_RETURN_RET_LOGE(decData != NULL, SOFTBUS_MALLOC_ERR, TRANS_CTRL, "calloc fail.");
         msg->keyIndex = (int32_t)SoftBusLtoHl(*(uint32_t *)msg->data);
         if (AuthDecrypt(auth, (uint8_t *)msg->data, (uint32_t)msg->dataLen, decData, &decDataLen) != SOFTBUS_OK &&
