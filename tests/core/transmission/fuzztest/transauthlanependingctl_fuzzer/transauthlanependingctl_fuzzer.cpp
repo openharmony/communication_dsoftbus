@@ -125,12 +125,17 @@ extern "C" int32_t LLVMFuzzerTestOneInput(const uint8_t *data, size_t size)
     /* Run your code on data */
     FuzzedDataProvider provider(data, size);
     OHOS::TransAuthWithParaReqLanePendingInitTest(provider);
-    OHOS::TransAuthWithParaReqLanePendingDeinitTest(provider);
+    OHOS::TransAuthWithParaReqLanePendingInitTest(provider);
+    OHOS::TransUpdateAuthWithParaLaneConnInfoTest(provider);
+    OHOS::TransAuthWithParaDelLaneReqByIdTest(provider);
+    OHOS::TransAuthWithParaGetLaneReqByLaneReqIdTest(provider);
     OHOS::FillTransAuthWithParaNodeTest(provider);
     OHOS::TransAuthWithParaAddLaneReqToListTest(provider);
-    OHOS::TransAuthWithParaDelLaneReqByIdTest(provider);
     OHOS::TransUpdateAuthWithParaLaneConnInfoTest(provider);
     OHOS::TransAuthWithParaGetLaneReqByLaneReqIdTest(provider);
+    OHOS::TransAuthWithParaDelLaneReqByIdTest(provider);
+    OHOS::TransAuthWithParaReqLanePendingDeinitTest(provider);
+    OHOS::TransAuthWithParaReqLanePendingDeinitTest(provider);
 
     return 0;
 }
