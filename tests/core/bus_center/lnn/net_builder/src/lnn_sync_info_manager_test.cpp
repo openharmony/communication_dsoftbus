@@ -1680,7 +1680,7 @@ HWTEST_F(LNNSyncInfoManagerTest, OnWifiDirectSyncMsgRecv_001, TestSize.Level1)
 {
     AuthTransData *data = nullptr;
     AuthHandle authHandle;
-    OnWifiDirectSyncMsgRecv(authHandle, data);
+    EXPECT_NO_FATAL_FAILURE(OnWifiDirectSyncMsgRecv(authHandle, data));
 }
 
 /*
@@ -1696,7 +1696,7 @@ HWTEST_F(LNNSyncInfoManagerTest, OnWifiDirectSyncMsgRecv_002, TestSize.Level1)
     data.data = new uint8_t(0);
     AuthHandle authHandle;
 
-    OnWifiDirectSyncMsgRecv(authHandle, &data);
+    EXPECT_NO_FATAL_FAILURE(OnWifiDirectSyncMsgRecv(authHandle, &data));
     delete (data.data);
     data.data = nullptr;
 }
@@ -1717,7 +1717,7 @@ HWTEST_F(LNNSyncInfoManagerTest, OnWifiDirectSyncMsgRecv_003, TestSize.Level1)
     NiceMock<LnnSyncInfoManagerInterfaceMock> lnnSyncInfoMgrMock;
     EXPECT_CALL(lnnSyncInfoMgrMock, GetAuthManagerByAuthId(_)).Times(1).WillOnce(Return(nullptr));
 
-    OnWifiDirectSyncMsgRecv(authHandle, &data);
+    EXPECT_NO_FATAL_FAILURE(OnWifiDirectSyncMsgRecv(authHandle, &data));
     delete (data.data);
     data.data = nullptr;
 }
@@ -1739,9 +1739,9 @@ HWTEST_F(LNNSyncInfoManagerTest, OnWifiDirectSyncMsgRecv_004, TestSize.Level1)
     NiceMock<LnnSyncInfoManagerInterfaceMock> lnnSyncInfoMgrMock;
     EXPECT_CALL(lnnSyncInfoMgrMock, GetAuthManagerByAuthId(_)).Times(1).WillOnce(Return(&authManager));
     EXPECT_CALL(lnnSyncInfoMgrMock, LnnGetNetworkIdByUdid(_, _, _)).Times(1).WillOnce(Return(SOFTBUS_ERR));
-    EXPECT_CALL(lnnSyncInfoMgrMock, DelAuthManager(_, _)).Times(1);
+    EXPECT_CALL(lnnSyncInfoMgrMock, DelDupAuthManager(_)).Times(1);
 
-    OnWifiDirectSyncMsgRecv(authHandle, &data);
+    EXPECT_NO_FATAL_FAILURE(OnWifiDirectSyncMsgRecv(authHandle, &data));
     delete (data.data);
     data.data = nullptr;
 }
@@ -1763,9 +1763,9 @@ HWTEST_F(LNNSyncInfoManagerTest, OnWifiDirectSyncMsgRecv_005, TestSize.Level1)
     NiceMock<LnnSyncInfoManagerInterfaceMock> lnnSyncInfoMgrMock;
     EXPECT_CALL(lnnSyncInfoMgrMock, GetAuthManagerByAuthId(_)).Times(1).WillOnce(Return(&authManager));
     EXPECT_CALL(lnnSyncInfoMgrMock, LnnGetNetworkIdByUdid(_, _, _)).Times(1).WillOnce(Return(SOFTBUS_OK));
-    EXPECT_CALL(lnnSyncInfoMgrMock, DelAuthManager(_, _)).Times(1);
+    EXPECT_CALL(lnnSyncInfoMgrMock, DelDupAuthManager(_)).Times(1);
 
-    OnWifiDirectSyncMsgRecv(authHandle, &data);
+    EXPECT_NO_FATAL_FAILURE(OnWifiDirectSyncMsgRecv(authHandle, &data));
     delete (data.data);
     data.data = nullptr;
 }
@@ -1787,9 +1787,9 @@ HWTEST_F(LNNSyncInfoManagerTest, OnWifiDirectSyncMsgRecv_006, TestSize.Level1)
     NiceMock<LnnSyncInfoManagerInterfaceMock> lnnSyncInfoMgrMock;
     EXPECT_CALL(lnnSyncInfoMgrMock, GetAuthManagerByAuthId(_)).Times(1).WillOnce(Return(&authManager));
     EXPECT_CALL(lnnSyncInfoMgrMock, LnnGetNetworkIdByUdid(_, _, _)).Times(1).WillOnce(Return(SOFTBUS_OK));
-    EXPECT_CALL(lnnSyncInfoMgrMock, DelAuthManager(_, _)).Times(1);
+    EXPECT_CALL(lnnSyncInfoMgrMock, DelDupAuthManager(_)).Times(1);
 
-    OnWifiDirectSyncMsgRecv(authHandle, &data);
+    EXPECT_NO_FATAL_FAILURE(OnWifiDirectSyncMsgRecv(authHandle, &data));
 
     delete (data.data);
     data.data = nullptr;
@@ -1813,9 +1813,9 @@ HWTEST_F(LNNSyncInfoManagerTest, OnWifiDirectSyncMsgRecv_007, TestSize.Level1)
     NiceMock<LnnSyncInfoManagerInterfaceMock> lnnSyncInfoMgrMock;
     EXPECT_CALL(lnnSyncInfoMgrMock, GetAuthManagerByAuthId(_)).Times(1).WillOnce(Return(&authManager));
     EXPECT_CALL(lnnSyncInfoMgrMock, LnnGetNetworkIdByUdid(_, _, _)).Times(1).WillOnce(Return(SOFTBUS_OK));
-    EXPECT_CALL(lnnSyncInfoMgrMock, DelAuthManager(_, _)).Times(1);
+    EXPECT_CALL(lnnSyncInfoMgrMock, DelDupAuthManager(_)).Times(1);
 
-    OnWifiDirectSyncMsgRecv(authHandle, &data);
+    EXPECT_NO_FATAL_FAILURE(OnWifiDirectSyncMsgRecv(authHandle, &data));
 
     delete (data.data);
     data.data = nullptr;
@@ -1839,9 +1839,9 @@ HWTEST_F(LNNSyncInfoManagerTest, OnWifiDirectSyncMsgRecv_008, TestSize.Level1)
     NiceMock<LnnSyncInfoManagerInterfaceMock> lnnSyncInfoMgrMock;
     EXPECT_CALL(lnnSyncInfoMgrMock, GetAuthManagerByAuthId(_)).Times(1).WillOnce(Return(&authManager));
     EXPECT_CALL(lnnSyncInfoMgrMock, LnnGetNetworkIdByUdid(_, _, _)).Times(1).WillOnce(Return(SOFTBUS_OK));
-    EXPECT_CALL(lnnSyncInfoMgrMock, DelAuthManager(_, _)).Times(1);
+    EXPECT_CALL(lnnSyncInfoMgrMock, DelDupAuthManager(_)).Times(1);
 
-    OnWifiDirectSyncMsgRecv(authHandle, &data);
+    EXPECT_NO_FATAL_FAILURE(OnWifiDirectSyncMsgRecv(authHandle, &data));
 
     delete (data.data);
     data.data = nullptr;
