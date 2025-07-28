@@ -111,16 +111,17 @@ int32_t SoftBusGetWifiDeviceConfig(SoftBusWifiDevConf *configList, uint32_t *num
         SoftBusFree(result);
         return SOFTBUS_ERR;
     }
+    WifiDeviceConfig *tempResult = result;
 
     for (i = 0; i < wifiConfigSize; i++) {
-        if (ConvertSoftBusWifiConfFromWifiDev(result, configList) != SOFTBUS_OK) {
+        if (ConvertSoftBusWifiConfFromWifiDev(tempResult, configList) != SOFTBUS_OK) {
             LNN_LOGE(LNN_STATE, "convert wifi config failed");
             (void)memset_s(result, sizeof(WifiDeviceConfig) * WIFI_MAX_CONFIG_SIZE, 0,
                            sizeof(WifiDeviceConfig) * WIFI_MAX_CONFIG_SIZE);
             SoftBusFree(result);
             return SOFTBUS_ERR;
         }
-        result++;
+        tempResult++;
         configList++;
     }
     *num = wifiConfigSize;
