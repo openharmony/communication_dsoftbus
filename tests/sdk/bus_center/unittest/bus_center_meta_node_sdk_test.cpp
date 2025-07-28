@@ -18,6 +18,7 @@
 
 #include "softbus_access_token_test.h"
 #include "softbus_bus_center.h"
+#include "softbus_client_frame_manager.h"
 #include "softbus_error_code.h"
 
 namespace OHOS {
@@ -42,7 +43,10 @@ void BusCenterMetaNodeSdkTest::SetUpTestCase()
 
 void BusCenterMetaNodeSdkTest::TearDownTestCase() { }
 
-void BusCenterMetaNodeSdkTest::SetUp() { }
+void BusCenterMetaNodeSdkTest::SetUp()
+{
+    EXPECT_EQ(InitSoftBus(TEST_PKG_NAME), SOFTBUS_OK);
+}
 
 void BusCenterMetaNodeSdkTest::TearDown() { }
 
