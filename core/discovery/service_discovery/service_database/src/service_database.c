@@ -205,6 +205,7 @@ int32_t AddServiceInfo(const ServiceInfo *info)
     ListInit(&itemNode->node);
     if (memcpy_s(itemNode->serviceInfo, sizeof(ServiceInfo), info, sizeof(ServiceInfo)) != EOK) {
         DISC_LOGE(DISC_ABILITY, "memcpy service info failed");
+        ReleaseServiceInfoItem(itemNode);
         (void)SoftBusMutexUnlock(&(list->lock));
         return SOFTBUS_MEM_ERR;
     }
