@@ -36,6 +36,7 @@ public:
         char *outBuf, uint32_t outBufLen, const unsigned char *inBuf, uint32_t inLen) = 0;
     virtual bool LnnIsNodeOnline(const NodeInfo *info) = 0;
     virtual NodeInfo *GetNodeInfoFromMap(const DoubleHashMap *map, const char *id) = 0;
+    virtual int32_t LnnRetrieveDeviceInfo(const char *udidHash, NodeInfo *deviceInfo) = 0;
 };
 
 class LnnDistributedNetLedgerManagerInterfaceMock : public LnnDistributedNetLedgerManagerInterface {
@@ -50,6 +51,11 @@ public:
     MOCK_METHOD4(ConvertBytesToHexString, int32_t(char *, uint32_t, const unsigned char *, uint32_t));
     MOCK_METHOD1(LnnIsNodeOnline, bool(const NodeInfo *));
     MOCK_METHOD2(GetNodeInfoFromMap, NodeInfo *(const DoubleHashMap *, const char *));
+    MOCK_METHOD2(LnnRetrieveDeviceInfo, int32_t(const char *, NodeInfo *));
 };
+extern "C" {
+    int32_t LnnSaveRemoteDeviceInfo(const NodeInfo *deviceInfo);
+    NodeInfo *LnnGetNodeInfoById(const char *id, IdCategory type);
+}
 } // namespace OHOS
 #endif // LNN_DECISION_DB_DEPS_MOCK_H

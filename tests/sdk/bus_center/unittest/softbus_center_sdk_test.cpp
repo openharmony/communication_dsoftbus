@@ -21,6 +21,7 @@
 #include "lnn_local_net_ledger.h"
 #include "softbus_access_token_test.h"
 #include "softbus_bus_center.h"
+#include "softbus_client_frame_manager.h"
 #include "softbus_common.h"
 #include "softbus_error_code.h"
 
@@ -50,7 +51,10 @@ void ClientBusCenterSdkTest::SetUpTestCase()
 
 void ClientBusCenterSdkTest::TearDownTestCase() { }
 
-void ClientBusCenterSdkTest::SetUp() { }
+void ClientBusCenterSdkTest::SetUp()
+{
+    EXPECT_EQ(InitSoftBus(PKG_NAME), SOFTBUS_OK);
+}
 
 void ClientBusCenterSdkTest::TearDown() { }
 

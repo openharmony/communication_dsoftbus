@@ -858,6 +858,7 @@ HWTEST_F(KVAdapterWrapperTest, LnnSetCloudAbilityInner_Dbid_LessThanMin, TestSiz
 HWTEST_F(KVAdapterWrapperTest, LnnCloudSync002, TestSize.Level1)
 {
     LnnEnhanceFuncList *pfnLnnEnhanceFuncList = LnnEnhanceFuncListGet();
+    ASSERT_TRUE(pfnLnnEnhanceFuncList != nullptr);
     pfnLnnEnhanceFuncList->isCloudSyncEnabled = IsCloudSyncEnabled;
     int32_t dbId = g_dbId;
     constexpr int32_t idOffset = 1;

@@ -61,9 +61,9 @@ void AuthRequestTest::TearDown() { }
 HWTEST_F(AuthRequestTest, GET_AUTH_REQUEST_TEST_001, TestSize.Level1)
 {
     AuthRequest *request = static_cast<AuthRequest *>(SoftBusCalloc(sizeof(AuthRequest)));
-    (void)memset_s(request, sizeof(AuthRequest), 0, sizeof(AuthRequest));
+    ASSERT_TRUE(request != nullptr);
     AuthRequest *item = static_cast<AuthRequest *>(SoftBusCalloc(sizeof(AuthRequest)));
-    (void)memset_s(item, sizeof(AuthRequest), 0, sizeof(AuthRequest));
+    ASSERT_TRUE(item != nullptr);
     AuthVerifyCallback verifyCb;
     AuthConnCallback connCb;
     request->connCb = connCb;
@@ -100,9 +100,9 @@ HWTEST_F(AuthRequestTest, GET_AUTH_REQUEST_TEST_001, TestSize.Level1)
 HWTEST_F(AuthRequestTest, GET_AUTH_REQUEST_TEST_002, TestSize.Level1)
 {
     AuthRequest *request = static_cast<AuthRequest *>(SoftBusCalloc(sizeof(AuthRequest)));
-    (void)memset_s(request, sizeof(AuthRequest), 0, sizeof(AuthRequest));
+    ASSERT_TRUE(request != nullptr);
     AuthRequest *item = static_cast<AuthRequest *>(SoftBusCalloc(sizeof(AuthRequest)));
-    (void)memset_s(item, sizeof(AuthRequest), 0, sizeof(AuthRequest));
+    ASSERT_TRUE(item != nullptr);
     AuthVerifyCallback verifyCb;
     AuthConnCallback connCb;
     request->connCb = connCb;
@@ -127,5 +127,6 @@ HWTEST_F(AuthRequestTest, GET_AUTH_REQUEST_TEST_002, TestSize.Level1)
     ListTailInsert(&g_authRequestList, &(*request).node);
     uint32_t ret = GetAuthRequestWaitNum((const AuthRequest *)request, &g_authRequestList);
     EXPECT_EQ(ret, RESULT_VAL2);
+    ClearAuthRequest();
 }
 }

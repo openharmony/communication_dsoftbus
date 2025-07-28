@@ -42,6 +42,7 @@ public:
     virtual int32_t AuthPostTransData(AuthHandle authHandle, const AuthTransData *dataInfo) = 0;
     virtual int32_t GetHmlOrP2pAuthHandle(AuthHandle **authHandle, int32_t *num) = 0;
     virtual bool JSON_AddStringToObject(JsonObj *obj, const char *key, const char *value) = 0;
+    virtual void DelDupAuthManager(AuthManager *auth);
 };
 
 class LnnSyncInfoManagerInterfaceMock : public LnnSyncInfoManagerInterface {
@@ -65,6 +66,7 @@ public:
     MOCK_METHOD2(AuthPostTransData, int32_t(AuthHandle authHandle, const AuthTransData *dataInfo));
     MOCK_METHOD2(GetHmlOrP2pAuthHandle, int32_t(AuthHandle **authHandle, int32_t *num));
     MOCK_METHOD3(JSON_AddStringToObject, bool(JsonObj *obj, const char *key, const char *value));
+    MOCK_METHOD1(DelDupAuthManager, void(AuthManager *auth));
 };
 } // namespace OHOS
 
