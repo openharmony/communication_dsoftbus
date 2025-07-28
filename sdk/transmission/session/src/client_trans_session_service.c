@@ -94,8 +94,7 @@ static int32_t OpenSessionWithExistSession(int32_t sessionId, bool isEnabled)
         return SOFTBUS_TRANS_INVALID_SESSION_ID;
     }
 
-    ret = listener.OnSessionOpened(sessionId, SOFTBUS_OK);
-    if (ret != 0) {
+    if (listener.OnSessionOpened == NULL || listener.OnSessionOpened(sessionId, SOFTBUS_OK) != SOFTBUS_OK) {
         TRANS_LOGE(TRANS_SDK, "session callback OnSessionOpened failed, ret=%{public}d", ret);
         CloseSession(sessionId);
         return SOFTBUS_TRANS_INVALID_SESSION_ID;

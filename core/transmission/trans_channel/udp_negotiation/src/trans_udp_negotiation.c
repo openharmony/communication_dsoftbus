@@ -1201,7 +1201,7 @@ int32_t TransOpenUdpChannel(AppInfo *appInfo, const ConnectOption *connOpt, int3
         TRANS_LOGE(TRANS_CTRL, "prepare app info for opening udp channel.");
         return SOFTBUS_TRANS_UDP_PREPARE_APP_INFO_FAILED;
     }
-    SoftbusHitraceStart(SOFTBUS_HITRACE_ID_VALID, (uint64_t)(id + ID_OFFSET));
+    SoftbusHitraceStart(SOFTBUS_HITRACE_ID_VALID, (uint64_t)id + (uint64_t)ID_OFFSET);
     TRANS_LOGI(TRANS_CTRL,
         "SoftbusHitraceChainBegin: set HitraceId=%{public}" PRIu64, (uint64_t)(id + ID_OFFSET));
     UdpChannelInfo *newChannel = NewUdpChannelByAppInfo(appInfo);
