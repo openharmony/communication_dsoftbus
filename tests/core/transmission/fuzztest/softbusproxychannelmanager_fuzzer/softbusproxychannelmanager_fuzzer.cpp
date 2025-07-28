@@ -664,7 +664,7 @@ void TransProxyChanProcessByReqIdTest(const uint8_t *data, size_t size)
 void TransProxyChanProcessByReqIdTest(FuzzedDataProvider &provider)
 {
     int32_t reqId = provider.ConsumeIntegral<int32_t>();
-    uint32_t connId = provider.ConsumeIntegral<int32_t>();
+    uint32_t connId = provider.ConsumeIntegral<uint32_t>();
     int32_t errCode = SOFTBUS_OK;
 
     int32_t channelId = provider.ConsumeIntegral<int32_t>();
