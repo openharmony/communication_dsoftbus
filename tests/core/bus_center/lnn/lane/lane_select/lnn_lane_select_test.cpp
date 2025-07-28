@@ -654,6 +654,10 @@ HWTEST_F(LNNLaneSelectTest, LNN_SELECT_AUTH_LANE_TEST_001, TestSize.Level1)
     EXPECT_EQ(ret, SOFTBUS_INVALID_PARAM);
     ret = SelectAuthLane(networkId, &recommendList, &request);
     EXPECT_EQ(ret, SOFTBUS_LANE_NO_AVAILABLE_LINK);
+
+    recommendList.linkTypeNum = LANE_LINK_TYPE_BUTT + 1;
+    ret = SelectAuthLane(networkId, &recommendList, &request);
+    EXPECT_EQ(ret, SOFTBUS_INVALID_PARAM);
 }
 
 /*

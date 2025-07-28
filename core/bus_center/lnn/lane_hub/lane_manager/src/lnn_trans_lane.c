@@ -1004,7 +1004,7 @@ static void DfxReportLinkResult(uint32_t laneReqId, LaneLinkType linkType, int32
 {
     LnnEventExtra extra = { 0 };
     extra.errcode = reason;
-    extra.laneReqId = (int32_t)laneReqId;
+    extra.laneReqId = laneReqId;
     extra.laneLinkType = (int32_t)linkType;
     LNN_EVENT(EVENT_SCENE_LNN, EVENT_STAGE_LNN_LANE_SELECT_END, extra);
 }
