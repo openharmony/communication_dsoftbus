@@ -181,7 +181,6 @@ int32_t AddServiceInfo(const ServiceInfo *info)
         if (itemNode->serviceInfo->serviceId != info->serviceId) {
             continue;
         }
-
         DISC_LOGE(DISC_ABILITY, "service id already existed, call UpdateServiceInfo instead");
         (void)SoftBusMutexUnlock(&(list->lock));
         return SOFTBUS_DISCOVER_SD_SERVICE_ID_EXISTED;
@@ -209,7 +208,6 @@ int32_t AddServiceInfo(const ServiceInfo *info)
         (void)SoftBusMutexUnlock(&(list->lock));
         return SOFTBUS_MEM_ERR;
     }
-
 
     ListTailInsert(&(list->list), &(itemNode->node));
     list->cnt++;
