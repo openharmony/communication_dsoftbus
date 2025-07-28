@@ -1192,12 +1192,18 @@ static int32_t NSTACKX_PostEventBlock(EventHandle handle, void *arg, FreeArg cb)
 {
     struct PostEvtBlockArgs *blockEvtArg = (struct PostEvtBlockArgs *)calloc(1U, sizeof(struct PostEvtBlockArgs));
     if (blockEvtArg == NULL) {
+        if (cb != NULL) {
+            cb(arg);
+        }
         DFINDER_LOGE(TAG, "calloc failed");
         return NSTACKX_EFAILED;
     }
 
     struct NSTACKX_Sem *sem = NSTACKX_CreateSem();
     if (sem == NULL) {
+        if (cb != NULL) {
+            cb(arg);
+        }
         free(blockEvtArg);
         DFINDER_LOGE(TAG, "calloc sem failed");
         return NSTACKX_EFAILED;
@@ -1351,6 +1357,7 @@ static struct RegDeviceInfo *RegisterDeviceCreate(const NSTACKX_LocalDeviceInfoV
         free(regInfo);
         return NULL;
     }
+    regInfo->registerType = registerType;
     return regInfo;
 }
 
