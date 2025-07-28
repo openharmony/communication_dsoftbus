@@ -95,6 +95,7 @@ static bool IsCapacityChange(NodeInfo *info)
     if (LnnGetLocalNumU32Info(NUM_KEY_AUTH_CAP, &authCapacity) == SOFTBUS_OK) {
         if (authCapacity != info->authCapacity) {
             LNN_LOGW(LNN_LEDGER, "authCapacity=%{public}u->%{public}u", info->authCapacity, authCapacity);
+            info->authCapacity = authCapacity;
             return true;
         }
     }
