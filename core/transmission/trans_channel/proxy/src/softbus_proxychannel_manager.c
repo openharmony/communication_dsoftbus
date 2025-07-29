@@ -217,7 +217,7 @@ static int32_t TransUpdateAuthSeqByChannelId(int32_t channelId, int32_t reqId)
     ProxyChannelInfo *item = NULL;
     LIST_FOR_EACH_ENTRY(item, &g_proxyChannelList->list, ProxyChannelInfo, node) {
         if (item->channelId == channelId) {
-            item->authReqId = reqId;
+            item->authReqId = (uint32_t)reqId;
             item->retried = true;
             (void)SoftBusMutexUnlock(&g_proxyChannelList->lock);
             return SOFTBUS_OK;

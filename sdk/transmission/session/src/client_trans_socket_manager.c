@@ -748,7 +748,7 @@ void ClientCheckWaitTimeOut(const ClientSessionServer *serverNode, SessionInfo *
     sessionNode->lifecycle.maxWaitTime = 0;
 
     uint32_t tmpNum = *num;
-    if (tmpNum + 1 > capacity) {
+    if (tmpNum == UINT32_MAX || tmpNum + 1 > capacity) {
         TRANS_LOGE(TRANS_SDK, "socket num invalid tmpNum=%{public}u, capacity=%{public}u", tmpNum, capacity);
         return;
     }

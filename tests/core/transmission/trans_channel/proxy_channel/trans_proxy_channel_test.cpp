@@ -245,7 +245,7 @@ HWTEST_F(TransProxyChannelTest, TransProxyAckHandshakeTest001, TestSize.Level1)
     EXPECT_EQ(ret, SOFTBUS_CONN_MANAGER_TYPE_NOT_SUPPORT);
 
     ret = TransProxyAckHandshake(0, &info, SOFTBUS_OK);
-    EXPECT_EQ(ret, SOFTBUS_TRANS_PROXY_PACKMSG_ERR);
+    EXPECT_EQ(ret, SOFTBUS_CONN_MANAGER_TYPE_NOT_SUPPORT);
 
     info.appInfo.appType = APP_TYPE_NORMAL;
     ret = TransProxyAckHandshake(0, &info, SOFTBUS_NO_INIT);

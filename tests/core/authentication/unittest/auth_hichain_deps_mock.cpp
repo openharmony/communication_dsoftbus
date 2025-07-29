@@ -219,6 +219,13 @@ int32_t IdServiceQueryCredential(int32_t userId, const char *udidHash, const cha
         credList);
 }
 
+int32_t AuthIdServiceQueryCredential(int32_t peerUserId, const char *udidHash, const char *accountidHash,
+    bool isSameAccount, char **credList)
+{
+    return GetAuthHichainMockInterface()->AuthIdServiceQueryCredential(peerUserId, udidHash, accountidHash,
+        isSameAccount, credList);
+}
+
 char *IdServiceGetCredIdFromCredList(int32_t userId, const char *credList)
 {
     return GetAuthHichainMockInterface()->IdServiceGetCredIdFromCredList(userId, credList);

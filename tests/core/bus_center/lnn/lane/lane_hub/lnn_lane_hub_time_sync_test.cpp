@@ -115,6 +115,7 @@ HWTEST_F(LNNTimeSyncTest, ProcessStartTimeSyncRequest_Test01, TestSize.Level1)
     EXPECT_NE(ret, SOFTBUS_OK);
     double offset = 0;
     TimeSyncReqInfo *info = (TimeSyncReqInfo *)SoftBusCalloc(sizeof(TimeSyncReqInfo));
+    ASSERT_NE(info, nullptr);
     ListInit(&info->node);
     ListInit(&info->startReqList);
     NotifyTimeSyncResult(info, offset, SOFTBUS_OK);
@@ -132,6 +133,7 @@ HWTEST_F(LNNTimeSyncTest, ProcessStopTimeSyncRequest_Test01, TestSize.Level1)
     int32_t ret = ProcessStopTimeSyncRequest(nullptr);
     EXPECT_NE(ret, SOFTBUS_OK);
     StopTimeSyncReqMsgPara *para = (StopTimeSyncReqMsgPara *)SoftBusMalloc(sizeof(StopTimeSyncReqMsgPara));
+    ASSERT_NE(para, nullptr);
     char targetNetworkId[] = "time_sync_test_targetNetworkId_001";
     EXPECT_EQ(strncpy_s(para->targetNetworkId, NETWORK_ID_BUF_LEN, targetNetworkId, strlen(targetNetworkId)), EOK);
     ret = ProcessStopTimeSyncRequest(para);

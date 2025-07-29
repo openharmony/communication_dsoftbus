@@ -53,6 +53,7 @@ enum class LinkInfoKey {
     RATE_PREFERENCE =25,
     ENABLE_POWER_MODE = 26,
     IS_BEING_USED_BY_REMOTE = 27,
+    IS_DBAC = 28,
 };
 
 class LinkInfo : public Serializable, public InfoContainer<LinkInfoKey> {
@@ -157,6 +158,9 @@ public:
 
     void SetIsBeingUsedByRemote(bool isUsed);
     bool GetIsBeingUsedByRemote() const;
+
+    void SetIsDBAC(bool isDBAC);
+    bool GetIsDBAC() const;
 
     static std::string ToString(LinkMode mode);
 };

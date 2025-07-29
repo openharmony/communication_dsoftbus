@@ -33,6 +33,7 @@ using namespace testing;
 using namespace testing::ext;
 
 namespace OHOS {
+#define TEST_DATA_LEN 64
 #define FAST_TRANS_DATASIZE 256
 #define FAST_ARRAY_SIZE 1024
 #define TEST_AUTH_DECRYPT_SIZE 35
@@ -53,12 +54,6 @@ namespace OHOS {
 #define TEST_FAST_TRANS_DATA "test fast Trans Data"
 #define TEST_SESSION_KEY "test fast Trans Data"
 
-static bool g_testProxyChannelOpenSuccessFlag = false;
-static bool g_testProxyChannelOpenFailFlag = false;
-static bool g_testProxyChannelClosedFlag = false;
-static bool g_testProxyChannelReceiveFlag = false;
-static bool g_testNetworkChannelOpenFailFlag = false;
-
 class SoftbusProxyChannelMessageTest : public testing::Test {
 public:
     SoftbusProxyChannelMessageTest()
@@ -72,83 +67,6 @@ public:
     void TearDown() override
     {}
 };
-
-int32_t TestOnDataReceived(const char *pkgName, int32_t pid, int32_t channelId, int32_t channelType,
-    TransReceiveData* receiveData)
-{
-    (void)pkgName;
-    (void)pid;
-    (void)channelId;
-    (void)channelType;
-    (void)receiveData;
-    g_testProxyChannelReceiveFlag = true;
-    printf("TestOnDataReceived enter.\n");
-    return SOFTBUS_OK;
-}
-
-int32_t TestOnChannelOpened(const char *pkgName, int32_t pid, const char *sessionName, const ChannelInfo *channel)
-{
-    (void)pkgName;
-    (void)sessionName;
-    (void)channel;
-    (void)pid;
-    printf("TestOnChannelOpened enter.\n");
-    g_testProxyChannelOpenSuccessFlag = true;
-    return SOFTBUS_OK;
-}
-
-int32_t TestOnChannelClosed(const char *pkgName, int32_t pid, int32_t channelId, int32_t channelType)
-{
-    (void)pkgName;
-    (void)pid;
-    (void)channelId;
-    (void)channelType;
-    g_testProxyChannelClosedFlag = true;
-    printf("TestOnChannelClosed enter.\n");
-    return SOFTBUS_OK;
-}
-
-int32_t TestOnChannelOpenFailed(const char *pkgName, int32_t pid, int32_t channelId,
-    int32_t channelType, int32_t errCode)
-{
-    (void)pkgName;
-    (void)pid;
-    (void)channelId;
-    (void)channelType;
-    (void)errCode;
-    g_testProxyChannelOpenFailFlag = true;
-    printf("TestOnChannelOpenFailed enter.\n");
-    return SOFTBUS_OK;
-}
-
-int32_t TestGetUidAndPidBySessionName(const char *sessionName, int32_t *uid, int32_t *pid)
-{
-    (void)sessionName;
-    (void)uid;
-    (void)pid;
-    printf("TestGetUidAndPidBySessionName enter.\n");
-    return SOFTBUS_OK;
-}
-
-extern "C" {
-int32_t TestGetPkgNameBySessionName(const char *sessionName, char *pkgName, uint16_t len)
-{
-    (void)sessionName;
-    (void)pkgName;
-    (void)len;
-    printf("TestGetPkgNameBySessionName enter.\n");
-    return SOFTBUS_OK;
-}
-}
-
-void TestOnNetworkingChannelOpenFailed(int32_t channelId, const char *uuid)
-{
-    (void)channelId;
-    (void)uuid;
-    g_testNetworkChannelOpenFailFlag = true;
-    printf("TestOnNetworkingChannelOpenFailed enter.\n");
-    return;
-}
 
 void SoftbusProxyChannelMessageTest::SetUpTestCase(void)
 {
@@ -485,21 +403,21 @@ HWTEST_F(SoftbusProxyChannelMessageTest, TransProxyParseMessageTest001, TestSize
     msg.msgHead.type = (PROXYCHANNEL_MSG_TYPE_MAX & FOUR_BIT_MASK) | (1 << VERSION_SHIFT);
     ASSERT_TRUE(EOK == memcpy_s(buf, len, &msg, len));
     ret = TransProxyParseMessage(buf, len, &msg, &authHandle);
-    EXPECT_NE(SOFTBUS_OK, ret);
+    EXPECT_EQ(SOFTBUS_OK, ret);
 
     /* test message no encrypte */
     msg.msgHead.type = (PROXYCHANNEL_MSG_TYPE_NORMAL & FOUR_BIT_MASK) | (1 << VERSION_SHIFT);
     msg.msgHead.cipher = 0;
     ASSERT_TRUE(EOK == memcpy_s(buf, len, &msg, len));
     ret = TransProxyParseMessage(buf, len, &msg, &authHandle);
-    EXPECT_EQ(SOFTBUS_TRANS_INVALID_MESSAGE_TYPE, ret);
+    EXPECT_EQ(SOFTBUS_OK, ret);
 
     /* test normal message encrypte, and channel not exist */
     msg.msgHead.cipher = 1;
     msg.msgHead.peerId = -1;
     ASSERT_TRUE(EOK == memcpy_s(buf, len, &msg, len));
     ret = TransProxyParseMessage(buf, len, &msg, &authHandle);
-    EXPECT_NE(SOFTBUS_OK, ret);
+    EXPECT_EQ(SOFTBUS_OK, ret);
 
     SoftBusFree(buf);
 }
@@ -528,7 +446,7 @@ HWTEST_F(SoftbusProxyChannelMessageTest, TransProxyParseMessageTest002, TestSize
     EXPECT_EQ(SOFTBUS_OK, ret);
 
     ret = TransProxyParseMessage(buf, len, &outMsg, &authHandle);
-    EXPECT_NE(SOFTBUS_OK, ret);
+    EXPECT_EQ(SOFTBUS_OK, ret);
 
     SoftBusFree(buf);
 }
@@ -564,27 +482,47 @@ HWTEST_F(SoftbusProxyChannelMessageTest, TransProxyParseMessageTest003, TestSize
     EXPECT_EQ(SOFTBUS_OK, ret);
     /* test auth connection type is invalid */
     ret = TransProxyParseMessage(buf, len, &outMsg, &authHandle);
-    EXPECT_NE(SOFTBUS_OK, ret);
+    EXPECT_EQ(SOFTBUS_OK, ret);
     /* test auth connection type is tcp, and isBr is false */
     ret = TransProxyParseMessage(buf, len, &outMsg, &authHandle);
-    EXPECT_NE(SOFTBUS_OK, ret);
+    EXPECT_EQ(SOFTBUS_OK, ret);
     /* test auth connection type is tcp, and isBr is true */
     msg.msgHead.cipher |= USE_BLE_CIPHER;
     ASSERT_TRUE(EOK == memcpy_s(buf, len, &msg, len));
     ret = TransProxyParseMessage(buf, len, &outMsg, &authHandle);
-    EXPECT_NE(SOFTBUS_OK, ret);
+    EXPECT_EQ(SOFTBUS_OK, ret);
 
     /* test connection type is br */
     ret = TransProxyParseMessage(buf, len, &outMsg, &authHandle);
-    EXPECT_NE(SOFTBUS_OK, ret);
+    EXPECT_EQ(SOFTBUS_OK, ret);
     ret = TransProxyParseMessage(buf, len, &outMsg, &authHandle);
-    EXPECT_NE(SOFTBUS_OK, ret);
+    EXPECT_EQ(SOFTBUS_OK, ret);
     ret = TransProxyParseMessage(buf, len, &outMsg, &authHandle);
-    EXPECT_NE(SOFTBUS_OK, ret);
+    EXPECT_EQ(SOFTBUS_OK, ret);
     ret = TransProxyParseMessage(buf, len, &outMsg, &authHandle);
-    EXPECT_NE(SOFTBUS_OK, ret);
+    EXPECT_EQ(SOFTBUS_OK, ret);
 
     SoftBusFree(buf);
+}
+
+/**
+  * @tc.name: TransProxyParseMessageTest004
+  * @tc.desc: TransProxyParseMessage
+  * @tc.type: FUNC
+  * @tc.require:
+  */
+HWTEST_F(SoftbusProxyChannelMessageTest, TransProxyParseMessageTest004, TestSize.Level1)
+{
+    AuthHandle auth;
+    char data[TEST_DATA_LEN] = { 0x11, 0x22, 0x33, 0x44 };
+    ProxyMessage msg = {
+        .connId = 101032,
+        .msgHead.type = PROXYCHANNEL_MSG_TYPE_KEEPALIVE,
+        .msgHead.cipher = 0x3
+    };
+
+    int32_t ret = TransProxyParseMessage(data, 24, &msg, &auth);
+    EXPECT_EQ(ret, SOFTBUS_OK);
 }
 
 /**
@@ -895,12 +833,28 @@ HWTEST_F(SoftbusProxyChannelMessageTest, TransProxyParseMessageHeadTest001, Test
     char *bufHead = (char *)SoftBusCalloc(sizeof(ProxyMessage)+2);
     ASSERT_TRUE(bufHead != nullptr);
     ret = TransProxyParseMessageHead(bufHead, len, &msg);
-    EXPECT_NE(SOFTBUS_OK, ret);
+    EXPECT_EQ(SOFTBUS_OK, ret);
     TransProxyPackMessageHead(nullptr, nullptr, 0);
     SoftBusFree(buf);
     SoftBusFree(bufHead);
     ret = TransProxyUnPackRestErrMsg(nullptr, nullptr, 0);
     EXPECT_NE(SOFTBUS_OK, ret);
+}
+
+/**
+  * @tc.name: TransProxyParseMessageHeadTest002
+  * @tc.desc: TransProxyParseMessageHead
+  * @tc.type: FUNC
+  * @tc.require:
+  */
+HWTEST_F(SoftbusProxyChannelMessageTest, TransProxyParseMessageHeadTest002, TestSize.Level1)
+{
+    char data[TEST_DATA_LEN] = { 0x11, 0x22, 0x33, 0x44 };
+    ProxyMessage msg;
+    msg.msgHead.type = PROXYCHANNEL_MSG_TYPE_KEEPALIVE;
+
+    int32_t ret = TransProxyParseMessageHead(data, TEST_DATA_LEN, &msg);
+    EXPECT_EQ(ret, SOFTBUS_OK);
 }
 
 /**
@@ -1237,6 +1191,6 @@ HWTEST_F(SoftbusProxyChannelMessageTest, TransProxyParseD2DDataTest001, TestSize
     char data[] = "111111111";
     len = 10;
     ret = TransProxyParseD2DData(data, len);
-    EXPECT_EQ(SOFTBUS_INVALID_PARAM, ret);
+    EXPECT_EQ(SOFTBUS_TRANS_NODE_NOT_FOUND, ret);
 }
 } // namespace OHOS

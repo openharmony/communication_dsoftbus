@@ -671,7 +671,7 @@ int32_t TransProxyNoSubPacketTlvProc(
         return SOFTBUS_INVALID_PARAM;
     }
     TransUnPackTlvPackHead(pktHead);
-    TRANS_LOGI(TRANS_CTRL, "proxy channel parse tlv newPktHeadSize=%{public}d", newPktHeadSize);
+    TRANS_LOGD(TRANS_CTRL, "proxy channel parse tlv newPktHeadSize=%{public}d", newPktHeadSize);
 
     if (pktHead->magicNumber != MAGIC_NUMBER) {
         TRANS_LOGE(TRANS_CTRL, "invalid magicNumber=%{public}x, channelId=%{public}d, len=%{public}u",

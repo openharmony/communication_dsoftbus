@@ -112,5 +112,10 @@ bool JSON_AddStringToObject(JsonObj *obj, const char *key, const char *value)
 {
     return LnnSyncInfoManagerInstance()->JSON_AddStringToObject(obj, key, value);
 }
+
+void DelDupAuthManager(AuthManager *auth)
+{
+    return LnnSyncInfoManagerInstance()->DelDupAuthManager(auth);
+}
 }
 } // namespace OHOS

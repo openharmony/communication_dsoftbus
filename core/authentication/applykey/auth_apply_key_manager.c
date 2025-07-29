@@ -199,11 +199,6 @@ int32_t GetApplyKeyByBusinessInfo(const RequestBusinessInfo *info, uint8_t *uk, 
         AUTH_LOGE(AUTH_CONN, "memcpy key fail");
         return SOFTBUS_MEM_ERR;
     }
-    if (!AuthIsApplyKeyExpired(value->time)) {
-        AUTH_LOGE(AUTH_CONN, "apply key is expired cannot be used.");
-        return SOFTBUS_AUTH_APPLY_KEY_NOT_FOUND;
-    }
-
     return SOFTBUS_OK;
 }
 
@@ -296,7 +291,7 @@ static bool AuthPraseApplyKey(const char *applyKey)
             (void)memset_s(&node, sizeof(AuthApplyMap), 0, sizeof(AuthApplyMap));
             return false;
         }
-        if (node.value.userId == GetActiveOsAccountIds()) {
+        if (AuthIsApplyKeyExpired(node.value.time)) {
             if (InsertToAuthApplyMap(node.mapKey, node.value.applyKey, D2D_APPLY_KEY_LEN, node.value.userId,
                 node.value.time) != SOFTBUS_OK) {
                 AUTH_LOGE(AUTH_CONN, "insert apply key fail");
@@ -333,7 +328,7 @@ void AuthRecoveryApplyKey(void)
     }
     if (!AuthPraseApplyKey(applyKey)) {
         AUTH_LOGE(AUTH_CONN, "prase applyKey fail");
-        (void)LnnDeletaDeviceDataPacked((LnnDataType)LNN_DATA_TYPE_APPLY_KEY);
+        (void)LnnDeleteDeviceDataPacked((LnnDataType)LNN_DATA_TYPE_APPLY_KEY);
     }
     (void)memset_s(applyKey, applyKeyLen, 0, applyKeyLen);
     SoftBusFree(applyKey);
@@ -395,6 +390,12 @@ static int32_t AuthRemoveApplyKeyFile()
 {
     char *filename = DEFAULT_FILE_PATH;
     return remove(filename);
+}
+
+void AuthClearAccountApplyKey(void)
+{
+    ClearAuthApplyMap();
+    AuthRemoveApplyKeyFile();
 }
 
 static void ManagerAccountStateChangeEventHandler(const LnnEventBasicInfo *info)

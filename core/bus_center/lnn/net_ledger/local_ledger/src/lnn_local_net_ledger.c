@@ -83,6 +83,7 @@ static void UpdateStateVersionAndStore(StateVersionChangeReason reason)
     if ((ret = LnnSaveLocalDeviceInfoPacked(&g_localNetLedger.localInfo)) != SOFTBUS_OK) {
         LNN_LOGE(LNN_LEDGER, "update local store fail");
     }
+    UpdateLocalDeviceInfoToMlpsPacked(&g_localNetLedger.localInfo);
 }
 
 static int32_t LlGetNodeSoftBusVersion(void *buf, uint32_t len)
@@ -1723,7 +1724,7 @@ static int32_t LlGetStaticCapLen(void *buf, uint32_t len)
         LNN_LOGE(LNN_LEDGER, "invalid param");
         return SOFTBUS_INVALID_PARAM;
     }
-    *((int64_t *)buf) = g_localNetLedger.localInfo.staticCapLen;
+    *((int32_t *)buf) = g_localNetLedger.localInfo.staticCapLen;
     return SOFTBUS_OK;
 }
 
@@ -1972,6 +1973,7 @@ static int32_t UpdateLocalUserId(const void *userId)
         return SOFTBUS_INVALID_PARAM;
     }
     g_localNetLedger.localInfo.userId = *(int32_t *)userId;
+    UpdateLocalDeviceInfoToMlpsPacked(&g_localNetLedger.localInfo);
     return SOFTBUS_OK;
 }
 

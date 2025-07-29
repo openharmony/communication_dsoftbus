@@ -60,6 +60,93 @@ private:
 }
 
 namespace OHOS {
+static void HandleOfServerData(uint64_t connId, const AuthConnInfo *connInfo, bool fromServer, const AuthDataHead *head,
+    const uint8_t *data)
+{
+    HandleUkConnectionData(connId, connInfo, fromServer, head, data);
+    HandleConnectionDataInner(connId, connInfo, fromServer, head, data);
+    HandleConnectionData(connId, connInfo, fromServer, head, data);
+    HandleDeviceInfoData(connId, connInfo, fromServer, head, data);
+    HandleDecryptFailData(connId, connInfo, fromServer, head, data);
+    PostDecryptFailAuthData(connId, fromServer, head, data);
+    HandleDeviceIdData(connId, connInfo, fromServer, head, data);
+    OnDataReceived(connId, connInfo, fromServer, head, data);
+    HandleCancelAuthData(connId, connInfo, fromServer, head, data);
+    HandleCloseAckData(connId, connInfo, fromServer, head, data);
+}
+
+static void SetTcpKeepaliveByConnInfo(const AuthConnInfo connInfo)
+{
+    AuthSetTcpKeepaliveByConnInfo(&connInfo, DEFAULT_FREQ_CYCLE);
+    AuthSetTcpKeepaliveByConnInfo(&connInfo, HIGH_FREQ_CYCLE);
+    AuthSetTcpKeepaliveByConnInfo(&connInfo, LOW_FREQ_CYCLE);
+    AuthSetTcpKeepaliveByConnInfo(&connInfo, MID_FREQ_CYCLE);
+}
+
+static void ProcessAuthBleInfo(FuzzedDataProvider &provider, AuthConnInfo connInfo, AuthSessionInfo info)
+{
+    bool isServer = provider.ConsumeBool();
+    GetAuthIdByConnInfo(&connInfo, isServer);
+    uint32_t requestId = provider.ConsumeIntegral<uint32_t>();
+    uint32_t reason = provider.ConsumeIntegral<uint32_t>();
+    DfxRecordLnnConnectEnd(requestId, info.connId, &connInfo, reason);
+    OnConnectResult(requestId, info.connId, reason, &connInfo);
+
+    AuthDataHead head;
+    (void)memset_s(&head, sizeof(AuthDataHead), 0, sizeof(AuthDataHead));
+    int64_t authSeq = provider.ConsumeIntegral<int64_t>();
+    uint32_t dataType = provider.ConsumeIntegral<uint32_t>();
+    uint32_t len = provider.ConsumeIntegral<uint32_t>();
+    vector<uint8_t> data = provider.ConsumeBytes<uint8_t>(len);
+    head.seq = authSeq;
+    head.dataType = dataType;
+    head.len = data.size();
+    TryAuthSessionProcessDevIdData(&head, data.data(), &connInfo);
+    DfxRecordServerRecvPassiveConnTime(&connInfo, &head);
+    HandleAuthData(&connInfo, &head, data.data());
+    DeviceMessageParse messageParse;
+    (void)memset_s(&messageParse, sizeof(DeviceMessageParse), 0, sizeof(DeviceMessageParse));
+    messageParse.messageType = provider.ConsumeIntegral<int32_t>();
+    FlushDeviceProcess(&connInfo, isServer, &messageParse);
+    SetTcpKeepaliveByConnInfo(connInfo);
+    HandleOfServerData(info.connId, &connInfo, isServer, &head, data.data());
+    IsHaveAuthIdByConnId(info.connId);
+    CorrectFromServer(info.connId, &connInfo, &isServer);
+    string uuid = provider.ConsumeRandomLengthString(UUID_BUF_LEN);
+    AuthDeviceGetUsbConnInfo(uuid.c_str(), &connInfo);
+    AuthDeviceGetIdByConnInfo(&connInfo, isServer);
+    HandleBleDisconnectDelay((const void *)&(info.connId));
+    HandleDisconnectedEvent((const void *)&(info.connId));
+    OnDisconnected(info.connId, &connInfo);
+}
+
+static void ProcessAuthSessionInfo(FuzzedDataProvider &provider, AuthSessionInfo info)
+{
+    bool isServer = provider.ConsumeBool();
+    FindAuthManagerByUuid(info.uuid, info.connInfo.type, isServer);
+    FindAuthManagerByUdid(info.udid, info.connInfo.type, isServer);
+    FindNormalizedKeyAuthManagerByUdid(info.udid, isServer);
+}
+
+static void ProcessAuthManager(FuzzedDataProvider &provider, int64_t authSeq, AuthConnInfo connInfo,
+    AuthSessionInfo info)
+{
+    AuthManager inAuth;
+    (void)memset_s(&inAuth, sizeof(AuthManager), 0, sizeof(AuthManager));
+    UpdateAuthManagerByAuthId(authSeq, SetAuthP2pMac, &inAuth, info.connInfo.type);
+    UpdateAuthManagerByAuthId(authSeq, SetAuthConnId, &inAuth, info.connInfo.type);
+    IsAuthNoNeedDisconnect(&inAuth, &info);
+    ProcessAuthBleInfo(provider, connInfo, info);
+    ProcessAuthSessionInfo(provider, info);
+}
+
+static void ProcessAuthHandle(FuzzedDataProvider &provider, AuthHandle authHandle)
+{
+    uint32_t connectionId = provider.ConsumeIntegral<uint32_t>();
+    DelAuthManagerByConnectionId(connectionId);
+    AuthHandleLeaveLNN(authHandle);
+}
+
 static void ProcessFuzzConnInfo(FuzzedDataProvider &provider, AuthSessionInfo *info)
 {
     string addr;
@@ -139,11 +226,12 @@ bool NewAuthManagerFuzzTest(FuzzedDataProvider &provider)
     AuthDeviceSetP2pMac(authSeq, p2pMac.c_str());
     ModeCycle cycle = (ModeCycle)provider.ConsumeIntegralInRange<uint32_t>(MODE_MIN, MODE_MAX);
     AuthSendKeepaliveOption(uuid.c_str(), cycle);
+    ProcessAuthManager(provider, authSeq, connInfo, info);
     AuthHandle authHandle;
     (void)memset_s(&authHandle, sizeof(AuthHandle), 0, sizeof(AuthHandle));
     authHandle.authId = authSeq;
     authHandle.type = info.connInfo.type;
-    AuthHandleLeaveLNN(authHandle);
+    ProcessAuthHandle(provider, authHandle);
     auth = FindAuthManagerByAuthId(authSeq);
     if (auth != nullptr) {
         DelAuthManager(auth, AUTH_LINK_TYPE_MAX);

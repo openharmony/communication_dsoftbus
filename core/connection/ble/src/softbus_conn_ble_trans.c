@@ -377,6 +377,28 @@ int32_t ConnBlePostBytesInner(uint32_t connectionId, uint8_t *data, uint32_t dat
     node->dataLen = dataLen;
     node->data = data;
     node->onPostBytesFinished = postBytesFinishAction;
+
+    if (SoftBusMutexLock(&g_startBleSendLPInfo.lock) != SOFTBUS_OK) {
+        CONN_LOGE(CONN_BLE, "lock fail!");
+        ConnBleReturnConnection(&connection);
+        FreeSendNode(node);
+        return SOFTBUS_LOCK_ERR;
+    }
+    g_startBleSendLPInfo.messagePosted = true;
+    if (!g_startBleSendLPInfo.sendTaskRunning) {
+        status = ConnStartActionAsync(NULL, BleSendTask, NULL);
+        if (status != SOFTBUS_OK) {
+            CONN_LOGE(CONN_BLE, "start send task failed errno=%{public}d", status);
+            SoftBusMutexUnlock(&g_startBleSendLPInfo.lock);
+            ConnBleReturnConnection(&connection);
+            FreeSendNode(node);
+            return status;
+        }
+        g_startBleSendLPInfo.sendTaskRunning = true;
+        CONN_LOGI(CONN_BLE, "start ble send task succ");
+    }
+    SoftBusMutexUnlock(&g_startBleSendLPInfo.lock);
+
     status = ConnBleEnqueueNonBlock((const void *)node);
     if (status != SOFTBUS_OK) {
         CONN_LOGE(CONN_BLE,
@@ -393,23 +415,6 @@ int32_t ConnBlePostBytesInner(uint32_t connectionId, uint8_t *data, uint32_t dat
         "connId=%{public}u, pid=%{public}d, Len=%{public}u, Flg=%{public}d, Module=%{public}d, Seq=%{public}" PRId64 "",
         connectionId, pid, dataLen, flag, module, seq);
     ConnBleReturnConnection(&connection);
-
-    CONN_CHECK_AND_RETURN_RET_LOGE(SoftBusMutexLock(&g_startBleSendLPInfo.lock) == SOFTBUS_OK,
-        SOFTBUS_LOCK_ERR, CONN_BLE, "lock fail!");
-    g_startBleSendLPInfo.messagePosted = true;
-    if (!g_startBleSendLPInfo.sendTaskRunning) {
-        status = ConnStartActionAsync(NULL, BleSendTask, NULL);
-        if (status != SOFTBUS_OK) {
-            CONN_LOGE(CONN_BLE, "start send task failed errno=%{public}d", status);
-            SoftBusMutexUnlock(&g_startBleSendLPInfo.lock);
-            return status;
-        }
-        g_startBleSendLPInfo.sendTaskRunning = true;
-        SoftBusMutexUnlock(&g_startBleSendLPInfo.lock);
-        CONN_LOGI(CONN_BLE, "start ble send task succ");
-        return SOFTBUS_OK;
-    }
-    SoftBusMutexUnlock(&g_startBleSendLPInfo.lock);
     return SOFTBUS_OK;
 }
 

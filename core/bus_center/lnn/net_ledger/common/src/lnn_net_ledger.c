@@ -95,6 +95,7 @@ static bool IsCapacityChange(NodeInfo *info)
     if (LnnGetLocalNumU32Info(NUM_KEY_AUTH_CAP, &authCapacity) == SOFTBUS_OK) {
         if (authCapacity != info->authCapacity) {
             LNN_LOGW(LNN_LEDGER, "authCapacity=%{public}u->%{public}u", info->authCapacity, authCapacity);
+            info->authCapacity = authCapacity;
             return true;
         }
     }
@@ -228,13 +229,20 @@ static bool IsBleDirectlyOnlineFactorChange(NodeInfo *info)
 
 static void LnnSetLocalFeature(void)
 {
+    uint64_t feature = 0;
+    if (LnnGetLocalNumU64Info(NUM_KEY_FEATURE_CAPA, &feature) != SOFTBUS_OK) {
+        LNN_LOGE(LNN_LEDGER, "set feature fail");
+        return;
+    }
     if (IsSupportLpFeaturePacked()) {
-        uint64_t feature = 1 << BIT_BLE_SUPPORT_LP_HEARTBEAT;
-        if (LnnSetLocalNum64Info(NUM_KEY_FEATURE_CAPA, feature) != SOFTBUS_OK) {
-            LNN_LOGE(LNN_LEDGER, "set feature fail");
-        }
-    } else {
-        LNN_LOGE(LNN_LEDGER, "not support mlps");
+        feature |= 1 << BIT_BLE_SUPPORT_LP_HEARTBEAT;
+    }
+    if (LnnIsSupportLpSparkFeaturePacked()) {
+        feature |= 1 << BIT_SUPPORT_LP_SPARK_CAPABILITY;
+        (void)LnnClearFeatureCapability(&feature, BIT_SUPPORT_SPARK_GROUP_CAPABILITY);
+    }
+    if (LnnSetLocalNum64Info(NUM_KEY_FEATURE_CAPA, feature) != SOFTBUS_OK) {
+        LNN_LOGE(LNN_LEDGER, "set feature fail");
     }
 }
 

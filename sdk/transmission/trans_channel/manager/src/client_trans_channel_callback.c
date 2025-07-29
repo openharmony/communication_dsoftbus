@@ -104,6 +104,7 @@ static int32_t TransSendUdpChannelOpenedDataToCore(
         (channelType == CHANNEL_TYPE_AUTH ? RERORT_UDP_INFO_NUM : RERORT_UDP_INFO_NUM + ACCESS_INFO_PARAM_NUM);
 
     uint8_t *buf = (uint8_t *)SoftBusCalloc(len);
+    TRANS_CHECK_AND_RETURN_RET_LOGE(buf != NULL, SOFTBUS_MALLOC_ERR, TRANS_CTRL, "Calloc buf failed.");
     int32_t offSet = 0;
     int32_t ret = SOFTBUS_OK;
     ret = WriteInt32ToBuf(buf, len, &offSet, channelId);

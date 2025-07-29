@@ -165,6 +165,9 @@ void SoftBusRcCollectionDestruct(SoftBusRcCollection *collection)
     if (objects != NULL) {
         SoftBusRcObject *it = NULL;
         SoftBusRcObject *next = NULL;
+        int32_t code = SoftBusMutexLock(&objects->lock);
+        COMM_CHECK_AND_RETURN_LOGE(
+            code == SOFTBUS_OK, COMM_UTILS, "%{public}s, lock failed: error=%{public}d", collection->name, code);
         LIST_FOR_EACH_ENTRY_SAFE(it, next, &objects->list, SoftBusRcObject, node) {
             COMM_LOGW(COMM_UTILS,
                 "%{public}s, object still in collection, remove it before destructing: object id=%{public}d",
@@ -172,6 +175,7 @@ void SoftBusRcCollectionDestruct(SoftBusRcCollection *collection)
             ListDelete(&it->node);
             it->Dereference(&it);
         }
+        SoftBusMutexUnlock(&objects->lock);
         DestroySoftBusList(objects);
         collection->objects = NULL;
     }

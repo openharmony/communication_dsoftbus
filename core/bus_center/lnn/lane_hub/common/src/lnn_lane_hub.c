@@ -45,7 +45,7 @@ int32_t LnnInitLaneHub(void)
         LNN_LOGE(LNN_INIT, "init heart beat fail");
         return SOFTBUS_NO_INIT;
     }
-    if (InitSparkGroupManagerPacked() != SOFTBUS_OK) {
+    if (InitControlPlanePacked() != SOFTBUS_OK) {
         LNN_LOGE(LNN_INIT, "init spark group manage fail");
         return SOFTBUS_NO_INIT;
     }
@@ -67,7 +67,7 @@ int32_t LnnInitLaneHubDelay(void)
 
 void LnnDeinitLaneHub(void)
 {
-    DeinitSparkGroupManagerPacked();
+    DeinitControlPlanePacked();
     LnnDeinitQosPacked();
     DeinitLane();
     LnnDeinitTimeSync();

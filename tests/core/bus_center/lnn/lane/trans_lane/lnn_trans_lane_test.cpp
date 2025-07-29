@@ -18,6 +18,7 @@
 #include <gtest/gtest.h>
 #include <securec.h>
 
+#include "g_enhance_lnn_func_pack.h"
 #include "lnn_lane_deps_mock.h"
 #include "lnn_trans_free_lane.h"
 #include "lnn_trans_lane.h"
@@ -131,6 +132,31 @@ static void CondWait(void)
         return;
     }
     (void)SoftBusMutexUnlock(&g_lock);
+}
+
+void UpdateLocalDeviceInfoToMlps(const NodeInfo *localInfo)
+{
+    (void)localInfo;
+    return;
+}
+
+bool IsDeviceHasRiskFactor(void)
+{
+    return true;
+}
+
+bool LnnIsSupportLpSparkFeature(void)
+{
+    return true;
+}
+
+int32_t InitControlPlane(void)
+{
+    return SOFTBUS_OK;
+}
+
+void DeinitControlPlane(void)
+{
 }
 
 static void SetIsNeedCondWait(void)
@@ -1092,5 +1118,75 @@ HWTEST_F(LNNTransLaneMockTest, CHECK_VIRTUAL_LINK_BY_LANE_REQ_ID_TEST_002, TestS
     CondWait();
     bool isVirtualLink = CheckVirtualLinkByLaneReqId(laneReqId);
     EXPECT_FALSE(isVirtualLink);
+}
+
+/*
+ * @tc.name: IS_DEVICE_HAS_RISK_TEST_001
+ * @tc.desc: IsDeviceHasRiskFactorPacked func test.
+ * @tc.type: FUNC
+ * @tc.require:
+ */
+HWTEST_F(LNNTransLaneMockTest, IS_DEVICE_HAS_RISK_TEST_001, TestSize.Level1)
+{
+    NiceMock<TransLaneDepsInterfaceMock> laneMock;
+    LnnEnhanceFuncList lnnEnhanceFunc = { nullptr };
+    EXPECT_CALL(laneMock, LnnEnhanceFuncListGet).WillRepeatedly(Return(&lnnEnhanceFunc));
+    bool ret = IsDeviceHasRiskFactorPacked();
+    EXPECT_EQ(ret, false);
+
+    lnnEnhanceFunc.isDeviceHasRiskFactor = IsDeviceHasRiskFactor;
+    ret = IsDeviceHasRiskFactorPacked();
+    EXPECT_EQ(ret, true);
+}
+
+/*
+ * @tc.name: IS_SUPPORT_LP_SPARK_TEST_001
+ * @tc.desc: LnnIsSupportLpSparkFeaturePacked func test.
+ * @tc.type: FUNC
+ * @tc.require:
+ */
+HWTEST_F(LNNTransLaneMockTest, IS_SUPPORT_LP_SPARK_TEST_001, TestSize.Level1)
+{
+    NiceMock<TransLaneDepsInterfaceMock> laneMock;
+    EXPECT_CALL(laneMock, LnnEnhanceFuncListGet).WillRepeatedly(Return(nullptr));
+    bool ret = LnnIsSupportLpSparkFeaturePacked();
+    EXPECT_EQ(ret, false);
+    LnnEnhanceFuncList lnnEnhanceFunc = { nullptr };
+    EXPECT_CALL(laneMock, LnnEnhanceFuncListGet).WillRepeatedly(Return(&lnnEnhanceFunc));
+    ret = LnnIsSupportLpSparkFeaturePacked();
+    EXPECT_EQ(ret, false);
+
+    lnnEnhanceFunc.lnnIsSupportLpSparkFeature = LnnIsSupportLpSparkFeature;
+    ret = LnnIsSupportLpSparkFeaturePacked();
+    EXPECT_EQ(ret, true);
+}
+
+/*
+ * @tc.name: INIT_CONTROL_PLANE_TEST_001
+ * @tc.desc: InitControlPlanePacked func test.
+ * @tc.type: FUNC
+ * @tc.require:
+ */
+HWTEST_F(LNNTransLaneMockTest, INIT_CONTROL_PLANE_TEST_001, TestSize.Level1)
+{
+    NiceMock<TransLaneDepsInterfaceMock> laneMock;
+    EXPECT_CALL(laneMock, LnnEnhanceFuncListGet).WillRepeatedly(Return(nullptr));
+    NodeInfo localInfo = {};
+    EXPECT_NO_FATAL_FAILURE(UpdateLocalDeviceInfoToMlpsPacked(&localInfo));
+    LnnEnhanceFuncList lnnEnhanceFunc = { nullptr };
+    EXPECT_CALL(laneMock, LnnEnhanceFuncListGet).WillRepeatedly(Return(&lnnEnhanceFunc));
+    int32_t ret = InitControlPlanePacked();
+    EXPECT_EQ(ret, SOFTBUS_OK);
+    EXPECT_NO_FATAL_FAILURE(DeinitControlPlanePacked());
+    EXPECT_NO_FATAL_FAILURE(UpdateLocalDeviceInfoToMlpsPacked(&localInfo));
+
+    ret = InitControlPlanePacked();
+    lnnEnhanceFunc.initControlPlane = InitControlPlane;
+    lnnEnhanceFunc.deinitControlPlane = DeinitControlPlane;
+    lnnEnhanceFunc.updateLocalDeviceInfoToMlps = UpdateLocalDeviceInfoToMlps;
+    ret = InitControlPlanePacked();
+    EXPECT_EQ(ret, SOFTBUS_OK);
+    EXPECT_NO_FATAL_FAILURE(DeinitControlPlanePacked());
+    EXPECT_NO_FATAL_FAILURE(UpdateLocalDeviceInfoToMlpsPacked(&localInfo));
 }
 } // namespace OHOS

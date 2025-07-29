@@ -280,7 +280,7 @@ static ClientProxyChannelInfo *ClientTransProxyCreateChannelInfo(const ChannelIn
             return NULL;
         }
     } else {
-        if (memcpy_s(info->detail.sessionKey, SESSION_KEY_LENGTH, channel->sessionKey, SESSION_KEY_LENGTH) != EOK) {
+        if (memcpy_s(info->detail.sessionKey, SESSION_KEY_LENGTH, channel->sessionKey, channel->keyLen) != EOK) {
             SoftBusFree(info);
             TRANS_LOGE(TRANS_SDK, "sessionKey memcpy fail");
             return NULL;
@@ -1154,6 +1154,8 @@ static int ClientTransProxySubPacketProc(int32_t channelId, const SliceHead *hea
 
     int ret;
     int32_t index = head->priority;
+    TRANS_CHECK_AND_RETURN_RET_LOGE(index >= PROXY_CHANNEL_PRORITY_MESSAGE  && index < PROXY_CHANNEL_PRORITY_BUTT,
+        SOFTBUS_INVALID_PARAM, TRANS_SDK, "invalid index=%{public}d", index);
     SliceProcessor *processor = &(channelProcessor->processor[index]);
     if (head->sliceSeq == 0) {
         ret = ClientTransProxyFirstSliceProcess(processor, head, data, len, channelId);

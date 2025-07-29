@@ -23,6 +23,7 @@
 #include "message_handler.h"
 #include "softbus_access_token_test.h"
 #include "softbus_bus_center.h"
+#include "softbus_client_frame_manager.h"
 #include "softbus_error_code.h"
 
 namespace OHOS {
@@ -39,9 +40,14 @@ public:
     void TearDown();
 };
 
-void BusCenterHeartbeatSdkTest::SetUpTestCase()
+void BusCenterHeartbeatSdkTest::SetUpTestCase() { }
+
+void BusCenterHeartbeatSdkTest::TearDownTestCase() { }
+
+void BusCenterHeartbeatSdkTest::SetUp()
 {
     SetAccessTokenPermission("device_manager");
+    EXPECT_EQ(InitSoftBus(TEST_PKG_NAME1), SOFTBUS_OK);
     uint64_t tokenId = SetTokenIdByProcessName("device_manager");
     printf("SetTokenIdByProcessName tokenId:%ju\n", tokenId);
     LnnInitLnnLooper();
@@ -50,17 +56,13 @@ void BusCenterHeartbeatSdkTest::SetUpTestCase()
     LnnInitHeartbeat();
 }
 
-void BusCenterHeartbeatSdkTest::TearDownTestCase()
+void BusCenterHeartbeatSdkTest::TearDown()
 {
     LnnDeinitHeartbeat();
     LnnDeinitBusCenterEvent();
     LooperDeinit();
     LnnDeinitLnnLooper();
 }
-
-void BusCenterHeartbeatSdkTest::SetUp() { }
-
-void BusCenterHeartbeatSdkTest::TearDown() { }
 
 /*
  * @tc.name: Shift_Lnn_Gear_Test_001

@@ -383,7 +383,7 @@ int32_t LnnGetTrustedDevInfoFromDb(char **udidArray, uint32_t *num)
     }
     GetAllDevNums(num, userId);
     if (*num == 0) {
-        LNN_LOGW(LNN_LEDGER, "get none trusted dev info");
+        LNN_LOGD(LNN_LEDGER, "get none trusted dev info");
         *udidArray = NULL;
         DeviceDbListUnlock();
         return SOFTBUS_OK;

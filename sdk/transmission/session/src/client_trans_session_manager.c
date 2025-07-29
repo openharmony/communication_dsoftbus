@@ -39,7 +39,7 @@
 
 #define CONVERSION_BASE 1000LL
 #define CAST_SESSION "CastPlusSessionName"
-#define D2D_FORK_NUM_MAX 1
+#define D2D_FORK_NUM_MAX 5
 static void ClientTransSessionTimerProc(void);
 static void ClientTransAsyncSendBytesTimerProc(void);
 
@@ -1081,6 +1081,36 @@ int32_t ClientGetSessionIdByChannelId(int32_t channelId, int32_t channelType, in
     return SOFTBUS_TRANS_SESSION_INFO_NOT_FOUND;
 }
 
+int32_t ClientGetSessionIsD2DByChannelId(int32_t channelId, int32_t channelType, bool *isD2D)
+{
+    if ((channelId < 0) || (isD2D == NULL)) {
+        TRANS_LOGW(TRANS_SDK, "Invalid param");
+        return SOFTBUS_INVALID_PARAM;
+    }
+    int32_t ret = LockClientSessionServerList();
+    if (ret != SOFTBUS_OK) {
+        TRANS_LOGE(TRANS_SDK, "lock failed");
+        return ret;
+    }
+    ClientSessionServer *serverNode = NULL;
+    SessionInfo *sessionNode = NULL;
+    LIST_FOR_EACH_ENTRY(serverNode, &(g_clientSessionServerList->list), ClientSessionServer, node) {
+        if (IsListEmpty(&serverNode->sessionList)) {
+            continue;
+        }
+        LIST_FOR_EACH_ENTRY(sessionNode, &(serverNode->sessionList), SessionInfo, node) {
+            if (sessionNode->channelId == channelId && sessionNode->channelType == (ChannelType)channelType) {
+                *isD2D = sessionNode->isD2D;
+                UnlockClientSessionServerList();
+                return SOFTBUS_OK;
+            }
+        }
+    }
+    UnlockClientSessionServerList();
+    TRANS_LOGE(TRANS_SDK, "not found session by channelId=%{public}d", channelId);
+    return SOFTBUS_TRANS_SESSION_INFO_NOT_FOUND;
+}
+
 int32_t ClientGetSessionIsAsyncBySessionId(int32_t sessionId, bool *isAsync)
 {
     if ((sessionId < 0) || (isAsync == NULL)) {
@@ -1688,7 +1718,7 @@ int32_t ClientGetChannelIdAndTypeBySocketId(int32_t socketId, int32_t *type, int
             break;
         }
     }
-    if (!existence || isServer) {
+    if (!existence) {
         UnlockClientSessionServerList();
         TRANS_LOGE(TRANS_SDK, "not found or isServer, socketId=%{public}d", socketId);
         return SOFTBUS_TRANS_SESSION_INFO_NOT_FOUND;
@@ -3172,7 +3202,7 @@ int32_t ClientGetChannelBusinessTypeByChannelId(int32_t channelId, int32_t *busi
     return SOFTBUS_NOT_FIND;
 }
 
-int32_t ClientCheckIsD2DypeBySessionId(int32_t sessionId, bool *isD2D)
+int32_t ClientCheckIsD2DBySessionId(int32_t sessionId, bool *isD2D)
 {
     if ((sessionId < 0) || (isD2D == NULL)) {
         return SOFTBUS_INVALID_PARAM;
