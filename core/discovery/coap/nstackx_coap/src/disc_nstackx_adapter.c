@@ -682,25 +682,54 @@ void DiscCoapModifyNstackThread(LinkStatus status, int32_t ifnameIdx)
     (void)SoftBusMutexUnlock(&g_localDeviceInfoLock);
 }
 
-void DiscCoapUpdateLocalIp(LinkStatus status, int32_t ifnameIdx)
+static void FreeLocalDeviceInfo(NSTACKX_LocalDeviceInfoV2 *info)
 {
-    DISC_CHECK_AND_RETURN_LOGE(status == LINK_STATUS_UP || status == LINK_STATUS_DOWN, DISC_COAP,
-        "invlaid link status, status=%{public}d.", status);
-    DISC_CHECK_AND_RETURN_LOGE(ifnameIdx >= 0 && ifnameIdx <= MAX_IF, DISC_COAP,
-        "invlaid ifnameIdx, ifnameIdx=%{public}d.", ifnameIdx);
+    DISC_CHECK_AND_RETURN_LOGE(info != NULL, DISC_COAP, "info is null");
+    SoftBusFree(info->name);
+    SoftBusFree(info->deviceId);
+    SoftBusFree(info->localIfInfo);
+    SoftBusFree(info);
+}
 
-    DISC_CHECK_AND_RETURN_LOGE(SetLocalDeviceInfo(status, ifnameIdx) == SOFTBUS_OK, DISC_COAP,
-        "link status change: set local device info failed");
+static NSTACKX_LocalDeviceInfoV2 *DupLocalDeviceInfo(NSTACKX_LocalDeviceInfoV2 *info)
+{
+    NSTACKX_LocalDeviceInfoV2 *dup = (NSTACKX_LocalDeviceInfoV2 *)SoftBusCalloc(sizeof(NSTACKX_LocalDeviceInfoV2));
+    DISC_CHECK_AND_RETURN_RET_LOGE(dup != NULL, NULL, DISC_COAP, "malloc local device info fail");
+    if (info->name != NULL) {
+        dup->name = strdup(info->name);
+        if (dup->name == NULL) {
+            DISC_LOGE(DISC_COAP, "strdup name fail");
+            FreeLocalDeviceInfo(dup);
+            return NULL;
+        }
+    }
+    if (info->deviceId != NULL) {
+        dup->deviceId = strdup(info->deviceId);
+        if (dup->deviceId == NULL) {
+            DISC_LOGE(DISC_COAP, "strdup deviceId fail");
+            FreeLocalDeviceInfo(dup);
+            return NULL;
+        }
+    }
+    if (info->ifNums == 1) {
+        dup->localIfInfo = (NSTACKX_InterfaceInfo *)SoftBusCalloc(sizeof(NSTACKX_InterfaceInfo));
+        if (dup->localIfInfo == NULL || memcpy_s(dup->localIfInfo, sizeof(NSTACKX_InterfaceInfo),
+            info->localIfInfo, sizeof(NSTACKX_InterfaceInfo)) != EOK) {
+            DISC_LOGE(DISC_COAP, "mem local device info If info failed");
+            FreeLocalDeviceInfo(dup);
+            return NULL;
+        }
+        dup->ifNums = info->ifNums;
+    }
+    dup->deviceType = info->deviceType;
+    dup->deviceHash = info->deviceHash;
+    dup->hasDeviceHash = info->hasDeviceHash;
+    dup->businessType = info->businessType;
+    return dup;
+}
 
-    int64_t accountId = 0;
-    int32_t port = 0;
-    int32_t ret = LnnGetLocalNum64Info(NUM_KEY_ACCOUNT_LONG, &accountId);
-    DISC_CHECK_AND_RETURN_LOGE(ret == SOFTBUS_OK, DISC_COAP, "get local account failed");
-    ret = LnnGetLocalNumInfoByIfnameIdx(NUM_KEY_AUTH_PORT, &port, ifnameIdx);
-    DISC_CHECK_AND_RETURN_LOGE(ret != SOFTBUS_INVALID_PARAM, DISC_COAP, "get local port failed");
-    DISC_LOGI(DISC_COAP, "register ifname=%{public}s. status=%{public}s, port=%{public}d, accountInfo=%{public}s",
-        g_localDeviceInfo->localIfInfo->networkName, status == LINK_STATUS_UP ? "up" : "down", port,
-        accountId == 0 ? "without" : "with");
+static void UpdateLocalIpByLocalNumInfo(int64_t accountId, int32_t port)
+{
     DISC_CHECK_AND_RETURN_LOGE(SoftBusMutexLock(&g_localDeviceInfoLock) == SOFTBUS_OK, DISC_COAP, "lock failed");
     char *deviceIdStr = GetDeviceId();
     if (deviceIdStr == NULL) {
@@ -726,12 +755,44 @@ void DiscCoapUpdateLocalIp(LinkStatus status, int32_t ifnameIdx)
         (void)SoftBusMutexUnlock(&g_localDeviceInfoLock);
         return;
     }
-    ret = NSTACKX_RegisterDeviceV2(g_localDeviceInfo);
+    NSTACKX_LocalDeviceInfoV2 *dupInfo = DupLocalDeviceInfo(g_localDeviceInfo);
+    if (dupInfo == NULL) {
+        DISC_LOGE(DISC_COAP, "dup local device info fail");
+        cJSON_free(deviceIdStr);
+        g_localDeviceInfo->deviceId = NULL;
+        (void)SoftBusMutexUnlock(&g_localDeviceInfoLock);
+        return;
+    }
     cJSON_free(deviceIdStr);
     g_localDeviceInfo->deviceId = NULL;
     (void)SoftBusMutexUnlock(&g_localDeviceInfoLock);
-    DISC_CHECK_AND_RETURN_LOGE(ret == SOFTBUS_OK, DISC_COAP, "register local device info to dfinder failed");
+    int32_t ret = NSTACKX_RegisterDeviceV2(dupInfo);
+    FreeLocalDeviceInfo(dupInfo);
+    DISC_CHECK_AND_RETURN_LOGE(ret == SOFTBUS_OK, DISC_COAP,
+        "register local device info to dfinder failed, ret=%{public}d", ret);
     DiscCoapUpdateDevName();
+}
+
+void DiscCoapUpdateLocalIp(LinkStatus status, int32_t ifnameIdx)
+{
+    DISC_CHECK_AND_RETURN_LOGE(status == LINK_STATUS_UP || status == LINK_STATUS_DOWN, DISC_COAP,
+        "invlaid link status, status=%{public}d.", status);
+    DISC_CHECK_AND_RETURN_LOGE(ifnameIdx >= 0 && ifnameIdx <= MAX_IF, DISC_COAP,
+        "invlaid ifnameIdx, ifnameIdx=%{public}d.", ifnameIdx);
+
+    DISC_CHECK_AND_RETURN_LOGE(SetLocalDeviceInfo(status, ifnameIdx) == SOFTBUS_OK, DISC_COAP,
+        "link status change: set local device info failed");
+
+    int64_t accountId = 0;
+    int32_t port = 0;
+    int32_t ret = LnnGetLocalNum64Info(NUM_KEY_ACCOUNT_LONG, &accountId);
+    DISC_CHECK_AND_RETURN_LOGE(ret == SOFTBUS_OK, DISC_COAP, "get local account failed");
+    ret = LnnGetLocalNumInfoByIfnameIdx(NUM_KEY_AUTH_PORT, &port, ifnameIdx);
+    DISC_CHECK_AND_RETURN_LOGE(ret != SOFTBUS_INVALID_PARAM, DISC_COAP, "get local port failed");
+    DISC_LOGI(DISC_COAP, "register ifname=%{public}s. status=%{public}s, port=%{public}d, accountInfo=%{public}s",
+        g_localDeviceInfo->localIfInfo->networkName, status == LINK_STATUS_UP ? "up" : "down", port,
+        accountId == 0 ? "without" : "with");
+    UpdateLocalIpByLocalNumInfo(accountId, port);
 }
 
 void DiscCoapUpdateDevName(void)
