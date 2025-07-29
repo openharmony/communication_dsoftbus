@@ -328,7 +328,6 @@ static int32_t RequestMainPort(const char *ifName, const char *address)
 
 static int32_t EnableIpSubnet(LnnPhysicalSubnet *subnet)
 {
-    LNN_CHECK_AND_RETURN_RET_LOGE(subnet != NULL, SOFTBUS_INVALID_PARAM, LNN_BUILDER, "invalid param");
     char address[IP_LEN] = {0};
 
     int32_t ret = GetAvailableIpAddr(subnet->ifName, address, sizeof(address));
@@ -353,7 +352,6 @@ static int32_t EnableIpSubnet(LnnPhysicalSubnet *subnet)
 
 static int32_t DisableIpSubnet(LnnPhysicalSubnet *subnet)
 {
-    LNN_CHECK_AND_RETURN_RET_LOGE(subnet != NULL, SOFTBUS_INVALID_PARAM, LNN_BUILDER, "invalid param");
     if (subnet->status == LNN_SUBNET_RUNNING) {
         CloseIpLink();
         UpdateUsbNetCap(false);
@@ -366,7 +364,6 @@ static int32_t DisableIpSubnet(LnnPhysicalSubnet *subnet)
 
 static int32_t ChangeIpSubnetAddress(LnnPhysicalSubnet *subnet)
 {
-    LNN_CHECK_AND_RETURN_RET_LOGE(subnet != NULL, SOFTBUS_INVALID_PARAM, LNN_BUILDER, "invalid param");
     CloseIpLink();
     UpdateUsbNetCap(false);
     LeaveOldIpNetwork(subnet->ifName);
@@ -402,7 +399,6 @@ typedef enum {
 
 static void TransactIpSubnetState(LnnPhysicalSubnet *subnet, IpSubnetManagerEvent event, bool isAccepted)
 {
-    LNN_CHECK_AND_RETURN_LOGE(subnet != NULL, LNN_BUILDER, "invalid param");
     LnnPhysicalSubnetStatus transactMap[][IP_EVENT_RESULT_OPTION_COUNT] = {
         [USB_SUBNET_MANAGER_EVENT_IF_READY] = {LNN_SUBNET_RUNNING, LNN_SUBNET_IDLE},
         [USB_SUBNET_MANAGER_EVENT_IF_DOWN] = {LNN_SUBNET_SHUTDOWN, subnet->status},
