@@ -594,5 +594,10 @@ void LnnUpdateOhosAccount(UpdateAccountReason reason)
 {
     GetLnnOhosAccountInterface()->LnnUpdateOhosAccount(reason);
 }
+
+int32_t GetOsAccountIdByUserId(int32_t userId, char **id, uint32_t *len)
+{
+    return GetLnnOhosAccountInterface()->GetOsAccountIdByUserId(userId, id, len);
+}
 }
 } // namespace OHOS

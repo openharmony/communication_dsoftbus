@@ -170,6 +170,7 @@ public:
     virtual void LnnStopPublish(void);
     virtual void LnnUnregisterEventHandler(LnnEventType event, LnnEventHandler handler);
     virtual void LnnUpdateOhosAccount(UpdateAccountReason reason);
+    virtual int32_t GetOsAccountIdByUserId(int32_t userId, char **id, uint32_t *len) = 0;
 };
 
 class LnnOhosAccountInterfaceMock : public LnnOhosAccountInterface {
@@ -290,6 +291,7 @@ public:
     MOCK_METHOD5(LnnSendSyncInfoMsg,
         int32_t(LnnSyncInfoType, const char *, const uint8_t *, uint32_t, LnnSyncInfoMsgComplete));
     MOCK_METHOD5(QueryRecordByKey, int32_t(DbContext *, TableNameID, uint8_t *, uint8_t **, int));
+    MOCK_METHOD3(GetOsAccountIdByUserId, int32_t(int32_t userId, char **id, uint32_t *len));
 };
 } // namespace OHOS
 #endif // LNN_OHOS_ACCOUNT_MOCK_H
