@@ -303,7 +303,12 @@ static int32_t SoftbusGattcAddMacAddrToList(int32_t clientId, const SoftBusBtAdd
     }
     bleConnAddr->clientId = clientId;
 
-    CONN_CHECK_AND_RETURN_RET_LOGE(g_btAddrs != NULL, SOFTBUS_INVALID_PARAM, CONN_BLE, "BtAddrs is null");
+    if (g_btAddrs == NULL) {
+        CONN_LOGE(CONN_BLE, "BtAddrs is null.");
+        SoftBusFree(bleConnAddr);
+        return SOFTBUS_INVALID_PARAM;
+    }
+
     if (SoftBusMutexLock(&g_btAddrs->lock) != SOFTBUS_OK) {
         SoftBusFree(bleConnAddr);
         CONN_LOGE(CONN_BLE, "try to lock failed");
