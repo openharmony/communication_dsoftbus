@@ -1382,8 +1382,6 @@ HWTEST_F(LNNLaneMockTest, LANE_CANCEL_Test_003, TestSize.Level1)
 */
 HWTEST_F(LNNLaneMockTest, LANE_FREE_001, TestSize.Level1)
 {
-    NiceMock<LaneDepsInterfaceMock> laneMock;
-    EXPECT_CALL(laneMock, SoftBusGetSysTimeMs).WillRepeatedly(Return(0));
     const LnnLaneManager *laneManager = GetLaneManager();
     LaneType laneType = LANE_TYPE_BUTT;
     uint32_t laneReqId = laneManager->lnnGetLaneHandle(laneType);

@@ -1818,6 +1818,7 @@ ohos_unittest("LNNLaneSelectTest") {
     "$dsoftbus_root_path/core/frame/init/src/g_enhance_lnn_func.c",
     "$dsoftbus_root_path/tests/core/bus_center/lnn/lane/lane_select/lnn_lane_select_test.cpp",
     "$dsoftbus_root_path/tests/core/bus_center/lnn/lane/src/lnn_lane_deps_mock.cpp",
+    "$dsoftbus_root_path/tests/core/bus_center/lnn/lane/src/lnn_lane_select_mock.cpp",
     "$dsoftbus_root_path/tests/core/bus_center/lnn/lane/src/lnn_wifi_adpter_mock.cpp",
     "$dsoftbus_root_path/tests/core/bus_center/lnn/lane_link/lnn_lane_link_deps_mock.cpp",
   ]
