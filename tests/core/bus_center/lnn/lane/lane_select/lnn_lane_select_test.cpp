@@ -24,6 +24,7 @@
 #include "lnn_lane_deps_mock.h"
 #include "lnn_lane_link_deps_mock.h"
 #include "lnn_lane_link_ledger.h"
+#include "lnn_lane_select_mock.h"
 #include "lnn_lane_select.h"
 #include "lnn_select_rule.h"
 #include "lnn_wifi_adpter_mock.h"
@@ -555,6 +556,7 @@ HWTEST_F(LNNLaneSelectTest, LNN_SELECT_EXPECT_LANES_BY_QOS_006, TestSize.Level1)
 HWTEST_F(LNNLaneSelectTest, LNN_LANE_ADJUST_LINK_PRIORITY_FOR_RTT_001, TestSize.Level1)
 {
     NiceMock<LaneDepsInterfaceMock> laneMock;
+    NiceMock<LaneSelectInterfaceMock> selectMock;
     EXPECT_CALL(laneMock, LnnGetOnlineStateById).WillRepeatedly(Return(true));
     EXPECT_CALL(laneMock, LnnGetOsTypeByNetworkId)
         .WillRepeatedly(DoAll(SetArgPointee<LANE_MOCK_PARAM2>(HO_OS_TYPE), Return(SOFTBUS_OK)));
@@ -576,7 +578,7 @@ HWTEST_F(LNNLaneSelectTest, LNN_LANE_ADJUST_LINK_PRIORITY_FOR_RTT_001, TestSize.
         .qosRequire.minBW = HIGH_BW,
         .qosRequire.rttLevel = LANE_RTT_LEVEL_LOW,
     };
-    EXPECT_CALL(laneMock, SoftBusGetSysTimeMs).WillOnce(Return(0))
+    EXPECT_CALL(selectMock, SoftBusGetSysTimeMs).WillOnce(Return(0))
         .WillOnce(Return(WIFI_DIRECT_EXT_CAP_VALID_TIME));
     EXPECT_EQ(SOFTBUS_OK, SelectExpectLanesByQos(NODE_NETWORK_ID, &selectParam, &linkList));
     EXPECT_EQ(LANE_P2P, linkList.linkType[linkList.linkTypeNum - 1]);
@@ -593,6 +595,7 @@ HWTEST_F(LNNLaneSelectTest, LNN_LANE_ADJUST_LINK_PRIORITY_FOR_RTT_001, TestSize.
 HWTEST_F(LNNLaneSelectTest, LNN_LANE_ADJUST_LINK_PRIORITY_FOR_RTT_002, TestSize.Level1)
 {
     NiceMock<LaneDepsInterfaceMock> laneMock;
+    NiceMock<LaneSelectInterfaceMock> selectMock;
     EXPECT_CALL(laneMock, LnnGetOnlineStateById).WillRepeatedly(Return(true));
     EXPECT_CALL(laneMock, LnnGetOsTypeByNetworkId)
         .WillOnce(DoAll(SetArgPointee<LANE_MOCK_PARAM2>(OH_OS_TYPE), Return(SOFTBUS_OK)))
@@ -607,6 +610,7 @@ HWTEST_F(LNNLaneSelectTest, LNN_LANE_ADJUST_LINK_PRIORITY_FOR_RTT_002, TestSize.
         DoAll(SetArgPointee<LANE_MOCK_PARAM2>(0), Return(SOFTBUS_OK)));
     EXPECT_CALL(laneMock, LnnGetRemoteNumU64Info).WillRepeatedly(
         DoAll(SetArgPointee<LANE_MOCK_PARAM3>(0), Return(SOFTBUS_OK)));
+    EXPECT_CALL(selectMock, SoftBusGetSysTimeMs).WillOnce(Return(0));
 
     EXPECT_EQ(SOFTBUS_OK, UpdateP2pAvailability(PEER_UDID, false));
     LanePreferredLinkList linkList = {};

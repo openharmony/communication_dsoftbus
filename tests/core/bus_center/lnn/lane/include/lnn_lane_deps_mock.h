@@ -122,7 +122,6 @@ public:
     virtual int32_t LnnSetDLConnCapability(const char *networkId, uint64_t connCapability) = 0;
     virtual int32_t LnnGetRemoteNodeInfoByKey(const char *key, NodeInfo *info) = 0;
     virtual int32_t ConnSetConnectCallback(ConnModule moduleId, const ConnectCallback *callback) = 0;
-    virtual uint64_t SoftBusGetSysTimeMs(void) = 0;
 };
 
 class LaneDepsInterfaceMock : public LaneDepsInterface {
@@ -193,7 +192,6 @@ public:
     MOCK_METHOD4(LnnGetLocalStrInfoByIfnameIdx, int32_t (InfoKey, char *, uint32_t, int32_t));
     MOCK_METHOD2(LnnGetRemoteNodeInfoByKey, int32_t (const char *key, NodeInfo *info));
     MOCK_METHOD2(ConnSetConnectCallback, int32_t (ConnModule moduleId, const ConnectCallback *callback));
-    MOCK_METHOD0(SoftBusGetSysTimeMs, uint64_t(void));
 
     void SetDefaultResult(NodeInfo *info);
     void SetDefaultResultForAlloc(int32_t localNetCap, int32_t remoteNetCap,
