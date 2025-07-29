@@ -39,6 +39,8 @@ using namespace std;
 using namespace testing;
 using namespace testing::ext;
 namespace OHOS {
+#define DEVICE_NAME_BUF_LEN 128
+
 const std::string CHINESE_LANGUAGE = "zh-Hans";
 const std::string TRADITIONAL_CHINESE_LANGUAGE = "zh-Hant";
 const char *NICK_NAME = "TEST_NICK_NAME";
@@ -109,5 +111,60 @@ HWTEST_F(LnnSettingdataEventMonitorTest, LnnGetSettingDeviceNameTest003, TestSiz
             EXPECT_EQ(strncmp(devName, deviceName, DEVICE_NAME_BUF_LEN), 0);
         }
     }
+}
+
+/*
+ * @tc.name: LnnGetSettingDeviceNameTest004
+ * @tc.desc: LnnGetDeviceDisplayName invalid param
+ * @tc.type: FUNC
+ * @tc.require: 1
+ */
+HWTEST_F(LnnSettingdataEventMonitorTest, LnnGetSettingDeviceNameTest004, TestSize.Level1)
+{
+    uint32_t len = DEVICE_NAME_BUF_LEN;
+    char deviceName[] = "deviceName";
+    int32_t ret = LnnGetDeviceDisplayName(nullptr, DEFAULT_NAME, deviceName, len);
+    EXPECT_EQ(ret, SOFTBUS_INVALID_PARAM);
+}
+
+/*
+ * @tc.name: LnnGetSettingDeviceNameTest005
+ * @tc.desc: LnnGetDeviceDisplayName invalid param
+ * @tc.type: FUNC
+ * @tc.require: 1
+ */
+HWTEST_F(LnnSettingdataEventMonitorTest, LnnGetSettingDeviceNameTest005, TestSize.Level1)
+{
+    uint32_t len = DEVICE_NAME_BUF_LEN;
+    char deviceName[] = "deviceName";
+    int32_t ret = LnnGetDeviceDisplayName(NICK_NAME, nullptr, deviceName, len);
+    EXPECT_EQ(ret, SOFTBUS_INVALID_PARAM);
+}
+
+/*
+ * @tc.name: LnnGetSettingDeviceNameTest006
+ * @tc.desc: LnnGetDeviceDisplayName invalid param
+ * @tc.type: FUNC
+ * @tc.require: 1
+ */
+HWTEST_F(LnnSettingdataEventMonitorTest, LnnGetSettingDeviceNameTest006, TestSize.Level1)
+{
+    uint32_t len = DEVICE_NAME_BUF_LEN;
+    int32_t ret = LnnGetDeviceDisplayName(NICK_NAME, DEFAULT_NAME, nullptr, len);
+    EXPECT_EQ(ret, SOFTBUS_INVALID_PARAM);
+}
+
+/*
+ * @tc.name: LnnGetSettingDeviceNameTest007
+ * @tc.desc: LnnGetDeviceDisplayName invalid param
+ * @tc.type: FUNC
+ * @tc.require: 1
+ */
+HWTEST_F(LnnSettingdataEventMonitorTest, LnnGetSettingDeviceNameTest007, TestSize.Level1)
+{
+    uint32_t len = 0;
+    char deviceName[] = "deviceName";
+    int32_t ret = LnnGetDeviceDisplayName(NICK_NAME, DEFAULT_NAME, deviceName, len);
+    EXPECT_EQ(ret, SOFTBUS_INVALID_PARAM);
 }
 } // namespace OHOS
