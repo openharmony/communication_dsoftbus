@@ -47,6 +47,7 @@ typedef struct {
     uint32_t len;
     uint8_t type;
     int32_t err;
+    sem_t wait;
 } MsgCtx;
 
 typedef struct CoapRequest {

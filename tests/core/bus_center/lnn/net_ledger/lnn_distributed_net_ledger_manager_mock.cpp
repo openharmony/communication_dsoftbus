@@ -71,5 +71,10 @@ NodeInfo *GetNodeInfoFromMap(const DoubleHashMap *map, const char *id)
 {
     return GetLnnDistributedNetLedgerManagerInterface()->GetNodeInfoFromMap(map, id);
 }
+
+int32_t LnnRetrieveDeviceInfo(const char *udidHash, NodeInfo *deviceInfo)
+{
+    return GetLnnDistributedNetLedgerManagerInterface()->LnnRetrieveDeviceInfo(udidHash, deviceInfo);
+}
 } // extern "C"
 } // namespace OHOS

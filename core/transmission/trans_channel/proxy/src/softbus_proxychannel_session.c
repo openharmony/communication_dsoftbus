@@ -128,8 +128,13 @@ int32_t TransProxyPostSessionData(int32_t channelId, const unsigned char *data, 
 }
 
 static char *TransProxyPackAppNormalMsg(const ProxyMessageHead *msg, const char *payLoad,
-    int32_t datalen, int32_t *outlen)
+    int32_t datalen, int32_t *outLen)
 {
+    if (msg == NULL || payLoad == NULL || outLen == NULL) {
+        TRANS_LOGE(TRANS_MSG, "invalid param.");
+        return NULL;
+    }
+
     ProxyMessageHead proxyMessageHead;
     uint32_t connHeadLen = ConnGetHeadSize();
     uint32_t bufLen = PROXY_CHANNEL_HEAD_LEN + connHeadLen + (uint32_t)datalen;
@@ -156,7 +161,7 @@ static char *TransProxyPackAppNormalMsg(const ProxyMessageHead *msg, const char 
         SoftBusFree(buf);
         return NULL;
     }
-    *outlen = (int32_t)bufLen;
+    *outLen = (int32_t)bufLen;
 
     return buf;
 }

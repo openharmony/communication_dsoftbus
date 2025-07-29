@@ -13,11 +13,13 @@
  * limitations under the License.
  */
 
+#include <gtest/gtest.h>
 #include <securec.h>
 
-#include "gtest/gtest.h"
+#include "cJSON.h"
 #include "softbus_error_code.h"
 #include "softbus_proxychannel_control.c"
+#include "softbus_proxychannel_message.h"
 #include "softbus_proxychannel_message_struct.h"
 #include "softbus_proxy_network_mock_test.h"
 #include "softbus_proxychannel_network.c"
@@ -34,6 +36,8 @@ class SoftbusTransProxySessionInterface {
 public:
     
     virtual int32_t TransProxyGetChannelCapaByChanId(int32_t channelId, uint32_t *channelCapability) = 0;
+
+    virtual cJSON *cJSON_CreateObject(void) = 0;
 };
 
 class SoftbusTransProxySessionMock : public SoftbusTransProxySessionInterface {
@@ -47,6 +51,8 @@ public:
     
     MOCK_METHOD(int32_t, TransProxyGetChannelCapaByChanId,
         (int32_t channelId, uint32_t *channelCapability), (override));
+
+    MOCK_METHOD(cJSON *, cJSON_CreateObject, (), (override));
 
 private:
     static SoftbusTransProxySessionMock *gmock_;
@@ -69,6 +75,11 @@ int32_t TransProxyGetChannelCapaByChanId(int32_t channelId, uint32_t *channelCap
 {
     std::cout << "TransProxyGetChannelCapaByChanId mock calling enter" << std::endl;
     return SoftbusTransProxySessionMock::GetMockObj().TransProxyGetChannelCapaByChanId(channelId, channelCapability);
+}
+
+cJSON *cJSON_CreateObject()
+{
+    return SoftbusTransProxySessionMock::GetMockObj().cJSON_CreateObject();
 }
 
 namespace OHOS {
@@ -634,4 +645,18 @@ HWTEST_F(TransProxySessionTest, TransProxyResetPeerTest001, TestSize.Level1)
     EXPECT_EQ(ret, SOFTBUS_TRANS_PACK_LEEPALIVE_ACK_FAILED);
 }
 
+/**
+  * @tc.name: TransProxyPackHandshakeErrMsgTest001
+  * @tc.desc: TransProxyPackHandshakeErrMsg
+  * @tc.type: FUNC
+  * @tc.require:
+  */
+HWTEST_F(TransProxySessionTest, TransProxyPackHandshakeErrMsgTest001, TestSize.Level1)
+{
+    SoftbusTransProxySessionMock networkObj;
+    EXPECT_CALL(networkObj, cJSON_CreateObject).WillOnce(Return(nullptr));
+
+    char *ret = TransProxyPackHandshakeErrMsg(SOFTBUS_OK);
+    EXPECT_EQ(ret, nullptr);
+}
 } // namespace OHOS

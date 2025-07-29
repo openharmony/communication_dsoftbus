@@ -10,7 +10,7 @@ DSoftBus implements unified distributed communications between near-field device
 -   Performs unified device networking and topology management, and provides device information for data transmission.
 -   Sets up channels for transmitting messages, bytes, streams, and files.
 
-You can use the APIs provided by DSoftBus to implement fast communication between devices without caring about the communication details, which accelerating deployment and running of services across platforms.
+You can use the APIs provided by DSoftBus to implement fast communication between devices without caring about the communication details, which accelerates deployment and running of services across platforms.
 
 ## Architecture
 
@@ -275,7 +275,7 @@ The DSoftBus directory structure is as follows:
     ```C
     // Send bytes.
     int32_t SendBytes(int32_t socket, const void *data, uint32_t len);
-    // Async Send bytes. dataSeq Indicates the unique seq number of the packet to be send. which cannot be zero.
+    // Async Send bytes. dataSeq indicates the unique seq number of the packet to be sent, which cannot be zero.
     int32_t SendBytesAsync(int32_t socket, uint32_t dataSeq, const void *data, uint32_t len);    
     // Send messages.
     int32_t SendMessage(int32_t socket, const void *data, uint32_t len);

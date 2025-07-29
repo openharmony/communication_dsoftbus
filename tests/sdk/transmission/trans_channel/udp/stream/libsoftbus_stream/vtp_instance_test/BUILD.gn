@@ -45,16 +45,11 @@ ohos_unittest("VtpInstanceTest") {
     "$dsoftbus_root_path/core/frame:softbus_server",
     "$dsoftbus_root_path/tests/sdk:softbus_client_static",
   ]
-
-  native_source_path = rebase_path("$dsoftbus_root_path")
   dep_file = "components/nstackx_enhanced/nstackx_core/dfile/BUILD.gn"
-  enhanced = exec_script("$dsoftbus_root_path/check_sub_module.py",
-                         [
-                           "$native_source_path",
-                           "$dep_file",
-                         ],
-                         "value")
-  if (enhanced) {
+  native_source_path = rebase_path(dep_file, "$dsoftbus_root_path")
+  
+  enhanced_path = get_path_info(native_source_path, "name")
+  if (enhanced_path == "BUILD.gn") {
     deps += [
       "$dsoftbus_root_path/components/nstackx_enhanced/fillp:FillpSo",
       "$dsoftbus_root_path/components/nstackx_enhanced/nstackx_core/dfile:nstackx_dfile",

@@ -40,6 +40,7 @@ typedef int32_t (*AuthFindApplyKeyFunc)(const RequestBusinessInfo *info, uint8_t
 typedef int32_t (*AuthGenApplyKeyFunc)(
     const RequestBusinessInfo *info, uint32_t requestId, uint32_t connId, const GenApplyKeyCallback *genCb);
 typedef uint32_t (*GenApplyKeySeqFunc)(void);
+typedef void (*AuthClearAccountApplyKeyFunc)(void);
 typedef struct TagAuthOpenFuncList {
     RemoveAuthEventFunc removeAuthEvent;
     PackAuthDataFunc packAuthData;
@@ -51,6 +52,7 @@ typedef struct TagAuthOpenFuncList {
     AuthFindApplyKeyFunc authFindApplyKey;
     AuthGenApplyKeyFunc authGenApplyKey;
     GenApplyKeySeqFunc genApplyKeySeq;
+    AuthClearAccountApplyKeyFunc authClearAccountApplyKey;
 } AuthOpenFuncList;
 
 #ifdef __cplusplus

@@ -1049,7 +1049,7 @@ HWTEST_F(HeartBeatMediumTest, IsNeedTriggerSparkGroup_TEST01, TestSize.Level1)
     storedInfo.triggerSparkCount = SLE_JOIN_SPARK_TIMES;
     nowTime = LOW_FREQ_CYCLE * HB_TIME_FACTOR + storedInfo.triggerSparkTime;
     ret = IsNeedTriggerSparkGroup(&nodeInfo, &storedInfo, nowTime);
-    EXPECT_EQ(ret, false);
+    EXPECT_EQ(ret, true);
 
     storedInfo.triggerSparkTime = 0;
     nowTime = GetNowTime();

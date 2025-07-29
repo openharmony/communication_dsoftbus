@@ -945,7 +945,7 @@ static int32_t HandleFileSendingProcess(
     SendListenerInfo *sendInfo = NULL;
     int32_t ret = SOFTBUS_FILE_ERR;
     do {
-        int32_t osType;
+        int32_t osType = OHOS_TYPE_UNKNOWN;
         (void)ClientTransProxyGetOsTypeByChannelId(channelId, &osType);
         ret = CreateSendListenerInfo(&sendInfo, channelId, osType);
         if (ret != SOFTBUS_OK || sendInfo == NULL) {
@@ -1901,7 +1901,7 @@ int32_t ProcessRecvFileFrameData(int32_t sessionId, int32_t channelId, const Fil
         TRANS_LOGE(TRANS_FILE, "invalid param.");
         return SOFTBUS_INVALID_PARAM;
     }
-    int32_t osType;
+    int32_t osType = OHOS_TYPE_UNKNOWN;
     uint32_t packetSize;
     int32_t ret = ClientTransProxyGetOsTypeByChannelId(channelId, &osType);
     ret = CheckFrameLength(channelId, oneFrame->frameLength, osType, &packetSize);

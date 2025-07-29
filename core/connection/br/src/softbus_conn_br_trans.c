@@ -320,6 +320,25 @@ int32_t ConnBrPostBytes(
     node->module = module;
     node->seq = seq;
     node->isInner = (pid == 0);
+    if (SoftBusMutexLock(&g_startBrSendLPInfo.lock) != SOFTBUS_OK) {
+        CONN_LOGE(CONN_BR, "lock fail!");
+        FreeSendNode(node);
+        return SOFTBUS_LOCK_ERR;
+    }
+    g_startBrSendLPInfo.messagePosted = true;
+    if (!g_startBrSendLPInfo.sendTaskRunning) {
+        status = ConnStartActionAsync(NULL, SendHandlerLoop, NULL);
+        if (status != SOFTBUS_OK) {
+            CONN_LOGE(CONN_BR, "start br send task failed errno=%{public}d", status);
+            SoftBusMutexUnlock(&g_startBrSendLPInfo.lock);
+            FreeSendNode(node);
+            return status;
+        }
+        g_startBrSendLPInfo.sendTaskRunning = true;
+        CONN_LOGD(CONN_BR, "start br send task succ");
+    }
+    SoftBusMutexUnlock(&g_startBrSendLPInfo.lock);
+
     status = ConnBrEnqueueNonBlock((const void *)node);
     if (status != SOFTBUS_OK) {
         CONN_LOGE(CONN_BR,
@@ -333,22 +352,6 @@ int32_t ConnBrPostBytes(
         "br post bytes: receive post byte request, connId=%{public}u, pid=%{public}d, "
         "Len=%{public}u, Flg=%{public}d, Module=%{public}d, Seq=%{public}" PRId64 "",
         connectionId, pid, len, flag, module, seq);
-    CONN_CHECK_AND_RETURN_RET_LOGE(SoftBusMutexLock(&g_startBrSendLPInfo.lock) == SOFTBUS_OK,
-        SOFTBUS_LOCK_ERR, CONN_BR, "lock fail!");
-    g_startBrSendLPInfo.messagePosted = true;
-    if (!g_startBrSendLPInfo.sendTaskRunning) {
-        status = ConnStartActionAsync(NULL, SendHandlerLoop, NULL);
-        if (status != SOFTBUS_OK) {
-            CONN_LOGE(CONN_BR, "start br send task failed errno=%{public}d", status);
-            SoftBusMutexUnlock(&g_startBrSendLPInfo.lock);
-            return status;
-        }
-        g_startBrSendLPInfo.sendTaskRunning = true;
-        SoftBusMutexUnlock(&g_startBrSendLPInfo.lock);
-        CONN_LOGD(CONN_BR, "start br send task succ");
-        return SOFTBUS_OK;
-    }
-    SoftBusMutexUnlock(&g_startBrSendLPInfo.lock);
     return SOFTBUS_OK;
 }
 

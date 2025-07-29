@@ -229,8 +229,6 @@ static int32_t RecvPacketHead(ListenerModule module, int32_t fd, SocketPktHead *
             ConnRecvSocketData(fd, (char *)&buf[offset], (size_t)(sizeof(buf) - offset), RECV_DATA_TIMEOUT);
         if (recvLen < 0) {
             AUTH_LOGE(AUTH_CONN, "recv head fail.");
-            (void)DelTrigger(module, fd, READ_TRIGGER);
-            NotifyDisconnected(module, fd);
             return SOFTBUS_INVALID_DATA_HEAD;
         }
         offset += (uint32_t)recvLen;
@@ -327,6 +325,19 @@ bool IsExistAuthTcpConnFdItemByConnId(int32_t fd)
     return false;
 }
 
+bool IsExistAuthTcpConnFdItemWithoutLock(int32_t fd)
+{
+    AuthTcpConnInstance *item = NULL;
+    LIST_FOR_EACH_ENTRY(item, &g_authTcpConnFdList, AuthTcpConnInstance, node) {
+        if (item->fd != fd) {
+            continue;
+        }
+        return true;
+    }
+    AUTH_LOGE(AUTH_CONN, "auth tcp conn fd item is not found. fd=%{public}d", fd);
+    return false;
+}
+
 void DeleteAuthTcpConnFdItemByConnId(int32_t fd)
 {
     if (!RequireAuthTcpConnFdListLock()) {
@@ -382,7 +393,7 @@ static int32_t ProcessSocketInEvent(ListenerModule module, int32_t fd)
 {
     AUTH_CHECK_AND_RETURN_RET_LOGE(RequireAuthTcpConnFdListLock(), SOFTBUS_LOCK_ERR, AUTH_CONN,
         "RequireAuthTcpConnFdListLock fail");
-    if (IsNeededFdControl(module) && !IsExistAuthTcpConnFdItemByConnId(fd)) {
+    if (IsNeededFdControl(module) && !IsExistAuthTcpConnFdItemWithoutLock(fd)) {
         AUTH_LOGE(AUTH_CONN, "fd=%{public}d not exist, ignore", fd);
         ReleaseAuthTcpConnFdListLock();
         return SOFTBUS_INVALID_PARAM;
@@ -391,6 +402,10 @@ static int32_t ProcessSocketInEvent(ListenerModule module, int32_t fd)
     int32_t ret = RecvPacketHead(module, fd, &head);
     if (ret != SOFTBUS_OK) {
         ReleaseAuthTcpConnFdListLock();
+        if (ret == SOFTBUS_INVALID_DATA_HEAD) {
+            (void)DelTrigger(module, fd, READ_TRIGGER);
+            NotifyDisconnected(module, fd);
+        }
         return ret;
     }
     AUTH_LOGI(AUTH_CONN,
@@ -774,7 +789,7 @@ int32_t SocketPostBytes(int32_t fd, const AuthDataHead *head, const uint8_t *dat
         SoftBusFree(buf);
         return SOFTBUS_LOCK_ERR;
     }
-    if (IsNeededFdControl((ListenerModule)pktHead.module) && !IsExistAuthTcpConnFdItemByConnId(fd)) {
+    if (IsNeededFdControl((ListenerModule)pktHead.module) && !IsExistAuthTcpConnFdItemWithoutLock(fd)) {
         AUTH_LOGE(AUTH_CONN, "fd=%{public}d not exist, ignore", fd);
         ReleaseAuthTcpConnFdListLock();
         SoftBusFree(buf);
@@ -1014,9 +1029,7 @@ int32_t AuthSetTcpKeepaliveOption(int32_t fd, ModeCycle cycle)
 
 int32_t AuthTcpConnFdLockInit(void)
 {
-    SoftBusMutexAttr mutexAttr;
-    mutexAttr.type = SOFTBUS_MUTEX_RECURSIVE;
-    if (SoftBusMutexInit(&g_authTcpConnFdListLock, &mutexAttr) != SOFTBUS_OK) {
+    if (SoftBusMutexInit(&g_authTcpConnFdListLock, NULL) != SOFTBUS_OK) {
         AUTH_LOGE(AUTH_CONN, "authTcpConnFdList mutex init fail");
         return SOFTBUS_LOCK_ERR;
     }

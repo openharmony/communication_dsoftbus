@@ -64,10 +64,11 @@ typedef void (*LnnDcDispatchEventFunc)(DcEvent *dcEvent);
 typedef void (*TriggerSparkGroupBuildFunc)(uint32_t delayTime);
 typedef void (*TriggerSparkGroupClearFunc)(uint32_t state, uint32_t delayTime);
 typedef void (*TriggerSparkGroupJoinAgainFunc)(const char *udid, uint32_t delayTime);
-typedef int32_t (*InitSparkGroupManagerFunc)(void);
-typedef void (*DeinitSparkGroupManagerFunc)(void);
+typedef int32_t (*InitControlPlaneFunc)(void);
+typedef void (*DeinitControlPlaneFunc)(void);
 typedef int32_t (*QueryControlPlaneNodeValidFunc)(const char *deviceId);
 typedef int32_t (*LnnDumpControlLaneGroupInfoFunc)(int32_t fd);
+typedef bool (*IsSparkGroupEnabledFunc)(void);
 typedef void (*LnnDestroyCoapConnectListFunc)(void);
 typedef void (*LnnCoapConnectFunc)(const char *ip);
 typedef void (*LnnCoapConnectInitFunc)(void);
@@ -92,6 +93,7 @@ typedef int32_t (*SendDeviceInfoToSHByTypeFunc)(LpFeatureType type);
 typedef int32_t (*SendAdvInfoToMlpsFunc)(LpBroadcastParam *lpAdvParam, LpServerType type);
 typedef int32_t (*SwitchHeartbeatReportChannelFunc)(bool isToAP, uint16_t scanInterval, uint16_t scanWindow);
 typedef bool (*IsSupportLpFeatureFunc)(void);
+typedef bool (*LnnIsSupportLpSparkFeatureFunc)(void);
 typedef void (*SetLpKeepAliveStateFunc)(void *para);
 typedef int32_t (*LnnRegistBleHeartbeatMediumMgrFunc)(void);
 typedef int32_t (*EnablePowerControlFunc)(const WifiDirectLinkInfo *wifiDirectInfo);
@@ -196,7 +198,7 @@ typedef int32_t (*LnnSaveDeviceDataFunc)(const char *data, LnnDataType dataType)
 typedef int32_t (*LnnAsyncSaveDeviceDataFunc)(const char *data, LnnDataType dataType);
 typedef int32_t (*LnnRetrieveDeviceDataFunc)(LnnDataType dataType, char **data, uint32_t *dataLen);
 typedef int32_t (*LnnUpdateDeviceDataFunc)(const char *data, LnnDataType dataType);
-typedef int32_t (*LnnDeletaDeviceDataFunc)(LnnDataType dataType);
+typedef int32_t (*LnnDeleteDeviceDataFunc)(LnnDataType dataType);
 typedef int32_t (*LnnLinkFinderInitFunc)(void);
 typedef int32_t (*LnnUpdateLinkFinderInfoFunc)(void);
 typedef int32_t (*LnnRemoveLinkFinderInfoFunc)(const char *networkId);
@@ -290,10 +292,11 @@ typedef struct TagLnnEnhanceFuncList {
     TriggerSparkGroupBuildFunc triggerSparkGroupBuild;
     TriggerSparkGroupClearFunc triggerSparkGroupClear;
     TriggerSparkGroupJoinAgainFunc triggerSparkGroupJoinAgain;
-    InitSparkGroupManagerFunc initSparkGroupManager;
-    DeinitSparkGroupManagerFunc deinitSparkGroupManager;
+    InitControlPlaneFunc initControlPlane;
+    DeinitControlPlaneFunc deinitControlPlane;
     QueryControlPlaneNodeValidFunc queryControlPlaneNodeValid;
     LnnDumpControlLaneGroupInfoFunc lnnDumpControlLaneGroupInfo;
+    IsSparkGroupEnabledFunc isSparkGroupEnabled;
     // sle range
     RegistAuthTransListenerFunc registAuthTransListener;
     UnregistAuthTransListenerFunc unregistAuthTransListener;
@@ -328,6 +331,7 @@ typedef struct TagLnnEnhanceFuncList {
     SendAdvInfoToMlpsFunc sendAdvInfoToMlps;
     SwitchHeartbeatReportChannelFunc switchHeartbeatReportChannel;
     IsSupportLpFeatureFunc isSupportLpFeature;
+    LnnIsSupportLpSparkFeatureFunc lnnIsSupportLpSparkFeature;
     SetLpKeepAliveStateFunc setLpKeepAliveState;
     LnnRegistBleHeartbeatMediumMgrFunc lnnRegistBleHeartbeatMediumMgr;
     LnnRequestCheckOnlineStatusFunc lnnRequestCheckOnlineStatus;
@@ -448,7 +452,7 @@ typedef struct TagLnnEnhanceFuncList {
     InitActionBleConcurrencyFunc initActionBleConcurrency;
     InitActionStateAdapterFunc initActionStateAdapter;
     // adapter bus_center
-    LnnDeletaDeviceDataFunc lnnDeletaDeviceData;
+    LnnDeleteDeviceDataFunc lnnDeleteDeviceData;
     LnnLinkFinderInitFunc lnnLinkFinderInit;
     LnnUpdateLinkFinderInfoFunc lnnUpdateLinkFinderInfo;
     LnnRemoveLinkFinderInfoFunc lnnRemoveLinkFinderInfo;

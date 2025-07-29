@@ -51,6 +51,19 @@
     ]
   },
   {
+    "SESSION_NAME": "glasses_collaboration_service.*",
+    "REGEXP": "true",
+    "DEVID": "NETWORKID",
+    "SEC_LEVEL":"private",
+    "APP_INFO": [
+      {
+        "TYPE": "native_app",
+        "PKG_NAME": "glasses_collaboration_service",
+        "ACTIONS": "create,open"
+      }
+    ]
+  },
+  {
     "SESSION_NAME": "ohos.dtbcollab.dms.*",
     "REGEXP": "true",
     "DEVID": "UUID",

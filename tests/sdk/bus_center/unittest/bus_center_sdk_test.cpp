@@ -21,6 +21,7 @@
 #include "client_bus_center_manager.h"
 #include "softbus_access_token_test.h"
 #include "softbus_bus_center.h"
+#include "softbus_client_frame_manager.h"
 #include "softbus_def.h"
 #include "softbus_error_code.h"
 #include "softbus_server_frame.h"
@@ -62,7 +63,12 @@ void BusCenterSdkTest::SetUpTestCase()
 
 void BusCenterSdkTest::TearDownTestCase() { }
 
-void BusCenterSdkTest::SetUp() { }
+void BusCenterSdkTest::SetUp()
+{
+    EXPECT_EQ(InitSoftBus(TEST_PKG_NAME), SOFTBUS_OK);
+    EXPECT_EQ(InitSoftBus(TEST_PKG_NAME_1), SOFTBUS_OK);
+    EXPECT_EQ(InitSoftBus(TEST_MSDP_NAME), SOFTBUS_OK);
+}
 
 void BusCenterSdkTest::TearDown() { }
 
@@ -231,7 +237,7 @@ HWTEST_F(BusCenterSdkTest, BUS_CENTER_SDK_Leave_Lnn_Test_001, TestSize.Level0)
  */
 HWTEST_F(BusCenterSdkTest, BUS_CENTER_SDK_STATE_CB_Test_001, TestSize.Level0)
 {
-    EXPECT_TRUE(RegNodeDeviceStateCb(TEST_PKG_NAME, &g_nodeStateCb) == SOFTBUS_OK);
+    EXPECT_EQ(RegNodeDeviceStateCb(TEST_PKG_NAME, &g_nodeStateCb), SOFTBUS_OK);
     EXPECT_TRUE(UnregNodeDeviceStateCb(&g_nodeStateCb) == SOFTBUS_OK);
 }
 

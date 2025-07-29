@@ -229,7 +229,7 @@ typedef int32_t (*LnnTriggerSleHeartbeatFunc)(void);
 typedef int32_t (*LnnCleanTriggerSparkInfoFunc)(const char *udid, ConnectionAddrType addrType);
 typedef int32_t (*LnnOfflineTimingBySleHbFunc)(const char *networkId, ConnectionAddrType addrType);
 typedef int32_t (*LnnStopSleHeartbeatFunc)(void);
-typedef sint32_t (*LnnStopSleOfflineTimingStrategyFunc)(const char *networkId);
+typedef int32_t (*LnnStopSleOfflineTimingStrategyFunc)(const char *networkId);
 typedef int32_t (*SocketGetConnInfoFunc)(int32_t fd, AuthConnInfo *connInfo, bool *isServer, int32_t ifnameIdx);
 typedef int32_t (*GetConnInfoByConnectionIdFunc)(uint32_t connectionId, AuthConnInfo *connInfo);
 typedef uint32_t (*AuthGenRequestIdFunc)(void);

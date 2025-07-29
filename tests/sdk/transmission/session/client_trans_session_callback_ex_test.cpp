@@ -492,6 +492,9 @@ HWTEST_F(TransClientSessionCallbackExTest, TransOnSessionClosedTest001, TestSize
 
     EXPECT_CALL(transSessionMgrMock, ClientGetChannelBySessionId)
         .WillRepeatedly(ActionOfClientGetChannelBySessionId);
+    bool isD2d = false;
+    EXPECT_CALL(transSessionMgrMock, ClientGetSessionIsD2DByChannelId).WillRepeatedly(
+        DoAll(SetArgPointee<2>(isD2d), Return(SOFTBUS_OK)));
     EXPECT_CALL(transSessionMgrMock, ClientGetSessionCallbackAdapterById).WillRepeatedly(
         [](int32_t sessionId, SessionListenerAdapter *callbackAdapter, bool *isServer) -> int32_t {
         (void)sessionId;
@@ -527,6 +530,11 @@ HWTEST_F(TransClientSessionCallbackExTest, TransOnSessionClosedTest001, TestSize
     ret = TransOnSessionClosed(0, CHANNEL_TYPE_UDP, SHUTDOWN_REASON_LOCAL);
     EXPECT_EQ(ret, SOFTBUS_OK);
 
+    ret = TransOnSessionClosed(0, CHANNEL_TYPE_UDP, SHUTDOWN_REASON_LOCAL);
+    EXPECT_EQ(ret, SOFTBUS_OK);
+    isD2d = true;
+    EXPECT_CALL(transSessionMgrMock, ClientGetSessionIsD2DByChannelId).WillRepeatedly(
+        DoAll(SetArgPointee<2>(isD2d), Return(SOFTBUS_OK)));
     ret = TransOnSessionClosed(0, CHANNEL_TYPE_UDP, SHUTDOWN_REASON_LOCAL);
     EXPECT_EQ(ret, SOFTBUS_OK);
 }

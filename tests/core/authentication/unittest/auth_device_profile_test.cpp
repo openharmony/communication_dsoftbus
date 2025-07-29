@@ -404,10 +404,9 @@ HWTEST_F(AuthDeviceProfileTest, IS_SAME_ACCOUNT_TEST_003, TestSize.Level1)
  */
 HWTEST_F(AuthDeviceProfileTest, GET_SESSION_KEY_PROFILE_TEST_001, TestSize.Level1)
 {
-    uint8_t *sessionKey = nullptr;
     uint32_t length = 0;
-    bool result = GetSessionKeyProfile(TEST_SESSION_KEY_ID, sessionKey, &length);
-    EXPECT_TRUE(result);
+    bool result = GetSessionKeyProfile(TEST_SESSION_KEY_ID, nullptr, &length);
+    EXPECT_FALSE(result);
 }
 
 /*
@@ -420,7 +419,7 @@ HWTEST_F(AuthDeviceProfileTest, GET_SESSION_KEY_PROFILE_TEST_002, TestSize.Level
 {
     uint8_t sessionKey = 0;
     bool result = GetSessionKeyProfile(TEST_SESSION_KEY_ID, &sessionKey, nullptr);
-    EXPECT_TRUE(result);
+    EXPECT_FALSE(result);
 }
 
 /*
@@ -639,6 +638,13 @@ HWTEST_F(AuthDeviceProfileTest, COMPARE_ACL_WITH_PEER_DEVICE_INFO_TEST_002, Test
     EXPECT_CALL(mock, ConvertBytesToHexString).WillRepeatedly(Return(SOFTBUS_OK));
     EXPECT_CALL(mock, SoftBusGenerateStrHash).WillRepeatedly(Return(SOFTBUS_OK));
     bool result = CompareAclWithPeerDeviceInfo(aclProfile, peerAccountHash, peerUdid, peerUserId);
+    EXPECT_FALSE(result);
+    std::string accountId1 = "8bb0cf6eb9b17d0f";
+    accessee.SetAccesseeAccountId(accountId);
+    aclProfile.SetAccessee(accessee);
+    accesser.SetAccesserAccountId(accountId);
+    aclProfile.SetAccesser(accesser);
+    result = CompareAclWithPeerDeviceInfo(aclProfile, peerAccountHash, peerUdid, peerUserId);
     EXPECT_FALSE(result);
 }
 

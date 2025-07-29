@@ -343,16 +343,17 @@ static void TransProcDataRes(ListenerModule module, int32_t errCode, int32_t cha
         }
         (void)memset_s(conn.appInfo.sessionKey, sizeof(conn.appInfo.sessionKey), 0, sizeof(conn.appInfo.sessionKey));
         DelTrigger(module, fd, READ_TRIGGER);
-        TransTdcSocketReleaseFd(module, fd);
         (void)NotifyChannelOpenFailed(channelId, errCode);
+        TransDelSessionConnById(channelId);
+        TransTdcSocketReleaseFd(module, fd);
     } else {
         if (ret != SOFTBUS_OK || conn.serverSide) {
             return;
         }
         DelTrigger(module, fd, READ_TRIGGER);
         CloseTcpDirectFd(module, fd);
+        TransDelSessionConnById(channelId);
     }
-    TransDelSessionConnById(channelId);
     TransSrvDelDataBufNode(channelId);
 }
 
@@ -396,9 +397,9 @@ static int32_t ProcessSocketOutEvent(SessionConn *conn, int fd)
     if (ret != SOFTBUS_OK) {
         TRANS_LOGE(TRANS_CTRL, "start verify session failed, ret=%{public}d", ret);
         DelTrigger(conn->listenMod, fd, READ_TRIGGER);
-        TransTdcSocketReleaseFd(conn->listenMod, fd);
         (void)NotifyChannelOpenFailed(conn->channelId, ret);
         TransDelSessionConnById(conn->channelId);
+        TransTdcSocketReleaseFd(conn->listenMod, fd);
         TransSrvDelDataBufNode(conn->channelId);
     }
     return ret;

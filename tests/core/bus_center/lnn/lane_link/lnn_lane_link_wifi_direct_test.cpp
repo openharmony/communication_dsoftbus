@@ -265,7 +265,7 @@ HWTEST_F(LNNLaneLinkWifiDirectTest, HandleForceDownWifiDirect_002, TestSize.Leve
     conflictItem.devIdCnt = 1;
     char (*devId)[NETWORK_ID_BUF_LEN] = (char (*)[NETWORK_ID_BUF_LEN])SoftBusCalloc(NETWORK_ID_BUF_LEN);
     ASSERT_TRUE(devId != nullptr);
-    EXPECT_EQ(memcpy_s(devId, NETWORK_ID_BUF_LEN, NODE_NETWORK_ID, NETWORK_ID_BUF_LEN), EOK);
+    EXPECT_EQ(memcpy_s(devId, NETWORK_ID_BUF_LEN, NODE_NETWORK_ID, strlen(NODE_NETWORK_ID)), EOK);
     conflictItem.devIdList = devId;
     EXPECT_CALL(laneLinkMock, FindLinkConflictInfoByDevId)
         .WillRepeatedly(DoAll(SetArgPointee<LANE_MOCK_PARAM3>(conflictItem), Return(SOFTBUS_OK)));
@@ -321,7 +321,7 @@ HWTEST_F(LNNLaneLinkWifiDirectTest, WifiDirectForceDown_001, TestSize.Level1)
     conflictItem.devIdCnt = 1;
     char (*devId)[NETWORK_ID_BUF_LEN] = (char (*)[NETWORK_ID_BUF_LEN])SoftBusCalloc(NETWORK_ID_BUF_LEN);
     ASSERT_TRUE(devId != nullptr);
-    EXPECT_EQ(memcpy_s(devId, NETWORK_ID_BUF_LEN, NODE_NETWORK_ID, NETWORK_ID_BUF_LEN), EOK);
+    EXPECT_EQ(memcpy_s(devId, NETWORK_ID_BUF_LEN, NODE_NETWORK_ID, strlen(NODE_NETWORK_ID)), EOK);
     conflictItem.devIdList = devId;
     conflictItem.releaseLink = LANE_HML;
     EXPECT_CALL(laneLinkMock, FindLinkConflictInfoByDevId)
@@ -374,7 +374,7 @@ HWTEST_F(LNNLaneLinkWifiDirectTest, WifiDirectForceDown_002, TestSize.Level1)
     conflictItem.devIdCnt = 1;
     char (*devId)[NETWORK_ID_BUF_LEN] = (char (*)[NETWORK_ID_BUF_LEN])SoftBusCalloc(NETWORK_ID_BUF_LEN);
     ASSERT_TRUE(devId != nullptr);
-    EXPECT_EQ(memcpy_s(devId, NETWORK_ID_BUF_LEN, NODE_NETWORK_ID, NETWORK_ID_BUF_LEN), EOK);
+    EXPECT_EQ(memcpy_s(devId, NETWORK_ID_BUF_LEN, NODE_NETWORK_ID, strlen(NODE_NETWORK_ID)), EOK);
     conflictItem.devIdList = devId;
     EXPECT_CALL(laneLinkMock, FindLinkConflictInfoByDevId)
         .WillRepeatedly(DoAll(SetArgPointee<LANE_MOCK_PARAM3>(conflictItem), Return(SOFTBUS_OK)));
@@ -425,7 +425,7 @@ HWTEST_F(LNNLaneLinkWifiDirectTest, WifiDirectForceDown_003, TestSize.Level1)
     conflictItem.devIdCnt = 1;
     char (*devId)[NETWORK_ID_BUF_LEN] = (char (*)[NETWORK_ID_BUF_LEN])SoftBusCalloc(NETWORK_ID_BUF_LEN);
     ASSERT_TRUE(devId != nullptr);
-    EXPECT_EQ(memcpy_s(devId, NETWORK_ID_BUF_LEN, NODE_NETWORK_ID, NETWORK_ID_BUF_LEN), EOK);
+    EXPECT_EQ(memcpy_s(devId, NETWORK_ID_BUF_LEN, NODE_NETWORK_ID, strlen(NODE_NETWORK_ID)), EOK);
     conflictItem.devIdList = devId;
     EXPECT_CALL(laneLinkMock, FindLinkConflictInfoByDevId)
         .WillRepeatedly(DoAll(SetArgPointee<LANE_MOCK_PARAM3>(conflictItem), Return(SOFTBUS_OK)));
@@ -476,7 +476,7 @@ HWTEST_F(LNNLaneLinkWifiDirectTest, WifiDirectForceDown_004, TestSize.Level1)
     conflictItem.devIdCnt = 1;
     char (*devId)[NETWORK_ID_BUF_LEN] = (char (*)[NETWORK_ID_BUF_LEN])SoftBusCalloc(NETWORK_ID_BUF_LEN);
     ASSERT_TRUE(devId != nullptr);
-    EXPECT_EQ(memcpy_s(devId, NETWORK_ID_BUF_LEN, NODE_NETWORK_ID, NETWORK_ID_BUF_LEN), EOK);
+    EXPECT_EQ(memcpy_s(devId, NETWORK_ID_BUF_LEN, NODE_NETWORK_ID, strlen(NODE_NETWORK_ID)), EOK);
     conflictItem.devIdList = devId;
     EXPECT_CALL(laneLinkMock, FindLinkConflictInfoByDevId)
         .WillRepeatedly(DoAll(SetArgPointee<LANE_MOCK_PARAM3>(conflictItem), Return(SOFTBUS_OK)));
@@ -531,7 +531,7 @@ HWTEST_F(LNNLaneLinkWifiDirectTest, WifiDirectForceDown_005, TestSize.Level1)
     conflictItem.devIdCnt = 1;
     char (*devId)[NETWORK_ID_BUF_LEN] = (char (*)[NETWORK_ID_BUF_LEN])SoftBusCalloc(NETWORK_ID_BUF_LEN);
     ASSERT_TRUE(devId != nullptr);
-    EXPECT_EQ(memcpy_s(devId, NETWORK_ID_BUF_LEN, NODE_NETWORK_ID, NETWORK_ID_BUF_LEN), EOK);
+    EXPECT_EQ(memcpy_s(devId, NETWORK_ID_BUF_LEN, NODE_NETWORK_ID, strlen(NODE_NETWORK_ID)), EOK);
     conflictItem.devIdList = devId;
     EXPECT_CALL(laneLinkMock, FindLinkConflictInfoByDevId)
         .WillRepeatedly(DoAll(SetArgPointee<LANE_MOCK_PARAM3>(conflictItem), Return(SOFTBUS_OK)));
@@ -587,7 +587,7 @@ HWTEST_F(LNNLaneLinkWifiDirectTest, WifiDirectForceDown_006, TestSize.Level1)
     conflictItem.devIdCnt = 1;
     char (*devId)[NETWORK_ID_BUF_LEN] = (char (*)[NETWORK_ID_BUF_LEN])SoftBusCalloc(NETWORK_ID_BUF_LEN);
     ASSERT_TRUE(devId != nullptr);
-    EXPECT_EQ(memcpy_s(devId, NETWORK_ID_BUF_LEN, NODE_NETWORK_ID, NETWORK_ID_BUF_LEN), EOK);
+    EXPECT_EQ(memcpy_s(devId, NETWORK_ID_BUF_LEN, NODE_NETWORK_ID, strlen(NODE_NETWORK_ID)), EOK);
     conflictItem.devIdList = devId;
     EXPECT_CALL(laneLinkMock, FindLinkConflictInfoByDevId)
         .WillRepeatedly(DoAll(SetArgPointee<LANE_MOCK_PARAM3>(conflictItem), Return(SOFTBUS_OK)));
@@ -643,7 +643,7 @@ HWTEST_F(LNNLaneLinkWifiDirectTest, WifiDirectForceDown_007, TestSize.Level1)
     conflictItem.devIdCnt = 1;
     char (*devId)[NETWORK_ID_BUF_LEN] = (char (*)[NETWORK_ID_BUF_LEN])SoftBusCalloc(NETWORK_ID_BUF_LEN);
     ASSERT_TRUE(devId != nullptr);
-    EXPECT_EQ(memcpy_s(devId, NETWORK_ID_BUF_LEN, NODE_NETWORK_ID, NETWORK_ID_BUF_LEN), EOK);
+    EXPECT_EQ(memcpy_s(devId, NETWORK_ID_BUF_LEN, NODE_NETWORK_ID, strlen(NODE_NETWORK_ID)), EOK);
     conflictItem.devIdList = devId;
     EXPECT_CALL(laneLinkMock, FindLinkConflictInfoByDevId)
         .WillRepeatedly(DoAll(SetArgPointee<LANE_MOCK_PARAM3>(conflictItem), Return(SOFTBUS_OK)));
@@ -694,7 +694,7 @@ HWTEST_F(LNNLaneLinkWifiDirectTest, WifiDirectForceDown_008, TestSize.Level1)
     conflictItem.devIdCnt = 1;
     char (*devId)[NETWORK_ID_BUF_LEN] = (char (*)[NETWORK_ID_BUF_LEN])SoftBusCalloc(NETWORK_ID_BUF_LEN);
     ASSERT_TRUE(devId != nullptr);
-    EXPECT_EQ(memcpy_s(devId, NETWORK_ID_BUF_LEN, NODE_NETWORK_ID, NETWORK_ID_BUF_LEN), EOK);
+    EXPECT_EQ(memcpy_s(devId, NETWORK_ID_BUF_LEN, NODE_NETWORK_ID, strlen(NODE_NETWORK_ID)), EOK);
     conflictItem.devIdList = devId;
     EXPECT_CALL(laneLinkMock, FindLinkConflictInfoByDevId)
         .WillRepeatedly(DoAll(SetArgPointee<LANE_MOCK_PARAM3>(conflictItem), Return(SOFTBUS_OK)));
@@ -751,7 +751,7 @@ HWTEST_F(LNNLaneLinkWifiDirectTest, WifiDirectForceDown_009, TestSize.Level1)
     conflictItem.devIdCnt = 1;
     char (*devId)[NETWORK_ID_BUF_LEN] = (char (*)[NETWORK_ID_BUF_LEN])SoftBusCalloc(NETWORK_ID_BUF_LEN);
     ASSERT_TRUE(devId != nullptr);
-    EXPECT_EQ(memcpy_s(devId, NETWORK_ID_BUF_LEN, NODE_NETWORK_ID, NETWORK_ID_BUF_LEN), EOK);
+    EXPECT_EQ(memcpy_s(devId, NETWORK_ID_BUF_LEN, NODE_NETWORK_ID, strlen(NODE_NETWORK_ID)), EOK);
     conflictItem.devIdList = devId;
     EXPECT_CALL(laneLinkMock, FindLinkConflictInfoByDevId)
         .WillRepeatedly(DoAll(SetArgPointee<LANE_MOCK_PARAM3>(conflictItem), Return(SOFTBUS_OK)));
@@ -846,7 +846,7 @@ HWTEST_F(LNNLaneLinkWifiDirectTest, HandleForceDownWifiDirectTrans_002, TestSize
     conflictItem.devIdCnt = 1;
     char (*devId)[NETWORK_ID_BUF_LEN] = (char (*)[NETWORK_ID_BUF_LEN])SoftBusCalloc(NETWORK_ID_BUF_LEN);
     ASSERT_TRUE(devId != nullptr);
-    EXPECT_EQ(memcpy_s(devId, NETWORK_ID_BUF_LEN, NODE_NETWORK_ID, NETWORK_ID_BUF_LEN), EOK);
+    EXPECT_EQ(memcpy_s(devId, NETWORK_ID_BUF_LEN, NODE_NETWORK_ID, strlen(NODE_NETWORK_ID)), EOK);
     conflictItem.devIdList = devId;
     EXPECT_CALL(laneLinkMock, FindLinkConflictInfoByDevId)
         .WillRepeatedly(DoAll(SetArgPointee<LANE_MOCK_PARAM3>(conflictItem), Return(SOFTBUS_OK)));
@@ -877,7 +877,7 @@ HWTEST_F(LNNLaneLinkWifiDirectTest, HandleForceDownWifiDirectTrans_003, TestSize
     conflictItem.devIdCnt = 1;
     char (*devId)[NETWORK_ID_BUF_LEN] = (char (*)[NETWORK_ID_BUF_LEN])SoftBusCalloc(NETWORK_ID_BUF_LEN);
     ASSERT_TRUE(devId != nullptr);
-    EXPECT_EQ(memcpy_s(devId, NETWORK_ID_BUF_LEN, NODE_NETWORK_ID, NETWORK_ID_BUF_LEN), EOK);
+    EXPECT_EQ(memcpy_s(devId, NETWORK_ID_BUF_LEN, NODE_NETWORK_ID, strlen(NODE_NETWORK_ID)), EOK);
     conflictItem.devIdList = devId;
     EXPECT_CALL(laneLinkMock, FindLinkConflictInfoByDevId)
         .WillRepeatedly(DoAll(SetArgPointee<LANE_MOCK_PARAM3>(conflictItem), Return(SOFTBUS_OK)));

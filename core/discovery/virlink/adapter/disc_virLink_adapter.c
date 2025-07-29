@@ -34,34 +34,37 @@ static struct DiscVirlinkConnStatusListener g_discVirlinkConnStatusListener = {N
 static int32_t VirLinkLinklessGetWifiDirectAuthByNetworkId(const char *networkId, AuthHandle *authHandle)
 {
     char uuid[UUID_BUF_LEN] = {0};
-    char *anonyNetworkId = NULL;
-    Anonymize(networkId, &anonyNetworkId);
-
     int32_t ret = LnnConvertDlId(networkId, CATEGORY_NETWORK_ID, CATEGORY_UUID, uuid, UUID_BUF_LEN);
     DISC_CHECK_AND_RETURN_RET_LOGE(ret == SOFTBUS_OK, ret, DISC_BROADCAST, "convert dlId failed");
     AuthDeviceGetLatestIdByUuid(uuid, AUTH_LINK_TYPE_ENHANCED_P2P, authHandle);
 
     if (authHandle->authId != AUTH_INVALID_ID) {
+        char *anonyNetworkId = NULL;
+        Anonymize(networkId, &anonyNetworkId);
         DISC_LOGI(DISC_BROADCAST, "find wifidirect authHandle, networkId=%{public}s",
             AnonymizeWrapper(anonyNetworkId));
         AnonymizeFree(anonyNetworkId);
         return SOFTBUS_OK;
     }
-    AnonymizeFree(anonyNetworkId);
     return SOFTBUS_INVALID_PARAM;
 }
 
 int DiscVirlinkLinklessVirtualSend(const char *networkId, const uint8_t *data, uint32_t dataLen)
 {
-    char *anonyNetworkId = NULL;
-    Anonymize(networkId, &anonyNetworkId);
+    if (networkId == NULL || data == NULL || dataLen == 0) {
+        DISC_LOGE(DISC_BROADCAST, "invalid param");
+        return SOFTBUS_INVALID_PARAM;
+    }
+
     AuthHandle authHandle = { .authId = AUTH_INVALID_ID };
     if (VirLinkLinklessGetWifiDirectAuthByNetworkId(networkId, &authHandle) != SOFTBUS_OK) {
+        char *anonyNetworkId = NULL;
+        Anonymize(networkId, &anonyNetworkId);
         DISC_LOGE(DISC_BROADCAST, "get authHandle fail, networkId=%{public}s", AnonymizeWrapper(anonyNetworkId));
         AnonymizeFree(anonyNetworkId);
         return SOFTBUS_INVALID_PARAM;
     }
-    AnonymizeFree(anonyNetworkId);
+
     DISC_LOGI(DISC_BROADCAST, "send virtual msg, authId=%{public}" PRId64 ", datalen=%{public}u", authHandle.authId,
               dataLen);
     AuthTransData dataInfo = {
@@ -124,7 +127,10 @@ static void VirlinkLinklessOnDeviceOnline(const char *remoteMac, const char *rem
         return;
     }
 
-    DISC_LOGI(DISC_BROADCAST, "device online, network=%{public}.5s", networkId);
+    char *anonyNetworkId = NULL;
+    Anonymize(networkId, &anonyNetworkId);
+    DISC_LOGI(DISC_BROADCAST, "device online, network=%{public}s", AnonymizeWrapper(anonyNetworkId));
+    AnonymizeFree(anonyNetworkId);
     struct DiscVirlinkConnStatusListener listener = g_discVirlinkConnStatusListener;
     if (listener.onDeviceOnline != NULL) {
         listener.onDeviceOnline(remoteMac, remoteIp, networkId, isSource);
@@ -145,7 +151,10 @@ static void VirlinkLinklessOnDeviceOffline(const char *remoteMac, const char *re
         return;
     }
 
-    DISC_LOGI(DISC_BROADCAST, "device offline, network=%{public}.5s", networkId);
+    char *anonyNetworkId = NULL;
+    Anonymize(networkId, &anonyNetworkId);
+    DISC_LOGI(DISC_BROADCAST, "device offline, network=%{public}s", AnonymizeWrapper(anonyNetworkId));
+    AnonymizeFree(anonyNetworkId);
     struct DiscVirlinkConnStatusListener listener = g_discVirlinkConnStatusListener;
     if (listener.onDeviceOffline != NULL) {
         listener.onDeviceOffline(remoteMac, remoteIp, networkId, localIp);

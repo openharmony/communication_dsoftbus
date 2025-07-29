@@ -1569,6 +1569,7 @@ ohos_unittest("LNNDistributedNetLedgerManagerTest") {
     "$dsoftbus_dfx_path/interface/include/form",
     "$dsoftbus_root_path/adapter/common/bus_center/include",
     "$dsoftbus_root_path/adapter/common/include",
+    "$dsoftbus_root_path/adapter/common/net/bluetooth/broadcast/interface",
     "$dsoftbus_root_path/core/adapter/bus_center/include",
     "$dsoftbus_root_path/core/authentication/include",
     "$dsoftbus_root_path/core/authentication/interface",
@@ -1589,6 +1590,7 @@ ohos_unittest("LNNDistributedNetLedgerManagerTest") {
     "$dsoftbus_root_path/core/common/include",
     "$dsoftbus_root_path/core/discovery/interface",
     "$dsoftbus_root_path/core/discovery/manager/include",
+    "$dsoftbus_root_path/core/frame/init/include",
     "$dsoftbus_root_path/interfaces/inner_kits/lnn",
     "$dsoftbus_root_path/interfaces/kits/bus_center",
     "$dsoftbus_root_path/interfaces/kits/common",
@@ -1605,6 +1607,7 @@ ohos_unittest("LNNDistributedNetLedgerManagerTest") {
   external_deps = [
     "cJSON:cjson",
     "c_utils:utils",
+    "device_auth:deviceauth_sdk",
     "googletest:gmock_main",
     "hilog:libhilog",
   ]
@@ -2750,12 +2753,11 @@ ohos_unittest("LNNTransLaneMockTest") {
     "$dsoftbus_root_path/core/bus_center/lnn/lane_hub/lane_manager/src/lnn_trans_free_lane.c",
     "$dsoftbus_root_path/core/bus_center/lnn/lane_hub/lane_manager/src/lnn_trans_lane.c",
     "$dsoftbus_root_path/core/bus_center/service/src/bus_center_manager.c",
-    "$dsoftbus_root_path/core/frame/init/src/g_enhance_lnn_func.c",
+    "$dsoftbus_root_path/core/frame/init/src/g_enhance_lnn_func_pack.c",
     "lane/src/lnn_lane_deps_mock.cpp",
     "lane/src/lnn_wifi_adpter_mock.cpp",
     "lane/trans_lane/lnn_trans_lane_deps_mock.cpp",
     "lane/trans_lane/lnn_trans_lane_test.cpp",
-    "$dsoftbus_root_path/core/frame/init/src/g_enhance_lnn_func_pack.c",
   ]
 
   include_dirs = [
@@ -3805,6 +3807,64 @@ ohos_unittest("LNNFeatureCapabilityTest") {
   }
 }
 
+ohos_unittest("LNNFeatureCapabilityMockTest") {
+  module_out_path = module_output_path
+  sources = [
+    "$dsoftbus_root_path/core/bus_center/lnn/net_ledger/common/src/lnn_feature_capability.c",
+    "$dsoftbus_root_path/tests/core/bus_center/lnn/net_ledger/lnn_feature_capability_mock.cpp",
+    "$dsoftbus_root_path/tests/core/bus_center/lnn/net_ledger/lnn_feature_capability_mock_test.cpp",
+  ]
+
+  include_dirs = [
+    "$dsoftbus_root_path/adapter/default_config/spec_config",
+    "$dsoftbus_root_path/core/bus_center/lnn/net_ledger/common/include",
+  ]
+
+  deps = [
+    "$dsoftbus_dfx_path:softbus_dfx",
+    "$dsoftbus_root_path/adapter:softbus_adapter",
+    "$dsoftbus_root_path/core/common:softbus_utils",
+    "$dsoftbus_root_path/core/frame:softbus_server",
+  ]
+
+  external_deps = [
+    "cJSON:cjson",
+    "c_utils:utils",
+    "googletest:gmock",
+    "hilog:libhilog",
+  ]
+}
+
+ohos_unittest("LNNNetLedgerTest") {
+  module_out_path = module_output_path
+  sources = [
+    "$dsoftbus_root_path/tests/core/bus_center/lnn/net_ledger/lnn_net_ledger_test.cpp",
+    "$dsoftbus_root_path/tests/core/bus_center/lnn/net_ledger/lnn_net_ledger_test_mock.cpp",
+  ]
+
+  include_dirs = lnn_mock_test_include_dirs
+  include_dirs += [
+    "$dsoftbus_root_path/core/bus_center/lnn/net_ledger/common/include",
+    "$dsoftbus_root_path/core/bus_center/lnn/net_ledger/common/src",
+    "$dsoftbus_root_path/tests/core/bus_center/lnn/net_ledger",
+  ]
+
+  deps = [
+    "$dsoftbus_dfx_path:softbus_dfx",
+    "$dsoftbus_root_path/adapter:softbus_adapter",
+    "$dsoftbus_root_path/core/common:softbus_utils",
+  ]
+
+  external_deps = [
+    "cJSON:cjson",
+    "c_utils:utils",
+    "googletest:gmock",
+    "hilog:libhilog",
+  ]
+
+  external_deps += [ "huks:libhukssdk" ]
+}
+
 group("unittest") {
   testonly = true
   deps = [
@@ -3820,6 +3880,7 @@ group("unittest") {
     ":LNNDiscoveryInterfaceTest",
     ":LNNDisctributedLedgerTest",
     ":LNNDistributedNetLedgerManagerTest",
+    ":LNNFeatureCapabilityMockTest",
     ":LNNFeatureCapabilityTest",
     ":LNNHuksUtilsTest",
     ":LNNIpNetworkImplMockTest",
@@ -3836,6 +3897,7 @@ group("unittest") {
     ":LNNNetBuilderTest",
     ":LNNNetLedgerCommonTest",
     ":LNNNetLedgerMockTest",
+    ":LNNNetLedgerTest",
     ":LNNNetworkInfoTest",
     ":LNNNetworkManagerMockTest",
     ":LNNNodeWeightTest",

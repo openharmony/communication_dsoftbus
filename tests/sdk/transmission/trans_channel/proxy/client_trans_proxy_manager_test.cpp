@@ -272,20 +272,20 @@ HWTEST_F(ClientTransProxyManagerTest, ClientTransProxyOnDataReceivedTest001, Tes
     ret = memcpy_s(buf + sizeof(SliceHead), TEST_DATA_LENGTH_2, &packetHead, sizeof(PacketHead));
     EXPECT_EQ(EOK, ret);
     ret = ClientTransProxyOnDataReceived(channelId, buf, TEST_DATA_LENGTH_2, TRANS_SESSION_BYTES);
-    EXPECT_EQ(SOFTBUS_TRANS_SESSION_INFO_NOT_FOUND, ret);
+    EXPECT_EQ(SOFTBUS_NOT_FIND, ret);
 
     packetHead.magicNumber = MAGIC_NUMBER;
     packetHead.dataLen = 0;
     ret = memcpy_s(buf + sizeof(SliceHead), TEST_DATA_LENGTH_2, &packetHead, sizeof(PacketHead));
     EXPECT_EQ(EOK, ret);
     ret = ClientTransProxyOnDataReceived(channelId, buf, TEST_DATA_LENGTH_2, TRANS_SESSION_BYTES);
-    EXPECT_EQ(SOFTBUS_TRANS_SESSION_INFO_NOT_FOUND, ret);
+    EXPECT_EQ(SOFTBUS_NOT_FIND, ret);
 
     packetHead.dataLen = sizeof(PacketHead) - 1;
     ret = memcpy_s(buf + sizeof(SliceHead), TEST_DATA_LENGTH_2, &packetHead, sizeof(PacketHead));
     EXPECT_EQ(EOK, ret);
     ret = ClientTransProxyOnDataReceived(channelId, buf, TEST_DATA_LENGTH_2, TRANS_SESSION_BYTES);
-    EXPECT_EQ(SOFTBUS_TRANS_SESSION_INFO_NOT_FOUND, ret);
+    EXPECT_EQ(SOFTBUS_NOT_FIND, ret);
 }
 
 /**
@@ -312,7 +312,7 @@ HWTEST_F(ClientTransProxyManagerTest, ClientTransProxyOnDataReceivedTest002, Tes
     ret = memcpy_s(buf + sizeof(SliceHead), TEST_DATA_LENGTH_2, &packetHead, sizeof(PacketHead));
     EXPECT_EQ(EOK, ret);
     ret = ClientTransProxyOnDataReceived(channelId, buf, TEST_DATA_LENGTH_2, TRANS_SESSION_BYTES);
-    EXPECT_EQ(SOFTBUS_TRANS_SESSION_INFO_NOT_FOUND, ret);
+    EXPECT_EQ(SOFTBUS_NOT_FIND, ret);
 
     sliceHead.sliceNum = SILCE_NUM_COUNT;
     sliceHead.sliceSeq = SLICE_SEQ_BEGIN;

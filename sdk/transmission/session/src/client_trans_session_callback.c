@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021-2024 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2025 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -473,8 +473,7 @@ static int32_t TransOnPagingSessionOpened(const char *sessionName, const Channel
             TRANS_LOGE(TRANS_SDK, "enable session failed, ret=%{public}d", ret);
             return ret;
         }
-        ISocketListener *listener = isServer ? &sessionCallback.socketServer : &sessionCallback.socketClient;
-        ret = TransOnBindSuccess(socket, listener);
+        ret = TransOnBindSuccess(socket, &sessionCallback.socketServer);
         if (ret != SOFTBUS_OK) {
             TRANS_LOGE(TRANS_SDK, "fork paging on bind failed, channelId=%{public}d", channel->channelId);
             return ret;
@@ -598,7 +597,6 @@ NO_SANITIZE("cfi") int32_t TransOnSessionClosed(int32_t channelId, int32_t chann
     int32_t sessionId = INVALID_SESSION_ID;
     int32_t ret = SOFTBUS_NO_INIT;
     SessionListenerAdapter sessionCallback;
-    SessionEnableStatus enableStatus;
     bool isServer = false;
     bool isUdpType = (channelType == CHANNEL_TYPE_UDP ? true : false);
     (void)memset_s(&sessionCallback, sizeof(SessionListenerAdapter), 0, sizeof(SessionListenerAdapter));
@@ -608,10 +606,18 @@ NO_SANITIZE("cfi") int32_t TransOnSessionClosed(int32_t channelId, int32_t chann
         (void)GetSocketCallbackAdapterByChannelId(channelId, channelType, &sessionId, &sessionCallback, &isServer);
     }
 
+    SessionEnableStatus enableStatus = ENABLE_STATUS_INIT;
     (void)ClientGetChannelBySessionId(sessionId, NULL, NULL, &enableStatus);
     TRANS_LOGI(TRANS_SDK, "trigger session close callback");
     if (sessionCallback.isSocketListener && enableStatus == ENABLE_STATUS_SUCCESS) {
-        ISocketListener *listener = isServer ? &sessionCallback.socketServer : &sessionCallback.socketClient;
+        bool isD2D = false;
+        (void)ClientGetSessionIsD2DByChannelId(channelId, channelType, &isD2D);
+        ISocketListener *listener = NULL;
+        if (isD2D) {
+            listener = &sessionCallback.socketServer;
+        } else {
+            listener = isServer ? &sessionCallback.socketServer : &sessionCallback.socketClient;
+        }
         if (listener->OnShutdown != NULL) {
             listener->OnShutdown(sessionId, reason);
         }
@@ -653,11 +659,18 @@ NO_SANITIZE("cfi") int32_t TransOnDataReceived(int32_t channelId, int32_t channe
     int32_t sessionId;
     SessionListenerAdapter sessionCallback;
     bool isServer = false;
+    bool isD2D = false;
     (void)memset_s(&sessionCallback, sizeof(SessionListenerAdapter), 0, sizeof(SessionListenerAdapter));
     int32_t ret = GetSocketCallbackAdapterByChannelId(channelId, channelType, &sessionId, &sessionCallback, &isServer);
     TRANS_CHECK_AND_RETURN_RET_LOGE(ret == SOFTBUS_OK, ret, TRANS_SDK, "get session callback failed");
     (void)ClientResetIdleTimeoutById(sessionId);
-    ISocketListener *listener = isServer ? &sessionCallback.socketServer : &sessionCallback.socketClient;
+    (void)ClientGetSessionIsD2DByChannelId(channelId, channelType, &isD2D);
+    ISocketListener *listener = NULL;
+    if (isD2D) {
+        listener = &sessionCallback.socketServer;
+    } else {
+        listener = isServer ? &sessionCallback.socketServer : &sessionCallback.socketClient;
+    }
     switch (type) {
         case TRANS_SESSION_BYTES:
             if (sessionCallback.isSocketListener) {
