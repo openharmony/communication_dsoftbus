@@ -198,3 +198,12 @@ void TransProcessGroupTalkieInfoPacked(const char *pkgName)
     }
     return pfnTransEnhanceFuncList->transProcessGroupTalkieInfo(pkgName);
 }
+
+bool IsInWhitelistPacked(const char *app)
+{
+    TransEnhanceFuncList *pfnTransEnhanceFuncList = TransEnhanceFuncListGet();
+    if (TransCheckFuncPointer((void *)pfnTransEnhanceFuncList->isInWhitelist) != SOFTBUS_OK) {
+        return true;
+    }
+    return pfnTransEnhanceFuncList->isInWhitelist(app);
+}

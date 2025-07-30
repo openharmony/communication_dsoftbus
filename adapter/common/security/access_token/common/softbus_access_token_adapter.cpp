@@ -28,6 +28,7 @@
 #include "tokenid_kit.h"
 
 #define DMS_COLLABATION_NAME_PREFIX "ohos.dtbcollab.dms"
+#define DBINDER_BUS_NAME_PREFIX "DBinder"
 static PermissionChangeCb g_permissionChangeCb = nullptr;
 constexpr int32_t JUDG_CNT = 1;
 constexpr int32_t DEVICE_KEY_SA_CNT = 3;
@@ -58,8 +59,20 @@ bool SoftBusCheckIsSystemService(uint64_t tokenId)
     return type == ATokenTypeEnum::TOKEN_NATIVE;
 }
 
-bool SoftBusCheckIsSystemApp(uint64_t tokenId)
+bool SoftBusCheckIsSystemApp(uint64_t tokenId, const char *sessionName)
 {
+    if (sessionName == nullptr) {
+        COMM_LOGE(COMM_PERM, "invalid param, sessionName is nullptr");
+        return false;
+    }
+    // The authorization of dbind and dtbcollab are granted through Samgr and DMS, and there is no control here
+    if (strncmp(sessionName, DBINDER_BUS_NAME_PREFIX, strlen(DBINDER_BUS_NAME_PREFIX)) == 0) {
+        return false;
+    }
+
+    if (strncmp(sessionName, DMS_COLLABATION_NAME_PREFIX, strlen(DMS_COLLABATION_NAME_PREFIX)) == 0) {
+        return false;
+    }
     return TokenIdKit::IsSystemAppByFullTokenID(tokenId);
 }
 
@@ -71,7 +84,6 @@ bool SoftBusCheckIsNormalApp(uint64_t fullTokenId, const char *sessionName)
     }
 
     // The authorization of dbind and dtbcollab are granted through Samgr and DMS, and there is no control here
-    #define DBINDER_BUS_NAME_PREFIX "DBinder"
     if (strncmp(sessionName, DBINDER_BUS_NAME_PREFIX, strlen(DBINDER_BUS_NAME_PREFIX)) == 0) {
         return false;
     }
