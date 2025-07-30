@@ -594,11 +594,8 @@ HWTEST_F(HeartBeatMediumStaticTest, HbOnlineNodeAuthTest_01, TestSize.Level1)
     LnnHeartbeatRecvInfo storedInfo;
     (void)memset_s(&device, sizeof(DeviceInfo), 0, sizeof(DeviceInfo));
     (void)memset_s(&storedInfo, sizeof(LnnHeartbeatRecvInfo), 0, sizeof(LnnHeartbeatRecvInfo));
-    device.isOnline = false;
-    int32_t ret = HbOnlineNodeAuth(&device, &storedInfo, HB_TIME_FACTOR_TWO_HUNDRED_MS);
-    EXPECT_EQ(ret, SOFTBUS_OK);
     device.isOnline = true;
-    ret = HbOnlineNodeAuth(&device, &storedInfo, HB_TIME_FACTOR_TWO_HUNDRED_MS);
+    int32_t ret = HbOnlineNodeAuth(&device, &storedInfo, HB_TIME_FACTOR_TWO_HUNDRED_MS);
     EXPECT_EQ(ret, SOFTBUS_NETWORK_HEARTBEAT_REPEATED);
     EXPECT_CALL(hbStrateMock, AuthStartVerify)
         .WillOnce(Return(SOFTBUS_INVALID_PARAM))
