@@ -63,7 +63,7 @@ bool SoftbusClientPluginLoadedFlagGet(void)
 
 int32_t SoftBusDlopen(SoftBusHandleType type, void **dllHandle)
 {
-    if (type > SOFTBUS_HANDLE_BUTT || dllHandle == NULL) {
+    if (type >= SOFTBUS_HANDLE_BUTT || dllHandle == NULL) {
         return SOFTBUS_INVALID_PARAM;
     }
 
@@ -100,7 +100,7 @@ int32_t SoftBusDlsym(const void *DllHandle, const char *funcName, void **funcHan
 
 void SoftBusDlclose(SoftBusHandleType type)
 {
-    if (type > SOFTBUS_HANDLE_BUTT || g_soHandle[type] == NULL) {
+    if (type >= SOFTBUS_HANDLE_BUTT || g_soHandle[type] == NULL) {
         return;
     }
 
