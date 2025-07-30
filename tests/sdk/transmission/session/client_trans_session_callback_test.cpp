@@ -283,7 +283,7 @@ HWTEST_F(TransClientSessionCallbackTest, TransClientSessionCallbackTest01, TestS
     ASSERT_EQ(ret, SOFTBUS_OK);
     ret = AcceptSessionAsServer(g_sessionName, channel, TYPE_BUTT, &sessionId);
     EXPECT_EQ(ret, SOFTBUS_OK);
-    const char *sessionName = "com.huawei.devicegroupmanage";
+    const char *sessionName = "com.devicegroupmanage";
     ret = AcceptSessionAsServer(sessionName, channel, TYPE_BUTT, &sessionId);
     EXPECT_EQ(ret, SOFTBUS_TRANS_SESSIONSERVER_NOT_CREATED);
     SoftBusFree(channel->groupId);
