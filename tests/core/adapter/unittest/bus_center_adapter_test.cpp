@@ -125,4 +125,82 @@ HWTEST_F(DsoftbusOtherTest, GetCommonDevInfo004, TestSize.Level0)
     ret = GetCommonDevInfo(COMM_DEVICE_KEY_UDID, value, len);
     EXPECT_EQ(SOFTBUS_NETWORK_GET_DEVICE_INFO_ERR, ret);
 }
+
+/*
+ * @tc.name: GetCommonDevInfoTest005
+ * @tc.desc: value is illegal
+ * @tc.type: FUNC
+ * @tc.require: 1
+ */
+HWTEST_F(DsoftbusOtherTest, GetCommonDevInfoTest005, TestSize.Level0)
+{
+    int32_t len = 10;
+    int32_t ret = GetCommonDevInfo(COMM_DEVICE_KEY_DEVNAME, nullptr, len);
+    EXPECT_EQ(ret, SOFTBUS_INVALID_PARAM);
+}
+
+/*
+ * @tc.name: GetCommonOsVersionTest001
+ * @tc.desc: value is illegal
+ * @tc.type: FUNC
+ * @tc.require: 1
+ */
+HWTEST_F(DsoftbusOtherTest, GetCommonOsVersionTest001, TestSize.Level0)
+{
+    uint32_t len = 10;
+    int32_t ret = GetCommonOsVersion(nullptr, len);
+    EXPECT_EQ(ret, SOFTBUS_INVALID_PARAM);
+}
+
+/*
+ * @tc.name: GetCommonDeviceVersionTest001
+ * @tc.desc: value is illegal
+ * @tc.type: FUNC
+ * @tc.require: 1
+ */
+HWTEST_F(DsoftbusOtherTest, GetCommonDeviceVersionTest001, TestSize.Level0)
+{
+    uint32_t len = 10;
+    int32_t ret = GetCommonDeviceVersion(nullptr, len);
+    EXPECT_EQ(ret, SOFTBUS_INVALID_PARAM);
+}
+
+/*
+ * @tc.name: GetCommonDeviceProductIdTest001
+ * @tc.desc: value is illegal
+ * @tc.type: FUNC
+ * @tc.require: 1
+ */
+HWTEST_F(DsoftbusOtherTest, GetCommonDeviceProductIdTest001, TestSize.Level0)
+{
+    uint32_t len = 10;
+    int32_t ret = GetCommonDeviceProductId(nullptr, len);
+    EXPECT_EQ(ret, SOFTBUS_INVALID_PARAM);
+}
+
+/*
+ * @tc.name: GetCommonDeviceModelNameTest001
+ * @tc.desc: value is illegal
+ * @tc.type: FUNC
+ * @tc.require: 1
+ */
+HWTEST_F(DsoftbusOtherTest, GetCommonDeviceModelNameTest001, TestSize.Level0)
+{
+    uint32_t len = 10;
+    int32_t ret = GetCommonDeviceModelName(nullptr, len);
+    EXPECT_EQ(ret, SOFTBUS_INVALID_PARAM);
+}
+
+/*
+ * @tc.name: GetDeviceSecurityLevelTest001
+ * @tc.desc: value is illegal
+ * @tc.type: FUNC
+ * @tc.require: 1
+ */
+HWTEST_F(DsoftbusOtherTest, GetDeviceSecurityLevelTest001, TestSize.Level0)
+{
+    int32_t *level = nullptr;
+    int32_t ret = GetDeviceSecurityLevel(level);
+    EXPECT_EQ(ret, SOFTBUS_INVALID_PARAM);
+}
 } // namespace OHOS
