@@ -202,7 +202,7 @@ static TcpDirectChannelInfo *TransGetNewTcpChannel(const ChannelInfo *channel)
         TRANS_LOGE(TRANS_SDK, "init fd lock failed");
         return NULL;
     }
-    if (memcpy_s(item->detail.sessionKey, SESSION_KEY_LENGTH, channel->sessionKey, SESSION_KEY_LENGTH) != EOK) {
+    if (memcpy_s(item->detail.sessionKey, SESSION_KEY_LENGTH, channel->sessionKey, channel->keyLen) != EOK) {
         (void)SoftBusMutexDestroy(&(item->detail.fdLock));
         SoftBusFree(item);
         TRANS_LOGE(TRANS_SDK, "sessionKey copy failed");
