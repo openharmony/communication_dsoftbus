@@ -315,7 +315,7 @@ static int32_t CreateUkNegotiateInstance(
         ReleaseUkNegotiateListLock();
         return SOFTBUS_MEM_ERR;
     }
-    instance->channelId = channelId;
+    instance->channelId = (int32_t)channelId;
     instance->requestId = requestId;
     instance->info = *info;
     instance->authMode = GetHichainAuthMode(info);

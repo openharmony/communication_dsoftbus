@@ -106,11 +106,11 @@ void LnnSendSleInfoForAllNode(void)
     int32_t infoNum = 0;
     if (LnnGetAllOnlineNodeInfo(&info, &infoNum) != SOFTBUS_OK) {
         LNN_LOGE(LNN_LEDGER, "get all online node info fail");
-        SoftBusFree(data);
+        cJSON_free(data);
         return;
     }
     if (info == NULL || infoNum == 0) {
-        SoftBusFree(data);
+        cJSON_free(data);
         LNN_LOGE(LNN_LEDGER, "online node is zero");
         return;
     }
@@ -129,7 +129,7 @@ void LnnSendSleInfoForAllNode(void)
         }
         AnonymizeFree(anonyNetworkId);
     }
-    SoftBusFree(data);
+    cJSON_free(data);
     SoftBusFree(info);
 }
 

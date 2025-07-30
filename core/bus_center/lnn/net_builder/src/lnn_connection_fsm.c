@@ -658,7 +658,7 @@ static int32_t GetPeerUdidInfo(NodeInfo *nodeInfo, char *udidData, char *peerUdi
 static void SetOnlineType(int32_t reason, NodeInfo *nodeInfo, LnnEventExtra extra)
 {
     if (reason == SOFTBUS_OK) {
-        extra.onlineType = DfxRecordLnnOnlineType(nodeInfo);
+        extra.onlineType = (uint32_t)DfxRecordLnnOnlineType(nodeInfo);
     } else {
         extra.onlineType = ONLINE_TYPE_INVALID;
     }
