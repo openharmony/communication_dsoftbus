@@ -936,6 +936,7 @@ void VtpStreamSocket::RegisterMetricCallback(bool isServer)
 bool VtpStreamSocket::Accept()
 {
     TRANS_LOGD(TRANS_STREAM, "enter.");
+    std::lock_guard<std::mutex> guard(streamSocketLock_);
     auto fd = FtAccept(listenFd_, nullptr, nullptr);
     TRANS_LOGI(TRANS_STREAM, "accept streamFd=%{public}d", fd);
     if (fd == -1) {
@@ -971,7 +972,6 @@ bool VtpStreamSocket::Accept()
         return false;
     }
 
-    std::lock_guard<std::mutex> guard(streamSocketLock_);
     streamFd_ = fd;
     configCv_.notify_all();
 
