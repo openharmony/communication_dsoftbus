@@ -1242,6 +1242,8 @@ HWTEST_F(TransTcpDirectTest, TransTdcSendBytesTest001, TestSize.Level1)
     ASSERT_NE(info, nullptr);
     g_tcpDirectChannelInfoList = CreateSoftBusList();
     ASSERT_NE(g_tcpDirectChannelInfoList, nullptr);
+    NiceMock<TransTcpDirectInterfaceMock> tcpDirectMock;
+    EXPECT_CALL(tcpDirectMock, SoftBusSocketGetError).WillRepeatedly(Return(SOFTBUS_CONN_BAD_FD));
 
     info->channelId = channelId;
     info->detail.needRelease = true;
@@ -1254,8 +1256,7 @@ HWTEST_F(TransTcpDirectTest, TransTdcSendBytesTest001, TestSize.Level1)
 
     info->detail.needRelease = false;
     ret = TransTdcSendBytes(channelId, data, len, false);
-    EXPECT_EQ(ret, SOFTBUS_TRANS_SESSION_INFO_NOT_FOUND);
-    SoftBusFree(info);
+    EXPECT_EQ(ret, SOFTBUS_TRANS_TDC_GET_INFO_FAILED);
     DestroySoftBusList(g_tcpDirectChannelInfoList);
     g_tcpDirectChannelInfoList = nullptr;
 }

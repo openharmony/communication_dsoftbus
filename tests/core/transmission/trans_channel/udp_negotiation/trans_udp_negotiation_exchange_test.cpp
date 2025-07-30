@@ -26,7 +26,7 @@ namespace OHOS {
 #define TEST_SOCKET_ADDR "192.168.8.119"
 #define TEST_ERROR_CODE (-12345)
 
-const char *g_sessionKey = "www.huaweitest.com";
+const char *g_sessionKey = "www.test.com";
 const char *g_pkgName = "dms";
 const char *g_sessionName = "ohos.distributedschedule.dms.test";
 const char *g_networkid = "ABCDEF00ABCDEF00ABCDEF00ABCDEF00ABCDEF00ABCDEF00ABCDEF00ABCDEF00";
