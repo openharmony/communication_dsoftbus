@@ -169,21 +169,6 @@ static uint8_t *TestDataSwitch(const uint8_t *data, size_t size)
     return dataWithEndCharacter;
 }
 
-static uint8_t *TestDataSwitch(FuzzedDataProvider &provider)
-{
-    auto dataSize = provider.ConsumeIntegral<uint32_t>();
-    auto data = provider.ConsumeBytes<uint8_t>(dataSize);
-    uint8_t *dataWithEndCharacter = static_cast<uint8_t *>(SoftBusCalloc(dataSize + 1));
-    if (dataWithEndCharacter == nullptr) {
-        return nullptr;
-    }
-    if (memcpy_s(dataWithEndCharacter, dataSize, data.data(), dataSize) != EOK) {
-        SoftBusFree(dataWithEndCharacter);
-        return nullptr;
-    }
-    return dataWithEndCharacter;
-}
-
 void TransProxyGetNewChanSeqTest(const uint8_t *data, size_t size)
 {
     if (data == nullptr || size < sizeof(int32_t)) {
@@ -826,12 +811,12 @@ void TransProxyDeathCallbackTest(const uint8_t *data, size_t size)
 
 void TransProxyDeathCallbackTest(FuzzedDataProvider &provider)
 {
-    uint8_t *dataWithEndCharacter = TestDataSwitch(provider);
-    if (dataWithEndCharacter == nullptr) {
+    std::string providerPkgName = provider.ConsumeBytesAsString(UINT8_MAX - 1);
+    char pkgName[UINT8_MAX] = { 0 };
+    if (strcpy_s(pkgName, UINT8_MAX, providerPkgName.c_str()) != EOK) {
         return;
     }
     int32_t pid = provider.ConsumeIntegral<int32_t>();
-    char *pkgName = const_cast<char *>(reinterpret_cast<const char *>(dataWithEndCharacter));
 
     int32_t channelId = provider.ConsumeIntegral<int32_t>();
     AppInfo appInfo;
@@ -850,8 +835,8 @@ void TransProxyDeathCallbackTest(FuzzedDataProvider &provider)
     proxyChannelInfo->channelId = channelId;
     (void)TransProxyCreateChanInfo(proxyChannelInfo, channelId, &appInfo);
 
+    TransProxyDeathCallback(nullptr, pid);
     TransProxyDeathCallback(pkgName, pid);
-    SoftBusFree(dataWithEndCharacter);
     TransProxyDelChanByChanId(channelId);
 }
 
