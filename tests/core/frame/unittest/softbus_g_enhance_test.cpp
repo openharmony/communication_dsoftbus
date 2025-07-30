@@ -692,4 +692,17 @@ HWTEST_F(SoftbusGEnhanceTest, SoftbusGEnhanceTest022, TestSize.Level1)
     EXPECT_EQ(LnnDumpControlLaneGroupInfoPacked(0), SOFTBUS_OK);
     EXPECT_FALSE(IsSparkGroupEnabledPacked());
 }
+
+/**
+ * @tc.name: IsInWhitelistPacked023
+ * @tc.desc: IsInWhitelistPacked function test
+ * @tc.type: FUNC
+ * @tc.require:
+ */
+HWTEST_F(SoftbusGEnhanceTest, IsInWhitelistPacked023, TestSize.Level1)
+{
+    const char *appName = "ohos.samples.distributedmusicplayer";
+    bool ret = IsInWhitelistPacked(appName);
+    EXPECT_EQ(ret, true);
+}
 }

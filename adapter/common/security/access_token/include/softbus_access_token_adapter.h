@@ -51,7 +51,7 @@ int32_t SoftBusCheckDmsServerPermission(uint64_t tokenId);
 bool SoftBusCheckIsCollabApp(uint64_t fullTokenId, const char *sessionName);
 bool SoftBusCheckIsAccess(void);
 bool SoftBusSaCanUseDeviceKey(uint64_t tokenId);
-bool SoftBusCheckIsSystemApp(uint64_t tokenId);
+bool SoftBusCheckIsSystemApp(uint64_t tokenId, const char *sessionName);
 #ifdef __cplusplus
 #if __cplusplus
 }
