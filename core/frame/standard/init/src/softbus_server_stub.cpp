@@ -34,6 +34,7 @@
 
 #ifdef SUPPORT_BUNDLENAME
 #include "bundle_mgr_proxy.h"
+#include "g_enhance_trans_func_pack.h"
 #include "iservice_registry.h"
 #include "ohos_account_kits.h"
 #include "os_account_manager.h"
@@ -74,16 +75,6 @@ namespace OHOS {
         static const char *DB_PACKAGE_NAME = "distributeddata-default";
         static const char *DM_PACKAGE_NAME = "ohos.distributedhardware.devicemanager";
         static const char *MSDP_PACKAGE_NAME = "ohos.msdp.spatialawareness";
-#ifdef SUPPORT_BUNDLENAME
-        constexpr int32_t SYSTEM_APP_NUMS = 5;
-        static constexpr std::array<const char*, SYSTEM_APP_NUMS> systemAppWhitelist = {
-            "com.huawei.hmos.hiviewcare",
-            "com.ohos.plrdtest.hongyan",
-            "com.huawei.hmos.aibase",
-            "ohos.samples.distributedmusicplayer",
-            "com.huawei.hmos.camera"
-        };
-#endif // SUPPORT_BUNDLENAME
     }
 
 int32_t SoftBusServerStub::CheckOpenSessionPermission(const SessionParam *param)
@@ -415,9 +406,8 @@ static int32_t GetAppId(const std::string &bundleName, std::string &appId)
 }
 
 static int32_t CheckNormalAppSessionName(
-    const char *sessionName, pid_t callingUid, std::string &strName)
+    const char *sessionName, pid_t callingUid, std::string &strName, uint64_t callingFullTokenId)
 {
-    uint64_t callingFullTokenId = IPCSkeleton::GetCallingFullTokenID();
     if (SoftBusCheckIsNormalApp(callingFullTokenId, sessionName)) {
         std::string bundleName;
         int32_t result = GetBundleName(callingUid, bundleName);
@@ -454,31 +444,13 @@ static int32_t CheckNormalAppSessionName(
     return SOFTBUS_OK;
 }
 
-static bool IsInWhitelist(std::string_view app)
+static int32_t TransCheckSystemAppList(pid_t callingUid)
 {
-    return std::find(systemAppWhitelist.begin(), systemAppWhitelist.end(), app) != systemAppWhitelist.end();
-}
-
-static int32_t TransCheckSystemAppList(pid_t callingUid, const char *sessionName)
-{
-    // if sessionName is DBinder or DMS should be return
-    #define DBINDER_BUS_NAME_PREFIX "DBinder"
-    if (strncmp(sessionName, DBINDER_BUS_NAME_PREFIX, strlen(DBINDER_BUS_NAME_PREFIX)) == 0) {
-        return SOFTBUS_OK;
-    }
-    #define DMS_COLLABATION_NAME_PREFIX "ohos.dtbcollab.dms"
-    if (strncmp(sessionName, DMS_COLLABATION_NAME_PREFIX, strlen(DMS_COLLABATION_NAME_PREFIX)) == 0) {
-        return SOFTBUS_OK;
-    }
-    uint64_t callingFullTokenId = IPCSkeleton::GetCallingFullTokenID();
-    if (SoftBusCheckIsSystemApp(callingFullTokenId) == false) {
-        return SOFTBUS_OK;
-    }
     std::string bundleName;
     int32_t ret = GetBundleName(callingUid, bundleName);
     COMM_CHECK_AND_RETURN_RET_LOGE(ret == SOFTBUS_OK, ret, COMM_SVC, "get bundle name failed.");
 
-    if (!IsInWhitelist(bundleName)) {
+    if (!IsInWhitelistPacked(bundleName.c_str())) {
         COMM_LOGE(COMM_SVC, "not found bundleName in system app whitelist.");
         return SOFTBUS_TRANS_NOT_FIND_BUNDLENAME;
     }
@@ -492,6 +464,9 @@ int32_t SoftBusServerStub::CreateSessionServerInner(MessageParcel &data, Message
     int32_t retReply;
     pid_t callingUid;
     pid_t callingPid;
+#ifdef SUPPORT_BUNDLENAME
+    uint64_t callingFullTokenId = IPCSkeleton::GetCallingFullTokenID();
+#endif
     const char *pkgName = data.ReadCString();
     if (pkgName == nullptr) {
         COMM_LOGE(COMM_SVC, "CreateSessionServerInner read pkgName failed!");
@@ -514,13 +489,16 @@ int32_t SoftBusServerStub::CreateSessionServerInner(MessageParcel &data, Message
         goto EXIT;
     }
 #ifdef SUPPORT_BUNDLENAME
-    if (TransCheckSystemAppList(callingUid, sessionName) != SOFTBUS_OK) {
-        retReply = SOFTBUS_PERMISSION_DENIED;
-        goto EXIT;
-    }
-    if (CheckNormalAppSessionName(sessionName, callingUid, strName) != SOFTBUS_OK) {
-        retReply = SOFTBUS_PERMISSION_DENIED;
-        goto EXIT;
+    if (SoftBusCheckIsSystemApp(callingFullTokenId, sessionName) == true) {
+        if (TransCheckSystemAppList(callingUid) != SOFTBUS_OK) {
+            retReply = SOFTBUS_PERMISSION_DENIED;
+            goto EXIT;
+        }
+    } else {
+        if (CheckNormalAppSessionName(sessionName, callingUid, strName, callingFullTokenId) != SOFTBUS_OK) {
+            retReply = SOFTBUS_PERMISSION_DENIED;
+            goto EXIT;
+        }
     }
     sessionName = strName.c_str();
 #endif

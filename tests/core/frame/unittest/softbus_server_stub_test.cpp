@@ -24,6 +24,7 @@
 #include "iservice_registry.h"
 #include "message_option.h"
 #include "message_parcel.h"
+#include "session_ipc_adapter.h"
 #include "softbus_access_token_test.h"
 #include "softbus_adapter_mem.h"
 #include "softbus_common.h"
@@ -2198,7 +2199,7 @@ HWTEST_F(SoftbusServerStubTest, SoftbusServerStubTest058, TestSize.Level1)
     std::string bundleName = "test";
     MessageParcel data;
     ReadSessionAttrs(data, nullptr);
-    int32_t ret = CheckNormalAppSessionName(nullptr, 0, bundleName);
+    int32_t ret = CheckNormalAppSessionName(nullptr, 0, bundleName, 0);
     EXPECT_EQ(ret, SOFTBUS_TRANS_GET_BUNDLENAME_FAILED);
 }
 
@@ -2299,5 +2300,53 @@ HWTEST_F(SoftbusServerStubTest, SoftbusServerStubTest061, TestSize.Level1)
     EXPECT_CALL(softbusServerStubMock, CheckLnnPermission).WillRepeatedly(Return(SOFTBUS_PERMISSION_DENIED));
     ret = softBusServer->SetDisplayNameInner(datas, reply);
     EXPECT_EQ(SOFTBUS_PERMISSION_DENIED, ret);
+}
+
+/**
+ * @tc.name:SoftBusCheckIsSystemApp062
+ * @tc.desc: SoftBusCheckIsSystemApp
+ * @tc.type: FUNC
+ * @tc.require:
+ */
+HWTEST_F(SoftbusServerStubTest, SoftBusCheckIsSystemApp062, TestSize.Level0)
+{
+    const char *sessionName = "DBinder";
+    uint64_t fullTokenId = 0;
+    int32_t ret = SoftBusCheckIsSystemApp(fullTokenId, sessionName);
+    EXPECT_FALSE(ret);
+
+    ret = SoftBusCheckIsSystemApp(fullTokenId, nullptr);
+    EXPECT_FALSE(ret);
+}
+
+/**
+ * @tc.name:SoftBusCheckIsSystemApp063
+ * @tc.desc: SoftBusCheckIsSystemApp
+ * @tc.type: FUNC
+ * @tc.require:
+ */
+HWTEST_F(SoftbusServerStubTest, SoftBusCheckIsSystemApp063, TestSize.Level0)
+{
+    const char *sessionName = "ohos.dtbcollab.dms";
+    uint64_t fullTokenId = 0;
+    int32_t ret = SoftBusCheckIsSystemApp(fullTokenId, sessionName);
+    EXPECT_FALSE(ret);
+}
+
+/**
+ * @tc.name:SoftBusCheckIsSystemApp064
+ * @tc.desc: SoftBusCheckIsSystemApp
+ * @tc.type: FUNC
+ * @tc.require:
+ */
+HWTEST_F(SoftbusServerStubTest, SoftBusCheckIsSystemApp064, TestSize.Level0)
+{
+    uint32_t fullTokenId;
+    const char *sessionName = "com.aijowiaow.cn";
+    int32_t ret = SoftBusGetCallingTokenId(&fullTokenId);
+    EXPECT_EQ(ret, SOFTBUS_OK);
+
+    ret = SoftBusCheckIsSystemApp(fullTokenId, sessionName);
+    EXPECT_FALSE(ret);
 }
 }
