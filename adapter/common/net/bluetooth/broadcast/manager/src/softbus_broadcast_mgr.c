@@ -119,8 +119,8 @@ static int32_t g_bcMaxNum = 0;
 static int32_t g_bcCurrentNum = 0;
 static int32_t g_bcOverMaxNum = 0;
 static DiscEventExtra g_bcManagerExtra[BC_NUM_MAX] = { 0 };
-static BroadcastManager g_bcManager[BC_NUM_MAX];
-static ScanManager g_scanManager[SCAN_NUM_MAX];
+static BroadcastManager g_bcManager[BC_NUM_MAX] = { 0 };
+static ScanManager g_scanManager[SCAN_NUM_MAX] = { 0 };
 static bool g_firstSetIndex[MAX_FILTER_SIZE + 1] = {false};
 
 static AdapterScannerControl g_AdapterStatusControl[GATT_SCAN_MAX_NUM] = {
@@ -893,7 +893,7 @@ static void BcReportScanDataCallback(BroadcastProtocol protocol,
     BroadcastReportInfo bcInfo;
     int32_t ret = BuildBroadcastReportInfo(reportData, &bcInfo);
     DISC_CHECK_AND_RETURN_LOGE(ret == SOFTBUS_OK, DISC_BROADCAST, "build bc report info failed");
-
+    bool isFindMatchFiter = false;
     for (uint32_t managerId = 0; managerId < SCAN_NUM_MAX; managerId++) {
         if (SoftBusMutexLock(&g_scanLock) != 0) {
             ReleaseBroadcastReportInfo(&bcInfo);
@@ -910,12 +910,15 @@ static void BcReportScanDataCallback(BroadcastProtocol protocol,
             SoftBusMutexUnlock(&g_scanLock);
             continue;
         }
-
+        isFindMatchFiter = true;
         DISC_LOGD(DISC_BROADCAST, "srvType=%{public}s, managerId=%{public}u, adapterScanId=%{public}d",
             GetSrvType(scanManager->srvType), managerId, adapterScanId);
         ScanCallback callback = *(scanManager->scanCallback);
         SoftBusMutexUnlock(&g_scanLock);
         callback.OnReportScanDataCallback((int32_t)managerId, &bcInfo);
+    }
+    if (!isFindMatchFiter) {
+        DISC_LOGW(DISC_BROADCAST, "not find matched filter, adapterScanId=%{public}d", adapterScanId);
     }
     ReleaseBroadcastReportInfo(&bcInfo);
 }
@@ -1303,9 +1306,10 @@ static void ReleaseBcScanFilter(int listenerId)
 static bool CheckNeedUnRegisterScanListener(int32_t listenerId)
 {
     int32_t adapterScanId = g_scanManager[listenerId].adapterScanId;
+    BroadcastProtocol protocol = g_scanManager[listenerId].protocol;
     for (int32_t managerId = 0; managerId < SCAN_NUM_MAX; managerId++) {
         if (managerId != listenerId && g_scanManager[managerId].adapterScanId == adapterScanId &&
-            g_scanManager[managerId].isScanning) {
+            g_scanManager[managerId].isScanning && g_scanManager[managerId].protocol == protocol) {
             return false;
         }
     }
@@ -1317,9 +1321,10 @@ static bool CheckNeedUpdateScan(int32_t listenerId, int32_t *liveListenerId)
     DISC_CHECK_AND_RETURN_RET_LOGE(liveListenerId != NULL, false, DISC_BROADCAST, "liveListenerId is nullptr");
 
     int32_t adapterScanId = g_scanManager[listenerId].adapterScanId;
+    BroadcastProtocol protocol = g_scanManager[listenerId].protocol;
     for (int32_t managerId = 0; managerId < SCAN_NUM_MAX; managerId++) {
         if (managerId != listenerId && g_scanManager[managerId].adapterScanId == adapterScanId &&
-            g_scanManager[managerId].isScanning) {
+            g_scanManager[managerId].isScanning && g_scanManager[managerId].protocol == protocol) {
             *liveListenerId = managerId;
             return true;
         }
@@ -1450,10 +1455,12 @@ static int32_t CombineSoftbusBcScanFilters(int32_t listenerId, SoftBusBcScanFilt
     DISC_CHECK_AND_RETURN_RET_LOGE(filterSize != NULL, SOFTBUS_INVALID_PARAM, DISC_BROADCAST, "filterSize is nullptr");
 
     uint8_t size = 0;
+    BroadcastProtocol protocol = g_scanManager[listenerId].protocol;
     for (int32_t managerId = 0; managerId < SCAN_NUM_MAX; managerId++) {
         ScanManager *scanManager = &g_scanManager[managerId];
         if (!scanManager->isUsed || (!scanManager->isScanning && managerId != listenerId) ||
-            scanManager->adapterScanId != g_scanManager[listenerId].adapterScanId) {
+            scanManager->adapterScanId != g_scanManager[listenerId].adapterScanId ||
+            scanManager->protocol != protocol) {
             continue;
         }
 
@@ -1466,7 +1473,8 @@ static int32_t CombineSoftbusBcScanFilters(int32_t listenerId, SoftBusBcScanFilt
     for (int32_t managerId = 0; managerId < SCAN_NUM_MAX; managerId++) {
         ScanManager *scanManager = &g_scanManager[managerId];
         if (!scanManager->isUsed || (!scanManager->isScanning && managerId != listenerId) ||
-            scanManager->adapterScanId != g_scanManager[listenerId].adapterScanId) {
+            scanManager->adapterScanId != g_scanManager[listenerId].adapterScanId ||
+            scanManager->protocol != protocol) {
             continue;
         }
 
@@ -2437,7 +2445,7 @@ static int32_t CheckNotScaning(int32_t listenerId, SoftBusBcScanParams *adapterP
     return ret;
 }
 
-static int32_t processFliterChanged(int32_t listenerId, SoftBusBcScanParams *adapterParam,
+static int32_t ProcessFliterChanged(int32_t listenerId, SoftBusBcScanParams *adapterParam,
     SoftBusBcScanFilter *adapterFilter, int32_t filterSize)
 {
     int32_t ret = -1;
@@ -2495,7 +2503,7 @@ static int32_t CheckChannelScan(BroadcastProtocol protocol, int32_t listenerId, 
     int32_t filterSize = 0;
     int32_t ret = 0;
     if (g_scanManager[listenerId].isFliterChanged) {
-        return processFliterChanged(listenerId, adapterParam, adapterFilter, filterSize);
+        return ProcessFliterChanged(listenerId, adapterParam, adapterFilter, filterSize);
     }
     ret = g_interface[protocol]->SetScanParams(g_scanManager[listenerId].adapterScanId, adapterParam,
         NULL, 0, SOFTBUS_SCAN_FILTER_CMD_NONE);
