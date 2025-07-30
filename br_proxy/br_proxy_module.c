@@ -812,8 +812,8 @@ static void OnChannelStatusChanged(int32_t channelId, int32_t status)
     args->channelId = channelId;
     args->status = status;
 
-    napi_status status = napi_call_threadsafe_function(tsfn_channel_status, args, napi_tsfn_nonblocking);
-    if (status != napi_ok) {
+    napi_status ret = napi_call_threadsafe_function(tsfn_channel_status, args, napi_tsfn_nonblocking);
+    if (ret != napi_ok) {
         SoftBusFree(args);
     }
 }
