@@ -26,8 +26,8 @@
 using namespace testing::ext;
 
 namespace OHOS {
-const char *g_pkgName = "com.huawei.plrdtest.dsoftbus";
-const char *g_sessionName = "com.huawei.plrdtest.dsoftbus.test";
+const char *g_pkgName = "com.plrdtest.dsoftbus";
+const char *g_sessionName = "com.plrdtest.dsoftbus.test";
 const char *g_networkid = "ABCDEF00ABCDEF00ABCDEF00ABCDEF00ABCDEF00ABCDEF00ABCDEF00ABCDEF00";
 const char *g_groupid = "TEST_GROUP_ID";
 static SessionAttribute g_sessionAttr = {

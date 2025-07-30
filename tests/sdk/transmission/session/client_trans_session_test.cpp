@@ -62,7 +62,7 @@ namespace OHOS {
 
 const char *g_pkgName = "dms";
 const char *g_sessionName = "ohos.distributedschedule.dms.test";
-const char *g_sessionKey = "www.huaweitest.com";
+const char *g_sessionKey = "www.test.com";
 const char *g_networkId = "ABCDEF00ABCDEF00ABCDEF00ABCDEF00ABCDEF00ABCDEF00ABCDEF00ABCDEF0";
 const char *g_deviceId = "ABCDEF00ABCDEF00ABCDEF00ABCDEF00ABCDEF00ABCDEF00ABCDEF00ABCDEF0";
 const char *g_groupId = "TEST_GROUP_ID";
