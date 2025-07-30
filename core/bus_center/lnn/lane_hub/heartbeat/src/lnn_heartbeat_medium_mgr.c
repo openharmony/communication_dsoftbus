@@ -583,7 +583,7 @@ static bool IsAccountChange(DeviceInfo *device, NodeInfo *cacheDeviceInfo)
 
 static bool IsNeedConnectOnLine(DeviceInfo *device, HbRespData *hbResp, ConnectOnlineReason *connectReason)
 {
-    LNN_CHECK_AND_RETURN_RET_LOGE((hbResp != NULL) && (hbResp->stateVersion != STATE_VERSION_INVALID),
+    LNN_CHECK_AND_RETURN_RET_LOGW((hbResp != NULL) && (hbResp->stateVersion != STATE_VERSION_INVALID),
         true, LNN_HEART_BEAT,  "ble don't support ble direct online");
     int32_t ret, stateVersion;
     NodeInfo deviceInfo;

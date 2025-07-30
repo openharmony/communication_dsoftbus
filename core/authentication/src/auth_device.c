@@ -633,6 +633,10 @@ int32_t AuthStartReconnectDevice(
 {
     AUTH_CHECK_AND_RETURN_RET_LOGE(connInfo != NULL, SOFTBUS_INVALID_PARAM, AUTH_CONN, "connInfo is NULL");
     AUTH_CHECK_AND_RETURN_RET_LOGE(connCb != NULL, SOFTBUS_INVALID_PARAM, AUTH_CONN, "connCb is NULL");
+    if (connInfo->type < AUTH_LINK_TYPE_WIFI || connInfo->type >= AUTH_LINK_TYPE_MAX) {
+        AUTH_LOGE(AUTH_CONN, "connInfo type error");
+        return SOFTBUS_INVALID_PARAM;
+    }
     AUTH_LOGI(AUTH_CONN, "start reconnect device. requestId=%{public}u, authId=%{public}" PRId64,
         requestId, authHandle.authId);
     AuthManager *auth = GetAuthManagerByAuthId(authHandle.authId);
