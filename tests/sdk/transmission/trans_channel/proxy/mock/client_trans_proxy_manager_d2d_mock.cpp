@@ -59,10 +59,9 @@ int32_t TransProxyProcessD2DData(ProxyDataInfo *dataInfo, const PacketD2DHead *d
 }
 
 int32_t TransProxyDecryptD2DData(int32_t businessType, ProxyDataInfo *dataInfo, const char *sessionKey,
-    const char *sessionBytesIv, const unsigned char *sessionMsgIv)
+    const unsigned char *sessionCommonIv)
 {
-    return GetProxyManagerD2DInterface()->TransProxyDecryptD2DData(businessType, dataInfo, sessionKey,
-        sessionBytesIv, sessionMsgIv);
+    return GetProxyManagerD2DInterface()->TransProxyDecryptD2DData(businessType, dataInfo, sessionKey, sessionCommonIv);
 }
 
 int32_t TransProxySessionDataLenCheck(uint32_t dataLen, SessionPktType type)
