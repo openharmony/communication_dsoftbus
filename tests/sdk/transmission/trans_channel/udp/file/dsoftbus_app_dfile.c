@@ -51,9 +51,9 @@ typedef enum {
     LNN_STATE_LEAVELNN,         // 21
 } StatusNum;
 
-static const char *g_testModuleName    = "com.huawei.plrdtest.dsoftbus";
-static const char *g_testSessionName   = "com.huawei.plrdtest.dsoftbus.JtOpenFileSession";
-static const char *g_testSessionNameE2 = "com.huawei.plrdtest.dsoftbus.JtOnOpenFileSession";
+static const char *g_testModuleName    = "com.plrdtest.dsoftbus";
+static const char *g_testSessionName   = "com.plrdtest.dsoftbus.JtOpenFileSession";
+static const char *g_testSessionNameE2 = "com.plrdtest.dsoftbus.JtOnOpenFileSession";
 static const char *g_testGroupId = "g_testGroupId";
 static ISessionListener g_sessionlistener;
 static SessionAttribute g_sessionAttr;

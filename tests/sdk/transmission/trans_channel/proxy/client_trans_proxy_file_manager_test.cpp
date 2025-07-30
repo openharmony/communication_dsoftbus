@@ -73,7 +73,7 @@ char g_writeData[128] = "test111111111111111111111111111111111111111111111111111
 const char *g_rootDir = "/data";
 const char *g_destFile = "test.txt";
 char g_recvFile[] = "/data/test.txt";
-const char *g_sessionKey = "www.huaweitest.com";
+const char *g_sessionKey = "www.test.com";
 
 SessionAttribute g_attr = {
     .dataType = TYPE_MESSAGE,
