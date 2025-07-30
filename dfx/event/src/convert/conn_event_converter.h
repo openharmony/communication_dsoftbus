@@ -61,6 +61,7 @@ CONN_ASSIGNER(AnonymizeString, PeerIp, peerIp)
 CONN_ASSIGNER(AnonymizeString, PeerBrMac, peerBrMac)
 CONN_ASSIGNER(AnonymizeString, PeerBleMac, peerBleMac)
 CONN_ASSIGNER(AnonymizeString, PeerWifiMac, peerWifiMac)
+CONN_ASSIGNER(AnonymizeString, PeerSleMac, peerSleMac)
 CONN_ASSIGNER(String, PeerPort, peerPort)
 CONN_ASSIGNER(AnonymizeString, PeerNetworkId, peerNetworkId)
 CONN_ASSIGNER(AnonymizeString, PeerUdid, peerUdid)
@@ -68,6 +69,8 @@ CONN_ASSIGNER(String, PeerDeviceType, peerDeviceType)
 CONN_ASSIGNER(AnonymizeString, LocalNetworkId, localNetworkId)
 CONN_ASSIGNER(String, CallerPkg, callerPkg)
 CONN_ASSIGNER(String, CalleePkg, calleePkg)
+CONN_ASSIGNER(String, SrcAccountIdHash, srcAccountIdHash)
+CONN_ASSIGNER(String, DstAccountIdHash, dstAccountIdHash)
 CONN_ASSIGNER(Errcode, BootLinkType, bootLinkType)
 CONN_ASSIGNER(Errcode, IsRenegotiate, isRenegotiate)
 CONN_ASSIGNER(Errcode, IsReuse, isReuse)
@@ -94,8 +97,12 @@ CONN_ASSIGNER(Errcode, NeedHmlConnect, needHmlConnect)
 CONN_ASSIGNER(String, BusinessTag, businessTag)
 CONN_ASSIGNER(Errcode, StaChload, staChload)
 CONN_ASSIGNER(Errcode, SameAccount, sameAccount)
+CONN_ASSIGNER(Errcode, DiscoveryCnt, discoveryCnt)
+CONN_ASSIGNER(Errcode, ConnectingCnt, connectingCnt)
+CONN_ASSIGNER(Errcode, ConnectSuccessCnt, connectSuccessCnt)
+CONN_ASSIGNER(Errcode, ConnectFailCnt, connectFailCnt)
 
-#define CONN_ASSIGNER_SIZE 60 // Size of g_connAssigners
+#define CONN_ASSIGNER_SIZE 67 // Size of g_connAssigners
 static HiSysEventParamAssigner g_connAssigners[] = {
     { "STAGE_RES",         HISYSEVENT_INT32,  ConnAssignerResult        },
     { "ERROR_CODE",        HISYSEVENT_INT32,  ConnAssignerErrcode       },
@@ -124,6 +131,7 @@ static HiSysEventParamAssigner g_connAssigners[] = {
     { "PEER_BR_MAC",       HISYSEVENT_STRING, ConnAssignerPeerBrMac     },
     { "PEER_BLE_MAC",      HISYSEVENT_STRING, ConnAssignerPeerBleMac    },
     { "PEER_WIFI_MAC",     HISYSEVENT_STRING, ConnAssignerPeerWifiMac   },
+    { "PEER_SLE_MAC",      HISYSEVENT_STRING, ConnAssignerPeerSleMac    },
     { "PEER_PORT",         HISYSEVENT_STRING, ConnAssignerPeerPort      },
     { "PEER_NET_ID",       HISYSEVENT_STRING, ConnAssignerPeerNetworkId },
     { "PEER_UDID",         HISYSEVENT_STRING, ConnAssignerPeerUdid      },
@@ -131,6 +139,8 @@ static HiSysEventParamAssigner g_connAssigners[] = {
     { "LOCAL_NET_ID",      HISYSEVENT_STRING, ConnAssignerLocalNetworkId},
     { "HOST_PKG",          HISYSEVENT_STRING, ConnAssignerCallerPkg     },
     { "TO_CALL_PKG",       HISYSEVENT_STRING, ConnAssignerCalleePkg     },
+    { "SRC_ACCOUNT_ID_HASH",    HISYSEVENT_STRING, ConnAssignerSrcAccountIdHash     },
+    { "DST_ACCOUNT_ID_HASH",    HISYSEVENT_STRING, ConnAssignerDstAccountIdHash     },
     { "BOOT_LINK_TYPE",    HISYSEVENT_INT32,  ConnAssignerBootLinkType  },
     { "IS_RENEGOTIATE",    HISYSEVENT_INT32,  ConnAssignerIsRenegotiate },
     { "IS_REUSE",          HISYSEVENT_INT32,  ConnAssignerIsReuse       },
@@ -157,6 +167,10 @@ static HiSysEventParamAssigner g_connAssigners[] = {
     { "BUSINESS_TAG",           HISYSEVENT_STRING, ConnAssignerBusinessTag         },
     { "STA_CHLOAD",             HISYSEVENT_INT32,  ConnAssignerStaChload           },
     { "SAME_ACCOUNT",           HISYSEVENT_INT32,  ConnAssignerSameAccount         },
+    { "DISCOVERY_CNT",          HISYSEVENT_INT32,  ConnAssignerDiscoveryCnt         },
+    { "CONNECTING_CNT",         HISYSEVENT_INT32,  ConnAssignerConnectingCnt        },
+    { "CONNECT_SUCCESS_CNT",    HISYSEVENT_INT32,  ConnAssignerConnectSuccessCnt    },
+    { "CONNECT_FAIL_CNT",       HISYSEVENT_INT32,  ConnAssignerConnectFailCnt       },
  // Modification Note: remember updating CONN_ASSIGNER_SIZE
 };
 
