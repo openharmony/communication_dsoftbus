@@ -922,10 +922,10 @@ static int32_t SendApplyKeyNegoDeviceId(uint32_t connId, const RequestBusinessIn
     };
     if (PostApplyKeyData(connId, false, &head, (uint8_t *)applyKeyParams) != SOFTBUS_OK) {
         AUTH_LOGE(AUTH_CONN, "post apply key data fail");
-        SoftBusFree(applyKeyParams);
+        cJSON_free(applyKeyParams);
         return SOFTBUS_AUTH_SEND_FAIL;
     }
-    SoftBusFree(applyKeyParams);
+    cJSON_free(applyKeyParams);
     return SOFTBUS_OK;
 }
 
