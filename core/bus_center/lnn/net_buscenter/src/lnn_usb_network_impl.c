@@ -455,7 +455,7 @@ static void OnSoftbusIpNetworkDisconnected(LnnPhysicalSubnet *subnet)
 static void OnIpNetifStatusChanged(LnnPhysicalSubnet *subnet, void *status)
 {
     if (subnet == NULL) {
-        LNN_LOGE(LNN_BUILDER, "invalid subnet parameter");
+        LNN_LOGE(LNN_BUILDER, "invaild subnet paramter");
         if (status != NULL) {
             SoftBusFree(status);
         }
