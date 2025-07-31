@@ -2378,6 +2378,7 @@ int32_t TransProxyManagerInit(const IServerChannelCallBack *cb)
     ret = RegisterTimeoutCallback(SOFTBUS_PROXYCHANNEL_TIMER_FUN, TransProxyTimerProc);
     if (ret != SOFTBUS_OK) {
         DestroySoftBusList(g_proxyChannelList);
+        g_proxyChannelList = NULL;
         TRANS_LOGE(TRANS_INIT, "trans proxy register timeout callback failed.");
         return ret;
     }
