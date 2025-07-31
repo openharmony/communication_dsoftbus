@@ -104,7 +104,7 @@ int32_t SocketSendEx(const Socket *s, uint16_t mss, const struct iovec *iov, uin
 
     return ret;
 }
-#ifndef NSTACKX_WITH_HMOS_LINUX
+#ifndef NSTACKX_WITH_LINUX
 static int32_t SendUdpSegment(struct sockaddr_in *sa)
 {
     int32_t err;
@@ -185,7 +185,7 @@ static int32_t LocalAddrBindAndGet(int32_t fd, struct sockaddr_in *sa)
 
 void CheckGSOSupport(void)
 {
-#ifndef NSTACKX_WITH_HMOS_LINUX
+#ifndef NSTACKX_WITH_LINUX
     int32_t fd;
     struct sockaddr_in sa = {0};
 

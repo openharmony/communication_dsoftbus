@@ -122,7 +122,7 @@ if (defined(ohos_lite)) {
       } else if (ohos_kernel_type == "linux") {
         cflags += [
           "-Wall",
-          "-DNSTACKX_WITH_HMOS_LINUX",
+          "-DNSTACKX_WITH_LINUX",
           "-DMBEDTLS_INCLUDED",
           "-DENABLE_USER_LOG",
         ]
@@ -183,7 +183,7 @@ if (defined(ohos_lite)) {
     branch_protector_ret = "pac_ret"
 
     cflags += [
-      "-DNSTACKX_WITH_HMOS_LINUX",
+      "-DNSTACKX_WITH_LINUX",
       "-DENABLE_USER_LOG",
       "-DNSTACKX_WITH_LINUX_STANDARD",
     ]
