@@ -568,8 +568,8 @@ static int32_t SendDirectBoardcast(LnnHeartbeatFsm *hbFsm, LnnProcessSendOnceMsg
         .isLastEnd = true,
         .isMsdpRange = msgPara->isMsdpRange,
     };
-    delayTime +=
-        (msgPara->duration <= 0 || msgPara->duration > HB_SEND_ONCE_LEN) ? HB_SEND_DIRECT_LEN_ONCE : msgPara->duration;
+    delayTime += (msgPara->duration <= 0 || msgPara->duration > HB_SEND_ONCE_LEN) ?
+        HB_SEND_DIRECT_LEN_ONCE : (uint32_t)msgPara->duration;
     ret = LnnPostSendEndMsgToHbFsm(hbFsm, &endData, delayTime);
     if (ret != SOFTBUS_OK) {
         LNN_LOGE(LNN_HEART_BEAT, "HB send once last end fail, hbType=%{public}d", registedHbType);
@@ -773,7 +773,11 @@ static int32_t DirectAdvSendStrategy(LnnHeartbeatFsm *hbFsm, void *obj)
 static int32_t RegistParamMgrBySpecificType(LnnHeartbeatType type)
 {
     LnnHeartbeatParamManager *paramMgr = NULL;
-
+    int32_t typeId = LnnConvertHbTypeToId(type);
+    if (typeId < 0 || typeId >= HB_MAX_TYPE_COUNT) {
+        LNN_LOGE(LNN_HEART_BEAT, "HB type invalid");
+        return SOFTBUS_INVALID_PARAM;
+    }
     GearMode mode = {
         .cycle = LOW_FREQ_CYCLE,
         .duration = LONG_DURATION,
@@ -798,7 +802,7 @@ static int32_t RegistParamMgrBySpecificType(LnnHeartbeatType type)
         }
         paramMgr->gearModeCnt++;
     }
-    g_hbParamMgr[LnnConvertHbTypeToId(type)] = paramMgr;
+    g_hbParamMgr[typeId] = paramMgr;
     return SOFTBUS_OK;
 }
 
