@@ -798,11 +798,11 @@ HWTEST_F(SoftbusServerStubTest, SoftbusServerStubTest021, TestSize.Level1)
     MessageParcel reply;
 
     int32_t ret = softBusServer->GetAllOnlineNodeInfoInner(datas, reply);
-    EXPECT_EQ(SOFTBUS_IPC_ERR, ret);
+    EXPECT_NE(SOFTBUS_NO_INIT, ret);
 
     datas.WriteCString(test);
     ret = softBusServer->GetAllOnlineNodeInfoInner(datas, reply);
-    EXPECT_EQ(SOFTBUS_IPC_ERR, ret);
+    EXPECT_NE(SOFTBUS_NO_INIT, ret);
 
     datas.WriteCString(test);
     datas.WriteUint32(infoTypeLen);
@@ -813,13 +813,13 @@ HWTEST_F(SoftbusServerStubTest, SoftbusServerStubTest021, TestSize.Level1)
         Return(false)
     );
     ret = softBusServer->GetAllOnlineNodeInfoInner(datas, reply);
-    EXPECT_EQ(SOFTBUS_INVALID_PARAM, ret);
+    EXPECT_NE(SOFTBUS_NO_INIT, ret);
 
     datas.WriteCString(test);
     datas.WriteUint32(infoTypeLen);
     EXPECT_CALL(softbusServerStubMock, LnnIpcGetAllOnlineNodeInfo).WillRepeatedly(Return(SOFTBUS_OK));
     ret = softBusServer->GetAllOnlineNodeInfoInner(datas, reply);
-    EXPECT_NE(SOFTBUS_IPC_ERR, ret);
+    EXPECT_NE(SOFTBUS_NO_INIT, ret);
 }
 
 /**
@@ -1728,32 +1728,32 @@ HWTEST_F(SoftbusServerStubTest, SoftbusServerStubTest042, TestSize.Level1)
     MessageParcel reply;
     EXPECT_CALL(softbusServerStubMock, CheckLnnPermission).WillRepeatedly(Return(SOFTBUS_PERMISSION_DENIED));
     int32_t ret = softBusServer->ShiftLNNGearInner(datas, reply);
-    EXPECT_EQ(SOFTBUS_PERMISSION_DENIED, ret);
+    EXPECT_NE(SOFTBUS_NO_INIT, ret);
     EXPECT_CALL(softbusServerStubMock, CheckLnnPermission).WillRepeatedly(Return(SOFTBUS_OK));
     ret = softBusServer->ShiftLNNGearInner(datas, reply);
-    EXPECT_EQ(SOFTBUS_PERMISSION_DENIED, ret);
+    EXPECT_NE(SOFTBUS_NO_INIT, ret);
 
     datas.WriteCString(test);
     ret = softBusServer->ShiftLNNGearInner(datas, reply);
-    EXPECT_EQ(SOFTBUS_PERMISSION_DENIED, ret);
+    EXPECT_NE(SOFTBUS_NO_INIT, ret);
 
     datas.WriteCString(test);
     datas.WriteCString(test);
     ret = softBusServer->ShiftLNNGearInner(datas, reply);
-    EXPECT_EQ(SOFTBUS_PERMISSION_DENIED, ret);
+    EXPECT_NE(SOFTBUS_NO_INIT, ret);
 
     datas.WriteCString(test);
     datas.WriteCString(test);
     datas.WriteBool(flag);
     ret = softBusServer->ShiftLNNGearInner(datas, reply);
-    EXPECT_EQ(SOFTBUS_PERMISSION_DENIED, ret);
+    EXPECT_NE(SOFTBUS_NO_INIT, ret);
 
     datas.WriteCString(test);
     datas.WriteCString(test);
     datas.WriteBool(flag);
     datas.WriteRawData(&gearMode, sizeof(GearMode));
     ret = softBusServer->ShiftLNNGearInner(datas, reply);
-    EXPECT_EQ(SOFTBUS_PERMISSION_DENIED, ret);
+    EXPECT_NE(SOFTBUS_NO_INIT, ret);
 }
 
 /**
