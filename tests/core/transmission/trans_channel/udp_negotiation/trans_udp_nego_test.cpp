@@ -36,7 +36,7 @@ using namespace testing::ext;
 
 namespace OHOS {
 static int64_t g_channelId = 0;
-const char *g_sessionKey = "www.huaweitest.com";
+const char *g_sessionKey = "www.test.com";
 const char *g_pkgName = "dms";
 const char *g_sessionName = "ohos.distributedschedule.dms.test";
 const char *g_groupid = "TEST_GROUP_ID";
