@@ -267,7 +267,7 @@ int32_t PostDeviceInfoMessage(int64_t authSeq, const AuthSessionInfo *info)
     DestroySessionKeyList(&sessionKeyList);
     if ((info->connInfo.type == AUTH_LINK_TYPE_WIFI || info->connInfo.type == AUTH_LINK_TYPE_USB) && info->isServer) {
         compressFlag = FLAG_RELAY_DEVICE_INFO;
-        authSeq = 0;
+        authSeq = info->headSeq;
     }
     AuthDataHead head = {
         .dataType = DATA_TYPE_DEVICE_INFO,

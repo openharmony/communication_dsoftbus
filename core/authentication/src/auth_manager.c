@@ -1431,6 +1431,15 @@ static void HandleDeviceInfoData(
             "flag=%{public}d, len=%{public}u, " CONN_INFO ", fromServer=%{public}s",
             head->dataType, head->module, head->seq, head->flag, head->len, CONN_DATA(connId),
             GetAuthSideStr(fromServer));
+        if (!RequireAuthLock()) {
+            AUTH_LOGE(AUTH_FSM, "lock fail");
+            return;
+        }
+        AuthFsm *authFsm = GetAuthFsmByConnId(connId, !fromServer, false);
+        if (authFsm == NULL) {
+            authFsm->info.headSeq = head->seq;
+        }
+        ReleaseAuthLock();
         ret = AuthSessionProcessDevInfoDataByConnId(connId, !fromServer, data, head->len);
     }
     if (ret != SOFTBUS_OK) {
