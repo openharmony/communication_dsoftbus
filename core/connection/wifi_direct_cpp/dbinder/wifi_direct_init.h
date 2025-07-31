@@ -86,7 +86,7 @@ public:
     int32_t LnnConvertDlId(
         const char *srcId, IdCategory srcIdType, IdCategory dstIdType, char *dstIdBuf, uint32_t dstIdBufLen);
     int32_t GetConnectionIdByHandle(AuthHandle handle);
-    int32_t ConnSetKeepaliveByConnectionId(uint32_t connectionId, bool needKeepAlive);
+    int32_t ConnSetKeepaliveByConnectionId(uint32_t connectionId, bool needKeepalive);
 
 private:
     bool OpenSoftbusServerSo();
@@ -135,7 +135,7 @@ private:
     using LnnConvertDlIdFunc = int32_t (*)(
         const char *srcId, IdCategory srcIdType, IdCategory dstIdType, char *dstIdBuf, uint32_t dstIdBufLen);
     using GetConnectionIdByHandleFunc = int32_t (*)(AuthHandle handle);
-    using ConnSetKeepaliveByConnectionIdFunc = int32_t (*)(uint32_t connectionId, bool needKeepAlive);
+    using ConnSetKeepaliveByConnectionIdFunc = int32_t (*)(uint32_t connectionId, bool needKeepalive);
 
     RegAuthTransListenerFunc regAuthTransListenerFunc_ = nullptr;
     AuthGetDeviceUuidFunc authGetDeviceUuidFunc_ = nullptr;

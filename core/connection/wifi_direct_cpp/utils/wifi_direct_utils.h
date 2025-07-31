@@ -113,7 +113,6 @@ public:
     static std::string RemoteDeviceIdToMac(const std::string &remoteDeviceId);
     static std::string RemoteMacToDeviceId(const std::string &remoteMac);
     static int GetLocalScreenStatus();
-    static int GetUdidByNetWorkId(const char *networkId, char *output);
     static int GetChload();
     static std::string RemoveSubstring(const std::string &str, const std::string &substr);
 

@@ -455,7 +455,7 @@ int32_t ConnDisconnectDeviceAllConn(const ConnectOption *option)
     return g_connManager[option->type]->DisconnectDeviceNow(option);
 }
 
-int32_t ConnSetKeepAliveByConnectionId(uint32_t connectionId, bool needKeepalive)
+int32_t ConnSetKeepaliveByConnectionId(uint32_t connectionId, bool needKeepalive)
 {
     ConnectionInfo info = { 0 };
     ConnectType type;

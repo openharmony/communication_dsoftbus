@@ -97,7 +97,7 @@ int32_t ConnTypeIsSupport(ConnectType type);
  * @param[in] needKeepalive tcp need keepalive.
  * @return <b>SOFTBUS_OK</b> set keepalive success.
  */
-int32_t ConnSetKeepAliveByConnectionId(uint32_t connectionId, bool needKeepalive);
+int32_t ConnSetKeepaliveByConnectionId(uint32_t connectionId, bool needKeepalive);
 
 /**
  * @ingroup Softbus_conn_manager
