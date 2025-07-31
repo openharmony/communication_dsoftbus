@@ -812,24 +812,24 @@ int32_t DBinderSoftbusServer::GetConnectionIdByHandle(AuthHandle handle)
     return getConnectionIdByHandleFunc_(handle);
 }
 
-int32_t DBinderSoftbusServer::ConnSetKeepaliveByConnectionId(uint32_t connectionId, bool needKeepAlive)
+int32_t DBinderSoftbusServer::ConnSetKeepaliveByConnectionId(uint32_t connectionId, bool needKeepalive)
 {
     CHECK_INSTANCE_EXIT_WITH_RETVAL(exitFlag_, SOFTBUS_WIFI_DIRECT_INSTANCE_EXIT);
     if (connSetKeepaliveByConnectionIdFunc_ != nullptr) {
-        return connSetKeepaliveByConnectionIdFunc_(connectionId, needKeepAlive);
+        return connSetKeepaliveByConnectionIdFunc_(connectionId, needKeepalive);
     }
 
     if (!OpenSoftbusServerSo()) {
         return SOFTBUS_WIFI_DIRECT_DLOPEN_FAILED;
     }
 
-    connSetKeepaliveByConnectionIdFunc_ =
-        (ConnSetKeepaliveByConnectionIdFunc)dlsym(soHandle_, "ConnSetKeepaliveByConnectionId");
+    connSetKeepaliveByConnectionIdFunc_ = (ConnSetKeepaliveByConnectionIdFunc)dlsym(
+        soHandle_, "ConnSetKeepaliveByConnectionId");
     if (connSetKeepaliveByConnectionIdFunc_ == nullptr) {
         CONN_LOGE(CONN_EVENT, "[wifi_direct_init] dlsym ConnSetKeepaliveByConnectionId failed.");
         return SOFTBUS_WIFI_DIRECT_DLSYM_FAILED;
     }
 
-    return connSetKeepaliveByConnectionIdFunc_(connectionId, needKeepAlive);
+    return connSetKeepaliveByConnectionIdFunc_(connectionId, needKeepalive);
 }
 }

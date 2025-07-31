@@ -106,6 +106,11 @@ typedef enum {
     DEFAULT_POWER,
 } LinkPowerMode;
 
+typedef enum {
+    WIFI_DIRECT_SCREEN_OFF,
+    WIFI_DIRECT_SCREEN_ON,
+} WifiDirectScreenState;
+
 struct WifiDirectLink {
     int32_t linkId;
     char localIp[IP_STR_MAX_LEN];
