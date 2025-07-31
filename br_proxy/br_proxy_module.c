@@ -791,7 +791,11 @@ static void OnDataReceived(int32_t channelId, const char* data, uint32_t dataLen
         return;
     }
 
-    napi_call_threadsafe_function(tsfn_data_received, args, napi_tsfn_nonblocking);
+    napi_status status = napi_call_threadsafe_function(tsfn_data_received, args, napi_tsfn_nonblocking);
+    if (status != napi_ok) {
+        SoftBusFree(args->data);
+        SoftBusFree(args);
+    }
 }
 
 static void OnChannelStatusChanged(int32_t channelId, int32_t status)
@@ -808,7 +812,10 @@ static void OnChannelStatusChanged(int32_t channelId, int32_t status)
     args->channelId = channelId;
     args->status = status;
 
-    napi_call_threadsafe_function(tsfn_channel_status, args, napi_tsfn_nonblocking);
+    napi_status ret = napi_call_threadsafe_function(tsfn_channel_status, args, napi_tsfn_nonblocking);
+    if (ret != napi_ok) {
+        SoftBusFree(args);
+    }
 }
 
 static void SetCallbackInternal(napi_env env, napi_value callback, int32_t channelId, ListenerType type)
