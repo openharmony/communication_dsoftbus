@@ -34,6 +34,9 @@ extern "C" {
         return false;                                                                                         \
     }
 
+TRANS_ASSIGNER(Uint8, TalkieFreq, talkieFreq)
+TRANS_ASSIGNER(Uint8, TalkieType, talkieType)
+TRANS_ASSIGNER(Uint8, TalkieLevel, talkieLevel)
 TRANS_ASSIGNER(Errcode, Result, result)
 TRANS_ASSIGNER(Errcode, Errcode, errcode)
 TRANS_ASSIGNER(AnonymizeString, SocketName, socketName)
@@ -52,6 +55,12 @@ TRANS_ASSIGNER(Int32, CostTime, costTime)
 TRANS_ASSIGNER(Int32, ChannelScore, channelScore)
 TRANS_ASSIGNER(Int32, PeerChannelId, peerChannelId)
 TRANS_ASSIGNER(Int32, BtFlow, btFlow)
+TRANS_ASSIGNER(Int32, PagingId, pagingId)
+TRANS_ASSIGNER(Int32, CallPid, callPid)
+TRANS_ASSIGNER(Int32, SaId, saId)
+TRANS_ASSIGNER(Int32,  BusinessFlag, businessFlag)
+TRANS_ASSIGNER(String, GroupId, groupId)
+TRANS_ASSIGNER(String, SubGroupId, subGroupId)
 TRANS_ASSIGNER(AnonymizeString, PeerNetworkId, peerNetworkId)
 TRANS_ASSIGNER(AnonymizeString, PeerUdid, peerUdid)
 TRANS_ASSIGNER(String, PeerDevVer, peerDevVer)
@@ -59,6 +68,8 @@ TRANS_ASSIGNER(AnonymizeString, LocalUdid, localUdid)
 TRANS_ASSIGNER(String, CallerPkg, callerPkg)
 TRANS_ASSIGNER(String, CalleePkg, calleePkg)
 TRANS_ASSIGNER(String, FirstTokenName, firstTokenName)
+TRANS_ASSIGNER(AnonymizeString, CallerAccountId, callerAccountId)
+TRANS_ASSIGNER(AnonymizeString, CalleeAccountId, calleeAccountId)
 TRANS_ASSIGNER(Uint64, FirstTokenId, firstTokenId)
 TRANS_ASSIGNER(Int32,  FirstTokenType, firstTokenType)
 TRANS_ASSIGNER(LongString,  TrafficStats, trafficStats)
@@ -87,8 +98,11 @@ TRANS_ASSIGNER(Int32,  LocalIsDbdc, localIsDbdc)
 TRANS_ASSIGNER(Int32,  RemoteIsDbdc, remoteIsDbdc)
 TRANS_ASSIGNER(String, ConCurrentId, conCurrentId)
 
-#define TRANS_ASSIGNER_SIZE 52 // Size of TRANS_ASSIGNERS
+#define TRANS_ASSIGNER_SIZE 63 // Size of TRANS_ASSIGNERS
 static const HiSysEventParamAssigner TRANS_ASSIGNERS[] = {
+    { "TALKIE_FREQ",         HISYSEVENT_UINT8,    TransAssignerTalkieFreq      },
+    { "TALKIE_TYPR",         HISYSEVENT_UINT8,    TransAssignerTalkieType      },
+    { "TALKIE_LEVEL",        HISYSEVENT_UINT8,    TransAssignerTalkieLevel     },
     { "STAGE_RES",           HISYSEVENT_INT32,    TransAssignerResult          },
     { "ERROR_CODE",          HISYSEVENT_INT32,    TransAssignerErrcode         },
     { "SOCKET_NAME",         HISYSEVENT_STRING,   TransAssignerSocketName      },
@@ -107,6 +121,12 @@ static const HiSysEventParamAssigner TRANS_ASSIGNERS[] = {
     { "CHAN_SCORE",          HISYSEVENT_INT32,    TransAssignerChannelScore    },
     { "PEER_CHAN_ID",        HISYSEVENT_INT32,    TransAssignerPeerChannelId   },
     { "BT_FLOW",             HISYSEVENT_INT32,    TransAssignerBtFlow          },
+    { "PAGING_ID",           HISYSEVENT_INT32,    TransAssignerPagingId        },
+    { "CALLER_PID",          HISYSEVENT_INT32,    TransAssignerCallPid         },
+    { "SA_ID",               HISYSEVENT_INT32,    TransAssignerSaId            },
+    { "BUSINESS_FLAG",       HISYSEVENT_INT32,    TransAssignerBusinessFlag    },
+    { "GROUP_ID",            HISYSEVENT_STRING,   TransAssignerGroupId         },
+    { "SUB_GROUP_ID",        HISYSEVENT_STRING,   TransAssignerSubGroupId      },
     { "PEER_NET_ID",         HISYSEVENT_STRING,   TransAssignerPeerNetworkId   },
     { "PEER_UDID",           HISYSEVENT_STRING,   TransAssignerPeerUdid        },
     { "PEER_DEV_VER",        HISYSEVENT_STRING,   TransAssignerPeerDevVer      },
@@ -114,6 +134,8 @@ static const HiSysEventParamAssigner TRANS_ASSIGNERS[] = {
     { "HOST_PKG",            HISYSEVENT_STRING,   TransAssignerCallerPkg       },
     { "TO_CALL_PKG",         HISYSEVENT_STRING,   TransAssignerCalleePkg       },
     { "FIRST_TOKEN_NAME",    HISYSEVENT_STRING,   TransAssignerFirstTokenName  },
+    { "CALLER_ACCOUNT_ID",   HISYSEVENT_STRING,   TransAssignerCallerAccountId },
+    { "CALLEE_ACCOUNT_ID",   HISYSEVENT_STRING,   TransAssignerCalleeAccountId },
     { "FIRST_TOKEN_ID",      HISYSEVENT_UINT64,   TransAssignerFirstTokenId    },
     { "FIRST_TOKEN_TYPE",    HISYSEVENT_INT32,    TransAssignerFirstTokenType  },
     { "TRAFFIC_STATS",       HISYSEVENT_STRING,   TransAssignerTrafficStats    },

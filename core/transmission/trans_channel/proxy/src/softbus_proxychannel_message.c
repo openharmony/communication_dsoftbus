@@ -24,6 +24,7 @@
 #include "bus_center_manager.h"
 #include "g_enhance_trans_func.h"
 #include "g_enhance_trans_func_pack.h"
+#include "legacy/softbus_hisysevt_transreporter.h"
 #include "lnn_ohos_account_adapter.h"
 #include "softbus_access_token_adapter.h"
 #include "softbus_adapter_crypto.h"
@@ -41,6 +42,7 @@
 #include "softbus_utils.h"
 #include "trans_channel_common.h"
 #include "trans_channel_manager.h"
+#include "trans_event.h"
 #include "trans_log.h"
 #include "trans_proxy_process_data.h"
 #include "trans_session_account_adapter.h"
@@ -432,6 +434,19 @@ static int32_t TransPagingUnPackHandshakeAckMsg(const ProxyMessage *msg, AppInfo
     return SOFTBUS_OK;
 }
 
+static void ReportPagingProcessHandshakeAckExtra(const ProxyChannelInfo *chan, int32_t retCode)
+{
+    TransEventExtra extra = {
+        .channelId = chan->myId,
+        .peerChannelId = chan->peerId,
+        .connectionId = (int32_t)chan->connId,
+        .costTime = GetSoftbusRecordTimeMillis() - chan->appInfo.timeStart,
+        .errcode = retCode
+    };
+    extra.result = (retCode == SOFTBUS_OK) ? EVENT_STAGE_RESULT_OK : EVENT_STAGE_RESULT_FAILED;
+    TRANS_EVENT(EVENT_SCENE_PAGING_CONNECT, EVENT_STAGE_PAGING_SOURCE_HANDSHAKE_END, extra);
+}
+
 static void TransPagingProcessHandshakeAckMsg(const ProxyMessage *msg)
 {
     TRANS_CHECK_AND_RETURN_LOGE(msg != NULL, TRANS_CTRL, "invalid param");
@@ -442,11 +457,13 @@ static void TransPagingProcessHandshakeAckMsg(const ProxyMessage *msg)
     int32_t errCode = SOFTBUS_OK;
     if (TransPagingHandshakeUnPackErrMsg(&chan, msg, &errCode) == SOFTBUS_OK) {
         TransProxyProcessErrMsg(&chan, errCode);
+        ReportPagingProcessHandshakeAckExtra(&chan, errCode);
         return;
     }
     int32_t ret = TransPagingUnPackHandshakeAckMsg(msg, &chan.appInfo);
     if (ret != SOFTBUS_OK) {
         TransProxyProcessErrMsg(&chan, SOFTBUS_TRANS_UNPACK_REPLY_FAILED);
+        ReportPagingProcessHandshakeAckExtra(&chan, errCode);
         return;
     }
     chan.peerId = chan.appInfo.peerData.channelId;
@@ -456,8 +473,10 @@ static void TransPagingProcessHandshakeAckMsg(const ProxyMessage *msg)
     if (ret != SOFTBUS_OK) {
         TRANS_LOGE(TRANS_CTRL, "failed to update channel info, ret=%{public}d", ret);
         TransProxyProcessErrMsg(&chan, ret);
+        ReportPagingProcessHandshakeAckExtra(&chan, errCode);
         return;
     }
+    ReportPagingProcessHandshakeAckExtra(&chan, errCode);
     (void)OnProxyChannelOpened(chan.channelId, &(chan.appInfo), PROXY_CHANNEL_CLIENT);
 }
 
@@ -653,6 +672,22 @@ static int32_t TransProxyPagingCheckListen(ProxyChannelInfo *chan)
     return SOFTBUS_OK;
 }
 
+static void ReportPagingProcessHandshakeExtra(const ProxyChannelInfo *chan)
+{
+    TransEventExtra extra = {
+        .channelId = chan->channelId,
+        .peerChannelId = chan->peerId,
+        .connectionId = (int32_t)chan->connId,
+        .result = EVENT_STAGE_RESULT_OK,
+        .peerUdid = chan->appInfo.peerUdid,
+        .callerAccountId = chan->appInfo.myData.callerAccountId,
+        .calleeAccountId = chan->appInfo.myData.calleeAccountId,
+        .socketName = chan->appInfo.myData.sessionName,
+        .businessFlag = chan->appInfo.peerData.businessFlag
+    };
+    TRANS_EVENT(EVENT_SCENE_PAGING_CONNECT, EVENT_STAGE_PAGING_SINK_HANDSHAKE_START, extra);
+}
+
 void TransPagingProcessHandshakeMsg(const ProxyMessage *msg, uint8_t *accountHash, uint8_t *udidHash)
 {
     TRANS_CHECK_AND_RETURN_LOGE(msg != NULL, TRANS_CTRL, "invalid param");
@@ -669,6 +704,8 @@ void TransPagingProcessHandshakeMsg(const ProxyMessage *msg, uint8_t *accountHas
         SoftBusFree(chan);
         return;
     }
+    chan->appInfo.timeStart = GetSoftbusRecordTimeMillis();
+    ReportPagingProcessHandshakeExtra(chan);
     ret = TransGetPkgnameByBusinessFlagPacked(chan->appInfo.peerData.businessFlag,
         (char *)&(chan->appInfo.myData.pkgName), sizeof(chan->appInfo.myData.pkgName));
     if (ret != SOFTBUS_OK) {
