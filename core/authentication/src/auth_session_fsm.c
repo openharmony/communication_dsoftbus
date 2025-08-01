@@ -1597,27 +1597,10 @@ static void TryCompleteAuthSessionForError(AuthFsm *authFsm, AuthSessionInfo *in
     CompleteAuthSession(authFsm, SOFTBUS_AUTH_UNPACK_DEVINFO_FAIL);
 }
 
-static bool PreLinkCheckHasPtk(const char *uuid)
-{
-    if (uuid == NULL) {
-        AUTH_LOGE(AUTH_FSM, "uuid is null");
-        return false;
-    }
-    struct WifiDirectManager *wdMgr = GetWifiDirectManager();
-    if (wdMgr == NULL || wdMgr->linkHasPtk == NULL) {
-        AUTH_LOGE(AUTH_FSM, "get wifiDirect mgr fail");
-        return false;
-    }
-    if (wdMgr->linkHasPtk(uuid)) {
-        return true;
-    }
-    return false;
-}
-
 static void ClientTryCompleteAuthSession(AuthFsm *authFsm, AuthSessionInfo *info)
 {
     LnnFsmRemoveMessage(&authFsm->fsm, FSM_MSG_AUTH_TIMEOUT);
-    if (IsAuthPreLinkNodeExist(info->requestId) && !PreLinkCheckHasPtk(info->uuid)) {
+    if (AuthPreLinkCheckNeedPtk(info->requestId, info->uuid)) {
         TrySyncPtkClient(info);
         return;
     }
@@ -1656,7 +1639,7 @@ static void HandleMsgRecvDeviceInfo(AuthFsm *authFsm, const MessagePara *para)
             ClientTryCompleteAuthSession(authFsm, info);
             return;
         }
-        if (IsAuthPreLinkNodeExist(info->requestId) && !PreLinkCheckHasPtk(info->uuid)) {
+        if (AuthPreLinkCheckNeedPtk(info->requestId, info->uuid)) {
             TrySavePtkServer(info);
         }
         /* WIFI: server should response device info */
@@ -1666,7 +1649,7 @@ static void HandleMsgRecvDeviceInfo(AuthFsm *authFsm, const MessagePara *para)
             return;
         }
         LnnFsmRemoveMessage(&authFsm->fsm, FSM_MSG_AUTH_TIMEOUT);
-        if (IsAuthPreLinkNodeExist(info->requestId) && !PreLinkCheckHasPtk(info->uuid)) {
+        if (AuthPreLinkCheckNeedPtk(info->requestId, info->uuid)) {
             TryAddSyncPtkListenerServer();
             return;
         }

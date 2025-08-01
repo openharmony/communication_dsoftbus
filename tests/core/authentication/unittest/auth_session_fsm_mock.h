@@ -36,7 +36,6 @@ public:
     virtual int32_t GetAuthRequest(uint32_t requestId, AuthRequest *request) = 0;
     virtual int32_t LnnRetrieveDeviceInfoByUdidPacked(const char *udid, NodeInfo *deviceInfo) = 0;
     virtual int32_t LnnGetRemoteNodeInfoById(const char *id, IdCategory type, NodeInfo *info) = 0;
-    virtual struct WifiDirectManager *GetWifiDirectManager(void) = 0;
 };
 
 class AuthSessionFsmInterfaceMock : public AuthSessionFsmInterface {
@@ -45,7 +44,6 @@ public:
     ~AuthSessionFsmInterfaceMock() override;
 
     MOCK_METHOD0(SoftBusGetBrState, int32_t (void));
-    MOCK_METHOD0(GetWifiDirectManager, struct WifiDirectManager * (void));
     MOCK_METHOD3(GetUdidShortHash, bool (const AuthSessionInfo *, char *, uint32_t));
     MOCK_METHOD2(LnnRetrieveDeviceInfoPacked, int32_t (const char *, NodeInfo *));
     MOCK_METHOD2(IsSupportFeatureByCapaBit, bool (uint32_t, AuthCapability));
