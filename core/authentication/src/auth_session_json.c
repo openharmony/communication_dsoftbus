@@ -1730,11 +1730,27 @@ static void UnpackCipherRpaInfo(const JsonObj *json, NodeInfo *info)
     (void)memset_s(peerIrk, LFINDER_IRK_STR_LEN, 0, LFINDER_IRK_STR_LEN);
 }
 
+static int32_t PackNetCapacityByVersion(JsonObj *json, const NodeInfo *info, SoftBusVersion version)
+{
+    uint32_t netCapacity = 0;
+    if (version == SOFTBUS_OLD_V1 || version == SOFTBUS_OLD_V2) {
+        AUTH_LOGW(AUTH_FSM, "The bit cannot exceed 8 bits in old version");
+        netCapacity = (uint16_t)(info->netCapacity) & 0xFF;
+    } else {
+        netCapacity = info->netCapacity;
+    }
+    AUTH_LOGI(AUTH_FSM, "pack device info version=%{public}d, netCapacity=%{public}d", version, netCapacity);
+    if (!JSON_AddInt32ToObject(json, CONN_CAP, info->netCapacity)) {
+        AUTH_LOGE(AUTH_FSM, "JSON_AddStringToObject failed.");
+        return SOFTBUS_AUTH_PACK_DEVINFO_FAIL;
+    }
+    return SOFTBUS_OK;
+}
+
 static int32_t PackCommonEx(JsonObj *json, const NodeInfo *info)
 {
     bool isFalse = (!JSON_AddStringToObject(json, VERSION_TYPE, info->versionType) ||
         !JSON_AddInt32ToObject(json, STATIC_NET_CAP, info->staticNetCap) ||
-        !JSON_AddInt32ToObject(json, CONN_CAP, info->netCapacity) ||
         !JSON_AddInt32ToObject(json, AUTH_CAP, info->authCapacity) ||
         !JSON_AddInt32ToObject(json, HB_CAP, info->heartbeatCapacity) ||
         !JSON_AddInt16ToObject(json, DATA_CHANGE_FLAG, info->dataChangeFlag) ||
@@ -1803,6 +1819,9 @@ static int32_t PackCommon(JsonObj *json, const NodeInfo *info, SoftBusVersion ve
     if (PackCommonDevInfo(json, info, isMetaAuth) != SOFTBUS_OK) {
         return SOFTBUS_AUTH_PACK_DEVINFO_FAIL;
     }
+    if (PackNetCapacityByVersion(json, info, version) != SOFTBUS_OK) {
+        return SOFTBUS_AUTH_PACK_DEVINFO_FAIL;
+    }
     if (PackCommonEx(json, info) != SOFTBUS_OK) {
         AUTH_LOGE(AUTH_FSM, "data pack failed.");
         return SOFTBUS_AUTH_PACK_DEVINFO_FAIL;
@@ -1814,15 +1833,12 @@ static int32_t PackCommon(JsonObj *json, const NodeInfo *info, SoftBusVersion ve
         AUTH_LOGE(AUTH_FSM, "PackCipherKeySyncMsg failed.");
     }
     PackCommP2pInfo(json, info);
-
     if (PackCipherRpaInfo(json, info) != SOFTBUS_OK) {
         AUTH_LOGE(AUTH_FSM, "pack CipherRpaInfo of device key failed.");
     }
-
     if (!JSON_AddInt32ToObject(json, DEVICE_SECURITY_LEVEL, info->deviceSecurityLevel)) {
         AUTH_LOGE(AUTH_FSM, "pack deviceSecurityLevel fail.");
     }
-
 #ifdef DISABLE_IDENTITY_SERVICE
     int32_t authVersion = AUTH_VERSION_INVALID;
 #else
