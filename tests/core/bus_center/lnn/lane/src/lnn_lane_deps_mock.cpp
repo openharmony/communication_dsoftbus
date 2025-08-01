@@ -487,10 +487,5 @@ int32_t ConnSetConnectCallback(ConnModule moduleId, const ConnectCallback *callb
 {
     return GetLaneDepsInterface()->ConnSetConnectCallback(moduleId, callback);
 }
-
-uint64_t SoftBusGetSysTimeMs(void)
-{
-    return GetLaneDepsInterface()->SoftBusGetSysTimeMs();
-}
 }
 } // namespace OHOS

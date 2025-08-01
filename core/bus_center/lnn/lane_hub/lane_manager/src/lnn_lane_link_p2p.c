@@ -3236,8 +3236,8 @@ void LnnDisconnectP2pWithoutLnn(uint32_t laneReqId)
 
 int32_t LnnDisconnectP2p(const char *networkId, uint32_t laneReqId)
 {
-    if (g_p2pLinkedList == NULL || g_p2pLinkList == NULL) {
-        LNN_LOGE(LNN_LANE, "lane link p2p not init, disconn request ignore");
+    if (networkId == NULL || g_p2pLinkedList == NULL || g_p2pLinkList == NULL) {
+        LNN_LOGE(LNN_LANE, "invalid param or not init");
         return SOFTBUS_INVALID_PARAM;
     }
     char mac[MAX_MAC_LEN] = {0};
