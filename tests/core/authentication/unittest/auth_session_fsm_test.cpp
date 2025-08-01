@@ -790,7 +790,7 @@ HWTEST_F(AuthSessionFsmTest, POPULATE_DEVICE_TYPE_ID_TEST_003, TestSize.Level1)
  */
 HWTEST_F(AuthSessionFsmTest, PRE_LINK_CHECK_HAS_PTK_TEST_001, TestSize.Level1)
 {
-    NickMock<AuthSessionFsmInterfaceMock> mock;
+    NiceMock<AuthSessionFsmInterfaceMock> mock;
     EXPECT_CALL(mock, GetWifiDirectManager).WillOnce(Return(NULL)).WillOnce(Return(&g_manager3))
         .WillOnce(Return(&g_manager2)).WillRepeatedly(Return(&g_manager1));
     EXPECT_FALSE(PreLinkCheckHasPtk(NULL));
