@@ -66,5 +66,10 @@ int32_t LnnGetRemoteNodeInfoById(const char *id, IdCategory type, NodeInfo *info
 {
     return GetAuthSessionFsmInterface()->LnnGetRemoteNodeInfoById(id, type, info);
 }
+
+struct WifiDirectManager *GetWifiDirectManager(void)
+{
+    return GetAuthSessionFsmInterface()->GetWifiDirectManager();
+}
 }
 }

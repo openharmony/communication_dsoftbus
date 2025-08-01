@@ -44,6 +44,7 @@ constexpr char BLE_MAC[BT_MAC_LEN] = "00:15:5d:de:d4:23";
 constexpr char SLE_MAC[BT_MAC_LEN] = "00:15:5d:de:d4:23";
 constexpr uint8_t DEVICE_ID_HASH[UDID_HASH_LEN] = "123456789";
 constexpr uint8_t TMP_IN_DATA[TMP_DATA_LEN] = "tmpInData";
+constexpr char TEST_UUID[] = "111122223333abcdef";
 
 class AuthSessionFsmTest : public testing::Test {
 public:
@@ -68,6 +69,30 @@ void AuthSessionFsmTest::TearDownTestCase()
 void AuthSessionFsmTest::SetUp() { }
 
 void AuthSessionFsmTest::TearDown() { }
+
+static bool AuthFsmTestTrueLinkHasPtk(const char *remoteDeviceId)
+{
+    (void)remoteDeviceId;
+    return true;
+}
+
+static bool AuthFsmTestFalseLinkHasPtk(const char *remoteDeviceId)
+{
+    (void)remoteDeviceId;
+    return false;
+}
+
+static struct WifiDirectManager g_manager1 = {
+    .linkHasPtk = AuthFsmTestTrueLinkHasPtk,
+};
+
+static struct WifiDirectManager g_manager2 = {
+    .linkHasPtk = AuthFsmTestFalseLinkHasPtk,
+};
+
+static struct WifiDirectManager g_manager3 = {
+    .linkHasPtk = NULL,
+};
 
 /*
  * @tc.name: TRANSLATE_TO_AUTH_FSM_TEST_001
@@ -755,5 +780,23 @@ HWTEST_F(AuthSessionFsmTest, POPULATE_DEVICE_TYPE_ID_TEST_003, TestSize.Level1)
     EXPECT_CALL(mock, LnnRetrieveDeviceInfoPacked).WillOnce(DoAll(SetArgPointee<1>(infoOther), Return(SOFTBUS_OK)));
     PopulateDeviceTypeId(&authParam, requestId);
     EXPECT_EQ(authParam.deviceTypeId, 0);
+}
+
+/*
+ * @tc.name: PRE_LINK_CHECK_HAS_PTK_TEST_001
+ * @tc.desc: PopulateDeviceTypeId test
+ * @tc.type: FUNC
+ * @tc.require:
+ */
+HWTEST_F(AuthSessionFsmTest, PRE_LINK_CHECK_HAS_PTK_TEST_001, TestSize.Level1)
+{
+    NickMock<AuthSessionFsmInterfaceMock> mock;
+    EXPECT_CALL(mock, GetWifiDirectManager).WillOnce(Return(NULL)).WillOnce(Return(&g_manager3))
+        .WillOnce(Return(&g_manager2)).WillRepeatedly(Return(&g_manager1));
+    EXPECT_FALSE(PreLinkCheckHasPtk(NULL));
+    EXPECT_FALSE(PreLinkCheckHasPtk(TEST_UUID));
+    EXPECT_FALSE(PreLinkCheckHasPtk(TEST_UUID));
+    EXPECT_FALSE(PreLinkCheckHasPtk(TEST_UUID));
+    EXPECT_TRUE(PreLinkCheckHasPtk(TEST_UUID));
 }
 } // namespace OHOS
