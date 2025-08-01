@@ -529,7 +529,14 @@ static void OnSoftbusIpNetworkDisconnected(LnnPhysicalSubnet *subnet)
 
 static void OnIpNetifStatusChanged(LnnPhysicalSubnet *subnet, void *status)
 {
-    LNN_CHECK_AND_RETURN_LOGE(subnet != NULL, LNN_BUILDER, "invalid param");
+    if (subnet == NULL) {
+        LNN_LOGE(LNN_BUILDER, "invaild subnet paramter");
+        if (status != NULL) {
+            SoftBusFree(status);
+        }
+        return;
+    }
+    
     IpSubnetManagerEvent event = IP_SUBNET_MANAGER_EVENT_MAX;
     if (status == NULL) {
         if (subnet->status == LNN_SUBNET_RUNNING) {
