@@ -148,7 +148,6 @@ ohos_unittest("BusCenterEventTest") {
 ohos_unittest("BusCenterManagerTest") {
   module_out_path = module_output_path
   sources = [
-    "$dsoftbus_root_path/core/authentication/src/auth_pre_link.c",
     "$dsoftbus_root_path/core/bus_center/service/src/bus_center_manager.c",
     "$dsoftbus_root_path/core/frame/init/src/g_enhance_auth_func.c",
     "unittest/bus_center_manager_deps_mock.cpp",
