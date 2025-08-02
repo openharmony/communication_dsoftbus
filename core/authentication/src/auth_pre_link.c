@@ -297,7 +297,7 @@ bool IsAuthPreLinkNodeExist(uint32_t requestId)
 
 bool AuthPreLinkCheckNeedPtk(uint32_t requestId, const char *uuid)
 {
-    return IsAuthPreLinkNodeExist(info->requestId) && !PreLinkCheckHasPtk(info->uuid);
+    return IsAuthPreLinkNodeExist(requestId) && !PreLinkCheckHasPtk(uuid);
 }
 
 int32_t AddToAuthPreLinkList(uint32_t requestId, int32_t fd, ConnectionAddr *connAddr)
