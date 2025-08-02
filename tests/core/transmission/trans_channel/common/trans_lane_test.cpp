@@ -406,6 +406,8 @@ HWTEST_F(TransLaneTest, TransLaneTest010, TestSize.Level1)
     ASSERT_TRUE(preferred != nullptr);
     (void)memset_s(preferred, sizeof(LanePreferredLinkList), 0, sizeof(LanePreferredLinkList));
     TransformSessionPreferredToLanePreferred(sessionParam, preferred, nullptr);
+    TransformSessionPreferredToLanePreferred(sessionParam, nullptr, nullptr);
+    TransformSessionPreferredToLanePreferred(nullptr, preferred, nullptr);
     SoftBusFree(sessionParam);
     SoftBusFree(preferred);
 }

@@ -133,6 +133,8 @@ HWTEST_F(TransUkManagerTest, UkGetUkPolicyTest001, TestSize.Level1)
     char sessionName[SESSION_NAME_SIZE_MAX] = "testSessionName";
     int32_t ret = GetUkPolicy(&appInfo);
     EXPECT_EQ(NO_NEED_UK, ret);
+    ret = GetUkPolicy(nullptr);
+    EXPECT_EQ(SOFTBUS_INVALID_PARAM, ret);
 
     SessionServer *sessionServer = reinterpret_cast<SessionServer *>(SoftBusCalloc(sizeof(SessionServer)));
     EXPECT_TRUE(sessionServer != nullptr);

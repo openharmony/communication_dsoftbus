@@ -818,7 +818,7 @@ int32_t TransLimitChange(int32_t channelId, uint8_t tos)
         return SOFTBUS_NOT_NEED_UPDATE;
     }
     if (channel.businessType != BUSINESS_TYPE_FILE) {
-        TRANS_LOGE(TRANS_FILE, "bussiness type not match");
+        TRANS_LOGE(TRANS_FILE, "business type not match");
         return SOFTBUS_NOT_NEED_UPDATE;
     }
     bool isTosSet = false;
