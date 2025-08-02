@@ -802,6 +802,8 @@ static void ProxyResetHandler(void)
     }
     SoftBusMutexUnlock(&GetProxyChannelManager()->proxyConnectionList->lock);
 
+    item = NULL;
+    next = NULL;
     LIST_FOR_EACH_ENTRY_SAFE(item, next, &notifyConnectionList, struct ProxyConnection, node) {
         ListDelete(&item->node);
         if (GetProxyChannelState(item) != PROXY_CHANNEL_CONNECTING) {
