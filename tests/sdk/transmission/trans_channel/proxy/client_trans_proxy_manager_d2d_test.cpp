@@ -265,7 +265,7 @@ HWTEST_F(ClientTransProxyD2DTest, ClientTransProxyNoSubPacketD2DDataProcTest, Te
     (void)memcpy_s(data, TEST_DATA_LENGTH_2, &head, sizeof(PacketD2DHead));
     businessType = BUSINESS_TYPE_D2D_VOICE;
     ret = ClientTransProxyNoSubPacketD2DDataProc(channelId, data, len, businessType);
-    EXPECT_EQ(SOFTBUS_INVALID_PARAM, ret);
+    EXPECT_EQ(SOFTBUS_INVALID_DATA_HEAD, ret);
 
     businessType = BUSINESS_TYPE_D2D_MESSAGE;
     ret = ClientTransProxyNoSubPacketD2DDataProc(channelId, data, len, businessType);

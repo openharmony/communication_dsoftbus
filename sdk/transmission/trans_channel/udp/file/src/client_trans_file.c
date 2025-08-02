@@ -280,7 +280,7 @@ static void FileSendListener(int32_t dfileId, DFileMsgType msgType, const DFileM
 static void NotifyRecvResult(int32_t sessionId, DFileMsgType msgType, const DFileMsg *msgData,
     FileListener *listener)
 {
-    if (msgData == NULL || listener == NULL) {
+    if (msgData == NULL || listener == NULL || msgData->fileList.fileNum <= 0) {
         TRANS_LOGE(TRANS_SDK, "param invalid");
         return;
     }

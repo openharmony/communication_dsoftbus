@@ -147,6 +147,10 @@ int32_t TransUkRequestDeleteItem(uint32_t requestId)
 
 int32_t GetUkPolicy(const AppInfo *appInfo)
 {
+    if (appInfo == NULL) {
+        TRANS_LOGE(TRANS_CTRL, "invalid param.");
+        return SOFTBUS_INVALID_PARAM;
+    }
 #ifdef SOFTBUS_STANDARD_OS
     NodeInfo nodeInfo;
     (void)memset_s(&nodeInfo, sizeof(NodeInfo), 0, sizeof(NodeInfo));
