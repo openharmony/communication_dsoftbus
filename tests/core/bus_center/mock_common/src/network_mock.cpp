@@ -164,4 +164,4 @@ int32_t LnnClearNetCapability(uint32_t *capability, NetCapability type)
     return GetNetworkInterface()->LnnClearNetCapability(capability, type);
 }
 }
-}
+} // namespace OHOS

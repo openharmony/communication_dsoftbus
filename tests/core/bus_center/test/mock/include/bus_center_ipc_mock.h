@@ -23,8 +23,8 @@
 #include "bus_center_manager.h"
 #include "lnn_connection_addr_utils.h"
 #include "lnn_local_net_ledger.h"
-#include "lnn_ranging_manager_struct.h"
 #include "lnn_heartbeat_utils_struct.h"
+#include "lnn_ranging_manager_struct.h"
 
 namespace OHOS {
 class BusCenterIpcInterface {

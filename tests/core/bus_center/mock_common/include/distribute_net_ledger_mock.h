@@ -37,7 +37,7 @@ public:
     virtual int32_t LnnGetRemoteNumInfoByIfnameIdx(const char *netWorkId, InfoKey key, int32_t *info,
         int32_t ifIdx) = 0;
     virtual int32_t LnnGetRemoteNumU32Info(const char *networkId, InfoKey key, uint32_t *info) = 0;
-    virtual int32_t LnnGetRemoteNumInfo(const char *netWorkId, InfoKey key, int32_t *info) = 0;
+    virtual int32_t LnnGetRemoteNumInfo(const char *networkId, InfoKey key, int32_t *info) = 0;
     virtual int32_t LnnGetRemoteNum16Info(const char *networkId, InfoKey key, int16_t *info) = 0;
     virtual int32_t LnnGetRemoteBoolInfo(const char *networkId, InfoKey key, bool *info) = 0;
     virtual int32_t LnnGetRemoteNumU64Info(const char *networkId, InfoKey key, uint64_t *info) = 0;
@@ -56,10 +56,10 @@ public:
     MOCK_METHOD4(LnnGetRemoteStrInfo, int32_t(const char *, InfoKey, char *, uint32_t));
     MOCK_METHOD5(LnnGetRemoteStrInfoByIfnameIdx, int32_t(const char *, InfoKey, char *, uint32_t, int32_t));
     MOCK_METHOD4(LnnGetRemoteNumInfoByIfnameIdx, int32_t (const char *, InfoKey, int32_t *, int32_t));
-    MOCK_METHOD3(LnnGetRemoteNumU32Info, int32_t (const char *, InfoKey, uint32_t *));
-    MOCK_METHOD3(LnnGetRemoteNumInfo, int32_t (const char*, InfoKey, int32_t*));
-    MOCK_METHOD3(LnnGetRemoteNum16Info, int32_t (const char*, InfoKey, int16_t*));
-    MOCK_METHOD3(LnnGetRemoteBoolInfo, int32_t (const char *, InfoKey, bool *));
+    MOCK_METHOD3(LnnGetRemoteNumU32Info, int32_t(const char *, InfoKey, uint32_t *));
+    MOCK_METHOD3(LnnGetRemoteNumInfo, int32_t(const char*, InfoKey, int32_t*));
+    MOCK_METHOD3(LnnGetRemoteNum16Info, int32_t(const char*, InfoKey, int16_t*));
+    MOCK_METHOD3(LnnGetRemoteBoolInfo, int32_t(const char *, InfoKey, bool *));
     MOCK_METHOD3(LnnGetRemoteNumU64Info, int32_t(const char *, InfoKey, uint64_t *));
     MOCK_METHOD2(LnnGetOnlineStateById, bool(const char *, IdCategory));
     MOCK_METHOD2(LnnConvertDLidToUdid, const char *(const char *, IdCategory));

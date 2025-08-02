@@ -83,9 +83,9 @@ int32_t LnnGetRemoteStrInfoByIfnameIdx(const char *netWorkId, InfoKey key, char 
     return GetDistriLedgerInterface()->LnnGetRemoteStrInfoByIfnameIdx(netWorkId, key, info, len, ifIdx);
 }
 
-int32_t LnnGetRemoteNumInfoByIfnameIdx(const char *netWorkId, InfoKey key, int32_t *info, int32_t ifIdx)
+int32_t LnnGetRemoteNumInfoByIfnameIdx(const char *networkId, InfoKey key, int32_t *info, int32_t ifIdx)
 {
-    return GetDistriLedgerInterface()->LnnGetRemoteNumInfoByIfnameIdx(netWorkId, key, info, ifIdx);
+    return GetDistriLedgerInterface()->LnnGetRemoteNumInfoByIfnameIdx(networkId, key, info, ifIdx);
 }
 
 bool LnnGetOnlineStateById(const char *id, IdCategory type)
