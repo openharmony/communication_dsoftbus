@@ -524,7 +524,7 @@ int32_t TransOnSessionOpened(
         return ret;
     }
     if (channel->channelType == CHANNEL_TYPE_UDP) {
-        TransSetUdpChanelSessionId(channel->channelId, sessionId);
+        TransSetUdpChannelSessionId(channel->channelId, sessionId);
     }
     if (sessionCallback.isSocketListener) {
         ret = HandleOnBindSuccess(sessionId, sessionCallback, channel, accessInfo);

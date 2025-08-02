@@ -25,7 +25,7 @@
 
 int32_t ClientOnChannelOpened(IpcIo *data, IpcIo *reply)
 {
-    TRANS_CHECK_AND_RETURN_RET_LOGE(reply != NULL, SOFTBUS_INVALID_PARAM, TRANS_CTRL, "invalid param");
+    TRANS_CHECK_AND_RETURN_RET_LOGE(data != NULL && reply != NULL, SOFTBUS_INVALID_PARAM, TRANS_CTRL, "invalid param");
     size_t size = 0;
     ChannelInfo channel = {0};
     const char *sessionName = (const char *)ReadString(data, &size);
@@ -158,6 +158,10 @@ int32_t ClientOnChannelBind(IpcIo *data, IpcIo *reply)
 
 static int32_t ReadCollabInfo(IpcIo *data, CollabInfo *info)
 {
+    if (info == NULL) {
+        COMM_LOGE(COMM_SDK, "invalid param.");
+        return SOFTBUS_INVALID_PARAM;
+    }
     size_t size = 0;
     char *accountId = (char *)ReadString(data, &size);
     if (accountId == NULL) {
