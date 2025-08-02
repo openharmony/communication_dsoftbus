@@ -51,6 +51,8 @@ private:
     int32_t pid;
 };
 
+std::unordered_map<uint32_t, std::shared_ptr<SoftBusAccessTokenAdapter>> callbackPtrMap_;
+
 extern "C" {
 bool SoftBusCheckIsSystemService(uint64_t tokenId)
 {
@@ -192,8 +194,24 @@ void SoftBusRegisterDataSyncPermission(
     std::shared_ptr<SoftBusAccessTokenAdapter> callbackPtr_ =
         std::make_shared<SoftBusAccessTokenAdapter>(scopeInfo, pkgName, pid);
     COMM_LOGI(COMM_PERM, "after register. tokenId=%{public}" PRIu64, tonkenId);
+    callbackPtrMap_.emplace(pid, callbackPtr_);
     if (AccessTokenKit::RegisterPermStateChangeCallback(callbackPtr_) != SOFTBUS_OK) {
         COMM_LOGE(COMM_PERM, "RegisterPermStateChangeCallback failed.");
+    }
+}
+
+void SoftBusUnRegisterDataSyncPermission(int32_t pid)
+{
+    std::shared_ptr<SoftBusAccessTokenAdapter> callbackPtr_ = nullptr;
+    auto iter = callbackPtrMap_.find(pid);
+    if (iter != callbackPtrMap_.end()) {
+        callbackPtr_ = iter->second;
+        if (AccessTokenKit::UnRegisterPermStateChangeCallback(callbackPtr_) != SOFTBUS_OK) {
+            COMM_LOGE(COMM_PERM, "UnRegisterPermStateChangeCallback failed");
+        }
+        callbackPtrMap_.erase(iter->first);
+    } else {
+        COMM_LOGE(COMM_PERM, "UnRegisterPermStateChangeCallback not find pid:%{public}d", pid);
     }
 }
 
