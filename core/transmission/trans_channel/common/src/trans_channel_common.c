@@ -393,6 +393,10 @@ void TransOpenChannelSetModule(int32_t channelType, ConnectOption *connOpt)
 
 int32_t TransOpenChannelProc(ChannelType type, AppInfo *appInfo, const ConnectOption *connOpt, int32_t *channelId)
 {
+    if (appInfo == NULL || connOpt == NULL) {
+        TRANS_LOGE(TRANS_CTRL, "invalid param.");
+        return SOFTBUS_INVALID_PARAM;
+    }
     if (type == CHANNEL_TYPE_BUTT) {
         TRANS_LOGE(TRANS_CTRL, "open invalid channel type.");
         return SOFTBUS_TRANS_INVALID_CHANNEL_TYPE;
