@@ -766,7 +766,7 @@ static bool IsAllowSave(const char *bundleName, bool isFindServer)
 }
 
 static struct GeneralConnection *CreateConnection(const GeneralConnectionParam *param, const char *addr,
-    int32_t underlayerHandle, bool isClient, int32_t *errorCode)
+    uint32_t underlayerHandle, bool isClient, int32_t *errorCode)
 {
     if (!IsAllowSave(param->bundleName, false)) {
         CONN_LOGE(CONN_BLE, "add pkg name is max");
@@ -1044,7 +1044,7 @@ static void OnCommDisconnected(uint32_t connectionId, const ConnectionInfo *info
 
 static void OnCommDataReceived(uint32_t connectionId, ConnModule moduleId, int64_t seq, char *data, int32_t len)
 {
-    if (data == NULL || len < GENERAL_CONNECTION_HEADER_SIZE || moduleId != MODULE_BLE_GENERAL) {
+    if (data == NULL || len < (int32_t)GENERAL_CONNECTION_HEADER_SIZE || moduleId != MODULE_BLE_GENERAL) {
         CONN_LOGE(CONN_BLE, "invalid param, connectionId=%{public}u", connectionId);
         return;
     }
@@ -1106,8 +1106,7 @@ static int32_t Connect(const GeneralConnectionParam *param, const char *addr)
         .OnConnectFailed = OnCommConnectFail,
     };
     int32_t status = SOFTBUS_OK;
-    struct GeneralConnection *generalConnection = CreateConnection(param, addr,
-        INVALID_UNDERLAY_HANDLE, true, &status);
+    struct GeneralConnection *generalConnection = CreateConnection(param, addr, 0, true, &status);
     CONN_CHECK_AND_RETURN_RET_LOGE(generalConnection != NULL, status, CONN_BLE,
         "create connection failed");
     status = SaveConnection(generalConnection);
