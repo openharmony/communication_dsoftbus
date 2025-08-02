@@ -13,28 +13,28 @@
  * limitations under the License.
  */
 
- #ifndef AUTH_PRE_LINK_MOCK_H
- #define AUTH_PRE_LINK_MOCK_H
+#ifndef AUTH_PRE_LINK_MOCK_H
+#define AUTH_PRE_LINK_MOCK_H
 
- #include <gmock/gmock.h>
+#include <gmock/gmock.h>
 
- #include "auth_pre_link.h"
+#include "auth_pre_link.h"
 
- namespace OHOS {
- class AuthPreLinkInterface {
- public:
-     AuthPreLinkInterface() {};
-     virtual ~AuthPreLinkInterface() {};
+namespace OHOS {
+class AuthPreLinkInterface {
+public:
+    AuthPreLinkInterface() {};
+    virtual ~AuthPreLinkInterface() {};
 
-     virtual struct WifiDirectManager *GetWifiDirectManager(void) = 0;
- };
+    virtual struct WifiDirectManager *GetWifiDirectManager(void) = 0;
+};
 
- class AuthPreLinkInterfaceMock : public AuthPreLinkInterface {
- public:
-     AuthPreLinkInterfaceMock();
-     ~AuthPreLinkInterfaceMock() override;
+class AuthPreLinkInterfaceMock : public AuthPreLinkInterface {
+public:
+    AuthPreLinkInterfaceMock();
+    ~AuthPreLinkInterfaceMock() override;
 
-     MOCK_METHOD0(GetWifiDirectManager, struct WifiDirectManager * (void));
- };
- }
- #endif // AUTH_PRE_LINK_MOCK_H
+    MOCK_METHOD0(GetWifiDirectManager, struct WifiDirectManager * (void));
+};
+}
+#endif // AUTH_PRE_LINK_MOCK_H
