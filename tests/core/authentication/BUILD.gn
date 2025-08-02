@@ -1407,6 +1407,8 @@ ohos_unittest("AuthSessionJsonMockTest") {
 ohos_unittest("AuthPreLinkTest") {
   module_out_path = module_output_path
   sources = [
+    "$dsoftbus_root_path/core/frame/init/src/g_enhance_lnn_func_pack.c",
+    "$dsoftbus_root_path/core/frame/init/src/g_enhance_lnn_func.c",
     "unittest/auth_pre_link_mock.cpp",
     "unittest/auth_pre_link_test.cpp",
   ]
