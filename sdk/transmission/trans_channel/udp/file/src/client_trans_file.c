@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021-2024 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2025 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -40,7 +40,8 @@ static void NotifySendResult(int32_t sessionId, DFileMsgType msgType,
 
     switch (msgType) {
         case DFILE_ON_FILE_SEND_SUCCESS:
-            if (listener->sendListener.OnSendFileFinished != NULL) {
+            if (listener->sendListener.OnSendFileFinished != NULL &&
+                msgData->fileList.files != NULL && msgData->fileList.fileNum > 0) {
                 listener->sendListener.OnSendFileFinished(sessionId, msgData->fileList.files[0]);
             }
             break;
