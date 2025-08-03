@@ -355,7 +355,7 @@ int32_t GetTcpSockPort(int32_t fd)
 
 int32_t ConnSetTcpKeepaliveState(int32_t fd, bool needKeepalive)
 {
-    CONN_CHECK_AND_RETURN_RET_LOGE(fd > 0, SOFTBUS_NOT_FIND, CONN_COMMON, "invalid param");
+    CONN_CHECK_AND_RETURN_RET_LOGE(fd >= 0, SOFTBUS_NOT_FIND, CONN_COMMON, "invalid param");
     int32_t enable = needKeepalive ? 1 : 0;
     int32_t ret = SoftBusSocketSetOpt(fd, SOFTBUS_SOL_SOCKET, SOFTBUS_SO_KEEPALIVE, &enable, sizeof(enable));
     if (ret != SOFTBUS_ADAPTER_OK) {
