@@ -493,7 +493,7 @@ char *TransTdcPackFastData(const AppInfo *appInfo, uint32_t *outLen)
 {
 #define MAGIC_NUMBER 0xBABEFACE
 #define TDC_PKT_HEAD_SEQ_START 1024
-    if ((appInfo == NULL) || (outLen == NULL)) {
+    if ((appInfo == NULL) || (outLen == NULL) || (appInfo->fastTransData == NULL)) {
         TRANS_LOGE(TRANS_CTRL, "invalid param");
         return NULL;
     }
