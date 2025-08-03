@@ -209,7 +209,7 @@ void SoftBusUnRegisterDataSyncPermission(int32_t pid)
         if (AccessTokenKit::UnRegisterPermStateChangeCallback(callbackPtr_) != SOFTBUS_OK) {
             COMM_LOGE(COMM_PERM, "UnRegisterPermStateChangeCallback failed");
         }
-        callbackPtrMap_.erase(iter->first);
+        callbackPtrMap_.erase(iter);
     } else {
         COMM_LOGE(COMM_PERM, "UnRegisterPermStateChangeCallback not find pid:%{public}d", pid);
     }
