@@ -24,7 +24,7 @@
 
 #ifdef __cplusplus
 extern "C" {
-#endif
+#endif // __cplusplus
 
 int32_t SetDefaultQdiscPacked(void);
 int32_t InitQosPacked(void);
@@ -46,11 +46,11 @@ int32_t ClientOpenHtpChannelPacked(int32_t channelId, int64_t requestId, const c
 int32_t ServerOpenHtpChannelPacked(const char *remoteIp, int64_t flIdentity);
 int32_t CloseHtpChannelPacked(int32_t channelId);
 void ServerUpdateHtpChannelPacked(int64_t flIdentity, int32_t channelId);
+bool CheckHtpPermissionPacked(int32_t uid);
 void TransProcessGroupTalkieInfoPacked(const char *pkgName);
 bool IsInWhitelistPacked(const char *app);
 
 #ifdef __cplusplus
 }
-#endif
-
-#endif
+#endif // __cplusplus
+#endif // G_ENHANCE_TRANS_FUNC_PACK
