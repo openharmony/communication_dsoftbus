@@ -25,12 +25,13 @@
 
 #ifdef __cplusplus
 extern "C" {
-#endif
+#endif // __cplusplus
 
 typedef int32_t (*InitQosFunc)(void);
 typedef int32_t (*NotifyQosChannelOpenedFunc)(const ChannelInfo *chanInfo);
 typedef void (*NotifyQosChannelClosedFunc)(int32_t channelId, int32_t channelType);
-typedef void (*GetExtQosInfoFunc)(const SessionParam *param, QosInfo *qosInfo, uint32_t index, AllocExtendInfo *extendInfo);
+typedef void (*GetExtQosInfoFunc)(
+    const SessionParam *param, QosInfo *qosInfo, uint32_t index, AllocExtendInfo *extendInfo);
 typedef int32_t (*SetDefaultQdiscFunc)(void);
 typedef int32_t (*TransReversePullUpFunc)(const uint32_t chatMode, const uint32_t businessFlag, const char *pkgName);
 typedef int32_t (*TransGetPkgnameByBusinessFlagFunc)(const uint32_t businessFlag, char *pkgName, const uint32_t pkgLen);
@@ -48,6 +49,7 @@ typedef int32_t (*ClientOpenHtpChannelFunc)(
 typedef int32_t (*ServerOpenHtpChannelFunc)(const char *remoteIp, int64_t flIdentity);
 typedef int32_t (*CloseHtpChannelFunc)(int32_t channelId);
 typedef void (*ServerUpdateHtpChannelFunc)(int64_t flIdentity, int32_t channelId);
+typedef bool (*CheckHtpPermissionFunc)(int32_t uid);
 typedef void (*TransProcessGroupTalkieInfoFunc)(const char *pkgName);
 typedef bool (*IsInWhitelistFunc)(const char *app);
 
@@ -71,6 +73,7 @@ typedef struct TagTransEnhanceFuncList {
     ServerOpenHtpChannelFunc serverOpenHtpChannel;
     CloseHtpChannelFunc closeHtpChannel;
     ServerUpdateHtpChannelFunc serverUpdateHtpChannel;
+    CheckHtpPermissionFunc checkHtpPermission;
     TransProcessGroupTalkieInfoFunc transProcessGroupTalkieInfo;
     IsInWhitelistFunc isInWhitelist;
 } TransEnhanceFuncList;
@@ -80,6 +83,5 @@ int32_t TransRegisterEnhanceFunc(void *soHandle);
 
 #ifdef __cplusplus
 }
-#endif
-
-#endif
+#endif // __cplusplus
+#endif // G_ENHANCE_TRANS_FUNC

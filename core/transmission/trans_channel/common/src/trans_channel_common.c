@@ -194,12 +194,12 @@ void FillAppInfo(AppInfo *appInfo, const SessionParam *param, TransInfo *transIn
     transInfo->channelType = TransGetChannelType(param, connInfo->type);
     appInfo->linkType = connInfo->type;
     appInfo->channelType = transInfo->channelType;
-    appInfo->isFlashLight = connInfo->isLowLatency;
     appInfo->flowInfo.flowSize = param->flowInfo.flowSize;
     appInfo->flowInfo.sessionType = param->flowInfo.sessionType;
     appInfo->flowInfo.flowQosType = param->flowInfo.flowQosType;
     (void)TransCommonGetLocalConfig(appInfo->channelType, appInfo->businessType, &appInfo->myData.dataConfig);
-    if (connInfo->isLowLatency) {
+    if (connInfo->isLowLatency && CheckHtpPermissionPacked(appInfo->myData.uid)) {
+        appInfo->isFlashLight = true;
         struct WifiDirectManager *mgr = GetWifiDirectManager();
         if (mgr != NULL && mgr->getLocalAndRemoteMacByRemoteIp != NULL) {
             ret = mgr->getLocalAndRemoteMacByRemoteIp(
