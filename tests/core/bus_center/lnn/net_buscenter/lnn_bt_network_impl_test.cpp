@@ -211,7 +211,7 @@ HWTEST_F(LNNBtNetworkImplMockTest, LNN_BT_NETWORK_IMPL_TEST_006, TestSize.Level1
     OnBtNetifStatusChanged(&subnet, (void *)(&btState1));
 
     EXPECT_CALL(btMock, LnnGetNetIfTypeByName)
-    .WillOnce(LnnBtNetworkImplInterfaceMock::ActionOfLnnGetNetIfTypeByNameBr);
+        .WillOnce(LnnBtNetworkImplInterfaceMock::ActionOfLnnGetNetIfTypeByNameBr);
     SoftBusBtState btState2 = SOFTBUS_BR_TURN_OFF;
     OnBtNetifStatusChanged(&subnet, (void *)(&btState2));
 
