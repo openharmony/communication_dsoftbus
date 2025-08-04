@@ -257,5 +257,10 @@ int32_t LnnCleanTriggerSparkInfo(const char *udid, ConnectionAddrType addrType)
 {
     return GetLnnConnInterface()->LnnCleanTriggerSparkInfo(udid, addrType);
 }
+
+void LnnSetWiFiIp(NodeInfo *info, const char *ip, int32_t ifnameIdx)
+{
+    return GetLnnConnInterface()->LnnSetWiFiIp(info, ip, ifnameIdx);
+}
 }
 } // namespace OHOS

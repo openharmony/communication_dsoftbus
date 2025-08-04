@@ -525,6 +525,7 @@ ohos_unittest("LNNConnectionFsmTest") {
     "$dsoftbus_root_path/core/adapter/transmission/include",
     "$dsoftbus_root_path/core/bus_center/ipc/include",
     "$dsoftbus_root_path/core/bus_center/lnn/lane_hub/lane_qos/include",
+    "$dsoftbus_root_path/core/bus_center/lnn/net_ledger/common/include",
     "$dsoftbus_root_path/core/bus_center/monitor/include/",
     "$dsoftbus_root_path/core/common/security/permission/include",
     "$dsoftbus_root_path/core/frame/common/include",

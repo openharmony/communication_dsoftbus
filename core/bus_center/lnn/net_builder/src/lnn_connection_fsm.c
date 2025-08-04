@@ -1161,6 +1161,7 @@ static void FilterRetrieveDeviceInfo(NodeInfo *info)
     info->authChannelId[CONNECTION_ADDR_BLE][AUTH_AS_CLIENT_SIDE] = 0;
     info->authChannelId[CONNECTION_ADDR_BLE][AUTH_AS_SERVER_SIDE] = 0;
     info->AuthTypeValue = 0;
+    LnnSetWiFiIp(info, LOCAL_IPV6_STR, USB_IF);
 }
 
 static int32_t LnnRecoveryBroadcastKey()

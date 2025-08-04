@@ -1740,7 +1740,7 @@ static int32_t PackNetCapacityByVersion(JsonObj *json, const NodeInfo *info, Sof
         netCapacity = info->netCapacity;
     }
     AUTH_LOGI(AUTH_FSM, "pack device info version=%{public}d, netCapacity=%{public}d", version, netCapacity);
-    if (!JSON_AddInt32ToObject(json, CONN_CAP, info->netCapacity)) {
+    if (!JSON_AddInt32ToObject(json, CONN_CAP, netCapacity)) {
         AUTH_LOGE(AUTH_FSM, "JSON_AddStringToObject failed.");
         return SOFTBUS_AUTH_PACK_DEVINFO_FAIL;
     }
