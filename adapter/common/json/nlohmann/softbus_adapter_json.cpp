@@ -142,7 +142,7 @@ bool JSON_GetBoolFromOject(const JsonObj *obj, const char *key, bool *value)
     }
     nlohmann::json item = (*json)[key];
     if (!item.is_boolean()) {
-        COMM_LOGE(COMM_ADAPTER, "Cannot find or invalid key. key=%{public}s", key);
+        COMM_LOGW(COMM_ADAPTER, "Cannot find or invalid key. key=%{public}s", key);
         return false;
     }
     *value = item.get<bool>();
@@ -179,7 +179,7 @@ static bool JSON_GetIntegerFromObject(const JsonObj *obj, const char *key, Integ
     }
     nlohmann::json item = (*json)[key];
     if (!item.is_number()) {
-        COMM_LOGE(COMM_ADAPTER, "Cannot find or invalid key. key=%{public}s", key);
+        COMM_LOGW(COMM_ADAPTER, "Cannot find or invalid key. key=%{public}s", key);
         return false;
     }
     value = item.get<Integer>();
@@ -256,7 +256,7 @@ bool JSON_GetStringFromObject(const JsonObj *obj, const char *key, char *value, 
     }
     nlohmann::json item = (*json)[key];
     if (!item.is_string()) {
-        COMM_LOGD(COMM_ADAPTER, "cannot find or invalid key. key=%{public}s", key);
+        COMM_LOGW(COMM_ADAPTER, "cannot find or invalid key. key=%{public}s", key);
         return false;
     }
     std::string valueString = item.get<std::string>();
@@ -300,7 +300,7 @@ bool JSON_GetStringArrayFromOject(const JsonObj *obj, const char *key, char **va
     }
     nlohmann::json item = (*json)[key];
     if (!item.is_array()) {
-        COMM_LOGE(COMM_ADAPTER, "cannot find or invalid key. key=%{public}s", key);
+        COMM_LOGW(COMM_ADAPTER, "cannot find or invalid key. key=%{public}s", key);
         return false;
     }
     if ((unsigned long)(*len) < (unsigned long)item.size()) {
