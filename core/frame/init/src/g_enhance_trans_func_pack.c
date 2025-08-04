@@ -190,6 +190,15 @@ void ServerUpdateHtpChannelPacked(int64_t flIdentity, int32_t channelId)
     return pfnTransEnhanceFuncList->serverUpdateHtpChannel(flIdentity, channelId);
 }
 
+bool CheckHtpPermissionPacked(int32_t uid)
+{
+    TransEnhanceFuncList *pfnTransEnhanceFuncList = TransEnhanceFuncListGet();
+    if (TransCheckFuncPointer((void *)pfnTransEnhanceFuncList->checkHtpPermission) != SOFTBUS_OK) {
+        return false;
+    }
+    return pfnTransEnhanceFuncList->checkHtpPermission(uid);
+}
+
 void TransProcessGroupTalkieInfoPacked(const char *pkgName)
 {
     TransEnhanceFuncList *pfnTransEnhanceFuncList = TransEnhanceFuncListGet();

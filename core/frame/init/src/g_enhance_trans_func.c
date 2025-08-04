@@ -15,8 +15,8 @@
 
 #include "g_enhance_trans_func.h"
 
-#include <securec.h>
 #include <dlfcn.h>
+#include <securec.h>
 
 TransEnhanceFuncList g_transEnhanceFuncList = { NULL };
 
@@ -47,6 +47,7 @@ int32_t TransRegisterEnhanceFunc(void *soHandle)
     g_transEnhanceFuncList.serverOpenHtpChannel = dlsym(soHandle, "ServerOpenHtpChannel");
     g_transEnhanceFuncList.closeHtpChannel = dlsym(soHandle, "CloseHtpChannel");
     g_transEnhanceFuncList.serverUpdateHtpChannel = dlsym(soHandle, "ServerUpdateHtpChannel");
+    g_transEnhanceFuncList.checkHtpPermission = dlsym(soHandle, "CheckHtpPermission");
     g_transEnhanceFuncList.transProcessGroupTalkieInfo = dlsym(soHandle, "TransProcessGroupTalkieInfo");
     g_transEnhanceFuncList.isInWhitelist = dlsym(soHandle, "IsInWhitelist");
     return SOFTBUS_OK;
