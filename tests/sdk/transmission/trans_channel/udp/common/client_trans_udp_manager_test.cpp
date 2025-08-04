@@ -444,7 +444,7 @@ HWTEST_F(ClientTransUdpManagerTest, ClientEmitFileEventTest002, TestSize.Level1)
     int32_t ret = ClientEmitFileEvent(channelId);
     EXPECT_NE(SOFTBUS_OK, ret);
 
-    ret = TransSetUdpChanelSessionId(TEST_CHANNELID, TEST_SESSIONID);
+    ret = TransSetUdpChannelSessionId(TEST_CHANNELID, TEST_SESSIONID);
     EXPECT_NE(SOFTBUS_NO_INIT, ret);
 
     ret = TransSetUdpChannelRenameHook(TEST_CHANNELID, nullptr);
@@ -716,12 +716,12 @@ HWTEST_F(ClientTransUdpManagerTest, ClientEmitFileEventTest003, TestSize.Level1)
 }
 
 /**
- * @tc.name: TransSetUdpChanelSessionIdTest001
+ * @tc.name: TransSetUdpChannelSessionIdTest001
  * @tc.desc: trans set udpchannel sessionid test, use the wrong or normal parameter.
  * @tc.type: FUNC
  * @tc.require:
  */
-HWTEST_F(ClientTransUdpManagerTest, TransSetUdpChanelSessionIdTest001, TestSize.Level1)
+HWTEST_F(ClientTransUdpManagerTest, TransSetUdpChannelSessionId001, TestSize.Level1)
 {
     int32_t channelId = TEST_CHANNELID;
     int32_t sessionId = TEST_SESSIONID;
@@ -729,7 +729,7 @@ HWTEST_F(ClientTransUdpManagerTest, TransSetUdpChanelSessionIdTest001, TestSize.
     EXPECT_EQ(SOFTBUS_OK, ret);
     ClientTransUdpMgrDeinit();
 
-    ret = TransSetUdpChanelSessionId(channelId, sessionId);
+    ret = TransSetUdpChannelSessionId(channelId, sessionId);
     EXPECT_EQ(SOFTBUS_NO_INIT, ret);
 
     ret = ClientTransUdpMgrInit(&g_sessionCb);
@@ -740,7 +740,7 @@ HWTEST_F(ClientTransUdpManagerTest, TransSetUdpChanelSessionIdTest001, TestSize.
     ret = ClientTransAddUdpChannel(newChannel);
     EXPECT_EQ(SOFTBUS_OK, ret);
 
-    ret = TransSetUdpChanelSessionId(channelId, sessionId);
+    ret = TransSetUdpChannelSessionId(channelId, sessionId);
     EXPECT_EQ(SOFTBUS_OK, ret);
 
     ret = TransDeleteUdpChannel(channelId);

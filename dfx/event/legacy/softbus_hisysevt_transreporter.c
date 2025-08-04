@@ -928,7 +928,15 @@ int32_t InitTransStatisticSysEvt(void)
     }
 
     g_calledApiInfoList = CreateSoftBusList();
+    if (g_calledApiInfoList == NULL) {
+        COMM_LOGE(COMM_EVENT, "Create g_calledApiInfoList failed.");
+        return SOFTBUS_CREATE_LIST_ERR;
+    }
     g_calledApiCntlist = CreateSoftBusList();
+    if (g_calledApiCntlist == NULL) {
+        COMM_LOGE(COMM_EVENT, "Create g_calledApiCntlist failed.");
+        return SOFTBUS_CREATE_LIST_ERR;
+    }
     ClearOpenSessionCnt();
     ClearOpenSessionKpi();
     ClearOpenSessionTime();
