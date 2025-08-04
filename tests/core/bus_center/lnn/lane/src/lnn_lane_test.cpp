@@ -473,6 +473,7 @@ HWTEST_F(LNNLaneMockTest, LANE_ALLOC_Test_001, TestSize.Level1)
     NiceMock<LnnWifiAdpterInterfaceMock> wifiMock;
     wifiMock.SetDefaultResult();
     SoftBusWifiLinkedInfo wlanInfo;
+    (void)memset_s(&wlanInfo, sizeof(SoftBusWifiLinkedInfo), 0, sizeof(SoftBusWifiLinkedInfo));
     wlanInfo.connState = SOFTBUS_API_WIFI_CONNECTED;
     EXPECT_CALL(wifiMock, SoftBusGetLinkedInfo)
         .WillRepeatedly(DoAll(SetArgPointee<LANE_MOCK_PARAM1>(wlanInfo), Return(SOFTBUS_OK)));
@@ -715,6 +716,7 @@ HWTEST_F(LNNLaneMockTest, LANE_ALLOC_Test_008, TestSize.Level1)
     NiceMock<LnnWifiAdpterInterfaceMock> wifiMock;
     wifiMock.SetDefaultResult();
     SoftBusWifiLinkedInfo wlanInfo;
+    (void)memset_s(&wlanInfo, sizeof(SoftBusWifiLinkedInfo), 0, sizeof(SoftBusWifiLinkedInfo));
     wlanInfo.band = 0;
     wlanInfo.connState = SOFTBUS_API_WIFI_CONNECTED;
     EXPECT_CALL(wifiMock, SoftBusGetLinkedInfo)
@@ -756,6 +758,7 @@ HWTEST_F(LNNLaneMockTest, LANE_ALLOC_Test_009, TestSize.Level1)
     NiceMock<LnnWifiAdpterInterfaceMock> wifiMock;
     wifiMock.SetDefaultResult();
     SoftBusWifiLinkedInfo wlanInfo;
+    (void)memset_s(&wlanInfo, sizeof(SoftBusWifiLinkedInfo), 0, sizeof(SoftBusWifiLinkedInfo));
     wlanInfo.band = 1;
     wlanInfo.connState = SOFTBUS_API_WIFI_CONNECTED;
     EXPECT_CALL(wifiMock, SoftBusGetLinkedInfo)
@@ -1158,6 +1161,7 @@ HWTEST_F(LNNLaneMockTest, LANE_RE_ALLOC_Test_003, TestSize.Level1)
     NiceMock<LnnWifiAdpterInterfaceMock> wifiMock;
     wifiMock.SetDefaultResult();
     SoftBusWifiLinkedInfo wlanInfo;
+    (void)memset_s(&wlanInfo, sizeof(SoftBusWifiLinkedInfo), 0, sizeof(SoftBusWifiLinkedInfo));
     wlanInfo.band = 0;
     wlanInfo.connState = SOFTBUS_API_WIFI_CONNECTED;
     EXPECT_CALL(wifiMock, SoftBusGetLinkedInfo)

@@ -206,6 +206,8 @@ public:
         bool isMeta);
     static int32_t ActionOfLnnGetNetworkIdByUdid(const char *udid, char *buf, uint32_t len);
     static int32_t socketEvent;
+    static int32_t ActionOfGetRemoteStrInfoByIfnameIdx
+        (const char *networkId, InfoKey key, char *info, uint32_t len, int32_t ifIdx);
 };
 } // namespace OHOS
 #endif // LNN_LANE_DEPS_MOCK_H
