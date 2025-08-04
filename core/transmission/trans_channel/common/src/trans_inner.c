@@ -165,7 +165,7 @@ int32_t TransInnerAddDataBufNode(int32_t channelId, int32_t fd, int32_t channelT
     if (SoftBusMutexLock(&(g_innerChannelDataBufList->lock)) != SOFTBUS_OK) {
         SoftBusFree(node->data);
         SoftBusFree(node);
-        return SOFTBUS_MALLOC_ERR;
+        return SOFTBUS_LOCK_ERR;
     }
     ListInit(&node->node);
     ListTailInsert(&g_innerChannelDataBufList->list, &node->node);
@@ -206,7 +206,12 @@ int32_t InnerAddSession(InnerSessionInfo *innerInfo)
         TRANS_CHECK_AND_RETURN_RET_LOGE(ret == EOK, SOFTBUS_MEM_ERR, TRANS_CTRL, "memcpy failed");
     }
 
-    (void)memcpy_s(info->peerNetworkId, NETWORK_ID_BUF_LEN, innerInfo->peerNetworkId, NETWORK_ID_BUF_LEN);
+    ret = memcpy_s(info->peerNetworkId, NETWORK_ID_BUF_LEN, innerInfo->peerNetworkId, NETWORK_ID_BUF_LEN);
+    if (ret != EOK) {
+        SoftBusFree(info);
+        info = NULL;
+        TRANS_CHECK_AND_RETURN_RET_LOGE(ret == EOK, SOFTBUS_MEM_ERR, TRANS_CTRL, "memcpy failed");
+    }
 
     if (SoftBusMutexLock(&g_sessionList->lock) != SOFTBUS_OK) {
         SoftBusFree(info);
