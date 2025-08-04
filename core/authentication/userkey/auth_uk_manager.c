@@ -75,6 +75,7 @@ typedef struct {
     uint32_t requestId;
     bool isGenUkSuccess;
     int32_t reason;
+    int32_t ukId;
 } SyncGenUkResult;
 
 typedef enum {
@@ -539,7 +540,7 @@ static void AsyncCallGenUkResultReceived(void *para)
         AUTH_LOGI(AUTH_CONN, "recv genuk success, requestId=%{public}u", res->requestId);
         if (instance.genCb.onGenSuccess != NULL) {
             AUTH_LOGI(AUTH_CONN, "onGenSuccess callback");
-            instance.genCb.onGenSuccess(instance.requestId, instance.ukId);
+            instance.genCb.onGenSuccess(instance.requestId, res->ukId);
             TransCloseSessionInner(instance.channelId);
             DeleteUkNegotiateInstance(instance.requestId);
         }
@@ -555,7 +556,7 @@ static void AsyncCallGenUkResultReceived(void *para)
     SoftBusFree(res);
 }
 
-static void UpdateAllGenCbCallback(const AuthACLInfo *info, bool isSuccess, int32_t reason)
+static void UpdateAllGenCbCallback(const AuthACLInfo *info, bool isSuccess, int32_t reason, int32_t ukId)
 {
     if (g_ukNegotiateList == NULL) {
         AUTH_LOGE(AUTH_INIT, "uknego instance is null");
@@ -586,6 +587,7 @@ static void UpdateAllGenCbCallback(const AuthACLInfo *info, bool isSuccess, int3
         result->requestId = item->requestId;
         result->isGenUkSuccess = isSuccess;
         result->reason = reason;
+        result->ukId = ukId;
         if (LnnAsyncCallbackDelayHelper(
             GetLooper(LOOP_TYPE_DEFAULT), AsyncCallGenUkResultReceived, (void *)result, 0) != SOFTBUS_OK) {
             AUTH_LOGE(AUTH_CONN, "async uknego success event fail");
@@ -613,7 +615,7 @@ static void OnGenSuccess(uint32_t requestId)
             instance.negoInfo.isRecvCloseAckEvent);
         return;
     }
-    UpdateAllGenCbCallback(&instance.info, true, SOFTBUS_OK);
+    UpdateAllGenCbCallback(&instance.info, true, SOFTBUS_OK, instance.ukId);
 }
 
 static void OnGenFailed(uint32_t requestId, int32_t reason)
@@ -626,7 +628,7 @@ static void OnGenFailed(uint32_t requestId, int32_t reason)
         AUTH_LOGE(AUTH_CONN, "get instance failed! ret=%{public}d", ret);
         return;
     }
-    UpdateAllGenCbCallback(&instance.info, false, reason);
+    UpdateAllGenCbCallback(&instance.info, false, reason, 0);
 }
 
 static char *PackUkAclParam(const AuthACLInfo *info, bool isClient)
