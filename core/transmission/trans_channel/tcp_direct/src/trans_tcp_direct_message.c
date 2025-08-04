@@ -919,7 +919,6 @@ static void ReportTransEventExtra(
     TRANS_EVENT(EVENT_SCENE_OPEN_CHANNEL_SERVER, EVENT_STAGE_HANDSHAKE_START, *extra);
 }
 
-// Todo: 发送 Errmsg 后关闭 HTP channel
 static int32_t CheckServerPermission(AppInfo *appInfo, char *ret)
 {
     if (appInfo->fdProtocol == LNN_PROTOCOL_HTP && !CheckHtpPermissionPacked(appInfo->myData.uid)) {
