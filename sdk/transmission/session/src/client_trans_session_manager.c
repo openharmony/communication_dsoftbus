@@ -1889,12 +1889,14 @@ int32_t CreatePagingSession(const char *sessionName, int32_t businessType, int32
             pagingListen = &(serverNode->listener.socketClient);
             if (memcpy_s(pagingListen, sizeof(ISocketListener), socketListener, sizeof(ISocketListener))) {
                 TRANS_LOGE(TRANS_SDK, "cpy client listen failed, sessionId=%{public}d", socketId);
+                SoftBusFree(session);
                 return SOFTBUS_MEM_ERR;
             }
         } else {
             pagingListen = &(serverNode->listener.socketServer);
             if (memcpy_s(pagingListen, sizeof(ISocketListener), socketListener, sizeof(ISocketListener))) {
                 TRANS_LOGE(TRANS_SDK, "cpy server listen failed, sessionId=%{public}d", socketId);
+                SoftBusFree(session);
                 return SOFTBUS_MEM_ERR;
             }
         }
