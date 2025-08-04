@@ -64,6 +64,8 @@ HWTEST_F(WifiDirectDfxTest, ReportConnEventExtraTest, TestSize.Level1)
     EXPECT_NO_FATAL_FAILURE(WifiDirectDfx::GetInstance().DfxRecord(result, reason, wifiDirectConnectInfo));
     wifiDirectConnectInfo.connectType = WIFI_DIRECT_CONNECT_TYPE_BLE_TRIGGER_HML;
     EXPECT_NO_FATAL_FAILURE(WifiDirectDfx::GetInstance().DfxRecord(result, reason, wifiDirectConnectInfo));
+    wifiDirectConnectInfo.connectType = WIFI_DIRECT_CONNECT_TYPE_SPARKLINK_TRIGGER_HML;
+    EXPECT_NO_FATAL_FAILURE(WifiDirectDfx::GetInstance().DfxRecord(result, reason, wifiDirectConnectInfo));
     wifiDirectConnectInfo.connectType = WIFI_DIRECT_CONNECT_TYPE_AUTH_TRIGGER_HML;
     EXPECT_NO_FATAL_FAILURE(WifiDirectDfx::GetInstance().DfxRecord(result, reason, wifiDirectConnectInfo));
     wifiDirectConnectInfo.connectType = WIFI_DIRECT_CONNECT_TYPE_ACTION_TRIGGER_HML;
@@ -90,6 +92,8 @@ HWTEST_F(WifiDirectDfxTest, SetBootLinkTypeTest, TestSize.Level1)
     wifiDirectConnectInfo.negoChannel.type = NEGO_CHANNEL_NULL;
     EXPECT_NO_FATAL_FAILURE(WifiDirectDfx::GetInstance().DfxRecord(result, reason, wifiDirectConnectInfo));
     wifiDirectConnectInfo.connectType = WIFI_DIRECT_CONNECT_TYPE_BLE_TRIGGER_HML;
+    EXPECT_NO_FATAL_FAILURE(WifiDirectDfx::GetInstance().DfxRecord(result, reason, wifiDirectConnectInfo));
+    wifiDirectConnectInfo.connectType = WIFI_DIRECT_CONNECT_TYPE_SPARKLINK_TRIGGER_HML;
     EXPECT_NO_FATAL_FAILURE(WifiDirectDfx::GetInstance().DfxRecord(result, reason, wifiDirectConnectInfo));
     wifiDirectConnectInfo.negoChannel.type = NEGO_CHANNEL_AUTH;
     wifiDirectConnectInfo.negoChannel.handle.authHandle.type = 1;
