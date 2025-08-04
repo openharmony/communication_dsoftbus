@@ -1600,7 +1600,7 @@ static void TryCompleteAuthSessionForError(AuthFsm *authFsm, AuthSessionInfo *in
 static void ClientTryCompleteAuthSession(AuthFsm *authFsm, AuthSessionInfo *info)
 {
     LnnFsmRemoveMessage(&authFsm->fsm, FSM_MSG_AUTH_TIMEOUT);
-    if (IsAuthPreLinkNodeExist(info->requestId)) {
+    if (AuthPreLinkCheckNeedPtk(info->requestId, info->uuid)) {
         TrySyncPtkClient(info);
         return;
     }
@@ -1639,7 +1639,7 @@ static void HandleMsgRecvDeviceInfo(AuthFsm *authFsm, const MessagePara *para)
             ClientTryCompleteAuthSession(authFsm, info);
             return;
         }
-        if (IsAuthPreLinkNodeExist(info->requestId)) {
+        if (AuthPreLinkCheckNeedPtk(info->requestId, info->uuid)) {
             TrySavePtkServer(info);
         }
         /* WIFI: server should response device info */
@@ -1649,7 +1649,7 @@ static void HandleMsgRecvDeviceInfo(AuthFsm *authFsm, const MessagePara *para)
             return;
         }
         LnnFsmRemoveMessage(&authFsm->fsm, FSM_MSG_AUTH_TIMEOUT);
-        if (IsAuthPreLinkNodeExist(info->requestId)) {
+        if (AuthPreLinkCheckNeedPtk(info->requestId, info->uuid)) {
             TryAddSyncPtkListenerServer();
             return;
         }
