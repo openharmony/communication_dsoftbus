@@ -656,6 +656,10 @@ HWTEST_F(TransLanePendingTest, CopyAsyncReqItemSessionParamIds001, TestSize.Leve
 
     int32_t ret = CopyAsyncReqItemSessionParamIds(param, &target);
     EXPECT_EQ(SOFTBUS_OK, ret);
+    ret = CopyAsyncReqItemSessionParamIds(nullptr, &target);
+    EXPECT_EQ(SOFTBUS_INVALID_PARAM, ret);
+    ret = CopyAsyncReqItemSessionParamIds(param, nullptr);
+    EXPECT_EQ(SOFTBUS_INVALID_PARAM, ret);
 
     SoftBusFree((void *)(param->attr));
     param->attr = nullptr;

@@ -177,6 +177,7 @@ int32_t TransInnerAddDataBufNode(int32_t channelId, int32_t fd, int32_t channelT
 
 int32_t InnerAddSession(InnerSessionInfo *innerInfo)
 {
+    TRANS_CHECK_AND_RETURN_RET_LOGE(innerInfo != NULL, SOFTBUS_INVALID_PARAM, TRANS_CTRL, "invalid param");
     TRANS_CHECK_AND_RETURN_RET_LOGE(g_sessionList != NULL, SOFTBUS_NO_INIT, TRANS_CTRL, "session list not init");
 
     TransInnerSessionInfo *info = (TransInnerSessionInfo *)SoftBusCalloc(sizeof(TransInnerSessionInfo));
@@ -284,6 +285,7 @@ static int32_t DeleteSession(int32_t fd, int32_t channelId)
 
 static int32_t GetSessionInfoByFd(int32_t fd, TransInnerSessionInfo *info)
 {
+    TRANS_CHECK_AND_RETURN_RET_LOGE(info != NULL, SOFTBUS_INVALID_PARAM, TRANS_CTRL, "invalid param");
     TRANS_CHECK_AND_RETURN_RET_LOGE(g_sessionList != NULL, SOFTBUS_NO_INIT, TRANS_CTRL, "session list not init");
 
     if (SoftBusMutexLock(&(g_sessionList->lock)) != SOFTBUS_OK) {
@@ -311,6 +313,7 @@ static int32_t GetSessionInfoByFd(int32_t fd, TransInnerSessionInfo *info)
 
 static int32_t GetSessionInfoByChanId(int32_t channelId, TransInnerSessionInfo *info)
 {
+    TRANS_CHECK_AND_RETURN_RET_LOGE(info != NULL, SOFTBUS_INVALID_PARAM, TRANS_CTRL, "invalid param");
     TRANS_CHECK_AND_RETURN_RET_LOGE(g_sessionList != NULL, SOFTBUS_NO_INIT, TRANS_CTRL, "session list not init");
     int32_t ret = 0;
     if (SoftBusMutexLock(&(g_sessionList->lock)) != SOFTBUS_OK) {
@@ -445,7 +448,7 @@ static DataBuf *TransGetInnerDataBufNodeById(int32_t channelId)
 static int32_t TransTdcProcessInnerTlvData(
     TransInnerSessionInfo *info, TcpDataTlvPacketHead *pktHead, int32_t pkgHeadSize)
 {
-    if (info->listener.func == NULL) {
+    if (info == NULL || pktHead == NULL || info->listener.func == NULL) {
         TRANS_LOGE(TRANS_CTRL, "callback func is null, channelId=%{public}d", info->channelId);
         return SOFTBUS_NO_INIT;
     }
@@ -493,6 +496,7 @@ static int32_t TransTdcProcessInnerTlvData(
 
 static int32_t TransInnerTdcProcAllTlvData(TransInnerSessionInfo *info)
 {
+    TRANS_CHECK_AND_RETURN_RET_LOGE(info != NULL, SOFTBUS_INVALID_PARAM, TRANS_CTRL, "invalid param");
     TRANS_CHECK_AND_RETURN_RET_LOGE(g_innerChannelDataBufList != NULL,
         SOFTBUS_NO_INIT, TRANS_CTRL, "g_tcpSrvData list not init");
     while (1) {
@@ -522,7 +526,7 @@ static int32_t TransInnerTdcProcAllTlvData(TransInnerSessionInfo *info)
 
 static int32_t TransTdcProcessInnerData(TransInnerSessionInfo *info)
 {
-    if (info->listener.func == NULL) {
+    if (info == NULL || info->listener.func == NULL) {
         TRANS_LOGE(TRANS_CTRL, "callback func is null, channelId=%{public}d", info->channelId);
         return SOFTBUS_NO_INIT;
     }
@@ -564,6 +568,7 @@ static int32_t TransTdcProcessInnerData(TransInnerSessionInfo *info)
 
 static int32_t TransInnerTdcProcAllData(TransInnerSessionInfo *info)
 {
+    TRANS_CHECK_AND_RETURN_RET_LOGE(info != NULL, SOFTBUS_INVALID_PARAM, TRANS_CTRL, "invalid param");
     TRANS_CHECK_AND_RETURN_RET_LOGE(
         g_innerChannelDataBufList != NULL, SOFTBUS_NO_INIT, TRANS_CTRL, "g_tcpSrvDataList is null");
     while (1) {

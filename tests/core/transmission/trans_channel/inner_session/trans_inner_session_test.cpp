@@ -155,6 +155,8 @@ HWTEST_F(TransInnerSessionTest, GetIsClientInfoByIdTest001, TestSize.Level1)
     EXPECT_CALL(TransInnerMock, GetAppInfoById).WillOnce(Return(SOFTBUS_OK));
     int32_t ret = GetIsClientInfoById(TRANS_TEST_SESSION_ID, channelType, &isClient);
     EXPECT_EQ(SOFTBUS_OK, ret);
+    ret = GetIsClientInfoById(TRANS_TEST_SESSION_ID, channelType, nullptr);
+    EXPECT_EQ(SOFTBUS_INVALID_PARAM, ret);
     EXPECT_CALL(TransInnerMock, GetAppInfoById).WillOnce(Return(SOFTBUS_INVALID_PARAM));
     ret = GetIsClientInfoById(TRANS_TEST_SESSION_ID, channelType, &isClient);
     EXPECT_EQ(SOFTBUS_INVALID_PARAM, ret);

@@ -217,6 +217,9 @@ void TransFreeLanePendingDeinit(void)
 
 static void DestroyNetworkingReqItemParam(TransReqLaneItem *laneItem)
 {
+    if (laneItem == NULL) {
+        return;
+    }
     if (laneItem->param.sessionName != NULL) {
         SoftBusFree((void *)(laneItem->param.sessionName));
         laneItem->param.sessionName = NULL;
@@ -333,6 +336,10 @@ static void CallbackOpenChannelFailed(const SessionParam *param, const AppInfo *
 
 static int32_t CopyAsyncReqItemSessionParamIds(const SessionParam *source, SessionParam *target)
 {
+    if (source == NULL || target == NULL) {
+        TRANS_LOGE(TRANS_SVC, "invalid param");
+        return SOFTBUS_INVALID_PARAM;
+    }
     char *groupId = (char *)SoftBusCalloc(sizeof(char) * GROUP_ID_SIZE_MAX);
     TRANS_CHECK_AND_RETURN_RET_LOGE(groupId != NULL, SOFTBUS_MALLOC_ERR, TRANS_SVC, "SoftBusCalloc groupId failed");
     if (source->groupId != NULL && strcpy_s(groupId, GROUP_ID_SIZE_MAX, source->groupId) != EOK) {
@@ -1086,6 +1093,10 @@ static LaneLinkType TransGetLaneLinkTypeBySessionLinkType(LinkType type)
 static void TransformSessionPreferredToLanePreferred(const SessionParam *param,
     LanePreferredLinkList *preferred, TransOption *transOption)
 {
+    if (param == NULL || param->attr == NULL || preferred == NULL) {
+        TRANS_LOGE(TRANS_SVC, "invalid param");
+        return;
+    }
     (void)transOption;
     if (param->attr->linkTypeNum <= 0 || param->attr->linkTypeNum > LINK_TYPE_MAX) {
         preferred->linkTypeNum = 0;
@@ -1179,6 +1190,10 @@ static void TransGetQosInfo(const SessionParam *param, QosInfo *qosInfo, AllocEx
 {
     if (!(param->isQosLane)) {
         TRANS_LOGD(TRANS_SVC, "not support qos lane");
+        return;
+    }
+    if (param->qosCount > QOS_TYPE_BUTT) {
+        TRANS_LOGE(TRANS_SDK, "read invalid qosCount=%{public}" PRIu32, param->qosCount);
         return;
     }
 
