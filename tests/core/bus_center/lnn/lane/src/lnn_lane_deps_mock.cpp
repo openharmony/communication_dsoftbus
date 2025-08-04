@@ -46,6 +46,7 @@ void LaneDepsInterfaceMock::SetDefaultResult(NodeInfo *info)
     EXPECT_CALL(*this, LnnGetOnlineStateById).WillRepeatedly(Return(true));
     EXPECT_CALL(*this, LnnGetLocalStrInfo).WillRepeatedly(Return(SOFTBUS_OK));
     EXPECT_CALL(*this, LnnGetRemoteStrInfo).WillRepeatedly(Return(SOFTBUS_OK));
+    EXPECT_CALL(*this, LnnGetRemoteStrInfoByIfnameIdx).WillRepeatedly(Return(SOFTBUS_OK));
     EXPECT_CALL(*this, SoftBusFrequencyToChannel).WillRepeatedly(Return(1));
     EXPECT_CALL(*this, LnnVisitPhysicalSubnet).WillRepeatedly(Return(true));
     EXPECT_CALL(*this, LnnGetNodeInfoById).WillRepeatedly(Return(nullptr));
@@ -77,6 +78,7 @@ void LaneDepsInterfaceMock::SetDefaultResultForAlloc(int32_t localNetCap, int32_
         .WillRepeatedly(DoAll(SetArgPointee<LANE_MOCK_PARAM3>(remoteFeatureCap), Return(SOFTBUS_OK)));
     EXPECT_CALL(*this, LnnGetRemoteStrInfo).WillRepeatedly(ActionOfGetRemoteStrInfo);
     EXPECT_CALL(*this, SoftBusGenerateStrHash).WillRepeatedly(ActionOfGenerateStrHash);
+    EXPECT_CALL(*this, LnnGetRemoteStrInfoByIfnameIdx).WillRepeatedly(ActionOfGetRemoteStrInfoByIfnameIdx);
 }
 
 int32_t LaneDepsInterfaceMock::ActionOfLnnGetNetworkIdByUdid(const char *udid, char *buf, uint32_t len)
@@ -127,6 +129,29 @@ int32_t LaneDepsInterfaceMock::ActionOfGetRemoteStrInfo(const char *netWorkId, I
             if (strncpy_s(info, UDID_BUF_LEN, peerUdid, strlen(peerUdid)) != EOK) {
                 return SOFTBUS_STRCPY_ERR;
             }
+    }
+    return SOFTBUS_OK;
+}
+
+int32_t LaneDepsInterfaceMock::ActionOfGetRemoteStrInfoByIfnameIdx
+    (const char *netWorkId, InfoKey key, char *info, uint32_t len, int32_t ifIdx)
+{
+    (void)netWorkId;
+    (void)len;
+    if (info == nullptr) {
+        GTEST_LOG_(ERROR) << "invalid param";
+        return SOFTBUS_INVALID_PARAM;
+    }
+    switch (key) {
+        case STRING_KEY_IP: {
+            char ipAddr[] = "192.168.2.1";
+            if (strncpy_s(info, len, ipAddr, strlen(ipAddr)) != EOK) {
+                return SOFTBUS_STRCPY_ERR;
+            }
+            break;
+        }
+        default:
+            break;
     }
     return SOFTBUS_OK;
 }
