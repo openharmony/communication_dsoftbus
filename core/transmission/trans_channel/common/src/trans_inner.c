@@ -454,7 +454,7 @@ static int32_t TransTdcProcessInnerTlvData(
     TransInnerSessionInfo *info, TcpDataTlvPacketHead *pktHead, int32_t pkgHeadSize)
 {
     if (info == NULL || pktHead == NULL || info->listener.func == NULL) {
-        TRANS_LOGE(TRANS_CTRL, "callback func is null, channelId=%{public}d", info->channelId);
+        TRANS_LOGE(TRANS_CTRL, "invalid param");
         return SOFTBUS_NO_INIT;
     }
     if (SoftBusMutexLock(&(g_innerChannelDataBufList->lock)) != SOFTBUS_OK) {
@@ -532,7 +532,7 @@ static int32_t TransInnerTdcProcAllTlvData(TransInnerSessionInfo *info)
 static int32_t TransTdcProcessInnerData(TransInnerSessionInfo *info)
 {
     if (info == NULL || info->listener.func == NULL) {
-        TRANS_LOGE(TRANS_CTRL, "callback func is null, channelId=%{public}d", info->channelId);
+        TRANS_LOGE(TRANS_CTRL, "invalid param");
         return SOFTBUS_NO_INIT;
     }
     if (SoftBusMutexLock(&(g_innerChannelDataBufList->lock)) != SOFTBUS_OK) {
