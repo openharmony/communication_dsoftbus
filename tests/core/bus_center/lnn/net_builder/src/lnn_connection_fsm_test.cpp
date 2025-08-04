@@ -28,6 +28,7 @@
 #include "lnn_map.h"
 #include "lnn_net_builder.h"
 #include "lnn_net_ledger_mock.h"
+#include "lnn_node_info.h"
 #include "lnn_service_mock.h"
 #include "message_handler.h"
 #include "softbus_adapter_mem.h"
