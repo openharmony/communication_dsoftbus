@@ -190,6 +190,9 @@ void WifiDirectDfx::SetBootLinkType(ConnEventExtra &extra, const WifiDirectConne
     if (type == NEGO_CHANNEL_NULL && info.connectType == WIFI_DIRECT_CONNECT_TYPE_BLE_TRIGGER_HML) {
         extra.bootLinkType = STATISTIC_BLE_TRIGGER;
     }
+    if (type == NEGO_CHANNEL_NULL && info.connectType == WIFI_DIRECT_CONNECT_TYPE_SPARKLINK_TRIGGER_HML) {
+        extra.bootLinkType = STATISTIC_SPARK_LINK_TRIGGER;
+    }
     if (info.dfxInfo.bootLinkType == STATISTIC_BLE_AND_ACTION) {
         extra.bootLinkType = STATISTIC_BLE_AND_ACTION;
     }
