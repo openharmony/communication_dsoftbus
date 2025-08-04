@@ -184,6 +184,9 @@ static SoftBusMutex g_rawLinkLock;
     } while (0)
 
 typedef int32_t (*GuideLinkByType)(const LinkRequest *request, uint32_t laneReqId, const LaneLinkCb *callback);
+static int32_t GetRequest(P2pLinkReqList *p2pLinkReqInfo, LinkRequest *request);
+static void TryConcurrencyPreLinkConn(const LinkRequest *request, uint32_t laneLinkReqId,
+    const struct WifiDirectConnectInfo *wifiDirectInfo);
 
 static int32_t LinkLock(void)
 {
@@ -1980,6 +1983,21 @@ static int32_t GetAuthTriggerLinkReqParamByAuthHandle(uint32_t authRequestId, ui
     return SOFTBUS_LANE_GUIDE_BUILD_FAIL;
 }
 
+static void TryAddPreLinkConn(uint32_t authRequestId, const struct WifiDirectConnectInfo *wifiDirectInfo)
+{
+    P2pLinkReqList p2pLinkReqInfo;
+    (void)memset_s(&p2pLinkReqInfo, sizeof(P2pLinkReqList), 0, sizeof(P2pLinkReqList));
+    if (GetP2pLinkReqByReqId(ASYNC_RESULT_AUTH, authRequestId, &p2pLinkReqInfo) == SOFTBUS_OK) {
+        LinkRequest request;
+        (void)memset_s(&request, sizeof(LinkRequest), 0, sizeof(LinkRequest));
+        if (GetRequest(&p2pLinkReqInfo, &request) != SOFTBUS_OK) {
+            LNN_LOGE(LNN_LANE, "get request fail");
+            return;
+        }
+        TryConcurrencyPreLinkConn(&request, p2pLinkReqInfo.laneRequestInfo.laneReqId, wifiDirectInfo);
+    }
+}
+
 static void OnAuthTriggerConnOpened(uint32_t authRequestId, AuthHandle authHandle)
 {
     LNN_LOGI(LNN_LANE, "auth trigger opened with authRequestId=%{public}u, authId=%{public}" PRId64 "",
@@ -2000,7 +2018,7 @@ static void OnAuthTriggerConnOpened(uint32_t authRequestId, AuthHandle authHandl
         LNN_LOGE(LNN_LANE, "set auth trigger link param fail");
         goto FAIL;
     }
-
+    TryAddPreLinkConn(authRequestId, &wifiDirectInfo);
     struct WifiDirectConnectCallback callback = {
         .onConnectSuccess = OnWifiDirectConnectSuccess,
         .onConnectFailure = OnWifiDirectConnectFailure,
@@ -2333,7 +2351,7 @@ static int32_t CheckTransReqInfo(const LinkRequest *request, uint32_t laneReqId)
 }
 
 static void TryConcurrencyPreLinkConn(const LinkRequest *request, uint32_t laneLinkReqId,
-    struct WifiDirectConnectInfo *wifiDirectInfo)
+    const struct WifiDirectConnectInfo *wifiDirectInfo)
 {
     LNN_LOGI(LNN_LANE, "prelink connect enter");
     char udid[UDID_BUF_LEN] = {0};

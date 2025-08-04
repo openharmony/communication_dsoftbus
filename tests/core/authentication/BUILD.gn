@@ -1340,7 +1340,7 @@ ohos_unittest("AuthLaneTest") {
 #   ]
 #   # if (defined(ohos_lite)) {
 #   #  if (ohos_kernel_type == "liteos_m") {
-    
+
 #   #  }
 #   # }
 #   external_deps += [ "device_info_manager:distributed_device_profile_sdk" ]
@@ -1349,7 +1349,6 @@ ohos_unittest("AuthLaneTest") {
 ohos_unittest("AuthSessionJsonMockTest") {
   module_out_path = module_output_path
   sources = [
-    "$dsoftbus_root_path/core/authentication/src/auth_pre_link.c",
     "unittest/auth_session_json_deps_mock.cpp",
     "unittest/auth_session_json_mock_test.cpp",
     "$dsoftbus_root_path/core/frame/init/src/g_enhance_lnn_func.c",
@@ -1391,6 +1390,7 @@ ohos_unittest("AuthSessionJsonMockTest") {
 
   deps = [
     "$dsoftbus_root_path/core/common:softbus_utils",
+    "$dsoftbus_root_path/core/frame:softbus_server",
     "$dsoftbus_root_path/tests/sdk/common:softbus_access_token_test",
     "$dsoftbus_root_path/adapter:softbus_adapter",
     "$dsoftbus_root_path/dfx:softbus_dfx",
@@ -1408,10 +1408,10 @@ ohos_unittest("AuthSessionJsonMockTest") {
 ohos_unittest("AuthPreLinkTest") {
   module_out_path = module_output_path
   sources = [
-    "$dsoftbus_root_path/core/authentication/src/auth_pre_link.c",
-    "unittest/auth_pre_link_test.cpp",
     "$dsoftbus_root_path/core/frame/init/src/g_enhance_lnn_func_pack.c",
     "$dsoftbus_root_path/core/frame/init/src/g_enhance_lnn_func.c",
+    "unittest/auth_pre_link_mock.cpp",
+    "unittest/auth_pre_link_test.cpp",
   ]
 
   include_dirs = [
@@ -1420,6 +1420,7 @@ ohos_unittest("AuthPreLinkTest") {
     "$dsoftbus_root_path/core/adapter/bus_center/include",
     "$dsoftbus_root_path/core/authentication/include",
     "$dsoftbus_root_path/core/authentication/interface",
+    "$dsoftbus_root_path/core/authentication/src",
     "$dsoftbus_root_path/core/bus_center/interface",
     "$dsoftbus_root_path/core/bus_center/lnn/lane_hub/heartbeat/include",
     "$dsoftbus_root_path/core/bus_center/lnn/lane_hub/lane_manager/include",
@@ -1680,7 +1681,7 @@ ohos_unittest("AuthRequestTest") {
 
 ohos_unittest("AuthApplyKeyProcessTest") {
   module_out_path = module_output_path
-  sources = [ 
+  sources = [
     "unittest/auth_apply_key_process_mock.cpp",
     "unittest/auth_apply_key_process_test.cpp",
   ]
