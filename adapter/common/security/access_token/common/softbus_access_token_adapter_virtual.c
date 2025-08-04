@@ -60,6 +60,11 @@ void SoftBusRegisterDataSyncPermission(
     (void)pid;
 }
 
+void SoftBusUnRegisterDataSyncPermission(int32_t pid)
+{
+    (void)pid;
+}
+
 void SoftBusRegisterPermissionChangeCb(PermissionChangeCb cb)
 {
     (void)cb;
