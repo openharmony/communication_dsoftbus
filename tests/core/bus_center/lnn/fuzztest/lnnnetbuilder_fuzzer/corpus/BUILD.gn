@@ -22,8 +22,8 @@ ohos_fuzztest("LnnSyncInfoMsgFuzzTest") {
   fuzz_config_file =
       "$dsoftbus_root_path/tests/core/lnn/fuzztest/lnnsyninfomanager_fuzzer"
   include_dirs = [
-    "$dsoftbus_root_path/interfaces/kits/lnn",
     "$dsoftbus_root_path/adapter/common/include",
+    "$dsoftbus_root_path/interfaces/kits/lnn",
     "$dsoftbus_root_path/core/bus_center/lnn/net_builder/include",
     "$dsoftbus_root_path/core/common/include",
     "$dsoftbus_root_path/adapter/common/include",

@@ -21,6 +21,7 @@
 
 #include "softbus_adapter_json.h"
 #include "auth_common.h"
+#include "auth_identity_service_adapter.h"
 #include "auth_hichain_adapter.h"
 #include "auth_session_fsm.h"
 #include "bus_center_manager.h"
@@ -89,6 +90,7 @@ public:
     virtual int32_t GetActiveOsAccountIds(void) = 0;
     virtual bool IsSKIdInvalid(int32_t sessionKeyId, const char *accountHash, const char *udidShortHash,
         int32_t userId) = 0;
+    virtual int32_t IdServiceGetCredTypeByCredId(int32_t userId, const char *credId, int32_t *credType) = 0;
 };
 
 class AuthHichainInterfaceMock : public AuthHichainInterface {
@@ -138,6 +140,7 @@ public:
     MOCK_METHOD1(IdServiceDestroyCredentialList, void (char **));
     MOCK_METHOD0(GetActiveOsAccountIds, int32_t(void));
     MOCK_METHOD4(IsSKIdInvalid, bool (int32_t, const char *, const char *, int32_t));
+    MOCK_METHOD3(IdServiceGetCredTypeByCredId, int32_t (int32_t, const char *, int32_t *));
 };
 } // namespace OHOS
 #endif // AUTH_COMMON_MOCK_H

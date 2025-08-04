@@ -119,8 +119,7 @@ int32_t LnnGetAllMetaNodeInfo(MetaNodeInfo *infos, int32_t *infoNum)
     return BusCenterIpcInterfaceInstance()->LnnGetAllMetaNodeInfo(infos, infoNum);
 }
 
-int32_t LnnShiftLNNGear(
-    const char *pkgName, const char *callerId, const char *targetNetworkId, const GearMode *mode)
+int32_t LnnShiftLNNGear(const char *pkgName, const char *callerId, const char *targetNetworkId, const GearMode *mode)
 {
     return BusCenterIpcInterfaceInstance()->LnnShiftLNNGear(pkgName, callerId, targetNetworkId, mode);
 }
