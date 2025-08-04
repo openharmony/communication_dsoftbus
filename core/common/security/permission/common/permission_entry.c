@@ -785,6 +785,11 @@ bool PermIsSecLevelPublic(const char *sessionName)
     SoftBusPermissionEntry *pe = NULL;
     bool ret = false;
 
+    if (g_permissionEntryList == NULL) {
+        COMM_LOGE(COMM_PERM, "entry list is null");
+        return false;
+    }
+
     if (SoftBusMutexLock(&g_permissionEntryList->lock) != 0) {
         return false;
     }
@@ -871,6 +876,10 @@ int32_t AddDynamicPermission(int32_t callingUid, int32_t callingPid, const char 
         COMM_LOGE(COMM_PERM, "sessionName is null");
         return SOFTBUS_INVALID_PARAM;
     }
+    if (g_dynamicPermissionList == NULL) {
+        COMM_LOGE(COMM_PERM, "dynamic list is null");
+        return SOFTBUS_INVALID_PARAM;
+    }
     SoftBusMutexLock(&g_dynamicPermissionList->lock);
     if (g_dynamicPermissionList->cnt >= DYNAMIC_PERMISSION_MAX_SIZE) {
         COMM_LOGE(COMM_PERM, "dynamic permission reach the upper limit");
@@ -915,6 +924,10 @@ int32_t DeleteDynamicPermission(const char *sessionName)
 {
     if (sessionName == NULL) {
         COMM_LOGE(COMM_PERM, "sessionName is null");
+        return SOFTBUS_INVALID_PARAM;
+    }
+    if (g_dynamicPermissionList == NULL) {
+        COMM_LOGE(COMM_PERM, "dynamic list is null");
         return SOFTBUS_INVALID_PARAM;
     }
     SoftBusMutexLock(&g_dynamicPermissionList->lock);
