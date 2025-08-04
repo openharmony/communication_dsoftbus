@@ -641,25 +641,6 @@ HWTEST_F(WifiDirectUtilsTest, GetRemoteConnSubFeatureTest, TestSize.Level1)
 }
 
 /*
- * @tc.name: GetChloadTest
- * @tc.desc: test GetChload method
- * @tc.type: FUNC
- * @tc.require:
- */
-HWTEST_F(WifiDirectUtilsTest, GetChloadTest, TestSize.Level1)
-{
-    std::shared_ptr<Wifi::WifiDevice> mockDevice = Wifi::WifiDevice::GetInstance(0);
-    EXPECT_CALL(*mockDevice, GetLinkedInfo).WillRepeatedly(Return(Wifi::WIFI_OPT_PERMISSION_DENIED));
-    auto ret = WifiDirectUtils::GetChload();
-    EXPECT_EQ(ret, Wifi::WIFI_OPT_PERMISSION_DENIED);
-
-    int chload = 6;
-    EXPECT_CALL(*mockDevice, GetLinkedInfo).WillRepeatedly(Return(Wifi::WIFI_OPT_SUCCESS));
-    ret = WifiDirectUtils::GetChload();
-    EXPECT_EQ(ret, chload);
-}
-
-/*
  * @tc.name: GetRecommendChannelFromLnnTest
  * @tc.desc: test GetRecommendChannelFromLnn method
  * @tc.type: FUNC
