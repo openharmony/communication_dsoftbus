@@ -128,11 +128,18 @@ int32_t ClinetTransProxyFileManagerInit(void)
 
     if (!atomic_load_explicit(&(g_recvFileInfoLock.lockInitFlag), memory_order_acquire)) {
         int32_t ret = SoftBusMutexInit(&g_recvFileInfoLock.lock, NULL);
-        TRANS_CHECK_AND_RETURN_RET_LOGE(ret == SOFTBUS_OK, ret, TRANS_FILE, "recvfile mutex init fail!");
+        if (ret != SOFTBUS_OK) {
+            (void)SoftBusMutexDestroy(&g_sendFileInfoLock.lock);
+            return ret;
+        }
         atomic_store_explicit(&(g_recvFileInfoLock.lockInitFlag), true, memory_order_release);
     }
     int32_t ret = InitPendingPacket();
-    TRANS_CHECK_AND_RETURN_RET_LOGE(ret == SOFTBUS_OK, ret, TRANS_FILE, "InitPendingPacket fail!");
+    if (ret != SOFTBUS_OK) {
+        (void)SoftBusMutexDestroy(&g_sendFileInfoLock.lock);
+        (void)SoftBusMutexDestroy(&g_recvFileInfoLock.lock);
+        return ret;
+    }
 
     if (RegisterTimeoutCallback(SOFTBUS_PROXY_SENDFILE_TIMER_FUN, ProxyFileTransTimerProc) != SOFTBUS_OK) {
         TRANS_LOGE(TRANS_FILE, "register sendfile timer fail");
