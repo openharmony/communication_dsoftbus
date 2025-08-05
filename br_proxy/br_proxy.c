@@ -644,6 +644,10 @@ bool IsProxyChannelEnabled(int32_t uid)
 static PermissonHookCb g_pushCb;
 int32_t RegisterAccessHook(PermissonHookCb *cb)
 {
+    if (cb == NULL) {
+        TRANS_LOGE(TRANS_SDK, "[br_proxy] cb is NULL");
+        return SOFTBUS_INVALID_PARAM;
+    }
     int32_t ret = ClientStubInit();
     if (ret != SOFTBUS_OK) {
         TRANS_LOGE(TRANS_SDK, "[br_proxy] client stub init failed! ret:%{public}d", ret);
