@@ -178,7 +178,7 @@ static SoftBusMutex g_rawLinkLock;
         LnnEventExtra extra = { 0 };                                               \
         LnnEventExtraInit(&extra);                                                 \
         extra.result = EVENT_STAGE_RESULT_OK;                                      \
-        extra.laneId = (int32_t)(lnnLaneId);                                       \
+        extra.laneId = lnnLaneId;                                                  \
         extra.connReqId = (int32_t)(lnnConnReqId);                                 \
         LNN_EVENT(EVENT_SCENE_LNN, EVENT_STAGE_LNN_LANE_SELECT_END, extra);        \
     } while (0)
@@ -659,7 +659,7 @@ static int32_t GetP2pLinkReqParamByChannelRequetId(
             LNN_LOGE(LNN_LANE, "get remote p2p mac fail");
             return SOFTBUS_LANE_GET_LEDGER_INFO_ERR;
         }
-        wifiDirectInfo->bandWidth = item->p2pInfo.bandWidth;
+        wifiDirectInfo->bandWidth = (int32_t)item->p2pInfo.bandWidth;
         uint64_t currentTime = SoftBusGetSysTimeMs();
         if (currentTime >= item->p2pInfo.triggerLinkTime) {
             uint64_t costTime = currentTime - item->p2pInfo.triggerLinkTime;
@@ -724,7 +724,7 @@ static int32_t GetP2pLinkReqParamByAuthHandle(uint32_t authRequestId, uint32_t p
             LinkUnlock();
             return SOFTBUS_STRCPY_ERR;
         }
-        wifiDirectInfo->bandWidth = item->p2pInfo.bandWidth;
+        wifiDirectInfo->bandWidth = (int32_t)item->p2pInfo.bandWidth;
         uint64_t currentTime = SoftBusGetSysTimeMs();
         if (currentTime >= item->p2pInfo.triggerLinkTime) {
             uint64_t costTime = currentTime - item->p2pInfo.triggerLinkTime;
@@ -898,7 +898,7 @@ static void DfxReportWdResult(const P2pLinkReqList *reqInfo, const LaneLinkInfo 
 {
     LnnEventExtra extra = { 0 };
     extra.errcode = reason;
-    extra.laneReqId = (int32_t)reqInfo->laneRequestInfo.laneReqId;
+    extra.laneReqId = reqInfo->laneRequestInfo.laneReqId;
     extra.guideType = (int32_t)guideType;
     if (reqInfo->p2pInfo.reuseOnly) {
         extra.isWifiDirectReuse = true;
@@ -1951,7 +1951,7 @@ static int32_t GetAuthTriggerLinkReqParamByAuthHandle(uint32_t authRequestId, ui
             LNN_LOGE(LNN_LANE, "get remote wifidirect addr fail");
             return SOFTBUS_LANE_GET_LEDGER_INFO_ERR;
         }
-        wifiDirectInfo->bandWidth = item->p2pInfo.bandWidth;
+        wifiDirectInfo->bandWidth = (int32_t)item->p2pInfo.bandWidth;
         uint64_t currentTime = SoftBusGetSysTimeMs();
         if (currentTime >= item->p2pInfo.triggerLinkTime) {
             uint64_t costTime = currentTime - item->p2pInfo.triggerLinkTime;
