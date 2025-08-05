@@ -826,14 +826,14 @@ HWTEST_F(AuthUkManagerTest, UPDATE_ALL_GEN_CB_CALLBACK_Test_001, TestSize.Level1
     EXPECT_EQ(EOK, strcpy_s(info.sinkAccountId, ACCOUNT_ID_BUF_LEN, NODE2_ACCOUNT_ID));
     bool isSuccess = true;
     int32_t reason = SOFTBUS_AUTH_UK_INSTANCE_NOT_FIND;
-    EXPECT_NO_FATAL_FAILURE(UpdateAllGenCbCallback(&info, isSuccess, reason));
+    EXPECT_NO_FATAL_FAILURE(UpdateAllGenCbCallback(&info, isSuccess, reason, 0));
     EXPECT_EQ(InitUkNegoInstanceList(), SOFTBUS_OK);
-    EXPECT_NO_FATAL_FAILURE(UpdateAllGenCbCallback(&info, isSuccess, reason));
+    EXPECT_NO_FATAL_FAILURE(UpdateAllGenCbCallback(&info, isSuccess, reason, 0));
     EXPECT_EQ(UkNegotiateInit(), SOFTBUS_OK);
-    EXPECT_NO_FATAL_FAILURE(UpdateAllGenCbCallback(&info, isSuccess, reason));
+    EXPECT_NO_FATAL_FAILURE(UpdateAllGenCbCallback(&info, isSuccess, reason, 0));
     uint32_t requestId = 1;
     EXPECT_EQ(CreateUkNegotiateInstanceInner(), SOFTBUS_OK);
-    EXPECT_NO_FATAL_FAILURE(UpdateAllGenCbCallback(&info, isSuccess, reason));
+    EXPECT_NO_FATAL_FAILURE(UpdateAllGenCbCallback(&info, isSuccess, reason, 0));
     EXPECT_NO_FATAL_FAILURE(OnGenSuccess(reason));
     DeleteUkNegotiateInstance(requestId);
     DeInitUkNegoInstanceList();
