@@ -879,7 +879,7 @@ HWTEST_F(AuthOtherTest, START_RECONNECT_DEVICE_TEST_001, TestSize.Level1)
     AuthConnCallback connCb;
     AuthHandle authHandle = { .authId = 1, .type = AUTH_LINK_TYPE_WIFI };
     int32_t ret = AuthStartReconnectDevice(authHandle, &connInfo, 1, &connCb);
-    EXPECT_TRUE(ret == SOFTBUS_AUTH_NOT_FOUND);
+    EXPECT_TRUE(ret == SOFTBUS_INVALID_PARAM);
 
     NodeInfo nodeInfo;
     ReportAuthRequestPassed(11, authHandle, &nodeInfo);
