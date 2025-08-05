@@ -111,6 +111,12 @@ typedef struct {
     SoftBusMutex sendCondLock;
 } SoftBusBleSendSignal;
 
+typedef enum {
+    SOFTBUS_BT_TRANSPORT_INVALID = 0x00,
+    SOFTBUS_BT_TRANSPORT_BR_EDR = 0x01,
+    SOFTBUS_BT_TRANSPORT_LE = 0x02,
+} SoftBusBtTransport;
+
 #ifdef __cplusplus
 }
 #endif /* __cplusplus */
