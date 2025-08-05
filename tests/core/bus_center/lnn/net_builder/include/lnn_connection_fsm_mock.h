@@ -90,6 +90,7 @@ public:
     virtual bool RawLinkNeedUpdateAuthManager(const char *uuid, bool isServer) = 0;
     virtual void LnnStopOfflineTimingBySleHb(const char *networkId, ConnectionAddrType addrType) = 0;
     virtual int32_t LnnCleanTriggerSparkInfo(const char *udid, ConnectionAddrType addrType) = 0;
+    virtual void LnnSetWiFiIp(NodeInfo *info, const char *ip, int32_t ifnameIdx) = 0;
 };
 
 class LnnConnFsmInterfaceMock : public LnnConnFsmInterface {
@@ -140,6 +141,7 @@ public:
     MOCK_METHOD2(RawLinkNeedUpdateAuthManager, bool(const char *, bool));
     MOCK_METHOD2(LnnStopOfflineTimingBySleHb, void(const char *, ConnectionAddrType));
     MOCK_METHOD2(LnnCleanTriggerSparkInfo, int32_t(const char *, ConnectionAddrType));
+    MOCK_METHOD3(LnnSetWiFiIp, void(NodeInfo *, const char *, int32_t));
 };
 } // namespace OHOS
 #endif // LNN_CONNECTION_FSM_MOCK_H

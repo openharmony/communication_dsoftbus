@@ -1435,7 +1435,7 @@ static void HandleDeviceInfoData(
             return;
         }
         AuthFsm *authFsm = GetAuthFsmByConnId(connId, !fromServer, false);
-        if (authFsm == NULL) {
+        if (authFsm != NULL) {
             authFsm->info.headSeq = head->seq;
         }
         ReleaseAuthLock();
