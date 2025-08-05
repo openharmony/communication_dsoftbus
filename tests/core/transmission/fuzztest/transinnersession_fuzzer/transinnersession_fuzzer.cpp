@@ -114,8 +114,12 @@ SessionConn *TestSetSessionConn()
 void TransCreateSessionServerInnerTest(FuzzedDataProvider &provider)
 {
     std::string pkgName = provider.ConsumeRandomLengthString(PKG_NAME_SIZE_MAX_LEN);
+    char tmpPkaName[PKG_NAME_SIZE_MAX_LEN] = { 0 };
+    if (strcpy_s(tmpPkaName, PKG_NAME_SIZE_MAX_LEN, pkgName.c_str()) != EOK) {
+        return;
+    }
     const char *sessionName = "ohos.trans_inner_session_test";
-    (void)TransCreateSessionServerInner(sessionName, pkgName.c_str(), &g_innerSessionListener);
+    (void)TransCreateSessionServerInner(sessionName, tmpPkaName, &g_innerSessionListener);
 }
 
 void InnerMessageHandlerTest(FuzzedDataProvider &provider)
