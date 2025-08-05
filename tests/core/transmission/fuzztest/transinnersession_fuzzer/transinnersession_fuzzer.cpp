@@ -92,12 +92,11 @@ static ISessionListenerInner g_innerSessionListener = {
 
 SessionConn *TestSetSessionConn()
 {
-    SessionConn *conn = (SessionConn*)SoftBusCalloc(sizeof(SessionConn));
+    SessionConn *conn = static_cast<SessionConn *>(SoftBusCalloc(sizeof(SessionConn)));
     if (conn == nullptr) {
         return nullptr;
     }
 
-    (void)memset_s(conn, sizeof(SessionConn), 0, sizeof(SessionConn));
     conn->serverSide = true;
     conn->channelId = 1;
     conn->status = TCP_DIRECT_CHANNEL_STATUS_INIT;
