@@ -54,52 +54,52 @@ static void InitTransFlowInfo(FuzzedDataProvider &provider, TransFlowInfo flowIn
 
 static bool InitAppInfoDataInfo(FuzzedDataProvider &provider, AppInfoData appInfoData)
 {
-    std::string deviceId = provider.ConsumeRandomLengthString(DEVICE_ID_SIZE_MAX);
+    std::string deviceId = provider.ConsumeRandomLengthString(DEVICE_ID_SIZE_MAX - 1);
     if (strcpy_s(appInfoData.deviceId, DEVICE_ID_SIZE_MAX, deviceId.c_str()) != EOK) {
         COMM_LOGE(COMM_TEST, "strcpy_s deviceId failed!");
         return false;
     }
-    std::string pkgName = provider.ConsumeRandomLengthString(PKG_NAME_SIZE_MAX);
+    std::string pkgName = provider.ConsumeRandomLengthString(PKG_NAME_SIZE_MAX - 1);
     if (strcpy_s(appInfoData.pkgName, PKG_NAME_SIZE_MAX, pkgName.c_str()) != EOK) {
         COMM_LOGE(COMM_TEST, "strcpy_s pkgName failed!");
         return false;
     }
-    std::string sessionName = provider.ConsumeRandomLengthString(SESSION_NAME_SIZE_MAX);
+    std::string sessionName = provider.ConsumeRandomLengthString(SESSION_NAME_SIZE_MAX - 1);
     if (strcpy_s(appInfoData.sessionName, SESSION_NAME_SIZE_MAX, sessionName.c_str()) != EOK) {
         COMM_LOGE(COMM_TEST, "strcpy_s sessionName failed!");
         return false;
     }
-    std::string authState = provider.ConsumeRandomLengthString(AUTH_STATE_SIZE_MAX);
+    std::string authState = provider.ConsumeRandomLengthString(AUTH_STATE_SIZE_MAX - 1);
     if (strcpy_s(appInfoData.authState, AUTH_STATE_SIZE_MAX, authState.c_str()) != EOK) {
         COMM_LOGE(COMM_TEST, "strcpy_s authState failed!");
         return false;
     }
-    std::string addr = provider.ConsumeRandomLengthString(IP_LEN);
+    std::string addr = provider.ConsumeRandomLengthString(IP_LEN - 1);
     if (strcpy_s(appInfoData.addr, IP_LEN, addr.c_str()) != EOK) {
         COMM_LOGE(COMM_TEST, "strcpy_s addr failed!");
         return false;
     }
-    std::string mac = provider.ConsumeRandomLengthString(MAC_MAX_LEN);
+    std::string mac = provider.ConsumeRandomLengthString(MAC_MAX_LEN - 1);
     if (strcpy_s(appInfoData.mac, MAC_MAX_LEN, mac.c_str()) != EOK) {
         COMM_LOGE(COMM_TEST, "strcpy_s mac failed!");
         return false;
     }
-    std::string accountId = provider.ConsumeRandomLengthString(ACCOUNT_UID_LEN_MAX);
+    std::string accountId = provider.ConsumeRandomLengthString(ACCOUNT_UID_LEN_MAX - 1);
     if (strcpy_s(appInfoData.accountId, ACCOUNT_UID_LEN_MAX, accountId.c_str()) != EOK) {
         COMM_LOGE(COMM_TEST, "strcpy_s accountId failed!");
         return false;
     }
-    std::string callerAccountId = provider.ConsumeRandomLengthString(ACCOUNT_UID_LEN_MAX);
+    std::string callerAccountId = provider.ConsumeRandomLengthString(ACCOUNT_UID_LEN_MAX - 1);
     if (strcpy_s(appInfoData.callerAccountId, ACCOUNT_UID_LEN_MAX, callerAccountId.c_str()) != EOK) {
         COMM_LOGE(COMM_TEST, "strcpy_s callerAccountId failed!");
         return false;
     }
-    std::string calleeAccountId = provider.ConsumeRandomLengthString(ACCOUNT_UID_LEN_MAX);
+    std::string calleeAccountId = provider.ConsumeRandomLengthString(ACCOUNT_UID_LEN_MAX - 1);
     if (strcpy_s(appInfoData.calleeAccountId, ACCOUNT_UID_LEN_MAX, calleeAccountId.c_str()) != EOK) {
         COMM_LOGE(COMM_TEST, "strcpy_s calleeAccountId failed!");
         return false;
     }
-    std::string extraData = provider.ConsumeRandomLengthString(EXTRA_DATA_MAX_LEN);
+    std::string extraData = provider.ConsumeRandomLengthString(EXTRA_DATA_MAX_LEN - 1);
     if (strcpy_s(appInfoData.extraData, EXTRA_DATA_MAX_LEN, extraData.c_str()) != EOK) {
         COMM_LOGE(COMM_TEST, "strcpy_s extraData failed!");
         return false;
@@ -134,57 +134,57 @@ static bool InitAppInfo(FuzzedDataProvider &provider, AppInfo *appInfo)
         return false;
     }
     
-    std::string groupId = provider.ConsumeRandomLengthString(GROUP_ID_SIZE_MAX);
+    std::string groupId = provider.ConsumeRandomLengthString(GROUP_ID_SIZE_MAX - 1);
     if (strcpy_s(appInfo->groupId, GROUP_ID_SIZE_MAX, groupId.c_str()) != EOK) {
         COMM_LOGE(COMM_TEST, "strcpy_s groupId failed!");
         return false;
     }
-    std::string sessionKey = provider.ConsumeRandomLengthString(SESSION_KEY_LENGTH);
+    std::string sessionKey = provider.ConsumeRandomLengthString(SESSION_KEY_LENGTH - 1);
     if (strcpy_s(appInfo->sessionKey, SESSION_KEY_LENGTH, sessionKey.c_str()) != EOK) {
         COMM_LOGE(COMM_TEST, "strcpy_s sessionKey failed!");
         return false;
     }
-    std::string sinkSessionKey = provider.ConsumeRandomLengthString(SESSION_KEY_LENGTH);
+    std::string sinkSessionKey = provider.ConsumeRandomLengthString(SESSION_KEY_LENGTH - 1);
     if (strcpy_s(appInfo->sinkSessionKey, SESSION_KEY_LENGTH, sinkSessionKey.c_str()) != EOK) {
         COMM_LOGE(COMM_TEST, "strcpy_s sinkSessionKey failed!");
         return false;
     }
-    std::string reqId = provider.ConsumeRandomLengthString(REQ_ID_SIZE_MAX);
+    std::string reqId = provider.ConsumeRandomLengthString(REQ_ID_SIZE_MAX - 1);
     if (strcpy_s(appInfo->reqId, REQ_ID_SIZE_MAX, reqId.c_str()) != EOK) {
         COMM_LOGE(COMM_TEST, "strcpy_s reqId failed!");
         return false;
     }
-    std::string peerNetWorkId = provider.ConsumeRandomLengthString(DEVICE_ID_SIZE_MAX);
+    std::string peerNetWorkId = provider.ConsumeRandomLengthString(DEVICE_ID_SIZE_MAX - 1);
     if (strcpy_s(appInfo->peerNetWorkId, DEVICE_ID_SIZE_MAX, peerNetWorkId.c_str()) != EOK) {
         COMM_LOGE(COMM_TEST, "strcpy_s peerNetWorkId failed!");
         return false;
     }
-    std::string peerUdid = provider.ConsumeRandomLengthString(GROUP_ID_SIZE_MAX);
+    std::string peerUdid = provider.ConsumeRandomLengthString(GROUP_ID_SIZE_MAX - 1);
     if (strcpy_s(appInfo->peerUdid, GROUP_ID_SIZE_MAX, peerUdid.c_str()) != EOK) {
         COMM_LOGE(COMM_TEST, "strcpy_s peerUdid failed!");
         return false;
     }
-    std::string peerVersion = provider.ConsumeRandomLengthString(DEVICE_VERSION_SIZE_MAX);
+    std::string peerVersion = provider.ConsumeRandomLengthString(DEVICE_VERSION_SIZE_MAX - 1);
     if (strcpy_s(appInfo->peerVersion, DEVICE_VERSION_SIZE_MAX, peerVersion.c_str()) != EOK) {
         COMM_LOGE(COMM_TEST, "strcpy_s peerVersion failed!");
         return false;
     }
-    std::string tokenName = provider.ConsumeRandomLengthString(PKG_NAME_SIZE_MAX);
+    std::string tokenName = provider.ConsumeRandomLengthString(PKG_NAME_SIZE_MAX - 1);
     if (strcpy_s(appInfo->tokenName, PKG_NAME_SIZE_MAX, tokenName.c_str()) != EOK) {
         COMM_LOGE(COMM_TEST, "strcpy_s tokenName failed!");
         return false;
     }
-    std::string extraAccessInfo = provider.ConsumeRandomLengthString(EXTRA_ACCESS_INFO_LEN_MAX);
+    std::string extraAccessInfo = provider.ConsumeRandomLengthString(EXTRA_ACCESS_INFO_LEN_MAX - 1);
     if (strcpy_s(appInfo->extraAccessInfo, EXTRA_ACCESS_INFO_LEN_MAX, extraAccessInfo.c_str()) != EOK) {
         COMM_LOGE(COMM_TEST, "strcpy_s extraAccessInfo failed!");
         return false;
     }
-    std::string pagingNonce = provider.ConsumeRandomLengthString(PAGING_NONCE_LEN);
+    std::string pagingNonce = provider.ConsumeRandomLengthString(PAGING_NONCE_LEN - 1);
     if (strcpy_s(appInfo->pagingNonce, PAGING_NONCE_LEN, pagingNonce.c_str()) != EOK) {
         COMM_LOGE(COMM_TEST, "strcpy_s pagingNonce failed!");
         return false;
     }
-    std::string pagingSessionkey = provider.ConsumeRandomLengthString(SHORT_SESSION_KEY_LENGTH);
+    std::string pagingSessionkey = provider.ConsumeRandomLengthString(SHORT_SESSION_KEY_LENGTH - 1);
     if (strcpy_s(appInfo->pagingSessionkey, SHORT_SESSION_KEY_LENGTH, pagingSessionkey.c_str()) != EOK) {
         COMM_LOGE(COMM_TEST, "strcpy_s pagingSessionkey failed!");
         return false;
@@ -240,8 +240,11 @@ static bool InitAppInfo(FuzzedDataProvider &provider, AppInfo *appInfo)
 void PackErrorTest(FuzzedDataProvider &provider)
 {
     int32_t errCode = provider.ConsumeIntegral<int32_t>();
-    std::string str = provider.ConsumeRandomLengthString();
-    const char* errDesc = str.c_str();
+    std::string str = provider.ConsumeRandomLengthString(UINT8_MAX - 1);
+    char errDesc[UINT8_MAX] = { 0 };
+    if (strcpy_s(errDesc, UINT8_MAX, str.c_str()) != EOK) {
+        return;
+    }
 
     (void)PackError(errCode, errDesc);
     (void)PackError(errCode, nullptr);
@@ -276,9 +279,12 @@ void JsonObjectPackRequestExTest(FuzzedDataProvider &provider)
         COMM_LOGE(COMM_TEST, "Init cJSON failed!");
         return;
     }
-    std::string str = provider.ConsumeRandomLengthString();
-    unsigned char *encodeSessionKey = (unsigned char *)str.c_str();
-
+    std::string str = provider.ConsumeRandomLengthString(UINT8_MAX - 1);
+    char tmp[UINT8_MAX] = { 0 };
+    if (strcpy_s(tmp, UINT8_MAX, str.c_str()) != EOK) {
+        return;
+    }
+    unsigned char *encodeSessionKey = reinterpret_cast<unsigned char *>(tmp);
     JsonObjectPackRequestEx(&appInfo, json, encodeSessionKey);
     cJSON_Delete(json);
 }
@@ -328,12 +334,21 @@ void TransTdcEncryptTest(FuzzedDataProvider &provider)
     uint32_t inLen = provider.ConsumeIntegral<uint32_t>();
     uint32_t outLen = provider.ConsumeIntegral<uint32_t>();
 
-    std::string str = provider.ConsumeRandomLengthString();
-    const char *sessionKey = str.c_str();
-    str = provider.ConsumeRandomLengthString();
-    const char *in = str.c_str();
-    str = provider.ConsumeRandomLengthString();
-    char *out = (char *)str.c_str();
+    std::string str = provider.ConsumeRandomLengthString(UINT8_MAX - 1);
+    char sessionKey[UINT8_MAX] = { 0 };
+    if (strcpy_s(sessionKey, UINT8_MAX, str.c_str()) != EOK) {
+        return;
+    }
+    str = provider.ConsumeRandomLengthString(UINT8_MAX - 1);
+    char in[UINT8_MAX] = { 0 };
+    if (strcpy_s(in, UINT8_MAX, str.c_str()) != EOK) {
+        return;
+    }
+    str = provider.ConsumeRandomLengthString(UINT8_MAX - 1);
+    char out[UINT8_MAX] = { 0 };
+    if (strcpy_s(out, UINT8_MAX, str.c_str()) != EOK) {
+        return;
+    }
 
     TransTdcEncrypt(sessionKey, in, inLen, out, &outLen);
 }
@@ -359,9 +374,10 @@ void TransTdcPackFastDataTest(FuzzedDataProvider &provider)
 } // namespace OHOS
 
 /* Fuzzer entry point */
-extern "C" int32_t LLVMFuzzerTestOneInput(FuzzedDataProvider &provider)
+extern "C" int32_t LLVMFuzzerTestOneInput(const uint8_t *data, size_t size)
 {
     /* Run your code on data */
+    FuzzedDataProvider provider(data, size);
     OHOS::PackErrorTest(provider);
     OHOS::PackFirstDataTest(provider);
     OHOS::JsonObjectPackRequestExTest(provider);
