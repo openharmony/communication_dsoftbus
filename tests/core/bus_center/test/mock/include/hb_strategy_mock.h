@@ -71,6 +71,8 @@ public:
     virtual void NotifyForegroundUseridChange(char *networkId, uint32_t discoveryType, bool isChange) = 0;
     virtual bool IdServiceIsPotentialTrustedDevice(
         const char *udidHash, const char *accountIdHash, bool isSameAccount) = 0;
+    virtual int32_t LnnStartSleOfflineTimingStrategy(const char *networkId) = 0;
+    virtual int32_t LnnStopSleOfflineTimingStrategy(const char *networkId) = 0;
 };
 class HeartBeatStategyInterfaceMock : public HeartBeatStategyInterface {
 public:
@@ -112,6 +114,8 @@ public:
     MOCK_METHOD3(LnnNotifyDeviceTrustedChange, void(int32_t type, const char *msg, uint32_t msgLen));
     MOCK_METHOD3(NotifyForegroundUseridChange, void(char *, uint32_t, bool));
     MOCK_METHOD3(IdServiceIsPotentialTrustedDevice, bool(const char *, const char *, bool));
+    MOCK_METHOD1(LnnStartSleOfflineTimingStrategy, int32_t(const char *));
+    MOCK_METHOD1(LnnStopSleOfflineTimingStrategy, int32_t(const char *));
 };
 } // namespace OHOS
 #endif // HEARTBEAT_STRATEGY_H

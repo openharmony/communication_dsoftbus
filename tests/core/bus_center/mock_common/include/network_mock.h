@@ -107,5 +107,12 @@ public:
     MOCK_METHOD2(LnnSetNetCapability, int32_t (uint32_t *, NetCapability));
     MOCK_METHOD2(LnnClearNetCapability, int32_t(uint32_t *, NetCapability));
 };
+
+extern "C"
+{
+    int SoftBusAddSleStateListener(const SoftBusSleStateListener *listener, int *listenerId);
+    bool IsSleEnabled();
+    void SoftBusRemoveSleStateListener(int listenerId);
+}
 } // namespace OHOS
 #endif // NET_WORK_MOCK_H

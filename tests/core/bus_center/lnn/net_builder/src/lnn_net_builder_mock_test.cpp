@@ -16,18 +16,19 @@
 #include <gtest/gtest.h>
 #include <securec.h>
 
+#include "dsoftbus_enhance_interface.h"
+#include "g_enhance_lnn_func.h"
 #include "lnn_log.h"
 #include "lnn_net_builder.c"
 #include "lnn_net_builder.h"
 #include "lnn_net_builder_deps_mock.h"
 #include "lnn_net_builder_init.c"
 #include "lnn_net_builder_process.c"
+#include "lnn_net_builder.h"
 #include "lnn_ohos_account.h"
 #include "softbus_adapter_bt_common.h"
 #include "softbus_common.h"
 #include "softbus_error_code.h"
-#include "dsoftbus_enhance_interface.h"
-#include "g_enhance_lnn_func.h"
 
 namespace OHOS {
 using namespace testing::ext;
