@@ -2758,6 +2758,8 @@ int32_t ClientWaitSyncBind(int32_t socket)
             timePtr = &absTime;
         }
     }
+    TRANS_LOGI(TRANS_SDK, "start wait bind, socket=%{public}d, waitTime=%{public}u",
+        socket, sessionNode->lifecycle.maxWaitTime);
     ret = SoftBusCondWait(&callbackCond, &(g_clientSessionServerList->lock), timePtr);
     if (ret != SOFTBUS_OK) {
         UnlockClientSessionServerList();
