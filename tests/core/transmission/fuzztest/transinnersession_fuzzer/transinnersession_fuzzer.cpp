@@ -30,7 +30,7 @@
 #define TRANS_TEST_DATA_LEN 256
 
 namespace OHOS {
-static const char *g_pkgName = "dms";
+static const char *PKG_NAME = "dms";
 
 
 class TransInnerSession {
@@ -107,7 +107,7 @@ SessionConn *TestSetSessionConn()
     conn->requestId = 0;
     conn->listenMod = DIRECT_CHANNEL_SERVER_WIFI;
     conn->appInfo.myData.pid = 1;
-    (void)memcpy_s(conn->appInfo.myData.pkgName, PKG_NAME_SIZE_MAX_LEN, g_pkgName, (strlen(g_pkgName)+1));
+    (void)memcpy_s(conn->appInfo.myData.pkgName, PKG_NAME_SIZE_MAX_LEN, PKG_NAME, (strlen(PKG_NAME) + 1));
     return conn;
 }
 
@@ -146,7 +146,11 @@ void OnSessionOpenedInnerTest(FuzzedDataProvider &provider)
     int32_t channelId = provider.ConsumeIntegral<int32_t>();
     int32_t result = 0;
     std::string peerNetworkId = provider.ConsumeRandomLengthString(NETWORK_ID_BUF_LEN);
-    (void)OnSessionOpenedInner(channelId,  const_cast<char *>(peerNetworkId.c_str()), result);
+    char tmpPeerNetworkId[NETWORK_ID_BUF_LEN] = { 0 };
+    if (strcpy_s(tmpPeerNetworkId, NETWORK_ID_BUF_LEN, peerNetworkId.c_str()) != EOK) {
+        return;
+    }
+    (void)OnSessionOpenedInner(channelId, tmpPeerNetworkId, result);
 }
 
 void TransOnSessionOpenedInnerTest(FuzzedDataProvider &provider)
@@ -154,9 +158,13 @@ void TransOnSessionOpenedInnerTest(FuzzedDataProvider &provider)
     int32_t channelId = provider.ConsumeIntegral<int32_t>();
     int32_t result = 0;
     std::string peerNetworkId = provider.ConsumeRandomLengthString(NETWORK_ID_BUF_LEN);
-    (void)TransOnSessionOpenedInner(channelId, -1,  const_cast<char *>(peerNetworkId.c_str()), result);
+    char tmpPeerNetworkId[NETWORK_ID_BUF_LEN] = { 0 };
+    if (strcpy_s(tmpPeerNetworkId, NETWORK_ID_BUF_LEN, peerNetworkId.c_str()) != EOK) {
+        return;
+    }
+    (void)TransOnSessionOpenedInner(channelId, -1, tmpPeerNetworkId, result);
     int32_t res = provider.ConsumeIntegral<int32_t>();
-    (void)TransOnSessionOpenedInner(channelId, CHANNEL_TYPE_PROXY,  const_cast<char *>(peerNetworkId.c_str()), res);
+    (void)TransOnSessionOpenedInner(channelId, CHANNEL_TYPE_PROXY, tmpPeerNetworkId, res);
 }
 
 void TransOnSessionClosedInnerTest(FuzzedDataProvider &provider)
@@ -182,7 +190,11 @@ void TransOnSetChannelInfoByReqIdTest(FuzzedDataProvider &provider)
 void TransOnLinkDownInnerTest(FuzzedDataProvider &provider)
 {
     std::string networkId = provider.ConsumeRandomLengthString(NETWORK_ID_BUF_LEN);
-    (void)TransOnLinkDownInner(const_cast<char *>(networkId.c_str()));
+    char tmpNetworkId[NETWORK_ID_BUF_LEN] = { 0 };
+    if (strcpy_s(tmpNetworkId, NETWORK_ID_BUF_LEN, networkId.c_str()) != EOK) {
+        return;
+    }
+    (void)TransOnLinkDownInner(tmpNetworkId);
 }
 
 void TransOpenSessionInnerTest(FuzzedDataProvider &provider)
@@ -190,14 +202,26 @@ void TransOpenSessionInnerTest(FuzzedDataProvider &provider)
     std::string peerNetworkId = provider.ConsumeRandomLengthString(NETWORK_ID_BUF_LEN);
     std::string sessionName = provider.ConsumeRandomLengthString(SESSION_NAME_MAX_LEN);
     uint32_t reqId = provider.ConsumeIntegral<uint32_t>();
-    (void)TransOpenSessionInner(peerNetworkId.c_str(), sessionName.c_str(), reqId);
+    char tmpSessionName[SESSION_NAME_MAX_LEN] = { 0 };
+    if (strcpy_s(tmpSessionName, SESSION_NAME_MAX_LEN, sessionName.c_str()) != EOK) {
+        return;
+    }
+    char tmpPeerNetworkId[NETWORK_ID_BUF_LEN] = { 0 };
+    if (strcpy_s(tmpPeerNetworkId, NETWORK_ID_BUF_LEN, peerNetworkId.c_str()) != EOK) {
+        return;
+    }
+    (void)TransOpenSessionInner(tmpPeerNetworkId, tmpSessionName, reqId);
 }
 
 void TransSendDataInnerTest(FuzzedDataProvider &provider)
 {
     int32_t channelId = provider.ConsumeIntegral<int32_t>();
     std::string data = provider.ConsumeRandomLengthString(TRANS_TEST_DATA_LEN);
-    (void)TransSendDataInner(channelId, data.c_str(), static_cast<uint32_t>(strlen(data.c_str())));
+    char tmpData[TRANS_TEST_DATA_LEN] = { 0 };
+    if (strcpy_s(tmpData, TRANS_TEST_DATA_LEN, data.c_str()) != EOK) {
+        return;
+    }
+    (void)TransSendDataInner(channelId, tmpData, static_cast<uint32_t>(strlen(tmpData)));
 }
 
 void TransCloseSessionInnerTest(FuzzedDataProvider &provider)
