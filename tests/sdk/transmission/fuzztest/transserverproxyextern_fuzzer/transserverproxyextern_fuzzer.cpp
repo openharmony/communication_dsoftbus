@@ -16,6 +16,7 @@
 #include "transserverproxyextern_fuzzer.h"
 
 #include <chrono>
+#include <fuzzer/FuzzedDataProvider.h>
 #include <thread>
 #include "securec.h"
 
@@ -366,6 +367,89 @@ void ServerIpcEvaluateQosTest(const uint8_t *data, size_t size)
     SoftBusFree(dataWithEndCharacter);
     DataGenerator::Clear();
 }
+
+void ServerIpcNotifyAuthSuccessTest(FuzzedDataProvider &provider)
+{
+    int32_t channelId = provider.ConsumeIntegral<int32_t>();
+    int32_t channelType = provider.ConsumeIntegral<int32_t>();
+
+    (void)ServerIpcNotifyAuthSuccess(channelId, channelType);
+}
+
+void ServerIpcPrivilegeCloseChannelTest(FuzzedDataProvider &provider)
+{
+    uint64_t tokenId = provider.ConsumeIntegral<uint64_t>();
+    int32_t pid = provider.ConsumeIntegral<int32_t>();
+    std::string providerData = provider.ConsumeBytesAsString(UINT8_MAX - 1);
+    char peerNetworkId[UINT8_MAX] = { 0 };
+    if (strcpy_s(peerNetworkId, UINT8_MAX, providerData.c_str()) != EOK) {
+        return;
+    }
+    
+    (void)ServerIpcPrivilegeCloseChannel(tokenId, pid, peerNetworkId);
+    (void)ServerIpcPrivilegeCloseChannel(tokenId, pid, nullptr);
+}
+
+void ServerIpcOpenBrProxyTest(FuzzedDataProvider &provider)
+{
+    std::string providerData = provider.ConsumeBytesAsString(UINT8_MAX - 1);
+    char brMac[UINT8_MAX] = { 0 };
+    if (strcpy_s(brMac, UINT8_MAX, providerData.c_str()) != EOK) {
+        return;
+    }
+    providerData = provider.ConsumeBytesAsString(UINT8_MAX - 1);
+    char uuid[UINT8_MAX] = { 0 };
+    if (strcpy_s(uuid, UINT8_MAX, providerData.c_str()) != EOK) {
+        return;
+    }
+    
+    (void)ServerIpcOpenBrProxy(brMac, uuid);
+    (void)ServerIpcOpenBrProxy(brMac, nullptr);
+    (void)ServerIpcOpenBrProxy(nullptr, uuid);
+}
+
+void ServerIpcCloseBrProxyTest(FuzzedDataProvider &provider)
+{
+    int32_t channelId = provider.ConsumeIntegral<int32_t>();
+    
+    (void)ServerIpcCloseBrProxy(channelId);
+}
+
+void ServerIpcSendBrProxyDataTest(FuzzedDataProvider &provider)
+{
+    int32_t channelId = provider.ConsumeIntegral<int32_t>();
+    uint32_t dataLen = provider.ConsumeIntegral<uint32_t>();
+    std::string providerData = provider.ConsumeBytesAsString(UINT8_MAX - 1);
+    char data[UINT8_MAX] = { 0 };
+    if (strcpy_s(data, UINT8_MAX, providerData.c_str()) != EOK) {
+        return;
+    }
+
+    (void)ServerIpcSendBrProxyData(channelId, data, dataLen);
+}
+
+void ServerIpcSetListenerStateTest(FuzzedDataProvider &provider)
+{
+    int32_t channelId = provider.ConsumeIntegral<int32_t>();
+    int32_t type = provider.ConsumeIntegral<int32_t>();
+    bool CbEnabled = provider.ConsumeIntegral<bool>();
+
+    (void)ServerIpcSetListenerState(channelId, type, CbEnabled);
+}
+
+void ServerIpcIsProxyChannelEnabledTest(FuzzedDataProvider &provider)
+{
+    int32_t uid = provider.ConsumeIntegral<int32_t>();
+    bool isEnable = provider.ConsumeIntegral<bool>();
+
+    (void)ServerIpcIsProxyChannelEnabled(uid, &isEnable);
+}
+
+void ServerIpcRegisterPushHookTest()
+{
+    ServerIpcRegisterPushHook();
+    TransServerProxyClear();
+}
 } // namespace OHOS
 
 /* Fuzzer entry point */
@@ -377,6 +461,7 @@ extern "C" int32_t LLVMFuzzerTestOneInput(const uint8_t *data, size_t size)
     }
 
     /* Run your code on data */
+    FuzzedDataProvider provider(data, size);
     OHOS::TransServerProxyDeInitTest(data, size);
     OHOS::ServerIpcCreateSessionServerTest(data, size);
     OHOS::ServerIpcRemoveSessionServerTest(data, size);
@@ -392,6 +477,14 @@ extern "C" int32_t LLVMFuzzerTestOneInput(const uint8_t *data, size_t size)
     OHOS::ServerIpcGrantPermissionTest(data, size);
     OHOS::ServerIpcRemovePermissionTest(data, size);
     OHOS::ServerIpcEvaluateQosTest(data, size);
+    OHOS::ServerIpcNotifyAuthSuccessTest(provider);
+    OHOS::ServerIpcPrivilegeCloseChannelTest(provider);
+    OHOS::ServerIpcOpenBrProxyTest(provider);
+    OHOS::ServerIpcCloseBrProxyTest(provider);
+    OHOS::ServerIpcSendBrProxyDataTest(provider);
+    OHOS::ServerIpcSetListenerStateTest(provider);
+    OHOS::ServerIpcIsProxyChannelEnabledTest(provider);
+    OHOS::ServerIpcRegisterPushHookTest();
     std::this_thread::sleep_for(std::chrono::milliseconds(LOOP_SLEEP_MILLS));
     return 0;
 }
