@@ -21,7 +21,6 @@
 #include "bus_center_manager.h"
 #include "common_list.h"
 #include "comm_log.h"
-#include "legacy/softbus_adapter_hitrace.h"
 #include "lnn_connection_addr_utils.h"
 #include "lnn_net_builder.h"
 #include "g_enhance_auth_func.h"
@@ -814,7 +813,7 @@ static int32_t AddAuthChannelInfo(AuthChannelInfo *info)
     AuthChannelInfo *item = NULL;
     LIST_FOR_EACH_ENTRY(item, &g_authChannelList->list, AuthChannelInfo, node) {
         if (item->appInfo.myData.channelId == info->appInfo.myData.channelId) {
-            (void)SoftBusMutexLock(&g_authChannelList->lock);
+            (void)SoftBusMutexUnlock(&g_authChannelList->lock);
             TRANS_LOGE(TRANS_SVC, "found auth channel, channelId=%{public}" PRId64,
                 info->appInfo.myData.channelId);
             return SOFTBUS_TRANS_INVALID_CHANNEL_ID;
@@ -1074,8 +1073,8 @@ static int32_t TransFillAuthChannelInfo(AuthChannelInfo *channel, const LaneConn
     channel->connOpt.socketOption.moduleId = AUTH_RAW_P2P_CLIENT;
     channel->accountInfo = accountInfo;
 
-    if (LnnGetLocalStrInfo(STRING_KEY_NETWORKID, channel->appInfo.peerNetWorkId,
-                           sizeof(channel->appInfo.peerNetWorkId)) != SOFTBUS_OK) {
+    if (LnnGetLocalStrInfo(STRING_KEY_NETWORKID,
+        channel->appInfo.peerNetWorkId, sizeof(channel->appInfo.peerNetWorkId)) != SOFTBUS_OK) {
         TRANS_LOGW(TRANS_SVC, "LnnGetLocalStrInfo STRING_KEY_NETWORKID failed");
     }
 
@@ -1119,7 +1118,7 @@ static int32_t PostAuthMsg(AuthChannelInfo *channel, TransEventExtra *extra, con
     }
     extra->result = 0;
     TRANS_EVENT(EVENT_SCENE_OPEN_CHANNEL, EVENT_STAGE_HANDSHAKE_START, *extra);
-    if (TransPostAuthChannelMsg(&channel->appInfo, authId, AUTH_CHANNEL_REQ) !=SOFTBUS_OK) {
+    if (TransPostAuthChannelMsg(&channel->appInfo, authId, AUTH_CHANNEL_REQ) != SOFTBUS_OK) {
         TRANS_LOGE(TRANS_SVC, "TransPostAuthRequest failed");
         DelAuthChannelInfoByChanId(*channelId);
         (void)SoftBusMutexUnlock(&g_authChannelList->lock);
@@ -1161,7 +1160,7 @@ int32_t TransOpenAuthMsgChannelWithPara(const char *sessionName, const LaneConnI
         .channelId = *channelId,
         .channelType = CHANNEL_TYPE_AUTH,
         .linkType = CONNECT_HML
-     };
+    };
     TRANS_EVENT(EVENT_SCENE_OPEN_CHANNEL, EVENT_STAGE_START_CONNECT, extra);
 
     int32_t ret = PostAuthMsg(channel, &extra, connInfo, channelId);
