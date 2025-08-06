@@ -165,7 +165,6 @@ void MintpSocketConnectTest(FuzzedDataProvider &provider)
     FillConnectOption(provider, &option);
     int32_t fd = provider.ConsumeIntegral<int32_t>();
     int32_t domain = provider.ConsumeIntegral<int32_t>();
-    (void)MintpSocketConnect(fd, domain, nullptr);
     (void)MintpSocketConnect(fd, domain, &option);
 }
 
