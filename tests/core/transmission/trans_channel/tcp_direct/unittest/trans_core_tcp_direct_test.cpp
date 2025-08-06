@@ -17,7 +17,6 @@
 #include "dsoftbus_enhance_interface.h"
 #include "g_enhance_lnn_func.h"
 #include "message_handler.h"
-#include "softbus_conn_ble_direct.h"
 #include "softbus_feature_config.h"
 #include "trans_auth_message.h"
 #include "trans_channel_callback.h"

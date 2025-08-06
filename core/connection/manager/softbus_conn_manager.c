@@ -570,10 +570,11 @@ int32_t ConnServerInit(void)
         CONN_LOGD(CONN_COMMON, "init ble ok");
     }
 
+    CONN_LOGI(CONN_COMMON, "start init sle");
     connectObj = ConnSleInitPacked(&g_connManagerCb);
     if (connectObj != NULL) {
         g_connManager[CONNECT_SLE] = connectObj;
-        CONN_LOGD(CONN_COMMON, "init sle ok");
+        CONN_LOGI(CONN_COMMON, "init sle ok");
     }
 
     if (g_listenerList == NULL) {

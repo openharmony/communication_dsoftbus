@@ -28,6 +28,10 @@
 #define NULL 0
 #endif
 
+#ifdef __cplusplus
+extern "C" {
+#endif
+
 enum WifiDirectConnectType {
     WIFI_DIRECT_CONNECT_TYPE_AUTH_NEGO_P2P = 0,
     WIFI_DIRECT_CONNECT_TYPE_AUTH_NEGO_HML = 1,
@@ -209,7 +213,6 @@ struct WifiDirectConnectInfo {
     bool ratePreference;
     int32_t bandWidth;
     enum IpAddrType ipAddrType;
-
     struct WifiDirectDfxInfo dfxInfo;
     bool isVirtualLink;
 };
@@ -238,10 +241,6 @@ struct WifiDirectDisconnectCallback {
     void (*onDisconnectSuccess)(uint32_t requestId);
     void (*onDisconnectFailure)(uint32_t requestId, int32_t reason);
 };
-
-#ifdef __cplusplus
-extern "C" {
-#endif
 
 #ifdef __cplusplus
 }

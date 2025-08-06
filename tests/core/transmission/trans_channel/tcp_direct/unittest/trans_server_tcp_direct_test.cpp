@@ -45,7 +45,6 @@
 #include "bus_center_manager.h"
 #include "trans_session_service.h"
 #include "disc_event_manager.h"
-#include "softbus_conn_ble_direct.h"
 #include "message_handler.h"
 #include "dsoftbus_enhance_interface.h"
 #include "g_enhance_lnn_func.h"

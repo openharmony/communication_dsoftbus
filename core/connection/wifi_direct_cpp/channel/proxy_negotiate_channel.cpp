@@ -63,7 +63,6 @@ static void OnDisconnected(int32_t channelId)
 
 int CoCProxyNegotiateChannel::Init()
 {
-    CONN_LOGI(CONN_INIT, "enter");
     ITransProxyPipelineListener listener = {
         .onDataReceived = OnDataReceived,
         .onDisconnected = OnDisconnected,
@@ -79,7 +78,7 @@ CoCProxyNegotiateChannel::CoCProxyNegotiateChannel(int32_t channelId) : channelI
 {
     char remoteUuid[UUID_BUF_LEN] {};
     if (DBinderSoftbusServer::GetInstance().TransProxyPipelineGetUuidByChannelId(channelId, remoteUuid,
-            UUID_BUF_LEN) != SOFTBUS_OK) {
+        UUID_BUF_LEN) != SOFTBUS_OK) {
         CONN_LOGE(CONN_WIFI_DIRECT, "auth get uuid failed");
         return;
     }

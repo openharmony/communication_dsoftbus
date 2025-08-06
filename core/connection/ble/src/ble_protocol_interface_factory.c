@@ -27,7 +27,7 @@ static int32_t ConnCocClientConnect(ConnBleConnection *connection)
 {
     ConnEnhanceFuncList *pfnConnEnhanceFuncList = ConnEnhanceFuncListGet();
     if (pfnConnEnhanceFuncList->connCocClientConnect == NULL) {
-        CONN_LOGE(CONN_EVENT, "connCocClientConnect not register");
+        CONN_LOGE(CONN_BLE, "connCocClientConnect not register");
         return SOFTBUS_FUNC_NOT_REGISTER;
     }
     return pfnConnEnhanceFuncList->connCocClientConnect(connection);
@@ -37,7 +37,7 @@ static int32_t ConnCocClientDisconnect(ConnBleConnection *connection, bool ignor
 {
     ConnEnhanceFuncList *pfnConnEnhanceFuncList = ConnEnhanceFuncListGet();
     if (pfnConnEnhanceFuncList->connCocClientDisconnect == NULL) {
-        CONN_LOGE(CONN_EVENT, "connCocClientDisconnect not register");
+        CONN_LOGE(CONN_BLE, "connCocClientDisconnect not register");
         return SOFTBUS_FUNC_NOT_REGISTER;
     }
     return pfnConnEnhanceFuncList->connCocClientDisconnect(connection, ignore1, ignore2);
@@ -47,7 +47,7 @@ static int32_t ConnCocClientSend(ConnBleConnection *connection, const uint8_t *d
 {
     ConnEnhanceFuncList *pfnConnEnhanceFuncList = ConnEnhanceFuncListGet();
     if (pfnConnEnhanceFuncList->connCocClientSend == NULL) {
-        CONN_LOGE(CONN_EVENT, "connCocClientSend not register");
+        CONN_LOGE(CONN_BLE, "connCocClientSend not register");
         return SOFTBUS_FUNC_NOT_REGISTER;
     }
     return pfnConnEnhanceFuncList->connCocClientSend(connection, data, dataLen, module);
@@ -57,7 +57,7 @@ static int32_t ConnCocClientUpdatePriority(ConnBleConnection *connection, Connec
 {
     ConnEnhanceFuncList *pfnConnEnhanceFuncList = ConnEnhanceFuncListGet();
     if (pfnConnEnhanceFuncList->connCocClientUpdatePriority == NULL) {
-        CONN_LOGE(CONN_EVENT, "connCocClientUpdatePriority not register");
+        CONN_LOGE(CONN_BLE, "connCocClientUpdatePriority not register");
         return SOFTBUS_FUNC_NOT_REGISTER;
     }
     return pfnConnEnhanceFuncList->connCocClientUpdatePriority(connection, priority);
@@ -67,7 +67,7 @@ static int32_t ConnCocServerStartService(void)
 {
     ConnEnhanceFuncList *pfnConnEnhanceFuncList = ConnEnhanceFuncListGet();
     if (pfnConnEnhanceFuncList->connCocServerStartService == NULL) {
-        CONN_LOGE(CONN_EVENT, "connCocServerStartService not register");
+        CONN_LOGE(CONN_BLE, "connCocServerStartService not register");
         return SOFTBUS_FUNC_NOT_REGISTER;
     }
     return pfnConnEnhanceFuncList->connCocServerStartService();
@@ -77,7 +77,7 @@ static int32_t ConnCocServerStopService(void)
 {
     ConnEnhanceFuncList *pfnConnEnhanceFuncList = ConnEnhanceFuncListGet();
     if (pfnConnEnhanceFuncList->connCocServerStopService == NULL) {
-        CONN_LOGE(CONN_EVENT, "connCocServerStopService not register");
+        CONN_LOGE(CONN_BLE, "connCocServerStopService not register");
         return SOFTBUS_FUNC_NOT_REGISTER;
     }
     return pfnConnEnhanceFuncList->connCocServerStopService();
@@ -87,7 +87,7 @@ static int32_t ConnCocServerSend(ConnBleConnection *connection, const uint8_t *d
 {
     ConnEnhanceFuncList *pfnConnEnhanceFuncList = ConnEnhanceFuncListGet();
     if (pfnConnEnhanceFuncList->connCocServerSend == NULL) {
-        CONN_LOGE(CONN_EVENT, "connCocServerSend not register");
+        CONN_LOGE(CONN_BLE, "connCocServerSend not register");
         return SOFTBUS_FUNC_NOT_REGISTER;
     }
     return pfnConnEnhanceFuncList->connCocServerSend(connection, data, dataLen, module);
@@ -97,7 +97,7 @@ static int32_t ConnCocServerDisconnect(ConnBleConnection *connection)
 {
     ConnEnhanceFuncList *pfnConnEnhanceFuncList = ConnEnhanceFuncListGet();
     if (pfnConnEnhanceFuncList->connCocServerDisconnect == NULL) {
-        CONN_LOGE(CONN_EVENT, "connCocServerDisconnect not register");
+        CONN_LOGE(CONN_BLE, "connCocServerDisconnect not register");
         return SOFTBUS_FUNC_NOT_REGISTER;
     }
     return pfnConnEnhanceFuncList->connCocServerDisconnect(connection);
@@ -107,7 +107,7 @@ static int32_t ConnCocServerConnect(ConnBleConnection *connection)
 {
     ConnEnhanceFuncList *pfnConnEnhanceFuncList = ConnEnhanceFuncListGet();
     if (pfnConnEnhanceFuncList->connCocServerConnect == NULL) {
-        CONN_LOGE(CONN_EVENT, "connCocServerConnect not register");
+        CONN_LOGE(CONN_BLE, "connCocServerConnect not register");
         return SOFTBUS_FUNC_NOT_REGISTER;
     }
     return pfnConnEnhanceFuncList->connCocServerConnect(connection);
@@ -117,7 +117,7 @@ static int32_t ConnCocInitClientModule(SoftBusLooper *looper, const ConnBleClien
 {
     ConnEnhanceFuncList *pfnConnEnhanceFuncList = ConnEnhanceFuncListGet();
     if (pfnConnEnhanceFuncList->connCocInitClientModule == NULL) {
-        CONN_LOGE(CONN_EVENT, "connCocInitClientModule not register");
+        CONN_LOGE(CONN_BLE, "connCocInitClientModule not register");
         return SOFTBUS_FUNC_NOT_REGISTER;
     }
 
@@ -128,7 +128,7 @@ static int32_t ConnCocInitServerModule(SoftBusLooper *looper, const ConnBleServe
 {
     ConnEnhanceFuncList *pfnConnEnhanceFuncList = ConnEnhanceFuncListGet();
     if (pfnConnEnhanceFuncList->connCocInitServerModule == NULL) {
-        CONN_LOGE(CONN_EVENT, "connCocInitServerModule not register");
+        CONN_LOGE(CONN_BLE, "connCocInitServerModule not register");
         return SOFTBUS_FUNC_NOT_REGISTER;
     }
     return pfnConnEnhanceFuncList->connCocInitServerModule(looper, sListener);
@@ -179,11 +179,16 @@ const BleUnifyInterface *ConnBleGetUnifyInterface(BleProtocolType type)
         return NULL;
     }
     ConnCocInit();
-    if (g_bleUnifyInterface[BLE_COC].bleClientConnect == NULL || g_bleUnifyInterface[BLE_COC].bleClientDisconnect == NULL ||
-        g_bleUnifyInterface[BLE_COC].bleClientSend == NULL || g_bleUnifyInterface[BLE_COC].bleClientUpdatePriority == NULL ||
-        g_bleUnifyInterface[BLE_COC].bleServerStartService == NULL || g_bleUnifyInterface[BLE_COC].bleServerStopService == NULL ||
-        g_bleUnifyInterface[BLE_COC].bleServerSend == NULL || g_bleUnifyInterface[BLE_COC].bleServerDisconnect == NULL ||
-        g_bleUnifyInterface[BLE_COC].bleClientInitModule == NULL || g_bleUnifyInterface[BLE_COC].bleServerInitModule == NULL) {
+    if (g_bleUnifyInterface[BLE_COC].bleClientConnect == NULL ||
+        g_bleUnifyInterface[BLE_COC].bleClientDisconnect == NULL ||
+        g_bleUnifyInterface[BLE_COC].bleClientSend == NULL ||
+        g_bleUnifyInterface[BLE_COC].bleClientUpdatePriority == NULL ||
+        g_bleUnifyInterface[BLE_COC].bleServerStartService == NULL ||
+        g_bleUnifyInterface[BLE_COC].bleServerStopService == NULL ||
+        g_bleUnifyInterface[BLE_COC].bleServerSend == NULL ||
+        g_bleUnifyInterface[BLE_COC].bleServerDisconnect == NULL ||
+        g_bleUnifyInterface[BLE_COC].bleClientInitModule == NULL ||
+        g_bleUnifyInterface[BLE_COC].bleServerInitModule == NULL) {
         if (type == BLE_COC) {
             CONN_LOGE(CONN_BLE, "Failed to return type, ble_coc not register.");
             return NULL;
