@@ -63,6 +63,9 @@ HWTEST_F(AuthRequestTest, GET_AUTH_REQUEST_TEST_001, TestSize.Level1)
     AuthRequest *request = static_cast<AuthRequest *>(SoftBusCalloc(sizeof(AuthRequest)));
     ASSERT_TRUE(request != nullptr);
     AuthRequest *item = static_cast<AuthRequest *>(SoftBusCalloc(sizeof(AuthRequest)));
+    if (item == nullptr) {
+        SoftBusFree(request);
+    }
     ASSERT_TRUE(item != nullptr);
     AuthVerifyCallback verifyCb;
     AuthConnCallback connCb;
@@ -102,6 +105,9 @@ HWTEST_F(AuthRequestTest, GET_AUTH_REQUEST_TEST_002, TestSize.Level1)
     AuthRequest *request = static_cast<AuthRequest *>(SoftBusCalloc(sizeof(AuthRequest)));
     ASSERT_TRUE(request != nullptr);
     AuthRequest *item = static_cast<AuthRequest *>(SoftBusCalloc(sizeof(AuthRequest)));
+    if (item == nullptr) {
+        SoftBusFree(request);
+    }
     ASSERT_TRUE(item != nullptr);
     AuthVerifyCallback verifyCb;
     AuthConnCallback connCb;

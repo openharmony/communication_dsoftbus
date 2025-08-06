@@ -32,8 +32,8 @@ public:
     virtual char *JSON_PrintUnformatted(const JsonObj *obj) = 0;
     virtual JsonObj *JSON_Parse(const char *str, uint32_t len) = 0;
     virtual bool JSON_GetInt64FromOject(const JsonObj *obj, const char *key, int64_t *value) = 0;
-    virtual int32_t ConvertBytesToHexString(
-        char *outBuf, uint32_t outBufLen, const unsigned char *inBuf, uint32_t inLen);
+    virtual int32_t ConvertBytesToHexString(char *outBuf, uint32_t outBufLen,
+        const unsigned char *inBuf, uint32_t inLen);
     virtual bool JSON_GetInt32FromOject(const JsonObj *obj, const char *key, int32_t *value) = 0;
     virtual bool JSON_GetStringFromObject(const JsonObj *obj, const char *key, char *value, uint32_t size) = 0;
     virtual AuthManager *GetAuthManagerByAuthId(int64_t authId) = 0;
@@ -56,8 +56,8 @@ public:
     MOCK_METHOD1(JSON_PrintUnformatted, char *(const JsonObj *obj));
     MOCK_METHOD2(JSON_Parse, JsonObj *(const char *str, uint32_t len));
     MOCK_METHOD3(JSON_GetInt64FromOject, bool(const JsonObj *obj, const char *key, int64_t *value));
-    MOCK_METHOD4(ConvertBytesToHexString,
-        int32_t(char *outBuf, uint32_t outBufLen, const unsigned char *inBuf, uint32_t inLen));
+    MOCK_METHOD4(ConvertBytesToHexString, int32_t(char *outBuf, uint32_t outBufLen,
+        const unsigned char *inBuf, uint32_t inLen));
     MOCK_METHOD3(JSON_GetInt32FromOject, bool(const JsonObj *obj, const char *key, int32_t *value));
     MOCK_METHOD4(JSON_GetStringFromObject, bool(const JsonObj *obj, const char *key, char *value, uint32_t size));
     MOCK_METHOD1(GetAuthManagerByAuthId, AuthManager *(int64_t authId));
