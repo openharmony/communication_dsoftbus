@@ -36,6 +36,7 @@
 #define REQUEST_ID_INVALID (-1)
 
 #define HML_IP_NET_PREFIX "172.30."
+#define HML_IPV6_SUFFIX "%chba0"
 #define BYPASS_MAC "FF:FF:FF:FF:FF:FF"
 #define SSID_PREFIX "Direct-"
 #define SSID_PREFIX_LEN 7

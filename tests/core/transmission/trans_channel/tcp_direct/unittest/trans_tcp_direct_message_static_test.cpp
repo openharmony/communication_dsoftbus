@@ -22,7 +22,6 @@
 #include "softbus_adapter_crypto.h"
 #include "softbus_adapter_thread.h"
 #include "softbus_adapter_socket.h"
-#include "softbus_conn_ble_direct.h"
 #include "softbus_feature_config.h"
 #include "legacy/softbus_hisysevt_transreporter.h"
 #include "softbus_message_open_channel.h"

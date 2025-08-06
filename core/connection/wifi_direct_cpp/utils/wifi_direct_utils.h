@@ -93,7 +93,6 @@ public:
     static WifiDirectBandWidth BandWidthNumberToEnum(int bandWidth);
     static int BandWidthEnumToNumber(WifiDirectBandWidth bandWidth);
     static int GetRecommendChannelFromLnn(const std::string &networkId);
-
     static void SerialFlowEnter();
     static void SerialFlowExit();
     static void ParallelFlowEnter();
@@ -108,13 +107,12 @@ public:
     static int32_t GetRemoteConnSubFeature(const std::string &remoteNetworkId, uint64_t &feature);
     static std::string GetRemoteOsVersion(const char *remoteNetworkId);
     static int32_t GetRemoteScreenStatus(const char *remoteNetworkId);
+    static int GetChload();
 
     static bool IsDeviceId(const std::string &remoteId);
     static std::string RemoteDeviceIdToMac(const std::string &remoteDeviceId);
     static std::string RemoteMacToDeviceId(const std::string &remoteMac);
     static int GetLocalScreenStatus();
-    static int GetChload();
-    static std::string RemoveSubstring(const std::string &str, const std::string &substr);
 
 private:
     static inline std::mutex serialParallelLock_;

@@ -298,9 +298,9 @@ static Server *NewServerNode(const GeneralConnectionParam *param)
     Server *nameNode = (Server *)SoftBusCalloc(sizeof(Server));
     CONN_CHECK_AND_RETURN_RET_LOGE(nameNode != NULL, NULL, CONN_BLE, "nameNode is null");
     ListInit(&nameNode->node);
-    if ((strncpy_s(nameNode->info.bundleName, BUNDLE_NAME_MAX, param->bundleName, BUNDLE_NAME_MAX) != EOK) ||
-        (strncpy_s(nameNode->info.name, GENERAL_NAME_LEN, param->name, GENERAL_NAME_LEN) != EOK) ||
-        (strncpy_s(nameNode->info.pkgName, PKG_NAME_SIZE_MAX, param->pkgName, PKG_NAME_SIZE_MAX) != EOK)) {
+    if ((strncpy_s(nameNode->info.bundleName, BUNDLE_NAME_MAX, param->bundleName, BUNDLE_NAME_MAX - 1) != EOK) ||
+        (strncpy_s(nameNode->info.name, GENERAL_NAME_LEN, param->name, GENERAL_NAME_LEN - 1) != EOK) ||
+        (strncpy_s(nameNode->info.pkgName, PKG_NAME_SIZE_MAX, param->pkgName, PKG_NAME_SIZE_MAX - 1) != EOK)) {
         CONN_LOGE(CONN_BLE, "strcpy failed");
         SoftBusFree(nameNode);
         return NULL;
@@ -578,9 +578,9 @@ static bool FindInfoFromServer(GeneralConnectionInfo *info, struct GeneralConnec
         return false;
     }
 
-    if (strncpy_s(infoTemp.name, GENERAL_NAME_LEN, it->info.name, GENERAL_NAME_LEN) != EOK ||
-        strncpy_s(infoTemp.pkgName, PKG_NAME_SIZE_MAX, it->info.pkgName, PKG_NAME_SIZE_MAX) != EOK ||
-        strncpy_s(infoTemp.bundleName, BUNDLE_NAME_MAX, it->info.bundleName, BUNDLE_NAME_MAX) != EOK) {
+    if (strncpy_s(infoTemp.name, GENERAL_NAME_LEN, it->info.name, GENERAL_NAME_LEN - 1) != EOK ||
+        strncpy_s(infoTemp.pkgName, PKG_NAME_SIZE_MAX, it->info.pkgName, PKG_NAME_SIZE_MAX - 1) != EOK ||
+        strncpy_s(infoTemp.bundleName, BUNDLE_NAME_MAX, it->info.bundleName, BUNDLE_NAME_MAX - 1) != EOK) {
         CONN_LOGE(CONN_BLE, "copy info failed");
         (void)SoftBusMutexUnlock(&g_generalManager.servers->lock);
         return false;
@@ -590,9 +590,11 @@ static bool FindInfoFromServer(GeneralConnectionInfo *info, struct GeneralConnec
 
     status = SoftBusMutexLock(&generalConnection->lock);
     CONN_CHECK_AND_RETURN_RET_LOGE(status == SOFTBUS_OK, false, CONN_BLE, "lock failed");
-    if (strncpy_s(generalConnection->info.name, GENERAL_NAME_LEN, infoTemp.name, GENERAL_NAME_LEN) != EOK ||
-        strncpy_s(generalConnection->info.pkgName, PKG_NAME_SIZE_MAX, infoTemp.pkgName, PKG_NAME_SIZE_MAX) != EOK ||
-        strncpy_s(generalConnection->info.bundleName, BUNDLE_NAME_MAX, infoTemp.bundleName, BUNDLE_NAME_MAX) != EOK) {
+    if (strncpy_s(generalConnection->info.name, GENERAL_NAME_LEN, infoTemp.name, GENERAL_NAME_LEN - 1) != EOK ||
+        strncpy_s(generalConnection->info.pkgName, PKG_NAME_SIZE_MAX,
+            infoTemp.pkgName, PKG_NAME_SIZE_MAX - 1) != EOK ||
+        strncpy_s(generalConnection->info.bundleName,
+            BUNDLE_NAME_MAX, infoTemp.bundleName, BUNDLE_NAME_MAX - 1) != EOK) {
         CONN_LOGE(CONN_BLE, "copy failed");
         (void)SoftBusMutexUnlock(&generalConnection->lock);
         return false;
@@ -778,10 +780,10 @@ static struct GeneralConnection *CreateConnection(const GeneralConnectionParam *
     CONN_CHECK_AND_RETURN_RET_LOGW(connection != NULL, NULL, CONN_BLE, "calloc connection failed");
     ListInit(&connection->node);
     connection->underlayerHandle = underlayerHandle;
-    if (strncpy_s(connection->addr, BT_MAC_LEN, addr, BT_MAC_LEN) != EOK ||
-        strncpy_s(connection->info.name, GENERAL_NAME_LEN, param->name, GENERAL_NAME_LEN) != EOK ||
-        strncpy_s(connection->info.pkgName, PKG_NAME_SIZE_MAX, param->pkgName, PKG_NAME_SIZE_MAX) != EOK ||
-        strncpy_s(connection->info.bundleName, BUNDLE_NAME_MAX, param->bundleName, BUNDLE_NAME_MAX) != EOK) {
+    if (strncpy_s(connection->addr, BT_MAC_LEN, addr, BT_MAC_LEN - 1) != EOK ||
+        strncpy_s(connection->info.name, GENERAL_NAME_LEN, param->name, GENERAL_NAME_LEN - 1) != EOK ||
+        strncpy_s(connection->info.pkgName, PKG_NAME_SIZE_MAX, param->pkgName, PKG_NAME_SIZE_MAX - 1) != EOK ||
+        strncpy_s(connection->info.bundleName, BUNDLE_NAME_MAX, param->bundleName, BUNDLE_NAME_MAX - 1) != EOK) {
         CONN_LOGE(CONN_BLE, "copy failed");
         SoftBusFree(connection);
         *errorCode = SOFTBUS_STRCPY_ERR;
@@ -964,8 +966,7 @@ static int32_t ProcessHandShakeAck(uint32_t connectionId, GeneralConnectionInfo 
 {
     struct GeneralConnection *generalConnection = GetValidConnectionByGeneralId(connectionId, info->localId);
     CONN_CHECK_AND_RETURN_RET_LOGE(generalConnection != NULL, SOFTBUS_INVALID_PARAM, CONN_BLE,
-        "connection is null, generalId=%{public}u", info->localId);
-
+        "connection is null, generalId=%{public}u", info->peerId);
     ConnRemoveMsgFromLooper(&g_generalManagerSyncHandler, GENERAL_MGR_MSG_CONNECT_TIMEOUT,
         generalConnection->generalId, 0, NULL);
     if (info->ackStatus != SOFTBUS_OK) {

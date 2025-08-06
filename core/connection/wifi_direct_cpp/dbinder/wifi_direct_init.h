@@ -13,6 +13,9 @@
  * limitations under the License.
  */
 
+#ifndef OHOS_WIFI_DIRECT_INIT_H
+#define OHOS_WIFI_DIRECT_INIT_H
+
 #include <atomic>
 #include <mutex>
 #include <string>
@@ -23,11 +26,6 @@
 #include "lnn_distributed_net_ledger_struct.h"
 #include "lnn_feature_capability_struct.h"
 #include "softbus_proxychannel_pipeline_struct.h"
-#include "stdint.h"
-#include "stdbool.h"
-
-#ifndef OHOS_WIFI_DIRECT_INIT_H
-#define OHOS_WIFI_DIRECT_INIT_H
 
 namespace OHOS {
 enum {
@@ -37,14 +35,12 @@ enum {
     SOFTBUS_WIFI_DIRECT_INSTANCE_EXIT,
 };
 
-// static constexpr int MAX_SEND_MESSAGE_LENGTH = 4 * 1024;
-
 class DBinderSoftbusServer {
 public:
     static DBinderSoftbusServer& GetInstance();
     DBinderSoftbusServer();
     ~DBinderSoftbusServer();
-    
+
     int32_t RegAuthTransListener(int32_t module, const AuthTransListener *listener);
     int32_t AuthGetDeviceUuid(int64_t authId, char *uuid, uint16_t size);
     int32_t AuthPostTransData(AuthHandle authHandle, const AuthTransData *dataInfo);

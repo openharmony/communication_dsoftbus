@@ -116,7 +116,7 @@ int AuthNegotiateChannel::SendMessage(const NegotiateMessage &msg) const
 
     CONN_CHECK_AND_RETURN_RET_LOGE(
         DBinderSoftbusServer::GetInstance().AuthPostTransData(handle_, &dataInfo) == SOFTBUS_OK,
-            SOFTBUS_CONN_AUTH_POST_DATA_FAILED, CONN_WIFI_DIRECT, "post data failed");
+        SOFTBUS_CONN_AUTH_POST_DATA_FAILED, CONN_WIFI_DIRECT, "post data failed");
     return SOFTBUS_OK;
 }
 
@@ -329,7 +329,6 @@ static void OnAuthException(AuthHandle authHandle, int32_t error)
 
 void AuthNegotiateChannel::Init()
 {
-    CONN_LOGI(CONN_INIT, "enter");
     AuthTransListener authListener = {
         .onDataReceived = OnAuthDataReceived,
         .onDisconnected = OnAuthDisconnected,

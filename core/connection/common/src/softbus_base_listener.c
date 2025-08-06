@@ -428,27 +428,20 @@ int32_t StartBaseClient(ListenerModule module, const SoftbusBaseListener *listen
     return status;
 }
 
-static int32_t SetIpv6Tos(int fd, uint32_t tos)
+static void SetIpv6Tos(int fd, uint32_t tos)
 {
     int32_t ret = SoftBusSocketSetOpt(fd, SOFTBUS_IPPROTO_IPV6, SOFTBUS_IPV6_TCLASS, &tos, sizeof(tos));
-    CONN_CHECK_AND_RETURN_RET_LOGE(ret == SOFTBUS_ADAPTER_OK, ret, CONN_COMMON, "set tos failed, fd=%{public}d", fd);
-    return SOFTBUS_OK;
+    CONN_CHECK_AND_RETURN_LOGE(
+        ret == SOFTBUS_ADAPTER_OK, CONN_COMMON, "set tos failed, ret=%{public}d, fd=%{public}d", ret, fd);
 }
 
 static void SetP2pSocketOption(const LocalListenerInfo *info, int32_t fd)
 {
-    char anonymizedIpAddr[IP_LEN] = { 0 };
-    ConvertAnonymizeIpAddress(anonymizedIpAddr, IP_LEN, info->socketOption.addr, IP_LEN);
     int32_t moduleId = info->socketOption.moduleId;
-    CONN_LOGI(CONN_COMMON, "addr=%{public}s moduleId=%{public}d", anonymizedIpAddr, moduleId);
-
     if (moduleId >= AUTH_ENHANCED_P2P_START && moduleId <= AUTH_ENHANCED_P2P_END &&
         GetDomainByAddr(info->socketOption.addr) == SOFTBUS_AF_INET6) {
-        int32_t ret = SetIpv6Tos(fd, IPV6_MESSAGE_TOS);
-        CONN_LOGI(CONN_COMMON, "set ipv6 tos ret=%{public}d, fd=%{public}d", ret, fd);
-        return;
+        SetIpv6Tos(fd, IPV6_MESSAGE_TOS);
     }
-    CONN_LOGE(CONN_COMMON, "not need set ipv6 tos");
 }
 
 static int32_t StartServerListenUnsafe(SoftbusListenerNode *node, const LocalListenerInfo *info)

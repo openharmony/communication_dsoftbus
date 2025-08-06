@@ -617,7 +617,6 @@ void P2pV1Processor::ProcessAuthExceptionEvent(const std::shared_ptr<AuthExcepti
     if (negotiateChannel->GetType() == NegotiateChannelType::AUTH_CHANNEL) {
         authChannel = std::static_pointer_cast<AuthNegotiateChannel>(negotiateChannel);
     }
-
     CONN_CHECK_AND_RETURN_LOGE(authChannel != nullptr && *authChannel == event->handle_,
         CONN_WIFI_DIRECT, "other auth exception ignore");
     CleanupIfNeed(event->error_, connectCommand_->GetRemoteDeviceId());
