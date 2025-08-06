@@ -226,8 +226,8 @@ void TransTdcUnPackAllTlvDataTest(FuzzedDataProvider &provider)
     (void)memset_s(&node, sizeof(DataBuf), 0, sizeof(DataBuf));
     bool flag = false;
 
-    (void)TransTdcUnPackAllTlvData(channelId, nullptr, nullptr, nullptr, nullptr);
-    (void)TransTdcUnPackAllTlvData(channelId, &head, &headSize, &node, &flag);
+    (void)TransTdcUnPackAllTlvData(channelId, &head, nullptr, nullptr, nullptr);
+    (void)TransTdcUnPackAllTlvData(channelId, nullptr, &headSize, &node, &flag);
 }
 
 void ReleaseDataHeadResourceTest(FuzzedDataProvider &provider)
