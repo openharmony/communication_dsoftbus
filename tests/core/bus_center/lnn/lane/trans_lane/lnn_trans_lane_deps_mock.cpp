@@ -171,14 +171,14 @@ int32_t CheckLinkConflictByReleaseLink(LaneLinkType releaseLink)
     return GetTransLaneIf()->CheckLinkConflictByReleaseLink(releaseLink);
 }
 
-int32_t FindLaneResourceByLinkType(const char *peerUdid, LaneLinkType type, LaneResource *resource)
-{
-    return GetTransLaneIf()->FindLaneResourceByLinkType(peerUdid, type, resource);
-}
-
 LnnEnhanceFuncList *LnnEnhanceFuncListGet(void)
 {
     return GetTransLaneIf()->LnnEnhanceFuncListGet();
+}
+
+int32_t FindLaneResourceByLinkType(const char *peerUdid, LaneLinkType type, LaneResource *resource)
+{
+    return GetTransLaneIf()->FindLaneResourceByLinkType(peerUdid, type, resource);
 }
 }
 } // namespace OHOS

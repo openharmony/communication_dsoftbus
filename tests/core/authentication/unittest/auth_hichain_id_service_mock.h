@@ -16,10 +16,13 @@
 #ifndef AUTH_HICHAIN_ID_SERVICE_MOCK_H
 #define AUTH_HICHAIN_ID_SERVICE_MOCK_H
 
+#include <cstdbool>
+#include <cstdint>
 #include <gmock/gmock.h>
 
 #include "bus_center_info_key.h"
 #include "device_auth.h"
+#include "lnn_heartbeat_utils.h"
 #include "softbus_json_utils.h"
 
 namespace OHOS {
@@ -44,6 +47,9 @@ public:
     virtual int32_t LnnInsertSpecificTrustedDevInfo(const char *udid) = 0;
     virtual void LnnHbOnTrustedRelationIncreased(int32_t groupType) = 0;
     virtual int32_t LnnGetLocalByteInfo(InfoKey key, uint8_t *info, uint32_t len) = 0;
+    virtual void LnnUpdateHeartbeatInfo(LnnHeartbeatUpdateInfoType type);
+    virtual const CredManager *IdServiceGetCredMgrInstance() = 0;
+    virtual int32_t IdServiceQueryCredentialByUdid(int32_t userId, const char *udid, char **credList) = 0;
 };
 
 class AuthHichainIdServiceInterfaceMock : public AuthHichainIdServiceInterface {
@@ -67,6 +73,9 @@ public:
     MOCK_METHOD1(LnnInsertSpecificTrustedDevInfo, int32_t(const char *));
     MOCK_METHOD1(LnnHbOnTrustedRelationIncreased, void(int32_t));
     MOCK_METHOD3(LnnGetLocalByteInfo, int32_t(InfoKey key, uint8_t *info, uint32_t len));
+    MOCK_METHOD1(LnnUpdateHeartbeatInfo, void(LnnHeartbeatUpdateInfoType));
+    MOCK_METHOD0(IdServiceGetCredMgrInstance, const CredManager * ());
+    MOCK_METHOD3(IdServiceQueryCredentialByUdid, int32_t (int32_t, const char *, char **));
 };
 
 } // namespace OHOS
