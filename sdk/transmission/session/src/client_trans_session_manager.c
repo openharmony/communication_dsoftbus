@@ -1860,15 +1860,10 @@ static SessionInfo *GetSocketExistSession(const SessionParam *param, bool isEncy
 int32_t CreatePagingSession(const char *sessionName, int32_t businessType, int32_t socketId,
     const ISocketListener *socketListener, bool isClient)
 {
-    if (socketId < 0 || sessionName == NULL) {
-        TRANS_LOGE(TRANS_SDK, "invalid param");
-        return SOFTBUS_INVALID_PARAM;
-    }
+    TRANS_CHECK_AND_RETURN_RET_LOGE(
+        (socketId > 0 && sessionName != NULL), SOFTBUS_INVALID_PARAM, TRANS_SDK, "Invalid param");
     int32_t ret = LockClientSessionServerList();
-    if (ret != SOFTBUS_OK) {
-        TRANS_LOGE(TRANS_SDK, "lock failed");
-        return ret;
-    }
+    TRANS_CHECK_AND_RETURN_RET_LOGE(ret == SOFTBUS_OK, ret, TRANS_SDK, "lock failed");
     SessionInfo *session = (SessionInfo *)SoftBusCalloc(sizeof(SessionInfo));
     if (session == NULL) {
         UnlockClientSessionServerList();
@@ -1881,20 +1876,21 @@ int32_t CreatePagingSession(const char *sessionName, int32_t businessType, int32
     ClientSessionServer *serverNode = NULL;
     ISocketListener *pagingListen = NULL;
     LIST_FOR_EACH_ENTRY(serverNode, &(g_clientSessionServerList->list), ClientSessionServer, node) {
-        if (strcmp(serverNode->sessionName, sessionName) != 0) {
+        if (strcmp(serverNode->sessionName, sessionName) != EOK) {
             continue;
         }
         serverNode->listener.isSocketListener = true;
         if (isClient) {
             pagingListen = &(serverNode->listener.socketClient);
-            if (memcpy_s(pagingListen, sizeof(ISocketListener), socketListener, sizeof(ISocketListener))) {
+            if (memcpy_s(pagingListen, sizeof(ISocketListener), socketListener, sizeof(ISocketListener)) != EOK) {
                 SoftBusFree(session);
                 UnlockClientSessionServerList();
                 return SOFTBUS_MEM_ERR;
             }
         } else {
+            session->role = SESSION_ROLE_SERVER;
             pagingListen = &(serverNode->listener.socketServer);
-            if (memcpy_s(pagingListen, sizeof(ISocketListener), socketListener, sizeof(ISocketListener))) {
+            if (memcpy_s(pagingListen, sizeof(ISocketListener), socketListener, sizeof(ISocketListener)) != EOK) {
                 SoftBusFree(session);
                 UnlockClientSessionServerList();
                 return SOFTBUS_MEM_ERR;
