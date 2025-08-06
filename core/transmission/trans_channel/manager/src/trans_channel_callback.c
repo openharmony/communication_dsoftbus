@@ -109,7 +109,8 @@ static int32_t TransServerOnChannelOpened(const char *pkgName, int32_t pid, cons
         TransSetSocketChannelStateByChannel(
             channel->channelId, channel->channelType, CORE_SESSION_STATE_CHANNEL_OPENED);
     }
-    int32_t ret = !channel->isServer && channel->channelType == CHANNEL_TYPE_UDP && NotifyQosChannelOpenedPacked(channel);
+    int32_t ret =
+        !channel->isServer && channel->channelType == CHANNEL_TYPE_UDP && NotifyQosChannelOpenedPacked(channel);
     TRANS_CHECK_AND_RETURN_RET_LOGE(ret == SOFTBUS_OK, ret, TRANS_CTRL, "NotifyQosChannelOpened failed.");
     int32_t sceneCommand = channel->isServer ? EVENT_SCENE_OPEN_CHANNEL_SERVER : EVENT_SCENE_OPEN_CHANNEL;
     TRANS_EVENT(sceneCommand, EVENT_STAGE_OPEN_CHANNEL_END, extra);
