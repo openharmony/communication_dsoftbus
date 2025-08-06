@@ -17,6 +17,7 @@
 #include <unistd.h>
 
 #include "trans_uk_manager.h"
+
 #include "bus_center_manager.h"
 #include "lnn_distributed_net_ledger.h"
 #include "lnn_ohos_account_adapter.h"
@@ -204,9 +205,19 @@ int32_t GetLocalAccountUidByUserId(char *id, uint32_t idLen, uint32_t *len, int3
     int32_t ret = LnnGetLocalStrInfo(STRING_KEY_ACCOUNT_UID, id, idLen);
     if (ret != SOFTBUS_OK) {
         TRANS_LOGE(TRANS_CTRL, "get local account uid failed, ret=%{public}d", ret);
-        id = DEFAULT_ACCOUNT_UID;
+        if (idLen < (strlen(DEFAULT_ACCOUNT_UID) + 1)) {
+            TRANS_LOGE(TRANS_CTRL, "idLen is not enough to hold DEFAULT_ACCOUNT_UID.");
+            return SOFTBUS_INVALID_PARAM;
+        }
+        if (strcpy_s(id, idLen, DEFAULT_ACCOUNT_UID) != EOK) {
+            TRANS_LOGE(TRANS_CTRL, "str copy id failed.");
+            return SOFTBUS_STRCPY_ERR;
+        }
         *len = strlen(id);
-        return ret;
+        if (id[*len] == '\0') {
+            TRANS_LOGE(TRANS_CTRL, "id buffer is not null-terminated.");
+            return SOFTBUS_INVALID_PARAM;
+        }
     }
     *len = strnlen(id, idLen);
     return SOFTBUS_OK;

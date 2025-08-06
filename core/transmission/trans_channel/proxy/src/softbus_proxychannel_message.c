@@ -463,7 +463,7 @@ static void TransPagingProcessHandshakeAckMsg(const ProxyMessage *msg)
     int32_t ret = TransPagingUnPackHandshakeAckMsg(msg, &chan.appInfo);
     if (ret != SOFTBUS_OK) {
         TransProxyProcessErrMsg(&chan, SOFTBUS_TRANS_UNPACK_REPLY_FAILED);
-        ReportPagingProcessHandshakeAckExtra(&chan, errCode);
+        ReportPagingProcessHandshakeAckExtra(&chan, ret);
         return;
     }
     chan.peerId = chan.appInfo.peerData.channelId;
@@ -473,7 +473,7 @@ static void TransPagingProcessHandshakeAckMsg(const ProxyMessage *msg)
     if (ret != SOFTBUS_OK) {
         TRANS_LOGE(TRANS_CTRL, "failed to update channel info, ret=%{public}d", ret);
         TransProxyProcessErrMsg(&chan, ret);
-        ReportPagingProcessHandshakeAckExtra(&chan, errCode);
+        ReportPagingProcessHandshakeAckExtra(&chan, ret);
         return;
     }
     ReportPagingProcessHandshakeAckExtra(&chan, errCode);
@@ -526,7 +526,7 @@ static void TransPagingProcessResetMsg(const ProxyMessage *msg)
         return;
     }
     if (TransDecConnRefByConnId(msg->connId, false) == SOFTBUS_OK) {
-        TRANS_LOGE(TRANS_CTRL, "recv reset dis connect, connId=%{public}u", msg->connId);
+        TRANS_LOGI(TRANS_CTRL, "recv reset dis connect, connId=%{public}u", msg->connId);
         (void)ConnDisconnectDevice(msg->connId);
     }
     if (TransPagingResetChan(info) != SOFTBUS_OK) {
@@ -548,23 +548,23 @@ static int32_t TransProxyFillPagingLocalInfo(ProxyChannelInfo *chan)
         strcpy_s(chan->appInfo.myData.calleeAccountId, sizeof(chan->appInfo.myData.calleeAccountId),
         chan->appInfo.peerData.callerAccountId) != EOK) {
         TRANS_LOGE(TRANS_CTRL, "fill local account id failed.");
-        return SOFTBUS_STRCMP_ERR;
+        return SOFTBUS_STRCPY_ERR;
     }
     char localUdid[UDID_BUF_LEN] = { 0 };
     int32_t ret = LnnGetLocalStrInfo(STRING_KEY_DEV_UDID, localUdid, UDID_BUF_LEN);
     if (ret != SOFTBUS_OK) {
-        TRANS_LOGE(TRANS_CTRL, "get local udid fail.");
+        TRANS_LOGE(TRANS_CTRL, "get local udid fail");
         return ret;
     }
     uint8_t udidHash[SHA_256_HASH_LEN] = { 0 };
     ret = SoftBusGenerateStrHash((unsigned char *)localUdid, strlen(localUdid), (unsigned char *)udidHash);
     if (ret != SOFTBUS_OK) {
-        TRANS_LOGE(TRANS_CTRL, "generate udid hash fail.");
+        TRANS_LOGE(TRANS_CTRL, "generate udid hash fail");
         return ret;
     }
     uint8_t callerHash[SHA_256_HASH_LEN] = { 0 };
-    if (ConvertHexStringToBytes((unsigned char *)callerHash, SHA_256_HASH_LEN, chan->appInfo.myData.callerAccountId,
-        strlen(chan->appInfo.myData.callerAccountId)) != SOFTBUS_OK) {
+    if (ConvertHexStringToBytes((unsigned char *)callerHash, SHA_256_HASH_LEN,
+        chan->appInfo.myData.callerAccountId, strlen(chan->appInfo.myData.callerAccountId)) != SOFTBUS_OK) {
         TRANS_LOGE(TRANS_CTRL, "account hash str to bytes failed");
         return SOFTBUS_TRANS_HEX_STR_TO_BYTES_FAIL;
     }
@@ -572,7 +572,7 @@ static int32_t TransProxyFillPagingLocalInfo(ProxyChannelInfo *chan)
         callerHash, D2D_SHORT_ACCOUNT_HASH_LEN) != EOK ||
         memcpy_s(chan->appInfo.myData.shortUdidHash, sizeof(chan->appInfo.myData.shortUdidHash),
         udidHash, D2D_SHORT_UDID_HASH_LEN) != EOK) {
-        TRANS_LOGE(TRANS_CTRL, "cpy accounthash or devicehash failed");
+        TRANS_LOGE(TRANS_CTRL, "cpy accounthash or deviceidhash failed");
         return SOFTBUS_MEM_ERR;
     }
     return SOFTBUS_OK;
@@ -990,15 +990,13 @@ int32_t PackPlaintextMessage(ProxyMessageHead *msg, ProxyDataInfo *dataInfo)
     return SOFTBUS_OK;
 }
 
-static int32_t PackEncryptedMessage(
-    ProxyMessageHead *msg, AuthHandle authHandle, ProxyDataInfo *dataInfo)
+static int32_t PackEncryptedMessage(ProxyMessageHead *msg, AuthHandle authHandle, ProxyDataInfo *dataInfo)
 {
     if (authHandle.authId == AUTH_INVALID_ID) {
         TRANS_LOGE(TRANS_CTRL, "invalid authId, myChannelId=%{public}d", msg->myId);
         return SOFTBUS_INVALID_PARAM;
     }
-    uint32_t size = ConnGetHeadSize() + PROXY_CHANNEL_HEAD_LEN +
-        AuthGetEncryptSize(authHandle.authId, dataInfo->inLen);
+    uint32_t size = ConnGetHeadSize() + PROXY_CHANNEL_HEAD_LEN + AuthGetEncryptSize(authHandle.authId, dataInfo->inLen);
     uint8_t *buf = (uint8_t *)SoftBusCalloc(size);
     if (buf == NULL) {
         TRANS_LOGE(TRANS_CTRL, "malloc enc buf fail, myChannelId=%{public}d", msg->myId);
