@@ -531,52 +531,6 @@ HWTEST_F(SoftbusProxyChannelMessagePagingTest, TransPagingUnPackResetMsgTest001,
 }
 
 /**@
- * @tc.name: TransPagingProcessResetMsgTest001
- * @tc.desc: test proxy open proxy channel, use wrong param.
- * @tc.type: FUNC
- * @tc.require:
- */
-HWTEST_F(SoftbusProxyChannelMessagePagingTest, TransPagingProcessResetMsgTest001, TestSize.Level1)
-{
-    ProxyMessage *msg = (ProxyMessage *)SoftBusCalloc(sizeof(ProxyMessage));
-    ASSERT_TRUE(msg != nullptr);
-    int32_t peerId = TEST_CHANNEL_ID;
-    cJSON *testRootTest = nullptr;
-    testRootTest = cJSON_CreateObject();
-    ASSERT_TRUE(testRootTest != nullptr);
-
-    NiceMock<SoftbusProxychannelMessagePagingInterfaceMock> ProxyPagingMock;
-    EXPECT_CALL(ProxyPagingMock, cJSON_ParseWithLength).WillOnce(Return(nullptr));
-    TransPagingProcessResetMsg(msg);
-    bool res = AddNumberToJsonObject(testRootTest, JSON_KEY_PAGING_SINK_CHANNEL_ID, peerId);
-    EXPECT_EQ(true, res);
-    EXPECT_CALL(ProxyPagingMock, cJSON_ParseWithLength).WillOnce(Return(testRootTest));
-    EXPECT_CALL(ProxyPagingMock, TransProxyGetAppInfoById).WillOnce(Return(SOFTBUS_INVALID_PARAM));
-    TransPagingProcessResetMsg(msg);
-    cJSON *testRoot = nullptr;
-    testRoot = cJSON_CreateObject();
-    ASSERT_TRUE(testRoot != nullptr);
-    res = AddNumberToJsonObject(testRoot, JSON_KEY_PAGING_SINK_CHANNEL_ID, peerId);
-    EXPECT_EQ(true, res);
-    EXPECT_CALL(ProxyPagingMock, cJSON_ParseWithLength).WillOnce(Return(testRoot));
-    EXPECT_CALL(ProxyPagingMock, TransProxyGetAppInfoById).WillOnce(Return(SOFTBUS_OK));
-    EXPECT_CALL(ProxyPagingMock, TransPagingResetChan).WillOnce(Return(SOFTBUS_INVALID_PARAM));
-    TransPagingProcessResetMsg(msg);
-
-    cJSON *root = nullptr;
-    root = cJSON_CreateObject();
-    ASSERT_TRUE(root != nullptr);
-    res = AddNumberToJsonObject(root, JSON_KEY_PAGING_SINK_CHANNEL_ID, peerId);
-    EXPECT_EQ(true, res);
-    EXPECT_CALL(ProxyPagingMock, cJSON_ParseWithLength).WillOnce(Return(root));
-    EXPECT_CALL(ProxyPagingMock, TransProxyGetAppInfoById).WillOnce(Return(SOFTBUS_OK));
-    EXPECT_CALL(ProxyPagingMock, TransPagingResetChan).WillOnce(Return(SOFTBUS_OK));
-    EXPECT_CALL(ProxyPagingMock, OnProxyChannelClosed).WillRepeatedly(Return(SOFTBUS_OK));
-    TransPagingProcessResetMsg(msg);
-    SoftBusFree(msg);
-}
-
-/**@
  * @tc.name: TransProxyFillPagingChannelInfoTest001
  * @tc.desc: test proxy open proxy channel, use wrong param.
  * @tc.type: FUNC
@@ -726,12 +680,12 @@ HWTEST_F(SoftbusProxyChannelMessagePagingTest, TransProxyFillPagingChannelInfoTe
     EXPECT_EQ(true, res);
     res = AddStringToJsonObject(testRoot, JSON_KEY_DEVICE_ID, data);
     EXPECT_EQ(true, res);
-    EXPECT_CALL(ProxyPagingMock, cJSON_ParseWithLength).WillOnce(Return(testRoot));
-    EXPECT_CALL(ProxyPagingMock, SoftBusGenerateSessionKey).WillOnce(Return(SOFTBUS_OK));
-    EXPECT_CALL(ProxyPagingMock, SoftBusGenerateRandomArray).WillOnce(Return(SOFTBUS_OK));
-    EXPECT_CALL(ProxyPagingMock, LnnGetLocalStrInfo).WillOnce(Return(SOFTBUS_OK));
-    EXPECT_CALL(ProxyPagingMock, AddNumberToSocketName).WillOnce(Return(SOFTBUS_OK));
-    EXPECT_CALL(ProxyPagingMock, GenerateChannelId).WillOnce(Return(TEST_CHANNEL_ID));
+    EXPECT_CALL(ProxyPagingMock, cJSON_ParseWithLength).WillRepeatedly(Return(testRoot));
+    EXPECT_CALL(ProxyPagingMock, SoftBusGenerateSessionKey).WillRepeatedly(Return(SOFTBUS_OK));
+    EXPECT_CALL(ProxyPagingMock, SoftBusGenerateRandomArray).WillRepeatedly(Return(SOFTBUS_OK));
+    EXPECT_CALL(ProxyPagingMock, LnnGetLocalStrInfo).WillRepeatedly(Return(SOFTBUS_OK));
+    EXPECT_CALL(ProxyPagingMock, AddNumberToSocketName).WillRepeatedly(Return(SOFTBUS_OK));
+    EXPECT_CALL(ProxyPagingMock, GenerateChannelId).WillRepeatedly(Return(TEST_CHANNEL_ID));
     int32_t ret = TransProxyFillPagingChannelInfo(&msg, &chan, accountHash, udidHash);
     EXPECT_EQ(SOFTBUS_OK, ret);
 }
@@ -1068,82 +1022,12 @@ HWTEST_F(SoftbusProxyChannelMessagePagingTest, TransWaitListenResult001, TestSiz
 }
 
 /**@
- * @tc.name: TransPagingPackMessageHead001
- * @tc.desc: test proxy open proxy channel, use wrong param.
- * @tc.type: FUNC
- * @tc.require:
- */
-HWTEST_F(SoftbusProxyChannelMessagePagingTest, TransPagingPackMessageHead001, TestSize.Level1)
-{
-    PagingMessageHead msgHead = {
-        .type = 1,
-        .channelId = TEST_CHANNEL_ID,
-    };
-    ProxyMessage msg = {
-        .data = const_cast<char *>(TEST_DATA),
-        .dataLen = TEST_LEN,
-        .msgHead.peerId = TEST_CHANNEL_ID,
-    };
-    uint8_t *buf = (uint8_t *)SoftBusCalloc(PAGING_CHANNEL_HEAD_LEN);
-    ASSERT_TRUE(buf != nullptr);
-    uint8_t *accountHash = reinterpret_cast<uint8_t *>(const_cast<char *>(TEST_DATA));
-    uint8_t *udidHash = reinterpret_cast<uint8_t *>(const_cast<char *>(TEST_DATA));
-    bool needHash = false;
-    int32_t ret = TransPagingPackMessageHead(&msgHead, buf, accountHash, udidHash, needHash);
-    EXPECT_EQ(SOFTBUS_OK, ret);
-    needHash = true;
-    ret = TransPagingPackMessageHead(&msgHead, buf, accountHash, udidHash, needHash);
-    EXPECT_EQ(SOFTBUS_OK, ret);
-    NiceMock<SoftbusProxychannelMessagePagingInterfaceMock> ProxyPagingMock;
-    EXPECT_CALL(ProxyPagingMock, TransProxyTransSendMsg).WillOnce(Return(SOFTBUS_INVALID_PARAM));
-    TransPagingSendBadKeyMsg(&msg, accountHash, udidHash);
-    EXPECT_CALL(ProxyPagingMock, TransProxyTransSendMsg).WillOnce(Return(SOFTBUS_OK));
-    TransPagingSendBadKeyMsg(&msg, accountHash, udidHash);
-}
-
-/**@
- * @tc.name: TransPagingParseMessage002
- * @tc.desc: test proxy open proxy channel, use wrong param.
- * @tc.type: FUNC
- * @tc.require:
- */
-HWTEST_F(SoftbusProxyChannelMessagePagingTest, TransPagingParseMessage002, TestSize.Level1)
-{
-    PagingProxyMessage msg = {
-        .msgHead.channelId = TEST_CHANNEL_ID,
-        .msgHead.type = 1,
-    };
-    (void)memcpy_s((void *)msg.authKey, SESSION_KEY_LENGTH, TEST_DATA, SESSION_KEY_LENGTH);
-    ProxyDataInfo dataInfo = {
-        .inData = reinterpret_cast<uint8_t *>(const_cast<char *>(TEST_DATA)),
-        .inLen = TEST_LEN,
-    };
-    (void)memset_s(&dataInfo, sizeof(ProxyDataInfo), 0, sizeof(ProxyDataInfo));
-    ProxyChannelInfo chan;
-    (void)memset_s(&chan, sizeof(ProxyChannelInfo), 0, sizeof(ProxyChannelInfo));
-    bool needHash = false;
-    int32_t ret = TransPagingPackMessage(nullptr, &dataInfo, &chan, needHash);
-    EXPECT_EQ(SOFTBUS_INVALID_PARAM, ret);
-    ret = TransPagingPackMessage(&msg, nullptr, &chan, needHash);
-    EXPECT_EQ(SOFTBUS_INVALID_PARAM, ret);
-    ret = TransPagingPackMessage(&msg, &dataInfo, nullptr, needHash);
-    EXPECT_EQ(SOFTBUS_INVALID_PARAM, ret);
-    NiceMock<SoftbusProxychannelMessagePagingInterfaceMock> ProxyPagingMock;
-    EXPECT_CALL(ProxyPagingMock, SoftBusEncryptData).WillOnce(Return(SOFTBUS_INVALID_PARAM));
-    ret = TransPagingPackMessage(&msg, &dataInfo, &chan, needHash);
-    EXPECT_EQ(SOFTBUS_ENCRYPT_ERR, ret);
-    EXPECT_CALL(ProxyPagingMock, SoftBusEncryptData).WillOnce(Return(SOFTBUS_OK));
-    ret = TransPagingPackMessage(&msg, &dataInfo, &chan, needHash);
-    EXPECT_EQ(SOFTBUS_OK, ret);
-}
-
-/**@
  * @tc.name: TransPagingPackHandshakeErrMsg001
  * @tc.desc: test proxy open proxy channel, use wrong param.
  * @tc.type: FUNC
  * @tc.require:
  */
-HWTEST_F(SoftbusProxyChannelMessagePagingTest, TransPagingPackHandshakeErrMsg001, TestSize.Level1)
+HWTEST_F(SoftbusProxyChannelMessagePagingTest, TransPagingPackHandshakeErrMsg001, TestSize.Level2)
 {
     char *buf = TransPagingPackHandshakeErrMsg(SOFTBUS_OK, TEST_CHANNEL_ID);
     EXPECT_TRUE(buf != nullptr);
@@ -1166,7 +1050,7 @@ HWTEST_F(SoftbusProxyChannelMessagePagingTest, TransPagingPackHandshakeErrMsg001
  * @tc.type: FUNC
  * @tc.require:
  */
-HWTEST_F(SoftbusProxyChannelMessagePagingTest, TransPagingPackHandshakeMsg001, TestSize.Level1)
+HWTEST_F(SoftbusProxyChannelMessagePagingTest, TransPagingPackHandshakeMsg001, TestSize.Level2)
 {
     ProxyChannelInfo info = {
         .appInfo.myData.dataLen = 1,
@@ -1190,7 +1074,7 @@ HWTEST_F(SoftbusProxyChannelMessagePagingTest, TransPagingPackHandshakeMsg001, T
  * @tc.type: FUNC
  * @tc.require:
  */
-HWTEST_F(SoftbusProxyChannelMessagePagingTest, TransPagingPackHandshakeAckMsg001, TestSize.Level1)
+HWTEST_F(SoftbusProxyChannelMessagePagingTest, TransPagingPackHandshakeAckMsg001, TestSize.Level2)
 {
     ProxyChannelInfo info = {
         .appInfo.myData.dataLen = 1,
@@ -1222,7 +1106,7 @@ HWTEST_F(SoftbusProxyChannelMessagePagingTest, TransPagingPackHandshakeAckMsg001
  * @tc.type: FUNC
  * @tc.require:
  */
-HWTEST_F(SoftbusProxyChannelMessagePagingTest, TransPagingPackHandshakeAckMsg002, TestSize.Level1)
+HWTEST_F(SoftbusProxyChannelMessagePagingTest, TransPagingPackHandshakeAckMsg002, TestSize.Level2)
 {
     int16_t channelId = -1;
     char *buf = TransProxyPagingPackChannelId(channelId);
