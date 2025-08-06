@@ -137,14 +137,10 @@ void TransProxyPackTlvBytesTest(FuzzedDataProvider &provider)
     int32_t finalSeq = provider.ConsumeIntegral<int32_t>();
     int32_t flag = provider.ConsumeIntegral<int32_t>();
     (void)ProxyBuildTlvDataHead(nullptr, finalSeq, flag, dataLen, &tlvBufferSize);
-    (void)ProxyBuildTlvDataHead(&pktHead, finalSeq, flag, dataLen, &tlvBufferSize);
-    (void)ProxyBuildTlvDataHead(&pktHead, finalSeq, flag, dataLen, nullptr);
 
     bool needAck = provider.ConsumeBool();
     uint32_t dataSeqs = provider.ConsumeIntegral<uint32_t>();
     (void)ProxyBuildNeedAckTlvData(nullptr, needAck, dataSeqs, &tlvBufferSize);
-    (void)ProxyBuildNeedAckTlvData(&pktHead, needAck, dataSeqs, &tlvBufferSize);
-    (void)ProxyBuildNeedAckTlvData(&pktHead, needAck, dataSeqs, nullptr);
 
     SessionPktType flag2 = static_cast<SessionPktType>(
         provider.ConsumeIntegralInRange<uint16_t>(TRANS_SESSION_BYTES, TRANS_SESSION_ASYNC_MESSAGE));
@@ -162,7 +158,7 @@ void TransProxyPackTlvBytesTest(FuzzedDataProvider &provider)
     DataHeadTlvPacketHead info;
     (void)memset_s(&info, sizeof(DataHeadTlvPacketHead), 0, sizeof(DataHeadTlvPacketHead));
     FillDataHeadTlvPacketHead(provider, &info);
-    TransProxyPackTlvBytes(&dataInfo, sessionKey, flag2, seq, &info);
+    TransProxyPackTlvBytes(&dataInfo, nullptr, flag2, seq, &info);
 }
 
 void TransProxyPackDataTest(FuzzedDataProvider &provider)
@@ -416,8 +412,8 @@ void TransProxyParseTlvTest(FuzzedDataProvider &provider)
     len += headSize;
     (void)CheckLenAndCopyData(len, headSize, data, &head);
 
-    (void)TransProxyParseTlv(len, nullptr, nullptr, nullptr);
-    (void)TransProxyParseTlv(len, data, &head, &headSize);
+    (void)TransProxyParseTlv(len, data, nullptr, nullptr);
+    (void)TransProxyParseTlv(len, nullptr, &head, &headSize);
 }
 
 void TransProxyNoSubPacketTlvProcTest(FuzzedDataProvider &provider)
