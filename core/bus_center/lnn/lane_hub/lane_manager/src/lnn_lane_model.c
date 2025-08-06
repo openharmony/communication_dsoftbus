@@ -225,8 +225,17 @@ int32_t GetLaneIdList(uint32_t profileId, uint64_t **laneIdList, uint32_t *listS
     uint32_t cnt = 0;
     LaneIdInfo *infoNode = NULL;
     LIST_FOR_EACH_ENTRY(infoNode, &laneModel->laneIdList, LaneIdInfo, node) {
+        if (cnt >= laneModel->ref) {
+            LNN_LOGE(LNN_LANE, "ref count is smaller than cnt");
+            break;
+        }
         (*laneIdList)[cnt] = infoNode->laneId;
         cnt++;
+    }
+    if (cnt != laneModel->ref) {
+        LNN_LOGE(LNN_LANE, "ref count and cnt are not equal");
+        ModelUnlock();
+        return SOFTBUS_INVALID_PARAM;
     }
     *listSize = cnt;
     ModelUnlock();
