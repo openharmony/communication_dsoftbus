@@ -34,6 +34,7 @@
 #define DEFAULT_USER_KEY_INDEX      (-1)
 #define DEFAULT_UKID_TIME           (-1)
 #define DEFAULT_USERID              (-1)
+#define MAX_BUNDLE_NAME_LEN         200
 
 using DpClient = OHOS::DistributedDeviceProfile::DistributedDeviceProfileClient;
 static std::set<std::string> g_notTrustedDevices;
@@ -408,6 +409,32 @@ static UpdateDpAclResult UpdateDpSameAccountAcl(const std::string &peerUdid, int
     return updateResult;
 }
 
+static int32_t GenerateDsoftbusBundleName(
+    const char *peerUdid, const char *localUdid, int32_t localUserId, char *bundleName)
+{
+    if (peerUdid == NULL || localUdid == NULL || bundleName == NULL) {
+        LNN_LOGE(LNN_STATE, "invalid param");
+        return SOFTBUS_INVALID_PARAM;
+    }
+
+    char localShortUdid[SHORT_UDID_HASH_HEX_LEN + 1] = { 0 };
+    char peerShortUdid[SHORT_UDID_HASH_HEX_LEN + 1] = { 0 };
+    if (strncpy_s(localShortUdid, SHORT_UDID_HASH_HEX_LEN + 1, localUdid, SHORT_UDID_HASH_HEX_LEN) != EOK) {
+        LNN_LOGE(LNN_STATE, "strncpy_s localUdid fail");
+        return SOFTBUS_STRCPY_ERR;
+    }
+    if (strncpy_s(peerShortUdid, SHORT_UDID_HASH_HEX_LEN + 1, peerUdid, SHORT_UDID_HASH_HEX_LEN) != EOK) {
+        LNN_LOGE(LNN_STATE, "strncpy_s peerUdid fail");
+        return SOFTBUS_STRCPY_ERR;
+    }
+    if (sprintf_s(bundleName, MAX_BUNDLE_NAME_LEN, "dsoftbus_%d_%s_%s", localUserId, localShortUdid,
+        peerShortUdid) < 0) {
+        LNN_LOGE(LNN_STATE, "sprintf_s bundleName fail");
+        return SOFTBUS_SPRINTF_ERR;
+    }
+    return SOFTBUS_OK;
+}
+
 static void InsertDpSameAccountAcl(const std::string &peerUdid, int32_t peerUserId, int32_t sessionKeyId)
 {
     OHOS::DistributedDeviceProfile::AccessControlProfile accessControlProfile;
@@ -433,6 +460,12 @@ static void InsertDpSameAccountAcl(const std::string &peerUdid, int32_t peerUser
         accesser.SetAccesserSessionKeyId(sessionKeyId);
         accesser.SetAccesserSKTimeStamp(currentTime);
     }
+    char bundleName[MAX_BUNDLE_NAME_LEN] = { 0 };
+    if (GenerateDsoftbusBundleName(peerUdid.c_str(), udid, GetActiveOsAccountIds(), bundleName) != SOFTBUS_OK) {
+        LNN_LOGE(LNN_STATE, "generate dsoftbus bundle name fail.");
+        return;
+    }
+    accesser.SetAccesserBundleName(std::string(bundleName));
     accessee.SetAccesseeDeviceId(peerUdid);
     if (peerUserId != 0) {
         accessee.SetAccesseeUserId(peerUserId);
@@ -450,14 +483,8 @@ static void InsertDpSameAccountAcl(const std::string &peerUdid, int32_t peerUser
         LNN_LOGE(LNN_STATE, "PutAccessControlProfile failed, ret=%{public}d", ret);
         return;
     }
-    char *anonyUdid = nullptr;
-    Anonymize(peerUdid.c_str(), &anonyUdid);
-    LNN_LOGI(LNN_STATE,
-        "insert dp same account succ, udid=%{public}s, localUserId=%{public}d, peerUserId=%{public}d, "
-        "sessionKeyId=%{public}d, currentTime=%{public}" PRIu64,
-        AnonymizeWrapper(anonyUdid), accesser.GetAccesserUserId(), accessee.GetAccesseeUserId(), sessionKeyId,
-        currentTime);
-    AnonymizeFree(anonyUdid);
+    LNN_LOGI(LNN_STATE, "insert dp same account succ, GetAccesser=%{public}s, GetAccessee=%{public}s",
+        accesser.dump().c_str(), accessee.dump().c_str());
 }
 
 static UpdateDpAclResult PutDpAclUkByUserId(
