@@ -27,5 +27,6 @@ extern "C" int LLVMFuzzerTestOneInput(const uint8_t *data, size_t size)
     auto result = RUN_ALL_TESTS();
     CONN_LOGI(CONN_WIFI_DIRECT, "result=%{public}d", result);
     DataGenerator::Clear();
+    sleep(1);
     return 0;
 }
