@@ -187,11 +187,7 @@ int32_t StartVtpStreamChannelServer(int32_t channelId, const VtpStreamOpenParam 
     }
 
     auto newAdaptor = it->second;
-    if (newAdaptor->InitAdaptor(channelId, param, true, callback) != true) {
-        CloseVtpStreamChannel(channelId, param->pkgName);
-        TRANS_LOGE(TRANS_STREAM, "adaptor already existed channelId=%{public}d.", channelId);
-        return SOFTBUS_ALREADY_EXISTED;
-    }
+    newAdaptor->InitAdaptor(channelId, param, true, callback);
 
     Communication::SoftBus::IpAndPort ipPort;
     ipPort.ip = param->myIp;
@@ -236,11 +232,7 @@ int32_t StartVtpStreamChannelClient(int32_t channelId, const VtpStreamOpenParam 
     }
 
     auto newAdaptor = it->second;
-    if (newAdaptor->InitAdaptor(channelId, param, false, callback) != true) {
-        CloseVtpStreamChannel(channelId, param->pkgName);
-        TRANS_LOGE(TRANS_STREAM, "adaptor already existed channelId=%{public}d.", channelId);
-        return SOFTBUS_ALREADY_EXISTED;
-    }
+    newAdaptor->InitAdaptor(channelId, param, false, callback);
 
     Communication::SoftBus::IpAndPort ipPort;
     ipPort.ip = param->myIp;

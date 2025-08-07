@@ -65,27 +65,24 @@ void StreamAdaptor::SetAliveState(bool state)
     aliveState_.exchange(state);
 }
 
-bool StreamAdaptor::InitAdaptor(int32_t channelId, const VtpStreamOpenParam *param, bool isServerSide,
+void StreamAdaptor::InitAdaptor(int32_t channelId, const VtpStreamOpenParam *param, bool isServerSide,
     const IStreamListener *callback)
 {
     if (param == nullptr) {
         TRANS_LOGE(TRANS_STREAM, "param invalid");
-        return false;
+        return;
     }
     auto adaptor = shared_from_this();
     auto adaptorListener = std::make_shared<StreamAdaptorListener>(adaptor);
     streamManager_ =  Communication::SoftBus::IStreamManager::GetInstance(nullptr, adaptorListener);
-    if (streamManager_->PrepareEnvironment(param->pkgName) != true) {
-        TRANS_LOGE(TRANS_STREAM, "PrepareEnvironment already existed pkgName=%{public}s", param->pkgName);
-        return false;
-    }
+    streamManager_->PrepareEnvironment(param->pkgName);
     serverSide_ = isServerSide;
     if (sessionKey_.first == nullptr) {
         sessionKey_.first = new uint8_t[param->keyLen];
     }
     if (memcpy_s(sessionKey_.first, param->keyLen, param->sessionKey, param->keyLen) != EOK) {
         TRANS_LOGE(TRANS_STREAM, "memcpy key error.");
-        return false;
+        return;
     }
 
     sessionKey_.second = param->keyLen;
@@ -93,7 +90,6 @@ bool StreamAdaptor::InitAdaptor(int32_t channelId, const VtpStreamOpenParam *par
     streamType_ = param->type;
     channelId_ = channelId;
     isRawStreamEncrypt_ = param->isRawStreamEncrypt;
-    return true;
 }
 
 void StreamAdaptor::ReleaseAdaptor()
