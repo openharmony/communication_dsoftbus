@@ -1976,7 +1976,7 @@ char *TransProxyPackFastData(const AppInfo *appInfo, uint32_t *outLen)
 
 int32_t TransProxyParseD2DData(const char *data, int32_t len)
 {
-    if (data == NULL) {
+    if (data == NULL || len <= PROXY_CHANNEL_D2D_HEAD_LEN) {
         TRANS_LOGE(TRANS_CTRL, "invalid param");
         return SOFTBUS_INVALID_PARAM;
     }
