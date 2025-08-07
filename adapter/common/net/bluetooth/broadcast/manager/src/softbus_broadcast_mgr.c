@@ -2297,6 +2297,7 @@ int32_t SetBroadcastingParam(int32_t bcId, const BroadcastParam *param)
         callCount++);
     SoftbusBroadcastParam softbusBcParam = {};
     ConvertBcParams(protocol, param, &softbusBcParam);
+    g_bcManager[bcId].isDisableCb = false;
     SoftBusMutexUnlock(&g_bcLock);
 
     return PerformSetBroadcastingParam(bcId, &softbusBcParam);
