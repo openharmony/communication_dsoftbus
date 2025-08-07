@@ -56,7 +56,7 @@ static _Atomic int32_t g_proxyPktHeadSeq = 2048;
 
 int32_t TransParseMessageHeadType(char *data, int32_t len, ProxyMessage *msg)
 {
-    if (data == NULL || msg == NULL) {
+    if (data == NULL || msg == NULL || len <= sizeof(uint8_t)) {
         TRANS_LOGE(TRANS_CTRL, "invalid param");
         return SOFTBUS_INVALID_PARAM;
     }
