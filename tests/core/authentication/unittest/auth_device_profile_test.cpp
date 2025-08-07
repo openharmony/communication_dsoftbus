@@ -38,7 +38,7 @@ const int32_t TEST_USER_ID_ONE = 1;
 const int32_t TEST_USER_ID_TWO = 2;
 const int32_t TEST_USER_ID_THREE = 3;
 const uint32_t TEST_ERROR_USER_ID = -1;
-const uint32_t CRED_ID_STR_LEN = 65;
+const uint32_t CRED_ID_STR_LEN = 300;
 
 typedef struct {
     bool isLocal;
