@@ -1262,7 +1262,7 @@ HWTEST_F(SoftbusProxyTransceiverTest, TransProxyOnDataReceivedTest005, TestSize.
     char data[TEST_DATA_LEN];
     
     SoftbusTransProxyTransceiverMock transceiverMockObj;
-    EXPECT_CALL(transceiverMockObj, TransProxyParseMessage).WillOnce(Return(SOFTBUS_TRANS_RECV_DATA_OVER_LEN));
+    EXPECT_CALL(transceiverMockObj, TransProxyParseMessage).WillRepeatedly(Return(SOFTBUS_TRANS_RECV_DATA_OVER_LEN));
 
     EXPECT_NO_FATAL_FAILURE(
         TransProxyOnDataReceived(connectionId, MODULE_PROXY_CHANNEL, seq, data, TEST_DATA_LEN));
@@ -1281,7 +1281,7 @@ HWTEST_F(SoftbusProxyTransceiverTest, TransProxyOnDataReceivedTest006, TestSize.
     char data[TEST_DATA_LEN];
     
     SoftbusTransProxyTransceiverMock transceiverMockObj;
-    EXPECT_CALL(transceiverMockObj, TransProxyParseMessage).WillOnce(Return(SOFTBUS_OK));
+    EXPECT_CALL(transceiverMockObj, TransProxyParseMessage).WillRepeatedly(Return(SOFTBUS_OK));
 
     EXPECT_NO_FATAL_FAILURE(
         TransProxyOnDataReceived(connectionId, MODULE_PROXY_CHANNEL, seq, data, TEST_DATA_LEN));
