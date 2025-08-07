@@ -146,7 +146,7 @@ HWTEST_F(LNNHuksUtilsTest, LNN_GENERATE_CEKEY_BY_HUKS_Test_001, TestSize.Level0)
 HWTEST_F(LNNHuksUtilsTest, LNN_DELETE_CEKEY_BY_HUKS_Test_001, TestSize.Level0)
 {
     struct HksBlob *keyAlias = nullptr;
-    int32_t ret = LnnDeleteCeKeyByHuks(keyAlias);
+    int32_t ret = LnnDeleteCeKeyByHuks(keyAlias, true);
     EXPECT_EQ(ret, SOFTBUS_INVALID_PARAM);
 }
 
