@@ -54,7 +54,6 @@ ohos_fuzztest("SoftBusNegotiateMessageFuzzTest") {
     "$dsoftbus_root_path/core/transmission/trans_channel/proxy/include",
     "$dsoftbus_root_path/core/bus_center/lnn/lane_hub/lane_manager/include",
     "$dsoftbus_root_path/adapter/common/include/OS_adapter_define/linux",
-    "$dsoftbus_root_path/interfaces/kits/connect",
   ]
 
   sources = [ "softbusnegotiatemessage_fuzzer.cpp" ]

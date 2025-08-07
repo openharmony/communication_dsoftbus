@@ -12,12 +12,12 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+#include "securec.h"
 #include <gmock/gmock.h>
 #include <gtest/gtest.h>
 
 #include "disc_log.h"
 #include "message_handler.h"
-#include "securec.h"
 #include "softbus_adapter_mem.h"
 #include "softbus_ble_mock.h"
 #include "softbus_broadcast_utils.h"
@@ -391,10 +391,10 @@ HWTEST_F(SoftbusBroadcastMgrTest, SoftbusBroadcastInterface001, TestSize.Level1)
     int32_t listenerId = -1;
     EXPECT_EQ(SOFTBUS_BC_MGR_NO_FUNC_REGISTERED, RegisterBroadcaster(BROADCAST_PROTOCOL_BLE,
         SRV_TYPE_DIS, &bcId, GetBroadcastCallback()));
-    EXPECT_EQ(SOFTBUS_BC_MGR_NO_FUNC_REGISTERED, UnRegisterBroadcaster(bcId));
+    EXPECT_EQ(SOFTBUS_LOCK_ERR, UnRegisterBroadcaster(bcId));
     EXPECT_EQ(SOFTBUS_BC_MGR_NO_FUNC_REGISTERED, RegisterScanListener(BROADCAST_PROTOCOL_BLE,
         SRV_TYPE_DIS, &listenerId, GetScanCallback()));
-    EXPECT_EQ(SOFTBUS_BC_MGR_NO_FUNC_REGISTERED, UnRegisterScanListener(listenerId));
+    EXPECT_EQ(SOFTBUS_LOCK_ERR, UnRegisterScanListener(listenerId));
 
     BroadcastParam bcParam = {};
     BroadcastPacket packet = {};
@@ -406,15 +406,15 @@ HWTEST_F(SoftbusBroadcastMgrTest, SoftbusBroadcastInterface001, TestSize.Level1)
     packet.rspData.payloadLen = sizeof(RSP_DATA_PAYLOAD);
     packet.rspData.payload = RSP_DATA_PAYLOAD;
 
-    EXPECT_EQ(SOFTBUS_BC_MGR_NO_FUNC_REGISTERED, StartBroadcasting(bcId, &bcParam, &packet));
-    EXPECT_EQ(SOFTBUS_BC_MGR_NO_FUNC_REGISTERED, SetBroadcastingData(bcId, &packet));
-    EXPECT_EQ(SOFTBUS_BC_MGR_NO_FUNC_REGISTERED, StopBroadcasting(bcId));
+    EXPECT_EQ(SOFTBUS_LOCK_ERR, StartBroadcasting(bcId, &bcParam, &packet));
+    EXPECT_EQ(SOFTBUS_LOCK_ERR, SetBroadcastingData(bcId, &packet));
+    EXPECT_EQ(SOFTBUS_LOCK_ERR, StopBroadcasting(bcId));
 
     BcScanParams scanParam = {};
     BuildScanParam(&scanParam);
 
-    EXPECT_EQ(SOFTBUS_BC_MGR_NO_FUNC_REGISTERED, StartScan(listenerId, &scanParam));
-    EXPECT_EQ(SOFTBUS_BC_MGR_NO_FUNC_REGISTERED, StopScan(listenerId));
+    EXPECT_EQ(SOFTBUS_LOCK_ERR, StartScan(listenerId, &scanParam));
+    EXPECT_EQ(SOFTBUS_LOCK_ERR, StopScan(listenerId));
     EXPECT_FALSE(BroadcastIsLpDeviceAvailable());
 
     DISC_LOGI(DISC_TEST, "SoftbusBroadcastInterface001 end ----");
@@ -432,15 +432,15 @@ HWTEST_F(SoftbusBroadcastMgrTest, SoftbusBroadcastInterface002, TestSize.Level1)
     ManagerMock managerMock;
     EXPECT_CALL(managerMock, SoftbusBleAdapterInit).WillRepeatedly(ActionOfSoftbusBleAdapterInitNull);
 
-    EXPECT_EQ(SOFTBUS_BC_MGR_FUNC_NULL, InitBroadcastMgr());
+    EXPECT_EQ(SOFTBUS_OK, InitBroadcastMgr());
     int32_t bcId = -1;
     int32_t listenerId = -1;
     EXPECT_EQ(SOFTBUS_BC_MGR_FUNC_NULL, RegisterBroadcaster(BROADCAST_PROTOCOL_BLE,
         SRV_TYPE_DIS, &bcId, GetBroadcastCallback()));
-    EXPECT_EQ(SOFTBUS_BC_MGR_FUNC_NULL, UnRegisterBroadcaster(bcId));
+    EXPECT_EQ(SOFTBUS_INVALID_PARAM, UnRegisterBroadcaster(bcId));
     EXPECT_EQ(SOFTBUS_BC_MGR_FUNC_NULL, RegisterScanListener(BROADCAST_PROTOCOL_BLE,
         SRV_TYPE_DIS, &listenerId, GetScanCallback()));
-    EXPECT_EQ(SOFTBUS_BC_MGR_FUNC_NULL, UnRegisterScanListener(listenerId));
+    EXPECT_EQ(SOFTBUS_INVALID_PARAM, UnRegisterScanListener(listenerId));
 
     BroadcastParam bcParam = {};
     BroadcastPacket packet = {};
@@ -452,18 +452,18 @@ HWTEST_F(SoftbusBroadcastMgrTest, SoftbusBroadcastInterface002, TestSize.Level1)
     packet.rspData.payloadLen = sizeof(RSP_DATA_PAYLOAD);
     packet.rspData.payload = RSP_DATA_PAYLOAD;
 
-    EXPECT_EQ(SOFTBUS_BC_MGR_FUNC_NULL, StartBroadcasting(bcId, &bcParam, &packet));
-    EXPECT_EQ(SOFTBUS_BC_MGR_FUNC_NULL, SetBroadcastingData(bcId, &packet));
-    EXPECT_EQ(SOFTBUS_BC_MGR_FUNC_NULL, StopBroadcasting(bcId));
+    EXPECT_EQ(SOFTBUS_BC_MGR_INVALID_BC_ID, StartBroadcasting(bcId, &bcParam, &packet));
+    EXPECT_EQ(SOFTBUS_BC_MGR_INVALID_BC_ID, SetBroadcastingData(bcId, &packet));
+    EXPECT_EQ(SOFTBUS_BC_MGR_INVALID_BC_ID, StopBroadcasting(bcId));
 
     BcScanParams scanParam = {};
     BuildScanParam(&scanParam);
 
-    EXPECT_EQ(SOFTBUS_BC_MGR_FUNC_NULL, StartScan(listenerId, &scanParam));
-    EXPECT_EQ(SOFTBUS_BC_MGR_FUNC_NULL, StopScan(listenerId));
+    EXPECT_EQ(SOFTBUS_BC_MGR_INVALID_LISN_ID, StartScan(listenerId, &scanParam));
+    EXPECT_EQ(SOFTBUS_BC_MGR_INVALID_LISN_ID, StopScan(listenerId));
     EXPECT_FALSE(BroadcastIsLpDeviceAvailable());
 
-    EXPECT_EQ(SOFTBUS_BC_MGR_FUNC_NULL, DeInitBroadcastMgr());
+    EXPECT_EQ(SOFTBUS_OK, DeInitBroadcastMgr());
 
     DISC_LOGI(DISC_TEST, "SoftbusBroadcastInterface002 end ----");
 }
@@ -1260,7 +1260,7 @@ HWTEST_F(SoftbusBroadcastMgrTest, SoftbusBroadcastStartScan004, TestSize.Level1)
     ManagerMock managerMock;
     EXPECT_CALL(managerMock, SoftbusBleAdapterInit).WillRepeatedly(ActionOfSoftbusBleAdapterInitNull);
 
-    EXPECT_EQ(SOFTBUS_BC_MGR_FUNC_NULL, InitBroadcastMgr());
+    EXPECT_EQ(SOFTBUS_OK, InitBroadcastMgr());
 
     int32_t listenerId = -1;
     uint8_t filterNum = 1;
@@ -1272,12 +1272,12 @@ HWTEST_F(SoftbusBroadcastMgrTest, SoftbusBroadcastStartScan004, TestSize.Level1)
         SRV_TYPE_DIS, &listenerId, GetScanCallback()));
 
     EXPECT_EQ(SOFTBUS_BC_MGR_INVALID_LISN_ID, SetScanFilter(listenerId, filter, filterNum));
-    EXPECT_EQ(SOFTBUS_BC_MGR_FUNC_NULL, StartScan(listenerId, &scanParam));
-    EXPECT_EQ(SOFTBUS_BC_MGR_FUNC_NULL, StartScan(listenerId, &scanParam));
-    EXPECT_EQ(SOFTBUS_BC_MGR_FUNC_NULL, StopScan(listenerId));
+    EXPECT_EQ(SOFTBUS_BC_MGR_INVALID_LISN_ID, StartScan(listenerId, &scanParam));
+    EXPECT_EQ(SOFTBUS_BC_MGR_INVALID_LISN_ID, StartScan(listenerId, &scanParam));
+    EXPECT_EQ(SOFTBUS_BC_MGR_INVALID_LISN_ID, StopScan(listenerId));
 
-    EXPECT_EQ(SOFTBUS_BC_MGR_FUNC_NULL, UnRegisterScanListener(listenerId));
-    EXPECT_EQ(SOFTBUS_BC_MGR_FUNC_NULL, DeInitBroadcastMgr());
+    EXPECT_EQ(SOFTBUS_INVALID_PARAM, UnRegisterScanListener(listenerId));
+    EXPECT_EQ(SOFTBUS_OK, DeInitBroadcastMgr());
 
     DISC_LOGI(DISC_TEST, "SoftbusBroadcastStartScan004 end ----");
 }
@@ -2061,7 +2061,7 @@ HWTEST_F(SoftbusBroadcastMgrTest, PerformSetBroadcastingParam003, TestSize.Level
     int32_t bcId = -1;
     EXPECT_EQ(SOFTBUS_OK, RegisterBroadcaster(BROADCAST_PROTOCOL_BLE, SRV_TYPE_DIS, &bcId, GetBroadcastCallback()));
     EXPECT_TRUE(bcId >= 0);
-    
+
     EXPECT_EQ(SOFTBUS_OK, StartBroadcasting(bcId, &bcParam, &packet));
     EXPECT_EQ(SOFTBUS_OK, PerformSetBroadcastingParam(bcId, &adapterParam));
     EXPECT_EQ(SOFTBUS_OK, UnRegisterBroadcaster(bcId));
@@ -2099,9 +2099,9 @@ HWTEST_F(SoftbusBroadcastMgrTest, PerformSetBroadcastingParam004, TestSize.Level
     int32_t bcId = -1;
     EXPECT_EQ(SOFTBUS_OK, RegisterBroadcaster(BROADCAST_PROTOCOL_BLE, SRV_TYPE_DIS, &bcId, GetBroadcastCallback()));
     EXPECT_TRUE(bcId >= 0);
-    
+
     EXPECT_EQ(SOFTBUS_OK, StartBroadcasting(bcId, &bcParam, &packet));
-    EXPECT_EQ(SOFTBUS_BC_MGR_WAIT_COND_FAIL, PerformSetBroadcastingParam(bcId, &adapterParam));
+    EXPECT_EQ(SOFTBUS_BC_MGR_NOT_BROADCASTING, PerformSetBroadcastingParam(bcId, &adapterParam));
     EXPECT_EQ(SOFTBUS_OK, UnRegisterBroadcaster(bcId));
     EXPECT_EQ(SOFTBUS_OK, DeInitBroadcastMgr());
     DISC_LOGI(DISC_TEST, "PerformSetBroadcastingParam004 end ----");
@@ -2175,7 +2175,7 @@ HWTEST_F(SoftbusBroadcastMgrTest, EnableBroadcasting002, TestSize.Level1)
     int32_t bcId = -1;
     EXPECT_EQ(SOFTBUS_OK, RegisterBroadcaster(BROADCAST_PROTOCOL_BLE, SRV_TYPE_DIS, &bcId, GetBroadcastCallback()));
     EXPECT_TRUE(bcId >= 0);
-    
+
     EXPECT_EQ(SOFTBUS_BC_MGR_NOT_BROADCASTING, EnableBroadcasting(bcId));
     EXPECT_EQ(SOFTBUS_OK, UnRegisterBroadcaster(bcId));
     EXPECT_EQ(SOFTBUS_OK, DeInitBroadcastMgr());

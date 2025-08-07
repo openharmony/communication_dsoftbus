@@ -40,6 +40,10 @@ if (!defined(ohos_lite)) {
     "hilog:libhilog",
   ]
 
+  if (dsoftbus_feature_deps_sle) {
+    bt_test_external_deps += [ "nearlink_service:nearlink_framework" ]
+  }
+
   if (support_bluetooth &&
       (dsoftbus_feature_conn_ble || dsoftbus_feature_conn_br)) {
     bt_test_external_deps += [ "bluetooth:btframework" ]

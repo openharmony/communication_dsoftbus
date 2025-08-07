@@ -20,10 +20,11 @@
 #include <securec.h>
 
 #include "ble_protocol_interface_factory.h"
+#include "g_enhance_conn_func.h"
 #include "softbus_conn_ble_manager_mock.h"
-#include "softbus_adapter_ble_conflict_struct.h"
 #include "softbus_adapter_bt_common.h"
 #include "softbus_adapter_crypto.h"
+#include "softbus_adapter_ble_conflict_struct.h"
 #include "softbus_adapter_mem.h"
 #include "softbus_conn_ble_connection.h"
 #include "softbus_conn_ble_manager.h"
@@ -33,7 +34,6 @@
 #include "softbus_feature_config.h"
 #include "softbus_utils.h"
 #include "softbus_conn_ble_manager.c"
-#include "g_enhance_conn_func.h"
 
 using namespace testing::ext;
 using namespace testing;
@@ -151,8 +151,8 @@ public:
     static void TearDownTestCase();
     void SetUp() override
     {
-        ConnEnhanceFuncList *pfnLConnEnhanceFuncList = ConnEnhanceFuncListGet();
-        pfnLConnEnhanceFuncList->softbusBleConflictRegisterListener = SoftbusBleConflictRegisterListener;
+        ConnEnhanceFuncList *pfnConnEnhanceFuncList = ConnEnhanceFuncListGet();
+        pfnConnEnhanceFuncList->softbusBleConflictRegisterListener = SoftbusBleConflictRegisterListener;
         ConnectCallback connectCb = { 0 };
         connectCb.OnConnected = OnConnected;
         connectCb.OnReusedConnected = OnReusedConnected;
@@ -818,7 +818,7 @@ HWTEST_F(ConnectionBleManagerTest, ConnBleOnReferenceRequest002, TestSize.Level1
     connection->side = CONN_SIDE_SERVER;
     ret = ConnBleSaveConnection(connection);
     ASSERT_EQ(SOFTBUS_OK, ret);
-    
+
     cJSON json = { 0 };
     NiceMock<ConnectionBleManagerInterfaceMock> bleMock;
     EXPECT_CALL(bleMock, GetJsonObjectSignedNumberItem)
@@ -1091,7 +1091,7 @@ HWTEST_F(ConnectionBleManagerTest, BleCheckPreventing, TestSize.Level1)
     ASSERT_NE(connection, nullptr);
     const char *devId = "1111222233335555";
     memcpy_s(connection->networkId, NETWORK_ID_BUF_LEN, devId, DEVID_BUFF_LEN);
-    
+
     ConnBleDevice *device = nullptr;
     ConnBleConnectRequestContext ctx = {
         .fastestConnectEnable = true,
@@ -1105,7 +1105,7 @@ HWTEST_F(ConnectionBleManagerTest, BleCheckPreventing, TestSize.Level1)
     NiceMock<ConnectionBleManagerInterfaceMock> bleMock;
     EXPECT_CALL(bleMock, LnnGetConnSubFeatureByUdidHashStr).WillRepeatedly(Return(SOFTBUS_INVALID_PARAM));
     EXPECT_CALL(bleMock, LnnGetRemoteStrInfo).WillRepeatedly(Return(SOFTBUS_OK));
-    
+
     result = NewDevice(&device, &ctx);
     EXPECT_EQ(SOFTBUS_OK, result);
     AttempReuseConnect(device, BleConnectDeviceDirectly);
