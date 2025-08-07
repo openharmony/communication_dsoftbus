@@ -69,9 +69,9 @@ ohos_unittest("BrConnTest") {
     "hilog:libhilog",
   ]
   sources = [
-    "$dsoftbus_root_path/core/frame/common/src/softbus_init_common.c",
     "$dsoftbus_root_path/tests/core/connection/br/mock/softbus_conn_br_manager_mock.cpp",
     "softbus_conn_br_manager_test.cpp",
+    "$dsoftbus_root_path/core/frame/common/src/softbus_init_common.c",
   ]
   include_dirs = [
     "$dsoftbus_dfx_path/interface/include/form",

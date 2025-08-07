@@ -36,7 +36,7 @@ ohos_unittest("P2pv1ProcessorTest") {
     "$dsoftbus_root_path/interfaces/kits/disc",
     "$dsoftbus_root_path/interfaces/kits/adapter",
     "$dsoftbus_root_path/core/frame/init/include",
-    
+    "$dsoftbus_root_path/core/bus_center/ipc/include",
   ]
 
   sources = processorv1_ut_sources

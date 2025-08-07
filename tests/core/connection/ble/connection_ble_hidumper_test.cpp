@@ -17,10 +17,10 @@
 
 #include "ble_protocol_interface_factory.h"
 #include "softbus_conn_ble_manager_mock.h"
-#include "softbus_adapter_ble_conflict.h"
 #include "softbus_adapter_bt_common.h"
 #include "softbus_adapter_crypto.h"
 #include "softbus_adapter_mem.h"
+#include "softbus_adapter_ble_conflict.h"
 #include "softbus_conn_ble_connection.h"
 #include "softbus_conn_ble_manager.h"
 #include "softbus_conn_ble_snapshot.h"
