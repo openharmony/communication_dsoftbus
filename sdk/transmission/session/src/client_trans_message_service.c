@@ -333,7 +333,7 @@ int SendStream(int sessionId, const StreamData *data, const StreamData *ext, con
 static int32_t ClientCheckFuncPointer(void *func)
 {
     if (func == NULL) {
-        TRANS_LOGE(TRANS_FILE, "enhance func not register.");
+        TRANS_LOGE(TRANS_FILE, "enhance func not register");
         return SOFTBUS_FUNC_NOT_REGISTER;
     }
     return SOFTBUS_OK;
