@@ -245,9 +245,9 @@ int32_t LnnSaveRemoteDeviceInfo(const NodeInfo *deviceInfo)
     return GetDecisionDbDepsInterface()->LnnSaveRemoteDeviceInfo(deviceInfo);
 }
 
-int32_t LnnDeleteCeKeyByHuks(struct HksBlob *keyAlias)
+int32_t LnnDeleteCeKeyByHuks(struct HksBlob *keyAlias, bool isUnlocked)
 {
-    return GetDecisionDbDepsInterface()->LnnDeleteCeKeyByHuks(keyAlias);
+    return GetDecisionDbDepsInterface()->LnnDeleteCeKeyByHuks(keyAlias, isUnlocked);
 }
 
 int32_t LnnGenerateCeKeyByHuks(struct HksBlob *keyAlias, bool isUnlocked)

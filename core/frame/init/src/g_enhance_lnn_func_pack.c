@@ -1629,6 +1629,15 @@ int32_t LnnRetrieveDeviceDataPacked(LnnDataType dataType, char **data, uint32_t 
     return pfnLnnEnhanceFuncList->lnnRetrieveDeviceData(dataType, data, dataLen);
 }
 
+int32_t LnnSaveDeviceDataPacked(const char *data, LnnDataType dataType)
+{
+    LnnEnhanceFuncList *pfnLnnEnhanceFuncList = LnnEnhanceFuncListGet();
+    if (LnnCheckFuncPointer((void *)pfnLnnEnhanceFuncList->lnnSaveDeviceData) != SOFTBUS_OK) {
+        return SOFTBUS_NOT_IMPLEMENT;
+    }
+    return pfnLnnEnhanceFuncList->lnnSaveDeviceData(data, dataType);
+}
+
 bool IsDeviceHasRiskFactorPacked(void)
 {
     LnnEnhanceFuncList *pfnLnnEnhanceFuncList = LnnEnhanceFuncListGet();
