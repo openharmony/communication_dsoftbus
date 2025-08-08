@@ -77,6 +77,7 @@ struct WifiDirectManager {
     int (*getStationFrequency)(void);
     bool (*isHmlConnected)(void);
     HmlCapabilityCode (*getHmlCapabilityCode)(void);
+    VirtualLinkCapabilityCode (*getVirtualLinkCapabilityCode)(void);
     VspCapabilityCode (*getVspCapabilityCode)(void);
 
     int32_t (*init)(void);
