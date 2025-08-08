@@ -41,6 +41,9 @@ typedef int32_t (*AuthGenApplyKeyFunc)(
     const RequestBusinessInfo *info, uint32_t requestId, uint32_t connId, const GenApplyKeyCallback *genCb);
 typedef uint32_t (*GenApplyKeySeqFunc)(void);
 typedef void (*AuthClearAccountApplyKeyFunc)(void);
+typedef bool (*RequireAuthTcpConnFdListLockFunc)(void);
+typedef void (*ReleaseAuthTcpConnFdListLockFunc)(void);
+typedef bool (*IsExistMetaAuthTcpConnFdItemWithoutLockFunc)(int32_t fd);
 typedef struct TagAuthOpenFuncList {
     RemoveAuthEventFunc removeAuthEvent;
     PackAuthDataFunc packAuthData;
@@ -53,6 +56,9 @@ typedef struct TagAuthOpenFuncList {
     AuthGenApplyKeyFunc authGenApplyKey;
     GenApplyKeySeqFunc genApplyKeySeq;
     AuthClearAccountApplyKeyFunc authClearAccountApplyKey;
+    RequireAuthTcpConnFdListLockFunc requireAuthTcpConnFdListLock;
+    ReleaseAuthTcpConnFdListLockFunc releaseAuthTcpConnFdListLock;
+    IsExistMetaAuthTcpConnFdItemWithoutLockFunc isExistMetaAuthTcpConnFdItemWithoutLock;
 } AuthOpenFuncList;
 
 #ifdef __cplusplus
