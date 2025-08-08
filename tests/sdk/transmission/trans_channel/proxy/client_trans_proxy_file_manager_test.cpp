@@ -477,17 +477,17 @@ HWTEST_F(ClientTransProxyFileManagerTest, ClinetTransProxyGetSessionFileLockTest
 HWTEST_F(ClientTransProxyFileManagerTest, ClinetTransProxyCreateSendListenerInfoTest001, TestSize.Level1)
 {
     int32_t ret = CreateSessionServer(g_pkgName, g_sessionName, &g_sessionlistener);
-    EXPECT_EQ(SOFTBUS_TRANS_SESSION_SERVER_NOINIT, ret);
+    ASSERT_EQ(SOFTBUS_TRANS_SESSION_SERVER_NOINIT, ret);
 
     int32_t sessionId = 1;
     SessionEnableStatus isEnabled = ENABLE_STATUS_INIT;
 
     ret = ClientAddSession(&g_param, &sessionId, &isEnabled);
-    EXPECT_EQ(SOFTBUS_TRANS_SESSION_SERVER_NOINIT, ret);
+    ASSERT_EQ(SOFTBUS_TRANS_SESSION_SERVER_NOINIT, ret);
 
     SendListenerInfo *sendListenerInfo;
     ret = CreateSendListenerInfo(&sendListenerInfo, TEST_CHANNEL_ID, 0);
-    EXPECT_EQ(SOFTBUS_TRANS_SESSION_SERVER_NOINIT, ret);
+    ASSERT_EQ(SOFTBUS_TRANS_SESSION_SERVER_NOINIT, ret);
 
     int32_t channelId = 1;
     int32_t osType = TEST_OS_TYPE;
@@ -496,15 +496,15 @@ HWTEST_F(ClientTransProxyFileManagerTest, ClinetTransProxyCreateSendListenerInfo
     sessionInfo.channelId = channelId;
     sessionInfo.channelType = CHANNEL_TYPE_PROXY;
     ret = TransClientInit();
-    EXPECT_EQ(SOFTBUS_OK, ret);
+    ASSERT_EQ(SOFTBUS_OK, ret);
     ret = AddSession(g_sessionName, &sessionInfo);
-    EXPECT_EQ(SOFTBUS_TRANS_SESSIONSERVER_NOT_CREATED, ret);
+    ASSERT_EQ(SOFTBUS_TRANS_SESSIONSERVER_NOT_CREATED, ret);
 
     ret = TransSetFileSendListener(g_sessionName, &g_listener);
-    EXPECT_EQ(SOFTBUS_OK, ret);
+    ASSERT_EQ(SOFTBUS_OK, ret);
 
     ret = TransSetFileReceiveListener(g_sessionName, &g_fileRecvListener, g_rootDir);
-    EXPECT_EQ(SOFTBUS_OK, ret);
+    ASSERT_EQ(SOFTBUS_OK, ret);
 
     ret = CreateSendListenerInfo(&sendListenerInfo, channelId, 0);
     EXPECT_EQ(SOFTBUS_TRANS_SESSION_INFO_NOT_FOUND, ret);

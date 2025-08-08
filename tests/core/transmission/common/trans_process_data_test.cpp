@@ -747,6 +747,12 @@ HWTEST_F(TransProcessDataTest, TransProxyDecryptD2DDataTest001, TestSize.Level1)
     businessType = BUSINESS_TYPE_D2D_MESSAGE;
     ret = TransProxyDecryptD2DData(businessType, &dataInfo, sessionKey, sessionCommonIv);
     EXPECT_EQ(SOFTBUS_INVALID_PARAM, ret);
+
+    businessType = BUSINESS_TYPE_D2D_MESSAGE;
+    dataInfo.inData = (uint8_t *)"11111111111";
+    dataInfo.inLen = 12;
+    ret = TransProxyDecryptD2DData(businessType, &dataInfo, sessionKey, sessionCommonIv);
+    EXPECT_EQ(SOFTBUS_INVALID_PARAM, ret);
 }
 
 /**

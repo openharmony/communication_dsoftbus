@@ -43,6 +43,8 @@ public:
     virtual int32_t TransProxyOpenProxyChannel(AppInfo *appInfo,
         const ConnectOption *connInfo, int32_t *channelId) = 0;
     virtual int32_t TransOpenDirectChannel(AppInfo *appInfo, const ConnectOption *connInfo, int32_t *channelId) = 0;
+    virtual int32_t TransGetAclInfoBySessionName(const char *sessionName,
+        uint64_t *tokenId, int32_t *pid, int32_t *userId) = 0;
 };
 
 class TransLaneCommonTestInterfaceMock : public TransLaneCommonTestInterface {
@@ -61,6 +63,8 @@ public:
     MOCK_METHOD3(TransProxyOpenProxyChannel, int32_t (AppInfo *appInfo,
         const ConnectOption *connInfo, int32_t *channelId));
     MOCK_METHOD3(TransOpenDirectChannel, int32_t (AppInfo *appInfo, const ConnectOption *connInfo, int32_t *channelId));
+    MOCK_METHOD4(TransGetAclInfoBySessionName, int32_t (const char *sessionName,
+        uint64_t *tokenId, int32_t *pid, int32_t *userId));
 };
 } // namespace OHOS
 #endif // TRANS_LANE_COMMON_TEST_MOCK_H
