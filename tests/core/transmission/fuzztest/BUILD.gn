@@ -17,6 +17,7 @@ group("fuzztest") {
     "softbusmessageopenchannel_fuzzer:fuzztest",
     "softbusproxychannellistener_fuzzer:fuzztest",
     "softbusproxychannelmanager_fuzzer:fuzztest",
+    "softbusproxychannelmanagerext_fuzzer:fuzztest",
     "softbusproxychannelmanagermock_fuzzer:fuzztest",
     "softbusproxychannelnetwork_fuzzer:fuzztest",
     "softbusmintpsocket_fuzzer:fuzztest",
