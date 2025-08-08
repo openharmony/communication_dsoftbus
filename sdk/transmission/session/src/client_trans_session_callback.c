@@ -579,7 +579,6 @@ NO_SANITIZE("cfi") int32_t TransOnSessionOpenFailed(int32_t channelId, int32_t c
         } else { // sync bind
             (void)ClientSignalSyncBind(sessionId, errCode);
         }
-
         TRANS_LOGI(TRANS_SDK, "ok, sessionid=%{public}d", sessionId);
         return SOFTBUS_OK;
     }
@@ -663,8 +662,8 @@ NO_SANITIZE("cfi") int32_t TransOnDataReceived(int32_t channelId, int32_t channe
     (void)memset_s(&sessionCallback, sizeof(SessionListenerAdapter), 0, sizeof(SessionListenerAdapter));
     int32_t ret = GetSocketCallbackAdapterByChannelId(channelId, channelType, &sessionId, &sessionCallback, &isServer);
     TRANS_CHECK_AND_RETURN_RET_LOGE(ret == SOFTBUS_OK, ret, TRANS_SDK, "get session callback failed");
-    (void)ClientResetIdleTimeoutById(sessionId);
     (void)ClientGetSessionIsD2DByChannelId(channelId, channelType, &isD2D);
+    (void)ClientResetIdleTimeoutById(sessionId);
     ISocketListener *listener = NULL;
     if (isD2D) {
         listener = &sessionCallback.socketServer;
