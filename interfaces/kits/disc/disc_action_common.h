@@ -34,7 +34,7 @@ typedef struct {
     uint8_t wifiMac[ACTION_MAC_SIZE];
 } DiscActionParam;
 
-#if __cplusplus
+#ifdef __cplusplus
 }
 #endif /* __cplusplus */
 #endif /* DISC_ACTION_COMMON_H */

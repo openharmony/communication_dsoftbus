@@ -29,7 +29,7 @@
 #include "softbus_broadcast_adapter_type_struct.h"
 #include "softbus_broadcast_adapter_interface_struct.h"
 #include "softbus_broadcast_type_struct.h"
-#include "wrapper_br_interface_struct.h"
+#include "softbus_wrapper_br_interface_struct.h"
 
 #ifdef __cplusplus
 extern "C" {

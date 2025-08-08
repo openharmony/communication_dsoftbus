@@ -121,4 +121,4 @@ typedef enum {
 }
 #endif /* __cplusplus */
 
-#endif /* SOFTBUS_ADAPTER_BT_COMMON_H */
+#endif /* SOFTBUS_ADAPTER_BT_COMMON_STRUCT_H */
