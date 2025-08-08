@@ -15,17 +15,22 @@
 
 #include "softbusclientstub_fuzzer.h"
 
-#include "securec.h"
 #include <cstdint>
+#include <cstring>
+#include <fuzzer/FuzzedDataProvider.h>
+#include <securec.h>
 
 #include "client_trans_channel_manager.h"
 #include "fuzz_data_generator.h"
 #include "softbus_adapter_mem.h"
 #include "softbus_client_stub.h"
+#include "softbus_server_ipc_interface_code.h"
 
 namespace OHOS {
 constexpr size_t FOO_MAX_LEN = 1024;
 constexpr size_t U32_AT_SIZE = 4;
+constexpr size_t UUID_STRING_LEN = 38;
+constexpr size_t HAP_NAME_MAX_LEN = 256;
 
 class TestEnv {
 public:
@@ -758,6 +763,183 @@ bool OnChannelBindInnerTest(const uint8_t *data, size_t size)
 
     return true;
 }
+
+bool OnChannelOnQosInnerTest(FuzzedDataProvider &provider)
+{
+    sptr<OHOS::SoftBusClientStub> softBusClientStub = new OHOS::SoftBusClientStub();
+    if (softBusClientStub == nullptr) {
+        return false;
+    }
+    int32_t channelId = provider.ConsumeIntegral<int32_t>();
+    int32_t channelType = provider.ConsumeIntegral<int32_t>();
+    int32_t event = provider.ConsumeIntegral<int32_t>();
+    uint32_t count = provider.ConsumeIntegral<uint32_t>();
+    MessageParcel datas;
+    MessageParcel reply;
+    MessageOption option;
+    datas.WriteInterfaceToken(SOFTBUS_CLIENT_STUB_INTERFACE_TOKEN);
+    datas.WriteInt32(channelId);
+    datas.WriteInt32(channelType);
+    datas.WriteInt32(event);
+    datas.WriteUint32(count);
+    softBusClientStub->OnRemoteRequest(CLIENT_CHANNEL_ON_QOS, datas, reply, option);
+    return true;
+}
+
+static bool FillCollabInfo(CollabInfo *info, FuzzedDataProvider &provider)
+{
+    if (info == NULL) {
+        return false;
+    }
+    std::string providerAccountId = provider.ConsumeBytesAsString(ACCOUNT_UID_LEN_MAX - 1);
+    if (strcpy_s(info->accountId, ACCOUNT_UID_LEN_MAX - 1, providerAccountId.c_str()) != EOK) {
+        return false;
+    }
+    info->tokenId = provider.ConsumeIntegral<uint64_t>();
+    info->userId = provider.ConsumeIntegral<int32_t>();
+    info->pid = provider.ConsumeIntegral<int32_t>();
+    std::string providerDeviceId = provider.ConsumeBytesAsString(DEVICE_ID_LEN_MAX - 1);
+    if (strcpy_s(info->deviceId, DEVICE_ID_LEN_MAX - 1, providerDeviceId.c_str()) != EOK) {
+        return false;
+    }
+    return true;
+}
+
+static void WriteCollabInfo(MessageParcel &datas, CollabInfo &info)
+{
+    datas.WriteCString(info.accountId);
+    datas.WriteUint64(info.tokenId);
+    datas.WriteInt32(info.userId);
+    datas.WriteInt32(info.pid);
+    datas.WriteCString(info.deviceId);
+}
+
+bool OnCheckCollabRelationInnerTest(FuzzedDataProvider &provider)
+{
+    bool isSinkSide = provider.ConsumeBool();
+    int32_t channelId = provider.ConsumeIntegral<uint32_t>();
+    int32_t channelType = provider.ConsumeIntegral<uint32_t>();
+    CollabInfo sourceInfo;
+    (void)memset_s(&sourceInfo, sizeof(CollabInfo), 0, sizeof(CollabInfo));
+    if (!FillCollabInfo(&sourceInfo, provider)) {
+        return false;
+    }
+
+    CollabInfo sinkInfo;
+    (void)memset_s(&sinkInfo, sizeof(CollabInfo), 0, sizeof(CollabInfo));
+    if (!FillCollabInfo(&sinkInfo, provider)) {
+        return false;
+    }
+
+    sptr<OHOS::SoftBusClientStub> softBusClientStub = new OHOS::SoftBusClientStub();
+    if (softBusClientStub == nullptr) {
+        return false;
+    }
+    MessageParcel datas;
+    MessageParcel reply;
+    MessageOption option;
+    datas.WriteInterfaceToken(SOFTBUS_CLIENT_STUB_INTERFACE_TOKEN);
+    datas.WriteBool(isSinkSide);
+    WriteCollabInfo(datas, sourceInfo);
+    WriteCollabInfo(datas, sinkInfo);
+    datas.WriteInt32(channelId);
+    datas.WriteInt32(channelType);
+    softBusClientStub->OnRemoteRequest(CLIENT_CHECK_COLLAB_RELATION, datas, reply, option);
+    return true;
+}
+
+bool OnBrProxyOpenedInnerTest(FuzzedDataProvider &provider)
+{
+    int32_t channelId = provider.ConsumeIntegral<int32_t>();
+    int32_t reason = provider.ConsumeIntegral<int32_t>();
+    char brMac[BT_MAC_LEN] = { 0 };
+    char uuid[UUID_STRING_LEN] = { 0 };
+    std::string providerBrMac = provider.ConsumeBytesAsString(BT_MAC_LEN - 1);
+    if (strcpy_s(brMac, BT_MAC_LEN - 1, providerBrMac.c_str()) != EOK) {
+        return false;
+    }
+    std::string providerUuid = provider.ConsumeBytesAsString(UUID_STRING_LEN - 1);
+    if (strcpy_s(uuid, UUID_STRING_LEN - 1, providerUuid.c_str()) != EOK) {
+        return false;
+    }
+    sptr<OHOS::SoftBusClientStub> softBusClientStub = new OHOS::SoftBusClientStub();
+    if (softBusClientStub == nullptr) {
+        return false;
+    }
+    MessageParcel datas;
+    MessageParcel reply;
+    MessageOption option;
+    datas.WriteInterfaceToken(SOFTBUS_CLIENT_STUB_INTERFACE_TOKEN);
+    datas.WriteInt32(channelId);
+    datas.WriteInt32(reason);
+    datas.WriteCString(brMac);
+    datas.WriteCString(uuid);
+    softBusClientStub->OnRemoteRequest(CLIENT_ON_BR_PROXY_OPENED, datas, reply, option);
+    return true;
+}
+
+bool OnBrProxyDataRecvInnerTest(FuzzedDataProvider &provider)
+{
+    int32_t channelId = provider.ConsumeIntegral<int32_t>();
+    uint32_t len = provider.ConsumeIntegralInRange<int32_t>(0, FOO_MAX_LEN);
+    uint8_t dataInfo[FOO_MAX_LEN] = { 0 };
+    std::string providerDataInfo = provider.ConsumeBytesAsString(len - 1);
+    if (strcpy_s((char *)dataInfo, len - 1, providerDataInfo.c_str()) != EOK) {
+        return false;
+    }
+    sptr<OHOS::SoftBusClientStub> softBusClientStub = new OHOS::SoftBusClientStub();
+    if (softBusClientStub == nullptr) {
+        return false;
+    }
+    MessageParcel datas;
+    MessageParcel reply;
+    MessageOption option;
+    datas.WriteInterfaceToken(SOFTBUS_CLIENT_STUB_INTERFACE_TOKEN);
+    datas.WriteInt32(channelId);
+    datas.WriteUint32(len);
+    datas.WriteRawData(dataInfo, len);
+    softBusClientStub->OnRemoteRequest(CLIENT_ON_BR_PROXY_DATA_RECV, datas, reply, option);
+    return true;
+}
+
+bool OnBrProxyStateChangedInnerTest(FuzzedDataProvider &provider)
+{
+    int32_t channelId = provider.ConsumeIntegral<int32_t>();
+    int32_t errCode = provider.ConsumeIntegral<int32_t>();
+    sptr<OHOS::SoftBusClientStub> softBusClientStub = new OHOS::SoftBusClientStub();
+    if (softBusClientStub == nullptr) {
+        return false;
+    }
+    MessageParcel datas;
+    MessageParcel reply;
+    MessageOption option;
+    datas.WriteInterfaceToken(SOFTBUS_CLIENT_STUB_INTERFACE_TOKEN);
+    datas.WriteInt32(channelId);
+    datas.WriteInt32(errCode);
+    softBusClientStub->OnRemoteRequest(CLIENT_ON_BR_PROXY_STATE_CHANGED, datas, reply, option);
+    return true;
+}
+
+bool OnBrProxyQueryPermissionInnerTest(FuzzedDataProvider &provider)
+{
+    char bundleName[HAP_NAME_MAX_LEN] = { 0 };
+    std::string providerBundleName = provider.ConsumeBytesAsString(HAP_NAME_MAX_LEN - 1);
+    if (strcpy_s(bundleName, HAP_NAME_MAX_LEN - 1, providerBundleName.c_str()) != EOK) {
+        return false;
+    }
+    sptr<OHOS::SoftBusClientStub> softBusClientStub = new OHOS::SoftBusClientStub();
+    if (softBusClientStub == nullptr) {
+        return false;
+    }
+    MessageParcel datas;
+    MessageParcel reply;
+    MessageOption option;
+    datas.WriteInterfaceToken(SOFTBUS_CLIENT_STUB_INTERFACE_TOKEN);
+    datas.WriteCString(bundleName);
+    softBusClientStub->OnRemoteRequest(CLIENT_ON_BR_PROXY_QUERY_PERMISSION, datas, reply, option);
+    return true;
+}
+
 } // namespace OHOS
 
 /* Fuzzer entry point */
@@ -793,5 +975,12 @@ extern "C" int32_t LLVMFuzzerTestOneInput(const uint8_t *data, size_t size)
     OHOS::OnClientTransLimitChangeInnerTest(data, size);
     OHOS::SetChannelInfoInnerTest(data, size);
     OHOS::OnChannelBindInnerTest(data, size);
+    FuzzedDataProvider provider(data, size);
+    OHOS::OnChannelOnQosInnerTest(provider);
+    OHOS::OnCheckCollabRelationInnerTest(provider);
+    OHOS::OnBrProxyOpenedInnerTest(provider);
+    OHOS::OnBrProxyDataRecvInnerTest(provider);
+    OHOS::OnBrProxyStateChangedInnerTest(provider);
+    OHOS::OnBrProxyQueryPermissionInnerTest(provider);
     return 0;
 }
