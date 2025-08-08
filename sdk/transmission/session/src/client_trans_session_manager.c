@@ -1902,6 +1902,7 @@ int32_t CreatePagingSession(const char *sessionName, int32_t businessType, int32
         return SOFTBUS_OK;
     }
     UnlockClientSessionServerList();
+    SoftBusFree(session);
     return SOFTBUS_TRANS_PAGING_SERVER_NOT_CREATED;
 }
 
