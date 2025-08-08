@@ -73,6 +73,5 @@ if (defined(ohos_lite)) {
   trans_session_sdk_src += [
     "$dsoftbus_root_path/core/transmission/broadcast/src/trans_spec_object_proxy.cpp",
     "$dsoftbus_root_path/core/transmission/broadcast/src/trans_spec_object_stub.cpp",
-    "$dsoftbus_root_path/core/transmission/broadcast/src/trans_spec_object.cpp",
   ]
 }

@@ -14,38 +14,6 @@
 import("//build/ohos.gni")
 import("../../../dsoftbus.gni")
 
-dsoftbus_root_path = "../../.."
-
-config("softbus_frame_test_config") {
-  include_dirs = [
-    "$dsoftbus_root_path/service/softbus_server/include",
-    "$dsoftbus_root_path/core/common/inner_communication",
-    "$dsoftbus_root_path/core/common/include",
-    "$dsoftbus_root_path/sdk/frame/include",
-  ]
-}
-
-ohos_executable("softbus_test") {
-  sanitize = {
-    cfi = true
-    cfi_cross_dso = true
-    debug = false
-  }
-  branch_protector_ret = "pac_ret"
-
-  install_enable = true
-  sources = [ "softbus_test.c" ]
-  configs = [ ":softbus_frame_test_config" ]
-
-  if (is_standard_system) {
-    defines += [ "STANDARD_SYSTEM_ENABLE" ]
-
-    deps = [ "$dsoftbus_root_path/tests/sdk:softbus_client_static" ]
-    part_name = "softbus"
-  }
-  subsystem_name = "communication"
-}
-
 group("unittest") {
   testonly = true
   deps = [ "unittest:unittest" ]
