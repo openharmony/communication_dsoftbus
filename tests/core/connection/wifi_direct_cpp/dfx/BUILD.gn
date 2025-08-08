@@ -107,7 +107,7 @@ ohos_unittest("WifiDirectDfxTest") {
     "$dsoftbus_root_path/core/connection/wifi_direct_cpp/wifi_direct_manager.cpp",
     "$dsoftbus_root_path/core/connection/wifi_direct_cpp/wifi_direct_role_option.cpp",
     "$dsoftbus_root_path/core/connection/wifi_direct_cpp/wifi_direct_scheduler.cpp",
-    "$dsoftbus_root_path/wifi_direct_scheduler_factory.cpp",
+    "$wifi_direct_cpp_path/wifi_direct_scheduler_factory.cpp",
     "$wifi_direct_cpp_path/entity/entity_factory.cpp",
     "$wifi_direct_cpp_path/wifi_direct_executor_factory.cpp",
     "$dsoftbus_root_path/tests/core/connection/wifi_direct_cpp/net_conn_client.cpp",

@@ -55,10 +55,6 @@ static OutData *ConstructOutData(GeneralConnectionInfo *info, GeneralConnectionM
 OutData *GeneralConnectionPackMsg(GeneralConnectionInfo *info, GeneralConnectionMsgType msgType)
 {
     CONN_CHECK_AND_RETURN_RET_LOGE(info != NULL, NULL, CONN_BLE, "pack msg failed, info is null");
-    CONN_CHECK_AND_RETURN_RET_LOGE(strnlen(info->name, GENERAL_NAME_LEN) <= GENERAL_NAME_LEN, NULL,
-        CONN_BLE, "pack msg failed, name invalid");
-    CONN_CHECK_AND_RETURN_RET_LOGE(strnlen(info->bundleName, BUNDLE_NAME_MAX) <= BUNDLE_NAME_MAX, NULL,
-        CONN_BLE, "pack msg failed, bundleName invalid");
     cJSON *json = cJSON_CreateObject();
     CONN_CHECK_AND_RETURN_RET_LOGE(json != NULL, NULL, CONN_BLE, "create json object failed");
     int32_t status = SOFTBUS_OK;

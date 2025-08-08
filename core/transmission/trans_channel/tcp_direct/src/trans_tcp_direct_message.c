@@ -502,8 +502,8 @@ static int32_t NotifyChannelOpened(int32_t channelId)
         info.isFastData = true;
     }
     TransGetLaneIdByChannelId(channelId, &info.laneId);
-    info.isSupportTlv = GetCapabilityBit(conn.appInfo.channelCapability, TRANS_CAPABILITY_TLV_OFFSET);
     GetOsTypeByNetworkId(info.peerDeviceId, &info.osType);
+    info.isSupportTlv = GetCapabilityBit(conn.appInfo.channelCapability, TRANS_CAPABILITY_TLV_OFFSET);
     ret = TransTdcOnChannelOpened(pkgName, pid, conn.appInfo.myData.sessionName, &info);
     ClearAppInfoSessionKey(&conn.appInfo);
     conn.status = TCP_DIRECT_CHANNEL_STATUS_CONNECTED;
@@ -929,7 +929,7 @@ static int32_t CheckServerPermission(AppInfo *appInfo, char *ret)
     if (appInfo->callingTokenId != TOKENID_NOT_SET) {
         (void)LnnGetNetworkIdByUuid(appInfo->peerData.deviceId, appInfo->peerNetWorkId, NETWORK_ID_BUF_LEN);
         int32_t osType = 0;
-        (void)GetOsTypeByNetworkId(appInfo->peerNetWorkId, &osType);
+        GetOsTypeByNetworkId(appInfo->peerNetWorkId, &osType);
         if (osType != OH_OS_TYPE) {
             TRANS_LOGI(TRANS_CTRL, "not support acl check osType=%{public}d", osType);
         } else if (GetCapabilityBit(appInfo->channelCapability, TRANS_CHANNEL_ACL_CHECK_OFFSET)) {

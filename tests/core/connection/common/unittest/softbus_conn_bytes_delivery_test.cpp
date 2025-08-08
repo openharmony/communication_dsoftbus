@@ -106,8 +106,8 @@ HWTEST_F(ConnBytesDeliveryTest, DeliverTest, TestSize.Level1)
         delivered.push_back(p);
 
         auto ret = ConnDeliver(delivery, i, nullptr, 0, {0, 0, 0, seq});
-        CONN_LOGI(CONN_TEST, "delivery done, connection id=%{public}u, L/P/F/M/S=0/0/0/0/%{public}ld, ret=%{public}d",
-            i, seq, ret);
+        CONN_LOGI(CONN_TEST, "delivery done, connection id=%{public}d, "
+            "L/P/F/M/S=0/0/0/0/%{public}" PRId64 ", ret=%{public}d", i, seq, ret);
         EXPECT_EQ(ret, SOFTBUS_OK) << "the " << i << "th deliver failed";
     }
 

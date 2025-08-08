@@ -555,7 +555,8 @@ void ConnBleInnerComplementDeviceId(ConnBleConnection *connection)
             connection->connectionId, connection->protocol);
         return;
     }
-    int32_t status = LnnGetRemoteStrInfo(connection->networkId, STRING_KEY_DEV_UDID, connection->udid, UDID_BUF_LEN);
+    int32_t status = LnnGetRemoteStrInfo(connection->networkId, STRING_KEY_DEV_UDID,
+        connection->udid, UDID_BUF_LEN);
     CONN_LOGD(CONN_BLE,
         "complementation ble connection device id, connId=%{public}u, protocol=%{public}d, status=%{public}d",
         connection->connectionId, connection->protocol, status);

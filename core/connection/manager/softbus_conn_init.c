@@ -29,10 +29,7 @@ int32_t ConnOpenFuncInit(void *soHandle)
         return SOFTBUS_NETWORK_DLOPEN_FAILED;
     }
     int32_t (*connRegisterOpenfunc)(void);
-
-    int ret = SOFTBUS_OK;
-
-    ret = SoftBusDlsym(soHandle, "ConnRegisterOpenFunc", (void**)&connRegisterOpenfunc);
+    int ret = SoftBusDlsym(soHandle, "ConnRegisterOpenFunc", (void**)&connRegisterOpenfunc);
     if (ret != SOFTBUS_OK) {
         COMM_LOGE(COMM_SVC, "dlsym ConnRegisterOpenFunc failed, ret=%d", ret);
         return SOFTBUS_NETWORK_DLSYM_FAILED;

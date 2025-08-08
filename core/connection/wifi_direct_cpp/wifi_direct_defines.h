@@ -13,9 +13,9 @@
  * limitations under the License.
  */
 
-#include "wifi_direct_defines_struct.h"
-
 #ifndef WIFI_DIRECT_DEFINES_H
 #define WIFI_DIRECT_DEFINES_H
+
+#include "wifi_direct_defines_struct.h"
 
 #endif

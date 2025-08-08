@@ -77,6 +77,8 @@ HWTEST_F(SoftbusProxyChannelMessagePagingTest, TransParseMessageHeadTypeTest001,
     type = (PROXYCHANNEL_MSG_TYPE_D2D & FOUR_BIT_MASK) | (VERSION << VERSION_SHIFT);
     ret = TransParseMessageHeadType(data, len, &msg);
     EXPECT_EQ(SOFTBUS_OK, ret);
+    ret = TransParseMessageHeadType(data, 0, &msg);
+    EXPECT_EQ(SOFTBUS_INVALID_PARAM, ret);
 }
 
 /**@
