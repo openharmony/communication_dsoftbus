@@ -102,7 +102,7 @@ typedef enum {
 typedef struct {
     uint8_t talkieFreq;        // TALKIE_FREQ
     uint8_t talkieType;        // TALKIE_TYPE
-    uint8_t talkieLevel;       // TALKLE_LEVEL
+    uint8_t talkieLevel;       // TALKIE_LEVEL
     int32_t result;            // STAGE_RES
     int32_t errcode;           // ERROR_CODE
     const char *socketName;    // SESSION_NAME
