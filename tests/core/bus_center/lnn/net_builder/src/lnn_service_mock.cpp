@@ -253,6 +253,16 @@ void LnnNotifyDeviceInfoChanged(SoftBusDeviceInfoState state)
     return GetServiceInterface()->LnnNotifyDeviceInfoChanged(state);
 }
 
+bool IsHeartbeatEnable(void)
+{
+    return GetServiceInterface()->IsHeartbeatEnable();
+}
+
+struct WifiDirectManager* GetWifiDirectManager(void)
+{
+    return GetServiceInterface()->GetWifiDirectManager();
+}
+
 int32_t LnnServicetInterfaceMock::ActionOfLnnRegisterEventHandler(LnnEventType event, LnnEventHandler handler)
 {
     if (event == LNN_EVENT_TYPE_MAX || handler == nullptr) {
