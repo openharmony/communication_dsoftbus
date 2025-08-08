@@ -14,7 +14,6 @@
  */
 
 #include "wifi_direct_utils.h"
-
 #include <algorithm>
 #include <arpa/inet.h>
 #include <charconv>
@@ -35,7 +34,6 @@
 #include "conn_log.h"
 #include "data/link_manager.h"
 #include "g_enhance_lnn_func.h"
-#include "inner_api/wifi_msg.h"
 #include "lnn_distributed_net_ledger.h"
 #include "lnn_feature_capability.h"
 #include "lnn_lane_vap_info_struct.h"
@@ -354,12 +352,10 @@ std::vector<uint8_t> WifiDirectUtils::MacStringToArray(const std::string &macStr
         try {
             result = std::stoul(token, &idx, BASE_HEX);
         } catch (const std::out_of_range& e) {
-            // invalid mac address, which is printed for fault locating.
-            CONN_LOGE(CONN_NEARBY, "out of range, error mac string=%{public}s", macString.c_str());
+            CONN_LOGE(CONN_NEARBY, "out of range");
             return std::vector<uint8_t>();
         } catch (const std::invalid_argument& e) {
-            // invalid mac address, which is printed for fault locating.
-            CONN_LOGE(CONN_NEARBY, "invalid argument, error mac string=%{public}s", macString.c_str());
+            CONN_LOGE(CONN_NEARBY, "invalid argument");
             return std::vector<uint8_t>();
         }
         array.push_back(static_cast<uint8_t>(result));
@@ -678,13 +674,11 @@ bool WifiDirectUtils::CheckLinkAtDfsChannelConflict(const std::string &remoteDev
 {
     bool dfsLinkIsExist = false;
     auto remoteNetworkId = UuidToNetworkId(remoteDeviceId);
-
     int32_t osType = OH_OS_TYPE;
     if (DBinderSoftbusServer::GetInstance().LnnGetOsTypeByNetworkId(remoteNetworkId.c_str(), &osType) != SOFTBUS_OK) {
         CONN_LOGE(CONN_WIFI_DIRECT, "get os type failed");
         return false;
     }
-
     LinkManager::GetInstance().ForEach([&dfsLinkIsExist, osType, type](InnerLink &link) {
         if (link.GetLinkType() == type && osType != OH_OS_TYPE && IsDfsChannel(link.GetFrequency())) {
             dfsLinkIsExist = true;
@@ -770,6 +764,21 @@ int32_t WifiDirectUtils::GetRemoteScreenStatus(const char *remoteNetworkId)
     return screenStatus;
 }
 
+int WifiDirectUtils::GetChload()
+{
+    auto wifiLinkedInfo = std::make_shared<Wifi::WifiLinkedInfo>();
+    auto wifiDevicePtr = Wifi::WifiDevice::GetInstance(WIFI_DEVICE_ABILITY_ID);
+    CONN_CHECK_AND_RETURN_RET_LOGE(wifiDevicePtr != nullptr, INVALID_CHLOAD, CONN_WIFI_DIRECT, "wifiDevicePtr is null");
+
+    auto ret = wifiDevicePtr->GetLinkedInfo(*wifiLinkedInfo);
+    CONN_CHECK_AND_RETURN_RET_LOGE(
+        ret == Wifi::WIFI_OPT_SUCCESS, ret, CONN_WIFI_DIRECT, "get link info fail,err=%{public}d", ret);
+
+    auto chload = wifiLinkedInfo->chload;
+    CONN_LOGI(CONN_WIFI_DIRECT, "current sta chload=%{public}d", chload);
+    return chload;
+}
+
 bool WifiDirectUtils::IsDeviceId(const std::string &remoteId)
 {
     return remoteId.length() == UUID_BUF_LEN - 1;
@@ -779,7 +788,9 @@ std::string WifiDirectUtils::RemoteDeviceIdToMac(const std::string &remoteDevice
 {
     auto remoteNetworkId = UuidToNetworkId(remoteDeviceId);
     char remoteMac[MAC_ADDR_STR_LEN] {};
-    auto ret = DBinderSoftbusServer::GetInstance().LnnGetRemoteStrInfo(remoteNetworkId.c_str(), STRING_KEY_WIFIDIRECT_ADDR, remoteMac, MAC_ADDR_STR_LEN);
+    auto ret = DBinderSoftbusServer::GetInstance().LnnGetRemoteStrInfo(remoteNetworkId.c_str(),
+                                                                       STRING_KEY_WIFIDIRECT_ADDR,
+                                                                       remoteMac, MAC_ADDR_STR_LEN);
     CONN_CHECK_AND_RETURN_RET_LOGE(ret == SOFTBUS_OK, "", CONN_WIFI_DIRECT,
         "get wifi direct addr failed, ret=%{public}d", ret);
     CONN_LOGI(CONN_WIFI_DIRECT, "remoteMac=%{public}s", WifiDirectAnonymizeMac(remoteMac).c_str());
@@ -796,7 +807,9 @@ std::string WifiDirectUtils::RemoteMacToDeviceId(const std::string &remoteMac)
 
     for (int32_t i = 0; i < num; i++) {
         char wifiDirectAddr[MAC_ADDR_STR_LEN] {};
-        ret = DBinderSoftbusServer::GetInstance().LnnGetRemoteStrInfo(basicInfo[i].networkId, STRING_KEY_WIFIDIRECT_ADDR, wifiDirectAddr, MAC_ADDR_STR_LEN);
+        ret = DBinderSoftbusServer::GetInstance().LnnGetRemoteStrInfo(basicInfo[i].networkId,
+                                                                      STRING_KEY_WIFIDIRECT_ADDR,
+                                                                      wifiDirectAddr, MAC_ADDR_STR_LEN);
         if (ret != SOFTBUS_OK) {
             CONN_LOGE(CONN_WIFI_DIRECT, "get wifi direct addr failed, remoteNetworkId=%{public}s, ret=%{public}d",
                 WifiDirectAnonymizeDeviceId(basicInfo[i].networkId).c_str(), ret);
@@ -820,27 +833,5 @@ int WifiDirectUtils::GetLocalScreenStatus()
     CONN_CHECK_AND_RETURN_RET_LOGE(ret == SOFTBUS_OK, ret, CONN_WIFI_DIRECT,
         "get screen state failed, ret=%{public}d", ret);
     return result ? WIFI_DIRECT_SCREEN_ON : WIFI_DIRECT_SCREEN_OFF;
-}
-
-int WifiDirectUtils::GetChload()
-{
-    auto wifiLinkedInfo = std::make_shared<Wifi::WifiLinkedInfo>();
-    auto wifiDevicePtr = Wifi::WifiDevice::GetInstance(WIFI_DEVICE_ABILITY_ID);
-    CONN_CHECK_AND_RETURN_RET_LOGE(wifiDevicePtr != nullptr, INVALID_CHLOAD, CONN_WIFI_DIRECT, "wifiDevicePtr is null");
-
-    auto ret = wifiDevicePtr->GetLinkedInfo(*wifiLinkedInfo);
-    CONN_CHECK_AND_RETURN_RET_LOGE(
-        ret == Wifi::WIFI_OPT_SUCCESS, ret, CONN_WIFI_DIRECT, "get link info fail,err=%{public}d", ret);
-
-    auto chload = wifiLinkedInfo->chload;
-    CONN_LOGI(CONN_WIFI_DIRECT, "current sta chload=%{public}d", chload);
-    return chload;
-}
-
-std::string WifiDirectUtils::RemoveSubstring(const std::string &str, const std::string &substr)
-{
-    std::string escapedSubstr = std::regex_replace(substr, std::regex(R"([\.\^\$\|\(\)\[\]\{\}\*\+\?\\])"), R"(\$&)");
-    std::regex pattern(escapedSubstr);
-    return std::regex_replace(str, pattern, "");
 }
 } // namespace OHOS::SoftBus

@@ -191,11 +191,11 @@ int32_t SetIpTos(int fd, uint32_t tos)
     return SOFTBUS_OK;
 }
 
-static int32_t SetIpv6Tos(int fd, uint32_t tos)
+static void SetIpv6Tos(int fd, uint32_t tos)
 {
     int32_t ret = SoftBusSocketSetOpt(fd, SOFTBUS_IPPROTO_IPV6, SOFTBUS_IPV6_TCLASS, &tos, sizeof(tos));
-    CONN_CHECK_AND_RETURN_RET_LOGE(ret == SOFTBUS_ADAPTER_OK, ret, CONN_COMMON, "set tos failed, fd=%{public}d", fd);
-    return SOFTBUS_OK;
+    CONN_CHECK_AND_RETURN_LOGE(
+        ret == SOFTBUS_ADAPTER_OK, CONN_COMMON, "set tos failed, ret=%{public}d, fd=%{public}d", ret, fd);
 }
 
 static int32_t OpenTcpServerSocket(const LocalListenerInfo *option)
@@ -313,8 +313,9 @@ static int32_t OpenTcpClientSocket(const ConnectOption *option, const char *myIp
     // tcp user timeout on the Client
     if (option->socketOption.moduleId >= AUTH_P2P && option->socketOption.moduleId <= AUTH_ENHANCED_P2P_END) {
         (void)ConnSetTcpUserTimeOut(fd, SOFTBUS_CONN_TCP_USER_TIME);
-        ret = SetIpv6Tos(fd, IPV6_MESSAGE_TOS);
-        CONN_LOGE(CONN_WIFI_DIRECT, "set ip tos ret=%{public}d, fd=%{public}d", ret, fd);
+        if (domain == SOFTBUS_AF_INET6) {
+            SetIpv6Tos(fd, IPV6_MESSAGE_TOS);
+        }
     }
     ret = BindTcpClientAddr(domain, fd, myIp);
     if (ret != SOFTBUS_OK) {

@@ -738,7 +738,7 @@ static int32_t CheckBrServerStateAndOpenSppServer(int32_t *serverId, uint32_t tr
         g_sppDriver->CloseSppServer(serverFd);
         return SOFTBUS_LOCK_ERR;
     }
-    if (!g_serverState.available) {
+    if (!g_serverState.available || traceId != g_serverState.traceId) {
         CONN_LOGW(CONN_BR, "server closed during create socket period, exit listen task. traceId=%{public}u",
             traceId);
         g_sppDriver->CloseSppServer(serverFd);

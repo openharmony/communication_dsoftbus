@@ -16,7 +16,7 @@
 #ifndef DISC_BLE_DISPATCHER_STRUCT_H
 #define DISC_BLE_DISPATCHER_STRUCT_H
 
-#include "disc_manager.h"
+#include "disc_manager_struct.h"
 
 #ifdef __cplusplus
 #if __cplusplus

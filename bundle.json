@@ -172,7 +172,7 @@
               "adapter/softbus_broadcast_utils_struct.h",
               "adapter/softbus_broadcast_type_struct.h",
               "adapter/softbus_rsa_encrypt_struct.h",
-              "adapter/wrapper_br_interface_struct.h",
+              "adapter/softbus_wrapper_br_interface_struct.h",
               "../../adapter/common/include/softbus_adapter_json.h",
               "authentication/auth_common_struct.h",
               "authentication/auth_connection_struct.h",
