@@ -1,10 +1,10 @@
 /*
- * Copyright (c) 2024 Huawei Device Co., Ltd.
+ * Copyright (c) 2024-2025 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
- *     http://www.apache.org/licenses/LICENSE-2.0
+ *    http://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
@@ -32,6 +32,8 @@ public:
     static OhosAccountKits &GetInstance();
 
     virtual std::pair<bool, OHOS::AccountSA::OhosAccountInfo> QueryOhosAccountInfo();
+    virtual std::pair<bool, OHOS::AccountSA::OhosAccountInfo> QueryOsAccountDistributedInfo(std::int32_t id);
+    virtual int32_t  GetOsAccountDistributedInfo(int32_t localId, OHOS::AccountSA::OhosAccountInfo &accountInfo);
     virtual bool IsSameAccountGroupDevice(void);
 };
 
@@ -40,6 +42,8 @@ public:
     OhosAccountKitsMock();
     ~OhosAccountKitsMock() override;
     MOCK_METHOD0(QueryOhosAccountInfo, std::pair<bool, OHOS::AccountSA::OhosAccountInfo>());
+    MOCK_METHOD1(QueryOsAccountDistributedInfo, std::pair<bool, OHOS::AccountSA::OhosAccountInfo>(std::int32_t));
+    MOCK_METHOD2(GetOsAccountDistributedInfo, int32_t(int32_t localId, OHOS::AccountSA::OhosAccountInfo &accountInfo));
     MOCK_METHOD0(IsSameAccountGroupDevice, bool(void));
 
     static OhosAccountKitsMock *GetMock()
