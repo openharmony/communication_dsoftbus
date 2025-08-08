@@ -1018,7 +1018,7 @@ static int32_t PackEncryptedMessage(ProxyMessageHead *msg, AuthHandle authHandle
 int32_t TransPagingPackMessage(PagingProxyMessage *msg, ProxyDataInfo *dataInfo, ProxyChannelInfo *chan, bool needHash)
 {
     if (msg == NULL || dataInfo == NULL || chan == NULL) {
-        TRANS_LOGE(TRANS_CTRL, "invalid param channelId=%{public}d", msg->msgHead.channelId);
+        TRANS_LOGE(TRANS_CTRL, "invalid param");
         return SOFTBUS_INVALID_PARAM;
     }
     uint32_t headLen = needHash ? PAGING_CHANNEL_HANDSHAKE_HEAD_LEN : PAGING_CHANNEL_HEAD_LEN;

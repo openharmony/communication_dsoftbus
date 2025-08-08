@@ -639,7 +639,7 @@ static UdpChannelMgrCb g_udpChannelCb = {
 static int32_t ClientCheckFuncPointer(void *func)
 {
     if (func == NULL) {
-        TRANS_LOGE(TRANS_INIT, "enhance func not register.");
+        TRANS_LOGE(TRANS_INIT, "enhance func not register");
         return SOFTBUS_FUNC_NOT_REGISTER;
     }
     return SOFTBUS_OK;
@@ -899,7 +899,7 @@ int32_t TransSetUdpChannelRenameHook(int32_t channelId, OnRenameFileCallback onR
         TRANS_LOGE(TRANS_SDK, "onRenameFile is null");
         return SOFTBUS_INVALID_PARAM;
     }
-    
+
     if (g_udpChannelMgr == NULL) {
         TRANS_LOGE(TRANS_SDK, "udp channel manager hasn't init.");
         return SOFTBUS_NO_INIT;

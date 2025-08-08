@@ -259,19 +259,11 @@ int VtpStreamSocket::HandleFillpFrameEvt(int fd, const FtEventCbkInfo *info)
     return SOFTBUS_OK;
 }
 
-static int32_t FirstClientCheckFuncPointer(
-    int (*func)(int fd, OnFrameEvt cb, const FtEventCbkInfo *info))
-{
-    if (func == NULL) {
-        return SOFTBUS_FUNC_NOT_REGISTER;
-    }
-    return SOFTBUS_OK;
-}
-
 static int HandleVtpFrameEvtPacked(int fd, OnFrameEvt cb, const FtEventCbkInfo *info)
 {
     ClientEnhanceFuncList *pfnClientEnhanceFuncList = ClientEnhanceFuncListGet();
-    if (FirstClientCheckFuncPointer(pfnClientEnhanceFuncList->handleVtpFrameEvt) != SOFTBUS_OK) {
+    if (pfnClientEnhanceFuncList->handleVtpFrameEvt == nullptr) {
+        TRANS_LOGE(TRANS_STREAM, "func handleVtpFrameEvt is not registered");
         return SOFTBUS_FUNC_NOT_SUPPORT;
     }
     return pfnClientEnhanceFuncList->handleVtpFrameEvt(fd, cb, info);
@@ -320,18 +312,11 @@ void VtpStreamSocket::FillSupportDet(int fd, const FtEventCbkInfo *info, QosTv *
 }
 #endif
 
-static int32_t SecondClientCheckFuncPointer(bool (*func)(const FtEventCbkInfo *info))
-{
-    if (func == NULL) {
-        return SOFTBUS_FUNC_NOT_REGISTER;
-    }
-    return SOFTBUS_OK;
-}
-
 static bool IsVtpFrameSentEvtPacked(const FtEventCbkInfo *info)
 {
     ClientEnhanceFuncList *pfnClientEnhanceFuncList = ClientEnhanceFuncListGet();
-    if (SecondClientCheckFuncPointer(pfnClientEnhanceFuncList->isVtpFrameSentEvt) != SOFTBUS_OK) {
+    if (pfnClientEnhanceFuncList->isVtpFrameSentEvt == nullptr) {
+        TRANS_LOGE(TRANS_STREAM, "Func isVtpFrameSentEvt is not registered");
         return false;
     }
     return pfnClientEnhanceFuncList->isVtpFrameSentEvt(info);
@@ -1639,19 +1624,11 @@ ssize_t VtpStreamSocket::Decrypt(const void *in, ssize_t inLen, void *out, ssize
     return outLen;
 }
 
-static int32_t ThirdClientCheckFuncPointer(
-    int32_t (*func)(int fd, OnFrameEvt *cb, const void *para))
-{
-    if (func == NULL) {
-        return SOFTBUS_FUNC_NOT_REGISTER;
-    }
-    return SOFTBUS_OK;
-}
-
 static int32_t VtpSetSocketMultiLayerPacked(int fd, OnFrameEvt *cb, const void *para)
 {
     ClientEnhanceFuncList *pfnClientEnhanceFuncList = ClientEnhanceFuncListGet();
-    if (ThirdClientCheckFuncPointer(pfnClientEnhanceFuncList->vtpSetSocketMultiLayer) != SOFTBUS_OK) {
+    if (pfnClientEnhanceFuncList->vtpSetSocketMultiLayer == nullptr) {
+        TRANS_LOGE(TRANS_STREAM, "Func vtpSetSocketMultiLayer is not registered");
         return SOFTBUS_FUNC_NOT_SUPPORT;
     }
     return pfnClientEnhanceFuncList->vtpSetSocketMultiLayer(fd, cb, para);
