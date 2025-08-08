@@ -66,6 +66,6 @@ typedef struct {
 
 #ifdef __cplusplus
 }
-#endif /* __cplusplus */
+#endif
 
 #endif /* DISC_INTERFACE_STRUCT_H */
