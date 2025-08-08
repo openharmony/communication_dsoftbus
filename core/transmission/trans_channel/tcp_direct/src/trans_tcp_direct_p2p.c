@@ -328,6 +328,10 @@ static int32_t CreateP2pListenerList(void)
 
 ListenerModule GetModuleByHmlIp(const char *ip)
 {
+    if (ip == NULL) {
+        TRANS_LOGE(TRANS_CTRL, "ip is null.");
+        return UNUSE_BUTT;
+    }
     HmlListenerInfo *item = NULL;
     HmlListenerInfo *nextItem = NULL;
     if (SoftBusMutexLock(&g_hmlListenerList->lock) != SOFTBUS_OK) {
