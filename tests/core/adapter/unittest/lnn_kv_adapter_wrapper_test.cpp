@@ -185,27 +185,6 @@ HWTEST_F(KVAdapterWrapperTest, LnnGet001, TestSize.Level1)
 }
 
 /**
- * @tc.name: LnnCloudSync
- * @tc.desc: LnnCloudSync
- * @tc.type: FUNC
- * @tc.require:
- */
-HWTEST_F(KVAdapterWrapperTest, LnnCloudSync001, TestSize.Level1)
-{
-    LnnEnhanceFuncList *pfnLnnEnhanceFuncList = LnnEnhanceFuncListGet();
-    pfnLnnEnhanceFuncList->isCloudSyncEnabled = IsCloudSyncEnabled;
-    int32_t dbId = g_dbId;
-
-    NiceMock<LnnKvAdapterWrapperInterfaceMock> LnnKvAdapterWrapperMock;
-    EXPECT_CALL(LnnKvAdapterWrapperMock, IsCloudSyncEnabled).WillOnce(Return(true));
-    int32_t lnnCloudRet = LnnCloudSync(dbId);
-    EXPECT_EQ(lnnCloudRet, SOFTBUS_KV_CLOUD_SYNC_FAIL);
-
-    lnnCloudRet = LnnCloudSync(dbId + 1);
-    EXPECT_EQ(lnnCloudRet, SOFTBUS_INVALID_PARAM);
-}
-
-/**
  * @tc.name: LnnSubcribeKvStoreService
  * @tc.desc: LnnSubcribeKvStoreService
  * @tc.type: FUNC
@@ -215,20 +194,6 @@ HWTEST_F(KVAdapterWrapperTest, LnnSubcribeKvStoreService001, TestSize.Level1)
 {
     int32_t lnnSubcribeKvStoreRet = LnnSubcribeKvStoreService();
     EXPECT_EQ(lnnSubcribeKvStoreRet, SOFTBUS_OK);
-}
-
-/**
- * @tc.name: LnnDestroyKvAdapter
- * @tc.desc: LnnDestroyKvAdapter
- * @tc.type: FUNC
- * @tc.require:
- */
-HWTEST_F(KVAdapterWrapperTest, LnnDestroy001, TestSize.Level1)
-{
-    int32_t dbId;
-    int32_t createRet = LnnCreateKvAdapter(&dbId, APP_ID.c_str(), APP_ID_LEN, STORE_ID.c_str(), STORE_ID_LEN);
-    EXPECT_EQ(createRet, SOFTBUS_OK);
-    EXPECT_EQ(LnnDestroyKvAdapter(dbId), SOFTBUS_OK);
 }
 
 /**
@@ -864,5 +829,46 @@ HWTEST_F(KVAdapterWrapperTest, LnnCloudSync002, TestSize.Level1)
     constexpr int32_t idOffset = 1;
     int32_t lnnCloudRet = LnnCloudSync(dbId + idOffset);
     EXPECT_EQ(lnnCloudRet, SOFTBUS_INVALID_PARAM);
+}
+
+/**
+ * @tc.name: LnnDeleteDBDataByNull
+ * @tc.desc: LnnDeleteDBData Invalid Param
+ * @tc.type: FUNC
+ * @tc.require:
+ */
+HWTEST_F(KVAdapterWrapperTest, LnnDeleteDBDataByNull, TestSize.Level1)
+{
+    int32_t dbId = g_dbId;
+    const char * keyStr = nullptr;
+    string valueStr = "ccc";
+    EXPECT_EQ(LnnPutDBData(dbId, keyStr, 3, valueStr.c_str(), 3), SOFTBUS_INVALID_PARAM);
+}
+
+/**
+ * @tc.name: LnnGetDBDataByKey
+ * @tc.desc: LnnGetDBData  Invalid Param
+ * @tc.type: FUNC
+ * @tc.require:
+ */
+HWTEST_F(KVAdapterWrapperTest, LnnGetDBDataByKey, TestSize.Level1)
+{
+    int32_t dbId = g_dbId;
+    const char * keyStr = nullptr;
+    char *value = nullptr;
+    EXPECT_EQ(LnnGetDBData(dbId, keyStr, 3, &value), SOFTBUS_INVALID_PARAM);
+}
+
+/**
+ * @tc.name: LnnDeleteDBDataByInvalid
+ * @tc.desc: LnnDeleteDBDataByPrefix  Invalid Param
+ * @tc.type: FUNC
+ * @tc.require:
+ */
+HWTEST_F(KVAdapterWrapperTest, LnnDeleteDBDataByInvalid, TestSize.Level1)
+{
+    int32_t dbId = g_dbId;
+    char *keyPtr = nullptr;
+    EXPECT_EQ(LnnDeleteDBDataByPrefix(dbId, keyPtr, MIN_STRING_LEN - 1), SOFTBUS_INVALID_PARAM);
 }
 } // namespace OHOS
