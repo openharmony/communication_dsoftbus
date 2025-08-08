@@ -957,15 +957,19 @@ int CreateSocket(const char *pkgName, const char *sessionName)
     return SOFTBUS_OK;
 }
 
-static SessionAttribute *CreateSessionAttributeBySocketInfoTrans(const SocketInfo *info, bool *isEncyptedRawStream)
+static SessionAttribute *CreateSessionAttributeBySocketInfoTrans(const SocketInfo *info, bool *isEncryptedRawStream)
 {
+    if (info == NULL ||isEncryptedRawStream == NULL) {
+        TRANS_LOGE(TRANS_SDK, "Invalid param");
+        return NULL;
+    }
     SessionAttribute *tmpAttr = (SessionAttribute *)SoftBusCalloc(sizeof(SessionAttribute));
     if (tmpAttr == NULL) {
         TRANS_LOGE(TRANS_SDK, "SoftBusCalloc SessionAttribute failed");
         return NULL;
     }
 
-    *isEncyptedRawStream = false;
+    *isEncryptedRawStream = false;
     tmpAttr->fastTransData = NULL;
     tmpAttr->fastTransDataSize = 0;
     switch (info->dataType) {
@@ -982,7 +986,7 @@ static SessionAttribute *CreateSessionAttributeBySocketInfoTrans(const SocketInf
         case DATA_TYPE_RAW_STREAM_ENCRYPED:
             tmpAttr->dataType = TYPE_STREAM;
             tmpAttr->attr.streamAttr.streamType = RAW_STREAM;
-            *isEncyptedRawStream = (info->dataType == DATA_TYPE_RAW_STREAM_ENCRYPED);
+            *isEncryptedRawStream = (info->dataType == DATA_TYPE_RAW_STREAM_ENCRYPED);
             break;
         case DATA_TYPE_VIDEO_STREAM:
             tmpAttr->dataType = TYPE_STREAM;
@@ -1010,8 +1014,8 @@ int32_t ClientAddSocket(const SocketInfo *info, int32_t *sessionId)
         return SOFTBUS_INVALID_PARAM;
     }
 
-    bool isEncyptedRawStream = false;
-    SessionAttribute *tmpAttr = CreateSessionAttributeBySocketInfoTrans(info, &isEncyptedRawStream);
+    bool isEncryptedRawStream = false;
+    SessionAttribute *tmpAttr = CreateSessionAttributeBySocketInfoTrans(info, &isEncryptedRawStream);
     if (tmpAttr == NULL) {
         TRANS_LOGE(TRANS_SDK, "Create SessionAttribute failed");
         return SOFTBUS_MALLOC_ERR;
@@ -1027,7 +1031,7 @@ int32_t ClientAddSocket(const SocketInfo *info, int32_t *sessionId)
     };
 
     SessionEnableStatus isEnabled = ENABLE_STATUS_INIT;
-    int32_t ret = ClientAddSocketSession(&param, isEncyptedRawStream, sessionId, &isEnabled);
+    int32_t ret = ClientAddSocketSession(&param, isEncryptedRawStream, sessionId, &isEnabled);
     if (ret != SOFTBUS_OK) {
         SoftBusFree(tmpAttr);
         if (ret == SOFTBUS_TRANS_SESSION_REPEATED) {

@@ -64,6 +64,10 @@ static void NotifySendResult(int32_t sessionId, DFileMsgType msgType,
 
 static void FillFileStatusList(const DFileMsg *msgData, FileEvent *event)
 {
+    if (msgData == NULL || event == NULL) {
+        TRANS_LOGI(TRANS_SDK, "invalid param.");
+        return;
+    }
     int32_t fileNum = msgData->clearPolicyFileList.fileNum;
     if (fileNum <= 0) {
         TRANS_LOGI(TRANS_SDK, "invalid fileNum.");

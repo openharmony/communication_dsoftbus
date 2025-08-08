@@ -56,7 +56,7 @@ static _Atomic int32_t g_proxyPktHeadSeq = 2048;
 
 int32_t TransParseMessageHeadType(char *data, int32_t len, ProxyMessage *msg)
 {
-    if (data == NULL || msg == NULL) {
+    if (data == NULL || msg == NULL || len <= sizeof(uint8_t)) {
         TRANS_LOGE(TRANS_CTRL, "invalid param");
         return SOFTBUS_INVALID_PARAM;
     }
@@ -1018,7 +1018,7 @@ static int32_t PackEncryptedMessage(ProxyMessageHead *msg, AuthHandle authHandle
 int32_t TransPagingPackMessage(PagingProxyMessage *msg, ProxyDataInfo *dataInfo, ProxyChannelInfo *chan, bool needHash)
 {
     if (msg == NULL || dataInfo == NULL || chan == NULL) {
-        TRANS_LOGE(TRANS_CTRL, "invalid param channelId=%{public}d", msg->msgHead.channelId);
+        TRANS_LOGE(TRANS_CTRL, "invalid param");
         return SOFTBUS_INVALID_PARAM;
     }
     uint32_t headLen = needHash ? PAGING_CHANNEL_HANDSHAKE_HEAD_LEN : PAGING_CHANNEL_HEAD_LEN;
@@ -1976,7 +1976,7 @@ char *TransProxyPackFastData(const AppInfo *appInfo, uint32_t *outLen)
 
 int32_t TransProxyParseD2DData(const char *data, int32_t len)
 {
-    if (data == NULL) {
+    if (data == NULL || len <= PROXY_CHANNEL_D2D_HEAD_LEN) {
         TRANS_LOGE(TRANS_CTRL, "invalid param");
         return SOFTBUS_INVALID_PARAM;
     }

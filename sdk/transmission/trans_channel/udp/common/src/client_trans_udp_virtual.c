@@ -28,8 +28,8 @@ void ClientTransUdpMgrDeinit(void)
     return;
 }
 
-int32_t TransOnUdpChannelOpened(const char *sessionName, const ChannelInfo *channel, int32_t *udpPort,
-    SocketAccessInfo *accessInfo)
+int32_t TransOnUdpChannelOpened(
+    const char *sessionName, const ChannelInfo *channel, int32_t *udpPort, SocketAccessInfo *accessInfo)
 {
     (void)sessionName;
     (void)channel;

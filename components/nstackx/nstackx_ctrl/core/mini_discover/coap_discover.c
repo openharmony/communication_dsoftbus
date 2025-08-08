@@ -319,7 +319,7 @@ static void CoapServiceDiscoverTimerHandle(void *argument)
         DFINDER_LOGE(TAG, "failed to post service discover request");
         goto L_ERR_SERVICE_DISCOVER;
     }
-    DFINDER_LOGI(TAG, "the %u times for device discover.", g_discoverCount + 1);
+    DFINDER_LOGD(TAG, "the %u times for device discover.", g_discoverCount + 1);
 
     /* Restart timer */
     discoverInterval = GetDiscoverInterval(g_discoverCount);

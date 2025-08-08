@@ -38,7 +38,7 @@ int32_t TransOnChannelMsgReceived(int32_t channelId, int32_t channelType,
 int32_t TransOnChannelQosEvent(int32_t channelId, int32_t channelType, int32_t eventId,
     int32_t tvCount, const QosTv *tvList);
 
-int32_t TransSetChannelInfo(const char* sessionName, int32_t sessionId, int32_t channleId, int32_t channelType);
+int32_t TransSetChannelInfo(const char* sessionName, int32_t sessionId, int32_t channelId, int32_t channelType);
 int32_t TransOnChannelBind(int32_t channelId, int32_t channelType);
 int32_t TransOnChannelOnQos(int32_t channelId, int32_t channelType, QoSEvent event, const QosTV *qos, uint32_t count);
 int32_t TransOnCheckCollabRelation(

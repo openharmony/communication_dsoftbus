@@ -20,7 +20,7 @@
 #include "softbus_adapter_bt_common.h"
 #include "softbus_adapter_crypto.h"
 #include "softbus_adapter_mem.h"
-#include "softbus_adapter_ble_conflict.h"
+#include "softbus_adapter_ble_conflict_struct.h"
 #include "softbus_conn_ble_connection.h"
 #include "softbus_conn_ble_manager.h"
 #include "softbus_conn_ble_snapshot.h"
