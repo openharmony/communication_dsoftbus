@@ -125,6 +125,11 @@ void AuthNegotiateChannel::OnWaitDetectResponseTimeout()
     CONN_LOGI(CONN_WIFI_DIRECT, "timeout");
     {
         std::lock_guard lock(channelLock_);
+        auto it = authIdToChannelMap_.find(handle_.authId);
+        if (it == authIdToChannelMap_.end()) {
+            CONN_LOGE(CONN_WIFI_DIRECT, "not find channel by authId=%{public}" PRId64, handle_.authId);
+            return;
+        }
         authIdToChannelMap_.erase(handle_.authId);
         if (authIdToChannelMap_.empty()) {
             CONN_LOGI(CONN_WIFI_DIRECT, "shutdown timer");
