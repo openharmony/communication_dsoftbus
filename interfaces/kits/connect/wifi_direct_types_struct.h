@@ -93,6 +93,12 @@ typedef enum {
 } HmlCapabilityCode;
 
 typedef enum {
+    CONN_VIRTUAL_LINK_CAP_UNKNOWN = -1,
+    CONN_VIRTUAL_LINK_SUPPORT = 0,
+    CONN_VIRTUAL_LINK_NOT_SUPPORT = 1,
+} VirtualLinkCapabilityCode;
+
+typedef enum {
     CONN_VSP_CAP_UNKNOWN = -1,
     CONN_VSP_SUPPORT = 0,
     CONN_VSP_NOT_SUPPORT = 1,
