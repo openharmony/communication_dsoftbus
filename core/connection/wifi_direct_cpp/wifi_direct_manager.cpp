@@ -586,6 +586,14 @@ static HmlCapabilityCode GetHmlCapabilityCode(void)
     return entity.GetHmlCapabilityCode();
 }
 
+static VirtualLinkCapabilityCode GetVirtualLinkCapabilityCode(void)
+{
+    CONN_LOGI(CONN_WIFI_DIRECT, "enter");
+    OHOS::SoftBus::InnerLink::LinkType type = OHOS::SoftBus::InnerLink::LinkType::HML;
+    auto &entity = OHOS::SoftBus::EntityFactory::GetInstance().GetEntity(type);
+    return entity.GetVirtualLinkCapabilityCode();
+}
+
 static VspCapabilityCode GetVspCapabilityCode(void)
 {
     CONN_LOGI(CONN_WIFI_DIRECT, "enter");
@@ -762,6 +770,7 @@ static struct WifiDirectManager g_manager = {
     .getStationFrequency = GetStationFrequency,
     .isHmlConnected = IsHmlConnected,
     .getHmlCapabilityCode = GetHmlCapabilityCode,
+    .getVirtualLinkCapabilityCode = GetVirtualLinkCapabilityCode,
     .getVspCapabilityCode = GetVspCapabilityCode,
 
     .init = Init,
