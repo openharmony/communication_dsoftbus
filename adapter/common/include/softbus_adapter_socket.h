@@ -98,7 +98,7 @@ extern "C" {
 /* linux support 1024, liteos support 640 */
 #define SOFTBUS_FD_SETSIZE SOFTBUS_FD_SETSIZE_
 
-#define IPV6_MESSAGE_TOS 0x28
+#define IPV6_MESSAGE_TOS 0xA8
 typedef SoftBusSysTime SoftBusSockTimeOut;
 /* netinet/in.h */
 typedef struct {
