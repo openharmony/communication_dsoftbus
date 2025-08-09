@@ -598,11 +598,32 @@ static int32_t TransProxyFillPagingLocalInfo(ProxyChannelInfo *chan)
     return SOFTBUS_OK;
 }
 
+static bool TransProxyCheckAccount(const char *hashStr, const uint8_t *shortHash)
+{
+    if (hashStr == NULL || shortHash == NULL) {
+        return false;
+    }
+    uint8_t hash[SHA_256_HASH_LEN] = { 0 };
+    if (ConvertHexStringToBytes((unsigned char *)hash, SHA_256_HASH_LEN, hashStr, strlen(hashStr)) != SOFTBUS_OK) {
+        TRANS_LOGE(TRANS_CTRL, "account hash str to bytes failed");
+        return false;
+    }
+
+    for (size_t i = 0; i < D2D_SHORT_ACCOUNT_HASH_LEN; i++) {
+        if (shortHash[i] != hash[i]) {
+            return false;
+        }
+    }
+    return true;
+}
+
 static int32_t TransProxyFillPagingChannelInfo(const ProxyMessage *msg, ProxyChannelInfo *chan,
     uint8_t *accountHash, uint8_t *udidHash)
 {
     int32_t ret = TransPagingUnPackHandshakeMsg(msg, &chan->appInfo);
     TRANS_CHECK_AND_RETURN_RET_LOGE(ret == SOFTBUS_OK, ret, TRANS_CTRL, "Paging unpack failed.");
+    TRANS_CHECK_AND_RETURN_RET_LOGE(TransProxyCheckAccount(chan->appInfo.peerData.callerAccountId, accountHash),
+        SOFTBUS_INVALID_PARAM, TRANS_CTRL, "account is invalid.");
     ret = SoftBusGenerateSessionKey(chan->appInfo.pagingSessionkey, SHORT_SESSION_KEY_LENGTH);
     TRANS_CHECK_AND_RETURN_RET_LOGE(ret == SOFTBUS_OK, ret, TRANS_CTRL, "Generate SessionKey failed.");
     ret = SoftBusGenerateRandomArray((unsigned char *)chan->appInfo.pagingNonce, PAGING_NONCE_LEN);
