@@ -84,7 +84,7 @@ int32_t ConnBleEnqueueNonBlock(const void *msg)
     SendQueueNode *queueNode = (SendQueueNode *)msg;
     int32_t priority = GetPriority(queueNode->flag);
     if (SoftBusMutexLock(&g_bleQueueLock) != EOK) {
-        CONN_LOGE(CONN_BLE, "Lock failed");
+        CONN_LOGE(CONN_BLE, "Lock fail");
         return SOFTBUS_LOCK_ERR;
     }
     bool isListEmpty = true;
@@ -109,7 +109,7 @@ int32_t ConnBleEnqueueNonBlock(const void *msg)
     if (lockFreeQueue == NULL) {
         ConnectionQueue *newQueue = CreateBleQueue(queueNode->pid);
         if (newQueue == NULL) {
-            CONN_LOGE(CONN_BLE, "ConnBleEnqueueNonBlock CreateBleQueue failed");
+            CONN_LOGE(CONN_BLE, "ConnBleEnqueueNonBlock CreateBleQueue fail");
             goto END;
         }
         ListTailInsert(&g_bleQueueList, &(newQueue->node));
@@ -138,7 +138,7 @@ int32_t ConnBleDequeueBlock(void **msg)
     ConnectionQueue *next = NULL;
     SoftBusSysTime waitTime = {0};
     int32_t ret = SoftBusGetTime(&waitTime);
-    CONN_CHECK_AND_RETURN_RET_LOGE(ret == SOFTBUS_OK, SOFTBUS_INVALID_PARAM, CONN_BLE, "softbus get time failed");
+    CONN_CHECK_AND_RETURN_RET_LOGE(ret == SOFTBUS_OK, SOFTBUS_INVALID_PARAM, CONN_BLE, "softbus get time fail");
     waitTime.sec += BLE_WAIT_TIME_SEC;
 
     CONN_CHECK_AND_RETURN_RET_LOGE(msg != NULL, SOFTBUS_INVALID_PARAM, CONN_BLE, "msg is null");
@@ -189,11 +189,11 @@ int32_t ConnBleDequeueBlock(void **msg)
 int32_t ConnBleInitSendQueue(void)
 {
     if (SoftBusMutexInit(&g_bleQueueLock, NULL) != 0) {
-        CONN_LOGE(CONN_INIT, "Mutex Init failed");
+        CONN_LOGE(CONN_INIT, "Mutex Init fail");
         return SOFTBUS_NO_INIT;
     }
     if (SoftBusCondInit(&g_sendWaitCond) != SOFTBUS_OK) {
-        CONN_LOGE(CONN_INIT, "cond Init failed");
+        CONN_LOGE(CONN_INIT, "cond Init fail");
         (void)SoftBusMutexDestroy(&g_bleQueueLock);
         return SOFTBUS_NO_INIT;
     }
@@ -204,7 +204,7 @@ int32_t ConnBleInitSendQueue(void)
     }
     g_innerQueue = CreateBleQueue(0);
     if (g_innerQueue == NULL) {
-        CONN_LOGE(CONN_INIT, "BleQueueInit CreateBleQueue(0) failed");
+        CONN_LOGE(CONN_INIT, "BleQueueInit CreateBleQueue(0) fail");
         (void)SoftBusMutexDestroy(&g_bleQueueLock);
         (void)SoftBusCondDestroy(&g_sendWaitCond);
         (void)SoftBusCondDestroy(&g_sendCond);
