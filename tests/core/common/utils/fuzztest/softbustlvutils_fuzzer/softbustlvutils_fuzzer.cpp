@@ -39,6 +39,21 @@ static void FuzzSetTlvBinary(uint8_t tSize, uint8_t lSize, const uint8_t *data, 
     DestroyTlvObject(obj);
 }
 
+static void FuzzAddTlvMember(uint8_t tSize, uint8_t lSize, const uint8_t *data, uint32_t dataSize)
+{
+    TlvObject *obj = CreateTlvObject(tSize, lSize);
+    COMM_CHECK_AND_RETURN_LOGE(obj != nullptr, COMM_UTILS, "create tlv obj fail");
+    uint32_t type = 0;
+    uint32_t length = dataSize;
+    uint32_t offset = 0;
+    for (; offset < dataSize && length > 0; type++) {
+        length = (SoftBusCryptoRand() % (dataSize - offset));
+        (void)AddTlvMember(obj, type, length, data + offset);
+        offset += length;
+    }
+    DestroyTlvObject(obj);
+}
+
 static void FuzzAddTlvMemberByVariableType(uint8_t tSize, uint8_t lSize, FuzzedDataProvider &provider)
 {
     TlvObject *obj = CreateTlvObject(tSize, lSize);
@@ -77,6 +92,7 @@ static void DoSomethingInterestingWithMyAPI(FuzzedDataProvider &provider)
     uint8_t *data = blobData.data();
     uint32_t dataSize = blobData.size();
     FuzzSetTlvBinary(tSize, lSize, data, dataSize);
+    FuzzAddTlvMember(tSize, lSize, data, dataSize);
     FuzzAddTlvMemberByVariableType(tSize, lSize, provider);
 }
 } // namespace OHOS
