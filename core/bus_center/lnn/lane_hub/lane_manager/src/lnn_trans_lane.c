@@ -1487,7 +1487,7 @@ static bool IsNeedNotifyFail(uint32_t laneReqId)
         notifyFail = true;
     }
     if (!notifyFail) {
-        nodeInfo->isCompleted = notifyFail ? true : false;
+        nodeInfo->isCompleted = false;
         Unlock();
         return notifyFail;
     }
