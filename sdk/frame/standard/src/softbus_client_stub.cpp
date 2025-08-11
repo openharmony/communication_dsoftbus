@@ -194,6 +194,7 @@ static int32_t MessageParcelReadEx(MessageParcel &data, ChannelInfo *channel)
         SOFTBUS_IPC_ERR, COMM_SDK, "read peerDeviceId failed");
     READ_PARCEL_WITH_RET(data, Bool, channel->isD2D, SOFTBUS_IPC_ERR);
     if (channel->isD2D) {
+        READ_PARCEL_WITH_RET(data, Int32, channel->pagingId, SOFTBUS_IPC_ERR);
         READ_PARCEL_WITH_RET(data, Uint32, channel->businessFlag, SOFTBUS_IPC_ERR);
         READ_PARCEL_WITH_RET(data, Uint32, channel->deviceTypeId, SOFTBUS_IPC_ERR);
         channel->pagingNonce = (char *)data.ReadRawData(PAGING_NONCE_LEN);
@@ -225,8 +226,7 @@ static int32_t MessageParcelReadEx(MessageParcel &data, ChannelInfo *channel)
         COMM_CHECK_AND_RETURN_RET_LOGE(channel->sessionKey != nullptr, SOFTBUS_IPC_ERR,
             COMM_SDK, "read rawData failed");
         channel->groupId = (char *)data.ReadCString();
-        COMM_CHECK_AND_RETURN_RET_LOGE(channel->groupId != nullptr,
-            SOFTBUS_IPC_ERR, COMM_SDK, "read groupId failed");
+        COMM_CHECK_AND_RETURN_RET_LOGE(channel->groupId != nullptr, SOFTBUS_IPC_ERR, COMM_SDK, "read groupId failed");
     }
     return SOFTBUS_OK;
 }
