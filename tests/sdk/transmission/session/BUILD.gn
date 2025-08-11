@@ -170,6 +170,7 @@ ohos_unittest("TransClientSessionCallbackTest") {
   include_dirs = [
     "$dsoftbus_dfx_path/interface/include/form",
     "$dsoftbus_root_path/adapter/default_config/spec_config",
+    "$dsoftbus_root_path/adapter/common/security/access_token/include",
     "$dsoftbus_root_path/components/nstackx/fillp/include",
     "$dsoftbus_root_path/core/authentication/interface",
     "$dsoftbus_root_path/core/bus_center/interface",
@@ -198,7 +199,6 @@ ohos_unittest("TransClientSessionCallbackTest") {
     "$dsoftbus_root_path/core/common:softbus_utils",
     "$dsoftbus_root_path/core/frame:softbus_server",
     "$dsoftbus_root_path/tests/sdk:softbus_client_static",
-    "$dsoftbus_root_path/adapter:softbus_adapter",
   ]
 
   external_deps = [
