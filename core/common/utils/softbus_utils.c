@@ -943,6 +943,10 @@ void SoftbusDumpBytes(const char *message, const uint8_t *data, uint32_t dataLen
         dataLen <= SOFTBUS_DUMP_BYTES_MAX_LEN, COMM_UTILS, "data len=%{public}u is too large", dataLen);
     uint16_t hexLen = HEXIFY_LEN(dataLen);
     char *hex = SoftBusCalloc(hexLen);
+    if (hex == NULL) {
+        COMM_LOGE(COMM_UTILS, "malloc hex fail");
+        return;
+    }
     int32_t ret = ConvertBytesToHexString(hex, hexLen, data, dataLen);
     if (ret != SOFTBUS_OK) {
         COMM_LOGE(COMM_UTILS, "convert to hex string error=%{public}d", ret);
