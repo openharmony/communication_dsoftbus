@@ -54,9 +54,9 @@ static OutData *ConstructOutData(GeneralConnectionInfo *info, GeneralConnectionM
 
 OutData *GeneralConnectionPackMsg(GeneralConnectionInfo *info, GeneralConnectionMsgType msgType)
 {
-    CONN_CHECK_AND_RETURN_RET_LOGE(info != NULL, NULL, CONN_BLE, "pack msg failed, info is null");
+    CONN_CHECK_AND_RETURN_RET_LOGE(info != NULL, NULL, CONN_BLE, "pack msg fail, info is null");
     cJSON *json = cJSON_CreateObject();
-    CONN_CHECK_AND_RETURN_RET_LOGE(json != NULL, NULL, CONN_BLE, "create json object failed");
+    CONN_CHECK_AND_RETURN_RET_LOGE(json != NULL, NULL, CONN_BLE, "create json object fail");
     int32_t status = SOFTBUS_OK;
     switch (msgType) {
         case GENERAL_CONNECTION_MSG_TYPE_HANDSHAKE:
@@ -91,7 +91,7 @@ OutData *GeneralConnectionPackMsg(GeneralConnectionInfo *info, GeneralConnection
 
     char *payload = cJSON_PrintUnformatted(json);
     cJSON_Delete(json);
-    CONN_CHECK_AND_RETURN_RET_LOGE(payload != NULL, NULL, CONN_BLE, "cJSON_PrintUnformatted failed");
+    CONN_CHECK_AND_RETURN_RET_LOGE(payload != NULL, NULL, CONN_BLE, "cJSON_PrintUnformatted fail");
     OutData *outData = ConstructOutData(info, msgType, payload);
     if (outData == NULL) {
         cJSON_free(payload);
@@ -105,11 +105,11 @@ OutData *GeneralConnectionPackMsg(GeneralConnectionInfo *info, GeneralConnection
 int32_t GeneralConnectionUnpackMsg(const uint8_t *data, uint32_t dataLen, GeneralConnectionInfo *info,
     GeneralConnectionMsgType parseMsgType)
 {
-    CONN_CHECK_AND_RETURN_RET_LOGE(data != NULL, SOFTBUS_INVALID_PARAM, CONN_BLE, "unpack msg failed, data is null");
-    CONN_CHECK_AND_RETURN_RET_LOGE(info != NULL, SOFTBUS_INVALID_PARAM, CONN_BLE, "unpack msg failed, info is null");
+    CONN_CHECK_AND_RETURN_RET_LOGE(data != NULL, SOFTBUS_INVALID_PARAM, CONN_BLE, "unpack msg fail, data is null");
+    CONN_CHECK_AND_RETURN_RET_LOGE(info != NULL, SOFTBUS_INVALID_PARAM, CONN_BLE, "unpack msg fail, info is null");
 
     cJSON *json = cJSON_ParseWithLength((char *)data, dataLen);
-    CONN_CHECK_AND_RETURN_RET_LOGE(json != NULL, SOFTBUS_PARSE_JSON_ERR, CONN_BLE, "parse json failed");
+    CONN_CHECK_AND_RETURN_RET_LOGE(json != NULL, SOFTBUS_PARSE_JSON_ERR, CONN_BLE, "parse json fail");
     int32_t status = SOFTBUS_OK;
     switch (parseMsgType) {
         case GENERAL_CONNECTION_MSG_TYPE_HANDSHAKE:
