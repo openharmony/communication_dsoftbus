@@ -90,5 +90,10 @@ int32_t TransOpenDirectChannel(AppInfo *appInfo, const ConnectOption *connInfo, 
 {
     return GetTransLaneCommonTestInterface()->TransOpenDirectChannel(appInfo, connInfo, channelId);
 }
+
+int32_t TransGetAclInfoBySessionName(const char *sessionName, uint64_t *tokenId, int32_t *pid, int32_t *userId)
+{
+    return GetTransLaneCommonTestInterface()->TransGetAclInfoBySessionName(sessionName, tokenId, pid, userId);
+}
 }
 }

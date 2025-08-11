@@ -40,7 +40,7 @@ ohos_unittest("TransInnerSessionTest") {
     "$dsoftbus_root_path/tests/core/transmission/trans_channel/inner_session/trans_inner_session_test.cpp",
   ]
 
-  deps = [ 
+  deps = [
     "$dsoftbus_root_path/core/common:softbus_utils",
     "$dsoftbus_root_path/core/frame:softbus_server",
     "$dsoftbus_root_path/adapter:softbus_adapter",

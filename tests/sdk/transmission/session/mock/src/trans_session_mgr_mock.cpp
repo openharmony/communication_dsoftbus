@@ -128,11 +128,6 @@ int32_t ClientGetSessionIdByChannelId(int32_t channelId, int32_t channelType, in
     return GetManagerInterface()->ClientGetSessionIdByChannelId(channelId, channelType, sessionId, isClosing);
 }
 
-int32_t ClientGetSessionIsD2DByChannelId(int32_t channelId, int32_t channelType, bool *isD2D)
-{
-    return GetManagerInterface()->ClientGetSessionIsD2DByChannelId(channelId, channelType, isD2D);
-}
-
 int32_t ClientGetSessionCallbackAdapterById(int32_t sessionId, SessionListenerAdapter *callbackAdapter, bool *isServer)
 {
     return GetManagerInterface()->ClientGetSessionCallbackAdapterById(sessionId, callbackAdapter, isServer);
@@ -187,6 +182,11 @@ int32_t GetSupportTlvAndNeedAckById(int32_t channelId, int32_t channelType, bool
 int32_t ClientGetSessionNameBySessionId(int32_t sessionId, char *sessionName)
 {
     return GetManagerInterface()->ClientGetSessionNameBySessionId(sessionId, sessionName);
+}
+
+int32_t ClientGetSessionIsD2DByChannelId(int32_t channelId, int32_t channelType, bool *isD2D)
+{
+    return GetManagerInterface()->ClientGetSessionIsD2DByChannelId(channelId, channelType, isD2D);
 }
 
 bool IsSessionExceedLimit(void)

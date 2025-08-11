@@ -15,7 +15,6 @@
 
 #include "trans_tcp_direct_common_mock.h"
 
-#include "stdint.h"
 #include "auth_interface_struct.h"
 
 using namespace testing;
