@@ -516,13 +516,17 @@ void TransProxyDecryptD2DDataTest(const uint8_t *data, size_t size)
 {
     ProxyDataInfo dataInfo;
     (void)memset_s(&dataInfo, sizeof(ProxyDataInfo), 0, sizeof(ProxyDataInfo));
-    uint8_t *dataTmp = TestDataSwitch(data, size);
-    if (dataTmp == nullptr) {
+    FuzzedDataProvider provider(data, size);
+    std::string providerSessionKey1 = provider.ConsumeBytesAsString(SHORT_SESSION_KEY_LENGTH - 1);
+    char sessionKey[SHORT_SESSION_KEY_LENGTH] = { 0 };
+    if (strcpy_s(sessionKey, SHORT_SESSION_KEY_LENGTH, providerSessionKey1.c_str()) != EOK) {
         return;
     }
-    char *sessionKey = const_cast<char *>(reinterpret_cast<const char *>(dataTmp));
-    const unsigned char *sessionCommonIv = const_cast<unsigned char *>(
-        reinterpret_cast<const unsigned char *>(dataTmp));
+    std::string providerSessionKey2 = provider.ConsumeBytesAsString(GCM_IV_LEN - 1);
+    unsigned char sessionCommonIv[GCM_IV_LEN] = { 0 };
+    if (memcpy_s(sessionCommonIv, GCM_IV_LEN, providerSessionKey2.c_str(), GCM_IV_LEN - 1) != EOK) {
+        return;
+    }
     int32_t businessType;
     GenerateInt32(businessType);
     (void)TransProxyDecryptD2DData(businessType, &dataInfo, sessionKey, sessionCommonIv);
@@ -538,7 +542,6 @@ void TransProxyDecryptD2DDataTest(const uint8_t *data, size_t size)
     (void)TransProxyDecryptD2DData(businessType, &dataInfo, nullptr, sessionCommonIv);
     (void)TransProxyDecryptD2DData(businessType, &dataInfo, sessionKey, sessionCommonIv);
     (void)TransProxyDecryptD2DData(businessType, &dataInfo, sessionKey, nullptr);
-    SoftBusFree(dataTmp);
     SoftBusFree(dataInfo.inData);
     SoftBusFree(dataInfo.outData);
 }
