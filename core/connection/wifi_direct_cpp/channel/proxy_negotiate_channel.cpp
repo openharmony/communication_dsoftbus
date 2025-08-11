@@ -70,7 +70,7 @@ int CoCProxyNegotiateChannel::Init()
 
     int32_t ret = DBinderSoftbusServer::GetInstance().TransProxyPipelineRegisterListener(MSG_TYPE_P2P_NEGO, &listener);
     CONN_CHECK_AND_RETURN_RET_LOGW(
-        ret == SOFTBUS_OK, ret, CONN_WIFI_DIRECT, "register proxy channel listener failed, error=%{public}d", ret);
+        ret == SOFTBUS_OK, ret, CONN_WIFI_DIRECT, "register proxy channel listener fail, error=%{public}d", ret);
     return SOFTBUS_OK;
 }
 
@@ -79,7 +79,7 @@ CoCProxyNegotiateChannel::CoCProxyNegotiateChannel(int32_t channelId) : channelI
     char remoteUuid[UUID_BUF_LEN] {};
     if (DBinderSoftbusServer::GetInstance().TransProxyPipelineGetUuidByChannelId(channelId, remoteUuid,
         UUID_BUF_LEN) != SOFTBUS_OK) {
-        CONN_LOGE(CONN_WIFI_DIRECT, "auth get uuid failed");
+        CONN_LOGE(CONN_WIFI_DIRECT, "auth get uuid fail");
         return;
     }
     remoteDeviceId_ = remoteUuid;
@@ -105,13 +105,13 @@ int CoCProxyNegotiateChannel::SendMessage(const NegotiateMessage &msg) const
     }
     auto protocol = WifiDirectProtocolFactory::CreateProtocol(type);
     CONN_CHECK_AND_RETURN_RET_LOGE(
-        protocol != nullptr, SOFTBUS_INVALID_PARAM, CONN_WIFI_DIRECT, "create protocol failed");
+        protocol != nullptr, SOFTBUS_INVALID_PARAM, CONN_WIFI_DIRECT, "create protocol fail");
     std::vector<uint8_t> output;
     msg.Marshalling(*protocol, output);
 
     auto ret = DBinderSoftbusServer::GetInstance().TransProxyPipelineSendMessage(
         channelId_, output.data(), static_cast<uint32_t>(output.size()), MSG_TYPE_P2P_NEGO);
-    CONN_CHECK_AND_RETURN_RET_LOGE(ret == SOFTBUS_OK, ret, CONN_WIFI_DIRECT, "post data failed");
+    CONN_CHECK_AND_RETURN_RET_LOGE(ret == SOFTBUS_OK, ret, CONN_WIFI_DIRECT, "post data fail");
 
     return SOFTBUS_OK;
 }

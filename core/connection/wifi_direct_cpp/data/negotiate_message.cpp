@@ -242,7 +242,7 @@ void NegotiateMessage::MarshallingLinkInfo(WifiDirectProtocol &protocol) const
 {
     auto pro = WifiDirectProtocolFactory::CreateProtocol(protocol.GetType());
     if (pro == nullptr) {
-        CONN_LOGE(CONN_WIFI_DIRECT, "create protocol failed");
+        CONN_LOGE(CONN_WIFI_DIRECT, "create protocol fail");
         return;
     }
     pro->SetFormat(protocol.GetFormat());

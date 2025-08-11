@@ -99,7 +99,7 @@ int WifiDirectHidumper::JudgeP2pGroup()
     if (ret != WIFI_SUCCESS) {
         CONN_CHECK_AND_RETURN_RET_LOGE(
             ret != ERROR_P2P_GROUP_NOT_AVAILABLE, P2P_GROUP_NOT_EXIST, CONN_WIFI_DIRECT, "p2p group not exist");
-        CONN_LOGE(CONN_WIFI_DIRECT, "get current group failed, error=%{public}d", ret);
+        CONN_LOGE(CONN_WIFI_DIRECT, "get current group fail, error=%{public}d", ret);
         return ret;
     }
     return (groupInfo->frequency != 0) ? P2P_GROUP_EXIST : P2P_GROUP_NOT_EXIST;

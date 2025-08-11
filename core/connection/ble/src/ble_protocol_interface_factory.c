@@ -175,7 +175,7 @@ static void ConnCocInit(void)
 const BleUnifyInterface *ConnBleGetUnifyInterface(BleProtocolType type)
 {
     if (type != BLE_GATT && type != BLE_COC) {
-        CONN_LOGE(CONN_BLE, "Failed to return type.");
+        CONN_LOGE(CONN_BLE, "fail to return type.");
         return NULL;
     }
     ConnCocInit();
@@ -190,7 +190,7 @@ const BleUnifyInterface *ConnBleGetUnifyInterface(BleProtocolType type)
         g_bleUnifyInterface[BLE_COC].bleClientInitModule == NULL ||
         g_bleUnifyInterface[BLE_COC].bleServerInitModule == NULL) {
         if (type == BLE_COC) {
-            CONN_LOGE(CONN_BLE, "Failed to return type, ble_coc not register.");
+            CONN_LOGE(CONN_BLE, "fail to return type, ble_coc not register.");
             return NULL;
         }
     }
