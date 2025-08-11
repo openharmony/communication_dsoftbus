@@ -43,7 +43,7 @@ static int32_t OpenUsbServerSocket(const LocalListenerInfo *option)
     int ret = SoftBusSocketCreate(
         domain, SOFTBUS_SOCK_STREAM | SOFTBUS_SOCK_CLOEXEC | SOFTBUS_SOCK_NONBLOCK, 0, (int32_t *)&fd);
     if (ret != SOFTBUS_OK) {
-        CONN_LOGE(CONN_COMMON, "Create socket failed! ret=%{public}d", ret);
+        CONN_LOGE(CONN_COMMON, "Create socket fail! ret=%{public}d", ret);
         return SOFTBUS_TCP_SOCKET_ERR;
     }
 
@@ -77,12 +77,12 @@ static int32_t OpenUsbClientSocket(const ConnectOption *option, const char *myIp
     int32_t domain = GetDomainByAddr(option->socketOption.addr);
     int32_t ret = SoftBusSocketCreate(domain, SOFTBUS_SOCK_STREAM, 0, &fd);
     if (ret != SOFTBUS_OK) {
-        CONN_LOGE(CONN_COMMON, "create socket failed, serverIp=%{public}s, serverPort=%{public}d, error=%{public}d",
+        CONN_LOGE(CONN_COMMON, "create socket fail, serverIp=%{public}s, serverPort=%{public}d, error=%{public}d",
             animizedIp, option->socketOption.port, ret);
         return ret;
     }
     if (isNonBlock && ConnToggleNonBlockMode(fd, true) != SOFTBUS_OK) {
-        CONN_LOGE(CONN_COMMON, "set nonblock failed, serverIp=%{public}s, serverPort=%{public}d, fd=%{public}d",
+        CONN_LOGE(CONN_COMMON, "set nonblock fail, serverIp=%{public}s, serverPort=%{public}d, fd=%{public}d",
             animizedIp, option->socketOption.port, fd);
         SoftBusSocketClose(fd);
         return SOFTBUS_TCPCONNECTION_SOCKET_ERR;
@@ -90,7 +90,7 @@ static int32_t OpenUsbClientSocket(const ConnectOption *option, const char *myIp
     SetClientOption(fd);
     ret = BindTcpClientAddr(domain, fd, myIp);
     if (ret != SOFTBUS_OK) {
-        CONN_LOGE(CONN_COMMON, "bind client address failed, serverIp=%{public}s, serverPort=%{public}d, "
+        CONN_LOGE(CONN_COMMON, "bind client address fail, serverIp=%{public}s, serverPort=%{public}d, "
             "error=%{public}d", animizedIp, option->socketOption.port, ret);
         ConnShutdownSocket(fd);
         return ret;
@@ -100,7 +100,7 @@ static int32_t OpenUsbClientSocket(const ConnectOption *option, const char *myIp
     ret = SocketConnect(fd, domain, option);
     if ((ret != SOFTBUS_ADAPTER_OK) && (ret != SOFTBUS_ADAPTER_SOCKET_EINPROGRESS) &&
         (ret != SOFTBUS_ADAPTER_SOCKET_EAGAIN)) {
-        CONN_LOGE(CONN_COMMON, "client connect failed, serverIp=%{public}s, serverPort=%{public}d, fd=%{public}d, "
+        CONN_LOGE(CONN_COMMON, "client connect fail, serverIp=%{public}s, serverPort=%{public}d, fd=%{public}d, "
             "ret=%{public}d, errno=%{public}d(%{public}s)", animizedIp, option->socketOption.port, fd, ret,
             errno, strerror(errno));
         ConnShutdownSocket(fd);
@@ -119,7 +119,7 @@ static int32_t AcceptUsbClient(int32_t fd, ConnectOption *clientAddr, int32_t *c
     (void)memset_s(&addr, sizeof(addr), 0, sizeof(addr));
     int32_t ret = SOFTBUS_TEMP_FAILURE_RETRY(SoftBusSocketAccept(fd, &addr, cfd));
     if (ret != SOFTBUS_OK) {
-        CONN_LOGE(CONN_COMMON, "accept failed, ret=%{public}" PRId32 ", cfd=%{public}d, fd=%{public}d", ret, *cfd, fd);
+        CONN_LOGE(CONN_COMMON, "accept fail, ret=%{public}" PRId32 ", cfd=%{public}d, fd=%{public}d", ret, *cfd, fd);
         return ret;
     }
 
@@ -129,7 +129,7 @@ static int32_t AcceptUsbClient(int32_t fd, ConnectOption *clientAddr, int32_t *c
 
     if (SoftBusInetNtoP(SOFTBUS_AF_INET6, &((SoftBusSockAddrIn6 *)&addr)->sin6Addr,
         clientAddr->socketOption.addr, sizeof(clientAddr->socketOption.addr)) == NULL) {
-        CONN_LOGE(CONN_COMMON, "get addr failed");
+        CONN_LOGE(CONN_COMMON, "get addr fail");
         return SOFTBUS_TCPCONNECTION_SOCKET_ERR;
     }
     return SOFTBUS_OK;
