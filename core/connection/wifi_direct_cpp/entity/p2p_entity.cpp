@@ -44,7 +44,7 @@ static void P2pConnectionChangeCallback(const WifiP2pLinkedInfo info)
     param.groupInfo = std::make_shared<P2pAdapter::WifiDirectP2pGroupInfo>();
     auto ret = P2pAdapter::GetGroupInfo(*(param.groupInfo));
     if (ret != SOFTBUS_OK) {
-        CONN_LOGI(CONN_WIFI_DIRECT, "get group info failed, error=%{public}d", ret);
+        CONN_LOGI(CONN_WIFI_DIRECT, "get group info fail, error=%{public}d", ret);
         param.groupInfo = nullptr;
     }
     P2pBroadcast::GetInstance()->DispatchWorkHandler(
@@ -93,7 +93,7 @@ void P2pEntity::DisconnectLink(const std::string &remoteMac)
     CONN_LOGI(CONN_WIFI_DIRECT, "enter");
     P2pAdapter::WifiDirectP2pGroupInfo groupInfo {};
     auto ret = P2pAdapter::GetGroupInfo(groupInfo);
-    CONN_CHECK_AND_RETURN_LOGE(ret == SOFTBUS_OK, CONN_WIFI_DIRECT, "get group info failed");
+    CONN_CHECK_AND_RETURN_LOGE(ret == SOFTBUS_OK, CONN_WIFI_DIRECT, "get group info fail");
     bool isNeedRemove = true;
     if (groupInfo.isGroupOwner) {
         if (groupInfo.clientDevices.size() > 1) {
@@ -271,7 +271,7 @@ P2pOperationResult P2pEntity::Disconnect(const P2pDestroyGroupParam &param)
                 return SOFTBUS_OK;
             });
         if (ret != SOFTBUS_OK) {
-            CONN_LOGI(CONN_WIFI_DIRECT, "get reuse cnt from interface info failed, error=%{public}d", ret);
+            CONN_LOGI(CONN_WIFI_DIRECT, "get reuse cnt from interface info fail, error=%{public}d", ret);
             result.errorCode_ = ret;
             return result;
         }
@@ -447,15 +447,15 @@ static void UpdateInterfaceInfo(
     if (groupInfo->isGroupOwner) {
         auto ret = P2pAdapter::GetGroupConfig(groupConfig);
         CONN_CHECK_AND_RETURN_LOGE(
-            ret == SOFTBUS_OK, CONN_WIFI_DIRECT, "get group config failed, error=%{public}d", ret);
+            ret == SOFTBUS_OK, CONN_WIFI_DIRECT, "get group config fail, error=%{public}d", ret);
     }
     std::string dynamicMac;
     auto ret = P2pAdapter::GetDynamicMacAddress(dynamicMac);
-    CONN_CHECK_AND_RETURN_LOGE(ret == SOFTBUS_OK, CONN_WIFI_DIRECT, "get dynamic mac failed, error=%{public}d", ret);
+    CONN_CHECK_AND_RETURN_LOGE(ret == SOFTBUS_OK, CONN_WIFI_DIRECT, "get dynamic mac fail, error=%{public}d", ret);
     std::string ip;
     ret = P2pAdapter::GetIpAddress(ip);
     if (ret != SOFTBUS_OK) {
-        CONN_LOGE(CONN_WIFI_DIRECT, "get ip failed, error=%{public}d", ret);
+        CONN_LOGE(CONN_WIFI_DIRECT, "get ip fail, error=%{public}d", ret);
     } else {
         CONN_LOGI(CONN_WIFI_DIRECT, "localIp=%{public}s", WifiDirectAnonymizeIp(ip).c_str());
     }
@@ -551,7 +551,7 @@ void P2pEntity::UpdateLinkManager(
     CONN_CHECK_AND_RETURN_LOGE(groupInfo, CONN_WIFI_DIRECT, "groupInfo is null");
     std::string dynamicMac;
     auto ret = P2pAdapter::GetDynamicMacAddress(dynamicMac);
-    CONN_CHECK_AND_RETURN_LOGE(ret == SOFTBUS_OK, CONN_WIFI_DIRECT, "get dynamic mac failed, error=%{public}d", ret);
+    CONN_CHECK_AND_RETURN_LOGE(ret == SOFTBUS_OK, CONN_WIFI_DIRECT, "get dynamic mac fail, error=%{public}d", ret);
     UpdateInnerLink(groupInfo, dynamicMac);
 }
 

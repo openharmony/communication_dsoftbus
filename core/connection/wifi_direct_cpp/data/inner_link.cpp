@@ -364,11 +364,11 @@ void InnerLink::GenerateLink(uint32_t requestId, int pid, WifiDirectLink &link, 
         remoteIp = GetRemoteIpv6();
     }
     if (strcpy_s(link.localIp, IP_STR_MAX_LEN, localIp.c_str()) != EOK) {
-        CONN_LOGI(CONN_WIFI_DIRECT, "local ip cpy failed, link id=%{public}d", link.linkId);
+        CONN_LOGI(CONN_WIFI_DIRECT, "local ip cpy fail, link id=%{public}d", link.linkId);
         // fall-through
     }
     if (strcpy_s(link.remoteIp, IP_STR_MAX_LEN, remoteIp.c_str()) != EOK) {
-        CONN_LOGI(CONN_WIFI_DIRECT, "remote ip cpy failed, link id=%{public}d", link.linkId);
+        CONN_LOGI(CONN_WIFI_DIRECT, "remote ip cpy fail, link id=%{public}d", link.linkId);
         // fall-through
     }
     
@@ -376,11 +376,11 @@ void InnerLink::GenerateLink(uint32_t requestId, int pid, WifiDirectLink &link, 
     std::string localIpv6 = GetLocalIpv6();
     std::string remoteIpv6 = GetRemoteIpv6();
     if (strcpy_s(link.localIpv6, IP_STR_MAX_LEN, localIpv6.c_str()) != EOK) {
-        CONN_LOGI(CONN_WIFI_DIRECT, "local custom ip cpy failed, link id=%{public}d", link.linkId);
+        CONN_LOGI(CONN_WIFI_DIRECT, "local custom ip cpy fail, link id=%{public}d", link.linkId);
         // fall-through
     }
     if (strcpy_s(link.remoteIpv6, IP_STR_MAX_LEN, remoteIpv6.c_str()) != EOK) {
-        CONN_LOGI(CONN_WIFI_DIRECT, "remote custom ip cpy failed, link id=%{public}d", link.linkId);
+        CONN_LOGI(CONN_WIFI_DIRECT, "remote custom ip cpy fail, link id=%{public}d", link.linkId);
         // fall-through
     }
 }
