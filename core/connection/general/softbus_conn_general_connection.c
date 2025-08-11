@@ -88,7 +88,7 @@ static SoftBusHandlerWrapper g_generalManagerSyncHandler = {
 static int GeneralCompareConnectionLooperEventFunc(const SoftBusMessage *msg, void *args)
 {
     SoftBusMessage *ctx = (SoftBusMessage *)args;
-    CONN_CHECK_AND_RETURN_RET_LOGE(msg->what == ctx->what, COMPARE_FAILED, CONN_BLE, "compade failed");
+    CONN_CHECK_AND_RETURN_RET_LOGE(msg->what == ctx->what, COMPARE_FAILED, CONN_BLE, "compare fail");
     switch (ctx->what) {
         case GENERAL_MGR_MSG_MERGE_CMD: {
             if (msg->arg1 == ctx->arg1) {
@@ -200,7 +200,7 @@ static void ConnReturnGeneralConnection(struct GeneralConnection **generalConnec
 struct GeneralConnection *GetConnectionByGeneralId(uint32_t generalId)
 {
     int32_t ret = SoftBusMutexLock(&g_generalManager.connections->lock);
-    CONN_CHECK_AND_RETURN_RET_LOGE(ret == SOFTBUS_OK, NULL, CONN_BLE, "lock failed");
+    CONN_CHECK_AND_RETURN_RET_LOGE(ret == SOFTBUS_OK, NULL, CONN_BLE, "lock fail");
     struct GeneralConnection *it = NULL;
     LIST_FOR_EACH_ENTRY(it, &g_generalManager.connections->list, struct GeneralConnection, node) {
         if (it->generalId == generalId) {
@@ -217,7 +217,7 @@ static void ConnRemoveGeneralConnection(struct GeneralConnection *generalConnect
 {
     CONN_CHECK_AND_RETURN_LOGE(generalConnection != NULL, CONN_BLE, "connection is null");
     CONN_CHECK_AND_RETURN_LOGE(SoftBusMutexLock(&g_generalManager.connections->lock) == SOFTBUS_OK, CONN_BLE,
-        "lock failed");
+        "lock fail");
 
     struct GeneralConnection *it = NULL;
     bool exist = false;
@@ -239,7 +239,7 @@ static void ConnRemoveGeneralConnection(struct GeneralConnection *generalConnect
 struct GeneralConnection *GetGeneralConnectionByReqId(uint32_t reqId)
 {
     CONN_CHECK_AND_RETURN_RET_LOGE(SoftBusMutexLock(&g_generalManager.connections->lock) == SOFTBUS_OK, NULL, CONN_BLE,
-        "lock failed");
+        "lock fail");
     struct GeneralConnection *it = NULL;
     LIST_FOR_EACH_ENTRY(it, &g_generalManager.connections->list, struct GeneralConnection, node) {
         if (it->requestId == reqId) {
@@ -255,7 +255,7 @@ struct GeneralConnection *GetGeneralConnectionByReqId(uint32_t reqId)
 struct GeneralConnection *GetGeneralConnectionByParam(const char *pkgName, int32_t pid)
 {
     CONN_CHECK_AND_RETURN_RET_LOGE(SoftBusMutexLock(&g_generalManager.connections->lock) == SOFTBUS_OK, NULL, CONN_BLE,
-        "lock failed");
+        "lock fail");
     struct GeneralConnection *it = NULL;
     LIST_FOR_EACH_ENTRY(it, &g_generalManager.connections->list, struct GeneralConnection, node) {
         if (StrCmpIgnoreCase(it->info.pkgName, pkgName) == 0 && it->info.pid == pid) {
@@ -275,19 +275,19 @@ static int32_t GeneralSendResetMessage(struct GeneralConnection *generalConnecti
     info.peerId = generalConnection->peerGeneralId;
     OutData *data = GeneralConnectionPackMsg(&info, GENERAL_CONNECTION_MSG_TYPE_RESET);
     CONN_CHECK_AND_RETURN_RET_LOGE(data != NULL, SOFTBUS_CONN_GENERAL_PACK_ERROR, CONN_BLE,
-        "pack data failed, generalId=%{public}u", generalConnection->generalId);
+        "pack data fail, generalId=%{public}u", generalConnection->generalId);
     CONN_LOGI(CONN_BLE, "send reset msg, generalId=%{public}u", generalConnection->generalId);
     int32_t status = SendInner(data, generalConnection->underlayerHandle, MODULE_BLE_GENERAL, 0);
     FreeOutData(data);
     if (status != SOFTBUS_OK) {
-        CONN_LOGE(CONN_BLE, "send failed, generalId=%{public}u, err=%{public}d", generalConnection->generalId, status);
+        CONN_LOGE(CONN_BLE, "send fail, generalId=%{public}u, err=%{public}d", generalConnection->generalId, status);
         ConnDisconnectDevice(generalConnection->underlayerHandle);
         return status;
     }
     if (generalConnection->isClient &&
         ConnPostMsgToLooper(&g_generalManagerSyncHandler, GENERAL_MGR_MSG_DISCONNECT_DELAY,
             generalConnection->underlayerHandle, 0, NULL, GENERAL_CONNECT_DISCONNECT_DELAY) != SOFTBUS_OK) {
-        CONN_LOGE(CONN_BLE, "post msg failed");
+        CONN_LOGE(CONN_BLE, "post msg fail");
         return SOFTBUS_CONN_GENERAL_POST_MSG_FAILED;
     }
     return SOFTBUS_OK;
@@ -301,7 +301,7 @@ static Server *NewServerNode(const GeneralConnectionParam *param)
     if ((strncpy_s(nameNode->info.bundleName, BUNDLE_NAME_MAX, param->bundleName, BUNDLE_NAME_MAX - 1) != EOK) ||
         (strncpy_s(nameNode->info.name, GENERAL_NAME_LEN, param->name, GENERAL_NAME_LEN - 1) != EOK) ||
         (strncpy_s(nameNode->info.pkgName, PKG_NAME_SIZE_MAX, param->pkgName, PKG_NAME_SIZE_MAX - 1) != EOK)) {
-        CONN_LOGE(CONN_BLE, "strcpy failed");
+        CONN_LOGE(CONN_BLE, "strcpy fail");
         SoftBusFree(nameNode);
         return NULL;
     }
@@ -320,7 +320,7 @@ static void ClearAllGeneralConnection(const char *pkgName, int32_t pid)
     CONN_LOGW(CONN_BLE, "clean up connections");
     CONN_CHECK_AND_RETURN_LOGE(pkgName != NULL, CONN_BLE, "pkgName is null");
     CONN_CHECK_AND_RETURN_LOGE((SoftBusMutexLock(&g_generalManager.servers->lock)) == SOFTBUS_OK, CONN_BLE,
-        "lock servers failed");
+        "lock servers fail");
     Server *serverIt = NULL;
     Server *serverNext = NULL;
     LIST_FOR_EACH_ENTRY_SAFE(serverIt, serverNext, &g_generalManager.servers->list, Server, node) {
@@ -334,7 +334,7 @@ static void ClearAllGeneralConnection(const char *pkgName, int32_t pid)
     ListNode waitNotifyDisconnect = {0};
     ListInit(&waitNotifyDisconnect);
     CONN_CHECK_AND_RETURN_LOGE(SoftBusMutexLock(&g_generalManager.connections->lock) == SOFTBUS_OK, CONN_BLE,
-        "lock failed");
+        "lock fail");
     struct GeneralConnection *it = NULL;
     struct GeneralConnection *next = NULL;
     LIST_FOR_EACH_ENTRY_SAFE(it, next, &g_generalManager.connections->list, struct GeneralConnection, node) {
@@ -362,11 +362,11 @@ static int32_t GeneralSendMergeMessage(struct GeneralConnection *generalConnecti
     info.updateHandle = updateHandle;
     OutData *data = GeneralConnectionPackMsg(&info, GENERAL_CONNECTION_MSG_TYPE_MERGE);
     CONN_CHECK_AND_RETURN_RET_LOGE(data != NULL, SOFTBUS_CONN_GENERAL_PACK_ERROR, CONN_BLE,
-        "pack data failed, generalId=%{public}u", generalConnection->generalId);
+        "pack data fail, generalId=%{public}u", generalConnection->generalId);
     int32_t status = SendInner(data, generalConnection->underlayerHandle, MODULE_BLE_GENERAL, 0);
     FreeOutData(data);
     CONN_CHECK_AND_RETURN_RET_LOGE(status == SOFTBUS_OK, SOFTBUS_CONN_GENERAL_PACK_ERROR, CONN_BLE,
-        "send failed, generalId=%{public}u, err=%{public}d", generalConnection->generalId, status);
+        "send fail, generalId=%{public}u, err=%{public}d", generalConnection->generalId, status);
     return status;
 }
 
@@ -376,7 +376,7 @@ static int32_t GeneralSessionNegotiation(
     GeneralConnectionInfo info = {0};
     if (strcpy_s(info.name, GENERAL_NAME_LEN, generalConnection->info.name) != EOK ||
         strcpy_s(info.bundleName, BUNDLE_NAME_MAX, generalConnection->info.bundleName) != EOK) {
-            CONN_LOGE(CONN_BLE, "copy address failed, generalId=%{public}u", generalConnection->generalId);
+            CONN_LOGE(CONN_BLE, "copy address fail, generalId=%{public}u", generalConnection->generalId);
         return SOFTBUS_STRCPY_ERR;
     }
     info.ackStatus = ackStatus;
@@ -385,11 +385,11 @@ static int32_t GeneralSessionNegotiation(
     info.abilityBitSet = generalConnection->abilityBitSet;
     OutData *data = GeneralConnectionPackMsg(&info, type);
     CONN_CHECK_AND_RETURN_RET_LOGE(data != NULL, SOFTBUS_CONN_GENERAL_PACK_ERROR, CONN_BLE,
-        "pack data failed, generalId=%{public}u", generalConnection->generalId);
+        "pack data fail, generalId=%{public}u", generalConnection->generalId);
     CONN_LOGI(CONN_BLE, "send session negotiation msg, generalId=%{public}u", generalConnection->generalId);
     int32_t status = SendInner(data, generalConnection->underlayerHandle, MODULE_BLE_GENERAL, 0);
     if (status != SOFTBUS_OK) {
-        CONN_LOGE(CONN_BLE, "send failed, generalId=%{public}u, err=%{public}d", generalConnection->generalId, status);
+        CONN_LOGE(CONN_BLE, "send fail, generalId=%{public}u, err=%{public}d", generalConnection->generalId, status);
     }
     FreeOutData(data);
     return status;
@@ -407,7 +407,7 @@ static int32_t StartConnConnectDevice(const char *addr,
         .bleOption.psm = GENERAL_PSM,
     };
     if (strcpy_s(option.bleOption.bleMac, BT_MAC_LEN, addr) != EOK) {
-        CONN_LOGE(CONN_BLE, "copy mac failed");
+        CONN_LOGE(CONN_BLE, "copy mac fail");
         return SOFTBUS_STRCPY_ERR;
     }
     int32_t status = ConnConnectDevice(&option, requestId, result);
@@ -433,12 +433,12 @@ static int32_t SetConnectionDeviceId(struct GeneralConnection *generalConnection
         ret = memcpy_s(generalConnection->udid, UDID_BUF_LEN, bleConnection->udid, UDID_BUF_LEN);
     }
     if (ret != EOK) {
-        CONN_LOGE(CONN_BLE, "server copy networkId failed, generalId=%{public}u", generalConnection->generalId);
+        CONN_LOGE(CONN_BLE, "server copy networkId fail, generalId=%{public}u", generalConnection->generalId);
     }
     ret = memcpy_s(generalConnection->addr, BT_MAC_LEN, bleConnection->addr, BT_MAC_LEN);
     ConnBleReturnConnection(&bleConnection);
     CONN_CHECK_AND_RETURN_RET_LOGE(ret == EOK, SOFTBUS_MEM_ERR, CONN_BLE,
-        "copy mac failed, err=%{public}d", ret);
+        "copy mac fail, err=%{public}d", ret);
     return SOFTBUS_OK;
 }
 
@@ -446,11 +446,11 @@ static void OnCommConnectSucc(uint32_t requestId, uint32_t connectionId, const C
 {
     (void)info;
     struct GeneralConnection *generalConnection = GetGeneralConnectionByReqId(requestId);
-    CONN_CHECK_AND_RETURN_LOGE(generalConnection != NULL, CONN_BLE, "get connection failed");
+    CONN_CHECK_AND_RETURN_LOGE(generalConnection != NULL, CONN_BLE, "get connection fail");
     int32_t status = SOFTBUS_OK;
     do {
         if (SoftBusMutexLock(&generalConnection->lock) != SOFTBUS_OK) {
-            CONN_LOGE(CONN_BLE, "lock failed, generalId=%{public}u", generalConnection->generalId);
+            CONN_LOGE(CONN_BLE, "lock fail, generalId=%{public}u", generalConnection->generalId);
             status = SOFTBUS_LOCK_ERR;
             break;
         }
@@ -482,7 +482,7 @@ static void OnCommConnectSucc(uint32_t requestId, uint32_t connectionId, const C
 static uint32_t GenerateRequestId(void)
 {
     int32_t ret = SoftBusMutexLock(&g_requestIdLock);
-    CONN_CHECK_AND_RETURN_RET_LOGE(ret == SOFTBUS_OK, g_requestId, CONN_BLE, "lock failed");
+    CONN_CHECK_AND_RETURN_RET_LOGE(ret == SOFTBUS_OK, g_requestId, CONN_BLE, "lock fail");
     uint32_t reqId = g_requestId++;
     (void)SoftBusMutexUnlock(&g_requestIdLock);
     return reqId;
@@ -491,9 +491,9 @@ static uint32_t GenerateRequestId(void)
 static void OnCommConnectFail(uint32_t requestId, int32_t reason)
 {
     struct GeneralConnection *connection = GetGeneralConnectionByReqId(requestId);
-    CONN_CHECK_AND_RETURN_LOGE(connection != NULL, CONN_BLE, "get connection failed");
+    CONN_CHECK_AND_RETURN_LOGE(connection != NULL, CONN_BLE, "get connection fail");
     CONN_LOGE(CONN_BLE,
-        "on connect failed, generalId=%{public}u, reason=%{public}d",
+        "on connect fail, generalId=%{public}u, reason=%{public}d",
         connection->generalId, reason);
     ConnRemoveMsgFromLooper(&g_generalManagerSyncHandler, GENERAL_MGR_MSG_CONNECT_TIMEOUT,
         connection->generalId, 0, NULL);
@@ -505,10 +505,10 @@ static void OnCommConnectFail(uint32_t requestId, int32_t reason)
     }
     if (connection->protocol == BLE_COC) {
         CONN_LOGI(CONN_BLE,
-            "connect failed, try to connect gatt, generalId=%{public}u", connection->generalId);
+            "connect fail, try to connect gatt, generalId=%{public}u", connection->generalId);
         int32_t status = SoftBusMutexLock(&connection->lock);
         if (status != SOFTBUS_OK) {
-            CONN_LOGE(CONN_BLE, "lock failed, error=%{public}d", status);
+            CONN_LOGE(CONN_BLE, "lock fail, error=%{public}d", status);
             g_generalConnectionListener.onConnectFailed(&connection->info, connection->generalId, status);
             ConnRemoveGeneralConnection(connection);
             ConnReturnGeneralConnection(&connection);
@@ -532,7 +532,7 @@ static void UpdateConnectionState(struct GeneralConnection *generalConnection,
     enum GeneralConnState expectedState, enum GeneralConnState nextState)
 {
     int32_t status = SoftBusMutexLock(&generalConnection->lock);
-    CONN_CHECK_AND_RETURN_LOGE(status == SOFTBUS_OK, CONN_BLE, "lock failed");
+    CONN_CHECK_AND_RETURN_LOGE(status == SOFTBUS_OK, CONN_BLE, "lock fail");
     if (generalConnection->state != expectedState) {
         CONN_LOGW(CONN_BLE,
             "unexpected state, actualState=%{public}d, expectedState=%{public}d, nextState=%{public}d",
@@ -560,7 +560,7 @@ static uint32_t AllocateGeneralIdUnsafe(void)
 static bool FindInfoFromServer(GeneralConnectionInfo *info, struct GeneralConnection *generalConnection)
 {
     int32_t status = SoftBusMutexLock(&g_generalManager.servers->lock);
-    CONN_CHECK_AND_RETURN_RET_LOGE(status == SOFTBUS_OK, false, CONN_BLE, "lock failed");
+    CONN_CHECK_AND_RETURN_RET_LOGE(status == SOFTBUS_OK, false, CONN_BLE, "lock fail");
 
     Server *it = NULL;
     bool found = false;
@@ -581,7 +581,7 @@ static bool FindInfoFromServer(GeneralConnectionInfo *info, struct GeneralConnec
     if (strncpy_s(infoTemp.name, GENERAL_NAME_LEN, it->info.name, GENERAL_NAME_LEN - 1) != EOK ||
         strncpy_s(infoTemp.pkgName, PKG_NAME_SIZE_MAX, it->info.pkgName, PKG_NAME_SIZE_MAX - 1) != EOK ||
         strncpy_s(infoTemp.bundleName, BUNDLE_NAME_MAX, it->info.bundleName, BUNDLE_NAME_MAX - 1) != EOK) {
-        CONN_LOGE(CONN_BLE, "copy info failed");
+        CONN_LOGE(CONN_BLE, "copy info fail");
         (void)SoftBusMutexUnlock(&g_generalManager.servers->lock);
         return false;
     }
@@ -589,13 +589,13 @@ static bool FindInfoFromServer(GeneralConnectionInfo *info, struct GeneralConnec
     (void)SoftBusMutexUnlock(&g_generalManager.servers->lock);
 
     status = SoftBusMutexLock(&generalConnection->lock);
-    CONN_CHECK_AND_RETURN_RET_LOGE(status == SOFTBUS_OK, false, CONN_BLE, "lock failed");
+    CONN_CHECK_AND_RETURN_RET_LOGE(status == SOFTBUS_OK, false, CONN_BLE, "lock fail");
     if (strncpy_s(generalConnection->info.name, GENERAL_NAME_LEN, infoTemp.name, GENERAL_NAME_LEN - 1) != EOK ||
         strncpy_s(generalConnection->info.pkgName, PKG_NAME_SIZE_MAX,
             infoTemp.pkgName, PKG_NAME_SIZE_MAX - 1) != EOK ||
         strncpy_s(generalConnection->info.bundleName,
             BUNDLE_NAME_MAX, infoTemp.bundleName, BUNDLE_NAME_MAX - 1) != EOK) {
-        CONN_LOGE(CONN_BLE, "copy failed");
+        CONN_LOGE(CONN_BLE, "copy fail");
         (void)SoftBusMutexUnlock(&generalConnection->lock);
         return false;
     }
@@ -620,7 +620,7 @@ static void OnReuseConnectFail(uint32_t requestId, int32_t reason)
 static bool IsLocalStartMerge(struct GeneralConnection *generalConnection)
 {
     int32_t status = SoftBusMutexLock(&generalConnection->lock);
-    CONN_CHECK_AND_RETURN_RET_LOGE(status == SOFTBUS_OK, false, CONN_BLE, "lock failed");
+    CONN_CHECK_AND_RETURN_RET_LOGE(status == SOFTBUS_OK, false, CONN_BLE, "lock fail");
     bool isSupportNetWorkIdExchange = generalConnection->isSupportNetWorkIdExchange;
     (void)SoftBusMutexUnlock(&generalConnection->lock);
 
@@ -630,7 +630,7 @@ static bool IsLocalStartMerge(struct GeneralConnection *generalConnection)
         LnnGetLocalStrInfo(STRING_KEY_NETWORKID, localNetworkId, NETWORK_ID_BUF_LEN) :
         LnnGetLocalStrInfo(STRING_KEY_DEV_UDID, localUdid, UDID_BUF_LEN);
     CONN_CHECK_AND_RETURN_RET_LOGE(status == SOFTBUS_OK, false,
-        CONN_BLE, "get local str info failed, error=%{public}d", status);
+        CONN_BLE, "get local str info fail, error=%{public}d", status);
     return isSupportNetWorkIdExchange ? (strcmp(localNetworkId, generalConnection->networkId) > 0):
         (strcmp(localUdid, generalConnection->udid) > 0);
 }
@@ -650,7 +650,7 @@ static void MergeConnectionInner(struct GeneralConnection *out,
     CONN_LOGI(CONN_BLE, "merge connection, before generalId=%{public}u", out->generalId);
     GeneralSendMergeMessage(out, generalConnection->peerGeneralId);
     int32_t status = SoftBusMutexLock(&out->lock);
-    CONN_CHECK_AND_RETURN_LOGE(status == SOFTBUS_OK, CONN_BLE, "lock failed");
+    CONN_CHECK_AND_RETURN_LOGE(status == SOFTBUS_OK, CONN_BLE, "lock fail");
     out->underlayerHandle = generalConnection->underlayerHandle;
     (void)SoftBusMutexUnlock(&out->lock);
 }
@@ -674,7 +674,7 @@ static void MergeConnection(uint32_t generalId)
     CONN_CHECK_AND_RETURN_LOGE(generalConnection != NULL, CONN_BLE, "connection is null");
 
     if (SoftBusMutexLock(&g_generalManager.connections->lock) != SOFTBUS_OK) {
-        CONN_LOGE(CONN_BLE, "try to get connection lock failed");
+        CONN_LOGE(CONN_BLE, "try to get connection lock fail");
         ConnReturnGeneralConnection(&generalConnection);
         return;
     }
@@ -718,7 +718,7 @@ static void ConnFreeGeneralConnection(struct GeneralConnection *generalConnectio
 static void Reference(struct GeneralConnection *target)
 {
     CONN_CHECK_AND_RETURN_LOGE(SoftBusMutexLock(&target->lock) == SOFTBUS_OK, CONN_BLE,
-        "lock failed");
+        "lock fail");
     target->objectRc += 1;
     (void)SoftBusMutexUnlock(&target->lock);
 }
@@ -726,7 +726,7 @@ static void Reference(struct GeneralConnection *target)
 static void Dereference(struct GeneralConnection *underlayer)
 {
     CONN_CHECK_AND_RETURN_LOGE(SoftBusMutexLock(&underlayer->lock) == SOFTBUS_OK, CONN_BLE,
-        "lock failed");
+        "lock fail");
     underlayer->objectRc -= 1;
     int32_t objectRc = underlayer->objectRc;
     (void)SoftBusMutexUnlock(&underlayer->lock);
@@ -741,7 +741,7 @@ static bool IsAllowSave(const char *bundleName, bool isFindServer)
     int32_t count = 0;
     if (!isFindServer) {
         CONN_CHECK_AND_RETURN_RET_LOGE(SoftBusMutexLock(&g_generalManager.connections->lock) == SOFTBUS_OK,
-            false, CONN_BLE, "lock failed");
+            false, CONN_BLE, "lock fail");
         struct GeneralConnection *it = NULL;
         LIST_FOR_EACH_ENTRY(it, &g_generalManager.connections->list, struct GeneralConnection, node) {
             if (StrCmpIgnoreCase(it->info.bundleName, bundleName) == 0 && it->isClient) {
@@ -751,7 +751,7 @@ static bool IsAllowSave(const char *bundleName, bool isFindServer)
         (void)SoftBusMutexUnlock(&g_generalManager.connections->lock);
     } else {
         CONN_CHECK_AND_RETURN_RET_LOGE(SoftBusMutexLock(&g_generalManager.servers->lock) == SOFTBUS_OK,
-            SOFTBUS_LOCK_ERR, CONN_BLE, "lock failed");
+            SOFTBUS_LOCK_ERR, CONN_BLE, "lock fail");
         Server *item = NULL;
         LIST_FOR_EACH_ENTRY(item, &g_generalManager.servers->list, Server, node) {
             if (StrCmpIgnoreCase(item->info.bundleName, bundleName) == 0) {
@@ -777,14 +777,14 @@ static struct GeneralConnection *CreateConnection(const GeneralConnectionParam *
     }
 
     struct GeneralConnection *connection = (struct GeneralConnection *)SoftBusCalloc(sizeof(struct GeneralConnection));
-    CONN_CHECK_AND_RETURN_RET_LOGW(connection != NULL, NULL, CONN_BLE, "calloc connection failed");
+    CONN_CHECK_AND_RETURN_RET_LOGW(connection != NULL, NULL, CONN_BLE, "calloc connection fail");
     ListInit(&connection->node);
     connection->underlayerHandle = underlayerHandle;
     if (strncpy_s(connection->addr, BT_MAC_LEN, addr, BT_MAC_LEN - 1) != EOK ||
         strncpy_s(connection->info.name, GENERAL_NAME_LEN, param->name, GENERAL_NAME_LEN - 1) != EOK ||
         strncpy_s(connection->info.pkgName, PKG_NAME_SIZE_MAX, param->pkgName, PKG_NAME_SIZE_MAX - 1) != EOK ||
         strncpy_s(connection->info.bundleName, BUNDLE_NAME_MAX, param->bundleName, BUNDLE_NAME_MAX - 1) != EOK) {
-        CONN_LOGE(CONN_BLE, "copy failed");
+        CONN_LOGE(CONN_BLE, "copy fail");
         SoftBusFree(connection);
         *errorCode = SOFTBUS_STRCPY_ERR;
         return NULL;
@@ -793,7 +793,7 @@ static struct GeneralConnection *CreateConnection(const GeneralConnectionParam *
     connection->dereference = Dereference;
     connection->info.pid = param->pid;
     if (SoftBusMutexInit(&connection->lock, NULL) != SOFTBUS_OK) {
-        CONN_LOGE(CONN_BLE, "init lock failed");
+        CONN_LOGE(CONN_BLE, "init lock fail");
         SoftBusFree(connection);
         *errorCode = SOFTBUS_LOCK_ERR;
         return NULL;
@@ -828,7 +828,7 @@ static int32_t SaveConnection(struct GeneralConnection *connection)
 static void UpdatePeerGeneralId(struct GeneralConnection *connection, GeneralConnectionInfo *info)
 {
     CONN_CHECK_AND_RETURN_LOGE(SoftBusMutexLock(&connection->lock) == SOFTBUS_OK, CONN_BLE,
-        "lock failed");
+        "lock fail");
     connection->peerGeneralId = info->peerId;
     (void)SoftBusMutexUnlock(&connection->lock);
 }
@@ -840,7 +840,7 @@ static int32_t ProcessHandshakeMessage(uint32_t connectionId, GeneralConnectionI
     char addr[BT_MAC_LEN] = {0};
     struct GeneralConnection *generalConnection = CreateConnection(&param, addr, connectionId, false, &ret);
     CONN_CHECK_AND_RETURN_RET_LOGE(generalConnection != NULL, ret, CONN_BLE,
-        "create connection failed");
+        "create connection fail");
     ret = SaveConnection(generalConnection);
     if (ret != SOFTBUS_OK) {
         generalConnection->dereference(generalConnection);
@@ -851,7 +851,7 @@ static int32_t ProcessHandshakeMessage(uint32_t connectionId, GeneralConnectionI
         generalConnection->peerGeneralId, generalConnection->generalId);
     ret = SetConnectionDeviceId(generalConnection);
     if (ret != SOFTBUS_OK) {
-        CONN_LOGE(CONN_BLE, "set param failed, error=%{public}d", ret);
+        CONN_LOGE(CONN_BLE, "set param fail, error=%{public}d", ret);
         ConnRemoveGeneralConnection(generalConnection);
         generalConnection->dereference(generalConnection);
         return ret;
@@ -875,7 +875,7 @@ static int32_t ProcessHandshakeMessage(uint32_t connectionId, GeneralConnectionI
     generalConnection->dereference(generalConnection);
     CONN_CHECK_AND_RETURN_RET_LOGE(ConnPostMsgToLooper(&g_generalManagerSyncHandler, GENERAL_MGR_MSG_MERGE_CMD,
         generalId, 0, NULL, 0) == SOFTBUS_OK, ret, CONN_BLE,
-        "post merge msg failed");
+        "post merge msg fail");
     return ret;
 }
 
@@ -922,7 +922,7 @@ static int32_t ProcessMergeMessage(uint32_t connectionId, GeneralConnectionInfo 
     ConnReturnGeneralConnection(&mergedConnection);
     int32_t ret = SoftBusMutexLock(&generalConnection->lock);
     if (ret != SOFTBUS_OK) {
-        CONN_LOGE(CONN_BLE, "locak failed, generalId=%{public}u, err=%{public}d",
+        CONN_LOGE(CONN_BLE, "locak fail, generalId=%{public}u, err=%{public}d",
             generalConnection->generalId, ret);
         ConnReturnGeneralConnection(&generalConnection);
         return SOFTBUS_LOCK_ERR;
@@ -956,7 +956,7 @@ static int32_t ProcessResetMessage(uint32_t connectionId, GeneralConnectionInfo 
 static void UpdateGeneralConnectionByInfo(struct GeneralConnection *generalConnection, GeneralConnectionInfo *info)
 {
     CONN_CHECK_AND_RETURN_LOGE(SoftBusMutexLock(&generalConnection->lock) == SOFTBUS_OK, CONN_BLE,
-        "lock failed");
+        "lock fail");
     generalConnection->abilityBitSet = info->abilityBitSet;
     generalConnection->peerGeneralId = info->peerId;
     (void)SoftBusMutexUnlock(&generalConnection->lock);
@@ -970,7 +970,7 @@ static int32_t ProcessHandShakeAck(uint32_t connectionId, GeneralConnectionInfo 
     ConnRemoveMsgFromLooper(&g_generalManagerSyncHandler, GENERAL_MGR_MSG_CONNECT_TIMEOUT,
         generalConnection->generalId, 0, NULL);
     if (info->ackStatus != SOFTBUS_OK) {
-        CONN_LOGE(CONN_BLE, "hand shake failed, ackStatus=%{public}d, generalId=%{public}u",
+        CONN_LOGE(CONN_BLE, "hand shake fail, ackStatus=%{public}d, generalId=%{public}u",
             info->ackStatus, generalConnection->generalId);
         g_generalConnectionListener.onConnectFailed(&generalConnection->info,
             generalConnection->generalId, info->ackStatus);
@@ -984,7 +984,7 @@ static int32_t ProcessHandShakeAck(uint32_t connectionId, GeneralConnectionInfo 
     g_generalConnectionListener.onConnectSuccess(&generalConnection->info, generalConnection->generalId);
     if (ConnPostMsgToLooper(&g_generalManagerSyncHandler, GENERAL_MGR_MSG_MERGE_CMD,
         generalConnection->generalId, 0, NULL, 0) != SOFTBUS_OK) {
-        CONN_LOGE(CONN_BLE, "post merage msg failed");
+        CONN_LOGE(CONN_BLE, "post merage msg fail");
     }
     ConnReturnGeneralConnection(&generalConnection);
     return SOFTBUS_OK;
@@ -1018,7 +1018,7 @@ static void OnCommDisconnected(uint32_t connectionId, const ConnectionInfo *info
 {
     CONN_CHECK_AND_RETURN_LOGE(info != NULL, CONN_BLE, "info is null");
     CONN_CHECK_AND_RETURN_LOGE(SoftBusMutexLock(&g_generalManager.connections->lock) == SOFTBUS_OK, CONN_BLE,
-        "lock failed");
+        "lock fail");
     CONN_LOGI(CONN_BLE, "on connect disconnected, connectionId=%{public}u", connectionId);
     struct GeneralConnection *it = NULL;
     struct GeneralConnection *next = NULL;
@@ -1075,7 +1075,7 @@ static void OnCommDataReceived(uint32_t connectionId, ConnModule moduleId, int64
         return;
     }
     int32_t status = GeneralConnectionUnpackMsg(recvData, recvDataLen, &info, head.msgType);
-    CONN_CHECK_AND_RETURN_LOGE(status == SOFTBUS_OK, CONN_BLE, "pack msg failed, handle=%{public}u, status=%{public}d",
+    CONN_CHECK_AND_RETURN_LOGE(status == SOFTBUS_OK, CONN_BLE, "pack msg fail, handle=%{public}u, status=%{public}d",
         info.localId, status);
     status = ProcessInnerMessageByType(connectionId, msgType, &info);
     CONN_LOGD(CONN_BLE, "process inner msg, handle=%{public}u, status=%{public}d", info.localId, status);
@@ -1109,7 +1109,7 @@ static int32_t Connect(const GeneralConnectionParam *param, const char *addr)
     int32_t status = SOFTBUS_OK;
     struct GeneralConnection *generalConnection = CreateConnection(param, addr, 0, true, &status);
     CONN_CHECK_AND_RETURN_RET_LOGE(generalConnection != NULL, status, CONN_BLE,
-        "create connection failed");
+        "create connection fail");
     status = SaveConnection(generalConnection);
     if (status != SOFTBUS_OK) {
         generalConnection->dereference(generalConnection);
@@ -1117,7 +1117,7 @@ static int32_t Connect(const GeneralConnectionParam *param, const char *addr)
     }
     status= StartConnConnectDevice(generalConnection->addr, BLE_COC, &result, generalConnection->requestId);
     if (status != SOFTBUS_OK) {
-        CONN_LOGE(CONN_BLE, "connect failed, err=%{public}d", status);
+        CONN_LOGE(CONN_BLE, "connect fail, err=%{public}d", status);
         ConnRemoveGeneralConnection(generalConnection);
         generalConnection->dereference(generalConnection);
         return SOFTBUS_CONN_GENERAL_CONNECT_FAILED;
@@ -1125,7 +1125,7 @@ static int32_t Connect(const GeneralConnectionParam *param, const char *addr)
     status = ConnPostMsgToLooper(&g_generalManagerSyncHandler, GENERAL_MGR_MSG_CONNECT_TIMEOUT,
         generalConnection->generalId, 0, NULL, GENERAL_CONNECT_TIMEOUT_MILLIS);
     if (status != SOFTBUS_OK) {
-        CONN_LOGE(CONN_BLE, "post timeout msg failed, err=%{public}d", status);
+        CONN_LOGE(CONN_BLE, "post timeout msg fail, err=%{public}d", status);
         ConnRemoveGeneralConnection(generalConnection);
         generalConnection->dereference(generalConnection);
         return status;
@@ -1159,7 +1159,7 @@ static int32_t Send(uint32_t generalHandle, const uint8_t *data, uint32_t dataLe
         "invalid param, generalId=%{public}u", generalHandle);
     int32_t status = SoftBusMutexLock(&generalConnection->lock);
     if (status != SOFTBUS_OK) {
-        CONN_LOGE(CONN_BLE, "lock failed, handle=%{public}u, err=%{public}u",
+        CONN_LOGE(CONN_BLE, "lock fail, handle=%{public}u, err=%{public}u",
             generalConnection->generalId, status);
         ConnReturnGeneralConnection(&generalConnection);
         return SOFTBUS_LOCK_ERR;
@@ -1199,7 +1199,7 @@ static void Disconnect(uint32_t generalHandle, int32_t pid)
 static int32_t GetPeerDeviceId(uint32_t generalHandle, char *addr, uint32_t length, uint32_t tokenId, int32_t pid)
 {
     CONN_CHECK_AND_RETURN_RET_LOGE(addr != NULL, SOFTBUS_INVALID_PARAM, CONN_BLE,
-        "addr is null, get deviceId failed");
+        "addr is null, get deviceId fail");
     CONN_CHECK_AND_RETURN_RET_LOGE(length == BT_MAC_LEN, SOFTBUS_INVALID_PARAM, CONN_BLE,
         "invalid param, generalId=%{public}u, len=%{public}u", generalHandle, length);
 
@@ -1208,7 +1208,7 @@ static int32_t GetPeerDeviceId(uint32_t generalHandle, char *addr, uint32_t leng
         "invalid param, generalId=%{public}u", generalHandle);
     int32_t status = SoftBusGetRandomAddress(generalConnection->addr, addr, (int32_t)tokenId);
     if (status != SOFTBUS_OK) {
-        CONN_LOGE(CONN_BLE, "get mac failed, generalId=%{public}u", generalHandle);
+        CONN_LOGE(CONN_BLE, "get mac fail, generalId=%{public}u", generalHandle);
     }
     ConnReturnGeneralConnection(&generalConnection);
     return status;
@@ -1217,14 +1217,14 @@ static int32_t GetPeerDeviceId(uint32_t generalHandle, char *addr, uint32_t leng
 static int32_t CreateServer(const GeneralConnectionParam *param)
 {
     CONN_CHECK_AND_RETURN_RET_LOGE(param != NULL, SOFTBUS_INVALID_PARAM, CONN_BLE,
-        "create server failed, param is null");
+        "create server fail, param is null");
     if (!IsAllowSave(param->bundleName, true)) {
         CONN_LOGE(CONN_BLE, "add pkg name is max");
         return SOFTBUS_CONN_GENERAL_CREATE_SERVER_MAX;
     }
     int32_t status = SoftBusMutexLock(&g_generalManager.servers->lock);
     CONN_CHECK_AND_RETURN_RET_LOGE(status == SOFTBUS_OK, SOFTBUS_LOCK_ERR,
-        CONN_BLE, "lock servers failed");
+        CONN_BLE, "lock servers fail");
     Server *it = NULL;
     bool exit = false;
     LIST_FOR_EACH_ENTRY(it, &g_generalManager.servers->list, Server, node) {
@@ -1252,9 +1252,9 @@ static int32_t CreateServer(const GeneralConnectionParam *param)
 
 static void CloseServer(const GeneralConnectionParam *param)
 {
-    CONN_CHECK_AND_RETURN_LOGE(param != NULL, CONN_BLE, "close server failed, param is null");
+    CONN_CHECK_AND_RETURN_LOGE(param != NULL, CONN_BLE, "close server fail, param is null");
     int32_t status = SoftBusMutexLock(&g_generalManager.servers->lock);
-    CONN_CHECK_AND_RETURN_LOGE(status == SOFTBUS_OK, CONN_BLE, "lock names failed");
+    CONN_CHECK_AND_RETURN_LOGE(status == SOFTBUS_OK, CONN_BLE, "lock names fail");
     Server *it = NULL;
     Server *next = NULL;
     LIST_FOR_EACH_ENTRY_SAFE(it, next, &g_generalManager.servers->list, Server, node) {
@@ -1292,23 +1292,23 @@ int32_t InitGeneralConnectionManager(void)
         .OnDataReceived = OnCommDataReceived,
     };
     int32_t ret = SoftBusMutexInit(&g_requestIdLock, NULL);
-    CONN_CHECK_AND_RETURN_RET_LOGE(ret == SOFTBUS_OK, ret, CONN_INIT, "init lock failed");
+    CONN_CHECK_AND_RETURN_RET_LOGE(ret == SOFTBUS_OK, ret, CONN_INIT, "init lock fail");
     ret = ConnSetConnectCallback(MODULE_BLE_GENERAL, &connCb);
     if (ret != SOFTBUS_OK) {
-        CONN_LOGE(CONN_INIT, "set callback failed");
+        CONN_LOGE(CONN_INIT, "set callback fail");
         SoftBusMutexDestroy(&g_requestIdLock);
         return ret;
     }
     SoftBusList *connections = CreateSoftBusList();
     if (connections == NULL) {
-        CONN_LOGE(CONN_INIT, "create connections list failed");
+        CONN_LOGE(CONN_INIT, "create connections list fail");
         SoftBusMutexDestroy(&g_requestIdLock);
         return SOFTBUS_CREATE_LIST_ERR;
     }
     g_generalManager.connections = connections;
     SoftBusList *servers = CreateSoftBusList();
     if (servers == NULL) {
-        CONN_LOGE(CONN_INIT, "create servers list failed");
+        CONN_LOGE(CONN_INIT, "create servers list fail");
         SoftBusMutexDestroy(&g_requestIdLock);
         DestroySoftBusList(g_generalManager.connections);
         return SOFTBUS_CREATE_LIST_ERR;
@@ -1316,7 +1316,7 @@ int32_t InitGeneralConnectionManager(void)
     g_generalManager.servers = servers;
     g_generalManagerSyncHandler.handler.looper = GetLooper(LOOP_TYPE_CONN);
     if (g_generalManagerSyncHandler.handler.looper == NULL) {
-        CONN_LOGE(CONN_INIT, "create names list failed");
+        CONN_LOGE(CONN_INIT, "create names list fail");
         SoftBusMutexDestroy(&g_requestIdLock);
         DestroySoftBusList(g_generalManager.connections);
         DestroySoftBusList(g_generalManager.servers);
