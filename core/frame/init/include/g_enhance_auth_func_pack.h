@@ -34,7 +34,6 @@ void AuthUpdateNormalizeKeyIndexPacked(const char *udidHash, int64_t index,
     AuthLinkType type, SessionKey *normalizedKey, bool isServer);
 int32_t GenerateCertificatePacked(SoftbusCertChain *softbusCertChain, const AuthSessionInfo *info);
 bool IsNeedUDIDAbatementPacked(const AuthSessionInfo *info);
-bool AuthIsLatestNormalizeKeyInTimePacked(const char *udidHash, uint64_t time);
 int32_t VerifyCertificatePacked(SoftbusCertChain *softbusCertChain, const NodeInfo *nodeInfo,
     const AuthSessionInfo *info);
 void AuthMetaNotifyDataReceivedPacked(uint32_t connectionId, const SocketPktHead *pktHead, const uint8_t *data);

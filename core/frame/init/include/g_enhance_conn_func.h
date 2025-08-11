@@ -42,7 +42,8 @@ typedef int32_t (*ConnCocServerConnectFunc)(ConnBleConnection *connection);
 typedef int32_t (*ConnCocInitClientModuleFunc)(SoftBusLooper *looper, const ConnBleClientEventListener *cListener);
 typedef int32_t (*ConnCocInitServerModuleFunc)(SoftBusLooper *looper, const ConnBleServerEventListener *sListener);
 
-typedef int32_t (*ConnBleDirectConnectDeviceFunc)(const ConnectOption *option, uint32_t requestId, const ConnectResult *result);
+typedef int32_t (*ConnBleDirectConnectDeviceFunc)(
+    const ConnectOption *option, uint32_t requestId, const ConnectResult *result);
 typedef bool (*ConnBleDirectIsEnableFunc)(BleProtocolType protocol);
 typedef int32_t (*ConnBleDirectInitFunc)(void);
 
@@ -54,7 +55,8 @@ typedef void (*SoftbusBleConflictNotifyDateReceiveFunc)(int32_t underlayerHandle
 typedef void (*SoftbusBleConflictNotifyDisconnectFunc)(const char *addr, const char *udid);
 typedef void (*SoftbusBleConflictNotifyConnectResultFunc)(uint32_t requestId, int32_t underlayerHandle, bool status);
 typedef ConnectFuncInterface *(*ConnSleInitFunc)(const ConnectCallback *callback);
-typedef int32_t (*ConnDirectConnectDeviceFunc)(const ConnectOption *option, uint32_t reqId, const ConnectResult* result);
+typedef int32_t (*ConnDirectConnectDeviceFunc)(
+    const ConnectOption *option, uint32_t reqId, const ConnectResult* result);
 typedef int32_t (*ConnPagingConnectInitFunc)(void);
 
 typedef struct TagConnEnhanceFuncList {

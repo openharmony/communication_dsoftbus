@@ -47,16 +47,15 @@ typedef int32_t (*TransDealTdcChannelOpenResultFunc)(
 typedef int32_t (*TransDealProxyChannelOpenResultFunc)(
     int32_t channelId, int32_t openResult, const AccessInfo *accessInfo);
 typedef int32_t (*TransOpenChannelFunc)(const SessionParam *param, TransInfo *transInfo);
-typedef int32_t (*TransCreateSessionServerFunc)(
-    const char *pkgName, const char *sessionName, int32_t uid, int32_t pid);
+typedef int32_t (*TransCreateSessionServerFunc)(const char *pkgName, const char *sessionName, int32_t uid, int32_t pid);
 typedef TransDeviceState (*TransGetDeviceStateFunc)(const char *networkId);
 typedef int32_t (*TransAuthWithParaGetLaneReqByLaneReqIdFunc)(uint32_t laneReqId, TransAuthWithParaNode *paraNode);
 typedef int32_t (*TransAuthWithParaDelLaneReqByIdFunc)(uint32_t laneReqId);
 typedef int32_t (*GetAppInfoFunc)(const char *sessionName, int32_t channelId, AppInfo *appInfo, bool isClient);
 typedef int32_t (*TransOpenAuthMsgChannelWithParaFunc)(const char *sessionName, const LaneConnInfo *connInfo,
     int32_t *channelId, bool accountInfo);
-typedef int32_t (*TransLaneMgrAddLaneFunc)(const TransInfo *transInfo,
-    const LaneConnInfo *connInfo, uint32_t laneHandle, bool isQosLane, AppInfoData *myData);
+typedef int32_t (*TransLaneMgrAddLaneFunc)(
+    const TransInfo *transInfo, const LaneConnInfo *connInfo, uint32_t laneHandle, bool isQosLane, AppInfoData *myData);
 typedef int32_t (*TransCloseChannelFunc)(const char *sessionName, int32_t channelId, int32_t channelType);
 typedef int32_t (*NotifyOpenAuthChannelFailedFunc)(const char *pkgName, int32_t pid, int32_t channelId,
     int32_t errCode);

@@ -27,9 +27,9 @@ extern "C" {
 #endif
 
 typedef int32_t (*RemoveAuthEventFunc)(EventType event, RemoveCompareFunc func, void *param);
-typedef int32_t (*PackAuthDataFunc)(const AuthDataHead *head, const uint8_t *data,
-   uint8_t *buf, uint32_t size);
-typedef int32_t (*PostAuthEventFunc)(EventType event, EventHandler handler, const void *obj, uint32_t size, uint64_t delayMs);
+typedef int32_t (*PackAuthDataFunc)(const AuthDataHead *head, const uint8_t *data, uint8_t *buf, uint32_t size);
+typedef int32_t (*PostAuthEventFunc)(
+    EventType event, EventHandler handler, const void *obj, uint32_t size, uint64_t delayMs);
 typedef const uint8_t *(*UnpackAuthDataFunc)(const uint8_t *data, uint32_t len, AuthDataHead *head);
 typedef int32_t (*UnpackDeviceInfoMessageFunc)(const DevInfoData *devInfo, NodeInfo *nodeInfo, bool isMetaAuth,
     const AuthSessionInfo *info);

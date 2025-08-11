@@ -214,7 +214,7 @@ int32_t GetLocalAccountUidByUserId(char *id, uint32_t idLen, uint32_t *len, int3
             return SOFTBUS_STRCPY_ERR;
         }
         *len = strlen(id);
-        if (id[*len] == '\0') {
+        if (id[*len] != '\0') {
             TRANS_LOGE(TRANS_CTRL, "id buffer is not null-terminated.");
             return SOFTBUS_INVALID_PARAM;
         }

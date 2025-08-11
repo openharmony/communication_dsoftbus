@@ -153,8 +153,8 @@ SoftBusServerStub::SoftBusServerStub()
     memberPermissionMap_[SERVER_CLOSE_BR_PROXY] = OHOS_PERMISSION_ACCESS_BLUETOOTH;
     memberPermissionMap_[SERVER_SEND_BR_PROXY_DATA] = OHOS_PERMISSION_ACCESS_BLUETOOTH;
     memberPermissionMap_[SERVER_SET_BR_PROXY_LISTENER_STATE] = OHOS_PERMISSION_ACCESS_BLUETOOTH;
-    memberPermissionMap_[SERVER_GET_BR_PROXY_CHANNEL_STATE] = OHOS_PERMISSION_ACCESS_BLUETOOTH;
-    memberPermissionMap_[SERVER_REGISTER_PUSH_HOOK] = OHOS_PERMISSION_ACCESS_BLUETOOTH;
+    memberPermissionMap_[SERVER_GET_BR_PROXY_CHANNEL_STATE] = OHOS_PERMISSION_DISTRIBUTED_DATASYNC;
+    memberPermissionMap_[SERVER_REGISTER_PUSH_HOOK] = OHOS_PERMISSION_DISTRIBUTED_DATASYNC;
 }
 
 void SoftBusServerStub::InitMemberFuncMap()
@@ -715,7 +715,7 @@ int32_t SoftBusServerStub::OpenAuthSessionInner(MessageParcel &data, MessageParc
     COMM_LOGI(COMM_SVC, "OpenAuthSession channelId=%{public}d", retReply);
 EXIT:
     if (!reply.WriteInt32(retReply)) {
-        COMM_LOGE(COMM_SVC, "OpenSessionInner write reply failed! retReply=%{public}d", retReply);
+        COMM_LOGE(COMM_SVC, "OpenSessionInner write reply failed!");
         return SOFTBUS_TRANS_PROXY_WRITEINT_FAILED;
     }
     return SOFTBUS_OK;
@@ -2166,20 +2166,6 @@ int32_t SoftBusServerStub::GetPeerDeviceIdInner(MessageParcel &data, MessageParc
     return SOFTBUS_OK;
 }
 
-static int32_t PushIdentifyCheck(const char *pkgName)
-{
-    #define COMM_PKGNAME_PUSH   "PUSH_SERVICE"
-    #define PUSH_SERVICE_UID    7023
-    if (strcmp(pkgName, COMM_PKGNAME_PUSH) != 0) {
-        return SOFTBUS_OK;
-    }
-    pid_t uid = IPCSkeleton::GetCallingUid();
-    if (uid != PUSH_SERVICE_UID) {
-        return SOFTBUS_TRANS_BR_PROXY_CALLER_RESTRICTED;
-    }
-    return SOFTBUS_OK;
-}
-
 int32_t SoftBusServerStub::SoftbusRegisterBrProxyServiceInner(MessageParcel &data, MessageParcel &reply)
 {
     COMM_LOGD(COMM_SVC, "enter");
@@ -2192,11 +2178,6 @@ int32_t SoftBusServerStub::SoftbusRegisterBrProxyServiceInner(MessageParcel &dat
     if (pkgName == nullptr) {
         COMM_LOGE(COMM_SVC, "SoftbusRegisterServiceInner read pkgName failed!");
         return SOFTBUS_TRANS_PROXY_READCSTRING_FAILED;
-    }
-    int32_t ret = PushIdentifyCheck(pkgName);
-    if (ret != SOFTBUS_OK) {
-        COMM_LOGE(COMM_SVC, "[br_proxy] Push identity verification failed! ret=%{public}d", ret);
-        return ret;
     }
     uint32_t code = MANAGE_REGISTER_BR_PROXY_SERVICE;
     SoftbusRecordCalledApiInfo(pkgName, code);
