@@ -641,6 +641,9 @@ HWTEST_F(SoftbusProxyChannelMessagePagingTest, TransProxyFillPagingChannelInfoTe
     res = AddStringToJsonObject(root, JSON_KEY_DEVICE_ID, data);
     EXPECT_EQ(true, res);
     EXPECT_CALL(ProxyPagingMock, cJSON_ParseWithLength).WillOnce(Return(root));
+    unsigned char str[SHA_256_HASH_LEN] = "TEST_";
+    EXPECT_CALL(ProxyPagingMock, ConvertHexStringToBytes)
+        .WillRepeatedly(DoAll(SetArrayArgument<0>(str, str + SHA_256_HASH_LEN), Return(SOFTBUS_OK)));
     EXPECT_CALL(ProxyPagingMock, SoftBusGenerateSessionKey).WillOnce(Return(SOFTBUS_INVALID_PARAM));
     ret = TransProxyFillPagingChannelInfo(&msg, &chan, accountHash, udidHash);
     EXPECT_EQ(SOFTBUS_INVALID_PARAM, ret);
@@ -678,6 +681,9 @@ HWTEST_F(SoftbusProxyChannelMessagePagingTest, TransProxyFillPagingChannelInfoTe
     res = AddStringToJsonObject(testRoot, JSON_KEY_DEVICE_ID, data);
     EXPECT_EQ(true, res);
     EXPECT_CALL(ProxyPagingMock, cJSON_ParseWithLength).WillOnce(Return(testRoot));
+    unsigned char str[SHA_256_HASH_LEN] = "TEST_";
+    EXPECT_CALL(ProxyPagingMock, ConvertHexStringToBytes)
+        .WillRepeatedly(DoAll(SetArrayArgument<0>(str, str + SHA_256_HASH_LEN), Return(SOFTBUS_OK)));
     EXPECT_CALL(ProxyPagingMock, SoftBusGenerateSessionKey).WillOnce(Return(SOFTBUS_OK));
     EXPECT_CALL(ProxyPagingMock, SoftBusGenerateRandomArray).WillOnce(Return(SOFTBUS_INVALID_PARAM));
     int32_t ret = TransProxyFillPagingChannelInfo(&msg, &chan, accountHash, udidHash);
@@ -716,6 +722,9 @@ HWTEST_F(SoftbusProxyChannelMessagePagingTest, TransProxyFillPagingChannelInfoTe
     res = AddStringToJsonObject(testRoot, JSON_KEY_DEVICE_ID, data);
     EXPECT_EQ(true, res);
     EXPECT_CALL(ProxyPagingMock, cJSON_ParseWithLength).WillOnce(Return(testRoot));
+    unsigned char str[SHA_256_HASH_LEN] = "TEST_";
+    EXPECT_CALL(ProxyPagingMock, ConvertHexStringToBytes)
+        .WillRepeatedly(DoAll(SetArrayArgument<0>(str, str + SHA_256_HASH_LEN), Return(SOFTBUS_OK)));
     EXPECT_CALL(ProxyPagingMock, SoftBusGenerateSessionKey).WillOnce(Return(SOFTBUS_OK));
     EXPECT_CALL(ProxyPagingMock, SoftBusGenerateRandomArray).WillOnce(Return(SOFTBUS_OK));
     EXPECT_CALL(ProxyPagingMock, LnnGetLocalStrInfo).WillOnce(Return(SOFTBUS_OK));
@@ -756,6 +765,9 @@ HWTEST_F(SoftbusProxyChannelMessagePagingTest, TransProxyFillPagingChannelInfoTe
     res = AddStringToJsonObject(testRoot, JSON_KEY_DEVICE_ID, data);
     EXPECT_EQ(true, res);
     EXPECT_CALL(ProxyPagingMock, cJSON_ParseWithLength).WillRepeatedly(Return(testRoot));
+    unsigned char str[SHA_256_HASH_LEN] = "TEST_";
+    EXPECT_CALL(ProxyPagingMock, ConvertHexStringToBytes)
+        .WillRepeatedly(DoAll(SetArrayArgument<0>(str, str + SHA_256_HASH_LEN), Return(SOFTBUS_OK)));
     EXPECT_CALL(ProxyPagingMock, SoftBusGenerateSessionKey).WillRepeatedly(Return(SOFTBUS_OK));
     EXPECT_CALL(ProxyPagingMock, SoftBusGenerateRandomArray).WillRepeatedly(Return(SOFTBUS_OK));
     EXPECT_CALL(ProxyPagingMock, LnnGetLocalStrInfo).WillRepeatedly(Return(SOFTBUS_OK));
@@ -797,6 +809,9 @@ HWTEST_F(SoftbusProxyChannelMessagePagingTest, TransProxyFillPagingChannelInfoTe
     res = AddStringToJsonObject(testRoot, JSON_KEY_DEVICE_ID, data);
     EXPECT_EQ(true, res);
     EXPECT_CALL(ProxyPagingMock, cJSON_ParseWithLength).WillOnce(Return(testRoot));
+    unsigned char str[SHA_256_HASH_LEN] = "TEST_";
+    EXPECT_CALL(ProxyPagingMock, ConvertHexStringToBytes)
+        .WillRepeatedly(DoAll(SetArrayArgument<0>(str, str + SHA_256_HASH_LEN), Return(SOFTBUS_OK)));
     EXPECT_CALL(ProxyPagingMock, SoftBusGenerateSessionKey).WillOnce(Return(SOFTBUS_OK));
     EXPECT_CALL(ProxyPagingMock, SoftBusGenerateRandomArray).WillOnce(Return(SOFTBUS_OK));
     EXPECT_CALL(ProxyPagingMock, LnnGetLocalStrInfo).WillOnce(Return(SOFTBUS_INVALID_PARAM));
@@ -894,6 +909,9 @@ HWTEST_F(SoftbusProxyChannelMessagePagingTest, TransPagingProcessHandshakeMsgTes
     NiceMock<SoftbusProxychannelMessagePagingInterfaceMock> ProxyPagingMock;
     EXPECT_CALL(ProxyPagingMock, cJSON_ParseWithLength).WillOnce(Return(nullptr));
     EXPECT_CALL(ProxyPagingMock, TransPagingAckHandshake).WillRepeatedly(Return(SOFTBUS_OK));
+    unsigned char str[SHA_256_HASH_LEN] = "TEST_";
+    EXPECT_CALL(ProxyPagingMock, ConvertHexStringToBytes)
+        .WillRepeatedly(DoAll(SetArrayArgument<0>(str, str + SHA_256_HASH_LEN), Return(SOFTBUS_OK)));
     TransPagingProcessHandshakeMsg(&msg, accountHash, udidHash);
     cJSON *testRoot = cJSON_CreateObject();
     ASSERT_TRUE(testRoot != nullptr);
@@ -950,6 +968,9 @@ HWTEST_F(SoftbusProxyChannelMessagePagingTest, TransPagingProcessHandshakeMsgTes
     res = AddStringToJsonObject(testRoot, JSON_KEY_DEVICE_ID, data);
     EXPECT_EQ(true, res);
     NiceMock<SoftbusProxychannelMessagePagingInterfaceMock> ProxyPagingMock;
+    unsigned char str[SHA_256_HASH_LEN] = "TEST_";
+    EXPECT_CALL(ProxyPagingMock, ConvertHexStringToBytes)
+        .WillRepeatedly(DoAll(SetArrayArgument<0>(str, str + SHA_256_HASH_LEN), Return(SOFTBUS_OK)));
     EXPECT_CALL(ProxyPagingMock, TransPagingAckHandshake).WillRepeatedly(Return(SOFTBUS_OK));
     EXPECT_CALL(ProxyPagingMock, cJSON_ParseWithLength).WillOnce(Return(testRoot));
     EXPECT_CALL(ProxyPagingMock, SoftBusGenerateSessionKey).WillOnce(Return(SOFTBUS_OK));
@@ -991,6 +1012,9 @@ HWTEST_F(SoftbusProxyChannelMessagePagingTest, TransPagingProcessHandshakeMsgTes
     res = AddStringToJsonObject(testRoot, JSON_KEY_DEVICE_ID, data);
     EXPECT_EQ(true, res);
     NiceMock<SoftbusProxychannelMessagePagingInterfaceMock> ProxyPagingMock;
+    unsigned char str[SHA_256_HASH_LEN] = "TEST_";
+    EXPECT_CALL(ProxyPagingMock, ConvertHexStringToBytes)
+        .WillRepeatedly(DoAll(SetArrayArgument<0>(str, str + SHA_256_HASH_LEN), Return(SOFTBUS_OK)));
     EXPECT_CALL(ProxyPagingMock, TransPagingAckHandshake).WillRepeatedly(Return(SOFTBUS_OK));
     EXPECT_CALL(ProxyPagingMock, cJSON_ParseWithLength).WillOnce(Return(testRoot));
     EXPECT_CALL(ProxyPagingMock, SoftBusGenerateSessionKey).WillOnce(Return(SOFTBUS_OK));
@@ -1034,6 +1058,9 @@ HWTEST_F(SoftbusProxyChannelMessagePagingTest, TransPagingProcessHandshakeMsgTes
     res = AddStringToJsonObject(testRoot, JSON_KEY_DEVICE_ID, data);
     EXPECT_EQ(true, res);
     NiceMock<SoftbusProxychannelMessagePagingInterfaceMock> ProxyPagingMock;
+    unsigned char str[SHA_256_HASH_LEN] = "TEST_";
+    EXPECT_CALL(ProxyPagingMock, ConvertHexStringToBytes)
+        .WillRepeatedly(DoAll(SetArrayArgument<0>(str, str + SHA_256_HASH_LEN), Return(SOFTBUS_OK)));
     EXPECT_CALL(ProxyPagingMock, TransPagingAckHandshake).WillRepeatedly(Return(SOFTBUS_OK));
     EXPECT_CALL(ProxyPagingMock, cJSON_ParseWithLength).WillOnce(Return(testRoot));
     EXPECT_CALL(ProxyPagingMock, SoftBusGenerateSessionKey).WillOnce(Return(SOFTBUS_OK));
