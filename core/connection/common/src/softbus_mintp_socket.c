@@ -68,7 +68,7 @@ int32_t SetMintpSocketMsgSize(int32_t fd)
     int32_t msgSize = MTP_SOCKET_MSG_SIZE;
     int32_t rc = SoftBusSocketSetOpt(fd, SOL_MTP, MTP_MAX_MSG_SIZE, &msgSize, sizeof(msgSize));
     if (rc != SOFTBUS_ADAPTER_OK) {
-        CONN_LOGE(CONN_COMMON, "set MTP_MAX_MSG_SIZE failed. rc=%{public}d, errno=%{public}d", rc, errno);
+        CONN_LOGE(CONN_COMMON, "set MTP_MAX_MSG_SIZE fail. rc=%{public}d, errno=%{public}d", rc, errno);
         return rc;
     }
     return SOFTBUS_OK;
@@ -78,7 +78,7 @@ int32_t SetMintpSocketTos(int32_t fd, uint32_t tos)
 {
     int32_t rc = SoftBusSocketSetOpt(fd, SOL_MTP, MTP_TOS, &tos, sizeof(tos));
     if (rc != SOFTBUS_ADAPTER_OK) {
-        CONN_LOGE(CONN_COMMON, "set mintp tos failed. fd=%{public}d", fd);
+        CONN_LOGE(CONN_COMMON, "set mintp tos fail. fd=%{public}d", fd);
         return rc;
     }
     return SOFTBUS_OK;
@@ -88,7 +88,7 @@ int32_t SetMintpSocketTransType(int32_t fd, uint32_t transType)
 {
     int32_t rc = SoftBusSocketSetOpt(fd, SOL_MTP, MTP_TRANS_TYPE, &transType, sizeof(transType));
     if (rc != SOFTBUS_ADAPTER_OK) {
-        CONN_LOGE(CONN_COMMON, "set mintp trans type failed. fd=%{public}d", fd);
+        CONN_LOGE(CONN_COMMON, "set mintp trans type fail. fd=%{public}d", fd);
         return rc;
     }
     return SOFTBUS_OK;
@@ -102,7 +102,7 @@ int32_t SetMintpSocketKeepAlive(int32_t fd, int32_t timeoutMs)
     }
     int32_t rc = SoftBusSocketSetOpt(fd, SOL_MTP, MTP_KEEPIDLE, &timeoutMs, sizeof(timeoutMs));
     if (rc != SOFTBUS_ADAPTER_OK) {
-        CONN_LOGE(CONN_COMMON, "set mintp keep idle failed. fd=%{public}d", fd);
+        CONN_LOGE(CONN_COMMON, "set mintp keep idle fail. fd=%{public}d", fd);
         return rc;
     }
     return SOFTBUS_OK;
@@ -116,7 +116,7 @@ int32_t SetMintpSocketTimeSync(int32_t fd, MintpTimeSync *timeSync)
     }
     int32_t rc = SoftBusSocketSetOpt(fd, SOL_MTP, MTP_TIME_SYNC, timeSync, sizeof(MintpTimeSync));
     if (rc != SOFTBUS_ADAPTER_OK) {
-        CONN_LOGE(CONN_COMMON, "set mintp time sync failed. fd=%{public}d", fd);
+        CONN_LOGE(CONN_COMMON, "set mintp time sync fail. fd=%{public}d", fd);
         return rc;
     }
     return SOFTBUS_OK;
@@ -141,20 +141,20 @@ static int32_t BindMintp(int32_t domain, int32_t fd, const char *localIp)
     if (isIpv4) {
         int32_t rc = SoftBusInetPtoN(SOFTBUS_AF_INET, localIp, &tmpAddr.ip.addr);
         if (rc != SOFTBUS_ADAPTER_OK) {
-            CONN_LOGE(CONN_COMMON, "ipv4 SoftBusInetPtoN failed. rc=%{public}d", rc);
+            CONN_LOGE(CONN_COMMON, "ipv4 SoftBusInetPtoN fail. rc=%{public}d", rc);
             return SOFTBUS_SOCKET_ADDR_ERR;
         }
     } else {
         int32_t rc = SoftBusInetPtoN(SOFTBUS_AF_INET6, localIp, &tmpAddr.ip6.addr);
         if (rc != SOFTBUS_ADAPTER_OK) {
-            CONN_LOGE(CONN_COMMON, "ipv6 SoftBusInetPtoN failed. rc=%{public}d", rc);
+            CONN_LOGE(CONN_COMMON, "ipv6 SoftBusInetPtoN fail. rc=%{public}d", rc);
             return SOFTBUS_SOCKET_ADDR_ERR;
         }
     }
     addrLen = isIpv4 ? sizeof(SoftBusSockAddrIn) : sizeof(tmpAddr);
     int32_t ret = bind(fd, (struct sockaddr *)&tmpAddr, addrLen);
     if (ret != 0) {
-        CONN_LOGE(CONN_COMMON, "bind mintp failed. ret=%{public}d, errno=%{public}d(%{public}s)", ret, errno,
+        CONN_LOGE(CONN_COMMON, "bind mintp fail. ret=%{public}d, errno=%{public}d(%{public}s)", ret, errno,
             strerror(errno));
         return SOFTBUS_SOCKET_BIND_ERR;
     }
@@ -178,12 +178,12 @@ static int32_t OpenMintpServerSocket(const LocalListenerInfo *option)
     int32_t domain = GetDomainByAddr(option->socketOption.addr);
     int32_t ret = SoftBusSocketCreate(domain, SOFTBUS_SOCK_DGRAM | SOFTBUS_SOCK_NONBLOCK, IPPROTO_MINTP, &fd);
     if (ret != SOFTBUS_ADAPTER_OK) {
-        CONN_LOGE(CONN_COMMON, "create mintp socket failed. ret=%{public}d", ret);
+        CONN_LOGE(CONN_COMMON, "create mintp socket fail. ret=%{public}d", ret);
         return ret;
     }
     ret = BindMintp(domain, fd, option->socketOption.addr);
     if (ret != SOFTBUS_OK) {
-        CONN_LOGE(CONN_COMMON, "bind mintp failed. ret=%{public}d", ret);
+        CONN_LOGE(CONN_COMMON, "bind mintp fail. ret=%{public}d", ret);
         ConnShutdownSocket(fd);
         return ret;
     }
@@ -201,13 +201,13 @@ static int32_t MintpSocketConnect(int32_t fd, int32_t domain, const ConnectOptio
     if (domain == SOFTBUS_AF_INET) {
         int32_t rc = SoftBusInetPtoN(SOFTBUS_AF_INET, option->socketOption.addr, &tmpAddr.ip.addr);
         if (rc != SOFTBUS_ADAPTER_OK) {
-            CONN_LOGE(CONN_COMMON, "ipv4 SoftBusInetPtoN failed. rc=%{public}d", rc);
+            CONN_LOGE(CONN_COMMON, "ipv4 SoftBusInetPtoN fail. rc=%{public}d", rc);
             return rc;
         }
     } else {
         int32_t rc = SoftBusInetPtoN(SOFTBUS_AF_INET6, option->socketOption.addr, &tmpAddr.ip6.addr);
         if (rc != SOFTBUS_ADAPTER_OK) {
-            CONN_LOGE(CONN_COMMON, "ipv6 SoftBusInetPtoN failed. rc=%{public}d", rc);
+            CONN_LOGE(CONN_COMMON, "ipv6 SoftBusInetPtoN fail. rc=%{public}d", rc);
             return rc;
         }
     }
@@ -235,19 +235,19 @@ static int32_t OpenMintpClientSocket(const ConnectOption *option, const char *my
     int32_t domain = GetDomainByAddr(option->socketOption.addr);
     int32_t ret = SoftBusSocketCreate(domain, SOFTBUS_SOCK_DGRAM, IPPROTO_MINTP, &fd);
     if (ret != SOFTBUS_OK) {
-        CONN_LOGE(CONN_COMMON, "create mintp socket failed. serverIp=%{public}s, serverPort=%{public}d, ret=%{public}d",
+        CONN_LOGE(CONN_COMMON, "create mintp socket fail. serverIp=%{public}s, serverPort=%{public}d, ret=%{public}d",
             animizedIp, option->socketOption.port, ret);
         return ret;
     }
     if (isNonBlock && ConnToggleNonBlockMode(fd, true) != SOFTBUS_OK) {
-        CONN_LOGE(CONN_COMMON, "set nonblock mode failed. serverIp=%{public}s, serverPort=%{public}d", animizedIp,
+        CONN_LOGE(CONN_COMMON, "set nonblock mode fail. serverIp=%{public}s, serverPort=%{public}d", animizedIp,
             option->socketOption.port);
         ConnShutdownSocket(fd);
         return SOFTBUS_SOCKET_ERR;
     }
     ret = BindMintp(domain, fd, myIp);
     if (ret != SOFTBUS_OK) {
-        CONN_LOGE(CONN_COMMON, "bind mintp failed. ret=%{public}d", ret);
+        CONN_LOGE(CONN_COMMON, "bind mintp fail. ret=%{public}d", ret);
         ConnShutdownSocket(fd);
         return ret;
     }
@@ -255,7 +255,7 @@ static int32_t OpenMintpClientSocket(const ConnectOption *option, const char *my
     ret = MintpSocketConnect(fd, domain, option);
     if ((ret != SOFTBUS_ADAPTER_OK) && (ret != SOFTBUS_ADAPTER_SOCKET_EINPROGRESS) &&
         (ret != SOFTBUS_ADAPTER_SOCKET_EAGAIN)) {
-        CONN_LOGE(CONN_COMMON, "connect mintp failed. serverIp=%{public}s, serverPort=%{public}d, ret=%{public}d",
+        CONN_LOGE(CONN_COMMON, "connect mintp fail. serverIp=%{public}s, serverPort=%{public}d, ret=%{public}d",
             animizedIp, option->socketOption.port, ret);
         ConnShutdownSocket(fd);
         return SOFTBUS_SOCKET_ERR;
@@ -270,7 +270,7 @@ int32_t GetMintpSockPort(int32_t fd)
     SoftBusSockAddr addr;
     int32_t rc = SoftBusSocketGetLocalName(fd, &addr);
     if (rc != SOFTBUS_ADAPTER_OK) {
-        CONN_LOGE(CONN_COMMON, "get mintp sock port failed. rc=%{public}d, fd=%{public}d", rc, fd);
+        CONN_LOGE(CONN_COMMON, "get mintp sock port fail. rc=%{public}d, fd=%{public}d", rc, fd);
         return rc;
     }
     if (addr.saFamily == SOFTBUS_AF_INET6) {
@@ -289,7 +289,7 @@ static int32_t AcceptMintpClient(int32_t fd, ConnectOption *clientAddr, int32_t 
     (void)memset_s(&mtpClientAddr, addrLen, 0, addrLen);
     int32_t ret = SOFTBUS_TEMP_FAILURE_RETRY(SoftBusSocketAccept(fd, (SoftBusSockAddr *)&mtpClientAddr, cfd));
     if (ret != SOFTBUS_OK) {
-        CONN_LOGE(CONN_COMMON, "accept mintp client failed. ret=%{public}d", ret);
+        CONN_LOGE(CONN_COMMON, "accept mintp client fail. ret=%{public}d", ret);
         return ret;
     }
     clientAddr->type = CONNECT_HML;
@@ -298,12 +298,12 @@ static int32_t AcceptMintpClient(int32_t fd, ConnectOption *clientAddr, int32_t 
     char mtpMac[BT_MAC_LEN] = { 0 };
     ret = ConvertBtMacToStr(mtpMac, sizeof(mtpMac), mtpClientAddr.mac.addr, sizeof(mtpClientAddr.mac.addr));
     if (ret != SOFTBUS_OK) {
-        CONN_LOGE(CONN_COMMON, "convert mintp mac to string failed. ret=%{public}d", ret);
+        CONN_LOGE(CONN_COMMON, "convert mintp mac to string fail. ret=%{public}d", ret);
         return ret;
     }
     ret = strcpy_s(clientAddr->socketOption.addr, sizeof(clientAddr->socketOption.addr), mtpMac);
     if (ret != EOK) {
-        CONN_LOGE(CONN_COMMON, "copy mintp mac to clientAddr failed. ret=%{public}d", ret);
+        CONN_LOGE(CONN_COMMON, "copy mintp mac to clientAddr fail. ret=%{public}d", ret);
         return SOFTBUS_ERR;
     }
     CONN_LOGI(CONN_COMMON, "accept mintp client success, cfd=%{public}d", *cfd);
