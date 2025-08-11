@@ -141,6 +141,7 @@ typedef struct {
     int fd;
     AppType appType;
     ProtocolType protocol;
+    int32_t pagingId;
     int32_t encrypt;
     int32_t algorithm;
     int32_t crc;
