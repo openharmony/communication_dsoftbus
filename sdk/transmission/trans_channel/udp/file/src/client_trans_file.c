@@ -82,11 +82,14 @@ static void FillFileStatusList(const DFileMsg *msgData, FileEvent *event)
     event->statusList.notCompletedList.files = (char **)SoftBusCalloc(fileNum * sizeof(char *));
     if (event->statusList.notCompletedList.files == NULL) {
         TRANS_LOGE(TRANS_SDK, "mem malloc failed");
+        SoftBusFree(event->statusList.completedList.files);
         return;
     }
     event->statusList.notStartedList.files = (char **)SoftBusCalloc(fileNum * sizeof(char *));
     if (event->statusList.notStartedList.files == NULL) {
         TRANS_LOGE(TRANS_SDK, "mem malloc failed");
+        SoftBusFree(event->statusList.completedList.files);
+        SoftBusFree(event->statusList.notCompletedList.files);
         return;
     }
     int32_t completedIndex = 0;
