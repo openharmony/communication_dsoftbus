@@ -57,6 +57,9 @@
 #define EMPTY_STRING                      ""
 #define DEFAULT_LINK_IFNAME               "lo"
 
+#define IPV4_LOOP_IP                      "127.0.0.1"
+#define IPV6_LOOP_IP                      "::1"
+
 static NSTACKX_LocalDeviceInfoV2 *g_localDeviceInfo = NULL;
 static DiscInnerCallback *g_discCoapInnerCb = NULL;
 static SoftBusMutex g_localDeviceInfoLock = {0};
@@ -572,18 +575,20 @@ static int32_t SetLocalLinkInfo(LinkStatus status, int32_t ifnameIdx)
         return SOFTBUS_DISCOVER_COAP_NOT_INIT;
     }
 
-    errno_t res = memset_s(g_localDeviceInfo->localIfInfo, sizeof(NSTACKX_InterfaceInfo), 0,
+    (void)memset_s(g_localDeviceInfo->localIfInfo, sizeof(NSTACKX_InterfaceInfo), 0,
         sizeof(NSTACKX_InterfaceInfo));
-    if (res != EOK) {
-        DISC_LOGE(DISC_COAP, "memset_s local device info failed");
-        (void)SoftBusMutexUnlock(&g_localDeviceInfoLock);
-        return SOFTBUS_MEM_ERR;
-    }
-
     if (status == LINK_STATUS_DOWN) {
         if (strcpy_s(g_localDeviceInfo->localIfInfo->networkName, sizeof(g_localDeviceInfo->localIfInfo->networkName),
             g_linkInfo[ifnameIdx].netWorkName) != EOK) {
             DISC_LOGE(DISC_COAP, "strcpy networkname failed.");
+            (void)SoftBusMutexUnlock(&g_localDeviceInfoLock);
+            return SOFTBUS_STRCPY_ERR;
+        }
+        // Set IpAddr to loop IP assuming the link is down.
+        char *networkIpAddr = (ifnameIdx == WLAN_IF) ? IPV4_LOOP_IP : IPV6_LOOP_IP;
+        if (strcpy_s(g_localDeviceInfo->localIfInfo->networkIpAddr,
+            sizeof(g_localDeviceInfo->localIfInfo->networkIpAddr), networkIpAddr) != EOK) {
+            DISC_LOGE(DISC_COAP, "strcpy networkIpAddr failed.");
             (void)SoftBusMutexUnlock(&g_localDeviceInfoLock);
             return SOFTBUS_STRCPY_ERR;
         }
@@ -600,14 +605,14 @@ static int32_t SetLocalLinkInfo(LinkStatus status, int32_t ifnameIdx)
             (void)SoftBusMutexUnlock(&g_localDeviceInfoLock);
             return SOFTBUS_STRCPY_ERR;
         }
+        if (LnnGetLocalStrInfoByIfnameIdx(STRING_KEY_IP, g_localDeviceInfo->localIfInfo->networkIpAddr,
+            sizeof(g_localDeviceInfo->localIfInfo->networkIpAddr), ifnameIdx) != SOFTBUS_OK) {
+            DISC_LOGE(DISC_COAP, "get local device info from lnn failed.");
+            (void)SoftBusMutexUnlock(&g_localDeviceInfoLock);
+            return SOFTBUS_DISCOVER_GET_LOCAL_STR_FAILED;
+        }
     }
-
-    if (LnnGetLocalStrInfoByIfnameIdx(STRING_KEY_IP, g_localDeviceInfo->localIfInfo->networkIpAddr,
-        sizeof(g_localDeviceInfo->localIfInfo->networkIpAddr), ifnameIdx) != SOFTBUS_OK) {
-        DISC_LOGE(DISC_COAP, "get local device info from lnn failed.");
-        (void)SoftBusMutexUnlock(&g_localDeviceInfoLock);
-        return SOFTBUS_DISCOVER_GET_LOCAL_STR_FAILED;
-    }
+    
     g_localDeviceInfo->ifNums = 1;
     (void)SoftBusMutexUnlock(&g_localDeviceInfoLock);
     return SOFTBUS_OK;
@@ -786,9 +791,9 @@ void DiscCoapUpdateLocalIp(LinkStatus status, int32_t ifnameIdx)
     int64_t accountId = 0;
     int32_t port = 0;
     int32_t ret = LnnGetLocalNum64Info(NUM_KEY_ACCOUNT_LONG, &accountId);
-    DISC_CHECK_AND_RETURN_LOGE(ret == SOFTBUS_OK, DISC_COAP, "get local account failed");
+    DISC_CHECK_AND_RETURN_LOGE(ret == SOFTBUS_OK, DISC_COAP, "get local account failed, err=%{public}d", ret);
     ret = LnnGetLocalNumInfoByIfnameIdx(NUM_KEY_AUTH_PORT, &port, ifnameIdx);
-    DISC_CHECK_AND_RETURN_LOGE(ret != SOFTBUS_INVALID_PARAM, DISC_COAP, "get local port failed");
+    DISC_CHECK_AND_RETURN_LOGE(ret != SOFTBUS_INVALID_PARAM, DISC_COAP, "get local port failed, err=%{public}d", ret);
     DISC_LOGI(DISC_COAP, "register ifname=%{public}s. status=%{public}s, port=%{public}d, accountInfo=%{public}s",
         g_localDeviceInfo->localIfInfo->networkName, status == LINK_STATUS_UP ? "up" : "down", port,
         accountId == 0 ? "without" : "with");
