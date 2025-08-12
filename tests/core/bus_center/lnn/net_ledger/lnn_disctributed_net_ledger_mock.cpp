@@ -44,5 +44,10 @@ int32_t LnnRetrieveDeviceInfo(const char *udid, NodeInfo *deviceInfo)
 {
     return GetLnnDisctributedNetLedgerInterface()->LnnRetrieveDeviceInfo(udid, deviceInfo);
 }
+
+int32_t LnnFindDeviceUdidTrustedInfoFromDb(const char *udid)
+{
+    return GetLnnDisctributedNetLedgerInterface()->LnnFindDeviceUdidTrustedInfoFromDb(udid);
+}
 }
 }
