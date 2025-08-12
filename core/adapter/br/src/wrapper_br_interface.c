@@ -56,9 +56,8 @@ static void CloseSppServer(int32_t serverFd)
 
 static int32_t ConnectByPort(const char *uuid, const BT_ADDR mac, const int socketPsmValue, void *connectCallback)
 {
-    if (mac == NULL) {
-        return SOFTBUS_INVALID_PARAM;
-    }
+    CONN_CHECK_AND_RETURN_RET_LOGE(mac != NULL, SOFTBUS_INVALID_PARAM, CONN_BR, "mac is incalid value");
+    CONN_CHECK_AND_RETURN_RET_LOGE(uuid != NULL, SOFTBUS_INVALID_PARAM, CONN_BR, "uuid is incalid value");
     BluetoothCreateSocketPara socketPara;
     (void)memset_s((char *)&socketPara, sizeof(socketPara), 0, sizeof(socketPara));
     socketPara.uuid.uuid = (char *)uuid;
@@ -140,6 +139,7 @@ static int32_t GetRemoteDeviceInfo(int32_t clientFd, const BluetoothRemoteDevice
 
     return SOFTBUS_OK;
 }
+
 static int32_t GetSppServerPort(int serverId)
 {
     return SocketGetScn(serverId);

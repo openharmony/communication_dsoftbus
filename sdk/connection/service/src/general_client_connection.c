@@ -51,6 +51,7 @@ int32_t GeneralRegisterListener(IGeneralListener *listener)
     int32_t ret = SoftBusMutexLock(&g_connectionListenerLock);
     if (ret != SOFTBUS_OK) {
         CONN_LOGE(CONN_INIT, "lock failed");
+        SoftBusMutexDestroy(&g_connectionListenerLock);
         return ret;
     }
     g_connectionListener = listener;
