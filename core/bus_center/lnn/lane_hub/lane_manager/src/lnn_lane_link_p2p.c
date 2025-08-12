@@ -598,13 +598,13 @@ static bool GetAuthType(const char *peerNetWorkId)
 static int32_t GetFeatureCap(const char *networkId, uint64_t *local, uint64_t *remote)
 {
     int32_t ret = LnnGetLocalNumU64Info(NUM_KEY_FEATURE_CAPA, local);
-    if (ret != SOFTBUS_OK || *local == 0) {
-        LNN_LOGE(LNN_LANE, "LnnGetLocalNumInfo err, ret=%{public}d, local=%{public}" PRIu64, ret, *local);
+    if (ret != SOFTBUS_OK) {
+        LNN_LOGE(LNN_LANE, "LnnGetLocalNumInfo err, ret=%{public}d", ret);
         return SOFTBUS_LANE_GET_LEDGER_INFO_ERR;
     }
     ret = LnnGetRemoteNumU64Info(networkId, NUM_KEY_FEATURE_CAPA, remote);
-    if (ret != SOFTBUS_OK || *remote == 0) {
-        LNN_LOGE(LNN_LANE, "LnnGetRemoteNumInfo err, ret=%{public}d, remote=%{public}" PRIu64, ret, *remote);
+    if (ret != SOFTBUS_OK) {
+        LNN_LOGE(LNN_LANE, "LnnGetRemoteNumInfo err, ret=%{public}d", ret);
         return SOFTBUS_LANE_GET_LEDGER_INFO_ERR;
     }
     return SOFTBUS_OK;

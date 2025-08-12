@@ -30,7 +30,7 @@ WifiConfigInfo::WifiConfigInfo(std::vector<uint8_t> &config)
         "invalid parameter, config size is %{public}zu", config.size());
     auto pro = WifiDirectProtocolFactory::CreateProtocol(ProtocolType::TLV);
     if (pro == nullptr) {
-        CONN_LOGE(CONN_WIFI_DIRECT, "create tlv protocol failed");
+        CONN_LOGE(CONN_WIFI_DIRECT, "create tlv protocol fail");
         return;
     }
     pro->SetFormat(ProtocolFormat { TlvProtocol::TLV_TAG_SIZE, TlvProtocol::TLV_LENGTH_SIZE1 });
@@ -92,7 +92,7 @@ void WifiConfigInfo::UnmarshallingInterfaceArray(WifiDirectProtocol &protocol, u
 {
     CONN_CHECK_AND_RETURN_LOGW(data != nullptr, CONN_WIFI_DIRECT, "data is nullptr");
     auto pro = WifiDirectProtocolFactory::CreateProtocol(protocol.GetType());
-    CONN_CHECK_AND_RETURN_LOGE(pro != nullptr, CONN_WIFI_DIRECT, "create protocol failed");
+    CONN_CHECK_AND_RETURN_LOGE(pro != nullptr, CONN_WIFI_DIRECT, "create protocol fail");
     pro->SetFormat(ProtocolFormat { TlvProtocol::TLV_TAG_SIZE, TlvProtocol::TLV_LENGTH_SIZE1 });
 
     InterfaceInfo info;

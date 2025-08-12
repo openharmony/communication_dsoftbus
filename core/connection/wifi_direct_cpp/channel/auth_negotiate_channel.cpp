@@ -42,7 +42,7 @@ AuthNegotiateChannel::AuthNegotiateChannel(const AuthHandle &handle)
 {
     char remoteUuid[UUID_BUF_LEN] {};
     auto ret = DBinderSoftbusServer::GetInstance().AuthGetDeviceUuid(handle_.authId, remoteUuid, UUID_BUF_LEN);
-    CONN_CHECK_AND_RETURN_LOGE(ret == SOFTBUS_OK, CONN_WIFI_DIRECT, "auth get device id failed");
+    CONN_CHECK_AND_RETURN_LOGE(ret == SOFTBUS_OK, CONN_WIFI_DIRECT, "auth get device id fail");
     remoteDeviceId_ = remoteUuid;
     CONN_LOGI(CONN_WIFI_DIRECT, "remoteDeviceId=%{public}s", WifiDirectAnonymizeDeviceId(remoteDeviceId_).c_str());
 }
@@ -69,7 +69,7 @@ bool AuthNegotiateChannel::IsMeta() const
 {
     bool isMeta = false;
     int32_t ret = DBinderSoftbusServer::GetInstance().AuthGetMetaType(handle_.authId, &isMeta);
-    CONN_CHECK_AND_RETURN_RET_LOGW(ret == SOFTBUS_OK, false, CONN_WIFI_DIRECT, "get meta type failed");
+    CONN_CHECK_AND_RETURN_RET_LOGW(ret == SOFTBUS_OK, false, CONN_WIFI_DIRECT, "get meta type fail");
     return isMeta;
 }
 
@@ -103,7 +103,7 @@ int AuthNegotiateChannel::SendMessage(const NegotiateMessage &msg) const
     }
     auto protocol = WifiDirectProtocolFactory::CreateProtocol(type);
     CONN_CHECK_AND_RETURN_RET_LOGE(
-        protocol != nullptr, SOFTBUS_INVALID_PARAM, CONN_WIFI_DIRECT, "create protocol failed");
+        protocol != nullptr, SOFTBUS_INVALID_PARAM, CONN_WIFI_DIRECT, "create protocol fail");
     std::vector<uint8_t> output;
     msg.Marshalling(*protocol, output);
 
@@ -116,7 +116,7 @@ int AuthNegotiateChannel::SendMessage(const NegotiateMessage &msg) const
 
     CONN_CHECK_AND_RETURN_RET_LOGE(
         DBinderSoftbusServer::GetInstance().AuthPostTransData(handle_, &dataInfo) == SOFTBUS_OK,
-        SOFTBUS_CONN_AUTH_POST_DATA_FAILED, CONN_WIFI_DIRECT, "post data failed");
+        SOFTBUS_CONN_AUTH_POST_DATA_FAILED, CONN_WIFI_DIRECT, "post data fail");
     return SOFTBUS_OK;
 }
 
@@ -125,6 +125,11 @@ void AuthNegotiateChannel::OnWaitDetectResponseTimeout()
     CONN_LOGI(CONN_WIFI_DIRECT, "timeout");
     {
         std::lock_guard lock(channelLock_);
+        auto it = authIdToChannelMap_.find(handle_.authId);
+        if (it == authIdToChannelMap_.end()) {
+            CONN_LOGE(CONN_WIFI_DIRECT, "not find channel by authId=%{public}" PRId64, handle_.authId);
+            return;
+        }
         authIdToChannelMap_.erase(handle_.authId);
         if (authIdToChannelMap_.empty()) {
             CONN_LOGI(CONN_WIFI_DIRECT, "shutdown timer");
@@ -336,10 +341,10 @@ void AuthNegotiateChannel::Init()
     };
 
     int32_t ret = DBinderSoftbusServer::GetInstance().RegAuthTransListener(MODULE_P2P_LINK, &authListener);
-    CONN_CHECK_AND_RETURN_LOGW(ret == SOFTBUS_OK, CONN_INIT, "register auth transfer listener failed");
+    CONN_CHECK_AND_RETURN_LOGW(ret == SOFTBUS_OK, CONN_INIT, "register auth transfer listener fail");
     ret = DBinderSoftbusServer::GetInstance().LnnRegisterEventHandler(LNN_EVENT_NOTIFY_RAW_ENHANCE_P2P,
         AddAuthConnection);
-    CONN_CHECK_AND_RETURN_LOGW(ret == SOFTBUS_OK, CONN_INIT, "register lnn event failed, ret=%{public}d", ret);
+    CONN_CHECK_AND_RETURN_LOGW(ret == SOFTBUS_OK, CONN_INIT, "register lnn event fail, ret=%{public}d", ret);
 }
 
 std::pair<int, ListenerModule> AuthNegotiateChannel::StartListening(
@@ -426,17 +431,17 @@ void AuthNegotiateChannel::RefreshAuthConnection(std::string remoteUuid)
             }
             return false;
         });
-    CONN_CHECK_AND_RETURN_LOGE(res, CONN_WIFI_DIRECT, "get param failed");
+    CONN_CHECK_AND_RETURN_LOGE(res, CONN_WIFI_DIRECT, "get param fail");
     CONN_CHECK_AND_RETURN_LOGE(param.remotePort > 0, CONN_WIFI_DIRECT, "remote port is zero");
 
     auto authOpenEventPromise = std::make_shared<std::promise<AuthOpenEvent>>();
     uint32_t authReqId = 0;
     auto ret = AuthNegotiateChannel::OpenConnection(param, nullptr, authReqId, authOpenEventPromise);
     CONN_CHECK_AND_RETURN_LOGE(ret == SOFTBUS_OK, CONN_WIFI_DIRECT,
-        "open connection failed, ret=%{public}d", ret);
+        "open connection fail, ret=%{public}d", ret);
     auto authEvent = authOpenEventPromise->get_future().get();
     CONN_CHECK_AND_RETURN_LOGE(authEvent.reason_ == SOFTBUS_OK, CONN_WIFI_DIRECT,
-        "open connection failed, ret=%{public}d", authEvent.reason_);
+        "open connection fail, ret=%{public}d", authEvent.reason_);
     auto channel = std::make_shared<AuthNegotiateChannel>(authEvent.handle_);
     LinkManager::GetInstance().RefreshAuthHandle(remoteUuid, channel);
     NegotiateMessage msg(NegotiateMessageType::CMD_REFRESH_AUTH_HANDLE);
@@ -455,15 +460,15 @@ int AuthNegotiateChannel::AssignValueForAuthConnInfo(bool isMeta, bool needUdid,
     }
     auto ret = strcpy_s(authConnInfo.info.ipInfo.ip, IP_LEN, param.remoteIp.c_str());
     CONN_CHECK_AND_RETURN_RET_LOGW(
-        ret == EOK, SOFTBUS_CONN_OPEN_CONNECTION_COPY_IP_FAILED, CONN_WIFI_DIRECT, "copy ip failed");
+        ret == EOK, SOFTBUS_CONN_OPEN_CONNECTION_COPY_IP_FAILED, CONN_WIFI_DIRECT, "copy ip fail");
     if (needUdid) {
         const char *remoteUdid = DBinderSoftbusServer::GetInstance().LnnConvertDLidToUdid(param.remoteUuid.c_str(),
             CATEGORY_UUID);
         CONN_CHECK_AND_RETURN_RET_LOGE(remoteUdid != nullptr && strlen(remoteUdid) != 0,
-            SOFTBUS_CONN_OPEN_CONNECTION_GET_REMOTE_UUID_FAILED, CONN_WIFI_DIRECT, "get remote udid failed");
+            SOFTBUS_CONN_OPEN_CONNECTION_GET_REMOTE_UUID_FAILED, CONN_WIFI_DIRECT, "get remote udid fail");
         ret = strcpy_s(authConnInfo.info.ipInfo.udid, UDID_BUF_LEN, remoteUdid);
         CONN_CHECK_AND_RETURN_RET_LOGE(
-            ret == EOK, SOFTBUS_CONN_OPEN_CONNECTION_COPY_UUID_FAILED, CONN_WIFI_DIRECT, "copy udid failed");
+            ret == EOK, SOFTBUS_CONN_OPEN_CONNECTION_COPY_UUID_FAILED, CONN_WIFI_DIRECT, "copy udid fail");
     }
     return SOFTBUS_OK;
 }
@@ -497,7 +502,7 @@ int AuthNegotiateChannel::OpenConnection(const OpenParam &param, const std::shar
 
     AuthConnInfo authConnInfo {};
     auto ret = AssignValueForAuthConnInfo(isMeta, needUdid, param, channel, authConnInfo);
-    CONN_CHECK_AND_RETURN_RET_LOGE(ret == SOFTBUS_OK, ret, CONN_WIFI_DIRECT, "assign value for auth conn info failed");
+    CONN_CHECK_AND_RETURN_RET_LOGE(ret == SOFTBUS_OK, ret, CONN_WIFI_DIRECT, "assign value for auth conn info fail");
 
     auto requestId = DBinderSoftbusServer::GetInstance().AuthGenRequestId();
     {
@@ -510,7 +515,7 @@ int AuthNegotiateChannel::OpenConnection(const OpenParam &param, const std::shar
     authReqId = requestId;
     ret = AuthOpenConnection(requestId, authConnInfo, isMeta);
     if (ret != SOFTBUS_OK) {
-        CONN_LOGE(CONN_WIFI_DIRECT, "auth open connect failed, error=%{public}d", ret);
+        CONN_LOGE(CONN_WIFI_DIRECT, "auth open connect fail, error=%{public}d", ret);
         std::lock_guard lock(lock_);
         requestIdToDeviceIdMap_.erase(requestId);
         if (authOpenEventPromise != nullptr) {

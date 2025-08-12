@@ -62,7 +62,7 @@ int Ipv4Info::FromIpString(const std::string &ipString)
         return SOFTBUS_OK;
     }
     if (inet_pton(AF_INET, ipString.c_str(), &ip_) != 1) {
-        CONN_LOGW(CONN_WIFI_DIRECT, "inet_pton failed");
+        CONN_LOGW(CONN_WIFI_DIRECT, "inet_pton fail");
         return SOFTBUS_CONN_INET_PTON_FAILED;
     }
     ip_ = htonl(ip_);
@@ -77,7 +77,7 @@ std::string Ipv4Info::ToIpString() const
     uint32_t ip = ntohl(ip_);
     char ipStr[IP_STR_MAX_LEN] {};
     const char *ret = inet_ntop(AF_INET, &ip, ipStr, IP_STR_MAX_LEN);
-    CONN_CHECK_AND_RETURN_RET_LOGW(ret != nullptr, "", CONN_WIFI_DIRECT, "inet_ntop failed");
+    CONN_CHECK_AND_RETURN_RET_LOGW(ret != nullptr, "", CONN_WIFI_DIRECT, "inet_ntop fail");
     return ipStr;
 }
 

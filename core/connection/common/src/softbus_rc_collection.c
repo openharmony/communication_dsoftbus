@@ -49,7 +49,7 @@ int32_t SoftBusRcSave(SoftBusRcCollection *collection, SoftBusRcObject *object)
     SoftBusList *objects = collection->objects;
     int32_t code = SoftBusMutexLock(&objects->lock);
     COMM_CHECK_AND_RETURN_RET_LOGE(
-        code == SOFTBUS_OK, code, COMM_UTILS, "%{public}s, lock failed: error=%{public}d", collection->name, code);
+        code == SOFTBUS_OK, code, COMM_UTILS, "%{public}s, lock fail: error=%{public}d", collection->name, code);
 
     if (collection->idGenerator != NULL) {
         uint32_t id = AllocateUniqueIdUnsafe(collection, object, UINT16_MAX);
@@ -62,7 +62,7 @@ int32_t SoftBusRcSave(SoftBusRcCollection *collection, SoftBusRcObject *object)
     }
     code = object->Reference(object);
     if (code != SOFTBUS_OK) {
-        COMM_LOGW(COMM_UTILS, "%{public}s, reference object failed: error=%{public}d", collection->name, code);
+        COMM_LOGW(COMM_UTILS, "%{public}s, reference object fail: error=%{public}d", collection->name, code);
         SoftBusMutexUnlock(&objects->lock);
         return code;
     }
@@ -81,7 +81,7 @@ SoftBusRcObject *SoftBusRcGetCommon(SoftBusRcCollection *collection, SoftBusRcOb
     SoftBusList *objects = collection->objects;
     int32_t code = SoftBusMutexLock(&objects->lock);
     COMM_CHECK_AND_RETURN_RET_LOGE(
-        code == SOFTBUS_OK, NULL, COMM_UTILS, "%{public}s, lock failed: error=%{public}d", collection->name, code);
+        code == SOFTBUS_OK, NULL, COMM_UTILS, "%{public}s, lock fail: error=%{public}d", collection->name, code);
 
     SoftBusRcObject *it = NULL;
     LIST_FOR_EACH_ENTRY(it, &objects->list, SoftBusRcObject, node) {
@@ -91,7 +91,7 @@ SoftBusRcObject *SoftBusRcGetCommon(SoftBusRcCollection *collection, SoftBusRcOb
         code = it->Reference(it);
         SoftBusMutexUnlock(&objects->lock);
         if (code != SOFTBUS_OK) {
-            COMM_LOGW(COMM_UTILS, "%{public}s, reference object failed: object id=%{public}d, error=%{public}d",
+            COMM_LOGW(COMM_UTILS, "%{public}s, reference object fail: object id=%{public}d, error=%{public}d",
                 collection->name, it->id, code);
             return NULL;
         }
@@ -126,7 +126,7 @@ void SoftBusRcRemove(SoftBusRcCollection *collection, SoftBusRcObject *object)
     SoftBusList *objects = collection->objects;
     int32_t code = SoftBusMutexLock(&objects->lock);
     COMM_CHECK_AND_RETURN_LOGE(
-        code == SOFTBUS_OK, COMM_UTILS, "%{public}s, lock failed: error=%{public}d", collection->name, code);
+        code == SOFTBUS_OK, COMM_UTILS, "%{public}s, lock fail: error=%{public}d", collection->name, code);
     SoftBusRcObject *exist = SoftBusRcGetCommon(collection, PointerMatcher, object);
     if (exist == NULL) {
         COMM_LOGW(COMM_UTILS, "%{public}s, object not found: object id=%{public}d", collection->name, object->id);
@@ -150,7 +150,7 @@ int32_t SoftBusRcCollectionConstruct(const char *name, SoftBusRcCollection *coll
     // generator is nullable
 
     SoftBusList *objects = CreateSoftBusList();
-    COMM_CHECK_AND_RETURN_RET_LOGE(objects, SOFTBUS_MALLOC_ERR, COMM_UTILS, "create list failed");
+    COMM_CHECK_AND_RETURN_RET_LOGE(objects, SOFTBUS_MALLOC_ERR, COMM_UTILS, "create list fail");
     collection->objects = objects;
     collection->idGenerator = generator;
     collection->name = name;
@@ -167,7 +167,7 @@ void SoftBusRcCollectionDestruct(SoftBusRcCollection *collection)
         SoftBusRcObject *next = NULL;
         int32_t code = SoftBusMutexLock(&objects->lock);
         COMM_CHECK_AND_RETURN_LOGE(
-            code == SOFTBUS_OK, COMM_UTILS, "%{public}s, lock failed: error=%{public}d", collection->name, code);
+            code == SOFTBUS_OK, COMM_UTILS, "%{public}s, lock fail: error=%{public}d", collection->name, code);
         LIST_FOR_EACH_ENTRY_SAFE(it, next, &objects->list, SoftBusRcObject, node) {
             COMM_LOGW(COMM_UTILS,
                 "%{public}s, object still in collection, remove it before destructing: object id=%{public}d",

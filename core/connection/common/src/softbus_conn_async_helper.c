@@ -97,13 +97,13 @@ int32_t ConnAsyncCall(ConnAsync *async, ConnAsyncFunction function, void *arg, u
 
     int32_t callId = (++callIdGenerator);
     struct AsyncContext *ctx = SoftBusCalloc(sizeof(struct AsyncContext));
-    CONN_CHECK_AND_RETURN_RET_LOGE(ctx, SOFTBUS_MEM_ERR, CONN_COMMON, "malloc async ctx failed");
+    CONN_CHECK_AND_RETURN_RET_LOGE(ctx, SOFTBUS_MEM_ERR, CONN_COMMON, "malloc async ctx fail");
     ctx->function = function;
     ctx->arg = arg;
 
     SoftBusMessage *msg = SoftBusCalloc(sizeof(SoftBusMessage));
     if (msg == NULL) {
-        CONN_LOGE(CONN_COMMON, "malloc softbus message failed");
+        CONN_LOGE(CONN_COMMON, "malloc softbus message fail");
         SoftBusFree(ctx);
         return SOFTBUS_MEM_ERR;
     }

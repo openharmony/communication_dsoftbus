@@ -958,7 +958,7 @@ HWTEST_F(TransTcpDirectTest, ClientTdcOnDataEventTest001, TestSize.Level1)
     ASSERT_EQ(ret, SOFTBUS_OK);
 
     ret = ClientTdcOnDataEvent(DIRECT_CHANNEL_SERVER_WIFI, events, fd);
-    EXPECT_EQ(ret, SOFTBUS_MEM_ERR);
+    EXPECT_EQ(ret, SOFTBUS_NOT_FIND);
 }
 
 /**

@@ -871,26 +871,25 @@ static int32_t ClientTransProxyProcD2DData(int32_t channelId, const char *data, 
     ProxyDataInfo dataInfo = { 0 };
 
     int32_t ret = TransProxyProcessD2DData(&dataInfo, head, data, businessType);
-    if (ret != SOFTBUS_OK) {
-        TRANS_LOGE(TRANS_SDK, "process d2d data err");
-        return ret;
-    }
-
+    TRANS_CHECK_AND_RETURN_RET_LOGE(ret == SOFTBUS_OK, ret, TRANS_SDK, "process d2d data err");
     ProxyChannelInfoDetail info;
     ret = ClientTransProxyGetInfoByChannelId(channelId, &info);
     if (ret != SOFTBUS_OK) {
         TRANS_LOGE(TRANS_SDK, "get info err");
+        SoftBusFree(dataInfo.outData);
         return ret;
     }
     uint8_t sessionCommonIv[GCM_IV_LEN];
     if (businessType == BUSINESS_TYPE_D2D_MESSAGE) {
         if (TransGenerateRandIv(sessionCommonIv, &ivSource->nonce, &ivSource->dataSeq) != SOFTBUS_OK) {
             TRANS_LOGE(TRANS_CTRL, "generate iv failed");
+            SoftBusFree(dataInfo.outData);
             return SOFTBUS_GCM_SET_IV_FAIL;
         }
     } else {
         if (TransGenerateToBytesRandIv(sessionCommonIv, (uint32_t *)&ivSource->nonce) != SOFTBUS_OK) {
             TRANS_LOGE(TRANS_CTRL, "generate iv failed");
+            SoftBusFree(dataInfo.outData);
             return SOFTBUS_GCM_SET_IV_FAIL;
         }
     }

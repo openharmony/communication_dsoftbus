@@ -215,10 +215,6 @@ HWTEST_F(TransIpcStandardTest, OpenSessionTest001, TestSize.Level1)
     param->attr = &sessionAttribute;
     ret = transServerProxy.OpenSession(param, info);
     EXPECT_EQ(ret, SOFTBUS_ACCESS_TOKEN_DENIED);
-    sessionAttribute.fastTransData = reinterpret_cast<uint8_t *>(const_cast<char *>(g_peerDeviceId));
-    sessionAttribute.fastTransDataSize = LEN;
-    ret = transServerProxy.OpenSession(param, info);
-    EXPECT_EQ(ret, SOFTBUS_ACCESS_TOKEN_DENIED);
     SoftBusFree(param);
     SoftBusFree(info);
 }

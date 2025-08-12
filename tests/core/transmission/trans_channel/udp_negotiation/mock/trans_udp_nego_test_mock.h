@@ -18,9 +18,7 @@
 
 #include <gmock/gmock.h>
 #include <gtest/gtest.h>
-#include "stdint.h"
 #include "auth_interface_struct.h"
-
 
 namespace OHOS {
 class TransUdpNegoInterface {

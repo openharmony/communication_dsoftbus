@@ -101,7 +101,7 @@ TRANS_ASSIGNER(String, ConCurrentId, conCurrentId)
 #define TRANS_ASSIGNER_SIZE 63 // Size of TRANS_ASSIGNERS
 static const HiSysEventParamAssigner TRANS_ASSIGNERS[] = {
     { "TALKIE_FREQ",         HISYSEVENT_UINT8,    TransAssignerTalkieFreq      },
-    { "TALKIE_TYPR",         HISYSEVENT_UINT8,    TransAssignerTalkieType      },
+    { "TALKIE_TYPE",         HISYSEVENT_UINT8,    TransAssignerTalkieType      },
     { "TALKIE_LEVEL",        HISYSEVENT_UINT8,    TransAssignerTalkieLevel     },
     { "STAGE_RES",           HISYSEVENT_INT32,    TransAssignerResult          },
     { "ERROR_CODE",          HISYSEVENT_INT32,    TransAssignerErrcode         },

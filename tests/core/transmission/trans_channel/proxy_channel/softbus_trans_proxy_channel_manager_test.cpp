@@ -515,6 +515,8 @@ HWTEST_F(SoftbusTransProxyChannelManagerTest, HandleProxyGenUkResultTest003, Tes
 
     ListAdd(&g_proxyChannelList->list, &(proxyChannelInfo->node));
     EXPECT_NO_THROW(HandleProxyGenUkResult(requestId, ukId, SOFTBUS_INVALID_PARAM));
+
+    ListDelete(&(proxyChannelInfo->node));
 }
 
 /**
@@ -627,6 +629,8 @@ HWTEST_F(SoftbusTransProxyChannelManagerTest, TransDealProxyChannelOpenResultTes
 
     int32_t ret = TransDealProxyChannelOpenResult(TEST_CHANNEL_ID, SOFTBUS_TRANS_SESSION_OPENING, &accessInfo, 0);
     EXPECT_EQ(ret, SOFTBUS_OK);
+
+    ListDelete(&(proxyChannelInfo->node));
 }
 
 /**
