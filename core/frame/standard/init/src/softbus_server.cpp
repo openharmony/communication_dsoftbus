@@ -691,7 +691,7 @@ static int32_t PushIdentifyCheck()
     #define PUSH_SERVICE_UID 7023
     std::string pkgName = "PUSH_SERVICE";
     sptr<IRemoteObject> clientObject =
-        SoftbusClientInfoManager::GetInstance().GetSoftbusClientProxy();
+        SoftbusClientInfoManager::GetInstance().GetSoftbusClientProxy(pkgName);
     if (clientObject == nullptr) {
         COMM_LOGE(COMM_SVC, "get remote object failed!");
         return SOFTBUS_TRANS_PROXY_REMOTE_NULL;
