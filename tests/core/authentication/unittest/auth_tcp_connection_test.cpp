@@ -484,11 +484,11 @@ HWTEST_F(AuthTcpConnectionTest, ADD_AUTH_TCP_CONN_FD_ITEM_TEST_001, TestSize.Lev
 {
     int32_t fd = 1;
 
-    int32_t ret = AddAuthTcpConnFdItem(fd);
+    int32_t ret = AddAuthTcpConnFdItem(fd, AUTH_P2P);
     EXPECT_EQ(ret, SOFTBUS_LOCK_ERR);
     ret = AuthTcpConnFdLockInit();
     EXPECT_EQ(ret, SOFTBUS_OK);
-    ret = AddAuthTcpConnFdItem(fd);
+    ret = AddAuthTcpConnFdItem(fd, AUTH_P2P);
     EXPECT_EQ(ret, SOFTBUS_OK);
     DeleteAuthTcpConnFdItemByConnId(fd);
     AuthTcpConnFdLockDeinit();
@@ -511,7 +511,7 @@ HWTEST_F(AuthTcpConnectionTest, IS_EXIST_AUTH_TCP_CONN_FD_ITEM_BY_COON_ID_TEST_0
     EXPECT_EQ(result, SOFTBUS_OK);
     ret = IsExistAuthTcpConnFdItemByConnId(fd);
     EXPECT_FALSE(ret);
-    result = AddAuthTcpConnFdItem(fd);
+    result = AddAuthTcpConnFdItem(fd, AUTH_P2P);
     EXPECT_EQ(result, SOFTBUS_OK);
     ret = IsExistAuthTcpConnFdItemByConnId(fd);
     EXPECT_TRUE(ret);
@@ -556,7 +556,7 @@ HWTEST_F(AuthTcpConnectionTest, PROCESS_SOCKET_IN_EVENT_TEST_001, TestSize.Level
     ret = ProcessSocketInEvent(AUTH_USB, fd);
     EXPECT_EQ(ret, SOFTBUS_INVALID_PARAM);
 
-    ret = AddAuthTcpConnFdItem(fd);
+    ret = AddAuthTcpConnFdItem(fd, AUTH_P2P);
     EXPECT_EQ(result, SOFTBUS_OK);
     ret = ProcessSocketInEvent(AUTH_USB, fd);
     EXPECT_EQ(ret, SOFTBUS_INVALID_DATA_HEAD);
