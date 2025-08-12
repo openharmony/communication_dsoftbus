@@ -21,11 +21,10 @@
 #include <vector>
 
 #include "fuzz_data_generator.h"
+#include "softbus_adapter_mem.h"
 #include "softbus_usb_tcp_socket.c"
 
 namespace OHOS {
-
-#define MY_PORT 6000
 
 class SoftBusUsbTcpScoket {
 public:
@@ -48,19 +47,88 @@ private:
     volatile bool isInited_;
 };
 
-void AcceptUsbClientTest(FuzzedDataProvider &provider)
+void FillLocalListenerInfo(FuzzedDataProvider &provider, LocalListenerInfo *info)
 {
-    int32_t fd = provider.ConsumeIntegral<int8_t>();
-    ConnectOption clientAddr;
-    int32_t cfd = 0;
-
-    (void)AcceptUsbClient(fd, &clientAddr, &cfd);
+    std::string addr = provider.ConsumeBytesAsString(IP_LEN - 1);
+    std::string ifName = provider.ConsumeBytesAsString(NETIF_NAME_LEN - 1);
+    std::string localMac = provider.ConsumeBytesAsString(MAC_MAX_LEN - 1);
+    std::string remoteMac = provider.ConsumeBytesAsString(MAC_MAX_LEN - 1);
+    if (strcpy_s(info->socketOption.addr, IP_LEN, addr.c_str()) != 0) {
+        return;
+    }
+    if (strcpy_s(info->socketOption.ifName, NETIF_NAME_LEN, ifName.c_str()) != 0) {
+        return;
+    }
+    if (strcpy_s(info->socketOption.localMac, MAC_MAX_LEN, localMac.c_str()) != 0) {
+        return;
+    }
+    if (strcpy_s(info->socketOption.remoteMac, MAC_MAX_LEN, remoteMac.c_str()) != 0) {
+        return;
+    }
+    info->type = static_cast<ConnectType>(
+        provider.ConsumeIntegralInRange<int32_t>(CONNECT_TCP, CONNECT_TYPE_MAX));
+    info->socketOption.port = -1;
+    info->socketOption.moduleId = static_cast<ListenerModule>(
+        provider.ConsumeIntegralInRange<int32_t>(PROXY, UNUSE_BUTT));
+    info->socketOption.protocol = LNN_PROTOCOL_USB;
 }
 
-void GetUsbProtocolTest(FuzzedDataProvider &provider)
+static void FillConnectOption(FuzzedDataProvider &provider, ConnectOption *option)
 {
-    (void)provider;
+    std::string addr = provider.ConsumeBytesAsString(IP_LEN - 1);
+    std::string ifName = provider.ConsumeBytesAsString(NETIF_NAME_LEN - 1);
+    std::string localMac = provider.ConsumeBytesAsString(MAC_MAX_LEN - 1);
+    std::string remoteMac = provider.ConsumeBytesAsString(MAC_MAX_LEN - 1);
+    if (strcpy_s(option->socketOption.addr, IP_LEN, addr.c_str()) != 0) {
+        return;
+    }
+    if (strcpy_s(option->socketOption.ifName, NETIF_NAME_LEN, ifName.c_str()) != 0) {
+        return;
+    }
+    if (strcpy_s(option->socketOption.localMac, MAC_MAX_LEN, localMac.c_str()) != 0) {
+        return;
+    }
+    if (strcpy_s(option->socketOption.remoteMac, MAC_MAX_LEN, remoteMac.c_str()) != 0) {
+        return;
+    }
+    option->type = static_cast<ConnectType>(
+        provider.ConsumeIntegralInRange<int32_t>(CONNECT_TCP, CONNECT_TYPE_MAX));
+    option->socketOption.port = -1;
+    option->socketOption.moduleId = static_cast<ListenerModule>(
+        provider.ConsumeIntegralInRange<int32_t>(PROXY, UNUSE_BUTT));
+    option->socketOption.protocol = LNN_PROTOCOL_USB;
+    option->socketOption.keepAlive = 1;
+}
+
+void OpenUsbServerSocketTest(FuzzedDataProvider &provider)
+{
+    LocalListenerInfo option;
+    (void)memset_s(&option, sizeof(LocalListenerInfo), 0, sizeof(LocalListenerInfo));
+    FillLocalListenerInfo(provider, &option);
+    (void)OpenUsbServerSocket(nullptr);
+    (void)OpenUsbServerSocket(&option);
+}
+
+void OpenUsbClientSocketTest(FuzzedDataProvider &provider)
+{
+    ConnectOption option;
+    (void)memset_s(&option, sizeof(ConnectOption), 0, sizeof(ConnectOption));
+    FillConnectOption(provider, &option);
+    const char *ip = "192.168.30.1";
+    (void)OpenUsbClientSocket(nullptr, ip, true);
+    (void)OpenUsbClientSocket(&option, ip, true);
+}
+
+void AcceptUsbClientTest(FuzzedDataProvider &provider)
+{
+    ConnectOption option;
+    (void)memset_s(&option, sizeof(ConnectOption), 0, sizeof(ConnectOption));
+    FillConnectOption(provider, &option);
+    int32_t fd = provider.ConsumeIntegral<int32_t>();
+    int32_t cfd = 0;
     (void)GetUsbProtocol();
+    (void)AcceptUsbClient(fd, nullptr, &cfd);
+    (void)AcceptUsbClient(fd, &option, &cfd);
 }
 } // namespace OHOS
 
@@ -74,8 +142,8 @@ extern "C" int32_t LLVMFuzzerTestOneInput(const uint8_t *data, size_t size)
 
     /* Run your code on data */
     FuzzedDataProvider provider(data, size);
+    OHOS::OpenUsbServerSocketTest(provider);
+    OHOS::OpenUsbClientSocketTest(provider);
     OHOS::AcceptUsbClientTest(provider);
-    OHOS::GetUsbProtocolTest(provider);
-
     return 0;
 }
