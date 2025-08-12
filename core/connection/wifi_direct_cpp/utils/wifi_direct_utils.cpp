@@ -830,8 +830,8 @@ int WifiDirectUtils::GetLocalScreenStatus()
     bool result = false;
     auto ret = DBinderSoftbusServer::GetInstance().LnnGetLocalBoolInfo(
         BOOL_KEY_SCREEN_STATUS, &result, NODE_SCREEN_STATUS_LEN);
-    CONN_CHECK_AND_RETURN_RET_LOGE(ret == SOFTBUS_OK, ret, CONN_WIFI_DIRECT,
-        "get screen state failed, ret=%{public}d", ret);
+    CONN_CHECK_AND_RETURN_RET_LOGE(
+        ret == SOFTBUS_OK, ret, CONN_WIFI_DIRECT, "get screen state failed, ret=%{public}d", ret);
     return result ? WIFI_DIRECT_SCREEN_ON : WIFI_DIRECT_SCREEN_OFF;
 }
 } // namespace OHOS::SoftBus

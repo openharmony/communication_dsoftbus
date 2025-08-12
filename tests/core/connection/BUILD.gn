@@ -60,8 +60,6 @@ group("unittest") {
 group("fuzztest") {
   testonly = true
   deps = [
-    "ble/fuzztest/bleconnection_fuzzer:BleConnectionFuzzTest",
-    "br/fuzztest/brconnection_fuzzer:BrConnectionFuzzTest",
     "common/fuzztest/connectioncommon_fuzzer:ConnectionCommonFuzzTest",
     "fuzztest:fuzztest",
   ]
