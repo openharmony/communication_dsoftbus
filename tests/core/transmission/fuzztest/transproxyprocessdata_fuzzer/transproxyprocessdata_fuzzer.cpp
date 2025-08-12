@@ -572,30 +572,31 @@ void TransProxyPackD2DBytesTest(const uint8_t *data, size_t size)
 {
     ProxyDataInfo dataInfo;
     (void)memset_s(&dataInfo, sizeof(ProxyDataInfo), 0, sizeof(ProxyDataInfo));
-    uint8_t *dataTmp = TestDataSwitch(data, size);
-    if (dataTmp == nullptr) {
+    FuzzedDataProvider provider(data, size);
+    std::string providerSessionKey1 = provider.ConsumeBytesAsString(SHORT_SESSION_KEY_LENGTH - 1);
+    char sessionKey[SHORT_SESSION_KEY_LENGTH] = { 0 };
+    if (strcpy_s(sessionKey, SHORT_SESSION_KEY_LENGTH, providerSessionKey1.c_str()) != EOK) {
         return;
     }
-    char *sessionKey = const_cast<char *>(reinterpret_cast<const char *>(dataTmp));
-    char *sessionIv = const_cast<char *>(reinterpret_cast<const char *>(dataTmp));
-    FuzzedDataProvider provider(data, size);
+    std::string providerSessionKey2 = provider.ConsumeBytesAsString(GCM_IV_LEN - 1);
+    char sessionIv[GCM_IV_LEN] = { 0 };
+    if (strcpy_s(sessionIv, GCM_IV_LEN, providerSessionKey2.c_str()) != EOK) {
+        return;
+    }
     SessionPktType flag = static_cast<SessionPktType>(
         provider.ConsumeIntegralInRange<uint16_t>(TRANS_SESSION_BYTES, TRANS_SESSION_ASYNC_MESSAGE));
     (void)TransProxyPackD2DBytes(&dataInfo, sessionKey, sessionIv, flag);
     GenerateUint32(dataInfo.inLen);
     GenerateUint32(dataInfo.outLen);
     dataInfo.inData = TestDataSwitch(data, size);
-    dataInfo.outData = TestDataSwitch(data, size);
-    if (dataInfo.inData == nullptr || dataInfo.outData == nullptr) {
+    if (dataInfo.inData == nullptr) {
         return;
     }
     (void)TransProxyPackD2DBytes(&dataInfo, sessionKey, sessionIv, flag);
     (void)TransProxyPackD2DBytes(nullptr, sessionKey, sessionIv, flag);
     (void)TransProxyPackD2DBytes(&dataInfo, nullptr, sessionIv, flag);
     (void)TransProxyPackD2DBytes(&dataInfo, sessionKey, nullptr, flag);
-    SoftBusFree(dataTmp);
     SoftBusFree(dataInfo.inData);
-    SoftBusFree(dataInfo.outData);
 }
 } // namespace OHOS
 
