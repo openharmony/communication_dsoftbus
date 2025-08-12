@@ -31,19 +31,19 @@ int32_t ConnectionClientProxy::OnConnectionStateChange(uint32_t handle, int32_t 
     }
     MessageParcel data;
     if (!data.WriteInterfaceToken(GetDescriptor())) {
-        CONN_LOGE(CONN_COMMON, "write InterfaceToken failed.");
+        CONN_LOGE(CONN_COMMON, "write InterfaceToken fail.");
         return SOFTBUS_IPC_ERR;
     }
     if (!data.WriteUint32(handle)) {
-        CONN_LOGE(CONN_COMMON, "write handle failed.");
+        CONN_LOGE(CONN_COMMON, "write handle fail.");
         return SOFTBUS_IPC_ERR;
     }
     if (!data.WriteInt32(state)) {
-        CONN_LOGE(CONN_COMMON, "write state failed.");
+        CONN_LOGE(CONN_COMMON, "write state fail.");
         return SOFTBUS_IPC_ERR;
     }
     if (!data.WriteInt32(reason)) {
-        CONN_LOGE(CONN_COMMON, "write reason failed.");
+        CONN_LOGE(CONN_COMMON, "write reason fail.");
         return SOFTBUS_IPC_ERR;
     }
 
@@ -51,7 +51,7 @@ int32_t ConnectionClientProxy::OnConnectionStateChange(uint32_t handle, int32_t 
     MessageOption option = { MessageOption::TF_ASYNC };
     int32_t ret = remote->SendRequest(CLIENT_GENERAL_CONNECTION_STATE_CHANGE, data, reply, option);
     if (ret != SOFTBUS_OK) {
-        CONN_LOGE(CONN_COMMON, "OnConnectionStateChange send request failed, ret=%{public}d", ret);
+        CONN_LOGE(CONN_COMMON, "OnConnectionStateChange send request fail, ret=%{public}d", ret);
         return ret;
     }
     return SOFTBUS_OK;
@@ -66,15 +66,15 @@ int32_t ConnectionClientProxy::OnAcceptConnect(const char *name, uint32_t handle
     }
     MessageParcel data;
     if (!data.WriteInterfaceToken(GetDescriptor())) {
-        CONN_LOGE(CONN_COMMON, "write InterfaceToken failed.");
+        CONN_LOGE(CONN_COMMON, "write InterfaceToken fail.");
         return SOFTBUS_IPC_ERR;
     }
     if (!data.WriteCString(name)) {
-        CONN_LOGE(CONN_COMMON, "write name failed.");
+        CONN_LOGE(CONN_COMMON, "write name fail.");
         return SOFTBUS_IPC_ERR;
     }
     if (!data.WriteUint32(handle)) {
-        CONN_LOGE(CONN_COMMON, "write handle failed.");
+        CONN_LOGE(CONN_COMMON, "write handle fail.");
         return SOFTBUS_IPC_ERR;
     }
 
@@ -82,7 +82,7 @@ int32_t ConnectionClientProxy::OnAcceptConnect(const char *name, uint32_t handle
     MessageOption option = { MessageOption::TF_ASYNC };
     int32_t ret = remote->SendRequest(CLIENT_GENERAL_ACCEPT_CONNECT, data, reply, option);
     if (ret != SOFTBUS_OK) {
-        CONN_LOGE(CONN_COMMON, "OnAcceptConnect send request failed, ret=%{public}d", ret);
+        CONN_LOGE(CONN_COMMON, "OnAcceptConnect send request fail, ret=%{public}d", ret);
         return ret;
     }
     return SOFTBUS_OK;
@@ -97,19 +97,19 @@ int32_t ConnectionClientProxy::OnDataReceived(uint32_t handle, const uint8_t *da
     }
     MessageParcel dataParcel;
     if (!dataParcel.WriteInterfaceToken(GetDescriptor())) {
-        CONN_LOGE(CONN_COMMON, "write InterfaceToken failed.");
+        CONN_LOGE(CONN_COMMON, "write InterfaceToken fail.");
         return SOFTBUS_IPC_ERR;
     }
     if (!dataParcel.WriteUint32(handle)) {
-        CONN_LOGE(CONN_COMMON, "write handle failed.");
+        CONN_LOGE(CONN_COMMON, "write handle fail.");
         return SOFTBUS_IPC_ERR;
     }
     if (!dataParcel.WriteUint32(len)) {
-        CONN_LOGE(CONN_COMMON, "write len failed.");
+        CONN_LOGE(CONN_COMMON, "write len fail.");
         return SOFTBUS_IPC_ERR;
     }
     if (!dataParcel.WriteBuffer(data, len)) {
-        CONN_LOGE(CONN_COMMON, "write data failed.");
+        CONN_LOGE(CONN_COMMON, "write data fail.");
         return SOFTBUS_IPC_ERR;
     }
 
@@ -117,7 +117,7 @@ int32_t ConnectionClientProxy::OnDataReceived(uint32_t handle, const uint8_t *da
     MessageOption option = { MessageOption::TF_ASYNC };
     int32_t ret = remote->SendRequest(CLIENT_GENERAL_DATA_RECEIVED, dataParcel, replyParcel, option);
     if (ret != SOFTBUS_OK) {
-        CONN_LOGE(CONN_COMMON, "OnDataReceived send request failed, ret=%{public}d", ret);
+        CONN_LOGE(CONN_COMMON, "OnDataReceived send request fail, ret=%{public}d", ret);
         return ret;
     }
     return SOFTBUS_OK;

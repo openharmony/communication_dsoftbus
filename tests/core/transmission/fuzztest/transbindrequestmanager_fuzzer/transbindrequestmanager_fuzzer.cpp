@@ -53,6 +53,9 @@ private:
 
 static void FillBindRequestParam(FuzzedDataProvider &provider, BindRequestParam *param)
 {
+    if (param == nullptr) {
+        return;
+    }
     std::string socketName = provider.ConsumeRandomLengthString(SESSION_NAME_SIZE_MAX);
     std::string peerSocketName = provider.ConsumeRandomLengthString(SESSION_NAME_SIZE_MAX);
     std::string netWorkId = provider.ConsumeRandomLengthString(NETWORK_ID_BUF_LEN);
@@ -67,8 +70,21 @@ void GetBindRequestManagerByPeerTest(FuzzedDataProvider &provider)
 {
     BindRequestParam param;
     (void)memset_s(&param, sizeof(BindRequestParam), 0, sizeof(BindRequestParam));
-    FillBindRequestParam(provider, &param);
+    std::string socketName = provider.ConsumeRandomLengthString(SESSION_NAME_SIZE_MAX);
+    std::string peerSocketName = provider.ConsumeRandomLengthString(SESSION_NAME_SIZE_MAX);
+    std::string netWorkId = provider.ConsumeRandomLengthString(NETWORK_ID_BUF_LEN);
+    if (strcpy_s(param.mySocketName, SESSION_NAME_SIZE_MAX, socketName.c_str()) != EOK ||
+        strcpy_s(param.peerSocketName, SESSION_NAME_SIZE_MAX, peerSocketName.c_str()) != EOK ||
+        strcpy_s(param.peerNetworkId, NETWORK_ID_BUF_LEN, netWorkId.c_str()) != EOK) {
+        return;
+    }
     (void)TransBindRequestManagerInit();
+    (void)GetBindRequestManagerByPeer(&param);
+    (void)CreateBindRequestManager(param.mySocketName, param.peerSocketName, param.peerNetworkId);
+    (void)GetBindRequestManagerByPeer(&param);
+    (void)memset_s(param.peerNetworkId, NETWORK_ID_BUF_LEN, 0, NETWORK_ID_BUF_LEN);
+    (void)GetBindRequestManagerByPeer(&param);
+    (void)memset_s(param.peerSocketName, SESSION_NAME_SIZE_MAX, 0, SESSION_NAME_SIZE_MAX);
     (void)GetBindRequestManagerByPeer(&param);
     TransBindRequestManagerDeinit();
 }
@@ -95,12 +111,14 @@ void CreateBindRequestManagerTest(FuzzedDataProvider &provider)
 
 void TransAddTimestampToListTest(FuzzedDataProvider &provider)
 {
-    (void)TransAddTimestampToList(nullptr, nullptr, nullptr, 0);
-    std::string mySocketName = provider.ConsumeRandomLengthString(SESSION_NAME_SIZE_MAX);
-    std::string peerSocketName = provider.ConsumeRandomLengthString(SESSION_NAME_SIZE_MAX);
-    std::string netWorkId = provider.ConsumeRandomLengthString(NETWORK_ID_BUF_LEN);
-    (void)TransAddTimestampToList(mySocketName.c_str(), nullptr, nullptr, 0);
-    (void)TransAddTimestampToList(mySocketName.c_str(), peerSocketName.c_str(), nullptr, 0);
+    BindRequestParam param;
+    (void)memset_s(&param, sizeof(BindRequestParam), 0, sizeof(BindRequestParam));
+    FillBindRequestParam(provider, &param);
+    uint64_t timestamp = provider.ConsumeIntegral<uint64_t>();
+    (void)TransAddTimestampToList(nullptr, param.peerSocketName, param.peerNetworkId, timestamp);
+    (void)TransAddTimestampToList(param.mySocketName, nullptr, param.peerNetworkId, timestamp);
+    (void)TransAddTimestampToList(param.mySocketName, param.peerSocketName, nullptr, timestamp);
+    (void)TransAddTimestampToList(param.mySocketName, param.peerSocketName, param.peerNetworkId, timestamp);
 }
 
 void TransDelTimestampFormListTest(FuzzedDataProvider &provider)
@@ -112,8 +130,10 @@ void TransDelTimestampFormListTest(FuzzedDataProvider &provider)
 
     (void)TransBindRequestManagerInit();
     TransDelTimestampFormList(&param, 0);
+    uint64_t timestamp = provider.ConsumeIntegral<uint64_t>();
+    (void)CreateBindRequestManager(param.mySocketName, param.peerSocketName, param.peerNetworkId);
+    TransDelTimestampFormList(&param, 0);
 
-    uint64_t timestamp = provider.ConsumeIntegralInRange<uint64_t>(0, UINT64_MAX);
     TransDelTimestampFormList(&param, timestamp);
     TransBindRequestManagerDeinit();
 }
@@ -130,6 +150,8 @@ void GetDeniedFlagByPeerTest(FuzzedDataProvider &provider)
 
     (void)TransBindRequestManagerInit();
     (void)GetDeniedFlagByPeer(mySocketName.c_str(), peerSocketName.c_str(), netWorkId.c_str());
+    (void)CreateBindRequestManager(mySocketName.c_str(), peerSocketName.c_str(), netWorkId.c_str());
+    (void)GetDeniedFlagByPeer(mySocketName.c_str(), peerSocketName.c_str(), netWorkId.c_str());
     TransBindRequestManagerDeinit();
 }
 
@@ -138,8 +160,13 @@ void TransResetBindDeniedFlagTest(FuzzedDataProvider &provider)
     BindRequestParam param;
     (void)memset_s(&param, sizeof(BindRequestParam), 0, sizeof(BindRequestParam));
     FillBindRequestParam(provider, &param);
+    (void)TransResetBindDeniedFlag(&param);
+    (void)TransBindRequestManagerInit();
     (void)TransBindRequestManagerInit();
     (void)TransResetBindDeniedFlag(&param);
+    (void)CreateBindRequestManager(param.mySocketName, param.peerSocketName, param.peerNetworkId);
+    (void)TransResetBindDeniedFlag(&param);
+    TransBindRequestManagerDeinit();
     TransBindRequestManagerDeinit();
 }
 } // namespace OHOS

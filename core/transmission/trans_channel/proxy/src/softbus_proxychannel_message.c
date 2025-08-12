@@ -375,18 +375,28 @@ static int32_t TransPagingUnPackHandshakeMsg(const ProxyMessage *msg, AppInfo *a
 {
     cJSON *root = cJSON_ParseWithLength(msg->data, msg->dataLen);
     TRANS_CHECK_AND_RETURN_RET_LOGE(root != NULL, SOFTBUS_PARSE_JSON_ERR, TRANS_CTRL, "parse json failed.");
+    uint32_t dataLen = 0;
     if (!GetJsonObjectStringItem(root, JSON_KEY_CALLER_ACCOUNT_ID, appInfo->peerData.callerAccountId,
         ACCOUNT_UID_LEN_MAX) ||
         !GetJsonObjectStringItem(root, JSON_KEY_CALLEE_ACCOUNT_ID, appInfo->peerData.calleeAccountId,
         ACCOUNT_UID_LEN_MAX) ||
-        !TransUnPackPagingExtraData(root, appInfo->peerData.extraData) ||
-        !GetJsonObjectNumberItem(root, JSON_KEY_PAGING_DATA_LEN, (int32_t *)&appInfo->peerData.dataLen) ||
+        !GetJsonObjectNumberItem(root, JSON_KEY_PAGING_DATA_LEN, (int32_t *)&dataLen) ||
         !GetJsonObjectNumberItem(root, JSON_KEY_PAGING_BUSINESS_FLAG, (int32_t *)&appInfo->peerData.businessFlag) ||
         !GetJsonObjectNumberItem(root, JSON_KEY_BUSINESS_TYPE, (int32_t *)&appInfo->businessType) ||
         !GetJsonObjectStringItem(root, JSON_KEY_DEVICE_ID, appInfo->peerData.deviceId, SHORT_DEVICE_LEN)) {
         TRANS_LOGE(TRANS_CTRL, "failed to get handshake msg APP_TYPE_NORMAL");
         cJSON_Delete(root);
         return SOFTBUS_PARSE_JSON_ERR;
+    }
+    if (dataLen > 0 && dataLen <= EXTRA_DATA_MAX_LEN) {
+        appInfo->peerData.dataLen = dataLen;
+        if (!TransUnPackPagingExtraData(root, appInfo->peerData.extraData)) {
+            TRANS_LOGE(TRANS_CTRL, "unpack extraData failed!");
+            cJSON_Delete(root);
+            return SOFTBUS_PARSE_JSON_ERR;
+        }
+    } else {
+        appInfo->peerData.dataLen = 0;
     }
     cJSON_Delete(root);
     return SOFTBUS_OK;
@@ -398,17 +408,27 @@ static int32_t TransPagingUnPackHandshakeAckMsg(const ProxyMessage *msg, AppInfo
     TRANS_CHECK_AND_RETURN_RET_LOGE(root != NULL, SOFTBUS_PARSE_JSON_ERR, TRANS_CTRL, "parse json failed.");
     char sessionKey[ORIGIN_LEN_16_BASE64_LENGTH] = { 0 };
     char nonce[ORIGIN_LEN_16_BASE64_LENGTH] = { 0 };
+    uint32_t dataLen = 0;
     // deviceId len is 8 bit
     if (!GetJsonObjectNumberItem(root, JSON_KEY_PAGING_SINK_CHANNEL_ID, (int32_t *)&appInfo->peerData.channelId) ||
         !GetJsonObjectStringItem(root, JSON_KEY_SESSION_KEY, sessionKey, ORIGIN_LEN_16_BASE64_LENGTH) ||
         !GetJsonObjectStringItem(root, JSON_KEY_PAGING_NONCE, nonce, ORIGIN_LEN_16_BASE64_LENGTH) ||
         !GetJsonObjectStringItem(root, JSON_KEY_DEVICE_ID, appInfo->peerData.deviceId, SHORT_DEVICE_LEN) ||
         !GetJsonObjectNumberItem(root, JSON_KEY_DEVICETYPE_ID, (int32_t *)&appInfo->peerData.devTypeId) ||
-        !TransUnPackPagingExtraData(root, appInfo->peerData.extraData) ||
-        !GetJsonObjectNumberItem(root, JSON_KEY_PAGING_DATA_LEN, (int32_t *)&appInfo->peerData.dataLen)) {
+        !GetJsonObjectNumberItem(root, JSON_KEY_PAGING_DATA_LEN, (int32_t *)&dataLen)) {
         TRANS_LOGE(TRANS_CTRL, "failed to get handshake msg APP_TYPE_NORMAL");
         cJSON_Delete(root);
         return SOFTBUS_PARSE_JSON_ERR;
+    }
+    if (dataLen > 0 && dataLen <= EXTRA_DATA_MAX_LEN) {
+        appInfo->peerData.dataLen = dataLen;
+        if (!TransUnPackPagingExtraData(root, appInfo->peerData.extraData)) {
+            TRANS_LOGE(TRANS_CTRL, "unpack extraData failed!");
+            cJSON_Delete(root);
+            return SOFTBUS_PARSE_JSON_ERR;
+        }
+    } else {
+        appInfo->peerData.dataLen = 0;
     }
     size_t len = 0;
     if (strlen(sessionKey) != 0) {
@@ -578,11 +598,32 @@ static int32_t TransProxyFillPagingLocalInfo(ProxyChannelInfo *chan)
     return SOFTBUS_OK;
 }
 
+static bool TransProxyCheckAccount(const char *hashStr, const uint8_t *shortHash)
+{
+    if (hashStr == NULL || shortHash == NULL) {
+        return false;
+    }
+    uint8_t hash[SHA_256_HASH_LEN] = { 0 };
+    if (ConvertHexStringToBytes((unsigned char *)hash, SHA_256_HASH_LEN, hashStr, strlen(hashStr)) != SOFTBUS_OK) {
+        TRANS_LOGE(TRANS_CTRL, "account hash str to bytes failed");
+        return false;
+    }
+
+    for (size_t i = 0; i < D2D_SHORT_ACCOUNT_HASH_LEN; i++) {
+        if (shortHash[i] != hash[i]) {
+            return false;
+        }
+    }
+    return true;
+}
+
 static int32_t TransProxyFillPagingChannelInfo(const ProxyMessage *msg, ProxyChannelInfo *chan,
     uint8_t *accountHash, uint8_t *udidHash)
 {
     int32_t ret = TransPagingUnPackHandshakeMsg(msg, &chan->appInfo);
     TRANS_CHECK_AND_RETURN_RET_LOGE(ret == SOFTBUS_OK, ret, TRANS_CTRL, "Paging unpack failed.");
+    TRANS_CHECK_AND_RETURN_RET_LOGE(TransProxyCheckAccount(chan->appInfo.peerData.callerAccountId, accountHash),
+        SOFTBUS_INVALID_PARAM, TRANS_CTRL, "account is invalid.");
     ret = SoftBusGenerateSessionKey(chan->appInfo.pagingSessionkey, SHORT_SESSION_KEY_LENGTH);
     TRANS_CHECK_AND_RETURN_RET_LOGE(ret == SOFTBUS_OK, ret, TRANS_CTRL, "Generate SessionKey failed.");
     ret = SoftBusGenerateRandomArray((unsigned char *)chan->appInfo.pagingNonce, PAGING_NONCE_LEN);

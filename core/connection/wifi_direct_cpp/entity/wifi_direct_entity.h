@@ -29,6 +29,12 @@ public:
         return CONN_HML_NOT_SUPPORT;
     }
 
+    virtual VirtualLinkCapabilityCode GetVirtualLinkCapabilityCode()
+    {
+        CONN_LOGW(CONN_WIFI_DIRECT, "not support");
+        return CONN_VIRTUAL_LINK_NOT_SUPPORT;
+    }
+
     virtual VspCapabilityCode GetVspCapabilityCode()
     {
         CONN_LOGW(CONN_WIFI_DIRECT, "not support");

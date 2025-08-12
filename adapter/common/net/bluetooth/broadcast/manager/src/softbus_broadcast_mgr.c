@@ -32,6 +32,8 @@
 #include "softbus_event.h"
 #include "legacy/softbus_hidumper_bc_mgr.h"
 #include "softbus_utils.h"
+#include "softbus_conn_async_helper.h"
+
 
 #define BC_WAIT_TIME_MS                  50
 #define BC_WAIT_TIME_SEC                 1
@@ -132,7 +134,7 @@ static AdapterScannerControl g_AdapterStatusControl[GATT_SCAN_MAX_NUM] = {
     { .adapterScannerId = -1, .isAdapterScanCbReg = false},
     { .adapterScannerId = -1, .isAdapterScanCbReg = false},
     { .adapterScannerId = -1, .isAdapterScanCbReg = false},
- };
+};
 
 static SoftbusBroadcastMediumInterface *g_interface[MEDIUM_NUM_MAX];
 
@@ -167,8 +169,10 @@ static void ReleaseScanIdx(int32_t listenerId)
     g_scanManager[listenerId].deleteSize = 0;
 }
 
-static void HandleOnStateOff(BroadcastProtocol protocol)
+static void HandleOnStateOff(int32_t timer, void *arg)
 {
+    BroadcastProtocol protocol = *(BroadcastProtocol *)arg;
+    SoftBusFree(arg);
     for (uint32_t managerId = 0; managerId < BC_NUM_MAX; managerId++) {
         DISC_CHECK_AND_RETURN_LOGE(SoftBusMutexLock(&g_bcLock) == SOFTBUS_OK, DISC_BROADCAST, "bcLock mutex error");
 
@@ -224,7 +228,10 @@ static void BcBtStateChanged(int32_t listenerId, int32_t state)
         return;
     }
     DISC_LOGI(DISC_BROADCAST, "receive bt turn off event, start reset broadcast mgr state..");
-    HandleOnStateOff(BROADCAST_PROTOCOL_BLE);
+    BroadcastProtocol *protocol = SoftBusCalloc(sizeof(BroadcastProtocol));
+    DISC_CHECK_AND_RETURN_LOGE(protocol != NULL, DISC_BROADCAST, "malloc protocol failed");
+    *protocol = BROADCAST_PROTOCOL_BLE;
+    HandleOnStateOff(0, protocol);
 }
 
 static void SleStateChanged(int32_t state)
@@ -233,7 +240,18 @@ static void SleStateChanged(int32_t state)
         return;
     }
     DISC_LOGI(DISC_BROADCAST, "receive sle turn off event, start reset broadcast mgr state..");
-    HandleOnStateOff(BROADCAST_PROTOCOL_SLE);
+
+    BroadcastProtocol *protocol = SoftBusCalloc(sizeof(BroadcastProtocol));
+    DISC_CHECK_AND_RETURN_LOGE(protocol != NULL, DISC_BROADCAST, "malloc protocol failed");
+    *protocol = BROADCAST_PROTOCOL_SLE;
+    ConnAsync *sync = ConnAsyncGetInstance();
+    DISC_CHECK_AND_RETURN_LOGE(sync != NULL, DISC_BROADCAST, "get sync failed");
+    int32_t ret = ConnAsyncCall(sync, HandleOnStateOff, (void *)protocol, 0);
+    if (ret < 0) {
+        SoftBusFree(protocol);
+        DISC_LOGE(DISC_BROADCAST, "post state change to looper failed, err=%{public}d", ret);
+        return;
+    }
 }
 
 static SoftBusBtStateListener g_softbusBcBtStateLister = {
@@ -282,7 +300,7 @@ static void DelayReportBroadcast(void *para)
             DISC_EVENT(EVENT_SCENE_BLE, EVENT_STAGE_BROADCAST, extra);
         }
     }
- 
+
     g_bcMaxNum = 0;
     g_bcOverMaxNum = 0;
     memset_s(g_bcManagerExtra, sizeof(g_bcManagerExtra), 0, sizeof(g_bcManagerExtra));
@@ -1793,12 +1811,11 @@ int32_t UnRegisterScanListener(int32_t listenerId)
                 g_AdapterStatusControl[index].isAdapterScanCbReg = false;
             }
         }
+        SoftBusMutexUnlock(&g_scanLock);
         ret = g_interface[protocol]->UnRegisterScanListener(adapterScanId);
-        if (ret != SOFTBUS_OK) {
-            DISC_LOGE(DISC_BROADCAST, "call from adapter failed");
-            SoftBusMutexUnlock(&g_scanLock);
-            return ret;
-        }
+        DISC_CHECK_AND_RETURN_RET_LOGE(ret == SOFTBUS_OK, ret, DISC_BROADCAST, "call from adapter failed");
+        ret = SoftBusMutexLock(&g_scanLock);
+        DISC_CHECK_AND_RETURN_RET_LOGE(ret == SOFTBUS_OK, ret, DISC_BROADCAST, "mutex error");
     }
     DISC_LOGD(DISC_BROADCAST, "srvType=%{public}s", GetSrvType(g_scanManager[listenerId].srvType));
     ReleaseBcScanFilter(listenerId);
@@ -2297,6 +2314,7 @@ int32_t SetBroadcastingParam(int32_t bcId, const BroadcastParam *param)
         callCount++);
     SoftbusBroadcastParam softbusBcParam = {};
     ConvertBcParams(protocol, param, &softbusBcParam);
+    g_bcManager[bcId].isDisableCb = false;
     SoftBusMutexUnlock(&g_bcLock);
 
     return PerformSetBroadcastingParam(bcId, &softbusBcParam);

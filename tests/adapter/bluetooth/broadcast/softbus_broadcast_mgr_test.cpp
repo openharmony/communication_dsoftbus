@@ -2101,7 +2101,7 @@ HWTEST_F(SoftbusBroadcastMgrTest, PerformSetBroadcastingParam004, TestSize.Level
     EXPECT_TRUE(bcId >= 0);
 
     EXPECT_EQ(SOFTBUS_OK, StartBroadcasting(bcId, &bcParam, &packet));
-    EXPECT_EQ(SOFTBUS_BC_MGR_NOT_BROADCASTING, PerformSetBroadcastingParam(bcId, &adapterParam));
+    EXPECT_EQ(SOFTBUS_OK, PerformSetBroadcastingParam(bcId, &adapterParam));
     EXPECT_EQ(SOFTBUS_OK, UnRegisterBroadcaster(bcId));
     EXPECT_EQ(SOFTBUS_OK, DeInitBroadcastMgr());
     DISC_LOGI(DISC_TEST, "PerformSetBroadcastingParam004 end ----");

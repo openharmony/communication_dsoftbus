@@ -211,8 +211,7 @@ static bool InitAppInfo(FuzzedDataProvider &provider, AppInfo *appInfo)
     appInfo->waitOpenReplyCnt = provider.ConsumeIntegral<int32_t>();
     appInfo->callingTokenId = provider.ConsumeIntegral<uint64_t>();
     appInfo->channelCapability = provider.ConsumeIntegral<uint32_t>();
-    uint8_t tmpU8 = provider.ConsumeIntegral<uint8_t>();
-    appInfo->fastTransData = &tmpU8;
+    appInfo->fastTransData = nullptr;
     appInfo->timeStart = provider.ConsumeIntegral<int64_t>();
     appInfo->connectedStart = provider.ConsumeIntegral<int64_t>();
     appInfo->authSeq = provider.ConsumeIntegral<int64_t>();

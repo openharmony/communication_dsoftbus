@@ -34,7 +34,7 @@ int32_t Reference(SoftBusRcObject *object)
 
     int32_t ret = Lock(object);
     COMM_CHECK_AND_RETURN_RET_LOGE(ret == SOFTBUS_OK, ret, COMM_UTILS,
-        "%{public}s lock failed: id=%{public}d, error=%{public}d", object->name, object->id, ret);
+        "%{public}s lock fail: id=%{public}d, error=%{public}d", object->name, object->id, ret);
     object->objectRc += 1;
     Unlock(object);
     return SOFTBUS_OK;
@@ -47,7 +47,7 @@ void Deference(SoftBusRcObject **ptr)
     COMM_CHECK_AND_RETURN_LOGE(object != NULL, COMM_UTILS, "object is null");
 
     int32_t ret = Lock(object);
-    COMM_CHECK_AND_RETURN_LOGE(ret == SOFTBUS_OK, COMM_UTILS, "%{public}s lock failed: id=%{public}d, error=%{public}d",
+    COMM_CHECK_AND_RETURN_LOGE(ret == SOFTBUS_OK, COMM_UTILS, "%{public}s lock fail: id=%{public}d, error=%{public}d",
         object->name, object->id, ret);
     object->objectRc -= 1;
     int32_t remain = object->objectRc;
@@ -75,7 +75,7 @@ int32_t SoftBusRcObjectConstruct(const char *name, SoftBusRcObject *object, Soft
     };
     int32_t ret = SoftBusMutexInit(&object->mutex, &attr);
     COMM_CHECK_AND_RETURN_RET_LOGE(
-        ret == SOFTBUS_OK, ret, COMM_UTILS, "%{public}s init lock failed: error=%{public}d", name, ret);
+        ret == SOFTBUS_OK, ret, COMM_UTILS, "%{public}s init lock fail: error=%{public}d", name, ret);
     // assigned 1, as object is referenced by local construct progress
     object->objectRc = 1;
     object->freehook = hook;

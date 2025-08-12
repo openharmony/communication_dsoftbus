@@ -86,6 +86,7 @@ static void GetProxyChannelInfo(int32_t channelId, const AppInfo *appInfo, bool 
     info->osType = appInfo->osType;
     info->isD2D = appInfo->isD2D;
     if (appInfo->isD2D) {
+        info->pagingId = appInfo->pagingId;
         info->businessFlag = appInfo->myData.businessFlag;
         info->deviceTypeId = appInfo->peerData.devTypeId;
         info->pagingNonce = (char *)appInfo->pagingNonce;

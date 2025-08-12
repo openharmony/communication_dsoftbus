@@ -732,6 +732,7 @@ HWTEST_F(LNNDataCloudSyncMockTest, LnnDBDataAddChangeSyncToCache_Test_002, TestS
  */
 HWTEST_F(LNNDataCloudSyncMockTest, LnnUpdateOldCacheInfo_Test_001, TestSize.Level1)
 {
+    NiceMock<LnnDataCloudSyncInterfaceMock> DataCloudSyncMock;
     NodeInfo newInfo;
     NodeInfo oldInfo;
     UpdateDeviceNameToCache(&newInfo, &oldInfo);
@@ -741,6 +742,10 @@ HWTEST_F(LNNDataCloudSyncMockTest, LnnUpdateOldCacheInfo_Test_001, TestSize.Leve
     EXPECT_EQ(ret, SOFTBUS_INVALID_PARAM);
     ret = LnnUpdateOldCacheInfo(&newInfo, nullptr);
     EXPECT_EQ(ret, SOFTBUS_INVALID_PARAM);
+    EXPECT_CALL(DataCloudSyncMock, LnnFindDeviceUdidTrustedInfoFromDb).WillRepeatedly(Return(SOFTBUS_OK));
+    ret = LnnUpdateOldCacheInfo(&newInfo, &oldInfo);
+    EXPECT_EQ(ret, SOFTBUS_OK);
+    EXPECT_CALL(DataCloudSyncMock, LnnFindDeviceUdidTrustedInfoFromDb).WillRepeatedly(Return(SOFTBUS_NOT_FIND));
     ret = LnnUpdateOldCacheInfo(&newInfo, &oldInfo);
     EXPECT_EQ(ret, SOFTBUS_OK);
 }

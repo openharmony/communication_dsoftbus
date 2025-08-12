@@ -35,10 +35,12 @@ public:
     virtual int32_t ClientGetChannelBusinessTypeByChannelId(int32_t channelId, int32_t *businessType) = 0;
     virtual int32_t TransProxyPackD2DBytes(ProxyDataInfo *dataInfo, const char *sessionKey,
         const char *sessionIv, SessionPktType flag) = 0;
+    virtual uint8_t *TransProxyPackD2DData(
+        ProxyDataInfo *dataInfo, uint32_t sliceNum, SessionPktType pktType, uint32_t cnt, uint32_t *dataLen) = 0;
     virtual int32_t ServerIpcSendMessage(
         int32_t channelId, int32_t channelType, const void *data, uint32_t len, int32_t msgType) = 0;
     virtual int32_t TransProxyProcessD2DData(
-    ProxyDataInfo *dataInfo, const PacketD2DHead *dataHead, const char *data, int32_t businessType) = 0;
+        ProxyDataInfo *dataInfo, const PacketD2DHead *dataHead, const char *data, int32_t businessType) = 0;
     virtual int32_t TransProxyDecryptD2DData(int32_t businessType, ProxyDataInfo *dataInfo, const char *sessionKey,
         const unsigned char *sessionCommonIv) = 0;
     virtual int32_t TransProxySessionDataLenCheck(uint32_t dataLen, SessionPktType type);
@@ -60,6 +62,8 @@ public:
     MOCK_METHOD2(ClientGetChannelBusinessTypeByChannelId, int32_t(int32_t channelId, int32_t *businessType));
     MOCK_METHOD4(TransProxyPackD2DBytes, int32_t(ProxyDataInfo *dataInfo, const char *sessionKey,
         const char *sessionIv, SessionPktType flag));
+    MOCK_METHOD5(TransProxyPackD2DData, uint8_t *(ProxyDataInfo *dataInfo, uint32_t sliceNum,
+        SessionPktType pktType, uint32_t cnt, uint32_t *dataLen));
     MOCK_METHOD5(ServerIpcSendMessage, int32_t(int32_t channelId, int32_t channelType, const void *data,
             uint32_t len, int32_t msgType));
     MOCK_METHOD4(TransProxyProcessD2DData, int32_t(ProxyDataInfo *dataInfo, const PacketD2DHead *dataHead,

@@ -79,7 +79,7 @@ HWTEST_F(TransInnerTest, TransInnerAddDataBufNodeTest001, TestSize.Level1)
     int32_t ret = TransInnerAddDataBufNode(TRANS_TEST_CHANNEL_ID, TRANS_TEST_FD, CHANNEL_TYPE_PROXY);
     EXPECT_EQ(SOFTBUS_OK, ret);
     ret = TransInnerAddDataBufNode(TRANS_TEST_CHANNEL_ID, TRANS_TEST_FD, CHANNEL_TYPE_TCP_DIRECT);
-    EXPECT_EQ(SOFTBUS_MALLOC_ERR, ret);
+    EXPECT_EQ(SOFTBUS_LOCK_ERR, ret);
     TransSrvDelInnerDataBufNode(TRANS_TEST_CHANNEL_ID);
     InnerListInit();
     ret = TransInnerAddDataBufNode(TRANS_TEST_CHANNEL_ID, TRANS_TEST_FD, CHANNEL_TYPE_TCP_DIRECT);

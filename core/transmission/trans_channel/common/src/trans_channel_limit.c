@@ -47,10 +47,6 @@ static const SessionWhiteList g_sessionWhiteList[] = {
         .regexp = false,
     },
     {
-        .sessionName = "com.huawei.plrdtest.dsoftbus",
-        .regexp = false,
-    },
-    {
         .sessionName = "com.huawei.*CastPlusDiscoveryModule",
         .regexp = true,
     },
