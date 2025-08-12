@@ -22,6 +22,7 @@
 #include "g_enhance_lnn_func.h"
 #include "g_enhance_lnn_func_pack.h"
 #include "lnn_async_callback_utils.h"
+#include "lnn_decision_db.h"
 #include "lnn_distributed_net_ledger.h"
 #include "lnn_heartbeat_utils.h"
 #include "lnn_kv_adapter_wrapper.h"
@@ -916,12 +917,14 @@ static void UpdateDevBasicInfoToCache(const NodeInfo *newInfo, NodeInfo *oldInfo
     oldInfo->connSubFeature = newInfo->connSubFeature;
     oldInfo->authCapacity = newInfo->authCapacity;
     oldInfo->deviceInfo.osType = newInfo->deviceInfo.osType;
-    oldInfo->stateVersion = newInfo->stateVersion;
     oldInfo->updateTimestamp = newInfo->updateTimestamp;
     oldInfo->deviceSecurityLevel = newInfo->deviceSecurityLevel;
-    oldInfo->localStateVersion = newInfo->localStateVersion;
     oldInfo->heartbeatCapacity = newInfo->heartbeatCapacity;
     oldInfo->staticNetCap = newInfo->staticNetCap;
+    if (LnnFindDeviceUdidTrustedInfoFromDb(newInfo->deviceInfo.deviceUdid) != SOFTBUS_OK) {
+        oldInfo->stateVersion = newInfo->stateVersion;
+        oldInfo->localStateVersion = newInfo->localStateVersion;
+    }
 }
 
 static int32_t LnnUpdateOldCacheInfo(const NodeInfo *newInfo, NodeInfo *oldInfo)

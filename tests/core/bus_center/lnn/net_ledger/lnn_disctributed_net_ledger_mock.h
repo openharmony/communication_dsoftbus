@@ -27,6 +27,7 @@ public:
     virtual ~LnnDisctributedNetLedgerInterface() {};
     virtual int32_t LnnSaveRemoteDeviceInfo(const NodeInfo *deviceInfo) = 0;
     virtual int32_t LnnRetrieveDeviceInfo(const char *udid, NodeInfo *deviceInfo) = 0;
+    virtual int32_t LnnFindDeviceUdidTrustedInfoFromDb(const char *udid) = 0;
 };
 
 class LnnDisctributedNetLedgerInterfaceMock : public LnnDisctributedNetLedgerInterface {
@@ -35,6 +36,7 @@ public:
     ~LnnDisctributedNetLedgerInterfaceMock() override;
     MOCK_METHOD1(LnnSaveRemoteDeviceInfo, int32_t (const NodeInfo *deviceInfo));
     MOCK_METHOD2(LnnRetrieveDeviceInfo, int32_t (const char *udid, NodeInfo *deviceInfo));
+    MOCK_METHOD1(LnnFindDeviceUdidTrustedInfoFromDb, int32_t (const char *));
 };
 } // namespace OHOS
 #endif // LNN_DISCTRIBUTED_NET_LEDGER_MOCK_H
