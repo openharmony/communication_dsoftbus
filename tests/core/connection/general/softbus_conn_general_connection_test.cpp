@@ -508,7 +508,7 @@ HWTEST_F(GeneralConnectionTest, TestOnConnectDisconnected, TestSize.Level1)
     EXPECT_EQ(handle > 0, true);
 
     ConnectResult *connectResult = GeneralConnectionInterfaceMock::GetConnectResultMock();
-    uint32_t requestId = 13;
+    uint32_t requestId = 14;
     ConnectionInfo infos = {0};
     uint32_t connectionId = (CONNECT_BLE << CONNECT_TYPE_SHIFT) + 1;
     connectResult->OnConnectSuccessed(requestId, connectionId, &infos);

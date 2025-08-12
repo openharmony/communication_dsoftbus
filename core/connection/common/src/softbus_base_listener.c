@@ -1268,14 +1268,14 @@ static int32_t StartWatchThread(void)
 
         status = SoftBusMutexInit(&state->lock, NULL);
         if (status != SOFTBUS_OK) {
-            CONN_LOGE(CONN_COMMON, "start watch task async fail, error=%{public}d", status);
+            CONN_LOGE(CONN_COMMON, "init lock fail, error=%{public}d", status);
             CleanupWatchThreadState(&state);
             break;
         }
         state->referenceCount = 1;
         status = ConnStartActionAsync(state, WatchTask, "Watch_Tsk");
         if (status != SOFTBUS_OK) {
-            CONN_LOGE(CONN_COMMON, "init lock fail, error=%{public}d", status);
+            CONN_LOGE(CONN_COMMON, "start watch task async fail, error=%{public}d", status);
             CleanupWatchThreadState(&state);
             break;
         }

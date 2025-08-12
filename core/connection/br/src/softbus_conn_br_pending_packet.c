@@ -231,6 +231,7 @@ int32_t ConnBrOnAckRequest(ConnBrConnection *connection, const cJSON *json)
 
 int32_t ConnBrOnAckResponse(ConnBrConnection *connection, const cJSON *json)
 {
+    CONN_CHECK_AND_RETURN_RET_LOGE(connection != NULL, SOFTBUS_INVALID_PARAM, CONN_BR, "connection is null");
     int32_t peerWindows = 0;
     uint64_t seq = 0;
     if (!GetJsonObjectSignedNumberItem(json, KEY_WINDOWS, &peerWindows) ||

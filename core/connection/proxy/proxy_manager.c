@@ -465,7 +465,11 @@ static ProxyConnectInfo *CopyProxyConnectInfo(ProxyConnectInfo *srcInfo)
 {
     ProxyConnectInfo *destInfo = (ProxyConnectInfo *)SoftBusCalloc(sizeof(ProxyConnectInfo));
     CONN_CHECK_AND_RETURN_RET_LOGE(destInfo != NULL, NULL, CONN_PROXY, "data is NULL");
-    (void)memcpy_s(destInfo, sizeof(ProxyConnectInfo), srcInfo, sizeof(ProxyConnectInfo));
+    if (memcpy_s(destInfo, sizeof(ProxyConnectInfo), srcInfo, sizeof(ProxyConnectInfo)) != EOK) {
+        CONN_LOGE(CONN_PROXY, "memcpy ProxyConnectInfo failed");
+        SoftBusFree(destInfo);
+        return NULL;
+    }
     ListInit(&destInfo->node);
     return destInfo;
 }
@@ -1007,12 +1011,14 @@ int32_t ProxyChannelManagerInit(void)
     ret = SoftBusAddBtStateListener(&btStateListener, &listenerId);
     if (ret != SOFTBUS_OK) {
         CONN_LOGE(CONN_PROXY, "add bt listener failed, listenerId=%{public}d", listenerId);
+        SoftBusMutexDestroy(&g_reqIdLock);
         DestroySoftBusList(g_proxyChannelManager.proxyConnectionList);
         return ret;
     }
     ret = RegisterHfpListener(OnObserverStateChanged);
     if (ret != SOFTBUS_OK) {
         CONN_LOGE(CONN_PROXY, "register hfp listener failed, ret=%{public}d", ret);
+        SoftBusMutexDestroy(&g_reqIdLock);
         DestroySoftBusList(g_proxyChannelManager.proxyConnectionList);
         SoftBusRemoveBtStateListener(listenerId);
         return ret;
