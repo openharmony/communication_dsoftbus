@@ -127,7 +127,7 @@ static ConnPostData *PackInnerMsg(GeneralConnectionInfo *info, GeneralConnection
 
 static bool GetConnectCallbackFlag()
 {
-    if (g_connectCallbackFlag == true) {
+    if (g_connectCallbackFlag) {
         g_connectCallbackFlag = false;
         return true;
     }
@@ -146,7 +146,7 @@ static int32_t GetFailCallbackReason()
 
 static bool GetRecvDataFlag()
 {
-    if (g_recvDataFlag == true) {
+    if (g_recvDataFlag) {
         g_recvDataFlag = false;
         return true;
     }

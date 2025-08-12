@@ -89,7 +89,6 @@ processorv1_ut_sources = [
   "$wifi_direct_path/dfx/processor_snapshot.cpp",
   "$wifi_direct_path/dfx/wifi_direct_dfx.cpp",
   "$wifi_direct_path/dfx/wifi_direct_trace.cpp",
-  "$wifi_direct_path/entity/entity_factory.cpp",
   "$wifi_direct_path/event/wifi_direct_event_dispatcher.cpp",
   "$wifi_direct_path/processor/null_processor.cpp",
   "$wifi_direct_path/processor/p2p_v1_processor.cpp",
@@ -97,17 +96,18 @@ processorv1_ut_sources = [
   "$wifi_direct_path/protocol/tlv_protocol.cpp",
   "$wifi_direct_path/utils/wifi_direct_anonymous.cpp",
   "$wifi_direct_path/wifi_direct_executor.cpp",
-  "$wifi_direct_path/wifi_direct_executor_factory.cpp",
   "$wifi_direct_path/wifi_direct_executor_manager.cpp",
   "$wifi_direct_path/wifi_direct_initiator.cpp",
   "$wifi_direct_path/wifi_direct_ip_manager.cpp",
   "$wifi_direct_path/wifi_direct_manager.cpp",
   "$wifi_direct_path/wifi_direct_role_option.cpp",
   "$wifi_direct_path/wifi_direct_scheduler.cpp",
-  "$wifi_direct_path/wifi_direct_scheduler_factory.cpp",
   "$wifi_direct_unit_path/net_conn_client.cpp",
   "$wifi_direct_unit_path/wifi_direct_mock.cpp",
   "$wifi_direct_unit_path/wifi_direct_utils.cpp",
+  "$wifi_direct_path/wifi_direct_scheduler_factory.cpp",
+  "$wifi_direct_path/entity/entity_factory.cpp",
+  "$wifi_direct_path/wifi_direct_executor_factory.cpp",
 ]
 
 processorv1_ut_defines = [ "P2P_V1_WAITING_TIMEOUT_MS_OVERWRITE=1000" ]

@@ -108,6 +108,7 @@ HWTEST_F(AdapterBleGattClientTest, SoftbusGattcRegister001, TestSize.Level3)
 {
     MockBluetooth mocker;
     MockAll(mocker);
+
     EXPECT_CALL(mocker, BleGattcRegister).Times(1).WillOnce(Return(0));
     EXPECT_EQ(SoftbusGattcRegister(), -1);
 
@@ -395,6 +396,7 @@ HWTEST_F(AdapterBleGattClientTest, GattClientConnectCycle001, TestSize.Level3)
 
     auto clientId = SoftbusGattcRegister();
     ASSERT_NE(clientId, -1);
+
     SoftbusGattcRegisterCallback(GetStubGattcCallback(), clientId);
     SoftBusBtAddr addr = {
         .addr = { 0x11, 0x22, 0x33, 0x44, 0x55, 0x66 }
