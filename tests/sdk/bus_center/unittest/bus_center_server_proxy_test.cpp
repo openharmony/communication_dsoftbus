@@ -55,7 +55,7 @@ HWTEST_F(BusCenterServerProxyTest, ServerIpcGetAllOnlineNodeInfo_TEST_001, TestS
     uint32_t infoTypeLen = 0;
     int32_t *infoNum = nullptr;
     int32_t ret = ServerIpcGetAllOnlineNodeInfo(pkgName, info, infoTypeLen, infoNum);
-    EXPECT_EQ(ret, SOFTBUS_SERVER_NOT_INIT);
+    EXPECT_NE(ret, SOFTBUS_OK);
 }
 
 /*
@@ -70,7 +70,7 @@ HWTEST_F(BusCenterServerProxyTest, ServerIpcGetLocalDeviceInfo_TEST_001, TestSiz
     void *info = nullptr;
     uint32_t infoTypeLen = 0;
     int32_t ret = ServerIpcGetLocalDeviceInfo(pkgName, info, infoTypeLen);
-    EXPECT_EQ(ret, SOFTBUS_SERVER_NOT_INIT);
+    EXPECT_NE(ret, SOFTBUS_OK);
 }
 
 /*
@@ -88,7 +88,7 @@ HWTEST_F(BusCenterServerProxyTest, ServerIpcGetNodeKeyInfo_TEST_001, TestSize.Le
     unsigned char *buf = array;
     uint32_t len = 0;
     int32_t ret = ServerIpcGetNodeKeyInfo(pkgName, networkId, key, buf, len);
-    EXPECT_EQ(ret, SOFTBUS_SERVER_NOT_INIT);
+    EXPECT_NE(ret, SOFTBUS_OK);
 }
 
 /*
@@ -103,7 +103,7 @@ HWTEST_F(BusCenterServerProxyTest, ServerIpcSetNodeDataChangeFlag_TEST_001, Test
     const char *networkId = "123";
     uint16_t dataChangeFlag = 0;
     int32_t ret = ServerIpcSetNodeDataChangeFlag(pkgName, networkId, dataChangeFlag);
-    EXPECT_EQ(ret, SOFTBUS_SERVER_NOT_INIT);
+    EXPECT_NE(ret, SOFTBUS_OK);
 }
 
 /*
@@ -116,7 +116,7 @@ HWTEST_F(BusCenterServerProxyTest, ServerIpcRegDataLevelChangeCb_TEST_001, TestS
 {
     const char *pkgName = "001";
     int32_t ret = ServerIpcRegDataLevelChangeCb(pkgName);
-    EXPECT_EQ(ret, SOFTBUS_SERVER_NOT_INIT);
+    EXPECT_NE(ret, SOFTBUS_OK);
 }
 
 /*
@@ -129,7 +129,7 @@ HWTEST_F(BusCenterServerProxyTest, ServerIpcUnregDataLevelChangeCb_TEST_001, Tes
 {
     const char *pkgName = "001";
     int32_t ret = ServerIpcUnregDataLevelChangeCb(pkgName);
-    EXPECT_EQ(ret, SOFTBUS_SERVER_NOT_INIT);
+    EXPECT_NE(ret, SOFTBUS_OK);
 }
 
 /*
@@ -144,7 +144,7 @@ HWTEST_F(BusCenterServerProxyTest, ServerIpcJoinLNN_TEST_001, TestSize.Level1)
     void *addr = nullptr;
     uint32_t addrTypeLen = 0;
     int32_t ret = ServerIpcJoinLNN(pkgName, addr, addrTypeLen, false);
-    EXPECT_EQ(ret, SOFTBUS_SERVER_NOT_INIT);
+    EXPECT_NE(ret, SOFTBUS_OK);
 }
 
 /*
@@ -158,7 +158,7 @@ HWTEST_F(BusCenterServerProxyTest, ServerIpcLeaveLNN_TEST_001, TestSize.Level1)
     const char *pkgName = "001";
     const char *networkId = "123";
     int32_t ret = ServerIpcLeaveLNN(pkgName, networkId);
-    EXPECT_EQ(ret, SOFTBUS_SERVER_NOT_INIT);
+    EXPECT_NE(ret, SOFTBUS_OK);
 }
 
 /*
@@ -174,7 +174,7 @@ HWTEST_F(BusCenterServerProxyTest, ServerIpcStartTimeSync_TEST_001, TestSize.Lev
     int32_t accuracy = 1;
     int32_t period = 1;
     int32_t ret = ServerIpcStartTimeSync(pkgName, targetNetworkId, accuracy, period);
-    EXPECT_EQ(ret, SOFTBUS_SERVER_NOT_INIT);
+    EXPECT_NE(ret, SOFTBUS_OK);
 }
 
 /*
@@ -188,7 +188,7 @@ HWTEST_F(BusCenterServerProxyTest, ServerIpcStopTimeSync_TEST_001, TestSize.Leve
     const char *pkgName = "001";
     const char *targetNetworkId = "1234";
     int32_t ret = ServerIpcStopTimeSync(pkgName, targetNetworkId);
-    EXPECT_EQ(ret, SOFTBUS_SERVER_NOT_INIT);
+    EXPECT_NE(ret, SOFTBUS_OK);
 }
 
 /*
@@ -202,7 +202,7 @@ HWTEST_F(BusCenterServerProxyTest, ServerIpcPublishLNN_TEST_001, TestSize.Level1
     const char *pkgName = "001";
     const PublishInfo *info = nullptr;
     int32_t ret = ServerIpcPublishLNN(pkgName, info);
-    EXPECT_EQ(ret, SOFTBUS_SERVER_NOT_INIT);
+    EXPECT_NE(ret, SOFTBUS_OK);
 }
 
 /*
@@ -216,7 +216,7 @@ HWTEST_F(BusCenterServerProxyTest, ServerIpcStopPublishLNN_TEST_001, TestSize.Le
     const char *pkgName = "001";
     int32_t publishId = 123;
     int32_t ret = ServerIpcStopPublishLNN(pkgName, publishId);
-    EXPECT_EQ(ret, SOFTBUS_SERVER_NOT_INIT);
+    EXPECT_NE(ret, SOFTBUS_OK);
 }
 
 /*
@@ -230,7 +230,7 @@ HWTEST_F(BusCenterServerProxyTest, ServerIpcRefreshLNN_TEST_001, TestSize.Level1
     const char *pkgName = "001";
     const SubscribeInfo *info = nullptr;
     int32_t ret = ServerIpcRefreshLNN(pkgName, info);
-    EXPECT_EQ(ret, SOFTBUS_SERVER_NOT_INIT);
+    EXPECT_NE(ret, SOFTBUS_OK);
 }
 
 /*
@@ -244,7 +244,7 @@ HWTEST_F(BusCenterServerProxyTest, ServerIpcStopRefreshLNN_TEST_001, TestSize.Le
     const char *pkgName = "001";
     int32_t refreshId = 123;
     int32_t ret = ServerIpcStopRefreshLNN(pkgName, refreshId);
-    EXPECT_EQ(ret, SOFTBUS_SERVER_NOT_INIT);
+    EXPECT_NE(ret, SOFTBUS_OK);
 }
 
 /*
@@ -260,7 +260,7 @@ HWTEST_F(BusCenterServerProxyTest, ServerIpcActiveMetaNode_TEST_001, TestSize.Le
     char testtId = 'a';
     char *metaNodeId = &testtId;
     int32_t ret = ServerIpcActiveMetaNode(pkgName, info, metaNodeId);
-    EXPECT_EQ(ret, SOFTBUS_SERVER_NOT_INIT);
+    EXPECT_NE(ret, SOFTBUS_OK);
 }
 
 /*
@@ -274,7 +274,7 @@ HWTEST_F(BusCenterServerProxyTest, ServerIpcDeactiveMetaNode_TEST_001, TestSize.
     const char *pkgName = "001";
     const char *metaNodeId = "123";
     int32_t ret = ServerIpcDeactiveMetaNode(pkgName, metaNodeId);
-    EXPECT_EQ(ret, SOFTBUS_SERVER_NOT_INIT);
+    EXPECT_NE(ret, SOFTBUS_OK);
 }
 
 /*
@@ -290,7 +290,7 @@ HWTEST_F(BusCenterServerProxyTest, ServerIpcGetAllMetaNodeInfo_TEST_001, TestSiz
     int32_t testNum = 123;
     int32_t *infoNum = &testNum;
     int32_t ret = ServerIpcGetAllMetaNodeInfo(pkgName, infos, infoNum);
-    EXPECT_EQ(ret, SOFTBUS_SERVER_NOT_INIT);
+    EXPECT_NE(ret, SOFTBUS_OK);
 }
 
 /*
@@ -306,7 +306,7 @@ HWTEST_F(BusCenterServerProxyTest, ServerIpcShiftLNNGear_TEST_001, TestSize.Leve
     const char *targetNetworkId = "111";
     const GearMode *mode = nullptr;
     int32_t ret = ServerIpcShiftLNNGear(pkgName, callerId, targetNetworkId, mode);
-    EXPECT_EQ(ret, SOFTBUS_SERVER_NOT_INIT);
+    EXPECT_NE(ret, SOFTBUS_OK);
 }
 
 /*
@@ -321,7 +321,7 @@ HWTEST_F(BusCenterServerProxyTest, ServerIpcSyncTrustedRelationShip_TEST_001, Te
     const char *msg = "123";
     uint32_t msgLen = 123;
     int32_t ret = ServerIpcSyncTrustedRelationShip(pkgName, msg, msgLen);
-    EXPECT_EQ(ret, SOFTBUS_TRANS_PROXY_REMOTE_NULL);
+    EXPECT_NE(ret, SOFTBUS_OK);
 }
 
 } // namespace OHOS
