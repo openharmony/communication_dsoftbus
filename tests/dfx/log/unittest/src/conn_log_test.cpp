@@ -59,6 +59,9 @@ HWTEST_F(ConnLogTest, ConnLogTest001, TestSize.Level0)
     EXPECT_NO_FATAL_FAILURE(ExpectMatchSoftBusLogAttrs(CONN_LABELS[++index], CONN_ACTION, ++connDomainBase,
         "ConnAction"));
     EXPECT_NO_FATAL_FAILURE(ExpectMatchSoftBusLogAttrs(CONN_LABELS[++index], CONN_SLE, connSleBase, "ConnSle"));
+    EXPECT_NO_FATAL_FAILURE(
+        ExpectMatchSoftBusLogAttrs(CONN_LABELS[++index], CONN_EVENT, ++connDomainBase, "ConnEvent"));
+    EXPECT_NO_FATAL_FAILURE(ExpectMatchSoftBusLogAttrs(CONN_LABELS[++index], CONN_PROXY, ++connSleBase, "ConnProxy"));
     EXPECT_NO_FATAL_FAILURE(ExpectMatchSoftBusLogAttrs(CONN_LABELS[++index], CONN_TEST, DOMAIN_ID_TEST, "ConnTest"));
 }
 
