@@ -925,14 +925,14 @@ int32_t TransProxyPackD2DBytes(
     }
     if (TransGenerateToBytesRandIv(cipherKey.iv, &nonce) != SOFTBUS_OK) {
         TRANS_LOGE(TRANS_CTRL, "generate iv failed");
-        (void)memset_s(cipherKey.key, SHORT_SESSION_KEY_LENGTH, 0, SHORT_SESSION_KEY_LENGTH);
+        (void)memset_s(&cipherKey, sizeof(AesCtrCipherKey), 0, sizeof(AesCtrCipherKey));
         return SOFTBUS_GCM_SET_IV_FAIL;
     }
     dataInfo->outLen = dataInfo->inLen + NONCE_LEN + sizeof(PacketD2DHead);
     dataInfo->outData = (uint8_t *)SoftBusCalloc(dataInfo->outLen);
     if (dataInfo->outData == NULL) {
         TRANS_LOGE(TRANS_CTRL, "malloc failed");
-        (void)memset_s(&cipherKey, SHORT_SESSION_KEY_LENGTH, 0, SHORT_SESSION_KEY_LENGTH);
+        (void)memset_s(&cipherKey, sizeof(AesCtrCipherKey), 0, sizeof(AesCtrCipherKey));
         return SOFTBUS_MALLOC_ERR;
     }
 
@@ -940,7 +940,7 @@ int32_t TransProxyPackD2DBytes(
     char *outData = (char *)dataInfo->outData + NONCE_LEN + sizeof(PacketD2DHead);
     int32_t ret = SoftBusEncryptDataByCtr(&cipherKey, (const unsigned char *)dataInfo->inData,
         dataInfo->inLen, (unsigned char *)outData, &outLen);
-    (void)memset_s(&cipherKey, SHORT_SESSION_KEY_LENGTH, 0, SHORT_SESSION_KEY_LENGTH);
+    (void)memset_s(&cipherKey, sizeof(AesCtrCipherKey), 0, sizeof(AesCtrCipherKey));
 
     if (ret != SOFTBUS_OK || outLen != dataInfo->inLen) {
         outData = NULL;

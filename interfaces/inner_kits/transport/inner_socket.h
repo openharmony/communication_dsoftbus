@@ -49,12 +49,10 @@ extern "C" {
  * @version 2.0
  */
 typedef enum {
-    LONG_DURATION_SESSION = 1, /**< Long duration session. */
-    LONG_BACKGROUND_SESSION,   /**< Long duration and background session. */
-    LONG_FOREGROUND_SESSION,   /**< Long duration and foreground session. */
-    SHORT_DURATION_SESSION,    /**< Short duration session. */
-    SHORT_BACKGROUND_SESSION,  /**< Short duration and background session. */
-    SHORT_FOREGROUND_SESSION,  /**< Short duration and foreground session. */
+    LONG_BACKGROUND_SESSION = 0,  /**< Long duration and background session. */
+    LONG_FOREGROUND_SESSION = 1,  /**< Long duration and foreground session. */
+    SHORT_BACKGROUND_SESSION = 2, /**< Short duration and background session. */
+    SHORT_FOREGROUND_SESSION = 3  /**< Short duration and foreground session. */
 } FlowSessionType;
 
 /**

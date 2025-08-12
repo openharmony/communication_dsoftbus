@@ -1258,7 +1258,7 @@ static int32_t CheckAndGenerateSinkSessionKey(ProxyChannelInfo *chan)
 {
     (void)LnnGetNetworkIdByUuid(chan->appInfo.peerData.deviceId, chan->appInfo.peerNetWorkId, NETWORK_ID_BUF_LEN);
     int32_t osType = 0;
-    (void)GetOsTypeByNetworkId(chan->appInfo.peerNetWorkId, &osType);
+    GetOsTypeByNetworkId(chan->appInfo.peerNetWorkId, &osType);
     if (osType != OH_OS_TYPE) {
         DisableCapabilityBit(&chan->appInfo.channelCapability, TRANS_CHANNEL_SINK_GENERATE_KEY_OFFSET);
     }
@@ -1650,6 +1650,7 @@ int32_t TransDealProxyChannelOpenResult(
     int32_t ret = TransProxyGetChanByChanId(channelId, &chan);
     TRANS_CHECK_AND_RETURN_RET_LOGE(ret == SOFTBUS_OK, ret, TRANS_CTRL,
         "get proxy channelInfo failed, channelId=%{public}d, ret=%{public}d", channelId, ret);
+
     if (callingPid != 0 && chan.appInfo.myData.pid != callingPid) {
         TRANS_LOGE(TRANS_CTRL,
             "pid does not match callingPid, pid=%{public}d, callingPid=%{public}d, channelId=%{public}d",
@@ -1687,6 +1688,7 @@ int32_t TransDealProxyChannelOpenResult(
         TransProxyDelChanByChanId(channelId);
         return SOFTBUS_OK;
     }
+
     if (chan.appInfo.fastTransData != NULL && chan.appInfo.fastTransDataSize > 0) {
         TransProxyFastDataRecv(&chan);
     }
@@ -1739,7 +1741,11 @@ void TransAsyncProxyChannelTask(int32_t channelId)
     }
     if (curCount >= LOOPER_REPLY_CNT_MAX) {
         TRANS_LOGE(TRANS_CTRL, "Open proxy channel timeout, channelId=%{public}d", channelId);
-        (void)TransProxyAckHandshake(chan.connId, &chan, SOFTBUS_TRANS_OPEN_CHANNEL_NEGTIATE_TIMEOUT);
+        if (chan.isD2D) {
+            (void)TransPagingAckHandshake(&chan, SOFTBUS_TRANS_OPEN_CHANNEL_NEGTIATE_TIMEOUT);
+        } else {
+            (void)TransProxyAckHandshake(chan.connId, &chan, SOFTBUS_TRANS_OPEN_CHANNEL_NEGTIATE_TIMEOUT);
+        }
         (void)OnProxyChannelClosed(channelId, &(chan.appInfo));
         TransProxyDelChanByChanId(channelId);
         return;
@@ -2333,10 +2339,10 @@ static void TransNotifySingleNetworkOffLine(const LnnEventBasicInfo *info)
         TransOnLinkDown(offlineInfo->networkId, offlineInfo->uuid, offlineInfo->udid, "", BT_BLE);
     } else if (type == CONNECTION_ADDR_BR) {
         TransOnLinkDown(offlineInfo->networkId, offlineInfo->uuid, offlineInfo->udid, "", BT_BR);
+    }  else if (type == CONNECTION_ADDR_NCM) {
+        TransOnLinkDown(offlineInfo->networkId, offlineInfo->uuid, offlineInfo->udid, "", WIFI_USB);
     } else if (type == CONNECTION_ADDR_SLE) {
         TransOnLinkDown(offlineInfo->networkId, offlineInfo->uuid, offlineInfo->udid, "", BT_SLE);
-    } else if (type == CONNECTION_ADDR_NCM) {
-        TransOnLinkDown(offlineInfo->networkId, offlineInfo->uuid, offlineInfo->udid, "", WIFI_USB);
     }
 }
 
@@ -2355,8 +2361,8 @@ static void TransNotifyOffLine(const LnnEventBasicInfo *info)
     TransOnLinkDown(onlineStateInfo->networkId, onlineStateInfo->uuid, onlineStateInfo->udid, "", WIFI_STA);
     TransOnLinkDown(onlineStateInfo->networkId, onlineStateInfo->uuid, onlineStateInfo->udid, "", BT_BR);
     TransOnLinkDown(onlineStateInfo->networkId, onlineStateInfo->uuid, onlineStateInfo->udid, "", BT_BLE);
-    TransOnLinkDown(onlineStateInfo->networkId, onlineStateInfo->uuid, onlineStateInfo->udid, "", BT_SLE);
     TransOnLinkDown(onlineStateInfo->networkId, onlineStateInfo->uuid, onlineStateInfo->udid, "", WIFI_USB);
+    TransOnLinkDown(onlineStateInfo->networkId, onlineStateInfo->uuid, onlineStateInfo->udid, "", BT_SLE);
 }
 
 static void TransNotifyUserSwitch(const LnnEventBasicInfo *info)

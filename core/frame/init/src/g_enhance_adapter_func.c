@@ -37,6 +37,7 @@ int32_t AdapterRegisterEnhanceFunc(void *soHandle)
     g_adapterEnhanceFuncList.getLocalSleAddr = dlsym(soHandle, "GetLocalSleAddr");
     g_adapterEnhanceFuncList.softbusBleAdapterInit = dlsym(soHandle, "SoftbusBleAdapterInit");
     g_adapterEnhanceFuncList.softbusBleAdapterDeInit = dlsym(soHandle, "SoftbusBleAdapterDeInit");
+    g_adapterEnhanceFuncList.registerRaderCbForOpenSrc = dlsym(soHandle, "RegisterRaderCbForOpenSrc");
     g_adapterEnhanceFuncList.softbusSleAdapterInit = dlsym(soHandle, "SoftbusSleAdapterInit");
     g_adapterEnhanceFuncList.softbusSleAdapterDeInit = dlsym(soHandle, "SoftbusSleAdapterDeInit");
     return SOFTBUS_OK;

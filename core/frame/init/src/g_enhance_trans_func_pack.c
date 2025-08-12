@@ -81,6 +81,24 @@ int32_t TransGetPkgnameByBusinessFlagPacked(const uint32_t businessFlag, char *p
     return pfnTransEnhanceFuncList->transGetPkgnameByBusinessFlag(businessFlag, pkgName, pkgLen);
 }
 
+int32_t InitSoftbusPagingResPullPacked(void)
+{
+    TransEnhanceFuncList *pfnTransEnhanceFuncList = TransEnhanceFuncListGet();
+    if (TransCheckFuncPointer((void *)pfnTransEnhanceFuncList->initSoftbusPagingResPull) != SOFTBUS_OK) {
+        return SOFTBUS_OK;
+    }
+    return pfnTransEnhanceFuncList->initSoftbusPagingResPull();
+}
+
+void DeInitSoftbusPagingResPullPacked(void)
+{
+    TransEnhanceFuncList *pfnTransEnhanceFuncList = TransEnhanceFuncListGet();
+    if (TransCheckFuncPointer((void *)pfnTransEnhanceFuncList->deInitSoftbusPagingResPull) != SOFTBUS_OK) {
+        return;
+    }
+    return pfnTransEnhanceFuncList->deInitSoftbusPagingResPull();
+}
+
 int32_t InitSoftbusPagingPacked(void)
 {
     TransEnhanceFuncList *pfnTransEnhanceFuncList = TransEnhanceFuncListGet();
@@ -134,24 +152,6 @@ int32_t TransDelPagingInfoByBusinessFlagPacked(uint32_t businessFlag)
         return SOFTBUS_OK;
     }
     return pfnTransEnhanceFuncList->transDelPagingInfoByBusinessFlag(businessFlag);
-}
-
-int32_t InitSoftbusPagingResPullPacked(void)
-{
-    TransEnhanceFuncList *pfnTransEnhanceFuncList = TransEnhanceFuncListGet();
-    if (TransCheckFuncPointer((void *)pfnTransEnhanceFuncList->initSoftbusPagingResPull) != SOFTBUS_OK) {
-        return SOFTBUS_OK;
-    }
-    return pfnTransEnhanceFuncList->initSoftbusPagingResPull();
-}
-
-void DeInitSoftbusPagingResPullPacked(void)
-{
-    TransEnhanceFuncList *pfnTransEnhanceFuncList = TransEnhanceFuncListGet();
-    if (TransCheckFuncPointer((void *)pfnTransEnhanceFuncList->deInitSoftbusPagingResPull) != SOFTBUS_OK) {
-        return;
-    }
-    return pfnTransEnhanceFuncList->deInitSoftbusPagingResPull();
 }
 
 int32_t ClientOpenHtpChannelPacked(int32_t channelId, int64_t requestId, const char *localMac, const char *remoteMac)
@@ -211,6 +211,9 @@ void TransProcessGroupTalkieInfoPacked(const char *pkgName)
 bool IsInWhitelistPacked(const char *app)
 {
     TransEnhanceFuncList *pfnTransEnhanceFuncList = TransEnhanceFuncListGet();
+    if (pfnTransEnhanceFuncList == NULL) {
+        return true;
+    }
     if (TransCheckFuncPointer((void *)pfnTransEnhanceFuncList->isInWhitelist) != SOFTBUS_OK) {
         return true;
     }
