@@ -461,7 +461,7 @@ static int32_t UpdateRemoteNode(RemoteNode *remoteNode, RxIface *rxIface, const 
     int8_t *updated)
 {
     int32_t ret = UpdateDeviceInfo(&remoteNode->deviceInfo, rxIface, deviceInfo, updated);
-    if (ret == NSTACKX_EOK && (*updated == NSTACKX_FALSE)) {
+    if (ret == NSTACKX_EOK) {
         UpdatedByTimeout(rxIface, updated);
     }
     return ret;
@@ -470,7 +470,7 @@ static int32_t UpdateRemoteNode(RemoteNode *remoteNode, RxIface *rxIface, const 
 #ifdef DFINDER_DISTINGUISH_ACTIVE_PASSIVE_DISCOVERY
 static bool IsNeedUpdate(uint8_t seqType, int8_t *updated)
 {
-    if (seqType == DFINDER_SEQ_TYPE_BCAST && *updated == NSTACKX_TRUE) {
+    if (seqType == DFINDER_SEQ_TYPE_BCAST && *updated == NSTACKX_FALSE) {
         return false;
     }
 
