@@ -18,11 +18,11 @@
 
 #include <stdbool.h>
 #include <stdint.h>
-#include "auth_interface_struct.h"
 #include "lnn_node_info.h"
 #include "softbus_common.h"
 #include "softbus_conn_interface.h"
 #include "softbus_def.h"
+#include "auth_interface_struct.h"
 
 #ifdef __cplusplus
 #if __cplusplus
@@ -106,6 +106,7 @@ void AuthDeinit(void);
 int32_t AuthRestoreAuthManager(const char *udidHash,
     const AuthConnInfo *connInfo, uint32_t requestId, NodeInfo *nodeInfo, int64_t *authId);
 int32_t AuthCheckMetaExist(const AuthConnInfo *connInfo, bool *isExist);
+
 
 #ifdef __cplusplus
 #if __cplusplus
