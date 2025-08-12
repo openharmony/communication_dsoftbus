@@ -12,10 +12,13 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+
+#include "trans_spec_object_stub.h"
+
 #include <dlfcn.h>
+
 #include "softbus_init_common.h"
 #include "trans_log.h"
-#include "trans_spec_object_stub.h"
 
 namespace OHOS {
 
