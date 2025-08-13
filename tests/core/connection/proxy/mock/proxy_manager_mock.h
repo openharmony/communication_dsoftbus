@@ -54,7 +54,8 @@ public:
     virtual int32_t Connect(const char *uuid, const BT_ADDR mac, void *connectCallback) = 0;
     virtual int32_t Write(int32_t clientFd, const uint8_t *buf, const int32_t len) = 0;
     virtual int32_t Read(int32_t clientFd, uint8_t *buf, const int32_t len) = 0;
-    virtual bool IsPairedDevice(const char *addr) = 0;
+    virtual bool IsPairedDevice(const char *addr, bool isRealMac) = 0;
+    virtual int32_t GetRealMac(char *realAddr, uint32_t realAddrLen, const char *hashAddr) = 0;
 };
 class ProxyChannelMock : public ProxyChannelInterface {
 public:
@@ -72,7 +73,8 @@ public:
     MOCK_METHOD(int32_t, Connect, (const char *uuid, const BT_ADDR mac, void *connectCallback), (override));
     MOCK_METHOD(int32_t, Write, (int32_t clientFd, const uint8_t *buf, const int32_t len), (override));
     MOCK_METHOD(int32_t, Read, (int32_t clientFd, uint8_t *buf, const int32_t len), (override));
-    MOCK_METHOD(bool, IsPairedDevice, (const char *addr), (override));
+    MOCK_METHOD(bool, IsPairedDevice, (const char *addr,  bool isRealMac), (override));
+    MOCK_METHOD(int32_t, GetRealMac, (char *realAddr, uint32_t realAddrLen, const char *hashAddr), (override));
 
     static int32_t ActionOfAddBtStateListener(const SoftBusBtStateListener *listener, int *listenerId);
     static int32_t ActionOfRegisterHfpListener(const ProxyListener listener);
