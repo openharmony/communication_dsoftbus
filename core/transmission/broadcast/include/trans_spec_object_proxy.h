@@ -26,27 +26,6 @@ public:
 
     ~TransSpecObjectProxy() = default;
 
-    int32_t SendEvent(EventData *event) override;
-    int32_t StopEvent(EventType event) override;
-    int32_t RegisterEventListener(EventType event, EventFreq freq,
-        bool deduplicate, const sptr<IRemoteObject>& listener) override;
-    int32_t UnregisterEventListener(const sptr<IRemoteObject>& listener) override;
-    int32_t CreateSocketServer(const char *pkgName, bool isFirstTimeAdd, const MetaCustomData *customData,
-        const sptr<IRemoteObject>& listener) override;
-    int32_t RemoveSocketServer(const char *pkgName, bool isLastTimeDel, const MetaCustomData *customData,
-        const sptr<IRemoteObject>& listener) override;
-    int32_t OpenSocket(const MetaCustomData *customData) override;
-    int32_t CloseSocket(int32_t socketId) override;
-    int32_t SendMetaSocketData(int32_t socketId, const void *dataInfo, uint32_t len) override;
-    int32_t GetMacInfo(int32_t channelId, int32_t channelType, MacInfo *info) override;
-
-    int32_t OpenAuthSessionWithPara(const char *sessionName, const LinkPara *para) override;
-    int32_t SendLinkEvent(const char *networkId, uint16_t seqNum) override;
-    int32_t StopLinkEvent(const char *networkId) override;
-    int32_t RegisterLinkEventListener(const sptr<IRemoteObject>& listener) override;
-    int32_t UnregisterLinkEventListener(const sptr<IRemoteObject>& listener) override;
-    int32_t TransProxySendMetaCtrlData(int32_t socketId, const MetaCustomData *customData) override;
-
 private:
     static inline BrokerDelegator<TransSpecObjectProxy> delegator_;
 };
