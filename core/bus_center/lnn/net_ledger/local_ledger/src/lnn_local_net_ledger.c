@@ -2704,7 +2704,7 @@ static void InitUserIdCheckSum(NodeInfo *nodeInfo)
 
 static void UpdateLocalAuthCapacity(NodeInfo *info)
 {
-    if (info->deviceInfo.deviceTypeId == TYPE_WATCH_ID) {
+    if (info->deviceInfo.deviceTypeId == TYPE_WATCH_ID || info->deviceInfo.deviceTypeId == TYPE_GLASS_ID) {
         info->authCapacity &= (~(1 << (uint32_t)BIT_SUPPORT_BR_DUP_BLE));
     }
 }

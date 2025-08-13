@@ -61,6 +61,7 @@ static TypeInfo g_typeConvertMap[] = {
     {GET_TYPE_WATCH, TYPE_WATCH},
     {GET_TYPE_IPCAMERA, TYPE_IPCAMERA},
     {GET_TYPE_2IN1, TYPE_2IN1},
+    {GET_TYPE_GLASS, TYPE_GLASS},
 };
 
 static int32_t SoftBusGetBleMacAddr(char *macStr, uint32_t len)
