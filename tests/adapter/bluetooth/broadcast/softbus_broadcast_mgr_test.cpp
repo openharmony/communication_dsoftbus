@@ -2138,7 +2138,7 @@ HWTEST_F(SoftbusBroadcastMgrTest, EnableBroadcasting001, TestSize.Level1)
     EXPECT_EQ(SOFTBUS_OK, RegisterBroadcaster(BROADCAST_PROTOCOL_BLE, SRV_TYPE_DIS, &bcId, GetBroadcastCallback()));
     EXPECT_TRUE(bcId >= 0);
     int32_t bcIdTest = bcId + 1;
-    
+
     EXPECT_EQ(SOFTBUS_BC_MGR_INVALID_BC_ID, EnableBroadcasting(bcIdTest));
     EXPECT_EQ(SOFTBUS_OK, UnRegisterBroadcaster(bcId));
     EXPECT_EQ(SOFTBUS_OK, DeInitBroadcastMgr());
