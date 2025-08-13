@@ -2745,24 +2745,27 @@ int32_t ClientWaitSyncBind(int32_t socket)
         return sessionNode->lifecycle.bindErrCode;
     }
     SoftBusCond callbackCond = sessionNode->lifecycle.callbackCond;
-    sessionNode->lifecycle.condIsWaiting = true;
-    SoftBusSysTime *timePtr = NULL;
-    SoftBusSysTime absTime = { 0 };
-    if (sessionNode->lifecycle.maxWaitTime != 0) {
-        ret = SoftBusGetTime(&absTime);
-        if (ret == SOFTBUS_OK) {
-            absTime.sec += (int64_t)((sessionNode->lifecycle.maxWaitTime / CONVERSION_BASE) + EXTRA_WAIT_TIME);
-            timePtr = &absTime;
+    if (sessionNode->enableStatus == ENABLE_STATUS_INIT) {
+        sessionNode->lifecycle.condIsWaiting = true;
+        SoftBusSysTime *timePtr = NULL;
+        SoftBusSysTime absTime = { 0 };
+        if (sessionNode->lifecycle.maxWaitTime != 0) {
+            ret = SoftBusGetTime(&absTime);
+            if (ret == SOFTBUS_OK) {
+                absTime.sec += (int64_t)((sessionNode->lifecycle.maxWaitTime / CONVERSION_BASE) + EXTRA_WAIT_TIME);
+                timePtr = &absTime;
+            }
+        }
+        TRANS_LOGI(TRANS_SDK, "start wait bind, socket=%{public}d, waitTime=%{public}u",
+            socket, sessionNode->lifecycle.maxWaitTime);
+        ret = SoftBusCondWait(&callbackCond, &(g_clientSessionServerList->lock), timePtr);
+        if (ret != SOFTBUS_OK) {
+            UnlockClientSessionServerList();
+            TRANS_LOGE(TRANS_SDK, "cond wait failed, socket=%{public}d", socket);
+            return ret;
         }
     }
-    TRANS_LOGI(TRANS_SDK, "start wait bind, socket=%{public}d, waitTime=%{public}u",
-        socket, sessionNode->lifecycle.maxWaitTime);
-    ret = SoftBusCondWait(&callbackCond, &(g_clientSessionServerList->lock), timePtr);
-    if (ret != SOFTBUS_OK) {
-        UnlockClientSessionServerList();
-        TRANS_LOGE(TRANS_SDK, "cond wait failed, socket=%{public}d", socket);
-        return ret;
-    }
+
     UnlockClientSessionServerList();
     return CheckSessionEnableStatus(socket, &callbackCond);
 }
