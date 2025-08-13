@@ -36,7 +36,8 @@ typedef int32_t (*UnpackDeviceInfoMessageFunc)(const DevInfoData *devInfo, NodeI
 typedef char *(*PackDeviceInfoMessageFunc)(const AuthConnInfo *connInfo, SoftBusVersion version, bool isMetaAuth,
     const char *remoteUuid, const AuthSessionInfo *info);
 typedef bool (*AuthIsPotentialTrustedFunc)(const DeviceInfo *device, bool isOnlyPointToPoint);
-typedef int32_t (*AuthFindApplyKeyFunc)(const RequestBusinessInfo *info, uint8_t *applyKey);
+typedef int32_t (*AuthFindApplyKeyFunc)(
+    const RequestBusinessInfo *info, uint8_t *applyKey, char *accountHash, uint32_t accountHashLen);
 typedef int32_t (*AuthGenApplyKeyFunc)(
     const RequestBusinessInfo *info, uint32_t requestId, uint32_t connId, const GenApplyKeyCallback *genCb);
 typedef uint32_t (*GenApplyKeySeqFunc)(void);

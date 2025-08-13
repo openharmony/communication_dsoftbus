@@ -35,7 +35,8 @@ public:
         uint32_t connectionId, uint8_t *buf, uint32_t len, int32_t priority, int32_t pid) = 0;
     virtual int32_t ConvertBytesToHexString(
         char *outBuf, uint32_t outBufLen, const unsigned char *inBuf, uint32_t inLen) = 0;
-    virtual int32_t AuthFindApplyKey(const RequestBusinessInfo *info, uint8_t *applyKey) = 0;
+    virtual int32_t AuthFindApplyKey(
+        const RequestBusinessInfo *info, uint8_t *applyKey, char *accountHash, uint32_t accountHashLen) = 0;
     virtual char *TransPagingPackHandshakeAckMsg(ProxyChannelInfo *chan) = 0;
 };
 
@@ -51,7 +52,8 @@ public:
         uint32_t connectionId, uint8_t *buf, uint32_t len, int32_t priority, int32_t pid));
     MOCK_METHOD4(ConvertBytesToHexString, int32_t (
         char *outBuf, uint32_t outBufLen, const unsigned char *inBuf, uint32_t inLen));
-    MOCK_METHOD2(AuthFindApplyKey, int32_t (const RequestBusinessInfo *info, uint8_t *applyKey));
+    MOCK_METHOD4(AuthFindApplyKey,
+        int32_t(const RequestBusinessInfo *info, uint8_t *applyKey, char *accountHash, uint32_t accountHashLen));
     MOCK_METHOD1(TransPagingPackHandshakeAckMsg, char *(ProxyChannelInfo *chan));
 };
 } // namespace OHOS

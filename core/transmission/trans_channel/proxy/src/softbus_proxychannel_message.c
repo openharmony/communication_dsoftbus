@@ -598,31 +598,12 @@ static int32_t TransProxyFillPagingLocalInfo(ProxyChannelInfo *chan)
     return SOFTBUS_OK;
 }
 
-static bool TransProxyCheckAccount(const char *hashStr, const uint8_t *shortHash)
-{
-    if (hashStr == NULL || shortHash == NULL) {
-        return false;
-    }
-    uint8_t hash[SHA_256_HASH_LEN] = { 0 };
-    if (ConvertHexStringToBytes((unsigned char *)hash, SHA_256_HASH_LEN, hashStr, strlen(hashStr)) != SOFTBUS_OK) {
-        TRANS_LOGE(TRANS_CTRL, "account hash str to bytes failed");
-        return false;
-    }
-
-    for (size_t i = 0; i < D2D_SHORT_ACCOUNT_HASH_LEN; i++) {
-        if (shortHash[i] != hash[i]) {
-            return false;
-        }
-    }
-    return true;
-}
-
 static int32_t TransProxyFillPagingChannelInfo(const ProxyMessage *msg, ProxyChannelInfo *chan,
-    uint8_t *accountHash, uint8_t *udidHash)
+    uint8_t *accountHash, uint8_t *udidHash, const char *authAccountHash)
 {
     int32_t ret = TransPagingUnPackHandshakeMsg(msg, &chan->appInfo);
     TRANS_CHECK_AND_RETURN_RET_LOGE(ret == SOFTBUS_OK, ret, TRANS_CTRL, "Paging unpack failed.");
-    TRANS_CHECK_AND_RETURN_RET_LOGE(TransProxyCheckAccount(chan->appInfo.peerData.callerAccountId, accountHash),
+    TRANS_CHECK_AND_RETURN_RET_LOGE(strcmp(chan->appInfo.peerData.callerAccountId, authAccountHash) == 0,
         SOFTBUS_INVALID_PARAM, TRANS_CTRL, "account is invalid.");
     ret = SoftBusGenerateSessionKey(chan->appInfo.pagingSessionkey, SHORT_SESSION_KEY_LENGTH);
     TRANS_CHECK_AND_RETURN_RET_LOGE(ret == SOFTBUS_OK, ret, TRANS_CTRL, "Generate SessionKey failed.");
@@ -729,13 +710,14 @@ static void ReportPagingProcessHandshakeExtra(const ProxyChannelInfo *chan)
     TRANS_EVENT(EVENT_SCENE_PAGING_CONNECT, EVENT_STAGE_PAGING_SINK_HANDSHAKE_START, extra);
 }
 
-void TransPagingProcessHandshakeMsg(const ProxyMessage *msg, uint8_t *accountHash, uint8_t *udidHash)
+void TransPagingProcessHandshakeMsg(
+    const ProxyMessage *msg, uint8_t *accountHash, uint8_t *udidHash, const char *authAccountHash)
 {
     TRANS_CHECK_AND_RETURN_LOGE(msg != NULL, TRANS_CTRL, "invalid param");
     TRANS_LOGI(TRANS_CTRL, "recv paging Handshake, peerChannelId=%{public}d", msg->msgHead.peerId);
     ProxyChannelInfo *chan = (ProxyChannelInfo *)SoftBusCalloc(sizeof(ProxyChannelInfo));
     TRANS_CHECK_AND_RETURN_LOGE(chan != NULL, TRANS_CTRL, "proxy handshake calloc failed.");
-    int32_t ret = TransProxyFillPagingChannelInfo(msg, chan, accountHash, udidHash);
+    int32_t ret = TransProxyFillPagingChannelInfo(msg, chan, accountHash, udidHash, authAccountHash);
     if (ret != SOFTBUS_OK) {
         TRANS_CHECK_AND_RETURN_LOGE(chan != NULL, TRANS_CTRL,
             "unpack handshake failed, peerChannelId=%{public}d",
@@ -809,7 +791,8 @@ EXIT_ERR:
     ReleaseProxyChannelId(chan.channelId);
 }
 
-static int32_t PagingParseMsgGetAuthKey(uint8_t *accountHash, uint8_t *udidHash, AesGcmCipherKey *cipherKey)
+static int32_t PagingParseMsgGetAuthKey(
+    uint8_t *accountHash, uint8_t *udidHash, AesGcmCipherKey *cipherKey, char *authAccountHash)
 {
     RequestBusinessInfo businessInfo;
     (void)memset_s(&businessInfo, sizeof(RequestBusinessInfo), 0, sizeof(RequestBusinessInfo));
@@ -822,7 +805,7 @@ static int32_t PagingParseMsgGetAuthKey(uint8_t *accountHash, uint8_t *udidHash,
         return SOFTBUS_NETWORK_BYTES_TO_HEX_STR_ERR;
     }
     uint8_t applyKey[SESSION_KEY_LENGTH] = { 0 };
-    int32_t ret = AuthFindApplyKey(&businessInfo, applyKey);
+    int32_t ret = AuthFindApplyKey(&businessInfo, applyKey, authAccountHash, SHA_256_HEX_HASH_LEN);
     if (ret != SOFTBUS_OK) {
         TRANS_LOGE(TRANS_CTRL, "get auth key fail");
         return ret;
@@ -925,7 +908,8 @@ int32_t TransPagingParseMessage(char *data, int32_t len, ProxyMessage *msg)
 
     AesGcmCipherKey cipherKey = { 0 };
     cipherKey.keyLen = SESSION_KEY_LENGTH;
-    ret = PagingParseMsgGetAuthKey(accountHash, udidHash, &cipherKey);
+    char authAccountHash[SHA_256_HEX_HASH_LEN] = { 0 };
+    ret = PagingParseMsgGetAuthKey(accountHash, udidHash, &cipherKey, authAccountHash);
     if (ret != SOFTBUS_OK) {
         TRANS_LOGE(TRANS_CTRL, "parse msg get auth key fail");
         if (msg->msgHead.type == PROXYCHANNEL_MSG_TYPE_PAGING_HANDSHAKE) {
@@ -947,7 +931,7 @@ int32_t TransPagingParseMessage(char *data, int32_t len, ProxyMessage *msg)
     msg->dataLen = (int32_t)decDataLen;
     switch (msg->msgHead.type) {
         case PROXYCHANNEL_MSG_TYPE_PAGING_HANDSHAKE:
-            TransPagingProcessHandshakeMsg(msg, accountHash, udidHash);
+            TransPagingProcessHandshakeMsg(msg, accountHash, udidHash, authAccountHash);
             break;
         case PROXYCHANNEL_MSG_TYPE_PAGING_HANDSHAKE_ACK:
             TransPagingProcessHandshakeAckMsg(msg);
