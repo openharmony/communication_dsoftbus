@@ -27,15 +27,15 @@
 #include "softbus_permission.h"
 #include "tokenid_kit.h"
 
-#define DMS_COLLABATION_NAME_PREFIX "ohos.dtbcollab.dms"
-#define DBINDER_BUS_NAME_PREFIX "DBinder"
-static PermissionChangeCb g_permissionChangeCb = nullptr;
 constexpr int32_t JUDG_CNT = 1;
 constexpr int32_t DEVICE_KEY_SA_CNT = 3;
 const char *SAMGR_PROCESS_NAME = "samgr";
 const char *DMS_PROCESS_NAME = "distributedsched";
 const std::string DEVICE_KEY_SA_PROCESS_NAME[DEVICE_KEY_SA_CNT] = { "distributedsched", "distributedfiledaemon",
     "distributeddata" };
+#define DMS_COLLABATION_NAME_PREFIX "ohos.dtbcollab.dms"
+#define DBINDER_BUS_NAME_PREFIX "DBinder"
+static PermissionChangeCb g_permissionChangeCb = nullptr;
 
 namespace OHOS {
 using namespace Security::AccessToken;
@@ -68,11 +68,14 @@ bool SoftBusCheckIsSystemApp(uint64_t tokenId, const char *sessionName)
         return false;
     }
     // The authorization of dbind and dtbcollab are granted through Samgr and DMS, and there is no control here
-    if (strncmp(sessionName, DBINDER_BUS_NAME_PREFIX, strlen(DBINDER_BUS_NAME_PREFIX)) == 0) {
+    uint32_t dbinderPrefixLen = strlen(DBINDER_BUS_NAME_PREFIX);
+    if (strlen(sessionName) >= dbinderPrefixLen &&
+        strncmp(sessionName, DBINDER_BUS_NAME_PREFIX, dbinderPrefixLen) == 0) {
         return false;
     }
-
-    if (strncmp(sessionName, DMS_COLLABATION_NAME_PREFIX, strlen(DMS_COLLABATION_NAME_PREFIX)) == 0) {
+    uint32_t dmsCollabPrefixLen = strlen(DMS_COLLABATION_NAME_PREFIX);
+    if (strlen(sessionName) >= dmsCollabPrefixLen &&
+        strncmp(sessionName, DMS_COLLABATION_NAME_PREFIX, dmsCollabPrefixLen) == 0) {
         return false;
     }
     return TokenIdKit::IsSystemAppByFullTokenID(tokenId);
@@ -180,8 +183,7 @@ void SoftBusAccessTokenAdapter::PermStateChangeCallback(PermStateChangeInfo &res
     }
 }
 
-void SoftBusRegisterDataSyncPermission(
-    const uint64_t tonkenId, const char *permissionName, const char *pkgName, int32_t pid)
+void SoftBusRegisterDataSyncPermission(uint64_t tonkenId, const char *permissionName, const char *pkgName, int32_t pid)
 {
     if (permissionName == nullptr || pkgName == nullptr) {
         COMM_LOGE(COMM_PERM, "invalid param, permissionName or pkgName is nullptr");

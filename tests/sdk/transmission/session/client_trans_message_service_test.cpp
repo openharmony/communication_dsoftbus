@@ -46,6 +46,7 @@
 #define TRANS_TEST_MAX_MSG_LEN (1 * 1024)
 #define TRANS_TEST_MAX_BYTES_LEN (2 * 1024)
 #define TRANS_TEST_BEYOND_MAX_MSG_LEN (6 * 1024)
+#define TRANS_TEST_DEFAULT_MAX_MSG_LEN (4 * 1024)
 #define TRANS_TEST_BEYOND_MAX_BYTES_LEN (6 * 1024 * 1024)
 #define TRANS_TEST_SEND_LEN 123
 #define TRANS_TEST_FILE_COUNT 2
@@ -520,6 +521,12 @@ HWTEST_F(TransClientMsgServiceTest, SendMessageAsyncTest01, TestSize.Level1)
     ret = SendMessageAsync(socket, dataSeq, data, len);
     EXPECT_EQ(ret, SOFTBUS_TRANS_SESSION_INFO_NOT_FOUND);
 
+    ret = SendMessageAsync(0, dataSeq, data, len);
+    EXPECT_EQ(ret, SOFTBUS_TRANS_SESSION_INFO_NOT_FOUND);
+
+    ret = SendMessageAsync(-1, dataSeq, data, len);
+    EXPECT_EQ(ret, SOFTBUS_TRANS_SESSION_INFO_NOT_FOUND);
+
     int32_t sessionId = AddSessionServerAndSession(
         g_sessionName, CHANNEL_TYPE_PROXY, BUSINESS_TYPE_MESSAGE, false, ENABLE_STATUS_SUCCESS);
     ASSERT_GT(sessionId, 0);
@@ -536,6 +543,10 @@ HWTEST_F(TransClientMsgServiceTest, SendMessageAsyncTest01, TestSize.Level1)
     len = TRANS_TEST_BEYOND_MAX_MSG_LEN;
     ret = SendMessageAsync(sessionId, dataSeq, data, len);
     EXPECT_EQ(ret, SOFTBUS_TRANS_SEND_LEN_BEYOND_LIMIT);
+
+    len = TRANS_TEST_DEFAULT_MAX_MSG_LEN;
+    ret = SendMessageAsync(sessionId, dataSeq, data, len);
+    EXPECT_EQ(ret, SOFTBUS_TRANS_PROXY_CHANNEL_NOT_FOUND);
     DeleteSessionServerAndSession(g_sessionName, sessionId);
 }
 }
