@@ -251,6 +251,8 @@ static void OnLaneQosEvent(uint32_t laneHandle, LaneOwner laneOwner, LaneQosEven
 static void MockAllocLaneByQos(NiceMock<LaneDepsInterfaceMock> &mock, NiceMock<TransLaneDepsInterfaceMock> &laneMock,
     LaneResource resourceItem)
 {
+    static LnnEnhanceFuncList lnnEnhanceFunc = { nullptr };
+    EXPECT_CALL(laneMock, LnnEnhanceFuncListGet).WillRepeatedly(Return(&lnnEnhanceFunc));
     EXPECT_CALL(mock, StartBaseClient).WillRepeatedly(Return(SOFTBUS_OK));
     EXPECT_CALL(mock, LnnGetRemoteNumInfo)
         .WillRepeatedly(DoAll(SetArgPointee<LANE_MOCK_PARAM3>(1), Return(SOFTBUS_OK)));
@@ -272,6 +274,20 @@ static void MockAllocLaneByQos(NiceMock<LaneDepsInterfaceMock> &mock, NiceMock<T
     EXPECT_CALL(laneMock, AddLaneResourceToPool).WillRepeatedly(Return(SOFTBUS_OK));
     EXPECT_CALL(laneMock, GenerateLaneId).WillRepeatedly(Return(LANE_ID_BASE));
     EXPECT_CALL(laneMock, CheckLinkConflictByReleaseLink).WillRepeatedly(Return(SOFTBUS_OK));
+}
+
+bool ActionOfHaveConcurrencyPreLinkNode(uint32_t laneReqId, bool isCheckPreLink)
+{
+    (void)laneReqId;
+    (void)isCheckPreLink;
+    return true;
+}
+
+bool IsSupportLowLatency(const TransReqInfo *reqInfo, const LaneLinkInfo *laneLinkInfo)
+{
+    (void)reqInfo;
+    (void)laneLinkInfo;
+    return true;
 }
 
 static void ResetQosEventResult()
@@ -762,6 +778,8 @@ HWTEST_F(LNNTransLaneMockTest, LNN_FREE_LANE_DELAY_DESTROY_TEST_002, TestSize.Le
     EXPECT_EQ(ret, SOFTBUS_OK);
     CondWait();
     SetIsNeedCondWait();
+    LnnEnhanceFuncList *lnnEnhanceFunc = LnnEnhanceFuncListGet();
+    lnnEnhanceFunc->haveConcurrencyPreLinkNodeByLaneReqId = ActionOfHaveConcurrencyPreLinkNode;
     ret = transObj->allocLaneByQos(LANE_REQ_ID_TWO, (const LaneAllocInfo *)&allocInfo, &g_listenerCb);
     EXPECT_EQ(ret, SOFTBUS_OK);
     CondWait();
@@ -1066,6 +1084,24 @@ HWTEST_F(LNNTransLaneMockTest, LNN_HANDLE_LANE_FREE_UNUSED_LINK_005, TestSize.Le
     EXPECT_CALL(laneMock, LnnGetNetworkIdByUdid).WillRepeatedly(Return(SOFTBUS_OK));
     EXPECT_CALL(lnnMock, LnnDisconnectP2p).WillRepeatedly(Return(SOFTBUS_OK));
     EXPECT_NO_FATAL_FAILURE(FreeUnusedLink(laneReqId, &info));
+}
+
+/*
+* @tc.name: LNN_HANDLE_LANE_IS_SUPPORT_LOW_LATENCY_TEST_001
+* @tc.desc: is support low latency
+* @tc.type: FUNC
+* @tc.require:
+*/
+HWTEST_F(LNNTransLaneMockTest, LNN_HANDLE_LANE_IS_SUPPORT_LOW_LATENCY_TEST_001, TestSize.Level1)
+{
+    NiceMock<TransLaneDepsInterfaceMock> laneMock;
+    LnnEnhanceFuncList lnnEnhanceFunc = { nullptr };
+    EXPECT_CALL(laneMock, LnnEnhanceFuncListGet).WillRepeatedly(Return(&lnnEnhanceFunc));
+    EXPECT_EQ(false, IsSupportLowLatencyPacked(nullptr, nullptr));
+
+    lnnEnhanceFunc.isSupportLowLatency = IsSupportLowLatency;
+    EXPECT_CALL(laneMock, LnnEnhanceFuncListGet).WillRepeatedly(Return(&lnnEnhanceFunc));
+    EXPECT_EQ(true, IsSupportLowLatencyPacked(nullptr, nullptr));
 }
 
 /*
