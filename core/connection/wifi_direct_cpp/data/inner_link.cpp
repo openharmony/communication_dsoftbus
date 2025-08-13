@@ -43,6 +43,7 @@ InnerLink::InnerLink(LinkType type, const std::string &remoteDeviceId)
 InnerLink::~InnerLink()
 {
     auto listenerModuleId = GetListenerModule();
+    auto customPort = GetLocalCustomPort();
     bool hasAnotherUsed = false;
     LinkManager::GetInstance().ForEach([&hasAnotherUsed, this](InnerLink &innerLink) {
         if (innerLink.GetLinkType() == InnerLink::LinkType::P2P && innerLink.GetLocalIpv4() == this->GetLocalIpv4() &&
@@ -52,11 +53,14 @@ InnerLink::~InnerLink()
         return false;
     });
     CONN_LOGI(CONN_WIFI_DIRECT, "hasAnotherUsed=%{public}d", hasAnotherUsed);
+    if (customPort > 0) {
+        CONN_LOGI(CONN_WIFI_DIRECT, "stop custom listening");
+        StopCustomListen(customPort);
+    }
     if (listenerModuleId != UNUSE_BUTT) {
         CONN_LOGI(CONN_WIFI_DIRECT, "stop auth listening");
         if (GetLinkType() == LinkType::HML) {
             AuthNegotiateChannel::StopListening(AUTH_LINK_TYPE_ENHANCED_P2P, listenerModuleId);
-            StopCustomListen(GetLocalCustomPort());
         } else {
             if (!hasAnotherUsed) {
                 AuthNegotiateChannel::StopListening(AUTH_LINK_TYPE_P2P, listenerModuleId);
