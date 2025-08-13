@@ -28,6 +28,8 @@ void *g_localLedgerDepsInterface;
 constexpr char DEFAULT_DEVICE_NAME[] = "OpenHarmony";
 constexpr char DEFAULT_DEVICE_UDID[] = "aaabbbcccdddeeefffggghhh";
 constexpr char DEFAULT_DEVICE_TYPE[] = "default_type";
+constexpr char GLASS_TYPE[] = "A31";
+constexpr char WATCH_TYPE[] = "WATCH";
 constexpr int32_t SOFTBUS_BUSCENTER_DUMP_LOCALDEVICEINFO_FD = -1;
 
 LocalLedgerDepsInterfaceMock::LocalLedgerDepsInterfaceMock()
@@ -69,6 +71,36 @@ int32_t LocalLedgerDepsInterfaceMock::LedgerGetCommonDevInfo(const CommonDeviceK
         default:
             break;
     }
+    return SOFTBUS_OK;
+}
+
+int32_t LocalLedgerDepsInterfaceMock::LedgerGetCommonDevInfoGlass(const CommonDeviceKey key, char *value, uint32_t len)
+{
+    static bool isFirst = true;
+    const char *type = isFirst ? GLASS_TYPE : WATCH_TYPE;
+    if (value == nullptr) {
+        return SOFTBUS_INVALID_PARAM;
+    }
+    switch (key) {
+        case COMM_DEVICE_KEY_DEVNAME:
+            if (strncpy_s(value, len, DEFAULT_DEVICE_NAME, strlen(DEFAULT_DEVICE_NAME)) != EOK) {
+                return SOFTBUS_STRCPY_ERR;
+            }
+            break;
+        case COMM_DEVICE_KEY_UDID:
+            if (strncpy_s(value, len, DEFAULT_DEVICE_UDID, UDID_BUF_LEN) != EOK) {
+                return SOFTBUS_STRCPY_ERR;
+            }
+            break;
+        case COMM_DEVICE_KEY_DEVTYPE:
+            if (strncpy_s(value, len, type, strlen(type)) != EOK) {
+                return SOFTBUS_STRCPY_ERR;
+            }
+            break;
+        default:
+            break;
+    }
+    isFirst = false;
     return SOFTBUS_OK;
 }
 

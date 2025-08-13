@@ -744,6 +744,13 @@ HWTEST_F(HeartBeatCtrlStaticTest, LNN_TRIGGER_DATA_LEVEL_HEARTBEAT_TEST_001, Tes
     HbLpEventHandler((const LnnEventBasicInfo *)&LPEvent);
     ret = LnnTriggerDataLevelHeartbeat();
     EXPECT_NE(ret, SOFTBUS_OK);
+
+    g_hbConditionState.isRequestDisable = true;
+    EXPECT_CALL(ledgerMock, LnnGetLocalNumInfo).WillOnce(
+        DoAll(SetArgPointee<1>(TYPE_GLASS_ID), Return(SOFTBUS_OK)));
+    ret = LnnTriggerDataLevelHeartbeat();
+    EXPECT_EQ(ret, SOFTBUS_FUNC_NOT_SUPPORT);
+    g_hbConditionState.isRequestDisable = false;
 }
 
 /*
@@ -961,12 +968,15 @@ HWTEST_F(HeartBeatCtrlStaticTest, LNN_START_HEARTBEAT_FRAMED_ELAY_TEST_001, Test
     EXPECT_CALL(hbStaticMock, LnnStartNewHbStrategyFsm).WillRepeatedly(Return(SOFTBUS_OK));
     EXPECT_CALL(hbStaticMock, LnnAsyncCallbackDelayHelper).WillRepeatedly(Return(SOFTBUS_OK));
     EXPECT_CALL(hbStaticMock, LnnHbMediumMgrInit).WillRepeatedly(Return(SOFTBUS_OK));
-    EXPECT_CALL(ledgerMock, LnnGetLocalNumInfo).WillRepeatedly(
-        DoAll(SetArgPointee<1>(TYPE_WATCH_ID), Return(SOFTBUS_OK)));
+    EXPECT_CALL(ledgerMock, LnnGetLocalNumInfo).WillOnce(
+        DoAll(SetArgPointee<1>(TYPE_WATCH_ID), Return(SOFTBUS_OK))).WillOnce(
+        DoAll(SetArgPointee<1>(TYPE_GLASS_ID), Return(SOFTBUS_OK)));
     g_hbConditionState.isRequestDisable = true;
     int32_t ret = LnnStartHeartbeatFrameDelay();
-    EXPECT_CALL(ledgerMock, LnnGetLocalNumInfo).WillRepeatedly(Return(SOFTBUS_INVALID_PARAM));
     EXPECT_EQ(ret, SOFTBUS_OK);
+    ret = LnnStartHeartbeatFrameDelay();
+    EXPECT_EQ(ret, SOFTBUS_OK);
+    EXPECT_CALL(ledgerMock, LnnGetLocalNumInfo).WillRepeatedly(Return(SOFTBUS_INVALID_PARAM));
     g_hbConditionState.isRequestDisable = false;
     ret = LnnStartHeartbeatFrameDelay();
     EXPECT_EQ(ret, SOFTBUS_OK);
@@ -997,13 +1007,17 @@ HWTEST_F(HeartBeatCtrlStaticTest, LNN_IS_CLOUD_SYNC_END_TEST_001, TestSize.Level
 HWTEST_F(HeartBeatCtrlStaticTest, LNN_TRIGGER_HB_FOR_RANGE_TEST_002, TestSize.Level1)
 {
     NiceMock<LnnNetLedgertInterfaceMock> ledgerMock;
-    EXPECT_CALL(ledgerMock, LnnGetLocalNumInfo).WillRepeatedly(
-        DoAll(SetArgPointee<1>(TYPE_WATCH_ID), Return(SOFTBUS_OK)));
+    EXPECT_CALL(ledgerMock, LnnGetLocalNumInfo).WillOnce(
+        DoAll(SetArgPointee<1>(TYPE_WATCH_ID), Return(SOFTBUS_OK))).WillOnce(
+        DoAll(SetArgPointee<1>(TYPE_GLASS_ID), Return(SOFTBUS_OK)));
     g_hbConditionState.isRequestDisable = true;
     HbMode mode = { .connFlag = false, .duration = 5, .replyFlag = false};
     RangeConfig config = {.medium = BLE_ADV_HB, .configInfo.heartbeat.mode = mode };
     int32_t ret = LnnTriggerHbRangeForMsdp("test", &config);
     EXPECT_EQ(ret, SOFTBUS_FUNC_NOT_SUPPORT);
+    ret = LnnTriggerHbRangeForMsdp("test", &config);
+    EXPECT_EQ(ret, SOFTBUS_FUNC_NOT_SUPPORT);
+    g_hbConditionState.isRequestDisable = false;
 }
 
 /*
@@ -1197,5 +1211,51 @@ HWTEST_F(HeartBeatCtrlStaticTest, LnnStopOfflineTimingBySleHb_001, TestSize.Leve
     EXPECT_NO_FATAL_FAILURE(LnnStopOfflineTimingBySleHb(nullptr, CONNECTION_ADDR_BLE));
     EXPECT_NO_FATAL_FAILURE(LnnStopOfflineTimingBySleHb(networkId, CONNECTION_ADDR_WLAN));
     EXPECT_NO_FATAL_FAILURE(LnnStopOfflineTimingBySleHb(networkId, CONNECTION_ADDR_BLE));
+}
+
+/*
+ * @tc.name: LnnIsNeedInterceptBroadcast_001
+ * @tc.desc: test LnnIsNeedInterceptBroadcast func
+ * @tc.type: FUNC
+ * @tc.require:
+ */
+HWTEST_F(HeartBeatCtrlStaticTest, LnnIsNeedInterceptBroadcast_001, TestSize.Level1)
+{
+    NiceMock<LnnNetLedgertInterfaceMock> ledgerMock;
+    EXPECT_CALL(ledgerMock, LnnGetLocalNumInfo).WillOnce(Return(SOFTBUS_INVALID_PARAM)).WillOnce(
+        DoAll(SetArgPointee<1>(TYPE_GLASS_ID), Return(SOFTBUS_OK))).WillOnce(
+        DoAll(SetArgPointee<1>(TYPE_GLASS_ID), Return(SOFTBUS_OK))).WillOnce(
+        DoAll(SetArgPointee<1>(TYPE_WATCH_ID), Return(SOFTBUS_OK)));
+
+    g_hbConditionState.isRequestDisable = true;
+    EXPECT_EQ(LnnIsNeedInterceptBroadcast(true), false);
+    EXPECT_EQ(LnnIsNeedInterceptBroadcast(false), false);
+    EXPECT_EQ(LnnIsNeedInterceptBroadcast(true), true);
+    EXPECT_EQ(LnnIsNeedInterceptBroadcast(false), true);
+    g_hbConditionState.isRequestDisable = false;
+}
+
+/*
+ * @tc.name: InitHbSpecificConditionState_001
+ * @tc.desc: test InitHbSpecificConditionState func
+ * @tc.type: FUNC
+ * @tc.require:
+ */
+HWTEST_F(HeartBeatCtrlStaticTest, InitHbSpecificConditionState_001, TestSize.Level1)
+{
+    NiceMock<LnnNetLedgertInterfaceMock> ledgerMock;
+    EXPECT_CALL(ledgerMock, LnnGetLocalNumInfo).WillOnce(Return(SOFTBUS_INVALID_PARAM)).WillOnce(
+        DoAll(SetArgPointee<1>(TYPE_GLASS_ID), Return(SOFTBUS_OK))).WillOnce(
+        DoAll(SetArgPointee<1>(TYPE_WATCH_ID), Return(SOFTBUS_OK)));
+    g_hbConditionState.isRequestDisable = false;
+    InitHbSpecificConditionState();
+    EXPECT_EQ(g_hbConditionState.isRequestDisable, false);
+
+    InitHbSpecificConditionState();
+    EXPECT_EQ(g_hbConditionState.isRequestDisable, true);
+
+    g_hbConditionState.isRequestDisable = false;
+    InitHbSpecificConditionState();
+    EXPECT_EQ(g_hbConditionState.isRequestDisable, true);
 }
 } // namespace OHOS

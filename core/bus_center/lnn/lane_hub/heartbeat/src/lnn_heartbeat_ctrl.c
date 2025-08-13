@@ -112,7 +112,7 @@ static void InitHbSpecificConditionState(void)
     if (LnnGetLocalNumInfo(NUM_KEY_DEV_TYPE_ID, &localDevTypeId) != SOFTBUS_OK) {
         return;
     }
-    if (localDevTypeId == TYPE_WATCH_ID) {
+    if (localDevTypeId == TYPE_WATCH_ID || localDevTypeId == TYPE_GLASS_ID) {
         LNN_LOGD(LNN_INIT, "localDevTypeId=%{public}d", localDevTypeId);
         g_hbConditionState.isRequestDisable = true;
     }
@@ -160,11 +160,12 @@ bool LnnIsCloudSyncEnd(void)
     return g_isCloudSyncEnd;
 }
 
-bool LnnIsNeedInterceptBroadcast(void)
+bool LnnIsNeedInterceptBroadcast(bool disableGlass)
 {
     int32_t localDevTypeId = TYPE_UNKNOW_ID;
     if (LnnGetLocalNumInfo(NUM_KEY_DEV_TYPE_ID, &localDevTypeId) == SOFTBUS_OK &&
-        localDevTypeId == TYPE_WATCH_ID && g_hbConditionState.isRequestDisable) {
+        (localDevTypeId == TYPE_WATCH_ID || (localDevTypeId == TYPE_GLASS_ID && disableGlass)) &&
+        g_hbConditionState.isRequestDisable) {
         LNN_LOGI(LNN_HEART_BEAT, "local heartbeat disable");
         return true;
     }
@@ -1102,7 +1103,7 @@ int32_t LnnStartHeartbeatFrameDelay(void)
         LNN_LOGD(LNN_HEART_BEAT, "no trusted relation, heartbeat(HB) process start later");
         return SOFTBUS_OK;
     }
-    if (LnnIsNeedInterceptBroadcast()) {
+    if (LnnIsNeedInterceptBroadcast(true)) {
         LNN_LOGI(LNN_HEART_BEAT, "local heartbeat disable");
         return SOFTBUS_OK;
     }
@@ -1293,7 +1294,7 @@ int32_t LnnTriggerHbRangeForMsdp(const char *pkgName, const RangeConfig *config)
 {
     LNN_CHECK_AND_RETURN_RET_LOGE(pkgName != NULL && config != NULL && config->medium != SLE_CONN_HADM,
         SOFTBUS_INVALID_PARAM, LNN_INIT, "invalid param");
-    if (LnnIsNeedInterceptBroadcast()) {
+    if (LnnIsNeedInterceptBroadcast(true)) {
         LNN_LOGI(LNN_HEART_BEAT, "local heartbeat disable");
         return SOFTBUS_FUNC_NOT_SUPPORT;
     }
@@ -1527,7 +1528,7 @@ void LnnDeinitHeartbeat(void)
 
 int32_t LnnTriggerDataLevelHeartbeat(void)
 {
-    if (LnnIsNeedInterceptBroadcast()) {
+    if (LnnIsNeedInterceptBroadcast(true)) {
         LNN_LOGI(LNN_HEART_BEAT, "local heartbeat disable");
         return SOFTBUS_FUNC_NOT_SUPPORT;
     }

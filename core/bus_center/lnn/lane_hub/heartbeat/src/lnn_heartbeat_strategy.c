@@ -1173,7 +1173,7 @@ int32_t LnnStartHbByTypeAndStrategyDirectly(LnnHeartbeatType hbType, LnnHeartbea
 
 int32_t LnnStartHeartbeat(uint64_t delayMillis)
 {
-    if (LnnIsNeedInterceptBroadcast()) {
+    if (LnnIsNeedInterceptBroadcast(true)) {
         LNN_LOGI(LNN_HEART_BEAT, "local heartbeat disable");
         return SOFTBUS_FUNC_NOT_SUPPORT;
     }
