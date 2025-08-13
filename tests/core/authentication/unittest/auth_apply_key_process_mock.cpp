@@ -90,9 +90,10 @@ int64_t GenSeq(bool isServer)
     return 0;
 }
 
-int32_t GetApplyKeyByBusinessInfo(const RequestBusinessInfo *info, uint8_t *uk, uint32_t ukLen)
+int32_t GetApplyKeyByBusinessInfo(
+    const RequestBusinessInfo *info, uint8_t *uk, uint32_t ukLen, char *accountHash, uint32_t accountHashLen)
 {
-    return AuthApplyKeyProcessInterfaceMock()->GetApplyKeyByBusinessInfo(info, uk, ukLen);
+    return AuthApplyKeyProcessInterfaceMock()->GetApplyKeyByBusinessInfo(info, uk, ukLen, accountHash, accountHashLen);
 }
 
 const uint8_t *UnpackAuthData(const uint8_t *data, uint32_t len, AuthDataHead *head)
@@ -143,9 +144,9 @@ int32_t ConnSetConnectCallback(ConnModule moduleId, const ConnectCallback *callb
 }
 
 int32_t AuthInsertApplyKey(const RequestBusinessInfo *info, const uint8_t *uk, uint32_t ukLen,
-    uint64_t time)
+    uint64_t time, char *accountHash)
 {
-    return AuthApplyKeyProcessInterfaceMock()->AuthInsertApplyKey(info, uk, ukLen, time);
+    return AuthApplyKeyProcessInterfaceMock()->AuthInsertApplyKey(info, uk, ukLen, time, accountHash);
 }
 
 const char *GetAuthSideStr(bool isServer)

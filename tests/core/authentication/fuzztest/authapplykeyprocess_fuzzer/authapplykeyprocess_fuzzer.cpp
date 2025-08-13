@@ -58,11 +58,15 @@ private:
 
 namespace OHOS {
 
-void SetApplyKeyNegoInfo(uint32_t requestId, bool isRecv, const GenApplyKeyStartState state)
+void SetApplyKeyNegoInfo(
+    FuzzedDataProvider &provider, uint32_t requestId, bool isRecv, const GenApplyKeyStartState state)
 {
-    SetApplyKeyNegoInfoRecvSessionKey(requestId, isRecv);
+    uint32_t len = provider.ConsumeIntegral<uint32_t>();
+    vector<uint8_t> applyKey = provider.ConsumeRemainingBytes<uint8_t>();
+    string accountHashBuf = provider.ConsumeRandomLengthString(len);
+    SetApplyKeyNegoInfoRecvSessionKey(requestId, isRecv, applyKey.data(), applyKey.size());
     SetApplyKeyNegoInfoRecvCloseAck(requestId, isRecv);
-    SetApplyKeyNegoInfoRecvFinish(requestId, isRecv);
+    SetApplyKeyNegoInfoRecvFinish(requestId, isRecv, (char *)accountHashBuf.c_str());
     SetApplyKeyStartState(requestId, state);
 }
 
@@ -96,7 +100,8 @@ void ProcessApplyKeyInfo(FuzzedDataProvider &provider, RequestBusinessInfo reqBu
     OnCommDataReceived(connId, MODULE_AUTH_MSG, seq, (char *)data.c_str(), len);
     OnCommDataReceived(connId, MODULE_CONNECTION, seq, (char *)data.c_str(), len);
     vector<uint8_t> applyKey = provider.ConsumeRemainingBytes<uint8_t>();
-    AuthFindApplyKey(&reqBusInfo, applyKey.data());
+    AuthFindApplyKey(
+        &reqBusInfo, applyKey.data(), (char *)localAccountShortHash.c_str(), localAccountShortHash.length());
     UpdateUniqueId();
     GenApplyKeySeq();
     OnCommDisconnected(connId, &connInfo);

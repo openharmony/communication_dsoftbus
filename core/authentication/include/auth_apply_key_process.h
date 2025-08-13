@@ -26,7 +26,8 @@
 extern "C" {
 #endif
 
-int32_t AuthFindApplyKey(const RequestBusinessInfo *info, uint8_t *applyKey);
+int32_t AuthFindApplyKey(
+    const RequestBusinessInfo *info, uint8_t *applyKey, char *accountHash, uint32_t accountHashLen);
 int32_t AuthGenApplyKey(
     const RequestBusinessInfo *info, uint32_t requestId, uint32_t connId, const GenApplyKeyCallback *genCb);
 uint32_t GenApplyKeySeq(void);

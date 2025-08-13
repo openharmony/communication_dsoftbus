@@ -28,8 +28,10 @@ extern "C" {
 
 int32_t InitApplyKeyManager(void);
 void DeInitApplyKeyManager(void);
-int32_t AuthInsertApplyKey(const RequestBusinessInfo *info, const uint8_t *uk, uint32_t ukLen, uint64_t time);
-int32_t GetApplyKeyByBusinessInfo(const RequestBusinessInfo *info, uint8_t *uk, uint32_t ukLen);
+int32_t AuthInsertApplyKey(
+    const RequestBusinessInfo *info, const uint8_t *uk, uint32_t ukLen, uint64_t time, char *accountHash);
+int32_t GetApplyKeyByBusinessInfo(
+    const RequestBusinessInfo *info, uint8_t *uk, uint32_t ukLen, char *accountHash, uint32_t accountHashLen);
 int32_t AuthDeleteApplyKey(const RequestBusinessInfo *info);
 void AuthRecoveryApplyKey(void);
 void AuthClearAccountApplyKey(void);

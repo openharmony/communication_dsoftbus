@@ -163,9 +163,11 @@ int32_t ConvertBytesToHexString(char *outBuf, uint32_t outBufLen, const unsigned
     return GetSoftbusProxychannelMessagePagingInterface()->ConvertBytesToHexString(outBuf, outBufLen, inBuf, inLen);
 }
 
-int32_t AuthFindApplyKey(const RequestBusinessInfo *info, uint8_t *applyKey)
+int32_t AuthFindApplyKey(
+    const RequestBusinessInfo *info, uint8_t *applyKey, char *accountHash, uint32_t accountHashLen)
 {
-    return GetSoftbusProxychannelMessagePagingInterface()->AuthFindApplyKey(info, applyKey);
+    return GetSoftbusProxychannelMessagePagingInterface()->AuthFindApplyKey(
+        info, applyKey, accountHash, accountHashLen);
 }
 
 int32_t TransProxyTransSendMsg(
