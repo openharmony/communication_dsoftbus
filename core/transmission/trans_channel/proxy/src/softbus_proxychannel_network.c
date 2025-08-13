@@ -161,6 +161,10 @@ void NotifyNetworkingMsgReceived(const char *sessionName, int32_t channelId, con
 
 int32_t TransRegisterNetworkingChannelListener(const char *sessionName, const INetworkingListener *listener)
 {
+    if (sessionName == NULL) {
+        TRANS_LOGE(TRANS_CTRL, "invalid param.");
+        return SOFTBUS_STRCPY_ERR;
+    }
     int32_t unuse = -1;
     for (int32_t i = 0; i < MAX_LISTENER_CNT; i++) {
         if (strlen(g_listeners[i].sessionName) == 0) {
