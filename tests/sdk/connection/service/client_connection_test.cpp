@@ -167,24 +167,24 @@ HWTEST_F(ClientConnectionTest, RegisterListenerTest, TestSize.Level0)
 HWTEST_F(ClientConnectionTest, ClientConnectionTest, TestSize.Level0)
 {
     int32_t ret = GeneralRegisterListener(&g_listener);
-    ASSERT_EQ(ret, SOFTBUS_TRANS_GET_SYSTEM_ABILITY_FAILED);
+    ASSERT_EQ(ret, SOFTBUS_OK);
     const char *pkgName = "ohos.distributedschedule.dms";
     const char *name = "hanglvzongheng";
     ret = GeneralCreateServer(pkgName, name);
-    ASSERT_NE(ret, SOFTBUS_OK);
+    ASSERT_NE(ret, SOFTBUS_TRANS_GET_BUNDLENAME_FAILED);
     ret = GeneralRemoveServer(pkgName, name);
-    ASSERT_NE(ret, SOFTBUS_OK);
+    ASSERT_NE(ret, SOFTBUS_TRANS_GET_BUNDLENAME_FAILED);
     Address address;
     address.addrType = CONNECTION_ADDR_BLE;
     char mac[BT_MAC_LEN] = "12:32:43:54:65:76";
     ret = memcpy_s(address.addr.ble.mac, BT_MAC_LEN, mac, BT_MAC_LEN);
     ASSERT_EQ(ret, EOK);
     ret = GeneralConnect(pkgName, name, &address);
-    ASSERT_NE(ret, SOFTBUS_OK);
+    ASSERT_NE(ret, SOFTBUS_TRANS_GET_BUNDLENAME_FAILED);
     GeneralDisconnect(0);
     const uint8_t *data = (const uint8_t *)"hello world";
     ret = GeneralSend(1, data, strlen((const char *)data));
-    ASSERT_NE(ret, SOFTBUS_OK);
+    ASSERT_NE(ret, SOFTBUS_INVALID_PARAM);
     ret = GeneralGetPeerDeviceId(0, nullptr, 0);
     ASSERT_EQ(ret, SOFTBUS_INVALID_PARAM);
     ret = GeneralGetPeerDeviceId(1, nullptr, 0);
@@ -197,7 +197,7 @@ HWTEST_F(ClientConnectionTest, ClientConnectionTest, TestSize.Level0)
     ret = GeneralGetPeerDeviceId(1, udid, 0);
     ASSERT_EQ(ret, SOFTBUS_INVALID_PARAM);
     ret = GeneralGetPeerDeviceId(1, udid, len);
-    ASSERT_NE(ret, SOFTBUS_OK);
+    ASSERT_NE(ret, SOFTBUS_INVALID_PARAM);
     ret = GeneralUnregisterListener();
     ASSERT_EQ(ret, SOFTBUS_OK);
 }
