@@ -37,12 +37,18 @@ extern "C" {
 // mock dlopen
 void *dlopen(const char *fileName, int flag)
 {
+    if (mockDlsym == nullptr) {
+        mockDlsym = new NiceMock<MockDlsym>();
+    }
     return mockDlsym->dlopen(fileName, flag);
 }
 
 // mock dlsym
 void *dlsym(void *handle, const char *symbol)
 {
+    if (mockDlsym == nullptr) {
+        mockDlsym = new NiceMock<MockDlsym>();
+    }
     return mockDlsym->dlsym(handle, symbol);
 }
 }
