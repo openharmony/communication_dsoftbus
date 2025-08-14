@@ -20,12 +20,13 @@
 extern "C" {
 #endif /* __cplusplus */
 
-#define BR_MAC_LEN          18
+#define BR_MAC_LEN          33
 #define UUID_LEN            38
 #define ERR_DESC_STR_LEN    128
 
 #define MAC_MIN_LENGTH 12             // 无分隔符格式最小长度
 #define MAC_MAX_LENGTH 17             // 标准格式最大长度
+#define MAC_SHA256_LEN 32             // MAC经SHA-256转换后长度
 #define UUID_STD_LENGTH 36        // 标准格式UUID长度（含连字符）
 #define UUID_NO_HYPHEN_LENGTH 32  // 无连字符UUID长度
 
@@ -58,7 +59,7 @@ typedef enum {
 #define COMM_PKGNAME_BRPROXY "BrProxyPkgName"
 #define PKGNAME_MAX_LEN  30
 #define DEFAULT_CHANNEL_ID (-1)
-#define BR_PROXY_SEND_MAX_LEN 4096
+#define BR_PROXY_SEND_MAX_LEN (4 * 1024 * 1024)
 #define COMM_PKGNAME_PUSH "PUSH_SERVICE"
 
 typedef struct {

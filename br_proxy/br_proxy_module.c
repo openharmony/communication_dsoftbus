@@ -336,7 +336,7 @@ static int32_t GetChannelInfoParam(napi_env env, napi_value arg, AsyncOpenChanne
         napi_get_value_string_utf8(env, peerBRUuidValue, NULL, 0, &uuidLen)) {
         goto EXIT;
     }
-    if (macLen < MAC_MIN_LENGTH || macLen > MAC_MAX_LENGTH) {
+    if (macLen < MAC_MIN_LENGTH || (macLen > MAC_MAX_LENGTH && macLen != MAC_SHA256_LEN)) {
         TRANS_LOGE(TRANS_SDK, "[br_proxy] mac len is wrong, macLen:%{public}zu", macLen);
         goto EXIT;
     }
