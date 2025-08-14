@@ -366,7 +366,6 @@ if (defined(ohos_lite)) {
       "$os_type/client_manager/src/softbus_client_info_manager.cpp",
       "$os_type/init/src/if_softbus_server.cpp",
       "$os_type/init/src/softbus_server.cpp",
-      "$dsoftbus_root_path/core/transmission/broadcast/src/trans_spec_object.cpp",
       "$os_type/init/src/softbus_server_death_recipient.cpp",
       "$os_type/init/src/softbus_server_stub.cpp",
       "common/src/softbus_ddos.c",

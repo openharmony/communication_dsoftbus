@@ -18,13 +18,13 @@
 #include "softbus_init_common.h"
 #include "softbus_adapter_range.h"
 
-void RegisterRaderCbForOpenSrcPacked(void *callback)
+void RegisterRadarCbForOpenSrcPacked(void *callback)
 {
     AdapterEnhanceFuncList *pfnAdapterEnhanceFuncList = AdapterEnhanceFuncListGet();
-    if (AdapterCheckFuncPointer((void *)pfnAdapterEnhanceFuncList->registerRaderCbForOpenSrc) != SOFTBUS_OK) {
+    if (AdapterCheckFuncPointer((void *)pfnAdapterEnhanceFuncList->registerRadarCbForOpenSrc) != SOFTBUS_OK) {
         return;
     }
-    return pfnAdapterEnhanceFuncList->registerRaderCbForOpenSrc(callback);
+    return pfnAdapterEnhanceFuncList->registerRadarCbForOpenSrc(callback);
 }
 
 #ifdef DISC_COMMUNITY

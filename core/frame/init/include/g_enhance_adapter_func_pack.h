@@ -36,7 +36,7 @@ int32_t GetLocalSleAddrPacked(char *sleAddr, uint32_t sleAddrLen);
 
 int32_t SoftBusRegRangeCbPacked(SoftBusRangeModule module, const SoftBusRangeCallback *callback);
 void SoftBusUnregRangeCbPacked(SoftBusRangeModule module);
-void RegisterRaderCbForOpenSrcPacked(void *callback);
+void RegisterRadarCbForOpenSrcPacked(void *callback);
 void SoftbusSleAdapterInitPacked(void);
 void SoftbusSleAdapterDeInitPacked(void);
 #ifdef __cplusplus

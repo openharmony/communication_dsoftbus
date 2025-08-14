@@ -132,7 +132,6 @@ ohos_unittest("SoftbusServerTest") {
     "$dsoftbus_root_path/interfaces/kits/bus_center/enhance",
     "$dsoftbus_root_path/interfaces/kits/connection",
     "$dsoftbus_root_path/interfaces/kits/disc",
-    "$dsoftbus_root_path/interfaces/kits/transport/enhance",
     "$dsoftbus_root_path/tests/core/frame/unittest/mock",
   ]
 
