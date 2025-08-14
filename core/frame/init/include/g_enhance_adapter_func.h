@@ -36,7 +36,7 @@ typedef int32_t (*GetSleRangeCapacityFunc)(void);
 typedef int32_t (*GetLocalSleAddrFunc)(char *sleAddr, uint32_t sleAddrLen);
 typedef void (*SoftbusBleAdapterInitFunc)(void);
 typedef void (*SoftbusBleAdapterDeInitFunc)(void);
-typedef void (*RegisterRaderCbForOpenSrcFunc)(void *callback);
+typedef void (*RegisterRadarCbForOpenSrcFunc)(void *callback);
 typedef void (*SoftbusSleAdapterInit)(void);
 typedef void (*SoftbusSleAdapterDeInit)(void);
 
@@ -52,7 +52,7 @@ typedef struct TagAdapterEnhanceFuncList {
     GetLocalSleAddrFunc getLocalSleAddr;
     SoftbusBleAdapterInitFunc softbusBleAdapterInit;
     SoftbusBleAdapterDeInitFunc softbusBleAdapterDeInit;
-    RegisterRaderCbForOpenSrcFunc registerRaderCbForOpenSrc;
+    RegisterRadarCbForOpenSrcFunc registerRadarCbForOpenSrc;
     SoftbusSleAdapterInit softbusSleAdapterInit;
     SoftbusSleAdapterDeInit softbusSleAdapterDeInit;
 } AdapterEnhanceFuncList;

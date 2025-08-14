@@ -487,7 +487,7 @@ HWTEST_F(ClientTransProxyFileManagerTest, ClinetTransProxyCreateSendListenerInfo
 
     SendListenerInfo *sendListenerInfo;
     ret = CreateSendListenerInfo(&sendListenerInfo, TEST_CHANNEL_ID, 0);
-    ASSERT_EQ(SOFTBUS_TRANS_SESSION_SERVER_NOINIT, ret);
+    EXPECT_EQ(SOFTBUS_TRANS_SESSION_SERVER_NOINIT, ret);
 
     int32_t channelId = 1;
     int32_t osType = TEST_OS_TYPE;

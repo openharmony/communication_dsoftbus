@@ -2339,7 +2339,7 @@ static void TransNotifySingleNetworkOffLine(const LnnEventBasicInfo *info)
         TransOnLinkDown(offlineInfo->networkId, offlineInfo->uuid, offlineInfo->udid, "", BT_BLE);
     } else if (type == CONNECTION_ADDR_BR) {
         TransOnLinkDown(offlineInfo->networkId, offlineInfo->uuid, offlineInfo->udid, "", BT_BR);
-    }  else if (type == CONNECTION_ADDR_NCM) {
+    } else if (type == CONNECTION_ADDR_NCM) {
         TransOnLinkDown(offlineInfo->networkId, offlineInfo->uuid, offlineInfo->udid, "", WIFI_USB);
     } else if (type == CONNECTION_ADDR_SLE) {
         TransOnLinkDown(offlineInfo->networkId, offlineInfo->uuid, offlineInfo->udid, "", BT_SLE);
@@ -2765,7 +2765,6 @@ static int32_t TransProxyResetReplyCnt(int32_t channelId)
 int32_t TransDealProxyCheckCollabResult(int32_t channelId, int32_t checkResult, pid_t callingPid)
 {
     SoftBusHitraceChainBegin("TransDealProxyCheckCollabResult");
-
     int32_t dmsPid = 0;
     char dmsPkgName[PKG_NAME_SIZE_MAX] = { 0 };
     (void)TransGetPidAndPkgName(DMS_SESSIONNAME, DMS_UID, &dmsPid, dmsPkgName, PKG_NAME_SIZE_MAX);
