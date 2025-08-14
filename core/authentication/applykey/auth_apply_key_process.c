@@ -79,6 +79,8 @@ typedef struct {
     bool isServer;
     int32_t connId;
     uint32_t requestId;
+    uint32_t applyKeyLen;
+    uint8_t applyKey[D2D_APPLY_KEY_LEN];
     GenApplyKeyStartState state;
     RequestBusinessInfo info;
     ApplyKeyNegoInfo negoInfo;
@@ -131,6 +133,9 @@ static void DeInitApplyKeyNegoInstanceList(void)
     }
     LIST_FOR_EACH_ENTRY_SAFE(item, nextItem, &g_applyKeyNegoList->list, ApplyKeyNegoInstance, node) {
         ListDelete(&item->node);
+        (void)memset_s(item->applyKey, sizeof(item->applyKey), 0, sizeof(item->applyKey));
+        (void)memset_s(
+            item->info.peerAccountHash, sizeof(item->info.peerAccountHash), 0, sizeof(item->info.peerAccountHash));
         SoftBusFree(item);
     }
     AUTH_LOGI(AUTH_CONN, "deinit applyKeynego instance");
@@ -235,13 +240,18 @@ static int32_t GetGenApplyKeyInstanceByChannel(int32_t channelId, ApplyKeyNegoIn
     return SOFTBUS_AUTH_APPLY_KEY_INSTANCE_NOT_FOUND;
 }
 
-static int32_t SetApplyKeyNegoInfoRecvSessionKey(uint32_t requestId, bool isRecv)
+static int32_t SetApplyKeyNegoInfoRecvSessionKey(
+    uint32_t requestId, bool isRecv, const uint8_t *applyKey, uint32_t applyKeyLen)
 {
     if (g_applyKeyNegoList == NULL) {
         AUTH_LOGE(AUTH_INIT, "applyKeynego instance is null");
         return SOFTBUS_NO_INIT;
     }
 
+    if (applyKey == NULL) {
+        AUTH_LOGE(AUTH_CONN, "applyKey is null");
+        return SOFTBUS_INVALID_PARAM;
+    }
     ApplyKeyNegoInstance *item = NULL;
     ApplyKeyNegoInstance *nextItem = NULL;
     if (!RequireApplyKeyNegoListLock()) {
@@ -251,6 +261,12 @@ static int32_t SetApplyKeyNegoInfoRecvSessionKey(uint32_t requestId, bool isRecv
     LIST_FOR_EACH_ENTRY_SAFE(item, nextItem, &g_applyKeyNegoList->list, ApplyKeyNegoInstance, node) {
         if (item->requestId == requestId) {
             item->negoInfo.isRecvSessionKeyEvent = isRecv;
+            item->applyKeyLen = applyKeyLen;
+            if (memcpy_s(item->applyKey, sizeof(item->applyKey), applyKey, applyKeyLen) != EOK) {
+                AUTH_LOGE(AUTH_CONN, "memcpy applyKey fail");
+                ReleaseApplyKeyNegoListLock();
+                return SOFTBUS_MEM_ERR;
+            }
             ReleaseApplyKeyNegoListLock();
             return SOFTBUS_OK;
         }
@@ -259,13 +275,17 @@ static int32_t SetApplyKeyNegoInfoRecvSessionKey(uint32_t requestId, bool isRecv
     return SOFTBUS_AUTH_APPLY_KEY_INSTANCE_NOT_FOUND;
 }
 
-static int32_t SetApplyKeyNegoInfoRecvFinish(uint32_t requestId, bool isRecv)
+static int32_t SetApplyKeyNegoInfoRecvFinish(uint32_t requestId, bool isRecv, char *accountHash)
 {
     if (g_applyKeyNegoList == NULL) {
         AUTH_LOGE(AUTH_INIT, "applyKeynego instance is null");
         return SOFTBUS_NO_INIT;
     }
 
+    if (accountHash == NULL) {
+        AUTH_LOGE(AUTH_CONN, "accountHash is null");
+        return SOFTBUS_INVALID_PARAM;
+    }
     ApplyKeyNegoInstance *item = NULL;
     ApplyKeyNegoInstance *nextItem = NULL;
     if (!RequireApplyKeyNegoListLock()) {
@@ -275,6 +295,13 @@ static int32_t SetApplyKeyNegoInfoRecvFinish(uint32_t requestId, bool isRecv)
     LIST_FOR_EACH_ENTRY_SAFE(item, nextItem, &g_applyKeyNegoList->list, ApplyKeyNegoInstance, node) {
         if (item->requestId == requestId) {
             item->negoInfo.isRecvFinishEvent = isRecv;
+            uint64_t currentTime = SoftBusGetSysTimeMs();
+            int32_t ret = AuthInsertApplyKey(&item->info, item->applyKey, item->applyKeyLen, currentTime, accountHash);
+            if (ret != SOFTBUS_OK) {
+                AUTH_LOGE(AUTH_CONN, "insert apply key failed! ret=%{public}d", ret);
+                ReleaseApplyKeyNegoListLock();
+                return ret;
+            }
             ReleaseApplyKeyNegoListLock();
             return SOFTBUS_OK;
         }
@@ -350,6 +377,9 @@ static void DeleteApplyKeyNegoInstance(uint32_t requestId)
         }
         AUTH_LOGE(AUTH_CONN, "delete applyKeynego instance, requestId=%{public}u", requestId);
         ListDelete(&(item->node));
+        (void)memset_s(item->applyKey, sizeof(item->applyKey), 0, sizeof(item->applyKey));
+        (void)memset_s(
+            item->info.peerAccountHash, sizeof(item->info.peerAccountHash), 0, sizeof(item->info.peerAccountHash));
         SoftBusFree(item);
         ReleaseApplyKeyNegoListLock();
         return;
@@ -379,7 +409,9 @@ static void AsyncCallGenApplyKeyResultReceived(void *para)
         if (instance.genCb.onGenSuccess != NULL) {
             AUTH_LOGI(AUTH_CONN, "onGenSuccess callback");
             uint8_t applyKey[D2D_APPLY_KEY_LEN] = { 0 };
-            if (GetApplyKeyByBusinessInfo(&instance.info, applyKey, D2D_APPLY_KEY_LEN) != SOFTBUS_OK) {
+            char accountHash[SHA_256_HEX_HASH_LEN] = { 0 };
+            if (GetApplyKeyByBusinessInfo(
+                &instance.info, applyKey, D2D_APPLY_KEY_LEN, accountHash, SHA_256_HEX_HASH_LEN) != SOFTBUS_OK) {
                 DeleteApplyKeyNegoInstance(instance.requestId);
                 SoftBusFree(res);
                 AUTH_LOGE(AUTH_CONN, "get apply key by instance fail");
@@ -613,13 +645,7 @@ static void OnSessionKeyReturned(int64_t authSeq, const uint8_t *sessionKey, uin
         AUTH_LOGE(AUTH_CONN, "get instance failed! ret=%{public}d", ret);
         return;
     }
-    uint64_t currentTime = SoftBusGetSysTimeMs();
-    ret = AuthInsertApplyKey(&instance.info, sessionKey, sessionKeyLen, currentTime);
-    if (ret != SOFTBUS_OK) {
-        AUTH_LOGE(AUTH_CONN, "insert apply key failed! ret=%{public}d", ret);
-        return;
-    }
-    if (SetApplyKeyNegoInfoRecvSessionKey(instance.requestId, true) != SOFTBUS_OK) {
+    if (SetApplyKeyNegoInfoRecvSessionKey(instance.requestId, true, sessionKey, sessionKeyLen) != SOFTBUS_OK) {
         AUTH_LOGE(AUTH_CONN, "applyKeynego info not found, requestId=%{public}u", instance.requestId);
         return;
     }
@@ -673,6 +699,22 @@ static int32_t SendApplyKeyNegoCloseAckEvent(int32_t channelId, uint32_t request
     return SOFTBUS_OK;
 }
 
+static bool CheckAccountHashWithHichain(const char *accountHash, const ApplyKeyNegoInstance *instance)
+{
+    if (!instance->isServer) {
+        if (strncmp(accountHash, instance->info.peerAccountHash, SHA_256_HEX_HASH_LEN) != 0) {
+            AUTH_LOGE(AUTH_CONN, "peer account hash is not target");
+            return false;
+        }
+    } else {
+        if (strncmp(accountHash, instance->info.accountHash, D2D_ACCOUNT_HASH_STR_LEN - 1) != 0) {
+            AUTH_LOGE(AUTH_CONN, "peer account short hash is not target");
+            return false;
+        }
+    }
+    return true;
+}
+
 static void OnFinished(int64_t authSeq, int32_t operationCode, const char *returnData)
 {
     AUTH_LOGI(AUTH_CONN, "applyKeynego OnFinish: authSeq=%{public}" PRId64, authSeq);
@@ -682,11 +724,9 @@ static void OnFinished(int64_t authSeq, int32_t operationCode, const char *retur
     }
 
     ApplyKeyNegoInstance instance;
-    char hichainReturnAccountId[SHA_256_HEX_HASH_LEN];
-    char hichainReturnAccountHash[SHA_256_HEX_HASH_LEN];
+    char hichainReturnAccountId[SHA_256_HEX_HASH_LEN] = { 0 };
+    char hichainReturnAccountHash[SHA_256_HEX_HASH_LEN] = { 0 };
     (void)memset_s(&instance, sizeof(ApplyKeyNegoInstance), 0, sizeof(ApplyKeyNegoInstance));
-    (void)memset_s(&hichainReturnAccountId, sizeof(hichainReturnAccountId), 0, sizeof(hichainReturnAccountId));
-    (void)memset_s(&hichainReturnAccountHash, sizeof(hichainReturnAccountHash), 0, sizeof(hichainReturnAccountHash));
     cJSON *msg = cJSON_ParseWithLength(returnData, strlen(returnData));
     if (msg == NULL) {
         AUTH_LOGE(AUTH_CONN, "cJSON_ParseWithLength fail");
@@ -707,13 +747,11 @@ static void OnFinished(int64_t authSeq, int32_t operationCode, const char *retur
         AUTH_LOGE(AUTH_CONN, "get instance failed! ret=%{public}d", ret);
         return;
     }
-    if (!instance.isServer &&
-        strncmp(hichainReturnAccountHash, instance.info.peerAccountHash, SHA_256_HEX_HASH_LEN) != 0) {
-        AUTH_LOGE(AUTH_CONN, "peer account hash is not target");
+    if (!CheckAccountHashWithHichain(hichainReturnAccountHash, &instance)) {
         OnGenFailed((uint32_t)authSeq, SOFTBUS_STRCMP_ERR);
         return;
     }
-    if (SetApplyKeyNegoInfoRecvFinish(instance.requestId, true) != SOFTBUS_OK) {
+    if (SetApplyKeyNegoInfoRecvFinish(instance.requestId, true, hichainReturnAccountHash) != SOFTBUS_OK) {
         AUTH_LOGE(AUTH_CONN, "applyKeynego info not found, requestId=%{public}u", instance.requestId);
         return;
     }
@@ -1138,13 +1176,14 @@ static void RegisterD2DConnectListener(void)
     AUTH_LOGI(AUTH_CONN, "ConnSetConnectCallback, ret=%{public}d", ret);
 }
 
-int32_t AuthFindApplyKey(const RequestBusinessInfo *info, uint8_t *applyKey)
+int32_t AuthFindApplyKey(
+    const RequestBusinessInfo *info, uint8_t *applyKey, char *accountHash, uint32_t accountHashLen)
 {
-    if (info == NULL || applyKey == NULL) {
+    if (info == NULL || applyKey == NULL || accountHash == NULL) {
         AUTH_LOGE(AUTH_CONN, "find apply key nego is invalid param");
         return SOFTBUS_INVALID_PARAM;
     }
-    if (GetApplyKeyByBusinessInfo(info, applyKey, D2D_APPLY_KEY_LEN) != SOFTBUS_OK) {
+    if (GetApplyKeyByBusinessInfo(info, applyKey, D2D_APPLY_KEY_LEN, accountHash, accountHashLen) != SOFTBUS_OK) {
         AUTH_LOGE(AUTH_CONN, "find apply key fail");
         return SOFTBUS_AUTH_APPLY_KEY_NOT_FOUND;
     }

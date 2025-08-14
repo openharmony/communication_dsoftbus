@@ -619,9 +619,10 @@ HWTEST_F(SoftbusProxyChannelMessagePagingTest, TransProxyFillPagingChannelInfoTe
     int32_t dataLen = TEST_LEN;
     uint8_t *accountHash = reinterpret_cast<uint8_t *>(const_cast<char *>(TEST_DATA));
     uint8_t *udidHash = reinterpret_cast<uint8_t *>(const_cast<char *>(TEST_DATA));
+    char *authAccountHash = const_cast<char *>(TEST_DATA);
     NiceMock<SoftbusProxychannelMessagePagingInterfaceMock> ProxyPagingMock;
     EXPECT_CALL(ProxyPagingMock, cJSON_ParseWithLength).WillOnce(Return(nullptr));
-    int32_t ret = TransProxyFillPagingChannelInfo(&msg, &chan, accountHash, udidHash);
+    int32_t ret = TransProxyFillPagingChannelInfo(&msg, &chan, accountHash, udidHash, authAccountHash);
     EXPECT_EQ(SOFTBUS_PARSE_JSON_ERR, ret);
     cJSON *root = nullptr;
     root = cJSON_CreateObject();
@@ -645,7 +646,7 @@ HWTEST_F(SoftbusProxyChannelMessagePagingTest, TransProxyFillPagingChannelInfoTe
     EXPECT_CALL(ProxyPagingMock, ConvertHexStringToBytes)
         .WillRepeatedly(DoAll(SetArrayArgument<0>(str, str + SHA_256_HASH_LEN), Return(SOFTBUS_OK)));
     EXPECT_CALL(ProxyPagingMock, SoftBusGenerateSessionKey).WillOnce(Return(SOFTBUS_INVALID_PARAM));
-    ret = TransProxyFillPagingChannelInfo(&msg, &chan, accountHash, udidHash);
+    ret = TransProxyFillPagingChannelInfo(&msg, &chan, accountHash, udidHash, authAccountHash);
     EXPECT_EQ(SOFTBUS_INVALID_PARAM, ret);
 }
 
@@ -663,6 +664,7 @@ HWTEST_F(SoftbusProxyChannelMessagePagingTest, TransProxyFillPagingChannelInfoTe
     int32_t dataLen = TEST_LEN;
     uint8_t *accountHash = reinterpret_cast<uint8_t *>(const_cast<char *>(TEST_DATA));
     uint8_t *udidHash = reinterpret_cast<uint8_t *>(const_cast<char *>(TEST_DATA));
+    char *authAccountHash = const_cast<char *>(TEST_DATA);
     NiceMock<SoftbusProxychannelMessagePagingInterfaceMock> ProxyPagingMock;
     cJSON *testRoot = cJSON_CreateObject();
     ASSERT_TRUE(testRoot != nullptr);
@@ -686,7 +688,7 @@ HWTEST_F(SoftbusProxyChannelMessagePagingTest, TransProxyFillPagingChannelInfoTe
         .WillRepeatedly(DoAll(SetArrayArgument<0>(str, str + SHA_256_HASH_LEN), Return(SOFTBUS_OK)));
     EXPECT_CALL(ProxyPagingMock, SoftBusGenerateSessionKey).WillOnce(Return(SOFTBUS_OK));
     EXPECT_CALL(ProxyPagingMock, SoftBusGenerateRandomArray).WillOnce(Return(SOFTBUS_INVALID_PARAM));
-    int32_t ret = TransProxyFillPagingChannelInfo(&msg, &chan, accountHash, udidHash);
+    int32_t ret = TransProxyFillPagingChannelInfo(&msg, &chan, accountHash, udidHash, authAccountHash);
     EXPECT_EQ(SOFTBUS_INVALID_PARAM, ret);
 }
 
@@ -704,6 +706,7 @@ HWTEST_F(SoftbusProxyChannelMessagePagingTest, TransProxyFillPagingChannelInfoTe
     int32_t dataLen = TEST_LEN;
     uint8_t *accountHash = reinterpret_cast<uint8_t *>(const_cast<char *>(TEST_DATA));
     uint8_t *udidHash = reinterpret_cast<uint8_t *>(const_cast<char *>(TEST_DATA));
+    char *authAccountHash = const_cast<char *>(TEST_DATA);
     NiceMock<SoftbusProxychannelMessagePagingInterfaceMock> ProxyPagingMock;
     cJSON *testRoot = cJSON_CreateObject();
     ASSERT_TRUE(testRoot != nullptr);
@@ -729,7 +732,7 @@ HWTEST_F(SoftbusProxyChannelMessagePagingTest, TransProxyFillPagingChannelInfoTe
     EXPECT_CALL(ProxyPagingMock, SoftBusGenerateRandomArray).WillOnce(Return(SOFTBUS_OK));
     EXPECT_CALL(ProxyPagingMock, LnnGetLocalStrInfo).WillOnce(Return(SOFTBUS_OK));
     EXPECT_CALL(ProxyPagingMock, AddNumberToSocketName).WillOnce(Return(SOFTBUS_INVALID_PARAM));
-    int32_t ret = TransProxyFillPagingChannelInfo(&msg, &chan, accountHash, udidHash);
+    int32_t ret = TransProxyFillPagingChannelInfo(&msg, &chan, accountHash, udidHash, authAccountHash);
     EXPECT_EQ(SOFTBUS_INVALID_PARAM, ret);
 }
 
@@ -747,6 +750,7 @@ HWTEST_F(SoftbusProxyChannelMessagePagingTest, TransProxyFillPagingChannelInfoTe
     int32_t dataLen = TEST_LEN;
     uint8_t *accountHash = reinterpret_cast<uint8_t *>(const_cast<char *>(TEST_DATA));
     uint8_t *udidHash = reinterpret_cast<uint8_t *>(const_cast<char *>(TEST_DATA));
+    char *authAccountHash = const_cast<char *>(TEST_DATA);
     NiceMock<SoftbusProxychannelMessagePagingInterfaceMock> ProxyPagingMock;
     cJSON *testRoot = cJSON_CreateObject();
     ASSERT_TRUE(testRoot != nullptr);
@@ -773,7 +777,7 @@ HWTEST_F(SoftbusProxyChannelMessagePagingTest, TransProxyFillPagingChannelInfoTe
     EXPECT_CALL(ProxyPagingMock, LnnGetLocalStrInfo).WillRepeatedly(Return(SOFTBUS_OK));
     EXPECT_CALL(ProxyPagingMock, AddNumberToSocketName).WillRepeatedly(Return(SOFTBUS_OK));
     EXPECT_CALL(ProxyPagingMock, GenerateChannelId).WillRepeatedly(Return(TEST_CHANNEL_ID));
-    int32_t ret = TransProxyFillPagingChannelInfo(&msg, &chan, accountHash, udidHash);
+    int32_t ret = TransProxyFillPagingChannelInfo(&msg, &chan, accountHash, udidHash, authAccountHash);
     EXPECT_EQ(SOFTBUS_OK, ret);
 }
 
@@ -791,6 +795,7 @@ HWTEST_F(SoftbusProxyChannelMessagePagingTest, TransProxyFillPagingChannelInfoTe
     int32_t dataLen = TEST_LEN;
     uint8_t *accountHash = reinterpret_cast<uint8_t *>(const_cast<char *>(TEST_DATA));
     uint8_t *udidHash = reinterpret_cast<uint8_t *>(const_cast<char *>(TEST_DATA));
+    char *authAccountHash = const_cast<char *>(TEST_DATA);
     NiceMock<SoftbusProxychannelMessagePagingInterfaceMock> ProxyPagingMock;
     cJSON *testRoot = cJSON_CreateObject();
     ASSERT_TRUE(testRoot != nullptr);
@@ -815,7 +820,7 @@ HWTEST_F(SoftbusProxyChannelMessagePagingTest, TransProxyFillPagingChannelInfoTe
     EXPECT_CALL(ProxyPagingMock, SoftBusGenerateSessionKey).WillOnce(Return(SOFTBUS_OK));
     EXPECT_CALL(ProxyPagingMock, SoftBusGenerateRandomArray).WillOnce(Return(SOFTBUS_OK));
     EXPECT_CALL(ProxyPagingMock, LnnGetLocalStrInfo).WillOnce(Return(SOFTBUS_INVALID_PARAM));
-    int32_t ret = TransProxyFillPagingChannelInfo(&msg, &chan, accountHash, udidHash);
+    int32_t ret = TransProxyFillPagingChannelInfo(&msg, &chan, accountHash, udidHash, authAccountHash);
     EXPECT_EQ(SOFTBUS_INVALID_PARAM, ret);
 }
 
@@ -905,14 +910,15 @@ HWTEST_F(SoftbusProxyChannelMessagePagingTest, TransPagingProcessHandshakeMsgTes
     int32_t dataLen = TEST_LEN;
     uint8_t *accountHash = reinterpret_cast<uint8_t *>(const_cast<char *>(TEST_DATA));
     uint8_t *udidHash = reinterpret_cast<uint8_t *>(const_cast<char *>(TEST_DATA));
-    TransPagingProcessHandshakeMsg(nullptr, accountHash, udidHash);
+    char *authAccountHash = const_cast<char *>(TEST_DATA);
+    TransPagingProcessHandshakeMsg(nullptr, accountHash, udidHash, authAccountHash);
     NiceMock<SoftbusProxychannelMessagePagingInterfaceMock> ProxyPagingMock;
     EXPECT_CALL(ProxyPagingMock, cJSON_ParseWithLength).WillOnce(Return(nullptr));
     EXPECT_CALL(ProxyPagingMock, TransPagingAckHandshake).WillRepeatedly(Return(SOFTBUS_OK));
     unsigned char str[SHA_256_HASH_LEN] = "TEST_";
     EXPECT_CALL(ProxyPagingMock, ConvertHexStringToBytes)
         .WillRepeatedly(DoAll(SetArrayArgument<0>(str, str + SHA_256_HASH_LEN), Return(SOFTBUS_OK)));
-    TransPagingProcessHandshakeMsg(&msg, accountHash, udidHash);
+    TransPagingProcessHandshakeMsg(&msg, accountHash, udidHash, authAccountHash);
     cJSON *testRoot = cJSON_CreateObject();
     ASSERT_TRUE(testRoot != nullptr);
     bool res = AddStringToJsonObject(testRoot, JSON_KEY_CALLER_ACCOUNT_ID, data);
@@ -935,7 +941,7 @@ HWTEST_F(SoftbusProxyChannelMessagePagingTest, TransPagingProcessHandshakeMsgTes
     EXPECT_CALL(ProxyPagingMock, AddNumberToSocketName).WillOnce(Return(SOFTBUS_OK));
     EXPECT_CALL(ProxyPagingMock, GenerateChannelId).WillOnce(Return(TEST_CHANNEL_ID));
     EXPECT_CALL(ProxyPagingMock, TransGetPkgnameByBusinessFlagPacked).WillOnce(Return(SOFTBUS_INVALID_PARAM));
-    TransPagingProcessHandshakeMsg(&msg, accountHash, udidHash);
+    TransPagingProcessHandshakeMsg(&msg, accountHash, udidHash, authAccountHash);
 }
 
 /**@
@@ -951,6 +957,7 @@ HWTEST_F(SoftbusProxyChannelMessagePagingTest, TransPagingProcessHandshakeMsgTes
     int32_t dataLen = TEST_LEN;
     uint8_t *accountHash = reinterpret_cast<uint8_t *>(const_cast<char *>(TEST_DATA));
     uint8_t *udidHash = reinterpret_cast<uint8_t *>(const_cast<char *>(TEST_DATA));
+    char *authAccountHash = const_cast<char *>(TEST_DATA);
     cJSON *testRoot = cJSON_CreateObject();
     ASSERT_TRUE(testRoot != nullptr);
     bool res = AddStringToJsonObject(testRoot, JSON_KEY_CALLER_ACCOUNT_ID, data);
@@ -979,7 +986,7 @@ HWTEST_F(SoftbusProxyChannelMessagePagingTest, TransPagingProcessHandshakeMsgTes
     EXPECT_CALL(ProxyPagingMock, GenerateChannelId).WillOnce(Return(TEST_CHANNEL_ID));
     EXPECT_CALL(ProxyPagingMock, TransGetPkgnameByBusinessFlagPacked).WillOnce(Return(SOFTBUS_OK));
     EXPECT_CALL(ProxyPagingMock, TransProxyCreatePagingChanInfo).WillOnce(Return(SOFTBUS_INVALID_PARAM));
-    TransPagingProcessHandshakeMsg(&msg, accountHash, udidHash);
+    TransPagingProcessHandshakeMsg(&msg, accountHash, udidHash, authAccountHash);
 }
 
 /**@
@@ -995,6 +1002,7 @@ HWTEST_F(SoftbusProxyChannelMessagePagingTest, TransPagingProcessHandshakeMsgTes
     int32_t dataLen = TEST_LEN;
     uint8_t *accountHash = reinterpret_cast<uint8_t *>(const_cast<char *>(TEST_DATA));
     uint8_t *udidHash = reinterpret_cast<uint8_t *>(const_cast<char *>(TEST_DATA));
+    char *authAccountHash = const_cast<char *>(TEST_DATA);
     cJSON *testRoot = cJSON_CreateObject();
     ASSERT_TRUE(testRoot != nullptr);
     bool res = AddStringToJsonObject(testRoot, JSON_KEY_CALLER_ACCOUNT_ID, data);
@@ -1025,7 +1033,7 @@ HWTEST_F(SoftbusProxyChannelMessagePagingTest, TransPagingProcessHandshakeMsgTes
     EXPECT_CALL(ProxyPagingMock, TransProxyCreatePagingChanInfo).WillOnce(Return(SOFTBUS_OK));
     EXPECT_CALL(ProxyPagingMock, TransHasAndUpdatePagingListenPacked).WillRepeatedly(Return(true));
     EXPECT_CALL(ProxyPagingMock, TransPagingGetPidAndDataByFlgPacked).WillOnce(Return(SOFTBUS_INVALID_PARAM));
-    TransPagingProcessHandshakeMsg(&msg, accountHash, udidHash);
+    TransPagingProcessHandshakeMsg(&msg, accountHash, udidHash, authAccountHash);
 }
 
 /**@
@@ -1041,6 +1049,7 @@ HWTEST_F(SoftbusProxyChannelMessagePagingTest, TransPagingProcessHandshakeMsgTes
     int32_t dataLen = TEST_LEN;
     uint8_t *accountHash = reinterpret_cast<uint8_t *>(const_cast<char *>(TEST_DATA));
     uint8_t *udidHash = reinterpret_cast<uint8_t *>(const_cast<char *>(TEST_DATA));
+    char *authAccountHash = const_cast<char *>(TEST_DATA);
     cJSON *testRoot = cJSON_CreateObject();
     ASSERT_TRUE(testRoot != nullptr);
     bool res = AddStringToJsonObject(testRoot, JSON_KEY_CALLER_ACCOUNT_ID, data);
@@ -1074,7 +1083,7 @@ HWTEST_F(SoftbusProxyChannelMessagePagingTest, TransPagingProcessHandshakeMsgTes
         SetArgPointee<2>(1), Return(SOFTBUS_OK)));
     EXPECT_CALL(ProxyPagingMock, TransPagingUpdatePidAndData).WillRepeatedly(Return(SOFTBUS_OK));
     EXPECT_CALL(ProxyPagingMock, OnProxyChannelOpened).WillOnce(Return(SOFTBUS_OK));
-    TransPagingProcessHandshakeMsg(&msg, accountHash, udidHash);
+    TransPagingProcessHandshakeMsg(&msg, accountHash, udidHash, authAccountHash);
 }
 
 /**@
@@ -1089,6 +1098,7 @@ HWTEST_F(SoftbusProxyChannelMessagePagingTest, TransWaitListenResult001, TestSiz
     int32_t reason = SOFTBUS_INVALID_PARAM;
     uint8_t *accountHash = reinterpret_cast<uint8_t *>(const_cast<char *>(TEST_DATA));
     uint8_t *udidHash = reinterpret_cast<uint8_t *>(const_cast<char *>(TEST_DATA));
+    char authAccountHash[SHA_256_HEX_HASH_LEN] = { 0 };
     AesGcmCipherKey cipherKey;
     NiceMock<SoftbusProxychannelMessagePagingInterfaceMock> ProxyPagingMock;
     EXPECT_CALL(ProxyPagingMock, TransPagingAckHandshake).WillRepeatedly(Return(SOFTBUS_OK));
@@ -1108,18 +1118,18 @@ HWTEST_F(SoftbusProxyChannelMessagePagingTest, TransWaitListenResult001, TestSiz
     EXPECT_CALL(ProxyPagingMock, OnProxyChannelOpened).WillRepeatedly(Return(SOFTBUS_OK));
     TransWaitListenResult(businessFlag, reason);
     EXPECT_CALL(ProxyPagingMock, ConvertBytesToHexString).WillOnce(Return(SOFTBUS_INVALID_PARAM));
-    int32_t ret = PagingParseMsgGetAuthKey(accountHash, udidHash, &cipherKey);
+    int32_t ret = PagingParseMsgGetAuthKey(accountHash, udidHash, &cipherKey, authAccountHash);
     EXPECT_EQ(SOFTBUS_NETWORK_BYTES_TO_HEX_STR_ERR, ret);
     EXPECT_CALL(ProxyPagingMock, ConvertBytesToHexString).WillOnce(Return(SOFTBUS_OK))
         .WillOnce(Return(SOFTBUS_INVALID_PARAM));
-    ret = PagingParseMsgGetAuthKey(accountHash, udidHash, &cipherKey);
+    ret = PagingParseMsgGetAuthKey(accountHash, udidHash, &cipherKey, authAccountHash);
     EXPECT_EQ(SOFTBUS_NETWORK_BYTES_TO_HEX_STR_ERR, ret);
     EXPECT_CALL(ProxyPagingMock, ConvertBytesToHexString).WillRepeatedly(Return(SOFTBUS_OK));
     EXPECT_CALL(ProxyPagingMock, AuthFindApplyKey).WillOnce(Return(SOFTBUS_INVALID_PARAM));
-    ret = PagingParseMsgGetAuthKey(accountHash, udidHash, &cipherKey);
+    ret = PagingParseMsgGetAuthKey(accountHash, udidHash, &cipherKey, authAccountHash);
     EXPECT_EQ(SOFTBUS_INVALID_PARAM, ret);
     EXPECT_CALL(ProxyPagingMock, AuthFindApplyKey).WillRepeatedly(Return(SOFTBUS_OK));
-    ret = PagingParseMsgGetAuthKey(accountHash, udidHash, &cipherKey);
+    ret = PagingParseMsgGetAuthKey(accountHash, udidHash, &cipherKey, authAccountHash);
     EXPECT_EQ(SOFTBUS_OK, ret);
 }
 
