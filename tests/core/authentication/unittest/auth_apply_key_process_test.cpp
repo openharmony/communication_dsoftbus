@@ -250,32 +250,36 @@ HWTEST_F(AuthApplyKeyProcessTest, SET_APPLY_KEY_NEGO_INFO_Test_001, TestSize.Lev
     RequestBusinessInfo info;
     AuthApplyKeyProcessInterfaceMock authApplyKeyMock;
     EXPECT_CALL(authApplyKeyMock, ConnSetConnectCallback).WillRepeatedly(Return(true));
+    EXPECT_CALL(authApplyKeyMock, AuthInsertApplyKey).WillRepeatedly(Return(SOFTBUS_OK));
     (void)memset_s(&instance, sizeof(instance), 0, sizeof(instance));
     (void)memset_s(&cb, sizeof(cb), 0, sizeof(cb));
     (void)memset_s(&info, sizeof(info), 0, sizeof(info));
+    char accountHash[SHA_256_HEX_HASH_LEN] = { 0 };
+    EXPECT_EQ(strcpy_s(accountHash, SHA_256_HEX_HASH_LEN, NODE1_ACCOUNT_HASH), EOK);
+    uint8_t sessionKey[D2D_APPLY_KEY_LEN] = { 0 };
 
-    int32_t ret = SetApplyKeyNegoInfoRecvSessionKey(requestId, true);
+    int32_t ret = SetApplyKeyNegoInfoRecvSessionKey(requestId, true, sessionKey, D2D_APPLY_KEY_LEN);
     EXPECT_EQ(ret, SOFTBUS_NO_INIT);
-    ret = SetApplyKeyNegoInfoRecvFinish(requestId, true);
+    ret = SetApplyKeyNegoInfoRecvFinish(requestId, true, accountHash);
     EXPECT_EQ(ret, SOFTBUS_NO_INIT);
     ret = InitApplyKeyNegoInstanceList();
     EXPECT_EQ(ret, SOFTBUS_OK);
-    ret = SetApplyKeyNegoInfoRecvSessionKey(requestId, true);
+    ret = SetApplyKeyNegoInfoRecvSessionKey(requestId, true, sessionKey, D2D_APPLY_KEY_LEN);
     EXPECT_EQ(ret, SOFTBUS_LOCK_ERR);
-    ret = SetApplyKeyNegoInfoRecvFinish(requestId, true);
+    ret = SetApplyKeyNegoInfoRecvFinish(requestId, true, accountHash);
     EXPECT_EQ(ret, SOFTBUS_LOCK_ERR);
     ret = ApplyKeyNegoInit();
     EXPECT_EQ(ret, SOFTBUS_OK);
-    ret = SetApplyKeyNegoInfoRecvSessionKey(requestId, true);
+    ret = SetApplyKeyNegoInfoRecvSessionKey(requestId, true, sessionKey, D2D_APPLY_KEY_LEN);
     EXPECT_EQ(ret, SOFTBUS_AUTH_APPLY_KEY_INSTANCE_NOT_FOUND);
-    ret = SetApplyKeyNegoInfoRecvFinish(requestId, true);
+    ret = SetApplyKeyNegoInfoRecvFinish(requestId, true, accountHash);
     EXPECT_EQ(ret, SOFTBUS_AUTH_APPLY_KEY_INSTANCE_NOT_FOUND);
     EXPECT_CALL(authApplyKeyMock, LnnAsyncCallbackDelayHelper).WillOnce(Return(SOFTBUS_OK));
     ret = CreateApplyKeyNegoInstance(&info, requestId, channelId, true, &cb);
     EXPECT_EQ(ret, SOFTBUS_OK);
-    ret = SetApplyKeyNegoInfoRecvSessionKey(requestId, true);
+    ret = SetApplyKeyNegoInfoRecvSessionKey(requestId, true, sessionKey, D2D_APPLY_KEY_LEN);
     EXPECT_EQ(ret, SOFTBUS_OK);
-    ret = SetApplyKeyNegoInfoRecvFinish(requestId, true);
+    ret = SetApplyKeyNegoInfoRecvFinish(requestId, true, accountHash);
     EXPECT_EQ(ret, SOFTBUS_OK);
     ApplyKeyNegoDeinit();
 }
@@ -328,16 +332,18 @@ HWTEST_F(AuthApplyKeyProcessTest, AUTH_FIND_APPLY_KEY_Test_001, TestSize.Level1)
     AuthApplyKeyProcessInterfaceMock authApplyKeyMock;
     RequestBusinessInfo info;
     uint8_t applyKey[D2D_APPLY_KEY_LEN];
+    char accountHash[SHA_256_HEX_HASH_LEN] = { 0 };
+    EXPECT_EQ(strcpy_s(accountHash, SHA_256_HEX_HASH_LEN, NODE1_ACCOUNT_HASH), EOK);
 
-    int32_t ret = AuthFindApplyKey(nullptr, applyKey);
+    int32_t ret = AuthFindApplyKey(nullptr, applyKey, accountHash, SHA_256_HEX_HASH_LEN);
     EXPECT_EQ(ret, SOFTBUS_INVALID_PARAM);
 
     EXPECT_CALL(authApplyKeyMock, GetApplyKeyByBusinessInfo).WillOnce(Return(SOFTBUS_AUTH_APPLY_KEY_NOT_FOUND));
-    ret = AuthFindApplyKey(&info, applyKey);
+    ret = AuthFindApplyKey(&info, applyKey, accountHash, SHA_256_HEX_HASH_LEN);
     EXPECT_EQ(ret, SOFTBUS_AUTH_APPLY_KEY_NOT_FOUND);
 
     EXPECT_CALL(authApplyKeyMock, GetApplyKeyByBusinessInfo).WillOnce(Return(SOFTBUS_OK));
-    ret = AuthFindApplyKey(&info, applyKey);
+    ret = AuthFindApplyKey(&info, applyKey, accountHash, SHA_256_HEX_HASH_LEN);
     EXPECT_EQ(ret, SOFTBUS_OK);
 }
 
@@ -518,9 +524,7 @@ HWTEST_F(AuthApplyKeyProcessTest, ON_SESSION_KEY_RETURNED_Test_001, TestSize.Lev
     EXPECT_CALL(authApplyKeyMock, LnnAsyncCallbackDelayHelper).WillOnce(Return(SOFTBUS_OK));
     ret = CreateApplyKeyNegoInstance(&info, authSeq, channelId, true, &cb);
     EXPECT_EQ(ret, SOFTBUS_OK);
-    EXPECT_CALL(authApplyKeyMock, AuthInsertApplyKey).WillOnce(Return(SOFTBUS_SPRINTF_ERR));
     OnSessionKeyReturned(authSeq, TEST_APPLY_KEY_DATA, sizeof(TEST_APPLY_KEY_DATA));
-    EXPECT_CALL(authApplyKeyMock, AuthInsertApplyKey).WillOnce(Return(SOFTBUS_OK));
     OnSessionKeyReturned(authSeq, TEST_APPLY_KEY_DATA, sizeof(TEST_APPLY_KEY_DATA));
 
     ApplyKeyNegoDeinit();
