@@ -248,7 +248,7 @@ static struct LocalIface *CreateLocalIface(const char *ifname, const char *servi
 {
     struct LocalIface *iface = (struct LocalIface *)calloc(1, sizeof(struct LocalIface));
     if (iface == NULL) {
-        DFINDER_LOGE(TAG, "calloc for local iface %s fail, size wanted: %zu", iface, sizeof(struct LocalIface));
+        DFINDER_LOGE(TAG, "calloc local iface fail");
         return NULL;
     }
 
