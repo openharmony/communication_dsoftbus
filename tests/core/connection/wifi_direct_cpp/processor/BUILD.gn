@@ -61,8 +61,6 @@ ohos_unittest("P2pv1ProcessorTest") {
   deps = [
     "$dsoftbus_dfx_path:softbus_dfx",
     "$dsoftbus_root_path/adapter:softbus_adapter",
-    "$dsoftbus_root_path/core/frame:softbus_server",
-    "$dsoftbus_root_path/core/connection/wifi_direct_cpp:wifi_direct",
   ]
 
   external_deps = [
