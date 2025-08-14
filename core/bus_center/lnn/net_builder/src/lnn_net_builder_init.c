@@ -134,6 +134,20 @@ static void GetSessionKeyByNodeInfo(const NodeInfo *info, AuthHandle authHandle)
     UpdateDpSameAccount(&aclParams, sessionKey, false, info->aclState);
 }
 
+static bool IsDeviceOnlineByTargetType(const char *networkId, DiscoveryType onlineType)
+{
+    NodeInfo node;
+    (void)memset_s(&node, sizeof(NodeInfo), 0, sizeof(NodeInfo));
+    if (LnnGetRemoteNodeInfoById(networkId, CATEGORY_NETWORK_ID, &node) != SOFTBUS_OK) {
+        char *anonyNetworkId = NULL;
+        Anonymize(networkId, &anonyNetworkId);
+        LNN_LOGE(LNN_LANE, "getRemoteInfo fail, networkId=%{public}s", AnonymizeWrapper(anonyNetworkId));
+        AnonymizeFree(anonyNetworkId);
+        return false;
+    }
+    return LnnHasDiscoveryType(&node, onlineType);
+}
+
 static void OnReAuthVerifyPassed(uint32_t requestId, AuthHandle authHandle, const NodeInfo *info)
 {
     LNN_CHECK_AND_RETURN_LOGE(info != NULL, LNN_BUILDER, "reAuth verify result error");
@@ -160,8 +174,8 @@ static void OnReAuthVerifyPassed(uint32_t requestId, AuthHandle authHandle, cons
     LnnConnectionFsm *connFsm = FindConnectionFsmByAddr(&addr, true);
     if (connFsm != NULL && !connFsm->isDead && !LnnIsNeedCleanConnectionFsm(info, addr.type)) {
         if (info != NULL && LnnUpdateGroupType(info) == SOFTBUS_OK && LnnUpdateAccountInfo(info) == SOFTBUS_OK) {
-            if (IsSameAccountId(info->accountId) && LnnHasDiscoveryType(info, DISCOVERY_TYPE_BLE)) {
-                TriggerSparkGroupBuildPacked(SPARK_GROUP_DELAY_TIME_MS);
+            if (IsSameAccountId(info->accountId) && IsDeviceOnlineByTargetType(info->networkId, DISCOVERY_TYPE_BLE)) {
+                TriggerSparkGroupJoinAgainPacked(info->deviceInfo.deviceUdid, SPARK_GROUP_DELAY_TIME_MS);
             }
             UpdateProfile(info);
             LnnUpdateRemoteDeviceName(info);
