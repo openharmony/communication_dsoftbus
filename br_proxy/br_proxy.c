@@ -148,6 +148,45 @@ static bool IsMacValid(const char *macAddr)
     return true;
 }
 
+static bool IsHexChar(char c)
+{
+    return (c >= '0' && c <= '9') ||
+           (c >= 'a' && c <= 'f') ||
+           (c >= 'A' && c <= 'F');
+}
+
+static bool IsValidSha256(const char *str)
+{
+    if (str == NULL) {
+        return false;
+    }
+    int32_t len = strlen(str);
+    if (len != MAC_SHA256_LEN) {
+        return false;
+    }
+    for (int32_t i = 0; i < len; i++) {
+        if (!IsHexChar(str[i])) {
+            return false;
+        }
+    }
+    return true;
+}
+
+static bool IsPeerDevAddrValid(const char *addr)
+{
+    if (addr == NULL) {
+        return false;
+    }
+
+    if (IsValidSha256(addr)) {
+        return true;
+    } else if (IsMacValid(addr)) {
+        return true;
+    }
+
+    return false;
+}
+
 static bool IsUuidValid(const char *uuid)
 {
     if (uuid == NULL) {
@@ -429,7 +468,7 @@ static int32_t CheckOpenParm(BrProxyChannelInfo *channelInfo, IBrProxyListener *
         return SOFTBUS_INVALID_PARAM;
     }
 
-    if (!IsMacValid(channelInfo->peerBRMacAddr)) {
+    if (!IsPeerDevAddrValid(channelInfo->peerBRMacAddr)) {
         TRANS_LOGE(TRANS_SDK, "[br_proxy] mac is invalid!");
         return SOFTBUS_TRANS_BR_PROXY_INVALID_PARAM;
     }
