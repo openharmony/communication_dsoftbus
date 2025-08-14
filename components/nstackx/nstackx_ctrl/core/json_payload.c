@@ -609,7 +609,7 @@ int32_t ParseServiceNotification(const uint8_t *buf, NSTACKX_NotificationConfig 
     }
     config->msgLen = strlen(item->valuestring);
     if (strcpy_s(config->msg, NSTACKX_MAX_NOTIFICATION_DATA_LEN, item->valuestring) != EOK) {
-        DFINDER_LOGE(TAG, "copy notification fail, errno: %d, desc: %s", errno, strerror(errno));
+        DFINDER_LOGE(TAG, "copy notification fail");
         goto LERR;
     }
     cJSON_Delete(data);
