@@ -944,6 +944,8 @@ HWTEST_F(HeartBeatMediumTest, LnnHeartbeatCtrlVirtual_TEST01, TestSize.Level1)
     LnnDeinitHeartbeat();
     ret = LnnInitHeartbeat();
     EXPECT_TRUE(ret == SOFTBUS_OK);
+    EXPECT_TRUE(LnnIsNeedInterceptBroadcast(true) == false);
+    EXPECT_TRUE(LnnIsNeedInterceptBroadcast(false) == false);
 }
 
 /*
