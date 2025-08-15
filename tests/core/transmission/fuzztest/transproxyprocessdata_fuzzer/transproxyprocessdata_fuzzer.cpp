@@ -122,6 +122,9 @@ void TransProxyPackBytesTest(FuzzedDataProvider &provider)
     (void)memset_s(&dataInfo, sizeof(ProxyDataInfo), 0, sizeof(ProxyDataInfo));
 
     TransProxyPackBytes(channelId, &dataInfo, sessionKey, flag, 0);
+
+    dataInfo.inLen = MAX_MALLOC_SIZE;
+    TransProxyPackBytes(channelId, &dataInfo, sessionKey, flag, 0);
 }
 
 void TransProxyPackTlvBytesTest(FuzzedDataProvider &provider)
@@ -133,6 +136,9 @@ void TransProxyPackTlvBytesTest(FuzzedDataProvider &provider)
 
     int32_t tlvBufferSize = provider.ConsumeIntegral<int8_t>();
     uint32_t dataLen = provider.ConsumeIntegral<uint32_t>();
+    TransProxyPackTlvData(nullptr, tlvBufferSize, dataLen);
+    dataLen = -(MAGICNUM_SIZE + TLVCOUNT_SIZE + tlvBufferSize);
+    TransProxyPackTlvData(&pktHead, tlvBufferSize, dataLen);
 
     int32_t finalSeq = provider.ConsumeIntegral<int32_t>();
     int32_t flag = provider.ConsumeIntegral<int32_t>();
@@ -246,6 +252,8 @@ void TransProxyProcessSessionDataTest(FuzzedDataProvider &provider)
     (void)TransProxyProcessSessionData(&dataInfo, &dataHead, data);
     dataHead.dataLen = OVERHEAD_LEN + 1;
     (void)TransProxyProcessSessionData(&dataInfo, &dataHead, data);
+    dataHead.dataLen = INT32_MAX - 1;
+    (void)TransProxyProcessSessionData(&dataInfo, &dataHead, data);
 }
 
 static void FillSliceProcessor(FuzzedDataProvider &provider, SliceProcessor *processor)
@@ -298,7 +306,11 @@ void TransProxySessionDataLenCheckTest(FuzzedDataProvider &provider)
     len = 0;
     type = TRANS_SESSION_ASYNC_MESSAGE;
     (void)TransProxySessionDataLenCheck(len, type);
+    len = UINT32_MAX - 1;
+    (void)TransProxySessionDataLenCheck(len, type);
     type = TRANS_SESSION_BYTES;
+    (void)TransProxySessionDataLenCheck(len, type);
+    len = 0;
     (void)TransProxySessionDataLenCheck(len, type);
 }
 
@@ -506,10 +518,19 @@ void TransProxyProcessD2DDataTest(FuzzedDataProvider &provider)
     }
     int32_t businessType = provider.ConsumeIntegral<int32_t>();
     PacketD2DHead dataHead;
+    (void)memset_s(&dataHead, sizeof(PacketD2DHead), 0, sizeof(PacketD2DHead));
     (void)TransProxyProcessD2DData(&dataInfo, &dataHead, data, businessType);
     (void)TransProxyProcessD2DData(&dataInfo, nullptr, data, businessType);
     (void)TransProxyProcessD2DData(&dataInfo, &dataHead, nullptr, businessType);
     (void)TransProxyProcessD2DData(nullptr, &dataHead, data, businessType);
+    businessType = BUSINESS_TYPE_D2D_MESSAGE;
+    (void)TransProxyProcessD2DData(&dataInfo, &dataHead, data, businessType);
+    dataHead.dataLen = SHORT_TAG_LEN;
+    (void)TransProxyProcessD2DData(&dataInfo, &dataHead, data, businessType);
+    dataHead.dataLen = SHORT_TAG_LEN + 1;
+    (void)TransProxyProcessD2DData(&dataInfo, &dataHead, data, businessType);
+    dataHead.dataLen = INT32_MAX - 1;
+    (void)TransProxyProcessD2DData(&dataInfo, &dataHead, data, businessType);
 }
 
 void TransProxyDecryptD2DDataTest(const uint8_t *data, size_t size)
@@ -598,6 +619,19 @@ void TransProxyPackD2DBytesTest(const uint8_t *data, size_t size)
     (void)TransProxyPackD2DBytes(&dataInfo, sessionKey, nullptr, flag);
     SoftBusFree(dataInfo.inData);
 }
+
+void TransPackD2DToBytesExtraDataTest(FuzzedDataProvider &provider)
+{
+    ProxyDataInfo dataInfo;
+    (void)memset_s(&dataInfo, sizeof(ProxyDataInfo), 0, sizeof(ProxyDataInfo));
+    SessionPktType flag = static_cast<SessionPktType>(
+        provider.ConsumeIntegralInRange<uint16_t>(TRANS_SESSION_BYTES, TRANS_SESSION_ASYNC_MESSAGE));
+    uint32_t nonce = provider.ConsumeIntegral<uint32_t>();
+
+    (void)TransGenerateToBytesRandIv(nullptr, nullptr);
+    (void)TransPackD2DToBytesExtraData(nullptr, flag, nonce);
+    (void)TransPackD2DToBytesExtraData(&dataInfo, flag, nonce);
+}
 } // namespace OHOS
 
 /* Fuzzer entry point */
@@ -633,5 +667,6 @@ extern "C" int32_t LLVMFuzzerTestOneInput(const uint8_t *data, size_t size)
     OHOS::TransProxyDecryptD2DDataTest(data, size);
     OHOS::TransProxyD2DFirstSliceProcessTest(provider);
     OHOS::TransProxyPackD2DBytesTest(data, size);
+    OHOS::TransPackD2DToBytesExtraDataTest(provider);
     return 0;
 }
