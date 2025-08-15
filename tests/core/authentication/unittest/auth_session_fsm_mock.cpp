@@ -66,5 +66,23 @@ int32_t LnnGetRemoteNodeInfoById(const char *id, IdCategory type, NodeInfo *info
 {
     return GetAuthSessionFsmInterface()->LnnGetRemoteNodeInfoById(id, type, info);
 }
+
+int32_t PostDeviceInfoMessage(int64_t authSeq, const AuthSessionInfo *info)
+{
+    return GetAuthSessionFsmInterface()->PostDeviceInfoMessage(authSeq, info);
+}
+int32_t ProcessDeviceIdMessage(AuthSessionInfo *info, const uint8_t *data, uint32_t len,
+    int64_t authSeq)
+{
+    return GetAuthSessionFsmInterface()->ProcessDeviceIdMessage(info, data, len, authSeq);
+}
+int32_t PostDeviceIdMessage(int64_t authSeq, const AuthSessionInfo *info)
+{
+    return GetAuthSessionFsmInterface()->PostDeviceIdMessage(authSeq, info);
+}
+bool LnnIsNeedInterceptBroadcast(bool disableGlass)
+{
+    return GetAuthSessionFsmInterface()->LnnIsNeedInterceptBroadcast(disableGlass);
+}
 }
 }

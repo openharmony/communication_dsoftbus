@@ -496,6 +496,7 @@ public:
     MOCK_METHOD1(LnnUpdateLocalBroadcastCipherKeyPacked, int32_t(BroadcastCipherKey *));
 
     static int32_t LedgerGetCommonDevInfo(const CommonDeviceKey key, char *value, uint32_t len);
+    static int32_t LedgerGetCommonDevInfoGlass(const CommonDeviceKey key, char *value, uint32_t len);
     static int32_t LedgerSoftBusRegBusCenterVarDump(char *dumpVar, SoftBusVarDumpCb cb);
     static int32_t MockGetLocalSleAddrFunc(char *sleAddr, uint32_t sleAddrLen);
 };

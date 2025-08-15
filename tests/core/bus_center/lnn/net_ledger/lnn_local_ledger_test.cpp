@@ -409,10 +409,9 @@ HWTEST_F(LNNLedgerMockTest, Local_Ledger_Key_Test_005, TestSize.Level1)
     int32_t ret = LnnInitLocalNodeInfo(info);
     EXPECT_EQ(ret, SOFTBUS_INVALID_PARAM);
 
-    NodeInfo *nodeInfo = (NodeInfo *)SoftBusMalloc(sizeof(NodeInfo));
-    ASSERT_TRUE(nodeInfo != nullptr);
+    NodeInfo *nodeInfo = &g_localNetLedger.localInfo;
     (void)memset_s(nodeInfo, sizeof(NodeInfo), 0, sizeof(NodeInfo));
-
+    nodeInfo->authCapacity |= (1 << (uint32_t)BIT_SUPPORT_BR_DUP_BLE);
     LocalLedgerDepsInterfaceMock localLedgerMock;
     EXPECT_CALL(localLedgerMock, GetCommonDeviceVersion(_, _)).WillRepeatedly(Return(SOFTBUS_OK));
     EXPECT_CALL(localLedgerMock, GetDeviceSecurityLevel(_)).WillRepeatedly(Return(SOFTBUS_OK));
@@ -422,19 +421,17 @@ HWTEST_F(LNNLedgerMockTest, Local_Ledger_Key_Test_005, TestSize.Level1)
     EXPECT_CALL(localLedgerMock, GetCommonOsType(_)).WillRepeatedly(Return(SOFTBUS_OK));
     EXPECT_CALL(localLedgerMock, GetCommonOsVersion(_, _)).WillRepeatedly(Return(SOFTBUS_OK));
     EXPECT_CALL(localLedgerMock, GetCommonDevInfo(_, NotNull(), _))
-        .WillRepeatedly(localLedgerMock.LedgerGetCommonDevInfo);
+        .WillRepeatedly(localLedgerMock.LedgerGetCommonDevInfoGlass);
     EXPECT_CALL(localLedgerMock, LnnInitLocalP2pInfo(_))
         .WillOnce(Return(SOFTBUS_OK))
         .WillRepeatedly(Return(SOFTBUS_SET_P2P_INFO_FAIL));
     ret = LnnInitLocalNodeInfo(nodeInfo);
     EXPECT_EQ(ret, SOFTBUS_OK);
+    EXPECT_EQ(nodeInfo->authCapacity, 0);
     ret = LnnInitLocalNodeInfo(nodeInfo);
     EXPECT_EQ(ret, SOFTBUS_SET_P2P_INFO_FAIL);
     ret = LnnInitLocalNodeInfo(nodeInfo);
     EXPECT_EQ(ret, SOFTBUS_SET_P2P_INFO_FAIL);
-    if (nodeInfo != nullptr) {
-        SoftBusFree(nodeInfo);
-    }
 }
 
 /*
