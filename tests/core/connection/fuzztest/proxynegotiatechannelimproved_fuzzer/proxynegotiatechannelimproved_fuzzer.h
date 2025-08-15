@@ -13,9 +13,9 @@
  * limitations under the License.
  */
 
-#ifndef PROXYNEGOTIATEMESSAGE_FUZZER_H
-#define PROXYNEGOTIATEMESSAGE_FUZZER_H
+#ifndef PROXYNEGOTIATE_IMPROVED_FUZZER_H
+#define PROXYNEGOTIATE_IMPROVED_FUZZER_H
 
-#define FUZZ_PROJECT_NAME "proxynegotiatechannel_fuzzer"
+#define FUZZ_PROJECT_NAME "proxynegotiatechannelimproved_fuzzer"
 
 #endif
