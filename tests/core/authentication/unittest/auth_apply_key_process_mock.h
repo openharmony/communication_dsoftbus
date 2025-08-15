@@ -33,7 +33,7 @@ namespace OHOS {
 class AuthApplyKeyProcessInterface {
 public:
     AuthApplyKeyProcessInterface() {};
-    virtual ~AuthApplyKeyProcessInterface() { };
+    virtual ~AuthApplyKeyProcessInterface() {};
     virtual int32_t LnnAsyncCallbackDelayHelper(
         SoftBusLooper *looper, LnnAsyncCallbackFunc callback, void *para, uint64_t delayMillis) = 0;
     virtual int32_t LnnGetLocalStrInfo(InfoKey key, char *info, uint32_t len) = 0;
@@ -48,8 +48,8 @@ public:
         const RequestBusinessInfo *info, uint8_t *uk, uint32_t ukLen, char *accountHash, uint32_t accountHashLen) = 0;
     virtual const uint8_t *UnpackAuthData(const uint8_t *data, uint32_t len, AuthDataHead *head) = 0;
     virtual cJSON *cJSON_ParseWithLength(const char *string, size_t length) = 0;
-    virtual bool GetJsonObjectStringItem(
-        const cJSON *json, const char * const string, char *target, uint32_t targetLen) = 0;
+    virtual bool GetJsonObjectStringItem(const cJSON *json, const char * const string, char *target,
+        uint32_t targetLen) = 0;
     virtual bool GetJsonObjectNumberItem(const cJSON *json, const char * const string, int32_t *target) = 0;
     virtual int32_t InitDeviceAuthService() = 0;
     virtual const LightAccountVerifier *GetLightAccountVerifierInstance(void) = 0;
