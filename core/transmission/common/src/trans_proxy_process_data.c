@@ -145,6 +145,10 @@ int32_t TransProxyPackBytes(
 
 static uint8_t *TransProxyPackTlvData(DataHead *pktHead, int32_t tlvBufferSize, uint32_t dataLen)
 {
+    if (pktHead == NULL) {
+        TRANS_LOGE(TRANS_CTRL, "param invalid");
+        return NULL;
+    }
     int32_t newDataHeadSize = MAGICNUM_SIZE + TLVCOUNT_SIZE + tlvBufferSize;
     uint8_t *buf = (uint8_t *)SoftBusCalloc(dataLen + newDataHeadSize);
     if (buf == NULL) {
