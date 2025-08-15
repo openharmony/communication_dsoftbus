@@ -33,8 +33,8 @@
 #include "lnn_heartbeat_ctrl.h"
 #include "lnn_heartbeat_utils.h"
 #include "lnn_network_manager.h"
-#include "softbus_adapter_bt_common.h"
 #include "lnn_cipherkey_manager_struct.h"
+#include "softbus_adapter_bt_common.h"
 
 namespace OHOS {
 class LnnConnFsmInterface {
@@ -72,7 +72,7 @@ public:
     virtual void LnnNotifyDeviceTrustedChange(int32_t type, const char *msg, uint32_t msgLen) = 0;
     virtual int32_t GetAuthRequest(uint32_t requestId, AuthRequest *request) = 0;
     virtual void UpdateDpSameAccount(UpdateDpAclParams *aclParams, SessionKey sessionKey, bool isNeedUpdateDk,
-    AclWriteState aclState) = 0;
+        AclWriteState aclState) = 0;
     virtual int32_t LnnGetAddrTypeByIfName(const char *ifName, ConnectionAddrType *type) = 0;
     virtual bool LnnConvertAuthConnInfoToAddr(
         ConnectionAddr *addr, const AuthConnInfo *connInfo, ConnectionAddrType hintType) = 0;
@@ -81,13 +81,14 @@ public:
     virtual bool LnnIsSameConnectionAddr(const ConnectionAddr *addr1, const ConnectionAddr *addr2, bool isShort) = 0;
     virtual void DelSessionKeyProfile(int32_t sessionKeyId) = 0;
     virtual bool GetSessionKeyProfile(int32_t sessionKeyId, uint8_t *sessionKey, uint32_t *length) = 0;
-    virtual AuthManager *GetAuthManagerByAuthId(int64_t authId) = 0;
     virtual int32_t GetLatestSessionKey(
         const SessionKeyList *list, AuthLinkType type, int32_t *index, SessionKey *key) = 0;
     virtual void DelDupAuthManager(AuthManager *auth) = 0;
     virtual void DelUserKeyByNetworkId(const char *networkId) = 0;
     virtual void LnnNotifyAddRawEnhanceP2pEvent(LnnNotifyRawEnhanceP2pEvent *event) = 0;
     virtual bool RawLinkNeedUpdateAuthManager(const char *uuid, bool isServer) = 0;
+    virtual AuthManager *GetAuthManagerByAuthId(int64_t authId) = 0;
+    virtual void SetDpGroupShare(const NodeInfo *info, AuthHandle authHandle) = 0;
     virtual void LnnStopOfflineTimingBySleHb(const char *networkId, ConnectionAddrType addrType) = 0;
     virtual int32_t LnnCleanTriggerSparkInfo(const char *udid, ConnectionAddrType addrType) = 0;
     virtual void LnnSetWiFiIp(NodeInfo *info, const char *ip, int32_t ifnameIdx) = 0;
@@ -106,7 +107,8 @@ public:
     MOCK_METHOD2(AuthGetServerSide, int32_t(int64_t, bool *));
     MOCK_METHOD2(LnnRetrieveDeviceInfo, int32_t(const char *, NodeInfo *));
     MOCK_METHOD2(LnnRetrieveDeviceInfoByNetworkId, int32_t(const char *, NodeInfo *));
-    MOCK_METHOD5(AuthRestoreAuthManager, int32_t(const char *, const AuthConnInfo *, uint32_t, NodeInfo *, int64_t *));
+    MOCK_METHOD5(AuthRestoreAuthManager, int32_t(const char *, const AuthConnInfo *, uint32_t, NodeInfo *,
+        int64_t *));
     MOCK_METHOD0(LnnLoadLocalBroadcastCipherKey, int32_t(void));
     MOCK_METHOD1(LnnGetLocalBroadcastCipherKey, int32_t(BroadcastCipherKey *));
     MOCK_METHOD3(LnnSetLocalByteInfo, int32_t(InfoKey, const uint8_t *, uint32_t));
@@ -133,12 +135,13 @@ public:
     MOCK_METHOD3(LnnIsSameConnectionAddr, bool(const ConnectionAddr *, const ConnectionAddr *, bool));
     MOCK_METHOD1(DelSessionKeyProfile, void(int32_t));
     MOCK_METHOD3(GetSessionKeyProfile, bool(int32_t, uint8_t *, uint32_t *));
-    MOCK_METHOD1(GetAuthManagerByAuthId, AuthManager *(int64_t));
     MOCK_METHOD4(GetLatestSessionKey, int32_t(const SessionKeyList *, AuthLinkType, int32_t *, SessionKey *));
     MOCK_METHOD1(DelDupAuthManager, void(AuthManager *));
     MOCK_METHOD1(DelUserKeyByNetworkId, void(const char *));
     MOCK_METHOD1(LnnNotifyAddRawEnhanceP2pEvent, void(LnnNotifyRawEnhanceP2pEvent *));
     MOCK_METHOD2(RawLinkNeedUpdateAuthManager, bool(const char *, bool));
+    MOCK_METHOD1(GetAuthManagerByAuthId, AuthManager *(int64_t));
+    MOCK_METHOD2(SetDpGroupShare, void(const NodeInfo *, AuthHandle));
     MOCK_METHOD2(LnnStopOfflineTimingBySleHb, void(const char *, ConnectionAddrType));
     MOCK_METHOD2(LnnCleanTriggerSparkInfo, int32_t(const char *, ConnectionAddrType));
     MOCK_METHOD3(LnnSetWiFiIp, void(NodeInfo *, const char *, int32_t));

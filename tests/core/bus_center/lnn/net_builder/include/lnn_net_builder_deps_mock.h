@@ -207,9 +207,9 @@ public:
     virtual int32_t ProcessBleOnline(NodeInfo *nodeInfo, const ConnectionAddr *connAddr, AuthCapability authCapability);
     virtual int32_t CheckAuthChannelIsExit(ConnectOption *connInfo);
     virtual void GetLnnTriggerInfo(LnnTriggerInfo *triggerInfo) = 0;
+    virtual void LnnGetDataShareInitResult(bool *isDataShareInit) = 0;
     virtual int32_t LnnSetDLConnUserIdCheckSum(const char *networkId, int32_t userIdCheckSum) = 0;
     virtual void LnnNotifyDeviceTrustedChange(int32_t type, const char *msg, uint32_t msgLen) = 0;
-    virtual void LnnGetDataShareInitResult(bool *isDataShareInit) = 0;
     virtual int32_t LnnInitSaStatusMonitor(void) = 0;
     virtual void LnnDeInitSaStatusMonitor(void) = 0;
     virtual int32_t LnnGetLocalStrInfoByIfnameIdx(InfoKey key, char *info, uint32_t len, int32_t ifIdx) = 0;
@@ -247,6 +247,7 @@ public:
         LnnSendSyncInfoMsg, int32_t(LnnSyncInfoType, const char *, const uint8_t *, uint32_t, LnnSyncInfoMsgComplete));
     MOCK_METHOD2(LnnGetNodeInfoById, NodeInfo *(const char *, IdCategory));
     MOCK_METHOD2(LnnUpdateNodeInfo, int32_t(NodeInfo *, int32_t));
+    MOCK_METHOD1(LnnUpdateRemoteDeviceName, int32_t(const NodeInfo *));
     MOCK_METHOD1(LnnAddMetaInfo, int32_t(NodeInfo *));
     MOCK_METHOD3(AuthGetLatestAuthSeqList, int32_t(const char *, int64_t *, uint32_t));
     MOCK_METHOD5(LnnConvertDlId, int32_t(const char *, IdCategory, IdCategory, char *, uint32_t));
@@ -334,7 +335,6 @@ public:
     MOCK_METHOD1(LnnPrintConnectionAddr, const char *(const ConnectionAddr *));
     MOCK_METHOD1(LnnUpdateGroupType, int32_t(const NodeInfo *));
     MOCK_METHOD1(LnnUpdateAccountInfo, int32_t(const NodeInfo *));
-    MOCK_METHOD1(LnnUpdateRemoteDeviceName, int32_t(const NodeInfo *));
     MOCK_METHOD2(LnnConvertAddrToAuthConnInfo, bool(const ConnectionAddr *, AuthConnInfo *));
     MOCK_METHOD2(LnnFsmRemoveMessageByType, int32_t(FsmStateMachine *, int32_t));
     MOCK_METHOD0(LnnDeinitBusCenterEvent, void());
@@ -360,9 +360,9 @@ public:
     MOCK_METHOD1(AuthRemoveAuthManagerByAuthHandle, void(AuthHandle));
     MOCK_METHOD3(ProcessBleOnline, int32_t(NodeInfo *, const ConnectionAddr *, AuthCapability));
     MOCK_METHOD1(GetLnnTriggerInfo, void(LnnTriggerInfo *));
+    MOCK_METHOD1(LnnGetDataShareInitResult, void (bool *));
     MOCK_METHOD2(LnnSetDLConnUserIdCheckSum, int32_t(const char *networkId, int32_t userIdCheckSum));
     MOCK_METHOD3(LnnNotifyDeviceTrustedChange, void(int32_t type, const char *msg, uint32_t msgLen));
-    MOCK_METHOD1(LnnGetDataShareInitResult, void(bool *));
     MOCK_METHOD0(LnnInitSaStatusMonitor, int32_t());
     MOCK_METHOD0(LnnDeInitSaStatusMonitor, void());
     MOCK_METHOD4(LnnGetLocalStrInfoByIfnameIdx, int32_t(InfoKey, char *, uint32_t, int32_t));
