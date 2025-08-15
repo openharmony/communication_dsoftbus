@@ -62,6 +62,8 @@ HWTEST_F(DiscLogTest, DiscLogTest001, TestSize.Level0)
         DISC_ACTION, ++discDomainBase, "DiscAction"));
     EXPECT_NO_FATAL_FAILURE(ExpectMatchSoftBusLogAttrs(DISC_LABELS[++index],
         DISC_EVENT, ++discDomainBase, "DiscEvent"));
+    EXPECT_NO_FATAL_FAILURE(ExpectMatchSoftBusLogAttrs(DISC_LABELS[++index],
+        DISC_VIRLINK, ++discDomainBase, "DiscVirlink"));
     EXPECT_NO_FATAL_FAILURE(ExpectMatchSoftBusLogAttrs(DISC_LABELS[++index], DISC_TEST, DOMAIN_ID_TEST, "DiscTest"));
 }
 
