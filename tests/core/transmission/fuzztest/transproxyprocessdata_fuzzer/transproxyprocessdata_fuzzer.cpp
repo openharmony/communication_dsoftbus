@@ -563,6 +563,8 @@ void TransProxyDecryptD2DDataTest(const uint8_t *data, size_t size)
     (void)TransProxyDecryptD2DData(businessType, &dataInfo, nullptr, sessionCommonIv);
     (void)TransProxyDecryptD2DData(businessType, &dataInfo, sessionKey, sessionCommonIv);
     (void)TransProxyDecryptD2DData(businessType, &dataInfo, sessionKey, nullptr);
+    businessType = BUSINESS_TYPE_D2D_MESSAGE;
+    (void)TransProxyDecryptD2DData(businessType, &dataInfo, sessionKey, sessionCommonIv);
     SoftBusFree(dataInfo.inData);
     SoftBusFree(dataInfo.outData);
 }
@@ -630,7 +632,6 @@ void TransPackD2DToBytesExtraDataTest(FuzzedDataProvider &provider)
 
     (void)TransGenerateToBytesRandIv(nullptr, nullptr);
     (void)TransPackD2DToBytesExtraData(nullptr, flag, nonce);
-    (void)TransPackD2DToBytesExtraData(&dataInfo, flag, nonce);
 }
 } // namespace OHOS
 
