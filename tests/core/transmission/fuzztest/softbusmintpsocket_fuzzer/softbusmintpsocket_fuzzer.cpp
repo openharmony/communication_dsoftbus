@@ -68,7 +68,7 @@ static void FillLocalListenerInfo(FuzzedDataProvider &provider, LocalListenerInf
     info->socketOption.port = provider.ConsumeIntegral<int32_t>();
     info->socketOption.moduleId = static_cast<ListenerModule>(
         provider.ConsumeIntegralInRange<int32_t>(PROXY, UNUSE_BUTT));
-    info->socketOption.protocol = provider.ConsumeIntegral<int32_t>();
+    info->socketOption.protocol = provider.ConsumeIntegral<uint32_t>();
 }
 
 static void FillConnectOption(FuzzedDataProvider &provider, ConnectOption *option)
@@ -94,7 +94,7 @@ static void FillConnectOption(FuzzedDataProvider &provider, ConnectOption *optio
     option->socketOption.port = provider.ConsumeIntegral<int32_t>();
     option->socketOption.moduleId = static_cast<ListenerModule>(
         provider.ConsumeIntegralInRange<int32_t>(PROXY, UNUSE_BUTT));
-    option->socketOption.protocol = provider.ConsumeIntegral<int32_t>();
+    option->socketOption.protocol = provider.ConsumeIntegral<uint32_t>();
     option->socketOption.keepAlive = provider.ConsumeIntegral<int32_t>();
 }
 
