@@ -79,13 +79,13 @@ ohos_unittest("LinkInfoTest") {
   ]
 
   sources = [
+    "$dsoftbus_root_path/core/frame/common/src/softbus_init_common.c",
+    "$dsoftbus_root_path/core/frame/init/src/g_enhance_lnn_func.c",
     "$wifi_direct_cpp_path/data/ipv4_info.cpp",
     "$wifi_direct_cpp_path/data/link_info.cpp",
     "$wifi_direct_cpp_path/protocol/tlv_protocol.cpp",
     "$wifi_direct_cpp_path/utils/wifi_direct_utils.cpp",
-    "$dsoftbus_root_path/core/frame/common/src/softbus_init_common.c",
     "link_info_test.cpp",
-    "$dsoftbus_root_path/core/frame/init/src/g_enhance_lnn_func.c",
   ]
   deps = [ "$dsoftbus_dfx_path:softbus_dfx" ]
   external_deps = [
@@ -121,6 +121,8 @@ ohos_unittest("NegotiateMessageTest") {
   ]
 
   sources = [
+    "$dsoftbus_root_path/core/frame/common/src/softbus_init_common.c",
+    "$dsoftbus_root_path/core/frame/init/src/g_enhance_lnn_func.c",
     "$wifi_direct_cpp_path/data/interface_info.cpp",
     "$wifi_direct_cpp_path/data/ipv4_info.cpp",
     "$wifi_direct_cpp_path/data/link_info.cpp",
@@ -128,9 +130,7 @@ ohos_unittest("NegotiateMessageTest") {
     "$wifi_direct_cpp_path/protocol/json_protocol.cpp",
     "$wifi_direct_cpp_path/protocol/tlv_protocol.cpp",
     "$wifi_direct_cpp_path/utils/wifi_direct_utils.cpp",
-    "$dsoftbus_root_path/core/frame/common/src/softbus_init_common.c",
     "negotiate_message_test.cpp",
-    "$dsoftbus_root_path/core/frame/init/src/g_enhance_lnn_func.c",
   ]
   deps = [ "$dsoftbus_dfx_path:softbus_dfx" ]
   external_deps = [
@@ -158,6 +158,11 @@ ohos_unittest("InnerLinkTest") {
   ]
 
   sources = [
+    "$dsoftbus_root_path/core/connection/wifi_direct_cpp/entity/entity_factory.cpp",
+    "$dsoftbus_root_path/core/connection/wifi_direct_cpp/wifi_direct_executor_factory.cpp",
+    "$dsoftbus_root_path/core/connection/wifi_direct_cpp/wifi_direct_scheduler_factory.cpp",
+    "$dsoftbus_root_path/core/frame/common/src/softbus_init_common.c",
+    "$dsoftbus_root_path/core/frame/init/src/g_enhance_lnn_func.c",
     "$wifi_direct_cpp_path/adapter/p2p_adapter.cpp",
     "$wifi_direct_cpp_path/channel/auth_negotiate_channel.cpp",
     "$wifi_direct_cpp_path/channel/dummy_negotiate_channel.cpp",
@@ -165,6 +170,7 @@ ohos_unittest("InnerLinkTest") {
     "$wifi_direct_cpp_path/command/command_factory.cpp",
     "$wifi_direct_cpp_path/command/connect_command.cpp",
     "$wifi_direct_cpp_path/command/disconnect_command.cpp",
+    "$wifi_direct_cpp_path/command/force_disconnect_command.cpp",
     "$wifi_direct_cpp_path/command/negotiate_command.cpp",
     "$wifi_direct_cpp_path/command/processor_selector_factory.cpp",
     "$wifi_direct_cpp_path/command/simple_processor_selector.cpp",
@@ -196,7 +202,6 @@ ohos_unittest("InnerLinkTest") {
     "$wifi_direct_cpp_path/protocol/tlv_protocol.cpp",
     "$wifi_direct_cpp_path/utils/wifi_direct_anonymous.cpp",
     "$wifi_direct_cpp_path/utils/wifi_direct_utils.cpp",
-    "$dsoftbus_root_path/core/frame/common/src/softbus_init_common.c",
     "$wifi_direct_cpp_path/wifi_direct_executor.cpp",
     "$wifi_direct_cpp_path/wifi_direct_executor_manager.cpp",
     "$wifi_direct_cpp_path/wifi_direct_initiator.cpp",
@@ -206,20 +211,16 @@ ohos_unittest("InnerLinkTest") {
     "$wifi_direct_cpp_path/wifi_direct_scheduler.cpp",
     "$wifi_direct_cpp_unit_path/net_conn_client.cpp",
     "$wifi_direct_cpp_unit_path/wifi_direct_mock.cpp",
-    "$wifi_direct_cpp_path/command/force_disconnect_command.cpp",
     "inner_link_test.cpp",
-    "$dsoftbus_root_path/core/frame/init/src/g_enhance_lnn_func.c",
-    "$dsoftbus_root_path/core/connection/wifi_direct_cpp/wifi_direct_scheduler_factory.cpp",
-    "$dsoftbus_root_path/core/connection/wifi_direct_cpp/entity/entity_factory.cpp",
-    "$dsoftbus_root_path/core/connection/wifi_direct_cpp/wifi_direct_executor_factory.cpp",
   ]
 
-  include_dirs = [ "$dsoftbus_root_path/core/frame/common/include",
-                   "$dsoftbus_root_path/interfaces/inner_kits/transport",
-                   "$dsoftbus_root_path/interfaces/kits/authentication/enhance",
-                   "$dsoftbus_root_path/interfaces/kits/connect",
-                   "$dsoftbus_root_path/interfaces/kits/lnn/enhance",
-                   "$dsoftbus_root_path/interfaces/kits/connect",
+  include_dirs = [
+    "$dsoftbus_root_path/core/frame/common/include",
+    "$dsoftbus_root_path/interfaces/inner_kits/transport",
+    "$dsoftbus_root_path/interfaces/kits/authentication/enhance",
+    "$dsoftbus_root_path/interfaces/kits/connect",
+    "$dsoftbus_root_path/interfaces/kits/lnn/enhance",
+    "$dsoftbus_root_path/interfaces/kits/connect",
   ]
 
   deps = [
@@ -272,6 +273,8 @@ ohos_unittest("LinkManagerTest") {
   ]
 
   sources = [
+    "$dsoftbus_root_path/core/frame/common/src/softbus_init_common.c",
+    "$dsoftbus_root_path/core/frame/init/src/g_enhance_lnn_func.c",
     "$wifi_direct_cpp_path/adapter/p2p_adapter.cpp",
     "$wifi_direct_cpp_path/channel/auth_negotiate_channel.cpp",
     "$wifi_direct_cpp_path/channel/dummy_negotiate_channel.cpp",
@@ -311,21 +314,16 @@ ohos_unittest("LinkManagerTest") {
     "$wifi_direct_cpp_path/protocol/tlv_protocol.cpp",
     "$wifi_direct_cpp_path/utils/wifi_direct_anonymous.cpp",
     "$wifi_direct_cpp_path/utils/wifi_direct_utils.cpp",
-    "$dsoftbus_root_path/core/frame/common/src/softbus_init_common.c",
-    "$wifi_direct_cpp_path/wifi_direct_executor_factory.cpp",
+    "$wifi_direct_cpp_path/wifi_direct_executor.cpp",
     "$wifi_direct_cpp_path/wifi_direct_executor_manager.cpp",
     "$wifi_direct_cpp_path/wifi_direct_initiator.cpp",
     "$wifi_direct_cpp_path/wifi_direct_ip_manager.cpp",
     "$wifi_direct_cpp_path/wifi_direct_manager.cpp",
     "$wifi_direct_cpp_path/wifi_direct_role_option.cpp",
     "$wifi_direct_cpp_path/wifi_direct_scheduler.cpp",
-    "$wifi_direct_cpp_path/wifi_direct_scheduler_factory.cpp",
-    "$wifi_direct_cpp_path/wifi_direct_executor.cpp",
-    "$wifi_direct_cpp_path/entity/entity_factory.cpp",
     "$wifi_direct_cpp_unit_path/net_conn_client.cpp",
     "$wifi_direct_cpp_unit_path/wifi_direct_mock.cpp",
     "link_manager_test.cpp",
-    "$dsoftbus_root_path/core/frame/init/src/g_enhance_lnn_func.c",
   ]
   deps = [
     "$dsoftbus_dfx_path:softbus_dfx",
@@ -377,6 +375,8 @@ ohos_unittest("InterfaceInfoTest") {
   ]
 
   sources = [
+    "$dsoftbus_root_path/core/frame/common/src/softbus_init_common.c",
+    "$dsoftbus_root_path/core/frame/init/src/g_enhance_lnn_func.c",
     "$wifi_direct_cpp_path/adapter/p2p_adapter.cpp",
     "$wifi_direct_cpp_path/data/interface_info.cpp",
     "$wifi_direct_cpp_path/data/interface_manager.cpp",
@@ -384,11 +384,9 @@ ohos_unittest("InterfaceInfoTest") {
     "$wifi_direct_cpp_path/dfx/interface_snapshot.cpp",
     "$wifi_direct_cpp_path/protocol/tlv_protocol.cpp",
     "$wifi_direct_cpp_path/utils/wifi_direct_utils.cpp",
-    "$dsoftbus_root_path/core/frame/common/src/softbus_init_common.c",
     "$wifi_direct_cpp_path/wifi_direct_initiator.cpp",
     "$wifi_direct_cpp_unit_path/wifi_direct_mock.cpp",
     "interface_info_test.cpp",
-    "$dsoftbus_root_path/core/frame/init/src/g_enhance_lnn_func.c",
   ]
 
   deps = [ "$dsoftbus_dfx_path:softbus_dfx" ]
@@ -427,19 +425,19 @@ ohos_unittest("InterfaceManagerTest") {
   ]
 
   sources = [
+    "$dsoftbus_root_path/core/frame/common/src/softbus_init_common.c",
+    "$dsoftbus_root_path/core/frame/init/src/g_enhance_lnn_func.c",
     "$wifi_direct_cpp_path/adapter/p2p_adapter.cpp",
     "$wifi_direct_cpp_path/data/interface_info.cpp",
     "$wifi_direct_cpp_path/data/interface_manager.cpp",
     "$wifi_direct_cpp_path/data/ipv4_info.cpp",
     "$wifi_direct_cpp_path/dfx/interface_snapshot.cpp",
     "$wifi_direct_cpp_path/protocol/tlv_protocol.cpp",
-    "$wifi_direct_cpp_path/utils/wifi_direct_utils.cpp",
-    "$dsoftbus_root_path/core/frame/common/src/softbus_init_common.c",
-    "$wifi_direct_cpp_path/wifi_direct_initiator.cpp",
     "$wifi_direct_cpp_path/utils/wifi_direct_anonymous.cpp",
+    "$wifi_direct_cpp_path/utils/wifi_direct_utils.cpp",
+    "$wifi_direct_cpp_path/wifi_direct_initiator.cpp",
     "$wifi_direct_cpp_unit_path/wifi_direct_mock.cpp",
     "interface_manager_test.cpp",
-    "$dsoftbus_root_path/core/frame/init/src/g_enhance_lnn_func.c",
   ]
 
   deps = [ "$dsoftbus_dfx_path:softbus_dfx" ]
@@ -478,6 +476,8 @@ ohos_unittest("WifiConfigInfoTest") {
   ]
 
   sources = [
+    "$dsoftbus_root_path/core/frame/common/src/softbus_init_common.c",
+    "$dsoftbus_root_path/core/frame/init/src/g_enhance_lnn_func.c",
     "$wifi_direct_cpp_path/data/interface_info.cpp",
     "$wifi_direct_cpp_path/data/ipv4_info.cpp",
     "$wifi_direct_cpp_path/data/negotiate_message.cpp",
@@ -485,9 +485,7 @@ ohos_unittest("WifiConfigInfoTest") {
     "$wifi_direct_cpp_path/protocol/json_protocol.cpp",
     "$wifi_direct_cpp_path/protocol/tlv_protocol.cpp",
     "$wifi_direct_cpp_path/utils/wifi_direct_utils.cpp",
-    "$dsoftbus_root_path/core/frame/common/src/softbus_init_common.c",
     "wifi_config_info_test.cpp",
-    "$dsoftbus_root_path/core/frame/init/src/g_enhance_lnn_func.c",
   ]
 
   deps = [ "$dsoftbus_dfx_path:softbus_dfx" ]
