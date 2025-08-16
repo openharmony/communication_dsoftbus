@@ -158,7 +158,7 @@ static int32_t ForceDisconnectDevice(
 {
     CONN_CHECK_AND_RETURN_RET_LOGW(info != nullptr, SOFTBUS_INVALID_PARAM, CONN_WIFI_DIRECT, "info is null");
     CONN_CHECK_AND_RETURN_RET_LOGW(callback != nullptr, SOFTBUS_INVALID_PARAM, CONN_WIFI_DIRECT, "callback is null");
-    CONN_LOGI(CONN_WIFI_DIRECT, "requestid=%{public}d linktype=%{public}d remoteUuid=%{public}s", info->requestId,
+    CONN_LOGI(CONN_WIFI_DIRECT, "requestId=%{public}d linkType=%{public}d remoteUuid=%{public}s", info->requestId,
         info->linkType, OHOS::SoftBus::WifiDirectAnonymizeDeviceId(info->remoteUuid).c_str());
     return OHOS::SoftBus::WifiDirectSchedulerFactory::GetInstance().GetScheduler().ForceDisconnectDevice(
         *info, *callback);
@@ -270,7 +270,7 @@ static void OnForceDisconnectFailure(uint32_t requestId, int32_t reason)
 
 static int32_t ForceDisconnectDeviceSync(enum WifiDirectLinkType wifiDirectLinkType)
 {
-    CONN_LOGI(CONN_WIFI_DIRECT, "linktype=%{public}d", wifiDirectLinkType);
+    CONN_LOGI(CONN_WIFI_DIRECT, "linkType=%{public}d", wifiDirectLinkType);
     std::string remoteUuid;
     auto linkType = LinkTypeConver(wifiDirectLinkType);
     OHOS::SoftBus::LinkManager::GetInstance().ForEach([&remoteUuid, linkType] (OHOS::SoftBus::InnerLink &link) {
@@ -302,12 +302,12 @@ static int32_t ForceDisconnectDeviceSync(enum WifiDirectLinkType wifiDirectLinkT
         .onDisconnectSuccess = OnForceDisconnectSuccess,
         .onDisconnectFailure = OnForceDisconnectFailure,
     };
-    CONN_LOGI(CONN_WIFI_DIRECT, "requestid=%{public}d linktype=%{public}d remoteUuid=%{public}s", info.requestId,
+    CONN_LOGI(CONN_WIFI_DIRECT, "requestId=%{public}d linkType=%{public}d remoteUuid=%{public}s", info.requestId,
         info.linkType, OHOS::SoftBus::WifiDirectAnonymizeDeviceId(info.remoteUuid).c_str());
     auto ret = OHOS::SoftBus::WifiDirectSchedulerFactory::GetInstance().GetScheduler().ForceDisconnectDevice(
         info, callback);
     if (ret != SOFTBUS_OK) {
-        CONN_LOGE(CONN_WIFI_DIRECT, "force disconnect scheduler fail, requestid=%{public}d ret=%{public}d",
+        CONN_LOGE(CONN_WIFI_DIRECT, "force disconnect scheduler fail, requestId=%{public}d ret=%{public}d",
             info.requestId, ret);
         std::lock_guard lock(g_promiseMaplock);
         g_promiseMap.erase(info.requestId);
@@ -315,7 +315,7 @@ static int32_t ForceDisconnectDeviceSync(enum WifiDirectLinkType wifiDirectLinkT
     }
     int32_t result = SOFTBUS_OK;
     result = g_promiseMap[info.requestId]->get_future().get();
-    CONN_LOGE(CONN_WIFI_DIRECT, "force disconnect requestid=%{public}d reason=%{public}d", info.requestId, result);
+    CONN_LOGE(CONN_WIFI_DIRECT, "force disconnect requestId=%{public}d reason=%{public}d", info.requestId, result);
     std::lock_guard lock(g_promiseMaplock);
     g_promiseMap.erase(info.requestId);
     return result;
@@ -536,7 +536,7 @@ static void NotifyRoleChange(enum WifiDirectRole oldRole, enum WifiDirectRole ne
 static void NotifyConnectedForSink(const struct WifiDirectSinkLink *link)
 {
     CONN_LOGI(CONN_WIFI_DIRECT,
-        "remoteUuid=%{public}s, localIp=%{public}s, remoteIp=%{public}s remoteMac=%{public}s bandWidth=%{public}d",
+        "remoteUuid=%{public}s, localIp=%{public}s, remoteIp=%{public}s remoteMac=%{public}s bw=%{public}d",
         OHOS::SoftBus::WifiDirectAnonymizeDeviceId(link->remoteUuid).c_str(),
         OHOS::SoftBus::WifiDirectAnonymizeIp(link->localIp).c_str(),
         OHOS::SoftBus::WifiDirectAnonymizeIp(link->remoteIp).c_str(),
@@ -561,7 +561,7 @@ static void NotifyDisconnectedForSink(const struct WifiDirectSinkLink *link)
 static bool IsNegotiateChannelNeeded(const char *remoteNetworkId, enum WifiDirectLinkType linkType)
 {
     CONN_LOGD(CONN_WIFI_DIRECT, "enter");
-    CONN_CHECK_AND_RETURN_RET_LOGE(remoteNetworkId != nullptr, true, CONN_WIFI_DIRECT, "remote networkid is null");
+    CONN_CHECK_AND_RETURN_RET_LOGE(remoteNetworkId != nullptr, true, CONN_WIFI_DIRECT, "remote networkId is null");
     auto remoteUuid = OHOS::SoftBus::WifiDirectUtils::NetworkIdToUuid(remoteNetworkId);
     CONN_CHECK_AND_RETURN_RET_LOGE(!remoteUuid.empty(), true, CONN_WIFI_DIRECT, "get remote uuid failed");
 

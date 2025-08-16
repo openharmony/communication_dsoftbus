@@ -42,7 +42,7 @@ AuthNegotiateChannel::AuthNegotiateChannel(const AuthHandle &handle)
 {
     char remoteUuid[UUID_BUF_LEN] {};
     auto ret = DBinderSoftbusServer::GetInstance().AuthGetDeviceUuid(handle_.authId, remoteUuid, UUID_BUF_LEN);
-    CONN_CHECK_AND_RETURN_LOGE(ret == SOFTBUS_OK, CONN_WIFI_DIRECT, "auth get device id fail");
+    CONN_CHECK_AND_RETURN_LOGE(ret == SOFTBUS_OK, CONN_WIFI_DIRECT, "auth get uuid fail");
     remoteDeviceId_ = remoteUuid;
     CONN_LOGI(CONN_WIFI_DIRECT, "remoteDeviceId=%{public}s", WifiDirectAnonymizeDeviceId(remoteDeviceId_).c_str());
 }
@@ -204,10 +204,8 @@ static bool CheckSameAccount(const NegotiateMessage &msg, const std::string &rem
     if (DBinderSoftbusServer::GetInstance().LnnGetOsTypeByNetworkId(remoteNetworkId.c_str(), &osType) == SOFTBUS_OK) {
         CONN_LOGI(CONN_WIFI_DIRECT, "remote osType is %{public}d", osType);
         // The osType of the remote device is not OH_OS_TYPE, the remote device uses the same account.
-        if (osType != OH_OS_TYPE) {
-            CONN_LOGI(CONN_WIFI_DIRECT, "remote device version is not later than 4.x");
-            return true;
-        }
+        CONN_CHECK_AND_RETURN_RET_LOGI(osType == OH_OS_TYPE, true, CONN_WIFI_DIRECT,
+            "remote device version is not later than 4.x");
     }
     bool ret = true;
     switch (msg.GetMessageType()) {
@@ -515,7 +513,7 @@ int AuthNegotiateChannel::OpenConnection(const OpenParam &param, const std::shar
     authReqId = requestId;
     ret = AuthOpenConnection(requestId, authConnInfo, isMeta);
     if (ret != SOFTBUS_OK) {
-        CONN_LOGE(CONN_WIFI_DIRECT, "auth open connect fail, error=%{public}d", ret);
+        CONN_LOGE(CONN_WIFI_DIRECT, "auth open connect fail, ret=%{public}d", ret);
         std::lock_guard lock(lock_);
         requestIdToDeviceIdMap_.erase(requestId);
         if (authOpenEventPromise != nullptr) {
