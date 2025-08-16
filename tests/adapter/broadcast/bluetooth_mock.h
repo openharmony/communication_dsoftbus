@@ -86,7 +86,7 @@ public:
     virtual int32_t BleGattsSendResponse(int32_t serverId, GattsSendRspParam *param) = 0;
     virtual int32_t BleGattsSendIndication(int32_t serverId, GattsSendIndParam *param) = 0;
     virtual int BleChangeScanParams(int32_t scannerId, const BleScanConfigs *config, const BleScanNativeFilter *filter,
-    uint32_t filterSize, uint32_t filterAction) = 0;
+        uint32_t filterSize, uint32_t filterAction) = 0;
     virtual int32_t RegisterBroadcastMediumFunction(
         BroadcastProtocol type, const SoftbusBroadcastMediumInterface *interface) = 0;
     virtual int32_t SoftBusAddBtStateListener(const SoftBusBtStateListener *listener, int32_t *listenerId) = 0;
