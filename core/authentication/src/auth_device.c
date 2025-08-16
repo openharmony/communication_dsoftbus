@@ -25,9 +25,9 @@
 #include "auth_session_message.h"
 #include "bus_center_manager.h"
 #include "device_profile_listener.h"
-#include "lnn_app_bind_interface.h"
 #include "g_enhance_lnn_func.h"
 #include "g_enhance_lnn_func_pack.h"
+#include "lnn_app_bind_interface.h"
 #include "lnn_decision_db.h"
 #include "lnn_heartbeat_ctrl.h"
 #include "lnn_local_net_ledger.h"
@@ -106,7 +106,7 @@ bool IsNeedAuthLimit(const char *udidHash)
         return false;
     }
     if (time == 0) {
-        AUTH_LOGD(AUTH_FSM, "no need delay authentication");
+        AUTH_LOGI(AUTH_FSM, "no need delay authentication");
         return false;
     }
     currentTime = GetCurrentTimeMs();

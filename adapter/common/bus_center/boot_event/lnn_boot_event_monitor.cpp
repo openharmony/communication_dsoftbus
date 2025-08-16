@@ -19,6 +19,7 @@
 #include "bus_center_manager.h"
 #include "g_enhance_lnn_func.h"
 #include "g_enhance_lnn_func_pack.h"
+#include "softbus_init_common.h"
 #include "lnn_async_callback_utils.h"
 #include "lnn_event_monitor_impl.h"
 #include "lnn_heartbeat_strategy.h"
@@ -26,7 +27,6 @@
 #include "lnn_ohos_account.h"
 #include "parameter.h"
 #include "lnn_init_monitor.h"
-#include "softbus_init_common.h"
 
 static int32_t ProcessBootEvent(void)
 {
