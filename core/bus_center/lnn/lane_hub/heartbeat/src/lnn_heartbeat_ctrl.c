@@ -868,6 +868,10 @@ static void HbAccountStateChangeEventHandler(const LnnEventBasicInfo *info)
             }
             LnnOnOhosAccountLogout();
             HbConditionChanged(false);
+            if (LnnStartHbByTypeAndStrategy(
+                HEARTBEAT_TYPE_BLE_V0 | HEARTBEAT_TYPE_BLE_V3, STRATEGY_HB_SEND_SINGLE, false) != SOFTBUS_OK) {
+                LNN_LOGE(LNN_HEART_BEAT, "ctrl start single ble heartbeat fail");
+            }
             break;
         default:
             return;
