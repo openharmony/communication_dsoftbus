@@ -259,7 +259,7 @@ HWTEST_F(AdapterDsoftbusRsaCryptoTest, SoftBusRsaDecrypt003, TestSize.Level0)
 }
 
 /*
- * @tc.name: DataBusNativeVirtual00
+ * @tc.name: DataBusNativeVirtual001
  * @tc.desc: function
  * @tc.type: FUNC
  * @tc.require: 1
