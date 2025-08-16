@@ -112,7 +112,7 @@ std::string P2pConnectState::CalculateGcIp(const std::string &goIpAddr)
         lastDotPos != std::string::npos, "", CONN_WIFI_DIRECT, "not find last dot of go ip addr");
     int32_t goIpSuffix = 0;
     bool result = WifiDirectUtils::StringToInt(goIpAddr.substr(lastDotPos + 1), goIpSuffix);
-    CONN_CHECK_AND_RETURN_RET_LOGE(result, "", CONN_WIFI_DIRECT, "go ip suffix is not valid number string");
+    CONN_CHECK_AND_RETURN_RET_LOGE(result, "", CONN_WIFI_DIRECT, "go ip suffix is invalid number string");
     int gcIpSuffix = 0;
     int count = 0;
     do {
@@ -129,10 +129,7 @@ void P2pConnectState::PreprocessP2pConnectionChangeEvent(
     if (info.connectState != P2pConnectionState::P2P_CONNECTED) {
         return;
     }
-    if (groupInfo == nullptr) {
-        CONN_LOGE(CONN_WIFI_DIRECT, "group info is null, skip config ip");
-        return;
-    }
+    CONN_CHECK_AND_RETURN_LOGW(groupInfo != nullptr, CONN_WIFI_DIRECT, "group info is null, skip config ip");
     P2pEntity::GetInstance().Lock();
     std::shared_ptr<P2pOperationWrapper<P2pConnectParam>> operation = nullptr;
     if (operation_ != nullptr && operation_->type_ == P2pOperationType::CONNECT) {
