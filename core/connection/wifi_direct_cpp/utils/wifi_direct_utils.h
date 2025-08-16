@@ -48,10 +48,10 @@ public:
     static std::string ToString(const std::vector<uint8_t> &input);
     static std::vector<uint8_t> ToBinary(const std::string &input);
 
-    static bool Is2GBand(int frequency);
-    static bool Is5GBand(int frequency);
+    static bool Is2GBand(int freq);
+    static bool Is5GBand(int freq);
     static int ChannelToFrequency(int channel);
-    static int FrequencyToChannel(int frequency);
+    static int FrequencyToChannel(int freq);
 
     static std::string NetworkIdToUuid(const std::string &networkId);
     static std::string UuidToNetworkId(const std::string &uuid);
