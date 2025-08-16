@@ -15,8 +15,8 @@
 
 #include "lnn_data_cloud_sync.h"
 
-#include "stdlib.h"
 #include <securec.h>
+#include <stdlib.h>
 
 #include "anonymizer.h"
 #include "g_enhance_lnn_func.h"
