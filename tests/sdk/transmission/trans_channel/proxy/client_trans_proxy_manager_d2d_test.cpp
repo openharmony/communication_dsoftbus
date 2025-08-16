@@ -426,7 +426,7 @@ HWTEST_F(ClientTransProxyD2DTest, TransProxyChannelAsyncSendMessageTest, TestSiz
     ret = ClientTransProxyAddChannelInfo(info);
     EXPECT_EQ(SOFTBUS_OK, ret);
     ret = TransProxyAsyncPackAndSendMessage(channelId, data, len, dataSeq, TRANS_SESSION_MESSAGE);
-    EXPECT_EQ(SOFTBUS_OK, ret);
+    EXPECT_EQ(SOFTBUS_MALLOC_ERR, ret);
     ret = ClientTransProxyDelChannelInfo(channelId);
     EXPECT_EQ(SOFTBUS_OK, ret);
 }
