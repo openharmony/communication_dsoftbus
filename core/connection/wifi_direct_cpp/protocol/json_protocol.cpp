@@ -80,7 +80,7 @@ bool JsonProtocol::Read(int &key, uint8_t *&value, size_t &size)
         case nlohmann::detail::value_t::string: {
             std::string orgValue = *readPos_;
             if (orgValue.size() >= sizeof(data_)) {
-                CONN_LOGE(CONN_WIFI_DIRECT, "string value is invalid, len = %{public}zu", orgValue.size());
+                CONN_LOGE(CONN_WIFI_DIRECT, "string value is invalid, len=%{public}zu", orgValue.size());
                 ret = false;
                 break;
             }
