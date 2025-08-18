@@ -116,7 +116,6 @@ static bool AuthUkManagerFuzzTestPart2(FuzzedDataProvider &provider, uint32_t &r
     OnGenFailed(requestId, 0);
 
     int32_t inLen = provider.ConsumeIntegral<int32_t>();
-    AuthGetUkEncryptSize(inLen);
     AuthGetUkDecryptSize(inLen);
     vector<uint8_t> outData(data.size() + OVERHEAD_LEN);
     uint32_t outLen = outData.size();
