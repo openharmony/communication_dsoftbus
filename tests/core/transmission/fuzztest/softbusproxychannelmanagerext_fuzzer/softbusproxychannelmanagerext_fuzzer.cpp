@@ -235,7 +235,7 @@ void TransProxyDelChanByChanIdTest(FuzzedDataProvider &provider)
     AppInfo appInfo;
     (void)memset_s(&appInfo, sizeof(AppInfo), 0, sizeof(AppInfo));
     FillAppInfo(provider, &appInfo);
-    info->status = PROXY_CHANNEL_STATUS_PYH_CONNECTING;
+    info->status = PROXY_CHANNEL_STATUS_PYH_CONNECTED;
     info->reqId = provider.ConsumeIntegral<int32_t>();
     (void)TransProxyDelChanByChanId(channelId);
     (void)TransProxyCreateChanInfo(info, channelId, &appInfo);
