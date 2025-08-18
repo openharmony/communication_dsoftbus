@@ -59,6 +59,7 @@
 #define LNN_RESTART_DISCOVERY_DELAY_LEN (5 * 1000LL)
 
 static SoftBusMutex g_dataShareLock;
+static SoftBusMutex g_netIfNameListLock;
 static bool g_isDataShareInit = false;
 
 typedef enum {
@@ -187,6 +188,10 @@ static int32_t ParseIfNameConfig(char *buf, uint32_t bufLen)
         LNN_LOGE(LNN_BUILDER, "parameters invalid");
         return SOFTBUS_INVALID_PARAM;
     }
+    if (SoftBusMutexLock(&g_netIfNameListLock) != SOFTBUS_OK) {
+        LNN_LOGE(LNN_BUILDER, "gen net ifname list mutex fail");
+        return SOFTBUS_LOCK_ERR;
+    }
     char *key = strtok_s(buf, LNN_DELIMITER_OUTSIDE, &outerPtr);
     while (key != NULL) {
         value1 = strtok_s(key, LNN_DELIMITER_INSIDE, &innerPtr);
@@ -201,48 +206,58 @@ static int32_t ParseIfNameConfig(char *buf, uint32_t bufLen)
         }
         key = strtok_s(NULL, LNN_DELIMITER_OUTSIDE, &outerPtr);
     }
+    (void)SoftBusMutexUnlock(&g_netIfNameListLock);
     return SOFTBUS_OK;
 }
 
 static int32_t SetIfNameDefaultVal(void)
 {
-    LnnNetIfMgr *netIfMgr = NetifMgrFactory(LNN_ETH_TYPE, LNN_DEFAULT_IF_NAME_ETH);
-    if (netIfMgr == NULL) {
-        LNN_LOGE(LNN_BUILDER, "add default ETH port failed");
-        return SOFTBUS_NETWORK_SET_DEFAULT_VAL_FAILED;
+    if (SoftBusMutexLock(&g_netIfNameListLock) != SOFTBUS_OK) {
+        LNN_LOGE(LNN_BUILDER, "gen net ifname list mutex fail");
+        return SOFTBUS_LOCK_ERR;
     }
-    ListTailInsert(&g_netIfNameList, &netIfMgr->node);
-    netIfMgr = NetifMgrFactory(LNN_WLAN_TYPE, LNN_DEFAULT_IF_NAME_WLAN);
-    if (netIfMgr == NULL) {
-        LNN_LOGE(LNN_BUILDER, "add default ETH port failed");
-        return SOFTBUS_NETWORK_SET_DEFAULT_VAL_FAILED;
-    }
-    ListTailInsert(&g_netIfNameList, &netIfMgr->node);
-    netIfMgr = NetifMgrFactory(LNN_BR_TYPE, LNN_DEFAULT_IF_NAME_BR);
-    if (netIfMgr == NULL) {
-        LNN_LOGE(LNN_BUILDER, "add default BR netIfMgr failed");
-        return SOFTBUS_NETWORK_SET_DEFAULT_VAL_FAILED;
-    }
-    ListTailInsert(&g_netIfNameList, &netIfMgr->node);
-    netIfMgr = NetifMgrFactory(LNN_BLE_TYPE, LNN_DEFAULT_IF_NAME_BLE);
-    if (netIfMgr == NULL) {
-        LNN_LOGE(LNN_BUILDER, "add default BLE netIfMgr failed");
-        return SOFTBUS_NETWORK_SET_DEFAULT_VAL_FAILED;
-    }
-    ListTailInsert(&g_netIfNameList, &netIfMgr->node);
-    netIfMgr = NetifMgrFactory(LNN_USB_TYPE, LNN_DEFAULT_IF_NAME_USB_NCM);
-    if (netIfMgr == NULL) {
-        LNN_LOGE(LNN_BUILDER, "add default USB NCM netIfMgr failed");
-        return SOFTBUS_NETWORK_SET_DEFAULT_VAL_FAILED;
-    }
-    ListTailInsert(&g_netIfNameList, &netIfMgr->node);
-    netIfMgr = NetifMgrFactory(LNN_USB_TYPE, LNN_DEFAULT_IF_NAME_USB_WWAN);
-    if (netIfMgr == NULL) {
-        LNN_LOGE(LNN_BUILDER, "add default USB WWAN netIfMgr failed");
-        return SOFTBUS_NETWORK_SET_DEFAULT_VAL_FAILED;
-    }
-    ListTailInsert(&g_netIfNameList, &netIfMgr->node);
-    return SOFTBUS_OK;
+    do {
+        LnnNetIfMgr *netIfMgr = NetifMgrFactory(LNN_ETH_TYPE, LNN_DEFAULT_IF_NAME_ETH);
+        if (netIfMgr == NULL) {
+            LNN_LOGE(LNN_BUILDER, "add default ETH port failed");
+            break;
+        }
+        ListTailInsert(&g_netIfNameList, &netIfMgr->node);
+        netIfMgr = NetifMgrFactory(LNN_WLAN_TYPE, LNN_DEFAULT_IF_NAME_WLAN);
+        if (netIfMgr == NULL) {
+            LNN_LOGE(LNN_BUILDER, "add default wifi port failed");
+            break;
+        }
+        ListTailInsert(&g_netIfNameList, &netIfMgr->node);
+        netIfMgr = NetifMgrFactory(LNN_BR_TYPE, LNN_DEFAULT_IF_NAME_BR);
+        if (netIfMgr == NULL) {
+            LNN_LOGE(LNN_BUILDER, "add default BR netIfMgr failed");
+            break;
+        }
+        ListTailInsert(&g_netIfNameList, &netIfMgr->node);
+        netIfMgr = NetifMgrFactory(LNN_BLE_TYPE, LNN_DEFAULT_IF_NAME_BLE);
+        if (netIfMgr == NULL) {
+            LNN_LOGE(LNN_BUILDER, "add default BLE netIfMgr failed");
+            break;
+        }
+        ListTailInsert(&g_netIfNameList, &netIfMgr->node);
+        netIfMgr = NetifMgrFactory(LNN_USB_TYPE, LNN_DEFAULT_IF_NAME_USB_NCM);
+        if (netIfMgr == NULL) {
+            LNN_LOGE(LNN_BUILDER, "add default USB NCM netIfMgr failed");
+            break;
+        }
+        ListTailInsert(&g_netIfNameList, &netIfMgr->node);
+        netIfMgr = NetifMgrFactory(LNN_USB_TYPE, LNN_DEFAULT_IF_NAME_USB_WWAN);
+        if (netIfMgr == NULL) {
+            LNN_LOGE(LNN_BUILDER, "add default USB WWAN netIfMgr failed");
+            break;
+        }
+        ListTailInsert(&g_netIfNameList, &netIfMgr->node);
+        (void)SoftBusMutexUnlock(&g_netIfNameListLock);
+        return SOFTBUS_OK;
+    } while (0);
+    (void)SoftBusMutexUnlock(&g_netIfNameListLock);
+    return SOFTBUS_NETWORK_SET_DEFAULT_VAL_FAILED;
 }
 
 static int32_t LnnInitManagerByConfig(void)
@@ -478,11 +493,16 @@ int32_t LnnClearNetConfigList(void)
     LnnNetIfMgr *item = NULL;
     LnnNetIfMgr *next = NULL;
 
+    if (SoftBusMutexLock(&g_netIfNameListLock) != SOFTBUS_OK) {
+        LNN_LOGE(LNN_BUILDER, "gen net ifname list mutex fail");
+        return SOFTBUS_LOCK_ERR;
+    }
     LIST_FOR_EACH_ENTRY_SAFE(item, next, &g_netIfNameList, LnnNetIfMgr, node)
     {
         ListDelete(&item->node);
         SoftBusFree(item);
     }
+    (void)SoftBusMutexUnlock(&g_netIfNameListLock);
     return SOFTBUS_OK;
 }
 
@@ -539,13 +559,19 @@ bool LnnVisitNetif(VisitNetifCallback callback, void *data)
 {
     LnnNetIfMgr *item = NULL;
     VisitNextChoice result = CHOICE_VISIT_NEXT;
+    if (SoftBusMutexLock(&g_netIfNameListLock) != SOFTBUS_OK) {
+        LNN_LOGE(LNN_BUILDER, "gen net ifname list mutex fail");
+        return false;
+    }
     LIST_FOR_EACH_ENTRY(item, &g_netIfNameList, LnnNetIfMgr, node)
     {
         result = callback(item, data);
         if (result == CHOICE_FINISH_VISITING) {
+            (void)SoftBusMutexUnlock(&g_netIfNameListLock);
             return false;
         }
     }
+    (void)SoftBusMutexUnlock(&g_netIfNameListLock);
     return true;
 }
 
@@ -839,7 +865,13 @@ static int32_t LnnRegisterEvent(void)
 int32_t LnnInitNetworkManager(void)
 {
     if (SoftBusMutexInit(&g_dataShareLock, NULL) != SOFTBUS_OK) {
-        LNN_LOGE(LNN_BUILDER, "softbus mutex init fail");
+        LNN_LOGE(LNN_BUILDER, "g_dataShareLock init fail");
+        return SOFTBUS_NO_INIT;
+    }
+    SoftBusMutexAttr mutexAttr;
+    mutexAttr.type = SOFTBUS_MUTEX_RECURSIVE;
+    if (SoftBusMutexInit(&g_netIfNameListLock, &mutexAttr) != SOFTBUS_OK) {
+        LNN_LOGE(LNN_BUILDER, "g_netIfNameListLock init fail");
         return SOFTBUS_NO_INIT;
     }
     RegistNetIfMgr(LNN_ETH_TYPE, CreateNetifMgr);
@@ -986,6 +1018,7 @@ void LnnDeinitNetworkManager(void)
     LnnUnregisterEventHandler(LNN_EVENT_DATA_SHARE_STATE_CHANGE, DataShareStateEventHandler);
     LnnUnregisterEventHandler(LNN_EVENT_DEVICE_ROOT_STATE_CHANGED, NetDeviceRootStateEventHandler);
     (void)SoftBusMutexDestroy(&g_dataShareLock);
+    (void)SoftBusMutexDestroy(&g_netIfNameListLock);
 }
 
 int32_t LnnGetNetIfTypeByName(const char *ifName, LnnNetIfType *type)
@@ -994,13 +1027,19 @@ int32_t LnnGetNetIfTypeByName(const char *ifName, LnnNetIfType *type)
         LNN_LOGE(LNN_BUILDER, "parameters is NULL");
         return SOFTBUS_INVALID_PARAM;
     }
+    if (SoftBusMutexLock(&g_netIfNameListLock) != SOFTBUS_OK) {
+        LNN_LOGE(LNN_BUILDER, "gen net ifname list mutex fail");
+        return SOFTBUS_LOCK_ERR;
+    }
     LnnNetIfMgr *netif = NULL;
     LIST_FOR_EACH_ENTRY(netif, &g_netIfNameList, LnnNetIfMgr, node) {
         if (strncmp(ifName, netif->ifName, sizeof(netif->ifName)) == 0) {
             *type = netif->type;
+            (void)SoftBusMutexUnlock(&g_netIfNameListLock);
             return SOFTBUS_OK;
         }
     }
+    (void)SoftBusMutexUnlock(&g_netIfNameListLock);
     return SOFTBUS_NETWORK_NOT_FOUND;
 }
 
