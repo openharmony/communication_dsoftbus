@@ -27,12 +27,9 @@ InfoContainer<WifiConfigInfoKey>::KeyTypeTable InfoContainer<WifiConfigInfoKey>:
 WifiConfigInfo::WifiConfigInfo(std::vector<uint8_t> &config)
 {
     CONN_CHECK_AND_RETURN_LOGE(config.size() >= HEADER_LEN, CONN_WIFI_DIRECT,
-        "invalid parameter, config size is %{public}zu", config.size());
+        "invalid param, config size is %{public}zu", config.size());
     auto pro = WifiDirectProtocolFactory::CreateProtocol(ProtocolType::TLV);
-    if (pro == nullptr) {
-        CONN_LOGE(CONN_WIFI_DIRECT, "create tlv protocol fail");
-        return;
-    }
+    CONN_CHECK_AND_RETURN_LOGE(pro != nullptr, CONN_WIFI_DIRECT, "create tlv protocol fail");
     pro->SetFormat(ProtocolFormat { TlvProtocol::TLV_TAG_SIZE, TlvProtocol::TLV_LENGTH_SIZE1 });
     Unmarshalling(*pro, std::vector<uint8_t>(config.begin() + HEADER_LEN, config.end()));
 }
