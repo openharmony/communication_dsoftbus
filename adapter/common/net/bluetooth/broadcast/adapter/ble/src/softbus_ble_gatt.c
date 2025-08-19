@@ -1032,6 +1032,7 @@ static void FreeManufactureFilter(BleScanNativeFilter *nativeFilter, int32_t fil
 static bool SoftbusSetLpParam(LpServerType type,
     const SoftBusLpBroadcastParam *bcParam, const SoftBusLpScanParam *scanParam)
 {
+    DISC_CHECK_AND_RETURN_RET_LOGE(bcParam != NULL && scanParam != NULL, false, DISC_BLE_ADAPTER, "invalid param");
     BleScanConfigs scanConfig = {};
     scanConfig.scanMode = GetBtScanMode(scanParam->scanParam.scanInterval, scanParam->scanParam.scanWindow);
     BtLpDeviceParam lpParam = {};
