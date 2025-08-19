@@ -1095,7 +1095,7 @@ void AuthManagerSetAuthFailed(int64_t authSeq, const AuthSessionInfo *info, int3
     }
     DelDupAuthManager(auth);
 
-    if (needDisconnect && auth != NULL) {
+    if (needDisconnect) {
         RemoveAuthManagerByConnInfo(&info->connInfo, info->isServer);
     }
     ReportAuthRequestFailed(info->requestId, reason);
