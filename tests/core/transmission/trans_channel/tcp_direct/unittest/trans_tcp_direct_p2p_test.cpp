@@ -947,7 +947,7 @@ HWTEST_F(TransTcpDirectP2pTest, AddHmlTriggerTest001, TestSize.Level1)
     int64_t seq = 1;
     int32_t ret = StartHmlListener(g_localIp, &g_port, g_udid, LNN_PROTOCOL_IP);
     EXPECT_EQ(ret, SOFTBUS_OK);
-    ret = AddHmlTrigger(fd, g_ip, seq, 0, g_udid);
+    ret = AddHmlTrigger(fd, g_ip, seq, 0, nullptr);
     EXPECT_NE(SOFTBUS_OK, ret);
     ClearHmlListenerByUuid(g_uuid);
 }
