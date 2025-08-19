@@ -41,6 +41,7 @@ typedef struct {
     int32_t pid;
     int32_t tokenType;
     uint64_t tokenId;
+    uint64_t timestamp;
     CallerType callerType;
     AccessInfo accessInfo;
 } SessionServer;
@@ -78,6 +79,8 @@ int32_t GetAccessInfoBySessionName(
 int32_t GetTokenTypeBySessionName(const char *sessionName, int32_t *tokenType);
 
 int32_t TransGetAclInfoBySessionName(const char *sessionName, uint64_t *tokenId, int32_t *pid, int32_t *userId);
+
+int32_t CheckAndUpdateTimeBySessionName(const char *sessionName, uint64_t timestamp);
 #ifdef __cplusplus
 }
 #endif
