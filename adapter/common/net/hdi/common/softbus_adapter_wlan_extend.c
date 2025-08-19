@@ -57,6 +57,8 @@ static void ReleaseMeasResources(void)
 
 static void ExcuteChannelMeas(void)
 {
+    LNN_CHECK_AND_RETURN_LOGE(g_wlanChannelInfoCb != NULL, LNN_STATE, "invalid parameter");
+    LNN_CHECK_AND_RETURN_LOGE(g_channelList.buff != NULL, LNN_STATE, "invalid parameter");
     if (g_channelList.measNum >= g_channelList.num) {
         WlanChannelInfo *info = g_channelInfoList.buff;
         uint32_t num = g_channelInfoList.num;
