@@ -20,6 +20,7 @@
 #include "lnn_heartbeat_medium_mgr.h"
 #include "softbus_error_code.h"
 #include "softbus_init_common.h"
+#include "softbus_adapter_mem.h"
 
 #define VIRTUAL_DEFAULT_SCORE 60
 
@@ -778,9 +779,11 @@ void SendDeviceStateToMlpsPacked(void *para)
 {
     LnnEnhanceFuncList *pfnLnnEnhanceFuncList = LnnEnhanceFuncListGet();
     if (LnnCheckFuncPointer((void *)pfnLnnEnhanceFuncList->sendDeviceStateToMlps) != SOFTBUS_OK) {
+        SoftBusFree(para);
         return;
     }
     return pfnLnnEnhanceFuncList->sendDeviceStateToMlps(para);
+    SoftBusFree(para);
 }
 
 int32_t LnnRetrieveDeviceInfoByNetworkIdPacked(const char *networkId, NodeInfo *info)
