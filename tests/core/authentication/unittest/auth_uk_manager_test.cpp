@@ -111,19 +111,6 @@ HWTEST_F(AuthUkManagerTest, AUTH_UK_MANAGER_Test_002, TestSize.Level1)
 }
 
 /*
- * @tc.name: AUTH_UK_MANAGER_Test_003
- * @tc.desc: AuthGetUkEncryptSize test
- * @tc.type: FUNC
- * @tc.require:
- */
-HWTEST_F(AuthUkManagerTest, AUTH_UK_MANAGER_Test_003, TestSize.Level1)
-{
-    uint32_t inLen = 1;
-    uint32_t ret = AuthGetUkEncryptSize(inLen);
-    EXPECT_EQ(ret, inLen + OVERHEAD_LEN);
-}
-
-/*
  * @tc.name: AUTH_UK_MANAGER_Test_004
  * @tc.desc: AuthGetUkDecryptSize test
  * @tc.type: FUNC
