@@ -35,6 +35,7 @@
 #include "softbus_error_code.h"
 
 #define HB_GEARMODE_MAX_SET_CNT        100
+#define HB_DUMP_GEAR_MODE_LIST_MAX_NUM 10
 #define HB_GEARMODE_LIFETIME_PERMANENT (-1)
 #define HB_DEFAULT_CALLER_ID           "HEARTBEAT_DEFAULT_CALLER_ID"
 #define HB_SUPER_DEVICE_CALLER_ID      "hmos.collaborationfwk.deviceDetect"
@@ -93,7 +94,6 @@ static LnnHeartbeatStrategyManager g_hbStrategyMgr[] = {
 
 static void DumpGearModeSettingList(int64_t nowTime, const ListNode *gearModeList)
 {
-#define HB_DUMP_GEAR_MODE_LIST_MAX_NUM 10
     int32_t dumpCount = 0;
     GearModeStorageInfo *info = NULL;
 
@@ -179,7 +179,7 @@ int32_t LnnGetGearModeBySpecificType(GearMode *mode, char *callerId, LnnHeartbea
         LNN_LOGE(LNN_HEART_BEAT, "HB get Gearmode invalid param");
         return SOFTBUS_INVALID_PARAM;
     }
-    if (memset_s(mode, sizeof(GearMode), 0, sizeof(GearMode) != EOK)) {
+    if (memset_s(mode, sizeof(GearMode), 0, sizeof(GearMode)) != EOK) {
         LNN_LOGE(LNN_HEART_BEAT, "HB get Gearmode memset_s err");
         return SOFTBUS_MEM_ERR;
     }
