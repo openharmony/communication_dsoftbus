@@ -997,6 +997,9 @@ static void TransProxyReportAuditEvent(ProxyChannelInfo *info, SoftbusAuditType 
 {
     TransAuditExtra extra = {
         .hostPkg = NULL,
+        .result = TRANS_AUDIT_DISCONTINUE,
+        .errcode = errCode,
+        .auditType = auditType,
         .localIp = NULL,
         .localPort = NULL,
         .localDevId = NULL,
@@ -1004,10 +1007,7 @@ static void TransProxyReportAuditEvent(ProxyChannelInfo *info, SoftbusAuditType 
         .peerIp = NULL,
         .peerPort = NULL,
         .peerDevId = NULL,
-        .peerSessName = NULL,
-        .result = TRANS_AUDIT_DISCONTINUE,
-        .errcode = errCode,
-        .auditType = auditType,
+        .peerSessName = NULL
     };
     if (info != NULL) {
         extra.localChannelId = info->myId;
@@ -1051,14 +1051,14 @@ static int32_t TransProxyHandshakeUnpackErrMsg(ProxyChannelInfo *info, const Pro
     int32_t ret = TransProxyUnPackHandshakeErrMsg(msg->data, errCode, msg->dataLen);
     if (ret == SOFTBUS_OK) {
         TransEventExtra extra = {
+            .result = EVENT_STAGE_RESULT_FAILED,
+            .errcode = *errCode,
             .socketName = NULL,
-            .peerNetworkId = NULL,
-            .calleePkg = NULL,
-            .callerPkg = NULL,
             .channelId = info->myId,
             .peerChannelId = info->peerId,
-            .errcode = *errCode,
-            .result = EVENT_STAGE_RESULT_FAILED
+            .peerNetworkId = NULL,
+            .callerPkg = NULL,
+            .calleePkg = NULL
         };
         TRANS_EVENT(EVENT_SCENE_OPEN_CHANNEL, EVENT_STAGE_HANDSHAKE_REPLY, extra);
         TransProxyReportAuditEvent(info, AUDIT_EVENT_MSG_ERROR, *errCode);
@@ -1811,13 +1811,13 @@ static void TransProxyProcessResetMsgHelper(const ProxyChannelInfo *info, const 
         TransProxyOpenProxyChannelFail(info->channelId, &(info->appInfo), errCode);
     } else if (info->status == PROXY_CHANNEL_STATUS_COMPLETED) {
         TransEventExtra extra = {
+            .result = EVENT_STAGE_RESULT_OK,
             .socketName = NULL,
-            .peerNetworkId = NULL,
-            .calleePkg = NULL,
-            .callerPkg = NULL,
             .channelId = msg->msgHead.myId,
             .peerChannelId = msg->msgHead.peerId,
-            .result = EVENT_STAGE_RESULT_OK
+            .peerNetworkId = NULL,
+            .callerPkg = NULL,
+            .calleePkg = NULL
         };
         TRANS_EVENT(EVENT_SCENE_CLOSE_CHANNEL_PASSIVE, EVENT_STAGE_CLOSE_CHANNEL, extra);
         OnProxyChannelClosed(info->channelId, &(info->appInfo));
