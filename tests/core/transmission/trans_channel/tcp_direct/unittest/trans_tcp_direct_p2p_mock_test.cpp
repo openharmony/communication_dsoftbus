@@ -681,7 +681,6 @@ HWTEST_F(TransTcpDirectP2pMockTest, OnVerifyP2pReplyTest002, TestSize.Level1)
     EXPECT_CALL(TcpP2pDirectMock, AddTrigger).WillRepeatedly(Return(SOFTBUS_OK));
     ret = OnVerifyP2pReply(authId, seq, json);
     EXPECT_EQ(SOFTBUS_TRANS_VERIFY_P2P_FAILED, ret);
-    TransDelSessionConnById(conn->channelId);
     cJSON_Delete(json);
 }
 
@@ -740,7 +739,6 @@ HWTEST_F(TransTcpDirectP2pMockTest, OnAuthChannelCloseTest001, TestSize.Level1)
     EXPECT_CALL(TcpP2pDirectMock, NotifyChannelOpenFailed).WillRepeatedly(Return(SOFTBUS_NO_INIT));
     OnAuthChannelClose(authHandle);
     OnAuthChannelClose(authHandle);
-    TransDelSessionConnById(conn->channelId);
 }
 
 /**

@@ -235,7 +235,7 @@ void TransProxyDelChanByChanIdTest(FuzzedDataProvider &provider)
     AppInfo appInfo;
     (void)memset_s(&appInfo, sizeof(AppInfo), 0, sizeof(AppInfo));
     FillAppInfo(provider, &appInfo);
-    info->status = PROXY_CHANNEL_STATUS_PYH_CONNECTING;
+    info->status = PROXY_CHANNEL_STATUS_PYH_CONNECTED;
     info->reqId = provider.ConsumeIntegral<int32_t>();
     (void)TransProxyDelChanByChanId(channelId);
     (void)TransProxyCreateChanInfo(info, channelId, &appInfo);
@@ -301,11 +301,10 @@ void TransProxyProcessErrMsgTest(FuzzedDataProvider &provider)
     int32_t channelId = provider.ConsumeIntegral<int32_t>();
     info->myId = provider.ConsumeIntegral<int16_t>();
     info->peerId = provider.ConsumeIntegral<int16_t>();
-    info->appInfo.appType = APP_TYPE_NORMAL;
     AppInfo appInfo;
     (void)memset_s(&appInfo, sizeof(AppInfo), 0, sizeof(AppInfo));
     FillAppInfo(provider, &appInfo);
-    appInfo.appType = APP_TYPE_NORMAL;
+    appInfo.appType = APP_TYPE_NOT_CARE;
     (void)TransProxyCreateChanInfo(info, channelId, &appInfo);
     int32_t errCode = provider.ConsumeIntegral<int32_t>();
     (void)TransProxyProcessErrMsg(info, errCode);

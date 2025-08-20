@@ -25,6 +25,7 @@
 #include "auth_identity_service_adapter.h"
 #include "auth_log.h"
 #include "auth_manager.h"
+#include "auth_uk_manager.h"
 #include "bus_center_manager.h"
 #include "g_enhance_lnn_func.h"
 #include "g_enhance_auth_func.h"
@@ -443,6 +444,10 @@ int32_t AuthGetAuthHandleByIndex(const AuthConnInfo *connInfo, bool isServer, in
 
 int32_t AuthGetAuthHandleByIndexForBle(const AuthConnInfo *connInfo, char *networkId, NodeInfo *info)
 {
+    if (connInfo == NULL || networkId == NULL || info == NULL) {
+        AUTH_LOGE(AUTH_CONN, "get auth handle by index fail because para error");
+        return SOFTBUS_INVALID_PARAM;
+    }
     if (LnnGetNetworkIdByUdidHash(connInfo->info.bleInfo.deviceIdHash, UDID_HASH_LEN, networkId, NETWORK_ID_BUF_LEN,
         true) != SOFTBUS_OK) {
         AUTH_LOGE(AUTH_CONN, "get networkId fail");
@@ -536,7 +541,8 @@ int32_t AuthRestoreAuthManager(
     // get device key
     bool hasDeviceKey = false;
     AuthDeviceKeyInfo keyInfo = { 0 };
-    bool isSupportCloud = IsCloudSyncEnabledPacked() && IsFeatureSupport(nodeInfo->feature, BIT_CLOUD_SYNC_DEVICE_INFO);
+    bool isSupportCloud = IsCloudSyncEnabledPacked() &&
+        IsFeatureSupport(nodeInfo->feature, BIT_CLOUD_SYNC_DEVICE_INFO);
     if (AuthFindLatestNormalizeKeyPacked(udidHash, &keyInfo, !isSupportCloud) == SOFTBUS_OK ||
         AuthFindDeviceKeyPacked(udidHash, connInfo->type, &keyInfo) == SOFTBUS_OK) {
         hasDeviceKey = true;
@@ -709,6 +715,7 @@ bool AuthIsPotentialTrusted(const DeviceInfo *device, bool isOnlyPointToPoint)
         AUTH_LOGI(AUTH_HICHAIN, "device is potential trusted, continue verify progress");
         return true;
     }
+
     return false;
 }
 
@@ -750,7 +757,7 @@ TrustedReturnType AuthHasTrustedRelation(void)
         return TRUSTED_RELATION_IGNORE;
     }
     SoftBusFree(udidArray);
-    AUTH_LOGD(AUTH_CONN, "auth get trusted relation num=%{public}u", num);
+    AUTH_LOGI(AUTH_CONN, "auth get trusted relation num=%{public}u", num);
     return (num != 0) ? TRUSTED_RELATION_YES : TRUSTED_RELATION_NO;
 }
 

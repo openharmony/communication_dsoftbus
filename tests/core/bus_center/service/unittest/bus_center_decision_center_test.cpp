@@ -160,9 +160,6 @@ HWTEST_F(BusCenterDecisionTest, BusCenterDecisionTest005, TestSize.Level1)
     int32_t ret = InitDecisionCenter();
     EXPECT_EQ(SOFTBUS_OK, ret);
     EXPECT_NO_FATAL_FAILURE(DeinitDecisionCenter());
-    if (list != nullptr) {
-        SoftBusFree(list);
-    }
 }
 
 /*
@@ -188,9 +185,6 @@ HWTEST_F(BusCenterDecisionTest, BusCenterDecisionTest006, TestSize.Level1)
     int32_t ret = InitDecisionCenter();
     EXPECT_EQ(SOFTBUS_OK, ret);
     EXPECT_NO_FATAL_FAILURE(DeinitDecisionCenter());
-    if (list != nullptr) {
-        SoftBusFree(list);
-    }
 }
 
 /*
@@ -210,13 +204,11 @@ HWTEST_F(BusCenterDecisionTest, BusCenterDecisionTest007, TestSize.Level1)
     ListInit(&list->list);
     NiceMock<BusCenterDecisionCenterDepsInterfaceMock> BusCenterDecisionMock;
     EXPECT_CALL(BusCenterDecisionMock, CreateSoftBusList).WillOnce(Return(list));
-    EXPECT_CALL(BusCenterDecisionMock, LnnEnhanceFuncListGet).WillRepeatedly(Return(nullptr));
+    EXPECT_CALL(BusCenterDecisionMock, LnnEnhanceFuncListGet).WillRepeatedly(Return(&g_lnnEnhanceFuncListTest));
+    g_lnnEnhanceFuncListTest.registAuthTransListener = nullptr;
     int32_t ret = InitDecisionCenter();
     EXPECT_EQ(SOFTBUS_OK, ret);
     EXPECT_NO_FATAL_FAILURE(DeinitDecisionCenter());
-    if (list != nullptr) {
-        SoftBusFree(list);
-    }
 }
 }
        

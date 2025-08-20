@@ -57,7 +57,7 @@ void LnnRegDataLevelChangeCb(const IDataLevelChangeCallback *callback);
 void LnnUnregDataLevelChangeCb(void);
 bool IsHeartbeatEnable(void);
 bool LnnIsCloudSyncEnd(void);
-bool LnnIsNeedInterceptBroadcast(void);
+bool LnnIsNeedInterceptBroadcast(bool disableGlass);
 
 void LnnRegBleRangeCb(const IBleRangeInnerCallback *callback);
 void LnnUnregBleRangeCb(void);

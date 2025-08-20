@@ -381,6 +381,7 @@ static void DeleteApplyKeyNegoInstance(uint32_t requestId)
         (void)memset_s(
             item->info.peerAccountHash, sizeof(item->info.peerAccountHash), 0, sizeof(item->info.peerAccountHash));
         SoftBusFree(item);
+        g_applyKeyNegoList->cnt--;
         ReleaseApplyKeyNegoListLock();
         return;
     }
@@ -529,6 +530,10 @@ static int32_t CreateApplyKeyNegoInstance(const RequestBusinessInfo *info, uint3
         AUTH_LOGE(AUTH_INIT, "applyKeynego instance is null");
         return SOFTBUS_INVALID_PARAM;
     }
+    if (g_applyKeyNegoList->cnt >= APPLY_KEY_MAX_INSTANCE_CNT) {
+        AUTH_LOGE(AUTH_INIT, "applyKey instance num is max limit");
+        return SOFTBUS_CHANNEL_AUTH_INSTANCE_FULL;
+    }
 
     if (!RequireApplyKeyNegoListLock()) {
         AUTH_LOGE(AUTH_CONN, "RequireApplyKeyNegoListLock fail");
@@ -552,6 +557,7 @@ static int32_t CreateApplyKeyNegoInstance(const RequestBusinessInfo *info, uint3
     instance->negoInfo.isRecvCloseAckEvent = false;
     ListInit(&instance->node);
     ListAdd(&g_applyKeyNegoList->list, &instance->node);
+    g_applyKeyNegoList->cnt++;
     char *anonyAccountHash = NULL;
     Anonymize(info->accountHash, &anonyAccountHash);
     char *anonyUdidHash = NULL;
@@ -875,9 +881,9 @@ static int32_t GetUdidAndAccountShortHash(
         return SOFTBUS_NETWORK_BYTES_TO_HEX_STR_ERR;
     }
     char *anonyAccountHash = NULL;
-    Anonymize(localUdidShortHash, &anonyAccountHash);
     char *anonyUdidHash = NULL;
-    Anonymize(localAccountShortHash, &anonyUdidHash);
+    Anonymize(localUdidShortHash, &anonyUdidHash);
+    Anonymize(localAccountShortHash, &anonyAccountHash);
     AUTH_LOGI(AUTH_CONN, "generate accountShortHash=%{public}s, udidShortHash=%{public}s",
         AnonymizeWrapper(anonyAccountHash), AnonymizeWrapper(anonyUdidHash));
     AnonymizeFree(anonyAccountHash);

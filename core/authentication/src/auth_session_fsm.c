@@ -1000,7 +1000,7 @@ static void HandleMsgRecvDeviceId(AuthFsm *authFsm, const MessagePara *para)
             LNN_AUDIT(AUDIT_SCENE_HANDLE_MSG_DEV_ID, lnnAuditExtra);
             break;
         }
-        if (info->connInfo.type == AUTH_LINK_TYPE_BLE && LnnIsNeedInterceptBroadcast()) {
+        if (info->connInfo.type == AUTH_LINK_TYPE_BLE && LnnIsNeedInterceptBroadcast(false)) {
             ret = SOFTBUS_FUNC_NOT_SUPPORT;
             AUTH_LOGI(AUTH_FSM, "not support ble online");
             break;
@@ -1062,7 +1062,7 @@ static void HandleMsgRecvDeviceIdNego(AuthFsm *authFsm, const MessagePara *para)
             LNN_AUDIT(AUDIT_SCENE_HANDLE_MSG_DEV_ID, lnnAuditExtra);
             break;
         }
-        if (info->connInfo.type == AUTH_LINK_TYPE_BLE && LnnIsNeedInterceptBroadcast()) {
+        if (info->connInfo.type == AUTH_LINK_TYPE_BLE && LnnIsNeedInterceptBroadcast(false)) {
             ret = SOFTBUS_FUNC_NOT_SUPPORT;
             AUTH_LOGI(AUTH_FSM, "not support ble online");
             break;

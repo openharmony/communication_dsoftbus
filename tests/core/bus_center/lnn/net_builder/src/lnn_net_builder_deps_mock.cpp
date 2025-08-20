@@ -778,5 +778,10 @@ int32_t LnnGetLocalStrInfoByIfnameIdx(InfoKey key, char *info, uint32_t len, int
 {
     return GetNetBuilderDepsInterface()->LnnGetLocalStrInfoByIfnameIdx(key, info, len, ifIdx);
 }
+
+bool IsSameAccountId(int64_t accountId)
+{
+    return GetNetBuilderDepsInterface()->IsSameAccountId(accountId);
+}
 } // extern "C"
 } // namespace OHOS

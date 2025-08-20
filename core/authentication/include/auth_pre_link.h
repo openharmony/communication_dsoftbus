@@ -16,9 +16,9 @@
 #ifndef AUTH_PRE_LINK_H
 #define AUTH_PRE_LINK_H
 
+#include <stdatomic.h>
 #include <stdbool.h>
 #include <stdint.h>
-#include <stdatomic.h>
 #include "common_list.h"
 #include "softbus_common.h"
 #include "auth_attest_interface_struct.h"

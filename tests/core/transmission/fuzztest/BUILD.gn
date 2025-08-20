@@ -25,6 +25,7 @@ group("fuzztest") {
     "softbususbtcpsocket_fuzzer:fuzztest",
     "transauthlanependingctl_fuzzer:fuzztest",
     "transbindrequestmanager_fuzzer:fuzztest",
+    "transbroadcast_fuzzer:fuzztest",
     "transinner_fuzzer:fuzztest",
     "transnegotiationmessage_fuzzer:fuzztest",
     "transproxyonmessagereceived_fuzzer:fuzztest",

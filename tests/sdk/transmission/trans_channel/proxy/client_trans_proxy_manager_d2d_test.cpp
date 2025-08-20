@@ -169,7 +169,7 @@ HWTEST_F(ClientTransProxyD2DTest, TransProxyProcessD2DBytesTest, TestSize.Level1
 {
     uint8_t data[] = "1111";
     uint32_t len = 5;
-    uint8_t *testData = static_cast<uint_t *>(SoftBusCalloc(len));
+    uint8_t *testData = static_cast<uint8_t *>(SoftBusCalloc(len));
     ASSERT_TRUE(testData != nullptr);
     int32_t channelId = 1;
     ProxyChannelInfoDetail info;
@@ -445,7 +445,6 @@ HWTEST_F(ClientTransProxyD2DTest, TransProxyChannelAsyncSendMessageTest, TestSiz
     EXPECT_EQ(SOFTBUS_OK, ret);
     ret = TransProxyAsyncPackAndSendMessage(channelId, data, len, dataSeq, TRANS_SESSION_MESSAGE);
     EXPECT_EQ(SOFTBUS_MALLOC_ERR, ret);
-
     ret = ClientTransProxyDelChannelInfo(channelId);
     EXPECT_EQ(SOFTBUS_OK, ret);
 }

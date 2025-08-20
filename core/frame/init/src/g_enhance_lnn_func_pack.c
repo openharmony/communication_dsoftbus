@@ -18,6 +18,7 @@
 #include "g_enhance_lnn_func.h"
 #include "lnn_heartbeat_utils_struct.h"
 #include "lnn_heartbeat_medium_mgr.h"
+#include "softbus_adapter_mem.h"
 #include "softbus_error_code.h"
 #include "softbus_init_common.h"
 
@@ -778,6 +779,7 @@ void SendDeviceStateToMlpsPacked(void *para)
 {
     LnnEnhanceFuncList *pfnLnnEnhanceFuncList = LnnEnhanceFuncListGet();
     if (LnnCheckFuncPointer((void *)pfnLnnEnhanceFuncList->sendDeviceStateToMlps) != SOFTBUS_OK) {
+        SoftBusFree(para);
         return;
     }
     return pfnLnnEnhanceFuncList->sendDeviceStateToMlps(para);
