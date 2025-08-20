@@ -217,6 +217,37 @@ int32_t TransSessionServerDelItem(const char *sessionName)
     return SOFTBUS_OK;
 }
 
+int32_t CheckAndUpdateTimeBySessionName(const char *sessionName, uint64_t timestamp)
+{
+    if (sessionName == NULL) {
+        TRANS_LOGE(TRANS_CTRL, "Parameter sessionName is empty");
+        return SOFTBUS_INVALID_PARAM;
+    }
+    if (g_sessionServerList == NULL) {
+        TRANS_LOGE(TRANS_CTRL, "sessionServer is empty");
+        return SOFTBUS_INVALID_PARAM;
+    }
+    if (SoftBusMutexLock(&g_sessionServerList->lock) != SOFTBUS_OK) {
+        TRANS_LOGE(TRANS_CTRL, "Lock failure");
+        return SOFTBUS_LOCK_ERR;
+    }
+
+    SessionServer *pos = NULL;
+    LIST_FOR_EACH_ENTRY(pos, &g_sessionServerList->list, SessionServer, node) {
+        if (strcmp(pos->sessionName, sessionName) == 0) {
+            if (pos->timestamp < timestamp) {
+                pos->timestamp = timestamp;
+                (void)SoftBusMutexUnlock(&g_sessionServerList->lock);
+                return SOFTBUS_OK;
+            }
+            (void)SoftBusMutexUnlock(&g_sessionServerList->lock);
+            return SOFTBUS_TRANS_SESSION_TIME_NOT_EQUAL;
+        }
+    }
+    (void)SoftBusMutexUnlock(&g_sessionServerList->lock);
+    return SOFTBUS_TRANS_SESSION_NAME_NO_EXIST;
+}
+
 bool CheckUidAndPid(const char *sessionName, pid_t callingUid, pid_t callingPid)
 {
     if (sessionName == NULL) {

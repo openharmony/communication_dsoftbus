@@ -253,7 +253,7 @@ void InterfaceInfo::SetP2pGroupConfig(const std::string &groupConfig)
     Set(InterfaceInfoKey::PSK, ret[P2P_GROUP_CONFIG_INDEX_SHARE_KEY]);
     int32_t freq = 0;
     bool result = WifiDirectUtils::StringToInt(ret[P2P_GROUP_CONFIG_INDEX_FREQ], freq);
-    CONN_CHECK_AND_RETURN_LOGE(result, CONN_WIFI_DIRECT, "frequency in group config is not valid number string");
+    CONN_CHECK_AND_RETURN_LOGE(result, CONN_WIFI_DIRECT, "freq in group config is not valid number string");
     Set(InterfaceInfoKey::CENTER_20M, freq);
 }
 
@@ -404,7 +404,7 @@ void InterfaceInfo::IncreaseRefCount()
     int count = Get(InterfaceInfoKey::REUSE_COUNT, 0);
     count++;
     Set(InterfaceInfoKey::REUSE_COUNT, count);
-    CONN_LOGI(CONN_WIFI_DIRECT, "reuseCount = %{public}d", count);
+    CONN_LOGI(CONN_WIFI_DIRECT, "reuseCnt = %{public}d", count);
 }
 
 void InterfaceInfo::DecreaseRefCount()
@@ -412,6 +412,6 @@ void InterfaceInfo::DecreaseRefCount()
     int count = Get(InterfaceInfoKey::REUSE_COUNT, 0);
     --count;
     Set(InterfaceInfoKey::REUSE_COUNT, count);
-    CONN_LOGI(CONN_WIFI_DIRECT, "reuseCount = %{public}d", count);
+    CONN_LOGI(CONN_WIFI_DIRECT, "reuseCnt = %{public}d", count);
 }
 } // namespace OHOS::SoftBus

@@ -163,9 +163,24 @@ int32_t AuthFindDeviceKey(const char *udidHash, int32_t keyType, AuthDeviceKeyIn
     return GetAuthOtherInterfaceMock()->AuthFindDeviceKey(udidHash, keyType, deviceKey);
 }
 
+int32_t CustomizedSecurityProtocolInitPacked(void)
+{
+    return GetAuthOtherInterfaceMock()->CustomizedSecurityProtocolInitPacked();
+}
+
+int32_t LnnRetrieveDeviceInfoByNetworkIdPacked(const char *networkId, NodeInfo *info)
+{
+    return GetAuthOtherInterfaceMock()->LnnRetrieveDeviceInfoByNetworkIdPacked(networkId, info);
+}
+
 AuthManager *GetAuthManagerByAuthId(int64_t authId)
 {
     return GetAuthOtherInterfaceMock()->GetAuthManagerByAuthId(authId);
+}
+
+int32_t LnnGetLocalNum64Info(InfoKey key, int64_t *info)
+{
+    return GetAuthOtherInterfaceMock()->LnnGetLocalNum64Info(key, info);
 }
 }
 } // namespace OHOS

@@ -18,8 +18,8 @@
 
 #include "auth_common.h"
 #include "auth_interface.h"
-#include "softbus_conn_interface.h"
 #include "auth_connection_struct.h"
+#include "softbus_conn_interface.h"
 
 #ifdef __cplusplus
 #if __cplusplus

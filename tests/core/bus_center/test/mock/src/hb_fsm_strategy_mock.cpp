@@ -202,9 +202,9 @@ int32_t LnnGetLocalNumInfo(InfoKey key, int32_t *info)
     return HeartBeatFSMStrategyInterfaceInstance()->LnnGetLocalNumInfo(key, info);
 }
 
-bool LnnIsNeedInterceptBroadcast(void)
+bool LnnIsNeedInterceptBroadcast(bool disableGlass)
 {
-    return HeartBeatFSMStrategyInterfaceInstance()->LnnIsNeedInterceptBroadcast();
+    return HeartBeatFSMStrategyInterfaceInstance()->LnnIsNeedInterceptBroadcast(disableGlass);
 }
 }
 } // namespace OHOS

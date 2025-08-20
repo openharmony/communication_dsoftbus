@@ -1092,7 +1092,6 @@ void AuthManagerSetAuthFailed(int64_t authSeq, const AuthSessionInfo *info, int3
         AuthHandle authHandle = { .authId = auth->authId, .type = info->connInfo.type };
         AuthNotifyDeviceDisconnect(authHandle);
     }
-    DelDupAuthManager(auth);
 
     if (needDisconnect && auth != NULL) {
         RemoveAuthManagerByConnInfo(&info->connInfo, info->isServer);
@@ -1106,6 +1105,7 @@ void AuthManagerSetAuthFailed(int64_t authSeq, const AuthSessionInfo *info, int3
         UpdateAuthDevicePriority(info->connId);
         DisconnectAuthDevice((uint64_t *)&info->connId);
     }
+    DelDupAuthManager(auth);
     AuthAddNodeToLimitMap(info->udid, reason);
 }
 

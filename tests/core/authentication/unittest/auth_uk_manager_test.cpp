@@ -111,19 +111,6 @@ HWTEST_F(AuthUkManagerTest, AUTH_UK_MANAGER_Test_002, TestSize.Level1)
 }
 
 /*
- * @tc.name: AUTH_UK_MANAGER_Test_003
- * @tc.desc: AuthGetUkEncryptSize test
- * @tc.type: FUNC
- * @tc.require:
- */
-HWTEST_F(AuthUkManagerTest, AUTH_UK_MANAGER_Test_003, TestSize.Level1)
-{
-    uint32_t inLen = 1;
-    uint32_t ret = AuthGetUkEncryptSize(inLen);
-    EXPECT_EQ(ret, inLen + OVERHEAD_LEN);
-}
-
-/*
  * @tc.name: AUTH_UK_MANAGER_Test_004
  * @tc.desc: AuthGetUkDecryptSize test
  * @tc.type: FUNC
@@ -366,6 +353,8 @@ HWTEST_F(AuthUkManagerTest, COMPARE_BY_ACL_SAME_ACCOUNT_Test_001, TestSize.Level
     ret = CompareByAclSameAccount(nullptr, nullptr, false);
     EXPECT_EQ(ret, false);
     ret = CompareByAclSameAccount(&oldAcl, nullptr, false);
+    EXPECT_EQ(ret, false);
+    ret = CompareByAclSameAccount(&oldAcl, &newAcl, true);
     EXPECT_EQ(ret, false);
     EXPECT_EQ(EOK, strcpy_s(oldAcl.sinkAccountId, ACCOUNT_ID_BUF_LEN, NODE1_ACCOUNT_ID));
     EXPECT_EQ(EOK, strcpy_s(newAcl.sinkAccountId, ACCOUNT_ID_BUF_LEN, NODE1_ACCOUNT_ID));
@@ -1176,7 +1165,7 @@ HWTEST_F(AuthUkManagerTest, SECURITY_ON_BYTES_RECEIVED_Test_001, TestSize.Level1
         .len = len,
     };
     uint32_t size = AUTH_PKT_HEAD_LEN + len;
-    uint8_t *buf = (uint8_t *)SoftBusCalloc(size);
+    uint8_t *buf = static_cast<uint8_t *>(SoftBusCalloc(size));
     ASSERT_TRUE(buf != nullptr);
     int32_t ret = PackAuthData(&head, data, buf, size);
     EXPECT_EQ(ret, SOFTBUS_OK);

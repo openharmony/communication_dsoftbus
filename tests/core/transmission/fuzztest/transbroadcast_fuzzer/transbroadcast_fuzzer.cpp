@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2024 Huawei Device Co., Ltd.
+ * Copyright (c) 2025 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -13,32 +13,39 @@
  * limitations under the License.
  */
 
-#include "gtest/gtest.h"
+#include "transbroadcast_fuzzer.h"
 
-#include "conn_log.h"
+#include <cstring>
+#include <fuzzer/FuzzedDataProvider.h>
+#include <securec.h>
+#include <vector>
+
 #include "fuzz_data_generator.h"
-#include "fuzz_environment.h"
+#include "trans_spec_object_stub.h"
 
 namespace OHOS {
+void OnRemoteRequestTest(FuzzedDataProvider &provider)
+{
+    sptr<OHOS::TransSpecObjectStub> transSpecObjectStub = new OHOS::TransSpecObjectStub();
+    if (transSpecObjectStub == nullptr) {
+        return;
+    }
+
+    uint32_t code = provider.ConsumeIntegral<uint32_t>();
+    MessageParcel data;
+    MessageParcel reply;
+    MessageOption option;
+
+    transSpecObjectStub->OnRemoteRequest(code, data, reply, option);
+}
 } // namespace OHOS
 
 /* Fuzzer entry point */
 extern "C" int32_t LLVMFuzzerTestOneInput(const uint8_t *data, size_t size)
 {
     /* Run your code on data */
-    if (data == nullptr || size < sizeof(int32_t)) {
-        CONN_LOGE(CONN_TEST, "Invalid param");
-        return 0;
-    }
-    std::cout << "llvm fuzz enter" << std::endl;
-    CONN_LOGI(CONN_TEST, "llvm fuzz enter");
+    FuzzedDataProvider provider(data, size);
+    OHOS::OnRemoteRequestTest(provider);
 
-    DataGenerator::Write(data, size);
-    OHOS::SoftBus::FuzzEnvironment::EnableFuzz();
-    testing::InitGoogleTest();
-    testing::GTEST_FLAG(filter) = "*Fuzz*";
-    auto result = RUN_ALL_TESTS();
-
-    DataGenerator::Clear();
-    return result;
+    return 0;
 }

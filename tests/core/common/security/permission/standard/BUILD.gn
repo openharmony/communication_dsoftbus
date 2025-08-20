@@ -41,6 +41,7 @@ ohos_unittest("SoftbusPermissionTest") {
       "access_token:libprivacy_sdk",
       "googletest:gtest_main",
       "hilog:libhilog",
+      "ipc:ipc_single",
     ]
   }
 }

@@ -2249,4 +2249,53 @@ HWTEST_F(LNNNetBuilderMockTest, InitSyncInfoReg_Test_001, TestSize.Level1)
     auto ret = InitSyncInfoReg();
     EXPECT_EQ(ret, SOFTBUS_INVALID_PARAM);
 }
+
+/*
+ * @tc.name: TryTriggerSparkGroupBuild_Test_001
+ * @tc.desc: TryTriggerSparkGroupBuild test
+ * @tc.type: FUNC
+ * @tc.require:
+ */
+HWTEST_F(LNNNetBuilderMockTest, TryTriggerSparkGroupBuild_Test_001, TestSize.Level1)
+{
+    DeviceVerifyPassMsgPara msgPara = {};
+    NodeInfo nodeInfo = {};
+    msgPara.nodeInfo = &nodeInfo;
+    NiceMock<NetBuilderDepsInterfaceMock> NetBuilderMock;
+    EXPECT_CALL(NetBuilderMock, IsSameAccountId(_)).WillRepeatedly(Return(true));
+    EXPECT_CALL(NetBuilderMock, LnnHasDiscoveryType(_, _)).WillRepeatedly(Return(true));
+    EXPECT_NO_FATAL_FAILURE(TryTriggerSparkGroupBuild(&msgPara));
+}
+
+/*
+ * @tc.name: OnReAuthVerifyPassed_Test_001
+ * @tc.desc: OnReAuthVerifyPassed test
+ * @tc.type: FUNC
+ * @tc.require:
+ */
+HWTEST_F(LNNNetBuilderMockTest, OnReAuthVerifyPassed_Test_001, TestSize.Level1)
+{
+    NodeInfo info = {};
+    AuthHandle authHandle = { .authId = AUTH_META_ID, .type = AUTH_LINK_TYPE_WIFI };
+    uint32_t requestId = 1;
+    NiceMock<NetBuilderDepsInterfaceMock> NetBuilderMock;
+    EXPECT_CALL(NetBuilderMock, GetAuthRequest(_, _)).WillRepeatedly(Return(SOFTBUS_OK));
+    EXPECT_CALL(NetBuilderMock, LnnConvertAuthConnInfoToAddr(_, _, _)).WillRepeatedly(Return(true));
+    EXPECT_CALL(NetBuilderMock, SoftBusGenerateStrHash(_, _, _)).WillRepeatedly(Return(SOFTBUS_OK));
+    LnnConnectionFsm *connFsm = reinterpret_cast<LnnConnectionFsm *>(SoftBusMalloc(sizeof(LnnConnectionFsm)));
+    ListInit(&connFsm->node);
+    connFsm->isDead = false;
+    ListAdd(&g_netBuilder.fsmList, &connFsm->node);
+    EXPECT_CALL(NetBuilderMock, LnnIsSameConnectionAddr(_, _, _)).WillRepeatedly(Return(true));
+    EXPECT_CALL(NetBuilderMock, LnnIsNeedCleanConnectionFsm(_, _)).WillRepeatedly(Return(false));
+    EXPECT_CALL(NetBuilderMock, LnnUpdateGroupType(_)).WillRepeatedly(Return(SOFTBUS_OK));
+    EXPECT_CALL(NetBuilderMock, LnnUpdateAccountInfo(_)).WillRepeatedly(Return(SOFTBUS_OK));
+    EXPECT_CALL(NetBuilderMock, IsSameAccountId(_)).WillRepeatedly(Return(true));
+    EXPECT_CALL(NetBuilderMock, LnnGetRemoteNodeInfoById(_, _, _)).WillOnce(Return(SOFTBUS_INVALID_PARAM))
+        .WillRepeatedly(Return(SOFTBUS_OK));
+    EXPECT_CALL(NetBuilderMock, LnnHasDiscoveryType(_, _)).WillRepeatedly(Return(true));
+    EXPECT_NO_FATAL_FAILURE(OnReAuthVerifyPassed(requestId, authHandle, &info));
+    ListDelete(&connFsm->node);
+    SoftBusFree(connFsm);
+}
 } // namespace OHOS
