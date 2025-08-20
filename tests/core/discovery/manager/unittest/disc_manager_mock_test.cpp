@@ -58,8 +58,9 @@ public:
     }
 
     static int32_t OnDeviceFound(const char *packageName, const DeviceInfo *device,
-                                 const InnerDeviceInfoAddtions *additions)
+                                 const InnerDeviceInfoAddtions *additions, int32_t subscribeId)
     {
+        (void)subscribeId;
         callbackPackageName_ = packageName;
         deviceInfo_ = *device;
         return SOFTBUS_OK;
