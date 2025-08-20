@@ -98,7 +98,7 @@ static void FillProxyMessage(FuzzedDataProvider &provider, ProxyMessage *msg)
 
 void ChanIsEqualTest(FuzzedDataProvider &provider)
 {
-    ProxyChannelInfo *info = (ProxyChannelInfo *)SoftBusCalloc(sizeof(ProxyChannelInfo));
+    ProxyChannelInfo *info = reinterpret_cast<ProxyChannelInfo *>(SoftBusCalloc(sizeof(ProxyChannelInfo)));
     if (info == nullptr) {
         return;
     }
@@ -137,7 +137,7 @@ void TransProxyGetAppInfoTypeTest(FuzzedDataProvider &provider)
 
 void TransPagingUpdatePagingChannelInfoTest(FuzzedDataProvider &provider)
 {
-    ProxyChannelInfo *info = (ProxyChannelInfo *)SoftBusCalloc(sizeof(ProxyChannelInfo));
+    ProxyChannelInfo *info = reinterpret_cast<ProxyChannelInfo *>(SoftBusCalloc(sizeof(ProxyChannelInfo)));
     if (info == nullptr) {
         return;
     }
@@ -152,7 +152,7 @@ void TransPagingUpdatePagingChannelInfoTest(FuzzedDataProvider &provider)
 
 void TransPagingUpdatePidAndDataTest(FuzzedDataProvider &provider)
 {
-    ProxyChannelInfo *info = (ProxyChannelInfo *)SoftBusCalloc(sizeof(ProxyChannelInfo));
+    ProxyChannelInfo *info = reinterpret_cast<ProxyChannelInfo *>(SoftBusCalloc(sizeof(ProxyChannelInfo)));
     if (info == nullptr) {
         return;
     }
@@ -178,7 +178,7 @@ void TransPagingUpdatePidAndDataTest(FuzzedDataProvider &provider)
 
 void TransPagingBadKeyRetryTest(FuzzedDataProvider &provider)
 {
-    ProxyChannelInfo *info = (ProxyChannelInfo *)SoftBusCalloc(sizeof(ProxyChannelInfo));
+    ProxyChannelInfo *info = reinterpret_cast<ProxyChannelInfo *>(SoftBusCalloc(sizeof(ProxyChannelInfo)));
     if (info == nullptr) {
         return;
     }
@@ -196,7 +196,7 @@ void TransPagingBadKeyRetryTest(FuzzedDataProvider &provider)
 
 void TransRefreshProxyTimesNativeTest(FuzzedDataProvider &provider)
 {
-    ProxyChannelInfo *info = (ProxyChannelInfo *)SoftBusCalloc(sizeof(ProxyChannelInfo));
+    ProxyChannelInfo *info = reinterpret_cast<ProxyChannelInfo *>(SoftBusCalloc(sizeof(ProxyChannelInfo)));
     if (info == nullptr) {
         return;
     }
@@ -227,7 +227,7 @@ void TransRefreshProxyTimesNativeTest(FuzzedDataProvider &provider)
 
 void TransProxyDelChanByChanIdTest(FuzzedDataProvider &provider)
 {
-    ProxyChannelInfo *info = (ProxyChannelInfo *)SoftBusCalloc(sizeof(ProxyChannelInfo));
+    ProxyChannelInfo *info = reinterpret_cast<ProxyChannelInfo *>(SoftBusCalloc(sizeof(ProxyChannelInfo)));
     if (info == nullptr) {
         return;
     }
@@ -247,7 +247,7 @@ void TransProxyDelChanByChanIdTest(FuzzedDataProvider &provider)
 
 void TransProxyGetSendMsgChanInfoTest(FuzzedDataProvider &provider)
 {
-    ProxyChannelInfo *info1 = (ProxyChannelInfo *)SoftBusCalloc(sizeof(ProxyChannelInfo));
+    ProxyChannelInfo *info1 = reinterpret_cast<ProxyChannelInfo *>(SoftBusCalloc(sizeof(ProxyChannelInfo)));
     ProxyChannelInfo info2;
     if (info1 == nullptr) {
         return;
@@ -294,7 +294,7 @@ void TransProxyGetSendMsgChanInfoTest(FuzzedDataProvider &provider)
 
 void TransProxyProcessErrMsgTest(FuzzedDataProvider &provider)
 {
-    ProxyChannelInfo *info = (ProxyChannelInfo *)SoftBusCalloc(sizeof(ProxyChannelInfo));
+    ProxyChannelInfo *info = reinterpret_cast<ProxyChannelInfo *>(SoftBusCalloc(sizeof(ProxyChannelInfo)));
     if (info == nullptr) {
         return;
     }
@@ -313,7 +313,7 @@ void TransProxyProcessErrMsgTest(FuzzedDataProvider &provider)
 
 void TransPagingHandshakeUnPackErrMsgTest(FuzzedDataProvider &provider)
 {
-    ProxyChannelInfo *info = (ProxyChannelInfo *)SoftBusCalloc(sizeof(ProxyChannelInfo));
+    ProxyChannelInfo *info = reinterpret_cast<ProxyChannelInfo *>(SoftBusCalloc(sizeof(ProxyChannelInfo)));
     if (info == nullptr) {
         return;
     }
@@ -343,7 +343,7 @@ void SelectRouteTypeTest(FuzzedDataProvider &provider)
 
 void CheckAndGenerateSinkSessionKeyTest(FuzzedDataProvider &provider)
 {
-    ProxyChannelInfo *info = (ProxyChannelInfo *)SoftBusCalloc(sizeof(ProxyChannelInfo));
+    ProxyChannelInfo *info = reinterpret_cast<ProxyChannelInfo *>(SoftBusCalloc(sizeof(ProxyChannelInfo)));
     if (info == nullptr) {
         return;
     }
@@ -365,6 +365,146 @@ void CheckAndGenerateSinkSessionKeyTest(FuzzedDataProvider &provider)
     if (msg.data != nullptr) {
         SoftBusFree(msg.data);
     }
+}
+
+void TransHandleProxyChanelOpenedTest(FuzzedDataProvider &provider)
+{
+    ProxyChannelInfo *info = reinterpret_cast<ProxyChannelInfo *>(SoftBusCalloc(sizeof(ProxyChannelInfo)));
+    if (info == nullptr) {
+        return;
+    }
+    info->channelId = provider.ConsumeIntegral<int32_t>();
+    info->appInfo.myData.pid = provider.ConsumeIntegral<int32_t>();
+    info->isD2D = provider.ConsumeBool();
+    AppInfo appInfo;
+    (void)memset_s(&appInfo, sizeof(AppInfo), 0, sizeof(AppInfo));
+    FillAppInfo(provider, &appInfo);
+    (void)TransProxyCreateChanInfo(info, info->channelId, &appInfo);
+    AccessInfo accessInfo;
+    (void)memset_s(&accessInfo, sizeof(AccessInfo), 0, sizeof(AccessInfo));
+    accessInfo.userId = provider.ConsumeIntegral<int32_t>();
+    accessInfo.localTokenId = provider.ConsumeIntegral<uint64_t>();
+    char businessAccountId[ACCOUNT_UID_LEN_MAX] = { 0 };
+    char extraAccessInfo[EXTRA_ACCESS_INFO_LEN_MAX] = { 0 };
+    std::string providerData = provider.ConsumeBytesAsString(ACCOUNT_UID_LEN_MAX);
+    if (strcpy_s(businessAccountId, ACCOUNT_UID_LEN_MAX - 1, providerData.c_str()) != EOK) {
+        return;
+    }
+    accessInfo.businessAccountId = businessAccountId;
+    providerData = provider.ConsumeBytesAsString(EXTRA_ACCESS_INFO_LEN_MAX);
+    if (strcpy_s(extraAccessInfo, EXTRA_ACCESS_INFO_LEN_MAX - 1, providerData.c_str()) != EOK) {
+        return;
+    }
+    accessInfo.extraAccessInfo = extraAccessInfo;
+    int32_t openResult = provider.ConsumeIntegral<int32_t>();
+    (void)TransHandleProxyChanelOpened(info->channelId, info, &accessInfo);
+    int32_t pid = provider.ConsumeIntegral<int32_t>();
+    int32_t channelId = provider.ConsumeIntegral<int32_t>();
+    (void)TransDealProxyChannelOpenResult(channelId, openResult, &accessInfo, pid);
+    (void)TransProxyDelChanByChanId(channelId);
+}
+
+void TransProxyUpdateBlePriorityTest(FuzzedDataProvider &provider)
+{
+    int32_t channelId = provider.ConsumeIntegral<int32_t>();
+    uint32_t connId = provider.ConsumeIntegral<uint32_t>();
+    BlePriority priority = static_cast<BlePriority>(
+        provider.ConsumeIntegralInRange<int16_t>(BLE_PRIORITY_DEFAULT, BLE_PRIORITY_MAX));
+    (void)TransProxyUpdateBlePriority(channelId, connId, priority);
+    (void)TransProxyTimerProc();
+}
+
+void TransWifiStateChangeTest(FuzzedDataProvider &provider)
+{
+    LnnEventBasicInfo info;
+    info.event = static_cast<LnnEventType>(
+        provider.ConsumeIntegralInRange<int16_t>(LNN_EVENT_IP_ADDR_CHANGED, LNN_EVENT_TYPE_MAX));
+    LnnOnlineStateEventInfo lnnOnlineStateEventInfo;
+    lnnOnlineStateEventInfo.basic = info;
+    lnnOnlineStateEventInfo.isOnline = provider.ConsumeBool();
+    char uuid[UUID_BUF_LEN] = { 0 };
+    char networkId[NETWORK_ID_BUF_LEN] = { 0 };
+    char udid[UDID_BUF_LEN] = { 0 };
+    std::string providerData = provider.ConsumeBytesAsString(UUID_BUF_LEN);
+    if (strcpy_s(uuid, UUID_BUF_LEN - 1, providerData.c_str()) != EOK) {
+        return;
+    }
+    providerData = provider.ConsumeBytesAsString(NETWORK_ID_BUF_LEN);
+    if (strcpy_s(networkId, NETWORK_ID_BUF_LEN - 1, providerData.c_str()) != EOK) {
+        return;
+    }
+    providerData = provider.ConsumeBytesAsString(UDID_BUF_LEN);
+    if (strcpy_s(udid, UDID_BUF_LEN - 1, providerData.c_str()) != EOK) {
+        return;
+    }
+    lnnOnlineStateEventInfo.uuid = uuid;
+    lnnOnlineStateEventInfo.networkId = networkId;
+    lnnOnlineStateEventInfo.udid = udid;
+    (void)TransWifiStateChange(reinterpret_cast<LnnEventBasicInfo *>(&lnnOnlineStateEventInfo));
+    (void)TransNotifyOffLine(reinterpret_cast<LnnEventBasicInfo *>(&lnnOnlineStateEventInfo));
+    LnnSingleNetworkOffLineEvent lnnSingleNetworkOffLineEvent;
+    lnnSingleNetworkOffLineEvent.basic = info;
+    lnnSingleNetworkOffLineEvent.networkId = networkId;
+    lnnSingleNetworkOffLineEvent.udid = udid;
+    lnnSingleNetworkOffLineEvent.uuid = uuid;
+    lnnSingleNetworkOffLineEvent.type = static_cast<ConnectionAddrType>(
+        provider.ConsumeIntegralInRange<int16_t>(CONNECTION_ADDR_WLAN, CONNECTION_ADDR_MAX));
+    (void)TransNotifySingleNetworkOffLine(reinterpret_cast<LnnEventBasicInfo *>(&lnnSingleNetworkOffLineEvent));
+    LnnMonitorHbStateChangedEvent lnnMonitorHbStateChangedEvent;
+    lnnMonitorHbStateChangedEvent.basic = info;
+    lnnMonitorHbStateChangedEvent.status = static_cast<SoftBusUserSwitchState>(
+        provider.ConsumeIntegralInRange<int16_t>(SOFTBUS_USER_SWITCHED, SOFTBUS_USER_SWITCH_UNKNOWN));
+    (void)TransNotifyUserSwitch(reinterpret_cast<LnnEventBasicInfo *>(&lnnMonitorHbStateChangedEvent));
+}
+
+void TransProxyGetNameByChanIdTest(FuzzedDataProvider &provider)
+{
+    int32_t chanId = provider.ConsumeIntegral<int32_t>();
+    char pkgName[PKG_NAME_SIZE_MAX] = { 0 };
+    char sessionName[SESSION_NAME_SIZE_MAX] = { 0 };
+    std::string providerData1 = provider.ConsumeBytesAsString(PKG_NAME_SIZE_MAX - 1);
+    if (strcpy_s(pkgName, PKG_NAME_SIZE_MAX - 1, providerData1.c_str()) != EOK) {
+        return;
+    }
+    std::string providerData2 = provider.ConsumeBytesAsString(SESSION_NAME_SIZE_MAX - 1);
+    if (strcpy_s(sessionName, SESSION_NAME_SIZE_MAX - 1, providerData2.c_str()) != EOK) {
+        return;
+    }
+    (void)TransProxyGetNameByChanId(chanId, pkgName, sessionName, PKG_NAME_SIZE_MAX, SESSION_NAME_SIZE_MAX);
+}
+
+void TransProxyCloseChannelByRequestIdTest(FuzzedDataProvider &provider)
+{
+    int32_t connId;
+    ProxyChannelInfo info1;
+    int32_t channelId;
+    AuthHandle authHandle;
+    ListNode privilegeCloseList;
+    ListInit(&privilegeCloseList);
+    authHandle.authId = provider.ConsumeIntegral<int64_t>();
+    authHandle.type = provider.ConsumeIntegral<uint32_t>();
+    uint32_t reqId = provider.ConsumeIntegral<uint32_t>();
+    ProxyChannelInfo *info = reinterpret_cast<ProxyChannelInfo *>(SoftBusCalloc(sizeof(ProxyChannelInfo)));
+    if (info == nullptr) {
+        return;
+    }
+    info->channelId = provider.ConsumeIntegral<int32_t>();
+    info->appInfo.myData.pid = provider.ConsumeIntegral<int32_t>();
+    info->isD2D = provider.ConsumeBool();
+    AppInfo appInfo;
+    (void)memset_s(&appInfo, sizeof(AppInfo), 0, sizeof(AppInfo));
+    FillAppInfo(provider, &appInfo);
+    (void)TransProxyCreateChanInfo(info, info->channelId, &appInfo);
+    (void)TransProxyGetAppInfoByChanId(info->channelId, &appInfo);
+    (void)TransProxyGetConnIdByChanId(info->channelId, &connId);
+    (void)TransProxyGetProxyChannelInfoByChannelId(info->channelId, &info1);
+    (void)TransProxyGetProxyChannelIdByAuthReq(reqId, &channelId);
+    (void)TransProxySetAuthHandleByChanId(info->channelId, authHandle);
+    (void)TransProxyGetChannelByFlag(info->appInfo.myData.businessFlag, &info1, info->appInfo.isClient);
+    (void)TransProxyGetPrivilegeCloseList(&privilegeCloseList, info->appInfo.callingTokenId, info->appInfo.myData.pid);
+    (void)TransProxyResetReplyCnt(info->channelId);
+    (void)TransProxyCloseChannelByRequestId(-1);
+    (void)TransProxyCloseChannelByRequestId(info->reqId);
 }
 } // namespace OHOS
 
@@ -389,5 +529,10 @@ extern "C" int32_t LLVMFuzzerTestOneInput(const uint8_t *data, size_t size)
     OHOS::TransPagingHandshakeUnPackErrMsgTest(provider);
     OHOS::SelectRouteTypeTest(provider);
     OHOS::CheckAndGenerateSinkSessionKeyTest(provider);
+    OHOS::TransHandleProxyChanelOpenedTest(provider);
+    OHOS::TransProxyUpdateBlePriorityTest(provider);
+    OHOS::TransWifiStateChangeTest(provider);
+    OHOS::TransProxyGetNameByChanIdTest(provider);
+    OHOS::TransProxyCloseChannelByRequestIdTest(provider);
     return 0;
 }
