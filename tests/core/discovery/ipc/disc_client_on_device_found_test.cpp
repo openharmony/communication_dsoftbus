@@ -111,12 +111,13 @@ public:
         return SOFTBUS_OK;
     }
     static int32_t CallbackOnServerDeviceFound(const char *pkgName, const DeviceInfo *device,
-        const InnerDeviceInfoAddtions *additions)
+        const InnerDeviceInfoAddtions *additions, int32_t subscribeId)
     {
+        (void)subscribeId;
         if (innerCallback_.serverCb.OnServerDeviceFound == nullptr) {
             return SOFTBUS_NO_INIT;
         }
-        return innerCallback_.serverCb.OnServerDeviceFound(pkgName, device, additions);
+        return innerCallback_.serverCb.OnServerDeviceFound(pkgName, device, additions, subscribeId);
     }
 
 private:
@@ -263,28 +264,34 @@ HWTEST_F(DiscClientOnDeviceFoundTest, OnServerDeviceFoundFailed001, TestSize.Lev
     NiceMock<BusCenterMock> mock;
     EXPECT_CALL(mock, ClientOnRefreshDeviceFound).Times(0);
 
-    int32_t ret = mock.CallbackOnServerDeviceFound(g_pkgName1.c_str(), &g_deviceInfoCast, &g_additions);
+    int32_t ret = mock.CallbackOnServerDeviceFound(g_pkgName1.c_str(), &g_deviceInfoCast, &g_additions,
+        g_subscribeInfoCast.subscribeId);
     EXPECT_NE(ret, SOFTBUS_OK);
 
     ret = LnnIpcRefreshLNN(g_pkgName1.c_str(), g_callingPid1, &g_subscribeInfoCast);
     EXPECT_EQ(ret, SOFTBUS_OK);
 
-    ret = mock.CallbackOnServerDeviceFound(nullptr, &g_deviceInfoCast, &g_additions);
+    ret = mock.CallbackOnServerDeviceFound(nullptr, &g_deviceInfoCast, &g_additions,
+        g_subscribeInfoCast.subscribeId);
     EXPECT_NE(ret, SOFTBUS_OK);
 
-    ret = mock.CallbackOnServerDeviceFound(g_pkgName1.c_str(), nullptr, &g_additions);
+    ret = mock.CallbackOnServerDeviceFound(g_pkgName1.c_str(), nullptr, &g_additions,
+        g_subscribeInfoCast.subscribeId);
     EXPECT_NE(ret, SOFTBUS_OK);
 
-    ret = mock.CallbackOnServerDeviceFound(g_pkgName1.c_str(), &g_deviceInfoCast, nullptr);
+    ret = mock.CallbackOnServerDeviceFound(g_pkgName1.c_str(), &g_deviceInfoCast, nullptr,
+        g_subscribeInfoCast.subscribeId);
     EXPECT_NE(ret, SOFTBUS_OK);
 
-    ret = mock.CallbackOnServerDeviceFound(g_pkgName2.c_str(), &g_deviceInfoCast, &g_additions);
+    ret = mock.CallbackOnServerDeviceFound(g_pkgName2.c_str(), &g_deviceInfoCast, &g_additions,
+        g_subscribeInfoCast.subscribeId);
     EXPECT_EQ(ret, SOFTBUS_OK);
 
     ret = LnnIpcStopRefreshLNN(g_pkgName1.c_str(), g_callingPid1, g_subscribeInfoCast.subscribeId);
     EXPECT_EQ(ret, SOFTBUS_OK);
 
-    ret = mock.CallbackOnServerDeviceFound(g_pkgName1.c_str(), &g_deviceInfoCast, &g_additions);
+    ret = mock.CallbackOnServerDeviceFound(g_pkgName1.c_str(), &g_deviceInfoCast, &g_additions,
+        g_subscribeInfoCast.subscribeId);
     EXPECT_EQ(ret, SOFTBUS_OK);
 }
 
@@ -302,7 +309,8 @@ HWTEST_F(DiscClientOnDeviceFoundTest, OnServerDeviceFoundSuccess001, TestSize.Le
     EXPECT_EQ(ret, SOFTBUS_OK);
     {
         EXPECT_CALL(mock, ClientOnRefreshDeviceFound(EqStr(g_pkgName1), g_callingPid1, NotNull(), Ge(1))).Times(1);
-        ret = mock.CallbackOnServerDeviceFound(g_pkgName1.c_str(), &g_deviceInfoCast, &g_additions);
+        ret = mock.CallbackOnServerDeviceFound(g_pkgName1.c_str(), &g_deviceInfoCast, &g_additions,
+            g_subscribeInfoCast.subscribeId);
         EXPECT_EQ(ret, SOFTBUS_OK);
     }
     ret = LnnIpcStopRefreshLNN(g_pkgName1.c_str(), g_callingPid1, g_subscribeInfoCast.subscribeId);
@@ -326,14 +334,16 @@ HWTEST_F(DiscClientOnDeviceFoundTest, OnServerDeviceFoundWhenRefreshRepeatReques
     EXPECT_EQ(ret, SOFTBUS_OK);
     {
         EXPECT_CALL(mock, ClientOnRefreshDeviceFound(EqStr(g_pkgName1), g_callingPid1, NotNull(), Ge(1))).Times(1);
-        ret = mock.CallbackOnServerDeviceFound(g_pkgName1.c_str(), &g_deviceInfoCast, &g_additions);
+        ret = mock.CallbackOnServerDeviceFound(g_pkgName1.c_str(), &g_deviceInfoCast, &g_additions,
+            g_subscribeInfoCast.subscribeId);
         EXPECT_EQ(ret, SOFTBUS_OK);
     }
     ret = LnnIpcStopRefreshLNN(g_pkgName1.c_str(), g_callingPid1, g_subscribeInfoCast.subscribeId);
     EXPECT_EQ(ret, SOFTBUS_OK);
     {
         EXPECT_CALL(mock, ClientOnRefreshDeviceFound).Times(0);
-        ret = mock.CallbackOnServerDeviceFound(g_pkgName1.c_str(), &g_deviceInfoCast, &g_additions);
+        ret = mock.CallbackOnServerDeviceFound(g_pkgName1.c_str(), &g_deviceInfoCast, &g_additions,
+            g_subscribeInfoCast.subscribeId);
         EXPECT_EQ(ret, SOFTBUS_OK);
     }
 }
@@ -355,27 +365,31 @@ HWTEST_F(DiscClientOnDeviceFoundTest, OnServerDeviceFoundWhenRefreshWithSamePkgP
     {
         EXPECT_CALL(mock, ClientOnRefreshDeviceFound(EqStr(g_pkgName1), g_callingPid1, NotNull(), Ge(1)))
             .Times(AtLeast(1));
-        ret = mock.CallbackOnServerDeviceFound(g_pkgName1.c_str(), &g_deviceInfoCast, &g_additions);
+        ret = mock.CallbackOnServerDeviceFound(g_pkgName1.c_str(), &g_deviceInfoCast, &g_additions,
+            g_subscribeInfoCast.subscribeId);
         EXPECT_EQ(ret, SOFTBUS_OK);
     }
     {
         EXPECT_CALL(mock, ClientOnRefreshDeviceFound(EqStr(g_pkgName1), g_callingPid1, NotNull(), Ge(1)))
             .Times(AtLeast(1));
-        ret = mock.CallbackOnServerDeviceFound(g_pkgName1.c_str(), &g_deviceInfoOsd, &g_additions);
+        ret = mock.CallbackOnServerDeviceFound(g_pkgName1.c_str(), &g_deviceInfoOsd, &g_additions,
+            g_subscribeInfoOsd.subscribeId);
         EXPECT_EQ(ret, SOFTBUS_OK);
     }
     ret = LnnIpcStopRefreshLNN(g_pkgName1.c_str(), g_callingPid1, g_subscribeInfoCast.subscribeId);
     EXPECT_EQ(ret, SOFTBUS_OK);
     {
         EXPECT_CALL(mock, ClientOnRefreshDeviceFound(EqStr(g_pkgName1), g_callingPid1, NotNull(), Ge(1))).Times(1);
-        ret = mock.CallbackOnServerDeviceFound(g_pkgName1.c_str(), &g_deviceInfoOsd, &g_additions);
+        ret = mock.CallbackOnServerDeviceFound(g_pkgName1.c_str(), &g_deviceInfoOsd, &g_additions,
+            g_subscribeInfoOsd.subscribeId);
         EXPECT_EQ(ret, SOFTBUS_OK);
     }
     ret = LnnIpcStopRefreshLNN(g_pkgName1.c_str(), g_callingPid1, g_subscribeInfoOsd.subscribeId);
     EXPECT_EQ(ret, SOFTBUS_OK);
     {
         EXPECT_CALL(mock, ClientOnRefreshDeviceFound).Times(0);
-        ret = mock.CallbackOnServerDeviceFound(g_pkgName1.c_str(), &g_deviceInfoOsd, &g_additions);
+        ret = mock.CallbackOnServerDeviceFound(g_pkgName1.c_str(), &g_deviceInfoOsd, &g_additions,
+            g_subscribeInfoOsd.subscribeId);
         EXPECT_EQ(ret, SOFTBUS_OK);
     }
 }
@@ -398,14 +412,16 @@ HWTEST_F(DiscClientOnDeviceFoundTest, OnServerDeviceFoundWhenRefreshWithDiffPid0
     EXPECT_EQ(ret, SOFTBUS_OK);
     {
         EXPECT_CALL(mock, ClientOnRefreshDeviceFound(EqStr(g_pkgName1), g_callingPid2, NotNull(), Ge(1))).Times(1);
-        ret = mock.CallbackOnServerDeviceFound(g_pkgName1.c_str(), &g_deviceInfoOsd, &g_additions);
+        ret = mock.CallbackOnServerDeviceFound(g_pkgName1.c_str(), &g_deviceInfoOsd, &g_additions,
+            g_subscribeInfoOsd.subscribeId);
         EXPECT_EQ(ret, SOFTBUS_OK);
     }
     ret = LnnIpcStopRefreshLNN(g_pkgName1.c_str(), g_callingPid2, g_subscribeInfoOsd.subscribeId);
     EXPECT_EQ(ret, SOFTBUS_OK);
     {
         EXPECT_CALL(mock, ClientOnRefreshDeviceFound).Times(0);
-        ret = mock.CallbackOnServerDeviceFound(g_pkgName1.c_str(), &g_deviceInfoOsd, &g_additions);
+        ret = mock.CallbackOnServerDeviceFound(g_pkgName1.c_str(), &g_deviceInfoOsd, &g_additions,
+            g_subscribeInfoOsd.subscribeId);
         EXPECT_EQ(ret, SOFTBUS_OK);
     }
 }
@@ -428,19 +444,22 @@ HWTEST_F(DiscClientOnDeviceFoundTest, OnServerDeviceFoundWhenRefreshWithDiffPkg0
     EXPECT_EQ(ret, SOFTBUS_OK);
     {
         EXPECT_CALL(mock, ClientOnRefreshDeviceFound).Times(0);
-        ret = mock.CallbackOnServerDeviceFound(g_pkgName1.c_str(), &g_deviceInfoCast, &g_additions);
+        ret = mock.CallbackOnServerDeviceFound(g_pkgName1.c_str(), &g_deviceInfoCast, &g_additions,
+            g_subscribeInfoCast.subscribeId);
         EXPECT_EQ(ret, SOFTBUS_OK);
     }
     {
         EXPECT_CALL(mock, ClientOnRefreshDeviceFound(EqStr(g_pkgName2), g_callingPid1, NotNull(), Ge(1))).Times(1);
-        ret = mock.CallbackOnServerDeviceFound(g_pkgName2.c_str(), &g_deviceInfoOsd, &g_additions);
+        ret = mock.CallbackOnServerDeviceFound(g_pkgName2.c_str(), &g_deviceInfoOsd, &g_additions,
+            g_subscribeInfoOsd.subscribeId);
         EXPECT_EQ(ret, SOFTBUS_OK);
     }
     ret = LnnIpcStopRefreshLNN(g_pkgName2.c_str(), g_callingPid1, g_subscribeInfoOsd.subscribeId);
     EXPECT_EQ(ret, SOFTBUS_OK);
     {
         EXPECT_CALL(mock, ClientOnRefreshDeviceFound).Times(0);
-        ret = mock.CallbackOnServerDeviceFound(g_pkgName2.c_str(), &g_deviceInfoOsd, &g_additions);
+        ret = mock.CallbackOnServerDeviceFound(g_pkgName2.c_str(), &g_deviceInfoOsd, &g_additions,
+            g_subscribeInfoOsd.subscribeId);
         EXPECT_EQ(ret, SOFTBUS_OK);
     }
 }
