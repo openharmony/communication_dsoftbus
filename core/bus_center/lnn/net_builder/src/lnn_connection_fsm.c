@@ -443,6 +443,47 @@ static void SetAssetSessionKeyByAuthInfo(NodeInfo *info, AuthHandle authHandle)
     UpdateDpSameAccount(&aclParams, sessionKey, false, info->aclState);
 }
 
+static void UpdateDeviceInfoToMlps(const char *udid)
+{
+    LpDeviceStateInfo *info = (LpDeviceStateInfo *)SoftBusCalloc(sizeof(LpDeviceStateInfo));
+    if (info == NULL) {
+        LNN_LOGE(LNN_BUILDER, "calloc info fail");
+        return;
+    }
+    if (strcpy_s(info->udid, UDID_BUF_LEN, udid) != EOK) {
+        LNN_LOGE(LNN_BUILDER, "strcpy_s outUdid fail");
+        SoftBusFree(info);
+        return;
+    }
+    info->isOnline = true;
+    SendDeviceStateToMlpsPacked(info);
+}
+
+static void TryTriggerSparkJoinAgain(const LnnConntionInfo *connInfo, bool isAccountChanged)
+{
+    if (connInfo == NULL || connInfo->addr.type != CONNECTION_ADDR_WLAN || !isAccountChanged) {
+        LNN_LOGD(LNN_BUILDER, "no need handle");
+        return;
+    }
+    UpdateDeviceInfoToMlps(connInfo->nodeInfo->deviceInfo.deviceUdid);
+    TriggerSparkGroupJoinAgainPacked(connInfo->nodeInfo->deviceInfo.deviceUdid, SPARK_GROUP_DELAY_TIME_MS);
+}
+
+static bool IsAccountHashChanged(const LnnConntionInfo *connInfo)
+{
+    if (connInfo == NULL) {
+        LNN_LOGE(LNN_BUILDER, "invalid param");
+        return false;
+    }
+    NodeInfo oldInfo;
+    (void)memset_s(&oldInfo, sizeof(NodeInfo), 0, sizeof(NodeInfo));
+    if (LnnGetRemoteNodeInfoById(connInfo->nodeInfo->deviceInfo.deviceUdid, CATEGORY_UDID, &oldInfo) != SOFTBUS_OK) {
+        LNN_LOGE(LNN_BUILDER, "get node info fail");
+        return false;
+    }
+    return (memcmp(oldInfo.accountHash, connInfo->nodeInfo->accountHash, sizeof(oldInfo.accountHash)) != 0);
+}
+
 static void SetLnnConnNodeInfo(
     LnnConntionInfo *connInfo, const char *networkId, LnnConnectionFsm *connFsm, int32_t retCode)
 {
@@ -456,7 +497,9 @@ static void SetLnnConnNodeInfo(
     if (!connFsm->isNeedConnect && connInfo->addr.type == CONNECTION_ADDR_BLE) {
         connInfo->nodeInfo->isSupportSv = true;
     }
+    bool isAccountChanged = IsAccountHashChanged(connInfo);
     report = LnnAddOnlineNode(connInfo->nodeInfo);
+    TryTriggerSparkJoinAgain(connInfo, isAccountChanged);
     SetAssetSessionKeyByAuthInfo(connInfo->nodeInfo, connInfo->authHandle);
     LnnOfflineTimingByHeartbeat(networkId, connInfo->addr.type);
     if (LnnInsertLinkFinderInfoPacked(networkId) != SOFTBUS_OK) {
