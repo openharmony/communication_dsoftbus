@@ -188,8 +188,8 @@ bool AuthApplyKeyProcessFuzzTest(FuzzedDataProvider &provider)
     OnRequest(authSeq, OPERATION_CODE, reqParams.c_str());
     PackApplyKeyAclParam(BUSINESS_TYPE_D2D);
     ProcessApplyKey(provider, sessionInfo, authSeq, requestId);
-    SetApplyKeyNegoInfo(requestId, true, GEN_APPLY_KEY_STATE_START);
-    SetApplyKeyNegoInfo(requestId, true, GEN_APPLY_KEY_STATE_UNKNOW);
+    SetApplyKeyNegoInfo(provider, requestId, true, GEN_APPLY_KEY_STATE_START);
+    SetApplyKeyNegoInfo(provider, requestId, true, GEN_APPLY_KEY_STATE_UNKNOW);
     ApplyKeyGetLightAccountInstance();
     OnGenSuccess(requestId);
     uint32_t len = provider.ConsumeIntegral<uint32_t>();
