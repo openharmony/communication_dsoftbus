@@ -141,7 +141,7 @@ static void AddLinkLedgerNodesByCount(const char *baseUdid, uint64_t baseTime, u
     LinkLedgerInfo info = {};
     for (uint32_t i = 0; i < count; i++) {
         int32_t ret = sprintf_s(udid, sizeof(udid), "%s_%u", baseUdid, i);
-        EXPECT_TRUE(ret != EOK);
+        EXPECT_GT(ret, 0);
         info.lastTryBuildTime = baseTime + i;
         ret = LnnAddLinkLedgerInfo(udid, &info);
         EXPECT_EQ(ret, SOFTBUS_OK);
@@ -153,7 +153,7 @@ static void DeleteLinkLedgerNodesByCount(const char *baseUdid, uint32_t count)
     char udid[UDID_BUF_LEN] = {0};
     for (uint32_t i = 0; i < count; i++) {
         int32_t ret = sprintf_s(udid, sizeof(udid), "%s_%u", baseUdid, i);
-        EXPECT_TRUE(ret != EOK);
+        EXPECT_GT(ret, 0);
         EXPECT_NO_FATAL_FAILURE(LnnDeleteLinkLedgerInfo(udid));
     }
 }
@@ -172,7 +172,7 @@ HWTEST_F(LNNLaneLinkLedgerTest, LNN_LINK_LEDGER_MULTI_NODE_TEST_001, TestSize.Le
 
     AddLinkLedgerNodesByCount(PEER_UDID, TEST_TIME, MAX_NODE_SIZE);
     int32_t ret = sprintf_s(firstUdid, sizeof(firstUdid), "%s_%d", PEER_UDID, 0);
-    EXPECT_TRUE(ret != EOK);
+    EXPECT_GT(ret, 0);
     (void)memset_s(&info, sizeof(LinkLedgerInfo), 0, sizeof(LinkLedgerInfo));
     ret = LnnGetLinkLedgerInfo(firstUdid, &info);
     EXPECT_EQ(ret, SOFTBUS_OK);
@@ -180,7 +180,7 @@ HWTEST_F(LNNLaneLinkLedgerTest, LNN_LINK_LEDGER_MULTI_NODE_TEST_001, TestSize.Le
 
     info.lastTryBuildTime = TEST_TIME + MAX_NODE_SIZE;
     ret = sprintf_s(udid, sizeof(udid), "%s_%d", PEER_UDID, MAX_NODE_SIZE);
-    EXPECT_TRUE(ret != EOK);
+    EXPECT_GT(ret, 0);
     ret = LnnAddLinkLedgerInfo(udid, &info);
     EXPECT_EQ(ret, SOFTBUS_OK);
     EXPECT_NO_FATAL_FAILURE(LnnDeleteLinkLedgerInfo(udid));
@@ -190,7 +190,7 @@ HWTEST_F(LNNLaneLinkLedgerTest, LNN_LINK_LEDGER_MULTI_NODE_TEST_001, TestSize.Le
     EXPECT_EQ(ret, SOFTBUS_NOT_FIND);
 
     ret = sprintf_s(udid, sizeof(udid), "%s_%d", PEER_UDID, 1);
-    EXPECT_TRUE(ret != EOK);
+    EXPECT_GT(ret, 0);
     (void)memset_s(&info, sizeof(LinkLedgerInfo), 0, sizeof(LinkLedgerInfo));
     ret = LnnGetLinkLedgerInfo(udid, &info);
     EXPECT_EQ(ret, SOFTBUS_OK);
@@ -200,7 +200,7 @@ HWTEST_F(LNNLaneLinkLedgerTest, LNN_LINK_LEDGER_MULTI_NODE_TEST_001, TestSize.Le
 }
 
 /*
-* @tc.name: LNN_LINK_LEDGER_MULTI_NODE_TEST_001
+* @tc.name: LNN_LINK_LEDGER_MULTI_NODE_TEST_002
 * @tc.desc: test link ledger multi node
 * @tc.type: FUNC
 * @tc.require:
@@ -211,7 +211,7 @@ HWTEST_F(LNNLaneLinkLedgerTest, LNN_LINK_LEDGER_MULTI_NODE_TEST_002, TestSize.Le
     char udid[UDID_BUF_LEN] = {0};
     char firstUdid[UDID_BUF_LEN] = {0};
     int32_t ret = sprintf_s(firstUdid, sizeof(firstUdid), "%s_%d", PEER_UDID, 0);
-    EXPECT_TRUE(ret != EOK);
+    EXPECT_GT(ret, 0);
 
     AddLinkLedgerNodesByCount(PEER_UDID, TEST_TIME, MAX_NODE_SIZE);
     (void)memset_s(&info, sizeof(LinkLedgerInfo), 0, sizeof(LinkLedgerInfo));
@@ -226,7 +226,7 @@ HWTEST_F(LNNLaneLinkLedgerTest, LNN_LINK_LEDGER_MULTI_NODE_TEST_002, TestSize.Le
 
     info.lastTryBuildTime = TEST_TIME + MAX_NODE_SIZE + 1;
     ret = sprintf_s(udid, sizeof(udid), "%s_%d", PEER_UDID, MAX_NODE_SIZE);
-    EXPECT_TRUE(ret != EOK);
+    EXPECT_GT(ret, 0);
     ret = LnnAddLinkLedgerInfo(udid, &info);
     EXPECT_EQ(ret, SOFTBUS_OK);
     EXPECT_NO_FATAL_FAILURE(LnnDeleteLinkLedgerInfo(udid));
@@ -237,7 +237,7 @@ HWTEST_F(LNNLaneLinkLedgerTest, LNN_LINK_LEDGER_MULTI_NODE_TEST_002, TestSize.Le
     EXPECT_EQ(info.lastTryBuildTime, updateTime);
 
     ret = sprintf_s(udid, sizeof(udid), "%s_%d", PEER_UDID, 1);
-    EXPECT_TRUE(ret != EOK);
+    EXPECT_GT(ret, 0);
     (void)memset_s(&info, sizeof(LinkLedgerInfo), 0, sizeof(LinkLedgerInfo));
     ret = LnnGetLinkLedgerInfo(udid, &info);
     EXPECT_EQ(ret, SOFTBUS_NOT_FIND);
