@@ -248,6 +248,11 @@ bool RawLinkNeedUpdateAuthManager(const char *uuid, bool isServer)
     return GetLnnConnInterface()->RawLinkNeedUpdateAuthManager(uuid, isServer);
 }
 
+void SetDpGroupShare(const NodeInfo *info, AuthHandle authHandle)
+{
+    return GetLnnConnInterface()->SetDpGroupShare(info, authHandle);
+}
+
 void LnnStopOfflineTimingBySleHb(const char *networkId, ConnectionAddrType addrType)
 {
     return GetLnnConnInterface()->LnnStopOfflineTimingBySleHb(networkId, addrType);
