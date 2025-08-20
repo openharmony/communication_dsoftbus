@@ -159,7 +159,7 @@ static bool IsRepeatLeaveLNNRequest(const char *pkgName, const char *networkId)
     SoftBusList *list = g_lnnRequestInfo.leaveLNNRequestInfo;
     if (list == NULL) {
         LNN_LOGE(LNN_EVENT, "request info list empty");
-        return SOFTBUS_LIST_EMPTY;
+        return fasle;
     }
     LIST_FOR_EACH_ENTRY(info, &list->list, LeaveLnnRequestInfo, node) {
         if (strncmp(pkgName, info->pkgName, strlen(pkgName)) != 0) {
