@@ -1275,6 +1275,11 @@ static void GetNodeInfoDiscovery(NodeInfo *oldInfo, NodeInfo *info, NodeInfoAbil
     if (oldInfo != NULL) {
         info->metaInfo = oldInfo->metaInfo;
     }
+    if (LnnHasDiscoveryType(info, DISCOVERY_TYPE_BLE)) {
+        SoftBusSysTime time = { 0 };
+        (void)SoftBusGetTime(&time);
+        info->heartbeatTimestamp = (uint64_t)time.sec * HB_TIME_FACTOR + (uint64_t)time.usec / HB_TIME_FACTOR;
+    }
     if (oldInfo != NULL && LnnIsNodeOnline(oldInfo)) {
         char *anonyUuid = NULL;
         Anonymize(oldInfo->uuid, &anonyUuid);
