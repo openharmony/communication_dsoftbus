@@ -19,6 +19,7 @@
 #include "trans_uk_manager.h"
 #include "trans_uk_manager_test_mock.h"
 
+#include "softbus_access_token_adapter.h"
 #include "softbus_adapter_mem.h"
 #include "softbus_json_utils.h"
 #include "trans_lane_common_test_mock.h"
@@ -174,6 +175,179 @@ HWTEST_F(TransUkManagerTest, UkGetUkPolicyTest001, TestSize.Level1)
     EXPECT_EQ(SOFTBUS_OK, ret);
 }
 
+/**
+ * @tc.name: GetLocalAccountUidByUserIdTest_001
+ * @tc.desc: GetLocalAccountUidByUserId_ShouldReturnInvalidParam_WhenIdIsNull
+ * @tc.type: FUNC
+ * @tc.require:
+ */
+HWTEST_F(TransUkManagerTest, GetLocalAccountUidByUserIdTest_001, TestSize.Level0)
+{
+    uint32_t idLen = 20;
+    uint32_t len = 0;
+    int32_t userId = 1;
+
+    int32_t result = GetLocalAccountUidByUserId(NULL, idLen, &len, userId);
+
+    EXPECT_EQ(result, SOFTBUS_INVALID_PARAM);
+}
+
+/**
+ * @tc.name: GetLocalAccountUidByUserIdTest_002
+ * @tc.desc: GetLocalAccountUidByUserId_ShouldReturnInvalidParam_WhenIdIsNull
+ * @tc.type: FUNC
+ * @tc.require:
+ */
+HWTEST_F(TransUkManagerTest, GetLocalAccountUidByUserIdTest_002, TestSize.Level0)
+{
+    char id[20] = "";
+    uint32_t idLen = 20;
+    int32_t userId = 1;
+
+    int32_t result = GetLocalAccountUidByUserId(id, idLen, NULL, userId);
+    id[idLen - 1] = '\0';
+
+    EXPECT_EQ(result, SOFTBUS_INVALID_PARAM);
+}
+
+/**
+ * @tc.name: GetLocalAccountUidByUserIdTest_003
+ * @tc.desc: GetLocalAccountUidByUserId_ShouldReturnOK_WhenLnnGetLocalStrInfoSucceeds.
+ * @tc.type: FUNC
+ * @tc.require:
+ */
+HWTEST_F(TransUkManagerTest, GetLocalAccountUidByUserIdTest_003, TestSize.Level0)
+{
+    TransLaneCommonTestInterfaceMock mock;
+
+    char mockUid[] = "local_uid";
+    EXPECT_CALL(mock, LnnGetLocalStrInfo(STRING_KEY_ACCOUNT_UID, _, _))
+        .WillOnce(DoAll(
+            SetArrayArgument<1>(mockUid, mockUid + strlen(mockUid) + 1),
+            Return(SOFTBUS_OK)));
+    
+    uint32_t len = 10;
+    char id[10] = {0};
+    int32_t result = GetLocalAccountUidByUserId(id, sizeof(id), &len, 1);
+
+    EXPECT_EQ(result, SOFTBUS_OK);
+    EXPECT_STREQ(id, "local_uid");
+    EXPECT_EQ(len, strlen("local_uid"));
+}
+
+/**
+ * @tc.name: GetLocalAccountUidByUserIdTest_005
+ * @tc.desc: GetLocalAccountUidByUserId_ShouldReturnStrcpyErr_WhenStrcpySFails.
+ * @tc.type: FUNC
+ * @tc.require:
+ */
+HWTEST_F(TransUkManagerTest, GetLocalAccountUidByUserIdTest_005, TestSize.Level0)
+{
+    uint32_t len = 10;
+    char userId = 1;
+    char id[10] = "test";
+    NiceMock<TransLaneCommonTestInterfaceMock> TransLaneCommonMock;
+    EXPECT_CALL(TransLaneCommonMock, LnnGetLocalStrInfo).WillOnce(Return(SOFTBUS_STRCPY_ERR));
+    int32_t result = GetLocalAccountUidByUserId(id, len, &len, userId);
+    EXPECT_EQ(result, SOFTBUS_INVALID_PARAM);
+}
+
+/**
+ * @tc.name: GetLocalAccountUidByUserIdTest_006
+ * @tc.desc: GetLocalAccountUidByUserIdTest
+ * @tc.type: FUNC
+ * @tc.require:
+ */
+HWTEST_F(TransUkManagerTest, GetLocalAccountUidByUserIdTest_006, TestSize.Level1)
+{
+    const uint32_t shortLen = 5;
+    char shortId[shortLen] = {0};
+    uint32_t outLen = 0;
+    int32_t testUserId = 1001;
+
+    NiceMock<TransLaneCommonTestInterfaceMock> TransLaneCommonMock;
+    EXPECT_CALL(TransLaneCommonMock, LnnGetLocalStrInfo).WillOnce(Return(SOFTBUS_NETWORK_NOT_FOUND));
+
+    int32_t ret = GetLocalAccountUidByUserId(shortId, shortLen, &outLen, testUserId);
+
+    EXPECT_EQ(ret, SOFTBUS_INVALID_PARAM);
+    EXPECT_EQ(outLen, 0u);
+}
+
+/**
+ * @tc.name: GetLocalAccountUidByUserIdTest_007
+ * @tc.desc: GetLocalAccountUidByUserIdTest_007
+ * @tc.type: FUNC
+ * @tc.require:
+ */
+HWTEST_F(TransUkManagerTest, GetLocalAccountUidByUserIdTest_007, TestSize.Level1)
+{
+    const uint32_t testLen = 20;
+    char badId[testLen] = { 0 };
+    (void)memset_s(badId, testLen, 'a', testLen - 1);
+    uint32_t outLen = 0;
+    int32_t testUserId = 1002;
+
+    NiceMock<TransLaneCommonTestInterfaceMock> TransLaneCommonMock;
+    EXPECT_CALL(TransLaneCommonMock, LnnGetLocalStrInfo).WillOnce(Return(SOFTBUS_NETWORK_NOT_FOUND));
+
+    int32_t ret = GetLocalAccountUidByUserId(badId, testLen, &outLen, testUserId);
+
+    EXPECT_EQ(ret, SOFTBUS_OK);
+    EXPECT_EQ(badId[testLen - 1], '\0');
+}
+
+/**
+ * @tc.name: FillHapSinkInfoToAppInfoTest_001
+ * @tc.desc: FillHapSinkInfoToAppInfo_ShouleReturnImmediately_WhenAppInfoIsNull.
+ * @tc.type: FUNC
+ * @tc.require:
+ */
+HWTEST_F(TransUkManagerTest, FillHapSinkInfoToAppInfoTest_001, TestSize.Level0)
+{
+    EXPECT_NO_FATAL_FAILURE(FillHapSinkAclInfoToAppInfo(NULL));
+}
+
+/**
+ * @tc.name: FillHapSinkInfoToAppInfoTest_002
+ * @tc.desc: FillHapSinkInfoToAppInfo_ShouleFillAclInfo_WhenTokenTypeIsHAP.
+ * @tc.type: FUNC
+ * @tc.require:
+ */
+HWTEST_F(TransUkManagerTest, FillHapSinkInfoToAppInfoTest_002, TestSize.Level0)
+{
+    AppInfo *appInfo = new AppInfo();
+    appInfo->myData.tokenType = ACCESS_TOKEN_TYPE_HAP;
+    (void)strcpy_s(appInfo->myData.sessionName, sizeof(appInfo->myData.sessionName), "test_session");
+    (void)strcpy_s(appInfo->myData.accountId, sizeof(appInfo->myData.accountId), "test_account");
+    appInfo->myData.userId = 1001;
+    NiceMock<TransLaneCommonTestInterfaceMock> TransLaneCommonMock;
+    EXPECT_CALL(TransLaneCommonMock, TransGetAclInfoBySessionName).WillOnce(Return(SOFTBUS_OK));
+
+    EXPECT_NO_FATAL_FAILURE(FillHapSinkAclInfoToAppInfo(appInfo));
+    delete appInfo;
+}
+
+/**
+ * @tc.name: FillHapSinkInfoToAppInfoTest_003
+ * @tc.desc: FillHapSinkInfoToAppInfo_ShouleFillAclInfo_WhenTokenTypeIsHAP.
+ * @tc.type: FUNC
+ * @tc.require:
+ */
+HWTEST_F(TransUkManagerTest, FillHapSinkInfoToAppInfoTest_003, TestSize.Level0)
+{
+    AppInfo *appInfo = new AppInfo();
+    appInfo->myData.tokenType = ACCESS_TOKEN_TYPE_HAP;
+    (void)strcpy_s(appInfo->myData.sessionName, sizeof(appInfo->myData.sessionName), "test_session");
+    (void)strcpy_s(appInfo->myData.accountId, sizeof(appInfo->myData.accountId), "test_account");
+    appInfo->myData.userId = 1001;
+    NiceMock<TransLaneCommonTestInterfaceMock> TransLaneCommonMock;
+    EXPECT_CALL(TransLaneCommonMock, TransGetAclInfoBySessionName).WillOnce(Return(SOFTBUS_NO_INIT));
+
+    EXPECT_NO_FATAL_FAILURE(FillHapSinkAclInfoToAppInfo(appInfo));
+    delete appInfo;
+}
+    
 /**
  * @tc.name: UkEncryptAndAddSinkSessionKeyTest001
  * @tc.desc: UkEncryptAndAddSinkSessionKeyTest001.

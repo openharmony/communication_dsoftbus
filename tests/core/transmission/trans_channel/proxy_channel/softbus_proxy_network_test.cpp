@@ -317,6 +317,83 @@ HWTEST_F(SoftbusProxyNetworkTest, TransOpenNetWorkingChannelTest001, TestSize.Le
 }
 
 /**
+  * @tc.name: TransNotifyDecryptNetworkingMsg001
+  * @tc.desc: TransNotifyDecryptNetworkingMsg
+  * @tc.type: FUNC
+  * @tc.require:
+  */
+HWTEST_F(SoftbusProxyNetworkTest, TransNotifyDecryptNetworkingMsg001, TestSize.Level1)
+{
+    SoftbusTransProxyNetworkMock networkObj;
+    EXPECT_CALL(networkObj, TransProxyGetSessionKeyByChanId).WillOnce(Return(SOFTBUS_TRANS_SESSION_INFO_NOT_FOUND));
+
+    int32_t ret = TransNotifyDecryptNetworkingMsg(TEST_VALID_SESSIONNAME, TEST_CHANNEL_ID, nullptr, TEST_NUMBER_256);
+    EXPECT_EQ(ret, SOFTBUS_TRANS_SESSION_INFO_NOT_FOUND);
+}
+
+/**
+  * @tc.name: TransNotifyDecryptNetworkingMsg002
+  * @tc.desc: TransNotifyDecryptNetworkingMsg
+  * @tc.type: FUNC
+  * @tc.require:
+  */
+HWTEST_F(SoftbusProxyNetworkTest, TransNotifyDecryptNetworkingMsg002, TestSize.Level1)
+{
+    char sessionKey[SESSION_KEY_LENGTH] = "njfejfjpfjewpfqpFHEQWP";
+
+    SoftbusTransProxyNetworkMock networkObj;
+    EXPECT_CALL(networkObj, TransProxyGetSessionKeyByChanId)
+        .WillRepeatedly(DoAll(SetArgPointee<1>(*sessionKey), Return(SOFTBUS_OK)));
+
+    EXPECT_CALL(networkObj, SoftBusDecryptData).WillOnce(Return(SOFTBUS_DECRYPT_ERR));
+
+    int32_t ret = TransNotifyDecryptNetworkingMsg(TEST_VALID_SESSIONNAME, TEST_CHANNEL_ID, nullptr, TEST_NUMBER_256);
+    EXPECT_EQ(ret, SOFTBUS_DECRYPT_ERR);
+}
+
+/**
+  * @tc.name: TransNotifyDecryptNetworkingMsg003
+  * @tc.desc: TransNotifyDecryptNetworkingMsg
+  * @tc.type: FUNC
+  * @tc.require:
+  */
+HWTEST_F(SoftbusProxyNetworkTest, TransNotifyDecryptNetworkingMsg003, TestSize.Level1)
+{
+    char sessionKey[SESSION_KEY_LENGTH] = "njfejfjpfjewpfqpFHEQWP";
+
+    SoftbusTransProxyNetworkMock networkObj;
+    EXPECT_CALL(networkObj, TransProxyGetSessionKeyByChanId)
+        .WillRepeatedly(DoAll(SetArgPointee<1>(*sessionKey), Return(SOFTBUS_OK)));
+
+    EXPECT_CALL(networkObj, SoftBusDecryptData).WillOnce(Return(SOFTBUS_OK));
+
+    SoftbusProxyNetworkTest::TestRegisterNetworkingChannelListener();
+    int32_t ret = TransNotifyDecryptNetworkingMsg("test.com.session", TEST_CHANNEL_ID, nullptr, TEST_NUMBER_256);
+    EXPECT_EQ(ret, SOFTBUS_NOT_FIND);
+}
+
+/**
+  * @tc.name: TransNotifyDecryptNetworkingMsg004
+  * @tc.desc: TransNotifyDecryptNetworkingMsg
+  * @tc.type: FUNC
+  * @tc.require:
+  */
+HWTEST_F(SoftbusProxyNetworkTest, TransNotifyDecryptNetworkingMsg004, TestSize.Level1)
+{
+    char sessionKey[SESSION_KEY_LENGTH] = "njfejfjpfjewpfqpFHEQWP";
+
+    SoftbusTransProxyNetworkMock networkObj;
+    EXPECT_CALL(networkObj, TransProxyGetSessionKeyByChanId)
+        .WillRepeatedly(DoAll(SetArgPointee<1>(*sessionKey), Return(SOFTBUS_OK)));
+
+    EXPECT_CALL(networkObj, SoftBusDecryptData).WillOnce(Return(SOFTBUS_OK));
+
+    SoftbusProxyNetworkTest::TestRegisterNetworkingChannelListener();
+    int32_t ret = TransNotifyDecryptNetworkingMsg(TEST_VALID_SESSIONNAME, TEST_CHANNEL_ID, nullptr, TEST_NUMBER_256);
+    EXPECT_EQ(ret, SOFTBUS_OK);
+}
+
+/**
  * @tc.name: NotifyNetworkingMsgReceived001
  * @tc.desc: NotifyNetworkingMsgReceived
  * @tc.type: FUNC
