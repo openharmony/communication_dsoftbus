@@ -305,7 +305,7 @@ static void TryUpdateTimeSyncReq(TimeSyncReqInfo *info)
             info->curPeriod = curPeriod;
             LNN_LOGI(LNN_CLOCK, "update time sync request. rc=%{public}d",
                 LnnStartTimeSyncImplPacked(info->targetNetworkId, curAccuracy,
-                    curPeriod, &g_timeSyncImplCb));
+                curPeriod, &g_timeSyncImplCb));
         }
     } else {
         LNN_LOGI(LNN_CLOCK, "stop time sync request. rc=%{public}d",
