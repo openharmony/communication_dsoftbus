@@ -37,7 +37,7 @@
 #define AUTH_PKT_HEAD_LEN        24
 #define AUTH_SOCKET_MAX_DATA_LEN (64 * 1024)
 #define TCP_KEEPALIVE_TOS_VAL    180
-#define RECV_DATA_TIMEOUT        (2 * 1000 * 1000)
+#define RECV_DATA_TIMEOUT        (10 * 1000 * 1000)
 
 typedef struct {
     int32_t keepaliveIdle;
@@ -245,7 +245,7 @@ static uint8_t *RecvPacketData(int32_t fd, uint32_t len)
     }
     uint32_t offset = 0;
     while (offset < len) {
-        ssize_t recvLen = ConnRecvSocketData(fd, (char *)(data + offset), (size_t)(len - offset), 0);
+        ssize_t recvLen = ConnRecvSocketData(fd, (char *)(data + offset), (size_t)(len - offset), RECV_DATA_TIMEOUT);
         if (recvLen < 0) {
             AUTH_LOGE(AUTH_CONN, "recv data fail.");
             SoftBusFree(data);
