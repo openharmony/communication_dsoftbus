@@ -1767,4 +1767,22 @@ HWTEST_F(LNNDisctributedLedgerTest, IS_IGNORE_UPDATE_TO_LEDGER_Test_001, TestSiz
     newTimestamp = 1;
     EXPECT_EQ(false, IsIgnoreUpdateToLedger(oldStateVersion, oldTimestamp, newStateVersion, newTimestamp));
 }
+
+/*
+ * @tc.name: GetNodeInfoDiscovery_Test_001
+ * @tc.desc: GetNodeInfoDiscovery BLE online update heartbeatTimestamp
+ * @tc.type: FUNC
+ * @tc.require: IBH09C
+ */
+HWTEST_F(LNNDisctributedLedgerTest, GetNodeInfoDiscovery_Test_001, TestSize.Level1)
+{
+    NodeInfo info;
+    NodeInfoAbility infoAbility;
+    (void)memset_s(&infoAbility, sizeof(NodeInfoAbility), 0, sizeof(infoAbility));
+    (void)memset_s(&info, sizeof(NodeInfo), 0, sizeof(info));
+    info.discoveryType = 1 << DISCOVERY_TYPE_BLE;
+    EXPECT_NO_FATAL_FAILURE(GetNodeInfoDiscovery(NULL, &info, &infoAbility));
+    info.discoveryType = 1 << DISCOVERY_TYPE_WIFI;
+    EXPECT_NO_FATAL_FAILURE(GetNodeInfoDiscovery(NULL, &info, &infoAbility));
+}
 } // namespace OHOS
