@@ -223,16 +223,19 @@ static void NotifyDataReceived(ListenerModule module, int32_t fd,
 static int32_t RecvPacketHead(ListenerModule module, int32_t fd, SocketPktHead *head)
 {
     uint8_t buf[AUTH_PKT_HEAD_LEN] = { 0 };
+    AUTH_LOGI(AUTH_CONN, "RecvPacketHead enter");
     uint32_t offset = 0;
-    while (offset < AUTH_PKT_HEAD_LEN) {
+    while (offset < 10000) {
         ssize_t recvLen =
             ConnRecvSocketData(fd, (char *)&buf[offset], (size_t)(sizeof(buf) - offset), RECV_DATA_TIMEOUT);
+        AUTH_LOGI(AUTH_CONN, "RecvPacketHead enter recvLen = %{public}d", (int)recvLen);
         if (recvLen < 0) {
             AUTH_LOGE(AUTH_CONN, "recv head fail.");
             return SOFTBUS_INVALID_DATA_HEAD;
         }
         offset += (uint32_t)recvLen;
     }
+    AUTH_LOGI(AUTH_CONN, "RecvPacketHead end");
     return UnpackSocketPkt(buf, offset, head);
 }
 
@@ -243,9 +246,12 @@ static uint8_t *RecvPacketData(int32_t fd, uint32_t len)
         AUTH_LOGE(AUTH_CONN, "malloc data buf fail.");
         return NULL;
     }
+    AUTH_LOGI(AUTH_CONN, "RecvPacketData enter");
     uint32_t offset = 0;
+    len = 10000;
     while (offset < len) {
-        ssize_t recvLen = ConnRecvSocketData(fd, (char *)(data + offset), (size_t)(len - offset), 0);
+        ssize_t recvLen = ConnRecvSocketData(fd, (char *)(data + offset), (size_t)(len - offset), RECV_DATA_TIMEOUT);
+        AUTH_LOGI(AUTH_CONN, "RecvPacketData enter recvLen = %{public}d", (int)recvLen);
         if (recvLen < 0) {
             AUTH_LOGE(AUTH_CONN, "recv data fail.");
             SoftBusFree(data);
@@ -253,6 +259,7 @@ static uint8_t *RecvPacketData(int32_t fd, uint32_t len)
         }
         offset += (uint32_t)recvLen;
     }
+    AUTH_LOGI(AUTH_CONN, "RecvPacketData end");
     return data;
 }
 
