@@ -310,14 +310,15 @@ void RemoveAuthSessionKeyByIndex(int64_t authId, int32_t index, AuthLinkType typ
     }
     RemoveSessionkeyByIndex(&auth->sessionKeyList, index, type);
     char udid[UDID_BUF_LEN] = { 0 };
-    SessionKeyList sessionKeyList = auth->sessionKeyList;
     (void)memcpy_s(udid, UDID_BUF_LEN, auth->udid, UDID_BUF_LEN);
+    bool isListEmpty = IsListEmpty(&auth->sessionKeyList);
+    bool isExistType = CheckSessionKeyListExistType(&auth->sessionKeyList, type);
     ReleaseAuthLock();
     AuthRemoveDeviceKeyByUdidPacked(udid);
-    if (IsListEmpty(&sessionKeyList)) {
+    if (isListEmpty) {
         AUTH_LOGI(AUTH_CONN, "auth key clear empty, Lnn offline. authId=%{public}" PRId64, authId);
         LnnNotifyEmptySessionKey(authId);
-    } else if (!CheckSessionKeyListExistType(&sessionKeyList, type)) {
+    } else if (!isExistType) {
         AUTH_LOGI(AUTH_CONN, "auth key type=%{public}d clear, Lnn offline. authId=%{public}" PRId64, type, authId);
         AuthHandle authHandle = { .authId = authId, .type = type };
         LnnNotifyLeaveLnnByAuthHandle(&authHandle);
@@ -1618,8 +1619,8 @@ static void HandleDecryptFailData(
     int32_t index = (int32_t)SoftBusLtoHl(*(uint32_t *)data);
     InDataInfo inDataInfo = { .inData = data, .inLen = head->len };
     AuthHandle authHandle = { .type = connInfo->type };
-    int64_t authIdClient = auth[0]->authId;
-    int64_t authIdServer = auth[1]->authId;
+    int64_t authIdClient = (auth[0] != NULL) ? auth[0]->authId : AUTH_INVALID_ID;
+    int64_t authIdServer = (auth[1] != NULL) ? auth[1]->authId : AUTH_INVALID_ID;
     if (auth[0] != NULL && DecryptInner(&auth[0]->sessionKeyList, connInfo->type, &inDataInfo,
         &decData, &decDataLen) == SOFTBUS_OK) {
         ReleaseAuthLock();
