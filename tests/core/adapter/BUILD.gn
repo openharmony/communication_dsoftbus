@@ -220,6 +220,7 @@ ohos_unittest("LnnOhosAccountAdapterTest") {
   include_dirs = [
     "$dsoftbus_root_path/core/adapter/bus_center/include",
     "$dsoftbus_root_path/core/authentication/include",
+    "$dsoftbus_root_path/core/transmission/common/include",
     "$dsoftbus_root_path/interfaces/kits/common",
     "unittest",
   ]
@@ -242,6 +243,7 @@ ohos_unittest("LnnOhosAccountAdapterTest") {
       "googletest:gtest_main",
       "hilog:libhilog",
       "ipc:ipc_single",
+      "os_account:libaccountkits",
       "os_account:os_account_innerkits",
     ]
   } else {
