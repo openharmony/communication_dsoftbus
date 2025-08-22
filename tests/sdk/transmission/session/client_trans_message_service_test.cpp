@@ -188,7 +188,8 @@ static int32_t AddSessionServerAndSession(
 
     TestGenerateCommParam(sessionParam);
     sessionParam->sessionName = sessionName;
-    int32_t ret = ClientAddSessionServer(SEC_TYPE_PLAINTEXT, g_pkgName, sessionName, &g_sessionlistener);
+    uint64_t timestamp = 0;
+    int32_t ret = ClientAddSessionServer(SEC_TYPE_PLAINTEXT, g_pkgName, sessionName, &g_sessionlistener, &timestamp);
     if (ret != SOFTBUS_OK) {
         return ret;
     }

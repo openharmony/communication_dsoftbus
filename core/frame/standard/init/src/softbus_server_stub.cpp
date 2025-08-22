@@ -516,11 +516,8 @@ int32_t SoftBusServerStub::CreateSessionServerInner(MessageParcel &data, Message
     }
     sessionName = strName.c_str();
 #endif
-    if (SoftBusCheckTimestamp(data, sessionName) != SOFTBUS_OK) {
-        retReply = SOFTBUS_TRANS_PROXY_READUINT_FAILED;
-        goto EXIT;
-    }
-    retReply = CreateSessionServer(pkgName, sessionName);
+    (void)SoftBusCheckTimestamp(data, sessionName);
+    retReply = CreateSessionServer(pkgName, sessionName, 0);
 EXIT:
     if (!reply.WriteInt32(retReply)) {
         COMM_LOGE(COMM_SVC, "CreateSessionServerInner write reply failed!");
@@ -565,7 +562,7 @@ int32_t SoftBusServerStub::RemoveSessionServerInner(MessageParcel &data, Message
         retReply = SOFTBUS_TRANS_PROXY_READUINT_FAILED;
         goto EXIT;
     }
-    retReply = RemoveSessionServer(pkgName, sessionName);
+    retReply = RemoveSessionServer(pkgName, sessionName, 0);
 EXIT:
     if (!reply.WriteInt32(retReply)) {
         COMM_LOGE(COMM_SVC, "RemoveSessionServerInner write reply failed!");

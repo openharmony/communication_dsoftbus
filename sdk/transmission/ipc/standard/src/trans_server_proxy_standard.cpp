@@ -16,7 +16,6 @@
 #include "trans_server_proxy_standard.h"
 
 #include "ipc_skeleton.h"
-#include "softbus_adapter_timer.h"
 #include "softbus_error_code.h"
 #include "softbus_server_ipc_interface_code.h"
 #include "trans_log.h"
@@ -65,7 +64,7 @@ int32_t TransServerProxy::SoftbusRegisterService(const char *clientPkgName, cons
     return SOFTBUS_OK;
 }
 
-int32_t TransServerProxy::CreateSessionServer(const char *pkgName, const char *sessionName)
+int32_t TransServerProxy::CreateSessionServer(const char *pkgName, const char *sessionName, uint64_t timestamp)
 {
     if (pkgName == nullptr || sessionName == nullptr) {
         return SOFTBUS_INVALID_PARAM;
@@ -89,7 +88,6 @@ int32_t TransServerProxy::CreateSessionServer(const char *pkgName, const char *s
         TRANS_LOGE(TRANS_SDK, "write session name failed!");
         return SOFTBUS_TRANS_PROXY_WRITECSTRING_FAILED;
     }
-    uint64_t timestamp = SoftBusGetSysTimeMs();
     if (!data.WriteUint64(timestamp)) {
         TRANS_LOGE(TRANS_SDK, "write timestamp failed!");
         return SOFTBUS_TRANS_PROXY_WRITEINT_FAILED;
@@ -109,7 +107,7 @@ int32_t TransServerProxy::CreateSessionServer(const char *pkgName, const char *s
     return serverRet;
 }
 
-int32_t TransServerProxy::RemoveSessionServer(const char *pkgName, const char *sessionName)
+int32_t TransServerProxy::RemoveSessionServer(const char *pkgName, const char *sessionName, uint64_t timestamp)
 {
     if (pkgName == nullptr || sessionName == nullptr) {
         return SOFTBUS_INVALID_PARAM;
@@ -133,7 +131,6 @@ int32_t TransServerProxy::RemoveSessionServer(const char *pkgName, const char *s
         TRANS_LOGE(TRANS_SDK, "session name failed!");
         return SOFTBUS_TRANS_PROXY_WRITECSTRING_FAILED;
     }
-    uint64_t timestamp = SoftBusGetSysTimeMs();
     if (!data.WriteUint64(timestamp)) {
         TRANS_LOGE(TRANS_SDK, "write timestamp failed!");
         return SOFTBUS_TRANS_PROXY_WRITEINT_FAILED;

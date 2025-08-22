@@ -79,17 +79,19 @@ int32_t BusCenterServerProxy::SoftbusRegisterService(const char *clientPkgName, 
     return SOFTBUS_OK;
 }
 
-int32_t BusCenterServerProxy::CreateSessionServer(const char *pkgName, const char *sessionName)
+int32_t BusCenterServerProxy::CreateSessionServer(const char *pkgName, const char *sessionName, uint64_t timestamp)
 {
     (void)pkgName;
     (void)sessionName;
+    (void)timestamp;
     return SOFTBUS_OK;
 }
 
-int32_t BusCenterServerProxy::RemoveSessionServer(const char *pkgName, const char *sessionName)
+int32_t BusCenterServerProxy::RemoveSessionServer(const char *pkgName, const char *sessionName, uint64_t timestamp)
 {
     (void)pkgName;
     (void)sessionName;
+    (void)timestamp;
     return SOFTBUS_OK;
 }
 

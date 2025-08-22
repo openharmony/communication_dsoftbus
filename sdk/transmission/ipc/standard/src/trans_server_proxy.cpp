@@ -126,7 +126,7 @@ void TransServerProxyDeInit(void)
     g_serverProxy = nullptr;
 }
 
-int32_t ServerIpcCreateSessionServer(const char *pkgName, const char *sessionName)
+int32_t ServerIpcCreateSessionServer(const char *pkgName, const char *sessionName, uint64_t timestamp)
 {
     sptr<TransServerProxy> proxy = RetryGetProxy();
     TRANS_CHECK_AND_RETURN_RET_LOGE(
@@ -137,10 +137,10 @@ int32_t ServerIpcCreateSessionServer(const char *pkgName, const char *sessionNam
         return SOFTBUS_INVALID_PARAM;
     }
 
-    return proxy->CreateSessionServer(pkgName, sessionName);
+    return proxy->CreateSessionServer(pkgName, sessionName, timestamp);
 }
 
-int32_t ServerIpcRemoveSessionServer(const char *pkgName, const char *sessionName)
+int32_t ServerIpcRemoveSessionServer(const char *pkgName, const char *sessionName, uint64_t timestamp)
 {
     sptr<TransServerProxy> proxy = GetProxy();
     TRANS_CHECK_AND_RETURN_RET_LOGE(
@@ -150,7 +150,7 @@ int32_t ServerIpcRemoveSessionServer(const char *pkgName, const char *sessionNam
         TRANS_LOGE(TRANS_SDK, "pkgName or sessionName is nullptr!");
         return SOFTBUS_INVALID_PARAM;
     }
-    return proxy->RemoveSessionServer(pkgName, sessionName);
+    return proxy->RemoveSessionServer(pkgName, sessionName, timestamp);
 }
 
 int32_t ServerIpcOpenSession(const SessionParam *param, TransInfo *info)
