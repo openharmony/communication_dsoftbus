@@ -58,7 +58,7 @@
 #include "trans_session_manager.h"
 #include "trans_uk_manager.h"
 
-#define ID_OFFSET (0xABAB0000)
+#define ID_OFFSET (1)
 
 #define D2D_CHANNEL_CONTROL_TIMEOUT    60    // 60s
 #define PROXY_CHANNEL_CONTROL_TIMEOUT  19    // 19s
