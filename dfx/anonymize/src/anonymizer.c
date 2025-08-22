@@ -26,6 +26,7 @@
 
 #define COMMON_STRING_MAX_LEN 128
 #define WIDE_CHAR_MAX_LEN 8
+#define HALF_STR_NUM 2
 
 typedef struct {
     bool (*Matcher)(const char *, uint32_t);
@@ -200,6 +201,7 @@ static int32_t AnonymizeIpAddr(const char *str, uint32_t len, char **anonymized)
 {
     int32_t ret = CopyStr(str, anonymized);
     COMM_CHECK_AND_RETURN_RET_LOGE(ret == SOFTBUS_OK, ret, COMM_DFX, "copy ip addr failed");
+    COMM_CHECK_AND_RETURN_RET_LOGE(len != 0, SOFTBUS_INVALID_PARAM, COMM_DFX, "len is invalid");
 
     for (uint32_t i = len - 1; i >= 0; --i) {
         if (IsDot((*anonymized)[i])) {
@@ -335,7 +337,7 @@ static int32_t AnonymizeCommString(const char *str, uint32_t len, char **anonymi
 
 static int32_t AnonymizeHalfStr(const char *str, uint32_t len, char **anonymized)
 {
-    uint32_t plainTextLen = len / 2;
+    uint32_t plainTextLen = len / HALF_STR_NUM;
     uint32_t plainTextOffset = len - plainTextLen;
     uint32_t anonymizeLen = 1 + plainTextLen;
 

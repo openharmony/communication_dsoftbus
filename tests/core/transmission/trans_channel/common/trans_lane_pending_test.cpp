@@ -188,14 +188,14 @@ static int32_t TestLnnCancelLane(uint32_t laneHandle)
     return SOFTBUS_OK;
 }
 
-static LnnLaneManager g_LaneManager = {
+static LnnLaneManager g_laneManager = {
     .lnnGetLaneHandle = TestApplyLaneReqId,
     .lnnAllocLane = TestLnnAllocLane,
     .lnnFreeLane = TestLnnFreeLane,
     .lnnCancelLane = TestLnnCancelLane,
 };
 
-static LnnLaneManager g_LaneManagerApplyFail = {
+static LnnLaneManager g_laneManagerApplyFail = {
     .lnnGetLaneHandle = nullptr,
     .lnnAllocLane = TestLnnAllocLaneFail,
     .lnnFreeLane = TestLnnFreeLaneFail,
@@ -438,7 +438,7 @@ HWTEST_F(TransLanePendingTest, TransGetLaneInfo002, TestSize.Level1)
     EXPECT_EQ(SOFTBUS_WIFI_DIRECT_INIT_FAILED, ret);
 
     EXPECT_CALL(TransLanePendingMock, TransGetUidAndPid).WillRepeatedly(Return(SOFTBUS_OK));
-    EXPECT_CALL(TransLanePendingMock, GetLaneManager).WillRepeatedly(Return(&g_LaneManager));
+    EXPECT_CALL(TransLanePendingMock, GetLaneManager).WillRepeatedly(Return(&g_laneManager));
     EXPECT_CALL(TransLanePendingMock, LnnRequestLane).WillRepeatedly(Return(SOFTBUS_OK));
     EXPECT_CALL(TransLanePendingMock, SoftBusCondWait).WillOnce(Return(SOFTBUS_OK));
     ret = TransGetLaneInfo(param, &connInfo, &laneHandle);
@@ -496,7 +496,7 @@ HWTEST_F(TransLanePendingTest, TransAsyncGetLaneInfoByOption001, TestSize.Level1
 
     SoftBusList *tmpList = g_asyncReqLanePendingList;
     g_asyncReqLanePendingList = nullptr;
-    EXPECT_CALL(TransLanePendingMock, GetLaneManager).WillRepeatedly(Return(&g_LaneManager));
+    EXPECT_CALL(TransLanePendingMock, GetLaneManager).WillRepeatedly(Return(&g_laneManager));
     ret = TransAsyncGetLaneInfoByOption(newParam, &requestOption, &laneHandle, 0, 0);
     EXPECT_EQ(SOFTBUS_INVALID_PARAM, ret);
     g_asyncReqLanePendingList = tmpList;
@@ -568,13 +568,13 @@ HWTEST_F(TransLanePendingTest, TransAsyncGetLaneInfoByQos001, TestSize.Level1)
     int32_t ret = TransAsyncGetLaneInfoByQos(newParam, &allocInfo, &laneHandle, 0, 0);
     EXPECT_EQ(SOFTBUS_TRANS_GET_LANE_INFO_ERR, ret);
 
-    EXPECT_CALL(TransLanePendingMock, GetLaneManager).WillRepeatedly(Return(&g_LaneManagerApplyFail));
+    EXPECT_CALL(TransLanePendingMock, GetLaneManager).WillRepeatedly(Return(&g_laneManagerApplyFail));
     ret = TransAsyncGetLaneInfoByQos(newParam, &allocInfo, &laneHandle, 0, 0);
     EXPECT_EQ(SOFTBUS_TRANS_GET_LANE_INFO_ERR, ret);
 
     SoftBusList *tmpList = g_asyncReqLanePendingList;
     g_asyncReqLanePendingList = nullptr;
-    EXPECT_CALL(TransLanePendingMock, GetLaneManager).WillRepeatedly(Return(&g_LaneManager));
+    EXPECT_CALL(TransLanePendingMock, GetLaneManager).WillRepeatedly(Return(&g_laneManager));
     ret = TransAsyncGetLaneInfoByQos(newParam, &allocInfo, &laneHandle, 0, 0);
     EXPECT_EQ(SOFTBUS_INVALID_PARAM, ret);
     g_asyncReqLanePendingList = tmpList;
@@ -1088,11 +1088,11 @@ HWTEST_F(TransLanePendingTest, TransWaitingFreeLane001, TestSize.Level1)
     ret = TransDelLaneFreeFromPending(laneReqId, false);
     EXPECT_EQ(SOFTBUS_OK, ret);
 
-    EXPECT_CALL(TransLanePendingMock, GetLaneManager).WillRepeatedly(Return(&g_LaneManagerApplyFail));
+    EXPECT_CALL(TransLanePendingMock, GetLaneManager).WillRepeatedly(Return(&g_laneManagerApplyFail));
     ret = TransWaitingFreeLane(laneReqId);
     EXPECT_EQ(SOFTBUS_INVALID_PARAM, ret);
 
-    EXPECT_CALL(TransLanePendingMock, GetLaneManager).WillRepeatedly(Return(&g_LaneManager));
+    EXPECT_CALL(TransLanePendingMock, GetLaneManager).WillRepeatedly(Return(&g_laneManager));
     EXPECT_CALL(TransLanePendingMock, SoftBusCondWait).WillRepeatedly(Return(SOFTBUS_OK));
     ret = TransAddFreeLaneToPending(laneReqId);
     EXPECT_EQ(SOFTBUS_OK, ret);
@@ -1117,7 +1117,7 @@ HWTEST_F(TransLanePendingTest, TransFreeLaneByLaneHandle001, TestSize.Level1)
     int32_t ret = TransFreeLaneByLaneHandle(laneReqId, true);
     EXPECT_EQ(SOFTBUS_TRANS_GET_LANE_INFO_ERR, ret);
     
-    EXPECT_CALL(TransLanePendingMock, GetLaneManager).WillRepeatedly(Return(&g_LaneManager));
+    EXPECT_CALL(TransLanePendingMock, GetLaneManager).WillRepeatedly(Return(&g_laneManager));
     ret = TransFreeLaneByLaneHandle(laneReqId, true);
     EXPECT_EQ(SOFTBUS_OK, ret);
 
@@ -1333,10 +1333,10 @@ HWTEST_F(TransLanePendingTest, CancelLaneOnWaitLaneState001, TestSize.Level1)
 
     uint32_t laneHandle = TEST_LANE_ID;
     NiceMock<TransLanePendingTestInterfaceMock> TransLanePendingMock;
-    EXPECT_CALL(TransLanePendingMock, GetLaneManager).WillRepeatedly(Return(&g_LaneManagerApplyFail));
+    EXPECT_CALL(TransLanePendingMock, GetLaneManager).WillRepeatedly(Return(&g_laneManagerApplyFail));
     CancelLaneOnWaitLaneState(laneHandle, true);
 
-    EXPECT_CALL(TransLanePendingMock, GetLaneManager).WillRepeatedly(Return(&g_LaneManager));
+    EXPECT_CALL(TransLanePendingMock, GetLaneManager).WillRepeatedly(Return(&g_laneManager));
     CancelLaneOnWaitLaneState(laneHandle, true);
 }
 
@@ -1386,7 +1386,7 @@ HWTEST_F(TransLanePendingTest, TransAsyncGetLaneInfo002, TestSize.Level1)
 
     int32_t channelType = CHANNEL_TYPE_TCP_DIRECT;
     CoreSessionState state = CORE_SESSION_STATE_INIT;
-    EXPECT_CALL(TransLanePendingMock, GetLaneManager).WillRepeatedly(Return(&g_LaneManager));
+    EXPECT_CALL(TransLanePendingMock, GetLaneManager).WillRepeatedly(Return(&g_laneManager));
     EXPECT_CALL(TransLanePendingMock, TransGetUidAndPid).WillRepeatedly(Return(SOFTBUS_OK));
     ret =
         TransAddSocketChannelInfo(TEST_SESSION_NAME, TEST_SESSION_ID, TEST_CHANNEL_ID, channelType, state);

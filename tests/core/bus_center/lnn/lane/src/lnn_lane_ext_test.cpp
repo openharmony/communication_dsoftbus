@@ -1043,14 +1043,14 @@ HWTEST_F(LNNLaneExtMockTest, LNN_ADD_LANE_IS_VALID_LINK_ADDR_002, TestSize.Level
 
 /*
 * @tc.name: CHECK_LANE_LINK_EXIST_BY_TYPE_001
-* @tc.desc: test CheckLaneLinkExistByType
+* @tc.desc: test ExistsLaneLinkByType
 * @tc.type: FUNC
 * @tc.require:
 */
 HWTEST_F(LNNLaneExtMockTest, CHECK_LANE_LINK_EXIST_BY_TYPE_001, TestSize.Level1)
 {
-    EXPECT_FALSE(CheckLaneLinkExistByType(LANE_LINK_TYPE_BUTT));
-    EXPECT_FALSE(CheckLaneLinkExistByType(LANE_HML));
+    EXPECT_FALSE(ExistsLaneLinkByType(LANE_LINK_TYPE_BUTT));
+    EXPECT_FALSE(ExistsLaneLinkByType(LANE_HML));
 
     NiceMock<LaneDepsInterfaceMock> laneDepMock;
     EXPECT_CALL(laneDepMock, LnnGetLocalStrInfo).WillRepeatedly(Return(SOFTBUS_OK));
@@ -1059,7 +1059,7 @@ HWTEST_F(LNNLaneExtMockTest, CHECK_LANE_LINK_EXIST_BY_TYPE_001, TestSize.Level1)
     ASSERT_EQ(strcpy_s(linkInfo.peerUdid, UDID_BUF_LEN, PEER_UDID), EOK);
     uint64_t laneId = LANE_ID_BASE;
     EXPECT_EQ(SOFTBUS_OK, AddLaneResourceToPool(&linkInfo, laneId, false));
-    EXPECT_TRUE(CheckLaneLinkExistByType(LANE_HML));
+    EXPECT_TRUE(ExistsLaneLinkByType(LANE_HML));
     EXPECT_EQ(SOFTBUS_OK, DelLaneResourceByLaneId(laneId, false));
 }
 

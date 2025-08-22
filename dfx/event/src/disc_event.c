@@ -66,6 +66,10 @@ void DiscAuditInner(int32_t scene, const char *func, int32_t line, DiscAuditExtr
 
 void DiscEventExtraInit(DiscEventExtra *extra)
 {
+    if (extra == NULL) {
+        COMM_LOGE(COMM_DFX, "extra is NUll");
+        return;
+    }
     extra->capabilityData = NULL;
     extra->scanCycle = NULL;
     extra->localNetworkId = NULL;
