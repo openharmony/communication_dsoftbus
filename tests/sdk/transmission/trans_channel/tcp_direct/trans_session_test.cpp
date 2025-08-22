@@ -283,7 +283,8 @@ HWTEST_F(TransSessionTest, SendFileTest002, TestSize.Level1)
     const char *sFileList[] = { TEST_FILE_NAME };
     int32_t sessionId = INVALID_SESSION_ID;
     SessionEnableStatus isEnabled = ENABLE_STATUS_INIT;
-    (void)ClientAddSessionServer(SEC_TYPE_CIPHERTEXT, pkgName, mySessionName, &g_sessionlistener);
+    uint64_t timestamp = 0;
+    (void)ClientAddSessionServer(SEC_TYPE_CIPHERTEXT, pkgName, mySessionName, &g_sessionlistener, &timestamp);
     (void)ClientAddSession(&param, &sessionId, &isEnabled);
 
     int32_t ret = SendFile(sessionId, sFileList, nullptr, 1);
@@ -346,7 +347,8 @@ HWTEST_F(TransSessionTest, ClientCleanAllSessionWhenServerDeathTest001, TestSize
 
     int32_t sessionId = INVALID_SESSION_ID;
     SessionEnableStatus isEnabled = ENABLE_STATUS_INIT;
-    int32_t ret = ClientAddSessionServer(SEC_TYPE_CIPHERTEXT, pkgName, mySessionName, &g_sessionlistener);
+    uint64_t timestamp = 0;
+    int32_t ret = ClientAddSessionServer(SEC_TYPE_CIPHERTEXT, pkgName, mySessionName, &g_sessionlistener, &timestamp);
     EXPECT_EQ(ret, SOFTBUS_SERVER_NAME_REPEATED);
     ret = ClientAddSession(&param, &sessionId, &isEnabled);
     EXPECT_EQ(ret, SOFTBUS_OK);
