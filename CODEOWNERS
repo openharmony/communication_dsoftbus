@@ -14,12 +14,12 @@
  */
 
 [Arch]
-adapter/default_config/     liufeihu@huawei.com
-BUILD.gn        liufeihu@huawei.com
-bundle.json     liufeihu@huawei.com
-config.py       liufeihu@huawei.com
-dsoftbus.gni    liufeihu@huawei.com
-Kconfig         liufeihu@huawei.com
+adapter/default_config/     songzhengteng@huawei.com
+BUILD.gn        songzhengteng@huawei.com
+bundle.json     songzhengteng@huawei.com
+config.py       songzhengteng@huawei.com
+dsoftbus.gni    songzhengteng@huawei.com
+Kconfig         songzhengteng@huawei.com
 
 [Misc]
 CODEOWNERS      zhangshaojie3@huawei.com
@@ -43,14 +43,14 @@ tests/core/connection/wifi_direct/            songzhengteng@huawei.com
 tests/core/connection/wifi_direct_cpp/        songzhengteng@huawei.com
 
 [Disc]
-adapter/common/range/   fanjingya1@huawei.com
-core/discovery/         fanjingya1@huawei.com
-tests/adapter/fuzztest/softbusadapterrange_fuzzer/      fanjingya1@huawei.com
-tests/adapter/unittest/softbus_adapter_range_test.cpp   fanjingya1@huawei.com
-tests/core/discovery/   fanjingya1@huawei.com
+adapter/common/range/   wangjingen1@huawei.com
+core/discovery/         wangjingen1@huawei.com
+tests/adapter/fuzztest/softbusadapterrange_fuzzer/      wangjingen1@huawei.com
+tests/adapter/unittest/softbus_adapter_range_test.cpp   wangjingen1@huawei.com
+tests/core/discovery/   wangjingen1@huawei.com
 
 [DiscInterface]
-interfaces/kits/discovery/  fanjingya1@huawei.com
+interfaces/kits/discovery/  wangjingen1@huawei.com
 
 [Lnn]
 adapter/common/bus_center/boot_event/      chenbotong1@huawei.com
@@ -125,18 +125,18 @@ interfaces/inner_kits/transport/    baiyuxin6@huawei.com
 interfaces/kits/transport/          baiyuxin6@huawei.com
 
 [Comm]
-adapter/common/include/     zhusiyuan2@huawei.com
-adapter/common/json/        zhusiyuan2@huawei.com
-adapter/common/kernel/      zhusiyuan2@huawei.com
-core/common/                zhusiyuan2@huawei.com
-tests/core/common/          zhusiyuan2@huawei.com
+adapter/common/include/     songzhengteng@huawei.com
+adapter/common/json/        songzhengteng@huawei.com
+adapter/common/kernel/      songzhengteng@huawei.com
+core/common/                songzhengteng@huawei.com
+tests/core/common/          songzhengteng@huawei.com
 
 [CommInterface]
-interfaces/kits/common/softbus_common.h     zhusiyuan2@huawei.com
+interfaces/kits/common/softbus_common.h     songzhengteng@huawei.com
 
 [DFX]
-dfx/            zhusiyuan2@huawei.com
-tests/dfx       zhusiyuan2@huawei.com
+dfx/            songzhengteng@huawei.com
+tests/dfx       songzhengteng@huawei.com
 
 [DFXInterface]
 hisysevent.yaml             litongxin3@huawei.com
@@ -151,8 +151,8 @@ tests/core/frame/           baiyuxin6@huawei.com
 tests/sdk/frame/            baiyuxin6@huawei.com
 
 [Permission]
-core/common/security/permission/        liubao6@huawei.com
-tests/core/common/security/permission/  liubao6@huawei.com
+core/common/security/permission/        liubao6@huawei.com baiyuxin6@huawei.com
+tests/core/common/security/permission/  liubao6@huawei.com baiyuxin6@huawei.com
 
 [Crypto]
 adapter/common/mbedtls/     chenbotong1@huawei.com
