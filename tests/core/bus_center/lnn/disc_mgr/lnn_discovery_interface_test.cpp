@@ -46,8 +46,8 @@ void LNNDiscoveryInterfaceTest::SetUp() { }
 
 void LNNDiscoveryInterfaceTest::TearDown() { }
 
-static int32_t OnRefreshDeviceFoundTest(
-    const char *pkgName, const DeviceInfo *device, const InnerDeviceInfoAddtions *additions)
+static int32_t OnRefreshDeviceFoundTest(const char *pkgName, const DeviceInfo *device,
+    const InnerDeviceInfoAddtions *additions, int32_t subscribeId)
 {
     return SOFTBUS_OK;
 }
