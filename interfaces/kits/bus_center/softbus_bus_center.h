@@ -220,6 +220,7 @@ typedef enum {
     STATIC_CAP_BIT_ETH,             /**< Support ETH */
     STATIC_CAP_BIT_USB,             /**< Support USB */
     STATIC_CAP_BIT_SLE,             /**< Support SLE */
+    STATIC_CAP_BIT_VIRTUAL_LINK,    /**< Support VIRTUAL LINK */
     STATIC_CAP_BIT_COUNT,           /**< Invalid type */
 } StaticNetCapability;
 
