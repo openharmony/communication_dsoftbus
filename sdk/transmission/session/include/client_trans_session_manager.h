@@ -73,7 +73,7 @@ int32_t ClientGetSessionCallbackById(int32_t sessionId, ISessionListener *callba
 int32_t ClientGetSessionCallbackByName(const char *sessionName, ISessionListener *callback);
 
 int32_t ClientAddSessionServer(SoftBusSecType type, const char *pkgName, const char *sessionName,
-    const ISessionListener *listener);
+    const ISessionListener *listener, uint64_t *timestamp);
 
 int32_t ClientGetSessionSide(int32_t sessionId);
 
@@ -94,7 +94,7 @@ int32_t CheckPermissionState(int32_t sessionId);
 
 void PermissionStateChange(const char *pkgName, int32_t state);
 
-int32_t ClientAddSocketServer(SoftBusSecType type, const char *pkgName, const char *sessionName);
+int32_t ClientAddSocketServer(SoftBusSecType type, const char *pkgName, const char *sessionName, uint64_t *timestamp);
 
 int32_t ClientAddSocketSession(
     const SessionParam *param, bool isEncyptedRawStream, int32_t *sessionId, SessionEnableStatus *isEnabled);

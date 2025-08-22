@@ -34,6 +34,7 @@
 #include "session_ipc_adapter.h"
 #include "softbus_access_token_adapter.h"
 #include "softbus_adapter_mem.h"
+#include "softbus_adapter_timer.h"
 #include "softbus_client_frame_manager.h"
 #include "softbus_def.h"
 #include "softbus_error_code.h"
@@ -122,8 +123,9 @@ int CreateSessionServer(const char *pkgName, const char *sessionName, const ISes
         TRANS_LOGE(TRANS_SDK, "invalid pkg name");
         return SOFTBUS_INVALID_PKGNAME;
     }
+    uint64_t timestamp = 0;
 
-    int ret = ClientAddSessionServer(SEC_TYPE_CIPHERTEXT, pkgName, sessionName, listener);
+    int ret = ClientAddSessionServer(SEC_TYPE_CIPHERTEXT, pkgName, sessionName, listener, &timestamp);
     if (ret == SOFTBUS_SERVER_NAME_REPEATED) {
         TRANS_LOGI(TRANS_SDK, "SessionServer is already created in client");
     } else if (ret != SOFTBUS_OK) {
@@ -131,7 +133,7 @@ int CreateSessionServer(const char *pkgName, const char *sessionName, const ISes
         return ret;
     }
 
-    ret = ServerIpcCreateSessionServer(pkgName, sessionName);
+    ret = ServerIpcCreateSessionServer(pkgName, sessionName, timestamp);
     if (ret == SOFTBUS_SERVER_NAME_REPEATED) {
         TRANS_LOGW(TRANS_SDK, "ok, SessionServer is already created in server");
         return SOFTBUS_OK;
@@ -153,8 +155,9 @@ int RemoveSessionServer(const char *pkgName, const char *sessionName)
     char *tmpName = NULL;
     Anonymize(sessionName, &tmpName);
     TRANS_LOGI(TRANS_SDK, "pkgName=%{public}s, sessionName=%{public}s", pkgName, AnonymizeWrapper(tmpName));
+    uint64_t timestamp = SoftBusGetSysTimeMs();
 
-    int32_t ret = ServerIpcRemoveSessionServer(pkgName, sessionName);
+    int32_t ret = ServerIpcRemoveSessionServer(pkgName, sessionName, timestamp);
     if (ret != SOFTBUS_OK) {
         TRANS_LOGE(TRANS_SDK, "remove in server failed, ret=%{public}d.", ret);
         AnonymizeFree(tmpName);
@@ -936,14 +939,15 @@ int CreateSocket(const char *pkgName, const char *sessionName)
             return SOFTBUS_TRANS_NOT_FIND_APPID;
         }
     }
-    ret = ClientAddSocketServer(SEC_TYPE_CIPHERTEXT, pkgName, (const char*)newSessionName);
+    uint64_t timestamp = 0;
+    ret = ClientAddSocketServer(SEC_TYPE_CIPHERTEXT, pkgName, (const char*)newSessionName, &timestamp);
     if (ret == SOFTBUS_SERVER_NAME_REPEATED) {
         TRANS_LOGD(TRANS_SDK, "SocketServer is already created in client");
     } else if (ret != SOFTBUS_OK) {
         TRANS_LOGE(TRANS_SDK, "add socket server err, ret=%{public}d", ret);
         return ret;
     }
-    ret = ServerIpcCreateSessionServer(pkgName, sessionName);
+    ret = ServerIpcCreateSessionServer(pkgName, sessionName, timestamp);
     if (ret == SOFTBUS_SERVER_NAME_REPEATED) {
         TRANS_LOGD(TRANS_SDK, "ok, SocketServer is already created in server");
         return SOFTBUS_OK;
