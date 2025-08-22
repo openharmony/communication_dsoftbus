@@ -178,7 +178,7 @@ bool LnnIsLinkReady(const char *iface)
     if (RtNetlinkTalk(&req.hdr, &answer.hdr, sizeof(answer)) != SOFTBUS_OK) {
         return false;
     }
-    info = NLMSG_DATA(&answer.hdr);
+    info = (struct ifinfomsg *)NLMSG_DATA(&answer.hdr);
     infoDataLen = (int32_t)answer.hdr.nlmsg_len - NLMSG_LENGTH(sizeof(struct ifinfomsg));
     if (GetRtAttr(IFLA_RTA(info), infoDataLen, IFLA_CARRIER, &carrier, sizeof(uint8_t)) != SOFTBUS_OK) {
         return false;
