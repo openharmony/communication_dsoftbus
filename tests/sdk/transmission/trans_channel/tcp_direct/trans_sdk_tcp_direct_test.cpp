@@ -149,7 +149,8 @@ void TransSdkTcpDirectTest::SetUpTestCase(void)
     int32_t ret = TransClientInit();
     EXPECT_EQ(ret, SOFTBUS_OK);
     TransTdcManagerInit(&g_sessionCb);
-    ret = ClientAddSessionServer(SEC_TYPE_PLAINTEXT, g_pkgName, g_sessionName, &g_sessionlistener);
+    uint64_t timestamp = 0;
+    ret = ClientAddSessionServer(SEC_TYPE_PLAINTEXT, g_pkgName, g_sessionName, &g_sessionlistener, &timestamp);
     EXPECT_EQ(ret,  SOFTBUS_OK);
     ret = InitBaseListener();
     EXPECT_EQ(ret, SOFTBUS_OK);

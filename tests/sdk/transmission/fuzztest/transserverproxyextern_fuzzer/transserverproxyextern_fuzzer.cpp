@@ -83,10 +83,10 @@ void ServerIpcCreateSessionServerTest(const uint8_t *data, size_t size)
     char *pkgName = const_cast<char *>(reinterpret_cast<const char *>(dataWithEndCharacter));
     char *sessionName = const_cast<char *>(reinterpret_cast<const char *>(dataWithEndCharacter));
 
-    (void)ServerIpcCreateSessionServer(pkgName, sessionName);
-    (void)ServerIpcCreateSessionServer(nullptr, sessionName);
-    (void)ServerIpcCreateSessionServer(pkgName, nullptr);
-    (void)ServerIpcCreateSessionServer(nullptr, nullptr);
+    (void)ServerIpcCreateSessionServer(pkgName, sessionName, 1);
+    (void)ServerIpcCreateSessionServer(nullptr, sessionName, 1);
+    (void)ServerIpcCreateSessionServer(pkgName, nullptr, 1);
+    (void)ServerIpcCreateSessionServer(nullptr, nullptr, 1);
     SoftBusFree(dataWithEndCharacter);
 }
 
@@ -99,10 +99,10 @@ void ServerIpcRemoveSessionServerTest(const uint8_t *data, size_t size)
     char *pkgName = const_cast<char *>(reinterpret_cast<const char *>(dataWithEndCharacter));
     char *sessionName = const_cast<char *>(reinterpret_cast<const char *>(dataWithEndCharacter));
 
-    (void)ServerIpcRemoveSessionServer(pkgName, sessionName);
-    (void)ServerIpcRemoveSessionServer(nullptr, sessionName);
-    (void)ServerIpcRemoveSessionServer(pkgName, nullptr);
-    (void)ServerIpcRemoveSessionServer(nullptr, nullptr);
+    (void)ServerIpcRemoveSessionServer(pkgName, sessionName, 1);
+    (void)ServerIpcRemoveSessionServer(nullptr, sessionName, 1);
+    (void)ServerIpcRemoveSessionServer(pkgName, nullptr, 1);
+    (void)ServerIpcRemoveSessionServer(nullptr, nullptr, 1);
     SoftBusFree(dataWithEndCharacter);
 }
 

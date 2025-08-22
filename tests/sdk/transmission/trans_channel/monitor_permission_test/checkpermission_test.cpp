@@ -63,7 +63,8 @@ void CheckPermissionTest::SetUpTestCase()
 {
     (void)TransClientInit();
     SoftbusConfigInit();
-    int32_t ret = ClientAddSessionServer(SEC_TYPE_CIPHERTEXT, g_pkgName, g_sessionName, &g_sessionlistener);
+    uint64_t timestamp = 0;
+    int32_t ret = ClientAddSessionServer(SEC_TYPE_CIPHERTEXT, g_pkgName, g_sessionName, &g_sessionlistener, &timestamp);
     EXPECT_EQ(SOFTBUS_OK, ret);
 
     SessionParam param = {
