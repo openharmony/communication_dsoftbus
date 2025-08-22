@@ -148,12 +148,14 @@ static bool LaneLinkAddrOfBle(const LaneLinkInfo *sourceLink, const LaneLinkInfo
     }
     switch (sourceLink->type) {
         case LANE_BLE:
+        /* fall-through */
         case LANE_COC:
             if (strncmp(sourceLink->linkInfo.ble.bleMac, linkInfoItem->linkInfo.ble.bleMac, BT_MAC_LEN) != 0) {
                 break;
             }
             return true;
         case LANE_BLE_DIRECT:
+        /* fall-through */
         case LANE_COC_DIRECT:
             if (strncmp(sourceLink->linkInfo.bleDirect.networkId, linkInfoItem->linkInfo.bleDirect.networkId,
                 NETWORK_ID_BUF_LEN) != 0) {
@@ -972,7 +974,7 @@ int32_t GetAllLinkWithDevId(const char *peerUdid, LaneLinkType **linkList, uint8
     return SOFTBUS_OK;
 }
 
-bool CheckLaneLinkExistByType(LaneLinkType linkType)
+bool ExistsLaneLinkByType(LaneLinkType linkType)
 {
     if (linkType >= LANE_LINK_TYPE_BUTT) {
         LNN_LOGE(LNN_LANE, "invalid linkType=%{public}d", linkType);

@@ -53,7 +53,7 @@ static void SoftBusGetAlarmInfo(int fd, AlarmRecord *record)
     }
 
     if (record->methodId > 0) {
-        SOFTBUS_DPRINTF(fd, ", MethodId=%d", record->minBw);
+        SOFTBUS_DPRINTF(fd, ", MethodId=%d", record->methodId);
     }
 
     if (record->permissionName != NULL) {

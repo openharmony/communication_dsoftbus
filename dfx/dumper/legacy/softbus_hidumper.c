@@ -44,6 +44,10 @@ void SoftBusDumpShowHelp(int fd)
     ListNode *item = NULL;
     LIST_FOR_EACH(item, &g_hidumperhander_list) {
         HandlerNode *itemNode = LIST_ENTRY(item, HandlerNode, node);
+        if (itemNode == NULL) {
+            SOFTBUS_DPRINTF(fd, "itemNode is invalid.\n");
+            return;
+        }
         SOFTBUS_DPRINTF(fd, "| [");
         SOFTBUS_DPRINTF(fd, "%s", itemNode->moduleName);
         SOFTBUS_DPRINTF(fd, "]");
@@ -53,6 +57,10 @@ void SoftBusDumpShowHelp(int fd)
     item = NULL;
     LIST_FOR_EACH(item, &g_hidumperhander_list) {
         HandlerNode *itemNode = LIST_ENTRY(item, HandlerNode, node);
+        if (itemNode == NULL) {
+            SOFTBUS_DPRINTF(fd, "itemNode is null.\n");
+            return;
+        }
         SOFTBUS_DPRINTF(fd, "\t\t");
         SOFTBUS_DPRINTF(fd, "%s", itemNode->moduleName);
         SOFTBUS_DPRINTF(fd, "\t\t");
@@ -81,11 +89,15 @@ void SoftBusDumpSubModuleHelp(int fd, char *moduleName, ListNode *varList)
     ListNode *item = NULL;
     LIST_FOR_EACH(item, varList) {
         SoftBusDumpVarNode *itemNode = LIST_ENTRY(item, SoftBusDumpVarNode, node);
+        if (itemNode == NULL) {
+            SOFTBUS_DPRINTF(fd, "varlist itemNode is invalid.\n");
+            return;
+        }
         SOFTBUS_DPRINTF(fd, "%s |", itemNode->varName);
     }
     SOFTBUS_DPRINTF(fd, ">]\n");
     SOFTBUS_DPRINTF(fd, "   -h         List all the dump item in %s module\n", moduleName);
-    SOFTBUS_DPRINTF(fd, "   -l <item>  Dump the item in %s module, item is nesessary\n", moduleName);
+    SOFTBUS_DPRINTF(fd, "   -l <item>  Dump the item in %s module, item is necessary\n", moduleName);
 }
 
 static SoftBusDumpVarNode *SoftBusCreateDumpVarNode(const char *varName, SoftBusVarDumpCb cb)

@@ -205,9 +205,9 @@ void DeinitLinkLedger(void)
     GetLaneLinkDepsInterface()->DeinitLinkLedger();
 }
 
-bool CheckLaneLinkExistByType(LaneLinkType linkType)
+bool ExistsLaneLinkByType(LaneLinkType linkType)
 {
-    return GetLaneLinkDepsInterface()->CheckLaneLinkExistByType(linkType);
+    return GetLaneLinkDepsInterface()->ExistsLaneLinkByType(linkType);
 }
 }
 } // namespace OHOS

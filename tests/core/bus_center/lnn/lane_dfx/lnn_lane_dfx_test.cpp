@@ -164,6 +164,8 @@ HWTEST_F(LNNLaneDfxTest, UPDATE_LANE_EVENT_INFO_003, TestSize.Level1)
     EXPECT_EQ(ret, SOFTBUS_INVALID_PARAM);
     ret = UpdateLaneEventInfo(laneHandle, EVENT_TRANS_TYPE, LANE_PROCESS_TYPE_UINT64, NULL);
     EXPECT_EQ(ret, SOFTBUS_INVALID_PARAM);
+    ret = UpdateLaneEventInfo(laneHandle, EVENT_TRANS_TYPE, LANE_PROCESS_TYPE_BUTT, (void *)(&ERR_CODE));
+    EXPECT_EQ(ret, SOFTBUS_INVALID_PARAM);
     ret = ReportLaneEventInfo(laneHandle, ERR_CODE);
     EXPECT_EQ(ret, SOFTBUS_OK);
 }

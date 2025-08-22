@@ -107,7 +107,7 @@ static int32_t DeleteLaneEventInfo(uint32_t laneHandle)
 
 int32_t UpdateLaneEventInfo(uint32_t laneHandle, uint32_t eventType, LaneProcessValueType valueType, void *arg)
 {
-    if (arg == NULL || valueType == LANE_PROCESS_TYPE_BUTT ||
+    if (arg == NULL || valueType >= LANE_PROCESS_TYPE_BUTT ||
         (valueType == LANE_PROCESS_TYPE_UINT32 && eventType >= EVENT_32_BIT_MAX) ||
         (valueType == LANE_PROCESS_TYPE_UINT64 && eventType >= EVENT_64_BIT_MAX) ||
         laneHandle == INVALID_LANE_REQ_ID) {

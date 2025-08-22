@@ -98,6 +98,7 @@ static int32_t GetLaneResource(LaneTransType transType, LaneLinkType *optLink, u
             GetFileLaneLink(defaultLink, &index, isHighBand);
             break;
         case LANE_T_RAW_STREAM:
+        /* fall-through */
         case LANE_T_COMMON_VIDEO:
         case LANE_T_COMMON_VOICE:
             GetStreamLaneLink(defaultLink, &index, isHighBand);

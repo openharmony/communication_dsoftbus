@@ -15,16 +15,18 @@
 
 #include "instant_statistics.h"
 
+#include "anonymizer.h"
+#include "bt_statistic.h"
 #include "bus_center_manager.h"
 #include "comm_log.h"
 #include "communication_radar.h"
 #include "data/link_manager.h"
+#include "legacy/softbus_hisysevt_transreporter.h"
 #include "lnn_distributed_net_ledger.h"
 #include "lnn_lane_interface.h"
 #include "softbus_adapter_mem.h"
 #include "softbus_conn_interface.h"
 #include "softbus_error_code.h"
-#include "legacy/softbus_hisysevt_transreporter.h"
 #include "softbus_json_utils.h"
 #include "softbus_proxychannel_manager.h"
 #include "softbus_utils.h"
@@ -34,8 +36,6 @@
 #include "trans_tcp_direct_sessionconn.h"
 #include "trans_udp_channel_manager.h"
 #include "wifi_statistic.h"
-#include "bt_statistic.h"
-#include "anonymizer.h"
 
 using namespace OHOS::SoftBus;
 
@@ -99,16 +99,12 @@ static std::string AnonymizeStr(const std::string &data)
     return result;
 }
 
-static void InstPackAndAnonymizeStringIfNotNull(cJSON *json, std::string &str, const char *key, bool isDeviceId)
+static void InstPackAndAnonymizeStringIfNotNull(cJSON *json, std::string &str, const char *key)
 {
-    if (json == NULL || str.empty() || key == NULL) {
+    if (json == nullptr || str.empty() || key == nullptr) {
         return;
     }
-    if (isDeviceId) {
-        (void)AddStringToJsonObject(json, key, AnonymizeStr(str).c_str());
-    } else {
-        (void)AddStringToJsonObject(json, key, AnonymizeStr(str).c_str());
-    }
+    (void)AddStringToJsonObject(json, key, AnonymizeStr(str).c_str());
 }
 
 static bool InstantIsParaMatch(const std::string &dst, const std::string &src)
@@ -132,7 +128,7 @@ static int32_t InstSetPeerDeviceIdForRemoteInfo(std::string &dst, const std::str
 static void InstUpdateRemoteInfoByInnerLink(InstantRemoteInfo *remoteInfo,
     const InnerLinkBasicInfo &link, const std::string &remoteUuid)
 {
-    if (remoteInfo == NULL) {
+    if (remoteInfo == nullptr) {
         COMM_LOGE(COMM_DFX, "invalid param");
         return;
     }
@@ -162,15 +158,15 @@ static void InstUpdateRemoteInfoByInnerLink(InstantRemoteInfo *remoteInfo,
 static InstantRemoteInfo *InstCreateAndAddRemoteInfo(SoftBusList *remoteChannelInfoList, bool matched)
 {
     if (matched) {
-        return NULL;
+        return nullptr;
     }
     if (remoteChannelInfoList->cnt >= INST_MAX_REMOTE_NUM) {
-        return NULL;
+        return nullptr;
     }
     InstantRemoteInfo *rInfo = static_cast<InstantRemoteInfo *>(SoftBusCalloc(sizeof(InstantRemoteInfo)));
-    if (rInfo == NULL) {
+    if (rInfo == nullptr) {
         COMM_LOGE(COMM_DFX, "malloc remote channel info fail");
-        return NULL;
+        return nullptr;
     }
     ListInit(&rInfo->node);
     ListInit(&rInfo->channels);
@@ -189,7 +185,7 @@ static void InstAddRemoteInfoByLinkManager(SoftBusList *remoteChannelInfoList)
         if (remoteUuid.empty()) {
             continue;
         }
-        InstantRemoteInfo *rInfo = NULL;
+        InstantRemoteInfo *rInfo = nullptr;
         bool matched = false;
         LIST_FOR_EACH_ENTRY(rInfo, &remoteChannelInfoList->list, InstantRemoteInfo, node) {
             if (InstantIsParaMatch(rInfo->uuid, remoteUuid)) {
@@ -199,7 +195,7 @@ static void InstAddRemoteInfoByLinkManager(SoftBusList *remoteChannelInfoList)
             }
         }
         rInfo = InstCreateAndAddRemoteInfo(remoteChannelInfoList, matched);
-        if (rInfo == NULL) {
+        if (rInfo == nullptr) {
             continue;
         }
         InstUpdateRemoteInfoByInnerLink(rInfo, link, remoteUuid);
@@ -211,7 +207,7 @@ static void InstAddRemoteInfoByLinkManager(SoftBusList *remoteChannelInfoList)
 static int32_t InstGetIpFromLinkTypeOrConnectType(const InstantRemoteInfo *remoteInfo, int32_t linkType,
     int32_t connectType)
 {
-    if (remoteInfo == NULL) {
+    if (remoteInfo == nullptr) {
         COMM_LOGE(COMM_DFX, "invalid param");
         return UNKNOWN_IP;
     }
@@ -230,7 +226,7 @@ static int32_t InstGetIpFromLinkTypeOrConnectType(const InstantRemoteInfo *remot
 
 static bool InstIsMatchSessionConn(const InstantRemoteInfo *rInfo, const SessionConn *conn)
 {
-    if (rInfo == NULL || conn == NULL) {
+    if (rInfo == nullptr || conn == nullptr) {
         COMM_LOGE(COMM_DFX, "invalid param");
         return false;
     }
@@ -287,7 +283,7 @@ static bool InstIsMatchTcpChannel(const InstantRemoteInfo *rInfo, const TcpChann
 
 static void InstSetIpForRemoteInfo(InstantRemoteInfo *remoteInfo, const AppInfo *appInfo)
 {
-    if (remoteInfo == NULL || appInfo == NULL) {
+    if (remoteInfo == nullptr || appInfo == nullptr) {
         COMM_LOGE(COMM_DFX, "invalid param");
         return;
     }
@@ -309,7 +305,7 @@ static void InstSetIpForRemoteInfo(InstantRemoteInfo *remoteInfo, const AppInfo 
 
 static void InstSetUdidForRemoteInfoByUuid(InstantRemoteInfo *remoteInfo)
 {
-    if (remoteInfo == NULL) {
+    if (remoteInfo == nullptr) {
         COMM_LOGE(COMM_DFX, "invalid param");
         return;
     }
@@ -321,7 +317,7 @@ static void InstSetUdidForRemoteInfoByUuid(InstantRemoteInfo *remoteInfo)
 
 static void InstSetUuidForRemoteInfoByUdid(InstantRemoteInfo *remoteInfo)
 {
-    if (remoteInfo == NULL) {
+    if (remoteInfo == nullptr) {
         COMM_LOGE(COMM_DFX, "invalid param");
         return;
     }
@@ -333,7 +329,7 @@ static void InstSetUuidForRemoteInfoByUdid(InstantRemoteInfo *remoteInfo)
 
 static void UpdateRemoteInfoBySessionConn(InstantRemoteInfo *remoteInfo, const SessionConn *conn)
 {
-    if (remoteInfo == NULL || conn == NULL) {
+    if (remoteInfo == nullptr || conn == nullptr) {
         COMM_LOGE(COMM_DFX, "invalid param");
         return;
     }
@@ -375,17 +371,17 @@ static void UpdateRemoteInfoByTcpChannelInfo(InstantRemoteInfo *remoteInfo, cons
 
 static InstantChannelInfo *InstCreateAndAddChannelInfo(InstantRemoteInfo *remoteInfo)
 {
-    if (remoteInfo == NULL) {
+    if (remoteInfo == nullptr) {
         COMM_LOGE(COMM_DFX, "invalid param");
-        return NULL;
+        return nullptr;
     }
     if (remoteInfo->channelNum >= INST_MAX_CHANNEL_NUM_EACH) {
-        return NULL;
+        return nullptr;
     }
     InstantChannelInfo *channelInfo = static_cast<InstantChannelInfo *>(SoftBusCalloc(sizeof(InstantChannelInfo)));
-    if (channelInfo == NULL) {
+    if (channelInfo == nullptr) {
         COMM_LOGE(COMM_DFX, "channel info Calloc fail");
-        return NULL;
+        return nullptr;
     }
     ListInit(&channelInfo->node);
     ListAdd(&remoteInfo->channels, &channelInfo->node);
@@ -395,12 +391,12 @@ static InstantChannelInfo *InstCreateAndAddChannelInfo(InstantRemoteInfo *remote
 
 static void InstAddSessionConnToRemoteInfo(InstantRemoteInfo *remoteInfo, SessionConn *conn)
 {
-    if (remoteInfo == NULL || conn == NULL) {
+    if (remoteInfo == nullptr || conn == nullptr) {
         COMM_LOGE(COMM_DFX, "invalid param");
         return;
     }
     InstantChannelInfo *channelInfo = InstCreateAndAddChannelInfo(remoteInfo);
-    if (channelInfo == NULL) {
+    if (channelInfo == nullptr) {
         return;
     }
     channelInfo->serverSide = conn->serverSide;
@@ -434,13 +430,13 @@ static void InstAddTcpChannelInfoToRemoteInfo(InstantRemoteInfo *remoteInfo, Tcp
 
 static void InstUpdateRemoteInfoBySessionConn(SoftBusList *remoteChannelInfoList)
 {
-    SessionConn *item = NULL;
+    SessionConn *item = nullptr;
     SoftBusList *sessionList = GetSessionConnList();
-    if (sessionList == NULL || GetSessionConnLock() != SOFTBUS_OK) {
+    if (sessionList == nullptr || GetSessionConnLock() != SOFTBUS_OK) {
         return;
     }
     LIST_FOR_EACH_ENTRY(item, &sessionList->list, SessionConn, node) {
-        InstantRemoteInfo *rInfo = NULL;
+        InstantRemoteInfo *rInfo = nullptr;
         bool matched = false;
         LIST_FOR_EACH_ENTRY(rInfo, &remoteChannelInfoList->list, InstantRemoteInfo, node) {
             if (InstIsMatchSessionConn(rInfo, item)) {
@@ -450,7 +446,7 @@ static void InstUpdateRemoteInfoBySessionConn(SoftBusList *remoteChannelInfoList
             }
         }
         rInfo = InstCreateAndAddRemoteInfo(remoteChannelInfoList, matched);
-        if (rInfo == NULL) {
+        if (rInfo == nullptr) {
             continue;
         }
         InstAddSessionConnToRemoteInfo(rInfo, item);
@@ -460,13 +456,13 @@ static void InstUpdateRemoteInfoBySessionConn(SoftBusList *remoteChannelInfoList
 
 static void InstUpdateRemoteInfoByTcpChannel(SoftBusList *remoteChannelInfoList)
 {
-    TcpChannelInfo *item = NULL;
+    TcpChannelInfo *item = nullptr;
     SoftBusList *tcpChannelInfoList = GetTcpChannelInfoList();
-    if (tcpChannelInfoList == NULL || GetTcpChannelInfoLock() != SOFTBUS_OK) {
+    if (tcpChannelInfoList == nullptr || GetTcpChannelInfoLock() != SOFTBUS_OK) {
         return;
     }
     LIST_FOR_EACH_ENTRY(item, &tcpChannelInfoList->list, TcpChannelInfo, node) {
-        InstantRemoteInfo *rInfo = NULL;
+        InstantRemoteInfo *rInfo = nullptr;
         bool matched = false;
         LIST_FOR_EACH_ENTRY(rInfo, &remoteChannelInfoList->list, InstantRemoteInfo, node) {
             if (InstIsMatchTcpChannel(rInfo, item)) {
@@ -476,7 +472,7 @@ static void InstUpdateRemoteInfoByTcpChannel(SoftBusList *remoteChannelInfoList)
             }
         }
         rInfo = InstCreateAndAddRemoteInfo(remoteChannelInfoList, matched);
-        if (rInfo == NULL) {
+        if (rInfo == nullptr) {
             continue;
         }
         InstAddTcpChannelInfoToRemoteInfo(rInfo, item);
@@ -486,7 +482,7 @@ static void InstUpdateRemoteInfoByTcpChannel(SoftBusList *remoteChannelInfoList)
 
 static bool InstIsMatchUdpChannel(const InstantRemoteInfo *rInfo, const UdpChannelInfo *info)
 {
-    if (rInfo == NULL || info == NULL) {
+    if (rInfo == nullptr || info == nullptr) {
         COMM_LOGE(COMM_DFX, "invalid param");
         return false;
     }
@@ -508,7 +504,7 @@ static bool InstIsMatchUdpChannel(const InstantRemoteInfo *rInfo, const UdpChann
 
 static void UpdateRemoteInfoByUdpChannel(InstantRemoteInfo *remoteInfo, const UdpChannelInfo *info)
 {
-    if (remoteInfo == NULL || info == NULL) {
+    if (remoteInfo == nullptr || info == nullptr) {
         COMM_LOGE(COMM_DFX, "invalid param");
         return;
     }
@@ -521,12 +517,12 @@ static void UpdateRemoteInfoByUdpChannel(InstantRemoteInfo *remoteInfo, const Ud
 
 static void InstAddUdpChannelToRemoteInfo(InstantRemoteInfo *remoteInfo, const UdpChannelInfo *info)
 {
-    if (remoteInfo == NULL || info == NULL) {
+    if (remoteInfo == nullptr || info == nullptr) {
         COMM_LOGE(COMM_DFX, "invalid param");
         return;
     }
     InstantChannelInfo *channelInfo = InstCreateAndAddChannelInfo(remoteInfo);
-    if (channelInfo == NULL) {
+    if (channelInfo == nullptr) {
         return;
     }
     channelInfo->serverSide = !info->info.isClient;
@@ -541,13 +537,13 @@ static void InstAddUdpChannelToRemoteInfo(InstantRemoteInfo *remoteInfo, const U
 
 static void InstUpdateRemoteInfoByUdpChannel(SoftBusList *remoteChannelInfoList)
 {
-    UdpChannelInfo *item = NULL;
+    UdpChannelInfo *item = nullptr;
     SoftBusList *sessionList = GetUdpChannelMgrHead();
-    if (sessionList == NULL || GetUdpChannelLock() != SOFTBUS_OK) {
+    if (sessionList == nullptr || GetUdpChannelLock() != SOFTBUS_OK) {
         return;
     }
     LIST_FOR_EACH_ENTRY(item, &sessionList->list, UdpChannelInfo, node) {
-        InstantRemoteInfo *rInfo = NULL;
+        InstantRemoteInfo *rInfo = nullptr;
         bool matched = false;
         LIST_FOR_EACH_ENTRY(rInfo, &remoteChannelInfoList->list, InstantRemoteInfo, node) {
             if (InstIsMatchUdpChannel(rInfo, item)) {
@@ -557,7 +553,7 @@ static void InstUpdateRemoteInfoByUdpChannel(SoftBusList *remoteChannelInfoList)
             }
         }
         rInfo = InstCreateAndAddRemoteInfo(remoteChannelInfoList, matched);
-        if (rInfo == NULL) {
+        if (rInfo == nullptr) {
             continue;
         }
         InstAddUdpChannelToRemoteInfo(rInfo, item);
@@ -567,7 +563,7 @@ static void InstUpdateRemoteInfoByUdpChannel(SoftBusList *remoteChannelInfoList)
 
 static bool InstIsMatchProxyChannel(const InstantRemoteInfo *rInfo, const ProxyChannelInfo *conn)
 {
-    if (rInfo == NULL || conn == NULL) {
+    if (rInfo == nullptr || conn == nullptr) {
         COMM_LOGE(COMM_DFX, "invalid param");
         return false;
     }
@@ -578,7 +574,7 @@ static bool InstIsMatchProxyChannel(const InstantRemoteInfo *rInfo, const ProxyC
 
 static void UpdateRemoteInfoByProxyChannel(InstantRemoteInfo *remoteInfo, const ProxyChannelInfo *info)
 {
-    if (remoteInfo == NULL || info == NULL) {
+    if (remoteInfo == nullptr || info == nullptr) {
         COMM_LOGE(COMM_DFX, "invalid param");
         return;
     }
@@ -597,7 +593,7 @@ static void UpdateRemoteInfoByProxyChannel(InstantRemoteInfo *remoteInfo, const 
 
 static void InstSetDeviceIdByConnId(InstantRemoteInfo *remoteInfo, InstantChannelInfo *channelInfo, uint32_t connId)
 {
-    if (remoteInfo == NULL || channelInfo == NULL) {
+    if (remoteInfo == nullptr || channelInfo == nullptr) {
         COMM_LOGE(COMM_DFX, "invalid param");
         return;
     }
@@ -622,7 +618,7 @@ static void InstSetDeviceIdByConnId(InstantRemoteInfo *remoteInfo, InstantChanne
 static void SetParamByProxyChannelInfo(InstantRemoteInfo *remoteInfo, InstantChannelInfo *channelInfo,
     const ProxyChannelInfo *info)
 {
-    if (remoteInfo == NULL || channelInfo == NULL || info == NULL) {
+    if (remoteInfo == nullptr || channelInfo == nullptr || info == nullptr) {
         COMM_LOGE(COMM_DFX, "invalid param");
         return;
     }
@@ -640,12 +636,12 @@ static void SetParamByProxyChannelInfo(InstantRemoteInfo *remoteInfo, InstantCha
 
 static void InstAddProxyChannelToRemoteInfo(InstantRemoteInfo *remoteInfo, const ProxyChannelInfo *info)
 {
-    if (remoteInfo == NULL || info == NULL) {
+    if (remoteInfo == nullptr || info == nullptr) {
         COMM_LOGE(COMM_DFX, "invalid param");
         return;
     }
     InstantChannelInfo *channelInfo = InstCreateAndAddChannelInfo(remoteInfo);
-    if (channelInfo == NULL) {
+    if (channelInfo == nullptr) {
         return;
     }
     SetParamByProxyChannelInfo(remoteInfo, channelInfo, info);
@@ -653,13 +649,13 @@ static void InstAddProxyChannelToRemoteInfo(InstantRemoteInfo *remoteInfo, const
 
 static void InstUpdateRemoteInfoByProxyChannel(SoftBusList *remoteChannelInfoList)
 {
-    ProxyChannelInfo *item = NULL;
+    ProxyChannelInfo *item = nullptr;
     SoftBusList *sessionList = GetProxyChannelMgrHead();
-    if (sessionList == NULL || GetProxyChannelLock() != SOFTBUS_OK) {
+    if (sessionList == nullptr || GetProxyChannelLock() != SOFTBUS_OK) {
         return;
     }
     LIST_FOR_EACH_ENTRY(item, &sessionList->list, ProxyChannelInfo, node) {
-        InstantRemoteInfo *rInfo = NULL;
+        InstantRemoteInfo *rInfo = nullptr;
         bool matched = false;
         LIST_FOR_EACH_ENTRY(rInfo, &remoteChannelInfoList->list, InstantRemoteInfo, node) {
             if (InstIsMatchProxyChannel(rInfo, item)) {
@@ -669,7 +665,7 @@ static void InstUpdateRemoteInfoByProxyChannel(SoftBusList *remoteChannelInfoLis
             }
         }
         rInfo = InstCreateAndAddRemoteInfo(remoteChannelInfoList, matched);
-        if (rInfo == NULL) {
+        if (rInfo == nullptr) {
             continue;
         }
         InstAddProxyChannelToRemoteInfo(rInfo, item);
@@ -679,7 +675,7 @@ static void InstUpdateRemoteInfoByProxyChannel(SoftBusList *remoteChannelInfoLis
 
 static bool InstIsMatchAuthChannel(const InstantRemoteInfo *rInfo, const AuthChannelInfo *info)
 {
-    if (rInfo == NULL || info == NULL) {
+    if (rInfo == nullptr || info == nullptr) {
         COMM_LOGE(COMM_DFX, "invalid param");
         return false;
     }
@@ -689,7 +685,7 @@ static bool InstIsMatchAuthChannel(const InstantRemoteInfo *rInfo, const AuthCha
 
 static void InstUpdateRemoteInfoByAuthChannel(InstantRemoteInfo *remoteInfo, const AuthChannelInfo *info)
 {
-    if (remoteInfo == NULL || info == NULL) {
+    if (remoteInfo == nullptr || info == nullptr) {
         COMM_LOGE(COMM_DFX, "invalid param");
         return;
     }
@@ -700,7 +696,7 @@ static void InstUpdateRemoteInfoByAuthChannel(InstantRemoteInfo *remoteInfo, con
 static void InstSetParamByAuthChannelInfo(InstantRemoteInfo *remoteInfo, InstantChannelInfo *channelInfo,
     const AuthChannelInfo *info)
 {
-    if (remoteInfo == NULL || channelInfo == NULL || info == NULL) {
+    if (remoteInfo == nullptr || channelInfo == nullptr || info == nullptr) {
         COMM_LOGE(COMM_DFX, "invalid param");
         return;
     }
@@ -714,12 +710,12 @@ static void InstSetParamByAuthChannelInfo(InstantRemoteInfo *remoteInfo, Instant
 
 static void InstAddAuthChannelToRemoteInfo(InstantRemoteInfo *remoteInfo, const AuthChannelInfo *info)
 {
-    if (remoteInfo == NULL || info == NULL) {
+    if (remoteInfo == nullptr || info == nullptr) {
         COMM_LOGE(COMM_DFX, "invalid param");
         return;
     }
     InstantChannelInfo *channelInfo = InstCreateAndAddChannelInfo(remoteInfo);
-    if (channelInfo == NULL) {
+    if (channelInfo == nullptr) {
         return;
     }
     InstSetParamByAuthChannelInfo(remoteInfo, channelInfo, info);
@@ -727,13 +723,13 @@ static void InstAddAuthChannelToRemoteInfo(InstantRemoteInfo *remoteInfo, const 
 
 static void InstUpdateByAuthChannelList(SoftBusList *remoteChannelInfoList)
 {
-    AuthChannelInfo *item = NULL;
+    AuthChannelInfo *item = nullptr;
     SoftBusList *sessionList = GetAuthChannelListHead();
-    if (sessionList == NULL || GetAuthChannelLock() != SOFTBUS_OK) {
+    if (sessionList == nullptr || GetAuthChannelLock() != SOFTBUS_OK) {
         return;
     }
     LIST_FOR_EACH_ENTRY(item, &sessionList->list, AuthChannelInfo, node) {
-        InstantRemoteInfo *rInfo = NULL;
+        InstantRemoteInfo *rInfo = nullptr;
         bool matched = false;
         LIST_FOR_EACH_ENTRY(rInfo, &remoteChannelInfoList->list, InstantRemoteInfo, node) {
             if (InstIsMatchAuthChannel(rInfo, item)) {
@@ -743,7 +739,7 @@ static void InstUpdateByAuthChannelList(SoftBusList *remoteChannelInfoList)
             }
         }
         rInfo = InstCreateAndAddRemoteInfo(remoteChannelInfoList, matched);
-        if (rInfo == NULL) {
+        if (rInfo == nullptr) {
             continue;
         }
         InstAddAuthChannelToRemoteInfo(rInfo, item);
@@ -753,12 +749,12 @@ static void InstUpdateByAuthChannelList(SoftBusList *remoteChannelInfoList)
 
 static void InstReleaseRemoteChannelInfoList(SoftBusList *remoteChannelInfoList)
 {
-    InstantRemoteInfo *item = NULL;
-    InstantRemoteInfo *next = NULL;
+    InstantRemoteInfo *item = nullptr;
+    InstantRemoteInfo *next = nullptr;
     LIST_FOR_EACH_ENTRY_SAFE(item, next, &remoteChannelInfoList->list, InstantRemoteInfo, node) {
         if (!IsListEmpty(&item->channels)) {
-            InstantChannelInfo *channelItem = NULL;
-            InstantChannelInfo *channelNext = NULL;
+            InstantChannelInfo *channelItem = nullptr;
+            InstantChannelInfo *channelNext = nullptr;
             LIST_FOR_EACH_ENTRY_SAFE(channelItem, channelNext, &item->channels, InstantChannelInfo, node) {
                 ListDelete(&channelItem->node);
                 SoftBusFree(channelItem);
@@ -773,19 +769,19 @@ static void InstReleaseRemoteChannelInfoList(SoftBusList *remoteChannelInfoList)
 
 static void InstPackRemoteBasicInfo(cJSON *upperJson, InstantRemoteInfo *remoteInfo)
 {
-    if (upperJson == NULL || remoteInfo == NULL) {
+    if (upperJson == nullptr || remoteInfo == nullptr) {
         COMM_LOGE(COMM_DFX, "invalid param");
         return;
     }
     cJSON *json = cJSON_CreateObject();
-    COMM_CHECK_AND_RETURN_LOGE(json != NULL, COMM_DFX, "cJSON_CreateObject fail");
+    COMM_CHECK_AND_RETURN_LOGE(json != nullptr, COMM_DFX, "cJSON_CreateObject fail");
 
     (void)AddNumber64ToJsonObject(json, "deviceType", remoteInfo->deviceType);
-    InstPackAndAnonymizeStringIfNotNull(json, remoteInfo->udid, "udid", true);
-    InstPackAndAnonymizeStringIfNotNull(json, remoteInfo->hmlMac, "hmlMac", false);
-    InstPackAndAnonymizeStringIfNotNull(json, remoteInfo->p2pMac, "p2pMac", false);
-    InstPackAndAnonymizeStringIfNotNull(json, remoteInfo->bleMac, "bleMac", false);
-    InstPackAndAnonymizeStringIfNotNull(json, remoteInfo->brMac, "brMac", false);
+    InstPackAndAnonymizeStringIfNotNull(json, remoteInfo->udid, "udid");
+    InstPackAndAnonymizeStringIfNotNull(json, remoteInfo->hmlMac, "hmlMac");
+    InstPackAndAnonymizeStringIfNotNull(json, remoteInfo->p2pMac, "p2pMac");
+    InstPackAndAnonymizeStringIfNotNull(json, remoteInfo->bleMac, "bleMac");
+    InstPackAndAnonymizeStringIfNotNull(json, remoteInfo->brMac, "brMac");
     (void)AddNumberToJsonObject(json, "channelNum", remoteInfo->channelNum);
     (void)AddNumberToJsonObject(json, "p2pRole", remoteInfo->p2pRole);
     (void)AddNumberToJsonObject(json, "p2pFreq", remoteInfo->p2pFreq);
@@ -798,19 +794,19 @@ static void InstPackRemoteBasicInfo(cJSON *upperJson, InstantRemoteInfo *remoteI
 
     char *str = cJSON_PrintUnformatted(json);
     cJSON_Delete(json);
-    COMM_CHECK_AND_RETURN_LOGE(str != NULL, COMM_DFX, "cJSON_PrintUnformatted fail");
+    COMM_CHECK_AND_RETURN_LOGE(str != nullptr, COMM_DFX, "cJSON_PrintUnformatted fail");
     cJSON_AddItemToArray(upperJson, cJSON_CreateString(str));
     cJSON_free(str);
 }
 
 static void InstPackChannelInfo(cJSON *upperJson, InstantChannelInfo *channelInfo)
 {
-    if (upperJson == NULL || channelInfo == NULL) {
+    if (upperJson == nullptr || channelInfo == nullptr) {
         COMM_LOGE(COMM_DFX, "invalid param");
         return;
     }
     cJSON *channelJson = cJSON_CreateObject();
-    COMM_CHECK_AND_RETURN_LOGE(channelJson != NULL, COMM_DFX, "cJSON_CreateObject fail");
+    COMM_CHECK_AND_RETURN_LOGE(channelJson != nullptr, COMM_DFX, "cJSON_CreateObject fail");
 
     (void)AddStringToJsonObject(channelJson, "socketName", channelInfo->socketName.c_str());
     (void)AddNumberToJsonObject(channelJson, "channelType", channelInfo->channelType);
@@ -823,26 +819,26 @@ static void InstPackChannelInfo(cJSON *upperJson, InstantChannelInfo *channelInf
 
     char *str = cJSON_PrintUnformatted(channelJson);
     cJSON_Delete(channelJson);
-    COMM_CHECK_AND_RETURN_LOGE(str != NULL, COMM_DFX, "cJSON_PrintUnformatted fail");
+    COMM_CHECK_AND_RETURN_LOGE(str != nullptr, COMM_DFX, "cJSON_PrintUnformatted fail");
     cJSON_AddItemToArray(upperJson, cJSON_CreateString(str));
     cJSON_free(str);
 }
 
 static void InstPackRemoteInfo(cJSON *json, SoftBusList *remoteChannelInfoList)
 {
-    if (json == NULL || remoteChannelInfoList == NULL) {
+    if (json == nullptr || remoteChannelInfoList == nullptr) {
         COMM_LOGE(COMM_DFX, "invalid param");
         return;
     }
-    InstantRemoteInfo *item = NULL;
+    InstantRemoteInfo *item = nullptr;
     LIST_FOR_EACH_ENTRY(item, &remoteChannelInfoList->list, InstantRemoteInfo, node) {
         cJSON *deviceJson = cJSON_AddArrayToObject(json, "remoteInfo");
-        if (deviceJson == NULL) {
+        if (deviceJson == nullptr) {
             continue;
         }
         InstPackRemoteBasicInfo(deviceJson, item);
         if (!IsListEmpty(&item->channels)) {
-            InstantChannelInfo *channelItem = NULL;
+            InstantChannelInfo *channelItem = nullptr;
             LIST_FOR_EACH_ENTRY(channelItem, &item->channels, InstantChannelInfo, node) {
                 InstPackChannelInfo(deviceJson, channelItem);
             }
@@ -852,7 +848,7 @@ static void InstPackRemoteInfo(cJSON *json, SoftBusList *remoteChannelInfoList)
 
 static void InstUpdateRemoteInfoByLnn(InstantRemoteInfo *remoteInfo, NodeBasicInfo *info)
 {
-    if (remoteInfo == NULL || info == NULL) {
+    if (remoteInfo == nullptr || info == nullptr) {
         return;
     }
     NodeInfo nodeInfo = { { 0 } };
@@ -874,17 +870,17 @@ static void InstUpdateRemoteInfoByLnn(InstantRemoteInfo *remoteInfo, NodeBasicIn
 static int32_t InstAddRemoteInfoByLnn(SoftBusList *remoteChannelInfoList)
 {
     int32_t infoNum;
-    NodeBasicInfo *info = NULL;
+    NodeBasicInfo *info = nullptr;
     int32_t ret = LnnGetAllOnlineNodeInfo(&info, &infoNum);
     if (ret != SOFTBUS_OK) {
         return ret;
     }
-    if (info == NULL || infoNum == 0) {
+    if (info == nullptr || infoNum == 0) {
         return SOFTBUS_OK;
     }
     for (int32_t i = 0; i < infoNum; ++i) {
         InstantRemoteInfo *rInfo = InstCreateAndAddRemoteInfo(remoteChannelInfoList, false);
-        if (rInfo == NULL) {
+        if (rInfo == nullptr) {
             continue;
         }
         InstUpdateRemoteInfoByLnn(rInfo, info + i);
@@ -895,11 +891,11 @@ static int32_t InstAddRemoteInfoByLnn(SoftBusList *remoteChannelInfoList)
 
 static void InstGetRemoteInfo(cJSON *json)
 {
-    if (json == NULL) {
+    if (json == nullptr) {
         return;
     }
     SoftBusList *remoteChannelInfoList = CreateSoftBusList();
-    if (remoteChannelInfoList == NULL) {
+    if (remoteChannelInfoList == nullptr) {
         COMM_LOGE(COMM_DFX, "remoteChannelInfoList init fail");
         return;
     }
@@ -923,11 +919,11 @@ static void InstGetRemoteInfo(cJSON *json)
 static int32_t InstGetAllInfo(int32_t radarId, int32_t errorCode)
 {
     cJSON *json = cJSON_CreateObject();
-    COMM_CHECK_AND_RETURN_RET_LOGE(json != NULL, SOFTBUS_CREATE_JSON_ERR, COMM_DFX, "cJSON_CreateObject fail");
+    COMM_CHECK_AND_RETURN_RET_LOGE(json != nullptr, SOFTBUS_CREATE_JSON_ERR, COMM_DFX, "cJSON_CreateObject fail");
     (void)AddNumberToJsonObject(json, "radarId", radarId);
     (void)AddNumberToJsonObject(json, "errorCode", errorCode);
     cJSON *remoteDevicesJson = cJSON_AddArrayToObject(json, "remoteDevices");
-    if (remoteDevicesJson != NULL) {
+    if (remoteDevicesJson != nullptr) {
         InstGetRemoteInfo(remoteDevicesJson);
     }
 
@@ -941,7 +937,7 @@ static int32_t InstGetAllInfo(int32_t radarId, int32_t errorCode)
 
     char *info = cJSON_PrintUnformatted(json);
     cJSON_Delete(json);
-    COMM_CHECK_AND_RETURN_RET_LOGE(info != NULL, SOFTBUS_PARSE_JSON_ERR, COMM_DFX, "cJSON_PrintUnformatted fail");
+    COMM_CHECK_AND_RETURN_RET_LOGE(info != nullptr, SOFTBUS_PARSE_JSON_ERR, COMM_DFX, "cJSON_PrintUnformatted fail");
 
     TransEventExtra extra = {
         .result = EVENT_STAGE_RESULT_OK,
@@ -956,9 +952,9 @@ static inline SoftBusHandler *CreateHandler(SoftBusLooper *looper, InstAsyncCall
 {
     static char handlerName[] = "Instant_statistics";
     SoftBusHandler *handler = static_cast<SoftBusHandler *>(SoftBusMalloc(sizeof(SoftBusHandler)));
-    if (handler == NULL) {
+    if (handler == nullptr) {
         COMM_LOGI(COMM_DFX, "create handler failed");
-        return NULL;
+        return nullptr;
     }
     handler->looper = looper;
     handler->name = handlerName;
@@ -968,10 +964,10 @@ static inline SoftBusHandler *CreateHandler(SoftBusLooper *looper, InstAsyncCall
 
 static void FreeMessageFunc(SoftBusMessage *msg)
 {
-    if (msg == NULL) {
+    if (msg == nullptr) {
         return;
     }
-    if (msg->handler != NULL) {
+    if (msg->handler != nullptr) {
         SoftBusFree(msg->handler);
     }
     SoftBusFree(msg);
@@ -980,13 +976,13 @@ static void FreeMessageFunc(SoftBusMessage *msg)
 static SoftBusMessage *CreateMessage(SoftBusLooper *looper, InstAsyncCallbackFunc callback)
 {
     SoftBusMessage *msg = static_cast<SoftBusMessage *>(SoftBusMalloc(sizeof(SoftBusMessage)));
-    if (msg == NULL) {
+    if (msg == nullptr) {
         COMM_LOGI(COMM_DFX, "malloc softbus message failed");
-        return NULL;
+        return nullptr;
     }
     SoftBusHandler *handler = CreateHandler(looper, callback);
     msg->what = INST_DELAY_REGISTER;
-    msg->obj = NULL;
+    msg->obj = nullptr;
     msg->handler = handler;
     msg->FreeMessage = FreeMessageFunc;
     return msg;
@@ -994,12 +990,12 @@ static SoftBusMessage *CreateMessage(SoftBusLooper *looper, InstAsyncCallbackFun
 
 static int32_t InstantRegisterMsgDelay(SoftBusLooper *looper, InstAsyncCallbackFunc callback, uint64_t delayMillis)
 {
-    if ((looper == NULL) || (callback == NULL)) {
+    if ((looper == nullptr) || (callback == nullptr)) {
         return SOFTBUS_INVALID_PARAM;
     }
 
     SoftBusMessage *message = CreateMessage(looper, callback);
-    if (message == NULL) {
+    if (message == nullptr) {
         return SOFTBUS_MEM_ERR;
     }
 
@@ -1009,7 +1005,7 @@ static int32_t InstantRegisterMsgDelay(SoftBusLooper *looper, InstAsyncCallbackF
 
 void InstRegister(SoftBusMessage *msg)
 {
-    if (msg == NULL) {
+    if (msg == nullptr) {
         (void)InstantRegisterMsgDelay(GetLooper(LOOP_TYPE_DEFAULT), InstRegister, INST_MINUTE_TIME);
     } else {
         struct RadarCallback callback = { 0 };
