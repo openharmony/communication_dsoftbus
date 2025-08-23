@@ -355,6 +355,10 @@ int VtpStreamSocket::FillpStatistics(int fd, const FtEventCbkInfo *info)
             std::lock_guard<std::mutex> guard(g_streamSocketMapLock_);
             auto itListener = g_streamSocketMap.find(fd);
             if (itListener != g_streamSocketMap.end()) {
+                if (itListener->second->OnQosEvent == nullptr) {
+                    TRANS_LOGE(TRANS_STREAM, "OnQosEvent is empty");
+                    return SOFTBUS_INVALID_PARAM;
+                }
                 std::thread([itListener, eventId, tvCount, metricList, &itLock]() {
                     const std::string threadName = "OS_qosEvent";
                     pthread_setname_np(pthread_self(), threadName.c_str());
