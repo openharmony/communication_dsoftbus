@@ -183,6 +183,11 @@ void UpdateDpSameAccount(UpdateDpAclParams *aclParams, SessionKey sessionKey, bo
     return GetLnnConnInterface()->UpdateDpSameAccount(aclParams, sessionKey, isNeedUpdateDk, aclState);
 }
 
+void UpdateDpSameAccountWithoutUserKey(UpdateDpAclParams *aclParams, AclWriteState aclState)
+{
+    return GetLnnConnInterface()->UpdateDpSameAccountWithoutUserKey(aclParams, aclState);
+}
+
 int32_t LnnGetAddrTypeByIfName(const char *ifName, ConnectionAddrType *type)
 {
     return GetLnnConnInterface()->LnnGetAddrTypeByIfName(ifName, type);

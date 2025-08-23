@@ -539,6 +539,29 @@ void UpdateDpSameAccount(UpdateDpAclParams *aclParams, SessionKey sessionKey, bo
     }
 }
 
+void UpdateDpSameAccountWithoutUserKey(UpdateDpAclParams *aclParams, AclWriteState aclState)
+{
+    if (aclParams == nullptr || aclParams->deviceId == nullptr) {
+        LNN_LOGE(LNN_STATE, "deviceId is null");
+        return;
+    }
+    if (aclState == ACL_NOT_WRITE) {
+        LNN_LOGE(LNN_STATE, "no need write acl");
+        return;
+    }
+    int32_t sessionKeyId = DEFAULT_USER_KEY_INDEX;
+    std::string peerUdid(aclParams->deviceId);
+
+    if (IsSameAccount(aclParams->accountId) || (aclState == ACL_CAN_WRITE)) {
+        if (UpdateDpSameAccountAcl(peerUdid, aclParams->peerUserId, aclParams->peerUserId,
+            sessionKeyId) != UPDATE_ACL_SUCC
+            && UpdateDpSameAccountAcl(peerUdid, aclParams->peerUserId, DEFAULT_USERID,
+            sessionKeyId) != UPDATE_ACL_SUCC) {
+            InsertDpSameAccountAcl(peerUdid, aclParams->peerUserId, sessionKeyId);
+        }
+    }
+}
+
 bool GetSessionKeyProfile(int32_t sessionKeyId, uint8_t *sessionKey, uint32_t *length)
 {
     LNN_CHECK_AND_RETURN_RET_LOGE(sessionKey != NULL, false, LNN_EVENT, "sessionKey is null");
