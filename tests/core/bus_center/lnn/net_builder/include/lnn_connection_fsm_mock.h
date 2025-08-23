@@ -73,6 +73,7 @@ public:
     virtual int32_t GetAuthRequest(uint32_t requestId, AuthRequest *request) = 0;
     virtual void UpdateDpSameAccount(UpdateDpAclParams *aclParams, SessionKey sessionKey, bool isNeedUpdateDk,
         AclWriteState aclState) = 0;
+    virtual void UpdateDpSameAccountWithoutUserKey(UpdateDpAclParams *aclParams, AclWriteState aclState) = 0;
     virtual int32_t LnnGetAddrTypeByIfName(const char *ifName, ConnectionAddrType *type) = 0;
     virtual bool LnnConvertAuthConnInfoToAddr(
         ConnectionAddr *addr, const AuthConnInfo *connInfo, ConnectionAddrType hintType) = 0;
@@ -128,6 +129,7 @@ public:
     MOCK_METHOD1(AuthRemoveAuthManagerByAuthHandle, void(AuthHandle));
     MOCK_METHOD2(GetAuthRequest, int32_t(uint32_t, AuthRequest *));
     MOCK_METHOD4(UpdateDpSameAccount, void(UpdateDpAclParams *, SessionKey, bool, AclWriteState));
+    MOCK_METHOD2(UpdateDpSameAccountWithoutUserKey, void(UpdateDpAclParams *, AclWriteState));
     MOCK_METHOD2(LnnGetAddrTypeByIfName, int32_t(const char *, ConnectionAddrType *));
     MOCK_METHOD3(LnnConvertAuthConnInfoToAddr, bool(ConnectionAddr *, const AuthConnInfo *, ConnectionAddrType));
     MOCK_METHOD1(LnnUpdateAccountInfo, int32_t(const NodeInfo *));
