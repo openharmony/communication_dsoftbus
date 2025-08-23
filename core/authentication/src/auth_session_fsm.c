@@ -541,7 +541,11 @@ static void UpdateDpAclSKId(AuthFsm *authFsm)
         IsSupportFeatureByCapaBit(info->nodeInfo.authCapacity, BIT_SUPPORT_USERKEY_NEGO);
     AUTH_LOGI(AUTH_FSM, "judge insert user key aclState=%{public}d, authCapacity=%{public}d", info->nodeInfo.aclState,
         info->nodeInfo.authCapacity);
-    UpdateDpSameAccount(&aclParams, sessionKey, isNeedUpdateDk, info->nodeInfo.aclState);
+    if (info->authVersion <= AUTH_VERSION_V2) {
+        UpdateDpSameAccount(&aclParams, sessionKey, isNeedUpdateDk, info->nodeInfo.aclState);
+    } else {
+        UpdateDpSameAccountWithoutUserKey(&aclParams, info->nodeInfo.aclState);
+    }
     (void)memset_s(&sessionKey, sizeof(SessionKey), 0, sizeof(SessionKey));
 }
 
