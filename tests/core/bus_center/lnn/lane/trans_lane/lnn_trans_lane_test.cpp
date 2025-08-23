@@ -723,6 +723,8 @@ HWTEST_F(LNNTransLaneMockTest, LNN_FREE_LANE_DELAY_DESTROY_TEST_001, TestSize.Le
     };
     EXPECT_EQ(EOK, strcpy_s(allocInfo.networkId, NETWORK_ID_BUF_LEN, NODE_NETWORK_ID));
     NiceMock<TransLaneDepsInterfaceMock> laneMock;
+    LnnEnhanceFuncList lnnEnhanceFunc = { nullptr };
+    EXPECT_CALL(laneMock, LnnEnhanceFuncListGet).WillRepeatedly(Return(&lnnEnhanceFunc));
     LaneResource resourceItem = {};
     resourceItem.link.type = LANE_HML;
     resourceItem.clientRef = 1;
@@ -807,6 +809,8 @@ HWTEST_F(LNNTransLaneMockTest, LNN_FREE_LANE_DELAY_DESTROY_TEST_003, TestSize.Le
     };
     EXPECT_EQ(EOK, strcpy_s(allocInfo.networkId, NETWORK_ID_BUF_LEN, NODE_NETWORK_ID));
     NiceMock<TransLaneDepsInterfaceMock> laneMock;
+    LnnEnhanceFuncList lnnEnhanceFunc = { nullptr };
+    EXPECT_CALL(laneMock, LnnEnhanceFuncListGet).WillRepeatedly(Return(&lnnEnhanceFunc));
     LaneResource resourceItem = {};
     resourceItem.link.type = LANE_HML;
     resourceItem.clientRef = 1;
