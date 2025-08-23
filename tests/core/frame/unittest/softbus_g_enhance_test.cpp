@@ -398,8 +398,8 @@ HWTEST_F(SoftbusGEnhanceTest, SoftbusGEnhanceTest012, TestSize.Level1)
     EXPECT_EQ(ret, SOFTBUS_NOT_IMPLEMENT);
     ret = UpdateConcurrencyReuseLaneReqIdByActionIdPacked(0, 0, 0);
     EXPECT_EQ(ret, SOFTBUS_NOT_IMPLEMENT);
-    ret = UpdateConcurrencyReuseLaneReqIdByUdidPacked(nullptr, 0, 0);
-    EXPECT_EQ(ret, SOFTBUS_NOT_IMPLEMENT);
+    ret = UpdateConcurrencyReuseLaneReqIdByUdidPacked(nullptr, 0, 0, 0);
+    EXPECT_EQ(ret, SOFTBUS_INVALID_PARAM);
     ret = LnnAddLocalVapInfoPacked(LNN_VAP_UNKNOWN, nullptr);
     EXPECT_EQ(ret, SOFTBUS_NOT_IMPLEMENT);
     ret = LnnDeleteLocalVapInfoPacked(LNN_VAP_UNKNOWN);
