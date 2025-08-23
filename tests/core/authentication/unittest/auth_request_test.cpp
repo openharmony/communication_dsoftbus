@@ -13,9 +13,9 @@
  * limitations under the License.
  */
 
+#include "gmock/gmock.h"
 #include <cinttypes>
 #include <gtest/gtest.h>
-#include "gmock/gmock.h"
 #include <securec.h>
 #include <sys/time.h>
 
@@ -135,4 +135,4 @@ HWTEST_F(AuthRequestTest, GET_AUTH_REQUEST_TEST_002, TestSize.Level1)
     EXPECT_EQ(ret, RESULT_VAL2);
     ClearAuthRequest();
 }
-}
+} // namespace OHOS

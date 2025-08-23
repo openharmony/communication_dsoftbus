@@ -133,6 +133,5 @@ int32_t IdServiceQueryCredentialByUdid(int32_t userId, const char *udid, char **
     return GetAuthHichainIdServiceInterfaceMock()->IdServiceQueryCredentialByUdid(userId, udid, credList);
 }
 
-
 } // extern "C"
 } // namespace OHOS

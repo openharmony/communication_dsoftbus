@@ -132,8 +132,7 @@ int32_t LnnGetRemoteNodeInfoById(const char *id, IdCategory type, NodeInfo *info
     return GetAuthOtherInterfaceMock()->LnnGetRemoteNodeInfoById(id, type, info);
 }
 
-int32_t ConvertBytesToHexString(char *outBuf, uint32_t outBufLen, const unsigned char *inBuf,
-    uint32_t inLen)
+int32_t ConvertBytesToHexString(char *outBuf, uint32_t outBufLen, const unsigned char *inBuf, uint32_t inLen)
 {
     return GetAuthOtherInterfaceMock()->ConvertBytesToHexString(outBuf, outBufLen, inBuf, inLen);
 }

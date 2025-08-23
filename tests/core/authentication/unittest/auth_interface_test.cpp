@@ -19,24 +19,24 @@
 #include <securec.h>
 #include <sys/time.h>
 
-#include "auth_connection.h"
 #include "auth_connection.c"
+#include "auth_connection.h"
 #include "auth_device.c"
+#include "auth_interface.c"
 #include "auth_interface.h"
 #include "auth_interface_mock.h"
-#include "auth_interface.c"
 #include "auth_lane.c"
 #include "auth_log.h"
 #include "auth_manager.h"
-#include "auth_session_fsm.h"
 #include "auth_session_fsm.c"
-#include "auth_session_key.h"
+#include "auth_session_fsm.h"
 #include "auth_session_key.c"
-#include "softbus_error_code.h"
-#include "softbus_adapter_json.h"
-#include "softbus_socket.h"
+#include "auth_session_key.h"
 #include "lnn_ctrl_lane.h"
 #include "lnn_lane_interface.h"
+#include "softbus_adapter_json.h"
+#include "softbus_error_code.h"
+#include "softbus_socket.h"
 
 namespace OHOS {
 using namespace testing::ext;
@@ -55,21 +55,13 @@ public:
     void TearDown();
 };
 
-void AuthOtherMockTest::SetUpTestCase()
-{
-}
+void AuthOtherMockTest::SetUpTestCase() { }
 
-void AuthOtherMockTest::TearDownTestCase()
-{
-}
+void AuthOtherMockTest::TearDownTestCase() { }
 
-void AuthOtherMockTest::SetUp()
-{
-}
+void AuthOtherMockTest::SetUp() { }
 
-void AuthOtherMockTest::TearDown()
-{
-}
+void AuthOtherMockTest::TearDown() { }
 
 /*
  * @tc.name: AUTH_INIT_TEST_001
@@ -80,8 +72,7 @@ void AuthOtherMockTest::TearDown()
 HWTEST_F(AuthOtherMockTest, AUTH_INIT_TEST_001, TestSize.Level1)
 {
     AuthOtherInterfaceMock authMock;
-    EXPECT_CALL(authMock, AuthDeviceInit).WillOnce(Return(SOFTBUS_INVALID_PARAM))
-        .WillRepeatedly(Return(SOFTBUS_OK));
+    EXPECT_CALL(authMock, AuthDeviceInit).WillOnce(Return(SOFTBUS_INVALID_PARAM)).WillRepeatedly(Return(SOFTBUS_OK));
     EXPECT_CALL(authMock, SoftbusGetConfig).WillRepeatedly(Return(SOFTBUS_OK));
     EXPECT_CALL(authMock, RegHichainSaStatusListener).WillRepeatedly(Return(SOFTBUS_OK));
     EXPECT_CALL(authMock, CustomizedSecurityProtocolInit).WillRepeatedly(Return(SOFTBUS_OK));
@@ -103,7 +94,8 @@ HWTEST_F(AuthOtherMockTest, AUTH_INIT_TEST_002, TestSize.Level1)
 {
     AuthOtherInterfaceMock authMock;
     EXPECT_CALL(authMock, AuthDeviceInit).WillRepeatedly(Return(SOFTBUS_OK));
-    EXPECT_CALL(authMock, RegHichainSaStatusListener).WillOnce(Return(SOFTBUS_AUTH_GET_SA_MANAGER_FAIL))
+    EXPECT_CALL(authMock, RegHichainSaStatusListener)
+        .WillOnce(Return(SOFTBUS_AUTH_GET_SA_MANAGER_FAIL))
         .WillRepeatedly(Return(SOFTBUS_OK));
     EXPECT_CALL(authMock, CustomizedSecurityProtocolInit).WillRepeatedly(Return(SOFTBUS_CREATE_LIST_ERR));
     int32_t ret = AuthInit();
@@ -450,7 +442,8 @@ HWTEST_F(AuthOtherMockTest, FILL_AUTH_SESSION_INFO_TEST_001, TestSize.Level1)
 HWTEST_F(AuthOtherMockTest, AUTH_GET_AUTH_HANDLE_BY_INDEX_TEST_001, TestSize.Level1)
 {
     AuthOtherInterfaceMock authMock;
-    EXPECT_CALL(authMock, LnnGetRemoteNodeInfoByKey).WillOnce(Return(SOFTBUS_OK))
+    EXPECT_CALL(authMock, LnnGetRemoteNodeInfoByKey)
+        .WillOnce(Return(SOFTBUS_OK))
         .WillRepeatedly(AuthOtherInterfaceMock::ActionOfLnnGetRemoteNodeInfoByKey);
 
     AuthConnInfo connInfo = {
@@ -477,7 +470,8 @@ HWTEST_F(AuthOtherMockTest, AUTH_GET_AUTH_HANDLE_BY_INDEX_TEST_002, TestSize.Lev
     AuthOtherInterfaceMock authMock;
     EXPECT_CALL(authMock, LnnGetNetworkIdByUdidHash).WillRepeatedly(Return(SOFTBUS_OK));
     EXPECT_CALL(authMock, LnnGetRemoteNodeInfoByKey)
-        .WillOnce(Return(SOFTBUS_INVALID_PARAM)).WillRepeatedly(Return(SOFTBUS_OK));
+        .WillOnce(Return(SOFTBUS_INVALID_PARAM))
+        .WillRepeatedly(Return(SOFTBUS_OK));
 
     AuthConnInfo connInfo = {
         .info.ipInfo.ip = "192.168.12.1",
@@ -520,7 +514,8 @@ HWTEST_F(AuthOtherMockTest, AUTH_GET_P2P_CONN_INFO_TEST_001, TestSize.Level1)
 
     AuthOtherInterfaceMock authMock;
     EXPECT_CALL(authMock, ConvertBytesToHexString)
-        .WillOnce(Return(SOFTBUS_INVALID_PARAM)).WillRepeatedly(Return(SOFTBUS_OK));
+        .WillOnce(Return(SOFTBUS_INVALID_PARAM))
+        .WillRepeatedly(Return(SOFTBUS_OK));
     EXPECT_NO_FATAL_FAILURE(PrintAuthConnInfo(nullptr));
     EXPECT_NO_FATAL_FAILURE(PrintAuthConnInfo(&connInfo));
 
@@ -541,7 +536,8 @@ HWTEST_F(AuthOtherMockTest, AUTH_GET_P2P_CONN_INFO_TEST_001, TestSize.Level1)
 HWTEST_F(AuthOtherMockTest, AUTH_CHECK_SESSION_KEY_VALID_BY_CONN_INFO_TEST_001, TestSize.Level1)
 {
     AuthOtherInterfaceMock authMock;
-    EXPECT_CALL(authMock, LnnGetRemoteNodeInfoById).WillOnce(Return(SOFTBUS_INVALID_PARAM))
+    EXPECT_CALL(authMock, LnnGetRemoteNodeInfoById)
+        .WillOnce(Return(SOFTBUS_INVALID_PARAM))
         .WillRepeatedly(AuthOtherInterfaceMock::ActionOfLnnGetRemoteNodeInfoById);
 
     const char *networkId = "123456456";
@@ -589,7 +585,7 @@ HWTEST_F(AuthOtherMockTest, GET_IS_EXCHANGE_UDID_BY_NETWORKID_TEST_001, TestSize
 HWTEST_F(AuthOtherMockTest, GET_PEER_UDID_BY_NETWORK_ID_TEST_001, TestSize.Level1)
 {
     const char *networkId = "networkId";
-    char udid[UDID_BUF_LEN] = {0};
+    char udid[UDID_BUF_LEN] = { 0 };
     int32_t ret = GetPeerUdidByNetworkId(networkId, udid, TEST_DATA_LEN);
     EXPECT_EQ(ret, SOFTBUS_INVALID_PARAM);
 }
