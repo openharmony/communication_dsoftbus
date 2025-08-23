@@ -38,4 +38,4 @@ struct WifiDirectManager *GetWifiDirectManager(void)
     return GetAuthPreLinkInterface()->GetWifiDirectManager();
 }
 }
-}
+} // namespace OHOS

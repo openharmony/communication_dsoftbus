@@ -115,8 +115,8 @@ static void SetAuthSessionInfo(AuthSessionInfo *info, uint64_t connId, bool isSe
             break;
         case AUTH_LINK_TYPE_BLE:
             ASSERT_TRUE(memcpy_s(info->connInfo.info.bleInfo.bleMac, BT_MAC_LEN, BLE_MAC, strlen(BLE_MAC)) == EOK);
-            ASSERT_TRUE(memcpy_s(info->connInfo.info.bleInfo.deviceIdHash, UDID_HASH_LEN,
-                DEVICE_ID_HASH, DEVICE_ID_HASH_LEN) == EOK);
+            ASSERT_TRUE(memcpy_s(info->connInfo.info.bleInfo.deviceIdHash, UDID_HASH_LEN, DEVICE_ID_HASH,
+                DEVICE_ID_HASH_LEN) == EOK);
             break;
         case AUTH_LINK_TYPE_BR:
             ASSERT_TRUE(memcpy_s(info->connInfo.info.brInfo.brMac, BT_MAC_LEN, BR_MAC, strlen(BR_MAC)) == EOK);

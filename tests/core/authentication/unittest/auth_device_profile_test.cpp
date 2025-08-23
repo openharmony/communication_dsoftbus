@@ -182,11 +182,7 @@ HWTEST_F(AuthDeviceProfileTest, IS_POTENTIAL_DEVCIE_TEST_004, TestSize.Level1)
     SessionKey sessionKey;
     (void)memset_s(&sessionKey, sizeof(SessionKey), 0, sizeof(SessionKey));
     DelNotTrustDevice(nullptr);
-    UpdateDpAclParams aclParams = {
-        .accountId = accountId,
-        .deviceId = nullptr,
-        .peerUserId = peerUserId
-    };
+    UpdateDpAclParams aclParams = { .accountId = accountId, .deviceId = nullptr, .peerUserId = peerUserId };
     UpdateDpSameAccount(&aclParams, sessionKey, true, ACL_WRITE_DEFAULT);
     bool ret = IsPotentialTrustedDeviceDp(deviceIdHash, true);
     EXPECT_EQ(ret, false);
@@ -389,8 +385,8 @@ HWTEST_F(AuthDeviceProfileTest, IS_SAME_ACCOUNT_TEST_003, TestSize.Level1)
 {
     int64_t accountId = TEST_ACCOUNT_ID;
     AuthDeviceProfileInterfaceMock mock;
-    EXPECT_CALL(mock, LnnGetLocalNum64Info).WillRepeatedly(DoAll(SetArgPointee<1>(TEST_ACCOUNT_ID),
-        Return(SOFTBUS_OK)));
+    EXPECT_CALL(mock, LnnGetLocalNum64Info)
+        .WillRepeatedly(DoAll(SetArgPointee<1>(TEST_ACCOUNT_ID), Return(SOFTBUS_OK)));
     EXPECT_CALL(mock, LnnIsDefaultOhosAccount).WillOnce(Return(false));
     bool result = IsSameAccount(accountId);
     EXPECT_TRUE(result);
@@ -669,11 +665,7 @@ HWTEST_F(AuthDeviceProfileTest, IS_TRUSTED_DEVICE_FROM_ACCESS_TEST_003, TestSize
     SessionKey sessionKey;
     (void)memset_s(&sessionKey, sizeof(SessionKey), 0, sizeof(SessionKey));
     DelNotTrustDevice(nullptr);
-    UpdateDpAclParams aclParams = {
-        .accountId = accountId,
-        .deviceId = nullptr,
-        .peerUserId = peerUserId
-    };
+    UpdateDpAclParams aclParams = { .accountId = accountId, .deviceId = nullptr, .peerUserId = peerUserId };
     UpdateDpSameAccount(&aclParams, sessionKey, true, ACL_NOT_WRITE);
     UpdateDpSameAccount(&aclParams, sessionKey, true, ACL_WRITE_DEFAULT);
     ret = IsTrustedDeviceFromAccess(accountHash, udid, 100);

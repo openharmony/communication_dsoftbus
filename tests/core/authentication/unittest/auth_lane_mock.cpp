@@ -54,8 +54,7 @@ int32_t TransGetConnByChanId(int32_t channelId, int32_t channelType, int32_t *co
 int32_t AuthMetaStartVerify(uint32_t connectionId, const AuthKeyInfo *authKeyInfo, uint32_t requestId,
     int32_t callingPid, const AuthVerifyCallback *callBack)
 {
-    return GetAuthLaneMockInterface()->AuthMetaStartVerify(
-        connectionId, authKeyInfo, requestId, callingPid, callBack);
+    return GetAuthLaneMockInterface()->AuthMetaStartVerify(connectionId, authKeyInfo, requestId, callingPid, callBack);
 }
 
 void LnnSetUnlockState(void)
