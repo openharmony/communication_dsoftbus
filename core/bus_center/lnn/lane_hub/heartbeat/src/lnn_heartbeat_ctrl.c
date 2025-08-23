@@ -20,7 +20,7 @@
 #include <string.h>
 
 #include "anonymizer.h"
-
+#include "auth_apply_key_manager.h"
 #include "auth_interface.h"
 #include "auth_manager.h"
 #include "bus_center_manager.h"
@@ -803,6 +803,7 @@ static void HbScreenLockChangeEventHandler(const LnnEventBasicInfo *info)
         LNN_LOGI(LNN_HEART_BEAT, "user unlocked");
         (void)LnnGenerateCeParams(true);
         AuthLoadDeviceKeyPacked();
+        AuthRecoveryApplyKey();
         LnnUpdateOhosAccount(UPDATE_ACCOUNT_ONLY);
         if (!LnnIsDefaultOhosAccount()) {
             LnnNotifyAccountStateChangeEvent(SOFTBUS_ACCOUNT_LOG_IN);
