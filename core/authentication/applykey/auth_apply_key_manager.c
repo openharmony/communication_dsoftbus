@@ -59,6 +59,7 @@ typedef struct {
 static Map g_authApplyMap;
 static SoftBusMutex g_authApplyMutex;
 static bool g_isInit = false;
+static bool g_isRecoveryApplyKey = false;
 
 static int32_t AuthApplyMapInit(void)
 {
@@ -337,10 +338,21 @@ void AuthRecoveryApplyKey(void)
 {
     char *applyKey = NULL;
     uint32_t applyKeyLen = 0;
+    if (SoftBusMutexLock(&g_authApplyMutex) != SOFTBUS_OK) {
+        AUTH_LOGE(AUTH_CONN, "SoftBusMutexLock fail");
+        return;
+    }
+    if (g_isRecoveryApplyKey) {
+        (void)SoftBusMutexUnlock(&g_authApplyMutex);
+        return;
+    }
     if (LnnRetrieveDeviceDataPacked(LNN_DATA_TYPE_APPLY_KEY, &applyKey, &applyKeyLen) != SOFTBUS_OK) {
+        (void)SoftBusMutexUnlock(&g_authApplyMutex);
         AUTH_LOGE(AUTH_CONN, "retrieve device fail");
         return;
     }
+    g_isRecoveryApplyKey = true;
+    (void)SoftBusMutexUnlock(&g_authApplyMutex);
     if (applyKey == NULL) {
         AUTH_LOGE(AUTH_CONN, "applyKey is empty");
         return;
@@ -466,4 +478,5 @@ void DeInitApplyKeyManager(void)
 {
     ClearAuthApplyMap();
     (void)SoftBusMutexDestroy(&g_authApplyMutex);
+    g_isRecoveryApplyKey = false;
 }
