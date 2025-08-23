@@ -47,8 +47,8 @@
 #endif
 
 #define DEFAULT_ACCOUNT_UID "ohosAnonymousUid"
-#define DBINDER_PREFIX "DBinder"
-#define DBINDER_DMS "DBinder5522"
+#define RPC_SESSION_NAME_PREFIX "DBinder"
+#define DMS_SESSION_NAME_PREFIX "DBinder5522"
 
 namespace {
     using namespace OHOS::DistributedDeviceProfile;
@@ -338,8 +338,8 @@ int32_t TransCheckServerAccessControl(const AppInfo *appInfo)
     if (peerTokenType != myTokenType) {
         const char *mySessionName = appInfo->myData.sessionName;
         const char *peerSessionName = appInfo->peerData.sessionName;
-        if (StrStartWith(peerSessionName, DBINDER_DMS) && (peerTokenType == ACCESS_TOKEN_TYPE_NATIVE) &&
-            StrStartWith(mySessionName, DBINDER_PREFIX)) {
+        if (StrStartWith(peerSessionName, DMS_SESSION_NAME_PREFIX) && (peerTokenType == ACCESS_TOKEN_TYPE_NATIVE) &&
+            StrStartWith(mySessionName, RPC_SESSION_NAME_PREFIX)) {
             return SOFTBUS_OK;
         }
         COMM_LOGE(COMM_PERM, "peerTokenType=%{public}d, myTokenType=%{public}d, not support",
