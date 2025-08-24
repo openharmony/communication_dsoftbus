@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2025 Huawei Device Co., Ltd.
+ * Copyright (c) 2025-2025 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -29,7 +29,6 @@ char g_peerUdud[] = "123456ABCDEF";
 namespace OHOS {
 using namespace testing::ext;
 
-
 class LnnConnIdCbManagerTest : public testing::Test {
 public:
     static void SetUpTestCase(void);
@@ -41,7 +40,6 @@ public:
 void LnnConnIdCbManagerTest::SetUpTestCase(void) { }
 
 void LnnConnIdCbManagerTest::TearDownTestCase(void) { }
-
 
 void LnnConnIdCbManagerTest::SetUp()
 {
@@ -59,9 +57,7 @@ static void OnLnnServerJoinExtCb(const ConnectionAddr *addr, int32_t ret)
     return;
 }
 
-static LnnServerJoinExtCallBack cb = {
-    .lnnServerJoinExtCallback = OnLnnServerJoinExtCb
-};
+static LnnServerJoinExtCallBack cb = { .lnnServerJoinExtCallback = OnLnnServerJoinExtCb };
 
 /**
  * @tc.name: LnnConnIdCbManagerTest001

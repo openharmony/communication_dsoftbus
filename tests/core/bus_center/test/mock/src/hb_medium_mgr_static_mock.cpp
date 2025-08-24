@@ -102,14 +102,12 @@ int32_t SoftBusGenerateStrHash(const unsigned char *str, uint32_t len, unsigned 
     return HbMediumMgrInterface()->SoftBusGenerateStrHash(str, len, hash);
 }
 
-int32_t ConvertBytesToUpperCaseHexString(char *outBuf, uint32_t outBufLen, const unsigned char *inBuf,
-    uint32_t inLen)
+int32_t ConvertBytesToUpperCaseHexString(char *outBuf, uint32_t outBufLen, const unsigned char *inBuf, uint32_t inLen)
 {
     return HbMediumMgrInterface()->ConvertBytesToUpperCaseHexString(outBuf, outBufLen, inBuf, inLen);
 }
 
-int32_t ConvertBytesToHexString(char *outBuf, uint32_t outBufLen, const unsigned char *inBuf,
-    uint32_t inLen)
+int32_t ConvertBytesToHexString(char *outBuf, uint32_t outBufLen, const unsigned char *inBuf, uint32_t inLen)
 {
     return HbMediumMgrInterface()->ConvertBytesToHexString(outBuf, outBufLen, inBuf, inLen);
 }
