@@ -557,7 +557,7 @@ HWTEST_F(AuthSessionFsmTest, SYNC_DEV_ID_STATE_PROCESS_TEST_001, TestSize.Level1
 HWTEST_F(AuthSessionFsmTest, GET_AUTH_FSM_BY_REQUEST_ID_TEST_001, TestSize.Level1)
 {
     uint64_t requestId = TEST_REQUEST_ID;
-    AuthFsm * fsm = GetAuthFsmByRequestId(requestId);
+    AuthFsm *fsm = GetAuthFsmByRequestId(requestId);
     EXPECT_EQ(fsm, nullptr);
 }
 
@@ -639,7 +639,6 @@ HWTEST_F(AuthSessionFsmTest, AUTH_SESSION_GET_AUTH_VERSION_TEST_001, TestSize.Le
     ret = AuthSessionGetAuthVersion(authSeq, &version);
     EXPECT_EQ(ret, SOFTBUS_AUTH_GET_SESSION_INFO_FAIL);
 }
-
 
 /*
  * @tc.name: AUTH_SESSION_GET_IS_SAME_TEST_001

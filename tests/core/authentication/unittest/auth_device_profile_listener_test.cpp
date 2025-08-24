@@ -13,7 +13,6 @@
  * limitations under the License.
  */
 
-
 #include <gtest/gtest.h>
 
 #include "auth_device_profile_listener.h"

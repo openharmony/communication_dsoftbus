@@ -17,8 +17,8 @@
 #define DSOFTBUS_APP_BIND_MOCK_H
 
 #include "bus_center_event.h"
-#include "lnn_heartbeat_utils.h"
 #include "lnn_distributed_net_ledger.h"
+#include "lnn_heartbeat_utils.h"
 #include "lnn_ohos_account.h"
 #include <gmock/gmock.h>
 #include <mutex>
@@ -47,16 +47,16 @@ public:
     AuthDeviceProfileListenerInterfaceMock();
     ~AuthDeviceProfileListenerInterfaceMock() override;
     MOCK_METHOD3(LnnStartHbByTypeAndStrategy, int32_t(LnnHeartbeatType, LnnHeartbeatStrategyType, bool));
-    MOCK_METHOD0(LnnIsLocalSupportBurstFeature, bool (void));
-    MOCK_METHOD0(GetActiveOsAccountIds, int32_t (void));
-    MOCK_METHOD3(LnnGetRemoteNodeInfoById, int32_t (const char *, IdCategory, NodeInfo *));
-    MOCK_METHOD3(DpHasAccessControlProfile, bool (const char *, bool, int32_t));
+    MOCK_METHOD0(LnnIsLocalSupportBurstFeature, bool(void));
+    MOCK_METHOD0(GetActiveOsAccountIds, int32_t(void));
+    MOCK_METHOD3(LnnGetRemoteNodeInfoById, int32_t(const char *, IdCategory, NodeInfo *));
+    MOCK_METHOD3(DpHasAccessControlProfile, bool(const char *, bool, int32_t));
     MOCK_METHOD2(LnnDeleteSpecificTrustedDevInfo, int32_t(const char *, int32_t));
-    MOCK_METHOD0(GetScreenState, SoftBusScreenState (void));
-    MOCK_METHOD0(IsHeartbeatEnable, bool (void));
-    MOCK_METHOD1(LnnInsertSpecificTrustedDevInfo, int32_t (const char *));
-    MOCK_METHOD1(LnnHbOnTrustedRelationIncreased, void (int32_t));
-    MOCK_METHOD0(LnnHbOnTrustedRelationReduced, void (void));
+    MOCK_METHOD0(GetScreenState, SoftBusScreenState(void));
+    MOCK_METHOD0(IsHeartbeatEnable, bool(void));
+    MOCK_METHOD1(LnnInsertSpecificTrustedDevInfo, int32_t(const char *));
+    MOCK_METHOD1(LnnHbOnTrustedRelationIncreased, void(int32_t));
+    MOCK_METHOD0(LnnHbOnTrustedRelationReduced, void(void));
 };
 
 extern "C" {

@@ -19,6 +19,7 @@
 #include <securec.h>
 #include <sys/time.h>
 
+#include "auth_common_mock.h"
 #include "auth_connection.c"
 #include "auth_connection.h"
 #include "auth_device.c"
@@ -33,7 +34,6 @@
 #include "auth_session_key.c"
 #include "auth_session_key.h"
 #include "auth_tcp_connection_mock.h"
-#include "auth_common_mock.h"
 #include "lnn_ctrl_lane.h"
 #include "lnn_lane_interface.h"
 #include "softbus_adapter_json.h"
@@ -1219,8 +1219,7 @@ HWTEST_F(AuthOtherTest, AUTH_START_LISTENING_FOR_WIFI_DIRECT_TEST_001, TestSize.
     ListenerModule moduleId;
     (void)memset_s(&moduleId, sizeof(ListenerModule), 0, sizeof(ListenerModule));
     EXPECT_NE(AuthStartListeningForWifiDirect(AUTH_LINK_TYPE_P2P, ip, 37025, &moduleId), SOFTBUS_INVALID_PORT);
-    EXPECT_NE(
-        AuthStartListeningForWifiDirect(AUTH_LINK_TYPE_ENHANCED_P2P, ip, 37025, &moduleId), SOFTBUS_INVALID_PORT);
+    EXPECT_NE(AuthStartListeningForWifiDirect(AUTH_LINK_TYPE_ENHANCED_P2P, ip, 37025, &moduleId), SOFTBUS_INVALID_PORT);
     EXPECT_EQ(AuthStartListeningForWifiDirect(AUTH_LINK_TYPE_WIFI, ip, 37025, &moduleId), SOFTBUS_INVALID_PARAM);
 }
 

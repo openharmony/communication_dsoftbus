@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2024 Huawei Device Co., Ltd.
+ * Copyright (c) 2024-2025 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -26,13 +26,14 @@
 using namespace std;
 
 namespace OHOS {
-    const uint8_t *g_baseFuzzData = nullptr;
-    size_t g_baseFuzzSize = 0;
-    size_t g_baseFuzzPos;
+const uint8_t *g_baseFuzzData = nullptr;
+size_t g_baseFuzzSize = 0;
+size_t g_baseFuzzPos;
 
-template <class T> T GetData()
+template <class T>
+T GetData()
 {
-    T objetct{};
+    T objetct {};
     size_t objetctSize = sizeof(objetct);
     if (g_baseFuzzData == nullptr || objetctSize > g_baseFuzzSize - g_baseFuzzPos) {
         return objetct;
@@ -57,7 +58,7 @@ bool AuthDataFuzzTest(const uint8_t *data, size_t size)
     AuthLinkType authLinkType = static_cast<AuthLinkType>(testData % AUTH_LINK_TYPE_MAX);
     uint64_t authId = 0;
     GenerateUint64(authId);
-    AuthHandle authHandle = {.authId = authId, .type = authLinkType};
+    AuthHandle authHandle = { .authId = authId, .type = authLinkType };
 
     const AuthTransData *outData = reinterpret_cast<const AuthTransData *>(data);
     AuthTransData *dataInfo = (AuthTransData *)SoftBusMalloc(sizeof(AuthTransData));
@@ -86,7 +87,7 @@ bool AuthCryptFuzzTest(const uint8_t *data, size_t size)
     AuthLinkType authLinkType = static_cast<AuthLinkType>(testData % AUTH_LINK_TYPE_MAX);
     uint64_t authId = 0;
     GenerateUint64(authId);
-    AuthHandle authHandle = {.authId = authId, .type = authLinkType};
+    AuthHandle authHandle = { .authId = authId, .type = authLinkType };
 
     uint8_t *outData = nullptr;
     outData = (uint8_t *)SoftBusCalloc(sizeof(size));
@@ -168,7 +169,7 @@ void AuthMetaStartVerifyFuzzTest(const uint8_t *data, size_t size)
 }
 
 /* Fuzzer entry point */
-extern "C" int32_t LLVMFuzzerTestOneInput(const uint8_t* data, size_t size)
+extern "C" int32_t LLVMFuzzerTestOneInput(const uint8_t *data, size_t size)
 {
     if (data == nullptr || size == 0) {
         return 0;
@@ -186,4 +187,4 @@ extern "C" int32_t LLVMFuzzerTestOneInput(const uint8_t* data, size_t size)
 
     return 0;
 }
-}
+} // namespace OHOS

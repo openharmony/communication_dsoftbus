@@ -17,8 +17,8 @@
 #include <gtest/gtest.h>
 #include <securec.h>
 
-#include "auth_uk_manager.h"
 #include "auth_uk_manager.c"
+#include "auth_uk_manager.h"
 #include "auth_user_common_key.h"
 
 namespace OHOS {
@@ -94,7 +94,7 @@ HWTEST_F(AuthUserCommonKeyNewTest, ReleaseUkNegotiateListLock002, TestSize.Level
  */
 HWTEST_F(AuthUserCommonKeyNewTest, InitUkNegoInstanceList001, TestSize.Level0)
 {
-    g_ukNegotiateList = (SoftBusList*)SoftBusMalloc(sizeof(SoftBusList));
+    g_ukNegotiateList = (SoftBusList *)SoftBusMalloc(sizeof(SoftBusList));
     ASSERT_NE(g_ukNegotiateList, nullptr);
     EXPECT_EQ(InitUkNegoInstanceList(), SOFTBUS_OK);
     SoftBusFree(g_ukNegotiateList);
@@ -147,7 +147,7 @@ HWTEST_F(AuthUserCommonKeyNewTest, GetGenUkInstanceByChannelTest001, TestSize.Le
  */
 HWTEST_F(AuthUserCommonKeyNewTest, GetGenUkInstanceByChannelTest002, TestSize.Level0)
 {
-    g_ukNegotiateList = (SoftBusList*)SoftBusMalloc(sizeof(SoftBusList));
+    g_ukNegotiateList = (SoftBusList *)SoftBusMalloc(sizeof(SoftBusList));
     ASSERT_NE(g_ukNegotiateList, nullptr);
     EXPECT_EQ(GetGenUkInstanceByChannel(1, NULL), SOFTBUS_INVALID_PARAM);
     SoftBusFree(g_ukNegotiateList);
@@ -161,7 +161,7 @@ HWTEST_F(AuthUserCommonKeyNewTest, GetGenUkInstanceByChannelTest002, TestSize.Le
  */
 HWTEST_F(AuthUserCommonKeyNewTest, GetGenUkInstanceByChannelTest003, TestSize.Level0)
 {
-    g_ukNegotiateList = (SoftBusList*)SoftBusMalloc(sizeof(SoftBusList));
+    g_ukNegotiateList = (SoftBusList *)SoftBusMalloc(sizeof(SoftBusList));
     ASSERT_NE(g_ukNegotiateList, nullptr);
     UkNegotiateInstance instance;
     (void)memset_s(&instance, sizeof(UkNegotiateInstance), 0, sizeof(UkNegotiateInstance));
@@ -177,7 +177,7 @@ HWTEST_F(AuthUserCommonKeyNewTest, GetGenUkInstanceByChannelTest003, TestSize.Le
  */
 HWTEST_F(AuthUserCommonKeyNewTest, GetGenUkInstanceByChannelTest004, TestSize.Level0)
 {
-    g_ukNegotiateList = (SoftBusList*)SoftBusMalloc(sizeof(SoftBusList));
+    g_ukNegotiateList = (SoftBusList *)SoftBusMalloc(sizeof(SoftBusList));
     ASSERT_NE(g_ukNegotiateList, nullptr);
     UkNegotiateInstance instance;
     (void)memset_s(&instance, sizeof(UkNegotiateInstance), 0, sizeof(UkNegotiateInstance));
@@ -195,7 +195,7 @@ HWTEST_F(AuthUserCommonKeyNewTest, GetGenUkInstanceByChannelTest004, TestSize.Le
  */
 HWTEST_F(AuthUserCommonKeyNewTest, GetGenUkInstanceByChannelTest005, TestSize.Level0)
 {
-    g_ukNegotiateList = (SoftBusList*)SoftBusMalloc(sizeof(SoftBusList));
+    g_ukNegotiateList = (SoftBusList *)SoftBusMalloc(sizeof(SoftBusList));
     ASSERT_NE(g_ukNegotiateList, nullptr);
     UkNegotiateInstance instance;
     (void)memset_s(&instance, sizeof(UkNegotiateInstance), 0, sizeof(UkNegotiateInstance));
@@ -211,7 +211,7 @@ HWTEST_F(AuthUserCommonKeyNewTest, GetGenUkInstanceByChannelTest005, TestSize.Le
  */
 HWTEST_F(AuthUserCommonKeyNewTest, GetGenUkInstanceByChannelTest006, TestSize.Level0)
 {
-    g_ukNegotiateList = (SoftBusList*)SoftBusMalloc(sizeof(SoftBusList));
+    g_ukNegotiateList = (SoftBusList *)SoftBusMalloc(sizeof(SoftBusList));
     ASSERT_NE(g_ukNegotiateList, nullptr);
     UkNegotiateInstance instance;
     (void)memset_s(&instance, sizeof(UkNegotiateInstance), 0, sizeof(UkNegotiateInstance));
@@ -329,7 +329,7 @@ HWTEST_F(AuthUserCommonKeyNewTest, GetGenUkInstanceByReqTest003, TestSize.Level0
 {
     g_ukNegotiateList = CreateSoftBusList();
     ASSERT_NE(g_ukNegotiateList, nullptr);
-    UkNegotiateInstance  instance;
+    UkNegotiateInstance instance;
     (void)memset_s(&instance, sizeof(UkNegotiateInstance), 0, sizeof(UkNegotiateInstance));
     instance.requestId = 1;
     int32_t result = GetGenUkInstanceByReq(1, &instance);
@@ -420,8 +420,8 @@ HWTEST_F(AuthUserCommonKeyNewTest, CreateUkNegotiateInstanceTest001, TestSize.Le
 {
     uint32_t requestId = 1;
     uint32_t channelId = 1;
-    AuthACLInfo info = {0};
-    AuthGenUkCallback genCb = {0};
+    AuthACLInfo info = { 0 };
+    AuthGenUkCallback genCb = { 0 };
     int32_t ret = CreateUkNegotiateInstance(requestId, channelId, &info, &genCb);
     EXPECT_EQ(ret, SOFTBUS_LOCK_ERR);
 }
@@ -436,8 +436,8 @@ HWTEST_F(AuthUserCommonKeyNewTest, CreateUkNegotiateInstanceTest002, TestSize.Le
 {
     uint32_t requestId = 1;
     uint32_t channelId = 1;
-    AuthACLInfo info = {1};
-    AuthGenUkCallback genCb = {0};
+    AuthACLInfo info = { 1 };
+    AuthGenUkCallback genCb = { 0 };
     int32_t ret = CreateUkNegotiateInstance(requestId, channelId, &info, &genCb);
     EXPECT_EQ(ret, SOFTBUS_LOCK_ERR);
 }
@@ -585,7 +585,7 @@ HWTEST_F(AuthUserCommonKeyNewTest, DeleteUkNegotiateInstanceTest003, TestSize.Le
  */
 HWTEST_F(AuthUserCommonKeyNewTest, DeleteUkNegotiateInstanceTest004, TestSize.Level0)
 {
-    g_ukNegotiateList = (SoftBusList*)SoftBusMalloc(sizeof(SoftBusList));
+    g_ukNegotiateList = (SoftBusList *)SoftBusMalloc(sizeof(SoftBusList));
     ASSERT_NE(g_ukNegotiateList, nullptr);
     g_ukNegotiateList->list.next = &g_ukNegotiateList->list;
     g_ukNegotiateList->list.prev = &g_ukNegotiateList->list;
@@ -601,7 +601,7 @@ HWTEST_F(AuthUserCommonKeyNewTest, DeleteUkNegotiateInstanceTest004, TestSize.Le
  */
 HWTEST_F(AuthUserCommonKeyNewTest, CompareByAllAclTest001, TestSize.Level0)
 {
-    g_ukNegotiateList = (SoftBusList*)SoftBusMalloc(sizeof(SoftBusList));
+    g_ukNegotiateList = (SoftBusList *)SoftBusMalloc(sizeof(SoftBusList));
     ASSERT_NE(g_ukNegotiateList, nullptr);
     AuthACLInfo oldAcl;
     (void)memset_s(&oldAcl, sizeof(AuthACLInfo), 0, sizeof(AuthACLInfo));
@@ -749,7 +749,7 @@ HWTEST_F(AuthUserCommonKeyNewTest, CompareByAllAclTest004, TestSize.Level0)
  */
 HWTEST_F(AuthUserCommonKeyNewTest, CompareByAllAclTest005, TestSize.Level0)
 {
-    const AuthACLInfo* oldAcl = nullptr;
+    const AuthACLInfo *oldAcl = nullptr;
     AuthACLInfo newAcl;
     (void)memset_s(&newAcl, sizeof(AuthACLInfo), 0, sizeof(AuthACLInfo));
     newAcl.isServer = true;
@@ -772,7 +772,7 @@ HWTEST_F(AuthUserCommonKeyNewTest, CompareByAllAclTest005, TestSize.Level0)
  */
 HWTEST_F(AuthUserCommonKeyNewTest, CompareByAllAclTest006, TestSize.Level0)
 {
-    const AuthACLInfo* newAcl = nullptr;
+    const AuthACLInfo *newAcl = nullptr;
     AuthACLInfo oldAcl;
     (void)memset_s(&oldAcl, sizeof(AuthACLInfo), 0, sizeof(AuthACLInfo));
     oldAcl.isServer = true;
@@ -917,4 +917,4 @@ HWTEST_F(AuthUserCommonKeyNewTest, CompareByAclDiffAccountWithUserLevelTest005, 
     newAcl.sourceUserId = 2;
     EXPECT_FALSE(CompareByAclDiffAccountWithUserLevel(&oldAcl, &newAcl, false));
 }
-}
+} // namespace OHOS

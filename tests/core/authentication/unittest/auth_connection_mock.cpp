@@ -75,4 +75,4 @@ int32_t StartSocketListening(ListenerModule module, const LocalListenerInfo *inf
     return GetCommonInterface()->StartSocketListening(module, info);
 }
 }
-}
+} // namespace OHOS
