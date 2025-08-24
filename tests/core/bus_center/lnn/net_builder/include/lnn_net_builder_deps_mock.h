@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2022-2023 Huawei Device Co., Ltd.
+ * Copyright (c) 2022-2025 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -89,8 +89,8 @@ public:
         ConnectionAddr *addr, const AuthConnInfo *connInfo, ConnectionAddrType hintType);
     virtual bool AddStringToJsonObject(cJSON *json, const char * const string, const char *value);
     virtual bool AddNumberToJsonObject(cJSON *json, const char * const string, int32_t num);
-    virtual int32_t LnnSendSyncInfoMsg(LnnSyncInfoType type, const char *networkId, const uint8_t *msg, uint32_t len,
-        LnnSyncInfoMsgComplete complete);
+    virtual int32_t LnnSendSyncInfoMsg(
+        LnnSyncInfoType type, const char *networkId, const uint8_t *msg, uint32_t len, LnnSyncInfoMsgComplete complete);
     virtual NodeInfo *LnnGetNodeInfoById(const char *id, IdCategory type);
     virtual int32_t LnnUpdateNodeInfo(NodeInfo *newInfo, int32_t connectionType);
     virtual int32_t LnnAddMetaInfo(NodeInfo *info);
@@ -187,8 +187,8 @@ public:
     virtual bool LnnConvertAddrToAuthConnInfo(const ConnectionAddr *addr, AuthConnInfo *connInfo);
     virtual int32_t LnnFsmRemoveMessageByType(FsmStateMachine *fsm, int32_t what);
     virtual void LnnDeinitBusCenterEvent(void);
-    virtual int32_t AuthStartVerify(const AuthConnInfo *connInfo, const AuthVerifyParam *authVerifyParam,
-        const AuthVerifyCallback *callback);
+    virtual int32_t AuthStartVerify(
+        const AuthConnInfo *connInfo, const AuthVerifyParam *authVerifyParam, const AuthVerifyCallback *callback);
     virtual bool IsSupportLpFeature(void);
     virtual int32_t LnnSubcribeKvStoreService(void);
     virtual void LnnNotifyLocalNetworkIdChanged(void);
@@ -339,8 +339,7 @@ public:
     MOCK_METHOD2(LnnConvertAddrToAuthConnInfo, bool(const ConnectionAddr *, AuthConnInfo *));
     MOCK_METHOD2(LnnFsmRemoveMessageByType, int32_t(FsmStateMachine *, int32_t));
     MOCK_METHOD0(LnnDeinitBusCenterEvent, void());
-    MOCK_METHOD3(
-        AuthStartVerify, int32_t(const AuthConnInfo *, const AuthVerifyParam *, const AuthVerifyCallback *));
+    MOCK_METHOD3(AuthStartVerify, int32_t(const AuthConnInfo *, const AuthVerifyParam *, const AuthVerifyCallback *));
     MOCK_METHOD2(LnnIsNeedCleanConnectionFsm, bool(const NodeInfo *, ConnectionAddrType));
     MOCK_METHOD1(AuthFlushDevice, int32_t(const char *uuid));
     MOCK_METHOD0(IsSupportLpFeature, bool());
@@ -361,13 +360,13 @@ public:
     MOCK_METHOD1(AuthRemoveAuthManagerByAuthHandle, void(AuthHandle));
     MOCK_METHOD3(ProcessBleOnline, int32_t(NodeInfo *, const ConnectionAddr *, AuthCapability));
     MOCK_METHOD1(GetLnnTriggerInfo, void(LnnTriggerInfo *));
-    MOCK_METHOD1(LnnGetDataShareInitResult, void (bool *));
+    MOCK_METHOD1(LnnGetDataShareInitResult, void(bool *));
     MOCK_METHOD2(LnnSetDLConnUserIdCheckSum, int32_t(const char *networkId, int32_t userIdCheckSum));
     MOCK_METHOD3(LnnNotifyDeviceTrustedChange, void(int32_t type, const char *msg, uint32_t msgLen));
     MOCK_METHOD0(LnnInitSaStatusMonitor, int32_t());
     MOCK_METHOD0(LnnDeInitSaStatusMonitor, void());
     MOCK_METHOD4(LnnGetLocalStrInfoByIfnameIdx, int32_t(InfoKey, char *, uint32_t, int32_t));
-    MOCK_METHOD1(IsSameAccountId, bool (int64_t));
+    MOCK_METHOD1(IsSameAccountId, bool(int64_t));
 };
 } // namespace OHOS
 #endif // LNN_NET_BUILDER_DEPS_MOCK_H

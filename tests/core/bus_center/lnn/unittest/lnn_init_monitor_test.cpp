@@ -74,7 +74,6 @@ HWTEST_F(LNNInitMonitorTest, LnnInitMonitor_Test_001, TestSize.Level0)
     status = LnnInitDeviceInfoStatusGet(LEDGER_INFO_DEVICE_NAME);
     EXPECT_EQ(status, DEPS_STATUS_NOT_INIT);
 
-
     LnnInitModuleReturnSet(INIT_DEPS_DEVICE_PROFILE, SOFTBUS_OK);
     LnnInitModuleStatusSet(INIT_DEPS_DEVICE_PROFILE, DEPS_STATUS_SUCCESS);
     status = LnnInitModuleStatusGet(INIT_DEPS_DEVICE_PROFILE);

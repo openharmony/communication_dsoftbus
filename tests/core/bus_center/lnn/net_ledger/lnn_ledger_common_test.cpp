@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2022 Huawei Device Co., Ltd.
+ * Copyright (c) 2022-2025 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -21,6 +21,7 @@
 #include <securec.h>
 
 #include "bus_center_manager.h"
+#include "g_enhance_lnn_func.h"
 #include "lnn_decision_db.h"
 #include "lnn_device_info.h"
 #include "lnn_distributed_net_ledger.h"
@@ -34,20 +35,19 @@
 #include "lnn_net_ledger_common_mock.h"
 #include "lnn_node_info.h"
 #include "softbus_adapter_mem.h"
+#include "softbus_config_adapter.h"
+#include "softbus_def.h"
 #include "softbus_error_code.h"
 #include "softbus_feature_config.h"
 #include "softbus_utils.h"
-#include "g_enhance_lnn_func.h"
-#include "softbus_def.h"
-#include "softbus_config_adapter.h"
 
 #define ONE_BIT_MAX_HEX               15
 #define DEVICE_TYPE_MAX_LENGTH        3
 #define LEFT_SHIFT_DEVICE_TYPE_LENGTH (DEVICE_TYPE_MAX_LENGTH * 4)
 #define DEFAUTL_LNN_FEATURE           0x3E2
 
-#define LNN_SUPPORT_ENHANCE_FEATURE             0x3F7EA
-#define ENHANCE_SUPPORT_AUTH_CAPACITY           0xFF
+#define LNN_SUPPORT_ENHANCE_FEATURE   0x3F7EA
+#define ENHANCE_SUPPORT_AUTH_CAPACITY 0xFF
 
 namespace OHOS {
 using namespace testing::ext;
@@ -958,8 +958,7 @@ HWTEST_F(LNNNetLedgerCommonTest, LNN_NET_LEDGER_Test_002, TestSize.Level1)
     EXPECT_TRUE(LnnSetLocalStrInfo(STRING_KEY_NETWORKID, LOCAL_NETWORKID) == SOFTBUS_OK);
     EXPECT_TRUE(LnnSetNodeDataChangeFlag(nullptr, DATA_CHANGE_FLAG) == SOFTBUS_INVALID_PARAM);
     EXPECT_TRUE(LnnSetNodeDataChangeFlag(LOCAL_NETWORKID, DATA_CHANGE_FLAG) == SOFTBUS_OK);
-    EXPECT_TRUE(
-        LnnSetNodeDataChangeFlag(REMOTE_NETWORKID, DATA_CHANGE_FLAG) == SOFTBUS_NETWORK_INVALID_DEV_INFO);
+    EXPECT_TRUE(LnnSetNodeDataChangeFlag(REMOTE_NETWORKID, DATA_CHANGE_FLAG) == SOFTBUS_NETWORK_INVALID_DEV_INFO);
     LnnDeinitNetLedger();
 }
 

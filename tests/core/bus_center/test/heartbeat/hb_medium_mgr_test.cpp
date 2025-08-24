@@ -21,9 +21,9 @@
 #include "ble_mock.h"
 #include "bus_center_adapter.h"
 #include "distribute_net_ledger_mock.h"
+#include "dsoftbus_enhance_interface.h"
 #include "hb_medium_mgr_mock.h"
 #include "hb_strategy_mock.h"
-#include "dsoftbus_enhance_interface.h"
 #include "lnn_connection_fsm_mock.h"
 #include "lnn_heartbeat_ctrl_virtual.c"
 #include "lnn_heartbeat_medium_mgr.c"
@@ -324,8 +324,7 @@ HWTEST_F(HeartBeatMediumTest, HbMediumMgrRecvProcessTest_01, TestSize.Level1)
     EXPECT_CALL(hbStrateMock, IsExistLnnDfxNodeByUdidHash).WillRepeatedly(Return(true));
     int32_t ret = HbMediumMgrRecvProcess(&device, &mediumWeight, HEARTBEAT_TYPE_BLE_V1, false, &hbResp);
     EXPECT_TRUE(ret == SOFTBUS_NETWORK_NOT_CONNECTABLE);
-    HbFirstSaveRecvTime(
-        &storedInfo, &device, mediumWeight.weight, mediumWeight.localMasterWeight, TEST_RECVTIME_FIRST);
+    HbFirstSaveRecvTime(&storedInfo, &device, mediumWeight.weight, mediumWeight.localMasterWeight, TEST_RECVTIME_FIRST);
     EXPECT_CALL(ledgerMock, LnnGetAllOnlineNodeInfo).WillRepeatedly(Return(SOFTBUS_INVALID_PARAM));
     ret = HbMediumMgrRecvProcess(&device, &mediumWeight, HEARTBEAT_TYPE_BLE_V1, false, &hbResp);
     EXPECT_NE(ret, SOFTBUS_OK);
@@ -1040,8 +1039,7 @@ HWTEST_F(HeartBeatMediumTest, IsNeedTriggerSparkGroup_TEST01, TestSize.Level1)
     EXPECT_EQ(ret, false);
 
     NiceMock<LnnNetLedgertInterfaceMock> netLedgertMock;
-    EXPECT_CALL(netLedgertMock, LnnHasDiscoveryType).WillOnce(Return(false))
-        .WillRepeatedly(Return(true));
+    EXPECT_CALL(netLedgertMock, LnnHasDiscoveryType).WillOnce(Return(false)).WillRepeatedly(Return(true));
     ret = IsNeedTriggerSparkGroup(&nodeInfo, &storedInfo, nowTime);
     EXPECT_EQ(ret, false);
 
@@ -1091,15 +1089,18 @@ HWTEST_F(HeartBeatMediumTest, HbMediumMgrRecvSleInfo_TEST01, TestSize.Level1)
     EXPECT_NO_FATAL_FAILURE(HbMediumMgrRecvSleInfo(nullptr, nullptr));
     EXPECT_NO_FATAL_FAILURE(HbMediumMgrRecvSleInfo(networkId, nullptr));
     NiceMock<DistributeLedgerInterfaceMock> disLedgerMock;
-    EXPECT_CALL(disLedgerMock, LnnGetDLSleHbTimestamp).WillOnce(Return(SOFTBUS_NETWORK_GENERATE_STR_HASH_ERR))
+    EXPECT_CALL(disLedgerMock, LnnGetDLSleHbTimestamp)
+        .WillOnce(Return(SOFTBUS_NETWORK_GENERATE_STR_HASH_ERR))
         .WillRepeatedly(Return(SOFTBUS_OK));
     EXPECT_NO_FATAL_FAILURE(HbMediumMgrRecvSleInfo(networkId, &info));
 
-    EXPECT_CALL(disLedgerMock, LnnSetDLSleHbTimestamp).WillOnce(Return(SOFTBUS_NETWORK_GENERATE_STR_HASH_ERR))
+    EXPECT_CALL(disLedgerMock, LnnSetDLSleHbTimestamp)
+        .WillOnce(Return(SOFTBUS_NETWORK_GENERATE_STR_HASH_ERR))
         .WillRepeatedly(Return(SOFTBUS_OK));
     EXPECT_NO_FATAL_FAILURE(HbMediumMgrRecvSleInfo(networkId, &info));
     NiceMock<HbMediumMgrExtInterfaceMock> hbStrateMock;
-    EXPECT_CALL(hbStrateMock, LnnStartSleOfflineTimingStrategy).WillOnce(Return(SOFTBUS_NETWORK_GENERATE_STR_HASH_ERR))
+    EXPECT_CALL(hbStrateMock, LnnStartSleOfflineTimingStrategy)
+        .WillOnce(Return(SOFTBUS_NETWORK_GENERATE_STR_HASH_ERR))
         .WillRepeatedly(Return(SOFTBUS_OK));
     EXPECT_NO_FATAL_FAILURE(HbMediumMgrRecvSleInfo(networkId, &info));
 }

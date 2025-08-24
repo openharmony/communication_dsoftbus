@@ -123,8 +123,8 @@ void LnnNotifyNetlinkStateChangeEvent(NetManagerIfNameState state, const char *i
     return GetNetworkInterface()->LnnNotifyNetlinkStateChangeEvent(state, ifName);
 }
 
-int32_t LnnAsyncCallbackDelayHelper(SoftBusLooper *looper, LnnAsyncCallbackFunc callback,
-    void *para, uint64_t delayMillis)
+int32_t LnnAsyncCallbackDelayHelper(
+    SoftBusLooper *looper, LnnAsyncCallbackFunc callback, void *para, uint64_t delayMillis)
 {
     return GetNetworkInterface()->LnnAsyncCallbackDelayHelper(looper, callback, para, delayMillis);
 }

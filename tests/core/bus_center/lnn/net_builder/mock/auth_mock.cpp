@@ -46,8 +46,8 @@ uint32_t AuthGenRequestId(void)
     return GetAuthInterface()->AuthGenRequestId();
 }
 
-int32_t AuthStartVerify(const AuthConnInfo *connInfo, const AuthVerifyParam *authVerifyParam,
-    const AuthVerifyCallback *callback)
+int32_t AuthStartVerify(
+    const AuthConnInfo *connInfo, const AuthVerifyParam *authVerifyParam, const AuthVerifyCallback *callback)
 {
     return GetAuthInterface()->AuthStartVerify(connInfo, authVerifyParam, callback);
 }
@@ -90,4 +90,4 @@ int32_t AuthSendKeepaliveOption(const char *uuid, ModeCycle cycle)
     return GetAuthInterface()->AuthSendKeepaliveOption(uuid, cycle);
 }
 }
-}
+} // namespace OHOS

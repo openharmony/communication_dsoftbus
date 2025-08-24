@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2024 Huawei Device Co., Ltd.
+ * Copyright (c) 2024-2025 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -26,6 +26,7 @@
 #include "auth_user_common_key.h"
 #include "bus_center_event.h"
 #include "bus_center_manager.h"
+#include "lnn_cipherkey_manager_struct.h"
 #include "lnn_connection_addr_utils.h"
 #include "lnn_deviceinfo_to_profile.h"
 #include "lnn_distributed_net_ledger.h"
@@ -33,7 +34,6 @@
 #include "lnn_heartbeat_ctrl.h"
 #include "lnn_heartbeat_utils.h"
 #include "lnn_network_manager.h"
-#include "lnn_cipherkey_manager_struct.h"
 #include "softbus_adapter_bt_common.h"
 
 namespace OHOS {
@@ -108,8 +108,7 @@ public:
     MOCK_METHOD2(AuthGetServerSide, int32_t(int64_t, bool *));
     MOCK_METHOD2(LnnRetrieveDeviceInfo, int32_t(const char *, NodeInfo *));
     MOCK_METHOD2(LnnRetrieveDeviceInfoByNetworkId, int32_t(const char *, NodeInfo *));
-    MOCK_METHOD5(AuthRestoreAuthManager, int32_t(const char *, const AuthConnInfo *, uint32_t, NodeInfo *,
-        int64_t *));
+    MOCK_METHOD5(AuthRestoreAuthManager, int32_t(const char *, const AuthConnInfo *, uint32_t, NodeInfo *, int64_t *));
     MOCK_METHOD0(LnnLoadLocalBroadcastCipherKey, int32_t(void));
     MOCK_METHOD1(LnnGetLocalBroadcastCipherKey, int32_t(BroadcastCipherKey *));
     MOCK_METHOD3(LnnSetLocalByteInfo, int32_t(InfoKey, const uint8_t *, uint32_t));

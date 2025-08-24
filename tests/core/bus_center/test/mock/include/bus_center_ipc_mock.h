@@ -22,8 +22,8 @@
 #include "bus_center_client_proxy.h"
 #include "bus_center_manager.h"
 #include "lnn_connection_addr_utils.h"
-#include "lnn_local_net_ledger.h"
 #include "lnn_heartbeat_utils_struct.h"
+#include "lnn_local_net_ledger.h"
 #include "lnn_ranging_manager_struct.h"
 
 namespace OHOS {
@@ -42,14 +42,14 @@ public:
     virtual int32_t LnnStartTimeSync(const char *pkgName, int32_t callingPid, const char *targetNetworkId,
         TimeSyncAccuracy accuracy, TimeSyncPeriod period) = 0;
     virtual int32_t LnnStopTimeSync(const char *pkgName, const char *targetNetworkId, int32_t callingPid) = 0;
-    virtual int32_t LnnPublishService(const char *pkgName, const PublishInfo *info, bool isInnerRequest,
-        int32_t callingPid) = 0;
-    virtual int32_t LnnUnPublishService(const char *pkgName, int32_t publishId, bool isInnerRequest,
-        int32_t callingPid) = 0;
+    virtual int32_t LnnPublishService(
+        const char *pkgName, const PublishInfo *info, bool isInnerRequest, int32_t callingPid) = 0;
+    virtual int32_t LnnUnPublishService(
+        const char *pkgName, int32_t publishId, bool isInnerRequest, int32_t callingPid) = 0;
     virtual int32_t LnnStartDiscDevice(const char *pkgName, const SubscribeInfo *info, const InnerCallback *cb,
         bool isInnerRequest, int32_t callingPid) = 0;
-    virtual int32_t LnnStopDiscDevice(const char *pkgName, int32_t subscribeId, bool isInnerRequest,
-        int32_t callingPid) = 0;
+    virtual int32_t LnnStopDiscDevice(
+        const char *pkgName, int32_t subscribeId, bool isInnerRequest, int32_t callingPid) = 0;
     virtual int32_t LnnActiveMetaNode(const MetaNodeConfigInfo *info, char *metaNodeId) = 0;
     virtual int32_t LnnDeactiveMetaNode(const char *metaNodeId) = 0;
     virtual int32_t LnnGetAllMetaNodeInfo(MetaNodeInfo *infos, int32_t *infoNum) = 0;
@@ -91,8 +91,8 @@ public:
     MOCK_METHOD3(LnnStopTimeSync, int32_t(const char *, const char *, int32_t));
     MOCK_METHOD4(LnnPublishService, int32_t(const char *, const PublishInfo *, bool, int32_t));
     MOCK_METHOD4(LnnUnPublishService, int32_t(const char *, int32_t, bool, int32_t));
-    MOCK_METHOD5(LnnStartDiscDevice,
-        int32_t(const char *, const SubscribeInfo *, const InnerCallback *, bool, int32_t));
+    MOCK_METHOD5(
+        LnnStartDiscDevice, int32_t(const char *, const SubscribeInfo *, const InnerCallback *, bool, int32_t));
     MOCK_METHOD4(LnnStopDiscDevice, int32_t(const char *, int32_t, bool, int32_t));
     MOCK_METHOD2(LnnActiveMetaNode, int32_t(const MetaNodeConfigInfo *, char *));
     MOCK_METHOD1(LnnDeactiveMetaNode, int32_t(const char *));
@@ -112,8 +112,7 @@ public:
     MOCK_METHOD1(LnnRegSleRangeCbPacked, void(const ISleRangeInnerCallback *callback));
     MOCK_METHOD0(LnnUnregBleRangeCb, void(void));
     MOCK_METHOD0(LnnUnregSleRangeCbPacked, void(void));
-    MOCK_METHOD3(ClientOnRangeResult, int32_t(const char *pkgName, int32_t pid,
-        const RangeResultInnerInfo *rangeInfo));
+    MOCK_METHOD3(ClientOnRangeResult, int32_t(const char *pkgName, int32_t pid, const RangeResultInnerInfo *rangeInfo));
 };
 } // namespace OHOS
 #endif // AUTH_CONNECTION_MOCK_H
