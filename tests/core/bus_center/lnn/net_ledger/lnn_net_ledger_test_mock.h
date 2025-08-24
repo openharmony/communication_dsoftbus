@@ -38,11 +38,11 @@ class LnnNetLedgerInterfaceMock : public LnnNetLedgerInterface {
 public:
     LnnNetLedgerInterfaceMock();
     ~LnnNetLedgerInterfaceMock() override;
-    MOCK_METHOD2(LnnGetLocalNumU64Info, int32_t (InfoKey, uint64_t *));
+    MOCK_METHOD2(LnnGetLocalNumU64Info, int32_t(InfoKey, uint64_t *));
     MOCK_METHOD2(LnnSetLocalNum64Info, int32_t(InfoKey, int64_t));
     MOCK_METHOD0(IsSupportLpFeaturePacked, bool(void));
     MOCK_METHOD0(LnnIsSupportLpSparkFeaturePacked, bool(void));
-    MOCK_METHOD2(LnnClearFeatureCapability, int32_t (uint64_t *, FeatureCapability));
+    MOCK_METHOD2(LnnClearFeatureCapability, int32_t(uint64_t *, FeatureCapability));
 };
 } // namespace OHOS
 #endif // LNN_NET_LEDGER_TEST_MOCK_H

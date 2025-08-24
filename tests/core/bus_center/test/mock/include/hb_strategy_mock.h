@@ -41,8 +41,7 @@ public:
         LnnHeartbeatType hbType, LnnHeartbeatStrategyType strategyType, bool isRelay) = 0;
     virtual int32_t LnnRequestLeaveSpecific(const char *networkId, ConnectionAddrType addrType) = 0;
     virtual AuthVerifyCallback *LnnGetReAuthVerifyCallback(void) = 0;
-    virtual int32_t LnnSetGearModeBySpecificType(
-        const char *callerId, const GearMode *mode, LnnHeartbeatType type) = 0;
+    virtual int32_t LnnSetGearModeBySpecificType(const char *callerId, const GearMode *mode, LnnHeartbeatType type) = 0;
     virtual int32_t LnnEnableHeartbeatByType(LnnHeartbeatType type, bool isEnable) = 0;
     virtual int32_t LnnStopHeartbeatByType(LnnHeartbeatType type) = 0;
     virtual int32_t LnnHbStrategyInit(void) = 0;
@@ -103,8 +102,7 @@ public:
     MOCK_METHOD2(LnnRetrieveDeviceInfo, int32_t(const char *, NodeInfo *));
     MOCK_METHOD0(IsSameAccountGroupDevice, bool(void));
     MOCK_METHOD0(AuthGenRequestId, uint32_t(void));
-    MOCK_METHOD3(
-        AuthStartVerify, int32_t(const AuthConnInfo *, const AuthVerifyParam *, const AuthVerifyCallback *));
+    MOCK_METHOD3(AuthStartVerify, int32_t(const AuthConnInfo *, const AuthVerifyParam *, const AuthVerifyCallback *));
     MOCK_METHOD2(AddNodeToLnnBleReportExtraMap, void(const char *, const LnnBleReportExtra *));
     MOCK_METHOD2(GetNodeFromLnnBleReportExtraMap, int32_t(const char *, LnnBleReportExtra *));
     MOCK_METHOD1(DeleteNodeFromLnnBleReportExtraMap, void(const char *));
