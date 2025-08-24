@@ -650,11 +650,11 @@ HWTEST_F(ClientBusCentManagerTest, LNN_ON_TIME_SYNC_RESULT_Test_001, TestSize.Le
 }
 
 /*
-* @tc.name: REG_DATA_LEVEL_CHANGE_CB_INNER_Test_001
-* @tc.desc: reg data level change cb inner test
-* @tc.type: FUNC
-* @tc.require:
-*/
+ * @tc.name: REG_DATA_LEVEL_CHANGE_CB_INNER_Test_001
+ * @tc.desc: reg data level change cb inner test
+ * @tc.type: FUNC
+ * @tc.require:
+ */
 HWTEST_F(ClientBusCentManagerTest, REG_DATA_LEVEL_CHANGE_CB_INNER_Test_001, TestSize.Level1)
 {
     IDataLevelCb cb;
@@ -670,11 +670,11 @@ HWTEST_F(ClientBusCentManagerTest, REG_DATA_LEVEL_CHANGE_CB_INNER_Test_001, Test
 }
 
 /*
-* @tc.name: REG_BLE_RANGE_INNER_Test_001
-* @tc.desc: reg ble range cb inner test
-* @tc.type: FUNC
-* @tc.require:
-*/
+ * @tc.name: REG_BLE_RANGE_INNER_Test_001
+ * @tc.desc: reg ble range cb inner test
+ * @tc.type: FUNC
+ * @tc.require:
+ */
 HWTEST_F(ClientBusCentManagerTest, REG_BLE_RANGE_INNER_Test_001, TestSize.Level1)
 {
     IRangeCallback cb;
@@ -689,11 +689,11 @@ HWTEST_F(ClientBusCentManagerTest, REG_BLE_RANGE_INNER_Test_001, TestSize.Level1
 }
 
 /*
-* @tc.name: UNREG_BLE_RANGE_INNER_Test_001
-* @tc.desc: unReg ble range cb inner test
-* @tc.type: FUNC
-* @tc.require:
-*/
+ * @tc.name: UNREG_BLE_RANGE_INNER_Test_001
+ * @tc.desc: unReg ble range cb inner test
+ * @tc.type: FUNC
+ * @tc.require:
+ */
 HWTEST_F(ClientBusCentManagerTest, UNREG_BLE_RANGE_INNER_Test_001, TestSize.Level1)
 {
     ClientBusCenterManagerInterfaceMock busCentManagerMock;
@@ -724,11 +724,11 @@ HWTEST_F(ClientBusCentManagerTest, TRIGGER_HB_FOR_RANGE_INNER_Test_001, TestSize
 }
 
 /*
-* @tc.name: RESTART_REG_DATA_LEVEL_CHANGE_Test_001
-* @tc.desc: restart reg data level change test
-* @tc.type: FUNC
-* @tc.require:
-*/
+ * @tc.name: RESTART_REG_DATA_LEVEL_CHANGE_Test_001
+ * @tc.desc: restart reg data level change test
+ * @tc.type: FUNC
+ * @tc.require:
+ */
 HWTEST_F(ClientBusCentManagerTest, RESTART_REG_DATA_LEVEL_CHANGE_Test_001, TestSize.Level1)
 {
     g_regDataLevelChangePkgName[0] = '\0';
@@ -745,11 +745,11 @@ HWTEST_F(ClientBusCentManagerTest, RESTART_REG_DATA_LEVEL_CHANGE_Test_001, TestS
 }
 
 /*
-* @tc.name: UNREG_DATA_LEVEL_CHANGE_CB_INNER_Test_001
-* @tc.desc: unreg data level change cb inner test
-* @tc.type: FUNC
-* @tc.require:
-*/
+ * @tc.name: UNREG_DATA_LEVEL_CHANGE_CB_INNER_Test_001
+ * @tc.desc: unreg data level change cb inner test
+ * @tc.type: FUNC
+ * @tc.require:
+ */
 HWTEST_F(ClientBusCentManagerTest, UNREG_DATA_LEVEL_CHANGE_CB_INNER_Test_001, TestSize.Level1)
 {
     ClientBusCenterManagerInterfaceMock busCentManagerMock;
@@ -762,11 +762,11 @@ HWTEST_F(ClientBusCentManagerTest, UNREG_DATA_LEVEL_CHANGE_CB_INNER_Test_001, Te
 }
 
 /*
-* @tc.name: SET_DATA_LEVEL_INNER_Test_001
-* @tc.desc: set data level inner test
-* @tc.type: FUNC
-* @tc.require:
-*/
+ * @tc.name: SET_DATA_LEVEL_INNER_Test_001
+ * @tc.desc: set data level inner test
+ * @tc.type: FUNC
+ * @tc.require:
+ */
 HWTEST_F(ClientBusCentManagerTest, SET_DATA_LEVEL_INNER_Test_001, TestSize.Level1)
 {
     ClientBusCenterManagerInterfaceMock busCentManagerMock;
@@ -779,11 +779,11 @@ HWTEST_F(ClientBusCentManagerTest, SET_DATA_LEVEL_INNER_Test_001, TestSize.Level
 }
 
 /*
-* @tc.name: LNN_ON_LOCAL_NETWORK_ID_CHANGED_Test_001
-* @tc.desc: lnn on local network id changed test
-* @tc.type: FUNC
-* @tc.require:
-*/
+ * @tc.name: LNN_ON_LOCAL_NETWORK_ID_CHANGED_Test_001
+ * @tc.desc: lnn on local network id changed test
+ * @tc.type: FUNC
+ * @tc.require:
+ */
 HWTEST_F(ClientBusCentManagerTest, LNN_ON_LOCAL_NETWORK_ID_CHANGED_Test_001, TestSize.Level1)
 {
     SoftBusMutexInit(&g_busCenterClient.lock, nullptr);
@@ -809,11 +809,11 @@ HWTEST_F(ClientBusCentManagerTest, LNN_ON_LOCAL_NETWORK_ID_CHANGED_Test_001, Tes
 }
 
 /*
-* @tc.name: LNN_ON_NODE_DEVICE_TRUSTED_CHANGE_Test_001
-* @tc.desc: lnn on node device trusted change test
-* @tc.type: FUNC
-* @tc.require:
-*/
+ * @tc.name: LNN_ON_NODE_DEVICE_TRUSTED_CHANGE_Test_001
+ * @tc.desc: lnn on node device trusted change test
+ * @tc.type: FUNC
+ * @tc.require:
+ */
 HWTEST_F(ClientBusCentManagerTest, LNN_ON_NODE_DEVICE_TRUSTED_CHANGE_Test_001, TestSize.Level1)
 {
     SoftBusMutexInit(&g_busCenterClient.lock, nullptr);
@@ -837,11 +837,11 @@ HWTEST_F(ClientBusCentManagerTest, LNN_ON_NODE_DEVICE_TRUSTED_CHANGE_Test_001, T
 }
 
 /*
-* @tc.name: LNN_ON_HICHAIN_PROOF_EXCEPTION_Test_001
-* @tc.desc: lnn on hichain proof exception test
-* @tc.type: FUNC
-* @tc.require:
-*/
+ * @tc.name: LNN_ON_HICHAIN_PROOF_EXCEPTION_Test_001
+ * @tc.desc: lnn on hichain proof exception test
+ * @tc.type: FUNC
+ * @tc.require:
+ */
 HWTEST_F(ClientBusCentManagerTest, LNN_ON_HICHAIN_PROOF_EXCEPTION_Test_001, TestSize.Level1)
 {
     SoftBusMutexInit(&g_busCenterClient.lock, nullptr);
@@ -865,11 +865,11 @@ HWTEST_F(ClientBusCentManagerTest, LNN_ON_HICHAIN_PROOF_EXCEPTION_Test_001, Test
 }
 
 /*
-* @tc.name: LNN_ON_TIME_SYNC_RESULT_Test_002
-* @tc.desc: lnn on time sync result test
-* @tc.type: FUNC
-* @tc.require:
-*/
+ * @tc.name: LNN_ON_TIME_SYNC_RESULT_Test_002
+ * @tc.desc: lnn on time sync result test
+ * @tc.type: FUNC
+ * @tc.require:
+ */
 HWTEST_F(ClientBusCentManagerTest, LNN_ON_TIME_SYNC_RESULT_Test_002, TestSize.Level1)
 {
     SoftBusMutexInit(&g_busCenterClient.lock, nullptr);
@@ -893,11 +893,11 @@ HWTEST_F(ClientBusCentManagerTest, LNN_ON_TIME_SYNC_RESULT_Test_002, TestSize.Le
 }
 
 /*
-* @tc.name: LNN_ON_DATA_LEVEL_CHANGED_Test_001
-* @tc.desc: lnn on data level changed test
-* @tc.type: FUNC
-* @tc.require:
-*/
+ * @tc.name: LNN_ON_DATA_LEVEL_CHANGED_Test_001
+ * @tc.desc: lnn on data level changed test
+ * @tc.type: FUNC
+ * @tc.require:
+ */
 HWTEST_F(ClientBusCentManagerTest, LNN_ON_DATA_LEVEL_CHANGED_Test_001, TestSize.Level1)
 {
     auto ptr = g_busCenterClient.dataLevelCb.onDataLevelChanged;
@@ -909,11 +909,11 @@ HWTEST_F(ClientBusCentManagerTest, LNN_ON_DATA_LEVEL_CHANGED_Test_001, TestSize.
 }
 
 /*
-* @tc.name: DISC_RECOVERY_PUBLISH_Test_001
-* @tc.desc: disc recovery publish test
-* @tc.type: FUNC
-* @tc.require:
-*/
+ * @tc.name: DISC_RECOVERY_PUBLISH_Test_001
+ * @tc.desc: disc recovery publish test
+ * @tc.type: FUNC
+ * @tc.require:
+ */
 HWTEST_F(ClientBusCentManagerTest, DISC_RECOVERY_PUBLISH_Test_001, TestSize.Level1)
 {
     g_isInited = false;
@@ -925,11 +925,11 @@ HWTEST_F(ClientBusCentManagerTest, DISC_RECOVERY_PUBLISH_Test_001, TestSize.Leve
 }
 
 /*
-* @tc.name: DISC_RECOVERY_SUBSCRIBE_Test_001
-* @tc.desc: disc recovery subscribe test
-* @tc.type: FUNC
-* @tc.require:
-*/
+ * @tc.name: DISC_RECOVERY_SUBSCRIBE_Test_001
+ * @tc.desc: disc recovery subscribe test
+ * @tc.type: FUNC
+ * @tc.require:
+ */
 HWTEST_F(ClientBusCentManagerTest, DISC_RECOVERY_SUBSCRIBE_Test_001, TestSize.Level1)
 {
     g_isInited = false;
@@ -941,11 +941,11 @@ HWTEST_F(ClientBusCentManagerTest, DISC_RECOVERY_SUBSCRIBE_Test_001, TestSize.Le
 }
 
 /*
-* @tc.name: IS_SAME_CONNECTION_ADDR_Test_001
-* @tc.desc: is same connection addr test
-* @tc.type: FUNC
-* @tc.require:
-*/
+ * @tc.name: IS_SAME_CONNECTION_ADDR_Test_001
+ * @tc.desc: is same connection addr test
+ * @tc.type: FUNC
+ * @tc.require:
+ */
 HWTEST_F(ClientBusCentManagerTest, IS_SAME_CONNECTION_ADDR_Test_001, TestSize.Level1)
 {
     ConnectionAddr addr1;
@@ -989,11 +989,11 @@ HWTEST_F(ClientBusCentManagerTest, IS_SAME_CONNECTION_ADDR_Test_001, TestSize.Le
 }
 
 /*
-* @tc.name: IS_SAME_CONNECTION_ADDR_Test_002
-* @tc.desc: is same connection addr test
-* @tc.type: FUNC
-* @tc.require:
-*/
+ * @tc.name: IS_SAME_CONNECTION_ADDR_Test_002
+ * @tc.desc: is same connection addr test
+ * @tc.type: FUNC
+ * @tc.require:
+ */
 HWTEST_F(ClientBusCentManagerTest, IS_SAME_CONNECTION_ADDR_Test_002, TestSize.Level1)
 {
     ConnectionAddr addr1;
@@ -1049,11 +1049,11 @@ HWTEST_F(ClientBusCentManagerTest, IS_SAME_CONNECTION_ADDR_Test_002, TestSize.Le
 }
 
 /*
-* @tc.name: ADD_LEAVE_LNNCB_ITEM_Test_001
-* @tc.desc: add leave lnncb item test
-* @tc.type: FUNC
-* @tc.require:
-*/
+ * @tc.name: ADD_LEAVE_LNNCB_ITEM_Test_001
+ * @tc.desc: add leave lnncb item test
+ * @tc.type: FUNC
+ * @tc.require:
+ */
 HWTEST_F(ClientBusCentManagerTest, ADD_LEAVE_LNNCB_ITEM_Test_001, TestSize.Level1)
 {
     OnLeaveLNNResult cb = [](const char *, int32_t) -> void {};
@@ -1062,11 +1062,11 @@ HWTEST_F(ClientBusCentManagerTest, ADD_LEAVE_LNNCB_ITEM_Test_001, TestSize.Level
 }
 
 /*
-* @tc.name: ADD_TIME_SYNC_CB_ITEM_Test_001
-* @tc.desc: add time sync cb item test
-* @tc.type: FUNC
-* @tc.require:
-*/
+ * @tc.name: ADD_TIME_SYNC_CB_ITEM_Test_001
+ * @tc.desc: add time sync cb item test
+ * @tc.type: FUNC
+ * @tc.require:
+ */
 HWTEST_F(ClientBusCentManagerTest, ADD_TIME_SYNC_CB_ITEM_Test_001, TestSize.Level1)
 {
     ITimeSyncCb cb;
@@ -1077,11 +1077,11 @@ HWTEST_F(ClientBusCentManagerTest, ADD_TIME_SYNC_CB_ITEM_Test_001, TestSize.Leve
 }
 
 /*
-* @tc.name: FREE_DISC_PUBLISH_MSG_Test_001
-* @tc.desc: free disc publish msg test
-* @tc.type: FUNC
-* @tc.require:
-*/
+ * @tc.name: FREE_DISC_PUBLISH_MSG_Test_001
+ * @tc.desc: free disc publish msg test
+ * @tc.type: FUNC
+ * @tc.require:
+ */
 HWTEST_F(ClientBusCentManagerTest, FREE_DISC_PUBLISH_MSG_Test_001, TestSize.Level1)
 {
     DiscPublishMsg *msg = nullptr;
@@ -1112,11 +1112,11 @@ HWTEST_F(ClientBusCentManagerTest, FREE_DISC_PUBLISH_MSG_Test_001, TestSize.Leve
 }
 
 /*
-* @tc.name: FREE_DISC_SUBSCRIBE_MSG_Test_001
-* @tc.desc: free disc subscribe msg test
-* @tc.type: FUNC
-* @tc.require:
-*/
+ * @tc.name: FREE_DISC_SUBSCRIBE_MSG_Test_001
+ * @tc.desc: free disc subscribe msg test
+ * @tc.type: FUNC
+ * @tc.require:
+ */
 HWTEST_F(ClientBusCentManagerTest, FREE_DISC_SUBSCRIBE_MSG_Test_001, TestSize.Level1)
 {
     DiscSubscribeMsg *msg = nullptr;
