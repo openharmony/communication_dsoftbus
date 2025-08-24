@@ -17,21 +17,21 @@
 
 #include <cstddef>
 #include <cstring>
-#include <securec.h>
 #include <fuzzer/FuzzedDataProvider.h>
+#include <securec.h>
 
 #include "auth_common_struct.h"
-#include "auth_manager.h"
 #include "auth_manager.c"
+#include "auth_manager.h"
 #include "fuzz_environment.h"
 #include "softbus_access_token_test.h"
 
 #define AUTH_TYPE_MIN AUTH_LINK_TYPE_WIFI
 #define AUTH_TYPE_MAX AUTH_LINK_TYPE_MAX
-#define TYPE_MIN DATA_TYPE_AUTH
-#define TYPE_MAX DATA_TYPE_APPLY_KEY_CONNECTION
-#define MODULE_MIN MODULE_TRUST_ENGINE
-#define MODULE_MAX MODULE_OLD_NEARBY
+#define TYPE_MIN      DATA_TYPE_AUTH
+#define TYPE_MAX      DATA_TYPE_APPLY_KEY_CONNECTION
+#define MODULE_MIN    MODULE_TRUST_ENGINE
+#define MODULE_MAX    MODULE_OLD_NEARBY
 
 using namespace std;
 
@@ -53,10 +53,11 @@ public:
     {
         return isInited_;
     }
+
 private:
     volatile bool isInited_ = false;
 };
-}
+} // namespace
 
 namespace OHOS {
 static void ProcessFuzzConnInfo(FuzzedDataProvider &provider, AuthSessionInfo *info)
@@ -106,8 +107,7 @@ bool AuthEncryptFuzzTest(FuzzedDataProvider &provider)
     AuthSessionInfo info;
     (void)memset_s(&info, sizeof(AuthSessionInfo), 0, sizeof(AuthSessionInfo));
     info.isServer = provider.ConsumeBool();
-    info.connInfo.type = (AuthLinkType)provider.ConsumeIntegralInRange<uint32_t>(AUTH_TYPE_MIN,
-        AUTH_TYPE_MAX);
+    info.connInfo.type = (AuthLinkType)provider.ConsumeIntegralInRange<uint32_t>(AUTH_TYPE_MIN, AUTH_TYPE_MAX);
     info.connId = (uint64_t)info.connInfo.type << INT32_BIT_NUM;
     ProcessFuzzConnInfo(provider, &info);
     AuthManager *auth = NewAuthManager(authSeq, &info);
@@ -149,7 +149,7 @@ bool AuthEncryptFuzzTest(FuzzedDataProvider &provider)
     }
     return true;
 }
-}
+} // namespace OHOS
 
 /* Fuzzer entry point */
 extern "C" int32_t LLVMFuzzerTestOneInput(const uint8_t *data, size_t size)

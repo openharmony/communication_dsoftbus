@@ -16,19 +16,19 @@
 #include "authmanagerstatus_fuzzer.h"
 #include <cstddef>
 #include <cstring>
-#include <securec.h>
 #include <fuzzer/FuzzedDataProvider.h>
+#include <securec.h>
 
-#include "auth_manager.h"
 #include "auth_manager.c"
+#include "auth_manager.h"
 #include "fuzz_environment.h"
 #include "softbus_access_token_test.h"
 
 using namespace std;
 
-#define UDID_HASH_LEN 32
-#define AUTH_TYPE_MIN AUTH_LINK_TYPE_WIFI
-#define AUTH_TYPE_MAX AUTH_LINK_TYPE_MAX
+#define UDID_HASH_LEN   32
+#define AUTH_TYPE_MIN   AUTH_LINK_TYPE_WIFI
+#define AUTH_TYPE_MAX   AUTH_LINK_TYPE_MAX
 #define NORMAL_TYPE_MIN NORMALIZED_NOT_SUPPORT
 #define NORMAL_TYPE_MAX NORMALIZED_SUPPORT
 
@@ -52,10 +52,11 @@ public:
     {
         return isInited_;
     }
+
 private:
     volatile bool isInited_ = false;
 };
-}
+} // namespace
 
 namespace OHOS {
 static void ProcessFuzzConnInfo(FuzzedDataProvider &provider, AuthSessionInfo *info)
@@ -123,7 +124,7 @@ static void ProcAuthRequest(FuzzedDataProvider &provider, AuthHandle *authHandle
     request.verifyCb = verifyCb;
     request.connInfo = info->connInfo;
     request.requestId = AuthGenRequestId();
-    uint8_t udidHash[UDID_HASH_LEN] = {0};
+    uint8_t udidHash[UDID_HASH_LEN] = { 0 };
     info->requestId = request.requestId;
     GenerateUdidHash(info->udid, udidHash);
     AddAuthRequest(&request);
@@ -155,8 +156,7 @@ bool AuthManagerStatusFuzzTest(FuzzedDataProvider &provider)
     if (strcpy_s(info.uuid, UUID_BUF_LEN, uuid.c_str()) != EOK) {
         return false;
     }
-    info.connInfo.type = (AuthLinkType)provider.ConsumeIntegralInRange<uint32_t>(AUTH_TYPE_MIN,
-        AUTH_TYPE_MAX);
+    info.connInfo.type = (AuthLinkType)provider.ConsumeIntegralInRange<uint32_t>(AUTH_TYPE_MIN, AUTH_TYPE_MAX);
     info.connId = (uint64_t)info.connInfo.type << INT32_BIT_NUM;
     info.isConnectServer = provider.ConsumeBool();
     info.normalizedType = (NormalizedType)provider.ConsumeIntegralInRange<uint32_t>(NORMAL_TYPE_MIN, NORMAL_TYPE_MAX);
@@ -188,7 +188,7 @@ bool AuthManagerStatusFuzzTest(FuzzedDataProvider &provider)
     }
     return true;
 }
-}
+} // namespace OHOS
 
 /* Fuzzer entry point */
 extern "C" int32_t LLVMFuzzerTestOneInput(const uint8_t *data, size_t size)

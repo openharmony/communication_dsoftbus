@@ -53,20 +53,19 @@ int32_t SoftBusGenerateStrHash(const unsigned char *str, uint32_t len, unsigned 
     return AuthApplyKeyProcessInterfaceMock()->SoftBusGenerateStrHash(str, len, hash);
 }
 
-
 int32_t LnnGetLocalByteInfo(InfoKey key, uint8_t *info, uint32_t len)
 {
     return AuthApplyKeyProcessInterfaceMock()->LnnGetLocalByteInfo(key, info, len);
 }
 
-bool AddStringToJsonObject(cJSON *json, const char *const string, const char *value)
+bool AddStringToJsonObject(cJSON *json, const char * const string, const char *value)
 {
     return AuthApplyKeyProcessInterfaceMock()->AddStringToJsonObject(json, string, value);
 }
 
 bool AddNumberToJsonObject(cJSON *json, const char * const string, int num)
 {
-    return  AuthApplyKeyProcessInterfaceMock()->AddNumberToJsonObject(json, string, num);
+    return AuthApplyKeyProcessInterfaceMock()->AddNumberToJsonObject(json, string, num);
 }
 
 uint32_t ConnGetHeadSize(void)
@@ -79,8 +78,7 @@ uint32_t GetAuthDataSize(uint32_t len)
     return AuthApplyKeyProcessInterfaceMock()->GetAuthDataSize(len);
 }
 
-int32_t PackAuthData(const AuthDataHead *head, const uint8_t *data,
-    uint8_t *buf, uint32_t size)
+int32_t PackAuthData(const AuthDataHead *head, const uint8_t *data, uint8_t *buf, uint32_t size)
 {
     return AuthApplyKeyProcessInterfaceMock()->PackAuthData(head, data, buf, size);
 }
@@ -101,7 +99,7 @@ const uint8_t *UnpackAuthData(const uint8_t *data, uint32_t len, AuthDataHead *h
     return AuthApplyKeyProcessInterfaceMock()->UnpackAuthData(data, len, head);
 }
 
-void cJSON_Delete(cJSON* item)
+void cJSON_Delete(cJSON *item)
 {
     (void)item;
     return;
@@ -143,8 +141,8 @@ int32_t ConnSetConnectCallback(ConnModule moduleId, const ConnectCallback *callb
     return AuthApplyKeyProcessInterfaceMock()->ConnSetConnectCallback(moduleId, callback);
 }
 
-int32_t AuthInsertApplyKey(const RequestBusinessInfo *info, const uint8_t *uk, uint32_t ukLen,
-    uint64_t time, char *accountHash)
+int32_t AuthInsertApplyKey(
+    const RequestBusinessInfo *info, const uint8_t *uk, uint32_t ukLen, uint64_t time, char *accountHash)
 {
     return AuthApplyKeyProcessInterfaceMock()->AuthInsertApplyKey(info, uk, ukLen, time, accountHash);
 }

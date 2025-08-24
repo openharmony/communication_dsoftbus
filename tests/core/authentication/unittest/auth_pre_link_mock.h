@@ -34,7 +34,7 @@ public:
     AuthPreLinkInterfaceMock();
     ~AuthPreLinkInterfaceMock() override;
 
-    MOCK_METHOD0(GetWifiDirectManager, struct WifiDirectManager * (void));
+    MOCK_METHOD0(GetWifiDirectManager, struct WifiDirectManager *(void));
 };
-}
+} // namespace OHOS
 #endif // AUTH_PRE_LINK_MOCK_H
