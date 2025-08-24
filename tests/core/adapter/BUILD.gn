@@ -29,7 +29,9 @@ ohos_unittest("LnnKVAdapterTest") {
     "$dsoftbus_root_path/core/common:softbus_utils",
     "$dsoftbus_root_path/core/frame:softbus_server",
   ]
-  external_deps = [ "kv_store:distributeddata_inner" ]
+  if (dsoftbus_feature_lnn_cloud_sync) {
+    external_deps = [ "kv_store:distributeddata_inner" ]
+  }
 }
 
 ohos_unittest("LnnKVAdapterWrapperTest") {
@@ -58,12 +60,16 @@ ohos_unittest("LnnKVAdapterWrapperTest") {
   ]
   external_deps = [
     "googletest:gmock",
+  ]
+  if (dsoftbus_feature_lnn_cloud_sync) {
+    external_deps += [
     "dsoftbus:softbus_client",
     "kv_store:distributeddata_inner",
-  ]
+    ]
+  }
 }
 
-ohos_unittest("LnnSettingDataEventMonitorTest") {
+ohos_unittest("LnnSettingdataEventMonitorTest") {
   module_out_path = module_output_path
   sources = [ "unittest/lnn_settingdata_event_monitor_test.cpp" ]
   include_dirs = [
@@ -87,18 +93,23 @@ ohos_unittest("LnnSettingDataEventMonitorTest") {
     "$dsoftbus_root_path/core/common:softbus_utils",
     "$dsoftbus_root_path/core/frame:softbus_server",
   ]
-  external_deps = [
-    "ability_base:want",
-    "ability_base:zuri",
-    "ability_runtime:dataobs_manager",
-    "data_share:datashare_consumer",
-    "googletest:gmock_main",
-    "googletest:gtest_main",
-    "hilog:libhilog",
-    "init:libbegetutil",
-    "kv_store:distributeddata_inner",
-    "samgr:samgr_proxy",
+  external_deps = []
+  if (dsoftbus_feature_lnn_cloud_sync) {
+    external_deps += [
+        "ability_base:want",
+        "ability_base:zuri",
+        "ability_runtime:dataobs_manager",
+        "c_utils:utils",
+        "data_share:datashare_consumer",
+        "googletest:gmock_main",
+        "googletest:gtest_main",
+        "hilog:libhilog",
+        "kv_store:distributeddata_inner",
+        "samgr:samgr_proxy",
+        "init:libbegetutil",
   ]
+  }
+    
   if (is_standard_system && has_ces_part) {
     external_deps += [ "common_event_service:cesfwk_innerkits" ]
   }
@@ -154,6 +165,7 @@ ohos_unittest("LNNOhosAccountTest") {
     "$dsoftbus_root_path/core/bus_center/lnn/net_builder/include",
     "$dsoftbus_root_path/core/bus_center/lnn/net_buscenter/include",
     "$dsoftbus_root_path/core/bus_center/lnn/net_ledger/common/include",
+    "$dsoftbus_root_path/core/bus_center/lnn/net_ledger/local_ledger/include",
     "$dsoftbus_root_path/core/bus_center/service/include",
     "$dsoftbus_root_path/core/bus_center/utils/include",
     "$dsoftbus_root_path/core/common/include",
@@ -332,7 +344,7 @@ group("unittest") {
     ":LNNOhosAccountTest",
     ":LnnOhosAccountAdapterTest",
     ":LnnSaStatusMonitorTest",
-    ":LnnSettingDataEventMonitorTest",
+    ":LnnSettingdataEventMonitorTest",
   ]
   if (dsoftbus_feature_lnn_cloud_sync) {
     deps += [

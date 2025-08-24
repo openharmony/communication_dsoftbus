@@ -95,6 +95,7 @@ ohos_unittest("AuthConnectionTest") {
     "unittest/auth_connection_mock.cpp",
     "unittest/auth_connection_test.cpp",
   ]
+  sources += [ "$dsoftbus_root_path/core/connection/wifi_direct_cpp/wifi_direct_manager_virtual.c" ]
 
   include_dirs = [
     "$dsoftbus_dfx_path/interface/include/form",
