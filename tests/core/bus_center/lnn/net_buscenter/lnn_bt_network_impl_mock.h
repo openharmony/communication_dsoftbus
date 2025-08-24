@@ -49,7 +49,7 @@ public:
     virtual bool LnnVisitNetif(VisitNetifCallback callback, void *data) = 0;
     virtual int32_t LnnRegistPhysicalSubnet(LnnPhysicalSubnet *manager) = 0;
     virtual void LnnNotifyPhysicalSubnetStatusChanged(const char *ifName, ProtocolType protocolType, void *status) = 0;
-        virtual int32_t LnnGetLocalStrInfo(InfoKey key, char *info, uint32_t len) = 0;
+    virtual int32_t LnnGetLocalStrInfo(InfoKey key, char *info, uint32_t len) = 0;
     virtual const NodeInfo *LnnGetLocalNodeInfo(void) = 0;
     virtual int32_t LnnGetAuthPort(const NodeInfo *info, int32_t ifnameIdx) = 0;
     virtual int32_t LnnGetSessionPort(const NodeInfo *info, int32_t ifnameIdx) = 0;

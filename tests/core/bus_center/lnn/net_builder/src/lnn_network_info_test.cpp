@@ -503,9 +503,7 @@ HWTEST_F(LNNNetworkInfoTest, DO_SEND_USER_ID_TEST_001, TestSize.Level1)
         .WillRepeatedly(DoAll(SetArgPointee<2>(info), Return(SOFTBUS_OK)));
     NiceMock<LnnNetBuilderInterfaceMock> netBuilderMock;
     EXPECT_CALL(netBuilderMock, LnnRequestLeaveSpecific).WillRepeatedly(Return(SOFTBUS_OK));
-    EXPECT_CALL(netLedgerMock, LnnHasDiscoveryType)
-        .WillOnce(Return(true))
-        .WillRepeatedly(Return(false));
+    EXPECT_CALL(netLedgerMock, LnnHasDiscoveryType).WillOnce(Return(true)).WillRepeatedly(Return(false));
     const char *udid = "udidTest";
     EXPECT_NO_FATAL_FAILURE(DoSendUserId(udid, const_cast<uint8_t *>(USER_ID_MSG)));
     EXPECT_NO_FATAL_FAILURE(DoSendUserId(udid, const_cast<uint8_t *>(USER_ID_MSG)));
@@ -514,8 +512,7 @@ HWTEST_F(LNNNetworkInfoTest, DO_SEND_USER_ID_TEST_001, TestSize.Level1)
         return;
     }
     NiceMock<LnnSyncInfoInterfaceMock> lnnSyncInfoMock;
-    EXPECT_CALL(lnnSyncInfoMock, CreateSyncInfoParam).WillOnce(Return(nullptr))
-        .WillRepeatedly(Return(data));
+    EXPECT_CALL(lnnSyncInfoMock, CreateSyncInfoParam).WillOnce(Return(nullptr)).WillRepeatedly(Return(data));
     EXPECT_NO_FATAL_FAILURE(DoSendUserId(udid, const_cast<uint8_t *>(USER_ID_MSG)));
     NiceMock<LnnServicetInterfaceMock> serviceMock;
     EXPECT_CALL(serviceMock, LnnAsyncCallbackHelper).WillRepeatedly(Return(SOFTBUS_OK));
@@ -608,7 +605,7 @@ HWTEST_F(LNNNetworkInfoTest, IS_SUPPORT_AP_COEXIST_TEST_002, TestSize.Level1)
 HWTEST_F(LNNNetworkInfoTest, CONVERT_MSG_TO_USERID_TEST_001, TestSize.Level1)
 {
     int32_t userId = 0;
-    uint8_t msg[BITLEN] = {0xFF, 0xFF, 0xFF, 0xFF};
+    uint8_t msg[BITLEN] = { 0xFF, 0xFF, 0xFF, 0xFF };
     uint32_t len = BITLEN;
     uint32_t ret = ConvertMsgToUserId(&userId, msg, len);
     EXPECT_EQ(ret, SOFTBUS_OK);
@@ -624,7 +621,7 @@ HWTEST_F(LNNNetworkInfoTest, CONVERT_MSG_TO_USERID_TEST_001, TestSize.Level1)
 HWTEST_F(LNNNetworkInfoTest, CONVERT_MSG_TO_USERID_TEST_002, TestSize.Level1)
 {
     int32_t userId = 0;
-    uint8_t msg[BITLEN] = {0x00, 0x00, 0x00, 0x00};
+    uint8_t msg[BITLEN] = { 0x00, 0x00, 0x00, 0x00 };
     uint32_t len = BITLEN;
     uint32_t ret = ConvertMsgToUserId(&userId, msg, len);
     EXPECT_EQ(ret, SOFTBUS_OK);
@@ -640,7 +637,7 @@ HWTEST_F(LNNNetworkInfoTest, CONVERT_MSG_TO_USERID_TEST_002, TestSize.Level1)
 HWTEST_F(LNNNetworkInfoTest, CONVERT_MSG_TO_USERID_TEST_003, TestSize.Level1)
 {
     int32_t userId = 0;
-    uint8_t msg[BITLEN] = {0xFF, 0xFF, 0x00, 0x00};
+    uint8_t msg[BITLEN] = { 0xFF, 0xFF, 0x00, 0x00 };
     uint32_t len = BITLEN;
     uint32_t ret = ConvertMsgToUserId(&userId, msg, len);
     EXPECT_EQ(ret, SOFTBUS_OK);
@@ -655,7 +652,7 @@ HWTEST_F(LNNNetworkInfoTest, CONVERT_MSG_TO_USERID_TEST_003, TestSize.Level1)
 HWTEST_F(LNNNetworkInfoTest, CONVERT_MSG_TO_USERID_TEST_004, TestSize.Level1)
 {
     int32_t userId = 0;
-    uint8_t msg[BITLEN] = {0x00, 0xFF, 0xFF, 0xFF};
+    uint8_t msg[BITLEN] = { 0x00, 0xFF, 0xFF, 0xFF };
     uint32_t len = BITLEN;
     uint32_t ret = ConvertMsgToUserId(&userId, msg, len);
     EXPECT_EQ(ret, SOFTBUS_OK);
@@ -670,7 +667,7 @@ HWTEST_F(LNNNetworkInfoTest, CONVERT_MSG_TO_USERID_TEST_004, TestSize.Level1)
 HWTEST_F(LNNNetworkInfoTest, CONVERT_MSG_TO_USERID_TEST_005, TestSize.Level1)
 {
     int32_t userId = 0;
-    uint8_t msg[BITLEN] = {0x00, 0x00, 0x00, 0x00};
+    uint8_t msg[BITLEN] = { 0x00, 0x00, 0x00, 0x00 };
     uint32_t len = BITLEN - 1;
     uint32_t ret = ConvertMsgToUserId(&userId, msg, len);
     EXPECT_EQ(ret, SOFTBUS_INVALID_PARAM);
@@ -684,7 +681,7 @@ HWTEST_F(LNNNetworkInfoTest, CONVERT_MSG_TO_USERID_TEST_005, TestSize.Level1)
  */
 HWTEST_F(LNNNetworkInfoTest, CONVERT_MSG_TO_USERID_TEST_006, TestSize.Level1)
 {
-    uint8_t msg[BITLEN] = {0x00, 0x00, 0x00, 0x00};
+    uint8_t msg[BITLEN] = { 0x00, 0x00, 0x00, 0x00 };
     uint32_t len = BITLEN;
     uint32_t ret = ConvertMsgToUserId(nullptr, msg, len);
     EXPECT_EQ(ret, SOFTBUS_INVALID_PARAM);
@@ -714,7 +711,7 @@ HWTEST_F(LNNNetworkInfoTest, CONVERT_MSG_TO_USERID_TEST_008, TestSize.Level1)
 {
     const char *networkId = NETWORKID;
     int32_t userId = 0;
-    uint8_t msg[BITLEN] = {0xFF, 0xFF, 0xFF, 0xFF};
+    uint8_t msg[BITLEN] = { 0xFF, 0xFF, 0xFF, 0xFF };
     uint32_t len = BITLEN;
     NiceMock<LnnNetLedgertInterfaceMock> netLedgerMock;
     NiceMock<LnnNetBuilderInterfaceMock> netBuilderMock;
@@ -747,7 +744,7 @@ HWTEST_F(LNNNetworkInfoTest, CONVERT_MSG_TO_USERID_TEST_008, TestSize.Level1)
 HWTEST_F(LNNNetworkInfoTest, LnnProcessUserChangeMsg_Test_001, TestSize.Level1)
 {
     int32_t userId = 0;
-    uint8_t msg[BITLEN] = {0x00, 0xFF, 0xFF, 0xFF};
+    uint8_t msg[BITLEN] = { 0x00, 0xFF, 0xFF, 0xFF };
     uint32_t len = BITLEN;
     const char *networkId = NETWORKID;
     NiceMock<LnnNetBuilderInterfaceMock> netBuilderMock;
@@ -766,7 +763,7 @@ HWTEST_F(LNNNetworkInfoTest, LnnProcessUserChangeMsg_Test_001, TestSize.Level1)
 HWTEST_F(LNNNetworkInfoTest, OnLnnProcessUserChangeMsgDelay_Test_001, TestSize.Level1)
 {
     int32_t userId = 0;
-    uint8_t msg[BITLEN] = {0x00, 0xFF, 0xFF, 0xFF};
+    uint8_t msg[BITLEN] = { 0x00, 0xFF, 0xFF, 0xFF };
     uint32_t len = BITLEN;
     OnLnnProcessUserChangeMsgDelay(nullptr);
     LnnAsyncSendUserId(nullptr);
@@ -783,7 +780,7 @@ HWTEST_F(LNNNetworkInfoTest, OnLnnProcessUserChangeMsgDelay_Test_001, TestSize.L
 HWTEST_F(LNNNetworkInfoTest, LnnAsyncSendUserId_Test_001, TestSize.Level1)
 {
     int32_t userId = 0;
-    uint8_t msg[BITLEN] = {0x00, 0xFF, 0xFF, 0xFF};
+    uint8_t msg[BITLEN] = { 0x00, 0xFF, 0xFF, 0xFF };
     uint32_t len = BITLEN;
     SendSyncInfoParam *dataInfo = (SendSyncInfoParam *)SoftBusCalloc(sizeof(SendSyncInfoParam));
     ASSERT_NE(dataInfo, nullptr);
@@ -801,7 +798,7 @@ HWTEST_F(LNNNetworkInfoTest, LnnAsyncSendUserId_Test_001, TestSize.Level1)
 HWTEST_F(LNNNetworkInfoTest, LnnAsyncSendUserId_Test_002, TestSize.Level1)
 {
     int32_t userId = 0;
-    uint8_t msg[BITLEN] = {0x00, 0xFF, 0xFF, 0xFF};
+    uint8_t msg[BITLEN] = { 0x00, 0xFF, 0xFF, 0xFF };
     uint32_t len = BITLEN;
     NiceMock<LnnSyncInfoInterfaceMock> syncInfoMock;
     NiceMock<LnnNetBuilderInterfaceMock> netBuilderMock;
@@ -841,7 +838,7 @@ HWTEST_F(LNNNetworkInfoTest, DoSendUserId_Test_001, TestSize.Level1)
     ASSERT_NE(data, nullptr);
 
     int32_t userId = 0;
-    uint8_t msg[BITLEN] = {0x00, 0xFF, 0xFF, 0xFF};
+    uint8_t msg[BITLEN] = { 0x00, 0xFF, 0xFF, 0xFF };
     uint32_t len = BITLEN;
     const char *udid = NETWORKID;
 
@@ -849,21 +846,16 @@ HWTEST_F(LNNNetworkInfoTest, DoSendUserId_Test_001, TestSize.Level1)
     NiceMock<LnnNetBuilderInterfaceMock> netBuilderMock;
     NiceMock<LnnSyncInfoInterfaceMock> lnnSyncInfoMock;
     NiceMock<LnnServicetInterfaceMock> serviceMock;
-    EXPECT_CALL(netBuilderMock, LnnRequestLeaveSpecific)
-        .WillRepeatedly(TestLnnRequestLeaveSpecific);
+    EXPECT_CALL(netBuilderMock, LnnRequestLeaveSpecific).WillRepeatedly(TestLnnRequestLeaveSpecific);
     EXPECT_CALL(netLedgerMock, LnnGetRemoteNodeInfoById)
         .WillOnce(Return(SOFTBUS_INVALID_PARAM))
         .WillRepeatedly(Return(SOFTBUS_OK));
     DoSendUserId(udid, msg);
-    EXPECT_CALL(netLedgerMock, LnnHasDiscoveryType)
-        .WillRepeatedly(Return(false));
+    EXPECT_CALL(netLedgerMock, LnnHasDiscoveryType).WillRepeatedly(Return(false));
     DoSendUserId(udid, msg);
-    EXPECT_CALL(lnnSyncInfoMock, CreateSyncInfoParam)
-        .WillRepeatedly(Return(data));
-    EXPECT_CALL(serviceMock, LnnAsyncCallbackHelper)
-        .WillRepeatedly(Return(SOFTBUS_OK));
-    EXPECT_CALL(serviceMock, LnnAsyncCallbackDelayHelper)
-        .WillRepeatedly(Return(SOFTBUS_OK));
+    EXPECT_CALL(lnnSyncInfoMock, CreateSyncInfoParam).WillRepeatedly(Return(data));
+    EXPECT_CALL(serviceMock, LnnAsyncCallbackHelper).WillRepeatedly(Return(SOFTBUS_OK));
+    EXPECT_CALL(serviceMock, LnnAsyncCallbackDelayHelper).WillRepeatedly(Return(SOFTBUS_OK));
     DoSendUserId(udid, msg);
     uint32_t ret = ConvertMsgToUserId(&userId, msg, len);
     EXPECT_EQ(ret, SOFTBUS_OK);
@@ -879,19 +871,16 @@ HWTEST_F(LNNNetworkInfoTest, DoSendUserId_Test_001, TestSize.Level1)
 HWTEST_F(LNNNetworkInfoTest, DoSendUserId_Test_002, TestSize.Level1)
 {
     int32_t userId = 0;
-    uint8_t msg[BITLEN] = {0x00, 0xFF, 0xFF, 0xFF};
+    uint8_t msg[BITLEN] = { 0x00, 0xFF, 0xFF, 0xFF };
     uint32_t len = BITLEN;
     const char *udid = NETWORKID;
     NiceMock<LnnNetLedgertInterfaceMock> netLedgerMock;
     NiceMock<LnnSyncInfoInterfaceMock> lnnSyncInfoMock;
     NiceMock<LnnServicetInterfaceMock> serviceMock;
     NiceMock<LnnNetBuilderInterfaceMock> netBuilderMock;
-    EXPECT_CALL(netBuilderMock, LnnRequestLeaveSpecific)
-        .WillRepeatedly(TestLnnRequestLeaveSpecific);
-    EXPECT_CALL(netLedgerMock, LnnGetRemoteNodeInfoById)
-        .WillRepeatedly(Return(SOFTBUS_OK));
-    EXPECT_CALL(netLedgerMock, LnnHasDiscoveryType)
-        .WillRepeatedly(Return(true));
+    EXPECT_CALL(netBuilderMock, LnnRequestLeaveSpecific).WillRepeatedly(TestLnnRequestLeaveSpecific);
+    EXPECT_CALL(netLedgerMock, LnnGetRemoteNodeInfoById).WillRepeatedly(Return(SOFTBUS_OK));
+    EXPECT_CALL(netLedgerMock, LnnHasDiscoveryType).WillRepeatedly(Return(true));
     DoSendUserId(udid, msg);
     uint32_t ret = ConvertMsgToUserId(&userId, msg, len);
     EXPECT_EQ(ret, SOFTBUS_OK);
@@ -906,21 +895,17 @@ HWTEST_F(LNNNetworkInfoTest, DoSendUserId_Test_002, TestSize.Level1)
 HWTEST_F(LNNNetworkInfoTest, DoSendUserId_Test_003, TestSize.Level1)
 {
     int32_t userId = 0;
-    uint8_t msg[BITLEN] = {0x00, 0xFF, 0xFF, 0xFF};
+    uint8_t msg[BITLEN] = { 0x00, 0xFF, 0xFF, 0xFF };
     uint32_t len = BITLEN;
     const char *udid = NETWORKID;
     NiceMock<LnnNetLedgertInterfaceMock> netLedgerMock;
     NiceMock<LnnSyncInfoInterfaceMock> lnnSyncInfoMock;
     NiceMock<LnnServicetInterfaceMock> serviceMock;
     NiceMock<LnnNetBuilderInterfaceMock> netBuilderMock;
-    EXPECT_CALL(netBuilderMock, LnnRequestLeaveSpecific)
-        .WillRepeatedly(TestLnnRequestLeaveSpecific);
-    EXPECT_CALL(netLedgerMock, LnnGetRemoteNodeInfoById)
-        .WillRepeatedly(Return(SOFTBUS_OK));
-    EXPECT_CALL(netLedgerMock, LnnHasDiscoveryType)
-        .WillRepeatedly(Return(false));
-    EXPECT_CALL(lnnSyncInfoMock, CreateSyncInfoParam)
-        .WillRepeatedly(Return(nullptr));
+    EXPECT_CALL(netBuilderMock, LnnRequestLeaveSpecific).WillRepeatedly(TestLnnRequestLeaveSpecific);
+    EXPECT_CALL(netLedgerMock, LnnGetRemoteNodeInfoById).WillRepeatedly(Return(SOFTBUS_OK));
+    EXPECT_CALL(netLedgerMock, LnnHasDiscoveryType).WillRepeatedly(Return(false));
+    EXPECT_CALL(lnnSyncInfoMock, CreateSyncInfoParam).WillRepeatedly(Return(nullptr));
     DoSendUserId(udid, msg);
     uint32_t ret = ConvertMsgToUserId(&userId, msg, len);
     EXPECT_EQ(ret, SOFTBUS_OK);
@@ -937,23 +922,18 @@ HWTEST_F(LNNNetworkInfoTest, DoSendUserId_Test_004, TestSize.Level1)
     SendSyncInfoParam *data = (SendSyncInfoParam *)SoftBusCalloc(sizeof(SendSyncInfoParam));
     ASSERT_NE(data, nullptr);
     int32_t userId = 0;
-    uint8_t msg[BITLEN] = {0x00, 0xFF, 0xFF, 0xFF};
+    uint8_t msg[BITLEN] = { 0x00, 0xFF, 0xFF, 0xFF };
     uint32_t len = BITLEN;
     const char *udid = NETWORKID;
     NiceMock<LnnNetLedgertInterfaceMock> netLedgerMock;
     NiceMock<LnnSyncInfoInterfaceMock> lnnSyncInfoMock;
     NiceMock<LnnServicetInterfaceMock> serviceMock;
     NiceMock<LnnNetBuilderInterfaceMock> netBuilderMock;
-    EXPECT_CALL(netBuilderMock, LnnRequestLeaveSpecific)
-        .WillRepeatedly(TestLnnRequestLeaveSpecific);
-    EXPECT_CALL(netLedgerMock, LnnGetRemoteNodeInfoById)
-        .WillRepeatedly(Return(SOFTBUS_OK));
-    EXPECT_CALL(netLedgerMock, LnnHasDiscoveryType)
-        .WillRepeatedly(Return(false));
-    EXPECT_CALL(lnnSyncInfoMock, CreateSyncInfoParam)
-        .WillRepeatedly(Return(data));
-    EXPECT_CALL(serviceMock, LnnAsyncCallbackHelper)
-        .WillRepeatedly(Return(SOFTBUS_OK));
+    EXPECT_CALL(netBuilderMock, LnnRequestLeaveSpecific).WillRepeatedly(TestLnnRequestLeaveSpecific);
+    EXPECT_CALL(netLedgerMock, LnnGetRemoteNodeInfoById).WillRepeatedly(Return(SOFTBUS_OK));
+    EXPECT_CALL(netLedgerMock, LnnHasDiscoveryType).WillRepeatedly(Return(false));
+    EXPECT_CALL(lnnSyncInfoMock, CreateSyncInfoParam).WillRepeatedly(Return(data));
+    EXPECT_CALL(serviceMock, LnnAsyncCallbackHelper).WillRepeatedly(Return(SOFTBUS_OK));
     DoSendUserId(udid, msg);
     uint32_t ret = ConvertMsgToUserId(&userId, msg, len);
     EXPECT_EQ(ret, SOFTBUS_OK);
@@ -970,7 +950,7 @@ HWTEST_F(LNNNetworkInfoTest, DoSendUserId_Test_005, TestSize.Level1)
     SendSyncInfoParam *data = (SendSyncInfoParam *)SoftBusCalloc(sizeof(SendSyncInfoParam));
     ASSERT_NE(data, nullptr);
     int32_t userId = 0;
-    uint8_t msg[BITLEN] = {0x00, 0xFF, 0xFF, 0xFF};
+    uint8_t msg[BITLEN] = { 0x00, 0xFF, 0xFF, 0xFF };
     uint32_t len = BITLEN;
     const char *udid = NETWORKID;
 
@@ -981,10 +961,8 @@ HWTEST_F(LNNNetworkInfoTest, DoSendUserId_Test_005, TestSize.Level1)
     EXPECT_CALL(netBuilderMock, LnnRequestLeaveSpecific).WillRepeatedly(TestLnnRequestLeaveSpecific);
     EXPECT_CALL(netLedgerMock, LnnGetRemoteNodeInfoById).WillRepeatedly(Return(SOFTBUS_OK));
     EXPECT_CALL(netLedgerMock, LnnHasDiscoveryType).WillRepeatedly(Return(false));
-    EXPECT_CALL(lnnSyncInfoMock, CreateSyncInfoParam)
-        .WillRepeatedly(Return(data));
-    EXPECT_CALL(serviceMock, LnnAsyncCallbackHelper)
-        .WillRepeatedly(Return(SOFTBUS_INVALID_PARAM));
+    EXPECT_CALL(lnnSyncInfoMock, CreateSyncInfoParam).WillRepeatedly(Return(data));
+    EXPECT_CALL(serviceMock, LnnAsyncCallbackHelper).WillRepeatedly(Return(SOFTBUS_INVALID_PARAM));
     DoSendUserId(udid, msg);
     uint32_t ret = ConvertMsgToUserId(&userId, msg, len);
     EXPECT_EQ(ret, SOFTBUS_OK);
@@ -1002,25 +980,19 @@ HWTEST_F(LNNNetworkInfoTest, DoSendUserId_Test_006, TestSize.Level1)
     ASSERT_NE(data, nullptr);
 
     int32_t userId = 0;
-    uint8_t msg[BITLEN] = {0x00, 0xFF, 0xFF, 0xFF};
+    uint8_t msg[BITLEN] = { 0x00, 0xFF, 0xFF, 0xFF };
     uint32_t len = BITLEN;
     const char *udid = NETWORKID;
     NiceMock<LnnNetLedgertInterfaceMock> netLedgerMock;
     NiceMock<LnnSyncInfoInterfaceMock> lnnSyncInfoMock;
     NiceMock<LnnServicetInterfaceMock> serviceMock;
     NiceMock<LnnNetBuilderInterfaceMock> netBuilderMock;
-    EXPECT_CALL(netBuilderMock, LnnRequestLeaveSpecific)
-        .WillRepeatedly(TestLnnRequestLeaveSpecific);
-    EXPECT_CALL(netLedgerMock, LnnGetRemoteNodeInfoById)
-        .WillRepeatedly(Return(SOFTBUS_OK));
-    EXPECT_CALL(netLedgerMock, LnnHasDiscoveryType)
-        .WillRepeatedly(Return(false));
-    EXPECT_CALL(lnnSyncInfoMock, CreateSyncInfoParam)
-        .WillRepeatedly(Return(data));
-    EXPECT_CALL(serviceMock, LnnAsyncCallbackHelper)
-        .WillRepeatedly(Return(SOFTBUS_OK));
-    EXPECT_CALL(serviceMock, LnnAsyncCallbackDelayHelper)
-        .WillRepeatedly(Return(SOFTBUS_INVALID_PARAM));
+    EXPECT_CALL(netBuilderMock, LnnRequestLeaveSpecific).WillRepeatedly(TestLnnRequestLeaveSpecific);
+    EXPECT_CALL(netLedgerMock, LnnGetRemoteNodeInfoById).WillRepeatedly(Return(SOFTBUS_OK));
+    EXPECT_CALL(netLedgerMock, LnnHasDiscoveryType).WillRepeatedly(Return(false));
+    EXPECT_CALL(lnnSyncInfoMock, CreateSyncInfoParam).WillRepeatedly(Return(data));
+    EXPECT_CALL(serviceMock, LnnAsyncCallbackHelper).WillRepeatedly(Return(SOFTBUS_OK));
+    EXPECT_CALL(serviceMock, LnnAsyncCallbackDelayHelper).WillRepeatedly(Return(SOFTBUS_INVALID_PARAM));
     DoSendUserId(udid, msg);
     uint32_t ret = ConvertMsgToUserId(&userId, msg, len);
     EXPECT_EQ(ret, SOFTBUS_OK);
@@ -1035,12 +1007,11 @@ HWTEST_F(LNNNetworkInfoTest, DoSendUserId_Test_006, TestSize.Level1)
 HWTEST_F(LNNNetworkInfoTest, NotifyRemoteDevOffLineByUserId_Test_001, TestSize.Level1)
 {
     int32_t userId = 0;
-    uint8_t msg[BITLEN] = {0x00, 0xFF, 0xFF, 0xFF};
+    uint8_t msg[BITLEN] = { 0x00, 0xFF, 0xFF, 0xFF };
     uint32_t len = BITLEN;
     const char *udid = NETWORKID;
     NiceMock<LnnNetBuilderInterfaceMock> netBuilderMock;
-    EXPECT_CALL(netBuilderMock, LnnRequestLeaveSpecific)
-        .WillRepeatedly(TestLnnRequestLeaveSpecific);
+    EXPECT_CALL(netBuilderMock, LnnRequestLeaveSpecific).WillRepeatedly(TestLnnRequestLeaveSpecific);
     NiceMock<LnnNetLedgertInterfaceMock> netLedgerMock;
     NiceMock<LnnSyncInfoInterfaceMock> lnnSyncInfoMock;
     NiceMock<LnnServicetInterfaceMock> serviceMock;
@@ -1066,12 +1037,11 @@ HWTEST_F(LNNNetworkInfoTest, NotifyRemoteDevOffLineByUserId_Test_001, TestSize.L
 HWTEST_F(LNNNetworkInfoTest, NotifyRemoteDevOffLineByUserId_Test_002, TestSize.Level1)
 {
     int32_t userId = 0;
-    uint8_t msg[BITLEN] = {0x00, 0xFF, 0xFF, 0xFF};
+    uint8_t msg[BITLEN] = { 0x00, 0xFF, 0xFF, 0xFF };
     uint32_t len = BITLEN;
     const char *udid = NETWORKID;
     NiceMock<LnnNetBuilderInterfaceMock> netBuilderMock;
-    EXPECT_CALL(netBuilderMock, LnnRequestLeaveSpecific)
-        .WillRepeatedly(TestLnnRequestLeaveSpecific);
+    EXPECT_CALL(netBuilderMock, LnnRequestLeaveSpecific).WillRepeatedly(TestLnnRequestLeaveSpecific);
     NiceMock<LnnNetLedgertInterfaceMock> netLedgerMock;
     userId = DP_INACTIVE_DEFAULT_USERID;
     EXPECT_CALL(netLedgerMock, LnnGetRemoteNodeInfoById)
@@ -1095,15 +1065,13 @@ HWTEST_F(LNNNetworkInfoTest, NotifyRemoteDevOffLineByUserId_Test_002, TestSize.L
 HWTEST_F(LNNNetworkInfoTest, NotifyRemoteDevOffLineByUserId_Test_003, TestSize.Level1)
 {
     int32_t userId = 0;
-    uint8_t msg[BITLEN] = {0x00, 0xFF, 0xFF, 0xFF};
+    uint8_t msg[BITLEN] = { 0x00, 0xFF, 0xFF, 0xFF };
     uint32_t len = BITLEN;
     const char *udid = NETWORKID;
     NiceMock<LnnNetBuilderInterfaceMock> netBuilderMock;
     NiceMock<LnnSyncInfoInterfaceMock> lnnSyncInfoMock;
-    EXPECT_CALL(netBuilderMock, LnnRequestLeaveSpecific)
-        .WillRepeatedly(TestLnnRequestLeaveSpecific);
-    EXPECT_CALL(lnnSyncInfoMock, CreateSyncInfoParam)
-        .WillRepeatedly(Return(nullptr));
+    EXPECT_CALL(netBuilderMock, LnnRequestLeaveSpecific).WillRepeatedly(TestLnnRequestLeaveSpecific);
+    EXPECT_CALL(lnnSyncInfoMock, CreateSyncInfoParam).WillRepeatedly(Return(nullptr));
 
     NiceMock<LnnNetLedgertInterfaceMock> netLedgerMock;
     userId = BITS;
@@ -1128,15 +1096,13 @@ HWTEST_F(LNNNetworkInfoTest, NotifyRemoteDevOffLineByUserId_Test_003, TestSize.L
 HWTEST_F(LNNNetworkInfoTest, NotifyRemoteDevOffLineByUserId_Test_004, TestSize.Level1)
 {
     int32_t userId = 0;
-    uint8_t msg[BITLEN] = {0x00, 0xFF, 0xFF, 0xFF};
+    uint8_t msg[BITLEN] = { 0x00, 0xFF, 0xFF, 0xFF };
     uint32_t len = BITLEN;
     const char *udid = NETWORKID;
     NiceMock<LnnNetBuilderInterfaceMock> netBuilderMock;
     NiceMock<LnnSyncInfoInterfaceMock> lnnSyncInfoMock;
-    EXPECT_CALL(netBuilderMock, LnnRequestLeaveSpecific)
-        .WillRepeatedly(TestLnnRequestLeaveSpecific);
-    EXPECT_CALL(lnnSyncInfoMock, CreateSyncInfoParam)
-        .WillRepeatedly(Return(nullptr));
+    EXPECT_CALL(netBuilderMock, LnnRequestLeaveSpecific).WillRepeatedly(TestLnnRequestLeaveSpecific);
+    EXPECT_CALL(lnnSyncInfoMock, CreateSyncInfoParam).WillRepeatedly(Return(nullptr));
     NiceMock<LnnNetLedgertInterfaceMock> netLedgerMock;
     userId = BITS;
     EXPECT_CALL(netLedgerMock, LnnGetRemoteNodeInfoById)
@@ -1160,15 +1126,13 @@ HWTEST_F(LNNNetworkInfoTest, NotifyRemoteDevOffLineByUserId_Test_004, TestSize.L
 HWTEST_F(LNNNetworkInfoTest, NotifyRemoteDevOffLineByUserId_Test_005, TestSize.Level1)
 {
     int32_t userId = 0;
-    uint8_t msg[BITLEN] = {0x00, 0xFF, 0xFF, 0xFF};
+    uint8_t msg[BITLEN] = { 0x00, 0xFF, 0xFF, 0xFF };
     uint32_t len = BITLEN;
     const char *udid = NETWORKID;
     NiceMock<LnnNetBuilderInterfaceMock> netBuilderMock;
     NiceMock<LnnSyncInfoInterfaceMock> lnnSyncInfoMock;
-    EXPECT_CALL(netBuilderMock, LnnRequestLeaveSpecific)
-        .WillRepeatedly(TestLnnRequestLeaveSpecific);
-    EXPECT_CALL(lnnSyncInfoMock, CreateSyncInfoParam)
-        .WillRepeatedly(Return(nullptr));
+    EXPECT_CALL(netBuilderMock, LnnRequestLeaveSpecific).WillRepeatedly(TestLnnRequestLeaveSpecific);
+    EXPECT_CALL(lnnSyncInfoMock, CreateSyncInfoParam).WillRepeatedly(Return(nullptr));
     NiceMock<LnnNetLedgertInterfaceMock> netLedgerMock;
     userId = DP_INACTIVE_DEFAULT_USERID;
     EXPECT_CALL(netLedgerMock, LnnGetRemoteNodeInfoById)
@@ -1192,7 +1156,7 @@ HWTEST_F(LNNNetworkInfoTest, NotifyRemoteDevOffLineByUserId_Test_005, TestSize.L
 HWTEST_F(LNNNetworkInfoTest, ConvertUserIdToMsg_Test_001, TestSize.Level1)
 {
     int32_t userId = 0;
-    uint8_t msg[BITLEN] = {0x00, 0xFF, 0xFF, 0xFF};
+    uint8_t msg[BITLEN] = { 0x00, 0xFF, 0xFF, 0xFF };
     uint32_t len = BITLEN;
     uint8_t *rettest = ConvertUserIdToMsg(userId);
     EXPECT_NE(rettest, nullptr);

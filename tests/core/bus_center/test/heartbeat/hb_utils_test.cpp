@@ -178,8 +178,7 @@ HWTEST_F(HeartBeatUtilsTest, LnnGenerateHexStringHashTest_01, TestSize.Level1)
     NiceMock<HbHeartbeatUtilsInterfaceMock> heartbeatUtilsMock;
     uint32_t ret;
     uint8_t str[SHA_256_HASH_LEN] = { 0 };
-    EXPECT_CALL(heartbeatUtilsMock, SoftBusGenerateStrHash)
-        .WillRepeatedly(Return(SOFTBUS_INVALID_PARAM));
+    EXPECT_CALL(heartbeatUtilsMock, SoftBusGenerateStrHash).WillRepeatedly(Return(SOFTBUS_INVALID_PARAM));
     ret = LnnGenerateHexStringHash(nullptr, nullptr, 0);
     EXPECT_TRUE(ret == SOFTBUS_INVALID_PARAM);
     ret = LnnGenerateHexStringHash(str, nullptr, 0);
@@ -281,8 +280,8 @@ HWTEST_F(HeartBeatUtilsTest, LnnIsSupportHeartbeatCapTest_01, TestSize.Level1)
     EXPECT_NO_FATAL_FAILURE(LnnDumpOnlineDeviceInfo());
     bool ret = LnnIsSupportHeartbeatCap((1 << BIT_SUPPORT_DIRECT_TRIGGER), BIT_SUPPORT_DIRECT_TRIGGER);
     EXPECT_TRUE(ret);
-    EXPECT_CALL(ledgerMock, LnnGetAllOnlineNodeInfo).WillOnce(
-        DoAll(SetArgPointee<0>(nodeBasicInfo), SetArgPointee<1>(infoNum), Return(SOFTBUS_OK)));
+    EXPECT_CALL(ledgerMock, LnnGetAllOnlineNodeInfo)
+        .WillOnce(DoAll(SetArgPointee<0>(nodeBasicInfo), SetArgPointee<1>(infoNum), Return(SOFTBUS_OK)));
     EXPECT_NO_FATAL_FAILURE(LnnDumpOnlineDeviceInfo());
     ret = LnnIsSupportHeartbeatCap((1 << BIT_SUPPORT_DIRECT_TRIGGER), BIT_SUPPORT_SCREEN_STATUS);
     EXPECT_FALSE(ret);
@@ -302,8 +301,8 @@ HWTEST_F(HeartBeatUtilsTest, GenerateRandomNumForHbTest_01, TestSize.Level1)
     NodeBasicInfo *nodeBasicInfo = (NodeBasicInfo *)SoftBusCalloc(sizeof(NodeBasicInfo) * infoNum);
     ASSERT_TRUE(nodeBasicInfo != nullptr);
     (void)memset_s(nodeBasicInfo, sizeof(NodeBasicInfo), 0, sizeof(NodeBasicInfo));
-    EXPECT_CALL(ledgerMock, LnnGetAllOnlineNodeInfo).WillOnce(
-        DoAll(SetArgPointee<0>(nodeBasicInfo), SetArgPointee<1>(infoNum), Return(SOFTBUS_OK)));
+    EXPECT_CALL(ledgerMock, LnnGetAllOnlineNodeInfo)
+        .WillOnce(DoAll(SetArgPointee<0>(nodeBasicInfo), SetArgPointee<1>(infoNum), Return(SOFTBUS_OK)));
     EXPECT_CALL(distributeLedgerMock, LnnGetRemoteStrInfo(_, Eq(STRING_KEY_DEV_UDID), _, _))
         .WillOnce(Return(SOFTBUS_INVALID_PARAM))
         .WillRepeatedly(Return(SOFTBUS_OK));
@@ -440,7 +439,7 @@ HWTEST_F(HeartBeatUtilsTest, LnnGetShortAccountHashTest_02, TestSize.Level1)
 HWTEST_F(HeartBeatUtilsTest, LnnGenerateHexStringHashTest_02, TestSize.Level1)
 {
     NiceMock<HbHeartbeatUtilsInterfaceMock> heartbeatUtilsMock;
-    unsigned char str[10] = {0};
+    unsigned char str[10] = { 0 };
     char hashStr[] = "1234";
     uint32_t len = 5;
     EXPECT_CALL(heartbeatUtilsMock, SoftBusGenerateStrHash).WillRepeatedly(Return(SOFTBUS_OK));

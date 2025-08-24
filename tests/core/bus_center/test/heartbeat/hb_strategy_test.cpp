@@ -717,14 +717,13 @@ HWTEST_F(HeartBeatStrategyTest, LNN_SET_GEARMODE_BY_SPECIFICTYPE_TEST_01, TestSi
 HWTEST_F(HeartBeatStrategyTest, LNN_HB_STRATEGY_INIT_TEST_01, TestSize.Level1)
 {
     NiceMock<HeartBeatFSMStrategyInterfaceMock> hbMock;
-    EXPECT_CALL(hbMock, SoftBusMutexLockInner)
-        .WillOnce(Return(SOFTBUS_INVALID_PARAM));
-    int32_t ret =  LnnHbStrategyInit();
+    EXPECT_CALL(hbMock, SoftBusMutexLockInner).WillOnce(Return(SOFTBUS_INVALID_PARAM));
+    int32_t ret = LnnHbStrategyInit();
     EXPECT_EQ(ret, SOFTBUS_NETWORK_HB_MGR_REG_FAIL);
     EXPECT_CALL(hbMock, SoftBusMutexLockInner)
         .WillOnce(Return(SOFTBUS_OK))
         .WillRepeatedly(Return(SOFTBUS_INVALID_PARAM));
-    ret =  LnnHbStrategyInit();
+    ret = LnnHbStrategyInit();
     EXPECT_EQ(ret, SOFTBUS_NETWORK_HB_MGR_REG_FAIL);
 }
 
@@ -738,7 +737,7 @@ HWTEST_F(HeartBeatStrategyTest, VISIT_ENABLE_HBTYPE_TEST_01, TestSize.Level1)
 {
     NiceMock<HeartBeatFSMStrategyInterfaceMock> hbMock;
     EXPECT_CALL(hbMock, LnnConvertHbTypeToId).WillRepeatedly(Return(HB_INVALID_TYPE_ID));
-    bool ret =  VisitEnableHbType(nullptr, HEARTBEAT_TYPE_BLE_V0, nullptr);
+    bool ret = VisitEnableHbType(nullptr, HEARTBEAT_TYPE_BLE_V0, nullptr);
     EXPECT_TRUE(ret);
 }
 
@@ -754,15 +753,15 @@ HWTEST_F(HeartBeatStrategyTest, LNN_STOP_HEARTBEATVY_TYPE_TEST_01, TestSize.Leve
     EXPECT_CALL(hbMock, LnnPostStopMsgToHbFsm)
         .WillOnce(Return(SOFTBUS_INVALID_PARAM))
         .WillRepeatedly(Return(SOFTBUS_OK));
-    int32_t ret =  LnnStopHeartbeatByType(HEARTBEAT_TYPE_BLE_V0);
+    int32_t ret = LnnStopHeartbeatByType(HEARTBEAT_TYPE_BLE_V0);
     EXPECT_EQ(ret, SOFTBUS_NETWORK_POST_MSG_FAIL);
     EXPECT_CALL(hbMock, LnnPostTransStateMsgToHbFsm)
         .WillOnce(Return(SOFTBUS_INVALID_PARAM))
         .WillRepeatedly(Return(SOFTBUS_OK));
-    ret =  LnnStopHeartbeatByType(HEARTBEAT_TYPE_UDP | HEARTBEAT_TYPE_BLE_V0 | HEARTBEAT_TYPE_BLE_V1 |
+    ret = LnnStopHeartbeatByType(HEARTBEAT_TYPE_UDP | HEARTBEAT_TYPE_BLE_V0 | HEARTBEAT_TYPE_BLE_V1 |
         HEARTBEAT_TYPE_BLE_V3 | HEARTBEAT_TYPE_TCP_FLUSH);
     EXPECT_EQ(ret, SOFTBUS_INVALID_PARAM);
-    ret =  LnnStopHeartbeatByType(HEARTBEAT_TYPE_BLE_V0 | HEARTBEAT_TYPE_BLE_V1);
+    ret = LnnStopHeartbeatByType(HEARTBEAT_TYPE_BLE_V0 | HEARTBEAT_TYPE_BLE_V1);
     EXPECT_EQ(ret, SOFTBUS_OK);
 }
 

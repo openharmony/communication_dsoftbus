@@ -690,8 +690,7 @@ int32_t AuthDeviceGetLatestIdByUuid(const char *uuid, AuthLinkType type, AuthHan
     return GetLnnIpNetworkImplInterface()->AuthDeviceGetLatestIdByUuid(uuid, type, authHandle);
 }
 
-int32_t AuthGetLatestAuthSeqListByType(
-    const char *udid, int64_t *seqList, uint64_t *authVerifyTime, DiscoveryType type)
+int32_t AuthGetLatestAuthSeqListByType(const char *udid, int64_t *seqList, uint64_t *authVerifyTime, DiscoveryType type)
 {
     return GetLnnIpNetworkImplInterface()->AuthGetLatestAuthSeqListByType(udid, seqList, authVerifyTime, type);
 }

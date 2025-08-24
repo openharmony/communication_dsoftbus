@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2022 Huawei Device Co., Ltd.
+ * Copyright (c) 2022-2025 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -199,7 +199,7 @@ public:
     MOCK_METHOD1(LnnUpdateLocalScreenStatus, int32_t(bool));
     MOCK_METHOD2(LnnClearStaticNetCap, int32_t(uint32_t *, StaticNetCapability));
     MOCK_METHOD2(LnnSetStaticNetCap, int32_t(uint32_t *, StaticNetCapability));
-    MOCK_METHOD2(LnnSetLocalNumU32Info, int32_t (InfoKey key, uint32_t info));
+    MOCK_METHOD2(LnnSetLocalNumU32Info, int32_t(InfoKey key, uint32_t info));
     MOCK_METHOD4(LnnGetLocalStrInfoByIfnameIdx, int32_t(InfoKey, char *, uint32_t, int32_t));
     MOCK_METHOD3(LnnGetLocalNumInfoByIfnameIdx, int32_t(InfoKey, int32_t *, int32_t));
     MOCK_METHOD3(LnnSetLocalStrInfoByIfnameIdx, int32_t(InfoKey, const char *, int32_t));
