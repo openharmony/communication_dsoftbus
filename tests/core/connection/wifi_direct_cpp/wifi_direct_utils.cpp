@@ -17,16 +17,18 @@
 #include "bus_center_manager.h"
 #include "data/link_manager.h"
 #include "conn_log.h"
+#include "g_enhance_lnn_func.h"
 #include "lnn_p2p_info.h"
 #include "lnn_feature_capability.h"
 #include "lnn_distributed_net_ledger.h"
 #include "lnn_node_info.h"
+#include "lnn_log.h"
 #include "securec.h"
 #include "softbus_error_code.h"
+#include "softbus_init_common.h"
 #include "syspara/parameters.h"
 #include "utils/wifi_direct_anonymous.h"
 #include "wifi_direct_defines.h"
-#include "lnn_lane_vap_info.h"
 #include <algorithm>
 #include <arpa/inet.h>
 #include <endian.h>
@@ -137,13 +139,22 @@ int32_t WifiDirectUtils::FrequencyToChannel(int32_t frequency)
     }
 }
 
+static int32_t LnnGetRecommendChannelPacked(const char *udid, int32_t *preferChannel)
+{
+    LnnEnhanceFuncList *pfnLnnEnhanceFuncList = LnnEnhanceFuncListGet();
+    if (LnnCheckFuncPointer((void *)pfnLnnEnhanceFuncList->lnnGetRecommendChannel) != SOFTBUS_OK) {
+        return SOFTBUS_NOT_IMPLEMENT;
+    }
+    return pfnLnnEnhanceFuncList->lnnGetRecommendChannel(udid, preferChannel);
+}
+
 int32_t WifiDirectUtils::GetRecommendChannelFromLnn(const std::string &networkId)
 {
     char udid[UDID_BUF_LEN] {};
     int32_t ret = LnnGetRemoteStrInfo(networkId.c_str(), STRING_KEY_DEV_UDID, udid, UDID_BUF_LEN);
     CONN_CHECK_AND_RETURN_RET_LOGE(ret == SOFTBUS_OK, ret, CONN_WIFI_DIRECT, "get udid failed, ret = %{public}d", ret);
     int32_t channelIdLnn = 0;
-    ret = LnnGetRecommendChannel(udid, &channelIdLnn);
+    ret = LnnGetRecommendChannelPacked(udid, &channelIdLnn);
     CONN_CHECK_AND_RETURN_RET_LOGE(
         ret == SOFTBUS_OK, ret, CONN_WIFI_DIRECT, "get channel from Lnn failed, ret = %{public}d", ret);
     return channelIdLnn;
@@ -181,19 +192,46 @@ std::string WifiDirectUtils::GetLocalUuid()
     return uuid;
 }
 
+static int32_t LnnGetLocalPtkByUuidPacked(const char *uuid, char *localPtk, uint32_t len)
+{
+    LnnEnhanceFuncList *pfnLnnEnhanceFuncList = LnnEnhanceFuncListGet();
+    if (LnnCheckFuncPointer((void *)pfnLnnEnhanceFuncList->lnnGetLocalPtkByUuid) != SOFTBUS_OK) {
+        return SOFTBUS_OK;
+    }
+    return pfnLnnEnhanceFuncList->lnnGetLocalPtkByUuid(uuid, localPtk, len);
+}
+
+static int32_t LnnGetLocalDefaultPtkByUuidPacked(const char *uuid, char *localPtk, uint32_t len)
+{
+    LnnEnhanceFuncList *pfnLnnEnhanceFuncList = LnnEnhanceFuncListGet();
+    if (LnnCheckFuncPointer((void *)pfnLnnEnhanceFuncList->lnnGetLocalDefaultPtkByUuid) != SOFTBUS_OK) {
+        return SOFTBUS_OK;
+    }
+    return pfnLnnEnhanceFuncList->lnnGetLocalDefaultPtkByUuid(uuid, localPtk, len);
+}
+
 static constexpr int32_t PTK_128BIT_LEN = 16;
 std::vector<uint8_t> WifiDirectUtils::GetLocalPtk(const std::string &remoteNetworkId)
 {
     auto remoteUuid = NetworkIdToUuid(remoteNetworkId);
     std::vector<uint8_t> result;
     uint8_t ptkBytes[PTK_DEFAULT_LEN] {};
-    auto ret = LnnGetLocalPtkByUuid(remoteUuid.c_str(), (char *)ptkBytes, sizeof(ptkBytes));
+    auto ret = LnnGetLocalPtkByUuidPacked(remoteUuid.c_str(), (char *)ptkBytes, sizeof(ptkBytes));
     if (ret == SOFTBUS_NOT_FIND) {
-        ret = LnnGetLocalDefaultPtkByUuid(remoteUuid.c_str(), (char *)ptkBytes, sizeof(ptkBytes));
+        ret = LnnGetLocalDefaultPtkByUuidPacked(remoteUuid.c_str(), (char *)ptkBytes, sizeof(ptkBytes));
     }
     CONN_CHECK_AND_RETURN_RET_LOGE(ret == SOFTBUS_OK, result, CONN_WIFI_DIRECT, "get local ptk failed");
     result.insert(result.end(), ptkBytes, ptkBytes + PTK_128BIT_LEN);
     return result;
+}
+
+static int32_t LnnGetRemoteDefaultPtkByUuidPacked(const char *uuid, char *remotePtk, uint32_t len)
+{
+    LnnEnhanceFuncList *pfnLnnEnhanceFuncList = LnnEnhanceFuncListGet();
+    if (LnnCheckFuncPointer((void *)pfnLnnEnhanceFuncList->lnnGetRemoteDefaultPtkByUuid) != SOFTBUS_OK) {
+        return SOFTBUS_OK;
+    }
+    return pfnLnnEnhanceFuncList->lnnGetRemoteDefaultPtkByUuid(uuid, remotePtk, len);
 }
 
 std::vector<uint8_t> WifiDirectUtils::GetRemotePtk(const std::string &remoteNetworkId)
@@ -204,7 +242,7 @@ std::vector<uint8_t> WifiDirectUtils::GetRemotePtk(const std::string &remoteNetw
     auto remoteUuid = NetworkIdToUuid(remoteNetworkId);
     int32_t ret = LnnGetRemoteByteInfo(remoteNetworkId.c_str(), BYTE_KEY_REMOTE_PTK, ptkBytes, sizeof(ptkBytes));
     if (ret == SOFTBUS_OK && memcmp(ptkBytes, zeroPtkBytes, PTK_DEFAULT_LEN) == 0) {
-        ret = LnnGetRemoteDefaultPtkByUuid(remoteUuid.c_str(), (char *)ptkBytes, sizeof(ptkBytes));
+        ret = LnnGetRemoteDefaultPtkByUuidPacked(remoteUuid.c_str(), (char *)ptkBytes, sizeof(ptkBytes));
     }
     CONN_CHECK_AND_RETURN_RET_LOGE(ret == SOFTBUS_OK, result, CONN_WIFI_DIRECT, "get remote ptk failed");
     result.insert(result.end(), ptkBytes, ptkBytes + PTK_128BIT_LEN);
@@ -530,7 +568,7 @@ uint32_t WifiDirectUtils::CalculateStringLength(const char *str, uint32_t size)
     return 0;
 }
 
-void WifiDirectUtils::SyncLnnInfoForP2p(WifiDirectRole role, const std::string &localMac, const std::string &goMac)
+void WifiDirectUtils::SyncLnnInfoForP2p(WifiDirectApiRole role, const std::string &localMac, const std::string &goMac)
 {
     CONN_LOGI(CONN_WIFI_DIRECT, "role=%{public}d, localMac=%{public}s, goMac=%{public}s",
         role, WifiDirectAnonymizeMac(localMac).c_str(), WifiDirectAnonymizeMac(goMac).c_str());
@@ -550,6 +588,38 @@ void WifiDirectUtils::SyncLnnInfoForP2p(WifiDirectRole role, const std::string &
     }
 
     LnnSyncP2pInfo();
+}
+
+static constexpr int DFS_CHANNEL_FIRST = 52;
+static constexpr int DFS_CHANNEL_LAST = 64;
+bool WifiDirectUtils::IsDfsChannel(const int &frequency)
+{
+    int channel = FrequencyToChannel(frequency);
+    CONN_LOGI(CONN_WIFI_DIRECT, "channel=%{public}d", channel);
+    if (channel >= DFS_CHANNEL_FIRST && channel <= DFS_CHANNEL_LAST) {
+        return true;
+    }
+    return false;
+}
+
+bool WifiDirectUtils::CheckLinkAtDfsChannelConflict(const std::string &remoteDeviceId, InnerLink::LinkType type)
+{
+    bool dfsLinkIsExist = false;
+    auto remoteNetworkId = UuidToNetworkId(remoteDeviceId);
+    int32_t osType = OH_OS_TYPE;
+    if (LnnGetOsTypeByNetworkId(remoteNetworkId.c_str(), &osType) != SOFTBUS_OK) {
+        CONN_LOGE(CONN_WIFI_DIRECT, "get os type failed");
+        return false;
+    }
+    LinkManager::GetInstance().ForEach([&dfsLinkIsExist, osType, type](InnerLink &link) {
+        if (link.GetLinkType() == type && osType != OH_OS_TYPE && IsDfsChannel(link.GetFrequency())) {
+            dfsLinkIsExist = true;
+            return true;
+        }
+        return false;
+    });
+    CONN_LOGI(CONN_WIFI_DIRECT, "dfsLinkIsExist=%{public}d", dfsLinkIsExist);
+    return dfsLinkIsExist;
 }
 
 int32_t WifiDirectUtils::GetOsType(const char *networkId)
@@ -577,6 +647,25 @@ int32_t WifiDirectUtils::GetDeviceType()
     CONN_CHECK_AND_RETURN_RET_LOGE(ret == SOFTBUS_OK, ret, CONN_WIFI_DIRECT, "get local device type failed");
     CONN_LOGI(CONN_WIFI_DIRECT, "dfx local device type %{public}d", deviceTypeId);
     return deviceTypeId;
+}
+
+int32_t WifiDirectUtils::GetLocalConnSubFeature(uint64_t &feature)
+{
+    uint64_t connSubFeature = 0;
+    auto ret = LnnGetLocalNumU64Info(NUM_KEY_CONN_SUB_FEATURE_CAPA, &connSubFeature);
+    CONN_CHECK_AND_RETURN_RET_LOGE(ret == SOFTBUS_OK, ret, CONN_WIFI_DIRECT, "get connSubFeature failed");
+    feature = connSubFeature;
+    return SOFTBUS_OK;
+}
+
+int32_t WifiDirectUtils::GetRemoteConnSubFeature(const std::string &remoteNetworkId, uint64_t &feature)
+{
+    uint64_t connSubFeature = 0;
+    auto ret = LnnGetRemoteNumU64Info(remoteNetworkId.c_str(), NUM_KEY_CONN_SUB_FEATURE_CAPA, &connSubFeature);
+    CONN_CHECK_AND_RETURN_RET_LOGE(ret == SOFTBUS_OK, ret, CONN_WIFI_DIRECT,
+        "remoteNetworkId=%{public}s, get connSubFeature failed", WifiDirectAnonymizeDeviceId(remoteNetworkId).c_str());
+    feature = connSubFeature;
+    return SOFTBUS_OK;
 }
 
 std::string WifiDirectUtils::GetRemoteOsVersion(const char *remoteNetworkId)
@@ -609,5 +698,38 @@ int32_t WifiDirectUtils::GetRemoteScreenStatus(const char *remoteNetworkId)
     CONN_LOGI(CONN_WIFI_DIRECT, "remote screen status %{public}d", screenStatus);
     SoftBusFree(nodeInfo);
     return screenStatus;
+}
+
+int WifiDirectUtils::GetChload()
+{
+    return SOFTBUS_OK;
+}
+
+bool WifiDirectUtils::IsDeviceId(const std::string &remoteId)
+{
+    return remoteId.length() == UUID_BUF_LEN - 1;
+}
+
+std::string WifiDirectUtils::RemoteDeviceIdToMac(const std::string &remoteDeviceId)
+{
+    return {};
+}
+
+std::string WifiDirectUtils::RemoteMacToDeviceId(const std::string &remoteMac)
+{
+    return {};
+}
+
+// test source not using c++ 17, from_chars is C++17 feature
+static constexpr int WIFI_5G_FREQ = 5180;
+bool WifiDirectUtils::StringToInt(const std::string &channelString, int32_t &result)
+{
+    result = WIFI_5G_FREQ;
+    return true;
+}
+
+int WifiDirectUtils::GetLocalScreenStatus()
+{
+    return SOFTBUS_OK;
 }
 } // namespace OHOS::SoftBus

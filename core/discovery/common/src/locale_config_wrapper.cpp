@@ -13,8 +13,12 @@
  * limitations under the License.
  */
 
-#include "locale_config.h"
+#include <securec.h>
+#include <string>
+
+#include "disc_log.h"
 #include "locale_config_wrapper.h"
+#include "parameter.h"
 
 #ifdef __cplusplus
 extern "C" {
@@ -22,11 +26,36 @@ extern "C" {
 
 const std::string CHINESE_LANGUAGE = "zh-Hans";
 const std::string TRADITIONAL_CHINESE_LANGUAGE = "zh-Hant";
+static constexpr const char *LANGUAGE_KEY = "persist.global.language";
+static constexpr const char *DEFAULT_LANGUAGE_KEY = "const.global.language";
+static constexpr const int32_t CONFIG_LEN = 128;
+
+static std::string ReadSystemParameter(const char *paramKey)
+{
+    DISC_CHECK_AND_RETURN_RET_LOGE(paramKey != NULL, "", DISC_INIT, "paramKey is nullptr");
+
+    char param[CONFIG_LEN + 1];
+    (void)memset_s(param, CONFIG_LEN + 1, 0, CONFIG_LEN + 1);
+    int32_t ret = GetParameter(paramKey, "", param, CONFIG_LEN);
+    if (ret > 0) {
+        return param;
+    }
+    DISC_LOGE(DISC_INIT, "GetParameter failed");
+    return "";
+}
 
 bool IsZHLanguage(void)
 {
-    auto language = OHOS::Global::I18n::LocaleConfig::GetSystemLanguage();
-    return CHINESE_LANGUAGE == language || TRADITIONAL_CHINESE_LANGUAGE == language;
+    std::string systemLanguage = ReadSystemParameter(LANGUAGE_KEY);
+    if (!systemLanguage.empty()) {
+        return CHINESE_LANGUAGE == systemLanguage || TRADITIONAL_CHINESE_LANGUAGE == systemLanguage;
+    }
+    systemLanguage = ReadSystemParameter(DEFAULT_LANGUAGE_KEY);
+    if (!systemLanguage.empty()) {
+        return CHINESE_LANGUAGE == systemLanguage || TRADITIONAL_CHINESE_LANGUAGE == systemLanguage;
+    }
+    // Default language is Chinese.
+    return true;
 }
 
 #ifdef __cplusplus

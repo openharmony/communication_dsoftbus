@@ -46,3 +46,20 @@ void ConnBleReturnConnection(ConnBleConnection **connection)
 {
     (void)connection;
 }
+
+ConnBleConnection *ConnBleGetConnectionById(uint32_t connectionId)
+{
+    (void)connectionId;
+    return NULL;
+}
+
+void ConnBleCancelIdleTimeout(ConnBleConnection *connection)
+{
+    (void)connection;
+}
+
+const BleUnifyInterface *ConnBleGetUnifyInterface(BleProtocolType type)
+{
+    (void)type;
+    return NULL;
+}

@@ -40,7 +40,7 @@ HWTEST_F(TransEventTest, TransEventTest001, TestSize.Level0)
         .socketName = "testSocket",
         .dataType = 0, // invalid
     };
-    constexpr int32_t VALID_EXTRA_SIZE = 4;  //result errcode socketName firstTokenId
+    constexpr int32_t VALID_EXTRA_SIZE = 18;  //result errcode socketName firstTokenId
 
     HiSysEventMock mock;
     EXPECT_CALL(mock,
@@ -59,6 +59,9 @@ HWTEST_F(TransEventTest, TransEventTest001, TestSize.Level0)
 HWTEST_F(TransEventTest, TransEventTest002, TestSize.Level0)
 {
     TransEventExtra validExtra = {
+        .talkieFreq = 1,
+        .talkieType = 1,
+        .talkieLevel = 1,
         .result = 1,
         .errcode = 2,
         .socketName = "testSocketName",
@@ -77,6 +80,12 @@ HWTEST_F(TransEventTest, TransEventTest002, TestSize.Level0)
         .channelScore = 15,
         .peerChannelId = 16,
         .btFlow = 17,
+        .pagingId = 18,
+        .callPid = 19,
+        .saId = 20,
+        .businessFlag = 21,
+        .groupId = "a8ynvpdaihw1f6nknjd2hkfhxljxypkr6kvjsbhnhpp16974uo4fvsrpfa6t50fm",
+        .subGroupId = "a8ynvpdaihw1f6nknjd2hkfhxljxypkr6kvjsbhnhpp16974uo4fvsrpfa6t50fm",
         .peerNetworkId = "a8ynvpdaihw1f6nknjd2hkfhxljxypkr6kvjsbhnhpp16974uo4fvsrpfa6t50fm",
         .peerUdid = "a8ynvpdaihw1f6nknjd2hkfhxljxypkr6kvjsbhnhpp16974uo4fvsrpfa6t50fm",
         .peerDevVer = "NOH-AN00 peer_device_version",
@@ -84,6 +93,8 @@ HWTEST_F(TransEventTest, TransEventTest002, TestSize.Level0)
         .callerPkg = "testCallerPkg",
         .calleePkg = "testCalleePkg",
         .firstTokenName = "testfirstToken",
+        .callerAccountId = "a8ynvpdaihw1f6nknjd2hkfhxljxypkr6kvjsbhnhpp16974uo4fvsrpfa6t50fm",
+        .calleeAccountId = "a8ynvpdaihw1f6nknjd2hkfhxljxypkr6kvjsbhnhpp16974uo4fvsrpfa6t50fm",
         .firstTokenId = 0,
         .firstTokenType = 1,
         .trafficStats = "localpdaihw1f6nknjd2hkfhxljxypkr6kvjsbhnhpp16974uo4fvsrpfa6t50fm",
@@ -95,6 +106,22 @@ HWTEST_F(TransEventTest, TransEventTest002, TestSize.Level0)
         .minBW = 83886080,
         .maxLatency = 4000,
         .minLatency = 2000,
+        .localStaChload = 1,
+        .remoteStaChload = 1,
+        .localHmlChload = 1,
+        .remoteHmlChload = 1,
+        .localP2pChload = 1,
+        .remoteP2pChload = 1,
+        .localStaChannel = 1,
+        .remoteStaChannel = 1,
+        .hmlChannel = 1,
+        .localP2pChannel = 1,
+        .remoteP2pChannel = 1,
+        .localIsDbac = 1,
+        .remoteIsDbac = 1,
+        .localIsDbdc = 1,
+        .remoteIsDbdc = 1,
+        .conCurrentId = "testConCurrentId",
     };
     constexpr int32_t VALID_EXTRA_SIZE = TRANS_ASSIGNER_SIZE;
 
@@ -115,6 +142,9 @@ HWTEST_F(TransEventTest, TransEventTest002, TestSize.Level0)
 HWTEST_F(TransEventTest, TransEventTest003, TestSize.Level0)
 {
     TransEventExtra invalidExtra = {
+        .talkieFreq = -1,
+        .talkieType = -1,
+        .talkieLevel = -1,
         .result = -1,  // valid
         .errcode = -2, // valid
         .socketName = "",
@@ -133,6 +163,11 @@ HWTEST_F(TransEventTest, TransEventTest003, TestSize.Level0)
         .channelScore = -15,
         .peerChannelId = -16,
         .btFlow = -17,
+        .pagingId = -18,
+        .callPid = -19,
+        .saId = -20,
+        .groupId = "",
+        .subGroupId = "",
         .peerNetworkId = "",
         .peerUdid = "",
         .peerDevVer = "",
@@ -140,13 +175,30 @@ HWTEST_F(TransEventTest, TransEventTest003, TestSize.Level0)
         .callerPkg = "\0",
         .calleePkg = nullptr,
         .firstTokenName = "",
+        .callerAccountId = "",
+        .calleeAccountId = "",
         .firstTokenId = 0,
         .firstTokenType = -1,
-        .minBW = 0,
-        .maxLatency = 0,
-        .minLatency = 0,
+        .minBW = -2,
+        .maxLatency = -3,
+        .minLatency = -4,
+        .localStaChload = 0,
+        .remoteStaChload = 0,
+        .localHmlChload = 0,
+        .remoteHmlChload = 0,
+        .localP2pChload = 0,
+        .remoteP2pChload = 0,
+        .localStaChannel = 0,
+        .remoteStaChannel = 0,
+        .hmlChannel = 0,
+        .localP2pChannel = 0,
+        .remoteP2pChannel = 0,
+        .localIsDbac = -1,
+        .remoteIsDbac = -1,
+        .localIsDbdc = -1,
+        .remoteIsDbdc = -1,
     };
-    constexpr int32_t VALID_EXTRA_SIZE = 6; // result, errcode and firstTokenId is valid
+    constexpr int32_t VALID_EXTRA_SIZE = 17; // result, errcode , firstTokenId and each ui8 is valid
 
     HiSysEventMock mock;
     EXPECT_CALL(mock,
@@ -165,7 +217,7 @@ HWTEST_F(TransEventTest, TransEventTest003, TestSize.Level0)
 HWTEST_F(TransEventTest, TransEventTest004, TestSize.Level0)
 {
     TransEventExtra emptyExtra = { 0 };
-    constexpr int32_t VALID_EXTRA_SIZE = 3; // result, errcode and firstTokenId is valid
+    constexpr int32_t VALID_EXTRA_SIZE = 17; // result, errcode, firstTokenId and each ui8 is valid
 
     HiSysEventMock mock;
     EXPECT_CALL(mock,
@@ -184,11 +236,11 @@ HWTEST_F(TransEventTest, TransEventTest004, TestSize.Level0)
 HWTEST_F(TransEventTest, TransEventTest005, TestSize.Level0)
 {
     TransAlarmExtra extra = {
-        .conflictName = NULL,
-        .conflictedName = NULL,
-        .occupyedName = NULL,
-        .permissionName = NULL,
-        .sessionName = NULL,
+        .conflictName = nullptr,
+        .conflictedName = nullptr,
+        .occupyedName = nullptr,
+        .permissionName = nullptr,
+        .sessionName = nullptr,
         .result = 1,
         .errcode = 2233,
         .minBw = 32,
@@ -274,7 +326,7 @@ HWTEST_F(TransEventTest, TransEventTest007, TestSize.Level0)
         .btFlow = 17,
         .firstTokenId = 0,
     };
-    constexpr int32_t VALID_EXTRA_SIZE = 19;
+    constexpr int32_t VALID_EXTRA_SIZE = 33;
     HiSysEventMock mock;
     EXPECT_CALL(mock,
         HiSysEvent_Write(_, _, StrEq(SOFTBUS_EVENT_DOMAIN), StrEq(TRANS_EVENT_NAME), Eq(SOFTBUS_EVENT_TYPE_BEHAVIOR), _,
@@ -294,7 +346,7 @@ HWTEST_F(TransEventTest, TransEventTest007, TestSize.Level0)
         .calleePkg = "testCalleePkg",
         .firstTokenId = 0,
     };
-    constexpr int32_t VALID_EXTRA_SIZE1 = 9;
+    constexpr int32_t VALID_EXTRA_SIZE1 = 23;
     HiSysEventMock mock1;
     EXPECT_CALL(mock1,
         HiSysEvent_Write(_, _, StrEq(SOFTBUS_EVENT_DOMAIN), StrEq(TRANS_EVENT_NAME), Eq(SOFTBUS_EVENT_TYPE_BEHAVIOR), _,
@@ -311,7 +363,7 @@ HWTEST_F(TransEventTest, TransEventTest007, TestSize.Level0)
         .calleePkg = "testCalleePkg",
         .firstTokenId = 0,
     };
-    constexpr int32_t VALID_EXTRA_SIZE2 = 7;
+    constexpr int32_t VALID_EXTRA_SIZE2 = 21;
     HiSysEventMock mock2;
     EXPECT_CALL(mock2,
         HiSysEvent_Write(_, _, StrEq(SOFTBUS_EVENT_DOMAIN), StrEq(TRANS_EVENT_NAME), Eq(SOFTBUS_EVENT_TYPE_BEHAVIOR), _,
@@ -327,7 +379,7 @@ HWTEST_F(TransEventTest, TransEventTest007, TestSize.Level0)
         .calleePkg = "testCalleePkg",
         .firstTokenId = 0,
     };
-    constexpr int32_t VALID_EXTRA_SIZE3 = 6;
+    constexpr int32_t VALID_EXTRA_SIZE3 = 20;
     HiSysEventMock mock3;
     EXPECT_CALL(mock3,
         HiSysEvent_Write(_, _, StrEq(SOFTBUS_EVENT_DOMAIN), StrEq(TRANS_EVENT_NAME), Eq(SOFTBUS_EVENT_TYPE_BEHAVIOR), _,
@@ -345,14 +397,14 @@ HWTEST_F(TransEventTest, TransEventTest007, TestSize.Level0)
 HWTEST_F(TransEventTest, TransEventTest008, TestSize.Level0)
 {
     TransAuditExtra extra = {
-        .localIp = NULL,
-        .localPort = NULL,
-        .localDevId = NULL,
-        .localSessName = NULL,
-        .peerIp = NULL,
-        .peerPort = NULL,
-        .peerDevId = NULL,
-        .peerSessName = NULL,
+        .localIp = nullptr,
+        .localPort = nullptr,
+        .localDevId = nullptr,
+        .localSessName = nullptr,
+        .peerIp = nullptr,
+        .peerPort = nullptr,
+        .peerDevId = nullptr,
+        .peerSessName = nullptr,
         .hostPkg = "a.b.c.transSudit",
         .result = 2,
         .errcode = 9527,

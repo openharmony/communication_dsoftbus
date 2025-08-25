@@ -14,7 +14,7 @@
 import("//build/test.gni")
 import("../../../../dsoftbus.gni")
 
-module_output_path = "dsoftbus/transmission"
+module_output_path = "dsoftbus/soft_bus/transmission"
 
 ohos_unittest("TransClientProxyTest") {
   module_out_path = module_output_path
@@ -64,10 +64,37 @@ ohos_unittest("TransClientProxyStandardTest") {
   ]
 }
 
+ohos_unittest("TransClientProxyGitpidTest") {
+  module_out_path = module_output_path
+  sources = [
+    "trans_client_proxy_getpid_test.cpp"
+  ]
+
+  include_dirs = [
+    "$dsoftbus_core_path/transmission/ipc/standard/include",
+    "$dsoftbus_core_path/transmission/ipc/include",
+    "$dsoftbus_sdk_path/frame/standard/include",
+  ]
+
+  deps = [
+    "$dsoftbus_core_path/common:softbus_utils",
+    "$dsoftbus_core_path/frame:softbus_server",
+    "$dsoftbus_root_path/adapter:softbus_adapter",
+  ]
+
+  external_deps = [
+    "c_utils:utils",
+    "hilog:libhilog",
+    "ipc:ipc_single",
+    "samgr:samgr_proxy",
+  ]
+}
+
 group("unittest") {
   testonly = true
   deps = [
     ":TransClientProxyStandardTest",
     ":TransClientProxyTest",
+    ":TransClientProxyGitpidTest",
   ]
 }

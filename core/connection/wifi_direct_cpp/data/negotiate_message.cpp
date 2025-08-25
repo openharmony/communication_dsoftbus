@@ -98,31 +98,36 @@ InfoContainer<NegotiateMessageKey>::KeyTypeTable InfoContainer<NegotiateMessageK
 };
 
 static std::map<NegotiateMessageType, std::string> g_messageNameMap = {
-    { NegotiateMessageType::CMD_INVALID,                 "CMD_INVALID"                 },
-    { NegotiateMessageType::CMD_CONN_V2_REQ_1,           "CMD_CONN_V2_REQ_1"           },
-    { NegotiateMessageType::CMD_CONN_V2_REQ_2,           "CMD_CONN_V2_REQ_2"           },
-    { NegotiateMessageType::CMD_CONN_V2_REQ_3,           "CMD_CONN_V2_REQ_3"           },
-    { NegotiateMessageType::CMD_CONN_V2_RESP_1,          "CMD_CONN_V2_RESP_1"          },
-    { NegotiateMessageType::CMD_CONN_V2_RESP_2,          "CMD_CONN_V2_RESP_2"          },
-    { NegotiateMessageType::CMD_CONN_V2_RESP_3,          "CMD_CONN_V2_RESP_3"          },
-    { NegotiateMessageType::CMD_DISCONNECT_V2_REQ,       "CMD_DISCONNECT_V2_REQ"       },
-    { NegotiateMessageType::CMD_DISCONNECT_V2_RESP,      "CMD_DISCONNECT_V2_RESP"      },
-    { NegotiateMessageType::CMD_FORCE_DISCONNECT_REQ,    "CMD_FORCE_DISCONNECT_REQ"    },
-    { NegotiateMessageType::CMD_CLIENT_JOIN_FAIL_NOTIFY, "CMD_CLIENT_JOIN_FAIL_NOTIFY" },
-    { NegotiateMessageType::CMD_TRIGGER_REQ,             "CMD_TRIGGER_REQ"             },
-    { NegotiateMessageType::CMD_TRIGGER_RESP,            "CMD_TRIGGER_RESP"            },
-    { NegotiateMessageType::CMD_AUTH_LISTEN_RESP,        "CMD_AUTH_LISTEN_RESP"        },
-    { NegotiateMessageType::CMD_RENEGOTIATE_REQ,         "CMD_RENEGOTIATE_REQ"         },
-    { NegotiateMessageType::CMD_RENEGOTIATE_RESP,        "CMD_RENEGOTIATE_RESP"        },
-    { NegotiateMessageType::CMD_AUTH_HAND_SHAKE,         "CMD_AUTH_HAND_SHAKE"         },
-    { NegotiateMessageType::CMD_AUTH_HAND_SHAKE_RSP,     "CMD_AUTH_HAND_SHAKE_RSP"     },
-    { NegotiateMessageType::CMD_DETECT_LINK_REQ,         "CMD_DETECT_LINK_REQ"         },
-    { NegotiateMessageType::CMD_DETECT_LINK_RSP,         "CMD_DETECT_LINK_RSP"         },
-    { NegotiateMessageType::CMD_V3_REQ,                  "CMD_V3_REQ"                  },
-    { NegotiateMessageType::CMD_V3_RSP,                  "CMD_V3_RSP"                  },
-    { NegotiateMessageType::CMD_V3_CUSTOM_PORT_REQ,      "CMD_V3_CUSTOM_PORT_REQ"      },
-    { NegotiateMessageType::CMD_V3_CUSTOM_PORT_RSP,      "CMD_V3_CUSTOM_PORT_RSP"      },
-    { NegotiateMessageType::CMD_ERROR_NOTIFICATION,      "CMD_ERROR_NOTIFICATION"      },
+    { NegotiateMessageType::CMD_INVALID,                     "CMD_INVALID"                       },
+    { NegotiateMessageType::CMD_CONN_V2_REQ_1,               "CMD_CONN_V2_REQ_1"                 },
+    { NegotiateMessageType::CMD_CONN_V2_REQ_2,               "CMD_CONN_V2_REQ_2"                 },
+    { NegotiateMessageType::CMD_CONN_V2_REQ_3,               "CMD_CONN_V2_REQ_3"                 },
+    { NegotiateMessageType::CMD_CONN_V2_RESP_1,              "CMD_CONN_V2_RESP_1"                },
+    { NegotiateMessageType::CMD_CONN_V2_RESP_2,              "CMD_CONN_V2_RESP_2"                },
+    { NegotiateMessageType::CMD_CONN_V2_RESP_3,              "CMD_CONN_V2_RESP_3"                },
+    { NegotiateMessageType::CMD_DISCONNECT_V2_REQ,           "CMD_DISCONNECT_V2_REQ"             },
+    { NegotiateMessageType::CMD_DISCONNECT_V2_RESP,          "CMD_DISCONNECT_V2_RESP"            },
+    { NegotiateMessageType::CMD_FORCE_DISCONNECT_REQ,        "CMD_FORCE_DISCONNECT_REQ"          },
+    { NegotiateMessageType::CMD_REFRESH_AUTH_HANDLE,         "CMD_REFRESH_AUTH_HANDLE"           },
+    { NegotiateMessageType::CMD_CLIENT_JOIN_FAIL_NOTIFY,     "CMD_CLIENT_JOIN_FAIL_NOTIFY"       },
+    { NegotiateMessageType::CMD_TRIGGER_REQ,                 "CMD_TRIGGER_REQ"                   },
+    { NegotiateMessageType::CMD_TRIGGER_RESP,                "CMD_TRIGGER_RESP"                  },
+    { NegotiateMessageType::CMD_AUTH_LISTEN_RESP,            "CMD_AUTH_LISTEN_RESP"              },
+    { NegotiateMessageType::CMD_RENEGOTIATE_REQ,             "CMD_RENEGOTIATE_REQ"               },
+    { NegotiateMessageType::CMD_RENEGOTIATE_RESP,            "CMD_RENEGOTIATE_RESP"              },
+    { NegotiateMessageType::CMD_AUTH_HAND_SHAKE,             "CMD_AUTH_HAND_SHAKE"               },
+    { NegotiateMessageType::CMD_AUTH_HAND_SHAKE_RSP,         "CMD_AUTH_HAND_SHAKE_RSP"           },
+    { NegotiateMessageType::CMD_DETECT_LINK_REQ,             "CMD_DETECT_LINK_REQ"               },
+    { NegotiateMessageType::CMD_DETECT_LINK_RSP,             "CMD_DETECT_LINK_RSP"               },
+    { NegotiateMessageType::CMD_V3_REQ,                      "CMD_V3_REQ"                        },
+    { NegotiateMessageType::CMD_V3_RSP,                      "CMD_V3_RSP"                        },
+    { NegotiateMessageType::CMD_V3_CUSTOM_PORT_REQ,          "CMD_V3_CUSTOM_PORT_REQ"            },
+    { NegotiateMessageType::CMD_V3_CUSTOM_PORT_RSP,          "CMD_V3_CUSTOM_PORT_RSP"            },
+    { NegotiateMessageType::CMD_ERROR_NOTIFICATION,          "CMD_ERROR_NOTIFICATION"            },
+    { NegotiateMessageType::CMD_DBAC_SYNC_DATA,              "CMD_DBAC_SYNC_DATA"                },
+    { NegotiateMessageType::CMD_NEGOTIATE_POWER_MODE_REQ,    "CMD_NEGOTIATE_POWER_MODE_REQ"      },
+    { NegotiateMessageType::CMD_NEGOTIATE_POWER_MODE_RESP,   "CMD_NEGOTIATE_POWER_MODE_RESP"     },
+    { NegotiateMessageType::CMD_LOW_POWER_SWITCH_HIGH_POWER, "CMD_LOW_POWER_SWITCH_HIGH_POWER"   },
 };
 
 static std::map<LegacyCommandType, std::string> g_legacyMessageNameMap = {
@@ -237,7 +242,7 @@ void NegotiateMessage::MarshallingLinkInfo(WifiDirectProtocol &protocol) const
 {
     auto pro = WifiDirectProtocolFactory::CreateProtocol(protocol.GetType());
     if (pro == nullptr) {
-        CONN_LOGE(CONN_WIFI_DIRECT, "create protocol failed");
+        CONN_LOGE(CONN_WIFI_DIRECT, "create protocol fail");
         return;
     }
     pro->SetFormat(protocol.GetFormat());
@@ -259,15 +264,24 @@ int NegotiateMessage::Unmarshalling(WifiDirectProtocol &protocol, const std::vec
     while (protocol.Read(key, data, size)) {
         auto type = keyTypeTable_[static_cast<NegotiateMessageKey>(key)];
         switch (Serializable::ValueType(type)) {
-            case Serializable::ValueType::BOOL:
-                Set(NegotiateMessageKey(key), *(bool *)(data));
+            case Serializable::ValueType::BOOL: {
+                // Consistent with where data is added, use the uint8_t type
+                if (size >= sizeof(uint8_t)) {
+                    bool value = *reinterpret_cast<uint8_t *>(data);
+                    Set(NegotiateMessageKey(key), value);
+                }
                 break;
-            case Serializable::ValueType::INT:
-                Set(NegotiateMessageKey(key), *(int *)(data));
+            }
+            case Serializable::ValueType::INT: {
+                int intKey = (int)WifiDirectUtils::BytesToInt((uint8_t *)data, size);
+                Set(NegotiateMessageKey(key), intKey);
                 break;
-            case Serializable::ValueType::UINT:
-                Set(NegotiateMessageKey(key), *(uint32_t *)(data));
+            }
+            case Serializable::ValueType::UINT: {
+                uint32_t uintKey = (uint32_t)WifiDirectUtils::BytesToInt((uint8_t *)data, size);
+                Set(NegotiateMessageKey(key), uintKey);
                 break;
+            }
             case Serializable::ValueType::STRING:
                 size = WifiDirectUtils::CalculateStringLength((char *)data, size);
                 Set(NegotiateMessageKey(key), std::string(reinterpret_cast<const char *>(data), size));

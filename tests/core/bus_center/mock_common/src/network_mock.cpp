@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2022 Huawei Device Co., Ltd.
+ * Copyright (c) 2022-2025 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -83,9 +83,29 @@ void LnnNotifyBtAclStateChangeEvent(const char *btMac, SoftBusBtAclState state)
     return GetNetworkInterface()->LnnNotifyBtAclStateChangeEvent(btMac, state);
 }
 
-int32_t SoftBusAddBtStateListener(const SoftBusBtStateListener *listener)
+int32_t SoftBusAddBtStateListener(const SoftBusBtStateListener *listener, int32_t *listenerId)
 {
-    return GetNetworkInterface()->SoftBusAddBtStateListener(listener);
+    return GetNetworkInterface()->SoftBusAddBtStateListener(listener, listenerId);
+}
+
+int SoftBusAddSleStateListener(const SoftBusSleStateListener *listener, int *listenerId)
+{
+    return GetNetworkInterface()->SoftBusAddSleStateListener(listener, listenerId);
+}
+
+bool IsSleEnabled(void)
+{
+    return GetNetworkInterface()->IsSleEnabled();
+}
+
+void SoftBusRemoveSleStateListener(int listenerId)
+{
+    return GetNetworkInterface()->SoftBusRemoveSleStateListener(listenerId);
+}
+
+void LnnNotifySleStateChangeEvent(void *state)
+{
+    return GetNetworkInterface()->LnnNotifySleStateChangeEvent(state);
 }
 
 int32_t SoftbusGetConfig(ConfigType type, unsigned char *val, uint32_t len)
@@ -102,5 +122,46 @@ void LnnNotifyNetlinkStateChangeEvent(NetManagerIfNameState state, const char *i
 {
     return GetNetworkInterface()->LnnNotifyNetlinkStateChangeEvent(state, ifName);
 }
+
+int32_t LnnAsyncCallbackDelayHelper(
+    SoftBusLooper *looper, LnnAsyncCallbackFunc callback, void *para, uint64_t delayMillis)
+{
+    return GetNetworkInterface()->LnnAsyncCallbackDelayHelper(looper, callback, para, delayMillis);
+}
+
+int32_t StartBaseClient(ListenerModule module, const SoftbusBaseListener *listener)
+{
+    return GetNetworkInterface()->StartBaseClient(module, listener);
+}
+
+int32_t AddTrigger(ListenerModule module, int32_t fd, TriggerType trigger)
+{
+    return GetNetworkInterface()->AddTrigger(module, fd, trigger);
+}
+
+int32_t LnnGetLocalNumU32Info(InfoKey key, uint32_t *info)
+{
+    return GetNetworkInterface()->LnnGetLocalNumU32Info(key, info);
+}
+
+int32_t LnnSetLocalNumU32Info(InfoKey key, uint32_t info)
+{
+    return GetNetworkInterface()->LnnSetLocalNumU32Info(key, info);
+}
+
+SoftBusBand SoftBusGetLinkBand(void)
+{
+    return GetNetworkInterface()->SoftBusGetLinkBand();
+}
+
+int32_t LnnSetNetCapability(uint32_t *capability, NetCapability type)
+{
+    return GetNetworkInterface()->LnnSetNetCapability(capability, type);
+}
+
+int32_t LnnClearNetCapability(uint32_t *capability, NetCapability type)
+{
+    return GetNetworkInterface()->LnnClearNetCapability(capability, type);
 }
 }
+} // namespace OHOS

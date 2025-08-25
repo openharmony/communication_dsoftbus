@@ -66,14 +66,14 @@ const char *g_pkgName = "dms";
 const char *g_sessionName = "ohos.distributedschedule.dms.test";
 const char *g_peerNetworkId = "1234567789";
 const char *g_groupId = "123";
-FILE *g_fileTest = NULL;
-FILE *g_fileSs = NULL;
+FILE *g_fileTest = nullptr;
+FILE *g_fileSs = nullptr;
 int32_t g_fd = 0;
 char g_writeData[128] = "test111111111111111111111111111111111111111111111111111111111111";
 const char *g_rootDir = "/data";
 const char *g_destFile = "test.txt";
 char g_recvFile[] = "/data/test.txt";
-const char *g_sessionKey = "www.huaweitest.com";
+const char *g_sessionKey = "www.test.com";
 
 SessionAttribute g_attr = {
     .dataType = TYPE_MESSAGE,
@@ -181,7 +181,7 @@ public:
 
 void ClientTransProxyFileManagerTest::SetUpTestCase(void)
 {
-    SetAceessTokenPermission("dsoftbusTransTest");
+    SetAccessTokenPermission("dsoftbusTransTest");
     g_fileTest = fopen(g_testProxyFileList[0], "w+");
     EXPECT_NE(g_fileTest, nullptr);
 
@@ -199,10 +199,10 @@ void ClientTransProxyFileManagerTest::TearDownTestCase(void)
 {
     int32_t ret = fclose(g_fileTest);
     EXPECT_EQ(ret, 0);
-    g_fileTest = NULL;
+    g_fileTest = nullptr;
     ret = fclose(g_fileSs);
     EXPECT_EQ(ret, 0);
-    g_fileSs = NULL;
+    g_fileSs = nullptr;
     close(g_fd);
     g_fd = -1;
     ret = remove(g_testProxyFileList[0]);
@@ -223,7 +223,7 @@ void ClientTransProxyFileManagerTest::TearDownTestCase(void)
  * @tc.type: FUNC
  * @tc.require:
  */
-HWTEST_F(ClientTransProxyFileManagerTest, ClinetTransProxySendFileTest001, TestSize.Level0)
+HWTEST_F(ClientTransProxyFileManagerTest, ClinetTransProxySendFileTest001, TestSize.Level1)
 {
     int32_t channelId = 1;
     int32_t ret = ProxyChannelSendFile(channelId, g_testProxyFileList, g_testProxyFileList, 0);
@@ -274,7 +274,7 @@ HWTEST_F(ClientTransProxyFileManagerTest, ClinetTransProxySendFileTest001, TestS
  * @tc.type: FUNC
  * @tc.require:
  */
-HWTEST_F(ClientTransProxyFileManagerTest, ClinetTransRecvFileFrameDataTest001, TestSize.Level0)
+HWTEST_F(ClientTransProxyFileManagerTest, ClinetTransRecvFileFrameDataTest001, TestSize.Level1)
 {
     int32_t channelId = 1;
     int32_t sessionId = 1;
@@ -288,6 +288,7 @@ HWTEST_F(ClientTransProxyFileManagerTest, ClinetTransRecvFileFrameDataTest001, T
     channel->linkType = LANE_BR;
     channel->sessionKey = (char *)g_sessionKey;
     channel->osType = OH_TYPE;
+    channel->keyLen = TEST_SEQ32;
     ret = ClientTransProxyAddChannelInfo(ClientTransProxyCreateChannelInfo(channel));
     EXPECT_EQ(SOFTBUS_OK, ret);
     SoftBusFree(channel);
@@ -304,12 +305,50 @@ HWTEST_F(ClientTransProxyFileManagerTest, ClinetTransRecvFileFrameDataTest001, T
 }
 
 /**
+ * @tc.name: ClientTransProxyCreateChannelInfoTest001
+ * @tc.desc: clent trans recv file frame data test, use the wrong parameter.
+ * @tc.type: FUNC
+ * @tc.require:
+ */
+HWTEST_F(ClientTransProxyFileManagerTest, ClientTransProxyCreateChannelInfoTest001, TestSize.Level1)
+{
+    ChannelInfo *channel = (ChannelInfo *)SoftBusMalloc(sizeof(ChannelInfo));
+    ASSERT_TRUE(channel != nullptr);
+    channel->channelId = 1;
+    channel->isEncrypt = 0;
+    channel->linkType = LANE_BR;
+    channel->sessionKey = (char *)g_sessionKey;
+    channel->osType = OH_TYPE;
+    channel->isD2D = 1;
+    channel->dataLen = 0;
+    channel->isServer = 1;
+    channel->pagingNonce = (char *)g_sessionKey;
+    channel->pagingSessionkey = (char *)g_sessionKey;
+    channel->extraData = (char *)g_sessionKey;
+    channel->pagingAccountId = (char *)g_sessionKey;
+    channel->keyLen = TEST_SEQ32;
+    ClientProxyChannelInfo *info = ClientTransProxyCreateChannelInfo(channel);
+    ASSERT_TRUE(info != nullptr);
+    SoftBusFree(info);
+    channel->dataLen = EXTRA_DATA_MAX_LEN + 1;
+    channel->isServer = 0;
+    ClientProxyChannelInfo *testInfo = ClientTransProxyCreateChannelInfo(channel);
+    ASSERT_TRUE(testInfo != nullptr);
+    SoftBusFree(testInfo);
+    channel->dataLen = EXTRA_DATA_MAX_LEN - 1;
+    ClientProxyChannelInfo *testInfoTest = ClientTransProxyCreateChannelInfo(channel);
+    ASSERT_TRUE(testInfoTest != nullptr);
+    SoftBusFree(testInfoTest);
+    SoftBusFree(channel);
+}
+
+/**
  * @tc.name: ClinetTransRecvFileFrameDataTest002
  * @tc.desc: client trans recv file frame data test, use the wrong parameter.
  * @tc.type: FUNC
  * @tc.require:
  */
-HWTEST_F(ClientTransProxyFileManagerTest, ClinetTransRecvFileFrameDataTest002, TestSize.Level0)
+HWTEST_F(ClientTransProxyFileManagerTest, ClinetTransRecvFileFrameDataTest002, TestSize.Level1)
 {
     int32_t channelId = 1;
     int32_t sessionId = 1;
@@ -320,12 +359,13 @@ HWTEST_F(ClientTransProxyFileManagerTest, ClinetTransRecvFileFrameDataTest002, T
     channel->isEncrypt = 0;
     channel->linkType = LANE_BR;
     channel->sessionKey = (char *)g_sessionKey;
+    channel->keyLen = TEST_SEQ32;
     int32_t ret = ClientTransProxyAddChannelInfo(ClientTransProxyCreateChannelInfo(channel));
     EXPECT_EQ(SOFTBUS_OK, ret);
     SoftBusFree(channel);
     FileFrame fileFrame;
     fileFrame.frameLength = PROXY_BR_MAX_PACKET_SIZE - 1;
- 
+
     fileFrame.frameType = TRANS_SESSION_FILE_FIRST_FRAME;
     ret = ProcessRecvFileFrameData(sessionId, channelId, &fileFrame);
     EXPECT_EQ(SOFTBUS_NO_INIT, ret);
@@ -375,7 +415,7 @@ HWTEST_F(ClientTransProxyFileManagerTest, ClinetTransRecvFileFrameDataTest002, T
  * @tc.type: FUNC
  * @tc.require:
  */
-HWTEST_F(ClientTransProxyFileManagerTest, ClinetTransProxyFileManagerInitDataTest001, TestSize.Level0)
+HWTEST_F(ClientTransProxyFileManagerTest, ClinetTransProxyFileManagerInitDataTest001, TestSize.Level1)
 {
     int32_t ret = ClinetTransProxyFileManagerInit();
     EXPECT_EQ(SOFTBUS_OK, ret);
@@ -411,7 +451,7 @@ HWTEST_F(ClientTransProxyFileManagerTest, ClinetTransProxyFileManagerInitDataTes
  * @tc.type: FUNC
  * @tc.require:
  */
-HWTEST_F(ClientTransProxyFileManagerTest, ClinetTransProxyGetSessionFileLockTest001, TestSize.Level0)
+HWTEST_F(ClientTransProxyFileManagerTest, ClinetTransProxyGetSessionFileLockTest001, TestSize.Level1)
 {
     int32_t channelId = 1;
     ProxyFileMutexLock *sessionLock = GetSessionFileLock(channelId);
@@ -434,20 +474,20 @@ HWTEST_F(ClientTransProxyFileManagerTest, ClinetTransProxyGetSessionFileLockTest
  * @tc.type: FUNC
  * @tc.require:
  */
-HWTEST_F(ClientTransProxyFileManagerTest, ClinetTransProxyCreateSendListenerInfoTest001, TestSize.Level0)
+HWTEST_F(ClientTransProxyFileManagerTest, ClinetTransProxyCreateSendListenerInfoTest001, TestSize.Level1)
 {
     int32_t ret = CreateSessionServer(g_pkgName, g_sessionName, &g_sessionlistener);
-    ASSERT_EQ(SOFTBUS_OK, ret);
+    ASSERT_EQ(SOFTBUS_TRANS_SESSION_SERVER_NOINIT, ret);
 
     int32_t sessionId = 1;
     SessionEnableStatus isEnabled = ENABLE_STATUS_INIT;
 
     ret = ClientAddSession(&g_param, &sessionId, &isEnabled);
-    ASSERT_EQ(SOFTBUS_OK, ret);
+    ASSERT_EQ(SOFTBUS_TRANS_SESSION_SERVER_NOINIT, ret);
 
     SendListenerInfo *sendListenerInfo;
     ret = CreateSendListenerInfo(&sendListenerInfo, TEST_CHANNEL_ID, 0);
-    EXPECT_EQ(SOFTBUS_TRANS_SESSION_INFO_NOT_FOUND, ret);
+    EXPECT_EQ(SOFTBUS_TRANS_SESSION_SERVER_NOINIT, ret);
 
     int32_t channelId = 1;
     int32_t osType = TEST_OS_TYPE;
@@ -485,7 +525,7 @@ HWTEST_F(ClientTransProxyFileManagerTest, ClinetTransProxyCreateSendListenerInfo
  * @tc.type: FUNC
  * @tc.require:
  */
-HWTEST_F(ClientTransProxyFileManagerTest, ClinetTransProxyGetAndCheckFileSizeTest001, TestSize.Level0)
+HWTEST_F(ClientTransProxyFileManagerTest, ClinetTransProxyGetAndCheckFileSizeTest001, TestSize.Level1)
 {
     uint64_t fileSize = 0;
     uint64_t frameNum = 0;
@@ -508,7 +548,7 @@ HWTEST_F(ClientTransProxyFileManagerTest, ClinetTransProxyGetAndCheckFileSizeTes
  * @tc.type: FUNC
  * @tc.require:
  */
-HWTEST_F(ClientTransProxyFileManagerTest, ClinetTransProxySendOneFrameTest001, TestSize.Level0)
+HWTEST_F(ClientTransProxyFileManagerTest, ClinetTransProxySendOneFrameTest001, TestSize.Level1)
 {
     SendListenerInfo info;
     info.sessionId = TEST_SESSION_ID;
@@ -576,7 +616,7 @@ HWTEST_F(ClientTransProxyFileManagerTest, ClinetTransProxySendOneFrameTest001, T
  * @tc.type: FUNC
  * @tc.require:
  */
-HWTEST_F(ClientTransProxyFileManagerTest, ClinetTransProxySendOneFrameTest002, TestSize.Level0)
+HWTEST_F(ClientTransProxyFileManagerTest, ClinetTransProxySendOneFrameTest002, TestSize.Level1)
 {
     SendListenerInfo *infoRear = (SendListenerInfo *)SoftBusCalloc(sizeof(SendListenerInfo));
     infoRear->sessionId = 1;
@@ -609,7 +649,7 @@ HWTEST_F(ClientTransProxyFileManagerTest, ClinetTransProxySendOneFrameTest002, T
  * @tc.type: FUNC
  * @tc.require:
  */
-HWTEST_F(ClientTransProxyFileManagerTest, ClinetTransProxyFileRecipientInfoTest001, TestSize.Level0)
+HWTEST_F(ClientTransProxyFileManagerTest, ClinetTransProxyFileRecipientInfoTest001, TestSize.Level1)
 {
     FileRecipientInfo info;
     info.recvFileInfo.fileFd = -2;
@@ -645,7 +685,7 @@ HWTEST_F(ClientTransProxyFileManagerTest, ClinetTransProxyFileRecipientInfoTest0
  * @tc.type: FUNC
  * @tc.require:
  */
-HWTEST_F(ClientTransProxyFileManagerTest, ClinetTransProxyFileAckReqAndResDataTest001, TestSize.Level0)
+HWTEST_F(ClientTransProxyFileManagerTest, ClinetTransProxyFileAckReqAndResDataTest001, TestSize.Level1)
 {
     int32_t channelId = 1;
     uint32_t startSeq = TEST_SEQ;
@@ -683,7 +723,7 @@ HWTEST_F(ClientTransProxyFileManagerTest, ClinetTransProxyFileAckReqAndResDataTe
  * @tc.type: FUNC
  * @tc.require:
  */
-HWTEST_F(ClientTransProxyFileManagerTest, ClinetTransProxyPackFileDataTest001, TestSize.Level0)
+HWTEST_F(ClientTransProxyFileManagerTest, ClinetTransProxyPackFileDataTest001, TestSize.Level1)
 {
     FileFrame fileFrame = {
         .frameType = TRANS_SESSION_BYTES,
@@ -726,7 +766,7 @@ HWTEST_F(ClientTransProxyFileManagerTest, ClinetTransProxyPackFileDataTest001, T
  * @tc.type: FUNC
  * @tc.require:
  */
-HWTEST_F(ClientTransProxyFileManagerTest, ClinetTransProxyPackFileDataFrameTest001, TestSize.Level0)
+HWTEST_F(ClientTransProxyFileManagerTest, ClinetTransProxyPackFileDataFrameTest001, TestSize.Level1)
 {
     uint32_t dataTest = TEST_DATA_LENGTH;
     FileFrame fileFrame = {
@@ -767,7 +807,7 @@ HWTEST_F(ClientTransProxyFileManagerTest, ClinetTransProxyPackFileDataFrameTest0
  * @tc.type: FUNC
  * @tc.require:
  */
-HWTEST_F(ClientTransProxyFileManagerTest, ClinetTransProxyRetransFileFrameTest001, TestSize.Level0)
+HWTEST_F(ClientTransProxyFileManagerTest, ClinetTransProxyRetransFileFrameTest001, TestSize.Level1)
 {
     SendListenerInfo info = {
         .channelId = 1,
@@ -797,7 +837,7 @@ HWTEST_F(ClientTransProxyFileManagerTest, ClinetTransProxyRetransFileFrameTest00
  * @tc.type: FUNC
  * @tc.require:
  */
-HWTEST_F(ClientTransProxyFileManagerTest, ClinetTransProxyAckResponseDataHandleTest001, TestSize.Level0)
+HWTEST_F(ClientTransProxyFileManagerTest, ClinetTransProxyAckResponseDataHandleTest001, TestSize.Level1)
 {
     SendListenerInfo info = {
         .fileSize = TEST_FILE_SIZE,
@@ -830,7 +870,7 @@ HWTEST_F(ClientTransProxyFileManagerTest, ClinetTransProxyAckResponseDataHandleT
  * @tc.type: FUNC
  * @tc.require:
  */
-HWTEST_F(ClientTransProxyFileManagerTest, ClinetTransProxyGetFullRecvPathTest001, TestSize.Level0)
+HWTEST_F(ClientTransProxyFileManagerTest, ClinetTransProxyGetFullRecvPathTest001, TestSize.Level1)
 {
     char *result = GetFullRecvPath(nullptr, nullptr);
     EXPECT_EQ(nullptr, result);
@@ -866,7 +906,7 @@ HWTEST_F(ClientTransProxyFileManagerTest, ClinetTransProxyGetFullRecvPathTest001
  * @tc.type: FUNC
  * @tc.require:
  */
-HWTEST_F(ClientTransProxyFileManagerTest, ClinetTransProxyGetDirPathTest001, TestSize.Level0)
+HWTEST_F(ClientTransProxyFileManagerTest, ClinetTransProxyGetDirPathTest001, TestSize.Level1)
 {
     int32_t ret = GetDirPath(nullptr, nullptr, 0);
     EXPECT_NE(SOFTBUS_OK, ret);
@@ -894,7 +934,7 @@ HWTEST_F(ClientTransProxyFileManagerTest, ClinetTransProxyGetDirPathTest001, Tes
  * @tc.type: FUNC
  * @tc.require:
  */
-HWTEST_F(ClientTransProxyFileManagerTest, ClinetTransProxyGetAbsFullPathTest001, TestSize.Level0)
+HWTEST_F(ClientTransProxyFileManagerTest, ClinetTransProxyGetAbsFullPathTest001, TestSize.Level1)
 {
     int32_t ret = GetAbsFullPath(nullptr, nullptr, 0);
     EXPECT_NE(SOFTBUS_OK, ret);
@@ -922,7 +962,7 @@ HWTEST_F(ClientTransProxyFileManagerTest, ClinetTransProxyGetAbsFullPathTest001,
  * @tc.type: FUNC
  * @tc.require:
  */
-HWTEST_F(ClientTransProxyFileManagerTest, ClinetTransProxySendListenerInfoTest001, TestSize.Level0)
+HWTEST_F(ClientTransProxyFileManagerTest, ClinetTransProxySendListenerInfoTest001, TestSize.Level1)
 {
     SendListenerInfo *info = (SendListenerInfo *)SoftBusCalloc(sizeof(SendListenerInfo));
     EXPECT_TRUE(info != nullptr);
@@ -949,7 +989,7 @@ HWTEST_F(ClientTransProxyFileManagerTest, ClinetTransProxySendListenerInfoTest00
  * @tc.type: FUNC
  * @tc.require:
  */
-HWTEST_F(ClientTransProxyFileManagerTest, ClinetTransProxyFileTransStartInfoTest001, TestSize.Level0)
+HWTEST_F(ClientTransProxyFileManagerTest, ClinetTransProxyFileTransStartInfoTest001, TestSize.Level1)
 {
     int32_t ret = PackFileTransStartInfo(nullptr, nullptr, TEST_FILE_TEST_TXT_FILE, nullptr);
     EXPECT_NE(SOFTBUS_OK, ret);
@@ -980,7 +1020,7 @@ HWTEST_F(ClientTransProxyFileManagerTest, ClinetTransProxyFileTransStartInfoTest
  * @tc.type: FUNC
  * @tc.require:
  */
-HWTEST_F(ClientTransProxyFileManagerTest, ClinetTransProxyUnFileTransStartInfoTest001, TestSize.Level0)
+HWTEST_F(ClientTransProxyFileManagerTest, ClinetTransProxyUnFileTransStartInfoTest001, TestSize.Level1)
 {
     uint32_t packetSize = TEST_PACKET_SIZE;
     int32_t ret = UnpackFileTransStartInfo(nullptr, nullptr, nullptr, packetSize);
@@ -1028,7 +1068,7 @@ HWTEST_F(ClientTransProxyFileManagerTest, ClinetTransProxyUnFileTransStartInfoTe
  * @tc.type: FUNC
  * @tc.require:
  */
-HWTEST_F(ClientTransProxyFileManagerTest, ClinetTransProxyFileCrcCheckSumTest001, TestSize.Level0)
+HWTEST_F(ClientTransProxyFileManagerTest, ClinetTransProxyFileCrcCheckSumTest001, TestSize.Level1)
 {
     int32_t ret = SendFileCrcCheckSum(nullptr);
     EXPECT_NE(SOFTBUS_OK, ret);
@@ -1066,7 +1106,7 @@ HWTEST_F(ClientTransProxyFileManagerTest, ClinetTransProxyFileCrcCheckSumTest001
  * @tc.type: FUNC
  * @tc.require:
  */
-HWTEST_F(ClientTransProxyFileManagerTest, ClinetTransProxyFileToFrameTest001, TestSize.Level0)
+HWTEST_F(ClientTransProxyFileManagerTest, ClinetTransProxyFileToFrameTest001, TestSize.Level1)
 {
     SendListenerInfo info;
     info.sessionId = 1;
@@ -1104,7 +1144,7 @@ HWTEST_F(ClientTransProxyFileManagerTest, ClinetTransProxyFileToFrameTest001, Te
  * @tc.type: FUNC
  * @tc.require:
  */
-HWTEST_F(ClientTransProxyFileManagerTest, ClinetTransProxyFileToFrameTest002, TestSize.Level0)
+HWTEST_F(ClientTransProxyFileManagerTest, ClinetTransProxyFileToFrameTest002, TestSize.Level1)
 {
     SendListenerInfo sendInfo = {
         .channelId = 1,
@@ -1129,7 +1169,7 @@ HWTEST_F(ClientTransProxyFileManagerTest, ClinetTransProxyFileToFrameTest002, Te
  * @tc.type: FUNC
  * @tc.require:
  */
-HWTEST_F(ClientTransProxyFileManagerTest, ClinetTransProxyStartSendFileTest001, TestSize.Level0)
+HWTEST_F(ClientTransProxyFileManagerTest, ClinetTransProxyStartSendFileTest001, TestSize.Level1)
 {
     SendListenerInfo sendInfo = {
         .channelId = 1,
@@ -1147,7 +1187,7 @@ HWTEST_F(ClientTransProxyFileManagerTest, ClinetTransProxyStartSendFileTest001, 
  * @tc.type: FUNC
  * @tc.require:
  */
-HWTEST_F(ClientTransProxyFileManagerTest, ClinetTransProxyCheckFileTest001, TestSize.Level0)
+HWTEST_F(ClientTransProxyFileManagerTest, ClinetTransProxyCheckFileTest001, TestSize.Level1)
 {
     bool result = CheckRecvFileExist(nullptr);
     EXPECT_EQ(false, result);
@@ -1162,7 +1202,7 @@ HWTEST_F(ClientTransProxyFileManagerTest, ClinetTransProxyCheckFileTest001, Test
  * @tc.type: FUNC
  * @tc.require:
  */
-HWTEST_F(ClientTransProxyFileManagerTest, ClinetTransProxyPutToRcvListTest001, TestSize.Level0)
+HWTEST_F(ClientTransProxyFileManagerTest, ClinetTransProxyPutToRcvListTest001, TestSize.Level1)
 {
     int32_t ret = PutToRecvFileList(nullptr, nullptr);
     EXPECT_NE(SOFTBUS_OK, ret);
@@ -1190,7 +1230,7 @@ HWTEST_F(ClientTransProxyFileManagerTest, ClinetTransProxyPutToRcvListTest001, T
  * @tc.type: FUNC
  * @tc.require:
  */
-HWTEST_F(ClientTransProxyFileManagerTest, ClinetTransProxyRecvRecipientInfoListTest001, TestSize.Level0)
+HWTEST_F(ClientTransProxyFileManagerTest, ClinetTransProxyRecvRecipientInfoListTest001, TestSize.Level1)
 {
     int32_t sessionId = 1;
     FileRecipientInfo *result = GetRecipientNoLock(sessionId);
@@ -1227,7 +1267,7 @@ HWTEST_F(ClientTransProxyFileManagerTest, ClinetTransProxyRecvRecipientInfoListT
  * @tc.type: FUNC
  * @tc.require:
  */
-HWTEST_F(ClientTransProxyFileManagerTest, ClinetTransProxyGetRecipientInfoListTest001, TestSize.Level0)
+HWTEST_F(ClientTransProxyFileManagerTest, ClinetTransProxyGetRecipientInfoListTest001, TestSize.Level1)
 {
     int32_t sessionId = -1;
     int32_t channelId = 1;
@@ -1252,7 +1292,7 @@ HWTEST_F(ClientTransProxyFileManagerTest, ClinetTransProxyGetRecipientInfoListTe
  * @tc.type: FUNC
  * @tc.require:
  */
-HWTEST_F(ClientTransProxyFileManagerTest, ClinetTransProxyWriteEmptyFrameTest001, TestSize.Level0)
+HWTEST_F(ClientTransProxyFileManagerTest, ClinetTransProxyWriteEmptyFrameTest001, TestSize.Level1)
 {
     int32_t cnt = 0;
     int32_t ret = WriteEmptyFrame(nullptr, cnt);
@@ -1283,14 +1323,14 @@ HWTEST_F(ClientTransProxyFileManagerTest, ClinetTransProxyWriteEmptyFrameTest001
  * @tc.type: FUNC
  * @tc.require:
  */
-HWTEST_F(ClientTransProxyFileManagerTest, ClinetTransProxyProcessOneFrameCRCTest001, TestSize.Level0)
+HWTEST_F(ClientTransProxyFileManagerTest, ClinetTransProxyProcessOneFrameCRCTest001, TestSize.Level1)
 {
     uint32_t dataLen = 0;
     int32_t ret = ProcessOneFrameCRC(nullptr, dataLen, nullptr);
     EXPECT_NE(SOFTBUS_OK, ret);
 
     uint8_t *emptyBuff = (uint8_t *)SoftBusCalloc(TEST_FILE_SIZE);
-    if (emptyBuff == NULL) {
+    if (emptyBuff == nullptr) {
         return;
     }
     FileFrame frame = {
@@ -1339,7 +1379,7 @@ HWTEST_F(ClientTransProxyFileManagerTest, ClinetTransProxyProcessOneFrameCRCTest
  * @tc.type: FUNC
  * @tc.require:
  */
-HWTEST_F(ClientTransProxyFileManagerTest, ClinetTransProxyProcessOneFrameTest001, TestSize.Level0)
+HWTEST_F(ClientTransProxyFileManagerTest, ClinetTransProxyProcessOneFrameTest001, TestSize.Level1)
 {
     FileFrame frame = {
         .frameType = TRANS_SESSION_FILE_FIRST_FRAME,
@@ -1375,7 +1415,7 @@ HWTEST_F(ClientTransProxyFileManagerTest, ClinetTransProxyProcessOneFrameTest001
  * @tc.type: FUNC
  * @tc.require:
  */
-HWTEST_F(ClientTransProxyFileManagerTest, ClinetTransProxyCrcCheckTest001, TestSize.Level0)
+HWTEST_F(ClientTransProxyFileManagerTest, ClinetTransProxyCrcCheckTest001, TestSize.Level1)
 {
     FileFrame frame = {
         .seq = TEST_SEQ32,
@@ -1404,7 +1444,7 @@ HWTEST_F(ClientTransProxyFileManagerTest, ClinetTransProxyCrcCheckTest001, TestS
  * @tc.type: FUNC
  * @tc.require:
  */
-HWTEST_F(ClientTransProxyFileManagerTest, ClinetTransProxyFileAckRequestTest001, TestSize.Level0)
+HWTEST_F(ClientTransProxyFileManagerTest, ClinetTransProxyFileAckRequestTest001, TestSize.Level1)
 {
     FileFrame frame = {
         .frameLength = TEST_HEADER_LENGTH,
@@ -1436,7 +1476,7 @@ HWTEST_F(ClientTransProxyFileManagerTest, ClinetTransProxyFileAckRequestTest001,
  * @tc.type: FUNC
  * @tc.require:
  */
-HWTEST_F(ClientTransProxyFileManagerTest, ClinetTransProxyFileAckResponseTest001, TestSize.Level0)
+HWTEST_F(ClientTransProxyFileManagerTest, ClinetTransProxyFileAckResponseTest001, TestSize.Level1)
 {
     FileFrame frame = {
         .frameLength = 0,
@@ -1480,7 +1520,7 @@ HWTEST_F(ClientTransProxyFileManagerTest, ClinetTransProxyFileAckResponseTest001
  * @tc.type: FUNC
  * @tc.require:
  */
-HWTEST_F(ClientTransProxyFileManagerTest, ClinetTransProxyCheckParameterTest001, TestSize.Level0)
+HWTEST_F(ClientTransProxyFileManagerTest, ClinetTransProxyCheckParameterTest001, TestSize.Level1)
 {
     bool result = IsValidFileString(nullptr, TEST_FILE_CNT, TEST_FILE_LENGTH);
     EXPECT_EQ(false, result);
@@ -1500,7 +1540,7 @@ HWTEST_F(ClientTransProxyFileManagerTest, ClinetTransProxyCheckParameterTest001,
  * @tc.type: FUNC
  * @tc.require:
  */
-HWTEST_F(ClientTransProxyFileManagerTest, ClinetTransProxyProcessFileListDataTest001, TestSize.Level0)
+HWTEST_F(ClientTransProxyFileManagerTest, ClinetTransProxyProcessFileListDataTest001, TestSize.Level1)
 {
     int32_t sessionId = 1;
     FileFrame frame = {
@@ -1517,7 +1557,7 @@ HWTEST_F(ClientTransProxyFileManagerTest, ClinetTransProxyProcessFileListDataTes
  * @tc.type: FUNC
  * @tc.require:
  */
-HWTEST_F(ClientTransProxyFileManagerTest, ClinetTransProxyGetFileInfoTest001, TestSize.Level0)
+HWTEST_F(ClientTransProxyFileManagerTest, ClinetTransProxyGetFileInfoTest001, TestSize.Level1)
 {
     FileFrame frame = {
         .frameLength = 0,
@@ -1552,7 +1592,7 @@ HWTEST_F(ClientTransProxyFileManagerTest, ClinetTransProxyGetFileInfoTest001, Te
  * @tc.type: FUNC
  * @tc.require:
  */
-HWTEST_F(ClientTransProxyFileManagerTest, ClinetTransProxyWriteFrameTest001, TestSize.Level0)
+HWTEST_F(ClientTransProxyFileManagerTest, ClinetTransProxyWriteFrameTest001, TestSize.Level1)
 {
     int32_t sessionId = 1;
     FileFrame frame = {
@@ -1573,7 +1613,7 @@ HWTEST_F(ClientTransProxyFileManagerTest, ClinetTransProxyWriteFrameTest001, Tes
  * @tc.type: FUNC
  * @tc.require:
  */
-HWTEST_F(ClientTransProxyFileManagerTest, ProxyChannelSendFileStreamTest001, TestSize.Level0)
+HWTEST_F(ClientTransProxyFileManagerTest, ProxyChannelSendFileStreamTest001, TestSize.Level1)
 {
     int32_t channelId = 1;
     const char *data = "test_data";
@@ -1590,7 +1630,7 @@ HWTEST_F(ClientTransProxyFileManagerTest, ProxyChannelSendFileStreamTest001, Tes
  * @tc.type: FUNC
  * @tc.require:
  */
-HWTEST_F(ClientTransProxyFileManagerTest, ProxySendFileTransResultTest001, TestSize.Level0)
+HWTEST_F(ClientTransProxyFileManagerTest, ProxySendFileTransResultTest001, TestSize.Level1)
 {
     int32_t channelId = 1;
     uint32_t seq = TEST_SEQ;
@@ -1607,7 +1647,7 @@ HWTEST_F(ClientTransProxyFileManagerTest, ProxySendFileTransResultTest001, TestS
  * @tc.type: FUNC
  * @tc.require:
  */
-HWTEST_F(ClientTransProxyFileManagerTest, ProxyUnpackFileTransResultFrame001, TestSize.Level0)
+HWTEST_F(ClientTransProxyFileManagerTest, ProxyUnpackFileTransResultFrame001, TestSize.Level1)
 {
     uint32_t seq = TEST_SEQ;
     int32_t result = 0;
@@ -1642,7 +1682,7 @@ HWTEST_F(ClientTransProxyFileManagerTest, ProxyUnpackFileTransResultFrame001, Te
  * @tc.type: FUNC
  * @tc.require:
  */
-HWTEST_F(ClientTransProxyFileManagerTest, ClinetTransProxyFileAckReqAndResDataTest002, TestSize.Level0)
+HWTEST_F(ClientTransProxyFileManagerTest, ClinetTransProxyFileAckReqAndResDataTest002, TestSize.Level1)
 {
     int32_t channelId = 1;
     uint32_t startSeq = TEST_SEQ;
@@ -1694,7 +1734,7 @@ HWTEST_F(ClientTransProxyFileManagerTest, ClinetTransProxyFileAckReqAndResDataTe
  * @tc.type: FUNC
  * @tc.require:
  */
-HWTEST_F(ClientTransProxyFileManagerTest, ClinetTransProxyPackFileDataTest002, TestSize.Level0)
+HWTEST_F(ClientTransProxyFileManagerTest, ClinetTransProxyPackFileDataTest002, TestSize.Level1)
 {
     FileFrame fileFrame = {
         .frameType = TRANS_SESSION_BYTES,
@@ -1737,7 +1777,7 @@ HWTEST_F(ClientTransProxyFileManagerTest, ClinetTransProxyPackFileDataTest002, T
  * @tc.type: FUNC
  * @tc.require:
  */
-HWTEST_F(ClientTransProxyFileManagerTest, ClinetTransProxyRetransFileFrameTest002, TestSize.Level0)
+HWTEST_F(ClientTransProxyFileManagerTest, ClinetTransProxyRetransFileFrameTest002, TestSize.Level1)
 {
     SendListenerInfo info = {
         .fileSize = TEST_FILE_SIZE,
@@ -1777,7 +1817,7 @@ HWTEST_F(ClientTransProxyFileManagerTest, ClinetTransProxyRetransFileFrameTest00
  * @tc.type: FUNC
  * @tc.require:
  */
-HWTEST_F(ClientTransProxyFileManagerTest, ClinetTransProxyGetFileSizeTest001, TestSize.Level0)
+HWTEST_F(ClientTransProxyFileManagerTest, ClinetTransProxyGetFileSizeTest001, TestSize.Level1)
 {
     const char *fileList[] = {
         "test0",
@@ -1809,12 +1849,12 @@ HWTEST_F(ClientTransProxyFileManagerTest, ClinetTransProxyGetFileSizeTest001, Te
  * @tc.type: FUNC
  * @tc.require:
  */
-HWTEST_F(ClientTransProxyFileManagerTest, ClinetTransProxyUpdateFileReceivePathTest001, TestSize.Level0)
+HWTEST_F(ClientTransProxyFileManagerTest, ClinetTransProxyUpdateFileReceivePathTest001, TestSize.Level1)
 {
     int32_t sessionId = TEST_SESSION_ID;
     FileListener *fileListener = (FileListener *)SoftBusCalloc(sizeof(FileListener));
 
-    fileListener->socketRecvCallback = NULL;
+    fileListener->socketRecvCallback = nullptr;
     int32_t ret = UpdateFileReceivePath(sessionId, fileListener);
     EXPECT_EQ(SOFTBUS_OK, ret);
 
@@ -1831,7 +1871,7 @@ HWTEST_F(ClientTransProxyFileManagerTest, ClinetTransProxyUpdateFileReceivePathT
  * @tc.type: FUNC
  * @tc.require:
  */
-HWTEST_F(ClientTransProxyFileManagerTest, ClinetTransProxyCreateFileFromFrameTest001, TestSize.Level0)
+HWTEST_F(ClientTransProxyFileManagerTest, ClinetTransProxyCreateFileFromFrameTest001, TestSize.Level1)
 {
     int32_t sessionId = TEST_SESSION_ID;
     int32_t channelId = TEST_CHANNEL_ID;
@@ -1859,7 +1899,7 @@ HWTEST_F(ClientTransProxyFileManagerTest, ClinetTransProxyCreateFileFromFrameTes
  * @tc.type: FUNC
  * @tc.require:
  */
-HWTEST_F(ClientTransProxyFileManagerTest, ClinetTransProxyChannelSendFileTest001, TestSize.Level0)
+HWTEST_F(ClientTransProxyFileManagerTest, ClinetTransProxyChannelSendFileTest001, TestSize.Level1)
 {
     int32_t channelId = TEST_CHANNEL_ID;
     const char *sFileList[] = {
@@ -1898,7 +1938,7 @@ HWTEST_F(ClientTransProxyFileManagerTest, ClinetTransProxyChannelSendFileTest001
  * @tc.type: FUNC
  * @tc.require:
  */
-HWTEST_F(ClientTransProxyFileManagerTest, CheckFrameLengthTest, TestSize.Level0)
+HWTEST_F(ClientTransProxyFileManagerTest, CheckFrameLengthTest, TestSize.Level1)
 {
     int32_t osType = TEST_OS_TYPE;
     uint32_t packetSize;
@@ -1911,6 +1951,7 @@ HWTEST_F(ClientTransProxyFileManagerTest, CheckFrameLengthTest, TestSize.Level0)
     channel1->isEncrypt = 0;
     channel1->linkType = LANE_BR;
     channel1->sessionKey = (char *)g_sessionKey;
+    channel1->keyLen = TEST_SEQ32;
     ret = ClientTransProxyAddChannelInfo(ClientTransProxyCreateChannelInfo(channel1));
     EXPECT_EQ(SOFTBUS_OK, ret);
     ret = CheckFrameLength(1, PROXY_BR_MAX_PACKET_SIZE + 1, osType, &packetSize);
@@ -1924,6 +1965,7 @@ HWTEST_F(ClientTransProxyFileManagerTest, CheckFrameLengthTest, TestSize.Level0)
     channel2->isEncrypt = 0;
     channel2->linkType = LANE_BLE_DIRECT;
     channel2->sessionKey = (char *)g_sessionKey;
+    channel2->keyLen = TEST_SEQ32;
     ret = ClientTransProxyAddChannelInfo(ClientTransProxyCreateChannelInfo(channel2));
     EXPECT_EQ(SOFTBUS_OK, ret);
     ret = CheckFrameLength(2, PROXY_BLE_MAX_PACKET_SIZE + 1, osType, &packetSize);

@@ -1,4 +1,4 @@
-# Copyright (c) 2021-2024 Huawei Device Co., Ltd.
+# Copyright (c) 2021-2025 Huawei Device Co., Ltd.
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
 # You may obtain a copy of the License at
@@ -13,13 +13,14 @@
 
 import("../dsoftbus.gni")
 import("bus_center/bus_center_sdk.gni")
+import("connection/connection_sdk.gni")
 import("frame/frame_sdk.gni")
 import("transmission/trans_sdk.gni")
 
 common_client_src = bus_center_sdk_src + softbus_client_frame_src +
-                    trans_session_manager_sdk_src
+                    trans_session_manager_sdk_src + connection_sdk_src
 common_client_inc = bus_center_sdk_inc + softbus_client_frame_inc +
-                    trans_session_manager_sdk_inc
+                    trans_session_manager_sdk_inc + connection_sdk_inc
 common_client_deps = bus_center_sdk_deps + trans_session_manager_sdk_deps
 
 common_client_ext_deps = []
@@ -66,24 +67,9 @@ config("dsoftbus_sdk_interface") {
     "$dsoftbus_root_path/interfaces/kits/transport",
     "$dsoftbus_root_path/sdk/transmission/session/cpp/include",
     "$dsoftbus_root_path/interfaces/inner_kits/transport",
+    "$dsoftbus_root_path/core/transmission/common/include",
+    "$dsoftbus_root_path/br_proxy",
   ]
-
-  if (enhanced_kits_broadcast) {
-    include_dirs +=
-        [ "$dsoftbus_root_path/dsoftbus_enhance/interfaces/kits/broadcast" ]
-  }
-
-  if (dsoftbus_feature_ex_kits) {
-    include_dirs +=
-        [ "$dsoftbus_root_path/dsoftbus_enhance/interfaces/kits/bus_center" ]
-  }
-
-  if (schema_enhanced) {
-    include_dirs += [
-      "$dsoftbus_root_path/dsoftbus_enhance/interfaces/kits/transport",
-      "$dsoftbus_root_path/core/transmission/common/include",
-    ]
-  }
 }
 
 target(build_type, "softbus_client") {
@@ -93,6 +79,12 @@ target(build_type, "softbus_client") {
   external_deps = common_client_ext_deps + libsoftbus_stream_ext_deps
   public_configs = [ ":dsoftbus_sdk_interface" ]
   defines += TRANS_SDK_DEFINES
+
+  include_dirs += [
+    "$dsoftbus_root_path/core/frame/init/include",
+    "$dsoftbus_root_path/core/transmission/common/include",
+    "$dsoftbus_root_path/core/common/include",
+  ]
 
   if (defined(ohos_lite)) {
     cflags_cc = [ "-stdc=c++14" ]

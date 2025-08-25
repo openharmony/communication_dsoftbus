@@ -16,12 +16,7 @@
 #ifndef LNN_CONNECTION_ADDR_UTILS_H
 #define LNN_CONNECTION_ADDR_UTILS_H
 
-#include <stdbool.h>
-
 #include "auth_interface.h"
-#include "lnn_node_info.h"
-#include "softbus_bus_center.h"
-#include "softbus_conn_interface.h"
 
 #ifdef __cplusplus
 extern "C" {

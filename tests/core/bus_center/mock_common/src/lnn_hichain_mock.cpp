@@ -17,8 +17,8 @@
 
 #include "auth_interface.h"
 #include "auth_log.h"
-#include "softbus_adapter_mem.h"
 #include "softbus_adapter_json.h"
+#include "softbus_adapter_mem.h"
 
 using namespace testing;
 using namespace testing::ext;
@@ -93,14 +93,14 @@ int32_t LnnHichainInterfaceMock::ActionOfProcessData(
     return HC_SUCCESS;
 }
 
-int32_t LnnHichainInterfaceMock::InvokeAuthDevice(int32_t osAccountId, int64_t authReqId, const char *authParams,
-    const DeviceAuthCallback *gaCallback)
+int32_t LnnHichainInterfaceMock::InvokeAuthDevice(
+    int32_t osAccountId, int64_t authReqId, const char *authParams, const DeviceAuthCallback *gaCallback)
 {
     return HC_SUCCESS;
 }
 
-int32_t LnnHichainInterfaceMock::AuthDeviceConnSend(int32_t osAccountId, int64_t authReqId, const char *authParams,
-    const DeviceAuthCallback *gaCallback)
+int32_t LnnHichainInterfaceMock::AuthDeviceConnSend(
+    int32_t osAccountId, int64_t authReqId, const char *authParams, const DeviceAuthCallback *gaCallback)
 {
     AUTH_LOGI(AUTH_TEST, "AuthDeviceConnSend");
     (void)SoftBusCondSignal(&LnnHichainInterfaceMock::cond);
@@ -116,8 +116,8 @@ int32_t LnnHichainInterfaceMock::InvokeDataChangeListener(const char *appId, con
     return SOFTBUS_OK;
 }
 
-int32_t LnnHichainInterfaceMock::InvokeGetJoinedGroups1(int32_t osAccountId, const char *appId, int32_t groupType,
-    char **returnGroupVec, uint32_t *groupNum)
+int32_t LnnHichainInterfaceMock::InvokeGetJoinedGroups1(
+    int32_t osAccountId, const char *appId, int32_t groupType, char **returnGroupVec, uint32_t *groupNum)
 {
     (void)osAccountId;
     (void)appId;
@@ -130,14 +130,14 @@ int32_t LnnHichainInterfaceMock::InvokeGetJoinedGroups1(int32_t osAccountId, con
         *groupNum = GRUOP_NUM2;
     }
     *returnGroupVec = reinterpret_cast<char *>(SoftBusCalloc(*groupNum));
-    if (*returnGroupVec == NULL) {
+    if (*returnGroupVec == nullptr) {
         return HC_ERR_INVALID_PARAMS;
     }
     return HC_SUCCESS;
 }
 
-int32_t LnnHichainInterfaceMock::InvokeGetJoinedGroups2(int32_t osAccountId, const char *appId, int32_t groupType,
-    char **returnGroupVec, uint32_t *groupNum)
+int32_t LnnHichainInterfaceMock::InvokeGetJoinedGroups2(
+    int32_t osAccountId, const char *appId, int32_t groupType, char **returnGroupVec, uint32_t *groupNum)
 {
     (void)osAccountId;
     (void)appId;
@@ -148,8 +148,8 @@ int32_t LnnHichainInterfaceMock::InvokeGetJoinedGroups2(int32_t osAccountId, con
     return HC_ERR_INVALID_PARAMS;
 }
 
-int32_t LnnHichainInterfaceMock::InvokeGetJoinedGroups3(int32_t osAccountId, const char *appId, int32_t groupType,
-    char **returnGroupVec, uint32_t *groupNum)
+int32_t LnnHichainInterfaceMock::InvokeGetJoinedGroups3(
+    int32_t osAccountId, const char *appId, int32_t groupType, char **returnGroupVec, uint32_t *groupNum)
 {
     (void)osAccountId;
     (void)appId;
@@ -179,7 +179,7 @@ int32_t LnnHichainInterfaceMock::getRelatedGroups(
     }
     char data = 'A';
     if (g_isReturnDeviceNum) {
-        char* testChar = &data;
+        char *testChar = &data;
         *deviceNum = strlen(testChar) + 1;
         *returnDevInfoVec = testChar;
         return SOFTBUS_OK;
@@ -195,7 +195,7 @@ int32_t LnnHichainInterfaceMock::getRelatedGroups1(
     (void)groupId;
     *deviceNum = 1;
     JsonObj *obj = JSON_CreateObject();
-    if (obj == NULL) {
+    if (obj == nullptr) {
         AUTH_LOGI(AUTH_TEST, "create jsonObject err");
         return SOFTBUS_CREATE_JSON_ERR;
     }
@@ -207,7 +207,7 @@ int32_t LnnHichainInterfaceMock::getRelatedGroups1(
         JSON_Delete(obj);
         return SOFTBUS_PARSE_JSON_ERR;
     }
-    char* jsons = JSON_PrintUnformatted(obj);
+    char *jsons = JSON_PrintUnformatted(obj);
     *returnDevInfoVec = jsons;
 
     AUTH_LOGI(AUTH_TEST, "getRelatedGroups1 test");
@@ -222,7 +222,7 @@ int32_t LnnHichainInterfaceMock::getTrustedDevices(
     (void)groupId;
     *deviceNum = 1;
     JsonObj *obj = JSON_CreateObject();
-    if (obj == NULL) {
+    if (obj == nullptr) {
         AUTH_LOGI(AUTH_TEST, "create jsonObject err");
         return SOFTBUS_CREATE_JSON_ERR;
     }
@@ -230,7 +230,7 @@ int32_t LnnHichainInterfaceMock::getTrustedDevices(
         JSON_Delete(obj);
         return SOFTBUS_PARSE_JSON_ERR;
     }
-    char* jsons = JSON_PrintUnformatted(obj);
+    char *jsons = JSON_PrintUnformatted(obj);
     *returnDevInfoVec = jsons;
     if (!g_isReturnTrue) {
         g_isReturnTrue = true;
@@ -247,9 +247,9 @@ int32_t LnnHichainInterfaceMock::getTrustedDevices1(
     (void)osAccountId;
     (void)appId;
     (void)groupId;
-    
+
     char jsonsStr[] = "{\"groupId\":\"1111\", \"groupType\":1}";
-    char* data = jsonsStr;
+    char *data = jsonsStr;
     *returnDevInfoVec = data;
     AUTH_LOGI(AUTH_TEST, "returnDevInfoVec is invalid");
     if (g_isReturnDeviceNum) {

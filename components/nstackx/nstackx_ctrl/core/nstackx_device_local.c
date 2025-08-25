@@ -24,6 +24,7 @@
 #include "nstackx_util.h"
 #include "nstackx_device_remote.h"
 #include "nstackx_list.h"
+#include "nstackx_inet.h"
 
 #define TAG "LOCALDEVICE"
 enum {
@@ -35,13 +36,14 @@ enum {
 struct LocalIface {
     List node;
 
-    char ifname[NSTACKX_MAX_INTERFACE_NAME_LEN];
-    char ipStr[NSTACKX_MAX_IP_STRING_LEN];
-    struct in_addr ip;
-
     uint8_t type;
     uint8_t state;
     uint8_t createCount;
+    uint8_t af;
+    char ifname[NSTACKX_MAX_INTERFACE_NAME_LEN];
+    char ipStr[NSTACKX_MAX_IP_STRING_LEN];
+    union InetAddr addr;
+    char serviceData[NSTACKX_MAX_SERVICE_DATA_LEN];
     struct timespec updateTime;
 
     Timer *timer;
@@ -64,6 +66,8 @@ static LocalDevice g_localDevice;
 #define LOCAL_DEVICE_OFFLINE_DEFERRED_DURATION 5000 /* Defer local device offline event, 5 seconds */
 
 #define NSTACKX_DEFAULT_DEVICE_NAME "nStack Device"
+#define NSTACKX_IPV6_MULTICAST_ADDR "FF02::1"
+#define DEFAULT_IFACE_NUM 1
 
 #define IFACE_COAP_CTX_INIT_MAX_RETRY_TIMES 4
 static const uint32_t g_ifaceCoapCtxRetryBackoffList[IFACE_COAP_CTX_INIT_MAX_RETRY_TIMES] = { 10, 15, 25, 100 };
@@ -177,7 +181,7 @@ static void LocalIfaceCreateContextTimeout(void *arg)
 {
     struct LocalIface *iface = (struct LocalIface *)arg;
     DFINDER_LOGD(TAG, "iface %s create context for %u times", iface->ifname, iface->createCount);
-    iface->ctx = CoapServerInit(&iface->ip, (void *)iface);
+    iface->ctx = CoapServerInit(iface->af, &iface->addr, (void *)iface);
     if (iface->ctx != NULL) {
         DFINDER_LOGD(TAG, "iface %s create coap context success", iface->ifname);
         TimerDelete(iface->timer);
@@ -201,7 +205,7 @@ static inline bool NeedCreateSynchronously(uint8_t ifaceType)
     return ifaceType < IFACE_TYPE_P2P;
 }
 
-static int LocalIfaceInit(struct LocalIface *iface, const char *ifname, const struct in_addr *ip, const char *ipStr)
+static int LocalIfaceInit(struct LocalIface *iface, const char *ifname, const char *ipStr)
 {
     DFINDER_LOGI(TAG, "trying to bring up interface %s", ifname);
 
@@ -210,21 +214,20 @@ static int LocalIfaceInit(struct LocalIface *iface, const char *ifname, const st
         return NSTACKX_EFAILED;
     }
     if (strcpy_s(iface->ipStr, sizeof(iface->ipStr), ipStr) != EOK) {
-        DFINDER_LOGE(TAG, "copy ip string failed");
+        DFINDER_LOGE(TAG, "copy iface %s ip string failed", ifname);
         return NSTACKX_EFAILED;
     }
-    iface->type = GetIfaceType(ifname);
-    iface->ip.s_addr = ip->s_addr;
 
     if (NeedCreateSynchronously(iface->type)) {
-        iface->ctx = CoapServerInit(ip, (void *)iface);
+        iface->ctx = CoapServerInit(iface->af, &iface->addr, (void *)iface);
         if (iface->ctx == NULL) {
-            DFINDER_LOGE(TAG, "create coap context failed");
+            DFINDER_LOGE(TAG, "create coap context for iface %s failed", ifname);
             IncStatistics(STATS_CREATE_SERVER_FAILED);
             return NSTACKX_EFAILED;
         }
         iface->state = IFACE_STATE_READY;
         ListInsertTail(&g_localDevice.readyList[iface->type], &iface->node);
+        DFINDER_LOGI(TAG, "bring up interface %s success", ifname);
     } else {
         iface->timer = TimerStart(GetEpollFD(), g_ifaceCoapCtxRetryBackoffList[0],
             NSTACKX_FALSE, LocalIfaceCreateContextTimeout, iface);
@@ -240,16 +243,22 @@ static int LocalIfaceInit(struct LocalIface *iface, const char *ifname, const st
     return NSTACKX_EOK;
 }
 
-static struct LocalIface *CreateLocalIface(const char *ifname, const struct in_addr *ip, const char *ipStr)
+static struct LocalIface *CreateLocalIface(const char *ifname, const char *serviceData, uint8_t af,
+    const union InetAddr *addr, const char *ipStr)
 {
-    struct LocalIface *iface = calloc(1, sizeof(struct LocalIface));
+    struct LocalIface *iface = (struct LocalIface *)calloc(1, sizeof(struct LocalIface));
     if (iface == NULL) {
-        DFINDER_LOGE(TAG, "alloc falied");
+        DFINDER_LOGE(TAG, "calloc local iface fail");
         return NULL;
     }
 
-    if (LocalIfaceInit(iface, ifname, ip, ipStr) != NSTACKX_EOK) {
-        DFINDER_LOGE(TAG, "local iface init failed");
+    iface->type = GetIfaceType(ifname);
+    DFINDER_LOGI(TAG, "GetIfaceType type %hhu", iface->type);
+    iface->addr = *addr;
+    iface->af = af;
+    (void)memcpy_s(iface->serviceData, NSTACKX_MAX_SERVICE_DATA_LEN, serviceData, NSTACKX_MAX_SERVICE_DATA_LEN);
+    if (LocalIfaceInit(iface, ifname, ipStr) != NSTACKX_EOK) {
+        DFINDER_LOGE(TAG, "local iface %s init failed", ifname);
         free(iface);
         return NULL;
     }
@@ -275,13 +284,15 @@ void DestroyLocalIface(struct LocalIface *iface, bool moduleDeinit)
     free(iface);
 }
 
-static struct LocalIface *GetLocalIface(List *head, const char *ifname, const struct in_addr *ip)
+static struct LocalIface *GetLocalIface(List *head, const char *ifname, uint8_t af, const union InetAddr *addr)
 {
     List *pos = NULL;
     LIST_FOR_EACH(pos, head) {
         struct LocalIface *iface = (struct LocalIface *)pos;
-        DFINDER_LOGD(TAG, "local ifname: %s, ifname: %s", iface->ifname, ifname);
-        if (strcmp(iface->ifname, ifname) == 0 && (ip == NULL || ip->s_addr == iface->ip.s_addr)) {
+        if (iface->af != af || strcmp(iface->ifname, ifname) != 0) {
+            continue;
+        }
+        if (addr == NULL || InetEqual(af, addr, &iface->addr)) {
             return iface;
         }
     }
@@ -289,12 +300,12 @@ static struct LocalIface *GetLocalIface(List *head, const char *ifname, const st
     return NULL;
 }
 
-static struct LocalIface *GetActiveLocalIface(const char *ifname)
+static struct LocalIface *GetActiveLocalIface(uint8_t af, const char *ifname)
 {
     uint8_t type = GetIfaceType(ifname);
-    struct LocalIface *iface = GetLocalIface(&g_localDevice.readyList[type], ifname, NULL);
+    struct LocalIface *iface = GetLocalIface(&g_localDevice.readyList[type], ifname, af, NULL);
     if (iface == NULL) {
-        iface = GetLocalIface(&g_localDevice.creatingList, ifname, NULL);
+        iface = GetLocalIface(&g_localDevice.creatingList, ifname, af, NULL);
     }
 
     return iface;
@@ -308,6 +319,7 @@ static void AddToDestroyList(struct LocalIface *iface)
             DFINDER_LOGD(TAG, "iface %s start offline timer", iface->ifname);
         }
         LocalIfaceChangeState(iface, &g_localDevice.destroyList, IFACE_STATE_DESTROYING);
+        (void)memset_s(iface->serviceData, NSTACKX_MAX_SERVICE_DATA_LEN, 0, NSTACKX_MAX_SERVICE_DATA_LEN);
         ClockGetTime(CLOCK_MONOTONIC, &iface->updateTime);
         if (iface->timer != NULL) {
             (void)TimerSetTimeout(iface->timer, 0, NSTACKX_FALSE);
@@ -316,40 +328,42 @@ static void AddToDestroyList(struct LocalIface *iface)
     }
 }
 
-int AddLocalIface(const char *ifname, const struct in_addr *ip)
+int AddLocalIface(const char *ifname, const char *serviceData, uint8_t af, const union InetAddr *addr)
 {
-    struct LocalIface *iface = GetActiveLocalIface(ifname);
+    struct LocalIface *iface = GetActiveLocalIface(af, ifname);
     if (iface == NULL) {
-        iface = GetLocalIface(&g_localDevice.destroyList, ifname, ip);
+        iface = GetLocalIface(&g_localDevice.destroyList, ifname, af, addr);
         if (iface != NULL) {
-            DFINDER_LOGW(TAG, "iface %s is in destroying", ifname);
+            DFINDER_LOGI(TAG, "iface %s is in destroying, now make it in ready state", ifname);
+            (void)memcpy_s(iface->serviceData, NSTACKX_MAX_SERVICE_DATA_LEN,
+                serviceData, NSTACKX_MAX_SERVICE_DATA_LEN);
             LocalIfaceChangeState(iface, &g_localDevice.readyList[iface->type], IFACE_STATE_READY);
             return NSTACKX_EOK;
         }
     } else {
-        if (iface->ip.s_addr == ip->s_addr) {
-            DFINDER_LOGW(TAG, "iface %s already existed", ifname);
+        if (iface->af == af && InetEqual(af, &(iface->addr), addr)) {
+            DFINDER_LOGI(TAG, "iface %s already existed and in correct state", ifname);
+            (void)memcpy_s(iface->serviceData, NSTACKX_MAX_SERVICE_DATA_LEN,
+                serviceData, NSTACKX_MAX_SERVICE_DATA_LEN);
             return NSTACKX_EOK;
         }
-
         AddToDestroyList(iface);
     }
 
-    char ipStr[INET_ADDRSTRLEN] = {0};
-    if (inet_ntop(AF_INET, ip, ipStr, sizeof(ipStr)) == NULL) {
-        DFINDER_LOGE(TAG, "ip to string failed");
+    char ipStr[NSTACKX_MAX_IP_STRING_LEN] = {0};
+    if (inet_ntop(af, addr, ipStr, sizeof(ipStr)) == NULL) {
+        DFINDER_LOGE(TAG, "inet_ntop fail, errno: %d, desc: %s", errno, strerror(errno));
         return NSTACKX_EFAILED;
     }
-
-    iface = CreateLocalIface(ifname, ip, ipStr);
+    iface = CreateLocalIface(ifname, serviceData, af, addr, ipStr);
     return (iface == NULL) ? NSTACKX_EFAILED : NSTACKX_EOK;
 }
 
-void RemoveLocalIface(const char *ifname)
+void RemoveLocalIface(uint8_t af, const char *ifname)
 {
-    struct LocalIface *iface = GetActiveLocalIface(ifname);
+    struct LocalIface *iface = GetActiveLocalIface(af, ifname);
     if (iface == NULL) {
-        DFINDER_LOGW(TAG, "iface %s not found when deleting iface", ifname);
+        DFINDER_LOGI(TAG, "af %hhu iface %s not found when deleting iface", af, ifname);
         return;
     }
 
@@ -367,19 +381,75 @@ static void RemoveAllLocalIfaceOfList(List *list)
 
 static void RemoveAllLocalIface(void)
 {
-    uint8_t i;
-    for (i = IFACE_TYPE_ETH; i < IFACE_TYPE_MAX; i++) {
+    for (uint8_t i = IFACE_TYPE_ETH; i < IFACE_TYPE_MAX; i++) {
         RemoveAllLocalIfaceOfList(&g_localDevice.readyList[i]);
     }
 
     RemoveAllLocalIfaceOfList(&g_localDevice.creatingList);
 }
 
-static inline void RemoveSpecifiedLocalIface(const NSTACKX_InterfaceInfo *ifInfo, uint32_t ifNums)
+static void DestroyAllLocalIfaceOfList(List *list, uint8_t af)
+{
+    List *pos = NULL;
+    List *tmp = NULL;
+    LIST_FOR_EACH_SAFE(pos, tmp, list) {
+        struct LocalIface *iface = (struct LocalIface *)pos;
+        if (iface->af != af) {
+            continue;
+        }
+        DestroyLocalIface(iface, true);
+    }
+}
+
+static void DestroyAllLocalIface(uint8_t af)
+{
+    for (uint8_t i = IFACE_TYPE_ETH; i < IFACE_TYPE_MAX; i++) {
+        DestroyAllLocalIfaceOfList(&g_localDevice.readyList[i], af);
+    }
+
+    DestroyAllLocalIfaceOfList(&g_localDevice.creatingList, af);
+    DestroyAllLocalIfaceOfList(&g_localDevice.destroyList, af);
+}
+
+static bool IsDestroyIfaceByAddr(const NSTACKX_InterfaceInfo *ifInfo, uint32_t ifNums)
+{
+    if (ifNums != DEFAULT_IFACE_NUM) {
+        DFINDER_LOGW(TAG, "ifnums is %u not match, so no need destroy iface", ifNums);
+        return false;
+    }
+    union InetAddr addr;
+    uint8_t af = InetGetAfType(ifInfo[0].networkIpAddr, &addr);
+    if (af == AF_ERROR) {
+        DFINDER_LOGE(TAG, "inet_pton fail");
+        return false;
+    }
+    if (InetEqualZero(af, &addr) || InetEqualLoop(af, ifInfo[0].networkIpAddr)) {
+        DFINDER_LOGI(TAG, "destroy ip with any with af %hhu th nic %s", af, ifInfo[0].networkName);
+        DestroyAllLocalIface(af);
+        return true;
+    }
+    return false;
+}
+
+static void RemoveSpecifiedLocalIface(const NSTACKX_InterfaceInfo *ifInfo, uint32_t ifNums)
 {
     uint32_t i;
     for (i = 0; i < ifNums; ++i) {
-        RemoveLocalIface(ifInfo[i].networkName);
+        // af is always AF_INET/AF_INET6
+        union InetAddr addr;
+        uint8_t af = InetGetAfType(ifInfo[i].networkIpAddr, &addr);
+        struct LocalIface *iface = GetActiveLocalIface(af, ifInfo[i].networkName);
+        if (iface == NULL) {
+            DFINDER_LOGI(TAG, "af %hhu iface %s not found when deleting iface", af, ifInfo[i].networkName);
+            continue;
+        }
+
+        if (af == AF_INET) {
+            AddToDestroyList(iface);
+        } else {
+            // USB(ipv6) use old iface, send coap unicast failed(network unreachable), must destroy iface
+            DestroyLocalIface(iface, true);
+        }
     }
 }
 
@@ -388,23 +458,24 @@ static int AddLocalIfaceIpChanged(const NSTACKX_InterfaceInfo *ifInfo, uint32_t 
     uint8_t ifaceType = IFACE_TYPE_MAX;
     uint32_t i;
     for (i = 0; i < ifNums; ++i) {
-        if (ifInfo->networkName[0] == '\0' || ifInfo->networkIpAddr[0] == '\0') {
+        if (ifInfo[i].networkName[0] == '\0' || ifInfo[i].networkIpAddr[0] == '\0') {
             DFINDER_LOGI(TAG, "skip empty network name or ip addr");
             continue;
         }
 
-        struct in_addr ip;
-        if (inet_pton(AF_INET, ifInfo[i].networkIpAddr, &ip) != 1) {
-            DFINDER_LOGE(TAG, "invalid ip addr of iface %u", ifInfo[i].networkName);
+        union InetAddr addr;
+        uint8_t af = InetGetAfType(ifInfo[i].networkIpAddr, &addr);
+        if (af == AF_ERROR) {
+            DFINDER_LOGE(TAG, "inet_pton fail for %u th nic %s, errno: %d, desc: %s",
+                i, ifInfo[i].networkName, errno, strerror(errno));
             return NSTACKX_EFAILED;
         }
-
-        if (ip.s_addr == 0) {
-            DFINDER_LOGI(TAG, "skip ip with any");
+        if (InetEqualZero(af, &addr) || InetEqualLoop(af, ifInfo[i].networkIpAddr)) {
+            DFINDER_LOGI(TAG, "skip ip with any with %u af %hhu th nic %s", i, af, ifInfo[i].networkName);
             continue;
         }
 
-        if (AddLocalIface(ifInfo[i].networkName, &ip) != NSTACKX_EOK) {
+        if (AddLocalIface(ifInfo[i].networkName, ifInfo[i].serviceData, af, &addr) != NSTACKX_EOK) {
             DFINDER_LOGE(TAG, "create local iface %s failed", ifInfo[i].networkName);
             return NSTACKX_EFAILED;
         }
@@ -432,7 +503,7 @@ static int CopyDeviceInfoV2(const NSTACKX_LocalDeviceInfoV2 *devInfo)
     }
 
     if (devInfo->name[0] == '\0') {
-        DFINDER_LOGW(TAG, "Invalid device name. Will use default name");
+        DFINDER_LOGW(TAG, "try to register invalid device name, will use default: %s", NSTACKX_DEFAULT_DEVICE_NAME);
         (void)strcpy_s(g_localDevice.deviceInfo.deviceName,
             sizeof(g_localDevice.deviceInfo.deviceName), NSTACKX_DEFAULT_DEVICE_NAME);
     } else {
@@ -457,6 +528,12 @@ int RegisterLocalDeviceV2(const NSTACKX_LocalDeviceInfoV2 *devInfo, int register
     if (PthreadMutexLock(&g_deviceInfoLock) != 0) {
         DFINDER_LOGE(TAG, "failed to lock");
         return NSTACKX_EFAILED;
+    }
+    if (IsDestroyIfaceByAddr(devInfo->localIfInfo, devInfo->ifNums)) {
+        if (PthreadMutexUnlock(&g_deviceInfoLock) != 0) {
+            DFINDER_LOGE(TAG, "failed to unlock");
+        }
+        return NSTACKX_EOK;
     }
     if (registerType == REGISTER_TYPE_UPDATE_ALL) {
         RemoveAllLocalIface();
@@ -562,6 +639,75 @@ int32_t SetLocalDeviceServiceData(const char *serviceData)
         return NSTACKX_EFAILED;
     }
     return NSTACKX_EOK;
+}
+
+static struct LocalIface *GetLocalIfaceByIp(List *head, uint8_t af, const char *ip, uint32_t len)
+{
+    List *pos = NULL;
+    LIST_FOR_EACH(pos, head) {
+        struct LocalIface *iface = (struct LocalIface *)pos;
+        if (iface->af != af || len != strlen(iface->ipStr)) {
+            continue;
+        }
+
+        if (strcmp(iface->ipStr, ip) == 0) {
+            return iface;
+        }
+    }
+
+    return NULL;
+}
+
+static int32_t UpdateLocalDeviceServiceDataV2(uint8_t af, const struct NSTACKX_ServiceData *data)
+{
+    uint8_t i;
+    struct LocalIface *iface = NULL;
+    const char *ip = data->ip;
+    uint32_t len = (uint32_t)strlen(data->ip);
+
+    iface = GetLocalIfaceByIp(&g_localDevice.creatingList, af, ip, len);
+    if (iface != NULL) {
+        (void)memcpy_s(iface->serviceData, NSTACKX_MAX_SERVICE_DATA_LEN,
+                       data->serviceData, NSTACKX_MAX_SERVICE_DATA_LEN);
+        DFINDER_LOGI(TAG, "set service data sucess");
+        return NSTACKX_EOK;
+    }
+
+    for (i = 0; i < IFACE_TYPE_MAX; i++) {
+        iface = GetLocalIfaceByIp(&g_localDevice.readyList[i], af, ip, len);
+        if (iface != NULL) {
+            (void)memcpy_s(iface->serviceData, NSTACKX_MAX_SERVICE_DATA_LEN,
+                           data->serviceData, NSTACKX_MAX_SERVICE_DATA_LEN);
+            DFINDER_LOGI(TAG, "set service data sucess");
+            return NSTACKX_EOK;
+        }
+    }
+
+    return NSTACKX_EFAILED;
+}
+
+int32_t SetLocalDeviceServiceDataV2(const struct NSTACKX_ServiceData *param, uint32_t cnt)
+{
+    int32_t ret = NSTACKX_EFAILED;
+    uint32_t i;
+    if (PthreadMutexLock(&g_serviceDataLock) != 0) {
+        DFINDER_LOGE(TAG, "failed to lock");
+        return NSTACKX_EFAILED;
+    }
+
+    for (i = 0; i < cnt; i++) {
+        union InetAddr addr;
+        uint8_t af = InetGetAfType(param[i].ip, &addr);
+        if (UpdateLocalDeviceServiceDataV2(af, &(param[i])) == NSTACKX_EOK) {
+            DFINDER_LOGI(TAG, "update local device serviceData by param[%u]", i);
+            ret = NSTACKX_EOK;
+        }
+    }
+    if (PthreadMutexUnlock(&g_serviceDataLock) != 0) {
+        DFINDER_LOGE(TAG, "failed to unlock");
+        return NSTACKX_EFAILED;
+    }
+    return ret;
 }
 
 void SetLocalDeviceBusinessType(uint8_t businessType)
@@ -674,14 +820,17 @@ void DetectLocalIface(void *arg)
             continue;
         }
 
-        struct in_addr *ip = &((struct sockaddr_in *)&req[i].ifr_addr)->sin_addr;
-        if (req[i].ifr_addr.sa_family != AF_INET || ip->s_addr == 0) {
-            DFINDER_LOGD(TAG, "iface %s is not ipv4 or ip is any", req[i].ifr_name);
+        union InetAddr addr;
+        addr.in.s_addr = (((struct sockaddr_in *)&req[i].ifr_addr)->sin_addr).s_addr;
+        if (req[i].ifr_addr.sa_family != AF_INET || addr.in.s_addr == 0) {
+            DFINDER_LOGI(TAG, "iface %s is not ipv4 or ip is any", req[i].ifr_name);
             continue;
         }
 
         DFINDER_LOGI(TAG, "try to add new iface %s", req[i].ifr_name);
-        (void)AddLocalIface(req[i].ifr_name, ip);
+        char serviceData[NSTACKX_MAX_SERVICE_DATA_LEN];
+        (void)memset_s(serviceData, NSTACKX_MAX_SERVICE_DATA_LEN, 0, NSTACKX_MAX_SERVICE_DATA_LEN);
+        (void)AddLocalIface(req[i].ifr_name, serviceData, AF_INET, &addr);
     }
     (void)close(fd);
 
@@ -696,7 +845,17 @@ int GetBroadcastIp(const struct LocalIface *iface, char *ipStr, size_t ipStrLen)
 #ifdef _WIN32
     return GetIfBroadcastAddr(&iface->ip, ipStr, ipStrLen);
 #else
-    return GetIfBroadcastIp(iface->ifname, ipStr, ipStrLen);
+    if (iface->af == AF_INET) {
+        return GetIfBroadcastIp(iface->ifname, ipStr, ipStrLen);
+    }
+
+    // ipv6 not support broadcast, only use multicast
+    if (strcpy_s(ipStr, ipStrLen, NSTACKX_IPV6_MULTICAST_ADDR) != EOK) {
+        DFINDER_LOGE(TAG, "strcpy_s failed");
+        return NSTACKX_EFAILED;
+    }
+
+    return NSTACKX_EOK;
 #endif
 }
 
@@ -715,14 +874,19 @@ const char *GetLocalDeviceNetworkName(void)
     return g_localDevice.deviceInfo.networkName;
 }
 
-const struct in_addr *GetLocalIfaceIp(const struct LocalIface *iface)
-{
-    return &iface->ip;
-}
-
 const char *GetLocalIfaceIpStr(const struct LocalIface *iface)
 {
     return iface->ipStr;
+}
+
+const char *GetLocalIfaceServiceData(const struct LocalIface *iface)
+{
+    return iface->serviceData;
+}
+
+uint8_t GetLocalIfaceAf(const struct LocalIface *iface)
+{
+    return iface->af;
 }
 
 const char *GetLocalIfaceName(const struct LocalIface *iface)
@@ -730,14 +894,14 @@ const char *GetLocalIfaceName(const struct LocalIface *iface)
     return iface->ifname;
 }
 
-CoapCtxType *LocalIfaceGetCoapCtx(const char *ifname)
+CoapCtxType *LocalIfaceGetCoapCtx(uint8_t af, const char *ifname)
 {
     int i;
     for (i = 0; i < IFACE_TYPE_MAX; i++) {
         List *pos = NULL;
         LIST_FOR_EACH(pos, &g_localDevice.readyList[i]) {
             struct LocalIface *iface = (struct LocalIface *)pos;
-            if (strcmp(iface->ifname, ifname) != 0) {
+            if (af != iface->af || strcmp(iface->ifname, ifname) != 0) {
                 continue;
             }
 
@@ -774,7 +938,8 @@ static inline bool IfaceTypeIsMatch(uint8_t ifaceType, uint8_t serverType)
     return serverType == INVALID_TYPE ||
         (serverType == SERVER_TYPE_WLANORETH && (ifaceType == IFACE_TYPE_ETH || ifaceType == IFACE_TYPE_WLAN)) ||
         (serverType == SERVER_TYPE_P2P && ifaceType == IFACE_TYPE_P2P) ||
-        (serverType == SERVER_TYPE_USB && ifaceType == IFACE_TYPE_USB);
+        (serverType == SERVER_TYPE_USB && ifaceType == IFACE_TYPE_USB) ||
+        (serverType == IFACE_TYPE_USB_SCALE && ifaceType == IFACE_TYPE_USB_SCALE);
 }
 
 CoapCtxType *LocalIfaceGetCoapCtxByRemoteIp(const struct in_addr *remoteIp, uint8_t serverType)
@@ -801,7 +966,7 @@ CoapCtxType *LocalIfaceGetCoapCtxByRemoteIp(const struct in_addr *remoteIp, uint
 
     uint8_t ifaceType = GetIfaceType(req.ifr_ifrn.ifrn_name);
     DFINDER_LOGD(TAG, "ifaceType: %hhu", ifaceType);
-    iface = GetLocalIface(&g_localDevice.readyList[ifaceType], req.ifr_ifrn.ifrn_name, NULL);
+    iface = GetLocalIface(&g_localDevice.readyList[ifaceType], req.ifr_ifrn.ifrn_name, AF_INET, NULL);
 #endif
     if (iface == NULL) {
         DFINDER_LOGE(TAG, "can not find iface");
@@ -815,12 +980,30 @@ CoapCtxType *LocalIfaceGetCoapCtxByRemoteIp(const struct in_addr *remoteIp, uint
 
     return iface->ctx;
 }
+
+#else
+const struct in_addr *GetLocalIfaceIp(const struct LocalIface *iface)
+{
+    return &iface->in;
+}
 #endif
 
 #ifdef NSTACKX_DFINDER_HIDUMP
+
+static inline struct DumpIfaceInfo *LocalSetDumpIfaceInfo(struct DumpIfaceInfo *info, const char *ifname, uint8_t state,
+    uint8_t af, union InetAddr *addr)
+{
+    info->ifname = ifname;
+    info->state = state;
+    info->af = af;
+    info->addr = addr;
+    return info;
+}
+
 int LocalIfaceDump(char *buf, size_t size)
 {
     List *pos = NULL;
+    struct DumpIfaceInfo info;
     struct LocalIface *iface = NULL;
     int ret;
     size_t index = 0;
@@ -828,7 +1011,9 @@ int LocalIfaceDump(char *buf, size_t size)
     for (i = 0; i < IFACE_TYPE_MAX; i++) {
         LIST_FOR_EACH(pos, &g_localDevice.readyList[i]) {
             iface = (struct LocalIface *)pos;
-            ret = DFinderDumpIface(buf + index, size - index, iface->ifname, &iface->ip, iface->state);
+
+            ret = DFinderDumpIface(LocalSetDumpIfaceInfo(&info, iface->ifname, iface->state, iface->af, &iface->addr),
+                buf + index, size - index);
             if (ret < 0 || (uint32_t)ret > size - index) {
                 return NSTACKX_EFAILED;
             }
@@ -839,7 +1024,8 @@ int LocalIfaceDump(char *buf, size_t size)
 
     LIST_FOR_EACH(pos, &g_localDevice.creatingList) {
         iface = (struct LocalIface *)pos;
-        ret = DFinderDumpIface(buf + index, size - index, iface->ifname, &iface->ip, iface->state);
+        ret = DFinderDumpIface(LocalSetDumpIfaceInfo(&info, iface->ifname, iface->state, iface->af, &iface->addr),
+            buf + index, size - index);
         if (ret < 0 || (uint32_t)ret > size - index) {
             return NSTACKX_EFAILED;
         }
@@ -849,7 +1035,8 @@ int LocalIfaceDump(char *buf, size_t size)
 
     LIST_FOR_EACH(pos, &g_localDevice.destroyList) {
         iface = (struct LocalIface *)pos;
-        ret = DFinderDumpIface(buf + index, size - index, iface->ifname, &iface->ip, iface->state);
+        ret = DFinderDumpIface(LocalSetDumpIfaceInfo(&info, iface->ifname, iface->state, iface->af, &iface->addr),
+            buf + index, size - index);
         if (ret < 0 || (uint32_t)ret > size - index) {
             return NSTACKX_EFAILED;
         }

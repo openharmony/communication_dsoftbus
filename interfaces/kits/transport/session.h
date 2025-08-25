@@ -58,10 +58,12 @@ extern "C" {
  * @version 1.0
  */
 typedef enum {
-    TYPE_MESSAGE = 1,  /**< Message */
-    TYPE_BYTES,        /**< Bytes */
-    TYPE_FILE,         /**< File */
-    TYPE_STREAM,       /**< Stream */
+    TYPE_MESSAGE = 1,         /**< Message */
+    TYPE_BYTES,               /**< Bytes */
+    TYPE_FILE,                /**< File */
+    TYPE_STREAM,              /**< Stream */
+    TYPE_D2D_MESSAGE = 10,    /**< D2D Message */
+    TYPE_D2D_VOICE,           /**< D2D Voice */
     TYPE_BUTT,
 } SessionType;
 
@@ -96,7 +98,9 @@ typedef enum  {
     LINK_TYPE_COC = 8,
     LINK_TYPE_COC_DIRECT = 9,
     LINK_TYPE_HML = 10,
-    LINK_TYPE_MAX = 10,
+    LINK_TYPE_SLE = 11,
+    LINK_TYPE_SLE_DIRECT = 12,
+    LINK_TYPE_MAX = 12,
 } LinkType;
 
 /**

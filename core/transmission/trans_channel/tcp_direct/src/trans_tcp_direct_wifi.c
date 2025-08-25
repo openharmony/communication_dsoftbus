@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2022-2024 Huawei Device Co., Ltd.
+ * Copyright (c) 2022-2025 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -18,6 +18,7 @@
 #include <securec.h>
 
 #include "auth_interface.h"
+#include "bus_center_manager.h"
 #include "lnn_network_manager.h"
 #include "legacy/softbus_adapter_hitrace.h"
 #include "softbus_adapter_mem.h"
@@ -29,7 +30,7 @@
 #include "trans_tcp_direct_p2p.h"
 #include "wifi_direct_manager.h"
 
-#define ID_OFFSET (1)
+#define ID_OFFSET (0xABAB0000)
 
 static void FreeFastTransData(AppInfo *appInfo)
 {
@@ -144,7 +145,16 @@ int32_t OpenTcpDirectChannel(const AppInfo *appInfo, const ConnectOption *connIn
         TRANS_LOGE(TRANS_CTRL, "copy appinfo fast trans data fail");
         return ret;
     }
-    AuthGetLatestIdByUuid(newConn->appInfo.peerData.deviceId, AUTH_LINK_TYPE_WIFI, false, &newConn->authHandle);
+    if (module == DIRECT_CHANNEL_SERVER_USB) {
+        AuthGetLatestIdByUuid(newConn->appInfo.peerData.deviceId, AUTH_LINK_TYPE_USB, false, &newConn->authHandle);
+        if (LnnGetLocalStrInfoByIfnameIdx(STRING_KEY_IP6_WITH_IF, newConn->appInfo.myData.addr,
+            sizeof(newConn->appInfo.myData.addr), USB_IF) != SOFTBUS_OK) {
+            TRANS_LOGE(TRANS_CTRL, "get local ip failed");
+            return SOFTBUS_NETWORK_GET_NODE_INFO_ERR;
+        }
+    } else {
+        AuthGetLatestIdByUuid(newConn->appInfo.peerData.deviceId, AUTH_LINK_TYPE_WIFI, false, &newConn->authHandle);
+    }
     if ((newConn->authHandle.authId == AUTH_INVALID_ID) && (connInfo->type == CONNECT_P2P_REUSE)) {
         AuthGetLatestIdByUuid(newConn->appInfo.peerData.deviceId, AUTH_LINK_TYPE_BR, false, &newConn->authHandle);
     }
@@ -167,6 +177,7 @@ int32_t OpenTcpDirectChannel(const AppInfo *appInfo, const ConnectOption *connIn
 
     ret = AddTcpConnAndSessionInfo(newchannelId, fd, newConn, module);
     if (ret != SOFTBUS_OK) {
+        ConnShutdownSocket(fd);
         return ret;
     }
     *channelId = newchannelId;

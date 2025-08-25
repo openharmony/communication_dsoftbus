@@ -16,40 +16,14 @@
 #ifndef LNN_LOCAL_NET_LEDGER_H
 #define LNN_LOCAL_NET_LEDGER_H
 
-#include <pthread.h>
-#include <stdint.h>
-
-#include "bus_center_info_key.h"
-#include "lnn_device_info.h"
 #include "lnn_node_info.h"
+#include "lnn_local_net_ledger_struct.h"
 
 #ifdef __cplusplus
 extern "C" {
 #endif
 
-typedef enum {
-    LL_INIT_UNKNOWN = 0,
-    LL_INIT_FAIL,
-    LL_INIT_SUCCESS,
-} LocalLedgerStatus;
-
-typedef struct {
-    InfoKey key;
-    int32_t maxLen;
-    int32_t (*getInfo)(void *info, uint32_t len);
-    int32_t (*setInfo)(const void *info);
-} LocalLedgerKey;
-
-typedef enum {
-    UPDATE_ACCOUNT_LONG = 1,
-    UPDATE_DEV_NAME = 2,
-    UPDATE_DEV_UNIFIED_NAME = 4,
-    UPDATE_DEV_UNIFIED_DEFAULT_NAME = 8,
-    UPDATE_DEV_NICK_NAME = 16,
-    UPDATE_NETWORKID = 32,
-    UPDATE_CONCURRENT_AUTH = 64,
-    UPDATE_CIPHERKEY = 128,
-} StateVersionChangeReason;
+#define MAX_STATE_VERSION 0xFF
 
 int32_t LnnInitLocalLedger(void);
 int32_t LnnInitLocalLedgerDelay(void);
@@ -59,9 +33,13 @@ const NodeInfo *LnnGetLocalNodeInfo(void);
 int32_t LnnGetLocalNodeInfoSafe(NodeInfo *info);
 int32_t LnnUpdateLocalNetworkId(const void *id);
 int32_t LnnUpdateLocalNetworkIdTime(int64_t time);
+int32_t LnnUpdateLocalHuksKeyTime(uint64_t huksKeyTime);
 int32_t LnnUpdateLocalScreenStatus(bool isScreenOn);
 void LnnUpdateStateVersion(StateVersionChangeReason reason);
 int32_t LnnUpdateLocalDeviceName(const DeviceBasicInfo *info);
+int32_t LnnGenBroadcastCipherInfo(void);
+int32_t HandleDeviceInfoIfUdidChanged(void);
+int32_t LnnUpdateSleCapacityAndVersion(int32_t slecap);
 
 #ifdef __cplusplus
 }

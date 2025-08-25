@@ -24,6 +24,17 @@
 
 #define CODE_OPEN_AUTH_MSG_CHANNEL 4
 
+static int32_t PackUsbLinkTypeMsg(cJSON *msg, const AppInfo *appInfo)
+{
+    if (appInfo->linkType == LANE_USB) {
+        if (!AddNumberToJsonObject(msg, "LANE_LINK_TYPE", appInfo->linkType)) {
+            TRANS_LOGE(TRANS_SVC, "add usb linkType failed");
+            return SOFTBUS_CREATE_JSON_ERR;
+        }
+    }
+    return SOFTBUS_OK;
+}
+
 int32_t TransAuthChannelMsgPack(cJSON *msg, const AppInfo *appInfo)
 {
     if (appInfo == NULL || msg == NULL) {
@@ -49,15 +60,16 @@ int32_t TransAuthChannelMsgPack(cJSON *msg, const AppInfo *appInfo)
         TRANS_LOGE(TRANS_SVC, "failed");
         return SOFTBUS_CREATE_JSON_ERR;
     }
+    char compatibleAddr[IP_LEN] = { 0 };
     if (appInfo->linkType == LANE_HML_RAW) {
         if (!AddNumberToJsonObject(msg, "LANE_LINK_TYPE", appInfo->linkType) ||
-            !AddStringToJsonObject(msg, "LOCAL_HML_RAW_IP", appInfo->myData.addr) ||
-            !AddStringToJsonObject(msg, "PEER_HML_RAW_IP", appInfo->peerData.addr)) {
+            !AddStringToJsonObject(msg, "LOCAL_HML_RAW_IP", compatibleAddr) ||
+            !AddStringToJsonObject(msg, "PEER_HML_RAW_IP", compatibleAddr)) {
             TRANS_LOGE(TRANS_SVC, "add linkType and ip failed");
             return SOFTBUS_CREATE_JSON_ERR;
         }
     }
-    return SOFTBUS_OK;
+    return PackUsbLinkTypeMsg(msg, appInfo);
 }
 
 int32_t TransAuthChannelMsgUnpack(const char *msg, AppInfo *appInfo, int32_t len)
@@ -98,14 +110,9 @@ int32_t TransAuthChannelMsgUnpack(const char *msg, AppInfo *appInfo, int32_t len
     if (!GetJsonObjectNumberItem(obj, "API_VERSION", (int32_t *)&appInfo->myData.apiVersion)) {
         TRANS_LOGW(TRANS_SVC, "apiVersion is null.");
     }
-    if (GetJsonObjectNumberItem(obj, "LANE_LINK_TYPE", (int32_t *)&(appInfo->linkType))
-        && (appInfo->linkType == LANE_HML_RAW)) {
-        if (!GetJsonObjectStringItem(obj, "LOCAL_HML_RAW_IP", appInfo->peerData.addr, IP_LEN) ||
-            !GetJsonObjectStringItem(obj, "PEER_HML_RAW_IP", appInfo->myData.addr, IP_LEN)) {
-            TRANS_LOGE(TRANS_SVC, "get linkType and ip failed");
-            cJSON_Delete(obj);
-            return SOFTBUS_PARSE_JSON_ERR;
-        }
+    if (!GetJsonObjectNumberItem(obj, "LANE_LINK_TYPE", (int32_t *)&(appInfo->linkType)) ||
+        (appInfo->linkType != LANE_HML_RAW)) {
+        TRANS_LOGW(TRANS_SVC, "get linkType failed");
     }
     cJSON_Delete(obj);
     return SOFTBUS_OK;

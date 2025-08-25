@@ -17,33 +17,12 @@
 #define LNN_TRANS_LANE_H
 
 #include "lnn_lane_assign.h"
-#include "lnn_lane_link.h"
 #include "lnn_lane_listener.h"
+#include "lnn_trans_lane_struct.h"
 
 #ifdef __cplusplus
 extern "C" {
 #endif
-
-typedef struct {
-    bool isSupportIpv6;
-    uint32_t actionAddr;
-    TransOption info;
-    ILaneListener listener;
-} ExtraReqInfo;
-
-typedef struct {
-    bool isWithQos;
-    bool isCanceled;
-    bool isNotified;
-    bool notifyFree;
-    bool hasNotifiedFree;
-    uint32_t laneReqId;
-    LaneAllocInfo allocInfo;
-    uint64_t laneId;
-    ListNode node;
-    LaneAllocListener listener;
-    ExtraReqInfo extraInfo;
-} TransReqInfo;
 
 LaneInterface *TransLaneGetInstance(void);
 int32_t GetTransReqInfoByLaneReqId(uint32_t laneReqId, TransReqInfo *reqInfo);
@@ -51,11 +30,15 @@ int32_t PostDelayDestroyMessage(uint32_t laneReqId, uint64_t laneId, uint64_t de
 int32_t PostDetectTimeoutMessage(uint32_t detectId, uint64_t delayMillis);
 void RemoveDetectTimeoutMessage(uint32_t detectId);
 int32_t PostLaneStateChangeMessage(LaneState state, const char *peerUdid, const LaneLinkInfo *laneLinkInfo);
+int32_t PostNotifyFreeLaneResult(uint32_t laneReqId, int32_t errCode, uint64_t delayMillis);
 void RemoveDelayDestroyMessage(uint64_t laneId);
 void DelLogicAndLaneRelationship(uint64_t laneId);
 int32_t UpdateReqListLaneId(uint64_t oldLaneId, uint64_t newLaneId);
-void NotifyFreeLaneResult(uint32_t laneReqId, int32_t errCode);
+int32_t UpdateNotifyInfoBylaneReqId(uint32_t laneReqId, bool isNotifyFree);
 int32_t HandleLaneQosChange(const LaneLinkInfo *laneLinkInfo);
+int32_t UpdateFreeLaneStatus(uint32_t laneReqId);
+int32_t DeleteRequestNode(uint32_t laneReqId);
+bool CheckVirtualLinkByLaneReqId(uint32_t laneReqId);
 
 #ifdef __cplusplus
 }

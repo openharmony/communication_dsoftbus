@@ -16,13 +16,6 @@
 #ifndef VTP_INSTANCE_H
 #define VTP_INSTANCE_H
 
-#include <cstddef>
-#include <map>
-#include <mutex>
-#include <string>
-#include <utility>
-#include <vector>
-
 #include "fillpinc.h"
 #include "i_stream_socket.h"
 

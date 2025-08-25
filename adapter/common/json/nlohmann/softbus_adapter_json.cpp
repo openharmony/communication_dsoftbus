@@ -15,8 +15,6 @@
 
 #include "softbus_adapter_json.h"
 
-#include <vector>
-
 #include "comm_log.h"
 #include "nlohmann/json.hpp"
 #include "securec.h"
@@ -144,7 +142,7 @@ bool JSON_GetBoolFromOject(const JsonObj *obj, const char *key, bool *value)
     }
     nlohmann::json item = (*json)[key];
     if (!item.is_boolean()) {
-        COMM_LOGE(COMM_ADAPTER, "Cannot find or invalid key. key=%{public}s", key);
+        COMM_LOGW(COMM_ADAPTER, "Cannot find or invalid key. key=%{public}s", key);
         return false;
     }
     *value = item.get<bool>();
@@ -181,7 +179,7 @@ static bool JSON_GetIntegerFromObject(const JsonObj *obj, const char *key, Integ
     }
     nlohmann::json item = (*json)[key];
     if (!item.is_number()) {
-        COMM_LOGE(COMM_ADAPTER, "Cannot find or invalid key. key=%{public}s", key);
+        COMM_LOGW(COMM_ADAPTER, "Cannot find or invalid key. key=%{public}s", key);
         return false;
     }
     value = item.get<Integer>();
@@ -245,7 +243,7 @@ bool JSON_AddStringToObject(JsonObj *obj, const char *key, const char *value)
     return true;
 }
 
-bool JSON_GetStringFromOject(const JsonObj *obj, const char *key, char *value, uint32_t size)
+bool JSON_GetStringFromObject(const JsonObj *obj, const char *key, char *value, uint32_t size)
 {
     if (obj == nullptr || key == nullptr || value == nullptr) {
         COMM_LOGE(COMM_ADAPTER, "invalid param");
@@ -258,7 +256,7 @@ bool JSON_GetStringFromOject(const JsonObj *obj, const char *key, char *value, u
     }
     nlohmann::json item = (*json)[key];
     if (!item.is_string()) {
-        COMM_LOGD(COMM_ADAPTER, "cannot find or invalid key. key=%{public}s", key);
+        COMM_LOGW(COMM_ADAPTER, "cannot find or invalid key. key=%{public}s", key);
         return false;
     }
     std::string valueString = item.get<std::string>();
@@ -302,12 +300,18 @@ bool JSON_GetStringArrayFromOject(const JsonObj *obj, const char *key, char **va
     }
     nlohmann::json item = (*json)[key];
     if (!item.is_array()) {
-        COMM_LOGE(COMM_ADAPTER, "cannot find or invalid key. key=%{public}s", key);
+        COMM_LOGW(COMM_ADAPTER, "cannot find or invalid key. key=%{public}s", key);
         return false;
     }
     if ((unsigned long)(*len) < (unsigned long)item.size()) {
         COMM_LOGE(COMM_ADAPTER, "item size invalid, size=%{public}lu.", (unsigned long)item.size());
         return false;
+    }
+    for (nlohmann::json::iterator it = item.begin(); it != item.end(); ++it) {
+        if (!it.value().is_string()) {
+            COMM_LOGE(COMM_ADAPTER, "invalid value");
+            return false;
+        }
     }
     int32_t i = 0;
     for (nlohmann::json::iterator it = item.begin(); it != item.end(); ++it) {

@@ -16,29 +16,14 @@
 #ifndef SOFTBUS_CONN_BLE_CLIENT_H
 #define SOFTBUS_CONN_BLE_CLIENT_H
 
-#include "message_handler.h"
 #include "softbus_conn_ble_connection.h"
 #include "softbus_conn_interface.h"
 #include "softbus_error_code.h"
-
-/* In the fastest connection mode, the underlying connection timeout and notifications is set to 3500 milliseconds */
-#define BLE_FAST_CONNECT_TIMEOUT 3500
+#include "softbus_conn_ble_client_struct.h"
 
 #ifdef __cplusplus
 extern "C" {
 #endif
-
-enum RetrySearchServiceReason {
-    BLE_CLIENT_REGISTER_NOTIFICATION_ERR,
-    BLE_CLIENT_REGISTER_NOTIFICATION_FAIL,
-    BLE_CLIENT_SEARCH_SERVICE_ERR,
-    BLE_CLIENT_GET_SERVICE_ERR,
-};
-
-typedef struct {
-    int32_t underlayerHandle;
-    int32_t status;
-} CommonStatusContext;
 
 int32_t ConnGattClientConnect(ConnBleConnection *connection);
 int32_t ConnGattClientDisconnect(ConnBleConnection *connection, bool grace, bool refreshGatt);

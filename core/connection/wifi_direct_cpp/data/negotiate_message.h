@@ -17,12 +17,7 @@
 
 #include <map>
 #include <set>
-#include "info_container.h"
-#include "ipv4_info.h"
 #include "interface_info.h"
-#include "link_info.h"
-
-#include "wifi_direct_types.h"
 
 namespace OHOS::SoftBus {
 enum class LegacyCommandType {
@@ -80,12 +75,17 @@ enum class NegotiateMessageType {
     CMD_DETECT_LINK_REQ = 57,
     CMD_DETECT_LINK_RSP = 58,
     CMD_FORCE_DISCONNECT_REQ = 59,
+    CMD_REFRESH_AUTH_HANDLE = 60,
+    CMD_DBAC_SYNC_DATA = 61,
 
     CMD_V3_REQ = 100,
     CMD_V3_RSP = 101,
     CMD_V3_CUSTOM_PORT_REQ = 102,
     CMD_V3_CUSTOM_PORT_RSP = 103,
     CMD_ERROR_NOTIFICATION = 104,
+    CMD_NEGOTIATE_POWER_MODE_REQ = 105,
+    CMD_NEGOTIATE_POWER_MODE_RESP = 106,
+    CMD_LOW_POWER_SWITCH_HIGH_POWER = 107,
 };
 
 enum class NegotiateMessageKey {

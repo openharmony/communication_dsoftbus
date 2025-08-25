@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2025 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -16,10 +16,6 @@
 #ifndef SOFTBUS_SESSION_CONNECT_H
 #define SOFTBUS_SESSION_CONNECT_H
 
-#include "softbus_app_info.h"
-#include "softbus_base_listener.h"
-#include "stdbool.h"
-#include "stdint.h"
 #include "trans_tcp_direct_manager.h"
 #include "trans_tcp_direct_sessionconn.h"
 
@@ -39,9 +35,10 @@ int32_t TransTdcSrvRecvData(ListenerModule module, int32_t channelId, int32_t ty
 
 int32_t NotifyChannelOpenFailedBySessionConn(const SessionConn *conn, int32_t errCode);
 int32_t NotifyChannelOpenFailed(int32_t channelId, int32_t errCode);
-int32_t TransDealTdcChannelOpenResult(int32_t channelId, int32_t openResult);
+int32_t TransDealTdcChannelOpenResult(
+    int32_t channelId, int32_t openResult, const AccessInfo *accessInfo, pid_t callingPid);
 void TransAsyncTcpDirectChannelTask(int32_t channelId);
-int32_t TransDealTdcCheckCollabResult(int32_t channelId, int32_t checkResult);
+int32_t TransDealTdcCheckCollabResult(int32_t channelId, int32_t checkResult, pid_t callingPid);
 
 #ifdef __cplusplus
 }

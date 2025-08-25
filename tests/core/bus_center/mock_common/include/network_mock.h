@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2022 Huawei Device Co., Ltd.
+ * Copyright (c) 2022-2025 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -33,8 +33,12 @@
 #include "lnn_network_manager.h"
 #include "message_handler.h"
 #include "softbus_adapter_bt_common.h"
+#include "softbus_adapter_sle_common_struct.h"
 #include "softbus_adapter_socket.h"
+#include "softbus_base_listener.h"
 #include "softbus_config_type.h"
+#include "softbus_conn_interface.h"
+#include "softbus_wifi_api_adapter.h"
 
 namespace OHOS {
 class NetworkInterface {
@@ -53,10 +57,23 @@ public:
     virtual int32_t LnnAsyncCallbackHelper(SoftBusLooper *looper, LnnAsyncCallbackFunc callback, void *para) = 0;
     virtual void LnnNotifyBtAclStateChangeEvent(const char *btMac, SoftBusBtAclState state) = 0;
     virtual int32_t ConvertBtMacToStr(char *strMac, uint32_t strMacLen, const uint8_t *binMac, uint32_t binMacLen) = 0;
-    virtual int32_t SoftBusAddBtStateListener(const SoftBusBtStateListener *listener) = 0;
+    virtual int32_t SoftBusAddBtStateListener(const SoftBusBtStateListener *listener, int32_t *listenerId) = 0;
+    virtual int SoftBusAddSleStateListener(const SoftBusSleStateListener *listener, int *listenerId) = 0;
+    virtual bool IsSleEnabled() = 0;
+    virtual void SoftBusRemoveSleStateListener(int listenerId) = 0;
+    virtual void LnnNotifySleStateChangeEvent(void *state) = 0;
     virtual int32_t SoftbusGetConfig(ConfigType type, unsigned char *val, uint32_t len) = 0;
     virtual void LnnNotifyBtStateChangeEvent(void *state) = 0;
     virtual void LnnNotifyNetlinkStateChangeEvent(NetManagerIfNameState state, const char *ifName) = 0;
+    virtual int32_t LnnAsyncCallbackDelayHelper(
+        SoftBusLooper *looper, LnnAsyncCallbackFunc callback, void *para, uint64_t delayMillis) = 0;
+    virtual int32_t StartBaseClient(ListenerModule module, const SoftbusBaseListener *listener) = 0;
+    virtual int32_t AddTrigger(ListenerModule module, int32_t fd, TriggerType trigger) = 0;
+    virtual int32_t LnnGetLocalNumU32Info(InfoKey key, uint32_t *info) = 0;
+    virtual int32_t LnnSetLocalNumU32Info(InfoKey key, uint32_t info) = 0;
+    virtual SoftBusBand SoftBusGetLinkBand(void) = 0;
+    virtual int32_t LnnSetNetCapability(uint32_t *capability, NetCapability type) = 0;
+    virtual int32_t LnnClearNetCapability(uint32_t *capability, NetCapability type) = 0;
 };
 class NetworkInterfaceMock : public NetworkInterface {
 public:
@@ -73,10 +90,28 @@ public:
     MOCK_METHOD3(LnnAsyncCallbackHelper, int32_t(SoftBusLooper *, LnnAsyncCallbackFunc, void *));
     MOCK_METHOD2(LnnNotifyBtAclStateChangeEvent, void(const char *, SoftBusBtAclState));
     MOCK_METHOD4(ConvertBtMacToStr, int32_t(char *, uint32_t, const uint8_t *, uint32_t));
-    MOCK_METHOD1(SoftBusAddBtStateListener, int(const SoftBusBtStateListener *));
+    MOCK_METHOD2(SoftBusAddBtStateListener, int(const SoftBusBtStateListener *, int32_t *));
+    MOCK_METHOD2(SoftBusAddSleStateListener, int(const SoftBusSleStateListener *, int *));
+    MOCK_METHOD0(IsSleEnabled, bool());
+    MOCK_METHOD1(SoftBusRemoveSleStateListener, void(int));
+    MOCK_METHOD1(LnnNotifySleStateChangeEvent, void(void *));
     MOCK_METHOD3(SoftbusGetConfig, int(ConfigType, unsigned char *, uint32_t));
     MOCK_METHOD1(LnnNotifyBtStateChangeEvent, void(void *));
     MOCK_METHOD2(LnnNotifyNetlinkStateChangeEvent, void(NetManagerIfNameState, const char *));
+    MOCK_METHOD4(LnnAsyncCallbackDelayHelper, int32_t(SoftBusLooper *, LnnAsyncCallbackFunc, void *, uint64_t));
+    MOCK_METHOD2(StartBaseClient, int32_t(ListenerModule module, const SoftbusBaseListener *listener));
+    MOCK_METHOD3(AddTrigger, int32_t(ListenerModule module, int32_t fd, TriggerType trigger));
+    MOCK_METHOD2(LnnGetLocalNumU32Info, int32_t(InfoKey, uint32_t *));
+    MOCK_METHOD2(LnnSetLocalNumU32Info, int32_t(InfoKey key, uint32_t info));
+    MOCK_METHOD0(SoftBusGetLinkBand, SoftBusBand());
+    MOCK_METHOD2(LnnSetNetCapability, int32_t(uint32_t *, NetCapability));
+    MOCK_METHOD2(LnnClearNetCapability, int32_t(uint32_t *, NetCapability));
 };
+
+extern "C" {
+int SoftBusAddSleStateListener(const SoftBusSleStateListener *listener, int *listenerId);
+bool IsSleEnabled();
+void SoftBusRemoveSleStateListener(int listenerId);
+}
 } // namespace OHOS
 #endif // NET_WORK_MOCK_H

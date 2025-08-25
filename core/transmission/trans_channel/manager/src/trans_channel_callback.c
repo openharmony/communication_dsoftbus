@@ -16,6 +16,8 @@
 #include "trans_channel_callback.h"
 #include "bus_center_info_key.h"
 #include "bus_center_manager.h"
+#include "g_enhance_trans_func.h"
+#include "g_enhance_trans_func_pack.h"
 #include "lnn_distributed_net_ledger.h"
 #include "securec.h"
 #include "legacy/softbus_adapter_hitrace.h"
@@ -24,7 +26,7 @@
 #include "softbus_def.h"
 #include "softbus_error_code.h"
 #include "legacy/softbus_hisysevt_transreporter.h"
-#include "softbus_qos.h"
+#include "softbus_init_common.h"
 #include "trans_channel_common.h"
 #include "trans_client_proxy.h"
 #include "trans_event.h"
@@ -107,7 +109,8 @@ static int32_t TransServerOnChannelOpened(const char *pkgName, int32_t pid, cons
         TransSetSocketChannelStateByChannel(
             channel->channelId, channel->channelType, CORE_SESSION_STATE_CHANNEL_OPENED);
     }
-    int32_t ret = !channel->isServer && channel->channelType == CHANNEL_TYPE_UDP && NotifyQosChannelOpened(channel);
+    int32_t ret =
+        !channel->isServer && channel->channelType == CHANNEL_TYPE_UDP && NotifyQosChannelOpenedPacked(channel);
     TRANS_CHECK_AND_RETURN_RET_LOGE(ret == SOFTBUS_OK, ret, TRANS_CTRL, "NotifyQosChannelOpened failed.");
     int32_t sceneCommand = channel->isServer ? EVENT_SCENE_OPEN_CHANNEL_SERVER : EVENT_SCENE_OPEN_CHANNEL;
     TRANS_EVENT(sceneCommand, EVENT_STAGE_OPEN_CHANNEL_END, extra);
@@ -121,9 +124,6 @@ static int32_t TransServerOnChannelOpened(const char *pkgName, int32_t pid, cons
     if (channel->channelType == CHANNEL_TYPE_TCP_DIRECT && ret != SOFTBUS_OK) {
         (void)TransDelTcpChannelInfoByChannelId(channel->channelId);
     }
-    if (!IsTdcRecoveryTransLimit() || !IsUdpRecoveryTransLimit()) {
-        (void)UdpChannelFileTransLimit(channel, FILE_PRIORITY_BK);
-    }
     return ret;
 }
 
@@ -135,7 +135,7 @@ static int32_t TransServerOnChannelClosed(
     }
 
     (void)TransLaneMgrDelLane(channelId, channelType, true);
-    NotifyQosChannelClosed(channelId, channelType);
+    NotifyQosChannelClosedPacked(channelId, channelType);
     ChannelMsg data = {
         .msgChannelId = channelId,
         .msgChannelType = channelType,
@@ -150,9 +150,6 @@ static int32_t TransServerOnChannelClosed(
         TRANS_LOGE(TRANS_CTRL, "client ipc on channel close fail");
         return SOFTBUS_IPC_ERR;
     }
-    if (IsTdcRecoveryTransLimit() && IsUdpRecoveryTransLimit()) {
-        UdpChannelFileTransRecoveryLimit(FILE_PRIORITY_BE);
-    }
     return SOFTBUS_OK;
 }
 
@@ -165,7 +162,7 @@ static int32_t TransServerOnChannelOpenFailed(const char *pkgName, int32_t pid, 
     if (TransLaneMgrDelLane(channelId, channelType, true) != SOFTBUS_OK) {
         TRANS_LOGW(TRANS_CTRL, "delete lane object failed.");
     }
-    NotifyQosChannelClosed(channelId, channelType);
+    NotifyQosChannelClosedPacked(channelId, channelType);
     ChannelMsg data = {
         .msgChannelId = channelId,
         .msgChannelType = channelType,

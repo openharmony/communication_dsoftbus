@@ -57,6 +57,7 @@ ConnectionAddrType LnnConvertHbTypeToConnAddrType(LnnHeartbeatType type)
             return CONNECTION_ADDR_WLAN;
         case HEARTBEAT_TYPE_BLE_V1:
         case HEARTBEAT_TYPE_BLE_V0:
+        case HEARTBEAT_TYPE_SLE:
             return CONNECTION_ADDR_BLE;
         default:
             break;
@@ -396,14 +397,14 @@ void LnnDumpLocalBasicInfo(void)
     AnonymizeFree(anonyUdidHash);
     AnonymizeFree(anonyNetworkId);
     const char *devTypeStr = LnnConvertIdToDeviceType(localInfo.deviceTypeId);
-    (void)LnnGetLocalStrInfo(STRING_KEY_WLAN_IP, localIp, IP_LEN);
+    (void)LnnGetLocalStrInfoByIfnameIdx(STRING_KEY_IP, localIp, IP_LEN, WLAN_IF);
     (void)LnnGetLocalStrInfo(STRING_KEY_P2P_MAC, localP2PMac, MAC_LEN);
     (void)LnnGetLocalStrInfo(STRING_KEY_BT_MAC, localBtMac, BT_MAC_LEN);
     (void)LnnGetAllOnlineNodeNum(&onlineNodeNum);
     Anonymize(localIp, &anonyIp);
     Anonymize(localBtMac, &anonyBtMac);
     Anonymize(localP2PMac, &anonyP2pMac);
-    Anonymize(localInfo.deviceName, &anonyDeviceName);
+    AnonymizeDeviceName(localInfo.deviceName, &anonyDeviceName);
     LNN_LOGI(LNN_HEART_BEAT, "devType=%{public}s, deviceTypeId=%{public}hu, deviceName=%{public}s, ip=%{public}s, "
         "brMac=%{public}s, p2pMac=%{public}s, onlineNodeNum=%{public}d", devTypeStr, localInfo.deviceTypeId,
         AnonymizeWrapper(anonyDeviceName), AnonymizeWrapper(anonyIp), AnonymizeWrapper(anonyBtMac),
@@ -459,7 +460,7 @@ static int32_t LnnDumpPrintMac(const char *networkId)
 static int32_t LnnDumpPrintIp(const char *networkId)
 {
     char ipAddr[IP_STR_MAX_LEN] = {0};
-    if (LnnGetRemoteStrInfo(networkId, STRING_KEY_WLAN_IP, ipAddr, IP_STR_MAX_LEN) != SOFTBUS_OK) {
+    if (LnnGetRemoteStrInfoByIfnameIdx(networkId, STRING_KEY_IP, ipAddr, IP_STR_MAX_LEN, WLAN_IF) != SOFTBUS_OK) {
         LNN_LOGE(LNN_HEART_BEAT, "get ipAddr failed");
         return SOFTBUS_LANE_GET_LEDGER_INFO_ERR;
     }
@@ -492,6 +493,17 @@ static int32_t LnnDumpPrintNetType(const char *networkId)
     return SOFTBUS_OK;
 }
 
+static int32_t LnnDumpPrintStaticNetCap(const char *networkId)
+{
+    uint32_t staticNetCap = 0;
+    if (LnnGetRemoteNumU32Info(networkId, NUM_KEY_STATIC_NET_CAP, &staticNetCap) != SOFTBUS_OK) {
+        LNN_LOGE(LNN_HEART_BEAT, "get static netCap failed");
+        return SOFTBUS_LANE_GET_LEDGER_INFO_ERR;
+    }
+    LNN_LOGI(LNN_HEART_BEAT, "StaticNetCap=%{public}u", staticNetCap);
+    return SOFTBUS_OK;
+}
+
 static void LnnDumpOnlinePrintInfo(NodeBasicInfo *nodeInfo)
 {
     if (nodeInfo == NULL) {
@@ -499,7 +511,7 @@ static void LnnDumpOnlinePrintInfo(NodeBasicInfo *nodeInfo)
         return;
     }
     char *anonyDeviceName = NULL;
-    Anonymize(nodeInfo->deviceName, &anonyDeviceName);
+    AnonymizeDeviceName(nodeInfo->deviceName, &anonyDeviceName);
     LNN_LOGI(LNN_HEART_BEAT, "DeviceName=%{public}s", AnonymizeWrapper(anonyDeviceName));
     AnonymizeFree(anonyDeviceName);
     char *tmpNetWorkId = NULL;
@@ -528,6 +540,10 @@ static void LnnDumpOnlinePrintInfo(NodeBasicInfo *nodeInfo)
     }
     if (LnnDumpPrintNetType(nodeInfo->networkId) != SOFTBUS_OK) {
         LNN_LOGE(LNN_HEART_BEAT, "LnnDumpPrintNetType failed");
+        return;
+    }
+    if (LnnDumpPrintStaticNetCap(nodeInfo->networkId) != SOFTBUS_OK) {
+        LNN_LOGE(LNN_HEART_BEAT, "LnnDumpPrintStaticNetCap failed");
         return;
     }
 }

@@ -17,6 +17,8 @@
 
 #include <gtest/gtest.h>
 #include <securec.h>
+
+#include "softbus_adapter_ble_conflict_struct.h"
 #include "softbus_feature_config.h"
 #include "softbus_conn_ble_client.h"
 #include "conn_log.h"
@@ -25,17 +27,16 @@
 #include "softbus_def.h"
 #include "softbus_error_code.h"
 #include "softbus_adapter_mem.h"
-#include "softbus_adapter_ble_conflict.h"
 #include "bus_center_info_key.h"
 #include "softbus_conn_ble_manager.h"
 #include "ble_protocol_interface_factory.h"
-#include "connection_ble_client_mock.h"
+#include "softbus_conn_ble_client_mock.h"
 
 using namespace testing::ext;
 using namespace testing;
 using namespace std;
 
-static SoftBusGattcCallback *gattCb = NULL;
+static SoftBusGattcCallback *gattCb = nullptr;
 namespace OHOS {
 
 extern "C" {
@@ -75,8 +76,10 @@ int32_t ConnBleInitTransModule(ConnBleTransEventListener *listener)
     return SOFTBUS_OK;
 }
 
-int32_t SoftBusAddBtStateListener(const SoftBusBtStateListener *listener)
+int32_t SoftBusAddBtStateListener(const SoftBusBtStateListener *listener, int32_t *listenerId)
 {
+    (void)listener;
+    (void)listenerId;
     return SOFTBUS_OK;
 }
 
@@ -311,7 +314,7 @@ HWTEST_F(ClientConnectionTest, ServiceCompleteCallback001, TestSize.Level1)
         SOFTBUS_CONN_BLE_UNDERLAY_CLIENT_CONNECT_ERR));
     const char *addr = "11:22:33:44:55:12";
     ConnBleConnection *connection = ConnBleCreateConnection(addr, BLE_GATT, CONN_SIDE_CLIENT, 100, false);
-    EXPECT_NE(NULL, connection);
+    EXPECT_NE(nullptr, connection);
 
     connection->fastestConnectEnable = true;
     connection->connectionRc = 0;
@@ -326,7 +329,7 @@ HWTEST_F(ClientConnectionTest, ServiceCompleteCallback001, TestSize.Level1)
 
     const char *bleAddr = "11:22:33:44:55:33";
     ConnBleConnection *bleConnection = ConnBleCreateConnection(bleAddr, BLE_GATT, CONN_SIDE_CLIENT, 2, false);
-    EXPECT_NE(NULL, connection);
+    EXPECT_NE(nullptr, connection);
     bleConnection->state = BLE_CONNECTION_STATE_SERVICE_SEARCHING;
     bleConnection->retrySearchServiceCnt = 0;
     ret = ConnBleSaveConnection(bleConnection);
@@ -368,7 +371,7 @@ HWTEST_F(ClientConnectionTest, ServiceCompleteCallback002, TestSize.Level1)
         .WillRepeatedly(Return(SOFTBUS_CONN_BLE_UNDERLAY_CLIENT_CONNECT_ERR));
     const char *bleAddr = "11:22:33:44:55:00";
     ConnBleConnection *bleConnection = ConnBleCreateConnection(bleAddr, BLE_GATT, CONN_SIDE_CLIENT, 3, false);
-    EXPECT_NE(NULL, bleConnection);
+    EXPECT_NE(nullptr, bleConnection);
     bleConnection->retrySearchServiceCnt = 0;
     bleConnection->state = BLE_CONNECTION_STATE_SERVICE_SEARCHING;
     int32_t ret = ConnBleSaveConnection(bleConnection);
@@ -407,7 +410,7 @@ HWTEST_F(ClientConnectionTest, RegistNotificationCallback001, TestSize.Level1)
     gattCb->registNotificationCallback(100, SOFTBUS_OK);
     const char *bleAddr = "11:22:33:44:55:66";
     ConnBleConnection *bleConnection = ConnBleCreateConnection(bleAddr, BLE_GATT, CONN_SIDE_CLIENT, 4, false);
-    EXPECT_NE(NULL, bleConnection);
+    EXPECT_NE(nullptr, bleConnection);
     bleConnection->retrySearchServiceCnt = 0;
     bleConnection->state = BLE_CONNECTION_STATE_CONNECTED;
     int32_t ret = ConnBleSaveConnection(bleConnection);
@@ -440,7 +443,7 @@ HWTEST_F(ClientConnectionTest, RegistNotificationCallback002, TestSize.Level1)
 {
     const char *bleAddr = "11:22:33:44:44:99";
     ConnBleConnection *bleConnection = ConnBleCreateConnection(bleAddr, BLE_GATT, CONN_SIDE_CLIENT, 5, false);
-    EXPECT_NE(NULL, bleConnection);
+    EXPECT_NE(nullptr, bleConnection);
     bleConnection->retrySearchServiceCnt = 0;
     bleConnection->state = BLE_CONNECTION_STATE_CONN_NOTIFICATING;
     int32_t ret = ConnBleSaveConnection(bleConnection);
@@ -476,7 +479,7 @@ HWTEST_F(ClientConnectionTest, RegistNotificationCallback003, TestSize.Level1)
 {
     const char *bleAddr = "11:22:33:44:44:37";
     ConnBleConnection *bleConnection = ConnBleCreateConnection(bleAddr, BLE_GATT, CONN_SIDE_CLIENT, 16, false);
-    EXPECT_NE(NULL, bleConnection);
+    EXPECT_NE(nullptr, bleConnection);
 
     bleConnection->state = BLE_CONNECTION_STATE_NET_NOTIFICATING;
     int32_t ret = ConnBleSaveConnection(bleConnection);
@@ -491,7 +494,7 @@ HWTEST_F(ClientConnectionTest, RegistNotificationCallback003, TestSize.Level1)
     
     const char *addr = "11:22:33:44:44:37";
     ConnBleConnection *connection = ConnBleCreateConnection(addr, BLE_GATT, CONN_SIDE_CLIENT, 17, false);
-    EXPECT_NE(NULL, connection);
+    EXPECT_NE(nullptr, connection);
 
     connection->state = BLE_CONNECTION_STATE_NET_NOTIFICATING;
     ret = ConnBleSaveConnection(connection);
@@ -521,7 +524,7 @@ HWTEST_F(ClientConnectionTest, NotificationReceiveCallback001, TestSize.Level1)
 {
     const char *bleAddr = "11:00:33:44:44:99";
     ConnBleConnection *bleConnection = ConnBleCreateConnection(bleAddr, BLE_GATT, CONN_SIDE_CLIENT, 5, false);
-    EXPECT_NE(NULL, bleConnection);
+    EXPECT_NE(nullptr, bleConnection);
 
     int32_t ret = ConnBleSaveConnection(bleConnection);
     EXPECT_EQ(SOFTBUS_OK, ret);
@@ -575,7 +578,7 @@ HWTEST_F(ClientConnectionTest, NotificationReceiveCallback002, TestSize.Level1)
 {
     const char *bleAddr = "11:22:33:44:44:99";
     ConnBleConnection *bleConnection = ConnBleCreateConnection(bleAddr, BLE_GATT, CONN_SIDE_CLIENT, 6, false);
-    EXPECT_NE(NULL, bleConnection);
+    EXPECT_NE(nullptr, bleConnection);
 
     bleConnection->buffer.seq = 0;
     bleConnection->buffer.total = 0;
@@ -617,7 +620,7 @@ HWTEST_F(ClientConnectionTest, NotificationReceiveCallback003, TestSize.Level1)
 {
     const char *bleAddr = "11:22:33:44:22:99";
     ConnBleConnection *bleConnection = ConnBleCreateConnection(bleAddr, BLE_GATT, CONN_SIDE_CLIENT, 7, false);
-    EXPECT_NE(NULL, bleConnection);
+    EXPECT_NE(nullptr, bleConnection);
 
     bleConnection->buffer.seq = 0;
     bleConnection->buffer.total = 0;
@@ -661,7 +664,7 @@ HWTEST_F(ClientConnectionTest, NotificationReceiveCallback004, TestSize.Level1)
 {
     const char *bleAddr = "11:22:33:44:22:03";
     ConnBleConnection *bleConnection = ConnBleCreateConnection(bleAddr, BLE_GATT, CONN_SIDE_CLIENT, 8, false);
-    EXPECT_NE(NULL, bleConnection);
+    EXPECT_NE(nullptr, bleConnection);
 
     bleConnection->buffer.seq = 0;
     bleConnection->buffer.total = 0;
@@ -684,7 +687,7 @@ HWTEST_F(ClientConnectionTest, NotificationReceiveCallback004, TestSize.Level1)
 
     const char *addr = "11:22:33:44:22:06";
     ConnBleConnection *connection = ConnBleCreateConnection(addr, BLE_GATT, CONN_SIDE_CLIENT, 9, false);
-    EXPECT_NE(NULL, connection);
+    EXPECT_NE(nullptr, connection);
     connection->state = BLE_CONNECTION_STATE_EXCHANGING_BASIC_INFO;
     ret = ConnBleSaveConnection(connection);
     EXPECT_EQ(SOFTBUS_OK, ret);
@@ -709,7 +712,7 @@ HWTEST_F(ClientConnectionTest, ConfigureMtuSizeCallback001, TestSize.Level1)
 
     const char *bleAddr = "11:22:33:44:22:05";
     ConnBleConnection *bleConnection = ConnBleCreateConnection(bleAddr, BLE_GATT, CONN_SIDE_CLIENT, 10, false);
-    EXPECT_NE(NULL, bleConnection);
+    EXPECT_NE(nullptr, bleConnection);
     int32_t ret = ConnBleSaveConnection(bleConnection);
     EXPECT_EQ(SOFTBUS_OK, ret);
 
@@ -723,7 +726,7 @@ HWTEST_F(ClientConnectionTest, ConfigureMtuSizeCallback001, TestSize.Level1)
     SoftBusSleepMs(500);
     const char *addr = "11:22:33:44:22:06";
     ConnBleConnection *connection = ConnBleCreateConnection(addr, BLE_GATT, CONN_SIDE_CLIENT, 11, false);
-    EXPECT_NE(NULL, connection);
+    EXPECT_NE(nullptr, connection);
     connection->state = BLE_CONNECTION_STATE_MTU_SETTING;
     ret = ConnBleSaveConnection(connection);
     EXPECT_EQ(SOFTBUS_OK, ret);
@@ -747,7 +750,7 @@ HWTEST_F(ClientConnectionTest, ConfigureMtuSizeCallback002, TestSize.Level1)
 {
     const char *addr = "11:22:33:44:22:05";
     ConnBleConnection *connection = ConnBleCreateConnection(addr, BLE_GATT, CONN_SIDE_CLIENT, 12, false);
-    EXPECT_NE(NULL, connection);
+    EXPECT_NE(nullptr, connection);
     connection->state = BLE_CONNECTION_STATE_MTU_SETTING;
     int32_t ret = ConnBleSaveConnection(connection);
     EXPECT_EQ(SOFTBUS_OK, ret);
@@ -761,7 +764,7 @@ HWTEST_F(ClientConnectionTest, ConfigureMtuSizeCallback002, TestSize.Level1)
 
     const char *bleAddr = "11:22:33:44:22:56";
     ConnBleConnection *bleConnection = ConnBleCreateConnection(bleAddr, BLE_GATT, CONN_SIDE_CLIENT, 13, false);
-    EXPECT_NE(NULL, bleConnection);
+    EXPECT_NE(nullptr, bleConnection);
     bleConnection->state = BLE_CONNECTION_STATE_MTU_SETTING;
     ret = ConnBleSaveConnection(bleConnection);
     EXPECT_EQ(SOFTBUS_OK, ret);
@@ -773,7 +776,7 @@ HWTEST_F(ClientConnectionTest, ConfigureMtuSizeCallback002, TestSize.Level1)
 
     const char *addrBle = "11:22:33:44:22:56";
     ConnBleConnection *connectionBle = ConnBleCreateConnection(addrBle, BLE_GATT, CONN_SIDE_CLIENT, 14, false);
-    EXPECT_NE(NULL, connectionBle);
+    EXPECT_NE(nullptr, connectionBle);
     connectionBle->state = BLE_CONNECTION_STATE_MTU_SETTING;
     ret = ConnBleSaveConnection(connectionBle);
     EXPECT_EQ(SOFTBUS_OK, ret);

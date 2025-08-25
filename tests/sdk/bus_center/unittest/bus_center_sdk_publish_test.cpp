@@ -46,7 +46,9 @@ public:
 
 void BusCenterSdkPublish::SetUpTestCase(void)
 {
-    SetAceessTokenPermission("busCenterTest");
+    SetAccessTokenPermission("busCenterTest");
+    uint64_t tokenId = SetTokenIdByProcessName("device_manager");
+    printf("SetTokenIdByProcessName tokenId:%ju\n", tokenId);
 }
 
 void BusCenterSdkPublish::TearDownTestCase(void) { }
@@ -105,21 +107,21 @@ HWTEST_F(BusCenterSdkPublish, PublishLNNTest001, TestSize.Level1)
         .dataLen = sizeof("capdata1"),
         .ranging = false };
 
-    ret = PublishLNN(NULL, &testInfo, &g_publishCb);
+    ret = PublishLNN(nullptr, &testInfo, &g_publishCb);
     EXPECT_EQ(ret, SOFTBUS_INVALID_PARAM);
 
-    ret = PublishLNN(g_pkgName, NULL, &g_publishCb);
+    ret = PublishLNN(g_pkgName, nullptr, &g_publishCb);
     EXPECT_EQ(ret, SOFTBUS_INVALID_PARAM);
 
-    ret = PublishLNN(g_pkgName, &testInfo, NULL);
+    ret = PublishLNN(g_pkgName, &testInfo, nullptr);
     EXPECT_EQ(ret, SOFTBUS_INVALID_PARAM);
 
-    testInfo.capabilityData = NULL;
+    testInfo.capabilityData = nullptr;
     ret = PublishLNN(g_pkgName, &testInfo, &g_publishCb);
     EXPECT_EQ(ret, SOFTBUS_INVALID_PARAM);
     testInfo.capabilityData = (unsigned char *)"capdata1";
 
-    testInfo.capability = NULL;
+    testInfo.capability = nullptr;
     ret = PublishLNN(g_pkgName, &testInfo, &g_publishCb);
     EXPECT_EQ(ret, SOFTBUS_INVALID_PARAM);
     testInfo.capability = "dvKit";
@@ -251,7 +253,7 @@ HWTEST_F(BusCenterSdkPublish, PublishLNNTest004, TestSize.Level1)
         .ranging = false };
 
     testInfo.publishId = GetPublishId();
-    testInfo.capabilityData = NULL;
+    testInfo.capabilityData = nullptr;
     testInfo.dataLen = sizeof("capdata1");
     ret = PublishLNN(g_pkgName, &testInfo, &g_publishCb);
     EXPECT_EQ(ret, SOFTBUS_INVALID_PARAM);
@@ -264,7 +266,7 @@ HWTEST_F(BusCenterSdkPublish, PublishLNNTest004, TestSize.Level1)
     ret = StopPublishLNN(g_pkgName, testInfo.publishId);
 
     testInfo.publishId = GetPublishId();
-    testInfo.capabilityData = NULL;
+    testInfo.capabilityData = nullptr;
     testInfo.dataLen = 0;
     ret = PublishLNN(g_pkgName, &testInfo, &g_publishCb);
     EXPECT_EQ(ret, SOFTBUS_OK);
@@ -829,7 +831,7 @@ HWTEST_F(BusCenterSdkPublish, StopPublishLNN001, TestSize.Level1)
         .ranging = false };
 
     PublishLNN(g_pkgName, &testInfo, &g_publishCb);
-    ret = StopPublishLNN(NULL, testInfo.publishId);
+    ret = StopPublishLNN(nullptr, testInfo.publishId);
     EXPECT_TRUE(ret != 0);
     ret = StopPublishLNN(g_erroPkgName1, testInfo.publishId);
     EXPECT_TRUE(ret != 0);

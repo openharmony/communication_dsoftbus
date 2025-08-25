@@ -23,9 +23,9 @@
 #include "softbus_error_code.h"
 
 static uint8_t g_vaildAdvData[] = { 0x04, 0x05, 0x10, 0x00, 0x00, 0x02, 0x00, 0x18, 0xE8, 0x31, 0xF7, 0x63, 0x0B, 0x76,
-    0x19, 0xAE, 0x21, 0x0E, 0x56, 0x0A, 0x0B, 0x0C, 0x0D, 0x0E };
+    0x19, 0xAE, 0x21, 0x0E, 0x56, 0x0A, 0x0B, 0x0C, 0x0D, 0x0E};
 static uint8_t g_vaildRspData[] = { 0x0F, 0x43, 0x01, 0xAA, 0x00, 0x61, 0x01, 0x3A, 0x4D, 0x79, 0x20, 0x44, 0x65, 0x76,
-    0x69, 0x63, 0x65, 0x00 };
+    0x69, 0x63, 0x65, 0x00, 0x77, 0x01, 0x02, 0x03, 0x04, 0x05, 0x06, 0x07 };
 
 static uint8_t g_invalidAdvData[] = { 0x00, 0x00 };
 static uint8_t g_invalidRspData[] = { 0x00, 0x00 };
@@ -521,7 +521,30 @@ HWTEST_F(DiscBleUtilsTest, GetDeviceInfoFromDisAdvData_006, TestSize.Level1)
     int32_t ret = GetDeviceInfoFromDisAdvData(
         &device, reinterpret_cast<const uint8_t *>(&reportInfo), sizeof(BroadcastReportInfo));
     EXPECT_EQ(ret, SOFTBUS_OK);
-
+    EXPECT_EQ(device.channelId, 0x01);
     DISC_LOGI(DISC_TEST, "DiscBleUtilsTest, GetDeviceInfoFromDisAdvData_006, End");
 }
+
+/*
+ * @tc.name: DiscSoftbusBleBuildReportJson001
+ * @tc.desc: Test DiscSoftbusBleBuildReportJson
+ * @tc.type: FUNC
+ */
+HWTEST_F(DiscBleUtilsTest, DiscSoftbusBleBuildReportJson001, TestSize.Level1)
+{
+    DISC_LOGI(DISC_TEST, "DiscBleUtilsTest, DiscSoftbusBleBuildReportJson001, Start");
+
+    DeviceInfo device = { { 0 } };
+    uint32_t handleId  = 1;
+
+    int32_t ret = DiscSoftbusBleBuildReportJson(nullptr, handleId);
+    EXPECT_EQ(ret, SOFTBUS_INVALID_PARAM);
+    ret = DiscSoftbusBleBuildReportJson(&device, 0);
+    EXPECT_EQ(ret, SOFTBUS_INVALID_PARAM);
+    ret = DiscSoftbusBleBuildReportJson(&device, handleId);
+    EXPECT_EQ(ret, SOFTBUS_OK);
+
+    DISC_LOGI(DISC_TEST, "DiscBleUtilsTest, DiscSoftbusBleBuildReportJson001, End");
+}
 } // namespace OHOS
+

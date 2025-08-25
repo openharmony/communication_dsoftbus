@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2023 Huawei Device Co., Ltd.
+ * Copyright (c) 2023-2025 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -24,38 +24,12 @@
 #ifndef SOFTBUS_BROADCAST_MANAGER_H
 #define SOFTBUS_BROADCAST_MANAGER_H
 
+#include "softbus_broadcast_manager_struct.h"
 #include "softbus_broadcast_type.h"
 
 #ifdef __cplusplus
 extern "C"{
 #endif
-
-/**
- * @brief Defines the broadcast callback function.
- *
- * @since 4.1
- * @version 1.0
- */
-typedef struct {
-    void (*OnStartBroadcastingCallback)(int32_t bcId, int32_t status);
-    void (*OnStopBroadcastingCallback)(int32_t bcId, int32_t status);
-    void (*OnUpdateBroadcastingCallback)(int32_t bcId, int32_t status);
-    void (*OnSetBroadcastingCallback)(int32_t bcId, int32_t status);
-} BroadcastCallback;
-
-/**
- * @brief Defines the broadcast scan callback function.
- *
- * @since 4.1
- * @version 1.0
- */
-typedef struct {
-    void (*OnStartScanCallback)(int32_t listenerId, int32_t status);
-    void (*OnStopScanCallback)(int32_t listenerId, int32_t status);
-    void (*OnReportScanDataCallback)(int32_t listenerId, const BroadcastReportInfo *reportInfo);
-    void (*OnScanStateChanged)(int32_t resultCode, bool isStartScan);
-    void (*OnLpDeviceInfoCallback)(const BroadcastUuid *uuid, int32_t type, uint8_t *data, uint32_t dataSize);
-} ScanCallback;
 
 /**
  * @brief init broadcast manager.
@@ -80,6 +54,7 @@ int32_t DeInitBroadcastMgr(void);
 /**
  * @brief Register the service to the broadcast manager.
  *
+ * @param protocol Indicates the broadcast protocol {@link BroadcastProtocol}.
  * @param type Indicates the service type {@link BaseServiceType}.
  * @param bcId Indicates the service broadcast ID.
  * @param cb Indicates the service broadcast callback {@link BroadcastCallback}.
@@ -90,7 +65,8 @@ int32_t DeInitBroadcastMgr(void);
  * @since 4.1
  * @version 1.0
  */
-int32_t RegisterBroadcaster(BaseServiceType type, int32_t *bcId, const BroadcastCallback *cb);
+int32_t RegisterBroadcaster(BroadcastProtocol protocol,
+    BaseServiceType type, int32_t *bcId, const BroadcastCallback *cb);
 
 /**
  * @brief UnRegister the service to the broadcast manager.
@@ -108,6 +84,7 @@ int32_t UnRegisterBroadcaster(int32_t bcId);
 /**
  * @brief Register the service listener to the broadcast manager.
  *
+ * @param protocol Indicates the broadcast protocol {@link BroadcastProtocol}.
  * @param type Indicates the service type {@link BaseServiceType}.
  * @param listenerId Indicates the service listener ID.
  * @param cb Indicates the service listener callback {@link ScanCallback}.
@@ -118,7 +95,8 @@ int32_t UnRegisterBroadcaster(int32_t bcId);
  * @since 4.1
  * @version 1.0
  */
-int32_t RegisterScanListener(BaseServiceType type, int32_t *listenerId, const ScanCallback *cb);
+int32_t RegisterScanListener(BroadcastProtocol protocol,
+    BaseServiceType type, int32_t *listenerId, const ScanCallback *cb);
 
 /**
  * @brief UnRegister the service listener to the broadcast manager.
@@ -165,7 +143,7 @@ int32_t StartBroadcasting(int32_t bcId, const BroadcastParam *param, const Broad
 int32_t UpdateBroadcasting(int32_t bcId, const BroadcastParam *param, const BroadcastPacket *packet);
 
 /**
- * @brief The service set broadcast data. Set broadcast data when broadcast is enabled.
+ * @brief The service set broadcast data. Set broadcast data when broadcast is advertising.
  *
  * @param bcId Indicates the service broadcast ID.
  * @param packet Indicates the pointer to the service advertising data. For details, see {@link BroadcastPacket}.
@@ -178,6 +156,21 @@ int32_t UpdateBroadcasting(int32_t bcId, const BroadcastParam *param, const Broa
  */
 
 int32_t SetBroadcastingData(int32_t bcId, const BroadcastPacket *packet);
+
+/**
+ * @brief The service set broadcast param. Set broadcast param when broadcast is advertising and disabled.
+ *
+ * @param bcId Indicates the service broadcast ID.
+ * @param param Indicates the pointer to the service parameter information. For details, see {@link BroadcastParam}.
+ *
+ * @return Returns <b>SOFTBUS_OK</b> if the service starts the broadcast successfully.
+ * returns any other value if the unregister fails.
+ *
+ * @since 5.1
+ * @version 1.0
+ */
+int32_t SetBroadcastingParam(int32_t bcId, const BroadcastParam *param);
+
 /**
  * @brief The service stop broadcast
  *

@@ -25,9 +25,11 @@
 #include "softbus_message_open_channel.h"
 #include "softbus_socket.h"
 #include "softbus_utils.h"
+#include "trans_channel_common.h"
 #include "trans_tcp_direct_callback.h"
 #include "trans_tcp_direct_manager.h"
 #include "trans_tcp_direct_sessionconn.h"
+#include "trans_uk_manager.h"
 #include "wifi_direct_manager.h"
 
 namespace OHOS {
@@ -61,7 +63,7 @@ public:
     virtual int32_t SoftBusGenerateSessionKey(char *key, uint32_t len) = 0;
     virtual int32_t AuthGetServerSide(int64_t authId, bool *isServer) = 0;
     virtual int32_t AuthGetConnInfo(AuthHandle authHandle, AuthConnInfo *connInfo) = 0;
-    virtual char *PackRequest(const AppInfo *appInfo) = 0;
+    virtual char *PackRequest(const AppInfo *appInfo, int64_t requestId) = 0;
     virtual int32_t LnnSetLocalStrInfo(InfoKey key, const char *info) = 0;
     virtual int32_t LnnSetDLP2pIp(const char *id, IdCategory type, const char *p2pIp) = 0;
     virtual int32_t LnnGetNetworkIdByUuid(const char *uuid, char *buf, uint32_t len) = 0;
@@ -79,6 +81,13 @@ public:
     virtual int32_t LnnGetRemoteNodeInfoById(const char *id, IdCategory type, NodeInfo *info) = 0;
     virtual int32_t TransCheckServerAccessControl(uint64_t callingTokenId) = 0;
     virtual int32_t TransTdcOnChannelClosed(const char *pkgName, int32_t pid, int32_t channelId) = 0;
+    virtual int32_t GetErrCodeBySocketErr(int32_t transErrCode) = 0;
+    virtual int32_t CheckCollabRelation(const AppInfo *appInfo, int32_t channelId, int32_t channelType) = 0;
+    virtual int32_t GetTokenTypeBySessionName(const char *sessionName, int32_t *tokenType) = 0;
+    virtual int32_t AuthDecryptByUkId(
+        int32_t ukId, const uint8_t *inData, uint32_t inLen, uint8_t *outData, uint32_t *outLen) = 0;
+    virtual int32_t AuthFindUkIdByAclInfo(const AuthACLInfo *acl, int32_t *ukId) = 0;
+    virtual int32_t LnnGetLocalStrInfoByIfnameIdx(InfoKey key, char *info, uint32_t len, int32_t ifIdx) = 0;
 };
 
 class TransTcpDirectMessageInterfaceMock : public TransTcpDirectMessageInterface {
@@ -111,7 +120,7 @@ public:
     MOCK_METHOD2(SoftBusGenerateSessionKey, int32_t (char *key, uint32_t len));
     MOCK_METHOD2(AuthGetServerSide, int32_t (int64_t authId, bool *isServer));
     MOCK_METHOD2(AuthGetConnInfo, int32_t (AuthHandle authHandle, AuthConnInfo *connInfo));
-    MOCK_METHOD1(PackRequest, char *(const AppInfo *appInfo));
+    MOCK_METHOD2(PackRequest, char *(const AppInfo *appInfo, int64_t requestId));
     MOCK_METHOD2(LnnSetLocalStrInfo, int32_t (InfoKey key, const char *info));
     MOCK_METHOD3(LnnSetDLP2pIp, int32_t (const char *id, IdCategory type, const char *p2pIp));
     MOCK_METHOD3(LnnGetNetworkIdByUuid, int32_t (const char *uuid, char *buf, uint32_t len));
@@ -129,6 +138,13 @@ public:
     MOCK_METHOD3(LnnGetRemoteNodeInfoById, int32_t (const char *id, IdCategory type, NodeInfo *info));
     MOCK_METHOD1(TransCheckServerAccessControl, int32_t (uint64_t callingTokenId));
     MOCK_METHOD3(TransTdcOnChannelClosed, int32_t (const char *pkgName, int32_t pid, int32_t channelId));
+    MOCK_METHOD1(GetErrCodeBySocketErr, int32_t (int32_t transErrCode));
+    MOCK_METHOD3(CheckCollabRelation, int32_t (const AppInfo *appInfo, int32_t channelId, int32_t channelType));
+    MOCK_METHOD2(GetTokenTypeBySessionName, int32_t (const char *sessionName, int32_t *tokenType));
+    MOCK_METHOD5(AuthDecryptByUkId, int32_t (int32_t ukId, const uint8_t *inData, uint32_t inLen, uint8_t *outData,
+        uint32_t *outLen));
+    MOCK_METHOD2(AuthFindUkIdByAclInfo, int32_t (const AuthACLInfo *acl, int32_t *ukId));
+    MOCK_METHOD4(LnnGetLocalStrInfoByIfnameIdx, int32_t (InfoKey key, char *info, uint32_t len, int32_t ifIdx));
 };
 } // namespace OHOS
 #endif // TRANS_TCP_DIRECT_MESSAGE_TEST_MOCK_H

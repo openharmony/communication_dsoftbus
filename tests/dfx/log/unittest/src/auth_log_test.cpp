@@ -40,12 +40,13 @@ HWTEST_F(AuthLogTest, AuthLogTest001, TestSize.Level0)
     int32_t index = 0;
     int32_t authDomainBase = 0xd005720;
 
-    ExpectMatchSoftBusLogAttrs(AUTH_LABELS[index], AUTH_INIT, authDomainBase, "AuthInit");
-    ExpectMatchSoftBusLogAttrs(AUTH_LABELS[++index], AUTH_HICHAIN, ++authDomainBase, "AuthHiChain");
-    ExpectMatchSoftBusLogAttrs(AUTH_LABELS[++index], AUTH_CONN, ++authDomainBase, "AuthConn");
-    ExpectMatchSoftBusLogAttrs(AUTH_LABELS[++index], AUTH_FSM, ++authDomainBase, "AuthFsm");
-    ExpectMatchSoftBusLogAttrs(AUTH_LABELS[++index], AUTH_KEY, ++authDomainBase, "AuthKey");
-    ExpectMatchSoftBusLogAttrs(AUTH_LABELS[++index], AUTH_TEST, DOMAIN_ID_TEST, "AuthTest");
+    EXPECT_NO_FATAL_FAILURE(ExpectMatchSoftBusLogAttrs(AUTH_LABELS[index], AUTH_INIT, authDomainBase, "AuthInit"));
+    EXPECT_NO_FATAL_FAILURE(ExpectMatchSoftBusLogAttrs(AUTH_LABELS[++index], AUTH_HICHAIN, ++authDomainBase,
+        "AuthHiChain"));
+    EXPECT_NO_FATAL_FAILURE(ExpectMatchSoftBusLogAttrs(AUTH_LABELS[++index], AUTH_CONN, ++authDomainBase, "AuthConn"));
+    EXPECT_NO_FATAL_FAILURE(ExpectMatchSoftBusLogAttrs(AUTH_LABELS[++index], AUTH_FSM, ++authDomainBase, "AuthFsm"));
+    EXPECT_NO_FATAL_FAILURE(ExpectMatchSoftBusLogAttrs(AUTH_LABELS[++index], AUTH_KEY, ++authDomainBase, "AuthKey"));
+    EXPECT_NO_FATAL_FAILURE(ExpectMatchSoftBusLogAttrs(AUTH_LABELS[++index], AUTH_TEST, DOMAIN_ID_TEST, "AuthTest"));
 }
 
 /**

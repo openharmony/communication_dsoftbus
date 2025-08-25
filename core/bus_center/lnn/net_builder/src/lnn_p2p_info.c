@@ -18,21 +18,23 @@
 #include <securec.h>
 
 #include "anonymizer.h"
-#include "auth_device_common_key.h"
 #include "bus_center_manager.h"
+#include "g_enhance_lnn_func.h"
+#include "g_enhance_lnn_func_pack.h"
 #include "lnn_async_callback_utils.h"
 #include "lnn_distributed_net_ledger.h"
 #include "lnn_feature_capability.h"
 #include "lnn_lane_link_p2p.h"
 #include "lnn_local_net_ledger.h"
 #include "lnn_log.h"
-#include "lnn_secure_storage.h"
 #include "lnn_sync_info_manager.h"
 #include "softbus_adapter_crypto.h"
 #include "softbus_adapter_json.h"
 #include "softbus_adapter_mem.h"
 #include "softbus_def.h"
 #include "softbus_error_code.h"
+#include "softbus_json_utils.h"
+#include "softbus_init_common.h"
 #include "wifi_direct_manager.h"
 
 #define JSON_KEY_P2P_ROLE "P2P_ROLE"
@@ -120,12 +122,12 @@ static int32_t LnnParseP2pInfoMsg(const char *msg, P2pInfo *info, uint32_t len)
         JSON_Delete(json);
         return SOFTBUS_GET_INFO_FROM_JSON_FAIL;
     }
-    if (!JSON_GetStringFromOject(json, JSON_KEY_WIFI_CFG, info->wifiCfg, sizeof(info->wifiCfg))) {
+    if (!JSON_GetStringFromObject(json, JSON_KEY_WIFI_CFG, info->wifiCfg, sizeof(info->wifiCfg))) {
         LNN_LOGE(LNN_BUILDER, "wifi cfg not found");
         JSON_Delete(json);
         return SOFTBUS_GET_INFO_FROM_JSON_FAIL;
     }
-    if (!JSON_GetStringFromOject(json, JSON_KEY_CHAN_LIST_5G, info->chanList5g, sizeof(info->chanList5g))) {
+    if (!JSON_GetStringFromObject(json, JSON_KEY_CHAN_LIST_5G, info->chanList5g, sizeof(info->chanList5g))) {
         LNN_LOGE(LNN_BUILDER, "chan list 5g not found");
         JSON_Delete(json);
         return SOFTBUS_GET_INFO_FROM_JSON_FAIL;
@@ -135,12 +137,12 @@ static int32_t LnnParseP2pInfoMsg(const char *msg, P2pInfo *info, uint32_t len)
         JSON_Delete(json);
         return SOFTBUS_GET_INFO_FROM_JSON_FAIL;
     }
-    if (!JSON_GetStringFromOject(json, JSON_KEY_P2P_MAC, info->p2pMac, sizeof(info->p2pMac))) {
+    if (!JSON_GetStringFromObject(json, JSON_KEY_P2P_MAC, info->p2pMac, sizeof(info->p2pMac))) {
         LNN_LOGE(LNN_BUILDER, "p2p mac not found");
         JSON_Delete(json);
         return SOFTBUS_GET_INFO_FROM_JSON_FAIL;
     }
-    if (!JSON_GetStringFromOject(json, JSON_KEY_GO_MAC, info->goMac, sizeof(info->goMac))) {
+    if (!JSON_GetStringFromObject(json, JSON_KEY_GO_MAC, info->goMac, sizeof(info->goMac))) {
         LNN_LOGE(LNN_BUILDER, "go mac not found");
         JSON_Delete(json);
         return SOFTBUS_GET_INFO_FROM_JSON_FAIL;
@@ -156,7 +158,7 @@ static int32_t LnnParseWifiDirectAddrMsg(const char *msg, char *wifiDirectAddr, 
         LNN_LOGE(LNN_BUILDER, "parse wifidirect addr json fail");
         return SOFTBUS_PARSE_JSON_ERR;
     }
-    if (!JSON_GetStringFromOject(json, JSON_KEY_WIFIDIRECT_ADDR, wifiDirectAddr, MAC_LEN)) {
+    if (!JSON_GetStringFromObject(json, JSON_KEY_WIFIDIRECT_ADDR, wifiDirectAddr, MAC_LEN)) {
         LNN_LOGE(LNN_BUILDER, "wifidirect addr not found");
         JSON_Delete(json);
         return SOFTBUS_GET_INFO_FROM_JSON_FAIL;
@@ -217,7 +219,7 @@ static void ProcessSyncP2pInfo(void *para)
         if (IsNeedSyncP2pInfo(localInfo, &info[i]) &&
             LnnSendSyncInfoMsg(LNN_INFO_TYPE_P2P_INFO, info[i].networkId, (uint8_t *)msg, len, NULL) != SOFTBUS_OK) {
             char *anonyDeviceName = NULL;
-            Anonymize(info[i].deviceName, &anonyDeviceName);
+            AnonymizeDeviceName(info[i].deviceName, &anonyDeviceName);
             LNN_LOGE(LNN_BUILDER, "sync p2p info fail. deviceName=%{public}s", AnonymizeWrapper(anonyDeviceName));
             AnonymizeFree(anonyDeviceName);
         }
@@ -357,18 +359,22 @@ int32_t LnnInitLocalP2pInfo(NodeInfo *info)
 
 int32_t LnnInitP2p(void)
 {
-    if (LnnInitPtk() != SOFTBUS_OK) {
+    if (LnnInitPtkPacked() != SOFTBUS_OK) {
         LNN_LOGE(LNN_INIT, "init ptk fail");
     }
     if (LnnInitPtkSyncListener() != SOFTBUS_OK) {
         LNN_LOGE(LNN_INIT, "init ptk listener fail");
+    }
+    if (LnnInitBroadcastLinkKeyPacked() != SOFTBUS_OK) {
+        LNN_LOGE(LNN_INIT, "init broadcast link key fail");
     }
     return LnnRegSyncInfoHandler(LNN_INFO_TYPE_P2P_INFO, OnReceiveP2pSyncInfoMsg);
 }
 
 void LnnDeinitP2p(void)
 {
-    LnnDeinitPtk();
+    LnnDeinitPtkPacked();
+    LnnDeinitBroadcastLinkKeyPacked();
     (void)LnnUnregSyncInfoHandler(LNN_INFO_TYPE_P2P_INFO, OnReceiveP2pSyncInfoMsg);
 }
 

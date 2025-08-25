@@ -16,8 +16,6 @@
 #ifndef CLIENT_TRANS_UDP_STREAM_INTERFACE_H_
 #define CLIENT_TRANS_UDP_STREAM_INTERFACE_H_
 
-#include <stdint.h>
-#include "session.h"
 #include "softbus_trans_def.h"
 
 #ifdef __cplusplus

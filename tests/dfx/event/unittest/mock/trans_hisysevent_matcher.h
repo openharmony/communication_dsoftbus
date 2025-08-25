@@ -23,6 +23,13 @@
 #include "hisysevent_c.h"
 #include "softbus_event.h"
 
+static void MatchTransEventNameTypeExtraUint8Param(const HiSysEventParam *params, int32_t index, uint8_t extraParam)
+{
+    EXPECT_STREQ(params[index].name, TRANS_ASSIGNERS[index].name);
+    EXPECT_EQ(params[index].t, TRANS_ASSIGNERS[index].type);
+    EXPECT_EQ(params[index].v.ui8, extraParam);
+}
+
 static void MatchTransEventNameTypeExtraInt32Param(const HiSysEventParam *params, int32_t index, int32_t extraParam)
 {
     EXPECT_STREQ(params[index].name, TRANS_ASSIGNERS[index].name);
@@ -63,7 +70,10 @@ MATCHER_P2(TransValidParamArrayMatcher, inExtra, validSize, "trans valid param a
     params += SOFTBUS_ASSIGNER_SIZE; // Skip softbus params, they are matched by SoftbusParamArrayMatcher
     auto extra = static_cast<TransEventExtra>(inExtra);
     int32_t index = 0;
-    MatchTransEventNameTypeExtraInt32Param(params, index, extra.result);
+    MatchTransEventNameTypeExtraUint8Param(params, index, extra.talkieFreq);
+    MatchTransEventNameTypeExtraUint8Param(params, ++index, extra.talkieType);
+    MatchTransEventNameTypeExtraUint8Param(params, ++index, extra.talkieLevel);
+    MatchTransEventNameTypeExtraInt32Param(params, ++index, extra.result);
     MatchTransEventNameTypeExtraInt32Param(params, ++index, extra.errcode);
     MatchTransEventNameTypeExtraStrParamAnony(params, ++index, extra.socketName);
     MatchTransEventNameTypeExtraInt32Param(params, ++index, extra.dataType);
@@ -81,6 +91,12 @@ MATCHER_P2(TransValidParamArrayMatcher, inExtra, validSize, "trans valid param a
     MatchTransEventNameTypeExtraInt32Param(params, ++index, extra.channelScore);
     MatchTransEventNameTypeExtraInt32Param(params, ++index, extra.peerChannelId);
     MatchTransEventNameTypeExtraInt32Param(params, ++index, extra.btFlow);
+    MatchTransEventNameTypeExtraInt32Param(params, ++index, extra.pagingId);
+    MatchTransEventNameTypeExtraInt32Param(params, ++index, extra.callPid);
+    MatchTransEventNameTypeExtraInt32Param(params, ++index, extra.saId);
+    MatchTransEventNameTypeExtraInt32Param(params, ++index, extra.businessFlag);
+    MatchTransEventNameTypeExtraStrParam(params, ++index, extra.groupId);
+    MatchTransEventNameTypeExtraStrParam(params, ++index, extra.subGroupId);
     MatchTransEventNameTypeExtraStrParamAnony(params, ++index, extra.peerNetworkId);
     MatchTransEventNameTypeExtraStrParamAnony(params, ++index, extra.peerUdid);
     MatchTransEventNameTypeExtraStrParam(params, ++index, extra.peerDevVer);
@@ -88,6 +104,8 @@ MATCHER_P2(TransValidParamArrayMatcher, inExtra, validSize, "trans valid param a
     MatchTransEventNameTypeExtraStrParam(params, ++index, extra.callerPkg);
     MatchTransEventNameTypeExtraStrParam(params, ++index, extra.calleePkg);
     MatchTransEventNameTypeExtraStrParam(params, ++index, extra.firstTokenName);
+    MatchTransEventNameTypeExtraStrParamAnony(params, ++index, extra.callerAccountId);
+    MatchTransEventNameTypeExtraStrParamAnony(params, ++index, extra.calleeAccountId);
     MatchTransEventNameTypeExtraInt64Param(params, ++index, extra.firstTokenId);
     MatchTransEventNameTypeExtraInt32Param(params, ++index, extra.firstTokenType);
     MatchTransEventNameTypeExtraStrParam(params, ++index, extra.trafficStats);
@@ -99,6 +117,22 @@ MATCHER_P2(TransValidParamArrayMatcher, inExtra, validSize, "trans valid param a
     MatchTransEventNameTypeExtraInt32Param(params, ++index, extra.minBW);
     MatchTransEventNameTypeExtraInt32Param(params, ++index, extra.maxLatency);
     MatchTransEventNameTypeExtraInt32Param(params, ++index, extra.minLatency);
+    MatchTransEventNameTypeExtraUint8Param(params, ++index, extra.localStaChload);
+    MatchTransEventNameTypeExtraUint8Param(params, ++index, extra.remoteStaChload);
+    MatchTransEventNameTypeExtraUint8Param(params, ++index, extra.localHmlChload);
+    MatchTransEventNameTypeExtraUint8Param(params, ++index, extra.remoteHmlChload);
+    MatchTransEventNameTypeExtraUint8Param(params, ++index, extra.localP2pChload);
+    MatchTransEventNameTypeExtraUint8Param(params, ++index, extra.remoteP2pChload);
+    MatchTransEventNameTypeExtraUint8Param(params, ++index, extra.localStaChannel);
+    MatchTransEventNameTypeExtraUint8Param(params, ++index, extra.remoteStaChannel);
+    MatchTransEventNameTypeExtraUint8Param(params, ++index, extra.hmlChannel);
+    MatchTransEventNameTypeExtraUint8Param(params, ++index, extra.localP2pChannel);
+    MatchTransEventNameTypeExtraUint8Param(params, ++index, extra.remoteP2pChannel);
+    MatchTransEventNameTypeExtraInt32Param(params, ++index, extra.localIsDbac);
+    MatchTransEventNameTypeExtraInt32Param(params, ++index, extra.remoteIsDbac);
+    MatchTransEventNameTypeExtraInt32Param(params, ++index, extra.localIsDbdc);
+    MatchTransEventNameTypeExtraInt32Param(params, ++index, extra.remoteIsDbdc);
+    MatchTransEventNameTypeExtraStrParam(params, ++index, extra.conCurrentId);
     EXPECT_EQ(++index, validSize);
     return true;
 }
@@ -108,14 +142,47 @@ MATCHER_P2(TransInvalidParamArrayMatcher, inExtra, validSize, "trans invalid par
     const auto *params = static_cast<const HiSysEventParam *>(arg);
     params += SOFTBUS_ASSIGNER_SIZE; // Skip softbus params, they are matched by SoftbusParamArrayMatcher
     auto extra = static_cast<TransEventExtra>(inExtra);
-    int32_t index = 0;
+    int32_t index = 3;
     MatchTransEventNameTypeExtraInt32Param(params, index, ((extra.result < 0) ? (-extra.result) : extra.result));
     MatchTransEventNameTypeExtraInt32Param(params, ++index, ((extra.errcode < 0) ? (-extra.errcode) : extra.errcode));
-    ++index;
-    int32_t num = 25;
-    EXPECT_STREQ(params[index].name, TRANS_ASSIGNERS[num].name);
+    int32_t num = 36;
+    EXPECT_STREQ(params[++index].name, TRANS_ASSIGNERS[num].name);
     EXPECT_EQ(params[index].t, TRANS_ASSIGNERS[num].type);
     EXPECT_EQ(params[index].v.i64, extra.firstTokenId);
+    num = 47;
+    EXPECT_STREQ(params[++index].name, TRANS_ASSIGNERS[num].name);
+    EXPECT_EQ(params[index].t, TRANS_ASSIGNERS[num].type);
+    EXPECT_EQ(params[index].v.i64, extra.localStaChload);
+    EXPECT_STREQ(params[++index].name, TRANS_ASSIGNERS[++num].name);
+    EXPECT_EQ(params[index].t, TRANS_ASSIGNERS[num].type);
+    EXPECT_EQ(params[index].v.i64, extra.remoteStaChload);
+    EXPECT_STREQ(params[++index].name, TRANS_ASSIGNERS[++num].name);
+    EXPECT_EQ(params[index].t, TRANS_ASSIGNERS[num].type);
+    EXPECT_EQ(params[index].v.i64, extra.localHmlChload);
+    EXPECT_STREQ(params[++index].name, TRANS_ASSIGNERS[++num].name);
+    EXPECT_EQ(params[index].t, TRANS_ASSIGNERS[num].type);
+    EXPECT_EQ(params[index].v.i64, extra.remoteHmlChload);
+    EXPECT_STREQ(params[++index].name, TRANS_ASSIGNERS[++num].name);
+    EXPECT_EQ(params[index].t, TRANS_ASSIGNERS[num].type);
+    EXPECT_EQ(params[index].v.i64, extra.localP2pChload);
+    EXPECT_STREQ(params[++index].name, TRANS_ASSIGNERS[++num].name);
+    EXPECT_EQ(params[index].t, TRANS_ASSIGNERS[num].type);
+    EXPECT_EQ(params[index].v.i64, extra.remoteP2pChload);
+    EXPECT_STREQ(params[++index].name, TRANS_ASSIGNERS[++num].name);
+    EXPECT_EQ(params[index].t, TRANS_ASSIGNERS[num].type);
+    EXPECT_EQ(params[index].v.i64, extra.localStaChannel);
+    EXPECT_STREQ(params[++index].name, TRANS_ASSIGNERS[++num].name);
+    EXPECT_EQ(params[index].t, TRANS_ASSIGNERS[num].type);
+    EXPECT_EQ(params[index].v.i64, extra.remoteStaChannel);
+    EXPECT_STREQ(params[++index].name, TRANS_ASSIGNERS[++num].name);
+    EXPECT_EQ(params[index].t, TRANS_ASSIGNERS[num].type);
+    EXPECT_EQ(params[index].v.i64, extra.hmlChannel);
+    EXPECT_STREQ(params[++index].name, TRANS_ASSIGNERS[++num].name);
+    EXPECT_EQ(params[index].t, TRANS_ASSIGNERS[num].type);
+    EXPECT_EQ(params[index].v.i64, extra.localP2pChannel);
+    EXPECT_STREQ(params[++index].name, TRANS_ASSIGNERS[++num].name);
+    EXPECT_EQ(params[index].t, TRANS_ASSIGNERS[num].type);
+    EXPECT_EQ(params[index].v.i64, extra.remoteP2pChannel);
     EXPECT_EQ(++index, validSize);
     return true;
 }

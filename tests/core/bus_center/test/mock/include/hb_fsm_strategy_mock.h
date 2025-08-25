@@ -26,6 +26,7 @@
 #include "lnn_heartbeat_medium_mgr.h"
 #include "lnn_heartbeat_utils.h"
 #include "lnn_state_machine.h"
+#include "softbus_adapter_thread.h"
 
 namespace OHOS {
 class HeartBeatFSMStrategyInterface {
@@ -56,7 +57,7 @@ public:
     virtual int32_t LnnPostStopMsgToHbFsm(LnnHeartbeatFsm *hbFsm, LnnHeartbeatType type) = 0;
     virtual int32_t LnnStopHeartbeatFsm(LnnHeartbeatFsm *hbFsm) = 0;
     virtual void LnnRemoveSendEndMsg(
-        LnnHeartbeatFsm *hbFsm, LnnHeartbeatType type, bool wakeupFlag, bool isRelay, bool *isRemoved) = 0;
+        LnnHeartbeatFsm *hbFsm, LnnProcessSendOnceMsgPara *msg, bool wakeupFlag, bool *isRemoved) = 0;
     virtual int32_t LnnPostNextSendOnceMsgToHbFsm(
         LnnHeartbeatFsm *hbFsm, const LnnProcessSendOnceMsgPara *para, uint64_t delayMillis) = 0;
     virtual void LnnRemoveProcessSendOnceMsg(
@@ -68,6 +69,11 @@ public:
     virtual bool IsFeatureSupport(uint64_t feature, FeatureCapability capaBit) = 0;
     virtual uint32_t GenerateRandomNumForHb(uint32_t randMin, uint32_t randMax) = 0;
     virtual bool LnnIsMultiDeviceOnline(void) = 0;
+    virtual int32_t SoftBusMutexLockInner(SoftBusMutex *mutex) = 0;
+    virtual int32_t LnnPostTransStateMsgToHbFsm(LnnHeartbeatFsm *hbFsm, LnnHeartbeatEventType evtType) = 0;
+    virtual int32_t LnnPostUpdateSendInfoMsgToHbFsm(LnnHeartbeatFsm *hbFsm, LnnHeartbeatUpdateInfoType type) = 0;
+    virtual int32_t LnnGetLocalNumInfo(InfoKey key, int32_t *info);
+    virtual bool LnnIsNeedInterceptBroadcast(bool disableGlass);
 };
 
 class HeartBeatFSMStrategyInterfaceMock : public HeartBeatFSMStrategyInterface {
@@ -96,7 +102,7 @@ public:
     MOCK_METHOD2(LnnRemoveCheckDevStatusMsg, void(LnnHeartbeatFsm *, LnnCheckDevStatusMsgPara *));
     MOCK_METHOD2(LnnPostStopMsgToHbFsm, int32_t(LnnHeartbeatFsm *, LnnHeartbeatType));
     MOCK_METHOD1(LnnStopHeartbeatFsm, int32_t(LnnHeartbeatFsm *));
-    MOCK_METHOD5(LnnRemoveSendEndMsg, void(LnnHeartbeatFsm *, LnnHeartbeatType, bool, bool, bool *));
+    MOCK_METHOD4(LnnRemoveSendEndMsg, void(LnnHeartbeatFsm *, LnnProcessSendOnceMsgPara *, bool, bool *));
     MOCK_METHOD3(
         LnnPostNextSendOnceMsgToHbFsm, int32_t(LnnHeartbeatFsm *, const LnnProcessSendOnceMsgPara *, uint64_t));
     MOCK_METHOD3(LnnRemoveProcessSendOnceMsg, void(LnnHeartbeatFsm *, LnnHeartbeatType, LnnHeartbeatStrategyType));
@@ -107,6 +113,11 @@ public:
     MOCK_METHOD2(IsFeatureSupport, bool(uint64_t, FeatureCapability));
     MOCK_METHOD2(GenerateRandomNumForHb, uint32_t(uint32_t, uint32_t));
     MOCK_METHOD0(LnnIsMultiDeviceOnline, bool());
+    MOCK_METHOD1(SoftBusMutexLockInner, int32_t(SoftBusMutex *));
+    MOCK_METHOD2(LnnPostTransStateMsgToHbFsm, int32_t(LnnHeartbeatFsm *, LnnHeartbeatEventType));
+    MOCK_METHOD2(LnnPostUpdateSendInfoMsgToHbFsm, int32_t(LnnHeartbeatFsm *, LnnHeartbeatUpdateInfoType));
+    MOCK_METHOD2(LnnGetLocalNumInfo, int32_t(InfoKey key, int32_t *info));
+    MOCK_METHOD1(LnnIsNeedInterceptBroadcast, bool(bool));
 };
 } // namespace OHOS
 #endif // HEARTBEAT_FSM_STRATEGY_H

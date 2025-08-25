@@ -16,9 +16,6 @@
 #ifndef TRANS_CHANNEL_CALLBACK_H
 #define TRANS_CHANNEL_CALLBACK_H
 
-#include <stdint.h>
-
-#include "session.h"
 #include "softbus_def.h"
 #include "softbus_trans_def.h"
 

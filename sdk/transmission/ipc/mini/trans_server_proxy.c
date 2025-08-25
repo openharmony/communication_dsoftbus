@@ -32,13 +32,20 @@ void TransServerProxyDeInit(void)
     return;
 }
 
-int32_t ServerIpcCreateSessionServer(const char *pkgName, const char *sessionName)
+void TransServerProxyClear(void)
 {
+    return;
+}
+
+int32_t ServerIpcCreateSessionServer(const char *pkgName, const char *sessionName, uint64_t timestamp)
+{
+    (void)timestamp;
     return TransCreateSessionServer(pkgName, sessionName, 0, 0);
 }
 
-int32_t ServerIpcRemoveSessionServer(const char *pkgName, const char *sessionName)
+int32_t ServerIpcRemoveSessionServer(const char *pkgName, const char *sessionName, uint64_t timestamp)
 {
+    (void)timestamp;
     return TransRemoveSessionServer(pkgName, sessionName);
 }
 
@@ -57,7 +64,13 @@ int32_t ServerIpcOpenAuthSession(const char *sessionName, const ConnectionAddr *
     if (!LnnConvertAddrToOption(addrInfo, &connOpt)) {
         return SOFTBUS_MEM_ERR;
     }
-    return TransOpenAuthChannel(sessionName, &connOpt, "");
+    ConnectParam param;
+    (void)memset_s(&param, sizeof(ConnectParam), 0, sizeof(ConnectParam));
+    if (addrInfo->type == CONNECTION_ADDR_BLE) {
+        param.blePriority = addrInfo->info.ble.priority;
+    }
+
+    return TransOpenAuthChannel(sessionName, &connOpt, "", &param);
 }
 
 int32_t ServerIpcNotifyAuthSuccess(int32_t channelId, int32_t channelType)

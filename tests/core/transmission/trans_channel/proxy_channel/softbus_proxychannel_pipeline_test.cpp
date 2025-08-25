@@ -13,9 +13,10 @@
  * limitations under the License.
  */
 
+#include <gmock/gmock.h>
 #include <securec.h>
 
-#include "gtest/gtest.h"
+#include "cJSON.h"
 #include "lnn_lane_link.h"
 #include "message_handler.h"
 #include "session.h"
@@ -27,7 +28,7 @@
 #include "softbus_protocol_def.h"
 #include "softbus_proxychannel_common.h"
 #include "softbus_proxychannel_control.h"
-#include "softbus_proxychannel_pipeline.h"
+#include "softbus_proxychannel_message.h"
 #include "softbus_proxychannel_pipeline.c"
 #include "softbus_proxychannel_session.h"
 #include "softbus_proxychannel_transceiver.h"
@@ -41,8 +42,48 @@ using namespace testing;
 using namespace testing::ext;
 using namespace std;
 
+class SoftbusTransProxyPipelineInterface {
+public:
+
+    virtual cJSON *cJSON_CreateObject(void) = 0;
+};
+
+class SoftbusTransProxyPipelineMock : public SoftbusTransProxyPipelineInterface {
+public:
+    static SoftbusTransProxyPipelineMock &GetMockObj(void)
+    {
+        return *gmock_;
+    }
+    SoftbusTransProxyPipelineMock();
+    ~SoftbusTransProxyPipelineMock();
+
+    MOCK_METHOD(cJSON *, cJSON_CreateObject, (), (override));
+
+private:
+    static SoftbusTransProxyPipelineMock *gmock_;
+};
+
+SoftbusTransProxyPipelineMock *SoftbusTransProxyPipelineMock::gmock_;
+
+SoftbusTransProxyPipelineMock::SoftbusTransProxyPipelineMock()
+{
+    gmock_ = this;
+}
+
+SoftbusTransProxyPipelineMock::~SoftbusTransProxyPipelineMock()
+{
+    gmock_ = nullptr;
+}
+
+cJSON *cJSON_CreateObject()
+{
+    return SoftbusTransProxyPipelineMock::GetMockObj().cJSON_CreateObject();
+}
+
 namespace OHOS {
 
+#define TEST_CHANNEL_ID 1124
+#define SLEEP_TIME 5
 
 class SoftbusProxyChannelPipelineTest : public testing::Test {
 public:
@@ -82,8 +123,11 @@ void SoftbusProxyChannelPipelineTest::SetUpTestCase(void)
     EXPECT_EQ(SOFTBUS_OK, ret);
 }
 
-void SoftbusProxyChannelPipelineTest::TearDownTestCase(void)
+void SoftbusProxyChannelPipelineTest::TearDownTestCase(void) {}
+
+static void testFunc(SoftBusMessage *msg)
 {
+    (void)msg;
 }
 
 static void OnProxyChannelOpened(int32_t channelRequestId, int32_t channelId)
@@ -275,7 +319,11 @@ HWTEST_F(SoftbusProxyChannelPipelineTest, TransProxyPipelineCloseChannelDelayTes
 {
     int32_t channelId = INVALID_CHANNEL_ID;
     int32_t ret = TransProxyPipelineCloseChannelDelay(channelId);
-    EXPECT_EQ(SOFTBUS_INVALID_PARAM, ret);
+    EXPECT_EQ(ret, SOFTBUS_INVALID_PARAM);
+
+    channelId = TEST_CHANNEL_ID;
+    ret = TransProxyPipelineCloseChannelDelay(channelId);
+    EXPECT_EQ(ret, SOFTBUS_OK);
 }
 
 /**
@@ -290,5 +338,147 @@ HWTEST_F(SoftbusProxyChannelPipelineTest, InnerOnChannelOpenedTest001, TestSize.
     int32_t channelId = INVALID_CHANNEL_ID;
     int32_t ret = TransProxyPipelineCloseChannelDelay(channelId);
     EXPECT_EQ(SOFTBUS_INVALID_PARAM, ret);
+}
+
+/**
+  * @tc.name: CompareByRequestIdTest001
+  * @tc.desc: CompareByRequestId function test
+  * @tc.type: FUNC
+  * @tc.require:
+  */
+HWTEST_F(SoftbusProxyChannelPipelineTest, CompareByRequestIdTest001, TestSize.Level1)
+{
+    struct PipelineChannelItem *item =
+        static_cast<struct PipelineChannelItem *>(SoftBusCalloc(sizeof(struct PipelineChannelItem)));
+    EXPECT_NE(item, nullptr);
+
+    int32_t param = 1;
+    item->requestId = 1;
+
+    bool flag = CompareByRequestId(static_cast<const struct PipelineChannelItem *>(item), &param);
+    EXPECT_EQ(flag, true);
+
+    flag = CompareByUuid(static_cast<const struct PipelineChannelItem *>(item), &param);
+    EXPECT_EQ(flag, false);
+    SoftBusFree(item);
+}
+
+/**
+  * @tc.name: TransProxyPipelineHandleMessageTest001
+  * @tc.desc: TransProxyPipelineHandleMessage function test
+  * @tc.type: FUNC
+  * @tc.require:
+  */
+HWTEST_F(SoftbusProxyChannelPipelineTest, TransProxyPipelineHandleMessageTest001, TestSize.Level1)
+{
+    SoftBusMessage msg;
+    (void)memset_s(&msg, sizeof(SoftBusMessage), 0, sizeof(SoftBusMessage));
+    msg.FreeMessage = testFunc;
+    msg.what = LOOPER_MSG_TYPE_OPEN_CHANNEL;
+    msg.arg1 = 1;
+    char *clone = static_cast<char *>(SoftBusCalloc(UUID_BUF_LEN));
+    EXPECT_NE(clone, nullptr);
+    const char *uid = "111"; // test value
+    (void)strcpy_s(clone, UUID_BUF_LEN, uid);
+    msg.obj = clone;
+    TransProxyPipelineHandleMessage(&msg);
+
+    msg.what = LOOPER_MSG_TYPE_DELEY_CLOSE_CHANNEL;
+    TransProxyPipelineHandleMessage(&msg);
+
+    msg.what = LOOPER_MSG_TYPE_ON_CHANNEL_OPEN_FAILED;
+    TransProxyPipelineHandleMessage(&msg);
+
+    msg.what = LOOPER_MSG_TYPE_ON_CHANNEL_OPENED;
+    TransProxyPipelineHandleMessage(&msg);
+
+    msg.what = static_cast<PipelineLooperMsgType>(5); // test value
+    TransProxyPipelineHandleMessage(&msg);
+}
+
+/**
+  * @tc.name: TransProxyPipelineOnChannelOpenedTest002
+  * @tc.desc: TransProxyPipelineOnChannelOpened function test
+  * @tc.type: FUNC
+  * @tc.require:
+  */
+HWTEST_F(SoftbusProxyChannelPipelineTest, TransProxyPipelineOnChannelOpenedTest002, TestSize.Level1)
+{
+    const char *uuid = "111111111"; // test value
+    int32_t channelId = TEST_CHANNEL_ID;
+    unsigned char isServer = 1;
+    int32_t ret = TransProxyPipelineOnChannelOpened(channelId, uuid, isServer);
+    EXPECT_EQ(ret, SOFTBUS_OK);
+}
+
+/**
+  * @tc.name: TransProxyPipelineCloseChannelTest002
+  * @tc.desc: TransProxyPipelineCloseChannel function test
+  * @tc.type: FUNC
+  * @tc.require:
+  */
+HWTEST_F(SoftbusProxyChannelPipelineTest, TransProxyPipelineCloseChannelTest002, TestSize.Level1)
+{
+    int32_t channelId = TEST_CHANNEL_ID;
+    PipelineChannelItem item;
+    (void)memset_s(&item, sizeof(PipelineChannelItem), 0, sizeof(PipelineChannelItem));
+    item.requestId = 1;
+    const char *uuid = "1111111111"; // test value
+
+    int32_t ret = InnerSaveChannel(channelId, uuid);
+    EXPECT_EQ(ret, SOFTBUS_OK);
+    ret = TransProxyPipelineCloseChannel(channelId);
+    EXPECT_NE(ret, SOFTBUS_OK);
+}
+
+/**
+  * @tc.name: TransProxyPipelineOpenChannelTest002
+  * @tc.desc: TransProxyPipelineOpenChannel function test
+  * @tc.type: FUNC
+  * @tc.require:
+  */
+HWTEST_F(SoftbusProxyChannelPipelineTest, TransProxyPipelineOpenChannelTest002, TestSize.Level1)
+{
+    char networkId[SESSIONKEYSIZE] = {0};
+    (void)strcpy_s(networkId, SESSIONKEYSIZE, TEST_CHANNEL_INDENTITY);
+    TransProxyPipelineChannelOption option = {
+        .bleDirect = false,
+    };
+
+    ITransProxyPipelineCallback channelCallback = {
+        .onChannelOpened = OnProxyChannelOpened,
+        .onChannelOpenFailed = OnProxyChannelOpenFailed,
+    };
+
+    int32_t ret = TransProxyPipelineOpenChannel(TEST_NUMBER_THREE, networkId, &option, &channelCallback);
+    EXPECT_EQ(ret, SOFTBUS_OK);
+    sleep(SLEEP_TIME);
+}
+
+/**
+  * @tc.name: TransProxyPipelineOnChannelOpenFailedTest001
+  * @tc.desc: TransProxyPipelineOnChannelOpenFailed
+  * @tc.type: FUNC
+  * @tc.require:
+  */
+HWTEST_F(SoftbusProxyChannelPipelineTest, TransProxyPipelineOnChannelOpenFailedTest001, TestSize.Level1)
+{
+    const char *uuid = "nfnwo385487wnfo2901";
+    EXPECT_NO_FATAL_FAILURE(TransProxyPipelineOnChannelOpenFailed(3088, uuid));
+}
+
+/**
+  * @tc.name: TransProxyPackHandshakeMsgTest001
+  * @tc.desc: TransProxyPackHandshakeMsg
+  * @tc.type: FUNC
+  * @tc.require:
+  */
+HWTEST_F(SoftbusProxyChannelPipelineTest, TransProxyPackHandshakeMsgTest001, TestSize.Level1)
+{
+    SoftbusTransProxyPipelineMock networkObj;
+    EXPECT_CALL(networkObj, cJSON_CreateObject).WillOnce(Return(nullptr));
+
+    char *ret = TransProxyPackHandshakeErrMsg(SOFTBUS_OK);
+    EXPECT_EQ(ret, nullptr);
 }
 } // namespace OHOS

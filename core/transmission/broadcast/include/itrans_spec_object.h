@@ -17,7 +17,6 @@
 #define OHOS_ITRANS_SPEC_OBJECT_H
 
 #include "iremote_broker.h"
-#include "session.h"
 
 namespace OHOS {
 class ITransSpecObject : public IRemoteBroker {

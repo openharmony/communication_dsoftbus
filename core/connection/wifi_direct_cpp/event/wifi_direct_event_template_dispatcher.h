@@ -15,8 +15,8 @@
 #ifndef WIFI_DIRECT_EVENT_TEMPLATE_DISPATCHER_H
 #define WIFI_DIRECT_EVENT_TEMPLATE_DISPATCHER_H
 
-#include <functional>
-#include "conn_log.h"
+#include <typeinfo>
+#include "command/command_factory.h"
 #include "wifi_direct_event_queue.h"
 #include "wifi_direct_event_wrapper.h"
 
@@ -29,6 +29,7 @@ public:
         : queue_(queue), prev_(prev), func_(std::forward<Func>(func)), chained_(false)
     {
         prev->chained_ = true;
+        typeName_ = typeid(Content).name();
     }
 
     ~WifiDirectEventTemplateDispatcher() noexcept(false)
@@ -61,8 +62,8 @@ private:
 
     bool Dispatch(const std::shared_ptr<WifiDirectEventBase> &content)
     {
-        auto wrapper = dynamic_cast<WifiDirectEventWrapper<Content> *>(content.get());
-        if (wrapper != nullptr) {
+        if (content != nullptr && content->getContentTypeid() == typeName_) {
+            auto wrapper = static_cast<WifiDirectEventWrapper<Content> *>(content.get());
             func_(wrapper->content_);
             return true;
         }
@@ -73,6 +74,7 @@ private:
     PrevDispatcher *prev_;
     Func func_;
     bool chained_;
+    std::string typeName_;
 };
 }
 #endif

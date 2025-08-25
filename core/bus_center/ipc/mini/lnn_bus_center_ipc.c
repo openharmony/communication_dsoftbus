@@ -27,15 +27,16 @@
 #include "softbus_error_code.h"
 
 static int32_t OnRefreshDeviceFound(const char *pkgName, const DeviceInfo *device,
-    const InnerDeviceInfoAddtions *additions);
+    const InnerDeviceInfoAddtions *additions, int32_t subscribeId);
 
 static IServerDiscInnerCallback g_discInnerCb = {
     .OnServerDeviceFound = OnRefreshDeviceFound,
 };
 
 static int32_t OnRefreshDeviceFound(const char *pkgName, const DeviceInfo *device,
-    const InnerDeviceInfoAddtions *additions)
+    const InnerDeviceInfoAddtions *additions, int32_t subscribeId)
 {
+    (void)subscribeId;
     DeviceInfo newDevice;
     if (memcpy_s(&newDevice, sizeof(DeviceInfo), device, sizeof(DeviceInfo)) != EOK) {
         LNN_LOGE(LNN_EVENT, "copy new device info error");
@@ -46,11 +47,11 @@ static int32_t OnRefreshDeviceFound(const char *pkgName, const DeviceInfo *devic
     return SOFTBUS_OK;
 }
 
-int32_t LnnIpcServerJoin(const char *pkgName, int32_t callingPid, void *addr, uint32_t addrTypeLen)
+int32_t LnnIpcServerJoin(const char *pkgName, int32_t callingPid, void *addr, uint32_t addrTypeLen, bool isForceJoin)
 {
     (void)callingPid;
     (void)addrTypeLen;
-    return LnnServerJoin((ConnectionAddr *)addr, pkgName);
+    return LnnServerJoin((ConnectionAddr *)addr, pkgName, isForceJoin);
 }
 
 int32_t LnnIpcServerLeave(const char *pkgName, int32_t callingPid, const char *networkId)
@@ -106,29 +107,27 @@ int32_t LnnIpcStopTimeSync(const char *pkgName, const char *targetNetworkId, int
     return LnnStopTimeSync(pkgName, targetNetworkId, callingPid);
 }
 
-int32_t LnnIpcPublishLNN(const char *pkgName, const PublishInfo *info)
+int32_t LnnIpcPublishLNN(const char *pkgName, int32_t callingPid, const PublishInfo *info)
 {
-    return LnnPublishService(pkgName, info, false);
+    return LnnPublishService(pkgName, info, false, callingPid);
 }
 
-int32_t LnnIpcStopPublishLNN(const char *pkgName, int32_t publishId)
+int32_t LnnIpcStopPublishLNN(const char *pkgName, int32_t callingPid, int32_t publishId)
 {
-    return LnnUnPublishService(pkgName, publishId, false);
+    return LnnUnPublishService(pkgName, publishId, false, callingPid);
 }
 
 int32_t LnnIpcRefreshLNN(const char *pkgName, int32_t callingPid, const SubscribeInfo *info)
 {
-    (void)callingPid;
     InnerCallback callback = {
         .serverCb = g_discInnerCb,
     };
-    return LnnStartDiscDevice(pkgName, info, &callback, false);
+    return LnnStartDiscDevice(pkgName, info, &callback, false, callingPid);
 }
 
 int32_t LnnIpcStopRefreshLNN(const char *pkgName, int32_t callingPid, int32_t refreshId)
 {
-    (void)callingPid;
-    return LnnStopDiscDevice(pkgName, refreshId, false);
+    return LnnStopDiscDevice(pkgName, refreshId, false, callingPid);
 }
 
 int32_t LnnIpcActiveMetaNode(const MetaNodeConfigInfo *info, char *metaNodeId)
@@ -232,4 +231,13 @@ int32_t LnnIpcNotifyTimeSyncResult(const char *pkgName, int32_t pid, const void 
 void BusCenterServerDeathCallback(const char *pkgName)
 {
     (void)pkgName;
+}
+
+int32_t LnnIpcSetDisplayName(const char *pkgName, const char *nameData, uint32_t len)
+{
+    (void)pkgName;
+    (void)nameData;
+    (void)len;
+    LNN_LOGI(LNN_EVENT, "not implement");
+    return SOFTBUS_OK;
 }

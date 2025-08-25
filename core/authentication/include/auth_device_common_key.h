@@ -16,28 +16,14 @@
 #ifndef AUTH_DEVICE_COMMON_KEY_H
 #define AUTH_DEVICE_COMMON_KEY_H
 
-#include <stdint.h>
-#include <stdbool.h>
-#include "auth_interface.h"
 #include "auth_session_key.h"
-#include "lnn_node_info.h"
-#include "softbus_def.h"
-#include "softbus_common.h"
+#include "auth_device_common_key_struct.h"
 
 #ifdef __cplusplus
 #if __cplusplus
 extern "C" {
 #endif
 #endif
-
-typedef struct {
-    bool isServerSide;
-    int32_t keyType;
-    int64_t keyIndex;
-    uint8_t deviceKey[SESSION_KEY_LENGTH];
-    uint32_t keyLen;
-    bool isOldKey;
-} AuthDeviceKeyInfo;
 
 void AuthLoadDeviceKey(void);
 void AuthUpdateCreateTime(const char *udidHash, int32_t keyType, bool isServer);

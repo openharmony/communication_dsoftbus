@@ -19,6 +19,9 @@
 #include <stdbool.h>
 #include <stdint.h>
 
+#include "device_auth.h"
+#include "softbus_common.h"
+
 #ifdef __cplusplus
 #if __cplusplus
 extern "C" {
@@ -30,6 +33,22 @@ extern "C" {
 #define GROUP_TYPE_MESH (1 << 2)
 #define GROUP_TYPE_COMPATIBLE (1 << 3)
 #define PC_PROOF_NON_CONSISTENT_ERRCODE 2046820418
+#define MAX_CRED_ID_SIZE 300
+
+typedef struct {
+    char udid[UDID_BUF_LEN];
+    char uid[MAX_ACCOUNT_HASH_LEN];
+    char credId[MAX_CRED_ID_SIZE];
+    int32_t userId;
+    DeviceAuthCallback *cb;
+    uint16_t deviceTypeId;
+} HiChainAuthParam;
+
+typedef enum {
+    HICHAIN_AUTH_DEVICE = 0,
+    HICHAIN_AUTH_IDENTITY_SERVICE,
+    HICHAIN_AUTH_BUTT
+} HiChainAuthMode;
 
 typedef struct {
     void (*onGroupCreated)(const char *groupId, int32_t groupType);
@@ -40,8 +59,10 @@ typedef struct {
 int32_t RegTrustDataChangeListener(const TrustDataChangeListener *listener);
 void UnregTrustDataChangeListener(void);
 
-int32_t HichainStartAuth(int64_t authSeq, const char *udid, const char *uid, int32_t userId);
-int32_t HichainProcessData(int64_t authSeq, const uint8_t *data, uint32_t len);
+int32_t HichainStartAuth(int64_t authSeq, HiChainAuthParam *hiChainParam, HiChainAuthMode authMode);
+int32_t HichainProcessData(int64_t authSeq, const uint8_t *data, uint32_t len, HiChainAuthMode authMode);
+int32_t HichainProcessUkNegoData(
+    int64_t authSeq, const uint8_t *data, uint32_t len, HiChainAuthMode authMode, DeviceAuthCallback *cb);
 uint32_t HichainGetJoinedGroups(int32_t groupType);
 int32_t RegHichainSaStatusListener(void);
 int32_t UnRegHichainSaStatusListener(void);

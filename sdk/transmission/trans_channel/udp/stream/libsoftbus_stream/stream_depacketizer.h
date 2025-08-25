@@ -16,11 +16,7 @@
 #ifndef STREAM_DEPACKETTIZER_H
 #define STREAM_DEPACKETTIZER_H
 
-#include <memory>
-#include <utility>
-
 #include "stream_packet_header.h"
-#include "i_stream.h"
 
 namespace Communication {
 namespace SoftBus {

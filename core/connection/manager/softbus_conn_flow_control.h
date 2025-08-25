@@ -16,11 +16,8 @@
 #ifndef SOFTBUS_FLOW_CONTROL_H
 #define SOFTBUS_FLOW_CONTROL_H
 
-#include "stdint.h"
-
 #include "common_list.h"
 #include "softbus_adapter_thread.h"
-#include "softbus_error_code.h"
 
 #ifdef __cplusplus
 extern "C" {

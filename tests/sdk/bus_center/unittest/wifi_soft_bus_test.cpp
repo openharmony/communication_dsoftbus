@@ -74,7 +74,7 @@ static void WaitSacnResult(void)
 
 HWTEST_F(WifiSoftBusTest, WifiSoftBusGetWifiScanListTest001, TestSize.Level0)
 {
-    SoftBusWifiScanInfo *result = NULL;
+    SoftBusWifiScanInfo *result = nullptr;
     unsigned int size = WIFI_MAX_SCAN_HOTSPOT_LIMIT;
     int32_t ret;
 
@@ -97,7 +97,7 @@ HWTEST_F(WifiSoftBusTest, WifiSoftBusGetWifiScanListTest001, TestSize.Level0)
 
     EXPECT_TRUE(SoftBusGetWifiScanList(&result, &size) == SOFTBUS_OK);
 
-    EXPECT_TRUE(result != NULL);
+    EXPECT_TRUE(result != nullptr);
     SoftBusFree(result);
     EXPECT_TRUE(SoftBusUnRegisterWifiEvent(&g_scanResultCb) == SOFTBUS_OK);
 }

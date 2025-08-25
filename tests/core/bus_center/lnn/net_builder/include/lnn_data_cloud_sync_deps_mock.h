@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2024 Huawei Device Co., Ltd.
+ * Copyright (c) 2024-2025 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -19,9 +19,9 @@
 #include <gmock/gmock.h>
 #include <mutex>
 
+#include "cJSON.h"
 #include "lnn_async_callback_utils.h"
-#include "lnn_cipherkey_manager.h"
-#include "lnn_device_info_recovery.h"
+#include "lnn_data_cloud_sync_struct.h"
 #include "lnn_distributed_net_ledger.h"
 #include "lnn_heartbeat_utils.h"
 #include "softbus_utils.h"
@@ -46,6 +46,9 @@ public:
         unsigned char *outBuf, uint32_t outBufLen, const char *inBuf, uint32_t inLen);
     virtual int32_t LnnAsyncCallbackDelayHelper(
         SoftBusLooper *looper, LnnAsyncCallbackFunc callback, void *para, uint64_t delayMillis);
+    virtual int32_t LnnGetLocalNodeInfoSafe(NodeInfo *info) = 0;
+    virtual int32_t LnnPackCloudSyncAckSeq(cJSON *json, char *peerudid) = 0;
+    virtual int32_t LnnFindDeviceUdidTrustedInfoFromDb(const char *udid) = 0;
 };
 
 class LnnDataCloudSyncInterfaceMock : public LnnDataCloudSyncInterface {
@@ -65,6 +68,10 @@ public:
     MOCK_METHOD3(LnnGenerateHexStringHash, int32_t(const unsigned char *, char *, uint32_t));
     MOCK_METHOD4(ConvertHexStringToBytes, int32_t(unsigned char *, uint32_t, const char *, uint32_t));
     MOCK_METHOD4(LnnAsyncCallbackDelayHelper, int32_t(SoftBusLooper *, LnnAsyncCallbackFunc, void *, uint64_t));
+    MOCK_METHOD1(LnnGetLocalNodeInfoSafe, int32_t(NodeInfo *));
+    MOCK_METHOD2(LnnPackCloudSyncAckSeq, int32_t(cJSON *, char *));
+    MOCK_METHOD1(LnnFindDeviceUdidTrustedInfoFromDb, int32_t(const char *));
 };
 } // namespace OHOS
-#endif // LNN_AUTH_MOCK_H
+
+#endif // LNN_DATA_CLOUD_SYNC_DEPS_MOCK_H

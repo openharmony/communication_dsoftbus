@@ -18,6 +18,7 @@
 
 #include <stdint.h>
 
+#include "ble_range.h"
 #include "softbus_utils.h"
 
 #ifdef __cplusplus
@@ -32,19 +33,52 @@ extern "C" {
 #define SOFTBUS_MODEL_ID_LEN (HEXIFY_LEN(3))
 #define SOFTBUS_SUB_MODEL_ID_LEN (HEXIFY_LEN(1))
 #define SOFTBUS_NEW_MODEL_ID_LEN (HEXIFY_LEN(4))
+#define SOFTBUS_MODEL_NAME_LEN (HEXIFY_LEN(8))
+#define NETWORK_ID_BUF_LEN 65
+
+typedef enum {
+    MODULE_BLE_DISCOVERY = 1,
+    MODULE_BLE_HEARTBEAT,
+    MODULE_BLE_APPROACH,
+    MODULE_SLE_CONNECTION,
+    MODULE_UWB,
+} SoftBusRangeModule;
+
+typedef enum {
+    RANGE_SERVICE_DEFAULT = 0,
+    RANGE_SERVICE_TOUCH,
+    RANGE_SERVICE_VLINK,
+    RANGE_SERVICE_BUTT,
+} SoftBusRangeBusinessType;
 
 typedef struct {
     int8_t power;
+    bool isCycle;
+    bool isSupportNearLink;
     char identity[SOFTBUS_DEV_IDENTITY_LEN];
     char modelId[SOFTBUS_MODEL_ID_LEN];
     char subModelId[SOFTBUS_SUB_MODEL_ID_LEN];
     char newModelId[SOFTBUS_NEW_MODEL_ID_LEN];
+    char modelName[SOFTBUS_MODEL_NAME_LEN];
     int32_t rssi;
-    int32_t serviceType;
+    SoftBusRangeBusinessType serviceType;
 } SoftBusRangeParam;
+
+typedef struct {
+    SoftBusRangeModule module;
+} SoftBusRangeHandle;
+
+typedef struct {
+    void (*onRangeResult)(SoftBusRangeHandle handle, const RangeResult *result);
+} SoftBusRangeCallback;
 
 int SoftBusBleRange(SoftBusRangeParam *param, int32_t *range);
 int SoftBusGetBlePower(int8_t *power);
+int32_t SoftBusGetAdvPower(int8_t *power);
+
+int32_t SoftBusBleRangeAsync(const SoftBusRangeParam *param);
+int32_t SoftBusRegRangeCb(SoftBusRangeModule module, const SoftBusRangeCallback *callback);
+void SoftBusUnregRangeCb(SoftBusRangeModule module);
 
 #ifdef __cplusplus
 #if __cplusplus

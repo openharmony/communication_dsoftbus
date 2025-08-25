@@ -34,13 +34,13 @@
 
 #define TAG "nStackXCoAP"
 
-#define COAP_URI_BUFFER_LENGTH 64 /* the size of the buffer or variable used to save uri. */
 #define COAP_MAX_NUM_SUBSCRIBE_MODULE_COUNT 32 /* the maximum count of subscribed module */
 
 #define COAP_RECV_COUNT_INTERVAL 1000
 #define COAP_DISVOCER_MAX_RATE 200
 #define COAP_MSGID_SURVIVAL_SECONDS 100
 #define COAP_MAX_MSGID_RESERVE_NUM 100
+#define MULTICAST_ADDR "ff02::1"
 
 typedef struct {
     coap_mid_t msgId;
@@ -90,16 +90,18 @@ static int32_t CoapUriParse(const char *uriString, coap_uri_t *uriPtr)
 
     (void)memset_s(&localUri, sizeof(localUri), 0, sizeof(localUri));
     if ((uriString == NULL) || (uriPtr == NULL)) {
+        DFINDER_LOGE(TAG, "URI string or uri Ptr is null");
         return NSTACKX_EFAILED;
     }
 
     if (coap_split_uri((unsigned char *)uriString, strlen(uriString), &localUri) < 0) {
-        DFINDER_LOGE(TAG, "invalid CoAP URI");
+        DFINDER_LOGE(TAG, "coap_split_uri failed");
         return NSTACKX_EFAILED;
     }
+
 #ifdef DFINDER_SUPPORT_MULTI_COAP_SCHEME
-    if (!coap_dtls_is_supported() && localUri.scheme == COAP_URI_SCHEME_COAPS) {
-        DFINDER_LOGE(TAG, "coap uri sheme coaps with no dtls support");
+    if (localUri.scheme == COAP_URI_SCHEME_COAPS && !coap_dtls_is_supported()) {
+        DFINDER_LOGE(TAG, "COAP_URI_SCHEME_COAPS with no dtls support");
         return NSTACKX_EFAILED;
     }
     if (((localUri.scheme == COAP_URI_SCHEME_COAPS_TCP) || (localUri.scheme == COAP_URI_SCHEME_COAPS)) &&
@@ -109,33 +111,41 @@ static int32_t CoapUriParse(const char *uriString, coap_uri_t *uriPtr)
     }
 #else
     if (localUri.scheme != COAP_URI_SCHEME_COAP) {
-        DFINDER_LOGE(TAG, "coaps uri scheme not supported in this version of libcoap");
+        DFINDER_LOGE(TAG, "current libcoap only support COAP_URI_SCHEME_COAP");
         return NSTACKX_EFAILED;
     }
 #endif
+
     (void)memcpy_s(uriPtr, sizeof(coap_uri_t), &localUri, sizeof(coap_uri_t));
     return NSTACKX_EOK;
 }
 
 static coap_pdu_t *CoapPackToPdu(const CoapRequest *coapRequest, const coap_uri_t *uriPtr, coap_session_t *session)
 {
-    coap_pdu_t *pdu = NULL;
     if (coapRequest == NULL || coapRequest->remoteUrl == NULL || session == NULL) {
+        DFINDER_LOGW(TAG, "coap request or session is null");
         return NULL;
     }
-    pdu = coap_new_pdu(coapRequest->type, coapRequest->code, session);
+    coap_pdu_t *pdu = coap_new_pdu(coapRequest->type, coapRequest->code, session);
     if (pdu == NULL) {
+        DFINDER_LOGW(TAG, "coap_new_pdu failed");
         return NULL;
     }
     if (coapRequest->tokenLength) {
         if (!coap_add_token(pdu, coapRequest->tokenLength, coapRequest->token)) {
-            DFINDER_LOGW(TAG, "cannot add token to request");
+            DFINDER_LOGW(TAG, "coap_add_token failed, token len is %zu", coapRequest->tokenLength);
         }
     }
-    coap_add_option(pdu, COAP_OPTION_URI_HOST, uriPtr->host.length, uriPtr->host.s);
-    coap_add_option(pdu, COAP_OPTION_URI_PATH, uriPtr->path.length, uriPtr->path.s);
+    if (coap_add_option(pdu, COAP_OPTION_URI_HOST, uriPtr->host.length, uriPtr->host.s) == 0) {
+        DFINDER_LOGW(TAG, "coap_add_option COAP_OPTION_URI_HOST failed");
+    }
+    if (coap_add_option(pdu, COAP_OPTION_URI_PATH, uriPtr->path.length, uriPtr->path.s) == 0) {
+        DFINDER_LOGW(TAG, "coap_add_option COAP_OPTION_URI_PATH failed");
+    }
     if (coapRequest->dataLength) {
-        coap_add_data(pdu, coapRequest->dataLength, (uint8_t *)(coapRequest->data));
+        if (!coap_add_data(pdu, coapRequest->dataLength, (uint8_t *)(coapRequest->data))) {
+            DFINDER_LOGW(TAG, "coap_add_data failed, data len is %zu", coapRequest->dataLength);
+        }
     }
 
     return pdu;
@@ -151,20 +161,29 @@ static void FillCoapRequest(CoapRequest *coapRequest, uint8_t coapType, const ch
     coapRequest->dataLength = dataLen;
 }
 
+static int32_t coapServerParameterInit(CoapServerParameter *coapServerParameter, coap_address_t *dst)
+{
+    if (dst->addr.sa.sa_family == AF_INET) {
+        dst->addr.sin.sin_port = htons(COAP_DEFAULT_PORT);
+    } else {
+        dst->addr.sin6.sin6_port = htons(COAP_DEFAULT_PORT);
+    }
+    coapServerParameter->proto = COAP_PROTO_UDP;
+    coapServerParameter->dst = dst;
+    return NSTACKX_EOK;
+}
+
 static int32_t CoapSendRequestEx(CoapCtxType *ctx, uint8_t coapType, const char *url, char *data, size_t dataLen)
 {
     CoapRequest coapRequest;
     coap_session_t *session = NULL;
     coap_address_t dst = {0};
     coap_str_const_t remote;
-    int32_t tid;
-    int32_t res;
     coap_pdu_t *pdu = NULL;
     coap_uri_t coapUri;
     CoapServerParameter coapServerParameter = {0};
 
     FillCoapRequest(&coapRequest, coapType, url, data, dataLen);
-
     (void)memset_s(&remote, sizeof(remote), 0, sizeof(remote));
     (void)memset_s(&coapUri, sizeof(coapUri), 0, sizeof(coapUri));
     if (CoapUriParse(coapRequest.remoteUrl, &coapUri) != NSTACKX_EOK) {
@@ -172,16 +191,16 @@ static int32_t CoapSendRequestEx(CoapCtxType *ctx, uint8_t coapType, const char 
         return NSTACKX_EFAILED;
     }
     remote = coapUri.host;
-    res = CoapResolveAddress(&remote, &dst.addr.sa);
+    dst.addr.sa.sa_family = GetLocalIfaceAf((const struct LocalIface *)ctx->iface);
+    int32_t res = CoapResolveAddress(&remote, &dst.addr.sa);
     if (res < 0) {
         DFINDER_LOGE(TAG, "fail to resolve address");
         return NSTACKX_EFAILED;
     }
-
     dst.size = (uint32_t)res;
-    dst.addr.sin.sin_port = htons(COAP_DEFAULT_PORT);
-    coapServerParameter.proto = COAP_PROTO_UDP;
-    coapServerParameter.dst = &dst;
+    if (coapServerParameterInit(&coapServerParameter, &dst) != NSTACKX_EOK) {
+        return NSTACKX_EFAILED;
+    }
     session = CoapGetSession(ctx->ctx, GetLocalIfaceIpStr(ctx->iface), COAP_SRV_DEFAULT_PORT, &coapServerParameter);
     if (session == NULL) {
         DFINDER_LOGE(TAG, "get client session failed");
@@ -194,8 +213,8 @@ static int32_t CoapSendRequestEx(CoapCtxType *ctx, uint8_t coapType, const char 
     }
     DFINDER_LOGD("MYCOAP", "send coap pdu mid: %d", coap_pdu_get_mid(pdu));
     DFINDER_MGT_REQ_LOG(&coapRequest);
-    tid = coap_send(session, pdu);
-    if (tid == COAP_INVALID_MID) {
+    res = coap_send(session, pdu);
+    if (res == COAP_INVALID_MID) {
         DFINDER_LOGE(TAG, "coap send failed");
         goto SESSION_RELEASE;
     }
@@ -217,17 +236,29 @@ static int32_t CoapSendRequest(CoapCtxType *ctx, uint8_t coapType, const char *u
     return ret;
 }
 
-static int32_t CoapResponseService(CoapCtxType *ctx, const char *remoteUrl, uint8_t businessType)
+static int32_t CoapSetUri(uint8_t af, char *uri, size_t len, const char *ip, const char *path)
 {
-    char *data = PrepareServiceDiscover(GetLocalIfaceIpStr(ctx->iface), NSTACKX_FALSE, businessType);
-    if (data == NULL) {
-        DFINDER_LOGE(TAG, "prepare service failed");
+    char *format = af == AF_INET ? "coap://%s/%s" : "coap://[%s]/%s";
+    if (sprintf_s(uri, len, format, ip, path) < 0) {
+        DFINDER_LOGE(TAG, "format coap uri failed");
         return NSTACKX_EFAILED;
     }
 
-    // for internal auto-reply unicast, make its type to NON-confirmable
-    // reliablity depends on the number of broadcast
+    return NSTACKX_EOK;
+}
+
+static int32_t CoapResponseService(CoapCtxType *ctx, const char *remoteUrl, uint8_t businessType)
+{
+    char *data = PrepareServiceDiscover(GetLocalIfaceAf(ctx->iface), GetLocalIfaceIpStr(ctx->iface),
+        NSTACKX_FALSE, businessType, GetLocalIfaceServiceData(ctx->iface));
+    if (data == NULL) {
+        DFINDER_LOGE(TAG, "prepare service discover data fail when send response");
+        return NSTACKX_EFAILED;
+    }
+
     uint8_t coapMsgType = (ShouldAutoReplyUnicast(businessType) == NSTACKX_TRUE) ? COAP_MESSAGE_NON : COAP_MESSAGE_CON;
+    // current multicast ipv6 only support NON type
+    coapMsgType = GetLocalIfaceAf(ctx->iface) == AF_INET6 ? COAP_MESSAGE_NON : coapMsgType;
     int32_t ret = CoapSendRequest(ctx, coapMsgType, remoteUrl, data, strlen(data) + 1);
 
     cJSON_free(data);
@@ -247,7 +278,8 @@ static int32_t HndPostServiceDiscoverInner(const coap_pdu_t *request, char **rem
     const uint8_t *buf = NULL;
     IncreaseRecvDiscoverNum();
     if (g_recvDiscoverMsgNum > COAP_DISVOCER_MAX_RATE) {
-        DFINDER_LOGD(TAG, "too many dicover messages received");
+        DFINDER_LOGW(TAG, "recv disc msg num %u over limited val %d during 1s",
+            g_recvDiscoverMsgNum, COAP_DISVOCER_MAX_RATE);
         return NSTACKX_EFAILED;
     }
     if (coap_get_data(request, &size, &buf) == 0 || size == 0 || size > COAP_RXBUFFER_SIZE) {
@@ -262,13 +294,13 @@ static int32_t HndPostServiceDiscoverInner(const coap_pdu_t *request, char **rem
      */
     deviceInfo->discoveryType = (*remoteUrl != NULL) ? NSTACKX_DISCOVERY_TYPE_PASSIVE : NSTACKX_DISCOVERY_TYPE_ACTIVE;
     if (deviceInfo->mode == PUBLISH_MODE_UPLINE || deviceInfo->mode == PUBLISH_MODE_OFFLINE) {
-        DFINDER_LOGD(TAG, "peer is not DISCOVER_MODE");
+        DFINDER_LOGD(TAG, "remote dev mode %hhu, not in disc mode", deviceInfo->mode);
         NSTACKX_DeviceInfo deviceList;
         (void)memset_s(&deviceList, sizeof(NSTACKX_DeviceInfo), 0, sizeof(NSTACKX_DeviceInfo));
         if (GetNotifyDeviceInfo(&deviceList, deviceInfo) == NSTACKX_EOK) {
             NotifyDeviceFound(&deviceList, 1);
         } else {
-            DFINDER_LOGE(TAG, "GetNotifyDeviceInfo failed");
+            DFINDER_LOGE(TAG, "get notify device info failed");
         }
         return NSTACKX_EFAILED;
     }
@@ -283,6 +315,8 @@ static void CoapResponseServiceDiscovery(const char *remoteUrl, const coap_conte
             CoapCtxType *ctx = CoapGetCoapCtxType(currCtx);
             if (ctx != NULL) {
                 (void)CoapResponseService(ctx, remoteUrl, businessType);
+            } else {
+                DFINDER_LOGW(TAG, "can not get corresponding context to send coap response");
             }
         }
     } else {
@@ -311,9 +345,14 @@ static int32_t HndPostServiceDiscoverEx(coap_session_t *session, const coap_pdu_
         goto L_ERR;
     }
 
+    if (coapCtx->freeCtxLater == NSTACKX_TRUE) {
+        DFINDER_LOGE(TAG, "coapCtx is will free");
+        goto L_ERR;
+    }
+
     if (strcpy_s(deviceInfo->networkName, sizeof(deviceInfo->networkName),
         GetLocalIfaceName(coapCtx->iface)) != EOK) {
-        DFINDER_LOGE(TAG, "copy network name failed");
+        DFINDER_LOGE(TAG, "copy local network name %s fail", GetLocalIfaceName(coapCtx->iface));
         goto L_ERR;
     }
 
@@ -321,7 +360,7 @@ static int32_t HndPostServiceDiscoverEx(coap_session_t *session, const coap_pdu_
         goto L_ERR;
     }
     if (GetModeInfo() == PUBLISH_MODE_UPLINE || GetModeInfo() == PUBLISH_MODE_OFFLINE) {
-        DFINDER_LOGD(TAG, "local is not DISCOVER_MODE");
+        DFINDER_LOGD(TAG, "local dev in mode %hhu, try report discovered devices but will not reply", GetModeInfo());
         goto L_ERR;
     }
 
@@ -332,7 +371,7 @@ static int32_t HndPostServiceDiscoverEx(coap_session_t *session, const coap_pdu_
 
     g_forceUpdate = NSTACKX_FALSE;
     if (deviceInfo->mode == PUBLISH_MODE_PROACTIVE) {
-        DFINDER_LOGD(TAG, "peer is PUBLISH_MODE_PROACTIVE");
+        DFINDER_LOGD(TAG, "remote dev in mode %hhu, local dev will not reply", deviceInfo->mode);
         goto L_ERR;
     }
     CoapResponseServiceDiscovery(remoteUrl, currCtx, response, deviceInfo->businessType);
@@ -606,19 +645,25 @@ static void HndPostServiceMsg(coap_resource_t *resource, coap_session_t *session
 
 static int32_t CoapPostServiceDiscoverEx(CoapCtxType *ctx)
 {
+    if (ctx->freeCtxLater == NSTACKX_TRUE) {
+        DFINDER_LOGE(TAG, "ctx is will free");
+        return NSTACKX_EFAILED;
+    }
+
     char broadcastIp[NSTACKX_MAX_IP_STRING_LEN] = {0};
     if (GetBroadcastIp(ctx->iface, broadcastIp, sizeof(broadcastIp)) != NSTACKX_EOK) {
         DFINDER_LOGE(TAG, "get broadcast ip failed");
         return NSTACKX_EFAILED;
     }
 
-    char discoverUri[COAP_URI_BUFFER_LENGTH] = {0};
-    if (sprintf_s(discoverUri, sizeof(discoverUri), "coap://%s/%s", broadcastIp, COAP_DEVICE_DISCOVER_URI) < 0) {
-        DFINDER_LOGE(TAG, "formate uri failed");
+    char discoverUri[NSTACKX_MAX_URI_BUFFER_LENGTH] = {0};
+    if (CoapSetUri(GetLocalIfaceAf((const struct LocalIface *)ctx->iface), discoverUri, sizeof(discoverUri),
+        broadcastIp, COAP_DEVICE_DISCOVER_URI) != NSTACKX_EOK) {
         return NSTACKX_EFAILED;
     }
 
-    char *data = PrepareServiceDiscover(GetLocalIfaceIpStr(ctx->iface), NSTACKX_TRUE, GetLocalDeviceBusinessType());
+    char *data = PrepareServiceDiscover(GetLocalIfaceAf(ctx->iface), GetLocalIfaceIpStr(ctx->iface), NSTACKX_TRUE,
+        GetLocalDeviceBusinessType(), GetLocalIfaceServiceData(ctx->iface));
     if (data == NULL) {
         DFINDER_LOGE(TAG, "prepare json failed");
         return NSTACKX_EFAILED;
@@ -709,6 +754,7 @@ static void CoapServiceDiscoverTimerHandle(void *argument)
         DFINDER_LOGE(TAG, "failed when posting service discover request");
         goto L_ERR_DISCOVER;
     }
+    DFINDER_LOGD(TAG, "the %u time for device discovery", g_discoverCount + 1);
 
     /* Restart timer */
     discoverInterval = GetDiscoverInterval(g_discoverCount);
@@ -948,7 +994,7 @@ L_ERR_SEND_MSG:
 
 int32_t CoapSendServiceMsg(MsgCtx *msgCtx, const char *remoteIpStr, const struct in_addr *remoteIp)
 {
-    char uriBuffer[COAP_URI_BUFFER_LENGTH] = {0};
+    char uriBuffer[NSTACKX_MAX_URI_BUFFER_LENGTH] = {0};
     uint16_t dataLen = 0;
 
     CoapCtxType *ctx = LocalIfaceGetCoapCtxByRemoteIp(remoteIp, msgCtx->type);
@@ -992,10 +1038,9 @@ static int32_t CoapPostServiceNotificationEx(CoapCtxType *ctx)
             GetLocalIfaceName(ctx->iface));
         return NSTACKX_EFAILED;
     }
-    char notificationUri[COAP_URI_BUFFER_LENGTH] = {0};
-    if (sprintf_s(notificationUri, sizeof(notificationUri),
-        "coap://%s/%s", broadcastIp, COAP_SERVICE_NOTIFICATION_URI) < 0) {
-        DFINDER_LOGE(TAG, "format coap service notification uri failed");
+    char notificationUri[NSTACKX_MAX_URI_BUFFER_LENGTH] = {0};
+    if (CoapSetUri(GetLocalIfaceAf((const struct LocalIface *)ctx->iface), notificationUri, sizeof(notificationUri),
+        broadcastIp, COAP_SERVICE_NOTIFICATION_URI) != NSTACKX_EOK) {
         return NSTACKX_EFAILED;
     }
     char *data = PrepareServiceNotification();
@@ -1314,23 +1359,32 @@ static int32_t SendDiscoveryRspEx(CoapCtxType *ctx, const NSTACKX_ResponseSettin
         DFINDER_LOGE(TAG, "discoveryRsp remoteIp copy error");
         return NSTACKX_EFAILED;
     }
-    if (sprintf_s(remoteUrl, sizeof(remoteUrl), "coap://%s/" COAP_DEVICE_DISCOVER_URI, host) < 0) {
-        DFINDER_LOGE(TAG, "failed to get discoveryRsp remoteUrl");
+
+    if (CoapSetUri(GetLocalIfaceAf((const struct LocalIface *)ctx->iface), remoteUrl, sizeof(remoteUrl),
+        host, COAP_DEVICE_DISCOVER_URI) != NSTACKX_EOK) {
         return NSTACKX_EFAILED;
     }
-    IncreaseSequenceNumber(NSTACKX_FALSE);
+    IncreaseUcastSequenceNumber(GetLocalIfaceAf((const struct LocalIface *)ctx->iface));
     return CoapResponseService(ctx, remoteUrl, responseSettings->businessType);
 }
 
 void SendDiscoveryRsp(const NSTACKX_ResponseSettings *responseSettings)
 {
-    CoapCtxType *ctx = LocalIfaceGetCoapCtx(responseSettings->localNetworkName);
+    union InetAddr addr;
+    uint8_t af = InetGetAfType(responseSettings->remoteIp, &addr);
+    if (af == AF_ERROR) {
+        IncStatistics(STATS_SEND_SD_RESPONSE_FAILED);
+        DFINDER_LOGE(TAG, "remoteip get af type failed");
+        return;
+    }
+    CoapCtxType *ctx = LocalIfaceGetCoapCtx(af, responseSettings->localNetworkName);
     if (ctx == NULL) {
         DFINDER_LOGE(TAG, "local iface get coap context return null");
         IncStatistics(STATS_SEND_SD_RESPONSE_FAILED);
+        DFINDER_LOGE(TAG, "can not find coap ctx related to nic %s to send rsp, please check or reconnect to network",
+            responseSettings->localNetworkName);
         return;
     }
-
     if (SendDiscoveryRspEx(ctx, responseSettings) != NSTACKX_EOK) {
         IncStatistics(STATS_SEND_SD_RESPONSE_FAILED);
     }

@@ -27,7 +27,19 @@ public:
     ~BusCenterExObjProxy() = default;
 
 private:
-    static inline BrokerDelegator<BusCenterExObjProxy> delegator_;
+    int32_t EnableDiscoveryPolicy(const char *pkgName, const char *capability, bool enable,
+        const sptr<IRemoteObject> &callback);
+    int32_t SetDiscoveryPolicy(const char *capability, DiscoveryPolicy policy, const DeviceInfo *device);
+    int32_t JoinMetaNode(const char *pkgName, void *addr, CustomData *customData, uint32_t addrTypeLen,
+        const sptr<IRemoteObject> &callback);
+    int32_t SetPreLinkParam(const void *msg, const uint32_t msgLen);
+    int32_t GetPreLinkParam(void *msg, uint32_t *msgLen);
+    int32_t RegPreLinkParamListener(const char *pkgName, const sptr<IRemoteObject> &callback);
+    int32_t LeaveMetaNode(const char *pkgName, const char *metaNodeId, const sptr<IRemoteObject> &callback);
+    int32_t ResourceConflictCheck(const SoftBusResourceRequest *resource, ConflictInfo *conflict);
+    int32_t RegisterConflictListener(const char *pkgName, const sptr<IRemoteObject> &callback);
+    int32_t CtrlLNNBleHb(const char *pkgName, int32_t strategy, int32_t timeout);
+    int32_t ResolveResourceConflict(const char *pkgName, const char *deviceId);
 };
 } // namespace OHOS
 

@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2022 Huawei Device Co., Ltd.
+ * Copyright (c) 2022-2025 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -33,14 +33,12 @@ uint32_t AuthGenRequestId(void)
     return 0;
 }
 
-int32_t AuthStartVerify(const AuthConnInfo *connInfo, uint32_t requestId, const AuthVerifyCallback *callback,
-    AuthVerifyModule module, bool isFastAuth)
+int32_t AuthStartVerify(const AuthConnInfo *connInfo, const AuthVerifyParam *authVerifyParam,
+    const AuthVerifyCallback *callback)
 {
     (void)connInfo;
-    (void)requestId;
+    (void)authVerifyParam;
     (void)callback;
-    (void)module;
-    (void)isFastAuth;
     AUTH_LOGW(AUTH_CONN, "not implement");
     return SOFTBUS_NOT_IMPLEMENT;
 }
@@ -258,8 +256,9 @@ bool IsAuthHasTrustedRelation(void)
     return false;
 }
 
-bool AuthIsPotentialTrusted(const DeviceInfo *device)
+bool AuthIsPotentialTrusted(const DeviceInfo *device, bool isOnlyPointToPoint)
 {
     (void)device;
+    (void)isOnlyPointToPoint;
     return false;
 }

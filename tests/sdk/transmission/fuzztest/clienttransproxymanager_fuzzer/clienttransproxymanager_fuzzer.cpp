@@ -66,13 +66,13 @@ void ClientTransProxyManagerTest(const uint8_t* data, size_t size)
     GenerateUint32(fileCnt);
     GenerateInt32(sessionId);
 
-    ClientTransProxyOnChannelOpened(sessionName, &channel);
+    ClientTransProxyOnChannelOpened(sessionName, &channel, nullptr);
 
     ClientTransProxyOnDataReceived(channelId, clientData, len, (SessionPktType)pktType);
 
     ClientTransProxyCloseChannel(channelId);
 
-    TransProxyChannelSendBytes(channelId, clientData, len);
+    TransProxyChannelSendBytes(channelId, clientData, len, false);
 
     TransProxyChannelSendMessage(channelId, clientData, len);
 

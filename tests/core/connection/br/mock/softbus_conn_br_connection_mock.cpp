@@ -13,7 +13,7 @@
  * limitations under the License.
  */
 
-#include "br_mock.h"
+#include "softbus_conn_br_connection_mock.h"
 
 using namespace testing;
 using namespace testing::ext;
@@ -69,14 +69,14 @@ int32_t SoftbusGetConfig(ConfigType type, unsigned char *val, uint32_t len)
     return GetConnectionBrInterface()->SoftbusGetConfig(type, val, len);
 }
 
-SppSocketDriver *InitSppSocketDriver()
+SppSocketDriver *InitSppSocketDriver(void)
 {
     return GetConnectionBrInterface()->InitSppSocketDriver();
 }
 
-int32_t SoftBusAddBtStateListener(const SoftBusBtStateListener *listener)
+int32_t SoftBusAddBtStateListener(const SoftBusBtStateListener *listener, int32_t *listenerId)
 {
-    return GetConnectionBrInterface()->SoftBusAddBtStateListener(listener);
+    return GetConnectionBrInterface()->SoftBusAddBtStateListener(listener, listenerId);
 }
 
 uint32_t ConnGetHeadSize(void)
@@ -129,6 +129,11 @@ void ConnBrDelBrPendingPacket(uint32_t id, int64_t seq)
     return GetConnectionBrInterface()->ConnBrDelBrPendingPacket(id, seq);
 }
 
+void ConnBrDelBrPendingPacketById(uint32_t id)
+{
+    return GetConnectionBrInterface()->ConnBrDelBrPendingPacketById(id);
+}
+
 int32_t ConnBrGetBrPendingPacket(uint32_t id, int64_t seq, uint32_t waitMillis, void **data)
 {
     return GetConnectionBrInterface()->ConnBrGetBrPendingPacket(id, seq, waitMillis, data);
@@ -168,6 +173,11 @@ int32_t SoftBusThreadCreate(
     SoftBusThread *thread, SoftBusThreadAttr *threadAttr, void *(*threadEntry) (void *), void *arg)
 {
     return GetConnectionBrInterface()->SoftBusThreadCreate(thread, threadAttr, threadEntry, arg);
+}
+
+int32_t BrHiDumperRegister(void)
+{
+    return SOFTBUS_OK;
 }
 }
 }

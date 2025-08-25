@@ -27,7 +27,8 @@
 #include "softbus_error_code.h"
 
 namespace OHOS {
-    int32_t TransOnSessionOpened(const char *sessionName, const ChannelInfo *channel, SessionType flag)
+    int32_t TransOnSessionOpened(
+        const char *sessionName, const ChannelInfo *channel, SessionType flag, SocketAccessInfo *accessInfo)
     {
         return 0;
     }
@@ -84,7 +85,7 @@ namespace OHOS {
             return;
         }
         char tmp = *(reinterpret_cast<const char *>(data));
-        TransTdcSendBytes((int32_t)size, &tmp, (uint32_t)size);
+        TransTdcSendBytes(static_cast<int32_t>(size), &tmp, static_cast<uint32_t>(size), false);
     }
 
     void TransTdcSendMessageTest(const uint8_t* data, size_t size)
@@ -142,7 +143,7 @@ namespace OHOS {
         DataGenerator::Write(data, size);
         int32_t channelId = 0;
         GenerateInt32(channelId);
-        TransTdcGetInfoById(channelId, NULL);
+        TransTdcGetInfoById(channelId, nullptr);
         DataGenerator::Clear();
     }
 
@@ -154,7 +155,7 @@ namespace OHOS {
         DataGenerator::Write(data, size);
         int32_t channelId = 0;
         GenerateInt32(channelId);
-        TransTdcGetInfoIncFdRefById(channelId, NULL, true);
+        TransTdcGetInfoIncFdRefById(channelId, nullptr, true);
         DataGenerator::Clear();
     }
 
@@ -166,7 +167,7 @@ namespace OHOS {
         DataGenerator::Write(data, size);
         int32_t fd = 0;
         GenerateInt32(fd);
-        TransTdcGetInfoByFd(fd, NULL);
+        TransTdcGetInfoByFd(fd, nullptr);
         DataGenerator::Clear();
     }
 
@@ -191,7 +192,7 @@ namespace OHOS {
         if (memcpy_s(tmp, sizeof(tmp) - 1, data, sizeof(tmp) - 1) != EOK) {
             return;
         }
-        ClientTransTdcOnChannelOpened(tmp, NULL);
+        ClientTransTdcOnChannelOpened(tmp, nullptr, nullptr);
     }
 
     void TransDisableSessionListenerTest(const uint8_t* data, size_t size)
@@ -213,8 +214,8 @@ namespace OHOS {
         cb->OnSessionOpenFailed = TransOnSessionOpenFailed;
         cb->OnDataReceived = TransOnDataReceived;
         cb->OnStreamReceived = TransOnOnStreamRecevied;
-        cb->OnGetSessionId = NULL;
-        cb->OnQosEvent = NULL;
+        cb->OnGetSessionId = nullptr;
+        cb->OnQosEvent = nullptr;
     }
     void ClientTransTdcOnSessionOpenedTest(const uint8_t* data, size_t size)
     {
@@ -231,7 +232,7 @@ namespace OHOS {
         if (ClientTransTdcSetCallBack(&cb) != SOFTBUS_OK) {
             return;
         }
-        ClientTransTdcOnSessionOpened(tmp, &channel);
+        ClientTransTdcOnSessionOpened(tmp, &channel, nullptr);
     }
 
     void ClientTransTdcOnSessionClosedTest(const uint8_t* data, size_t size)

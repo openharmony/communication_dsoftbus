@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2025 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -72,13 +72,6 @@ static void OnSessionOpenFailProc(const SessionConn *node, int32_t errCode)
             TRANS_LOGW(TRANS_CTRL, "notify channel open fail err");
         }
     }
-
-    int32_t fd = node->appInfo.fd;
-    if (fd >= 0) {
-        TRANS_LOGW(TRANS_CTRL, "session is shutdown. fd=%{public}d", fd);
-        DelTrigger(node->listenMod, fd, RW_TRIGGER);
-        TransTdcSocketReleaseFd(node->listenMod, fd);
-    }
 }
 
 static void NotifyTdcChannelTimeOut(ListNode *tdcChannelList)
@@ -118,8 +111,15 @@ static void TransTdcTimerProc(void)
         item->timeout++;
         if (item->status < TCP_DIRECT_CHANNEL_STATUS_CONNECTED) {
             if (item->timeout >= HANDSHAKE_TIMEOUT) {
+                int32_t fd = item->appInfo.fd;
+                item->appInfo.fd = -1;
                 ListDelete(&item->node);
                 sessionList->cnt--;
+                if (fd >= 0) {
+                    TRANS_LOGW(TRANS_CTRL, "session is shutdown. fd=%{public}d", fd);
+                    DelTrigger(item->listenMod, fd, RW_TRIGGER);
+                    TransTdcSocketReleaseFd(item->listenMod, fd);
+                }
 
                 ListAdd(&tempTdcChannelList, &item->node);
             }
@@ -171,9 +171,15 @@ void TransTdcStopSessionProc(ListenerModule listenMod)
         if (listenMod != item->listenMod) {
             continue;
         }
+        int32_t fd = item->appInfo.fd;
+        item->appInfo.fd = -1;
         ListDelete(&item->node);
         sessionList->cnt--;
-
+        if (fd >= 0) {
+            TRANS_LOGW(TRANS_CTRL, "session is shutdown. fd=%{public}d", fd);
+            DelTrigger(item->listenMod, fd, RW_TRIGGER);
+            TransTdcSocketReleaseFd(item->listenMod, fd);
+        }
         ListAdd(&tempTdcChannelList, &item->node);
     }
     ReleaseSessionConnLock();
@@ -214,8 +220,10 @@ int32_t TransTcpDirectInit(const IServerChannelCallBack *cb)
 
 void TransTcpDirectDeinit(void)
 {
+    if (UnRegisterTimeoutCallback(SOFTBUS_TCP_DIRECTCHANNEL_TIMER_FUN) != SOFTBUS_OK) {
+        TRANS_LOGE(TRANS_CTRL, "unregister tcp directchannel timer callback failed");
+    }
     TransSrvDataListDeinit();
-    (void)RegisterTimeoutCallback(SOFTBUS_TCP_DIRECTCHANNEL_TIMER_FUN, NULL);
 }
 
 void TransTdcDeathCallback(const char *pkgName, int32_t pid)
@@ -271,8 +279,9 @@ static int32_t TransUpdateAppInfo(AppInfo *appInfo, const ConnectOption *connInf
         }
     } else {
         if (connInfo->type == CONNECT_TCP) {
-            if (LnnGetLocalStrInfo(STRING_KEY_WLAN_IP, appInfo->myData.addr, sizeof(appInfo->myData.addr)) !=
-                SOFTBUS_OK) {
+            int32_t ifNameIdx = (connInfo->socketOption.moduleId == DIRECT_CHANNEL_SERVER_USB) ? USB_IF : WLAN_IF;
+            if (LnnGetLocalStrInfoByIfnameIdx(STRING_KEY_IP, appInfo->myData.addr,
+                sizeof(appInfo->myData.addr), ifNameIdx) != SOFTBUS_OK) {
                 TRANS_LOGE(TRANS_CTRL, "Lnn: get local ip fail.");
                 return SOFTBUS_TRANS_GET_LOCAL_IP_FAILED;
             }
@@ -299,7 +308,7 @@ int32_t TransOpenDirectChannel(AppInfo *appInfo, const ConnectOption *connInfo, 
         appInfo->routeType = WIFI_P2P_REUSE;
         ret = OpenTcpDirectChannel(appInfo, connInfo, channelId);
     } else {
-        appInfo->routeType = WIFI_STA;
+        appInfo->routeType = (connInfo->socketOption.moduleId == DIRECT_CHANNEL_SERVER_USB) ? WIFI_USB : WIFI_STA;
         ret = OpenTcpDirectChannel(appInfo, connInfo, channelId);
     }
 

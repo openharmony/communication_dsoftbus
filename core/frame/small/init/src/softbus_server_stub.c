@@ -82,7 +82,7 @@ static TaskConfig GetTaskConfig(Service *service)
 
 static void ComponentDeathCallback(const char *pkgName, int32_t pid)
 {
-    DiscServerDeathCallback(pkgName);
+    DiscServerDeathCallback(pkgName, pid);
     TransServerDeathCallback(pkgName, pid);
     BusCenterServerDeathCallback(pkgName);
 }
@@ -135,7 +135,12 @@ static int32_t ServerRegisterService(IpcIo *req, IpcIo *reply)
         COMM_LOGE(COMM_SVC, "ServerRegisterService no permission.");
         goto EXIT;
     }
+
     bool value = ReadRemoteObject(req, &svc);
+    if (!value) {
+        COMM_LOGE(COMM_SVC, "softbus read remote obj failed!");
+        goto EXIT;
+    }
 
     svcId.handle = svc.handle;
     svcId.token = svc.token;
@@ -194,6 +199,9 @@ const ServerInvokeCmd g_serverInvokeCmdTbl[] = {
     { SERVER_DEACTIVE_META_NODE, ServerDeactiveMetaNode },
     { SERVER_GET_ALL_META_NODE_INFO, ServerGetAllMetaNodeInfo },
     { SERVER_SHIFT_LNN_GEAR, ServerShiftLnnGear },
+    { SERVER_TRIGGER_RANGE_FOR_MSDP, ServerTriggerRangeForMsdp },
+    { SERVER_REG_RANGE_CB_FOR_MSDP, ServerRegRangeCbForMsdp },
+    { SERVER_UNREG_RANGE_CB_FOR_MSDP, ServerUnregRangeCbForMsdp },
     { SERVER_CREATE_SESSION_SERVER, ServerCreateSessionServer },
     { SERVER_REMOVE_SESSION_SERVER, ServerRemoveSessionServer },
     { SERVER_OPEN_SESSION, ServerOpenSession },
@@ -206,6 +214,7 @@ const ServerInvokeCmd g_serverInvokeCmdTbl[] = {
     { SERVER_UNREG_DATA_LEVEL_CHANGE_CB, ServerUnregDataLevelChangeCb },
     { SERVER_SET_DATA_LEVEL, ServerSetDataLevel },
     { SERVER_RELEASE_RESOURCES, ServerReleaseResources },
+    { SERVER_PROCESS_INNER_EVENT, ServerProcessInnerEvent },
     { SERVER_PRIVILEGE_CLOSE_CHANNEL, ServerPrivilegeCloseChannel },
 };
 

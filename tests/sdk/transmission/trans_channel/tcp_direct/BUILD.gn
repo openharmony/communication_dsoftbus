@@ -14,7 +14,7 @@
 import("//build/test.gni")
 import("../../../../../dsoftbus.gni")
 
-module_output_path = "dsoftbus/transmission"
+module_output_path = "dsoftbus/soft_bus/transmission"
 dsoftbus_root_path = "../../../../.."
 softbus_adapter_config = "${dsoftbus_root_path}/adapter/default_config"
 
@@ -32,6 +32,7 @@ ohos_unittest("TransSdkTcpDirectTest") {
     "$softbus_adapter_config/spec_config",
     "$dsoftbus_root_path/adapter/common/include/OS_adapter_define/linux",
     "$dsoftbus_root_path/core/common/include",
+    "$dsoftbus_root_path/interfaces/kits/connect",
     "$dsoftbus_root_path/core/connection/interface",
     "$dsoftbus_root_path/sdk/transmission/session/include",
     "$dsoftbus_root_path/interfaces/inner_kits/transport",
@@ -43,9 +44,11 @@ ohos_unittest("TransSdkTcpDirectTest") {
     "$dsoftbus_root_path/sdk/transmission/session/include",
     "$dsoftbus_root_path/core/frame/common/include",
     "$dsoftbus_root_path/sdk/transmission/trans_channel/udp/common/include",
+    "$dsoftbus_root_path/interfaces/kits/transport",
     "$dsoftbus_root_path/core/transmission/trans_channel/udp_negotiation/include",
     "$dsoftbus_root_path/sdk/transmission/trans_channel/udp/file/include",
     "$dsoftbus_root_path/sdk/transmission/ipc/include",
+    "$dsoftbus_root_path/sdk/bus_center/manager/include",
   ]
 
   deps = [
@@ -69,6 +72,7 @@ ohos_unittest("TransSessionTest") {
   include_dirs = [
     "$dsoftbus_root_path/core/common/include",
     "$dsoftbus_root_path/core/common/include",
+    "$dsoftbus_root_path/interfaces/kits/connect",
     "$dsoftbus_root_path/core/connection/interface",
     "$dsoftbus_root_path/sdk/transmission/session/include",
     "$dsoftbus_root_path/interfaces/inner_kits/transport",
@@ -80,6 +84,7 @@ ohos_unittest("TransSessionTest") {
     "$dsoftbus_root_path/sdk/transmission/session/include",
     "$dsoftbus_root_path/core/frame/common/include",
     "$dsoftbus_root_path/sdk/transmission/trans_channel/udp/common/include",
+    "$dsoftbus_root_path/interfaces/kits/transport",
     "$dsoftbus_root_path/core/transmission/trans_channel/udp_negotiation/include",
     "$dsoftbus_root_path/sdk/transmission/trans_channel/udp/file/include",
     "$dsoftbus_root_path/sdk/transmission/ipc/include",
@@ -94,6 +99,7 @@ ohos_unittest("TransSessionTest") {
   if (is_standard_system) {
     external_deps = [
       "c_utils:utils",
+      "googletest:gmock",
       "hilog:libhilog",
     ]
   } else {
@@ -106,25 +112,38 @@ ohos_unittest("TransSessionTest") {
 
 ohos_unittest("TransTcpDirectTest") {
   module_out_path = module_output_path
-  sources = [ "trans_tcp_direct_test.cpp" ]
+  sources = [
+    "trans_tcp_direct_mock.cpp",
+    "trans_tcp_direct_test.cpp",
+  ]
 
   include_dirs = [
     "$dsoftbus_root_path/core/common/include",
     "$dsoftbus_root_path/core/common/include",
+    "$dsoftbus_root_path/interfaces/kits/connect",
     "$dsoftbus_root_path/core/connection/interface",
     "$dsoftbus_root_path/sdk/transmission/session/include",
     "$dsoftbus_root_path/interfaces/inner_kits/transport",
     "$dsoftbus_root_path/interfaces/kits/transport",
     "$dsoftbus_root_path/tests/sdk/common/include",
+    "$dsoftbus_root_path/sdk/transmission/trans_channel/common/include",
     "$dsoftbus_root_path/sdk/transmission/trans_channel/tcp_direct/src",
     "$dsoftbus_root_path/adapter/common/include",
     "$dsoftbus_root_path/sdk/transmission/trans_channel/tcp_direct/include",
     "$dsoftbus_root_path/sdk/transmission/session/include",
     "$dsoftbus_root_path/core/frame/common/include",
     "$dsoftbus_root_path/sdk/transmission/trans_channel/udp/common/include",
+    "$dsoftbus_root_path/interfaces/kits/transport",
     "$dsoftbus_root_path/core/transmission/trans_channel/udp_negotiation/include",
     "$dsoftbus_root_path/sdk/transmission/trans_channel/udp/file/include",
     "$dsoftbus_root_path/sdk/transmission/ipc/include",
+    "$dsoftbus_root_path/sdk/transmission/common/include",
+    "$dsoftbus_root_path/sdk/transmission/common/src",
+    "$dsoftbus_root_path/core/transmission/common/include",
+    "$dsoftbus_root_path/core/transmission/common/src",
+    "$dsoftbus_root_path/adapter/common/include/OS_adapter_define/linux",
+    "$dsoftbus_root_path/adapter/default_config/spec_config",
+    "$dsoftbus_root_path/sdk/bus_center/manager/include",
   ]
 
   deps = [
@@ -136,6 +155,7 @@ ohos_unittest("TransTcpDirectTest") {
   if (is_standard_system) {
     external_deps = [
       "c_utils:utils",
+      "googletest:gmock",
       "hilog:libhilog",
     ]
   } else {
@@ -146,11 +166,63 @@ ohos_unittest("TransTcpDirectTest") {
   }
 }
 
+ohos_unittest("TransTcpDirectMockTest") {
+  module_out_path = module_output_path
+  sources = [
+    "trans_tcp_direct_mock_test.cpp",
+    "trans_tcp_direct_tlv_mock.cpp",
+  ]
+
+  include_dirs = [
+    "$dsoftbus_root_path/core/common/include",
+    "$dsoftbus_root_path/core/common/include",
+    "$dsoftbus_root_path/core/connection/interface",
+    "$dsoftbus_root_path/sdk/transmission/session/include",
+    "$dsoftbus_root_path/interfaces/inner_kits/transport",
+    "$dsoftbus_root_path/interfaces/kits/transport",
+    "$dsoftbus_root_path/tests/sdk/common/include",
+    "$dsoftbus_root_path/sdk/transmission/trans_channel/common/include",
+    "$dsoftbus_root_path/sdk/transmission/trans_channel/tcp_direct/src",
+    "$dsoftbus_root_path/adapter/common/include",
+    "$dsoftbus_root_path/sdk/transmission/trans_channel/tcp_direct/include",
+    "$dsoftbus_root_path/sdk/transmission/session/include",
+    "$dsoftbus_root_path/core/frame/common/include",
+    "$dsoftbus_root_path/sdk/transmission/trans_channel/udp/common/include",
+    "$dsoftbus_root_path/core/transmission/trans_channel/udp_negotiation/include",
+    "$dsoftbus_root_path/sdk/transmission/trans_channel/udp/file/include",
+    "$dsoftbus_root_path/sdk/transmission/ipc/include",
+    "$dsoftbus_root_path/core/transmission/common/include",
+    "$dsoftbus_root_path/core/transmission/common/src",
+    "$dsoftbus_root_path/sdk/bus_center/manager/include",
+  ]
+
+  deps = [
+    "$dsoftbus_root_path/adapter:softbus_adapter",
+    "$dsoftbus_root_path/core/common:softbus_utils",
+    "$dsoftbus_root_path/tests/sdk/common:softbus_access_token_test",
+  ]
+
+  if (is_standard_system) {
+    external_deps = [
+      "c_utils:utils",
+      "googletest:gmock",
+      "hilog:libhilog",
+    ]
+  } else {
+    external_deps = [
+      "c_utils:utils",
+      "googletest:gmock",
+      "hilog:libhilog",
+    ]
+  }
+}
+
 group("unittest") {
   testonly = true
   deps = [
     ":TransSdkTcpDirectTest",
     ":TransSessionTest",
+    ":TransTcpDirectMockTest",
     ":TransTcpDirectTest",
   ]
 }

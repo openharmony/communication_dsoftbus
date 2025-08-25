@@ -230,15 +230,16 @@ HWTEST_F(AuthSessionMessageTest, PackDeviceIdJson_TEST_001, TestSize.Level1)
 {
     AuthSessionInfo info;
     (void)memset_s(&info, sizeof(AuthSessionInfo), 0, sizeof(AuthSessionInfo));
+    int64_t authSeq = 1;
     info.version = SOFTBUS_OLD_V1;
     info.idType = EXCHANGE_UDID;
     info.connInfo.type = AUTH_LINK_TYPE_WIFI;
     info.isServer = true;
-    EXPECT_TRUE(PackDeviceIdJson(&info) == nullptr);
+    EXPECT_TRUE(PackDeviceIdJson(&info, authSeq) == nullptr);
     info.isServer = false;
-    EXPECT_TRUE(PackDeviceIdJson(&info) == nullptr);
+    EXPECT_TRUE(PackDeviceIdJson(&info, authSeq) == nullptr);
     info.connInfo.type = AUTH_LINK_TYPE_BR;
-    EXPECT_TRUE(PackDeviceIdJson(&info) == nullptr);
+    EXPECT_TRUE(PackDeviceIdJson(&info, authSeq) == nullptr);
 }
 
 /*
@@ -326,13 +327,14 @@ HWTEST_F(AuthSessionMessageTest, SetExchangeIdTypeAndValue_TEST_001, TestSize.Le
  */
 HWTEST_F(AuthSessionMessageTest, UnpackDeviceIdJson_TEST_001, TestSize.Level1)
 {
+    int64_t authSeq = 1;
     JsonObj *obj = JSON_CreateObject();
     EXPECT_TRUE(obj != nullptr);
     AuthSessionInfo info;
-    EXPECT_TRUE(UnpackDeviceIdJson(nullptr, 0, &info) == SOFTBUS_INVALID_PARAM);
+    EXPECT_TRUE(UnpackDeviceIdJson(nullptr, 0, &info, authSeq) == SOFTBUS_INVALID_PARAM);
     JSON_AddInt32ToObject(obj, EXCHANGE_ID_TYPE, EXCHANGE_FAIL);
     char *msg = JSON_PrintUnformatted(obj);
-    EXPECT_TRUE(UnpackDeviceIdJson(msg, strlen(msg), &info) == SOFTBUS_NOT_FIND);
+    EXPECT_TRUE(UnpackDeviceIdJson(msg, strlen(msg), &info, authSeq) == SOFTBUS_NOT_FIND);
     if (msg != nullptr) {
         JSON_Free(msg);
     }
@@ -348,12 +350,12 @@ HWTEST_F(AuthSessionMessageTest, UnpackDeviceIdJson_TEST_001, TestSize.Level1)
     JSON_AddStringToObject(obj1, SUPPORT_INFO_COMPRESS, TRUE_STRING_TAG);
     char *msg1 = JSON_PrintUnformatted(obj1);
     info.connInfo.type = AUTH_LINK_TYPE_BR;
-    EXPECT_TRUE(UnpackDeviceIdJson(msg1, strlen(msg1), &info) == SOFTBUS_CMP_FAIL);
+    EXPECT_TRUE(UnpackDeviceIdJson(msg1, strlen(msg1), &info, authSeq) == SOFTBUS_CMP_FAIL);
     info.connInfo.type = AUTH_LINK_TYPE_WIFI;
     info.isServer = false;
-    EXPECT_TRUE(UnpackDeviceIdJson(msg1, strlen(msg1), &info) == SOFTBUS_CMP_FAIL);
+    EXPECT_TRUE(UnpackDeviceIdJson(msg1, strlen(msg1), &info, authSeq) == SOFTBUS_CMP_FAIL);
     info.isConnectServer = true;
-    EXPECT_TRUE(UnpackDeviceIdJson(msg1, strlen(msg1), &info) == SOFTBUS_OK);
+    EXPECT_TRUE(UnpackDeviceIdJson(msg1, strlen(msg1), &info, authSeq) == SOFTBUS_OK);
     if (msg1 != nullptr) {
         JSON_Free(msg1);
     }
@@ -456,7 +458,7 @@ HWTEST_F(AuthSessionMessageTest, UnpackWifiDirectInfo_TEST_001, TestSize.Level1)
     EXPECT_TRUE(UnpackBt(json, &info, SOFTBUS_NEW_V1, false) == SOFTBUS_OK);
     JSON_AddInt64ToObject(json, TRANSPORT_PROTOCOL, 3);
     EXPECT_TRUE(UnpackBt(json, &info, SOFTBUS_NEW_V1, false) == SOFTBUS_OK);
-    EXPECT_TRUE(PackWiFi(json, &info, SOFTBUS_NEW_V1, false) == SOFTBUS_OK);
+    EXPECT_TRUE(PackWiFi(json, &info, SOFTBUS_NEW_V1, false, WLAN_IF) == SOFTBUS_OK);
     JSON_Delete(json);
 }
 
@@ -475,7 +477,7 @@ HWTEST_F(AuthSessionMessageTest, CheckBusVersion_TEST_001, TestSize.Level1)
     EXPECT_NE(CheckBusVersion(json1), SOFTBUS_OK);
     NodeInfo info;
     (void)memset_s(&info, sizeof(NodeInfo), 0, sizeof(NodeInfo));
-    EXPECT_NE(UnpackWiFi(json1, &info, SOFTBUS_OLD_V1, false), SOFTBUS_OK);
+    EXPECT_NE(UnpackWiFi(json1, &info, SOFTBUS_OLD_V1, false, WLAN_IF), SOFTBUS_OK);
     JSON_Delete(json1);
     JsonObj *json = JSON_CreateObject();
     EXPECT_TRUE(json != nullptr);
@@ -483,10 +485,10 @@ HWTEST_F(AuthSessionMessageTest, CheckBusVersion_TEST_001, TestSize.Level1)
     JSON_AddInt32ToObject(json, BUS_MIN_VERSION, 0);
     ;
     EXPECT_TRUE(CheckBusVersion(json) == 2);
-    EXPECT_TRUE(UnpackWiFi(json, &info, SOFTBUS_OLD_V1, false) == SOFTBUS_OK);
+    EXPECT_TRUE(UnpackWiFi(json, &info, SOFTBUS_OLD_V1, false, WLAN_IF) == SOFTBUS_OK);
     JSON_AddInt64ToObject(json, TRANSPORT_PROTOCOL, 63);
     JSON_AddStringToObject(json, BLE_OFFLINE_CODE, "123");
-    EXPECT_TRUE(UnpackWiFi(json, &info, SOFTBUS_OLD_V1, false) == SOFTBUS_OK);
+    EXPECT_TRUE(UnpackWiFi(json, &info, SOFTBUS_OLD_V1, false, WLAN_IF) == SOFTBUS_OK);
     JSON_Delete(json);
 }
 
@@ -560,15 +562,16 @@ HWTEST_F(AuthSessionMessageTest, UpdatePeerDeviceName_TEST_001, TestSize.Level1)
 HWTEST_F(AuthSessionMessageTest, ProcessDeviceIdMessage_TEST_001, TestSize.Level1)
 {
     AuthSessionInfo info;
+    int64_t authSeq = 1;
     info.connInfo.type = AUTH_LINK_TYPE_WIFI;
     uint8_t data[] = "test";
-    EXPECT_TRUE(ProcessDeviceIdMessage(&info, data, DEVICE_ID_STR_LEN) == SOFTBUS_INVALID_PARAM);
+    EXPECT_TRUE(ProcessDeviceIdMessage(&info, data, DEVICE_ID_STR_LEN, authSeq) == SOFTBUS_INVALID_PARAM);
     info.connInfo.type = AUTH_LINK_TYPE_BLE;
-    EXPECT_TRUE(ProcessDeviceIdMessage(&info, data, DEVICE_ID_STR_LEN + 1) == SOFTBUS_INVALID_PARAM);
+    EXPECT_TRUE(ProcessDeviceIdMessage(&info, data, DEVICE_ID_STR_LEN + 1, authSeq) == SOFTBUS_INVALID_PARAM);
     info.isServer = false;
-    EXPECT_TRUE(ProcessDeviceIdMessage(&info, data, DEVICE_ID_STR_LEN) == SOFTBUS_INVALID_PARAM);
+    EXPECT_TRUE(ProcessDeviceIdMessage(&info, data, DEVICE_ID_STR_LEN, authSeq) == SOFTBUS_INVALID_PARAM);
     info.isServer = true;
-    EXPECT_TRUE(ProcessDeviceIdMessage(&info, data, DEVICE_ID_STR_LEN) == SOFTBUS_OK);
+    EXPECT_TRUE(ProcessDeviceIdMessage(&info, data, DEVICE_ID_STR_LEN, authSeq) == SOFTBUS_OK);
 }
 
 /*
@@ -643,12 +646,12 @@ HWTEST_F(AuthSessionMessageTest, PACK_FAST_AUTH_VALUE_TEST_001, TestSize.Level1)
 HWTEST_F(AuthSessionMessageTest, CHECK_BUS_VERSION_TEST_001, TestSize.Level1)
 {
     JsonObj *obj = JSON_CreateObject();
-    if (obj == NULL) {
+    if (obj == nullptr) {
         return;
     }
 
     NodeInfo *info = (NodeInfo *)SoftBusCalloc(sizeof(NodeInfo));
-    if (info == NULL) {
+    if (info == nullptr) {
         JSON_Delete(obj);
         return;
     }
@@ -665,15 +668,15 @@ HWTEST_F(AuthSessionMessageTest, CHECK_BUS_VERSION_TEST_001, TestSize.Level1)
     }
     JSON_AddStringToObject(obj, BLE_OFFLINE_CODE, "10244");
 
-    info->connectInfo.authPort = 8710;
-    info->connectInfo.sessionPort = 26;
-    info->connectInfo.proxyPort = 80;
+    info->connectInfo.ifInfo[WLAN_IF].authPort = 8710;
+    info->connectInfo.ifInfo[WLAN_IF].sessionPort = 26;
+    info->connectInfo.ifInfo[WLAN_IF].proxyPort = 80;
     info->supportedProtocols = LNN_PROTOCOL_BR;
 
-    int32_t ret = UnpackWiFi(obj, info, version, false);
+    int32_t ret = UnpackWiFi(obj, info, version, false, WLAN_IF);
     EXPECT_TRUE(ret == SOFTBUS_OK);
     JSON_AddInt32ToObject(obj, "BUS_MAX_VERSION", (int32_t)-1);
-    ret = UnpackWiFi(obj, info, version, false);
+    ret = UnpackWiFi(obj, info, version, false, WLAN_IF);
     EXPECT_NE(ret, SOFTBUS_OK);
 
     (void)JSON_AddStringToObject(obj, "BROADCAST_CIPHER_KEY", "1222222222");
@@ -702,7 +705,7 @@ HWTEST_F(AuthSessionMessageTest, POST_BT_V1_DEVID_TEST_001, TestSize.Level1)
 {
     int64_t authSeq = 0;
     AuthSessionInfo *info = (AuthSessionInfo *)SoftBusCalloc(sizeof(AuthSessionInfo));
-    if (info == NULL) {
+    if (info == nullptr) {
         return;
     }
     info->requestId = 1;
@@ -840,6 +843,7 @@ HWTEST_F(AuthSessionMessageTest, PACK_NORMALIZED_KEY_VALUE_TEST_001, TestSize.Le
     SessionKey sessionKey = {
         .len = SESSION_KEY_LENGTH,
     };
+    int64_t authSeq = 1;
     EXPECT_EQ(SOFTBUS_OK, SoftBusGenerateRandomArray(sessionKey.value, SESSION_KEY_LENGTH));
     JsonObj *obj = JSON_CreateObject();
     EXPECT_TRUE(obj != nullptr);
@@ -851,18 +855,18 @@ HWTEST_F(AuthSessionMessageTest, PACK_NORMALIZED_KEY_VALUE_TEST_001, TestSize.Le
         .connInfo.type = AUTH_LINK_TYPE_WIFI,
         .normalizedKey = nullptr,
     };
-    PackNormalizedKey(obj, &info);
+    PackNormalizedKey(obj, &info, authSeq);
     info.isNeedFastAuth = true;
-    PackNormalizedKey(obj, &info);
+    PackNormalizedKey(obj, &info, authSeq);
     info.isServer = true;
-    PackNormalizedKey(obj, &info);
+    PackNormalizedKey(obj, &info, authSeq);
     info.normalizedType = NORMALIZED_NOT_SUPPORT;
     info.localState = AUTH_STATE_START;
-    PackNormalizedKey(obj, &info);
+    PackNormalizedKey(obj, &info, authSeq);
     info.normalizedKey = &sessionKey;
-    PackNormalizedKey(obj, &info);
+    PackNormalizedKey(obj, &info, authSeq);
     EXPECT_TRUE(memcpy_s(info.connInfo.info.ipInfo.deviceIdHash, UUID_BUF_LEN, UUID_TEST, strlen(UUID_TEST)) == EOK);
-    PackNormalizedKey(obj, &info);
+    PackNormalizedKey(obj, &info, authSeq);
     EXPECT_EQ(SOFTBUS_OK, PackNormalizedKeyValue(obj, &sessionKey));
     JSON_Delete(obj);
 }
@@ -875,6 +879,7 @@ HWTEST_F(AuthSessionMessageTest, PACK_NORMALIZED_KEY_VALUE_TEST_001, TestSize.Le
  */
 HWTEST_F(AuthSessionMessageTest, PARSE_NORMALIZED_KEY_VALUE_TEST_001, TestSize.Level1)
 {
+    int64_t authSeq = 1;
     const char *encNormalizedKey = "encnormalizedkeytest";
     SessionKey sessionKey = {
         .len = SESSION_KEY_LENGTH,
@@ -884,7 +889,7 @@ HWTEST_F(AuthSessionMessageTest, PARSE_NORMALIZED_KEY_VALUE_TEST_001, TestSize.L
     EXPECT_NE(SOFTBUS_OK, ParseNormalizedKeyValue(&info, encNormalizedKey, &sessionKey));
     ASSERT_TRUE(memcpy_s(info.uuid, UUID_BUF_LEN, UUID_TEST, strlen(UUID_TEST)) == EOK);
     AuthDeviceKeyInfo deviceKey;
-    EXPECT_NE(SOFTBUS_OK, ParseNormalizeData(&info, const_cast<char *>(encNormalizedKey), &deviceKey));
+    EXPECT_NE(SOFTBUS_OK, ParseNormalizeData(&info, const_cast<char *>(encNormalizedKey), &deviceKey, authSeq));
 }
 
 /*
@@ -895,6 +900,7 @@ HWTEST_F(AuthSessionMessageTest, PARSE_NORMALIZED_KEY_VALUE_TEST_001, TestSize.L
  */
 HWTEST_F(AuthSessionMessageTest, PACK_DEVICE_JSON_INFO_TEST_001, TestSize.Level1)
 {
+    int64_t authSeq = 1;
     JsonObj *obj = JSON_CreateObject();
     EXPECT_TRUE(obj != nullptr);
     SessionKey sessionKey;
@@ -908,12 +914,12 @@ HWTEST_F(AuthSessionMessageTest, PACK_DEVICE_JSON_INFO_TEST_001, TestSize.Level1
     EXPECT_EQ(SOFTBUS_OK, PackDeviceJsonInfo(&info, obj));
     const char *encNormalizedKey = "encnormalizedkeytest";
     EXPECT_EQ(true, JSON_AddStringToObject(obj, NORMALIZED_DATA, encNormalizedKey));
-    UnpackNormalizedKey(obj, &info, NORMALIZED_NOT_SUPPORT);
-    UnpackNormalizedKey(obj, &info, NORMALIZED_SUPPORT);
+    UnpackNormalizedKey(obj, &info, NORMALIZED_NOT_SUPPORT, authSeq);
+    UnpackNormalizedKey(obj, &info, NORMALIZED_SUPPORT, authSeq);
     info.isServer = true;
     info.normalizedKey = nullptr;
     EXPECT_TRUE(memcpy_s(info.uuid, UUID_BUF_LEN, UUID_TEST, strlen(UUID_TEST)) == EOK);
-    UnpackNormalizedKey(obj, &info, NORMALIZED_SUPPORT);
+    UnpackNormalizedKey(obj, &info, NORMALIZED_SUPPORT, authSeq);
     info.isConnectServer = true;
     EXPECT_EQ(SOFTBUS_OK, PackDeviceJsonInfo(&info, obj));
     info.connInfo.type = AUTH_LINK_TYPE_BLE;

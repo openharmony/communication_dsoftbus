@@ -14,20 +14,23 @@
  */
 
 #include "broadcast_scheduler.h"
+#include "disc_log.h"
+#include "g_enhance_disc_func_pack.h"
 
 int32_t SchedulerInitBroadcast(void)
 {
-    return InitBroadcastMgr();
+    return SchedulerInitBroadcastPacked();
 }
 
 int32_t SchedulerDeinitBroadcast(void)
 {
-    return DeInitBroadcastMgr();
+    return SchedulerDeinitBroadcastPacked();
 }
 
-int32_t SchedulerRegisterBroadcaster(BaseServiceType type, int32_t *bcId, const BroadcastCallback *cb)
+int32_t SchedulerRegisterBroadcaster(
+    BroadcastProtocol protocol, BaseServiceType type, int32_t *bcId, const BroadcastCallback *cb)
 {
-    return RegisterBroadcaster(type, bcId, cb);
+    return RegisterBroadcaster(protocol, type, bcId, cb);
 }
 
 int32_t SchedulerUnregisterBroadcaster(int32_t bcId)
@@ -35,9 +38,10 @@ int32_t SchedulerUnregisterBroadcaster(int32_t bcId)
     return UnRegisterBroadcaster(bcId);
 }
 
-int32_t SchedulerRegisterScanListener(BaseServiceType type, int32_t *listenerId, const ScanCallback *cb)
+int32_t SchedulerRegisterScanListener(
+    BroadcastProtocol protocol, BaseServiceType type, int32_t *listenerId, const ScanCallback *cb)
 {
-    return RegisterScanListener(type, listenerId, cb);
+    return RegisterScanListener(protocol, type, listenerId, cb);
 }
 
 int32_t SchedulerUnregisterListener(int32_t listenerId)
@@ -48,23 +52,27 @@ int32_t SchedulerUnregisterListener(int32_t listenerId)
 int32_t SchedulerStartBroadcast(int32_t bcId, BroadcastContentType contentType, const BroadcastParam *param,
     const BroadcastPacket *packet)
 {
-    (void)contentType;
-    return StartBroadcasting(bcId, param, packet);
+    return SchedulerStartBroadcastPacked(bcId, contentType, param, packet);
 }
 
 int32_t SchedulerUpdateBroadcast(int32_t bcId, const BroadcastParam *param, const BroadcastPacket *packet)
 {
-    return UpdateBroadcasting(bcId, param, packet);
+    return SchedulerUpdateBroadcastPacked(bcId, param, packet);
 }
 
 int32_t SchedulerSetBroadcastData(int32_t bcId, const BroadcastPacket *packet)
 {
-    return SetBroadcastingData(bcId, packet);
+    return SchedulerSetBroadcastDataPacked(bcId, packet);
+}
+
+int32_t SchedulerSetBroadcastParam(int32_t bcId, const BroadcastParam *param)
+{
+    return SchedulerSetBroadcastParamPacked(bcId, param);
 }
 
 int32_t SchedulerStopBroadcast(int32_t bcId)
 {
-    return StopBroadcasting(bcId);
+    return SchedulerStopBroadcastPacked(bcId);
 }
 
 int32_t SchedulerStartScan(int32_t listenerId, const BcScanParams *param)

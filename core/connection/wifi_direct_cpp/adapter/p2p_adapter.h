@@ -62,7 +62,8 @@ public:
         std::vector<WifiDirectP2pDeviceInfo> clientDevices;
     };
 
-    static int32_t GetChannel5GListIntArray(std::vector<int> &frequencyList);
+    static P2pAdapter &GetInstance();
+    static int32_t GetChannel5GListIntArray(std::vector<int> &channels);
     static bool IsWifiP2pEnabled();
     static std::string GetInterfaceCoexistCap();
     static int32_t GetStationFrequency();

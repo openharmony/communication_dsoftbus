@@ -15,10 +15,60 @@
 
 #include "trans_spec_object_stub.h"
 
+#include <dlfcn.h>
+
+#include "softbus_init_common.h"
+#include "trans_log.h"
+
 namespace OHOS {
+
+#ifdef __aarch64__
+static constexpr const char *SOFTBUS_PLUGIN_PATH_NAME = "/system/lib64/libdsoftbus_server_plugin.z.so";
+#else
+static constexpr const char *SOFTBUS_PLUGIN_PATH_NAME = "/system/lib/libdsoftbus_server_plugin.z.so";
+#endif
+
+TransSpecObjectStub::TransSpecObjectStub()
+{
+}
+
+bool TransSpecObjectStub::OpenSoftbusPluginSo()
+{
+    std::lock_guard<std::mutex> lockGuard(loadSoMutex_);
+
+    if (isLoaded_ && (soHandle_ != nullptr)) {
+        return true;
+    }
+
+    (void)SoftBusDlopen(SOFTBUS_HANDLE_SERVER_PLUGIN, &soHandle_);
+    if (soHandle_ == nullptr) {
+        TRANS_LOGE(TRANS_EVENT, "dlopen %{public}s failed, err msg:%{public}s", SOFTBUS_PLUGIN_PATH_NAME, dlerror());
+        return false;
+    }
+
+    isLoaded_ = true;
+    TRANS_LOGI(TRANS_EVENT, "dlopen %{public}s SOFTBUS_CLIENT_SUCCESS", SOFTBUS_PLUGIN_PATH_NAME);
+
+    return true;
+}
+
 int32_t TransSpecObjectStub::OnRemoteRequest(uint32_t code,
     MessageParcel &data, MessageParcel &reply, MessageOption &option)
 {
-    return IPCObjectStub::OnRemoteRequest(code, data, reply, option);
+    if (onRemoteRequestFunc_ != nullptr) {
+        return onRemoteRequestFunc_(code, data, reply, option);
+    }
+
+    if (!OpenSoftbusPluginSo()) {
+        return IPCObjectStub::OnRemoteRequest(code, data, reply, option);
+    }
+
+    onRemoteRequestFunc_ = (OnRemoteRequestFunc)dlsym(soHandle_, "TransOnRemoteRequestByDlsym");
+    if (onRemoteRequestFunc_ == nullptr) {
+        TRANS_LOGE(TRANS_EVENT, "dlsym AuthGetDeviceUuid fail, err msg:%{public}s", dlerror());
+        return IPCObjectStub::OnRemoteRequest(code, data, reply, option);
+    }
+
+    return onRemoteRequestFunc_(code, data, reply, option);
 }
 } // namespace OHOS

@@ -1,4 +1,4 @@
-# Copyright (c) 2022-2024 Huawei Device Co., Ltd.
+# Copyright (c) 2022-2025 Huawei Device Co., Ltd.
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
 # You may obtain a copy of the License at
@@ -14,7 +14,7 @@
 import("//build/test.gni")
 import("../../../../../../dsoftbus.gni")
 
-module_output_path = "dsoftbus/transmission"
+module_output_path = "dsoftbus/soft_bus/transmission"
 
 ohos_unittest("TransLinkListenerTest") {
   module_out_path = module_output_path
@@ -24,33 +24,30 @@ ohos_unittest("TransLinkListenerTest") {
   ]
 
   include_dirs = [
-    "unittest/common/",
-
     "$dsoftbus_core_path/adapter/transmission/include",
-
     "$dsoftbus_core_path/authentication/interface",
-
     "$dsoftbus_core_path/bus_center/interface",
     "$dsoftbus_core_path/bus_center/lnn/lane_hub/lane_manager/include",
     "$dsoftbus_core_path/bus_center/lnn/net_ledger/common/include",
     "$dsoftbus_core_path/bus_center/lnn/net_ledger/distributed_ledger/include",
-
     "$dsoftbus_core_path/connection/wifi_direct_cpp",
-
     "$dsoftbus_core_path/discovery/interface",
     "$dsoftbus_core_path/discovery/manager/include",
-
     "$dsoftbus_core_path/transmission/session/include",
     "$dsoftbus_core_path/transmission/trans_channel/manager/include",
     "$dsoftbus_core_path/transmission/trans_channel/manager/src",
     "$dsoftbus_core_path/transmission/trans_channel/tcp_direct/include",
-
-    "../mock",
+    "$dsoftbus_dfx_path/interface/include/form",
+    "$dsoftbus_root_path/interfaces/kits/connect",
+    "$dsoftbus_root_path/tests/core/transmission/trans_channel/manager/mock",
+    "unittest/common/",
   ]
 
   deps = [
     "$dsoftbus_core_path/common:softbus_utils",
     "$dsoftbus_core_path/frame:softbus_server",
+    "$dsoftbus_root_path/adapter:softbus_adapter",
+    "$dsoftbus_root_path/core/connection/wifi_direct_cpp:wifi_direct",
   ]
 
   external_deps = [

@@ -12,6 +12,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+
 #include "link_manager.h"
 
 #include "conn_log.h"
@@ -20,6 +21,12 @@
 #include "wifi_direct_manager.h"
 
 namespace OHOS::SoftBus {
+LinkManager& LinkManager::GetInstance()
+{
+    static LinkManager instance;
+    return instance;
+}
+
 int LinkManager::AllocateLinkId()
 {
     CONN_LOGD(CONN_WIFI_DIRECT, "enter");
@@ -195,7 +202,7 @@ void LinkManager::RemoveLink(const std::string &remoteMac)
     }
 }
 
-void LinkManager::RemoveLinks(InnerLink::LinkType type)
+void LinkManager::RemoveLinks(InnerLink::LinkType type, bool onlyRemoveConnected)
 {
     CONN_LOGD(CONN_WIFI_DIRECT, "enter");
     std::vector<std::shared_ptr<InnerLink>> links;
@@ -203,7 +210,10 @@ void LinkManager::RemoveLinks(InnerLink::LinkType type)
         std::lock_guard lock(lock_);
         auto it = links_.begin();
         while (it != links_.end()) {
-            if (it->first.first == type) {
+            auto condition = onlyRemoveConnected ?
+                (it->first.first == type && it->second->GetState() == InnerLink::LinkState::CONNECTED) :
+                it->first.first == type;
+            if (condition) {
                 CONN_LOGI(CONN_WIFI_DIRECT, "remoteDeviceId=%{public}s",
                           WifiDirectAnonymizeDeviceId(it->second->GetRemoteDeviceId()).c_str());
                 links.push_back(it->second);
@@ -258,7 +268,8 @@ std::shared_ptr<InnerLink> LinkManager::GetReuseLink(
     if (connectType == WIFI_DIRECT_CONNECT_TYPE_AUTH_NEGO_HML ||
         connectType == WIFI_DIRECT_CONNECT_TYPE_BLE_TRIGGER_HML ||
         connectType == WIFI_DIRECT_CONNECT_TYPE_AUTH_TRIGGER_HML ||
-        connectType == WIFI_DIRECT_CONNECT_TYPE_ACTION_TRIGGER_HML) {
+        connectType == WIFI_DIRECT_CONNECT_TYPE_ACTION_TRIGGER_HML ||
+        connectType == WIFI_DIRECT_CONNECT_TYPE_SPARKLINK_TRIGGER_HML) {
         linkType = WIFI_DIRECT_LINK_TYPE_HML;
     }
 
@@ -286,6 +297,21 @@ std::shared_ptr<InnerLink> LinkManager::GetReuseLink(
     return iterator->second;
 }
 
+std::string LinkManager::GetRemoteMacByRemoteDeviceId(const std::string &remoteDeviceId)
+{
+    std::lock_guard lock(lock_);
+    auto it = links_.find({ InnerLink::LinkType::HML, remoteDeviceId });
+    if (it == links_.end()) {
+        CONN_LOGE(CONN_WIFI_DIRECT, "not find %{public}s as device id",
+            WifiDirectAnonymizeDeviceId(remoteDeviceId).c_str());
+        return "";
+    }
+    CONN_LOGI(CONN_WIFI_DIRECT, "remoteDeviceId=%{public}s, remoteMac=%{public}s",
+        WifiDirectAnonymizeDeviceId(remoteDeviceId).c_str(),
+        WifiDirectAnonymizeMac(it->second->GetRemoteBaseMac()).c_str());
+    return it->second->GetRemoteBaseMac();
+}
+
 void LinkManager::RefreshRelationShip(const std::string &remoteDeviceId, const std::string &remoteMac)
 {
     CONN_LOGI(CONN_WIFI_DIRECT, "remoteDeviceId=%{public}s, remoteMac=%{public}s",
@@ -302,9 +328,43 @@ void LinkManager::RefreshRelationShip(const std::string &remoteDeviceId, const s
     link->SetRemoteDeviceId(remoteDeviceId);
     auto result = links_.insert({{ InnerLink::LinkType::HML, remoteDeviceId }, link });
     if (!result.second) {
-        CONN_LOGE(CONN_WIFI_DIRECT, "insert by remoteDeviceId failed, use remoteMac");
+        CONN_LOGE(CONN_WIFI_DIRECT, "insert by remoteDeviceId fail, use remoteMac");
         links_.insert({{ InnerLink::LinkType::HML, remoteMac }, link });
     }
+}
+
+bool LinkManager::RefreshAuthHandle(std::string remoteDeviceId, const std::shared_ptr<NegotiateChannel> &channel)
+{
+    CONN_LOGI(CONN_WIFI_DIRECT, "start refresh auth handle, remoteDeviceId=%{public}s",
+        WifiDirectAnonymizeDeviceId(remoteDeviceId).c_str());
+    std::lock_guard lock(lock_);
+    auto iterator = links_.find({ InnerLink::LinkType::HML, remoteDeviceId });
+    if (iterator == links_.end()) {
+        CONN_LOGE(CONN_WIFI_DIRECT, "type=%{public}d remoteDeviceId=%{public}s not found",
+            static_cast<int>(InnerLink::LinkType::HML), WifiDirectAnonymizeDeviceId(remoteDeviceId).c_str());
+        return false;
+    }
+
+    iterator->second->SetNegotiateChannel(channel);
+    return true;
+}
+
+bool LinkManager::CheckOnlyVirtualLink(void)
+{
+    bool hasRealLink = false;
+    bool hasVirtualLink = false;
+    LinkManager::GetInstance().ForEach([&hasRealLink, &hasVirtualLink] (const InnerLink &link) {
+        if (link.GetLinkType() == InnerLink::LinkType::HML) {
+            if (link.GetLinkPowerMode() != LOW_POWER) {
+                hasRealLink = true;
+                return true;
+            } else {
+                hasVirtualLink = true;
+            }
+        }
+        return false;
+    });
+    return hasVirtualLink && !hasRealLink;
 }
 
 void LinkManager::Dump() const
@@ -317,5 +377,13 @@ void LinkManager::Dump() const
     if (links_.empty()) {
         CONN_LOGI(CONN_WIFI_DIRECT, "no inner link");
     }
+}
+
+void LinkManager::Dump(std::list<std::shared_ptr<LinkSnapshot>> &snapshots)
+{
+    LinkManager::GetInstance().ForEach([&snapshots](const InnerLink &link) {
+        snapshots.push_back(std::make_shared<LinkSnapshot>(link));
+        return true;
+    });
 }
 } // namespace OHOS::SoftBus

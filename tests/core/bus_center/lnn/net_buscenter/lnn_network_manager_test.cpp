@@ -21,7 +21,6 @@
 #include "lnn_network_manager.c"
 #include "lnn_network_manager.h"
 #include "lnn_network_manager_mock.h"
-#include "lnn_oobe_manager.h"
 #include "lnn_physical_subnet_manager.h"
 #include "lnn_settingdata_event_monitor.h"
 #include "lnn_trans_mock.h"
@@ -114,6 +113,9 @@ HWTEST_F(LNNNetworkManagerMockTest, LNN_NETWORK_MANAGER_TEST_001, TestSize.Level
     EXPECT_CALL(managerMock, RegistIPProtocolManager)
         .WillOnce(Return(SOFTBUS_INVALID_PARAM))
         .WillRepeatedly(Return(SOFTBUS_OK));
+    EXPECT_CALL(managerMock, RegistUsbProtocolManager)
+        .WillOnce(Return(SOFTBUS_INVALID_PARAM))
+        .WillRepeatedly(Return(SOFTBUS_OK));
     EXPECT_CALL(authMock, RegGroupChangeListener)
         .WillOnce(Return(SOFTBUS_INVALID_PARAM))
         .WillRepeatedly(Return(SOFTBUS_OK));
@@ -125,6 +127,8 @@ HWTEST_F(LNNNetworkManagerMockTest, LNN_NETWORK_MANAGER_TEST_001, TestSize.Level
         .WillRepeatedly(Return(SOFTBUS_OK));
     EXPECT_CALL(managerMock, LnnRegisterEventHandler).WillRepeatedly(Return(SOFTBUS_OK));
     int32_t ret = LnnInitNetworkManager();
+    EXPECT_TRUE(ret != SOFTBUS_OK);
+    ret = LnnInitNetworkManager();
     EXPECT_TRUE(ret != SOFTBUS_OK);
     ret = LnnInitNetworkManager();
     EXPECT_TRUE(ret != SOFTBUS_OK);
@@ -238,7 +242,12 @@ HWTEST_F(LNNNetworkManagerMockTest, LNN_NETWORK_MANAGER_TEST_004, TestSize.Level
     NiceMock<LnnNetLedgertInterfaceMock> ledgerMock;
     EXPECT_CALL(ledgerMock, IsActiveOsAccountUnlocked).WillRepeatedly(Return(true));
     EXPECT_CALL(managerMock, SoftbusGetConfig).WillRepeatedly(Return(SOFTBUS_INVALID_PARAM));
+    EXPECT_CALL(ledgerMock, LnnGetLocalNumInfo)
+        .WillOnce(DoAll(SetArgPointee<1>(TYPE_GLASS_ID), Return(SOFTBUS_OK)))
+        .WillRepeatedly(Return(SOFTBUS_OK));
     bool ret = LnnIsAutoNetWorkingEnabled();
+    EXPECT_TRUE(ret == false);
+    ret = LnnIsAutoNetWorkingEnabled();
     EXPECT_TRUE(ret == true);
     EXPECT_CALL(managerMock, SoftbusGetConfig).WillRepeatedly(Return(SOFTBUS_OK));
     ret = LnnIsAutoNetWorkingEnabled();
@@ -344,9 +353,12 @@ HWTEST_F(LNNNetworkManagerMockTest, ON_DEVICE_BOUND_TEST_001, TestSize.Level1)
     EXPECT_CALL(managerMock, SoftbusGetConfig).WillRepeatedly(Return(SOFTBUS_OK));
     EXPECT_CALL(managerMock, DfxRecordTriggerTime(_, _)).WillRepeatedly(Return());
     EXPECT_CALL(managerMock, LnnGetOnlineStateById).WillRepeatedly(Return(true));
-    (void)OnDeviceBound(udid, groupInfo);
+    EXPECT_CALL(managerMock, LnnAsyncCallbackDelayHelper).WillRepeatedly(Return(SOFTBUS_OK));
+    EXPECT_NO_FATAL_FAILURE(OnDeviceBound(udid, groupInfo));
+    EXPECT_CALL(managerMock, LnnAsyncCallbackDelayHelper).WillRepeatedly(Return(SOFTBUS_ERR));
+    EXPECT_NO_FATAL_FAILURE(OnDeviceBound(udid, groupInfo));
     EXPECT_CALL(managerMock, LnnGetOnlineStateById).WillRepeatedly(Return(false));
-    (void)OnDeviceBound(udid, groupInfo);
+    EXPECT_NO_FATAL_FAILURE(OnDeviceBound(udid, groupInfo));
 }
 
 HWTEST_F(LNNNetworkManagerMockTest, CREAT_NETIFMGR_TEST_001, TestSize.Level1)
@@ -624,4 +636,41 @@ HWTEST_F(LNNNetworkManagerMockTest, LNN_REGISTER_EVENT_001, TestSize.Level1)
     EXPECT_EQ(ret, SOFTBUS_OK);
 }
 
+HWTEST_F(LNNNetworkManagerMockTest, NetRootDeviceLeaveLnnTest_001, TestSize.Level1)
+{
+    int ret = 0;
+    NiceMock<LnnNetworkManagerInterfaceMock> managerMock;
+    NiceMock<LnnNetLedgertInterfaceMock> ledgerMock;
+    EXPECT_CALL(ledgerMock, LnnGetAllOnlineNodeInfo).WillOnce(Return(SOFTBUS_INVALID_PARAM));
+    ret = NetRootDeviceLeaveLnn();
+    EXPECT_EQ(ret, SOFTBUS_NETWORK_GET_ALL_NODE_INFO_ERR);
+
+    EXPECT_CALL(ledgerMock, LnnGetAllOnlineNodeInfo).WillOnce(Return(SOFTBUS_OK));
+    ret = NetRootDeviceLeaveLnn();
+    EXPECT_EQ(ret, SOFTBUS_NO_ONLINE_DEVICE);
+}
+
+HWTEST_F(LNNNetworkManagerMockTest, NetDeviceRootStateEventHandler_001, TestSize.Level1)
+{
+    LnnDeviceRootStateChangeEvent *event =
+        reinterpret_cast<LnnDeviceRootStateChangeEvent *>(SoftBusCalloc(sizeof(LnnDeviceRootStateChangeEvent)));
+    event->basic.event = LNN_EVENT_TYPE_MAX;
+    event->status = SOFTBUS_DEVICE_IS_ROOT;
+
+    NiceMock<LnnNetworkManagerInterfaceMock> managerMock;
+    NiceMock<LnnNetLedgertInterfaceMock> ledgerMock;
+    EXPECT_CALL(ledgerMock, LnnGetAllOnlineNodeInfo).WillRepeatedly(Return(SOFTBUS_INVALID_PARAM));
+
+    NetDeviceRootStateEventHandler(NULL);
+
+    NetDeviceRootStateEventHandler(&event->basic);
+
+    event->basic.event = LNN_EVENT_DEVICE_ROOT_STATE_CHANGED;
+    NetDeviceRootStateEventHandler(&event->basic);
+
+    event->status = SOFTBUS_DEVICE_NOT_ROOT;
+    NetDeviceRootStateEventHandler(&event->basic);
+
+    EXPECT_EQ(event->status, 0);
+}
 } // namespace OHOS

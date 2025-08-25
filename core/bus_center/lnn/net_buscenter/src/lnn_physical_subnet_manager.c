@@ -20,6 +20,7 @@
 #include "lnn_log.h"
 #include "lnn_network_manager.h"
 #include "softbus_adapter_thread.h"
+#include "softbus_def.h"
 #include "softbus_error_code.h"
 
 #define MAX_SUPPORTED_PHYSICAL_SUBNET 6
@@ -131,16 +132,17 @@ int32_t LnnUnregistPhysicalSubnetByType(ProtocolType type)
 
 void DoNotifyStatusChange(const char *ifName, ProtocolType protocolType, void *status)
 {
+    LNN_LOGI(LNN_BUILDER, "ifname is %{public}s, protocolType %{public}d", ifName, protocolType);
     for (uint16_t i = 0; i < MAX_SUPPORTED_PHYSICAL_SUBNET; i++) {
         if (g_physicalSubnets[i] == NULL || g_physicalSubnets[i]->protocol->id != protocolType) {
             continue;
         }
-
+        
         if (strcmp(g_physicalSubnets[i]->ifName, LNN_PHYSICAL_SUBNET_ALL_NETIF) != 0 &&
             strcmp(g_physicalSubnets[i]->ifName, ifName) != 0) {
             continue;
         }
-
+        
         if (g_physicalSubnets[i]->onNetifStatusChanged != NULL) {
             g_physicalSubnets[i]->onNetifStatusChanged(g_physicalSubnets[i], status);
         }
@@ -150,7 +152,7 @@ void DoNotifyStatusChange(const char *ifName, ProtocolType protocolType, void *s
 void LnnNotifyPhysicalSubnetStatusChanged(const char *ifName, ProtocolType protocolType, void *status)
 {
     CALL_VOID_FUNC_WITH_LOCK(&g_physicalSubnetsLock, DoNotifyStatusChange(ifName, protocolType, status));
-    LNN_LOGI(LNN_BUILDER, "success");
+    LNN_LOGD(LNN_BUILDER, "success");
 }
 
 static void EnableResetingSubnetByType(ProtocolType protocolType)
@@ -170,6 +172,10 @@ void LnnNotifyAllTypeOffline(ConnectionAddrType type)
     if (type == CONNECTION_ADDR_ETH || type == CONNECTION_ADDR_WLAN || type == CONNECTION_ADDR_MAX) {
         CALL_VOID_FUNC_WITH_LOCK(&g_physicalSubnetsLock, EnableResetingSubnetByType(LNN_PROTOCOL_IP));
         LNN_LOGI(LNN_BUILDER, "success");
+    }
+    if (type == CONNECTION_ADDR_NCM) {
+        CALL_VOID_FUNC_WITH_LOCK(&g_physicalSubnetsLock, EnableResetingSubnetByType(LNN_PROTOCOL_USB));
+        LNN_LOGI(LNN_BUILDER, "usb success");
     }
 }
 

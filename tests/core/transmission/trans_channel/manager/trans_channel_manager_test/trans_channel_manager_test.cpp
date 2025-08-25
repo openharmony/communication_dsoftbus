@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2022-2024 Huawei Device Co., Ltd.
+ * Copyright (c) 2022-2025 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -18,7 +18,6 @@
 
 #include "bus_center_manager.h"
 #include "disc_event_manager.h"
-#include "lnn_lane_qos.h"
 #include "message_handler.h"
 #include "softbus_adapter_mem.h"
 #include "softbus_feature_config.h"
@@ -42,6 +41,7 @@ namespace OHOS {
 #define TRANS_TEST_PID 4700
 #define TEST_PROXY_CHANNEL_ID 1026
 #define TEST_TDC_CHANNEL_ID 2048
+#define TEST_BUF_LEN 1024
 
 const char *g_pkgName = "dms";
 const char *g_sessionName = "ohos.distributedschedule.dms.test";
@@ -75,6 +75,8 @@ void TransChannelManagerTest::SetUpTestCase(void)
     LooperInit();
     ConnServerInit();
     AuthInit();
+    TransManagerInterfaceMock mock;
+    EXPECT_CALL(mock, LnnGetLocalStrInfo).WillRepeatedly(Return(SOFTBUS_OK));
     BusCenterServerInit();
     TransServerInit();
     DiscEventManagerInit();
@@ -132,7 +134,7 @@ HWTEST_F(TransChannelManagerTest, GetAppInfo001, TestSize.Level1)
     param->attr = &g_sessionAttr[tmp];
 
     TransManagerInterfaceMock mock;
-    EXPECT_CALL(mock, TransCommonGetAppInfo).WillOnce(Return(SOFTBUS_MEM_ERR));
+    EXPECT_CALL(mock, TransCommonGetAppInfo).WillRepeatedly(Return(SOFTBUS_MEM_ERR));
 
     TransInfo *transInfo = (TransInfo *)SoftBusCalloc(sizeof(TransInfo));
     ASSERT_TRUE(transInfo != nullptr);
@@ -178,11 +180,21 @@ HWTEST_F(TransChannelManagerTest, TransOpenAuthChannel001, TestSize.Level1)
     ASSERT_TRUE(connOpt != nullptr);
     memset_s(connOpt, sizeof(ConnectOption), 0, sizeof(ConnectOption));
 
-    int32_t ret = TransOpenAuthChannel(NULL, NULL, NULL);
+    int32_t ret = TransOpenAuthChannel(nullptr, nullptr, nullptr, nullptr);
     EXPECT_EQ(INVALID_CHANNEL_ID, ret);
-    ret = TransOpenAuthChannel(sessionName, NULL, NULL);
+    ret = TransOpenAuthChannel(sessionName, nullptr, nullptr, nullptr);
     EXPECT_EQ(INVALID_CHANNEL_ID, ret);
-    ret = TransOpenAuthChannel(NULL, connOpt, NULL);
+    ConnectParam param;
+    (void)memset_s(&param, sizeof(ConnectParam), 0, sizeof(ConnectParam));
+    TransManagerInterfaceMock mock;
+    connOpt->type = CONNECT_TCP;
+    ret = TransOpenAuthChannel(sessionName, connOpt, nullptr, &param);
+    EXPECT_EQ(INVALID_CHANNEL_ID, ret);
+    connOpt->type = CONNECT_BR;
+    ret = TransOpenAuthChannel(sessionName, connOpt, nullptr, &param);
+    EXPECT_EQ(INVALID_CHANNEL_ID, ret);
+    connOpt->type = CONNECT_BLE;
+    ret = TransOpenAuthChannel(sessionName, connOpt, nullptr, &param);
     EXPECT_EQ(INVALID_CHANNEL_ID, ret);
     SoftBusFree(connOpt);
 }
@@ -243,21 +255,21 @@ HWTEST_F(TransChannelManagerTest, TransRippleStats001, TestSize.Level1)
     int32_t ret = TransRippleStats(channelId, channelType, trafficStats);
     EXPECT_EQ(SOFTBUS_INVALID_PARAM, ret);
 
-    ret = TransRippleStats(channelId, channelType, NULL);
+    ret = TransRippleStats(channelId, channelType, nullptr);
     EXPECT_EQ(SOFTBUS_INVALID_PARAM, ret);
 
     channelId = -1;
     ret = TransStreamStats(channelId, channelType, data);
     EXPECT_EQ(SOFTBUS_INVALID_PARAM, ret);
 
-    ret = TransStreamStats(channelId, channelType, NULL);
+    ret = TransStreamStats(channelId, channelType, nullptr);
     EXPECT_EQ(SOFTBUS_INVALID_PARAM, ret);
 
     TransLaneMgrDeinit();
     ret = TransStreamStats(channelId, channelType, data);
     EXPECT_EQ(SOFTBUS_INVALID_PARAM, ret);
 
-    if (data != NULL) {
+    if (data != nullptr) {
         SoftBusFree(data);
     }
 }
@@ -310,22 +322,22 @@ HWTEST_F(TransChannelManagerTest, TransCloseChannel001, TestSize.Level1)
     int32_t channelType = 222;
 
     channelId++;
-    int32_t ret = TransCloseChannel(NULL, channelId, channelType);
+    int32_t ret = TransCloseChannel(nullptr, channelId, channelType);
     EXPECT_EQ(SOFTBUS_TRANS_INVALID_CHANNEL_TYPE, ret);
 
     channelId++;
     channelType = CHANNEL_TYPE_UDP;
-    ret = TransCloseChannel(NULL, channelId, channelType);
+    ret = TransCloseChannel(nullptr, channelId, channelType);
     EXPECT_EQ(SOFTBUS_NO_INIT, ret);
 
     channelId++;
     channelType = CHANNEL_TYPE_AUTH;
-    ret = TransCloseChannel(NULL, channelId, channelType);
+    ret = TransCloseChannel(nullptr, channelId, channelType);
     EXPECT_EQ(SOFTBUS_LOCK_ERR, ret);
 
     channelId++;
     channelType = CHANNEL_TYPE_TCP_DIRECT;
-    ret = TransCloseChannel(NULL, channelId, channelType);
+    ret = TransCloseChannel(nullptr, channelId, channelType);
     EXPECT_EQ(SOFTBUS_OK, ret);
 }
 
@@ -354,8 +366,8 @@ HWTEST_F(TransChannelManagerTest, TransSendMsg001, TestSize.Level1)
 
     int32_t pid = 1;
 
-    TransProxyDeathCallback(NULL, pid);
-    TransChannelDeathCallback(NULL, pid);
+    TransProxyDeathCallback(nullptr, pid);
+    TransChannelDeathCallback(nullptr, pid);
 }
 
 /**
@@ -375,11 +387,11 @@ HWTEST_F(TransChannelManagerTest, TransGetNameByChanId001, TestSize.Level1)
     uint16_t pkgLen = 1;
     uint16_t sessionNameLen = 2;
 
-    int32_t ret = TransGetNameByChanId(NULL, pkgName, sessionName, pkgLen, sessionNameLen);
+    int32_t ret = TransGetNameByChanId(nullptr, pkgName, sessionName, pkgLen, sessionNameLen);
     EXPECT_EQ(SOFTBUS_INVALID_PARAM, ret);
-    ret = TransGetNameByChanId(info, NULL, sessionName, pkgLen, sessionNameLen);
+    ret = TransGetNameByChanId(info, nullptr, sessionName, pkgLen, sessionNameLen);
     EXPECT_EQ(SOFTBUS_INVALID_PARAM, ret);
-    ret = TransGetNameByChanId(info, pkgName, NULL, pkgLen, sessionNameLen);
+    ret = TransGetNameByChanId(info, pkgName, nullptr, pkgLen, sessionNameLen);
     EXPECT_EQ(SOFTBUS_INVALID_PARAM, ret);
 
     info->channelType = 8888;
@@ -394,7 +406,11 @@ HWTEST_F(TransChannelManagerTest, TransGetNameByChanId001, TestSize.Level1)
     ret = TransGetNameByChanId(info, pkgName, sessionName, pkgLen, sessionNameLen);
     EXPECT_EQ(SOFTBUS_INVALID_PARAM, ret);
 
-    if (info != NULL) {
+    info->channelType = CHANNEL_TYPE_PROXY;
+    ret = TransGetNameByChanId(info, pkgName, sessionName, pkgLen, sessionNameLen);
+    EXPECT_EQ(SOFTBUS_INVALID_PARAM, ret);
+
+    if (info != nullptr) {
         SoftBusFree(info);
     }
 }
@@ -432,7 +448,11 @@ HWTEST_F(TransChannelManagerTest, TransGetAppInfoByChanId001, TestSize.Level1)
     ret = TransGetAppInfoByChanId(channelId, channelType, appInfo);
     EXPECT_EQ(SOFTBUS_INVALID_PARAM, ret);
 
-    if (appInfo != NULL) {
+    channelType = CHANNEL_TYPE_PROXY;
+    ret = TransGetAppInfoByChanId(channelId, channelType, appInfo);
+    EXPECT_EQ(SOFTBUS_NO_INIT, ret);
+
+    if (appInfo != nullptr) {
         SoftBusFree(appInfo);
     }
 }
@@ -449,8 +469,16 @@ HWTEST_F(TransChannelManagerTest, TransGetConnByChanId001, TestSize.Level1)
     int32_t channelType = 222;
     int32_t connId = -1;
 
-    channelType = CHANNEL_TYPE_PROXY + 1;
+    channelType = CHANNEL_TYPE_PROXY;
     int32_t ret = TransGetConnByChanId(channelId, channelType, &connId);
+    EXPECT_EQ(SOFTBUS_NO_INIT, ret);
+
+    channelType = CHANNEL_TYPE_AUTH;
+    ret = TransGetConnByChanId(channelId, channelType, &connId);
+    EXPECT_EQ(SOFTBUS_INVALID_PARAM, ret);
+
+    channelType = CHANNEL_TYPE_BUTT;
+    ret = TransGetConnByChanId(channelId, channelType, &connId);
     EXPECT_EQ(SOFTBUS_TRANS_INVALID_CHANNEL_TYPE, ret);
 }
 
@@ -477,7 +505,7 @@ HWTEST_F(TransChannelManagerTest, TransGetConnByChanId002, TestSize.Level1)
  */
 HWTEST_F(TransChannelManagerTest, GenerateProxyChannelId001, TestSize.Level1)
 {
-    SoftBusMutexInit(&g_myIdLock, NULL);
+    SoftBusMutexInit(&g_myIdLock, nullptr);
     int32_t channelId = GenerateProxyChannelId();
     EXPECT_EQ(TEST_PROXY_CHANNEL_ID, channelId);
     channelId = GenerateTdcChannelId();
@@ -515,7 +543,7 @@ HWTEST_F(TransChannelManagerTest, TransSetFirstTokenInfo001, TestSize.Level1)
     TransEventExtra extra;
     (void)memset_s(&extra, sizeof(TransEventExtra), 0, sizeof(TransEventExtra));
     TransManagerInterfaceMock mock;
-    EXPECT_CALL(mock, TransACLGetFirstTokenID).WillOnce(Return(TOKENID_NOT_SET));
+    EXPECT_CALL(mock, TransAclGetFirstTokenID).WillOnce(Return(TOKENID_NOT_SET));
     TransSetFirstTokenInfo(appInfo, &extra);
     EXPECT_NE(nullptr, appInfo);
     TransFreeAppInfo(appInfo);
@@ -598,7 +626,7 @@ HWTEST_F(TransChannelManagerTest, TransOpenChannel003, TestSize.Level1)
     int32_t ret = TransOpenChannel(param, transInfo);
     EXPECT_EQ(SOFTBUS_MEM_ERR, ret);
     DestroySoftBusList(g_socketChannelList);
-    g_socketChannelList = NULL;
+    g_socketChannelList = nullptr;
     SoftBusFree(param);
     SoftBusFree(transInfo);
 }
@@ -632,7 +660,7 @@ HWTEST_F(TransChannelManagerTest, TransOpenChannel004, TestSize.Level1)
     int32_t ret = TransOpenChannel(param, transInfo);
     EXPECT_EQ(SOFTBUS_TRANS_GET_CONN_OPT_FAILED, ret);
     DestroySoftBusList(g_socketChannelList);
-    g_socketChannelList = NULL;
+    g_socketChannelList = nullptr;
     SoftBusFree(param);
     SoftBusFree(transInfo);
 }
@@ -663,7 +691,7 @@ HWTEST_F(TransChannelManagerTest, TransOpenChannel005, TestSize.Level1)
     int32_t ret = TransOpenChannel(param, transInfo);
     EXPECT_EQ(SOFTBUS_OK, ret);
     DestroySoftBusList(g_socketChannelList);
-    g_socketChannelList = NULL;
+    g_socketChannelList = nullptr;
     SoftBusFree(param);
     SoftBusFree(transInfo);
 }
@@ -696,7 +724,7 @@ HWTEST_F(TransChannelManagerTest, TransOpenChannel006, TestSize.Level1)
     int32_t ret = TransOpenChannel(param, transInfo);
     EXPECT_EQ(SOFTBUS_NOT_FIND, ret);
     DestroySoftBusList(g_socketChannelList);
-    g_socketChannelList = NULL;
+    g_socketChannelList = nullptr;
     SoftBusFree(param);
     SoftBusFree(transInfo);
 }
@@ -804,6 +832,10 @@ HWTEST_F(TransChannelManagerTest, TransPrivilegeCloseChannel001, TestSize.Level1
     int32_t pid = 1;
     int32_t ret = TransPrivilegeCloseChannel(tokenId, pid, nullptr);
     EXPECT_EQ(SOFTBUS_INVALID_PARAM, ret);
+
+    const char *deviceId = "ASDS123124";
+    ret = TransPrivilegeCloseChannel(tokenId, pid, deviceId);
+    EXPECT_EQ(SOFTBUS_OK, ret);
 }
 
 /**
@@ -824,11 +856,358 @@ HWTEST_F(TransChannelManagerTest, PrivilegeCloseListAddItem001, TestSize.Level1)
     EXPECT_EQ(SOFTBUS_OK, ret);
     ret = PrivilegeCloseListAddItem(&privilegeCloseList, pid, g_pkgName);
     EXPECT_EQ(SOFTBUS_OK, ret);
-    PrivilegeCloseChannelInfo *pos = NULL;
-    PrivilegeCloseChannelInfo *tmp = NULL;
+    PrivilegeCloseChannelInfo *pos = nullptr;
+    PrivilegeCloseChannelInfo *tmp = nullptr;
     LIST_FOR_EACH_ENTRY_SAFE(pos, tmp, &privilegeCloseList, PrivilegeCloseChannelInfo, node) {
         ListDelete(&(pos->node));
         SoftBusFree(pos);
     }
+}
+
+/**
+ * @tc.name: GetChannelInfoFromBuf Test
+ * @tc.desc: GetChannelInfoFromBuf001
+ * @tc.require:
+ */
+HWTEST_F(TransChannelManagerTest, GetChannelInfoFromBuf001, TestSize.Level1)
+{
+    uint8_t buf[12] = {0};
+    uint32_t len = 12;
+    OpenChannelResult info = {0};
+    AccessInfo accessInfo = {0};
+    info.channelType = CHANNEL_TYPE_AUTH;
+    int ret = GetChannelInfoFromBuf(buf, len, &info, &accessInfo);
+    EXPECT_EQ(SOFTBUS_TRANS_INVALID_DATA_LENGTH, ret);
+
+    len = 8;
+    ret = GetChannelInfoFromBuf(buf, len, &info, &accessInfo);
+    EXPECT_EQ(SOFTBUS_TRANS_INVALID_DATA_LENGTH, ret);
+
+    len = 4;
+    ret = GetChannelInfoFromBuf(buf, len, &info, &accessInfo);
+    EXPECT_EQ(SOFTBUS_TRANS_INVALID_DATA_LENGTH, ret);
+
+    len = 1;
+    ret = GetChannelInfoFromBuf(buf, len, &info, &accessInfo);
+    EXPECT_EQ(SOFTBUS_TRANS_INVALID_DATA_LENGTH, ret);
+}
+
+/**
+ * @tc.name: GetUdpChannelInfoFromBuf Test
+ * @tc.desc: GetUdpChannelInfoFromBuf001
+ * @tc.require:
+ */
+HWTEST_F(TransChannelManagerTest, GetUdpChannelInfoFromBuf001, TestSize.Level1)
+{
+    uint8_t buf[28] = {0};
+    int32_t udpPort = 0;
+    uint32_t len = 28;
+    OpenChannelResult info = {0};
+    AccessInfo accessInfo = {0};
+    int ret = GetUdpChannelInfoFromBuf(buf, len, &udpPort, &info, &accessInfo);
+    EXPECT_EQ(SOFTBUS_OK, ret);
+
+    len = 12;
+    ret = GetUdpChannelInfoFromBuf(buf, len, &udpPort, &info, &accessInfo);
+    EXPECT_EQ(SOFTBUS_TRANS_INVALID_DATA_LENGTH, ret);
+
+    len = 8;
+    ret = GetUdpChannelInfoFromBuf(buf, len, &udpPort, &info, &accessInfo);
+    EXPECT_EQ(SOFTBUS_TRANS_INVALID_DATA_LENGTH, ret);
+
+    len = 4;
+    ret = GetUdpChannelInfoFromBuf(buf, len, &udpPort, &info, &accessInfo);
+    EXPECT_EQ(SOFTBUS_TRANS_INVALID_DATA_LENGTH, ret);
+
+    len = 1;
+    ret = GetUdpChannelInfoFromBuf(buf, len, &udpPort, &info, &accessInfo);
+    EXPECT_EQ(SOFTBUS_TRANS_INVALID_DATA_LENGTH, ret);
+}
+
+/**
+ * @tc.name: GetLimitChangeInfoFromBuf Test
+ * @tc.desc: GetLimitChangeInfoFromBuf001
+ * @tc.require:
+ */
+HWTEST_F(TransChannelManagerTest, GetLimitChangeInfoFromBuf001, TestSize.Level1)
+{
+    uint8_t buf[9] = {0};
+    int32_t channelId = 0;
+    uint8_t tos = 0;
+    int32_t limit = 0;
+    uint32_t len = 9;
+
+    int ret = GetLimitChangeInfoFromBuf(buf, &channelId, &tos, &limit, len);
+    EXPECT_EQ(SOFTBUS_OK, ret);
+
+    len = 5;
+    ret = GetLimitChangeInfoFromBuf(buf, &channelId, &tos, &limit, len);
+    EXPECT_EQ(SOFTBUS_TRANS_INVALID_DATA_LENGTH, ret);
+
+    len = 4;
+    ret = GetLimitChangeInfoFromBuf(buf, &channelId, &tos, &limit, len);
+    EXPECT_EQ(SOFTBUS_TRANS_INVALID_DATA_LENGTH, ret);
+
+    len = 1;
+    ret = GetLimitChangeInfoFromBuf(buf, &channelId, &tos, &limit, len);
+    EXPECT_EQ(SOFTBUS_TRANS_INVALID_DATA_LENGTH, ret);
+}
+
+/**
+ * @tc.name: TransReportChannelOpenedInfo Test
+ * @tc.desc: TransReportChannelOpenedInfo001
+ * @tc.require:
+ */
+HWTEST_F(TransChannelManagerTest, TransReportChannelOpenedInfo001, TestSize.Level1)
+{
+    uint8_t buf[28] = {0};
+    uint32_t len = 28;
+
+    buf[4] = CHANNEL_TYPE_PROXY;
+    int ret = TransReportChannelOpenedInfo(buf, len, TRANS_TEST_PID);
+    EXPECT_NE(SOFTBUS_OK, ret);
+
+    buf[4] = CHANNEL_TYPE_TCP_DIRECT;
+    ret = TransReportChannelOpenedInfo(buf, len, TRANS_TEST_PID);
+    EXPECT_NE(SOFTBUS_OK, ret);
+
+    buf[4] = CHANNEL_TYPE_UDP;
+    ret = TransReportChannelOpenedInfo(buf, len, TRANS_TEST_PID);
+    EXPECT_NE(SOFTBUS_OK, ret);
+
+    buf[4] = CHANNEL_TYPE_AUTH;
+    ret = TransReportChannelOpenedInfo(buf, len, TRANS_TEST_PID);
+    EXPECT_NE(SOFTBUS_OK, ret);
+
+    buf[4] = CHANNEL_TYPE_BUTT;
+    ret = TransReportChannelOpenedInfo(buf, len, TRANS_TEST_PID);
+    EXPECT_EQ(SOFTBUS_TRANS_INVALID_CHANNEL_TYPE, ret);
+
+    len = 1;
+    ret = TransReportChannelOpenedInfo(buf, len, TRANS_TEST_PID);
+    EXPECT_NE(SOFTBUS_OK, ret);
+}
+
+/**
+ * @tc.name: TransReportLimitChangeInfo Test
+ * @tc.desc: TransReportLimitChangeInfo001
+ * @tc.require:
+ */
+HWTEST_F(TransChannelManagerTest, TransReportLimitChangeInfo001, TestSize.Level1)
+{
+    uint8_t buf[9] = {0};
+    int32_t len = 9;
+
+    EXPECT_NO_FATAL_FAILURE(TransReportLimitChangeInfo(buf, len, TRANS_TEST_PID));
+    len = 1;
+    EXPECT_NO_FATAL_FAILURE(TransReportLimitChangeInfo(buf, len, TRANS_TEST_PID));
+}
+
+/**
+ * @tc.name: GetCollabCheckResultFromBuf Test
+ * @tc.desc: GetCollabCheckResultFromBuf001
+ * @tc.require:
+ */
+HWTEST_F(TransChannelManagerTest, GetCollabCheckResultFromBuf001, TestSize.Level1)
+{
+    uint8_t buf[12] = {0};
+    int32_t channelId = 0;
+    int32_t channelType = 0;
+    int32_t checkResult = 0;
+    int32_t len = 12;
+
+    int ret = GetCollabCheckResultFromBuf(buf, &channelId, &channelType, &checkResult, len);
+    EXPECT_EQ(SOFTBUS_OK, ret);
+
+    len = 8;
+    ret = GetCollabCheckResultFromBuf(buf, &channelId, &channelType, &checkResult, len);
+    EXPECT_EQ(SOFTBUS_TRANS_INVALID_DATA_LENGTH, ret);
+
+    len = 4;
+    ret = GetCollabCheckResultFromBuf(buf, &channelId, &channelType, &checkResult, len);
+    EXPECT_EQ(SOFTBUS_TRANS_INVALID_DATA_LENGTH, ret);
+
+    len = 1;
+    ret = GetCollabCheckResultFromBuf(buf, &channelId, &channelType, &checkResult, len);
+    EXPECT_EQ(SOFTBUS_TRANS_INVALID_DATA_LENGTH, ret);
+}
+
+/**
+ * @tc.name: TransReportCheckCollabInfo Test
+ * @tc.desc: TransReportCheckCollabInfo001
+ * @tc.require:
+ */
+HWTEST_F(TransChannelManagerTest, TransReportCheckCollabInfo001, TestSize.Level1)
+{
+    uint8_t buf[12] = {0};
+    int32_t len = 12;
+
+    buf[4] = CHANNEL_TYPE_PROXY;
+    int ret = TransReportCheckCollabInfo(buf, len, TRANS_TEST_PID);
+    EXPECT_NE(SOFTBUS_OK, ret);
+
+    buf[4] = CHANNEL_TYPE_TCP_DIRECT;
+    ret = TransReportCheckCollabInfo(buf, len, TRANS_TEST_PID);
+    EXPECT_NE(SOFTBUS_OK, ret);
+
+    buf[4] = CHANNEL_TYPE_UDP;
+    ret = TransReportCheckCollabInfo(buf, len, TRANS_TEST_PID);
+    EXPECT_NE(SOFTBUS_OK, ret);
+
+    buf[4] = CHANNEL_TYPE_BUTT;
+    ret = TransReportCheckCollabInfo(buf, len, TRANS_TEST_PID);
+    EXPECT_EQ(SOFTBUS_TRANS_INVALID_CHANNEL_TYPE, ret);
+
+    len = 1;
+    ret = TransReportCheckCollabInfo(buf, len, TRANS_TEST_PID);
+    EXPECT_NE(SOFTBUS_OK, ret);
+}
+
+/**
+ * @tc.name: TransProcessInnerEvent Test
+ * @tc.desc: TransProcessInnerEvent001
+ * @tc.require:
+ */
+HWTEST_F(TransChannelManagerTest, TransProcessInnerEvent001, TestSize.Level1)
+{
+    uint8_t buf[12] = {0};
+    int32_t len = 12;
+    int32_t eventType = EVENT_TYPE_CHANNEL_OPENED;
+
+    int ret = TransProcessInnerEvent(eventType, nullptr, len);
+    EXPECT_EQ(SOFTBUS_INVALID_PARAM, ret);
+
+    eventType = EVENT_TYPE_BUTT;
+    ret = TransProcessInnerEvent(eventType, buf, len);
+    EXPECT_EQ(SOFTBUS_TRANS_MSG_INVALID_EVENT_TYPE, ret);
+
+    eventType = EVENT_TYPE_TRANS_LIMIT_CHANGE;
+    ret = TransProcessInnerEvent(eventType, buf, len);
+    EXPECT_EQ(SOFTBUS_OK, ret);
+
+    eventType = EVENT_TYPE_COLLAB_CHECK;
+    ret = TransProcessInnerEvent(eventType, buf, len);
+    EXPECT_NE(SOFTBUS_OK, ret);
+
+    eventType = EVENT_TYPE_SET_ACCESS_INFO;
+    ret = TransProcessInnerEvent(eventType, buf, len);
+    EXPECT_NE(SOFTBUS_OK, ret);
+}
+
+/**
+ * @tc.name: GenerateChannelId test
+ * @tc.desc: GenerateChannelId001
+ * @tc.type: FUNC
+ * @tc.require:
+ */
+HWTEST_F(TransChannelManagerTest, GenerateChannelId001, TestSize.Level1)
+{
+    int32_t channelId;
+    int32_t tdcChannel = g_allocTdcChannelId;
+    g_allocTdcChannelId = MAX_TDC_CHANNEL_ID;
+    int32_t ret = SoftBusMutexInit(&g_myIdLock, NULL);
+    EXPECT_EQ(SOFTBUS_OK, ret);
+    channelId = GenerateTdcChannelId();
+    EXPECT_EQ(MAX_TDC_CHANNEL_ID, channelId);
+    g_allocTdcChannelId = tdcChannel;
+
+    int32_t proxyChannel = g_channelIdCount;
+    g_channelIdCount = MAX_PROXY_CHANNEL_ID_COUNT;
+    channelId = GenerateProxyChannelId();
+    EXPECT_EQ(INVALID_CHANNEL_ID, channelId);
+    g_channelIdCount = proxyChannel;
+    SoftBusMutexDestroy(&g_myIdLock);
+}
+
+static void AddInt32ToBuffer(int32_t value, uint8_t *testBuffer, int32_t &bufferOffset)
+{
+    if (memcpy_s(testBuffer + bufferOffset, sizeof(int32_t), &value, sizeof(int32_t)) != EOK) {
+        return;
+    }
+    bufferOffset += sizeof(int32_t);
+}
+
+static void AddUint64ToBuffer(uint64_t value, uint8_t *testBuffer, int32_t &bufferOffset)
+{
+    if (memcpy_s(testBuffer + bufferOffset, sizeof(uint64_t), &value, sizeof(uint64_t)) != EOK) {
+        return;
+    }
+    bufferOffset += sizeof(uint64_t);
+}
+
+static void AddStringToBuffer(const char *str, uint8_t *testBuffer, int32_t &bufferOffset)
+{
+    uint32_t len = strlen(str);
+    if (memcpy_s(testBuffer + bufferOffset, sizeof(uint32_t), &len, sizeof(uint32_t)) != EOK) {
+        return;
+    }
+    bufferOffset += sizeof(uint32_t);
+    if (memcpy_s(testBuffer + bufferOffset, len, str, len) != EOK) {
+        return;
+    }
+    bufferOffset += len;
+}
+
+/**
+ * @tc.name: TransSetAccessInfo test
+ * @tc.desc: TransSetAccessInfo001
+ * @tc.type: FUNC
+ * @tc.require:
+ */
+HWTEST_F(TransChannelManagerTest, TransSetAccessInfo001, TestSize.Level1)
+{
+    int32_t expectedUserId = 123;
+    uint64_t expectedTokenId = 987654321;
+    const char *expectedSessionName = "test_session";
+    const char *expectedExtraInfo = "extra_info_data";
+    const char *expectedBusinessVer = "v1.2.3";
+    uint8_t testBuffer[TEST_BUF_LEN] = {0};
+    int32_t bufferOffset = 0;
+    pid_t callingPid = (pid_t)TRANS_TEST_PID;
+ 
+    AddInt32ToBuffer(expectedUserId, testBuffer, bufferOffset);
+    AddUint64ToBuffer(expectedTokenId, testBuffer, bufferOffset);
+    AddStringToBuffer(expectedSessionName, testBuffer, bufferOffset);
+    AddStringToBuffer(expectedExtraInfo, testBuffer, bufferOffset);
+    AddStringToBuffer(expectedBusinessVer, testBuffer, bufferOffset);
+
+    int32_t ret = TransSetAccessInfo(testBuffer, TEST_BUF_LEN, callingPid);
+    EXPECT_EQ(ret, SOFTBUS_NO_INIT);
+
+    char sessionName[] = "test_session";
+    SessionServer *newNode = (SessionServer *)SoftBusCalloc(sizeof(SessionServer));
+    ASSERT_TRUE(newNode != nullptr);
+    strcpy_s(newNode->sessionName, sizeof(sessionName), sessionName);
+    newNode->pid = callingPid;
+
+    ret = TransSessionMgrInit();
+    EXPECT_EQ(ret, SOFTBUS_OK);
+    ret = TransSessionServerAddItem(newNode);
+    EXPECT_EQ(ret, SOFTBUS_OK);
+
+    ret = TransSetAccessInfo(testBuffer, TEST_BUF_LEN, callingPid);
+    EXPECT_EQ(ret, SOFTBUS_OK);
+
+    ret = TransSessionServerDelItem(sessionName);
+    EXPECT_EQ(SOFTBUS_OK, ret);
+    TransSessionMgrDeinit();
+}
+
+/**
+ * @tc.name: TransSetAccessInfo test
+ * @tc.desc: TransSetAccessInfo002
+ * @tc.type: FUNC
+ * @tc.require:
+ */
+HWTEST_F(TransChannelManagerTest, TransSetAccessInfo002, TestSize.Level1)
+{
+    uint8_t shortBuf[1] = {0};
+    pid_t callingPid = (pid_t)TRANS_TEST_PID;
+    int32_t ret = TransSetAccessInfo(shortBuf, 1, callingPid);
+    EXPECT_EQ(ret, SOFTBUS_TRANS_INVALID_DATA_LENGTH);
+
+    uint8_t buf[sizeof(int32_t) + 1] = {0};
+    ret = TransSetAccessInfo(buf, sizeof(buf), callingPid);
+    EXPECT_EQ(ret, SOFTBUS_TRANS_INVALID_DATA_LENGTH);
 }
 } // OHOS

@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021-2024 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2025 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -55,6 +55,10 @@ namespace OHOS {
 #define TEST_SLEEP_TIME 5000
 #define TEST_ARR_INIT 0
 #define TEST_FAST_DATA_SIZE 10
+#define TEST_CHANNEL_ID 1024
+#define TEST_USER_ID 100
+#define TEST_TOKEN_ID 1111111
+#define TEST_CALLING_PID 1234
 
 static int32_t m_testProxyAuthChannelId = -1;
 static bool g_testProxyChannelOpenSuccessFlag = false;
@@ -160,10 +164,11 @@ void SoftbusProxyChannelManagerTest::SetUpTestCase(void)
     callBack.OnChannelClosed = TestOnChannelClosed;
     callBack.OnChannelOpenFailed = TestOnChannelOpenFailed;
     callBack.OnDataReceived = TestOnDataReceived;
-    callBack.OnQosEvent = NULL;
+    callBack.OnQosEvent = nullptr;
     callBack.GetPkgNameBySessionName = TestGetPkgNameBySessionName;
     callBack.GetUidAndPidBySessionName = TestGetUidAndPidBySessionName;
     ASSERT_EQ(SOFTBUS_OK, TransProxyManagerInitInner(&callBack));
+    ASSERT_EQ(SOFTBUS_OK, TransChannelResultLoopInit());
 }
 
 void SoftbusProxyChannelManagerTest::TearDownTestCase(void)
@@ -174,7 +179,7 @@ void SoftbusProxyChannelManagerTest::TearDownTestCase(void)
 static ProxyChannelInfo *BuildProxyChannelInfo(int32_t channelId, const char *identity, ProxyChannelStatus status)
 {
     ProxyChannelInfo *chan = (ProxyChannelInfo *)SoftBusCalloc(sizeof(ProxyChannelInfo));
-    if (chan == NULL) {
+    if (chan == nullptr) {
         return nullptr;
     }
     chan->authHandle.authId = channelId;
@@ -237,13 +242,13 @@ HWTEST_F(SoftbusProxyChannelManagerTest, TransProxyOpenProxyChannelTest001, Test
     EXPECT_EQ(SOFTBUS_OK, ret);
     ReleaseProxyChannelLock();
 
-    ret = TransProxyOpenProxyChannel(NULL, &connInfo, &channelId);
+    ret = TransProxyOpenProxyChannel(nullptr, &connInfo, &channelId);
     EXPECT_EQ(SOFTBUS_INVALID_PARAM, ret);
 
-    ret = TransProxyOpenProxyChannel(&appInfo, NULL, &channelId);
+    ret = TransProxyOpenProxyChannel(&appInfo, nullptr, &channelId);
     EXPECT_EQ(SOFTBUS_INVALID_PARAM, ret);
 
-    ret = TransProxyOpenProxyChannel(&appInfo, &connInfo, NULL);
+    ret = TransProxyOpenProxyChannel(&appInfo, &connInfo, nullptr);
     EXPECT_EQ(SOFTBUS_INVALID_PARAM, ret);
 
     connInfo.type = CONNECT_BLE_DIRECT;
@@ -287,7 +292,7 @@ HWTEST_F(SoftbusProxyChannelManagerTest, TransProxyGetNewChanSeqTest001, TestSiz
 HWTEST_F(SoftbusProxyChannelManagerTest, TransProxyGetNewChanSeqTest002, TestSize.Level1)
 {
     ProxyChannelInfo *chan = reinterpret_cast<ProxyChannelInfo *>(SoftBusCalloc(sizeof(ProxyChannelInfo)));
-    ASSERT_TRUE(nullptr != chan);
+    ASSERT_TRUE(chan != nullptr);
     chan->channelId = TEST_VALID_CHANNEL_ID;
     chan->seq = TEST_VALID_SEQ;
     chan->connId = TEST_VALID_CONN_ID;
@@ -420,7 +425,7 @@ HWTEST_F(SoftbusProxyChannelManagerTest, TransProxyGetSessionKeyByChanIdTest001,
 HWTEST_F(SoftbusProxyChannelManagerTest, TransProxyGetSessionKeyByChanIdTest002, TestSize.Level1)
 {
     int32_t channelId;
-    char *sessionKey = NULL;
+    char *sessionKey = nullptr;
     uint32_t sessionKeySize = SESSIONKEYSIZE;
 
     channelId = TEST_MESSAGE_CHANNEL_ID;
@@ -484,7 +489,7 @@ HWTEST_F(SoftbusProxyChannelManagerTest, TransProxyGetAppInfoByChanIdTest001, Te
 HWTEST_F(SoftbusProxyChannelManagerTest, TransProxyGetAppInfoByChanIdTest002, TestSize.Level1)
 {
     int32_t chanId = TEST_MESSAGE_CHANNEL_VALID_ID;
-    AppInfo* appInfo = NULL;
+    AppInfo* appInfo = nullptr;
 
     int32_t ret = TransProxyGetAppInfoByChanId(chanId, appInfo);
     EXPECT_EQ(SOFTBUS_INVALID_PARAM, ret);
@@ -521,7 +526,7 @@ HWTEST_F(SoftbusProxyChannelManagerTest, TransProxyGetConnIdByChanIdTest001, Tes
 HWTEST_F(SoftbusProxyChannelManagerTest, TransProxyGetConnIdByChanIdTest002, TestSize.Level1)
 {
     int32_t channelId = TEST_MESSAGE_CHANNEL_ID;
-    int32_t* connId = NULL;
+    int32_t* connId = nullptr;
 
     int32_t ret = TransProxyGetConnIdByChanId(channelId, connId);
     EXPECT_NE(SOFTBUS_OK, ret);
@@ -565,7 +570,7 @@ HWTEST_F(SoftbusProxyChannelManagerTest, TransProxyGetConnOptionByChanIdTest001,
     EXPECT_NE(SOFTBUS_OK, ret);
 
     ProxyChannelInfo *chan = (ProxyChannelInfo *)SoftBusCalloc(sizeof(ProxyChannelInfo));
-    ASSERT_TRUE(NULL != chan);
+    ASSERT_TRUE(chan != nullptr);
     chan->authHandle.authId = TEST_NUMBER_TWENTY;
     chan->connId = TEST_NUMBER_TWENTY;
     chan->reqId = TEST_NUMBER_TWENTY;
@@ -593,7 +598,7 @@ HWTEST_F(SoftbusProxyChannelManagerTest, TransProxyGetConnOptionByChanIdTest001,
 HWTEST_F(SoftbusProxyChannelManagerTest, TransProxyGetConnOptionByChanIdTest002, TestSize.Level1)
 {
     int32_t channelId = TEST_MESSAGE_CHANNEL_VALID_ID;
-    ConnectOption* connOpt = NULL;
+    ConnectOption* connOpt = nullptr;
 
     int32_t ret = TransProxyGetConnOptionByChanId(channelId, connOpt);
     EXPECT_EQ(SOFTBUS_INVALID_PARAM, ret);
@@ -637,13 +642,14 @@ HWTEST_F(SoftbusProxyChannelManagerTest, TransProxyChanProcessByReqIdTest001, Te
     int32_t channelId = TEST_NUMBER_25;
     uint32_t connId = TEST_NUMBER_TEN;
     char identity[TEST_ARRRY_SIZE] = {0};
+    int32_t errCode = SOFTBUS_OK;
     int32_t ret = strcpy_s(identity, TEST_CHANNEL_IDENTITY_LEN, TEST_STRING_ELEVEN);
     if (ret != EOK) {
         TRANS_LOGE(TRANS_TEST, "copy failed");
         return;
     }
     TestTransProxyAddAuthChannel(channelId, identity, PROXY_CHANNEL_STATUS_PYH_CONNECTING);
-    TransProxyChanProcessByReqId(TEST_NUMBER_26, connId);
+    TransProxyChanProcessByReqId(TEST_NUMBER_26, connId, errCode);
     usleep(TEST_SLEEP_TIME);
     ProxyChannelInfo chanInfo;
     ret = TransProxyGetSendMsgChanInfo(TEST_NUMBER_25, &chanInfo);
@@ -663,10 +669,11 @@ HWTEST_F(SoftbusProxyChannelManagerTest, TransProxyChanProcessByReqIdTest002, Te
     EXPECT_EQ(SOFTBUS_OK, ret);
     int32_t channelId = TEST_VALID_CHANNEL_ID;
     uint32_t connId = TEST_VALID_CONN_ID;
+    int32_t errCode = SOFTBUS_OK;
     char identity[TEST_ARRRY_SIZE] = { TEST_ARR_INIT };
     (void)strcpy_s(identity, TEST_CHANNEL_IDENTITY_LEN, TEST_STRING_ELEVEN);
     TestTransProxyAddAuthChannel(channelId, identity, PROXY_CHANNEL_STATUS_PYH_CONNECTING);
-    TransProxyChanProcessByReqId(TEST_VALID_CHANNEL_ID, connId);
+    TransProxyChanProcessByReqId(TEST_VALID_CHANNEL_ID, connId, errCode);
     usleep(TEST_SLEEP_TIME);
     ProxyChannelInfo chanInfo;
     ret = TransProxyGetSendMsgChanInfo(TEST_VALID_CHANNEL_ID, &chanInfo);
@@ -688,14 +695,23 @@ HWTEST_F(SoftbusProxyChannelManagerTest, TransProxyOnMessageReceivedTest001, Tes
     info.appInfo.appType = APP_TYPE_AUTH;
     (void)strcpy_s(info.appInfo.peerData.sessionName, SESSIONKEYSIZE, TEST_AUTHSESSION);
     msg.data = TransProxyPackHandshakeMsg(&info);
-    ASSERT_TRUE(NULL != msg.data);
-    msg.dateLen = strlen(msg.data) + TEST_NUMBER_ONE;
+    ASSERT_TRUE(msg.data != nullptr);
+    msg.dataLen = strlen(msg.data) + TEST_NUMBER_ONE;
     msg.connId = TEST_NUMBER_ELEVEN;
     msg.msgHead.myId = TEST_NUMBER_ELEVEN;
     msg.msgHead.peerId = TEST_NUMBER_ELEVEN;
     msg.msgHead.type = PROXYCHANNEL_MSG_TYPE_HANDSHAKE;
     TransProxyOnMessageReceived(&msg);
     EXPECT_FALSE(g_testProxyChannelOpenSuccessFlag);
+
+    msg.msgHead.type = PROXYCHANNEL_MSG_TYPE_HANDSHAKE_AUTH;
+    TransProxyOnMessageReceived(&msg);
+
+    msg.msgHead.type = PROXYCHANNEL_MSG_TYPE_HANDSHAKE_ACK;
+    TransProxyOnMessageReceived(&msg);
+
+    msg.msgHead.type = PROXYCHANNEL_MSG_TYPE_MAX;
+    TransProxyOnMessageReceived(&msg);
 }
 
 /**@
@@ -711,8 +727,8 @@ HWTEST_F(SoftbusProxyChannelManagerTest, TransProxyOnMessageReceivedTest002, Tes
     g_testProxyChannelOpenSuccessFlag = false;
     msg.msgHead.type = PROXYCHANNEL_MSG_TYPE_HANDSHAKE_ACK;
     msg.data = TransProxyPackHandshakeErrMsg(SOFTBUS_INVALID_PARAM);
-    ASSERT_TRUE(NULL != msg.data);
-    msg.dateLen = strlen(msg.data) + TEST_NUMBER_ONE;
+    ASSERT_TRUE(msg.data != nullptr);
+    msg.dataLen = strlen(msg.data) + TEST_NUMBER_ONE;
 
     /* test receive errcode msg */
     TransProxyOnMessageReceived(&msg);
@@ -725,9 +741,9 @@ HWTEST_F(SoftbusProxyChannelManagerTest, TransProxyOnMessageReceivedTest002, Tes
     string identity = TEST_STRING_TEN;
     (void)strcpy_s(chan.identity, TEST_CHANNEL_IDENTITY_LEN, identity.c_str());
     msg.data = TransProxyPackHandshakeAckMsg(&chan);
-    ASSERT_TRUE(NULL != msg.data);
+    ASSERT_TRUE(msg.data != nullptr);
 
-    msg.dateLen = strlen(msg.data) + TEST_NUMBER_ONE;
+    msg.dataLen = strlen(msg.data) + TEST_NUMBER_ONE;
     msg.msgHead.myId = TEST_NUMBER_TEN;
     TransProxyOnMessageReceived(&msg);
     EXPECT_FALSE(g_testProxyChannelOpenSuccessFlag);
@@ -745,8 +761,8 @@ HWTEST_F(SoftbusProxyChannelManagerTest, TransProxyOnMessageReceivedTest003, Tes
     ProxyMessage msg;
     const char *identity = TEST_STRING_ELEVEN;
     msg.data = TransProxyPackIdentity(identity);
-    ASSERT_TRUE(NULL != msg.data);
-    msg.dateLen = strlen(msg.data) + TEST_NUMBER_ONE;
+    ASSERT_TRUE(msg.data != nullptr);
+    msg.dataLen = strlen(msg.data) + TEST_NUMBER_ONE;
     msg.connId = TEST_NUMBER_VALID;
     msg.msgHead.type = PROXYCHANNEL_MSG_TYPE_RESET;
     /* test no compare channel */
@@ -781,7 +797,7 @@ HWTEST_F(SoftbusProxyChannelManagerTest, TransProxyOnMessageReceivedTest004, Tes
     const char *identity = TEST_STRING_ELEVEN;
     TestTransProxyAddAuthChannel(channelId, identity, PROXY_CHANNEL_STATUS_KEEPLIVEING);
     msg.data = TransProxyPackIdentity(identity);
-    msg.dateLen = strlen(msg.data) + TEST_NUMBER_ONE;
+    msg.dataLen = strlen(msg.data) + TEST_NUMBER_ONE;
 
     msg.msgHead.type = PROXYCHANNEL_MSG_TYPE_KEEPALIVE;
     TransProxyOnMessageReceived(&msg);
@@ -1013,6 +1029,34 @@ HWTEST_F(SoftbusProxyChannelManagerTest, TransProxyProcessResetMsgHelperTest001,
 }
 
 /**@
+ * @tc.name: TransProxyProcessResetMsgHelperTest002
+ * @tc.desc: test trans proxy process
+ * @tc.type: FUNC
+ * @tc.require:
+ */
+HWTEST_F(SoftbusProxyChannelManagerTest, TransProxyProcessResetMsgHelperTest002, TestSize.Level1)
+{
+    ProxyChannelInfo *chan = reinterpret_cast<ProxyChannelInfo *>(SoftBusCalloc(sizeof(ProxyChannelInfo)));
+    ASSERT_TRUE(nullptr != chan);
+    chan->appInfo.appType = APP_TYPE_NORMAL;
+    chan->channelId = TEST_VALID_CHANNEL_ID;
+    chan->appInfo.fastTransDataSize = TEST_FAST_DATA_SIZE;
+    chan->appInfo.fastTransData = reinterpret_cast<uint8_t *>(SoftBusCalloc(sizeof(chan->appInfo.fastTransDataSize)));
+    chan->status = PROXY_CHANNEL_STATUS_COMPLETED;
+    ASSERT_TRUE(nullptr != chan->appInfo.fastTransData);
+
+    ProxyMessage *msg = reinterpret_cast<ProxyMessage *>(SoftBusCalloc(sizeof(ProxyMessage)));
+    ASSERT_TRUE(nullptr != msg);
+    msg->msgHead.cipher = 8; // test value
+    msg->msgHead.peerId = TEST_PARSE_MESSAGE_CHANNEL;
+    msg->msgHead.type = (PROXYCHANNEL_MSG_TYPE_HANDSHAKE & FOUR_BIT_MASK) | (1 << VERSION_SHIFT);
+
+    TransProxyProcessResetMsgHelper(chan, msg);
+    ReleaseChannelInfo(chan);
+    SoftBusFree(msg);
+}
+
+/**@
  * @tc.name: TransProxyNegoSessionKeySuccTest001
  * @tc.desc: test trans proxy process
  * @tc.type: FUNC
@@ -1065,6 +1109,52 @@ HWTEST_F(SoftbusProxyChannelManagerTest, TransProxyOpenProxyChannelSuccessTest00
     chan->reqId = TEST_VALID_REQ;
     chan->channelId = TEST_VALID_CHANNEL_ID;
     chan->status = PROXY_CHANNEL_STATUS_HANDSHAKEING;
+    int32_t ret = TransProxyAddChanItem(chan);
+    EXPECT_EQ(SOFTBUS_OK, ret);
+
+    TransProxyOpenProxyChannelSuccess(TEST_VALID_CHANNEL_ID);
+    TransProxyDelChanByChanId(TEST_VALID_CHANNEL_ID);
+}
+
+/**@
+ * @tc.name: TransProxyOpenProxyChannelSuccessTest002
+ * @tc.desc: test trans proxy process
+ * @tc.type: FUNC
+ * @tc.require:
+ */
+HWTEST_F(SoftbusProxyChannelManagerTest, TransProxyOpenProxyChannelSuccessTest002, TestSize.Level1)
+{
+    ProxyChannelInfo *chan = reinterpret_cast<ProxyChannelInfo *>(SoftBusCalloc(sizeof(ProxyChannelInfo)));
+    ASSERT_TRUE(nullptr != chan);
+    chan->reqId = TEST_VALID_REQ;
+    chan->channelId = TEST_VALID_CHANNEL_ID;
+    chan->type = CONNECT_BLE;
+    chan->status = PROXY_CHANNEL_STATUS_HANDSHAKEING;
+    chan->connId = TEST_VALID_CONN_ID;
+    chan->appInfo.blePriority = BLE_PRIORITY_DEFAULT;
+    int32_t ret = TransProxyAddChanItem(chan);
+    EXPECT_EQ(SOFTBUS_OK, ret);
+
+    TransProxyOpenProxyChannelSuccess(TEST_VALID_CHANNEL_ID);
+    TransProxyDelChanByChanId(TEST_VALID_CHANNEL_ID);
+}
+
+/**@
+ * @tc.name: TransProxyOpenProxyChannelSuccessTest003
+ * @tc.desc: test trans proxy process
+ * @tc.type: FUNC
+ * @tc.require:
+ */
+HWTEST_F(SoftbusProxyChannelManagerTest, TransProxyOpenProxyChannelSuccessTest003, TestSize.Level1)
+{
+    ProxyChannelInfo *chan = reinterpret_cast<ProxyChannelInfo *>(SoftBusCalloc(sizeof(ProxyChannelInfo)));
+    ASSERT_TRUE(nullptr != chan);
+    chan->reqId = TEST_VALID_REQ;
+    chan->channelId = TEST_VALID_CHANNEL_ID;
+    chan->type = CONNECT_BLE;
+    chan->status = PROXY_CHANNEL_STATUS_HANDSHAKEING;
+    chan->connId = TEST_VALID_CONN_ID;
+    chan->appInfo.blePriority = BLE_PRIORITY_BALANCED;
     int32_t ret = TransProxyAddChanItem(chan);
     EXPECT_EQ(SOFTBUS_OK, ret);
 
@@ -1147,24 +1237,6 @@ HWTEST_F(SoftbusProxyChannelManagerTest, TransNotifyOffLineTest001, TestSize.Lev
     info->event = LNN_EVENT_NODE_MIGRATE;
     TransNotifyOffLine(info);
     SoftBusFree(info);
-}
-
-/**@
- * @tc.name: TransProxyCloseProxyOtherResTest001
- * @tc.desc: test trans proxy close proxy other res
- * @tc.type: FUNC
- * @tc.require:
- */
-HWTEST_F(SoftbusProxyChannelManagerTest, TransProxyCloseProxyOtherResTest001, TestSize.Level1)
-{
-    int32_t ret = TransProxyLoopInit();
-    EXPECT_EQ(SOFTBUS_OK, ret);
-    ProxyChannelInfo *chan = reinterpret_cast<ProxyChannelInfo *>(SoftBusCalloc(sizeof(ProxyChannelInfo)));
-    ASSERT_TRUE(nullptr != chan);
-    int32_t channelId = TEST_VALID_CHANNEL_ID;
-    chan->channelId = TEST_VALID_CHANNEL_ID;
-
-    TransProxyCloseProxyOtherRes(channelId, chan);
 }
 
 /**@
@@ -1299,7 +1371,7 @@ HWTEST_F(SoftbusProxyChannelManagerTest, TransProxyDeathCallbackTest001, TestSiz
     appInfo.myData.pid = TEST_DEATH_CHANNEL_ID;
     // will free in TransProxyDeathCallback
     ProxyChannelInfo *chan = (ProxyChannelInfo *)SoftBusCalloc(sizeof(ProxyChannelInfo));
-    ASSERT_TRUE(NULL != chan);
+    ASSERT_TRUE(chan != nullptr);
     chan->channelId = TEST_DEATH_CHANNEL_ID;
     chan->connId = TEST_NUMBER_VALID;
     chan->status = PROXY_CHANNEL_STATUS_KEEPLIVEING;
@@ -1307,11 +1379,11 @@ HWTEST_F(SoftbusProxyChannelManagerTest, TransProxyDeathCallbackTest001, TestSiz
     int32_t ret = TransProxyCreateChanInfo(chan, chan->channelId, &appInfo);
     ASSERT_EQ(SOFTBUS_OK, ret);
 
-    TransProxyDeathCallback(NULL, TEST_DEATH_CHANNEL_ID);
+    TransProxyDeathCallback(nullptr, TEST_DEATH_CHANNEL_ID);
     TransProxyDeathCallback(TEST_PKGNAME, TEST_DEATH_CHANNEL_ID);
 
     ProxyChannelInfo *chanInfo = (ProxyChannelInfo *)SoftBusCalloc(sizeof(ProxyChannelInfo));
-    ASSERT_TRUE(NULL != chanInfo);
+    ASSERT_TRUE(chanInfo != nullptr);
     chanInfo->channelId = TEST_DEATH_CHANNEL_ID;
     chanInfo->connId = TEST_NUMBER_VALID;
     chanInfo->status = PROXY_CHANNEL_STATUS_KEEPLIVEING;
@@ -1357,16 +1429,16 @@ HWTEST_F(SoftbusProxyChannelManagerTest, CheckAppTypeAndMsgHeadTest001, TestSize
   */
 HWTEST_F(SoftbusProxyChannelManagerTest, TransProxyGetChanByReqIdTest001, TestSize.Level1)
 {
-    ProxyChannelInfo *chan = NULL;
+    ProxyChannelInfo *chan = nullptr;
     int32_t reqId = TEST_PARSE_MESSAGE_CHANNEL;
 
     int32_t ret = TransProxyGetChanByReqId(reqId, chan);
     EXPECT_EQ(SOFTBUS_OK, ret);
 
     reqId = TEST_MESSAGE_CHANNEL_VALID_ID;
-    chan = NULL;
+    chan = nullptr;
     ret = TransProxyGetChanByReqId(reqId, chan);
-    EXPECT_EQ(NULL, chan);
+    EXPECT_EQ(nullptr, chan);
 }
 
 
@@ -1442,14 +1514,14 @@ HWTEST_F(SoftbusProxyChannelManagerTest, TransProxyUpdateAckInfoTest001, TestSiz
     (void)strcpy_s(testInfo.identity, sizeof(testInfo.identity), TEST_CHANNEL_INDENTITY);
 
     ProxyChannelInfo *info = (ProxyChannelInfo *)SoftBusCalloc(sizeof(ProxyChannelInfo));
-    if (info == NULL) {
+    if (info == nullptr) {
         return;
     }
     info->appInfo.appType = APP_TYPE_AUTH;
     info->myId = TEST_NUMBER_ZERO;
     (void)strcpy_s(info->identity, sizeof(info->identity), TEST_CHANNEL_INDENTITY);
 
-    int32_t ret = TransProxyUpdateAckInfo(NULL);
+    int32_t ret = TransProxyUpdateAckInfo(nullptr);
     EXPECT_NE(SOFTBUS_OK, ret);
 
     ret = TransProxyAddChanItem(info);
@@ -1472,7 +1544,7 @@ HWTEST_F(SoftbusProxyChannelManagerTest, TransProxyDelByConnIdTest003, TestSize.
     EXPECT_NE(SOFTBUS_OK, ret);
 
     ProxyChannelInfo *info = (ProxyChannelInfo *)SoftBusCalloc(sizeof(ProxyChannelInfo));
-    if (info == NULL) {
+    if (info == nullptr) {
         return;
     }
     info->myId = 1;
@@ -1483,7 +1555,7 @@ HWTEST_F(SoftbusProxyChannelManagerTest, TransProxyDelByConnIdTest003, TestSize.
     EXPECT_EQ(SOFTBUS_OK, ret);
 
     LnnEventBasicInfo lnnInfo;
-    TransWifiStateChange(NULL);
+    TransWifiStateChange(nullptr);
     TransWifiStateChange(&lnnInfo);
 }
 
@@ -1715,14 +1787,14 @@ HWTEST_F(SoftbusProxyChannelManagerTest, TransProxyUpdateAckInfoTest002, TestSiz
     (void)strcpy_s(testInfo.identity, sizeof(testInfo.identity), TEST_CHANNEL_INDENTITY);
 
     ProxyChannelInfo *info = (ProxyChannelInfo *)SoftBusCalloc(sizeof(ProxyChannelInfo));
-    if (info == NULL) {
+    if (info == nullptr) {
         return;
     }
     info->appInfo.appType = APP_TYPE_AUTH;
     info->myId = 0;
     (void)strcpy_s(info->identity, sizeof(info->identity), TEST_CHANNEL_INDENTITY);
 
-    int32_t ret = TransProxyUpdateAckInfo(NULL);
+    int32_t ret = TransProxyUpdateAckInfo(nullptr);
     EXPECT_NE(SOFTBUS_OK, ret);
 
     ret = TransProxyAddChanItem(info);
@@ -1762,7 +1834,7 @@ HWTEST_F(SoftbusProxyChannelManagerTest, TransProxyGetLocalInfoTest001, TestSize
     info.type = CONNECT_BLE_DIRECT;
     ConstructProxyChannelInfo(chan, msg, newChanId, &info);
 
-    TransWifiOnLineProc(NULL);
+    TransWifiOnLineProc(nullptr);
 
     char network[TEST_NUMBER_TWENTY]  = { TEST_ARR_INIT };
     ret = strcpy_s(network, TEST_NUMBER_TWENTY, TEST_CHANNEL_INDENTITY);
@@ -1777,7 +1849,7 @@ HWTEST_F(SoftbusProxyChannelManagerTest, TransProxyGetLocalInfoTest001, TestSize
     TransWifiOffLineProc(&networkId);
 
     LnnEventBasicInfo lnnInfo;
-    TransNotifyOffLine(NULL);
+    TransNotifyOffLine(nullptr);
     TransNotifyOffLine(&lnnInfo);
 }
 
@@ -1805,7 +1877,7 @@ HWTEST_F(SoftbusProxyChannelManagerTest, TransProxyGetAppInfoTypeTest001, TestSi
 HWTEST_F(SoftbusProxyChannelManagerTest, TransProxySpecialUpdateChanInfoTest001, TestSize.Level1)
 {
     ProxyChannelInfo channelInfo;
-    memset_s(&channelInfo, sizeof(ProxyChannelInfo), 0, sizeof(ProxyChannelInfo));
+    (void)memset_s(&channelInfo, sizeof(ProxyChannelInfo), 0, sizeof(ProxyChannelInfo));
     int32_t ret = TransProxySpecialUpdateChanInfo(nullptr);
     EXPECT_EQ(SOFTBUS_INVALID_PARAM, ret);
     channelInfo.channelId = TEST_MESSAGE_CHANNEL_ID;
@@ -1847,6 +1919,37 @@ HWTEST_F(SoftbusProxyChannelManagerTest, TransProxySpecialUpdateChanInfoTest002,
 }
 
 /**
+ * @tc.name: TransProxySpecialUpdateChanInfoTest003
+ * @tc.desc: Should return SOFTBUS_TRANS_NODE_NOT_FOUND when given invalid parameters.
+ * @tc.type: FUNC
+ * @tc.require:
+ */
+HWTEST_F(SoftbusProxyChannelManagerTest, TransProxySpecialUpdateChanInfoTest003, TestSize.Level1)
+{
+    ProxyChannelInfo *channelInfo = static_cast<ProxyChannelInfo *>(SoftBusCalloc(sizeof(ProxyChannelInfo)));
+    ASSERT_TRUE(channelInfo != nullptr);
+
+    int32_t ret = TransProxySpecialUpdateChanInfo(nullptr);
+    EXPECT_EQ(SOFTBUS_INVALID_PARAM, ret);
+    channelInfo->channelId = TEST_VALID_CHANNEL_ID;
+    channelInfo->reqId = 1;
+    channelInfo->isServer = 1;
+    channelInfo->type = CONNECT_BR;
+    channelInfo->status = PROXY_CHANNEL_STATUS_HANDSHAKEING;
+    channelInfo->connId = 1;
+    channelInfo->type = CONNECT_TYPE_MAX;
+    (void)strcpy_s(channelInfo->identity, sizeof(channelInfo->identity), TEST_CHANNEL_INDENTITY);
+
+    ret = TransProxyAddChanItem(channelInfo);
+    EXPECT_EQ(SOFTBUS_OK, ret);
+    ret = TransProxySpecialUpdateChanInfo(channelInfo);
+    EXPECT_EQ(SOFTBUS_OK, ret);
+
+    channelInfo->status = PROXY_CHANNEL_STATUS_PYH_CONNECTING;
+    TransProxyDelChanByReqId(channelInfo->reqId, 1);
+}
+
+/**
  * @tc.name: TransProxyGetChanByChanIdTest001
  * @tc.desc: Should return SOFTBUS_TRANS_NODE_NOT_FOUND when given invalid parameters.
  * @tc.desc: Should return SOFTBUS_INVALID_PARAM when given null channelInfo.
@@ -1856,7 +1959,7 @@ HWTEST_F(SoftbusProxyChannelManagerTest, TransProxySpecialUpdateChanInfoTest002,
 HWTEST_F(SoftbusProxyChannelManagerTest, TransProxyGetChanByChanIdTest001, TestSize.Level1)
 {
     ProxyChannelInfo chan;
-    memset_s(&chan, sizeof(ProxyChannelInfo), 0, sizeof(ProxyChannelInfo));
+    (void)memset_s(&chan, sizeof(ProxyChannelInfo), 0, sizeof(ProxyChannelInfo));
     int32_t chanId = 1;
     int32_t ret = TransProxyGetChanByChanId(chanId, nullptr);
     EXPECT_EQ(SOFTBUS_INVALID_PARAM, ret);
@@ -1874,7 +1977,7 @@ HWTEST_F(SoftbusProxyChannelManagerTest, TransProxyGetChanByChanIdTest001, TestS
 HWTEST_F(SoftbusProxyChannelManagerTest, TransProxyProcessDataConfigTest001, TestSize.Level1)
 {
     AppInfo appInfo;
-    memset_s(&appInfo, sizeof(AppInfo), 0, sizeof(AppInfo));
+    (void)memset_s(&appInfo, sizeof(AppInfo), 0, sizeof(AppInfo));
     int32_t ret = TransProxyProcessDataConfig(nullptr);
     EXPECT_EQ(SOFTBUS_INVALID_PARAM, ret);
     appInfo.businessType = BUSINESS_TYPE_MESSAGE;
@@ -1915,7 +2018,7 @@ HWTEST_F(SoftbusProxyChannelManagerTest, TransProxyProcessDataConfigTest002, Tes
 HWTEST_F(SoftbusProxyChannelManagerTest, TransProxyFillDataConfigTest001, TestSize.Level1)
 {
     AppInfo appInfo;
-    memset_s(&appInfo, sizeof(AppInfo), 0, sizeof(AppInfo));
+    (void)memset_s(&appInfo, sizeof(AppInfo), 0, sizeof(AppInfo));
     appInfo.appType = APP_TYPE_AUTH;
     int32_t ret = TransProxyFillDataConfig(nullptr);
     EXPECT_EQ(SOFTBUS_INVALID_PARAM, ret);
@@ -1971,15 +2074,15 @@ HWTEST_F(SoftbusProxyChannelManagerTest, TransProxyFillChannelInfoTest001, TestS
     chan->appInfo.appType = APP_TYPE_NORMAL;
     chan->appInfo.callingTokenId = TOKENID_NOT_SET;
     msg->data = TransProxyPackHandshakeMsg(chan);
-    msg->dateLen = strlen(msg->data) + 1;
+    msg->dataLen = strlen(msg->data) + 1;
 
     int32_t ret = TransProxyFillChannelInfo(msg, nullptr);
     EXPECT_EQ(SOFTBUS_INVALID_PARAM, ret);
     ret = TransProxyFillChannelInfo(msg, chan);
-    EXPECT_EQ(SOFTBUS_TRANS_PROXY_ERROR_APP_TYPE, ret);
+    EXPECT_EQ(SOFTBUS_CONN_MANAGER_TYPE_NOT_SUPPORT, ret);
     msg->msgHead.type = ENCRYPTED;
     ret = TransProxyFillChannelInfo(msg, chan);
-    EXPECT_EQ(SOFTBUS_TRANS_PROXY_ERROR_APP_TYPE, ret);
+    EXPECT_EQ(SOFTBUS_CONN_MANAGER_TYPE_NOT_SUPPORT, ret);
     ReleaseChannelInfo(chan);
     SoftBusFree(msg);
 }
@@ -2040,7 +2143,7 @@ HWTEST_F(SoftbusProxyChannelManagerTest, TransProxyHandShakeUnpackErrMsg001, Tes
     chan->channelId = TEST_VALID_CHANNEL_ID;
     chan->myId = TEST_NUMBER_THREE;
     chan->peerId = TEST_NUMBER_TEN;
-    msg->dateLen = TEST_NUMBER_TWENTY;
+    msg->dataLen = TEST_NUMBER_TWENTY;
     int32_t code = SOFTBUS_OK;
     ret = TransProxyHandshakeUnpackErrMsg(chan, msg, &code);
     EXPECT_EQ(SOFTBUS_CREATE_JSON_ERR, ret);
@@ -2069,7 +2172,7 @@ HWTEST_F(SoftbusProxyChannelManagerTest, TransProxyHandShakeUnpackRightMsg001, T
     chan->channelId = TEST_PARSE_MESSAGE_CHANNEL;
     chan->myId = TEST_NUMBER_THREE;
     chan->peerId = TEST_NUMBER_TEN;
-    msg->dateLen = TEST_NUMBER_TWENTY;
+    msg->dataLen = TEST_NUMBER_TWENTY;
     ret = TransProxyHandshakeUnpackRightMsg(chan, msg, SOFTBUS_OK, fastDataSize);
     EXPECT_EQ(SOFTBUS_INVALID_PARAM, ret);
     ReleaseChannelInfo(chan);
@@ -2104,5 +2207,384 @@ HWTEST_F(SoftbusProxyChannelManagerTest, TransProxyGetPrivilegeCloseList001, Tes
     EXPECT_EQ(SOFTBUS_OK, ret);
     ret = TransProxyDelByChannelId(channelId, chan);
     EXPECT_EQ(SOFTBUS_OK, ret);
+}
+
+/**
+ * @tc.name: TransDealProxyCheckCollabResult001
+ * @tc.desc: TransDealProxyCheckCollabResult Test.
+ * @tc.type: FUNC
+ * @tc.require:
+ */
+HWTEST_F(SoftbusProxyChannelManagerTest, TransDealProxyCheckCollabResult001, TestSize.Level1)
+{
+    int32_t channelId = TEST_VALID_CHANNEL_ID;
+    int32_t ret = TransDealProxyCheckCollabResult(channelId, SOFTBUS_OK, TEST_CALLING_PID);
+    EXPECT_EQ(SOFTBUS_TRANS_CHECK_PID_ERROR, ret);
+
+    ProxyChannelInfo *chan = reinterpret_cast<ProxyChannelInfo *>(SoftBusCalloc(sizeof(ProxyChannelInfo)));
+    ASSERT_TRUE(chan != nullptr);
+    chan->channelId = TEST_VALID_CHANNEL_ID;
+    chan->reqId = TEST_VALID_REQ;
+    chan->status = PROXY_CHANNEL_STATUS_PYH_CONNECTING;
+    chan->connId = TEST_VALID_CONN_ID;
+    ret = TransProxyAddChanItem(chan);
+    EXPECT_EQ(SOFTBUS_OK, ret);
+
+    TransCheckChannelOpenToLooperDelay(channelId, CHANNEL_TYPE_PROXY, TEST_SLEEP_TIME);
+    ret = TransDealProxyCheckCollabResult(channelId, SOFTBUS_OK, TEST_CALLING_PID);
+    EXPECT_EQ(SOFTBUS_TRANS_CHECK_PID_ERROR, ret);
+
+    ret = TransProxyDelByChannelId(channelId, chan);
+    EXPECT_EQ(SOFTBUS_OK, ret);
+}
+
+/**
+ * @tc.name: TransDealProxyCheckCollabResult002
+ * @tc.desc: TransDealProxyCheckCollabResult Test.
+ * @tc.type: FUNC
+ * @tc.require:
+ */
+HWTEST_F(SoftbusProxyChannelManagerTest, TransDealProxyCheckCollabResult002, TestSize.Level1)
+{
+    ProxyChannelInfo *chan = reinterpret_cast<ProxyChannelInfo *>(SoftBusCalloc(sizeof(ProxyChannelInfo)));
+    ASSERT_TRUE(chan != nullptr);
+    chan->channelId = TEST_VALID_CHANNEL_ID;
+    int32_t ret = TransProxyAddChanItem(chan);
+    EXPECT_EQ(SOFTBUS_OK, ret);
+
+    TransCheckChannelOpenToLooperDelay(TEST_VALID_CHANNEL_ID, CHANNEL_TYPE_PROXY, TEST_SLEEP_TIME);
+    ret = TransDealProxyCheckCollabResult(TEST_VALID_CHANNEL_ID, SOFTBUS_TRANS_NODE_NOT_FOUND, TEST_CALLING_PID);
+    EXPECT_EQ(SOFTBUS_TRANS_CHECK_PID_ERROR, ret);
+    ret = TransProxyDelByChannelId(TEST_VALID_CHANNEL_ID, chan);
+    EXPECT_EQ(SOFTBUS_OK, ret);
+}
+
+/**
+ * @tc.name: TransProxyPostResetPeerMsgToLoop001
+ * @tc.desc: test TransProxyPostResetPeerMsgToLoop.
+ * @tc.type: FUNC
+ * @tc.require:
+ */
+HWTEST_F(SoftbusProxyChannelManagerTest, TransProxyPostResetPeerMsgToLoop001, TestSize.Level1)
+{
+    ProxyChannelInfo *chan = reinterpret_cast<ProxyChannelInfo *>(SoftBusCalloc(sizeof(ProxyChannelInfo)));
+    ASSERT_TRUE(chan != nullptr);
+    chan->channelId = TEST_VALID_CHANNEL_ID;
+    int32_t ret = TransProxyAddChanItem(chan);
+    EXPECT_EQ(SOFTBUS_OK, ret);
+    TransProxyPostKeepAliveMsgToLoop(nullptr);
+    TransProxyPostResetPeerMsgToLoop(nullptr);
+    TransProxyPostOpenFailMsgToLoop(nullptr, SOFTBUS_TRANS_NODE_NOT_FOUND);
+
+    ret = TransProxyCloseProxyChannel(TEST_VALID_CHANNEL_ID);
+    EXPECT_EQ(SOFTBUS_OK, ret);
+}
+
+/**
+ * @tc.name: TransProxyPostResetPeerMsgToLoop002
+ * @tc.desc: test TransProxyPostResetPeerMsgToLoop.
+ * @tc.type: FUNC
+ * @tc.require:
+ */
+HWTEST_F(SoftbusProxyChannelManagerTest, TransProxyPostResetPeerMsgToLoop002, TestSize.Level1)
+{
+    ProxyChannelInfo *chan = reinterpret_cast<ProxyChannelInfo *>(SoftBusCalloc(sizeof(ProxyChannelInfo)));
+    ASSERT_TRUE(chan != nullptr);
+    chan->channelId = TEST_VALID_CHANNEL_ID;
+    int32_t ret = TransProxyAddChanItem(chan);
+    EXPECT_EQ(SOFTBUS_OK, ret);
+    TransProxyPostResetPeerMsgToLoop(nullptr);
+    TransProxyPostOpenClosedMsgToLoop(nullptr);
+
+    ret = TransProxyCloseProxyChannel(TEST_VALID_CHANNEL_ID);
+    EXPECT_EQ(SOFTBUS_OK, ret);
+}
+
+/**
+ * @tc.name: TransProxyGetChannelCapaByChanId001
+ * @tc.desc: test handshake uk msg.
+ * @tc.type: FUNC
+ * @tc.require:
+ */
+HWTEST_F(SoftbusProxyChannelManagerTest, TransProxyGetChannelCapaByChanId001, TestSize.Level1)
+{
+    int32_t channelId = 1124; // test value
+    uint32_t channelCapability = 0;
+
+    int32_t ret = TransProxyGetChannelCapaByChanId(channelId, &channelCapability);
+    EXPECT_EQ(SOFTBUS_TRANS_SESSION_INFO_NOT_FOUND, ret);
+
+    ProxyChannelInfo *channelInfo = static_cast<ProxyChannelInfo *>(SoftBusCalloc(sizeof(ProxyChannelInfo)));
+    ASSERT_TRUE(channelInfo != nullptr);
+    ret = TransProxySpecialUpdateChanInfo(nullptr);
+    EXPECT_EQ(SOFTBUS_INVALID_PARAM, ret);
+    channelInfo->channelId = channelId;
+    channelInfo->reqId = 1;
+    channelInfo->isServer = 1;
+    channelInfo->status = PROXY_CHANNEL_STATUS_COMPLETED;
+    channelInfo->connId = 1;
+    channelInfo->type = CONNECT_TYPE_MAX;
+    (void)strcpy_s(channelInfo->identity, sizeof(channelInfo->identity), TEST_CHANNEL_INDENTITY);
+
+    ret = TransProxyAddChanItem(channelInfo);
+    EXPECT_EQ(SOFTBUS_OK, ret);
+
+    ret = TransProxyGetChannelCapaByChanId(channelId, &channelCapability);
+    EXPECT_EQ(SOFTBUS_OK, ret);
+
+    TransProxyDelChanByReqId(channelInfo->reqId, 1);
+}
+
+/**
+ * @tc.name: TransProxySendHandShakeMsgWhenInner001
+ * @tc.desc: test handshake uk msg.
+ * @tc.type: FUNC
+ * @tc.require:
+ */
+HWTEST_F(SoftbusProxyChannelManagerTest, TransProxySendHandShakeMsgWhenInner001, TestSize.Level1)
+{
+    uint32_t connId = 1;
+    int32_t retCode = 1;
+
+    ProxyChannelInfo *channelInfo = static_cast<ProxyChannelInfo *>(SoftBusCalloc(sizeof(ProxyChannelInfo)));
+    ASSERT_TRUE(channelInfo != nullptr);
+
+    channelInfo->appInfo.appType = APP_TYPE_AUTH;
+    int32_t ret = TransProxySendHandShakeMsgWhenInner(connId, channelInfo, retCode);
+    EXPECT_EQ(SOFTBUS_OK, ret);
+
+    channelInfo->appInfo.appType = APP_TYPE_INNER;
+    channelInfo->appInfo.fastTransData = static_cast<uint8_t *>(SoftBusCalloc(sizeof(uint8_t)));
+    ASSERT_TRUE(channelInfo->appInfo.fastTransData != nullptr);
+    channelInfo->appInfo.fastTransDataSize = 1;
+
+    ret = TransProxySendHandShakeMsgWhenInner(connId, channelInfo, retCode);
+    EXPECT_EQ(SOFTBUS_TRANS_PROXY_PACKMSG_ERR, ret);
+
+    SoftBusFree((void *)channelInfo->appInfo.fastTransData);
+    SoftBusFree(channelInfo);
+}
+
+/**
+ * @tc.name: TransServerProxyChannelOpened001
+ * @tc.desc: test handshake uk msg.
+ * @tc.type: FUNC
+ * @tc.require:
+ */
+HWTEST_F(SoftbusProxyChannelManagerTest, TransServerProxyChannelOpened001, TestSize.Level1)
+{
+    ProxyChannelInfo *channelInfo = static_cast<ProxyChannelInfo *>(SoftBusCalloc(sizeof(ProxyChannelInfo)));
+    ASSERT_TRUE(channelInfo != nullptr);
+    TransEventExtra extra;
+    (void)memset_s(&extra, sizeof(TransEventExtra), 0, sizeof(TransEventExtra));
+    int32_t proxyChannelId = 1111; // test value
+
+    int32_t ret = TransServerProxyChannelOpened(channelInfo, &extra, proxyChannelId);
+    EXPECT_NE(SOFTBUS_OK, ret);
+    SoftBusFree(channelInfo);
+
+    int32_t channelId = 1234; // test value
+    ret = TransProxyUpdateReplyCnt(channelId);
+    EXPECT_EQ(SOFTBUS_TRANS_NODE_NOT_FOUND, ret);
+}
+
+/**
+ * @tc.name: TransAsyncProxyChannelTask001
+ * @tc.desc: test handshake uk msg.
+ * @tc.type: FUNC
+ * @tc.require:
+ */
+HWTEST_F(SoftbusProxyChannelManagerTest, TransAsyncProxyChannelTask001, TestSize.Level1)
+{
+    int32_t channelId = 1124; // test value
+    ProxyChannelInfo *channelInfo = static_cast<ProxyChannelInfo *>(SoftBusCalloc(sizeof(ProxyChannelInfo)));
+    ASSERT_TRUE(channelInfo != nullptr);
+    int32_t ret = TransProxySpecialUpdateChanInfo(nullptr);
+    EXPECT_EQ(SOFTBUS_INVALID_PARAM, ret);
+
+    channelInfo->channelId = channelId;
+    channelInfo->reqId = 1;
+    channelInfo->isServer = 1;
+    channelInfo->status = PROXY_CHANNEL_STATUS_COMPLETED;
+    channelInfo->connId = 1;
+    channelInfo->type = CONNECT_TYPE_MAX;
+    channelInfo->appInfo.waitOpenReplyCnt = CHANNEL_OPEN_SUCCESS;
+    (void)strcpy_s(channelInfo->identity, sizeof(channelInfo->identity), TEST_CHANNEL_INDENTITY);
+
+    ret = TransProxyAddChanItem(channelInfo);
+    EXPECT_EQ(SOFTBUS_OK, ret);
+
+    TransAsyncProxyChannelTask(channelId);
+    TransProxyDelChanByReqId(channelInfo->reqId, 1);
+}
+
+/**
+ * @tc.name: TransAsyncProxyChannelTask002
+ * @tc.desc: test handshake uk msg.
+ * @tc.type: FUNC
+ * @tc.require:
+ */
+HWTEST_F(SoftbusProxyChannelManagerTest, TransAsyncProxyChannelTask002, TestSize.Level1)
+{
+    int32_t channelId = 1124; // test value
+    ProxyChannelInfo *channelInfo = static_cast<ProxyChannelInfo *>(SoftBusCalloc(sizeof(ProxyChannelInfo)));
+    ASSERT_TRUE(channelInfo != nullptr);
+    int32_t ret = TransProxySpecialUpdateChanInfo(nullptr);
+    EXPECT_EQ(SOFTBUS_INVALID_PARAM, ret);
+
+    channelInfo->channelId = channelId;
+    channelInfo->reqId = 1;
+    channelInfo->isServer = 1;
+    channelInfo->status = PROXY_CHANNEL_STATUS_COMPLETED;
+    channelInfo->connId = 1;
+    channelInfo->type = CONNECT_TYPE_MAX;
+    channelInfo->appInfo.waitOpenReplyCnt = LOOPER_REPLY_CNT_MAX;
+    (void)strcpy_s(channelInfo->identity, sizeof(channelInfo->identity), TEST_CHANNEL_INDENTITY);
+    int32_t reqId = channelInfo->reqId;
+
+    ret = TransProxyAddChanItem(channelInfo);
+    EXPECT_EQ(SOFTBUS_OK, ret);
+
+    TransAsyncProxyChannelTask(channelId);
+    TransProxyDelChanByReqId(reqId, 1);
+}
+
+/**
+ * @tc.name: CopyAppInfoFastTransData001
+ * @tc.desc: test handshake uk msg.
+ * @tc.type: FUNC
+ * @tc.require:
+ */
+HWTEST_F(SoftbusProxyChannelManagerTest, CopyAppInfoFastTransData001, TestSize.Level1)
+{
+    ProxyChannelInfo *channelInfo = static_cast<ProxyChannelInfo *>(SoftBusCalloc(sizeof(ProxyChannelInfo)));
+    ASSERT_TRUE(channelInfo != nullptr);
+
+    AppInfo *appInfo = static_cast<AppInfo *>(SoftBusCalloc(sizeof(AppInfo)));
+    ASSERT_TRUE(appInfo != nullptr);
+    appInfo->fastTransData = static_cast<uint8_t *>(SoftBusCalloc(sizeof(uint8_t)));
+    ASSERT_TRUE(appInfo->fastTransData != nullptr);
+    appInfo->fastTransDataSize = 1;
+
+    int32_t ret = CopyAppInfoFastTransData(channelInfo, appInfo);
+    EXPECT_EQ(SOFTBUS_OK, ret);
+
+    uint32_t connId = 1;
+    int32_t channelId = 1111; // test value
+    TransProxyUpdateBlePriority(channelId, connId, BLE_PRIORITY_HIGH);
+    TransProxyUpdateBlePriority(channelId, connId, BLE_PRIORITY_LOW_POWER);
+    TransProxyUpdateBlePriority(channelId, connId, BLE_PRIORITY_MAX);
+
+    TransProxyOpenProxyChannelFail(channelId, appInfo, SOFTBUS_TRANS_PEER_SESSION_NOT_CREATED);
+    TransWifiOffLineProc(nullptr);
+
+    LnnEventBasicInfo info;
+    info.event = LNN_EVENT_TYPE_MAX;
+    TransNotifyOffLine(&info);
+
+    SoftBusFree(channelInfo);
+    SoftBusFree((void*)appInfo->fastTransData);
+    SoftBusFree(appInfo);
+}
+
+/**
+ * @tc.name: TransProxyUpdateSinkAccessInfo001
+ * @tc.desc: test update sink access info.
+ * @tc.type: FUNC
+ * @tc.require:
+ */
+HWTEST_F(SoftbusProxyChannelManagerTest, TransProxyUpdateSinkAccessInfo001, TestSize.Level1)
+{
+    AccessInfo accessInfo = {
+        .userId = TEST_USER_ID,
+        .localTokenId = TEST_TOKEN_ID,
+        .businessAccountId = nullptr,
+        .extraAccessInfo = nullptr,
+    };
+    int32_t channelId = TEST_CHANNEL_ID;
+    int32_t ret = TransProxyUpdateSinkAccessInfo(channelId, &accessInfo);
+    EXPECT_EQ(SOFTBUS_TRANS_NODE_NOT_FOUND, ret);
+}
+
+/**
+ * @tc.name: TransServerProxyChannelOpened002
+ * @tc.desc: test trans proxy channel opened.
+ * @tc.type: FUNC
+ * @tc.require:
+ */
+HWTEST_F(SoftbusProxyChannelManagerTest, TransServerProxyChannelOpened002, TestSize.Level1)
+{
+    TransEventExtra extra = { 0 };
+    ProxyChannelInfo *channelInfo = reinterpret_cast<ProxyChannelInfo *>(SoftBusCalloc(sizeof(ProxyChannelInfo)));
+    ASSERT_TRUE(channelInfo != nullptr);
+    int32_t channelId = TEST_SLEEP_TIME;
+    channelInfo->channelId = channelId;
+    channelInfo->connId = 1;
+
+    int32_t ret = TransServerProxyChannelOpened(channelInfo, &extra, channelId);
+    EXPECT_EQ(SOFTBUS_TRANS_PROXY_ERROR_APP_TYPE, ret);
+    SoftBusFree(channelInfo);
+}
+
+/**
+ * @tc.name: TransProxySendHandShakeMsgWhenInner002
+ * @tc.desc: test trans proxy channel send handshake msg.
+ * @tc.type: FUNC
+ * @tc.require:
+ */
+HWTEST_F(SoftbusProxyChannelManagerTest, TransProxySendHandShakeMsgWhenInner002, TestSize.Level1)
+{
+    ProxyChannelInfo *channelInfo = reinterpret_cast<ProxyChannelInfo *>(SoftBusCalloc(sizeof(ProxyChannelInfo)));
+    ASSERT_TRUE(channelInfo != nullptr);
+    int32_t channelId = TEST_FAST_DATA_SIZE;
+    channelInfo->channelId = channelId;
+    channelInfo->connId = 1;
+
+    int32_t ret = TransProxySendHandShakeMsgWhenInner(1, channelInfo, SOFTBUS_OK);
+    EXPECT_EQ(SOFTBUS_OK, ret);
+    channelInfo->appInfo.appType = APP_TYPE_INNER;
+    ret = TransProxySendHandShakeMsgWhenInner(1, channelInfo, SOFTBUS_OK);
+    EXPECT_EQ(SOFTBUS_TRANS_PROXY_PACKMSG_ERR, ret);
+    SoftBusFree(channelInfo);
+}
+
+/**
+ * @tc.name: TransProxyUpdateSinkAccessInfo002
+ * @tc.desc: test update sink access info.
+ * @tc.type: FUNC
+ * @tc.require:
+ */
+HWTEST_F(SoftbusProxyChannelManagerTest, TransProxyUpdateSinkAccessInfo002, TestSize.Level1)
+{
+    AccessInfo accessInfo = {
+        .userId = 100,
+        .localTokenId = TEST_TOKEN_ID,
+        .businessAccountId = nullptr,
+        .extraAccessInfo = nullptr,
+    };
+
+    ProxyChannelInfo *channelInfo = reinterpret_cast<ProxyChannelInfo *>(SoftBusCalloc(sizeof(ProxyChannelInfo)));
+    ASSERT_TRUE(channelInfo != nullptr);
+
+    int32_t channelId = TEST_CHANNEL_ID;
+    channelInfo->channelId = channelId;
+    channelInfo->reqId = 1;
+    channelInfo->isServer = 1;
+    channelInfo->status = PROXY_CHANNEL_STATUS_COMPLETED;
+    channelInfo->connId = 1;
+    channelInfo->type = CONNECT_TYPE_MAX;
+    channelInfo->appInfo.myData.tokenType = ACCESS_TOKEN_TYPE_HAP;
+    (void)strcpy_s(channelInfo->identity, sizeof(channelInfo->identity), TEST_CHANNEL_INDENTITY);
+    int32_t ret = TransProxyAddChanItem(channelInfo);
+    EXPECT_EQ(SOFTBUS_OK, ret);
+
+    ret = TransProxyUpdateSinkAccessInfo(channelId, &accessInfo);
+    EXPECT_EQ(SOFTBUS_TRANS_NODE_NOT_FOUND, ret);
+
+    channelInfo->appInfo.myData.tokenType = ACCESS_TOKEN_TYPE_NATIVE;
+    ret = TransProxyUpdateSinkAccessInfo(channelId, &accessInfo);
+    EXPECT_EQ(SOFTBUS_OK, ret);
+
+    TransProxyDelChanByReqId(channelInfo->reqId, 1);
 }
 } // namespace OHOS

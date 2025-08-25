@@ -1,4 +1,4 @@
-# Copyright (c) 2021-2023 Huawei Device Co., Ltd.
+# Copyright (c) 2021-2025 Huawei Device Co., Ltd.
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
 # You may obtain a copy of the License at
@@ -18,8 +18,6 @@ if (defined(ohos_lite)) {
 
   dsoftbus_root_path = "../../.."
 
-  defines += [ "HAVE_PRO = 0" ]
-
   if (ohos_build_type == "debug") {
     unittest("AdapterTest") {
       output_extension = "bin"
@@ -35,6 +33,7 @@ if (defined(ohos_lite)) {
         "$dsoftbus_root_path/adapter/common/include",
         "$dsoftbus_root_path/core/common/include/",
         "$dsoftbus_root_path/interfaces/kits/common",
+        "$dsoftbus_root_path/interfaces/inner_kits/lnn",
         "$hilog_lite_include_path",
       ]
       deps = [
@@ -44,13 +43,14 @@ if (defined(ohos_lite)) {
       ]
 
       external_deps = [ "bounds_checking_function:libsec_static" ]
+
+      defines += [ "HAVE_PRO = 0" ]
     }
   }
 } else {
   import("//build/test.gni")
   import("../../../dsoftbus.gni")
-  defines += [ "HAVE_PRO = 0" ]
-  module_output_path = "dsoftbus/adapter"
+  module_output_path = "dsoftbus/soft_bus/adapter"
 
   ohos_unittest("AdaptorDsoftbusCryptTest") {
     module_out_path = module_output_path
@@ -149,6 +149,7 @@ if (defined(ohos_lite)) {
       "googletest:gtest_main",
       "hilog:libhilog",
     ]
+    defines += [ "HAVE_PRO = 1" ]
   }
 
   ohos_unittest("SoftbusThreadTest") {
@@ -165,6 +166,7 @@ if (defined(ohos_lite)) {
       "googletest:gtest_main",
       "hilog:libhilog",
     ]
+    defines += [ "HAVE_PRO = 1" ]
   }
 
   ohos_unittest("SoftbusTimeTest") {
@@ -206,6 +208,7 @@ if (defined(ohos_lite)) {
       "$dsoftbus_root_path/interfaces/kits/common",
       "$dsoftbus_root_path/tests/core/bus_center/mock_common/src",
       "$dsoftbus_root_path/tests/core/bus_center/mock_common/include",
+      "$dsoftbus_root_path/interfaces/kits/transport",
       "$dsoftbus_root_path/adapter/common/net/wifi/include",
       "$dsoftbus_root_path/adapter/common/net/wifi/common",
       "$dsoftbus_root_path/core/common/include",
@@ -245,6 +248,7 @@ if (defined(ohos_lite)) {
       "$dsoftbus_root_path/adapter/common/include",
       "$dsoftbus_root_path/adapter/common/include/OS_adapter_define/linux",
       "$dsoftbus_root_path/adapter/common/net/bluetooth/include",
+      "$dsoftbus_root_path/adapter/common/net/wifi/include",
       "$dsoftbus_root_path/adapter/default_config/spec_config",
       "$dsoftbus_root_path/core/bus_center/lnn/net_buscenter/include",
       "$dsoftbus_root_path/core/bus_center/lnn/net_ledger/common/include",
@@ -260,6 +264,7 @@ if (defined(ohos_lite)) {
       "$dsoftbus_root_path/tests/adapter/unittest",
       "$dsoftbus_root_path/tests/core/bus_center/mock_common/include",
       "$dsoftbus_root_path/tests/core/connection/wifi_direct_cpp",
+      "$dsoftbus_root_path/core/bus_center/monitor/include",
     ]
     deps = [
       "$dsoftbus_dfx_path:softbus_dfx",
@@ -282,6 +287,7 @@ if (defined(ohos_lite)) {
     module_out_path = module_output_path
     sources = [
       "$dsoftbus_root_path/adapter/common/kernel/liteos_m/softbus_adapter_mem.c",
+      "$dsoftbus_root_path/core/bus_center/monitor/src/lnn_init_monitor.c",
       "$dsoftbus_root_path/core/common/message_handler/message_handler.c",
       "$dsoftbus_root_path/core/common/utils/softbus_utils.c",
       "$dsoftbus_root_path/tests/core/bus_center/mock_common/src/network_mock.cpp",
@@ -289,12 +295,18 @@ if (defined(ohos_lite)) {
     ]
     include_dirs = [
       "$dsoftbus_root_path/adapter/default_config/spec_config",
+      "$dsoftbus_root_path/interfaces/kits/connect",
       "$dsoftbus_root_path/core/connection/interface",
+      "$dsoftbus_root_path/adapter/common/net/wifi/include",
       "$dsoftbus_root_path/core/bus_center/interface",
+      "$dsoftbus_root_path/core/bus_center/lnn/net_ledger/common/include",
+      "$dsoftbus_root_path/core/discovery/interface",
+      "$dsoftbus_root_path/core/discovery/manager/include",
       "$dsoftbus_root_path/interfaces/kits/bus_center",
       "$dsoftbus_root_path/adapter/common/include/OS_adapter_define/linux",
       "$dsoftbus_root_path/adapter/default_config/spec_config",
       "$dsoftbus_root_path/adapter/common/bus_center/include",
+      "$dsoftbus_root_path/interfaces/inner_kits/lnn",
       "$dsoftbus_root_path/interfaces/kits/common",
       "$dsoftbus_root_path/tests/core/bus_center/mock_common/include",
       "$dsoftbus_root_path/adapter/common/bus_center/network",
@@ -305,11 +317,63 @@ if (defined(ohos_lite)) {
       "$dsoftbus_root_path/core/bus_center/service/include",
       "$dsoftbus_root_path/core/bus_center/utils/include",
       "$dsoftbus_root_path/core/bus_center/lnn/net_buscenter/include",
+      "$dsoftbus_root_path/core/bus_center/monitor/include",
+      "$dsoftbus_root_path/core/bus_center/lnn/lane_hub/heartbeat/include",
       "$dsoftbus_root_path/adapter/common/include",
       "$dsoftbus_root_path/core/common/include",
       "$dsoftbus_dfx_path/interface/include",
     ]
-    deps = [ "$dsoftbus_root_path/core/common:softbus_utils" ]
+    deps = [
+      "$dsoftbus_root_path/adapter:softbus_adapter",
+      "$dsoftbus_root_path/core/common:softbus_utils",
+    ]
+    external_deps = [
+      "googletest:gmock",
+      "googletest:gtest_main",
+      "hilog:libhilog",
+    ]
+  }
+
+  ohos_unittest("SoftbusSleMonitorTest") {
+    module_out_path = module_output_path
+    sources = [
+      "$dsoftbus_root_path/core/bus_center/monitor/src/lnn_init_monitor.c",
+      "$dsoftbus_root_path/core/common/message_handler/message_handler.c",
+      "$dsoftbus_root_path/core/common/utils/softbus_utils.c",
+      "$dsoftbus_root_path/tests/core/bus_center/mock_common/src/network_mock.cpp",
+      "softbus_sle_monitor_test.cpp",
+      "$dsoftbus_root_path/core/frame/init/src/g_enhance_adapter_func_pack.c",
+      "$dsoftbus_root_path/core/frame/init/src/g_enhance_adapter_func.c",
+    ]
+    include_dirs = [
+      "$dsoftbus_root_path/adapter/common/bus_center/include",
+      "$dsoftbus_root_path/adapter/common/bus_center/network",
+      "$dsoftbus_root_path/adapter/common/include",
+      "$dsoftbus_root_path/adapter/common/include/OS_adapter_define/linux",
+      "$dsoftbus_root_path/adapter/common/net/bluetooth/include",
+      "$dsoftbus_root_path/adapter/common/net/wifi/include",
+      "$dsoftbus_root_path/adapter/default_config/spec_config",
+      "$dsoftbus_root_path/core/bus_center/interface",
+      "$dsoftbus_root_path/core/bus_center/lnn/lane_hub/heartbeat/include",
+      "$dsoftbus_root_path/core/bus_center/lnn/net_buscenter/include",
+      "$dsoftbus_root_path/core/bus_center/monitor/include",
+      "$dsoftbus_root_path/core/bus_center/service/include",
+      "$dsoftbus_root_path/core/bus_center/utils/include",
+      "$dsoftbus_root_path/core/bus_center/utils/include/lnn_async_callback_utils.h",
+      "$dsoftbus_root_path/core/common/include",
+      "$dsoftbus_root_path/core/connection/interface",
+      "$dsoftbus_root_path/interfaces/inner_kits/lnn",
+      "$dsoftbus_root_path/interfaces/kits/adapter",
+      "$dsoftbus_root_path/interfaces/kits/bus_center",
+      "$dsoftbus_root_path/interfaces/kits/common",
+      "$dsoftbus_root_path/interfaces/kits/lnn",
+      "$dsoftbus_root_path/tests/core/bus_center/mock_common/include",
+      "$dsoftbus_root_path/core/frame/init/include",
+    ]
+    deps = [
+      "$dsoftbus_root_path/core/common:softbus_utils",
+      "$dsoftbus_root_path/adapter:softbus_adapter",
+    ]
     external_deps = [
       "googletest:gmock",
       "googletest:gtest_main",
@@ -327,6 +391,8 @@ if (defined(ohos_lite)) {
       "$dsoftbus_root_path/core/bus_center/utils/include/",
       "$dsoftbus_root_path/adapter/common/net/hdi/include/",
       "$dsoftbus_dfx_path/interface/include",
+      "$dsoftbus_root_path/interfaces/kits/adapter",
+      "$dsoftbus_root_path/interfaces/kits/bus_center",
     ]
     deps = [
       "$dsoftbus_dfx_path:softbus_dfx",
@@ -358,7 +424,10 @@ if (defined(ohos_lite)) {
     }
     if (!defined(ohos_lite) && dsoftbus_feature_lnn_frame == true &&
         support_bluetooth && dsoftbus_feature_conn_ble) {
-      deps += [ ":AdapterDsoftbusNetworkTest" ]
+      deps += [
+        ":AdapterDsoftbusNetworkTest",
+        ":SoftbusSleMonitorTest",
+      ]
     }
     if (!defined(global_parts_info) ||
         defined(global_parts_info.communication_netmanager_base)) {

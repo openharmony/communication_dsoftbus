@@ -23,6 +23,16 @@ namespace OHOS {
 class BusCenterExObjStub : public IRemoteStub<IBusCenterExObj> {
 public:
     int32_t OnRemoteRequest(uint32_t code, MessageParcel &data, MessageParcel &reply, MessageOption &option) override;
+
+private:
+    bool OpenSoftbusPluginSo();
+    using OnRemoteRequestFunc = int32_t (*)(uint32_t code, MessageParcel &data, MessageParcel &reply,
+        MessageOption &option);
+    OnRemoteRequestFunc onRemoteRequestFunc_ = nullptr;
+
+    std::mutex loadSoMutex_;
+    bool isLoaded_ = false;
+    void *soHandle_ = nullptr;
 };
 } // namespace OHOS
 

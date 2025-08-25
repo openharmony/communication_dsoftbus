@@ -17,13 +17,19 @@ import("../../../dsoftbus.gni")
 group("unittest") {
   testonly = true
   deps = [
+    "common/unittest:DataheadTransformTest",
+    "common/unittest:SoftbusConnAsyncHelperTest",
     "common/unittest:SoftbusConnCommonTest",
+    "common/unittest:SoftbusConnQueueTest",
+    "common/unittest:SoftbusRcTest",
+    "ipc:unittest",
     "manager:ConnectionManagerTest",
   ]
   if (support_bluetooth && dsoftbus_feature_conn_br) {
     deps += [
       "br:BrConnTest",
       "br:BrConnectionTest",
+      "br:BrHidumperTest",
       "br:ConnectionBrTest",
     ]
   }
@@ -32,9 +38,13 @@ group("unittest") {
       "ble:BleClientTest",
       "ble:BleConnectionManagerTest",
       "ble:BleConnectionServiceTest",
+      "ble:BleHidumperTest",
       "ble:BleTransTest",
       "ble:ConnectionBleSwitchTest",
       "ble:ConnectionBleTest",
+      "general:GeneralConnectionTest",
+      "general:GeneralNegotiationTest",
+      "proxy:ProxyChannelManagerTest",
     ]
   }
   if (dsoftbus_feature_conn_tcp_comm && dsoftbus_feature_conn_tcp_proxy) {
@@ -50,13 +60,15 @@ group("unittest") {
 group("fuzztest") {
   testonly = true
   deps = [
-    "ble/fuzztest/bleconnection_fuzzer:BleConnectionFuzzTest",
-    "br/fuzztest/brconnection_fuzzer:BrConnectionFuzzTest",
     "common/fuzztest/connectioncommon_fuzzer:ConnectionCommonFuzzTest",
     "fuzztest:fuzztest",
   ]
-  if (dsoftbus_feature_ex_kits == true) {
-    deps +=
-        [ "dsoftbus_root_path/dsoftbus_enhance/test/core/connection:fuzztest" ]
+  if (support_bluetooth) {
+    if (dsoftbus_feature_conn_br) {
+      deps += [ "br/fuzztest/brconnection_fuzzer:BrConnectionFuzzTest" ]
+    }
+    if (dsoftbus_feature_conn_ble) {
+      deps += [ "ble/fuzztest/bleconnection_fuzzer:BleConnectionFuzzTest" ]
+    }
   }
 }

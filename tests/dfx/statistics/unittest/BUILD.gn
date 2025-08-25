@@ -16,7 +16,7 @@ import("//build/ohos.gni")
 import("//build/test.gni")
 import("../../../../dsoftbus.gni")
 
-module_output_path = "dsoftbus/common"
+module_output_path = "dsoftbus/soft_bus/common"
 
 ohos_unittest("TransNetworkStatisticsTest") {
   module_out_path = module_output_path
@@ -35,6 +35,7 @@ ohos_unittest("TransNetworkStatisticsTest") {
     "$dsoftbus_dfx_path/dumper/legacy:softbus_dfx_dump",
     "$dsoftbus_root_path/core/common:softbus_utils",
     "$dsoftbus_root_path/core/frame:softbus_server",
+    "$dsoftbus_root_path/adapter:softbus_adapter",
   ]
   external_deps = [
     "c_utils:utils",

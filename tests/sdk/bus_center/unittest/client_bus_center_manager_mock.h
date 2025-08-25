@@ -34,16 +34,16 @@ public:
     virtual int32_t BusCenterServerProxyInit(void);
     virtual void BusCenterServerProxyDeInit(void);
     virtual int32_t SoftbusGetConfig(ConfigType type, unsigned char *val, uint32_t len);
-    virtual int32_t ServerIpcGetAllOnlineNodeInfo(
-        const char *pkgName, void **info, uint32_t infoTypeLen, int32_t *infoNum);
+    virtual int32_t ServerIpcGetAllOnlineNodeInfo(const char *pkgName,
+        void **info, uint32_t infoTypeLen, int32_t *infoNum);
     virtual int32_t ServerIpcGetLocalDeviceInfo(const char *pkgName, void *info, uint32_t infoTypeLen);
     virtual int32_t ServerIpcGetNodeKeyInfo(
         const char *pkgName, const char *networkId, int32_t key, unsigned char *buf, uint32_t len);
     virtual int32_t ServerIpcSetNodeDataChangeFlag(const char *pkgName, const char *networkId, uint16_t dataChangeFlag);
-    virtual int32_t ServerIpcJoinLNN(const char *pkgName, void *addr, unsigned int addrTypeLen);
+    virtual int32_t ServerIpcJoinLNN(const char *pkgName, void *addr, unsigned int addrTypeLen, bool isForceJoin);
     virtual int32_t ServerIpcLeaveLNN(const char *pkgName, const char *networkId);
-    virtual int32_t ServerIpcStartTimeSync(
-        const char *pkgName, const char *targetNetworkId, int32_t accuracy, int32_t period);
+    virtual int32_t ServerIpcStartTimeSync(const char *pkgName,
+        const char *targetNetworkId, int32_t accuracy, int32_t period);
     virtual int32_t ServerIpcStopTimeSync(const char *pkgName, const char *targetNetworkId);
     virtual int32_t ServerIpcPublishLNN(const char *pkgName, const PublishInfo *info);
     virtual int32_t ServerIpcStopPublishLNN(const char *pkgName, int32_t publishId);
@@ -54,6 +54,9 @@ public:
     virtual int32_t ServerIpcSetDataLevel(const DataLevel *dataLevel);
     virtual int32_t SoftBusMutexLockInner(SoftBusMutex *mutex);
     virtual int32_t SoftBusMutexUnlockInner(SoftBusMutex *mutex);
+    virtual int32_t ServerIpcRegRangeCbForMsdp(const char *pkgName);
+    virtual int32_t ServerIpcUnregRangeCbForMsdp(const char *pkgName);
+    virtual int32_t ServerIpcTriggerRangeForMsdp(const char *pkgName, const RangeConfig *config);
 };
 class ClientBusCenterManagerInterfaceMock : public ClientBusCenterManagerInterface {
 public:
@@ -67,7 +70,7 @@ public:
     MOCK_METHOD3(ServerIpcGetLocalDeviceInfo, int32_t(const char *, void *, uint32_t));
     MOCK_METHOD5(ServerIpcGetNodeKeyInfo, int32_t(const char *, const char *, int, unsigned char *, uint32_t));
     MOCK_METHOD3(ServerIpcSetNodeDataChangeFlag, int32_t(const char *, const char *, uint16_t));
-    MOCK_METHOD3(ServerIpcJoinLNN, int32_t(const char *, void *, unsigned int));
+    MOCK_METHOD4(ServerIpcJoinLNN, int32_t(const char *, void *, unsigned int, bool));
     MOCK_METHOD2(ServerIpcLeaveLNN, int32_t(const char *, const char *));
     MOCK_METHOD4(ServerIpcStartTimeSync, int32_t(const char *, const char *, int32_t, int32_t));
     MOCK_METHOD2(ServerIpcStopTimeSync, int32_t(const char *, const char *));
@@ -78,6 +81,9 @@ public:
     MOCK_METHOD1(ServerIpcRegDataLevelChangeCb, int32_t (const char *));
     MOCK_METHOD1(ServerIpcUnregDataLevelChangeCb, int32_t (const char *));
     MOCK_METHOD1(ServerIpcSetDataLevel, int32_t (const DataLevel *));
+    MOCK_METHOD1(ServerIpcRegRangeCbForMsdp, int32_t (const char *));
+    MOCK_METHOD1(ServerIpcUnregRangeCbForMsdp, int32_t (const char *));
+    MOCK_METHOD2(ServerIpcTriggerRangeForMsdp, int32_t (const char *, const RangeConfig *));
     MOCK_METHOD1(SoftBusMutexLockInner, int32_t (SoftBusMutex *));
     MOCK_METHOD1(SoftBusMutexUnlockInner, int32_t (SoftBusMutex *));
 };

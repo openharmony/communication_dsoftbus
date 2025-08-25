@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2022-2024 Huawei Device Co., Ltd.
+ * Copyright (c) 2022-2025 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -115,9 +115,12 @@ static ApiNameIdMap g_apiNameIdMapTbl[] = {
     {SERVER_DEACTIVE_META_NODE, "DeactiveMetaNode"},
     {SERVER_GET_ALL_META_NODE_INFO, "GetAllMetaNodeInfo"},
     {SERVER_SHIFT_LNN_GEAR, "ShiftLNNGear"},
+    {SERVER_TRIGGER_RANGE_FOR_MSDP, "TriggerRangeForMsdp"},
+    {SERVER_STOP_RANGE_FOR_MSDP, "StopRangeForMsdp"},
     {SERVER_SYNC_TRUSTED_RELATION, "SyncTrustedRelationShip"},
     {SERVER_RIPPLE_STATS, "RippleStats"},
     {SERVER_CTRL_LNN_BLE_HB, "CtrlLNNBleHb"},
+    {SERVER_SET_DISPLAY_NAME, "SetDisplayName"},
 };
 
 typedef struct {
@@ -287,8 +290,13 @@ static char *GetApiNameByCode(uint32_t code)
 
 static void AddInfoNodeToList(bool isAppDiff, const char *appName, char *apiName)
 {
+#define MAX_PKG_NAME_CNT 200
     CalledApiInfoStruct *apiInfoNode = NULL;
     if (isAppDiff) {
+        if (g_calledApiInfoList->cnt > MAX_PKG_NAME_CNT) {
+            COMM_LOGE(COMM_EVENT, "the number %{public}u of callers exceeds the limit", g_calledApiInfoList->cnt);
+            return;
+        }
         apiInfoNode = GetNewApiInfo(appName, apiName);
         if (apiInfoNode == NULL) {
             COMM_LOGE(COMM_EVENT, "GetNewApiInfo fail");
@@ -450,7 +458,7 @@ void SoftbusRecordOpenSession(SoftBusOpenSessionStatus isSucc, uint32_t time)
     }
 
     if (g_openSessionCnt.successCnt != 0) {
-        uint64_t totalTimeCost = (g_openSessionTime.aveTimeCost) * (g_openSessionCnt.successCnt - 1) + time;
+        uint64_t totalTimeCost = (uint64_t)(g_openSessionTime.aveTimeCost) * (g_openSessionCnt.successCnt - 1) + time;
         g_openSessionTime.aveTimeCost = (uint32_t)(totalTimeCost / g_openSessionCnt.successCnt);
     }
 
@@ -920,7 +928,15 @@ int32_t InitTransStatisticSysEvt(void)
     }
 
     g_calledApiInfoList = CreateSoftBusList();
+    if (g_calledApiInfoList == NULL) {
+        COMM_LOGE(COMM_EVENT, "Create g_calledApiInfoList failed.");
+        return SOFTBUS_CREATE_LIST_ERR;
+    }
     g_calledApiCntlist = CreateSoftBusList();
+    if (g_calledApiCntlist == NULL) {
+        COMM_LOGE(COMM_EVENT, "Create g_calledApiCntlist failed.");
+        return SOFTBUS_CREATE_LIST_ERR;
+    }
     ClearOpenSessionCnt();
     ClearOpenSessionKpi();
     ClearOpenSessionTime();

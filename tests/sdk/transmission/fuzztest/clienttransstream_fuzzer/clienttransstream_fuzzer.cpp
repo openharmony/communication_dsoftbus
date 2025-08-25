@@ -28,7 +28,7 @@ namespace OHOS {
         ChannelInfo *channel = nullptr;
         int32_t streamPort = *(reinterpret_cast<const int32_t *>(data));
 
-        TransOnstreamChannelOpened(channel, &streamPort);
+        TransOnstreamChannelOpened(channel, &streamPort, nullptr);
     }
 
     void TransSendStreamTest(const uint8_t* data, size_t size)

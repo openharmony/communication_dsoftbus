@@ -13,8 +13,6 @@
  * limitations under the License.
  */
 
-#include <string>
-
 #include "session_set_timer.h"
 #include "xcollie/xcollie.h"
 

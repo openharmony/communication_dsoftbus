@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021-2024 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2025 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -16,7 +16,9 @@
 #ifndef SOFTBUS_APP_INFO_H
 #define SOFTBUS_APP_INFO_H
 
+#include "inner_socket.h"
 #include "session.h"
+#include "softbus_common.h"
 #include "softbus_def.h"
 #include "softbus_protocol_def.h"
 
@@ -37,6 +39,8 @@ extern "C" {
 #define MAX_FAST_DATA_LEN (4 * 1024)
 #define BASE64_FAST_DATA_LEN 5558
 #define TOKENID_NOT_SET 0
+#define ACCOUNT_UID_LEN_MAX 65
+#define PAGING_NONCE_LEN 16
 
 typedef enum {
     API_UNKNOWN = 0,
@@ -64,12 +68,15 @@ typedef enum {
     BT_BR = 3,
     BT_BLE = 4,
     WIFI_P2P_REUSE = 6,
+    WIFI_USB = 7,
+    BT_SLE = 8,
 } RouteType;
 
 typedef enum {
     UDP_CONN_TYPE_INVALID = -1,
     UDP_CONN_TYPE_WIFI = 0,
     UDP_CONN_TYPE_P2P = 1,
+    UDP_CONN_TYPE_USB = 2,
 } UdpConnType;
 
 typedef enum {
@@ -84,41 +91,64 @@ typedef struct {
     char sessionName[SESSION_NAME_SIZE_MAX];
     char authState[AUTH_STATE_SIZE_MAX];
     char addr[IP_LEN];
-    int uid;
-    int pid;
-    int port;
+    char mac[MAC_MAX_LEN];
+    char accountId[ACCOUNT_UID_LEN_MAX];
+    char callerAccountId[ACCOUNT_UID_LEN_MAX];
+    char calleeAccountId[ACCOUNT_UID_LEN_MAX];
+    uint8_t shortAccountHash[D2D_SHORT_ACCOUNT_HASH_LEN];
+    uint8_t shortUdidHash[D2D_SHORT_UDID_HASH_LEN];
+    char extraData[EXTRA_DATA_MAX_LEN];
+    uint32_t dataLen;
+    uint32_t businessFlag;
+    int32_t uid;
+    int32_t pid;
+    int32_t port;
     ApiVersion apiVersion;
     uint32_t dataConfig;
     int32_t userId;
+    int32_t userKeyId;
     int64_t channelId;
-    int64_t accountId;
+    uint64_t tokenId; // identify first caller
+    int32_t tokenType;
+    int32_t sessionId;
+    uint32_t devTypeId;
 } AppInfoData;
 
 typedef struct {
     char groupId[GROUP_ID_SIZE_MAX];
     char sessionKey[SESSION_KEY_LENGTH];
+    char sinkSessionKey[SESSION_KEY_LENGTH];
     char reqId[REQ_ID_SIZE_MAX];
     char peerNetWorkId[DEVICE_ID_SIZE_MAX];
     char peerUdid[DEVICE_ID_SIZE_MAX];
     char peerVersion[DEVICE_VERSION_SIZE_MAX];
     char tokenName[PKG_NAME_SIZE_MAX];
+    char extraAccessInfo[EXTRA_ACCESS_INFO_LEN_MAX];
+    char pagingNonce[PAGING_NONCE_LEN];
+    char pagingSessionkey[SHORT_SESSION_KEY_LENGTH];
     bool isClient;
+    bool isD2D;
+    bool isLowLatency;
+    bool isFlashLight;
     uint16_t fastTransDataSize;
     RouteType routeType;
-    BusinessType businessType;
     StreamType streamType;
+    BusinessType businessType;
     UdpConnType udpConnType;
     UdpChannelOptType udpChannelOptType;
+    BlePriority blePriority;
+    TransFlowInfo flowInfo;
     int fd;
     AppType appType;
     ProtocolType protocol;
+    int32_t pagingId;
     int32_t encrypt;
     int32_t algorithm;
     int32_t crc;
     int32_t fileProtocol;
     int32_t autoCloseTime;
-    int myHandleId;
-    int peerHandleId;
+    int32_t myHandleId;
+    int32_t peerHandleId;
     int32_t transFlag;
     int32_t linkType;
     int32_t connectType;
@@ -127,13 +157,28 @@ typedef struct {
     uint64_t callingTokenId; // for transmission access control
     int32_t osType;
     int32_t waitOpenReplyCnt;
+    uint32_t channelCapability;
     const uint8_t *fastTransData;
     int64_t timeStart;
     int64_t connectedStart;
     int64_t authSeq;
     AppInfoData myData;
     AppInfoData peerData;
+    ProtocolType fdProtocol;
 } AppInfo;
+
+enum {
+    FLAG_BYTES = 0,
+    FLAG_ACK = 1,
+    FLAG_MESSAGE = 2,
+    FILE_FIRST_FRAME = 3,
+    FILE_ONGOINE_FRAME = 4,
+    FILE_LAST_FRAME = 5,
+    FILE_ONLYONE_FRAME = 6,
+    FILE_ALLFILE_SENT = 7,
+    FLAG_ASYNC_MESSAGE = 8,
+    FLAG_SET_LOW_LATENCY = 9
+};
 
 #ifdef __cplusplus
 }

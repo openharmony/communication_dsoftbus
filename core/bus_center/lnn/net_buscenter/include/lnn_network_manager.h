@@ -16,65 +16,17 @@
 #ifndef LNN_NETWORK_MANAGER_H
 #define LNN_NETWORK_MANAGER_H
 
-#include <stdbool.h>
-#include <stdint.h>
-
 #include "bus_center_info_key.h"
 #include "common_list.h"
+#include "lnn_network_manager_struct.h"
 #include "softbus_bus_center.h"
 #include "softbus_conn_interface.h"
-#include "softbus_protocol_def.h"
 
 #ifdef __cplusplus
 #if __cplusplus
 extern "C" {
 #endif
 #endif
-
-#define LNN_LOOPBACK_IFNAME "lo"
-
-// netif type
-#define LNN_NETIF_TYPE_ETH  (0x1)
-#define LNN_NETIF_TYPE_WLAN (0x1 << 1)
-#define LNN_NETIF_TYPE_BR   (0x1 << 2)
-#define LNN_NETIF_TYPE_BLE  (0x1 << 3)
-typedef uint16_t LnnNetIfType;
-
-#define LNN_NETWORK_MAX_PROTOCOL_COUNT 3
-
-typedef struct {
-    ListNode node;
-    LnnNetIfType type;
-    char ifName[NET_IF_NAME_LEN];
-} LnnNetIfMgr;
-
-typedef LnnNetIfMgr *(*LnnNetIfManagerBuilder)(const char *ifName);
-
-typedef enum {
-    CHOICE_VISIT_NEXT,
-    CHOICE_FINISH_VISITING
-} VisitNextChoice;
-
-typedef VisitNextChoice (*VisitNetifCallback)(const LnnNetIfMgr *, void *);
-
-typedef enum {
-    LNN_LISTENER_MODE_PROXY,
-    LNN_LISTENER_MODE_DIRECT,
-    LNN_LISTENER_MODE_AUTH
-} ListenerMode;
-
-typedef struct LnnProtocolManager {
-    int32_t (*init)(struct LnnProtocolManager *self);
-    void (*deinit)(struct LnnProtocolManager *self);
-    int32_t (*enable)(struct LnnProtocolManager *self, LnnNetIfMgr *netifMgr);
-    int32_t (*disable)(struct LnnProtocolManager *self, LnnNetIfMgr *netifMgr);
-    ListenerModule (*getListenerModule)(ListenerMode mode);
-    ProtocolType id;
-    LnnNetIfType supportedNetif;
-    uint16_t pri;
-} LnnProtocolManager;
-
-typedef VisitNextChoice (*VisitProtocolCallback)(const LnnProtocolManager *, void *);
 
 int32_t LnnRegistProtocol(LnnProtocolManager *impl);
 
@@ -93,6 +45,7 @@ bool LnnIsAutoNetWorkingEnabled(void);
 bool LnnVisitNetif(VisitNetifCallback callback, void *data);
 bool LnnVisitProtocol(VisitProtocolCallback callback, void *data);
 int32_t RegistIPProtocolManager(void);
+int32_t RegistUsbProtocolManager(void);
 void LnnSetUnlockState(void);
 void LnnGetDataShareInitResult(bool *isDataShareInit);
 

@@ -24,6 +24,7 @@ extern "C" {
 
 int32_t ClientStubInit(void);
 int32_t ClientRegisterService(const char *pkgName);
+int32_t ClientRegisterBrProxyService(const char *pkgName);
 
 #ifdef __cplusplus
 }

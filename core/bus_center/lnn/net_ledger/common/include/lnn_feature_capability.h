@@ -16,33 +16,12 @@
 #ifndef LNN_FEATURE_CAPABILITY_H
 #define LNN_FEATURE_CAPABILITY_H
 
-#include <stdint.h>
 #include "softbus_bus_center.h"
+#include "lnn_feature_capability_struct.h"
 
 #ifdef __cplusplus
 extern "C" {
 #endif
-
-typedef enum {
-    BIT_WIFI_P2P_REUSE = 1,
-    BIT_BR_DUP,
-    BIT_WIFI_DIRECT_TLV_NEGOTIATION,
-    BIT_META_NODE_CAPABILITY,
-    BIT_INFO_COMPRESS,
-    BIT_SUPPOURT_EX_CAPABILITY,
-    BIT_WIFI_DIRECT_NO_DISCONNECT_RESP,
-    BIT_SUPPORT_UNIFORM_NAME_CAPABILITY,
-    BIT_BLE_ONLINE_REUSE_CAPABILITY,
-    BIT_COC_CONNECT_CAPABILITY,
-    BIT_BLE_SUPPORT_LP_HEARTBEAT, // support burst and lowpower
-    BIT_BLE_DIRECT_ONLINE,
-    BIT_BLE_DIRECT_CONNECT_CAPABILITY,
-    BIT_SUPPORT_NEGO_P2P_BY_CHANNEL_CAPABILITY,
-    BIT_BLE_TRIGGER_CONNECTION,
-    BIT_SUPPORT_THREE_STATE,
-    BIT_CLOUD_SYNC_DEVICE_INFO,
-    BIT_FEATURE_COUNT,
-} FeatureCapability;
 
 uint64_t LnnGetFeatureCapabilty(void);
 bool IsFeatureSupport(uint64_t feature, FeatureCapability capaBit);

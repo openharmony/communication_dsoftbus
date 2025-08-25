@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021-2024 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2025 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -19,7 +19,7 @@
 #include "common_list.h"
 #include "softbus_adapter_thread.h"
 #include "stdint.h"
-
+#include "softbus_protocol_def.h"
 
 #ifdef __cplusplus
 #if __cplusplus
@@ -48,8 +48,12 @@ extern "C" {
 
 #define PKG_NAME_SIZE_MAX 65
 #define SESSION_NAME_SIZE_MAX 256
+#define INTERFACE_NAME_SIZE_MAX 64
+#define PROCESS_NAME_SIZE_MAX 64
 #define DEVICE_ID_SIZE_MAX 65
 #define DEVICE_VERSION_SIZE_MAX 128
+#define PRODUCT_ID_SIZE_MAX 128
+#define MODEL_NAME_SIZE_MAX 128
 #define GROUP_ID_SIZE_MAX 128
 #define REQ_ID_SIZE_MAX 65
 #define AUTH_STATE_SIZE_MAX 65
@@ -62,9 +66,15 @@ extern "C" {
 #define MAX_DEV_INFO_COUNT 32
 #define MAX_PUBLISH_INFO_COUNT 32
 #define IP_LEN 46
+#define MAC_MAX_LEN 18
 #define MAX_PEERS_NUM 32
 #define MAX_OPERATION_CODE_LEN 32
 #define SESSION_KEY_LENGTH 32
+#define SHORT_SESSION_KEY_LENGTH 16
+#define SHORT_SESSION_IV_LENGTH 4
+#define ORIGIN_LEN_16_BASE64_LENGTH 25
+#define D2D_SHORT_UDID_HASH_LEN 5
+#define D2D_SHORT_ACCOUNT_HASH_LEN 5
 #define DEVICE_KEY_LEN 16
 
 #define MAX_SOCKET_ADDR_LEN 46
@@ -75,9 +85,17 @@ extern "C" {
 #define WAIT_SERVER_READY_INTERVAL 200
 #define WAIT_SERVER_READY_SHORT_INTERVAL 50
 
+#define EXTRA_DATA_MAX_LEN 5
+#define EXTRA_DATA_STR_MAX_LEN 11
+#define SHORT_DEVICE_LEN 9
+#define PAGING_SOCKET_NAME_PREFIX "Paging_"
+
 #define NODE_ADDR_LOOPBACK "0"
 
 #define MAX_UDP_CHANNEL_ID_COUNT 20
+#define ACCOUNT_UID_STR_LEN 65
+
+#define ACCOUNT_ID_SIZE_MAX 65
 
 #ifndef ARRAY_SIZE
 #define ARRAY_SIZE(a) (sizeof(a) / sizeof((a)[0]))
@@ -85,6 +103,9 @@ extern "C" {
 
 #define FILE_PRIORITY_BE 0x00
 #define FILE_PRIORITY_BK 0x08
+
+#define GENERAL_SEND_DATA_MAX_LEN 1024
+#define GENERAL_NAME_SIZE_MAX     256
 
 typedef struct {
     SoftBusMutex lock;
@@ -142,10 +163,18 @@ typedef enum {
     BUSINESS_TYPE_BYTE = 2,
     BUSINESS_TYPE_FILE = 3,
     BUSINESS_TYPE_STREAM = 4,
-
+    BUSINESS_TYPE_D2D_MESSAGE = 10,
+    BUSINESS_TYPE_D2D_VOICE = 11,
     BUSINESS_TYPE_NOT_CARE,
     BUSINESS_TYPE_BUTT,
 } BusinessType;
+
+typedef struct {
+    int32_t userId;
+    uint64_t localTokenId;
+    char *businessAccountId;
+    char *extraAccessInfo;
+} AccessInfo;
 
 typedef struct {
     bool isServer;
@@ -153,6 +182,10 @@ typedef struct {
     bool isEncrypt;
     bool isUdpFile;
     bool isFastData;
+    bool isSupportTlv;
+    bool isD2D;
+    int32_t sessionId;
+    int32_t pagingId;
     int32_t channelId;
     int32_t channelType;
     int32_t businessType;
@@ -176,6 +209,8 @@ typedef struct {
     int32_t osType;
     int64_t timeStart;
     uint64_t laneId;
+    uint32_t dataLen;
+    uint32_t businessFlag;
     char *groupId;
     char *sessionKey;
     char *peerSessionName;
@@ -183,6 +218,19 @@ typedef struct {
     char *myIp;
     char *peerIp;
     char *reqId;
+    int32_t tokenType;
+    int32_t peerUserId;
+    uint64_t peerTokenId;
+    uint32_t deviceTypeId;
+    char *peerBusinessAccountId;
+    char *peerExtraAccessInfo;
+    char *extraData;
+    char *pagingNonce;
+    char *pagingSessionkey;
+    char *pagingAccountId;
+    bool isLowLatency;
+    ProtocolType fdProtocol;
+    char *pkgName;
 } ChannelInfo;
 
 #ifdef __cplusplus

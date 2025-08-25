@@ -15,30 +15,23 @@
 
 #include "softbus_server_proxy_frame.h"
 
-#include <chrono>
-#include <cstdlib>
-#include <ctime>
-#include <mutex>
 #include <thread>
-#include "client_bus_center_manager.h"
-#include "client_trans_session_manager.h"
-#include "client_trans_socket_manager.h"
 #include "bus_center_server_proxy.h"
+#include "client_bus_center_manager.h"
+#include "general_client_connection.h"
+#include "client_trans_socket_manager.h"
+#include "general_connection_server_proxy.h"
 #include "comm_log.h"
+#include "g_enhance_sdk_func.h"
 #include "ipc_skeleton.h"
-#include "iremote_broker.h"
-#include "iremote_object.h"
-#include "iremote_proxy.h"
 #include "softbus_adapter_mem.h"
-#include "softbus_adapter_timer.h"
 #include "softbus_client_death_recipient.h"
 #include "softbus_client_frame_manager.h"
 #include "softbus_client_stub_interface.h"
-#include "softbus_def.h"
-#include "softbus_error_code.h"
 #include "softbus_server_ipc_interface_code.h"
 #include "softbus_server_proxy_standard.h"
 #include "trans_server_proxy.h"
+#include "g_enhance_sdk_func.h"
 
 namespace {
 OHOS::sptr<OHOS::IRemoteObject> g_serverProxy = nullptr;
@@ -165,6 +158,17 @@ static void RestartAuthParaNotify(void)
     COMM_LOGI(COMM_SDK, "Restart AuthPara notify success!");
 }
 
+static int32_t DiscRecoveryPolicyPacked(void)
+{
+    ClientEnhanceFuncList *pfnClientEnhanceFuncList = ClientEnhanceFuncListGet();
+    ClientRegisterEnhanceFuncCheck((void *)pfnClientEnhanceFuncList->discRecoveryPolicy);
+    if (pfnClientEnhanceFuncList->discRecoveryPolicy == nullptr) {
+        COMM_LOGE(COMM_SDK, "discRecoveryPolicy func not register");
+        return SOFTBUS_OK;
+    }
+    return pfnClientEnhanceFuncList->discRecoveryPolicy();
+}
+
 void ClientDeathProcTask(void)
 {
     {
@@ -175,8 +179,10 @@ void ClientDeathProcTask(void)
         }
         g_serverProxy.clear();
     }
-    TransServerProxyDeInit();
+    TransServerProxyClear();
     BusCenterServerProxyDeInit();
+    ConnectionServerProxyDeInit();
+    ConnectionDeathNotify();
 
     ListNode sessionServerInfoList;
     ListInit(&sessionServerInfoList);
@@ -195,11 +201,12 @@ void ClientDeathProcTask(void)
     }
     TransServerProxyInit();
     BusCenterServerProxyInit();
+    ConnectionServerProxyInit();
     InnerRegisterService(&sessionServerInfoList);
     RestartAuthParaNotify();
     DiscRecoveryPublish();
     DiscRecoverySubscribe();
-    DiscRecoveryPolicy();
+    DiscRecoveryPolicyPacked();
     RestartRegDataLevelChange();
 }
 
@@ -208,6 +215,7 @@ void RestartAuthParaCallbackUnregister(void)
     g_restartAuthParaCallback = nullptr;
 }
 
+extern "C" {
 int32_t RestartAuthParaCallbackRegister(RestartEventCallback callback)
 {
     if (callback == nullptr) {
@@ -217,6 +225,7 @@ int32_t RestartAuthParaCallbackRegister(RestartEventCallback callback)
     g_restartAuthParaCallback = callback;
     COMM_LOGI(COMM_SDK, "Restart event callback register success!");
     return SOFTBUS_OK;
+}
 }
 
 int32_t ClientStubInit(void)
@@ -246,6 +255,33 @@ int ClientRegisterService(const char *pkgName)
         sleepCnt++;
         if (sleepCnt >= SOFTBUS_MAX_RETRY_TIMES) {
             return SOFTBUS_SERVER_NOT_INIT;
+        }
+    }
+
+    COMM_LOGD(COMM_SDK, "softbus server register service success! pkgName=%{public}s", pkgName);
+    return SOFTBUS_OK;
+}
+
+int32_t ClientRegisterBrProxyService(const char *pkgName)
+{
+    if (g_serverProxy == nullptr) {
+        COMM_LOGE(COMM_SDK, "g_serverProxy is nullptr!");
+        return SOFTBUS_INVALID_PARAM;
+    }
+    OHOS::sptr<OHOS::SoftBusServerProxyFrame> serverProxyFrame =
+        new (std::nothrow) OHOS::SoftBusServerProxyFrame(g_serverProxy);
+    if (serverProxyFrame == nullptr) {
+        COMM_LOGE(COMM_SDK, "serverProxyFrame is nullptr!");
+        return SOFTBUS_INVALID_PARAM;
+    }
+    uint32_t sleepCnt = 0;
+    int32_t ret = SOFTBUS_SERVER_NOT_INIT;
+    while (ret != SOFTBUS_OK) {
+        ret = serverProxyFrame->RegisterBrProxyService(pkgName, nullptr);
+        SoftBusSleepMs(WAIT_SERVER_READY_INTERVAL);
+        sleepCnt++;
+        if (sleepCnt >= SOFTBUS_MAX_RETRY_TIMES) {
+            return ret;
         }
     }
 

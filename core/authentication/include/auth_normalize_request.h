@@ -16,10 +16,7 @@
 #ifndef AUTH_NORMALIZE_REQUEST_H
 #define AUTH_NORMALIZE_REQUEST_H
 
-#include <stdint.h>
-#include <stdbool.h>
 #include "auth_interface.h"
-#include "softbus_common.h"
 
 #ifdef __cplusplus
 #if __cplusplus
@@ -32,6 +29,7 @@ typedef struct {
     int64_t authSeq;
     AuthConnInfo connInfo;
     bool isConnectServer;
+    bool isNeedNotifyVerify;
     ListNode node;
 } NormalizeRequest;
 

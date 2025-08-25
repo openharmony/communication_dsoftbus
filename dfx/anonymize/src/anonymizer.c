@@ -24,13 +24,19 @@
 #include "comm_log.h"
 #include "softbus_error_code.h"
 
-#define DEVICE_NAME_MAX_LEN 128
+#define COMMON_STRING_MAX_LEN 128
 #define WIDE_CHAR_MAX_LEN 8
 
 typedef struct {
     bool (*Matcher)(const char *, uint32_t);
     int32_t (*Anonymizer)(const char *, uint32_t, char **);
 } AnonymizeHandler;
+
+typedef struct {
+    uint32_t plainPrefixPos;
+    uint32_t plainSuffixPos;
+    uint32_t len;
+} AnonymizeParam;
 
 static const char SYMBOL_ANONYMIZE = '*';
 static const char SYMBOL_COLON = ':';
@@ -164,9 +170,9 @@ static bool MatchUdidStr(const char *str, uint32_t len)
     return true;
 }
 
-static bool MatchDeviceName(const char *str, uint32_t len)
+static bool MatchCommString(const char *str, uint32_t len)
 {
-    return len <= DEVICE_NAME_MAX_LEN;
+    return len <= COMMON_STRING_MAX_LEN;
 }
 
 static char *MallocStr(uint32_t len)
@@ -259,32 +265,20 @@ static void RestoreLocale(const char *localeBefore)
     }
 }
 
-static int32_t AnonymizeMultiByteStr(const char *str, uint32_t len, uint32_t lenRatio, uint32_t posRatio,
+static int32_t AnonymizeWideStrToByteStr(const wchar_t *wideStr, uint32_t wideStrLen, const AnonymizeParam *param,
     char **anonymized)
 {
-    COMM_CHECK_AND_RETURN_RET_LOGE(lenRatio != 0, SOFTBUS_INVALID_PARAM, COMM_DFX, "lenRatio is 0");
-    COMM_CHECK_AND_RETURN_RET_LOGE(posRatio != 0, SOFTBUS_INVALID_PARAM, COMM_DFX, "posRatio is 0");
-
-    wchar_t wideStr[DEVICE_NAME_MAX_LEN] = {0};
-    size_t wideCharNum = mbstowcs(wideStr, str, len);
-    if (wideCharNum == 0 || wideCharNum > len) {
-        COMM_LOGW(COMM_DFX, "convert wide str failed");
-        return CopyStr(str, anonymized);
-    }
-
+    COMM_CHECK_AND_RETURN_RET_LOGE(wideStrLen != 0, SOFTBUS_INVALID_PARAM, COMM_DFX, "wideStrLen is 0");
+    COMM_CHECK_AND_RETURN_RET_LOGE(param->len != 0, SOFTBUS_INVALID_PARAM, COMM_DFX, "len is 0");
+    uint32_t len = param->len;
     *anonymized = MallocStr(len);
     COMM_CHECK_AND_RETURN_RET_LOGE(*anonymized != NULL, SOFTBUS_MALLOC_ERR, COMM_DFX, "malloc failed");
-
-    uint32_t wideStrLen = (uint32_t)wideCharNum;
-    uint32_t anonymizedNum = (wideStrLen + lenRatio - 1) / lenRatio; // +ratio-1 for round up
-    uint32_t plainPrefixPos = wideStrLen / posRatio;
-    uint32_t plainSuffixPos = plainPrefixPos + anonymizedNum;
 
     char multiByteChar[WIDE_CHAR_MAX_LEN] = {0};
     uint32_t multiByteStrIndex = 0;
     uint32_t wideStrIndex = 0;
     errno_t ret = EOK;
-    for (; wideStrIndex < plainPrefixPos && multiByteStrIndex < len; ++wideStrIndex) {
+    for (; wideStrIndex < param->plainPrefixPos && multiByteStrIndex < len; ++wideStrIndex) {
         int32_t multiByteCharLen = wctomb(multiByteChar, wideStr[wideStrIndex]);
         COMM_CHECK_AND_RETURN_RET_LOGE(multiByteCharLen > 0, SOFTBUS_WIDECHAR_ERR, COMM_DFX, "convert prefix failed");
         ret = memcpy_s(*anonymized + multiByteStrIndex, len - multiByteStrIndex, multiByteChar, multiByteCharLen);
@@ -292,7 +286,7 @@ static int32_t AnonymizeMultiByteStr(const char *str, uint32_t len, uint32_t len
         multiByteStrIndex += (uint32_t)multiByteCharLen;
     }
 
-    for (; wideStrIndex < plainSuffixPos && multiByteStrIndex < len; ++wideStrIndex) {
+    for (; wideStrIndex < param->plainSuffixPos && multiByteStrIndex < len; ++wideStrIndex) {
         (*anonymized)[multiByteStrIndex++] = SYMBOL_ANONYMIZE;
     }
 
@@ -309,7 +303,7 @@ static int32_t AnonymizeMultiByteStr(const char *str, uint32_t len, uint32_t len
     return SOFTBUS_OK;
 }
 
-static int32_t AnonymizeDeviceName(const char *str, uint32_t len, char **anonymized)
+static int32_t AnonymizeCommString(const char *str, uint32_t len, char **anonymized)
 {
     static const uint32_t ANONYMIZE_LEN_RATIO = 2; // anonymize half str
     static const uint32_t ANONYMIZE_POS_RATIO = 4; // start from 1/4 pos
@@ -318,7 +312,22 @@ static int32_t AnonymizeDeviceName(const char *str, uint32_t len, char **anonymi
     int32_t ret = SetLocale(&localeBefore);
     COMM_CHECK_AND_RETURN_RET_LOGE(ret == SOFTBUS_OK, ret, COMM_DFX, "get locale failed");
 
-    ret = AnonymizeMultiByteStr(str, len, ANONYMIZE_LEN_RATIO, ANONYMIZE_POS_RATIO, anonymized);
+    wchar_t wideStr[COMMON_STRING_MAX_LEN] = {0};
+    uint32_t wideStrLen = (uint32_t)mbstowcs(wideStr, str, len);
+    if (wideStrLen == 0 || wideStrLen > len) {
+        COMM_LOGW(COMM_DFX, "convert wide str failed");
+        RestoreLocale(localeBefore);
+        return CopyStr(str, anonymized);
+    }
+    uint32_t anonymizedNum = (wideStrLen + ANONYMIZE_LEN_RATIO - 1) / ANONYMIZE_LEN_RATIO; // +ratio-1 for round up
+    uint32_t plainPrefixPos = wideStrLen / ANONYMIZE_POS_RATIO;
+    AnonymizeParam param = {
+        .plainPrefixPos = plainPrefixPos,
+        .plainSuffixPos = plainPrefixPos + anonymizedNum,
+        .len = len,
+    };
+
+    ret = AnonymizeWideStrToByteStr(wideStr, wideStrLen, &param, anonymized);
     RestoreLocale(localeBefore);
     COMM_CHECK_AND_RETURN_RET_LOGE(ret == SOFTBUS_OK, ret, COMM_DFX, "anonymize multi byte str failed");
     return ret;
@@ -360,7 +369,7 @@ static int32_t AnonymizeInner(const char *str, char **anonymized)
         { MatchIpAddr, AnonymizeIpAddr },
         { MatchMacAddr, AnonymizeMacAddr },
         { MatchUdidStr, AnonymizeUdidStr },
-        { MatchDeviceName, AnonymizeDeviceName },
+        { MatchCommString, AnonymizeCommString },
     };
 
     uint32_t len = strlen(str);
@@ -370,6 +379,53 @@ static int32_t AnonymizeInner(const char *str, char **anonymized)
         }
     }
     return AnonymizeHalfStr(str, len, anonymized);
+}
+
+static int32_t AnonymizeDeviceNameInner(const char *str, char **anonymized)
+{
+    static const uint32_t DEVICE_NAME_PREFIX = 1;
+    static const uint32_t DEVICE_NAME_SUFFIX = 3;
+    static const uint32_t DEVICE_NAME_RATIO_ANONYMIZE_LEN = 8;
+
+    if (str == NULL) {
+        return CopyStr("NULL", anonymized);
+    }
+    uint32_t len = strlen(str);
+    if (len == 0) {
+        return CopyStr("EMPTY", anonymized);
+    }
+    if (len >= COMMON_STRING_MAX_LEN) {
+        COMM_LOGW(COMM_DFX, "invalid str len=%{public}u", len);
+        return CopyStr("INVALID", anonymized);
+    }
+
+    char *localeBefore = NULL;
+    int32_t ret = SetLocale(&localeBefore);
+    COMM_CHECK_AND_RETURN_RET_LOGE(ret == SOFTBUS_OK, ret, COMM_DFX, "get locale failed");
+
+    wchar_t wideStr[COMMON_STRING_MAX_LEN] = {0};
+    uint32_t wideStrLen = (uint32_t)mbstowcs(wideStr, str, len);
+    if (wideStrLen == 0 || wideStrLen > len) {
+        COMM_LOGW(COMM_DFX, "convert wide str failed");
+        /* string is garbled when the memory is abnormal*/
+        RestoreLocale(localeBefore);
+        return CopyStr(str, anonymized);
+    }
+    if (wideStrLen < DEVICE_NAME_RATIO_ANONYMIZE_LEN) {
+        RestoreLocale(localeBefore);
+        return AnonymizeCommString(str, len, anonymized);
+    }
+    uint32_t anonymizedNum = wideStrLen - DEVICE_NAME_PREFIX - DEVICE_NAME_SUFFIX;
+    AnonymizeParam param = {
+        .plainPrefixPos = DEVICE_NAME_PREFIX,
+        .plainSuffixPos = DEVICE_NAME_PREFIX + anonymizedNum,
+        .len = len,
+    };
+
+    ret = AnonymizeWideStrToByteStr(wideStr, wideStrLen, &param, anonymized);
+    RestoreLocale(localeBefore);
+    COMM_CHECK_AND_RETURN_RET_LOGE(ret == SOFTBUS_OK, ret, COMM_DFX, "anonymize multi byte str failed");
+    return ret;
 }
 
 void Anonymize(const char *plainStr, char **anonymizedStr)
@@ -396,4 +452,17 @@ void AnonymizeFree(char *anonymizedStr)
 const char *AnonymizeWrapper(const char *anonymizedStr)
 {
     return anonymizedStr ? anonymizedStr : "NULL";
+}
+
+void AnonymizeDeviceName(const char *plainStr, char **anonymizedStr)
+{
+    COMM_CHECK_AND_RETURN_LOGE(anonymizedStr != NULL, COMM_DFX, "anonymizedStr is null");
+
+    if (AnonymizeDeviceNameInner(plainStr, anonymizedStr) == SOFTBUS_OK) {
+        return;
+    }
+    if (*anonymizedStr != NULL) {
+        AnonymizeFree(*anonymizedStr);
+        *anonymizedStr = NULL;
+    }
 }

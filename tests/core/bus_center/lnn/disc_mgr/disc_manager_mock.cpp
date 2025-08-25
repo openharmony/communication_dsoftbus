@@ -36,41 +36,42 @@ static DiscManagerInterface *GetDiscManagerInterface()
 }
 
 extern "C" {
-int32_t DiscPublishService(const char *packageName, const PublishInfo *info)
+int32_t DiscPublishService(const char *packageName, const PublishInfo *info, int32_t callingPid)
 {
-    return GetDiscManagerInterface()->DiscPublishService(packageName, info);
+    return GetDiscManagerInterface()->DiscPublishService(packageName, info, callingPid);
 }
-int32_t DiscStartScan(DiscModule moduleId, const PublishInfo *info)
+int32_t DiscStartScan(DiscModule moduleId, const PublishInfo *info, int32_t callingPid)
 {
-    return GetDiscManagerInterface()->DiscStartScan(moduleId, info);
+    return GetDiscManagerInterface()->DiscStartScan(moduleId, info, callingPid);
 }
-int32_t DiscUnPublishService(const char *packageName, int32_t publishId)
+int32_t DiscUnPublishService(const char *packageName, int32_t publishId, int32_t callingPid)
 {
-    return GetDiscManagerInterface()->DiscUnPublishService(packageName, publishId);
+    return GetDiscManagerInterface()->DiscUnPublishService(packageName, publishId, callingPid);
 }
-int32_t DiscUnpublish(DiscModule moduleId, int32_t publishId)
+int32_t DiscUnpublish(DiscModule moduleId, int32_t publishId, int32_t callingPid)
 {
-    return GetDiscManagerInterface()->DiscUnpublish(moduleId, publishId);
+    return GetDiscManagerInterface()->DiscUnpublish(moduleId, publishId, callingPid);
 }
-int32_t DiscStartDiscovery(const char *packageName, const SubscribeInfo *info, const IServerDiscInnerCallback *cb)
+int32_t DiscStartDiscovery(const char *packageName, const SubscribeInfo *info, const IServerDiscInnerCallback *cb,
+    int32_t callingPid)
 {
-    return GetDiscManagerInterface()->DiscStartDiscovery(packageName, info, cb);
+    return GetDiscManagerInterface()->DiscStartDiscovery(packageName, info, cb, callingPid);
 }
 int32_t DiscSetDiscoverCallback(DiscModule moduleId, const DiscInnerCallback *callback)
 {
     return GetDiscManagerInterface()->DiscSetDiscoverCallback(moduleId, callback);
 }
-int32_t DiscStartAdvertise(DiscModule moduleId, const SubscribeInfo *info)
+int32_t DiscStartAdvertise(DiscModule moduleId, const SubscribeInfo *info, int32_t callingPid)
 {
-    return GetDiscManagerInterface()->DiscStartAdvertise(moduleId, info);
+    return GetDiscManagerInterface()->DiscStartAdvertise(moduleId, info, callingPid);
 }
-int32_t DiscStopDiscovery(const char *packageName, int32_t subscribeId)
+int32_t DiscStopDiscovery(const char *packageName, int32_t subscribeId, int32_t callingPid)
 {
-    return GetDiscManagerInterface()->DiscStopDiscovery(packageName, subscribeId);
+    return GetDiscManagerInterface()->DiscStopDiscovery(packageName, subscribeId, callingPid);
 }
-int32_t DiscStopAdvertise(DiscModule moduleId, int32_t subscribeId)
+int32_t DiscStopAdvertise(DiscModule moduleId, int32_t subscribeId, int32_t callingPid)
 {
-    return GetDiscManagerInterface()->DiscStopAdvertise(moduleId, subscribeId);
+    return GetDiscManagerInterface()->DiscStopAdvertise(moduleId, subscribeId, callingPid);
 }
 }
 } // namespace OHOS

@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021-2024 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2025 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -20,9 +20,14 @@
 #include "access_control.h"
 #include "anonymizer.h"
 #include "bus_center_manager.h"
+
+#include "g_enhance_lnn_func.h"
+#include "g_enhance_lnn_func_pack.h"
+#include "g_enhance_trans_func.h"
+#include "g_enhance_trans_func_pack.h"
+#include "legacy/softbus_adapter_hitrace.h"
 #include "legacy/softbus_hisysevt_transreporter.h"
 #include "lnn_distributed_net_ledger.h"
-#include "lnn_lane_qos.h"
 #include "message_handler.h"
 #include "session.h"
 #include "softbus_adapter_mem.h"
@@ -32,8 +37,8 @@
 #include "softbus_proxychannel_manager.h"
 #include "softbus_proxychannel_session.h"
 #include "softbus_proxychannel_transceiver.h"
-#include "softbus_qos.h"
 #include "softbus_utils.h"
+#include "softbus_init_common.h"
 #include "trans_auth_lane_pending_ctl.h"
 #include "trans_auth_manager.h"
 #include "trans_auth_negotiation.h"
@@ -41,6 +46,7 @@
 #include "trans_channel_callback.h"
 #include "trans_channel_common.h"
 #include "trans_event.h"
+#include "trans_ipc_adapter.h"
 #include "trans_lane_manager.h"
 #include "trans_lane_pending_ctl.h"
 #include "trans_link_listener.h"
@@ -52,6 +58,7 @@
 #include "trans_tcp_direct_sessionconn.h"
 #include "trans_udp_channel_manager.h"
 #include "trans_udp_negotiation.h"
+#include "trans_uk_manager.h"
 
 #define MAX_PROXY_CHANNEL_ID 0x00000800
 #define MAX_TDC_CHANNEL_ID 0x7FFFFFFF
@@ -62,6 +69,7 @@
 #define ID_USED 1UL
 #define BIT_NUM 8
 #define REPORT_UDP_INFO_SIZE 4
+#define ACCESS_INFO_PARAM_NUM 3
 
 static int32_t g_allocTdcChannelId = MAX_PROXY_CHANNEL_ID;
 static SoftBusMutex g_myIdLock;
@@ -76,6 +84,12 @@ typedef enum {
     LOOP_CHANNEL_OPEN_MSG,
     LOOP_LIMIT_CHANGE_MSG,
 } ChannelResultLoopMsg;
+
+typedef struct {
+    int32_t channelId;
+    int32_t channelType;
+    int32_t openResult;
+} OpenChannelResult;
 
 typedef struct {
     ListNode node;
@@ -281,6 +295,9 @@ int32_t TransChannelInit(void)
     ret = TransAsyncReqLanePendingInit();
     TRANS_CHECK_AND_RETURN_RET_LOGE(ret == SOFTBUS_OK, ret, TRANS_INIT, "trans async req lane pending init failed.");
 
+    ret = TransUkRequestMgrInit();
+    TRANS_CHECK_AND_RETURN_RET_LOGE(ret == SOFTBUS_OK, ret, TRANS_INIT, "trans uk request manager init failed.");
+
     ret = TransReqAuthPendingInit();
     TRANS_CHECK_AND_RETURN_RET_LOGE(ret == SOFTBUS_OK, ret, TRANS_INIT, "trans auth request pending init failed.");
     ret = TransAuthWithParaReqLanePendingInit();
@@ -314,12 +331,13 @@ void TransChannelDeinit(void)
     TransAuthWithParaReqLanePendingDeinit();
     TransFreeLanePendingDeinit();
     TransBindRequestManagerDeinit();
+    TransUkRequestMgrDeinit();
     SoftBusMutexDestroy(&g_myIdLock);
 }
 
 static void TransSetFirstTokenInfo(AppInfo *appInfo, TransEventExtra *event)
 {
-    event->firstTokenId = TransACLGetFirstTokenID();
+    event->firstTokenId = TransAclGetFirstTokenID();
     if (event->firstTokenId == TOKENID_NOT_SET) {
         event->firstTokenId = appInfo->callingTokenId;
     }
@@ -370,12 +388,15 @@ static void TransFreeLaneInner(uint32_t laneHandle, bool isQosLane, bool isAsync
 
 int32_t TransOpenChannel(const SessionParam *param, TransInfo *transInfo)
 {
+    SoftBusHitraceChainBegin("TransOpenChannel");
     if (param == NULL || transInfo == NULL) {
         TRANS_LOGE(TRANS_CTRL, "param invalid");
+        SoftBusHitraceChainEnd();
         return SOFTBUS_INVALID_PARAM;
     }
     if (GetDeniedFlagByPeer(param->sessionName, param->peerSessionName, param->peerDeviceId)) {
         TRANS_LOGE(TRANS_CTRL, "request denied: sessionId=%{public}d", param->sessionId);
+        SoftBusHitraceChainEnd();
         return SOFTBUS_TRANS_BIND_REQUEST_DENIED;
     }
     char *tmpName = NULL;
@@ -388,11 +409,16 @@ int32_t TransOpenChannel(const SessionParam *param, TransInfo *transInfo)
     uint32_t laneHandle = INVALID_LANE_REQ_ID;
     CoreSessionState state = CORE_SESSION_STATE_INIT;
     AppInfo *appInfo = (AppInfo *)SoftBusCalloc(sizeof(AppInfo));
-    TRANS_CHECK_AND_RETURN_RET_LOGE(appInfo != NULL, SOFTBUS_MALLOC_ERR, TRANS_CTRL, "calloc appInfo failed.");
+    if (appInfo == NULL) {
+        TRANS_LOGE(TRANS_CTRL, "calloc appInfo failed.");
+        SoftBusHitraceChainEnd();
+        return SOFTBUS_MALLOC_ERR;
+    }
     ret = TransCommonGetAppInfo(param, appInfo);
     if (ret != SOFTBUS_OK) {
         TRANS_LOGE(TRANS_CTRL, "get appinfo failed");
         TransFreeAppInfo(appInfo);
+        SoftBusHitraceChainEnd();
         return ret;
     }
     ret = TransAddSocketChannelInfo(
@@ -400,6 +426,7 @@ int32_t TransOpenChannel(const SessionParam *param, TransInfo *transInfo)
     if (ret != SOFTBUS_OK) {
         TRANS_LOGE(TRANS_CTRL, "Add socket channel record failed.");
         TransFreeAppInfo(appInfo);
+        SoftBusHitraceChainEnd();
         return ret;
     }
     NodeInfo nodeInfo;
@@ -414,8 +441,7 @@ int32_t TransOpenChannel(const SessionParam *param, TransInfo *transInfo)
     extra.sessionId = param->sessionId;
     TRANS_EVENT(EVENT_SCENE_OPEN_CHANNEL, EVENT_STAGE_OPEN_CHANNEL_START, extra);
     if (param->isQosLane) {
-        uint32_t callingTokenId = TransACLGetCallingTokenID();
-        ret = TransAsyncGetLaneInfo(param, &laneHandle, callingTokenId, appInfo->timeStart);
+        ret = TransAsyncGetLaneInfo(param, &laneHandle, appInfo->callingTokenId, appInfo->timeStart);
         if (ret != SOFTBUS_OK) {
             Anonymize(param->sessionName, &tmpName);
             TRANS_LOGE(TRANS_CTRL, "Async get Lane failed, sessionName=%{public}s, sessionId=%{public}d",
@@ -427,6 +453,7 @@ int32_t TransOpenChannel(const SessionParam *param, TransInfo *transInfo)
             (void)TransDeleteSocketChannelInfoBySession(param->sessionName, param->sessionId);
         }
         TransFreeAppInfo(appInfo);
+        SoftBusHitraceChainEnd();
         return ret;
     }
     transInfo->channelId = INVALID_CHANNEL_ID;
@@ -491,6 +518,7 @@ int32_t TransOpenChannel(const SessionParam *param, TransInfo *transInfo)
         "server TransOpenChannel ok: socket=%{public}d, channelId=%{public}d, channelType=%{public}d, "
         "laneHandle=%{public}u",
         param->sessionId, transInfo->channelId, transInfo->channelType, laneHandle);
+    SoftBusHitraceChainEnd();
     return SOFTBUS_OK;
 EXIT_ERR:
     extra.linkType = IsLaneModuleError(ret) ? extra.linkType : CONNECT_HML;
@@ -505,6 +533,7 @@ EXIT_ERR:
     }
     (void)TransDeleteSocketChannelInfoBySession(param->sessionName, param->sessionId);
     TRANS_LOGE(TRANS_SVC, "server TransOpenChannel err, socket=%{public}d, ret=%{public}d", param->sessionId, ret);
+    SoftBusHitraceChainEnd();
     return ret;
 EXIT_CANCEL:
     TransBuildTransOpenChannelCancelEvent(&extra, transInfo, appInfo->timeStart, SOFTBUS_TRANS_STOP_BIND_BY_CANCEL);
@@ -513,6 +542,7 @@ EXIT_CANCEL:
     TransFreeLaneInner(laneHandle, param->isQosLane, param->isAsync);
     (void)TransDeleteSocketChannelInfoBySession(param->sessionName, param->sessionId);
     TRANS_LOGE(TRANS_SVC, "server open channel cancel, socket=%{public}d", param->sessionId);
+    SoftBusHitraceChainEnd();
     return SOFTBUS_TRANS_STOP_BIND_BY_CANCEL;
 }
 
@@ -565,10 +595,12 @@ EXIT_ERR:
 }
 
 int32_t TransOpenAuthChannel(const char *sessionName, const ConnectOption *connOpt,
-    const char *reqId)
+    const char *reqId, const ConnectParam *param)
 {
+    SoftBusHitraceChainBegin("TransOpenAuthChannel");
     int32_t channelId = INVALID_CHANNEL_ID;
-    if (!IsValidString(sessionName, SESSION_NAME_SIZE_MAX) || connOpt == NULL) {
+    if (!IsValidString(sessionName, SESSION_NAME_SIZE_MAX) || connOpt == NULL || param == NULL) {
+        SoftBusHitraceChainEnd();
         return channelId;
     }
     char callerPkg[PKG_NAME_SIZE_MAX] = {0};
@@ -587,6 +619,7 @@ int32_t TransOpenAuthChannel(const char *sessionName, const ConnectOption *connO
             TRANS_LOGE(TRANS_CTRL, "GetAuthAppInfo failed");
             goto EXIT_ERR;
         }
+        appInfo->blePriority = param->blePriority;
         appInfo->connectType = connOpt->type;
         if (strcpy_s(appInfo->reqId, REQ_ID_SIZE_MAX, reqId) != EOK) {
             TRANS_LOGE(TRANS_CTRL, "strcpy_s reqId failed");
@@ -602,11 +635,13 @@ int32_t TransOpenAuthChannel(const char *sessionName, const ConnectOption *connO
     } else {
         goto EXIT_ERR;
     }
+    SoftBusHitraceChainEnd();
     return channelId;
 EXIT_ERR:
     extra.result = EVENT_STAGE_RESULT_FAILED;
     extra.errcode = SOFTBUS_TRANS_AUTH_CHANNEL_NOT_FOUND;
     TRANS_EVENT(EVENT_SCENE_OPEN_CHANNEL, EVENT_STAGE_OPEN_CHANNEL_END, extra);
+    SoftBusHitraceChainEnd();
     return INVALID_CHANNEL_ID;
 }
 
@@ -656,7 +691,7 @@ int32_t TransStreamStats(int32_t channelId, int32_t channelType, const StreamSen
     info.statsType = LANE_T_COMMON_VIDEO;
     FrameSendStats *stats = &info.statsInfo.stream.frameStats;
     ConvertStreamStats(data, stats);
-    LnnReportLaneIdStatsInfo(&info, 1); /* only report stream stats */
+    LnnReportLaneIdStatsInfoPacked(&info, 1); /* only report stream stats */
     return SOFTBUS_OK;
 }
 
@@ -675,10 +710,10 @@ int32_t TransRequestQos(int32_t channelId, int32_t chanType, int32_t appType, in
     int32_t result = 0;
     if (quality == QOS_IMPROVE) {
         TRANS_LOGI(TRANS_QOS, "trans requestQos");
-        ret = LnnRequestQosOptimization(&laneId, 1, &result, 1);
+        ret = LnnRequestQosOptimizationPacked(&laneId, 1, &result, 1);
     } else if (quality == QOS_RECOVER) {
         TRANS_LOGI(TRANS_QOS, "trans cancel Qos");
-        LnnCancelQosOptimization(&laneId, 1);
+        LnnCancelQosOptimizationPacked(&laneId, 1);
         ret = SOFTBUS_OK;
     } else {
         TRANS_LOGE(TRANS_QOS, "requestQos invalid. quality=%{public}d", quality);
@@ -714,7 +749,7 @@ int32_t TransRippleStats(int32_t channelId, int32_t channelType, const TrafficSt
     }
     // modify with laneId
     uint64_t laneId = INVALID_LANE_ID;
-    LnnReportRippleData(laneId, &rptdata);
+    LnnReportRippleDataPacked(laneId, &rptdata);
     return SOFTBUS_OK;
 }
 
@@ -745,7 +780,7 @@ int32_t TransNotifyAuthSuccess(int32_t channelId, int32_t channelType)
 int32_t TransReleaseUdpResources(int32_t channelId)
 {
     TRANS_LOGI(TRANS_CTRL, "release Udp channel resources: channelId=%{public}d", channelId);
-    NotifyQosChannelClosed(channelId, CHANNEL_TYPE_UDP);
+    NotifyQosChannelClosedPacked(channelId, CHANNEL_TYPE_UDP);
     (void)TransLaneMgrDelLane(channelId, CHANNEL_TYPE_UDP, false);
     (void)TransDelUdpChannel(channelId);
     return SOFTBUS_OK;
@@ -753,10 +788,9 @@ int32_t TransReleaseUdpResources(int32_t channelId)
 
 int32_t TransCloseChannel(const char *sessionName, int32_t channelId, int32_t channelType)
 {
+    SoftBusHitraceChainBegin("TransCloseChannel");
     int32_t ret = TransCommonCloseChannel(sessionName, channelId, channelType);
-    if (IsTdcRecoveryTransLimit() && IsUdpRecoveryTransLimit()) {
-        UdpChannelFileTransRecoveryLimit(FILE_PRIORITY_BE);
-    }
+    SoftBusHitraceChainEnd();
     return ret;
 }
 
@@ -798,6 +832,7 @@ void TransChannelDeathCallback(const char *pkgName, int32_t pid)
     TransTdcChannelInfoDeathCallback(pkgName, pid);
     TransLaneMgrDeathCallback(pkgName, pid);
     TransUdpDeathCallback(pkgName, pid);
+    TransAuthDeathCallback(pkgName, pid);
 }
 
 int32_t TransGetNameByChanId(const TransInfo *info, char *pkgName, char *sessionName,
@@ -821,22 +856,20 @@ int32_t TransGetNameByChanId(const TransInfo *info, char *pkgName, char *session
 
 int32_t TransGetAndComparePid(pid_t pid, int32_t channelId, int32_t channelType)
 {
-    int32_t curChannelPid;
+    int32_t curChannelPid = 0;
     int32_t ret = SOFTBUS_OK;
-    if ((ChannelType)channelType == CHANNEL_TYPE_TCP_DIRECT) {
+    AppInfo appInfo;
+    ret = TransGetAppInfoByChanId(channelId, channelType, &appInfo);
+    (void)memset_s(appInfo.sessionKey, sizeof(appInfo.sessionKey), 0, sizeof(appInfo.sessionKey));
+    if (ret != SOFTBUS_OK && (ChannelType)channelType == CHANNEL_TYPE_TCP_DIRECT) {
         ret = TransGetPidByChanId(channelId, channelType, &curChannelPid);
-        if (ret != SOFTBUS_OK) {
-            TRANS_LOGE(TRANS_CTRL, "get pid by channelId failed, channelId=%{public}d", channelId);
-            return ret;
-        }
-    } else {
-        AppInfo appInfo;
-        ret = TransGetAppInfoByChanId(channelId, channelType, &appInfo);
-        (void)memset_s(appInfo.sessionKey, sizeof(appInfo.sessionKey), 0, sizeof(appInfo.sessionKey));
-        if (ret != SOFTBUS_OK) {
-            TRANS_LOGE(TRANS_CTRL, "get appInfo by channelId failed, channelId=%{public}d", channelId);
-            return ret;
-        }
+    }
+    if (ret != SOFTBUS_OK) {
+        TRANS_LOGE(TRANS_CTRL, "get appInfo by channelId failed, channelId=%{public}d, ret=%{public}d",
+            channelId, ret);
+        return ret;
+    }
+    if (curChannelPid == 0) {
         curChannelPid = appInfo.myData.pid;
     }
     if (pid != (pid_t)curChannelPid) {
@@ -920,45 +953,67 @@ int32_t CheckAuthChannelIsExit(ConnectOption *connInfo)
     return ret;
 }
 
+static int32_t ReadAccessInfo(uint8_t *buf, uint32_t len, int32_t *offset, AccessInfo *accessInfo)
+{
+    int32_t ret = ReadInt32FromBuf(buf, len, offset, &accessInfo->userId);
+    if (ret != SOFTBUS_OK) {
+        TRANS_LOGE(TRANS_CTRL, "get userId from buf failed.");
+        return ret;
+    }
+    ret = ReadUint64FromBuf(buf, len, offset, &accessInfo->localTokenId);
+    if (ret != SOFTBUS_OK) {
+        TRANS_LOGE(TRANS_CTRL, "get tokenId from buf failed.");
+        return ret;
+    }
+    return SOFTBUS_OK;
+}
+
 static int32_t GetChannelInfoFromBuf(
-    uint8_t *buf, int32_t *channelId, int32_t *channelType, int32_t *openResult, uint32_t len)
+    uint8_t *buf, uint32_t len, OpenChannelResult *info, AccessInfo *accessInfo)
 {
     int32_t offSet = 0;
     int32_t ret = SOFTBUS_OK;
-    ret = ReadInt32FromBuf(buf, len, &offSet, channelId);
+    ret = ReadInt32FromBuf(buf, len, &offSet, &info->channelId);
     if (ret != SOFTBUS_OK) {
         TRANS_LOGE(TRANS_CTRL, "get channelId from buf failed!");
         return ret;
     }
-    ret = ReadInt32FromBuf(buf, len, &offSet, channelType);
+    ret = ReadInt32FromBuf(buf, len, &offSet, &info->channelType);
     if (ret != SOFTBUS_OK) {
         TRANS_LOGE(TRANS_CTRL, "get channelId from buf failed!");
         return ret;
     }
-    ret = ReadInt32FromBuf(buf, len, &offSet, openResult);
+    ret = ReadInt32FromBuf(buf, len, &offSet, &info->openResult);
     if (ret != SOFTBUS_OK) {
         TRANS_LOGE(TRANS_CTRL, "get openResult from buf failed!");
         return ret;
+    }
+    if (info->channelType != CHANNEL_TYPE_AUTH) {
+        ret = ReadAccessInfo(buf, len, &offSet, accessInfo);
+        if (ret != SOFTBUS_OK) {
+            TRANS_LOGE(TRANS_CTRL, "get access info from buf failed!");
+            return ret;
+        }
     }
     return ret;
 }
 
 static int32_t GetUdpChannelInfoFromBuf(
-    uint8_t *buf, int32_t *channelId, int32_t *channelType, int32_t *openResult, int32_t *udpPort, uint32_t len)
+    uint8_t *buf, uint32_t len, int32_t *udpPort, OpenChannelResult *info, AccessInfo *accessInfo)
 {
     int32_t offSet = 0;
     int32_t ret = SOFTBUS_OK;
-    ret = ReadInt32FromBuf(buf, len, &offSet, channelId);
+    ret = ReadInt32FromBuf(buf, len, &offSet, &info->channelId);
     if (ret != SOFTBUS_OK) {
         TRANS_LOGE(TRANS_CTRL, "get channelId from buf failed!");
         return ret;
     }
-    ret = ReadInt32FromBuf(buf, len, &offSet, channelType);
+    ret = ReadInt32FromBuf(buf, len, &offSet, &info->channelType);
     if (ret != SOFTBUS_OK) {
         TRANS_LOGE(TRANS_CTRL, "get channelId from buf failed!");
         return ret;
     }
-    ret = ReadInt32FromBuf(buf, len, &offSet, openResult);
+    ret = ReadInt32FromBuf(buf, len, &offSet, &info->openResult);
     if (ret != SOFTBUS_OK) {
         TRANS_LOGE(TRANS_CTRL, "get openResult from buf failed!");
         return ret;
@@ -967,6 +1022,13 @@ static int32_t GetUdpChannelInfoFromBuf(
     if (ret != SOFTBUS_OK) {
         TRANS_LOGE(TRANS_CTRL, "get udpPort from buf failed!");
         return ret;
+    }
+    if (info->channelType != CHANNEL_TYPE_AUTH) {
+        ret = ReadAccessInfo(buf, len, &offSet, accessInfo);
+        if (ret != SOFTBUS_OK) {
+            TRANS_LOGE(TRANS_CTRL, "get access info from buf failed!");
+            return ret;
+        }
     }
     return ret;
 }
@@ -994,36 +1056,36 @@ static int32_t GetLimitChangeInfoFromBuf(
     return ret;
 }
 
-static int32_t TransReportChannelOpenedInfo(uint8_t *buf, uint32_t len)
+static int32_t TransReportChannelOpenedInfo(uint8_t *buf, uint32_t len, pid_t callingPid)
 {
-    int32_t channelId = 0;
-    int32_t channelType = 0;
-    int32_t openResult = 0;
+    OpenChannelResult info = { 0 };
+    AccessInfo accessInfo = { 0 };
     int32_t udpPort = 0;
     int32_t ret = SOFTBUS_OK;
-    if (len == sizeof(int32_t) * REPORT_UDP_INFO_SIZE) {
-        ret = GetUdpChannelInfoFromBuf(buf, &channelId, &channelType, &openResult, &udpPort, len);
+    if (len == sizeof(int32_t) * REPORT_UDP_INFO_SIZE ||
+        len == sizeof(int32_t) * (REPORT_UDP_INFO_SIZE + ACCESS_INFO_PARAM_NUM)) {
+        ret = GetUdpChannelInfoFromBuf(buf, len, &udpPort, &info, &accessInfo);
     } else {
-        ret = GetChannelInfoFromBuf(buf, &channelId, &channelType, &openResult, len);
+        ret = GetChannelInfoFromBuf(buf, len, &info, &accessInfo);
     }
     if (ret != SOFTBUS_OK) {
         return ret;
     }
-    switch (channelType) {
+    switch (info.channelType) {
         case CHANNEL_TYPE_PROXY:
-            ret = TransDealProxyChannelOpenResult(channelId, openResult);
+            ret = TransDealProxyChannelOpenResult(info.channelId, info.openResult, &accessInfo, callingPid);
             break;
         case CHANNEL_TYPE_TCP_DIRECT:
-            ret = TransDealTdcChannelOpenResult(channelId, openResult);
+            ret = TransDealTdcChannelOpenResult(info.channelId, info.openResult, &accessInfo, callingPid);
             break;
         case CHANNEL_TYPE_UDP:
-            ret = TransDealUdpChannelOpenResult(channelId, openResult, udpPort);
+            ret = TransDealUdpChannelOpenResult(info.channelId, info.openResult, udpPort, &accessInfo, callingPid);
             break;
         case CHANNEL_TYPE_AUTH:
-            ret = TransDealAuthChannelOpenResult(channelId, openResult);
+            ret = TransDealAuthChannelOpenResult(info.channelId, info.openResult, callingPid);
             break;
         default:
-            TRANS_LOGE(TRANS_CTRL, "channelType=%{public}d is error", channelType);
+            TRANS_LOGE(TRANS_CTRL, "channelType=%{public}d is error", info.channelType);
             ret = SOFTBUS_TRANS_INVALID_CHANNEL_TYPE;
     }
     if (ret != SOFTBUS_OK) {
@@ -1032,7 +1094,7 @@ static int32_t TransReportChannelOpenedInfo(uint8_t *buf, uint32_t len)
     return ret;
 }
 
-static void TransReportLimitChangeInfo(uint8_t *buf, uint32_t len)
+static void TransReportLimitChangeInfo(uint8_t *buf, uint32_t len, pid_t callingPid)
 {
     int32_t channelId = 0;
     uint8_t tos = 0;
@@ -1045,7 +1107,7 @@ static void TransReportLimitChangeInfo(uint8_t *buf, uint32_t len)
     if (limitChangeResult != SOFTBUS_OK) {
         TRANS_LOGE(TRANS_CTRL, "limitChangeResult is failed, limitChangeResult=%{public}d", limitChangeResult);
     }
-    ret = TransSetTos(channelId, tos);
+    ret = TransSetTos(channelId, tos, callingPid);
     if (ret != SOFTBUS_OK) {
         TRANS_LOGE(TRANS_CTRL, "Set limit change event failed, ret=%{public}d", ret);
     }
@@ -1073,7 +1135,7 @@ static int32_t GetCollabCheckResultFromBuf(uint8_t *buf,
     return ret;
 }
 
-static int32_t TransReportCheckCollabInfo(uint8_t *buf, uint32_t len)
+static int32_t TransReportCheckCollabInfo(uint8_t *buf, uint32_t len, pid_t callingPid)
 {
     int32_t channelId = 0;
     int32_t channelType = 0;
@@ -1084,13 +1146,13 @@ static int32_t TransReportCheckCollabInfo(uint8_t *buf, uint32_t len)
     }
     switch (channelType) {
         case CHANNEL_TYPE_PROXY:
-            ret = TransDealProxyCheckCollabResult(channelId, checkResult);
+            ret = TransDealProxyCheckCollabResult(channelId, checkResult, callingPid);
             break;
         case CHANNEL_TYPE_TCP_DIRECT:
-            ret = TransDealTdcCheckCollabResult(channelId, checkResult);
+            ret = TransDealTdcCheckCollabResult(channelId, checkResult, callingPid);
             break;
         case CHANNEL_TYPE_UDP:
-            ret = TransDealUdpCheckCollabResult(channelId, checkResult);
+            ret = TransDealUdpCheckCollabResult(channelId, checkResult, callingPid);
             break;
         default:
             TRANS_LOGE(TRANS_CTRL, "channelType=%{public}d is error.", channelType);
@@ -1099,22 +1161,68 @@ static int32_t TransReportCheckCollabInfo(uint8_t *buf, uint32_t len)
     return ret;
 }
 
+static int32_t TransSetAccessInfo(uint8_t *buf, uint32_t len, pid_t callingPid)
+{
+    char sessionName[SESSION_NAME_SIZE_MAX] = { 0 };
+    char extraAccessInfo[EXTRA_ACCESS_INFO_LEN_MAX] = { 0 };
+    int32_t offset = 0;
+    int32_t userId = -1;
+    uint64_t tokenId = 0;
+    int32_t ret = ReadInt32FromBuf(buf, len, &offset, &userId);
+    if (ret != SOFTBUS_OK) {
+        TRANS_LOGE(TRANS_CTRL, "get userId from buf failed.");
+        return ret;
+    }
+    ret = ReadUint64FromBuf(buf, len, &offset, &tokenId);
+    if (ret != SOFTBUS_OK) {
+        TRANS_LOGE(TRANS_CTRL, "get tokenId from buf failed.");
+        return ret;
+    }
+    ret = ReadStringFromBuf(buf, len, &offset, sessionName, SESSION_NAME_SIZE_MAX);
+    if (ret != SOFTBUS_OK) {
+        TRANS_LOGE(TRANS_CTRL, "get sessionName from buf failed.");
+        return ret;
+    }
+    ret = ReadStringFromBuf(buf, len, &offset, extraAccessInfo, EXTRA_ACCESS_INFO_LEN_MAX);
+    if (ret != SOFTBUS_OK) {
+        TRANS_LOGE(TRANS_CTRL, "get extraInfo from buf failed.");
+        return ret;
+    }
+    AccessInfo accessInfo = {
+        .userId = userId,
+        .localTokenId = tokenId,
+        .extraAccessInfo = extraAccessInfo,
+    };
+    ret = AddAccessInfoBySessionName(sessionName, &accessInfo, callingPid);
+    if (ret != SOFTBUS_OK) {
+        TRANS_LOGE(TRANS_CTRL, "add accessInfo by sessionName failed.");
+    }
+    return ret;
+}
+
 int32_t TransProcessInnerEvent(int32_t eventType, uint8_t *buf, uint32_t len)
 {
+    SoftBusHitraceChainBegin("TransProcessInnerEvent");
     if (buf == NULL) {
         TRANS_LOGE(TRANS_CTRL, "process inner event buf is null");
+        SoftBusHitraceChainEnd();
         return SOFTBUS_INVALID_PARAM;
     }
+
+    pid_t callingPid = TransGetCallingPid();
     int32_t ret = SOFTBUS_OK;
     switch (eventType) {
         case EVENT_TYPE_CHANNEL_OPENED:
-            ret = TransReportChannelOpenedInfo(buf, len);
+            ret = TransReportChannelOpenedInfo(buf, len, callingPid);
             break;
         case EVENT_TYPE_TRANS_LIMIT_CHANGE:
-            TransReportLimitChangeInfo(buf, len);
+            TransReportLimitChangeInfo(buf, len, callingPid);
             break;
         case EVENT_TYPE_COLLAB_CHECK:
-            ret = TransReportCheckCollabInfo(buf, len);
+            ret = TransReportCheckCollabInfo(buf, len, callingPid);
+            break;
+        case EVENT_TYPE_SET_ACCESS_INFO:
+            ret = TransSetAccessInfo(buf, len, callingPid);
             break;
         default:
             TRANS_LOGE(TRANS_CTRL, "eventType=%{public}d error", eventType);
@@ -1123,6 +1231,7 @@ int32_t TransProcessInnerEvent(int32_t eventType, uint8_t *buf, uint32_t len)
     if (ret != SOFTBUS_OK) {
         TRANS_LOGE(TRANS_CTRL, "report event failed, eventType=%{public}d", eventType);
     }
+    SoftBusHitraceChainEnd();
     return ret;
 }
 

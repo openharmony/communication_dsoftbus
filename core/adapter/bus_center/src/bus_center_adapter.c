@@ -33,17 +33,19 @@
 #include "softbus_feature_config.h"
 #include "softbus_utils.h"
 
-#define OHOS_API_VERSION    "const.ohos.apiversion"
-#define OHOS_BOOT_SN        "ohos.boot.sn"
-#define OS_VERSION          "const.ohos.fullname"      /* Read osversion by the string */
-#define DEVICE_VERSION      "const.build.ver.physical" /* Read deviceversion by the string */
-#define VERSION_SDK         "ro.build.version.sdk"
-#define UNDEFINED_VALUE     "undefined"
+#define OHOS_API_VERSION           "const.ohos.apiversion"
+#define OHOS_BOOT_SN               "ohos.boot.sn"
+#define OS_VERSION                 "const.ohos.fullname"                       /* Read osversion by the string */
+#define DEVICE_VERSION             "const.build.ver.physical"                  /* Read deviceversion by the string */
+#define PRODUCT_ID                 "const.distributed_collaboration.productId" /* Read product id by the string */
+#define MODEL_NAME                 "const.product.model" /* Read product model name by the string */
+#define VERSION_SDK                "ro.build.version.sdk"
+#define UNDEFINED_VALUE            "undefined"
 #define OHOS_DEVICE_SECURITY_LEVEL "const.security.device_security_level"
-#define OHOS_TYPE_UNKNOWN   (-1)
-#define API_VERSION_LEN     10
-#define VERSION_SDK_LEN     10
-#define SN_LEN              32
+#define OHOS_TYPE_UNKNOWN          (-1)
+#define API_VERSION_LEN            10
+#define VERSION_SDK_LEN            10
+#define SN_LEN                     32
 
 typedef struct {
     const char *inBuf;
@@ -59,6 +61,7 @@ static TypeInfo g_typeConvertMap[] = {
     {GET_TYPE_WATCH, TYPE_WATCH},
     {GET_TYPE_IPCAMERA, TYPE_IPCAMERA},
     {GET_TYPE_2IN1, TYPE_2IN1},
+    {GET_TYPE_GLASS, TYPE_GLASS},
 };
 
 static int32_t SoftBusGetBleMacAddr(char *macStr, uint32_t len)
@@ -196,7 +199,7 @@ int32_t GetCommonOsType(int32_t *value)
     int32_t ret = SoftBusGetOsType();
     *value = ret;
     if (*value == OHOS_TYPE_UNKNOWN) {
-        LNN_LOGE(LNN_STATE, "get invalid os type, osType = %{public}d", *value);
+        LNN_LOGE(LNN_STATE, "get invalid os type, osType=%{public}d", *value);
         return SOFTBUS_NETWORK_GET_INVALID_DEVICE_INFO;
     }
     return SOFTBUS_OK;
@@ -221,7 +224,7 @@ int32_t GetCommonOsVersion(char *value, uint32_t len)
             return SOFTBUS_MEM_ERR;
         }
     } else {
-        LNN_LOGE(LNN_STATE, "get invalid osVersion, osVersion= %{public}s", UNDEFINED_VALUE);
+        LNN_LOGE(LNN_STATE, "get invalid osVersion, osVersion=%{public}s", UNDEFINED_VALUE);
         SoftBusFree(osVersion);
         return SOFTBUS_NETWORK_GET_INVALID_DEVICE_INFO;
     }
@@ -248,11 +251,73 @@ int32_t GetCommonDeviceVersion(char *value, uint32_t len)
             return SOFTBUS_MEM_ERR;
         }
     } else {
-        LNN_LOGE(LNN_STATE, "get invalid deviceVersion, deviceVersion= %{public}s", UNDEFINED_VALUE);
+        LNN_LOGE(LNN_STATE, "get invalid deviceVersion, deviceVersion=%{public}s", UNDEFINED_VALUE);
         SoftBusFree(deviceVersion);
         return SOFTBUS_NETWORK_GET_INVALID_DEVICE_INFO;
     }
     SoftBusFree(deviceVersion);
+    return SOFTBUS_OK;
+}
+
+int32_t GetCommonDeviceProductId(char *value, uint32_t len)
+{
+    if (value == NULL) {
+        LNN_LOGE(LNN_STATE, "para error");
+        return SOFTBUS_INVALID_PARAM;
+    }
+    char *productId = (char *)SoftBusCalloc(PRODUCT_ID_SIZE_MAX);
+    if (productId == NULL) {
+        LNN_LOGE(LNN_STATE, "calloc productId failed!");
+        return SOFTBUS_MEM_ERR;
+    }
+    GetParameter(PRODUCT_ID, UNDEFINED_VALUE, productId, PRODUCT_ID_SIZE_MAX);
+    if (strcmp(productId, UNDEFINED_VALUE) != 0) {
+        if (strcpy_s(value, len, productId) != EOK) {
+            LNN_LOGE(LNN_STATE, "strcpy_s productId failed.");
+            SoftBusFree(productId);
+            return SOFTBUS_MEM_ERR;
+        }
+    } else {
+        LNN_LOGE(LNN_STATE, "get invalid productId, productId=%{public}s", UNDEFINED_VALUE);
+        SoftBusFree(productId);
+        return SOFTBUS_NETWORK_GET_INVALID_DEVICE_INFO;
+    }
+    char *anonyProductId = NULL;
+    Anonymize(productId, &anonyProductId);
+    LNN_LOGI(LNN_STATE, "get productId=%{public}s", AnonymizeWrapper(anonyProductId));
+    AnonymizeFree(anonyProductId);
+    SoftBusFree(productId);
+    return SOFTBUS_OK;
+}
+
+int32_t GetCommonDeviceModelName(char *value, uint32_t len)
+{
+    if (value == NULL) {
+        LNN_LOGE(LNN_STATE, "para error");
+        return SOFTBUS_INVALID_PARAM;
+    }
+    char *modelName = (char *)SoftBusCalloc(MODEL_NAME_SIZE_MAX);
+    if (modelName == NULL) {
+        LNN_LOGE(LNN_STATE, "calloc modelName failed!");
+        return SOFTBUS_MEM_ERR;
+    }
+    GetParameter(MODEL_NAME, UNDEFINED_VALUE, modelName, MODEL_NAME_SIZE_MAX);
+    if (strcmp(modelName, UNDEFINED_VALUE) != 0) {
+        if (strcpy_s(value, len, modelName) != EOK) {
+            LNN_LOGE(LNN_STATE, "strcpy_s modelName failed.");
+            SoftBusFree(modelName);
+            return SOFTBUS_MEM_ERR;
+        }
+    } else {
+        LNN_LOGE(LNN_STATE, "get invalid modelName, modelName=%{public}s", UNDEFINED_VALUE);
+        SoftBusFree(modelName);
+        return SOFTBUS_NETWORK_GET_INVALID_DEVICE_INFO;
+    }
+    char *anonyModelName = NULL;
+    Anonymize(modelName, &anonyModelName);
+    LNN_LOGI(LNN_STATE, "get modelName=%{public}s", AnonymizeWrapper(anonyModelName));
+    AnonymizeFree(anonyModelName);
+    SoftBusFree(modelName);
     return SOFTBUS_OK;
 }
 

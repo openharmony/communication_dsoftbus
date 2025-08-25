@@ -19,9 +19,11 @@
 #include "anonymizer.h"
 #include "bus_center_event.h"
 #include "bus_center_manager.h"
+#include "g_enhance_lnn_func_pack.h"
 #include "lnn_log.h"
 #include "lnn_net_builder.h"
 #include "lnn_network_manager.h"
+#include "lnn_node_info_struct.h"
 #include "lnn_physical_subnet_manager.h"
 #include "softbus_adapter_bt_common.h"
 #include "softbus_adapter_mem.h"
@@ -137,6 +139,7 @@ static int32_t DisableBleSubnet(LnnPhysicalSubnet *subnet)
         LNN_LOGE(LNN_BUILDER, "leave ble network fail, ret=%{public}d", ret);
         return ret;
     }
+    CheckNeedCloudSyncOfflinePacked(DISCOVERY_TYPE_BLE);
     return SOFTBUS_OK;
 }
 

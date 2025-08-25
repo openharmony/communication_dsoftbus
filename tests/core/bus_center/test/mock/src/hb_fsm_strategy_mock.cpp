@@ -132,9 +132,9 @@ int32_t LnnStopHeartbeatFsm(LnnHeartbeatFsm *hbFsm)
     return HeartBeatFSMStrategyInterfaceInstance()->LnnStopHeartbeatFsm(hbFsm);
 }
 
-void LnnRemoveSendEndMsg(LnnHeartbeatFsm *hbFsm, LnnHeartbeatType type, bool wakeupFlag, bool isRelay, bool *isRemoved)
+void LnnRemoveSendEndMsg(LnnHeartbeatFsm *hbFsm, LnnProcessSendOnceMsgPara *msgPara, bool wakeupFlag, bool *isRemoved)
 {
-    return HeartBeatFSMStrategyInterfaceInstance()->LnnRemoveSendEndMsg(hbFsm, type, wakeupFlag, isRelay, isRemoved);
+    return HeartBeatFSMStrategyInterfaceInstance()->LnnRemoveSendEndMsg(hbFsm, msgPara, wakeupFlag, isRemoved);
 }
 
 int32_t LnnPostNextSendOnceMsgToHbFsm(
@@ -181,6 +181,30 @@ uint32_t GenerateRandomNumForHb(uint32_t randMin, uint32_t randMax)
 bool LnnIsMultiDeviceOnline(void)
 {
     return HeartBeatFSMStrategyInterfaceInstance()->LnnIsMultiDeviceOnline();
+}
+int32_t SoftBusMutexLockInner(SoftBusMutex *mutex)
+{
+    return HeartBeatFSMStrategyInterfaceInstance()->SoftBusMutexLockInner(mutex);
+}
+
+int32_t LnnPostTransStateMsgToHbFsm(LnnHeartbeatFsm *hbFsm, LnnHeartbeatEventType evtType)
+{
+    return HeartBeatFSMStrategyInterfaceInstance()->LnnPostTransStateMsgToHbFsm(hbFsm, evtType);
+}
+
+int32_t LnnPostUpdateSendInfoMsgToHbFsm(LnnHeartbeatFsm *hbFsm, LnnHeartbeatUpdateInfoType type)
+{
+    return HeartBeatFSMStrategyInterfaceInstance()->LnnPostUpdateSendInfoMsgToHbFsm(hbFsm, type);
+}
+
+int32_t LnnGetLocalNumInfo(InfoKey key, int32_t *info)
+{
+    return HeartBeatFSMStrategyInterfaceInstance()->LnnGetLocalNumInfo(key, info);
+}
+
+bool LnnIsNeedInterceptBroadcast(bool disableGlass)
+{
+    return HeartBeatFSMStrategyInterfaceInstance()->LnnIsNeedInterceptBroadcast(disableGlass);
 }
 }
 } // namespace OHOS

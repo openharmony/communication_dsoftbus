@@ -16,9 +16,8 @@
 #ifndef LNN_COAP_DISCOVERY_IMPL_H
 #define LNN_COAP_DISCOVERY_IMPL_H
 
-#include <stdint.h>
-
 #include "form/lnn_event_form.h"
+#include "lnn_coap_discovery_impl_struct.h"
 #include "softbus_bus_center.h"
 
 #ifdef __cplusplus
@@ -26,10 +25,6 @@
 extern "C" {
 #endif
 #endif
-
-typedef struct {
-    void (*onDeviceFound)(const ConnectionAddr *addr, const LnnDfxDeviceInfoReport *infoReport);
-} LnnDiscoveryImplCallback;
 
 int32_t LnnInitCoapDiscovery(LnnDiscoveryImplCallback *callback);
 
@@ -40,14 +35,6 @@ int32_t LnnStopCoapPublish(void);
 int32_t LnnStartCoapDiscovery(void);
 
 int32_t LnnStopCoapDiscovery(void);
-
-void LnnDestroyCoapConnectList(void);
-
-void LnnCoapConnect(const char *ip);
-
-void LnnCoapConnectInit(void);
-
-void LnnCoapConnectDeinit(void);
 
 #ifdef __cplusplus
 #if __cplusplus

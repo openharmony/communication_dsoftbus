@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021-2024 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2025 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -18,7 +18,6 @@
 
 #include <map>
 #include "if_softbus_server.h"
-#include "iremote_object.h"
 #include "iremote_stub.h"
 #include "bus_center_manager.h"
 
@@ -32,6 +31,7 @@ public:
 private:
     int32_t GetNodeKeyInfoLen(int32_t key);
     int32_t SoftbusRegisterServiceInner(MessageParcel &data, MessageParcel &reply);
+    int32_t SoftbusRegisterBrProxyServiceInner(MessageParcel &data, MessageParcel &reply);
 
     int32_t CreateSessionServerInner(MessageParcel &data, MessageParcel &reply);
     int32_t RemoveSessionServerInner(MessageParcel &data, MessageParcel &reply);
@@ -72,12 +72,31 @@ private:
     int32_t DeactiveMetaNodeInner(MessageParcel &data, MessageParcel &reply);
     int32_t GetAllMetaNodeInfoInner(MessageParcel &data, MessageParcel &reply);
     int32_t ShiftLNNGearInner(MessageParcel &data, MessageParcel &reply);
+    int32_t TriggerRangeForMsdpInner(MessageParcel &data, MessageParcel &reply);
+    int32_t StopRangeForMsdpInner(MessageParcel &data, MessageParcel &reply);
+    int32_t RegRangeCbForMsdpInner(MessageParcel &data, MessageParcel &reply);
+    int32_t UnregRangeCbForMsdpInner(MessageParcel &data, MessageParcel &reply);
     int32_t SyncTrustedRelationShipInner(MessageParcel &data, MessageParcel &reply);
     int32_t GetSoftbusSpecObjectInner(MessageParcel &data, MessageParcel &reply);
     int32_t GetBusCenterExObjInner(MessageParcel &data, MessageParcel &reply);
+    int32_t SetDisplayNameInner(MessageParcel &data, MessageParcel &reply);
+    int32_t CreateServerInner(MessageParcel &data, MessageParcel &reply);
+    int32_t RemoveServerInner(MessageParcel &data, MessageParcel &reply);
+    int32_t ConnectInner(MessageParcel &data, MessageParcel &reply);
+    int32_t DisconnectInner(MessageParcel &data, MessageParcel &reply);
+    int32_t SendInner(MessageParcel &data, MessageParcel &reply);
+    int32_t GetPeerDeviceIdInner(MessageParcel &data, MessageParcel &reply);
+    int32_t OpenBrProxyInner(MessageParcel &data, MessageParcel &reply);
+    int32_t CloseBrProxyInner(MessageParcel &data, MessageParcel &reply);
+    int32_t SendBrProxyDataInner(MessageParcel &data, MessageParcel &reply);
+    int32_t SetBrProxyListenerStateInner(MessageParcel &data, MessageParcel &reply);
+    int32_t GetBrProxyChannelStateInner(MessageParcel &data, MessageParcel &reply);
+    int32_t RegisterPushHookInner(MessageParcel &data, MessageParcel &reply);
+    int32_t PermissionVerify(uint32_t code);
 
     void InitMemberFuncMap();
     void InitMemberPermissionMap();
+    void InitPackNameMap();
 
     using SoftbusServerStubFunc =
         int32_t (SoftBusServerStub::*)(MessageParcel &data, MessageParcel &reply);

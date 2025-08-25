@@ -66,13 +66,13 @@ HWTEST_F(AdaptorDsoftbusCryptTest, SoftBusBase64Encode002, TestSize.Level0)
     char dst[100];
     char src[] = "abcde";
     size_t olen = 10;
-    int32_t ret = SoftBusBase64Encode(NULL, sizeof(dst), &olen, (unsigned char *)src, sizeof(src));
+    int32_t ret = SoftBusBase64Encode(nullptr, sizeof(dst), &olen, (unsigned char *)src, sizeof(src));
     EXPECT_EQ(SOFTBUS_INVALID_PARAM, ret);
 
-    ret = SoftBusBase64Encode((unsigned char *)dst, sizeof(dst), NULL, (unsigned char *)src, sizeof(src));
+    ret = SoftBusBase64Encode((unsigned char *)dst, sizeof(dst), nullptr, (unsigned char *)src, sizeof(src));
     EXPECT_EQ(SOFTBUS_INVALID_PARAM, ret);
 
-    ret = SoftBusBase64Encode((unsigned char *)dst, sizeof(dst), &olen, NULL, sizeof(src));
+    ret = SoftBusBase64Encode((unsigned char *)dst, sizeof(dst), &olen, nullptr, sizeof(src));
     EXPECT_EQ(SOFTBUS_INVALID_PARAM, ret);
 }
 
@@ -124,13 +124,13 @@ HWTEST_F(AdaptorDsoftbusCryptTest, SoftBusBase64Decode002, TestSize.Level0)
     size_t olen = 10;
     size_t slen = 1;
 
-    int32_t ret = SoftBusBase64Decode(NULL, dlen, &olen, (unsigned char *)src, slen);
+    int32_t ret = SoftBusBase64Decode(nullptr, dlen, &olen, (unsigned char *)src, slen);
     EXPECT_EQ(SOFTBUS_INVALID_PARAM, ret);
 
-    ret = SoftBusBase64Decode((unsigned char *)dst, dlen, NULL, (unsigned char *)src, slen);
+    ret = SoftBusBase64Decode((unsigned char *)dst, dlen, nullptr, (unsigned char *)src, slen);
     EXPECT_EQ(SOFTBUS_INVALID_PARAM, ret);
 
-    ret = SoftBusBase64Decode((unsigned char *)dst, dlen, &olen, NULL, slen);
+    ret = SoftBusBase64Decode((unsigned char *)dst, dlen, &olen, nullptr, slen);
     EXPECT_EQ(SOFTBUS_INVALID_PARAM, ret);
 }
 
@@ -178,7 +178,7 @@ HWTEST_F(AdaptorDsoftbusCryptTest, SoftBusGenerateSessionKey001, TestSize.Level0
 HWTEST_F(AdaptorDsoftbusCryptTest, SoftBusGenerateSessionKey002, TestSize.Level0)
 {
     int32_t len = 10;
-    int32_t ret = SoftBusGenerateSessionKey(NULL, len);
+    int32_t ret = SoftBusGenerateSessionKey(nullptr, len);
     EXPECT_EQ(SOFTBUS_ENCRYPT_ERR, ret);
 }
 
@@ -220,10 +220,10 @@ HWTEST_F(AdaptorDsoftbusCryptTest, SoftBusGenerateStrHash002, TestSize.Level0)
 {
     char str[] = "abcde";
     char hash[100];
-    int32_t ret = SoftBusGenerateStrHash(NULL, sizeof(str), (unsigned char *)hash);
+    int32_t ret = SoftBusGenerateStrHash(nullptr, sizeof(str), (unsigned char *)hash);
     EXPECT_EQ(SOFTBUS_INVALID_PARAM, ret);
 
-    ret = SoftBusGenerateStrHash((unsigned char *)str, sizeof(str), NULL);
+    ret = SoftBusGenerateStrHash((unsigned char *)str, sizeof(str), nullptr);
     EXPECT_EQ(SOFTBUS_INVALID_PARAM, ret);
 
     uint32_t len = 0;
@@ -609,5 +609,80 @@ HWTEST_F(AdaptorDsoftbusCryptTest, SoftBusDecryptDataWithSeq004, TestSize.Level0
     ret = SoftBusDecryptDataWithSeq(
         &cipherKey, (unsigned char *)encryptData, encryptLen, (unsigned char *)decryptData, nullptr, seqNum);
     EXPECT_EQ(SOFTBUS_INVALID_PARAM, ret);
+}
+
+/*
+ * @tc.name: SoftBusEncryptDataByGcm128001
+ * @tc.desc: encrypt invalid param
+ * @tc.type: FUNC
+ * @tc.require: I5OHDE
+ */
+HWTEST_F(AdaptorDsoftbusCryptTest, SoftBusEncryptDataByGcm128001, TestSize.Level0)
+{
+    AesGcm128CipherKey cipherKey;
+    cipherKey.keyLen = SHORT_SESSION_KEY_LENGTH;
+    int32_t ret = SoftBusGenerateRandomArray(cipherKey.key, SHORT_SESSION_KEY_LENGTH);
+    EXPECT_EQ(SOFTBUS_OK, ret);
+
+    char input[SESSION_KEY_LENGTH];
+    uint32_t inLen = SESSION_KEY_LENGTH;
+    char encryptData[SESSION_KEY_LENGTH + SHORT_TAG_LEN];
+    uint32_t encryptLen = SESSION_KEY_LENGTH + SHORT_TAG_LEN;
+    ret = SoftBusEncryptDataByGcm128(nullptr, (unsigned char *)input, inLen, (unsigned char *)encryptData, &encryptLen);
+    EXPECT_EQ(SOFTBUS_INVALID_PARAM, ret);
+
+    ret = SoftBusEncryptDataByGcm128(&cipherKey, nullptr, inLen, (unsigned char *)encryptData, &encryptLen);
+    EXPECT_EQ(SOFTBUS_INVALID_PARAM, ret);
+
+    ret = SoftBusEncryptDataByGcm128(&cipherKey, (unsigned char *)input, 0, (unsigned char *)encryptData, &encryptLen);
+    EXPECT_EQ(SOFTBUS_INVALID_PARAM, ret);
+
+    ret = SoftBusEncryptDataByGcm128(&cipherKey, (unsigned char *)input, inLen, nullptr, &encryptLen);
+    EXPECT_EQ(SOFTBUS_INVALID_PARAM, ret);
+
+    ret = SoftBusEncryptDataByGcm128(&cipherKey, (unsigned char *)input, inLen, (unsigned char *)encryptData, nullptr);
+    EXPECT_EQ(SOFTBUS_INVALID_PARAM, ret);
+
+    ret = SoftBusEncryptDataByGcm128(&cipherKey, (unsigned char *)input, inLen,
+        (unsigned char *)encryptData, &encryptLen);
+    EXPECT_EQ(SOFTBUS_OK, ret);
+}
+
+/*
+ * @tc.name: SoftBusDecryptDataByGcm128002
+ * @tc.desc: decrypt invalid param
+ * @tc.type: FUNC
+ * @tc.require: I5OHDE
+ */
+HWTEST_F(AdaptorDsoftbusCryptTest, SoftBusDecryptDataByGcm128002, TestSize.Level0)
+{
+    AesGcm128CipherKey cipherKey;
+    cipherKey.keyLen = SHORT_SESSION_KEY_LENGTH;
+    int32_t ret = SoftBusGenerateRandomArray(cipherKey.key, SHORT_SESSION_KEY_LENGTH);
+    EXPECT_EQ(SOFTBUS_OK, ret);
+
+    char input[SESSION_KEY_LENGTH];
+    uint32_t inLen = SESSION_KEY_LENGTH;
+    char decryptData[SESSION_KEY_LENGTH];
+    uint32_t decryptLen = SESSION_KEY_LENGTH;
+
+    ret = SoftBusDecryptDataByGcm128(nullptr, (unsigned char *)input, inLen, (unsigned char *)decryptData, &decryptLen);
+    EXPECT_EQ(SOFTBUS_INVALID_PARAM, ret);
+
+    ret = SoftBusDecryptDataByGcm128(&cipherKey, nullptr, inLen, (unsigned char *)decryptData, &decryptLen);
+    EXPECT_EQ(SOFTBUS_INVALID_PARAM, ret);
+
+    ret = SoftBusDecryptDataByGcm128(&cipherKey, (unsigned char *)input, 0, (unsigned char *)decryptData, &decryptLen);
+    EXPECT_EQ(SOFTBUS_INVALID_PARAM, ret);
+
+    ret = SoftBusDecryptDataByGcm128(&cipherKey, (unsigned char *)input, inLen, nullptr, &decryptLen);
+    EXPECT_EQ(SOFTBUS_INVALID_PARAM, ret);
+
+    ret = SoftBusDecryptDataByGcm128(&cipherKey, (unsigned char *)input, inLen, (unsigned char *)decryptData, nullptr);
+    EXPECT_EQ(SOFTBUS_INVALID_PARAM, ret);
+
+    ret = SoftBusEncryptDataByGcm128(&cipherKey, (unsigned char *)input, inLen,
+        (unsigned char *)decryptData, &decryptLen);
+    EXPECT_EQ(SOFTBUS_OK, ret);
 }
 } // namespace OHOS

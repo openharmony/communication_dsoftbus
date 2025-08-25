@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2024 Huawei Device Co., Ltd.
+ * Copyright (c) 2024-2025 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -95,6 +95,21 @@ int32_t LnnAsyncCallbackDelayHelper(
     SoftBusLooper *looper, LnnAsyncCallbackFunc callback, void *para, uint64_t delayMillis)
 {
     return GetDataCloudSyncInterface()->LnnAsyncCallbackDelayHelper(looper, callback, para, delayMillis);
+}
+
+int32_t LnnGetLocalNodeInfoSafe(NodeInfo *info)
+{
+    return GetDataCloudSyncInterface()->LnnGetLocalNodeInfoSafe(info);
+}
+
+int32_t LnnPackCloudSyncAckSeq(cJSON *json, char *peerudid)
+{
+    return GetDataCloudSyncInterface()->LnnPackCloudSyncAckSeq(json, peerudid);
+}
+
+int32_t LnnFindDeviceUdidTrustedInfoFromDb(const char *udid)
+{
+    return GetDataCloudSyncInterface()->LnnFindDeviceUdidTrustedInfoFromDb(udid);
 }
 }
 } // namespace OHOS

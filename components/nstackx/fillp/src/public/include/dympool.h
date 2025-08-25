@@ -18,7 +18,6 @@
 
 #include "hlist.h"
 #include "queue.h"
-#include "spunge_mem.h"
 
 #ifdef __cplusplus
 extern "C" {

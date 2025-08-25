@@ -70,6 +70,7 @@ namespace OHOS {
         }
         int32_t ret = strncpy_s(callerId,
                                 callerIdLen, (const char *)data, size >= callerIdLen ? callerIdLen - 1 : size);
+        callerId[callerIdLen - 1] = '\0';
         if (ret != EOK) {
             return;
         }
@@ -94,7 +95,7 @@ namespace OHOS {
 extern "C" int32_t LLVMFuzzerTestOneInput(const uint8_t* data, size_t size)
 {
     /* Run your code on data */
-    SetAceessTokenPermission("shiftLnnGearFuzzTest");
+    SetAccessTokenPermission("shiftLnnGearFuzzTest");
     OHOS::DoSomethingInterestingWithMyAPI(data, size);
     return 0;
 }

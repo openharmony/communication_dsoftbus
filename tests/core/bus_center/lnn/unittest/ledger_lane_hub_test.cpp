@@ -141,12 +141,12 @@ static void ConstructWlan2P4GNode(void)
     g_nodeInfo[WLAN2P4G_NUM].authSeqNum = NODE1_AUTH_SEQ_NUM;
     ret = LnnSetDiscoveryType(&g_nodeInfo[WLAN2P4G_NUM], DISCOVERY_TYPE_BLE);
     EXPECT_TRUE(ret == SOFTBUS_OK);
-    ret = LnnSetProxyPort(&g_nodeInfo[WLAN2P4G_NUM], REMOTE_PROXY_PORT);
+    ret = LnnSetProxyPort(&g_nodeInfo[WLAN2P4G_NUM], REMOTE_PROXY_PORT, WLAN_IF);
     EXPECT_TRUE(ret == SOFTBUS_OK);
-    ret = LnnSetSessionPort(&g_nodeInfo[WLAN2P4G_NUM], REMOTE_SESSION_PORT);
+    ret = LnnSetSessionPort(&g_nodeInfo[WLAN2P4G_NUM], REMOTE_SESSION_PORT, WLAN_IF);
     EXPECT_TRUE(ret == SOFTBUS_OK);
-    LnnSetWiFiIp(&g_nodeInfo[WLAN2P4G_NUM], LOCAL_WLAN_IP);
-    ret = LnnSetAuthPort(&g_nodeInfo[WLAN2P4G_NUM], REMOTE_AUTH_PORT);
+    LnnSetWiFiIp(&g_nodeInfo[WLAN2P4G_NUM], LOCAL_WLAN_IP, WLAN_IF);
+    ret = LnnSetAuthPort(&g_nodeInfo[WLAN2P4G_NUM], REMOTE_AUTH_PORT, WLAN_IF);
     EXPECT_TRUE(ret == SOFTBUS_OK);
 }
 
@@ -174,11 +174,11 @@ static void ConstructBtLocalInfo(void)
 
 static void ConstructWiFiLocalInfo(bool is5G)
 {
-    int32_t ret = LnnSetLocalNumInfo(NUM_KEY_AUTH_PORT, LOCAL_AUTH_PORT);
+    int32_t ret = LnnSetLocalNumInfoByIfnameIdx(NUM_KEY_AUTH_PORT, LOCAL_AUTH_PORT, WLAN_IF);
     EXPECT_TRUE(ret == SOFTBUS_OK);
-    ret = LnnSetLocalNumInfo(NUM_KEY_PROXY_PORT, LOCAL_PROXY_PORT);
+    ret = LnnSetLocalNumInfoByIfnameIdx(NUM_KEY_PROXY_PORT, LOCAL_PROXY_PORT, WLAN_IF);
     EXPECT_TRUE(ret == SOFTBUS_OK);
-    ret = LnnSetLocalNumInfo(NUM_KEY_SESSION_PORT, LOCAL_SESSION_PORT);
+    ret = LnnSetLocalNumInfoByIfnameIdx(NUM_KEY_SESSION_PORT, LOCAL_SESSION_PORT, WLAN_IF);
     EXPECT_TRUE(ret == SOFTBUS_OK);
     if (is5G) {
         ret = LnnSetLocalNumInfo(NUM_KEY_NET_CAP, 1 << BIT_WIFI_5G);
@@ -186,7 +186,7 @@ static void ConstructWiFiLocalInfo(bool is5G)
         ret = LnnSetLocalNumInfo(NUM_KEY_NET_CAP, 1 << BIT_WIFI_24G);
     }
     EXPECT_TRUE(ret == SOFTBUS_OK);
-    ret = LnnSetLocalStrInfo(STRING_KEY_WLAN_IP, LOCAL_WLAN_IP);
+    ret = LnnSetLocalStrInfoByIfnameIdx(STRING_KEY_IP, LOCAL_WLAN_IP, WLAN_IF);
     EXPECT_TRUE(ret == SOFTBUS_OK);
 }
 
@@ -218,17 +218,17 @@ static void GetWiFiLocalInfo(void)
 {
     int32_t ret;
     int32_t port = 0;
-    ret = LnnGetLocalNumInfo(NUM_KEY_AUTH_PORT, &port);
+    ret = LnnGetLocalNumInfoByIfnameIdx(NUM_KEY_AUTH_PORT, &port, WLAN_IF);
     EXPECT_TRUE((ret == SOFTBUS_OK) && (port == LOCAL_AUTH_PORT));
-    ret = LnnGetLocalNumInfo(NUM_KEY_PROXY_PORT, &port);
+    ret = LnnGetLocalNumInfoByIfnameIdx(NUM_KEY_PROXY_PORT, &port, WLAN_IF);
     EXPECT_TRUE((ret == SOFTBUS_OK) && (port == LOCAL_PROXY_PORT));
-    ret = LnnGetLocalNumInfo(NUM_KEY_SESSION_PORT, &port);
+    ret = LnnGetLocalNumInfoByIfnameIdx(NUM_KEY_SESSION_PORT, &port, WLAN_IF);
     EXPECT_TRUE((ret == SOFTBUS_OK) && (port == LOCAL_SESSION_PORT));
 }
 
 /*
  * @tc.name: SOFTBUS_DUMP_PRINT_NET_CAPACITY_Test_001
- * @tc.desc: SoftbusDumpPrintNetCapacity test
+ * @tc.desc: SoftbusDumpPrintDynamicNetCap test
  * @tc.type: FUNC
  * @tc.require:
  */
@@ -239,14 +239,14 @@ HWTEST_F(LedgerLaneHubTest, SOFTBUS_DUMP_PRINT_NET_CAPACITY_Test_001, TestSize.L
 
     (void)memset_s(&nodeInfo, sizeof(NodeBasicInfo), 0, sizeof(NodeBasicInfo));
     (void)strncpy_s(nodeInfo.networkId, NETWORK_ID_BUF_LEN, NODE5_NETWORK_ID, strlen(NODE5_NETWORK_ID));
-    EXPECT_NE(SoftbusDumpPrintNetCapacity(fd, &nodeInfo), SOFTBUS_OK);
+    EXPECT_NE(SoftbusDumpPrintDynamicNetCap(fd, &nodeInfo), SOFTBUS_OK);
 
     ConstructCommonLocalInfo();
     ConstructWiFiLocalInfo(true);
 
     (void)memset_s(&nodeInfo, sizeof(NodeBasicInfo), 0, sizeof(NodeBasicInfo));
     (void)strncpy_s(nodeInfo.networkId, NETWORK_ID_BUF_LEN, LOCAL_NETWORKID, strlen(LOCAL_NETWORKID));
-    EXPECT_EQ(SoftbusDumpPrintNetCapacity(fd, &nodeInfo), SOFTBUS_OK);
+    EXPECT_EQ(SoftbusDumpPrintDynamicNetCap(fd, &nodeInfo), SOFTBUS_OK);
 }
 
 /*
@@ -283,7 +283,7 @@ HWTEST_F(LedgerLaneHubTest, LNN_SET_NODE_DATA_CHANGE_FLAG_Test_001, TestSize.Lev
     char *networkId = nullptr;
     char networkIdSecond[NETWORK_ID_BUF_LEN] = "1234";
     uint16_t dataChangeFlag = 0;
-    EXPECT_NE(LnnSetNodeDataChangeFlag(networkId, dataChangeFlag), SOFTBUS_OK);
+    EXPECT_EQ(LnnSetNodeDataChangeFlag(networkId, dataChangeFlag), SOFTBUS_INVALID_PARAM);
     EXPECT_EQ(LnnSetNodeDataChangeFlag(networkIdSecond, dataChangeFlag), SOFTBUS_NETWORK_INVALID_DEV_INFO);
 
     ConstructCommonLocalInfo();
@@ -355,7 +355,7 @@ HWTEST_F(LedgerLaneHubTest, LNN_GET_LOCAL_STR_INFO_Test_001, TestSize.Level1)
  */
 HWTEST_F(LedgerLaneHubTest, LNN_INIT_LOCAL_LEDGER_DELAY_Test_001, TestSize.Level1)
 {
-    EXPECT_TRUE(LnnInitLocalLedgerDelay() == SOFTBUS_OK);
+    EXPECT_EQ(LnnInitLocalLedgerDelay(), SOFTBUS_OK);
 }
 
 /*

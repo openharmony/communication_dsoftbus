@@ -18,6 +18,9 @@
 #include <securec.h>
 
 #include "auth_interface.h"
+#include "lnn_bus_center_ipc.h"
+#include "lnn_ohos_account_adapter.h"
+#include "softbus_access_token_adapter.h"
 #include "softbus_adapter_mem.h"
 #include "softbus_adapter_thread.h"
 #include "softbus_base_listener.h"
@@ -25,6 +28,7 @@
 #include "softbus_error_code.h"
 #include "trans_channel_manager.h"
 #include "trans_log.h"
+#include "trans_uk_manager.h"
 
 #define TRANS_SEQ_STEP 2
 
@@ -221,6 +225,40 @@ int32_t SetAppInfoById(int32_t channelId, const AppInfo *appInfo)
     return SOFTBUS_TRANS_SET_APP_INFO_FAILED;
 }
 
+int32_t UpdateAccessInfoById(int32_t channelId, const AccessInfo *accessInfo)
+{
+    if (accessInfo == NULL || accessInfo->localTokenId == 0) {
+        TRANS_LOGE(TRANS_CTRL, "invalid accessInfo.");
+        return SOFTBUS_INVALID_PARAM;
+    }
+    SessionConn *conn = NULL;
+    if (GetSessionConnLock() != SOFTBUS_OK) {
+        return SOFTBUS_LOCK_ERR;
+    }
+    uint32_t size = 0;
+    char accountId[ACCOUNT_UID_LEN_MAX] = { 0 };
+    int32_t ret = GetLocalAccountUidByUserId(accountId, ACCOUNT_UID_LEN_MAX, &size, accessInfo->userId);
+    if (ret != SOFTBUS_OK) {
+        TRANS_LOGE(TRANS_CTRL, "get current account failed. ret=%{public}d", ret);
+    }
+    LIST_FOR_EACH_ENTRY(conn, &g_sessionConnList->list, SessionConn, node) {
+        if (conn->channelId == channelId && conn->appInfo.myData.tokenType > ACCESS_TOKEN_TYPE_HAP) {
+            conn->appInfo.myData.userId = accessInfo->userId;
+            conn->appInfo.myData.tokenId = accessInfo->localTokenId;
+            if (memcpy_s(conn->appInfo.myData.accountId, ACCOUNT_UID_LEN_MAX, accountId, size) != EOK) {
+                TRANS_LOGE(TRANS_CTRL, "memcpy current account failed.");
+                ReleaseSessionConnLock();
+                return SOFTBUS_MEM_ERR;
+            }
+            ReleaseSessionConnLock();
+            return SOFTBUS_OK;
+        }
+    }
+    ReleaseSessionConnLock();
+    TRANS_LOGE(TRANS_CTRL, "can not get srv session conn info.");
+    return SOFTBUS_TRANS_SET_APP_INFO_FAILED;
+}
+
 int32_t GetAppInfoById(int32_t channelId, AppInfo *appInfo)
 {
     SessionConn *conn = NULL;
@@ -398,6 +436,7 @@ TcpChannelInfo *CreateTcpChannelInfo(const ChannelInfo *channel)
         return NULL;
     }
     tcpChannelInfo->callingTokenId = conn.appInfo.callingTokenId;
+    tcpChannelInfo->fdProtocol = conn.appInfo.fdProtocol;
     return tcpChannelInfo;
 }
 
@@ -480,6 +519,10 @@ int32_t TransDelTcpChannelInfoByChannelId(int32_t channelId)
     TcpChannelInfo *next = NULL;
     LIST_FOR_EACH_ENTRY_SAFE(item, next, &g_tcpChannelInfoList->list, TcpChannelInfo, node) {
         if (item->channelId == channelId) {
+            if (item->fdProtocol == LNN_PROTOCOL_MINTP && !item->isServer) {
+                TRANS_LOGI(TRANS_CTRL, "tran stop time sync");
+                (void)LnnIpcStopTimeSync(item->pkgName, item->peerDeviceId, item->pid);
+            }
             ListDelete(&item->node);
             TRANS_LOGI(TRANS_CTRL, "delete TcpChannelInfo success, channelId=%{public}d", item->channelId);
             SoftBusFree(item);
@@ -512,6 +555,10 @@ void TransTdcChannelInfoDeathCallback(const char *pkgName, int32_t pid)
     TcpChannelInfo *next = NULL;
     LIST_FOR_EACH_ENTRY_SAFE(item, next, &g_tcpChannelInfoList->list, TcpChannelInfo, node) {
         if ((strcmp(item->pkgName, pkgName) == 0) && (item->pid == pid)) {
+            if (item->fdProtocol == LNN_PROTOCOL_MINTP && !item->isServer) {
+                TRANS_LOGI(TRANS_CTRL, "tran stop time sync");
+                (void)LnnIpcStopTimeSync(item->pkgName, item->peerDeviceId, item->pid);
+            }
             ListDelete(&item->node);
             TRANS_LOGI(TRANS_CTRL, "delete TcpChannelInfo success, channelId=%{public}d", item->channelId);
             SoftBusFree(item);
@@ -678,6 +725,36 @@ int32_t TransGetPidByChanId(int32_t channelId, int32_t channelType, int32_t *pid
     (void)SoftBusMutexUnlock(&(g_tcpChannelInfoList->lock));
     TRANS_LOGE(TRANS_SVC, "can not find pid by channelId=%{public}d", channelId);
     return SOFTBUS_TRANS_INVALID_CHANNEL_ID;
+}
+
+int32_t TransGetPkgNameByChanId(int32_t channelId, char *pkgName)
+{
+    if (pkgName == NULL) {
+        TRANS_LOGE(TRANS_CTRL, "pkgName is null");
+        return SOFTBUS_INVALID_PARAM;
+    }
+
+    if (g_tcpChannelInfoList == NULL) {
+        TRANS_LOGE(TRANS_CTRL, "tcp channel info list hasn't init.");
+        return SOFTBUS_INVALID_PARAM;
+    }
+
+    if (SoftBusMutexLock(&(g_tcpChannelInfoList->lock)) != SOFTBUS_OK) {
+        TRANS_LOGE(TRANS_SVC, "lock failed");
+        return SOFTBUS_LOCK_ERR;
+    }
+
+    TcpChannelInfo *info = NULL;
+    LIST_FOR_EACH_ENTRY(info, &(g_tcpChannelInfoList->list), TcpChannelInfo, node) {
+        if (info->channelId == channelId) {
+            (void)memcpy_s(pkgName, PKG_NAME_SIZE_MAX, info->pkgName, PKG_NAME_SIZE_MAX);
+            (void)SoftBusMutexUnlock(&(g_tcpChannelInfoList->lock));
+            return SOFTBUS_OK;
+        }
+    }
+    (void)SoftBusMutexUnlock(&(g_tcpChannelInfoList->lock));
+    TRANS_LOGE(TRANS_SVC, "can not find pkgName by channelId=%{public}d", channelId);
+    return SOFTBUS_NOT_FIND;
 }
 
 int32_t TransTdcUpdateReplyCnt(int32_t channelId)

@@ -30,18 +30,8 @@
 namespace OHOS::SoftBus {
 class WifiDirectIpManager {
 public:
-    static WifiDirectIpManager& GetInstance()
-    {
-        static WifiDirectIpManager instance;
-        {
-            std::lock_guard lock(clearMutex_);
-            if (!hasClear_) {
-                ClearAllIpv4();
-                hasClear_ = true;
-            }
-        }
-        return instance;
-    }
+    static WifiDirectIpManager& GetInstance();
+
     static void Init();
 
     std::string ApplyIpv6(const std::string &mac);
@@ -53,6 +43,9 @@ public:
     void ReleaseIpv4(
         const std::string &interface, const Ipv4Info &local, const Ipv4Info &remote, const std::string &remoteMac);
     static void ClearAllIpv4();
+    void ConfigStaticIpv6(const std::string &interface, const std::string &ipv6Addr, const std::string &macAddr);
+    void ReleaseStaticIpv6(const std::string &interface, const std::string &ipv6Addr, const std::string &macAddr);
+    static std::string RemoveIpv6Suffix(const std::string &ipv6Addr);
 
     void Lock()
     {
@@ -80,7 +73,6 @@ public:
         const std::string &interface, const std::string &ipString, const std::string &macString);
     static int32_t DeleteStaticArp(
         const std::string &interface, const std::string &ipString, const std::string &macString);
-
 private:
     class Initiator {
     public:
@@ -89,7 +81,6 @@ private:
             WifiDirectInitiator::GetInstance().Add(WifiDirectIpManager::Init);
         }
     };
-
     std::recursive_mutex mutex_;
     static inline Initiator initiator_;
 

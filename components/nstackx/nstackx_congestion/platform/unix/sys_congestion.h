@@ -16,7 +16,6 @@
 #ifndef SYS_CONGESTION_H
 #define SYS_CONGESTION_H
 
-#include "nstackx_common_header.h"
 #include "nstackx_congestion.h"
 
 int32_t GetWifiInfo(const char *devName, WifiStationInfo *wifiStationInfo);

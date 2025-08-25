@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021-2024 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2025 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -23,6 +23,7 @@
 #include "softbus_def.h"
 #include "softbus_error_code.h"
 #include "legacy/softbus_hisysevt_transreporter.h"
+#include "softbus_access_token_adapter.h"
 #include "softbus_proxychannel_callback.h"
 #include "softbus_proxychannel_manager.h"
 #include "softbus_proxychannel_network.h"
@@ -62,7 +63,9 @@ static void GetProxyChannelInfo(int32_t channelId, const AppInfo *appInfo, bool 
     info->peerSessionName = (char *)appInfo->peerData.sessionName;
     info->peerPid = appInfo->peerData.pid;
     info->peerUid = appInfo->peerData.uid;
-    info->sessionKey = (char *)appInfo->sessionKey;
+    info->sessionKey = GetCapabilityBit(appInfo->channelCapability, TRANS_CHANNEL_SINK_GENERATE_KEY_OFFSET) ?
+        (char *)appInfo->sinkSessionKey :
+        (char *)appInfo->sessionKey;
     info->keyLen = SESSION_KEY_LENGTH;
     info->fileEncrypt = appInfo->encrypt;
     info->algorithm = appInfo->algorithm;
@@ -81,6 +84,21 @@ static void GetProxyChannelInfo(int32_t channelId, const AppInfo *appInfo, bool 
     info->linkType = appInfo->linkType;
     info->connectType = appInfo->connectType;
     info->osType = appInfo->osType;
+    info->isD2D = appInfo->isD2D;
+    if (appInfo->isD2D) {
+        info->pagingId = appInfo->pagingId;
+        info->businessFlag = appInfo->myData.businessFlag;
+        info->deviceTypeId = appInfo->peerData.devTypeId;
+        info->pagingNonce = (char *)appInfo->pagingNonce;
+        info->pagingSessionkey = (char *)appInfo->pagingSessionkey;
+        if (appInfo->peerData.dataLen > 0) {
+            info->dataLen = appInfo->peerData.dataLen;
+            info->extraData = (char *)appInfo->peerData.extraData;
+        }
+        if (info->isServer) {
+            info->pagingAccountId = (char *)appInfo->peerData.callerAccountId;
+        }
+    }
     TransGetLaneIdByChannelId(channelId, &info->laneId);
 }
 
@@ -91,6 +109,11 @@ static int32_t NotifyNormalChannelOpened(int32_t channelId, const AppInfo *appIn
     char buf[NETWORK_ID_BUF_LEN] = {0};
 
     GetProxyChannelInfo(channelId, appInfo, isServer, &info);
+    if (appInfo->isD2D) {
+        info.peerDeviceId = (char *)appInfo->peerData.deviceId;
+        return TransProxyOnChannelOpened(appInfo->myData.pkgName, appInfo->myData.pid,
+            appInfo->myData.sessionName, &info);
+    }
     if (appInfo->appType != APP_TYPE_AUTH) {
         ret = LnnGetNetworkIdByUuid(appInfo->peerData.deviceId, buf, NETWORK_ID_BUF_LEN);
         if (ret != SOFTBUS_OK) {
@@ -104,10 +127,17 @@ static int32_t NotifyNormalChannelOpened(int32_t channelId, const AppInfo *appIn
         if (LnnGetOsTypeByNetworkId(buf, &(info.osType)) != SOFTBUS_OK) {
             TRANS_LOGE(TRANS_CTRL, "get remote osType fail, channelId=%{public}d", channelId);
         }
+        info.tokenType = appInfo->myData.tokenType;
+        if (isServer && appInfo->myData.tokenType > ACCESS_TOKEN_TYPE_HAP) {
+            info.peerUserId = appInfo->peerData.userId;
+            info.peerTokenId = appInfo->peerData.tokenId;
+            info.peerExtraAccessInfo = (char *)appInfo->extraAccessInfo;
+        }
     } else {
         info.peerDeviceId = (char *)appInfo->peerData.deviceId;
     }
-
+    info.isSupportTlv = GetCapabilityBit(appInfo->channelCapability, TRANS_CAPABILITY_TLV_OFFSET);
+    GetOsTypeByNetworkId(info.peerDeviceId, &info.osType);
     ret = TransProxyOnChannelOpened(appInfo->myData.pkgName, appInfo->myData.pid, appInfo->myData.sessionName, &info);
     TRANS_LOGI(TRANS_CTRL, "proxy channel open, channelId=%{public}d, ret=%{public}d", channelId, ret);
     return ret;
@@ -222,7 +252,6 @@ int32_t OnProxyChannelBind(int32_t channelId, const AppInfo *appInfo)
         TRANS_LOGE(TRANS_CTRL, "proxy channel bind app info invalid channelId=%{public}d", channelId);
         return SOFTBUS_INVALID_PARAM;
     }
-
     switch (appInfo->appType) {
         case APP_TYPE_NORMAL:
         case APP_TYPE_AUTH:
@@ -372,6 +401,7 @@ static int32_t TransGetConnectOption(const char *sessionName, const char *peerNe
     option.requestInfo.trans.transType = LANE_T_MSG;
     option.requestInfo.trans.expectedBw = 0;
     option.requestInfo.trans.acceptableProtocols = LNN_PROTOCOL_ALL ^ LNN_PROTOCOL_NIP;
+    option.requestInfo.trans.isInnerCalled = true;
     if (memcpy_s(option.requestInfo.trans.networkId, NETWORK_ID_BUF_LEN,
         peerNetworkId, NETWORK_ID_BUF_LEN) != EOK) {
         TRANS_LOGE(TRANS_CTRL, "memcpy networkId failed.");
@@ -418,7 +448,7 @@ int32_t TransOpenNetWorkingChannel(
     if (TransGetConnectOption(sessionName, peerNetworkId, preferred, channelId) != SOFTBUS_OK) {
         ReleaseProxyChannelId(channelId);
         TRANS_LOGE(TRANS_CTRL, "networking get connect option fail");
-        return channelId;
+        return INVALID_CHANNEL_ID;
     }
     return channelId;
 }
@@ -433,7 +463,6 @@ int32_t TransSendNetworkingMessage(int32_t channelId, const char *data, uint32_t
     }
 
     int32_t ret = TransProxyGetSendMsgChanInfo(channelId, info);
-    (void)memset_s(info->appInfo.sessionKey, sizeof(info->appInfo.sessionKey), 0, sizeof(info->appInfo.sessionKey));
     if (ret != SOFTBUS_OK) {
         TRANS_LOGE(TRANS_MSG, "get proxy channelId failed. channelId=%{public}d", channelId);
         SoftBusFree(info);
@@ -453,6 +482,7 @@ int32_t TransSendNetworkingMessage(int32_t channelId, const char *data, uint32_t
     }
 
     ret = TransProxySendInnerMessage(info, (char *)data, dataLen, priority);
+    (void)memset_s(info->appInfo.sessionKey, sizeof(info->appInfo.sessionKey), 0, sizeof(info->appInfo.sessionKey));
     SoftBusFree(info);
     return ret;
 }

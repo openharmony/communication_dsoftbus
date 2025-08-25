@@ -16,7 +16,6 @@
 #ifndef TRANS_SERVER_PROXY_H
 #define TRANS_SERVER_PROXY_H
 
-#include "stdint.h"
 #include "softbus_common.h"
 #include "softbus_trans_def.h"
 
@@ -26,8 +25,9 @@ extern "C" {
 
 int32_t TransServerProxyInit(void);
 void TransServerProxyDeInit(void);
-int32_t ServerIpcCreateSessionServer(const char *pkgName, const char *sessionName);
-int32_t ServerIpcRemoveSessionServer(const char *pkgName, const char *sessionName);
+void TransServerProxyClear(void);
+int32_t ServerIpcCreateSessionServer(const char *pkgName, const char *sessionName, uint64_t timestamp);
+int32_t ServerIpcRemoveSessionServer(const char *pkgName, const char *sessionName, uint64_t timestamp);
 int32_t ServerIpcOpenSession(const SessionParam *param, TransInfo *info);
 int32_t ServerIpcOpenAuthSession(const char *sessionName, const ConnectionAddr *addrInfo);
 int32_t ServerIpcNotifyAuthSuccess(int32_t channelId, int32_t channelType);
@@ -44,6 +44,12 @@ int32_t ServerIpcRippleStats(int32_t channelId, int32_t channelType, const Traff
 int32_t ServerIpcEvaluateQos(const char *peerNetworkId, TransDataType dataType, const QosTV *qos, uint32_t qosCount);
 int32_t ServerIpcProcessInnerEvent(int32_t eventType, uint8_t *buf, uint32_t len);
 int32_t ServerIpcPrivilegeCloseChannel(uint64_t tokenId, int32_t pid, const char *peerNetworkId);
+int32_t ServerIpcOpenBrProxy(const char *brMac, const char *uuid);
+int32_t ServerIpcCloseBrProxy(int32_t channelId);
+int32_t ServerIpcSendBrProxyData(int32_t channelId, char* data, uint32_t dataLen);
+int32_t ServerIpcSetListenerState(int32_t channelId, int32_t type, bool CbEnabled);
+int32_t ServerIpcIsProxyChannelEnabled(int32_t uid, bool *isEnable);
+int32_t ServerIpcRegisterPushHook();
 #ifdef __cplusplus
 }
 #endif

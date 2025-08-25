@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2022-2024 Huawei Device Co., Ltd.
+ * Copyright (c) 2022-2025 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -128,11 +128,18 @@ int32_t ClinetTransProxyFileManagerInit(void)
 
     if (!atomic_load_explicit(&(g_recvFileInfoLock.lockInitFlag), memory_order_acquire)) {
         int32_t ret = SoftBusMutexInit(&g_recvFileInfoLock.lock, NULL);
-        TRANS_CHECK_AND_RETURN_RET_LOGE(ret == SOFTBUS_OK, ret, TRANS_FILE, "recvfile mutex init fail!");
+        if (ret != SOFTBUS_OK) {
+            (void)SoftBusMutexDestroy(&g_sendFileInfoLock.lock);
+            return ret;
+        }
         atomic_store_explicit(&(g_recvFileInfoLock.lockInitFlag), true, memory_order_release);
     }
     int32_t ret = InitPendingPacket();
-    TRANS_CHECK_AND_RETURN_RET_LOGE(ret == SOFTBUS_OK, ret, TRANS_FILE, "InitPendingPacket fail!");
+    if (ret != SOFTBUS_OK) {
+        (void)SoftBusMutexDestroy(&g_sendFileInfoLock.lock);
+        (void)SoftBusMutexDestroy(&g_recvFileInfoLock.lock);
+        return ret;
+    }
 
     if (RegisterTimeoutCallback(SOFTBUS_PROXY_SENDFILE_TIMER_FUN, ProxyFileTransTimerProc) != SOFTBUS_OK) {
         TRANS_LOGE(TRANS_FILE, "register sendfile timer fail");
@@ -142,7 +149,9 @@ int32_t ClinetTransProxyFileManagerInit(void)
 
 void ClinetTransProxyFileManagerDeinit(void)
 {
-    (void)RegisterTimeoutCallback(SOFTBUS_PROXY_SENDFILE_TIMER_FUN, NULL);
+    if (UnRegisterTimeoutCallback(SOFTBUS_PROXY_SENDFILE_TIMER_FUN) != SOFTBUS_OK) {
+        TRANS_LOGE(TRANS_FILE, "unregister proxy sendfile timer failed");
+    }
     if (SoftBusMutexDestroy(&g_sendFileInfoLock.lock) != SOFTBUS_OK) {
         TRANS_LOGE(TRANS_FILE, "destroy send file lock fail");
     }
@@ -338,7 +347,7 @@ static int32_t UnpackFileTransStartInfo(
             fileNameData = fileFrame->fileData + FRAME_DATA_SEQ_OFFSET;
         }
     }
-    if (fileNameLen > MAX_FILE_PATH_NAME_LEN) {
+    if (fileNameLen >= MAX_FILE_PATH_NAME_LEN) {
         TRANS_LOGE(TRANS_FILE, "start info fail fileNameLen=%{public}" PRIu64, fileNameLen);
         return SOFTBUS_INVALID_PARAM;
     }
@@ -943,7 +952,7 @@ static int32_t HandleFileSendingProcess(
     SendListenerInfo *sendInfo = NULL;
     int32_t ret = SOFTBUS_FILE_ERR;
     do {
-        int32_t osType;
+        int32_t osType = OHOS_TYPE_UNKNOWN;
         (void)ClientTransProxyGetOsTypeByChannelId(channelId, &osType);
         ret = CreateSendListenerInfo(&sendInfo, channelId, osType);
         if (ret != SOFTBUS_OK || sendInfo == NULL) {
@@ -1899,7 +1908,7 @@ int32_t ProcessRecvFileFrameData(int32_t sessionId, int32_t channelId, const Fil
         TRANS_LOGE(TRANS_FILE, "invalid param.");
         return SOFTBUS_INVALID_PARAM;
     }
-    int32_t osType;
+    int32_t osType = OHOS_TYPE_UNKNOWN;
     uint32_t packetSize;
     int32_t ret = ClientTransProxyGetOsTypeByChannelId(channelId, &osType);
     ret = CheckFrameLength(channelId, oneFrame->frameLength, osType, &packetSize);

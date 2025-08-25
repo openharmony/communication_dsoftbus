@@ -83,7 +83,7 @@ HWTEST_F(BusCenterServerProxyStandardTest, CreateSessionServer_TEST_001, TestSiz
     const char *sessionName = "111";
     const sptr<IRemoteObject> impl = nullptr;
     BusCenterServerProxy servertest(impl);
-    int32_t ret = servertest.CreateSessionServer(pkgName, sessionName);
+    int32_t ret = servertest.CreateSessionServer(pkgName, sessionName, 1);
     EXPECT_EQ(ret, SOFTBUS_OK);
 }
 
@@ -99,7 +99,7 @@ HWTEST_F(BusCenterServerProxyStandardTest, RemoveSessionServer_TEST_001, TestSiz
     const char *sessionName = "111";
     const sptr<IRemoteObject> impl = nullptr;
     BusCenterServerProxy servertest(impl);
-    int32_t ret = servertest.RemoveSessionServer(pkgName, sessionName);
+    int32_t ret = servertest.RemoveSessionServer(pkgName, sessionName, 1);
     EXPECT_EQ(ret, SOFTBUS_OK);
 }
 
@@ -284,7 +284,7 @@ HWTEST_F(BusCenterServerProxyStandardTest, JoinLNN_TEST_001, TestSize.Level1)
     uint32_t addrTypeLen = ADDRTYPE_LEN;
     const sptr<IRemoteObject> impl = nullptr;
     BusCenterServerProxy servertest(impl);
-    int32_t ret = servertest.JoinLNN(pkgName, (void *)addr, addrTypeLen);
+    int32_t ret = servertest.JoinLNN(pkgName, (void *)addr, addrTypeLen, false);
     EXPECT_EQ(ret, SOFTBUS_INVALID_PARAM);
 }
 
@@ -300,7 +300,7 @@ HWTEST_F(BusCenterServerProxyStandardTest, JoinLNN_TEST_002, TestSize.Level1)
     uint32_t addrTypeLen = ADDRTYPE_LEN;
     const sptr<IRemoteObject> impl = nullptr;
     BusCenterServerProxy servertest(impl);
-    int32_t ret = servertest.JoinLNN(pkgName, nullptr, addrTypeLen);
+    int32_t ret = servertest.JoinLNN(pkgName, nullptr, addrTypeLen, false);
     EXPECT_EQ(ret, SOFTBUS_INVALID_PARAM);
 }
 
@@ -537,6 +537,51 @@ HWTEST_F(BusCenterServerProxyStandardTest, SetDataLevel_TEST_001, TestSize.Level
     const sptr<IRemoteObject> impl = nullptr;
     BusCenterServerProxy servertest(impl);
     int32_t ret = servertest.SetDataLevel(dataLevel);
+    EXPECT_EQ(ret, SOFTBUS_INVALID_PARAM);
+}
+
+/*
+ * @tc.name: RegBleRangeCb_TEST_001
+ * @tc.desc: RegisterRangeCallbackForMsdp return value is equal to SOFTBUS_INVALID_PARAM
+ * @tc.type: FUNC
+ * @tc.require:
+ */
+HWTEST_F(BusCenterServerProxyStandardTest, RegBleRangeCb_TEST_001, TestSize.Level1)
+{
+    const char *pkgName = nullptr;
+    const sptr<IRemoteObject> impl = nullptr;
+    BusCenterServerProxy servertest(impl);
+    int32_t ret = servertest.RegisterRangeCallbackForMsdp(pkgName);
+    EXPECT_EQ(ret, SOFTBUS_INVALID_PARAM);
+}
+
+/*
+ * @tc.name: UnregBleRangeCb_TEST_001
+ * @tc.desc: UnregisterRangeCallbackForMsdp return value is equal to SOFTBUS_INVALID_PARAM
+ * @tc.type: FUNC
+ * @tc.require:
+ */
+HWTEST_F(BusCenterServerProxyStandardTest, UnregBleRangeCb_TEST_001, TestSize.Level1)
+{
+    const char *pkgName = nullptr;
+    const sptr<IRemoteObject> impl = nullptr;
+    BusCenterServerProxy servertest(impl);
+    int32_t ret = servertest.UnregisterRangeCallbackForMsdp(pkgName);
+    EXPECT_EQ(ret, SOFTBUS_INVALID_PARAM);
+}
+
+/*
+ * @tc.name: TriggerHbForMeasureDistance_TEST_001
+ * @tc.desc: TriggerRangeForMsdp return value is equal to SOFTBUS_INVALID_PARAM
+ * @tc.type: FUNC
+ * @tc.require:
+ */
+HWTEST_F(BusCenterServerProxyStandardTest, TriggerHbForMeasureDistance_TEST_001, TestSize.Level1)
+{
+    const RangeConfig *config = nullptr;
+    const sptr<IRemoteObject> impl = nullptr;
+    BusCenterServerProxy servertest(impl);
+    int32_t ret = servertest.TriggerRangeForMsdp(nullptr, config);
     EXPECT_EQ(ret, SOFTBUS_INVALID_PARAM);
 }
 

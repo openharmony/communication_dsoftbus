@@ -21,6 +21,7 @@
 #include "ohos_account_kits.h"
 #include "os_account_manager.h"
 #include "securec.h"
+#include "softbus_adapter_mem.h"
 #include "softbus_error_code.h"
 #include "auth_hichain_adapter.h"
 
@@ -62,6 +63,48 @@ int32_t GetOsAccountId(char *id, uint32_t idLen, uint32_t *len)
     }
     if (memcpy_s(id, idLen, accountInfo.second.name_.c_str(), *len) != EOK) {
         LNN_LOGE(LNN_STATE, "memcpy_s uid failed, idLen=%{public}d, len=%{public}d", idLen, *len);
+        return SOFTBUS_MEM_ERR;
+    }
+    return SOFTBUS_OK;
+}
+
+int32_t GetOsAccountIdByUserId(int32_t userId, char **id, uint32_t *len)
+{
+    if (id == nullptr || len == nullptr || userId <= 0) {
+        LNN_LOGE(LNN_STATE, "invalid parameter");
+        return SOFTBUS_INVALID_PARAM;
+    }
+
+    auto accountInfo = OHOS::AccountSA::OhosAccountKits::GetInstance().QueryOsAccountDistributedInfo(userId);
+    if (!accountInfo.first) {
+        LNN_LOGE(LNN_STATE, "QueryOhosAccountInfo failed");
+        return SOFTBUS_NETWORK_GET_ACCOUNT_INFO_FAILED;
+    }
+
+    if (accountInfo.second.name_.empty()) {
+        LNN_LOGE(LNN_STATE, "accountInfo uid is empty");
+        return SOFTBUS_NETWORK_GET_ACCOUNT_INFO_FAILED;
+    }
+
+    *len = accountInfo.second.name_.length();
+    char *anonyUid = nullptr;
+    Anonymize(accountInfo.second.name_.c_str(), &anonyUid);
+    LNN_LOGI(LNN_STATE, "uid=%{public}s, len=%{public}d", AnonymizeWrapper(anonyUid), *len);
+    AnonymizeFree(anonyUid);
+
+    if (memcmp(DEFAULT_ACCOUNT_NAME, accountInfo.second.name_.c_str(), *len) == 0) {
+        LNN_LOGD(LNN_STATE, "not login account");
+        return SOFTBUS_MEM_ERR;
+    }
+    *id = (char *)SoftBusCalloc(*len);
+    if (*id == nullptr) {
+        LNN_LOGE(LNN_STATE, "malloc fail");
+        return SOFTBUS_MEM_ERR;
+    }
+    if (memcpy_s(*id, *len, accountInfo.second.name_.c_str(), *len) != EOK) {
+        LNN_LOGE(LNN_STATE, "memcpy_s uid failed, len=%{public}d", *len);
+        SoftBusFree(*id);
+        *id = nullptr;
         return SOFTBUS_MEM_ERR;
     }
     return SOFTBUS_OK;
@@ -166,6 +209,36 @@ int32_t GetOsAccountUid(char *id, uint32_t idLen, uint32_t *len)
     }
     if (memcpy_s(id, idLen, accountInfo.second.uid_.c_str(), *len) != EOK) {
         LNN_LOGE(LNN_STATE, "memcpy_s uid failed, idLen=%{public}d, len=%{public}d", idLen, *len);
+        return SOFTBUS_MEM_ERR;
+    }
+    return SOFTBUS_OK;
+}
+
+int32_t GetOsAccountUidByUserId(char *id, uint32_t idLen, uint32_t *len, int32_t userId)
+{
+    if (id == nullptr || len == nullptr || idLen == 0 || userId <= 0) {
+        LNN_LOGE(LNN_STATE, "invalid parameter");
+        return SOFTBUS_INVALID_PARAM;
+    }
+    OHOS::AccountSA::OhosAccountInfo accountInfo;
+    int32_t ret = OHOS::AccountSA::OhosAccountKits::GetInstance().GetOsAccountDistributedInfo(userId, accountInfo);
+    if (ret != OHOS::ERR_OK) {
+        LNN_LOGE(LNN_STATE, "get accountInfo failed ret=%{public}d", ret);
+        return ret;
+    }
+    if (accountInfo.uid_.empty()) {
+        LNN_LOGE(LNN_STATE, "accountInfo uid is empty");
+        return SOFTBUS_NETWORK_GET_ACCOUNT_INFO_FAILED;
+    }
+
+    *len = accountInfo.uid_.length();
+    char *anonyUid = nullptr;
+    Anonymize(accountInfo.uid_.c_str(), &anonyUid);
+    LNN_LOGI(LNN_STATE, "accountUid=%{public}s, len=%{public}u", AnonymizeWrapper(anonyUid), *len);
+    AnonymizeFree(anonyUid);
+
+    if (memcpy_s(id, idLen, accountInfo.uid_.c_str(), *len) != EOK) {
+        LNN_LOGE(LNN_STATE, "memcpy_s accountUid failed, idLen=%{public}u, len=%{public}u", idLen, *len);
         return SOFTBUS_MEM_ERR;
     }
     return SOFTBUS_OK;

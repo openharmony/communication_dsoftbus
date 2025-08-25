@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021-2024 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2025 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -16,10 +16,6 @@
 #ifndef SOFTBUS_PROXYCHANNEL_MANAGER_H
 #define SOFTBUS_PROXYCHANNEL_MANAGER_H
 
-#include "stdint.h"
-#include "auth_interface.h"
-#include "softbus_app_info.h"
-#include "softbus_conn_interface.h"
 #include "softbus_proxychannel_message.h"
 #include "trans_channel_callback.h"
 
@@ -51,11 +47,12 @@ void TransProxyOpenProxyChannelSuccess(int32_t channelId);
 void TransProxyOpenProxyChannelFail(int32_t channelId, const AppInfo *appInfo, int32_t errCode);
 void TransProxyOnMessageReceived(const ProxyMessage *msg);
 
+int32_t TransProxyGetChannelCapaByChanId(int32_t channelId, uint32_t *channelCapability);
 int32_t TransProxyGetSessionKeyByChanId(int32_t channelId, char *sessionKey, uint32_t sessionKeySize);
 int32_t TransProxyGetSendMsgChanInfo(int32_t channelId, ProxyChannelInfo *chanInfo);
 
 int32_t TransProxyCreateChanInfo(ProxyChannelInfo *chan, int32_t channelId, const AppInfo *appInfo);
-void TransProxyChanProcessByReqId(int32_t reqId, uint32_t connId);
+void TransProxyChanProcessByReqId(int32_t reqId, uint32_t connId, int32_t errCode);
 
 int32_t TransProxyGetAuthId(int32_t channelId, AuthHandle *authHandle);
 int32_t TransProxyGetNameByChanId(int32_t chanId, char *pkgName, char *sessionName,
@@ -73,7 +70,8 @@ int32_t TransProxyGetAppInfoType(int16_t myId, const char *identity, AppType *ap
 int32_t TransProxySpecialUpdateChanInfo(ProxyChannelInfo *channelInfo);
 int32_t TransProxySetAuthHandleByChanId(int32_t channelId, AuthHandle authHandle);
 
-int32_t TransDealProxyChannelOpenResult(int32_t channelId, int32_t openResult);
+int32_t TransDealProxyChannelOpenResult(
+    int32_t channelId, int32_t openResult, const AccessInfo *accessInfo, pid_t callingPid);
 void TransAsyncProxyChannelTask(int32_t channelId);
 
 int32_t TransProxyGetPrivilegeCloseList(ListNode *privilegeCloseList, uint64_t tokenId, int32_t pid);
@@ -81,7 +79,19 @@ int32_t TransProxyGetPrivilegeCloseList(ListNode *privilegeCloseList, uint64_t t
 int32_t TransProxyGetConnIdByChanId(int32_t channelId, int32_t *connId);
 int32_t TransProxyGetProxyChannelInfoByChannelId(int32_t channelId, ProxyChannelInfo *chan);
 
-int32_t TransDealProxyCheckCollabResult(int32_t channelId, int32_t checkResult);
+int32_t TransDealProxyCheckCollabResult(int32_t channelId, int32_t checkResult, pid_t callingPid);
+int32_t TransProxyGetAppInfoById(int16_t channelId, AppInfo *appInfo);
+
+int32_t TransProxyCreatePagingChanInfo(ProxyChannelInfo *chan);
+int32_t TransProxyGetProxyChannelIdByAuthReq(uint32_t reqId, int32_t *channelId);
+int32_t TransPagingResetChan(ProxyChannelInfo *chanInfo);
+char *TransPagingPackHandshakeMsg(ProxyChannelInfo *info);
+int32_t TransPagingHandshakeUnPackErrMsg(ProxyChannelInfo *chan, const ProxyMessage *msg, int32_t *errCode);
+int32_t TransProxyGetChannelByFlag(uint32_t businessFlag, ProxyChannelInfo *chan, bool isClient);
+void TransProxyProcessErrMsg(ProxyChannelInfo *info, int32_t errCode);
+int32_t TransPagingUpdatePagingChannelInfo(ProxyChannelInfo *info);
+int32_t TransPagingUpdatePidAndData(int32_t channelId, int32_t pid, char *data, uint32_t len);
+void TransPagingBadKeyRetry(int32_t channelId);
 #ifdef __cplusplus
 }
 #endif

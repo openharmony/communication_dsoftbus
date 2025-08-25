@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2025 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -16,7 +16,6 @@
 #ifndef SOFTBUS_PROXYCHANNEL_CONTROL_H
 #define SOFTBUS_PROXYCHANNEL_CONTROL_H
 #include "softbus_proxychannel_message.h"
-
 #ifdef __cplusplus
 extern "C" {
 #endif
@@ -27,7 +26,8 @@ int32_t TransProxyAckHandshake(uint32_t connId, ProxyChannelInfo *chan, int32_t 
 void TransProxyKeepalive(uint32_t connId, const ProxyChannelInfo *info);
 int32_t TransProxyAckKeepalive(ProxyChannelInfo *info);
 int32_t TransProxyResetPeer(ProxyChannelInfo *info);
-
+int32_t TransPagingHandshake(int32_t channelId, uint8_t *authKey, uint32_t keyLen);
+int32_t TransPagingAckHandshake(ProxyChannelInfo *chan, int32_t retCode);
 #ifdef __cplusplus
 }
 #endif

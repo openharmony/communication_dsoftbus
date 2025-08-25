@@ -22,6 +22,7 @@
 #include "client_trans_session_service.h"
 #include "client_trans_socket_manager.h"
 #include "client_trans_socket_option.h"
+#include "g_enhance_sdk_func.h"
 #include "inner_socket.h"
 #include "session_ipc_adapter.h"
 #include "socket.h"
@@ -107,7 +108,7 @@ int32_t Socket(SocketInfo info)
             TRANS_LOGE(TRANS_SDK, "copy session name failed");
             return SOFTBUS_STRCPY_ERR;
         }
-        if (!RemoveAppIdFromSessionName(info.name, newSessionName)) {
+        if (!RemoveAppIdFromSessionName(info.name, newSessionName, SESSION_NAME_SIZE_MAX + 1)) {
             TRANS_LOGE(TRANS_SDK, "invalid bundlename or appId and delete appId failed");
             return SOFTBUS_TRANS_NOT_FIND_APPID;
         }
@@ -254,6 +255,25 @@ static int32_t CheckSocketOptParam(OptLevel level, OptType optType, void *optVal
     return SOFTBUS_OK;
 }
 
+static int32_t ClientCheckFuncPointer(void *func)
+{
+    if (func == NULL) {
+        TRANS_LOGE(TRANS_SDK, "enhance func not register");
+        return SOFTBUS_FUNC_NOT_REGISTER;
+    }
+    return SOFTBUS_OK;
+}
+
+static int32_t SetExtSocketOptPacked(
+    int32_t socket, OptLevel level, OptType optType, void *optValue, uint32_t optValueSize)
+{
+    ClientEnhanceFuncList *pfnClientEnhanceFuncList = ClientEnhanceFuncListGet();
+    if (ClientCheckFuncPointer((void *)pfnClientEnhanceFuncList->setExtSocketOpt) != SOFTBUS_OK) {
+        return SOFTBUS_NOT_IMPLEMENT;
+    }
+    return pfnClientEnhanceFuncList->setExtSocketOpt(socket, level, optType, optValue, optValueSize);
+}
+
 int32_t SetSocketOpt(int32_t socket, OptLevel level, OptType optType, void *optValue, int32_t optValueSize)
 {
     int32_t ret = CheckSocketOptParam(level, optType, optValue);
@@ -267,9 +287,19 @@ int32_t SetSocketOpt(int32_t socket, OptLevel level, OptType optType, void *optV
     if (optType >= OPT_TYPE_BEGIN && optType < OPT_TYPE_END) {
         ret = SetCommonSocketOpt(socket, level, optType, optValue, optValueSize);
     } else {
-        ret = SetExtSocketOpt(socket, level, optType, optValue, optValueSize);
+        ret = SetExtSocketOptPacked(socket, level, optType, optValue, optValueSize);
     }
     return ret;
+}
+
+static int32_t GetExtSocketOptPacked(
+    int32_t socket, OptLevel level, OptType optType, void *optValue, int32_t *optValueSize)
+{
+    ClientEnhanceFuncList *pfnClientEnhanceFuncList = ClientEnhanceFuncListGet();
+    if (ClientCheckFuncPointer((void *)pfnClientEnhanceFuncList->getExtSocketOpt) != SOFTBUS_OK) {
+        return SOFTBUS_NOT_IMPLEMENT;
+    }
+    return pfnClientEnhanceFuncList->getExtSocketOpt(socket, level, optType, optValue, optValueSize);
 }
 
 int32_t GetSocketOpt(int32_t socket, OptLevel level, OptType optType, void *optValue, int32_t *optValueSize)
@@ -285,7 +315,7 @@ int32_t GetSocketOpt(int32_t socket, OptLevel level, OptType optType, void *optV
     if (optType >= OPT_TYPE_BEGIN && optType < OPT_TYPE_END) {
         ret = GetCommonSocketOpt(socket, level, optType, optValue, optValueSize);
     } else {
-        ret = GetExtSocketOpt(socket, level, optType, optValue, optValueSize);
+        ret = GetExtSocketOptPacked(socket, level, optType, optValue, optValueSize);
     }
     return ret;
 }
@@ -311,4 +341,66 @@ int32_t RegisterRelationChecker(IFeatureAbilityRelationChecker *relationChecker)
         return SOFTBUS_INVALID_PARAM;
     }
     return ClientRegisterRelationChecker(relationChecker);
+}
+
+static int32_t WriteAcessInfoToBuf(uint8_t *buf, uint32_t bufLen, char *sessionName, SocketAccessInfo *accessInfo)
+{
+    int32_t offSet = 0;
+    int32_t ret = WriteInt32ToBuf(buf, bufLen, &offSet, accessInfo->userId);
+    if (ret != SOFTBUS_OK) {
+        TRANS_LOGE(TRANS_CTRL, "write userId=%{public}d to buf failed! ret=%{public}d", accessInfo->userId, ret);
+        return ret;
+    }
+    ret = WriteUint64ToBuf(buf, bufLen, &offSet, accessInfo->localTokenId);
+    if (ret != SOFTBUS_OK) {
+        TRANS_LOGE(TRANS_CTRL, "write tokenId to buf failed! ret=%{public}d", ret);
+        return ret;
+    }
+    ret = WriteStringToBuf(buf, bufLen, &offSet, sessionName, strlen(sessionName) + 1);
+    if (ret != SOFTBUS_OK) {
+        TRANS_LOGE(TRANS_CTRL, "write sessionName to buf failed! ret=%{public}d", ret);
+        return ret;
+    }
+    ret = WriteStringToBuf(buf, bufLen, &offSet, accessInfo->extraAccessInfo, strlen(accessInfo->extraAccessInfo) + 1);
+    if (ret != SOFTBUS_OK) {
+        TRANS_LOGE(TRANS_CTRL, "write extraAccessInfo to buf failed! ret=%{public}d", ret);
+        return ret;
+    }
+    return SOFTBUS_OK;
+}
+
+int32_t SetAccessInfo(int32_t socket, SocketAccessInfo accessInfo)
+{
+#define WRITE_BUF_PARAM_NUM 5 // tokenId + userId + 2 * string info len
+    TRANS_LOGI(TRANS_SDK, "SetAccessInfo: socket=%{public}d", socket);
+    if (accessInfo.extraAccessInfo == NULL || accessInfo.userId < 0) {
+        TRANS_LOGE(TRANS_SDK, "accessInfo param invalid, socket=%{public}d.", socket);
+        return SOFTBUS_INVALID_PARAM;
+    }
+    uint32_t extraInfoLen = strnlen(accessInfo.extraAccessInfo, EXTRA_ACCESS_INFO_LEN_MAX) + 1;
+    TRANS_CHECK_AND_RETURN_RET_LOGE(extraInfoLen <= EXTRA_ACCESS_INFO_LEN_MAX,
+        SOFTBUS_INVALID_PARAM, TRANS_SDK, "extra info len over limit");
+    char sessionName[SESSION_NAME_SIZE_MAX] = { 0 };
+    int32_t ret = ClientGetSessionNameBySessionId(socket, sessionName);
+    TRANS_CHECK_AND_RETURN_RET_LOGE(
+        ret == SOFTBUS_OK, ret, TRANS_SDK, "get sessionName by socket=%{public}d failed, ret=%{public}d", socket, ret);
+
+    uint32_t bufLen = sizeof(int32_t) * WRITE_BUF_PARAM_NUM + extraInfoLen + strlen(sessionName) + 1;
+    uint8_t *buf = (uint8_t *)SoftBusCalloc(bufLen);
+    if (buf == NULL) {
+        TRANS_LOGE(TRANS_SDK, "malloc buf failed, socket=%{public}d.", socket);
+        return SOFTBUS_MALLOC_ERR;
+    }
+    ret = WriteAcessInfoToBuf(buf, bufLen, sessionName, &accessInfo);
+    if (ret != SOFTBUS_OK) {
+        TRANS_LOGE(TRANS_CTRL, "Write accessinfo to buf failed! ret=%{public}d", ret);
+        SoftBusFree(buf);
+        return ret;
+    }
+    ret = ServerIpcProcessInnerEvent(EVENT_TYPE_SET_ACCESS_INFO, buf, bufLen);
+    if (ret != SOFTBUS_OK) {
+        TRANS_LOGE(TRANS_CTRL, "ServerIpcProcessInnerEvent failed! ret=%{public}d", ret);
+    }
+    SoftBusFree(buf);
+    return ret;
 }

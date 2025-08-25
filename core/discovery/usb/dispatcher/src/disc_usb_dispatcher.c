@@ -17,7 +17,7 @@
 #include "disc_event.h"
 #include "disc_log.h"
 #include "disc_manager.h"
-#include "disc_usb.h"
+#include "g_enhance_disc_func_pack.h"
 #include "softbus_error_code.h"
 
 #define DISPATCHER_SIZE 1
@@ -103,50 +103,58 @@ static int32_t UsbDispatchSubscribeOption(const SubscribeOption *option, Discove
 
 static int32_t UsbDispatchStartActivePublish(const PublishOption *option)
 {
+    DISC_CHECK_AND_RETURN_RET_LOGE(option != NULL, SOFTBUS_INVALID_PARAM, DISC_USB, "option is nullptr");
     return UsbDispatchPublishOption(option, DISCOVER_MODE_ACTIVE, PUBLISH_FUNC);
 }
 
 static int32_t UsbDispatchStartPassivePublish(const PublishOption *option)
 {
+    DISC_CHECK_AND_RETURN_RET_LOGE(option != NULL, SOFTBUS_INVALID_PARAM, DISC_USB, "option is nullptr");
     return UsbDispatchPublishOption(option, DISCOVER_MODE_PASSIVE, PUBLISH_FUNC);
 }
 
 static int32_t UsbDispatchStopActivePublish(const PublishOption *option)
 {
+    DISC_CHECK_AND_RETURN_RET_LOGE(option != NULL, SOFTBUS_INVALID_PARAM, DISC_USB, "option is nullptr");
     return UsbDispatchPublishOption(option, DISCOVER_MODE_ACTIVE, UNPUBLISH_FUNC);
 }
 
 static int32_t UsbDispatchStopPassivePublish(const PublishOption *option)
 {
+    DISC_CHECK_AND_RETURN_RET_LOGE(option != NULL, SOFTBUS_INVALID_PARAM, DISC_USB, "option is nullptr");
     return UsbDispatchPublishOption(option, DISCOVER_MODE_PASSIVE, UNPUBLISH_FUNC);
 }
 
 static int32_t UsbDispatchStartActiveDiscovery(const SubscribeOption *option)
 {
+    DISC_CHECK_AND_RETURN_RET_LOGE(option != NULL, SOFTBUS_INVALID_PARAM, DISC_USB, "option is nullptr");
     return UsbDispatchSubscribeOption(option, DISCOVER_MODE_ACTIVE, STARTDISCOVERTY_FUNC);
 }
 
 static int32_t UsbDispatchStartPassiveDiscovery(const SubscribeOption *option)
 {
+    DISC_CHECK_AND_RETURN_RET_LOGE(option != NULL, SOFTBUS_INVALID_PARAM, DISC_USB, "option is nullptr");
     return UsbDispatchSubscribeOption(option, DISCOVER_MODE_PASSIVE, STARTDISCOVERTY_FUNC);
 }
 
 static int32_t UsbDispatchStopActiveDiscovery(const SubscribeOption *option)
 {
+    DISC_CHECK_AND_RETURN_RET_LOGE(option != NULL, SOFTBUS_INVALID_PARAM, DISC_USB, "option is nullptr");
     return UsbDispatchSubscribeOption(option, DISCOVER_MODE_ACTIVE, STOPDISCOVERY_FUNC);
 }
 
 static int32_t UsbDispatchStopPassiveDiscovery(const SubscribeOption *option)
 {
+    DISC_CHECK_AND_RETURN_RET_LOGE(option != NULL, SOFTBUS_INVALID_PARAM, DISC_USB, "option is nullptr");
     return UsbDispatchSubscribeOption(option, DISCOVER_MODE_PASSIVE, STOPDISCOVERY_FUNC);
 }
 
-static void UsbDispatchLinkStatusChanged(LinkStatus status)
+static void UsbDispatchLinkStatusChanged(LinkStatus status, int32_t ifnameIdx)
 {
     for (uint32_t i = 0; i < g_dispatcherSize; i++) {
         if (g_usbDispatchers[i] != NULL && g_usbDispatchers[i]->mediumInterface != NULL &&
             g_usbDispatchers[i]->mediumInterface->LinkStatusChanged != NULL) {
-            g_usbDispatchers[i]->mediumInterface->LinkStatusChanged(status);
+            g_usbDispatchers[i]->mediumInterface->LinkStatusChanged(status, ifnameIdx);
         }
     }
 }
@@ -197,7 +205,7 @@ DiscoveryFuncInterface *DiscUsbDispatcherInit(DiscInnerCallback *discInnerCb)
     }
     DISC_LOGI(DISC_INIT, "DiscUsbFrameInit");
     g_dispatcherSize = 0;
-    DiscoveryUsbDispatcherInterface *usbInterface = DiscUsbInit(discInnerCb);
+    DiscoveryUsbDispatcherInterface *usbInterface = DiscUsbInitPacked(discInnerCb);
     if (usbInterface == NULL) {
         DfxRecordUsbInitEnd(EVENT_STAGE_USB_INIT, SOFTBUS_DISCOVER_MANAGER_INIT_FAIL);
         DISC_LOGE(DISC_INIT, "DiscUsbInit err");
@@ -225,5 +233,5 @@ void DiscUsbDispatcherDeinit(void)
         g_usbDispatchers[i] = NULL;
     }
     g_dispatcherSize = 0;
-    DiscUsbDeinit();
+    DiscUsbDeinitPacked();
 }

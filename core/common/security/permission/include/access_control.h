@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2023-2024 Huawei Device Co., Ltd.
+ * Copyright (c) 2023-2025 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -15,6 +15,7 @@
 
 #ifndef ACCESS_CONTROL_H
 #define ACCESS_CONTROL_H
+#include "softbus_app_info.h"
 
 #ifdef __cplusplus
 #if __cplusplus
@@ -35,9 +36,7 @@ enum FirstTokenType {
 
 int32_t TransCheckClientAccessControl(const char *peerNetworkId);
 int32_t CheckSecLevelPublic(const char *mySessionName, const char *peerSessionName);
-int32_t TransCheckServerAccessControl(uint64_t callingTokenId);
-uint64_t TransACLGetFirstTokenID(void);
-uint64_t TransACLGetCallingTokenID(void);
+int32_t TransCheckServerAccessControl(const AppInfo *appInfo);
 void TransGetTokenInfo(uint64_t callingId, char *tokenName, int32_t nameLen, int32_t *tokenType);
 
 #ifdef __cplusplus

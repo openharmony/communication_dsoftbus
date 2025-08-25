@@ -16,7 +16,6 @@
 #ifndef FILLP_SYS_IO_H
 #define FILLP_SYS_IO_H
 
-#include "fillptypes.h"
 #include "hlist.h"
 
 #ifdef __cplusplus

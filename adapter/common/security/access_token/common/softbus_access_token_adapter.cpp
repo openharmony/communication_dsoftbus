@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2024 Huawei Device Co., Ltd.
+ * Copyright (c) 2024-2025 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -16,29 +16,26 @@
 #include "softbus_access_token_adapter.h"
 
 #include <securec.h>
-#include <string>
 
 #include "accesstoken_kit.h"
 #include "comm_log.h"
-#include "native_token_info.h"
-#include "perm_state_change_callback_customize.h"
+#include "ipc_skeleton.h"
 #include "privacy_kit.h"
 #include "regex.h"
+#include "softbus_common.h"
 #include "softbus_error_code.h"
 #include "softbus_permission.h"
 #include "tokenid_kit.h"
 
 constexpr int32_t JUDG_CNT = 1;
-const std::string SAMGR_PROCESS_NAME = "samgr";
-const std::string DMS_PROCESS_NAME = "distributedsched";
+constexpr int32_t DEVICE_KEY_SA_CNT = 3;
+const char *SAMGR_PROCESS_NAME = "samgr";
+const char *DMS_PROCESS_NAME = "distributedsched";
+const std::string DEVICE_KEY_SA_PROCESS_NAME[DEVICE_KEY_SA_CNT] = { "distributedsched", "distributedfiledaemon",
+    "distributeddata" };
+#define DMS_COLLABATION_NAME_PREFIX "ohos.dtbcollab.dms"
+#define DBINDER_BUS_NAME_PREFIX "DBinder"
 static PermissionChangeCb g_permissionChangeCb = nullptr;
-const char *g_sessionName[] = {
-    "DBinder*",
-    "hiview*",
-    "com.ohos.plrdtest.hongyan*",
-    "ObjectstoreDB*",
-};
-constexpr int32_t SESSION_NAME_NUM = sizeof(g_sessionName) / sizeof(g_sessionName[0]);
 
 namespace OHOS {
 using namespace Security::AccessToken;
@@ -54,12 +51,34 @@ private:
     int32_t pid;
 };
 
+std::unordered_map<uint32_t, std::shared_ptr<SoftBusAccessTokenAdapter>> callbackPtrMap_;
+
 extern "C" {
 bool SoftBusCheckIsSystemService(uint64_t tokenId)
 {
     auto type = AccessTokenKit::GetTokenTypeFlag((AccessTokenID)tokenId);
     COMM_LOGD(COMM_ADAPTER, "access token type=%{public}d", type);
     return type == ATokenTypeEnum::TOKEN_NATIVE;
+}
+
+bool SoftBusCheckIsSystemApp(uint64_t tokenId, const char *sessionName)
+{
+    if (sessionName == nullptr) {
+        COMM_LOGE(COMM_PERM, "invalid param, sessionName is nullptr");
+        return false;
+    }
+    // The authorization of dbind and dtbcollab are granted through Samgr and DMS, and there is no control here
+    uint32_t dbinderPrefixLen = strlen(DBINDER_BUS_NAME_PREFIX);
+    if (strlen(sessionName) >= dbinderPrefixLen &&
+        strncmp(sessionName, DBINDER_BUS_NAME_PREFIX, dbinderPrefixLen) == 0) {
+        return false;
+    }
+    uint32_t dmsCollabPrefixLen = strlen(DMS_COLLABATION_NAME_PREFIX);
+    if (strlen(sessionName) >= dmsCollabPrefixLen &&
+        strncmp(sessionName, DMS_COLLABATION_NAME_PREFIX, dmsCollabPrefixLen) == 0) {
+        return false;
+    }
+    return TokenIdKit::IsSystemAppByFullTokenID(tokenId);
 }
 
 bool SoftBusCheckIsNormalApp(uint64_t fullTokenId, const char *sessionName)
@@ -69,9 +88,12 @@ bool SoftBusCheckIsNormalApp(uint64_t fullTokenId, const char *sessionName)
         return false;
     }
 
-    #define DBINDER_BUS_NAME_PREFIX "DBinder"
-    // The authorization of dbind is granted through Samgr, and there is no control here
+    // The authorization of dbind and dtbcollab are granted through Samgr and DMS, and there is no control here
     if (strncmp(sessionName, DBINDER_BUS_NAME_PREFIX, strlen(DBINDER_BUS_NAME_PREFIX)) == 0) {
+        return false;
+    }
+
+    if (strncmp(sessionName, DMS_COLLABATION_NAME_PREFIX, strlen(DMS_COLLABATION_NAME_PREFIX)) == 0) {
         return false;
     }
 
@@ -161,8 +183,7 @@ void SoftBusAccessTokenAdapter::PermStateChangeCallback(PermStateChangeInfo &res
     }
 }
 
-void SoftBusRegisterDataSyncPermission(
-    const uint64_t tonkenId, const char *permissionName, const char *pkgName, int32_t pid)
+void SoftBusRegisterDataSyncPermission(uint64_t tonkenId, const char *permissionName, const char *pkgName, int32_t pid)
 {
     if (permissionName == nullptr || pkgName == nullptr) {
         COMM_LOGE(COMM_PERM, "invalid param, permissionName or pkgName is nullptr");
@@ -175,8 +196,24 @@ void SoftBusRegisterDataSyncPermission(
     std::shared_ptr<SoftBusAccessTokenAdapter> callbackPtr_ =
         std::make_shared<SoftBusAccessTokenAdapter>(scopeInfo, pkgName, pid);
     COMM_LOGI(COMM_PERM, "after register. tokenId=%{public}" PRIu64, tonkenId);
+    callbackPtrMap_.emplace(pid, callbackPtr_);
     if (AccessTokenKit::RegisterPermStateChangeCallback(callbackPtr_) != SOFTBUS_OK) {
         COMM_LOGE(COMM_PERM, "RegisterPermStateChangeCallback failed.");
+    }
+}
+
+void SoftBusUnRegisterDataSyncPermission(int32_t pid)
+{
+    std::shared_ptr<SoftBusAccessTokenAdapter> callbackPtr_ = nullptr;
+    auto iter = callbackPtrMap_.find(pid);
+    if (iter != callbackPtrMap_.end()) {
+        callbackPtr_ = iter->second;
+        if (AccessTokenKit::UnRegisterPermStateChangeCallback(callbackPtr_) != SOFTBUS_OK) {
+            COMM_LOGE(COMM_PERM, "UnRegisterPermStateChangeCallback failed");
+        }
+        callbackPtrMap_.erase(iter);
+    } else {
+        COMM_LOGE(COMM_PERM, "UnRegisterPermStateChangeCallback not find pid:%{public}d", pid);
     }
 }
 
@@ -250,29 +287,15 @@ int32_t SoftBusCheckDmsServerPermission(uint64_t tokenId)
     return SOFTBUS_PERMISSION_DENIED;
 }
 
-static bool CheckSessionName(const char *src, const char *dst)
-{
-    regex_t regComp;
-    if (regcomp(&regComp, src, REG_EXTENDED | REG_NOSUB) != REG_OK) {
-        COMM_LOGE(COMM_PERM, "regcomp failed.");
-        return false;
-    }
-    bool compare = regexec(&regComp, dst, 0, nullptr, 0) == REG_OK;
-    regfree(&regComp);
-    return compare;
-}
-
-bool SoftBusCheckIsApp(uint64_t fullTokenId, const char *sessionName)
+bool SoftBusCheckIsCollabApp(uint64_t fullTokenId, const char *sessionName)
 {
     if (sessionName == nullptr) {
         COMM_LOGE(COMM_PERM, "invalid param, sessionName is nullptr");
         return false;
     }
 
-    for (uint32_t i = 0; i < SESSION_NAME_NUM; i++) {
-        if (CheckSessionName(g_sessionName[i], sessionName)) {
-            return false;
-        }
+    if (strncmp(sessionName, DMS_COLLABATION_NAME_PREFIX, strlen(DMS_COLLABATION_NAME_PREFIX)) != 0) {
+        return false;
     }
 
     auto tokenType = AccessTokenKit::GetTokenTypeFlag((AccessTokenID)fullTokenId);
@@ -281,6 +304,36 @@ bool SoftBusCheckIsApp(uint64_t fullTokenId, const char *sessionName)
     }
     COMM_LOGI(COMM_ADAPTER, "The caller is an app");
     return true;
+}
+
+bool SoftBusCheckIsAccess(void)
+{
+    uint32_t callingTokenId = IPCSkeleton::GetCallingTokenID();
+    int32_t ret = AccessTokenKit::VerifyAccessToken((AccessTokenID)callingTokenId,
+        OHOS_PERMISSION_DISTRIBUTED_DATASYNC);
+    bool isAccessToken = (ret == PERMISSION_GRANTED);
+    return isAccessToken;
+}
+
+bool SoftBusSaCanUseDeviceKey(uint64_t tokenId)
+{
+    auto tokenType = AccessTokenKit::GetTokenTypeFlag(static_cast<AccessTokenID>(tokenId));
+    if (tokenType != ATokenTypeEnum::TOKEN_NATIVE) {
+        COMM_LOGE(COMM_PERM, "not native call");
+        return false;
+    }
+    NativeTokenInfo nativeTokenInfo;
+    int32_t result = AccessTokenKit::GetNativeTokenInfo(tokenId, nativeTokenInfo);
+    if (result == SOFTBUS_OK) {
+        for (int32_t i = 0; i < DEVICE_KEY_SA_CNT; i++) {
+            if (nativeTokenInfo.processName.compare(DEVICE_KEY_SA_PROCESS_NAME[i]) == 0) {
+                return true;
+            }
+        }
+        COMM_LOGE(COMM_PERM, "check dk server permission failed, processName=%{private}s",
+            nativeTokenInfo.processName.c_str());
+    }
+    return false;
 }
 }
 } // namespace OHOS

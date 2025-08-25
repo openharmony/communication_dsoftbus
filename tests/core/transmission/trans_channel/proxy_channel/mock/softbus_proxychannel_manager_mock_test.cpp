@@ -99,6 +99,78 @@ int32_t ConnGetTypeByConnectionId(uint32_t connectionId, ConnectType *type)
     return SoftbusTransProxyChannelManagerMock::GetMockObj().ConnGetTypeByConnectionId(connectionId, type);
 }
 
+int32_t TransProxyAckHandshake(uint32_t connId, ProxyChannelInfo *chan, int32_t retCode)
+{
+    std::cout << "TransProxyAckHandshake calling enter" << std::endl;
+    return SoftbusTransProxyChannelManagerMock::GetMockObj().TransProxyAckHandshake(connId, chan, retCode);
+}
+
+int32_t OnProxyChannelBind(int32_t channelId, const AppInfo *appInfo)
+{
+    std::cout << "OnProxyChannelBind calling enter" << std::endl;
+    return SoftbusTransProxyChannelManagerMock::GetMockObj().OnProxyChannelBind(channelId, appInfo);
+}
+
+int32_t TransUkRequestGetRequestInfoByRequestId(uint32_t requestId, UkRequestNode *ukRequest)
+{
+    std::cout << "TransUkRequestGetRequestInfoByRequestId calling enter" << std::endl;
+    return SoftbusTransProxyChannelManagerMock::GetMockObj()
+        .TransUkRequestGetRequestInfoByRequestId(requestId, ukRequest);
+}
+
+int32_t GetLocalAccountUidByUserId(char *id, uint32_t idLen, uint32_t *len, int32_t userId)
+{
+    std::cout << "GetLocalAccountUidByUserId calling enter" << std::endl;
+    return SoftbusTransProxyChannelManagerMock::GetMockObj().GetLocalAccountUidByUserId(id, idLen, len, userId);
+}
+
+int32_t GetAuthConnInfoByConnId(uint32_t connectionId, AuthConnInfo *authConnInfo)
+{
+    std::cout << "GetAuthConnInfoByConnId calling enter" << std::endl;
+    return SoftbusTransProxyChannelManagerMock::GetMockObj().GetAuthConnInfoByConnId(connectionId, authConnInfo);
+}
+
+int32_t TransReNegotiateSessionKey(const AuthConnInfo *authConnInfo, int32_t channelId)
+{
+    std::cout << "TransReNegotiateSessionKey calling enter" << std::endl;
+    return SoftbusTransProxyChannelManagerMock::GetMockObj().TransReNegotiateSessionKey(authConnInfo, channelId);
+}
+
+int32_t TransProxyUnpackIdentity(const char *msg, char *identity, uint32_t identitySize, int32_t len)
+{
+    std::cout << "TransProxyUnpackIdentity calling enter" << std::endl;
+    return SoftbusTransProxyChannelManagerMock::GetMockObj().TransProxyUnpackIdentity(msg, identity, identitySize, len);
+}
+
+int32_t TransProxyTransInit(void)
+{
+    std::cout << "TransProxyTransInit calling enter" << std::endl;
+    return SoftbusTransProxyChannelManagerMock::GetMockObj().TransProxyTransInit();
+}
+
+int32_t RegisterTimeoutCallback(int32_t timerFunId, TimerFunCallback callback)
+{
+    std::cout << "RegisterTimeoutCallback calling enter" << std::endl;
+    return SoftbusTransProxyChannelManagerMock::GetMockObj().RegisterTimeoutCallback(timerFunId, callback);
+}
+
+int32_t TransGetPidAndPkgName(const char *sessionName, int32_t uid, int32_t *pid, char *pkgName, uint32_t len)
+{
+    std::cout << "TransGetPidAndPkgName calling enter" << std::endl;
+    return SoftbusTransProxyChannelManagerMock::GetMockObj().TransGetPidAndPkgName(sessionName, uid, pid, pkgName, len);
+}
+
+int32_t OnProxyChannelOpened(int32_t channelId, const AppInfo *appInfo, unsigned char isServer)
+{
+    std::cout << "OnProxyChannelOpened calling enter" << std::endl;
+    return SoftbusTransProxyChannelManagerMock::GetMockObj().OnProxyChannelOpened(channelId, appInfo, isServer);
+}
+void TransCheckChannelOpenRemoveFromLooper(int32_t channelId)
+{
+    std::cout << "TransCheckChannelOpenRemoveFromLooper calling enter" << std::endl;
+    return SoftbusTransProxyChannelManagerMock::GetMockObj().TransCheckChannelOpenRemoveFromLooper(channelId);
+}
+
 #ifdef __cplusplus
 }
 #endif

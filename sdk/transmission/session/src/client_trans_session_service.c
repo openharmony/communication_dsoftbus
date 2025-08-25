@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021-2024 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2025 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -34,6 +34,7 @@
 #include "session_ipc_adapter.h"
 #include "softbus_access_token_adapter.h"
 #include "softbus_adapter_mem.h"
+#include "softbus_adapter_timer.h"
 #include "softbus_client_frame_manager.h"
 #include "softbus_def.h"
 #include "softbus_error_code.h"
@@ -94,8 +95,7 @@ static int32_t OpenSessionWithExistSession(int32_t sessionId, bool isEnabled)
         return SOFTBUS_TRANS_INVALID_SESSION_ID;
     }
 
-    ret = listener.OnSessionOpened(sessionId, SOFTBUS_OK);
-    if (ret != 0) {
+    if (listener.OnSessionOpened == NULL || listener.OnSessionOpened(sessionId, SOFTBUS_OK) != SOFTBUS_OK) {
         TRANS_LOGE(TRANS_SDK, "session callback OnSessionOpened failed, ret=%{public}d", ret);
         CloseSession(sessionId);
         return SOFTBUS_TRANS_INVALID_SESSION_ID;
@@ -123,8 +123,9 @@ int CreateSessionServer(const char *pkgName, const char *sessionName, const ISes
         TRANS_LOGE(TRANS_SDK, "invalid pkg name");
         return SOFTBUS_INVALID_PKGNAME;
     }
+    uint64_t timestamp = 0;
 
-    int ret = ClientAddSessionServer(SEC_TYPE_CIPHERTEXT, pkgName, sessionName, listener);
+    int ret = ClientAddSessionServer(SEC_TYPE_CIPHERTEXT, pkgName, sessionName, listener, &timestamp);
     if (ret == SOFTBUS_SERVER_NAME_REPEATED) {
         TRANS_LOGI(TRANS_SDK, "SessionServer is already created in client");
     } else if (ret != SOFTBUS_OK) {
@@ -132,7 +133,7 @@ int CreateSessionServer(const char *pkgName, const char *sessionName, const ISes
         return ret;
     }
 
-    ret = ServerIpcCreateSessionServer(pkgName, sessionName);
+    ret = ServerIpcCreateSessionServer(pkgName, sessionName, timestamp);
     if (ret == SOFTBUS_SERVER_NAME_REPEATED) {
         TRANS_LOGW(TRANS_SDK, "ok, SessionServer is already created in server");
         return SOFTBUS_OK;
@@ -154,8 +155,9 @@ int RemoveSessionServer(const char *pkgName, const char *sessionName)
     char *tmpName = NULL;
     Anonymize(sessionName, &tmpName);
     TRANS_LOGI(TRANS_SDK, "pkgName=%{public}s, sessionName=%{public}s", pkgName, AnonymizeWrapper(tmpName));
+    uint64_t timestamp = SoftBusGetSysTimeMs();
 
-    int32_t ret = ServerIpcRemoveSessionServer(pkgName, sessionName);
+    int32_t ret = ServerIpcRemoveSessionServer(pkgName, sessionName, timestamp);
     if (ret != SOFTBUS_OK) {
         TRANS_LOGE(TRANS_SDK, "remove in server failed, ret=%{public}d.", ret);
         AnonymizeFree(tmpName);
@@ -365,10 +367,14 @@ static int IsValidAddrInfoArr(const ConnectionAddr *addrInfo, int num)
     if (addrInfo == NULL || num <= 0) {
         return addrIndex;
     }
+    int32_t usbIndex = -1;
     int32_t wifiIndex = -1;
     int32_t brIndex = -1;
     int32_t bleIndex = -1;
     for (int32_t index = 0; index < num; index++) {
+        if (addrInfo[index].type == CONNECTION_ADDR_NCM && usbIndex < 0) {
+            usbIndex = index;
+        }
         if ((addrInfo[index].type == CONNECTION_ADDR_ETH || addrInfo[index].type == CONNECTION_ADDR_WLAN) &&
             wifiIndex < 0) {
             wifiIndex = index;
@@ -380,7 +386,8 @@ static int IsValidAddrInfoArr(const ConnectionAddr *addrInfo, int num)
             bleIndex = index;
         }
     }
-    addrIndex = (wifiIndex >= 0) ? wifiIndex : addrIndex;
+    addrIndex = (usbIndex >= 0) ? usbIndex : addrIndex;
+    addrIndex = (addrIndex < 0) ? wifiIndex : addrIndex;
     addrIndex = (addrIndex < 0) ? brIndex : addrIndex;
     addrIndex = (addrIndex < 0) ? bleIndex : addrIndex;
     return addrIndex;
@@ -572,7 +579,7 @@ void CloseSession(int sessionId)
         return;
     }
     AddSessionStateClosing();
-    ret = ClientTransCloseChannel(channelId, type);
+    ret = ClientTransCloseChannel(channelId, type, sessionId);
     if (ret != SOFTBUS_OK) {
         TRANS_LOGE(TRANS_SDK, "close channel err: ret=%{public}d, channelId=%{public}d, channelType=%{public}d",
             ret, channelId, type);
@@ -792,9 +799,9 @@ int32_t GetDefaultConfigType(int32_t channelType, int32_t businessType)
     return SOFTBUS_CONFIG_TYPE_MAX;
 }
 
-int ReadMaxSendBytesSize(int32_t channelId, int32_t type, void* value, uint32_t valueSize)
+int32_t ReadMaxSendBytesSize(int32_t channelId, int32_t type, void *value, uint32_t valueSize)
 {
-    if (valueSize != sizeof(uint32_t)) {
+    if (value == NULL || valueSize != sizeof(uint32_t)) {
         TRANS_LOGE(TRANS_SDK, "valueSize not match. valueSize=%{public}d", valueSize);
         return SOFTBUS_INVALID_PARAM;
     }
@@ -879,7 +886,7 @@ int GetSessionOption(int sessionId, SessionOption option, void* optionValue, uin
     return g_SessionOptionArr[option].readFunc(channelId, type, optionValue, valueSize);
 }
 
-bool RemoveAppIdFromSessionName(const char *sessionName, char *newSessionName)
+bool RemoveAppIdFromSessionName(const char *sessionName, char *newSessionName, int32_t length)
 {
     if ((sessionName == NULL) || (newSessionName == NULL)) {
         TRANS_LOGE(TRANS_SDK, "invalid param");
@@ -897,7 +904,7 @@ bool RemoveAppIdFromSessionName(const char *sessionName, char *newSessionName)
         return false;
     }
     size_t len = posId - sessionName;
-    if (strncpy_s(newSessionName, SESSION_NAME_SIZE_MAX + 1, sessionName, len) != EOK) {
+    if (strncpy_s(newSessionName, length, sessionName, len) != EOK) {
         TRANS_LOGE(TRANS_SDK, "copy sessionName failed");
         return false;
     }
@@ -927,41 +934,46 @@ int CreateSocket(const char *pkgName, const char *sessionName)
     TRANS_CHECK_AND_RETURN_RET_LOGE(ret == SOFTBUS_OK, ret, TRANS_SDK, "get callingFullTokenId failed");
 
     if (SoftBusCheckIsNormalApp(callingFullTokenId, sessionName)) {
-        if (!RemoveAppIdFromSessionName(sessionName, newSessionName)) {
+        if (!RemoveAppIdFromSessionName(sessionName, newSessionName, SESSION_NAME_SIZE_MAX + 1)) {
             TRANS_LOGE(TRANS_SDK, "invalid bundlename or appId and delete appId failed");
             return SOFTBUS_TRANS_NOT_FIND_APPID;
         }
     }
-    ret = ClientAddSocketServer(SEC_TYPE_CIPHERTEXT, pkgName, (const char*)newSessionName);
+    uint64_t timestamp = 0;
+    ret = ClientAddSocketServer(SEC_TYPE_CIPHERTEXT, pkgName, (const char*)newSessionName, &timestamp);
     if (ret == SOFTBUS_SERVER_NAME_REPEATED) {
         TRANS_LOGD(TRANS_SDK, "SocketServer is already created in client");
     } else if (ret != SOFTBUS_OK) {
         TRANS_LOGE(TRANS_SDK, "add socket server err, ret=%{public}d", ret);
         return ret;
     }
-    ret = ServerIpcCreateSessionServer(pkgName, sessionName);
+    ret = ServerIpcCreateSessionServer(pkgName, sessionName, timestamp);
     if (ret == SOFTBUS_SERVER_NAME_REPEATED) {
         TRANS_LOGD(TRANS_SDK, "ok, SocketServer is already created in server");
         return SOFTBUS_OK;
     } else if (ret != SOFTBUS_OK) {
         SocketServerStateUpdate(newSessionName);
         TRANS_LOGE(TRANS_SDK, "createSocketServer failed, ret=%{public}d", ret);
-        (void)ClientDeleteSessionServer(SEC_TYPE_CIPHERTEXT, newSessionName);
+        (void)TryDeleteEmptySessionServer(pkgName, newSessionName);
         return ret;
     }
     TRANS_LOGD(TRANS_SDK, "ok");
     return SOFTBUS_OK;
 }
 
-static SessionAttribute *CreateSessionAttributeBySocketInfoTrans(const SocketInfo *info, bool *isEncyptedRawStream)
+static SessionAttribute *CreateSessionAttributeBySocketInfoTrans(const SocketInfo *info, bool *isEncryptedRawStream)
 {
+    if (info == NULL ||isEncryptedRawStream == NULL) {
+        TRANS_LOGE(TRANS_SDK, "Invalid param");
+        return NULL;
+    }
     SessionAttribute *tmpAttr = (SessionAttribute *)SoftBusCalloc(sizeof(SessionAttribute));
     if (tmpAttr == NULL) {
         TRANS_LOGE(TRANS_SDK, "SoftBusCalloc SessionAttribute failed");
         return NULL;
     }
 
-    *isEncyptedRawStream = false;
+    *isEncryptedRawStream = false;
     tmpAttr->fastTransData = NULL;
     tmpAttr->fastTransDataSize = 0;
     switch (info->dataType) {
@@ -978,7 +990,7 @@ static SessionAttribute *CreateSessionAttributeBySocketInfoTrans(const SocketInf
         case DATA_TYPE_RAW_STREAM_ENCRYPED:
             tmpAttr->dataType = TYPE_STREAM;
             tmpAttr->attr.streamAttr.streamType = RAW_STREAM;
-            *isEncyptedRawStream = (info->dataType == DATA_TYPE_RAW_STREAM_ENCRYPED);
+            *isEncryptedRawStream = (info->dataType == DATA_TYPE_RAW_STREAM_ENCRYPED);
             break;
         case DATA_TYPE_VIDEO_STREAM:
             tmpAttr->dataType = TYPE_STREAM;
@@ -1006,8 +1018,8 @@ int32_t ClientAddSocket(const SocketInfo *info, int32_t *sessionId)
         return SOFTBUS_INVALID_PARAM;
     }
 
-    bool isEncyptedRawStream = false;
-    SessionAttribute *tmpAttr = CreateSessionAttributeBySocketInfoTrans(info, &isEncyptedRawStream);
+    bool isEncryptedRawStream = false;
+    SessionAttribute *tmpAttr = CreateSessionAttributeBySocketInfoTrans(info, &isEncryptedRawStream);
     if (tmpAttr == NULL) {
         TRANS_LOGE(TRANS_SDK, "Create SessionAttribute failed");
         return SOFTBUS_MALLOC_ERR;
@@ -1023,7 +1035,7 @@ int32_t ClientAddSocket(const SocketInfo *info, int32_t *sessionId)
     };
 
     SessionEnableStatus isEnabled = ENABLE_STATUS_INIT;
-    int32_t ret = ClientAddSocketSession(&param, isEncyptedRawStream, sessionId, &isEnabled);
+    int32_t ret = ClientAddSocketSession(&param, isEncryptedRawStream, sessionId, &isEnabled);
     if (ret != SOFTBUS_OK) {
         SoftBusFree(tmpAttr);
         if (ret == SOFTBUS_TRANS_SESSION_REPEATED) {
@@ -1101,13 +1113,32 @@ static int32_t CheckSessionCancelState(int32_t socket)
         if (ret != SOFTBUS_OK) {
             TRANS_LOGE(TRANS_SDK, "get channel by socket=%{public}d failed, ret=%{public}d", socket, ret);
         }
-        ret = ClientTransCloseChannel(channelId, type);
+        ret = ClientTransCloseChannel(channelId, type, socket);
         if (ret != SOFTBUS_OK) {
             TRANS_LOGE(TRANS_SDK, "close channel err: ret=%{public}d, channelId=%{public}d, channeType=%{public}d", ret,
                 channelId, type);
         }
         return lifecycle.bindErrCode;
     }
+    return SOFTBUS_OK;
+}
+
+static int32_t SocketCheckAndSetSessionState(int32_t socket)
+{
+    SocketLifecycleData lifecycle;
+    (void)memset_s(&lifecycle, sizeof(SocketLifecycleData), 0, sizeof(SocketLifecycleData));
+
+    int32_t ret = GetSocketLifecycleAndSessionNameBySessionId(socket, NULL, &lifecycle);
+    if (ret != SOFTBUS_OK) {
+        TRANS_LOGE(TRANS_SDK, "get socket state failed, socket=%{public}d failed, ret=%{public}d", socket, ret);
+        return ret;
+    }
+
+    if (lifecycle.sessionState != SESSION_STATE_INIT) {
+        TRANS_LOGE(TRANS_SDK, "socket=%{public}d is being bound, please check", socket);
+        return SOFTBUS_TRANS_SESSION_OPENING;
+    }
+
     return SOFTBUS_OK;
 }
 
@@ -1122,9 +1153,12 @@ int32_t ClientBind(int32_t socket, const QosTV qos[], uint32_t qosCount, const I
     // For rebind, clear the socket state.
     int32_t ret = ClientSetSocketState(socket, 0, SESSION_ROLE_INIT);
     TRANS_CHECK_AND_RETURN_RET_LOGE(ret == SOFTBUS_OK, ret, TRANS_SDK, "init session role failed, ret=%{public}d", ret);
-    ret = SetSessionStateBySessionId(socket, SESSION_STATE_INIT, 0);
-    TRANS_CHECK_AND_RETURN_RET_LOGE(
-        ret == SOFTBUS_OK, ret, TRANS_SDK, "init session state failed, ret=%{public}d", ret);
+
+    ret = SocketCheckAndSetSessionState(socket);
+    if (ret != SOFTBUS_OK) {
+        TRANS_LOGE(TRANS_SDK, "check the socket=%{public}d status failed, ret=%{public}d", socket, ret);
+        return ret;
+    }
 
     ret = ClientSetListenerBySessionId(socket, listener, false);
     TRANS_CHECK_AND_RETURN_RET_LOGE(
@@ -1150,6 +1184,7 @@ int32_t ClientBind(int32_t socket, const QosTV qos[], uint32_t qosCount, const I
         ret = ClientWaitSyncBind(socket);
         TRANS_CHECK_AND_RETURN_RET_LOGE(
             ret == SOFTBUS_OK, ret, TRANS_SDK, "ClientWaitSyncBind err, ret=%{public}d", ret);
+        (void)SetSessionStateBySessionId(socket, SESSION_STATE_CALLBACK_FINISHED, 0);
     }
     ret = ClientSetSocketState(socket, maxIdleTimeout, SESSION_ROLE_CLIENT);
     TRANS_CHECK_AND_RETURN_RET_LOGE(ret == SOFTBUS_OK, ret, TRANS_SDK, "set session role failed, ret=%{public}d", ret);
@@ -1209,8 +1244,10 @@ void ClientShutdown(int32_t socket, int32_t cancelReason)
         TRANS_LOGE(TRANS_SDK, "get socket state failed, socket=%{public}d failed, ret=%{public}d", socket, ret);
         return;
     }
-    if (lifecycle.sessionState == SESSION_STATE_CANCELLING) {
+    if (lifecycle.sessionState == SESSION_STATE_CANCELLING &&
+        lifecycle.bindErrCode == SOFTBUS_TRANS_STOP_BIND_BY_CANCEL) {
         TRANS_LOGW(TRANS_SDK, "This socket already in cancelling state. socket=%{public}d", socket);
+        return;
     }
     SetSessionStateBySessionId(socket, SESSION_STATE_CANCELLING, cancelReason);
     if (lifecycle.sessionState == SESSION_STATE_INIT) {
@@ -1240,7 +1277,7 @@ void ClientShutdown(int32_t socket, int32_t cancelReason)
         } else {
             AddSessionStateClosing();
         }
-        ret = ClientTransCloseChannel(channelId, type);
+        ret = ClientTransCloseChannel(channelId, type, socket);
         if (ret != SOFTBUS_OK) {
             TRANS_LOGE(TRANS_SDK, "close channel err: ret=%{public}d, channelId=%{public}d, channeType=%{public}d", ret,
                 channelId, type);

@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2024 Huawei Device Co., Ltd.
+ * Copyright (c) 2024-2025 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -17,12 +17,15 @@
 #include <cstdlib>
 #include <cstring>
 #include <fcntl.h>
+#include <securec.h>
 
 #include "gtest/gtest.h"
 #include <gmock/gmock-actions.h>
-
+#include "lnn_log.h"
 #include "lnn_ohos_account_adapter.h"
 #include "lnn_ohos_account_adapter_mock.h"
+#include "softbus_adapter_mem.h"
+#include "softbus_app_info.h"
 #include "softbus_error_code.h"
 #include "softbus_utils.h"
 
@@ -55,11 +58,14 @@ void LnnOhosAccountAdapterTest::TearDown(void) { }
 HWTEST_F(LnnOhosAccountAdapterTest, GetOsAccountId_001, TestSize.Level1)
 {
     uint32_t len = 0;
-    char *accountInfo = (char *)malloc(LNN_OHOS_ACCOUNT_ADAPTER_TEST_ID_LEN * HEXIFY_UNIT_LEN);
+    char *accountInfo = (char *)SoftBusCalloc(LNN_OHOS_ACCOUNT_ADAPTER_TEST_ID_LEN * HEXIFY_UNIT_LEN);
+    ASSERT_NE(accountInfo, nullptr);
     EXPECT_EQ(GetOsAccountId(nullptr, LNN_OHOS_ACCOUNT_ADAPTER_TEST_ID_LEN, &len), SOFTBUS_INVALID_PARAM);
     EXPECT_EQ(GetOsAccountId(accountInfo, 0, &len), SOFTBUS_INVALID_PARAM);
     EXPECT_EQ(GetOsAccountId(accountInfo, LNN_OHOS_ACCOUNT_ADAPTER_TEST_ID_LEN, nullptr), SOFTBUS_INVALID_PARAM);
-    free(accountInfo);
+    if (accountInfo != nullptr) {
+        SoftBusFree(accountInfo);
+    }
 }
 
 /**
@@ -71,11 +77,14 @@ HWTEST_F(LnnOhosAccountAdapterTest, GetOsAccountId_001, TestSize.Level1)
 HWTEST_F(LnnOhosAccountAdapterTest, GetOsAccountId_002, TestSize.Level1)
 {
     uint32_t len = 0;
-    char *accountInfo = (char *)malloc(LNN_OHOS_ACCOUNT_ADAPTER_TEST_ID_LEN * HEXIFY_UNIT_LEN);
+    char *accountInfo = (char *)SoftBusCalloc(LNN_OHOS_ACCOUNT_ADAPTER_TEST_ID_LEN * HEXIFY_UNIT_LEN);
+    ASSERT_NE(accountInfo, nullptr);
     AccountSA::OhosAccountKitsMock mock;
     EXPECT_CALL(mock, IsSameAccountGroupDevice()).Times(1).WillOnce(testing::Return(false));
     EXPECT_EQ(GetOsAccountId(accountInfo, LNN_OHOS_ACCOUNT_ADAPTER_TEST_ID_LEN, &len), SOFTBUS_AUTH_INNER_ERR);
-    free(accountInfo);
+    if (accountInfo != nullptr) {
+        SoftBusFree(accountInfo);
+    }
 }
 
 /**
@@ -86,7 +95,8 @@ HWTEST_F(LnnOhosAccountAdapterTest, GetOsAccountId_002, TestSize.Level1)
  */
 HWTEST_F(LnnOhosAccountAdapterTest, GetOsAccountId_003, TestSize.Level1)
 {
-    char *accountInfo = (char *)malloc(LNN_OHOS_ACCOUNT_ADAPTER_TEST_ID_LEN * HEXIFY_UNIT_LEN);
+    char *accountInfo = (char *)SoftBusCalloc(LNN_OHOS_ACCOUNT_ADAPTER_TEST_ID_LEN * HEXIFY_UNIT_LEN);
+    ASSERT_NE(accountInfo, nullptr);
     uint32_t len = 0;
     OHOS::AccountSA::OhosAccountInfo oh_acc_info;
     std::pair<bool, OHOS::AccountSA::OhosAccountInfo> oh_acc_info_pair = { false, oh_acc_info };
@@ -95,7 +105,9 @@ HWTEST_F(LnnOhosAccountAdapterTest, GetOsAccountId_003, TestSize.Level1)
     EXPECT_CALL(mock, QueryOhosAccountInfo()).Times(1).WillOnce(testing::Return(oh_acc_info_pair));
     EXPECT_EQ(GetOsAccountId(accountInfo, LNN_OHOS_ACCOUNT_ADAPTER_TEST_ID_LEN, &len),
         SOFTBUS_NETWORK_GET_ACCOUNT_INFO_FAILED);
-    free(accountInfo);
+    if (accountInfo != nullptr) {
+        SoftBusFree(accountInfo);
+    }
 }
 
 /**
@@ -106,7 +118,8 @@ HWTEST_F(LnnOhosAccountAdapterTest, GetOsAccountId_003, TestSize.Level1)
  */
 HWTEST_F(LnnOhosAccountAdapterTest, GetOsAccountId_004, TestSize.Level1)
 {
-    char *accountInfo = (char *)malloc(LNN_OHOS_ACCOUNT_ADAPTER_TEST_ID_LEN * HEXIFY_UNIT_LEN);
+    char *accountInfo = (char *)SoftBusCalloc(LNN_OHOS_ACCOUNT_ADAPTER_TEST_ID_LEN * HEXIFY_UNIT_LEN);
+    ASSERT_NE(accountInfo, nullptr);
     uint32_t len = 0;
     OHOS::AccountSA::OhosAccountInfo oh_acc_info;
     oh_acc_info.name_ = "";
@@ -117,7 +130,9 @@ HWTEST_F(LnnOhosAccountAdapterTest, GetOsAccountId_004, TestSize.Level1)
     EXPECT_EQ(GetOsAccountId(accountInfo, LNN_OHOS_ACCOUNT_ADAPTER_TEST_ID_LEN, &len),
         SOFTBUS_NETWORK_GET_ACCOUNT_INFO_FAILED);
 
-    free(accountInfo);
+    if (accountInfo != nullptr) {
+        SoftBusFree(accountInfo);
+    }
 }
 
 /**
@@ -208,7 +223,7 @@ HWTEST_F(LnnOhosAccountAdapterTest, GetCurrentAccount_005, TestSize.Level1)
 
 /**
  * @tc.name: GetCurrentAccount_006
- * @tc.desc:  GetCurrentAccount
+ * @tc.desc: GetCurrentAccount
  * @tc.type: FUN
  * @tc.require: 1
  */
@@ -222,5 +237,449 @@ HWTEST_F(LnnOhosAccountAdapterTest, GetCurrentAccount_006, TestSize.Level1)
     EXPECT_CALL(mock, IsSameAccountGroupDevice()).Times(1).WillOnce(testing::Return(true));
     EXPECT_CALL(mock, QueryOhosAccountInfo()).Times(1).WillOnce(testing::Return(oh_acc_info_pair));
     EXPECT_EQ(GetCurrentAccount(&account), SOFTBUS_OK);
+}
+
+/**
+ * @tc.name: GetOsAccountIdByUserId_InvalidParam01
+ * @tc.desc: GetOsAccountIdByUserId invalid param
+ * @tc.type: FUN
+ * @tc.require: 1
+ */
+HWTEST_F(LnnOhosAccountAdapterTest, GetOsAccountIdByUserId_InvalidParam01, TestSize.Level1)
+{
+    int32_t userId = 100;
+    uint32_t len = 10;
+    int32_t ret = GetOsAccountIdByUserId(userId, nullptr, &len);
+    EXPECT_EQ(ret, SOFTBUS_INVALID_PARAM);
+}
+
+/**
+ * @tc.name: GetOsAccountIdByUserId_InvalidParam02
+ * @tc.desc: GetOsAccountIdByUserId invalid param
+ * @tc.type: FUN
+ * @tc.require: 1
+ */
+HWTEST_F(LnnOhosAccountAdapterTest, GetOsAccountIdByUserId_InvalidParam02, TestSize.Level1)
+{
+    int32_t userId = 100;
+    char *id = nullptr;
+    int32_t ret = GetOsAccountIdByUserId(userId, &id, nullptr);
+    EXPECT_EQ(ret, SOFTBUS_INVALID_PARAM);
+}
+
+/**
+ * @tc.name: GetOsAccountIdByUserId_InvalidParam03
+ * @tc.desc: GetOsAccountIdByUserId invalid param
+ * @tc.type: FUN
+ * @tc.require: 1
+ */
+HWTEST_F(LnnOhosAccountAdapterTest, GetOsAccountIdByUserId_InvalidParam03, TestSize.Level1)
+{
+    int32_t userId = 0;
+    uint32_t len = 10;
+    char *id = nullptr;
+    int32_t ret = GetOsAccountIdByUserId(userId, &id, &len);
+    EXPECT_EQ(ret, SOFTBUS_INVALID_PARAM);
+}
+
+/**
+ * @tc.name: GetOsAccountUid_InvalidParam01
+ * @tc.desc: GetOsAccountUid invalid param
+ * @tc.type: FUN
+ * @tc.require: 1
+ */
+HWTEST_F(LnnOhosAccountAdapterTest, GetOsAccountUid_InvalidParam01, TestSize.Level1)
+{
+    uint32_t idLen = ACCOUNT_UID_STR_LEN;
+    uint32_t len = 0;
+    int32_t ret = GetOsAccountUid(nullptr, idLen, &len);
+    EXPECT_EQ(ret, SOFTBUS_INVALID_PARAM);
+}
+
+/**
+ * @tc.name: GetOsAccountUid_InvalidParam02
+ * @tc.desc: GetOsAccountUid invalid param
+ * @tc.type: FUN
+ * @tc.require: 1
+ */
+HWTEST_F(LnnOhosAccountAdapterTest, GetOsAccountUid_InvalidParam02, TestSize.Level1)
+{
+    char accountUid[ACCOUNT_UID_STR_LEN] = { 0 };
+    uint32_t idLen = ACCOUNT_UID_STR_LEN;
+    int32_t ret = GetOsAccountUid(accountUid, idLen, nullptr);
+    EXPECT_EQ(ret, SOFTBUS_INVALID_PARAM);
+}
+
+/**
+ * @tc.name: GetOsAccountUid_InvalidParam03
+ * @tc.desc: GetOsAccountUid invalid param
+ * @tc.type: FUN
+ * @tc.require: 1
+ */
+HWTEST_F(LnnOhosAccountAdapterTest, GetOsAccountUid_InvalidParam03, TestSize.Level1)
+{
+    char accountUid[ACCOUNT_UID_STR_LEN] = { 0 };
+    uint32_t idLen = 0;
+    uint32_t len = 0;
+    int32_t ret = GetOsAccountUid(accountUid, idLen, &len);
+    EXPECT_EQ(ret, SOFTBUS_INVALID_PARAM);
+
+    idLen = ACCOUNT_UID_STR_LEN;
+    ret = GetOsAccountUid(accountUid, idLen, &len);
+    EXPECT_NE(ret, SOFTBUS_INVALID_PARAM);
+}
+
+/**
+ * @tc.name: GetOsAccountUidByUserId_InvalidParam01
+ * @tc.desc: GetOsAccountUidByUserId invalid param
+ * @tc.type: FUN
+ * @tc.require: 1
+ */
+HWTEST_F(LnnOhosAccountAdapterTest, GetOsAccountUidByUserId_InvalidParam01, TestSize.Level1)
+{
+    uint32_t idLen = ACCOUNT_UID_STR_LEN;
+    uint32_t len = 0;
+    int32_t userId = 100;
+    int32_t ret = GetOsAccountUidByUserId(nullptr, idLen, &len, userId);
+    EXPECT_EQ(ret, SOFTBUS_INVALID_PARAM);
+}
+
+/**
+ * @tc.name: GetOsAccountUidByUserId_InvalidParam02
+ * @tc.desc: GetOsAccountUidByUserId invalid param
+ * @tc.type: FUN
+ * @tc.require: 1
+ */
+HWTEST_F(LnnOhosAccountAdapterTest, GetOsAccountUidByUserId_InvalidParam02, TestSize.Level1)
+{
+    char accountid[ACCOUNT_UID_STR_LEN] = { 0 };
+    uint32_t idLen = ACCOUNT_UID_STR_LEN;
+    int32_t userId = 100;
+    int32_t ret = GetOsAccountUidByUserId(accountid, idLen, nullptr, userId);
+    EXPECT_EQ(ret, SOFTBUS_INVALID_PARAM);
+}
+
+/**
+ * @tc.name: GetOsAccountUidByUserId_InvalidParam03
+ * @tc.desc: GetOsAccountUidByUserId invalid param
+ * @tc.type: FUN
+ * @tc.require: 1
+ */
+HWTEST_F(LnnOhosAccountAdapterTest, GetOsAccountUidByUserId_InvalidParam03, TestSize.Level1)
+{
+    char accountid[ACCOUNT_UID_STR_LEN] = { 0 };
+    uint32_t idLen = 0;
+    uint32_t len = 0;
+    int32_t userId = 100;
+    int32_t ret = GetOsAccountUidByUserId(accountid, idLen, &len, userId);
+    EXPECT_EQ(ret, SOFTBUS_INVALID_PARAM);
+}
+
+/**
+ * @tc.name: GetOsAccountUidByUserId_InvalidParam04
+ * @tc.desc: GetOsAccountUidByUserId invalid param
+ * @tc.type: FUN
+ * @tc.require: 1
+ */
+HWTEST_F(LnnOhosAccountAdapterTest, GetOsAccountUidByUserId_InvalidParam04, TestSize.Level1)
+{
+    char accountid[ACCOUNT_UID_STR_LEN] = { 0 };
+    uint32_t idLen = ACCOUNT_UID_STR_LEN;
+    uint32_t len = 0;
+    int32_t userId = 0;
+    int32_t ret = GetOsAccountUidByUserId(accountid, idLen, &len, userId);
+    EXPECT_EQ(ret, SOFTBUS_INVALID_PARAM);
+}
+
+
+/**
+ * @tc.name: GetOsAccountIdByUserId_001
+ * @tc.desc: GetOsAccountIdByUserId invalid param
+ * @tc.type: FUN
+ * @tc.require: 1
+ */
+HWTEST_F(LnnOhosAccountAdapterTest, GetOsAccountIdByUserId_001, TestSize.Level1)
+{
+    int32_t userId = 0;
+    uint32_t len = 0;
+    char *id = (char *)SoftBusCalloc(LNN_OHOS_ACCOUNT_ADAPTER_TEST_ID_LEN * HEXIFY_UNIT_LEN);
+    EXPECT_EQ(GetOsAccountIdByUserId(userId, &id, &len), SOFTBUS_INVALID_PARAM);
+}
+
+/**
+ * @tc.name: GetOsAccountIdByUserId_002
+ * @tc.desc: GetOsAccountIdByUserId invalid param
+ * @tc.type: FUN
+ * @tc.require: 1
+ */
+HWTEST_F(LnnOhosAccountAdapterTest, GetOsAccountIdByUserId_002, TestSize.Level1)
+{
+    int32_t userId = 123456;
+    uint32_t len = 0;
+    EXPECT_EQ(GetOsAccountIdByUserId(userId, nullptr, &len), SOFTBUS_INVALID_PARAM);
+}
+
+/**
+ * @tc.name: GetOsAccountIdByUserId_003
+ * @tc.desc: GetOsAccountIdByUserId Get Account Info FailInfo
+ * @tc.type: FUN
+ * @tc.require: 1
+ */
+HWTEST_F(LnnOhosAccountAdapterTest, GetOsAccountIdByUserId_003, TestSize.Level1)
+{
+    int32_t userId = 123456;
+    uint32_t len = 10;
+    char *iD = (char *)SoftBusCalloc(LNN_OHOS_ACCOUNT_ADAPTER_TEST_ID_LEN * HEXIFY_UNIT_LEN);
+    ASSERT_NE(iD, nullptr);
+    EXPECT_EQ(GetOsAccountIdByUserId(userId, &iD, &len), SOFTBUS_NETWORK_GET_ACCOUNT_INFO_FAILED);
+    if (iD != nullptr) {
+        SoftBusFree(iD);
+    }
+}
+
+/**
+ * @tc.name: GetOsAccountId_005
+ * @tc.desc:  GetOsAccountId Fail
+ * @tc.type: FUN
+ * @tc.require: 1
+ */
+HWTEST_F(LnnOhosAccountAdapterTest, GetOsAccountId_005, TestSize.Level1)
+{
+    char *accountInfo = (char *)SoftBusCalloc(LNN_OHOS_ACCOUNT_ADAPTER_TEST_ID_LEN * HEXIFY_UNIT_LEN);
+    ASSERT_NE(accountInfo, nullptr);
+    uint32_t len = 17;
+    OHOS::AccountSA::OhosAccountInfo oh_acc_info;
+    oh_acc_info.name_ = "ohosAnonymousName";
+    std::pair<bool, OHOS::AccountSA::OhosAccountInfo> oh_acc_info_pair = { true, oh_acc_info };
+    OHOS::AccountSA::OhosAccountKitsMock mock;
+    EXPECT_CALL(mock, IsSameAccountGroupDevice()).Times(1).WillOnce(testing::Return(true));
+    EXPECT_CALL(mock, QueryOhosAccountInfo()).Times(1).WillOnce(testing::Return(oh_acc_info_pair));
+    EXPECT_EQ(GetOsAccountId(accountInfo, LNN_OHOS_ACCOUNT_ADAPTER_TEST_ID_LEN, &len),
+        SOFTBUS_MEM_ERR);
+
+    if (accountInfo != nullptr) {
+        SoftBusFree(accountInfo);
+    }
+}
+
+/**
+ * @tc.name: GetOsAccountUidByUserId_001
+ * @tc.desc: GetOsAccountUidByUserId Invalid Param
+ * @tc.type: FUN
+ * @tc.require: 1
+ */
+HWTEST_F(LnnOhosAccountAdapterTest, GetOsAccountUidByUserId_001, TestSize.Level1)
+{
+    int32_t userId = 123456;
+    uint32_t len = LNN_OHOS_ACCOUNT_ADAPTER_TEST_ID_LEN;
+    uint32_t idLen = 0;
+    char *accountInfo = (char *)SoftBusCalloc(LNN_OHOS_ACCOUNT_ADAPTER_TEST_ID_LEN * HEXIFY_UNIT_LEN);
+    ASSERT_NE(accountInfo, nullptr);
+    EXPECT_EQ(GetOsAccountUidByUserId(accountInfo, idLen, &len, userId), SOFTBUS_INVALID_PARAM);
+    if (accountInfo != nullptr) {
+        SoftBusFree(accountInfo);
+    }
+}
+
+/**
+ * @tc.name: GetOsAccountUidByUserId_002
+ * @tc.desc: GetOsAccountUidByUserId Failed
+ * @tc.type: FUN
+ * @tc.require: 1
+ */
+HWTEST_F(LnnOhosAccountAdapterTest, GetOsAccountUidByUserId_002, TestSize.Level1)
+{
+    int32_t userId = 123456;
+    uint32_t len = LNN_OHOS_ACCOUNT_ADAPTER_TEST_ID_LEN;
+    uint32_t idLen = LNN_OHOS_ACCOUNT_ADAPTER_TEST_ID_LEN * HEXIFY_UNIT_LEN;
+    char *accountInfo = (char *)SoftBusCalloc(LNN_OHOS_ACCOUNT_ADAPTER_TEST_ID_LEN * HEXIFY_UNIT_LEN);
+    ASSERT_NE(accountInfo, nullptr);
+    OHOS::AccountSA::OhosAccountInfo oh_acc_info;
+    oh_acc_info.name_ = "teatsa";
+    EXPECT_EQ(GetOsAccountUidByUserId(accountInfo, idLen, &len, userId), SOFTBUS_NETWORK_GET_ACCOUNT_INFO_FAILED);
+    if (accountInfo != nullptr) {
+        SoftBusFree(accountInfo);
+    }
+}
+
+/**
+ * @tc.name: GetOsAccountUidByUserId_003
+ * @tc.desc:  GetOsAccountUidByUserId Failed
+ * @tc.type: FUN
+ * @tc.require: 1
+ */
+HWTEST_F(LnnOhosAccountAdapterTest, GetOsAccountUidByUserId_003, TestSize.Level1)
+{
+    int32_t userId = 123456;
+    uint32_t len = LNN_OHOS_ACCOUNT_ADAPTER_TEST_ID_LEN;
+    uint32_t idLen = LNN_OHOS_ACCOUNT_ADAPTER_TEST_ID_LEN;
+    char *accountInfo = (char *)SoftBusCalloc(LNN_OHOS_ACCOUNT_ADAPTER_TEST_ID_LEN * HEXIFY_UNIT_LEN);
+    ASSERT_NE(accountInfo, nullptr);
+    OHOS::AccountSA::OhosAccountInfo oh_acc_info;
+    oh_acc_info.name_ = "ohosAnonymousName";
+    EXPECT_EQ(GetOsAccountUidByUserId(accountInfo, idLen, &len, userId), SOFTBUS_NETWORK_GET_ACCOUNT_INFO_FAILED);
+    if (accountInfo != nullptr) {
+        SoftBusFree(accountInfo);
+    }
+}
+
+/**
+ * @tc.name: GET_OS_ACCOUNT_ID_BY_USER_ID_TEST_001
+ * @tc.desc:  GetOsAccountIdByUserId Failed
+ * @tc.type: FUN
+ * @tc.require: 1
+ */
+HWTEST_F(LnnOhosAccountAdapterTest, GET_OS_ACCOUNT_ID_BY_USER_ID_TEST_001, TestSize.Level1)
+{
+    uint32_t size = 0;
+    int32_t ret = GetOsAccountIdByUserId(0, nullptr, &size);
+    EXPECT_EQ(ret, SOFTBUS_INVALID_PARAM);
+}
+
+/**
+ * @tc.name: GET_OS_ACCOUNT_ID_BY_USER_ID_TEST_002
+ * @tc.desc:  GetOsAccountIdByUserId Failed
+ * @tc.type: FUN
+ * @tc.require: 1
+ */
+HWTEST_F(LnnOhosAccountAdapterTest, GET_OS_ACCOUNT_ID_BY_USER_ID_TEST_002, TestSize.Level1)
+{
+    char *id = nullptr;
+    int32_t ret = GetOsAccountIdByUserId(0, &id, nullptr);
+    EXPECT_EQ(ret, SOFTBUS_INVALID_PARAM);
+}
+
+/**
+ * @tc.name: GET_OS_ACCOUNT_ID_BY_USER_ID_TEST_003
+ * @tc.desc:  GetOsAccountIdByUserId Failed
+ * @tc.type: FUN
+ * @tc.require: 1
+ */
+HWTEST_F(LnnOhosAccountAdapterTest, GET_OS_ACCOUNT_ID_BY_USER_ID_TEST_003, TestSize.Level1)
+{
+    int32_t userId = -1;
+    char *id = nullptr;
+    uint32_t size = 0;
+    int32_t ret = GetOsAccountIdByUserId(userId, &id, &size);
+    EXPECT_EQ(ret, SOFTBUS_INVALID_PARAM);
+}
+
+/**
+ * @tc.name: GET_OS_ACCOUNT_TEST_001
+ * @tc.desc:  GetOsAccountUid Failed with invalid param
+ * @tc.type: FUN
+ * @tc.require: 1
+ */
+HWTEST_F(LnnOhosAccountAdapterTest, GET_OS_ACCOUNT_TEST_001, TestSize.Level1)
+{
+    uint32_t size = 0;
+    int32_t ret = GetOsAccountUid(nullptr, ACCOUNT_UID_STR_LEN, &size);
+    EXPECT_EQ(ret, SOFTBUS_INVALID_PARAM);
+}
+
+/**
+ * @tc.name: GET_OS_ACCOUNT_TEST_002
+ * @tc.desc:  GetOsAccountUid Failed
+ * @tc.type: FUN
+ * @tc.require: 1
+ */
+HWTEST_F(LnnOhosAccountAdapterTest, GET_OS_ACCOUNT_TEST_002, TestSize.Level1)
+{
+    char accountUid[ACCOUNT_UID_STR_LEN];
+    uint32_t size = 0;
+    (void)memset_s(accountUid, ACCOUNT_UID_STR_LEN, 0, ACCOUNT_UID_STR_LEN);
+    int32_t ret = GetOsAccountUid(accountUid, 0, &size);
+    EXPECT_EQ(ret, SOFTBUS_INVALID_PARAM);
+}
+
+/**
+ * @tc.name: GET_OS_ACCOUNT_TEST_003
+ * @tc.desc:  GetOsAccountUid Failed
+ * @tc.type: FUN
+ * @tc.require: 1
+ */
+HWTEST_F(LnnOhosAccountAdapterTest, GET_OS_ACCOUNT_TEST_003, TestSize.Level1)
+{
+    char accountUid[ACCOUNT_UID_STR_LEN];
+    (void)memset_s(accountUid, ACCOUNT_UID_STR_LEN, 0, ACCOUNT_UID_STR_LEN);
+    int32_t ret = GetOsAccountUid(accountUid, ACCOUNT_UID_STR_LEN, nullptr);
+    EXPECT_EQ(ret, SOFTBUS_INVALID_PARAM);
+}
+
+/**
+ * @tc.name: GET_OS_ACCOUNT_UID_BY_USER_ID_TEST_001
+ * @tc.desc:  GetOsAccountUid Failed
+ * @tc.type: FUN
+ * @tc.require: 1
+ */
+HWTEST_F(LnnOhosAccountAdapterTest, GET_OS_ACCOUNT_UID_BY_USER_ID_TEST_001, TestSize.Level1)
+{
+    int32_t userId = 0;
+    uint32_t size = 0;
+    int32_t ret = GetOsAccountUidByUserId(nullptr, ACCOUNT_UID_LEN_MAX - 1, &size, userId);
+    EXPECT_EQ(ret, SOFTBUS_INVALID_PARAM);
+}
+
+/**
+ * @tc.name: GET_OS_ACCOUNT_UID_BY_USER_ID_TEST_002
+ * @tc.desc:  GetOsAccountUid Failed with invalid param
+ * @tc.type: FUN
+ * @tc.require: 1
+ */
+HWTEST_F(LnnOhosAccountAdapterTest, GET_OS_ACCOUNT_UID_BY_USER_ID_TEST_002, TestSize.Level1)
+{
+    char accountId[ACCOUNT_UID_LEN_MAX];
+    int32_t userId = 0;
+    (void)memset_s(accountId, ACCOUNT_UID_LEN_MAX, 0, ACCOUNT_UID_LEN_MAX);
+    int32_t ret = GetOsAccountUidByUserId(accountId, ACCOUNT_UID_LEN_MAX - 1, nullptr, userId);
+    EXPECT_EQ(ret, SOFTBUS_INVALID_PARAM);
+}
+
+/**
+ * @tc.name: GET_OS_ACCOUNT_UID_BY_USER_ID_TEST_003
+ * @tc.desc:  GetOsAccountUid Failed
+ * @tc.type: FUN
+ * @tc.require: 1
+ */
+HWTEST_F(LnnOhosAccountAdapterTest, GET_OS_ACCOUNT_UID_BY_USER_ID_TEST_003, TestSize.Level1)
+{
+    char accountId[ACCOUNT_UID_LEN_MAX];
+    int32_t userId = 0;
+    uint32_t size = 0;
+    (void)memset_s(accountId, ACCOUNT_UID_LEN_MAX, 0, ACCOUNT_UID_LEN_MAX);
+    int32_t ret = GetOsAccountUidByUserId(accountId, 0, &size, userId);
+    EXPECT_EQ(ret, SOFTBUS_INVALID_PARAM);
+}
+
+/**
+ * @tc.name: GET_OS_ACCOUNT_UID_BY_USER_ID_TEST_004
+ * @tc.desc:  GetOsAccountUid Failed
+ * @tc.type: FUN
+ * @tc.require: 1
+ */
+HWTEST_F(LnnOhosAccountAdapterTest, GET_OS_ACCOUNT_UID_BY_USER_ID_TEST_004, TestSize.Level1)
+{
+    char accountId[ACCOUNT_UID_LEN_MAX];
+    int32_t userId = -1;
+    uint32_t size = 0;
+    (void)memset_s(accountId, ACCOUNT_UID_LEN_MAX, 0, ACCOUNT_UID_LEN_MAX);
+    int32_t ret = GetOsAccountUidByUserId(accountId, ACCOUNT_UID_LEN_MAX - 1, &size, userId);
+    EXPECT_EQ(ret, SOFTBUS_INVALID_PARAM);
+}
+
+/**
+ * @tc.name: GET_OS_ACCOUNT_UID_BY_USER_ID_TEST_005
+ * @tc.desc:  GetOsAccountUid Failed with invalid param
+ * @tc.type: FUN
+ * @tc.require: 1
+ */
+HWTEST_F(LnnOhosAccountAdapterTest, GET_OS_ACCOUNT_UID_BY_USER_ID_TEST_005, TestSize.Level1)
+{
+    char accountId[ACCOUNT_UID_LEN_MAX];
+    int32_t userId = 0;
+    uint32_t size = 0;
+    (void)memset_s(accountId, ACCOUNT_UID_LEN_MAX, 0, ACCOUNT_UID_LEN_MAX);
+    int32_t ret = GetOsAccountUidByUserId(accountId, ACCOUNT_UID_LEN_MAX - 1, &size, userId);
+    EXPECT_EQ(ret, SOFTBUS_INVALID_PARAM);
 }
 } // namespace OHOS::SoftBus

@@ -16,7 +16,7 @@ import("//build/ohos.gni")
 import("//build/test.gni")
 import("../../../../dsoftbus.gni")
 
-module_output_path = "dsoftbus/common"
+module_output_path = "dsoftbus/soft_bus/common"
 dsoftbus_root_path = "../../../.."
 
 ohos_unittest("CommonCoreQueueTest") {
@@ -31,7 +31,10 @@ ohos_unittest("CommonCoreQueueTest") {
     "$dsoftbus_root_path/core/common/include",
   ]
 
-  deps = [ "$dsoftbus_root_path/core/common:softbus_utils" ]
+  deps = [ 
+    "$dsoftbus_root_path/core/common:softbus_utils",
+    "$dsoftbus_root_path/adapter:softbus_adapter",
+  ]
 
   external_deps = [
     "googletest:gtest_main",

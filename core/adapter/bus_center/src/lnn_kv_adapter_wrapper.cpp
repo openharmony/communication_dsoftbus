@@ -13,19 +13,10 @@
  * limitations under the License.
  */
 
-#include <cstring>
-#include <securec.h>
-#include <string>
-
 #include "lnn_kv_adapter_wrapper.h"
-#include "lnn_device_info_recovery.h"
 #include "lnn_kv_adapter.h"
 #include "lnn_kv_data_change_listener.h"
 #include "lnn_log.h"
-#include "lnn_node_info.h"
-#include "softbus_error_code.h"
-#include "softbus_def.h"
-#include "softbus_utils.h"
 #include "iservice_registry.h"
 #include "lnn_kv_store_launch_listener.h"
 #include "system_ability_definition.h"
@@ -36,7 +27,6 @@ namespace {
 constexpr int32_t MIN_DBID_COUNT = 1;
 constexpr int32_t MAX_STRING_LEN = 4096;
 constexpr int32_t MIN_STRING_LEN = 1;
-const std::string SEPARATOR = "#";
 std::mutex g_kvAdapterWrapperMutex;
 } // namespace
 
@@ -294,25 +284,25 @@ void LnnUnRegisterDataChangeListener(int32_t dbId)
     LNN_LOGI(LNN_LEDGER, "DeRegisterDataChangeListener success");
 }
 
-bool LnnSubcribeKvStoreService(void)
+int32_t LnnSubcribeKvStoreService(void)
 {
     auto abilityManager = SystemAbilityManagerClient::GetInstance().GetSystemAbilityManager();
     if (abilityManager == nullptr) {
         LNN_LOGE(LNN_LEDGER, "abilityManager is nullptr");
-        return false;
+        return SOFTBUS_NO_INIT;
     }
     sptr<KvStoreStatusChangeListener> listener = new (std::nothrow) KvStoreStatusChangeListener();
     if (listener == nullptr) {
         LNN_LOGE(LNN_LEDGER, "failed to create listener");
-        return false;
+        return SOFTBUS_MEM_ERR;
     }
     int32_t ret = abilityManager->SubscribeSystemAbility(DISTRIBUTED_KV_DATA_SERVICE_ABILITY_ID, listener);
     if (ret != ERR_OK) {
         LNN_LOGE(LNN_LEDGER, "subscribe system ability failed, ret=%{public}d", ret);
-        return false;
+        return SOFTBUS_KV_SUBSCRIBE_SA_FAILED;
     }
     LNN_LOGI(LNN_LEDGER, "subscribe kv store service success");
-    return true;
+    return SOFTBUS_OK;
 }
 
 int32_t LnnSetCloudAbilityInner(int32_t dbId, const bool isEnableCloud)

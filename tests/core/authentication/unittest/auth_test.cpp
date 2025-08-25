@@ -49,9 +49,8 @@ constexpr char P2P_MAC[BT_MAC_LEN] = "01:02:03:04:05:06";
 constexpr char P2P_MAC2[BT_MAC_LEN] = { 0 };
 constexpr char UUID_TEST[UUID_BUF_LEN] = "0123456789ABC";
 constexpr char UUID_TEST2[UUID_BUF_LEN] = { 0 };
-static constexpr int32_t DEFALUT_USERID = 100;
 
-#define LINK_TYPE      8
+#define LINK_TYPE      AUTH_LINK_TYPE_MAX
 #define CLIENT_PORT    6666
 #define KEEPALIVE_TIME 601
 
@@ -65,7 +64,7 @@ public:
 
 void AuthTest::SetUpTestCase()
 {
-    SetAceessTokenPermission("AuthTest");
+    SetAccessTokenPermission("AuthTest");
 }
 
 void AuthTest::TearDownTestCase() { }
@@ -147,16 +146,21 @@ HWTEST_F(AuthTest, REG_TRUST_DATA_CHANGE_LISTENER_Test_001, TestSize.Level1)
  */
 HWTEST_F(AuthTest, HICHAIN_START_AUTH_Test_001, TestSize.Level1)
 {
+    HiChainAuthParam hiChainParam = {};
     int64_t authSeq = 0;
     const char *udid = "testdata";
     const char *uid = "testdata";
     int32_t ret;
 
-    ret = HichainStartAuth(authSeq, nullptr, uid, DEFALUT_USERID);
+    ret = HichainStartAuth(authSeq, NULL, HICHAIN_AUTH_DEVICE);
     EXPECT_TRUE(ret == SOFTBUS_INVALID_PARAM);
-    ret = HichainStartAuth(authSeq, udid, nullptr, DEFALUT_USERID);
+    if (strcpy_s(hiChainParam.udid, UDID_BUF_LEN, (char *)udid) != EOK ||
+        strcpy_s(hiChainParam.uid, MAX_ACCOUNT_HASH_LEN, (char *)uid) != EOK) {
+        return;
+    }
+    ret = HichainStartAuth(authSeq, &hiChainParam, HICHAIN_AUTH_BUTT);
     EXPECT_TRUE(ret == SOFTBUS_INVALID_PARAM);
-    (void)HichainStartAuth(authSeq, udid, uid, DEFALUT_USERID);
+    (void)HichainStartAuth(authSeq, &hiChainParam, HICHAIN_AUTH_DEVICE);
 }
 
 /*
@@ -172,9 +176,9 @@ HWTEST_F(AuthTest, HICHAIN_PROCESS_DATA_Test_001, TestSize.Level1)
     uint32_t len = TEST_DATA_LEN;
     int32_t ret;
 
-    ret = HichainProcessData(authSeq, nullptr, len);
+    ret = HichainProcessData(authSeq, nullptr, len, HICHAIN_AUTH_DEVICE);
     EXPECT_TRUE(ret == SOFTBUS_INVALID_PARAM);
-    ret = HichainProcessData(authSeq, data, len);
+    ret = HichainProcessData(authSeq, data, len, HICHAIN_AUTH_DEVICE);
     EXPECT_NE(ret, SOFTBUS_OK);
 }
 
@@ -607,9 +611,6 @@ HWTEST_F(AuthTest, POST_DEVICE_MESSAGE_Test_002, TestSize.Level1)
     EXPECT_TRUE(ret == SOFTBUS_INVALID_PARAM);
     ret = PostDeviceMessage(&authManager, flagRelay, AuthLinkType(type), &messageParse);
     EXPECT_NE(ret, SOFTBUS_OK);
-    type = LINK_TYPE;
-    ret = PostDeviceMessage(&authManager, flagRelay, AuthLinkType(type), &messageParse);
-    EXPECT_NE(ret, SOFTBUS_OK);
 }
 
 /*
@@ -645,7 +646,7 @@ HWTEST_F(AuthTest, SOCKET_CONNECT_DEVICE_Test_001, TestSize.Level1)
     int32_t port = 22;
     bool isBlockMode = true;
 
-    int32_t ret = SocketConnectDevice(ip, port, isBlockMode);
+    int32_t ret = SocketConnectDevice(ip, port, isBlockMode, WLAN_IF);
     EXPECT_TRUE(ret == AUTH_INVALID_FD);
 }
 
@@ -678,7 +679,7 @@ HWTEST_F(AuthTest, SOCKER_GET_CONN_INFO_Test_001, TestSize.Level1)
     bool isServer = true;
 
     (void)memset_s(&connInfo, sizeof(AuthConnInfo), 0, sizeof(AuthConnInfo));
-    int32_t ret = SocketGetConnInfo(fd, &connInfo, &isServer);
+    int32_t ret = SocketGetConnInfo(fd, &connInfo, &isServer, WLAN_IF);
     EXPECT_NE(ret, SOFTBUS_OK);
 }
 
@@ -713,10 +714,10 @@ HWTEST_F(AuthTest, AUTH_OPRN_CHANNEL_Test_001, TestSize.Level1)
     int32_t port = 1;
     int32_t ret;
 
-    ret = AuthOpenChannel(nullptr, port);
+    ret = AuthOpenChannel(nullptr, port, 0);
     EXPECT_TRUE(ret == INVALID_CHANNEL_ID);
     port = 0;
-    ret = AuthOpenChannel(ip, port);
+    ret = AuthOpenChannel(ip, port, 0);
     EXPECT_TRUE(ret == INVALID_CHANNEL_ID);
 }
 
@@ -814,9 +815,17 @@ HWTEST_F(AuthTest, AUTH_START_VERIFY_Test_001, TestSize.Level1)
 
     (void)memset_s(&connInfo, sizeof(AuthConnInfo), 0, sizeof(AuthConnInfo));
     connInfo.type = AUTH_LINK_TYPE_BLE;
-    ret = AuthStartVerify(nullptr, requestId, &callback, AUTH_MODULE_LNN, true);
+    AuthVerifyParam authVerifyParam;
+    (void)memset_s(&authVerifyParam, sizeof(authVerifyParam), 0, sizeof(authVerifyParam));
+    authVerifyParam.isFastAuth = true;
+    authVerifyParam.module = AUTH_MODULE_LNN;
+    authVerifyParam.requestId = requestId;
+    authVerifyParam.deviceKeyId.hasDeviceKeyId = false;
+    authVerifyParam.deviceKeyId.localDeviceKeyId = AUTH_INVALID_DEVICEKEY_ID;
+    authVerifyParam.deviceKeyId.remoteDeviceKeyId = AUTH_INVALID_DEVICEKEY_ID;
+    ret = AuthStartVerify(nullptr, &authVerifyParam, &callback);
     EXPECT_TRUE(ret == SOFTBUS_INVALID_PARAM);
-    ret = AuthStartVerify(&connInfo, requestId, nullptr, AUTH_MODULE_LNN, true);
+    ret = AuthStartVerify(&connInfo, &authVerifyParam, nullptr);
     EXPECT_TRUE(ret == SOFTBUS_INVALID_PARAM);
 }
 
@@ -973,6 +982,9 @@ HWTEST_F(AuthTest, AUTH_DEVICE_GET_ID_BY_P2P_MAC_Test_001, TestSize.Level1)
     EXPECT_TRUE(ret == AUTH_INVALID_ID);
     ret = AuthDeviceGetIdByUuid(P2P_MAC, type, isServer);
     EXPECT_TRUE(ret == AUTH_INVALID_ID);
+    type = AUTH_LINK_TYPE_MAX;
+    ret = AuthDeviceGetIdByUuid(P2P_MAC, type, isServer);
+    EXPECT_TRUE(ret == AUTH_INVALID_ID);
 }
 
 static void AuthOnDataReceived(AuthHandle authHandle, const AuthTransData *data)
@@ -998,7 +1010,7 @@ HWTEST_F(AuthTest, REGAUTH_TRANS_LISTENER_Test_001, TestSize.Level1)
     AuthTransListener listener = {
         .onDataReceived = AuthOnDataReceived,
         .onDisconnected = AuthOnDisconnected,
-        .onException = NULL,
+        .onException = nullptr,
     };
     int32_t ret;
     ret = RegAuthTransListener(module, nullptr);
@@ -1420,7 +1432,7 @@ HWTEST_F(AuthTest, AUTH_DEVICE_INIT_Test_001, TestSize.Level1)
     AuthTransCallback callBack = {
         .onDataReceived = AuthOnDataReceivedTest,
         .onDisconnected = AuthOnDisconnectedTest,
-        .onException = NULL,
+        .onException = nullptr,
     };
     ret = AuthDeviceInit(&callBack);
     EXPECT_NE(ret, SOFTBUS_OK);
@@ -1700,7 +1712,12 @@ HWTEST_F(AuthTest, AUTH_SESSION_START_AUTH_Test_001, TestSize.Level1)
         .isServer = false,
         .isFastAuth = true,
     };
-    int32_t ret = AuthSessionStartAuth(&authInfo, connInfo);
+    DeviceKeyId deviceKeyId = {
+        .hasDeviceKeyId = false,
+        .localDeviceKeyId = AUTH_INVALID_DEVICEKEY_ID,
+        .remoteDeviceKeyId = AUTH_INVALID_DEVICEKEY_ID,
+    };
+    int32_t ret = AuthSessionStartAuth(&authInfo, connInfo, &deviceKeyId);
     EXPECT_TRUE(ret == SOFTBUS_INVALID_PARAM);
     AuthConnInfo authConnInfo;
     authConnInfo.type = AUTH_LINK_TYPE_WIFI;
@@ -1710,7 +1727,7 @@ HWTEST_F(AuthTest, AUTH_SESSION_START_AUTH_Test_001, TestSize.Level1)
     authConnInfo.info.ipInfo.port = 20;
     authConnInfo.info.ipInfo.authId = 1024;
     (void)strcpy_s(authConnInfo.info.ipInfo.ip, IP_LEN, ip);
-    ret = AuthSessionStartAuth(&authInfo, &authConnInfo);
+    ret = AuthSessionStartAuth(&authInfo, &authConnInfo, &deviceKeyId);
     EXPECT_TRUE(ret == SOFTBUS_LOCK_ERR);
 }
 
@@ -1922,13 +1939,14 @@ HWTEST_F(AuthTest, POST_DEVICE_ID_MESSAGE_Test_001, TestSize.Level1)
  */
 HWTEST_F(AuthTest, PROCESS_DEVICE_ID_MESSAGE_Test_001, TestSize.Level1)
 {
+    int64_t authSeq = 1;
     AuthSessionInfo *info = nullptr;
     AuthSessionInfo infoValue;
     (void)memset_s(&infoValue, sizeof(AuthSessionInfo), 0, sizeof(AuthSessionInfo));
     uint8_t data[TEST_DATA_LEN] = "123";
-    int32_t ret = ProcessDeviceIdMessage(info, data, sizeof(data));
+    int32_t ret = ProcessDeviceIdMessage(info, data, sizeof(data), authSeq);
     EXPECT_TRUE(ret == SOFTBUS_INVALID_PARAM);
-    ret = ProcessDeviceIdMessage(&infoValue, data, sizeof(data));
+    ret = ProcessDeviceIdMessage(&infoValue, data, sizeof(data), authSeq);
     EXPECT_TRUE(ret != SOFTBUS_OK);
 }
 
@@ -1954,8 +1972,8 @@ HWTEST_F(AuthTest, SET_SOCKET_CALLBACK_Test_001, TestSize.Level1)
 HWTEST_F(AuthTest, SOCKET_POST_BYTES_Test_001, TestSize.Level1)
 {
     int32_t fd = 0;
-    const AuthDataHead *head = NULL;
-    const uint8_t *data = NULL;
+    const AuthDataHead *head = nullptr;
+    const uint8_t *data = nullptr;
     int32_t ret = SocketPostBytes(fd, head, data);
     EXPECT_TRUE(ret == SOFTBUS_INVALID_PARAM);
     AuthDataHead headValue;
@@ -1974,13 +1992,13 @@ HWTEST_F(AuthTest, SOCKET_POST_BYTES_Test_001, TestSize.Level1)
 HWTEST_F(AuthTest, SOCKET_GET_CONN_INFO_Test_001, TestSize.Level1)
 {
     int32_t fd = 0;
-    AuthConnInfo *connInfo = NULL;
+    AuthConnInfo *connInfo = nullptr;
     bool isServer = false;
-    int32_t ret = SocketGetConnInfo(fd, connInfo, &isServer);
+    int32_t ret = SocketGetConnInfo(fd, connInfo, &isServer, WLAN_IF);
     EXPECT_TRUE(ret == SOFTBUS_INVALID_PARAM);
     AuthConnInfo connInfoValue;
     (void)memset_s(&connInfoValue, sizeof(AuthConnInfo), 0, sizeof(AuthConnInfo));
-    ret = SocketGetConnInfo(fd, &connInfoValue, &isServer);
+    ret = SocketGetConnInfo(fd, &connInfoValue, &isServer, WLAN_IF);
     EXPECT_NE(ret, SOFTBUS_OK);
 }
 
@@ -2009,9 +2027,9 @@ HWTEST_F(AuthTest, AUTH_OPEN_CHANNEL_Test_001, TestSize.Level1)
     char *ip = nullptr;
     char ipValue[32] = "0";
     int32_t port = 22;
-    int32_t ret = AuthOpenChannel(ip, port);
+    int32_t ret = AuthOpenChannel(ip, port, 0);
     EXPECT_TRUE(ret == INVALID_CHANNEL_ID);
-    ret = AuthOpenChannel(ipValue, port);
+    ret = AuthOpenChannel(ipValue, port, 0);
     EXPECT_TRUE(ret == INVALID_CHANNEL_ID);
 }
 
@@ -2042,7 +2060,7 @@ HWTEST_F(AuthTest, NOTIFY_TRANS_DATA_RECEIVED_Test_001, TestSize.Level1)
     AuthTransListener listener = {
         .onDataReceived = AuthOnDataReceived,
         .onDisconnected = AuthOnDisconnected,
-        .onException = NULL,
+        .onException = nullptr,
     };
     int32_t ret;
     ret = RegAuthTransListener(MODULE_UDP_INFO, &listener);

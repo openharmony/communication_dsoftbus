@@ -15,7 +15,6 @@
 
 #ifndef SOFTBUS_PROXYCHANNEL_LISTENER_H
 #define SOFTBUS_PROXYCHANNEL_LISTENER_H
-#include <stdint.h>
 #include "softbus_app_info.h"
 
 #ifdef __cplusplus

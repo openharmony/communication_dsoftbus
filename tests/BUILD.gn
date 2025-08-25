@@ -50,10 +50,13 @@ if (defined(ohos_lite)) {
         "core/transmission:unittest",
         "dfx:unittest",
         "sdk/bus_center:unittest",
+        "sdk/connection/ipc:unittest",
+        "sdk/connection/service:unittest",
         "sdk/discovery:unittest",
         "sdk/frame/common:unittest",
         "sdk/frame/standard:unittest",
         "sdk/transmission:unittest",
+        "br_proxy:unittest",
       ]
     }
   }
@@ -62,13 +65,13 @@ if (defined(ohos_lite)) {
     testonly = true
     deps = [
       "adapter:fuzztest",
+      "br_proxy:fuzztest",
       "core/adapter:fuzztest",
       "core/authentication:fuzztest",
       "core/broadcast:fuzztest",
       "core/bus_center:fuzztest",
       "core/common:fuzztest",
       "core/connection:fuzztest",
-      "core/discovery:fuzztest",
       "core/frame:fuzztest",
       "core/transmission:fuzztest",
       "dfx:fuzztest",

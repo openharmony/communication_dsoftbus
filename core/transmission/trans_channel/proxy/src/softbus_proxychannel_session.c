@@ -128,8 +128,13 @@ int32_t TransProxyPostSessionData(int32_t channelId, const unsigned char *data, 
 }
 
 static char *TransProxyPackAppNormalMsg(const ProxyMessageHead *msg, const char *payLoad,
-    int32_t datalen, int32_t *outlen)
+    int32_t datalen, int32_t *outLen)
 {
+    if (msg == NULL || payLoad == NULL || outLen == NULL) {
+        TRANS_LOGE(TRANS_MSG, "invalid param.");
+        return NULL;
+    }
+
     ProxyMessageHead proxyMessageHead;
     uint32_t connHeadLen = ConnGetHeadSize();
     uint32_t bufLen = PROXY_CHANNEL_HEAD_LEN + connHeadLen + (uint32_t)datalen;
@@ -156,26 +161,68 @@ static char *TransProxyPackAppNormalMsg(const ProxyMessageHead *msg, const char 
         SoftBusFree(buf);
         return NULL;
     }
+    *outLen = (int32_t)bufLen;
+
+    return buf;
+}
+
+static char *TransProxyPackD2DMsg(const ProxyChannelInfo *info, const char *payLoad, int32_t dataLen, int32_t *outlen)
+{
+    ProxyMessageShortHead msgHead = { 0 };
+    msgHead.type = (PROXYCHANNEL_MSG_TYPE_D2D & FOUR_BIT_MASK) | (VERSION << VERSION_SHIFT);
+    msgHead.myId = info->myId;
+    msgHead.peerId = info->peerId;
+
+    uint32_t connHeadLen = ConnGetHeadSize();
+    uint32_t bufLen = PROXY_CHANNEL_D2D_HEAD_LEN + connHeadLen + (uint32_t)dataLen;
+
+    char *buf = (char *)SoftBusCalloc(bufLen);
+    if (buf == NULL) {
+        TRANS_LOGE(TRANS_MSG, "buf calloc failed");
+        return NULL;
+    }
+    PackProxyMessageShortHead(&msgHead);
+    if (memcpy_s(buf + connHeadLen, bufLen - connHeadLen, &msgHead, PROXY_CHANNEL_D2D_HEAD_LEN) != EOK) {
+        TRANS_LOGE(TRANS_MSG, "memcpy_s head failed.");
+        SoftBusFree(buf);
+        return NULL;
+    }
+    uint32_t dstLen = bufLen - connHeadLen - PROXY_CHANNEL_D2D_HEAD_LEN;
+    if (memcpy_s(buf + connHeadLen + PROXY_CHANNEL_D2D_HEAD_LEN, dstLen, payLoad, dataLen) != EOK) {
+        TRANS_LOGE(TRANS_MSG, "memcpy_s data failed.");
+        SoftBusFree(buf);
+        return NULL;
+    }
     *outlen = (int32_t)bufLen;
 
     return buf;
 }
 
-static int32_t TransProxyTransNormalMsg(const ProxyChannelInfo *info, const char *payLoad, int32_t payLoadLen,
-    ProxyPacketType flag)
+static int32_t TransProxyTransNormalMsg(
+    const ProxyChannelInfo *info, const char *payLoad, int32_t payLoadLen, ProxyPacketType flag)
 {
-    ProxyMessageHead msgHead = { 0 };
-    msgHead.type = (PROXYCHANNEL_MSG_TYPE_NORMAL & FOUR_BIT_MASK) | (VERSION << VERSION_SHIFT);
-    msgHead.myId = info->myId;
-    msgHead.peerId = info->peerId;
+    char *buf = NULL;
     int32_t bufLen = 0;
-    char *buf = TransProxyPackAppNormalMsg(&msgHead, payLoad, payLoadLen, &bufLen);
-    if (buf == NULL) {
-        TRANS_LOGE(TRANS_MSG, "proxy pack msg error");
-        return SOFTBUS_TRANS_PROXY_PACKMSG_ERR;
+    if (info->appInfo.businessType == BUSINESS_TYPE_D2D_MESSAGE ||
+        info->appInfo.businessType == BUSINESS_TYPE_D2D_VOICE) {
+        buf = TransProxyPackD2DMsg(info, payLoad, payLoadLen, &bufLen);
+        if (buf == NULL) {
+            TRANS_LOGE(TRANS_MSG, "proxy pack msg error");
+            return SOFTBUS_TRANS_PROXY_PACKMSG_ERR;
+        }
+    } else {
+        ProxyMessageHead msgHead = { 0 };
+        msgHead.type = (PROXYCHANNEL_MSG_TYPE_NORMAL & FOUR_BIT_MASK) | (VERSION << VERSION_SHIFT);
+        msgHead.myId = info->myId;
+        msgHead.peerId = info->peerId;
+        buf = TransProxyPackAppNormalMsg(&msgHead, payLoad, payLoadLen, &bufLen);
+        if (buf == NULL) {
+            TRANS_LOGE(TRANS_MSG, "proxy pack msg error");
+            return SOFTBUS_TRANS_PROXY_PACKMSG_ERR;
+        }
     }
-    int32_t ret = TransProxyTransSendMsg(info->connId, (uint8_t *)buf, (uint32_t)bufLen,
-        ProxyTypeToConnPri(flag), info->appInfo.myData.pid);
+    int32_t ret = TransProxyTransSendMsg(
+        info->connId, (uint8_t *)buf, (uint32_t)bufLen, ProxyTypeToConnPri(flag), info->appInfo.myData.pid);
     if (ret == SOFTBUS_CONNECTION_ERR_SENDQUEUE_FULL) {
         TRANS_LOGE(TRANS_MSG, "proxy send queue full.");
         return SOFTBUS_CONNECTION_ERR_SENDQUEUE_FULL;

@@ -12,10 +12,10 @@
 # limitations under the License.
 
 import("../../adapter/common/bus_center/bus_center_adapter.gni")
+import("../../adapter/common/net/bluetooth/net_bluetooth.gni")
 import("../../adapter/common/net/hdi/net_hdi.gni")
 import("../../adapter/common/net/wifi/net_wifi.gni")
 import("../../core/adapter/core_adapter.gni")
-import("../../core/bus_center/lnn/decision_center/decision_center.gni")
 import("../../core/bus_center/lnn/disc_mgr/bus_center_disc_mgr.gni")
 import("../../core/bus_center/lnn/lane_hub/lane_hub.gni")
 import("../../core/bus_center/lnn/net_builder/net_builder.gni")
@@ -28,19 +28,17 @@ bus_center_server_src =
     bus_center_adapter_src + bus_center_core_adapter_src +
     bus_center_disc_mgr_src + bus_center_hub_src + bus_center_builder_src +
     bus_center_net_mgr_src + bus_center_ledger_src + bus_center_monitor_src +
-    bus_center_utils_src + adapter_wifi_src + adapter_hdi_src +
-    bus_center_decision_center_src
+    bus_center_utils_src + adapter_wifi_src + adapter_hdi_src
 bus_center_server_inc =
     bus_center_adapter_inc + bus_center_core_adapter_inc +
     bus_center_disc_mgr_inc + bus_center_hub_inc + bus_center_builder_inc +
     bus_center_net_mgr_inc + bus_center_ledger_inc + bus_center_monitor_inc +
-    bus_center_utils_inc + adapter_wifi_inc + adapter_hdi_inc +
-    bus_center_decision_center_inc
+    bus_center_utils_inc + adapter_wifi_inc + adapter_hdi_inc
 bus_center_server_deps =
     bus_center_adapter_deps + bus_center_core_adapter_deps +
     bus_center_disc_mgr_deps + bus_center_hub_deps + bus_center_builder_deps +
     bus_center_net_mgr_deps + bus_center_ledger_deps + bus_center_monitor_deps +
-    bus_center_utils_deps + bus_center_decision_center_deps
+    bus_center_utils_deps
 
 bus_center_server_src += [
   "$dsoftbus_root_path/core/bus_center/service/src/bus_center_manager.c",
@@ -49,10 +47,11 @@ bus_center_server_src += [
 ]
 
 bus_center_server_inc += [
-  "$dsoftbus_root_path/interface/kits/bus_center",
+  "$dsoftbus_root_path/interfaces/kits/bus_center",
   "$dsoftbus_root_path/core/bus_center/interface",
   "$dsoftbus_root_path/core/bus_center/ipc/include",
   "$dsoftbus_root_path/core/bus_center/service/include",
+  "$dsoftbus_root_path/core/bus_center/lnn/lane_hub/lane_manager/include",
   "$dsoftbus_root_path/sdk/bus_center/manager/include",
 ]
 
@@ -95,198 +94,19 @@ if (defined(ohos_lite)) {
     "$dsoftbus_root_path/sdk/frame/$os_type/include",
   ]
 
-  if (dsoftbus_feature_ex_kits) {
-    import(
-        "$dsoftbus_root_path/dsoftbus_enhance/core/bus_center/extend/bus_center_ex.gni")
-
-    bus_center_server_inc += bus_center_ex_inc
-    bus_center_server_src += bus_center_ex_src
-  } else {
-    bus_center_server_inc +=
-        [ "$dsoftbus_root_path/core/bus_center/extend/include" ]
-    bus_center_server_src += [ "$dsoftbus_root_path/core/bus_center/extend/src/bus_center_ex_obj_stub.cpp" ]
-  }
+  bus_center_server_inc +=
+  [
+    "$dsoftbus_root_path/core/bus_center/extend/include",
+    "$dsoftbus_root_path/interfaces/kits/bus_center/enhance",
+  ]
+  bus_center_server_src += [
+    "$dsoftbus_root_path/core/bus_center/extend/src/bus_center_ex_obj_stub.cpp",
+    "$dsoftbus_root_path/core/bus_center/extend/src/bus_center_ex_obj.cpp",
+  ]
 
   bus_center_server_external_deps +=
       bus_center_adapter_external_deps + bus_center_ledger_external_deps +
       bus_center_core_adapter_external_deps + adapter_wifi_external_deps +
       adapter_hdi_external_deps
   bus_center_server_external_deps += [ "c_utils:utils" ]
-}
-
-native_source_path = rebase_path("$dsoftbus_root_path")
-agcr_dir = "dsoftbus_enhance/components/newip/agcr"
-agcr_enhanced = exec_script("$dsoftbus_root_path/check_sub_module.py",
-                            [
-                              "$native_source_path",
-                              "$agcr_dir",
-                            ],
-                            "value")
-
-if (agcr_enhanced) {
-  import("../../dsoftbus_enhance/components/newip/agcr/agcr.gni")
-
-  bus_center_server_src += agcr_src
-  bus_center_server_inc += agcr_inc
-}
-
-lnn_lp_dir = "dsoftbus_enhance/adapter/common/mlps/src"
-lnn_lp_enhanced = exec_script("$dsoftbus_root_path/check_sub_module.py",
-                              [
-                                "$native_source_path",
-                                "$lnn_lp_dir",
-                              ],
-                              "value")
-
-if (lnn_lp_enhanced) {
-  import("../../dsoftbus_enhance/adapter/common/mlps/adapter_mlps.gni")
-  bus_center_server_inc += adapter_mlps_inc
-  bus_center_server_src += adapter_mlps_src
-}
-
-lnn_lane_dir = "dsoftbus_enhance/core/bus_center/lnn/lane_hub/lane/src"
-lnn_lane_enhanced = exec_script("$dsoftbus_root_path/check_sub_module.py",
-                                [
-                                  "$native_source_path",
-                                  "$lnn_lane_dir",
-                                ],
-                                "value")
-
-if (lnn_lane_enhanced && dsoftbus_feature_lnn_lane_mgr) {
-  import("../../dsoftbus_enhance/core/bus_center/lnn/lane_hub/lane/lane.gni")
-  bus_center_server_src += bus_center_lane_enhance_src
-  bus_center_server_external_deps += bus_center_lane_enhance_external_deps
-}
-
-route_dir = "dsoftbus_enhance/components/newip/route"
-route_enhanced = exec_script("$dsoftbus_root_path/check_sub_module.py",
-                             [
-                               "$native_source_path",
-                               "$route_dir",
-                             ],
-                             "value")
-
-if (route_enhanced) {
-  import("../../dsoftbus_enhance/components/newip/route/route.gni")
-
-  bus_center_server_src += route_src
-  bus_center_server_inc += route_inc
-}
-
-btn_dir = "dsoftbus_enhance/components/newip/btn"
-btn_enhanced = exec_script("$dsoftbus_root_path/check_sub_module.py",
-                           [
-                             "$native_source_path",
-                             "$btn_dir",
-                           ],
-                           "value")
-
-if (btn_enhanced) {
-  import("../../dsoftbus_enhance/components/newip/btn/btn.gni")
-
-  bus_center_server_src += btn_src
-  bus_center_server_inc += btn_inc
-}
-
-meta_node_dir = "dsoftbus_enhance/core/bus_center/lnn/meta_node"
-meta_node_enhanced = exec_script("$dsoftbus_root_path/check_sub_module.py",
-                                 [
-                                   "$native_source_path",
-                                   "$meta_node_dir",
-                                 ],
-                                 "value")
-
-if (meta_node_enhanced) {
-  import(
-      "//foundation/communication/dsoftbus/dsoftbus_enhance/core/bus_center/lnn/meta_node/meta_node.gni")
-
-  bus_center_server_src += bus_center_meta_node_enhance_src
-  bus_center_server_inc += bus_center_meta_node_enhance_inc
-}
-if (!meta_node_enhanced || !dsoftbus_feature_lnn_meta_node) {
-  import(
-      "//foundation/communication/dsoftbus/core/bus_center/lnn/meta_node/meta_node.gni")
-
-  bus_center_server_src += bus_center_meta_node_src
-  bus_center_server_inc += bus_center_meta_node_inc
-}
-
-native_source_path = rebase_path("$dsoftbus_root_path")
-dep_linkfinder = "dsoftbus_enhance/core/bus_center/adapter"
-lk_enhanced = exec_script("$dsoftbus_root_path/check_sub_module.py",
-                          [
-                            "$native_source_path",
-                            "$dep_linkfinder",
-                          ],
-                          "value")
-
-if (lk_enhanced) {
-  import("../../dsoftbus_enhance/core/bus_center/adapter/adapter.gni")
-
-  bus_center_server_src += lnn_link_finder_sources
-  bus_center_server_inc += lnn_link_finder_include_dirs
-  bus_center_server_deps += lnn_link_finder_deps
-} else {
-  bus_center_server_src += [
-    "$dsoftbus_root_path/core/adapter/bus_center/src/lnn_link_finder_virtul.c",
-  ]
-  bus_center_server_inc +=
-      [ "$dsoftbus_root_path/core/adapter/bus_center/include" ]
-}
-
-lnn_coap_dep_dir = "dsoftbus_enhance/core/bus_center/lnn/disc_mgr"
-lnn_disc_enhanced = exec_script("$dsoftbus_root_path/check_sub_module.py",
-                                [
-                                  "$native_source_path",
-                                  "$lnn_coap_dep_dir",
-                                ],
-                                "value")
-
-if (dsoftbus_feature_lnn_frame && lnn_disc_enhanced) {
-  disc_mgr_enhance_path =
-      "$dsoftbus_root_path/dsoftbus_enhance/core/bus_center/lnn/disc_mgr"
-  bus_center_server_src += [ "$disc_mgr_enhance_path/src/lnn_coap_adapter.c" ]
-  bus_center_server_inc +=
-      [ "$dsoftbus_root_path/dsoftbus_enhance/core/connection/coap" ]
-} else {
-  bus_center_server_src += [ "$dsoftbus_root_path/core/bus_center/lnn/disc_mgr/src/lnn_coap_adapter_virtual.c" ]
-}
-
-native_source_path = rebase_path("$dsoftbus_root_path")
-oobe_dir = "dsoftbus_enhance/adapter/common/oobe"
-oobe_enhanced = exec_script("$dsoftbus_root_path/check_sub_module.py",
-                            [
-                              "$native_source_path",
-                              "$oobe_dir",
-                            ],
-                            "value")
-
-if (!oobe_enhanced) {
-  bus_center_server_src += [ "$dsoftbus_root_path/core/adapter/bus_center/src/lnn_oobe_manager_virtual.cpp" ]
-  bus_center_server_inc +=
-      [ "$dsoftbus_root_path/core/adapter/bus_center/include" ]
-} else {
-  bus_center_server_src += [ "$dsoftbus_root_path/dsoftbus_enhance/adapter/common/oobe/lnn_oobe_manager.cpp" ]
-
-  bus_center_server_inc += [
-    "$dsoftbus_root_path/adapter/common/bus_center/include",
-    "$dsoftbus_root_path/core/adapter/bus_center/include",
-  ]
-}
-
-usb_channel_dir = "dsoftbus_enhance/core/bus_center/lnn/usb_channel_config/src"
-usb_channel_enhanced = exec_script("$dsoftbus_root_path/check_sub_module.py",
-                                   [
-                                     "$native_source_path",
-                                     "$usb_channel_dir",
-                                   ],
-                                   "value")
-
-if (usb_channel_enhanced) {
-  import(
-      "../../dsoftbus_enhance/core/bus_center/lnn/usb_channel_config/usb_channel.gni")
-
-  bus_center_server_inc += usb_channel_enhance_inc
-  bus_center_server_src += usb_channel_enhance_src
-  bus_center_server_external_deps += usb_channel_enhance_external_deps
 }

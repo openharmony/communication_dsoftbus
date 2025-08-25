@@ -22,7 +22,8 @@
 #include <memory>
 
 #include "timer.h"
-#include "auth_interface.h"
+#include "auth_interface_struct.h"
+#include "bus_center_event_struct.h"
 #include "softbus_common.h"
 
 #include "wifi_direct_initiator.h"
@@ -52,8 +53,11 @@ public:
     static void Init();
     static std::pair<int, ListenerModule> StartListening(AuthLinkType type, const std::string &localIp, int port);
     static void StopListening(AuthLinkType type, ListenerModule module);
+    static int AssignValueForAuthConnInfo(bool isMeta, bool needUdid, const OpenParam &param,
+        const std::shared_ptr<AuthNegotiateChannel> &channel, AuthConnInfo &authConnInfo);
+    static int AuthOpenConnection(uint32_t requestId, AuthConnInfo authConnInfo, bool isMeta);
     static int OpenConnection(const OpenParam &param, const std::shared_ptr<AuthNegotiateChannel> &channel,
-        uint32_t &authReqId);
+        uint32_t &authReqId, std::shared_ptr<std::promise<AuthOpenEvent>> authOpenEventPromise = nullptr);
     static void StopCustomListening();
     static void RemovePendingAuthReq(uint32_t authReqId);
 
@@ -68,10 +72,22 @@ public:
     bool operator==(const AuthHandle &otherHandle) const;
     bool IsMeta() const;
     void SetClose();
+    AuthHandle GetAuthHandle();
 
+    static void AddAuthConnection(const LnnEventBasicInfo *info);
+    static void RefreshAuthConnection(std::string remoteUuid);
     int SendMessage(const NegotiateMessage &msg) const override;
     NegotiateMessage SendMessageAndWaitResponse(const NegotiateMessage &msg);
     std::string GetRemoteDeviceId() const override;
+
+    using SyncDBACDataHook = std::function<void(const std::vector<uint8_t> &data)>;
+    static void Register(const SyncDBACDataHook &syncDBACDataHook);
+    static void SyncDBACData(const std::vector<uint8_t> &data);
+
+    NegotiateChannelType GetType() const override
+    {
+        return NegotiateChannelType::AUTH_CHANNEL;
+    }
 
 private:
     static void OnConnOpened(uint32_t requestId, AuthHandle authHandle);
@@ -88,6 +104,7 @@ private:
     static inline Initiator initiator_;
     static inline std::recursive_mutex lock_;
     static inline std::map<uint32_t, std::string> requestIdToDeviceIdMap_;
+    static inline std::map<uint32_t, std::shared_ptr<std::promise<AuthOpenEvent>>> authOpenEventPromiseMap_;
 
     static inline std::recursive_mutex channelLock_;
     static inline std::map<int64_t, std::shared_ptr<AuthNegotiateChannel>> authIdToChannelMap_;
@@ -97,6 +114,8 @@ private:
     std::shared_ptr<std::promise<NegotiateMessage>> promise_;
     uint32_t timerId_;
     bool close_;
+
+    static inline SyncDBACDataHook syncDBACDataHook_;
 };
 } // namespace OHOS::SoftBus
 #endif

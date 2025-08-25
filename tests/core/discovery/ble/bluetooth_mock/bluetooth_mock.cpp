@@ -459,6 +459,13 @@ int32_t BleStopScan(int32_t scannerId)
     return BluetoothMock::GetMock()->BleStopScan(scannerId);
 }
 
+int32_t BleChangeScanParams(int32_t scannerId, const BleScanConfigs *config, const BleScanNativeFilter *filter,
+    uint32_t filterSize, uint32_t filterAction)
+{
+    LOG("%s", __func__);
+    return BluetoothMock::GetMock()->BleChangeScanParams(scannerId, config, filter, filterSize, filterAction);
+}
+
 int32_t BleStartAdvEx(int32_t *advId, const StartAdvRawData rawData, BleAdvParams advParam)
 {
     LOG("%s", __func__);
@@ -477,6 +484,24 @@ int32_t BleSetAdvData(int32_t advId, const StartAdvRawData data)
     LOG("%s", __func__);
     OHOS::DumpBleAdvRawData(data);
     return BluetoothMock::GetMock()->BleSetAdvData(advId, data);
+}
+
+int32_t BleChangeAdvParams(int32_t advId, const BleAdvParams advParam)
+{
+    LOG("%s", __func__);
+    return BluetoothMock::GetMock()->BleChangeAdvParams(advId, advParam);
+}
+
+int32_t BleEnableAdvEx(int32_t advId)
+{
+    LOG("%s", __func__);
+    return BluetoothMock::GetMock()->BleEnableAdvEx(advId);
+}
+
+int32_t BleDisableAdvEx(int32_t advId)
+{
+    LOG("%s", __func__);
+    return BluetoothMock::GetMock()->BleDisableAdvEx(advId);
 }
 
 int32_t GetAdvHandle(int32_t advId, int32_t *advHandle)
@@ -520,4 +545,10 @@ int32_t SetLpDeviceParam(const BtLpDeviceParam *lpParam)
 {
     LOG("%s", __func__);
     return BluetoothMock::GetMock()->SetLpDeviceParam(lpParam);
+}
+
+int32_t GetRandomAddress(const BdAddr *realAddr, BdAddr *randomAddr, uint64_t tokenId)
+{
+    LOG("%s", __func__);
+    return BluetoothMock::GetMock()->GetRandomAddress(realAddr, randomAddr, tokenId);
 }

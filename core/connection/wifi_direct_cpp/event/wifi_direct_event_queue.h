@@ -16,8 +16,6 @@
 #define WIFI_DIRECT_EVENT_QUEUE_H
 
 #include <queue>
-#include <mutex>
-#include <memory>
 #include <condition_variable>
 #include "wifi_direct_event_base.h"
 #include "wifi_direct_event_wrapper.h"

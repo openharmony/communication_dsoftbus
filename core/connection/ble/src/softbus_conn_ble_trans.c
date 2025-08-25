@@ -50,7 +50,7 @@ static int32_t UnpackTransHeader(uint8_t *data, uint32_t dataLen, BleTransHeader
     if ((header->size != dataLen - BLE_TRANS_HEADER_SIZE) || (header->total > MAX_DATA_LEN) ||
         (header->size > header->total) || (header->total - header->size < header->offset)) {
         CONN_LOGW(CONN_BLE,
-            "unpack ble trans header failed, dataLen=%{public}u, total=%{public}u, currentPacketSize=%{public}u",
+            "unpack ble trans header fail, dataLen=%{public}u, total=%{public}u, currentPacketSize=%{public}u",
             dataLen, header->total, header->size);
         return SOFTBUS_CONN_BLE_INTERNAL_ERR;
     }
@@ -79,15 +79,15 @@ uint8_t *ConnGattTransRecv(
     uint32_t connectionId, uint8_t *data, uint32_t dataLen, ConnBleReadBuffer *buffer, uint32_t *outLen)
 {
     CONN_CHECK_AND_RETURN_RET_LOGW(data != NULL, NULL, CONN_BLE,
-        "ble recv packet failed: invalid param, data is null, connectionId=%{public}u", connectionId);
+        "ble recv packet fail: invalid param, data is null, connectionId=%{public}u", connectionId);
     CONN_CHECK_AND_RETURN_RET_LOGW(dataLen != 0, NULL, CONN_BLE,
-        "ble recv packet failed: invalid param, data len is 0, connectionId=%{public}u", connectionId);
+        "ble recv packet fail: invalid param, data len is 0, connectionId=%{public}u", connectionId);
     CONN_CHECK_AND_RETURN_RET_LOGW(outLen != NULL, NULL, CONN_BLE,
-        "ble recv packet failed: invalid param, outLen is null, connectionId=%{public}u", connectionId);
+        "ble recv packet fail: invalid param, outLen is null, connectionId=%{public}u", connectionId);
 
     BleTransHeader header = { 0 };
     CONN_CHECK_AND_RETURN_RET_LOGW(UnpackTransHeader(data, dataLen, &header) == SOFTBUS_OK, NULL, CONN_BLE,
-        "unpack ble trans header failed, discard this packet, connectionId=%{public}u, dataLen=%{public}u",
+        "unpack ble trans header fail, discard this packet, connectionId=%{public}u, dataLen=%{public}u",
         connectionId, dataLen);
 
     if (header.size == header.total) {
@@ -103,12 +103,12 @@ uint8_t *ConnGattTransRecv(
         uint32_t valueLen = header.total;
         uint8_t *value = SoftBusCalloc(sizeof(uint8_t) * valueLen);
         CONN_CHECK_AND_RETURN_RET_LOGE(value != NULL, NULL, CONN_BLE,
-            "calloc value failed, discard this packet. connId=%{public}u, packetDataLen=%{public}u, "
+            "calloc value fail, discard this packet. connId=%{public}u, packetDataLen=%{public}u, "
             "Seq=%{public}u, Total=%{public}u, Size=%{public}u, Offset=%{public}u",
             connectionId, dataLen, header.seq, header.total, header.size, header.offset);
         if (memcpy_s(value, valueLen, data + BLE_TRANS_HEADER_SIZE, header.size) != EOK) {
             CONN_LOGE(CONN_BLE,
-                "memcpy_s value failed, discard this packet. connId=%{public}u, dataLen=%{public}u, "
+                "memcpy_s value fail, discard this packet. connId=%{public}u, dataLen=%{public}u, "
                 "headerSeq=%{public}u, headerTotal=%{public}u, headerSize=%{public}u, headerOffset=%{public}u",
                 connectionId, dataLen, header.seq, header.total, header.size, header.offset);
             SoftBusFree(value);
@@ -167,7 +167,7 @@ uint8_t *ConnGattTransRecv(
     uint8_t *copyData = SoftBusCalloc(dataLen);
     if (packet == NULL || copyData == NULL || memcpy_s(copyData, dataLen, data, dataLen) != EOK) {
         CONN_LOGE(CONN_BLE,
-            "ble recv packet failed: calloc ble package or copy data failed, discard all received. "
+            "ble recv packet fail: calloc ble package or copy data fail, discard all received. "
             "connId=%{public}u, dataLen=%{public}u, "
             "headerSeq=%{public}u, headerTotal=%{public}u, headerSize=%{public}u, headerOffset=%{public}u, "
             "bufferSeq=%{public}u, bufferTotal=%{public}u, bufferReceived=%{public}u",
@@ -200,7 +200,7 @@ uint8_t *ConnGattTransRecv(
 
     if (buffer->received > buffer->total) {
         CONN_LOGW(CONN_BLE,
-            "ble recv packet failed, receive data length more than expected, discard all received segmental packet"
+            "ble recv packet fail, receive data length more than expected, discard all received segmental packet"
             "connId=%{public}u, dataLen=%{public}u, "
             "headerSeq=%{public}u, headerTotal=%{public}u, headerSize=%{public}u, headerOffset=%{public}u, "
             "bufferSeq=%{public}u, bufferTotal=%{public}u, bufferReceived=%{public}u",
@@ -214,7 +214,7 @@ uint8_t *ConnGattTransRecv(
     uint8_t *value = SoftBusCalloc(sizeof(uint8_t) * valueLen);
     if (value == NULL) {
         CONN_LOGE(CONN_BLE,
-            "calloc out value failed, discard all received segmental packet. connId=%{public}u, dataLen=%{public}u, "
+            "calloc out value fail, discard all received segmental packet. connId=%{public}u, dataLen=%{public}u, "
             "headerSeq=%{public}u, headerTotal=%{public}u, headerSize=%{public}u, headerOffset=%{public}u, "
             "bufferSeq=%{public}u, bufferTotal=%{public}u, bufferReceived=%{public}u",
             connectionId, dataLen, header.seq, header.total, header.size, header.offset, buffer->seq, buffer->total,
@@ -239,7 +239,7 @@ uint8_t *ConnGattTransRecv(
         }
         if (memcpy_s(value + offset, valueLen - offset, it->data + BLE_TRANS_HEADER_SIZE, it->header.size) != EOK) {
             CONN_LOGE(CONN_BLE,
-                "memcpy_s packet to value failed, discard all received segmental packet. connId=%{public}u, "
+                "memcpy_s packet to value fail, discard all received segmental packet. connId=%{public}u, "
                 "packetDataLen=%{public}u, Seq=%{public}u, Total=%{public}u, Size=%{public}u, Offset=%{public}u, "
                 "valueLen=%{public}u, currentValueOffset=%{public}u",
                 connectionId, dataLen, header.seq, header.total, header.size, header.offset, valueLen, offset);
@@ -262,6 +262,7 @@ static void FreeSendNode(SendQueueNode *node)
 {
     if (node->data != NULL) {
         SoftBusFree(node->data);
+        node->data = NULL;
     }
     SoftBusFree(node);
 }
@@ -313,7 +314,7 @@ int32_t ConnBlePostBytesInner(uint32_t connectionId, uint8_t *data, uint32_t dat
     int32_t module, int64_t seq, PostBytesFinishAction postBytesFinishAction)
 {
     CONN_CHECK_AND_RETURN_RET_LOGW(data != NULL, SOFTBUS_INVALID_PARAM, CONN_BLE,
-        "ble post bytes failed, invalid param, data is null, connId=%{public}u, pid=%{public}d, "
+        "ble post bytes fail, invalid param, data is null, connId=%{public}u, pid=%{public}d, "
         "Len=%{public}u, Flg=%{public}d, Module=%{public}d, Seq=%{public}" PRId64 "",
         connectionId, pid, dataLen, flag, module, seq);
 
@@ -338,7 +339,7 @@ int32_t ConnBlePostBytesInner(uint32_t connectionId, uint8_t *data, uint32_t dat
     int32_t status = SoftBusMutexLock(&connection->lock);
     if (status != SOFTBUS_OK) {
         CONN_LOGE(CONN_BLE,
-            "try to lock failed, connId=%{public}u, pid=%{public}d, "
+            "try to lock fail, connId=%{public}u, pid=%{public}d, "
             "Len=%{public}u, Flg=%{public}d, Module=%{public}d, Seq=%{public}" PRId64 ", err=%{public}d",
             connectionId, pid, dataLen, flag, module, seq, status);
         ConnBleReturnConnection(&connection);
@@ -361,7 +362,7 @@ int32_t ConnBlePostBytesInner(uint32_t connectionId, uint8_t *data, uint32_t dat
     SendQueueNode *node = (SendQueueNode *)SoftBusCalloc(sizeof(SendQueueNode));
     if (node == NULL) {
         CONN_LOGE(CONN_BLE,
-            "calloc send node failed, connId=%{public}u, pid=%{public}d, "
+            "calloc send node fail, connId=%{public}u, pid=%{public}d, "
             "Len=%{public}u, Flg=%{public}d, Module=%{public}d, Seq=%{public}" PRId64 "",
             connectionId, pid, dataLen, flag, module, seq);
         ConnBleReturnConnection(&connection);
@@ -376,10 +377,32 @@ int32_t ConnBlePostBytesInner(uint32_t connectionId, uint8_t *data, uint32_t dat
     node->dataLen = dataLen;
     node->data = data;
     node->onPostBytesFinished = postBytesFinishAction;
+
+    if (SoftBusMutexLock(&g_startBleSendLPInfo.lock) != SOFTBUS_OK) {
+        CONN_LOGE(CONN_BLE, "lock fail!");
+        ConnBleReturnConnection(&connection);
+        FreeSendNode(node);
+        return SOFTBUS_LOCK_ERR;
+    }
+    g_startBleSendLPInfo.messagePosted = true;
+    if (!g_startBleSendLPInfo.sendTaskRunning) {
+        status = ConnStartActionAsync(NULL, BleSendTask, "BleSend_Tsk");
+        if (status != SOFTBUS_OK) {
+            CONN_LOGE(CONN_BLE, "start send task fail errno=%{public}d", status);
+            SoftBusMutexUnlock(&g_startBleSendLPInfo.lock);
+            ConnBleReturnConnection(&connection);
+            FreeSendNode(node);
+            return status;
+        }
+        g_startBleSendLPInfo.sendTaskRunning = true;
+        CONN_LOGI(CONN_BLE, "start ble send task succ");
+    }
+    SoftBusMutexUnlock(&g_startBleSendLPInfo.lock);
+
     status = ConnBleEnqueueNonBlock((const void *)node);
     if (status != SOFTBUS_OK) {
         CONN_LOGE(CONN_BLE,
-            "enqueue send node failed, connId=%{public}u, pid=%{public}d, "
+            "enqueue send node fail, connId=%{public}u, pid=%{public}d, "
             "Len=%{public}u, Flg=%{public}d, Module=%{public}d, Seq=%{public}" PRId64 ", err=%{public}d",
             connectionId, pid, dataLen, flag, module, seq, status);
         FreeSendNode(node);
@@ -392,23 +415,6 @@ int32_t ConnBlePostBytesInner(uint32_t connectionId, uint8_t *data, uint32_t dat
         "connId=%{public}u, pid=%{public}d, Len=%{public}u, Flg=%{public}d, Module=%{public}d, Seq=%{public}" PRId64 "",
         connectionId, pid, dataLen, flag, module, seq);
     ConnBleReturnConnection(&connection);
-
-    CONN_CHECK_AND_RETURN_RET_LOGE(SoftBusMutexLock(&g_startBleSendLPInfo.lock) == SOFTBUS_OK,
-        SOFTBUS_LOCK_ERR, CONN_BLE, "lock fail!");
-    g_startBleSendLPInfo.messagePosted = true;
-    if (!g_startBleSendLPInfo.sendTaskRunning) {
-        status = ConnStartActionAsync(NULL, BleSendTask, "BleSend_Tsk");
-        if (status != SOFTBUS_OK) {
-            CONN_LOGE(CONN_BLE, "start send task failed errno=%{public}d", status);
-            SoftBusMutexUnlock(&g_startBleSendLPInfo.lock);
-            return status;
-        }
-        g_startBleSendLPInfo.sendTaskRunning = true;
-        SoftBusMutexUnlock(&g_startBleSendLPInfo.lock);
-        CONN_LOGI(CONN_BLE, "start ble send task succ");
-        return SOFTBUS_OK;
-    }
-    SoftBusMutexUnlock(&g_startBleSendLPInfo.lock);
     return SOFTBUS_OK;
 }
 
@@ -461,7 +467,7 @@ int64_t ConnBlePackCtlMessage(BleCtlMessageSerializationContext ctx, uint8_t **o
     int32_t ret = BleCtrlMsgSerializeByJson(ctx, &data, &dataLen);
     if (ret != SOFTBUS_OK) {
         CONN_LOGE(CONN_BLE,
-            "ble connecion pack ctl message failed: serialize json bytes failed, "
+            "ble connecion pack ctl message fail: serialize json bytes fail, "
             "connId=%{public}u, method=%{public}d", ctx.connectionId, ctx.method);
         return ret;
     }
@@ -477,7 +483,7 @@ int64_t ConnBlePackCtlMessage(BleCtlMessageSerializationContext ctx, uint8_t **o
     int64_t seq = ConnBlePackCtrlMsgHeader(header, dataLen);
     if (memcpy_s(buf + headSize, bufLen - headSize, data, dataLen) != EOK) {
         CONN_LOGE(CONN_BLE,
-            "ble connecion pack ctl message failed: memcpy ctl message bytes failed, "
+            "ble connecion pack ctl message fail: memcpy ctl message bytes fail, "
             "connId=%{public}u, method=%{public}d", ctx.connectionId, ctx.method);
         cJSON_free(data);
         SoftBusFree(buf);
@@ -535,12 +541,12 @@ uint8_t *ConnCocTransRecv(uint32_t connectionId, LimitedBuffer *buffer, int32_t 
     }
     uint8_t *dataCopy = SoftBusCalloc(packLen);
     if (dataCopy == NULL) {
-        CONN_LOGE(CONN_BLE, "coc connection parse data failed: calloc failed, retry next time, connId=%{public}u, "
+        CONN_LOGE(CONN_BLE, "coc connection parse data fail: calloc fail, retry next time, connId=%{public}u, "
             "packLen=%{public}u", connectionId, packLen);
         return NULL;
     }
     if (memcpy_s(dataCopy, packLen, buffer->buffer, packLen) != EOK) {
-        CONN_LOGE(CONN_BLE, "coc connection parse data failed: memcpy_s failed, retry next time, "
+        CONN_LOGE(CONN_BLE, "coc connection parse data fail: memcpy_s fail, retry next time, "
             "connId=%{public}u, packLen=%{public}u, bufferLen=%{public}u", connectionId, packLen, buffer->length);
         SoftBusFree(dataCopy);
         return NULL;
@@ -548,7 +554,7 @@ uint8_t *ConnCocTransRecv(uint32_t connectionId, LimitedBuffer *buffer, int32_t 
 
     if (buffer->length > packLen &&
         memmove_s(buffer->buffer, buffer->length, buffer->buffer + packLen, buffer->length - packLen) != EOK) {
-        CONN_LOGE(CONN_BLE, "coc connection parse data failed: memmove_s failed, retry next time. "
+        CONN_LOGE(CONN_BLE, "coc connection parse data fail: memmove_s fail, retry next time. "
             "connectionId=%{public}u", connectionId);
         SoftBusFree(dataCopy);
         return NULL;
@@ -608,7 +614,7 @@ void *BleSendTask(void *arg)
         g_startBleSendLPInfo.messagePosted = false;
         SoftBusMutexUnlock(&g_startBleSendLPInfo.lock);
         if (status != SOFTBUS_OK || sendNode == NULL) {
-            CONN_LOGW(CONN_BLE, "ble dequeue failed err=%{public}d,", status);
+            CONN_LOGW(CONN_BLE, "ble dequeue fail err=%{public}d,", status);
             SoftBusSleepMs(WAIT_TIME);
             continue;
         }
@@ -631,7 +637,7 @@ void *BleSendTask(void *arg)
                 status = ConnCocTransSend(connection, sendNode->data, sendNode->dataLen, sendNode->module);
                 break;
             default:
-                CONN_LOGE(CONN_BLE, "ble connecion trans send failed, connectionId=%{public}u, protocol=%{public}d",
+                CONN_LOGE(CONN_BLE, "ble connecion trans send fail, connectionId=%{public}u, protocol=%{public}d",
                     connection->connectionId, connection->protocol);
         }
         ConnBleReturnConnection(&connection);
@@ -649,24 +655,24 @@ void *BleSendTask(void *arg)
 int32_t ConnBleInitTransModule(ConnBleTransEventListener *listener)
 {
     CONN_CHECK_AND_RETURN_RET_LOGW(
-        listener != NULL, SOFTBUS_INVALID_PARAM, CONN_INIT, "init ble trans failed: invalid param, listener is null");
+        listener != NULL, SOFTBUS_INVALID_PARAM, CONN_INIT, "init ble trans fail: invalid param, listener is null");
     CONN_CHECK_AND_RETURN_RET_LOGW(listener->onPostBytesFinished != NULL, SOFTBUS_INVALID_PARAM, CONN_INIT,
-        "init ble trans failed: invalid param, listener onPostByteFinshed is null");
+        "init ble trans fail: invalid param, listener onPostByteFinshed is null");
 
     struct ConnSlideWindowController *controller = ConnSlideWindowControllerNew();
     CONN_CHECK_AND_RETURN_RET_LOGW(controller != NULL, SOFTBUS_CONN_BLE_INTERNAL_ERR, CONN_INIT,
-        "init br trans module failed: init flow controller failed");
+        "init br trans module fail: init flow controller fail");
 
     int32_t status = ConnBleInitSendQueue();
     if (status != SOFTBUS_OK) {
-        CONN_LOGW(CONN_INIT, "init ble trans failed: init send queue failed, err=%{public}d", status);
+        CONN_LOGW(CONN_INIT, "init ble trans fail: init send queue fail, err=%{public}d", status);
         ConnSlideWindowControllerDelete(controller);
         return status;
     }
 
     status = SoftBusMutexInit(&g_startBleSendLPInfo.lock, NULL);
     if (status != SOFTBUS_OK) {
-        CONN_LOGW(CONN_INIT, "init ble trans failed: init send lp lock failed, err=%{public}d", status);
+        CONN_LOGW(CONN_INIT, "init ble trans fail: init send lp lock fail, err=%{public}d", status);
         ConnBleDeinitSendQueue();
         ConnSlideWindowControllerDelete(controller);
         return status;

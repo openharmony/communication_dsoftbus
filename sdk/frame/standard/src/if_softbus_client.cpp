@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021-2024 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2025 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -15,7 +15,6 @@
 
 #include "comm_log.h"
 #include "if_softbus_client.h"
-#include "softbus_error_code.h"
 
 namespace OHOS {
 int32_t ISoftBusClient::OnChannelOpened(const char *sessionName, const ChannelInfo *channel)
@@ -164,6 +163,11 @@ void ISoftBusClient::OnDataLevelChanged(const char *networkId, const DataLevelIn
     COMM_LOGI(COMM_EVENT, "ipc default impl");
 }
 
+void ISoftBusClient::OnMsdpRangeResult(const RangeResultInnerInfo *rangeInfo)
+{
+    COMM_LOGI(COMM_EVENT, "ipc default impl");
+}
+
 int32_t ISoftBusClient::OnClientTransLimitChange(int32_t channelId, uint8_t tos)
 {
     COMM_LOGI(COMM_EVENT, "ipc default impl");
@@ -189,12 +193,74 @@ int32_t ISoftBusClient::OnClientChannelOnQos(
 }
 
 int32_t ISoftBusClient::OnCheckCollabRelation(
-    const CollabInfo *sourceInfo, const CollabInfo *sinkInfo, int32_t channelId, int32_t channelType)
+    const CollabInfo *sourceInfo, bool isSinkSide, const CollabInfo *sinkInfo, int32_t channelId, int32_t channelType)
 {
     (void)sourceInfo;
+    (void)isSinkSide;
     (void)sinkInfo;
     (void)channelId;
     (void)channelType;
+    COMM_LOGI(COMM_EVENT, "ipc default impl");
+    return SOFTBUS_OK;
+}
+
+int32_t ISoftBusClient::OnConnectionStateChange(uint32_t handle, int32_t state, int32_t reason)
+{
+    (void)handle;
+    (void)state;
+    (void)reason;
+    COMM_LOGI(COMM_EVENT, "ipc default impl");
+    return SOFTBUS_OK;
+}
+
+int32_t ISoftBusClient::OnAcceptConnect(const char *name, uint32_t handle)
+{
+    (void)name;
+    (void)handle;
+    COMM_LOGI(COMM_EVENT, "ipc default impl");
+    return SOFTBUS_OK;
+}
+
+int32_t ISoftBusClient::OnDataReceived(uint32_t handle, const uint8_t *data, uint32_t len)
+{
+    (void)handle;
+    (void)data;
+    (void)len;
+    COMM_LOGI(COMM_EVENT, "ipc default impl");
+    return SOFTBUS_OK;
+}
+
+int32_t ISoftBusClient::OnBrProxyOpened(int32_t channelId, const char *brMac, const char *uuid, int32_t reason)
+{
+    (void)channelId;
+    (void)brMac;
+    (void)uuid;
+    (void)reason;
+    COMM_LOGI(COMM_EVENT, "ipc default impl");
+    return SOFTBUS_OK;
+}
+ 
+int32_t ISoftBusClient::OnBrProxyDataRecv(int32_t channelId, const uint8_t *data, uint32_t len)
+{
+    (void)channelId;
+    (void)data;
+    (void)len;
+    COMM_LOGI(COMM_EVENT, "ipc default impl");
+    return SOFTBUS_OK;
+}
+ 
+int32_t ISoftBusClient::OnBrProxyStateChanged(int32_t channelId, int32_t channelState)
+{
+    (void)channelId;
+    (void)channelState;
+    COMM_LOGI(COMM_EVENT, "ipc default impl");
+    return SOFTBUS_OK;
+}
+
+int32_t ISoftBusClient::OnBrProxyQueryPermission(const char *bundleName, bool *isEmpowered)
+{
+    (void)bundleName;
+    (void)isEmpowered;
     COMM_LOGI(COMM_EVENT, "ipc default impl");
     return SOFTBUS_OK;
 }

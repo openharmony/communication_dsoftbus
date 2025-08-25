@@ -17,7 +17,6 @@
 #define P2P_UNAVAILABLE_STATE_H
 
 #include "p2p_entity_state.h"
-#include "p2p_operation.h"
 
 namespace OHOS::SoftBus {
 class P2pUnavailableState : public P2pEntityState {

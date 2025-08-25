@@ -15,8 +15,6 @@
 #ifndef WIFI_DIRECT_PROTOCOL_H
 #define WIFI_DIRECT_PROTOCOL_H
 
-#include <string>
-#include <vector>
 #include "data/serializable.h"
 
 namespace OHOS::SoftBus {

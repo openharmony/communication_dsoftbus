@@ -22,6 +22,7 @@
 #include "client_trans_session_service.h"
 #include "client_trans_socket_manager.h"
 #include "client_trans_statistics.h"
+#include "g_enhance_sdk_func.h"
 #include "softbus_def.h"
 #include "softbus_error_code.h"
 #include "softbus_feature_config.h"
@@ -74,6 +75,43 @@ int CheckSendLen(int32_t channelId, int32_t channelType, unsigned int len, int32
     return SOFTBUS_OK;
 }
 
+static int32_t CheckBusinessTypeAndOsTypeBySessionId(int32_t sessionId, int32_t channelId, int32_t channelType,
+    uint32_t len)
+{
+    int32_t businessType = BUSINESS_TYPE_BUTT;
+    int32_t osType = OH_OS_TYPE;
+    int32_t ret = ClientGetChannelBusinessTypeBySessionId(sessionId, &businessType);
+    TRANS_CHECK_AND_RETURN_RET_LOGE(ret == SOFTBUS_OK, ret,
+        TRANS_BYTES, "ClientGetChannelBusinessTypeBySessionId fail, sessionId=%{public}d", sessionId);
+    ret = ClientGetChannelOsTypeBySessionId(sessionId, &osType);
+    TRANS_CHECK_AND_RETURN_RET_LOGE(ret == SOFTBUS_OK, ret,
+        TRANS_BYTES, "ClientGetChannelOsTypeBySessionId fail, sessionId=%{public}d", sessionId);
+
+    if ((osType == OH_OS_TYPE) && (businessType != BUSINESS_TYPE_BYTE) && (businessType != BUSINESS_TYPE_NOT_CARE) &&
+        (channelType != CHANNEL_TYPE_AUTH)) {
+        TRANS_LOGE(TRANS_BYTES,
+            "BusinessType no match, businessType=%{public}d, sessionId=%{public}d", businessType, sessionId);
+        return SOFTBUS_TRANS_BUSINESS_TYPE_NOT_MATCH;
+    }
+    bool isD2D = false;
+    ClientCheckIsD2DBySessionId(sessionId, &isD2D);
+    if (isD2D && (businessType != BUSINESS_TYPE_D2D_VOICE)) {
+        TRANS_LOGE(TRANS_BYTES,
+            "businessType no match d2d, businessType=%{public}d, sessionId=%{public}d", businessType, sessionId);
+        return SOFTBUS_TRANS_BUSINESS_TYPE_NOT_MATCH;
+    }
+    if (osType != OH_OS_TYPE && businessType == BUSINESS_TYPE_MESSAGE) {
+        ret = CheckSendLenForBooster(len);
+        TRANS_CHECK_AND_RETURN_RET_LOGE(ret == SOFTBUS_OK, ret,
+            TRANS_BYTES, "CheckSendLenForBooster fail, len=%{public}u, sessionId=%{public}d", len, sessionId);
+    } else {
+        ret = CheckSendLen(channelId, channelType, len, BUSINESS_TYPE_BYTE);
+        TRANS_CHECK_AND_RETURN_RET_LOGE(ret == SOFTBUS_OK, ret,
+            TRANS_BYTES, "CheckSendLen fail, len=%{public}u, sessionId=%{public}d", len, sessionId);
+    }
+    return SOFTBUS_OK;
+}
+
 int SendBytes(int sessionId, const void *data, unsigned int len)
 {
     if (data == NULL || len == 0) {
@@ -95,31 +133,9 @@ int SendBytes(int sessionId, const void *data, unsigned int len)
     TRANS_CHECK_AND_RETURN_RET_LOGE(ret == SOFTBUS_OK, ret,
         TRANS_BYTES, "ClientGetChannelBySessionId fail, sessionId=%{public}d", sessionId);
 
-    int32_t businessType = BUSINESS_TYPE_BUTT;
-    int32_t osType = OH_OS_TYPE;
-    ret = ClientGetChannelBusinessTypeBySessionId(sessionId, &businessType);
+    ret = CheckBusinessTypeAndOsTypeBySessionId(sessionId, channelId, channelType, len);
     TRANS_CHECK_AND_RETURN_RET_LOGE(ret == SOFTBUS_OK, ret,
-        TRANS_BYTES, "ClientGetChannelBusinessTypeBySessionId fail, sessionId=%{public}d", sessionId);
-    ret = ClientGetChannelOsTypeBySessionId(sessionId, &osType);
-    TRANS_CHECK_AND_RETURN_RET_LOGE(ret == SOFTBUS_OK, ret,
-        TRANS_BYTES, "ClientGetChannelOsTypeBySessionId fail, sessionId=%{public}d", sessionId);
-
-    if ((osType == OH_OS_TYPE) && (businessType != BUSINESS_TYPE_BYTE) && (businessType != BUSINESS_TYPE_NOT_CARE) &&
-        (channelType != CHANNEL_TYPE_AUTH)) {
-        TRANS_LOGE(TRANS_BYTES,
-            "BusinessType no match, businessType=%{public}d, sessionId=%{public}d", businessType, sessionId);
-        return SOFTBUS_TRANS_BUSINESS_TYPE_NOT_MATCH;
-    }
-
-    if (osType != OH_OS_TYPE && businessType == BUSINESS_TYPE_MESSAGE) {
-        ret = CheckSendLenForBooster(len);
-        TRANS_CHECK_AND_RETURN_RET_LOGE(ret == SOFTBUS_OK, ret,
-            TRANS_BYTES, "CheckSendLenForBooster fail, len=%{public}u, sessionId=%{public}d", len, sessionId);
-    } else {
-        ret = CheckSendLen(channelId, channelType, len, BUSINESS_TYPE_BYTE);
-        TRANS_CHECK_AND_RETURN_RET_LOGE(ret == SOFTBUS_OK, ret,
-            TRANS_BYTES, "CheckSendLen fail, len=%{public}u, sessionId=%{public}d", len, sessionId);
-    }
+        TRANS_BYTES, "CheckBusinessTypeAndOsTypeBySessionId fail, sessionId=%{public}d", sessionId);
     if (enableStatus != ENABLE_STATUS_SUCCESS) {
         TRANS_LOGE(TRANS_BYTES,
             "Enable status fail, len=%{public}u, sessionId=%{public}d", len, sessionId);
@@ -128,6 +144,108 @@ int SendBytes(int sessionId, const void *data, unsigned int len)
     (void)ClientResetIdleTimeoutById(sessionId);
     UpdateChannelStatistics(sessionId, len);
     return ClientTransChannelSendBytes(channelId, channelType, data, len);
+}
+
+static int32_t CheckAsyncSendBytesFunc(int32_t channelId, int32_t channelType)
+{
+    bool supportTlv = false;
+    bool needAck = false;
+    int32_t ret = GetSupportTlvAndNeedAckById(channelId, channelType, &supportTlv, &needAck);
+    if (ret != SOFTBUS_OK) {
+        TRANS_LOGE(TRANS_BYTES, "GetSupportTlvAndNeedAckById fail, channelId=%{public}d", channelId);
+        return ret;
+    }
+    if (!supportTlv || !needAck) {
+        TRANS_LOGE(TRANS_BYTES, "supportTlv or needAck is false, not support async sendbytes, channelId=%{public}d",
+            channelId);
+        return SOFTBUS_TRANS_NOT_SUPPORT_ASYNC_SEND_BYTES;
+    }
+    return SOFTBUS_OK;
+}
+
+int32_t SendBytesAsync(int32_t socket, uint32_t dataSeq, const void *data, uint32_t len)
+{
+    if (data == NULL || dataSeq <= 0 || len == 0) {
+        TRANS_LOGE(TRANS_BYTES, "Invalid param");
+        return SOFTBUS_INVALID_PARAM;
+    }
+    int ret = CheckPermissionState(socket);
+    if (ret != SOFTBUS_OK) {
+        TRANS_LOGE(TRANS_BYTES,
+            "no permission, socket=%{public}d, len=%{public}u, ret=%{public}d", socket, len, ret);
+        return ret;
+    }
+
+    int32_t channelId = INVALID_CHANNEL_ID;
+    int32_t channelType = CHANNEL_TYPE_BUTT;
+    SessionEnableStatus enableStatus = ENABLE_STATUS_INIT;
+    ret = ClientGetChannelBySessionId(socket, &channelId, &channelType, &enableStatus);
+    TRANS_CHECK_AND_RETURN_RET_LOGE(ret == SOFTBUS_OK, ret,
+        TRANS_BYTES, "ClientGetChannelBySessionId fail, socket=%{public}d", socket);
+    ret = CheckAsyncSendBytesFunc(channelId, channelType);
+    TRANS_CHECK_AND_RETURN_RET_LOGE(ret == SOFTBUS_OK, ret,
+        TRANS_BYTES, "checkAsyncSendByts fail, socket=%{public}d", socket);
+    ret = CheckBusinessTypeAndOsTypeBySessionId(socket, channelId, channelType, len);
+    TRANS_CHECK_AND_RETURN_RET_LOGE(ret == SOFTBUS_OK, ret,
+        TRANS_BYTES, "CheckBusinessTypeAndOsTypeBySessionId fail, socket=%{public}d", socket);
+    if (enableStatus != ENABLE_STATUS_SUCCESS) {
+        TRANS_LOGE(TRANS_BYTES,
+            "session is not enable, len=%{public}u, socket=%{public}d", len, socket);
+        return SOFTBUS_TRANS_SESSION_NO_ENABLE;
+    }
+    (void)ClientResetIdleTimeoutById(socket);
+    UpdateChannelStatistics(socket, len);
+    return ClientTransChannelAsyncSendBytes(channelId, channelType, data, len, dataSeq);
+}
+
+static int32_t CheckBusinessTypeBySessionId(int32_t sessionId, int32_t channelId, int32_t channelType, uint32_t len)
+{
+    int32_t businessType = BUSINESS_TYPE_BUTT;
+    int32_t ret = ClientGetChannelBusinessTypeBySessionId(sessionId, &businessType);
+    TRANS_CHECK_AND_RETURN_RET_LOGE(ret == SOFTBUS_OK, ret, TRANS_BYTES,
+        "ClientGetChannelBusinessTypeBySessionId fail, sessionId=%{public}d", sessionId);
+    if (businessType != BUSINESS_TYPE_D2D_MESSAGE) {
+        TRANS_LOGE(TRANS_BYTES, "BusinessType no match, businessType=%{public}d, sessionId=%{public}d", businessType,
+            sessionId);
+        return SOFTBUS_TRANS_BUSINESS_TYPE_NOT_MATCH;
+    }
+    return SOFTBUS_OK;
+}
+
+int32_t SendMessageAsync(int32_t socket, uint16_t dataSeq, const void *data, uint32_t len)
+{
+    if (data == NULL || dataSeq <= 0 || len == 0) {
+        TRANS_LOGE(TRANS_BYTES, "Invalid param");
+        return SOFTBUS_INVALID_PARAM;
+    }
+    int ret = CheckPermissionState(socket);
+    if (ret != SOFTBUS_OK) {
+        TRANS_LOGE(TRANS_BYTES,
+            "no permission, socket=%{public}d, len=%{public}u, ret=%{public}d", socket, len, ret);
+        return ret;
+    }
+
+    int32_t channelId = INVALID_CHANNEL_ID;
+    int32_t channelType = CHANNEL_TYPE_BUTT;
+    SessionEnableStatus enableStatus = ENABLE_STATUS_INIT;
+    ret = ClientGetChannelBySessionId(socket, &channelId, &channelType, &enableStatus);
+    TRANS_CHECK_AND_RETURN_RET_LOGE(ret == SOFTBUS_OK, ret,
+        TRANS_BYTES, "ClientGetChannelBySessionId fail, socket=%{public}d", socket);
+    ret = CheckBusinessTypeBySessionId(socket, channelId, channelType, len);
+    TRANS_CHECK_AND_RETURN_RET_LOGE(ret == SOFTBUS_OK, ret,
+        TRANS_BYTES, "CheckBusinessTypeAndOsTypeBySessionId fail, socket=%{public}d", socket);
+    ret = CheckSendLen(channelId, channelType, len, BUSINESS_TYPE_MESSAGE);
+    if (ret != SOFTBUS_OK) {
+        return ret;
+    }
+    if (enableStatus != ENABLE_STATUS_SUCCESS) {
+        TRANS_LOGE(TRANS_BYTES,
+            "session is not enable, len=%{public}u, socket=%{public}d", len, socket);
+        return SOFTBUS_TRANS_SESSION_NO_ENABLE;
+    }
+    (void)ClientResetIdleTimeoutById(socket);
+    UpdateChannelStatistics(socket, len);
+    return ClientTransChannelAsyncSendMessage(channelId, channelType, data, len, dataSeq);
 }
 
 int SendMessage(int sessionId, const void *data, unsigned int len)
@@ -212,6 +330,33 @@ int SendStream(int sessionId, const StreamData *data, const StreamData *ext, con
     return ClientTransChannelSendStream(channelId, type, data, ext, param);
 }
 
+static int32_t ClientCheckFuncPointer(void *func)
+{
+    if (func == NULL) {
+        TRANS_LOGE(TRANS_FILE, "enhance func not register");
+        return SOFTBUS_FUNC_NOT_REGISTER;
+    }
+    return SOFTBUS_OK;
+}
+
+static int32_t CheckFileSchemaPacked(int32_t sessionId, FileSchemaListener *fileSchemaListener)
+{
+    ClientEnhanceFuncList *pfnClientEnhanceFuncList = ClientEnhanceFuncListGet();
+    if (ClientCheckFuncPointer((void *)pfnClientEnhanceFuncList->checkFileSchema) != SOFTBUS_OK) {
+        return SOFTBUS_OK;
+    }
+    return pfnClientEnhanceFuncList->checkFileSchema(sessionId, fileSchemaListener);
+}
+
+static int32_t SetSchemaCallbackPacked(FileSchema fileSchema, const char *sFileList[], uint32_t fileCnt)
+{
+    ClientEnhanceFuncList *pfnClientEnhanceFuncList = ClientEnhanceFuncListGet();
+    if (ClientCheckFuncPointer((void *)pfnClientEnhanceFuncList->setSchemaCallback) != SOFTBUS_OK) {
+        return SOFTBUS_OK;
+    }
+    return pfnClientEnhanceFuncList->setSchemaCallback(fileSchema, sFileList, fileCnt);
+}
+
 int SendFile(int sessionId, const char *sFileList[], const char *dFileList[], uint32_t fileCnt)
 {
     if ((sFileList == NULL) || (fileCnt == 0)) {
@@ -226,8 +371,8 @@ int SendFile(int sessionId, const char *sFileList[], const char *dFileList[], ui
     if (fileSchemaListener == NULL) {
         return SOFTBUS_MALLOC_ERR;
     }
-    if (CheckFileSchema(sessionId, fileSchemaListener) == SOFTBUS_OK) {
-        ret = SetSchemaCallback(fileSchemaListener->schema, sFileList, fileCnt);
+    if (CheckFileSchemaPacked(sessionId, fileSchemaListener) == SOFTBUS_OK) {
+        ret = SetSchemaCallbackPacked(fileSchemaListener->schema, sFileList, fileCnt);
         if (ret != SOFTBUS_OK) {
             TRANS_LOGE(TRANS_FILE, "set schema callback failed, sessionId=%{public}d, ret=%{public}d", sessionId, ret);
             SoftBusFree(fileSchemaListener);

@@ -29,5 +29,6 @@ if (dsoftbus_feature_trans_udp == true) {
 }
 trans_udp_channel_inc = [
   "$udp_channel_path/include",
+  "$dsoftbus_root_path/interfaces/kits/bus_center",
   "$dsoftbus_root_path/core/bus_center/service/include",
 ]

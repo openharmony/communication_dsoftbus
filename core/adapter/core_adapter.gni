@@ -14,7 +14,7 @@ import("../../adapter/common/net/bluetooth/net_bluetooth.gni")
 import("../../dsoftbus.gni")
 
 br_adapter_src =
-    [ "$dsoftbus_root_path/core/adapter/br/mock/wrapper_br_interface.c" ]
+    [ "$dsoftbus_root_path/core/adapter/br/src/wrapper_br_interface.c" ]
 
 br_adapter_inc = [ "$dsoftbus_root_path/core/adapter/br/include" ]
 
@@ -49,9 +49,11 @@ if (defined(ohos_lite)) {
     "$dsoftbus_root_path/core/adapter/bus_center/src/lnn_settingdata_event_monitor_virtual.cpp",
     "$dsoftbus_root_path/core/adapter/bus_center/src/lnn_ohos_account_virtual.cpp",
     "$dsoftbus_root_path/core/adapter/bus_center/src/lnn_ohos_account_adapter_virtual.cpp",
+    "$dsoftbus_root_path/core/adapter/bus_center/src/lnn_sa_status_monitor_virtual.cpp",
   ]
   bus_center_core_adapter_inc += [
     "$dsoftbus_root_path/core/adapter/bus_center/include",
+    "$dsoftbus_root_path/interfaces/kits/lnn",
     "$dsoftbus_root_path/core/bus_center/utils/include",
     "//base/startup/init/interfaces/innerkits/include/syspara",
   ]
@@ -84,6 +86,7 @@ if (defined(ohos_lite)) {
     bus_center_core_adapter_src += [ "$dsoftbus_root_path/core/adapter/bus_center/src/lnn_settingdata_event_monitor.cpp" ]
 
     bus_center_core_adapter_inc += [
+      "$dsoftbus_root_path/interfaces/kits/lnn",
       "$dsoftbus_root_path/adapter/common/bus_center/include",
       "$dsoftbus_root_path/core/adapter/bus_center/include",
     ]
@@ -130,4 +133,16 @@ if (defined(ohos_lite)) {
       "openssl:libcrypto_shared",
     ]
   }
+  if (dsoftbus_feature_lnn_usb_ncm && dsoftbus_feature_deps_usb_manager) {
+    bus_center_core_adapter_src += [
+      "$dsoftbus_root_path/core/adapter/bus_center/src/lnn_usb_adapter.cpp",
+    ]
+    bus_center_core_adapter_inc += [ "$dsoftbus_root_path/interfaces/kits/lnn" ]
+    bus_center_core_adapter_external_deps += [ "usb_manager:usbsrv_client" ]
+  } else {
+    bus_center_core_adapter_src += [ "$dsoftbus_root_path/core/adapter/bus_center/src/lnn_usb_adapter_virtual.cpp" ]
+  }
+  bus_center_core_adapter_src += [
+    "$dsoftbus_root_path/core/adapter/bus_center/src/lnn_sa_status_monitor.cpp",
+  ]
 }

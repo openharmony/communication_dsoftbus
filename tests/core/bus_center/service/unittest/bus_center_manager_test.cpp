@@ -21,12 +21,10 @@
 #include "bus_center_event.h"
 #include "lnn_async_callback_utils.h"
 #include "lnn_coap_discovery_impl.h"
-#include "lnn_decision_center.h"
 #include "lnn_discovery_manager.h"
 #include "lnn_event_monitor.h"
 #include "lnn_lane_hub.h"
 #include "lnn_log.h"
-#include "lnn_meta_node_interface.h"
 #include "lnn_net_builder.h"
 #include "lnn_net_ledger.h"
 #include "lnn_network_manager.h"
@@ -36,6 +34,8 @@
 #include "softbus_error_code.h"
 #include "softbus_feature_config.h"
 #include "softbus_utils.h"
+#include "dsoftbus_enhance_interface.h"
+#include "g_enhance_lnn_func.h"
 
 #include "bus_center_manager_deps_mock.h"
 
@@ -78,7 +78,7 @@ void BusCenterManagerTest::TearDown(void)
 HWTEST_F(BusCenterManagerTest, BusCenterManagerTest001, TestSize.Level1)
 {
     NiceMock<BusCenterManagerDepsInterfaceMock> BusCenterManagerMock;
-    EXPECT_CALL(BusCenterManagerMock, GetLooper(_)).WillOnce(Return(NULL));
+    EXPECT_CALL(BusCenterManagerMock, GetLooper(_)).WillOnce(Return(nullptr));
     LnnDeinitLnnLooper();
 }
 
@@ -91,7 +91,7 @@ HWTEST_F(BusCenterManagerTest, BusCenterManagerTest001, TestSize.Level1)
 HWTEST_F(BusCenterManagerTest, BusCenterManagerTest002, TestSize.Level1)
 {
     NiceMock<BusCenterManagerDepsInterfaceMock> BusCenterManagerMock;
-    EXPECT_CALL(BusCenterManagerMock, CreateNewLooper(_)).WillOnce(Return(NULL));
+    EXPECT_CALL(BusCenterManagerMock, CreateNewLooper(_)).WillOnce(Return(nullptr));
     int32_t ret = LnnInitLnnLooper();
     EXPECT_NE(ret, SOFTBUS_OK);
 }
@@ -105,7 +105,7 @@ HWTEST_F(BusCenterManagerTest, BusCenterManagerTest002, TestSize.Level1)
 HWTEST_F(BusCenterManagerTest, BusCenterManagerTest003, TestSize.Level1)
 {
     NiceMock<BusCenterManagerDepsInterfaceMock> BusCenterManagerMock;
-    EXPECT_CALL(BusCenterManagerMock, CreateNewLooper(_)).WillOnce(Return(NULL));
+    EXPECT_CALL(BusCenterManagerMock, CreateNewLooper(_)).WillOnce(Return(nullptr));
     int32_t ret = BusCenterServerInit();
     EXPECT_NE(ret, SOFTBUS_OK);
 }
@@ -118,10 +118,16 @@ HWTEST_F(BusCenterManagerTest, BusCenterManagerTest003, TestSize.Level1)
 */
 HWTEST_F(BusCenterManagerTest, BusCenterManagerTest004, TestSize.Level1)
 {
+    LnnEnhanceFuncList *pfnLnnEnhanceFuncList = LnnEnhanceFuncListGet();
+    pfnLnnEnhanceFuncList->lnnInitMetaNode = LnnInitMetaNode;
+
     NiceMock<BusCenterManagerDepsInterfaceMock> BusCenterManagerMock;
     SoftBusLooper loop;
-    EXPECT_CALL(BusCenterManagerMock, CreateNewLooper(_)).WillOnce(Return(&loop));
+    SoftBusLooper laneLoop;
+    EXPECT_CALL(BusCenterManagerMock, CreateNewLooper(_)).WillOnce(Return(&loop))
+        .WillOnce(Return(&laneLoop));
     EXPECT_CALL(BusCenterManagerMock, LnnInitNetLedger()).WillOnce(Return(SOFTBUS_OK));
+    EXPECT_CALL(BusCenterManagerMock, LnnInitDecisionCenter(_)).WillRepeatedly(Return(SOFTBUS_OK));
     EXPECT_CALL(BusCenterManagerMock, LnnInitBusCenterEvent()).WillOnce(Return(SOFTBUS_OK));
     EXPECT_CALL(BusCenterManagerMock, LnnInitEventMonitor()).WillOnce(Return(SOFTBUS_OK));
     EXPECT_CALL(BusCenterManagerMock, LnnInitDiscoveryManager()).WillOnce(Return(SOFTBUS_OK));
@@ -143,6 +149,9 @@ HWTEST_F(BusCenterManagerTest, BusCenterManagerTest004, TestSize.Level1)
 */
 HWTEST_F(BusCenterManagerTest, BusCenterManagerTest005, TestSize.Level1)
 {
+    LnnEnhanceFuncList *pfnLnnEnhanceFuncList = LnnEnhanceFuncListGet();
+    pfnLnnEnhanceFuncList->lnnInitMetaNode = LnnInitMetaNode;
+
     NiceMock<BusCenterManagerDepsInterfaceMock> BusCenterManagerMock;
     SoftBusLooper loop;
     EXPECT_CALL(BusCenterManagerMock, CreateNewLooper(_)).WillRepeatedly(Return(&loop));
@@ -190,6 +199,9 @@ HWTEST_F(BusCenterManagerTest, BusCenterManagerTest005, TestSize.Level1)
 */
 HWTEST_F(BusCenterManagerTest, BusCenterManagerTest006, TestSize.Level1)
 {
+    LnnEnhanceFuncList *pfnLnnEnhanceFuncList = LnnEnhanceFuncListGet();
+    pfnLnnEnhanceFuncList->lnnInitMetaNode = LnnInitMetaNode;
+    
     NiceMock<BusCenterManagerDepsInterfaceMock> BusCenterManagerMock;
     SoftBusLooper loop;
     EXPECT_CALL(BusCenterManagerMock, CreateNewLooper(_)).WillRepeatedly(Return(&loop));
@@ -212,7 +224,57 @@ HWTEST_F(BusCenterManagerTest, BusCenterManagerTest006, TestSize.Level1)
     ret = BusCenterServerInit();
     EXPECT_NE(ret, SOFTBUS_OK);
     EXPECT_CALL(BusCenterManagerMock, InitDecisionCenter()).WillRepeatedly(Return(SOFTBUS_OK));
+    EXPECT_CALL(BusCenterManagerMock, InitUdidChangedEvent()).WillOnce(Return(SOFTBUS_OK));
     ret = BusCenterServerInit();
     EXPECT_EQ(ret, SOFTBUS_OK);
+}
+
+/*
+* @tc.name: BusCenterManagerTest007
+* @tc.desc: test BusCenterServerInit
+* @tc.type: FUNC
+* @tc.require: 1
+*/
+HWTEST_F(BusCenterManagerTest, BusCenterManagerTest007, TestSize.Level1)
+{
+    NiceMock<BusCenterManagerDepsInterfaceMock> BusCenterManagerMock;
+    SoftBusLooper loop;
+    EXPECT_CALL(BusCenterManagerMock, CreateNewLooper(_)).WillOnce(Return(&loop))
+        .WillOnce(Return(nullptr));
+    EXPECT_NE(BusCenterServerInit(), SOFTBUS_OK);
+}
+
+/*
+* @tc.name: BusCenterManagerTest008
+* @tc.desc: test LnnInitLaneLooper
+* @tc.type: FUNC
+* @tc.require: 1
+*/
+HWTEST_F(BusCenterManagerTest, BusCenterManagerTest008, TestSize.Level1)
+{
+    NiceMock<BusCenterManagerDepsInterfaceMock> busCenterManagerMock;
+    SoftBusLooper loop;
+    EXPECT_CALL(busCenterManagerMock, CreateNewLooper(_)).WillOnce(Return(nullptr))
+        .WillRepeatedly(Return(&loop));
+    EXPECT_EQ(LnnInitLaneLooper(), SOFTBUS_LOOPER_ERR);
+    EXPECT_NO_FATAL_FAILURE(LnnDeinitLaneLooper());
+    EXPECT_EQ(LnnInitLaneLooper(), SOFTBUS_OK);
+    EXPECT_NO_FATAL_FAILURE(LnnDeinitLaneLooper());
+}
+
+/*
+* @tc.name: BusCenterServerInitTest001
+* @tc.desc: LnnInitPermission fun init error
+* @tc.type: FUNC
+* @tc.require: 1
+*/
+HWTEST_F(BusCenterManagerTest, BusCenterServerInitTest001, TestSize.Level1)
+{
+    NiceMock<BusCenterManagerDepsInterfaceMock> busCenterManagerMock;
+    SoftBusLooper loop;
+    EXPECT_CALL(busCenterManagerMock, CreateNewLooper(_)).WillRepeatedly(Return(&loop));
+    EXPECT_CALL(busCenterManagerMock, LnnInitPermission).WillRepeatedly(Return(SOFTBUS_INVALID_PARAM));
+    int ret = BusCenterServerInit();
+    EXPECT_EQ(ret, SOFTBUS_INVALID_PARAM);
 }
 }

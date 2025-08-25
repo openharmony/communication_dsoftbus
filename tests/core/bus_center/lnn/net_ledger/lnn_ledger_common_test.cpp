@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2022 Huawei Device Co., Ltd.
+ * Copyright (c) 2022-2025 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -21,6 +21,7 @@
 #include <securec.h>
 
 #include "bus_center_manager.h"
+#include "g_enhance_lnn_func.h"
 #include "lnn_decision_db.h"
 #include "lnn_device_info.h"
 #include "lnn_distributed_net_ledger.h"
@@ -33,8 +34,9 @@
 #include "lnn_net_ledger.h"
 #include "lnn_net_ledger_common_mock.h"
 #include "lnn_node_info.h"
-#include "lnn_oobe_manager.h"
 #include "softbus_adapter_mem.h"
+#include "softbus_config_adapter.h"
+#include "softbus_def.h"
 #include "softbus_error_code.h"
 #include "softbus_feature_config.h"
 #include "softbus_utils.h"
@@ -43,6 +45,9 @@
 #define DEVICE_TYPE_MAX_LENGTH        3
 #define LEFT_SHIFT_DEVICE_TYPE_LENGTH (DEVICE_TYPE_MAX_LENGTH * 4)
 #define DEFAUTL_LNN_FEATURE           0x3E2
+
+#define LNN_SUPPORT_ENHANCE_FEATURE   0x3F7EA
+#define ENHANCE_SUPPORT_AUTH_CAPACITY 0xFF
 
 namespace OHOS {
 using namespace testing::ext;
@@ -110,7 +115,7 @@ HWTEST_F(LNNNetLedgerCommonTest, LNN_DEVICE_INFO_Test_001, TestSize.Level1)
     uint16_t typeId = 0;
     int32_t ret = memset_s(&info, sizeof(DeviceBasicInfo), 0, sizeof(DeviceBasicInfo));
     EXPECT_TRUE(ret == EOK);
-    EXPECT_TRUE(LnnGetDeviceName(nullptr) == NULL);
+    EXPECT_TRUE(LnnGetDeviceName(nullptr) == nullptr);
     LnnGetDeviceName(&info);
     EXPECT_TRUE(LnnSetDeviceName(nullptr, NODE_DEVICE_NAME) == SOFTBUS_INVALID_PARAM);
     EXPECT_TRUE(LnnSetDeviceName(&info, nullptr) == SOFTBUS_INVALID_PARAM);
@@ -236,6 +241,93 @@ HWTEST_F(LNNNetLedgerCommonTest, LNN_NET_CAPABILITY_Test_003, TestSize.Level1)
 }
 
 /*
+ * @tc.name: LNN_SET_STATIC_NET_CAPA_001
+ * @tc.desc: lnn net static capability function test, LnnSetStaticNetCap, LnnHasStaticNetCap
+ * @tc.type: FUNC
+ * @tc.require:
+ */
+HWTEST_F(LNNNetLedgerCommonTest, LNN_SET_STATIC_NET_CAPA_001, TestSize.Level1)
+{
+    uint32_t capability = 0;
+    bool hasCapability = false;
+    int32_t ret = LnnSetStaticNetCap(&capability, STATIC_CAP_BIT_BLE);
+    EXPECT_EQ(ret, SOFTBUS_OK);
+    hasCapability = LnnHasStaticNetCap(capability, STATIC_CAP_BIT_BLE);
+    EXPECT_EQ(hasCapability, true);
+
+    ret = LnnSetStaticNetCap(&capability, STATIC_CAP_BIT_BR);
+    EXPECT_EQ(ret, SOFTBUS_OK);
+    hasCapability = LnnHasStaticNetCap(capability, STATIC_CAP_BIT_BR);
+    EXPECT_EQ(hasCapability, true);
+
+    ret = LnnSetStaticNetCap(&capability, STATIC_CAP_BIT_WIFI);
+    EXPECT_EQ(ret, SOFTBUS_OK);
+    hasCapability = LnnHasStaticNetCap(capability, STATIC_CAP_BIT_WIFI);
+    EXPECT_EQ(hasCapability, true);
+
+    ret = LnnSetStaticNetCap(&capability, STATIC_CAP_BIT_P2P);
+    EXPECT_EQ(ret, SOFTBUS_OK);
+    hasCapability = LnnHasStaticNetCap(capability, STATIC_CAP_BIT_P2P);
+    EXPECT_EQ(hasCapability, true);
+
+    ret = LnnSetStaticNetCap(&capability, STATIC_CAP_BIT_ENHANCED_P2P);
+    EXPECT_EQ(ret, SOFTBUS_OK);
+    hasCapability = LnnHasStaticNetCap(capability, STATIC_CAP_BIT_ENHANCED_P2P);
+    EXPECT_EQ(hasCapability, true);
+
+    ret = LnnSetStaticNetCap(&capability, STATIC_CAP_BIT_ETH);
+    EXPECT_EQ(ret, SOFTBUS_OK);
+    hasCapability = LnnHasStaticNetCap(capability, STATIC_CAP_BIT_ETH);
+    EXPECT_EQ(hasCapability, true);
+}
+
+/*
+ * @tc.name: LNN_SET_STATIC_NET_CAPA_002
+ * @tc.desc: test lnn set staticNetCapa
+ * @tc.type: FUNC LnnSetStaticNetCap
+ * @tc.require:
+ */
+HWTEST_F(LNNNetLedgerCommonTest, LNN_SET_STATIC_NET_CAPA_002, TestSize.Level1)
+{
+    uint32_t capability = 0;
+    bool hasCapability = false;
+    int32_t ret = LnnSetStaticNetCap(NULL, STATIC_CAP_BIT_COUNT);
+    EXPECT_EQ(ret, SOFTBUS_INVALID_PARAM);
+    ret = LnnSetStaticNetCap(&capability, STATIC_CAP_BIT_BLE);
+    EXPECT_EQ(ret, SOFTBUS_OK);
+    hasCapability = LnnHasStaticNetCap(capability, STATIC_CAP_BIT_BLE);
+    EXPECT_EQ(hasCapability, true);
+}
+
+/*
+ * @tc.name: LNN_SET_STATIC_NET_CAPA_003
+ * @tc.desc: lnn net capability function test, LnnSetStaticNetCap, LnnClearStaticNetCap
+ * @tc.type: FUNC
+ * @tc.require:
+ */
+HWTEST_F(LNNNetLedgerCommonTest, LNN_SET_STATIC_NET_CAPA_003, TestSize.Level1)
+{
+    uint32_t capability = 0;
+    bool hasCapability = false;
+    int32_t ret = LnnSetStaticNetCap(&capability, STATIC_CAP_BIT_BLE);
+    EXPECT_EQ(ret, SOFTBUS_OK);
+    hasCapability = LnnHasStaticNetCap(capability, STATIC_CAP_BIT_BLE);
+    EXPECT_EQ(hasCapability, true);
+
+    ret = LnnClearStaticNetCap(&capability, STATIC_CAP_BIT_BLE);
+    EXPECT_EQ(ret, SOFTBUS_OK);
+    hasCapability = LnnHasStaticNetCap(capability, STATIC_CAP_BIT_BLE);
+    EXPECT_EQ(hasCapability, false);
+
+    ret = LnnSetStaticNetCap(&capability, STATIC_CAP_BIT_COUNT);
+    EXPECT_EQ(ret, SOFTBUS_INVALID_PARAM);
+    hasCapability = LnnHasStaticNetCap(capability, STATIC_CAP_BIT_COUNT);
+    EXPECT_EQ(hasCapability, false);
+    ret = LnnClearStaticNetCap(&capability, STATIC_CAP_BIT_COUNT);
+    EXPECT_EQ(ret, SOFTBUS_INVALID_PARAM);
+}
+
+/*
  * @tc.name: LNN_NODE_INFO_Test_001
  * @tc.desc: lnn node info function test
  * @tc.type: FUNC
@@ -252,18 +344,18 @@ HWTEST_F(LNNNetLedgerCommonTest, LNN_NODE_INFO_Test_001, TestSize.Level1)
     LnnSetNodeConnStatus(nullptr, STATUS_ONLINE);
     LnnGetBtMac(nullptr);
     LnnSetBtMac(nullptr, nullptr);
-    LnnGetNetIfName(nullptr);
-    LnnSetNetIfName(nullptr, nullptr);
-    LnnGetWiFiIp(nullptr);
-    LnnSetWiFiIp(nullptr, nullptr);
+    LnnGetNetIfName(nullptr, WLAN_IF);
+    LnnSetNetIfName(nullptr, nullptr, WLAN_IF);
+    LnnGetWiFiIp(nullptr, WLAN_IF);
+    LnnSetWiFiIp(nullptr, nullptr, WLAN_IF);
     EXPECT_TRUE(LnnGetMasterUdid(nullptr) == nullptr);
     EXPECT_TRUE(LnnSetMasterUdid(nullptr, nullptr) == SOFTBUS_INVALID_PARAM);
-    EXPECT_TRUE(LnnGetAuthPort(nullptr) == SOFTBUS_INVALID_PARAM);
-    EXPECT_TRUE(LnnSetAuthPort(nullptr, PORT) == SOFTBUS_INVALID_PARAM);
-    EXPECT_TRUE(LnnGetSessionPort(nullptr) == SOFTBUS_INVALID_PARAM);
-    EXPECT_TRUE(LnnSetSessionPort(nullptr, PORT) == SOFTBUS_INVALID_PARAM);
-    EXPECT_TRUE(LnnGetProxyPort(nullptr) == SOFTBUS_INVALID_PARAM);
-    EXPECT_TRUE(LnnSetProxyPort(nullptr, PORT) == SOFTBUS_INVALID_PARAM);
+    EXPECT_TRUE(LnnGetAuthPort(nullptr, WLAN_IF) == SOFTBUS_INVALID_PARAM);
+    EXPECT_TRUE(LnnSetAuthPort(nullptr, PORT, WLAN_IF) == SOFTBUS_INVALID_PARAM);
+    EXPECT_TRUE(LnnGetSessionPort(nullptr, WLAN_IF) == SOFTBUS_INVALID_PARAM);
+    EXPECT_TRUE(LnnSetSessionPort(nullptr, PORT, WLAN_IF) == SOFTBUS_INVALID_PARAM);
+    EXPECT_TRUE(LnnGetProxyPort(nullptr, WLAN_IF) == SOFTBUS_INVALID_PARAM);
+    EXPECT_TRUE(LnnSetProxyPort(nullptr, PORT, WLAN_IF) == SOFTBUS_INVALID_PARAM);
     EXPECT_TRUE(LnnSetP2pRole(nullptr, PORT) == SOFTBUS_INVALID_PARAM);
     EXPECT_TRUE(LnnGetP2pRole(nullptr) == 0);
     EXPECT_TRUE(LnnSetP2pMac(nullptr, nullptr) == SOFTBUS_INVALID_PARAM);
@@ -409,24 +501,24 @@ HWTEST_F(LNNNetLedgerCommonTest, LNN_NODE_INFO_Test_006, TestSize.Level1)
     NodeInfo nodeInfo;
     constexpr char netIfName1[] = "wlan0";
 
-    LnnSetNetIfName(nullptr, netIfName1);
-    EXPECT_NE(strcmp(nodeInfo.connectInfo.netIfName, netIfName1), 0);
+    LnnSetNetIfName(nullptr, netIfName1, WLAN_IF);
+    EXPECT_NE(strcmp(nodeInfo.connectInfo.ifInfo[WLAN_IF].netIfName, netIfName1), 0);
 
-    LnnSetNetIfName(&nodeInfo, nullptr);
-    EXPECT_NE(strcmp(nodeInfo.connectInfo.netIfName, netIfName1), 0);
+    LnnSetNetIfName(&nodeInfo, nullptr, WLAN_IF);
+    EXPECT_NE(strcmp(nodeInfo.connectInfo.ifInfo[WLAN_IF].netIfName, netIfName1), 0);
 
     char *netIfName2 = (char *)SoftBusCalloc((NET_IF_NAME_LEN + 1) * sizeof(char));
-    LnnSetNetIfName(&nodeInfo, netIfName2);
+    LnnSetNetIfName(&nodeInfo, netIfName2, WLAN_IF);
     SoftBusFree(netIfName2);
 
-    LnnSetNetIfName(&nodeInfo, netIfName1);
-    EXPECT_EQ(strcmp(nodeInfo.connectInfo.netIfName, netIfName1), 0);
+    LnnSetNetIfName(&nodeInfo, netIfName1, WLAN_IF);
+    EXPECT_EQ(strcmp(nodeInfo.connectInfo.ifInfo[WLAN_IF].netIfName, netIfName1), 0);
 
     const char *netIfName = nullptr;
-    netIfName = LnnGetNetIfName(&nodeInfo);
+    netIfName = LnnGetNetIfName(&nodeInfo, WLAN_IF);
     EXPECT_EQ(strcmp(netIfName, netIfName1), 0);
 
-    netIfName = LnnGetNetIfName(nullptr);
+    netIfName = LnnGetNetIfName(nullptr, WLAN_IF);
     EXPECT_EQ(strcmp(netIfName, DEFAULT_IFNAME), 0);
 }
 
@@ -440,10 +532,10 @@ HWTEST_F(LNNNetLedgerCommonTest, LNN_NODE_INFO_Test_007, TestSize.Level1)
 {
     NodeInfo nodeInfo;
 
-    LnnSetWiFiIp(nullptr, LOCAL_WLAN_IP);
-    EXPECT_NE(strcmp(nodeInfo.connectInfo.deviceIp, LOCAL_WLAN_IP), 0);
-    LnnSetWiFiIp(&nodeInfo, LOCAL_WLAN_IP);
-    EXPECT_EQ(strcmp(nodeInfo.connectInfo.deviceIp, LOCAL_WLAN_IP), 0);
+    LnnSetWiFiIp(nullptr, LOCAL_WLAN_IP, WLAN_IF);
+    EXPECT_NE(strcmp(nodeInfo.connectInfo.ifInfo[WLAN_IF].deviceIp, LOCAL_WLAN_IP), 0);
+    LnnSetWiFiIp(&nodeInfo, LOCAL_WLAN_IP, WLAN_IF);
+    EXPECT_EQ(strcmp(nodeInfo.connectInfo.ifInfo[WLAN_IF].deviceIp, LOCAL_WLAN_IP), 0);
 }
 
 /*
@@ -866,8 +958,7 @@ HWTEST_F(LNNNetLedgerCommonTest, LNN_NET_LEDGER_Test_002, TestSize.Level1)
     EXPECT_TRUE(LnnSetLocalStrInfo(STRING_KEY_NETWORKID, LOCAL_NETWORKID) == SOFTBUS_OK);
     EXPECT_TRUE(LnnSetNodeDataChangeFlag(nullptr, DATA_CHANGE_FLAG) == SOFTBUS_INVALID_PARAM);
     EXPECT_TRUE(LnnSetNodeDataChangeFlag(LOCAL_NETWORKID, DATA_CHANGE_FLAG) == SOFTBUS_OK);
-    EXPECT_TRUE(
-        LnnSetNodeDataChangeFlag(REMOTE_NETWORKID, DATA_CHANGE_FLAG) == SOFTBUS_NETWORK_INVALID_DEV_INFO);
+    EXPECT_TRUE(LnnSetNodeDataChangeFlag(REMOTE_NETWORKID, DATA_CHANGE_FLAG) == SOFTBUS_NETWORK_INVALID_DEV_INFO);
     LnnDeinitNetLedger();
 }
 
@@ -902,7 +993,7 @@ HWTEST_F(LNNNetLedgerCommonTest, LNN_NET_LEDGER_Test_004, TestSize.Level1)
     EXPECT_TRUE(LnnSetLocalStrInfo(STRING_KEY_NETWORKID, LOCAL_NETWORKID) == SOFTBUS_OK);
     EXPECT_TRUE(LnnSetLocalStrInfo(STRING_KEY_UUID, LOCAL_UUID) == SOFTBUS_OK);
     EXPECT_TRUE(LnnSetLocalStrInfo(STRING_KEY_BT_MAC, LOCAL_BT_MAC) == SOFTBUS_OK);
-    EXPECT_TRUE(LnnSetLocalStrInfo(STRING_KEY_WLAN_IP, LOCAL_WLAN_IP) == SOFTBUS_OK);
+    EXPECT_TRUE(LnnSetLocalStrInfoByIfnameIdx(STRING_KEY_IP, LOCAL_WLAN_IP, WLAN_IF) == SOFTBUS_OK);
     EXPECT_TRUE(LnnSetLocalNumInfo(NUM_KEY_NET_CAP, 1 << BIT_BR) == SOFTBUS_OK);
     NodeBasicInfo nodeInfo;
     (void)memset_s(&nodeInfo, sizeof(NodeBasicInfo), 0, sizeof(NodeBasicInfo));
@@ -923,9 +1014,9 @@ HWTEST_F(LNNNetLedgerCommonTest, LOCAL_LEDGER_Test_001, TestSize.Level1)
 {
     EXPECT_TRUE(LnnInitLocalLedger() == SOFTBUS_OK);
     static InfoKey getLocalStringInfoKeyTable[] = { STRING_KEY_HICE_VERSION, STRING_KEY_DEV_UDID, STRING_KEY_NETWORKID,
-        STRING_KEY_UUID, STRING_KEY_DEV_TYPE, STRING_KEY_DEV_NAME, STRING_KEY_BT_MAC, STRING_KEY_WLAN_IP,
-        STRING_KEY_NET_IF_NAME, STRING_KEY_MASTER_NODE_UDID, STRING_KEY_NODE_ADDR, STRING_KEY_P2P_MAC,
-        STRING_KEY_P2P_GO_MAC, STRING_KEY_OFFLINE_CODE, STRING_KEY_WIFIDIRECT_ADDR };
+        STRING_KEY_UUID, STRING_KEY_DEV_TYPE, STRING_KEY_DEV_NAME, STRING_KEY_BT_MAC, STRING_KEY_MASTER_NODE_UDID,
+        STRING_KEY_NODE_ADDR, STRING_KEY_P2P_MAC, STRING_KEY_P2P_GO_MAC, STRING_KEY_OFFLINE_CODE,
+        STRING_KEY_WIFIDIRECT_ADDR };
     char buf[UDID_BUF_LEN] = { 0 };
     int32_t ret;
     uint32_t i;
@@ -937,6 +1028,32 @@ HWTEST_F(LNNNetLedgerCommonTest, LOCAL_LEDGER_Test_001, TestSize.Level1)
     for (i = 0; i < sizeof(getLocalStringInfoKeyTable) / sizeof(InfoKey); i++) {
         (void)memset_s(buf, UDID_BUF_LEN, 0, UDID_BUF_LEN);
         ret = LnnGetLocalStrInfo(getLocalStringInfoKeyTable[i], buf, UDID_BUF_LEN);
+        EXPECT_TRUE(ret == SOFTBUS_OK);
+    }
+    LnnDeinitLocalLedger();
+}
+
+/*
+ * @tc.name: LOCAL_LEDGER_BY_IFNAME_Test_001
+ * @tc.desc: lnn get local str by ifname test
+ * @tc.type: FUNC
+ * @tc.require:
+ */
+HWTEST_F(LNNNetLedgerCommonTest, LOCAL_LEDGER_BY_IFNAME_Test_001, TestSize.Level1)
+{
+    EXPECT_TRUE(LnnInitLocalLedger() == SOFTBUS_OK);
+    static InfoKey getLocalStringInfoKeyTable[] = { STRING_KEY_IP, STRING_KEY_NET_IF_NAME, STRING_KEY_IP6_WITH_IF };
+    char buf[UDID_BUF_LEN] = { 0 };
+    int32_t ret;
+    uint32_t i;
+    LnnSetLocalStrInfoByIfnameIdx(STRING_KEY_DEV_UDID, LOCAL_UDID, WLAN_IF);
+    for (i = 0; i < sizeof(getLocalStringInfoKeyTable) / sizeof(InfoKey); i++) {
+        ret = LnnGetLocalStrInfoByIfnameIdx(getLocalStringInfoKeyTable[i], nullptr, UDID_BUF_LEN, WLAN_IF);
+        EXPECT_TRUE(ret == SOFTBUS_INVALID_PARAM);
+    }
+    for (i = 0; i < sizeof(getLocalStringInfoKeyTable) / sizeof(InfoKey); i++) {
+        (void)memset_s(buf, UDID_BUF_LEN, 0, UDID_BUF_LEN);
+        ret = LnnGetLocalStrInfoByIfnameIdx(getLocalStringInfoKeyTable[i], buf, UDID_BUF_LEN, WLAN_IF);
         EXPECT_TRUE(ret == SOFTBUS_OK);
     }
     LnnDeinitLocalLedger();
@@ -957,9 +1074,9 @@ HWTEST_F(LNNNetLedgerCommonTest, LOCAL_LEDGER_Test_002, TestSize.Level1)
     EXPECT_TRUE(ret == SOFTBUS_NETWORK_SET_LEDGER_INFO_ERR);
     ret = LnnSetLocalStrInfo(STRING_KEY_BT_MAC, LOCAL_BT_MAC);
     EXPECT_TRUE(ret == SOFTBUS_OK);
-    ret = LnnSetLocalStrInfo(STRING_KEY_WLAN_IP, LOCAL_WLAN_IP);
+    ret = LnnSetLocalStrInfoByIfnameIdx(STRING_KEY_IP, LOCAL_WLAN_IP, WLAN_IF);
     EXPECT_TRUE(ret == SOFTBUS_OK);
-    ret = LnnSetLocalStrInfo(STRING_KEY_NET_IF_NAME, LOCAL_NET_IF_NAME);
+    ret = LnnSetLocalStrInfoByIfnameIdx(STRING_KEY_NET_IF_NAME, LOCAL_NET_IF_NAME, WLAN_IF);
     EXPECT_TRUE(ret == SOFTBUS_OK);
     ret = LnnSetLocalStrInfo(STRING_KEY_MASTER_NODE_UDID, MASTER_NODE_UDID);
     EXPECT_TRUE(ret == SOFTBUS_OK);
@@ -983,14 +1100,33 @@ HWTEST_F(LNNNetLedgerCommonTest, LOCAL_LEDGER_Test_002, TestSize.Level1)
 HWTEST_F(LNNNetLedgerCommonTest, LOCAL_LEDGER_Test_003, TestSize.Level1)
 {
     EXPECT_TRUE(LnnInitLocalLedger() == SOFTBUS_OK);
-    static InfoKey getLocalNumInfoKeyTable[] = { NUM_KEY_SESSION_PORT, NUM_KEY_AUTH_PORT, NUM_KEY_PROXY_PORT,
-        NUM_KEY_NET_CAP, NUM_KEY_DISCOVERY_TYPE, NUM_KEY_DEV_TYPE_ID, NUM_KEY_MASTER_NODE_WEIGHT, NUM_KEY_P2P_ROLE,
-        NUM_KEY_STATIC_CAP_LEN };
+    static InfoKey getLocalNumInfoKeyTable[] = { NUM_KEY_NET_CAP, NUM_KEY_DISCOVERY_TYPE, NUM_KEY_DEV_TYPE_ID,
+        NUM_KEY_MASTER_NODE_WEIGHT, NUM_KEY_P2P_ROLE, NUM_KEY_STATIC_CAP_LEN };
     int32_t ret, info;
     LnnSetLocalNumInfo(NUM_KEY_AUTH_PORT, LOCAL_AUTH_PORT);
     for (uint32_t i = 0; i < sizeof(getLocalNumInfoKeyTable) / sizeof(InfoKey); i++) {
         info = 0;
         ret = LnnGetLocalNumInfo(getLocalNumInfoKeyTable[i], &info);
+        EXPECT_TRUE(ret == SOFTBUS_OK);
+    }
+    LnnDeinitLocalLedger();
+}
+
+/*
+ * @tc.name: LOCAL_LEDGER_BY_IFNAME_Test_003
+ * @tc.desc: lnn get local num by ifname test
+ * @tc.type: FUNC
+ * @tc.require:
+ */
+HWTEST_F(LNNNetLedgerCommonTest, LOCAL_LEDGER_BY_IFNAME_Test_003, TestSize.Level1)
+{
+    EXPECT_TRUE(LnnInitLocalLedger() == SOFTBUS_OK);
+    static InfoKey getLocalNumInfoKeyTable[] = { NUM_KEY_SESSION_PORT, NUM_KEY_AUTH_PORT, NUM_KEY_PROXY_PORT };
+    int32_t ret, info;
+    LnnSetLocalNumInfoByIfnameIdx(NUM_KEY_AUTH_PORT, LOCAL_AUTH_PORT, WLAN_IF);
+    for (uint32_t i = 0; i < sizeof(getLocalNumInfoKeyTable) / sizeof(InfoKey); i++) {
+        info = 0;
+        ret = LnnGetLocalNumInfoByIfnameIdx(getLocalNumInfoKeyTable[i], &info, WLAN_IF);
         EXPECT_TRUE(ret == SOFTBUS_OK);
     }
     LnnDeinitLocalLedger();
@@ -1005,11 +1141,11 @@ HWTEST_F(LNNNetLedgerCommonTest, LOCAL_LEDGER_Test_003, TestSize.Level1)
 HWTEST_F(LNNNetLedgerCommonTest, LOCAL_LEDGER_Test_004, TestSize.Level1)
 {
     EXPECT_TRUE(LnnInitLocalLedger() == SOFTBUS_OK);
-    int32_t ret = LnnSetLocalNumInfo(NUM_KEY_SESSION_PORT, LOCAL_SESSION_PORT);
+    int32_t ret = LnnSetLocalNumInfoByIfnameIdx(NUM_KEY_SESSION_PORT, LOCAL_SESSION_PORT, WLAN_IF);
     EXPECT_TRUE(ret == SOFTBUS_OK);
-    ret = LnnSetLocalNumInfo(NUM_KEY_AUTH_PORT, LOCAL_AUTH_PORT);
+    ret = LnnSetLocalNumInfoByIfnameIdx(NUM_KEY_AUTH_PORT, LOCAL_AUTH_PORT, WLAN_IF);
     EXPECT_TRUE(ret == SOFTBUS_OK);
-    ret = LnnSetLocalNumInfo(NUM_KEY_PROXY_PORT, LOCAL_PROXY_PORT);
+    ret = LnnSetLocalNumInfoByIfnameIdx(NUM_KEY_PROXY_PORT, LOCAL_PROXY_PORT, WLAN_IF);
     EXPECT_TRUE(ret == SOFTBUS_OK);
     ret = LnnSetLocalNumInfo(NUM_KEY_NET_CAP, LOCAL_CAPACITY);
     EXPECT_TRUE(ret == SOFTBUS_OK);

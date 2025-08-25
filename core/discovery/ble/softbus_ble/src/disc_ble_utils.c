@@ -22,8 +22,8 @@
 #include "bus_center_manager.h"
 #include "cJSON.h"
 #include "disc_ble_constant.h"
-#include "softbus_broadcast_type.h"
 #include "disc_log.h"
+#include "softbus_broadcast_type.h"
 #include "lnn_device_info.h"
 #include "lnn_ohos_account.h"
 #include "locale_config_wrapper.h"
@@ -36,25 +36,22 @@
 #include "softbus_json_utils.h"
 #include "softbus_utils.h"
 
-#define WIDE_CHAR_MAX_LEN 8
-#define WIDE_STR_MAX_LEN 128
-
-#define MAC_BIT_ZERO 0
-#define MAC_BIT_ONE 1
-#define MAC_BIT_TWO 2
-#define MAC_BIT_THREE 3
-#define MAC_BIT_FOUR 4
-#define MAC_BIT_FIVE 5
-#define TLV_MAX_DATA_LEN 15
-#define TLV_VARIABLE_DATA_LEN 0
-#define HYPHEN_ZH        "的"
-#define HYPHEN_EXCEPT_ZH "-"
-#define EMPTY_STRING     ""
-
-static int32_t CalculateMbsTruncateSize(const char *multiByteStr, uint32_t capacity, uint32_t *truncatedSize);
+#define MAC_BIT_ZERO                0
+#define MAC_BIT_ONE                 1
+#define MAC_BIT_TWO                 2
+#define MAC_BIT_THREE               3
+#define MAC_BIT_FOUR                4
+#define MAC_BIT_FIVE                5
+#define TLV_MAX_DATA_LEN            15
+#define TLV_VARIABLE_DATA_LEN       0
+#define HYPHEN_ZH                   "的"
+#define HYPHEN_EXCEPT_ZH            "-"
+#define EMPTY_STRING                ""
 
 bool CheckBitMapEmpty(uint32_t capBitMapNum, const uint32_t *capBitMap)
 {
+    DISC_CHECK_AND_RETURN_RET_LOGE(capBitMap != NULL, false, DISC_BLE, "capBitMap is nullptr");
+
     for (uint32_t i = 0; i < capBitMapNum; i++) {
         if (capBitMap[i] != 0x0) {
             return false;
@@ -65,6 +62,8 @@ bool CheckBitMapEmpty(uint32_t capBitMapNum, const uint32_t *capBitMap)
 
 bool CheckCapBitMapExist(uint32_t capBitMapNum, const uint32_t *capBitMap, uint32_t pos)
 {
+    DISC_CHECK_AND_RETURN_RET_LOGE(capBitMap != NULL, false, DISC_BLE, "capBitMap is nullptr");
+
     uint32_t index = pos / INT32_MAX_BIT_NUM;
     if (index >= capBitMapNum) {
         return false;
@@ -74,6 +73,8 @@ bool CheckCapBitMapExist(uint32_t capBitMapNum, const uint32_t *capBitMap, uint3
 
 void SetCapBitMapPos(uint32_t capBitMapNum, uint32_t *capBitMap, uint32_t pos)
 {
+    DISC_CHECK_AND_RETURN_LOGE(capBitMap != NULL, DISC_BLE, "capBitMap is nullptr");
+
     uint32_t index = pos / INT32_MAX_BIT_NUM;
     if (index >= capBitMapNum) {
         return;
@@ -83,6 +84,8 @@ void SetCapBitMapPos(uint32_t capBitMapNum, uint32_t *capBitMap, uint32_t pos)
 
 void UnsetCapBitMapPos(uint32_t capBitMapNum, uint32_t *capBitMap, uint32_t pos)
 {
+    DISC_CHECK_AND_RETURN_LOGE(capBitMap != NULL, DISC_BLE, "capBitMap is nullptr");
+
     uint32_t index = pos / INT32_MAX_BIT_NUM;
     if (index >= capBitMapNum) {
         return;
@@ -93,6 +96,7 @@ void UnsetCapBitMapPos(uint32_t capBitMapNum, uint32_t *capBitMap, uint32_t pos)
 
 static int32_t DiscBleGetDeviceUdid(char *udid, uint32_t len)
 {
+    DISC_CHECK_AND_RETURN_RET_LOGE(udid != NULL, SOFTBUS_INVALID_PARAM, DISC_BLE, "udid is nullptr");
     int32_t ret = LnnGetLocalStrInfo(STRING_KEY_DEV_UDID, udid, len);
     DISC_CHECK_AND_RETURN_RET_LOGE(ret == SOFTBUS_OK, ret, DISC_BLE, "Get local dev Id failed.");
     return SOFTBUS_OK;
@@ -104,7 +108,7 @@ int32_t DiscBleGetDeviceName(char *deviceName, uint32_t size)
     DISC_CHECK_AND_RETURN_RET_LOGE(size != 0, SOFTBUS_INVALID_PARAM, DISC_BLE, "device name size is 0");
 
     char localDevName[DEVICE_NAME_BUF_LEN] = {0};
-    int32_t ret = LnnGetLocalStrInfo(STRING_KEY_DEV_NAME, localDevName, sizeof(localDevName));
+    int32_t ret = DiscGetDisplayName(localDevName, DEVICE_NAME_BUF_LEN, size);
     DISC_CHECK_AND_RETURN_RET_LOGE(ret == SOFTBUS_OK, ret, DISC_BLE, "get local device name failed");
 
     uint32_t truncateLen = 0;
@@ -157,71 +161,12 @@ int32_t DiscBleGetShortUserIdHash(uint8_t *hashStr, uint32_t len)
     return SOFTBUS_OK;
 }
 
-static int32_t SetLocale(char **localeBefore)
-{
-    *localeBefore = setlocale(LC_CTYPE, NULL);
-    if (*localeBefore == NULL) {
-        DISC_LOGW(DISC_BLE, "get locale failed");
-    }
-
-    char *localeAfter = setlocale(LC_CTYPE, "C.UTF-8");
-    return (localeAfter != NULL) ? SOFTBUS_OK : SOFTBUS_DISCOVER_SET_LOCALE_FAILED;
-}
-
-static void RestoreLocale(const char *localeBefore)
-{
-    if (setlocale(LC_CTYPE, localeBefore) == NULL) {
-        DISC_LOGW(DISC_BLE, "restore locale failed");
-    }
-}
-
-// Calculate the truncated length in wide characters, ensuring that the truncation is performed in wide character
-static int32_t CalculateMbsTruncateSize(const char *multiByteStr, uint32_t capacity, uint32_t *truncatedSize)
-{
-    size_t multiByteStrLen = strlen(multiByteStr);
-    if (multiByteStrLen == 0) {
-        *truncatedSize = 0;
-        return SOFTBUS_OK;
-    }
-    DISC_CHECK_AND_RETURN_RET_LOGE(multiByteStrLen <= WIDE_STR_MAX_LEN, SOFTBUS_INVALID_PARAM, DISC_BLE,
-        "multi byte str too long: %{public}zu", multiByteStrLen);
-
-    char *localeBefore = NULL;
-    int32_t ret = SetLocale(&localeBefore);
-    DISC_CHECK_AND_RETURN_RET_LOGE(ret == SOFTBUS_OK, ret, DISC_BLE, "set locale failed");
-
-    // convert multi byte str to wide str
-    wchar_t wideStr[WIDE_STR_MAX_LEN] = {0};
-    size_t numConverted = mbstowcs(wideStr, multiByteStr, multiByteStrLen);
-    if (numConverted == 0 || numConverted > multiByteStrLen) {
-        DISC_LOGE(DISC_BLE, "mbstowcs failed");
-        RestoreLocale(localeBefore);
-        return SOFTBUS_DISCOVER_CHAR_CONVERT_FAILED;
-    }
-
-    // truncate wide str until <= capacity
-    uint32_t truncateTotal = 0;
-    int32_t truncateIndex = (int32_t)numConverted - 1;
-    char multiByteChar[WIDE_CHAR_MAX_LEN] = {0};
-    while (capacity < multiByteStrLen - truncateTotal && truncateIndex >= 0) {
-        int32_t truncateCharLen = wctomb(multiByteChar, wideStr[truncateIndex]);
-        if (truncateCharLen <= 0) {
-            DISC_LOGE(DISC_BLE, "wctomb failed on w_char. truncateIndex=%{public}d", truncateIndex);
-            RestoreLocale(localeBefore);
-            return SOFTBUS_DISCOVER_CHAR_CONVERT_FAILED;
-        }
-        truncateTotal += (uint32_t)truncateCharLen;
-        truncateIndex--;
-    }
-
-    *truncatedSize = (multiByteStrLen >= truncateTotal) ? (multiByteStrLen - truncateTotal) : 0;
-    RestoreLocale(localeBefore);
-    return SOFTBUS_OK;
-}
-
 int32_t AssembleTLV(BroadcastData *broadcastData, uint8_t dataType, const void *value,
     uint32_t dataLen)
 {
+    DISC_CHECK_AND_RETURN_RET_LOGE(broadcastData != NULL, SOFTBUS_INVALID_PARAM, DISC_BLE, "broadcastData is nullptr");
+    DISC_CHECK_AND_RETURN_RET_LOGE(value != NULL, SOFTBUS_INVALID_PARAM, DISC_BLE, "value is nullptr");
+
     uint32_t remainLen = BROADCAST_MAX_LEN - broadcastData->dataLen;
     DISC_CHECK_AND_RETURN_RET_LOGE(remainLen != 0, SOFTBUS_DISCOVER_BLE_ASSEMBLE_DATA_FAIL,
         DISC_BLE, "tlv remainLen is 0.");
@@ -242,6 +187,9 @@ int32_t AssembleTLV(BroadcastData *broadcastData, uint8_t dataType, const void *
 /* A helper function for convert br mac bin address to string address */
 static int32_t CopyBrAddrValue(DeviceWrapper *device, const uint8_t *src, uint32_t srcLen)
 {
+    DISC_CHECK_AND_RETURN_RET_LOGE(device != NULL, SOFTBUS_INVALID_PARAM, DISC_BLE, "device is nullptr");
+    DISC_CHECK_AND_RETURN_RET_LOGE(src != NULL, SOFTBUS_INVALID_PARAM, DISC_BLE, "src is nullptr");
+
     uint32_t i = device->info->addrNum;
     int32_t ret = ConvertBtMacToStr(device->info->addr[i].info.br.brMac, BT_MAC_LEN, (uint8_t *)src, srcLen);
     DISC_CHECK_AND_RETURN_RET_LOGE(ret == SOFTBUS_OK, ret, DISC_BLE,
@@ -255,6 +203,9 @@ static int32_t CopyBrAddrValue(DeviceWrapper *device, const uint8_t *src, uint32
 
 static int32_t CopyDeviceIdHashValue(DeviceWrapper *device, const uint8_t *data, uint32_t len)
 {
+    DISC_CHECK_AND_RETURN_RET_LOGE(device != NULL, SOFTBUS_INVALID_PARAM, DISC_BLE, "device is nullptr");
+    DISC_CHECK_AND_RETURN_RET_LOGE(data != NULL, SOFTBUS_INVALID_PARAM, DISC_BLE, "data is nullptr");
+
     errno_t retMem = memcpy_s(device->info->addr[0].info.ble.udidHash, UDID_HASH_LEN, (void *)data, len);
     DISC_CHECK_AND_RETURN_RET_LOGE(retMem == EOK, SOFTBUS_MEM_ERR,
         DISC_BLE, "parse tlv copy device id hash value failed");
@@ -267,6 +218,10 @@ static int32_t CopyDeviceIdHashValue(DeviceWrapper *device, const uint8_t *data,
 
 static int32_t CopyDeviceNameValue(DeviceWrapper *device, const uint8_t *data, uint32_t *len, uint32_t remainLen)
 {
+    DISC_CHECK_AND_RETURN_RET_LOGE(device != NULL, SOFTBUS_INVALID_PARAM, DISC_BLE, "device is nullptr");
+    DISC_CHECK_AND_RETURN_RET_LOGE(data != NULL, SOFTBUS_INVALID_PARAM, DISC_BLE, "data is nullptr");
+    DISC_CHECK_AND_RETURN_RET_LOGE(len != NULL, SOFTBUS_INVALID_PARAM, DISC_BLE, "len is nullptr");
+
     // TLV_VARIBALE_DATA_LEN indicate indefinite length
     if (*len == TLV_VARIABLE_DATA_LEN) {
         uint32_t devNameLen = strlen((char *)data) + 1; // +1 is device name end '\0'
@@ -282,6 +237,10 @@ static int32_t CopyDeviceNameValue(DeviceWrapper *device, const uint8_t *data, u
 
 static int32_t CopyNicknameValue(DeviceWrapper *device, const uint8_t *data, uint32_t *len, uint32_t remainLen)
 {
+    DISC_CHECK_AND_RETURN_RET_LOGE(device != NULL, SOFTBUS_INVALID_PARAM, DISC_BLE, "device is nullptr");
+    DISC_CHECK_AND_RETURN_RET_LOGE(data != NULL, SOFTBUS_INVALID_PARAM, DISC_BLE, "data is nullptr");
+    DISC_CHECK_AND_RETURN_RET_LOGE(len != NULL, SOFTBUS_INVALID_PARAM, DISC_BLE, "len is nullptr");
+
     // TLV_VARIBALE_DATA_LEN indicate indefinite length
     if (*len == TLV_VARIABLE_DATA_LEN) {
         uint32_t nicknameLen = strlen((char *)data) + 1; // +1 is nick name end '\0'
@@ -297,6 +256,9 @@ static int32_t CopyNicknameValue(DeviceWrapper *device, const uint8_t *data, uin
 
 static int32_t ParseDeviceType(DeviceWrapper *device, const uint8_t* data, const uint32_t len)
 {
+    DISC_CHECK_AND_RETURN_RET_LOGE(device != NULL, SOFTBUS_INVALID_PARAM, DISC_BLE, "device is nullptr");
+    DISC_CHECK_AND_RETURN_RET_LOGE(data != NULL, SOFTBUS_INVALID_PARAM, DISC_BLE, "data is nullptr");
+
     uint8_t recvDevType[DEVICE_TYPE_LEN] = {0};
     errno_t retMem = memcpy_s(recvDevType, DEVICE_TYPE_LEN, (void *)data, len);
     DISC_CHECK_AND_RETURN_RET_LOGE(retMem == EOK, SOFTBUS_MEM_ERR,
@@ -310,6 +272,8 @@ static int32_t ParseDeviceType(DeviceWrapper *device, const uint8_t* data, const
 
 static int32_t ParseCustData(DeviceWrapper *device, const uint8_t *data, const uint32_t len)
 {
+    DISC_CHECK_AND_RETURN_RET_LOGE(device != NULL, SOFTBUS_INVALID_PARAM, DISC_BLE, "device is nullptr");
+    DISC_CHECK_AND_RETURN_RET_LOGE(data != NULL, SOFTBUS_INVALID_PARAM, DISC_BLE, "data is nullptr");
     DISC_CHECK_AND_RETURN_RET_LOGE(len >= CUST_CAPABILITY_LEN, SOFTBUS_INVALID_PARAM, DISC_BLE,
         "the length of cust data is too short");
     if ((int32_t)data[0] != (int32_t)CAST_PLUS) {
@@ -362,6 +326,8 @@ static int32_t ParseCustData(DeviceWrapper *device, const uint8_t *data, const u
 
 static int32_t SpliceDisplayName(DeviceWrapper *device)
 {
+    DISC_CHECK_AND_RETURN_RET_LOGE(device != NULL, SOFTBUS_INVALID_PARAM, DISC_BLE, "device is nullptr");
+
     char *hyphen = NULL;
     bool isSameAccount = false;
     bool isZH = IsZHLanguage();
@@ -386,8 +352,51 @@ static int32_t SpliceDisplayName(DeviceWrapper *device)
     return SOFTBUS_OK;
 }
 
+static int32_t UpdateDeviceName(DeviceWrapper *device)
+{
+    DISC_CHECK_AND_RETURN_RET_LOGE(device != NULL && device->info != NULL, SOFTBUS_INVALID_PARAM, DISC_BLE,
+        "device is null");
+    int32_t ret = SOFTBUS_OK;
+    if (strlen(device->nickname) != 0) {
+        ret = SpliceDisplayName(device);
+    } else {
+        ret = memcpy_s(device->info->devName, DISC_MAX_DEVICE_NAME_LEN, device->devName, strlen(device->devName));
+        DISC_CHECK_AND_RETURN_RET_LOGE(
+            ret == SOFTBUS_OK, SOFTBUS_MEM_ERR, DISC_BLE, "devName copy failed, ret=%{public}d", ret);
+    }
+    return ret;
+}
+
+static int32_t CopyActionValue(DeviceWrapper *device, const uint8_t *data, uint32_t len)
+{
+    DISC_CHECK_AND_RETURN_RET_LOGE(device != NULL && data != NULL, SOFTBUS_INVALID_PARAM, DISC_BLE, "invalid param");
+    DISC_CHECK_AND_RETURN_RET_LOGE(len == ACTION_MAC_SIZE + ACTION_CHANNEL_SIZE,
+        SOFTBUS_INVALID_PARAM, DISC_BLE, "invalid action len");
+    device->channelId = data[0];
+    errno_t ret = memcpy_s(device->mac, ACTION_MAC_SIZE, data + ACTION_CHANNEL_SIZE, ACTION_MAC_SIZE);
+    DISC_CHECK_AND_RETURN_RET_LOGE(ret == EOK, SOFTBUS_MEM_ERR, DISC_BLE, "memcpy mac failed");
+    return SOFTBUS_OK;
+}
+
+static int32_t ParseRecvTlvsExt(uint8_t type, DeviceWrapper *device, const uint8_t *data, uint32_t len)
+{
+    DISC_CHECK_AND_RETURN_RET_LOGE(device != NULL && data != NULL, SOFTBUS_INVALID_PARAM, DISC_BLE, "invalid param");
+    int32_t ret = SOFTBUS_OK;
+    switch (type) {
+        case TLV_TYPE_ACTION:
+            ret = CopyActionValue(device, data, len);
+            break;
+        default:
+            DISC_LOGW(DISC_BLE, "Unknown TLV, just skip, tlvType=%{public}d, tlvLen=%{public}u", type, len);
+            break;
+    }
+    return ret;
+}
+
 static int32_t ParseRecvTlvs(DeviceWrapper *device, const uint8_t *data, uint32_t dataLen)
 {
+    DISC_CHECK_AND_RETURN_RET_LOGE(device != NULL, SOFTBUS_INVALID_PARAM, DISC_BLE, "device is nullptr");
+    DISC_CHECK_AND_RETURN_RET_LOGE(data != NULL, SOFTBUS_INVALID_PARAM, DISC_BLE, "data is nullptr");
     uint32_t curLen = 0;
     int32_t ret = SOFTBUS_OK;
     while (curLen < dataLen) {
@@ -395,29 +404,28 @@ static int32_t ParseRecvTlvs(DeviceWrapper *device, const uint8_t *data, uint32_
         uint32_t len = (uint32_t)(data[curLen] & LEAST_SIGNIFICANT_4BIT_MASK);
         DISC_CHECK_AND_RETURN_RET_LOGE(
             curLen + TL_LEN + len <= dataLen && (len != TLV_VARIABLE_DATA_LEN || curLen + TL_LEN < dataLen),
-            SOFTBUS_BC_MGR_UNEXPECTED_PACKETS, DISC_BLE,
-            "unexperted advData: out of range, "
+            SOFTBUS_BC_MGR_UNEXPECTED_PACKETS, DISC_BLE, "unexperted advData: out of range, "
             "tlvType=%{public}d, tlvLen=%{public}u, currentPos=%{public}u, totalPos=%{public}u",
             type, len, curLen, dataLen);
         switch (type) {
             case TLV_TYPE_DEVICE_ID_HASH:
-                ret = CopyDeviceIdHashValue(device, &data[curLen + 1], len);
+                ret = CopyDeviceIdHashValue(device, &data[curLen + TL_LEN], len);
                 break;
             case TLV_TYPE_DEVICE_TYPE:
-                ret = ParseDeviceType(device, &data[curLen + 1], len);
+                ret = ParseDeviceType(device, &data[curLen + TL_LEN], len);
                 break;
             case TLV_TYPE_DEVICE_NAME:
-                ret = CopyDeviceNameValue(device, &data[curLen + 1], &len, dataLen - curLen - TL_LEN);
+                ret = CopyDeviceNameValue(device, &data[curLen + TL_LEN], &len, dataLen - curLen - TL_LEN);
                 break;
             case TLV_TYPE_CUST:
-                ret = ParseCustData(device, &data[curLen + 1], len);
+                ret = ParseCustData(device, &data[curLen + TL_LEN], len);
                 break;
             case TLV_TYPE_BR_MAC:
-                ret = CopyBrAddrValue(device, &data[curLen + 1], len);
+                ret = CopyBrAddrValue(device, &data[curLen + TL_LEN], len);
                 break;
             case TLV_TYPE_RANGE_POWER:
                 if (len > RANGE_POWER_TYPE_LEN) {
-                    ret = CopyNicknameValue(device, &data[curLen + 1], &len, dataLen - curLen - TL_LEN);
+                    ret = CopyNicknameValue(device, &data[curLen + TL_LEN], &len, dataLen - curLen - TL_LEN);
                     break;
                 }
                 errno_t retMem = memcpy_s(&device->power, RANGE_POWER_TYPE_LEN, (void *)&data[curLen + 1], len);
@@ -425,16 +433,15 @@ static int32_t ParseRecvTlvs(DeviceWrapper *device, const uint8_t *data, uint32_
                     DISC_BLE, "parse tlv copy range power failed");
                 break;
             default:
-                DISC_LOGW(DISC_BLE, "Unknown TLV, just skip, tlvType=%{public}d, tlvLen=%{public}u", type, len);
+                ret = ParseRecvTlvsExt(type, device, &data[curLen + TL_LEN], len);
                 break;
         }
         if (ret != SOFTBUS_OK) {
             break;
         }
-        // move cursor to next TLV
-        curLen += len + 1;
+        curLen += len + 1; // move cursor to next TLV
     }
-    ret = SpliceDisplayName(device);
+    ret = UpdateDeviceName(device);
     return ret;
 }
 
@@ -457,7 +464,7 @@ int32_t GetDeviceInfoFromDisAdvData(DeviceWrapper *device, const uint8_t *data, 
     errno_t retMem = memcpy_s(device->info->accountHash, SHORT_USER_ID_HASH_LEN,
         &serviceData[POS_USER_ID_HASH], SHORT_USER_ID_HASH_LEN);
     DISC_CHECK_AND_RETURN_RET_LOGE(retMem == EOK, SOFTBUS_MEM_ERR, DISC_BLE, "copy accountHash failed");
-    device->info->capabilityBitmap[0] = serviceData[POS_CAPABLITY];
+    device->info->capabilityBitmap[0] = serviceData[POS_CAPABILITY];
 
     uint32_t bcTlvLen = reportInfo->packet.bcData.payloadLen - POS_TLV;
 
@@ -485,3 +492,30 @@ int32_t GetDeviceInfoFromDisAdvData(DeviceWrapper *device, const uint8_t *data, 
     return ret;
 }
 
+int32_t DiscSoftbusBleBuildReportJson(DeviceInfo *device, uint32_t handleId)
+{
+    DISC_CHECK_AND_RETURN_RET_LOGE(device != NULL && handleId > 0, SOFTBUS_INVALID_PARAM, DISC_BLE,
+        "invalid parm");
+
+    cJSON *json = cJSON_CreateObject();
+    DISC_CHECK_AND_RETURN_RET_LOGE(json != NULL, SOFTBUS_CREATE_JSON_ERR, DISC_BLE,
+        "create json failed");
+    
+    if (!AddNumberToJsonObject(json, BLE_REPORT_HANDLE_JSON_LEY, handleId)) {
+        DISC_LOGE(DISC_BLE, "add handle failed");
+        cJSON_Delete(json);
+        return SOFTBUS_CREATE_JSON_ERR;
+    }
+    char *custData = cJSON_PrintUnformatted(json);
+    cJSON_Delete(json);
+    DISC_CHECK_AND_RETURN_RET_LOGE(custData != NULL, SOFTBUS_CREATE_JSON_ERR, DISC_BLE,
+        "to json str failed");
+    
+    if (strcpy_s(device->custData, DISC_MAX_CUST_DATA_LEN, custData) != EOK) {
+        DISC_LOGE(DISC_BLE, "copy cust data failed");
+        cJSON_free(custData);
+        return SOFTBUS_STRCPY_ERR;
+    }
+    cJSON_free(custData);
+    return SOFTBUS_OK;
+}

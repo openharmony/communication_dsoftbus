@@ -540,10 +540,10 @@ void DumpSessionkeyList(const SessionKeyList *list)
         AUTH_LOGI(AUTH_FSM,
             "[Dump] SessionKey keyNum=%{public}d, index=%{public}d, keyLen=%{public}u, key=XX, "
             "lastUseTime=%{public}" PRIu64 ", type=%{public}u, useTime=%{public}" PRIu64
-            ", %{public}" PRIu64 ", %{public}" PRIu64 ", %{public}" PRIu64 ", %{public}" PRIu64,
+            ", %{public}" PRIu64 ", %{public}" PRIu64 ", %{public}" PRIu64 ",  %{public}" PRIu64 ", %{public}" PRIu64,
             keyNum, item->index, item->key.len, item->lastUseTime, item->type, item->useTime[AUTH_LINK_TYPE_WIFI],
             item->useTime[AUTH_LINK_TYPE_BR], item->useTime[AUTH_LINK_TYPE_BLE], item->useTime[AUTH_LINK_TYPE_P2P],
-            item->useTime[AUTH_LINK_TYPE_ENHANCED_P2P]);
+            item->useTime[AUTH_LINK_TYPE_ENHANCED_P2P], item->useTime[AUTH_LINK_TYPE_SLE]);
         keyNum++;
     }
     AUTH_LOGI(AUTH_FSM, "[Dump] SessionKey total num=%{public}u", keyNum);
@@ -565,7 +565,11 @@ static void HandleUpdateSessionKeyEvent(const void *obj)
         .isServer = false,
         .isFastAuth = false,
     };
-    if (AuthSessionStartAuth(&authInfo, &auth->connInfo[authHandle.type]) != SOFTBUS_OK) {
+    DeviceKeyId deviceKeyId = {
+        .hasDeviceKeyId = false, .localDeviceKeyId = AUTH_INVALID_DEVICEKEY_ID,
+        .remoteDeviceKeyId = AUTH_INVALID_DEVICEKEY_ID,
+    };
+    if (AuthSessionStartAuth(&authInfo, &auth->connInfo[authHandle.type], &deviceKeyId) != SOFTBUS_OK) {
         AUTH_LOGI(
             AUTH_FSM, "start auth session to update session key fail, authId=%{public}" PRId64, authHandle.authId);
     }

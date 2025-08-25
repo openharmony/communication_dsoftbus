@@ -45,7 +45,7 @@ public:
 
 void DiscSdkOnlyL2Test::SetUpTestCase(void)
 {
-    SetAceessTokenPermission("discSdkOnlyL2Test");
+    SetAccessTokenPermission("discSdkOnlyL2Test");
 }
 
 void DiscSdkOnlyL2Test::TearDownTestCase(void)

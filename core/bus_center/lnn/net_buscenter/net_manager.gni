@@ -24,6 +24,7 @@ if (dsoftbus_feature_lnn_frame && dsoftbus_feature_lnn_wifi) {
   bus_center_net_mgr_src += [
     "$dsoftbus_root_path/core/bus_center/lnn/net_buscenter/src/lnn_ip_network_impl.c",
     "$dsoftbus_root_path/core/bus_center/lnn/net_buscenter/src/lnn_physical_subnet_manager.c",
+    "$dsoftbus_root_path/core/bus_center/lnn/net_buscenter/src/lnn_usb_network_impl.c",
   ]
 } else {
   bus_center_net_mgr_src += [ "$dsoftbus_root_path/core/bus_center/lnn/net_buscenter/src/lnn_physical_subnet_manager_virtual.c" ]
@@ -39,18 +40,3 @@ if (support_bluetooth &&
 bus_center_net_mgr_deps = []
 
 native_source_path = rebase_path("$dsoftbus_root_path")
-newip_dir = "dsoftbus_enhance/components/newip/network"
-newip_enhanced = exec_script("$dsoftbus_root_path/check_sub_module.py",
-                             [
-                               "$native_source_path",
-                               "$newip_dir",
-                             ],
-                             "value")
-
-if (newip_enhanced) {
-  import("../../../../dsoftbus_enhance/components/newip/network/network.gni")
-
-  bus_center_net_mgr_src += newip_manager_src
-  bus_center_net_mgr_inc += newip_manager_include
-  bus_center_net_mgr_deps += newip_manager_deps
-}

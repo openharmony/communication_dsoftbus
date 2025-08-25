@@ -78,9 +78,9 @@ bool JSON_GetInt32FromOject(const JsonObj *obj, const char *key, int32_t *value)
     return LnnSyncInfoManagerInstance()->JSON_GetInt32FromOject(obj, key, value);
 }
 
-bool JSON_GetStringFromOject(const JsonObj *obj, const char *key, char *value, uint32_t size)
+bool JSON_GetStringFromObject(const JsonObj *obj, const char *key, char *value, uint32_t size)
 {
-    return LnnSyncInfoManagerInstance()->JSON_GetStringFromOject(obj, key, value, size);
+    return LnnSyncInfoManagerInstance()->JSON_GetStringFromObject(obj, key, value, size);
 }
 
 AuthManager *GetAuthManagerByAuthId(int64_t authId)
@@ -103,16 +103,6 @@ int32_t AuthPostTransData(AuthHandle authHandle, const AuthTransData *dataInfo)
     return LnnSyncInfoManagerInstance()->AuthPostTransData(authHandle, dataInfo);
 }
 
-int32_t LnnGetRemoteNumU64Info(const char *networkId, InfoKey key, uint64_t *info)
-{
-    return LnnSyncInfoManagerInstance()->LnnGetRemoteNumU64Info(networkId, key, info);
-}
-
-int32_t LnnGetRemoteNumU32Info(const char *netWorkId, InfoKey key, uint32_t *info)
-{
-    return LnnSyncInfoManagerInstance()->LnnGetRemoteNumU32Info(netWorkId, key, info);
-}
-
 int32_t GetHmlOrP2pAuthHandle(AuthHandle **authHandle, int32_t *num)
 {
     return LnnSyncInfoManagerInstance()->GetHmlOrP2pAuthHandle(authHandle, num);
@@ -121,6 +111,11 @@ int32_t GetHmlOrP2pAuthHandle(AuthHandle **authHandle, int32_t *num)
 bool JSON_AddStringToObject(JsonObj *obj, const char *key, const char *value)
 {
     return LnnSyncInfoManagerInstance()->JSON_AddStringToObject(obj, key, value);
+}
+
+void DelDupAuthManager(AuthManager *auth)
+{
+    return LnnSyncInfoManagerInstance()->DelDupAuthManager(auth);
 }
 }
 } // namespace OHOS

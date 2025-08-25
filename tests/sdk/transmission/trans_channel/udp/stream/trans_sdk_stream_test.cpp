@@ -47,7 +47,7 @@ void TransSdkStreamTest::TearDownTestCase(void)
  * @tc.type: FUNC
  * @tc.require: I5FG70
  */
-HWTEST_F(TransSdkStreamTest, SendStreamTest001, TestSize.Level0)
+HWTEST_F(TransSdkStreamTest, SendStreamTest001, TestSize.Level1)
 {
     int32_t ret;
     int32_t sessionId = 1;
@@ -58,13 +58,13 @@ HWTEST_F(TransSdkStreamTest, SendStreamTest001, TestSize.Level0)
     ret = SendStream(-1, &streamData, &ext, &param);
     EXPECT_NE(SOFTBUS_OK, ret);
 
-    ret = SendStream(sessionId, NULL, &ext, &param);
+    ret = SendStream(sessionId, nullptr, &ext, &param);
     EXPECT_NE(SOFTBUS_OK, ret);
 
-    ret = SendStream(sessionId, &streamData, NULL, &param);
+    ret = SendStream(sessionId, &streamData, nullptr, &param);
     EXPECT_NE(SOFTBUS_OK, ret);
 
-    ret = SendStream(sessionId, &streamData, &ext, NULL);
+    ret = SendStream(sessionId, &streamData, &ext, nullptr);
     EXPECT_NE(SOFTBUS_OK, ret);
 }
 }

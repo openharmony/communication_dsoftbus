@@ -16,9 +16,7 @@
 #ifndef CLIENT_TRANS_STREAM_H
 #define CLIENT_TRANS_STREAM_H
 
-#include <stdint.h>
 #include "client_trans_udp_manager.h"
-#include "softbus_def.h"
 #include "softbus_trans_def.h"
 
 #ifdef __cplusplus
@@ -29,7 +27,7 @@ void RegisterStreamCb(const UdpChannelMgrCb *streamCb);
 
 void UnregisterStreamCb(void);
 
-int32_t TransOnstreamChannelOpened(const ChannelInfo *channel, int32_t *streamPort);
+int32_t TransOnstreamChannelOpened(const ChannelInfo *channel, int32_t *streamPort, SocketAccessInfo *accessInfo);
 
 int32_t TransCloseStreamChannel(int32_t channelId);
 

@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021-2024 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2025 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -40,7 +40,8 @@ static void NotifySendResult(int32_t sessionId, DFileMsgType msgType,
 
     switch (msgType) {
         case DFILE_ON_FILE_SEND_SUCCESS:
-            if (listener->sendListener.OnSendFileFinished != NULL) {
+            if (listener->sendListener.OnSendFileFinished != NULL &&
+                msgData->fileList.files != NULL && msgData->fileList.fileNum > 0) {
                 listener->sendListener.OnSendFileFinished(sessionId, msgData->fileList.files[0]);
             }
             break;
@@ -63,6 +64,10 @@ static void NotifySendResult(int32_t sessionId, DFileMsgType msgType,
 
 static void FillFileStatusList(const DFileMsg *msgData, FileEvent *event)
 {
+    if (msgData == NULL || event == NULL) {
+        TRANS_LOGI(TRANS_SDK, "invalid param.");
+        return;
+    }
     int32_t fileNum = msgData->clearPolicyFileList.fileNum;
     if (fileNum <= 0) {
         TRANS_LOGI(TRANS_SDK, "invalid fileNum.");
@@ -77,11 +82,14 @@ static void FillFileStatusList(const DFileMsg *msgData, FileEvent *event)
     event->statusList.notCompletedList.files = (char **)SoftBusCalloc(fileNum * sizeof(char *));
     if (event->statusList.notCompletedList.files == NULL) {
         TRANS_LOGE(TRANS_SDK, "mem malloc failed");
+        SoftBusFree(event->statusList.completedList.files);
         return;
     }
     event->statusList.notStartedList.files = (char **)SoftBusCalloc(fileNum * sizeof(char *));
     if (event->statusList.notStartedList.files == NULL) {
         TRANS_LOGE(TRANS_SDK, "mem malloc failed");
+        SoftBusFree(event->statusList.completedList.files);
+        SoftBusFree(event->statusList.notCompletedList.files);
         return;
     }
     int32_t completedIndex = 0;
@@ -103,8 +111,8 @@ static void FillFileStatusList(const DFileMsg *msgData, FileEvent *event)
     event->statusList.notCompletedList.fileCnt = (uint32_t)notCompletedIndex;
     event->statusList.notStartedList.fileCnt = (uint32_t)notStartedIndex;
     TRANS_LOGI(TRANS_SDK,
-        "status list totalFileNum=%{public}d, completedNum=%{public}d, notCompletedNum=%{public}d, "
-        "notStartedNum=%{public}d",
+        "status list totalFileNum=%{public}d, completedNum=%{public}u, notCompletedNum=%{public}u, "
+        "notStartedNum=%{public}u",
         fileNum, event->statusList.completedList.fileCnt, event->statusList.notCompletedList.fileCnt,
         event->statusList.notStartedList.fileCnt);
 }
@@ -238,7 +246,8 @@ static void FileSendListener(int32_t dfileId, DFileMsgType msgType, const DFileM
         return;
     }
     if (msgType == DFILE_ON_CONNECT_SUCCESS) {
-        g_udpChannelMgrCb->OnUdpChannelOpened(udpChannel.channelId);
+        SocketAccessInfo accessInfo = { 0 };
+        g_udpChannelMgrCb->OnUdpChannelOpened(udpChannel.channelId, &accessInfo);
         TRANS_LOGE(TRANS_SDK, "msgType failed, dfileId=%{public}d, type=%{public}d", dfileId, msgType);
         return;
     }
@@ -279,7 +288,7 @@ static void FileSendListener(int32_t dfileId, DFileMsgType msgType, const DFileM
 static void NotifyRecvResult(int32_t sessionId, DFileMsgType msgType, const DFileMsg *msgData,
     FileListener *listener)
 {
-    if (msgData == NULL || listener == NULL) {
+    if (msgData == NULL || listener == NULL || msgData->fileList.fileNum <= 0) {
         TRANS_LOGE(TRANS_SDK, "param invalid");
         return;
     }
@@ -466,7 +475,8 @@ static void RenameHook(DFileRenamePara *renamePara)
     TRANS_LOGD(TRANS_FILE, "default rename hook.");
 }
 
-int32_t TransOnFileChannelOpened(const char *sessionName, const ChannelInfo *channel, int32_t *filePort)
+int32_t TransOnFileChannelOpened(
+    const char *sessionName, const ChannelInfo *channel, int32_t *filePort, SocketAccessInfo *accessInfo)
 {
     if (channel == NULL || filePort == NULL) {
         TRANS_LOGW(TRANS_FILE, "invalid param.");
@@ -488,7 +498,7 @@ int32_t TransOnFileChannelOpened(const char *sessionName, const ChannelInfo *cha
             TRANS_LOGE(TRANS_FILE, "start file channel as server failed");
             return SOFTBUS_FILE_ERR;
         }
-        ret = g_udpChannelMgrCb->OnUdpChannelOpened(channel->channelId);
+        ret = g_udpChannelMgrCb->OnUdpChannelOpened(channel->channelId, accessInfo);
         if (ret != SOFTBUS_OK) {
             TRANS_LOGE(TRANS_FILE, "udp channel open failed.");
             NSTACKX_DFileClose(fileSession);

@@ -13,7 +13,7 @@
  * limitations under the License.
  */
 
-#include "connection_ble_mock.h"
+#include "softbus_conn_ble_connection_mock.h"
 
 #include <cstdio>
 #include <cstring>
@@ -57,7 +57,7 @@ int32_t SoftBusRegisterGattsCallbacks(SoftBusGattsCallback *callback, SoftBusBtU
 class ServiceConnectionTest : public testing::Test {
 public:
     static void SetUpTestCase();
-    static void TearDownTestCase() {}
+    static void TearDownTestCase();
     void SetUp() override {}
     void TearDown() override {}
 };
@@ -67,6 +67,12 @@ void ServiceConnectionTest::SetUpTestCase()
     LooperInit();
     SoftbusConfigInit();
     ConnServerInit();
+}
+
+void ServiceConnectionTest::TearDownTestCase()
+{
+    ConnServerDeinit();
+    LooperDeinit();
 }
 
 /*
@@ -117,7 +123,7 @@ HWTEST_F(ServiceConnectionTest, ServiceConnection003, TestSize.Level1)
     ConnBleConnection connection;
     NiceMock<ConnectionBleInterfaceMock> bleMock;
 
-    ret = ConnGattServerDisconnect(NULL);
+    ret = ConnGattServerDisconnect(nullptr);
     EXPECT_EQ(SOFTBUS_CONN_BLE_INTERNAL_ERR, ret);
 
     connection.underlayerHandle = INVALID_UNDERLAY_HANDLE;
@@ -194,7 +200,7 @@ HWTEST_F(ServiceConnectionTest, ClientConnection001, TestSize.Level1)
     ConnBleConnection connection;
     NiceMock<ConnectionBleInterfaceMock> bleMock;
 
-    ret = ConnGattClientConnect(NULL);
+    ret = ConnGattClientConnect(nullptr);
     EXPECT_EQ(SOFTBUS_CONN_BLE_INTERNAL_ERR, ret);
 
     EXPECT_CALL(bleMock, ConvertBtMacToBinary).WillRepeatedly(Return(SOFTBUS_INVALID_PARAM));
@@ -230,7 +236,7 @@ HWTEST_F(ServiceConnectionTest, ClientConnection002, TestSize.Level1)
     bool refreshGatt = true;
     NiceMock<ConnectionBleInterfaceMock> bleMock;
 
-    ret = ConnGattClientDisconnect(NULL, grace, refreshGatt);
+    ret = ConnGattClientDisconnect(nullptr, grace, refreshGatt);
     EXPECT_EQ(SOFTBUS_CONN_BLE_INTERNAL_ERR, ret);
 
     connection.underlayerHandle = INVALID_UNDERLAY_HANDLE;
@@ -272,7 +278,7 @@ HWTEST_F(ServiceConnectionTest, ClientConnection003, TestSize.Level1)
     NiceMock<ConnectionBleInterfaceMock> bleMock;
 
     ConnectBlePriority priority = CONN_BLE_PRIORITY_BALANCED;
-    int32_t ret = ConnGattClientUpdatePriority(NULL, priority);
+    int32_t ret = ConnGattClientUpdatePriority(nullptr, priority);
     EXPECT_EQ(SOFTBUS_INVALID_PARAM, ret);
 
     connection->connectionId = 1;
@@ -396,7 +402,7 @@ HWTEST_F(ServiceConnectionTest, ConnGattClientSend, TestSize.Level1)
 {
     ConnBleConnection bleConnection = {{0}};
 
-    int32_t ret = SoftBusMutexInit(&bleConnection.lock, NULL);
+    int32_t ret = SoftBusMutexInit(&bleConnection.lock, nullptr);
     ASSERT_EQ(SOFTBUS_OK, ret);
     bleConnection.connectionId = 10;
     bleConnection.underlayerHandle = 0;

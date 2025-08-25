@@ -15,10 +15,54 @@
 
 #include "bus_center_ex_obj_stub.h"
 
+#include <dlfcn.h>
+
+#include "lnn_log.h"
+#include "softbus_init_common.h"
 namespace OHOS {
+#ifdef __aarch64__
+static constexpr const char *SOFTBUS_SERVER_PLUGIN_PATH_NAME = "/system/lib64/libdsoftbus_server_plugin.z.so";
+#else
+static constexpr const char *SOFTBUS_SERVER_PLUGIN_PATH_NAME = "/system/lib/libdsoftbus_server_plugin.z.so";
+#endif
+
+bool BusCenterExObjStub::OpenSoftbusPluginSo()
+{
+    std::lock_guard<std::mutex> lockGuard(loadSoMutex_);
+
+    if (isLoaded_ && (soHandle_ != nullptr)) {
+        return true;
+    }
+
+    (void)SoftBusDlopen(SOFTBUS_HANDLE_SERVER_PLUGIN, &soHandle_);
+    if (soHandle_ == nullptr) {
+        LNN_LOGE(LNN_EVENT, "dlopen %{public}s failed, err msg:%{public}s", SOFTBUS_SERVER_PLUGIN_PATH_NAME, dlerror());
+        return false;
+    }
+
+    isLoaded_ = true;
+    LNN_LOGI(LNN_EVENT, "dlopen %{public}s SOFTBUS_CLIENT_SUCCESS", SOFTBUS_SERVER_PLUGIN_PATH_NAME);
+
+    return true;
+}
+
 int32_t BusCenterExObjStub::OnRemoteRequest(uint32_t code,
     MessageParcel &data, MessageParcel &reply, MessageOption &option)
 {
-    return IPCObjectStub::OnRemoteRequest(code, data, reply, option);
+    if (onRemoteRequestFunc_ != nullptr) {
+        return onRemoteRequestFunc_(code, data, reply, option);
+    }
+
+    if (!OpenSoftbusPluginSo()) {
+        return SOFTBUS_BUS_CENTER_EX_OBJ_PROXY_DLOPEN_FAILED;
+    }
+
+    onRemoteRequestFunc_ = (OnRemoteRequestFunc)dlsym(soHandle_, "OnRemoteRequestByDlsym");
+    if (onRemoteRequestFunc_ == nullptr) {
+        LNN_LOGE(LNN_EVENT, "dlsym OnRemoteRequest fail, err msg:%{public}s", dlerror());
+        return SOFTBUS_BUS_CENTER_EX_OBJ_PROXY_DLSYM_FAILED;
+    }
+
+    return onRemoteRequestFunc_(code, data, reply, option);
 }
 } // namespace OHOS

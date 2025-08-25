@@ -26,7 +26,7 @@ namespace OHOS {
 #define TEST_SOCKET_ADDR "192.168.8.119"
 #define TEST_ERROR_CODE (-12345)
 
-const char *g_sessionKey = "www.huaweitest.com";
+const char *g_sessionKey = "www.test.com";
 const char *g_pkgName = "dms";
 const char *g_sessionName = "ohos.distributedschedule.dms.test";
 const char *g_networkid = "ABCDEF00ABCDEF00ABCDEF00ABCDEF00ABCDEF00ABCDEF00ABCDEF00ABCDEF00";
@@ -54,9 +54,9 @@ void TransUdpNegotiationExchangeTest::TearDownTestCase(void)
 
 static void GenerateAppInfo(AppInfo *appInfo)
 {
-    if (appInfo == NULL) {
+    if (appInfo == nullptr) {
         appInfo = (AppInfo*)SoftBusMalloc(sizeof(AppInfo));
-        EXPECT_TRUE(appInfo != NULL);
+        EXPECT_TRUE(appInfo != nullptr);
         memset_s(appInfo, sizeof(AppInfo), 0, sizeof(AppInfo));
     }
     int32_t res = strcpy_s(appInfo->sessionKey, sizeof(appInfo->sessionKey), g_sessionKey);
@@ -86,16 +86,16 @@ static void GenerateAppInfo(AppInfo *appInfo)
 HWTEST_F(TransUdpNegotiationExchangeTest, TransUdpNegotiationExchangeTest001, TestSize.Level1)
 {
     AppInfo* appInfo = (AppInfo*)SoftBusMalloc(sizeof(AppInfo));
-    EXPECT_TRUE(appInfo != NULL);
+    EXPECT_TRUE(appInfo != nullptr);
     memset_s(appInfo, sizeof(AppInfo), 0, sizeof(AppInfo));
     cJSON *msg = cJSON_CreateObject();
-    int32_t ret = TransPackRequestUdpInfo(NULL, appInfo);
+    int32_t ret = TransPackRequestUdpInfo(nullptr, appInfo);
     EXPECT_EQ(ret, SOFTBUS_INVALID_PARAM);
-    ret = TransUnpackRequestUdpInfo(NULL, appInfo);
+    ret = TransUnpackRequestUdpInfo(nullptr, appInfo);
     EXPECT_EQ(ret, SOFTBUS_INVALID_PARAM);
-    ret = TransPackRequestUdpInfo(msg, NULL);
+    ret = TransPackRequestUdpInfo(msg, nullptr);
     EXPECT_EQ(ret, SOFTBUS_INVALID_PARAM);
-    ret = TransUnpackRequestUdpInfo(msg, NULL);
+    ret = TransUnpackRequestUdpInfo(msg, nullptr);
     EXPECT_EQ(ret, SOFTBUS_INVALID_PARAM);
     cJSON_Delete(msg);
     SoftBusFree(appInfo);
@@ -110,12 +110,12 @@ HWTEST_F(TransUdpNegotiationExchangeTest, TransUdpNegotiationExchangeTest001, Te
 HWTEST_F(TransUdpNegotiationExchangeTest, TransUdpNegotiationExchangeTest002, TestSize.Level1)
 {
     AppInfo* appInfo = (AppInfo*)SoftBusMalloc(sizeof(AppInfo));
-    EXPECT_TRUE(appInfo != NULL);
+    EXPECT_TRUE(appInfo != nullptr);
     memset_s(appInfo, sizeof(AppInfo), 0, sizeof(AppInfo));
     GenerateAppInfo(appInfo);
     appInfo->udpChannelOptType = TYPE_UDP_CHANNEL_OPEN;
     cJSON *msg = cJSON_CreateObject();
-    EXPECT_TRUE(msg != NULL);
+    EXPECT_TRUE(msg != nullptr);
     int32_t ret = TransPackRequestUdpInfo(msg, appInfo);
     EXPECT_EQ(ret, SOFTBUS_OK);
     memset_s(appInfo, sizeof(AppInfo), 0, sizeof(AppInfo));
@@ -148,14 +148,14 @@ HWTEST_F(TransUdpNegotiationExchangeTest, TransUdpNegotiationExchangeTest002, Te
 HWTEST_F(TransUdpNegotiationExchangeTest, TransUdpNegotiationExchangeTest003, TestSize.Level1)
 {
     AppInfo* appInfo = (AppInfo*)SoftBusMalloc(sizeof(AppInfo));
-    EXPECT_TRUE(appInfo != NULL);
+    EXPECT_TRUE(appInfo != nullptr);
     memset_s(appInfo, sizeof(AppInfo), 0, sizeof(AppInfo));
     cJSON *msg = cJSON_CreateObject();
-    int32_t ret = TransPackReplyUdpInfo(NULL, appInfo);
+    int32_t ret = TransPackReplyUdpInfo(nullptr, appInfo);
     EXPECT_EQ(SOFTBUS_INVALID_PARAM, ret);
-    ret = TransUnpackReplyUdpInfo(NULL, appInfo);
+    ret = TransUnpackReplyUdpInfo(nullptr, appInfo);
     EXPECT_EQ(SOFTBUS_INVALID_PARAM, ret);
-    ret = TransPackReplyUdpInfo(msg, NULL);
+    ret = TransPackReplyUdpInfo(msg, nullptr);
     EXPECT_EQ(SOFTBUS_INVALID_PARAM, ret);
     appInfo->udpChannelOptType = TYPE_UDP_CHANNEL_OPEN;
     ret = TransPackReplyUdpInfo(msg, appInfo);
@@ -163,7 +163,7 @@ HWTEST_F(TransUdpNegotiationExchangeTest, TransUdpNegotiationExchangeTest003, Te
     appInfo->udpChannelOptType = TYPE_INVALID_CHANNEL;
     ret = TransPackReplyUdpInfo(msg, appInfo);
     EXPECT_EQ(SOFTBUS_TRANS_INVALID_CHANNEL_TYPE, ret);
-    ret = TransUnpackReplyUdpInfo(msg, NULL);
+    ret = TransUnpackReplyUdpInfo(msg, nullptr);
     EXPECT_EQ(SOFTBUS_INVALID_PARAM, ret);
     cJSON_Delete(msg);
     SoftBusFree(appInfo);
@@ -178,13 +178,13 @@ HWTEST_F(TransUdpNegotiationExchangeTest, TransUdpNegotiationExchangeTest003, Te
 HWTEST_F(TransUdpNegotiationExchangeTest, TransUdpNegotiationExchangeTest004, TestSize.Level1)
 {
     AppInfo* appInfo = (AppInfo*)SoftBusMalloc(sizeof(AppInfo));
-    EXPECT_TRUE(appInfo != NULL);
+    EXPECT_TRUE(appInfo != nullptr);
     memset_s(appInfo, sizeof(AppInfo), 0, sizeof(AppInfo));
 
     GenerateAppInfo(appInfo);
     appInfo->udpChannelOptType = TYPE_UDP_CHANNEL_OPEN;
     cJSON *msg = cJSON_CreateObject();
-    EXPECT_TRUE(msg != NULL);
+    EXPECT_TRUE(msg != nullptr);
     int32_t ret = TransPackReplyUdpInfo(msg, appInfo);
     EXPECT_EQ(ret, SOFTBUS_OK);
     memset_s(appInfo, sizeof(AppInfo), 0, sizeof(AppInfo));
@@ -215,7 +215,7 @@ HWTEST_F(TransUdpNegotiationExchangeTest, TransUdpNegotiationExchangeTest004, Te
 HWTEST_F(TransUdpNegotiationExchangeTest, TransUdpNegotiationExchangeTest005, TestSize.Level1)
 {
     AppInfo* appInfo = (AppInfo*)SoftBusMalloc(sizeof(AppInfo));
-    EXPECT_TRUE(appInfo != NULL);
+    EXPECT_TRUE(appInfo != nullptr);
     memset_s(appInfo, sizeof(AppInfo), 0, sizeof(AppInfo));
     cJSON *msg = cJSON_CreateObject();
     GenerateAppInfo(appInfo);
@@ -248,13 +248,13 @@ HWTEST_F(TransUdpNegotiationExchangeTest, TransUdpNegotiationExchangeTest006, Te
 {
     cJSON *msg = cJSON_CreateObject();
     int32_t errCode = TEST_ERROR_CODE;
-    int32_t ret = TransPackReplyErrInfo(msg, errCode, NULL);
+    int32_t ret = TransPackReplyErrInfo(msg, errCode, nullptr);
     EXPECT_EQ(ret, SOFTBUS_INVALID_PARAM);
-    ret = TransUnpackReplyErrInfo(NULL, &errCode);
+    ret = TransUnpackReplyErrInfo(nullptr, &errCode);
     EXPECT_EQ(ret, SOFTBUS_PARSE_JSON_ERR);
-    ret = TransPackReplyErrInfo(NULL, errCode, "error descriptor test");
+    ret = TransPackReplyErrInfo(nullptr, errCode, "error descriptor test");
     EXPECT_EQ(ret, SOFTBUS_INVALID_PARAM);
-    ret = TransUnpackReplyErrInfo(msg, NULL);
+    ret = TransUnpackReplyErrInfo(msg, nullptr);
     EXPECT_EQ(ret, SOFTBUS_PARSE_JSON_ERR);
     cJSON_Delete(msg);
 }
@@ -268,7 +268,7 @@ HWTEST_F(TransUdpNegotiationExchangeTest, TransUdpNegotiationExchangeTest006, Te
 HWTEST_F(TransUdpNegotiationExchangeTest, TransUdpNegotiationExchangeTest007, TestSize.Level1)
 {
     cJSON *msg = cJSON_CreateObject();
-    EXPECT_TRUE(msg != NULL);
+    EXPECT_TRUE(msg != nullptr);
     int32_t errCode = TEST_ERROR_CODE;
     int32_t ret = TransPackReplyErrInfo(msg, errCode, "error descriptor test");
     EXPECT_EQ(ret, SOFTBUS_OK);

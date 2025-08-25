@@ -17,6 +17,7 @@
 #include "nstackx_device_remote.h"
 #include <securec.h>
 #include <stdatomic.h>
+#include <limits.h>
 #include "nstackx_device.h"
 #include "nstackx_dfinder_log.h"
 #include "nstackx_error.h"
@@ -39,7 +40,6 @@ typedef struct RemoteNode_ {
     List node;
     List orderedNode;
     DeviceInfo deviceInfo;
-    struct in_addr remoteIp;
     struct RxIface_ *rxIface;
     UpdateState updateState;
     struct timespec updateTs;
@@ -214,13 +214,17 @@ static RxIface *FindRxIface(const RemoteDevice* device, const NSTACKX_InterfaceI
     return NULL;
 }
 
-static RemoteNode *FindRemoteNodeByRemoteIp(const RxIface* rxIface, const struct in_addr *remoteIp)
+static RemoteNode *FindRemoteNodeByRemoteIp(const RxIface* rxIface, const DeviceInfo *deviceInfo)
 {
     List *pos = NULL;
     RemoteNode *remoteNode = NULL;
     LIST_FOR_EACH(pos, &rxIface->remoteNodeList) {
         remoteNode = (RemoteNode *)pos;
-        if (remoteNode->remoteIp.s_addr == remoteIp->s_addr) {
+        WifiApChannelInfo *info = &(remoteNode->deviceInfo.netChannelInfo.wifiApInfo);
+        if (info->af != deviceInfo->netChannelInfo.wifiApInfo.af) {
+            continue;
+        }
+        if (InetEqual(info->af, &(info->addr), &(deviceInfo->netChannelInfo.wifiApInfo.addr))) {
             return remoteNode;
         }
     }
@@ -280,7 +284,7 @@ static uint32_t CheckAndUpdateBusinessAll(BusinessDataAll *curInfo, const Busine
     return NSTACKX_EOK;
 }
 
-static RemoteNode *CreateRemoteNode(RxIface *rxIface, const struct in_addr *remoteIp, const DeviceInfo *deviceInfo)
+static RemoteNode *CreateRemoteNode(RxIface *rxIface, const DeviceInfo *deviceInfo)
 {
     RemoteNode *remoteNode = (RemoteNode *)calloc(1, sizeof(RemoteNode));
     if (remoteNode == NULL) {
@@ -289,7 +293,6 @@ static RemoteNode *CreateRemoteNode(RxIface *rxIface, const struct in_addr *remo
     }
 
     remoteNode->rxIface = rxIface;
-    remoteNode->remoteIp = *remoteIp;
     remoteNode->updateState = DFINDER_UPDATE_STATE_NULL;
     (void)memcpy_s(&remoteNode->deviceInfo, sizeof(DeviceInfo), deviceInfo, sizeof(DeviceInfo));
 
@@ -331,6 +334,29 @@ static int32_t UpdateCapabilityBitmap(DeviceInfo *curInfo, const DeviceInfo *new
         }
     }
     return NSTACKX_EOK;
+}
+
+static void UpdataeDeviceSeqInfo(DeviceInfo *curInfo, const DeviceInfo *newInfo, int8_t *updated)
+{
+    switch (newInfo->seq.seqType) {
+        case DFINDER_SEQ_TYPE_NONE:
+            return;
+        case DFINDER_SEQ_TYPE_BCAST:
+            if (curInfo->seq.seqBcast != newInfo->seq.seqBcast) {
+                curInfo->seq.seqBcast = newInfo->seq.seqBcast;
+                *updated = NSTACKX_TRUE;
+            }
+            return;
+        case DFINDER_SEQ_TYPE_UNICAST:
+            if (curInfo->seq.seqUcast != newInfo->seq.seqUcast) {
+                curInfo->seq.seqUcast = newInfo->seq.seqUcast;
+                *updated = NSTACKX_TRUE;
+            }
+            return;
+        default:
+            DFINDER_LOGE(TAG, "unknown seqType %hhu", newInfo->seq.seqType);
+            return;
+    }
 }
 
 static int32_t UpdateDeviceInfoInner(DeviceInfo *curInfo, const DeviceInfo *newInfo, int8_t *updated)
@@ -389,13 +415,8 @@ static int32_t UpdateDeviceInfo(DeviceInfo *curInfo, const RxIface *rxIface, con
         }
         updated = NSTACKX_TRUE;
     }
-    updated = (newInfo->seq.dealBcast) ?
-        (curInfo->seq.seqBcast != newInfo->seq.seqBcast) : (curInfo->seq.seqUcast != newInfo->seq.seqUcast);
-    if (newInfo->seq.dealBcast) {
-        curInfo->seq.seqBcast = newInfo->seq.seqBcast;
-    } else {
-        curInfo->seq.seqUcast = newInfo->seq.seqUcast;
-    }
+
+    UpdataeDeviceSeqInfo(curInfo, newInfo, &updated);
 #ifndef DFINDER_USE_MINI_NSTACKX
     if (strcmp(curInfo->extendServiceData, newInfo->extendServiceData) != 0) {
         if (strcpy_s(curInfo->extendServiceData, NSTACKX_MAX_EXTEND_SERVICE_DATA_LEN,
@@ -424,26 +445,38 @@ static int32_t UpdateDeviceInfo(DeviceInfo *curInfo, const RxIface *rxIface, con
 
 static void UpdatedByTimeout(RxIface *rxIface, int8_t *updated)
 {
-    struct timespec cur;
-    ClockGetTime(CLOCK_MONOTONIC, &cur);
-    uint32_t diffMs = GetTimeDiffMs(&cur, &(rxIface->updateTime));
-    if (diffMs > GetNotifyTimeoutMs()) {
+    struct timespec preTime = rxIface->updateTime;
+    ClockGetTime(CLOCK_MONOTONIC, &rxIface->updateTime);
+    if (*updated == NSTACKX_TRUE) {
+        return;
+    }
+    uint32_t diffMs = GetTimeDiffMs(&preTime, &(rxIface->updateTime));
+    uint32_t timeoutMs = GetNotifyTimeoutMs();
+    if (timeoutMs != 0 && diffMs > timeoutMs) {
         *updated = NSTACKX_TRUE;
     }
-    rxIface->updateTime = cur;
 }
 
 static int32_t UpdateRemoteNode(RemoteNode *remoteNode, RxIface *rxIface, const DeviceInfo *deviceInfo,
     int8_t *updated)
 {
     int32_t ret = UpdateDeviceInfo(&remoteNode->deviceInfo, rxIface, deviceInfo, updated);
-    if (ret == NSTACKX_EOK && (*updated == NSTACKX_FALSE)) {
+    if (ret == NSTACKX_EOK) {
         UpdatedByTimeout(rxIface, updated);
     }
     return ret;
 }
 
 #ifdef DFINDER_DISTINGUISH_ACTIVE_PASSIVE_DISCOVERY
+static bool IsNeedUpdate(uint8_t seqType, int8_t *updated)
+{
+    if (seqType == DFINDER_SEQ_TYPE_BCAST && *updated == NSTACKX_FALSE) {
+        return false;
+    }
+
+    return true;
+}
+
 static void UpdateRemoteNodeChangeStateActive(UpdateState *curState, int8_t *updated)
 {
     switch (*curState) {
@@ -501,6 +534,9 @@ static void UpdateRemoteNodeChangeStatePassive(UpdateState *curState, int8_t *up
 static void CheckAndUpdateRemoteNodeChangeState(RemoteNode *remoteNode,
     const DeviceInfo *deviceInfo, int8_t *updated)
 {
+    if (!IsNeedUpdate(deviceInfo->seq.seqType, updated)) {
+        return;
+    }
     UpdateState *curState = &(remoteNode->updateState);
     if (deviceInfo->discoveryType == NSTACKX_DISCOVERY_TYPE_PASSIVE) {
         UpdateRemoteNodeChangeStatePassive(curState, updated);
@@ -598,14 +634,13 @@ uint32_t GetRemoteNodeCount(void)
     return g_remoteNodeCount;
 }
 
-static RemoteNode *CheckAndCreateRemoteNode(RxIface *rxIface,
-    const struct in_addr *remoteIp, const DeviceInfo *deviceInfo)
+static RemoteNode *CheckAndCreateRemoteNode(RxIface *rxIface, const DeviceInfo *deviceInfo)
 {
     if (rxIface->remoteNodeCnt >= RX_IFACE_REMOTE_NODE_COUNT) {
         DestroyOldestRemoteNode(rxIface);
     }
 
-    RemoteNode *remoteNode = CreateRemoteNode(rxIface, remoteIp, deviceInfo);
+    RemoteNode *remoteNode = CreateRemoteNode(rxIface, deviceInfo);
     if (remoteNode == NULL) {
         return NULL;
     }
@@ -626,7 +661,7 @@ static bool UpdateOldRemoteNode(void)
 }
 
 int32_t UpdateRemoteNodeByDeviceInfo(const char *deviceId, const NSTACKX_InterfaceInfo *interfaceInfo,
-    const struct in_addr *remoteIp, const DeviceInfo *deviceInfo, int8_t *updated)
+    const DeviceInfo *deviceInfo, int8_t *updated)
 {
     if (!UpdateOldRemoteNode()) {
         return NSTACKX_EFAILED;
@@ -651,9 +686,9 @@ int32_t UpdateRemoteNodeByDeviceInfo(const char *deviceId, const NSTACKX_Interfa
         ListInsertTail(&(device->rxIfaceList), &(rxIface->node));
     }
 
-    RemoteNode *remoteNode = FindRemoteNodeByRemoteIp(rxIface, remoteIp);
+    RemoteNode *remoteNode = FindRemoteNodeByRemoteIp(rxIface, deviceInfo);
     if (remoteNode == NULL) {
-        remoteNode = CheckAndCreateRemoteNode(rxIface, remoteIp, deviceInfo);
+        remoteNode = CheckAndCreateRemoteNode(rxIface, deviceInfo);
         if (remoteNode == NULL) {
             goto FAIL_AND_FREE;
         }
@@ -795,7 +830,12 @@ static RemoteNode *GetRxIfaceFirstRemoteNode(RxIface *rxIface)
     RemoteNode *remoteNode = NULL;
     LIST_FOR_EACH(pos, &rxIface->remoteNodeList) {
         remoteNode = (RemoteNode *)pos;
-        if (remoteNode->remoteIp.s_addr != 0) {
+        // use only double frames, only support iopv4
+        WifiApChannelInfo *info = &(remoteNode->deviceInfo.netChannelInfo.wifiApInfo);
+        if (info->af != AF_INET) {
+            continue;
+        }
+        if (info->addr.in.s_addr != 0) {
             return remoteNode;
         }
     }
@@ -832,7 +872,7 @@ const struct in_addr *GetRemoteDeviceIpInner(List *list, const char *deviceId)
         return NULL;
     }
 
-    return &remoteNode->remoteIp;
+    return &(remoteNode->deviceInfo.netChannelInfo.wifiApInfo.addr.in);
 }
 
 const struct in_addr *GetRemoteDeviceIp(const char *deviceId)
@@ -865,7 +905,11 @@ static int DumpRemoteNode(const RemoteDevice *dev, char *buf, size_t len)
         }
     }
 
-    return index;
+    if (index > INT_MAX) {
+        DFINDER_LOGE(TAG, "dump node msg exceed");
+        return NSTACKX_EFAILED;
+    }
+    return (int)index;
 }
 
 int DumpRemoteDevice(char *buf, size_t len)
@@ -883,7 +927,11 @@ int DumpRemoteDevice(char *buf, size_t len)
         index += (size_t)ret;
     }
 
-    return index;
+    if (index > INT_MAX) {
+        DFINDER_LOGE(TAG, "dump remote device exceed");
+        return NSTACKX_EFAILED;
+    }
+    return (int)index;
 }
 #endif
 

@@ -34,8 +34,6 @@
 #include "wifi_direct_manager.h"
 
 #define INVALID_LINK (-1)
-#define DB_MAGIC_NUMBER 0x5A5A5A5A
-#define MESH_MAGIC_NUMBER 0xA5A5A5A5
 
 static char *GetLinkTypeStrng(LaneLinkType preferredLink)
 {
@@ -62,6 +60,12 @@ static char *GetLinkTypeStrng(LaneLinkType preferredLink)
             return "COC";
         case LANE_COC_DIRECT:
             return "COC_DIRECT";
+        case LANE_USB:
+            return "USB";
+        case LANE_SLE:
+            return "SLE";
+        case LANE_SLE_DIRECT:
+            return "SLE_DIRECT";
         default:
             return "INVALID_LINK";
     }
@@ -174,7 +178,7 @@ static int32_t AdjustLanePriority(const char *networkId, const LaneSelectParam *
             break;
         }
     }
-    if (resListScore[resList[idxWlan]] >= UNACCEPT_SCORE) {
+    if (idxWlan < resNum && resListScore[resList[idxWlan]] >= UNACCEPT_SCORE) {
         return SOFTBUS_OK;
     }
     for (uint32_t j = idxWlan; j < resNum; ++j) {
@@ -280,7 +284,7 @@ int32_t SelectExpectLanesByQos(const char *networkId, const LaneSelectParam *req
     int32_t ret = SOFTBUS_LANE_SELECT_FAIL;
     if (request->qosRequire.reuseBestEffort) {
         LNN_LOGI(LNN_LANE, "select lane by reuse best effort");
-        ret = DecideRueseLane(networkId, request, &laneLinkList);
+        ret = DecideReuseLane(networkId, request, &laneLinkList);
     } else if (request->qosRequire.minBW == 0 && request->qosRequire.maxLaneLatency == 0 &&
         request->qosRequire.minLaneLatency == 0) {
         LNN_LOGI(LNN_LANE, "select lane by default linkList");
@@ -342,7 +346,8 @@ static bool IsAuthReuseWifiDirect(const char *networkId, LaneLinkType linkType)
 
 int32_t SelectAuthLane(const char *networkId, LanePreferredLinkList *request, LanePreferredLinkList *recommendList)
 {
-    if ((networkId == NULL) || (request == NULL) || (recommendList == NULL)) {
+    if ((networkId == NULL) || (request == NULL) || (recommendList == NULL) ||
+        (request->linkTypeNum > LANE_LINK_TYPE_BUTT)) {
         return SOFTBUS_INVALID_PARAM;
     }
     recommendList->linkTypeNum = 0;

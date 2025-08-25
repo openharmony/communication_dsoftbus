@@ -146,6 +146,24 @@ HWTEST_F(TransChannelManagerMockTest, TransRequestQos005, TestSize.Level1)
 }
 
 /**
+ * @tc.name: TransRequestQos test
+ * @tc.desc: TransRequestQos006
+ * @tc.type: FUNC
+ * @tc.require:
+ */
+HWTEST_F(TransChannelManagerMockTest, TransRequestQos006, TestSize.Level1)
+{
+    int32_t channelId = 1;
+    int32_t chanType = 1;
+    int32_t appType = 1;
+    TransManagerTestInterfaceMock mock;
+    EXPECT_CALL(mock, TransGetLaneHandleByChannelId).WillOnce(Return(SOFTBUS_OK));
+    EXPECT_CALL(mock, LnnRequestQosOptimization).WillRepeatedly(Return(SOFTBUS_INVALID_PARAM));
+    int32_t ret = TransRequestQos(channelId, chanType, appType, QOS_IMPROVE);
+    EXPECT_EQ(SOFTBUS_TRANS_REQUEST_QOS_FAILED, ret);
+}
+
+/**
  * @tc.name: TransRippleStats test
  * @tc.desc: TransRippleStats002
  * @tc.type: FUNC
@@ -229,5 +247,42 @@ HWTEST_F(TransChannelManagerMockTest, TransRequestQos002, TestSize.Level1)
     EXPECT_CALL(mock, LnnRequestQosOptimization).WillRepeatedly(Return(SOFTBUS_INVALID_PARAM));
     int32_t ret = TransRequestQos(channelId, chanType, appType, QOS_IMPROVE);
     EXPECT_EQ(SOFTBUS_TRANS_REQUEST_QOS_FAILED, ret);
+}
+
+/**
+ * @tc.name: TransAsyncChannelOpenTaskManager test
+ * @tc.desc: TransAsyncChannelOpenTaskManager001
+ * @tc.type: FUNC
+ * @tc.require:
+ */
+HWTEST_F(TransChannelManagerMockTest, TransAsyncChannelOpenTaskManager001, TestSize.Level1)
+{
+    int32_t channelId = -1;
+    EXPECT_NO_FATAL_FAILURE(TransAsyncChannelOpenTaskManager(channelId, CHANNEL_TYPE_PROXY));
+    EXPECT_NO_FATAL_FAILURE(TransAsyncChannelOpenTaskManager(channelId, CHANNEL_TYPE_TCP_DIRECT));
+    EXPECT_NO_FATAL_FAILURE(TransAsyncChannelOpenTaskManager(channelId, CHANNEL_TYPE_UDP));
+    EXPECT_NO_FATAL_FAILURE(TransAsyncChannelOpenTaskManager(channelId, CHANNEL_TYPE_AUTH));
+    EXPECT_NO_FATAL_FAILURE(TransAsyncChannelOpenTaskManager(channelId, CHANNEL_TYPE_BUTT));
+}
+
+/**
+ * @tc.name: CheckAuthChannelIsExit test
+ * @tc.desc: CheckAuthChannelIsExit001
+ * @tc.type: FUNC
+ * @tc.require:
+ */
+HWTEST_F(TransChannelManagerMockTest, CheckAuthChannelIsExit001, TestSize.Level1)
+{
+    int32_t ret = CheckAuthChannelIsExit(nullptr);
+    EXPECT_EQ(SOFTBUS_INVALID_PARAM, ret);
+
+    ConnectOption option;
+    option.type = CONNECT_TCP;
+    ret = CheckAuthChannelIsExit(&option);
+    EXPECT_EQ(SOFTBUS_INVALID_PARAM, ret);
+
+    option.type = CONNECT_BR;
+    ret = CheckAuthChannelIsExit(&option);
+    EXPECT_EQ(SOFTBUS_TRANS_SESSION_INFO_NOT_FOUND, ret);
 }
 } // OHOS

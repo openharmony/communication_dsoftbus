@@ -42,22 +42,14 @@ class P2pCalculator : public DurationStatisticCalculator {
 public:
     virtual ~P2pCalculator() = default;
 
-    static P2pCalculator &GetInstance()
-    {
-        static P2pCalculator instance;
-        return instance;
-    }
+    static P2pCalculator &GetInstance();
 
     void CalculateAllEvent(uint32_t requestId, std::map<std::string, uint64_t> records) override;
 };
 
 class DurationStatisticCalculatorFactory {
 public:
-    static DurationStatisticCalculatorFactory &GetInstance()
-    {
-        static DurationStatisticCalculatorFactory instance;
-        return instance;
-    }
+    static DurationStatisticCalculatorFactory &GetInstance();
 
     std::shared_ptr<DurationStatisticCalculator> NewInstance(enum WifiDirectConnectType type);
 
@@ -70,11 +62,7 @@ private:
 
 class DurationStatistic {
 public:
-    static DurationStatistic &GetInstance()
-    {
-        static DurationStatistic instance;
-        return instance;
-    }
+    static DurationStatistic &GetInstance();
 
     void Start(uint32_t requestId, const std::shared_ptr<DurationStatisticCalculator> &calculator);
     void Record(uint32_t requestId, const std::string &event);

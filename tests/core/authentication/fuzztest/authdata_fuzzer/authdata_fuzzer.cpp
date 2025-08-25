@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2024 Huawei Device Co., Ltd.
+ * Copyright (c) 2024-2025 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -26,13 +26,14 @@
 using namespace std;
 
 namespace OHOS {
-    const uint8_t *g_baseFuzzData = nullptr;
-    size_t g_baseFuzzSize = 0;
-    size_t g_baseFuzzPos;
+const uint8_t *g_baseFuzzData = nullptr;
+size_t g_baseFuzzSize = 0;
+size_t g_baseFuzzPos;
 
-template <class T> T GetData()
+template <class T>
+T GetData()
 {
-    T objetct{};
+    T objetct {};
     size_t objetctSize = sizeof(objetct);
     if (g_baseFuzzData == nullptr || objetctSize > g_baseFuzzSize - g_baseFuzzPos) {
         return objetct;
@@ -45,7 +46,7 @@ template <class T> T GetData()
     return objetct;
 }
 
-bool AuthDataFuzzTest(const uint8_t* data, size_t size)
+bool AuthDataFuzzTest(const uint8_t *data, size_t size)
 {
     if (data == nullptr || size < sizeof(uint64_t) || size < sizeof(AuthTransData)) {
         COMM_LOGE(COMM_TEST, "data or size is invalid!");
@@ -54,16 +55,15 @@ bool AuthDataFuzzTest(const uint8_t* data, size_t size)
 
     int32_t testData = 0;
     GenerateInt32(testData);
-    AuthLinkType authLinkType = static_cast<AuthLinkType>
-    (testData % AUTH_LINK_TYPE_MAX);
+    AuthLinkType authLinkType = static_cast<AuthLinkType>(testData % AUTH_LINK_TYPE_MAX);
     uint64_t authId = 0;
     GenerateUint64(authId);
-    AuthHandle authHandle = { .authId = authId, .type = authLinkType};
+    AuthHandle authHandle = { .authId = authId, .type = authLinkType };
 
-    const AuthTransData *outData = reinterpret_cast<const AuthTransData*>(data);
+    const AuthTransData *outData = reinterpret_cast<const AuthTransData *>(data);
     AuthTransData *dataInfo = (AuthTransData *)SoftBusMalloc(sizeof(AuthTransData));
     if (dataInfo == nullptr) {
-        COMM_LOGE(COMM_TEST, "dataInfo is NULL");
+        COMM_LOGE(COMM_TEST, "dataInfo is nullptr");
         return false;
     }
     if (memcpy_s(dataInfo, sizeof(AuthTransData), outData, sizeof(AuthTransData)) != EOK) {
@@ -76,7 +76,7 @@ bool AuthDataFuzzTest(const uint8_t* data, size_t size)
     return true;
 }
 
-bool AuthCryptFuzzTest(const uint8_t* data, size_t size)
+bool AuthCryptFuzzTest(const uint8_t *data, size_t size)
 {
     if (data == nullptr || size < sizeof(uint64_t)) {
         COMM_LOGE(COMM_TEST, "data or size is invalid!");
@@ -90,9 +90,9 @@ bool AuthCryptFuzzTest(const uint8_t* data, size_t size)
     AuthHandle authHandle = { .authId = authId, .type = authLinkType };
 
     uint8_t *outData = nullptr;
-    outData =  (uint8_t *)SoftBusCalloc(sizeof(size));
+    outData = (uint8_t *)SoftBusCalloc(sizeof(size));
     if (outData == nullptr) {
-        COMM_LOGE(COMM_TEST, "outData is NULL, SoftBusMalloc failed!");
+        COMM_LOGE(COMM_TEST, "outData is nullptr, SoftBusMalloc failed!");
         return false;
     }
     uint32_t outLen = size;
@@ -102,16 +102,17 @@ bool AuthCryptFuzzTest(const uint8_t* data, size_t size)
     return true;
 }
 
-bool AuthFlushDeviceFuzzTest(const uint8_t* data, size_t size)
+bool AuthFlushDeviceFuzzTest(const uint8_t *data, size_t size)
 {
     if (data == nullptr || size > UDID_BUF_LEN) {
         COMM_LOGE(COMM_TEST, "data or size is invalid!");
         return false;
     }
-    const char *outData = reinterpret_cast<const char*>(data);
-    char *uuid = (char *)SoftBusMalloc(UDID_BUF_LEN);
+    const char *outData = reinterpret_cast<const char *>(data);
+    char *uuid = nullptr;
+    uuid = (char *)SoftBusMalloc(UDID_BUF_LEN);
     if (uuid == nullptr) {
-        COMM_LOGE(COMM_TEST, "uuid is NULL, SoftBusMalloc failed!");
+        COMM_LOGE(COMM_TEST, "uuid is nullptr, SoftBusMalloc failed!");
         return false;
     }
     if (memcpy_s(uuid, UDID_BUF_LEN, outData, size) != EOK) {
@@ -123,10 +124,10 @@ bool AuthFlushDeviceFuzzTest(const uint8_t* data, size_t size)
     return true;
 }
 
-bool AuthStartVerifyFuzzTest(const uint8_t* data, size_t size)
+bool AuthStartVerifyFuzzTest(const uint8_t *data, size_t size)
 {
     if (data == nullptr || size < sizeof(AuthConnInfo)) {
-        COMM_LOGE(COMM_TEST, "data is NULL or size less than authConnInfo");
+        COMM_LOGE(COMM_TEST, "data is nullptr or size less than authConnInfo");
         return false;
     }
     g_baseFuzzData = data;
@@ -136,17 +137,24 @@ bool AuthStartVerifyFuzzTest(const uint8_t* data, size_t size)
     const AuthConnInfo connInfo = *const_cast<AuthConnInfo *>(reinterpret_cast<const AuthConnInfo *>(data));
     uint32_t requestId = GetData<uint32_t>();
     bool isFastAuth = GetData<bool>();
-    AuthVerifyModule authVeriFyModule = static_cast<AuthVerifyModule>
-    (GetData<int>() % (AUTH_MODULE_BUTT - AUTH_MODULE_LNN + 1));
-
-    AuthStartVerify(&connInfo, requestId, authVerifyCallback, authVeriFyModule, isFastAuth);
+    AuthVerifyModule authVeriFyModule =
+        static_cast<AuthVerifyModule>(GetData<int>() % (AUTH_MODULE_BUTT - AUTH_MODULE_LNN + 1));
+    AuthVerifyParam authVerifyParam;
+    (void)memset_s(&authVerifyParam, sizeof(authVerifyParam), 0, sizeof(authVerifyParam));
+    authVerifyParam.isFastAuth = isFastAuth;
+    authVerifyParam.module = authVeriFyModule;
+    authVerifyParam.requestId = requestId;
+    authVerifyParam.deviceKeyId.hasDeviceKeyId = false;
+    authVerifyParam.deviceKeyId.localDeviceKeyId = AUTH_INVALID_DEVICEKEY_ID;
+    authVerifyParam.deviceKeyId.remoteDeviceKeyId = AUTH_INVALID_DEVICEKEY_ID;
+    AuthStartVerify(&connInfo, &authVerifyParam, authVerifyCallback);
     return true;
 }
 
-void AuthMetaStartVerifyFuzzTest(const uint8_t* data, size_t size)
+void AuthMetaStartVerifyFuzzTest(const uint8_t *data, size_t size)
 {
     if (data == nullptr || size != sizeof(AuthKeyInfo)) {
-        COMM_LOGE(COMM_TEST, "data is NULL or size is invalid");
+        COMM_LOGE(COMM_TEST, "data is nullptr or size is invalid");
         return;
     }
     uint32_t connectionId = 0;
@@ -161,7 +169,7 @@ void AuthMetaStartVerifyFuzzTest(const uint8_t* data, size_t size)
 }
 
 /* Fuzzer entry point */
-extern "C" int32_t LLVMFuzzerTestOneInput(const uint8_t* data, size_t size)
+extern "C" int32_t LLVMFuzzerTestOneInput(const uint8_t *data, size_t size)
 {
     if (data == nullptr || size == 0) {
         return 0;
@@ -174,10 +182,9 @@ extern "C" int32_t LLVMFuzzerTestOneInput(const uint8_t* data, size_t size)
     OHOS::AuthCryptFuzzTest(data, size);
     OHOS::AuthFlushDeviceFuzzTest(data, size);
     OHOS::AuthStartVerifyFuzzTest(data, size);
-    OHOS::AuthMetaStartVerifyFuzzTest(data, size);
 
     DataGenerator::Clear();
-    
+
     return 0;
 }
-}
+} // namespace OHOS

@@ -22,6 +22,7 @@
 #include "kits/c/wifi_device.h"
 #include "kits/c/wifi_error_code.h"
 #include "kits/c/wifi_hid2d.h"
+#include "kits/c/wifi_hotspot.h"
 #include "kits/c/wifi_p2p.h"
 #include "kits/c/wifi_scan_info.h"
 
@@ -43,6 +44,7 @@ public:
     virtual int32_t IsWifiActive(void) = 0;
     virtual WifiErrorCode GetWifiDetailState(WifiDetailState *state) = 0;
     virtual WifiErrorCode GetP2pEnableStatus(P2pState *state) = 0;
+    virtual WifiErrorCode GetHotspotConfig(HotspotConfig *result) = 0;
 };
 class WifiInterfaceMock : public WifiInterface {
 public:
@@ -61,6 +63,7 @@ public:
     MOCK_METHOD0(IsWifiActive, int(void));
     MOCK_METHOD1(GetWifiDetailState, WifiErrorCode(WifiDetailState *));
     MOCK_METHOD1(GetP2pEnableStatus, WifiErrorCode(P2pState *));
+    MOCK_METHOD1(GetHotspotConfig, WifiErrorCode(HotspotConfig *));
 };
 } // namespace OHOS
 #endif // AUTH_CONNECTION_MOCK_H

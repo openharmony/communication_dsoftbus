@@ -19,18 +19,23 @@
 #include <stdatomic.h>
 
 #include "anonymizer.h"
+#include "lnn_ohos_account_adapter.h"
+#include "g_enhance_trans_func.h"
+#include "g_enhance_trans_func_pack.h"
 #include "softbus_access_token_adapter.h"
 #include "softbus_adapter_mem.h"
 #include "softbus_def.h"
 #include "softbus_error_code.h"
 #include "softbus_permission.h"
-#include "softbus_qos.h"
 #include "softbus_scenario_manager.h"
 #include "softbus_utils.h"
+#include "softbus_init_common.h"
 #include "trans_channel_manager.h"
 #include "trans_client_proxy.h"
 #include "trans_event.h"
+#include "trans_inner.h"
 #include "trans_log.h"
+#include "trans_session_account_adapter.h"
 #include "trans_session_ipc_adapter.h"
 #include "trans_session_manager.h"
 
@@ -56,15 +61,26 @@ int32_t TransServerInit(void)
         TRANS_LOGE(TRANS_INIT, "TransChannelInit failed");
         return ret;
     }
-    ret = InitQos();
+    ret = InitQosPacked();
     if (ret != SOFTBUS_OK) {
         TRANS_LOGE(TRANS_INIT, "QosInit Failed");
+        return ret;
+    }
+    ret = InnerListInit();
+    if (ret != SOFTBUS_OK) {
+        TRANS_LOGE(TRANS_INIT, "InnerListInit Failed");
         return ret;
     }
     ret = ScenarioManagerGetInstance();
     if (ret != SOFTBUS_OK) {
         TRANS_LOGE(TRANS_INIT, "ScenarioManager init Failed");
         return ret;
+    }
+    if (InitSoftbusPagingPacked() != SOFTBUS_OK) {
+        TRANS_LOGE(TRANS_INIT, "InitSoftbusPagingPacked Failed");
+    }
+    if (InitSoftbusPagingResPullPacked() != SOFTBUS_OK) {
+        TRANS_LOGE(TRANS_INIT, "InitSoftbusPagingResPullPacked Failed");
     }
     RegisterPermissionChangeCallback();
     atomic_store_explicit(&g_transSessionInitFlag, true, memory_order_release);
@@ -80,8 +96,11 @@ void TransServerDeinit(void)
 
     TransSessionMgrDeinit();
     TransChannelDeinit();
+    InnerListDeinit();
     TransPermissionDeinit();
     ScenarioManagerdestroyInstance();
+    DeInitSoftbusPagingPacked();
+    DeInitSoftbusPagingResPullPacked();
     atomic_store_explicit(&g_transSessionInitFlag, false, memory_order_release);
 }
 
@@ -89,6 +108,30 @@ void TransServerDeathCallback(const char *pkgName, int32_t pid)
 {
     TransChannelDeathCallback(pkgName, pid);
     TransDelItemByPackageName(pkgName, pid);
+    TransPagingDeathCallbackPacked(pkgName, pid);
+    TransProcessGroupTalkieInfoPacked(pkgName);
+}
+
+static void TransSetUserId(CallerType callerType, SessionServer *newNode)
+{
+    if (callerType == CALLER_TYPE_FEATURE_ABILITY) {
+        newNode->accessInfo.userId = TransGetUserIdFromUid(newNode->uid);
+        if (newNode->accessInfo.userId == INVALID_USER_ID) {
+            TRANS_LOGE(TRANS_CTRL, "TransGetUserIdFromUid failed");
+            return;
+        }
+    } else {
+        newNode->accessInfo.userId = INVALID_USER_ID;
+    }
+}
+
+static void PrintSessionInfo(const char *pkgName, const char *sessionName, int32_t uid, int32_t pid)
+{
+    char *tmpName = NULL;
+    Anonymize(sessionName, &tmpName);
+    TRANS_LOGI(TRANS_CTRL, "pkgName=%{public}s, sessionName=%{public}s, uid=%{public}d, pid=%{public}d",
+        pkgName, AnonymizeWrapper(tmpName), uid, pid);
+    AnonymizeFree(tmpName);
 }
 
 int32_t TransCreateSessionServer(const char *pkgName, const char *sessionName, int32_t uid, int32_t pid)
@@ -96,11 +139,7 @@ int32_t TransCreateSessionServer(const char *pkgName, const char *sessionName, i
     if (!IsValidString(pkgName, PKG_NAME_SIZE_MAX - 1) || !IsValidString(sessionName, SESSION_NAME_SIZE_MAX - 1)) {
         return SOFTBUS_INVALID_PARAM;
     }
-    char *tmpName = NULL;
-    Anonymize(sessionName, &tmpName);
-    TRANS_LOGI(TRANS_CTRL, "pkgName=%{public}s, sessionName=%{public}s, uid=%{public}d, pid=%{public}d",
-        pkgName, AnonymizeWrapper(tmpName), uid, pid);
-    AnonymizeFree(tmpName);
+    PrintSessionInfo(pkgName, sessionName, uid, pid);
     SessionServer *newNode = (SessionServer *)SoftBusCalloc(sizeof(SessionServer));
     TRANS_CHECK_AND_RETURN_RET_LOGE(newNode != NULL, SOFTBUS_MALLOC_ERR, TRANS_CTRL, "malloc failed");
     if (strcpy_s(newNode->pkgName, sizeof(newNode->pkgName), pkgName) != EOK) {
@@ -116,10 +155,17 @@ int32_t TransCreateSessionServer(const char *pkgName, const char *sessionName, i
     newNode->pid = pid;
 
     int32_t ret = TransGetCallingFullTokenId(&newNode->tokenId);
-    TRANS_CHECK_AND_RETURN_RET_LOGE(ret == SOFTBUS_OK, ret, TRANS_CTRL, "get callingTokenId failed");
+    if (ret != SOFTBUS_OK) {
+        TRANS_LOGE(TRANS_CTRL, "get callingTokenId failed, ret=%{public}d", ret);
+        SoftBusFree(newNode);
+        return ret;
+    }
+    newNode->accessInfo.localTokenId = newNode->tokenId;
     int32_t tokenType = SoftBusGetAccessTokenType(newNode->tokenId);
     newNode->callerType = (SoftBusAccessTokenType)tokenType == ACCESS_TOKEN_TYPE_HAP ?
         CALLER_TYPE_FEATURE_ABILITY : CALLER_TYPE_SERVICE_ABILITY;
+    newNode->tokenType = tokenType;
+    TransSetUserId(newNode->callerType, newNode);
     ret = TransSessionServerAddItem(newNode);
     TransEventExtra extra = {
         .socketName = sessionName,
@@ -159,7 +205,7 @@ int32_t TransRemoveSessionServer(const char *pkgName, const char *sessionName)
 
 int32_t TransOpenSession(const SessionParam *param, TransInfo *info)
 {
-    if (!IsValidString(param->sessionName, SESSION_NAME_SIZE_MAX) ||
+    if (!param ||!IsValidString(param->sessionName, SESSION_NAME_SIZE_MAX) ||
         !IsValidString(param->peerSessionName, SESSION_NAME_SIZE_MAX) ||
         !IsValidString(param->peerDeviceId, DEVICE_ID_SIZE_MAX) ||
         (param->isQosLane && param->qosCount > QOS_TYPE_BUTT)) {

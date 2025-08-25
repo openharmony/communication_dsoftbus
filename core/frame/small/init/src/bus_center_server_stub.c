@@ -69,7 +69,7 @@ int32_t ServerJoinLNN(IpcIo *req, IpcIo *reply)
         LNN_LOGE(LNN_STATE, "no permission");
         return SOFTBUS_PERMISSION_DENIED;
     }
-    int32_t ret = LnnIpcServerJoin(pkgName, 0, addr, addrTypeLen);
+    int32_t ret = LnnIpcServerJoin(pkgName, 0, addr, addrTypeLen, false);
     if (ret != SOFTBUS_OK) {
         LNN_LOGE(LNN_STATE, "LnnIpcServerJoin failed");
         return ret;
@@ -375,7 +375,8 @@ int32_t ServerStopTimeSync(IpcIo *req, IpcIo *reply)
 
 static int32_t ServerRecoverPublishLNN(const char *pkgName, PublishInfo *info, IpcIo *reply)
 {
-    int32_t ret = LnnIpcPublishLNN(pkgName, info);
+    int32_t callingPid = GetCallingPid();
+    int32_t ret = LnnIpcPublishLNN(pkgName, callingPid, info);
     WriteInt32(reply, ret);
     if (ret != SOFTBUS_OK) {
         LNN_LOGE(LNN_STATE, "LnnIpcPublishLNN failed");
@@ -452,7 +453,8 @@ int32_t ServerStopPublishLNN(IpcIo *req, IpcIo *reply)
         LNN_LOGE(LNN_STATE, "no permission");
         return SOFTBUS_PERMISSION_DENIED;
     }
-    int32_t ret = LnnIpcStopPublishLNN(pkgName, publishId);
+    int32_t callingPid = GetCallingPid();
+    int32_t ret = LnnIpcStopPublishLNN(pkgName, callingPid, publishId);
     if (ret != SOFTBUS_OK) {
         LNN_LOGE(LNN_STATE, "LnnIpcStopPublishLNN failed");
         return ret;
@@ -504,7 +506,8 @@ int32_t ServerRefreshLNN(IpcIo *req, IpcIo *reply)
         info.capabilityData = NULL;
         info.dataLen = 0;
     }
-    int32_t ret = LnnIpcRefreshLNN(pkgName, 0, &info);
+    int32_t callingPid = GetCallingPid();
+    int32_t ret = LnnIpcRefreshLNN(pkgName, callingPid, &info);
     LNN_CHECK_AND_RETURN_RET_LOGE(WriteInt32(reply, ret), ret, LNN_STATE, "write reply failed");
     if (ret != SOFTBUS_OK) {
         LNN_LOGE(LNN_STATE, "refresh LNN failed, ret = %{public}d", ret);
@@ -532,7 +535,8 @@ int32_t ServerStopRefreshLNN(IpcIo *req, IpcIo *reply)
         LNN_LOGE(LNN_STATE, "no permission");
         return SOFTBUS_PERMISSION_DENIED;
     }
-    int32_t ret = LnnIpcStopRefreshLNN(pkgName, 0, refreshId);
+    int32_t callingPid = GetCallingPid();
+    int32_t ret = LnnIpcStopRefreshLNN(pkgName, callingPid, refreshId);
     if (ret != SOFTBUS_OK) {
         LNN_LOGE(LNN_STATE, "LnnIpcStopRefreshLNN failed");
         return ret;
@@ -702,4 +706,25 @@ int32_t ServerShiftLnnGear(IpcIo *req, IpcIo *reply)
 ERR_RETURN:
     WriteInt32(reply, SOFTBUS_INVALID_PARAM);
     return SOFTBUS_IPC_ERR;
+}
+
+int32_t ServerTriggerRangeForMsdp(IpcIo *req, IpcIo *reply)
+{
+    (void)req;
+    (void)reply;
+    return SOFTBUS_FUNC_NOT_SUPPORT;
+}
+
+int32_t ServerRegRangeCbForMsdp(IpcIo *req, IpcIo *reply)
+{
+    (void)req;
+    (void)reply;
+    return SOFTBUS_FUNC_NOT_SUPPORT;
+}
+
+int32_t ServerUnregRangeCbForMsdp(IpcIo *req, IpcIo *reply)
+{
+    (void)req;
+    (void)reply;
+    return SOFTBUS_FUNC_NOT_SUPPORT;
 }

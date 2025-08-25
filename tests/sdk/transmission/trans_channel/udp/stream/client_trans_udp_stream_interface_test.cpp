@@ -59,7 +59,7 @@ static char g_ip[] = "127.0.0.1";
 static VtpStreamOpenParam g_serverParam1 = {
     g_pkgName,
     g_ip,
-    NULL,
+    nullptr,
     -1,
     RAW_STREAM,
     (uint8_t*)"abcdef@ghabcdefghabcdefghfgdabc",
@@ -82,7 +82,7 @@ static VtpStreamOpenParam g_clientParam1 = {
  * @tc.type: FUNC
  * @tc.require:
  */
-HWTEST_F(ClientTransUdpStreamInterfaceTest, StartVtpStreamChannelServerTest001, TestSize.Level0)
+HWTEST_F(ClientTransUdpStreamInterfaceTest, StartVtpStreamChannelServerTest001, TestSize.Level1)
 {
     int32_t channelId = -1;
     int32_t ret = StartVtpStreamChannelServer(channelId, &g_serverParam1, &g_callback);
@@ -97,7 +97,7 @@ HWTEST_F(ClientTransUdpStreamInterfaceTest, StartVtpStreamChannelServerTest001, 
  * @tc.type: FUNC
  * @tc.require:
  */
-HWTEST_F(ClientTransUdpStreamInterfaceTest, StartVtpStreamChannelServerTest002, TestSize.Level0)
+HWTEST_F(ClientTransUdpStreamInterfaceTest, StartVtpStreamChannelServerTest002, TestSize.Level1)
 {
     int32_t channelId = 1;
     int32_t ret = StartVtpStreamChannelServer(channelId, &g_serverParam1, &g_callback);
@@ -113,7 +113,7 @@ HWTEST_F(ClientTransUdpStreamInterfaceTest, StartVtpStreamChannelServerTest002, 
  * @tc.type: FUNC
  * @tc.require:
  */
-HWTEST_F(ClientTransUdpStreamInterfaceTest, StartVtpStreamChannelClientTest001, TestSize.Level0)
+HWTEST_F(ClientTransUdpStreamInterfaceTest, StartVtpStreamChannelClientTest001, TestSize.Level1)
 {
     int32_t channelId = -1;
     int32_t ret = StartVtpStreamChannelClient(channelId, &g_clientParam1, &g_callback);
@@ -127,7 +127,7 @@ HWTEST_F(ClientTransUdpStreamInterfaceTest, StartVtpStreamChannelClientTest001, 
  * @tc.type: FUNC
  * @tc.require:
  */
-HWTEST_F(ClientTransUdpStreamInterfaceTest, StartVtpStreamChannelClientTest002, TestSize.Level0)
+HWTEST_F(ClientTransUdpStreamInterfaceTest, StartVtpStreamChannelClientTest002, TestSize.Level1)
 {
     int32_t channelId = 1;
     int32_t ret = StartVtpStreamChannelClient(channelId, &g_clientParam1, &g_callback);
@@ -137,12 +137,58 @@ HWTEST_F(ClientTransUdpStreamInterfaceTest, StartVtpStreamChannelClientTest002, 
 }
 
 /**
+ * @tc.name: StartVtpStreamChannelClientTest003
+ * @tc.desc: StartVtpStreamChannelClient error.
+ * @tc.type: FUNC
+ * @tc.require:
+ */
+HWTEST_F(ClientTransUdpStreamInterfaceTest, StartVtpStreamChannelClientTest003, TestSize.Level1)
+{
+    int32_t channelId = 1;
+    VtpStreamOpenParam clientParam = {
+        g_pkgName,
+        g_ip,
+        g_ip,
+        1,
+        RAW_STREAM,
+        (uint8_t *)"abcdef@ghabcdefghabcdefghfgdabc",
+        SESSION_KEY_LENGTH,
+    };
+    int32_t ret = StartVtpStreamChannelClient(channelId, &clientParam, nullptr);
+    EXPECT_EQ(SOFTBUS_INVALID_PARAM, ret);
+}
+
+/**
+ * @tc.name: StartVtpStreamChannelClientTest004
+ * @tc.desc: StartVtpStreamChannelClient error.
+ * @tc.type: FUNC
+ * @tc.require:
+ */
+HWTEST_F(ClientTransUdpStreamInterfaceTest, StartVtpStreamChannelClientTest004, TestSize.Level1)
+{
+    int32_t channelId = 1;
+    int32_t ret = StartVtpStreamChannelClient(channelId, nullptr, &g_callback);
+    EXPECT_EQ(SOFTBUS_INVALID_PARAM, ret);
+    VtpStreamOpenParam clientParam = {
+        nullptr,
+        g_ip,
+        g_ip,
+        1,
+        RAW_STREAM,
+        (uint8_t *)"abcdef@ghabcdefghabcdefghfgdabc",
+        SESSION_KEY_LENGTH,
+    };
+    ret = StartVtpStreamChannelClient(channelId, &clientParam, &g_callback);
+    EXPECT_EQ(SOFTBUS_INVALID_PARAM, ret);
+}
+
+/**
  * @tc.name: CloseVtpStreamChannelTest001
  * @tc.desc: CloseVtpStreamChannel error.
  * @tc.type: FUNC
  * @tc.require:
  */
-HWTEST_F(ClientTransUdpStreamInterfaceTest, CloseVtpStreamChannelTest001, TestSize.Level0)
+HWTEST_F(ClientTransUdpStreamInterfaceTest, CloseVtpStreamChannelTest001, TestSize.Level1)
 {
     int32_t channelId = 1;
     int32_t ret =  CloseVtpStreamChannel(channelId, g_pkgName);
@@ -155,7 +201,7 @@ HWTEST_F(ClientTransUdpStreamInterfaceTest, CloseVtpStreamChannelTest001, TestSi
  * @tc.type: FUNC
  * @tc.require:
  */
-HWTEST_F(ClientTransUdpStreamInterfaceTest, SendVtpStreamTest001, TestSize.Level0)
+HWTEST_F(ClientTransUdpStreamInterfaceTest, SendVtpStreamTest001, TestSize.Level1)
 {
     int32_t channelId = 1;
     StreamData streamData = {
@@ -177,7 +223,7 @@ HWTEST_F(ClientTransUdpStreamInterfaceTest, SendVtpStreamTest001, TestSize.Level
  * @tc.type: FUNC
  * @tc.require:
  */
-HWTEST_F(ClientTransUdpStreamInterfaceTest, SendVtpStreamTest002, TestSize.Level0)
+HWTEST_F(ClientTransUdpStreamInterfaceTest, SendVtpStreamTest002, TestSize.Level1)
 {
     int32_t channelId = 1;
     StreamData streamData = {
@@ -187,21 +233,21 @@ HWTEST_F(ClientTransUdpStreamInterfaceTest, SendVtpStreamTest002, TestSize.Level
     const StreamFrameInfo frameInfo = {};
     int32_t ret = StartVtpStreamChannelServer(channelId, &g_serverParam1, &g_callback);
     EXPECT_NE(SOFTBUS_OK, ret);
-    ret = SendVtpStream(channelId, &streamData, NULL, &frameInfo);
+    ret = SendVtpStream(channelId, &streamData, nullptr, &frameInfo);
     EXPECT_EQ(SOFTBUS_TRANS_MAKE_STREAM_FAILED, ret);
     CloseVtpStreamChannel(channelId, g_pkgName);
 
     g_serverParam1.type = INVALID;
     ret = StartVtpStreamChannelServer(channelId, &g_serverParam1, &g_callback);
     EXPECT_NE(SOFTBUS_OK, ret);
-    ret = SendVtpStream(channelId, &streamData, NULL, &frameInfo);
+    ret = SendVtpStream(channelId, &streamData, nullptr, &frameInfo);
     EXPECT_EQ(SOFTBUS_FUNC_NOT_SUPPORT, ret);
     CloseVtpStreamChannel(channelId, g_pkgName);
 
     g_serverParam1.type = COMMON_VIDEO_STREAM;
     ret = StartVtpStreamChannelServer(channelId, &g_serverParam1, &g_callback);
     EXPECT_NE(SOFTBUS_OK, ret);
-    ret = SendVtpStream(channelId, &streamData, NULL, &frameInfo);
+    ret = SendVtpStream(channelId, &streamData, nullptr, &frameInfo);
     EXPECT_EQ(SOFTBUS_TRANS_MAKE_STREAM_FAILED, ret);
     CloseVtpStreamChannel(channelId, g_pkgName);
 }
@@ -212,7 +258,7 @@ HWTEST_F(ClientTransUdpStreamInterfaceTest, SendVtpStreamTest002, TestSize.Level
  * @tc.type: FUNC
  * @tc.require:
  */
-HWTEST_F(ClientTransUdpStreamInterfaceTest, SendVtpStreamTest003, TestSize.Level0)
+HWTEST_F(ClientTransUdpStreamInterfaceTest, SendVtpStreamTest003, TestSize.Level1)
 {
     int32_t channelId = 1;
     StreamData streamData1 = {
@@ -228,7 +274,7 @@ HWTEST_F(ClientTransUdpStreamInterfaceTest, SendVtpStreamTest003, TestSize.Level
 
     int32_t ret = StartVtpStreamChannelServer(channelId, &g_serverParam1, &g_callback);
     EXPECT_NE(SOFTBUS_OK, ret);
-    ret = SendVtpStream(channelId, &streamData1, NULL, &frameInfo);
+    ret = SendVtpStream(channelId, &streamData1, nullptr, &frameInfo);
     EXPECT_EQ(SOFTBUS_TRANS_INVALID_DATA_LENGTH, ret);
     CloseVtpStreamChannel(channelId, g_pkgName);
 
@@ -237,5 +283,22 @@ HWTEST_F(ClientTransUdpStreamInterfaceTest, SendVtpStreamTest003, TestSize.Level
     ret = SendVtpStream(channelId, &streamData2, &streamData2, &frameInfo);
     EXPECT_EQ(SOFTBUS_TRANS_MAKE_STREAM_FAILED, ret);
     CloseVtpStreamChannel(channelId, g_pkgName);
+}
+
+/**
+ * @tc.name: SetVtpStreamMultiLayerOpt001
+ * @tc.desc: SetVtpStreamMultiLayerOpt invalid channelId test.
+ * @tc.type: FUNC
+ * @tc.require:
+ */
+HWTEST_F(ClientTransUdpStreamInterfaceTest, SetVtpStreamMultiLayerOpt001, TestSize.Level1)
+{
+    int32_t channelId = 1;
+    StreamData streamData1 = {
+        (char *)"",
+        -1,
+    };
+    int32_t ret = SetVtpStreamMultiLayerOpt(channelId, &streamData1);
+    EXPECT_EQ(SOFTBUS_TRANS_ADAPTOR_NOT_EXISTED, ret);
 }
 }

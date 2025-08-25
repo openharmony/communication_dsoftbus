@@ -49,9 +49,13 @@ public:
     virtual void LnnCoapConnectInit(void);
     virtual int32_t LnnInitNetLedgerDelay(void);
     virtual int32_t LnnInitEventMoniterDelay(void);
+    virtual int32_t LnnInitHuksCeParamsDelay(void);
     virtual int32_t LnnInitNetworkManagerDelay(void);
     virtual int32_t LnnInitNetBuilderDelay(void);
     virtual int32_t LnnInitLaneHubDelay(void);
+    virtual int32_t LnnLoadLocalDeviceAccountIdInfo(void);
+    virtual int32_t InitUdidChangedEvent(void);
+    virtual int32_t LnnInitPermission(void);
 };
 
 class BusCenterManagerDepsInterfaceMock : public BusCenterManagerDepsInterface {
@@ -79,9 +83,13 @@ public:
     MOCK_METHOD0(LnnCoapConnectInit, void (void));
     MOCK_METHOD0(LnnInitNetLedgerDelay, int32_t (void));
     MOCK_METHOD0(LnnInitEventMoniterDelay, int32_t (void));
+    MOCK_METHOD0(LnnInitHuksCeParamsDelay, int32_t (void));
     MOCK_METHOD0(LnnInitNetworkManagerDelay, int32_t (void));
     MOCK_METHOD0(LnnInitNetBuilderDelay, int32_t (void));
     MOCK_METHOD0(LnnInitLaneHubDelay, int32_t (void));
+    MOCK_METHOD0(LnnLoadLocalDeviceAccountIdInfo, int32_t (void));
+    MOCK_METHOD0(InitUdidChangedEvent, int32_t (void));
+    MOCK_METHOD0(LnnInitPermission, int32_t (void));
 };
 } // namespace OHOS
 #endif // BUS_CENTER_MANAGER_DEPS_MOCK_H

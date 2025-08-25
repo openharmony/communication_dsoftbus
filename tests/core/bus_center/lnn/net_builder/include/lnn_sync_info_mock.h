@@ -26,22 +26,32 @@ class LnnSyncInfoInterface {
 public:
     LnnSyncInfoInterface() {};
     virtual ~LnnSyncInfoInterface() {};
+    virtual int32_t LnnInitSyncInfoManager(void);
+    virtual int32_t LnnRegSyncInfoHandler(LnnSyncInfoType type, LnnSyncInfoMsgHandler handler);
+    virtual int32_t LnnUnregSyncInfoHandler(LnnSyncInfoType type, LnnSyncInfoMsgHandler handler);
     virtual int32_t LnnSendSyncInfoMsg(LnnSyncInfoType type, const char *networkId, const uint8_t *msg, uint32_t len,
         LnnSyncInfoMsgComplete complete) = 0;
-    virtual int32_t LnnRegSyncInfoHandler(LnnSyncInfoType type, LnnSyncInfoMsgHandler handler) = 0;
-    virtual int32_t LnnUnregSyncInfoHandler(LnnSyncInfoType type, LnnSyncInfoMsgHandler handler) = 0;
     virtual int32_t LnnSendP2pSyncInfoMsg(const char *networkId, uint32_t netCapability) = 0;
+
+    virtual void LnnSendAsyncInfoMsg(void *param) = 0;
+    virtual SendSyncInfoParam *CreateSyncInfoParam(LnnSyncInfoType type, const char *networkId, const uint8_t *msg,
+        uint32_t len, LnnSyncInfoMsgComplete complete) = 0;
 };
 
 class LnnSyncInfoInterfaceMock : public LnnSyncInfoInterface {
 public:
     LnnSyncInfoInterfaceMock();
     ~LnnSyncInfoInterfaceMock() override;
-    MOCK_METHOD5(
-        LnnSendSyncInfoMsg, int32_t(LnnSyncInfoType, const char *, const uint8_t *, uint32_t, LnnSyncInfoMsgComplete));
+    MOCK_METHOD0(LnnInitSyncInfoManager, int32_t(void));
     MOCK_METHOD2(LnnRegSyncInfoHandler, int32_t(LnnSyncInfoType, LnnSyncInfoMsgHandler));
     MOCK_METHOD2(LnnUnregSyncInfoHandler, int32_t(LnnSyncInfoType, LnnSyncInfoMsgHandler));
+    MOCK_METHOD5(
+        LnnSendSyncInfoMsg, int32_t(LnnSyncInfoType, const char *, const uint8_t *, uint32_t, LnnSyncInfoMsgComplete));
     MOCK_METHOD2(LnnSendP2pSyncInfoMsg, int32_t(const char *, uint32_t));
+
+    MOCK_METHOD1(LnnSendAsyncInfoMsg, void(void *));
+    MOCK_METHOD5(CreateSyncInfoParam,
+        SendSyncInfoParam *(LnnSyncInfoType, const char *, const uint8_t *, uint32_t, LnnSyncInfoMsgComplete));
 };
 } // namespace OHOS
 #endif // LNN_SYNC_INFO_MOCK_H

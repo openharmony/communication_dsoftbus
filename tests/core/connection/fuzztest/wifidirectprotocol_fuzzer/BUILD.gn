@@ -39,6 +39,7 @@ ohos_fuzztest("WifiDirectProtocolFuzzTest") {
     "$dsoftbus_root_path/core/common:softbus_utils",
     "$dsoftbus_root_path/core/frame:softbus_server",
     "$dsoftbus_root_path/tests/sdk/common:softbus_access_token_test",
+    "$dsoftbus_root_path/core/connection/wifi_direct_cpp:wifi_direct",
   ]
 
   external_deps = [

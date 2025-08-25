@@ -16,7 +16,6 @@
 #ifndef TRANS_UDP_NEGOTIATION_EXCHANGE_H
 #define TRANS_UDP_NEGOTIATION_EXCHANGE_H
 
-#include <stdint.h>
 #include "cJSON.h"
 #include "softbus_app_info.h"
 

@@ -28,6 +28,7 @@
 #include "softbus_error_code.h"
 #include "softbus_socket.h"
 #include "softbus_tcp_socket.h"
+#include "softbus_usb_tcp_socket.h"
 #include "softbus_watch_event_interface.h"
 
 using namespace testing::ext;
@@ -96,6 +97,11 @@ int32_t DataEvent(ListenerModule module, int32_t events, int32_t fd)
 
 SocketAddr g_socketAddr = {
     .addr = "127.0.0.1",
+    .port = g_port,
+};
+
+SocketAddr g_socketAddr6 = {
+    .addr = "::1",
     .port = g_port,
 };
 
@@ -173,7 +179,7 @@ HWTEST_F(SoftbusConnCommonTest, testBaseListener007, TestSize.Level1)
         for (triggerType = READ_TRIGGER; triggerType <= RW_TRIGGER; triggerType++) {
             EXPECT_EQ(SOFTBUS_CONN_FAIL, AddTrigger(static_cast<ListenerModule>(module),
                 fd, static_cast<TriggerType>(triggerType)));
-            EXPECT_EQ(SOFTBUS_OK, DelTrigger(static_cast<ListenerModule>(module),
+            EXPECT_EQ(SOFTBUS_NOT_FIND, DelTrigger(static_cast<ListenerModule>(module),
                 fd, static_cast<TriggerType>(triggerType)));
         }
     }
@@ -214,7 +220,7 @@ HWTEST_F(SoftbusConnCommonTest, testBaseListener008, TestSize.Level1)
                 fd, static_cast<TriggerType>(triggerType)));
             EXPECT_EQ(SOFTBUS_OK, DelTrigger(static_cast<ListenerModule>(module),
                 fd, static_cast<TriggerType>(triggerType)));
-            EXPECT_EQ(SOFTBUS_OK, DelTrigger(static_cast<ListenerModule>(module),
+            EXPECT_EQ(SOFTBUS_NOT_FIND, DelTrigger(static_cast<ListenerModule>(module),
                 fd, static_cast<TriggerType>(triggerType)));
         }
         EXPECT_EQ(SOFTBUS_OK, StopBaseListener(static_cast<ListenerModule>(module)));
@@ -262,7 +268,7 @@ HWTEST_F(SoftbusConnCommonTest, testBaseListener009, TestSize.Level1)
                 fdArray[1023], static_cast<TriggerType>(triggerType)));
             EXPECT_EQ(SOFTBUS_OK, DelTrigger(static_cast<ListenerModule>(module),
                 fdArray[1023], static_cast<TriggerType>(triggerType)));
-            EXPECT_EQ(SOFTBUS_OK, DelTrigger(static_cast<ListenerModule>(module),
+            EXPECT_EQ(SOFTBUS_NOT_FIND, DelTrigger(static_cast<ListenerModule>(module),
                 fdArray[1023], static_cast<TriggerType>(triggerType)));
         }
         EXPECT_EQ(SOFTBUS_OK, StopBaseListener(static_cast<ListenerModule>(module)));
@@ -319,9 +325,9 @@ HWTEST_F(SoftbusConnCommonTest, testBaseListener010, TestSize.Level1)
  */
 HWTEST_F(SoftbusConnCommonTest, testBaseListener016, TestSize.Level1)
 {
-    EXPECT_EQ(SOFTBUS_INVALID_PARAM, StartBaseClient(static_cast<ListenerModule>(PROXY - 1), NULL));
+    EXPECT_EQ(SOFTBUS_INVALID_PARAM, StartBaseClient(static_cast<ListenerModule>(PROXY - 1), nullptr));
     EXPECT_EQ(SOFTBUS_INVALID_PARAM,
-        StartBaseClient(static_cast<ListenerModule>(DIRECT_CHANNEL_SERVER_WIFI + 1), NULL));
+        StartBaseClient(static_cast<ListenerModule>(DIRECT_CHANNEL_SERVER_WIFI + 1), nullptr));
 };
 
 /*
@@ -602,7 +608,7 @@ HWTEST_F(SoftbusConnCommonTest, testSocket002, TestSize.Level1)
 {
     int32_t ret;
 
-    ret = ConnGetPeerSocketAddr(TEST_FD, NULL);
+    ret = ConnGetPeerSocketAddr(TEST_FD, nullptr);
     EXPECT_EQ(SOFTBUS_INVALID_PARAM, ret);
 
     SoftbusAdapterMock mock;
@@ -779,7 +785,7 @@ static int32_t OnGetAllFdEvent(ListNode *list)
 HWTEST_F(SoftbusConnCommonTest, AddEvent001, TestSize.Level1)
 {
     int32_t fd = -1;
-    int32_t ret = AddEvent(NULL, fd, READ_TRIGGER);
+    int32_t ret = AddEvent(nullptr, fd, READ_TRIGGER);
     EXPECT_EQ(SOFTBUS_INVALID_PARAM, ret);
  
     EventWatcher watcher = {0};
@@ -819,7 +825,7 @@ HWTEST_F(SoftbusConnCommonTest, ModifyEvent001, TestSize.Level1)
 {
     int32_t fd = -1;
  
-    int32_t ret = ModifyEvent(NULL, fd, READ_TRIGGER);
+    int32_t ret = ModifyEvent(nullptr, fd, READ_TRIGGER);
     EXPECT_EQ(SOFTBUS_INVALID_PARAM, ret);
  
     EventWatcher watcher = {0};
@@ -859,7 +865,7 @@ HWTEST_F(SoftbusConnCommonTest, RemoveEvent001, TestSize.Level1)
 {
     int32_t fd = -1;
  
-    int32_t ret = RemoveEvent(NULL, fd);
+    int32_t ret = RemoveEvent(nullptr, fd);
     EXPECT_EQ(SOFTBUS_INVALID_PARAM, ret);
  
     EventWatcher watcher = {0};
@@ -900,7 +906,7 @@ HWTEST_F(SoftbusConnCommonTest, WatchEvent001, TestSize.Level1)
     ListNode fdEventNode;
     ListInit(&fdEventNode);
  
-    int32_t ret = WatchEvent(NULL, -1, &fdEventNode);
+    int32_t ret = WatchEvent(nullptr, -1, &fdEventNode);
     EXPECT_EQ(SOFTBUS_INVALID_PARAM, ret);
  
     EventWatcher watcher = {0};
@@ -911,5 +917,306 @@ HWTEST_F(SoftbusConnCommonTest, WatchEvent001, TestSize.Level1)
     watcher.watcherId = 1;
     ret = WatchEvent(&watcher, -1, &fdEventNode);
     EXPECT_TRUE(ret < 0);
+};
+
+/*
+* @tc.name: testUsbSocket001
+* @tc.desc: test OpenUsbServerSocket
+* @tc.type: FUNC
+* @tc.require:
+*/
+HWTEST_F(SoftbusConnCommonTest, testUsbSocket001, TestSize.Level1)
+{
+    const SocketInterface *usb = GetUsbProtocol();
+    ASSERT_NE(usb, nullptr);
+
+    LocalListenerInfo info = {
+        .type = CONNECT_TCP,
+        .socketOption = {
+            .addr = "::1%lo",
+            .port = g_port,
+            .moduleId = DIRECT_CHANNEL_SERVER_USB,
+            .protocol = LNN_PROTOCOL_USB
+        }
+    };
+
+    SoftbusAdapterMock mock;
+    EXPECT_CALL(mock, SoftBusSocketSetOpt).WillRepeatedly(Return(SOFTBUS_ADAPTER_OK));
+    int32_t fd = usb->OpenServerSocket(&info);
+    int32_t ret = (fd <= 0) ? SOFTBUS_INVALID_PARAM : SOFTBUS_OK;
+    ASSERT_TRUE(ret == SOFTBUS_OK);
+    int32_t port = usb->GetSockPort(fd);
+    EXPECT_EQ(port, g_port);
+    ConnCloseSocket(fd);
+
+    info.socketOption.port = 0;
+    fd = usb->OpenServerSocket(&info);
+    ret = (fd <= 0) ? SOFTBUS_INVALID_PARAM : SOFTBUS_OK;
+    EXPECT_EQ(ret, SOFTBUS_OK);
+    ConnCloseSocket(fd);
+
+    info.type = CONNECT_BLE;
+    fd = usb->OpenServerSocket(&info);
+    ret = (fd <= 0) ? SOFTBUS_INVALID_PARAM : SOFTBUS_OK;
+    EXPECT_EQ(ret, SOFTBUS_INVALID_PARAM);
+    ConnCloseSocket(fd);
+
+    info.type = CONNECT_HML;
+    fd = usb->OpenServerSocket(&info);
+    ret = (fd <= 0) ? SOFTBUS_INVALID_PARAM : SOFTBUS_OK;
+    EXPECT_EQ(ret, SOFTBUS_INVALID_PARAM);
+    ConnCloseSocket(fd);
+
+    fd = usb->OpenServerSocket(nullptr);
+    EXPECT_EQ(fd, SOFTBUS_INVALID_PARAM);
+    ConnCloseSocket(fd);
+
+    info.socketOption.port = -1;
+    fd = usb->OpenServerSocket(&info);
+    EXPECT_EQ(fd, SOFTBUS_INVALID_PARAM);
+    ConnCloseSocket(fd);
+
+    info.type = CONNECT_P2P;
+    fd = usb->OpenServerSocket(&info);
+    EXPECT_EQ(fd, SOFTBUS_INVALID_PARAM);
+    ConnCloseSocket(fd);
+};
+
+/*
+* @tc.name: testUsbSocket002
+* @tc.desc: test OpenUsbUsbClientSocket
+* @tc.type: FUNC
+* @tc.require:
+*/
+HWTEST_F(SoftbusConnCommonTest, testUsbSocket002, TestSize.Level1)
+{
+    const SocketInterface *usb = GetUsbProtocol();
+    ASSERT_NE(usb, nullptr);
+
+    ConnectOption option = {
+        .type = CONNECT_TCP,
+        .socketOption = {
+            .addr = "::1%lo",
+            .port = g_port,
+            .moduleId = DIRECT_CHANNEL_SERVER_USB,
+            .protocol = LNN_PROTOCOL_USB
+        }
+    };
+
+    SoftbusAdapterMock mock;
+    EXPECT_CALL(mock, SoftBusSocketSetOpt).WillRepeatedly(Return(SOFTBUS_ADAPTER_OK));
+    int32_t fd = usb->OpenClientSocket(nullptr, "::1%lo", false);
+    EXPECT_EQ(fd, SOFTBUS_INVALID_PARAM);
+    ConnCloseSocket(fd);
+
+    fd = usb->OpenClientSocket(nullptr, nullptr, false);
+    EXPECT_EQ(fd, SOFTBUS_INVALID_PARAM);
+    ConnCloseSocket(fd);
+
+    option.socketOption.port = 0;
+    fd = usb->OpenClientSocket(&option, "::1%lo", false);
+    int32_t ret = (fd < 0) ? SOFTBUS_INVALID_PARAM : SOFTBUS_OK;
+    EXPECT_EQ(ret, SOFTBUS_INVALID_PARAM);
+    ConnCloseSocket(fd);
+
+    fd = usb->OpenClientSocket(&option, "", false);
+    EXPECT_EQ(fd, SOFTBUS_INVALID_PARAM);
+    ConnCloseSocket(fd);
+
+    fd = usb->OpenClientSocket(&option, "::1%lo", true);
+    ret = (fd < 0) ? SOFTBUS_INVALID_PARAM : SOFTBUS_OK;
+    EXPECT_EQ(ret, SOFTBUS_INVALID_PARAM);
+    ConnCloseSocket(fd);
+
+    option.socketOption.port = -1;
+    fd = usb->OpenClientSocket(&option, "::1%lo", false);
+    EXPECT_EQ(fd, SOFTBUS_INVALID_PARAM);
+    ConnCloseSocket(fd);
+
+    option.socketOption.port = -1;
+    fd = usb->OpenClientSocket(&option, nullptr, false);
+    EXPECT_EQ(fd, SOFTBUS_INVALID_PARAM);
+    ConnCloseSocket(fd);
+
+    option.type = CONNECT_P2P;
+    fd = usb->OpenClientSocket(&option, nullptr, false);
+    EXPECT_EQ(fd, SOFTBUS_INVALID_PARAM);
+    ConnCloseSocket(fd);
+
+    option.type = CONNECT_P2P;
+    fd = usb->OpenClientSocket(&option, "::1%lo", false);
+    EXPECT_EQ(fd, SOFTBUS_INVALID_PARAM);
+    ConnCloseSocket(fd);
+};
+
+/*
+* @tc.name: testUsbSocket003
+* @tc.desc: test GetUsbSockPort invalid fd
+* @tc.type: FUNC
+* @tc.require:
+*/
+HWTEST_F(SoftbusConnCommonTest, testUsbSocket003, TestSize.Level1)
+{
+    const SocketInterface *usb = GetUsbProtocol();
+    ASSERT_NE(usb, nullptr);
+    int32_t invalidFd = -1;
+    int32_t port = usb->GetSockPort(invalidFd);
+    int32_t ret = (port <= 0) ? SOFTBUS_INVALID_PARAM : SOFTBUS_OK;
+    EXPECT_EQ(ret, SOFTBUS_INVALID_PARAM);
+};
+
+/*
+* @tc.name: testUsbSocket004
+* @tc.desc: test AcceptUsbClient
+* @tc.type: FUNC
+* @tc.require:
+*/
+HWTEST_F(SoftbusConnCommonTest, testUsbSocket004, TestSize.Level1)
+{
+    const SocketInterface *usb = GetUsbProtocol();
+    ASSERT_NE(usb, nullptr);
+
+    ConnectOption clientAddr = {
+        .type = CONNECT_TCP,
+        .socketOption = {
+            .addr = "::1%lo",
+            .port = g_port,
+            .moduleId = DIRECT_CHANNEL_SERVER_USB,
+            .protocol = LNN_PROTOCOL_USB
+        }
+    };
+
+    int32_t cfd = 11;
+    SoftbusAdapterMock mock;
+    EXPECT_CALL(mock, SoftBusSocketSetOpt).WillRepeatedly(Return(SOFTBUS_ADAPTER_OK));
+    int32_t ret = usb->AcceptClient(TEST_FD, &clientAddr, &cfd);
+    int32_t res = (ret != SOFTBUS_OK) ? SOFTBUS_INVALID_PARAM : SOFTBUS_OK;
+    EXPECT_EQ(res, SOFTBUS_INVALID_PARAM);
+
+    ret = usb->AcceptClient(TEST_FD, nullptr, &cfd);
+    res = (ret != SOFTBUS_OK) ? SOFTBUS_INVALID_PARAM : SOFTBUS_OK;
+    EXPECT_EQ(res, SOFTBUS_INVALID_PARAM);
+
+    ret = usb->AcceptClient(TEST_FD, &clientAddr, &cfd);
+    res = (ret != SOFTBUS_OK) ? SOFTBUS_INVALID_PARAM : SOFTBUS_OK;
+    EXPECT_EQ(res, SOFTBUS_INVALID_PARAM);
+
+    ret = usb->AcceptClient(INVALID_FD, &clientAddr, &cfd);
+    res = (ret != SOFTBUS_OK) ? SOFTBUS_INVALID_PARAM : SOFTBUS_OK;
+    EXPECT_EQ(res, SOFTBUS_INVALID_PARAM);
+
+    ret = usb->AcceptClient(TEST_FD, nullptr, &cfd);
+    res = (ret != SOFTBUS_OK) ? SOFTBUS_INVALID_PARAM : SOFTBUS_OK;
+    EXPECT_EQ(res, SOFTBUS_INVALID_PARAM);
+
+    ret = usb->AcceptClient(INVALID_FD, nullptr, &cfd);
+    res = (ret != SOFTBUS_OK) ? SOFTBUS_INVALID_PARAM : SOFTBUS_OK;
+    EXPECT_EQ(res, SOFTBUS_INVALID_PARAM);
+};
+
+/*
+* @tc.name: testUsbSocket005
+* @tc.desc: test ConnSendSocketData invalid fd
+* @tc.type: FUNC
+* @tc.require:
+*/
+HWTEST_F(SoftbusConnCommonTest, testUsbSocket005, TestSize.Level1)
+{
+    const SocketInterface *usb = GetUsbProtocol();
+    ASSERT_NE(usb, nullptr);
+
+    SoftbusAdapterMock mock;
+    EXPECT_CALL(mock, SoftBusSocketSetOpt).WillRepeatedly(Return(SOFTBUS_ADAPTER_OK));
+    int32_t clientFd = usb->OpenClientSocket(nullptr, "::1%lo", false);
+    int32_t ret = (clientFd < 0) ? SOFTBUS_INVALID_PARAM : SOFTBUS_OK;
+    EXPECT_EQ(ret, SOFTBUS_INVALID_PARAM);
+    ssize_t bytes = ConnSendSocketData(clientFd, "Hello world", 11, 0);
+    EXPECT_EQ(bytes, -1);
+    ConnShutdownSocket(clientFd);
+};
+
+/*
+* @tc.name: ConnGetPeerSocketAddr6001
+* @tc.desc: test ConnGetPeerSocketAddr is SUCC
+* @tc.type: FUNC
+* @tc.require: I5PC1B
+*/
+HWTEST_F(SoftbusConnCommonTest, ConnGetPeerSocketAddr6001, TestSize.Level1)
+{
+    int32_t ret;
+    SoftbusAdapterMock mock;
+    EXPECT_CALL(mock, SoftBusSocketGetPeerName).WillOnce(Return(SOFTBUS_ADAPTER_OK))
+        .WillRepeatedly(SoftbusAdapterMock::ActionOfSoftBusSocketGetPeerName);
+    ret = ConnGetPeerSocketAddr6(TEST_FD, &g_socketAddr6);
+    EXPECT_EQ(SOFTBUS_OK, ret);
+
+    ret = ConnGetPeerSocketAddr6(TEST_FD, &g_socketAddr6);
+    EXPECT_EQ(SOFTBUS_OK, ret);
+};
+
+/*
+* @tc.name: ConnGetPeerSocketAddr6002
+* @tc.desc: test ConnGetPeerSocketAddr6 param is invalid
+* @tc.type: FUNC
+* @tc.require:
+*/
+HWTEST_F(SoftbusConnCommonTest, ConnGetPeerSocketAddr6002, TestSize.Level1)
+{
+    int32_t ret;
+    SocketAddr socketAddr;
+    SoftbusAdapterMock mock;
+    EXPECT_CALL(mock, SoftBusSocketGetPeerName).WillOnce(Return(SOFTBUS_ADAPTER_ERR));
+    ret = ConnGetPeerSocketAddr6(INVALID_FD, &socketAddr);
+    EXPECT_EQ(SOFTBUS_TCP_SOCKET_ERR, ret);
+}
+
+/*
+* @tc.name: ConnGetPeerSocketAddr6003
+* @tc.desc: test ConnGetPeerSocketAddr6 param is invalid
+* @tc.type: FUNC
+* @tc.require: I5PC1B
+*/
+HWTEST_F(SoftbusConnCommonTest, ConnGetPeerSocketAddr6003, TestSize.Level1)
+{
+    int32_t ret;
+
+    ret = ConnGetPeerSocketAddr6(TEST_FD, nullptr);
+    EXPECT_EQ(SOFTBUS_INVALID_PARAM, ret);
+
+    SoftbusAdapterMock mock;
+    EXPECT_CALL(mock, SoftBusSocketGetPeerName).WillRepeatedly(Return(SOFTBUS_ADAPTER_ERR));
+    ret = ConnGetPeerSocketAddr6(INVALID_FD, &g_socketAddr6);
+    EXPECT_EQ(SOFTBUS_TCP_SOCKET_ERR, ret);
+
+    ret = ConnGetPeerSocketAddr6(TEST_FD, &g_socketAddr6);
+    EXPECT_EQ(SOFTBUS_TCP_SOCKET_ERR, ret);
+};
+
+/*
+* @tc.name: ConnSetTcpKeepaliveStateSucc
+* @tc.desc: test ConnSetTcpKeepaliveState set succ
+* @tc.type: FUNC
+* @tc.require: I5PC1B
+*/
+HWTEST_F(SoftbusConnCommonTest, ConnSetTcpKeepaliveStateSucc, TestSize.Level1)
+{
+    SoftbusAdapterMock mock;
+    EXPECT_CALL(mock, SoftBusSocketSetOpt).WillRepeatedly(Return(SOFTBUS_ADAPTER_OK));
+    auto ret = ConnSetTcpKeepaliveState(TEST_FD, true);
+    EXPECT_EQ(SOFTBUS_ADAPTER_OK, ret);
+};
+
+/*
+* @tc.name: ConnSetTcpKeepaliveStateFail
+* @tc.desc: test ConnSetTcpKeepaliveState set fail
+* @tc.type: FUNC
+* @tc.require: I5PC1B
+*/
+HWTEST_F(SoftbusConnCommonTest, ConnSetTcpKeepaliveStateFail, TestSize.Level1)
+{
+    SoftbusAdapterMock mock;
+    EXPECT_CALL(mock, SoftBusSocketSetOpt).WillRepeatedly(Return(SOFTBUS_ADAPTER_ERR));
+    auto ret = ConnSetTcpKeepaliveState(TEST_FD, true);
+    EXPECT_EQ(SOFTBUS_ADAPTER_ERR, ret);
 };
 }

@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021-2023 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2025 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -202,6 +202,10 @@ int32_t TransSessionServerDelItem(const char *sessionName)
     }
     if (isFind) {
         ListDelete(&pos->node);
+        if (pos->accessInfo.extraAccessInfo != NULL) {
+            SoftBusFree(pos->accessInfo.extraAccessInfo);
+            pos->accessInfo.extraAccessInfo = NULL;
+        }
         SoftBusFree(pos);
         g_sessionServerList->cnt--;
         char *tmpName = NULL;
@@ -211,6 +215,37 @@ int32_t TransSessionServerDelItem(const char *sessionName)
     }
     (void)SoftBusMutexUnlock(&g_sessionServerList->lock);
     return SOFTBUS_OK;
+}
+
+int32_t CheckAndUpdateTimeBySessionName(const char *sessionName, uint64_t timestamp)
+{
+    if (sessionName == NULL) {
+        TRANS_LOGE(TRANS_CTRL, "Parameter sessionName is empty");
+        return SOFTBUS_INVALID_PARAM;
+    }
+    if (g_sessionServerList == NULL) {
+        TRANS_LOGE(TRANS_CTRL, "sessionServer is empty");
+        return SOFTBUS_INVALID_PARAM;
+    }
+    if (SoftBusMutexLock(&g_sessionServerList->lock) != SOFTBUS_OK) {
+        TRANS_LOGE(TRANS_CTRL, "Lock failure");
+        return SOFTBUS_LOCK_ERR;
+    }
+
+    SessionServer *pos = NULL;
+    LIST_FOR_EACH_ENTRY(pos, &g_sessionServerList->list, SessionServer, node) {
+        if (strcmp(pos->sessionName, sessionName) == 0) {
+            if (pos->timestamp < timestamp) {
+                pos->timestamp = timestamp;
+                (void)SoftBusMutexUnlock(&g_sessionServerList->lock);
+                return SOFTBUS_OK;
+            }
+            (void)SoftBusMutexUnlock(&g_sessionServerList->lock);
+            return SOFTBUS_TRANS_SESSION_TIME_NOT_EQUAL;
+        }
+    }
+    (void)SoftBusMutexUnlock(&g_sessionServerList->lock);
+    return SOFTBUS_TRANS_SESSION_NAME_NO_EXIST;
 }
 
 bool CheckUidAndPid(const char *sessionName, pid_t callingUid, pid_t callingPid)
@@ -261,6 +296,10 @@ void TransDelItemByPackageName(const char *pkgName, int32_t pid)
             }
             ListDelete(&pos->node);
             g_sessionServerList->cnt--;
+            if (pos->accessInfo.extraAccessInfo != NULL) {
+                SoftBusFree(pos->accessInfo.extraAccessInfo);
+                pos->accessInfo.extraAccessInfo = NULL;
+            }
             SoftBusFree(pos);
             pos = NULL;
         }
@@ -390,7 +429,7 @@ void TransOnLinkDown(const char *networkId, const char *uuid, const char *udid, 
     }
     int32_t routeType = (int32_t)GET_ROUTE_TYPE(type);
     int32_t connType = (int32_t)GET_CONN_TYPE(type);
-    bool isUserSwitchEvent = (bool)((type >> USER_SWITCH_OFFSET) & 0xff);
+    bool isUserSwitchEvent = (bool)(((uint32_t)(type) >> USER_SWITCH_OFFSET) & 0xff);
     char *anonyNetworkId = NULL;
     Anonymize(networkId, &anonyNetworkId);
     TRANS_LOGI(TRANS_CTRL,
@@ -490,6 +529,186 @@ int32_t TransGetTokenIdBySessionName(const char *sessionName, uint64_t *tokenId)
     LIST_FOR_EACH_ENTRY(pos, &g_sessionServerList->list, SessionServer, node) {
         if (strcmp(pos->sessionName, sessionName) == 0) {
             *tokenId = pos->tokenId;
+            (void)SoftBusMutexUnlock(&g_sessionServerList->lock);
+            return SOFTBUS_OK;
+        }
+    }
+    (void)SoftBusMutexUnlock(&g_sessionServerList->lock);
+    char *tmpName = NULL;
+    Anonymize(sessionName, &tmpName);
+    TRANS_LOGE(TRANS_CTRL, "sessionName=%{public}s not found.", AnonymizeWrapper(tmpName));
+    AnonymizeFree(tmpName);
+    return SOFTBUS_TRANS_SESSION_NAME_NO_EXIST;
+}
+
+static int32_t CheckAccessInfoAndCalloc(SessionServer *pos, uint32_t strLen)
+{
+    if (strLen > EXTRA_ACCESS_INFO_LEN_MAX) {
+        TRANS_LOGE(TRANS_CTRL, "extra access info length over limit.");
+        return SOFTBUS_INVALID_PARAM;
+    }
+    if (pos->accessInfo.extraAccessInfo == NULL) {
+        pos->accessInfo.extraAccessInfo = (char *)SoftBusCalloc(strLen);
+        if (pos->accessInfo.extraAccessInfo == NULL) {
+            return SOFTBUS_MALLOC_ERR;
+        }
+    } else {
+        SoftBusFree(pos->accessInfo.extraAccessInfo);
+        pos->accessInfo.extraAccessInfo = (char *)SoftBusCalloc(strLen);
+        if (pos->accessInfo.extraAccessInfo == NULL) {
+            return SOFTBUS_MALLOC_ERR;
+        }
+    }
+    return SOFTBUS_OK;
+}
+
+int32_t AddAccessInfoBySessionName(const char *sessionName, const AccessInfo *accessInfo, pid_t callingPid)
+{
+    if (sessionName == NULL || accessInfo == NULL) {
+        TRANS_LOGE(TRANS_CTRL, "invalid param.");
+        return SOFTBUS_INVALID_PARAM;
+    }
+    if (g_sessionServerList == NULL) {
+        TRANS_LOGE(TRANS_CTRL, "g_sessionServerList has not been initialized.");
+        return SOFTBUS_NO_INIT;
+    }
+
+    if (SoftBusMutexLock(&g_sessionServerList->lock) != SOFTBUS_OK) {
+        TRANS_LOGE(TRANS_CTRL, "lock mutex failed.");
+        return SOFTBUS_LOCK_ERR;
+    }
+    SessionServer *pos = NULL;
+    LIST_FOR_EACH_ENTRY(pos, &g_sessionServerList->list, SessionServer, node) {
+        if ((callingPid == 0 || pos->pid == callingPid) && strcmp(pos->sessionName, sessionName) == 0) {
+            uint32_t extraAccessInfoLen = strlen(accessInfo->extraAccessInfo) + 1;
+            if (CheckAccessInfoAndCalloc(pos, extraAccessInfoLen) != SOFTBUS_OK) {
+                TRANS_LOGE(TRANS_CTRL, "accountId or extra access info calloc failed.");
+                (void)SoftBusMutexUnlock(&g_sessionServerList->lock);
+                return SOFTBUS_MALLOC_ERR;
+            }
+            pos->accessInfo.userId = accessInfo->userId;
+            pos->accessInfo.localTokenId = accessInfo->localTokenId;
+            if (strcpy_s(pos->accessInfo.extraAccessInfo, extraAccessInfoLen, accessInfo->extraAccessInfo) != EOK) {
+                TRANS_LOGE(TRANS_CTRL, "accountId or extra access info strcpy failed.");
+                SoftBusFree(pos->accessInfo.extraAccessInfo);
+                pos->accessInfo.extraAccessInfo = NULL;
+                (void)SoftBusMutexUnlock(&g_sessionServerList->lock);
+                return SOFTBUS_STRCPY_ERR;
+            }
+            (void)SoftBusMutexUnlock(&g_sessionServerList->lock);
+            return SOFTBUS_OK;
+        }
+    }
+    (void)SoftBusMutexUnlock(&g_sessionServerList->lock);
+    char *tmpName = NULL;
+    Anonymize(sessionName, &tmpName);
+    TRANS_LOGE(TRANS_CTRL, "sessionName=%{public}s not found.", AnonymizeWrapper(tmpName));
+    AnonymizeFree(tmpName);
+    return SOFTBUS_TRANS_SESSION_NAME_NO_EXIST;
+}
+
+int32_t GetAccessInfoBySessionName(
+    const char *sessionName, int32_t *userId, uint64_t *tokenId, char *businessAccountId, char *extraAccessInfo)
+{
+    if (sessionName == NULL || userId == NULL || tokenId == NULL) {
+        TRANS_LOGE(TRANS_CTRL, "invalid param.");
+        return SOFTBUS_INVALID_PARAM;
+    }
+    if (g_sessionServerList == NULL) {
+        TRANS_LOGE(TRANS_CTRL, "g_sessionServerList has not been initialized.");
+        return SOFTBUS_NO_INIT;
+    }
+
+    if (SoftBusMutexLock(&g_sessionServerList->lock) != SOFTBUS_OK) {
+        TRANS_LOGE(TRANS_CTRL, "lock mutex failed.");
+        return SOFTBUS_LOCK_ERR;
+    }
+    SessionServer *pos = NULL;
+    LIST_FOR_EACH_ENTRY(pos, &g_sessionServerList->list, SessionServer, node) {
+        if (strcmp(pos->sessionName, sessionName) == 0) {
+            *userId = pos->accessInfo.userId;
+            *tokenId = pos->accessInfo.localTokenId;
+            if (businessAccountId != NULL && pos->accessInfo.businessAccountId !=  NULL &&
+                strcpy_s(businessAccountId, ACCOUNT_UID_LEN_MAX, pos->accessInfo.businessAccountId) != EOK) {
+                TRANS_LOGE(TRANS_CTRL, "accountId strcpy failed.");
+                (void)SoftBusMutexUnlock(&g_sessionServerList->lock);
+                return SOFTBUS_STRCPY_ERR;
+            }
+            if (extraAccessInfo != NULL && pos->accessInfo.extraAccessInfo != NULL &&
+                strcpy_s(extraAccessInfo, EXTRA_ACCESS_INFO_LEN_MAX, pos->accessInfo.extraAccessInfo) != EOK) {
+                TRANS_LOGE(TRANS_CTRL, "extra access info strcpy failed.");
+                (void)SoftBusMutexUnlock(&g_sessionServerList->lock);
+                return SOFTBUS_STRCPY_ERR;
+            }
+            (void)SoftBusMutexUnlock(&g_sessionServerList->lock);
+            return SOFTBUS_OK;
+        }
+    }
+    (void)SoftBusMutexUnlock(&g_sessionServerList->lock);
+    char *tmpName = NULL;
+    Anonymize(sessionName, &tmpName);
+    TRANS_LOGE(TRANS_CTRL, "sessionName=%{public}s not found.", AnonymizeWrapper(tmpName));
+    AnonymizeFree(tmpName);
+    return SOFTBUS_TRANS_SESSION_NAME_NO_EXIST;
+}
+
+int32_t GetTokenTypeBySessionName(const char *sessionName, int32_t *tokenType)
+{
+    if (sessionName == NULL || tokenType == NULL) {
+        TRANS_LOGE(TRANS_CTRL, "invalid param.");
+        return SOFTBUS_INVALID_PARAM;
+    }
+    if (g_sessionServerList == NULL) {
+        TRANS_LOGE(TRANS_CTRL, "g_sessionServerList has not been initialized.");
+        return SOFTBUS_NO_INIT;
+    }
+
+    if (SoftBusMutexLock(&g_sessionServerList->lock) != SOFTBUS_OK) {
+        TRANS_LOGE(TRANS_CTRL, "lock mutex failed.");
+        return SOFTBUS_LOCK_ERR;
+    }
+    SessionServer *pos = NULL;
+    LIST_FOR_EACH_ENTRY(pos, &g_sessionServerList->list, SessionServer, node) {
+        if (strcmp(pos->sessionName, sessionName) == 0) {
+            *tokenType = pos->tokenType;
+            (void)SoftBusMutexUnlock(&g_sessionServerList->lock);
+            return SOFTBUS_OK;
+        }
+    }
+    (void)SoftBusMutexUnlock(&g_sessionServerList->lock);
+    char *tmpName = NULL;
+    Anonymize(sessionName, &tmpName);
+    TRANS_LOGE(TRANS_CTRL, "sessionName=%{public}s not found.", AnonymizeWrapper(tmpName));
+    AnonymizeFree(tmpName);
+    return SOFTBUS_TRANS_SESSION_NAME_NO_EXIST;
+}
+
+int32_t TransGetAclInfoBySessionName(const char *sessionName, uint64_t *tokenId, int32_t *pid, int32_t *userId)
+{
+    if (sessionName == NULL || tokenId == NULL) {
+        TRANS_LOGE(TRANS_CTRL, "invalid param.");
+        return SOFTBUS_INVALID_PARAM;
+    }
+
+    if (g_sessionServerList == NULL) {
+        TRANS_LOGE(TRANS_CTRL, "g_sessionServerList has not been initialized.");
+        return SOFTBUS_NO_INIT;
+    }
+
+    if (SoftBusMutexLock(&g_sessionServerList->lock) != SOFTBUS_OK) {
+        TRANS_LOGE(TRANS_CTRL, "lock mutex failed.");
+        return SOFTBUS_LOCK_ERR;
+    }
+    SessionServer *pos = NULL;
+    LIST_FOR_EACH_ENTRY(pos, &g_sessionServerList->list, SessionServer, node) {
+        if (strcmp(pos->sessionName, sessionName) == 0) {
+            *tokenId = pos->tokenId;
+            if (pid != NULL) {
+                *pid = pos->pid;
+            }
+            if (userId != NULL) {
+                *userId = pos->accessInfo.userId;
+            }
             (void)SoftBusMutexUnlock(&g_sessionServerList->lock);
             return SOFTBUS_OK;
         }

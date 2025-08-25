@@ -73,13 +73,13 @@ void LnnDfxTest::TearDown(void)
 HWTEST_F(LnnDfxTest, LnnDfxTest_SoftBusRecordDiscoveryResult_001, TestSize.Level0)
 {
     int32_t ret = SOFTBUS_ERR;
-    ret = SoftBusRecordDiscoveryResult(START_DISCOVERY, NULL);
+    ret = SoftBusRecordDiscoveryResult(START_DISCOVERY, nullptr);
     EXPECT_EQ(SOFTBUS_OK, ret);
-    ret = SoftBusRecordDiscoveryResult(SEND_BROADCAST, NULL);
+    ret = SoftBusRecordDiscoveryResult(SEND_BROADCAST, nullptr);
     EXPECT_EQ(SOFTBUS_OK, ret);
-    ret = SoftBusRecordDiscoveryResult(RECV_BROADCAST, NULL);
+    ret = SoftBusRecordDiscoveryResult(RECV_BROADCAST, nullptr);
     EXPECT_EQ(SOFTBUS_OK, ret);
-    ret = SoftBusRecordDiscoveryResult(DEVICE_FOUND, NULL);
+    ret = SoftBusRecordDiscoveryResult(DEVICE_FOUND, nullptr);
     EXPECT_EQ(SOFTBUS_OK, ret);
     AppDiscNode node1 = {0};
     node1.appDiscCnt = 1;

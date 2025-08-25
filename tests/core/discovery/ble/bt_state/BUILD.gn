@@ -17,7 +17,7 @@ import("../../../../../adapter/common/net/bluetooth/net_bluetooth.gni")
 import("../../../../../dsoftbus.gni")
 import("../bluetooth_mock/bluetooth_mock.gni")
 
-module_output_path = "dsoftbus/discovery"
+module_output_path = "dsoftbus/soft_bus/discovery"
 
 ohos_unittest("DiscBtStateMockTest") {
   module_out_path = module_output_path
@@ -27,10 +27,13 @@ ohos_unittest("DiscBtStateMockTest") {
   sources += bluetooth_mock_sources
 
   include_dirs = [
+    "$dsoftbus_root_path/interfaces/kits/bus_center",
     "$dsoftbus_root_path/core/bus_center/interface",
+    "$dsoftbus_root_path/interfaces/kits/lnn",
     "$dsoftbus_root_path/core/bus_center/lnn/net_ledger/common/include",
     "$dsoftbus_root_path/core/bus_center/lnn/net_ledger/local_ledger/include",
     "$dsoftbus_root_path/core/discovery/ble/dispatcher/include",
+    “$dsoftbus_root_path/interfaces/kits/disc",
     "$dsoftbus_root_path/core/discovery/ble/softbus_ble/include",
     "$dsoftbus_root_path/core/discovery/interface",
     "$dsoftbus_root_path/core/discovery/manager/include",

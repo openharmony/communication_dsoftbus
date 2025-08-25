@@ -13,7 +13,7 @@
  * limitations under the License.
  */
 
-#include "br_mock.h"
+#include "softbus_conn_br_connection_mock.h"
 #include "softbus_conn_br_connection.h"
 #include "softbus_conn_br_manager.h"
 #include "softbus_conn_br_trans.h"
@@ -157,8 +157,8 @@ ConnBrTransEventListener g_transEventlistener = {
     .onPostByteFinshed = OnPostByteFinshed,
 };
 
-ConnectFuncInterface *connectFuncInterface = NULL;
-ConnectFuncInterface *g_connectFuncInterface = NULL;
+ConnectFuncInterface *connectFuncInterface = nullptr;
+ConnectFuncInterface *g_connectFuncInterface = nullptr;
 
 ConnectFuncInterface *ConnInit(void)
 {
@@ -200,19 +200,19 @@ HWTEST_F(ConnectionBrConnectionTest, BrManagerTest001, TestSize.Level1)
     EXPECT_CALL(brMock, InitSppSocketDriver).WillOnce(Return(&g_sppDriver));
     EXPECT_CALL(brMock, SoftbusGetConfig).WillOnce(Return(SOFTBUS_NO_INIT));
     ConnectFuncInterface *ret = ConnInitBr(&callback);
-    EXPECT_EQ(NULL, ret);
+    EXPECT_EQ(nullptr, ret);
 
     EXPECT_CALL(brMock, InitSppSocketDriver).WillOnce(Return(&g_sppDriver));
     EXPECT_CALL(brMock, SoftbusGetConfig).WillOnce(Return(SOFTBUS_OK));
     ret = ConnInitBr(&callback);
-    EXPECT_EQ(NULL, ret);
+    EXPECT_EQ(nullptr, ret);
 
     EXPECT_CALL(brMock, InitSppSocketDriver).WillOnce(Return(&g_sppDriver));
     EXPECT_CALL(brMock, SoftbusGetConfig)
         .WillOnce(ConnectionBrInterfaceMock::ActionOfSoftbusGetConfig1)
         .WillOnce(Return(SOFTBUS_NO_INIT));
     ret = ConnInitBr(&callback);
-    EXPECT_EQ(NULL, ret);
+    EXPECT_EQ(nullptr, ret);
 }
 
 HWTEST_F(ConnectionBrConnectionTest, BrManagerTest002, TestSize.Level1)
@@ -233,7 +233,7 @@ HWTEST_F(ConnectionBrConnectionTest, BrManagerTest002, TestSize.Level1)
         .WillOnce(ConnectionBrInterfaceMock::ActionOfSoftbusGetConfig2);
     EXPECT_CALL(brMock, ConnBrInnerQueueInit).WillOnce(Return(SOFTBUS_NO_INIT));
     ConnectFuncInterface *ret = ConnInitBr(&callback);
-    EXPECT_EQ(NULL, ret);
+    EXPECT_EQ(nullptr, ret);
 
     EXPECT_CALL(brMock, InitSppSocketDriver).WillOnce(Return(&g_sppDriver));
     EXPECT_CALL(brMock, SoftbusGetConfig)
@@ -241,7 +241,7 @@ HWTEST_F(ConnectionBrConnectionTest, BrManagerTest002, TestSize.Level1)
         .WillOnce(ConnectionBrInterfaceMock::ActionOfSoftbusGetConfig2);
     EXPECT_CALL(brMock, ConnBrInnerQueueInit).WillOnce(Return(SOFTBUS_OK));
     ret = ConnInitBr(&callback);
-    EXPECT_NE(NULL, ret);
+    EXPECT_NE(nullptr, ret);
 }
 
 HWTEST_F(ConnectionBrConnectionTest, BrManagerTest003, TestSize.Level1)
@@ -416,9 +416,11 @@ HWTEST_F(ConnectionBrConnectionTest, ConnBrTransReadOneFrame, TestSize.Level1)
     head.len = sizeof(ConnPktHead);
     buffer.buffer = (uint8_t *)(&head);
 
-    uint8_t *outData = NULL;
+    uint8_t *outData = nullptr;
     uint32_t connectionId = 1;
     int32_t socketHandle = 1;
+    NiceMock<ConnectionBrInterfaceMock> brMock;
+    ON_CALL(brMock, ConnBrDelBrPendingPacketById).WillByDefault(Return());
     int32_t ret = ConnBrTransReadOneFrame(connectionId, socketHandle, &buffer, &outData);
     EXPECT_EQ(SOFTBUS_CONN_BR_UNDERLAY_SOCKET_CLOSED, ret);
 }

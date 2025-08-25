@@ -22,38 +22,14 @@
 extern "C" {
 #endif
 
-#define DC_DATA_HEAD_SIZE 16
-#ifndef MAGIC_NUMBER
-#define MAGIC_NUMBER 0xBABEFACE
-#endif
-
-enum {
-    FLAG_BYTES = 0,
-    FLAG_ACK = 1,
-    FLAG_MESSAGE = 2,
-    FILE_FIRST_FRAME = 3,
-    FILE_ONGOINE_FRAME = 4,
-    FILE_LAST_FRAME = 5,
-    FILE_ONLYONE_FRAME = 6,
-    FILE_ALLFILE_SENT = 7,
-    FLAG_ASYNC_MESSAGE = 8,
-    FLAG_SET_LOW_LATENCY = 9
-};
-
-typedef struct {
-    uint32_t magicNumber;
-    int32_t seq;
-    uint32_t flags;
-    uint32_t dataLen;
-} __attribute__((packed)) TcpDataPacketHead;
-
 int32_t TransTdcRecvData(int32_t channelId);
 
 int32_t TransDataListInit(void);
 void TransDataListDeinit(void);
 int32_t TransDelDataBufNode(int32_t channelId);
 int32_t TransAddDataBufNode(int32_t channelId, int32_t fd);
-int32_t TransTdcSendBytes(int32_t channelId, const char *data, uint32_t len);
+int32_t TransTdcSendBytes(int32_t channelId, const char *data, uint32_t len, bool needAck);
+int32_t TransTdcAsyncSendBytes(int32_t channelId, const char *data, uint32_t len, uint32_t dataSeq);
 int32_t TransTdcSendMessage(int32_t channelId, const char *data, uint32_t len);
 
 #ifdef __cplusplus

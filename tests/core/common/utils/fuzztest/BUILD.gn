@@ -22,6 +22,7 @@ group("fuzztest") {
     "insertrecord_fuzzer:InsertRecordFuzzTest",
     "removeallrecord_fuzzer:RemoveAllRecordFuzzTest",
     "removerecordbykey_fuzzer:RemoveRecordByKeyFuzzTest",
+    "softbustlvutils_fuzzer:SoftBusTlvUtilsFuzzTest",
     "softbusutils_fuzzer:SoftBusUtilsFuzzTest",
     "sqlite3utils_fuzzer:Sqlite3UtilsFuzzTest",
     "updatedbpassword_fuzzer:UpdateDbPasswordFuzzTest",

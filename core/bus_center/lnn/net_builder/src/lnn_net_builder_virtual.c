@@ -34,10 +34,11 @@ void LnnDeinitNetBuilder(void)
 {
 }
 
-int32_t LnnServerJoin(ConnectionAddr *addr, const char *pkgName)
+int32_t LnnServerJoin(ConnectionAddr *addr, const char *pkgName, bool isForceJoin)
 {
     (void)addr;
     (void)pkgName;
+    (void)isForceJoin;
     return SOFTBUS_NOT_IMPLEMENT;
 }
 
@@ -85,4 +86,9 @@ int32_t LnnRequestLeaveSpecific(const char *networkId, ConnectionAddrType addrTy
     (void)networkId;
     (void)addrType;
     return SOFTBUS_NOT_IMPLEMENT;
+}
+
+int32_t LnnSetReSyncDeviceName(void)
+{
+    return SOFTBUS_OK;
 }

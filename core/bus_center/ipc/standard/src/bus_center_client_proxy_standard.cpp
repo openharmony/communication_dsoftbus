@@ -16,8 +16,7 @@
 #include "bus_center_client_proxy_standard.h"
 
 #include "lnn_log.h"
-#include "message_parcel.h"
-#include "softbus_error_code.h"
+#include "message_option.h"
 #include "softbus_server_ipc_interface_code.h"
 
 namespace OHOS {
@@ -635,6 +634,37 @@ void BusCenterClientProxy::OnDataLevelChanged(const char *networkId, const DataL
     MessageParcel reply;
     MessageOption option;
     int ret = remote->SendRequest(CLIENT_ON_DATA_LEVEL_CHANGED, data, reply, option);
+    if (ret != 0) {
+        LNN_LOGE(LNN_EVENT, "send request failed, ret=%{public}d", ret);
+    }
+}
+
+void BusCenterClientProxy::OnMsdpRangeResult(const RangeResultInnerInfo *rangeInfo)
+{
+    sptr<IRemoteObject> remote = Remote();
+    if (remote == nullptr) {
+        LNN_LOGE(LNN_EVENT, "remote is nullptr");
+        return;
+    }
+    MessageParcel data;
+    if (!data.WriteInterfaceToken(GetDescriptor())) {
+        LNN_LOGE(LNN_EVENT, "write InterfaceToken failed");
+        return;
+    }
+    if (!data.WriteRawData(rangeInfo, sizeof(RangeResultInnerInfo))) {
+        LNN_LOGE(LNN_EVENT, "write range info failed");
+        return;
+    }
+    if (rangeInfo->length > 0 && rangeInfo->length < MAX_ADDITION_DATA_LEN && rangeInfo->addition != NULL) {
+        if (!data.WriteRawData(rangeInfo->addition, rangeInfo->length)) {
+            LNN_LOGE(LNN_EVENT, "write range info failed");
+            return;
+        }
+    }
+
+    MessageParcel reply;
+    MessageOption option = { MessageOption::TF_ASYNC };
+    int ret = remote->SendRequest(CLIENT_ON_RANGE_RESULT, data, reply, option);
     if (ret != 0) {
         LNN_LOGE(LNN_EVENT, "send request failed, ret=%{public}d", ret);
     }

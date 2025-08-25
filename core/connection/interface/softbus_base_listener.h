@@ -16,35 +16,15 @@
 #ifndef SOFTBUS_BASE_LISTENER_H
 #define SOFTBUS_BASE_LISTENER_H
 
-#include "common_list.h"
 #include "softbus_conn_interface.h"
-#include "softbus_def.h"
 #include "softbus_utils.h"
+#include "softbus_base_listener_struct.h"
 
 #ifdef __cplusplus
 #if __cplusplus
 extern "C" {
 #endif
 #endif
-
-// NOTICE: all element MUST be bitmap mode
-typedef enum {
-    READ_TRIGGER = 1,
-    WRITE_TRIGGER = 2,
-    EXCEPT_TRIGGER = 4,
-    RW_TRIGGER = READ_TRIGGER | WRITE_TRIGGER,
-} TriggerType;
-
-typedef enum {
-    UNSET_MODE,
-    CLIENT_MODE,
-    SERVER_MODE,
-} ModeType;
-
-typedef struct {
-    int32_t (*onConnectEvent)(ListenerModule module, int32_t cfd, const ConnectOption *clientAddr);
-    int32_t (*onDataEvent)(ListenerModule module, int32_t events, int32_t fd);
-} SoftbusBaseListener;
 
 int32_t InitBaseListener(void);
 void DeinitBaseListener(void);

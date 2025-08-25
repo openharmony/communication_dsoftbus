@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2023 Huawei Device Co., Ltd.
+ * Copyright (c) 2023-2025 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -22,7 +22,6 @@
 #include "softbus_adapter_crypto.h"
 #include "softbus_adapter_thread.h"
 #include "softbus_adapter_socket.h"
-#include "softbus_conn_ble_direct.h"
 #include "softbus_feature_config.h"
 #include "legacy/softbus_hisysevt_transreporter.h"
 #include "softbus_message_open_channel.h"
@@ -36,6 +35,7 @@
 #include "wifi_direct_manager.h"
 
 #define TEST_CHANNEL_ID 1027
+#define TEST_TDC_PID 3284
 
 using namespace testing::ext;
 
@@ -107,7 +107,7 @@ AppInfo *TestSetAppInfo()
     if (appInfo == nullptr) {
         return nullptr;
     }
-    
+
     (void)memset_s(appInfo, sizeof(AppInfo), 0, sizeof(AppInfo));
     appInfo->businessType = BUSINESS_TYPE_BYTE;
     appInfo->appType = APP_TYPE_NORMAL;
@@ -349,8 +349,8 @@ HWTEST_F(TransTcpDirectMessageStaticTest, TransTdcFillDataConfig0009, TestSize.L
 HWTEST_F(TransTcpDirectMessageStaticTest, TransSrvGetDataBufNodeById0010, TestSize.Level1)
 {
     int32_t channelId = 1;
-    ServerDataBuf *node = TransSrvGetDataBufNodeById(channelId);
-    EXPECT_TRUE(node == NULL || node->data == NULL);
+    DataBuf *node = TransSrvGetDataBufNodeById(channelId);
+    EXPECT_TRUE(node == nullptr || node->data == nullptr);
 }
 
 /**
@@ -380,7 +380,6 @@ HWTEST_F(TransTcpDirectMessageStaticTest, TransTdcSrvProcData0012, TestSize.Leve
 {
     int32_t channelId = 1;
     int32_t ret;
-
     ret = TransSrvDataListInit();
     EXPECT_EQ(ret, SOFTBUS_OK);
     ret = TransTdcSrvProcData(DIRECT_CHANNEL_SERVER_P2P, channelId, 0);
@@ -522,7 +521,7 @@ HWTEST_F(TransTcpDirectMessageStaticTest, SendFailToFlushDeviceTest001, TestSize
 HWTEST_F(TransTcpDirectMessageStaticTest, TransTdcPostFisrtDataTest001, TestSize.Level1)
 {
     SessionConn *con = TestSetSessionConn();
-    EXPECT_NE(con, NULL);
+    EXPECT_NE(con, nullptr);
 
     int32_t ret = TransTdcPostFastData(con);
     EXPECT_NE(ret, SOFTBUS_OK);
@@ -565,7 +564,7 @@ HWTEST_F(TransTcpDirectMessageStaticTest, FindConfigTypeTest002, TestSize.Level1
  */
 HWTEST_F(TransTcpDirectMessageStaticTest, TransTdcProcessDataConfigTest001, TestSize.Level1)
 {
-    int32_t ret = TransTdcProcessDataConfig(NULL);
+    int32_t ret = TransTdcProcessDataConfig(nullptr);
     EXPECT_EQ(ret, SOFTBUS_INVALID_PARAM);
 
     AppInfo *appInfo = TestSetAppInfo();
@@ -599,7 +598,7 @@ HWTEST_F(TransTcpDirectMessageStaticTest, TransTdcPostReplyMsgTest001, TestSize.
     uint32_t seq = 1;
     uint32_t flags = 1;
 
-    int32_t ret = TransTdcPostReplyMsg(channelId, seq, flags, NULL);
+    int32_t ret = TransTdcPostReplyMsg(channelId, seq, flags, nullptr);
     EXPECT_EQ(ret, SOFTBUS_INVALID_PARAM);
 }
 
@@ -615,7 +614,7 @@ HWTEST_F(TransTcpDirectMessageStaticTest, OpenDataBusRequestReplyTest001, TestSi
     uint32_t seq = 1;
     uint32_t flags = 1;
 
-    int32_t ret = OpenDataBusRequestReply(NULL, channelId, seq, flags);
+    int32_t ret = OpenDataBusRequestReply(nullptr, channelId, seq, flags);
     EXPECT_EQ(ret, SOFTBUS_TRANS_GET_PACK_REPLY_FAILED);
 }
 
@@ -632,7 +631,7 @@ HWTEST_F(TransTcpDirectMessageStaticTest, OpenDataBusRequestErrorTest001, TestSi
     uint32_t flags = 1;
     int32_t errCode = -1;
 
-    int32_t ret = OpenDataBusRequestError(channelId, seq, NULL, errCode, flags);
+    int32_t ret = OpenDataBusRequestError(channelId, seq, nullptr, errCode, flags);
     EXPECT_EQ(ret, SOFTBUS_TRANS_GET_PACK_REPLY_FAILED);
 }
 
@@ -665,7 +664,7 @@ HWTEST_F(TransTcpDirectMessageStaticTest, NotifyFastDataRecvTest001, TestSize.Le
  */
 HWTEST_F(TransTcpDirectMessageStaticTest, TransTdcFillDataConfigTest001, TestSize.Level1)
 {
-    int32_t ret = TransTdcFillDataConfig(NULL);
+    int32_t ret = TransTdcFillDataConfig(nullptr);
     EXPECT_EQ(ret, SOFTBUS_INVALID_PARAM);
 
     AppInfo *appInfo = TestSetAppInfo();
@@ -690,26 +689,6 @@ HWTEST_F(TransTcpDirectMessageStaticTest, TransTdcFillDataConfigTest001, TestSiz
     EXPECT_EQ(ret, SOFTBUS_OK);
 
     SoftBusFree(appInfo);
-}
-
-/**
- * @tc.name: IsMetaSessionTest001
- * @tc.desc: Should return false when given invalid parameter.
- * @tc.desc: Should return true when given valid parameter.
- * @tc.type: FUNC
- * @tc.require:
- */
-HWTEST_F(TransTcpDirectMessageStaticTest, IsMetaSessionTest001, TestSize.Level1)
-{
-    const char *invalid = "test";
-    bool ret = IsMetaSession(invalid);
-    EXPECT_FALSE(ret);
-    const char *testSession = "testsession";
-    ret = IsMetaSession(testSession);
-    EXPECT_FALSE(ret);
-    const char *sessionName = "IShare";
-    ret = IsMetaSession(sessionName);
-    EXPECT_TRUE(ret);
 }
 
 /**
@@ -846,11 +825,11 @@ HWTEST_F(TransTcpDirectMessageStaticTest, ReleaseSessionConnTest001, TestSize.Le
 {
     SessionConn *chan = (SessionConn *)SoftBusCalloc(sizeof(SessionConn));
     ASSERT_TRUE(chan != nullptr);
-    ReleaseSessionConn(chan);
 
     int32_t channelId = TEST_CHANNEL_ID;
-    int32_t ret = NotifyChannelBind(channelId);
-    EXPECT_EQ(ret, SOFTBUS_TRANS_GET_SESSION_CONN_FAILED);
+    int32_t ret = NotifyChannelBind(channelId, chan);
+    EXPECT_EQ(ret, SOFTBUS_TRANS_SESSION_NAME_NO_EXIST);
+    ReleaseSessionConn(chan);
 }
 
 /**
@@ -909,18 +888,50 @@ HWTEST_F(TransTcpDirectMessageStaticTest, TransDealTdcChannelOpenResultTest001, 
     int32_t openResult = 1;
     int32_t channelId = 1;
     int32_t fd = 1;
-    int32_t ret = TransDealTdcChannelOpenResult(channelId, openResult);
+    AccessInfo accessInfo = { 0 };
+    CreatSessionConnList();
+    TransSrvDataListInit();
+    int32_t ret = TransDealTdcChannelOpenResult(channelId, openResult, &accessInfo, TEST_TDC_PID);
     EXPECT_EQ(ret, SOFTBUS_TRANS_GET_SESSION_CONN_FAILED);
     SessionConn *conn = TestSetSessionConn();
     ASSERT_TRUE(conn != nullptr);
     ret = TransTdcAddSessionConn(conn);
     EXPECT_EQ(ret, SOFTBUS_OK);
-    ret = TransDealTdcChannelOpenResult(channelId, openResult);
+    ret = TransDealTdcChannelOpenResult(channelId, openResult, &accessInfo, TEST_TDC_PID);
     EXPECT_EQ(ret, SOFTBUS_TRANS_NODE_IS_NULL);
     ret = TransSrvAddDataBufNode(channelId, fd);
     EXPECT_EQ(ret, SOFTBUS_OK);
-    ret = TransDealTdcChannelOpenResult(channelId, openResult);
+    ret = TransDealTdcChannelOpenResult(channelId, openResult, &accessInfo, TEST_TDC_PID);
+    EXPECT_EQ(ret, SOFTBUS_TRANS_CHECK_PID_ERROR);
+    TransDelSessionConnById(channelId);
+}
+
+/**
+ * @tc.name: TransDealTdcChannelOpenResultTest001
+ * @tc.desc: TransDealTdcChannelOpenResult
+ * @tc.type: FUNC
+ * @tc.require:
+ */
+HWTEST_F(TransTcpDirectMessageStaticTest, TransDealTdcChannelOpenResultTest002, TestSize.Level1)
+{
+    int32_t openResult = SOFTBUS_OK;
+    int32_t channelId = 1;
+    int32_t fd = 1;
+    AccessInfo accessInfo = { 0 };
+    int32_t ret = TransDealTdcChannelOpenResult(channelId, openResult, &accessInfo, TEST_TDC_PID);
+    EXPECT_EQ(ret, SOFTBUS_TRANS_GET_SESSION_CONN_FAILED);
+    SessionConn *conn = TestSetSessionConn();
+    ASSERT_TRUE(conn != nullptr);
+    conn->appInfo.myData.tokenType = 1;
+    conn->appInfo.channelCapability = 0xF;
+    ret = TransTdcAddSessionConn(conn);
     EXPECT_EQ(ret, SOFTBUS_OK);
+    ret = TransDealTdcChannelOpenResult(channelId, openResult, &accessInfo, TEST_TDC_PID);
+    EXPECT_EQ(ret, SOFTBUS_TRANS_CHECK_PID_ERROR);
+    ret = TransSrvAddDataBufNode(channelId, fd);
+    EXPECT_EQ(ret, SOFTBUS_OK);
+    ret = TransDealTdcChannelOpenResult(channelId, openResult, &accessInfo, TEST_TDC_PID);
+    EXPECT_EQ(ret, SOFTBUS_TRANS_CHECK_PID_ERROR);
     TransDelSessionConnById(channelId);
 }
 
@@ -934,6 +945,7 @@ HWTEST_F(TransTcpDirectMessageStaticTest, TransAsyncTcpDirectChannelTaskTest001,
 {
     int32_t channelId = 1;
     TransAsyncTcpDirectChannelTask(channelId);
+    // conn will free in Line 956
     SessionConn *conn = TestSetSessionConn();
     ASSERT_TRUE(conn != nullptr);
     int32_t ret = TransTdcAddSessionConn(conn);
@@ -943,7 +955,11 @@ HWTEST_F(TransTcpDirectMessageStaticTest, TransAsyncTcpDirectChannelTaskTest001,
     TransAsyncTcpDirectChannelTask(channelId);
     conn->appInfo.waitOpenReplyCnt = LOOPER_REPLY_CNT_MAX;
     TransAsyncTcpDirectChannelTask(channelId);
-    conn->appInfo.waitOpenReplyCnt = LOOPER_REPLY_CNT_MAX - 1;
+    SessionConn *testConn = TestSetSessionConn();
+    ASSERT_TRUE(testConn != nullptr);
+    ret = TransTdcAddSessionConn(testConn);
+    EXPECT_EQ(ret, SOFTBUS_OK);
+    testConn->appInfo.waitOpenReplyCnt = LOOPER_REPLY_CNT_MAX - 1;
     TransAsyncTcpDirectChannelTask(channelId);
     TransDelSessionConnById(channelId);
 }

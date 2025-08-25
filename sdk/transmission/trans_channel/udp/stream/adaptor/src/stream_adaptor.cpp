@@ -15,17 +15,8 @@
 
 #include "stream_adaptor.h"
 
-#include <map>
-#include <mutex>
-#include <string>
-
-#include "client_trans_udp_stream_interface.h"
-#include "securec.h"
 #include "softbus_adapter_crypto.h"
-#include "softbus_def.h"
-#include "softbus_error_code.h"
 #include "stream_adaptor_listener.h"
-#include "trans_log.h"
 
 using namespace OHOS;
 

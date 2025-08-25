@@ -31,6 +31,7 @@ typedef enum {
     DUMPER_LANE_P2P,
     DUMPER_LANE_WLAN,
     DUMPER_LANE_ETH,
+    DUMPER_LANE_SLE,
     DUMPER_LANE_LINK_TYPE_BUTT,
 }TransDumpLaneLinkType;
 

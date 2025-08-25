@@ -30,3 +30,14 @@ void SoftbusHitraceStop(void)
 {
     HiTraceChainClearId();
 }
+
+void SoftBusHitraceChainBegin(const char *name)
+{
+    HiTraceChainBegin(name, HITRACE_FLAG_DEFAULT);
+}
+
+void SoftBusHitraceChainEnd(void)
+{
+    HiTraceIdStruct traceId = HiTraceChainGetId();
+    HiTraceChainEnd(&traceId);
+}

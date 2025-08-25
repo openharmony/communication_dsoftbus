@@ -16,7 +16,7 @@
 #ifndef DISC_MANAGER_INTERFACE_H
 #define DISC_MANAGER_INTERFACE_H
 
-#include "softbus_common.h"
+#include "disc_interface_struct.h"
 #include "stdint.h"
 
 #ifdef __cplusplus
@@ -24,37 +24,6 @@
 extern "C" {
 #endif
 #endif
-
-/**
- * @ingroup softbus_disc_manager
- * Inner Module.
- *
- */
-typedef enum {
-    MODULE_MIN = 1,
-    MODULE_LNN = MODULE_MIN,
-    MODULE_CONN = 2,
-    MODULE_MAX = MODULE_CONN
-} DiscModule;
-
-typedef enum {
-    LINK_STATUS_UP = 0,
-    LINK_STATUS_DOWN,
-} LinkStatus;
-
-typedef enum {
-    TYPE_LOCAL_DEVICE_NAME,
-    TYPE_ACCOUNT,
-} InfoTypeChanged;
-
-/**
- * @ingroup softbus_disc_manager
- * Inner Callback.
- *
- */
-typedef struct {
-    void (*OnDeviceFound)(const DeviceInfo *device, const InnerDeviceInfoAddtions *addtions);
-} DiscInnerCallback;
 
 /**
  * @ingroup softbus_disc_manager
@@ -79,8 +48,9 @@ void DiscMgrDeinit(void);
  * @brief Found management module information destroy callback function.
  * Destroy the configuration related to the discovery release and clear it.
  * @param[in] pkgName Indicates the pointer to package name, which can contain a maximum of 64 bytes.
+ * @param[in] pid Indicates pid of the invoking process.
  */
-void DiscMgrDeathCallback(const char *pkgName);
+void DiscMgrDeathCallback(const char *pkgName, int32_t pid);
 
 /**
  * @ingroup softbus_disc_manager
@@ -133,7 +103,7 @@ int32_t DiscPublish(DiscModule moduleId, const PublishInfo *info);
  * @return <b>SOFTBUS_DISCOVER_MANAGER_INNERFUNCTION_FAIL</b> if InnerFunction failed.
  * @return <b>SOFTBUS_OK</b> if the passive publish is successful.
  */
-int32_t DiscStartScan(DiscModule moduleId, const PublishInfo *info);
+int32_t DiscStartScan(DiscModule moduleId, const PublishInfo *info, int32_t callingPid);
 
 /**
  * @ingroup softbus_disc_manager
@@ -147,7 +117,7 @@ int32_t DiscStartScan(DiscModule moduleId, const PublishInfo *info);
  * @return <b>SOFTBUS_DISCOVER_MANAGER_INNERFUNCTION_FAIL</b> if InnerFunction failed.
  * @return <b>SOFTBUS_OK</b> if the stop publish is successful.
  */
-int32_t DiscUnpublish(DiscModule moduleId, int32_t publishId);
+int32_t DiscUnpublish(DiscModule moduleId, int32_t publishId, int32_t callingPid);
 
 /**
  * @ingroup softbus_disc_manager
@@ -166,7 +136,7 @@ int32_t DiscUnpublish(DiscModule moduleId, int32_t publishId);
  * @return <b>SOFTBUS_DISCOVER_MANAGER_INNERFUNCTION_FAIL</b> InnerFunction failed.
  * @return <b>SOFTBUS_OK</b> Active discover successfully.
  */
-int32_t DiscStartAdvertise(DiscModule moduleId, const SubscribeInfo *info);
+int32_t DiscStartAdvertise(DiscModule moduleId, const SubscribeInfo *info, int32_t callingPid);
 
 /**
  * @ingroup softbus_disc_manager
@@ -198,15 +168,16 @@ int32_t DiscSubscribe(DiscModule moduleId, const SubscribeInfo *info);
  * @return <b>SOFTBUS_DISCOVER_MANAGER_INNERFUNCTION_FAIL</b> InnerFunction failed.
  * @return <b>SOFTBUS_OK</b> Stop discover successfully.
  */
-int32_t DiscStopAdvertise(DiscModule moduleId, int32_t subscribeId);
+int32_t DiscStopAdvertise(DiscModule moduleId, int32_t subscribeId, int32_t callingPid);
 
 /**
  * @brief Modify the connection state.
  * @param[in] status Used to indicate a certain connection state discovered. For details, see {@link LinkStatus}.
  * @param[in] medium A medium for sending information that can be used in a connection route.
+ * @param[in] ifnameIdx Index of ifname for coap discovery.
  * For details, see {@link ExchangeMedium}.
  */
-void DiscLinkStatusChanged(LinkStatus status, ExchangeMedium medium);
+void DiscLinkStatusChanged(LinkStatus status, ExchangeMedium medium, int32_t ifnameIdx);
 
 /**
  * @ingroup softbus_disc_manager
@@ -214,6 +185,8 @@ void DiscLinkStatusChanged(LinkStatus status, ExchangeMedium medium);
  * @param[in] type Information that changes
  */
 void DiscDeviceInfoChanged(InfoTypeChanged type);
+
+int32_t OnRaiseHandDeviceFound(RaiseHandDeviceInfo *deviceInfo);
 
 #ifdef __cplusplus
 #if __cplusplus

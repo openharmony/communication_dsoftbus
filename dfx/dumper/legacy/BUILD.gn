@@ -1,4 +1,4 @@
-# Copyright (c) 2021-2024 Huawei Device Co., Ltd.
+# Copyright (c) 2021-2025 Huawei Device Co., Ltd.
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
 # You may obtain a copy of the License at
@@ -39,8 +39,10 @@ if (defined(ohos_lite)) {
     include_dirs = [
       "$dsoftbus_dfx_path/event/src",
       "$dsoftbus_dfx_path/interface/include",
+      "$dsoftbus_dfx_path/interface/include/form",
       "$dsoftbus_root_path/core/transmission/common/include",
       "$dsoftbus_root_path/interfaces/kits/transport",
+      "$dsoftbus_root_path/interfaces/inner_kits/transport",
       "$hilog_lite_include_path",
     ]
     sources = [
@@ -65,6 +67,7 @@ if (defined(ohos_lite)) {
   config("dsoftbus_dump_interface_std") {
     include_dirs = [
       "$dsoftbus_dfx_path/interface/include",
+      "$dsoftbus_dfx_path/interface/include/form",
       "$dsoftbus_root_path/core/common/include",
       "$dsoftbus_root_path/components/nstackx/nstackx_core/dfile/interface",
       "$softbus_adapter_common/include",
@@ -81,20 +84,30 @@ if (defined(ohos_lite)) {
     }
     branch_protector_ret = "pac_ret"
     include_dirs = [
-      "$dsoftbus_dfx_path/interface/include",
       "$dsoftbus_dfx_path/event/src",
-      "$dsoftbus_root_path/interfaces/kits/bus_center",
-      "$dsoftbus_root_path/interfaces/kits/common",
+      "$dsoftbus_dfx_path/interface/include",
+      "$dsoftbus_dfx_path/interface/include/form",
       "$dsoftbus_root_path/components/nstackx/fillp/include",
       "$dsoftbus_root_path/components/nstackx/nstackx_core/dfile/interface",
-      "$dsoftbus_root_path/components/nstackx/nstackx_util/interface",
       "$dsoftbus_root_path/components/nstackx/nstackx_ctrl/interface",
-      "$dsoftbus_root_path/core/bus_center/utils/include",
+      "$dsoftbus_root_path/components/nstackx/nstackx_util/interface",
       "$dsoftbus_root_path/core/authentication/interface",
       "$dsoftbus_root_path/core/bus_center/interface",
       "$dsoftbus_root_path/core/bus_center/lnn/net_ledger/common/include",
+      "$dsoftbus_root_path/core/bus_center/utils/include",
       "$dsoftbus_root_path/core/connection/interface",
       "$dsoftbus_root_path/core/connection/wifi_direct_cpp",
+      "$dsoftbus_root_path/core/frame/common/include",
+      "$dsoftbus_root_path/core/frame/init/include",
+      "$dsoftbus_root_path/interfaces/kits/adapter/enhance",
+      "$dsoftbus_root_path/interfaces/kits/authentication",
+      "$dsoftbus_root_path/interfaces/kits/bus_center",
+      "$dsoftbus_root_path/interfaces/kits/common",
+      "$dsoftbus_root_path/interfaces/kits/connect",
+      "$dsoftbus_root_path/interfaces/kits/lnn",
+      "$dsoftbus_root_path/interfaces/kits/nstackx",
+      "$dsoftbus_root_path/interfaces/kits/transport",
+      "$dsoftbus_root_path/interfaces/inner_kits/transport",
     ]
     include_dirs += trans_common_inc
     sources = [
@@ -120,7 +133,7 @@ if (defined(ohos_lite)) {
     }
 
     public_configs = [ ":dsoftbus_dump_interface_std" ]
-    public_deps = [
+    deps = [
       "$dsoftbus_dfx_path:softbus_dfx",
       "$dsoftbus_root_path/adapter:softbus_adapter",
     ]

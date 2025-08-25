@@ -16,7 +16,6 @@
 #ifndef LNN_NET_CAPABILITY_H
 #define LNN_NET_CAPABILITY_H
 
-#include <stdint.h>
 #include "softbus_bus_center.h"
 
 #ifdef __cplusplus
@@ -27,6 +26,10 @@ bool LnnHasCapability(uint32_t capability, NetCapability type);
 uint32_t LnnGetNetCapabilty(void);
 int32_t LnnSetNetCapability(uint32_t *capability, NetCapability type);
 int32_t LnnClearNetCapability(uint32_t *capability, NetCapability type);
+bool LnnHasStaticNetCap(uint32_t capability, StaticNetCapability type);
+int32_t LnnSetStaticNetCap(uint32_t *capability, StaticNetCapability type);
+int32_t LnnClearStaticNetCap(uint32_t *capability, StaticNetCapability type);
+uint32_t LnnGetDefaultStaticNetCap(void);
 
 #ifdef __cplusplus
 }

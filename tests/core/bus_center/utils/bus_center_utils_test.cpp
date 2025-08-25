@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2024 Huawei Device Co., Ltd.
+ * Copyright (c) 2024-2025 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -92,27 +92,27 @@ HWTEST_F(BusCenterUtilsTest, GET_UUID_FROM_FILE_TEST_001, TestSize.Level1)
         .WillOnce(Return(SOFTBUS_INVALID_PARAM))
         .WillRepeatedly(Return(SOFTBUS_OK));
     char id[] = "11u22u33i44d55";
-    int32_t ret = GetUuidFromFile(id, UUID_BUF_LEN);
+    int32_t ret = GetUuidFromFile(id, UUID_BUF_LEN, false);
     EXPECT_EQ(ret, SOFTBUS_INVALID_PARAM);
 
     EXPECT_CALL(bcUtilsMock, SoftBusReadFullFile).WillRepeatedly(Return(SOFTBUS_FILE_ERR));
     EXPECT_CALL(bcUtilsMock, GenerateRandomStr)
         .WillOnce(Return(SOFTBUS_INVALID_PARAM))
         .WillRepeatedly(Return(SOFTBUS_OK));
-    ret = GetUuidFromFile(id, UUID_BUF_LEN);
+    ret = GetUuidFromFile(id, UUID_BUF_LEN, false);
     EXPECT_EQ(ret, SOFTBUS_INVALID_PARAM);
 
     EXPECT_CALL(bcUtilsMock, SoftBusWriteFile)
         .WillOnce(Return(SOFTBUS_INVALID_PARAM))
         .WillRepeatedly(Return(SOFTBUS_OK));
-    ret = GetUuidFromFile(id, UUID_BUF_LEN);
+    ret = GetUuidFromFile(id, UUID_BUF_LEN, false);
     EXPECT_EQ(ret, SOFTBUS_INVALID_PARAM);
 
-    ret = GetUuidFromFile(id, UUID_BUF_LEN);
+    ret = GetUuidFromFile(id, UUID_BUF_LEN, false);
     EXPECT_EQ(ret, SOFTBUS_NETWORK_GET_UUID_FROM_FILE_FAILED);
 
     char id1[] = "ABCDEF00ABCDEF00ABCDEF00ABCDEF00ABCDEF00ABCDEF00ABCDEF00ABCDEF00";
-    ret = GetUuidFromFile(id1, UUID_BUF_LEN);
+    ret = GetUuidFromFile(id1, UUID_BUF_LEN, false);
     EXPECT_EQ(ret, SOFTBUS_OK);
 }
 
@@ -151,15 +151,15 @@ HWTEST_F(BusCenterUtilsTest, LNN_GEN_LOCAL_NETWORKID_TEST_001, TestSize.Level1)
 HWTEST_F(BusCenterUtilsTest, LNN_GEN_LOCAL_UUID_TEST_001, TestSize.Level1)
 {
     NiceMock<BusCenterUtilsInterfaceMock> bcUtilsMock;
-    int32_t ret = LnnGenLocalUuid(nullptr, UUID_BUF_LEN);
+    int32_t ret = LnnGenLocalUuid(nullptr, UUID_BUF_LEN, false);
     EXPECT_EQ(ret, SOFTBUS_INVALID_PARAM);
 
     char uuid[] = "11u22u33i44d55";
-    ret = LnnGenLocalUuid(uuid, UUID_BUF_LEN - 1);
+    ret = LnnGenLocalUuid(uuid, UUID_BUF_LEN - 1, false);
     EXPECT_EQ(ret, SOFTBUS_INVALID_PARAM);
 
     EXPECT_CALL(bcUtilsMock, LnnGetFullStoragePath).WillRepeatedly(Return(SOFTBUS_INVALID_PARAM));
-    ret = LnnGenLocalUuid(uuid, UUID_BUF_LEN);
+    ret = LnnGenLocalUuid(uuid, UUID_BUF_LEN, false);
     EXPECT_EQ(ret, SOFTBUS_NETWORK_GET_UUID_FROM_FILE_FAILED);
 }
 
@@ -176,23 +176,23 @@ HWTEST_F(BusCenterUtilsTest, GET_IRK_FROM_FILE_TEST_001, TestSize.Level1)
     EXPECT_CALL(bcUtilsMock, LnnGetFullStoragePath)
         .WillOnce(Return(SOFTBUS_INVALID_PARAM))
         .WillRepeatedly(Return(SOFTBUS_OK));
-    int32_t ret = GetIrkFromFile(irk, LFINDER_IRK_LEN);
+    int32_t ret = GetIrkFromFile(irk, LFINDER_IRK_LEN, false);
     EXPECT_EQ(ret, SOFTBUS_INVALID_PARAM);
 
     EXPECT_CALL(bcUtilsMock, SoftBusReadFullFile).WillRepeatedly(Return(SOFTBUS_FILE_ERR));
     EXPECT_CALL(bcUtilsMock, SoftBusGenerateRandomArray)
         .WillOnce(Return(SOFTBUS_INVALID_PARAM))
         .WillRepeatedly(Return(SOFTBUS_OK));
-    ret = GetIrkFromFile(irk, LFINDER_IRK_LEN);
+    ret = GetIrkFromFile(irk, LFINDER_IRK_LEN, false);
     EXPECT_NE(ret, SOFTBUS_OK);
 
     EXPECT_CALL(bcUtilsMock, SoftBusWriteFile)
         .WillOnce(Return(SOFTBUS_INVALID_PARAM))
         .WillRepeatedly(Return(SOFTBUS_OK));
-    ret = GetIrkFromFile(irk, LFINDER_IRK_LEN);
+    ret = GetIrkFromFile(irk, LFINDER_IRK_LEN, false);
     EXPECT_EQ(ret, SOFTBUS_INVALID_PARAM);
 
-    ret = GetIrkFromFile(irk, LFINDER_IRK_LEN);
+    ret = GetIrkFromFile(irk, LFINDER_IRK_LEN, false);
     EXPECT_EQ(ret, SOFTBUS_OK);
 }
 
@@ -206,16 +206,16 @@ HWTEST_F(BusCenterUtilsTest, LNN_GEN_LOCAL_IRK_TEST_001, TestSize.Level1)
 {
     NiceMock<BusCenterUtilsInterfaceMock> bcUtilsMock;
     unsigned char irk[] = "test_irk_123";
-    int32_t ret = LnnGenLocalIrk(nullptr, LFINDER_IRK_LEN);
+    int32_t ret = LnnGenLocalIrk(nullptr, LFINDER_IRK_LEN, false);
     EXPECT_EQ(ret, SOFTBUS_INVALID_PARAM);
 
-    ret = LnnGenLocalIrk(irk, LFINDER_IRK_LEN - 1);
+    ret = LnnGenLocalIrk(irk, LFINDER_IRK_LEN - 1, false);
     EXPECT_EQ(ret, SOFTBUS_INVALID_PARAM);
 
     EXPECT_CALL(bcUtilsMock, LnnGetFullStoragePath)
         .WillOnce(Return(SOFTBUS_INVALID_PARAM))
         .WillRepeatedly(Return(SOFTBUS_OK));
-    ret = LnnGenLocalIrk(irk, LFINDER_IRK_LEN);
+    ret = LnnGenLocalIrk(irk, LFINDER_IRK_LEN, false);
     EXPECT_EQ(ret, SOFTBUS_GET_IRK_FAIL);
 }
 
@@ -311,28 +311,27 @@ HWTEST_F(BusCenterUtilsTest, LNN_MAP_SET_TEST_001, TestSize.Level1)
     Map *cMap = (Map *)SoftBusCalloc(sizeof(Map));
     ASSERT_NE(cMap, nullptr);
     cMap->nodes = (MapNode **)SoftBusCalloc(sizeof(MapNode *));
-    if (cMap->nodes == nullptr) {
-        SoftBusFree(cMap);
+    if (cMap->nodes != nullptr) {
+        cMap->bucketSize = 0;
+        cMap->nodeSize = 1;
+        const char *key = "123412341234abcdef";
+        NodeInfo nodeInfo;
+        (void)memset_s(&nodeInfo, sizeof(NodeInfo), 0, sizeof(NodeInfo));
+        uint32_t valueSize = HDF_MAP_VALUE_MAX_SIZE + 1;
+        int32_t ret = LnnMapSet(cMap, key, &nodeInfo, valueSize);
+        EXPECT_EQ(ret, SOFTBUS_INVALID_PARAM);
+
+        valueSize = HDF_MAP_VALUE_MAX_SIZE;
+        ret = LnnMapSet(cMap, key, &nodeInfo, valueSize);
+        EXPECT_EQ(ret, SOFTBUS_INVALID_PARAM);
+
+        cMap->bucketSize = 1;
+        ret = LnnMapSet(cMap, key, &nodeInfo, valueSize);
+        EXPECT_EQ(ret, SOFTBUS_OK);
+
+        EXPECT_EQ(LnnMapErase(cMap, key), SOFTBUS_OK);
+        EXPECT_NO_FATAL_FAILURE(LnnMapDelete(cMap));
     }
-    cMap->bucketSize = 0;
-    cMap->nodeSize = 1;
-    const char *key = "123412341234abcdef";
-    NodeInfo nodeInfo;
-    (void)memset_s(&nodeInfo, sizeof(NodeInfo), 0, sizeof(NodeInfo));
-    uint32_t valueSize = HDF_MAP_VALUE_MAX_SIZE + 1;
-    int32_t ret = LnnMapSet(cMap, key, &nodeInfo, valueSize);
-    EXPECT_EQ(ret, SOFTBUS_INVALID_PARAM);
-
-    valueSize = HDF_MAP_VALUE_MAX_SIZE;
-    ret = LnnMapSet(cMap, key, &nodeInfo, valueSize);
-    EXPECT_EQ(ret, SOFTBUS_INVALID_PARAM);
-
-    cMap->bucketSize = 1;
-    ret = LnnMapSet(cMap, key, &nodeInfo, valueSize);
-    EXPECT_EQ(ret, SOFTBUS_OK);
-
-    EXPECT_EQ(LnnMapErase(cMap, key), SOFTBUS_OK);
-    EXPECT_NO_FATAL_FAILURE(LnnMapDelete(cMap));
     SoftBusFree(cMap);
 }
 

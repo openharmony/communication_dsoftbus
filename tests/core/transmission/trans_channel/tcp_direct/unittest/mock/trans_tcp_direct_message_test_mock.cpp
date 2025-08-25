@@ -152,9 +152,9 @@ int32_t AuthGetConnInfo(AuthHandle authHandle, AuthConnInfo *connInfo)
     return GetTransTcpDirectMessageInterface()->AuthGetConnInfo(authHandle, connInfo);
 }
 
-char *PackRequest(const AppInfo *appInfo)
+char *PackRequest(const AppInfo *appInfo, int64_t requestId)
 {
-    return GetTransTcpDirectMessageInterface()->PackRequest(appInfo);
+    return GetTransTcpDirectMessageInterface()->PackRequest(appInfo, requestId);
 }
 
 int32_t LnnSetLocalStrInfo(InfoKey key, const char *info)
@@ -227,6 +227,36 @@ int32_t TransCheckServerAccessControl(uint64_t callingTokenId)
 int32_t TransTdcOnChannelClosed(const char *pkgName, int32_t pid, int32_t channelId)
 {
     return GetTransTcpDirectMessageInterface()->TransTdcOnChannelClosed(pkgName, pid, channelId);
+}
+
+int32_t GetErrCodeBySocketErr(int32_t transErrCode)
+{
+    return GetTransTcpDirectMessageInterface()->GetErrCodeBySocketErr(transErrCode);
+}
+
+int32_t CheckCollabRelation(const AppInfo *appInfo, int32_t channelId, int32_t channelType)
+{
+    return GetTransTcpDirectMessageInterface()->CheckCollabRelation(appInfo, channelId, channelType);
+}
+
+int32_t GetTokenTypeBySessionName(const char *sessionName, int32_t *tokenType)
+{
+    return GetTransTcpDirectMessageInterface()->GetTokenTypeBySessionName(sessionName, tokenType);
+}
+
+int32_t AuthDecryptByUkId(int32_t ukId, const uint8_t *inData, uint32_t inLen, uint8_t *outData, uint32_t *outLen)
+{
+    return GetTransTcpDirectMessageInterface()->AuthDecryptByUkId(ukId, inData, inLen, outData, outLen);
+}
+
+int32_t AuthFindUkIdByAclInfo(const AuthACLInfo *acl, int32_t *ukId)
+{
+    return GetTransTcpDirectMessageInterface()->AuthFindUkIdByAclInfo(acl, ukId);
+}
+
+int32_t LnnGetLocalStrInfoByIfnameIdx(InfoKey key, char *info, uint32_t len, int32_t ifIdx)
+{
+    return GetTransTcpDirectMessageInterface()->LnnGetLocalStrInfoByIfnameIdx(key, info, len, ifIdx);
 }
 }
 }

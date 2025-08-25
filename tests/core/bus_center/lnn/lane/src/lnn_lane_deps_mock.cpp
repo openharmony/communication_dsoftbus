@@ -46,6 +46,7 @@ void LaneDepsInterfaceMock::SetDefaultResult(NodeInfo *info)
     EXPECT_CALL(*this, LnnGetOnlineStateById).WillRepeatedly(Return(true));
     EXPECT_CALL(*this, LnnGetLocalStrInfo).WillRepeatedly(Return(SOFTBUS_OK));
     EXPECT_CALL(*this, LnnGetRemoteStrInfo).WillRepeatedly(Return(SOFTBUS_OK));
+    EXPECT_CALL(*this, LnnGetRemoteStrInfoByIfnameIdx).WillRepeatedly(Return(SOFTBUS_OK));
     EXPECT_CALL(*this, SoftBusFrequencyToChannel).WillRepeatedly(Return(1));
     EXPECT_CALL(*this, LnnVisitPhysicalSubnet).WillRepeatedly(Return(true));
     EXPECT_CALL(*this, LnnGetNodeInfoById).WillRepeatedly(Return(nullptr));
@@ -77,6 +78,7 @@ void LaneDepsInterfaceMock::SetDefaultResultForAlloc(int32_t localNetCap, int32_
         .WillRepeatedly(DoAll(SetArgPointee<LANE_MOCK_PARAM3>(remoteFeatureCap), Return(SOFTBUS_OK)));
     EXPECT_CALL(*this, LnnGetRemoteStrInfo).WillRepeatedly(ActionOfGetRemoteStrInfo);
     EXPECT_CALL(*this, SoftBusGenerateStrHash).WillRepeatedly(ActionOfGenerateStrHash);
+    EXPECT_CALL(*this, LnnGetRemoteStrInfoByIfnameIdx).WillRepeatedly(ActionOfGetRemoteStrInfoByIfnameIdx);
 }
 
 int32_t LaneDepsInterfaceMock::ActionOfLnnGetNetworkIdByUdid(const char *udid, char *buf, uint32_t len)
@@ -131,6 +133,29 @@ int32_t LaneDepsInterfaceMock::ActionOfGetRemoteStrInfo(const char *netWorkId, I
     return SOFTBUS_OK;
 }
 
+int32_t LaneDepsInterfaceMock::ActionOfGetRemoteStrInfoByIfnameIdx
+    (const char *netWorkId, InfoKey key, char *info, uint32_t len, int32_t ifIdx)
+{
+    (void)netWorkId;
+    (void)len;
+    if (info == nullptr) {
+        GTEST_LOG_(ERROR) << "invalid param";
+        return SOFTBUS_INVALID_PARAM;
+    }
+    switch (key) {
+        case STRING_KEY_IP: {
+            char ipAddr[] = "192.168.2.1";
+            if (strncpy_s(info, len, ipAddr, strlen(ipAddr)) != EOK) {
+                return SOFTBUS_STRCPY_ERR;
+            }
+            break;
+        }
+        default:
+            break;
+    }
+    return SOFTBUS_OK;
+}
+
 int32_t LaneDepsInterfaceMock::ActionOfStartBaseClient(ListenerModule module, const SoftbusBaseListener *listener)
 {
     (void)module;
@@ -179,9 +204,9 @@ int32_t GetAuthLinkTypeList(const char *networkId, AuthLinkTypeList *linkTypeLis
     return GetLaneDepsInterface()->GetAuthLinkTypeList(networkId, linkTypeList);
 }
 
-int32_t AuthAllocConn(const char *networkId, uint32_t authRequestId, AuthConnCallback *callback)
+int32_t AuthAllocLane(const char *networkId, uint32_t authRequestId, AuthConnCallback *callback)
 {
-    return GetLaneDepsInterface()->AuthAllocConn(networkId, authRequestId, callback);
+    return GetLaneDepsInterface()->AuthAllocLane(networkId, authRequestId, callback);
 }
 
 int32_t LnnGetRemoteNodeInfoById(const char *id, IdCategory type, NodeInfo *info)
@@ -423,16 +448,6 @@ void AuthDeviceGetLatestIdByUuid(const char *uuid, AuthLinkType type, AuthHandle
     GetLaneDepsInterface()->AuthDeviceGetLatestIdByUuid(uuid, type, authHandle);
 }
 
-void LnnDumpLocalBasicInfo(void)
-{
-    GetLaneDepsInterface()->LnnDumpLocalBasicInfo();
-}
-
-void LnnDumpOnlineDeviceInfo(void)
-{
-    GetLaneDepsInterface()->LnnDumpOnlineDeviceInfo();
-}
-
 int32_t LnnGetOsTypeByNetworkId(const char *networkId, int32_t *osType)
 {
     return GetLaneDepsInterface()->LnnGetOsTypeByNetworkId(networkId, osType);
@@ -466,6 +481,36 @@ int32_t LnnRequestCheckOnlineStatus(const char *networkId, uint64_t timeout)
 int32_t AuthCheckMetaExist(const AuthConnInfo *connInfo, bool *isExist)
 {
     return GetLaneDepsInterface()->AuthCheckMetaExist(connInfo, isExist);
+}
+
+int32_t LnnSetDLConnCapability(const char *networkId, uint32_t connCapability)
+{
+    return GetLaneDepsInterface()->LnnSetDLConnCapability(networkId, connCapability);
+}
+
+int32_t LnnGetRemoteNodeInfoByKey(const char *key, NodeInfo *info)
+{
+    return GetLaneDepsInterface()->LnnGetRemoteNodeInfoByKey(key, info);
+}
+
+int32_t ConnSetConnectCallback(ConnModule moduleId, const ConnectCallback *callback)
+{
+    return GetLaneDepsInterface()->ConnSetConnectCallback(moduleId, callback);
+}
+
+int32_t LnnGetRemoteStrInfoByIfnameIdx(const char *networkId, InfoKey key, char *info, uint32_t len, int32_t ifIdx)
+{
+    return GetLaneDepsInterface()->LnnGetRemoteStrInfoByIfnameIdx(networkId, key, info, len, ifIdx);
+}
+
+int32_t LnnGetRemoteNumInfoByIfnameIdx(const char *networkId, InfoKey key, int32_t *info, int32_t ifIdx)
+{
+    return GetLaneDepsInterface()->LnnGetRemoteNumInfoByIfnameIdx(networkId, key, info, ifIdx);
+}
+
+int32_t LnnGetLocalStrInfoByIfnameIdx(InfoKey key, char *info, uint32_t len, int32_t ifIdx)
+{
+    return GetLaneDepsInterface()->LnnGetLocalStrInfoByIfnameIdx(key, info, len, ifIdx);
 }
 }
 } // namespace OHOS

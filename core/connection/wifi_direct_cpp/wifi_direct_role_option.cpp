@@ -14,11 +14,17 @@
  */
 #include "wifi_direct_role_option.h"
 #include "conn_log.h"
-#include "softbus_error_code.h"
 #include "bus_center_manager.h"
 #include "lnn_device_info.h"
+#include "wifi_direct_init.h"
 
 namespace OHOS::SoftBus {
+WifiDirectRoleOption& WifiDirectRoleOption::GetInstance()
+{
+    static WifiDirectRoleOption instance;
+    return instance;
+}
+
 int WifiDirectRoleOption::GetExpectedRole(
     const std::string &networkId, enum WifiDirectConnectType type, uint32_t &expectedRole, bool &isStrict)
 {
@@ -43,7 +49,9 @@ int WifiDirectRoleOption::GetExpectedRole(
         }
         isStrict = false;
     } else if (type == WIFI_DIRECT_CONNECT_TYPE_BLE_TRIGGER_HML ||
-        type == WIFI_DIRECT_CONNECT_TYPE_AUTH_TRIGGER_HML || type == WIFI_DIRECT_CONNECT_TYPE_ACTION_TRIGGER_HML) {
+        type == WIFI_DIRECT_CONNECT_TYPE_AUTH_TRIGGER_HML ||
+        type == WIFI_DIRECT_CONNECT_TYPE_ACTION_TRIGGER_HML ||
+        type == WIFI_DIRECT_CONNECT_TYPE_SPARKLINK_TRIGGER_HML) {
         expectedRole = WIFI_DIRECT_API_ROLE_HML;
         isStrict = true;
     } else {
@@ -51,14 +59,14 @@ int WifiDirectRoleOption::GetExpectedRole(
         return SOFTBUS_INVALID_PARAM;
     }
 
-    CONN_LOGI(CONN_WIFI_DIRECT, "expectRole=0x%{public}x, isStrict=%{public}d", expectedRole, isStrict);
+    CONN_LOGI(CONN_WIFI_DIRECT, "expectedRole=0x%{public}x, isStrict=%{public}d", expectedRole, isStrict);
     return SOFTBUS_OK;
 }
 
 WifiDirectRole WifiDirectRoleOption::GetExpectedP2pRole(const std::string &netWorkId)
 {
     int32_t localDevTypeId = 0;
-    int32_t ret = LnnGetLocalNumInfo(NUM_KEY_DEV_TYPE_ID, &localDevTypeId);
+    int32_t ret = DBinderSoftbusServer::GetInstance().LnnGetLocalNumInfo(NUM_KEY_DEV_TYPE_ID, &localDevTypeId);
     CONN_CHECK_AND_RETURN_RET_LOGW(
         ret == SOFTBUS_OK, WIFI_DIRECT_ROLE_AUTO, CONN_WIFI_DIRECT, "get local dev type id failed");
     CONN_LOGD(CONN_WIFI_DIRECT, "localDevTypeId=0x%{public}03X", localDevTypeId);
@@ -69,7 +77,8 @@ WifiDirectRole WifiDirectRoleOption::GetExpectedP2pRole(const std::string &netWo
     }
 
     int32_t remoteDevTypeId = 0;
-    ret = LnnGetRemoteNumInfo(netWorkId.data(), NUM_KEY_DEV_TYPE_ID, &remoteDevTypeId);
+    ret = DBinderSoftbusServer::GetInstance().LnnGetRemoteNumInfo(netWorkId.data(),
+                                                                  NUM_KEY_DEV_TYPE_ID, &remoteDevTypeId);
     CONN_CHECK_AND_RETURN_RET_LOGW(
         ret == SOFTBUS_OK, WIFI_DIRECT_ROLE_AUTO, CONN_WIFI_DIRECT, "get remote dev type id failed");
     CONN_LOGD(CONN_WIFI_DIRECT, "remoteDevTypeId=0x%{public}03X", remoteDevTypeId);

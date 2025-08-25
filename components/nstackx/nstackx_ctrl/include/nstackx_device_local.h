@@ -17,7 +17,6 @@
 #define NSTACKX_DEVICE_LOCAL_H
 
 #include "nstackx_device.h"
-#include "coap_app.h"
 
 #ifdef __cplusplus
 extern "C" {
@@ -40,7 +39,7 @@ void ConfigureLocalDeviceName(const char *localDeviceName);
 void SetLocalDeviceHash(uint64_t deviceHash);
 int SetLocalDeviceCapability(uint32_t capabilityBitmapNum, uint32_t capabilityBitmap[]);
 int32_t SetLocalDeviceServiceData(const char *serviceData);
-
+int32_t SetLocalDeviceServiceDataV2(const struct NSTACKX_ServiceData *param, uint32_t cnt);
 void SetLocalDeviceBusinessType(uint8_t businessType);
 uint8_t GetLocalDeviceBusinessType(void);
 
@@ -61,15 +60,19 @@ DeviceInfo *GetLocalDeviceInfo(void);
 const char *GetLocalDeviceNetworkName(void);
 
 int GetBroadcastIp(const struct LocalIface *iface, char *ipStr, size_t ipStrLen);
-const struct in_addr *GetLocalIfaceIp(const struct LocalIface *iface);
 const char *GetLocalIfaceIpStr(const struct LocalIface *iface);
 const char *GetLocalIfaceName(const struct LocalIface *iface);
-CoapCtxType *LocalIfaceGetCoapCtx(const char *ifname);
+const char *GetLocalIfaceServiceData(const struct LocalIface *iface);
+uint8_t GetLocalIfaceAf(const struct LocalIface *iface);
+CoapCtxType *LocalIfaceGetCoapCtx(uint8_t af, const char *ifname);
 #ifndef DFINDER_USE_MINI_NSTACKX
 CoapCtxType *LocalIfaceGetCoapCtxByRemoteIp(const struct in_addr *remoteIp, uint8_t serverType);
+#else
+// only mini device support ipv4, other support ipv4 and ipv6
+const struct in_addr *GetLocalIfaceIp(const struct LocalIface *iface);
 #endif
-int AddLocalIface(const char *ifname, const struct in_addr *ip);
-void RemoveLocalIface(const char *ifname);
+int AddLocalIface(const char *ifname, const char *serviceData, uint8_t af, const union InetAddr *addr);
+void RemoveLocalIface(uint8_t af, const char *ifname);
 void DestroyLocalIface(struct LocalIface *iface, bool moduleDeinit);
 
 #ifdef NSTACKX_DFINDER_HIDUMP

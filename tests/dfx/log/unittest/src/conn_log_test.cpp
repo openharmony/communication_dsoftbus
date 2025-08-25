@@ -39,18 +39,30 @@ HWTEST_F(ConnLogTest, ConnLogTest001, TestSize.Level0)
 {
     int32_t index = 0;
     int32_t connDomainBase = 0xd005760;
+    int32_t connSleBase = 0xd005761;
 
-    ExpectMatchSoftBusLogAttrs(CONN_LABELS[index], CONN_INIT, connDomainBase, "ConnInit");
-    ExpectMatchSoftBusLogAttrs(CONN_LABELS[++index], CONN_BLE, ++connDomainBase, "ConnBle");
-    ExpectMatchSoftBusLogAttrs(CONN_LABELS[++index], CONN_BR, ++connDomainBase, "ConnBr");
-    ExpectMatchSoftBusLogAttrs(CONN_LABELS[++index], CONN_COMMON, ++connDomainBase, "ConnCommon");
-    ExpectMatchSoftBusLogAttrs(CONN_LABELS[++index], CONN_WIFI_DIRECT, ++connDomainBase, "ConnWD");
-    ExpectMatchSoftBusLogAttrs(CONN_LABELS[++index], CONN_NEARBY, ++connDomainBase, "ConnNearby");
-    ExpectMatchSoftBusLogAttrs(CONN_LABELS[++index], CONN_BLE_DIRECT, ++connDomainBase, "ConnBD");
-    ExpectMatchSoftBusLogAttrs(CONN_LABELS[++index], CONN_BROADCAST, ++connDomainBase, "ConnBC");
-    ExpectMatchSoftBusLogAttrs(CONN_LABELS[++index], CONN_NEWIP, ++connDomainBase, "ConnNewIp");
-    ExpectMatchSoftBusLogAttrs(CONN_LABELS[++index], CONN_ACTION, ++connDomainBase, "ConnAction");
-    ExpectMatchSoftBusLogAttrs(CONN_LABELS[++index], CONN_TEST, DOMAIN_ID_TEST, "ConnTest");
+    EXPECT_NO_FATAL_FAILURE(ExpectMatchSoftBusLogAttrs(CONN_LABELS[index], CONN_INIT, connDomainBase, "ConnInit"));
+    EXPECT_NO_FATAL_FAILURE(ExpectMatchSoftBusLogAttrs(CONN_LABELS[++index], CONN_BLE, ++connDomainBase, "ConnBle"));
+    EXPECT_NO_FATAL_FAILURE(ExpectMatchSoftBusLogAttrs(CONN_LABELS[++index], CONN_BR, ++connDomainBase, "ConnBr"));
+    EXPECT_NO_FATAL_FAILURE(ExpectMatchSoftBusLogAttrs(CONN_LABELS[++index], CONN_COMMON, ++connDomainBase,
+        "ConnCommon"));
+    EXPECT_NO_FATAL_FAILURE(ExpectMatchSoftBusLogAttrs(CONN_LABELS[++index], CONN_WIFI_DIRECT, ++connDomainBase,
+        "ConnWD"));
+    EXPECT_NO_FATAL_FAILURE(ExpectMatchSoftBusLogAttrs(CONN_LABELS[++index], CONN_NEARBY, ++connDomainBase,
+        "ConnNearby"));
+    EXPECT_NO_FATAL_FAILURE(ExpectMatchSoftBusLogAttrs(CONN_LABELS[++index], CONN_BLE_DIRECT, ++connDomainBase,
+        "ConnBD"));
+    EXPECT_NO_FATAL_FAILURE(ExpectMatchSoftBusLogAttrs(CONN_LABELS[++index], CONN_BROADCAST, ++connDomainBase,
+        "ConnBC"));
+    EXPECT_NO_FATAL_FAILURE(ExpectMatchSoftBusLogAttrs(CONN_LABELS[++index], CONN_NEWIP, ++connDomainBase,
+        "ConnNewIp"));
+    EXPECT_NO_FATAL_FAILURE(ExpectMatchSoftBusLogAttrs(CONN_LABELS[++index], CONN_ACTION, ++connDomainBase,
+        "ConnAction"));
+    EXPECT_NO_FATAL_FAILURE(ExpectMatchSoftBusLogAttrs(CONN_LABELS[++index], CONN_SLE, connSleBase, "ConnSle"));
+    EXPECT_NO_FATAL_FAILURE(
+        ExpectMatchSoftBusLogAttrs(CONN_LABELS[++index], CONN_EVENT, ++connDomainBase, "ConnEvent"));
+    EXPECT_NO_FATAL_FAILURE(ExpectMatchSoftBusLogAttrs(CONN_LABELS[++index], CONN_PROXY, ++connSleBase, "ConnProxy"));
+    EXPECT_NO_FATAL_FAILURE(ExpectMatchSoftBusLogAttrs(CONN_LABELS[++index], CONN_TEST, DOMAIN_ID_TEST, "ConnTest"));
 }
 
 /**

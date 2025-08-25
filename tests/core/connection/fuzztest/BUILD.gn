@@ -13,16 +13,18 @@
 
 import("//build/test.gni")
 import("../../../../dsoftbus.gni")
+deps = []
 
 group("fuzztest") {
   testonly = true
   if (dsoftbus_feature_conn_pv1 == true &&
       softbus_communication_wifi_feature == true) {
     deps = [
-      "authnegotiatechannel_fuzzer:AuthNegotiateChannelFuzzTest",
-      "proxynegotiatechannel_fuzzer:ProxyNegotiateChannelFuzzTest",
+      "authnegotiatechannelimproved_fuzzer:AuthNegotiateChannelImprovedFuzzTest",
+      "proxynegotiatechannelimproved_fuzzer:ProxyNegotiateChannelImprovedFuzzTest",
       "softbusnegotiatemessage_fuzzer:SoftBusNegotiateMessageFuzzTest",
       "wifidirectprotocol_fuzzer:WifiDirectProtocolFuzzTest",
     ]
   }
+  deps += [ "conngeneralconnection_fuzzer:ConnGeneralConnectionFuzzTest" ]
 }

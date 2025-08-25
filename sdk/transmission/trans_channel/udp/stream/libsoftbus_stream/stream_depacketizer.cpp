@@ -15,9 +15,6 @@
 
 #include "stream_depacketizer.h"
 
-#include "common_inner.h"
-#include "i_stream.h"
-
 namespace Communication {
 namespace SoftBus {
 void StreamDepacketizer::DepacketizeHeader(const char *header)
@@ -45,7 +42,9 @@ void StreamDepacketizer::DepacketizeBuffer(char *buffer, uint32_t bufferSize)
         tlvs_.Depacketize(ptr, bufferSize);
         TRANS_LOGD(TRANS_STREAM, "TLV version=%{public}d, num=%{public}d, extLen=%{public}zd, checksum=%{public}u",
             tlvs_.GetVersion(), tlvs_.GetTlvNums(), tlvs_.GetExtLen(), tlvs_.GetCheckSum());
-
+        if (tlvs_.GetCheckSum() == 0) {
+            return;
+        }
         tlvTotalLen = tlvs_.GetCheckSum() + sizeof(tlvs_.GetCheckSum());
         ptr += tlvTotalLen;
     }

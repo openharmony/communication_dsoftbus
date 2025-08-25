@@ -24,11 +24,13 @@
 #include "device_profile_listener.h"
 #include "lnn_app_bind_interface.h"
 #include "lnn_distributed_net_ledger.h"
+#include "lnn_decision_db.h"
 #include "lnn_heartbeat_ctrl.h"
 #include "lnn_heartbeat_strategy.h"
 #include "lnn_network_info.h"
 #include "lnn_network_manager.h"
 #include "lnn_ohos_account.h"
+#include "lnn_heartbeat_utils.h"
 
 static const uint32_t SOFTBUS_SA_ID = 4700;
 static DeviceProfileChangeListener g_deviceProfileChange = { 0 };
@@ -78,7 +80,9 @@ int32_t AuthDeviceProfileListener::OnTrustDeviceProfileDelete(const TrustDeviceP
     }
     if (profile.GetLocalUserId() != GetActiveOsAccountIds()) {
         AUTH_LOGE(AUTH_INIT, "delete deviceprofile not current user");
-        // delete db
+        if (!DpHasAccessControlProfile(profile.GetDeviceId().c_str(), true, profile.GetLocalUserId())) {
+            LnnDeleteSpecificTrustedDevInfo(profile.GetDeviceId().c_str(), profile.GetLocalUserId());
+        }
         return SOFTBUS_OK;
     }
     NodeInfo nodeInfo;
@@ -114,7 +118,6 @@ int32_t AuthDeviceProfileListener::OnTrustDeviceProfileActive(const TrustDeviceP
         return SOFTBUS_OK;
     }
     DelNotTrustDevice(profile.GetDeviceId().c_str());
-    LnnUpdateHeartbeatInfo(UPDATE_HB_NETWORK_INFO);
     if (IsHeartbeatEnable()) {
         if (LnnStartHbByTypeAndStrategy(
             HEARTBEAT_TYPE_BLE_V0 | HEARTBEAT_TYPE_BLE_V3, STRATEGY_HB_SEND_SINGLE, false) != SOFTBUS_OK) {
@@ -133,7 +136,6 @@ int32_t AuthDeviceProfileListener::OnTrustDeviceProfileInactive(const TrustDevic
     AUTH_LOGI(AUTH_INIT, "dp inactive callback enter! udid=%{public}s", AnonymizeWrapper(anonyUdid));
     AnonymizeFree(anonyUdid);
     LnnUpdateOhosAccount(UPDATE_HEARTBEAT);
-    LnnUpdateHeartbeatInfo(UPDATE_HB_NETWORK_INFO);
     int32_t userId = profile.GetPeerUserId();
     AUTH_LOGI(AUTH_INIT, "userId:%{public}d", userId);
     NotifyRemoteDevOffLineByUserId(userId, profile.GetDeviceId().c_str());
@@ -201,7 +203,7 @@ int32_t AuthDeviceProfileListener::OnCharacteristicProfileUpdate(
     return SOFTBUS_OK;
 }
 
-static void RegisterToDpHelper(void)
+static int32_t RegisterToDpHelper(void)
 {
     AUTH_LOGD(AUTH_INIT, "RegistertoDpHelper start!");
     uint32_t saId = SOFTBUS_SA_ID;
@@ -213,23 +215,27 @@ static void RegisterToDpHelper(void)
     sptr<IProfileChangeListener> subscribeDPChangeListener = new (std::nothrow) AuthDeviceProfileListener;
     if (subscribeDPChangeListener == nullptr) {
         AUTH_LOGE(AUTH_INIT, "new authDeviceProfileListener fail");
-        return;
+        return SOFTBUS_MEM_ERR;
     }
     SubscribeInfo subscribeInfo(saId, subscribeKey, subscribeTypes, subscribeDPChangeListener);
 
     int32_t subscribeRes = DistributedDeviceProfileClient::GetInstance().SubscribeDeviceProfile(subscribeInfo);
-    AUTH_LOGI(AUTH_INIT, "GetCharacteristicProfile subscribeRes=%{public}d", subscribeRes);
+    if (subscribeRes != OHOS::DistributedDeviceProfile::DP_SUCCESS) {
+        AUTH_LOGE(AUTH_INIT, "GetCharacteristicProfile subscribeRes failed, ret=%{public}d", subscribeRes);
+        return SOFTBUS_AUTH_SUB_DP_FAILED;
+    }
+    return SOFTBUS_OK;
 }
 } // namespace AuthToDeviceProfile
 } // namespace OHOS
 
-void RegisterToDp(DeviceProfileChangeListener *deviceProfilePara)
+int32_t RegisterToDp(DeviceProfileChangeListener *deviceProfilePara)
 {
     if (deviceProfilePara == nullptr) {
         AUTH_LOGE(AUTH_INIT, "invalid param!");
-        return;
+        return SOFTBUS_INVALID_PARAM;
     }
     g_deviceProfileChange = *deviceProfilePara;
-    OHOS::AuthToDeviceProfile::RegisterToDpHelper();
+    return OHOS::AuthToDeviceProfile::RegisterToDpHelper();
 }
 

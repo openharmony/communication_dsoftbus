@@ -25,6 +25,7 @@ ohos_fuzztest("ConnectionCommonFuzzTest") {
 
   include_dirs = [
     "$dsoftbus_root_path/core/connection/common/include",
+    "$dsoftbus_root_path/interfaces/kits/connect",
     "$dsoftbus_root_path/core/connection/interface",
   ]
 
@@ -41,5 +42,10 @@ ohos_fuzztest("ConnectionCommonFuzzTest") {
     "$dsoftbus_root_path/adapter:softbus_adapter",
     "$dsoftbus_root_path/core/common:softbus_utils",
     "$dsoftbus_root_path/core/frame:softbus_server",
+  ]
+
+  external_deps = [
+    "c_utils:utils",
+    "hilog:libhilog",
   ]
 }

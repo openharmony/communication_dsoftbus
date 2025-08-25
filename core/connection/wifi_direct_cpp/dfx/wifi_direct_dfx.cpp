@@ -15,13 +15,20 @@
 
 #include "wifi_direct_dfx.h"
 #include "adapter/p2p_adapter.h"
+#include "auth_interface.h"
 #include "conn_log.h"
 #include "duration_statistic.h"
 #include "utils/wifi_direct_utils.h"
+#include "wifi_direct_types.h"
 
 namespace OHOS::SoftBus {
+WifiDirectDfx& WifiDirectDfx::GetInstance()
+{
+    static WifiDirectDfx instance;
+    return instance;
+}
 
-void WifiDirectDfx::DfxRecord(bool success, int32_t reason, WifiDirectConnectInfo &connectInfo)
+void WifiDirectDfx::DfxRecord(bool success, int32_t reason, const WifiDirectConnectInfo &connectInfo)
 {
     if (success) {
         DurationStatistic::GetInstance().Record(connectInfo.requestId, TOTAL_END);
@@ -60,18 +67,9 @@ void WifiDirectDfx::Clear(uint32_t requestId)
     reuseFlagMap_.erase(requestId);
 }
 
-void WifiDirectDfx::ReportConnEventExtra(ConnEventExtra &extra, WifiDirectConnectInfo &wifiDirectConnectInfo)
+void WifiDirectDfx::ReportConnEventExtra(ConnEventExtra &extra, const WifiDirectConnectInfo &wifiDirectConnectInfo)
 {
-    SetLinkType(wifiDirectConnectInfo);
-    enum StatisticLinkType type = wifiDirectConnectInfo.dfxInfo.linkType;
-    if (type == STATISTIC_P2P) {
-        extra.linkType = CONNECT_P2P;
-    } else if (type == STATISTIC_HML) {
-        extra.linkType = CONNECT_HML;
-    } else {
-        extra.linkType = CONNECT_TRIGGER_HML;
-    }
-
+    SetReportExtraLinkType(extra, wifiDirectConnectInfo);
     auto requestId = wifiDirectConnectInfo.requestId;
     auto challengeCodeStr = GetChallengeCode(requestId);
     extra.challengeCode = challengeCodeStr.c_str();
@@ -83,7 +81,7 @@ void WifiDirectDfx::ReportConnEventExtra(ConnEventExtra &extra, WifiDirectConnec
         extra.negotiateTime = endTime - startTime > 0 ? endTime - startTime : 0;
     }
     auto dfxInfo = wifiDirectConnectInfo.dfxInfo;
-    extra.bootLinkType = dfxInfo.bootLinkType;
+    SetBootLinkType(extra, wifiDirectConnectInfo);
     extra.peerNetworkId = wifiDirectConnectInfo.remoteNetworkId;
     auto localNetworkId = WifiDirectUtils::GetLocalNetworkId();
     extra.localNetworkId = localNetworkId.c_str();
@@ -104,20 +102,37 @@ void WifiDirectDfx::ReportConnEventExtra(ConnEventExtra &extra, WifiDirectConnec
     auto remoteOsVersion = WifiDirectUtils::GetRemoteOsVersion(wifiDirectConnectInfo.remoteNetworkId);
     extra.peerDevVer = remoteOsVersion.c_str();
     extra.remoteScreenStatus = WifiDirectUtils::GetRemoteScreenStatus(wifiDirectConnectInfo.remoteNetworkId);
+    extra.localScreenStatus = WifiDirectUtils::GetLocalScreenStatus();
     extra.isReuse = IsReuse(requestId);
+    extra.staChload = WifiDirectUtils::GetChload();
+    extra.sameAccount =
+        WifiDirectUtils::IsDeviceId(WifiDirectUtils::NetworkIdToUuid(wifiDirectConnectInfo.remoteNetworkId));
     CONN_EVENT(EVENT_SCENE_CONNECT, EVENT_STAGE_CONNECT_END, extra);
 }
 
-void WifiDirectDfx::SetLinkType(WifiDirectConnectInfo &connectInfo)
+void WifiDirectDfx::SetReportExtraLinkType(ConnEventExtra &extra, const WifiDirectConnectInfo &connectInfo)
 {
-    if (connectInfo.connectType == WIFI_DIRECT_CONNECT_TYPE_AUTH_NEGO_P2P) {
-        connectInfo.dfxInfo.linkType = STATISTIC_P2P;
-    } else if (connectInfo.connectType == WIFI_DIRECT_CONNECT_TYPE_AUTH_NEGO_HML) {
-        connectInfo.dfxInfo.linkType = STATISTIC_HML;
-    } else {
-        connectInfo.dfxInfo.linkType = STATISTIC_TRIGGER_HML;
+    switch (connectInfo.connectType) {
+        case WIFI_DIRECT_CONNECT_TYPE_AUTH_NEGO_P2P:
+            extra.linkType = CONNECT_P2P;
+            break;
+        case WIFI_DIRECT_CONNECT_TYPE_AUTH_NEGO_HML:
+            extra.linkType = CONNECT_HML;
+            break;
+        case WIFI_DIRECT_CONNECT_TYPE_SPARKLINK_TRIGGER_HML:
+        case WIFI_DIRECT_CONNECT_TYPE_BLE_TRIGGER_HML:
+        case WIFI_DIRECT_CONNECT_TYPE_AUTH_TRIGGER_HML:
+            extra.linkType = CONNECT_TRIGGER_HML;
+            break;
+        case WIFI_DIRECT_CONNECT_TYPE_ACTION_TRIGGER_HML:
+            extra.linkType = CONNECT_TRIGGER_HML_V2C;
+            break;
+        default:
+            CONN_LOGI(CONN_WIFI_DIRECT, "invalid extra link type %{public}d", extra.linkType);
+            extra.linkType = CONNECT_TYPE_MAX;
+            break;
     }
-    CONN_LOGI(CONN_WIFI_DIRECT, "link type %{public}d", connectInfo.dfxInfo.linkType);
+    CONN_LOGI(CONN_WIFI_DIRECT, "report extra link type %{public}d", extra.linkType);
 }
 
 void WifiDirectDfx::SetReuseFlag(uint32_t requestId)
@@ -158,6 +173,52 @@ void WifiDirectDfx::ReportReceiveAuthLinkMsg(const NegotiateMessage &msg, const 
             .localNetworkId = localNetworkId.c_str(),
         };
         CONN_EVENT(EVENT_SCENE_PASSIVE_CONNECT, EVENT_STAGE_CONNECT_START, extra);
+    }
+}
+
+void WifiDirectDfx::SetBootLinkType(ConnEventExtra &extra, const WifiDirectConnectInfo &info)
+{
+    extra.bootLinkType = STATISTIC_NONE;
+    WifiDirectNegoChannelType type = info.negoChannel.type;
+    if (type == NEGO_CHANNEL_AUTH) {
+        SetBootLinkTypeByAuthHandle(extra, info);
+    } else if (type == NEGO_CHANNEL_COC) {
+        extra.bootLinkType = STATISTIC_COC;
+    } else if (type == NEGO_CHANNEL_ACTION) {
+        extra.bootLinkType = STATISTIC_ACTION;
+    }
+    
+    if (type == NEGO_CHANNEL_NULL && info.connectType == WIFI_DIRECT_CONNECT_TYPE_BLE_TRIGGER_HML) {
+        extra.bootLinkType = STATISTIC_BLE_TRIGGER;
+    }
+    if (type == NEGO_CHANNEL_NULL && info.connectType == WIFI_DIRECT_CONNECT_TYPE_SPARKLINK_TRIGGER_HML) {
+        extra.bootLinkType = STATISTIC_SPARK_LINK_TRIGGER;
+    }
+    if (info.dfxInfo.bootLinkType == STATISTIC_BLE_AND_ACTION) {
+        extra.bootLinkType = STATISTIC_BLE_AND_ACTION;
+    }
+    CONN_LOGI(CONN_WIFI_DIRECT, "boot link type %{public}d", extra.bootLinkType);
+}
+
+void WifiDirectDfx::SetBootLinkTypeByAuthHandle(ConnEventExtra &extra, const WifiDirectConnectInfo &info)
+{
+    auto type = info.negoChannel.handle.authHandle.type;
+    auto authHandleType = static_cast<AuthLinkType>(type);
+    CONN_LOGI(CONN_WIFI_DIRECT, "auth handle type %{public}d", authHandleType);
+    switch (authHandleType) {
+        case AUTH_LINK_TYPE_WIFI:
+            extra.bootLinkType = STATISTIC_WLAN;
+            break;
+        case AUTH_LINK_TYPE_BR:
+            extra.bootLinkType = STATISTIC_BR;
+            break;
+        case AUTH_LINK_TYPE_BLE:
+            extra.bootLinkType = STATISTIC_BLE;
+            break;
+        default:
+            CONN_LOGE(CONN_WIFI_DIRECT, "undefined handle type");
+            extra.bootLinkType = STATISTIC_NONE;
+            break;
     }
 }
 } // namespace OHOS::SoftBus

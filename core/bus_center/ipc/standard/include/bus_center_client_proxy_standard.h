@@ -51,6 +51,7 @@ public:
     void OnRefreshLNNResult(int32_t refreshId, int32_t reason) override;
     void OnRefreshDeviceFound(const void *device, uint32_t deviceLen) override;
     void OnDataLevelChanged(const char *networkId, const DataLevelInfo *dataLevelInfo) override;
+    void OnMsdpRangeResult(const RangeResultInnerInfo *rangeInfo) override;
 
 private:
     static inline BrokerDelegator<BusCenterClientProxy> delegator_;

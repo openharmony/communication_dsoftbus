@@ -1,4 +1,4 @@
-# Copyright (c) 2023 Huawei Device Co., Ltd.
+# Copyright (c) 2023-2025 Huawei Device Co., Ltd.
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
 # You may obtain a copy of the License at
@@ -12,146 +12,500 @@
 # limitations under the License.
 
 import("//build/ohos.gni")
+import("../../../core/connection/ble/conn_ble.gni")
+import("../../../core/connection/br/conn_br.gni")
+import("../../../core/connection/general/general_connection.gni")
+import("../../../core/connection/tcp/conn_tcp.gni")
 import("../../../dsoftbus.gni")
 
-ohos_static_library("wifi_direct") {
-  defines += [ "__STDC_FORMAT_MACROS" ]
-  if (is_asan) {
-    defines += [ "ASAN_BUILD" ]
-  }
-
-  wifi_direct_path = "$dsoftbus_root_path/core/connection/wifi_direct_cpp"
-  wifi_direct_connection_src = []
-
-  wifi_direct_connection_inc = [
-    "$dsoftbus_dfx_path/interface/include",
-    "$dsoftbus_root_path/adapter/common/include",
-    "$dsoftbus_root_path/adapter/common/net/wifi/include",
-    "$dsoftbus_root_path/core/adapter/authentication/include",
-    "$dsoftbus_root_path/core/adapter/bus_center/include",
-    "$dsoftbus_root_path/core/authentication/include",
-    "$dsoftbus_root_path/core/authentication/interface",
-    "$dsoftbus_root_path/core/bus_center/interface",
-    "$dsoftbus_root_path/core/bus_center/lnn/lane_hub/heartbeat/include",
-    "$dsoftbus_root_path/core/bus_center/lnn/net_builder/include",
-    "$dsoftbus_root_path/core/bus_center/lnn/net_ledger/common/include",
-    "$dsoftbus_root_path/core/bus_center/lnn/net_ledger/distributed_ledger/include",
-    "$dsoftbus_root_path/core/bus_center/lnn/lane_hub/lane_manager/include",
-    "$dsoftbus_root_path/core/bus_center/utils/include/",
-    "$dsoftbus_root_path/core/common/include",
-    "$dsoftbus_root_path/core/connection/interface",
-    "$dsoftbus_root_path/core/connection/manager",
+config("wifi_direct_interface") {
+  include_dirs = [
     "$dsoftbus_root_path/core/connection/wifi_direct_cpp",
-    "$dsoftbus_root_path/core/discovery/interface",
-    "$dsoftbus_root_path/core/discovery/manager/include",
-    "$dsoftbus_root_path/core/transmission/trans_channel/proxy/include",
-    "$dsoftbus_root_path/interfaces/inner_kits/lnn",
-    "$dsoftbus_root_path/interfaces/kits/common",
-    "$dsoftbus_root_path/interfaces/kits/discovery",
-    "$dsoftbus_root_path/interfaces/kits/bus_center",
+    "$dsoftbus_root_path/core/connection/wifi_direct_cpp/adapter",
+    "$dsoftbus_root_path/core/connection/wifi_direct_cpp/command",
+    "$dsoftbus_root_path/core/connection/wifi_direct_cpp/data",
+    "$dsoftbus_root_path/core/connection/wifi_direct_cpp/protocol",
+    "$dsoftbus_root_path/core/connection/wifi_direct_cpp/utils",
+    "$dsoftbus_root_path/interfaces/kits/transport",
   ]
+}
 
-  if (!defined(ohos_lite)) {
-    wifi_direct_connection_inc +=
-        [ "$dsoftbus_root_path/adapter/common/include/OS_adapter_define/linux" ]
-  }
+if (!softbus_config_enhance && defined(ohos_lite)) {
+  if (ohos_kernel_type == "liteos_m") {
+    ohos_static_library("wifi_direct") {
+      defines += [ "__STDC_FORMAT_MACROS" ]
+      if (is_asan) {
+        defines += [ "ASAN_BUILD" ]
+      }
+      deps = [
+        "$dsoftbus_root_path/adapter:softbus_adapter",
+        "$dsoftbus_root_path/core/common:softbus_utils",
+        "$dsoftbus_root_path/dfx:softbus_dfx",
+      ]
+      public_configs = [ ":wifi_direct_interface" ]
 
-  wifi_direct_connection_external_deps = []
+      wifi_direct_path = "$dsoftbus_root_path/core/connection/wifi_direct_cpp"
+      wifi_direct_connection_src = []
 
-  if (dsoftbus_feature_conn_pv1 == true &&
-      softbus_communication_wifi_feature == true &&
-      dsoftbus_feature_conn_tcp_comm == true) {
-    sanitize = {
-      cfi = true
-      cfi_cross_dso = true
-      debug = false
+      wifi_direct_connection_inc = [
+        "$dsoftbus_dfx_path/interface/include",
+        "$dsoftbus_dfx_path/interface/include/form",
+        "$dsoftbus_root_path/adapter/common/include",
+        "$dsoftbus_root_path/adapter/common/net/wifi/include",
+        "$dsoftbus_root_path/core/adapter/authentication/include",
+        "$dsoftbus_root_path/core/adapter/bus_center/include",
+        "$dsoftbus_root_path/core/authentication/include",
+        "$dsoftbus_root_path/core/authentication/interface",
+        "$dsoftbus_root_path/core/bus_center/interface",
+        "$dsoftbus_root_path/core/bus_center/lnn/interface/common",
+        "$dsoftbus_root_path/core/bus_center/lnn/lane_hub/heartbeat/include",
+        "$dsoftbus_root_path/core/bus_center/lnn/lane_hub/lane_manager/include",
+        "$dsoftbus_root_path/core/bus_center/lnn/net_builder/include",
+        "$dsoftbus_root_path/core/bus_center/lnn/net_ledger/common/include",
+        "$dsoftbus_root_path/core/bus_center/lnn/net_ledger/distributed_ledger/include",
+        "$dsoftbus_root_path/core/bus_center/lnn/net_ledger/local_ledger/include",
+        "$dsoftbus_root_path/core/bus_center/service/include",
+        "$dsoftbus_root_path/core/bus_center/utils/include/",
+        "$dsoftbus_root_path/core/common/include",
+        "$dsoftbus_root_path/core/connection/interface",
+        "$dsoftbus_root_path/core/connection/manager",
+        "$dsoftbus_root_path/core/connection/wifi_direct_cpp",
+        "$dsoftbus_root_path/core/connection/wifi_direct_cpp/dbinder",
+        "$dsoftbus_root_path/core/discovery/interface",
+        "$dsoftbus_root_path/core/discovery/manager/include",
+        "$dsoftbus_root_path/core/frame/init/include",
+        "$dsoftbus_root_path/core/transmission/trans_channel/proxy/include",
+        "$dsoftbus_root_path/interfaces/inner_kits/lnn",
+        "$dsoftbus_root_path/interfaces/inner_kits/transport",
+        "$dsoftbus_root_path/interfaces/kits/adapter",
+        "$dsoftbus_root_path/interfaces/kits/authentication",
+        "$dsoftbus_root_path/interfaces/kits/authentication/enhance",
+        "$dsoftbus_root_path/interfaces/kits/bus_center",
+        "$dsoftbus_root_path/interfaces/kits/common",
+        "$dsoftbus_root_path/interfaces/kits/connect",
+        "$dsoftbus_root_path/interfaces/kits/disc",
+        "$dsoftbus_root_path/interfaces/kits/discovery",
+        "$dsoftbus_root_path/interfaces/kits/lnn",
+        "$dsoftbus_root_path/interfaces/kits/lnn/enhance",
+        "$dsoftbus_root_path/interfaces/kits/transport",
+      ]
+
+      wifi_direct_connection_external_deps = []
+
+      if (dsoftbus_feature_conn_pv1 == true &&
+          softbus_communication_wifi_feature == true &&
+          dsoftbus_feature_conn_tcp_comm == true) {
+        wifi_direct_connection_src += [
+          "$wifi_direct_path/adapter/p2p_adapter.cpp",
+          "$wifi_direct_path/channel/auth_negotiate_channel.cpp",
+          "$wifi_direct_path/channel/proxy_negotiate_channel.cpp",
+          "$wifi_direct_path/channel/dummy_negotiate_channel.cpp",
+          "$wifi_direct_path/command/connect_command.cpp",
+          "$wifi_direct_path/command/command_factory.cpp",
+          "$wifi_direct_path/command/disconnect_command.cpp",
+          "$wifi_direct_path/command/force_disconnect_command.cpp",
+          "$wifi_direct_path/command/negotiate_command.cpp",
+          "$wifi_direct_path/command/processor_selector_factory.cpp",
+          "$wifi_direct_path/command/simple_processor_selector.cpp",
+          "$wifi_direct_path/data/inner_link.cpp",
+          "$wifi_direct_path/data/interface_info.cpp",
+          "$wifi_direct_path/data/interface_manager.cpp",
+          "$wifi_direct_path/data/ipv4_info.cpp",
+          "$wifi_direct_path/data/link_info.cpp",
+          "$wifi_direct_path/data/link_manager.cpp",
+          "$wifi_direct_path/data/negotiate_message.cpp",
+          "$wifi_direct_path/data/wifi_config_info.cpp",
+          "$wifi_direct_path/dfx/duration_statistic.cpp",
+          "$wifi_direct_path/dfx/interface_snapshot.cpp",
+          "$wifi_direct_path/dfx/link_snapshot.cpp",
+          "$wifi_direct_path/dfx/p2p_entity_snapshot.cpp",
+          "$wifi_direct_path/dfx/processor_snapshot.cpp",
+          "$wifi_direct_path/dfx/wifi_direct_trace.cpp",
+          "$wifi_direct_path/dfx/wifi_direct_dfx.cpp",
+          "$wifi_direct_path/dfx/wifi_direct_hidumper.cpp",
+          "$wifi_direct_path/event/wifi_direct_event_dispatcher.cpp",
+          "$wifi_direct_path/entity/p2p_available_state.cpp",
+          "$wifi_direct_path/entity/p2p_connect_state.cpp",
+          "$wifi_direct_path/entity/p2p_create_group_state.cpp",
+          "$wifi_direct_path/entity/p2p_destroy_group_state.cpp",
+          "$wifi_direct_path/entity/p2p_entity.cpp",
+          "$wifi_direct_path/entity/p2p_entity_state.cpp",
+          "$wifi_direct_path/entity/p2p_unavailable_state.cpp",
+          "$wifi_direct_path/entity/p2p_broadcast_receiver.cpp",
+          "$wifi_direct_path/processor/p2p_v1_processor.cpp",
+          "$wifi_direct_path/processor/null_processor.cpp",
+          "$wifi_direct_path/protocol/json_protocol.cpp",
+          "$wifi_direct_path/protocol/tlv_protocol.cpp",
+          "$wifi_direct_path/utils/wifi_direct_anonymous.cpp",
+          "$wifi_direct_path/utils/wifi_direct_utils.cpp",
+          "$dsoftbus_root_path/core/frame/common/src/softbus_init_common.c",
+          "$wifi_direct_path/wifi_direct_executor.cpp",
+          "$wifi_direct_path/wifi_direct_executor_manager.cpp",
+          "$wifi_direct_path/wifi_direct_initiator.cpp",
+          "$wifi_direct_path/wifi_direct_ip_manager.cpp",
+          "$wifi_direct_path/wifi_direct_manager.cpp",
+          "$wifi_direct_path/wifi_direct_role_option.cpp",
+          "$wifi_direct_path/wifi_direct_scheduler.cpp",
+          "$wifi_direct_path/dbinder/wifi_direct_init.cpp",
+          "$wifi_direct_path/wifi_direct_executor_factory.cpp",
+          "$wifi_direct_path/wifi_direct_scheduler_factory.cpp",
+          "$wifi_direct_path/entity/entity_factory.cpp",
+        ]
+
+        wifi_direct_connection_external_deps += [
+          "bounds_checking_function:libsec_shared",
+          "cJSON:cjson",
+          "c_utils:utils",
+          "hilog:libhilog",
+          "hitrace:libhitracechain",
+          "init:libbegetutil",
+          "json:nlohmann_json_static",
+          "netmanager_base:net_conn_manager_if",
+          "samgr:samgr_proxy",
+          "wifi:wifi_sdk",
+        ]
+
+        remove_configs = [
+          "//build/config/compiler:no_rtti",
+          "//build/config/compiler:no_exceptions",
+        ]
+
+        configs = [
+          "//build/config/compiler:rtti",
+          "//build/config/compiler:exceptions",
+        ]
+      } else {
+        wifi_direct_connection_src +=
+            [ "$wifi_direct_path/wifi_direct_manager_virtual.c" ]
+      }
+
+      include_dirs = wifi_direct_connection_inc
+      sources = wifi_direct_connection_src
+      external_deps = wifi_direct_connection_external_deps
+
+      part_name = "dsoftbus"
+      subsystem_name = "communication"
     }
-    branch_protector_ret = "pac_ret"
-    wifi_direct_connection_src += [
-      "$wifi_direct_path/adapter/p2p_adapter.cpp",
-      "$wifi_direct_path/channel/auth_negotiate_channel.cpp",
-      "$wifi_direct_path/channel/proxy_negotiate_channel.cpp",
-      "$wifi_direct_path/channel/dummy_negotiate_channel.cpp",
-      "$wifi_direct_path/command/connect_command.cpp",
-      "$wifi_direct_path/command/command_factory.cpp",
-      "$wifi_direct_path/command/disconnect_command.cpp",
-      "$wifi_direct_path/command/force_disconnect_command.cpp",
-      "$wifi_direct_path/command/negotiate_command.cpp",
-      "$wifi_direct_path/command/processor_selector_factory.cpp",
-      "$wifi_direct_path/command/simple_processor_selector.cpp",
-      "$wifi_direct_path/data/inner_link.cpp",
-      "$wifi_direct_path/data/interface_info.cpp",
-      "$wifi_direct_path/data/interface_manager.cpp",
-      "$wifi_direct_path/data/ipv4_info.cpp",
-      "$wifi_direct_path/data/link_info.cpp",
-      "$wifi_direct_path/data/link_manager.cpp",
-      "$wifi_direct_path/data/negotiate_message.cpp",
-      "$wifi_direct_path/data/wifi_config_info.cpp",
-      "$wifi_direct_path/dfx/duration_statistic.cpp",
-      "$wifi_direct_path/dfx/wifi_direct_trace.cpp",
-      "$wifi_direct_path/dfx/wifi_direct_dfx.cpp",
-      "$wifi_direct_path/event/wifi_direct_event_dispatcher.cpp",
-      "$wifi_direct_path/entity/p2p_available_state.cpp",
-      "$wifi_direct_path/entity/p2p_connect_state.cpp",
-      "$wifi_direct_path/entity/p2p_create_group_state.cpp",
-      "$wifi_direct_path/entity/p2p_destroy_group_state.cpp",
-      "$wifi_direct_path/entity/p2p_entity.cpp",
-      "$wifi_direct_path/entity/p2p_entity_state.cpp",
-      "$wifi_direct_path/entity/p2p_unavailable_state.cpp",
-      "$wifi_direct_path/entity/p2p_broadcast_receiver.cpp",
-      "$wifi_direct_path/processor/p2p_v1_processor.cpp",
-      "$wifi_direct_path/processor/null_processor.cpp",
-      "$wifi_direct_path/protocol/json_protocol.cpp",
-      "$wifi_direct_path/protocol/tlv_protocol.cpp",
-      "$wifi_direct_path/utils/wifi_direct_anonymous.cpp",
-      "$wifi_direct_path/utils/wifi_direct_utils.cpp",
-      "$wifi_direct_path/wifi_direct_executor.cpp",
-      "$wifi_direct_path/wifi_direct_initiator.cpp",
-      "$wifi_direct_path/wifi_direct_ip_manager.cpp",
-      "$wifi_direct_path/wifi_direct_manager.cpp",
-      "$wifi_direct_path/wifi_direct_role_option.cpp",
-      "$wifi_direct_path/wifi_direct_scheduler.cpp",
-    ]
-    if (dsoftbus_feature_ex_kits == true) {
-      import(
-          "../../../dsoftbus_enhance/core/connection/wifi_direct_cpp/wifi_direct.gni")
-
-      wifi_direct_connection_inc += wifi_direct_connection_enhance_inc
-      wifi_direct_connection_src += wifi_direct_connection_enhance_src
-      wifi_direct_connection_external_deps +=
-          wifi_direct_connection_enhance_external_deps
-    }
-
-    wifi_direct_connection_external_deps += [
-      "bounds_checking_function:libsec_shared",
-      "cJSON:cjson",
-      "c_utils:utils",
-      "hilog:libhilog",
-      "hitrace:libhitracechain",
-      "init:libbegetutil",
-      "json:nlohmann_json_static",
-      "netmanager_base:net_conn_manager_if",
-      "wifi:wifi_sdk",
-    ]
-
-    remove_configs = [
-      "//build/config/compiler:no_rtti",
-      "//build/config/compiler:no_exceptions",
-    ]
-
-    configs = [
-      "//build/config/compiler:rtti",
-      "//build/config/compiler:exceptions",
-    ]
   } else {
-    wifi_direct_connection_src +=
-        [ "$wifi_direct_path/wifi_direct_manager_virtual.c" ]
+    ohos_shared_library("wifi_direct") {
+      defines += [ "__STDC_FORMAT_MACROS" ]
+      if (is_asan) {
+        defines += [ "ASAN_BUILD" ]
+      }
+      deps = [
+        "$dsoftbus_root_path/adapter:softbus_adapter",
+        "$dsoftbus_root_path/core/common:softbus_utils",
+        "$dsoftbus_root_path/dfx:softbus_dfx",
+      ]
+      public_configs = [ ":wifi_direct_interface" ]
+
+      wifi_direct_path = "$dsoftbus_root_path/core/connection/wifi_direct_cpp"
+      wifi_direct_connection_src = []
+
+      wifi_direct_connection_inc = [
+        "$dsoftbus_dfx_path/interface/include",
+        "$dsoftbus_dfx_path/interface/include/form",
+        "$dsoftbus_root_path/adapter/common/include",
+        "$dsoftbus_root_path/adapter/common/net/wifi/include",
+        "$dsoftbus_root_path/core/adapter/authentication/include",
+        "$dsoftbus_root_path/core/adapter/bus_center/include",
+        "$dsoftbus_root_path/core/authentication/include",
+        "$dsoftbus_root_path/core/authentication/interface",
+        "$dsoftbus_root_path/core/bus_center/interface",
+        "$dsoftbus_root_path/core/bus_center/lnn/interface/common",
+        "$dsoftbus_root_path/core/bus_center/lnn/lane_hub/heartbeat/include",
+        "$dsoftbus_root_path/core/bus_center/lnn/lane_hub/lane_manager/include",
+        "$dsoftbus_root_path/core/bus_center/lnn/net_builder/include",
+        "$dsoftbus_root_path/core/bus_center/lnn/net_ledger/common/include",
+        "$dsoftbus_root_path/core/bus_center/lnn/net_ledger/distributed_ledger/include",
+        "$dsoftbus_root_path/core/bus_center/service/include",
+        "$dsoftbus_root_path/core/bus_center/utils/include/",
+        "$dsoftbus_root_path/core/common/include",
+        "$dsoftbus_root_path/core/connection/interface",
+        "$dsoftbus_root_path/core/connection/manager",
+        "$dsoftbus_root_path/core/connection/wifi_direct_cpp",
+        "$dsoftbus_root_path/core/connection/wifi_direct_cpp/dbinder",
+        "$dsoftbus_root_path/core/discovery/interface",
+        "$dsoftbus_root_path/core/discovery/manager/include",
+        "$dsoftbus_root_path/core/frame/init/include",
+        "$dsoftbus_root_path/core/transmission/trans_channel/proxy/include",
+        "$dsoftbus_root_path/interfaces/inner_kits/lnn",
+        "$dsoftbus_root_path/interfaces/inner_kits/transport",
+        "$dsoftbus_root_path/interfaces/kits/adapter",
+        "$dsoftbus_root_path/interfaces/kits/authentication",
+        "$dsoftbus_root_path/interfaces/kits/authentication/enhance",
+        "$dsoftbus_root_path/interfaces/kits/bus_center",
+        "$dsoftbus_root_path/interfaces/kits/common",
+        "$dsoftbus_root_path/interfaces/kits/connect",
+        "$dsoftbus_root_path/interfaces/kits/disc",
+        "$dsoftbus_root_path/interfaces/kits/discovery",
+        "$dsoftbus_root_path/interfaces/kits/lnn",
+        "$dsoftbus_root_path/interfaces/kits/lnn/enhance",
+        "$dsoftbus_root_path/interfaces/kits/transport",
+      ]
+
+      wifi_direct_connection_external_deps = []
+
+      if (dsoftbus_feature_conn_pv1 == true &&
+          softbus_communication_wifi_feature == true &&
+          dsoftbus_feature_conn_tcp_comm == true) {
+        wifi_direct_connection_src += [
+          "$wifi_direct_path/adapter/p2p_adapter.cpp",
+          "$wifi_direct_path/channel/auth_negotiate_channel.cpp",
+          "$wifi_direct_path/channel/proxy_negotiate_channel.cpp",
+          "$wifi_direct_path/channel/dummy_negotiate_channel.cpp",
+          "$wifi_direct_path/command/connect_command.cpp",
+          "$wifi_direct_path/command/command_factory.cpp",
+          "$wifi_direct_path/command/disconnect_command.cpp",
+          "$wifi_direct_path/command/force_disconnect_command.cpp",
+          "$wifi_direct_path/command/negotiate_command.cpp",
+          "$wifi_direct_path/command/processor_selector_factory.cpp",
+          "$wifi_direct_path/command/simple_processor_selector.cpp",
+          "$wifi_direct_path/data/inner_link.cpp",
+          "$wifi_direct_path/data/interface_info.cpp",
+          "$wifi_direct_path/data/interface_manager.cpp",
+          "$wifi_direct_path/data/ipv4_info.cpp",
+          "$wifi_direct_path/data/link_info.cpp",
+          "$wifi_direct_path/data/link_manager.cpp",
+          "$wifi_direct_path/data/negotiate_message.cpp",
+          "$wifi_direct_path/data/wifi_config_info.cpp",
+          "$wifi_direct_path/dfx/duration_statistic.cpp",
+          "$wifi_direct_path/dfx/interface_snapshot.cpp",
+          "$wifi_direct_path/dfx/link_snapshot.cpp",
+          "$wifi_direct_path/dfx/p2p_entity_snapshot.cpp",
+          "$wifi_direct_path/dfx/processor_snapshot.cpp",
+          "$wifi_direct_path/dfx/wifi_direct_trace.cpp",
+          "$wifi_direct_path/dfx/wifi_direct_dfx.cpp",
+          "$wifi_direct_path/dfx/wifi_direct_hidumper.cpp",
+          "$wifi_direct_path/event/wifi_direct_event_dispatcher.cpp",
+          "$wifi_direct_path/entity/p2p_available_state.cpp",
+          "$wifi_direct_path/entity/p2p_connect_state.cpp",
+          "$wifi_direct_path/entity/p2p_create_group_state.cpp",
+          "$wifi_direct_path/entity/p2p_destroy_group_state.cpp",
+          "$wifi_direct_path/entity/p2p_entity.cpp",
+          "$wifi_direct_path/entity/p2p_entity_state.cpp",
+          "$wifi_direct_path/entity/p2p_unavailable_state.cpp",
+          "$wifi_direct_path/entity/p2p_broadcast_receiver.cpp",
+          "$wifi_direct_path/processor/p2p_v1_processor.cpp",
+          "$wifi_direct_path/processor/null_processor.cpp",
+          "$wifi_direct_path/protocol/json_protocol.cpp",
+          "$wifi_direct_path/protocol/tlv_protocol.cpp",
+          "$wifi_direct_path/utils/wifi_direct_anonymous.cpp",
+          "$wifi_direct_path/utils/wifi_direct_utils.cpp",
+          "$dsoftbus_root_path/core/frame/common/src/softbus_init_common.c",
+          "$wifi_direct_path/wifi_direct_executor.cpp",
+          "$wifi_direct_path/wifi_direct_executor_manager.cpp",
+          "$wifi_direct_path/wifi_direct_initiator.cpp",
+          "$wifi_direct_path/wifi_direct_ip_manager.cpp",
+          "$wifi_direct_path/wifi_direct_manager.cpp",
+          "$wifi_direct_path/wifi_direct_role_option.cpp",
+          "$wifi_direct_path/wifi_direct_scheduler.cpp",
+          "$wifi_direct_path/dbinder/wifi_direct_init.cpp",
+          "$wifi_direct_path/wifi_direct_executor_factory.cpp",
+          "$wifi_direct_path/wifi_direct_scheduler_factory.cpp",
+          "$wifi_direct_path/entity/entity_factory.cpp",
+        ]
+
+        wifi_direct_connection_external_deps += [
+          "bounds_checking_function:libsec_shared",
+          "cJSON:cjson",
+          "c_utils:utils",
+          "hilog:libhilog",
+          "hitrace:libhitracechain",
+          "init:libbegetutil",
+          "json:nlohmann_json_static",
+          "netmanager_base:net_conn_manager_if",
+          "samgr:samgr_proxy",
+          "wifi:wifi_sdk",
+        ]
+
+        remove_configs = [
+          "//build/config/compiler:no_rtti",
+          "//build/config/compiler:no_exceptions",
+        ]
+
+        configs = [
+          "//build/config/compiler:rtti",
+          "//build/config/compiler:exceptions",
+        ]
+      } else {
+        wifi_direct_connection_src +=
+            [ "$wifi_direct_path/wifi_direct_manager_virtual.c" ]
+      }
+
+      include_dirs = wifi_direct_connection_inc
+      sources = wifi_direct_connection_src
+      external_deps = wifi_direct_connection_external_deps
+
+      part_name = "dsoftbus"
+      subsystem_name = "communication"
+    }
   }
+} else {
+  ohos_shared_library("wifi_direct") {
+    if (!defined(ohos_lite)) {
+      sanitize = {
+        cfi = true
+        cfi_cross_dso = true
+        debug = false
+      }
+      branch_protector_ret = "pac_ret"
+    }
+    defines += [ "__STDC_FORMAT_MACROS" ]
+    if (is_asan) {
+      defines += [ "ASAN_BUILD" ]
+    }
+    deps = [
+      "$dsoftbus_root_path/adapter:softbus_adapter",
+      "$dsoftbus_root_path/core/common:softbus_utils",
+      "$dsoftbus_root_path/dfx:softbus_dfx",
+    ]
+    public_configs = [ ":wifi_direct_interface" ]
 
-  include_dirs = wifi_direct_connection_inc
-  sources = wifi_direct_connection_src
-  external_deps = wifi_direct_connection_external_deps
+    wifi_direct_path = "$dsoftbus_root_path/core/connection/wifi_direct_cpp"
+    wifi_direct_connection_src = []
 
-  part_name = "dsoftbus"
-  subsystem_name = "communication"
+    wifi_direct_connection_inc = [
+      "$dsoftbus_dfx_path/interface/include",
+      "$dsoftbus_dfx_path/interface/include/form",
+      "$dsoftbus_root_path/adapter/common/include",
+      "$dsoftbus_root_path/adapter/common/net/wifi/include",
+      "$dsoftbus_root_path/core/adapter/authentication/include",
+      "$dsoftbus_root_path/core/adapter/bus_center/include",
+      "$dsoftbus_root_path/core/authentication/include",
+      "$dsoftbus_root_path/core/authentication/interface",
+      "$dsoftbus_root_path/core/bus_center/interface",
+      "$dsoftbus_root_path/core/bus_center/lnn/interface/common",
+      "$dsoftbus_root_path/core/bus_center/lnn/lane_hub/heartbeat/include",
+      "$dsoftbus_root_path/core/bus_center/lnn/lane_hub/lane_manager/include",
+      "$dsoftbus_root_path/core/bus_center/lnn/net_builder/include",
+      "$dsoftbus_root_path/core/bus_center/lnn/net_ledger/common/include",
+      "$dsoftbus_root_path/core/bus_center/lnn/net_ledger/distributed_ledger/include",
+      "$dsoftbus_root_path/core/bus_center/service/include",
+      "$dsoftbus_root_path/core/bus_center/utils/include/",
+      "$dsoftbus_root_path/core/common/include",
+      "$dsoftbus_root_path/core/connection/interface",
+      "$dsoftbus_root_path/core/connection/manager",
+      "$dsoftbus_root_path/core/connection/wifi_direct_cpp",
+      "$dsoftbus_root_path/core/connection/wifi_direct_cpp/dbinder",
+      "$dsoftbus_root_path/core/discovery/interface",
+      "$dsoftbus_root_path/core/discovery/manager/include",
+      "$dsoftbus_root_path/core/frame/init/include",
+      "$dsoftbus_root_path/core/transmission/trans_channel/proxy/include",
+      "$dsoftbus_root_path/interfaces/inner_kits/lnn",
+      "$dsoftbus_root_path/interfaces/inner_kits/transport",
+      "$dsoftbus_root_path/interfaces/kits/adapter",
+      "$dsoftbus_root_path/interfaces/kits/authentication",
+      "$dsoftbus_root_path/interfaces/kits/authentication/enhance",
+      "$dsoftbus_root_path/interfaces/kits/bus_center",
+      "$dsoftbus_root_path/interfaces/kits/common",
+      "$dsoftbus_root_path/interfaces/kits/connect",
+      "$dsoftbus_root_path/interfaces/kits/disc",
+      "$dsoftbus_root_path/interfaces/kits/discovery",
+      "$dsoftbus_root_path/interfaces/kits/lnn",
+      "$dsoftbus_root_path/interfaces/kits/lnn/enhance",
+      "$dsoftbus_root_path/interfaces/kits/transport",
+    ]
+
+    if (!defined(ohos_lite)) {
+      wifi_direct_connection_inc += [
+        "$dsoftbus_root_path/adapter/common/include/OS_adapter_define/linux",
+      ]
+    }
+    wifi_direct_connection_external_deps = []
+
+    if (dsoftbus_feature_conn_pv1 == true &&
+        softbus_communication_wifi_feature == true &&
+        dsoftbus_feature_conn_tcp_comm == true) {
+      wifi_direct_connection_src += [
+        "$wifi_direct_path/adapter/p2p_adapter.cpp",
+        "$wifi_direct_path/channel/auth_negotiate_channel.cpp",
+        "$wifi_direct_path/channel/proxy_negotiate_channel.cpp",
+        "$wifi_direct_path/channel/dummy_negotiate_channel.cpp",
+        "$wifi_direct_path/command/connect_command.cpp",
+        "$wifi_direct_path/command/command_factory.cpp",
+        "$wifi_direct_path/command/disconnect_command.cpp",
+        "$wifi_direct_path/command/force_disconnect_command.cpp",
+        "$wifi_direct_path/command/negotiate_command.cpp",
+        "$wifi_direct_path/command/processor_selector_factory.cpp",
+        "$wifi_direct_path/command/simple_processor_selector.cpp",
+        "$wifi_direct_path/data/inner_link.cpp",
+        "$wifi_direct_path/data/interface_info.cpp",
+        "$wifi_direct_path/data/interface_manager.cpp",
+        "$wifi_direct_path/data/ipv4_info.cpp",
+        "$wifi_direct_path/data/link_info.cpp",
+        "$wifi_direct_path/data/link_manager.cpp",
+        "$wifi_direct_path/data/negotiate_message.cpp",
+        "$wifi_direct_path/data/wifi_config_info.cpp",
+        "$wifi_direct_path/dfx/duration_statistic.cpp",
+        "$wifi_direct_path/dfx/interface_snapshot.cpp",
+        "$wifi_direct_path/dfx/link_snapshot.cpp",
+        "$wifi_direct_path/dfx/p2p_entity_snapshot.cpp",
+        "$wifi_direct_path/dfx/processor_snapshot.cpp",
+        "$wifi_direct_path/dfx/wifi_direct_trace.cpp",
+        "$wifi_direct_path/dfx/wifi_direct_dfx.cpp",
+        "$wifi_direct_path/dfx/wifi_direct_hidumper.cpp",
+        "$wifi_direct_path/event/wifi_direct_event_dispatcher.cpp",
+        "$wifi_direct_path/entity/p2p_available_state.cpp",
+        "$wifi_direct_path/entity/p2p_connect_state.cpp",
+        "$wifi_direct_path/entity/p2p_create_group_state.cpp",
+        "$wifi_direct_path/entity/p2p_destroy_group_state.cpp",
+        "$wifi_direct_path/entity/p2p_entity.cpp",
+        "$wifi_direct_path/entity/p2p_entity_state.cpp",
+        "$wifi_direct_path/entity/p2p_unavailable_state.cpp",
+        "$wifi_direct_path/entity/p2p_broadcast_receiver.cpp",
+        "$wifi_direct_path/processor/p2p_v1_processor.cpp",
+        "$wifi_direct_path/processor/null_processor.cpp",
+        "$wifi_direct_path/protocol/json_protocol.cpp",
+        "$wifi_direct_path/protocol/tlv_protocol.cpp",
+        "$wifi_direct_path/utils/wifi_direct_anonymous.cpp",
+        "$wifi_direct_path/utils/wifi_direct_utils.cpp",
+        "$dsoftbus_root_path/core/frame/common/src/softbus_init_common.c",
+        "$wifi_direct_path/wifi_direct_executor.cpp",
+        "$wifi_direct_path/wifi_direct_executor_manager.cpp",
+        "$wifi_direct_path/wifi_direct_initiator.cpp",
+        "$wifi_direct_path/wifi_direct_ip_manager.cpp",
+        "$wifi_direct_path/wifi_direct_manager.cpp",
+        "$wifi_direct_path/wifi_direct_role_option.cpp",
+        "$wifi_direct_path/wifi_direct_scheduler.cpp",
+        "$wifi_direct_path/dbinder/wifi_direct_init.cpp",
+        "$wifi_direct_path/wifi_direct_executor_factory.cpp",
+        "$wifi_direct_path/wifi_direct_scheduler_factory.cpp",
+        "$wifi_direct_path/entity/entity_factory.cpp",
+      ]
+
+      wifi_direct_connection_external_deps += [
+        "bounds_checking_function:libsec_shared",
+        "cJSON:cjson",
+        "c_utils:utils",
+        "hilog:libhilog",
+        "hitrace:libhitracechain",
+        "init:libbegetutil",
+        "json:nlohmann_json_static",
+        "netmanager_base:net_conn_manager_if",
+        "samgr:samgr_proxy",
+        "wifi:wifi_sdk",
+      ]
+
+      remove_configs = [
+        "//build/config/compiler:no_rtti",
+        "//build/config/compiler:no_exceptions",
+      ]
+
+      configs = [
+        "//build/config/compiler:rtti",
+        "//build/config/compiler:exceptions",
+      ]
+    } else {
+      wifi_direct_connection_src +=
+          [ "$wifi_direct_path/wifi_direct_manager_virtual.c" ]
+    }
+
+    include_dirs = wifi_direct_connection_inc
+    sources = wifi_direct_connection_src
+    external_deps = wifi_direct_connection_external_deps
+
+    part_name = "dsoftbus"
+    subsystem_name = "communication"
+  }
 }

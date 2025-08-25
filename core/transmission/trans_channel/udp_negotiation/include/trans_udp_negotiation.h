@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2025 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -16,7 +16,6 @@
 #ifndef TRANS_UDP_NEGOTIATION_H
 #define TRANS_UDP_NEGOTIATION_H
 
-#include <stdint.h>
 #include "softbus_app_info.h"
 #include "softbus_conn_interface.h"
 #include "trans_channel_callback.h"
@@ -40,10 +39,11 @@ void NotifyWifiByDelScenario(StreamType streamType, int32_t pid);
 void ReleaseUdpChannelId(int32_t channelId);
 
 void TransUdpDeathCallback(const char *pkgName, int32_t pid);
-int32_t TransDealUdpChannelOpenResult(int32_t channelId, int32_t openResult, int32_t udpPort);
+int32_t TransDealUdpChannelOpenResult(
+    int32_t channelId, int32_t openResult, int32_t udpPort, const AccessInfo *accessInfo, pid_t callingPid);
 int32_t SendReplyErrInfo(int32_t errCode, char* errDesc, AuthHandle authHandle, int64_t seq);
 
-int32_t TransDealUdpCheckCollabResult(int32_t channelId, int32_t checkResult);
+int32_t TransDealUdpCheckCollabResult(int32_t channelId, int32_t checkResult, pid_t callingPid);
 
 #ifdef __cplusplus
 }

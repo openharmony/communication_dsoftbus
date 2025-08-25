@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021-2022 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2025 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -118,15 +118,15 @@ void TestAddTestProxyChannel(int32_t authId = AUTH_INVALID_ID)
     callBack.OnChannelOpened = TestOnChannelOpened;
     callBack.OnChannelClosed = TestOnChannelClosed;
     callBack.OnChannelOpenFailed = TestOnChannelOpenFailed;
-    callBack.OnDataReceived = NULL;
+    callBack.OnDataReceived = nullptr;
     callBack.OnQosEvent = TestOnQosEvent;
-    callBack.GetPkgNameBySessionName = NULL;
+    callBack.GetPkgNameBySessionName = nullptr;
     callBack.GetUidAndPidBySessionName = TestGetUidAndPidBySessionName;
     TransProxyManagerInitInner(&callBack);
 
     m_testProxyChannelId = 1;
     ProxyChannelInfo *chan = (ProxyChannelInfo *)SoftBusCalloc(sizeof(ProxyChannelInfo));
-    if (chan == NULL) {
+    if (chan == nullptr) {
         TRANS_LOGE(TRANS_TEST, "test proxy calloc channel fail");
         return;
     }
@@ -164,7 +164,7 @@ HWTEST_F(TransProxyChannelTest, SetCipherOfHandshakeMsgTest001, TestSize.Level1)
     chan->appInfo.appType = APP_TYPE_NORMAL;
     chan->status = PROXY_CHANNEL_STATUS_PYH_CONNECTED;
 
-    int32_t ret = SetCipherOfHandshakeMsg(chan, NULL);
+    int32_t ret = SetCipherOfHandshakeMsg(chan, nullptr);
     EXPECT_EQ(ret, SOFTBUS_TRANS_PROXY_GET_AUTH_ID_FAILED);
 
     TestDelTestProxyChannel();
@@ -186,7 +186,7 @@ HWTEST_F(TransProxyChannelTest, SetCipherOfHandshakeMsgTest002, TestSize.Level1)
     chan->appInfo.appType = APP_TYPE_NORMAL;
     chan->status = PROXY_CHANNEL_STATUS_PYH_CONNECTED;
 
-    int32_t ret = SetCipherOfHandshakeMsg(chan, NULL);
+    int32_t ret = SetCipherOfHandshakeMsg(chan, nullptr);
     EXPECT_EQ(ret, SOFTBUS_TRANS_PROXY_GET_AUTH_ID_FAILED);
 
     TestDelTestProxyChannel();
@@ -200,7 +200,7 @@ HWTEST_F(TransProxyChannelTest, SetCipherOfHandshakeMsgTest002, TestSize.Level1)
  */
 HWTEST_F(TransProxyChannelTest, TransProxyHandshakeTest001, TestSize.Level1)
 {
-    int32_t ret = TransProxyHandshake(NULL);
+    int32_t ret = TransProxyHandshake(nullptr);
     EXPECT_EQ(ret, SOFTBUS_INVALID_PARAM);
 
     ProxyChannelInfo info;
@@ -210,7 +210,7 @@ HWTEST_F(TransProxyChannelTest, TransProxyHandshakeTest001, TestSize.Level1)
 
     TestAddTestProxyChannel();
     info.channelId = m_testProxyChannelId;
-    
+
     ret = TransProxyHandshake(&info);
     EXPECT_EQ(ret, SOFTBUS_TRANS_PROXY_SET_CIPHER_FAILED);
 
@@ -238,7 +238,7 @@ HWTEST_F(TransProxyChannelTest, TransProxyAckHandshakeTest001, TestSize.Level1)
     TestAddTestProxyChannel();
     info.channelId = m_testProxyChannelId;
 
-    int32_t ret = TransProxyAckHandshake(0, NULL, SOFTBUS_NO_INIT);
+    int32_t ret = TransProxyAckHandshake(0, nullptr, SOFTBUS_NO_INIT);
     EXPECT_EQ(ret, SOFTBUS_INVALID_PARAM);
 
     ret = TransProxyAckHandshake(0, &info, SOFTBUS_NO_INIT);
@@ -273,7 +273,7 @@ HWTEST_F(TransProxyChannelTest, TransProxyKeepaliveTest001, TestSize.Level1)
     TestAddTestProxyChannel();
     info.channelId = m_testProxyChannelId;
 
-    TransProxyKeepalive(connId, NULL);
+    TransProxyKeepalive(connId, nullptr);
     TransProxyKeepalive(connId, &info);
     info.appInfo.appType = APP_TYPE_NORMAL;
     TransProxyKeepalive(connId, &info);
@@ -322,7 +322,7 @@ HWTEST_F(TransProxyChannelTest, TransProxyAckKeepaliveTest001, TestSize.Level1)
     TestAddTestProxyChannel();
     info.channelId = m_testProxyChannelId;
 
-    int32_t ret = TransProxyAckKeepalive(NULL);
+    int32_t ret = TransProxyAckKeepalive(nullptr);
     EXPECT_EQ(ret, SOFTBUS_INVALID_PARAM);
 
     ret = TransProxyAckKeepalive(&info);
@@ -412,7 +412,7 @@ HWTEST_F(TransProxyChannelTest, TransProxyResetPeerTest002, TestSize.Level1)
 HWTEST_F(TransProxyChannelTest, TransProxyAddChanItemTest001, TestSize.Level1)
 {
     ProxyChannelInfo *info = (ProxyChannelInfo *)SoftBusCalloc(sizeof(ProxyChannelInfo));
-    if (info == NULL) {
+    if (info == nullptr) {
         return;
     }
     info->appInfo.appType = APP_TYPE_AUTH;
@@ -423,7 +423,7 @@ HWTEST_F(TransProxyChannelTest, TransProxyAddChanItemTest001, TestSize.Level1)
     IServerChannelCallBack callBack;
     TransProxyManagerInitInner(&callBack);
 
-    int32_t ret = TransProxyAddChanItem(NULL);
+    int32_t ret = TransProxyAddChanItem(nullptr);
     EXPECT_NE(SOFTBUS_OK, ret);
 
     ret = TransProxyAddChanItem(info);
@@ -483,7 +483,7 @@ HWTEST_F(TransProxyChannelTest, TransProxyProcessHandshakeMsgTest001, TestSize.L
 
     ProxyMessage msg;
     msg.data = TransProxyPackHandshakeMsg(&info);
-    msg.dateLen = strlen(msg.data) + 1;
+    msg.dataLen = strlen(msg.data) + 1;
     TransProxyProcessHandshakeMsg(&msg);
 
     TestDelTestProxyChannel();
@@ -498,7 +498,7 @@ HWTEST_F(TransProxyChannelTest, TransProxyProcessHandshakeMsgTest001, TestSize.L
 HWTEST_F(TransProxyChannelTest, TransProxyCreateChanInfoTest001, TestSize.Level1)
 {
     ProxyChannelInfo *info = (ProxyChannelInfo *)SoftBusCalloc(sizeof(ProxyChannelInfo));
-    if (info == NULL) {
+    if (info == nullptr) {
         return;
     }
     info->appInfo.appType = APP_TYPE_AUTH;
@@ -548,7 +548,7 @@ HWTEST_F(TransProxyChannelTest, TransProxyTimerProcTest001, TestSize.Level1)
  */
 HWTEST_F(TransProxyChannelTest, TransProxyDestroyChannelListTest001, TestSize.Level1)
 {
-    TransProxyDestroyChannelList(NULL);
+    TransProxyDestroyChannelList(nullptr);
     IServerChannelCallBack callBack;
     int32_t ret = TransProxyManagerInitInner(&callBack);
     EXPECT_EQ(ret, SOFTBUS_OK);
@@ -572,7 +572,7 @@ HWTEST_F(TransProxyChannelTest, TransProxyDeathCallbackTest001, TestSize.Level1)
     IServerChannelCallBack callBack;
     int32_t ret = TransProxyManagerInitInner(&callBack);
     EXPECT_EQ(ret, SOFTBUS_OK);
-    TransProxyDeathCallback(NULL, pid);
+    TransProxyDeathCallback(nullptr, pid);
     TransProxyDeathCallback(pkgName, pid);
 
     TransProxyManagerDeinitInner();
@@ -604,7 +604,7 @@ HWTEST_F(TransProxyChannelTest, TransProxyParseMessageTest001, TestSize.Level1)
     char *data = (char *)dataInfo.outData;
     int32_t len = dataInfo.outLen;
     AuthHandle authHandle = { .authId = AUTH_INVALID_ID };
-    
+
     ProxyMessage msg;
     int32_t ret = TransProxyParseMessage(data, len, &msg, &authHandle);
     EXPECT_NE(SOFTBUS_OK, ret);
@@ -629,7 +629,7 @@ HWTEST_F(TransProxyChannelTest, TransGetConnIdByChanIdTest001, TestSize.Level1)
     int32_t connId = -1;
     int32_t channelType = -1;
     TestAddTestProxyChannel();
-    
+
     int32_t ret = TransGetConnByChanId(channelId, 0, &connId);
     EXPECT_NE(SOFTBUS_OK, ret);
 
@@ -661,6 +661,27 @@ HWTEST_F(TransProxyChannelTest, TransProxySendInnerMessageTest001, TestSize.Leve
     info.authHandle.authId = 1;
     ret = TransProxySendInnerMessage(&info, TEST_PAY_LOAD, payLoadLen, priority);
     EXPECT_EQ(SOFTBUS_TRANS_PROXY_PACKMSG_ERR, ret);
+}
+
+/**
+ * @tc.name: TransProxySendInnerMessageTest002
+ * @tc.desc: TransProxySendInnerMessage
+ * @tc.type: FUNC
+ * @tc.require:
+ */
+HWTEST_F(TransProxyChannelTest, TransProxySendInnerMessageTest002, TestSize.Level1)
+{
+    ProxyChannelInfo info = {
+        .myId = 1925,
+        .peerId = 1524,
+        .authHandle.authId = 1,
+        .appInfo.channelCapability = 3
+    };
+    uint32_t payLoadLen = 12;
+    int32_t priority = 1;
+
+    int32_t ret = TransProxySendInnerMessage(&info, TEST_PAY_LOAD, payLoadLen, priority);
+    EXPECT_EQ(ret, SOFTBUS_TRANS_PROXY_PACKMSG_ERR);
 }
 
 /**

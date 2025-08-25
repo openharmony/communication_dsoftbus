@@ -25,11 +25,12 @@
 #include "auth_common.h"
 #include "bus_center_adapter.h"
 #include "bus_center_manager.h"
-#include "lnn_ble_heartbeat.h"
-#include "lnn_cipherkey_manager.h"
+#include "g_enhance_lnn_func.h"
+#include "g_enhance_lnn_func_pack.h"
 #include "lnn_data_cloud_sync.h"
-#include "lnn_device_info_recovery.h"
+#include "lnn_file_utils.h"
 #include "lnn_log.h"
+#include "lnn_net_ledger.h"
 #include "lnn_ohos_account.h"
 #include "lnn_p2p_info.h"
 #include "lnn_feature_capability.h"
@@ -37,22 +38,27 @@
 #include "softbus_adapter_bt_common.h"
 #include "softbus_adapter_crypto.h"
 #include "softbus_adapter_thread.h"
+#include "softbus_adapter_range.h"
 #include "softbus_def.h"
 #include "softbus_error_code.h"
 #include "softbus_utils.h"
+#include "softbus_init_common.h"
 #include "legacy/softbus_hidumper_buscenter.h"
+#include "lnn_init_monitor.h"
+#include "lnn_net_ledger.h"
+#include "lnn_sle_capability.h"
 
 #define SOFTBUS_VERSION "hm.1.0.0"
 #define VERSION_TYPE_LITE "LITE"
 #define VERSION_TYPE_DEFAULT ""
 #define SOFTBUS_BUSCENTER_DUMP_LOCALDEVICEINFO "local_device_info"
 #define ALL_GROUP_TYPE 0xF
-#define MAX_STATE_VERSION 0xFF
 #define DEFAULT_SUPPORT_HBCAPACITY 0x3
 #define DEFAULT_CONN_SUB_FEATURE 3
 #define CACHE_KEY_LENGTH 32
 #define STATE_VERSION_VALUE_LENGTH 8
 #define DEFAULT_DEVICE_NAME "OpenHarmony"
+#define LONG_TO_STRING_MAX_LEN 21
 
 typedef struct {
     LocalLedgerStatus status;
@@ -60,7 +66,7 @@ typedef struct {
     NodeInfo localInfo;
 } LocalNetLedger;
 
-static LocalNetLedger g_localNetLedger;
+LocalNetLedger g_localNetLedger;
 
 static void UpdateStateVersionAndStore(StateVersionChangeReason reason)
 {
@@ -74,9 +80,10 @@ static void UpdateStateVersionAndStore(StateVersionChangeReason reason)
         "reason=%{public}u changed, update local stateVersion=%{public}d, stateVersionReason=%{public}u", reason,
         g_localNetLedger.localInfo.stateVersion, g_localNetLedger.localInfo.stateVersionReason);
 
-    if ((ret = LnnSaveLocalDeviceInfo(&g_localNetLedger.localInfo)) != SOFTBUS_OK) {
+    if ((ret = LnnSaveLocalDeviceInfoPacked(&g_localNetLedger.localInfo)) != SOFTBUS_OK) {
         LNN_LOGE(LNN_LEDGER, "update local store fail");
     }
+    UpdateLocalDeviceInfoToMlpsPacked(&g_localNetLedger.localInfo);
 }
 
 static int32_t LlGetNodeSoftBusVersion(void *buf, uint32_t len)
@@ -325,6 +332,30 @@ static int32_t UpdateNodeDataChangeFlag(const void *buf)
     return LnnSetDataChangeFlag(info, *(int16_t *)buf);
 }
 
+static void DumpChangedAccountId(int64_t oldAccountId, int64_t newAccountId)
+{
+    char oldAccountString[LONG_TO_STRING_MAX_LEN] = {0};
+    if (sprintf_s(oldAccountString, LONG_TO_STRING_MAX_LEN, "%" PRId64, oldAccountId) == -1) {
+        LNN_LOGE(LNN_LEDGER, "long to string fail");
+        return;
+    }
+
+    char newAccountString[LONG_TO_STRING_MAX_LEN] = {0};
+    if (sprintf_s(newAccountString, LONG_TO_STRING_MAX_LEN, "%" PRId64, newAccountId) == -1) {
+        LNN_LOGE(LNN_LEDGER, "long to string fail");
+        return;
+    }
+
+    char *anonyOldAccountId = NULL;
+    char *anonyNewAccountId = NULL;
+    Anonymize(oldAccountString, &anonyOldAccountId);
+    Anonymize(newAccountString, &anonyNewAccountId);
+    LNN_LOGI(LNN_LEDGER, "accountId changed, accountId=%{public}s->%{public}s",
+        AnonymizeWrapper(anonyOldAccountId), AnonymizeWrapper(anonyNewAccountId));
+    AnonymizeFree(anonyOldAccountId);
+    AnonymizeFree(anonyNewAccountId);
+}
+
 static int32_t LocalUpdateNodeAccountId(const void *buf)
 {
     NodeInfo *info = &g_localNetLedger.localInfo;
@@ -333,7 +364,7 @@ static int32_t LocalUpdateNodeAccountId(const void *buf)
     }
 
     int64_t accountId = 0;
-    if (LnnGetAccountIdFromLocalCache(&accountId) != SOFTBUS_OK) {
+    if (LnnGetAccountIdFromLocalCachePacked(&accountId) != SOFTBUS_OK) {
         LNN_LOGE(LNN_LEDGER, "get accountId info from cache fail");
     }
     if (accountId == *((int64_t *)buf) && *((int64_t *)buf) != 0) {
@@ -354,11 +385,10 @@ static int32_t LocalUpdateNodeAccountId(const void *buf)
     if (*((int64_t *)buf) == 0) {
         LNN_LOGI(LNN_LEDGER, "accountId logout");
         info->accountId = *((int64_t *)buf);
-        LnnSaveLocalDeviceInfo(info);
+        LnnSaveLocalDeviceInfoPacked(info);
         return SOFTBUS_OK;
     }
-    LNN_LOGI(LNN_LEDGER, "accountId changed, accountId=%{public}" PRId64 "->%{public}" PRId64, info->accountId,
-        *((int64_t *)buf));
+    DumpChangedAccountId(info->accountId, *((int64_t *)buf));
     info->accountId = *((int64_t *)buf);
     UpdateStateVersionAndStore(UPDATE_ACCOUNT_LONG);
     return SOFTBUS_OK;
@@ -495,21 +525,21 @@ static int32_t LlGetBtMac(void *buf, uint32_t len)
     return SOFTBUS_OK;
 }
 
-static int32_t LlGetWlanIp(void *buf, uint32_t len)
+static int32_t LlGetWlanIp(void *buf, uint32_t len, int32_t ifnameIdx)
 {
     NodeInfo *info = &g_localNetLedger.localInfo;
     const char *ip = NULL;
     if (buf == NULL) {
         return SOFTBUS_INVALID_PARAM;
     }
-    ip = LnnGetWiFiIp(info);
+    ip = LnnGetWiFiIp(info, ifnameIdx);
     if (ip == NULL) {
         LNN_LOGE(LNN_LEDGER, "get wifi ip fail");
         return SOFTBUS_NETWORK_GET_DEVICE_INFO_ERR;
     }
     char *anonyIp = NULL;
     Anonymize(ip, &anonyIp);
-    LNN_LOGD(LNN_LEDGER, "get LocalIp=%{public}s", AnonymizeWrapper(anonyIp));
+    LNN_LOGI(LNN_LEDGER, "get LocalIp=%{public}s", AnonymizeWrapper(anonyIp));
     AnonymizeFree(anonyIp);
     if (strncpy_s((char *)buf, len, ip, strlen(ip)) != EOK) {
         LNN_LOGE(LNN_LEDGER, "STR COPY ERROR");
@@ -518,16 +548,59 @@ static int32_t LlGetWlanIp(void *buf, uint32_t len)
     return SOFTBUS_OK;
 }
 
-static int32_t LlGetNetIfName(void *buf, uint32_t len)
+static int32_t LlGetIp6WithIfname(void *buf, uint32_t len, int32_t ifnameIdx)
+{
+    NodeInfo *info = &g_localNetLedger.localInfo;
+    const char *ip = NULL;
+    if (buf == NULL) {
+        LNN_LOGE(LNN_LEDGER, "dsf buf is null");
+        return SOFTBUS_INVALID_PARAM;
+    }
+    ip = LnnGetWiFiIp(info, ifnameIdx);
+    if (ip == NULL) {
+        LNN_LOGE(LNN_LEDGER, "get wifi ip fail");
+        return SOFTBUS_NETWORK_GET_DEVICE_INFO_ERR;
+    }
+    const char *ifName = NULL;
+    ifName = LnnGetNetIfName(info, ifnameIdx);
+    if (ifName == NULL) {
+        LNN_LOGE(LNN_LEDGER, "get ifname fail");
+        return SOFTBUS_NETWORK_GET_DEVICE_INFO_ERR;
+    }
+    char combineIp[MAX_ADDR_LEN] = {0};
+    if (strncpy_s(combineIp, MAX_ADDR_LEN, ip, strlen(ip)) != EOK) {
+        LNN_LOGE(LNN_LEDGER, "STR COPY ERROR");
+        return SOFTBUS_MEM_ERR;
+    }
+    if (strcat_s(combineIp, MAX_ADDR_LEN, "%") != EOK) {
+        LNN_LOGE(LNN_LEDGER, "combine ip fail");
+        return SOFTBUS_STRCPY_ERR;
+    }
+    if (strcat_s(combineIp, MAX_ADDR_LEN, ifName) != EOK) {
+        LNN_LOGE(LNN_LEDGER, "combine ip and ifname fail");
+        return SOFTBUS_STRCPY_ERR;
+    }
+    char *anonyIp = NULL;
+    Anonymize(combineIp, &anonyIp);
+    LNN_LOGI(LNN_LEDGER, "get LocalIp=%{public}s", AnonymizeWrapper(anonyIp));
+    AnonymizeFree(anonyIp);
+    if (strncpy_s((char *)buf, len, combineIp, strlen(combineIp)) != EOK) {
+        LNN_LOGE(LNN_LEDGER, "STR COPY ERROR");
+        return SOFTBUS_MEM_ERR;
+    }
+    return SOFTBUS_OK;
+}
+
+static int32_t LlGetNetIfName(void *buf, uint32_t len, int32_t ifnameIdx)
 {
     NodeInfo *info = &g_localNetLedger.localInfo;
     const char *ifName = NULL;
     if (buf == NULL) {
         return SOFTBUS_INVALID_PARAM;
     }
-    ifName = LnnGetNetIfName(info);
+    ifName = LnnGetNetIfName(info, ifnameIdx);
     if (ifName == NULL) {
-        LNN_LOGE(LNN_LEDGER, "get bt mac fail");
+        LNN_LOGE(LNN_LEDGER, "get ifname fail");
         return SOFTBUS_NETWORK_GET_DEVICE_INFO_ERR;
     }
     if (strncpy_s((char *)buf, len, ifName, strlen(ifName)) != EOK) {
@@ -558,13 +631,13 @@ static int32_t L1GetMasterNodeUdid(void *buf, uint32_t len)
     return SOFTBUS_OK;
 }
 
-static int32_t LlGetAuthPort(void *buf, uint32_t len)
+static int32_t LlGetAuthPort(void *buf, uint32_t len, int32_t ifnameIdx)
 {
     NodeInfo *info = &g_localNetLedger.localInfo;
     if (buf == NULL || len != LNN_COMMON_LEN) {
         return SOFTBUS_INVALID_PARAM;
     }
-    int32_t port = LnnGetAuthPort(info);
+    int32_t port = LnnGetAuthPort(info, ifnameIdx);
     if (port <= 0) {
         return SOFTBUS_INVALID_PORT;
     }
@@ -572,41 +645,41 @@ static int32_t LlGetAuthPort(void *buf, uint32_t len)
     return SOFTBUS_OK;
 }
 
-static int32_t UpdateLocalAuthPort(const void *buf)
+static int32_t UpdateLocalAuthPort(const void *buf, int32_t ifnameIdx)
 {
     NodeInfo *info = &g_localNetLedger.localInfo;
     if (buf == NULL) {
         return SOFTBUS_INVALID_PARAM;
     }
-    return LnnSetAuthPort(info, *(int *)buf);
+    return LnnSetAuthPort(info, *(int *)buf, ifnameIdx);
 }
 
-static int32_t LlGetSessionPort(void *buf, uint32_t len)
+static int32_t LlGetSessionPort(void *buf, uint32_t len, int32_t ifnameIdx)
 {
     NodeInfo *info = &g_localNetLedger.localInfo;
     if (buf == NULL || len != LNN_COMMON_LEN) {
         return SOFTBUS_INVALID_PARAM;
     }
-    *((int32_t *)buf) = LnnGetSessionPort(info);
+    *((int32_t *)buf) = LnnGetSessionPort(info, ifnameIdx);
     return SOFTBUS_OK;
 }
 
-static int32_t UpdateLocalSessionPort(const void *buf)
+static int32_t UpdateLocalSessionPort(const void *buf, int32_t ifnameIdx)
 {
     NodeInfo *info = &g_localNetLedger.localInfo;
     if (buf == NULL) {
         return SOFTBUS_INVALID_PARAM;
     }
-    return LnnSetSessionPort(info, *(int *)buf);
+    return LnnSetSessionPort(info, *(int *)buf, ifnameIdx);
 }
 
-static int32_t LlGetProxyPort(void *buf, uint32_t len)
+static int32_t LlGetProxyPort(void *buf, uint32_t len, int32_t ifnameIdx)
 {
     NodeInfo *info = &g_localNetLedger.localInfo;
     if (buf == NULL || len != LNN_COMMON_LEN) {
         return SOFTBUS_INVALID_PARAM;
     }
-    *((int32_t *)buf) = LnnGetProxyPort(info);
+    *((int32_t *)buf) = LnnGetProxyPort(info, ifnameIdx);
     return SOFTBUS_OK;
 }
 
@@ -654,13 +727,13 @@ static int32_t UpdateStateVersion(const void *buf)
     return SOFTBUS_OK;
 }
 
-static int32_t UpdateLocalProxyPort(const void *buf)
+static int32_t UpdateLocalProxyPort(const void *buf, int32_t ifnameIdx)
 {
     NodeInfo *info = &g_localNetLedger.localInfo;
     if (buf == NULL) {
         return SOFTBUS_INVALID_PARAM;
     }
-    return LnnSetProxyPort(info, *(int *)buf);
+    return LnnSetProxyPort(info, *(int *)buf, ifnameIdx);
 }
 
 static int32_t LlGetNetCap(void *buf, uint32_t len)
@@ -986,6 +1059,12 @@ static int32_t InitLocalDeviceInfo(DeviceBasicInfo *info)
     if (GetCommonDeviceVersion(info->deviceVersion, DEVICE_VERSION_SIZE_MAX) != SOFTBUS_OK) {
         LNN_LOGE(LNN_LEDGER, "get device version failed");
     }
+    if (GetCommonDeviceProductId(info->productId, PRODUCT_ID_SIZE_MAX) != SOFTBUS_OK) {
+        LNN_LOGE(LNN_LEDGER, "get device productId failed");
+    }
+    if (GetCommonDeviceModelName(info->modelName, MODEL_NAME_SIZE_MAX) != SOFTBUS_OK) {
+        LNN_LOGE(LNN_LEDGER, "get device modelName failed");
+    }
     if (LnnGetUnifiedDeviceName(info->unifiedName, DEVICE_NAME_BUF_LEN) != SOFTBUS_OK) {
         LNN_LOGE(LNN_LEDGER, "get unifiedName fail");
     }
@@ -1094,12 +1173,12 @@ static int32_t UpdateLocalDeviceName(const void *name)
         return SOFTBUS_INVALID_PARAM;
     }
     NodeInfo localNodeInfo = {};
-    (void)LnnGetLocalDevInfo(&localNodeInfo);
+    (void)LnnGetLocalDevInfoPacked(&localNodeInfo);
     const char *beforeName = LnnGetDeviceName(&g_localNetLedger.localInfo.deviceInfo);
     char *anonyBeforeName = NULL;
-    Anonymize(beforeName, &anonyBeforeName);
+    AnonymizeDeviceName(beforeName, &anonyBeforeName);
     char *anonyName = NULL;
-    Anonymize((char *)name, &anonyName);
+    AnonymizeDeviceName((char *)name, &anonyName);
     char *anonyDeviceName = NULL;
     Anonymize(localNodeInfo.deviceInfo.deviceName, &anonyDeviceName);
     LNN_LOGI(LNN_LEDGER, "device name=%{public}s->%{public}s, cache=%{public}s",
@@ -1138,7 +1217,7 @@ static int32_t UpdateUnifiedName(const void *name)
         return SOFTBUS_INVALID_PARAM;
     }
     NodeInfo localNodeInfo = {};
-    (void)LnnGetLocalDevInfo(&localNodeInfo);
+    (void)LnnGetLocalDevInfoPacked(&localNodeInfo);
     const char *beforeName = g_localNetLedger.localInfo.deviceInfo.unifiedName;
     if (strcmp(beforeName, (char *)name) != 0) {
         if (strcpy_s(g_localNetLedger.localInfo.deviceInfo.unifiedName,
@@ -1159,7 +1238,7 @@ static int32_t UpdateUnifiedName(const void *name)
             LNN_LOGE(LNN_LEDGER, "memcpy fail");
             return SOFTBUS_MEM_ERR;
         }
-        if (LnnLedgerAllDataSyncToDB(&nodeInfo) != SOFTBUS_OK) {
+        if (LnnLedgerAllDataSyncToDB(&nodeInfo, false, NULL) != SOFTBUS_OK) {
             LNN_LOGE(LNN_LEDGER, "ledger unified device name change sync to cloud failed");
         }
     }
@@ -1172,7 +1251,7 @@ static int32_t UpdateUnifiedDefaultName(const void *name)
         return SOFTBUS_INVALID_PARAM;
     }
     NodeInfo localNodeInfo = {};
-    (void)LnnGetLocalDevInfo(&localNodeInfo);
+    (void)LnnGetLocalDevInfoPacked(&localNodeInfo);
     const char *beforeName = g_localNetLedger.localInfo.deviceInfo.unifiedDefaultName;
     if (strcmp(beforeName, (char *)name) != 0) {
         if (strcpy_s(g_localNetLedger.localInfo.deviceInfo.unifiedDefaultName, DEVICE_NAME_BUF_LEN, (char *)name) !=
@@ -1206,7 +1285,7 @@ static int32_t UpdateNickName(const void *name)
         return SOFTBUS_INVALID_PARAM;
     }
     NodeInfo localNodeInfo = {};
-    (void)LnnGetLocalDevInfo(&localNodeInfo);
+    (void)LnnGetLocalDevInfoPacked(&localNodeInfo);
     const char *beforeName = g_localNetLedger.localInfo.deviceInfo.nickName;
     if (strcmp(beforeName, (char *)name) != 0) {
         if (strcpy_s(g_localNetLedger.localInfo.deviceInfo.nickName, DEVICE_NAME_BUF_LEN, (char *)name) != EOK) {
@@ -1244,6 +1323,17 @@ int32_t LnnUpdateLocalNetworkIdTime(int64_t time)
     return SOFTBUS_OK;
 }
 
+int32_t LnnUpdateLocalHuksKeyTime(uint64_t huksKeyTime)
+{
+    if (SoftBusMutexLock(&g_localNetLedger.lock) != 0) {
+        LNN_LOGE(LNN_LEDGER, "lock mutex fail");
+        return SOFTBUS_LOCK_ERR;
+    }
+    g_localNetLedger.localInfo.huksKeyTime = huksKeyTime;
+    SoftBusMutexUnlock(&g_localNetLedger.lock);
+    return SOFTBUS_OK;
+}
+
 static int32_t UpdateLocalNetworkId(const void *id)
 {
     int32_t ret = ModifyId(g_localNetLedger.localInfo.lastNetworkId, NETWORK_ID_BUF_LEN,
@@ -1264,6 +1354,7 @@ static int32_t UpdateLocalNetworkId(const void *id)
         AnonymizeWrapper(anonyOldNetworkId), AnonymizeWrapper(anonyNetworkId),
         g_localNetLedger.localInfo.networkIdTimestamp);
     UpdateStateVersionAndStore(UPDATE_NETWORKID);
+    LnnLedgerInfoStatusSet();
     AnonymizeFree(anonyNetworkId);
     AnonymizeFree(anonyOldNetworkId);
     if (!IsLocalLedgerReady()) {
@@ -1302,7 +1393,9 @@ static int32_t UpdateLocalBleMac(const void *mac)
 
 static int32_t UpdateLocalUuid(const void *id)
 {
-    return ModifyId(g_localNetLedger.localInfo.uuid, UUID_BUF_LEN, (char *)id);
+    int32_t ret = ModifyId(g_localNetLedger.localInfo.uuid, UUID_BUF_LEN, (char *)id);
+    LnnLedgerInfoStatusSet();
+    return ret;
 }
 
 int32_t UpdateLocalParentId(const char *id)
@@ -1369,13 +1462,14 @@ int32_t UpdateLocalWeight(int32_t weight)
     return SOFTBUS_OK;
 }
 
-static int32_t UpdateLocalDeviceIp(const void *ip)
+static int32_t UpdateLocalDeviceIp(const void *ip, int32_t ifnameIdx)
 {
     if (ip == NULL) {
         LNN_LOGE(LNN_LEDGER, "para error");
         return SOFTBUS_INVALID_PARAM;
     }
-    LnnSetWiFiIp(&g_localNetLedger.localInfo, (char *)ip);
+    LNN_LOGI(LNN_LEDGER, "ifname is %{public}d", ifnameIdx);
+    LnnSetWiFiIp(&g_localNetLedger.localInfo, (char *)ip, ifnameIdx);
     char *anonyIp = NULL;
     Anonymize((char *)ip, &anonyIp);
     LNN_LOGI(LNN_LEDGER, "set LocalIp=%{public}s", AnonymizeWrapper(anonyIp));
@@ -1397,9 +1491,9 @@ static int32_t UpdateLocalBtMac(const void *mac)
     LnnSetBtMac(&g_localNetLedger.localInfo, (char *)mac);
     NodeInfo localNodeInfo;
     (void)memset_s(&localNodeInfo, sizeof(NodeInfo), 0, sizeof(NodeInfo));
-    if (LnnGetLocalDevInfo(&localNodeInfo) == SOFTBUS_OK) {
+    if (LnnGetLocalDevInfoPacked(&localNodeInfo) == SOFTBUS_OK) {
         LnnSetBtMac(&localNodeInfo, (char *)mac);
-        if (LnnSaveLocalDeviceInfo(&localNodeInfo) != SOFTBUS_OK) {
+        if (LnnSaveLocalDeviceInfoPacked(&localNodeInfo) != SOFTBUS_OK) {
             LNN_LOGE(LNN_LEDGER, "update Bt mac to localdevinfo store fail");
         }
     } else {
@@ -1420,13 +1514,14 @@ static int32_t UpdateLocalBtMac(const void *mac)
     return SOFTBUS_OK;
 }
 
-static int32_t UpdateLocalNetIfName(const void *netIfName)
+static int32_t UpdateLocalNetIfName(const void *netIfName, int32_t ifnameIdx)
 {
     if (netIfName == NULL) {
         LNN_LOGE(LNN_LEDGER, "para error");
         return SOFTBUS_INVALID_PARAM;
     }
-    LnnSetNetIfName(&g_localNetLedger.localInfo, (char *)netIfName);
+    LNN_LOGI(LNN_LEDGER, "ifname is %{public}d", ifnameIdx);
+    LnnSetNetIfName(&g_localNetLedger.localInfo, (char *)netIfName, ifnameIdx);
     return SOFTBUS_OK;
 }
 
@@ -1565,6 +1660,7 @@ int32_t LnnUpdateLocalNetworkId(const void *id)
         return ret;
     }
     SoftBusMutexUnlock(&g_localNetLedger.lock);
+    LnnLedgerInfoStatusSet();
     return SOFTBUS_OK;
 }
 
@@ -1628,7 +1724,7 @@ static int32_t LlGetStaticCapLen(void *buf, uint32_t len)
         LNN_LOGE(LNN_LEDGER, "invalid param");
         return SOFTBUS_INVALID_PARAM;
     }
-    *((int64_t *)buf) = g_localNetLedger.localInfo.staticCapLen;
+    *((int32_t *)buf) = g_localNetLedger.localInfo.staticCapLen;
     return SOFTBUS_OK;
 }
 
@@ -1877,6 +1973,7 @@ static int32_t UpdateLocalUserId(const void *userId)
         return SOFTBUS_INVALID_PARAM;
     }
     g_localNetLedger.localInfo.userId = *(int32_t *)userId;
+    UpdateLocalDeviceInfoToMlpsPacked(&g_localNetLedger.localInfo);
     return SOFTBUS_OK;
 }
 
@@ -1886,6 +1983,125 @@ static int32_t L1GetUserId(void *userId, uint32_t len)
         return SOFTBUS_INVALID_PARAM;
     }
     *((int32_t *)userId) = g_localNetLedger.localInfo.userId;
+    return SOFTBUS_OK;
+}
+
+static int32_t LlGetStaticNetCap(void *buf, uint32_t len)
+{
+    NodeInfo *info = &g_localNetLedger.localInfo;
+    if (buf == NULL || len != LNN_COMMON_LEN) {
+        return SOFTBUS_INVALID_PARAM;
+    }
+    *((uint32_t *)buf) = info->staticNetCap;
+    return SOFTBUS_OK;
+}
+
+static int32_t UpdateStaticNetCap(const void *capability)
+{
+    if (capability == NULL) {
+        return SOFTBUS_INVALID_PARAM;
+    }
+    g_localNetLedger.localInfo.staticNetCap = *(int32_t *)capability;
+    return SOFTBUS_OK;
+}
+
+static int32_t LlGetLocalSleRangeCapacity(void *buf, uint32_t len)
+{
+    if (buf == NULL || len != sizeof(int32_t)) {
+        LNN_LOGE(LNN_LEDGER, "input invalid");
+        return SOFTBUS_INVALID_PARAM;
+    }
+    *((int32_t *)buf) = g_localNetLedger.localInfo.sleRangeCapacity;
+    return SOFTBUS_OK;
+}
+
+static int32_t LlSetLocalSleRangeCapacity(const void *sleRangeCapacity)
+{
+    if (sleRangeCapacity == NULL) {
+        LNN_LOGE(LNN_LEDGER, "input Null");
+        return SOFTBUS_INVALID_PARAM;
+    }
+    g_localNetLedger.localInfo.sleRangeCapacity = *((int32_t *)sleRangeCapacity);
+    return SOFTBUS_OK;
+}
+
+static int32_t LlGetLocalSleAddr(void *buf, uint32_t len)
+{
+    if (buf == NULL || len != MAC_LEN) {
+        LNN_LOGE(LNN_LEDGER, "input invalid");
+        return SOFTBUS_INVALID_PARAM;
+    }
+    errno_t rc = memcpy_s(buf, len, g_localNetLedger.localInfo.connectInfo.sleMacAddr, MAC_LEN);
+    if (rc != EOK) {
+        LNN_LOGE(LNN_LEDGER, "memcpy_s fail, ret %{public}d", rc);
+        return SOFTBUS_MEM_ERR;
+    }
+    return SOFTBUS_OK;
+}
+
+static int32_t LlSetLocalSleAddr(const void *addr)
+{
+    if (addr == NULL) {
+        LNN_LOGE(LNN_LEDGER, "input null");
+        return SOFTBUS_INVALID_PARAM;
+    }
+    errno_t rc = memcpy_s(g_localNetLedger.localInfo.connectInfo.sleMacAddr, MAC_LEN, addr, MAC_LEN);
+    if (rc != EOK) {
+        LNN_LOGE(LNN_LEDGER, "memcpy_s fail, ret %{public}d", rc);
+        return SOFTBUS_MEM_ERR;
+    }
+    return SOFTBUS_OK;
+}
+
+static int32_t UpdateHuksKeyTime(const void *huksKeyTime)
+{
+    if (huksKeyTime == NULL) {
+        LNN_LOGE(LNN_LEDGER, "huks key time null");
+        return SOFTBUS_INVALID_PARAM;
+    }
+    g_localNetLedger.localInfo.huksKeyTime = *(uint64_t *)huksKeyTime;
+    if (LnnSaveLocalDeviceInfoPacked(&g_localNetLedger.localInfo) != SOFTBUS_OK) {
+        LNN_LOGE(LNN_LEDGER, "save local device info fail");
+    }
+    return SOFTBUS_OK;
+}
+
+static int32_t L1GetHuksKeyTime(void *buf, uint32_t len)
+{
+    NodeInfo *info = &g_localNetLedger.localInfo;
+    if (buf == NULL || len != sizeof(uint64_t)) {
+        LNN_LOGE(LNN_LEDGER, "buf null or len error");
+        return SOFTBUS_INVALID_PARAM;
+    }
+    *((uint64_t *)buf) = info->huksKeyTime;
+    return SOFTBUS_OK;
+}
+
+static int32_t LlGetLocalAccountUid(void *buf, uint32_t len)
+{
+    if (buf == NULL || len != ACCOUNT_UID_STR_LEN) {
+        LNN_LOGE(LNN_LEDGER, "input invalid");
+        return SOFTBUS_INVALID_PARAM;
+    }
+    errno_t rc = strcpy_s((char *)buf, len, g_localNetLedger.localInfo.accountUid);
+    if (rc != EOK) {
+        LNN_LOGE(LNN_LEDGER, "strcpy_s failed, ret=%{public}d", rc);
+        return SOFTBUS_MEM_ERR;
+    }
+    return SOFTBUS_OK;
+}
+
+static int32_t LlSetLocalAccountUid(const void *accountUid)
+{
+    if (accountUid == NULL) {
+        LNN_LOGE(LNN_LEDGER, "input invalid");
+        return SOFTBUS_INVALID_PARAM;
+    }
+    errno_t rc = strcpy_s(g_localNetLedger.localInfo.accountUid, ACCOUNT_UID_STR_LEN, (const char *)accountUid);
+    if (rc != EOK) {
+        LNN_LOGE(LNN_LEDGER, "strcpy_s failed, ret=%{public}d", rc);
+        return SOFTBUS_MEM_ERR;
+    }
     return SOFTBUS_OK;
 }
 
@@ -1901,8 +2117,6 @@ static LocalLedgerKey g_localKeyTable[] = {
     {STRING_KEY_DEV_UNIFIED_DEFAULT_NAME, DEVICE_NAME_BUF_LEN, LlGetUnifiedDefaultName, UpdateUnifiedDefaultName},
     {STRING_KEY_DEV_NICK_NAME, DEVICE_NAME_BUF_LEN, LlGetNickName, UpdateNickName},
     {STRING_KEY_BT_MAC, MAC_LEN, LlGetBtMac, UpdateLocalBtMac},
-    {STRING_KEY_WLAN_IP, IP_LEN, LlGetWlanIp, UpdateLocalDeviceIp},
-    {STRING_KEY_NET_IF_NAME, NET_IF_NAME_LEN, LlGetNetIfName, UpdateLocalNetIfName},
     {STRING_KEY_MASTER_NODE_UDID, UDID_BUF_LEN, L1GetMasterNodeUdid, UpdateMasterNodeUdid},
     {STRING_KEY_NODE_ADDR, SHORT_ADDRESS_MAX_LEN, LlGetNodeAddr, LlUpdateNodeAddr},
     {STRING_KEY_P2P_MAC, MAC_LEN, LlGetP2pMac, UpdateP2pMac},
@@ -1914,9 +2128,8 @@ static LocalLedgerKey g_localKeyTable[] = {
     {STRING_KEY_BLE_MAC, MAC_LEN, LlGetBleMac, UpdateLocalBleMac},
     {STRING_KEY_WIFIDIRECT_ADDR, MAC_LEN, LlGetWifiDirectAddr, UpdateWifiDirectAddr},
     {STRING_KEY_P2P_IP, IP_LEN, LlGetP2pIp, LlUpdateLocalP2pIp},
-    {NUM_KEY_SESSION_PORT, -1, LlGetSessionPort, UpdateLocalSessionPort},
-    {NUM_KEY_AUTH_PORT, -1, LlGetAuthPort, UpdateLocalAuthPort},
-    {NUM_KEY_PROXY_PORT, -1, LlGetProxyPort, UpdateLocalProxyPort},
+    {STRING_KEY_SLE_ADDR, MAC_LEN, LlGetLocalSleAddr, LlSetLocalSleAddr},
+    {STRING_KEY_ACCOUNT_UID, ACCOUNT_UID_STR_LEN, LlGetLocalAccountUid, LlSetLocalAccountUid},
     {NUM_KEY_NET_CAP, -1, LlGetNetCap, UpdateLocalNetCapability},
     {NUM_KEY_FEATURE_CAPA, -1, LlGetFeatureCapa, UpdateLocalFeatureCapability},
     {NUM_KEY_DISCOVERY_TYPE, -1, LlGetNetType, NULL},
@@ -1938,6 +2151,9 @@ static LocalLedgerKey g_localKeyTable[] = {
     {NUM_KEY_BLE_START_TIME, sizeof(int64_t), LocalGetNodeBleStartTime, LocalUpdateBleStartTime},
     {NUM_KEY_CONN_SUB_FEATURE_CAPA, -1, L1GetConnSubFeatureCapa, UpdateLocalConnSubFeatureCapability},
     {NUM_KEY_USERID, sizeof(int32_t), L1GetUserId, UpdateLocalUserId},
+    {NUM_KEY_STATIC_NET_CAP, -1, LlGetStaticNetCap, UpdateStaticNetCap},
+    {NUM_KEY_SLE_RANGE_CAP, sizeof(int32_t), LlGetLocalSleRangeCapacity, LlSetLocalSleRangeCapacity},
+    {NUM_KEY_HUKS_TIME, sizeof(uint64_t), L1GetHuksKeyTime, UpdateHuksKeyTime},
     {BYTE_KEY_IRK, LFINDER_IRK_LEN, LlGetIrk, UpdateLocalIrk},
     {BYTE_KEY_PUB_MAC, LFINDER_MAC_ADDR_LEN, LlGetPubMac, UpdateLocalPubMac},
     {BYTE_KEY_BROADCAST_CIPHER_KEY, SESSION_KEY_LENGTH, LlGetCipherInfoKey, UpdateLocalCipherInfoKey},
@@ -1950,6 +2166,15 @@ static LocalLedgerKey g_localKeyTable[] = {
     {BYTE_KEY_USERID_CHECKSUM, USERID_CHECKSUM_LEN, LlGetUserIdCheckSum, LlUpdateUserIdCheckSum},
     {BYTE_KEY_UDID_HASH, SHA_256_HASH_LEN, LlGetUdidHash, NULL},
     {BOOL_KEY_SCREEN_STATUS, NODE_SCREEN_STATUS_LEN, L1GetNodeScreenOnFlag, NULL},
+};
+
+static LocalLedgerKeyByIfname g_localKeyByIfnameTable[] = {
+    {STRING_KEY_IP, IP_LEN, LlGetWlanIp, UpdateLocalDeviceIp},
+    {STRING_KEY_NET_IF_NAME, NET_IF_NAME_LEN, LlGetNetIfName, UpdateLocalNetIfName},
+    {STRING_KEY_IP6_WITH_IF, IP_LEN, LlGetIp6WithIfname, NULL},
+    {NUM_KEY_SESSION_PORT, -1, LlGetSessionPort, UpdateLocalSessionPort},
+    {NUM_KEY_AUTH_PORT, -1, LlGetAuthPort, UpdateLocalAuthPort},
+    {NUM_KEY_PROXY_PORT, -1, LlGetProxyPort, UpdateLocalProxyPort},
 };
 
 int32_t LnnGetLocalStrInfo(InfoKey key, char *info, uint32_t len)
@@ -1982,6 +2207,40 @@ int32_t LnnGetLocalStrInfo(InfoKey key, char *info, uint32_t len)
     return SOFTBUS_NETWORK_NOT_FOUND;
 }
 
+int32_t LnnGetLocalStrInfoByIfnameIdx(InfoKey key, char *info, uint32_t len, int32_t ifIdx)
+{
+    uint32_t i;
+    int32_t ret;
+    if (info == NULL) {
+        LNN_LOGE(LNN_LEDGER, "para error");
+        return SOFTBUS_INVALID_PARAM;
+    }
+    if (key >= STRING_KEY_END) {
+        LNN_LOGE(LNN_LEDGER, "KEY error");
+        return SOFTBUS_INVALID_PARAM;
+    }
+    if (isIfnameIdxInvalid(ifIdx)) {
+        LNN_LOGE(LNN_LEDGER, "ifname index error");
+        return SOFTBUS_INVALID_PARAM;
+    }
+    if (SoftBusMutexLock(&g_localNetLedger.lock) != 0) {
+        LNN_LOGE(LNN_LEDGER, "lock mutex fail");
+        return SOFTBUS_LOCK_ERR;
+    }
+    for (i = 0; i < sizeof(g_localKeyByIfnameTable) / sizeof(LocalLedgerKeyByIfname); i++) {
+        if (key == g_localKeyByIfnameTable[i].key) {
+            if (g_localKeyByIfnameTable[i].getInfo != NULL) {
+                ret = g_localKeyByIfnameTable[i].getInfo((void *)info, len, ifIdx);
+                SoftBusMutexUnlock(&g_localNetLedger.lock);
+                return ret;
+            }
+        }
+    }
+    SoftBusMutexUnlock(&g_localNetLedger.lock);
+    LNN_LOGE(LNN_LEDGER, "KEY NOT exist");
+    return SOFTBUS_NETWORK_NOT_FOUND;
+}
+
 static int32_t LnnGetLocalInfo(InfoKey key, void* info, uint32_t infoSize)
 {
     uint32_t i;
@@ -2003,6 +2262,37 @@ static int32_t LnnGetLocalInfo(InfoKey key, void* info, uint32_t infoSize)
         if (key == g_localKeyTable[i].key) {
             if (g_localKeyTable[i].getInfo != NULL) {
                 ret = g_localKeyTable[i].getInfo(info, infoSize);
+                SoftBusMutexUnlock(&g_localNetLedger.lock);
+                return ret;
+            }
+        }
+    }
+    SoftBusMutexUnlock(&g_localNetLedger.lock);
+    LNN_LOGE(LNN_LEDGER, "KEY NOT exist");
+    return SOFTBUS_NETWORK_NOT_FOUND;
+}
+
+static int32_t LnnGetLocalInfoByIfnameIdx(InfoKey key, void* info, uint32_t infoSize, int32_t ifIdx)
+{
+    uint32_t i;
+    int32_t ret;
+    if (info == NULL) {
+        LNN_LOGE(LNN_LEDGER, "para error");
+        return SOFTBUS_INVALID_PARAM;
+    }
+    if ((key < NUM_KEY_BEGIN || key >= NUM_KEY_END) &&
+        (key < BYTE_KEY_BEGIN || key >= BYTE_KEY_END)) {
+        LNN_LOGE(LNN_LEDGER, "KEY error");
+        return SOFTBUS_INVALID_PARAM;
+    }
+    if (SoftBusMutexLock(&g_localNetLedger.lock) != 0) {
+        LNN_LOGE(LNN_LEDGER, "lock mutex fail");
+        return SOFTBUS_LOCK_ERR;
+    }
+    for (i = 0; i < sizeof(g_localKeyByIfnameTable) / sizeof(LocalLedgerKeyByIfname); i++) {
+        if (key == g_localKeyByIfnameTable[i].key) {
+            if (g_localKeyByIfnameTable[i].getInfo != NULL) {
+                ret = g_localKeyByIfnameTable[i].getInfo(info, infoSize, ifIdx);
                 SoftBusMutexUnlock(&g_localNetLedger.lock);
                 return ret;
             }
@@ -2089,7 +2379,44 @@ int32_t LnnSetLocalStrInfo(InfoKey key, const char *info)
                 SoftBusMutexUnlock(&g_localNetLedger.lock);
                 return ret;
             }
-            LNN_LOGE(LNN_LEDGER, "key not support or info format error. key=%{public}d", key);
+            LNN_LOGE(LNN_LEDGER, "set fail, key=%{public}d, len=%{public}zu", key, strlen(info));
+            SoftBusMutexUnlock(&g_localNetLedger.lock);
+            return SOFTBUS_INVALID_PARAM;
+        }
+    }
+    SoftBusMutexUnlock(&g_localNetLedger.lock);
+    LNN_LOGE(LNN_LEDGER, "key not exist");
+    return SOFTBUS_NETWORK_NOT_FOUND;
+}
+
+int32_t LnnSetLocalStrInfoByIfnameIdx(InfoKey key, const char *info, int32_t ifIdx)
+{
+    uint32_t i;
+    int32_t ret;
+    if (info == NULL) {
+        LNN_LOGE(LNN_LEDGER, "para error");
+        return SOFTBUS_INVALID_PARAM;
+    }
+    if (key >= STRING_KEY_END) {
+        LNN_LOGE(LNN_LEDGER, "KEY error");
+        return SOFTBUS_INVALID_PARAM;
+    }
+    if (isIfnameIdxInvalid(ifIdx)) {
+        LNN_LOGE(LNN_LEDGER, "ifname index error");
+        return SOFTBUS_INVALID_PARAM;
+    }
+    if (SoftBusMutexLock(&g_localNetLedger.lock) != 0) {
+        LNN_LOGE(LNN_LEDGER, "lock mutex fail");
+        return SOFTBUS_LOCK_ERR;
+    }
+    for (i = 0; i < sizeof(g_localKeyByIfnameTable) / sizeof(LocalLedgerKeyByIfname); i++) {
+        if (key == g_localKeyByIfnameTable[i].key) {
+            if (g_localKeyByIfnameTable[i].setInfo != NULL && JudgeString(info, g_localKeyByIfnameTable[i].maxLen)) {
+                ret = g_localKeyByIfnameTable[i].setInfo((void *)info, ifIdx);
+                SoftBusMutexUnlock(&g_localNetLedger.lock);
+                return ret;
+            }
+            LNN_LOGE(LNN_LEDGER, "set fail, key=%{public}d, len=%{public}zu", key, strlen(info));
             SoftBusMutexUnlock(&g_localNetLedger.lock);
             return SOFTBUS_INVALID_PARAM;
         }
@@ -2129,6 +2456,36 @@ static int32_t LnnSetLocalInfo(InfoKey key, void* info)
     return SOFTBUS_NETWORK_NOT_FOUND;
 }
 
+static int32_t LnnSetLocalInfoByIfnameIdx(InfoKey key, void* info, int32_t ifIdx)
+{
+    uint32_t i;
+    int32_t ret;
+    if ((key < NUM_KEY_BEGIN || key >= NUM_KEY_END) &&
+        (key < BYTE_KEY_BEGIN || key >= BYTE_KEY_END)) {
+        LNN_LOGE(LNN_LEDGER, "KEY error");
+        return SOFTBUS_INVALID_PARAM;
+    }
+    if (SoftBusMutexLock(&g_localNetLedger.lock) != 0) {
+        LNN_LOGE(LNN_LEDGER, "lock mutex fail");
+        return SOFTBUS_LOCK_ERR;
+    }
+    for (i = 0; i < sizeof(g_localKeyByIfnameTable) / sizeof(LocalLedgerKeyByIfname); i++) {
+        if (key == g_localKeyByIfnameTable[i].key) {
+            if (g_localKeyByIfnameTable[i].setInfo != NULL) {
+                ret = g_localKeyByIfnameTable[i].setInfo(info, ifIdx);
+                SoftBusMutexUnlock(&g_localNetLedger.lock);
+                return ret;
+            }
+            LNN_LOGE(LNN_LEDGER, "key not support. key=%{public}d", key);
+            SoftBusMutexUnlock(&g_localNetLedger.lock);
+            return SOFTBUS_NETWORK_SET_LEDGER_INFO_ERR;
+        }
+    }
+    SoftBusMutexUnlock(&g_localNetLedger.lock);
+    LNN_LOGE(LNN_LEDGER, "key not exist");
+    return SOFTBUS_NETWORK_NOT_FOUND;
+}
+
 static int32_t LnnFirstGetUdid(void)
 {
     NodeInfo *nodeInfo = &g_localNetLedger.localInfo;
@@ -2137,6 +2494,7 @@ static int32_t LnnFirstGetUdid(void)
         LNN_LOGE(LNN_LEDGER, "COMM_DEVICE_KEY_UDID failed");
         return SOFTBUS_NETWORK_GET_DEVICE_INFO_ERR;
     }
+    LnnLedgerInfoStatusSet();
     return SOFTBUS_OK;
 }
 
@@ -2146,7 +2504,7 @@ static int32_t LnnLoadBroadcastCipherInfo(BroadcastCipherKey *broadcastKey)
         LNN_LOGE(LNN_LEDGER, "broadcastKey is null.");
         return SOFTBUS_INVALID_PARAM;
     }
-    if (LnnGetLocalBroadcastCipherKey(broadcastKey) != SOFTBUS_OK) {
+    if (LnnGetLocalBroadcastCipherKeyPacked(broadcastKey) != SOFTBUS_OK) {
         LNN_LOGE(LNN_LEDGER, "get local info failed.");
         return SOFTBUS_NETWORK_NODE_KEY_INFO_ERR;
     }
@@ -2164,13 +2522,13 @@ static int32_t LnnLoadBroadcastCipherInfo(BroadcastCipherKey *broadcastKey)
     return SOFTBUS_OK;
 }
 
-static int32_t LnnGenBroadcastCipherInfo(void)
+int32_t LnnGenBroadcastCipherInfo(void)
 {
     BroadcastCipherKey broadcastKey;
     int32_t ret = SOFTBUS_NETWORK_GENERATE_CIPHER_INFO_FAILED;
     (void)memset_s(&broadcastKey, sizeof(BroadcastCipherKey), 0, sizeof(BroadcastCipherKey));
     do {
-        if (LnnLoadLocalBroadcastCipherKey() == SOFTBUS_OK) {
+        if (LnnLoadLocalBroadcastCipherKeyPacked() == SOFTBUS_OK) {
             ret = LnnLoadBroadcastCipherInfo(&broadcastKey);
             break;
         }
@@ -2192,7 +2550,7 @@ static int32_t LnnGenBroadcastCipherInfo(void)
             LNN_LOGE(LNN_LEDGER, "set iv error.");
             break;
         }
-        if (LnnUpdateLocalBroadcastCipherKey(&broadcastKey) != SOFTBUS_OK) {
+        if (LnnUpdateLocalBroadcastCipherKeyPacked(&broadcastKey) != SOFTBUS_OK) {
             LNN_LOGE(LNN_LEDGER, "update local broadcast key failed");
             break;
         }
@@ -2205,57 +2563,67 @@ static int32_t LnnGenBroadcastCipherInfo(void)
 
 int32_t LnnGetLocalNumInfo(InfoKey key, int32_t *info)
 {
-    return LnnGetLocalInfo(key, (void*)info, sizeof(int32_t));
+    return LnnGetLocalInfo(key, (void *)info, sizeof(int32_t));
 }
 
 int32_t LnnSetLocalNumInfo(InfoKey key, int32_t info)
 {
-    return LnnSetLocalInfo(key, (void*)&info);
+    return LnnSetLocalInfo(key, (void *)&info);
+}
+
+int32_t LnnGetLocalNumInfoByIfnameIdx(InfoKey key, int32_t *info, int32_t ifIdx)
+{
+    return LnnGetLocalInfoByIfnameIdx(key, (void *)info, sizeof(int32_t), ifIdx);
 }
 
 int32_t LnnGetLocalNum64Info(InfoKey key, int64_t *info)
 {
-    return LnnGetLocalInfo(key, (void*)info, sizeof(int64_t));
+    return LnnGetLocalInfo(key, (void *)info, sizeof(int64_t));
+}
+
+int32_t LnnSetLocalNumInfoByIfnameIdx(InfoKey key, int32_t info, int32_t ifIdx)
+{
+    return LnnSetLocalInfoByIfnameIdx(key, (void *)&info, ifIdx);
 }
 
 int32_t LnnGetLocalNumU64Info(InfoKey key, uint64_t *info)
 {
-    return LnnGetLocalInfo(key, (void*)info, sizeof(uint64_t));
+    return LnnGetLocalInfo(key, (void *)info, sizeof(uint64_t));
 }
 
 int32_t LnnSetLocalNum64Info(InfoKey key, int64_t info)
 {
-    return LnnSetLocalInfo(key, (void*)&info);
+    return LnnSetLocalInfo(key, (void *)&info);
 }
 
 int32_t LnnGetLocalNum16Info(InfoKey key, int16_t *info)
 {
-    return LnnGetLocalInfo(key, (void*)info, sizeof(int16_t));
+    return LnnGetLocalInfo(key, (void *)info, sizeof(int16_t));
 }
 
 int32_t LnnSetLocalNum16Info(InfoKey key, int16_t info)
 {
-    return LnnSetLocalInfo(key, (void*)&info);
+    return LnnSetLocalInfo(key, (void *)&info);
 }
 
 int32_t LnnGetLocalNumU16Info(InfoKey key, uint16_t *info)
 {
-    return LnnGetLocalInfo(key, (void*)info, sizeof(uint16_t));
+    return LnnGetLocalInfo(key, (void *)info, sizeof(uint16_t));
 }
 
 int32_t LnnSetLocalNumU16Info(InfoKey key, uint16_t info)
 {
-    return LnnSetLocalInfo(key, (void*)&info);
+    return LnnSetLocalInfo(key, (void *)&info);
 }
 
 int32_t LnnGetLocalNumU32Info(InfoKey key, uint32_t *info)
 {
-    return LnnGetLocalInfo(key, (void*)info, sizeof(uint32_t));
+    return LnnGetLocalInfo(key, (void *)info, sizeof(uint32_t));
 }
 
 int32_t LnnSetLocalNumU32Info(InfoKey key, uint32_t info)
 {
-    return LnnSetLocalInfo(key, (void*)&info);
+    return LnnSetLocalInfo(key, (void *)&info);
 }
 
 int32_t LnnSetLocalByteInfo(InfoKey key, const uint8_t *info, uint32_t len)
@@ -2324,7 +2692,7 @@ static void InitUserIdCheckSum(NodeInfo *nodeInfo)
     int32_t userId = GetActiveOsAccountIds();
     LNN_LOGI(LNN_LEDGER, "get userId:%{public}d", userId);
     nodeInfo->userId = userId;
-    int32_t ret = HbBuildUserIdCheckSum(&userId, 1, userIdCheckSum, USERID_CHECKSUM_LEN);
+    int32_t ret = HbBuildUserIdCheckSumPacked(&userId, 1, userIdCheckSum, USERID_CHECKSUM_LEN);
     if (ret != SOFTBUS_OK) {
         LNN_LOGW(LNN_LEDGER, "get userIdCheckSum failed, ret=%{public}d", ret);
     }
@@ -2336,7 +2704,7 @@ static void InitUserIdCheckSum(NodeInfo *nodeInfo)
 
 static void UpdateLocalAuthCapacity(NodeInfo *info)
 {
-    if (info->deviceInfo.deviceTypeId == TYPE_WATCH_ID) {
+    if (info->deviceInfo.deviceTypeId == TYPE_WATCH_ID || info->deviceInfo.deviceTypeId == TYPE_GLASS_ID) {
         info->authCapacity &= (~(1 << (uint32_t)BIT_SUPPORT_BR_DUP_BLE));
     }
 }
@@ -2351,6 +2719,7 @@ static int32_t LnnInitLocalNodeInfo(NodeInfo *nodeInfo)
         LNN_LOGE(LNN_LEDGER, "fail:strncpy_s fail");
         return SOFTBUS_STRCPY_ERR;
     }
+
     ret = InitLocalDeviceInfo(&nodeInfo->deviceInfo);
     if (ret != SOFTBUS_OK) {
         LNN_LOGE(LNN_LEDGER, "init local device info error");
@@ -2366,6 +2735,9 @@ static int32_t LnnInitLocalNodeInfo(NodeInfo *nodeInfo)
     if (ret != SOFTBUS_OK) {
         LNN_LOGE(LNN_LEDGER, "init local deviceSecurityLevel fail, deviceSecurityLevel=%{public}d",
             nodeInfo->deviceSecurityLevel);
+        LnnInitDeviceInfoStatusSet(LEDGER_INFO_DEVICE_SECURITY_LEVEL, DEPS_STATUS_FAILED);
+    } else {
+        LnnInitDeviceInfoStatusSet(LEDGER_INFO_DEVICE_SECURITY_LEVEL, DEPS_STATUS_SUCCESS);
     }
     ret = InitConnectInfo(&nodeInfo->connectInfo);
     if (ret != SOFTBUS_OK) {
@@ -2378,6 +2750,11 @@ static int32_t LnnInitLocalNodeInfo(NodeInfo *nodeInfo)
         return ret;
     }
     InitUserIdCheckSum(nodeInfo);
+    ret = LocalLedgerInitSleCapacity(nodeInfo);
+    if (ret != SOFTBUS_OK) {
+        LNN_LOGE(LNN_LEDGER, "init sle info error");
+        return ret;
+    }
     return SOFTBUS_OK;
 }
 
@@ -2389,6 +2766,7 @@ static void GenerateStateVersion(void)
     }
     randNum = randNum % (MAX_STATE_VERSION + 1);
     g_localNetLedger.localInfo.stateVersion = randNum;
+    g_localNetLedger.localInfo.isSupportSv = true;
     LNN_LOGI(LNN_LEDGER, "init local stateVersion=%{public}d", g_localNetLedger.localInfo.stateVersion);
 }
 
@@ -2413,6 +2791,7 @@ int32_t LnnInitLocalLedger(void)
     nodeInfo->netCapacity = LnnGetNetCapabilty();
     nodeInfo->authCapacity = GetAuthCapacity();
     nodeInfo->feature = LnnGetFeatureCapabilty();
+    nodeInfo->staticNetCap = LnnGetDefaultStaticNetCap();
     nodeInfo->connSubFeature = DEFAULT_CONN_SUB_FEATURE;
     if (LnnInitLocalNodeInfo(nodeInfo) != SOFTBUS_OK) {
         g_localNetLedger.status = LL_INIT_FAIL;
@@ -2440,14 +2819,48 @@ int32_t LnnInitLocalLedger(void)
     return SOFTBUS_OK;
 }
 
-int32_t LnnInitLocalLedgerDelay(void)
+int32_t HandleDeviceInfoIfUdidChanged(void)
 {
+    NodeInfo localNodeInfo;
+    (void)memset_s(&localNodeInfo, sizeof(NodeInfo), 0, sizeof(NodeInfo));
     NodeInfo *nodeInfo = &g_localNetLedger.localInfo;
     DeviceBasicInfo *deviceInfo = &nodeInfo->deviceInfo;
     if (GetCommonDevInfo(COMM_DEVICE_KEY_UDID, deviceInfo->deviceUdid, UDID_BUF_LEN) != SOFTBUS_OK) {
         LNN_LOGE(LNN_LEDGER, "GetCommonDevInfo: COMM_DEVICE_KEY_UDID failed");
         return SOFTBUS_NETWORK_GET_DEVICE_INFO_ERR;
     }
+    (void)LnnGetLocalDevInfoPacked(&localNodeInfo);
+    if (strcmp(deviceInfo->deviceUdid, localNodeInfo.deviceInfo.deviceUdid) != 0 &&
+        localNodeInfo.deviceInfo.deviceUdid[0] != '\0') {
+        LNN_LOGE(LNN_LEDGER, "udid changed, need update device info");
+        for (int32_t i = 0; i < LNN_FILE_ID_MAX; i++) {
+            if (LnnRemoveStorageConfigPath((LnnFileId)i) != SOFTBUS_OK) {
+                LNN_LOGE(LNN_LEDGER, "remove storage config path failed");
+                return SOFTBUS_FILE_ERR;
+            }
+        }
+        if (LnnUpdateLocalDeviceInfo() != SOFTBUS_OK) {
+            LNN_LOGE(LNN_LEDGER, "update local device info failed");
+            return SOFTBUS_NETWORK_INVALID_DEV_INFO;
+        }
+    }
+    return SOFTBUS_OK;
+}
+
+int32_t LnnInitLocalLedgerDelay(void)
+{
+    if (SoftBusMutexLock(&g_localNetLedger.lock) != 0) {
+        LNN_LOGE(LNN_LEDGER, "lock mutex fail");
+        return SOFTBUS_LOCK_ERR;
+    }
+    NodeInfo *nodeInfo = &g_localNetLedger.localInfo;
+    DeviceBasicInfo *deviceInfo = &nodeInfo->deviceInfo;
+    if (GetCommonDevInfo(COMM_DEVICE_KEY_UDID, deviceInfo->deviceUdid, UDID_BUF_LEN) != SOFTBUS_OK) {
+        LNN_LOGE(LNN_LEDGER, "GetCommonDevInfo: COMM_DEVICE_KEY_UDID failed");
+        SoftBusMutexUnlock(&g_localNetLedger.lock);
+        return SOFTBUS_NETWORK_GET_DEVICE_INFO_ERR;
+    }
+    SoftBusMutexUnlock(&g_localNetLedger.lock);
     int32_t ret = LnnInitOhosAccount();
     if (ret != SOFTBUS_OK) {
         LNN_LOGE(LNN_LEDGER, "init default ohos account failed");
@@ -2458,6 +2871,7 @@ int32_t LnnInitLocalLedgerDelay(void)
 
 void LnnDeinitLocalLedger(void)
 {
+    LocalLedgerDeinitSleCapacity();
     if (g_localNetLedger.status == LL_INIT_SUCCESS) {
         SoftBusMutexDestroy(&g_localNetLedger.lock);
     }
@@ -2485,6 +2899,18 @@ int32_t LnnUpdateLocalScreenStatus(bool isScreenOn)
         return SOFTBUS_LOCK_ERR;
     }
     LnnSetScreenStatus(&g_localNetLedger.localInfo, isScreenOn);
+    SoftBusMutexUnlock(&g_localNetLedger.lock);
+    return SOFTBUS_OK;
+}
+
+int32_t LnnUpdateSleCapacityAndVersion(int32_t slecap)
+{
+    if (SoftBusMutexLock(&g_localNetLedger.lock) != SOFTBUS_OK) {
+        LNN_LOGE(LNN_LEDGER, "lock mutex failed");
+        return SOFTBUS_LOCK_ERR;
+    }
+    g_localNetLedger.localInfo.sleRangeCapacity = slecap;
+    UpdateStateVersionAndStore(UPDATE_SLE_CAP);
     SoftBusMutexUnlock(&g_localNetLedger.lock);
     return SOFTBUS_OK;
 }

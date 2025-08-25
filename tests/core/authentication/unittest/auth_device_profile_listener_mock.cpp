@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2024 Huawei Device Co., Ltd.
+ * Copyright (c) 2024-2025 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -38,28 +38,25 @@ static AuthDeviceProfileListenerInterfaceMock *GetInterface()
 extern "C" {
 void DelNotTrustDevice(const char *udid)
 {
-    return GetInterface()->DelNotTrustDevice(udid);
+    (void)udid;
 }
 
-void RestartCoapDiscovery(void)
-{
-    return GetInterface()->RestartCoapDiscovery();
-}
+void RestartCoapDiscovery(void) { }
 
-int32_t LnnStartHbByTypeAndStrategy(
-    LnnHeartbeatType hbType, LnnHeartbeatStrategyType strategyType, bool isRelay)
+int32_t LnnStartHbByTypeAndStrategy(LnnHeartbeatType hbType, LnnHeartbeatStrategyType strategyType, bool isRelay)
 {
     return GetInterface()->LnnStartHbByTypeAndStrategy(hbType, strategyType, isRelay);
 }
 
 void LnnUpdateOhosAccount(UpdateAccountReason reason)
 {
-    return GetInterface()->LnnUpdateOhosAccount(reason);
+    (void)reason;
 }
 
 void NotifyRemoteDevOffLineByUserId(int32_t userId, const char *udid)
 {
-    return GetInterface()->NotifyRemoteDevOffLineByUserId(userId, udid);
+    (void)userId;
+    (void)udid;
 }
 
 bool LnnIsLocalSupportBurstFeature(void)
@@ -75,6 +72,46 @@ int32_t GetActiveOsAccountIds(void)
 int32_t LnnGetRemoteNodeInfoById(const char *id, IdCategory type, NodeInfo *info)
 {
     return GetInterface()->LnnGetRemoteNodeInfoById(id, type, info);
+}
+
+bool DpHasAccessControlProfile(const char *udid, bool isNeedUserId, int32_t localUserId)
+{
+    return GetInterface()->DpHasAccessControlProfile(udid, isNeedUserId, localUserId);
+}
+
+int32_t LnnDeleteSpecificTrustedDevInfo(const char *udid, int32_t localUserId)
+{
+    return GetInterface()->LnnDeleteSpecificTrustedDevInfo(udid, localUserId);
+}
+
+SoftBusScreenState GetScreenState(void)
+{
+    return GetInterface()->GetScreenState();
+}
+
+bool IsHeartbeatEnable(void)
+{
+    return GetInterface()->IsHeartbeatEnable();
+}
+
+int32_t LnnInsertSpecificTrustedDevInfo(const char *udid)
+{
+    return GetInterface()->LnnInsertSpecificTrustedDevInfo(udid);
+}
+
+void LnnHbOnTrustedRelationIncreased(int32_t groupType)
+{
+    return GetInterface()->LnnHbOnTrustedRelationIncreased(groupType);
+}
+
+void LnnHbOnTrustedRelationReduced(void)
+{
+    return GetInterface()->LnnHbOnTrustedRelationReduced();
+}
+
+void LnnUpdateHeartbeatInfo(LnnHeartbeatUpdateInfoType type)
+{
+    (void)type;
 }
 }
 } // namespace OHOS

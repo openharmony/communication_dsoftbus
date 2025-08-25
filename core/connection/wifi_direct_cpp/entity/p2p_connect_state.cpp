@@ -14,16 +14,11 @@
  */
 
 #include "p2p_connect_state.h"
-#include "common_timer_errors.h"
-#include "conn_log.h"
 #include "p2p_entity.h"
-#include "p2p_operation_result.h"
 #include "p2p_unavailable_state.h"
-#include "softbus_error_code.h"
 #include "softbus_adapter_crypto.h"
 #include "utils/wifi_direct_anonymous.h"
-#include "data/interface_manager.h"
-#include "data/link_manager.h"
+#include "utils/wifi_direct_utils.h"
 
 namespace OHOS::SoftBus {
 static constexpr int IP_SUFFIX_RANGE = 253;
@@ -43,7 +38,13 @@ void P2pConnectState::Enter(const std::shared_ptr<P2pOperation> &operation)
     timer_.Setup();
     operation_ = operation;
     int outTime = CONNECT_TIMEOUT_MS;
-    auto connectOp = std::dynamic_pointer_cast<P2pOperationWrapper<P2pConnectParam>>(operation);
+    std::shared_ptr<P2pOperationWrapper<P2pConnectParam>> connectOp = nullptr;
+    if (operation != nullptr && operation->type_ == P2pOperationType::CONNECT) {
+        connectOp = std::static_pointer_cast<P2pOperationWrapper<P2pConnectParam>>(operation);
+    } else {
+        CONN_LOGE(CONN_WIFI_DIRECT, "operation type is not connect");
+        return;
+    }
     if (connectOp->content_.isNeedDhcp) {
         outTime = CONNECT_TIMEOUT_DHCP_MS;
     }
@@ -97,6 +98,7 @@ void P2pConnectState::OnP2pStateChangeEvent(P2pState state)
             timer_.Unregister(operation_->timerId_);
             result.errorCode_ = SOFTBUS_CONN_P2P_CONNECT_STATE_WIFI_STATE_NOT_STARTED;
             operation_->promise_.set_value(result);
+            operation_ = nullptr;
         }
         ChangeState(P2pUnavailableState::Instance(), nullptr);
     }
@@ -108,7 +110,9 @@ std::string P2pConnectState::CalculateGcIp(const std::string &goIpAddr)
     auto lastDotPos = goIpAddr.find_last_of('.');
     CONN_CHECK_AND_RETURN_RET_LOGE(
         lastDotPos != std::string::npos, "", CONN_WIFI_DIRECT, "not find last dot of go ip addr");
-    auto goIpSuffix = std::stoi(goIpAddr.substr(lastDotPos + 1));
+    int32_t goIpSuffix = 0;
+    bool result = WifiDirectUtils::StringToInt(goIpAddr.substr(lastDotPos + 1), goIpSuffix);
+    CONN_CHECK_AND_RETURN_RET_LOGE(result, "", CONN_WIFI_DIRECT, "go ip suffix is invalid number string");
     int gcIpSuffix = 0;
     int count = 0;
     do {
@@ -125,12 +129,12 @@ void P2pConnectState::PreprocessP2pConnectionChangeEvent(
     if (info.connectState != P2pConnectionState::P2P_CONNECTED) {
         return;
     }
-    if (groupInfo == nullptr) {
-        CONN_LOGE(CONN_WIFI_DIRECT, "group info is null, skip config ip");
-        return;
-    }
+    CONN_CHECK_AND_RETURN_LOGW(groupInfo != nullptr, CONN_WIFI_DIRECT, "group info is null, skip config ip");
     P2pEntity::GetInstance().Lock();
-    auto operation = std::dynamic_pointer_cast<P2pOperationWrapper<P2pConnectParam>>(operation_);
+    std::shared_ptr<P2pOperationWrapper<P2pConnectParam>> operation = nullptr;
+    if (operation_ != nullptr && operation_->type_ == P2pOperationType::CONNECT) {
+        operation = std::static_pointer_cast<P2pOperationWrapper<P2pConnectParam>>(operation_);
+    }
     if (operation == nullptr) {
         CONN_LOGE(CONN_WIFI_DIRECT, "operation is null");
         P2pEntity::GetInstance().Unlock();
@@ -153,7 +157,7 @@ void P2pConnectState::PreprocessP2pConnectionChangeEvent(
     }
     auto ret = P2pAdapter::P2pConfigGcIp(groupInfo->interface, operation->content_.gcIp);
     P2pEntity::GetInstance().Unlock();
-    CONN_CHECK_AND_RETURN_LOGE(ret == SOFTBUS_OK, CONN_WIFI_DIRECT, "config gc ip failed, error=%{public}d", ret);
+    CONN_CHECK_AND_RETURN_LOGE(ret == SOFTBUS_OK, CONN_WIFI_DIRECT, "config gc ip fail, error=%{public}d", ret);
 }
 
 void P2pConnectState::OnP2pConnectionChangeEvent(
@@ -171,7 +175,7 @@ void P2pConnectState::OnP2pConnectionChangeEvent(
     P2pOperationResult result;
     if (ret != SOFTBUS_OK || info.connectState == P2P_DISCONNECTED) {
         result.errorCode_ = SOFTBUS_CONN_P2P_ABNORMAL_DISCONNECTION;
-        CONN_LOGE(CONN_WIFI_DIRECT, "connect call event failed, error=%{public}d", result.errorCode_);
+        CONN_LOGE(CONN_WIFI_DIRECT, "connect call event fail, error=%{public}d", result.errorCode_);
     } else {
         result.errorCode_ = SOFTBUS_OK;
     }
@@ -183,7 +187,10 @@ void P2pConnectState::OnP2pConnectionChangeEvent(
 
 bool P2pConnectState::DetectDhcpTimeout()
 {
-    auto operation = std::dynamic_pointer_cast<P2pOperationWrapper<P2pConnectParam>>(operation_);
+    std::shared_ptr<P2pOperationWrapper<P2pConnectParam>> operation = nullptr;
+    if (operation_ != nullptr && operation_->type_ == P2pOperationType::CONNECT) {
+        operation = std::static_pointer_cast<P2pOperationWrapper<P2pConnectParam>>(operation_);
+    }
     if (operation == nullptr || !operation->content_.isNeedDhcp) {
         return false;
     }
@@ -203,7 +210,6 @@ void P2pConnectState::OnTimeout()
         P2pEntity::GetInstance().Unlock();
         return;
     }
-
     SoftBusErrNo resultCode = SOFTBUS_CONN_CONNECT_GROUP_TIMEOUT;
     if (DetectDhcpTimeout()) {
         resultCode = SOFTBUS_CONN_CONNECT_DHCP_TIMEOUT;

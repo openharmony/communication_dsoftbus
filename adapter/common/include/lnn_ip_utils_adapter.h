@@ -33,6 +33,8 @@ extern "C" {
 #endif
 
 int32_t GetNetworkIpByIfName(const char *ifName, char *ip, char *netmask, uint32_t len);
+int32_t GetNetworkIpv6ByIfName(const char *ifName, char *ip, uint32_t len);
+bool GetLinkUpStateByIfName(const char *ifName);
 
 #ifdef __cplusplus
 }

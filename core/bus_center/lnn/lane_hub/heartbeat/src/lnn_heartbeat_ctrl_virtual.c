@@ -99,6 +99,20 @@ int32_t LnnShiftLNNGearWithoutPkgName(const char *callerId, const GearMode *mode
     return SOFTBUS_NOT_IMPLEMENT;
 }
 
+int32_t LnnTriggerSleRangeForMsdp(const char *pkgName, const RangeConfig *config)
+{
+    (void)pkgName;
+    (void)config;
+    return SOFTBUS_NOT_IMPLEMENT;
+}
+
+int32_t LnnTriggerHbRangeForMsdp(const char *pkgName, const RangeConfig *config)
+{
+    (void)pkgName;
+    (void)config;
+    return SOFTBUS_NOT_IMPLEMENT;
+}
+
 int32_t LnnTriggerDataLevelHeartbeat(void)
 {
     return SOFTBUS_OK;
@@ -123,5 +137,11 @@ bool LnnIsCloudSyncEnd(void)
 
 bool IsHeartbeatEnable(void)
 {
+    return false;
+}
+
+bool LnnIsNeedInterceptBroadcast(bool disableGlass)
+{
+    (void)disableGlass;
     return false;
 }

@@ -64,6 +64,10 @@ public:
         int32_t netId, const std::string &ifName, const std::string &destination, const std::string &nextHop);
     virtual int32_t AddInterfaceAddress(const std::string &ifName, const std::string &ipAddr, int32_t prefixLength);
     virtual int32_t DelInterfaceAddress(const std::string &ifName, const std::string &ipAddr, int32_t prefixLength);
+    virtual int32_t AddStaticIpv6Addr(
+        const std::string &ipv6Addr, const std::string &macAddr, const std::string &interface);
+    virtual int32_t DelStaticIpv6Addr(
+        const std::string &ipv6Addr, const std::string &macAddr, const std::string &interface);
 };
 
 class MockNetConnClient : public NetManagerStandard::NetConnClient {
@@ -83,6 +87,10 @@ public:
 
     MOCK_METHOD4(RemoveNetworkRoute,
         int32_t(int32_t netId, const std::string &ifName, const std::string &destination, const std::string &nextHop));
+    MOCK_METHOD3(ConfigStaticIpv6,
+        int32_t(const std::string &ipv6Addr, const std::string &macAddr, const std::string &interface));
+    MOCK_METHOD3(ReleaseStaticIpv6,
+        int32_t(const std::string &ipv6Addr, const std::string &macAddr, const std::string &interface));
 
     static MockNetConnClient *GetMock()
     {

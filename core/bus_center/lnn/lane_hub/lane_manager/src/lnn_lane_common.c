@@ -134,6 +134,20 @@ static int32_t Wlan5GInfoProc(const LaneLinkInfo *linkInfo, LaneConnInfo *connIn
     return SOFTBUS_OK;
 }
 
+static int32_t UsbInfoProc(const LaneLinkInfo *linkInfo, LaneConnInfo *connInfo, LaneProfile *profile)
+{
+    connInfo->type = LANE_USB;
+    if (memcpy_s(&connInfo->connInfo.usb, sizeof(UsbConnInfo),
+        &linkInfo->linkInfo.usb.connInfo, sizeof(UsbConnInfo)) != EOK) {
+        LNN_LOGE(LNN_LANE, "memcpy UsbConnInfo fail");
+        return SOFTBUS_MEM_ERR;
+    }
+    profile->linkType = LANE_USB;
+    profile->bw = linkInfo->linkInfo.usb.bw;
+    profile->phyChannel = linkInfo->linkInfo.usb.channel;
+    return SOFTBUS_OK;
+}
+
 static int32_t BleDirectInfoProc(const LaneLinkInfo *linkInfo, LaneConnInfo *connInfo, LaneProfile *profile)
 {
     if (strcpy_s(connInfo->connInfo.bleDirect.networkId, NETWORK_ID_BUF_LEN,
@@ -165,6 +179,37 @@ static int32_t CocInfoProc(const LaneLinkInfo *linkInfo, LaneConnInfo *connInfo,
     return SOFTBUS_OK;
 }
 
+static int32_t SleDirectInfoProc(const LaneLinkInfo *linkInfo, LaneConnInfo *connInfo, LaneProfile *profile)
+{
+    if (strcpy_s(connInfo->connInfo.sleDirect.networkId, NETWORK_ID_BUF_LEN,
+        linkInfo->linkInfo.sleDirect.networkId) != EOK) {
+        LNN_LOGE(LNN_LANE, "memcpy networkId fail");
+        return SOFTBUS_STRCPY_ERR;
+    }
+    connInfo->type = LANE_SLE_DIRECT;
+    connInfo->connInfo.sleDirect.protoType = linkInfo->linkInfo.sleDirect.protoType;
+    profile->linkType = LANE_SLE_DIRECT;
+    return SOFTBUS_OK;
+}
+
+static int32_t SleInfoProc(const LaneLinkInfo *linkInfo, LaneConnInfo *connInfo, LaneProfile *profile)
+{
+    connInfo->type = LANE_SLE;
+    if (memcpy_s(connInfo->connInfo.sle.sleMac, SLE_MAC_LEN,
+        linkInfo->linkInfo.sle.sleMac, SLE_MAC_LEN) != EOK) {
+        LNN_LOGE(LNN_LANE, "memcpy btMac fail");
+        return SOFTBUS_MEM_ERR;
+    }
+    if (memcpy_s(connInfo->connInfo.sle.deviceIdHash, UDID_HASH_LEN,
+        linkInfo->linkInfo.sle.deviceIdHash, UDID_HASH_LEN) != EOK) {
+        LNN_LOGE(LNN_LANE, "memcpy udidHash fail");
+        return SOFTBUS_MEM_ERR;
+    }
+    connInfo->connInfo.sle.protoType = linkInfo->linkInfo.sle.protoType;
+    profile->linkType = LANE_SLE;
+    return SOFTBUS_OK;
+}
+
 static LinkInfoProc g_funcList[LANE_LINK_TYPE_BUTT] = {
     [LANE_BR] = BrInfoProc,
     [LANE_BLE] = BleInfoProc,
@@ -178,6 +223,9 @@ static LinkInfoProc g_funcList[LANE_LINK_TYPE_BUTT] = {
     // CoC reuse gatt direct
     [LANE_COC_DIRECT] = BleDirectInfoProc,
     [LANE_HML_RAW] = HmlRawInfoProc,
+    [LANE_USB] = UsbInfoProc,
+    [LANE_SLE] = SleInfoProc,
+    [LANE_SLE_DIRECT] = SleDirectInfoProc,
 };
 
 int32_t LaneInfoProcess(const LaneLinkInfo *linkInfo, LaneConnInfo *connInfo, LaneProfile *profile)

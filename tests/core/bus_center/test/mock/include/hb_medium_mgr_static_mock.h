@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2024 Huawei Device Co., Ltd.
+ * Copyright (c) 2024-2025 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -19,7 +19,8 @@
 #include <gmock/gmock.h>
 #include <mutex>
 
-#include "auth_device_common_key.h"
+#include "auth_device_common_key_struct.h"
+#include "auth_interface_struct.h"
 #include "lnn_event_form.h"
 #include "lnn_feature_capability.h"
 #include "lnn_node_info.h"
@@ -49,30 +50,38 @@ public:
         char *outBuf, uint32_t outBufLen, const unsigned char *inBuf, uint32_t inLen) = 0;
     virtual int32_t ConvertBytesToHexString(
         char *outBuf, uint32_t outBufLen, const unsigned char *inBuf, uint32_t inLen) = 0;
-    virtual bool AuthIsPotentialTrusted(const DeviceInfo *device) = 0;
+    virtual bool AuthIsPotentialTrusted(const DeviceInfo *device, bool isOnlyPointToPoint) = 0;
     virtual int32_t DecryptUserId(NodeInfo *deviceInfo, uint8_t *advUserId, uint32_t len) = 0;
+    virtual int32_t LnnGetDLSleHbTimestamp(const char *networkId, uint64_t *timestamp) = 0;
+    virtual int32_t LnnSetDLSleHbTimestamp(const char *networkId, const uint64_t timestamp) = 0;
+    virtual int32_t LnnStartSleOfflineTimingStrategy(const char *networkId) = 0;
+    virtual int32_t LnnStopSleOfflineTimingStrategy(const char *networkId) = 0;
 };
 class HbMediumMgrInterfaceMock : public HbMediumMgrInterface {
 public:
     HbMediumMgrInterfaceMock();
     ~HbMediumMgrInterfaceMock() override;
-    MOCK_METHOD0(IsCloudSyncEnabled, bool (void));
-    MOCK_METHOD2(IsFeatureSupport, bool (uint64_t, FeatureCapability));
-    MOCK_METHOD3(AuthFindDeviceKey, int32_t (const char *, int32_t, AuthDeviceKeyInfo *));
-    MOCK_METHOD1(IsCipherManagerFindKey, bool (const char *));
-    MOCK_METHOD3(AuthFindLatestNormalizeKey, int32_t (const char *, AuthDeviceKeyInfo *, bool));
-    MOCK_METHOD1(LnnConvAddrTypeToDiscType, DiscoveryType (ConnectionAddrType));
-    MOCK_METHOD2(LnnConvertAddrToAuthConnInfo, bool (const ConnectionAddr *, AuthConnInfo *));
-    MOCK_METHOD0(SoftBusGetBrState, int32_t (void));
-    MOCK_METHOD2(LnnAddRemoteChannelCode, int32_t (const char *, int32_t));
-    MOCK_METHOD0(LnnRegistBleHeartbeatMediumMgr, int32_t (void));
-    MOCK_METHOD2(LnnGetDLHeartbeatTimestamp, int32_t (const char *, uint64_t *));
-    MOCK_METHOD2(LnnSetDLHeartbeatTimestamp, int32_t (const char *, const uint64_t));
-    MOCK_METHOD3(SoftBusGenerateStrHash, int32_t (const unsigned char *, uint32_t, unsigned char *));
-    MOCK_METHOD4(ConvertBytesToUpperCaseHexString, int32_t (char *, uint32_t, const unsigned char *, uint32_t));
-    MOCK_METHOD4(ConvertBytesToHexString, int32_t (char *, uint32_t, const unsigned char *, uint32_t));
-    MOCK_METHOD1(AuthIsPotentialTrusted, bool (const DeviceInfo *));
-    MOCK_METHOD3(DecryptUserId, int32_t (NodeInfo *, uint8_t *, uint32_t));
+    MOCK_METHOD0(IsCloudSyncEnabled, bool(void));
+    MOCK_METHOD2(IsFeatureSupport, bool(uint64_t, FeatureCapability));
+    MOCK_METHOD3(AuthFindDeviceKey, int32_t(const char *, int32_t, AuthDeviceKeyInfo *));
+    MOCK_METHOD1(IsCipherManagerFindKey, bool(const char *));
+    MOCK_METHOD3(AuthFindLatestNormalizeKey, int32_t(const char *, AuthDeviceKeyInfo *, bool));
+    MOCK_METHOD1(LnnConvAddrTypeToDiscType, DiscoveryType(ConnectionAddrType));
+    MOCK_METHOD2(LnnConvertAddrToAuthConnInfo, bool(const ConnectionAddr *, AuthConnInfo *));
+    MOCK_METHOD0(SoftBusGetBrState, int32_t(void));
+    MOCK_METHOD2(LnnAddRemoteChannelCode, int32_t(const char *, int32_t));
+    MOCK_METHOD0(LnnRegistBleHeartbeatMediumMgr, int32_t(void));
+    MOCK_METHOD2(LnnGetDLHeartbeatTimestamp, int32_t(const char *, uint64_t *));
+    MOCK_METHOD2(LnnSetDLHeartbeatTimestamp, int32_t(const char *, const uint64_t));
+    MOCK_METHOD3(SoftBusGenerateStrHash, int32_t(const unsigned char *, uint32_t, unsigned char *));
+    MOCK_METHOD4(ConvertBytesToUpperCaseHexString, int32_t(char *, uint32_t, const unsigned char *, uint32_t));
+    MOCK_METHOD4(ConvertBytesToHexString, int32_t(char *, uint32_t, const unsigned char *, uint32_t));
+    MOCK_METHOD2(AuthIsPotentialTrusted, bool(const DeviceInfo *, bool));
+    MOCK_METHOD3(DecryptUserId, int32_t(NodeInfo *, uint8_t *, uint32_t));
+    MOCK_METHOD2(LnnGetDLSleHbTimestamp, int32_t(const char *, uint64_t *));
+    MOCK_METHOD2(LnnSetDLSleHbTimestamp, int32_t(const char *, const uint64_t));
+    MOCK_METHOD1(LnnStartSleOfflineTimingStrategy, int32_t(const char *));
+    MOCK_METHOD1(LnnStopSleOfflineTimingStrategy, int32_t(const char *));
 };
 } // namespace OHOS
 #endif // HB_MEDIUM_MGR_STATIC_MOCK_H

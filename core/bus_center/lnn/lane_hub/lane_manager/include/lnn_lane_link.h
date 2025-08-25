@@ -19,6 +19,7 @@
 #include <stdint.h>
 #include "lnn_lane_def.h"
 #include "lnn_lane_link_conflict.h"
+#include "lnn_lane_link_struct.h"
 #include "bus_center_info_key.h"
 #include "softbus_common.h"
 #include "softbus_def.h"
@@ -27,92 +28,6 @@
 #ifdef __cplusplus
 extern "C" {
 #endif
-
-#define COC_DIRECT_LATENCY      1200
-#define BR_LATENCY              2500
-#define WLAN_LATENCY            800
-#define P2P_LATENCY             1600
-#define BLE_LATENCY             1500
-#define HML_LATENCY             1500
-#define BR_REUSE_LATENCY        1000
-
-typedef struct {
-    char peerNetworkId[NETWORK_ID_BUF_LEN];
-    bool networkDelegate;
-    bool p2pOnly;
-    //OldInfo
-    char peerBleMac[MAX_MAC_LEN];
-    bool isSupportIpv6;
-    int32_t psm;
-    LaneTransType transType;
-    uint32_t actionAddr;
-
-    LaneLinkType linkType;
-    ProtocolType acceptableProtocols;
-    int32_t pid;
-    uint32_t bandWidth;
-    uint64_t triggerLinkTime;
-    uint64_t availableLinkTime;
-} LinkRequest;
-
-typedef struct {
-    int32_t channel;
-    LaneBandwidth bw;
-    WlanConnInfo connInfo;
-} WlanLinkInfo;
-
-typedef struct {
-    int32_t channel;
-    LaneBandwidth bw;
-    P2pConnInfo connInfo;
-} P2pLinkInfo;
-
-typedef struct {
-    char brMac[BT_MAC_LEN];
-} BrLinkInfo;
-
-// 'GATT' and 'CoC' protocols under BLE use the same definitions
-typedef struct {
-    char bleMac[BT_MAC_LEN];
-    char deviceIdHash[UDID_HASH_LEN];
-    BleProtocolType protoType;
-    int32_t psm;
-} BleLinkInfo;
-
-// 'GATT' and 'CoC' protocols under BLE use the same definitions
-typedef struct {
-    BleProtocolType protoType;
-    char networkId[NETWORK_ID_BUF_LEN];
-} BleDirectInfo;
-
-typedef struct {
-    char peerUdid[UDID_BUF_LEN];
-    char netifName[NET_IF_NAME_LEN];
-    LaneLinkType type;
-    union {
-        WlanLinkInfo wlan;
-        P2pLinkInfo p2p;
-        BrLinkInfo br;
-        BleLinkInfo ble;
-        BleDirectInfo bleDirect;
-        RawWifiDirectConnInfo rawWifiDirect;
-    } linkInfo;
-} LaneLinkInfo;
-
-typedef struct {
-    bool isServerSide;
-    uint32_t laneScore;
-    uint32_t laneFload;
-    uint32_t clientRef;
-    LaneLinkInfo link;
-    ListNode node;
-    uint64_t laneId;
-} LaneResource;
-
-typedef struct {
-    void (*onLaneLinkSuccess)(uint32_t reqId, LaneLinkType linkType, const LaneLinkInfo *linkInfo);
-    void (*onLaneLinkFail)(uint32_t reqId, int32_t reason, LaneLinkType linkType);
-} LaneLinkCb;
 
 int32_t InitLaneLink(void);
 void DeinitLaneLink(void);
@@ -139,6 +54,8 @@ int32_t ClearLaneResourceByLaneId(uint64_t laneId);
 int32_t GetAllDevIdWithLinkType(LaneLinkType type, char **devIdList, uint8_t *devIdCnt);
 int32_t QueryOtherLaneResource(const DevIdentifyInfo *inputInfo, LaneLinkType type);
 bool FindLaneResourceByDevInfo(const DevIdentifyInfo *inputInfo, LaneLinkType type);
+int32_t GetAllLinkWithDevId(const char *peerUdid, LaneLinkType **linkList, uint8_t *linkCnt);
+bool CheckLaneLinkExistByType(LaneLinkType linkType);
 
 #ifdef __cplusplus
 }

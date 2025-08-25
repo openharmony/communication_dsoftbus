@@ -1,0 +1,110 @@
+# Copyright (c) 2024-2025 Huawei Device Co., Ltd.
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+#     http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+
+#####################hydra-fuzz###################
+import("//build/test.gni")
+import("../../../../../dsoftbus.gni")
+
+##############################fuzztest##########################################
+
+dsoftbus_root_path = "../../../../.."
+wifi_direct_path = "$dsoftbus_root_path/core/connection/wifi_direct_cpp"
+
+ohos_fuzztest("ProxyNegotiateChannelImprovedFuzzTest") {
+  module_out_path = dsoftbus_fuzz_out_path
+  fuzz_config_file = "$dsoftbus_root_path/tests/core/connection/fuzztest/proxynegotiatechannelimproved_fuzzer"
+  include_dirs = [
+    "$dsoftbus_dfx_path/interface/include/form",
+    "$dsoftbus_root_path/adapter/common/include",
+    "$dsoftbus_root_path/adapter/common/net/wifi/include",
+    "$dsoftbus_root_path/core/adapter/authentication/include",
+    "$dsoftbus_root_path/core/adapter/bus_center/include",
+    "$dsoftbus_root_path/core/authentication/include",
+    "$dsoftbus_root_path/core/authentication/interface",
+    "$dsoftbus_root_path/core/bus_center/interface",
+    "$dsoftbus_root_path/core/bus_center/lnn/lane_hub/heartbeat/include",
+    "$dsoftbus_root_path/core/bus_center/lnn/lane_hub/lane_manager/include",
+    "$dsoftbus_root_path/core/bus_center/lnn/net_builder/include",
+    "$dsoftbus_root_path/core/bus_center/lnn/net_ledger/common/include",
+    "$dsoftbus_root_path/core/bus_center/lnn/net_ledger/distributed_ledger/include",
+    "$dsoftbus_root_path/core/bus_center/service/include",
+    "$dsoftbus_root_path/core/bus_center/utils/include/",
+    "$dsoftbus_root_path/core/common/dfx/hisysevent_adapter/include",
+    "$dsoftbus_root_path/core/common/dfx/interface/include",
+    "$dsoftbus_root_path/core/common/include",
+    "$dsoftbus_root_path/core/connection/interface",
+    "$dsoftbus_root_path/core/connection/wifi_direct_cpp",
+    "$dsoftbus_root_path/core/connection/wifi_direct_cpp/channel",
+    "$dsoftbus_root_path/core/connection/wifi_direct_cpp/dbinder",
+    "$dsoftbus_root_path/core/discovery/interface",
+    "$dsoftbus_root_path/core/discovery/manager/include",
+    "$dsoftbus_root_path/core/frame/common/include",
+    "$dsoftbus_root_path/core/frame/init/include",
+    "$dsoftbus_root_path/core/transmission/trans_channel/proxy/include",
+    "$dsoftbus_root_path/interfaces/inner_kits/lnn",
+    "$dsoftbus_root_path/interfaces/inner_kits/transport",
+    "$dsoftbus_root_path/interfaces/kits/adapter",
+    "$dsoftbus_root_path/interfaces/kits/authentication",
+    "$dsoftbus_root_path/interfaces/kits/bus_center",
+    "$dsoftbus_root_path/interfaces/kits/common",
+    "$dsoftbus_root_path/interfaces/kits/connect",
+    "$dsoftbus_root_path/interfaces/kits/disc",
+    "$dsoftbus_root_path/interfaces/kits/discovery",
+    "$dsoftbus_root_path/interfaces/kits/lnn",
+    "$dsoftbus_root_path/interfaces/kits/transport",
+    "$dsoftbus_root_path/tests/common/include",
+    "$dsoftbus_root_path/tests/core/connection/wifi_direct_cpp",
+    "$dsoftbus_root_path/tests/core/connection/wifi_direct_cpp/processor",
+    "$wifi_direct_path/command",
+  ]
+
+  sources = [
+    "$dsoftbus_dfx_path/anonymize/src/anonymizer.c",
+    "$dsoftbus_root_path/tests/core/connection/wifi_direct_cpp/channel/proxy_negotiate_channel_test.cpp",
+    "$dsoftbus_root_path/tests/core/connection/wifi_direct_cpp/net_conn_client.cpp",
+    "$dsoftbus_root_path/tests/core/connection/wifi_direct_cpp/wifi_direct_mock.cpp",
+    "$dsoftbus_root_path/tests/core/connection/wifi_direct_cpp/wifi_direct_utils.cpp",
+    "$dsoftbus_root_path/core/frame/common/src/softbus_init_common.c",
+    "proxynegotiatechannelimproved_fuzzer.cpp",
+    "$dsoftbus_root_path/core/frame/init/src/g_enhance_lnn_func.c",
+  ]
+
+  cflags = [
+    "-fexceptions",
+    "-frtti",
+  ]
+
+  configs = [
+    "//build/config/compiler:rtti",
+    "//build/config/compiler:exceptions",
+  ]
+
+  deps = [
+    "$dsoftbus_root_path/adapter:softbus_adapter",
+    "$dsoftbus_root_path/core/common:softbus_utils",
+    "$dsoftbus_root_path/core/frame:softbus_server",
+    "$dsoftbus_root_path/dfx:softbus_dfx",
+    "$dsoftbus_root_path/core/connection/wifi_direct_cpp:wifi_direct",
+  ]
+
+  external_deps = [
+    "cJSON:cjson",
+    "c_utils:utils",
+    "googletest:gmock_rtti",
+    "googletest:gtest_rtti",
+    "hilog:libhilog",
+    "hitrace:libhitracechain",
+    "init:libbegetutil",
+    "wifi:wifi_sdk",
+  ]
+}

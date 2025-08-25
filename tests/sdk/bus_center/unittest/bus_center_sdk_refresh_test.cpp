@@ -44,7 +44,9 @@ public:
 
 void BusCenterSdkRefresh::SetUpTestCase(void)
 {
-    SetAceessTokenPermission("busCenterTest");
+    SetAccessTokenPermission("busCenterTest");
+    uint64_t tokenId = SetTokenIdByProcessName("device_manager");
+    printf("SetTokenIdByProcessName tokenId:%ju\n", tokenId);
 }
 
 void BusCenterSdkRefresh::TearDownTestCase(void) { }
@@ -72,7 +74,7 @@ static SubscribeInfo g_sInfo3 = { .subscribeId = GetSubscribeId(),
     .isSameAccount = true,
     .isWakeRemote = false,
     .capability = "hicall",
-    .capabilityData = NULL,
+    .capabilityData = nullptr,
     .dataLen = 0 };
 
 static void OnDiscoverResult(int32_t refreshId, RefreshResult Reason)
@@ -426,13 +428,13 @@ HWTEST_F(BusCenterSdkRefresh, RefreshLNNTest009, TestSize.Level1)
         .capabilityData = (unsigned char *)"capdata3",
         .dataLen = strlen("capdata3") };
 
-    ret = RefreshLNN(NULL, &testInfo, &g_refreshCb1);
+    ret = RefreshLNN(nullptr, &testInfo, &g_refreshCb1);
     EXPECT_TRUE(ret != 0);
 
-    ret = RefreshLNN(g_pkgName, NULL, &g_refreshCb1);
+    ret = RefreshLNN(g_pkgName, nullptr, &g_refreshCb1);
     EXPECT_TRUE(ret != 0);
 
-    ret = RefreshLNN(g_pkgName, &testInfo, NULL);
+    ret = RefreshLNN(g_pkgName, &testInfo, nullptr);
     EXPECT_TRUE(ret != 0);
 
     testInfo.medium = (ExchangeMedium)(AUTO + 3);
@@ -450,7 +452,7 @@ HWTEST_F(BusCenterSdkRefresh, RefreshLNNTest009, TestSize.Level1)
     EXPECT_TRUE(ret != 0);
     testInfo.freq = LOW;
 
-    testInfo.capabilityData = NULL;
+    testInfo.capabilityData = nullptr;
     ret = RefreshLNN(g_pkgName, &testInfo, &g_refreshCb1);
     EXPECT_TRUE(ret != 0);
     testInfo.capabilityData = (unsigned char *)"capdata1";

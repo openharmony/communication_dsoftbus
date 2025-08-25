@@ -35,16 +35,16 @@ public:
     void TearDown();
 };
 
-void BusCenterServerTest::SetUpTestCase()
-{
-    SetAceessTokenPermission("busCenterTest");
-    int32_t ret = BusCenterServerProxyInit();
-    EXPECT_TRUE(ret == SOFTBUS_OK);
-}
+void BusCenterServerTest::SetUpTestCase() { }
 
 void BusCenterServerTest::TearDownTestCase() { }
 
-void BusCenterServerTest::SetUp() { }
+void BusCenterServerTest::SetUp()
+{
+    SetAccessTokenPermission("device_manager");
+    int32_t ret = BusCenterServerProxyInit();
+    EXPECT_TRUE(ret == SOFTBUS_OK);
+}
 
 void BusCenterServerTest::TearDown() { }
 
@@ -63,7 +63,7 @@ HWTEST_F(BusCenterServerTest, SERVER_IPC_JOIN_LNN_TEST_001, TestSize.Level1)
     };
 
     EXPECT_TRUE(strncpy_s(addr.info.br.brMac, BT_MAC_LEN, BR_MAC, BT_MAC_LEN) == EOK);
-    int32_t ret = ServerIpcJoinLNN(pkgName, static_cast<void *>(&addr), sizeof(ConnectionAddr));
+    int32_t ret = ServerIpcJoinLNN(pkgName, static_cast<void *>(&addr), sizeof(ConnectionAddr), false);
     EXPECT_NE(ret, SOFTBUS_INVALID_PARAM);
 }
 
@@ -79,7 +79,7 @@ HWTEST_F(BusCenterServerTest, SERVER_IPC_LEAVE_LNN_TEST_001, TestSize.Level1)
     const char *networkId = "1234";
 
     int32_t ret = ServerIpcLeaveLNN(pkgName, networkId);
-    EXPECT_TRUE(ret == SOFTBUS_OK);
+    EXPECT_EQ(ret, SOFTBUS_OK);
 }
 
 /*
@@ -116,7 +116,7 @@ HWTEST_F(BusCenterServerTest, SERVER_IPC_ACTIVE_META_NODE_TEST_001, TestSize.Lev
     info.addrNum = 1;
     EXPECT_TRUE(strncpy_s(info.udid, UDID_BUF_LEN, udid, UDID_BUF_LEN) == EOK);
     int32_t ret = ServerIpcActiveMetaNode(pkgName, &info, metaNodeId);
-    EXPECT_TRUE(ret == SOFTBUS_OK);
+    EXPECT_EQ(ret, SOFTBUS_OK);
 }
 
 /*
@@ -131,7 +131,7 @@ HWTEST_F(BusCenterServerTest, SERVER_IPC_DEACTIVE_META_NODE_TEST_001, TestSize.L
     char metaNodeId[NETWORK_ID_BUF_LEN] = { 0 };
 
     int32_t ret = ServerIpcDeactiveMetaNode(pkgName, metaNodeId);
-    EXPECT_TRUE(ret == SOFTBUS_OK);
+    EXPECT_EQ(ret, SOFTBUS_OK);
 }
 
 /*
@@ -148,7 +148,7 @@ HWTEST_F(BusCenterServerTest, SERVER_IPC_GET_ALL_META_NODE_INFO_TEST_001, TestSi
 
     (void)memset_s(&infos, sizeof(MetaNodeInfo), 0, sizeof(MetaNodeInfo));
     int32_t ret = ServerIpcGetAllMetaNodeInfo(pkgName, &infos, &infoNum);
-    EXPECT_TRUE(ret == SOFTBUS_OK);
+    EXPECT_EQ(ret, SOFTBUS_OK);
 }
 
 /*

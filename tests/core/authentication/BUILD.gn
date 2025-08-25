@@ -1,4 +1,4 @@
-# Copyright (c) 2021-2024 Huawei Device Co., Ltd.
+# Copyright (c) 2021-2025 Huawei Device Co., Ltd.
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
 # You may obtain a copy of the License at
@@ -16,47 +16,55 @@ import("../../../core/authentication/authentication.gni")
 import("../../../dsoftbus.gni")
 import("unittest/authmanager.gni")
 
-module_output_path = "dsoftbus/auth"
+module_output_path = "dsoftbus/soft_bus/auth"
 
 ohos_unittest("AuthTest") {
   module_out_path = module_output_path
-  sources = [ "unittest/auth_test.cpp" ]
+  sources = [
+    "$dsoftbus_root_path/core/bus_center/monitor/src/lnn_init_monitor.c",
+    "unittest/auth_test.cpp",
+  ]
 
   include_dirs = [
+    "$dsoftbus_dfx_path/interface/include/form",
+    "$dsoftbus_dfx_path/interface/include/legacy",
+    "$dsoftbus_root_path/adapter/common/include/",
+    "$dsoftbus_root_path/core/adapter/bus_center/include",
     "$dsoftbus_root_path/core/authentication/include",
     "$dsoftbus_root_path/core/authentication/interface",
+    "$dsoftbus_root_path/core/authentication/src",
     "$dsoftbus_root_path/core/bus_center/interface",
+    "$dsoftbus_root_path/core/bus_center/lnn/lane_hub/heartbeat/include",
+    "$dsoftbus_root_path/core/bus_center/lnn/lane_hub/lane_manager/include",
+    "$dsoftbus_root_path/core/bus_center/lnn/meta_node/include",
+    "$dsoftbus_root_path/core/bus_center/lnn/net_builder/include",
+    "$dsoftbus_root_path/core/bus_center/lnn/net_buscenter/include",
+    "$dsoftbus_root_path/core/bus_center/lnn/net_ledger/common/include",
+    "$dsoftbus_root_path/core/bus_center/lnn/net_ledger/decision_db/include",
+    "$dsoftbus_root_path/core/bus_center/lnn/net_ledger/distributed_ledger/include",
+    "$dsoftbus_root_path/core/bus_center/monitor/include",
     "$dsoftbus_root_path/core/bus_center/service/include",
     "$dsoftbus_root_path/core/bus_center/utils/include",
-    "$dsoftbus_root_path/core/bus_center/lnn/lane_hub/heartbeat/include",
-    "$dsoftbus_root_path/core/bus_center/lnn/net_builder/include",
-    "$dsoftbus_root_path/core/bus_center/lnn/net_ledger/common/include",
-    "$dsoftbus_root_path/core/bus_center/lnn/net_ledger/distributed_ledger/include",
     "$dsoftbus_root_path/core/common/include",
     "$dsoftbus_root_path/core/common/message_handler/include",
     "$dsoftbus_root_path/core/connection/interface",
+    "$dsoftbus_root_path/core/connection/manager",
+    "$dsoftbus_root_path/core/discovery/interface",
+    "$dsoftbus_root_path/core/discovery/manager/include",
     "$dsoftbus_root_path/core/frame/$os_type/init/include",
     "$dsoftbus_root_path/core/frame/common/include",
+    "$dsoftbus_root_path/core/transmission/trans_channel/manager/include",
     "$dsoftbus_root_path/interfaces/kits/bus_center",
     "$dsoftbus_root_path/interfaces/kits/common",
-    "$dsoftbus_root_path/core/connection/manager",
-    "$dsoftbus_root_path/adapter/common/include/",
     "$dsoftbus_root_path/tests/sdk/common/include",
     "unittest/common/",
-    "$dsoftbus_root_path/core/authentication/src",
-    "$dsoftbus_root_path/core/discovery/manager/include",
-    "$dsoftbus_root_path/core/discovery/interface",
-    "$dsoftbus_root_path/core/bus_center/lnn/lane_hub/lane_manager/include",
-    "$dsoftbus_root_path/core/bus_center/lnn/net_ledger/decision_db/include",
-    "$dsoftbus_root_path/core/adapter/bus_center/include",
-    "$dsoftbus_root_path/core/transmission/trans_channel/manager/include",
-    "$dsoftbus_root_path/core/bus_center/lnn/meta_node/include",
   ]
 
   deps = [
     "$dsoftbus_root_path/core/common:softbus_utils",
     "$dsoftbus_root_path/core/frame:softbus_server",
     "$dsoftbus_root_path/tests/sdk/common:softbus_access_token_test",
+    "$dsoftbus_root_path/adapter:softbus_adapter",
   ]
 
   if (is_standard_system) {
@@ -81,6 +89,85 @@ ohos_unittest("AuthTest") {
   }
 }
 
+ohos_unittest("AuthConnectionTest") {
+  module_out_path = module_output_path
+  sources = [
+    "unittest/auth_connection_mock.cpp",
+    "unittest/auth_connection_test.cpp",
+  ]
+  sources += [ "$dsoftbus_root_path/core/connection/wifi_direct_cpp/wifi_direct_manager_virtual.c" ]
+
+  include_dirs = [
+    "$dsoftbus_dfx_path/interface/include/form",
+    "$dsoftbus_dfx_path/interface/include/legacy",
+    "$dsoftbus_root_path/adapter/common/include/",
+    "$dsoftbus_root_path/adapter/common/net/bluetooth/include",
+    "$dsoftbus_root_path/core/adapter/bus_center/include",
+    "$dsoftbus_root_path/core/authentication/include",
+    "$dsoftbus_root_path/core/authentication/interface",
+    "$dsoftbus_root_path/core/authentication/src",
+    "$dsoftbus_root_path/core/bus_center/interface",
+    "$dsoftbus_root_path/core/bus_center/lnn/lane_hub/lane_manager/include",
+    "$dsoftbus_root_path/core/bus_center/lnn/lanehub/heartbeat/include",
+    "$dsoftbus_root_path/core/bus_center/lnn/meta_node/include",
+    "$dsoftbus_root_path/core/bus_center/lnn/net_builder/include",
+    "$dsoftbus_root_path/core/bus_center/lnn/net_buscenter/include",
+    "$dsoftbus_root_path/core/bus_center/lnn/net_ledger/common/include",
+    "$dsoftbus_root_path/core/bus_center/lnn/net_ledger/decision_db/include",
+    "$dsoftbus_root_path/core/bus_center/lnn/net_ledger/distributed_ledger/include",
+    "$dsoftbus_root_path/core/bus_center/monitor/include",
+    "$dsoftbus_root_path/core/bus_center/service/include",
+    "$dsoftbus_root_path/core/bus_center/utils/include",
+    "$dsoftbus_root_path/core/common/include",
+    "$dsoftbus_root_path/core/common/message_handler/include",
+    "$dsoftbus_root_path/core/connection/interface",
+    "$dsoftbus_root_path/core/connection/manager",
+    "$dsoftbus_root_path/core/connection/wifi_direct_cpp",
+    "$dsoftbus_root_path/core/discovery/interface",
+    "$dsoftbus_root_path/core/discovery/manager/include",
+    "$dsoftbus_root_path/core/frame/common/include",
+    "$dsoftbus_root_path/core/frame/ostype/init/include",
+    "$dsoftbus_root_path/core/transmission/transchannel/manager/include",
+    "$dsoftbus_root_path/interfaces/kits/bus_center",
+    "$dsoftbus_root_path/interfaces/kits/common",
+    "$dsoftbus_root_path/interfaces/kits/connect",
+    "$dsoftbus_root_path/tests/sdk/common/include",
+    "unittest/common/",
+  ]
+
+  deps = [
+    "$dsoftbus_root_path/core/common:softbus_utils",
+    "$dsoftbus_root_path/core/frame:softbus_server",
+    "$dsoftbus_root_path/tests/sdk/common:softbus_access_token_test",
+    "$dsoftbus_root_path/adapter:softbus_adapter",
+    "$dsoftbus_root_path/core/connection/wifi_direct_cpp:wifi_direct",
+    "$dsoftbus_root_path/dfx:softbus_dfx",
+  ]
+
+  if (is_standard_system) {
+    external_deps = [
+      "bounds_checking_function:libsec_shared",
+      "cJSON:cjson",
+      "c_utils:utils",
+      "device_auth:deviceauth_sdk",
+      "dsoftbus:softbus_client",
+      "googletest:gmock",
+      "googletest:gtest_main",
+      "hilog:libhilog",
+    ]
+  } else {
+    external_deps = [
+      "bounds_checking_function:libsec_shared",
+      "cJSON:cjson",
+      "c_utils:utils",
+      "dsoftbus:softbus_client",
+      "googletest:gmock",
+      "googletest:gtest_main",
+      "hilog:libhilog",
+    ]
+  }
+}
+
 ohos_unittest("AuthEnhanceMockTest") {
   module_out_path = module_output_path
   sanitize = {
@@ -88,6 +175,7 @@ ohos_unittest("AuthEnhanceMockTest") {
     cfi_cross_dso = true
     debug = false
   }
+
   sources = [
     "$dsoftbus_root_path/core/adapter/authentication/src/lnn_extdata_config_virtual.c",
     "$dsoftbus_root_path/core/adapter/bus_center/src/lnn_ohos_account_adapter_virtual.cpp",
@@ -103,84 +191,87 @@ ohos_unittest("AuthEnhanceMockTest") {
     "$dsoftbus_root_path/core/authentication/src/auth_lane.c",
     "$dsoftbus_root_path/core/authentication/src/auth_manager.c",
     "$dsoftbus_root_path/core/authentication/src/auth_normalize_request.c",
+    "$dsoftbus_root_path/core/authentication/src/auth_pre_link.c",
     "$dsoftbus_root_path/core/authentication/src/auth_request.c",
     "$dsoftbus_root_path/core/authentication/src/auth_session_fsm.c",
     "$dsoftbus_root_path/core/authentication/src/auth_session_json.c",
     "$dsoftbus_root_path/core/authentication/src/auth_session_key.c",
     "$dsoftbus_root_path/core/authentication/src/auth_session_message.c",
     "$dsoftbus_root_path/core/authentication/src/auth_tcp_connection.c",
-    "$dsoftbus_root_path/core/authentication/src/virtual/auth_attest_virtual.c",
-    "$dsoftbus_root_path/core/authentication/src/virtual/auth_device_common_key_virtual.c",
     "$dsoftbus_root_path/core/authentication/src/virtual/auth_hichain_system_ability_monitor_virtual.c",
-    "$dsoftbus_root_path/core/authentication/src/virtual/auth_meta_manager_virtual.c",
-    "$dsoftbus_root_path/core/authentication/src/virtual/customized_security_protocol_virtual.c",
-    "$dsoftbus_root_path/core/bus_center/lnn/net_builder/src/lnn_cipherkey_manager_virtual.c",
-    "$dsoftbus_root_path/core/bus_center/lnn/net_builder/src/lnn_device_info_recovery_virtual.c",
-    "$dsoftbus_root_path/core/bus_center/lnn/net_builder/src/lnn_ptk_info_virtual.c",
+    "$dsoftbus_root_path/core/bus_center/monitor/src/lnn_init_monitor.c",
     "$dsoftbus_root_path/core/bus_center/lnn/net_ledger/common/src/lnn_feature_capability.c",
-    "$dsoftbus_root_path/core/bus_center/utils/src/lnn_compress_virtual.c",
     "$dsoftbus_root_path/core/bus_center/utils/src/lnn_map.c",
     "$dsoftbus_root_path/core/bus_center/utils/src/lnn_state_machine.c",
-    "$dsoftbus_root_path/tests/core/bus_center/mock_common/src/lnn_connection_mock.cpp",
     "$dsoftbus_root_path/tests/core/bus_center/mock_common/src/lnn_hichain_mock.cpp",
     "$dsoftbus_root_path/tests/core/bus_center/mock_common/src/lnn_socket_mock.cpp",
     "unittest/auth_common_mock.cpp",
     "unittest/auth_net_ledger_mock.cpp",
     "unittest/auth_test_enhance.cpp",
+    "$dsoftbus_root_path/core/frame/init/src/g_enhance_lnn_func.c",
+    "$dsoftbus_root_path/core/frame/init/src/g_enhance_auth_func.c",
+    "$dsoftbus_root_path/core/bus_center/utils/src/lnn_compress.c",
   ]
+
+  sources += [ "$dsoftbus_root_path/core/connection/wifi_direct_cpp/wifi_direct_manager_virtual.c" ]
 
   include_dirs = [
     "$dsoftbus_dfx_path/interface/include",
+    "$dsoftbus_dfx_path/interface/include/form",
+    "$dsoftbus_dfx_path/interface/include/legacy",
     "$dsoftbus_root_path/adapter/common/include",
+    "$dsoftbus_root_path/adapter/common/include/",
     "$dsoftbus_root_path/adapter/common/net/bluetooth/include",
-    "$dsoftbus_root_path/tests/core/bus_center/mock_common/include",
+    "$dsoftbus_root_path/core/adapter/authentication/include",
+    "$dsoftbus_root_path/core/adapter/bus_center/include",
     "$dsoftbus_root_path/core/authentication/include",
     "$dsoftbus_root_path/core/authentication/interface",
+    "$dsoftbus_root_path/core/authentication/src",
     "$dsoftbus_root_path/core/bus_center/interface",
-    "$dsoftbus_root_path/core/bus_center/utils/include",
-    "$dsoftbus_root_path/core/bus_center/lnn/net_ledger/common/include",
-    "$dsoftbus_root_path/core/bus_center/lnn/net_ledger/decision_db/include",
+    "$dsoftbus_root_path/core/bus_center/lnn/lane_hub/heartbeat/include",
+    "$dsoftbus_root_path/core/bus_center/lnn/lane_hub/lane_manager/include",
+    "$dsoftbus_root_path/core/bus_center/lnn/meta_node/include",
     "$dsoftbus_root_path/core/bus_center/lnn/net_builder/include",
     "$dsoftbus_root_path/core/bus_center/lnn/net_buscenter/include",
-    "$dsoftbus_root_path/core/bus_center/lnn/net_ledger/local_ledger/include",
+    "$dsoftbus_root_path/core/bus_center/lnn/net_ledger/common/include",
+    "$dsoftbus_root_path/core/bus_center/lnn/net_ledger/decision_db/include",
     "$dsoftbus_root_path/core/bus_center/lnn/net_ledger/distributed_ledger/include",
-    "$dsoftbus_root_path/core/bus_center/lnn/lane_hub/lane_manager/include",
+    "$dsoftbus_root_path/core/bus_center/lnn/net_ledger/local_ledger/include",
+    "$dsoftbus_root_path/core/bus_center/monitor/include",
+    "$dsoftbus_root_path/core/bus_center/service/include",
+    "$dsoftbus_root_path/core/bus_center/utils/include",
     "$dsoftbus_root_path/core/common/include",
     "$dsoftbus_root_path/core/common/message_handler/include",
+    "$dsoftbus_root_path/core/connection/ble/include",
     "$dsoftbus_root_path/core/connection/interface",
-    "$dsoftbus_root_path/core/connection/p2p/interface",
+    "$dsoftbus_root_path/core/connection/manager",
     "$dsoftbus_root_path/core/connection/p2p/common/include",
+    "$dsoftbus_root_path/core/connection/p2p/interface",
+    "$dsoftbus_root_path/core/connection/wifi_direct_cpp",
+    "$dsoftbus_root_path/core/discovery/interface",
+    "$dsoftbus_root_path/core/discovery/manager/include",
     "$dsoftbus_root_path/core/frame/$os_type/init/include",
     "$dsoftbus_root_path/core/frame/common/include",
-    "$dsoftbus_root_path/core/discovery/manager/include",
-    "$dsoftbus_root_path/core/discovery/interface",
+    "$dsoftbus_root_path/core/frame/init/include",
+    "$dsoftbus_root_path/core/transmission/trans_channel/manager/include",
     "$dsoftbus_root_path/interfaces/inner_kits/lnn",
+    "$dsoftbus_root_path/interfaces/inner_kits/transport",
     "$dsoftbus_root_path/interfaces/kits/bus_center",
-    "$dsoftbus_root_path/interfaces/kits/discovery",
     "$dsoftbus_root_path/interfaces/kits/common",
-    "$dsoftbus_root_path/core/connection/manager",
-    "$dsoftbus_root_path/adapter/common/include/",
+    "$dsoftbus_root_path/interfaces/kits/connect",
+    "$dsoftbus_root_path/interfaces/kits/discovery",
+    "$dsoftbus_root_path/tests/core/authentication/unittest",
+    "$dsoftbus_root_path/tests/core/bus_center/lnn/lane/include",
+    "$dsoftbus_root_path/tests/core/bus_center/mock_common/include",
     "$dsoftbus_root_path/tests/sdk/common/include",
     "unittest/common/",
-    "$dsoftbus_root_path/core/authentication/src",
-    "$dsoftbus_root_path/core/discovery/manager/include",
-    "$dsoftbus_root_path/core/discovery/interface",
-    "$dsoftbus_root_path/core/bus_center/lnn/lane_hub/lane_manager/include",
-    "$dsoftbus_root_path/adapter/common/net/bluetooth/include",
-    "$dsoftbus_root_path/core/adapter/bus_center/include",
-    "$dsoftbus_root_path/core/bus_center/lnn/lane_hub/heartbeat/include",
-    "$dsoftbus_root_path/core/adapter/authentication/include",
-    "$dsoftbus_root_path/core/bus_center/service/include",
-    "$dsoftbus_root_path/core/connection/ble/include",
-    "$dsoftbus_root_path/core/connection/wifi_direct_cpp",
-    "$dsoftbus_root_path/core/transmission/trans_channel/manager/include",
-    "$dsoftbus_root_path/core/bus_center/lnn/meta_node/include",
   ]
 
   deps = [
     "$dsoftbus_dfx_path:softbus_dfx",
     "$dsoftbus_root_path/adapter:softbus_adapter",
     "$dsoftbus_root_path/core/common:softbus_utils",
+    "$dsoftbus_root_path/core/frame:softbus_server",
     "$dsoftbus_root_path/tests/sdk/common:softbus_access_token_test",
   ]
 
@@ -193,6 +284,7 @@ ohos_unittest("AuthEnhanceMockTest") {
       "googletest:gmock",
       "googletest:gtest_main",
       "hilog:libhilog",
+      "zlib:libz",
     ]
   } else {
     external_deps = [
@@ -225,66 +317,64 @@ ohos_unittest("AuthTestCallBackTest") {
     "$dsoftbus_root_path/core/authentication/src/auth_session_key.c",
     "$dsoftbus_root_path/core/authentication/src/auth_session_message.c",
     "$dsoftbus_root_path/core/authentication/src/auth_tcp_connection.c",
-    "$dsoftbus_root_path/core/authentication/src/virtual/auth_device_common_key_virtual.c",
-    "$dsoftbus_root_path/core/authentication/src/virtual/auth_meta_manager_virtual.c",
-    "$dsoftbus_root_path/core/bus_center/lnn/net_builder/src/lnn_cipherkey_manager_virtual.c",
-    "$dsoftbus_root_path/core/bus_center/lnn/net_builder/src/lnn_device_info_recovery_virtual.c",
     "$dsoftbus_root_path/core/bus_center/lnn/net_ledger/common/src/lnn_feature_capability.c",
-    "$dsoftbus_root_path/core/bus_center/utils/src/lnn_compress_virtual.c",
-    "$dsoftbus_root_path/core/bus_center/utils/src/lnn_state_machine.c",
-    "$dsoftbus_root_path/tests/core/bus_center/mock_common/src/lnn_connection_mock.cpp",
+    "$dsoftbus_root_path/core/bus_center/monitor/src/lnn_init_monitor.c",
     "$dsoftbus_root_path/tests/core/bus_center/mock_common/src/lnn_hichain_mock.cpp",
     "$dsoftbus_root_path/tests/core/bus_center/mock_common/src/lnn_socket_mock.cpp",
     "unittest/auth_common_mock.cpp",
     "unittest/auth_net_ledger_mock.cpp",
     "unittest/auth_test_mock.cpp",
+    "$dsoftbus_root_path/core/frame/init/src/g_enhance_lnn_func.c",
+    "$dsoftbus_root_path/core/frame/init/src/g_enhance_auth_func.c",
   ]
 
   include_dirs = [
+    "$dsoftbus_dfx_path/interface/include/form",
+    "$dsoftbus_dfx_path/interface/include/legacy",
     "$dsoftbus_root_path/adapter/common/include",
+    "$dsoftbus_root_path/adapter/common/include/",
     "$dsoftbus_root_path/adapter/common/net/bluetooth/include",
-    "$dsoftbus_root_path/tests/core/bus_center/mock_common/include",
+    "$dsoftbus_root_path/core/adapter/authentication/include",
+    "$dsoftbus_root_path/core/adapter/bus_center/include",
     "$dsoftbus_root_path/core/authentication/include",
     "$dsoftbus_root_path/core/authentication/interface",
+    "$dsoftbus_root_path/core/authentication/src",
+    "$dsoftbus_root_path/core/authentication/src/virtual",
     "$dsoftbus_root_path/core/bus_center/interface",
-    "$dsoftbus_root_path/core/bus_center/utils/include",
-    "$dsoftbus_root_path/core/bus_center/lnn/net_ledger/common/include",
-    "$dsoftbus_root_path/core/bus_center/lnn/net_ledger/decision_db/include",
+    "$dsoftbus_root_path/core/bus_center/lnn/lane_hub/heartbeat/include",
+    "$dsoftbus_root_path/core/bus_center/lnn/lane_hub/lane_manager/include",
+    "$dsoftbus_root_path/core/bus_center/lnn/meta_node/include",
     "$dsoftbus_root_path/core/bus_center/lnn/net_builder/include",
     "$dsoftbus_root_path/core/bus_center/lnn/net_buscenter/include",
-    "$dsoftbus_root_path/core/bus_center/lnn/net_ledger/local_ledger/include",
+    "$dsoftbus_root_path/core/bus_center/lnn/net_ledger/common/include",
+    "$dsoftbus_root_path/core/bus_center/lnn/net_ledger/decision_db/include",
     "$dsoftbus_root_path/core/bus_center/lnn/net_ledger/distributed_ledger/include",
-    "$dsoftbus_root_path/core/bus_center/lnn/lane_hub/lane_manager/include",
+    "$dsoftbus_root_path/core/bus_center/lnn/net_ledger/local_ledger/include",
+    "$dsoftbus_root_path/core/bus_center/monitor/include",
+    "$dsoftbus_root_path/core/bus_center/service/include",
+    "$dsoftbus_root_path/core/bus_center/utils/include",
     "$dsoftbus_root_path/core/common/include",
     "$dsoftbus_root_path/core/common/message_handler/include",
+    "$dsoftbus_root_path/core/connection/ble/include",
     "$dsoftbus_root_path/core/connection/interface",
-    "$dsoftbus_root_path/core/connection/p2p/interface",
+    "$dsoftbus_root_path/core/connection/manager",
     "$dsoftbus_root_path/core/connection/p2p/common/include",
+    "$dsoftbus_root_path/core/connection/p2p/interface",
+    "$dsoftbus_root_path/core/connection/wifi_direct_cpp",
+    "$dsoftbus_root_path/core/discovery/interface",
+    "$dsoftbus_root_path/core/discovery/manager/include",
     "$dsoftbus_root_path/core/frame/$os_type/init/include",
     "$dsoftbus_root_path/core/frame/common/include",
-    "$dsoftbus_root_path/core/discovery/manager/include",
-    "$dsoftbus_root_path/core/discovery/interface",
+    "$dsoftbus_root_path/core/frame/init/include",
+    "$dsoftbus_root_path/core/transmission/trans_channel/manager/include",
     "$dsoftbus_root_path/interfaces/inner_kits/transport",
     "$dsoftbus_root_path/interfaces/kits/bus_center",
-    "$dsoftbus_root_path/interfaces/kits/discovery",
     "$dsoftbus_root_path/interfaces/kits/common",
-    "$dsoftbus_root_path/core/connection/manager",
-    "$dsoftbus_root_path/adapter/common/include/",
+    "$dsoftbus_root_path/interfaces/kits/connect",
+    "$dsoftbus_root_path/interfaces/kits/discovery",
+    "$dsoftbus_root_path/tests/core/bus_center/mock_common/include",
     "$dsoftbus_root_path/tests/sdk/common/include",
     "unittest/common/",
-    "$dsoftbus_root_path/core/authentication/src",
-    "$dsoftbus_root_path/core/discovery/manager/include",
-    "$dsoftbus_root_path/core/discovery/interface",
-    "$dsoftbus_root_path/core/bus_center/lnn/lane_hub/lane_manager/include",
-    "$dsoftbus_root_path/adapter/common/net/bluetooth/include",
-    "$dsoftbus_root_path/core/adapter/bus_center/include",
-    "$dsoftbus_root_path/core/bus_center/lnn/lane_hub/heartbeat/include",
-    "$dsoftbus_root_path/core/bus_center/service/include",
-    "$dsoftbus_root_path/core/adapter/authentication/include",
-    "$dsoftbus_root_path/core/connection/ble/include",
-    "$dsoftbus_root_path/core/connection/wifi_direct_cpp",
-    "$dsoftbus_root_path/core/transmission/trans_channel/manager/include",
-    "$dsoftbus_root_path/core/bus_center/lnn/meta_node/include",
   ]
 
   deps = [
@@ -292,7 +382,88 @@ ohos_unittest("AuthTestCallBackTest") {
     "$dsoftbus_root_path/core/common:softbus_utils",
     "$dsoftbus_root_path/core/frame:softbus_server",
     "$dsoftbus_root_path/tests/sdk/common:softbus_access_token_test",
+    "$dsoftbus_root_path/core/connection/wifi_direct_cpp:wifi_direct",
   ]
+  if (is_standard_system) {
+    external_deps = [
+      "bounds_checking_function:libsec_shared",
+      "cJSON:cjson",
+      "c_utils:utils",
+      "device_auth:deviceauth_sdk",
+      "dsoftbus:softbus_client",
+      "googletest:gmock",
+      "googletest:gtest_main",
+      "hilog:libhilog",
+    ]
+  } else {
+    external_deps = [
+      "bounds_checking_function:libsec_shared",
+      "cJSON:cjson",
+      "c_utils:utils",
+      "dsoftbus:softbus_client",
+      "googletest:gmock",
+      "googletest:gtest_main",
+      "hilog:libhilog",
+    ]
+  }
+}
+
+ohos_unittest("AuthOtherMockTest") {
+  module_out_path = module_output_path
+  sources = [
+    "$dsoftbus_root_path/core/bus_center/monitor/src/lnn_init_monitor.c",
+    "unittest/auth_interface_mock.cpp",
+    "unittest/auth_interface_test.cpp",
+  ]
+
+  include_dirs = [
+    "$dsoftbus_dfx_path/interface/include/form",
+    "$dsoftbus_dfx_path/interface/include/legacy",
+    "$dsoftbus_root_path/adapter/common/include/",
+    "$dsoftbus_root_path/adapter/common/net/bluetooth/include",
+    "$dsoftbus_root_path/core/adapter/authentication/include",
+    "$dsoftbus_root_path/core/adapter/bus_center/include",
+    "$dsoftbus_root_path/core/authentication/include",
+    "$dsoftbus_root_path/core/authentication/interface",
+    "$dsoftbus_root_path/core/authentication/src",
+    "$dsoftbus_root_path/core/bus_center/interface",
+    "$dsoftbus_root_path/core/bus_center/lnn/lane_hub/heartbeat/include",
+    "$dsoftbus_root_path/core/bus_center/lnn/lane_hub/lane_manager/include",
+    "$dsoftbus_root_path/core/bus_center/lnn/meta_node/include",
+    "$dsoftbus_root_path/core/bus_center/lnn/net_builder/include",
+    "$dsoftbus_root_path/core/bus_center/lnn/net_buscenter/include",
+    "$dsoftbus_root_path/core/bus_center/lnn/net_ledger/common/include",
+    "$dsoftbus_root_path/core/bus_center/lnn/net_ledger/decision_db/include",
+    "$dsoftbus_root_path/core/bus_center/lnn/net_ledger/distributed_ledger/include",
+    "$dsoftbus_root_path/core/bus_center/lnn/net_ledger/local_ledger/include",
+    "$dsoftbus_root_path/core/bus_center/monitor/include",
+    "$dsoftbus_root_path/core/bus_center/service/include",
+    "$dsoftbus_root_path/core/bus_center/utils/include",
+    "$dsoftbus_root_path/core/common/include",
+    "$dsoftbus_root_path/core/common/message_handler/include",
+    "$dsoftbus_root_path/core/connection/interface",
+    "$dsoftbus_root_path/core/connection/manager",
+    "$dsoftbus_root_path/core/connection/wifi_direct_cpp",
+    "$dsoftbus_root_path/core/discovery/interface",
+    "$dsoftbus_root_path/core/discovery/manager/include",
+    "$dsoftbus_root_path/core/frame/$os_type/init/include",
+    "$dsoftbus_root_path/core/frame/common/include",
+    "$dsoftbus_root_path/interfaces/kits/bus_center",
+    "$dsoftbus_root_path/interfaces/kits/common",
+    "$dsoftbus_root_path/interfaces/kits/connect",
+    "$dsoftbus_root_path/tests/core/bus_center/mock_common/include",
+    "$dsoftbus_root_path/tests/sdk/common/include",
+    "unittest/common/",
+  ]
+
+  deps = [
+    "$dsoftbus_root_path/adapter:softbus_adapter",
+    "$dsoftbus_root_path/core/common:softbus_utils",
+    "$dsoftbus_root_path/core/frame:softbus_server",
+    "$dsoftbus_root_path/tests/sdk/common:softbus_access_token_test",
+    "$dsoftbus_root_path/core/connection/wifi_direct_cpp:wifi_direct",
+  ]
+
   if (is_standard_system) {
     external_deps = [
       "bounds_checking_function:libsec_shared",
@@ -320,52 +491,58 @@ ohos_unittest("AuthTestCallBackTest") {
 ohos_unittest("AuthOtherTest") {
   module_out_path = module_output_path
   sources = [
-    "$dsoftbus_root_path/tests/core/bus_center/mock_common/src/lnn_connection_mock.cpp",
+    "$dsoftbus_root_path/core/bus_center/monitor/src/lnn_init_monitor.c",
+    "unittest/auth_common_mock.cpp",
     "unittest/auth_other_test.cpp",
     "unittest/auth_tcp_connection_mock.cpp",
   ]
 
   include_dirs = [
+    "$dsoftbus_dfx_path/interface/include/form",
+    "$dsoftbus_dfx_path/interface/include/legacy",
+    "$dsoftbus_root_path/adapter/common/include/",
+    "$dsoftbus_root_path/adapter/common/net/bluetooth/include",
+    "$dsoftbus_root_path/core/adapter/authentication/include",
+    "$dsoftbus_root_path/core/adapter/bus_center/include",
     "$dsoftbus_root_path/core/authentication/include",
     "$dsoftbus_root_path/core/authentication/interface",
+    "$dsoftbus_root_path/core/authentication/src",
     "$dsoftbus_root_path/core/bus_center/interface",
-    "$dsoftbus_root_path/core/bus_center/utils/include",
+    "$dsoftbus_root_path/core/bus_center/lnn/lane_hub/heartbeat/include",
     "$dsoftbus_root_path/core/bus_center/lnn/lane_hub/lane_manager/include",
+    "$dsoftbus_root_path/core/bus_center/lnn/meta_node/include",
     "$dsoftbus_root_path/core/bus_center/lnn/net_builder/include",
+    "$dsoftbus_root_path/core/bus_center/lnn/net_buscenter/include",
     "$dsoftbus_root_path/core/bus_center/lnn/net_ledger/common/include",
+    "$dsoftbus_root_path/core/bus_center/lnn/net_ledger/decision_db/include",
     "$dsoftbus_root_path/core/bus_center/lnn/net_ledger/distributed_ledger/include",
+    "$dsoftbus_root_path/core/bus_center/lnn/net_ledger/local_ledger/include",
+    "$dsoftbus_root_path/core/bus_center/monitor/include",
+    "$dsoftbus_root_path/core/bus_center/service/include",
+    "$dsoftbus_root_path/core/bus_center/utils/include",
     "$dsoftbus_root_path/core/common/include",
     "$dsoftbus_root_path/core/common/message_handler/include",
     "$dsoftbus_root_path/core/connection/interface",
+    "$dsoftbus_root_path/core/connection/manager",
+    "$dsoftbus_root_path/core/connection/wifi_direct_cpp",
+    "$dsoftbus_root_path/core/discovery/interface",
+    "$dsoftbus_root_path/core/discovery/manager/include",
     "$dsoftbus_root_path/core/frame/$os_type/init/include",
     "$dsoftbus_root_path/core/frame/common/include",
     "$dsoftbus_root_path/interfaces/kits/bus_center",
     "$dsoftbus_root_path/interfaces/kits/common",
-    "$dsoftbus_root_path/core/connection/manager",
-    "$dsoftbus_root_path/adapter/common/include/",
+    "$dsoftbus_root_path/interfaces/kits/connect",
+    "$dsoftbus_root_path/tests/core/bus_center/mock_common/include",
     "$dsoftbus_root_path/tests/sdk/common/include",
     "unittest/common/",
-    "$dsoftbus_root_path/core/authentication/src",
-    "$dsoftbus_root_path/core/discovery/manager/include",
-    "$dsoftbus_root_path/core/discovery/interface",
-    "$dsoftbus_root_path/core/bus_center/lnn/lane_hub/lane_manager/include",
-    "$dsoftbus_root_path/core/bus_center/lnn/net_ledger/decision_db/include",
-    "$dsoftbus_root_path/core/bus_center/lnn/net_ledger/local_ledger/include",
-    "$dsoftbus_root_path/core/bus_center/lnn/net_buscenter/include",
-    "$dsoftbus_root_path/adapter/common/net/bluetooth/include",
-    "$dsoftbus_root_path/core/adapter/bus_center/include",
-    "$dsoftbus_root_path/core/bus_center/lnn/lane_hub/heartbeat/include",
-    "$dsoftbus_root_path/core/bus_center/service/include",
-    "$dsoftbus_root_path/core/adapter/authentication/include",
-    "$dsoftbus_root_path/core/connection/wifi_direct_cpp",
-    "$dsoftbus_root_path/core/bus_center/lnn/meta_node/include",
-    "$dsoftbus_root_path/tests/core/bus_center/mock_common/include",
   ]
 
   deps = [
     "$dsoftbus_root_path/core/common:softbus_utils",
     "$dsoftbus_root_path/core/frame:softbus_server",
     "$dsoftbus_root_path/tests/sdk/common:softbus_access_token_test",
+    "$dsoftbus_root_path/adapter:softbus_adapter",
+    "$dsoftbus_root_path/core/connection/wifi_direct_cpp:wifi_direct",
   ]
 
   if (is_standard_system) {
@@ -397,38 +574,41 @@ ohos_unittest("AuthTcpConnectionTest") {
   sources = [ "unittest/auth_tcp_connection_test.cpp" ]
 
   include_dirs = [
+    "$dsoftbus_dfx_path/interface/include/form",
+    "$dsoftbus_dfx_path/interface/include/legacy",
+    "$dsoftbus_root_path/adapter/common/include/",
     "$dsoftbus_root_path/core/authentication/include",
     "$dsoftbus_root_path/core/authentication/interface",
+    "$dsoftbus_root_path/core/authentication/src",
     "$dsoftbus_root_path/core/bus_center/interface",
-    "$dsoftbus_root_path/core/bus_center/utils/include",
+    "$dsoftbus_root_path/core/bus_center/lnn/lane_hub/lane_manager/include",
     "$dsoftbus_root_path/core/bus_center/lnn/net_builder/include",
+    "$dsoftbus_root_path/core/bus_center/lnn/net_buscenter/include",
     "$dsoftbus_root_path/core/bus_center/lnn/net_ledger/common/include",
+    "$dsoftbus_root_path/core/bus_center/lnn/net_ledger/decision_db/include",
     "$dsoftbus_root_path/core/bus_center/lnn/net_ledger/distributed_ledger/include",
+    "$dsoftbus_root_path/core/bus_center/lnn/net_ledger/local_ledger/include",
+    "$dsoftbus_root_path/core/bus_center/utils/include",
     "$dsoftbus_root_path/core/common/include",
     "$dsoftbus_root_path/core/common/message_handler/include",
     "$dsoftbus_root_path/core/connection/interface",
+    "$dsoftbus_root_path/core/connection/manager",
+    "$dsoftbus_root_path/core/discovery/interface",
+    "$dsoftbus_root_path/core/discovery/manager/include",
     "$dsoftbus_root_path/core/frame/$os_type/init/include",
     "$dsoftbus_root_path/core/frame/common/include",
+    "$dsoftbus_root_path/core/transmission/trans_channel/manager/include",
     "$dsoftbus_root_path/interfaces/kits/bus_center",
     "$dsoftbus_root_path/interfaces/kits/common",
-    "$dsoftbus_root_path/core/connection/manager",
-    "$dsoftbus_root_path/adapter/common/include/",
     "$dsoftbus_root_path/tests/sdk/common/include",
     "unittest/common/",
-    "$dsoftbus_root_path/core/authentication/src",
-    "$dsoftbus_root_path/core/discovery/manager/include",
-    "$dsoftbus_root_path/core/discovery/interface",
-    "$dsoftbus_root_path/core/bus_center/lnn/lane_hub/lane_manager/include",
-    "$dsoftbus_root_path/core/bus_center/lnn/net_ledger/decision_db/include",
-    "$dsoftbus_root_path/core/bus_center/lnn/net_ledger/local_ledger/include",
-    "$dsoftbus_root_path/core/bus_center/lnn/net_buscenter/include",
-    "$dsoftbus_root_path/core/transmission/trans_channel/manager/include",
   ]
 
   deps = [
     "$dsoftbus_root_path/core/common:softbus_utils",
     "$dsoftbus_root_path/core/frame:softbus_server",
     "$dsoftbus_root_path/tests/sdk/common:softbus_access_token_test",
+    "$dsoftbus_root_path/adapter:softbus_adapter",
   ]
 
   if (is_standard_system) {
@@ -461,8 +641,11 @@ ohos_unittest("AuthHichainMockTest") {
   ]
 
   include_dirs = [
+    "$dsoftbus_dfx_path/interface/include/form",
+    "$dsoftbus_dfx_path/interface/include/legacy",
     "$dsoftbus_root_path/adapter/common/include/",
     "$dsoftbus_root_path/adapter/common/net/bluetooth/include",
+    "$dsoftbus_root_path/core/adapter/authentication/include",
     "$dsoftbus_root_path/core/adapter/bus_center/include",
     "$dsoftbus_root_path/core/authentication/include",
     "$dsoftbus_root_path/core/authentication/interface",
@@ -472,8 +655,8 @@ ohos_unittest("AuthHichainMockTest") {
     "$dsoftbus_root_path/core/bus_center/lnn/net_builder/include",
     "$dsoftbus_root_path/core/bus_center/lnn/net_buscenter/include",
     "$dsoftbus_root_path/core/bus_center/lnn/net_ledger/common/include",
-    "$dsoftbus_root_path/core/bus_center/lnn/net_ledger/distributed_ledger/include",
     "$dsoftbus_root_path/core/bus_center/lnn/net_ledger/decision_db/include",
+    "$dsoftbus_root_path/core/bus_center/lnn/net_ledger/distributed_ledger/include",
     "$dsoftbus_root_path/core/bus_center/lnn/net_ledger/local_ledger/include",
     "$dsoftbus_root_path/core/bus_center/utils/include",
     "$dsoftbus_root_path/core/common/include",
@@ -498,6 +681,8 @@ ohos_unittest("AuthHichainMockTest") {
   deps = [
     "$dsoftbus_root_path/core/common:softbus_utils",
     "$dsoftbus_root_path/tests/sdk/common:softbus_access_token_test",
+    "$dsoftbus_root_path/adapter:softbus_adapter",
+    "$dsoftbus_root_path/dfx:softbus_dfx",
   ]
 
   if (is_standard_system) {
@@ -525,50 +710,52 @@ ohos_unittest("AuthHichainMockTest") {
 ohos_unittest("AuthHichainTest") {
   module_out_path = module_output_path
   sources = [
-    "$dsoftbus_root_path/tests/core/authentication/unittest/auth_common_mock.cpp",
     "$dsoftbus_root_path/tests/core/bus_center/mock_common/src/lnn_hichain_mock.cpp",
     "unittest/auth_hichain_test.cpp",
     "unittest/auth_net_ledger_mock.cpp",
   ]
 
   include_dirs = [
+    "$dsoftbus_dfx_path/interface/include/form",
+    "$dsoftbus_dfx_path/interface/include/legacy",
+    "$dsoftbus_root_path/adapter/common/include/",
     "$dsoftbus_root_path/adapter/common/net/bluetooth/include",
+    "$dsoftbus_root_path/core/adapter/bus_center/include",
     "$dsoftbus_root_path/core/authentication/include",
     "$dsoftbus_root_path/core/authentication/interface",
-    "$dsoftbus_root_path/tests/core/authentication/unittest",
+    "$dsoftbus_root_path/core/authentication/src",
     "$dsoftbus_root_path/core/bus_center/interface",
-    "$dsoftbus_root_path/core/bus_center/utils/include",
+    "$dsoftbus_root_path/core/bus_center/lnn/lane_hub/lane_manager/include",
     "$dsoftbus_root_path/core/bus_center/lnn/net_builder/include",
+    "$dsoftbus_root_path/core/bus_center/lnn/net_buscenter/include",
     "$dsoftbus_root_path/core/bus_center/lnn/net_ledger/common/include",
+    "$dsoftbus_root_path/core/bus_center/lnn/net_ledger/decision_db/include",
     "$dsoftbus_root_path/core/bus_center/lnn/net_ledger/distributed_ledger/include",
+    "$dsoftbus_root_path/core/bus_center/lnn/net_ledger/local_ledger/include",
+    "$dsoftbus_root_path/core/bus_center/utils/include",
     "$dsoftbus_root_path/core/common/include",
     "$dsoftbus_root_path/core/common/message_handler/include",
     "$dsoftbus_root_path/core/connection/interface",
+    "$dsoftbus_root_path/core/connection/manager",
+    "$dsoftbus_root_path/core/discovery/interface",
+    "$dsoftbus_root_path/core/discovery/manager/include",
     "$dsoftbus_root_path/core/frame/$os_type/init/include",
     "$dsoftbus_root_path/core/frame/common/include",
     "$dsoftbus_root_path/interfaces/inner_kits/transport",
     "$dsoftbus_root_path/interfaces/kits/bus_center",
     "$dsoftbus_root_path/interfaces/kits/common",
     "$dsoftbus_root_path/interfaces/kits/discovery",
-    "$dsoftbus_root_path/core/connection/manager",
-    "$dsoftbus_root_path/adapter/common/include/",
+    "$dsoftbus_root_path/tests/core/authentication/unittest",
+    "$dsoftbus_root_path/tests/core/bus_center/mock_common/include",
     "$dsoftbus_root_path/tests/sdk/common/include",
     "unittest/common/",
-    "$dsoftbus_root_path/core/authentication/src",
-    "$dsoftbus_root_path/core/discovery/manager/include",
-    "$dsoftbus_root_path/core/discovery/interface",
-    "$dsoftbus_root_path/core/bus_center/lnn/lane_hub/lane_manager/include",
-    "$dsoftbus_root_path/core/bus_center/lnn/net_ledger/decision_db/include",
-    "$dsoftbus_root_path/core/bus_center/lnn/net_ledger/local_ledger/include",
-    "$dsoftbus_root_path/core/bus_center/lnn/net_buscenter/include",
-    "$dsoftbus_root_path/tests/core/bus_center/mock_common/include",
-    "$dsoftbus_root_path/core/adapter/bus_center/include",
   ]
 
   deps = [
     "$dsoftbus_root_path/core/common:softbus_utils",
     "$dsoftbus_root_path/core/frame:softbus_server",
     "$dsoftbus_root_path/tests/sdk/common:softbus_access_token_test",
+    "$dsoftbus_root_path/adapter:softbus_adapter",
   ]
 
   if (is_standard_system) {
@@ -597,18 +784,32 @@ ohos_unittest("AuthHichainTest") {
 
 ohos_unittest("AuthDeviceProfileTest") {
   module_out_path = module_output_path
-  sources = [ "unittest/auth_device_profile_test.cpp" ]
+  sources = [
+    "unittest/auth_device_profile_mock.cpp",
+    "unittest/auth_device_profile_test.cpp",
+  ]
 
   include_dirs = [
-    "$dsoftbus_root_path/interfaces/kits",
-    "$dsoftbus_root_path/core/authentication/interface",
+    "$dsoftbus_root_path/core/adapter/bus_center/include",
     "$dsoftbus_root_path/core/authentication/include",
+    "$dsoftbus_root_path/core/authentication/interface",
+    "$dsoftbus_root_path/core/authentication/src",
+    "$dsoftbus_root_path/core/bus_center/interface",
+    "$dsoftbus_root_path/core/bus_center/lnn/lane_hub/heartbeat/include",
+    "$dsoftbus_root_path/core/bus_center/lnn/net_builder/include",
+    "$dsoftbus_root_path/core/bus_center/lnn/net_ledger/common/include",
+    "$dsoftbus_root_path/core/bus_center/lnn/net_ledger/distributed_ledger/include",
+    "$dsoftbus_root_path/core/discovery/interface",
+    "$dsoftbus_root_path/core/discovery/manager/include",
+    "$dsoftbus_root_path/interfaces/kits",
+    "$dsoftbus_root_path/interfaces/kits/bus_center",
     "unittest/common/",
   ]
 
   deps = [
+    "$dsoftbus_root_path/adapter:softbus_adapter",
     "$dsoftbus_root_path/core/common:softbus_utils",
-    "$dsoftbus_root_path/core/frame:softbus_server",
+    "$dsoftbus_root_path/dfx:softbus_dfx",
   ]
 
   if (!defined(global_parts_info) ||
@@ -624,6 +825,9 @@ ohos_unittest("AuthDeviceProfileTest") {
       "googletest:gtest_main",
       "hilog:libhilog",
       "ipc:ipc_core",
+      "os_account:libaccountkits",
+      "os_account:os_account_innerkits",
+      "samgr:samgr_proxy",
     ]
   } else {
     external_deps = [
@@ -634,6 +838,89 @@ ohos_unittest("AuthDeviceProfileTest") {
       "googletest:gtest_main",
       "hilog:libhilog",
       "ipc:ipc_core",
+      "os_account:libaccountkits",
+      "os_account:os_account_innerkits",
+    ]
+  }
+}
+
+
+ohos_unittest("AuthSessionJsonTest") {
+  module_out_path = module_output_path
+  sources = [
+    "$dsoftbus_root_path/core/authentication/src/auth_common.c",
+    "unittest/auth_session_json_mock.cpp",
+    "unittest/auth_session_json_test.cpp",
+    "$dsoftbus_root_path/core/frame/init/src/g_enhance_lnn_func_pack.c",
+    "$dsoftbus_root_path/core/frame/init/src/g_enhance_lnn_func.c",
+    "$dsoftbus_root_path/core/frame/init/src/g_enhance_auth_func_pack.c",
+    "$dsoftbus_root_path/core/frame/init/src/g_enhance_auth_func.c",
+  ]
+
+  include_dirs = [
+    "$dsoftbus_dfx_path/interface/include/form",
+    "$dsoftbus_dfx_path/interface/include/legacy",
+    "$dsoftbus_root_path/adapter/common/include/",
+    "$dsoftbus_root_path/adapter/common/net/bluetooth/include",
+    "$dsoftbus_root_path/core/adapter/authentication/include",
+    "$dsoftbus_root_path/core/adapter/bus_center/include",
+    "$dsoftbus_root_path/core/authentication/include",
+    "$dsoftbus_root_path/core/authentication/interface",
+    "$dsoftbus_root_path/core/authentication/src",
+    "$dsoftbus_root_path/core/bus_center/interface",
+    "$dsoftbus_root_path/core/bus_center/lnn/lane_hub/heartbeat/include",
+    "$dsoftbus_root_path/core/bus_center/lnn/lane_hub/lane_manager/include",
+    "$dsoftbus_root_path/core/bus_center/lnn/net_builder/include",
+    "$dsoftbus_root_path/core/bus_center/lnn/net_ledger/common/include",
+    "$dsoftbus_root_path/core/bus_center/lnn/net_ledger/decision_db/include",
+    "$dsoftbus_root_path/core/bus_center/lnn/net_ledger/distributed_ledger/include",
+    "$dsoftbus_root_path/core/bus_center/lnn/net_ledger/local_ledger/include",
+    "$dsoftbus_root_path/core/bus_center/lnn/netbus_center/include",
+    "$dsoftbus_root_path/core/bus_center/service/include",
+    "$dsoftbus_root_path/core/bus_center/utils/include",
+    "$dsoftbus_root_path/core/common/include",
+    "$dsoftbus_root_path/core/common/message_handler/include",
+    "$dsoftbus_root_path/core/connection/interface",
+    "$dsoftbus_root_path/core/connection/manager",
+    "$dsoftbus_root_path/core/connection/wifi_direct_cpp",
+    "$dsoftbus_root_path/core/discovery/interface",
+    "$dsoftbus_root_path/core/discovery/manager/include",
+    "$dsoftbus_root_path/core/frame/$os_type/init/include",
+    "$dsoftbus_root_path/core/frame/common/include",
+    "$dsoftbus_root_path/interfaces/inner_kits/transport",
+    "$dsoftbus_root_path/interfaces/kits/bus_center",
+    "$dsoftbus_root_path/interfaces/kits/common",
+    "$dsoftbus_root_path/tests/sdk/common/include",
+    "unittest/common/",
+  ]
+
+  deps = [
+    "$dsoftbus_root_path/core/common:softbus_utils",
+    "$dsoftbus_root_path/tests/sdk/common:softbus_access_token_test",
+    "$dsoftbus_root_path/adapter:softbus_adapter",
+    "$dsoftbus_root_path/dfx:softbus_dfx",
+  ]
+
+  if (is_standard_system) {
+    external_deps = [
+      "bounds_checking_function:libsec_shared",
+      "cJSON:cjson",
+      "c_utils:utils",
+      "device_auth:deviceauth_sdk",
+      "dsoftbus:softbus_client",
+      "googletest:gmock",
+      "googletest:gtest_main",
+      "hilog:libhilog",
+    ]
+  } else {
+    external_deps = [
+      "bounds_checking_function:libsec_shared",
+      "cJSON:cjson",
+      "c_utils:utils",
+      "dsoftbus:softbus_client",
+      "googletest:gmock",
+      "googletest:gtest_main",
+      "hilog:libhilog",
     ]
   }
 }
@@ -643,42 +930,46 @@ ohos_unittest("AuthSessionMessageTest") {
   sources = [ "unittest/auth_session_message_test.cpp" ]
 
   include_dirs = [
+    "$dsoftbus_dfx_path/interface/include/form",
+    "$dsoftbus_dfx_path/interface/include/legacy",
+    "$dsoftbus_root_path/adapter/common/include/",
+    "$dsoftbus_root_path/adapter/common/net/bluetooth/include",
+    "$dsoftbus_root_path/core/adapter/authentication/include",
+    "$dsoftbus_root_path/core/adapter/bus_center/include",
     "$dsoftbus_root_path/core/authentication/include",
     "$dsoftbus_root_path/core/authentication/interface",
+    "$dsoftbus_root_path/core/authentication/src",
     "$dsoftbus_root_path/core/bus_center/interface",
-    "$dsoftbus_root_path/core/bus_center/utils/include",
+    "$dsoftbus_root_path/core/bus_center/lnn/lane_hub/heartbeat/include",
+    "$dsoftbus_root_path/core/bus_center/lnn/lane_hub/lane_manager/include",
     "$dsoftbus_root_path/core/bus_center/lnn/net_builder/include",
+    "$dsoftbus_root_path/core/bus_center/lnn/net_buscenter/include",
     "$dsoftbus_root_path/core/bus_center/lnn/net_ledger/common/include",
+    "$dsoftbus_root_path/core/bus_center/lnn/net_ledger/decision_db/include",
     "$dsoftbus_root_path/core/bus_center/lnn/net_ledger/distributed_ledger/include",
+    "$dsoftbus_root_path/core/bus_center/lnn/net_ledger/local_ledger/include",
+    "$dsoftbus_root_path/core/bus_center/service/include",
+    "$dsoftbus_root_path/core/bus_center/utils/include",
     "$dsoftbus_root_path/core/common/include",
     "$dsoftbus_root_path/core/common/message_handler/include",
     "$dsoftbus_root_path/core/connection/interface",
+    "$dsoftbus_root_path/core/connection/manager",
+    "$dsoftbus_root_path/core/connection/wifi_direct_cpp",
+    "$dsoftbus_root_path/core/discovery/interface",
+    "$dsoftbus_root_path/core/discovery/manager/include",
     "$dsoftbus_root_path/core/frame/$os_type/init/include",
     "$dsoftbus_root_path/core/frame/common/include",
     "$dsoftbus_root_path/interfaces/kits/bus_center",
     "$dsoftbus_root_path/interfaces/kits/common",
-    "$dsoftbus_root_path/core/connection/manager",
-    "$dsoftbus_root_path/adapter/common/include/",
     "$dsoftbus_root_path/tests/sdk/common/include",
     "unittest/common/",
-    "$dsoftbus_root_path/core/authentication/src",
-    "$dsoftbus_root_path/core/discovery/manager/include",
-    "$dsoftbus_root_path/core/discovery/interface",
-    "$dsoftbus_root_path/core/bus_center/lnn/lane_hub/lane_manager/include",
-    "$dsoftbus_root_path/core/bus_center/lnn/net_ledger/decision_db/include",
-    "$dsoftbus_root_path/core/bus_center/lnn/net_ledger/local_ledger/include",
-    "$dsoftbus_root_path/core/bus_center/lnn/net_buscenter/include",
-    "$dsoftbus_root_path/adapter/common/net/bluetooth/include",
-    "$dsoftbus_root_path/core/adapter/bus_center/include",
-    "$dsoftbus_root_path/core/bus_center/lnn/lane_hub/heartbeat/include",
-    "$dsoftbus_root_path/core/bus_center/service/include",
-    "$dsoftbus_root_path/core/adapter/authentication/include",
   ]
 
   deps = [
     "$dsoftbus_root_path/core/common:softbus_utils",
     "$dsoftbus_root_path/core/frame:softbus_server",
     "$dsoftbus_root_path/tests/sdk/common:softbus_access_token_test",
+    "$dsoftbus_root_path/adapter:softbus_adapter",
   ]
 
   if (is_standard_system) {
@@ -713,6 +1004,7 @@ ohos_unittest("AuthManagerTest") {
     "$dsoftbus_root_path/core/common:softbus_utils",
     "$dsoftbus_root_path/core/frame:softbus_server",
     "$dsoftbus_root_path/tests/sdk/common:softbus_access_token_test",
+    "$dsoftbus_root_path/adapter:softbus_adapter",
   ]
 
   if (is_standard_system) {
@@ -743,51 +1035,61 @@ ohos_unittest("AuthManagerTest") {
 ohos_unittest("AuthSessionFsmTest") {
   module_out_path = module_output_path
   sources = [
-    "$dsoftbus_root_path/tests/core/discovery/ble/softbus_ble_mock/ble_mock.cpp",
+    "unittest/auth_session_fsm_mock.cpp",
     "unittest/auth_session_fsm_test.cpp",
   ]
 
   include_dirs = [
+    "$dsoftbus_dfx_path/interface/include/form",
+    "$dsoftbus_dfx_path/interface/include/legacy",
+    "$dsoftbus_root_path/adapter/common/include/",
+    "$dsoftbus_root_path/adapter/common/net/bluetooth/broadcast/interface",
+    "$dsoftbus_root_path/adapter/common/net/bluetooth/include",
+    "$dsoftbus_root_path/core/adapter/authentication/include",
+    "$dsoftbus_root_path/core/adapter/bus_center/include",
     "$dsoftbus_root_path/core/authentication/include",
     "$dsoftbus_root_path/core/authentication/interface",
+    "$dsoftbus_root_path/core/authentication/src",
+    "$dsoftbus_root_path/core/broadcast/common/include",
     "$dsoftbus_root_path/core/bus_center/interface",
-    "$dsoftbus_root_path/core/bus_center/utils/include",
+    "$dsoftbus_root_path/core/bus_center/lnn/lane_hub/heartbeat/include",
+    "$dsoftbus_root_path/core/bus_center/lnn/lane_hub/lane_manager/include",
     "$dsoftbus_root_path/core/bus_center/lnn/net_builder/include",
+    "$dsoftbus_root_path/core/bus_center/lnn/net_buscenter/include",
     "$dsoftbus_root_path/core/bus_center/lnn/net_ledger/common/include",
+    "$dsoftbus_root_path/core/bus_center/lnn/net_ledger/decision_db/include",
     "$dsoftbus_root_path/core/bus_center/lnn/net_ledger/distributed_ledger/include",
+    "$dsoftbus_root_path/core/bus_center/lnn/net_ledger/local_ledger/include",
+    "$dsoftbus_root_path/core/bus_center/service/include",
+    "$dsoftbus_root_path/core/bus_center/utils/include",
     "$dsoftbus_root_path/core/common/include",
     "$dsoftbus_root_path/core/common/message_handler/include",
     "$dsoftbus_root_path/core/connection/interface",
+    "$dsoftbus_root_path/core/connection/manager",
+    "$dsoftbus_root_path/core/connection/wifi_direct_cpp",
+    "$dsoftbus_root_path/core/discovery/ble/softbus_ble/include",
+    "$dsoftbus_root_path/core/discovery/interface",
+    "$dsoftbus_root_path/core/discovery/manager/include",
     "$dsoftbus_root_path/core/frame/$os_type/init/include",
     "$dsoftbus_root_path/core/frame/common/include",
+    "$dsoftbus_root_path/interfaces/kits/authentication",
     "$dsoftbus_root_path/interfaces/kits/bus_center",
     "$dsoftbus_root_path/interfaces/kits/common",
-    "$dsoftbus_root_path/core/connection/manager",
-    "$dsoftbus_root_path/adapter/common/include/",
+    "$dsoftbus_root_path/interfaces/kits/connect",
+    "$dsoftbus_root_path/interfaces/kits/lnn",
+    "$dsoftbus_root_path/tests/core/discovery/ble/softbus_ble_mock",
     "$dsoftbus_root_path/tests/sdk/common/include",
     "unittest/common/",
-    "$dsoftbus_root_path/core/authentication/src",
-    "$dsoftbus_root_path/core/discovery/manager/include",
-    "$dsoftbus_root_path/core/discovery/interface",
-    "$dsoftbus_root_path/core/bus_center/lnn/lane_hub/lane_manager/include",
-    "$dsoftbus_root_path/core/bus_center/lnn/net_ledger/decision_db/include",
-    "$dsoftbus_root_path/core/bus_center/lnn/net_ledger/local_ledger/include",
-    "$dsoftbus_root_path/core/bus_center/lnn/net_buscenter/include",
-    "$dsoftbus_root_path/adapter/common/net/bluetooth/include",
-    "$dsoftbus_root_path/core/adapter/bus_center/include",
-    "$dsoftbus_root_path/core/bus_center/lnn/lane_hub/heartbeat/include",
-    "$dsoftbus_root_path/core/bus_center/service/include",
-    "$dsoftbus_root_path/core/adapter/authentication/include",
-    "$dsoftbus_root_path/tests/core/discovery/ble/softbus_ble_mock",
-    "$dsoftbus_root_path/core/discovery/ble/softbus_ble/include",
-    "$dsoftbus_root_path/adapter/common/net/bluetooth/broadcast/interface",
-    "$dsoftbus_root_path/core/broadcast/common/include",
   ]
 
   deps = [
+    "$dsoftbus_root_path/adapter:softbus_adapter",
     "$dsoftbus_root_path/core/common:softbus_utils",
+    "$dsoftbus_root_path/core/connection/wifi_direct_cpp:wifi_direct",
     "$dsoftbus_root_path/core/frame:softbus_server",
     "$dsoftbus_root_path/tests/sdk/common:softbus_access_token_test",
+    "$dsoftbus_root_path/adapter:softbus_adapter",
+    "$dsoftbus_root_path/core/connection/wifi_direct_cpp:wifi_direct",
   ]
 
   if (is_standard_system) {
@@ -819,23 +1121,25 @@ ohos_unittest("AuthSessionKeyTest") {
   sources = [ "unittest/auth_session_key_test.cpp" ]
 
   include_dirs = [
+    "$dsoftbus_dfx_path/interface/include/form",
+    "$dsoftbus_root_path/core/adapter/bus_center/include",
     "$dsoftbus_root_path/core/authentication/include",
     "$dsoftbus_root_path/core/authentication/interface",
+    "$dsoftbus_root_path/core/authentication/src",
     "$dsoftbus_root_path/core/bus_center/interface",
-    "$dsoftbus_root_path/core/bus_center/utils/include",
     "$dsoftbus_root_path/core/bus_center/lnn/net_builder/include",
     "$dsoftbus_root_path/core/bus_center/lnn/net_ledger/common/include",
+    "$dsoftbus_root_path/core/bus_center/utils/include",
     "$dsoftbus_root_path/interfaces/kits/bus_center",
     "$dsoftbus_root_path/interfaces/kits/common",
     "unittest/common/",
-    "$dsoftbus_root_path/core/authentication/src",
-    "$dsoftbus_root_path/core/adapter/bus_center/include",
   ]
 
   deps = [
     "$dsoftbus_root_path/core/common:softbus_utils",
     "$dsoftbus_root_path/core/frame:softbus_server",
     "$dsoftbus_root_path/tests/sdk/common:softbus_access_token_test",
+    "$dsoftbus_root_path/adapter:softbus_adapter",
   ]
 
   if (is_standard_system) {
@@ -861,11 +1165,12 @@ ohos_unittest("AuthNormalizeRequestTest") {
   sources = [ "unittest/auth_normalize_request_test.cpp" ]
 
   include_dirs = [
+    "$dsoftbus_dfx_path/interface/include/form",
     "$dsoftbus_root_path/core/authentication/include",
     "$dsoftbus_root_path/core/authentication/interface",
-    "$dsoftbus_root_path/core/bus_center/lnn/net_ledger/common/include",
     "$dsoftbus_root_path/core/bus_center/interface",
     "$dsoftbus_root_path/core/bus_center/lnn/net_builder/include",
+    "$dsoftbus_root_path/core/bus_center/lnn/net_ledger/common/include",
     "$dsoftbus_root_path/core/bus_center/utils/include",
   ]
 
@@ -873,6 +1178,7 @@ ohos_unittest("AuthNormalizeRequestTest") {
     "$dsoftbus_root_path/core/common:softbus_utils",
     "$dsoftbus_root_path/core/frame:softbus_server",
     "$dsoftbus_root_path/tests/sdk/common:softbus_access_token_test",
+    "$dsoftbus_root_path/adapter:softbus_adapter",
   ]
 
   if (is_standard_system) {
@@ -900,50 +1206,57 @@ ohos_unittest("AuthNormalizeRequestTest") {
 ohos_unittest("AuthLaneTest") {
   module_out_path = module_output_path
   sources = [
+    "$dsoftbus_root_path/core/bus_center/monitor/src/lnn_init_monitor.c",
     "unittest/auth_lane_mock.cpp",
     "unittest/auth_lane_test.cpp",
   ]
 
   include_dirs = [
+    "$dsoftbus_dfx_path/interface/include/form",
+    "$dsoftbus_dfx_path/interface/include/legacy",
+    "$dsoftbus_root_path/adapter/common/include/",
+    "$dsoftbus_root_path/adapter/common/net/bluetooth/include",
+    "$dsoftbus_root_path/core/adapter/authentication/include",
+    "$dsoftbus_root_path/core/adapter/bus_center/include",
     "$dsoftbus_root_path/core/authentication/include",
     "$dsoftbus_root_path/core/authentication/interface",
+    "$dsoftbus_root_path/core/authentication/src",
     "$dsoftbus_root_path/core/bus_center/interface",
-    "$dsoftbus_root_path/core/bus_center/utils/include",
+    "$dsoftbus_root_path/core/bus_center/ipc/include",
+    "$dsoftbus_root_path/core/bus_center/lnn/lane_hub/heartbeat/include",
+    "$dsoftbus_root_path/core/bus_center/lnn/lane_hub/lane_manager/include",
+    "$dsoftbus_root_path/core/bus_center/lnn/lane_hub/lane_manager/src",
+    "$dsoftbus_root_path/core/bus_center/lnn/meta_node/include",
     "$dsoftbus_root_path/core/bus_center/lnn/net_builder/include",
+    "$dsoftbus_root_path/core/bus_center/lnn/net_buscenter/include",
     "$dsoftbus_root_path/core/bus_center/lnn/net_ledger/common/include",
+    "$dsoftbus_root_path/core/bus_center/lnn/net_ledger/decision_db/include",
     "$dsoftbus_root_path/core/bus_center/lnn/net_ledger/distributed_ledger/include",
+    "$dsoftbus_root_path/core/bus_center/lnn/net_ledger/local_ledger/include",
+    "$dsoftbus_root_path/core/bus_center/monitor/include",
+    "$dsoftbus_root_path/core/bus_center/service/include",
+    "$dsoftbus_root_path/core/bus_center/utils/include",
     "$dsoftbus_root_path/core/common/include",
     "$dsoftbus_root_path/core/common/message_handler/include",
     "$dsoftbus_root_path/core/connection/interface",
+    "$dsoftbus_root_path/core/connection/manager",
+    "$dsoftbus_root_path/core/connection/wifi_direct_cpp",
+    "$dsoftbus_root_path/core/connection/wifi_direct_cpp/utils",
+    "$dsoftbus_root_path/core/discovery/interface",
+    "$dsoftbus_root_path/core/discovery/manager/include",
     "$dsoftbus_root_path/core/frame/common/include",
     "$dsoftbus_root_path/interfaces/kits/bus_center",
     "$dsoftbus_root_path/interfaces/kits/common",
-    "$dsoftbus_root_path/core/connection/manager",
-    "$dsoftbus_root_path/adapter/common/include/",
+    "$dsoftbus_root_path/tests/core/bus_center/mock_common/include",
     "$dsoftbus_root_path/tests/sdk/common/include",
     "unittest/common/",
-    "$dsoftbus_root_path/core/authentication/src",
-    "$dsoftbus_root_path/core/discovery/manager/include",
-    "$dsoftbus_root_path/core/discovery/interface",
-    "$dsoftbus_root_path/core/bus_center/lnn/lane_hub/lane_manager/include",
-    "$dsoftbus_root_path/core/bus_center/lnn/lane_hub/lane_manager/src",
-    "$dsoftbus_root_path/core/bus_center/lnn/net_ledger/decision_db/include",
-    "$dsoftbus_root_path/core/bus_center/lnn/net_ledger/local_ledger/include",
-    "$dsoftbus_root_path/core/bus_center/lnn/net_buscenter/include",
-    "$dsoftbus_root_path/adapter/common/net/bluetooth/include",
-    "$dsoftbus_root_path/core/adapter/bus_center/include",
-    "$dsoftbus_root_path/core/bus_center/lnn/lane_hub/heartbeat/include",
-    "$dsoftbus_root_path/core/bus_center/service/include",
-    "$dsoftbus_root_path/core/adapter/authentication/include",
-    "$dsoftbus_root_path/core/connection/wifi_direct_cpp/utils",
-    "$dsoftbus_root_path/core/connection/wifi_direct_cpp",
-    "$dsoftbus_root_path/tests/core/bus_center/mock_common/include",
-    "$dsoftbus_root_path/core/bus_center/lnn/meta_node/include",
   ]
 
   deps = [
     "$dsoftbus_root_path/core/common:softbus_utils",
     "$dsoftbus_root_path/core/frame:softbus_server",
+    "$dsoftbus_root_path/dfx:softbus_dfx",
+    "$dsoftbus_root_path/adapter:softbus_adapter",
   ]
 
   if (is_standard_system) {
@@ -970,90 +1283,118 @@ ohos_unittest("AuthLaneTest") {
   }
 }
 
-ohos_unittest("AuthDeviceProfileListenerTest") {
-  module_out_path = module_output_path
-  sources = [
-    "$dsoftbus_root_path/core/authentication/bind/auth_device_profile_listener.cpp",
-    "$dsoftbus_root_path/core/bus_center/lnn/lane_hub/heartbeat/src/lnn_heartbeat_ctrl_virtual.c",
-    "unittest/auth_device_profile_listener_mock.cpp",
-    "unittest/auth_device_profile_listener_test.cpp",
-  ]
+# ohos_unittest("AuthDeviceProfileListenerTest") {
+#   module_out_path = module_output_path
+#   sources = [
+#     "$dsoftbus_root_path/core/authentication/bind/auth_device_profile_listener.cpp",
+#     "unittest/auth_device_profile_listener_mock.cpp",
+#     "unittest/auth_device_profile_listener_test.cpp",
+#   ]
 
-  include_dirs = [
-    "$dsoftbus_root_path/interfaces/inner_kits/lnn",
-    "$dsoftbus_root_path/interfaces/kits",
-    "$dsoftbus_root_path/interfaces/kits/bus_center",
-    "$dsoftbus_root_path/core/authentication/interface",
-    "$dsoftbus_root_path/core/authentication/include",
-    "$dsoftbus_root_path/core/adapter/bus_center/include",
-    "$dsoftbus_root_path/core/bus_center/interface",
-    "$dsoftbus_root_path/core/bus_center/lnn/lane_hub/heartbeat/include",
-    "$dsoftbus_root_path/core/bus_center/lnn/net_builder/include",
-    "$dsoftbus_root_path/core/bus_center/lnn/net_buscenter/include",
-    "$dsoftbus_root_path/core/bus_center/lnn/net_ledger/common/include",
-    "$dsoftbus_root_path/core/bus_center/lnn/net_ledger/distributed_ledger/include",
-    "$dsoftbus_root_path/core/bus_center/service/include",
-    "$dsoftbus_root_path/core/bus_center/utils/include",
-    "$dsoftbus_root_path/core/discovery/interface",
-    "$dsoftbus_root_path/core/discovery/manager/include",
-  ]
+#   include_dirs = [
+#     "$dsoftbus_root_path/core/authentication/interface",
+#     "$dsoftbus_root_path/core/authentication/include",
+#     "$dsoftbus_root_path/core/adapter/bus_center/include",
+#     "$dsoftbus_root_path/core/bus_center/interface",
+#     "$dsoftbus_root_path/core/bus_center/lnn/lane_hub/heartbeat/include",
+#     "$dsoftbus_root_path/core/bus_center/lnn/net_builder/include",
+#     "$dsoftbus_root_path/core/bus_center/lnn/net_buscenter/include",
+#     "$dsoftbus_root_path/core/bus_center/lnn/net_ledger/common/include",
+#     "$dsoftbus_root_path/core/bus_center/lnn/net_ledger/decision_db/include",
+#     "$dsoftbus_root_path/core/bus_center/lnn/net_ledger/distributed_ledger/include",
+#     "$dsoftbus_root_path/core/bus_center/service/include",
+#     "$dsoftbus_root_path/core/bus_center/utils/include",
+#     "$dsoftbus_root_path/core/discovery/interface",
+#     "$dsoftbus_root_path/core/discovery/manager/include",
+#     "$dsoftbus_root_path/interfaces/inner_kits/lnn",
+#     "$dsoftbus_root_path/interfaces/kits",
+#     "$dsoftbus_root_path/interfaces/kits/bus_center",
+#   ]
 
-  deps = [ "$dsoftbus_root_path/core/common:softbus_utils" ]
+#   deps = [
+#     "$dsoftbus_root_path/core/common:softbus_utils",
+#     "$dsoftbus_root_path/adapter:softbus_adapter",
+#     "$dsoftbus_root_path/dfx:softbus_dfx",
+#   ]
 
-  if (!defined(global_parts_info) ||
-      defined(global_parts_info.deviceprofile_device_info_manager)) {
-    external_deps = [
-      "device_info_manager:distributed_device_profile_common",
-      "device_info_manager:distributed_device_profile_sdk",
-      "hilog:libhilog",
-      "ipc:ipc_core",
-    ]
-  } else {
-    external_deps = [
-      "hilog:libhilog",
-      "ipc:ipc_core",
-    ]
-  }
-  external_deps += [
-    "bounds_checking_function:libsec_shared",
-    "c_utils:utils",
-    "device_auth:deviceauth_sdk",
-    "googletest:gmock_main",
-    "googletest:gtest_main",
-  ]
-}
+#   if (!defined(global_parts_info) ||
+#       defined(global_parts_info.deviceprofile_device_info_manager)) {
+#     external_deps = [
+#       "device_info_manager:distributed_device_profile_common",
+#       "device_info_manager:distributed_device_profile_sdk",
+#       "hilog:libhilog",
+#       "ipc:ipc_core",
+#     ]
+#   } else {
+#     external_deps = [
+#       "hilog:libhilog",
+#       "ipc:ipc_core",
+#     ]
+#   }
+#   external_deps += [
+#     "bounds_checking_function:libsec_shared",
+#     "c_utils:utils",
+#     "device_auth:deviceauth_sdk",
+#     "googletest:gmock_main",
+#     "googletest:gtest_main",
+#     "samgr:samgr_proxy",
+#   ]
+#   # if (defined(ohos_lite)) {
+#   #  if (ohos_kernel_type == "liteos_m") {
+
+#   #  }
+#   # }
+#   external_deps += [ "device_info_manager:distributed_device_profile_sdk" ]
+# }
 
 ohos_unittest("AuthSessionJsonMockTest") {
   module_out_path = module_output_path
   sources = [
     "unittest/auth_session_json_deps_mock.cpp",
     "unittest/auth_session_json_mock_test.cpp",
+    "$dsoftbus_root_path/core/frame/init/src/g_enhance_lnn_func.c",
+    "$dsoftbus_root_path/core/frame/init/src/g_enhance_auth_func.c",
+    "$dsoftbus_root_path/core/frame/common/src/softbus_init_common.c",
+    "$dsoftbus_root_path/core/frame/init/src/g_enhance_lnn_func_pack.c",
+    "$dsoftbus_root_path/core/frame/init/src/g_enhance_auth_func_pack.c",
   ]
 
   include_dirs = [
+    "$dsoftbus_dfx_path/interface/include/form",
+    "$dsoftbus_dfx_path/interface/include/legacy",
     "$dsoftbus_root_path/adapter/common/include",
+    "$dsoftbus_root_path/adapter/common/net/bluetooth/include",
+    "$dsoftbus_root_path/core/adapter/authentication/include",
+    "$dsoftbus_root_path/core/adapter/bus_center/include",
+    "$dsoftbus_root_path/core/authentication/include",
+    "$dsoftbus_root_path/core/authentication/interface",
+    "$dsoftbus_root_path/core/authentication/src",
+    "$dsoftbus_root_path/core/bus_center/interface",
+    "$dsoftbus_root_path/core/bus_center/lnn/lane_hub/heartbeat/include",
+    "$dsoftbus_root_path/core/bus_center/lnn/lane_hub/lane_manager/include",
+    "$dsoftbus_root_path/core/bus_center/lnn/net_builder/include",
+    "$dsoftbus_root_path/core/bus_center/lnn/net_ledger/common/include",
+    "$dsoftbus_root_path/core/bus_center/lnn/net_ledger/decision_db/include",
+    "$dsoftbus_root_path/core/bus_center/lnn/net_ledger/local_ledger/include",
+    "$dsoftbus_root_path/core/bus_center/monitor/include",
+    "$dsoftbus_root_path/core/bus_center/service/include",
     "$dsoftbus_root_path/core/bus_center/utils/include",
     "$dsoftbus_root_path/core/common/include",
-    "$dsoftbus_root_path/core/bus_center/lnn/net_builder/include",
-    "$dsoftbus_root_path/core/authentication/interface",
-    "$dsoftbus_root_path/core/bus_center/interface",
-    "$dsoftbus_root_path/core/bus_center/lnn/net_ledger/local_ledger/include",
-    "$dsoftbus_root_path/core/adapter/bus_center/include",
-    "$dsoftbus_root_path/core/adapter/authentication/include",
-    "$dsoftbus_root_path/core/authentication/include",
-    "$dsoftbus_root_path/core/bus_center/lnn/net_ledger/common/include",
-    "$dsoftbus_root_path/adapter/common/net/bluetooth/include",
-    "$dsoftbus_root_path/core/bus_center/lnn/lane_hub/lane_manager/include",
-    "$dsoftbus_root_path/core/authentication/src",
-    "$dsoftbus_root_path/interfaces/kits/bus_center",
-    "$dsoftbus_root_path/interfaces/inner_kits/lnn",
-    "$dsoftbus_root_path/core/discovery/manager/include",
     "$dsoftbus_root_path/core/discovery/interface",
+    "$dsoftbus_root_path/core/discovery/manager/include",
+    "$dsoftbus_root_path/core/frame/common/include",
+    "$dsoftbus_root_path/core/frame/init/include",
+    "$dsoftbus_root_path/interfaces/inner_kits/lnn",
+    "$dsoftbus_root_path/interfaces/inner_kits/transport",
+    "$dsoftbus_root_path/interfaces/kits/bus_center",
   ]
 
   deps = [
     "$dsoftbus_root_path/core/common:softbus_utils",
+    "$dsoftbus_root_path/core/frame:softbus_server",
     "$dsoftbus_root_path/tests/sdk/common:softbus_access_token_test",
+    "$dsoftbus_root_path/adapter:softbus_adapter",
+    "$dsoftbus_root_path/dfx:softbus_dfx",
   ]
 
   external_deps = [
@@ -1065,24 +1406,508 @@ ohos_unittest("AuthSessionJsonMockTest") {
   ]
 }
 
+ohos_unittest("AuthPreLinkTest") {
+  module_out_path = module_output_path
+  sources = [
+    "$dsoftbus_root_path/core/frame/init/src/g_enhance_lnn_func_pack.c",
+    "$dsoftbus_root_path/core/frame/init/src/g_enhance_lnn_func.c",
+    "unittest/auth_pre_link_mock.cpp",
+    "unittest/auth_pre_link_test.cpp",
+  ]
+
+  include_dirs = [
+    "$dsoftbus_dfx_path/interface/include/form",
+    "$dsoftbus_dfx_path/interface/include/legacy",
+    "$dsoftbus_root_path/core/adapter/bus_center/include",
+    "$dsoftbus_root_path/core/authentication/include",
+    "$dsoftbus_root_path/core/authentication/interface",
+    "$dsoftbus_root_path/core/authentication/src",
+    "$dsoftbus_root_path/core/bus_center/interface",
+    "$dsoftbus_root_path/core/bus_center/lnn/lane_hub/heartbeat/include",
+    "$dsoftbus_root_path/core/bus_center/lnn/lane_hub/lane_manager/include",
+    "$dsoftbus_root_path/core/bus_center/lnn/net_builder/include",
+    "$dsoftbus_root_path/core/bus_center/lnn/net_ledger/common/include",
+    "$dsoftbus_root_path/core/bus_center/lnn/net_ledger/decision_db/include",
+    "$dsoftbus_root_path/core/bus_center/lnn/net_ledger/local_ledger/include",
+    "$dsoftbus_root_path/core/bus_center/service/include",
+    "$dsoftbus_root_path/core/bus_center/utils/include",
+    "$dsoftbus_root_path/core/discovery/interface",
+    "$dsoftbus_root_path/core/discovery/manager/include",
+    "$dsoftbus_root_path/interfaces/inner_kits/lnn",
+    "$dsoftbus_root_path/interfaces/inner_kits/transport",
+    "$dsoftbus_root_path/interfaces/kits/bus_center",
+  ]
+
+  deps = [
+    "$dsoftbus_root_path/core/common:softbus_utils",
+    "$dsoftbus_root_path/adapter:softbus_adapter",
+  ]
+
+  external_deps = [
+    "c_utils:utils",
+    "googletest:gmock_main",
+    "googletest:gtest_main",
+    "hilog:libhilog",
+  ]
+}
+
+ohos_unittest("AuthHichainIdServiceTest") {
+  module_out_path = module_output_path
+  sources = [
+    "unittest/auth_hichain_id_service_mock.cpp",
+    "unittest/auth_hichain_id_service_test.cpp",
+  ]
+
+  include_dirs = [
+    "$dsoftbus_dfx_path/interface/include/form",
+    "$dsoftbus_dfx_path/interface/include/legacy",
+    "$dsoftbus_root_path/core/adapter/bus_center/include",
+    "$dsoftbus_root_path/core/authentication/include",
+    "$dsoftbus_root_path/core/authentication/interface",
+    "$dsoftbus_root_path/core/authentication/src",
+    "$dsoftbus_root_path/core/bus_center/interface",
+    "$dsoftbus_root_path/core/bus_center/lnn/lane_hub/heartbeat/include",
+    "$dsoftbus_root_path/core/bus_center/lnn/net_builder/include",
+    "$dsoftbus_root_path/core/bus_center/lnn/net_ledger/common/include",
+    "$dsoftbus_root_path/core/bus_center/lnn/net_ledger/decision_db/include",
+    "$dsoftbus_root_path/core/bus_center/service/include",
+    "$dsoftbus_root_path/core/bus_center/utils/include",
+    "$dsoftbus_root_path/core/discovery/interface",
+    "$dsoftbus_root_path/core/discovery/manager/include",
+    "$dsoftbus_root_path/interfaces/kits/bus_center",
+  ]
+
+  deps = [
+    "$dsoftbus_root_path/core/common:softbus_utils",
+    "$dsoftbus_root_path/adapter:softbus_adapter",
+    "$dsoftbus_root_path/dfx:softbus_dfx",
+  ]
+
+  external_deps = [
+    "bounds_checking_function:libsec_shared",
+    "cJSON:cjson",
+    "c_utils:utils",
+    "device_auth:deviceauth_sdk",
+    "googletest:gmock_main",
+    "googletest:gtest_main",
+    "hilog:libhilog",
+  ]
+}
+
+ohos_unittest("AuthUkManagerTest") {
+  module_out_path = module_output_path
+  sources = [ "unittest/auth_uk_manager_test.cpp" ]
+
+  include_dirs = [
+    "$dsoftbus_dfx_path/interface/include/form",
+    "$dsoftbus_dfx_path/interface/include/legacy",
+    "$dsoftbus_root_path/adapter/common/include",
+    "$dsoftbus_root_path/adapter/common/net/bluetooth/include",
+    "$dsoftbus_root_path/core/adapter/authentication/include",
+    "$dsoftbus_root_path/core/adapter/bus_center/include",
+    "$dsoftbus_root_path/core/authentication/include",
+    "$dsoftbus_root_path/core/authentication/interface",
+    "$dsoftbus_root_path/core/authentication/src",
+    "$dsoftbus_root_path/core/authentication/userkey",
+    "$dsoftbus_root_path/core/bus_center/interface",
+    "$dsoftbus_root_path/core/bus_center/lnn/lane_hub/heartbeat/include",
+    "$dsoftbus_root_path/core/bus_center/lnn/lane_hub/lane_manager/include",
+    "$dsoftbus_root_path/core/bus_center/lnn/net_builder/include",
+    "$dsoftbus_root_path/core/bus_center/lnn/net_ledger/common/include",
+    "$dsoftbus_root_path/core/bus_center/lnn/net_ledger/decision_db/include",
+    "$dsoftbus_root_path/core/bus_center/lnn/net_ledger/distributed_ledger/include",
+    "$dsoftbus_root_path/core/bus_center/lnn/net_ledger/local_ledger/include",
+    "$dsoftbus_root_path/core/bus_center/service/include",
+    "$dsoftbus_root_path/core/bus_center/utils/include",
+    "$dsoftbus_root_path/core/common/include",
+    "$dsoftbus_root_path/core/discovery/interface",
+    "$dsoftbus_root_path/core/discovery/manager/include",
+    "$dsoftbus_root_path/core/transmission/interface",
+    "$dsoftbus_root_path/interfaces/inner_kits/lnn",
+    "$dsoftbus_root_path/interfaces/kits/bus_center",
+    "$dsoftbus_root_path/tests/core/authentication/unittest",
+    "$dsoftbus_root_path/tests/core/bus_center/mock_common/include",
+    "$dsoftbus_root_path/tests/sdk/common/include",
+    "unittest/common/",
+  ]
+
+  deps = [
+    "$dsoftbus_root_path/core/common:softbus_utils",
+    "$dsoftbus_root_path/core/frame:softbus_server",
+    "$dsoftbus_root_path/tests/sdk/common:softbus_access_token_test",
+    "$dsoftbus_root_path/adapter:softbus_adapter",
+  ]
+
+  if (is_standard_system) {
+    external_deps = [
+      "bounds_checking_function:libsec_shared",
+      "cJSON:cjson",
+      "c_utils:utils",
+      "device_auth:deviceauth_sdk",
+      "dsoftbus:softbus_client",
+      "googletest:gmock_main",
+      "googletest:gtest_main",
+      "hilog:libhilog",
+    ]
+  } else {
+    external_deps = [
+      "bounds_checking_function:libsec_shared",
+      "cJSON:cjson",
+      "c_utils:utils",
+      "dsoftbus:softbus_client",
+      "googletest:gmock_main",
+      "googletest:gtest_main",
+      "hilog:libhilog",
+    ]
+  }
+}
+
+ohos_unittest("AuthUserCommonKeyTest") {
+  module_out_path = module_output_path
+  sources = [ "unittest/auth_user_common_key_test.cpp" ]
+
+  include_dirs = [
+    "$dsoftbus_root_path/adapter/common/include",
+    "$dsoftbus_root_path/adapter/common/net/bluetooth/include",
+    "$dsoftbus_root_path/core/adapter/authentication/include",
+    "$dsoftbus_root_path/core/adapter/bus_center/include",
+    "$dsoftbus_root_path/core/authentication/include",
+    "$dsoftbus_root_path/core/authentication/interface",
+    "$dsoftbus_root_path/core/authentication/src",
+    "$dsoftbus_root_path/core/bus_center/interface",
+    "$dsoftbus_root_path/core/bus_center/lnn/lane_hub/heartbeat/include",
+    "$dsoftbus_root_path/core/bus_center/lnn/lane_hub/lane_manager/include",
+    "$dsoftbus_root_path/core/bus_center/lnn/net_builder/include",
+    "$dsoftbus_root_path/core/bus_center/lnn/net_ledger/common/include",
+    "$dsoftbus_root_path/core/bus_center/lnn/net_ledger/decision_db/include",
+    "$dsoftbus_root_path/core/bus_center/lnn/net_ledger/local_ledger/include",
+    "$dsoftbus_root_path/core/bus_center/service/include",
+    "$dsoftbus_root_path/core/bus_center/utils/include",
+    "$dsoftbus_root_path/core/common/include",
+    "$dsoftbus_root_path/core/discovery/interface",
+    "$dsoftbus_root_path/core/discovery/manager/include",
+    "$dsoftbus_root_path/interfaces/inner_kits/lnn",
+    "$dsoftbus_root_path/interfaces/kits/bus_center",
+  ]
+
+  deps = [
+    "$dsoftbus_root_path/core/common:softbus_utils",
+    "$dsoftbus_root_path/core/frame:softbus_server",
+    "$dsoftbus_root_path/tests/sdk/common:softbus_access_token_test",
+  ]
+
+  external_deps = [
+    "c_utils:utils",
+    "device_auth:deviceauth_sdk",
+    "googletest:gtest_main",
+    "hilog:libhilog",
+  ]
+}
+
+ohos_unittest("AuthUserCommonKeyNewTest") {
+  module_out_path = module_output_path
+  sources = [ "unittest/auth_user_common_key_new_test.cpp" ]
+
+  include_dirs = [
+    "$dsoftbus_root_path/adapter/common/include",
+    "$dsoftbus_root_path/adapter/common/net/bluetooth/include",
+    "$dsoftbus_root_path/core/adapter/authentication/include",
+    "$dsoftbus_root_path/core/adapter/bus_center/include",
+    "$dsoftbus_root_path/core/authentication/include",
+    "$dsoftbus_root_path/core/authentication/interface",
+    "$dsoftbus_root_path/core/authentication/src",
+    "$dsoftbus_root_path/core/authentication/userkey",
+    "$dsoftbus_root_path/core/bus_center/interface",
+    "$dsoftbus_root_path/core/bus_center/lnn/lane_hub/heartbeat/include",
+    "$dsoftbus_root_path/core/bus_center/lnn/lane_hub/lane_manager/include",
+    "$dsoftbus_root_path/core/bus_center/lnn/net_builder/include",
+    "$dsoftbus_root_path/core/bus_center/lnn/net_ledger/common/include",
+    "$dsoftbus_root_path/core/bus_center/lnn/net_ledger/decision_db/include",
+    "$dsoftbus_root_path/core/bus_center/lnn/net_ledger/distributed_ledger/include",
+    "$dsoftbus_root_path/core/bus_center/lnn/net_ledger/local_ledger/include",
+    "$dsoftbus_root_path/core/bus_center/service/include",
+    "$dsoftbus_root_path/core/bus_center/utils/include",
+    "$dsoftbus_root_path/core/common/include",
+    "$dsoftbus_root_path/core/discovery/interface",
+    "$dsoftbus_root_path/core/discovery/manager/include",
+    "$dsoftbus_root_path/core/transmission/interface/",
+    "$dsoftbus_root_path/interfaces/inner_kits/lnn",
+    "$dsoftbus_root_path/interfaces/kits/bus_center",
+  ]
+
+  deps = [
+    "$dsoftbus_root_path/core/common:softbus_utils",
+    "$dsoftbus_root_path/core/frame:softbus_server",
+    "$dsoftbus_root_path/tests/sdk/common:softbus_access_token_test",
+    "$dsoftbus_root_path/adapter:softbus_adapter",
+  ]
+
+  external_deps = [
+    "c_utils:utils",
+    "device_auth:deviceauth_sdk",
+    "googletest:gtest_main",
+    "hilog:libhilog",
+  ]
+}
+
+ohos_unittest("AuthRequestTest") {
+  module_out_path = module_output_path
+  sources = [ "unittest/auth_request_test.cpp" ]
+
+  include_dirs = [
+    "$dsoftbus_dfx_path/interface/include/form",
+    "$dsoftbus_root_path/adapter/common/include/",
+    "$dsoftbus_root_path/adapter/common/net/bluetooth/broadcast/interface",
+    "$dsoftbus_root_path/adapter/common/net/bluetooth/include",
+    "$dsoftbus_root_path/core/adapter/authentication/include",
+    "$dsoftbus_root_path/core/adapter/bus_center/include",
+    "$dsoftbus_root_path/core/authentication/include",
+    "$dsoftbus_root_path/core/authentication/interface",
+    "$dsoftbus_root_path/core/authentication/src",
+    "$dsoftbus_root_path/core/broadcast/common/include",
+    "$dsoftbus_root_path/core/bus_center/interface",
+    "$dsoftbus_root_path/core/bus_center/lnn/lane_hub/heartbeat/include",
+    "$dsoftbus_root_path/core/bus_center/lnn/lane_hub/lane_manager/include",
+    "$dsoftbus_root_path/core/bus_center/lnn/net_builder/include",
+    "$dsoftbus_root_path/core/bus_center/lnn/net_buscenter/include",
+    "$dsoftbus_root_path/core/bus_center/lnn/net_ledger/common/include",
+    "$dsoftbus_root_path/core/bus_center/lnn/net_ledger/decision_db/include",
+    "$dsoftbus_root_path/core/bus_center/lnn/net_ledger/distributed_ledger/include",
+    "$dsoftbus_root_path/core/bus_center/lnn/net_ledger/local_ledger/include",
+    "$dsoftbus_root_path/core/bus_center/service/include",
+    "$dsoftbus_root_path/core/bus_center/utils/include",
+    "$dsoftbus_root_path/core/common/include",
+    "$dsoftbus_root_path/core/common/message_handler/include",
+    "$dsoftbus_root_path/core/connection/interface",
+    "$dsoftbus_root_path/core/connection/manager",
+    "$dsoftbus_root_path/core/connection/wifi_direct_cpp",
+    "$dsoftbus_root_path/core/discovery/ble/softbus_ble/include",
+    "$dsoftbus_root_path/core/discovery/interface",
+    "$dsoftbus_root_path/core/discovery/manager/include",
+    "$dsoftbus_root_path/core/frame/$os_type/init/include",
+    "$dsoftbus_root_path/core/frame/common/include",
+    "$dsoftbus_root_path/interfaces/kits/bus_center",
+    "$dsoftbus_root_path/interfaces/kits/common",
+    "$dsoftbus_root_path/interfaces/kits/connect",
+    "$dsoftbus_root_path/tests/core/discovery/ble/softbus_ble_mock",
+    "$dsoftbus_root_path/tests/sdk/common/include",
+    "unittest/common/",
+  ]
+
+  deps = [
+    "$dsoftbus_root_path/core/common:softbus_utils",
+    "$dsoftbus_root_path/core/frame:softbus_server",
+    "$dsoftbus_root_path/tests/sdk/common:softbus_access_token_test",
+    "$dsoftbus_root_path/adapter:softbus_adapter",
+    "$dsoftbus_root_path/core/connection/wifi_direct_cpp:wifi_direct",
+  ]
+
+  if (is_standard_system) {
+    external_deps = [
+      "bounds_checking_function:libsec_shared",
+      "cJSON:cjson",
+      "c_utils:utils",
+      "device_auth:deviceauth_sdk",
+      "dsoftbus:softbus_client",
+      "googletest:gmock",
+      "googletest:gtest_main",
+      "hilog:libhilog",
+    ]
+  } else {
+    external_deps = [
+      "bounds_checking_function:libsec_shared",
+      "cJSON:cjson",
+      "c_utils:utils",
+      "dsoftbus:softbus_client",
+      "googletest:gmock",
+      "googletest:gtest_main",
+      "hilog:libhilog",
+    ]
+  }
+}
+
+ohos_unittest("AuthApplyKeyProcessTest") {
+  module_out_path = module_output_path
+  sources = [
+    "unittest/auth_apply_key_process_mock.cpp",
+    "unittest/auth_apply_key_process_test.cpp",
+  ]
+
+  include_dirs = [
+    "unittest",
+    "$dsoftbus_root_path/adapter/common/include",
+    "$dsoftbus_root_path/adapter/common/include/OS_adapter_define/linux",
+    "$dsoftbus_root_path/core/adapter/authentication/include",
+    "$dsoftbus_root_path/core/adapter/bus_center/include",
+    "$dsoftbus_root_path/core/authentication/applykey",
+    "$dsoftbus_root_path/core/authentication/include",
+    "$dsoftbus_root_path/core/authentication/interface",
+    "$dsoftbus_root_path/core/authentication/src",
+    "$dsoftbus_root_path/core/bus_center/interface",
+    "$dsoftbus_root_path/core/bus_center/lnn/lane_hub/lane_manager/include",
+    "$dsoftbus_root_path/core/bus_center/lnn/net_builder/include",
+    "$dsoftbus_root_path/core/bus_center/lnn/net_ledger/common/include",
+    "$dsoftbus_root_path/core/bus_center/lnn/net_ledger/distributed_ledger/include",
+    "$dsoftbus_root_path/core/bus_center/lnn/net_ledger/local_ledger/include",
+    "$dsoftbus_root_path/core/bus_center/service/include",
+    "$dsoftbus_root_path/core/bus_center/utils/include",
+    "$dsoftbus_root_path/core/connection/interface",
+    "$dsoftbus_root_path/core/common/include",
+    "$dsoftbus_root_path/core/discovery/manager/include",
+    "$dsoftbus_root_path/core/discovery/interface",
+    "$dsoftbus_root_path/core/transmission/common/include",
+    "$dsoftbus_root_path/core/transmission/interface",
+    "$dsoftbus_root_path/interfaces/kits/authentication",
+    "$dsoftbus_root_path/interfaces/kits/bus_center",
+    "$dsoftbus_root_path/interfaces/kits/common",
+    "$dsoftbus_root_path/interfaces/kits/connect",
+    "$dsoftbus_root_path/interfaces/kits/disc",
+    "$dsoftbus_root_path/interfaces/kits/lnn",
+    "$dsoftbus_root_path/interfaces/kits/transport",
+    "$dsoftbus_root_path/interfaces/inner_kits/lnn",
+    "$dsoftbus_root_path/tests/core/authentication/unittest",
+    "$dsoftbus_root_path/tests/core/bus_center/mock_common/include",
+    "$dsoftbus_root_path/tests/sdk/common/include",
+    "unittest/common/",
+  ]
+
+  deps = [
+    "$dsoftbus_root_path/adapter:softbus_adapter",
+    "$dsoftbus_root_path/core/common:softbus_utils",
+    "$dsoftbus_root_path/core/frame:softbus_server",
+    "$dsoftbus_root_path/tests/sdk/common:softbus_access_token_test",
+  ]
+
+  if (is_standard_system) {
+    external_deps = [
+      "bounds_checking_function:libsec_shared",
+      "cJSON:cjson",
+      "c_utils:utils",
+      "device_auth:deviceauth_sdk",
+      "dsoftbus:softbus_client",
+      "googletest:gmock",
+      "googletest:gtest_main",
+      "hilog:libhilog",
+    ]
+  } else {
+    external_deps = [
+      "bounds_checking_function:libsec_shared",
+      "cJSON:cjson",
+      "c_utils:utils",
+      "dsoftbus:softbus_client",
+      "googletest:gmock",
+      "googletest:gtest_main",
+      "hilog:libhilog",
+    ]
+  }
+}
+
+ohos_unittest("AuthIdentityServiceAdapterTest") {
+  module_out_path = module_output_path
+  sources = [
+    "unittest/auth_identity_service_adapter_mock.cpp",
+    "unittest/auth_identity_service_adapter_test.cpp",
+  ]
+
+  include_dirs = [
+    "unittest",
+    "$dsoftbus_root_path/adapter/common/include",
+    "$dsoftbus_root_path/adapter/common/include/OS_adapter_define/linux",
+    "$dsoftbus_root_path/core/adapter/authentication/include",
+    "$dsoftbus_root_path/core/adapter/bus_center/include",
+    "$dsoftbus_root_path/core/authentication/applykey",
+    "$dsoftbus_root_path/core/authentication/include",
+    "$dsoftbus_root_path/core/authentication/interface",
+    "$dsoftbus_root_path/core/authentication/src",
+    "$dsoftbus_root_path/core/bus_center/interface",
+    "$dsoftbus_root_path/core/bus_center/lnn/lane_hub/heartbeat/include",
+    "$dsoftbus_root_path/core/bus_center/lnn/lane_hub/lane_manager/include",
+    "$dsoftbus_root_path/core/bus_center/lnn/net_builder/include",
+    "$dsoftbus_root_path/core/bus_center/lnn/net_ledger/common/include",
+    "$dsoftbus_root_path/core/bus_center/lnn/net_ledger/decision_db/include",
+    "$dsoftbus_root_path/core/bus_center/lnn/net_ledger/distributed_ledger/include",
+    "$dsoftbus_root_path/core/bus_center/lnn/net_ledger/local_ledger/include",
+    "$dsoftbus_root_path/core/bus_center/service/include",
+    "$dsoftbus_root_path/core/bus_center/utils/include",
+    "$dsoftbus_root_path/core/connection/interface",
+    "$dsoftbus_root_path/core/common/include",
+    "$dsoftbus_root_path/core/discovery/interface",
+    "$dsoftbus_root_path/core/discovery/manager/include",
+    "$dsoftbus_root_path/core/transmission/common/include",
+    "$dsoftbus_root_path/core/transmission/interface",
+    "$dsoftbus_root_path/interfaces/kits/authentication",
+    "$dsoftbus_root_path/interfaces/kits/bus_center",
+    "$dsoftbus_root_path/interfaces/kits/common",
+    "$dsoftbus_root_path/interfaces/kits/connect",
+    "$dsoftbus_root_path/interfaces/kits/disc",
+    "$dsoftbus_root_path/interfaces/kits/lnn",
+    "$dsoftbus_root_path/interfaces/kits/transport",
+    "$dsoftbus_root_path/interfaces/inner_kits/lnn",
+    "$dsoftbus_root_path/tests/core/authentication/unittest",
+    "$dsoftbus_root_path/tests/core/bus_center/mock_common/include",
+    "$dsoftbus_root_path/tests/sdk/common/include",
+    "unittest/common/",
+  ]
+
+  deps = [
+    "$dsoftbus_root_path/adapter:softbus_adapter",
+    "$dsoftbus_root_path/core/common:softbus_utils",
+    "$dsoftbus_root_path/core/frame:softbus_server",
+    "$dsoftbus_root_path/tests/sdk/common:softbus_access_token_test",
+  ]
+
+  if (is_standard_system) {
+    external_deps = [
+      "bounds_checking_function:libsec_shared",
+      "cJSON:cjson",
+      "c_utils:utils",
+      "device_auth:deviceauth_sdk",
+      "dsoftbus:softbus_client",
+      "googletest:gmock",
+      "googletest:gtest_main",
+      "hilog:libhilog",
+    ]
+  } else {
+    external_deps = [
+      "bounds_checking_function:libsec_shared",
+      "cJSON:cjson",
+      "c_utils:utils",
+      "dsoftbus:softbus_client",
+      "googletest:gmock",
+      "hilog:libhilog",
+    ]
+  }
+}
+
 group("unittest") {
   testonly = true
   deps = [
-    ":AuthDeviceProfileListenerTest",
-    ":AuthDeviceProfileTest",
+    ":AuthConnectionTest",
+    # ":AuthDeviceProfileListenerTest",
+    # ":AuthDeviceProfileTest",
     ":AuthEnhanceMockTest",
+    ":AuthIdentityServiceAdapterTest",
+    ":AuthHichainIdServiceTest",
     ":AuthHichainMockTest",
     ":AuthHichainTest",
     ":AuthManagerTest",
     ":AuthNormalizeRequestTest",
+    ":AuthOtherMockTest",
     ":AuthOtherTest",
+    ":AuthPreLinkTest",
     ":AuthSessionFsmTest",
     ":AuthSessionJsonMockTest",
+    ":AuthSessionJsonTest",
     ":AuthSessionKeyTest",
     ":AuthSessionMessageTest",
     ":AuthTcpConnectionTest",
     ":AuthTest",
     ":AuthTestCallBackTest",
+    ":AuthUkManagerTest",
+    ":AuthUserCommonKeyTest",
+    ":AuthUserCommonKeyNewTest",
+    ":AuthRequestTest",
+    ":AuthApplyKeyProcessTest",
   ]
   if (dsoftbus_feature_lnn_lane_mgr) {
     deps += [ ":AuthLaneTest" ]
@@ -1092,9 +1917,4 @@ group("unittest") {
 group("fuzztest") {
   testonly = true
   deps = [ "fuzztest:fuzztest" ]
-  if (enhanced) {
-    deps += [
-      "$dsoftbus_root_path/dsoftbus_enhance/test/core/authentication:fuzztest",
-    ]
-  }
 }

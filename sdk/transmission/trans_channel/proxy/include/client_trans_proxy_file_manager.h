@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2022-2024 Huawei Device Co., Ltd.
+ * Copyright (c) 2022-2025 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -15,8 +15,6 @@
 
 #ifndef CLIENT_TRANS_PROXY_FILE_MANAGER_H
 #define CLIENT_TRANS_PROXY_FILE_MANAGER_H
-
-#include <stdint.h>
 
 #include "client_trans_file_listener.h"
 #include "client_trans_proxy_file_common.h"
@@ -53,6 +51,8 @@
 #define WAIT_ACK_TIME 200
 #define WAIT_ACK_LAST_TIME 5000
 #define WAIT_FRAME_ACK_TIMEOUT_COUNT 24
+
+#define OHOS_TYPE_UNKNOWN (-1)
 
 #ifdef __cplusplus
 extern "C" {

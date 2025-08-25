@@ -20,12 +20,15 @@
 
 #include "anonymizer.h"
 #include "bus_center_manager.h"
-#include "lnn_time_sync_impl.h"
+#include "g_enhance_lnn_func.h"
+#include "g_enhance_lnn_func_pack.h"
 #include "lnn_log.h"
+#include "lnn_feature_capability.h"
 #include "message_handler.h"
 #include "softbus_adapter_mem.h"
 #include "softbus_def.h"
 #include "softbus_error_code.h"
+#include "softbus_init_common.h"
 
 #define THOUSAND 1000
 
@@ -87,7 +90,7 @@ static void OnTimeSyncImplComplete(const char *networkId, double offset, int32_t
 
 static TimeSyncCtrl g_timeSyncCtrl;
 
-static TimeSyncImplCallback g_timeSyncImplCb = {
+TimeSyncImplCallback g_timeSyncImplCb = {
     .onTimeSyncImplComplete = OnTimeSyncImplComplete,
 };
 
@@ -250,7 +253,7 @@ static int32_t ProcessStartTimeSyncRequest(const StartTimeSyncReqMsgPara *para)
             break;
         }
         if (isCreateTimeSyncReq || isUpdateTimeSyncReq) {
-            if (LnnStartTimeSyncImpl(existInfo->targetNetworkId, existInfo->curAccuracy,
+            if (LnnStartTimeSyncImplPacked(existInfo->targetNetworkId, existInfo->curAccuracy,
                 existInfo->curPeriod, &g_timeSyncImplCb) != SOFTBUS_OK) {
                 LNN_LOGE(LNN_CLOCK, "start time sync fail");
                 RemoveStartTimeSyncReq(existInfo, para->pkgName, para->pid);
@@ -301,11 +304,12 @@ static void TryUpdateTimeSyncReq(TimeSyncReqInfo *info)
             info->curAccuracy = curAccuracy;
             info->curPeriod = curPeriod;
             LNN_LOGI(LNN_CLOCK, "update time sync request. rc=%{public}d",
-                LnnStartTimeSyncImpl(info->targetNetworkId, curAccuracy, curPeriod, &g_timeSyncImplCb));
+                LnnStartTimeSyncImplPacked(info->targetNetworkId, curAccuracy,
+                curPeriod, &g_timeSyncImplCb));
         }
     } else {
         LNN_LOGI(LNN_CLOCK, "stop time sync request. rc=%{public}d",
-            LnnStopTimeSyncImpl(info->targetNetworkId));
+            LnnStopTimeSyncImplPacked(info->targetNetworkId));
         ListDelete(&info->node);
         SoftBusFree(info);
     }
@@ -376,7 +380,8 @@ static void RemoveAllStartTimeSyncReq(TimeSyncReqInfo *info)
     LIST_FOR_EACH_ENTRY_SAFE(startTimeSyncItem, startTimeSyncNextItem, &info->startReqList, StartTimeSyncReq, node) {
         RemoveStartTimeSyncReq(info, startTimeSyncItem->pkgName, startTimeSyncItem->pid);
     }
-    (void)LnnStopTimeSyncImpl(info->targetNetworkId);
+
+    (void)LnnStopTimeSyncImplPacked(info->targetNetworkId);
     ListDelete(&info->node);
     SoftBusFree(info);
 }
@@ -395,7 +400,7 @@ static int32_t ProcessTimeSyncComplete(const TimeSyncCompleteMsgPara *para)
         SoftBusFree((void *)para);
         return SOFTBUS_NOT_FIND;
     }
-    LNN_LOGI(LNN_CLOCK, "time sync complete result. offset=%{public}.6lf, retCode=%{public}d",
+    LNN_LOGI(LNN_CLOCK, "time sync complete result. offset=%{public}f, retCode=%{public}d",
         para->offset, para->retCode);
     NotifyTimeSyncResult(info, para->offset, para->retCode);
     if (para->retCode == SOFTBUS_NETWORK_TIME_SYNC_HANDSHAKE_ERR || para->retCode == SOFTBUS_INVALID_PARAM) {
@@ -491,6 +496,21 @@ static void OnTimeSyncImplComplete(const char *networkId, double offset, int32_t
     }
 }
 
+static bool IsSupportHighAccuracy(const StartTimeSyncReqMsgPara *info)
+{
+    uint64_t remote = 0;
+    int32_t ret = LnnGetRemoteNumU64Info(info->targetNetworkId, NUM_KEY_FEATURE_CAPA, &remote);
+    if (ret != SOFTBUS_OK || remote == 0) {
+        LNN_LOGE(LNN_CLOCK, "LnnGetRemoteNumU64Info err, ret=%{public}d, remote=%{public}" PRIu64, ret, remote);
+        return false;
+    }
+    if (!IsFeatureSupport(remote, BIT_HIGH_ACCURACY_SYNC_TIME_CAPABILITY)) {
+        LNN_LOGE(LNN_CLOCK, "remote not support high accuracy, remote=%{public}" PRIu64, remote);
+        return false;
+    }
+    return true;
+}
+
 static bool CheckTimeSyncReqInfo(const StartTimeSyncReqMsgPara *info)
 {
     char uuid[UUID_BUF_LEN] = {0};
@@ -499,7 +519,23 @@ static bool CheckTimeSyncReqInfo(const StartTimeSyncReqMsgPara *info)
         LNN_LOGE(LNN_CLOCK, "get uuid fail");
         return false;
     }
+    if (info->accuracy == HIGH_ACCURACY && !IsSupportHighAccuracy(info)) {
+        return false;
+    }
     return true;
+}
+
+static void LnnSysTimeChangeEventHandler(const LnnEventBasicInfo *info)
+{
+    if (info->event != LNN_EVENT_SYS_TIME_CHANGE) {
+        LNN_LOGE(LNN_CLOCK, "recv err info");
+        return;
+    }
+    LNN_LOGI(LNN_CLOCK, "lnn sys time change notify");
+    int32_t ret = LnnTimeChangeNotifyPacked();
+    if (ret != SOFTBUS_OK) {
+        LNN_LOGE(LNN_CLOCK, "notify time change fail");
+    }
 }
 
 int32_t LnnInitTimeSync(void)
@@ -517,8 +553,12 @@ int32_t LnnInitTimeSync(void)
         LNN_LOGE(LNN_INIT, "mutex init fail");
         return SOFTBUS_NO_INIT;
     }
+    int32_t ret = LnnRegisterEventHandler(LNN_EVENT_SYS_TIME_CHANGE, LnnSysTimeChangeEventHandler);
+    if (ret != SOFTBUS_OK) {
+        LNN_LOGE(LNN_INIT, "reg sys time change cb fail");
+    }
     LNN_LOGI(LNN_INIT, "init time sync success");
-    return LnnTimeSyncImplInit();
+    return LnnTimeSyncImplInitPacked();
 }
 
 void LnnDeinitTimeSync(void)
@@ -530,8 +570,9 @@ void LnnDeinitTimeSync(void)
     if (PostMessageToHandler(MSG_TYPE_REMOVE_ALL, NULL) != SOFTBUS_OK) {
         LNN_LOGE(LNN_INIT, "post remove all time sync msg fail");
     }
+    LnnUnregisterEventHandler(LNN_EVENT_SYS_TIME_CHANGE, LnnSysTimeChangeEventHandler);
     (void)SoftBusMutexDestroy(&g_startReqListLock);
-    LnnTimeSyncImplDeinit();
+    LnnTimeSyncImplDeinitPacked();
 }
 
 int32_t LnnStartTimeSync(const char *pkgName, int32_t callingPid, const char *targetNetworkId,

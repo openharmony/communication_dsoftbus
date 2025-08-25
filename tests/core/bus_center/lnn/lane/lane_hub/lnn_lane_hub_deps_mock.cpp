@@ -81,5 +81,15 @@ void LnnDeinitHeartbeat(void)
 {
     return GetLaneHubDepsInterface()->LnnDeinitHeartbeat();
 }
+
+int32_t InitControlPlanePacked(void)
+{
+    return GetLaneHubDepsInterface()->InitControlPlanePacked();
+}
+
+int32_t SoftBusRegBusCenterVarDump(char *dumpVar, SoftBusVarDumpCb cb)
+{
+    return GetLaneHubDepsInterface()->SoftBusRegBusCenterVarDump(dumpVar, cb);
+}
 }
 } // namespace OHOS

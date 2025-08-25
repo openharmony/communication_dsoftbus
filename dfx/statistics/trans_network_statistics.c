@@ -294,9 +294,15 @@ static int32_t PackNetworkStatistics(cJSON *json, NetworkStatisticsInfo *info)
     }
     ChannelStatisticsInfo *temp = NULL;
     LIST_FOR_EACH_ENTRY(temp, &info->channels, ChannelStatisticsInfo, node) {
-        if (temp->channelInfo != NULL) {
-            cJSON_AddItemToArray(channelStatsObj, cJSON_ParseWithLength(temp->channelInfo, temp->len));
+        if (temp->channelInfo == NULL) {
+            continue;
         }
+        cJSON *channelInfoJson = cJSON_ParseWithLength(temp->channelInfo, temp->len);
+        if (channelInfoJson == NULL) {
+            COMM_LOGE(COMM_DFX, "parse channel info json fail, channelId=%{public}d", temp->channelId);
+            continue;
+        }
+        cJSON_AddItemToArray(channelStatsObj, channelInfoJson);
     }
     return SOFTBUS_OK;
 }

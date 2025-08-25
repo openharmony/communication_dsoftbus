@@ -21,12 +21,14 @@
 #include <gmock/gmock.h>
 #include "bus_center_manager.h"
 #include "lnn_device_info.h"
+#include "lnn_devicename_info.h"
 #include "lnn_ohos_account.h"
 #include "lnn_huks_utils.h"
 
 class BusCenterInterface {
 public:
     virtual int32_t LnnGetLocalStrInfo(InfoKey key, char *info, uint32_t len) = 0;
+    virtual int32_t LnnSetLocalDeviceName(const char *displayName) = 0;
     virtual int32_t LnnConvertDeviceTypeToId(const char *deviceType, uint16_t *typeId) = 0;
     virtual int32_t LnnGetLocalByteInfo(InfoKey key, uint8_t *info, uint32_t len) = 0;
     virtual bool LnnIsDefaultOhosAccount() = 0;
@@ -48,6 +50,7 @@ public:
     ~BusCenterMock();
 
     MOCK_METHOD(int32_t, LnnGetLocalStrInfo, (InfoKey key, char *info, uint32_t len), (override));
+    MOCK_METHOD(int32_t, LnnSetLocalDeviceName, (const char *displayName), (override));
     MOCK_METHOD(int32_t, LnnConvertDeviceTypeToId, (const char *deviceType, uint16_t *typeId), (override));
     MOCK_METHOD(int32_t, LnnGetLocalByteInfo, (InfoKey key, uint8_t *info, uint32_t len), (override));
     MOCK_METHOD(bool, LnnIsDefaultOhosAccount, (), (override));

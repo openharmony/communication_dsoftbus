@@ -16,137 +16,25 @@
 #ifndef LNN_NET_BUILDER_H
 #define LNN_NET_BUILDER_H
 
-#include <stdint.h>
-
 #include "auth_interface.h"
+#include "lnn_connId_callback_manager.h"
 #include "lnn_event.h"
 #include "lnn_sync_info_manager.h"
 #include "softbus_bus_center.h"
 #include "message_handler.h"
+#include "lnn_net_builder_struct.h"
+
+#define SPARK_GROUP_DELAY_TIME_MS 10000
 
 #ifdef __cplusplus
 extern "C" {
 #endif
 
-typedef enum {
-    NODE_TYPE_C,
-    NODE_TYPE_L
-} NodeType;
-
-#define JSON_KEY_NODE_CODE "NODE_CODE"
-#define JSON_KEY_NODE_ADDR "NODE_ADDR"
-#define JSON_KEY_NODE_PROXY_PORT "PROXY_PORT"
-#define JSON_KEY_NODE_SESSION_PORT "SESSION_PORT"
-
-typedef enum {
-    MSG_TYPE_JOIN_LNN = 0,
-    MSG_TYPE_DISCOVERY_DEVICE,
-    MSG_TYPE_CLEAN_CONN_FSM,
-    MSG_TYPE_VERIFY_RESULT,
-    MSG_TYPE_DEVICE_VERIFY_PASS,
-    MSG_TYPE_DEVICE_DISCONNECT = 5,
-    MSG_TYPE_DEVICE_NOT_TRUSTED,
-    MSG_TYPE_LEAVE_LNN,
-    MSG_TYPE_SYNC_OFFLINE_FINISH,
-    MSG_TYPE_NODE_STATE_CHANGED,
-    MSG_TYPE_MASTER_ELECT = 10,
-    MSG_TYPE_LEAVE_INVALID_CONN,
-    MSG_TYPE_LEAVE_BY_ADDR_TYPE,
-    MSG_TYPE_LEAVE_SPECIFIC,
-    MSG_TYPE_LEAVE_BY_AUTH_ID,
-    MSG_TYPE_BUILD_MAX,
-} NetBuilderMessageType;
-
-typedef struct {
-    char nodeAddr[SHORT_ADDRESS_MAX_LEN];
-    int32_t code;
-    int32_t proxyPort;
-    int32_t sessionPort;
-    int32_t authPort;
-} LnnNodeAddr;
-
-typedef struct {
-    char networkId[NETWORK_ID_BUF_LEN];
-    char pkgName[PKG_NAME_SIZE_MAX];
-    bool needReportFailure;
-    int32_t callingPid;
-    uint32_t requestId;
-    uint32_t flag;
-    ConnectionAddr addr;
-    int64_t authId;
-    ListNode node;
-} MetaJoinRequestNode;
-
-typedef struct {
-    ListNode node;
-    ConnectionAddr addr;
-    bool needReportFailure;
-} PendingJoinRequestNode;
-
-typedef struct {
-    NodeType nodeType;
-
-    /* connection fsm list */
-    ListNode fsmList;
-    ListNode pendingList;
-    /* connection count */
-    int32_t connCount;
-
-    SoftBusLooper *looper;
-    SoftBusHandler handler;
-
-    int32_t maxConnCount;
-    int32_t maxConcurrentCount;
-    bool isInit;
-} NetBuilder;
-
-typedef struct {
-    uint32_t requestId;
-    int32_t retCode;
-    NodeInfo *nodeInfo;
-    AuthHandle authHandle;
-} VerifyResultMsgPara;
-
-typedef struct {
-    NodeInfo *nodeInfo;
-    AuthHandle authHandle;
-    ConnectionAddr addr;
-} DeviceVerifyPassMsgPara;
-
-typedef struct {
-    char networkId[NETWORK_ID_BUF_LEN];
-    char masterUdid[UDID_BUF_LEN];
-    int32_t masterWeight;
-} ElectMsgPara;
-
-typedef struct {
-    char oldNetworkId[NETWORK_ID_BUF_LEN];
-    char newNetworkId[NETWORK_ID_BUF_LEN];
-    ConnectionAddrType addrType;
-} LeaveInvalidConnMsgPara;
-
-typedef struct {
-    char networkId[NETWORK_ID_BUF_LEN];
-    ConnectionAddrType addrType;
-} SpecificLeaveMsgPara;
-
-typedef struct {
-    char pkgName[PKG_NAME_SIZE_MAX];
-    bool isNeedConnect;
-    ConnectionAddr addr;
-    NodeInfo *dupInfo;
-    LnnDfxDeviceInfoReport infoReport;
-} JoinLnnMsgPara;
-
-typedef struct {
-    char pkgName[PKG_NAME_SIZE_MAX];
-    char networkId[NETWORK_ID_BUF_LEN];
-} LeaveLnnMsgPara;
-
 int32_t LnnInitNetBuilder(void);
 int32_t LnnInitNetBuilderDelay(void);
 void LnnDeinitNetBuilder(void);
 
+int32_t LnnSetReSyncDeviceName(void);
 int32_t LnnNotifyDiscoveryDevice(
     const ConnectionAddr *addr, const LnnDfxDeviceInfoReport *infoReport, bool isNeedConnect);
 void LnnSyncOfflineComplete(LnnSyncInfoType type, const char *networkId, const uint8_t *msg, uint32_t len);
@@ -184,9 +72,9 @@ void RemovePendingRequestByAddrType(const bool *addrType, uint32_t typeLen);
 void UpdateLocalNetCapability(void);
 void OnReceiveMasterElectMsg(LnnSyncInfoType type, const char *networkId, const uint8_t *msg, uint32_t len);
 void OnReceiveNodeAddrChangedMsg(LnnSyncInfoType type, const char *networkId, const uint8_t *msg, uint32_t size);
-int32_t ConifgLocalLedger(void);
+int32_t ConfigLocalLedger(void);
 int32_t SyncElectMessage(const char *networkId);
-ConnectionAddrType GetCurrentConnectType(void);
+ConnectionAddrType GetCurrentConnectType(AuthLinkType linkType);
 NodeInfo *DupNodeInfo(const NodeInfo *nodeInfo);
 bool NeedPendingJoinRequest(void);
 void PostVerifyResult(uint32_t requestId, int32_t retCode, AuthHandle authHandle, const NodeInfo *info);
@@ -204,9 +92,11 @@ void ClearPcRestrictMap(void);
 void DeleteNodeFromPcRestrictMap(const char *udidHash);
 int32_t GetNodeFromPcRestrictMap(const char *udidHash, uint32_t *count);
 int32_t UpdateNodeFromPcRestrictMap(const char *udidHash);
-int32_t JoinLnnWithNodeInfo(ConnectionAddr *addr, NodeInfo *info);
+int32_t JoinLnnWithNodeInfo(ConnectionAddr *addr, NodeInfo *info, bool isSession);
+int32_t LnnServerJoinExt(ConnectionAddr *addr, LnnServerJoinExtCallBack *callback);
 int32_t AuthFailNotifyProofInfo(int32_t errCode, const char *errorReturn, uint32_t errorReturnLen);
 void NotifyForegroundUseridChange(char *networkId, uint32_t discoveryType, bool isChange);
+int32_t LnnUpdateLocalUuidAndIrk(void);
 #ifdef __cplusplus
 }
 #endif

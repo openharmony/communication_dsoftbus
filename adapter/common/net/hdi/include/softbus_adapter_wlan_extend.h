@@ -16,32 +16,12 @@
 #ifndef SOFTBUS_ADAPTER_WLAN_EXTEND_H
 #define SOFTBUS_ADAPTER_WLAN_EXTEND_H
 
+#include "softbus_adapter_wlan_extend_struct.h"
+
 #include <stdint.h>
 #ifdef __cplusplus
 extern "C" {
 #endif
-
-typedef struct {
-    int32_t channelId;
-    int32_t chload;
-    int32_t noise;
-} WlanChannelInfo;
-
-typedef struct {
-    uint32_t num;
-    uint32_t measNum;
-    int32_t *buff;
-} ChannelList;
-
-typedef struct {
-    WlanChannelInfo *buff;
-    uint32_t num;
-} ChannelInfoList;
-
-typedef struct {
-    int32_t (*onChannelInfoAvailable)(WlanChannelInfo *info, uint32_t num);
-    int32_t (*onFail)(int32_t errorCode);
-} WlanChannelInfoCb;
 
 int32_t SoftBusRegWlanChannelInfoCb(WlanChannelInfoCb *cb);
 int32_t SoftBusRequestWlanChannelInfo(int32_t *channelId, uint32_t num);

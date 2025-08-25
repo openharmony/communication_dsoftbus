@@ -16,13 +16,8 @@
 #ifndef SOFTBUS_TCP_SOCKET_H
 #define SOFTBUS_TCP_SOCKET_H
 
-#include <stdbool.h>
-#include <stdint.h>
 #include <sys/types.h>
-#include <sys/uio.h>
-
 #include "softbus_adapter_errcode.h"
-#include "softbus_protocol_def.h"
 #include "softbus_socket.h"
 
 #ifdef __cplusplus
@@ -34,6 +29,12 @@ extern "C" {
 const SocketInterface *GetTcpProtocol(void);
 
 int32_t SetIpTos(int fd, uint32_t tos);
+int32_t BindTcpClientAddr(int32_t domain, int fd, const char *inputAddr);
+int32_t SocketConnect(int32_t fd, int32_t domain, const ConnectOption *option);
+void SetClientOption(int fd);
+void SetServerOption(int fd);
+int32_t GetTcpSockPort(int32_t fd);
+int BindLocalIP(int32_t domain, int fd, const char *localIP, uint16_t port);
 
 #ifdef __cplusplus
 #if __cplusplus

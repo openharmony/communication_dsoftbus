@@ -20,28 +20,18 @@
 #include <stdbool.h>
 #include <stdint.h>
 
+#include "auth_hichain.h"
+#include "auth_hichain_adapter_struct.h"
+
 #ifdef __cplusplus
 #if __cplusplus
 extern "C" {
 #endif
 #endif
 
-typedef enum {
-    AUTH_GROUP_ACCOUNT = 0x001,
-    AUTH_GROUP_P2P = 0x100,
-    AUTH_GROUP_MESH = 0x101,
-    AUTH_GROUP_COMPATIBLE = 0x200,
-} HichainGroup;
-
-typedef enum {
-    ID_TYPE_UNKNOWN = 0,
-    ID_TYPE_DEVID,
-    ID_TYPE_UID,
-} TrustedRelationIdType;
-
 int32_t RegChangeListener(const char *appId, DataChangeListener *listener);
 int32_t UnregChangeListener(const char *appId);
-int32_t AuthDevice(int64_t authReqId, const char *authParams, const DeviceAuthCallback *cb);
+int32_t AuthDevice(int32_t userId, int64_t authReqId, const char *authParams, const DeviceAuthCallback *cb);
 int32_t ProcessAuthData(int64_t authSeq, const uint8_t *data, uint32_t len, DeviceAuthCallback *cb);
 bool CheckDeviceInGroupByType(const char *udid, const char *uuid, HichainGroup groupType);
 bool CheckHasRelatedGroupInfo(HichainGroup groupType);
@@ -49,6 +39,7 @@ void DestroyDeviceAuth(void);
 bool IsPotentialTrustedDevice(TrustedRelationIdType idType, const char *deviceId, bool isPrecise, bool isPointToPoint);
 bool IsSameAccountGroupDevice(void);
 void CancelRequest(int64_t authReqId, const char *appId);
+char *GenDeviceLevelParam(HiChainAuthParam *hiChainParam);
 
 #ifdef __cplusplus
 #if __cplusplus

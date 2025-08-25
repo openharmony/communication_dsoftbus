@@ -16,7 +16,6 @@
 #include "stream_manager.h"
 
 #include "vtp_stream_socket.h"
-#include "softbus_error_code.h"
 
 #define INVALID_FD (-1)
 

@@ -20,22 +20,26 @@
 
 #include "bus_center_decision_center.h"
 #include "bus_center_event.h"
+#include "g_enhance_lnn_func.h"
+#include "g_enhance_lnn_func_pack.h"
 #include "lnn_async_callback_utils.h"
 #include "lnn_coap_discovery_impl.h"
 #include "lnn_discovery_manager.h"
 #include "lnn_event_monitor.h"
 #include "lnn_lane_hub.h"
 #include "lnn_log.h"
-#include "lnn_meta_node_interface.h"
 #include "lnn_net_builder.h"
 #include "lnn_net_ledger.h"
 #include "lnn_network_manager.h"
 #include "lnn_ohos_account_adapter.h"
+#include "auth_pre_link.h"
 #include "legacy/softbus_adapter_xcollie.h"
 #include "softbus_def.h"
 #include "softbus_error_code.h"
 #include "softbus_feature_config.h"
 #include "softbus_utils.h"
+#include "softbus_init_common.h"
+#include "softbus_permission.h"
 
 #define WATCHDOG_TASK_NAME "LNN_WATCHDOG_TASK"
 #define WATCHDOG_INTERVAL_TIME 10000
@@ -147,7 +151,7 @@ static void BusCenterServerDelayInit(void *para)
             g_lnnLocalConfigInit.initDelayImpl[i].isInit = true;
         }
     }
-    LnnCoapConnectInit();
+    LnnCoapConnectInitPacked();
     if (ret != SOFTBUS_OK) {
         retry++;
         SoftBusLooper *looper = GetLooper(LOOP_TYPE_DEFAULT);
@@ -175,6 +179,15 @@ static int32_t BusCenterServerInitFirstStep(void)
         LNN_LOGE(LNN_INIT, "init lnn looper fail");
         return SOFTBUS_LOOPER_ERR;
     }
+    if (LnnInitLaneLooper() != SOFTBUS_OK) {
+        LNN_LOGE(LNN_INIT, "init lane looper fail");
+        return SOFTBUS_LOOPER_ERR;
+    }
+    int32_t ret = LnnInitPermission();
+    if (ret != SOFTBUS_OK) {
+        LNN_LOGE(LNN_INIT, "Init lnn permission failed");
+        return ret;
+    }
     if (LnnInitNetLedger() != SOFTBUS_OK) {
         return SOFTBUS_NETWORK_LEDGER_INIT_FAILED;
     }
@@ -198,7 +211,7 @@ static int32_t BusCenterServerInitFirstStep(void)
         LNN_LOGE(LNN_INIT, "init net builder fail");
         return SOFTBUS_NETWORK_BUILDER_INIT_FAILED;
     }
-    if (LnnInitMetaNode() != SOFTBUS_OK) {
+    if (LnnInitMetaNodePacked() != SOFTBUS_OK) {
         LNN_LOGE(LNN_INIT, "init meta node fail");
         return SOFTBUS_NETWORK_META_NODE_INIT_FAILED;
     }
@@ -232,6 +245,25 @@ static int32_t BusCenterServerInitSecondStep(void)
         LNN_LOGE(LNN_INIT, "initDecisionCenter fail");
         return SOFTBUS_NO_INIT;
     }
+    if (InitAuthPreLinkList() != SOFTBUS_OK) {
+        LNN_LOGE(LNN_INIT, "initAuthPreLinkList fail");
+    }
+    if (InitAuthGenCertParallelList() != SOFTBUS_OK) {
+        LNN_LOGE(LNN_INIT, "initAuthGenCertParallelList fail");
+    }
+    if (InitActionBleConcurrencyPacked() != SOFTBUS_OK) {
+        LNN_LOGE(LNN_INIT, "initActionBleConcurrencyList fail");
+    }
+    if (InitActionStateAdapterPacked() != SOFTBUS_OK) {
+        LNN_LOGE(LNN_INIT, "initActionStateAdapter fail");
+    }
+    if (LnnLoadLocalDeviceAccountIdInfoPacked() != SOFTBUS_OK) {
+        LNN_LOGE(LNN_INIT, "lnnLoadLocalDeviceAccountIdInfo fail");
+    }
+    RestoreLocalDeviceInfo();
+    if (InitUdidChangedEvent() != SOFTBUS_OK) {
+        LNN_LOGE(LNN_INIT, "initUdidChangedEvent fail");
+    }
     return SOFTBUS_OK;
 }
 
@@ -256,6 +288,27 @@ void LnnDeinitLnnLooper(void)
     }
 }
 
+int32_t LnnInitLaneLooper(void)
+{
+    SoftBusLooper *looper = CreateNewLooper("lane_looper");
+    if (!looper) {
+        LNN_LOGE(LNN_LANE, "init lane looper fail");
+        return SOFTBUS_LOOPER_ERR;
+    }
+    SetLooper(LOOP_TYPE_LANE, looper);
+    LNN_LOGI(LNN_LANE, "init laneLooper success");
+    return SOFTBUS_OK;
+}
+
+void LnnDeinitLaneLooper(void)
+{
+    SoftBusLooper *looper = GetLooper(LOOP_TYPE_LANE);
+    if (looper != NULL) {
+        DestroyLooper(looper);
+        SetLooper(LOOP_TYPE_LANE, NULL);
+    }
+}
+
 int32_t BusCenterServerInit(void)
 {
     int32_t ret = BusCenterServerInitFirstStep();
@@ -272,6 +325,7 @@ int32_t BusCenterServerInit(void)
 
 void BusCenterServerDeinit(void)
 {
+    LnnDeinitPermission();
     RouteLSDeinit();
     DeinitNodeAddrAllocator();
     LnnDeinitLaneHub();
@@ -281,8 +335,11 @@ void BusCenterServerDeinit(void)
     LnnDeinitBusCenterEvent();
     LnnDeinitNetLedger();
     DeinitDecisionCenter();
-    LnnDeinitMetaNode();
-    LnnCoapConnectDeinit();
+    LnnDeinitMetaNodePacked();
+    LnnCoapConnectDeinitPacked();
+    LnnDeinitLaneLooper();
     LnnDeinitLnnLooper();
+    DeinitAuthGenCertParallelList();
+    DeinitAuthPreLinkList();
     LNN_LOGI(LNN_INIT, "bus center server deinit");
 }

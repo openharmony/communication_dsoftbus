@@ -15,8 +15,6 @@
 
 #include "session_ipc_adapter.h"
 
-#include <string>
-
 #include "ipc_skeleton.h"
 #include "softbus_error_code.h"
 #include "trans_log.h"

@@ -109,8 +109,8 @@ static void LnnOnBtAclStateChanged(int32_t listenerId, const SoftBusBtAddr *addr
 
 int32_t LnnInitBtStateMonitorImpl(void)
 {
-    g_btStateListenerId = SoftBusAddBtStateListener(&g_btStateListener);
-    if (g_btStateListenerId < 0) {
+    int32_t ret = SoftBusAddBtStateListener(&g_btStateListener, &g_btStateListenerId);
+    if (ret != SOFTBUS_OK) {
         LNN_LOGE(LNN_INIT, "monitor add bt state listener fail");
         return SOFTBUS_COMM_BLUETOOTH_ADD_STATE_LISTENER_ERR;
     }

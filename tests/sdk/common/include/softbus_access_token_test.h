@@ -16,11 +16,14 @@
 #ifndef SOFTBUS_ACCESS_TOKEN_TEST_H
 #define SOFTBUS_ACCESS_TOKEN_TEST_H
 
+#include <stdint.h>
+
 #ifdef __cplusplus
 extern "C" {
 #endif
 
-void SetAceessTokenPermission(const char *processName);
+void SetAccessTokenPermission(const char *processName);
+uint64_t SetTokenIdByProcessName(const char *processName);
 
 #ifdef __cplusplus
 }

@@ -13,6 +13,7 @@
  * limitations under the License.
  */
 
+#include <locale.h>
 #include "softbus_utils.h"
 
 #include <stdlib.h>
@@ -27,6 +28,8 @@
 #include "softbus_def.h"
 #include "softbus_error_code.h"
 
+#define WIDE_CHAR_MAX_LEN 8
+#define WIDE_STR_MAX_LEN 128
 
 #define MAC_BIT_ZERO 0
 #define MAC_BIT_ONE 1
@@ -52,6 +55,7 @@
 #define MAX_IP_LEN 48
 #define MAX_MAC_LEN 46
 #define MAX_HANDLE_TIMES 3600
+#define INT_TO_STRING_MAX_LEN 21
 
 #define ONE_BYTE_SIZE 8
 
@@ -100,12 +104,22 @@ int32_t RegisterTimeoutCallback(int32_t timerFunId, TimerFunCallback callback)
     if (callback == NULL || timerFunId >= SOFTBUS_MAX_TIMER_FUN_NUM ||
         timerFunId < SOFTBUS_CONN_TIMER_FUN) {
         COMM_LOGE(COMM_UTILS, "invalid param");
-        return SOFTBUS_ERR;
+        return SOFTBUS_INVALID_PARAM;
     }
     if (g_timerFunList[timerFunId] != NULL) {
         return SOFTBUS_OK;
     }
     g_timerFunList[timerFunId] = callback;
+    return SOFTBUS_OK;
+}
+
+int32_t UnRegisterTimeoutCallback(int32_t timerFunId)
+{
+    if (timerFunId >= SOFTBUS_MAX_TIMER_FUN_NUM || timerFunId < SOFTBUS_CONN_TIMER_FUN) {
+        COMM_LOGE(COMM_UTILS, "invalid param");
+        return SOFTBUS_INVALID_PARAM;
+    }
+    g_timerFunList[timerFunId] = NULL;
     return SOFTBUS_OK;
 }
 
@@ -638,7 +652,7 @@ int32_t GenerateStrHashAndConvertToHexString(const unsigned char *str, uint32_t 
     return SOFTBUS_OK;
 }
 
-static int32_t checkParamIsNull(uint8_t *buf, int32_t *offSet)
+static int32_t CheckParamIsNull(uint8_t *buf, int32_t *offSet)
 {
     if (buf == NULL) {
         COMM_LOGE(COMM_UTILS, "param buf is NULL");
@@ -653,7 +667,7 @@ static int32_t checkParamIsNull(uint8_t *buf, int32_t *offSet)
 
 int32_t WriteInt32ToBuf(uint8_t *buf, uint32_t dataLen, int32_t *offSet, int32_t data)
 {
-    int32_t ret = checkParamIsNull(buf, offSet);
+    int32_t ret = CheckParamIsNull(buf, offSet);
     if (ret != SOFTBUS_OK) {
         return ret;
     }
@@ -666,9 +680,24 @@ int32_t WriteInt32ToBuf(uint8_t *buf, uint32_t dataLen, int32_t *offSet, int32_t
     return SOFTBUS_OK;
 }
 
+int32_t WriteUint64ToBuf(uint8_t *buf, uint32_t bufLen, int32_t *offSet, uint64_t data)
+{
+    int32_t ret = CheckParamIsNull(buf, offSet);
+    if (ret != SOFTBUS_OK) {
+        return ret;
+    }
+    if (bufLen < *offSet + sizeof(data)) {
+        COMM_LOGE(COMM_UTILS, "write data is long than bufLen!");
+        return SOFTBUS_TRANS_INVALID_DATA_LENGTH;
+    }
+    *((uint64_t *)(buf + *offSet)) = data;
+    *offSet += sizeof(data);
+    return SOFTBUS_OK;
+}
+
 int32_t WriteUint8ToBuf(uint8_t *buf, uint32_t dataLen, int32_t *offSet, uint8_t data)
 {
-    int32_t ret = checkParamIsNull(buf, offSet);
+    int32_t ret = CheckParamIsNull(buf, offSet);
     if (ret != SOFTBUS_OK) {
         return ret;
     }
@@ -681,10 +710,35 @@ int32_t WriteUint8ToBuf(uint8_t *buf, uint32_t dataLen, int32_t *offSet, uint8_t
     return SOFTBUS_OK;
 }
 
+int32_t WriteStringToBuf(uint8_t *buf, uint32_t bufLen, int32_t *offSet, char *data, uint32_t dataLen)
+{
+    if (data == NULL || dataLen == 0) {
+        COMM_LOGE(COMM_UTILS, "param data is NULL");
+        return SOFTBUS_INVALID_PARAM;
+    }
+
+    int32_t ret = CheckParamIsNull(buf, offSet);
+    if (ret != SOFTBUS_OK) {
+        return ret;
+    }
+
+    if (bufLen < *offSet + dataLen + sizeof(dataLen)) {
+        COMM_LOGE(COMM_UTILS, "write data is long than dataLen!");
+        return SOFTBUS_TRANS_INVALID_DATA_LENGTH;
+    }
+    *((uint32_t *)(buf + *offSet)) = dataLen;
+    *offSet += sizeof(dataLen);
+    if (memcpy_s(buf + *offSet, bufLen - *offSet, data, dataLen) != EOK) {
+        COMM_LOGE(COMM_UTILS, "data copy failed!");
+        return SOFTBUS_MEM_ERR;
+    }
+    *offSet += dataLen;
+    return SOFTBUS_OK;
+}
 
 int32_t ReadInt32FromBuf(uint8_t *buf, uint32_t dataLen, int32_t *offSet, int32_t *data)
 {
-    int32_t ret = checkParamIsNull(buf, offSet);
+    int32_t ret = CheckParamIsNull(buf, offSet);
     if (ret != SOFTBUS_OK) {
         return ret;
     }
@@ -701,9 +755,28 @@ int32_t ReadInt32FromBuf(uint8_t *buf, uint32_t dataLen, int32_t *offSet, int32_
     return SOFTBUS_OK;
 }
 
+int32_t ReadUint64FromBuf(uint8_t *buf, uint32_t dataLen, int32_t *offSet, uint64_t *data)
+{
+    int32_t ret = CheckParamIsNull(buf, offSet);
+    if (ret != SOFTBUS_OK) {
+        return ret;
+    }
+    if (data == NULL) {
+        COMM_LOGE(COMM_UTILS, "param data is NULL");
+        return SOFTBUS_INVALID_PARAM;
+    }
+    if (dataLen < *offSet + sizeof(*data)) {
+        COMM_LOGE(COMM_UTILS, "Read data is long than dataLen!");
+        return SOFTBUS_TRANS_INVALID_DATA_LENGTH;
+    }
+    *data = *((uint64_t *)(buf + *offSet));
+    *offSet += sizeof(*data);
+    return SOFTBUS_OK;
+}
+
 int32_t ReadUint8FromBuf(uint8_t *buf, uint32_t dataLen, int32_t *offSet, uint8_t *data)
 {
-    int32_t ret = checkParamIsNull(buf, offSet);
+    int32_t ret = CheckParamIsNull(buf, offSet);
     if (ret != SOFTBUS_OK) {
         return ret;
     }
@@ -717,5 +790,191 @@ int32_t ReadUint8FromBuf(uint8_t *buf, uint32_t dataLen, int32_t *offSet, uint8_
     }
     *data = *(buf + *offSet);
     *offSet += sizeof(*data);
+    return SOFTBUS_OK;
+}
+
+int32_t ReadStringLenFormBuf(uint8_t *buf, uint32_t bufLen, int32_t *offSet, uint32_t *len)
+{
+    int32_t ret = CheckParamIsNull(buf, offSet);
+    if (ret != SOFTBUS_OK) {
+        return ret;
+    }
+    if (len == NULL) {
+        COMM_LOGE(COMM_UTILS, "param len is NULL");
+        return SOFTBUS_INVALID_PARAM;
+    }
+    if (bufLen < *offSet + sizeof(uint32_t)) {
+        COMM_LOGE(COMM_UTILS, "Read string len is long than bufLen!");
+        return SOFTBUS_TRANS_INVALID_DATA_LENGTH;
+    }
+    *len = *((uint32_t *)(buf + *offSet));
+    return SOFTBUS_OK;
+}
+
+int32_t ReadStringFromBuf(uint8_t *buf, uint32_t bufLen, int32_t *offSet, char *data, uint32_t dataLen)
+{
+    int32_t ret = CheckParamIsNull(buf, offSet);
+    if (ret != SOFTBUS_OK) {
+        return ret;
+    }
+    if (data == NULL) {
+        COMM_LOGE(COMM_UTILS, "param data is NULL");
+        return SOFTBUS_INVALID_PARAM;
+    }
+    if (bufLen < *offSet + sizeof(uint32_t)) {
+        COMM_LOGE(COMM_UTILS, "Read data is long than bufLen!");
+        return SOFTBUS_TRANS_INVALID_DATA_LENGTH;
+    }
+    uint32_t inDataLen = *((uint32_t *)(buf + *offSet));
+    *offSet += sizeof(uint32_t);
+    if (bufLen < *offSet + inDataLen) {
+        COMM_LOGE(COMM_UTILS, "Read data is long than bufLen!");
+        return SOFTBUS_TRANS_INVALID_DATA_LENGTH;
+    }
+    if (inDataLen > dataLen) {
+        COMM_LOGE(COMM_UTILS, "string data is long than datalen!");
+        return SOFTBUS_TRANS_INVALID_DATA_LENGTH;
+    }
+    if (memcpy_s(data, dataLen, buf + *offSet, inDataLen) != EOK) {
+        COMM_LOGE(COMM_UTILS, "data copy failed!");
+        return SOFTBUS_MEM_ERR;
+    }
+    *offSet += inDataLen;
+    return SOFTBUS_OK;
+}
+
+void EnableCapabilityBit(uint32_t *value, uint32_t offSet)
+{
+    if (value == NULL) {
+        COMM_LOGE(COMM_UTILS, "invalid param");
+        return;
+    }
+    *value |= (1 << offSet);
+}
+
+void DisableCapabilityBit(uint32_t *value, uint32_t offSet)
+{
+    if (value == NULL) {
+        COMM_LOGE(COMM_UTILS, "invalid param");
+        return;
+    }
+    *value &= ~(1 << offSet);
+}
+
+bool GetCapabilityBit(uint32_t value, uint32_t offSet)
+{
+    return (bool)((value >> offSet) & 0x1);
+}
+
+static int32_t SetLocale(char **localeBefore)
+{
+    *localeBefore = setlocale(LC_CTYPE, NULL);
+    if (*localeBefore == NULL) {
+        COMM_LOGW(COMM_UTILS, "get locale failed");
+    }
+
+    char *localeAfter = setlocale(LC_CTYPE, "C.UTF-8");
+    return (localeAfter != NULL) ? SOFTBUS_OK : SOFTBUS_DISCOVER_SET_LOCALE_FAILED;
+}
+
+static void RestoreLocale(const char *localeBefore)
+{
+    if (setlocale(LC_CTYPE, localeBefore) == NULL) {
+        COMM_LOGW(COMM_UTILS, "restore locale failed");
+    }
+}
+
+// Calculate the truncated length in wide characters, ensuring that the truncation is performed in wide character
+int32_t CalculateMbsTruncateSize(const char *multiByteStr, uint32_t capacity, uint32_t *truncatedSize)
+{
+    size_t multiByteStrLen = strlen(multiByteStr);
+    if (multiByteStrLen == 0) {
+        *truncatedSize = 0;
+        return SOFTBUS_OK;
+    }
+    if (multiByteStrLen > WIDE_STR_MAX_LEN) {
+        COMM_LOGE(COMM_UTILS, "multi byte str too long: %{public}zu", multiByteStrLen);
+        return SOFTBUS_INVALID_PARAM;
+    }
+
+    char *localeBefore = NULL;
+    int32_t ret = SetLocale(&localeBefore);
+    if (ret != SOFTBUS_OK) {
+        COMM_LOGE(COMM_UTILS, "set locale failed");
+        return ret;
+    }
+
+    // convert multi byte str to wide str
+    wchar_t wideStr[WIDE_STR_MAX_LEN] = {0};
+    size_t numConverted = mbstowcs(wideStr, multiByteStr, multiByteStrLen);
+    if (numConverted == 0 || numConverted > multiByteStrLen) {
+        COMM_LOGE(COMM_UTILS, "mbstowcs failed");
+        RestoreLocale(localeBefore);
+        return SOFTBUS_DISCOVER_CHAR_CONVERT_FAILED;
+    }
+
+    // truncate wide str until <= capacity
+    uint32_t truncateTotal = 0;
+    int32_t truncateIndex = (int32_t)numConverted - 1;
+    char multiByteChar[WIDE_CHAR_MAX_LEN] = {0};
+    while (capacity < multiByteStrLen - truncateTotal && truncateIndex >= 0) {
+        int32_t truncateCharLen = wctomb(multiByteChar, wideStr[truncateIndex]);
+        if (truncateCharLen <= 0) {
+            COMM_LOGE(COMM_UTILS, "wctomb failed on w_char. truncateIndex=%{public}d", truncateIndex);
+            RestoreLocale(localeBefore);
+            return SOFTBUS_DISCOVER_CHAR_CONVERT_FAILED;
+        }
+        truncateTotal += (uint32_t)truncateCharLen;
+        truncateIndex--;
+    }
+
+    *truncatedSize = (multiByteStrLen >= truncateTotal) ? (multiByteStrLen - truncateTotal) : 0;
+    RestoreLocale(localeBefore);
+    return SOFTBUS_OK;
+}
+
+#define SOFTBUS_DUMP_BYTES_MAX_LEN (256)
+void SoftbusDumpBytes(const char *message, const uint8_t *data, uint32_t dataLen)
+{
+    COMM_CHECK_AND_RETURN_LOGE(message, COMM_UTILS, "message is null");
+    COMM_CHECK_AND_RETURN_LOGE(data, COMM_UTILS, "data is null");
+    COMM_CHECK_AND_RETURN_LOGE(dataLen != 0, COMM_UTILS, "data len is 0");
+    COMM_CHECK_AND_RETURN_LOGE(
+        dataLen <= SOFTBUS_DUMP_BYTES_MAX_LEN, COMM_UTILS, "data len=%{public}u is too large", dataLen);
+    uint16_t hexLen = HEXIFY_LEN(dataLen);
+    char *hex = SoftBusCalloc(hexLen);
+    if (hex == NULL) {
+        COMM_LOGE(COMM_UTILS, "malloc hex fail");
+        return;
+    }
+    int32_t ret = ConvertBytesToHexString(hex, hexLen, data, dataLen);
+    if (ret != SOFTBUS_OK) {
+        COMM_LOGE(COMM_UTILS, "convert to hex string error=%{public}d", ret);
+        SoftBusFree(hex);
+        return;
+    }
+    COMM_LOGI(COMM_UTILS, "%{public}s dump %{public}u bytes: %{public}s", message, dataLen, hex);
+    SoftBusFree(hex);
+}
+
+int32_t AddNumberToSocketName(uint32_t num, const char *prefix, uint32_t preLen, char *socketName)
+{
+    if (prefix == NULL || socketName == NULL || preLen > (SESSION_NAME_SIZE_MAX - INT_TO_STRING_MAX_LEN)) {
+        COMM_LOGE(COMM_UTILS, "invalid param!");
+        return SOFTBUS_INVALID_PARAM;
+    }
+    if (strcpy_s(socketName, preLen, prefix) != EOK) {
+        COMM_LOGE(COMM_UTILS, "copy socketName prefix failed!");
+        return SOFTBUS_STRCPY_ERR;
+    }
+    char numStr[INT_TO_STRING_MAX_LEN];
+    if (sprintf_s(numStr, INT_TO_STRING_MAX_LEN, "%u", num) < 0) {
+        COMM_LOGE(COMM_UTILS, "sprintf_s fail!");
+        return SOFTBUS_SPRINTF_ERR;
+    }
+    if (strcat_s(socketName, INT_TO_STRING_MAX_LEN, numStr) != EOK) {
+        COMM_LOGE(COMM_UTILS, "strcat_s fail!");
+        return SOFTBUS_SPRINTF_ERR;
+    }
     return SOFTBUS_OK;
 }

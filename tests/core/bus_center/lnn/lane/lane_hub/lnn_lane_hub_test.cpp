@@ -18,9 +18,11 @@
 #include <securec.h>
 #include <thread>
 
+#include "dsoftbus_enhance_interface.h"
 #include "lnn_lane_hub_deps_mock.h"
 #include "lnn_lane_hub.h"
 #include "softbus_error_code.h"
+#include "g_enhance_lnn_func.h"
 
 namespace OHOS {
 using namespace testing::ext;
@@ -60,11 +62,15 @@ void LNNLaneHubTest::TearDown()
 */
 HWTEST_F(LNNLaneHubTest, LNN_INIT_LANE_HUB_TEST_001, TestSize.Level1)
 {
+    LnnEnhanceFuncList *pfnLnnEnhanceFuncList = LnnEnhanceFuncListGet();
+    pfnLnnEnhanceFuncList->lnnInitQos = LnnInitQos;
     NiceMock<LaneHubDepsInterfaceMock> laneHubMock;
     EXPECT_CALL(laneHubMock, InitLane).WillOnce(Return(SOFTBUS_OK));
     EXPECT_CALL(laneHubMock, LnnInitQos).WillOnce(Return(SOFTBUS_OK));
     EXPECT_CALL(laneHubMock, LnnInitTimeSync).WillOnce(Return(SOFTBUS_OK));
     EXPECT_CALL(laneHubMock, LnnInitHeartbeat).WillOnce(Return(SOFTBUS_OK));
+    EXPECT_CALL(laneHubMock, InitControlPlanePacked).WillOnce(Return(SOFTBUS_OK));
+    EXPECT_CALL(laneHubMock, SoftBusRegBusCenterVarDump).WillOnce(Return(SOFTBUS_OK));
 
     int32_t ret = LnnInitLaneHub();
     EXPECT_EQ(SOFTBUS_OK, ret);
@@ -94,6 +100,8 @@ HWTEST_F(LNNLaneHubTest, LNN_INIT_LANE_HUB_TEST_002, TestSize.Level1)
 */
 HWTEST_F(LNNLaneHubTest, LNN_INIT_LANE_HUB_TEST_003, TestSize.Level1)
 {
+    LnnEnhanceFuncList *pfnLnnEnhanceFuncList = LnnEnhanceFuncListGet();
+    pfnLnnEnhanceFuncList->lnnInitQos = LnnInitQos;
     NiceMock<LaneHubDepsInterfaceMock> laneHubMock;
     EXPECT_CALL(laneHubMock, InitLane).WillOnce(Return(SOFTBUS_OK));
     EXPECT_CALL(laneHubMock, LnnInitQos).WillOnce(Return(SOFTBUS_NO_INIT));
@@ -110,6 +118,8 @@ HWTEST_F(LNNLaneHubTest, LNN_INIT_LANE_HUB_TEST_003, TestSize.Level1)
 */
 HWTEST_F(LNNLaneHubTest, LNN_INIT_LANE_HUB_TEST_004, TestSize.Level1)
 {
+    LnnEnhanceFuncList *pfnLnnEnhanceFuncList = LnnEnhanceFuncListGet();
+    pfnLnnEnhanceFuncList->lnnInitQos = LnnInitQos;
     NiceMock<LaneHubDepsInterfaceMock> laneHubMock;
     EXPECT_CALL(laneHubMock, InitLane).WillOnce(Return(SOFTBUS_OK));
     EXPECT_CALL(laneHubMock, LnnInitQos).WillOnce(Return(SOFTBUS_OK));
@@ -127,6 +137,8 @@ HWTEST_F(LNNLaneHubTest, LNN_INIT_LANE_HUB_TEST_004, TestSize.Level1)
 */
 HWTEST_F(LNNLaneHubTest, LNN_INIT_LANE_HUB_TEST_005, TestSize.Level1)
 {
+    LnnEnhanceFuncList *pfnLnnEnhanceFuncList = LnnEnhanceFuncListGet();
+    pfnLnnEnhanceFuncList->lnnInitQos = LnnInitQos;
     NiceMock<LaneHubDepsInterfaceMock> laneHubMock;
     EXPECT_CALL(laneHubMock, InitLane).WillOnce(Return(SOFTBUS_OK));
     EXPECT_CALL(laneHubMock, LnnInitQos).WillOnce(Return(SOFTBUS_OK));
@@ -135,6 +147,49 @@ HWTEST_F(LNNLaneHubTest, LNN_INIT_LANE_HUB_TEST_005, TestSize.Level1)
 
     int32_t ret = LnnInitLaneHub();
     EXPECT_EQ(SOFTBUS_NO_INIT, ret);
+}
+
+/*
+* @tc.name: LNN_INIT_LANE_HUB_TEST_006
+* @tc.desc: LnnInitLaneHub test
+* @tc.type: FUNC
+* @tc.require:
+*/
+HWTEST_F(LNNLaneHubTest, LNN_INIT_LANE_HUB_TEST_006, TestSize.Level1)
+{
+    LnnEnhanceFuncList *pfnLnnEnhanceFuncList = LnnEnhanceFuncListGet();
+    pfnLnnEnhanceFuncList->lnnInitQos = LnnInitQos;
+    NiceMock<LaneHubDepsInterfaceMock> laneHubMock;
+    EXPECT_CALL(laneHubMock, InitLane).WillOnce(Return(SOFTBUS_OK));
+    EXPECT_CALL(laneHubMock, LnnInitQos).WillOnce(Return(SOFTBUS_OK));
+    EXPECT_CALL(laneHubMock, LnnInitTimeSync).WillOnce(Return(SOFTBUS_OK));
+    EXPECT_CALL(laneHubMock, LnnInitHeartbeat).WillOnce(Return(SOFTBUS_OK));
+    EXPECT_CALL(laneHubMock, InitControlPlanePacked).WillOnce(Return(SOFTBUS_NO_INIT));
+
+    int32_t ret = LnnInitLaneHub();
+    EXPECT_EQ(SOFTBUS_NO_INIT, ret);
+}
+
+/*
+* @tc.name: LNN_INIT_LANE_HUB_TEST_007
+* @tc.desc: LnnInitLaneHub test
+* @tc.type: FUNC
+* @tc.require:
+*/
+HWTEST_F(LNNLaneHubTest, LNN_INIT_LANE_HUB_TEST_007, TestSize.Level1)
+{
+    LnnEnhanceFuncList *pfnLnnEnhanceFuncList = LnnEnhanceFuncListGet();
+    pfnLnnEnhanceFuncList->lnnInitQos = LnnInitQos;
+    NiceMock<LaneHubDepsInterfaceMock> laneHubMock;
+    EXPECT_CALL(laneHubMock, InitLane).WillOnce(Return(SOFTBUS_OK));
+    EXPECT_CALL(laneHubMock, LnnInitQos).WillOnce(Return(SOFTBUS_OK));
+    EXPECT_CALL(laneHubMock, LnnInitTimeSync).WillOnce(Return(SOFTBUS_OK));
+    EXPECT_CALL(laneHubMock, LnnInitHeartbeat).WillOnce(Return(SOFTBUS_OK));
+    EXPECT_CALL(laneHubMock, InitControlPlanePacked).WillOnce(Return(SOFTBUS_OK));
+    EXPECT_CALL(laneHubMock, SoftBusRegBusCenterVarDump).WillOnce(Return(SOFTBUS_INVALID_PARAM));
+
+    int32_t ret = LnnInitLaneHub();
+    EXPECT_EQ(SOFTBUS_OK, ret);
 }
 
 /*

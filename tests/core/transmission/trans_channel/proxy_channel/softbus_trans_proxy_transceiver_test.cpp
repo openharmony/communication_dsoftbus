@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021-2024 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2025 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -13,27 +13,83 @@
  * limitations under the License.
  */
 
+#include <gmock/gmock.h>
 #include <securec.h>
 
 #include "message_handler.h"
 #include "session.h"
+#include "softbus_adapter_crypto.h"
 #include "softbus_conn_manager.h"
 #include "softbus_error_code.h"
 #include "softbus_feature_config.h"
 #include "softbus_json_utils.h"
 #include "softbus_protocol_def.h"
 #include "softbus_proxychannel_manager.h"
+#include "softbus_proxychannel_message.h"
 #include "softbus_proxychannel_transceiver.c"
-#include "softbus_proxychannel_transceiver.h"
 #include "softbus_utils.h"
-#include "gtest/gtest.h"
+#include "trans_channel_common.h"
 
 using namespace testing;
 using namespace testing::ext;
 
+class SoftbusTransProxyTransceiverInterface {
+public:
+
+    virtual int32_t TransProxyParseMessage(char *data, int32_t len, ProxyMessage *msg, AuthHandle *auth) = 0;
+
+    virtual int32_t SoftBusGenerateStrHash(const unsigned char *str, uint32_t len, unsigned char *hash) = 0;
+};
+
+class SoftbusTransProxyTransceiverMock : public SoftbusTransProxyTransceiverInterface {
+public:
+    static SoftbusTransProxyTransceiverMock &GetMockObj(void)
+    {
+        return *gmock_;
+    }
+    SoftbusTransProxyTransceiverMock();
+    ~SoftbusTransProxyTransceiverMock();
+
+    MOCK_METHOD(int32_t, TransProxyParseMessage,
+        (char *data, int32_t len, ProxyMessage *msg, AuthHandle *auth), (override));
+    
+    MOCK_METHOD(int32_t, SoftBusGenerateStrHash,
+        (const unsigned char *str, uint32_t len, unsigned char *hash), (override));
+
+private:
+    static SoftbusTransProxyTransceiverMock *gmock_;
+};
+
+SoftbusTransProxyTransceiverMock *SoftbusTransProxyTransceiverMock::gmock_;
+
+SoftbusTransProxyTransceiverMock::SoftbusTransProxyTransceiverMock()
+{
+    gmock_ = this;
+}
+
+SoftbusTransProxyTransceiverMock::~SoftbusTransProxyTransceiverMock()
+{
+    gmock_ = nullptr;
+}
+
+int32_t TransProxyParseMessage(char *data, int32_t len, ProxyMessage *msg, AuthHandle *auth)
+{
+    std::cout << "TransProxyParseMessage mock calling enter" << std::endl;
+    return SoftbusTransProxyTransceiverMock::GetMockObj().TransProxyParseMessage(data, len, msg, auth);
+}
+
+int32_t SoftBusGenerateStrHash(const unsigned char *str, uint32_t len, unsigned char *hash)
+{
+    std::cout << "SoftBusGenerateStrHash mock calling enter" << std::endl;
+    return SoftbusTransProxyTransceiverMock::GetMockObj().SoftBusGenerateStrHash(str, len, hash);
+}
+
 namespace OHOS {
 
 #define TEST_STRING_IDENTITY "11"
+#define TEST_VALID_CHANNEL_ID 1
+#define TEST_DATA_LEN 128
+#define TEST_DATALEN 10
 
 class SoftbusProxyTransceiverTest : public testing::Test {
 public:
@@ -141,6 +197,25 @@ HWTEST_F(SoftbusProxyTransceiverTest, TransProxyOpenConnChannelTest002, TestSize
 }
 
 /**
+ * @tc.name: TransProxyOpenConnChannelTest003
+ * @tc.desc: test proxy open exist channel.
+ * @tc.type: FUNC
+ * @tc.require:
+ */
+HWTEST_F(SoftbusProxyTransceiverTest, TransProxyOpenConnChannelTest003, TestSize.Level1)
+{
+    AppInfo appInfo;
+    appInfo.appType = APP_TYPE_AUTH;
+
+    int32_t channelId = 2058;
+    ConnectOption connInfo;
+    connInfo.type = CONNECT_TCP;
+
+    int32_t ret = TransProxyOpenConnChannel(&appInfo, &connInfo, &channelId);
+    EXPECT_EQ(ret, SOFTBUS_TRANS_PROXY_CONN_REPEAT);
+}
+
+/**
  * @tc.name: TransProxyCloseConnChannelTest001
  * @tc.desc: test proxy close conn channel.
  * @tc.type: FUNC
@@ -159,6 +234,38 @@ HWTEST_F(SoftbusProxyTransceiverTest, TransProxyCloseConnChannelTest001, TestSiz
     EXPECT_EQ(SOFTBUS_OK, ret);
     ret = TransProxyCloseConnChannel(1, isServer);
     EXPECT_EQ(SOFTBUS_OK, ret);
+}
+
+/**
+ * @tc.name: TransProxyCloseConnChannelTest002
+ * @tc.desc: test proxy close conn channel.
+ * @tc.type: FUNC
+ * @tc.require:
+ */
+HWTEST_F(SoftbusProxyTransceiverTest, TransProxyCloseConnChannelTest002, TestSize.Level1)
+{
+    g_proxyConnectionList = CreateSoftBusList();
+    EXPECT_NE(nullptr, g_proxyConnectionList);
+    ProxyConnInfo *connChan = reinterpret_cast<ProxyConnInfo *>(SoftBusCalloc(sizeof(ProxyConnInfo)));
+    EXPECT_NE(nullptr, connChan);
+    connChan->isServerSide = false;
+    ConnectOption connectOption;
+    (void)memset_s(&connectOption, sizeof(ConnectOption), 0, sizeof(ConnectOption));
+    connectOption.type = CONNECT_BR;
+    connChan->connInfo = connectOption;
+    int32_t ret = TransAddConnItem(connChan);
+    EXPECT_EQ(SOFTBUS_OK, ret);
+
+    ConnectionInfo tcpInfo;
+    tcpInfo.type = CONNECT_TCP;
+    bool isServer = false;
+    TransCreateConnByConnId(TEST_VALID_CHANNEL_ID, isServer);
+
+    ret = TransProxyCloseConnChannel(TEST_VALID_CHANNEL_ID, isServer);
+    EXPECT_EQ(SOFTBUS_OK, ret);
+    SoftBusFree(connChan);
+    DestroySoftBusList(g_proxyConnectionList);
+    g_proxyConnectionList = nullptr;
 }
 
 /**
@@ -192,7 +299,7 @@ HWTEST_F(SoftbusProxyTransceiverTest, TransProxyGetConnInfoByConnIdTest001, Test
 {
     ConnectOption connOptInfo;
 
-    int32_t ret = TransProxyGetConnInfoByConnId(3, NULL);
+    int32_t ret = TransProxyGetConnInfoByConnId(3, nullptr);
     EXPECT_NE(SOFTBUS_OK, ret);
     ret = TransProxyGetConnInfoByConnId(100, &connOptInfo);
     EXPECT_NE(SOFTBUS_OK, ret);
@@ -210,7 +317,7 @@ HWTEST_F(SoftbusProxyTransceiverTest, TransProxyGetConnInfoByConnIdTest001, Test
 HWTEST_F(SoftbusProxyTransceiverTest, TransProxyTransSendMsgTest001, TestSize.Level1)
 {
     uint32_t connectionId = 1;
-    uint8_t *buf = NULL;
+    uint8_t *buf = nullptr;
     uint32_t len = 1;
     int32_t priority = 0;
     int32_t pid = 0;
@@ -282,6 +389,84 @@ HWTEST_F(SoftbusProxyTransceiverTest, CompareConnectOption001, TestSize.Level1)
 }
 
 /**
+ * @tc.name: CompareConnectOptionTest002
+ * @tc.desc: test CompareConnectOption.
+ * @tc.type: FUNC
+ * @tc.require:
+ */
+HWTEST_F(SoftbusProxyTransceiverTest, CompareConnectOptionTest002, TestSize.Level1)
+{
+    ConnectOption connInfo;
+    connInfo.type = CONNECT_BR;
+    (void)strcpy_s(connInfo.brOption.brMac, BT_MAC_LEN, "hofdhfhwqofqho");
+
+    ConnectOption itemConnInfo;
+    (void)strcpy_s(itemConnInfo.brOption.brMac, BT_MAC_LEN, "ngfjrpgjrhp");
+
+    bool ret = CompareConnectOption(&itemConnInfo, &connInfo);
+    EXPECT_EQ(ret, false);
+}
+
+/**
+ * @tc.name: CompareConnectOptionTest003
+ * @tc.desc: test CompareConnectOption.
+ * @tc.type: FUNC
+ * @tc.require:
+ */
+HWTEST_F(SoftbusProxyTransceiverTest, CompareConnectOptionTest003, TestSize.Level1)
+{
+    ConnectOption connInfo = {
+        .type = CONNECT_SLE_DIRECT,
+        .sleDirectOption.protoType = SLE_SSAP
+    };
+    (void)strcpy_s(connInfo.sleDirectOption.networkId, NETWORK_ID_BUF_LEN, "1284456419466");
+
+    ConnectOption itemConnInfo;
+    itemConnInfo.sleDirectOption.protoType = SLE_SSAP;
+    (void)strcpy_s(itemConnInfo.sleDirectOption.networkId, NETWORK_ID_BUF_LEN, "1284456419466");
+
+    bool ret = CompareConnectOption(&itemConnInfo, &connInfo);
+    EXPECT_EQ(ret, true);
+}
+
+/**
+ * @tc.name: CompareConnectOptionTest004
+ * @tc.desc: test CompareConnectOption.
+ * @tc.type: FUNC
+ * @tc.require:
+ */
+HWTEST_F(SoftbusProxyTransceiverTest, CompareConnectOptionTest004, TestSize.Level1)
+{
+    ConnectOption connInfo = {
+        .type = CONNECT_SLE_DIRECT
+    };
+    (void)strcpy_s(connInfo.sleDirectOption.networkId, NETWORK_ID_BUF_LEN, "1284456419466");
+
+    ConnectOption itemConnInfo;
+    (void)strcpy_s(itemConnInfo.sleDirectOption.networkId, NETWORK_ID_BUF_LEN, "148754644566");
+
+    bool ret = CompareConnectOption(&itemConnInfo, &connInfo);
+    EXPECT_EQ(ret, false);
+}
+
+/**
+ * @tc.name: CompareConnectOptionTest005
+ * @tc.desc: test CompareConnectOption.
+ * @tc.type: FUNC
+ * @tc.require:
+ */
+HWTEST_F(SoftbusProxyTransceiverTest, CompareConnectOptionTest005, TestSize.Level1)
+{
+    ConnectOption itemConnInfo;
+    ConnectOption connInfo = {
+        .type = CONNECT_TYPE_MAX
+    };
+
+    bool ret = CompareConnectOption(&itemConnInfo, &connInfo);
+    EXPECT_EQ(ret, false);
+}
+
+/**
  * @tc.name: TransProxyConnExistProc001
  * @tc.desc: test TransProxyConnExistProc.
  * @tc.type: FUNC
@@ -289,14 +474,12 @@ HWTEST_F(SoftbusProxyTransceiverTest, CompareConnectOption001, TestSize.Level1)
  */
 HWTEST_F(SoftbusProxyTransceiverTest, TransProxyConnExistProc001, TestSize.Level1)
 {
-    ProxyChannelInfo chan;
     ConnectOption connInfo;
     (void)memset_s(&connInfo, sizeof(ConnectOption), 1, sizeof(ConnectOption));
     int32_t chanNewId = 1;
     bool isServer = false;
     TransCreateConnByConnId(1, isServer);
-    chan.isServer = false;
-    int32_t ret = TransProxyConnExistProc(&chan, chanNewId, &connInfo);
+    int32_t ret = TransProxyConnExistProc(isServer, chanNewId, &connInfo);
     EXPECT_EQ(SOFTBUS_TRANS_PROXY_CONN_ADD_REF_FAILED, ret);
 }
 
@@ -454,6 +637,122 @@ HWTEST_F(SoftbusProxyTransceiverTest, TransDecConnRefByConnId001, TestSize.Level
 }
 
 /**
+ * @tc.name: TransDecConnRefByConnId002
+ * @tc.desc: test TransDecConnRefByConnId.
+ * @tc.type: FUNC
+ * @tc.require:
+ */
+HWTEST_F(SoftbusProxyTransceiverTest, TransDecConnRefByConnId002, TestSize.Level1)
+{
+    ProxyConnInfo *chan = reinterpret_cast<ProxyConnInfo *>(SoftBusCalloc(sizeof(ProxyConnInfo)));
+    EXPECT_NE(nullptr, chan);
+    chan->connId = 123; // test value
+    chan->isServerSide = true;
+    chan->ref = 1;
+
+    g_proxyConnectionList = CreateSoftBusList();
+    EXPECT_NE(nullptr, g_proxyConnectionList);
+    ConnectOption connectOption;
+    (void)memset_s(&connectOption, sizeof(ConnectOption), 0, sizeof(ConnectOption));
+    connectOption.type = CONNECT_BR;
+    chan->connInfo = connectOption;
+    int32_t ret = TransAddConnItem(chan);
+    EXPECT_EQ(SOFTBUS_OK, ret);
+    ret = TransDecConnRefByConnId(123, true); // test value
+    EXPECT_EQ(SOFTBUS_OK, ret);
+
+    DestroySoftBusList(g_proxyConnectionList);
+    g_proxyConnectionList = nullptr;
+}
+
+/**
+ * @tc.name: TransDecConnRefByConnId003
+ * @tc.desc: test TransDecConnRefByConnId.
+ * @tc.type: FUNC
+ * @tc.require:
+ */
+HWTEST_F(SoftbusProxyTransceiverTest, TransDecConnRefByConnId003, TestSize.Level1)
+{
+    ProxyConnInfo *chan = reinterpret_cast<ProxyConnInfo *>(SoftBusCalloc(sizeof(ProxyConnInfo)));
+    EXPECT_NE(nullptr, chan);
+    chan->connId = 123; // test value
+    chan->isServerSide = true;
+    chan->ref = 5; // test value
+
+    g_proxyConnectionList = CreateSoftBusList();
+    EXPECT_NE(nullptr, g_proxyConnectionList);
+    ConnectOption connectOption;
+    (void)memset_s(&connectOption, sizeof(ConnectOption), 0, sizeof(ConnectOption));
+    connectOption.type = CONNECT_BR;
+    chan->connInfo = connectOption;
+    int32_t ret = TransAddConnItem(chan);
+    EXPECT_EQ(SOFTBUS_OK, ret);
+
+    ret = TransAddConnItem(chan);
+    EXPECT_EQ(SOFTBUS_TRANS_NOT_MATCH, ret);
+    ret = TransDecConnRefByConnId(123, true); // test value
+    EXPECT_EQ(SOFTBUS_TRANS_NOT_MATCH, ret);
+
+    SoftBusFree(chan);
+    DestroySoftBusList(g_proxyConnectionList);
+    g_proxyConnectionList = nullptr;
+}
+
+/**
+ * @tc.name: TransProxyPostOpenCloseMsgToLoop001
+ * @tc.desc: test TransDecConnRefByConnId.
+ * @tc.type: FUNC
+ * @tc.require:
+ */
+HWTEST_F(SoftbusProxyTransceiverTest, TransProxyPostOpenCloseMsgToLoop001, TestSize.Level1)
+{
+    int32_t ret = TransAddConnItem(nullptr);
+    EXPECT_EQ(SOFTBUS_INVALID_PARAM, ret);
+
+    ProxyConnInfo *chan = reinterpret_cast<ProxyConnInfo *>(SoftBusCalloc(sizeof(ProxyConnInfo)));
+    EXPECT_NE(nullptr, chan);
+    chan->connId = 10; // test value
+    chan->requestId = 10; // test value
+    chan->state = PROXY_CHANNEL_STATUS_PYH_CONNECTING;
+    chan->isServerSide = true;
+    chan->ref = 1;
+
+    g_proxyConnectionList = CreateSoftBusList();
+    EXPECT_NE(nullptr, g_proxyConnectionList);
+    ConnectOption connectOption;
+    (void)memset_s(&connectOption, sizeof(ConnectOption), 0, sizeof(ConnectOption));
+    connectOption.type = CONNECT_BR;
+    chan->connInfo = connectOption;
+    ret = TransAddConnItem(chan);
+    EXPECT_EQ(SOFTBUS_OK, ret);
+
+    uint32_t state = 1;
+    ret = TransSetConnStateByReqId(chan->requestId, chan->connId, state);
+    EXPECT_EQ(SOFTBUS_OK, ret);
+
+    SoftBusFree(chan);
+    DestroySoftBusList(g_proxyConnectionList);
+    g_proxyConnectionList = nullptr;
+}
+
+/**
+ * @tc.name: CheckIsProxyAuthChannel001
+ * @tc.desc: test TransDecConnRefByConnId.
+ * @tc.type: FUNC
+ * @tc.require:
+ */
+HWTEST_F(SoftbusProxyTransceiverTest, CheckIsProxyAuthChannel001, TestSize.Level1)
+{
+    int32_t ret = CheckIsProxyAuthChannel(nullptr);
+    EXPECT_EQ(SOFTBUS_INVALID_PARAM, ret);
+
+    ConnectOption connectOption;
+    (void)memset_s(&connectOption, sizeof(ConnectOption), 0, sizeof(ConnectOption));
+    ret = CheckIsProxyAuthChannel(&connectOption);
+    EXPECT_EQ(SOFTBUS_NO_INIT, ret);
+}
+
+/**
  * @tc.name: TransAddConnRefByConnId001
  * @tc.desc: test TransAddConnRefByConnId.
  * @tc.type: FUNC
@@ -519,6 +818,37 @@ HWTEST_F(SoftbusProxyTransceiverTest, TransAddConnItem001, TestSize.Level1)
 }
 
 /**
+ * @tc.name: TransAddConnItem002
+ * @tc.desc: test TransAddConnItem.
+ * @tc.type: FUNC
+ * @tc.require:
+ */
+HWTEST_F(SoftbusProxyTransceiverTest, TransAddConnItem002, TestSize.Level1)
+{
+    g_proxyConnectionList = CreateSoftBusList();
+    EXPECT_NE(nullptr, g_proxyConnectionList);
+    ProxyConnInfo *connChanSrc = reinterpret_cast<ProxyConnInfo *>(SoftBusCalloc(sizeof(ProxyConnInfo)));
+    connChanSrc->isServerSide = 1;
+    connChanSrc->state = PROXY_CHANNEL_STATUS_PYH_CONNECTING;
+    int32_t ret = TransAddConnItem(connChanSrc);
+    EXPECT_EQ(SOFTBUS_OK, ret);
+
+    ProxyConnInfo *connChanDst = reinterpret_cast<ProxyConnInfo *>(SoftBusCalloc(sizeof(ProxyConnInfo)));
+    EXPECT_NE(nullptr, connChanDst);
+    connChanDst->isServerSide = false;
+    ConnectOption connectOption;
+    (void)memset_s(&connectOption, sizeof(ConnectOption), 0, sizeof(ConnectOption));
+    connectOption.type = CONNECT_BR;
+    connChanDst->connInfo = connectOption;
+    ret = TransAddConnItem(connChanDst);
+    EXPECT_EQ(SOFTBUS_OK, ret);
+    SoftBusFree(connChanDst);
+    SoftBusFree(connChanSrc);
+    DestroySoftBusList(g_proxyConnectionList);
+    g_proxyConnectionList = nullptr;
+}
+
+/**
  * @tc.name: TransConnInfoToConnOpt001
  * @tc.desc: test TransConnInfoToConnOpt
  * @tc.type: FUNC
@@ -536,6 +866,24 @@ HWTEST_F(SoftbusProxyTransceiverTest, TransConnInfoToConnOpt001, TestSize.Level1
     connInfo.type = CONNECT_P2P;
     TransConnInfoToConnOpt(&connInfo, &connOption);
     EXPECT_EQ(nullptr, g_proxyConnectionList);
+}
+
+/**
+ * @tc.name: TransConnInfoToConnOpt002
+ * @tc.desc: test TransConnInfoToConnOpt
+ * @tc.type: FUNC
+ * @tc.require:
+ */
+HWTEST_F(SoftbusProxyTransceiverTest, TransConnInfoToConnOpt002, TestSize.Level1)
+{
+    ConnectionInfo connInfo = {
+        .type = CONNECT_SLE
+    };
+    (void)strcpy_s(connInfo.sleInfo.address, BT_MAC_LEN, "Fjhfwofwho");
+    (void)strcpy_s(connInfo.sleInfo.networkId, NETWORK_ID_BUF_LEN, "165489675616");
+    ConnectOption connOption;
+
+    EXPECT_NO_FATAL_FAILURE(TransConnInfoToConnOpt(&connInfo, &connOption));
 }
 
 /**
@@ -635,7 +983,7 @@ HWTEST_F(SoftbusProxyTransceiverTest, TransProxySendBadKeyMessage001, TestSize.L
     memset_s(&msg, sizeof(ProxyMessage), 0, sizeof(ProxyMessage));
     const char *identity = TEST_STRING_IDENTITY;
     msg.data = TransProxyPackIdentity(identity);
-    msg.dateLen = 9;
+    msg.dataLen = 9;
     AuthHandle authHandle = { .authId = AUTH_INVALID_ID };
     int32_t ret = TransProxySendBadKeyMessage(&msg, &authHandle);
     EXPECT_EQ(SOFTBUS_CONN_MANAGER_TYPE_NOT_SUPPORT, ret);
@@ -742,4 +1090,279 @@ HWTEST_F(SoftbusProxyTransceiverTest, TransProxyLoopMsgHandler001, TestSize.Leve
     TransProxyLoopMsgHandler(msg);
 }
 
+/**
+ * @tc.name: TransProxyPostResetPeerMsgToLoopTest001
+ * @tc.desc: TransProxyPostResetPeerMsgToLoop
+ * @tc.type: FUNC
+ * @tc.require:
+ */
+HWTEST_F(SoftbusProxyTransceiverTest, TransProxyPostResetPeerMsgToLoopTest001, TestSize.Level1)
+{
+    EXPECT_NO_FATAL_FAILURE(TransProxyPostResetPeerMsgToLoop(nullptr));
+}
+
+/**
+ * @tc.name: TransProxyPostDisConnectMsgToLoopTest001
+ * @tc.desc: TransProxyPostDisConnectMsgToLoop
+ * @tc.type: FUNC
+ * @tc.require:
+ */
+HWTEST_F(SoftbusProxyTransceiverTest, TransProxyPostDisConnectMsgToLoopTest001, TestSize.Level1)
+{
+    uint32_t connId = 1032;
+    EXPECT_NO_FATAL_FAILURE(TransProxyPostDisConnectMsgToLoop(connId, true, nullptr));
+}
+
+/**
+ * @tc.name: TransProxyOnDisConnectTest001
+ * @tc.desc: TransProxyOnDisConnect
+ * @tc.type: FUNC
+ * @tc.require:
+ */
+HWTEST_F(SoftbusProxyTransceiverTest, TransProxyOnDisConnectTest001, TestSize.Level1)
+{
+    uint32_t connId = 1032;
+    ConnectionInfo *connInfo = static_cast<ConnectionInfo *>(SoftBusCalloc(sizeof(ConnectionInfo)));
+
+    EXPECT_NO_FATAL_FAILURE(TransProxyOnDisConnect(connId, connInfo));
+    SoftBusFree(connInfo);
+}
+
+/**
+ * @tc.name: TransReportStartConnectEventTest001
+ * @tc.desc: TransReportStartConnectEvent
+ * @tc.type: FUNC
+ * @tc.require:
+ */
+HWTEST_F(SoftbusProxyTransceiverTest, TransReportStartConnectEventTest001, TestSize.Level1)
+{
+    AppInfo appInfo = {
+        .appType = APP_TYPE_AUTH,
+    };
+    (void)strcpy_s(appInfo.myData.sessionName, SESSION_NAME_SIZE_MAX, "com.wanna.yeel");
+
+    int32_t channelId = 1024;
+    ConnectOption connInfo {
+        .type = CONNECT_SLE_DIRECT
+    };
+
+    EXPECT_NO_FATAL_FAILURE(TransReportStartConnectEvent(&appInfo, &connInfo, channelId));
+}
+
+/**
+ * @tc.name: TransProxyOnDataReceivedTest001
+ * @tc.desc: TransProxyOnDataReceived
+ * @tc.type: FUNC
+ * @tc.require:
+ */
+HWTEST_F(SoftbusProxyTransceiverTest, TransProxyOnDataReceivedTest001, TestSize.Level1)
+{
+    uint32_t connectionId = 304513;
+    int64_t seq = 121;
+    
+    EXPECT_NO_FATAL_FAILURE(
+        TransProxyOnDataReceived(connectionId, MODULE_BLUETOOTH_MANAGER, seq, nullptr, TEST_DATA_LEN));
+}
+
+/**
+ * @tc.name: TransProxyOnDataReceivedTest002
+ * @tc.desc: TransProxyOnDataReceived
+ * @tc.type: FUNC
+ * @tc.require:
+ */
+HWTEST_F(SoftbusProxyTransceiverTest, TransProxyOnDataReceivedTest002, TestSize.Level1)
+{
+    uint32_t connectionId = 304513;
+    int64_t seq = 121;
+    char data[TEST_DATA_LEN];
+    
+    EXPECT_NO_FATAL_FAILURE(
+        TransProxyOnDataReceived(connectionId, MODULE_BLUETOOTH_MANAGER, seq, data, TEST_DATA_LEN));
+}
+
+/**
+ * @tc.name: TransProxyOnDataReceivedTest003
+ * @tc.desc: TransProxyOnDataReceived
+ * @tc.type: FUNC
+ * @tc.require:
+ */
+HWTEST_F(SoftbusProxyTransceiverTest, TransProxyOnDataReceivedTest003, TestSize.Level1)
+{
+    uint32_t connectionId = 304513;
+    int64_t seq = 121;
+    char data[TEST_DATA_LEN];
+    
+    ProxyMessage msg;
+    msg.msgHead.type = PROXYCHANNEL_MSG_TYPE_HANDSHAKE;
+    SoftbusTransProxyTransceiverMock transceiverMockObj;
+    EXPECT_CALL(transceiverMockObj, TransProxyParseMessage)
+        .WillRepeatedly(DoAll(SetArgPointee<2>(msg), Return(SOFTBUS_AUTH_NOT_FOUND)));
+
+    EXPECT_NO_FATAL_FAILURE(
+        TransProxyOnDataReceived(connectionId, MODULE_PROXY_CHANNEL, seq, data, TEST_DATA_LEN));
+}
+
+/**
+ * @tc.name: TransProxyOnDataReceivedTest004
+ * @tc.desc: TransProxyOnDataReceived
+ * @tc.type: FUNC
+ * @tc.require:
+ */
+HWTEST_F(SoftbusProxyTransceiverTest, TransProxyOnDataReceivedTest004, TestSize.Level1)
+{
+    uint32_t connectionId = 304513;
+    int64_t seq = 121;
+    char data[TEST_DATA_LEN];
+    
+    ProxyMessage msg;
+    msg.msgHead.type = PROXYCHANNEL_MSG_TYPE_HANDSHAKE;
+    SoftbusTransProxyTransceiverMock transceiverMockObj;
+    EXPECT_CALL(transceiverMockObj, TransProxyParseMessage)
+        .WillRepeatedly(DoAll(SetArgPointee<2>(msg), Return(SOFTBUS_DECRYPT_ERR)));
+
+    EXPECT_NO_FATAL_FAILURE(
+        TransProxyOnDataReceived(connectionId, MODULE_PROXY_CHANNEL, seq, data, TEST_DATA_LEN));
+}
+
+/**
+ * @tc.name: TransProxyOnDataReceivedTest005
+ * @tc.desc: TransProxyOnDataReceived
+ * @tc.type: FUNC
+ * @tc.require:
+ */
+HWTEST_F(SoftbusProxyTransceiverTest, TransProxyOnDataReceivedTest005, TestSize.Level1)
+{
+    uint32_t connectionId = 304513;
+    int64_t seq = 121;
+    char data[TEST_DATA_LEN];
+    
+    SoftbusTransProxyTransceiverMock transceiverMockObj;
+    EXPECT_CALL(transceiverMockObj, TransProxyParseMessage).WillRepeatedly(Return(SOFTBUS_TRANS_RECV_DATA_OVER_LEN));
+
+    EXPECT_NO_FATAL_FAILURE(
+        TransProxyOnDataReceived(connectionId, MODULE_PROXY_CHANNEL, seq, data, TEST_DATA_LEN));
+}
+
+/**
+ * @tc.name: TransProxyOnDataReceivedTest006
+ * @tc.desc: TransProxyOnDataReceived
+ * @tc.type: FUNC
+ * @tc.require:
+ */
+HWTEST_F(SoftbusProxyTransceiverTest, TransProxyOnDataReceivedTest006, TestSize.Level1)
+{
+    uint32_t connectionId = 304513;
+    int64_t seq = 121;
+    char data[TEST_DATA_LEN];
+    
+    SoftbusTransProxyTransceiverMock transceiverMockObj;
+    EXPECT_CALL(transceiverMockObj, TransProxyParseMessage).WillRepeatedly(Return(SOFTBUS_OK));
+
+    EXPECT_NO_FATAL_FAILURE(
+        TransProxyOnDataReceived(connectionId, MODULE_PROXY_CHANNEL, seq, data, TEST_DATA_LEN));
+}
+
+/**
+ * @tc.name: TransProxyUdpateNewPeerUdidHashTest001
+ * @tc.desc: TransProxyUdpateNewPeerUdidHash
+ * @tc.type: FUNC
+ * @tc.require:
+ */
+HWTEST_F(SoftbusProxyTransceiverTest, TransProxyUdpateNewPeerUdidHashTest001, TestSize.Level1)
+{
+    const char *deviceId = "hnfwoeiuyfownfoplqwrfh23092";
+    ConnectOption connOpt;
+    
+    SoftbusTransProxyTransceiverMock transceiverMockObj;
+    EXPECT_CALL(transceiverMockObj, SoftBusGenerateStrHash).WillOnce(Return(SOFTBUS_ENCRYPT_ERR));
+
+    int32_t ret = TransProxyUdpateNewPeerUdidHash(deviceId, &connOpt);
+    EXPECT_EQ(ret, SOFTBUS_ENCRYPT_ERR);
+}
+
+/**
+ * @tc.name: TransProxyUdpateNewPeerUdidHashTest002
+ * @tc.desc: TransProxyUdpateNewPeerUdidHash
+ * @tc.type: FUNC
+ * @tc.require:
+ */
+HWTEST_F(SoftbusProxyTransceiverTest, TransProxyUdpateNewPeerUdidHashTest002, TestSize.Level1)
+{
+    ConnectOption connOpt;
+    const char *deviceId = "hnfwoeiuyfownfoplqwrfh23092";
+    char udidHash[UDID_HASH_LEN] = { 0 };
+    (void)strcpy_s(udidHash, UDID_HASH_LEN, "nhfwwoafhweo");
+
+    SoftbusTransProxyTransceiverMock transceiverMockObj;
+    EXPECT_CALL(transceiverMockObj, SoftBusGenerateStrHash)
+        .WillRepeatedly(DoAll(SetArgPointee<2>(*udidHash), Return(SOFTBUS_OK)));
+
+    int32_t ret = TransProxyUdpateNewPeerUdidHash(deviceId, &connOpt);
+    EXPECT_EQ(ret, SOFTBUS_OK);
+}
+
+/**
+ * @tc.name: TransProxyResetAndCloseConnTest001
+ * @tc.desc: TransProxyResetAndCloseConn
+ * @tc.type: FUNC
+ * @tc.require:
+ */
+HWTEST_F(SoftbusProxyTransceiverTest, TransProxyResetAndCloseConnTest001, TestSize.Level1)
+{
+    g_proxyConnectionList = CreateSoftBusList();
+    ASSERT_TRUE(g_proxyConnectionList != nullptr);
+    g_proxyConnectionList->cnt = 1;
+
+    ProxyConnInfo *proxyConnInfo = static_cast<ProxyConnInfo *>(SoftBusCalloc(sizeof(ProxyConnInfo)));
+    ASSERT_TRUE(proxyConnInfo != nullptr);
+    proxyConnInfo->connId = 1234;
+    proxyConnInfo->isServerSide = true;
+    proxyConnInfo->ref = 1;
+
+    ListAdd(&(g_proxyConnectionList->list), &(proxyConnInfo->node));
+
+    ProxyChannelInfo chan = {
+        .connId = 1234,
+        .isServer = true,
+        .deviceTypeIsWinpc = true,
+        .myId = 4380,
+        .peerId = 2599,
+        .appInfo.appType = APP_TYPE_AUTH
+    };
+
+    int32_t ret = TransProxyResetAndCloseConn(&chan);
+    EXPECT_EQ(ret, SOFTBUS_OK);
+
+    chan.isServer = false;
+    ret = TransProxyResetAndCloseConn(&chan);
+    EXPECT_EQ(ret, SOFTBUS_OK);
+
+    chan.deviceTypeIsWinpc = false;
+    ret = TransProxyResetAndCloseConn(&chan);
+    EXPECT_EQ(ret, SOFTBUS_OK);
+}
+
+/**
+ * @tc.name: TransProxyOnDataReceived001
+ * @tc.desc: test TransProxyOnDataReceived.
+ * @tc.type: FUNC
+ * @tc.require:
+ */
+HWTEST_F(SoftbusProxyTransceiverTest, TransProxyOnDataReceived001, TestSize.Level1)
+{
+    ProxyMessageShortHead msgHead = { 0 };
+    char data[TEST_DATALEN];
+    int32_t len = TEST_DATALEN;
+    msgHead.type = (PROXYCHANNEL_MSG_TYPE_D2D & FOUR_BIT_MASK) | (VERSION << VERSION_SHIFT);
+    msgHead.myId = 1;
+    msgHead.peerId = 1;
+    (void)memcpy_s(data, TEST_DATALEN, &msgHead, sizeof(ProxyMessageShortHead));
+    uint32_t connectionId = 1;
+    ConnModule moduleId = MODULE_CONNECTION;
+    int64_t seq = 1;
+    EXPECT_NO_FATAL_FAILURE(TransProxyOnDataReceived(connectionId, moduleId, seq, data, len));
+
+    msgHead.type = (PROXYCHANNEL_MSG_TYPE_NORMAL & FOUR_BIT_MASK) | (VERSION << VERSION_SHIFT);
+    EXPECT_NO_FATAL_FAILURE(TransProxyOnDataReceived(connectionId, moduleId, seq, data, len));
+}
 } // namespace OHOS

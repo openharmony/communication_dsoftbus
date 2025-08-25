@@ -16,8 +16,6 @@
 #ifndef CONN_BR_PENDING_PACKET_H
 #define CONN_BR_PENDING_PACKET_H
 
-#include <stdint.h>
-
 #include "softbus_conn_br_connection.h"
 #include "softbus_json_utils.h"
 

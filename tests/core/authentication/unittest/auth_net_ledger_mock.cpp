@@ -65,19 +65,19 @@ const NodeInfo *LnnGetLocalNodeInfo(void)
     return GetNetLedgerInterface()->LnnGetLocalNodeInfo();
 }
 
-int32_t LnnGetAuthPort(const NodeInfo *info)
+int32_t LnnGetAuthPort(const NodeInfo *info, int32_t ifnameIdx)
 {
-    return GetNetLedgerInterface()->LnnGetAuthPort(info);
+    return GetNetLedgerInterface()->LnnGetAuthPort(info, ifnameIdx);
 }
 
-int32_t LnnGetSessionPort(const NodeInfo *info)
+int32_t LnnGetSessionPort(const NodeInfo *info, int32_t ifnameIdx)
 {
-    return GetNetLedgerInterface()->LnnGetSessionPort(info);
+    return GetNetLedgerInterface()->LnnGetSessionPort(info, ifnameIdx);
 }
 
-int32_t LnnGetProxyPort(const NodeInfo *info)
+int32_t LnnGetProxyPort(const NodeInfo *info, int32_t ifnameIdx)
 {
-    return GetNetLedgerInterface()->LnnGetProxyPort(info);
+    return GetNetLedgerInterface()->LnnGetProxyPort(info, ifnameIdx);
 }
 
 const char *LnnGetBtMac(const NodeInfo *info)
@@ -199,6 +199,16 @@ int32_t LnnGetLocalNodeInfoSafe(NodeInfo *info)
 {
     return GetNetLedgerInterface()->LnnGetLocalNodeInfoSafe(info);
 }
+
+int32_t LnnGetLocalByteInfo(InfoKey key, uint8_t *info, uint32_t len)
+{
+    return GetNetLedgerInterface()->LnnGetLocalByteInfo(key, info, len);
+}
+
+void LnnAnonymizePtk(const char *ptk, uint32_t len, char **anonymizedStr)
+{
+    return GetNetLedgerInterface()->LnnAnonymizePtk(ptk, len, anonymizedStr);
+}
 }
 
 char *AuthNetLedgertInterfaceMock::Pack(int64_t authSeq, const AuthSessionInfo *info, AuthDataHead &head)
@@ -291,4 +301,5 @@ void AuthNetLedgertInterfaceMock::OnDeviceDisconnect(AuthHandle authHandle)
     SoftBusCondSignal(&LnnHichainInterfaceMock::cond);
     SoftBusMutexUnlock(&LnnHichainInterfaceMock::mutex);
 }
+
 } // namespace OHOS

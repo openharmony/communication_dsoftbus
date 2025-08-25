@@ -19,7 +19,7 @@
 #include "softbus_common.h"
 #include "token_setproc.h"
 
-void SetAceessTokenPermission(const char *processName)
+void SetAccessTokenPermission(const char *processName)
 {
     uint64_t tokenId;
     const char **perms = new const char *[2];
@@ -38,4 +38,16 @@ void SetAceessTokenPermission(const char *processName)
     tokenId = GetAccessTokenId(&infoInstance);
     SetSelfTokenID(tokenId);
     OHOS::Security::AccessToken::AccessTokenKit::ReloadNativeTokenInfo();
+}
+
+uint64_t SetTokenIdByProcessName(const char *processName)
+{
+    if (processName == nullptr) {
+        return 0;
+    }
+    uint64_t tokenId = OHOS::Security::AccessToken::AccessTokenKit::GetNativeTokenId(processName);
+    if (tokenId != 0) {
+        SetSelfTokenID(tokenId);
+    }
+    return tokenId;
 }

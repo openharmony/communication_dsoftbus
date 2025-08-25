@@ -12,27 +12,17 @@
 # limitations under the License.
 
 declare_args() {
-  dsoftbus_feature_disc_ble = false
-  dsoftbus_feature_disc_coap = false
-  dsoftbus_feature_disc_lnn_coap = false
-  dsoftbus_feature_disc_share_ble = false
+  dsoftbus_feature_disc_ble = true
+  dsoftbus_feature_disc_coap = true
+  dsoftbus_feature_disc_lnn_coap = true
   dsoftbus_feature_disc_share_coap = false
-  dsoftbus_feature_disc_approach = false
-  dsoftbus_feature_disc_notification = false
-  dsoftbus_feature_disc_notification_rx = false
-  dsoftbus_feature_disc_link_ble = false
-  dsoftbus_feature_disc_virtual_link_ble = false
-  dsoftbus_feature_disc_lnn_hb = false
-  dsoftbus_feature_disc_touch = false
-  dsoftbus_feature_disc_sle = false
-  dsoftbus_feature_disc_usb = false
 
-  dsoftbus_feature_conn_tcp_proxy = false
-  dsoftbus_feature_conn_tcp_comm = false
+  dsoftbus_feature_conn_tcp_proxy = true
+  dsoftbus_feature_conn_tcp_comm = true
   dsoftbus_feature_conn_pv1 = false
 
-  dsoftbus_feature_conn_br = false
-  dsoftbus_feature_conn_ble = false
+  dsoftbus_feature_conn_br = true
+  dsoftbus_feature_conn_ble = true
   dsoftbus_feature_conn_coc = false
 
   dsoftbus_feature_conn_ble_direct = false
@@ -44,31 +34,31 @@ declare_args() {
   dsoftbus_feature_conn_legacy_im = false
   dsoftbus_feature_conn_legacy_data = false
 
-  dsoftbus_feature_trans_udp_file = false
+  dsoftbus_feature_trans_udp_file = true
   dsoftbus_feature_trans_udp_stream = false
-  dsoftbus_feature_trans_udp = false
-  dsoftbus_feature_trans_proxy_file = false
+  dsoftbus_feature_trans_udp = true
+  dsoftbus_feature_trans_proxy_file = true
   dsoftbus_feature_trans_qos = false
   dsoftbus_feature_trans_legacy = false
-  dsoftbus_feature_lnn_ble = false
-  dsoftbus_feature_lnn_wifi = false
-  dsoftbus_feature_lnn_ccmp = false
+  dsoftbus_feature_lnn_ble = true
+  dsoftbus_feature_lnn_wifi = true
+  dsoftbus_feature_lnn_ccmp = true
 
-  dsoftbus_feature_lnn_time_sync = false
-  dsoftbus_feature_lnn_sh = false
+  dsoftbus_feature_lnn_time_sync = true
+  dsoftbus_feature_lnn_sh = true
 
-  dsoftbus_feature_lnn_cloud_sync = false
-  dsoftbus_feature_lnn_channel_rating = false
-  dsoftbus_feature_lnn_lane_mgr = false
-  dsoftbus_feature_lnn_power_ctrl = false
-  dsoftbus_feature_lnn_lane_qos = false
+  dsoftbus_feature_lnn_cloud_sync = true
+  dsoftbus_feature_lnn_channel_rating = true
+  dsoftbus_feature_lnn_lane_mgr = true
+  dsoftbus_feature_lnn_power_ctrl = true
+  dsoftbus_feature_lnn_lane_qos = true
 
-  dsoftbus_feature_lnn_meta_node = false
-  dsoftbus_feature_lnn_frame = false
-  dsoftbus_feature_vtp = false
-  dsoftbus_feature_dfile = false
-  dsoftbus_feature_dmsg = false
+  dsoftbus_feature_lnn_frame = true
+  dsoftbus_feature_vtp = true
+  dsoftbus_feature_dfile = true
+  dsoftbus_feature_dmsg = true
   dsoftbus_feature_dnet = false
   dsoftbus_feature_linkfinder = false
-  dsoftbus_feature_coap = false
+  dsoftbus_feature_coap = true
+  dsoftbus_feature_lnn_usb_ncm = false
 }

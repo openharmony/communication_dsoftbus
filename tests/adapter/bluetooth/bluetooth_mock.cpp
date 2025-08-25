@@ -13,9 +13,10 @@
  * limitations under the License.
  */
 
+#include "bluetooth_mock.h"
+
 #include <securec.h>
 
-#include "bluetooth_mock.h"
 #include "softbus_common.h"
 #include "softbus_error_code.h"
 #include "softbus_utils.h"
@@ -222,6 +223,11 @@ int32_t BleGattsStopService(int32_t serverId, int32_t srvcHandle)
 int32_t BleGattsDeleteService(int32_t serverId, int32_t srvcHandle)
 {
     return MockBluetooth::GetMocker()->BleGattsDeleteService(serverId, srvcHandle);
+}
+
+int BleGattsConnect(int32_t serverId, BdAddr bdAddr)
+{
+    return MockBluetooth::GetMocker()->BleGattsConnect(serverId, bdAddr);
 }
 
 int32_t BleGattsDisconnect(int32_t serverId, BdAddr bdAddr, int32_t connId)

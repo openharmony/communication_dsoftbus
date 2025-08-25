@@ -16,17 +16,13 @@
 #ifndef SOFTBUS_CONN_BLE_SERVER_H
 #define SOFTBUS_CONN_BLE_SERVER_H
 
-#include "message_handler.h"
 #include "softbus_conn_ble_connection.h"
 #include "softbus_error_code.h"
+#include "softbus_conn_ble_server_struct.h"
 
 #ifdef __cplusplus
 extern "C" {
 #endif
-
-#define SERVER_WAIT_START_SERVER_TIMEOUT_MILLIS (5 * 1000)
-#define SERVER_WAIT_STOP_SERVER_TIMEOUT_MILLIS  (5 * 1000)
-#define SERVER_WAIT_MTU_TIMEOUT_MILLIS          (10 * 1000)
 
 int32_t ConnGattServerStartService(void);
 int32_t ConnGattServerStopService(void);

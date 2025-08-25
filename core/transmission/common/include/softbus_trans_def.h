@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021-2024 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2025 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -17,6 +17,8 @@
 #define SOFTBUS_TRANS_DEF_H
 
 #include <stdbool.h>
+
+#include "inner_socket.h"
 #include "session.h"
 
 #ifdef __cplusplus
@@ -36,6 +38,7 @@ typedef struct {
     const char *peerDeviceId;
     const char *groupId;
     const SessionAttribute *attr;
+    TransFlowInfo flowInfo;
     QosTV qos[QOS_TYPE_BUTT];
     uint32_t qosCount;
     int32_t sessionId;
@@ -43,6 +46,7 @@ typedef struct {
     bool isAsync;
     uint32_t actionId;
     int32_t pid;
+    bool isLowLatency;
 } SessionParam;
 
 typedef struct {

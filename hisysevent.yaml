@@ -158,6 +158,24 @@ BUSCENTER_BEHAVIOR:
   IS_WIFI_DIRECT_REUSE: { type: INT32, desc: lane is wifi direct reuse }
   BAND_WIDTH: { type: INT32, desc: lane band width }
   GUIDE_TYPE: { type: INT32, desc: lane guide type }
+  FUNC_ID: { type: INT32, desc: sdk function id }
+  RECORD_CNT: { type: INT32, desc: same user same id count }
+  ID_COUNT: { type: INT32, desc: same id count}
+  USER_COUNT: { type: INT32, desc: same user count}
+  TOTAL_COUNT: { type: INT32, desc: total count}
+  LANE_STAGE: { type: INT32, desc: lane stage }
+  LANE_HANDLE: { type: INT32, desc: lane handle }
+  QOS_RTT_LEVEL: { type: INT32, desc: lane qos info rtt level }
+  TRANS_TYPE: { type: INT32, desc: lane trans type }
+  LOCAL_CAP: { type: INT32, desc: lane local cap }
+  REMOTE_CAP: { type: INT32, desc: lane remote cap }
+  IS_GUIDE_RETRY: { type: INT32, desc: lane is guide retry }
+  WIFI_DETECT_STATE: { type: INT32, desc: lane wifi detect state }
+  WIFI_DETECT_TIME: { type: INT64, desc: lane wifi detect time }
+  BUILD_LINK_TIME: { type: INT64, desc: lane build link time }
+  IS_HML_REUSE: { type: INT32, desc: lane is hml reuse }
+  IS_DELAY_FREE: { type: INT32, desc: lane is delay free }
+  FREE_LINK_TIME: { type: INT64, desc: lane free link time }
   PEER_DEV_INFO: { type: STRING, desc: peer device lnn info }
   PEER_IP: { type: STRING, desc: peer device ip }
   PEER_BR_MAC: { type: STRING, desc: peer device br mac }
@@ -222,7 +240,7 @@ TRANSPORT_BEHAVIOR:
   SESSION_NAME: {type: STRING, desc: session name }
   DATA_TYPE: { type: INT32, desc: channel data type }
   LOGIC_CHAN_TYPE: { type: INT32, desc: logic channel type }
-  LANE_ID: { type: INT32, desc: lane id }
+  LANE_ID: { type: INT64, desc: lane id }
   PREFER_LINK_TYPE: { type: INT32, desc: preferred link type }
   LANE_TRANS_TYPE: { type: INT32, desc: transport lane data type }
   CHAN_ID: { type: INT32, desc: channel id }

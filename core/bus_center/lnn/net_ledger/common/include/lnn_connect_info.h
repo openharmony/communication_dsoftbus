@@ -16,30 +16,10 @@
 #ifndef LNN_CONNECT_INFO_H
 #define LNN_CONNECT_INFO_H
 
-#include <stdint.h>
-
-#include "bus_center_info_key.h"
-
+#include "lnn_connect_info_struct.h"
 #ifdef __cplusplus
 extern "C" {
 #endif
-
-#define LOCAL_IP "127.0.0.1"
-#define DEFAULT_IP ""
-#define DEFAULT_MAC ""
-#define DEFAULT_IFNAME ""
-#define MAX_ADDR_LEN 46
-
-typedef struct {
-    char netIfName[NET_IF_NAME_LEN];
-    char deviceIp[MAX_ADDR_LEN];
-    char macAddr[MAC_LEN];
-    char bleMacAddr[MAC_LEN];
-    int authPort;
-    int proxyPort;
-    int sessionPort;
-    uint64_t latestTime;
-} ConnectInfo;
 
 #ifdef __cplusplus
 }

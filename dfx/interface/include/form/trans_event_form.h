@@ -43,7 +43,30 @@ typedef enum {
     EVENT_SCENE_TRANS_RECEIVED_DATA = 16,
     EVENT_SCENE_TRANS_SEND_DATA = 17,
     EVENT_SCENE_CHANNEL_REQUEST = 18,
+    EVENT_SCENE_TRANS_RECV_STREAM = 19,
+    EVENT_SCENE_TRANS_REPORT_WIFIINFO = 20,
+    EVENT_SCENE_PAGING_CONNECT = 21,
+    EVENT_SCENE_TALKIE = 22,
 } TransEventScene;
+
+typedef enum {
+    EVENT_STAGE_PAGING_START_CONNECT = 1,
+    EVENT_STAGE_PAGING_END_CONNECT = 2,
+    EVENT_STAGE_PAGING_AUTH_START = 3,
+    EVENT_STAGE_PAGING_AUTH_END = 4,
+    EVENT_STAGE_PAGING_SOURCE_HANDSHAKE_START = 5,
+    EVENT_STAGE_PAGING_SOURCE_HANDSHAKE_END = 6,
+    EVENT_STAGE_PAGING_SINK_HANDSHAKE_START = 7,
+    EVENT_STAGE_PAGING_SINK_HANDSHAKE_END = 8,
+} TransEventPagingChannelStage;
+
+typedef enum {
+    EVENT_STAGE_TALKIE_BROADCAST_SEND = 1,
+    EVENT_STAGE_TALKIE_BROADCAST_STOP = 2,
+    EVENT_STAGE_TALKIE_BROADCAST_RECV = 3,
+    EVENT_STAGE_TALKIE_PULL_UP_START = 4,
+    EVENT_STAGE_TALKIE_PULL_UP_END = 5,
+} TransEventTalkieStage;
 
 typedef enum {
     EVENT_STAGE_OPEN_CHANNEL_START = 1,
@@ -63,6 +86,10 @@ typedef enum {
 } TransEventCommonStage;
 
 typedef enum {
+    EVENT_STAGE_TRANS_RECV_STREAM = 1,
+} TransEventStreamStage;
+
+typedef enum {
     DEVICE_STATE_INVALID = 1,
     DEVICE_STATE_LOCAL_BT_HALF_OFF,
     DEVICE_STATE_REMOTE_BT_HALF_OFF,
@@ -73,6 +100,9 @@ typedef enum {
 } TransDeviceState;
 
 typedef struct {
+    uint8_t talkieFreq;        // TALKIE_FREQ
+    uint8_t talkieType;        // TALKIE_TYPE
+    uint8_t talkieLevel;       // TALKIE_LEVEL
     int32_t result;            // STAGE_RES
     int32_t errcode;           // ERROR_CODE
     const char *socketName;    // SESSION_NAME
@@ -91,6 +121,12 @@ typedef struct {
     int32_t channelScore;      // CHAN_SCORE
     int32_t peerChannelId;     // PEER_CHAN_ID
     int32_t btFlow;            // BT_FLOW
+    int32_t pagingId;          // PAGING_ID
+    int32_t callPid;         // CALLER_PID
+    int32_t saId;              // SA_ID
+    int32_t businessFlag;      // BUSINESS_FLAG
+    const char *groupId;    // GROUP_ID
+    const char *subGroupId; // SUB_GROUP_ID
     const char *peerNetworkId; // PEER_NET_ID
     const char *peerUdid;      // PEER_UDID
     const char *peerDevVer;    // PEER_DEV_VER
@@ -98,17 +134,35 @@ typedef struct {
     const char *callerPkg;     // HOST_PKG
     const char *calleePkg;     // TO_CALL_PKG
     const char *firstTokenName; // FIRST_TOKEN_NAME
+    const char *callerAccountId; //CALLER_ACCOUNT_ID
+    const char *calleeAccountId; //CALLEE_ACCOUNT_ID
     uint64_t firstTokenId;     // FIRST_TOKEN_ID
     int32_t  firstTokenType;   // FIRST_TOKEN_TYPE
     const char *trafficStats;  // TRAFFIC_STATS
     int32_t  osType;           // OS_TYPE
     int32_t  deviceState;      // DEVICE_STATE
-    int32_t businessId;        // BUSSINESS_ID
+    int32_t businessId;        // BUSINESS_ID
     int32_t businessType;      // BUSINESS_TYPE
     int32_t sessionId;         // SESSION_ID
     int32_t minBW;             // MIN_BW
     int32_t maxLatency;        // MAX_LATENCY
     int32_t minLatency;        // MIN_LATENCY
+    uint8_t localStaChload;    // LOCAL_STA_CHLOAD
+    uint8_t remoteStaChload;   // REMOTE_STA_CHLOAD
+    uint8_t localHmlChload;    // LOCAL_HML_CHLOAD
+    uint8_t remoteHmlChload;   // REMOTE_HML_CHLOAD
+    uint8_t localP2pChload;    // LOCAL_P2P_CHLOAD
+    uint8_t remoteP2pChload;   // REMOTE_P2P_CHLOAD
+    uint8_t localStaChannel;   // LOCAL_STA_CHANNEL
+    uint8_t remoteStaChannel;  // REMOTE_STA_CHANNEL
+    uint8_t hmlChannel;        // HML_CHANNEL
+    uint8_t localP2pChannel;   // LOCAL_P2P_CHANNEL
+    uint8_t remoteP2pChannel;  // REMOTE_P2P_CHANNEL
+    int32_t localIsDbac;       // LOCAL_IS_DBAC
+    int32_t remoteIsDbac;      // REMOTE_IS_DBAC
+    int32_t localIsDbdc;       // LOCAL_IS_DBDC
+    int32_t remoteIsDbdc;      // REMOTE_IS_DBDC
+    const char *conCurrentId;  // CONCURRENT_ID
 } TransEventExtra;
 
 typedef enum {

@@ -66,10 +66,14 @@ void WifiDirectExecutor::Run(std::shared_ptr<WifiDirectProcessor> processor)
         try {
             CONN_LOGI(CONN_WIFI_DIRECT, "processor run");
             processor_->Run();
-        } catch (const ProcessorTerminate &) {
-            LinkManager::GetInstance().Dump();
-            CONN_LOGI(CONN_WIFI_DIRECT, "processor terminate");
-            ProcessUnHandleCommand();
+        } catch (const std::exception& e) {
+            std::string src = typeid(e).name();
+            std::string dst = typeid(ProcessorTerminate).name();
+            if (WifiDirectUtils::CompareIgnoreCase(src, dst) == 0) {
+                LinkManager::GetInstance().Dump();
+                CONN_LOGI(CONN_WIFI_DIRECT, "processor terminate");
+                ProcessUnHandleCommand();
+            }
         }
 
         std::lock_guard lock(processorLock_);
@@ -119,9 +123,10 @@ void WifiDirectExecutor::ProcessUnHandleCommand()
     CONN_LOGI(CONN_WIFI_DIRECT, "enter");
     WifiDirectSchedulerFactory::GetInstance().GetScheduler().RejectNegotiateData(*processor_);
     GetSender().ProcessUnHandle([this](std::shared_ptr<WifiDirectEventBase> &content) {
-        auto ncw =
-            std::dynamic_pointer_cast<WifiDirectEventWrapper<std::shared_ptr<NegotiateCommand>>>(content);
-        if (ncw != nullptr) {
+        if (content != nullptr && content->getContentTypeid() == typeid(std::shared_ptr<NegotiateCommand>).name()) {
+            CONN_LOGI(CONN_WIFI_DIRECT, "type id is same");
+            auto ncw =
+                std::static_pointer_cast<WifiDirectEventWrapper<std::shared_ptr<NegotiateCommand>>>(content);
             processor_->HandleCommandAfterTerminate(*ncw->content_);
             return;
         }
@@ -129,4 +134,12 @@ void WifiDirectExecutor::ProcessUnHandleCommand()
     GetSender().Clear();
 }
 
+void WifiDirectExecutor::Dump(std::list<std::shared_ptr<ProcessorSnapshot>> &snapshots)
+{
+    std::lock_guard lock(processorLock_);
+    if (processor_ != nullptr) {
+        snapshots.push_back(std::make_shared<ProcessorSnapshot>(
+            processor_->GetRemoteDeviceId(), processor_->GetProcessorName(), processor_->GetState()));
+    }
+}
 }

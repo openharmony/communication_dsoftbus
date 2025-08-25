@@ -14,7 +14,7 @@
 import("//build/test.gni")
 import("../../../../dsoftbus.gni")
 
-module_output_path = "dsoftbus/transmission"
+module_output_path = "dsoftbus/soft_bus/transmission"
 
 ohos_benchmarktest("TransTest") {
   module_out_path = module_output_path
@@ -49,6 +49,8 @@ ohos_benchmarktest("TransTest") {
       "access_token:libaccesstoken_sdk",
       "access_token:libnativetoken",
       "access_token:libtoken_setproc",
+      "cJSON:cjson_static",
+      "selinux_adapter:librestorecon",
     ]
   }
 }

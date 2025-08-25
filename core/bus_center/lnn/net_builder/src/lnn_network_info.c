@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2022-2023 Huawei Device Co., Ltd.
+ * Copyright (c) 2022-2025 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -20,6 +20,7 @@
 #include "anonymizer.h"
 #include "bus_center_event.h"
 #include "bus_center_manager.h"
+#include "g_enhance_lnn_func_pack.h"
 #include "lnn_async_callback_utils.h"
 #include "lnn_distributed_net_ledger.h"
 #include "lnn_deviceinfo_to_profile.h"
@@ -39,11 +40,11 @@
 #include "softbus_def.h"
 #include "wifi_direct_manager.h"
 
-#define MSG_LEN 10
-#define BITS 8
-#define BITLEN 4
+#define MSG_LEN                     10
+#define BITS                        8
+#define BITLEN                      4
 #define STRING_INTERFACE_BUFFER_LEN 16
-#define DP_INACTIVE_DEFAULT_USERID (-1)
+#define DP_INACTIVE_DEFAULT_USERID  (-1)
 
 static bool g_isWifiDirectSupported = false;
 static bool g_isApCoexistSupported = false;
@@ -149,7 +150,7 @@ static uint32_t ConvertMsgToUserId(int32_t *userId, const uint8_t *msg, uint32_t
         return SOFTBUS_INVALID_PARAM;
     }
     for (uint32_t i = 0; i < BITLEN; i++) {
-        *userId = *userId | (*(msg + i) << (BITS * i));
+        *userId = ((uint32_t)*userId) | (*(msg + i) << (BITS * i));
     }
     return SOFTBUS_OK;
 }
@@ -243,7 +244,25 @@ static void DoSendCapability(NodeInfo nodeInfo, NodeBasicInfo netInfo, uint8_t *
     }
 }
 
-static void SendNetCapabilityToRemote(uint32_t netCapability, uint32_t type)
+static void SendSleCapabilityToRemote(NodeInfo *nodeInfo, NodeBasicInfo netInfo, uint8_t *msg, uint32_t netCapability)
+{
+    int32_t ret = SOFTBUS_OK;
+    if (LnnHasDiscoveryType(nodeInfo, DISCOVERY_TYPE_BLE) || LnnHasDiscoveryType(nodeInfo, DISCOVERY_TYPE_BR)) {
+        ret = LnnStartHbByTypeAndStrategy(HEARTBEAT_TYPE_BLE_V0, STRATEGY_HB_SEND_SINGLE, false);
+    } else if (LnnHasDiscoveryType(nodeInfo, DISCOVERY_TYPE_WIFI)) {
+        ret = LnnSendSyncInfoMsg(LNN_INFO_TYPE_CAPABILITY, netInfo.networkId, msg, MSG_LEN, NULL);
+    } else {
+        LnnSendP2pSyncInfoMsg(netInfo.networkId, netCapability);
+    }
+    char *anonyNetworkId = NULL;
+    Anonymize(netInfo.networkId, &anonyNetworkId);
+    LNN_LOGE(LNN_BUILDER,
+        "sync cap info ret=%{public}d, peerNetworkId=%{public}s.",
+        ret, AnonymizeWrapper(anonyNetworkId));
+    AnonymizeFree(anonyNetworkId);
+}
+
+static void SendNetCapabilityToRemote(uint32_t netCapability, uint32_t type, bool isSyncSle)
 {
     uint8_t *msg = ConvertCapabilityToMsg(netCapability);
     if (msg ==NULL) {
@@ -270,7 +289,11 @@ static void SendNetCapabilityToRemote(uint32_t netCapability, uint32_t type)
         if (LnnGetRemoteNodeInfoById(netInfo[i].networkId, CATEGORY_NETWORK_ID, &nodeInfo) != SOFTBUS_OK) {
             continue;
         }
-        DoSendCapability(nodeInfo, netInfo[i], msg, netCapability, type);
+        if (!isSyncSle) {
+            DoSendCapability(nodeInfo, netInfo[i], msg, netCapability, type);
+        } else {
+            SendSleCapabilityToRemote(&nodeInfo, netInfo[i], msg, netCapability);
+        }
     }
     SoftBusFree(netInfo);
     SoftBusFree(msg);
@@ -285,15 +308,14 @@ static void WifiStateProcess(uint32_t netCapability, bool isSend)
         return;
     }
     uint32_t type = (1 << (uint32_t)DISCOVERY_TYPE_BLE) | (1 << (uint32_t)DISCOVERY_TYPE_BR);
-    SendNetCapabilityToRemote(netCapability, type);
+    SendNetCapabilityToRemote(netCapability, type, false);
     LNN_LOGI(LNN_BUILDER, "WifiStateEventHandler exit");
     return;
 }
 
-static bool IsP2pAvailable(bool isApSwitchOn)
+static bool IsP2pAvailable(void)
 {
-    bool isTripleMode = SoftBusIsWifiTripleMode();
-    return g_isWifiDirectSupported && (g_isApCoexistSupported || !isApSwitchOn || isTripleMode) && g_isWifiEnable;
+    return g_isWifiDirectSupported && g_isWifiEnable;
 }
 
 static void LnnSetNetworkCapability(uint32_t *capability)
@@ -347,7 +369,7 @@ static void ProcessApEnabled(uint32_t *capability, bool *needSync)
 {
     g_isApEnable = true;
     LnnSetNetworkCapability(capability);
-    if (IsP2pAvailable(true)) {
+    if (IsP2pAvailable()) {
         (void)LnnSetNetCapability(capability, BIT_WIFI_P2P);
     }
     *needSync = true;
@@ -356,8 +378,12 @@ static void ProcessApEnabled(uint32_t *capability, bool *needSync)
 static void ProcessApDisabled(uint32_t *capability, bool *needSync)
 {
     g_isApEnable = false;
-    if (IsP2pAvailable(false)) {
+    SoftBusWifiDetailState wifiState = SoftBusGetWifiState();
+    if (IsP2pAvailable()) {
         (void)LnnSetNetCapability(capability, BIT_WIFI_P2P);
+    }
+    if (!g_isWifiEnable || (wifiState != SOFTBUS_WIFI_STATE_ACTIVED && wifiState != SOFTBUS_WIFI_STATE_ACTIVATING)) {
+        LnnClearNetworkCapability(capability);
     }
     *needSync = true;
 }
@@ -390,6 +416,8 @@ static void GetNetworkCapability(SoftBusWifiState wifiState, uint32_t *capabilit
             if (!g_isApEnable) {
                 LnnClearNetworkCapability(capability);
                 LnnSetP2pNetCapability(capability);
+            } else if (!IsP2pAvailable()) {
+                (void)LnnClearNetCapability(capability, BIT_WIFI_P2P);
             }
             *needSync = true;
             break;
@@ -472,8 +500,212 @@ static void BtStateChangeEventHandler(const LnnEventBasicInfo *info)
     if (!isSend) {
         return;
     }
-    SendNetCapabilityToRemote(netCapability, 1 << (uint32_t)DISCOVERY_TYPE_WIFI);
+    SendNetCapabilityToRemote(netCapability, 1 << (uint32_t)DISCOVERY_TYPE_WIFI, false);
     return;
+}
+
+static void SleStateChangeEventHandle(const LnnEventBasicInfo *info)
+{
+    if (info == NULL || info->event != LNN_EVENT_SLE_STATE_CHANGED) {
+        LNN_LOGE(LNN_BUILDER, "sle state change evt handler get invalid param");
+        return;
+    }
+    uint32_t netCapability = 0;
+    if (LnnGetLocalNumU32Info(NUM_KEY_NET_CAP, &netCapability) != SOFTBUS_OK) {
+        LNN_LOGE(LNN_BUILDER, "get netcap fail");
+        return;
+    }
+    const LnnMonitorSleStateChangedEvent *event = (const LnnMonitorSleStateChangedEvent *)info;
+    SoftBusSleState sleState = (SoftBusSleState)event->status;
+    uint32_t delayTime = 0;
+    TriggerSparkGroupClearPacked((uint32_t)sleState, delayTime);
+    if (sleState == SOFTBUS_SLE_TURN_ON) {
+        (void)LnnSetNetCapability(&netCapability, BIT_SLE);
+    } else if (sleState == SOFTBUS_SLE_TURN_OFF) {
+        (void)LnnClearNetCapability(&netCapability, BIT_SLE);
+    }
+    if (LnnSetLocalNumInfo(NUM_KEY_NET_CAP, (int32_t)netCapability) != SOFTBUS_OK) {
+        LNN_LOGE(LNN_BUILDER, "set cap to local ledger fail");
+        return;
+    }
+    LNN_LOGI(LNN_BUILDER, "sle netCapability=%{public}d", netCapability);
+    SendNetCapabilityToRemote(netCapability, 0, true);
+}
+
+static int32_t GetEnhancedFLFeature(uint64_t *feature)
+{
+    if (feature == NULL) {
+        return SOFTBUS_INVALID_PARAM;
+    }
+    if (GetWifiDirectManager() == NULL || GetWifiDirectManager()->getVspCapabilityCode == NULL) {
+        LNN_LOGI(LNN_BUILDER, "failed to get wifi direct manager.");
+        return SOFTBUS_WIFI_DIRECT_INIT_FAILED;
+    }
+    VspCapabilityCode vspCapability = GetWifiDirectManager()->getVspCapabilityCode();
+    LNN_LOGI(LNN_BUILDER, "GetEnhancedFLFeature vspCap=%{public}d", vspCapability);
+    int32_t ret;
+    if (CONN_VSP_SUPPORT == vspCapability) {
+        ret = LnnSetFeatureCapability(feature, BIT_FL_CAPABILITY);
+        if (ret != SOFTBUS_OK) {
+            LNN_LOGE(LNN_BUILDER, "set feature capability failed, ret=%{public}d.", ret);
+            return ret;
+        }
+    }
+    return SOFTBUS_OK;
+}
+
+static void UpdateLocalFeatureByWifiVspRes()
+{
+    uint64_t localFeatureCap = 0;
+    if (LnnGetLocalNumU64Info(NUM_KEY_FEATURE_CAPA, &localFeatureCap) != SOFTBUS_OK) {
+        LNN_LOGE(LNN_BUILDER, "wifi service FL feature, get local feature cap failed");
+        return;
+    }
+    uint64_t oldFeature = localFeatureCap;
+    if (GetEnhancedFLFeature(&localFeatureCap) != SOFTBUS_OK) {
+        LNN_LOGE(LNN_BUILDER, "get local fl feature fail");
+        // fall-through
+    }
+    if (oldFeature == localFeatureCap) {
+        return;
+    }
+    int32_t ret = LnnSetLocalNum64Info(NUM_KEY_FEATURE_CAPA, localFeatureCap);
+    if (ret != SOFTBUS_OK) {
+        LNN_LOGE(LNN_BUILDER, "set localFeatureCap failed, ret=%{public}d.", ret);
+        return;
+    }
+    LNN_LOGI(LNN_BUILDER, "local feature changed:%{public}" PRIu64 "->%{public}" PRIu64, oldFeature, localFeatureCap);
+}
+
+static void UpdateVirtualLinkStaticCap(void)
+{
+    uint32_t staticNetCap = 0;
+    int32_t ret = LnnGetLocalNumU32Info(NUM_KEY_STATIC_NET_CAP, &staticNetCap);
+    if (ret != SOFTBUS_OK) {
+        LNN_LOGE(LNN_BUILDER, "get staticNetCap failed, ret=%{public}d.", ret);
+        return;
+    }
+    uint32_t oldCap = staticNetCap;
+    if (GetWifiDirectManager() == NULL || GetWifiDirectManager()->getVirtualLinkCapabilityCode == NULL) {
+        LNN_LOGI(LNN_BUILDER, "failed to get wifi direct manager.");
+        return;
+    }
+    VirtualLinkCapabilityCode code = GetWifiDirectManager()->getVirtualLinkCapabilityCode();
+    LNN_LOGI(LNN_BUILDER, "virtual link capability code=%{public}d.", code);
+    if (code != CONN_VIRTUAL_LINK_NOT_SUPPORT) {
+        ret = LnnSetStaticNetCap(&staticNetCap, STATIC_CAP_BIT_VIRTUAL_LINK);
+        if (ret != SOFTBUS_OK) {
+            LNN_LOGE(LNN_BUILDER, "clear staticNetCap failed, ret=%{public}d.", ret);
+            return;
+        }
+    } else {
+        ret = LnnClearStaticNetCap(&staticNetCap, STATIC_CAP_BIT_VIRTUAL_LINK);
+        if (ret != SOFTBUS_OK) {
+            LNN_LOGE(LNN_BUILDER, "clear staticNetCap failed, ret=%{public}d.", ret);
+            return;
+        }
+    }
+    if (oldCap == staticNetCap) {
+        LNN_LOGI(LNN_BUILDER, "static netCap same");
+        return;
+    }
+    ret = LnnSetLocalNumU32Info(NUM_KEY_STATIC_NET_CAP, staticNetCap);
+    if (ret != SOFTBUS_OK) {
+        LNN_LOGE(LNN_BUILDER, "set staticNetCap failed, ret=%{public}d.", ret);
+        return;
+    }
+    LNN_LOGI(LNN_BUILDER, "static netCap changed:%{public}u->%{public}u.", oldCap, staticNetCap);
+    return;
+}
+
+static int32_t UpdateHmlStaticCap(void)
+{
+    uint32_t staticNetCap = 0;
+    int32_t ret = LnnGetLocalNumU32Info(NUM_KEY_STATIC_NET_CAP, &staticNetCap);
+    if (ret != SOFTBUS_OK) {
+        LNN_LOGE(LNN_BUILDER, "get staticNetCap failed, ret=%{public}d.", ret);
+        return ret;
+    }
+    uint32_t oldCap = staticNetCap;
+    if (GetWifiDirectManager() == NULL || GetWifiDirectManager()->getHmlCapabilityCode == NULL) {
+        LNN_LOGI(LNN_BUILDER, "failed to get wifi direct manager.");
+        return SOFTBUS_WIFI_DIRECT_INIT_FAILED;
+    }
+    HmlCapabilityCode code = GetWifiDirectManager()->getHmlCapabilityCode();
+    LNN_LOGI(LNN_BUILDER, "hml capability code=%{public}d.", code);
+    if (code == CONN_HML_SUPPORT) {
+        ret = LnnSetStaticNetCap(&staticNetCap, STATIC_CAP_BIT_ENHANCED_P2P);
+        if (ret != SOFTBUS_OK) {
+            LNN_LOGE(LNN_BUILDER, "clear staticNetCap failed, ret=%{public}d.", ret);
+            return ret;
+        }
+    }
+    if (code == CONN_HML_CAP_UNKNOWN || code == CONN_HML_NOT_SUPPORT) {
+        ret = LnnClearStaticNetCap(&staticNetCap, STATIC_CAP_BIT_ENHANCED_P2P);
+        if (ret != SOFTBUS_OK) {
+            LNN_LOGE(LNN_BUILDER, "clear staticNetCap failed, ret=%{public}d.", ret);
+            return ret;
+        }
+    }
+    if (oldCap == staticNetCap) {
+        return SOFTBUS_OK;
+    }
+    ret = LnnSetLocalNumU32Info(NUM_KEY_STATIC_NET_CAP, staticNetCap);
+    if (ret != SOFTBUS_OK) {
+        LNN_LOGE(LNN_BUILDER, "set staticNetCap failed, ret=%{public}d.", ret);
+        return ret;
+    }
+    LNN_LOGI(LNN_BUILDER, "static netCap changed:%{public}u->%{public}u.", oldCap, staticNetCap);
+    return SOFTBUS_OK;
+}
+
+static void OnHmlServiceStart(void *state)
+{
+    if (state == NULL) {
+        LNN_LOGE(LNN_EVENT, "state is empty");
+        return;
+    }
+    SoftBusHmlState *curState = (SoftBusHmlState *)state;
+    if (*curState == CONN_HML_ENABLED) {
+        int32_t ret = UpdateHmlStaticCap();
+        if (ret != SOFTBUS_OK) {
+            LNN_LOGE(LNN_BUILDER, "update hml static cap failed, ret=%{public}d.", ret);
+        }
+        UpdateLocalFeatureByWifiVspRes();
+    }
+    SoftBusFree(curState);
+}
+
+static void HmlStateOnStartCb(SoftBusHmlState state)
+{
+    if (state != CONN_HML_ENABLED) {
+        LNN_LOGI(LNN_BUILDER, "ignore it.");
+        return;
+    }
+    SoftBusHmlState *notifyState = (SoftBusHmlState *)SoftBusCalloc(sizeof(SoftBusHmlState));
+    if (notifyState == NULL) {
+        LNN_LOGE(LNN_BUILDER, "notifyState malloc err");
+        return;
+    }
+    *notifyState = state;
+    if (LnnAsyncCallbackHelper(GetLooper(LOOP_TYPE_DEFAULT), OnHmlServiceStart, (void *)notifyState) != SOFTBUS_OK) {
+        LNN_LOGE(LNN_BUILDER, "async fail");
+        SoftBusFree(notifyState);
+    }
+}
+
+static void WifiServiceOnStartHandle(const LnnEventBasicInfo *info)
+{
+    LNN_LOGI(LNN_BUILDER, "wifi service on start.");
+    if (info == NULL || info->event != LNN_EVENT_WIFI_SERVICE_START) {
+        LNN_LOGE(LNN_BUILDER, "invalid param.");
+        return;
+    }
+    int32_t ret = UpdateHmlStaticCap();
+    if (ret != SOFTBUS_OK) {
+        LNN_LOGE(LNN_BUILDER, "update hml static cap failed, ret=%{public}d.", ret);
+    }
+    UpdateLocalFeatureByWifiVspRes();
 }
 
 static bool IsSupportApCoexist(const char *coexistCap)
@@ -529,6 +761,7 @@ static bool IsSupportApCoexist(const char *coexistCap)
 
 static void InitWifiDirectCapability(void)
 {
+    UpdateVirtualLinkStaticCap();
     g_isWifiDirectSupported = SoftBusHasWifiDirectCapability();
     char *coexistCap = SoftBusGetWifiInterfaceCoexistCap();
     LNN_CHECK_AND_RETURN_LOGE(coexistCap != NULL, LNN_INIT, "coexistCap is null");
@@ -539,17 +772,40 @@ static void InitWifiDirectCapability(void)
         g_isWifiDirectSupported, g_isApCoexistSupported);
 }
 
+static void InitWifiDirectListener(void)
+{
+    struct WifiDirectManager *pManager = GetWifiDirectManager();
+    if (pManager == NULL) {
+        LNN_LOGE(LNN_BUILDER, "get wifi direct manager fail");
+        return;
+    }
+    if (pManager->addHmlStateListener == NULL) {
+        LNN_LOGE(LNN_BUILDER, "addHmlStateListener null");
+        return;
+    }
+    pManager->addHmlStateListener(HmlStateOnStartCb);
+}
+
 int32_t LnnInitNetworkInfo(void)
 {
     InitWifiDirectCapability();
+    InitWifiDirectListener();
     int32_t ret = LnnRegisterEventHandler(LNN_EVENT_BT_STATE_CHANGED, BtStateChangeEventHandler);
     if (ret != SOFTBUS_OK) {
         LNN_LOGE(LNN_BUILDER, "network info register bt state change fail, ret=%{public}d", ret);
         return ret;
     }
+    ret = LnnRegisterEventHandler(LNN_EVENT_SLE_STATE_CHANGED, SleStateChangeEventHandle);
+    LNN_CHECK_AND_RETURN_RET_LOGE(ret == SOFTBUS_OK,
+        ret, LNN_BUILDER, "register sle state change event failed. ret=%{public}d", ret);
     ret = LnnRegisterEventHandler(LNN_EVENT_WIFI_STATE_CHANGED, WifiStateEventHandler);
     if (ret != SOFTBUS_OK) {
         LNN_LOGE(LNN_BUILDER, "network info register wifi state change fail, ret=%{public}d", ret);
+        return ret;
+    }
+    ret = LnnRegisterEventHandler(LNN_EVENT_WIFI_SERVICE_START, WifiServiceOnStartHandle);
+    if (ret != SOFTBUS_OK) {
+        LNN_LOGE(LNN_BUILDER, "register wifi service start fail, ret=%{public}d", ret);
         return ret;
     }
     ret = LnnRegSyncInfoHandler(LNN_INFO_TYPE_CAPABILITY, OnReceiveCapaSyncInfoMsg);
@@ -566,8 +822,11 @@ int32_t LnnInitNetworkInfo(void)
 
 void LnnDeinitNetworkInfo(void)
 {
+    (void)LnnUnregisterEventHandler(LNN_EVENT_BT_STATE_CHANGED, BtStateChangeEventHandler);
+    (void)LnnUnregisterEventHandler(LNN_EVENT_WIFI_STATE_CHANGED, WifiStateEventHandler);
     (void)LnnUnregSyncInfoHandler(LNN_INFO_TYPE_CAPABILITY, OnReceiveCapaSyncInfoMsg);
     (void)LnnUnregSyncInfoHandler(LNN_INFO_TYPE_USERID, OnReceiveUserIdSyncInfoMsg);
+    (void)LnnUnregisterEventHandler(LNN_EVENT_WIFI_SERVICE_START, WifiServiceOnStartHandle);
 }
 
 static void LnnProcessUserChangeMsg(LnnSyncInfoType syncType, const char *networkId, const uint8_t *msg, uint32_t len)
@@ -586,6 +845,27 @@ void OnLnnProcessUserChangeMsgDelay(void *para)
     SoftBusFree(para);
 }
 
+static void LnnAsyncSendUserId(void *param)
+{
+    SendSyncInfoParam *data = (SendSyncInfoParam *)param;
+    if (data == NULL) {
+        LNN_LOGE(LNN_BUILDER, "invalid para");
+        return;
+    }
+    if (data->msg == NULL) {
+        LNN_LOGE(LNN_BUILDER, "invalid para");
+        SoftBusFree(data);
+        return;
+    }
+    int32_t ret = LnnSendSyncInfoMsg(data->type, data->networkId, data->msg, data->len, data->complete);
+    if (ret != SOFTBUS_OK) {
+        LNN_LOGE(LNN_BUILDER, "send info msg type=%{public}d fail, ret:%{public}d", data->type, ret);
+        LnnRequestLeaveSpecific(data->networkId, CONNECTION_ADDR_MAX);
+    }
+    SoftBusFree(data->msg);
+    SoftBusFree(data);
+}
+
 static void DoSendUserId(const char *udid, uint8_t *msg)
 {
     #define USER_CHANGE_DELAY_TIME 5
@@ -602,9 +882,18 @@ static void DoSendUserId(const char *udid, uint8_t *msg)
         return;
     }
 
-    ret = LnnSendSyncInfoMsg(LNN_INFO_TYPE_USERID, nodeInfo.networkId, msg, MSG_LEN, LnnProcessUserChangeMsg);
+    SendSyncInfoParam *data =
+        CreateSyncInfoParam(LNN_INFO_TYPE_USERID, nodeInfo.networkId, msg, MSG_LEN, LnnProcessUserChangeMsg);
+    if (data == NULL) {
+        LNN_LOGE(LNN_BUILDER, "create async info fail");
+        LnnRequestLeaveSpecific(nodeInfo.networkId, CONNECTION_ADDR_MAX);
+        return;
+    }
+    ret = LnnAsyncCallbackHelper(GetLooper(LOOP_TYPE_DEFAULT), LnnAsyncSendUserId, (void *)data);
     if (ret != SOFTBUS_OK) {
-        LNN_LOGI(LNN_BUILDER, "sync info msg failed! ret:%{public}d", ret);
+        SoftBusFree(data->msg);
+        SoftBusFree(data);
+        LNN_LOGE(LNN_BUILDER, "async userid to peer fail");
         LnnRequestLeaveSpecific(nodeInfo.networkId, CONNECTION_ADDR_MAX);
         return;
     }
@@ -617,6 +906,7 @@ static void DoSendUserId(const char *udid, uint8_t *msg)
     ret = memcpy_s(networkId, NETWORK_ID_BUF_LEN, nodeInfo.networkId, NETWORK_ID_BUF_LEN);
     if (ret != EOK) {
         LNN_LOGI(LNN_BUILDER, "memcpy_s failed! ret:%{public}d", ret);
+        SoftBusFree(networkId);
         return;
     }
 
@@ -636,7 +926,7 @@ static uint8_t *ConvertUserIdToMsg(int32_t userId)
         return NULL;
     }
     for (uint32_t i = 0; i < BITLEN; i++) {
-        *(arr + i) = (userId >> (i * BITS)) & 0xFF;
+        *(arr + i) = ((uint32_t)userId >> (i * BITS)) & 0xFF;
     }
     return arr;
 }
@@ -656,6 +946,7 @@ void NotifyRemoteDevOffLineByUserId(int32_t userId, const char *udid)
     }
     uint8_t *msg = ConvertUserIdToMsg(userId);
     if (msg == NULL) {
+        LNN_LOGE(LNN_BUILDER, "convert userId to msg is null");
         return;
     }
     DoSendUserId(udid, msg);

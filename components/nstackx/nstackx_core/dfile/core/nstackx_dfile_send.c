@@ -12,6 +12,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+#include <stdlib.h>
 
 #include "nstackx_dfile_session.h"
 
@@ -448,7 +449,7 @@ int32_t SocketRecvForTcp(DFileSession *session, uint8_t *buffer, struct sockaddr
 
     frameHeader = (DFileFrameHeader *)(session->recvBuffer);
     payloadLen = ntohs(frameHeader->length);
-    if (payloadLen >= NSTACKX_RECV_BUFFER_LEN) {
+    if (payloadLen > NSTACKX_RECV_BUFFER_LEN - length) {
         DFILE_LOGI(TAG, "header length is %u recv length is %u payloadLen is %u type %u", length,
              session->recvLen, payloadLen, frameHeader->type);
         return NSTACKX_EFAILED;

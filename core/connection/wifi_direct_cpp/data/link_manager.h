@@ -16,21 +16,13 @@
 #ifndef LINK_MANAGER_H
 #define LINK_MANAGER_H
 
-#include <atomic>
-#include <map>
-#include <mutex>
-#include <functional>
-#include "inner_link.h"
-#include "wifi_direct_types.h"
+#include <list>
+#include "dfx/link_snapshot.h"
 
 namespace OHOS::SoftBus {
 class LinkManager {
 public:
-    static LinkManager& GetInstance()
-    {
-        static LinkManager instance;
-        return instance;
-    }
+    static LinkManager& GetInstance();
 
     using Handler = std::function<void(InnerLink &)>;
     using Checker = std::function<bool(InnerLink &)>;
@@ -48,16 +40,21 @@ public:
     bool ProcessIfPresent(int linkId, const Handler &handler);
     void RemoveLink(InnerLink::LinkType type, const std::string &remoteDeviceId);
     void RemoveLink(const std::string &remoteMac);
-    void RemoveLinks(InnerLink::LinkType type);
+    void RemoveLinks(InnerLink::LinkType type, bool onlyRemoveConnected = false);
 
     void GetAllLinksBasicInfo(std::vector<InnerLinkBasicInfo> &infos);
 
     std::shared_ptr<InnerLink> GetReuseLink(const std::string &remoteMac);
     std::shared_ptr<InnerLink> GetReuseLink(WifiDirectConnectType connectType, const std::string &remoteDeviceId);
     std::shared_ptr<InnerLink> GetReuseLink(WifiDirectLinkType linkType, const std::string &remoteDeviceId);
+    std::string GetRemoteMacByRemoteDeviceId(const std::string &remoteDeviceId);
     void RefreshRelationShip(const std::string &remoteDeviceId, const std::string &remoteMac);
+    bool RefreshAuthHandle(std::string remoteDeviceId, const std::shared_ptr<NegotiateChannel> &channel);
+    bool CheckOnlyVirtualLink(void);
 
     void Dump() const;
+    
+    void Dump(std::list<std::shared_ptr<LinkSnapshot>> &snapshots);
 
 private:
     mutable std::recursive_mutex lock_;

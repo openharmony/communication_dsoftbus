@@ -17,12 +17,8 @@
 #include "trans_server_proxy_standard.h"
 
 #include <malloc.h>
-#include <mutex>
 
 #include "ipc_skeleton.h"
-#include "iremote_broker.h"
-#include "iremote_object.h"
-#include "iremote_proxy.h"
 #include "softbus_adapter_timer.h"
 #include "softbus_error_code.h"
 #include "softbus_server_ipc_interface_code.h"
@@ -32,6 +28,7 @@ using namespace OHOS;
 
 namespace {
 sptr<TransServerProxy> g_serverProxy = nullptr;
+sptr<IRemoteObject> g_oldObject = nullptr;
 const std::u16string SAMANAGER_INTERFACE_TOKEN = u"ohos.samgr.accessToken";
 constexpr int32_t MIN_CHANNEL_ID = 0; // UDP channelId minmum value
 constexpr int32_t MAX_CHANNEL_ID = 19; // UDP channelId maxmum value
@@ -69,6 +66,10 @@ static sptr<TransServerProxy> GetProxy()
 
     sptr<IRemoteObject> object = GetSystemAbility();
     TRANS_CHECK_AND_RETURN_RET_LOGE(object != nullptr, nullptr, TRANS_SDK, "Get remote softbus object failed");
+    if (object == g_oldObject) {
+        TRANS_LOGE(TRANS_SDK, "Failed to get latest remote object.");
+        return nullptr;
+    }
 
     g_serverProxy = new (std::nothrow) TransServerProxy(object);
     TRANS_CHECK_AND_RETURN_RET_LOGE(g_serverProxy != nullptr, nullptr, TRANS_SDK, "Create trans server proxy failed");
@@ -96,20 +97,36 @@ int32_t TransServerProxyInit(void)
 {
     mallopt(M_DELAYED_FREE, M_DELAYED_FREE_ENABLE);
     TRANS_CHECK_AND_RETURN_RET_LOGE(
-        GetProxy() != nullptr, SOFTBUS_NO_INIT, TRANS_SDK, "Failed to initialize the server proxy");
-
+        RetryGetProxy() != nullptr, SOFTBUS_NO_INIT, TRANS_SDK, "Failed to initialize the server proxy");
     TRANS_LOGI(TRANS_SDK, "Init success");
     return SOFTBUS_OK;
+}
+
+void TransServerProxyClear(void)
+{
+    TRANS_LOGI(TRANS_SDK, "enter");
+    std::lock_guard<std::mutex> lock(g_mutex);
+    TRANS_CHECK_AND_RETURN_LOGE(
+        g_serverProxy != nullptr, TRANS_SDK, "softbus server g_serverProxy is nullptr");
+    if (g_serverProxy->GetRemoteObject(g_oldObject) != SOFTBUS_OK) {
+        g_oldObject = nullptr;
+        TRANS_LOGW(TRANS_SDK, "Failed to get old remote object.");
+    }
+    g_serverProxy.clear();
+    g_serverProxy = nullptr;
 }
 
 void TransServerProxyDeInit(void)
 {
     TRANS_LOGI(TRANS_SDK, "enter");
     std::lock_guard<std::mutex> lock(g_mutex);
+    TRANS_CHECK_AND_RETURN_LOGE(
+        g_serverProxy != nullptr, TRANS_SDK, "softbus server g_serverProxy is nullptr");
     g_serverProxy.clear();
+    g_serverProxy = nullptr;
 }
 
-int32_t ServerIpcCreateSessionServer(const char *pkgName, const char *sessionName)
+int32_t ServerIpcCreateSessionServer(const char *pkgName, const char *sessionName, uint64_t timestamp)
 {
     sptr<TransServerProxy> proxy = RetryGetProxy();
     TRANS_CHECK_AND_RETURN_RET_LOGE(
@@ -120,10 +137,10 @@ int32_t ServerIpcCreateSessionServer(const char *pkgName, const char *sessionNam
         return SOFTBUS_INVALID_PARAM;
     }
 
-    return proxy->CreateSessionServer(pkgName, sessionName);
+    return proxy->CreateSessionServer(pkgName, sessionName, timestamp);
 }
 
-int32_t ServerIpcRemoveSessionServer(const char *pkgName, const char *sessionName)
+int32_t ServerIpcRemoveSessionServer(const char *pkgName, const char *sessionName, uint64_t timestamp)
 {
     sptr<TransServerProxy> proxy = GetProxy();
     TRANS_CHECK_AND_RETURN_RET_LOGE(
@@ -133,7 +150,7 @@ int32_t ServerIpcRemoveSessionServer(const char *pkgName, const char *sessionNam
         TRANS_LOGE(TRANS_SDK, "pkgName or sessionName is nullptr!");
         return SOFTBUS_INVALID_PARAM;
     }
-    return proxy->RemoveSessionServer(pkgName, sessionName);
+    return proxy->RemoveSessionServer(pkgName, sessionName, timestamp);
 }
 
 int32_t ServerIpcOpenSession(const SessionParam *param, TransInfo *info)
@@ -330,4 +347,88 @@ int32_t ServerIpcPrivilegeCloseChannel(uint64_t tokenId, int32_t pid, const char
     TRANS_CHECK_AND_RETURN_RET_LOGE(
         proxy != nullptr, SOFTBUS_NO_INIT, TRANS_SDK, "softbus server g_serverProxy is nullptr");
     return proxy->PrivilegeCloseChannel(tokenId, pid, peerNetworkId);
+}
+
+int32_t ServerIpcOpenBrProxy(const char *brMac, const char *uuid)
+{
+    sptr<TransServerProxy> proxy = RetryGetProxy();
+    TRANS_CHECK_AND_RETURN_RET_LOGE(
+        proxy != nullptr, SOFTBUS_NO_INIT, TRANS_SDK, "[br_proxy] softbus server g_serverProxy is nullptr");
+ 
+    if (brMac == nullptr || uuid == nullptr) {
+        TRANS_LOGE(TRANS_SDK, "[br_proxy] parameter is nullptr!");
+        return SOFTBUS_INVALID_PARAM;
+    }
+ 
+    return proxy->OpenBrProxy(brMac, uuid);
+}
+ 
+int32_t ServerIpcCloseBrProxy(int32_t channelId)
+{
+    sptr<TransServerProxy> proxy = RetryGetProxy();
+    TRANS_CHECK_AND_RETURN_RET_LOGE(
+        proxy != nullptr, SOFTBUS_NO_INIT, TRANS_SDK, "[br_proxy] softbus server g_serverProxy is nullptr");
+ 
+    int32_t ret = proxy->CloseBrProxy(channelId);
+    if (ret != SOFTBUS_OK) {
+        TRANS_LOGE(TRANS_SDK, "[br_proxy] CloseBrProxy failed! ret=%{public}d.", ret);
+    }
+ 
+    return ret;
+}
+ 
+int32_t ServerIpcSendBrProxyData(int32_t channelId, char *data, uint32_t dataLen)
+{
+    sptr<TransServerProxy> proxy = RetryGetProxy();
+    TRANS_CHECK_AND_RETURN_RET_LOGE(
+        proxy != nullptr, SOFTBUS_NO_INIT, TRANS_SDK, "[br_proxy] softbus server g_serverProxy is nullptr");
+ 
+    int32_t ret = proxy->SendBrProxyData(channelId, data, dataLen);
+    if (ret != SOFTBUS_OK) {
+        TRANS_LOGE(TRANS_SDK, "[br_proxy] SendBrProxyData failed! ret=%{public}d.", ret);
+    }
+ 
+    return ret;
+}
+ 
+int32_t ServerIpcSetListenerState(int32_t channelId, int32_t type, bool CbEnabled)
+{
+    sptr<TransServerProxy> proxy = RetryGetProxy();
+    TRANS_CHECK_AND_RETURN_RET_LOGE(
+        proxy != nullptr, SOFTBUS_NO_INIT, TRANS_SDK, "[br_proxy] softbus server g_serverProxy is nullptr");
+ 
+    int32_t ret = proxy->SetListenerState(channelId, type, CbEnabled);
+    if (ret != SOFTBUS_OK) {
+        TRANS_LOGE(TRANS_SDK, "[br_proxy] SetListenerState failed! ret=%{public}d.", ret);
+    }
+ 
+    return ret;
+}
+ 
+int32_t ServerIpcIsProxyChannelEnabled(int32_t uid, bool *isEnable)
+{
+    sptr<TransServerProxy> proxy = RetryGetProxy();
+    TRANS_CHECK_AND_RETURN_RET_LOGE(
+        proxy != nullptr, SOFTBUS_NO_INIT, TRANS_SDK, "[br_proxy] softbus server g_serverProxy is nullptr");
+ 
+    int32_t ret = proxy->GetProxyChannelState(uid, isEnable);
+    if (ret != SOFTBUS_OK) {
+        TRANS_LOGE(TRANS_SDK, "[br_proxy] GetProxyChannelState failed! ret=%{public}d.", ret);
+    }
+ 
+    return ret;
+}
+
+int32_t ServerIpcRegisterPushHook()
+{
+    sptr<TransServerProxy> proxy = RetryGetProxy();
+    TRANS_CHECK_AND_RETURN_RET_LOGE(
+        proxy != nullptr, SOFTBUS_NO_INIT, TRANS_SDK, "[br_proxy] softbus server g_serverProxy is nullptr");
+
+    int32_t ret = proxy->RegisterPushHook();
+    if (ret != SOFTBUS_OK) {
+        TRANS_LOGE(TRANS_SDK, "[br_proxy] RegisterPushHook failed! ret=%{public}d.", ret);
+    }
+
+    return ret;
 }

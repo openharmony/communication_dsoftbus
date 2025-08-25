@@ -26,6 +26,7 @@ extern "C" {
 
 DiscoveryBleDispatcherInterface *DiscSoftBusBleInit(DiscInnerCallback *callback);
 void DiscSoftBusBleDeinit(void);
+void DiscSoftbusBleSetHandleId(uint32_t handleId);
 
 // TEST FUNCTION
 void PrintBleInfo(int32_t index);

@@ -75,8 +75,9 @@ void TestTransProxyAddAuthChannel(int32_t channelId, const char *identity, Proxy
     EXPECT_CALL(commMock, GenerateRandomStr).WillRepeatedly(Return(SOFTBUS_OK));
 
     AppInfo appInfo;
-    ProxyChannelInfo *chan = static_cast<ProxyChannelInfo *>(SoftBusCalloc(sizeof(ProxyChannelInfo)));
+    ProxyChannelInfo *chan = static_cast<ProxyChannelInfo *>(SoftBusMalloc(sizeof(ProxyChannelInfo)));
     ASSERT_TRUE(nullptr != chan);
+    (void)memset_s(chan, sizeof(ProxyChannelInfo), 0, sizeof(ProxyChannelInfo));
     chan->channelId = channelId;
     (void)strcpy_s(chan->identity, TEST_CHANNEL_IDENTITY_LEN, identity);
     chan->status = status;
@@ -144,6 +145,9 @@ HWTEST_F(TransProxyManagerTest, TransProxyCreateChanInfoTest001, TestSize.Level1
     EXPECT_CALL(authMock, AuthGetLatestIdByUuid).Times(0);
     TransConnInterfaceMock connMock;
     EXPECT_CALL(connMock, ConnPostBytes).WillRepeatedly(Return(SOFTBUS_OK));
+    EXPECT_CALL(commMock, SoftBusCalloc).WillRepeatedly([](unsigned int size) {
+        return new uint8_t[size];
+    });
 
     AppInfo appInfo;
     ProxyChannelInfo *chan = static_cast<ProxyChannelInfo *>(SoftBusCalloc(sizeof(ProxyChannelInfo)));
@@ -221,6 +225,10 @@ HWTEST_F(TransProxyManagerTest, TransProxyGetNameByChanIdTest001, TestSize.Level
     char sessionName[SESSION_NAME_SIZE_MAX] = {0};
     uint16_t pkgLen = PKG_NAME_SIZE_MAX;
     uint16_t sessionLen = SESSION_NAME_SIZE_MAX;
+    TransCommInterfaceMock commMock;
+    EXPECT_CALL(commMock, SoftBusCalloc).WillRepeatedly([](unsigned int size) {
+        return new uint8_t[size];
+    });
     int32_t ret = TransProxyGetNameByChanId(channelId, pkgName, sessionName, pkgLen, sessionLen);
     EXPECT_NE(SOFTBUS_OK, ret);
 
@@ -303,6 +311,9 @@ HWTEST_F(TransProxyManagerTest, TransProxyGetConnOptionByChanIdTest001, TestSize
 
     TransCommInterfaceMock commMock;
     EXPECT_CALL(commMock, GenerateRandomStr).WillRepeatedly(Return(SOFTBUS_OK));
+    EXPECT_CALL(commMock, SoftBusCalloc).WillRepeatedly([](unsigned int size) {
+        return new uint8_t[size];
+    });
 
     ProxyChannelInfo *chan = static_cast<ProxyChannelInfo *>(SoftBusCalloc(sizeof(ProxyChannelInfo)));
     ASSERT_TRUE(nullptr != chan);
@@ -353,6 +364,7 @@ HWTEST_F(TransProxyManagerTest, TransProxyChanProcessByReqIdTest001, TestSize.Le
 {
     int32_t channelId = 25;
     const char *identity = "25";
+    int32_t errCode = SOFTBUS_OK;
     TestTransProxyAddAuthChannel(channelId, identity, PROXY_CHANNEL_STATUS_PYH_CONNECTING);
 
     TransCommInterfaceMock commMock;
@@ -362,7 +374,7 @@ HWTEST_F(TransProxyManagerTest, TransProxyChanProcessByReqIdTest001, TestSize.Le
     EXPECT_CALL(connMock, ConnPostBytes).WillRepeatedly(Return(SOFTBUS_OK));
     EXPECT_CALL(connMock, ConnGetHeadSize).WillRepeatedly(Return(sizeof(ConnPktHead)));
 
-    TransProxyChanProcessByReqId(channelId, channelId);
+    TransProxyChanProcessByReqId(channelId, channelId, errCode);
     usleep(500000);
     ProxyChannelInfo chanInfo;
     int32_t ret = TransProxyGetSendMsgChanInfo(m_testProxyConningChannel, &chanInfo);
@@ -380,6 +392,10 @@ HWTEST_F(TransProxyManagerTest, TransProxyOnMessageReceivedTest005, TestSize.Lev
 {
     ProxyMessage msg;
     msg.msgHead.type = PROXYCHANNEL_MSG_TYPE_NORMAL;
+    TransCommInterfaceMock commMock;
+    EXPECT_CALL(commMock, SoftBusCalloc).WillRepeatedly([](unsigned int size) {
+        return new uint8_t[size];
+    });
     
     msg.msgHead.myId = -1;
     msg.msgHead.peerId = -1;
@@ -400,31 +416,6 @@ HWTEST_F(TransProxyManagerTest, TransProxyOnMessageReceivedTest005, TestSize.Lev
 }
 
 /**@
- * @tc.name: TransProxyCloseProxyChannelTest001
- * @tc.desc: test proxy close proxy channel.
- * @tc.type: FUNC
- * @tc.require:
- */
-HWTEST_F(TransProxyManagerTest, TransProxyCloseProxyChannelTest001, TestSize.Level1)
-{
-    int32_t channelId = -1;
-    int32_t ret = TransProxyCloseProxyChannel(channelId);
-    EXPECT_NE(SOFTBUS_OK, ret);
-
-    TestTransProxyAddAuthChannel(29, "29", PROXY_CHANNEL_STATUS_COMPLETED);
-
-    TransCommInterfaceMock commMock;
-    TransConnInterfaceMock connMock;
-    EXPECT_CALL(commMock, GenerateRandomStr).WillRepeatedly(Return(SOFTBUS_OK));
-    EXPECT_CALL(connMock, ConnDisconnectDevice).WillRepeatedly(Return(SOFTBUS_OK));
-    EXPECT_CALL(connMock, ConnGetHeadSize).WillRepeatedly(Return(sizeof(ConnPktHead)));
-    EXPECT_CALL(connMock, ConnPostBytes).WillRepeatedly(Return(SOFTBUS_OK));
-
-    ret = TransProxyCloseProxyChannel(channelId);
-    EXPECT_NE(SOFTBUS_OK, ret);
-}
-
-/**@
  * @tc.name: TransProxyDelChanByChanIdTest001
  * @tc.desc: test proxy del proxy channel.
  * @tc.type: FUNC
@@ -432,6 +423,10 @@ HWTEST_F(TransProxyManagerTest, TransProxyCloseProxyChannelTest001, TestSize.Lev
  */
 HWTEST_F(TransProxyManagerTest, TransProxyDelChanByChanIdTest001, TestSize.Level1)
 {
+    TransCommInterfaceMock commMock;
+    EXPECT_CALL(commMock, SoftBusCalloc).WillRepeatedly([](unsigned int size) {
+        return new uint8_t[size];
+    });
     TransProxyDelChanByChanId(m_testProxyAuthChannelId);
     ProxyChannelInfo chanInfo;
     int32_t ret = TransProxyGetSendMsgChanInfo(m_testProxyAuthChannelId, &chanInfo);
@@ -448,6 +443,10 @@ HWTEST_F(TransProxyManagerTest, TransProxyDelChanByReqIdTest001, TestSize.Level1
 {
     int32_t channelId = 31;
     const char *identity = "31";
+    TransCommInterfaceMock commMock;
+    EXPECT_CALL(commMock, SoftBusCalloc).WillRepeatedly([](unsigned int size) {
+        return new uint8_t[size];
+    });
     TestTransProxyAddAuthChannel(channelId, identity, PROXY_CHANNEL_STATUS_PYH_CONNECTING);
     TransProxyDelChanByReqId(channelId, 2);
     ProxyChannelInfo chanInfo;
@@ -465,6 +464,9 @@ HWTEST_F(TransProxyManagerTest, TransProxyDelByConnIdTest001, TestSize.Level1)
 {
     TransCommInterfaceMock commMock;
     TransConnInterfaceMock connMock;
+    EXPECT_CALL(commMock, SoftBusCalloc).WillRepeatedly([](unsigned int size) {
+        return new uint8_t[size];
+    });
     EXPECT_CALL(commMock, GenerateRandomStr).WillRepeatedly(Return(SOFTBUS_OK));
     EXPECT_CALL(connMock, ConnDisconnectDevice).WillRepeatedly(Return(SOFTBUS_OK));
     EXPECT_CALL(connMock, ConnGetHeadSize).WillRepeatedly(Return(sizeof(ConnPktHead)));
@@ -493,13 +495,16 @@ HWTEST_F(TransProxyManagerTest, TransProxyDeathCallbackTest001, TestSize.Level1)
     (void)strcpy_s(appInfo.myData.pkgName, TEST_PKG_NAME_LEN, "com.test.pkgname");
     appInfo.appType = APP_TYPE_AUTH;
     appInfo.myData.pid = TEST_DEATH_CHANNEL_ID;
+    TransCommInterfaceMock commMock;
+    EXPECT_CALL(commMock, SoftBusCalloc).WillRepeatedly([](unsigned int size) {
+        return new uint8_t[size];
+    });
     ProxyChannelInfo *chan = static_cast<ProxyChannelInfo *>(SoftBusCalloc(sizeof(ProxyChannelInfo)));
     ASSERT_TRUE(nullptr != chan);
     chan->channelId = TEST_DEATH_CHANNEL_ID;
     chan->connId = -1;
     chan->status = PROXY_CHANNEL_STATUS_KEEPLIVEING;
 
-    TransCommInterfaceMock commMock;
     TransConnInterfaceMock connMock;
     EXPECT_CALL(commMock, GenerateRandomStr).WillRepeatedly(Return(SOFTBUS_OK));
     EXPECT_CALL(connMock, ConnDisconnectDevice).WillRepeatedly(Return(SOFTBUS_OK));

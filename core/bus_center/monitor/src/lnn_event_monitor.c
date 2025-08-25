@@ -37,7 +37,7 @@ typedef enum {
 } MonitorImplType;
 
 static LnnInitEventMonitorImpl g_monitorImplInit[MONITOR_IMPL_MAX_TYPE] = {
-    LnnInitNetlinkMonitorImpl,
+    LnnInitNetlinkMonitorImplNotify,
     LnnInitProductMonitorImpl,
     LnnInitLwipMonitorImpl,
     LnnInitWifiServiceMonitorImpl,

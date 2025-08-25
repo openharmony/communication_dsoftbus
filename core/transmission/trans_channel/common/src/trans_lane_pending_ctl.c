@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2022-2024 Huawei Device Co., Ltd.
+ * Copyright (c) 2022-2025 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -21,6 +21,9 @@
 #include "auth_interface.h"
 #include "bus_center_manager.h"
 #include "common_list.h"
+#include "g_enhance_lnn_func_pack.h"
+#include "g_enhance_trans_func.h"
+#include "g_enhance_trans_func_pack.h"
 #include "lnn_distributed_net_ledger.h"
 #include "permission_entry.h"
 #include "softbus_adapter_mem.h"
@@ -30,15 +33,18 @@
 #include "softbus_proxychannel_manager.h"
 #include "softbus_proxychannel_network.h"
 #include "softbus_utils.h"
+#include "softbus_init_common.h"
+#include "legacy/softbus_adapter_hitrace.h"
 #include "trans_channel_common.h"
 #include "trans_channel_manager.h"
 #include "trans_client_proxy.h"
 #include "trans_event.h"
+#include "trans_ipc_adapter.h"
 #include "trans_lane_manager.h"
 #include "trans_log.h"
 #include "trans_network_statistics.h"
-#include "trans_qos_info.h"
 #include "trans_session_manager.h"
+#include "trans_uk_manager.h"
 
 #define MIN(a, b) ((a) < (b) ? (a) : (b))
 
@@ -47,6 +53,7 @@
 #define SESSION_NAME_PHONEPAD "com.huawei.pcassistant.phonepad-connect-channel"
 #define SESSION_NAME_CASTPLUS "CastPlusSessionName"
 #define SESSION_NAME_DISTRIBUTE_COMMUNICATION "com.huawei.boosterd.user"
+#define SESSION_NAME_TRIGGER_VIRTUAL_LINK "com.huawei.boosterd.signal"
 #define SESSION_NAME_ISHARE "IShare"
 #define ISHARE_MIN_NAME_LEN 6
 #define SESSION_NAME_DBD "distributeddata-default"
@@ -211,6 +218,9 @@ void TransFreeLanePendingDeinit(void)
 
 static void DestroyNetworkingReqItemParam(TransReqLaneItem *laneItem)
 {
+    if (laneItem == NULL) {
+        return;
+    }
     if (laneItem->param.sessionName != NULL) {
         SoftBusFree((void *)(laneItem->param.sessionName));
         laneItem->param.sessionName = NULL;
@@ -327,6 +337,10 @@ static void CallbackOpenChannelFailed(const SessionParam *param, const AppInfo *
 
 static int32_t CopyAsyncReqItemSessionParamIds(const SessionParam *source, SessionParam *target)
 {
+    if (source == NULL || target == NULL) {
+        TRANS_LOGE(TRANS_SVC, "invalid param");
+        return SOFTBUS_INVALID_PARAM;
+    }
     char *groupId = (char *)SoftBusCalloc(sizeof(char) * GROUP_ID_SIZE_MAX);
     TRANS_CHECK_AND_RETURN_RET_LOGE(groupId != NULL, SOFTBUS_MALLOC_ERR, TRANS_SVC, "SoftBusCalloc groupId failed");
     if (source->groupId != NULL && strcpy_s(groupId, GROUP_ID_SIZE_MAX, source->groupId) != EOK) {
@@ -389,8 +403,8 @@ static int32_t CopyAsyncReqItemSessionParam(const SessionParam *source, SessionP
     return CopyAsyncReqItemSessionParamIds(source, target);
 }
 
-static int32_t TransAddAsyncLaneReqFromPendingList(uint32_t laneHandle, const SessionParam *param,
-    uint64_t callingTokenId, int64_t timeStart)
+static int32_t TransAddAsyncLaneReqFromPendingList(
+    uint32_t laneHandle, const SessionParam *param, uint64_t callingTokenId, int64_t timeStart)
 {
     if (g_asyncReqLanePendingList == NULL) {
         TRANS_LOGE(TRANS_SVC, "lane pending list no init.");
@@ -407,8 +421,11 @@ static int32_t TransAddAsyncLaneReqFromPendingList(uint32_t laneHandle, const Se
     item->bSucc = false;
     item->isFinished = false;
     item->callingTokenId = callingTokenId;
-    item->firstTokenId = TransACLGetFirstTokenID();
+    item->firstTokenId = TransAclGetFirstTokenID();
     item->timeStart = timeStart;
+    item->param.flowInfo.flowSize = param->flowInfo.flowSize;
+    item->param.flowInfo.sessionType = param->flowInfo.sessionType;
+    item->param.flowInfo.flowQosType = param->flowInfo.flowQosType;
     if (CopyAsyncReqItemSessionParam(param, &(item->param)) != SOFTBUS_OK) {
         DestroyAsyncReqItemParam(&(item->param));
         SoftBusFree(item);
@@ -420,6 +437,7 @@ static int32_t TransAddAsyncLaneReqFromPendingList(uint32_t laneHandle, const Se
     item->param.sessionId = param->sessionId;
     item->param.actionId = param->actionId;
     item->param.pid = param->pid;
+    item->param.isLowLatency = param->isLowLatency;
     if (SoftBusMutexLock(&g_asyncReqLanePendingList->lock) != SOFTBUS_OK) {
         DestroyAsyncReqItemParam(&(item->param));
         SoftBusFree(item);
@@ -430,8 +448,8 @@ static int32_t TransAddAsyncLaneReqFromPendingList(uint32_t laneHandle, const Se
     ListAdd(&(g_asyncReqLanePendingList->list), &(item->node));
     g_asyncReqLanePendingList->cnt++;
     (void)SoftBusMutexUnlock(&g_asyncReqLanePendingList->lock);
-    TRANS_LOGI(TRANS_SVC, "add async request to pending list laneHandle=%{public}u, socket=%{public}d",
-        laneHandle, param->sessionId);
+    TRANS_LOGI(TRANS_SVC, "add async request to pending list laneHandle=%{public}u, socket=%{public}d", laneHandle,
+        param->sessionId);
     return SOFTBUS_OK;
 }
 
@@ -634,6 +652,7 @@ static int32_t TransProxyGetAppInfo(const char *sessionName, const char *peerNet
     appInfo->appType = APP_TYPE_INNER;
     appInfo->myData.apiVersion = API_V2;
     appInfo->autoCloseTime = 0;
+    appInfo->channelCapability = TRANS_CHANNEL_CAPABILITY;
     ret = LnnGetLocalStrInfo(STRING_KEY_UUID, appInfo->myData.deviceId, sizeof(appInfo->myData.deviceId));
     if (ret != SOFTBUS_OK) {
         TRANS_LOGE(TRANS_CTRL, "get local uuid fail. ret=%{public}d", ret);
@@ -662,7 +681,10 @@ static int32_t TransProxyGetAppInfo(const char *sessionName, const char *peerNet
 
     GetRemoteUdidWithNetworkId(peerNetworkId, appInfo->peerUdid, sizeof(appInfo->peerUdid));
     TransGetRemoteDeviceVersion(peerNetworkId, CATEGORY_NETWORK_ID, appInfo->peerVersion, sizeof(appInfo->peerVersion));
-
+    if (GetUkPolicy(appInfo) == NO_NEED_UK) {
+        TRANS_LOGI(TRANS_CTRL, "No need sink generate key.");
+        DisableCapabilityBit(&(appInfo->channelCapability), TRANS_CHANNEL_SINK_GENERATE_KEY_OFFSET);
+    }
     return SOFTBUS_OK;
 }
 
@@ -733,6 +755,7 @@ static void TransAsyncOpenChannelProc(uint32_t laneHandle, SessionParam *param, 
     extra->peerUdid = appInfo->peerUdid;
     extra->osType = (appInfo->osType < 0) ? UNKNOW_OS_TYPE : appInfo->osType;
     appInfo->connectType = connOpt.type;
+    appInfo->myData.sessionId = param->sessionId;
     extra->linkType = connOpt.type;
     FillAppInfo(appInfo, param, &transInfo, connInnerInfo);
     TransOpenChannelSetModule(transInfo.channelType, &connOpt);
@@ -879,6 +902,7 @@ static void TransBuildLaneAllocFailEvent(
 
 static void TransOnAsyncLaneFail(uint32_t laneHandle, int32_t reason)
 {
+    SoftBusHitraceChainBegin("TransOnAsyncLaneFail");
     TRANS_LOGI(TRANS_SVC, "request failed, laneHandle=%{public}u, reason=%{public}d", laneHandle, reason);
     SessionParam param;
     (void)memset_s(&param, sizeof(SessionParam), 0, sizeof(SessionParam));
@@ -891,6 +915,7 @@ static void TransOnAsyncLaneFail(uint32_t laneHandle, int32_t reason)
         TRANS_LOGE(TRANS_SVC, "get lane req item failed. laneHandle=%{public}u, ret=%{public}d", laneHandle, ret);
         (void)TransDeleteSocketChannelInfoBySession(param.sessionName, param.sessionId);
         (void)TransDelLaneReqFromPendingList(laneHandle, true);
+        SoftBusHitraceChainEnd();
         return;
     }
     LaneTransType transType = (LaneTransType)TransGetLaneTransTypeBySession(&param);
@@ -906,6 +931,7 @@ static void TransOnAsyncLaneFail(uint32_t laneHandle, int32_t reason)
     if (ret != SOFTBUS_OK) {
         TRANS_LOGE(TRANS_SVC, "CreateAppInfoByParam failed");
         CallbackOpenChannelFailed(&param, &appInfo, reason);
+        SoftBusHitraceChainEnd();
         return;
     }
     appInfo.callingTokenId = callingTokenId;
@@ -918,6 +944,7 @@ static void TransOnAsyncLaneFail(uint32_t laneHandle, int32_t reason)
     TRANS_EVENT(EVENT_SCENE_OPEN_CHANNEL, EVENT_STAGE_OPEN_CHANNEL_END, extra);
     (void)TransDeleteSocketChannelInfoBySession(param.sessionName, param.sessionId);
     (void)TransDelLaneReqFromPendingList(laneHandle, true);
+    SoftBusHitraceChainEnd();
 }
 
 static void TransOnLaneRequestFail(uint32_t laneHandle, int32_t reason)
@@ -1057,6 +1084,8 @@ static const LaneLinkType g_laneMap[LINK_TYPE_MAX + 1] = {
     LANE_COC,
     LANE_COC_DIRECT,
     LANE_HML,
+    LANE_SLE,
+    LANE_SLE_DIRECT,
 };
 static LaneLinkType TransGetLaneLinkTypeBySessionLinkType(LinkType type)
 {
@@ -1066,6 +1095,10 @@ static LaneLinkType TransGetLaneLinkTypeBySessionLinkType(LinkType type)
 static void TransformSessionPreferredToLanePreferred(const SessionParam *param,
     LanePreferredLinkList *preferred, TransOption *transOption)
 {
+    if (param == NULL || param->attr == NULL || preferred == NULL) {
+        TRANS_LOGE(TRANS_SVC, "invalid param");
+        return;
+    }
     (void)transOption;
     if (param->attr->linkTypeNum <= 0 || param->attr->linkTypeNum > LINK_TYPE_MAX) {
         preferred->linkTypeNum = 0;
@@ -1161,6 +1194,10 @@ static void TransGetQosInfo(const SessionParam *param, QosInfo *qosInfo, AllocEx
         TRANS_LOGD(TRANS_SVC, "not support qos lane");
         return;
     }
+    if (param->qosCount > QOS_TYPE_BUTT) {
+        TRANS_LOGE(TRANS_SDK, "read invalid qosCount=%{public}" PRIu32, param->qosCount);
+        return;
+    }
 
     for (uint32_t i = 0; i < param->qosCount; i++) {
         switch (param->qos[i].qos) {
@@ -1182,8 +1219,11 @@ static void TransGetQosInfo(const SessionParam *param, QosInfo *qosInfo, AllocEx
             case QOS_TYPE_REUSE_BE:
                 qosInfo->reuseBestEffort = (param->qos[i].value != 0) ? true : false;
                 break;
+            case QOS_TYPE_TRANS_RATE_PREFERENCE:
+                qosInfo->ratePreference = (param->qos[i].value != 0) ? true : false;
+                break;
             default:
-                GetExtQosInfo(param, qosInfo, i, extendInfo);
+                GetExtQosInfoPacked(param, qosInfo, i, extendInfo);
                 break;
         }
     }
@@ -1226,6 +1266,9 @@ static int32_t GetAllocInfoBySessionParam(const SessionParam *param, LaneAllocIn
     if (transType == LANE_T_BUTT) {
         return SOFTBUS_TRANS_INVALID_SESSION_TYPE;
     }
+    allocInfo->extendInfo.flowInfo.flowSize = param->flowInfo.flowSize;
+    allocInfo->extendInfo.flowInfo.sessionType = param->flowInfo.sessionType;
+    allocInfo->extendInfo.flowInfo.flowQosType = param->flowInfo.flowQosType;
     allocInfo->extendInfo.actionAddr = param->actionId;
     allocInfo->extendInfo.isSupportIpv6 = (param->attr->dataType != TYPE_STREAM && param->actionId > 0);
     allocInfo->extendInfo.networkDelegate = false;
@@ -1568,6 +1611,10 @@ int32_t TransAsyncGetLaneInfoByQos(const SessionParam *param, const LaneAllocInf
         (void)TransDelLaneReqFromPendingList(*laneHandle, true);
         return ret;
     }
+    if (strcmp(param->sessionName, SESSION_NAME_TRIGGER_VIRTUAL_LINK) == 0) {
+        TRANS_LOGE(TRANS_SVC, "trigger begin");
+        DcTriggerVirtualLinkPacked(param->peerDeviceId);
+    }
     CoreSessionState state = CORE_SESSION_STATE_INIT;
     TransGetSocketChannelStateBySession(param->sessionName, param->sessionId, &state);
     if (state == CORE_SESSION_STATE_CANCELLING) {
@@ -1670,6 +1717,18 @@ static int32_t SetBleConnInfo(const BleConnInfo *bleInfo, ConnectOption *connOpt
     return SOFTBUS_OK;
 }
 
+static int32_t SetSleDirectConnInfo(const SleDirectConnInfo *sleDirect, ConnectOption *connOpt)
+{
+    if (memcpy_s(connOpt->sleDirectOption.networkId, NETWORK_ID_BUF_LEN,
+        sleDirect->networkId, NETWORK_ID_BUF_LEN) != EOK) {
+        TRANS_LOGW(TRANS_SVC, "set networkId err.");
+        return SOFTBUS_STRCPY_ERR;
+    }
+    connOpt->type = CONNECT_SLE_DIRECT;
+    connOpt->sleDirectOption.protoType = sleDirect->protoType;
+    return SOFTBUS_OK;
+}
+
 static int32_t SetBleDirectConnInfo(const BleDirectConnInfo *bleDirect, ConnectOption *connOpt)
 {
     if (strcpy_s(connOpt->bleDirectOption.networkId, NETWORK_ID_BUF_LEN, bleDirect->networkId) != EOK) {
@@ -1694,6 +1753,19 @@ static int32_t SetHmlConnectInfo(const P2pConnInfo *p2pInfo, ConnectOption *conn
     return SOFTBUS_OK;
 }
 
+static int32_t SetUsbConnInfo(const UsbConnInfo *connInfo, ConnectOption *connOpt)
+{
+    connOpt->type = CONNECT_TCP;
+    connOpt->socketOption.port = (int32_t)connInfo->port;
+    connOpt->socketOption.protocol = connInfo->protocol;
+    connOpt->socketOption.moduleId = DIRECT_CHANNEL_SERVER_USB;
+    if (strcpy_s(connOpt->socketOption.addr, sizeof(connOpt->socketOption.addr), connInfo->addr) != EOK) {
+        TRANS_LOGE(TRANS_SVC, "set usb localIp err");
+        return SOFTBUS_STRCPY_ERR;
+    }
+    return SOFTBUS_OK;
+}
+
 int32_t TransGetConnectOptByConnInfo(const LaneConnInfo *info, ConnectOption *connOpt)
 {
     if (info == NULL || connOpt == NULL) {
@@ -1714,6 +1786,10 @@ int32_t TransGetConnectOptByConnInfo(const LaneConnInfo *info, ConnectOption *co
         return SetBleDirectConnInfo(&(info->connInfo.bleDirect), connOpt);
     } else if (info->type == LANE_HML) {
         return SetHmlConnectInfo(&(info->connInfo.p2p), connOpt);
+    } else if (info->type == LANE_USB) {
+        return SetUsbConnInfo(&(info->connInfo.usb), connOpt);
+    } else if (info->type == LANE_SLE_DIRECT) {
+        return SetSleDirectConnInfo(&(info->connInfo.sleDirect), connOpt);
     }
 
     TRANS_LOGE(TRANS_SVC, "get conn opt err: type=%{public}d", info->type);

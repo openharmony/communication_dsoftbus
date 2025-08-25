@@ -19,7 +19,6 @@
 #include "bus_center_decision_center.h"
 #include "bus_center_decision_center_mock.h"
 #include "bus_center_manager.h"
-#include "lnn_decision_center.h"
 #include "lnn_log.h"
 #include "lnn_net_builder_mock.h"
 #include "lnn_node_info.h"
@@ -71,8 +70,8 @@ HWTEST_F(BusCenterDecisionCenterTest, LnnDCProcessOnlineState_Test01, TestSize.L
 {
     bool isOnline = true;
     NodeBasicInfo info;
-    int32_t ret = InitDecisionCenter();
     (void)memset_s(&info, sizeof(NodeBasicInfo), 0, sizeof(NodeBasicInfo));
+    int32_t ret = InitDecisionCenter();
     LnnDCProcessOnlineState(isOnline, &info);
     EXPECT_EQ(ret, SOFTBUS_OK);
 }
@@ -87,6 +86,7 @@ HWTEST_F(BusCenterDecisionCenterTest, LnnDCProcessOnlineState_Test02, TestSize.L
 {
     bool isOnline = false;
     NodeBasicInfo info;
+    (void)memset_s(&info, sizeof(NodeBasicInfo), 0, sizeof(NodeBasicInfo));
     int32_t ret = InitDecisionCenter();
     NiceMock<BusCenterDecisionCenterInterfaceMock> busCenterDecisionCenterMock;
     EXPECT_CALL(busCenterDecisionCenterMock, LnnGetRemoteNodeInfoById).WillOnce(Return(SOFTBUS_INVALID_PARAM));
@@ -104,6 +104,7 @@ HWTEST_F(BusCenterDecisionCenterTest, LnnDCProcessOnlineState_Test03, TestSize.L
 {
     bool isOnline = false;
     NodeBasicInfo info;
+    (void)memset_s(&info, sizeof(NodeBasicInfo), 0, sizeof(NodeBasicInfo));
     NiceMock<BusCenterDecisionCenterInterfaceMock> busCenterDecisionCenterMock;
     int32_t ret = InitDecisionCenter();
     EXPECT_CALL(busCenterDecisionCenterMock, LnnGetRemoteNodeInfoById).WillOnce(Return(SOFTBUS_OK));
@@ -505,5 +506,4 @@ HWTEST_F(BusCenterDecisionCenterTest, DeinitDecisionCenterTest_2, TestSize.Level
         g_exceptionConnMgr.connections = nullptr;
     }
 }
-
 } // namespace OHOS
