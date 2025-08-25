@@ -2610,7 +2610,9 @@ ohos_unittest("LNNLaneLinkP2pTest") {
     "$dsoftbus_root_path/core/bus_center/utils/src/lnn_async_callback_utils.c",
     "$dsoftbus_root_path/core/bus_center/utils/src/lnn_map.c",
     "$dsoftbus_root_path/tests/core/bus_center/lnn/lane/src/lnn_lane_deps_mock.cpp",
+    "$dsoftbus_root_path/tests/core/bus_center/lnn/lane/src/lnn_lane_net_capability_mock.cpp",
     "$dsoftbus_root_path/tests/core/bus_center/lnn/lane_link/lnn_lane_link_deps_mock.cpp",
+    "$dsoftbus_root_path/tests/core/bus_center/lnn/lane_link/lnn_lane_link_p2p_deps_mock.cpp",
     "$dsoftbus_root_path/tests/core/bus_center/lnn/lane_link/lnn_lane_link_p2p_test.cpp",
   ]
 
@@ -3290,6 +3292,7 @@ ohos_unittest("LNNDataCloudSyncMockTest") {
     "$dsoftbus_root_path/core/authentication/interface",
     "$dsoftbus_root_path/core/bus_center/interface",
     "$dsoftbus_root_path/core/bus_center/lnn/lane_hub/heartbeat/include",
+    "$dsoftbus_root_path/core/bus_center/lnn/lane_hub/lane_manager/include",
     "$dsoftbus_root_path/core/bus_center/lnn/net_builder/include",
     "$dsoftbus_root_path/core/bus_center/lnn/net_builder/src",
     "$dsoftbus_root_path/core/bus_center/lnn/net_ledger/common/include",
@@ -4009,6 +4012,7 @@ group("unittest") {
   if (dsoftbus_feature_lnn_lane_mgr) {
     deps += [
       ":LNNLaneLinkConflictTest",
+      ":LNNLaneLinkP2pTest",
       ":LNNLaneLinkTest",
       ":LNNLaneLinkWifiDirectTest",
       ":LNNLaneListenerTest",

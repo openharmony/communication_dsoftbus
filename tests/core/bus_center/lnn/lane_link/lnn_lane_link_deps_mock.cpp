@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2023 Huawei Device Co., Ltd.
+ * Copyright (c) 2025 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -208,6 +208,27 @@ void DeinitLinkLedger(void)
 bool CheckLaneLinkExistByType(LaneLinkType linkType)
 {
     return GetLaneLinkDepsInterface()->CheckLaneLinkExistByType(linkType);
+}
+
+int32_t CreateWDLinkInfo(uint32_t p2pRequestId, const struct WifiDirectLink *link, LaneLinkInfo *linkInfo)
+{
+    return GetLaneLinkDepsInterface()->CreateWDLinkInfo(p2pRequestId, link, linkInfo);
+}
+
+void TryDelPreLinkByConnReqId(uint32_t connReqId)
+{
+    return GetLaneLinkDepsInterface()->TryDelPreLinkByConnReqId(connReqId);
+}
+
+int32_t CheckTransReqInfo(const LinkRequest *request, uint32_t laneReqId)
+{
+    return GetLaneLinkDepsInterface()->CheckTransReqInfo(request, laneReqId);
+}
+
+int32_t GetWifiDirectParamWithReuse(const LinkRequest *request, uint32_t laneReqId,
+    struct WifiDirectConnectInfo *wifiDirectInfo)
+{
+    return GetLaneLinkDepsInterface()->GetWifiDirectParamWithReuse(request, laneReqId, wifiDirectInfo);
 }
 }
 } // namespace OHOS
