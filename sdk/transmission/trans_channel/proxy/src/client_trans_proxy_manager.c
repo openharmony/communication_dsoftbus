@@ -972,7 +972,7 @@ static int32_t ClientTransProxyNoSubPacketD2DDataProc(
                 TRANS_SDK, "dataLen=%{public}d, channelId=%{public}d, inlen=%{public}d", head.dataLen, channelId, len);
             return SOFTBUS_INVALID_DATA_HEAD;
         }
-        if (memcpy_s(&nonce, NONCE_LEN, data + offSet, NONCE_LEN) != EOK) {
+        if (memcpy_s(&nonce, sizeof(uint16_t), data + offSet, NONCE_LEN) != EOK) {
             TRANS_LOGE(TRANS_SDK, "memcpy nonce failed");
             return SOFTBUS_MEM_ERR;
         }
