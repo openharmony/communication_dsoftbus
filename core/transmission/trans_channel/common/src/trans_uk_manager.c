@@ -404,6 +404,23 @@ int32_t EncryptAndAddSinkSessionKey(cJSON *msg, const AppInfo *appInfo)
     return SOFTBUS_OK;
 }
 
+static void OnGenUkSuccess(uint32_t requestId, int32_t ukId)
+{
+    (void)requestId;
+    (void)ukId;
+}
+
+static void OnGenUkFailed(uint32_t requestId, int32_t reason)
+{
+    (void)requestId;
+    (void)reason;
+}
+
+static AuthGenUkCallback authGenUkCallback = {
+    .onGenSuccess = OnGenUkSuccess,
+    .onGenFailed = OnGenUkFailed,
+};
+
 int32_t DecryptAndAddSinkSessionKey(const cJSON *msg, AppInfo *appInfo)
 {
     if (appInfo == NULL || msg == NULL) {
@@ -424,7 +441,16 @@ int32_t DecryptAndAddSinkSessionKey(const cJSON *msg, AppInfo *appInfo)
                 return ret;
             }
             ret = AuthFindUkIdByAclInfo(&aclInfo, &appInfo->myData.userKeyId);
-            TRANS_CHECK_AND_RETURN_RET_LOGE(ret == SOFTBUS_OK, ret, TRANS_CTRL, "find uk failed, ret=%{public}d", ret);
+            if (ret == SOFTBUS_AUTH_ACL_NOT_FOUND) {
+                TRANS_LOGE(TRANS_CTRL, "find uk failed no acl, ret=%{public}d", ret);
+                return ret;
+            }
+            if (ret != SOFTBUS_OK) {
+                uint32_t requestId = AuthGenRequestId();
+                (void)AuthGenUkIdByAclInfo(&aclInfo, requestId, &authGenUkCallback);
+                TRANS_LOGE(TRANS_CTRL, "find uk failed and get uk, ret=%{public}d", ret);
+                return ret;
+            }
             char decodeEncryptKey[ENCRYPT_KEY_LENGTH] = { 0 };
             size_t len = 0;
             if (SoftBusBase64Decode((unsigned char *)decodeEncryptKey, ENCRYPT_KEY_LENGTH, &len,
