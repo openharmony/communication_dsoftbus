@@ -19,11 +19,11 @@
 #ifdef __cplusplus
 extern "C" {
 #endif
- 
+
 #define DELAY_TIME_DEFAULT (60 * 60 * 1000)
- 
+
 #ifdef __cplusplus
 }
 #endif /* __cplusplus */
- 
+
 #endif // BROADCAST_DFX_EVENT_STRUCT_H
