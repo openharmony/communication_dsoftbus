@@ -587,8 +587,6 @@ void DiscOopBleDeinitPacked(void)
     return pfnDiscEnhanceFuncList->discOopBleDeinit();
 }
 
-
-
 void DiscCoapReportNotificationPacked(const NSTACKX_NotificationConfig *notification)
 {
     DiscEnhanceFuncList *pfnDiscEnhanceFuncList = DiscEnhanceFuncListGet();
@@ -610,10 +608,6 @@ int32_t DiscCoapFillServiceDataPacked(const PublishOption *option, char *outData
     return pfnDiscEnhanceFuncList->discCoapFillServiceData(option, outData, outDataLen, allCap);
 }
 #endif /* DSOFTBUS_FEATURE_DISC_COAP */
-
-
-
-
 
 int32_t DiscApproachBleEventInitPacked(void)
 {
