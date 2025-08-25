@@ -87,6 +87,8 @@ HWTEST_F(HeartBeatMediumStaticTest, HbGetRepeatThresholdByTypeTest_01, TestSize.
     EXPECT_EQ(ret, HB_REPEAD_RECV_THRESHOLD_MULTI_DEVICE);
     NodeInfo nodeInfo;
     (void)memset_s(&nodeInfo, sizeof(NodeInfo), 0, sizeof(NodeInfo));
+    char udidId[] = "1123344";
+    EXPECT_EQ(strcpy_s(nodeInfo.deviceInfo.deviceUdid, UDID_BUF_LEN, udidId), EOK);
     nodeInfo.deviceInfo.deviceTypeId = TYPE_PC_ID;
     EXPECT_CALL(ledgerMock, LnnGetRemoteNodeInfoById).WillOnce(DoAll(SetArgPointee<2>(nodeInfo), Return(SOFTBUS_OK)));
     char networkId[] = "1123344";
