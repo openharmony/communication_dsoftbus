@@ -57,7 +57,7 @@ typedef struct {
     char uidHash[MAX_ACCOUNT_HASH_LEN];
     char version;
     bool isEncrpted;
-    uint16_t SeqNo;
+    uint16_t seqNo;
     unsigned char *data;
     uint32_t dataLen;
 } EventNotify;
@@ -76,4 +76,4 @@ typedef struct {
 #ifdef __cplusplus
 }
 #endif
-#endif  //BROADCAST_STRUCT_H
+#endif  // BROADCAST_STRUCT_H
