@@ -33,7 +33,8 @@ typedef bool (*IsNeedUDIDAbatementFunc)(const AuthSessionInfo *info);
 typedef int32_t (*GenerateCertificateFunc)(SoftbusCertChain *softbusCertChain, const AuthSessionInfo *info);
 typedef int32_t (*VerifyCertificateFunc)(
     SoftbusCertChain *softbusCertChain, const NodeInfo *nodeInfo, const AuthSessionInfo *info);
-typedef void (*AuthUpdateNormalizeKeyIndexFunc)(const char *udidHash, int64_t index, AuthLinkType type, SessionKey *normalizedKey,
+typedef void (*AuthUpdateNormalizeKeyIndexFunc)(const char *udidHash,
+    int64_t index, AuthLinkType type, SessionKey *normalizedKey,
     bool isServer);
 typedef void (*DelAuthMetaManagerByConnectionIdFunc)(uint32_t connectionId);
 typedef int32_t (*AuthMetaGetConnInfoBySideFunc)(const char *uuid, bool isClient, AuthConnInfo *connInfo);

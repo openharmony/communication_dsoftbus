@@ -2447,7 +2447,7 @@ HWTEST_F(SoftbusProxyChannelManagerTest, CopyAppInfoFastTransData001, TestSize.L
     SoftBusFree(appInfo);
 }
 
-/**JU 
+/**JU
  * @tc.name: TransProxyUpdateSinkAccessInfo001
  * @tc.desc: test update sink access info.
  * @tc.type: FUNC
