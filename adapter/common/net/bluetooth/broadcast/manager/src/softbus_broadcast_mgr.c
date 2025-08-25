@@ -2026,7 +2026,7 @@ static int32_t DisableBroadcastingWaitSignal(int32_t bcId, SoftBusMutex *mutex)
     ret = SoftbusPauseCondWaitSec(BC_WAIT_TIME_SEC, bcId, mutex, &g_bcManager[bcId].enableCond);
     DISC_LOGW(DISC_BROADCAST, "wait signal ret=%{public}d", ret);
     g_bcManager[bcId].isDisabled = false;
-
+    g_bcManager[bcId].isAdvertising = true;
     return SOFTBUS_BC_MGR_WAIT_COND_FAIL;
 }
 
