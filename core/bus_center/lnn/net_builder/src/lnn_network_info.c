@@ -587,7 +587,7 @@ static void UpdateVirtualLinkStaticCap(void)
     }
     uint32_t oldCap = staticNetCap;
     if (GetWifiDirectManager() == NULL || GetWifiDirectManager()->getVirtualLinkCapabilityCode == NULL) {
-        LNN_LOGI(LNN_BUILDER, "failed to get wifi direct manager.");
+        LNN_LOGE(LNN_BUILDER, "failed to get wifi direct manager.");
         return;
     }
     VirtualLinkCapabilityCode code = GetWifiDirectManager()->getVirtualLinkCapabilityCode();
@@ -595,7 +595,7 @@ static void UpdateVirtualLinkStaticCap(void)
     if (code != CONN_VIRTUAL_LINK_NOT_SUPPORT) {
         ret = LnnSetStaticNetCap(&staticNetCap, STATIC_CAP_BIT_VIRTUAL_LINK);
         if (ret != SOFTBUS_OK) {
-            LNN_LOGE(LNN_BUILDER, "clear staticNetCap failed, ret=%{public}d.", ret);
+            LNN_LOGE(LNN_BUILDER, "set staticNetCap failed, ret=%{public}d.", ret);
             return;
         }
     } else {
