@@ -100,5 +100,15 @@ int32_t HandleLaneQosChange(const LaneLinkInfo *laneLinkInfo)
 {
     return GetLaneListenerDepsInterface()->HandleLaneQosChange(laneLinkInfo);
 }
+
+int32_t GetTransReqInfoByLaneReqId(uint32_t laneReqId, TransReqInfo *reqInfo)
+{
+    return GetLaneListenerDepsInterface()->GetTransReqInfoByLaneReqId(laneReqId, reqInfo);
+}
+
+void LnnDeleteLinkLedgerInfo(const char *udid)
+{
+    return GetLaneListenerDepsInterface()->LnnDeleteLinkLedgerInfo(udid);
+}
 }
 } // namespace OHOS

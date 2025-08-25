@@ -19,16 +19,13 @@
 #include <shared_mutex>
 
 #include "data/interface_info.h"
+#include "dfx/interface_snapshot.h"
 #include "wifi_direct_initiator.h"
 
 namespace OHOS::SoftBus {
 class InterfaceManager {
 public:
-    static InterfaceManager& GetInstance()
-    {
-        static InterfaceManager instance;
-        return instance;
-    }
+    static InterfaceManager& GetInstance();
 
     using Updater = std::function<int(InterfaceInfo &)>;
     using Reader = std::function<int(const InterfaceInfo &)>;
@@ -43,6 +40,8 @@ public:
 
     static void Init();
     void InitInterface(InterfaceInfo::InterfaceType type);
+
+    void Dump(std::list<std::shared_ptr<InterfaceSnapshot>> &snapshots);
 
 private:
     class Initiator {

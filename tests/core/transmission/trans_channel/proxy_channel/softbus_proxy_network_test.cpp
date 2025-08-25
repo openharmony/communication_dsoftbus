@@ -19,9 +19,10 @@
 #include "gtest/gtest.h"
 #include "softbus_error_code.h"
 #include "softbus_protocol_def.h"
+#include "softbus_proxy_network_mock_test.h"
 #include "softbus_proxychannel_callback.h"
 #include "softbus_proxychannel_listener.h"
-#include "softbus_proxychannel_network.h"
+#include "softbus_proxychannel_network.c"
 #include "softbus_transmission_interface.h"
 
 using namespace testing;
@@ -33,6 +34,7 @@ namespace OHOS {
 #define TEST_VALID_SESSIONNAME "com.test.sessionname"
 #define TEST_VALID_PEER_NETWORKID "12345678"
 #define TEST_NUMBER_256 256
+#define TEST_CHANNEL_ID 1314
 
 class SoftbusProxyNetworkTest : public testing::Test {
 public:
@@ -147,15 +149,15 @@ HWTEST_F(SoftbusProxyNetworkTest, TransNoRegisterListenerTest001, TestSize.Level
     SoftbusProxyNetworkTest::TestRegisterNetworkingChannelListener();
     char sessionName[TEST_NUMBER_256] = {0};
     strcpy_s(sessionName, TEST_NUMBER_256, TEST_VALID_SESSIONNAME);
-    int32_t ret = NotifyNetworkingChannelOpened(sessionName, 1, NULL, 0);
+    int32_t ret = NotifyNetworkingChannelOpened(sessionName, 1, nullptr, 0);
     EXPECT_EQ(SOFTBUS_OK, ret);
 
-    NotifyNetworkingChannelOpenFailed(sessionName, 1, NULL);
+    NotifyNetworkingChannelOpenFailed(sessionName, 1, nullptr);
     EXPECT_EQ(true, SoftbusProxyNetworkTest::m_channelOpenFailedFlag);
     NotifyNetworkingChannelClosed(sessionName, 1);
     EXPECT_EQ(true, SoftbusProxyNetworkTest::m_channelClosedFlag);
-    NotifyNetworkingMsgReceived(sessionName, 1, NULL, 0);
-    EXPECT_EQ(true, SoftbusProxyNetworkTest::m_messageReceivedFlag);
+    NotifyNetworkingMsgReceived(sessionName, 1, nullptr, 0);
+    EXPECT_EQ(false, SoftbusProxyNetworkTest::m_messageReceivedFlag);
 }
 
 /**
@@ -170,15 +172,15 @@ HWTEST_F(SoftbusProxyNetworkTest, TransRegisterListenerTest001, TestSize.Level1)
     strcpy_s(sessionName, TEST_NUMBER_256, TEST_VALID_SESSIONNAME);
     SoftbusProxyNetworkTest::TestRegisterNetworkingChannelListener();
 
-    int32_t ret = NotifyNetworkingChannelOpened(sessionName, 1, NULL, 0);
+    int32_t ret = NotifyNetworkingChannelOpened(sessionName, 1, nullptr, 0);
     EXPECT_EQ(SOFTBUS_OK, ret);
 
-    NotifyNetworkingChannelOpenFailed(sessionName, 1, NULL);
+    NotifyNetworkingChannelOpenFailed(sessionName, 1, nullptr);
     EXPECT_EQ(true, SoftbusProxyNetworkTest::m_channelOpenFailedFlag);
     NotifyNetworkingChannelClosed(sessionName, 1);
     EXPECT_EQ(true, SoftbusProxyNetworkTest::m_channelClosedFlag);
-    NotifyNetworkingMsgReceived(sessionName, 1, NULL, 0);
-    EXPECT_EQ(true, SoftbusProxyNetworkTest::m_messageReceivedFlag);
+    NotifyNetworkingMsgReceived(sessionName, 1, nullptr, 0);
+    EXPECT_EQ(false, SoftbusProxyNetworkTest::m_messageReceivedFlag);
 }
 
 /**
@@ -193,7 +195,7 @@ HWTEST_F(SoftbusProxyNetworkTest, TransNotifyNetworkingChannelOpenedTest001, Tes
     AppInfo appInfo;
     unsigned char isServer = '0';
     /* test app info is null */
-    int32_t ret = OnProxyChannelOpened(channelId, NULL, isServer);
+    int32_t ret = OnProxyChannelOpened(channelId, nullptr, isServer);
     EXPECT_NE(SOFTBUS_OK, ret);
     /* test app type is other */
     appInfo.appType = APP_TYPE_NOT_CARE;
@@ -223,7 +225,7 @@ HWTEST_F(SoftbusProxyNetworkTest, TransOnProxyChannelOpenFailedTest001, TestSize
     AppInfo appInfo;
     int32_t errCode = SOFTBUS_INVALID_PARAM;
     /* test app info is null */
-    int32_t ret = OnProxyChannelOpenFailed(channelId, NULL, errCode);
+    int32_t ret = OnProxyChannelOpenFailed(channelId, nullptr, errCode);
     EXPECT_NE(SOFTBUS_OK, ret);
     /* test app type is other */
     appInfo.appType = APP_TYPE_NOT_CARE;
@@ -243,7 +245,7 @@ HWTEST_F(SoftbusProxyNetworkTest, TransOnProxyChannelClosedTest001, TestSize.Lev
     int32_t channelId = -1;
     AppInfo appInfo;
     /* test app info is null */
-    ret = OnProxyChannelClosed(channelId, NULL);
+    ret = OnProxyChannelClosed(channelId, nullptr);
     EXPECT_NE(SOFTBUS_OK, ret);
     /* test app type is other */
     appInfo.appType = APP_TYPE_NOT_CARE;
@@ -269,9 +271,9 @@ HWTEST_F(SoftbusProxyNetworkTest, TransOnProxyChannelMsgReceivedTest001, TestSiz
     uint32_t len = strlen(data) + 1;
 
     /* test invalid param */
-    int32_t ret = OnProxyChannelMsgReceived(channelId, NULL, data, len);
+    int32_t ret = OnProxyChannelMsgReceived(channelId, nullptr, data, len);
     EXPECT_NE(SOFTBUS_OK, ret);
-    ret = OnProxyChannelMsgReceived(channelId, &appInfo, NULL, len);
+    ret = OnProxyChannelMsgReceived(channelId, &appInfo, nullptr, len);
     EXPECT_NE(SOFTBUS_OK, ret);
     ret = OnProxyChannelMsgReceived(channelId, &appInfo, data, 0);
     EXPECT_NE(SOFTBUS_OK, ret);
@@ -308,9 +310,104 @@ HWTEST_F(SoftbusProxyNetworkTest, TransOpenNetWorkingChannelTest001, TestSize.Le
     char sessionName[TEST_NUMBER_256] = {0};
     strcpy_s(sessionName, TEST_NUMBER_256, TEST_VALID_SESSIONNAME);
     int32_t ret = SOFTBUS_OK;
-    ret = TransOpenNetWorkingChannel(sessionName, NULL, &preferred);
+    ret = TransOpenNetWorkingChannel(sessionName, nullptr, &preferred);
     EXPECT_EQ(INVALID_CHANNEL_ID, ret);
-    ret = TransOpenNetWorkingChannel(sessionName, NULL, &preferred);
+    ret = TransOpenNetWorkingChannel(sessionName, nullptr, &preferred);
     EXPECT_EQ(INVALID_CHANNEL_ID, ret);
+}
+
+/**
+  * @tc.name: TransNotifyDecryptNetworkingMsg001
+  * @tc.desc: TransNotifyDecryptNetworkingMsg
+  * @tc.type: FUNC
+  * @tc.require:
+  */
+HWTEST_F(SoftbusProxyNetworkTest, TransNotifyDecryptNetworkingMsg001, TestSize.Level1)
+{
+    SoftbusTransProxyNetworkMock networkObj;
+    EXPECT_CALL(networkObj, TransProxyGetSessionKeyByChanId).WillOnce(Return(SOFTBUS_TRANS_SESSION_INFO_NOT_FOUND));
+
+    int32_t ret = TransNotifyDecryptNetworkingMsg(TEST_VALID_SESSIONNAME, TEST_CHANNEL_ID, nullptr, TEST_NUMBER_256);
+    EXPECT_EQ(ret, SOFTBUS_TRANS_SESSION_INFO_NOT_FOUND);
+}
+
+/**
+  * @tc.name: TransNotifyDecryptNetworkingMsg002
+  * @tc.desc: TransNotifyDecryptNetworkingMsg
+  * @tc.type: FUNC
+  * @tc.require:
+  */
+HWTEST_F(SoftbusProxyNetworkTest, TransNotifyDecryptNetworkingMsg002, TestSize.Level1)
+{
+    char sessionKey[SESSION_KEY_LENGTH] = "njfejfjpfjewpfqpFHEQWP";
+
+    SoftbusTransProxyNetworkMock networkObj;
+    EXPECT_CALL(networkObj, TransProxyGetSessionKeyByChanId)
+        .WillRepeatedly(DoAll(SetArgPointee<1>(*sessionKey), Return(SOFTBUS_OK)));
+
+    EXPECT_CALL(networkObj, SoftBusDecryptData).WillOnce(Return(SOFTBUS_DECRYPT_ERR));
+
+    int32_t ret = TransNotifyDecryptNetworkingMsg(TEST_VALID_SESSIONNAME, TEST_CHANNEL_ID, nullptr, TEST_NUMBER_256);
+    EXPECT_EQ(ret, SOFTBUS_DECRYPT_ERR);
+}
+
+/**
+  * @tc.name: TransNotifyDecryptNetworkingMsg003
+  * @tc.desc: TransNotifyDecryptNetworkingMsg
+  * @tc.type: FUNC
+  * @tc.require:
+  */
+HWTEST_F(SoftbusProxyNetworkTest, TransNotifyDecryptNetworkingMsg003, TestSize.Level1)
+{
+    char sessionKey[SESSION_KEY_LENGTH] = "njfejfjpfjewpfqpFHEQWP";
+
+    SoftbusTransProxyNetworkMock networkObj;
+    EXPECT_CALL(networkObj, TransProxyGetSessionKeyByChanId)
+        .WillRepeatedly(DoAll(SetArgPointee<1>(*sessionKey), Return(SOFTBUS_OK)));
+
+    EXPECT_CALL(networkObj, SoftBusDecryptData).WillOnce(Return(SOFTBUS_OK));
+
+    SoftbusProxyNetworkTest::TestRegisterNetworkingChannelListener();
+    int32_t ret = TransNotifyDecryptNetworkingMsg("test.com.session", TEST_CHANNEL_ID, nullptr, TEST_NUMBER_256);
+    EXPECT_EQ(ret, SOFTBUS_NOT_FIND);
+}
+
+/**
+  * @tc.name: TransNotifyDecryptNetworkingMsg004
+  * @tc.desc: TransNotifyDecryptNetworkingMsg
+  * @tc.type: FUNC
+  * @tc.require:
+  */
+HWTEST_F(SoftbusProxyNetworkTest, TransNotifyDecryptNetworkingMsg004, TestSize.Level1)
+{
+    char sessionKey[SESSION_KEY_LENGTH] = "njfejfjpfjewpfqpFHEQWP";
+
+    SoftbusTransProxyNetworkMock networkObj;
+    EXPECT_CALL(networkObj, TransProxyGetSessionKeyByChanId)
+        .WillRepeatedly(DoAll(SetArgPointee<1>(*sessionKey), Return(SOFTBUS_OK)));
+
+    EXPECT_CALL(networkObj, SoftBusDecryptData).WillOnce(Return(SOFTBUS_OK));
+
+    SoftbusProxyNetworkTest::TestRegisterNetworkingChannelListener();
+    int32_t ret = TransNotifyDecryptNetworkingMsg(TEST_VALID_SESSIONNAME, TEST_CHANNEL_ID, nullptr, TEST_NUMBER_256);
+    EXPECT_EQ(ret, SOFTBUS_OK);
+}
+
+/**
+ * @tc.name: NotifyNetworkingMsgReceived001
+ * @tc.desc: NotifyNetworkingMsgReceived
+ * @tc.type: FUNC
+ * @tc.require:
+ */
+HWTEST_F(SoftbusProxyNetworkTest, NotifyNetworkingMsgReceived001, TestSize.Level1)
+{
+    const char *data = "njfejfjpfjewpfqpFHEQWP";
+    uint32_t channelCapability = 3u;
+
+    SoftbusTransProxyNetworkMock networkObj;
+    EXPECT_CALL(networkObj, TransProxyGetSessionKeyByChanId)
+        .WillRepeatedly(DoAll(SetArgPointee<1>(channelCapability), Return(SOFTBUS_OK)));
+
+    EXPECT_NO_FATAL_FAILURE(NotifyNetworkingMsgReceived(TEST_VALID_SESSIONNAME, 1024, data, 256));
 }
 } // namespace OHOS

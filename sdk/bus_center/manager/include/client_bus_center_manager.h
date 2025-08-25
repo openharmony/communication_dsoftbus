@@ -19,6 +19,7 @@
 #include <stdbool.h>
 #include <stdint.h>
 
+#include "ble_range.h"
 #include "data_level.h"
 #include "data_level_inner.h"
 #include "softbus_bus_center.h"
@@ -27,10 +28,26 @@
 extern "C" {
 #endif
 
+typedef struct {
+    char peerIp[IP_STR_MAX_LEN];
+    int32_t peerPort;
+    char targetNetworkId[NETWORK_ID_BUF_LEN];
+} TimeSyncSocketInfo;
+
+typedef struct {
+    TimeSyncResult result;                  /**< Time synchronize result */
+    TimeSyncFlag flag;                      /**< Time synchronize flag */
+    TimeSyncSocketInfo targetSocketInfo;    /**< Time synchronize target info */
+} TimeSyncResultWithSocket;
+
+typedef struct {
+    void (*onTimeSyncResultWithSocket)(const TimeSyncResultWithSocket *info, int32_t retCode);
+} ITimeSyncCbWithSocket;
+
 int32_t BusCenterClientInit(void);
 void BusCenterClientDeinit(void);
 
-int32_t JoinLNNInner(const char *pkgName, ConnectionAddr *target, OnJoinLNNResult cb);
+int32_t JoinLNNInner(const char *pkgName, ConnectionAddr *target, OnJoinLNNResult cb, bool isForceJoin);
 int32_t LeaveLNNInner(const char *pkgName, const char *networkId, OnLeaveLNNResult cb);
 int32_t RegNodeDeviceStateCbInner(const char *pkgName, INodeStateCb *callback);
 int32_t UnregNodeDeviceStateCbInner(INodeStateCb *callback);
@@ -43,10 +60,15 @@ int32_t RegDataLevelChangeCbInner(const char *pkgName, IDataLevelCb *callback);
 int32_t UnregDataLevelChangeCbInner(const char *pkgName);
 int32_t SetDataLevelInner(const DataLevel *dataLevel);
 void RestartRegDataLevelChange(void);
+int32_t RegRangeCbForMsdpInner(const char *pkgName, IRangeCallback *callback);
+int32_t UnregRangeCbForMsdpInner(const char *pkgName);
 
 int32_t StartTimeSyncInner(const char *pkgName, const char *targetNetworkId, TimeSyncAccuracy accuracy,
     TimeSyncPeriod period, ITimeSyncCb *cb);
+int32_t StartTimeSyncWithSocketInner(const char *pkgName, const TimeSyncSocketInfo *socketInfo,
+    TimeSyncAccuracy accuracy, TimeSyncPeriod period, ITimeSyncCbWithSocket *cbWithSocket);
 int32_t StopTimeSyncInner(const char *pkgName, const char *targetNetworkId);
+int32_t StopTimeSyncWithSocketInner(const char *pkgName, const TimeSyncSocketInfo *socketInfo);
 int32_t PublishLNNInner(const char *pkgName, const PublishInfo *info, const IPublishCb *cb);
 int32_t StopPublishLNNInner(const char *pkgName, int32_t publishId);
 int32_t RefreshLNNInner(const char *pkgName, const SubscribeInfo *info, const IRefreshCallback *cb);
@@ -56,7 +78,10 @@ int32_t DeactiveMetaNodeInner(const char *pkgName, const char *metaNodeId);
 int32_t GetAllMetaNodeInfoInner(const char *pkgName, MetaNodeInfo *infos, int32_t *infoNum);
 int32_t ShiftLNNGearInner(const char *pkgName, const char *callerId, const char *targetNetworkId,
     const GearMode *mode);
+int32_t TriggerRangeForMsdpInner(const char *pkgName, const RangeConfig *config);
+int32_t StopRangeForMsdpInner(const char *pkgName, const RangeConfig *config);
 int32_t SyncTrustedRelationShipInner(const char *pkgName, const char *msg, uint32_t msgLen);
+int32_t SetDisplayNameInner(const char *pkgName, const char *nameData, uint32_t len);
 
 int32_t LnnOnJoinResult(void *addr, const char *networkId, int32_t retCode);
 int32_t LnnOnLeaveResult(const char *networkId, int32_t retCode);
@@ -72,10 +97,10 @@ void LnnOnPublishLNNResult(int32_t publishId, int32_t reason);
 void LnnOnRefreshLNNResult(int32_t refreshId, int32_t reason);
 void LnnOnRefreshDeviceFound(const void *device);
 void LnnOnDataLevelChanged(const char *networkId, const DataLevelInfo *dataLevelInfo);
+void LnnOnRangeResult(const RangeResultInnerInfo *rangeInfo);
 
 int32_t DiscRecoveryPublish(void);
 int32_t DiscRecoverySubscribe(void);
-int32_t DiscRecoveryPolicy(void);
 
 #ifdef __cplusplus
 }

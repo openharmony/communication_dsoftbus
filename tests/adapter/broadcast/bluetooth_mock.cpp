@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2024 Huawei Device Co., Ltd.
+ * Copyright (c) 2024-2025 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -23,6 +23,7 @@ BtGapCallBacks *MockBluetooth::btGapCallback = nullptr;
 BtGattCallbacks *MockBluetooth::btGattCallback = nullptr;
 BleScanCallbacks *MockBluetooth::bleScanCallback = nullptr;
 const SoftbusBroadcastMediumInterface *MockBluetooth::interface = nullptr;
+int32_t MockBluetooth::g_btAdvId = 0;
 
 static int32_t ActionGapRegisterCallbacks(BtGapCallBacks *func)
 {
@@ -49,9 +50,17 @@ static int32_t ActionBleDeregisterScanCallbacks(int32_t scannerId)
 }
 
 static int32_t ActionRegisterBroadcastMediumFunction(
-    SoftbusMediumType type, const SoftbusBroadcastMediumInterface *func)
+    BroadcastProtocol type, const SoftbusBroadcastMediumInterface *func)
 {
     MockBluetooth::interface = func;
+    return OHOS_BT_STATUS_SUCCESS;
+}
+
+int32_t MockBluetooth::ActionBleStartAdvEx(int32_t *advId, const StartAdvRawData rawData, BleAdvParams advParam)
+{
+    (void)rawData;
+    (void)advParam;
+    *advId = g_btAdvId;
     return OHOS_BT_STATUS_SUCCESS;
 }
 
@@ -89,6 +98,11 @@ bool DisableBle(void)
 bool IsBleEnabled()
 {
     return MockBluetooth::GetMocker()->IsBleEnabled();
+}
+
+bool IsLpDeviceAvailable()
+{
+    return true;
 }
 
 bool GetLocalAddr(unsigned char *mac, unsigned int len)
@@ -135,6 +149,13 @@ int32_t BleStartScanEx(
     int32_t scannerId, const BleScanConfigs *configs, const BleScanNativeFilter *filter, uint32_t filterSize)
 {
     return MockBluetooth::GetMocker()->BleStartScanEx(scannerId, configs, filter, filterSize);
+}
+
+int BleChangeScanParams(int32_t scannerId, const BleScanConfigs *config, const BleScanNativeFilter *filter,
+    uint32_t filterSize, uint32_t filterAction)
+{
+    return MockBluetooth::GetMocker()->BleChangeScanParams(scannerId, config, filter,
+        filterSize, filterAction);
 }
 
 int32_t BleStopScan(int32_t scannerId)
@@ -292,12 +313,12 @@ int32_t BleGattsSendIndication(int32_t serverId, GattsSendIndParam *param)
     return MockBluetooth::GetMocker()->BleGattsSendIndication(serverId, param);
 }
 
-int32_t SoftBusAddBtStateListener(const SoftBusBtStateListener *listener)
+int32_t SoftBusAddBtStateListener(const SoftBusBtStateListener *listener, int32_t *listenerId)
 {
-    return MockBluetooth::GetMocker()->SoftBusAddBtStateListener(listener);
+    return MockBluetooth::GetMocker()->SoftBusAddBtStateListener(listener, listenerId);
 }
 
-int32_t RegisterBroadcastMediumFunction(SoftbusMediumType type, const SoftbusBroadcastMediumInterface *interface)
+int32_t RegisterBroadcastMediumFunction(BroadcastProtocol type, const SoftbusBroadcastMediumInterface *interface)
 {
     DISC_LOGI(DISC_TEST, "begin to register func");
     int32_t ret = MockBluetooth::GetMocker()->RegisterBroadcastMediumFunction(type, interface);

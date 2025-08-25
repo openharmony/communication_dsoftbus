@@ -15,9 +15,8 @@
 
 #ifndef NSTACKX_DFINDER_HIDUMP_H
 #define NSTACKX_DFINDER_HIDUMP_H
-#include "sys_common_header.h"
-#include "nstackx.h"
 #include "nstackx_device.h"
+#include "nstackx_inet.h"
 
 #ifdef __cplusplus
 extern "C" {
@@ -33,8 +32,15 @@ extern "C" {
 } while (0)
 
 #ifdef NSTACKX_DFINDER_HIDUMP
+struct DumpIfaceInfo {
+    const char *ifname;
+    uint8_t state;
+    uint8_t af;
+    const union InetAddr *addr;
+};
+
 int DFinderDump(const char **argv, uint32_t argc, void *softObj, DFinderDumpFunc dump);
-int DFinderDumpIface(char *buf, int size, const char *ifname, const struct in_addr *ip, uint8_t state);
+int DFinderDumpIface(const struct DumpIfaceInfo *info, char *buf, int size);
 int DumpDeviceInfo(const DeviceInfo *info, char *buf, int size, uint8_t remote);
 #endif
 

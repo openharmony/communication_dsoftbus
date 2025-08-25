@@ -14,7 +14,7 @@
 import("//build/test.gni")
 import("../../../../dsoftbus.gni")
 
-module_output_path = "dsoftbus/bus_center"
+module_output_path = "dsoftbus/soft_bus/bus_center"
 dsoftbus_root_path = "../../../.."
 
 ohos_benchmarktest("BusCenterTest") {
@@ -39,6 +39,8 @@ ohos_benchmarktest("BusCenterTest") {
       "access_token:libaccesstoken_sdk",
       "access_token:libnativetoken",
       "access_token:libtoken_setproc",
+      "cJSON:cjson_static",
+      "selinux_adapter:librestorecon",
     ]
   }
 }

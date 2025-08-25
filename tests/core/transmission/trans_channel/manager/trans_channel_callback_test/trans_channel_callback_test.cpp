@@ -59,11 +59,11 @@ HWTEST_F(TransChannelCallbackTest, TransServerOnChannelOpened001, TestSize.Level
     ASSERT_TRUE(channel != nullptr);
     (void)memset_s(channel, sizeof(ChannelInfo), 0, sizeof(ChannelInfo));
 
-    int32_t ret = TransServerGetChannelCb()->OnChannelOpened(NULL, pid, sessionName, channel);
+    int32_t ret = TransServerGetChannelCb()->OnChannelOpened(nullptr, pid, sessionName, channel);
     EXPECT_EQ(SOFTBUS_INVALID_PARAM, ret);
-    ret = TransServerGetChannelCb()->OnChannelOpened(pkgName, pid, NULL, channel);
+    ret = TransServerGetChannelCb()->OnChannelOpened(pkgName, pid, nullptr, channel);
     EXPECT_EQ(SOFTBUS_INVALID_PARAM, ret);
-    ret = TransServerGetChannelCb()->OnChannelOpened(pkgName, pid, NULL, NULL);
+    ret = TransServerGetChannelCb()->OnChannelOpened(pkgName, pid, nullptr, nullptr);
     EXPECT_EQ(SOFTBUS_INVALID_PARAM, ret);
 
     channel->isEncrypt = true;
@@ -92,7 +92,7 @@ HWTEST_F(TransChannelCallbackTest, TransServerOnChannelOpenFailed001, TestSize.L
     int32_t channelId = 12;
     int32_t channelType = 21;
     int32_t errCode = 2;
-    int32_t ret = TransServerGetChannelCb()->OnChannelOpenFailed(NULL, pid, channelId, channelType, errCode);
+    int32_t ret = TransServerGetChannelCb()->OnChannelOpenFailed(nullptr, pid, channelId, channelType, errCode);
     EXPECT_EQ(SOFTBUS_INVALID_PARAM, ret);
 }
 
@@ -111,9 +111,9 @@ HWTEST_F(TransChannelCallbackTest, TransServerOnMsgReceived001, TestSize.Level1)
     TransReceiveData *receiveData = (TransReceiveData *)SoftBusCalloc(sizeof(TransReceiveData));
     ASSERT_TRUE(receiveData != nullptr);
 
-    int32_t ret = TransServerGetChannelCb()->OnDataReceived(NULL, pid, channelId, channelType, receiveData);
+    int32_t ret = TransServerGetChannelCb()->OnDataReceived(nullptr, pid, channelId, channelType, receiveData);
     EXPECT_EQ(SOFTBUS_INVALID_PARAM, ret);
-    ret = TransServerGetChannelCb()->OnDataReceived(pkgName, pid, channelId, channelType, NULL);
+    ret = TransServerGetChannelCb()->OnDataReceived(pkgName, pid, channelId, channelType, nullptr);
     EXPECT_EQ(SOFTBUS_INVALID_PARAM, ret);
 
     receiveData->data = (void *)TEST_PKG_NAME;
@@ -129,7 +129,7 @@ HWTEST_F(TransChannelCallbackTest, TransServerOnMsgReceived001, TestSize.Level1)
     ret = TransServerGetChannelCb()->OnDataReceived(pkgName, pid, channelId, channelType, receiveData);
     EXPECT_EQ(SOFTBUS_OK, ret);
 
-    if (receiveData != NULL) {
+    if (receiveData != nullptr) {
         SoftBusFree(receiveData);
     }
 }
@@ -146,9 +146,9 @@ HWTEST_F(TransChannelCallbackTest, TransServerOnQosEvent001, TestSize.Level1)
     ASSERT_TRUE(param != nullptr);
     const char *pkgName = TEST_PKG_NAME;
 
-    int32_t ret = TransServerGetChannelCb()->OnQosEvent(NULL, param);
+    int32_t ret = TransServerGetChannelCb()->OnQosEvent(nullptr, param);
     EXPECT_EQ(SOFTBUS_INVALID_PARAM, ret);
-    ret = TransServerGetChannelCb()->OnQosEvent(pkgName, NULL);
+    ret = TransServerGetChannelCb()->OnQosEvent(pkgName, nullptr);
     EXPECT_EQ(SOFTBUS_INVALID_PARAM, ret);
     param->tvCount = 0;
     ret = TransServerGetChannelCb()->OnQosEvent(pkgName, param);
@@ -164,7 +164,7 @@ HWTEST_F(TransChannelCallbackTest, TransServerOnQosEvent001, TestSize.Level1)
     ret = TransServerGetChannelCb()->OnQosEvent(pkgName, param);
     EXPECT_EQ(SOFTBUS_OK, ret);
 
-    if (param != NULL) {
+    if (param != nullptr) {
         SoftBusFree(param);
     }
 }
@@ -182,14 +182,14 @@ HWTEST_F(TransChannelCallbackTest, TransServerOnChannelLinkDown001, TestSize.Lev
     const char *networkId = "1234";
     int32_t routeType = 123124;
     LinkDownInfo info = {
-        .uuid = NULL,
-        .udid = NULL,
-        .peerIp = NULL,
+        .uuid = nullptr,
+        .udid = nullptr,
+        .peerIp = nullptr,
         .networkId = networkId,
         .routeType = routeType
     };
 
-    int32_t ret = TransServerOnChannelLinkDown(NULL, pid, &info);
+    int32_t ret = TransServerOnChannelLinkDown(nullptr, pid, &info);
     EXPECT_EQ(SOFTBUS_INVALID_PARAM, ret);
 
     pid = -1;
@@ -211,7 +211,7 @@ HWTEST_F(TransChannelCallbackTest, TransServerOnChannelClosed, TestSize.Level1)
 {
     int32_t channelId = 12;
     int32_t channelType = CHANNEL_TYPE_UDP;
-    int32_t ret = TransServerGetChannelCb()->OnChannelClosed(NULL, TEST_PID, channelId, channelType,
+    int32_t ret = TransServerGetChannelCb()->OnChannelClosed(nullptr, TEST_PID, channelId, channelType,
         MESSAGE_TYPE_NOMAL);
     EXPECT_EQ(SOFTBUS_INVALID_PARAM, ret);
 }

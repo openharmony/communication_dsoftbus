@@ -62,26 +62,23 @@ void TransAuthWithParaReqLanePendingDeinit(void)
 }
 
 static int32_t FillTransAuthWithParaNode(TransAuthWithParaNode *item, uint32_t laneReqId, const char *sessionName,
-    const LinkPara *linkPara, int32_t channelId)
+    bool accountInfo, int32_t channelId)
 {
     item->errCode = SOFTBUS_MALLOC_ERR;
     item->laneReqId = laneReqId;
     item->channelId = channelId;
     item->bSucc = false;
     item->isFinished = false;
+    item->accountInfo = accountInfo;
     if (strcpy_s(item->sessionName, SESSION_NAME_SIZE_MAX, sessionName) != EOK) {
         TRANS_LOGE(TRANS_SVC, "TransAuthWithParaAddLaneReqToList: copy sessionName failed");
         return SOFTBUS_STRCPY_ERR;
-    }
-    if (memcpy_s(&(item->linkPara), sizeof(LinkPara), linkPara, sizeof(LinkPara)) != SOFTBUS_OK) {
-        TRANS_LOGE(TRANS_SVC, "TransAuthWithParaAddLaneReqToList: copy linkPara failed");
-        return SOFTBUS_MEM_ERR;
     }
     return SOFTBUS_OK;
 }
 
 int32_t TransAuthWithParaAddLaneReqToList(uint32_t laneReqId, const char *sessionName,
-    const LinkPara *linkPara, int32_t channelId)
+    bool accountInfo, int32_t channelId)
 {
     int32_t errCode = SOFTBUS_TRANS_CHANNEL_OPEN_FAILED;
     if (g_authWithParaAsyncReqLaneList == NULL) {
@@ -89,7 +86,7 @@ int32_t TransAuthWithParaAddLaneReqToList(uint32_t laneReqId, const char *sessio
         return SOFTBUS_NO_INIT;
     }
 
-    if (sessionName == NULL || linkPara == NULL) {
+    if (sessionName == NULL) {
         TRANS_LOGE(TRANS_SVC, "sessionName or linkPara is null.");
         return SOFTBUS_INVALID_PARAM;
     }
@@ -105,7 +102,7 @@ int32_t TransAuthWithParaAddLaneReqToList(uint32_t laneReqId, const char *sessio
         return SOFTBUS_MALLOC_ERR;
     }
 
-    errCode = FillTransAuthWithParaNode(item, laneReqId, sessionName, linkPara, channelId);
+    errCode = FillTransAuthWithParaNode(item, laneReqId, sessionName, accountInfo, channelId);
     if (errCode != SOFTBUS_OK) {
         TRANS_LOGE(TRANS_SVC, "fill trans auth with para node failed. ret=%{public}d", errCode);
         goto ERR_EXIT;

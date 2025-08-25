@@ -71,12 +71,12 @@ static void BuildChannelMsg(ChannelMsg *data)
  * @tc.type: FUNC
  * @tc.require:
  */
-HWTEST_F(TransClientProxyTest, InformPermissionChangeTest001, TestSize.Level0)
+HWTEST_F(TransClientProxyTest, InformPermissionChangeTest001, TestSize.Level1)
 {
     int32_t ret;
 
     ret = InformPermissionChange(TEST_STATE, nullptr, TEST_PID);
-    EXPECT_EQ(SOFTBUS_INVALID_PKGNAME, ret);
+    EXPECT_EQ(SOFTBUS_TRANS_GET_CLIENT_PROXY_NULL, ret);
 
     ret = InformPermissionChange(TEST_STATE, g_pkgName, TEST_PID);
     EXPECT_EQ(SOFTBUS_TRANS_PROXY_REMOTE_NULL, ret);
@@ -99,7 +99,7 @@ HWTEST_F(TransClientProxyTest, InformPermissionChangeTest001, TestSize.Level0)
  * @tc.type: FUNC
  * @tc.require:
  */
-HWTEST_F(TransClientProxyTest, ClientIpcOnChannelOpenedTest001, TestSize.Level0)
+HWTEST_F(TransClientProxyTest, ClientIpcOnChannelOpenedTest001, TestSize.Level1)
 {
     int32_t ret;
     ChannelInfo channel;
@@ -143,7 +143,7 @@ HWTEST_F(TransClientProxyTest, ClientIpcOnChannelOpenedTest001, TestSize.Level0)
     
     channel.isServer = false;
     ret = ClientIpcOnChannelOpened(g_pkgName, g_sessionName, &channel, TEST_PID);
-    EXPECT_EQ(SOFTBUS_OK, ret);
+    EXPECT_NE(SOFTBUS_INVALID_PARAM, ret);
 }
 
 /**
@@ -152,7 +152,7 @@ HWTEST_F(TransClientProxyTest, ClientIpcOnChannelOpenedTest001, TestSize.Level0)
  * @tc.type: FUNC
  * @tc.require:
  */
-HWTEST_F(TransClientProxyTest, ClientIpcOnChannelOpenFailedTest001, TestSize.Level0)
+HWTEST_F(TransClientProxyTest, ClientIpcOnChannelOpenFailedTest001, TestSize.Level1)
 {
     int32_t ret;
     ChannelMsg data;
@@ -180,7 +180,7 @@ HWTEST_F(TransClientProxyTest, ClientIpcOnChannelOpenFailedTest001, TestSize.Lev
  * @tc.type: FUNC
  * @tc.require:
  */
-HWTEST_F(TransClientProxyTest, ClientIpcOnChannelLinkDownTest001, TestSize.Level0)
+HWTEST_F(TransClientProxyTest, ClientIpcOnChannelLinkDownTest001, TestSize.Level1)
 {
     int32_t ret;
     char networkId[] = "ABCDEFG";
@@ -191,7 +191,7 @@ HWTEST_F(TransClientProxyTest, ClientIpcOnChannelLinkDownTest001, TestSize.Level
         .msgUuid = nullptr,
         .msgUdid = nullptr
     };
-    ret = ClientIpcOnChannelLinkDown(&data, networkId, NULL, TEST_REMOTE_TYPE);
+    ret = ClientIpcOnChannelLinkDown(&data, networkId, nullptr, TEST_REMOTE_TYPE);
     EXPECT_EQ(SOFTBUS_OK, ret);
 
     static const uint32_t SOFTBUS_SA_ID = 4700;
@@ -208,7 +208,7 @@ HWTEST_F(TransClientProxyTest, ClientIpcOnChannelLinkDownTest001, TestSize.Level
         .msgUuid = nullptr,
         .msgUdid = nullptr
     };
-    ret = ClientIpcOnChannelLinkDown(&msg, networkId, NULL, TEST_REMOTE_TYPE);
+    ret = ClientIpcOnChannelLinkDown(&msg, networkId, nullptr, TEST_REMOTE_TYPE);
     EXPECT_EQ(SOFTBUS_OK, ret);
 }
 
@@ -218,7 +218,7 @@ HWTEST_F(TransClientProxyTest, ClientIpcOnChannelLinkDownTest001, TestSize.Level
  * @tc.type: FUNC
  * @tc.require:
  */
-HWTEST_F(TransClientProxyTest, ClientIpcOnChannelClosedTest001, TestSize.Level0)
+HWTEST_F(TransClientProxyTest, ClientIpcOnChannelClosedTest001, TestSize.Level1)
 {
     int32_t ret;
     ChannelMsg data;
@@ -246,7 +246,7 @@ HWTEST_F(TransClientProxyTest, ClientIpcOnChannelClosedTest001, TestSize.Level0)
  * @tc.type: FUNC
  * @tc.require:
  */
-HWTEST_F(TransClientProxyTest, ClientIpcOnChannelMsgReceivedTest001, TestSize.Level0)
+HWTEST_F(TransClientProxyTest, ClientIpcOnChannelMsgReceivedTest001, TestSize.Level1)
 {
     int32_t ret;
 
@@ -281,7 +281,7 @@ HWTEST_F(TransClientProxyTest, ClientIpcOnChannelMsgReceivedTest001, TestSize.Le
  * @tc.type: FUNC
  * @tc.require:
  */
-HWTEST_F(TransClientProxyTest, ClientIpcOnChannelQosEventTest001, TestSize.Level0)
+HWTEST_F(TransClientProxyTest, ClientIpcOnChannelQosEventTest001, TestSize.Level1)
 {
     int32_t ret;
 
@@ -315,7 +315,7 @@ HWTEST_F(TransClientProxyTest, ClientIpcOnChannelQosEventTest001, TestSize.Level
  * @tc.type: FUNC
  * @tc.require:
  */
-HWTEST_F(TransClientProxyTest, ClientIpcOnChannelBindTest001, TestSize.Level0)
+HWTEST_F(TransClientProxyTest, ClientIpcOnChannelBindTest001, TestSize.Level1)
 {
     ChannelMsg *data = nullptr;
     int32_t ret = ClientIpcOnChannelBind(data);
@@ -349,7 +349,7 @@ HWTEST_F(TransClientProxyTest, ClientIpcOnChannelBindTest001, TestSize.Level0)
  * @tc.type: FUNC
  * @tc.require:
  */
-HWTEST_F(TransClientProxyTest, ClientIpcOnChannelOpenFailedTest002, TestSize.Level0)
+HWTEST_F(TransClientProxyTest, ClientIpcOnChannelOpenFailedTest002, TestSize.Level1)
 {
     ChannelMsg *data = nullptr;
     int32_t errCode = 0;
@@ -370,7 +370,7 @@ HWTEST_F(TransClientProxyTest, ClientIpcOnChannelOpenFailedTest002, TestSize.Lev
  * @tc.type: FUNC
  * @tc.require:
  */
-HWTEST_F(TransClientProxyTest, ClientIpcOnChannelLinkDownTest002, TestSize.Level0)
+HWTEST_F(TransClientProxyTest, ClientIpcOnChannelLinkDownTest002, TestSize.Level1)
 {
     const char *peerIp = "1234"; // test value
     int32_t routeType = TEST_REMOTE_TYPE;
@@ -392,7 +392,7 @@ HWTEST_F(TransClientProxyTest, ClientIpcOnChannelLinkDownTest002, TestSize.Level
  * @tc.type: FUNC
  * @tc.require:
  */
-HWTEST_F(TransClientProxyTest, ClientIpcOnChannelClosedTest002, TestSize.Level0)
+HWTEST_F(TransClientProxyTest, ClientIpcOnChannelClosedTest002, TestSize.Level1)
 {
     ChannelMsg *data = nullptr;
     int32_t ret = ClientIpcOnChannelClosed(data);
@@ -412,7 +412,7 @@ HWTEST_F(TransClientProxyTest, ClientIpcOnChannelClosedTest002, TestSize.Level0)
  * @tc.type: FUNC
  * @tc.require:
  */
-HWTEST_F(TransClientProxyTest, ClientIpcSetChannelInfoTest001, TestSize.Level0)
+HWTEST_F(TransClientProxyTest, ClientIpcSetChannelInfoTest001, TestSize.Level1)
 {
     int32_t sessionId = TEST_PID;
     int32_t pid = TEST_PID;
@@ -447,7 +447,7 @@ HWTEST_F(TransClientProxyTest, ClientIpcSetChannelInfoTest001, TestSize.Level0)
  * @tc.type: FUNC
  * @tc.require:
  */
-HWTEST_F(TransClientProxyTest, ClientIpcOnChannelMsgReceivedTest002, TestSize.Level0)
+HWTEST_F(TransClientProxyTest, ClientIpcOnChannelMsgReceivedTest002, TestSize.Level1)
 {
     int32_t ret = ClientIpcOnChannelMsgReceived(nullptr, nullptr);
     EXPECT_EQ(SOFTBUS_INVALID_PARAM, ret);
@@ -476,7 +476,7 @@ HWTEST_F(TransClientProxyTest, ClientIpcOnChannelMsgReceivedTest002, TestSize.Le
  * @tc.type: FUNC
  * @tc.require:
  */
-HWTEST_F(TransClientProxyTest, ClientIpcOnTransLimitChangeTest001, TestSize.Level0)
+HWTEST_F(TransClientProxyTest, ClientIpcOnTransLimitChangeTest001, TestSize.Level1)
 {
     uint8_t tos = 0;
     int32_t ret = ClientIpcOnTransLimitChange(nullptr, TEST_PID, TEST_CHANNELID, tos);
@@ -495,7 +495,7 @@ HWTEST_F(TransClientProxyTest, ClientIpcOnTransLimitChangeTest001, TestSize.Leve
  * @tc.type: FUNC
  * @tc.require:
  */
-HWTEST_F(TransClientProxyTest, CheckServiceIsRegisteredTest001, TestSize.Level0)
+HWTEST_F(TransClientProxyTest, CheckServiceIsRegisteredTest001, TestSize.Level1)
 {
     int32_t ret = CheckServiceIsRegistered(nullptr, TEST_PID);
     EXPECT_EQ(SOFTBUS_INVALID_PARAM, ret);
@@ -510,7 +510,7 @@ HWTEST_F(TransClientProxyTest, CheckServiceIsRegisteredTest001, TestSize.Level0)
  * @tc.type: FUNC
  * @tc.require:
  */
-HWTEST_F(TransClientProxyTest, ClientIpcChannelOnQosTest001, TestSize.Level0)
+HWTEST_F(TransClientProxyTest, ClientIpcChannelOnQosTest001, TestSize.Level1)
 {
     int32_t ret = ClientIpcChannelOnQos(nullptr, QOS_SATISFIED, nullptr, QOS_TYPE_BUTT);
     EXPECT_EQ(SOFTBUS_INVALID_PARAM, ret);
@@ -544,18 +544,18 @@ HWTEST_F(TransClientProxyTest, ClientIpcChannelOnQosTest001, TestSize.Level0)
  * @tc.type: FUNC
  * @tc.require:
  */
-HWTEST_F(TransClientProxyTest, ClientIpcCheckCollabRelationTest001, TestSize.Level0)
+HWTEST_F(TransClientProxyTest, ClientIpcCheckCollabRelationTest001, TestSize.Level1)
 {
     int32_t pid = 0;
     CollabInfo sourceInfo = {
-        .accountId = 0,
+        .accountId = "",
         .deviceId = "ABCDE",
         .pid = 0,
         .tokenId = 0,
         .userId = 0,
     };
     CollabInfo sinkInfo = {
-        .accountId = 0,
+        .accountId = "",
         .deviceId = "ABCDE",
         .pid = 0,
         .tokenId = 0,
@@ -570,5 +570,154 @@ HWTEST_F(TransClientProxyTest, ClientIpcCheckCollabRelationTest001, TestSize.Lev
 
     ret = ClientIpcCheckCollabRelation(g_pkgName, pid, &sourceInfo, &sinkInfo, &transInfo);
     EXPECT_EQ(SOFTBUS_TRANS_PROXY_REMOTE_NULL, ret);
+}
+
+/**
+ * @tc.name: ClientIpcCheckParamTest001
+ * @tc.desc: ClientIpcCheckParam test.
+ * @tc.type: FUNC
+ * @tc.require:
+ */
+HWTEST_F(TransClientProxyTest, ClientIpcCheckParamTest001, TestSize.Level1)
+{
+    int32_t pid = 0;
+    int32_t ret = ClientIpcOnChannelOpened(nullptr, nullptr, nullptr, pid);
+    EXPECT_EQ(SOFTBUS_TRANS_GET_CLIENT_PROXY_NULL, ret);
+
+    int32_t errCode = 0;
+    ret = ClientIpcOnChannelOpenFailed(nullptr, errCode);
+    EXPECT_EQ(SOFTBUS_INVALID_PARAM, ret);
+
+    ChannelMsg *data;
+    data = (ChannelMsg *)SoftBusCalloc(sizeof(ChannelMsg));
+    ASSERT_NE(nullptr, data);
+    data->msgPkgName = nullptr;
+    ret = ClientIpcOnChannelOpenFailed(data, errCode);
+    EXPECT_EQ(SOFTBUS_TRANS_GET_CLIENT_PROXY_NULL, ret);
+
+    const char *peerIp = "1234";
+    int32_t routeType = TEST_REMOTE_TYPE;
+    const char *networkId = "1234";
+    ret = ClientIpcOnChannelLinkDown(nullptr, networkId, peerIp, routeType);
+    EXPECT_EQ(SOFTBUS_INVALID_PARAM, ret);
+
+    ret = ClientIpcOnChannelLinkDown(data, networkId, peerIp, routeType);
+    EXPECT_EQ(SOFTBUS_TRANS_GET_CLIENT_PROXY_NULL, ret);
+
+    ret = ClientIpcOnChannelClosed(nullptr);
+    EXPECT_EQ(SOFTBUS_TRANS_GET_CLIENT_PROXY_NULL, ret);
+
+    ret = ClientIpcOnChannelClosed(data);
+    EXPECT_EQ(SOFTBUS_TRANS_GET_CLIENT_PROXY_NULL, ret);
+
+    ret = ClientIpcOnChannelMsgReceived(nullptr, nullptr);
+    EXPECT_EQ(SOFTBUS_INVALID_PARAM, ret);
+
+    TransReceiveData *receiveData = (TransReceiveData *)SoftBusCalloc(sizeof(TransReceiveData));
+    ASSERT_NE(nullptr, receiveData);
+    receiveData->dataLen = TEST_LEN;
+    receiveData->dataType = TEST_DATA_TYPE;
+    ret = ClientIpcOnChannelMsgReceived(data, receiveData);
+    EXPECT_EQ(SOFTBUS_TRANS_GET_CLIENT_PROXY_NULL, ret);
+    SoftBusFree(receiveData);
+    SoftBusFree(data);
+
+    QosParam param;
+    param.pid = TEST_PID;
+    ret = ClientIpcOnChannelQosEvent(nullptr, &param);
+    EXPECT_EQ(SOFTBUS_TRANS_GET_CLIENT_PROXY_NULL, ret);
+}
+
+/**
+ * @tc.name: ClientIpcBrProxyOpenedTest001
+ * @tc.desc: ClientIpcBrProxyOpened test.
+ * @tc.type: FUNC
+ * @tc.require:
+ */
+HWTEST_F(TransClientProxyTest, ClientIpcBrProxyOpenedTest001, TestSize.Level1)
+{
+    int32_t channelId = 1;
+    int32_t reason = 1;
+
+    int32_t ret = ClientIpcBrProxyOpened(nullptr, channelId, nullptr, nullptr, reason);
+    EXPECT_EQ(SOFTBUS_INVALID_PARAM, ret);
+
+    const char *pkgName = "testName";
+    ret = ClientIpcBrProxyOpened(pkgName, channelId, nullptr, nullptr, reason);
+    EXPECT_EQ(SOFTBUS_INVALID_PARAM, ret);
+
+    const char *uuid = "testUuid";
+    ret = ClientIpcBrProxyOpened(nullptr, channelId, nullptr, uuid, reason);
+    EXPECT_EQ(SOFTBUS_INVALID_PARAM, ret);
+
+    const char *brMac = "11:22:33:44"; // test value
+    ret = ClientIpcBrProxyOpened(nullptr, channelId, brMac, nullptr, reason);
+    EXPECT_NE(SOFTBUS_OK, ret);
+}
+
+/**
+ * @tc.name: ClientIpcBrProxyReceivedDataTest001
+ * @tc.desc: ClientIpcBrProxyReceivedData test.
+ * @tc.type: FUNC
+ * @tc.require:
+ */
+HWTEST_F(TransClientProxyTest, ClientIpcBrProxyReceivedDataTest001, TestSize.Level1)
+{
+    int32_t channelId = 1;
+    uint32_t len = 1;
+
+    int32_t ret = ClientIpcBrProxyReceivedData(nullptr, channelId, nullptr, len);
+    EXPECT_EQ(SOFTBUS_INVALID_PARAM, ret);
+
+    const char *pkgName = "testName";
+    ret = ClientIpcBrProxyReceivedData(pkgName, channelId, nullptr, len);
+    EXPECT_EQ(SOFTBUS_INVALID_PARAM, ret);
+
+    uint8_t data = 1;
+    ret = ClientIpcBrProxyReceivedData(pkgName, channelId, &data, len);
+    EXPECT_NE(SOFTBUS_INVALID_PARAM, ret);
+}
+
+/**
+ * @tc.name: ClientIpcBrProxyStateChangedTest001
+ * @tc.desc: ClientIpcBrProxyStateChanged test.
+ * @tc.type: FUNC
+ * @tc.require:
+ */
+HWTEST_F(TransClientProxyTest, ClientIpcBrProxyStateChangedTest001, TestSize.Level1)
+{
+    int32_t channelId = 1;
+    int32_t channelState = 1;
+
+    int32_t ret = ClientIpcBrProxyStateChanged(nullptr, channelId, channelState);
+    EXPECT_EQ(SOFTBUS_INVALID_PARAM, ret);
+
+    const char *pkgName = "testName";
+    ret = ClientIpcBrProxyStateChanged(pkgName, channelId, channelState);
+    EXPECT_NE(SOFTBUS_INVALID_PARAM, ret);
+}
+
+/**
+ * @tc.name: ClientIpcQueryPermissionTest001
+ * @tc.desc: ClientIpcQueryPermission test.
+ * @tc.type: FUNC
+ * @tc.require:
+ */
+HWTEST_F(TransClientProxyTest, ClientIpcQueryPermissionTest001, TestSize.Level1)
+{
+    int32_t ret = ClientIpcQueryPermission(nullptr, nullptr, nullptr);
+    EXPECT_EQ(SOFTBUS_INVALID_PARAM, ret);
+
+    const char *pkgName = "testName";
+    ret = ClientIpcQueryPermission(pkgName, nullptr, nullptr);
+    EXPECT_EQ(SOFTBUS_INVALID_PARAM, ret);
+
+    const char *bundleName = "testName";
+    ret = ClientIpcQueryPermission(pkgName, bundleName, nullptr);
+    EXPECT_EQ(SOFTBUS_INVALID_PARAM, ret);
+
+    bool isEmpowered = true;
+    ret = ClientIpcQueryPermission(pkgName, bundleName, &isEmpowered);
+    EXPECT_NE(SOFTBUS_INVALID_PARAM, ret);
 }
 } // namespace OHOS

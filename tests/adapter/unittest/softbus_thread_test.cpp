@@ -62,7 +62,7 @@ static void *ThreadSelfTest(void *arg)
 static void *ThreadWaitTest(void *arg)
 {
     printf("----------%s--------\n", __FUNCTION__);
-    int32_t ret = SoftBusCondWait(&g_cond, &g_mutex, NULL);
+    int32_t ret = SoftBusCondWait(&g_cond, &g_mutex, nullptr);
     EXPECT_EQ(SOFTBUS_OK, ret);
     SoftBusSleepMs(DELAY_TIME);
     return nullptr;
@@ -146,6 +146,21 @@ HWTEST_F(SoftbusThreadTest, SoftBusMutexInitTest003, TestSize.Level0)
     };
     int32_t ret = SoftBusMutexInit(&mutex, &mutexAttr);
     EXPECT_EQ(SOFTBUS_OK, ret);
+}
+
+/*
+ * @tc.name: SoftBusMutexInitTest004
+ * @tc.desc: SoftBusMutexInit will return SOFTBUS_INVALID_PARAM when mutex=nullptr
+ * @tc.type: FUNC
+ * @tc.require: 1
+ */
+HWTEST_F(SoftbusThreadTest, SoftBusMutexInitTest004, TestSize.Level0)
+{
+    SoftBusMutexAttr mutexAttr = {
+        .type = SOFTBUS_MUTEX_RECURSIVE,
+    };
+    int32_t ret = SoftBusMutexInit(nullptr, &mutexAttr);
+    EXPECT_EQ(SOFTBUS_INVALID_PARAM, ret);
 }
 
 /*
@@ -499,7 +514,7 @@ HWTEST_F(SoftbusThreadTest, SoftBusThreadCreateTest004, TestSize.Level0)
 
     threadAttr.taskName = "ThreadTask";
     ret = SoftBusThreadCreate(&thread, &threadAttr, SoftBusThreadTask, nullptr);
-    EXPECT_EQ(SOFTBUS_ERR, ret);
+    EXPECT_EQ(SOFTBUS_OK, ret);
     EXPECT_TRUE(thread != 0);
 }
 #endif
@@ -614,7 +629,7 @@ HWTEST_F(SoftbusThreadTest, SoftBusThreadCreateTest010, TestSize.Level0)
     EXPECT_EQ(SOFTBUS_OK, ret);
 
     ret = SoftBusThreadCreate(&thread, &threadAttr, nullptr, nullptr);
-    EXPECT_EQ(SOFTBUS_ERR, ret);
+    EXPECT_EQ(SOFTBUS_INVALID_PARAM, ret);
 }
 
 /*
@@ -707,7 +722,7 @@ HWTEST_F(SoftbusThreadTest, SoftBusThreadSetNameTest004, TestSize.Level0)
     EXPECT_TRUE(thread != 0);
 
     ret = SoftBusThreadSetName(thread, name);
-    EXPECT_EQ(SOFTBUS_ERR, ret);
+    EXPECT_EQ(SOFTBUS_OK, ret);
 }
 
 /*
@@ -729,7 +744,7 @@ HWTEST_F(SoftbusThreadTest, SoftBusThreadSetNameTest005, TestSize.Level0)
     EXPECT_TRUE(thread != 0);
 
     ret = SoftBusThreadSetName(thread, name);
-    EXPECT_EQ(SOFTBUS_ERR, ret);
+    EXPECT_EQ(SOFTBUS_OK, ret);
 }
 
 /*
@@ -748,7 +763,22 @@ HWTEST_F(SoftbusThreadTest, SoftBusThreadSetNameTest006, TestSize.Level0)
     EXPECT_TRUE(thread != 0);
 
     ret = SoftBusThreadSetName(thread, name);
-    EXPECT_EQ(SOFTBUS_ERR, ret);
+    EXPECT_EQ(SOFTBUS_OK, ret);
+}
+
+/*
+ * @tc.name: SoftBusThreadSetNameTest007
+ * @tc.desc: SoftBusThreadSetName will return SOFTBUS_INVALID_PARAM when thread=0
+ * @tc.type: FUNC
+ * @tc.require: 1
+ */
+HWTEST_F(SoftbusThreadTest, SoftBusThreadSetNameTest007, TestSize.Level0)
+{
+    const char *name = "testThread";
+    SoftBusThread thread = 0;
+
+    int32_t ret = SoftBusThreadSetName(thread, name);
+    EXPECT_EQ(SOFTBUS_INVALID_PARAM, ret);
 }
 #endif
 
@@ -762,7 +792,7 @@ HWTEST_F(SoftbusThreadTest, SoftBusThreadGetSelfTest001, TestSize.Level0)
 {
     SoftBusThread thread = 0;
 
-    int32_t ret = SoftBusThreadCreate(&thread, NULL, ThreadSelfTest, nullptr);
+    int32_t ret = SoftBusThreadCreate(&thread, nullptr, ThreadSelfTest, nullptr);
     EXPECT_EQ(SOFTBUS_OK, ret);
     EXPECT_TRUE(thread != 0);
 }
@@ -1033,6 +1063,20 @@ HWTEST_F(SoftbusThreadTest, SoftBusThreadJoinTest002, TestSize.Level0)
 }
 
 /*
+ * @tc.name: SoftBusThreadJoinTest003
+ * @tc.desc: SoftBusThreadJoin will return SOFTBUS_INVALID_PARAM when thread=0
+ * @tc.type: FUNC
+ * @tc.require: 1
+ */
+HWTEST_F(SoftbusThreadTest, SoftBusThreadJoinTest003, TestSize.Level0)
+{
+    char *value = nullptr;
+    SoftBusThread thread = 0;
+    int32_t ret = SoftBusThreadJoin(thread, (void **)&value);
+    EXPECT_EQ(SOFTBUS_INVALID_PARAM, ret);
+}
+
+/*
  * @tc.name: SoftBusThreadFullTest001
  * @tc.desc: thread process test
  * @tc.type: FUNC
@@ -1040,7 +1084,7 @@ HWTEST_F(SoftbusThreadTest, SoftBusThreadJoinTest002, TestSize.Level0)
  */
 HWTEST_F(SoftbusThreadTest, SoftBusThreadFullTest001, TestSize.Level0)
 {
-    int32_t ret = SoftBusMutexInit(&g_mutex, NULL);
+    int32_t ret = SoftBusMutexInit(&g_mutex, nullptr);
     EXPECT_EQ(SOFTBUS_OK, ret);
 
     ret = SoftBusCondInit(&g_cond);

@@ -13,18 +13,13 @@
  * limitations under the License.
  */
 
-#include <cstring>
 #include "connect_command.h"
 #include "channel/auth_negotiate_channel.h"
 #include "channel/dummy_negotiate_channel.h"
 #include "channel/proxy_negotiate_channel.h"
-#include "conn_log.h"
 #include "data/link_manager.h"
 #include "dfx/wifi_direct_dfx.h"
-#include "event/wifi_direct_event_dispatcher.h"
 #include "processor_selector_factory.h"
-#include "utils/wifi_direct_anonymous.h"
-#include "utils/wifi_direct_utils.h"
 #include "wifi_direct_scheduler_factory.h"
 
 namespace OHOS::SoftBus {
@@ -83,10 +78,11 @@ void ConnectCommand::OnSuccess(const WifiDirectLink &link) const
 {
     CONN_LOGI(CONN_WIFI_DIRECT,
         "requestId=%{public}u, linkId=%{public}d, localIp=%{public}s, remoteIp=%{public}s, remotePort=%{public}d, "
-        "linkType=%{public}d, isReuse=%{public}d, bw=%{public}d, channelId=%{public}d, remoteDeviceId=%{public}s",
+        "linkType=%{public}d, isReuse=%{public}d, bw=%{public}d, channelId=%{public}d, remoteDeviceId=%{public}s "
+        "isVirtualLink=%{public}d",
         info_.info_.requestId, link.linkId, WifiDirectAnonymizeIp(link.localIp).c_str(),
         WifiDirectAnonymizeIp(link.remoteIp).c_str(), link.remotePort, link.linkType, link.isReuse, link.bandWidth,
-        link.channelId, WifiDirectAnonymizeDeviceId(remoteDeviceId_).c_str());
+        link.channelId, WifiDirectAnonymizeDeviceId(remoteDeviceId_).c_str(), info_.info_.isVirtualLink);
     if (successCallback_ != nullptr) {
         successCallback_(link);
         return;

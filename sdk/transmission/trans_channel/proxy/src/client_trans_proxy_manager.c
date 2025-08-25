@@ -20,6 +20,8 @@
 
 #include "anonymizer.h"
 #include "client_trans_proxy_file_manager.h"
+#include "client_trans_session_manager.h"
+#include "client_trans_socket_manager.h"
 #include "client_trans_tcp_direct_message.h"
 #include "softbus_adapter_crypto.h"
 #include "softbus_adapter_mem.h"
@@ -28,73 +30,22 @@
 #include "softbus_error_code.h"
 #include "softbus_feature_config.h"
 #include "softbus_utils.h"
+#include "trans_assemble_tlv.h"
 #include "trans_log.h"
 #include "trans_pending_pkt.h"
+#include "trans_proxy_process_data.h"
 #include "trans_server_proxy.h"
 
 #define SLICE_LEN (4 * 1024)
+#define SHORT_SLICE_LEN (1024)
 #define PROXY_ACK_SIZE 4
 #define OH_TYPE 10
+#define TLV_TYPE_AND_LENTH 2
 
 static IClientSessionCallBack g_sessionCb;
-static uint32_t g_proxyMaxByteBufSize;
-static uint32_t g_proxyMaxMessageBufSize;
 
 static SoftBusList *g_proxyChannelInfoList = NULL;
 static SoftBusList *g_channelSliceProcessorList = NULL;
-
-typedef struct {
-    int32_t priority;
-    int32_t sliceNum;
-    int32_t sliceSeq;
-    int32_t reserved;
-} SliceHead;
-
-typedef struct {
-    int32_t magicNumber;
-    int32_t seq;
-    int32_t flags;
-    int32_t dataLen;
-} PacketHead;
-
-typedef struct {
-    uint8_t *inData;
-    uint32_t inLen;
-    uint8_t *outData;
-    uint32_t outLen;
-} ClientProxyDataInfo;
-
-void ClientPackSliceHead(SliceHead *data)
-{
-    data->priority = (int32_t)SoftBusHtoLl((uint32_t)data->priority);
-    data->sliceNum = (int32_t)SoftBusHtoLl((uint32_t)data->sliceNum);
-    data->sliceSeq = (int32_t)SoftBusHtoLl((uint32_t)data->sliceSeq);
-    data->reserved = (int32_t)SoftBusHtoLl((uint32_t)data->reserved);
-}
-
-void ClientUnPackSliceHead(SliceHead *data)
-{
-    data->priority = (int32_t)SoftBusLtoHl((uint32_t)data->priority);
-    data->sliceNum = (int32_t)SoftBusLtoHl((uint32_t)data->sliceNum);
-    data->sliceSeq = (int32_t)SoftBusLtoHl((uint32_t)data->sliceSeq);
-    data->reserved = (int32_t)SoftBusLtoHl((uint32_t)data->reserved);
-}
-
-void ClientPackPacketHead(PacketHead *data)
-{
-    data->magicNumber = (int32_t)SoftBusHtoLl((uint32_t)data->magicNumber);
-    data->seq = (int32_t)SoftBusHtoLl((uint32_t)data->seq);
-    data->flags = (int32_t)SoftBusHtoLl((uint32_t)data->flags);
-    data->dataLen = (int32_t)SoftBusHtoLl((uint32_t)data->dataLen);
-}
-
-void ClientUnPackPacketHead(PacketHead *data)
-{
-    data->magicNumber = (int32_t)SoftBusLtoHl((uint32_t)data->magicNumber);
-    data->seq = (int32_t)SoftBusLtoHl((uint32_t)data->seq);
-    data->flags = (int32_t)SoftBusLtoHl((uint32_t)data->flags);
-    data->dataLen = (int32_t)SoftBusLtoHl((uint32_t)data->dataLen);
-}
 
 static void ClientTransProxySliceTimerProc(void);
 
@@ -120,6 +71,9 @@ static int32_t ClientTransProxyListInit()
 
 static void ClientTransProxyListDeinit(void)
 {
+    if (UnRegisterTimeoutCallback(SOFTBUS_PROXYSLICE_TIMER_FUN) != SOFTBUS_OK) {
+        TRANS_LOGE(TRANS_FILE, "unregister proxyslice timer failed");
+    }
     if (g_proxyChannelInfoList != NULL) {
         DestroySoftBusList(g_proxyChannelInfoList);
         g_proxyChannelInfoList = NULL;
@@ -152,16 +106,7 @@ int32_t ClientTransProxyInit(const IClientSessionCallBack *cb)
         return SOFTBUS_NO_INIT;
     }
 
-    if (SoftbusGetConfig(SOFTBUS_INT_MAX_BYTES_NEW_LENGTH, (unsigned char *)&g_proxyMaxByteBufSize,
-                         sizeof(g_proxyMaxByteBufSize)) != SOFTBUS_OK) {
-        TRANS_LOGW(TRANS_INIT, "get auth proxy channel max bytes length fail");
-    }
-    if (SoftbusGetConfig(SOFTBUS_INT_MAX_MESSAGE_NEW_LENGTH, (unsigned char *)&g_proxyMaxMessageBufSize,
-                         sizeof(g_proxyMaxMessageBufSize)) != SOFTBUS_OK) {
-        TRANS_LOGW(TRANS_INIT, "get auth proxy channel max message length fail");
-    }
-    TRANS_LOGI(TRANS_INIT, "proxy auth byteSize=%{public}u, messageSize=%{public}u",
-        g_proxyMaxByteBufSize, g_proxyMaxMessageBufSize);
+    TransGetProxyDataBufMaxSize();
     return SOFTBUS_OK;
 }
 
@@ -303,20 +248,49 @@ static ClientProxyChannelInfo *ClientTransProxyCreateChannelInfo(const ChannelIn
         TRANS_LOGE(TRANS_SDK, "info is null");
         return NULL;
     }
-    if (memcpy_s(info->detail.sessionKey, SESSION_KEY_LENGTH, channel->sessionKey, SESSION_KEY_LENGTH) != EOK) {
-        SoftBusFree(info);
-        TRANS_LOGE(TRANS_SDK, "sessionKey memcpy fail");
-        return NULL;
-    }
     info->channelId = channel->channelId;
     info->detail.isEncrypted = channel->isEncrypt;
     info->detail.sequence = 0;
     info->detail.linkType = channel->linkType;
     info->detail.osType = channel->osType;
+    info->detail.isD2D = channel->isD2D;
+    if (channel->isD2D) {
+        info->detail.dataLen = channel->dataLen;
+        if (memcpy_s(info->detail.pagingNonce, PAGING_NONCE_LEN, channel->pagingNonce, PAGING_NONCE_LEN) != EOK) {
+            SoftBusFree(info);
+            TRANS_LOGE(TRANS_SDK, "pagingNonce memcpy fail");
+            return NULL;
+        }
+        if (memcpy_s(info->detail.pagingSessionkey, SHORT_SESSION_KEY_LENGTH, channel->pagingSessionkey,
+            SHORT_SESSION_KEY_LENGTH) != EOK) {
+            SoftBusFree(info);
+            TRANS_LOGE(TRANS_SDK, "pagingSessionkey memcpy fail");
+            return NULL;
+        }
+        if (channel->dataLen > 0 && channel->dataLen < EXTRA_DATA_MAX_LEN &&
+            memcpy_s(info->detail.extraData, EXTRA_DATA_MAX_LEN, channel->extraData, channel->dataLen) != EOK) {
+            SoftBusFree(info);
+            TRANS_LOGE(TRANS_SDK, "extraData memcpy fail");
+            return NULL;
+        }
+        if (channel->isServer &&
+            strcpy_s(info->detail.pagingAccountId, ACCOUNT_UID_LEN_MAX, channel->pagingAccountId) != EOK) {
+            SoftBusFree(info);
+            TRANS_LOGE(TRANS_SDK, "pagingAccountId strcpy fail");
+            return NULL;
+        }
+    } else {
+        if (memcpy_s(info->detail.sessionKey, SESSION_KEY_LENGTH, channel->sessionKey, channel->keyLen) != EOK) {
+            SoftBusFree(info);
+            TRANS_LOGE(TRANS_SDK, "sessionKey memcpy fail");
+            return NULL;
+        }
+    }
     return info;
 }
 
-int32_t ClientTransProxyOnChannelOpened(const char *sessionName, const ChannelInfo *channel)
+int32_t ClientTransProxyOnChannelOpened(
+    const char *sessionName, const ChannelInfo *channel, SocketAccessInfo *accessInfo)
 {
     if (sessionName == NULL || channel == NULL) {
         TRANS_LOGW(TRANS_SDK, "invalid param.");
@@ -345,12 +319,18 @@ int32_t ClientTransProxyOnChannelOpened(const char *sessionName, const ChannelIn
         case BUSINESS_TYPE_FILE:
             type = TYPE_FILE;
             break;
+        case BUSINESS_TYPE_D2D_MESSAGE:
+            type = TYPE_D2D_MESSAGE;
+            break;
+        case BUSINESS_TYPE_D2D_VOICE:
+            type = TYPE_D2D_VOICE;
+            break;
         default:
             type = TYPE_MESSAGE;
             break;
     }
 
-    ret = g_sessionCb.OnSessionOpened(sessionName, channel, type);
+    ret = g_sessionCb.OnSessionOpened(sessionName, channel, type, accessInfo);
     if (ret != SOFTBUS_OK) {
         (void)ClientTransProxyDelChannelInfo(channel->channelId);
         char *tmpName = NULL;
@@ -388,30 +368,7 @@ int32_t ClientTransProxyOnChannelOpenFailed(int32_t channelId, int32_t errCode)
     return SOFTBUS_OK;
 }
 
-int32_t ClientTransProxySessionDataLenCheck(uint32_t dataLen, SessionPktType type)
-{
-    switch (type) {
-        case TRANS_SESSION_MESSAGE:
-        case TRANS_SESSION_ASYNC_MESSAGE: {
-            if (dataLen > g_proxyMaxMessageBufSize) {
-                return SOFTBUS_TRANS_INVALID_DATA_LENGTH;
-            }
-            break;
-        }
-        case TRANS_SESSION_BYTES: {
-            if (dataLen > g_proxyMaxByteBufSize) {
-                return SOFTBUS_TRANS_INVALID_DATA_LENGTH;
-            }
-            break;
-        }
-        default: {
-            return SOFTBUS_OK;
-        }
-    }
-    return SOFTBUS_OK;
-}
-
-static int32_t ClientTransProxyDecryptPacketData(int32_t channelId, int32_t seq, ClientProxyDataInfo *dataInfo)
+static int32_t ClientTransProxyDecryptPacketData(int32_t channelId, int32_t seq, ProxyDataInfo *dataInfo)
 {
     ProxyChannelInfoDetail info;
     int32_t ret = ClientTransProxyGetInfoByChannelId(channelId, &info);
@@ -419,43 +376,10 @@ static int32_t ClientTransProxyDecryptPacketData(int32_t channelId, int32_t seq,
         TRANS_LOGE(TRANS_SDK, "get channel Info by channelId=%{public}d failed, ret=%{public}d", channelId, ret);
         return ret;
     }
-    AesGcmCipherKey cipherKey = { 0 };
-    cipherKey.keyLen = SESSION_KEY_LENGTH;
-    if (memcpy_s(cipherKey.key, SESSION_KEY_LENGTH, info.sessionKey, SESSION_KEY_LENGTH) != EOK) {
-        TRANS_LOGE(TRANS_SDK, "memcpy key error.");
-        return SOFTBUS_MEM_ERR;
-    }
-    ret = SoftBusDecryptDataWithSeq(
-        &cipherKey, dataInfo->inData, dataInfo->inLen, dataInfo->outData, &(dataInfo->outLen), seq);
-    (void)memset_s(&cipherKey, sizeof(AesGcmCipherKey), 0, sizeof(AesGcmCipherKey));
-    if (ret != SOFTBUS_OK) {
-        TRANS_LOGE(TRANS_SDK, "trans proxy Decrypt Data fail. ret=%{public}d ", ret);
-        return SOFTBUS_DECRYPT_ERR;
-    }
-
-    return SOFTBUS_OK;
+    return TransProxyDecryptPacketData(seq, dataInfo, info.sessionKey);
 }
 
-static int32_t ClientTransProxyCheckSliceHead(const SliceHead *head)
-{
-    if (head == NULL) {
-        TRANS_LOGW(TRANS_SDK, "invalid param.");
-        return SOFTBUS_INVALID_PARAM;
-    }
-    if (head->priority < 0 || head->priority >= PROXY_CHANNEL_PRORITY_BUTT) {
-        TRANS_LOGE(TRANS_SDK, "invalid index=%{public}d", head->priority);
-        return SOFTBUS_INVALID_DATA_HEAD;
-    }
-
-    if (head->sliceNum != 1 && head->sliceSeq >= head->sliceNum) {
-        TRANS_LOGE(TRANS_SDK, "sliceNum=%{public}d, sliceSeq=%{public}d", head->sliceNum, head->sliceSeq);
-        return SOFTBUS_INVALID_DATA_HEAD;
-    }
-
-    return SOFTBUS_OK;
-}
-
-int32_t TransProxyPackAndSendData(
+int32_t ClientTransProxyPackAndSendData(
     int32_t channelId, const void *data, uint32_t len, ProxyChannelInfoDetail *info, SessionPktType pktType);
 
 static void ClientTransProxySendSessionAck(int32_t channelId, int32_t seq)
@@ -477,12 +401,13 @@ static void ClientTransProxySendSessionAck(int32_t channelId, int32_t seq)
         return;
     }
     info.sequence = seq;
-    if (TransProxyPackAndSendData(channelId, ack, PROXY_ACK_SIZE, &info, TRANS_SESSION_ACK) != SOFTBUS_OK) {
+    if (ClientTransProxyPackAndSendData(channelId, ack, PROXY_ACK_SIZE, &info, TRANS_SESSION_ACK) != SOFTBUS_OK) {
         TRANS_LOGE(TRANS_SDK, "send ack err, seq=%{public}d", seq);
     }
 }
 
-static int32_t ClientTransProxyProcSendMsgAck(int32_t channelId, const char *data, int32_t len, int32_t dataHeadSeq)
+static int32_t ClientTransProxyProcSendMsgAck(int32_t channelId, const char *data, int32_t len,
+                                              int32_t dataHeadSeq, uint32_t dataSeq)
 {
     if (len != PROXY_ACK_SIZE) {
         return SOFTBUS_TRANS_INVALID_DATA_LENGTH;
@@ -494,6 +419,29 @@ static int32_t ClientTransProxyProcSendMsgAck(int32_t channelId, const char *dat
     int32_t hostSeq = (int32_t)SoftBusNtoHl(*(uint32_t *)data);
     TRANS_LOGI(TRANS_SDK, "channelId=%{public}d, dataHeadSeq=%{public}d, seq=%{public}d, hostSeq=%{public}d",
         channelId, dataHeadSeq, seq, hostSeq);
+    if (dataSeq != 0) { // this async process
+        int32_t socketId = INVALID_SESSION_ID;
+        SessionListenerAdapter sessionCallback;
+        bool isServer = false;
+        (void)memset_s(&sessionCallback, sizeof(SessionListenerAdapter), 0, sizeof(SessionListenerAdapter));
+        int32_t ret = ClientGetSessionIdByChannelId(channelId, CHANNEL_TYPE_PROXY, &socketId, false);
+        if (ret != SOFTBUS_OK) {
+            TRANS_LOGE(TRANS_SDK, "get socketId failed, channelId=%{public}d", channelId);
+            return ret;
+        }
+        ret = ClientGetSessionCallbackAdapterById(socketId, &sessionCallback, &isServer);
+        if (ret != SOFTBUS_OK) {
+            TRANS_LOGE(TRANS_SDK, "get session callback failed, channelId=%{public}d", channelId);
+            return ret;
+        }
+        ret = DeleteDataSeqInfoList(dataSeq, channelId);
+        if (ret != SOFTBUS_OK) {
+            TRANS_LOGE(TRANS_SDK, "proxychannel delete dataSeqInfoList failed, channelId=%{public}d", channelId);
+            return ret;
+        }
+        sessionCallback.socketClient.OnBytesSent(socketId, dataSeq, SOFTBUS_OK);
+        return SOFTBUS_OK;
+    }
     int32_t ret = SetPendingPacket(channelId, seq, PENDING_TYPE_PROXY);
     if (ret != SOFTBUS_OK) {
         ret = SetPendingPacket(channelId, hostSeq, PENDING_TYPE_PROXY);
@@ -504,6 +452,67 @@ static int32_t ClientTransProxyProcSendMsgAck(int32_t channelId, const char *dat
     return ret;
 }
 
+static void ClientTransProxySendBytesAck(int32_t channelId, int32_t seq, uint32_t dataSeq, bool needAck)
+{
+    if (needAck) {
+        TRANS_LOGI(TRANS_SDK, "proxy channel server send ack to client");
+        unsigned char ack[PROXY_ACK_SIZE] = { 0 };
+        int32_t tmpSeq = 0;
+        ProxyChannelInfoDetail info;
+        if (ClientTransProxyGetInfoByChannelId(channelId, &info) != SOFTBUS_OK) {
+            TRANS_LOGE(TRANS_SDK, "get proxy info err, channelId=%{public}d", channelId);
+            return;
+        }
+        if (info.osType == OH_TYPE) {
+            tmpSeq = (int32_t)SoftBusHtoLl((uint32_t)seq);
+        } else {
+            tmpSeq = (int32_t)SoftBusHtoNl((uint32_t)seq);
+        }
+        if (memcpy_s(ack, PROXY_ACK_SIZE, &tmpSeq, sizeof(int32_t)) != EOK) {
+            TRANS_LOGE(TRANS_SDK, "memcpy seq err");
+            return;
+        }
+        info.sequence = seq;
+        if (TransProxyAsyncPackAndSendData(channelId, ack, PROXY_ACK_SIZE, dataSeq, TRANS_SESSION_ACK) != SOFTBUS_OK) {
+            TRANS_LOGE(TRANS_SDK, "send ack err, seq=%{public}d", seq);
+            return;
+        }
+    }
+}
+
+static int32_t ClientTransProxyBytesNotifySession(int32_t channelId, const DataHeadTlvPacketHead *dataHead,
+    const char *data, uint32_t len)
+{
+    SessionPktType flags = (SessionPktType)dataHead->flags;
+    int32_t seq = dataHead->seq;
+    uint32_t dataSeq = dataHead->dataSeq;
+    bool needAck = dataHead->needAck;
+    switch (flags) {
+        case TRANS_SESSION_MESSAGE:
+            ClientTransProxySendSessionAck(channelId, seq);
+            return g_sessionCb.OnDataReceived(channelId, CHANNEL_TYPE_PROXY, data, len, flags);
+        case TRANS_SESSION_ACK:
+            return ClientTransProxyProcSendMsgAck(channelId, data, len, seq, dataSeq);
+        case TRANS_SESSION_BYTES:
+            ClientTransProxySendBytesAck(channelId, seq, dataSeq, needAck);
+            return g_sessionCb.OnDataReceived(channelId, CHANNEL_TYPE_PROXY, data, len, flags);
+        case TRANS_SESSION_FILE_FIRST_FRAME:
+        case TRANS_SESSION_FILE_ONGOINE_FRAME:
+        case TRANS_SESSION_FILE_LAST_FRAME:
+        case TRANS_SESSION_FILE_ONLYONE_FRAME:
+        case TRANS_SESSION_FILE_ALLFILE_SENT:
+        case TRANS_SESSION_FILE_CRC_CHECK_FRAME:
+        case TRANS_SESSION_FILE_RESULT_FRAME:
+        case TRANS_SESSION_FILE_ACK_REQUEST_SENT:
+        case TRANS_SESSION_FILE_ACK_RESPONSE_SENT:
+        case TRANS_SESSION_ASYNC_MESSAGE:
+            return g_sessionCb.OnDataReceived(channelId, CHANNEL_TYPE_PROXY, data, len, flags);
+        default:
+            TRANS_LOGE(TRANS_SDK, "invalid flags=%{public}d", flags);
+            return SOFTBUS_INVALID_PARAM;
+    }
+}
+
 static int32_t ClientTransProxyNotifySession(
     int32_t channelId, SessionPktType flags, int32_t seq, const char *data, uint32_t len)
 {
@@ -512,7 +521,7 @@ static int32_t ClientTransProxyNotifySession(
             ClientTransProxySendSessionAck(channelId, seq);
             return g_sessionCb.OnDataReceived(channelId, CHANNEL_TYPE_PROXY, data, len, flags);
         case TRANS_SESSION_ACK:
-            return (int32_t)(ClientTransProxyProcSendMsgAck(channelId, data, len, seq));
+            return ClientTransProxyProcSendMsgAck(channelId, data, len, seq, 0);
         case TRANS_SESSION_BYTES:
         case TRANS_SESSION_FILE_FIRST_FRAME:
         case TRANS_SESSION_FILE_ONGOINE_FRAME:
@@ -533,32 +542,21 @@ static int32_t ClientTransProxyNotifySession(
 
 static int32_t ClientTransProxyProcessSessionData(int32_t channelId, const PacketHead *dataHead, const char *data)
 {
-    ClientProxyDataInfo dataInfo = { 0 };
-    uint32_t outLen = 0;
+    ProxyDataInfo dataInfo = { 0 };
 
-    if (dataHead->dataLen <= OVERHEAD_LEN) {
-        TRANS_LOGE(TRANS_SDK, "invalid data head dataLen=%{public}d", dataHead->dataLen);
-        return SOFTBUS_TRANS_INVALID_DATA_LENGTH;
+    int32_t ret = TransProxyProcessSessionData(&dataInfo, dataHead, data);
+    if (ret != SOFTBUS_OK) {
+        return ret;
     }
 
-    outLen = dataHead->dataLen - OVERHEAD_LEN;
-    dataInfo.outData = (unsigned char *)SoftBusCalloc(outLen);
-    if (dataInfo.outData == NULL) {
-        TRANS_LOGE(TRANS_SDK, "malloc fail when process session out data.");
-        return SOFTBUS_MALLOC_ERR;
-    }
-    dataInfo.inData = (unsigned char *)data;
-    dataInfo.inLen = dataHead->dataLen;
-    dataInfo.outLen = outLen;
-
-    int32_t ret = ClientTransProxyDecryptPacketData(channelId, dataHead->seq, &dataInfo);
+    ret = ClientTransProxyDecryptPacketData(channelId, dataHead->seq, &dataInfo);
     if (ret != SOFTBUS_OK) {
         TRANS_LOGE(TRANS_SDK, "decrypt err");
         SoftBusFree(dataInfo.outData);
         return SOFTBUS_DECRYPT_ERR;
     }
 
-    if (ClientTransProxySessionDataLenCheck(dataInfo.outLen, (SessionPktType)(dataHead->flags)) != SOFTBUS_OK) {
+    if (TransProxySessionDataLenCheck(dataInfo.outLen, (SessionPktType)(dataHead->flags)) != SOFTBUS_OK) {
         TRANS_LOGE(
             TRANS_SDK, "data len is too large outlen=%{public}d, flags=%{public}d", dataInfo.outLen, dataHead->flags);
         SoftBusFree(dataInfo.outData);
@@ -576,35 +574,448 @@ static int32_t ClientTransProxyProcessSessionData(int32_t channelId, const Packe
     return SOFTBUS_OK;
 }
 
-static int32_t ClientTransProxyNoSubPacketProc(int32_t channelId, const char *data, uint32_t len)
+static int32_t ClientTransProxyProcData(int32_t channelId, const DataHeadTlvPacketHead *dataHead, const char *data)
 {
-    PacketHead head;
-    if (len < sizeof(PacketHead)) {
-        TRANS_LOGE(TRANS_SDK, "check len failed, len=%{public}d", len);
-        return SOFTBUS_INVALID_PARAM;
+    ProxyDataInfo dataInfo = { 0 };
+    int32_t ret = TransProxyProcData(&dataInfo, dataHead, data);
+    if (ret != SOFTBUS_OK) {
+        return ret;
     }
-    if (memcpy_s(&head, sizeof(PacketHead), data, sizeof(PacketHead)) != EOK) {
-        TRANS_LOGE(TRANS_SDK, "memcpy packetHead failed");
-        return SOFTBUS_MEM_ERR;
+
+    ret = ClientTransProxyDecryptPacketData(channelId, dataHead->seq, &dataInfo);
+    if (ret != SOFTBUS_OK) {
+        TRANS_LOGE(TRANS_SDK, "decrypt err");
+        SoftBusFree(dataInfo.outData);
+        return SOFTBUS_DECRYPT_ERR;
     }
-    ClientUnPackPacketHead(&head);
-    if ((uint32_t)head.magicNumber != MAGIC_NUMBER) {
-        TRANS_LOGE(TRANS_SDK, "invalid magicNumber=%{public}x, channelId=%{public}d, len=%{public}d",
-            head.magicNumber, channelId, len);
+
+    if (TransProxySessionDataLenCheck(dataInfo.outLen, (SessionPktType)(dataHead->flags)) != SOFTBUS_OK) {
+        TRANS_LOGE(
+            TRANS_SDK, "data len is too large outlen=%{public}d, flags=%{public}d", dataInfo.outLen, dataHead->flags);
+        SoftBusFree(dataInfo.outData);
+        return SOFTBUS_TRANS_INVALID_DATA_LENGTH;
+    }
+
+    TRANS_LOGD(TRANS_SDK, "ProcessData debug: outlen=%{public}d", dataInfo.outLen);
+    if (ClientTransProxyBytesNotifySession(channelId, dataHead, (const char *)dataInfo.outData,
+                                           dataInfo.outLen) != SOFTBUS_OK) {
+        TRANS_LOGE(TRANS_SDK, "process data err");
+        SoftBusFree(dataInfo.outData);
         return SOFTBUS_INVALID_DATA_HEAD;
     }
+    SoftBusFree(dataInfo.outData);
+    return SOFTBUS_OK;
+}
+
+static int32_t ClientTransProxyNoSubPacketTlvProc(int32_t channelId, const char *data, uint32_t len)
+{
+    DataHeadTlvPacketHead pktHead = { 0 };
+    uint32_t newPktHeadSize = 0;
+    int32_t ret = TransProxyParseTlv(len, data, &pktHead, &newPktHeadSize);
+    if (ret != SOFTBUS_OK) {
+        TRANS_LOGE(TRANS_SDK, "proxy channel parse tlv failed, ret=%{public}d", ret);
+        return ret;
+    }
+    ret = TransProxyNoSubPacketTlvProc(channelId, data, len, &pktHead, newPktHeadSize);
+    if (ret != SOFTBUS_OK) {
+        TRANS_LOGE(TRANS_SDK, "process data failed, channelId=%{public}d, len=%{public}d", channelId, len);
+        return ret;
+    }
+    ret = ClientTransProxyProcData(channelId, &pktHead, data + newPktHeadSize);
+    if (ret != SOFTBUS_OK) {
+        TRANS_LOGE(TRANS_SDK, "process data err, channelId=%{public}d, len=%{public}u", channelId, len);
+        return ret;
+    }
+    return SOFTBUS_OK;
+}
+
+static int32_t TransGenerateRandIv(unsigned char *sessionIv, const uint16_t *nonce, const uint16_t *dataSeq)
+{
+    uint8_t shortIv[SHORT_SESSION_IV_LENGTH];
+    if (memcpy_s(shortIv, NONCE_LEN, nonce, NONCE_LEN) != EOK) {
+        TRANS_LOGE(TRANS_CTRL, "memcpy_s nonce fail");
+        return SOFTBUS_MEM_ERR;
+    }
+    if (memcpy_s(shortIv + NONCE_LEN, DATA_SEQ_LEN, dataSeq, DATA_SEQ_LEN) != EOK) {
+        TRANS_LOGE(TRANS_CTRL, "memcpy_s nonce fail");
+        return SOFTBUS_MEM_ERR;
+    }
+    if (SoftBusCalcHKDF(shortIv, SHORT_SESSION_IV_LENGTH, sessionIv, GCM_IV_LEN) != SOFTBUS_OK) {
+        TRANS_LOGE(TRANS_CTRL, "calc HKDF fail");
+        return SOFTBUS_CALC_HKDF_FAIL;
+    }
+    return SOFTBUS_OK;
+}
+
+static int32_t TransPackD2DExtraData(ProxyDataInfo *dataInfo, SessionPktType flag, uint16_t dataSeq, uint16_t nonce)
+{
+    if (memcpy_s(dataInfo->outData + sizeof(PacketD2DHead), NONCE_LEN, &nonce, NONCE_LEN) != EOK) {
+        TRANS_LOGE(TRANS_CTRL, "memcpy data seq failed");
+        return SOFTBUS_MEM_ERR;
+    }
+    if (memcpy_s(dataInfo->outData + sizeof(PacketD2DHead) + NONCE_LEN, DATA_SEQ_LEN, &dataSeq, DATA_SEQ_LEN) != EOK) {
+        TRANS_LOGE(TRANS_CTRL, "memcpy data seq failed");
+        return SOFTBUS_MEM_ERR;
+    }
+    PacketD2DHead *pktHead = (PacketD2DHead *)dataInfo->outData;
+    pktHead->flags = flag;
+    pktHead->dataLen = (int32_t)((int32_t)dataInfo->outLen - sizeof(PacketD2DHead) - DATA_SEQ_LEN - NONCE_LEN);
+    pktHead->flags = (int32_t)SoftBusHtoLl((uint32_t)pktHead->flags);
+    pktHead->dataLen = (int32_t)SoftBusHtoLl((uint32_t)pktHead->dataLen);
+    return SOFTBUS_OK;
+}
+
+static int32_t TransProxyPackAsyncMessage(int32_t channelId, const ProxyChannelInfoDetail *info,
+    ProxyDataInfo *dataInfo, SessionPktType flag, uint16_t dataSeq)
+{
+    if (dataInfo == NULL || info == NULL) {
+        TRANS_LOGE(TRANS_CTRL, "invalid para");
+        return SOFTBUS_INVALID_PARAM;
+    }
+    uint16_t nonce = 0;
+    if (SoftBusGenerateRandomArray((unsigned char *)&nonce, sizeof(uint16_t)) != SOFTBUS_OK) {
+        TRANS_LOGE(TRANS_CTRL, "generate nonce fail");
+        return SOFTBUS_GENERATE_RANDOM_ARRAY_FAIL;
+    }
+    AesGcm128CipherKey cipherKey = { 0 };
+    cipherKey.keyLen = SHORT_SESSION_KEY_LENGTH;
+    if (memcpy_s(cipherKey.key, SHORT_SESSION_KEY_LENGTH, info->pagingSessionkey, SHORT_SESSION_KEY_LENGTH) != EOK) {
+        TRANS_LOGE(TRANS_CTRL, "memcpy key failed");
+        return SOFTBUS_MEM_ERR;
+    }
+    if (TransGenerateRandIv(cipherKey.iv, &nonce, &dataSeq) != SOFTBUS_OK) {
+        TRANS_LOGE(TRANS_CTRL, "generate iv failed");
+        (void)memset_s(cipherKey.key, SHORT_SESSION_KEY_LENGTH, 0, SHORT_SESSION_KEY_LENGTH);
+        return SOFTBUS_GCM_SET_IV_FAIL;
+    }
+    dataInfo->outLen = dataInfo->inLen + SHORT_TAG_LEN + DATA_SEQ_LEN + NONCE_LEN + sizeof(PacketD2DHead);
+    dataInfo->outData = (uint8_t *)SoftBusCalloc(dataInfo->outLen);
+    if (dataInfo->outData == NULL) {
+        TRANS_LOGE(TRANS_CTRL, "malloc failed");
+        (void)memset_s(&cipherKey, sizeof(AesGcm128CipherKey), 0, sizeof(AesGcm128CipherKey));
+        return SOFTBUS_MALLOC_ERR;
+    }
+    uint32_t outLen = 0;
+    char *outData = (char *)dataInfo->outData + DATA_SEQ_LEN + NONCE_LEN + sizeof(PacketD2DHead);
+    int32_t ret = SoftBusEncryptDataByGcm128(&cipherKey, (const unsigned char *)dataInfo->inData,
+        dataInfo->inLen, (unsigned char *)outData, &outLen);
+    (void)memset_s(&cipherKey, sizeof(AesGcm128CipherKey), 0, sizeof(AesGcm128CipherKey));
+    if (ret != SOFTBUS_OK || outLen != dataInfo->inLen + SHORT_TAG_LEN) {
+        outData = NULL;
+        SoftBusFree(dataInfo->outData);
+        TRANS_LOGE(TRANS_CTRL, "encrypt error, channelId=%{public}d, ret=%{public}d", channelId, ret);
+        return SOFTBUS_TRANS_PROXY_SESS_ENCRYPT_ERR;
+    }
+    ret = TransPackD2DExtraData(dataInfo, flag, dataSeq, nonce);
+    if (ret != SOFTBUS_OK) {
+        outData = NULL;
+        SoftBusFree(dataInfo->outData);
+        TRANS_LOGE(TRANS_CTRL, "pack extra error, channelId=%{public}d, ret=%{public}d", channelId, ret);
+        return ret;
+    }
+    return SOFTBUS_OK;
+}
+
+int32_t TransProxyAsyncPackAndSendMessage(
+    int32_t channelId, const void *data, uint32_t len, uint16_t dataSeq, SessionPktType pktType)
+{
+    if (data == NULL) {
+        return SOFTBUS_INVALID_PARAM;
+    }
+    ProxyChannelInfoDetail info;
+    int32_t ret = ClientTransProxyGetInfoByChannelId(channelId, &info);
+    TRANS_CHECK_AND_RETURN_RET_LOGE(ret == SOFTBUS_OK, ret, TRANS_SDK, "get info fail");
+
+    ProxyDataInfo dataInfo = { (uint8_t *)data, len, (uint8_t *)data, len };
+    ret = TransProxyPackAsyncMessage(channelId, &info, &dataInfo, pktType, dataSeq);
+    if (ret != SOFTBUS_OK) {
+        TRANS_LOGE(TRANS_SDK, "TransProxyPackAsyncMessage error, channelId=%{public}d", channelId);
+        return ret;
+    }
+    uint32_t dataLen = 1;
+
+    uint32_t sliceNum = (dataInfo.outLen + (uint32_t)(SHORT_SLICE_LEN - 1)) / (uint32_t)SHORT_SLICE_LEN;
+    if (sliceNum > INT32_MAX) {
+        SoftBusFree(dataInfo.outData);
+        TRANS_LOGE(TRANS_FILE, "Data overflow, sliceNum=%{public}u, channelId=%{public}d", sliceNum, channelId);
+        return SOFTBUS_INVALID_NUM;
+    }
+    for (uint32_t cnt = 0; cnt < sliceNum; cnt++) {
+        uint8_t *sliceData = TransProxyPackD2DData(&dataInfo, sliceNum, pktType, cnt, &dataLen);
+        if (sliceData == NULL) {
+            TRANS_LOGE(TRANS_SDK, "pack data failed, channelId=%{public}d", channelId);
+            SoftBusFree(dataInfo.outData);
+            return SOFTBUS_MALLOC_ERR;
+        }
+
+        int ret = ServerIpcSendMessage(channelId, CHANNEL_TYPE_PROXY, sliceData, dataLen + sizeof(SliceHead), pktType);
+        if (ret != SOFTBUS_OK) {
+            TRANS_LOGE(TRANS_SDK, "ServerIpcSendMessage error, channelId=%{public}d, ret=%{public}d", channelId, ret);
+            SoftBusFree(sliceData);
+            SoftBusFree(dataInfo.outData);
+            return ret;
+        }
+
+        SoftBusFree(sliceData);
+    }
+    SoftBusFree(dataInfo.outData);
+    TRANS_LOGI(TRANS_SDK, "TransProxyAsyncPackAndSendData success, channelId=%{public}d", channelId);
+    return SOFTBUS_OK;
+}
+
+static void ClientTransProxySendD2DAck(int32_t channelId, uint16_t dataSeq)
+{
+    unsigned char ack[PROXY_ACK_SIZE] = { 0 };
+    int32_t tmpSeq = 0;
+    ProxyChannelInfoDetail info;
+    if (ClientTransProxyGetInfoByChannelId(channelId, &info) != SOFTBUS_OK) {
+        TRANS_LOGE(TRANS_SDK, "get proxy info err, channelId=%{public}d", channelId);
+        return;
+    }
+    if (info.osType == OH_TYPE) {
+        tmpSeq = (int32_t)SoftBusHtoLl((uint32_t)dataSeq);
+    } else {
+        tmpSeq = (int32_t)SoftBusHtoNl((uint32_t)dataSeq); // convet host order to net order
+    }
+    if (memcpy_s(ack, PROXY_ACK_SIZE, &tmpSeq, sizeof(int32_t)) != EOK) {
+        TRANS_LOGE(TRANS_SDK, "memcpy seq err");
+        return;
+    }
+    int32_t businessType;
+    if (ClientGetChannelBusinessTypeByChannelId(channelId, &businessType) != SOFTBUS_OK) {
+        TRANS_LOGE(TRANS_SDK, "get businessType, channelId=%{public}d", channelId);
+        return;
+    }
+    if (businessType == BUSINESS_TYPE_D2D_MESSAGE) {
+        if (TransProxyAsyncPackAndSendMessage(channelId, ack, PROXY_ACK_SIZE, dataSeq,
+            TRANS_SESSION_ACK) != SOFTBUS_OK) {
+            TRANS_LOGE(TRANS_SDK, "send ack err, dataSeq=%{public}u", dataSeq);
+        }
+    }
+}
+
+static int32_t ClientTransProxyProcD2DAck(int32_t channelId, const char *data, uint32_t len, uint16_t dataSeq)
+{
+    if (len != PROXY_ACK_SIZE) {
+        return SOFTBUS_TRANS_INVALID_DATA_LENGTH;
+    }
+    if (data == NULL) {
+        return SOFTBUS_TRANS_PROXY_ASSEMBLE_PACK_DATA_NULL;
+    }
+    if (dataSeq == 0) {
+        TRANS_LOGI(TRANS_SDK, "dataSeq invalid");
+        return SOFTBUS_TRANS_INVALID_DATA_LENGTH;
+    }
+    int32_t seq = *(int32_t *)data;
+    int32_t hostSeq = (int32_t)SoftBusNtoHl(*(uint32_t *)data);
+    TRANS_LOGI(TRANS_SDK, "channelId=%{public}d, dataHeadSeq=%{public}u, seq=%{public}d, hostSeq=%{public}d", channelId,
+        dataSeq, seq, hostSeq);
+
+    int32_t socketId = INVALID_SESSION_ID;
+    SessionListenerAdapter sessionCallback;
+    bool isServer = false;
+    (void)memset_s(&sessionCallback, sizeof(SessionListenerAdapter), 0, sizeof(SessionListenerAdapter));
+    int32_t ret = ClientGetSessionIdByChannelId(channelId, CHANNEL_TYPE_PROXY, &socketId, false);
+    if (ret != SOFTBUS_OK) {
+        TRANS_LOGE(TRANS_SDK, "get socketId failed, channelId=%{public}d", channelId);
+        return ret;
+    }
+    ret = ClientGetSessionCallbackAdapterById(socketId, &sessionCallback, &isServer);
+    if (ret != SOFTBUS_OK) {
+        TRANS_LOGE(TRANS_SDK, "get session callback failed, channelId=%{public}d", channelId);
+        return ret;
+    }
+    ret = DeleteDataSeqInfoList(dataSeq, channelId);
+    if (ret != SOFTBUS_OK) {
+        TRANS_LOGE(TRANS_SDK, "proxychannel delete dataSeqInfoList failed, channelId=%{public}d", channelId);
+        return ret;
+    }
+    if (sessionCallback.socketClient.OnMessageSent == NULL) {
+        TRANS_LOGE(TRANS_SDK, "OnMessageSent not implement, channelId=%{public}d", channelId);
+        return SOFTBUS_TRANS_REGISTER_LISTENER_FAILED;
+    }
+    sessionCallback.socketClient.OnMessageSent(socketId, dataSeq, SOFTBUS_OK);
+    return SOFTBUS_OK;
+}
+
+static int32_t ClientTransProxyNotifyD2D(
+    int32_t channelId, SessionPktType flags, uint16_t dataSeq, const char *data, uint32_t len)
+{
+    switch (flags) {
+        case TRANS_SESSION_MESSAGE:
+            ClientTransProxySendD2DAck(channelId, dataSeq);
+            return g_sessionCb.OnDataReceived(channelId, CHANNEL_TYPE_PROXY, data, len, flags);
+        case TRANS_SESSION_ACK:
+            return ClientTransProxyProcD2DAck(channelId, data, len, dataSeq);
+        case TRANS_SESSION_BYTES:
+        case TRANS_SESSION_FILE_FIRST_FRAME:
+        case TRANS_SESSION_FILE_ONGOINE_FRAME:
+        case TRANS_SESSION_FILE_LAST_FRAME:
+        case TRANS_SESSION_FILE_ONLYONE_FRAME:
+        case TRANS_SESSION_FILE_ALLFILE_SENT:
+        case TRANS_SESSION_FILE_CRC_CHECK_FRAME:
+        case TRANS_SESSION_FILE_RESULT_FRAME:
+        case TRANS_SESSION_FILE_ACK_REQUEST_SENT:
+        case TRANS_SESSION_FILE_ACK_RESPONSE_SENT:
+        case TRANS_SESSION_ASYNC_MESSAGE:
+            return g_sessionCb.OnDataReceived(channelId, CHANNEL_TYPE_PROXY, data, len, flags);
+        default:
+            TRANS_LOGE(TRANS_SDK, "invalid flags=%{public}d", flags);
+            return SOFTBUS_INVALID_PARAM;
+    }
+}
+
+static int32_t ClientTransProxyProcD2DData(int32_t channelId, const char *data, const PacketD2DHead *head,
+    int32_t businessType, const PacketD2DIvSource *ivSource)
+{
+    ProxyDataInfo dataInfo = { 0 };
+
+    int32_t ret = TransProxyProcessD2DData(&dataInfo, head, data, businessType);
+    TRANS_CHECK_AND_RETURN_RET_LOGE(ret == SOFTBUS_OK, ret, TRANS_SDK, "process d2d data err");
+    ProxyChannelInfoDetail info;
+    ret = ClientTransProxyGetInfoByChannelId(channelId, &info);
+    if (ret != SOFTBUS_OK) {
+        TRANS_LOGE(TRANS_SDK, "get info err");
+        SoftBusFree(dataInfo.outData);
+        return ret;
+    }
+    uint8_t sessionCommonIv[GCM_IV_LEN];
+    if (businessType == BUSINESS_TYPE_D2D_MESSAGE) {
+        if (TransGenerateRandIv(sessionCommonIv, &ivSource->nonce, &ivSource->dataSeq) != SOFTBUS_OK) {
+            TRANS_LOGE(TRANS_CTRL, "generate iv failed");
+            SoftBusFree(dataInfo.outData);
+            return SOFTBUS_GCM_SET_IV_FAIL;
+        }
+    } else {
+        if (TransGenerateToBytesRandIv(sessionCommonIv, (uint32_t *)&ivSource->nonce) != SOFTBUS_OK) {
+            TRANS_LOGE(TRANS_CTRL, "generate iv failed");
+            SoftBusFree(dataInfo.outData);
+            return SOFTBUS_GCM_SET_IV_FAIL;
+        }
+    }
+
+    ret = TransProxyDecryptD2DData(businessType, &dataInfo, info.pagingSessionkey, sessionCommonIv);
+    if (ret != SOFTBUS_OK) {
+        TRANS_LOGE(TRANS_SDK, "decrypt err");
+        SoftBusFree(dataInfo.outData);
+        return SOFTBUS_DECRYPT_ERR;
+    }
+
+    if (TransProxySessionDataLenCheck(dataInfo.outLen, (SessionPktType)(head->flags)) != SOFTBUS_OK) {
+        TRANS_LOGE(
+            TRANS_SDK, "data len is too large outlen=%{public}d, flags=%{public}d", dataInfo.outLen, head->flags);
+        SoftBusFree(dataInfo.outData);
+        return SOFTBUS_TRANS_INVALID_DATA_LENGTH;
+    }
+
+    TRANS_LOGI(TRANS_SDK, "Process D2D Data: outlen=%{public}d, dataseq=%{public}u",
+        dataInfo.outLen, ivSource->dataSeq);
+    if (ClientTransProxyNotifyD2D(channelId, (SessionPktType)head->flags, ivSource->dataSeq,
+        (const char *)dataInfo.outData, dataInfo.outLen) != SOFTBUS_OK) {
+        TRANS_LOGE(TRANS_SDK, "notify data err");
+        SoftBusFree(dataInfo.outData);
+        return SOFTBUS_INVALID_DATA_HEAD;
+    }
+    SoftBusFree(dataInfo.outData);
+    return SOFTBUS_OK;
+}
+
+static int32_t ClientTransParseExtraData(uint16_t *nonce, uint16_t *dataSeq, uint32_t *offSet, const char *data)
+{
+    if (memcpy_s(nonce, NONCE_LEN, data + *offSet, NONCE_LEN) != EOK) {
+        TRANS_LOGE(TRANS_SDK, "memcpy nonce fail");
+        return SOFTBUS_MEM_ERR;
+    }
+    *offSet += NONCE_LEN;
+    if (memcpy_s(dataSeq, DATA_SEQ_LEN, data + *offSet, DATA_SEQ_LEN) != EOK) {
+        TRANS_LOGE(TRANS_SDK, "memcpy data seq fail");
+        return SOFTBUS_MEM_ERR;
+    }
+    *offSet += DATA_SEQ_LEN;
+    return SOFTBUS_OK;
+}
+
+static int32_t ClientTransProxyNoSubPacketD2DDataProc(
+    int32_t channelId, const char *data, uint32_t len, int32_t businessType)
+{
+    TRANS_CHECK_AND_RETURN_RET_LOGE(data != NULL && len >= sizeof(PacketD2DHead),
+        SOFTBUS_INVALID_PARAM, TRANS_SDK, "data null or len error. len=%{public}d", len);
+    uint16_t dataSeq = 0;
+    uint16_t nonce = 0;
+    uint32_t offSet = 0;
+    PacketD2DHead head = { 0 };
+    if (memcpy_s(&head, sizeof(PacketD2DHead), data, sizeof(PacketD2DHead)) != EOK) {
+        TRANS_LOGE(TRANS_SDK, "memcpy head fail");
+        return SOFTBUS_MEM_ERR;
+    }
+    head.flags = (int32_t)SoftBusLtoHl((uint32_t)head.flags);
+    head.dataLen = (int32_t)SoftBusLtoHl((uint32_t)head.dataLen);
     if (head.dataLen <= 0) {
-        TRANS_LOGE(TRANS_SDK, "invalid dataLen=%{public}d, channelId=%{public}d, len=%{public}d",
-            head.dataLen, channelId, len);
-        return SOFTBUS_TRANS_INVALID_DATA_LENGTH;
+        TRANS_LOGE(
+            TRANS_SDK, "dataLen=%{public}d, channelId=%{public}d, inlen=%{public}d", head.dataLen, channelId, len);
+        return SOFTBUS_INVALID_DATA_HEAD;
     }
-    TRANS_LOGD(TRANS_SDK, "NoSubPacketProc dataLen=%{public}d, inputLen=%{public}d", head.dataLen, len);
-    if (len <= sizeof(PacketHead) || (head.dataLen != (int32_t)(len - sizeof(PacketHead)))) {
-        TRANS_LOGE(TRANS_SDK, "dataLen error, channelId=%{public}d, len=%{public}d, dataLen=%{public}d",
-            channelId, len, head.dataLen);
-        return SOFTBUS_TRANS_INVALID_DATA_LENGTH;
+    offSet += sizeof(PacketD2DHead);
+    if (businessType == BUSINESS_TYPE_D2D_MESSAGE) {
+        if (len != NONCE_LEN + DATA_SEQ_LEN + sizeof(PacketD2DHead) + head.dataLen) {
+            TRANS_LOGE(
+                TRANS_SDK, "dataLen=%{public}d, channelId=%{public}d, inlen=%{public}d", head.dataLen, channelId, len);
+            return SOFTBUS_INVALID_DATA_HEAD;
+        }
+        if (ClientTransParseExtraData(&nonce, &dataSeq, &offSet, data) != SOFTBUS_OK) {
+            TRANS_LOGE(TRANS_SDK, "parse extra data fail");
+            return SOFTBUS_MEM_ERR;
+        }
+    } else {
+        if (len != sizeof(PacketD2DHead) + head.dataLen + NONCE_LEN) {
+            TRANS_LOGE(
+                TRANS_SDK, "dataLen=%{public}d, channelId=%{public}d, inlen=%{public}d", head.dataLen, channelId, len);
+            return SOFTBUS_INVALID_DATA_HEAD;
+        }
+        if (memcpy_s(&nonce, NONCE_LEN, data + offSet, NONCE_LEN) != EOK) {
+            TRANS_LOGE(TRANS_SDK, "memcpy nonce failed");
+            return SOFTBUS_MEM_ERR;
+        }
+        offSet += NONCE_LEN;
     }
-    int32_t ret = ClientTransProxyProcessSessionData(channelId, &head, data + sizeof(PacketHead));
+    PacketD2DIvSource ivSource;
+    ivSource.dataSeq = dataSeq;
+    ivSource.nonce = nonce;
+    int32_t ret = ClientTransProxyProcD2DData(channelId, data + offSet, &head, businessType, &ivSource);
+    if (ret != SOFTBUS_OK) {
+        TRANS_LOGE(TRANS_SDK, "process data err, channelId=%{public}d, len=%{public}u", channelId, len);
+    }
+    return ret;
+}
+
+static int32_t ClientTransProxyNoSubPacketProc(int32_t channelId, const char *data, uint32_t len)
+{
+    int32_t businessType;
+    int32_t ret = ClientGetChannelBusinessTypeByChannelId(channelId, &businessType);
+    if (ret != SOFTBUS_OK) {
+        TRANS_LOGE(TRANS_SDK, "get business type failed, channelId=%{public}d", channelId);
+        return ret;
+    }
+    if (businessType == BUSINESS_TYPE_D2D_MESSAGE || businessType == BUSINESS_TYPE_D2D_VOICE) {
+        return ClientTransProxyNoSubPacketD2DDataProc(channelId, data, len, businessType);
+    }
+    bool supportTlv = false;
+    int32_t res = GetSupportTlvAndNeedAckById(channelId, CHANNEL_TYPE_PROXY, &supportTlv, NULL);
+    if (ret != SOFTBUS_OK) {
+        TRANS_LOGE(TRANS_SDK, "get support tlv failed, channelId=%{public}d", channelId);
+        return ret;
+    }
+    if (supportTlv) {
+        return ClientTransProxyNoSubPacketTlvProc(channelId, data, len);
+    }
+    PacketHead head = { 0 };
+    ret = TransProxyNoSubPacketProc(&head, len, data, channelId);
+    if (ret != SOFTBUS_OK) {
+        TRANS_LOGE(TRANS_SDK, "no sub packet failed, channelId=%{public}d, len=%{public}d", channelId, len);
+        return res;
+    }
+
+    ret = ClientTransProxyProcessSessionData(channelId, &head, data + sizeof(PacketHead));
     if (ret != SOFTBUS_OK) {
         TRANS_LOGE(TRANS_SDK, "process data err, channelId=%{public}d, len=%{public}d", channelId, len);
         return ret;
@@ -634,20 +1045,6 @@ static ChannelSliceProcessor *ClientTransProxyGetChannelSliceProcessor(int32_t c
     return node;
 }
 
-static void ClientTransProxyClearProcessor(SliceProcessor *processor)
-{
-    if (processor->data != NULL) {
-        SoftBusFree(processor->data);
-        processor->data = NULL;
-    }
-    processor->active = false;
-    processor->bufLen = 0;
-    processor->dataLen = 0;
-    processor->expectedSeq = 0;
-    processor->sliceNumber = 0;
-    processor->timeout = 0;
-}
-
 int32_t TransProxyDelSliceProcessorByChannelId(int32_t channelId)
 {
     ChannelSliceProcessor *node = NULL;
@@ -664,7 +1061,7 @@ int32_t TransProxyDelSliceProcessorByChannelId(int32_t channelId)
     LIST_FOR_EACH_ENTRY_SAFE(node, next, &g_channelSliceProcessorList->list, ChannelSliceProcessor, head) {
         if (node->channelId == channelId) {
             for (int i = PROXY_CHANNEL_PRORITY_MESSAGE; i < PROXY_CHANNEL_PRORITY_BUTT; i++) {
-                ClientTransProxyClearProcessor(&(node->processor[i]));
+                TransProxyClearProcessor(&(node->processor[i]));
             }
             ListDelete(&(node->head));
             TRANS_LOGI(TRANS_SDK, "delete channelId=%{public}d", channelId);
@@ -678,74 +1075,31 @@ int32_t TransProxyDelSliceProcessorByChannelId(int32_t channelId)
     return SOFTBUS_OK;
 }
 
-static int32_t ClientTransProxySliceProcessChkPkgIsValid(
-    const SliceProcessor *processor, const SliceHead *head, const char *data, uint32_t len)
-{
-    (void)data;
-    if (head->sliceNum != processor->sliceNumber || head->sliceSeq != processor->expectedSeq) {
-        TRANS_LOGE(TRANS_SDK, "unmatched normal slice received, head sliceNum=%{public}d, sliceSeq=%{public}d,\
-            processor sliceNumber=%{public}d, expectedSeq=%{public}d", head->sliceNum,
-            head->sliceSeq, processor->sliceNumber, processor->expectedSeq);
-        return SOFTBUS_TRANS_PROXY_ASSEMBLE_PACK_NO_INVALID;
-    }
-    if (processor->dataLen > processor->bufLen || (int32_t)len > processor->bufLen - processor->dataLen) {
-        TRANS_LOGE(TRANS_SDK, "data len invalid %{public}u, %{public}d", len, processor->dataLen);
-        return SOFTBUS_TRANS_PROXY_ASSEMBLE_PACK_EXCEED_LENGTH;
-    }
-    if (processor->data == NULL) {
-        TRANS_LOGE(TRANS_SDK, "data NULL");
-        return SOFTBUS_TRANS_PROXY_ASSEMBLE_PACK_DATA_NULL;
-    }
-    return SOFTBUS_OK;
-}
-
-static int32_t ClientGetActualDataLen(const SliceHead *head, uint32_t *actualDataLen)
-{
-    uint32_t maxDataLen =
-        (head->priority == PROXY_CHANNEL_PRORITY_MESSAGE) ? g_proxyMaxMessageBufSize : g_proxyMaxByteBufSize;
-    // The encrypted data length is longer than the actual data length
-    maxDataLen += SLICE_LEN;
-
-    if ((head->sliceNum < 0) || ((uint32_t)head->sliceNum > (maxDataLen / SLICE_LEN))) {
-        TRANS_LOGE(TRANS_SDK, "invalid sliceNum=%{public}d", head->sliceNum);
-        return SOFTBUS_INVALID_DATA_HEAD;
-    }
-
-    *actualDataLen = head->sliceNum * SLICE_LEN;
-    return SOFTBUS_OK;
-}
-
 static int32_t ClientTransProxyFirstSliceProcess(
-    SliceProcessor *processor, const SliceHead *head, const char *data, uint32_t len)
+    SliceProcessor *processor, const SliceHead *head, const char *data, uint32_t len, int32_t channelId)
 {
-    ClientTransProxyClearProcessor(processor);
+    TransProxyClearProcessor(processor);
+    int32_t businessType;
+    int32_t ret = ClientGetChannelBusinessTypeByChannelId(channelId, &businessType);
+    if (ret == SOFTBUS_OK) {
+        if (businessType == BUSINESS_TYPE_D2D_MESSAGE || businessType == BUSINESS_TYPE_D2D_VOICE) {
+            return TransProxyD2DFirstSliceProcess(processor, head, data, len, businessType);
+        }
+    }
 
-    uint32_t actualDataLen = 0;
-    int32_t ret = ClientGetActualDataLen(head, &actualDataLen);
+    bool supportTlv = false;
+    ret = GetSupportTlvAndNeedAckById(channelId, CHANNEL_TYPE_PROXY, &supportTlv, NULL);
     if (ret != SOFTBUS_OK) {
+        TRANS_LOGE(TRANS_SDK, "get support tlv failed, channelId=%{public}d", channelId);
         return ret;
     }
-    uint32_t maxLen = actualDataLen + sizeof(PacketHead) + OVERHEAD_LEN;
-    processor->data = (char *)SoftBusCalloc(maxLen);
-    if (processor->data == NULL) {
-        TRANS_LOGE(TRANS_SDK, "malloc fail when proc first slice package");
-        return SOFTBUS_MALLOC_ERR;
+    uint32_t actualDataLen = 0;
+    ret = TransGetActualDataLen(head, &actualDataLen);
+    if (ret != SOFTBUS_OK) {
+        TRANS_LOGE(TRANS_SDK, "get actual datalen failed, channelId=%{public}d", channelId);
+        return ret;
     }
-    processor->bufLen = (int32_t)maxLen;
-    if (memcpy_s(processor->data, maxLen, data, len) != EOK) {
-        TRANS_LOGE(TRANS_SDK, "memcpy fail when proc first slice package");
-        SoftBusFree(processor->data);
-        processor->data = NULL;
-        return SOFTBUS_MEM_ERR;
-    }
-    processor->sliceNumber = head->sliceNum;
-    processor->expectedSeq = 1;
-    processor->dataLen = (int32_t)len;
-    processor->active = true;
-    processor->timeout = 0;
-
-    TRANS_LOGI(TRANS_SDK, "FirstSliceProcess ok");
-    return SOFTBUS_OK;
+    return TransProxyFirstSliceProcess(processor, head, data, len, supportTlv);
 }
 
 static bool IsValidCheckoutProcess(int32_t channelId)
@@ -764,7 +1118,7 @@ static bool IsValidCheckoutProcess(int32_t channelId)
 static int32_t ClientTransProxyLastSliceProcess(
     SliceProcessor *processor, const SliceHead *head, const char *data, uint32_t len, int32_t channelId)
 {
-    int32_t ret = ClientTransProxySliceProcessChkPkgIsValid(processor, head, data, len);
+    int32_t ret = TransProxySliceProcessChkPkgIsValid(processor, head, data, len);
     if (ret != SOFTBUS_OK) {
         return ret;
     }
@@ -783,29 +1137,10 @@ static int32_t ClientTransProxyLastSliceProcess(
     }
 
     if (IsValidCheckoutProcess(channelId)) {
-        ClientTransProxyClearProcessor(processor);
+        TransProxyClearProcessor(processor);
     }
 
     TRANS_LOGI(TRANS_SDK, "LastSliceProcess ok");
-    return ret;
-}
-
-static int32_t ClientTransProxyNormalSliceProcess(
-    SliceProcessor *processor, const SliceHead *head, const char *data, uint32_t len)
-{
-    int32_t ret = ClientTransProxySliceProcessChkPkgIsValid(processor, head, data, len);
-    if (ret != SOFTBUS_OK) {
-        return ret;
-    }
-    if (memcpy_s(processor->data + processor->dataLen,
-        (uint32_t)(processor->bufLen - processor->dataLen), data, len) != EOK) {
-        TRANS_LOGE(TRANS_SDK, "memcpy fail when proc normal slice");
-        return SOFTBUS_MEM_ERR;
-    }
-    processor->expectedSeq++;
-    processor->dataLen += (int32_t)len;
-    processor->timeout = 0;
-    TRANS_LOGI(TRANS_SDK, "NormalSliceProcess ok");
     return ret;
 }
 
@@ -828,18 +1163,20 @@ static int ClientTransProxySubPacketProc(int32_t channelId, const SliceHead *hea
 
     int ret;
     int32_t index = head->priority;
+    TRANS_CHECK_AND_RETURN_RET_LOGE(index >= PROXY_CHANNEL_PRORITY_MESSAGE  && index < PROXY_CHANNEL_PRORITY_BUTT,
+        SOFTBUS_INVALID_PARAM, TRANS_SDK, "invalid index=%{public}d", index);
     SliceProcessor *processor = &(channelProcessor->processor[index]);
     if (head->sliceSeq == 0) {
-        ret = ClientTransProxyFirstSliceProcess(processor, head, data, len);
+        ret = ClientTransProxyFirstSliceProcess(processor, head, data, len, channelId);
     } else if (head->sliceNum == head->sliceSeq + 1) {
         ret = ClientTransProxyLastSliceProcess(processor, head, data, len, channelId);
     } else {
-        ret = ClientTransProxyNormalSliceProcess(processor, head, data, len);
+        ret = TransProxyNormalSliceProcess(processor, head, data, len);
     }
 
     SoftBusMutexUnlock(&g_channelSliceProcessorList->lock);
     if (ret != SOFTBUS_OK) {
-        ClientTransProxyClearProcessor(processor);
+        TransProxyClearProcessor(processor);
     }
     return ret;
 }
@@ -852,8 +1189,8 @@ static int32_t ClientTransProxySliceProc(int32_t channelId, const char *data, ui
     }
 
     SliceHead headSlice = *(SliceHead *)data;
-    ClientUnPackSliceHead(&headSlice);
-    if (ClientTransProxyCheckSliceHead(&headSlice) != SOFTBUS_OK) {
+    TransUnPackSliceHead(&headSlice);
+    if (TransProxyCheckSliceHead(&headSlice) != SOFTBUS_OK) {
         TRANS_LOGE(TRANS_SDK, "invalid slihead");
         return SOFTBUS_TRANS_PROXY_INVALID_SLICE_HEAD;
     }
@@ -888,7 +1225,7 @@ static void ClientTransProxySliceTimerProc(void)
                 removeNode->processor[i].timeout++;
                 if (removeNode->processor[i].timeout >= SLICE_PACKET_TIMEOUT) {
                     TRANS_LOGE(TRANS_SDK, "timeout=%{public}d", removeNode->processor[i].timeout);
-                    ClientTransProxyClearProcessor(&removeNode->processor[i]);
+                    TransProxyClearProcessor(&removeNode->processor[i]);
                 }
             }
         }
@@ -926,107 +1263,64 @@ void ClientTransProxyCloseChannel(int32_t channelId)
     }
 }
 
-static int32_t ClientTransProxyPackBytes(
-    int32_t channelId, ClientProxyDataInfo *dataInfo, int seq, char *sessionKey, SessionPktType flag)
+static int32_t ClientTransProxyPackTlvBytes(int32_t channelId, ProxyDataInfo *dataInfo,
+    ProxyChannelInfoDetail *info, SessionPktType flag, uint32_t dataSeq)
 {
-#define MAGIC_NUMBER 0xBABEFACE
-    if (dataInfo == NULL) {
+    if (dataInfo == NULL || info == NULL) {
         return SOFTBUS_INVALID_PARAM;
     }
-    dataInfo->outLen = dataInfo->inLen + OVERHEAD_LEN + sizeof(PacketHead);
-    dataInfo->outData = (uint8_t *)SoftBusCalloc(dataInfo->outLen);
-    if (dataInfo->outData == NULL) {
-        TRANS_LOGE(TRANS_SDK, "calloc error");
-        return SOFTBUS_MEM_ERR;
-    }
-
-    uint32_t outLen = 0;
-    AesGcmCipherKey cipherKey = { 0 };
-    cipherKey.keyLen = SESSION_KEY_LENGTH;
-    if (memcpy_s(cipherKey.key, SESSION_KEY_LENGTH, sessionKey, SESSION_KEY_LENGTH) != EOK) {
-        TRANS_LOGE(TRANS_SDK, "memcpy key error.");
-        SoftBusFree(dataInfo->outData);
-        return SOFTBUS_MEM_ERR;
-    }
-    char *outData = (char *)dataInfo->outData + sizeof(PacketHead);
-    int32_t ret = SoftBusEncryptDataWithSeq(&cipherKey, (const unsigned char *)dataInfo->inData,
-        dataInfo->inLen, (unsigned char *)outData, &outLen, seq);
-    (void)memset_s(cipherKey.key, SESSION_KEY_LENGTH, 0, SESSION_KEY_LENGTH);
-
-    if (ret != SOFTBUS_OK || outLen != dataInfo->inLen + OVERHEAD_LEN) {
-        TRANS_LOGE(TRANS_SDK, "encrypt error, ret=%{public}d", ret);
-        outData = NULL;
-        SoftBusFree(dataInfo->outData);
-        TRANS_LOGE(TRANS_SDK, "ClientTransProxyEncryptWithSeq channelId=%{public}d", channelId);
-        return SOFTBUS_TRANS_PROXY_SESS_ENCRYPT_ERR;
-    }
-    PacketHead *pktHead = (PacketHead *)dataInfo->outData;
-    pktHead->magicNumber = MAGIC_NUMBER;
-    pktHead->seq = seq;
-    pktHead->flags = flag;
-    pktHead->dataLen = (int32_t)((int32_t)dataInfo->outLen - sizeof(PacketHead));
-    ClientPackPacketHead(pktHead);
-
-    return SOFTBUS_OK;
+    bool needAck = false;
+    int32_t ret = GetSupportTlvAndNeedAckById(channelId, CHANNEL_TYPE_PROXY, NULL, &needAck);
+    TRANS_CHECK_AND_RETURN_RET_LOGE(ret == SOFTBUS_OK, ret, TRANS_SDK, "get need ack fail");
+    DataHeadTlvPacketHead headInfo = {
+        .needAck = needAck,
+        .dataSeq = dataSeq,
+    };
+    return TransProxyPackTlvBytes(dataInfo, info->sessionKey, flag, info->sequence, &headInfo);
 }
 
-static int32_t SessionPktTypeToProxyIndex(SessionPktType packetType)
+static int32_t ClientTransProxyPackBytes(int32_t channelId, ProxyDataInfo *dataInfo,
+    ProxyChannelInfoDetail *info, SessionPktType flag)
 {
-    switch (packetType) {
-        case TRANS_SESSION_MESSAGE:
-        case TRANS_SESSION_ASYNC_MESSAGE:
-        case TRANS_SESSION_ACK:
-            return PROXY_CHANNEL_PRORITY_MESSAGE;
-        case TRANS_SESSION_BYTES:
-            return PROXY_CHANNEL_PRORITY_BYTES;
-        default:
-            return PROXY_CHANNEL_PRORITY_FILE;
+    if (dataInfo == NULL || info == NULL) {
+        TRANS_LOGE(TRANS_SDK, "invalid param, channelId=%{public}d", channelId);
+        return SOFTBUS_INVALID_PARAM;
     }
+    bool supportTlv = false;
+    uint32_t dataSeq = 0;
+    int32_t res = GetSupportTlvAndNeedAckById(channelId, CHANNEL_TYPE_PROXY, &supportTlv, NULL);
+    TRANS_CHECK_AND_RETURN_RET_LOGE(res == SOFTBUS_OK, res, TRANS_SDK, "get support tlv fail");
+    if (supportTlv) {
+        return ClientTransProxyPackTlvBytes(channelId, dataInfo, info, flag, dataSeq);
+    }
+    return TransProxyPackBytes(channelId, dataInfo, info->sessionKey, flag, info->sequence);
 }
 
-int32_t TransProxyPackAndSendData(
+static int32_t TransProxyProcessD2DBytes(
     int32_t channelId, const void *data, uint32_t len, ProxyChannelInfoDetail *info, SessionPktType pktType)
 {
-    if (data == NULL || info == NULL) {
-        return SOFTBUS_INVALID_PARAM;
-    }
-    ClientProxyDataInfo dataInfo = { (uint8_t *)data, len, (uint8_t *)data, len };
-    int32_t ret = ClientTransProxyPackBytes(channelId, &dataInfo, info->sequence, info->sessionKey, pktType);
+    ProxyDataInfo dataInfo = { (uint8_t *)data, len, (uint8_t *)data, len };
+    int32_t ret = TransProxyPackD2DBytes(&dataInfo, info->pagingSessionkey, info->pagingNonce, pktType);
     if (ret != SOFTBUS_OK) {
-        TRANS_LOGE(TRANS_SDK, "ClientTransProxyPackBytes error, channelId=%{public}d", channelId);
+        TRANS_LOGE(TRANS_SDK, "pack d2d bytes error, channelId=%{public}d", channelId);
         return ret;
     }
+    uint32_t dataLen = 1;
 
-    uint32_t sliceNum = (dataInfo.outLen + (uint32_t)(SLICE_LEN - 1)) / (uint32_t)SLICE_LEN;
-    for (uint32_t i = 0; i < sliceNum; i++) {
-        uint32_t dataLen = (i == (sliceNum - 1U)) ? (dataInfo.outLen - i * SLICE_LEN) : SLICE_LEN;
-        int32_t offset = (int32_t)(i * SLICE_LEN);
-
-        uint8_t *sliceData = (uint8_t *)SoftBusCalloc(dataLen + sizeof(SliceHead));
+    uint32_t sliceNum = (dataInfo.outLen + (uint32_t)(SHORT_SLICE_LEN - 1)) / (uint32_t)SHORT_SLICE_LEN;
+    if (sliceNum > INT32_MAX) {
+        TRANS_LOGE(TRANS_SDK, "Data overflow");
+        SoftBusFree(dataInfo.outData);
+        return SOFTBUS_INVALID_NUM;
+    }
+    for (uint32_t cnt = 0; cnt < sliceNum; cnt++) {
+        uint8_t *sliceData = TransProxyPackD2DData(&dataInfo, sliceNum, pktType, cnt, &dataLen);
         if (sliceData == NULL) {
-            TRANS_LOGE(TRANS_SDK, "malloc slice data error, channelId=%{public}d", channelId);
+            TRANS_LOGE(TRANS_SDK, "pack data failed, channelId=%{public}d", channelId);
             SoftBusFree(dataInfo.outData);
             return SOFTBUS_MALLOC_ERR;
         }
-        SliceHead *slicehead = (SliceHead *)sliceData;
-        slicehead->priority = SessionPktTypeToProxyIndex(pktType);
-        if (sliceNum > INT32_MAX) {
-            TRANS_LOGE(TRANS_FILE, "Data overflow");
-            SoftBusFree(sliceData);
-            SoftBusFree(dataInfo.outData);
-            return SOFTBUS_INVALID_NUM;
-        }
-        slicehead->sliceNum = (int32_t)sliceNum;
-        slicehead->sliceSeq = (int32_t)i;
-        ClientPackSliceHead(slicehead);
-        if (memcpy_s(sliceData + sizeof(SliceHead), dataLen, dataInfo.outData + offset, dataLen) != EOK) {
-            TRANS_LOGE(TRANS_SDK, "memcpy_s error, channelId=%{public}d", channelId);
-            SoftBusFree(sliceData);
-            SoftBusFree(dataInfo.outData);
-            return SOFTBUS_MEM_ERR;
-        }
-
-        int ret = ServerIpcSendMessage(channelId, CHANNEL_TYPE_PROXY, sliceData, dataLen + sizeof(SliceHead), pktType);
+        ret = ServerIpcSendMessage(channelId, CHANNEL_TYPE_PROXY, sliceData, dataLen + sizeof(SliceHead), pktType);
         if (ret != SOFTBUS_OK) {
             TRANS_LOGE(TRANS_SDK, "ServerIpcSendMessage error, channelId=%{public}d, ret=%{public}d", channelId, ret);
             SoftBusFree(sliceData);
@@ -1042,8 +1336,159 @@ int32_t TransProxyPackAndSendData(
     return SOFTBUS_OK;
 }
 
-int32_t TransProxyChannelSendBytes(int32_t channelId, const void *data, uint32_t len)
+static int32_t TransProxyProcessNormalBytes(
+    int32_t channelId, const void *data, uint32_t len, ProxyChannelInfoDetail *info, SessionPktType pktType)
 {
+    ProxyDataInfo dataInfo = { (uint8_t *)data, len, (uint8_t *)data, len };
+    int32_t ret = ClientTransProxyPackBytes(channelId, &dataInfo, info, pktType);
+    if (ret != SOFTBUS_OK) {
+        TRANS_LOGE(TRANS_SDK, "ClientTransProxyPackBytes error, channelId=%{public}d", channelId);
+        return ret;
+    }
+    uint32_t dataLen = 1;
+
+    uint32_t sliceNum = (dataInfo.outLen + (uint32_t)(SLICE_LEN - 1)) / (uint32_t)SLICE_LEN;
+    if (sliceNum > INT32_MAX) {
+        TRANS_LOGE(TRANS_SDK, "Data overflow");
+        SoftBusFree(dataInfo.outData);
+        return SOFTBUS_INVALID_NUM;
+    }
+    for (uint32_t cnt = 0; cnt < sliceNum; cnt++) {
+        uint8_t *sliceData = TransProxyPackData(&dataInfo, sliceNum, pktType, cnt, &dataLen);
+        if (sliceData == NULL) {
+            TRANS_LOGE(TRANS_SDK, "pack data failed, channelId=%{public}d", channelId);
+            SoftBusFree(dataInfo.outData);
+            return SOFTBUS_MALLOC_ERR;
+        }
+        ret = ServerIpcSendMessage(channelId, CHANNEL_TYPE_PROXY, sliceData, dataLen + sizeof(SliceHead), pktType);
+        if (ret != SOFTBUS_OK) {
+            TRANS_LOGE(TRANS_SDK, "ServerIpcSendMessage error, channelId=%{public}d, ret=%{public}d", channelId, ret);
+            SoftBusFree(sliceData);
+            SoftBusFree(dataInfo.outData);
+            return ret;
+        }
+
+        SoftBusFree(sliceData);
+    }
+    SoftBusFree(dataInfo.outData);
+
+    TRANS_LOGI(TRANS_SDK, "TransProxyPackAndSendData success, channelId=%{public}d", channelId);
+    return SOFTBUS_OK;
+}
+
+int32_t ClientTransProxyPackAndSendData(
+    int32_t channelId, const void *data, uint32_t len, ProxyChannelInfoDetail *info, SessionPktType pktType)
+{
+    if (data == NULL || info == NULL) {
+        return SOFTBUS_INVALID_PARAM;
+    }
+    int32_t businessType;
+    int32_t ret;
+    ret = ClientGetChannelBusinessTypeByChannelId(channelId, &businessType);
+    if (ret != SOFTBUS_OK) {
+        TRANS_LOGE(TRANS_SDK, "get business type error, channelId=%{public}d", channelId);
+    }
+    if (businessType == BUSINESS_TYPE_D2D_VOICE) {
+        ret = TransProxyProcessD2DBytes(channelId, data, len, info, pktType);
+        if (ret != SOFTBUS_OK) {
+            TRANS_LOGE(TRANS_SDK, "process d2d bytes error, channelId=%{public}d", channelId);
+            return ret;
+        }
+        return SOFTBUS_OK;
+    } else {
+        ret = TransProxyProcessNormalBytes(channelId, data, len, info, pktType);
+        if (ret != SOFTBUS_OK) {
+            TRANS_LOGE(TRANS_SDK, "process d2d bytes error, channelId=%{public}d", channelId);
+            return ret;
+        }
+        return SOFTBUS_OK;
+    }
+    return SOFTBUS_OK;
+}
+
+int32_t TransProxyChannelSendBytes(int32_t channelId, const void *data, uint32_t len, bool needAck)
+{
+    if (data == NULL) {
+        return SOFTBUS_INVALID_PARAM;
+    }
+    ProxyChannelInfoDetail info;
+    int32_t ret = ClientTransProxyGetInfoByChannelId(channelId, &info);
+    TRANS_CHECK_AND_RETURN_RET_LOGE(ret == SOFTBUS_OK, ret, TRANS_SDK, "get info fail!");
+
+    if (!info.isEncrypted) {
+        ret = ServerIpcSendMessage(channelId, CHANNEL_TYPE_PROXY, data, len, TRANS_SESSION_BYTES);
+        TRANS_LOGI(TRANS_SDK, "send bytes: channelId=%{public}d, ret=%{public}d", channelId, ret);
+        return ret;
+    }
+    if (needAck) {
+        ret = AddPendingPacket(channelId, info.sequence, PENDING_TYPE_PROXY);
+        if (ret != SOFTBUS_OK) {
+            TRANS_LOGE(TRANS_SDK, "add pending packet failed, channelId=%{public}d.", channelId);
+            return ret;
+        }
+        ret = ClientTransProxyPackAndSendData(channelId, data, len, &info, TRANS_SESSION_BYTES);
+        if (ret != SOFTBUS_OK) {
+            DelPendingPacketbyChannelId(channelId, info.sequence, PENDING_TYPE_PROXY);
+            return ret;
+        }
+        TRANS_LOGI(TRANS_SDK, "send msg: channelId=%{public}d, seq=%{public}d", channelId, info.sequence);
+        return ProcPendingPacket(channelId, info.sequence, PENDING_TYPE_PROXY);
+    }
+    return ClientTransProxyPackAndSendData(channelId, data, len, &info, TRANS_SESSION_BYTES);
+}
+
+int32_t TransProxyAsyncPackAndSendData(
+    int32_t channelId, const void *data, uint32_t len, uint32_t dataSeq, SessionPktType pktType)
+{
+    if (data == NULL) {
+        return SOFTBUS_INVALID_PARAM;
+    }
+    ProxyChannelInfoDetail info;
+    int32_t ret = ClientTransProxyGetInfoByChannelId(channelId, &info);
+    TRANS_CHECK_AND_RETURN_RET_LOGE(ret == SOFTBUS_OK, ret, TRANS_SDK, "get info fail");
+
+    ProxyDataInfo dataInfo = { (uint8_t *)data, len, (uint8_t *)data, len };
+    ret = ClientTransProxyPackTlvBytes(channelId, &dataInfo, &info, pktType, dataSeq);
+    if (ret != SOFTBUS_OK) {
+        TRANS_LOGE(TRANS_SDK, "ClientTransProxyPackTlvBytes error, channelId=%{public}d", channelId);
+        return ret;
+    }
+    uint32_t dataLen = 1;
+
+    uint32_t sliceNum = (dataInfo.outLen + (uint32_t)(SLICE_LEN - 1)) / (uint32_t)SLICE_LEN;
+    if (sliceNum > INT32_MAX) {
+        SoftBusFree(dataInfo.outData);
+        TRANS_LOGE(TRANS_FILE, "Data overflow, sliceNum=%{public}u, channelId=%{public}d", sliceNum, channelId);
+        return SOFTBUS_INVALID_NUM;
+    }
+    for (uint32_t cnt = 0; cnt < sliceNum; cnt++) {
+        uint8_t *sliceData = TransProxyPackData(&dataInfo, sliceNum, pktType, cnt, &dataLen);
+        if (sliceData == NULL) {
+            TRANS_LOGE(TRANS_SDK, "pack data failed, channelId=%{public}d", channelId);
+            SoftBusFree(dataInfo.outData);
+            return SOFTBUS_MALLOC_ERR;
+        }
+
+        int ret = ServerIpcSendMessage(channelId, CHANNEL_TYPE_PROXY, sliceData, dataLen + sizeof(SliceHead), pktType);
+        if (ret != SOFTBUS_OK) {
+            TRANS_LOGE(TRANS_SDK, "ServerIpcSendMessage error, channelId=%{public}d, ret=%{public}d", channelId, ret);
+            SoftBusFree(sliceData);
+            SoftBusFree(dataInfo.outData);
+            return ret;
+        }
+
+        SoftBusFree(sliceData);
+    }
+    SoftBusFree(dataInfo.outData);
+    TRANS_LOGI(TRANS_SDK, "TransProxyAsyncPackAndSendData success, channelId=%{public}d", channelId);
+    return SOFTBUS_OK;
+}
+
+int32_t TransProxyChannelAsyncSendBytes(int32_t channelId, const void *data, uint32_t len, uint32_t dataSeq)
+{
+    if (data == NULL) {
+        return SOFTBUS_INVALID_PARAM;
+    }
     ProxyChannelInfoDetail info;
     int32_t ret = ClientTransProxyGetInfoByChannelId(channelId, &info);
     TRANS_CHECK_AND_RETURN_RET_LOGE(ret == SOFTBUS_OK, ret, TRANS_SDK, "get info fail!");
@@ -1054,7 +1499,20 @@ int32_t TransProxyChannelSendBytes(int32_t channelId, const void *data, uint32_t
         return ret;
     }
 
-    return TransProxyPackAndSendData(channelId, data, len, &info, TRANS_SESSION_BYTES);
+    ret = TransProxyAsyncPackAndSendData(channelId, data, len, dataSeq, TRANS_SESSION_BYTES);
+    TRANS_CHECK_AND_RETURN_RET_LOGE(ret == SOFTBUS_OK, ret, TRANS_SDK, "proxy async send data fail!");
+    int32_t socketId = 0;
+    ret = ClientGetSessionIdByChannelId(channelId, CHANNEL_TYPE_PROXY, &socketId, false);
+    if (ret != SOFTBUS_OK) {
+        TRANS_LOGE(TRANS_SDK, "get sessionId fail, ret=%{public}d", ret);
+        return ret;
+    }
+    ret = DataSeqInfoListAddItem(dataSeq, channelId, socketId, CHANNEL_TYPE_PROXY);
+    if (ret != SOFTBUS_OK) {
+        TRANS_LOGE(TRANS_SDK, "add dataSeqInfoList fail, ret=%{public}d", ret);
+        return ret;
+    }
+    return SOFTBUS_OK;
 }
 
 int32_t TransProxyChannelSendMessage(int32_t channelId, const void *data, uint32_t len)
@@ -1075,7 +1533,7 @@ int32_t TransProxyChannelSendMessage(int32_t channelId, const void *data, uint32
         TRANS_LOGE(TRANS_SDK, "add pending packet failed, channelId=%{public}d.", channelId);
         return ret;
     }
-    ret = TransProxyPackAndSendData(channelId, data, len, &info, TRANS_SESSION_MESSAGE);
+    ret = ClientTransProxyPackAndSendData(channelId, data, len, &info, TRANS_SESSION_MESSAGE);
     if (ret != SOFTBUS_OK) {
         DelPendingPacketbyChannelId(channelId, info.sequence, PENDING_TYPE_PROXY);
         return ret;
@@ -1099,5 +1557,27 @@ int32_t ClientTransProxyOnChannelBind(int32_t channelId, int32_t channelType)
         return ret;
     }
 
+    return SOFTBUS_OK;
+}
+
+int32_t TransProxyChannelAsyncSendMessage(int32_t channelId, const void *data, uint32_t len, uint16_t dataSeq)
+{
+    if (data == NULL) {
+        return SOFTBUS_INVALID_PARAM;
+    }
+
+    int32_t ret = TransProxyAsyncPackAndSendMessage(channelId, data, len, dataSeq, TRANS_SESSION_MESSAGE);
+    TRANS_CHECK_AND_RETURN_RET_LOGE(ret == SOFTBUS_OK, ret, TRANS_SDK, "proxy async send data fail!");
+    int32_t socketId = 0;
+    ret = ClientGetSessionIdByChannelId(channelId, CHANNEL_TYPE_PROXY, &socketId, false);
+    if (ret != SOFTBUS_OK) {
+        TRANS_LOGE(TRANS_SDK, "get sessionId fail, ret=%{public}d", ret);
+        return ret;
+    }
+    ret = DataSeqInfoListAddItem(dataSeq, channelId, socketId, CHANNEL_TYPE_PROXY);
+    if (ret != SOFTBUS_OK) {
+        TRANS_LOGE(TRANS_SDK, "add dataSeqInfoList fail, ret=%{public}d", ret);
+        return ret;
+    }
     return SOFTBUS_OK;
 }

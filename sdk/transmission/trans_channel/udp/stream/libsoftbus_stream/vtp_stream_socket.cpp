@@ -15,34 +15,27 @@
 
 #include "vtp_stream_socket.h"
 
-#include <chrono>
 #include <ifaddrs.h>
-#include <memory>
-#include <netinet/in.h>
-#include <securec.h>
-#include <sys/socket.h>
-#include <sys/time.h>
 #include <thread>
 
 #include "fillpinc.h"
+#include "g_enhance_sdk_func.h"
 #include "raw_stream_data.h"
 #include "session.h"
+#include "legacy/softbus_hisysevt_transreporter.h"
 #include "softbus_adapter_crypto.h"
 #include "softbus_adapter_socket.h"
-#include "softbus_adapter_timer.h"
-#include "softbus_error_code.h"
-#include "softbus_trans_def.h"
-#include "stream_common_data.h"
 #include "stream_depacketizer.h"
 #include "stream_packetizer.h"
-#include "vtp_stream_opt.h"
+#include "trans_event.h"
 
 namespace Communication {
 namespace SoftBus {
 bool g_logOn = false;
-const int FEED_BACK_PERIOD = 1;  /* feedback period of fillp stream traffic statistics is 1s */
-const int MS_PER_SECOND = 1000;
-const int US_PER_MS = 1000;
+const int32_t FEED_BACK_PERIOD = 1;  /* feedback period of fillp stream traffic statistics is 1s */
+const int32_t MS_PER_SECOND = 1000;
+const int32_t US_PER_MS = 1000;
+static constexpr int32_t MAX_PORT = 65535;
 
 namespace {
 void PrintOptionInfo(int type, const StreamAttr &value)
@@ -266,11 +259,21 @@ int VtpStreamSocket::HandleFillpFrameEvt(int fd, const FtEventCbkInfo *info)
     return SOFTBUS_OK;
 }
 
+static int HandleVtpFrameEvtPacked(int fd, OnFrameEvt cb, const FtEventCbkInfo *info)
+{
+    ClientEnhanceFuncList *pfnClientEnhanceFuncList = ClientEnhanceFuncListGet();
+    if (pfnClientEnhanceFuncList->handleVtpFrameEvt == nullptr) {
+        TRANS_LOGE(TRANS_STREAM, "func handleVtpFrameEvt is not registered");
+        return SOFTBUS_FUNC_NOT_SUPPORT;
+    }
+    return pfnClientEnhanceFuncList->handleVtpFrameEvt(fd, cb, info);
+}
+
 int VtpStreamSocket::HandleFillpFrameEvtInner(int fd, const FtEventCbkInfo *info)
 {
     if (onStreamEvtCb_ != nullptr) {
         TRANS_LOGD(TRANS_STREAM, "onStreamEvtCb_ enter");
-        return HandleVtpFrameEvt(fd, onStreamEvtCb_, info);
+        return HandleVtpFrameEvtPacked(fd, onStreamEvtCb_, info);
     } else {
         TRANS_LOGD(TRANS_STREAM, "onStreamEvtCb_ is nullptr");
     }
@@ -309,6 +312,16 @@ void VtpStreamSocket::FillSupportDet(int fd, const FtEventCbkInfo *info, QosTv *
 }
 #endif
 
+static bool IsVtpFrameSentEvtPacked(const FtEventCbkInfo *info)
+{
+    ClientEnhanceFuncList *pfnClientEnhanceFuncList = ClientEnhanceFuncListGet();
+    if (pfnClientEnhanceFuncList->isVtpFrameSentEvt == nullptr) {
+        TRANS_LOGE(TRANS_STREAM, "Func isVtpFrameSentEvt is not registered");
+        return false;
+    }
+    return pfnClientEnhanceFuncList->isVtpFrameSentEvt(info);
+}
+
 /* This function is used to prompt the metrics returned by FtApiRegEventCallbackFunc() function */
 int VtpStreamSocket::FillpStatistics(int fd, const FtEventCbkInfo *info)
 {
@@ -322,7 +335,7 @@ int VtpStreamSocket::FillpStatistics(int fd, const FtEventCbkInfo *info)
     } else if (info->evt == FT_EVT_TRAFFIC_DATA) {
         TRANS_LOGI(TRANS_STREAM, "recv fillp traffic data");
         return HandleRipplePolicy(fd, info);
-    } else if (IsVtpFrameSentEvt(info)) {
+    } else if (IsVtpFrameSentEvtPacked(info)) {
         TRANS_LOGI(TRANS_STREAM, "fd %{public}d recv fillp frame send evt", fd);
         return HandleFillpFrameEvt(fd, info);
     }
@@ -760,10 +773,13 @@ int VtpStreamSocket::CreateAndBindSocket(IpAndPort &local, bool isServer)
         streamFd_ = sockFd;
     }
     SetDefaultConfig(sockFd);
+    if (local.port < 0 || local.port > MAX_PORT) {
+        return -1;
+    }
 
     // bind
     sockaddr_in localSockAddr = { 0 };
-    char host[ADDR_MAX_SIZE];
+    char host[ADDR_MAX_SIZE] = { 0 };
     localSockAddr.sin_family = AF_INET;
     localSockAddr.sin_port = htons((short)local.port);
     localSockAddr.sin_addr.s_addr = inet_addr(local.ip.c_str());
@@ -921,7 +937,7 @@ bool VtpStreamSocket::Accept()
         return false;
     }
 
-    char host[ADDR_MAX_SIZE];
+    char host[ADDR_MAX_SIZE] = { 0 };
     if (remoteAddr.sa_family == AF_INET) {
         auto v4Addr = reinterpret_cast<const sockaddr_in *>(&remoteAddr);
         remoteIpPort_.ip = SoftBusInetNtoP(AF_INET, &(v4Addr->sin_addr), host, ADDR_MAX_SIZE);
@@ -1128,6 +1144,12 @@ bool VtpStreamSocket::ProcessCommonDataStream(std::unique_ptr<char[]> &dataBuffe
     return true;
 }
 
+int64_t g_diffTime = 0;
+int64_t g_startTime = 0;
+int64_t g_lastTime = 0;
+const int TIME_OUT = 50;
+const int WAIT_UPLOAD_TIME = 300000;
+
 void VtpStreamSocket::DoStreamRecv()
 {
     while (isStreamRecv_) {
@@ -1135,6 +1157,18 @@ void VtpStreamSocket::DoStreamRecv()
         std::unique_ptr<char[]> extBuffer = nullptr;
         int32_t extLen = 0;
         StreamFrameInfo info = {};
+        if (g_startTime != 0) {
+            g_diffTime = GetSoftbusRecordTimeMillis() - g_startTime;
+            if (g_diffTime > TIME_OUT && GetSoftbusRecordTimeMillis() - g_lastTime >= WAIT_UPLOAD_TIME) {
+                g_lastTime = GetSoftbusRecordTimeMillis();
+                TRANS_LOGW(TRANS_STREAM, "recv stream difftime = %{public}" PRIu64, g_diffTime);
+                TransEventExtra extra = {
+                    .costTime = (int32_t)g_diffTime,
+                };
+                TRANS_EVENT(EVENT_SCENE_TRANS_RECV_STREAM, EVENT_STAGE_TRANS_RECV_STREAM, extra);
+            }
+        }
+        g_startTime = GetSoftbusRecordTimeMillis();
         TRANS_LOGD(TRANS_STREAM, "recv stream");
         int32_t dataLength = VtpStreamSocket::RecvStreamLen();
         if (dataLength <= 0 || dataLength > MAX_STREAM_LEN) {
@@ -1292,7 +1326,7 @@ bool VtpStreamSocket::SetSocketBoundInner(int fd, std::string ip) const
             continue;
         }
 
-        char host[ADDR_MAX_SIZE];
+        char host[ADDR_MAX_SIZE] = { 0 };
         std::string devName(ifa->ifa_name);
         if (strcmp(boundIp.c_str(), SoftBusInetNtoP(AF_INET, &(((struct sockaddr_in *)ifa->ifa_addr)->sin_addr),
             host, ADDR_MAX_SIZE)) == 0) {
@@ -1590,10 +1624,20 @@ ssize_t VtpStreamSocket::Decrypt(const void *in, ssize_t inLen, void *out, ssize
     return outLen;
 }
 
+static int32_t VtpSetSocketMultiLayerPacked(int fd, OnFrameEvt *cb, const void *para)
+{
+    ClientEnhanceFuncList *pfnClientEnhanceFuncList = ClientEnhanceFuncListGet();
+    if (pfnClientEnhanceFuncList->vtpSetSocketMultiLayer == nullptr) {
+        TRANS_LOGE(TRANS_STREAM, "Func vtpSetSocketMultiLayer is not registered");
+        return SOFTBUS_FUNC_NOT_SUPPORT;
+    }
+    return pfnClientEnhanceFuncList->vtpSetSocketMultiLayer(fd, cb, para);
+}
+
 int32_t VtpStreamSocket::SetMultiLayer(const void *para)
 {
     int fd = GetStreamSocketFd(FD).GetIntValue();
-    return VtpSetSocketMultiLayer(fd, &onStreamEvtCb_, para);
+    return VtpSetSocketMultiLayerPacked(fd, &onStreamEvtCb_, para);
 }
 
 void VtpStreamSocket::CreateServerProcessThread()

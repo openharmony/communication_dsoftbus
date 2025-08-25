@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2024 Huawei Device Co., Ltd.
+ * Copyright (c) 2024-2025 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -25,6 +25,7 @@
 #include "client_trans_tcp_direct_manager.h"
 #include "client_trans_udp_manager.h"
 #include "softbus_adapter_mem.h"
+#include "softbus_adapter_timer.h"
 #include "softbus_app_info.h"
 #include "softbus_def.h"
 #include "softbus_error_code.h"
@@ -36,9 +37,45 @@
 #define NETWORK_ID_LEN 7
 #define GET_ROUTE_TYPE(type) ((uint32_t)(type) & 0xff)
 #define GET_CONN_TYPE(type) (((uint32_t)(type) >> 8) & 0xff)
+#define SENDBYTES_TIMEOUT_S 20
 
 #define DISTRIBUTED_DATA_SESSION "distributeddata-default"
 static IFeatureAbilityRelationChecker *g_relationChecker = NULL;
+static SoftBusList *g_clientDataSeqInfoList = NULL;
+
+int32_t LockClientDataSeqInfoList()
+{
+    if (g_clientDataSeqInfoList == NULL) {
+        TRANS_LOGE(TRANS_INIT, "g_clientDataSeqInfoList not init");
+        return SOFTBUS_TRANS_DATA_SEQ_INFO_NO_INIT;
+    }
+    int32_t ret = SoftBusMutexLock(&(g_clientDataSeqInfoList->lock));
+    if (ret != SOFTBUS_OK) {
+        return SOFTBUS_LOCK_ERR;
+    }
+    return SOFTBUS_OK;
+}
+
+void UnlockClientDataSeqInfoList()
+{
+    (void)SoftBusMutexUnlock(&(g_clientDataSeqInfoList->lock));
+}
+
+int TransDataSeqInfoListInit(void)
+{
+    g_clientDataSeqInfoList = CreateSoftBusList();
+    if (g_clientDataSeqInfoList == NULL) {
+        TRANS_LOGE(TRANS_INIT, "g_clientDataSeqInfoList not init");
+        return SOFTBUS_TRANS_DATA_SEQ_INFO_NO_INIT;
+    }
+    return SOFTBUS_OK;
+}
+
+void TransDataSeqInfoListDeinit(void)
+{
+    DestroySoftBusList(g_clientDataSeqInfoList);
+    g_clientDataSeqInfoList = NULL;
+}
 
 bool IsValidSessionParam(const SessionParam *param)
 {
@@ -146,7 +183,7 @@ NO_SANITIZE("cfi") void ClientDestroySession(const ListNode *destroyList, Shutdo
     LIST_FOR_EACH_ENTRY_SAFE(destroyNode, destroyNodeNext, destroyList, DestroySessionInfo, node) {
         int32_t id = destroyNode->sessionId;
         (void)ClientDeleteRecvFileList(id);
-        (void)ClientTransCloseChannel(destroyNode->channelId, destroyNode->channelType);
+        (void)ClientTransCloseChannel(destroyNode->channelId, destroyNode->channelType, id);
         if (destroyNode->OnSessionClosed != NULL) {
             destroyNode->OnSessionClosed(id);
         } else if (destroyNode->OnShutdown != NULL) {
@@ -293,11 +330,36 @@ static bool ClientTransCheckHmlIp(const char *ip)
     return false;
 }
 
+static const char *g_dmHandleAgingSessionName[] = {
+    "ohos.distributedhardware.devicemanager.resident",
+    "com.huawei.devicemanager.resident",
+    "com.huawei.devicemanager.dynamic",
+};
+
+static bool CheckDMHandleAgingSession(const char *sessionName, const SessionInfo *sessionNode)
+{
+    if (sessionNode->channelType != CHANNEL_TYPE_AUTH) {
+        return false;
+    }
+    const int len = sizeof(g_dmHandleAgingSessionName) / sizeof(g_dmHandleAgingSessionName[0]);
+    for (int i = 0; i < len; i++) {
+        if (strcmp(sessionName, g_dmHandleAgingSessionName[i]) == 0) {
+            TRANS_LOGI(TRANS_SDK, "device management handles aging sessions and keeps opening the session");
+            return true;
+        }
+    }
+    return false;
+}
+
 // determine connection type based on IP, delete session when connection type and parameter connType are consistent
-static bool ClientTransCheckNeedDel(SessionInfo *sessionNode, int32_t routeType, int32_t connType)
+static bool ClientTransCheckNeedDel(const char *name, SessionInfo *sessionNode, int32_t routeType, int32_t connType)
 {
     if (connType == TRANS_CONN_ALL) {
         if (routeType != ROUTE_TYPE_ALL && sessionNode->routeType != routeType) {
+            return false;
+        }
+
+        if (CheckDMHandleAgingSession(name, sessionNode)) {
             return false;
         }
         return true;
@@ -360,7 +422,6 @@ void DestroyAllClientSession(const ClientSessionServer *server, ListNode *destro
         ListAdd(destroyList, &(destroyNode->node));
         SoftBusFree(sessionNode);
     }
-
 }
 
 void DestroyClientSessionByNetworkId(const ClientSessionServer *server,
@@ -381,7 +442,7 @@ void DestroyClientSessionByNetworkId(const ClientSessionServer *server,
             continue;
         }
 
-        if (!ClientTransCheckNeedDel(sessionNode, routeType, connType)) {
+        if (!ClientTransCheckNeedDel(server->sessionName, sessionNode, routeType, connType)) {
             continue;
         }
 
@@ -610,6 +671,10 @@ void FillSessionParam(SessionParam *param, SessionAttribute *tmpAttr,
     param->attr = tmpAttr;
     param->isQosLane = true;
     param->actionId = sessionNode->actionId;
+    param->isLowLatency = sessionNode->isLowLatency;
+    param->flowInfo.flowSize = sessionNode->flowInfo.flowSize;
+    param->flowInfo.sessionType = sessionNode->flowInfo.sessionType;
+    param->flowInfo.flowQosType = sessionNode->flowInfo.flowQosType;
 }
 
 void ClientConvertRetVal(int32_t socket, int32_t *retOut)
@@ -649,7 +714,7 @@ void ClientCleanUpIdleTimeoutSocket(const ListNode *destroyList)
     LIST_FOR_EACH_ENTRY_SAFE(destroyNode, destroyNodeNext, destroyList, DestroySessionInfo, node) {
         int32_t id = destroyNode->sessionId;
         (void)ClientDeleteRecvFileList(id);
-        (void)ClientTransCloseChannel(destroyNode->channelId, destroyNode->channelType);
+        (void)ClientTransCloseChannel(destroyNode->channelId, destroyNode->channelType, id);
         TRANS_LOGI(TRANS_SDK, "session is idle, sessionId=%{public}d", id);
         if (destroyNode->OnShutdown != NULL) {
             destroyNode->OnShutdown(id, SHUTDOWN_REASON_TIMEOUT);
@@ -668,8 +733,7 @@ void ClientCheckWaitTimeOut(const ClientSessionServer *serverNode, SessionInfo *
         TRANS_LOGE(TRANS_SDK, "invalid param.");
         return;
     }
-    if (sessionNode->enableStatus == ENABLE_STATUS_SUCCESS &&
-        strcmp(serverNode->sessionName, ISHARE_AUTH_SESSION) != 0) {
+    if (sessionNode->enableStatus == ENABLE_STATUS_SUCCESS && !IsRawAuthSession(serverNode->sessionName)) {
         return;
     }
 
@@ -685,7 +749,7 @@ void ClientCheckWaitTimeOut(const ClientSessionServer *serverNode, SessionInfo *
     sessionNode->lifecycle.maxWaitTime = 0;
 
     uint32_t tmpNum = *num;
-    if (tmpNum + 1 > capacity) {
+    if (tmpNum == UINT32_MAX || tmpNum + 1 > capacity) {
         TRANS_LOGE(TRANS_SDK, "socket num invalid tmpNum=%{public}u, capacity=%{public}u", tmpNum, capacity);
         return;
     }
@@ -704,7 +768,7 @@ static bool CleanUpTimeoutAuthSession(int32_t sessionId)
         return false;
     }
 
-    if (strcmp(sessionName, ISHARE_AUTH_SESSION) != 0) {
+    if (!IsRawAuthSession(sessionName)) {
         return false;
     }
 
@@ -782,7 +846,8 @@ int32_t ReCreateSessionServerToServer(ListNode *sessionServerInfoList)
     SessionServerInfo *infoNodeNext = NULL;
     char *tmpName = NULL;
     LIST_FOR_EACH_ENTRY_SAFE(infoNode, infoNodeNext, sessionServerInfoList, SessionServerInfo, node) {
-        int32_t ret = ServerIpcCreateSessionServer(infoNode->pkgName, infoNode->sessionName);
+        uint64_t timestamp = SoftBusGetSysTimeMs();
+        int32_t ret = ServerIpcCreateSessionServer(infoNode->pkgName, infoNode->sessionName, timestamp);
         Anonymize(infoNode->sessionName, &tmpName);
         TRANS_LOGI(TRANS_SDK, "sessionName=%{public}s, pkgName=%{public}s, ret=%{public}d",
             AnonymizeWrapper(tmpName), infoNode->pkgName, ret);
@@ -879,6 +944,25 @@ int32_t ClientRemovePermission(const char *busName)
     return ret;
 }
 
+int32_t ClientDeletePagingSession(int32_t sessionId)
+{
+    if (sessionId <= 0) {
+        TRANS_LOGE(TRANS_SDK, "invalid sessionId=%{public}d", sessionId);
+        return SOFTBUS_INVALID_PARAM;
+    }
+
+    char pkgName[PKG_NAME_SIZE_MAX] = { 0 };
+    char sessionName[SESSION_NAME_SIZE_MAX] = { 0 };
+    int32_t ret = DeletePagingSession(sessionId, pkgName, sessionName);
+    if (ret != SOFTBUS_OK) {
+        TRANS_LOGE(TRANS_SDK, "failed delete session");
+        return ret;
+    }
+
+    (void)TryDeleteEmptySessionServer(pkgName, sessionName);
+    return SOFTBUS_OK;
+}
+
 int32_t ClientDeleteSocketSession(int32_t sessionId)
 {
     if (sessionId <= 0) {
@@ -962,12 +1046,14 @@ int32_t ClientRegisterRelationChecker(IFeatureAbilityRelationChecker *relationCh
 static void PrintCollabInfo(const CollabInfo *info, char *role)
 {
     char *tmpDeviceId = NULL;
+    char *tmpAccountId = NULL;
     Anonymize(info->deviceId, &tmpDeviceId);
+    Anonymize(info->accountId, &tmpAccountId);
     TRANS_LOGI(TRANS_SDK, "%{public}s deviceId=%{public}s", role, AnonymizeWrapper(tmpDeviceId));
     AnonymizeFree(tmpDeviceId);
     TRANS_LOGI(TRANS_SDK, "%{public}s userId=%{public}d", role, info->userId);
     TRANS_LOGI(TRANS_SDK, "%{public}s pid=%{public}d", role, info->pid);
-    TRANS_LOGI(TRANS_SDK, "%{public}s accountId=%{public}" PRId64, role, info->accountId);
+    TRANS_LOGI(TRANS_SDK, "%{public}s accountId=%{public}s", role, AnonymizeWrapper(tmpAccountId));
     TRANS_LOGI(TRANS_SDK, "%{public}s tokenId=%{public}" PRIu64, role, info->tokenId);
 }
 
@@ -982,7 +1068,7 @@ int32_t ClientTransCheckCollabRelation(
         TRANS_LOGE(TRANS_SDK, "extern checker is null or not registered.");
         return SOFTBUS_NO_INIT;
     }
-    int32_t ret = g_relationChecker->CheckCollabRelation(*sourceInfo, *sinkInfo);
+    int32_t ret = g_relationChecker->CheckCollabRelation(sourceInfo, sinkInfo);
     if (ret != SOFTBUS_OK) {
         TRANS_LOGE(TRANS_SDK,
             "channelId=%{public}d check collaboration relation fail, ret=%{public}d", channelId, ret);
@@ -1001,4 +1087,128 @@ void DestroyRelationChecker(void)
     }
     SoftBusFree(g_relationChecker);
     g_relationChecker= NULL;
+}
+
+int32_t DataSeqInfoListAddItem(uint32_t dataSeq, int32_t channelId, int32_t socketId, int32_t channelType)
+{
+    int32_t ret = LockClientDataSeqInfoList();
+    if (ret != SOFTBUS_OK) {
+        TRANS_LOGE(TRANS_SDK, "lock failed");
+        return ret;
+    }
+    DataSeqInfo *exitItem = NULL;
+    LIST_FOR_EACH_ENTRY(exitItem, &(g_clientDataSeqInfoList->list), DataSeqInfo, node) {
+        if (exitItem->channelId == channelId && exitItem->seq == (int32_t)dataSeq) {
+            TRANS_LOGI(TRANS_SDK, "DataSeqInfo add already exist, channelId=%{public}d", channelId);
+            UnlockClientDataSeqInfoList();
+            return SOFTBUS_OK;
+        }
+    }
+    int32_t businessType;
+    (void)ClientGetChannelBusinessTypeByChannelId(channelId, &businessType);
+    DataSeqInfo *item = (DataSeqInfo *)SoftBusCalloc(sizeof(DataSeqInfo));
+    TRANS_CHECK_AND_RETURN_RET_LOGE(item != NULL, SOFTBUS_MALLOC_ERR, TRANS_CTRL, "calloc failed");
+    item->channelId = channelId;
+    item->seq = (int32_t)dataSeq;
+    item->socketId = socketId;
+    item->channelType = channelType;
+    item->isMessage = (businessType == BUSINESS_TYPE_D2D_MESSAGE) ? true :false;
+    ListInit(&item->node);
+    ListAdd(&(g_clientDataSeqInfoList->list), &(item->node));
+    TRANS_LOGI(TRANS_SDK, "add DataSeqInfo success, channelId=%{public}d, dataSeq=%{public}u", channelId, dataSeq);
+    UnlockClientDataSeqInfoList();
+    return SOFTBUS_OK;
+}
+
+int32_t DeleteDataSeqInfoList(uint32_t dataSeq, int32_t channelId)
+{
+    int32_t ret = LockClientDataSeqInfoList();
+    if (ret != SOFTBUS_OK) {
+        TRANS_LOGE(TRANS_SDK, "lock failed");
+        return ret;
+    }
+    DataSeqInfo *item = NULL;
+    DataSeqInfo *nextItem = NULL;
+    LIST_FOR_EACH_ENTRY_SAFE(item, nextItem, &(g_clientDataSeqInfoList->list), DataSeqInfo, node) {
+        if (item->channelId == channelId && item->seq == (int32_t)dataSeq) {
+            ListDelete(&(item->node));
+            SoftBusFree(item);
+            TRANS_LOGD(TRANS_SDK, "delete DataSeqInfo success, channelId=%{public}d, dataSeq=%{public}u",
+                channelId, dataSeq);
+            UnlockClientDataSeqInfoList();
+            return SOFTBUS_OK;
+        }
+    }
+    TRANS_LOGD(TRANS_SDK, "dataSeqInfoList not found, channelId=%{public}d, dataSeq=%{public}u", channelId, dataSeq);
+    UnlockClientDataSeqInfoList();
+    return SOFTBUS_TRANS_DATA_SEQ_INFO_NOT_FOUND;
+}
+
+static void TransOnBindSentProc(ListNode *timeoutItemList)
+{
+    if (timeoutItemList == NULL) {
+        TRANS_LOGE(TRANS_SDK, "invalid param.");
+        return;
+    }
+    DataSeqInfo *item = NULL;
+    DataSeqInfo *nextItem = NULL;
+    LIST_FOR_EACH_ENTRY_SAFE(item, nextItem, timeoutItemList, DataSeqInfo, node) {
+        SessionListenerAdapter sessionCallback;
+        (void)memset_s(&sessionCallback, sizeof(SessionListenerAdapter), 0, sizeof(SessionListenerAdapter));
+        bool isServer = false;
+        int32_t ret = ClientGetSessionCallbackAdapterById(item->socketId, &sessionCallback, &isServer);
+        if (ret != SOFTBUS_OK) {
+            TRANS_LOGE(TRANS_SDK, "get session callback failed, socket=%{public}d", item->socketId);
+            ListDelete(&(item->node));
+            SoftBusFree(item);
+            continue;
+        }
+        if (item->isMessage) {
+            if (sessionCallback.socketClient.OnMessageSent == NULL) {
+                TRANS_LOGE(TRANS_SDK, "OnMessageSent not implement");
+                continue;
+            }
+            sessionCallback.socketClient.OnMessageSent(item->socketId, item->seq, SOFTBUS_TRANS_ASYNC_SEND_TIMEOUT);
+        } else {
+            if (sessionCallback.socketClient.OnBytesSent == NULL) {
+                TRANS_LOGE(TRANS_SDK, "OnBytesSent not implement");
+                continue;
+            }
+            sessionCallback.socketClient.OnBytesSent(item->socketId, item->seq, SOFTBUS_TRANS_ASYNC_SEND_TIMEOUT);
+        }
+        TRANS_LOGI(TRANS_SDK, "async sendbytes recv ack timeout, socket=%{public}d, dataSeq=%{public}u",
+            item->socketId, item->seq);
+        ListDelete(&(item->node));
+        SoftBusFree(item);
+    }
+}
+
+void TransAsyncSendBytesTimeoutProc(void)
+{
+    if (LockClientDataSeqInfoList() != SOFTBUS_OK) {
+        TRANS_LOGE(TRANS_SDK, "lock failed");
+        return;
+    }
+    ListNode timeoutItemList;
+    ListInit(&timeoutItemList);
+    DataSeqInfo *item = NULL;
+    DataSeqInfo *nextItem = NULL;
+    LIST_FOR_EACH_ENTRY_SAFE(item, nextItem, &(g_clientDataSeqInfoList->list), DataSeqInfo, node) {
+        item->timeout++;
+        if (item->timeout > SENDBYTES_TIMEOUT_S) {
+            DataSeqInfo *timeoutItem = (DataSeqInfo *)SoftBusCalloc(sizeof(DataSeqInfo));
+            if (timeoutItem == NULL) {
+                TRANS_LOGE(TRANS_SDK, "timeoutItem calloc fail");
+                continue;
+            }
+            timeoutItem->socketId = item->socketId;
+            timeoutItem->seq = item->seq;
+            timeoutItem->isMessage = item->isMessage;
+            ListDelete(&(item->node));
+            ListAdd(&timeoutItemList, &(timeoutItem->node));
+            SoftBusFree(item);
+        }
+    }
+    UnlockClientDataSeqInfoList();
+    (void)TransOnBindSentProc(&timeoutItemList);
 }

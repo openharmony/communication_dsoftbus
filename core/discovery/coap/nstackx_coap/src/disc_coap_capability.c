@@ -13,7 +13,7 @@
  * limitations under the License.
  */
 
-#include "disc_coap_capability.h"
+#include "disc_coap_capability_public.h"
 
 #include "anonymizer.h"
 #include "disc_log.h"
@@ -31,6 +31,7 @@ int32_t DiscCoapAssembleCapData(uint32_t capability, const char *capabilityData,
     return SOFTBUS_FUNC_NOT_SUPPORT;
 }
 
+#ifdef DSOFTBUS_FEATURE_DISC_COAP
 int32_t DiscCoapFillServiceData(const PublishOption *option, char *outData, uint32_t outDataLen, uint32_t allCap)
 {
     (void)option;
@@ -39,6 +40,7 @@ int32_t DiscCoapFillServiceData(const PublishOption *option, char *outData, uint
     (void)allCap;
     return SOFTBUS_OK;
 }
+#endif /* DSOFTBUS_FEATURE_DISC_COAP */
 
 int32_t DiscFillBtype(uint32_t capability, uint32_t allCap, NSTACKX_DiscoverySettings *discSet)
 {
@@ -83,7 +85,7 @@ int32_t DiscCoapProcessDeviceInfo(const NSTACKX_DeviceInfo *nstackxInfo, DeviceI
     char *anonymizedName = NULL;
     char *anonymizedId = NULL;
     char *anonymizedIp = NULL;
-    Anonymize(devInfo->devName, &anonymizedName);
+    AnonymizeDeviceName(devInfo->devName, &anonymizedName);
     Anonymize(devInfo->devId, &anonymizedId);
     Anonymize(devInfo->addr[0].info.ip.ip, &anonymizedIp);
     if (nstackxInfo->discoveryType == NSTACKX_DISCOVERY_TYPE_ACTIVE ||
@@ -119,9 +121,4 @@ int32_t DiscCoapProcessDeviceInfo(const NSTACKX_DeviceInfo *nstackxInfo, DeviceI
         return SOFTBUS_DISCOVER_COAP_SEND_RSP_FAIL;
     }
     return SOFTBUS_OK;
-}
-
-void DiscCoapReportNotification(const NSTACKX_NotificationConfig *notification)
-{
-    (void)notification;
 }

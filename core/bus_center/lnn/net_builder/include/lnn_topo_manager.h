@@ -18,24 +18,12 @@
 
 #include <stdint.h>
 
+#include "lnn_topo_manager_struct.h"
 #include "softbus_common.h"
 
 #ifdef __cplusplus
 extern "C" {
 #endif
-
-typedef struct {
-    char udid[UDID_BUF_LEN];
-    char peerUdid[UDID_BUF_LEN];
-    uint8_t relation[CONNECTION_ADDR_MAX];
-} LnnRelation;
-
-typedef struct {
-    ConnectionAddrType type;
-    uint8_t relation;
-    bool isJoin;
-    char udid[UDID_BUF_LEN];
-} LnnRelationChangedMsg;
 
 int32_t LnnInitTopoManager(void);
 void LnnDeinitTopoManager(void);

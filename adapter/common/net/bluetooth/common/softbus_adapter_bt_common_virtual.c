@@ -17,9 +17,10 @@
 
 #include "softbus_error_code.h"
 
-int SoftBusAddBtStateListener(const SoftBusBtStateListener *listener)
+int SoftBusAddBtStateListener(const SoftBusBtStateListener *listener, int *listenerId)
 {
     (void)listener;
+    (void)listenerId;
     return SOFTBUS_FUNC_NOT_SUPPORT;
 }
 
@@ -57,6 +58,14 @@ int SoftBusGetBtName(unsigned char *name, unsigned int *len)
 
 int SoftBusSetBtName(const char *name)
 {
+    return SOFTBUS_FUNC_NOT_SUPPORT;
+}
+
+int SoftBusGetRandomAddress(const char *addr, char *out, int tokenId)
+{
+    (void)addr;
+    (void)out;
+    (void)tokenId;
     return SOFTBUS_FUNC_NOT_SUPPORT;
 }
 

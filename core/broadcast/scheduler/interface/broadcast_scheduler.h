@@ -16,7 +16,7 @@
 #ifndef BROADCAST_SCHEDULER_H
 #define BROADCAST_SCHEDULER_H
 
-#include "broadcast_scheduler_type.h"
+#include "broadcast_scheduler_type_struct.h"
 #include "softbus_broadcast_manager.h"
 
 #ifdef __cplusplus
@@ -46,6 +46,7 @@ int32_t SchedulerDeinitBroadcast(void);
 /**
  * @brief Register the service to the broadcast scheduler.
  *
+ * @param  protocol Indicates the protocol type {@link BroadcastProtocol}.
  * @param type Indicates the service type {@link BaseServiceType}.
  * @param bcId Indicates the service broadcast ID.
  * @param cb Indicates the service broadcast callback {@link BroadcastCallback}.
@@ -56,7 +57,8 @@ int32_t SchedulerDeinitBroadcast(void);
  * @since 5.0
  * @version 1.0
  */
-int32_t SchedulerRegisterBroadcaster(BaseServiceType type, int32_t *bcId, const BroadcastCallback *cb);
+int32_t SchedulerRegisterBroadcaster(
+    BroadcastProtocol protocol, BaseServiceType type, int32_t *bcId, const BroadcastCallback *cb);
 
 /**
  * @brief Unregister the service to the broadcast scheduler.
@@ -74,6 +76,7 @@ int32_t SchedulerUnregisterBroadcaster(int32_t bcId);
 /**
  * @brief Register the service listener to the broadcast scheduler.
  *
+ * @param protocol Indicates the protocol type {@link BroadcastProtocol}.
  * @param type Indicates the service type {@link BaseServiceType}.
  * @param listenerId Indicates the service listener ID.
  * @param cb Indicates the service listener callback {@link ScanCallback}.
@@ -84,7 +87,8 @@ int32_t SchedulerUnregisterBroadcaster(int32_t bcId);
  * @since 5.0
  * @version 1.0
  */
-int32_t SchedulerRegisterScanListener(BaseServiceType type, int32_t *listenerId, const ScanCallback *cb);
+int32_t SchedulerRegisterScanListener(
+    BroadcastProtocol protocol, BaseServiceType type, int32_t *listenerId, const ScanCallback *cb);
 
 /**
  * @brief Unregister the service listener to the broadcast scheduler.
@@ -132,7 +136,7 @@ int32_t SchedulerStartBroadcast(int32_t bcId, BroadcastContentType contentType, 
 int32_t SchedulerUpdateBroadcast(int32_t bcId, const BroadcastParam *param, const BroadcastPacket *packet);
 
 /**
- * @brief The service set broadcast data. Set broadcast data when broadcast is enabled.
+ * @brief The service set broadcast data. Set broadcast data when broadcast is advertising.
  *
  * @param bcId Indicates the service broadcast ID.
  * @param packet Indicates the pointer to the service advertising data. For details, see {@link BroadcastPacket}.
@@ -144,6 +148,20 @@ int32_t SchedulerUpdateBroadcast(int32_t bcId, const BroadcastParam *param, cons
  * @version 1.0
  */
 int32_t SchedulerSetBroadcastData(int32_t bcId, const BroadcastPacket *packet);
+
+/**
+ * @brief The service set broadcast param. Set broadcast param when broadcast is advertising and disabled.
+ *
+ * @param bcId Indicates the service broadcast ID.
+ * @param packet Indicates the pointer to the service advertising data. For details, see {@link BroadcastPacket}.
+ *
+ * @return Returns <b>SOFTBUS_OK</b> if the service starts the broadcast successfully.
+ * returns any other value for failed.
+ *
+ * @since 5.1
+ * @version 1.0
+ */
+int32_t SchedulerSetBroadcastParam(int32_t bcId, const BroadcastParam *param);
 
 /**
  * @brief The service stop broadcast.
@@ -239,35 +257,6 @@ int32_t SchedulerQueryBroadcastStatus(int32_t bcId, int32_t *status);
  * @version 1.0
  */
 bool SchedulerIsLpDeviceAvailable(void);
-
-/**
- * @brief Set low-power chip broadcast parameters, scanning parameters, scanning filters, and broadcast data.
- *
- * @param bcParam Indicates low-power chip broadcast parameters and broadcast data.
- * @param scanParam Indicates low power chip scan parameters and filters.
- *
- * @return Returns <b>true</b> if the service set parameters succ.
- * @return Returns false for failed.
- *
- * @since 5.0
- * @version 1.0
- */
-bool SchedulerSetAdvDeviceParam(LpServerType type, const LpBroadcastParam *bcParam,
-    const LpScanParam *scanParam);
-
-/**
- * @brief Obtain the advHandle by advId.
- *
- * @param bcId Indicates the service broadcast ID, when the service register successfully
- * @param bcHandle Indicates Convert to bcHandle via advId.
- *
- * @return Returns <b>SOFTBUS_OK</b> if the service get the handle succ.
- * returns any other value for failed.
- *
- * @since 5.0
- * @version 1.0
- */
-int32_t SchedulerGetBroadcastHandle(int32_t bcId, int32_t *bcHandle);
 
 /**
  * @brief Enables data synchronization to a low-power chip.

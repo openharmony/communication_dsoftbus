@@ -39,9 +39,9 @@ public:
     virtual int32_t LnnGetLocalStrInfo(InfoKey key, char *info, uint32_t len) = 0;
     virtual int32_t LnnDeleteSpecificTrustedDevInfo(const char *udid, int32_t localUserId) = 0;
     virtual const NodeInfo *LnnGetLocalNodeInfo(void) = 0;
-    virtual int32_t LnnGetAuthPort(const NodeInfo *info) = 0;
-    virtual int32_t LnnGetSessionPort(const NodeInfo *info) = 0;
-    virtual int32_t LnnGetProxyPort(const NodeInfo *info) = 0;
+    virtual int32_t LnnGetAuthPort(const NodeInfo *info, int32_t ifnameIdx) = 0;
+    virtual int32_t LnnGetSessionPort(const NodeInfo *info, int32_t ifnameIdx) = 0;
+    virtual int32_t LnnGetProxyPort(const NodeInfo *info, int32_t ifnameIdx) = 0;
     virtual const char *LnnGetBtMac(const NodeInfo *info) = 0;
     virtual const char *LnnGetDeviceName(const DeviceBasicInfo *info) = 0;
     virtual char *LnnConvertIdToDeviceType(uint16_t typeId) = 0;
@@ -67,6 +67,8 @@ public:
     virtual void LnnDumpRemotePtk(const char *oldPtk, const char *newPtk, const char *log) = 0;
     virtual bool LnnGetOnlineStateById(const char *id, IdCategory type) = 0;
     virtual int32_t LnnGetLocalNodeInfoSafe(NodeInfo *info) = 0;
+    virtual int32_t LnnGetLocalByteInfo(InfoKey key, uint8_t *info, uint32_t len) = 0;
+    virtual void LnnAnonymizePtk(const char *ptk, uint32_t len, char **anonymizedStr) = 0;
 };
 class AuthNetLedgertInterfaceMock : public AuthNetLedgerInterface {
 public:
@@ -75,9 +77,9 @@ public:
     MOCK_METHOD3(LnnGetLocalStrInfo, int32_t(InfoKey, char *, uint32_t));
     MOCK_METHOD2(LnnDeleteSpecificTrustedDevInfo, int32_t(const char *, int32_t));
     MOCK_METHOD0(LnnGetLocalNodeInfo, const NodeInfo *());
-    MOCK_METHOD1(LnnGetAuthPort, int32_t(const NodeInfo *));
-    MOCK_METHOD1(LnnGetSessionPort, int32_t(const NodeInfo *));
-    MOCK_METHOD1(LnnGetProxyPort, int32_t(const NodeInfo *));
+    MOCK_METHOD2(LnnGetAuthPort, int32_t(const NodeInfo *, int32_t));
+    MOCK_METHOD2(LnnGetSessionPort, int32_t(const NodeInfo *, int32_t));
+    MOCK_METHOD2(LnnGetProxyPort, int32_t(const NodeInfo *, int32_t));
     MOCK_METHOD1(LnnGetBtMac, const char *(const NodeInfo *));
     MOCK_METHOD1(LnnGetDeviceName, const char *(const DeviceBasicInfo *));
     MOCK_METHOD1(LnnConvertIdToDeviceType, char *(uint16_t));
@@ -103,6 +105,8 @@ public:
     MOCK_METHOD3(LnnDumpRemotePtk, void(const char *, const char *, const char *));
     MOCK_METHOD2(LnnGetOnlineStateById, bool(const char *, IdCategory));
     MOCK_METHOD1(LnnGetLocalNodeInfoSafe, int32_t(NodeInfo *));
+    MOCK_METHOD3(LnnGetLocalByteInfo, int32_t(InfoKey, uint8_t *, uint32_t));
+    MOCK_METHOD3(LnnAnonymizePtk, void(const char *ptk, uint32_t len, char **anonymizedStr));
 
     static inline bool isRuned;
     static inline SoftBusMutex mutex;

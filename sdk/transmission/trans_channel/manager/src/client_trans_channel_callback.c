@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021-2024 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2025 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -14,6 +14,8 @@
  */
 
 #include "client_trans_channel_callback.h"
+
+#include "securec.h"
 
 #include "client_trans_auth_manager.h"
 #include "client_trans_proxy_manager.h"
@@ -32,13 +34,32 @@
 
 #define BITS 8
 #define REPORT_INFO_NUM 3
-#define RERORT_UDP_INFO_NUM 4
+#define REPORT_UDP_INFO_NUM 4
 #define REPORT_SYN_INFO_NUM 3
 #define SYN_INFO_LEN (sizeof(uint32_t) * REPORT_SYN_INFO_NUM)
+#define ACCESS_INFO_PARAM_NUM 3
+#define INVALID_USER_ID (-1)
 
-static int32_t TransSendChannelOpenedDataToCore(int32_t channelId, int32_t channelType, int32_t openResult)
+static int32_t WriteAccessInfoToBuf(uint8_t *buf, uint32_t bufLen, int32_t *offSet, const SocketAccessInfo *accessInfo)
 {
-    uint32_t len = sizeof(uint32_t) * REPORT_INFO_NUM;
+    int32_t ret = WriteInt32ToBuf(buf, bufLen, offSet, accessInfo->userId);
+    if (ret != SOFTBUS_OK) {
+        TRANS_LOGE(TRANS_CTRL, "write userId=%{public}d to buf failed! ret=%{public}d", accessInfo->userId, ret);
+        return ret;
+    }
+    ret = WriteUint64ToBuf(buf, bufLen, offSet, accessInfo->localTokenId);
+    if (ret != SOFTBUS_OK) {
+        TRANS_LOGE(TRANS_CTRL, "write tokenId to buf failed! ret=%{public}d", ret);
+        return ret;
+    }
+    return SOFTBUS_OK;
+}
+
+static int32_t TransSendChannelOpenedDataToCore(
+    int32_t channelId, int32_t channelType, int32_t openResult, const SocketAccessInfo *accessInfo)
+{
+    uint32_t len = sizeof(uint32_t) *
+        ((channelType == CHANNEL_TYPE_AUTH) ? REPORT_INFO_NUM : REPORT_INFO_NUM + ACCESS_INFO_PARAM_NUM);
     uint8_t *buf = (uint8_t *)SoftBusCalloc(len);
     if (buf == NULL) {
         TRANS_LOGE(TRANS_CTRL, "malloc buf failed, channelId=%{public}d", channelId);
@@ -63,14 +84,27 @@ static int32_t TransSendChannelOpenedDataToCore(int32_t channelId, int32_t chann
         SoftBusFree(buf);
         return ret;
     }
-    return ServerIpcProcessInnerEvent(EVENT_TYPE_CHANNEL_OPENED, buf, len);
+    if (channelType != CHANNEL_TYPE_AUTH) {
+        ret = WriteAccessInfoToBuf(buf, len, &offSet, accessInfo);
+        if (ret != SOFTBUS_OK) {
+            TRANS_LOGE(TRANS_CTRL, "write accessinfo to buf failed! ret=%{public}d", ret);
+            SoftBusFree(buf);
+            return ret;
+        }
+    }
+    ret = ServerIpcProcessInnerEvent(EVENT_TYPE_CHANNEL_OPENED, buf, len);
+    SoftBusFree(buf);
+    return ret;
 }
 
 static int32_t TransSendUdpChannelOpenedDataToCore(
-    int32_t channelId, int32_t channelType, int32_t openResult, int32_t udpPort)
+    int32_t channelId, int32_t channelType, int32_t openResult, int32_t udpPort, const SocketAccessInfo *accessInfo)
 {
-    uint32_t len = sizeof(uint32_t) * RERORT_UDP_INFO_NUM;
+    uint32_t len = sizeof(uint32_t) *
+        (channelType == CHANNEL_TYPE_AUTH ? REPORT_UDP_INFO_NUM : REPORT_UDP_INFO_NUM + ACCESS_INFO_PARAM_NUM);
+
     uint8_t *buf = (uint8_t *)SoftBusCalloc(len);
+    TRANS_CHECK_AND_RETURN_RET_LOGE(buf != NULL, SOFTBUS_MALLOC_ERR, TRANS_CTRL, "Calloc buf failed.");
     int32_t offSet = 0;
     int32_t ret = SOFTBUS_OK;
     ret = WriteInt32ToBuf(buf, len, &offSet, channelId);
@@ -97,7 +131,17 @@ static int32_t TransSendUdpChannelOpenedDataToCore(
         SoftBusFree(buf);
         return ret;
     }
-    return ServerIpcProcessInnerEvent(EVENT_TYPE_CHANNEL_OPENED, buf, len);
+    if (channelType != CHANNEL_TYPE_AUTH) {
+        ret = WriteAccessInfoToBuf(buf, len, &offSet, accessInfo);
+        if (ret != SOFTBUS_OK) {
+            TRANS_LOGE(TRANS_CTRL, "write accessinfo to buf failed! ret=%{public}d", ret);
+            SoftBusFree(buf);
+            return ret;
+        }
+    }
+    ret = ServerIpcProcessInnerEvent(EVENT_TYPE_CHANNEL_OPENED, buf, len);
+    SoftBusFree(buf);
+    return ret;
 }
 
 int32_t TransOnChannelOpened(const char *sessionName, const ChannelInfo *channel)
@@ -107,20 +151,22 @@ int32_t TransOnChannelOpened(const char *sessionName, const ChannelInfo *channel
         return SOFTBUS_INVALID_PARAM;
     }
 
+    SocketAccessInfo accessInfo = { 0 };
+    accessInfo.userId = INVALID_USER_ID;
     int32_t ret = SOFTBUS_NO_INIT;
     int32_t udpPort = 0;
     switch (channel->channelType) {
         case CHANNEL_TYPE_AUTH:
-            ret = ClientTransAuthOnChannelOpened(sessionName, channel);
+            ret = ClientTransAuthOnChannelOpened(sessionName, channel, &accessInfo);
             break;
         case CHANNEL_TYPE_PROXY:
-            ret = ClientTransProxyOnChannelOpened(sessionName, channel);
+            ret = ClientTransProxyOnChannelOpened(sessionName, channel, &accessInfo);
             break;
         case CHANNEL_TYPE_TCP_DIRECT:
-            ret = ClientTransTdcOnChannelOpened(sessionName, channel);
+            ret = ClientTransTdcOnChannelOpened(sessionName, channel, &accessInfo);
             break;
         case CHANNEL_TYPE_UDP:
-            ret = TransOnUdpChannelOpened(sessionName, channel, &udpPort);
+            ret = TransOnUdpChannelOpened(sessionName, channel, &udpPort, &accessInfo);
             break;
         default:
             TRANS_LOGE(TRANS_SDK, "[client] invalid type.");
@@ -133,9 +179,9 @@ int32_t TransOnChannelOpened(const char *sessionName, const ChannelInfo *channel
 
     if (channel->isServer) {
         if (channelType == CHANNEL_TYPE_UDP && udpPort > 0) {
-            ret = TransSendUdpChannelOpenedDataToCore(channelId, channelType, openResult, udpPort);
+            ret = TransSendUdpChannelOpenedDataToCore(channelId, channelType, openResult, udpPort, &accessInfo);
         } else {
-            ret = TransSendChannelOpenedDataToCore(channelId, channelType, openResult);
+            ret = TransSendChannelOpenedDataToCore(channelId, channelType, openResult, &accessInfo);
         }
     }
     if (ret == SOFTBUS_OK) {
@@ -166,7 +212,7 @@ int32_t TransOnChannelOpenFailed(int32_t channelId, int32_t channelType, int32_t
     }
 }
 
-int32_t TransOnChannelLinkDown(const char *networkId, int32_t routeType)
+int32_t TransOnChannelLinkDown(const char *networkId, uint32_t routeType)
 {
 #define USER_SWITCH_OFFSET 10
 #define PRIVILEGE_CLOSE_OFFSET 11
@@ -190,7 +236,7 @@ int32_t TransOnChannelLinkDown(const char *networkId, int32_t routeType)
     return SOFTBUS_OK;
 }
 
-static int32_t NofifyChannelClosed(int32_t channelId, int32_t channelType, ShutdownReason reason)
+static int32_t NotifyChannelClosed(int32_t channelId, int32_t channelType, ShutdownReason reason)
 {
     DeleteSocketResourceByChannelId(channelId, channelType);
     switch (channelType) {
@@ -227,7 +273,7 @@ int32_t TransOnChannelClosed(int32_t channelId, int32_t channelType, int32_t mes
         "channelId=%{public}d, channelType=%{public}d, messageType=%{public}d", channelId, channelType, messageType);
     switch (messageType) {
         case MESSAGE_TYPE_NOMAL:
-            return NofifyChannelClosed(channelId, channelType, reason);
+            return NotifyChannelClosed(channelId, channelType, reason);
         case MESSAGE_TYPE_CLOSE_ACK:
             return NofifyCloseAckReceived(channelId, channelType);
         default:
@@ -275,9 +321,9 @@ int32_t TransOnChannelQosEvent(int32_t channelId, int32_t channelType, int32_t e
     }
 }
 
-int32_t TransSetChannelInfo(const char* sessionName, int32_t sessionId, int32_t channleId, int32_t channelType)
+int32_t TransSetChannelInfo(const char* sessionName, int32_t sessionId, int32_t channelId, int32_t channelType)
 {
-    return ClientTransSetChannelInfo(sessionName, sessionId, channleId, channelType);
+    return ClientTransSetChannelInfo(sessionName, sessionId, channelId, channelType);
 }
 
 int32_t TransOnChannelBind(int32_t channelId, int32_t channelType)
@@ -329,13 +375,15 @@ static int32_t TransSendCollabResult(int32_t channelId, int32_t channelType, int
 }
 
 int32_t TransOnCheckCollabRelation(
-    const CollabInfo *sourceInfo, const CollabInfo *sinkInfo, int32_t channelId, int32_t channelType)
+    const CollabInfo *sourceInfo, bool isSinkSide, const CollabInfo *sinkInfo, int32_t channelId, int32_t channelType)
 {
     if (sourceInfo == NULL || sinkInfo == NULL) {
         TRANS_LOGE(TRANS_MSG, "param invalid");
         return SOFTBUS_INVALID_PARAM;
     }
     int32_t checkResult = ClientTransCheckCollabRelation(sourceInfo, sinkInfo, channelId, channelType);
-    int32_t ret = TransSendCollabResult(channelId, channelType, checkResult);
-    return ret;
+    if (!isSinkSide) {
+        return checkResult;
+    }
+    return TransSendCollabResult(channelId, channelType, checkResult);
 }

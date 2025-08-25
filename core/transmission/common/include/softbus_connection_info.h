@@ -27,6 +27,7 @@ typedef enum {
     LINK_TYPE_WIFI_WLAN,
     LINK_TYPE_WIFI_P2P,
     LINK_TYPE_BLE,
+    LINK_TYPE_SLE,
     LINK_TYPE_LOOPBACK,
 } LinkType;
 

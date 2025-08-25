@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021-2024 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2025 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -16,12 +16,11 @@
 #ifndef INTERFACES_INNERKITS_SOFTBUS_SERVER_H_
 #define INTERFACES_INNERKITS_SOFTBUS_SERVER_H_
 
+#include "ble_range.h"
 #include "data_level.h"
-#include "iremote_broker.h"
-#include "iremote_object.h"
 #include "iremote_proxy.h"
 #include "softbus_bus_center.h"
-#include "softbus_common.h"
+#include "softbus_connection.h"
 #include "softbus_trans_def.h"
 
 namespace OHOS {
@@ -30,9 +29,10 @@ public:
     virtual ~ISoftBusServer() = default;
 
     virtual int32_t SoftbusRegisterService(const char *clientPkgName, const sptr<IRemoteObject> &object) = 0;
+    virtual int32_t RegisterBrProxyService(const char *clientPkgName, const sptr<IRemoteObject>& object);
 
-    virtual int32_t CreateSessionServer(const char *pkgName, const char *sessionName) = 0;
-    virtual int32_t RemoveSessionServer(const char *pkgName, const char *sessionName) = 0;
+    virtual int32_t CreateSessionServer(const char *pkgName, const char *sessionName, uint64_t timestamp) = 0;
+    virtual int32_t RemoveSessionServer(const char *pkgName, const char *sessionName, uint64_t timestamp) = 0;
     virtual int32_t OpenSession(const SessionParam *param, TransInfo *info) = 0;
     virtual int32_t OpenAuthSession(const char *sessionName, const ConnectionAddr *addrInfo) = 0;
     virtual int32_t NotifyAuthSuccess(int32_t channelId, int32_t channelType) = 0;
@@ -42,7 +42,7 @@ public:
     virtual int32_t ReleaseResources(int32_t channelId) = 0;
     virtual int32_t SendMessage(int32_t channelId, int32_t channelType,
         const void *data, uint32_t len, int32_t msgType) = 0;
-    virtual int32_t JoinLNN(const char *pkgName, void *addr, uint32_t addrTypeLen) = 0;
+    virtual int32_t JoinLNN(const char *pkgName, void *addr, uint32_t addrTypeLen, bool isForceJoin) = 0;
     virtual int32_t LeaveLNN(const char *pkgName, const char *networkId) = 0;
     virtual int32_t GetAllOnlineNodeInfo(const char *pkgName, void **info, uint32_t infoTypeLen, int *infoNum) = 0;
     virtual int32_t GetLocalDeviceInfo(const char *pkgName, void *info, uint32_t infoTypeLen) = 0;
@@ -69,6 +69,10 @@ public:
     virtual int32_t GetAllMetaNodeInfo(MetaNodeInfo *info, int32_t *infoNum);
     virtual int32_t ShiftLNNGear(const char *pkgName, const char *callerId, const char *targetNetworkId,
         const GearMode *mode);
+    virtual int32_t TriggerRangeForMsdp(const char *pkgName, const RangeConfig *config);
+    virtual int32_t StopRangeForMsdp(const char *pkgName, const RangeConfig *config);
+    virtual int32_t RegisterRangeCallbackForMsdp(const char *pkgName) = 0;
+    virtual int32_t UnregisterRangeCallbackForMsdp(const char *pkgName) = 0;
     virtual int32_t SyncTrustedRelationShip(const char *pkgName, const char *msg, uint32_t msgLen);
     virtual int32_t GetSoftbusSpecObject(sptr<IRemoteObject> &object);
     virtual int32_t GetBusCenterExObj(sptr<IRemoteObject> &object);
@@ -76,7 +80,20 @@ public:
         uint32_t qosCount) = 0;
     virtual int32_t ProcessInnerEvent(int32_t eventType, uint8_t *buf, uint32_t len) = 0;
     virtual int32_t PrivilegeCloseChannel(uint64_t tokenId, int32_t pid, const char *peerNetworkId) = 0;
+    virtual int32_t SetDisplayName(const char *pkgName, const char *nameData, uint32_t len);
+    virtual int32_t CreateServer(const char *pkgName, const char *name);
+    virtual int32_t RemoveServer(const char *pkgName, const char *name);
+    virtual int32_t Connect(const char *pkgName, const char *name, const Address *address);
+    virtual int32_t Disconnect(uint32_t handle);
+    virtual int32_t Send(uint32_t handle, const uint8_t *data, uint32_t len);
+    virtual int32_t ConnGetPeerDeviceId(uint32_t handle, char *deviceId, uint32_t len);
 
+    virtual int32_t OpenBrProxy(const char *brMac, const char *uuid);
+    virtual int32_t CloseBrProxy(int32_t channelId);
+    virtual int32_t SendBrProxyData(int32_t channelId, char *data, uint32_t dataLen);
+    virtual int32_t SetListenerState(int32_t channelId, int32_t type, bool CbEnabled);
+    virtual bool IsProxyChannelEnabled(int32_t uid);
+    virtual int32_t PushRegisterHook();
 public:
     DECLARE_INTERFACE_DESCRIPTOR(u"OHOS.ISoftBusServer");
 };

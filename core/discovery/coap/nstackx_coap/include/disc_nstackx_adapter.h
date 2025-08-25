@@ -16,7 +16,6 @@
 #ifndef DISC_NSTACKX_ADAPTER_H
 #define DISC_NSTACKX_ADAPTER_H
 
-#include <stdint.h>
 #include "disc_manager.h"
 
 #ifdef __cplusplus
@@ -56,8 +55,10 @@ int32_t DiscCoapRegisterServiceData(const PublishOption *option, uint32_t allCap
 int32_t DiscCoapRegisterCapabilityData(const unsigned char *capabilityData, uint32_t dataLen, uint32_t capability);
 int32_t DiscCoapStartDiscovery(DiscCoapOption *option);
 int32_t DiscCoapStopDiscovery(void);
-void DiscCoapModifyNstackThread(LinkStatus status);
-void DiscCoapUpdateLocalIp(LinkStatus status);
+int32_t DiscCoapRegisterBusinessData(const unsigned char *capabilityData, uint32_t dataLen);
+void DiscCoapRecordLinkStatus(LinkStatus status, int32_t ifnameIdx);
+void DiscCoapModifyNstackThread(LinkStatus status, int32_t ifnameIdx);
+void DiscCoapUpdateLocalIp(LinkStatus status, int32_t ifnameIdx);
 void DiscCoapUpdateDevName(void);
 void DiscCoapUpdateAccount(void);
 int32_t DiscCoapSendRsp(const DeviceInfo *deviceInfo, uint8_t bType);

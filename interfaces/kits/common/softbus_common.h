@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021-2024 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2025 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -61,6 +61,7 @@ extern "C" {
 */
 #define OHOS_PERMISSION_DISTRIBUTED_DATASYNC "ohos.permission.DISTRIBUTED_DATASYNC"
 #define OHOS_PERMISSION_DISTRIBUTED_SOFTBUS_CENTER "ohos.permission.DISTRIBUTED_SOFTBUS_CENTER"
+#define OHOS_PERMISSION_ACCESS_BLUETOOTH "ohos.permission.ACCESS_BLUETOOTH"
 
 /**
  * @brief Indicates the length of the Bluetooth device MAC address in string format,
@@ -70,6 +71,15 @@ extern "C" {
  * @version 1.0
  */
 #define BT_MAC_LEN 18
+
+/**
+ * @brief Indicates the length of the SLE device MAC address in string format,
+ * including the terminating null character <b>\0</b>.
+ *
+ * @since 1.0
+ * @version 1.0
+ */
+#define SLE_MAC_LEN 18
 
 /**
  * @brief Indicates the length of the network ID string, including the terminating null character <b>\0</b>.
@@ -119,6 +129,12 @@ extern "C" {
 #define MAX_ACCOUNT_HASH_LEN 96
 
 /**
+ * @brief Indicates the maximum length of the heart beat value code in <b>IDiscoveryCallback</b>.
+ *
+ */
+#define HB_HEARTBEAT_VALUE_LEN 3
+
+/**
  * @brief Indicates the maximum length of the hash code in HEX calculated by SHA-256.
  *
  */
@@ -138,7 +154,13 @@ extern "C" {
 #define MAX_CAPABILITYDATA_LEN 513
 
 /**
- * @brief Indicates the maximum length of the custom data in <b>IDiscoveryCallback</b>.
+ * @brief Indicates the maximum length of the addition data in <b>RangeResult</b>.
+ *
+ */
+#define MAX_ADDITION_DATA_LEN 513
+
+/**
+ * @brief Indicates the maximum length of the addition data in <b>RangeResult</b>.
  *
  */
 #define DISC_MAX_CUST_DATA_LEN 513
@@ -252,6 +274,9 @@ typedef enum {
     CONNECTION_ADDR_ETH,      /**< Ethernet */
     CONNECTION_ADDR_SESSION,  /**< SESSION */
     CONNECTION_ADDR_USB,      /**< USB */
+    CONNECTION_ADDR_SESSION_WITH_KEY, /**< Session with key */
+    CONNECTION_ADDR_SLE,      /**< SLE */
+    CONNECTION_ADDR_NCM,      /**< USB NCM */
     CONNECTION_ADDR_MAX       /**< Invalid type */
 } ConnectionAddrType;
 
@@ -265,6 +290,35 @@ typedef enum  {
     BLE_COC,
     BLE_PROTOCOL_MAX
 } BleProtocolType;
+
+/**
+ * @brief Enumerates {@link BlePriority} types of ble priority
+ *
+ */
+typedef enum  {
+    BLE_PRIORITY_DEFAULT = 0,
+    BLE_PRIORITY_BALANCED,
+    BLE_PRIORITY_HIGH,
+    BLE_PRIORITY_LOW_POWER,
+    BLE_PRIORITY_MAX
+} BlePriority;
+
+/**
+ * @brief Enumerates {@link BleProtocolType} types of ble connection type
+ *
+ */
+typedef enum  {
+    SLE_PROTOCOL_ANY = -1,
+    SLE_SSAP = 0,
+    SLE_PORT = 1,
+    SLE_PROTOCOL_MAX
+} SleProtocolType;
+
+typedef struct {
+    bool hasDeviceKeyId;
+    int32_t localDeviceKeyId;
+    int32_t remoteDeviceKeyId;
+} DeviceKeyId;
 
 /**
  * @brief Defines the address of a device that is added to a LNN.
@@ -288,6 +342,7 @@ typedef struct {
             char bleMac[BT_MAC_LEN];  /**< BLE MAC address in string format */
             uint8_t udidHash[UDID_HASH_LEN];  /**< udid hash value */
             uint32_t psm;
+            BlePriority priority;
         } ble;
         /**< IPv4 or IPv6 address */
         struct IpAddr {
@@ -307,6 +362,8 @@ typedef struct {
         } session;
     } info;
     char peerUid[MAX_ACCOUNT_HASH_LEN];
+    DeviceKeyId deviceKeyId;
+    uint16_t deviceTypeId;
 } ConnectionAddr;
 
 /**
@@ -356,6 +413,8 @@ typedef enum {
     SUPER_HIGH = 3,
     /** Extreme-high */
     EXTREME_HIGH = 4,
+    /** 60/240 duty cycle */
+    SCREEN_ON_INSTANT = 5,
     FREQ_BUTT
 } ExchangeFreq;
 
@@ -387,7 +446,13 @@ typedef enum {
     /**virtual link capability */
     VLINK_CAPABILITY_BITMAP,
     /**Touch capability */
-    TOUCH_CAPABILITY_BITMAP
+    TOUCH_CAPABILITY_BITMAP,
+    /**Oop capability */
+    OOP_CAPABILITY_BITMAP,
+    /**Oh Approach capability */
+    OH_APPROACH_CAPABILITY_BITMAP,
+    /**Raise Hand capability */
+    RAISE_HAND_CAPABILITY_BITMAP
 } DataBitMap;
 
 typedef struct {
@@ -422,7 +487,10 @@ static const CapabilityMap g_capabilityMap[] = {
     {SHARE_CAPABILITY_BITMAP, (char *)"share"},
     {APPROACH_CAPABILITY_BITMAP, (char *)"approach"},
     {VLINK_CAPABILITY_BITMAP, (char *)"virtualLink"},
-    {TOUCH_CAPABILITY_BITMAP, (char *)"touch"}
+    {TOUCH_CAPABILITY_BITMAP, (char *)"touch"},
+    {OOP_CAPABILITY_BITMAP, (char *)"oop"},
+    {OH_APPROACH_CAPABILITY_BITMAP, (char *)"oh_approach"},
+    {RAISE_HAND_CAPABILITY_BITMAP, (char *)"raiseHand"}
 };
 
 /**

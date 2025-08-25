@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021-2024 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2025 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -52,8 +52,13 @@ public:
     int32_t OnClientTransLimitChange(int32_t channelId, uint8_t tos) override;
     int32_t OnClientChannelOnQos(
         int32_t channelId, int32_t channelType, QoSEvent event, const QosTV *qos, uint32_t count) override;
-    int32_t OnCheckCollabRelation(
-        const CollabInfo *sourceInfo, const CollabInfo *sinkInfo, int32_t channelId, int32_t channeltype) override;
+    int32_t OnCheckCollabRelation(const CollabInfo *sourceInfo, bool isSinkSide, const CollabInfo *sinkInfo,
+        int32_t channelId, int32_t channeltype) override;
+    void OnMsdpRangeResult(const RangeResultInnerInfo *rangeInfo) override;
+    int32_t OnBrProxyOpened(int32_t channelId, const char *brMac, const char *uuid, int32_t reason) override;
+    int32_t OnBrProxyDataRecv(int32_t channelId, const uint8_t *data, uint32_t len) override;
+    int32_t OnBrProxyStateChanged(int32_t channelId, int32_t channelState) override;
+    int32_t OnBrProxyQueryPermission(const char *bundleName, bool *isEmpowered) override;
 
 private:
     static inline BrokerDelegator<TransClientProxy> delegator_;

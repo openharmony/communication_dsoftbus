@@ -25,6 +25,7 @@
 #include "channel/auth_negotiate_channel.h"
 #include "data/link_manager.h"
 #include "utils/wifi_direct_anonymous.h"
+#include "wifi_direct_init.h"
 #include "wifi_direct_ip_manager.h"
 
 namespace OHOS::SoftBus {
@@ -42,6 +43,7 @@ InnerLink::InnerLink(LinkType type, const std::string &remoteDeviceId)
 InnerLink::~InnerLink()
 {
     auto listenerModuleId = GetListenerModule();
+    auto customPort = GetLocalCustomPort();
     bool hasAnotherUsed = false;
     LinkManager::GetInstance().ForEach([&hasAnotherUsed, this](InnerLink &innerLink) {
         if (innerLink.GetLinkType() == InnerLink::LinkType::P2P && innerLink.GetLocalIpv4() == this->GetLocalIpv4() &&
@@ -51,19 +53,22 @@ InnerLink::~InnerLink()
         return false;
     });
     CONN_LOGI(CONN_WIFI_DIRECT, "hasAnotherUsed=%{public}d", hasAnotherUsed);
+    if (customPort > 0) {
+        CONN_LOGI(CONN_WIFI_DIRECT, "stop custom listening");
+        StopCustomListen(customPort);
+    }
     if (listenerModuleId != UNUSE_BUTT) {
         CONN_LOGI(CONN_WIFI_DIRECT, "stop auth listening");
         if (GetLinkType() == LinkType::HML) {
             AuthNegotiateChannel::StopListening(AUTH_LINK_TYPE_ENHANCED_P2P, listenerModuleId);
-            StopCustomListen(GetLocalCustomPort());
         } else {
             if (!hasAnotherUsed) {
                 AuthNegotiateChannel::StopListening(AUTH_LINK_TYPE_P2P, listenerModuleId);
             }
         }
     }
-    if (!GetLocalIpv4().empty() && !GetRemoteIpv4().empty() && !GetRemoteBaseMac().empty() && !hasAnotherUsed &&
-        !GetLegacyReused()) {
+    if (!GetLocalIpv4().empty() && !GetRemoteIpv4().empty() && !GetRemoteBaseMac().empty() &&
+        GetLinkType() == LinkType::HML) {
         CONN_LOGI(CONN_WIFI_DIRECT, "release ip");
         WifiDirectIpManager::GetInstance().ReleaseIpv4(
             GetLocalInterface(), Ipv4Info(GetLocalIpv4()), Ipv4Info(GetRemoteIpv4()), GetRemoteBaseMac());
@@ -230,6 +235,16 @@ void InnerLink::SetLocalPort(int port)
     Set(InnerLinKey::LOCAL_PORT, port);
 }
 
+int InnerLink::GetRemotePort() const
+{
+    return Get(InnerLinKey::REMOTE_PORT, 0);
+}
+
+void InnerLink::SetRemotePort(int port)
+{
+    Set(InnerLinKey::REMOTE_PORT, port);
+}
+
 ListenerModule InnerLink::GetListenerModule() const
 {
     return Get(InnerLinKey::LISTENER_MODULE_ID, static_cast<ListenerModule>(UNUSE_BUTT));
@@ -328,10 +343,10 @@ void InnerLink::SetLegacyReused(bool value)
     Set(InnerLinKey::IS_LEGACY_REUSED, value);
 }
 
-void InnerLink::GenerateLink(uint32_t requestId, int pid, WifiDirectLink &link, bool ipv4)
+void InnerLink::GenerateLink(uint32_t requestId, int pid, WifiDirectLink &link, bool ipv4, bool isVirtualLink)
 {
     link.linkId = LinkManager::GetInstance().AllocateLinkId();
-    AddId(link.linkId, requestId, pid);
+    AddId(link.linkId, requestId, pid, isVirtualLink);
     switch (GetLinkType()) {
         case LinkType::HML:
             link.linkType = WIFI_DIRECT_LINK_TYPE_HML;
@@ -353,22 +368,34 @@ void InnerLink::GenerateLink(uint32_t requestId, int pid, WifiDirectLink &link, 
         remoteIp = GetRemoteIpv6();
     }
     if (strcpy_s(link.localIp, IP_STR_MAX_LEN, localIp.c_str()) != EOK) {
-        CONN_LOGI(CONN_WIFI_DIRECT, "local ip cpy failed, link id=%{public}d", link.linkId);
+        CONN_LOGI(CONN_WIFI_DIRECT, "local ip cpy fail, link id=%{public}d", link.linkId);
         // fall-through
     }
     if (strcpy_s(link.remoteIp, IP_STR_MAX_LEN, remoteIp.c_str()) != EOK) {
-        CONN_LOGI(CONN_WIFI_DIRECT, "remote ip cpy failed, link id=%{public}d", link.linkId);
+        CONN_LOGI(CONN_WIFI_DIRECT, "remote ip cpy fail, link id=%{public}d", link.linkId);
         // fall-through
     }
+    
     link.remotePort = GetRemoteCustomPort();
+    std::string localIpv6 = GetLocalIpv6();
+    std::string remoteIpv6 = GetRemoteIpv6();
+    if (strcpy_s(link.localIpv6, IP_STR_MAX_LEN, localIpv6.c_str()) != EOK) {
+        CONN_LOGI(CONN_WIFI_DIRECT, "local custom ip cpy fail, link id=%{public}d", link.linkId);
+        // fall-through
+    }
+    if (strcpy_s(link.remoteIpv6, IP_STR_MAX_LEN, remoteIpv6.c_str()) != EOK) {
+        CONN_LOGI(CONN_WIFI_DIRECT, "remote custom ip cpy fail, link id=%{public}d", link.linkId);
+        // fall-through
+    }
 }
 
-void InnerLink::AddId(int linkId, uint32_t requestId, int pid)
+void InnerLink::AddId(int linkId, uint32_t requestId, int pid, bool isVirtualLink)
 {
     auto item = std::make_shared<LinkIdStruct>();
     item->id = linkId;
     item->requestId = requestId;
     item->pid = pid;
+    item->isVirtualLink = isVirtualLink;
     linkIds_[linkId] = item;
 }
 
@@ -406,6 +433,38 @@ bool InnerLink::IsProtected() const
     return false;
 }
 
+void InnerLink::SetLinkPowerMode(int powerMode)
+{
+    Set(InnerLinKey::VIRTUAL_FLAG, powerMode);
+}
+
+int InnerLink::GetLinkPowerMode() const
+{
+    return Get(InnerLinKey::VIRTUAL_FLAG, static_cast<int>(INVALID_POWER));
+}
+
+int InnerLink::SetKeepaliveState(bool isKeepalive)
+{
+    auto authNegotiateChannel = std::dynamic_pointer_cast<AuthNegotiateChannel>(channel_);
+    CONN_CHECK_AND_RETURN_RET_LOGE(authNegotiateChannel != nullptr, SOFTBUS_INVALID_PARAM,
+        CONN_WIFI_DIRECT, "channel is nullptr");
+    AuthHandle handle = authNegotiateChannel->GetAuthHandle();
+    auto connectionId = DBinderSoftbusServer::GetInstance().GetConnectionIdByHandle(handle);
+    CONN_CHECK_AND_RETURN_RET_LOGE(connectionId > 0, connectionId, CONN_WIFI_DIRECT,
+        "not find connectionId, ret=%{public}d", connectionId);
+    return DBinderSoftbusServer::GetInstance().ConnSetKeepaliveByConnectionId(connectionId, isKeepalive);
+}
+
+bool InnerLink::CheckOnlyVirtualLinks() const
+{
+    for (const auto& pair : linkIds_) {
+        if (!pair.second->isVirtualLink) {
+            return false;
+        }
+    }
+    return true;
+}
+
 void InnerLink::Dump() const
 {
     nlohmann::json object;
@@ -438,5 +497,37 @@ void InnerLink::Dump() const
     }
     object["LINKS"] = linkIdArrayObject;
     CONN_LOGI(CONN_WIFI_DIRECT, "%{public}s", object.dump().c_str());
+}
+
+std::string InnerLink::ToString(InnerLink::LinkType type)
+{
+    switch (type) {
+        case LinkType::INVALID_TYPE:
+            return "INVALID_TYPE";
+        case LinkType::P2P:
+            return "P2P";
+        case LinkType::HML:
+            return "HML";
+        default:
+            return "UNKNOWN_TYPE(" + std::to_string(static_cast<int>(type)) + ")";
+    }
+}
+
+std::string InnerLink::ToString(InnerLink::LinkState state)
+{
+    switch (state) {
+        case LinkState::INVALID_STATE:
+            return "INVALID_STATE";
+        case LinkState::DISCONNECTED:
+            return "DISCONNECTED";
+        case LinkState::CONNECTED:
+            return "CONNECTED";
+        case LinkState::CONNECTING:
+            return "CONNECTING";
+        case LinkState::DISCONNECTING:
+            return "DISCONNECTING";
+        default:
+            return "UNKNOWN_STATE(" + std::to_string(static_cast<int>(state)) + ")";
+    }
 }
 } // namespace OHOS::SoftBus

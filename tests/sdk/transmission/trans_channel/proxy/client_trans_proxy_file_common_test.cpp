@@ -71,7 +71,7 @@ void ClientTransProxyFileCommonTest::TearDownTestCase(void) {}
  * @tc.type: FUNC
  * @tc.require:
  */
-HWTEST_F(ClientTransProxyFileCommonTest, FileListToBufferTest, TestSize.Level0)
+HWTEST_F(ClientTransProxyFileCommonTest, FileListToBufferTest, TestSize.Level1)
 {
     FileListBuffer bufferInfo = {0};
     EXPECT_EQ(0, FileListToBuffer(g_fileSet1, sizeof(g_fileSet1) / sizeof(const char *), &bufferInfo));
@@ -93,7 +93,7 @@ HWTEST_F(ClientTransProxyFileCommonTest, FileListToBufferTest, TestSize.Level0)
  * @tc.type: FUNC
  * @tc.require:
  */
-HWTEST_F(ClientTransProxyFileCommonTest, FileListToBufferTestBadInput1, TestSize.Level0)
+HWTEST_F(ClientTransProxyFileCommonTest, FileListToBufferTestBadInput1, TestSize.Level1)
 {
     FileListBuffer bufferInfo = {0};
     EXPECT_NE(0, FileListToBuffer(nullptr, sizeof(g_fileSet1) / sizeof(const char *), &bufferInfo));
@@ -108,7 +108,7 @@ HWTEST_F(ClientTransProxyFileCommonTest, FileListToBufferTestBadInput1, TestSize
  * @tc.type: FUNC
  * @tc.require:
  */
-HWTEST_F(ClientTransProxyFileCommonTest, FileListToBufferTestBadInput2, TestSize.Level0)
+HWTEST_F(ClientTransProxyFileCommonTest, FileListToBufferTestBadInput2, TestSize.Level1)
 {
     FileListBuffer bufferInfo = {0};
     EXPECT_NE(0, FileListToBuffer(g_fileSet1, 0, &bufferInfo));
@@ -123,7 +123,7 @@ HWTEST_F(ClientTransProxyFileCommonTest, FileListToBufferTestBadInput2, TestSize
  * @tc.type: FUNC
  * @tc.require:
  */
-HWTEST_F(ClientTransProxyFileCommonTest, FileListToBufferTestBadInput3, TestSize.Level0)
+HWTEST_F(ClientTransProxyFileCommonTest, FileListToBufferTestBadInput3, TestSize.Level1)
 {
     EXPECT_NE(0, FileListToBuffer(g_fileSet1, sizeof(g_fileSet1) / sizeof(const char *), nullptr));
 }
@@ -134,7 +134,7 @@ HWTEST_F(ClientTransProxyFileCommonTest, FileListToBufferTestBadInput3, TestSize
  * @tc.type: FUNC
  * @tc.require:
  */
-HWTEST_F(ClientTransProxyFileCommonTest, FileListToBufferTestBadInput4, TestSize.Level0)
+HWTEST_F(ClientTransProxyFileCommonTest, FileListToBufferTestBadInput4, TestSize.Level1)
 {
     const char *fileSet[] = {
         "/dev/path/to",
@@ -155,7 +155,7 @@ HWTEST_F(ClientTransProxyFileCommonTest, FileListToBufferTestBadInput4, TestSize
  * @tc.type: FUNC
  * @tc.require:
  */
-HWTEST_F(ClientTransProxyFileCommonTest, FileListToBufferTestBadInput5, TestSize.Level0)
+HWTEST_F(ClientTransProxyFileCommonTest, FileListToBufferTestBadInput5, TestSize.Level1)
 {
     const char *fileSet[] = {"/dev/path/to", ""};
     FileListBuffer bufferInfo = {0};
@@ -168,7 +168,7 @@ HWTEST_F(ClientTransProxyFileCommonTest, FileListToBufferTestBadInput5, TestSize
  * @tc.type: FUNC
  * @tc.require:
  */
-HWTEST_F(ClientTransProxyFileCommonTest, ClinetTransProxyFilePathTest, TestSize.Level0)
+HWTEST_F(ClientTransProxyFileCommonTest, ClinetTransProxyFilePathTest, TestSize.Level1)
 {
     bool result = IsPathValid(nullptr);
     EXPECT_EQ(false, result);
@@ -230,7 +230,7 @@ HWTEST_F(ClientTransProxyFileCommonTest, ClinetTransProxyFilePathTest, TestSize.
  * @tc.type: FUNC
  * @tc.require:
  */
-HWTEST_F(ClientTransProxyFileCommonTest, ClinetTransProxyFileNameTest, TestSize.Level0)
+HWTEST_F(ClientTransProxyFileCommonTest, ClinetTransProxyFileNameTest, TestSize.Level1)
 {
     uint16_t usDataLen = 1;
     const unsigned char strTmp[] = "test";
@@ -260,7 +260,7 @@ HWTEST_F(ClientTransProxyFileCommonTest, ClinetTransProxyFileNameTest, TestSize.
  * @tc.type: FUNC
  * @tc.require:
  */
-HWTEST_F(ClientTransProxyFileCommonTest, BufferToFileListTest, TestSize.Level0)
+HWTEST_F(ClientTransProxyFileCommonTest, BufferToFileListTest, TestSize.Level1)
 {
     int32_t fileCount = 0;
     char *result = BufferToFileList(nullptr, TEST_BUFFER_SIZE, &fileCount);
@@ -283,7 +283,7 @@ HWTEST_F(ClientTransProxyFileCommonTest, BufferToFileListTest, TestSize.Level0)
  * @tc.type: FUNC
  * @tc.require:
  */
-HWTEST_F(ClientTransProxyFileCommonTest, FileLockTest, TestSize.Level0)
+HWTEST_F(ClientTransProxyFileCommonTest, FileLockTest, TestSize.Level1)
 {
     int32_t fd = TEST_NORMAL_FD;
     int32_t ret = TryFileLock(fd, SOFTBUS_F_RDLCK, 0);

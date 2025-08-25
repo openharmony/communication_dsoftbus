@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2023 Huawei Device Co., Ltd.
+ * Copyright (c) 2023-2025 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -18,14 +18,19 @@
 #include <securec.h>
 
 #include "distribute_net_ledger_mock.h"
+#include "dsoftbus_enhance_interface.h"
+#include "g_enhance_lnn_func.h"
 #include "lnn_auth_mock.h"
 #include "lnn_connection_fsm.c"
 #include "lnn_connection_fsm.h"
 #include "lnn_connection_fsm_mock.h"
+#include "lnn_connection_fsm_process.c"
+#include "lnn_connection_fsm_process.h"
 #include "lnn_devicename_info.h"
 #include "lnn_map.h"
 #include "lnn_net_builder.h"
 #include "lnn_net_ledger_mock.h"
+#include "lnn_node_info.h"
 #include "lnn_service_mock.h"
 #include "message_handler.h"
 #include "softbus_adapter_mem.h"
@@ -159,7 +164,7 @@ HWTEST_F(LNNConnectionFsmTest, LNN_SEND_JOIN_REQUEST_TO_CONNFSM_TEST_001, TestSi
     ON_CALL(serviceMock, AuthGenRequestId).WillByDefault(Return(1));
     EXPECT_CALL(authMock, AuthStartVerify).WillOnce(Return(SOFTBUS_OK)).WillRepeatedly(Return(SOFTBUS_INVALID_PARAM));
     ON_CALL(serviceMock, LnnNotifyJoinResult).WillByDefault(Return());
-    ret = LnnSendJoinRequestToConnFsm(connFsm2);
+    ret = LnnSendJoinRequestToConnFsm(connFsm2, false);
     EXPECT_TRUE(ret == SOFTBUS_OK);
     SoftBusSleepMs(1000);
 }
@@ -776,6 +781,9 @@ HWTEST_F(LNNConnectionFsmTest, UPDATE_LEAVE_TO_LEDGER_TEST_001, TestSize.Level1)
  */
 HWTEST_F(LNNConnectionFsmTest, LNN_RECOVERY_BROADCAST_KEY_TEST_001, TestSize.Level1)
 {
+    LnnEnhanceFuncList *pfnLnnEnhanceFuncList = LnnEnhanceFuncListGet();
+    pfnLnnEnhanceFuncList->lnnLoadLocalBroadcastCipherKey = LnnLoadLocalBroadcastCipherKey;
+    pfnLnnEnhanceFuncList->lnnGetLocalBroadcastCipherKey = LnnGetLocalBroadcastCipherKey;
     NiceMock<LnnConnFsmInterfaceMock> lnnConnMock;
     EXPECT_CALL(lnnConnMock, LnnLoadLocalBroadcastCipherKey)
         .WillOnce(Return(SOFTBUS_INVALID_PARAM))
@@ -804,32 +812,34 @@ HWTEST_F(LNNConnectionFsmTest, IS_WIFI_CONNECT_INFO_CHANGED_TEST_001, TestSize.L
     NiceMock<LnnNetLedgertInterfaceMock> ledgerMock;
     EXPECT_CALL(ledgerMock, LnnHasDiscoveryType).WillOnce(Return(false)).WillRepeatedly(Return(true));
     NodeInfo oldNodeInfo = {
-        .connectInfo.authPort = PORT,
-        .connectInfo.proxyPort = PORT,
-        .connectInfo.sessionPort = PORT,
+        .connectInfo.ifInfo[WLAN_IF].authPort = PORT,
+        .connectInfo.ifInfo[WLAN_IF].proxyPort = PORT,
+        .connectInfo.ifInfo[WLAN_IF].sessionPort = PORT,
     };
     NodeInfo newNodeInfo = {
-        .connectInfo.authPort = PORT,
-        .connectInfo.proxyPort = PORT,
-        .connectInfo.sessionPort = PORT,
+        .connectInfo.ifInfo[WLAN_IF].authPort = PORT,
+        .connectInfo.ifInfo[WLAN_IF].proxyPort = PORT,
+        .connectInfo.ifInfo[WLAN_IF].sessionPort = PORT,
     };
-    EXPECT_EQ(EOK, memcpy_s(oldNodeInfo.connectInfo.deviceIp, IP_STR_MAX_LEN, IP, strlen(IP)));
-    EXPECT_EQ(EOK, memcpy_s(newNodeInfo.connectInfo.deviceIp, IP_STR_MAX_LEN, IP, strlen(IP)));
-    bool ret = IsWifiConnectInfoChanged(&oldNodeInfo, &newNodeInfo);
+    EXPECT_EQ(EOK, memcpy_s(oldNodeInfo.connectInfo.ifInfo[WLAN_IF].deviceIp, IP_STR_MAX_LEN, IP, strlen(IP)));
+    EXPECT_EQ(EOK, memcpy_s(newNodeInfo.connectInfo.ifInfo[WLAN_IF].deviceIp, IP_STR_MAX_LEN, IP, strlen(IP)));
+    oldNodeInfo.discoveryType = 2;
+    bool ret = IsWifiConnectInfoChanged(&oldNodeInfo, &newNodeInfo, CONNECTION_ADDR_WLAN);
     EXPECT_EQ(ret, false);
-    ret = IsWifiConnectInfoChanged(&oldNodeInfo, &newNodeInfo);
+    ret = IsWifiConnectInfoChanged(&oldNodeInfo, &newNodeInfo, CONNECTION_ADDR_WLAN);
     EXPECT_EQ(ret, false);
-    oldNodeInfo.connectInfo.sessionPort = PORT + 1;
-    ret = IsWifiConnectInfoChanged(&oldNodeInfo, &newNodeInfo);
+    oldNodeInfo.connectInfo.ifInfo[WLAN_IF].sessionPort = PORT + 1;
+    ret = IsWifiConnectInfoChanged(&oldNodeInfo, &newNodeInfo, CONNECTION_ADDR_WLAN);
     EXPECT_EQ(ret, true);
-    oldNodeInfo.connectInfo.proxyPort = PORT + 1;
-    ret = IsWifiConnectInfoChanged(&oldNodeInfo, &newNodeInfo);
+    oldNodeInfo.connectInfo.ifInfo[WLAN_IF].proxyPort = PORT + 1;
+    ret = IsWifiConnectInfoChanged(&oldNodeInfo, &newNodeInfo, CONNECTION_ADDR_WLAN);
     EXPECT_EQ(ret, true);
-    oldNodeInfo.connectInfo.authPort = PORT + 1;
-    ret = IsWifiConnectInfoChanged(&oldNodeInfo, &newNodeInfo);
+    oldNodeInfo.connectInfo.ifInfo[WLAN_IF].authPort = PORT + 1;
+    ret = IsWifiConnectInfoChanged(&oldNodeInfo, &newNodeInfo, CONNECTION_ADDR_WLAN);
     EXPECT_EQ(ret, true);
-    EXPECT_EQ(EOK, memcpy_s(oldNodeInfo.connectInfo.deviceIp, IP_STR_MAX_LEN, PEERUDID, strlen(PEERUDID)));
-    ret = IsWifiConnectInfoChanged(&oldNodeInfo, &newNodeInfo);
+    EXPECT_EQ(
+        EOK, memcpy_s(oldNodeInfo.connectInfo.ifInfo[WLAN_IF].deviceIp, IP_STR_MAX_LEN, PEERUDID, strlen(PEERUDID)));
+    ret = IsWifiConnectInfoChanged(&oldNodeInfo, &newNodeInfo, CONNECTION_ADDR_WLAN);
     EXPECT_EQ(ret, true);
 }
 

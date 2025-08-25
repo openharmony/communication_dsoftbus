@@ -45,9 +45,6 @@
 #ifndef SOFTBUS_BUS_CENTER_H
 #define SOFTBUS_BUS_CENTER_H
 
-#include <stdbool.h>
-#include <stdint.h>
-
 #include "softbus_common.h"
 
 #ifdef __cplusplus
@@ -186,6 +183,7 @@ typedef enum {
     NODE_KEY_P2P_IP_ADDRESS,         /**< P2P IP address in string format */
     NODE_KEY_DEVICE_SECURITY_LEVEL,  /**< device security level in number format */
     NODE_KEY_DEVICE_SCREEN_STATUS,   /**< device screen status in bool format */
+    NODE_KEY_STATIC_NETWORK_CAP,     /**< Static Network capability in number format */
 } NodeDeviceInfoKey;
 
 /**
@@ -202,8 +200,29 @@ typedef enum {
     BIT_WIFI_24G,   /**< Support WIFI 2.4G */
     BIT_WIFI_5G,    /**< Support WIFI 5G */
     BIT_ETH,        /**< Support ETH */
+    BIT_USB,        /**< Support USB */
+    BIT_SLE,        /**< Support SLE */
     BIT_COUNT,      /**< Invalid type */
 } NetCapability;
+
+/**
+ * @brief Enumerates supported static capabilities.
+ *
+ * @since 1.0
+ * @version 1.0
+ */
+typedef enum {
+    STATIC_CAP_BIT_BLE = 0,         /**< Support BLE */
+    STATIC_CAP_BIT_BR,              /**< Support BR */
+    STATIC_CAP_BIT_WIFI,            /**< Support WIFI */
+    STATIC_CAP_BIT_P2P,             /**< Support WIFI P2P */
+    STATIC_CAP_BIT_ENHANCED_P2P,    /**< Support WIFI ENHANCED P2P */
+    STATIC_CAP_BIT_ETH,             /**< Support ETH */
+    STATIC_CAP_BIT_USB,             /**< Support USB */
+    STATIC_CAP_BIT_SLE,             /**< Support SLE */
+    STATIC_CAP_BIT_VIRTUAL_LINK,    /**< Support VIRTUAL LINK */
+    STATIC_CAP_BIT_COUNT,           /**< Invalid type */
+} StaticNetCapability;
 
 /**
  * @brief Enumerates network types for an online device.
@@ -217,6 +236,7 @@ typedef enum {
     BIT_NETWORK_TYPE_BLE,          /**< BLE network type */
     BIT_NETWORK_TYPE_BR,           /**< BR network type */
     BIT_NETWORK_TYPE_P2P,          /**< P2P network type */
+    BIT_NETWORK_TYPE_USB = 8,      /**< USB network type */
     BIT_NETWORK_TYPE_COUNT,        /**< Invalid type */
 } NetworkType;
 
@@ -231,7 +251,7 @@ typedef enum {
     NORMAL_ACCURACY,               /**< Normal accuracy */
     HIGH_ACCURACY,                 /**< High accuracy */
     SUPER_HIGH_ACCURACY,           /**< Super high accuracy */
-    UNAVAIL_ACCURACY = 0xFFFF,     /**< Invalid accuracy */
+    UNAVAIL_ACCURACY,     /**< Invalid accuracy */
 } TimeSyncAccuracy;
 
 /**
@@ -632,7 +652,7 @@ typedef void (*OnLeaveLNNResult)(const char *networkId, int32_t retCode);
  * @since 1.0
  * @version 1.0
  */
-int32_t JoinLNN(const char *pkgName, ConnectionAddr *target, OnJoinLNNResult cb);
+int32_t JoinLNN(const char *pkgName, ConnectionAddr *target, OnJoinLNNResult cb, bool isForceJoin);
 
 /**
  * @brief Removes the current device from the LNN.
@@ -934,6 +954,23 @@ int32_t ShiftLNNGear(const char *pkgName, const char *callerId, const char *targ
  * @version 1.0
  */
 int32_t SyncTrustedRelationShip(const char *pkgName, const char *msg, uint32_t msgLen);
+
+/**
+ * @brief Set Local device display name.
+ *
+ * @param pkgName Indicates the pointer to the service package name, which can contain a maximum of 64 bytes.
+ * @param nameData Indicates the pointer to the display name, MUST be cJSON format.
+ * @param len Len Indicates the length of nameData.
+ *
+ * @return Returns <b>SOFTBUS_INVALID_PARAM</b> if parameters is null or invalid.
+ * @return Returns <b>SOFTBUS_DISCOVER_NOT_INIT</b> if the Intelligent Soft Bus client fails to be initialized.
+ * @return Returns <b>SOFTBUS_LOCK_ERR</b> if the mutex fails to be locked.
+ * @return Returns <b>SOFTBUS_OK</b> if the service subscription is successful
+ *
+ * @since 5.1
+ * @version 1.0
+ */
+int32_t SetDisplayName(const char *pkgName, const char *nameData, uint32_t len);
 #ifdef __cplusplus
 }
 #endif

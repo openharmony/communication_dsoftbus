@@ -18,11 +18,26 @@ import("./p2pv1_unittest.gni")
 wifi_direct_path = "$dsoftbus_root_path/core/connection/wifi_direct_cpp"
 wifi_direct_unit_path =
     "$dsoftbus_root_path/tests/core/connection/wifi_direct_cpp"
-ut_out_path = "dsoftbus/connection/wifi_direct_cpp/processor"
+ut_out_path = "dsoftbus/soft_bus/connection/wifi_direct_cpp/processor"
 ohos_unittest("P2pv1ProcessorTest") {
   module_out_path = ut_out_path
 
   include_dirs = processorv1_ut_include_dirs
+  include_dirs += [ "$dsoftbus_root_path/core/bus_center/service/include" ]
+
+  include_dirs += [
+    "$dsoftbus_root_path/interfaces/kits/transport",
+    "$dsoftbus_root_path/interfaces/kits/connect",
+    "$dsoftbus_root_path/interfaces/kits/lnn",
+    "$dsoftbus_root_path/interfaces/kits/lnn/enhance",
+    "$dsoftbus_root_path/core/connection/wifi_direct_cpp/dbinder",
+    "$dsoftbus_root_path/interfaces/kits/authentication",
+    "$dsoftbus_root_path/interfaces/kits/authentication/enhance",
+    "$dsoftbus_root_path/interfaces/kits/disc",
+    "$dsoftbus_root_path/interfaces/kits/adapter",
+    "$dsoftbus_root_path/core/frame/init/include",
+    "$dsoftbus_root_path/core/bus_center/ipc/include",
+  ]
 
   sources = processorv1_ut_sources
 
@@ -56,6 +71,10 @@ ohos_unittest("P2pv1ProcessorTest") {
     "hilog:libhilog",
     "hitrace:libhitracechain",
     "init:libbegetutil",
+    "ipc:ipc_single",
+    "json:nlohmann_json_static",
+    "safwk:system_ability_fwk",
+    "samgr:samgr_proxy",
     "wifi:wifi_sdk",
   ]
 }

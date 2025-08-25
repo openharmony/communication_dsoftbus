@@ -106,5 +106,22 @@ int32_t SoftBusCheckDmsServerPermission(uint64_t tokenId)
 {
     return GetSoftbusServerStubTestInterface()->SoftBusCheckDmsServerPermission(tokenId);
 }
+bool SoftBusCheckIsSystemApp(uint64_t tokenId, const char *sessionName)
+{
+    return GetSoftbusServerStubTestInterface()->SoftBusCheckIsSystemApp(tokenId, sessionName);
+}
+bool SoftBusCheckIsNormalApp(uint64_t fullTokenId, const char *sessionName)
+{
+    return GetSoftbusServerStubTestInterface()->SoftBusCheckIsNormalApp(fullTokenId, sessionName);
+}
+int32_t CheckLnnPermission(const char *interfaceName, const char *processName)
+{
+    return GetSoftbusServerStubTestInterface()->CheckLnnPermission(interfaceName, processName);
+}
+
+int32_t UnregChangeListener(const char *appId)
+{
+    return GetSoftbusServerStubTestInterface()->UnregChangeListener(appId);
+}
 }
 }

@@ -41,8 +41,8 @@ public:
     virtual int32_t SoftBusThreadCreate(
         SoftBusThread *thread, SoftBusThreadAttr *threadAttr, void *(*threadEntry) (void *), void *arg) = 0;
     virtual int32_t SoftbusGetConfig(ConfigType type, unsigned char *val, uint32_t len) = 0;
-    virtual SppSocketDriver *InitSppSocketDriver() = 0;
-    virtual int32_t SoftBusAddBtStateListener(const SoftBusBtStateListener *listener) = 0;
+    virtual SppSocketDriver *InitSppSocketDriver(void) = 0;
+    virtual int32_t SoftBusAddBtStateListener(const SoftBusBtStateListener *listener, int32_t *listenerId) = 0;
     virtual uint32_t ConnGetHeadSize(void) = 0;
     virtual int32_t ConnBrOnAckRequest(ConnBrConnection *connection, const cJSON *json) = 0;
     virtual int32_t ConnBrOnAckResponse(ConnBrConnection *connection, const cJSON *json) = 0;
@@ -54,6 +54,7 @@ public:
     virtual int32_t ConnBrDequeueBlock(void **msg) = 0;
     virtual int32_t ConnBrCreateBrPendingPacket(uint32_t id, int64_t seq) = 0;
     virtual void ConnBrDelBrPendingPacket(uint32_t id, int64_t seq) = 0;
+    virtual void ConnBrDelBrPendingPacketById(uint32_t id) = 0;
     virtual int32_t ConnBrGetBrPendingPacket(uint32_t id, int64_t seq, uint32_t waitMillis, void **data) = 0;
     virtual int32_t ConnBrInnerQueueInit(void) = 0;
     virtual void ConnBrInnerQueueDeinit(void) = 0;
@@ -61,6 +62,7 @@ public:
     virtual uint32_t ConnGetNewRequestId(ConnModule moduleId) = 0;
     virtual int32_t ConnBleKeepAlive(uint32_t connectionId, uint32_t requestId, uint32_t time) = 0;
     virtual int32_t ConnBleRemoveKeepAlive(uint32_t connectionId, uint32_t requestId) = 0;
+    virtual int32_t BrHiDumperRegister(void) = 0;
 };
 
 class ConnectionBrInterfaceMock : public ConnectionBrInterface {
@@ -72,7 +74,7 @@ public:
     MOCK_METHOD4(SoftBusThreadCreate, int32_t(SoftBusThread *, SoftBusThreadAttr *, void *(void *), void *));
     MOCK_METHOD3(SoftbusGetConfig, int(ConfigType, unsigned char *, uint32_t));
     MOCK_METHOD0(InitSppSocketDriver, SppSocketDriver*());
-    MOCK_METHOD1(SoftBusAddBtStateListener, int(const SoftBusBtStateListener *));
+    MOCK_METHOD2(SoftBusAddBtStateListener, int(const SoftBusBtStateListener *, int32_t *));
     MOCK_METHOD0(ConnGetHeadSize, uint32_t());
     MOCK_METHOD2(ConnBrOnAckRequest, int32_t(ConnBrConnection *, const cJSON *));
     MOCK_METHOD2(ConnBrOnAckResponse, int32_t(ConnBrConnection *, const cJSON *));
@@ -83,6 +85,7 @@ public:
     MOCK_METHOD1(ConnBrDequeueBlock, int32_t(void **));
     MOCK_METHOD2(ConnBrCreateBrPendingPacket, int32_t(uint32_t, int64_t));
     MOCK_METHOD2(ConnBrDelBrPendingPacket, void(uint32_t, int64_t));
+    MOCK_METHOD1(ConnBrDelBrPendingPacketById, void(uint32_t));
     MOCK_METHOD4(ConnBrGetBrPendingPacket, int32_t(uint32_t, int64_t, uint32_t, void **));
     MOCK_METHOD0(ConnBrInnerQueueInit, int32_t());
     MOCK_METHOD0(ConnBrInnerQueueDeinit, void());
@@ -90,6 +93,7 @@ public:
     MOCK_METHOD1(ConnGetNewRequestId, uint32_t(ConnModule));
     MOCK_METHOD3(ConnBleKeepAlive, int32_t(uint32_t, uint32_t, uint32_t));
     MOCK_METHOD2(ConnBleRemoveKeepAlive, int32_t(uint32_t, uint32_t));
+    MOCK_METHOD(int32_t, BrHiDumperRegister, (), (override));
 
     static int32_t ActionOfSoftbusGetConfig1(ConfigType type, unsigned char *val, uint32_t len);
     static int32_t ActionOfSoftbusGetConfig2(ConfigType type, unsigned char *val, uint32_t len);

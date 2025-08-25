@@ -16,8 +16,6 @@
 #ifndef NSTACKX_FILE_LIST_H
 #define NSTACKX_FILE_LIST_H
 
-#include <stdint.h>
-#include <stdio.h>
 #include "nstackx_dfile.h"
 #include "nstackx_list.h"
 #ifdef __cplusplus

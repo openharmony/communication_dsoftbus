@@ -15,32 +15,24 @@
 
 #include "lnn_netmanager_monitor.h"
 
-#include <cstring>
-#include <ctime>
-#include <regex>
-#include <securec.h>
+#include <linux/if_addr.h>
 
 #include "anonymizer.h"
-#include "bus_center_event.h"
 #include "bus_center_manager.h"
 #include "lnn_async_callback_utils.h"
 #include "lnn_event_monitor_impl.h"
-#include "lnn_local_net_ledger.h"
 #include "lnn_log.h"
 #include "lnn_net_capability.h"
 #include "net_conn_client.h"
 #include "net_interface_callback_stub.h"
-#include "softbus_adapter_file.h"
-#include "softbus_adapter_mem.h"
 #include "softbus_adapter_thread.h"
-#include "softbus_bus_center.h"
-#include "softbus_config_type.h"
-#include "softbus_error_code.h"
+#include "lnn_init_monitor.h"
 
 static const int32_t DELAY_LEN = 1000;
 static const int32_t NETMANAGER_OK = 0;
 static const int32_t DUPLICATE_ROUTE = -17;
 static const int32_t MAX_RETRY_COUNT = 20;
+static constexpr int IPV6_PREFIX = 64;
 
 namespace OHOS {
 namespace BusCenter {
@@ -62,7 +54,6 @@ public:
 
 static int32_t g_ethCount;
 static SoftBusMutex g_ethCountLock;
-static int32_t g_retry = 0;
 static OHOS::sptr<OHOS::NetManagerStandard::INetInterfaceStateCallback> g_netlinkCallback = nullptr;
 
 NetInterfaceStateMonitor::NetInterfaceStateMonitor()
@@ -70,18 +61,22 @@ NetInterfaceStateMonitor::NetInterfaceStateMonitor()
 
 int32_t NetInterfaceStateMonitor::OnInterfaceAdded(const std::string &ifName)
 {
+    LNN_LOGD(LNN_BUILDER, "enter OnInterfaceAdded, ifname = %{public}s", ifName.c_str());
     LnnNotifyNetlinkStateChangeEvent(SOFTBUS_NETMANAGER_IFNAME_ADDED, ifName.c_str());
     return SOFTBUS_OK;
 }
 
 int32_t NetInterfaceStateMonitor::OnInterfaceRemoved(const std::string &ifName)
 {
+    LNN_LOGD(LNN_BUILDER, "enter OnInterfaceRemoved, ifname = %{public}s", ifName.c_str());
     LnnNotifyNetlinkStateChangeEvent(SOFTBUS_NETMANAGER_IFNAME_REMOVED, ifName.c_str());
     return SOFTBUS_OK;
 }
 
 int32_t NetInterfaceStateMonitor::OnInterfaceChanged(const std::string &ifName, bool isUp)
 {
+    LNN_LOGD(LNN_BUILDER, "enter OnInterfaceChanged, ifname = %{public}s, isUp=%{public}s",
+        ifName.c_str(), isUp ? "true" : "false");
     return SOFTBUS_OK;
 }
 
@@ -138,6 +133,10 @@ int32_t NetInterfaceStateMonitor::OnInterfaceAddressUpdated(
     Anonymize(addr.c_str(), &anonyAddr);
     LNN_LOGI(LNN_BUILDER, "ifName=%{public}s, addr=%{public}s", ifName.c_str(), AnonymizeWrapper(anonyAddr));
     AnonymizeFree(anonyAddr);
+    if (((uint32_t)flags & IFA_F_TENTATIVE) == 0 && addr.find("fe80") != std::string::npos) {
+        LnnNotifyNetlinkStateChangeEvent(SOFTBUS_NETMANAGER_IFNAME_IPV6_UPDATED, ifName.c_str());
+        return SOFTBUS_OK;
+    }
     if (strstr(ifName.c_str(), "eth") == NULL) {
         return SOFTBUS_INVALID_PARAM;
     }
@@ -174,6 +173,8 @@ int32_t NetInterfaceStateMonitor::OnInterfaceAddressUpdated(
 int32_t NetInterfaceStateMonitor::OnInterfaceAddressRemoved(
     const std::string &addr, const std::string &ifName, int32_t flags, int32_t scope)
 {
+    LNN_LOGD(LNN_BUILDER, "enter OnInterfaceAddressRemoved, ifname=%{public}s, flags=%{public}d",
+        ifName.c_str(), flags);
     return SOFTBUS_OK;
 }
 } // namespace BusCenter
@@ -224,49 +225,51 @@ int32_t ConfigRoute(const int32_t id, const char *ifName, const char *destinatio
     return SOFTBUS_OK;
 }
 
-static void LnnRegisterNetManager(void *param)
+int32_t ConfigLocalIpv6(const char *ifName, const char *localIpv6)
 {
-    (void)param;
-    if (OHOS::BusCenter::g_retry >= MAX_RETRY_COUNT) {
-        LNN_LOGE(LNN_INIT, "retry is max size");
-        if (OHOS::BusCenter::g_netlinkCallback != nullptr) {
-            delete (OHOS::BusCenter::g_netlinkCallback);
-            OHOS::BusCenter::g_netlinkCallback = nullptr;
-        }
-        return;
+    if (ifName == nullptr || localIpv6 == nullptr) {
+        LNN_LOGE(LNN_BUILDER, "invalid param");
+        return SOFTBUS_INVALID_PARAM;
     }
-    if (OHOS::BusCenter::g_netlinkCallback == nullptr) {
-        OHOS::BusCenter::g_netlinkCallback = new (std::nothrow) OHOS::BusCenter::NetInterfaceStateMonitor();
+    int32_t ret =
+        OHOS::NetManagerStandard::NetConnClient::GetInstance().AddInterfaceAddress(ifName, localIpv6, IPV6_PREFIX);
+    if (ret != NETMANAGER_OK && ret != DUPLICATE_ROUTE) {
+        LNN_LOGE(LNN_BUILDER, "config net interface %{public}s ipv6 failed with ret=%{public}d", ifName, ret);
+        return SOFTBUS_NETWORK_CONFIG_NETLINK_IPV6_FAILED;
     }
-    if (OHOS::BusCenter::g_netlinkCallback == nullptr) {
+    return SOFTBUS_OK;
+}
+
+static int32_t LnnRegisterNetManager(void)
+{
+    OHOS::sptr<OHOS::NetManagerStandard::INetInterfaceStateCallback> netlinkCallback =
+        new (std::nothrow) OHOS::BusCenter::NetInterfaceStateMonitor();
+    if (netlinkCallback == nullptr) {
         LNN_LOGE(LNN_INIT, "new NetInterfaceStateMonitor failed");
-        LnnAsyncCallbackDelayHelper(GetLooper(LOOP_TYPE_DEFAULT), LnnRegisterNetManager, NULL, DELAY_LEN);
-        ++OHOS::BusCenter::g_retry;
-        return;
+        return SOFTBUS_MEM_ERR;
     }
+
     OHOS::BusCenter::g_ethCount = 0;
     if (SoftBusMutexInit(&OHOS::BusCenter::g_ethCountLock, nullptr) != SOFTBUS_OK) {
         LNN_LOGE(LNN_INIT, "init g_ethCountLock fail");
-        LnnAsyncCallbackDelayHelper(GetLooper(LOOP_TYPE_DEFAULT), LnnRegisterNetManager, NULL, DELAY_LEN);
-        ++OHOS::BusCenter::g_retry;
-        return;
+        delete (netlinkCallback);
+        return SOFTBUS_NETWORK_REGISTER_SERVICE_FAILED;
     }
-    int32_t ret = OHOS::NetManagerStandard::NetConnClient::GetInstance().RegisterNetInterfaceCallback(
-        OHOS::BusCenter::g_netlinkCallback);
+    int32_t ret = OHOS::NetManagerStandard::NetConnClient::GetInstance().RegisterNetInterfaceCallback(netlinkCallback);
     if (ret != NETMANAGER_OK) {
         SoftBusMutexDestroy(&OHOS::BusCenter::g_ethCountLock);
         LNN_LOGE(LNN_INIT, "register netmanager callback failed with ret=%{public}d", ret);
-        LnnAsyncCallbackDelayHelper(GetLooper(LOOP_TYPE_DEFAULT), LnnRegisterNetManager, NULL, DELAY_LEN);
-        ++OHOS::BusCenter::g_retry;
-        return;
+        return SOFTBUS_NETWORK_REGISTER_SERVICE_FAILED;
     }
     LNN_LOGI(LNN_INIT, "LnnRegisterNetManager succ");
+    OHOS::BusCenter::g_netlinkCallback = netlinkCallback;
+    return SOFTBUS_OK;
 }
 
 int32_t LnnInitNetManagerMonitorImpl(void)
 {
-    SoftBusLooper *looper = GetLooper(LOOP_TYPE_DEFAULT);
-    int32_t ret = LnnAsyncCallbackDelayHelper(looper, LnnRegisterNetManager, NULL, DELAY_LEN);
+    int32_t ret = LnnInitModuleNotifyWithRetryAsync(INIT_DEPS_USB, LnnRegisterNetManager, MAX_RETRY_COUNT,
+        DELAY_LEN, true);
     if (ret != SOFTBUS_OK) {
         LNN_LOGE(LNN_INIT, "LnnAsyncCallbackDelayHelper fail");
         return SOFTBUS_NETWORK_MONITOR_INIT_FAIL;
@@ -277,7 +280,6 @@ int32_t LnnInitNetManagerMonitorImpl(void)
 void LnnDeinitNetManagerMonitorImpl(void)
 {
     if (OHOS::BusCenter::g_netlinkCallback != nullptr) {
-        delete (OHOS::BusCenter::g_netlinkCallback);
         OHOS::BusCenter::g_netlinkCallback = nullptr;
     }
     (void)SoftBusMutexDestroy(&OHOS::BusCenter::g_ethCountLock);

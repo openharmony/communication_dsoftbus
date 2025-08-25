@@ -483,10 +483,12 @@ struct LoopConfigItem {
     SoftBusLooper *looper;
 };
 
-static struct LoopConfigItem g_loopConfig[] = {
+struct LoopConfigItem g_loopConfig[] = {
     {LOOP_TYPE_DEFAULT, NULL},
     {LOOP_TYPE_CONN, NULL},
-    {LOOP_TYPE_LNN, NULL}
+    {LOOP_TYPE_LNN, NULL},
+    {LOOP_TYPE_DISC, NULL},
+    {LOOP_TYPE_LANE, NULL},
 };
 
 SoftBusLooper *GetLooper(int type)

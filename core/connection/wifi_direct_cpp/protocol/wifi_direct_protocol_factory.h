@@ -15,7 +15,6 @@
 #ifndef WIFI_DIRECT_PROTOCOL_FACTORY_H
 #define WIFI_DIRECT_PROTOCOL_FACTORY_H
 
-#include <memory>
 #include "json_protocol.h"
 #include "tlv_protocol.h"
 

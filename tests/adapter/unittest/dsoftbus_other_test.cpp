@@ -75,10 +75,10 @@ HWTEST_F(AdapterDsoftbusOtherTest, GetNetworkIpByIfName002, TestSize.Level0)
     char netmask[] = "abcdefd";
     char ip[32] = "0";
     int32_t len = 10;
-    int32_t ret = GetNetworkIpByIfName(NULL, ip, netmask, len);
+    int32_t ret = GetNetworkIpByIfName(nullptr, ip, netmask, len);
     EXPECT_EQ(SOFTBUS_INVALID_PARAM, ret);
 
-    ret = GetNetworkIpByIfName(ifName, NULL, netmask, len);
+    ret = GetNetworkIpByIfName(ifName, nullptr, netmask, len);
     EXPECT_EQ(SOFTBUS_INVALID_PARAM, ret);
 }
 
@@ -93,8 +93,92 @@ HWTEST_F(AdapterDsoftbusOtherTest, GetNetworkIpByIfName003, TestSize.Level0)
     const char *ifName = "abcdefgh";
     char ip[32] = "0";
     int32_t len = 10;
-    int32_t ret = GetNetworkIpByIfName(ifName, ip, NULL, len);
+    int32_t ret = GetNetworkIpByIfName(ifName, ip, nullptr, len);
     EXPECT_EQ(SOFTBUS_NETWORK_IOCTL_FAIL, ret);
+}
+
+/*
+ * @tc.name: GetNetworkIpv6ByIfName001
+ * @tc.desc: ifname is nullptr
+ * @tc.type: FUNC
+ * @tc.require: 1
+ */
+HWTEST_F(AdapterDsoftbusOtherTest, GetNetworkIpv6ByIfName001, TestSize.Level1)
+{
+    char ip[46] = "0";
+    uint32_t len = 46;
+    int32_t ret = GetNetworkIpv6ByIfName(nullptr, ip, len);
+    EXPECT_EQ(SOFTBUS_INVALID_PARAM, ret);
+}
+
+/*
+ * @tc.name: GetNetworkIpv6ByIfName002
+ * @tc.desc: ip is nullptr
+ * @tc.type: FUNC
+ * @tc.require: 1
+ */
+HWTEST_F(AdapterDsoftbusOtherTest, GetNetworkIpv6ByIfName002, TestSize.Level1)
+{
+    const char *ifName = "wlan0";
+    uint32_t len = 46;
+    int32_t ret = GetNetworkIpv6ByIfName(ifName, nullptr, len);
+    EXPECT_EQ(SOFTBUS_INVALID_PARAM, ret);
+}
+
+/*
+ * @tc.name: GetNetworkIpv6ByIfName003
+ * @tc.desc: len is illegal
+ * @tc.type: FUNC
+ * @tc.require: 1
+ */
+HWTEST_F(AdapterDsoftbusOtherTest, GetNetworkIpv6ByIfName003, TestSize.Level1)
+{
+    const char *ifName = "wlan0";
+    char ip[46] = "0";
+    uint32_t len = 40;
+    int32_t ret = GetNetworkIpv6ByIfName(ifName, ip, len);
+    EXPECT_EQ(SOFTBUS_INVALID_PARAM, ret);
+}
+
+/*
+ * @tc.name: GetNetworkIpv6ByIfName004
+ * @tc.desc: ifname is illegal
+ * @tc.type: FUNC
+ * @tc.require: 1
+ */
+HWTEST_F(AdapterDsoftbusOtherTest, GetNetworkIpv6ByIfName004, TestSize.Level1)
+{
+    const char *ifName = "abcde";
+    char ip[46] = "0";
+    uint32_t len = 46;
+    int32_t ret = GetNetworkIpv6ByIfName(ifName, ip, len);
+    EXPECT_EQ(SOFTBUS_NETWORK_GET_IP_ADDR_FAILED, ret);
+}
+
+/*
+ * @tc.name: GetLinkUpStateByIfName001
+ * @tc.desc: ifname is nullptr
+ * @tc.type: FUNC
+ * @tc.require: 1
+ */
+HWTEST_F(AdapterDsoftbusOtherTest, GetLinkUpStateByIfName001, TestSize.Level1)
+{
+    const char *ifName = nullptr;
+    bool ret = GetLinkUpStateByIfName(ifName);
+    EXPECT_FALSE(ret);
+}
+
+/*
+ * @tc.name: GetLinkUpStateByIfName002
+ * @tc.desc: ifname is illegal
+ * @tc.type: FUNC
+ * @tc.require: 1
+ */
+HWTEST_F(AdapterDsoftbusOtherTest, GetLinkUpStateByIfName002, TestSize.Level1)
+{
+    const char *ifName = "abcde";
+    bool ret = GetLinkUpStateByIfName(ifName);
+    EXPECT_FALSE(ret);
 }
 
 /**
@@ -215,7 +299,7 @@ HWTEST_F(AdapterDsoftbusOtherTest, SoftBusMallocTest001, TestSize.Level0)
 HWTEST_F(AdapterDsoftbusOtherTest, SoftBusMallocTest002, TestSize.Level0)
 {
     void *ret = SoftBusMalloc(MAX_MALLOC_SIZE + 1);
-    EXPECT_EQ(NULL, ret);
+    EXPECT_EQ(nullptr, ret);
 }
 
 /**
@@ -227,7 +311,7 @@ HWTEST_F(AdapterDsoftbusOtherTest, SoftBusMallocTest002, TestSize.Level0)
 HWTEST_F(AdapterDsoftbusOtherTest, SoftBusMallocTest003, TestSize.Level0)
 {
     void *ret = SoftBusMalloc(-1);
-    EXPECT_EQ(NULL, ret);
+    EXPECT_EQ(nullptr, ret);
 }
 
 /**
@@ -291,7 +375,7 @@ HWTEST_F(AdapterDsoftbusOtherTest, SoftBusCallocTest002, TestSize.Level0)
 HWTEST_F(AdapterDsoftbusOtherTest, SoftBusCallocTest003, TestSize.Level0)
 {
     void *ret = SoftBusCalloc(-1);
-    EXPECT_EQ(NULL, ret);
+    EXPECT_EQ(nullptr, ret);
 }
 
 /**
@@ -303,7 +387,7 @@ HWTEST_F(AdapterDsoftbusOtherTest, SoftBusCallocTest003, TestSize.Level0)
 HWTEST_F(AdapterDsoftbusOtherTest, SoftBusCallocTest004, TestSize.Level0)
 {
     void *ret = SoftBusCalloc(MAX_MALLOC_SIZE + 1);
-    EXPECT_EQ(NULL, ret);
+    EXPECT_EQ(nullptr, ret);
 }
 
 } // namespace OHOS

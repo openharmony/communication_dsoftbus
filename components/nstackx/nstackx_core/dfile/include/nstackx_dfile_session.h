@@ -17,10 +17,8 @@
 #define NSTACKX_DFILE_SESSION_H
 #include "nstackx_event.h"
 #include "nstackx_socket.h"
-#include "nstackx_file_manager.h"
 #include "nstackx_dfile_transfer.h"
 #include "nstackx_dfile_private.h"
-#include "nstackx_timer.h"
 #ifdef __cplusplus
 extern "C" {
 #endif

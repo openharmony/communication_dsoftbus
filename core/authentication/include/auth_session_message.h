@@ -16,12 +16,10 @@
 #ifndef AUTH_MESSAGE_H
 #define AUTH_MESSAGE_H
 
-#include <stdint.h>
-#include <stdbool.h>
-
 #include "auth_manager.h"
 #include "auth_session_fsm.h"
 #include "softbus_json_utils.h"
+#include "auth_session_message_struct.h"
 
 #ifdef __cplusplus
 #if __cplusplus
@@ -29,32 +27,13 @@ extern "C" {
 #endif
 #endif
 
-typedef struct {
-    const char *msg;
-    uint32_t len;
-    int32_t linkType;
-    SoftBusVersion version;
-} DevInfoData;
-
-#define UDID_SHORT_HASH_HEX_STR 16
-#define UDID_SHORT_HASH_LEN_TEMP 8
-/* DeviceInfo-common */
-#define CODE "CODE"
-/* VerifyDevice */
-#define CODE_VERIFY_DEVICE 2
-#define DEVICE_ID "DEVICE_ID"
-
-/* TcpKeepalive */
-#define TIME "TIME"
-#define CODE_TCP_KEEPALIVE 3
-
 char *PackDeviceInfoMessage(const AuthConnInfo *connInfo, SoftBusVersion version, bool isMetaAuth,
     const char *remoteUuid, const AuthSessionInfo *info);
 int32_t UnpackDeviceInfoMessage(const DevInfoData *devInfo, NodeInfo *nodeInfo, bool isMetaAuth,
     const AuthSessionInfo *info);
 
 int32_t PostDeviceIdMessage(int64_t authSeq, const AuthSessionInfo *info);
-int32_t ProcessDeviceIdMessage(AuthSessionInfo *info, const uint8_t *data, uint32_t len);
+int32_t ProcessDeviceIdMessage(AuthSessionInfo *info, const uint8_t *data, uint32_t len, int64_t authSeq);
 
 int32_t PostDeviceInfoMessage(int64_t authSeq, const AuthSessionInfo *info);
 int32_t ProcessDeviceInfoMessage(int64_t authSeq, AuthSessionInfo *info, const uint8_t *data, uint32_t len);
@@ -66,6 +45,7 @@ int32_t PostDeviceMessage(
 bool IsDeviceMessagePacket(const AuthConnInfo *connInfo, const AuthDataHead *head, const uint8_t *data, bool isServer,
     DeviceMessageParse *messageParse);
 int32_t UpdateLocalAuthState(int64_t authSeq, AuthSessionInfo *info);
+int32_t TryUpdateLaneResourceLaneId(AuthSessionInfo *info);
 
 #ifdef __cplusplus
 #if __cplusplus

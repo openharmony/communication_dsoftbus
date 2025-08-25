@@ -19,11 +19,11 @@
 
 #include "bus_center_event.h"
 #include "bus_center_manager.h"
-#include "lnn_decision_center.h"
 #include "lnn_heartbeat_ctrl.h"
 #include "message_handler.h"
 #include "softbus_access_token_test.h"
 #include "softbus_bus_center.h"
+#include "softbus_client_frame_manager.h"
 #include "softbus_error_code.h"
 
 namespace OHOS {
@@ -40,26 +40,29 @@ public:
     void TearDown();
 };
 
-void BusCenterHeartbeatSdkTest::SetUpTestCase()
+void BusCenterHeartbeatSdkTest::SetUpTestCase() { }
+
+void BusCenterHeartbeatSdkTest::TearDownTestCase() { }
+
+void BusCenterHeartbeatSdkTest::SetUp()
 {
-    SetAceessTokenPermission("busCenterTest");
+    SetAccessTokenPermission("device_manager");
+    EXPECT_EQ(InitSoftBus(TEST_PKG_NAME1), SOFTBUS_OK);
+    uint64_t tokenId = SetTokenIdByProcessName("device_manager");
+    printf("SetTokenIdByProcessName tokenId:%ju\n", tokenId);
     LnnInitLnnLooper();
     LooperInit();
     LnnInitBusCenterEvent();
     LnnInitHeartbeat();
 }
 
-void BusCenterHeartbeatSdkTest::TearDownTestCase()
+void BusCenterHeartbeatSdkTest::TearDown()
 {
     LnnDeinitHeartbeat();
     LnnDeinitBusCenterEvent();
     LooperDeinit();
     LnnDeinitLnnLooper();
 }
-
-void BusCenterHeartbeatSdkTest::SetUp() { }
-
-void BusCenterHeartbeatSdkTest::TearDown() { }
 
 /*
  * @tc.name: Shift_Lnn_Gear_Test_001
@@ -85,22 +88,22 @@ HWTEST_F(BusCenterHeartbeatSdkTest, Shift_Lnn_Gear_Test_001, TestSize.Level1)
     GearMode mode4 = { .cycle = HIGH_FREQ_CYCLE, .duration = NORMAL_DURATION, .wakeupFlag = true };
     GearMode mode5 = { .cycle = MID_FREQ_CYCLE, .duration = LONG_DURATION, .wakeupFlag = false };
 
-    int32_t ret = ShiftLNNGear(TEST_PKG_NAME1, callerId1, NULL, &mode1);
+    int32_t ret = ShiftLNNGear(TEST_PKG_NAME1, callerId1, nullptr, &mode1);
     if (ret != SOFTBUS_NOT_IMPLEMENT) {
         EXPECT_EQ(ShiftLNNGear(TEST_PKG_NAME1, callerId1, networkId1, &mode1), SOFTBUS_INVALID_PARAM);
         EXPECT_EQ(ShiftLNNGear(TEST_PKG_NAME1, callerId1, networkId2, &mode1), SOFTBUS_INVALID_PARAM);
-        EXPECT_EQ(ShiftLNNGear(TEST_PKG_NAME1, callerId1, NULL, &mode1), SOFTBUS_OK);
-        EXPECT_EQ(ShiftLNNGear(TEST_PKG_NAME2, callerId1, NULL, &mode1), SOFTBUS_OK);
-        EXPECT_EQ(ShiftLNNGear(NULL, callerId1, NULL, &mode1), SOFTBUS_INVALID_PARAM);
-        EXPECT_EQ(ShiftLNNGear(TEST_PKG_NAME1, callerId1, NULL, NULL), SOFTBUS_INVALID_PARAM);
+        EXPECT_EQ(ShiftLNNGear(TEST_PKG_NAME1, callerId1, nullptr, &mode1), SOFTBUS_OK);
+        EXPECT_EQ(ShiftLNNGear(TEST_PKG_NAME2, callerId1, nullptr, &mode1), SOFTBUS_OK);
+        EXPECT_EQ(ShiftLNNGear(nullptr, callerId1, nullptr, &mode1), SOFTBUS_INVALID_PARAM);
+        EXPECT_EQ(ShiftLNNGear(TEST_PKG_NAME1, callerId1, nullptr, nullptr), SOFTBUS_INVALID_PARAM);
 
-        EXPECT_EQ(ShiftLNNGear(TEST_PKG_NAME1, callerId1, NULL, &mode2), SOFTBUS_OK);
-        EXPECT_EQ(ShiftLNNGear(TEST_PKG_NAME1, callerId2, NULL, &mode2), SOFTBUS_OK);
-        EXPECT_EQ(ShiftLNNGear(TEST_PKG_NAME1, callerId3, NULL, &mode3), SOFTBUS_OK);
-        EXPECT_EQ(ShiftLNNGear(TEST_PKG_NAME1, callerId4, NULL, &mode4), SOFTBUS_OK);
-        EXPECT_EQ(ShiftLNNGear(TEST_PKG_NAME1, callerId5, NULL, &mode5), SOFTBUS_OK);
-        EXPECT_EQ(ShiftLNNGear(TEST_PKG_NAME1, callerId6, NULL, &mode5), SOFTBUS_INVALID_PARAM);
-        EXPECT_EQ(ShiftLNNGear(TEST_PKG_NAME1, callerId7, NULL, &mode5), SOFTBUS_INVALID_PARAM);
+        EXPECT_EQ(ShiftLNNGear(TEST_PKG_NAME1, callerId1, nullptr, &mode2), SOFTBUS_OK);
+        EXPECT_EQ(ShiftLNNGear(TEST_PKG_NAME1, callerId2, nullptr, &mode2), SOFTBUS_OK);
+        EXPECT_EQ(ShiftLNNGear(TEST_PKG_NAME1, callerId3, nullptr, &mode3), SOFTBUS_OK);
+        EXPECT_EQ(ShiftLNNGear(TEST_PKG_NAME1, callerId4, nullptr, &mode4), SOFTBUS_OK);
+        EXPECT_EQ(ShiftLNNGear(TEST_PKG_NAME1, callerId5, nullptr, &mode5), SOFTBUS_OK);
+        EXPECT_EQ(ShiftLNNGear(TEST_PKG_NAME1, callerId6, nullptr, &mode5), SOFTBUS_INVALID_PARAM);
+        EXPECT_EQ(ShiftLNNGear(TEST_PKG_NAME1, callerId7, nullptr, &mode5), SOFTBUS_INVALID_PARAM);
     }
 }
 } // namespace OHOS

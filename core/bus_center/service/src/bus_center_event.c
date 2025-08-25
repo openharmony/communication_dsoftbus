@@ -20,11 +20,13 @@
 
 #include "anonymizer.h"
 #include "bus_center_decision_center.h"
-#include "bus_center_event.h"
 #include "bus_center_manager.h"
+#include "g_enhance_lnn_func.h"
+#include "g_enhance_lnn_func_pack.h"
+#include "g_enhance_trans_func.h"
+#include "g_enhance_trans_func_pack.h"
 #include "lnn_bus_center_ipc.h"
-#include "lnn_cipherkey_manager.h"
-#include "lnn_device_info_recovery.h"
+#include "lnn_connId_callback_manager.h"
 #include "lnn_distributed_net_ledger.h"
 #include "lnn_log.h"
 #include "lnn_network_id.h"
@@ -36,7 +38,8 @@
 #include "softbus_adapter_thread.h"
 #include "softbus_def.h"
 #include "softbus_error_code.h"
-#include "softbus_qos.h"
+#include "softbus_init_common.h"
+#include "trans_log.h"
 
 typedef struct {
     ListNode node;
@@ -56,6 +59,7 @@ typedef enum {
     NOTIFY_NETWORKID_UPDATE,
     NOTIFY_LOCAL_NETWORKID_UPDATE,
     NOTIFY_DEVICE_TRUSTED_CHANGED,
+    NOTIFY_STATE_SESSION,
 } NotifyType;
 
 #define NETWORK_ID_UPDATE_DELAY_TIME (60 * 60 * 1000 * 24) // 24 hour
@@ -156,8 +160,18 @@ static void HandleNetworkUpdateMessage(SoftBusMessage *msg)
     LnnSetLocalStrInfo(STRING_KEY_NETWORKID, networkId);
     LnnNotifyNetworkIdChangeEvent(networkId);
     LnnNotifyLocalNetworkIdChanged();
-    LnnUpdateAuthExchangeUdid();
+    LnnUpdateAuthExchangeUdidPacked();
     LNN_LOGD(LNN_EVENT, "offline exceted 5min, process networkId update event");
+}
+
+static void HandleStateSessionMessage(SoftBusMessage *msg)
+{
+    if (msg->obj == NULL) {
+        LNN_LOGE(LNN_EVENT, "invalid state session message");
+        return;
+    }
+    int32_t retCode = (int32_t)msg->arg1;
+    InvokeCallbackForJoinExt((const char *)msg->obj, retCode);
 }
 
 static void HandleNotifyMessage(SoftBusMessage *msg)
@@ -185,6 +199,9 @@ static void HandleNotifyMessage(SoftBusMessage *msg)
             break;
         case NOTIFY_DEVICE_TRUSTED_CHANGED:
             HandleDeviceTrustedChangedMessage(msg);
+            break;
+        case NOTIFY_STATE_SESSION:
+            HandleStateSessionMessage(msg);
             break;
         default:
             LNN_LOGE(LNN_EVENT, "unknown notify msgType=%{public}d", msg->what);
@@ -336,6 +353,41 @@ static int32_t PostNotifyMessageDelay(int32_t what, uint64_t delayMillis)
     return PostMessageToHandlerDelay(msg, delayMillis);
 }
 
+static char *DupUdid(char *udid)
+{
+    if (udid == NULL) {
+        LNN_LOGW(LNN_EVENT, "udid is null");
+        return NULL;
+    }
+    int32_t len = strlen(udid) + 1;
+    char *dupMsg = SoftBusCalloc(len);
+    if (dupMsg == NULL) {
+        LNN_LOGE(LNN_EVENT, "malloc dupMsg err");
+        return NULL;
+    }
+    if (strcpy_s(dupMsg, len, udid) != EOK) {
+        LNN_LOGE(LNN_EVENT, "copy dupMsg fail");
+        SoftBusFree(dupMsg);
+        return NULL;
+    }
+    return dupMsg;
+}
+
+static int32_t PostNotifyMessageWithUdid(int32_t what, char *udid, uint64_t arg1)
+{
+    SoftBusMessage *msg = SoftBusCalloc(sizeof(SoftBusMessage));
+    if (msg == NULL) {
+        LNN_LOGE(LNN_EVENT, "malloc msg fail");
+        return SOFTBUS_MALLOC_ERR;
+    }
+    msg->what = what;
+    msg->arg1 = arg1;
+    msg->obj = DupUdid(udid);
+    msg->handler = &g_notifyHandler;
+    msg->FreeMessage = FreeNotifyMessage;
+    return PostMessageToHandlerDelay(msg, 0);
+}
+
 static bool IsRepeatEventHandler(LnnEventType event, LnnEventHandler handler)
 {
     LnnEventHandlerItem *item = NULL;
@@ -432,13 +484,13 @@ void LnnNotifyOnlineState(bool isOnline, NodeBasicInfo *info)
     char *anonyNetworkId = NULL;
     Anonymize(info->networkId, &anonyNetworkId);
     char *anonyDeviceName = NULL;
-    Anonymize(info->deviceName, &anonyDeviceName);
+    AnonymizeDeviceName(info->deviceName, &anonyDeviceName);
     LNN_LOGI(LNN_EVENT, "notify node. deviceName=%{public}s, isOnline=%{public}s, networkId=%{public}s",
         AnonymizeWrapper(anonyDeviceName), (isOnline == true) ? "online" : "offline",
         AnonymizeWrapper(anonyNetworkId));
     AnonymizeFree(anonyNetworkId);
     AnonymizeFree(anonyDeviceName);
-    SetDefaultQdisc();
+    SetDefaultQdiscPacked();
     (void)PostNotifyMessage(NOTIFY_ONLINE_STATE_CHANGED, (uint64_t)isOnline, info);
     eventInfo.basic.event = LNN_EVENT_NODE_ONLINE_STATE_CHANGED;
     eventInfo.isOnline = isOnline;
@@ -484,7 +536,7 @@ void LnnNotifyBasicInfoChanged(NodeBasicInfo *info, NodeBasicInfoType type)
     }
     if (type == TYPE_DEVICE_NAME) {
         char *anonyDeviceName = NULL;
-        Anonymize(info->deviceName, &anonyDeviceName);
+        AnonymizeDeviceName(info->deviceName, &anonyDeviceName);
         LNN_LOGI(LNN_EVENT, "notify peer device name changed. deviceName=%{public}s",
             AnonymizeWrapper(anonyDeviceName));
         AnonymizeFree(anonyDeviceName);
@@ -504,6 +556,15 @@ void LnnNotifyNodeStatusChanged(NodeStatus *info, NodeStatusType type)
 void LnnNotifyLocalNetworkIdChanged(void)
 {
     (void)PostNotifyMessageDelay(NOTIFY_LOCAL_NETWORKID_UPDATE, 0);
+}
+
+void LnnNotifyStateForSession(char *udid, int32_t retCode)
+{
+    if (udid == NULL) {
+        LNN_LOGE(LNN_EVENT, "udid is null");
+        return;
+    }
+    (void)PostNotifyMessageWithUdid(NOTIFY_STATE_SESSION, udid, retCode);
 }
 
 void LnnNotifyDeviceTrustedChange(int32_t type, const char *msg, uint32_t msgLen)
@@ -606,9 +667,45 @@ void LnnNotifyBtStateChangeEvent(void *state)
     SoftBusFree(btState);
 }
 
+void LnnNotifySleStateChangeEvent(void *state)
+{
+    if (state  == NULL) {
+        LNN_LOGE(LNN_EVENT, "invaild state param");
+        return;
+    }
+    SoftBusSleState *sleState = (SoftBusSleState *)state;
+    if (*sleState < SOFTBUS_SLE_TURN_ON || *sleState >= SOFTBUS_SLE_UNKNOWN) {
+        LNN_LOGE(LNN_EVENT, "bad sleState=%{public}d", *sleState);
+        SoftBusFree(sleState);
+        return;
+    }
+    LnnMonitorSleStateChangedEvent event = {.basic.event = LNN_EVENT_SLE_STATE_CHANGED, .status = (uint8_t)(*sleState)};
+    NotifyEvent((const LnnEventBasicInfo *)&event);
+    SoftBusFree(sleState);
+}
+
 void LnnNotifyVapInfoChangeEvent(int32_t preferChannel)
 {
     LnnLaneVapChangeEvent event = {.basic.event = LNN_EVENT_LANE_VAP_CHANGE, .vapPreferChannel = preferChannel};
+    NotifyEvent((const LnnEventBasicInfo *)&event);
+}
+
+void LnnNotifyDeviceRootStateChangeEvent(void)
+{
+    SoftBusDeviceRootState state = SOFTBUS_DEVICE_ROOT_UNKNOWN;
+    if (IsDeviceHasRiskFactorPacked()) {
+        state = SOFTBUS_DEVICE_IS_ROOT;
+    } else {
+        state = SOFTBUS_DEVICE_NOT_ROOT;
+    }
+    LnnDeviceRootStateChangeEvent event = {.basic.event = LNN_EVENT_DEVICE_ROOT_STATE_CHANGED,
+        .status = (uint8_t)state};
+    NotifyEvent((const LnnEventBasicInfo *)&event);
+}
+
+void LnnNotifySysTimeChangeEvent(void)
+{
+    LnnEventBasicInfo event = {.event = LNN_EVENT_SYS_TIME_CHANGE};
     NotifyEvent((const LnnEventBasicInfo *)&event);
 }
 
@@ -802,7 +899,9 @@ void LnnNotifySingleOffLineEvent(const ConnectionAddr *addr, NodeBasicInfo *basi
     (void)memset_s(&info, sizeof(NodeInfo), 0, sizeof(NodeInfo));
     if (LnnGetRemoteNodeInfoById(basicInfo->networkId, CATEGORY_NETWORK_ID, &info) == SOFTBUS_OK) {
         if ((LnnHasDiscoveryType(&info, DISCOVERY_TYPE_WIFI) &&
-            LnnConvAddrTypeToDiscType(addr->type) == DISCOVERY_TYPE_WIFI)) {
+            LnnConvAddrTypeToDiscType(addr->type) == DISCOVERY_TYPE_WIFI) ||
+            (LnnHasDiscoveryType(&info, DISCOVERY_TYPE_USB) &&
+            (LnnConvAddrTypeToDiscType(addr->type) == DISCOVERY_TYPE_USB))) {
             LNN_LOGI(LNN_EVENT, "Two-way WIFI LNN not completely offline, not need to report offline");
             return;
         }
@@ -884,7 +983,15 @@ void LnnNotifyNetlinkStateChangeEvent(NetManagerIfNameState state, const char *i
             LNN_LOGE(LNN_EVENT, "copy ifName failed with ret=%{public}d", ret);
             return;
         }
+        NotifyEvent((const LnnEventBasicInfo *)&event);
     }
+}
+
+void LnnNotifyWifiServiceStart(void *para)
+{
+    (void)para;
+    LNN_LOGI(LNN_EVENT, "notify wifi service start");
+    LnnDeviceInfoChangeEvent event = {.basic.event = LNN_EVENT_WIFI_SERVICE_START};
     NotifyEvent((const LnnEventBasicInfo *)&event);
 }
 
@@ -972,4 +1079,13 @@ void LnnUnregisterEventHandler(LnnEventType event, LnnEventHandler handler)
         }
     }
     (void)SoftBusMutexUnlock(&g_eventCtrl.lock);
+}
+
+void LnnNotifyAddRawEnhanceP2pEvent(LnnNotifyRawEnhanceP2pEvent *event)
+{
+    if (event == NULL) {
+        LNN_LOGE(LNN_EVENT, "event is null");
+        return;
+    }
+    NotifyEvent((const LnnEventBasicInfo *)event);
 }

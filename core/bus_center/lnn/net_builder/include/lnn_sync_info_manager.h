@@ -18,34 +18,12 @@
 
 #include <stdint.h>
 
+#include "lnn_sync_info_manager_struct.h"
+#include "softbus_common.h"
+
 #ifdef __cplusplus
 extern "C" {
 #endif
-
-typedef enum {
-    LNN_INFO_TYPE_CAPABILITY = 0,
-    LNN_INFO_TYPE_CONNECTION_INFO,
-    LNN_INFO_TYPE_DEVICE_NAME,
-    LNN_INFO_TYPE_BATTERY_INFO,
-    LNN_INFO_TYPE_SCREEN_STATUS,
-    LNN_INFO_TYPE_OFFLINE = 5,
-    LNN_INFO_TYPE_P2P_INFO,
-    LNN_INFO_TYPE_CHANNEL_NOISE_INFO,
-    LNN_INFO_TYPE_NOT_TRUSTED,
-    LNN_INFO_TYPE_WIFI_DIRECT,
-    LNN_INFO_TYPE_NICK_NAME = 10,
-    LNN_INFO_TYPE_MASTER_ELECT,
-    LNN_INFO_TYPE_BSS_TRANS,
-    LNN_INFO_TYPE_TOPO_UPDATE,
-    LNN_INFO_TYPE_NODE_ADDR,
-    LNN_INFO_TYPE_NODE_ADDR_DETECTION,
-    LNN_INFO_TYPE_SYNC_CIPHERKEY,
-    LNN_INFO_TYPE_ROUTE_LSU,
-    LNN_INFO_TYPE_PTK,
-    LNN_INFO_TYPE_USERID,
-    LNN_INFO_TYPE_COUNT,
-    //LNN_INFO_TYPE_P2P_ROLE = 256,
-} LnnSyncInfoType;
 
 typedef void (*LnnSyncInfoMsgHandler)(LnnSyncInfoType type, const char *networkId, const uint8_t *msg, uint32_t len);
 typedef void (*LnnSyncInfoMsgComplete)(LnnSyncInfoType type, const char *networkId, const uint8_t *msg, uint32_t len);
@@ -60,6 +38,10 @@ int32_t LnnSendSyncInfoMsg(LnnSyncInfoType type, const char *networkId,
     const uint8_t *msg, uint32_t len, LnnSyncInfoMsgComplete complete);
 int32_t LnnSendP2pSyncInfoMsg(const char *networkId, uint32_t netCapability);
 int32_t LnnSendWifiOfflineInfoMsg(void);
+
+void LnnSendAsyncInfoMsg(void *param);
+SendSyncInfoParam *CreateSyncInfoParam(
+    LnnSyncInfoType type, const char *networkId, const uint8_t *msg, uint32_t len, LnnSyncInfoMsgComplete complete);
 
 #ifdef __cplusplus
 }

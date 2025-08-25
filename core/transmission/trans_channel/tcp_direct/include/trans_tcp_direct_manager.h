@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2025 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -16,10 +16,7 @@
 #ifndef SOFTBUS_DIRECT_CHANNEL_INTERFACE_H
 #define SOFTBUS_DIRECT_CHANNEL_INTERFACE_H
 
-#include <stdbool.h>
-
 #include "softbus_app_info.h"
-#include "softbus_base_listener.h"
 #include "softbus_conn_interface.h"
 #include "trans_channel_callback.h"
 
@@ -41,6 +38,8 @@ extern "C" {
 #define FLAG_P2P 8
 #define FLAG_AUTH_META 16
 #define FLAG_ENHANCE_P2P 32
+#define FLAG_SESSION_KEY 64
+#define FLAG_SLE 64
 #define AUTH_CONN_SERVER_SIDE 0x01
 
 typedef struct {

@@ -652,6 +652,34 @@ int32_t HandleForceDownWifiDirectTrans(const char *udidhashStr, LinkConflictType
     return SOFTBUS_LANE_NOT_FOUND;
 }
 
+bool CheckVirtualLinkOnly(void)
+{
+    struct WifiDirectManager *wifiDirectMgr = GetWifiDirectManager();
+    if (wifiDirectMgr == NULL || wifiDirectMgr->checkOnlyVirtualLink == NULL) {
+        LNN_LOGE(LNN_LANE, "get wifiDirect manager null");
+        return false;
+    }
+    bool ret = wifiDirectMgr->checkOnlyVirtualLink();
+    LNN_LOGI(LNN_LANE, "checkOnlyVirtualLink result, ret=%{public}d", ret);
+    return ret;
+}
+
+int32_t HandleForceDownVirtualLink(void)
+{
+    enum WifiDirectLinkType linkType = WIFI_DIRECT_LINK_TYPE_HML;
+    LNN_LOGI(LNN_LANE, "force disconnect virtual link sync, linkType=%{public}d", linkType);
+    struct WifiDirectManager *wifiDirectMgr = GetWifiDirectManager();
+    if (wifiDirectMgr == NULL || wifiDirectMgr->forceDisconnectDeviceSync == NULL) {
+        LNN_LOGE(LNN_LANE, "get wifiDirect manager null");
+        return SOFTBUS_INVALID_PARAM;
+    }
+    int32_t ret = wifiDirectMgr->forceDisconnectDeviceSync(linkType);
+    if (ret != SOFTBUS_OK) {
+        LNN_LOGE(LNN_LANE, "force disconnect wifidirect sync fail, linkType=%{public}d", linkType);
+    }
+    return ret;
+}
+
 int32_t InitLinkWifiDirect(void)
 {
     if (SoftBusMutexInit(&g_linkWifiDirectMutex, NULL) != SOFTBUS_OK) {
@@ -686,6 +714,5 @@ void DeInitLinkWifiDirect(void)
     SoftBusFree(g_forceDownList);
     g_forceDownList = NULL;
     LinkWifiDirectUnlock();
-    SoftBusMutexUnlock(&g_linkWifiDirectMutex);
     (void)SoftBusMutexDestroy(&g_linkWifiDirectMutex);
 }

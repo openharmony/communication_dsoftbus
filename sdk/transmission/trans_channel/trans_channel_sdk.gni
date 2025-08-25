@@ -37,5 +37,4 @@ trans_channel_sdk_src += [
 trans_channel_sdk_inc += [
   "$dsoftbus_root_path/sdk/transmission/trans_channel/manager/include",
   "$dsoftbus_root_path/core/transmission/trans_channel/common/include",
-  "$dsoftbus_root_path/core/bus_center/lnn/lane_hub/lane_manager/include",
 ]

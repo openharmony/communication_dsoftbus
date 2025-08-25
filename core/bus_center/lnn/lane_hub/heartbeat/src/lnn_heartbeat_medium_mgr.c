@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2022 Huawei Device Co., Ltd.
+ * Copyright (c) 2022-2025 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -20,39 +20,38 @@
 
 #include "anonymizer.h"
 #include "auth_manager.h"
-#include "auth_device_common_key.h"
+
 #include "auth_deviceprofile.h"
 #include "auth_interface.h"
+#include "auth_session_message_struct.h"
 #include "bus_center_event.h"
 #include "bus_center_info_key.h"
 #include "bus_center_manager.h"
 #include "common_list.h"
+#include "g_enhance_lnn_func.h"
+#include "g_enhance_lnn_func_pack.h"
 #include "lnn_async_callback_utils.h"
-#include "lnn_ble_heartbeat.h"
-#include "lnn_ble_lpdevice.h"
-#include "lnn_cipherkey_manager.h"
 #include "lnn_connection_addr_utils.h"
 #include "lnn_device_info.h"
-#include "lnn_device_info_recovery.h"
 #include "lnn_distributed_net_ledger.h"
+#include "lnn_distributed_net_ledger_common.h"
 #include "lnn_event.h"
 #include "lnn_feature_capability.h"
+#include "lnn_heartbeat_ctrl.h"
 #include "lnn_heartbeat_fsm.h"
 #include "lnn_heartbeat_strategy.h"
 #include "lnn_heartbeat_utils.h"
-#include "lnn_lane_vap_info.h"
 #include "lnn_local_net_ledger.h"
 #include "lnn_log.h"
 #include "lnn_net_builder.h"
 #include "lnn_node_info.h"
-#include "lnn_parameter_utils.h"
-
 #include "softbus_adapter_mem.h"
 #include "softbus_adapter_bt_common.h"
 #include "softbus_adapter_timer.h"
 #include "softbus_def.h"
 #include "softbus_error_code.h"
 #include "softbus_utils.h"
+#include "softbus_init_common.h"
 
 #define INVALID_BR_MAC_ADDR "00:00:00:00:00:00"
 
@@ -61,13 +60,17 @@
 #define HB_REAUTH_TIME        (10 * HB_TIME_FACTOR)
 #define HB_DFX_DELAY_TIME     (7 * HB_TIME_FACTOR)
 #define PC_RESTRICT_TIME      3
+#define SLE_JOIN_SPARK_TIMES  2
+
 typedef struct {
     ListNode node;
     DeviceInfo *device;
     int32_t weight;
     int32_t masterWeight;
+    int32_t triggerSparkCount;
     uint64_t lastRecvTime;
     uint64_t lastJoinLnnTime;
+    uint64_t triggerSparkTime;
 } LnnHeartbeatRecvInfo;
 
 typedef struct {
@@ -82,6 +85,7 @@ static int32_t HbMediumMgrRecvProcess(DeviceInfo *device, const LnnHeartbeatWeig
 static int32_t HbMediumMgrRecvHigherWeight(
     const char *udidHash, int32_t weight, ConnectionAddrType type, bool isReElect, bool isPeerScreenOn);
 static void HbMediumMgrRecvLpInfo(const char *networkId, uint64_t nowTime);
+static void HbMediumMgrRecvSleInfo(const char *networkId, SleDeviceInfo *info);
 
 static LnnHeartbeatMediumMgr *g_hbMeidumMgr[HB_MAX_TYPE_COUNT] = { 0 };
 
@@ -90,6 +94,7 @@ static LnnHeartbeatMediumMgrCb g_hbMediumMgrCb = {
     .onReceive = HbMediumMgrRecvProcess,
     .onRecvHigherWeight = HbMediumMgrRecvHigherWeight,
     .onRecvLpInfo = HbMediumMgrRecvLpInfo,
+    .onRecvSleInfo = HbMediumMgrRecvSleInfo,
 };
 
 static SoftBusList *g_hbRecvList = NULL;
@@ -161,6 +166,38 @@ static uint64_t HbGetRepeatThresholdByType(LnnHeartbeatType hbType)
     }
 }
 
+static void UpdateCapacity(NodeInfo *nodeInfo, HbRespData *hbResp)
+{
+    if ((hbResp->capabiltiy & ENABLE_WIFI_CAP) != 0) {
+        (void)LnnSetNetCapability(&(nodeInfo->netCapacity), BIT_WIFI);
+        if (LnnHasDiscoveryType(nodeInfo, DISCOVERY_TYPE_WIFI) &&
+            (hbResp->capabiltiy & (1 << BIT_WIFI_5G)) == 0 && (hbResp->capabiltiy & (1 << BIT_WIFI_24G)) == 0) {
+            (void)LnnSetNetCapability(&(nodeInfo->netCapacity), BIT_WIFI_5G);
+            (void)LnnSetNetCapability(&(nodeInfo->netCapacity), BIT_WIFI_24G);
+        }
+    } else {
+        (void)LnnClearNetCapability(&(nodeInfo->netCapacity), BIT_WIFI);
+        (void)LnnClearNetCapability(&(nodeInfo->netCapacity), BIT_WIFI_5G);
+        (void)LnnClearNetCapability(&(nodeInfo->netCapacity), BIT_WIFI_24G);
+    }
+    if ((hbResp->capabiltiy & P2P_GO) != 0 || (hbResp->capabiltiy & P2P_GC) != 0) {
+        (void)LnnSetNetCapability(&(nodeInfo->netCapacity), BIT_WIFI_P2P);
+    } else {
+        (void)LnnClearNetCapability(&(nodeInfo->netCapacity), BIT_WIFI_P2P);
+    }
+    if ((hbResp->capabiltiy & DISABLE_BR_CAP) != 0) {
+        (void)LnnClearNetCapability(&(nodeInfo->netCapacity), BIT_BR);
+    } else {
+        (void)LnnSetNetCapability(&(nodeInfo->netCapacity), BIT_BR);
+    }
+    if ((hbResp->capabiltiy & ENABLE_SLE_CAP) != 0) {
+        (void)LnnSetNetCapability(&nodeInfo->netCapacity, BIT_SLE);
+    } else {
+        (void)LnnClearNetCapability(&nodeInfo->netCapacity, BIT_SLE);
+    }
+    (void)LnnSetNetCapability(&(nodeInfo->netCapacity), BIT_BLE);
+}
+
 static void UpdateOnlineInfoNoConnection(const char *networkId, HbRespData *hbResp)
 {
     if (hbResp == NULL || hbResp->stateVersion == STATE_VERSION_INVALID) {
@@ -178,24 +215,7 @@ static void UpdateOnlineInfoNoConnection(const char *networkId, HbRespData *hbRe
         return;
     }
     uint32_t oldNetCapa = nodeInfo.netCapacity;
-    if ((hbResp->capabiltiy & ENABLE_WIFI_CAP) != 0) {
-        (void)LnnSetNetCapability(&nodeInfo.netCapacity, BIT_WIFI);
-    } else {
-        (void)LnnClearNetCapability(&nodeInfo.netCapacity, BIT_WIFI);
-        (void)LnnClearNetCapability(&nodeInfo.netCapacity, BIT_WIFI_5G);
-        (void)LnnClearNetCapability(&nodeInfo.netCapacity, BIT_WIFI_24G);
-    }
-    if ((hbResp->capabiltiy & P2P_GO) != 0 || (hbResp->capabiltiy & P2P_GC) != 0) {
-        (void)LnnSetNetCapability(&nodeInfo.netCapacity, BIT_WIFI_P2P);
-    } else {
-        (void)LnnClearNetCapability(&nodeInfo.netCapacity, BIT_WIFI_P2P);
-    }
-    if ((hbResp->capabiltiy & DISABLE_BR_CAP) != 0) {
-        (void)LnnClearNetCapability(&nodeInfo.netCapacity, BIT_BR);
-    } else {
-        (void)LnnSetNetCapability(&nodeInfo.netCapacity, BIT_BR);
-    }
-    (void)LnnSetNetCapability(&nodeInfo.netCapacity, BIT_BLE);
+    UpdateCapacity(&nodeInfo, hbResp);
     if (oldNetCapa == nodeInfo.netCapacity) {
         LNN_LOGD(LNN_HEART_BEAT, "capa not change, don't update devInfo");
         return;
@@ -343,11 +363,15 @@ static bool HbIsRepeatedJoinLnnRequest(LnnHeartbeatRecvInfo *storedInfo, uint64_
         return false;
     }
     if (nowTime - storedInfo->lastJoinLnnTime < HB_REPEAD_JOIN_LNN_THRESHOLD) {
-        char *anonyUdid = NULL;
-        Anonymize(storedInfo->device->devId, &anonyUdid);
-        LNN_LOGD(LNN_HEART_BEAT, "recv but ignore repeated join lnn request, udidHash=%{public}s",
-            AnonymizeWrapper(anonyUdid));
-        AnonymizeFree(anonyUdid);
+        if (storedInfo->device != NULL) {
+            char *anonyUdid = NULL;
+            Anonymize(storedInfo->device->devId, &anonyUdid);
+            LNN_LOGD(LNN_HEART_BEAT, "recv but ignore repeated join lnn request, udidHash=%{public}s",
+                AnonymizeWrapper(anonyUdid));
+            AnonymizeFree(anonyUdid);
+        } else {
+            LNN_LOGD(LNN_HEART_BEAT, "recv but ignore repeated join lnn request without udid");
+        }
         return true;
     }
     storedInfo->lastJoinLnnTime = nowTime;
@@ -423,10 +447,15 @@ static void SetDeviceNetCapability(uint32_t *deviceInfoNetCapacity, HbRespData *
     } else {
         (void)LnnSetNetCapability(deviceInfoNetCapacity, BIT_BR);
     }
-    if ((hbResp->capabiltiy & P2P_GO) != 0 || (hbResp->capabiltiy & P2P_GC)) {
+    if ((hbResp->capabiltiy & P2P_GO) != 0 || (hbResp->capabiltiy & P2P_GC) != 0) {
         (void)LnnSetNetCapability(deviceInfoNetCapacity, BIT_WIFI_P2P);
     } else {
         (void)LnnClearNetCapability(deviceInfoNetCapacity, BIT_WIFI_P2P);
+    }
+    if ((hbResp->capabiltiy & ENABLE_SLE_CAP) != 0) {
+        (void)LnnSetNetCapability(deviceInfoNetCapacity, BIT_SLE);
+    } else {
+        (void)LnnClearNetCapability(deviceInfoNetCapacity, BIT_SLE);
     }
     (void)LnnSetNetCapability(deviceInfoNetCapacity, BIT_BLE);
     LNN_LOGI(LNN_HEART_BEAT, "capability change:%{public}u->%{public}u", oldNetCapa, *deviceInfoNetCapacity);
@@ -527,15 +556,38 @@ static int32_t UpdateUserIdCheckSum(NodeInfo *deviceInfo, HbRespData *hbResp)
     }
     uint8_t defaultUserId[USERID_LEN] = {0};
     if ((memcmp(defaultUserId, hbResp->advUserId, USERID_LEN) != 0) &&
-        DecryptUserId(deviceInfo, hbResp->advUserId, USERID_LEN) != SOFTBUS_OK) {
+        DecryptUserIdPacked(deviceInfo, hbResp->advUserId, USERID_LEN) != SOFTBUS_OK) {
         return SOFTBUS_DECRYPT_ERR;
     }
     return SOFTBUS_OK;
 }
 
+static bool IsAccountChange(DeviceInfo *device, NodeInfo *cacheDeviceInfo)
+{
+    char accountString[LONG_TO_STRING_MAX_LEN] = {0};
+    if (sprintf_s(accountString, LONG_TO_STRING_MAX_LEN, "%" PRId64, cacheDeviceInfo->accountId) == -1) {
+        LNN_LOGE(LNN_HEART_BEAT, "long to string fail");
+        return true;
+    }
+    char accountHash[SHA_256_HASH_LEN] = { 0 };
+    int32_t ret = SoftBusGenerateStrHash((uint8_t *)accountString, strlen(accountString),
+    (unsigned char *)accountHash);
+    if (ret != SOFTBUS_OK) {
+        LNN_LOGE(LNN_HEART_BEAT, "account hash fail, ret=%{public}d", ret);
+        return true;
+    }
+    bool isChange = memcmp(accountHash, device->accountHash, HB_SHORT_ACCOUNT_HASH_LEN) != 0;
+    if (isChange) {
+        LNN_LOGI(LNN_HEART_BEAT, "accountHash compare. "
+        "accountHash=[%{public}02X, %{public}02X], device->accountHash=[%{public}02X, %{public}02X]",
+            accountHash[0], accountHash[1], device->accountHash[0], device->accountHash[1]);
+    }
+    return isChange;
+}
+
 static bool IsNeedConnectOnLine(DeviceInfo *device, HbRespData *hbResp, ConnectOnlineReason *connectReason)
 {
-    LNN_CHECK_AND_RETURN_RET_LOGE((hbResp != NULL) && (hbResp->stateVersion != STATE_VERSION_INVALID),
+    LNN_CHECK_AND_RETURN_RET_LOGW((hbResp != NULL) && (hbResp->stateVersion != STATE_VERSION_INVALID),
         true, LNN_HEART_BEAT,  "ble don't support ble direct online");
     int32_t ret, stateVersion;
     NodeInfo deviceInfo;
@@ -544,8 +596,8 @@ static bool IsNeedConnectOnLine(DeviceInfo *device, HbRespData *hbResp, ConnectO
         LNN_LOGI(LNN_HEART_BEAT, "ble don't support ble direct online");
         return true;
     }
-    if (LnnRetrieveDeviceInfo(device->devId, &deviceInfo) != SOFTBUS_OK ||
-        IsInvalidBrmac(deviceInfo.connectInfo.macAddr)) {
+    if (LnnRetrieveDeviceInfoPacked(device->devId, &deviceInfo) != SOFTBUS_OK ||
+        IsInvalidBrmac(deviceInfo.connectInfo.macAddr) || IsAccountChange(device, &deviceInfo)) {
         *connectReason = BLE_FIRST_CONNECT;
         LNN_LOGI(LNN_HEART_BEAT, "don't support ble direct online because retrieve fail, "
             "stateVersion=%{public}d->%{public}d", deviceInfo.stateVersion, (int32_t)hbResp->stateVersion);
@@ -556,9 +608,9 @@ static bool IsNeedConnectOnLine(DeviceInfo *device, HbRespData *hbResp, ConnectO
         return true;
     }
     AuthDeviceKeyInfo keyInfo = { 0 };
-    if ((!IsCloudSyncEnabled() || !IsFeatureSupport(deviceInfo.feature, BIT_CLOUD_SYNC_DEVICE_INFO)) &&
-        AuthFindDeviceKey(device->devId, AUTH_LINK_TYPE_BLE, &keyInfo) != SOFTBUS_OK &&
-        AuthFindLatestNormalizeKey(device->devId, &keyInfo, true) != SOFTBUS_OK) {
+    if ((!IsCloudSyncEnabledPacked() || !IsFeatureSupport(deviceInfo.feature, BIT_CLOUD_SYNC_DEVICE_INFO)) &&
+        AuthFindDeviceKeyPacked(device->devId, AUTH_LINK_TYPE_BLE, &keyInfo) != SOFTBUS_OK &&
+        AuthFindLatestNormalizeKeyPacked(device->devId, &keyInfo, true) != SOFTBUS_OK) {
         *connectReason = DEVICEKEY_NOT_EXISTED;
         LNN_LOGE(LNN_HEART_BEAT, "don't support ble direct online because key not exist");
         return true;
@@ -568,12 +620,12 @@ static bool IsNeedConnectOnLine(DeviceInfo *device, HbRespData *hbResp, ConnectO
     (void)SetDeviceScreenStatus(&deviceInfo, hbResp->isScreenOn);
     LNN_CHECK_AND_RETURN_RET_LOGE(UpdateUserIdCheckSum(&deviceInfo, hbResp) == SOFTBUS_OK,
         true, LNN_HEART_BEAT, "don't support ble direct online because UpdateUserIdCheckSum fail");
-    if ((ret = LnnUpdateRemoteDeviceInfo(&deviceInfo)) != SOFTBUS_OK) {
+    if ((ret = LnnUpdateRemoteDeviceInfoPacked(&deviceInfo)) != SOFTBUS_OK) {
         *connectReason = UPDATE_REMOTE_DEVICE_INFO_FAILED;
         LNN_LOGE(LNN_HEART_BEAT, "don't support ble direct online because update device info fail ret=%{public}d", ret);
         return true;
     }
-    if ((deviceInfo.deviceInfo.osType == OH_OS_TYPE) && (!IsCipherManagerFindKey(deviceInfo.deviceInfo.deviceUdid))) {
+    if ((deviceInfo.deviceInfo.osType == OH_OS_TYPE) && (!IsCipherManagerFindKeyPk(deviceInfo.deviceInfo.deviceUdid))) {
         *connectReason = FIND_REMOTE_CIPHERKEY_FAILED;
         LNN_LOGE(LNN_HEART_BEAT, "don't support ble direct online because broadcast key");
         return true;
@@ -605,7 +657,7 @@ static bool HbIsValidJoinLnnRequest(DeviceInfo *device, HbRespData *hbResp)
         LNN_LOGI(LNN_HEART_BEAT, "local don't support three state");
         return true;
     }
-    if (LnnRetrieveDeviceInfo(device->devId, &nodeInfo) != SOFTBUS_OK) {
+    if (LnnRetrieveDeviceInfoPacked(device->devId, &nodeInfo) != SOFTBUS_OK) {
         LNN_LOGI(LNN_HEART_BEAT, "retrieve device info failed");
         return true;
     }
@@ -797,19 +849,23 @@ static void DfxRecordHeartBeatAuthStart(const AuthConnInfo *connInfo, const char
 
 static int32_t HbOnlineNodeAuth(DeviceInfo *device, LnnHeartbeatRecvInfo *storedInfo, uint64_t nowTime)
 {
-    if (!device->isOnline) {
-        LNN_LOGW(LNN_HEART_BEAT, "ignore lnn request, not support connect");
-        return SOFTBUS_OK;
-    }
     if (HbIsRepeatedReAuthRequest(storedInfo, nowTime)) {
         LNN_LOGE(LNN_HEART_BEAT, "reauth request repeated");
         return SOFTBUS_NETWORK_HEARTBEAT_REPEATED;
     }
     AuthConnInfo authConn;
     uint32_t requestId = AuthGenRequestId();
+    AuthVerifyParam authVerifyParam;
+    (void)memset_s(&authVerifyParam, sizeof(authVerifyParam), 0, sizeof(authVerifyParam));
+    authVerifyParam.isFastAuth = false;
+    authVerifyParam.module = AUTH_MODULE_LNN;
+    authVerifyParam.requestId = requestId;
+    authVerifyParam.deviceKeyId.hasDeviceKeyId = false;
+    authVerifyParam.deviceKeyId.localDeviceKeyId = AUTH_INVALID_DEVICEKEY_ID;
+    authVerifyParam.deviceKeyId.remoteDeviceKeyId = AUTH_INVALID_DEVICEKEY_ID;
     (void)LnnConvertAddrToAuthConnInfo(device->addr, &authConn);
     DfxRecordHeartBeatAuthStart(&authConn, LNN_DEFAULT_PKG_NAME, requestId);
-    if (AuthStartVerify(&authConn, requestId, LnnGetReAuthVerifyCallback(), AUTH_MODULE_LNN, false) != SOFTBUS_OK) {
+    if (AuthStartVerify(&authConn, &authVerifyParam, LnnGetReAuthVerifyCallback()) != SOFTBUS_OK) {
         LNN_LOGI(LNN_HEART_BEAT, "AuthStartVerify error");
         return SOFTBUS_AUTH_START_VERIFY_FAIL;
     }
@@ -894,7 +950,7 @@ static void ProcRespVapChange(DeviceInfo *device, HbRespData *hbResp)
         }
         if (strncmp(udidHash, device->devId, HB_SHORT_UDID_HASH_HEX_LEN) == 0) {
             LNN_LOGD(LNN_HEART_BEAT, "hbResp preChannelCode=%{public}d", hbResp->preferChannel);
-            (void)LnnAddRemoteChannelCode(nodeInfo.deviceInfo.deviceUdid, hbResp->preferChannel);
+            (void)LnnAddRemoteChannelCodePacked(nodeInfo.deviceInfo.deviceUdid, hbResp->preferChannel);
             SoftBusFree(info);
             return;
         }
@@ -907,7 +963,7 @@ static bool IsSupportCloudSync(DeviceInfo *device)
     NodeInfo info;
     (void)memset_s(&info, sizeof(NodeInfo), 0, sizeof(NodeInfo));
     uint64_t localFeature = 0;
-    if (LnnRetrieveDeviceInfo(device->devId, &info) != SOFTBUS_OK) {
+    if (LnnRetrieveDeviceInfoPacked(device->devId, &info) != SOFTBUS_OK) {
         LNN_LOGE(LNN_HEART_BEAT, "don't support cloud sync beacause retrive info fail");
         return false;
     }
@@ -922,7 +978,7 @@ static bool IsSupportCloudSync(DeviceInfo *device)
 static bool IsDirectlyHeartBeat(DeviceInfo *device, HbRespData *hbResp)
 {
     if (device == NULL || hbResp == NULL) {
-        LNN_LOGE(LNN_HEART_BEAT, "device or resp is null");
+        LNN_LOGD(LNN_HEART_BEAT, "device or resp is null");
         return false;
     }
     if (hbResp->hbVersion == HB_VERSION_V2) {
@@ -996,7 +1052,7 @@ static bool IsNetworkIdChange(DeviceInfo *device, NodeInfo *remoteInfo, HbRespDa
 
     NodeInfo cacheInfo;
     (void)memset_s(&cacheInfo, sizeof(NodeInfo), 0, sizeof(NodeInfo));
-    if (LnnRetrieveDeviceInfo(device->devId, &cacheInfo) != SOFTBUS_OK) {
+    if (LnnRetrieveDeviceInfoPacked(device->devId, &cacheInfo) != SOFTBUS_OK) {
         LNN_LOGE(LNN_HEART_BEAT, "retrieve device info fail");
         return false;
     }
@@ -1013,6 +1069,82 @@ static bool IsNetworkIdChange(DeviceInfo *device, NodeInfo *remoteInfo, HbRespDa
     AnonymizeFree(cacheNetworkId);
     AnonymizeFree(remoteNetworkId);
     return true;
+}
+
+static bool IsNeedTriggerSparkGroup(const NodeInfo *remoteInfo, LnnHeartbeatRecvInfo *storedInfo, uint64_t nowTime)
+{
+    if (remoteInfo == NULL || storedInfo == NULL) {
+        LNN_LOGW(LNN_HEART_BEAT, "no need handle");
+        return false;
+    }
+    char *anonyNetworkId = NULL;
+    Anonymize(remoteInfo->networkId, &anonyNetworkId);
+    int32_t oldTriggerCnt = storedInfo->triggerSparkCount;
+    if (!LnnHasDiscoveryType(remoteInfo, DISCOVERY_TYPE_BLE)) {
+        LNN_LOGW(LNN_HEART_BEAT, "target dev ble not online, networkId=%{public}s", AnonymizeWrapper(anonyNetworkId));
+        AnonymizeFree(anonyNetworkId);
+        return false;
+    }
+    if (oldTriggerCnt > SLE_JOIN_SPARK_TIMES) {
+        LNN_LOGD(LNN_HEART_BEAT, "target dev has exceeded limt, TriggerCnt=%{public}d, networkId=%{public}s",
+            oldTriggerCnt, AnonymizeWrapper(anonyNetworkId));
+        AnonymizeFree(anonyNetworkId);
+        return false;
+    }
+    if (QueryControlPlaneNodeValidPacked(remoteInfo->networkId) == SOFTBUS_OK) {
+        LNN_LOGW(LNN_HEART_BEAT, "target node has exit spark group, networkId=%{public}s",
+            AnonymizeWrapper(anonyNetworkId));
+        AnonymizeFree(anonyNetworkId);
+        return false;
+    }
+    if ((storedInfo->triggerSparkTime != 0) &&
+        (nowTime - storedInfo->triggerSparkTime <= LOW_FREQ_CYCLE * HB_TIME_FACTOR)) {
+        LNN_LOGD(LNN_HEART_BEAT, "need trigger spark group, networkId=%{public}s", AnonymizeWrapper(anonyNetworkId));
+        AnonymizeFree(anonyNetworkId);
+        return true;
+    }
+    storedInfo->triggerSparkCount++;
+    storedInfo->triggerSparkTime = nowTime;
+    LNN_LOGW(LNN_HEART_BEAT, "try trigger spark, networkId=%{public}s", AnonymizeWrapper(anonyNetworkId));
+    AnonymizeFree(anonyNetworkId);
+    return true;
+}
+
+int32_t LnnCleanTriggerSparkInfo(const char *udid, ConnectionAddrType addrType)
+{
+    LNN_CHECK_AND_RETURN_RET_LOGE(udid != NULL, SOFTBUS_INVALID_PARAM, LNN_HEART_BEAT, "invalid param");
+    LNN_CHECK_AND_RETURN_RET_LOGW(addrType == CONNECTION_ADDR_BLE, SOFTBUS_OK, LNN_HEART_BEAT, "no need handle");
+
+    uint64_t nowTime = GetNowTime();
+    char *anonyUdid = NULL;
+    Anonymize(udid, &anonyUdid);
+    uint8_t udidHash[SHA_256_HASH_LEN] = { 0 };
+    char udidHashStr[DISC_MAX_DEVICE_ID_LEN] = { 0 };
+    if (SoftBusGenerateStrHash((uint8_t *)udid, strlen(udid), udidHash) != SOFTBUS_OK) {
+        LNN_LOGE(LNN_HEART_BEAT, "generate udiahash fail, udid=%{public}s", AnonymizeWrapper(anonyUdid));
+        AnonymizeFree(anonyUdid);
+        return SOFTBUS_NETWORK_GENERATE_STR_HASH_ERR;
+    }
+    if (ConvertBytesToHexString(
+        udidHashStr, UDID_SHORT_HASH_HEX_STR + 1, udidHash, UDID_SHORT_HASH_LEN_TEMP) != SOFTBUS_OK) {
+        LNN_LOGE(LNN_HEART_BEAT, "udiahash convert hash str fail, udid=%{public}s", AnonymizeWrapper(anonyUdid));
+        AnonymizeFree(anonyUdid);
+        return SOFTBUS_NETWORK_BYTES_TO_HEX_STR_ERR;
+    }
+    if (SoftBusMutexLock(&g_hbRecvList->lock) != SOFTBUS_OK) {
+        LNN_LOGE(LNN_HEART_BEAT, "try to lock failed, udid=%{public}s", AnonymizeWrapper(anonyUdid));
+        AnonymizeFree(anonyUdid);
+        return SOFTBUS_LOCK_ERR;
+    }
+    LnnHeartbeatRecvInfo *storedInfo = HbGetStoredRecvInfo(udidHashStr, CONNECTION_ADDR_BLE, nowTime);
+    if (storedInfo != NULL) {
+        storedInfo->triggerSparkCount = 0;
+        storedInfo->triggerSparkTime = 0;
+        LNN_LOGI(LNN_HEART_BEAT, "clean trigger info done, udid=%{public}s", AnonymizeWrapper(anonyUdid));
+    }
+    AnonymizeFree(anonyUdid);
+    (void)SoftBusMutexUnlock(&g_hbRecvList->lock);
+    return SOFTBUS_OK;
 }
 
 static int32_t HbNotifyReceiveDevice(DeviceInfo *device, const LnnHeartbeatWeight *mediumWeight,
@@ -1043,15 +1175,24 @@ static int32_t HbNotifyReceiveDevice(DeviceInfo *device, const LnnHeartbeatWeigh
     bool isDirectlyHb = IsDirectlyHeartBeat(device, hbResp);
     if (HbGetOnlineNodeByRecvInfo(device->devId, device->addr[0].type, &nodeInfo, hbResp) == SOFTBUS_OK) {
         CheckUserIdCheckSumChange(hbResp, &nodeInfo);
+        if (IsNeedTriggerSparkGroup(&nodeInfo, storedInfo, nowTime)) {
+            TriggerSparkGroupJoinAgainPacked(nodeInfo.deviceInfo.deviceUdid, SPARK_GROUP_DELAY_TIME_MS);
+        }
         if (isDirectlyHb || (!HbIsNeedReAuth(&nodeInfo, device->accountHash) &&
             !IsUuidChange(nodeInfo.uuid, hbResp, HB_SHORT_UUID_LEN) &&
             !IsNetworkIdChange(device, &nodeInfo, hbResp))) {
             (void)SoftBusMutexUnlock(&g_hbRecvList->lock);
             return HbUpdateOfflineTimingByRecvInfo(nodeInfo.networkId, device->addr[0].type, hbType, nowTime);
         }
-        res = HbOnlineNodeAuth(device, storedInfo, nowTime);
-        (void)SoftBusMutexUnlock(&g_hbRecvList->lock);
-        return res;
+        if (!device->isOnline) {
+            LNN_LOGW(LNN_HEART_BEAT, "ignore lnn request, not support connect");
+            (void)SoftBusMutexUnlock(&g_hbRecvList->lock);
+            return HbUpdateOfflineTimingByRecvInfo(nodeInfo.networkId, device->addr[0].type, hbType, nowTime);
+        } else {
+            res = HbOnlineNodeAuth(device, storedInfo, nowTime);
+            (void)SoftBusMutexUnlock(&g_hbRecvList->lock);
+            return res;
+        }
     }
     res = CheckJoinLnnConnectResult(device, hbResp, isDirectlyHb, storedInfo, nowTime);
     (void)SoftBusMutexUnlock(&g_hbRecvList->lock);
@@ -1065,7 +1206,9 @@ static int32_t HbMediumMgrRecvProcess(DeviceInfo *device, const LnnHeartbeatWeig
         LNN_LOGE(LNN_HEART_BEAT, "mgr recv process get invalid param");
         return SOFTBUS_INVALID_PARAM;
     }
-    if (!AuthIsPotentialTrusted(device)) {
+    bool isPotentialTrusted = IsDirectlyHeartBeat(device, hbResp) ?
+        AuthIsPotentialTrusted(device, false) : AuthIsPotentialTrusted(device, true);
+    if (!isPotentialTrusted) {
         char *anonyUdid = NULL;
         Anonymize(device->devId, &anonyUdid);
         LNN_LOGW(LNN_HEART_BEAT,
@@ -1127,6 +1270,41 @@ static void HbMediumMgrRecvLpInfo(const char *networkId, uint64_t nowTime)
     if (HbUpdateOfflineTimingByRecvInfo(networkId, CONNECTION_ADDR_BLE, HEARTBEAT_TYPE_BLE_V4, nowTime) != SOFTBUS_OK) {
         LNN_LOGE(LNN_HEART_BEAT, "HB medium mgr update time stamp fail");
     }
+}
+
+static void HbMediumMgrRecvSleInfo(const char *networkId, SleDeviceInfo *info)
+{
+    if (networkId == NULL || info == NULL) {
+        LNN_LOGE(LNN_HEART_BEAT, "invalid param");
+        return;
+    }
+    uint64_t oldSleTimestamp = 0;
+    uint64_t currentTime = GetNowTime();
+    char *anonyNetworkId = NULL;
+    Anonymize(networkId, &anonyNetworkId);
+    if (LnnGetDLSleHbTimestamp(networkId, &oldSleTimestamp) != SOFTBUS_OK) {
+        LNN_LOGE(LNN_HEART_BEAT, "get sle time stamp fail, networkId=%{public}s",
+            AnonymizeWrapper(anonyNetworkId));
+        AnonymizeFree(anonyNetworkId);
+        return;
+    }
+    if (LnnSetDLSleHbTimestamp(networkId, currentTime) != SOFTBUS_OK) {
+        LNN_LOGE(LNN_HEART_BEAT, "set sle time stamp fail, networkId=%{public}s",
+            AnonymizeWrapper(anonyNetworkId));
+        AnonymizeFree(anonyNetworkId);
+        return;
+    }
+    (void)LnnStopSleOfflineTimingStrategy(networkId);
+    if (LnnStartSleOfflineTimingStrategy(networkId) != SOFTBUS_OK) {
+        LNN_LOGE(LNN_HEART_BEAT, "start sle offline timing stragegy fail, networkId=%{public}s",
+            AnonymizeWrapper(anonyNetworkId));
+        AnonymizeFree(anonyNetworkId);
+        return;
+    }
+    LNN_LOGI(LNN_HEART_BEAT, "recv sle spark info, networkId=%{public}s,"
+        "timestamp:%{public}" PRIu64 "->%{public}" PRIu64 "",
+        AnonymizeWrapper(anonyNetworkId), oldSleTimestamp, currentTime);
+    AnonymizeFree(anonyNetworkId);
 }
 
 static void HbMediumMgrRelayProcess(const char *udidHash, ConnectionAddrType type, LnnHeartbeatType hbType)
@@ -1290,12 +1468,16 @@ void LnnDumpHbOnlineNodeList(void)
 
 int32_t LnnHbMediumMgrInit(void)
 {
-    if (LnnRegistBleHeartbeatMediumMgr() != SOFTBUS_OK) {
+    if (LnnRegistBleHeartbeatMediumMgrPacked() != SOFTBUS_OK) {
         LNN_LOGE(LNN_HEART_BEAT, "regist ble heartbeat manager fail");
         return SOFTBUS_NETWORK_HB_MGR_REG_FAIL;
     }
-    if (LnnRegisterBleLpDeviceMediumMgr() != SOFTBUS_OK) {
+    if (LnnRegisterBleLpDeviceMediumMgrPacked() != SOFTBUS_OK) {
         LNN_LOGE(LNN_HEART_BEAT, "LP regist LpDevice manager fail");
+        return SOFTBUS_NETWORK_HB_MGR_REG_FAIL;
+    }
+    if (LnnRegisterSleHeartbeatMediumMgrPacked() != SOFTBUS_OK) {
+        LNN_LOGE(LNN_HEART_BEAT, "regist sle heartbeat manager fail");
         return SOFTBUS_NETWORK_HB_MGR_REG_FAIL;
     }
     return HbInitRecvList();

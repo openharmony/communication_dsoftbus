@@ -16,7 +16,7 @@ import("//build/ohos.gni")
 import("//build/test.gni")
 import("../../../../../dsoftbus.gni")
 
-module_output_path = "dsoftbus/discovery"
+module_output_path = "dsoftbus/soft_bus/discovery"
 
 ohos_unittest("DiscManagerTest") {
   module_out_path = module_output_path
@@ -25,6 +25,7 @@ ohos_unittest("DiscManagerTest") {
   include_dirs = [
     "$softbus_adapter_common/include",
     "$dsoftbus_root_path/core/common/include",
+    "$dsoftbus_root_path/interfaces/kits/disc",
     "$dsoftbus_root_path/core/discovery/interface",
     "$dsoftbus_root_path/interfaces/kits/common",
     "$dsoftbus_root_path/interfaces/kits/discovery",
@@ -32,12 +33,13 @@ ohos_unittest("DiscManagerTest") {
     "$dsoftbus_root_path/core/discovery/coap/interface",
     "$dsoftbus_root_path/components/nstackx/nstackx_ctrl/interface",
     "unittest/common/",
+    "$dsoftbus_root_path/interfaces/kits/nstackx",
   ]
 
   deps = [
     "$dsoftbus_dfx_path:softbus_dfx",
     "$dsoftbus_root_path/components/nstackx/nstackx_ctrl:nstackx_ctrl",
-    "$dsoftbus_root_path/tests/core/frame:softbus_server_static",
+    "$dsoftbus_root_path/core/frame:softbus_server",
   ]
 
   external_deps = [
@@ -50,8 +52,6 @@ ohos_unittest("DiscManagerTest") {
 ohos_unittest("DiscManagerMockTest") {
   module_out_path = module_output_path
   sources = [
-    "$dsoftbus_core_path/discovery/ble/approach_ble/src/disc_approach_ble_virtual.c",
-    "$dsoftbus_core_path/discovery/ble/virtual_link_ble/src/disc_virtual_link_ble_virtual.c",
     "$dsoftbus_core_path/discovery/manager/src/disc_manager.c",
     "ble_mock.cpp",
     "coap_mock.cpp",
@@ -67,6 +67,7 @@ ohos_unittest("DiscManagerMockTest") {
     "$dsoftbus_core_path/discovery/ipc/include",
     "$dsoftbus_core_path/discovery/manager/include",
     "$dsoftbus_core_path/bus_center/interface",
+    "$dsoftbus_core_path/bus_center/lnn/net_builder/include",
     "$dsoftbus_core_path/bus_center/service/include",
     "$dsoftbus_core_path/discovery/ble/dispatcher/include",
     "$dsoftbus_core_path/discovery/usb/dispatcher/include",
@@ -81,6 +82,7 @@ ohos_unittest("DiscManagerMockTest") {
   deps = [
     "$dsoftbus_root_path/adapter:softbus_adapter",
     "$dsoftbus_root_path/core/common:softbus_utils",
+    "$dsoftbus_root_path/dfx:softbus_dfx",
   ]
   external_deps = [
     "googletest:gmock",

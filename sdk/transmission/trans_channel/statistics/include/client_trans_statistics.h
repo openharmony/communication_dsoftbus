@@ -15,7 +15,6 @@
 #ifndef CLIENT_TRANS_STATISTICS_H
 #define CLIENT_TRANS_STATISTICS_H
 
-#include "softbus_def.h"
 #include "trans_network_statistics.h"
 
 #ifdef __cplusplus
@@ -27,6 +26,8 @@ void AddSocketResource(const char *sessionName, const ChannelInfo *channel);
 void UpdateChannelStatistics(int32_t socketId, int64_t len);
 
 void DeleteSocketResourceByChannelId(int32_t channelId, int32_t channelType);
+
+void DeleteSocketResourceBySocketId(int32_t socketId);
 
 int32_t ClientTransStatisticsInit(void);
 

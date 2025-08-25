@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2024 Huawei Device Co., Ltd.
+ * Copyright (c) 2024-2025 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -15,8 +15,12 @@
 
 #include "trans_channel_common.h"
 
-#include "access_control.h"
+#include <unistd.h>
+
 #include "bus_center_manager.h"
+#include "g_enhance_trans_func.h"
+#include "g_enhance_trans_func_pack.h"
+#include "legacy/softbus_hisysevt_transreporter.h"
 #include "lnn_distributed_net_ledger.h"
 #include "lnn_lane_interface.h"
 #include "lnn_network_manager.h"
@@ -26,26 +30,26 @@
 #include "softbus_config_type.h"
 #include "softbus_error_code.h"
 #include "softbus_feature_config.h"
-#include "legacy/softbus_hisysevt_transreporter.h"
+#include "softbus_init_common.h"
 #include "softbus_proxychannel_manager.h"
-#include "softbus_qos.h"
 #include "softbus_wifi_api_adapter.h"
 #include "trans_auth_manager.h"
 #include "trans_client_proxy.h"
 #include "trans_event.h"
+#include "g_enhance_trans_func_pack.h"
+#include "trans_ipc_adapter.h"
 #include "trans_lane_manager.h"
 #include "trans_lane_pending_ctl.h"
 #include "trans_log.h"
 #include "trans_session_account_adapter.h"
+#include "trans_session_ipc_adapter.h"
 #include "trans_session_manager.h"
 #include "trans_tcp_direct_manager.h"
 #include "trans_tcp_direct_sessionconn.h"
 #include "trans_udp_channel_manager.h"
 #include "trans_udp_negotiation.h"
+#include "trans_uk_manager.h"
 #include "wifi_direct_manager.h"
-
-#define DMS_UID 5522
-#define DMS_SESSIONNAME "ohos.distributedschedule.dms.connect"
 
 typedef struct {
     int32_t channelType;
@@ -154,15 +158,30 @@ static ChannelType TransGetChannelType(const SessionParam *param, const int32_t 
         return CHANNEL_TYPE_BUTT;
     }
 
-    if (type == LANE_BR || type == LANE_BLE || type == LANE_BLE_DIRECT || type == LANE_COC || type == LANE_COC_DIRECT) {
+    if (type == LANE_BR || type == LANE_BLE || type == LANE_BLE_DIRECT || type == LANE_COC ||
+        type == LANE_COC_DIRECT || type == LANE_SLE || type == LANE_SLE_DIRECT) {
         return CHANNEL_TYPE_PROXY;
     } else if (transType == LANE_T_FILE || transType == LANE_T_COMMON_VIDEO || transType == LANE_T_COMMON_VOICE ||
         transType == LANE_T_RAW_STREAM) {
         return CHANNEL_TYPE_UDP;
-    } else if ((transType == LANE_T_MSG) && (type != LANE_P2P) && (type != LANE_P2P_REUSE) && (type != LANE_HML)) {
-        return CHANNEL_TYPE_PROXY;
     }
     return CHANNEL_TYPE_TCP_DIRECT;
+}
+
+static void TransGetAccessInfo(AppInfo *appInfo)
+{
+    int32_t ret = GetAccessInfoBySessionName(appInfo->myData.sessionName, &appInfo->myData.userId,
+        &appInfo->myData.tokenId, NULL, appInfo->extraAccessInfo);
+    if (ret != SOFTBUS_OK) {
+        TRANS_LOGE(TRANS_CTRL, "get access info fail, ret=%{public}d", ret);
+        return;
+    }
+    uint32_t size = 0;
+    ret = GetLocalAccountUidByUserId(appInfo->myData.accountId, ACCOUNT_UID_LEN_MAX, &size, appInfo->myData.userId);
+    if (ret != SOFTBUS_OK) {
+        TRANS_LOGW(TRANS_CTRL, "get accountId by userId=%{public}d failed, ret=%{public}d",
+            appInfo->myData.userId, ret);
+    }
 }
 
 void FillAppInfo(AppInfo *appInfo, const SessionParam *param, TransInfo *transInfo, const LaneConnInfo *connInfo)
@@ -171,10 +190,26 @@ void FillAppInfo(AppInfo *appInfo, const SessionParam *param, TransInfo *transIn
         TRANS_LOGE(TRANS_CTRL, "Invalid param");
         return;
     }
+    int32_t ret = SOFTBUS_OK;
     transInfo->channelType = TransGetChannelType(param, connInfo->type);
     appInfo->linkType = connInfo->type;
     appInfo->channelType = transInfo->channelType;
+    appInfo->flowInfo.flowSize = param->flowInfo.flowSize;
+    appInfo->flowInfo.sessionType = param->flowInfo.sessionType;
+    appInfo->flowInfo.flowQosType = param->flowInfo.flowQosType;
     (void)TransCommonGetLocalConfig(appInfo->channelType, appInfo->businessType, &appInfo->myData.dataConfig);
+    if (connInfo->isLowLatency && CheckHtpPermissionPacked(appInfo->myData.uid)) {
+        appInfo->isFlashLight = true;
+        struct WifiDirectManager *mgr = GetWifiDirectManager();
+        if (mgr != NULL && mgr->getLocalAndRemoteMacByRemoteIp != NULL) {
+            ret = mgr->getLocalAndRemoteMacByRemoteIp(
+                connInfo->connInfo.p2p.peerIp, appInfo->myData.mac, MAC_LEN, appInfo->peerData.mac, MAC_LEN);
+            if (ret != SOFTBUS_OK) {
+                TRANS_LOGE(TRANS_CTRL, "get local and remote mac by local ip failed, ret=%{public}d", ret);
+                return;
+            }
+        }
+    }
     if (connInfo->type == LANE_P2P || connInfo->type == LANE_HML) {
         if (strcpy_s(appInfo->myData.addr, IP_LEN, connInfo->connInfo.p2p.localIp) != EOK) {
             TRANS_LOGE(TRANS_CTRL, "copy local ip failed");
@@ -182,11 +217,17 @@ void FillAppInfo(AppInfo *appInfo, const SessionParam *param, TransInfo *transIn
     } else if (connInfo->type == LANE_P2P_REUSE) {
         struct WifiDirectManager *mgr = GetWifiDirectManager();
         if (mgr != NULL && mgr->getLocalIpByRemoteIp != NULL) {
-            int32_t ret = mgr->getLocalIpByRemoteIp(connInfo->connInfo.wlan.addr, appInfo->myData.addr, IP_LEN);
+            ret = mgr->getLocalIpByRemoteIp(connInfo->connInfo.wlan.addr, appInfo->myData.addr, IP_LEN);
             if (ret != SOFTBUS_OK) {
-                TRANS_LOGE(TRANS_CTRL, "get Local Ip fail, ret = %{public}d", ret);
+                TRANS_LOGE(TRANS_CTRL, "get Local Ip fail, ret=%{public}d", ret);
+                return;
             }
         }
+    }
+    TransGetAccessInfo(appInfo);
+    if (GetUkPolicy(appInfo) == NO_NEED_UK) {
+        TRANS_LOGI(TRANS_CTRL, "No need sink generate key.");
+        DisableCapabilityBit(&(appInfo->channelCapability), TRANS_CHANNEL_SINK_GENERATE_KEY_OFFSET);
     }
 }
 
@@ -322,8 +363,10 @@ int32_t TransCommonGetAppInfo(const SessionParam *param, AppInfo *appInfo)
     appInfo->myHandleId = -1;
     appInfo->peerHandleId = -1;
     appInfo->timeStart = GetSoftbusRecordTimeMillis();
-    appInfo->callingTokenId = TransACLGetCallingTokenID();
+    appInfo->callingTokenId = appInfo->myData.pid == getpid() ? 0 : TransAclGetCallingTokenID();
     appInfo->isClient = true;
+    appInfo->channelCapability = TRANS_CHANNEL_CAPABILITY;
+    appInfo->isLowLatency = param->isLowLatency;
     TRANS_LOGD(TRANS_CTRL, "GetAppInfo ok");
     return SOFTBUS_OK;
 }
@@ -341,6 +384,7 @@ void TransOpenChannelSetModule(int32_t channelType, ConnectOption *connOpt)
     } else if (channelType == CHANNEL_TYPE_TCP_DIRECT) {
         module = LnnGetProtocolListenerModule(connOpt->socketOption.protocol, LNN_LISTENER_MODE_DIRECT);
     }
+    TRANS_LOGI(TRANS_CTRL, "moduleId=%{public}d, channelType=%{public}d", connOpt->socketOption.moduleId, channelType);
     if (module != UNUSE_BUTT) {
         connOpt->socketOption.moduleId = module;
     }
@@ -349,6 +393,10 @@ void TransOpenChannelSetModule(int32_t channelType, ConnectOption *connOpt)
 
 int32_t TransOpenChannelProc(ChannelType type, AppInfo *appInfo, const ConnectOption *connOpt, int32_t *channelId)
 {
+    if (appInfo == NULL || connOpt == NULL) {
+        TRANS_LOGE(TRANS_CTRL, "invalid param.");
+        return SOFTBUS_INVALID_PARAM;
+    }
     if (type == CHANNEL_TYPE_BUTT) {
         TRANS_LOGE(TRANS_CTRL, "open invalid channel type.");
         return SOFTBUS_TRANS_INVALID_CHANNEL_TYPE;
@@ -427,13 +475,14 @@ int32_t TransCommonCloseChannel(const char *sessionName, int32_t channelId, int3
                 (void)TransLaneMgrDelLane(channelId, channelType, false);
                 break;
             case CHANNEL_TYPE_TCP_DIRECT:
+                CloseHtpChannelPacked(channelId);
                 (void)TransDelTcpChannelInfoByChannelId(channelId);
                 TransDelSessionConnById(channelId); // socket Fd will be shutdown when recv peer reply
                 (void)TransLaneMgrDelLane(channelId, channelType, false);
                 ret = SOFTBUS_OK;
                 break;
             case CHANNEL_TYPE_UDP:
-                (void)NotifyQosChannelClosed(channelId, channelType);
+                (void)NotifyQosChannelClosedPacked(channelId, channelType);
                 ret = TransCloseUdpChannel(channelId);
                 (void)TransLaneMgrDelLane(channelId, channelType, false);
                 break;
@@ -645,16 +694,16 @@ static int32_t GetSinkRelation(const AppInfo *appInfo, CollabInfo *sinkInfo)
         TRANS_LOGE(TRANS_CTRL, "LnnGetLocalStrInfo failed.");
         return ret;
     }
-    ret = GetCurrentAccount(&sinkInfo->accountId);
-    if (ret != SOFTBUS_OK) {
-        TRANS_LOGW(TRANS_CTRL, "get current account failed.");
-        sinkInfo->accountId = INVALID_ACCOUNT_ID;
-    }
     sinkInfo->pid = appInfo->myData.pid;
-    sinkInfo->userId = TransGetForegroundUserId();
+    sinkInfo->userId = TransGetUserIdFromSessionName(appInfo->myData.sessionName);
     if (sinkInfo->userId == INVALID_USER_ID) {
         TRANS_LOGE(TRANS_CTRL, "get userId failed.");
         return SOFTBUS_TRANS_GET_LOCAL_UID_FAIL;
+    }
+    uint32_t size = 0;
+    ret = GetOsAccountUidByUserId(sinkInfo->accountId, ACCOUNT_UID_LEN_MAX - 1, &size, sinkInfo->userId);
+    if (ret != SOFTBUS_OK) {
+        TRANS_LOGW(TRANS_CTRL, "get current account failed.");
     }
     return SOFTBUS_OK;
 }
@@ -663,11 +712,61 @@ static void GetSourceRelation(const AppInfo *appInfo, CollabInfo *sourceInfo)
 {
     sourceInfo->tokenId = appInfo->callingTokenId;
     sourceInfo->pid = appInfo->peerData.pid;
-    sourceInfo->accountId = appInfo->peerData.accountId;
+    if (strcpy_s(sourceInfo->accountId, sizeof(sourceInfo->accountId), appInfo->peerData.accountId) != EOK) {
+        TRANS_LOGE(TRANS_CTRL, "get accountId failed.");
+    }
     sourceInfo->userId = appInfo->peerData.userId;
     char netWorkId[NETWORK_ID_BUF_LEN] = { 0 };
     (void)LnnGetNetworkIdByUuid(appInfo->peerData.deviceId, netWorkId, NETWORK_ID_BUF_LEN);
     (void)LnnGetRemoteStrInfo(netWorkId, STRING_KEY_DEV_UDID, sourceInfo->deviceId, UDID_BUF_LEN);
+}
+
+int32_t CheckSourceCollabRelation(const char *sinkNetworkId, int32_t sourcePid, int32_t sourceUid)
+{
+    if (sinkNetworkId == NULL) {
+        TRANS_LOGE(TRANS_CTRL, "invalid param, sinkNetworkId is nullptr");
+        return SOFTBUS_INVALID_PARAM;
+    }
+    int32_t dmsPid = 0;
+    int32_t ret = SOFTBUS_OK;
+    CollabInfo sourceInfo;
+    (void)memset_s(&sourceInfo, sizeof(CollabInfo), 0, sizeof(CollabInfo));
+    TransInfo transInfo = {.channelId = -1, .channelType = -1};
+    char dmsPkgName[PKG_NAME_SIZE_MAX] = {0};
+    ret = LnnGetLocalStrInfo(STRING_KEY_DEV_UDID, sourceInfo.deviceId, UDID_BUF_LEN);
+    if (ret != SOFTBUS_OK) {
+        COMM_LOGE(COMM_SVC, "get sourceInfo udid failed. ret=%{public}d", ret);
+        return ret;
+    }
+    sourceInfo.userId = TransGetUserIdFromUid(sourceUid);
+    if (sourceInfo.userId == INVALID_USER_ID) {
+        TRANS_LOGE(TRANS_CTRL, "get userId failed.");
+        return SOFTBUS_TRANS_GET_LOCAL_UID_FAIL;
+    }
+    uint32_t size = 0;
+    ret = GetOsAccountUidByUserId(sourceInfo.accountId, ACCOUNT_UID_LEN_MAX - 1, &size, sourceInfo.userId);
+    if (ret != SOFTBUS_OK) {
+        COMM_LOGE(COMM_SVC, "get current account failed. ret=%{public}d", ret);
+    }
+    ret = TransGetCallingFullTokenId(&sourceInfo.tokenId);
+    if (ret != SOFTBUS_OK) {
+        COMM_LOGE(COMM_SVC, "get callingTokenId failed. ret=%{public}d", ret);
+        return ret;
+    }
+    sourceInfo.pid = sourcePid;
+
+    TransGetPidAndPkgName(DMS_SESSIONNAME, DMS_UID, &dmsPid, dmsPkgName, PKG_NAME_SIZE_MAX);
+    CollabInfo sinkInfo;
+    (void)memset_s(&sinkInfo, sizeof(CollabInfo), 0, sizeof(CollabInfo));
+    sinkInfo.pid = -1;
+    (void)LnnGetRemoteStrInfo(sinkNetworkId, STRING_KEY_DEV_UDID, sinkInfo.deviceId, UDID_BUF_LEN);
+    ret = ClientIpcCheckCollabRelation(dmsPkgName, dmsPid, &sourceInfo, &sinkInfo, &transInfo);
+    if (ret != SOFTBUS_OK) {
+        COMM_LOGE(COMM_SVC, "channelId=%{public}d check Collaboration relation fail, ret=%{public}d",
+            transInfo.channelId, ret);
+        return ret;
+    }
+    return SOFTBUS_OK;
 }
 
 int32_t CheckCollabRelation(const AppInfo *appInfo, int32_t channelId, int32_t channelType)
@@ -677,22 +776,24 @@ int32_t CheckCollabRelation(const AppInfo *appInfo, int32_t channelId, int32_t c
         return SOFTBUS_INVALID_PARAM;
     }
 
+    CollabInfo sourceInfo;
+    (void)memset_s(&sourceInfo, sizeof(CollabInfo), 0, sizeof(CollabInfo));
+    GetSourceRelation(appInfo, &sourceInfo);
+    if (sourceInfo.userId == INVALID_USER_ID) {
+        TRANS_LOGW(TRANS_CTRL, "userId is invalid.");
+        return SOFTBUS_TRANS_NOT_NEED_CHECK_RELATION;
+    }
+
     CollabInfo sinkInfo;
     (void)memset_s(&sinkInfo, sizeof(CollabInfo), 0, sizeof(CollabInfo));
+    sinkInfo.pid = -1;
     int32_t ret = GetSinkRelation(appInfo, &sinkInfo);
     if (ret != SOFTBUS_OK) {
         TRANS_LOGE(TRANS_CTRL, "get sink relation failed.");
         return ret;
     }
-    if (!SoftBusCheckIsApp(sinkInfo.tokenId, appInfo->myData.sessionName)) {
+    if (!SoftBusCheckIsCollabApp(sinkInfo.tokenId, appInfo->myData.sessionName)) {
         TRANS_LOGE(TRANS_CTRL, "check is not app.");
-        return SOFTBUS_TRANS_NOT_NEED_CHECK_RELATION;
-    }
-    CollabInfo sourceInfo;
-    (void)memset_s(&sourceInfo, sizeof(CollabInfo), 0, sizeof(CollabInfo));
-    GetSourceRelation(appInfo, &sourceInfo);
-    if (sourceInfo.userId == DEFAULT_USER_ID) {
-        TRANS_LOGE(TRANS_CTRL, "userId is invalid.");
         return SOFTBUS_TRANS_NOT_NEED_CHECK_RELATION;
     }
 

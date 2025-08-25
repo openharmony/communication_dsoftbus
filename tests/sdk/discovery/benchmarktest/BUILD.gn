@@ -12,7 +12,7 @@
 # limitations under the License.
 import("//build/test.gni")
 import("../../../../dsoftbus.gni")
-module_output_path = "dsoftbus/discovery"
+module_output_path = "dsoftbus/soft_bus/discovery"
 
 ohos_benchmarktest("DiscoveryTest") {
   module_out_path = module_output_path
@@ -33,6 +33,8 @@ ohos_benchmarktest("DiscoveryTest") {
       "access_token:libaccesstoken_sdk",
       "access_token:libnativetoken",
       "access_token:libtoken_setproc",
+      "cJSON:cjson_static",
+      "selinux_adapter:librestorecon",
     ]
   }
 }

@@ -1,4 +1,4 @@
-# Copyright (c) 2021-2024 Huawei Device Co., Ltd.
+# Copyright (c) 2021-2025 Huawei Device Co., Ltd.
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
 # You may obtain a copy of the License at
@@ -16,7 +16,7 @@ import("//build/ohos.gni")
 import("//build/test.gni")
 import("../../../../../dsoftbus.gni")
 
-module_output_path = "dsoftbus/discovery"
+module_output_path = "dsoftbus/soft_bus/discovery"
 
 ohos_unittest("DiscBleTest") {
   module_out_path = module_output_path
@@ -27,8 +27,10 @@ ohos_unittest("DiscBleTest") {
     "ble_mock.cpp",
     "bus_center_mock.cpp",
     "disc_ble_test.cpp",
+    "$dsoftbus_root_path/core/frame/init/src/g_enhance_adapter_func.c",
+    "$dsoftbus_root_path/core/frame/init/src/g_enhance_disc_func.c",
   ]
-  if (support_i18n && qemu_arm_disable) {
+  if (qemu_arm_disable) {
     sources += [
       "$dsoftbus_root_path/core/discovery/common/src/locale_config_wrapper.cpp",
     ]
@@ -37,13 +39,16 @@ ohos_unittest("DiscBleTest") {
   }
 
   include_dirs = [
+    "$dsoftbus_dfx_path/interface/include/form",
+    "$dsoftbus_root_path/components/nstackx/nstackx_ctrl/interface",
     "$dsoftbus_root_path/core/adapter/bus_center/include",
     "$dsoftbus_root_path/core/broadcast/common/include",
     "$dsoftbus_root_path/core/broadcast/scheduler/include",
     "$dsoftbus_root_path/core/broadcast/scheduler/interface",
-    "$dsoftbus_root_path/core/bus_center/lnn/lane_hub/lane_manager/include",
-    "$dsoftbus_root_path/core/bus_center/lnn/net_ledger/common/include",
     "$dsoftbus_root_path/core/bus_center/interface",
+    "$dsoftbus_root_path/core/bus_center/lnn/lane_hub/lane_manager/include",
+    "$dsoftbus_root_path/core/bus_center/lnn/net_builder/include",
+    "$dsoftbus_root_path/core/bus_center/lnn/net_ledger/common/include",
     "$dsoftbus_root_path/core/common/include",
     "$dsoftbus_root_path/core/discovery/ble/dispatcher/include",
     "$dsoftbus_root_path/core/discovery/ble/softbus_ble/include",
@@ -51,10 +56,15 @@ ohos_unittest("DiscBleTest") {
     "$dsoftbus_root_path/core/discovery/common/include",
     "$dsoftbus_root_path/core/discovery/interface",
     "$dsoftbus_root_path/core/discovery/manager/include",
+    "$dsoftbus_root_path/core/discovery/usb/dispatcher/include",
+    "$dsoftbus_root_path/core/frame/init/include",
     "$dsoftbus_root_path/interfaces/inner_kits/lnn",
-    "$dsoftbus_root_path/interfaces/kits/common",
+    "$dsoftbus_root_path/interfaces/kits/broadcast",
     "$dsoftbus_root_path/interfaces/kits/bus_center",
+    "$dsoftbus_root_path/interfaces/kits/common",
+    "$dsoftbus_root_path/interfaces/kits/disc",
     "$dsoftbus_root_path/interfaces/kits/discovery",
+    "$dsoftbus_root_path/interfaces/kits/lnn",
     "$softbus_adapter_common/include",
     "$softbus_adapter_common/net/bluetooth/broadcast/interface",
     "$softbus_adapter_common/net/bluetooth/include",
@@ -70,9 +80,10 @@ ohos_unittest("DiscBleTest") {
     "googletest:gtest_main",
     "hilog:libhilog",
     "huks:libhukssdk",
+    "init:libbegetutil",
   ]
-  if (support_i18n && qemu_arm_disable) {
-    external_deps += [ "i18n:intl_util" ]
+  if (is_standard_system && has_ces_part) {
+    external_deps += [ "common_event_service:cesfwk_innerkits" ]
   }
 }
 

@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2022-2023 Huawei Device Co., Ltd.
+ * Copyright (c) 2022-2025 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -31,7 +31,7 @@
 #include "lnn_deviceinfo_to_profile.h"
 #include "lnn_devicename_info.h"
 #include "lnn_distributed_net_ledger.h"
-#include "lnn_fast_offline.h"
+#include "lnn_fast_offline_struct.h"
 #include "lnn_local_net_ledger.h"
 #include "lnn_net_capability.h"
 #include "lnn_network_id.h"
@@ -61,7 +61,6 @@ class NetBuilderDepsInterface {
 public:
     NetBuilderDepsInterface() {};
     virtual ~NetBuilderDepsInterface() {};
-    virtual int32_t LnnGetSettingDeviceName(char *deviceName, uint32_t len) = 0;
     virtual int32_t AuthGetDeviceUuid(int64_t authId, char *uuid, uint16_t size) = 0;
     virtual int32_t LnnDeleteMetaInfo(const char *udid, AuthLinkType type) = 0;
     virtual int32_t TransGetConnByChanId(int32_t channelId, int32_t channelType, int32_t *connId) = 0;
@@ -90,8 +89,8 @@ public:
         ConnectionAddr *addr, const AuthConnInfo *connInfo, ConnectionAddrType hintType);
     virtual bool AddStringToJsonObject(cJSON *json, const char * const string, const char *value);
     virtual bool AddNumberToJsonObject(cJSON *json, const char * const string, int32_t num);
-    virtual int32_t LnnSendSyncInfoMsg(LnnSyncInfoType type, const char *networkId, const uint8_t *msg, uint32_t len,
-        LnnSyncInfoMsgComplete complete);
+    virtual int32_t LnnSendSyncInfoMsg(
+        LnnSyncInfoType type, const char *networkId, const uint8_t *msg, uint32_t len, LnnSyncInfoMsgComplete complete);
     virtual NodeInfo *LnnGetNodeInfoById(const char *id, IdCategory type);
     virtual int32_t LnnUpdateNodeInfo(NodeInfo *newInfo, int32_t connectionType);
     virtual int32_t LnnAddMetaInfo(NodeInfo *info);
@@ -117,8 +116,8 @@ public:
         SoftBusLooper *looper, LnnAsyncCallbackFunc callback, void *para, uint64_t delayMillis);
     virtual SoftBusLooper *GetLooper(int32_t looper);
     virtual int32_t ConnDisconnectDeviceAllConn(const ConnectOption *option);
-    virtual int32_t LnnGenLocalIrk(unsigned char *irk, uint32_t len);
-    virtual int32_t LnnGenLocalUuid(char *uuid, uint32_t len);
+    virtual int32_t LnnGenLocalIrk(unsigned char *irk, uint32_t len, bool isUpdate);
+    virtual int32_t LnnGenLocalUuid(char *uuid, uint32_t len, bool isUpdate);
     virtual int32_t LnnGenLocalNetworkId(char *networkId, uint32_t len);
     virtual int32_t LnnSetDLNodeAddr(const char *id, IdCategory type, const char *addr);
     virtual int32_t LnnSetDLProxyPort(const char *id, IdCategory type, int32_t proxyPort);
@@ -148,7 +147,7 @@ public:
     virtual int32_t LnnSendSyncOfflineFinishToConnFsm(LnnConnectionFsm *connFsm);
     virtual int32_t LnnGetLocalWeight(void);
     virtual void AuthMetaReleaseVerify(int64_t authId);
-    virtual int32_t LnnSendJoinRequestToConnFsm(LnnConnectionFsm *connFsm);
+    virtual int32_t LnnSendJoinRequestToConnFsm(LnnConnectionFsm *connFsm, bool isForceJoin);
     virtual void LnnNotifyJoinResult(ConnectionAddr *addr, const char *networkId, int32_t retCode);
     virtual void LnnDestroyConnectionFsm(LnnConnectionFsm *connFsm);
     virtual int32_t LnnStartConnectionFsm(LnnConnectionFsm *connFsm);
@@ -188,11 +187,15 @@ public:
     virtual bool LnnConvertAddrToAuthConnInfo(const ConnectionAddr *addr, AuthConnInfo *connInfo);
     virtual int32_t LnnFsmRemoveMessageByType(FsmStateMachine *fsm, int32_t what);
     virtual void LnnDeinitBusCenterEvent(void);
-    virtual int32_t AuthStartVerify(const AuthConnInfo *connInfo, uint32_t requestId,
-        const AuthVerifyCallback *callback, AuthVerifyModule module, bool isFastAuth);
+    virtual int32_t AuthStartVerify(
+        const AuthConnInfo *connInfo, const AuthVerifyParam *authVerifyParam, const AuthVerifyCallback *callback);
     virtual bool IsSupportLpFeature(void);
-    virtual bool LnnSubcribeKvStoreService(void);
+    virtual int32_t LnnSubcribeKvStoreService(void);
     virtual void LnnNotifyLocalNetworkIdChanged(void);
+    virtual int32_t TransAuthGetConnIdByChanId(int32_t channelId, int32_t *connId) = 0;
+    virtual int32_t TransAuthGetPeerUdidByChanId(int32_t channelId, char *peerUdid, uint32_t len) = 0;
+    virtual void LnnNotifyStateForSession(char *udid, int32_t retCode) = 0;
+    virtual void AuthRemoveAuthManagerByAuthHandle(AuthHandle authHandle) = 0;
     virtual bool LnnIsDefaultOhosAccount() = 0;
     virtual void DeleteFromProfile(const char *udid) = 0;
     virtual int32_t SoftBusGenerateStrHash(const unsigned char *str, uint32_t len, unsigned char *hash) = 0;
@@ -204,15 +207,18 @@ public:
     virtual int32_t ProcessBleOnline(NodeInfo *nodeInfo, const ConnectionAddr *connAddr, AuthCapability authCapability);
     virtual int32_t CheckAuthChannelIsExit(ConnectOption *connInfo);
     virtual void GetLnnTriggerInfo(LnnTriggerInfo *triggerInfo) = 0;
+    virtual void LnnGetDataShareInitResult(bool *isDataShareInit) = 0;
     virtual int32_t LnnSetDLConnUserIdCheckSum(const char *networkId, int32_t userIdCheckSum) = 0;
     virtual void LnnNotifyDeviceTrustedChange(int32_t type, const char *msg, uint32_t msgLen) = 0;
-    virtual void LnnGetDataShareInitResult(bool *isDataShareInit) = 0;
+    virtual int32_t LnnInitSaStatusMonitor(void) = 0;
+    virtual void LnnDeInitSaStatusMonitor(void) = 0;
+    virtual int32_t LnnGetLocalStrInfoByIfnameIdx(InfoKey key, char *info, uint32_t len, int32_t ifIdx) = 0;
+    virtual bool IsSameAccountId(int64_t accountId) = 0;
 };
 class NetBuilderDepsInterfaceMock : public NetBuilderDepsInterface {
 public:
     NetBuilderDepsInterfaceMock();
     ~NetBuilderDepsInterfaceMock() override;
-    MOCK_METHOD2(LnnGetSettingDeviceName, int32_t (char *, uint32_t));
     MOCK_METHOD3(AuthGetDeviceUuid, int32_t(int64_t, char *, uint16_t));
     MOCK_METHOD2(LnnDeleteMetaInfo, int32_t(const char *, AuthLinkType));
     MOCK_METHOD3(TransGetConnByChanId, int32_t(int32_t, int32_t, int32_t *));
@@ -242,6 +248,7 @@ public:
         LnnSendSyncInfoMsg, int32_t(LnnSyncInfoType, const char *, const uint8_t *, uint32_t, LnnSyncInfoMsgComplete));
     MOCK_METHOD2(LnnGetNodeInfoById, NodeInfo *(const char *, IdCategory));
     MOCK_METHOD2(LnnUpdateNodeInfo, int32_t(NodeInfo *, int32_t));
+    MOCK_METHOD1(LnnUpdateRemoteDeviceName, int32_t(const NodeInfo *));
     MOCK_METHOD1(LnnAddMetaInfo, int32_t(NodeInfo *));
     MOCK_METHOD3(AuthGetLatestAuthSeqList, int32_t(const char *, int64_t *, uint32_t));
     MOCK_METHOD5(LnnConvertDlId, int32_t(const char *, IdCategory, IdCategory, char *, uint32_t));
@@ -261,8 +268,8 @@ public:
     MOCK_METHOD4(LnnAsyncCallbackDelayHelper, int32_t(SoftBusLooper *, LnnAsyncCallbackFunc, void *, uint64_t));
     MOCK_METHOD1(GetLooper, SoftBusLooper *(int));
     MOCK_METHOD1(ConnDisconnectDeviceAllConn, int32_t(const ConnectOption *));
-    MOCK_METHOD2(LnnGenLocalUuid, int32_t(char *, uint32_t));
-    MOCK_METHOD2(LnnGenLocalIrk, int32_t(unsigned char *, uint32_t));
+    MOCK_METHOD3(LnnGenLocalUuid, int32_t(char *, uint32_t, bool));
+    MOCK_METHOD3(LnnGenLocalIrk, int32_t(unsigned char *, uint32_t, bool));
     MOCK_METHOD2(LnnGenLocalNetworkId, int32_t(char *, uint32_t));
     MOCK_METHOD3(LnnSetDLNodeAddr, int32_t(const char *, IdCategory, const char *));
     MOCK_METHOD3(LnnSetDLProxyPort, int32_t(const char *, IdCategory, int32_t));
@@ -292,7 +299,7 @@ public:
     MOCK_METHOD1(LnnSendSyncOfflineFinishToConnFsm, int32_t(LnnConnectionFsm *));
     MOCK_METHOD0(LnnGetLocalWeight, int32_t());
     MOCK_METHOD1(AuthMetaReleaseVerify, void(int64_t));
-    MOCK_METHOD1(LnnSendJoinRequestToConnFsm, int32_t(LnnConnectionFsm *));
+    MOCK_METHOD2(LnnSendJoinRequestToConnFsm, int32_t(LnnConnectionFsm *, bool));
     MOCK_METHOD3(LnnNotifyJoinResult, void(ConnectionAddr *, const char *, int32_t));
     MOCK_METHOD1(LnnDestroyConnectionFsm, void(LnnConnectionFsm *));
     MOCK_METHOD3(LnnCreateConnectionFsm,
@@ -317,7 +324,7 @@ public:
     MOCK_METHOD2(LnnUnregisterEventHandler, void(LnnEventType, LnnEventHandler));
     MOCK_METHOD1(LnnNotifyDeviceVerified, void(const char *));
     MOCK_METHOD0(LnnInitBusCenterEvent, int32_t());
-    MOCK_METHOD0(LnnSubcribeKvStoreService, bool());
+    MOCK_METHOD0(LnnSubcribeKvStoreService, int32_t());
     MOCK_METHOD0(LnnInitBatteryInfo, int32_t());
     MOCK_METHOD0(LnnDeinitBatteryInfo, void());
     MOCK_METHOD3(LnnSetLocalByteInfo, int32_t(InfoKey, const uint8_t *, uint32_t));
@@ -329,12 +336,10 @@ public:
     MOCK_METHOD1(LnnPrintConnectionAddr, const char *(const ConnectionAddr *));
     MOCK_METHOD1(LnnUpdateGroupType, int32_t(const NodeInfo *));
     MOCK_METHOD1(LnnUpdateAccountInfo, int32_t(const NodeInfo *));
-    MOCK_METHOD1(LnnUpdateRemoteDeviceName, int32_t(const NodeInfo *));
     MOCK_METHOD2(LnnConvertAddrToAuthConnInfo, bool(const ConnectionAddr *, AuthConnInfo *));
     MOCK_METHOD2(LnnFsmRemoveMessageByType, int32_t(FsmStateMachine *, int32_t));
     MOCK_METHOD0(LnnDeinitBusCenterEvent, void());
-    MOCK_METHOD5(
-        AuthStartVerify, int32_t(const AuthConnInfo *, uint32_t, const AuthVerifyCallback *, AuthVerifyModule, bool));
+    MOCK_METHOD3(AuthStartVerify, int32_t(const AuthConnInfo *, const AuthVerifyParam *, const AuthVerifyCallback *));
     MOCK_METHOD2(LnnIsNeedCleanConnectionFsm, bool(const NodeInfo *, ConnectionAddrType));
     MOCK_METHOD1(AuthFlushDevice, int32_t(const char *uuid));
     MOCK_METHOD0(IsSupportLpFeature, bool());
@@ -347,14 +352,21 @@ public:
     MOCK_METHOD2(LnnGetRemoteNodeInfoByKey, int32_t(const char *, NodeInfo *));
     MOCK_METHOD1(RegisterOOBEMonitor, void(void *p));
     MOCK_METHOD1(CheckAuthChannelIsExit, int32_t(ConnectOption *connInfo));
-    static int32_t ActionOfLnnGetSettingDeviceName(char *deviceName, uint32_t len);
     static int32_t ActionOfLnnGetAllOnlineNodeInfo(NodeBasicInfo **info, int32_t *infoNum);
     MOCK_METHOD1(CheckRemoteBasicInfoChanged, bool(const NodeInfo *));
+    MOCK_METHOD2(TransAuthGetConnIdByChanId, int32_t(int32_t, int32_t *));
+    MOCK_METHOD3(TransAuthGetPeerUdidByChanId, int32_t(int32_t, char *, uint32_t));
+    MOCK_METHOD2(LnnNotifyStateForSession, void(char *, int32_t));
+    MOCK_METHOD1(AuthRemoveAuthManagerByAuthHandle, void(AuthHandle));
     MOCK_METHOD3(ProcessBleOnline, int32_t(NodeInfo *, const ConnectionAddr *, AuthCapability));
     MOCK_METHOD1(GetLnnTriggerInfo, void(LnnTriggerInfo *));
+    MOCK_METHOD1(LnnGetDataShareInitResult, void(bool *));
     MOCK_METHOD2(LnnSetDLConnUserIdCheckSum, int32_t(const char *networkId, int32_t userIdCheckSum));
     MOCK_METHOD3(LnnNotifyDeviceTrustedChange, void(int32_t type, const char *msg, uint32_t msgLen));
-    MOCK_METHOD1(LnnGetDataShareInitResult, void(bool *));
+    MOCK_METHOD0(LnnInitSaStatusMonitor, int32_t());
+    MOCK_METHOD0(LnnDeInitSaStatusMonitor, void());
+    MOCK_METHOD4(LnnGetLocalStrInfoByIfnameIdx, int32_t(InfoKey, char *, uint32_t, int32_t));
+    MOCK_METHOD1(IsSameAccountId, bool(int64_t));
 };
 } // namespace OHOS
 #endif // LNN_NET_BUILDER_DEPS_MOCK_H

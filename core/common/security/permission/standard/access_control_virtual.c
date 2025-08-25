@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2023-2024 Huawei Device Co., Ltd.
+ * Copyright (c) 2023-2025 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -31,19 +31,10 @@ int32_t CheckSecLevelPublic(const char *mySessionName, const char *peerSessionNa
     return SOFTBUS_OK;
 }
 
-int32_t TransCheckServerAccessControl(uint64_t firstCallingId)
+int32_t TransCheckServerAccessControl(const AppInfo *appInfo)
 {
-    (void)firstCallingId;
+    (void)appInfo;
     return SOFTBUS_OK;
-}
-uint64_t TransACLGetFirstTokenID(void)
-{
-    return TOKENID_NOT_SET;
-}
-
-uint64_t TransACLGetCallingTokenID(void)
-{
-    return TOKENID_NOT_SET;
 }
 
 void TransGetTokenInfo(uint64_t callingId, char *tokenName, int32_t nameLen, int32_t *tokenType)

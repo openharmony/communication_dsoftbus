@@ -16,14 +16,7 @@
 #ifndef AUTH_SESSION_JSON_H
 #define AUTH_SESSION_JSON_H
 
-#include <stdint.h>
-#include <stdbool.h>
-
-#include "auth_interface.h"
-#include "auth_session_fsm.h"
 #include "auth_session_message.h"
-#include "lnn_node_info.h"
-#include "softbus_json_utils.h"
 
 #ifdef __cplusplus
 #if __cplusplus
@@ -31,8 +24,10 @@ extern "C" {
 #endif
 #endif
 
-char *PackDeviceIdJson(const AuthSessionInfo *info);
-int32_t UnpackDeviceIdJson(const char *msg, uint32_t len, AuthSessionInfo *info);
+#define AUTH_VERSION_VALUE AUTH_VERSION_V3
+
+char *PackDeviceIdJson(const AuthSessionInfo *info, int64_t authSeq);
+int32_t UnpackDeviceIdJson(const char *msg, uint32_t len, AuthSessionInfo *info, int64_t authSeq);
 bool GetUdidShortHash(const AuthSessionInfo *info, char *udidBuf, uint32_t bufLen);
 
 #ifdef __cplusplus

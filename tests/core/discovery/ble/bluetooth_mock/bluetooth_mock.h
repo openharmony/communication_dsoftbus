@@ -23,6 +23,7 @@
 
 #include "c_header/ohos_bt_gap.h"
 #include "c_header/ohos_bt_gatt.h"
+#include "c_header/ohos_bt_socket.h"
 
 namespace OHOS {
 using testing::NiceMock;
@@ -49,9 +50,14 @@ public:
     virtual int32_t BleStartScanEx(int32_t scannerId, const BleScanConfigs *configs, const BleScanNativeFilter *filter,
         uint32_t filterSize) = 0;
     virtual int32_t BleStopScan(int32_t scannerId) = 0;
+    virtual int32_t BleChangeScanParams(int32_t scannerId, const BleScanConfigs *config,
+        const BleScanNativeFilter *filter, uint32_t filterSize, uint32_t filterAction) = 0;
     virtual int32_t BleStartAdvEx(int32_t *advId, const StartAdvRawData rawData, BleAdvParams advParam) = 0;
     virtual int32_t BleStopAdv(int32_t advId) = 0;
     virtual int32_t BleSetAdvData(int32_t advId, const StartAdvRawData data) = 0;
+    virtual int32_t BleChangeAdvParams(int32_t advId, const BleAdvParams BleAdvParams) = 0;
+    virtual int32_t BleEnableAdvEx(int32_t advId) = 0;
+    virtual int32_t BleDisableAdvEx(int32_t advId) = 0;
     // lp
     virtual int32_t GetAdvHandle(int32_t advId, int32_t *advHandle) = 0;
     virtual int32_t EnableSyncDataToLpDevice() = 0;
@@ -61,6 +67,7 @@ public:
         int32_t bcHandle) = 0;
     virtual int32_t IsLpDeviceAvailable() = 0;
     virtual int32_t SetLpDeviceParam(const BtLpDeviceParam *lpParam) = 0;
+    virtual int32_t GetRandomAddress(const BdAddr *realAddr, BdAddr *randomAddr, uint64_t tokenId) = 0;
 };
 
 class BluetoothMock : public BluetoothInterface {
@@ -93,10 +100,16 @@ public:
     MOCK_METHOD(int32_t, BleStartScanEx, (int32_t scannerId, const BleScanConfigs *configs,
         const BleScanNativeFilter *filter, uint32_t filterSize), (override));
     MOCK_METHOD(int32_t, BleStopScan, (int32_t scannerId), (override));
+    MOCK_METHOD(int32_t, BleChangeScanParams, (int32_t scannerId, const BleScanConfigs *config,
+        const BleScanNativeFilter *filter, uint32_t filterSize,
+        uint32_t filterAction), (override));
     MOCK_METHOD(int32_t, BleStartAdvEx, (int32_t *advId, const StartAdvRawData rawData,
         BleAdvParams advParam), (override));
     MOCK_METHOD(int32_t, BleStopAdv, (int32_t advId), (override));
     MOCK_METHOD(int32_t, BleSetAdvData, (int32_t advId, const StartAdvRawData data), (override));
+    MOCK_METHOD(int32_t, BleChangeAdvParams, (int32_t advId, const BleAdvParams advParam), (override));
+    MOCK_METHOD(int32_t, BleEnableAdvEx, (int32_t advId), (override));
+    MOCK_METHOD(int32_t, BleDisableAdvEx, (int32_t advId), (override));
 
     MOCK_METHOD(int32_t, GetAdvHandle, (int32_t advId, int32_t *advHandle), (override));
     MOCK_METHOD(int32_t, EnableSyncDataToLpDevice, (), (override));
@@ -106,6 +119,8 @@ public:
         int32_t interval, int32_t bcHandle), (override));
     MOCK_METHOD(int32_t, IsLpDeviceAvailable, (), (override));
     MOCK_METHOD(int32_t, SetLpDeviceParam, (const BtLpDeviceParam *lpParam), (override));
+    MOCK_METHOD(int32_t, GetRandomAddress, (const BdAddr *realAddr,
+        BdAddr *randomAddr, uint64_t tokenId), (override));
 
     static BluetoothMock *GetMock(void);
     static bool ActionEnableBle(void);

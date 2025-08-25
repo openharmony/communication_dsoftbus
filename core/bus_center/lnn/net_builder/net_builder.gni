@@ -14,18 +14,13 @@
 import("../../../../dsoftbus.gni")
 
 native_source_path = rebase_path("$dsoftbus_root_path")
-lnn_dep_dir = "dsoftbus_enhance/core/bus_center/lnn/net_builder"
-enhanced = exec_script("$dsoftbus_root_path/check_sub_module.py",
-                       [
-                         "$native_source_path",
-                         "$lnn_dep_dir",
-                       ],
-                       "value")
 
 if (dsoftbus_feature_lnn_frame) {
   bus_center_builder_src = [
     "$dsoftbus_root_path/core/bus_center/lnn/net_builder/src/lnn_battery_info.c",
     "$dsoftbus_root_path/core/bus_center/lnn/net_builder/src/lnn_connection_fsm.c",
+    "$dsoftbus_root_path/core/bus_center/lnn/net_builder/src/lnn_connection_fsm_process.c",
+    "$dsoftbus_root_path/core/bus_center/lnn/net_builder/src/lnn_connId_callback_manager.c",
     "$dsoftbus_root_path/core/bus_center/lnn/net_builder/src/lnn_net_builder.c",
     "$dsoftbus_root_path/core/bus_center/lnn/net_builder/src/lnn_net_builder_init.c",
     "$dsoftbus_root_path/core/bus_center/lnn/net_builder/src/lnn_net_builder_process.c",
@@ -37,53 +32,24 @@ if (dsoftbus_feature_lnn_frame) {
     "$dsoftbus_root_path/core/bus_center/lnn/net_builder/src/lnn_devicename_info.c",
     "$dsoftbus_root_path/core/bus_center/lnn/net_builder/src/lnn_sync_item_info.c",
   ]
-  if (!enhanced) {
-    bus_center_builder_src += [
-      "$dsoftbus_root_path/core/bus_center/lnn/net_builder/src/lnn_fast_offline_virtual.c",
-      "$dsoftbus_root_path/core/bus_center/lnn/net_builder/src/lnn_cipherkey_manager_virtual.c",
-      "$dsoftbus_root_path/core/bus_center/lnn/net_builder/src/lnn_device_info_recovery_virtual.c",
-      "$dsoftbus_root_path/core/bus_center/lnn/net_builder/src/lnn_ptk_info_virtual.c",
-      "$dsoftbus_root_path/core/bus_center/utils/src/lnn_secure_storage.c",
-    ]
-    bus_center_builder_inc = []
-  } else {
-    import(
-        "$dsoftbus_root_path/dsoftbus_enhance/core/bus_center/lnn/net_builder/cipherkey/cipherkey.gni")
-    import(
-        "$dsoftbus_root_path/dsoftbus_enhance/core/bus_center/lnn/net_builder/ptk/ptk.gni")
-
-    bus_center_builder_src += cipherkey_sources + ptk_sources
-    bus_center_builder_src += [
-      "$dsoftbus_root_path/dsoftbus_enhance/core/bus_center/lnn/net_builder/fast_online/lnn_device_info_recovery.c",
-      "$dsoftbus_root_path/dsoftbus_enhance/core/bus_center/lnn/net_builder/fast_online/lnn_secure_storage.c",
-    ]
-    bus_center_builder_inc =
-        [ "$dsoftbus_root_path/dsoftbus_enhance/adapter/common/mlps/include" ]
-  }
 } else {
   bus_center_builder_src = [
     "$dsoftbus_root_path/core/bus_center/lnn/net_builder/src/lnn_net_virtual.c",
-    "$dsoftbus_root_path/core/bus_center/lnn/net_builder/src/lnn_device_info_recovery_virtual.c",
-    "$dsoftbus_root_path/core/bus_center/lnn/net_builder/src/lnn_fast_offline_virtual.c",
     "$dsoftbus_root_path/core/bus_center/lnn/net_builder/src/lnn_net_builder_virtual.c",
-    "$dsoftbus_root_path/core/bus_center/lnn/net_builder/src/lnn_cipherkey_manager_virtual.c",
-    "$dsoftbus_root_path/core/bus_center/lnn/net_builder/src/lnn_ptk_info_virtual.c",
-    "$dsoftbus_root_path/core/bus_center/utils/src/lnn_secure_storage.c",
   ]
   bus_center_builder_inc = []
 }
-bus_center_builder_inc += [
+bus_center_builder_inc = [
   "$dsoftbus_root_path/core/adapter/common/net/bluetooth/include",
   "$dsoftbus_root_path/core/adapter/bus_center/include",
+  "$dsoftbus_root_path/interfaces/kits/lnn",
   "$dsoftbus_root_path/core/bus_center/lnn/net_builder/include",
+  "$dsoftbus_root_path/interfaces/kits/lnn",
   "$dsoftbus_root_path/core/bus_center/lnn/net_ledger/local_ledger/include",
+  "$dsoftbus_root_path/interfaces/kits/adapter",
   "$dsoftbus_root_path/adapter/common/net/bluetooth/broadcast/interface",
 ]
 bus_center_builder_deps = []
-
-if (dsoftbus_feature_lnn_frame && enhanced) {
-  bus_center_builder_deps += [ "$dsoftbus_root_path/dsoftbus_enhance/core/bus_center/lnn/net_builder/fast_offline:fast_offline" ]
-}
 
 if (dsoftbus_feature_lnn_cloud_sync) {
   bus_center_builder_src += [ "$dsoftbus_root_path/core/bus_center/lnn/net_builder/src/lnn_data_cloud_sync.c" ]

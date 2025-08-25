@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2024 Huawei Device Co., Ltd.
+ * Copyright (c) 2024-2025 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -188,7 +188,7 @@ HWTEST_F(TransLaneCommonTest, TransGetChannelType001, TestSize.Level1)
 
     type = LANE_WLAN_5G;
     ret = TransGetChannelType(&MsgParam, type);
-    EXPECT_EQ(CHANNEL_TYPE_PROXY, ret);
+    EXPECT_EQ(CHANNEL_TYPE_TCP_DIRECT, ret);
 }
 
 /**
@@ -541,7 +541,7 @@ HWTEST_F(TransLaneCommonTest, TransCommonGetAppInfo002, TestSize.Level1)
     EXPECT_CALL(TransLaneCommonMock, TransGetPkgNameBySessionName).WillOnce(Return(SOFTBUS_OK));
     EXPECT_CALL(TransLaneCommonMock, LnnGetRemoteStrInfo).WillRepeatedly(Return(SOFTBUS_OK));
     EXPECT_CALL(TransLaneCommonMock, LnnGetOsTypeByNetworkId).WillOnce(Return(SOFTBUS_OK));
-    EXPECT_CALL(TransLaneCommonMock, LnnGetRemoteNodeInfoById).WillOnce(Return(SOFTBUS_TRANS_BAD_KEY));
+    EXPECT_CALL(TransLaneCommonMock, LnnGetRemoteNodeInfoById).WillRepeatedly(Return(SOFTBUS_TRANS_BAD_KEY));
     ret = TransCommonGetAppInfo(param, appInfo);
     EXPECT_EQ(ret, SOFTBUS_OK);
 
@@ -922,5 +922,17 @@ HWTEST_F(TransLaneCommonTest, TransReportBadKeyEvent001, TestSize.Level1)
     bool ret = IsPeerDeviceLegacyOs(osType);
     EXPECT_EQ(ret, false);
     TransReportBadKeyEvent(errCode, connectionId, seq, len);
+}
+
+/**
+ * @tc.name: CheckSourceCollabRelationTest001
+ * @tc.desc: test CheckSourceCollabRelation
+ * @tc.type: FUNC
+ * @tc.require:
+ */
+HWTEST_F(TransLaneCommonTest, CheckSourceCollabRelationTest001, TestSize.Level1)
+{
+    int32_t ret = CheckSourceCollabRelation(nullptr, TEST_PID, TEST_UID);
+    EXPECT_EQ(ret, SOFTBUS_INVALID_PARAM);
 }
 } // namespace OHOS

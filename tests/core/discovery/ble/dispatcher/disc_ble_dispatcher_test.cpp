@@ -159,7 +159,7 @@ static int32_t StopAdvertiseA(const SubscribeOption *option)
     return SOFTBUS_DISCOVER_TEST_CASE_ERRCODE;
 }
 
-static void LinkStatusChangedA(LinkStatus status)
+static void LinkStatusChangedA(LinkStatus status, int32_t ifnameIdx)
 {
     g_interfaceFunCntA.linkStatusChangedCntA = 1;
 }
@@ -260,7 +260,7 @@ static SubscribeOption g_sOption0 = { .freq = 1,
 static PublishOption g_pOption1 = {
     .freq = 1,
     .capabilityBitmap = {1},
-    .capabilityData = NULL,
+    .capabilityData = nullptr,
     .dataLen = 0,
     .ranging = true
 };
@@ -269,13 +269,13 @@ static SubscribeOption g_sOption1 = { .freq = 1,
     .isSameAccount = true,
     .isWakeRemote = false,
     .capabilityBitmap = { 1 },
-    .capabilityData = NULL,
+    .capabilityData = nullptr,
     .dataLen = 0 };
 
 static PublishOption g_pOption2 = {
     .freq = 1,
     .capabilityBitmap = {2},
-    .capabilityData = NULL,
+    .capabilityData = nullptr,
     .dataLen = 0,
     .ranging = true
 };
@@ -284,13 +284,14 @@ static SubscribeOption g_sOption2 = { .freq = 1,
     .isSameAccount = true,
     .isWakeRemote = false,
     .capabilityBitmap = { 2 },
-    .capabilityData = NULL,
-    .dataLen = 0 };
+    .capabilityData = nullptr,
+    .dataLen = 0
+};
 
 static PublishOption g_pOption3 = {
     .freq = 1,
     .capabilityBitmap = {3},
-    .capabilityData = NULL,
+    .capabilityData = nullptr,
     .dataLen = 0,
     .ranging = true
 };
@@ -299,7 +300,7 @@ static SubscribeOption g_sOption3 = { .freq = 1,
     .isSameAccount = true,
     .isWakeRemote = false,
     .capabilityBitmap = { 3 },
-    .capabilityData = NULL,
+    .capabilityData = nullptr,
     .dataLen = 0 };
 
 class DiscBleDispatcherTest : public testing::Test {
@@ -357,14 +358,14 @@ void DiscBleDispatcherTest::SetUp(void) { }
 void DiscBleDispatcherTest::TearDown(void) { }
 
 /*
- * @tc.name: testDiscPublish001
+ * @tc.name: DiscPublish001
  * @tc.desc: test dispatcher
  * @tc.type: FUNC
  * @tc.require:
  */
-HWTEST_F(DiscBleDispatcherTest, testDiscPublish001, TestSize.Level1)
+HWTEST_F(DiscBleDispatcherTest, DiscPublish001, TestSize.Level1)
 {
-    printf("testDiscPublish001\r\n");
+    printf("DiscPublish001\r\n");
     DiscoveryFuncInterface *interface = DiscBleInitForTest(&g_interfaceA, &g_interfaceB);
     int32_t ret;
     int32_t beforeFunCntA;
@@ -410,14 +411,14 @@ HWTEST_F(DiscBleDispatcherTest, testDiscPublish001, TestSize.Level1)
 };
 
 /*
- * @tc.name: testDiscovery001
+ * @tc.name: Discovery001
  * @tc.desc: test dispatcher
  * @tc.type: FUNC
  * @tc.require:
  */
-HWTEST_F(DiscBleDispatcherTest, testDiscovery001, TestSize.Level1)
+HWTEST_F(DiscBleDispatcherTest, Discovery001, TestSize.Level1)
 {
-    printf("testDiscovery001\r\n");
+    printf("Discovery001\r\n");
     DiscoveryFuncInterface *interface = DiscBleInitForTest(&g_interfaceA, &g_interfaceB);
     int32_t ret;
     int32_t beforeFunCntA;
@@ -463,14 +464,14 @@ HWTEST_F(DiscBleDispatcherTest, testDiscovery001, TestSize.Level1)
 };
 
 /*
- * @tc.name: testDiscPublish002
+ * @tc.name: DiscPublish002
  * @tc.desc: test dispatcher
  * @tc.type: FUNC
  * @tc.require:
  */
-HWTEST_F(DiscBleDispatcherTest, testDiscPublish002, TestSize.Level1)
+HWTEST_F(DiscBleDispatcherTest, DiscPublish002, TestSize.Level1)
 {
-    printf("testDiscPublish002\r\n");
+    printf("DiscPublish002\r\n");
     DiscoveryFuncInterface *interface = DiscBleInitForTest(&g_interfaceA, &g_interfaceB);
     int32_t ret;
     int32_t beforeFunCntA;
@@ -516,14 +517,14 @@ HWTEST_F(DiscBleDispatcherTest, testDiscPublish002, TestSize.Level1)
 };
 
 /*
- * @tc.name: testDiscovery002
+ * @tc.name: Discovery002
  * @tc.desc: test dispatcher
  * @tc.type: FUNC
  * @tc.require:
  */
-HWTEST_F(DiscBleDispatcherTest, testDiscovery002, TestSize.Level1)
+HWTEST_F(DiscBleDispatcherTest, Discovery002, TestSize.Level1)
 {
-    printf("testDiscovery002\r\n");
+    printf("Discovery002\r\n");
     DiscoveryFuncInterface *interface = DiscBleInitForTest(&g_interfaceA, &g_interfaceB);
     int32_t ret;
     int32_t beforeFunCntA;
@@ -569,14 +570,14 @@ HWTEST_F(DiscBleDispatcherTest, testDiscovery002, TestSize.Level1)
 };
 
 /*
- * @tc.name: testDiscPublish003
+ * @tc.name: DiscPublish003
  * @tc.desc: test dispatcher
  * @tc.type: FUNC
  * @tc.require:
  */
-HWTEST_F(DiscBleDispatcherTest, testDiscPublish003, TestSize.Level1)
+HWTEST_F(DiscBleDispatcherTest, DiscPublish003, TestSize.Level1)
 {
-    printf("testDiscDispatcher003\r\n");
+    printf("DiscDispatcher003\r\n");
     DiscoveryFuncInterface *interface = DiscBleInitForTest(&g_interfaceA, &g_interfaceB);
     int32_t ret;
     int32_t beforeFunCntA;
@@ -622,14 +623,14 @@ HWTEST_F(DiscBleDispatcherTest, testDiscPublish003, TestSize.Level1)
 };
 
 /*
- * @tc.name: testDiscovery003
+ * @tc.name: Discovery003
  * @tc.desc: test dispatcher
  * @tc.type: FUNC
  * @tc.require:
  */
-HWTEST_F(DiscBleDispatcherTest, testDiscovery003, TestSize.Level1)
+HWTEST_F(DiscBleDispatcherTest, Discovery003, TestSize.Level1)
 {
-    printf("testDiscovery003\r\n");
+    printf("Discovery003\r\n");
     DiscoveryFuncInterface *interface = DiscBleInitForTest(&g_interfaceA, &g_interfaceB);
     int32_t ret;
     int32_t beforeFunCntA;
@@ -675,33 +676,33 @@ HWTEST_F(DiscBleDispatcherTest, testDiscovery003, TestSize.Level1)
 };
 
 /*
- * @tc.name: testLinkStatusChanged001
+ * @tc.name: LinkStatusChanged001
  * @tc.desc: test dispatcher
  * @tc.type: FUNC
  * @tc.require:
  */
-HWTEST_F(DiscBleDispatcherTest, testLinkStatusChanged001, TestSize.Level1)
+HWTEST_F(DiscBleDispatcherTest, LinkStatusChanged001, TestSize.Level1)
 {
-    printf("testLinkStatusChanged001\r\n");
+    printf("LinkStatusChanged001\r\n");
     static LinkStatus status = LINK_STATUS_UP;
     DiscoveryFuncInterface *interface = DiscBleInitForTest(&g_interfaceA, &g_interfaceB);
     int32_t beforeFunCntA;
     int32_t afterFunCntA;
     beforeFunCntA = g_interfaceFunCntA.linkStatusChangedCntA;
-    interface->LinkStatusChanged(status);
+    interface->LinkStatusChanged(status, 0);
     afterFunCntA = g_interfaceFunCntA.linkStatusChangedCntA;
     EXPECT_EQ(beforeFunCntA + 1, afterFunCntA);
 };
 
 /*
- * @tc.name: testUpdateLocalDeviceInfo001
+ * @tc.name: UpdateLocalDeviceInfo001
  * @tc.desc: test dispatcher
  * @tc.type: FUNC
  * @tc.require:
  */
-HWTEST_F(DiscBleDispatcherTest, testUpdateLocalDeviceInfo001, TestSize.Level1)
+HWTEST_F(DiscBleDispatcherTest, UpdateLocalDeviceInfo001, TestSize.Level1)
 {
-    printf("testUpdateLocalDeviceInfo001\r\n");
+    printf("UpdateLocalDeviceInfo001\r\n");
     static InfoTypeChanged type = TYPE_LOCAL_DEVICE_NAME;
     DiscoveryFuncInterface *interface = DiscBleInitForTest(&g_interfaceA, &g_interfaceB);
     int32_t beforeFunCntA;

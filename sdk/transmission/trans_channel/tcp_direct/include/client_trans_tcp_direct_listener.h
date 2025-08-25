@@ -16,7 +16,6 @@
 #ifndef CLIENT_TRANS_TCP_DIRECT_LISTENER_H
 #define CLIENT_TRANS_TCP_DIRECT_LISTENER_H
 
-#include <stdint.h>
 #include "softbus_conn_interface.h"
 
 #ifdef __cplusplus
@@ -25,7 +24,7 @@ extern "C" {
 
 int32_t TransTdcCreateListener(int32_t fd);
 int32_t TransTdcCreateListenerWithoutAddTrigger(int32_t fd);
-void TransTdcReleaseFd(ListenerModule module, int32_t fd);
+void TransTdcReleaseFd(int32_t fd);
 int32_t TransTdcStopRead(int32_t fd);
 void TransTdcCloseFd(int32_t fd);
 void TdcLockDeinit(void);

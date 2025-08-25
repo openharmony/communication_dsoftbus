@@ -140,6 +140,13 @@ static inline bool AssignerUint32(uint32_t value, HiSysEventParam **param)
     return true;
 }
 
+/* Used by ASSIGNER macros */
+static inline bool AssignerUint8(uint8_t value, HiSysEventParam **param)
+{
+    (*param)->v.ui8 = value;
+    return true;
+}
+
 #define SOFTBUS_ASSIGNER(type, fieldName, field)                                                                   \
     static inline bool SoftbusAssigner##fieldName(                                                                 \
         const char *eventName, HiSysEventParamType paramType, SoftbusEventForm *form, HiSysEventParam *param)      \

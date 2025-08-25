@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2022-2024 Huawei Device Co., Ltd.
+ * Copyright (c) 2022-2025 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -16,12 +16,8 @@
 #ifndef SOFTBUS_TCP_DIRECT_SESSIONCONN_H
 #define SOFTBUS_TCP_DIRECT_SESSIONCONN_H
 
-#include <stdint.h>
-#include "auth_interface.h"
-#include "common_list.h"
 #include "softbus_app_info.h"
 #include "softbus_base_listener.h"
-#include "softbus_def.h"
 
 #ifdef __cplusplus
 #if __cplusplus
@@ -71,6 +67,7 @@ typedef struct {
     int64_t timeStart;
     int32_t linkType;
     uint64_t callingTokenId;
+    ProtocolType fdProtocol;
 } TcpChannelInfo;
 
 uint64_t TransTdcGetNewSeqId(void);
@@ -142,6 +139,10 @@ int32_t TransCheckTdcChannelOpenStatus(int32_t channelId, int32_t *curCount);
 int32_t TransTcpGetPrivilegeCloseList(ListNode *privilegeCloseList, uint64_t tokenId, int32_t pid);
 
 int32_t TransTdcResetReplyCnt(int32_t channelId);
+
+int32_t TransGetPkgNameByChanId(int32_t channelId, char *pkgName);
+
+int32_t UpdateAccessInfoById(int32_t channelId, const AccessInfo *accessInfo);
 #ifdef __cplusplus
 #if __cplusplus
 }

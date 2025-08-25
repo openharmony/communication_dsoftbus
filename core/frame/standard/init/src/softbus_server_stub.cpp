@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021-2024 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2025 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -15,11 +15,10 @@
 
 #include "softbus_server_stub.h"
 
-#include "regex.h"
 #include "securec.h"
 
+#include "accesstoken_kit.h"
 #include "access_control.h"
-#include "anonymizer.h"
 #include "ipc_skeleton.h"
 #include "legacy/softbus_hisysevt_transreporter.h"
 #include "softbus_access_token_adapter.h"
@@ -27,19 +26,39 @@
 #include "softbus_permission.h"
 #include "softbus_server_frame.h"
 #include "softbus_server_ipc_interface_code.h"
+#include "trans_channel_common.h"
 #include "trans_channel_manager.h"
-#include "trans_event.h"
+#include "trans_log.h"
 #include "trans_network_statistics.h"
 #include "trans_session_manager.h"
-#include "trans_tcp_direct_sessionconn.h"
 
 #ifdef SUPPORT_BUNDLENAME
 #include "bundle_mgr_proxy.h"
+#include "g_enhance_trans_func_pack.h"
 #include "iservice_registry.h"
 #include "ohos_account_kits.h"
 #include "os_account_manager.h"
 #include "system_ability_definition.h"
 #endif
+
+#define SERVER_JOIN_LNN_NAME "SERVER_JOIN_LNN"
+#define SERVER_LEAVE_LNN_NAME "SERVER_LEAVE_LNN"
+#define SERVER_SET_NODE_DATA_CHANGE_FLAG_NAME "SERVER_SET_NODE_DATA_CHANGE_FLAG"
+#define SERVER_ACTIVE_META_NODE_NAME "SERVER_ACTIVE_META_NODE"
+#define SERVER_DEACTIVE_META_NODE_NAME "SERVER_DEACTIVE_META_NODE"
+#define SERVER_GET_ALL_META_NODE_INFO_NAME "SERVER_GET_ALL_META_NODE_INFO"
+#define SERVER_SHIFT_LNN_GEAR_NAME "SERVER_SHIFT_LNN_GEAR"
+#define SERVER_SYNC_TRUSTED_RELATION_NAME "SERVER_SYNC_TRUSTED_RELATION"
+#define SERVER_SET_DISPLAY_NAME_NAME "SERVER_SET_DISPLAY_NAME"
+#define SERVER_SET_DATA_LEVEL_NAME "SERVER_SET_DATA_LEVEL"
+#define SERVER_REG_DATA_LEVEL_CHANGE_CB_NAME "SERVER_REG_DATA_LEVEL_CHANGE_CB"
+#define SERVER_UNREG_DATA_LEVEL_CHANGE_CB_NAME "SERVER_UNREG_DATA_LEVEL_CHANGE_CB"
+#define SERVER_TRIGGER_RANGE_FOR_MSDP_NAME "SERVER_TRIGGER_RANGE_FOR_MSDP"
+#define SERVER_STOP_RANGE_FOR_MSDP_NAME "SERVER_STOP_RANGE_FOR_MSDP"
+#define SERVER_REG_RANGE_CB_FOR_MSDP_NAME "SERVER_REG_RANGE_CB_FOR_MSDP"
+#define SERVER_UNREG_RANGE_CB_FOR_MSDP_NAME "SERVER_UNREG_RANGE_CB_FOR_MSDP"
+
+const char *g_limitPkgName = "ohos.distributedschedule.dms";
 
 #define READ_PARCEL_WITH_RET(parcel, type, data, retVal)        \
     do {                                                        \
@@ -55,8 +74,8 @@ namespace OHOS {
         constexpr int32_t DMS_CALLING_UID = 5522;
         static const char *DB_PACKAGE_NAME = "distributeddata-default";
         static const char *DM_PACKAGE_NAME = "ohos.distributedhardware.devicemanager";
+        static const char *MSDP_PACKAGE_NAME = "ohos.msdp.spatialawareness";
     }
-
 
 int32_t SoftBusServerStub::CheckOpenSessionPermission(const SessionParam *param)
 {
@@ -75,7 +94,10 @@ int32_t SoftBusServerStub::CheckOpenSessionPermission(const SessionParam *param)
     }
 
     if (!CheckUidAndPid(param->sessionName, callingUid, callingPid)) {
-        COMM_LOGE(COMM_SVC, "Check Uid and Pid failed, sessionName=%{public}s", param->sessionName);
+        char *tmpName = NULL;
+        Anonymize(param->sessionName, &tmpName);
+        COMM_LOGE(COMM_SVC, "Check Uid and Pid failed, sessionName=%{public}s", AnonymizeWrapper(tmpName));
+        AnonymizeFree(tmpName);
         return SOFTBUS_TRANS_CHECK_PID_ERROR;
     }
 
@@ -119,6 +141,20 @@ SoftBusServerStub::SoftBusServerStub()
 {
     InitMemberFuncMap();
     InitMemberPermissionMap();
+    memberFuncMap_[MANAGE_REGISTER_BR_PROXY_SERVICE] = &SoftBusServerStub::SoftbusRegisterBrProxyServiceInner;
+    memberFuncMap_[SERVER_OPEN_BR_PROXY] = &SoftBusServerStub::OpenBrProxyInner;
+    memberFuncMap_[SERVER_CLOSE_BR_PROXY] = &SoftBusServerStub::CloseBrProxyInner;
+    memberFuncMap_[SERVER_SEND_BR_PROXY_DATA] = &SoftBusServerStub::SendBrProxyDataInner;
+    memberFuncMap_[SERVER_SET_BR_PROXY_LISTENER_STATE] = &SoftBusServerStub::SetBrProxyListenerStateInner;
+    memberFuncMap_[SERVER_GET_BR_PROXY_CHANNEL_STATE] = &SoftBusServerStub::GetBrProxyChannelStateInner;
+    memberFuncMap_[SERVER_REGISTER_PUSH_HOOK] = &SoftBusServerStub::RegisterPushHookInner;
+    memberPermissionMap_[MANAGE_REGISTER_BR_PROXY_SERVICE] = OHOS_PERMISSION_ACCESS_BLUETOOTH;
+    memberPermissionMap_[SERVER_OPEN_BR_PROXY] = OHOS_PERMISSION_ACCESS_BLUETOOTH;
+    memberPermissionMap_[SERVER_CLOSE_BR_PROXY] = OHOS_PERMISSION_ACCESS_BLUETOOTH;
+    memberPermissionMap_[SERVER_SEND_BR_PROXY_DATA] = OHOS_PERMISSION_ACCESS_BLUETOOTH;
+    memberPermissionMap_[SERVER_SET_BR_PROXY_LISTENER_STATE] = OHOS_PERMISSION_ACCESS_BLUETOOTH;
+    memberPermissionMap_[SERVER_GET_BR_PROXY_CHANNEL_STATE] = OHOS_PERMISSION_DISTRIBUTED_DATASYNC;
+    memberPermissionMap_[SERVER_REGISTER_PUSH_HOOK] = OHOS_PERMISSION_DISTRIBUTED_DATASYNC;
 }
 
 void SoftBusServerStub::InitMemberFuncMap()
@@ -157,12 +193,23 @@ void SoftBusServerStub::InitMemberFuncMap()
     memberFuncMap_[SERVER_DEACTIVE_META_NODE] = &SoftBusServerStub::DeactiveMetaNodeInner;
     memberFuncMap_[SERVER_GET_ALL_META_NODE_INFO] = &SoftBusServerStub::GetAllMetaNodeInfoInner;
     memberFuncMap_[SERVER_SHIFT_LNN_GEAR] = &SoftBusServerStub::ShiftLNNGearInner;
+    memberFuncMap_[SERVER_TRIGGER_RANGE_FOR_MSDP] = &SoftBusServerStub::TriggerRangeForMsdpInner;
+    memberFuncMap_[SERVER_STOP_RANGE_FOR_MSDP] = &SoftBusServerStub::StopRangeForMsdpInner;
+    memberFuncMap_[SERVER_REG_RANGE_CB_FOR_MSDP] = &SoftBusServerStub::RegRangeCbForMsdpInner;
+    memberFuncMap_[SERVER_UNREG_RANGE_CB_FOR_MSDP] = &SoftBusServerStub::UnregRangeCbForMsdpInner;
     memberFuncMap_[SERVER_SYNC_TRUSTED_RELATION] = &SoftBusServerStub::SyncTrustedRelationShipInner;
     memberFuncMap_[SERVER_RIPPLE_STATS] = &SoftBusServerStub::RippleStatsInner;
     memberFuncMap_[SERVER_GET_SOFTBUS_SPEC_OBJECT] = &SoftBusServerStub::GetSoftbusSpecObjectInner;
     memberFuncMap_[SERVER_GET_BUS_CENTER_EX_OBJ] = &SoftBusServerStub::GetBusCenterExObjInner;
     memberFuncMap_[SERVER_PROCESS_INNER_EVENT] = &SoftBusServerStub::ProcessInnerEventInner;
     memberFuncMap_[SERVER_PRIVILEGE_CLOSE_CHANNEL] = &SoftBusServerStub::PrivilegeCloseChannelInner;
+    memberFuncMap_[SERVER_SET_DISPLAY_NAME] = &SoftBusServerStub::SetDisplayNameInner;
+    memberFuncMap_[SERVER_GENERAL_CREATE_SERVER] = &SoftBusServerStub::CreateServerInner;
+    memberFuncMap_[SERVER_GENERAL_REMOVE_SERVER] = &SoftBusServerStub::RemoveServerInner;
+    memberFuncMap_[SERVER_GENERAL_CONNECT] = &SoftBusServerStub::ConnectInner;
+    memberFuncMap_[SERVER_GENERAL_DISCONNECT] = &SoftBusServerStub::DisconnectInner;
+    memberFuncMap_[SERVER_GENERAL_SEND] = &SoftBusServerStub::SendInner;
+    memberFuncMap_[SERVER_GENERAL_GET_PEER_DEVICE_ID] = &SoftBusServerStub::GetPeerDeviceIdInner;
 }
 
 void SoftBusServerStub::InitMemberPermissionMap()
@@ -202,6 +249,10 @@ void SoftBusServerStub::InitMemberPermissionMap()
     memberPermissionMap_[SERVER_DEACTIVE_META_NODE] = OHOS_PERMISSION_DISTRIBUTED_SOFTBUS_CENTER;
     memberPermissionMap_[SERVER_GET_ALL_META_NODE_INFO] = OHOS_PERMISSION_DISTRIBUTED_SOFTBUS_CENTER;
     memberPermissionMap_[SERVER_SHIFT_LNN_GEAR] = OHOS_PERMISSION_DISTRIBUTED_SOFTBUS_CENTER;
+    memberPermissionMap_[SERVER_TRIGGER_RANGE_FOR_MSDP] = OHOS_PERMISSION_DISTRIBUTED_SOFTBUS_CENTER;
+    memberPermissionMap_[SERVER_STOP_RANGE_FOR_MSDP] = OHOS_PERMISSION_DISTRIBUTED_SOFTBUS_CENTER;
+    memberPermissionMap_[SERVER_REG_RANGE_CB_FOR_MSDP] = OHOS_PERMISSION_DISTRIBUTED_SOFTBUS_CENTER;
+    memberPermissionMap_[SERVER_UNREG_RANGE_CB_FOR_MSDP] = OHOS_PERMISSION_DISTRIBUTED_SOFTBUS_CENTER;
     memberPermissionMap_[SERVER_SYNC_TRUSTED_RELATION] = OHOS_PERMISSION_DISTRIBUTED_SOFTBUS_CENTER;
     memberPermissionMap_[SERVER_RIPPLE_STATS] = OHOS_PERMISSION_DISTRIBUTED_DATASYNC;
     memberPermissionMap_[SERVER_GET_SOFTBUS_SPEC_OBJECT] = OHOS_PERMISSION_DISTRIBUTED_DATASYNC;
@@ -209,6 +260,13 @@ void SoftBusServerStub::InitMemberPermissionMap()
     memberPermissionMap_[SERVER_EVALUATE_QOS] = OHOS_PERMISSION_DISTRIBUTED_DATASYNC;
     memberPermissionMap_[SERVER_PROCESS_INNER_EVENT] = OHOS_PERMISSION_DISTRIBUTED_DATASYNC;
     memberPermissionMap_[SERVER_PRIVILEGE_CLOSE_CHANNEL] = OHOS_PERMISSION_DISTRIBUTED_DATASYNC;
+    memberPermissionMap_[SERVER_SET_DISPLAY_NAME] = OHOS_PERMISSION_DISTRIBUTED_SOFTBUS_CENTER;
+    memberPermissionMap_[SERVER_GENERAL_CREATE_SERVER] = OHOS_PERMISSION_DISTRIBUTED_DATASYNC;
+    memberPermissionMap_[SERVER_GENERAL_REMOVE_SERVER] = OHOS_PERMISSION_DISTRIBUTED_DATASYNC;
+    memberPermissionMap_[SERVER_GENERAL_CONNECT] = OHOS_PERMISSION_DISTRIBUTED_DATASYNC;
+    memberPermissionMap_[SERVER_GENERAL_DISCONNECT] = OHOS_PERMISSION_DISTRIBUTED_DATASYNC;
+    memberPermissionMap_[SERVER_GENERAL_SEND] = OHOS_PERMISSION_DISTRIBUTED_DATASYNC;
+    memberPermissionMap_[SERVER_GENERAL_GET_PEER_DEVICE_ID] = OHOS_PERMISSION_DISTRIBUTED_DATASYNC;
 }
 
 int32_t SoftBusServerStub::OnRemoteRequest(
@@ -348,9 +406,8 @@ static int32_t GetAppId(const std::string &bundleName, std::string &appId)
 }
 
 static int32_t CheckNormalAppSessionName(
-    const char *sessionName, pid_t callingUid, std::string &strName)
+    const char *sessionName, pid_t callingUid, std::string &strName, uint64_t callingFullTokenId)
 {
-    uint64_t callingFullTokenId = IPCSkeleton::GetCallingFullTokenID();
     if (SoftBusCheckIsNormalApp(callingFullTokenId, sessionName)) {
         std::string bundleName;
         int32_t result = GetBundleName(callingUid, bundleName);
@@ -386,7 +443,34 @@ static int32_t CheckNormalAppSessionName(
     }
     return SOFTBUS_OK;
 }
+
+static int32_t TransCheckSystemAppList(pid_t callingUid)
+{
+    std::string bundleName;
+    int32_t ret = GetBundleName(callingUid, bundleName);
+    COMM_CHECK_AND_RETURN_RET_LOGE(ret == SOFTBUS_OK, ret, COMM_SVC, "get bundle name failed.");
+
+    if (!IsInWhitelistPacked(bundleName.c_str())) {
+        COMM_LOGE(COMM_SVC, "not found bundleName in system app whitelist.");
+        return SOFTBUS_TRANS_NOT_FIND_BUNDLENAME;
+    }
+    return SOFTBUS_OK;
+}
 #endif
+
+static int32_t SoftBusCheckTimestamp(MessageParcel &data, const char *sessionName)
+{
+    uint64_t timestamp = 0;
+    if (!data.ReadUint64(timestamp)) {
+        COMM_LOGE(COMM_SVC, "CreateSessionServerInner read timestamp failed!");
+        return SOFTBUS_TRANS_PROXY_READUINT_FAILED;
+    }
+    int32_t ret = CheckAndUpdateTimeBySessionName(sessionName, timestamp);
+    if (ret == SOFTBUS_TRANS_SESSION_NAME_NO_EXIST || ret == SOFTBUS_OK) {
+        return SOFTBUS_OK;
+    }
+    return SOFTBUS_TRANS_SESSION_TIME_NOT_EQUAL;
+}
 
 int32_t SoftBusServerStub::CreateSessionServerInner(MessageParcel &data, MessageParcel &reply)
 {
@@ -394,6 +478,9 @@ int32_t SoftBusServerStub::CreateSessionServerInner(MessageParcel &data, Message
     int32_t retReply;
     pid_t callingUid;
     pid_t callingPid;
+#ifdef SUPPORT_BUNDLENAME
+    uint64_t callingFullTokenId = IPCSkeleton::GetCallingFullTokenID();
+#endif
     const char *pkgName = data.ReadCString();
     if (pkgName == nullptr) {
         COMM_LOGE(COMM_SVC, "CreateSessionServerInner read pkgName failed!");
@@ -416,13 +503,21 @@ int32_t SoftBusServerStub::CreateSessionServerInner(MessageParcel &data, Message
         goto EXIT;
     }
 #ifdef SUPPORT_BUNDLENAME
-    if (CheckNormalAppSessionName(sessionName, callingUid, strName) != SOFTBUS_OK) {
-        retReply = SOFTBUS_PERMISSION_DENIED;
-        goto EXIT;
+    if (SoftBusCheckIsSystemApp(callingFullTokenId, sessionName) == true) {
+        if (TransCheckSystemAppList(callingUid) != SOFTBUS_OK) {
+            retReply = SOFTBUS_PERMISSION_DENIED;
+            goto EXIT;
+        }
+    } else {
+        if (CheckNormalAppSessionName(sessionName, callingUid, strName, callingFullTokenId) != SOFTBUS_OK) {
+            retReply = SOFTBUS_PERMISSION_DENIED;
+            goto EXIT;
+        }
     }
     sessionName = strName.c_str();
 #endif
-    retReply = CreateSessionServer(pkgName, sessionName);
+    (void)SoftBusCheckTimestamp(data, sessionName);
+    retReply = CreateSessionServer(pkgName, sessionName, 0);
 EXIT:
     if (!reply.WriteInt32(retReply)) {
         COMM_LOGE(COMM_SVC, "CreateSessionServerInner write reply failed!");
@@ -463,7 +558,11 @@ int32_t SoftBusServerStub::RemoveSessionServerInner(MessageParcel &data, Message
         COMM_LOGE(COMM_SVC, "Check Uid and Pid failed!");
         return SOFTBUS_TRANS_CHECK_PID_ERROR;
     }
-    retReply = RemoveSessionServer(pkgName, sessionName);
+    if (SoftBusCheckTimestamp(data, sessionName) != SOFTBUS_OK) {
+        retReply = SOFTBUS_TRANS_PROXY_READUINT_FAILED;
+        goto EXIT;
+    }
+    retReply = RemoveSessionServer(pkgName, sessionName, 0);
 EXIT:
     if (!reply.WriteInt32(retReply)) {
         COMM_LOGE(COMM_SVC, "RemoveSessionServerInner write reply failed!");
@@ -550,6 +649,10 @@ static void ReadSessionInfo(MessageParcel &data, SessionParam &param)
     param.sessionId = data.ReadInt32();
     param.actionId = data.ReadUint32();
     param.pid = OHOS::IPCSkeleton::GetCallingPid();
+    param.isLowLatency = data.ReadBool();
+    param.flowInfo.flowSize = data.ReadUint64();
+    param.flowInfo.sessionType = (FlowSessionType)data.ReadUint32();
+    param.flowInfo.flowQosType = (FlowQosType)data.ReadUint32();
 }
 
 int32_t SoftBusServerStub::OpenSessionInner(MessageParcel &data, MessageParcel &reply)
@@ -573,6 +676,18 @@ int32_t SoftBusServerStub::OpenSessionInner(MessageParcel &data, MessageParcel &
         retReply = SOFTBUS_INVALID_PARAM;
         goto EXIT;
     }
+
+#define DMS_COLLABATION_NAME_PREFIX "ohos.dtbcollab.dms"
+    if (strncmp(param.sessionName, DMS_COLLABATION_NAME_PREFIX, strlen(DMS_COLLABATION_NAME_PREFIX)) == 0) {
+        COMM_LOGI(COMM_SVC, "DMS bind request, need check collaboration relationship");
+        if (CheckSourceCollabRelation(param.peerDeviceId,
+            OHOS::IPCSkeleton::GetCallingPid(), OHOS::IPCSkeleton::GetCallingUid()) != SOFTBUS_OK) {
+            COMM_LOGE(COMM_SVC, "DMS check collaboration relationship failed, reject binding request");
+            retReply = SOFTBUS_TRANS_CHECK_RELATION_FAIL;
+            goto EXIT;
+        }
+    }
+
     if ((retReply = TransCheckClientAccessControl(param.peerDeviceId)) != SOFTBUS_OK) {
         goto EXIT;
     }
@@ -619,7 +734,7 @@ int32_t SoftBusServerStub::OpenAuthSessionInner(MessageParcel &data, MessageParc
     COMM_LOGI(COMM_SVC, "OpenAuthSession channelId=%{public}d", retReply);
 EXIT:
     if (!reply.WriteInt32(retReply)) {
-        COMM_LOGE(COMM_SVC, "OpenSessionInner write reply failed! retReply=%{public}d", retReply);
+        COMM_LOGE(COMM_SVC, "OpenSessionInner write reply failed!");
         return SOFTBUS_TRANS_PROXY_WRITEINT_FAILED;
     }
     return SOFTBUS_OK;
@@ -852,6 +967,11 @@ int32_t SoftBusServerStub::EvaluateQosInner(MessageParcel &data, MessageParcel &
 int32_t SoftBusServerStub::JoinLNNInner(MessageParcel &data, MessageParcel &reply)
 {
     COMM_LOGD(COMM_SVC, "enter");
+    int32_t ret = PermissionVerify(SERVER_JOIN_LNN);
+    if (ret != SOFTBUS_OK) {
+        COMM_LOGE(COMM_SVC, "permission verification failed");
+        return ret;
+    }
     const char *clientName = data.ReadCString();
     if (clientName == nullptr) {
         COMM_LOGE(COMM_SVC, "SoftbusJoinLNNInner read clientName failed!");
@@ -866,8 +986,12 @@ int32_t SoftBusServerStub::JoinLNNInner(MessageParcel &data, MessageParcel &repl
     auto rawData = data.ReadRawData(addrTypeLen);
     COMM_CHECK_AND_RETURN_RET_LOGE(rawData != nullptr, SOFTBUS_IPC_ERR, COMM_SVC, "read addrTypeLen failed.");
     void *addr = const_cast<void *>(rawData);
-
-    int32_t retReply = JoinLNN(clientName, addr, addrTypeLen);
+    bool isForceJoin;
+    if (!data.ReadBool(isForceJoin)) {
+        COMM_LOGE(COMM_SVC, "SoftbusJoinLNNInner read force join flag failed!");
+        return SOFTBUS_IPC_ERR;
+    }
+    int32_t retReply = JoinLNN(clientName, addr, addrTypeLen, isForceJoin);
     if (!reply.WriteInt32(retReply)) {
         COMM_LOGE(COMM_SVC, "SoftbusJoinLNNInner write reply failed!");
         return SOFTBUS_IPC_ERR;
@@ -878,6 +1002,11 @@ int32_t SoftBusServerStub::JoinLNNInner(MessageParcel &data, MessageParcel &repl
 int32_t SoftBusServerStub::LeaveLNNInner(MessageParcel &data, MessageParcel &reply)
 {
     COMM_LOGD(COMM_SVC, "enter");
+    int32_t ret = PermissionVerify(SERVER_LEAVE_LNN);
+    if (ret != SOFTBUS_OK) {
+        COMM_LOGE(COMM_SVC, "permission verification failed");
+        return ret;
+    }
     const char *clientName = data.ReadCString();
     if (clientName == nullptr) {
         COMM_LOGE(COMM_SVC, "SoftbusLeaveLNNInner read clientName failed!");
@@ -912,9 +1041,10 @@ int32_t SoftBusServerStub::GetAllOnlineNodeInfoInner(MessageParcel &data, Messag
         COMM_LOGE(COMM_SVC, "GetAllOnlineNodeInfoInner read info type length failed");
         return SOFTBUS_IPC_ERR;
     }
-    if (GetAllOnlineNodeInfo(clientName, &nodeInfo, infoTypeLen, &infoNum) != SOFTBUS_OK) {
-        COMM_LOGE(COMM_SVC, "GetAllOnlineNodeInfoInner get info failed");
-        return SOFTBUS_NETWORK_GET_ALL_NODE_INFO_ERR;
+    int32_t retReply = GetAllOnlineNodeInfo(clientName, &nodeInfo, infoTypeLen, &infoNum);
+    if (retReply != SOFTBUS_OK) {
+        COMM_LOGE(COMM_SVC, "GetAllOnlineNodeInfoInner get info failed, retReply=%{public}d", retReply);
+        return retReply;
     }
     if (infoNum < 0 || (infoNum > 0 && nodeInfo == nullptr)) {
         COMM_LOGE(COMM_SVC, "GetAllOnlineNodeInfoInner node info is invalid");
@@ -925,15 +1055,14 @@ int32_t SoftBusServerStub::GetAllOnlineNodeInfoInner(MessageParcel &data, Messag
         SoftBusFree(nodeInfo);
         return SOFTBUS_TRANS_PROXY_WRITEINT_FAILED;
     }
-    int32_t ret = SOFTBUS_OK;
     if (infoNum > 0) {
         if (!reply.WriteRawData(nodeInfo, static_cast<int32_t>(infoTypeLen * infoNum))) {
             COMM_LOGE(COMM_SVC, "GetAllOnlineNodeInfoInner write node info failed!");
-            ret = SOFTBUS_IPC_ERR;
+            retReply = SOFTBUS_IPC_ERR;
         }
         SoftBusFree(nodeInfo);
     }
-    return ret;
+    return retReply;
 }
 
 int32_t SoftBusServerStub::GetLocalDeviceInfoInner(MessageParcel &data, MessageParcel &reply)
@@ -957,13 +1086,14 @@ int32_t SoftBusServerStub::GetLocalDeviceInfoInner(MessageParcel &data, MessageP
         COMM_LOGE(COMM_SVC, "GetLocalDeviceInfoInner malloc info type length failed");
         return SOFTBUS_IPC_ERR;
     }
-    if (GetLocalDeviceInfo(clientName, nodeInfo, infoTypeLen) != SOFTBUS_OK) {
-        COMM_LOGE(COMM_SVC, "GetLocalDeviceInfoInner get local info failed");
-        SoftBusFree(nodeInfo);
-        return SOFTBUS_NETWORK_GET_LOCAL_NODE_INFO_ERR;
-    }
+    int32_t retReply = GetLocalDeviceInfo(clientName, nodeInfo, infoTypeLen);
     if (!reply.WriteRawData(nodeInfo, infoTypeLen)) {
         COMM_LOGE(COMM_SVC, "GetLocalDeviceInfoInner write node info failed!");
+        SoftBusFree(nodeInfo);
+        return SOFTBUS_IPC_ERR;
+    }
+    if (!reply.WriteInt32(retReply)) {
+        COMM_LOGE(COMM_SVC, "GetLocalDeviceInfoInner write reply failed!");
         SoftBusFree(nodeInfo);
         return SOFTBUS_IPC_ERR;
     }
@@ -1007,11 +1137,7 @@ int32_t SoftBusServerStub::GetNodeKeyInfoInner(MessageParcel &data, MessageParce
         COMM_LOGE(COMM_SVC, "malloc buffer failed!");
         return SOFTBUS_MALLOC_ERR;
     }
-    if (GetNodeKeyInfo(clientName, networkId, key, static_cast<unsigned char *>(buf), infoLen) != SOFTBUS_OK) {
-        COMM_LOGE(COMM_SVC, "get key info failed!");
-        SoftBusFree(buf);
-        return SOFTBUS_NETWORK_NODE_KEY_INFO_ERR;
-    }
+    int32_t ret = GetNodeKeyInfo(clientName, networkId, key, static_cast<unsigned char *>(buf), infoLen);
     if (!reply.WriteInt32(infoLen)) {
         COMM_LOGE(COMM_SVC, "write info length failed!");
         SoftBusFree(buf);
@@ -1022,12 +1148,22 @@ int32_t SoftBusServerStub::GetNodeKeyInfoInner(MessageParcel &data, MessageParce
         SoftBusFree(buf);
         return SOFTBUS_IPC_ERR;
     }
+    if (!reply.WriteInt32(ret)) {
+        COMM_LOGE(COMM_SVC, "write info length failed!");
+        SoftBusFree(buf);
+        return SOFTBUS_IPC_ERR;
+    }
     SoftBusFree(buf);
     return SOFTBUS_OK;
 }
 
 int32_t SoftBusServerStub::SetNodeDataChangeFlagInner(MessageParcel &data, MessageParcel &reply)
 {
+    int32_t ret = PermissionVerify(SERVER_SET_NODE_DATA_CHANGE_FLAG);
+    if (ret != SOFTBUS_OK) {
+        COMM_LOGE(COMM_SVC, "permission verification failed");
+        return ret;
+    }
     const char *clientName = data.ReadCString();
     if (clientName == nullptr) {
         COMM_LOGE(COMM_SVC, "SetNodeDataChangeFlag read clientName failed!");
@@ -1059,6 +1195,11 @@ int32_t SoftBusServerStub::RegDataLevelChangeCbInner(MessageParcel &data, Messag
     (void)DB_PACKAGE_NAME;
     return SOFTBUS_FUNC_NOT_SUPPORT;
 #else
+    int32_t ret = PermissionVerify(SERVER_REG_DATA_LEVEL_CHANGE_CB);
+    if (ret != SOFTBUS_OK) {
+        COMM_LOGE(COMM_SVC, "permission verification failed");
+        return ret;
+    }
     const char *pkgName = data.ReadCString();
     if (pkgName == nullptr) {
         COMM_LOGE(COMM_SVC, "RegDataLevelChangeCbInner read pkgName failed!");
@@ -1066,7 +1207,7 @@ int32_t SoftBusServerStub::RegDataLevelChangeCbInner(MessageParcel &data, Messag
     }
     if (strcmp(DB_PACKAGE_NAME, pkgName) != 0) {
         COMM_LOGE(COMM_SVC, "RegDataLevelChangeCbInner read pkgName invalid!");
-        return SOFTBUS_IPC_ERR;
+        return SOFTBUS_INVALID_PARAM;
     }
     int32_t retReply = RegDataLevelChangeCb(pkgName);
     if (!reply.WriteInt32(retReply)) {
@@ -1085,6 +1226,11 @@ int32_t SoftBusServerStub::UnregDataLevelChangeCbInner(MessageParcel &data, Mess
     (void)DB_PACKAGE_NAME;
     return SOFTBUS_FUNC_NOT_SUPPORT;
 #else
+    int32_t ret = PermissionVerify(SERVER_UNREG_DATA_LEVEL_CHANGE_CB);
+    if (ret != SOFTBUS_OK) {
+        COMM_LOGE(COMM_SVC, "permission verification failed");
+        return ret;
+    }
     const char *pkgName = data.ReadCString();
     if (pkgName == nullptr) {
         COMM_LOGE(COMM_SVC, "UnregDataLevelChangeCbInner read pkgName failed!");
@@ -1092,7 +1238,7 @@ int32_t SoftBusServerStub::UnregDataLevelChangeCbInner(MessageParcel &data, Mess
     }
     if (strcmp(DB_PACKAGE_NAME, pkgName) != 0) {
         COMM_LOGE(COMM_SVC, "UnregDataLevelChangeCbInner read pkgName invalid!");
-        return SOFTBUS_IPC_ERR;
+        return SOFTBUS_INVALID_PARAM;
     }
     int32_t retReply = UnregDataLevelChangeCb(pkgName);
     if (!reply.WriteInt32(retReply)) {
@@ -1110,6 +1256,11 @@ int32_t SoftBusServerStub::SetDataLevelInner(MessageParcel &data, MessageParcel 
     (void)reply;
     return SOFTBUS_FUNC_NOT_SUPPORT;
 #else
+    int32_t ret = PermissionVerify(SERVER_SET_DATA_LEVEL);
+    if (ret != SOFTBUS_OK) {
+        COMM_LOGE(COMM_SVC, "permission verification failed");
+        return ret;
+    }
     DataLevel *dataLevel = (DataLevel*)data.ReadRawData(sizeof(DataLevel));
     if (dataLevel == nullptr) {
         COMM_LOGE(COMM_SVC, "SetDataLevelInner read networkid failed!");
@@ -1358,7 +1509,6 @@ int32_t SoftBusServerStub::PublishLNNInner(MessageParcel &data, MessageParcel &r
     COMM_CHECK_AND_RETURN_RET_LOGE(data.ReadInt32(value), SOFTBUS_IPC_ERR, COMM_SVC, "read freq failed");
     COMM_CHECK_AND_RETURN_RET_LOGE(0 <= value && value < FREQ_BUTT, SOFTBUS_INVALID_PARAM, COMM_SVC, "freq invalid");
     info.freq = static_cast<ExchangeFreq>(value);
-
     info.capability = data.ReadCString();
     COMM_CHECK_AND_RETURN_RET_LOGE(info.capability != nullptr, SOFTBUS_IPC_ERR, COMM_SVC, "read capability failed");
     COMM_CHECK_AND_RETURN_RET_LOGE(data.ReadUint32(info.dataLen), SOFTBUS_IPC_ERR, COMM_SVC, "read dataLen failed");
@@ -1455,6 +1605,11 @@ int32_t SoftBusServerStub::StopRefreshLNNInner(MessageParcel &data, MessageParce
 int32_t SoftBusServerStub::ActiveMetaNodeInner(MessageParcel &data, MessageParcel &reply)
 {
     COMM_LOGD(COMM_SVC, "enter");
+    int32_t ret = PermissionVerify(SERVER_ACTIVE_META_NODE);
+    if (ret != SOFTBUS_OK) {
+        COMM_LOGE(COMM_SVC, "permission verification failed");
+        return ret;
+    }
     MetaNodeConfigInfo *info = const_cast<MetaNodeConfigInfo *>(
         reinterpret_cast<const MetaNodeConfigInfo *>(data.ReadRawData(sizeof(MetaNodeConfigInfo))));
     if (info == nullptr) {
@@ -1462,26 +1617,32 @@ int32_t SoftBusServerStub::ActiveMetaNodeInner(MessageParcel &data, MessageParce
         return SOFTBUS_IPC_ERR;
     }
     char metaNodeId[NETWORK_ID_BUF_LEN] = { 0 };
-    if (ActiveMetaNode(info, metaNodeId) != SOFTBUS_OK) {
-        return SOFTBUS_NETWORK_ACTIVE_META_NODE_ERR;
-    }
+    int32_t retReply = ActiveMetaNode(info, metaNodeId);
+
     if (!reply.WriteCString(metaNodeId)) {
         COMM_LOGE(COMM_SVC, "ActiveMetaNode write meta node id failed!");
         return SOFTBUS_IPC_ERR;
     }
+    COMM_CHECK_AND_RETURN_RET_LOGE(reply.WriteInt32(retReply), SOFTBUS_IPC_ERR, COMM_SVC, "write reply failed");
     return SOFTBUS_OK;
 }
 
 int32_t SoftBusServerStub::DeactiveMetaNodeInner(MessageParcel &data, MessageParcel &reply)
 {
     COMM_LOGD(COMM_SVC, "enter");
+    int32_t ret = PermissionVerify(SERVER_DEACTIVE_META_NODE);
+    if (ret != SOFTBUS_OK) {
+        COMM_LOGE(COMM_SVC, "permission verification failed");
+        return ret;
+    }
     const char *metaNodeId = reinterpret_cast<const char *>(data.ReadCString());
     if (metaNodeId == nullptr) {
         COMM_LOGE(COMM_SVC, "DeactiveMetaNode read meta node id failed!");
         return SOFTBUS_IPC_ERR;
     }
-    if (DeactiveMetaNode(metaNodeId) != SOFTBUS_OK) {
-        return SOFTBUS_NETWORK_DEACTIVE_META_NODE_ERR;
+    ret = DeactiveMetaNode(metaNodeId);
+    if (ret != SOFTBUS_OK) {
+        return ret;
     }
     return SOFTBUS_OK;
 }
@@ -1491,7 +1652,11 @@ int32_t SoftBusServerStub::GetAllMetaNodeInfoInner(MessageParcel &data, MessageP
     COMM_LOGD(COMM_SVC, "enter");
     int32_t infoNum;
     MetaNodeInfo infos[MAX_META_NODE_NUM];
-
+    int32_t ret = PermissionVerify(SERVER_GET_ALL_META_NODE_INFO);
+    if (ret != SOFTBUS_OK) {
+        COMM_LOGE(COMM_SVC, "permission verification failed");
+        return ret;
+    }
     if (!data.ReadInt32(infoNum)) {
         COMM_LOGE(COMM_SVC, "GetAllMetaNodeInfo read infoNum failed!");
         return SOFTBUS_IPC_ERR;
@@ -1500,8 +1665,9 @@ int32_t SoftBusServerStub::GetAllMetaNodeInfoInner(MessageParcel &data, MessageP
         COMM_LOGE(COMM_SVC, "invalid param, infoNum=%{public}d, maxNum=%{public}d", infoNum, MAX_META_NODE_NUM);
         return SOFTBUS_IPC_ERR;
     }
-    if (GetAllMetaNodeInfo(infos, &infoNum) != SOFTBUS_OK) {
-        return SOFTBUS_NETWORK_GET_META_NODE_INFO_ERR;
+    ret = GetAllMetaNodeInfo(infos, &infoNum);
+    if (ret != SOFTBUS_OK) {
+        return ret;
     }
     if (!reply.WriteInt32(infoNum)) {
         COMM_LOGE(COMM_SVC, "GetAllMetaNodeInfo write infoNum failed!");
@@ -1519,7 +1685,11 @@ int32_t SoftBusServerStub::ShiftLNNGearInner(MessageParcel &data, MessageParcel 
     COMM_LOGD(COMM_SVC, "enter");
     const char *targetNetworkId = nullptr;
     const GearMode *mode = nullptr;
-
+    int32_t ret = PermissionVerify(SERVER_SHIFT_LNN_GEAR);
+    if (ret != SOFTBUS_OK) {
+        COMM_LOGE(COMM_SVC, "permission verification failed");
+        return ret;
+    }
     const char *pkgName = data.ReadCString();
     if (pkgName == nullptr || strnlen(pkgName, PKG_NAME_SIZE_MAX) >= PKG_NAME_SIZE_MAX) {
         COMM_LOGE(COMM_SVC, "ShiftLNNGearInner read pkgName failed!");
@@ -1552,10 +1722,136 @@ int32_t SoftBusServerStub::ShiftLNNGearInner(MessageParcel &data, MessageParcel 
     return SOFTBUS_OK;
 }
 
+int32_t SoftBusServerStub::TriggerRangeForMsdpInner(MessageParcel &data, MessageParcel &reply)
+{
+    COMM_LOGD(COMM_SVC, "enter");
+    const RangeConfig *config = nullptr;
+    int32_t ret = PermissionVerify(SERVER_TRIGGER_RANGE_FOR_MSDP);
+    if (ret != SOFTBUS_OK) {
+        COMM_LOGE(COMM_SVC, "permission verification failed");
+        return ret;
+    }
+    const char *pkgName = data.ReadCString();
+    if (pkgName == nullptr || strnlen(pkgName, PKG_NAME_SIZE_MAX) >= PKG_NAME_SIZE_MAX) {
+        COMM_LOGE(COMM_SVC, "read pkgName failed!");
+        return SOFTBUS_TRANS_PROXY_WRITECSTRING_FAILED;
+    }
+    uint32_t code = SERVER_TRIGGER_RANGE_FOR_MSDP;
+    SoftbusRecordCalledApiInfo(pkgName, code);
+    config = reinterpret_cast<const RangeConfig *>(data.ReadRawData(sizeof(RangeConfig)));
+    if (config == nullptr) {
+        COMM_LOGE(COMM_SVC, "read config data failed!");
+        return SOFTBUS_TRANS_PROXY_READCSTRING_FAILED;
+    }
+    int32_t retReply = TriggerRangeForMsdp(pkgName, config);
+    if (!reply.WriteInt32(retReply)) {
+        COMM_LOGE(COMM_SVC, "write reply failed!");
+        return SOFTBUS_TRANS_PROXY_WRITEINT_FAILED;
+    }
+    return SOFTBUS_OK;
+}
+
+int32_t SoftBusServerStub::StopRangeForMsdpInner(MessageParcel &data, MessageParcel &reply)
+{
+    COMM_LOGD(COMM_SVC, "enter");
+    const RangeConfig *config = nullptr;
+    int32_t ret = PermissionVerify(SERVER_STOP_RANGE_FOR_MSDP);
+    if (ret != SOFTBUS_OK) {
+        COMM_LOGE(COMM_SVC, "permission verification failed");
+        return ret;
+    }
+    const char *pkgName = data.ReadCString();
+    if (pkgName == nullptr || strnlen(pkgName, PKG_NAME_SIZE_MAX) >= PKG_NAME_SIZE_MAX) {
+        COMM_LOGE(COMM_SVC, "read pkgName failed!");
+        return SOFTBUS_TRANS_PROXY_WRITECSTRING_FAILED;
+    }
+    uint32_t code = SERVER_STOP_RANGE_FOR_MSDP;
+    SoftbusRecordCalledApiInfo(pkgName, code);
+    config = reinterpret_cast<const RangeConfig *>(data.ReadRawData(sizeof(RangeConfig)));
+    if (config == nullptr) {
+        COMM_LOGE(COMM_SVC, "read config data failed!");
+        return SOFTBUS_TRANS_PROXY_READCSTRING_FAILED;
+    }
+    int32_t retReply = StopRangeForMsdp(pkgName, config);
+    if (!reply.WriteInt32(retReply)) {
+        COMM_LOGE(COMM_SVC, "write reply failed!");
+        return SOFTBUS_TRANS_PROXY_WRITEINT_FAILED;
+    }
+    return SOFTBUS_OK;
+}
+
+int32_t SoftBusServerStub::RegRangeCbForMsdpInner(MessageParcel &data, MessageParcel &reply)
+{
+    COMM_LOGI(COMM_SVC, "enter");
+#ifndef ENHANCED_FLAG
+    (void)data;
+    (void)reply;
+    (void)MSDP_PACKAGE_NAME;
+    return SOFTBUS_FUNC_NOT_SUPPORT;
+#else
+    int32_t ret = PermissionVerify(SERVER_REG_RANGE_CB_FOR_MSDP);
+    if (ret != SOFTBUS_OK) {
+        COMM_LOGE(COMM_SVC, "permission verification failed");
+        return ret;
+    }
+    const char *pkgName = data.ReadCString();
+    if (pkgName == nullptr) {
+        COMM_LOGE(COMM_SVC, "read pkgName failed");
+        return SOFTBUS_IPC_ERR;
+    }
+    if (strcmp(MSDP_PACKAGE_NAME, pkgName) != 0) {
+        COMM_LOGE(COMM_SVC, "read pkgName invalid");
+        return SOFTBUS_INVALID_PARAM;
+    }
+    int32_t retReply = RegisterRangeCallbackForMsdp(pkgName);
+    if (!reply.WriteInt32(retReply)) {
+        COMM_LOGE(COMM_SVC, "write reply failed");
+        return SOFTBUS_IPC_ERR;
+    }
+    return SOFTBUS_OK;
+#endif
+}
+
+int32_t SoftBusServerStub::UnregRangeCbForMsdpInner(MessageParcel &data, MessageParcel &reply)
+{
+    COMM_LOGI(COMM_SVC, "enter");
+#ifndef ENHANCED_FLAG
+    (void)data;
+    (void)reply;
+    (void)MSDP_PACKAGE_NAME;
+    return SOFTBUS_FUNC_NOT_SUPPORT;
+#else
+    int32_t ret = PermissionVerify(SERVER_UNREG_RANGE_CB_FOR_MSDP);
+    if (ret != SOFTBUS_OK) {
+        COMM_LOGE(COMM_SVC, "permission verification failed");
+        return ret;
+    }
+    const char *pkgName = data.ReadCString();
+    if (pkgName == nullptr) {
+        COMM_LOGE(COMM_SVC, "read pkgName failed");
+        return SOFTBUS_IPC_ERR;
+    }
+    if (strcmp(MSDP_PACKAGE_NAME, pkgName) != 0) {
+        COMM_LOGE(COMM_SVC, "read pkgName invalid");
+        return SOFTBUS_INVALID_PARAM;
+    }
+    int32_t retReply = UnregisterRangeCallbackForMsdp(pkgName);
+    if (!reply.WriteInt32(retReply)) {
+        COMM_LOGE(COMM_SVC, "write reply failed");
+        return SOFTBUS_IPC_ERR;
+    }
+    return SOFTBUS_OK;
+#endif
+}
+
 int32_t SoftBusServerStub::SyncTrustedRelationShipInner(MessageParcel &data, MessageParcel &reply)
 {
     COMM_LOGD(COMM_SVC, "enter");
-
+    int32_t ret = PermissionVerify(SERVER_SYNC_TRUSTED_RELATION);
+    if (ret != SOFTBUS_OK) {
+        COMM_LOGE(COMM_SVC, "permission verification failed");
+        return ret;
+    }
     const char *pkgName = data.ReadCString();
     if (pkgName == nullptr || strnlen(pkgName, PKG_NAME_SIZE_MAX) >= PKG_NAME_SIZE_MAX) {
         COMM_LOGE(COMM_SVC, "read pkgName failed!");
@@ -1679,6 +1975,417 @@ int32_t SoftBusServerStub::PrivilegeCloseChannelInner(MessageParcel &data, Messa
     if (!reply.WriteInt32(ret)) {
         COMM_LOGE(COMM_SVC, "write reply failed, ret=%{public}d", ret);
         return SOFTBUS_TRANS_PROXY_WRITEINT_FAILED;
+    }
+    return SOFTBUS_OK;
+}
+
+int32_t SoftBusServerStub::SetDisplayNameInner(MessageParcel &data, MessageParcel &reply)
+{
+    COMM_LOGD(COMM_SVC, "enter");
+    int32_t ret = PermissionVerify(SERVER_SET_DISPLAY_NAME);
+    if (ret != SOFTBUS_OK) {
+        COMM_LOGE(COMM_SVC, "permission verification failed");
+        return ret;
+    }
+    const char *pkgName = data.ReadCString();
+    if (pkgName == nullptr || strnlen(pkgName, PKG_NAME_SIZE_MAX) >= PKG_NAME_SIZE_MAX) {
+        COMM_LOGE(COMM_SVC, "read pkgName failed!");
+        return SOFTBUS_TRANS_PROXY_READCSTRING_FAILED;
+    }
+    if (strcmp(DM_PACKAGE_NAME, pkgName) != 0) {
+        COMM_LOGE(COMM_SVC, "read pkgName invalid!");
+        return SOFTBUS_INVALID_PARAM;
+    }
+    SoftbusRecordCalledApiInfo(pkgName, SERVER_SET_DISPLAY_NAME);
+    const char *nameData = data.ReadCString();
+    if (nameData == nullptr) {
+        COMM_LOGE(COMM_SVC, "read nameData failed!");
+        return SOFTBUS_TRANS_PROXY_READCSTRING_FAILED;
+    }
+    uint32_t len = data.ReadUint32();
+    if (len > MSG_MAX_SIZE || len != strlen(nameData)) {
+        COMM_LOGE(COMM_SVC, "len invalid!, len=%{public}u", len);
+        return SOFTBUS_INVALID_PARAM;
+    }
+    int32_t retReply = SetDisplayName(pkgName, nameData, len);
+    if (!reply.WriteInt32(retReply)) {
+        COMM_LOGE(COMM_SVC, "write reply failed");
+        return SOFTBUS_TRANS_PROXY_WRITEINT_FAILED;
+    }
+    return SOFTBUS_OK;
+}
+
+static int32_t CheckPkgName(const char *pkgName)
+{
+    if (strcmp(pkgName, g_limitPkgName) != 0) {
+        COMM_LOGE(COMM_SVC, "invalid package name");
+        return SOFTBUS_INVALID_PARAM;
+    }
+    return SOFTBUS_OK;
+}
+
+int32_t SoftBusServerStub::CreateServerInner(MessageParcel &data, MessageParcel &reply)
+{
+    const char *pkgName = data.ReadCString();
+    if (pkgName == nullptr || strnlen(pkgName, PKG_NAME_SIZE_MAX) >= PKG_NAME_SIZE_MAX) {
+        COMM_LOGE(COMM_SVC, "read pkgName failed!");
+        return SOFTBUS_IPC_ERR;
+    }
+    if (CheckPkgName(pkgName) != SOFTBUS_OK) {
+        return SOFTBUS_INVALID_PARAM;
+    }
+    const char *name = data.ReadCString();
+    if (name == nullptr || strnlen(name, SESSION_NAME_SIZE_MAX) >= SESSION_NAME_SIZE_MAX) {
+        COMM_LOGE(COMM_SVC, "read name failed!");
+        return SOFTBUS_IPC_ERR;
+    }
+    int32_t retReply = CreateServer(pkgName, name);
+    if (!reply.WriteInt32(retReply)) {
+        COMM_LOGE(COMM_SVC, "write reply failed");
+        return SOFTBUS_IPC_ERR;
+    }
+    return SOFTBUS_OK;
+}
+
+int32_t SoftBusServerStub::RemoveServerInner(MessageParcel &data, MessageParcel &reply)
+{
+    const char *pkgName = data.ReadCString();
+    if (pkgName == nullptr || strnlen(pkgName, PKG_NAME_SIZE_MAX) >= PKG_NAME_SIZE_MAX) {
+        COMM_LOGE(COMM_SVC, "read pkgName failed!");
+        return SOFTBUS_IPC_ERR;
+    }
+    if (CheckPkgName(pkgName) != SOFTBUS_OK) {
+        return SOFTBUS_INVALID_PARAM;
+    }
+    const char *name = data.ReadCString();
+    if (name == nullptr || strnlen(name, SESSION_NAME_SIZE_MAX) >= SESSION_NAME_SIZE_MAX) {
+        COMM_LOGE(COMM_SVC, "read name failed!");
+        return SOFTBUS_IPC_ERR;
+    }
+    int32_t retReply = RemoveServer(pkgName, name);
+    if (!reply.WriteInt32(retReply)) {
+        COMM_LOGE(COMM_SVC, "write reply failed");
+        return SOFTBUS_IPC_ERR;
+    }
+    return SOFTBUS_OK;
+}
+
+int32_t SoftBusServerStub::ConnectInner(MessageParcel &data, MessageParcel &reply)
+{
+    const char *pkgName = data.ReadCString();
+    if (pkgName == nullptr || strnlen(pkgName, PKG_NAME_SIZE_MAX) >= PKG_NAME_SIZE_MAX) {
+        COMM_LOGE(COMM_SVC, "read pkgName failed!");
+        return SOFTBUS_IPC_ERR;
+    }
+    if (CheckPkgName(pkgName) != SOFTBUS_OK) {
+        return SOFTBUS_INVALID_PARAM;
+    }
+    const char *name = data.ReadCString();
+    if (name == nullptr || strnlen(name, SESSION_NAME_SIZE_MAX) >= SESSION_NAME_SIZE_MAX) {
+        COMM_LOGE(COMM_SVC, "read name failed!");
+        return SOFTBUS_IPC_ERR;
+    }
+    Address connectAddress;
+    const char *address = data.ReadCString();
+    if (address == nullptr) {
+        COMM_LOGE(COMM_SVC, "read address fail, address is nullptr");
+        return SOFTBUS_IPC_ERR;
+    }
+    size_t len = strnlen(address, BT_MAC_LEN);
+    if (len != (BT_MAC_LEN - 1) || strcpy_s(connectAddress.addr.ble.mac, BT_MAC_LEN, address) != EOK) {
+        COMM_LOGE(COMM_SVC, "read address fail");
+        return SOFTBUS_IPC_ERR;
+    }
+    int32_t addrType = data.ReadInt32();
+    if (addrType < CONNECTION_ADDR_WLAN || addrType > CONNECTION_ADDR_MAX) {
+        COMM_LOGE(COMM_SVC, "read addrType fail, addrType= %{public}d", addrType);
+        return SOFTBUS_IPC_ERR;
+    }
+    connectAddress.addrType = static_cast<ConnectionAddrType>(addrType);
+    int32_t handle = Connect(pkgName, name, &connectAddress);
+    if (!reply.WriteInt32(handle)) {
+        COMM_LOGE(COMM_SVC, "write handle failed");
+        return SOFTBUS_IPC_ERR;
+    }
+    return SOFTBUS_OK;
+}
+
+int32_t SoftBusServerStub::DisconnectInner(MessageParcel &data, MessageParcel &reply)
+{
+    uint32_t handle;
+    if (!data.ReadUint32(handle)) {
+        COMM_LOGE(COMM_SVC, "read handle failed!");
+        return SOFTBUS_IPC_ERR;
+    }
+    int32_t retReply = Disconnect(handle);
+    if (!reply.WriteInt32(retReply)) {
+        COMM_LOGE(COMM_SVC, "write reply failed");
+        return SOFTBUS_IPC_ERR;
+    }
+    return SOFTBUS_OK;
+}
+
+int32_t SoftBusServerStub::SendInner(MessageParcel &data, MessageParcel &reply)
+{
+    uint32_t handle;
+    if (!data.ReadUint32(handle)) {
+        COMM_LOGE(COMM_SVC, "read handle failed!");
+        return SOFTBUS_IPC_ERR;
+    }
+    uint32_t len = 0;
+    if (!data.ReadUint32(len)) {
+        COMM_LOGE(COMM_SVC, "read len failed!");
+        return SOFTBUS_IPC_ERR;
+    }
+    if (len > GENERAL_SEND_DATA_MAX_LEN) {
+        COMM_LOGE(COMM_SVC, "len invalid!, len=%{public}u", len);
+        return SOFTBUS_INVALID_PARAM;
+    }
+    auto dataMsg = data.ReadRawData(len);
+    if (dataMsg == NULL) {
+        COMM_LOGE(COMM_SVC, "read data failed!");
+        return SOFTBUS_IPC_ERR;
+    }
+    uint8_t *buf = const_cast<uint8_t *>(reinterpret_cast<const uint8_t *>(dataMsg));
+    int32_t retReply = Send(handle, buf, len);
+    if (!reply.WriteInt32(retReply)) {
+        COMM_LOGE(COMM_SVC, "write reply failed");
+        return SOFTBUS_IPC_ERR;
+    }
+    return SOFTBUS_OK;
+}
+
+int32_t SoftBusServerStub::GetPeerDeviceIdInner(MessageParcel &data, MessageParcel &reply)
+{
+    uint32_t handle;
+    if (!data.ReadUint32(handle)) {
+        COMM_LOGE(COMM_SVC, "read handle failed!");
+        return SOFTBUS_IPC_ERR;
+    }
+    uint32_t len = 0;
+    if (!data.ReadUint32(len)) {
+        COMM_LOGE(COMM_SVC, "read len failed!");
+        return SOFTBUS_IPC_ERR;
+    }
+    if (len > BT_MAC_LEN) {
+        COMM_LOGE(COMM_SVC, "len invalid!, len=%{public}u", len);
+        return SOFTBUS_INVALID_PARAM;
+    }
+    char peerDeviceId[len];
+    (void)memset_s(peerDeviceId, len, '\0', len);
+    int32_t retReply = ConnGetPeerDeviceId(handle, peerDeviceId, len);
+    if (!reply.WriteRawData(peerDeviceId, len)) {
+        COMM_LOGE(COMM_SVC, "write peerDeviceId failed!");
+        return SOFTBUS_IPC_ERR;
+    }
+    if (!reply.WriteInt32(retReply)) {
+        COMM_LOGE(COMM_SVC, "write ret failed!");
+        return SOFTBUS_IPC_ERR;
+    }
+    return SOFTBUS_OK;
+}
+
+int32_t SoftBusServerStub::SoftbusRegisterBrProxyServiceInner(MessageParcel &data, MessageParcel &reply)
+{
+    COMM_LOGD(COMM_SVC, "enter");
+    auto remote = data.ReadRemoteObject();
+    if (remote == nullptr) {
+        COMM_LOGE(COMM_SVC, "SoftbusRegisterServiceInner read systemAbilityId failed!");
+        return SOFTBUS_TRANS_PROXY_REMOTE_NULL;
+    }
+    const char *pkgName = data.ReadCString();
+    if (pkgName == nullptr) {
+        COMM_LOGE(COMM_SVC, "SoftbusRegisterServiceInner read pkgName failed!");
+        return SOFTBUS_TRANS_PROXY_READCSTRING_FAILED;
+    }
+    uint32_t code = MANAGE_REGISTER_BR_PROXY_SERVICE;
+    SoftbusRecordCalledApiInfo(pkgName, code);
+    int32_t retReply = SoftbusRegisterService(pkgName, remote);
+    if (!reply.WriteInt32(retReply)) {
+        COMM_LOGE(COMM_SVC, "SoftbusRegisterServiceInner write reply failed!");
+        return SOFTBUS_TRANS_PROXY_WRITEINT_FAILED;
+    }
+    return SOFTBUS_OK;
+}
+ 
+int32_t SoftBusServerStub::OpenBrProxyInner(MessageParcel &data, MessageParcel &reply)
+{
+    const char *brMac = data.ReadCString();
+    if (brMac == nullptr) {
+        COMM_LOGE(COMM_SVC, "[br_proxy] read brMac failed!");
+        return SOFTBUS_TRANS_PROXY_READCSTRING_FAILED;
+    }
+ 
+    const char *uuid = data.ReadCString();
+    if (uuid == nullptr) {
+        COMM_LOGE(COMM_SVC, "[br_proxy] read uuid failed!");
+        return SOFTBUS_TRANS_PROXY_READCSTRING_FAILED;
+    }
+ 
+    int32_t retReply = OpenBrProxy(brMac, uuid);
+    if (!reply.WriteInt32(retReply)) {
+        COMM_LOGE(COMM_SVC, "[br_proxy] write reply failed!");
+        return SOFTBUS_TRANS_PROXY_WRITEINT_FAILED;
+    }
+    return SOFTBUS_OK;
+}
+ 
+int32_t SoftBusServerStub::CloseBrProxyInner(MessageParcel &data, MessageParcel &reply)
+{
+    int32_t channelId;
+    if (!data.ReadInt32(channelId)) {
+        COMM_LOGE(COMM_SVC, "[br_proxy] read channelId failed!");
+        return SOFTBUS_TRANS_PROXY_READINT_FAILED;
+    }
+ 
+    int32_t retReply = CloseBrProxy(channelId);
+    if (!reply.WriteInt32(retReply)) {
+        COMM_LOGE(COMM_SVC, "[br_proxy] write reply failed!");
+        return SOFTBUS_TRANS_PROXY_WRITEINT_FAILED;
+    }
+    return SOFTBUS_OK;
+}
+ 
+int32_t SoftBusServerStub::SendBrProxyDataInner(MessageParcel &data, MessageParcel &reply)
+{
+    int32_t channelId;
+    if (!data.ReadInt32(channelId)) {
+        COMM_LOGE(COMM_SVC, "[br_proxy] read channelId failed!");
+        return SOFTBUS_TRANS_PROXY_READINT_FAILED;
+    }
+ 
+    uint32_t dataLen;
+    if (!data.ReadUint32(dataLen)) {
+        COMM_LOGE(COMM_SVC, "[br_proxy] read dataLen failed!");
+        return SOFTBUS_TRANS_PROXY_READUINT_FAILED;
+    }
+ 
+    auto rawData = data.ReadRawData(dataLen);
+    COMM_CHECK_AND_RETURN_RET_LOGE(rawData != nullptr, SOFTBUS_IPC_ERR, COMM_SVC, "[br_proxy] read data failed!");
+    void *dataInfo = const_cast<void *>(rawData);
+ 
+    int32_t retReply = SendBrProxyData(channelId, (char *)dataInfo, dataLen);
+    if (!reply.WriteInt32(retReply)) {
+        COMM_LOGE(COMM_SVC, "[br_proxy] write reply failed!");
+        return SOFTBUS_TRANS_PROXY_WRITEINT_FAILED;
+    }
+    return SOFTBUS_OK;
+}
+ 
+int32_t SoftBusServerStub::SetBrProxyListenerStateInner(MessageParcel &data, MessageParcel &reply)
+{
+    int32_t channelId;
+    if (!data.ReadInt32(channelId)) {
+        COMM_LOGE(COMM_SVC, "[br_proxy] read channelId failed!");
+        return SOFTBUS_TRANS_PROXY_READINT_FAILED;
+    }
+    int32_t type;
+    if (!data.ReadInt32(type)) {
+        COMM_LOGE(COMM_SVC, "[br_proxy] read type failed!");
+        return SOFTBUS_TRANS_PROXY_READINT_FAILED;
+    }
+    bool CbEnabled = false;
+    if (!data.ReadBool(CbEnabled)) {
+        COMM_LOGE(COMM_SVC, "[br_proxy] read CbEnabled failed");
+        return SOFTBUS_TRANS_PROXY_READINT_FAILED;
+    }
+ 
+    int32_t retReply = SetListenerState(channelId, type, CbEnabled);
+    if (!reply.WriteInt32(retReply)) {
+        COMM_LOGE(COMM_SVC, "[br_proxy] write reply failed!");
+        return SOFTBUS_TRANS_PROXY_WRITEINT_FAILED;
+    }
+    return SOFTBUS_OK;
+}
+ 
+int32_t SoftBusServerStub::GetBrProxyChannelStateInner(MessageParcel &data, MessageParcel &reply)
+{
+    int32_t uid;
+    if (!data.ReadInt32(uid)) {
+        COMM_LOGE(COMM_SVC, "[br_proxy] read channelId failed!");
+        return SOFTBUS_TRANS_PROXY_READINT_FAILED;
+    }
+ 
+    bool retReply = IsProxyChannelEnabled(uid);
+    if (!reply.WriteBool(retReply)) {
+        COMM_LOGE(COMM_SVC, "[br_proxy] write reply failed!");
+        return SOFTBUS_TRANS_PROXY_WRITEINT_FAILED;
+    }
+    return SOFTBUS_OK;
+}
+
+int32_t SoftBusServerStub::RegisterPushHookInner(MessageParcel &data, MessageParcel &reply)
+{
+    int32_t ret = PushRegisterHook();
+    if (!reply.WriteInt32(ret)) {
+        COMM_LOGE(COMM_SVC, "[br_proxy] write reply failed!");
+        return SOFTBUS_TRANS_PROXY_WRITEINT_FAILED;
+    }
+    return SOFTBUS_OK;
+}
+
+static const char* LabelTransformation(uint32_t code)
+{
+    if (code == SERVER_JOIN_LNN) {
+        return SERVER_JOIN_LNN_NAME;
+    } else if (code == SERVER_LEAVE_LNN) {
+        return SERVER_LEAVE_LNN_NAME;
+    } else if (code == SERVER_SET_NODE_DATA_CHANGE_FLAG) {
+        return SERVER_SET_NODE_DATA_CHANGE_FLAG_NAME;
+    } else if (code == SERVER_ACTIVE_META_NODE) {
+        return SERVER_ACTIVE_META_NODE_NAME;
+    } else if (code == SERVER_DEACTIVE_META_NODE) {
+        return SERVER_DEACTIVE_META_NODE_NAME;
+    } else if (code == SERVER_GET_ALL_META_NODE_INFO) {
+        return SERVER_GET_ALL_META_NODE_INFO_NAME;
+    } else if (code == SERVER_SHIFT_LNN_GEAR) {
+        return SERVER_SHIFT_LNN_GEAR_NAME;
+    } else if (code == SERVER_SYNC_TRUSTED_RELATION) {
+        return SERVER_SYNC_TRUSTED_RELATION_NAME;
+    } else if (code == SERVER_SET_DISPLAY_NAME) {
+        return SERVER_SET_DISPLAY_NAME_NAME;
+    } else if (code == SERVER_SET_DATA_LEVEL) {
+        return SERVER_SET_DATA_LEVEL_NAME;
+    } else if (code == SERVER_REG_DATA_LEVEL_CHANGE_CB) {
+        return SERVER_REG_DATA_LEVEL_CHANGE_CB_NAME;
+    } else if (code == SERVER_UNREG_DATA_LEVEL_CHANGE_CB) {
+        return SERVER_UNREG_DATA_LEVEL_CHANGE_CB_NAME;
+    } else if (code == SERVER_TRIGGER_RANGE_FOR_MSDP) {
+        return SERVER_TRIGGER_RANGE_FOR_MSDP_NAME;
+    } else if (code == SERVER_STOP_RANGE_FOR_MSDP) {
+        return SERVER_STOP_RANGE_FOR_MSDP_NAME;
+    } else if (code == SERVER_REG_RANGE_CB_FOR_MSDP) {
+        return SERVER_REG_RANGE_CB_FOR_MSDP_NAME;
+    } else if (code == SERVER_UNREG_RANGE_CB_FOR_MSDP) {
+        return SERVER_UNREG_RANGE_CB_FOR_MSDP_NAME;
+    }
+    return nullptr;
+}
+
+int32_t SoftBusServerStub::PermissionVerify(uint32_t code)
+{
+    uint32_t tokenId = IPCSkeleton::GetCallingTokenID();
+    auto tokenType = OHOS::Security::AccessToken::AccessTokenKit::GetTokenTypeFlag(
+        static_cast<OHOS::Security::AccessToken::AccessTokenID>(tokenId));
+    if (tokenType != OHOS::Security::AccessToken::ATokenTypeEnum::TOKEN_NATIVE) {
+        COMM_LOGE(COMM_SVC, "not native call");
+        return SOFTBUS_PERMISSION_DENIED;
+    }
+    OHOS::Security::AccessToken::NativeTokenInfo nativeTokenInfo;
+    int32_t ret = OHOS::Security::AccessToken::AccessTokenKit::GetNativeTokenInfo(tokenId, nativeTokenInfo);
+    if (ret != SOFTBUS_OK) {
+        COMM_LOGE(COMM_SVC, "get nativeTokenInfo fail, ret=%{public}d", ret);
+        return SOFTBUS_PERMISSION_DENIED;
+    }
+    const char* tagName = LabelTransformation(code);
+    if (tagName == nullptr) {
+        COMM_LOGE(COMM_SVC, "the tag does not add process verification, code=%{public}d", code);
+        return SOFTBUS_PERMISSION_DENIED;
+    }
+    if (CheckLnnPermission(tagName, nativeTokenInfo.processName.c_str()) != SOFTBUS_OK) {
+        COMM_LOGE(COMM_SVC, "the process does not have permission, code=%{public}u, processName=%{public}s",
+            code, nativeTokenInfo.processName.c_str());
+        return SOFTBUS_PERMISSION_DENIED;
     }
     return SOFTBUS_OK;
 }

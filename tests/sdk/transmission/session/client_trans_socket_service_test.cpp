@@ -17,6 +17,7 @@
 #include <gtest/gtest.h>
 #include <securec.h>
 
+#include "client_trans_socket_option.h"
 #include "inner_socket.h"
 #include "socket.h"
 #include "softbus_error_code.h"
@@ -27,6 +28,8 @@
 #define SOCKET_PKG_NAME_INVALID_LEN  (SOCKET_PKG_NAME_MAX_LEN + 1)
 #define SOCKET_NETWORKID_MAX_LEN     64
 #define SOCKET_NETWORKID_INVALID_LEN (SOCKET_NETWORKID_MAX_LEN + 1)
+#define DATA_LENS 32
+#define INVALID_VALUE (-1)
 
 using namespace testing::ext;
 namespace OHOS {
@@ -248,11 +251,11 @@ HWTEST_F(TransClientSocketServiceTest, SetSocketOpt001, TestSize.Level1)
     void *temp = &optValueValid;
     int32_t optValueSizeInvalid = -1;
     int32_t optValueSizeValid = sizeof(int32_t);
-    int32_t ret = SetSocketOpt(socket, levelInvalid, optTypeInvalid, NULL, optValueSizeInvalid);
+    int32_t ret = SetSocketOpt(socket, levelInvalid, optTypeInvalid, nullptr, optValueSizeInvalid);
     ASSERT_EQ(ret, SOFTBUS_INVALID_PARAM);
-    ret = SetSocketOpt(socket, levelValid, optTypeInvalid, NULL, optValueSizeInvalid);
+    ret = SetSocketOpt(socket, levelValid, optTypeInvalid, nullptr, optValueSizeInvalid);
     ASSERT_EQ(ret, SOFTBUS_INVALID_PARAM);
-    ret = SetSocketOpt(socket, levelValid, optTypeValid, NULL, optValueSizeInvalid);
+    ret = SetSocketOpt(socket, levelValid, optTypeValid, nullptr, optValueSizeInvalid);
     ASSERT_EQ(ret, SOFTBUS_INVALID_PARAM);
     ret = SetSocketOpt(socket, levelValid, optTypeValid, temp, optValueSizeInvalid);
     ASSERT_EQ(ret, SOFTBUS_INVALID_PARAM);
@@ -277,13 +280,13 @@ HWTEST_F(TransClientSocketServiceTest, GetSocketOpt001, TestSize.Level1)
     void *temp = &optValueValid;
     int32_t valueSize = 0;
     int32_t *optValueSizeValid = &valueSize;
-    int32_t ret = GetSocketOpt(socket, levelInvalid, optTypeInvalid, NULL, NULL);
+    int32_t ret = GetSocketOpt(socket, levelInvalid, optTypeInvalid, nullptr, nullptr);
     ASSERT_EQ(ret, SOFTBUS_INVALID_PARAM);
-    ret = GetSocketOpt(socket, levelValid, optTypeInvalid, NULL, NULL);
+    ret = GetSocketOpt(socket, levelValid, optTypeInvalid, nullptr, nullptr);
     ASSERT_EQ(ret, SOFTBUS_INVALID_PARAM);
-    ret = GetSocketOpt(socket, levelValid, optTypeValid, NULL, NULL);
+    ret = GetSocketOpt(socket, levelValid, optTypeValid, nullptr, nullptr);
     ASSERT_EQ(ret, SOFTBUS_INVALID_PARAM);
-    ret = GetSocketOpt(socket, levelValid, optTypeValid, temp, NULL);
+    ret = GetSocketOpt(socket, levelValid, optTypeValid, temp, nullptr);
     ASSERT_EQ(ret, SOFTBUS_INVALID_PARAM);
     ret = GetSocketOpt(socket, levelValid, optTypeValid, temp, optValueSizeValid);
     ASSERT_NE(ret, SOFTBUS_INVALID_PARAM);
@@ -320,5 +323,179 @@ HWTEST_F(TransClientSocketServiceTest, RegisterRelationChecker001, TestSize.Leve
 {
     int32_t ret = RegisterRelationChecker(nullptr);
     ASSERT_EQ(ret, SOFTBUS_INVALID_PARAM);
+}
+
+/**
+ * @tc.name: SetCommonSocketOpt001
+ * @tc.desc: call SetCommonSocketOpt function with with invalid parameter.
+ * @tc.type: FUNC
+ * @tc.require:
+ */
+HWTEST_F(TransClientSocketServiceTest, SetCommonSocketOpt001, TestSize.Level1)
+{
+    int32_t socket = 1;
+    OptLevel level = OPT_LEVEL_KERNEL;
+    OptType optType = OPT_TYPE_FIRST_PACKAGE;
+    int32_t optValueSize = DATA_LENS;
+    void *optValue = &optValueSize;
+    int32_t ret = SetCommonSocketOpt(socket, level, optType, nullptr, 0);
+    EXPECT_EQ(ret, SOFTBUS_INVALID_PARAM);
+
+    ret = SetCommonSocketOpt(socket, level, optType, optValue, 0);
+    EXPECT_EQ(ret, SOFTBUS_INVALID_PARAM);
+
+    ret = SetCommonSocketOpt(socket, level, optType, optValue, optValueSize);
+    EXPECT_EQ(ret, SOFTBUS_NOT_IMPLEMENT);
+
+    optType = OPT_TYPE_MAX_IDLE_TIMEOUT;
+    ret = SetCommonSocketOpt(socket, level, optType, optValue, optValueSize);
+    EXPECT_EQ(ret, SOFTBUS_TRANS_SESSION_INFO_NOT_FOUND);
+
+    socket = INVALID_VALUE;
+    ret = SetCommonSocketOpt(socket, level, optType, optValue, optValueSize);
+    EXPECT_EQ(ret, SOFTBUS_INVALID_PARAM);
+
+    optType = OPT_TYPE_NEED_ACK;
+    ret = SetCommonSocketOpt(socket, level, optType, optValue, optValueSize);
+    EXPECT_EQ(ret, SOFTBUS_INVALID_PARAM);
+
+    socket = 1;
+    ret = SetCommonSocketOpt(socket, level, optType, optValue, optValueSize);
+    EXPECT_EQ(ret, SOFTBUS_INVALID_PARAM);
+}
+
+/**
+ * @tc.name: GetCommonSocketOpt001
+ * @tc.desc: call GetCommonSocketOpt function with with invalid parameter.
+ * @tc.type: FUNC
+ * @tc.require:
+ */
+HWTEST_F(TransClientSocketServiceTest, GetCommonSocketOpt001, TestSize.Level1)
+{
+    int32_t socket = 1;
+    OptLevel level = OPT_LEVEL_KERNEL;
+    OptType optType = OPT_TYPE_FIRST_PACKAGE;
+    int32_t optValueSize = DATA_LENS;
+    void *optValue = &optValueSize;
+    int32_t ret = GetCommonSocketOpt(socket, level, optType, nullptr, nullptr);
+    EXPECT_EQ(ret, SOFTBUS_INVALID_PARAM);
+
+    ret = GetCommonSocketOpt(socket, level, optType, nullptr, &optValueSize);
+    EXPECT_EQ(ret, SOFTBUS_INVALID_PARAM);
+
+    ret = SetCommonSocketOpt(socket, level, optType, optValue, optValueSize);
+    EXPECT_EQ(ret, SOFTBUS_NOT_IMPLEMENT);
+
+    optType = OPT_TYPE_SUPPORT_ACK;
+    ret = GetCommonSocketOpt(socket, level, optType, optValue, &optValueSize);
+    EXPECT_EQ(ret, SOFTBUS_TRANS_SESSION_INFO_NOT_FOUND);
+
+    socket = INVALID_VALUE;
+    ret = GetCommonSocketOpt(socket, level, optType, optValue, &optValueSize);
+    EXPECT_EQ(ret, SOFTBUS_INVALID_PARAM);
+
+    optType = OPT_TYPE_MAX_IDLE_TIMEOUT;
+    ret = GetCommonSocketOpt(socket, level, optType, optValue, &optValueSize);
+    EXPECT_EQ(ret, SOFTBUS_INVALID_PARAM);
+
+    socket = 1;
+    ret = GetCommonSocketOpt(socket, level, optType, optValue, &optValueSize);
+    EXPECT_EQ(ret, SOFTBUS_TRANS_SESSION_INFO_NOT_FOUND);
+}
+
+/**
+ * @tc.name: BindAsync001
+ * @tc.desc: call BindAsync function with with valid parameter.
+ * @tc.type: FUNC
+ * @tc.require:
+ */
+HWTEST_F(TransClientSocketServiceTest, BindAsync001, TestSize.Level1)
+{
+    SocketInfo info = {
+        .name = const_cast<char *>(g_socketName.c_str()),
+        .pkgName = const_cast<char *>(g_pkgName.c_str()),
+        .peerName = const_cast<char *>(g_socketPeerName.c_str()),
+        .peerNetworkId = nullptr,
+        .dataType = DATA_TYPE_MESSAGE,
+    };
+
+    int32_t socket = Socket(info);
+    EXPECT_EQ(socket, SOFTBUS_TRANS_SESSION_ADDPKG_FAILED);
+
+    QosTV qosInfo[] = {
+        {.qos = QOS_TYPE_MIN_BW,       .value = 80  },
+        { .qos = QOS_TYPE_MAX_LATENCY, .value = 4000},
+        { .qos = QOS_TYPE_MIN_LATENCY, .value = 2000},
+    };
+    int32_t ret = BindAsync(socket, qosInfo, sizeof(qosInfo) / sizeof(qosInfo[0]), nullptr);
+    ASSERT_EQ(ret, SOFTBUS_INVALID_PARAM);
+}
+
+/**
+ * @tc.name: EvaluateQos001
+ * @tc.desc: call EvaluateQos function with with valid parameter.
+ * @tc.type: FUNC
+ * @tc.require:
+ */
+HWTEST_F(TransClientSocketServiceTest, EvaluateQos001, TestSize.Level1)
+{
+    TransDataType dataType = DATA_TYPE_BYTES;
+    QosTV qos;
+    uint32_t qosCount = 1;
+    int32_t ret = EvaluateQos(const_cast<char *>(g_networkId.c_str()), dataType, &qos, qosCount);
+    EXPECT_EQ(ret, SOFTBUS_ACCESS_TOKEN_DENIED);
+
+    ret = EvaluateQos(nullptr, dataType, nullptr, qosCount);
+    EXPECT_EQ(ret, SOFTBUS_INVALID_PARAM);
+}
+
+/**
+ * @tc.name: GetMtuSize001
+ * @tc.desc: call GetMtuSize function with with valid parameter.
+ * @tc.type: FUNC
+ * @tc.require:
+ */
+HWTEST_F(TransClientSocketServiceTest, GetMtuSize001, TestSize.Level1)
+{
+    int32_t socket = INVALID_VALUE;
+    uint32_t mtuSize = 0;
+    int32_t ret = GetMtuSize(socket, &mtuSize);
+    EXPECT_EQ(ret, SOFTBUS_INVALID_PARAM);
+}
+
+/**
+ * @tc.name: PrivilegeShutdown001
+ * @tc.desc: call PrivilegeShutdown function with with valid parameter.
+ * @tc.type: FUNC
+ * @tc.require:
+ */
+HWTEST_F(TransClientSocketServiceTest, PrivilegeShutdown001, TestSize.Level1)
+{
+    uint64_t tokenId = 0;
+    int32_t pid = 0;
+
+    int32_t ret = PrivilegeShutdown(tokenId, pid, nullptr);
+    EXPECT_EQ(ret, SOFTBUS_INVALID_PARAM);
+
+    ret = PrivilegeShutdown(tokenId, pid, const_cast<char *>(g_networkId.c_str()));
+    EXPECT_EQ(ret, SOFTBUS_ACCESS_TOKEN_DENIED);
+}
+
+/**
+ * @tc.name: SetAccessInfo001
+ * @tc.desc: call SetAccessInfo function with with valid parameter.
+ * @tc.type: FUNC
+ * @tc.require:
+ */
+HWTEST_F(TransClientSocketServiceTest, SetAccessInfo001, TestSize.Level1)
+{
+    int32_t socket = 1;
+    SocketAccessInfo accessInfo = {
+        .userId = 1,
+        .businessAccountId = (char *)"accountId",
+    };
+
+    int32_t ret = SetAccessInfo(socket, accessInfo);
+    EXPECT_EQ(ret, SOFTBUS_INVALID_PARAM);
 }
 } // namespace OHOS

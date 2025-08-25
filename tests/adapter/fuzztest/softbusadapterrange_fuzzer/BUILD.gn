@@ -21,7 +21,10 @@ ohos_fuzztest("SoftBusAdapterRangeFuzzTest") {
   module_out_path = dsoftbus_fuzz_out_path
   fuzz_config_file =
       "$dsoftbus_root_path/tests/adapter/fuzztest/softbusadapterrange_fuzzer"
-  include_dirs = [ "$dsoftbus_root_path/adapter/common/include" ]
+  include_dirs = [
+    "$dsoftbus_root_path/adapter/common/include",
+    "$dsoftbus_root_path/interfaces/kits/common",
+  ]
   cflags = [
     "-g",
     "-O0",

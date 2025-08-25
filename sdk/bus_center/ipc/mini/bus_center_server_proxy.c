@@ -72,9 +72,35 @@ int32_t ServerIpcSetDataLevel(const DataLevel *dataLevel)
     return SOFTBUS_FUNC_NOT_SUPPORT;
 }
 
-int32_t ServerIpcJoinLNN(const char *pkgName, void *addr, uint32_t addrTypeLen)
+int32_t ServerIpcRegRangeCbForMsdp(const char *pkgName)
 {
-    return LnnIpcServerJoin(pkgName, 0, addr, addrTypeLen);
+    (void)pkgName;
+    return SOFTBUS_FUNC_NOT_SUPPORT;
+}
+
+int32_t ServerIpcUnregRangeCbForMsdp(const char *pkgName)
+{
+    (void)pkgName;
+    return SOFTBUS_FUNC_NOT_SUPPORT;
+}
+
+int32_t ServerIpcTriggerRangeForMsdp(const char *pkgName, const RangeConfig *config)
+{
+    (void)pkgName;
+    (void)config;
+    return SOFTBUS_FUNC_NOT_SUPPORT;
+}
+
+int32_t ServerIpcStopRangeForMsdp(const char *pkgName, const RangeConfig *config)
+{
+    (void)pkgName;
+    (void)config;
+    return SOFTBUS_FUNC_NOT_SUPPORT;
+}
+
+int32_t ServerIpcJoinLNN(const char *pkgName, void *addr, uint32_t addrTypeLen, bool isForceJoin)
+{
+    return LnnIpcServerJoin(pkgName, 0, addr, addrTypeLen, isForceJoin);
 }
 
 int32_t ServerIpcLeaveLNN(const char *pkgName, const char *networkId)
@@ -94,12 +120,12 @@ int32_t ServerIpcStopTimeSync(const char *pkgName, const char *targetNetworkId)
 
 int32_t ServerIpcPublishLNN(const char *pkgName, const PublishInfo *info)
 {
-    return LnnIpcPublishLNN(pkgName, info);
+    return LnnIpcPublishLNN(pkgName, 0, info);
 }
 
 int32_t ServerIpcStopPublishLNN(const char *pkgName, int32_t publishId)
 {
-    return LnnIpcStopPublishLNN(pkgName, publishId);
+    return LnnIpcStopPublishLNN(pkgName, 0, publishId);
 }
 
 int32_t ServerIpcRefreshLNN(const char *pkgName, const SubscribeInfo *info)
@@ -141,5 +167,13 @@ int32_t ServerIpcSyncTrustedRelationShip(const char *pkgName, const char *msg, u
     (void)pkgName;
     (void)msg;
     (void)msgLen;
+    return SOFTBUS_FUNC_NOT_SUPPORT;
+}
+
+int32_t ServerIpcSetDisplayName(const char *pkgName, const char *nameData, uint32_t len)
+{
+    (void)pkgName;
+    (void)nameData;
+    (void)len;
     return SOFTBUS_FUNC_NOT_SUPPORT;
 }

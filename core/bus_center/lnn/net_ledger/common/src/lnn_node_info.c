@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021-2024 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2025 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -21,6 +21,7 @@
 
 #include "anonymizer.h"
 #include "lnn_log.h"
+#include "softbus_adapter_crypto.h"
 #include "softbus_error_code.h"
 #include "softbus_utils.h"
 
@@ -149,42 +150,44 @@ void LnnSetBleMac(NodeInfo *info, const char *mac)
     }
 }
 
-const char *LnnGetNetIfName(const NodeInfo *info)
+const char *LnnGetNetIfName(const NodeInfo *info, int32_t ifnameIdx)
 {
-    if (info == NULL) {
+    if (info == NULL || isIfnameIdxInvalid(ifnameIdx)) {
         LNN_LOGE(LNN_LEDGER, "para error");
         return DEFAULT_IFNAME;
     }
-    return info->connectInfo.netIfName;
+    return info->connectInfo.ifInfo[ifnameIdx].netIfName;
 }
 
-void LnnSetNetIfName(NodeInfo *info, const char *netIfName)
+void LnnSetNetIfName(NodeInfo *info, const char *netIfName, int32_t ifnameIdx)
 {
-    if (info == NULL || netIfName == NULL) {
+    if (info == NULL || netIfName == NULL || isIfnameIdxInvalid(ifnameIdx)) {
         LNN_LOGE(LNN_LEDGER, "PARA ERROR");
         return;
     }
-    if (strncpy_s(info->connectInfo.netIfName, NET_IF_NAME_LEN, netIfName, strlen(netIfName)) != EOK) {
+    if (strncpy_s(info->connectInfo.ifInfo[ifnameIdx].netIfName, NET_IF_NAME_LEN,
+        netIfName, strlen(netIfName)) != EOK) {
         LNN_LOGE(LNN_LEDGER, "str copy error");
     }
 }
 
-const char *LnnGetWiFiIp(const NodeInfo *info)
+const char *LnnGetWiFiIp(const NodeInfo *info, int32_t ifnameIdx)
 {
-    if (info == NULL) {
+    if (info == NULL || isIfnameIdxInvalid(ifnameIdx)) {
         LNN_LOGE(LNN_LEDGER, "PARA error");
         return DEFAULT_IP;
     }
-    return info->connectInfo.deviceIp;
+    return info->connectInfo.ifInfo[ifnameIdx].deviceIp;
 }
 
-void LnnSetWiFiIp(NodeInfo *info, const char *ip)
+void LnnSetWiFiIp(NodeInfo *info, const char *ip, int32_t ifnameIdx)
 {
-    if (info == NULL || ip == NULL) {
+    if (info == NULL || ip == NULL || isIfnameIdxInvalid(ifnameIdx)) {
         LNN_LOGE(LNN_LEDGER, "PARA ERROR");
         return;
     }
-    if (strncpy_s(info->connectInfo.deviceIp, sizeof(info->connectInfo.deviceIp), ip, strlen(ip)) != EOK) {
+    if (strncpy_s(info->connectInfo.ifInfo[ifnameIdx].deviceIp, sizeof(info->connectInfo.ifInfo[ifnameIdx].deviceIp),
+        ip, strlen(ip)) != EOK) {
         LNN_LOGE(LNN_LEDGER, "STR COPY ERROR");
     }
 }
@@ -211,60 +214,60 @@ int32_t LnnSetMasterUdid(NodeInfo *info, const char *udid)
     return SOFTBUS_OK;
 }
 
-int32_t LnnGetAuthPort(const NodeInfo *info)
+int32_t LnnGetAuthPort(const NodeInfo *info, int32_t ifnameIdx)
 {
-    if (info == NULL) {
+    if (info == NULL || isIfnameIdxInvalid(ifnameIdx)) {
         LNN_LOGE(LNN_LEDGER, "para error");
         return SOFTBUS_INVALID_PARAM;
     }
-    return info->connectInfo.authPort;
+    return info->connectInfo.ifInfo[ifnameIdx].authPort;
 }
 
-int32_t LnnSetAuthPort(NodeInfo *info, int32_t port)
+int32_t LnnSetAuthPort(NodeInfo *info, int32_t port, int32_t ifnameIdx)
 {
-    if (info == NULL) {
+    if (info == NULL || isIfnameIdxInvalid(ifnameIdx)) {
         LNN_LOGE(LNN_LEDGER, "para error");
         return SOFTBUS_INVALID_PARAM;
     }
-    info->connectInfo.authPort = port;
+    info->connectInfo.ifInfo[ifnameIdx].authPort = port;
     return SOFTBUS_OK;
 }
 
-int32_t LnnGetSessionPort(const NodeInfo *info)
+int32_t LnnGetSessionPort(const NodeInfo *info, int32_t ifnameIdx)
 {
-    if (info == NULL) {
+    if (info == NULL || isIfnameIdxInvalid(ifnameIdx)) {
         LNN_LOGE(LNN_LEDGER, "para error");
         return SOFTBUS_INVALID_PARAM;
     }
-    return info->connectInfo.sessionPort;
+    return info->connectInfo.ifInfo[ifnameIdx].sessionPort;
 }
 
-int32_t LnnSetSessionPort(NodeInfo *info, int32_t port)
+int32_t LnnSetSessionPort(NodeInfo *info, int32_t port, int32_t ifnameIdx)
 {
-    if (info == NULL) {
+    if (info == NULL || isIfnameIdxInvalid(ifnameIdx)) {
         LNN_LOGE(LNN_LEDGER, "para error");
         return SOFTBUS_INVALID_PARAM;
     }
-    info->connectInfo.sessionPort = port;
+    info->connectInfo.ifInfo[ifnameIdx].sessionPort = port;
     return SOFTBUS_OK;
 }
 
-int32_t LnnGetProxyPort(const NodeInfo *info)
+int32_t LnnGetProxyPort(const NodeInfo *info, int32_t ifnameIdx)
 {
-    if (info == NULL) {
+    if (info == NULL || isIfnameIdxInvalid(ifnameIdx)) {
         LNN_LOGE(LNN_LEDGER, "para error");
         return SOFTBUS_INVALID_PARAM;
     }
-    return info->connectInfo.proxyPort;
+    return info->connectInfo.ifInfo[ifnameIdx].proxyPort;
 }
 
-int32_t LnnSetProxyPort(NodeInfo *info, int32_t port)
+int32_t LnnSetProxyPort(NodeInfo *info, int32_t port, int32_t ifnameIdx)
 {
-    if (info == NULL) {
+    if (info == NULL || isIfnameIdxInvalid(ifnameIdx)) {
         LNN_LOGE(LNN_LEDGER, "para error");
         return SOFTBUS_INVALID_PARAM;
     }
-    info->connectInfo.proxyPort = port;
+    info->connectInfo.ifInfo[ifnameIdx].proxyPort = port;
     return SOFTBUS_OK;
 }
 
@@ -631,8 +634,8 @@ void LnnDumpRemotePtk(const char *oldPtk, const char *newPtk, const char *log)
     }
     char *anonyPtk = NULL;
     char *anonyOldPtk = NULL;
-    Anonymize(ptkStr, &anonyPtk);
-    Anonymize(oldPtkStr, &anonyOldPtk);
+    LnnAnonymizePtk(ptkStr, PTK_STR_LEN, &anonyPtk);
+    LnnAnonymizePtk(oldPtkStr, PTK_STR_LEN, &anonyOldPtk);
     LNN_LOGI(LNN_LEDGER, "log=%{public}s, dump newPtk=%{public}s, oldPtk=%{public}s",
         log, AnonymizeWrapper(anonyPtk), AnonymizeWrapper(anonyOldPtk));
     AnonymizeFree(anonyPtk);
@@ -643,13 +646,17 @@ void LnnDumpRemotePtk(const char *oldPtk, const char *newPtk, const char *log)
 
 void LnnDumpNodeInfo(const NodeInfo *deviceInfo, const char *log)
 {
+    if (deviceInfo == NULL || log == NULL) {
+        LNN_LOGE(LNN_LEDGER, "invalid param");
+        return;
+    }
     char *anonyNetworkId = NULL;
     char *anonyUdid = NULL;
     char *anonyDeviceName = NULL;
     char *anonyBtMac = NULL;
     Anonymize(deviceInfo->networkId, &anonyNetworkId);
     Anonymize(deviceInfo->deviceInfo.deviceUdid, &anonyUdid);
-    Anonymize(deviceInfo->deviceInfo.deviceName, &anonyDeviceName);
+    AnonymizeDeviceName(deviceInfo->deviceInfo.deviceName, &anonyDeviceName);
     Anonymize(deviceInfo->connectInfo.macAddr, &anonyBtMac);
     LNN_LOGI(LNN_LEDGER, "log=%{public}s, stateVersion=%{public}d, networkId=%{public}s, udid=%{public}s, "
         "deviceName=%{public}s, btMac=%{public}s, networkIdTimestamp=%{public}" PRId64, log, deviceInfo->stateVersion,
@@ -670,4 +677,105 @@ int32_t LnnSetScreenStatus(NodeInfo *info, bool isScreenOn)
     info->isScreenOn = isScreenOn;
     LNN_LOGI(LNN_LEDGER, "set local screen status to %{public}s", isScreenOn ? "on" : "off");
     return SOFTBUS_OK;
+}
+
+bool isIfnameIdxInvalid(int32_t ifnameIdx)
+{
+    return (ifnameIdx < MIN_IF || ifnameIdx > MAX_IF) ? true : false;
+}
+
+void LnnAnonymizePtk(const char *ptk, uint32_t len, char **anonymizedStr)
+{
+    if (ptk == NULL || len != PTK_STR_LEN || anonymizedStr == NULL) {
+        LNN_LOGE(LNN_LEDGER, "Invalid parameter");
+        return;
+    }
+    char emptyByte[PTK_DEFAULT_LEN] = { 0 };
+    char emptyStr[PTK_STR_LEN] = { 0 };
+    if (ConvertBytesToHexString(emptyStr, PTK_STR_LEN, (unsigned char *)emptyByte, PTK_DEFAULT_LEN) != SOFTBUS_OK) {
+        LNN_LOGE(LNN_LEDGER, "convert emptyByte to string fail.");
+        return;
+    }
+    if (memcmp(ptk, emptyStr, PTK_STR_LEN) == 0) {
+        Anonymize(ptk, anonymizedStr);
+        return;
+    }
+    uint8_t ptkHash[SHA_256_HASH_LEN] = { 0 };
+    if (SoftBusGenerateStrHash((const unsigned char *)ptk, len, ptkHash) != SOFTBUS_OK) {
+        LNN_LOGE(LNN_LEDGER, "generate ptkHash fail");
+        return;
+    }
+    char ptkStr[PTK_STR_LEN] = { 0 };
+    if (ConvertBytesToHexString(ptkStr, PTK_STR_LEN, (unsigned char *)ptkHash, SHA_256_HASH_LEN) != SOFTBUS_OK) {
+        LNN_LOGE(LNN_LEDGER, "convert ptk to string fail.");
+        (void)memset_s(ptkHash, SHA_256_HASH_LEN, 0, SHA_256_HASH_LEN);
+        return;
+    }
+    Anonymize(ptkStr, anonymizedStr);
+    (void)memset_s(ptkHash, SHA_256_HASH_LEN, 0, SHA_256_HASH_LEN);
+    (void)memset_s(ptkStr, PTK_STR_LEN, 0, PTK_STR_LEN);
+}
+
+void LnnAnonymizeBroadcastCipher(const char *broadcastCipher, uint32_t len, char **anonymizedStr)
+{
+    if (broadcastCipher == NULL || len != SESSION_KEY_STR_LEN || anonymizedStr == NULL) {
+        LNN_LOGE(LNN_LEDGER, "Invalid parameter");
+        return;
+    }
+    unsigned char emptyByte[SESSION_KEY_LENGTH] = { 0 };
+    char emptyStr[SESSION_KEY_STR_LEN] = { 0 };
+    if (ConvertBytesToHexString(emptyStr, SESSION_KEY_STR_LEN, emptyByte, SESSION_KEY_LENGTH) != SOFTBUS_OK) {
+        LNN_LOGE(LNN_LEDGER, "convert emptyByte to string fail.");
+        return;
+    }
+    if (memcmp(broadcastCipher, emptyStr, SESSION_KEY_STR_LEN) == 0) {
+        Anonymize(broadcastCipher, anonymizedStr);
+        return;
+    }
+    uint8_t broadcastCipherHash[SHA_256_HASH_LEN] = { 0 };
+    if (SoftBusGenerateStrHash((const unsigned char *)broadcastCipher, len, broadcastCipherHash) != SOFTBUS_OK) {
+        LNN_LOGE(LNN_LEDGER, "generate broadcastCipherHash fail");
+        return;
+    }
+    char hashStr[SESSION_KEY_STR_LEN] = { 0 };
+    if (ConvertBytesToHexString(hashStr, SESSION_KEY_STR_LEN, broadcastCipherHash, SHA_256_HASH_LEN) != SOFTBUS_OK) {
+        LNN_LOGE(LNN_LEDGER, "convert broadcastCipher to string fail.");
+        (void)memset_s(broadcastCipherHash, SHA_256_HASH_LEN, 0, SHA_256_HASH_LEN);
+        return;
+    }
+    Anonymize(hashStr, anonymizedStr);
+    (void)memset_s(broadcastCipherHash, SHA_256_HASH_LEN, 0, SHA_256_HASH_LEN);
+    (void)memset_s(hashStr, SESSION_KEY_STR_LEN, 0, SESSION_KEY_STR_LEN);
+}
+
+void LnnAnonymizeIrk(const char *irk, uint32_t len, char **anonymizedStr)
+{
+    if (irk == NULL || len != LFINDER_IRK_STR_LEN || anonymizedStr == NULL) {
+        LNN_LOGE(LNN_LEDGER, "Invalid parameter");
+        return;
+    }
+    uint8_t emptyByte[LFINDER_IRK_LEN] = { 0 };
+    char emptyStr[LFINDER_IRK_STR_LEN] = { 0 };
+    if (ConvertBytesToHexString(emptyStr, LFINDER_IRK_STR_LEN, emptyByte, LFINDER_IRK_LEN) != SOFTBUS_OK) {
+        LNN_LOGE(LNN_LEDGER, "convert emptyByte to string fail.");
+        return;
+    }
+    if (memcmp(irk, emptyStr, LFINDER_IRK_STR_LEN) == 0) {
+        Anonymize(irk, anonymizedStr);
+        return;
+    }
+    uint8_t irkHash[SHA_256_HASH_LEN] = { 0 };
+    if (SoftBusGenerateStrHash((const unsigned char *)irk, len, irkHash) != SOFTBUS_OK) {
+        LNN_LOGE(LNN_LEDGER, "generate irkHash fail");
+        return;
+    }
+    char irkStr[LFINDER_IRK_STR_LEN] = { 0 };
+    if (ConvertBytesToHexString(irkStr, LFINDER_IRK_STR_LEN, (unsigned char *)irkHash, LFINDER_IRK_LEN) != SOFTBUS_OK) {
+        LNN_LOGE(LNN_LEDGER, "convert irk to string fail.");
+        (void)memset_s(irkHash, SHA_256_HASH_LEN, 0, SHA_256_HASH_LEN);
+        return;
+    }
+    Anonymize(irkStr, anonymizedStr);
+    (void)memset_s(irkHash, SHA_256_HASH_LEN, 0, SHA_256_HASH_LEN);
+    (void)memset_s(irkStr, LFINDER_IRK_STR_LEN, 0, LFINDER_IRK_STR_LEN);
 }

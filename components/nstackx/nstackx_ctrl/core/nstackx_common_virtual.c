@@ -237,3 +237,16 @@ int32_t NSTACKX_DFinderRegisterLog(DFinderLogCallback userLogCallback)
     (void)userLogCallback;
     return NSTACKX_EOK;
 }
+
+int32_t NSTACKX_RegisterDeviceHash(uint64_t deviceHash)
+{
+    (void)deviceHash;
+    return NSTACKX_EOK;
+}
+
+int32_t NSTACKX_RegisterServiceDataV2(const struct NSTACKX_ServiceData *param, uint32_t cnt)
+{
+    (void)param;
+    (void)cnt;
+    return NSTACKX_EOK;
+}

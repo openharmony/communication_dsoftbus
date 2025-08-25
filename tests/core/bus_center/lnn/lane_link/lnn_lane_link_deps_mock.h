@@ -18,8 +18,12 @@
 
 #include <gmock/gmock.h>
 
+#include "g_enhance_lnn_func.h"
+#include "lnn_distributed_net_ledger_struct.h"
 #include "lnn_lane_link.h"
 #include "lnn_lane_link_conflict.h"
+#include "lnn_lane_link_ledger.h"
+#include "lnn_trans_lane.h"
 #include "softbus_proxychannel_pipeline.h"
 
 namespace OHOS {
@@ -28,7 +32,7 @@ public:
     LaneLinkDepsInterface() {};
     virtual ~LaneLinkDepsInterface() {};
 
-    virtual int32_t GetTransReqInfoByLaneReqId(uint32_t laneReqId, TransOption *reqInfo) = 0;
+    virtual int32_t GetTransReqInfoByLaneReqId(uint32_t laneReqId, TransReqInfo *reqInfo) = 0;
     virtual int32_t TransProxyPipelineGenRequestId(void) = 0;
     virtual int32_t TransProxyPipelineOpenChannel(int32_t requestId, const char *networkId,
         const TransProxyPipelineChannelOption *option, const ITransProxyPipelineCallback *callback) = 0;
@@ -52,6 +56,18 @@ public:
     virtual void DelLogicAndLaneRelationship(uint64_t laneId) = 0;
     virtual int32_t LnnSyncPtk(const char *networkId) = 0;
     virtual int32_t CheckLinkConflictByReleaseLink(LaneLinkType releaseLink) = 0;
+    virtual int32_t LnnGetLinkLedgerInfo(const char *udid, LinkLedgerInfo *info) = 0;
+    virtual int32_t LnnAddLinkLedgerInfo(const char *udid, const LinkLedgerInfo *info) = 0;
+    virtual void LnnDeleteLinkLedgerInfo(const char *udid) = 0;
+    virtual int32_t InitLinkLedger(void) = 0;
+    virtual void DeinitLinkLedger(void) = 0;
+    virtual bool CheckLaneLinkExistByType(LaneLinkType linkType) = 0;
+    virtual int32_t CreateWDLinkInfo(uint32_t p2pRequestId, const struct WifiDirectLink *link,
+        LaneLinkInfo *linkInfo) = 0;
+    virtual void TryDelPreLinkByConnReqId(uint32_t connReqId) = 0;
+    virtual int32_t CheckTransReqInfo(const LinkRequest *request, uint32_t laneReqId) = 0;
+    virtual int32_t GetWifiDirectParamWithReuse(const LinkRequest *request, uint32_t laneReqId,
+        struct WifiDirectConnectInfo *wifiDirectInfo) = 0;
 };
 
 class LaneLinkDepsInterfaceMock : public LaneLinkDepsInterface {
@@ -59,7 +75,7 @@ public:
     LaneLinkDepsInterfaceMock();
     ~LaneLinkDepsInterfaceMock() override;
 
-    MOCK_METHOD2(GetTransReqInfoByLaneReqId, int32_t (uint32_t laneReqId, TransOption *reqInfo));
+    MOCK_METHOD2(GetTransReqInfoByLaneReqId, int32_t (uint32_t laneReqId, TransReqInfo *reqInfo));
     MOCK_METHOD0(TransProxyPipelineGenRequestId, int32_t (void));
     MOCK_METHOD4(TransProxyPipelineOpenChannel, int32_t (int32_t requestId, const char *networkId,
         const TransProxyPipelineChannelOption *option, const ITransProxyPipelineCallback *callback));
@@ -85,6 +101,17 @@ public:
     MOCK_METHOD1(DelLogicAndLaneRelationship, void (uint64_t laneId));
     MOCK_METHOD1(LnnSyncPtk, int32_t (const char *networkId));
     MOCK_METHOD1(CheckLinkConflictByReleaseLink, int32_t (LaneLinkType releaseLink));
+    MOCK_METHOD2(LnnGetLinkLedgerInfo, int32_t (const char *udid, LinkLedgerInfo *info));
+    MOCK_METHOD2(LnnAddLinkLedgerInfo, int32_t (const char *udid, const LinkLedgerInfo *info));
+    MOCK_METHOD1(LnnDeleteLinkLedgerInfo, void (const char *udid));
+    MOCK_METHOD0(InitLinkLedger, int32_t (void));
+    MOCK_METHOD0(DeinitLinkLedger, void (void));
+    MOCK_METHOD1(CheckLaneLinkExistByType, bool (LaneLinkType linkType));
+    MOCK_METHOD3(CreateWDLinkInfo, int32_t (uint32_t, const struct WifiDirectLink *, LaneLinkInfo *));
+    MOCK_METHOD1(TryDelPreLinkByConnReqId, void (uint32_t));
+    MOCK_METHOD2(CheckTransReqInfo, int32_t (const LinkRequest *, uint32_t));
+    MOCK_METHOD3(GetWifiDirectParamWithReuse, int32_t (const LinkRequest *, uint32_t,
+        struct WifiDirectConnectInfo *));
 
     static int32_t ActionOfChannelOpenFailed(int32_t requestId, const char *networkId,
         const TransProxyPipelineChannelOption *option, const ITransProxyPipelineCallback *callback);

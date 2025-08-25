@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2025 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -31,10 +31,10 @@
 #include "conn_log.h"
 #include "softbus_type_def.h"
 
-#include "adapter_bt_utils.h"
-#define APP_UUID_LEN 2
-#define INVALID_ID   (-1)
+#define APP_UUID_LEN      2
+#define INVALID_ID        (-1)
 
+static int32_t BleOhosStatusToSoftBus(BtStatus status);
 static void GetGattcCallback(int32_t clientId, SoftBusGattcCallback *cb);
 static int32_t SoftbusGattcAddMacAddrToList(int32_t clientId, const SoftBusBtAddr *addr);
 static void SoftbusGattcDeleteMacAddrFromList(int32_t clientId);
@@ -43,11 +43,17 @@ static BtGattClientCallbacks g_btGattClientCallbacks = { 0 };
 static SoftBusList *g_softBusGattcManager = NULL;
 static SoftBusList *g_btAddrs = NULL;
 static SoftBusBleSendSignal g_clientSendSignal = {0};
+
 typedef struct {
     char addr[BT_MAC_LEN];
     int32_t clientId;
     ListNode node;
 } BleConnMac;
+
+typedef struct {
+    BtStatus btStatus;
+    SoftBusBtStatus softBusBtStatus;
+} OhosStatusToSoftBus;
 
 static void GattcConnectionStateChangedCallback(int clientId, int connectionState, int status)
 {
@@ -127,6 +133,7 @@ static void GattcConfigureMtuSizeCallback(int clientId, int mtuSize, int status)
         return;
     }
     cb.configureMtuSizeCallback(clientId, mtuSize, status);
+    SoftbusGattcDeleteMacAddrFromList(clientId);
 }
 
 static void GattcRegisterNotificationCallback(int clientId, int status)
@@ -195,12 +202,13 @@ int32_t SoftbusGattcRegisterCallback(SoftBusGattcCallback *cb, int32_t clientId)
     }
     ListAdd(&g_softBusGattcManager->list, &gattcManager->node);
     (void)SoftBusMutexUnlock(&g_softBusGattcManager->lock);
-    CONN_LOGI(CONN_BLE, "clientId=%{public}d", gattcManager->clientId);
+    CONN_LOGI(CONN_BLE, "clientId=%{public}d", clientId);
     return SOFTBUS_OK;
 }
 
 static void GetGattcCallback(int32_t clientId, SoftBusGattcCallback *cb)
 {
+    CONN_CHECK_AND_RETURN_LOGE(g_softBusGattcManager != NULL, CONN_BLE, "GattcManager is null.");
     CONN_CHECK_AND_RETURN_LOGE(SoftBusMutexLock(&g_softBusGattcManager->lock) == SOFTBUS_OK,
         CONN_BLE, "try to lock failed, clientId=%{public}d", clientId);
     SoftBusGattcManager *it = NULL;
@@ -237,6 +245,8 @@ int32_t SoftbusGattcUnRegister(int32_t clientId)
         CONN_LOGE(CONN_BLE, "BleGattcUnRegister error");
         ret = SOFTBUS_GATTC_INTERFACE_FAILED;
     }
+    CONN_CHECK_AND_RETURN_RET_LOGE(g_softBusGattcManager != NULL, SOFTBUS_INVALID_PARAM,
+        CONN_BLE, "GattcManager is null");
     CONN_CHECK_AND_RETURN_RET_LOGE(SoftBusMutexLock(&g_softBusGattcManager->lock) == SOFTBUS_OK,
         SOFTBUS_LOCK_ERR, CONN_BLE, "try to lock failed, clientId=%{public}d", clientId);
     SoftBusGattcManager *it = NULL;
@@ -262,6 +272,7 @@ bool SoftbusGattcCheckExistConnectionByAddr(const SoftBusBtAddr *btAddr)
         CONN_LOGE(CONN_BLE, "convert bt mac to str fail!");
         return isExist;
     }
+    CONN_CHECK_AND_RETURN_RET_LOGE(g_btAddrs != NULL, false, CONN_BLE, "BtAddrs is null");
     CONN_CHECK_AND_RETURN_RET_LOGE(SoftBusMutexLock(&g_btAddrs->lock) == SOFTBUS_OK,
         false, CONN_BLE, "try to lock failed");
     BleConnMac *it = NULL;
@@ -272,6 +283,8 @@ bool SoftbusGattcCheckExistConnectionByAddr(const SoftBusBtAddr *btAddr)
             ConvertAnonymizeMacAddress(anomizeAddress, BT_MAC_LEN, macStr, BT_MAC_LEN);
             CONN_LOGE(CONN_BLE, "connection exist, addr=%{public}s", anomizeAddress);
             isExist = true;
+            ListDelete(&it->node);
+            SoftBusFree(it);
             break;
         }
     }
@@ -293,6 +306,12 @@ static int32_t SoftbusGattcAddMacAddrToList(int32_t clientId, const SoftBusBtAdd
     }
     bleConnAddr->clientId = clientId;
 
+    if (g_btAddrs == NULL) {
+        CONN_LOGE(CONN_BLE, "BtAddrs is null.");
+        SoftBusFree(bleConnAddr);
+        return SOFTBUS_INVALID_PARAM;
+    }
+
     if (SoftBusMutexLock(&g_btAddrs->lock) != SOFTBUS_OK) {
         SoftBusFree(bleConnAddr);
         CONN_LOGE(CONN_BLE, "try to lock failed");
@@ -305,6 +324,7 @@ static int32_t SoftbusGattcAddMacAddrToList(int32_t clientId, const SoftBusBtAdd
 
 static void SoftbusGattcDeleteMacAddrFromList(int32_t clientId)
 {
+    CONN_CHECK_AND_RETURN_LOGE(g_btAddrs != NULL, CONN_BLE, "BtAddrs is null");
     CONN_CHECK_AND_RETURN_LOGE(SoftBusMutexLock(&g_btAddrs->lock) == SOFTBUS_OK,
         CONN_BLE, "try to lock failed, clientId=%{public}d", clientId);
     BleConnMac *it = NULL;
@@ -321,21 +341,24 @@ static void SoftbusGattcDeleteMacAddrFromList(int32_t clientId)
 
 int32_t SoftbusGattcConnect(int32_t clientId, SoftBusBtAddr *addr)
 {
+    CONN_CHECK_AND_RETURN_RET_LOGE(addr != NULL, SOFTBUS_INVALID_PARAM, CONN_BLE, "addr is NULL");
     BdAddr bdAddr = {0};
     if (memcpy_s(bdAddr.addr, OHOS_BD_ADDR_LEN, addr->addr, BT_ADDR_LEN) != EOK) {
         CONN_LOGE(CONN_BLE, "memcpy error");
         return SOFTBUS_INVALID_PARAM;
     }
-    int32_t status = SoftbusGattcAddMacAddrToList(clientId, addr);
-    if (status != SOFTBUS_OK) {
-        // fall-through
-        CONN_LOGW(CONN_BLE, "add mac addr fail, status=%{public}d", status);
-    }
-    status = BleOhosStatusToSoftBus(
+
+    int32_t status = BleOhosStatusToSoftBus(
         BleGattcConnect(clientId, &g_btGattClientCallbacks, &bdAddr, false, OHOS_BT_TRANSPORT_TYPE_LE));
     if (status != SOFTBUS_OK) {
         CONN_LOGE(CONN_BLE, "status=%{public}d", status);
         return SOFTBUS_GATTC_INTERFACE_FAILED;
+    }
+
+    status = SoftbusGattcAddMacAddrToList(clientId, addr);
+    if (status != SOFTBUS_OK) {
+        // fall-through
+        CONN_LOGW(CONN_BLE, "add mac addr fail, status=%{public}d", status);
     }
 
     return SOFTBUS_OK;
@@ -343,6 +366,7 @@ int32_t SoftbusGattcConnect(int32_t clientId, SoftBusBtAddr *addr)
 
 int32_t SoftbusBleGattcDisconnect(int32_t clientId, bool refreshGatt)
 {
+    SoftbusGattcDeleteMacAddrFromList(clientId);
     (void)refreshGatt;
     if (BleGattcDisconnect(clientId) != SOFTBUS_OK) {
         CONN_LOGE(CONN_BLE, "BleGattcDisconnect error");
@@ -370,7 +394,7 @@ int32_t SoftbusGattcRefreshServices(int32_t clientId)
 
 int32_t SoftbusGattcGetService(int32_t clientId, SoftBusBtUuid *serverUuid)
 {
-    if (clientId <= 0) {
+    if (clientId <= 0 || serverUuid == NULL) {
         CONN_LOGE(CONN_BLE, "invalid param");
         return SOFTBUS_INVALID_PARAM;
     }
@@ -389,6 +413,10 @@ int32_t SoftbusGattcRegisterNotification(
     int32_t clientId, SoftBusBtUuid *serverUuid, SoftBusBtUuid *charaUuid, SoftBusBtUuid *descriptorUuid)
 {
     (void)descriptorUuid;
+    if (serverUuid == NULL || charaUuid == NULL) {
+        CONN_LOGE(CONN_BLE, "Uuid is null.");
+        return SOFTBUS_INVALID_PARAM;
+    }
     BtGattCharacteristic btCharaUuid;
     btCharaUuid.serviceUuid.uuid = serverUuid->uuid;
     btCharaUuid.serviceUuid.uuidLen = serverUuid->uuidLen;
@@ -542,4 +570,32 @@ int32_t InitSoftbusAdapterClient(void)
     g_btGattClientCallbacks.registerNotificationCb = GattcRegisterNotificationCallback;
     g_btGattClientCallbacks.notificationCb = GattcNotificationCallback;
     return SOFTBUS_OK;
+}
+
+OhosStatusToSoftBus g_bleStatus[] = {
+    {OHOS_BT_STATUS_SUCCESS,            SOFTBUS_BT_STATUS_SUCCESS},
+    {OHOS_BT_STATUS_FAIL,               SOFTBUS_BT_STATUS_FAIL},
+    {OHOS_BT_STATUS_NOT_READY,          SOFTBUS_BT_STATUS_NOT_READY},
+    {OHOS_BT_STATUS_NOMEM,              SOFTBUS_BT_STATUS_NOMEM},
+    {OHOS_BT_STATUS_BUSY,               SOFTBUS_BT_STATUS_BUSY},
+    {OHOS_BT_STATUS_DONE,               SOFTBUS_BT_STATUS_DONE},
+    {OHOS_BT_STATUS_UNSUPPORTED,        SOFTBUS_BT_STATUS_UNSUPPORTED},
+    {OHOS_BT_STATUS_PARM_INVALID,       SOFTBUS_BT_STATUS_PARM_INVALID},
+    {OHOS_BT_STATUS_UNHANDLED,          SOFTBUS_BT_STATUS_UNHANDLED},
+    {OHOS_BT_STATUS_AUTH_FAILURE,       SOFTBUS_BT_STATUS_AUTH_FAILURE},
+    {OHOS_BT_STATUS_RMT_DEV_DOWN,       SOFTBUS_BT_STATUS_RMT_DEV_DOWN},
+    {OHOS_BT_STATUS_AUTH_REJECTED,      SOFTBUS_BT_STATUS_AUTH_REJECTED},
+};
+
+static int32_t BleOhosStatusToSoftBus(BtStatus btStatus)
+{
+    int32_t status = OHOS_BT_STATUS_FAIL;
+    const int len = sizeof(g_bleStatus) / sizeof(g_bleStatus[0]);
+    OhosStatusToSoftBus *ptr = g_bleStatus;
+
+    if (btStatus >= len) {
+        return status;
+    }
+
+    return (ptr + btStatus)->softBusBtStatus;
 }

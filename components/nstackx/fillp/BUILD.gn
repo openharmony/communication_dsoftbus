@@ -98,11 +98,18 @@ if (defined(ohos_lite)) {
     if (ohos_kernel_type == "liteos_a") {
       cflags += [ "-DNSTACKX_WITH_LITEOS" ]
     } else {
-      cflags += [ "-DNSTACKX_WITH_HMOS_LINUX" ]
+      cflags += [ "-DNSTACKX_WITH_LINUX" ]
     }
   }
 } else {
   import("//build/ohos.gni")
+
+  config("nstackx_FillpSo_open_header") {
+    include_dirs = [
+      "include/fillptypes.h",
+    ]
+  }
+
   ohos_shared_library("FillpSo.open") {
     sanitize = {
       ubsan = true
@@ -117,7 +124,7 @@ if (defined(ohos_lite)) {
     cflags = fillp_cflags
     cflags += [
       "-Wall",
-      "-DNSTACKX_WITH_HMOS_LINUX",
+      "-DNSTACKX_WITH_LINUX",
     ]
 
     include_dirs = fillp_include
@@ -181,6 +188,7 @@ if (defined(ohos_lite)) {
       external_deps += [ "c_utils:utils" ]
     }
 
+    public_configs = [ ":nstackx_FillpSo_open_header" ]
     innerapi_tags = [ "platformsdk_indirect" ]
     part_name = "dsoftbus"
     subsystem_name = "communication"

@@ -20,16 +20,17 @@
 #include "anonymizer.h"
 #include "bus_center_info_key.h"
 #include "bus_center_manager.h"
+#include "g_enhance_lnn_func.h"
+#include "g_enhance_lnn_func_pack.h"
 #include "lnn_distributed_net_ledger.h"
 #include "lnn_lane.h"
 #include "lnn_lane_common.h"
 #include "lnn_lane_def.h"
-#include "lnn_lane_score.h"
+#include "lnn_lane_interface.h"
+#include "lnn_lane_link.h"
 #include "lnn_lane_link_p2p.h"
-#include "lnn_parameter_utils.h"
-#include "lnn_lane_power_control.h"
+#include "lnn_lane_link_wifi_direct.h"
 #include "lnn_lane_reliability.h"
-#include "lnn_lane_vap_info.h"
 #include "lnn_local_net_ledger.h"
 #include "lnn_log.h"
 #include "lnn_net_capability.h"
@@ -46,6 +47,7 @@
 #include "softbus_network_utils.h"
 #include "softbus_protocol_def.h"
 #include "softbus_utils.h"
+#include "softbus_init_common.h"
 #include "trans_network_statistics.h"
 #include "wifi_direct_manager.h"
 
@@ -58,10 +60,12 @@
 #define LANE_ID_HASH_LEN 32
 #define UDID_SHORT_HASH_HEXSTR_LEN_TMP 16
 #define UDID_SHORT_HASH_LEN_TMP 8
+#define LOOP_IP_ADDR "127.0.0.1"
 
 static bool g_enabledLowPower = false;
 
 typedef int32_t (*LaneLinkByType)(uint32_t reqId, const LinkRequest *reqInfo, const LaneLinkCb *callback);
+typedef bool (*CompareLinkAddr)(const LaneLinkInfo *sourceLink, const LaneLinkInfo *linkInfoItem);
 
 static SoftBusList g_laneResource;
 
@@ -123,24 +127,29 @@ uint64_t GenerateLaneId(const char *localUdid, const char *remoteUdid, LaneLinkT
     return INVALID_LANE_ID;
 }
 
-static bool IsValidLinkAddr(const LaneLinkInfo *sourceLink, const LaneLinkInfo *linkInfoItem)
+static bool LaneLinkAddrOfBr(const LaneLinkInfo *sourceLink, const LaneLinkInfo *linkInfoItem)
 {
+    if (sourceLink == NULL || linkInfoItem == NULL) {
+        LNN_LOGE(LNN_LANE, "invalid param");
+        return false;
+    }
+    if (strncmp(sourceLink->linkInfo.br.brMac, linkInfoItem->linkInfo.br.brMac, BT_MAC_LEN) != 0) {
+        LNN_LOGE(LNN_LANE, "lane resource is different form input link addr, linkType=%{public}d", sourceLink->type);
+        return false;
+    }
+    return true;
+}
+
+static bool LaneLinkAddrOfBle(const LaneLinkInfo *sourceLink, const LaneLinkInfo *linkInfoItem)
+{
+    if (sourceLink == NULL || linkInfoItem == NULL) {
+        LNN_LOGE(LNN_LANE, "invalid param");
+        return false;
+    }
     switch (sourceLink->type) {
-        case LANE_BR:
-            if (strncmp(sourceLink->linkInfo.br.brMac, linkInfoItem->linkInfo.br.brMac, BT_MAC_LEN) != 0) {
-                break;
-            }
-            return true;
         case LANE_BLE:
         case LANE_COC:
             if (strncmp(sourceLink->linkInfo.ble.bleMac, linkInfoItem->linkInfo.ble.bleMac, BT_MAC_LEN) != 0) {
-                break;
-            }
-            return true;
-        case LANE_P2P:
-        case LANE_HML:
-            if (strncmp(sourceLink->linkInfo.p2p.connInfo.peerIp,
-                linkInfoItem->linkInfo.p2p.connInfo.peerIp, IP_LEN) != 0) {
                 break;
             }
             return true;
@@ -148,14 +157,6 @@ static bool IsValidLinkAddr(const LaneLinkInfo *sourceLink, const LaneLinkInfo *
         case LANE_COC_DIRECT:
             if (strncmp(sourceLink->linkInfo.bleDirect.networkId, linkInfoItem->linkInfo.bleDirect.networkId,
                 NETWORK_ID_BUF_LEN) != 0) {
-                break;
-            }
-            return true;
-        case LANE_WLAN_5G:
-        case LANE_WLAN_2P4G:
-        case LANE_ETH:
-            if (strncmp(sourceLink->linkInfo.wlan.connInfo.addr,
-                linkInfoItem->linkInfo.wlan.connInfo.addr, MAX_SOCKET_ADDR_LEN) != 0) {
                 break;
             }
             return true;
@@ -167,6 +168,103 @@ static bool IsValidLinkAddr(const LaneLinkInfo *sourceLink, const LaneLinkInfo *
     return false;
 }
 
+static bool LaneLinkAddrOfSle(const LaneLinkInfo *sourceLink, const LaneLinkInfo *linkInfoItem)
+{
+    if (sourceLink == NULL || linkInfoItem == NULL) {
+        LNN_LOGE(LNN_LANE, "invalid param");
+        return false;
+    }
+    switch (sourceLink->type) {
+        case LANE_SLE:
+            if (strncmp(sourceLink->linkInfo.sle.sleMac, linkInfoItem->linkInfo.sle.sleMac, SLE_MAC_LEN) != 0) {
+                break;
+            }
+            return true;
+        case LANE_SLE_DIRECT:
+            if (strncmp(sourceLink->linkInfo.sleDirect.networkId, linkInfoItem->linkInfo.sleDirect.networkId,
+                NETWORK_ID_BUF_LEN) != 0) {
+                break;
+            }
+            return true;
+        default:
+            LNN_LOGE(LNN_LANE, "invalid linkType=%{public}d", sourceLink->type);
+            return false;
+    }
+    LNN_LOGE(LNN_LANE, "lane resource is different form input link addr, linkType=%{public}d", sourceLink->type);
+    return false;
+}
+
+static bool LaneLinkAddrOfWlan(const LaneLinkInfo *sourceLink, const LaneLinkInfo *linkInfoItem)
+{
+    if (sourceLink == NULL || linkInfoItem == NULL) {
+        LNN_LOGE(LNN_LANE, "invalid param");
+        return false;
+    }
+    if (strncmp(sourceLink->linkInfo.wlan.connInfo.addr,
+        linkInfoItem->linkInfo.wlan.connInfo.addr, MAX_SOCKET_ADDR_LEN) != 0) {
+        LNN_LOGE(LNN_LANE, "lane resource is different form input link addr, linkType=%{public}d", sourceLink->type);
+        return false;
+    }
+    return true;
+}
+
+static bool LaneLinkAddrOfWifiDirect(const LaneLinkInfo *sourceLink, const LaneLinkInfo *linkInfoItem)
+{
+    if (sourceLink == NULL || linkInfoItem == NULL) {
+        LNN_LOGE(LNN_LANE, "invalid param");
+        return false;
+    }
+    if (strncmp(sourceLink->linkInfo.p2p.connInfo.peerIp,
+        linkInfoItem->linkInfo.p2p.connInfo.peerIp, IP_LEN) != 0) {
+        LNN_LOGE(LNN_LANE, "lane resource is different form input link addr, linkType=%{public}d", sourceLink->type);
+        return false;
+    }
+    return true;
+}
+
+static bool LaneLinkAddrOfUsb(const LaneLinkInfo *sourceLink, const LaneLinkInfo *linkInfoItem)
+{
+    if (sourceLink == NULL || linkInfoItem == NULL) {
+        LNN_LOGE(LNN_LANE, "invalid param");
+        return false;
+    }
+    if (strncmp(sourceLink->linkInfo.usb.connInfo.addr,
+        linkInfoItem->linkInfo.usb.connInfo.addr, MAX_SOCKET_ADDR_LEN) != 0) {
+        LNN_LOGE(LNN_LANE, "lane resource is different form input link addr, linkType=%{public}d", sourceLink->type);
+        return false;
+    }
+    return true;
+}
+
+static bool LaneLinkAddrOfDefault(const LaneLinkInfo *sourceLink, const LaneLinkInfo *linkInfoItem)
+{
+    if (sourceLink == NULL || linkInfoItem == NULL) {
+        LNN_LOGE(LNN_LANE, "invalid param");
+        return false;
+    }
+    LNN_LOGE(LNN_LANE, "invalid linkType=%{public}d", sourceLink->type);
+    return false;
+}
+
+static CompareLinkAddr g_linkAddrCheck[LANE_LINK_TYPE_BUTT] = {
+    [LANE_BR] = LaneLinkAddrOfBr,
+    [LANE_BLE] = LaneLinkAddrOfBle,
+    [LANE_P2P] = LaneLinkAddrOfWifiDirect,
+    [LANE_ETH] = LaneLinkAddrOfWlan,
+    [LANE_WLAN_2P4G] = LaneLinkAddrOfWlan,
+    [LANE_WLAN_5G] = LaneLinkAddrOfWlan,
+    [LANE_BLE_DIRECT] = LaneLinkAddrOfBle,
+    [LANE_COC] = LaneLinkAddrOfBle,
+    [LANE_COC_DIRECT] = LaneLinkAddrOfBle,
+    [LANE_HML] = LaneLinkAddrOfWifiDirect,
+    [LANE_USB] = LaneLinkAddrOfUsb,
+    [LANE_SLE] = LaneLinkAddrOfSle,
+    [LANE_SLE_DIRECT] = LaneLinkAddrOfSle,
+    [LANE_HML_RAW] = LaneLinkAddrOfDefault,
+    [LANE_BLE_REUSE] = LaneLinkAddrOfDefault,
+    [LANE_P2P_REUSE] = LaneLinkAddrOfDefault,
+};
+
 static LaneResource* GetValidLaneResource(const LaneLinkInfo *linkInfoItem)
 {
     LaneResource *item = NULL;
@@ -174,7 +272,7 @@ static LaneResource* GetValidLaneResource(const LaneLinkInfo *linkInfoItem)
     LIST_FOR_EACH_ENTRY_SAFE(item, next, &g_laneResource.list, LaneResource, node) {
         if (linkInfoItem->type == item->link.type &&
             strncmp(item->link.peerUdid, linkInfoItem->peerUdid, UDID_BUF_LEN) == 0 &&
-            IsValidLinkAddr(&(item->link), linkInfoItem)) {
+            g_linkAddrCheck[item->link.type](&(item->link), linkInfoItem)) {
             return item;
         }
     }
@@ -205,9 +303,14 @@ static void AddVapInfo(const LaneLinkInfo *linkInfo)
     (void)memset_s(&vapAttr, sizeof(vapAttr), 0, sizeof(vapAttr));
     vapAttr.isEnable = true;
     vapAttr.channelId = linkInfo->linkInfo.p2p.channel;
-    int32_t ret = LnnAddLocalVapInfo(vapType, (const LnnVapAttr *)&vapAttr);
+    int32_t ret = LnnAddLocalVapInfoPacked(vapType, (const LnnVapAttr *)&vapAttr);
     if (ret != SOFTBUS_OK) {
         LNN_LOGE(LNN_LANE, "add vapInfo err, ret=%{public}d", ret);
+    }
+    if (linkInfo->type == LANE_HML) {
+        LnnSetLocalChannelInfoPacked(LNN_VAP_HML, linkInfo->linkInfo.p2p.channel);
+    } else {
+        LnnSetLocalChannelInfoPacked(LNN_VAP_P2P, linkInfo->linkInfo.p2p.channel);
     }
 }
 
@@ -218,9 +321,14 @@ static void DeleteVapInfo(LaneLinkType linkType)
         LNN_LOGE(LNN_LANE, "deleteVap fail, vapType unknown");
         return;
     }
-    int32_t ret = LnnDeleteLocalVapInfo(vapType);
+    int32_t ret = LnnDeleteLocalVapInfoPacked(vapType);
     if (ret != SOFTBUS_OK) {
         LNN_LOGE(LNN_LANE, "delete vapInfo fail=%{public}d", linkType);
+    }
+    if (linkType == LANE_HML) {
+        LnnSetLocalChannelInfoPacked(LNN_VAP_HML, 0);
+    } else {
+        LnnSetLocalChannelInfoPacked(LNN_VAP_P2P, 0);
     }
 }
 
@@ -271,10 +379,10 @@ static void HandleDetectWifiDirectApply(bool isDisableLowPower,  WifiDirectLinkI
         return;
     }
     if (isDisableLowPower) {
-        DisablePowerControl(wifiDirectInfo);
+        DisablePowerControlPacked(wifiDirectInfo);
         SetLanePowerStatus(false);
     } else {
-        int32_t ret = EnablePowerControl(wifiDirectInfo);
+        int32_t ret = EnablePowerControlPacked(wifiDirectInfo);
         SetLanePowerStatus(true);
         if (ret != SOFTBUS_OK) {
             LNN_LOGE(LNN_LANE, "enable fail, ret=%{public}d", ret);
@@ -587,7 +695,8 @@ int32_t ClearLaneResourceByLaneId(uint64_t laneId)
 static bool LinkTypeCheck(LaneLinkType type)
 {
     static const LaneLinkType supportList[] = { LANE_P2P, LANE_HML, LANE_WLAN_2P4G, LANE_WLAN_5G, LANE_BR, LANE_BLE,
-        LANE_BLE_DIRECT, LANE_P2P_REUSE, LANE_COC, LANE_COC_DIRECT, LANE_BLE_REUSE, LANE_HML_RAW };
+        LANE_BLE_DIRECT, LANE_P2P_REUSE, LANE_COC, LANE_SLE, LANE_SLE_DIRECT, LANE_COC_DIRECT, LANE_BLE_REUSE,
+        LANE_HML_RAW, LANE_USB };
     uint32_t size = sizeof(supportList) / sizeof(LaneLinkType);
     for (uint32_t i = 0; i < size; i++) {
         if (supportList[i] == type) {
@@ -817,6 +926,72 @@ int32_t GetAllDevIdWithLinkType(LaneLinkType type, char **devIdList, uint8_t *de
     }
     LaneUnlock();
     return ret;
+}
+
+int32_t GetAllLinkWithDevId(const char *peerUdid, LaneLinkType **linkList, uint8_t *linkCnt)
+{
+    if (peerUdid == NULL || linkList == NULL || linkCnt == NULL) {
+        LNN_LOGE(LNN_LANE, "invalid param");
+        return SOFTBUS_INVALID_PARAM;
+    }
+    if (LaneLock() != SOFTBUS_OK) {
+        LNN_LOGE(LNN_LANE, "lane lock fail");
+        return SOFTBUS_LOCK_ERR;
+    }
+    uint8_t tmpCnt = 0;
+    LaneResource *item = NULL;
+    LIST_FOR_EACH_ENTRY(item, &g_laneResource.list, LaneResource, node) {
+        if (strcmp(peerUdid, item->link.peerUdid) == 0) {
+            ++tmpCnt;
+        }
+    }
+    if (tmpCnt == 0) {
+        LaneUnlock();
+        char *anonyPeerUdid = NULL;
+        Anonymize(peerUdid, &anonyPeerUdid);
+        LNN_LOGE(LNN_LANE, "no find lane resource with peerUdid=%{public}s", AnonymizeWrapper(anonyPeerUdid));
+        AnonymizeFree(anonyPeerUdid);
+        return SOFTBUS_LANE_RESOURCE_NOT_FOUND;
+    }
+    LaneLinkType *tmpLinkList = (LaneLinkType *)SoftBusCalloc(tmpCnt * sizeof(LaneLinkType));
+    if (tmpLinkList == NULL) {
+        LaneUnlock();
+        LNN_LOGE(LNN_LANE, "link list calloc fail");
+        return SOFTBUS_MALLOC_ERR;
+    }
+    uint8_t tmpIndex = 0;
+    LIST_FOR_EACH_ENTRY(item, &g_laneResource.list, LaneResource, node) {
+        if (strcmp(peerUdid, item->link.peerUdid) == 0 && tmpIndex < tmpCnt) {
+            *(tmpLinkList + tmpIndex) = item->link.type;
+            ++tmpIndex;
+        }
+    }
+    LaneUnlock();
+    *linkList = tmpLinkList;
+    *linkCnt = tmpCnt;
+    return SOFTBUS_OK;
+}
+
+bool CheckLaneLinkExistByType(LaneLinkType linkType)
+{
+    if (linkType >= LANE_LINK_TYPE_BUTT) {
+        LNN_LOGE(LNN_LANE, "invalid linkType=%{public}d", linkType);
+        return false;
+    }
+    if (LaneLock() != SOFTBUS_OK) {
+        LNN_LOGE(LNN_LANE, "lane lock fail");
+        return false;
+    }
+    LaneResource *item = NULL;
+    LaneResource *next = NULL;
+    LIST_FOR_EACH_ENTRY_SAFE(item, next, &g_laneResource.list, LaneResource, node) {
+        if (linkType == item->link.type) {
+            LaneUnlock();
+            return true;
+        }
+    }
+    LaneUnlock();
+    return false;
 }
 
 static int32_t ConvertUdidToHexStr(const char *peerUdid, char *udidHashStr, uint32_t hashStrLen)
@@ -1054,7 +1229,7 @@ void LaneAddP2pAddress(const char *networkId, const char *ipAddr, uint16_t port)
         item->port = port;
         item->cnt++;
     } else {
-        P2pAddrNode *p2pAddrNode = (P2pAddrNode *)SoftBusMalloc(sizeof(P2pAddrNode));
+        P2pAddrNode *p2pAddrNode = (P2pAddrNode *)SoftBusCalloc(sizeof(P2pAddrNode));
         if (p2pAddrNode == NULL) {
             SoftBusMutexUnlock(&g_P2pAddrList.lock);
             return;
@@ -1100,7 +1275,7 @@ void LaneAddP2pAddressByIp(const char *ipAddr, uint16_t port)
         item->port = port;
         item->cnt++;
     } else {
-        P2pAddrNode *p2pAddrNode = (P2pAddrNode *)SoftBusMalloc(sizeof(P2pAddrNode));
+        P2pAddrNode *p2pAddrNode = (P2pAddrNode *)SoftBusCalloc(sizeof(P2pAddrNode));
         if (p2pAddrNode == NULL) {
             SoftBusMutexUnlock(&g_P2pAddrList.lock);
             return;
@@ -1285,6 +1460,10 @@ static int32_t LaneLinkOfP2p(uint32_t reqId, const LinkRequest *reqInfo, const L
         return SOFTBUS_MEM_ERR;
     }
     linkInfo.linkType = LANE_P2P;
+
+    if (CheckVirtualLinkOnly()) {
+        (void)HandleForceDownVirtualLink();
+    }
     return LnnConnectP2p(&linkInfo, reqId, callback);
 }
 
@@ -1403,11 +1582,12 @@ static int32_t FillWlanLinkInfo(ProtocolType protocol, const LinkRequest *reqInf
 {
     int32_t ret = SOFTBUS_LANE_GET_LEDGER_INFO_ERR;
     int32_t port = 0;
-    if (reqInfo->transType == LANE_T_MSG) {
-        ret = LnnGetRemoteNumInfo(reqInfo->peerNetworkId, NUM_KEY_PROXY_PORT, &port);
+
+    if (reqInfo->isInnerCalled) {
+        ret = LnnGetRemoteNumInfoByIfnameIdx(reqInfo->peerNetworkId, NUM_KEY_PROXY_PORT, &port, WLAN_IF);
         LNN_LOGI(LNN_LANE, "get remote proxy port, port=%{public}d, ret=%{public}d", port, ret);
     } else {
-        ret = LnnGetRemoteNumInfo(reqInfo->peerNetworkId, NUM_KEY_SESSION_PORT, &port);
+        ret = LnnGetRemoteNumInfoByIfnameIdx(reqInfo->peerNetworkId, NUM_KEY_SESSION_PORT, &port, WLAN_IF);
         LNN_LOGI(LNN_LANE, "get remote session port, port=%{public}d, ret=%{public}d", port, ret);
     }
     if (ret != SOFTBUS_OK) {
@@ -1431,8 +1611,8 @@ static int32_t CreateWlanLinkInfo(ProtocolType protocol, const LinkRequest *reqI
     }
     LNN_LOGI(LNN_LANE, "get remote wlan ip with protocol=%{public}u", protocol);
     if (protocol == LNN_PROTOCOL_IP) {
-        if (LnnGetRemoteStrInfo(reqInfo->peerNetworkId, STRING_KEY_WLAN_IP, linkInfo->linkInfo.wlan.connInfo.addr,
-            sizeof(linkInfo->linkInfo.wlan.connInfo.addr)) != SOFTBUS_OK) {
+        if (LnnGetRemoteStrInfoByIfnameIdx(reqInfo->peerNetworkId, STRING_KEY_IP, linkInfo->linkInfo.wlan.connInfo.addr,
+            sizeof(linkInfo->linkInfo.wlan.connInfo.addr), WLAN_IF) != SOFTBUS_OK) {
             LNN_LOGE(LNN_LANE, "get remote wlan ip fail");
             return SOFTBUS_LANE_GET_LEDGER_INFO_ERR;
         }
@@ -1477,6 +1657,83 @@ static int32_t LaneLinkOfWlan(uint32_t reqId, const LinkRequest *reqInfo, const 
         LNN_LOGE(LNN_LANE, "lane detect reliability fail, laneReqId=%{public}u", reqId);
         return ret;
     }
+    return SOFTBUS_OK;
+}
+
+static int32_t FillUsbLinkInfo(ProtocolType protocol, const LinkRequest *reqInfo, LaneLinkInfo *linkInfo)
+{
+    int32_t ret = SOFTBUS_LANE_GET_LEDGER_INFO_ERR;
+    int32_t port = 0;
+
+    if (reqInfo->isInnerCalled) {
+        ret = LnnGetRemoteNumInfoByIfnameIdx(reqInfo->peerNetworkId, NUM_KEY_PROXY_PORT, &port, USB_IF);
+        LNN_LOGI(LNN_LANE, "get remote proxy port, port=%{public}d, ret=%{public}d", port, ret);
+    } else {
+        ret = LnnGetRemoteNumInfoByIfnameIdx(reqInfo->peerNetworkId, NUM_KEY_SESSION_PORT, &port, USB_IF);
+        LNN_LOGI(LNN_LANE, "get remote session port, port=%{public}d, ret=%{public}d", port, ret);
+    }
+    if (ret != SOFTBUS_OK) {
+        return ret;
+    }
+    linkInfo->type = reqInfo->linkType;
+    UsbLinkInfo *usb = &(linkInfo->linkInfo.usb);
+    usb->channel = -1;
+    usb->bw = LANE_BW_160M;
+    usb->connInfo.protocol = protocol;
+    usb->connInfo.port = port;
+    return SOFTBUS_OK;
+}
+
+static int32_t CreateUsbLinkInfo(ProtocolType protocol, const LinkRequest *reqInfo, LaneLinkInfo *linkInfo)
+{
+    if (LnnGetRemoteStrInfo(reqInfo->peerNetworkId, STRING_KEY_DEV_UDID,
+        linkInfo->peerUdid, UDID_BUF_LEN) != SOFTBUS_OK) {
+        LNN_LOGE(LNN_LANE, "get udid error");
+        return SOFTBUS_LANE_GET_LEDGER_INFO_ERR;
+    }
+    LNN_LOGI(LNN_LANE, "get remote usb ip with protocol=%{public}u", protocol);
+    if (protocol == LNN_PROTOCOL_USB) {
+        if (LnnGetRemoteStrInfoByIfnameIdx(reqInfo->peerNetworkId, STRING_KEY_IP, linkInfo->linkInfo.usb.connInfo.addr,
+            sizeof(linkInfo->linkInfo.usb.connInfo.addr), USB_IF) != SOFTBUS_OK) {
+            LNN_LOGE(LNN_LANE, "get remote usb ip fail");
+            return SOFTBUS_LANE_GET_LEDGER_INFO_ERR;
+        }
+        if (strnlen(linkInfo->linkInfo.usb.connInfo.addr, sizeof(linkInfo->linkInfo.usb.connInfo.addr)) == 0 ||
+            strnlen(linkInfo->linkInfo.usb.connInfo.addr,
+            sizeof(linkInfo->linkInfo.usb.connInfo.addr)) == MAX_SOCKET_ADDR_LEN ||
+            strncmp(linkInfo->linkInfo.usb.connInfo.addr, LOOP_IP_ADDR, strlen(LOOP_IP_ADDR)) == 0) {
+            LNN_LOGE(LNN_LANE, "Usb ip not found");
+            return SOFTBUS_LANE_GET_LEDGER_INFO_ERR;
+        }
+    } else {
+        if (LnnGetRemoteStrInfo(reqInfo->peerNetworkId, STRING_KEY_NODE_ADDR, linkInfo->linkInfo.usb.connInfo.addr,
+            sizeof(linkInfo->linkInfo.usb.connInfo.addr)) != SOFTBUS_OK) {
+            LNN_LOGE(LNN_LANE, "get remote usb ip fail");
+            return SOFTBUS_LANE_GET_LEDGER_INFO_ERR;
+        }
+    }
+    return FillUsbLinkInfo(protocol, reqInfo, linkInfo);
+}
+
+static int32_t LaneLinkOfUsb(uint32_t reqId, const LinkRequest *reqInfo, const LaneLinkCb *callback)
+{
+    LaneLinkInfo linkInfo;
+    ProtocolType acceptableProtocols = LNN_PROTOCOL_ALL ^ LNN_PROTOCOL_NIP;
+    if (reqInfo->transType == LANE_T_MSG || reqInfo->transType == LANE_T_BYTE) {
+        acceptableProtocols |= LNN_PROTOCOL_NIP;
+    }
+    acceptableProtocols = acceptableProtocols & reqInfo->acceptableProtocols;
+    ProtocolType protocol = LnnLaneSelectProtocol(LNN_NETIF_TYPE_USB, reqInfo->peerNetworkId, acceptableProtocols);
+    if (protocol == 0) {
+        LNN_LOGE(LNN_LANE, "protocal is invalid!");
+        return SOFTBUS_LANE_GET_LEDGER_INFO_ERR;
+    }
+    int32_t ret = CreateUsbLinkInfo(protocol, reqInfo, &linkInfo);
+    if (ret != SOFTBUS_OK) {
+        LNN_LOGE(LNN_LANE, "CreateUsbLinkInfo fail, laneReqId=%{public}u", reqId);
+        return ret;
+    }
+    callback->onLaneLinkSuccess(reqId, linkInfo.type, &linkInfo);
     return SOFTBUS_OK;
 }
 
@@ -1535,6 +1792,54 @@ static int32_t LaneLinkOfCocDirect(uint32_t reqId, const LinkRequest *reqInfo, c
     return SOFTBUS_OK;
 }
 
+static int32_t LaneLinkOfSle(uint32_t reqId, const LinkRequest *reqInfo, const LaneLinkCb *callback)
+{
+    LaneLinkInfo linkInfo;
+    (void)memset_s(&linkInfo, sizeof(LaneLinkInfo), 0, sizeof(LaneLinkInfo));
+    if (LnnGetRemoteStrInfo(reqInfo->peerNetworkId, STRING_KEY_DEV_UDID,
+        linkInfo.peerUdid, UDID_BUF_LEN) != SOFTBUS_OK) {
+        LNN_LOGE(LNN_LANE, "get udid error");
+        return SOFTBUS_LANE_GET_LEDGER_INFO_ERR;
+    }
+    if (memcpy_s(linkInfo.linkInfo.sle.sleMac, BT_MAC_LEN, reqInfo->peerSleMac, BT_MAC_LEN) != EOK) {
+        LNN_LOGE(LNN_LANE, "memcpy peerSleMac error");
+        return SOFTBUS_MEM_ERR;
+    }
+    if (strlen(linkInfo.linkInfo.sle.sleMac) == 0) {
+        LNN_LOGE(LNN_LANE, "get peerSleMac error");
+        return SOFTBUS_LANE_GET_LEDGER_INFO_ERR;
+    }
+    int32_t ret = SoftBusGenerateStrHash((uint8_t*)linkInfo.peerUdid, strlen(linkInfo.peerUdid),
+        (uint8_t*)linkInfo.linkInfo.sle.deviceIdHash);
+    if (ret != SOFTBUS_OK) {
+        LNN_LOGE(LNN_LANE, "generate deviceId hash err");
+        return ret;
+    }
+    linkInfo.linkInfo.sle.protoType = SLE_SSAP;
+    linkInfo.type = LANE_SLE;
+    callback->onLaneLinkSuccess(reqId, linkInfo.type, &linkInfo);
+    return SOFTBUS_OK;
+}
+
+static int32_t LaneLinkOfSleDirect(uint32_t reqId, const LinkRequest *reqInfo, const LaneLinkCb *callback)
+{
+    LaneLinkInfo linkInfo;
+    (void)memset_s(&linkInfo, sizeof(LaneLinkInfo), 0, sizeof(LaneLinkInfo));
+    if (LnnGetRemoteStrInfo(reqInfo->peerNetworkId, STRING_KEY_DEV_UDID,
+        linkInfo.peerUdid, UDID_BUF_LEN) != SOFTBUS_OK) {
+        LNN_LOGE(LNN_LANE, "get udid error");
+        return SOFTBUS_LANE_GET_LEDGER_INFO_ERR;
+    }
+    if (strcpy_s(linkInfo.linkInfo.sleDirect.networkId, NETWORK_ID_BUF_LEN, reqInfo->peerNetworkId) != EOK) {
+        LNN_LOGE(LNN_LANE, "copy networkId fail");
+        return SOFTBUS_STRCPY_ERR;
+    }
+    linkInfo.type = LANE_SLE_DIRECT;
+    linkInfo.linkInfo.sleDirect.protoType = SLE_SSAP;
+    callback->onLaneLinkSuccess(reqId, linkInfo.type, &linkInfo);
+    return SOFTBUS_OK;
+}
+
 static LaneLinkByType g_linkTable[LANE_LINK_TYPE_BUTT] = {
     [LANE_BR] = LaneLinkOfBr,
     [LANE_BLE] = LaneLinkOfBle,
@@ -1548,6 +1853,9 @@ static LaneLinkByType g_linkTable[LANE_LINK_TYPE_BUTT] = {
     [LANE_COC_DIRECT] = LaneLinkOfCocDirect,
     [LANE_HML] = LaneLinkOfHml,
     [LANE_HML_RAW] = LaneLinkOfHmlRaw,
+    [LANE_USB] = LaneLinkOfUsb,
+    [LANE_SLE] = LaneLinkOfSle,
+    [LANE_SLE_DIRECT] = LaneLinkOfSleDirect,
 };
 
 int32_t BuildLink(const LinkRequest *reqInfo, uint32_t reqId, const LaneLinkCb *callback)
@@ -1581,7 +1889,7 @@ int32_t DestroyLink(const char *networkId, uint32_t laneReqId, LaneLinkType type
         LNN_LOGE(LNN_LANE, "the networkId is nullptr");
         return SOFTBUS_INVALID_PARAM;
     }
-    if (type == LANE_HML && IsPowerControlEnabled()) {
+    if (type == LANE_HML && IsPowerControlEnabledPacked()) {
         DetectDisableWifiDirectApply();
     }
     if (type == LANE_P2P || type == LANE_HML || type == LANE_HML_RAW) {

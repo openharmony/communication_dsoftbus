@@ -21,7 +21,7 @@
 namespace OHOS::SoftBus {
 class WifiDirectTrace {
 public:
-    static void StartTrace(const std::string &requestDeviceId, const std::string &receiveDeviceId);
+    static void StartTrace(const std::string &requestDeviceId, const std::string &receiverDeviceId);
     static void StopTrace();
     static void SetRequestId(uint64_t requestId);
 };

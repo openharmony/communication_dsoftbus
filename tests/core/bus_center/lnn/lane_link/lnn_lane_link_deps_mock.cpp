@@ -73,7 +73,7 @@ int32_t LaneLinkDepsInterfaceMock::ActionOfDetectFail(uint32_t laneReqId, const 
 }
 
 extern "C" {
-int32_t GetTransReqInfoByLaneReqId(uint32_t laneReqId, TransOption *reqInfo)
+int32_t GetTransReqInfoByLaneReqId(uint32_t laneReqId, TransReqInfo *reqInfo)
 {
     return GetLaneLinkDepsInterface()->GetTransReqInfoByLaneReqId(laneReqId, reqInfo);
 }
@@ -178,6 +178,36 @@ int32_t LnnSyncPtk(const char *networkId)
 int32_t CheckLinkConflictByReleaseLink(LaneLinkType releaseLink)
 {
     return GetLaneLinkDepsInterface()->CheckLinkConflictByReleaseLink(releaseLink);
+}
+
+int32_t LnnGetLinkLedgerInfo(const char *udid, LinkLedgerInfo *info)
+{
+    return GetLaneLinkDepsInterface()->LnnGetLinkLedgerInfo(udid, info);
+}
+
+int32_t LnnAddLinkLedgerInfo(const char *udid, const LinkLedgerInfo *info)
+{
+    return GetLaneLinkDepsInterface()->LnnAddLinkLedgerInfo(udid, info);
+}
+
+void LnnDeleteLinkLedgerInfo(const char *udid)
+{
+    GetLaneLinkDepsInterface()->LnnDeleteLinkLedgerInfo(udid);
+}
+
+int32_t InitLinkLedger(void)
+{
+    return GetLaneLinkDepsInterface()->InitLinkLedger();
+}
+
+void DeinitLinkLedger(void)
+{
+    GetLaneLinkDepsInterface()->DeinitLinkLedger();
+}
+
+bool CheckLaneLinkExistByType(LaneLinkType linkType)
+{
+    return GetLaneLinkDepsInterface()->CheckLaneLinkExistByType(linkType);
 }
 }
 } // namespace OHOS

@@ -15,13 +15,10 @@
 #ifndef WIFI_DIRECT_PROCESSOR_H
 #define WIFI_DIRECT_PROCESSOR_H
 
-#include <string>
-
 #include "conn_log.h"
-#include "softbus_error_code.h"
+#include "dfx/processor_snapshot.h"
 
-#include "command/wifi_direct_command.h"
-#include "event/wifi_direct_event_base.h"
+#include "event/wifi_direct_event_dispatcher.h"
 #include "wifi_direct_types.h"
 
 namespace OHOS::SoftBus {
@@ -38,7 +35,11 @@ public:
         executor_ = executor;
     }
 
-    virtual void Run() = 0;
+    virtual void Run()
+    {
+        CONN_LOGI(CONN_WIFI_DIRECT, "base class run");
+        throw ProcessorTerminate();
+    }
 
     void SetRejectNegotiateData()
     {
@@ -52,6 +53,11 @@ public:
         }
         return CanAcceptNegotiateDataAtState(command);
     }
+    
+    std::string GetRemoteDeviceId()
+    {
+        return remoteDeviceId_;
+    }
 
     virtual bool CanAcceptNegotiateDataAtState(WifiDirectCommand &command) = 0;
     virtual void HandleCommandAfterTerminate(WifiDirectCommand &command) = 0;
@@ -60,6 +66,9 @@ public:
         CONN_LOGE(CONN_WIFI_DIRECT, "not implement");
         return SOFTBUS_OK;
     };
+
+    virtual std::string GetProcessorName() const = 0;
+    virtual std::string GetState() const = 0;
 
 protected:
     std::string remoteDeviceId_;

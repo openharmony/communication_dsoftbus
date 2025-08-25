@@ -20,6 +20,9 @@
 #include "anonymizer.h"
 #include "auth_log.h"
 #include "bus_center_manager.h"
+#include "g_enhance_lnn_func.h"
+#include "g_enhance_lnn_func_pack.h"
+#include "lnn_log.h"
 #include "message_handler.h"
 #include "softbus_adapter_crypto.h"
 #include "softbus_adapter_mem.h"
@@ -27,6 +30,7 @@
 #include "softbus_base_listener.h"
 #include "softbus_def.h"
 #include "softbus_feature_config.h"
+#include "softbus_init_common.h"
 
 #define TIME_SEC_TO_MSEC  1000L
 #define TIME_MSEC_TO_USEC 1000L
@@ -44,6 +48,11 @@ typedef struct {
     RemoveCompareFunc cmpFunc;
     void *param;
 } EventRemoveInfo;
+
+typedef struct {
+    AuthLinkType type;
+    bool (*compareConnInfo)(const AuthConnInfo *info1, const AuthConnInfo *info2, bool cmpShortHash);
+} CompareByType;
 
 static uint64_t g_uniqueId = 0;
 static SoftBusMutex g_authLock;
@@ -263,47 +272,109 @@ const char *GetAuthSideStr(bool isServer)
     return isServer ? "server" : "client";
 }
 
+static bool CompareBrConnInfo(const AuthConnInfo *info1, const AuthConnInfo *info2, bool cmpShortHash)
+{
+    if (info2->type == AUTH_LINK_TYPE_BR &&
+        StrCmpIgnoreCase(info1->info.brInfo.brMac, info2->info.brInfo.brMac) == 0) {
+        return true;
+    }
+    return false;
+}
+
+static bool CompareWifiConnInfo(const AuthConnInfo *info1, const AuthConnInfo *info2, bool cmpShortHash)
+{
+    if (info2->type == AUTH_LINK_TYPE_WIFI && strcmp(info1->info.ipInfo.ip, info2->info.ipInfo.ip) == 0) {
+        return true;
+    }
+    return false;
+}
+
+static bool CompareSessionKeyConnInfo(const AuthConnInfo *info1, const AuthConnInfo *info2, bool cmpShortHash)
+{
+    if (info2->type == AUTH_LINK_TYPE_SESSION_KEY && strcmp(info1->info.ipInfo.ip, info2->info.ipInfo.ip) == 0) {
+        return true;
+    }
+    return false;
+}
+
+static bool CompareBleConnInfo(const AuthConnInfo *info1, const AuthConnInfo *info2, bool cmpShortHash)
+{
+    bool isLinkble = (info2->type == AUTH_LINK_TYPE_BLE &&
+                        (memcmp(info1->info.bleInfo.deviceIdHash, info2->info.bleInfo.deviceIdHash,
+                        (cmpShortHash ? SHORT_HASH_LEN : UDID_HASH_LEN)) == 0 ||
+                        StrCmpIgnoreCase(info1->info.bleInfo.bleMac, info2->info.bleInfo.bleMac) == 0));
+    return isLinkble;
+}
+
+static bool CompareP2pConnInfo(const AuthConnInfo *info1, const AuthConnInfo *info2, bool cmpShortHash)
+{
+    if (info2->type == AUTH_LINK_TYPE_P2P && info1->info.ipInfo.port == info2->info.ipInfo.port &&
+        strcmp(info1->info.ipInfo.ip, info2->info.ipInfo.ip) == 0) {
+        return true;
+    }
+    return false;
+}
+
+static bool CompareEnhancedP2pConnInfo(const AuthConnInfo *info1, const AuthConnInfo *info2, bool cmpShortHash)
+{
+    if (info2->type == AUTH_LINK_TYPE_ENHANCED_P2P && info1->info.ipInfo.port == info2->info.ipInfo.port &&
+        strcmp(info1->info.ipInfo.ip, info2->info.ipInfo.ip) == 0) {
+        return true;
+    }
+    return false;
+}
+
+static bool CompareSessionConnInfo(const AuthConnInfo *info1, const AuthConnInfo *info2, bool cmpShortHash)
+{
+    if (info2->type == AUTH_LINK_TYPE_SESSION &&
+        info1->info.sessionInfo.connId == info2->info.sessionInfo.connId &&
+        strcmp(info1->info.sessionInfo.udid, info2->info.sessionInfo.udid) == 0) {
+        return true;
+    }
+    return false;
+}
+
+static bool CompareSleConnInfo(const AuthConnInfo *info1, const AuthConnInfo *info2, bool cmpShortHash)
+{
+    bool isLinkble = (info2->type == AUTH_LINK_TYPE_SLE &&
+                        (StrCmpIgnoreCase(info1->info.sleInfo.networkId, info2->info.sleInfo.networkId) == 0 ||
+                        StrCmpIgnoreCase(info1->info.sleInfo.sleMac, info2->info.sleInfo.sleMac) == 0));
+    return isLinkble;
+}
+
+static bool CompareUsbConnInfo(const AuthConnInfo *info1, const AuthConnInfo *info2, bool cmpShortHash)
+{
+    (void)cmpShortHash;
+    if (info2->type == AUTH_LINK_TYPE_USB && strcmp(info1->info.ipInfo.ip, info2->info.ipInfo.ip) == 0) {
+        return true;
+    }
+    return false;
+}
+
+static CompareByType g_compareByType[] = {
+    {AUTH_LINK_TYPE_WIFI,         CompareWifiConnInfo},
+    {AUTH_LINK_TYPE_BR,           CompareBrConnInfo},
+    {AUTH_LINK_TYPE_BLE,          CompareBleConnInfo},
+    {AUTH_LINK_TYPE_P2P,          CompareP2pConnInfo},
+    {AUTH_LINK_TYPE_ENHANCED_P2P, CompareEnhancedP2pConnInfo},
+    {AUTH_LINK_TYPE_SESSION,      CompareSessionConnInfo},
+    {AUTH_LINK_TYPE_SESSION_KEY,  CompareSessionKeyConnInfo},
+    {AUTH_LINK_TYPE_SLE,          CompareSleConnInfo},
+    {AUTH_LINK_TYPE_USB,          CompareUsbConnInfo},
+};
+
 bool CompareConnInfo(const AuthConnInfo *info1, const AuthConnInfo *info2, bool cmpShortHash)
 {
     CHECK_NULL_PTR_RETURN_VALUE(info1, false);
     CHECK_NULL_PTR_RETURN_VALUE(info2, false);
-    bool isLinkble = false;
-    switch (info1->type) {
-        case AUTH_LINK_TYPE_WIFI:
-            if (info2->type == AUTH_LINK_TYPE_WIFI && strcmp(info1->info.ipInfo.ip, info2->info.ipInfo.ip) == 0) {
-                return true;
+    for (uint32_t i = 0; i < sizeof(g_compareByType) / sizeof(CompareByType); i++) {
+        if (info1->type == g_compareByType[i].type) {
+            if (g_compareByType[i].compareConnInfo != NULL) {
+                return g_compareByType[i].compareConnInfo(info1, info2, cmpShortHash);
             }
-            break;
-        case AUTH_LINK_TYPE_BR:
-            if (info2->type == AUTH_LINK_TYPE_BR &&
-                StrCmpIgnoreCase(info1->info.brInfo.brMac, info2->info.brInfo.brMac) == 0) {
-                return true;
-            }
-            break;
-        case AUTH_LINK_TYPE_BLE:
-            isLinkble = (info2->type == AUTH_LINK_TYPE_BLE &&
-                (memcmp(info1->info.bleInfo.deviceIdHash, info2->info.bleInfo.deviceIdHash,
-                (cmpShortHash ? SHORT_HASH_LEN : UDID_HASH_LEN)) == 0 ||
-                StrCmpIgnoreCase(info1->info.bleInfo.bleMac, info2->info.bleInfo.bleMac) == 0));
-            if (isLinkble) {
-                return true;
-            }
-            break;
-        case AUTH_LINK_TYPE_P2P:
-            if (info2->type == AUTH_LINK_TYPE_P2P && info1->info.ipInfo.port == info2->info.ipInfo.port &&
-                strcmp(info1->info.ipInfo.ip, info2->info.ipInfo.ip) == 0) {
-                return true;
-            }
-            break;
-        case AUTH_LINK_TYPE_ENHANCED_P2P:
-            if (info2->type == AUTH_LINK_TYPE_ENHANCED_P2P && info1->info.ipInfo.port == info2->info.ipInfo.port &&
-                strcmp(info1->info.ipInfo.ip, info2->info.ipInfo.ip) == 0) {
-                return true;
-            }
-            break;
-        default:
-            return false;
+        }
     }
+    AUTH_LOGE(AUTH_CONN, "link type not support, info1-type: %{public}d.", info1->type);
     return false;
 }
 
@@ -357,6 +428,15 @@ int32_t ConvertToConnectOption(const AuthConnInfo *connInfo, ConnectOption *opti
             if (SetP2pSocketOption(connInfo, option) != SOFTBUS_OK) {
                 return SOFTBUS_MEM_ERR;
             }
+            break;
+        case AUTH_LINK_TYPE_SLE:
+            option->type = CONNECT_SLE;
+            if (strcpy_s(option->sleOption.address, BT_MAC_LEN, connInfo->info.sleInfo.sleMac) != EOK ||
+                strcpy_s(option->sleOption.networkId, NETWORK_ID_BUF_LEN, connInfo->info.sleInfo.networkId) != EOK) {
+                AUTH_LOGE(AUTH_CONN, "copy sleMac fail");
+                return SOFTBUS_MEM_ERR;
+            }
+            option->sleOption.protocol = connInfo->info.sleInfo.protocol;
             break;
         default:
             AUTH_LOGE(AUTH_CONN, "unexpected connType=%{public}d", connInfo->type);
@@ -413,10 +493,24 @@ int32_t ConvertToAuthConnInfo(const ConnectionInfo *info, AuthConnInfo *connInfo
             connInfo->info.bleInfo.protocol = info->bleInfo.protocol;
             connInfo->info.bleInfo.psm = info->bleInfo.psm;
             break;
+        case CONNECT_SLE:
+            return ConvertToAuthInfoForSle(info, connInfo);
         default:
             AUTH_LOGE(AUTH_CONN, "unexpected connType=%{public}d", info->type);
             return SOFTBUS_AUTH_UNEXPECTED_CONN_TYPE;
     }
+    return SOFTBUS_OK;
+}
+
+int32_t ConvertToAuthInfoForSle(const ConnectionInfo *info, AuthConnInfo *connInfo)
+{
+    connInfo->type = AUTH_LINK_TYPE_SLE;
+    if (strcpy_s(connInfo->info.sleInfo.sleMac, BT_MAC_LEN, info->sleInfo.address) != EOK ||
+        strcpy_s(connInfo->info.sleInfo.networkId, NETWORK_ID_BUF_LEN, info->sleInfo.networkId) != EOK) {
+        AUTH_LOGE(AUTH_CONN, "copy sleMac fail");
+        return SOFTBUS_MEM_ERR;
+    }
+    connInfo->info.sleInfo.protocol = info->sleInfo.protocol;
     return SOFTBUS_OK;
 }
 
@@ -427,10 +521,16 @@ DiscoveryType ConvertToDiscoveryType(AuthLinkType type)
             return DISCOVERY_TYPE_WIFI;
         case AUTH_LINK_TYPE_BLE:
             return DISCOVERY_TYPE_BLE;
+        case AUTH_LINK_TYPE_SLE:
+            return DISCOVERY_TYPE_SLE;
         case AUTH_LINK_TYPE_BR:
             return DISCOVERY_TYPE_BR;
         case AUTH_LINK_TYPE_P2P:
             return DISCOVERY_TYPE_P2P;
+        case AUTH_LINK_TYPE_SESSION_KEY:
+            return DISCOVERY_TYPE_SESSION_KEY;
+        case AUTH_LINK_TYPE_USB:
+            return DISCOVERY_TYPE_USB;
         default:
             break;
     }
@@ -445,10 +545,16 @@ AuthLinkType ConvertToAuthLinkType(DiscoveryType type)
             return AUTH_LINK_TYPE_WIFI;
         case DISCOVERY_TYPE_BLE:
             return AUTH_LINK_TYPE_BLE;
+        case DISCOVERY_TYPE_SLE:
+            return AUTH_LINK_TYPE_SLE;
         case DISCOVERY_TYPE_BR:
             return AUTH_LINK_TYPE_BR;
         case DISCOVERY_TYPE_P2P:
             return AUTH_LINK_TYPE_P2P;
+        case DISCOVERY_TYPE_SESSION_KEY:
+            return AUTH_LINK_TYPE_SESSION_KEY;
+        case DISCOVERY_TYPE_USB:
+            return AUTH_LINK_TYPE_USB;
         default:
             AUTH_LOGE(AUTH_CONN, "unexpected discType=%{public}d", type);
             break;
@@ -487,7 +593,7 @@ int32_t GetPeerUdidByNetworkId(const char *networkId, char *udid, uint32_t len)
     }
     NodeInfo cacheInfo;
     (void)memset_s(&cacheInfo, sizeof(NodeInfo), 0, sizeof(NodeInfo));
-    if (LnnRetrieveDeviceInfoByNetworkId(networkId, &cacheInfo) == SOFTBUS_OK &&
+    if (LnnRetrieveDeviceInfoByNetworkIdPacked(networkId, &cacheInfo) == SOFTBUS_OK &&
         cacheInfo.deviceInfo.deviceUdid[0] != '\0') {
         if (strcpy_s(udid, len, cacheInfo.deviceInfo.deviceUdid) != EOK) {
             AUTH_LOGE(AUTH_CONN, "copy deviceUdid failed");
@@ -507,7 +613,7 @@ int32_t GetIsExchangeUdidByNetworkId(const char *networkId, bool *isExchangeUdid
     }
     NodeInfo cacheInfo;
     (void)memset_s(&cacheInfo, sizeof(NodeInfo), 0, sizeof(NodeInfo));
-    if (LnnRetrieveDeviceInfoByNetworkId(networkId, &cacheInfo) == SOFTBUS_OK) {
+    if (LnnRetrieveDeviceInfoByNetworkIdPacked(networkId, &cacheInfo) == SOFTBUS_OK) {
         *isExchangeUdid = cacheInfo.isAuthExchangeUdid;
         return SOFTBUS_OK;
     }
@@ -526,15 +632,16 @@ bool CheckAuthConnInfoType(const AuthConnInfo *connInfo)
 
 void PrintAuthConnInfo(const AuthConnInfo *connInfo)
 {
-    if (connInfo == NULL) {
-        return;
-    }
+    AUTH_CHECK_AND_RETURN_LOGE(connInfo != NULL, AUTH_FSM, "connInfo is null");
     char *anonyUdidHash = NULL;
     char *anonyMac = NULL;
     char *anonyIp = NULL;
+    char *anonyNetworkId = NULL;
     char udidHash[UDID_BUF_LEN] = { 0 };
+    char networkId[NETWORK_ID_BUF_LEN] = { 0 };
     switch (connInfo->type) {
         case AUTH_LINK_TYPE_WIFI:
+        case AUTH_LINK_TYPE_USB:
             Anonymize(connInfo->info.ipInfo.ip, &anonyIp);
             AUTH_LOGD(AUTH_CONN, "print AuthConninfo ip=*.*.*%{public}s", AnonymizeWrapper(anonyIp));
             AnonymizeFree(anonyIp);
@@ -556,6 +663,19 @@ void PrintAuthConnInfo(const AuthConnInfo *connInfo)
                 AnonymizeWrapper(anonyMac), AnonymizeWrapper(anonyUdidHash));
             AnonymizeFree(anonyMac);
             AnonymizeFree(anonyUdidHash);
+            break;
+        case AUTH_LINK_TYPE_SLE:
+            if (ConvertBytesToHexString(networkId, UDID_BUF_LEN,
+                (const unsigned char *)connInfo->info.sleInfo.networkId, NETWORK_ID_BUF_LEN) != SOFTBUS_OK) {
+                AUTH_LOGE(AUTH_CONN, "gen networkId hex str err");
+                return;
+            }
+            Anonymize(networkId, &anonyNetworkId);
+            Anonymize(connInfo->info.sleInfo.sleMac, &anonyMac);
+            AUTH_LOGD(AUTH_CONN, "print AuthConninfo sleMac=**:**:**:**:%{public}s, networkId=%{public}s",
+                AnonymizeWrapper(anonyMac), AnonymizeWrapper(anonyNetworkId));
+            AnonymizeFree(anonyMac);
+            AnonymizeFree(anonyNetworkId);
             break;
         default:
             break;

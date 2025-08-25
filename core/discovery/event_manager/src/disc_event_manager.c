@@ -13,27 +13,24 @@
  * limitations under the License.
  */
 
-#include "disc_approach_ble.h"
 #include "disc_event_manager.h"
 #include "disc_log.h"
-#include "disc_manager.h"
-#include "disc_touch_ble.h"
-#include "disc_virtual_link_ble.h"
+#include "g_enhance_disc_func_pack.h"
 #include "softbus_error_code.h"
 
 int32_t DiscEventManagerInit(void)
 {
-    int32_t ret = DiscApproachBleEventInit();
+    int32_t ret = DiscApproachBleEventInitPacked();
     DISC_CHECK_AND_RETURN_RET_LOGE(ret == SOFTBUS_OK, ret, DISC_INIT, "init approach ble event failed");
 
-    ret = DiscVLinkBleEventInit();
+    ret = DiscVLinkBleEventInitPacked();
     DISC_CHECK_AND_RETURN_RET_LOGE(ret == SOFTBUS_OK, ret, DISC_INIT, "init vlink ble event failed");
 
-    ret = DiscTouchBleEventInit();
+    ret = DiscTouchBleEventInitPacked();
     DISC_CHECK_AND_RETURN_RET_LOGE(ret == SOFTBUS_OK, ret, DISC_INIT, "init touch ble event failed");
 
-    ret = DiscMgrEventInit();
-    DISC_CHECK_AND_RETURN_RET_LOGE(ret == SOFTBUS_OK, ret, DISC_INIT, "init disc manager event failed");
+    ret = DiscOopBleEventInitPacked();
+    DISC_CHECK_AND_RETURN_RET_LOGE(ret == SOFTBUS_OK, ret, DISC_INIT, "init oop ble event failed");
 
     DISC_LOGI(DISC_INIT, "disc event manager init succ");
     return SOFTBUS_OK;
@@ -41,9 +38,9 @@ int32_t DiscEventManagerInit(void)
 
 void DiscEventManagerDeinit(void)
 {
-    DiscApproachBleEventDeinit();
-    DiscVLinkBleEventDeinit();
-    DiscTouchBleEventDeinit();
-    DiscMgrEventDeinit();
+    DiscApproachBleEventDeinitPacked();
+    DiscVLinkBleEventDeinitPacked();
+    DiscTouchBleEventDeinitPacked();
+    DiscOopBleEventDeinitPacked();
 }
 

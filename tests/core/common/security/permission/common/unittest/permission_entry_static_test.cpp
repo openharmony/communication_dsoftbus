@@ -74,7 +74,7 @@ HWTEST_F(PermissionEntrystaticTest, StrStartWithTest001, TestSize.Level0)
     ret = StrStartWith(tmpString, target);
     EXPECT_TRUE(ret == false);
 
-    ret = StrStartWith(NULL, NULL);
+    ret = StrStartWith(nullptr, nullptr);
     EXPECT_TRUE(ret == false);
 
     ret = StrStartWith(tmpStringNormal, target);
@@ -89,10 +89,10 @@ HWTEST_F(PermissionEntrystaticTest, StrStartWithTest001, TestSize.Level0)
  */
 HWTEST_F(PermissionEntrystaticTest, ProcessAppInfoTest001, TestSize.Level0)
 {
-    SoftBusAppInfo *pRet = NULL;
+    SoftBusAppInfo *pRet = nullptr;
 
-    pRet = ProcessAppInfo(NULL);
-    EXPECT_TRUE(pRet == NULL);
+    pRet = ProcessAppInfo(nullptr);
+    EXPECT_TRUE(pRet == nullptr);
 }
 
 /**
@@ -103,14 +103,14 @@ HWTEST_F(PermissionEntrystaticTest, ProcessAppInfoTest001, TestSize.Level0)
  */
 HWTEST_F(PermissionEntrystaticTest, ProcessPermissionEntryTest001, TestSize.Level0)
 {
-    SoftBusPermissionEntry *pRet = NULL;
+    SoftBusPermissionEntry *pRet = nullptr;
     cJSON object;
 
-    pRet = ProcessPermissionEntry(NULL);
-    EXPECT_TRUE(pRet == NULL);
+    pRet = ProcessPermissionEntry(nullptr);
+    EXPECT_TRUE(pRet == nullptr);
 
     pRet = ProcessPermissionEntry(&object);
-    EXPECT_TRUE(pRet == NULL);
+    EXPECT_TRUE(pRet == nullptr);
 }
 
 /**
@@ -123,7 +123,7 @@ HWTEST_F(PermissionEntrystaticTest, CompareStringTest001, TestSize.Level0)
 {
     int32_t ret;
 
-    ret = CompareString(NULL, NULL, true);
+    ret = CompareString(nullptr, nullptr, true);
     EXPECT_EQ(SOFTBUS_INVALID_PARAM, ret);
 
     ret = CompareString(g_pkgName, g_pkgName, true);
@@ -139,13 +139,13 @@ HWTEST_F(PermissionEntrystaticTest, CompareStringTest001, TestSize.Level0)
 HWTEST_F(PermissionEntrystaticTest, GetPermTypeTest001, TestSize.Level0)
 {
     int32_t ret;
-    ret = GetPermType(NULL, NULL);
+    ret = GetPermType(nullptr, nullptr);
     EXPECT_EQ(SOFTBUS_INVALID_PARAM, ret);
 
     SoftBusPermissionItem *pItem = (SoftBusPermissionItem *)SoftBusCalloc(sizeof(SoftBusPermissionItem));
-    ASSERT_TRUE(pItem != NULL);
+    ASSERT_TRUE(pItem != nullptr);
     SoftBusAppInfo *appInfo = (SoftBusAppInfo *)SoftBusCalloc(sizeof(SoftBusAppInfo));
-    ASSERT_TRUE(appInfo != NULL);
+    ASSERT_TRUE(appInfo != nullptr);
     ListInit(&appInfo->node);
     appInfo->type = NATIVE_APP;
     appInfo->uid = UNKNOWN_VALUE;
@@ -193,13 +193,13 @@ HWTEST_F(PermissionEntrystaticTest, GetPermTypeTest001, TestSize.Level0)
 HWTEST_F(PermissionEntrystaticTest, GetPermTypeTest002, TestSize.Level0)
 {
     int32_t ret;
-    ret = GetPermType(NULL, NULL);
+    ret = GetPermType(nullptr, nullptr);
     EXPECT_EQ(SOFTBUS_INVALID_PARAM, ret);
 
     SoftBusPermissionItem *pItem = (SoftBusPermissionItem *)SoftBusCalloc(sizeof(SoftBusPermissionItem));
-    ASSERT_TRUE(pItem != NULL);
+    ASSERT_TRUE(pItem != nullptr);
     SoftBusAppInfo *appInfo = (SoftBusAppInfo *)SoftBusCalloc(sizeof(SoftBusAppInfo));
-    ASSERT_TRUE(appInfo != NULL);
+    ASSERT_TRUE(appInfo != nullptr);
     ListInit(&appInfo->node);
     appInfo->type = GRANTED_APP;
     appInfo->uid = UNKNOWN_VALUE;
@@ -248,12 +248,12 @@ HWTEST_F(PermissionEntrystaticTest, GetPermTypeTest002, TestSize.Level0)
 HWTEST_F(PermissionEntrystaticTest, CheckPermissionAppInfoTest001, TestSize.Level0)
 {
     int32_t ret;
-    SoftBusPermissionEntry *pe = NULL;
+    SoftBusPermissionEntry *pe = nullptr;
 
     SoftBusPermissionItem *pItem = (SoftBusPermissionItem *)SoftBusCalloc(sizeof(SoftBusPermissionItem));
-    ASSERT_TRUE(pItem != NULL);
+    ASSERT_TRUE(pItem != nullptr);
 
-    ret = CheckPermissionAppInfo(NULL, NULL);
+    ret = CheckPermissionAppInfo(nullptr, nullptr);
     EXPECT_EQ(SOFTBUS_INVALID_PARAM, ret);
 
     pItem->actions = 0;
@@ -261,7 +261,7 @@ HWTEST_F(PermissionEntrystaticTest, CheckPermissionAppInfoTest001, TestSize.Leve
     EXPECT_EQ(SOFTBUS_INVALID_PARAM, ret);
 
     SoftBusPermissionEntry *permissionEntry = (SoftBusPermissionEntry *)SoftBusCalloc(sizeof(SoftBusPermissionEntry));
-    ASSERT_TRUE(permissionEntry != NULL);
+    ASSERT_TRUE(permissionEntry != nullptr);
     ListInit(&permissionEntry->node);
     ListInit(&permissionEntry->appInfo);
     permissionEntry->regexp = false;
@@ -307,7 +307,7 @@ HWTEST_F(PermissionEntrystaticTest, HaveGrantedPermissionTest001, TestSize.Level
 {
     bool ret;
 
-    ret = HaveGrantedPermission(NULL);
+    ret = HaveGrantedPermission(nullptr);
     EXPECT_TRUE(ret == false);
 
     ret = HaveGrantedPermission(DBINDER_SERVICE_NAME);
@@ -335,12 +335,12 @@ HWTEST_F(PermissionEntrystaticTest, NewDynamicPermissionEntryTest001, TestSize.L
     int32_t callingUid = 0;
     int32_t callingPid = 0;
     SoftBusPermissionEntry *permissionEntry = (SoftBusPermissionEntry *)SoftBusCalloc(sizeof(SoftBusPermissionEntry));
-    ASSERT_TRUE(permissionEntry != NULL);
+    ASSERT_TRUE(permissionEntry != nullptr);
 
-    ret = NewDynamicPermissionEntry(NULL, sessionName, callingUid, callingPid);
+    ret = NewDynamicPermissionEntry(nullptr, sessionName, callingUid, callingPid);
     EXPECT_TRUE(ret == true);
 
-    ret = NewDynamicPermissionEntry(permissionEntry, NULL, callingUid, callingPid);
+    ret = NewDynamicPermissionEntry(permissionEntry, nullptr, callingUid, callingPid);
     EXPECT_TRUE(ret == true);
 
     ret = NewDynamicPermissionEntry(permissionEntry, sessionNameWrong, callingUid, callingPid);
@@ -348,5 +348,28 @@ HWTEST_F(PermissionEntrystaticTest, NewDynamicPermissionEntryTest001, TestSize.L
 
     ret = NewDynamicPermissionEntry(permissionEntry, DBINDER_SERVICE_NAME, callingUid, callingPid);
     EXPECT_TRUE(ret == false);
+}
+
+/**
+ * @tc.name: DynamicPermissionTest001
+ * @tc.desc: call AddDynamicPermission and DeleteDynamicPermission.
+ * @tc.type: FUNC
+ * @tc.require:
+ */
+HWTEST_F(PermissionEntrystaticTest, DynamicPermissionTest001, TestSize.Level1)
+{
+    int32_t callingUid = 0;
+    int32_t callingPid = 0;
+    char sessionName[] = "testSessionName";
+
+    int32_t ret = AddDynamicPermission(callingUid, callingPid, nullptr);
+    EXPECT_EQ(ret, SOFTBUS_INVALID_PARAM);
+    ret = AddDynamicPermission(callingUid, callingPid, sessionName);
+    EXPECT_EQ(ret, SOFTBUS_INVALID_PARAM);
+
+    ret = DeleteDynamicPermission(nullptr);
+    EXPECT_EQ(ret, SOFTBUS_INVALID_PARAM);
+    ret = DeleteDynamicPermission(sessionName);
+    EXPECT_EQ(ret, SOFTBUS_INVALID_PARAM);
 }
 } // namespace OHOS

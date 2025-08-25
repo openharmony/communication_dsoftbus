@@ -15,10 +15,7 @@
 
 #include "softbus_server_proxy_standard.h"
 
-#include "comm_log.h"
-#include "message_parcel.h"
 #include "softbus_client_stub.h"
-#include "softbus_error_code.h"
 #include "softbus_server_ipc_interface_code.h"
 
 namespace OHOS {
@@ -78,17 +75,61 @@ int32_t SoftBusServerProxyFrame::SoftbusRegisterService(const char *clientPkgNam
     return serverRet;
 }
 
-int32_t SoftBusServerProxyFrame::CreateSessionServer(const char *pkgName, const char *sessionName)
+int32_t SoftBusServerProxyFrame::RegisterBrProxyService(const char *clientPkgName, const sptr<IRemoteObject>& object)
+{
+    sptr<IRemoteObject> remote = Remote();
+    if (remote == nullptr) {
+        COMM_LOGE(COMM_SDK, "remote is nullptr!");
+        return SOFTBUS_IPC_ERR;
+    }
+ 
+    sptr<IRemoteObject> clientStub = SoftBusServerProxyFrame::GetRemoteInstance();
+    if (clientStub == nullptr) {
+        COMM_LOGE(COMM_SDK, "client stub is nullptr!");
+        return SOFTBUS_IPC_ERR;
+    }
+    MessageParcel data;
+    if (!data.WriteInterfaceToken(GetDescriptor())) {
+        COMM_LOGE(COMM_SDK, "write InterfaceToken failed!");
+        return SOFTBUS_TRANS_PROXY_WRITETOKEN_FAILED;
+    }
+    if (!data.WriteRemoteObject(clientStub)) {
+        COMM_LOGE(COMM_SDK, "write remote object failed!");
+        return SOFTBUS_TRANS_PROXY_WRITEOBJECT_FAILED;
+    }
+    if (!data.WriteCString(clientPkgName)) {
+        COMM_LOGE(COMM_SDK, "write clientPkgName failed!");
+        return SOFTBUS_TRANS_PROXY_WRITECSTRING_FAILED;
+    }
+ 
+    MessageParcel reply;
+    MessageOption option;
+    int32_t err = remote->SendRequest(MANAGE_REGISTER_BR_PROXY_SERVICE, data, reply, option);
+    if (err != SOFTBUS_OK) {
+        COMM_LOGE(COMM_SDK, "SoftbusRegisterService send request failed! err:%{public}d", err);
+        return err;
+    }
+    int32_t serverRet = 0;
+    if (!reply.ReadInt32(serverRet)) {
+        COMM_LOGE(COMM_SDK, "SoftbusRegisterService read serverRet failed!");
+        return SOFTBUS_TRANS_PROXY_READINT_FAILED;
+    }
+    return serverRet;
+}
+
+int32_t SoftBusServerProxyFrame::CreateSessionServer(const char *pkgName, const char *sessionName, uint64_t timestamp)
 {
     (void)pkgName;
     (void)sessionName;
+    (void)timestamp;
     return SOFTBUS_OK;
 }
 
-int32_t SoftBusServerProxyFrame::RemoveSessionServer(const char *pkgName, const char *sessionName)
+int32_t SoftBusServerProxyFrame::RemoveSessionServer(const char *pkgName, const char *sessionName, uint64_t timestamp)
 {
     (void)pkgName;
     (void)sessionName;
+    (void)timestamp;
     return SOFTBUS_OK;
 }
 
@@ -149,11 +190,12 @@ int32_t SoftBusServerProxyFrame::SendMessage(int32_t channelId, int32_t channelT
     return SOFTBUS_OK;
 }
 
-int32_t SoftBusServerProxyFrame::JoinLNN(const char *pkgName, void *addr, uint32_t addrTypeLen)
+int32_t SoftBusServerProxyFrame::JoinLNN(const char *pkgName, void *addr, uint32_t addrTypeLen, bool isForceJoin)
 {
     (void)pkgName;
     (void)addr;
     (void)addrTypeLen;
+    (void)isForceJoin;
     return SOFTBUS_OK;
 }
 
@@ -208,7 +250,6 @@ int32_t SoftBusServerProxyFrame::RegDataLevelChangeCb(const char *pkgName)
     return SOFTBUS_OK;
 }
 
-
 int32_t SoftBusServerProxyFrame::UnregDataLevelChangeCb(const char *pkgName)
 {
     (void)pkgName;
@@ -218,6 +259,18 @@ int32_t SoftBusServerProxyFrame::UnregDataLevelChangeCb(const char *pkgName)
 int32_t SoftBusServerProxyFrame::SetDataLevel(const DataLevel *dataLevel)
 {
     (void)dataLevel;
+    return SOFTBUS_OK;
+}
+
+int32_t SoftBusServerProxyFrame::RegisterRangeCallbackForMsdp(const char *pkgName)
+{
+    (void)pkgName;
+    return SOFTBUS_OK;
+}
+
+int32_t SoftBusServerProxyFrame::UnregisterRangeCallbackForMsdp(const char *pkgName)
+{
+    (void)pkgName;
     return SOFTBUS_OK;
 }
 

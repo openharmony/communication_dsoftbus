@@ -17,15 +17,11 @@
 #define DISC_USB_DISPATCHER_H
 
 #include "disc_manager.h"
+#include "disc_usb_dispatcher_struct.h"
 
 #ifdef __cplusplus
 extern "C" {
 #endif
-
-typedef struct {
-    bool (*IsConcern)(uint32_t capability);
-    DiscoveryFuncInterface *mediumInterface;
-} DiscoveryUsbDispatcherInterface;
 
 DiscoveryFuncInterface *DiscUsbDispatcherInit(DiscInnerCallback *discInnerCb);
 // for test

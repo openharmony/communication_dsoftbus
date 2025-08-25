@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2024 Huawei Device Co., Ltd.
+ * Copyright (c) 2024-2025 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -102,26 +102,44 @@ int32_t SoftBusGenerateStrHash(const unsigned char *str, uint32_t len, unsigned 
     return HbMediumMgrInterface()->SoftBusGenerateStrHash(str, len, hash);
 }
 
-int32_t ConvertBytesToUpperCaseHexString(char *outBuf, uint32_t outBufLen, const unsigned char *inBuf,
-    uint32_t inLen)
+int32_t ConvertBytesToUpperCaseHexString(char *outBuf, uint32_t outBufLen, const unsigned char *inBuf, uint32_t inLen)
 {
     return HbMediumMgrInterface()->ConvertBytesToUpperCaseHexString(outBuf, outBufLen, inBuf, inLen);
 }
 
-int32_t ConvertBytesToHexString(char *outBuf, uint32_t outBufLen, const unsigned char *inBuf,
-    uint32_t inLen)
+int32_t ConvertBytesToHexString(char *outBuf, uint32_t outBufLen, const unsigned char *inBuf, uint32_t inLen)
 {
     return HbMediumMgrInterface()->ConvertBytesToHexString(outBuf, outBufLen, inBuf, inLen);
 }
 
-bool AuthIsPotentialTrusted(const DeviceInfo *device)
+bool AuthIsPotentialTrusted(const DeviceInfo *device, bool isOnlyPointToPoint)
 {
-    return HbMediumMgrInterface()->AuthIsPotentialTrusted(device);
+    return HbMediumMgrInterface()->AuthIsPotentialTrusted(device, isOnlyPointToPoint);
 }
 
 int32_t DecryptUserId(NodeInfo *deviceInfo, uint8_t *advUserId, uint32_t len)
 {
     return HbMediumMgrInterface()->DecryptUserId(deviceInfo, advUserId, len);
+}
+
+int32_t LnnGetDLSleHbTimestamp(const char *networkId, uint64_t *timestamp)
+{
+    return HbMediumMgrInterface()->LnnGetDLSleHbTimestamp(networkId, timestamp);
+}
+
+int32_t LnnSetDLSleHbTimestamp(const char *networkId, const uint64_t timestamp)
+{
+    return HbMediumMgrInterface()->LnnSetDLSleHbTimestamp(networkId, timestamp);
+}
+
+int32_t LnnStartSleOfflineTimingStrategy(const char *networkId)
+{
+    return HbMediumMgrInterface()->LnnStartSleOfflineTimingStrategy(networkId);
+}
+
+int32_t LnnStopSleOfflineTimingStrategy(const char *networkId)
+{
+    return HbMediumMgrInterface()->LnnStopSleOfflineTimingStrategy(networkId);
 }
 }
 } // namespace OHOS

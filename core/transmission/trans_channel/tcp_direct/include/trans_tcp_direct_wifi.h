@@ -16,8 +16,6 @@
 #ifndef SOFTBUS_TCP_DIRECT_WIFI_H
 #define SOFTBUS_TCP_DIRECT_WIFI_H
 
-#include <stdint.h>
-
 #include "softbus_conn_interface.h"
 #include "softbus_app_info.h"
 

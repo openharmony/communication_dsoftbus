@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021-2024 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2025 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -17,7 +17,6 @@
 #define SOFTBUS_SERVER_H_
 
 #include "softbus_server_stub.h"
-#include "softbus_common.h"
 #include "system_ability.h"
 
 namespace OHOS {
@@ -30,8 +29,8 @@ public:
 
     int32_t SoftbusRegisterService(const char *clientPkgName, const sptr<IRemoteObject> &object) override;
 
-    int32_t CreateSessionServer(const char *pkgName, const char *sessionName) override;
-    int32_t RemoveSessionServer(const char *pkgName, const char *sessionName) override;
+    int32_t CreateSessionServer(const char *pkgName, const char *sessionName, uint64_t timestamp) override;
+    int32_t RemoveSessionServer(const char *pkgName, const char *sessionName, uint64_t timestamp) override;
     int32_t OpenSession(const SessionParam *param, TransInfo *info) override;
     int32_t OpenAuthSession(const char *sessionName, const ConnectionAddr *addrInfo) override;
     int32_t NotifyAuthSuccess(int32_t channelId, int32_t channelType) override;
@@ -43,7 +42,7 @@ public:
         uint32_t len, int32_t msgType) override;
     int32_t GetSoftbusSpecObject(sptr<IRemoteObject> &object) override;
 
-    int32_t JoinLNN(const char *pkgName, void *addr, uint32_t addrTypeLen) override;
+    int32_t JoinLNN(const char *pkgName, void *addr, uint32_t addrTypeLen, bool isForceJoin) override;
     int32_t LeaveLNN(const char *pkgName, const char *networkId) override;
     int32_t GetAllOnlineNodeInfo(const char *pkgName, void **info, uint32_t infoTypeLen, int *infoNum) override;
     int32_t GetLocalDeviceInfo(const char *pkgName, void *info, uint32_t infoTypeLen) override;
@@ -68,6 +67,10 @@ public:
     int32_t GetAllMetaNodeInfo(MetaNodeInfo *info, int32_t *infoNum) override;
     int32_t ShiftLNNGear(const char *pkgName, const char *callerId, const char *targetNetworkId,
         const GearMode *mode) override;
+    int32_t TriggerRangeForMsdp(const char *pkgName, const RangeConfig *config) override;
+    int32_t StopRangeForMsdp(const char *pkgName, const RangeConfig *config) override;
+    int32_t RegisterRangeCallbackForMsdp(const char *pkgName) override;
+    int32_t UnregisterRangeCallbackForMsdp(const char *pkgName) override;
     int32_t SyncTrustedRelationShip(const char *pkgName, const char *msg, uint32_t msgLen) override;
     int Dump(int fd, const std::vector<std::u16string> &args) override;
     int32_t GetBusCenterExObj(sptr<IRemoteObject> &object) override;
@@ -75,7 +78,20 @@ public:
         uint32_t qosCount) override;
     int32_t ProcessInnerEvent(int32_t eventType, uint8_t *buf, uint32_t len) override;
     int32_t PrivilegeCloseChannel(uint64_t tokenId, int32_t pid, const char *peerNetworkId) override;
+    int32_t SetDisplayName(const char *pkgName, const char *nameData, uint32_t len) override;
+    int32_t CreateServer(const char *pkgName, const char *name) override;
+    int32_t RemoveServer(const char *pkgName, const char *name) override;
+    int32_t Connect(const char *pkgName, const char *name, const Address *address) override;
+    int32_t Disconnect(uint32_t handle) override;
+    int32_t Send(uint32_t handle, const uint8_t *data, uint32_t len) override;
+    int32_t ConnGetPeerDeviceId(uint32_t handle, char *deviceId, uint32_t len) override;
 
+    int32_t OpenBrProxy(const char *brMac, const char *uuid) override;
+    int32_t CloseBrProxy(int32_t channelId) override;
+    int32_t SendBrProxyData(int32_t channelId, char *data, uint32_t dataLen) override;
+    int32_t SetListenerState(int32_t channelId, int32_t type, bool CbEnabled) override;
+    bool IsProxyChannelEnabled(int32_t uid) override;
+    int32_t PushRegisterHook() override;
 protected:
     void OnStart() override;
     void OnStop() override;

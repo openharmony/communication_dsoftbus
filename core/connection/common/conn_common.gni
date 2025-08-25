@@ -1,4 +1,4 @@
-# Copyright (c) 2021 Huawei Device Co., Ltd.
+# Copyright (c) 2021-2025 Huawei Device Co., Ltd.
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
 # You may obtain a copy of the License at
@@ -14,13 +14,23 @@
 import("../../../dsoftbus.gni")
 
 conn_common_inc = [
+  "$dsoftbus_root_path/core/authentication/include",
+  "$dsoftbus_root_path/core/authentication/interface",
+  "$dsoftbus_root_path/interfaces/kits/connect",
   "$dsoftbus_root_path/core/connection/interface",
   "$dsoftbus_root_path/core/connection/common/include",
   "$dsoftbus_root_path/core/connection/manager",
+  "$dsoftbus_root_path/core/transmission/trans_channel/common/include",
   "$dsoftbus_root_path/core/transmission/trans_channel/proxy/include",
 ]
-conn_common_src =
-    [ "$dsoftbus_root_path/core/connection/common/src/softbus_conn_common.c" ]
+conn_common_src = [
+  "$dsoftbus_root_path/core/connection/common/src/softbus_conn_common.c",
+  "$dsoftbus_root_path/core/connection/common/src/softbus_conn_async_helper.c",
+  "$dsoftbus_root_path/core/connection/common/src/softbus_conn_bytes_delivery.c",
+  "$dsoftbus_root_path/core/connection/common/src/softbus_conn_fair_priority_queue.c",
+  "$dsoftbus_root_path/core/connection/common/src/softbus_rc_collection.c",
+  "$dsoftbus_root_path/core/connection/common/src/softbus_rc_object.c",
+]
 
 if (dsoftbus_feature_conn_tcp_comm) {
   conn_common_src += [
@@ -28,25 +38,14 @@ if (dsoftbus_feature_conn_tcp_comm) {
     "$dsoftbus_root_path/core/connection/common/src/softbus_datahead_transform.c",
     "$dsoftbus_root_path/core/connection/common/src/softbus_socket.c",
     "$dsoftbus_root_path/core/connection/common/src/softbus_tcp_socket.c",
+    "$dsoftbus_root_path/core/connection/common/src/softbus_usb_tcp_socket.c",
+    "$dsoftbus_root_path/core/connection/common/src/softbus_mintp_socket.c",
+    "$dsoftbus_root_path/core/connection/common/src/softbus_htp_socket.c",
   ]
-  if (defined(ohos_lite)) {
+  if (defined(ohos_lite) && ohos_kernel_type == "liteos_m") {
     conn_common_src += [ "$dsoftbus_root_path/core/connection/common/src/softbus_select_event_implement.c" ]
   } else {
     conn_common_src += [ "$dsoftbus_root_path/core/connection/common/src/softbus_epoll_event_implement.c" ]
-  }
-  native_source_path = rebase_path("$dsoftbus_root_path")
-  newip_dir = "dsoftbus_enhance/components/newip/network"
-  newip_enhanced = exec_script("$dsoftbus_root_path/check_sub_module.py",
-                               [
-                                 "$native_source_path",
-                                 "$newip_dir",
-                               ],
-                               "value")
-  if (newip_enhanced) {
-    import("../../../dsoftbus_enhance/components/newip/network/network.gni")
-
-    conn_common_src += newip_connection_src
-    conn_common_inc += newip_connection_include
   }
 } else {
   conn_common_src += [

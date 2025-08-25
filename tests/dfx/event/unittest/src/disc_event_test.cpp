@@ -40,7 +40,7 @@ HWTEST_F(DiscEventTest, DiscEventTest001, TestSize.Level0)
         .broadcastType = 0, // invalid
         .peerPort = "9000",
     };
-    constexpr int32_t VALID_EXTRA_SIZE = 3;
+    constexpr int32_t VALID_EXTRA_SIZE = 5;
 
     HiSysEventMock mock;
     EXPECT_CALL(mock,
@@ -62,20 +62,29 @@ HWTEST_F(DiscEventTest, DiscEventTest002, TestSize.Level0)
         .result = 1,
         .errcode = 2,
         .initType = 3,
-        .serverType = "",
-        .interFuncType = 5,
-        .capabilityBit = 6,
+        .serverType = "4",
+        .advHandle = 5,
+        .bcOverMaxCnt = 6,
+        .interFuncType = 7,
+        .capabilityBit = 8,
         .capabilityData = "testCapabilityData",
-        .bleTurnState = 8,
-        .ipLinkStatus = 9,
-        .coapChangeType = 10,
-        .broadcastType = 11,
-        .broadcastFreq = 12,
-        .scanType = 13,
+        .bleTurnState = 10,
+        .ipLinkStatus = 11,
+        .coapChangeType = 12,
+        .broadcastType = 13,
+        .broadcastFreq = 14,
+        .minInterval = 15,
+        .maxInterval = 16,
+        .currentNum = 17,
+        .scanType = 18,
+        .scanCount = 19,
         .scanCycle = "testScanCycle",
-        .discType = 15,
-        .discMode = 16,
-        .costTime = 17,
+        .discType = 21,
+        .discMode = 22,
+        .successCnt = 23,
+        .failCnt = 24,
+        .startTime = 25,
+        .costTime = 26,
         .localNetworkId = "a8ynvpdaihw1f6nknjd2hkfhxljxypkr6kvjsbhnhpp16974uo4fvsrpfa6t50fm",
         .peerIp = "10.11.12.1",
         .peerBrMac = "dd:15:bc:b9:f2:05",
@@ -132,7 +141,7 @@ HWTEST_F(DiscEventTest, DiscEventTest003, TestSize.Level0)
         .peerDeviceType = "\0",
         .callerPkg = nullptr,
     };
-    constexpr int32_t VALID_EXTRA_SIZE = 2; // result, errcode is valid
+    constexpr int32_t VALID_EXTRA_SIZE = 4; // result, errcode is valid
 
     HiSysEventMock mock;
     EXPECT_CALL(mock,
@@ -151,7 +160,7 @@ HWTEST_F(DiscEventTest, DiscEventTest003, TestSize.Level0)
 HWTEST_F(DiscEventTest, DiscEventTest004, TestSize.Level0)
 {
     DiscEventExtra emptyExtra = { 0 };
-    constexpr int32_t VALID_EXTRA_SIZE = 2; // result, errcode is valid
+    constexpr int32_t VALID_EXTRA_SIZE = 4; // result, errcode is valid
 
     HiSysEventMock mock;
     EXPECT_CALL(mock,

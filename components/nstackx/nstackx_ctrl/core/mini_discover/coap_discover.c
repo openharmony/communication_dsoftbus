@@ -189,7 +189,8 @@ static int32_t HndPostServiceDiscoverEx(const CoapPacket *pkt)
         goto FAIL;
     }
 
-    CoapResponseServiceDiscovery(remoteUrl, pkt, &deviceInfo->netChannelInfo.wifiApInfo.ip, deviceInfo->businessType);
+    CoapResponseServiceDiscovery(remoteUrl, pkt, &deviceInfo->netChannelInfo.wifiApInfo.addr.in,
+        deviceInfo->businessType);
 
     ret = NSTACKX_EOK;
 FAIL:
@@ -318,7 +319,7 @@ static void CoapServiceDiscoverTimerHandle(void *argument)
         DFINDER_LOGE(TAG, "failed to post service discover request");
         goto L_ERR_SERVICE_DISCOVER;
     }
-    DFINDER_LOGI(TAG, "the %u times for device discover.", g_discoverCount + 1);
+    DFINDER_LOGD(TAG, "the %u times for device discover.", g_discoverCount + 1);
 
     /* Restart timer */
     discoverInterval = GetDiscoverInterval(g_discoverCount);
@@ -480,10 +481,10 @@ int32_t CoapDiscoverInit(EpollDesc epollfd)
     (void)epollfd;
     if (g_discoverTimer == NULL) {
         g_discoverTimer = TimerStart(epollfd, 0, NSTACKX_FALSE, CoapServiceDiscoverTimerHandle, NULL);
-        if (g_discoverTimer == NULL) {
-            DFINDER_LOGE(TAG, "failed to start timer for service discover");
-            return NSTACKX_EFAILED;
-        }
+    }
+    if (g_discoverTimer == NULL) {
+        DFINDER_LOGE(TAG, "failed to start timer for service discover");
+        return NSTACKX_EFAILED;
     }
     CoapSoftBusInitMsgId();
     g_userRequest = NSTACKX_FALSE;

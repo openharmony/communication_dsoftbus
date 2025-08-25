@@ -21,30 +21,11 @@
 #include "softbus_app_info.h"
 #include "softbus_conn_interface.h"
 #include "softbus_trans_def.h"
+#include "trans_lane_manager_struct.h"
 
 #ifdef __cplusplus
 extern "C" {
 #endif /* __cplusplus */
-
-typedef enum {
-    CORE_SESSION_STATE_INIT,
-    CORE_SESSION_STATE_WAIT_LANE,
-    CORE_SESSION_STATE_LAN_COMPLETE,
-    CORE_SESSION_STATE_CHANNEL_OPENED,
-    CORE_SESSION_STATE_CANCELLING,
-    CORE_SESSION_STATE_BUTT,
-} CoreSessionState;
-
-typedef struct {
-    ListNode node;
-    bool isQosLane;
-    char pkgName[PKG_NAME_SIZE_MAX];
-    int32_t channelId;
-    int32_t channelType;
-    int32_t pid;
-    uint32_t laneHandle;
-    LaneConnInfo laneConnInfo;
-} TransLaneInfo;
 
 int32_t TransLaneMgrInit(void);
 

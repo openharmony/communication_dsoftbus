@@ -20,7 +20,7 @@
 
 #include "lnn_lane_interface.h"
 #include "softbus_conn_interface.h"
-#include "softbus_def.h"
+#include "trans_inner_session.h"
 
 #ifdef __cplusplus
 #if __cplusplus
@@ -106,6 +106,47 @@ int TransSendNetworkingMessage(int32_t channelId, const char *data, uint32_t dat
  * @return <b>SOFTBUS_OK</b> Success to register channel listener, return other internal errorcodes otherwise.
  */
 int TransRegisterNetworkingChannelListener(const char *sessionName, const INetworkingListener *listener);
+
+/**
+ * @brief Creates a session server.
+ * @param pkgName Indicates the pointer to the service bundle name.
+ * It is the unique identifier of the upper-layer service. The value cannot be empty or exceed 64 characters.
+ * @param sessionName Indicates the pointer to the session name, which is the unique ID of the session server.
+ * The value cannot be empty or exceed 255 characters.
+ * @param listener Indicates the pointer to the session callback.
+ * @return Returns <b>0</b> if the operation is successful; returns <b>-1</b> otherwise.
+ */
+int32_t TransCreateSessionServerInner(
+    const char *pkgName, const char *sessionName, const ISessionListenerInner *listener);
+
+/**
+ * @brief To open a bytes channel to the specified device.
+ * @see {@link TransCloseSessionInner}
+ * @param[in] sessionName indicates the pointer to the sessionName name.
+ * @param[in] peerNetworkId indicates the pointer to the peer network id.
+ * @param[in] channelId will return valid channelId.
+ * @return Returns <b>0</b> if the operation is successful; returns <b>-1</b> otherwise.
+ */
+int32_t TransOpenSessionInner(const char *sessionName, const char *peerNetworkId, uint32_t reqId);
+
+/**
+ * @brief send message through the sepcified channel.
+ * this interface is current only called once when the sync device info.
+ * @see {@link TransOpenSessionInner}
+ * @param[in] channelId indicates the opened ChannelId.
+ * @param[in] data indicates the pointer to message data.
+ * @param[in] dataLen indicates the message data of len.
+ * @return <b>SOFTBUS_OK</b> Success to send message to the channel, returns other internal error codes otherwise.
+ */
+int32_t TransSendDataInner(int32_t channelId, const char *data, uint32_t len);
+
+/**
+ * @brief To close the sepcified bytes channel.
+ * this interface is only called once when the channelId already opened.
+ * @see {@link TransOpenSessionInner}
+ * @param[in] channelId indicates the opened ChannelId.
+ */
+void TransCloseSessionInner(int32_t channelId);
 
 #ifdef __cplusplus
 #if __cplusplus

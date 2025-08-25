@@ -12,6 +12,17 @@
 # limitations under the License.
 
 hispark_pegasus_sdk_path = "//device/soc/hisilicon/hi3861v100/sdk_liteos"
+kernel_path = "//kernel/liteos_m/components/net/lwip-2.1/porting/include"
+third_party_path = "//third_party/lwip/src/include"
+build_lite_path = "//build/lite/config/component/cJSON:cjson_static"
+btframework_path = "//foundation/communication/bluetooth/frameworks/inner:btframework"
+inner_api_path = "//foundation/communication/bluetooth/interfaces/inner_api/include"
+commonlibrary_path = "//commonlibrary/utils_lite/include"
+cjson_shared_path = "//build/lite/config/component/cJSON:cjson_shared"
+ipc_single_path = "//foundation/communication/ipc/interfaces/innerkits/c/ipc:ipc_single"
+samgr_path = "//foundation/systemabilitymgr/samgr_lite/samgr:samgr"
+btframework_path = "//foundation/communication/bluetooth/frameworks/inner:btframework"
+
 dsoftbus_root_path = rebase_path(".")
 dsoftbus_sdk_path = "${dsoftbus_root_path}/sdk"
 dsoftbus_core_path = "${dsoftbus_root_path}/core"
@@ -37,13 +48,12 @@ declare_args() {
 }
 
 declare_args() {
-  dsoftbus_get_devicename = true
   softbus_communication_wifi_feature = true
   softbus_os_account = true
-  softbus_lnn_lp_feature = true
   dsoftbus_build_eng = false
   dsoftbus_access_token_feature = true
   dsoftbus_ipc_feature = true
+  softbus_config_enhance = false
 
   if (product_name != "qemu-arm-linux-min") {
     qemu_arm_disable = true
@@ -60,11 +70,6 @@ if (defined(global_parts_info) &&
 }
 
 if (defined(global_parts_info) &&
-    !defined(global_parts_info.ability_ability_runtime)) {
-  dsoftbus_get_devicename = false
-}
-
-if (defined(global_parts_info) &&
     !defined(global_parts_info.account_os_account)) {
   softbus_os_account = false
 }
@@ -74,11 +79,6 @@ if (defined(global_parts_info) &&
   support_bluetooth = false
 } else {
   support_bluetooth = true
-}
-
-if (defined(global_parts_info) &&
-    !defined(global_parts_info.resourceschedule_device_standby_ext)) {
-  softbus_lnn_lp_feature = false
 }
 
 if (defined(global_parts_info) &&
@@ -124,20 +124,6 @@ if (defined(ohos_lite)) {
 
 defines += [ "OPENSSL_NO_FILENAMES" ]
 
-if (dsoftbus_feature_disc_notification &&
-    dsoftbus_feature_inner_disc_broadcast) {
-  defines += [ "DSOFTBUS_FEATURE_DISC_NOTIFICATION" ]
-}
-
-if (dsoftbus_feature_disc_notification_rx &&
-    dsoftbus_feature_inner_disc_broadcast) {
-  defines += [ "DSOFTBUS_FEATURE_DISC_NOTIFICATION_RX" ]
-}
-
-if (dsoftbus_feature_disc_link_ble && dsoftbus_feature_inner_disc_broadcast) {
-  defines += [ "DSOFTBUS_FEATURE_DISC_LINK_BLE" ]
-}
-
 if (dsoftbus_feature_disc_coap && dsoftbus_feature_inner_disc_coap) {
   defines += [ "DSOFTBUS_FEATURE_DISC_COAP" ]
 }
@@ -157,10 +143,8 @@ if (defined(global_parts_info) &&
   dsoftbus_feature_lnn_cloud_sync = true
 }
 
-if (defined(global_parts_info) && !defined(global_parts_info.i18n)) {
-  support_i18n = false
-} else {
-  support_i18n = true
+if (softbus_config_enhance) {
+  defines += [ "DSOFTBUS_CONFIG_ENHANCE" ]
 }
 
 import("$dsoftbus_dfx_path/dsoftbus_dfx.gni")
@@ -179,6 +163,10 @@ if (dsoftbus_feature_lnn_ble) {
   defines += [ "ENABLE_FEATURE_LNN_BLE" ]
 }
 
+if (dsoftbus_feature_deps_data_share && dsoftbus_feature_deps_datamgr_service) {
+  defines += [ "ENABLE_FEATURE_DATAMGR_SERVICE" ]
+}
+
 if (dsoftbus_feature_conn_pv1 && softbus_communication_wifi_feature &&
     dsoftbus_feature_conn_tcp_comm) {
   defines += [ "DSOFTBUS_FEATURE_CONN_PV1" ]
@@ -186,16 +174,20 @@ if (dsoftbus_feature_conn_pv1 && softbus_communication_wifi_feature &&
     defines += [ "DSOFTBUS_FEATURE_CONN_PV2" ]
   }
   if (dsoftbus_feature_conn_action) {
-    defines += [ "DSOFTBUS_FEATURE_CONN_ACTION" ]
-    if (dsoftbus_feature_conn_hv2 && dsoftbus_feature_disc_link_ble) {
+    if (dsoftbus_feature_conn_hv2) {
       defines += [ "DSOFTBUS_FEATURE_CONN_HV2" ]
       if (dsoftbus_feature_conn_hv1 && dsoftbus_feature_conn_pv2 &&
           dsoftbus_feature_conn_pv1) {
         defines += [ "DSOFTBUS_FEATURE_CONN_HV1" ]
       }
-      if (dsoftbus_feature_conn_hv2c) {
-        defines += [ "DSOFTBUS_FEATURE_CONN_HV2C" ]
-      }
     }
   }
+}
+
+if (dsoftbus_feature_deps_sle) {
+  defines += [ "DSOFTBUS_FEATURE_SLE" ]
+}
+
+if (dsoftbus_feature_deps_remoteP2p_service) {
+  defines += [ "DSOFTBUS_DEVICE_CLOUD_CONVERGENCE" ]
 }

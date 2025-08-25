@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2024 Huawei Device Co., Ltd.
+ * Copyright (c) 2024-2025 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -13,20 +13,18 @@
  * limitations under the License.
  */
 
-#include "gmock/gmock.h"
-#include "gtest/gtest.h"
-
 #include "assert_helper.h"
 #include "bluetooth_mock.h"
 #include "c_header/ohos_bt_gatt.h"
 #include "disc_log.h"
 #include "softbus_adapter_mem.h"
-#include "softbus_ble_gatt.h"
+#include "softbus_ble_gatt_public.h"
 #include "softbus_broadcast_type.h"
 #include "softbus_error_code.h"
+#include "gmock/gmock.h"
+#include "gtest/gtest.h"
 
-#define GATT_ADV_MAX_NUM  16
-#define GATT_SCAN_MAX_NUM 2
+#define GATT_ADV_MAX_NUM  20
 
 using namespace testing::ext;
 using ::testing::AtMost;
@@ -55,6 +53,8 @@ public:
     static StRecordCtx advDataCtx;
     static StRecordCtx advUpdateCtx;
     static int32_t btInnerAdvId;
+    static int32_t g_status;
+    static int32_t g_adapterBcld;
 
     static void SetUpTestCase(void);
 };
@@ -66,16 +66,20 @@ StRecordCtx SoftbusBleGattTest::advDisableCtx("AdvDisableCallback");
 StRecordCtx SoftbusBleGattTest::advDataCtx("AdvDataCallback");
 StRecordCtx SoftbusBleGattTest::advUpdateCtx("AdvUpdateCallback");
 int32_t SoftbusBleGattTest::btInnerAdvId = -1;
+int32_t SoftbusBleGattTest::g_status = -1;
+int32_t SoftbusBleGattTest::g_adapterBcld = -1;
 
 void SoftbusBleGattTest::SetUpTestCase()
 {
     MockBluetooth mocker;
     SoftbusBleAdapterInit();
+    ASSERT_NE(MockBluetooth::interface, nullptr);
     MockBluetooth::interface->Init();
 }
 
-static void StubOnScanResult(int32_t scannerId, const SoftBusBcScanResult *reportData)
+static void StubOnScanResult(BroadcastProtocol protocol, int32_t scannerId, const SoftBusBcScanResult *reportData)
 {
+    (void)protocol;
     SoftbusBleGattTest::scanResultCtx.Update(scannerId, reportData);
 }
 
@@ -88,23 +92,27 @@ static SoftbusScanCallback *GetStubScanListener()
     return &listener;
 }
 
-static void StubAdvEnableCallback(int32_t advId, int32_t status)
+static void StubAdvEnableCallback(BroadcastProtocol protocol, int32_t advId, int32_t status)
 {
+    (void)protocol;
     SoftbusBleGattTest::advEnableCtx.Update(advId, status);
 }
 
-static void StubAdvDisableCallback(int32_t advId, int32_t status)
+static void StubAdvDisableCallback(BroadcastProtocol protocol, int32_t advId, int32_t status)
 {
+    (void)protocol;
     SoftbusBleGattTest::advDisableCtx.Update(advId, status);
 }
 
-static void StubAdvUpdateCallback(int32_t advId, int32_t status)
+static void StubAdvUpdateCallback(BroadcastProtocol protocol, int32_t advId, int32_t status)
 {
+    (void)protocol;
     SoftbusBleGattTest::advUpdateCtx.Update(advId, status);
 }
 
-static void StubAdvDataCallback(int32_t advId, int32_t status)
+static void StubAdvDataCallback(BroadcastProtocol protocol, int32_t advId, int32_t status)
 {
+    (void)protocol;
     SoftbusBleGattTest::advDataCtx.Update(advId, status);
 }
 
@@ -160,12 +168,12 @@ EXIT:
 }
 
 /**
- * @tc.name: TestSoftbusGattInit
+ * @tc.name: SoftbusGattInit001
  * @tc.desc: Test lnit will return SOFTBUS_OK when called more than once
  * @tc.type: FUNC
  * @tc.require: NONE
  */
-HWTEST_F(SoftbusBleGattTest, TestSoftbusGattInit001, TestSize.Level1)
+HWTEST_F(SoftbusBleGattTest, SoftbusGattInit001, TestSize.Level1)
 {
     int32_t ret = MockBluetooth::interface->Init();
     EXPECT_EQ(ret, SOFTBUS_OK);
@@ -175,12 +183,12 @@ HWTEST_F(SoftbusBleGattTest, TestSoftbusGattInit001, TestSize.Level1)
 }
 
 /**
- * @tc.name: TestSoftbusGattDeInit
+ * @tc.name: SoftbusGattDeInit001
  * @tc.desc: Test DeInit will return SOFTBUS_OK when called more than once
  * @tc.type: FUNC
  * @tc.require: NONE
  */
-HWTEST_F(SoftbusBleGattTest, TestSoftbusGattDeInit001, TestSize.Level1)
+HWTEST_F(SoftbusBleGattTest, SoftbusGattDeInit001, TestSize.Level1)
 {
     int32_t ret = MockBluetooth::interface->DeInit();
     EXPECT_EQ(ret, SOFTBUS_OK);
@@ -190,22 +198,23 @@ HWTEST_F(SoftbusBleGattTest, TestSoftbusGattDeInit001, TestSize.Level1)
 }
 
 /**
- * @tc.name: TestSoftbusRegisterAdvCb
+ * @tc.name: SoftbusRegisterAdvCb001
  * @tc.desc: Test SoftbusRegisterAdvCb will return SOFTBUS_INVALID_PARAM when called more than once
  * @tc.type: FUNC
  * @tc.require: NONE
  */
-HWTEST_F(SoftbusBleGattTest, TestSoftbusRegisterAdvCb001, TestSize.Level1)
+HWTEST_F(SoftbusBleGattTest, SoftbusRegisterAdvCb001, TestSize.Level1)
 {
     int32_t ret = MockBluetooth::interface->RegisterBroadcaster(nullptr, nullptr);
     EXPECT_EQ(ret, SOFTBUS_INVALID_PARAM);
 }
 
 // 充当参数
-static void FakeBcBleCallback(int32_t adapterBcld, int32_t status)
+static void FakeBcBleCallback(BroadcastProtocol protocol, int32_t adapterBcld, int32_t status)
 {
-    (void)adapterBcld;
-    (void)status;
+    (void)protocol;
+    SoftbusBleGattTest::g_adapterBcld = adapterBcld;
+    SoftbusBleGattTest::g_status = status;
 }
 
 static SoftbusBroadcastCallback g_softbusBcBleCbTest = {
@@ -213,15 +222,18 @@ static SoftbusBroadcastCallback g_softbusBcBleCbTest = {
     .OnStopBroadcastingCallback = FakeBcBleCallback,
     .OnUpdateBroadcastingCallback = FakeBcBleCallback,
     .OnSetBroadcastingCallback = FakeBcBleCallback,
+    .OnSetBroadcastingParamCallback = FakeBcBleCallback,
+    .OnDisableBroadcastingCallback = FakeBcBleCallback,
+    .OnEnableBroadcastingCallback = FakeBcBleCallback,
 };
 
 /**
- * @tc.name: TestSoftbusRegisterAdvCb002
+ * @tc.name: SoftbusRegisterAdvCb002
  * @tc.desc: Test SoftbusRegisterAdvCb will return SOFTBUS_LOCK_ERR when called more than once
  * @tc.type: FUNC
  * @tc.require: NONE
  */
-HWTEST_F(SoftbusBleGattTest, TestSoftbusRegisterAdvCb002, TestSize.Level1)
+HWTEST_F(SoftbusBleGattTest, SoftbusRegisterAdvCb002, TestSize.Level1)
 {
     int32_t advld = 0;
     int32_t ret = MockBluetooth::interface->RegisterBroadcaster(&advld, &g_softbusBcBleCbTest);
@@ -229,12 +241,12 @@ HWTEST_F(SoftbusBleGattTest, TestSoftbusRegisterAdvCb002, TestSize.Level1)
 }
 
 /**
- * @tc.name: TestSoftbusRegisterAdvCb003
+ * @tc.name: SoftbusRegisterAdvCb003
  * @tc.desc: Test SoftbusRegisterAdvCb will return OHOS_BT_STATUS_FAIL
  * @tc.type: FUNC
  * @tc.require: NONE
  */
-HWTEST_F(SoftbusBleGattTest, TestSoftbusRegisterAdvCb003, TestSize.Level1)
+HWTEST_F(SoftbusBleGattTest, SoftbusRegisterAdvCb003, TestSize.Level1)
 {
     MockBluetooth mocker;
     int32_t ret = MockBluetooth::interface->Init();
@@ -250,12 +262,12 @@ HWTEST_F(SoftbusBleGattTest, TestSoftbusRegisterAdvCb003, TestSize.Level1)
 }
 
 /**
- * @tc.name: TestSoftbusRegisterAdvCb004
+ * @tc.name: SoftbusRegisterAdvCb004
  * @tc.desc: Test SoftbusRegisterAdvCb will return SOFTBUS_OK when BleGattRegisterCallbacks
  * @tc.type: FUNC
  * @tc.require: NONE
  */
-HWTEST_F(SoftbusBleGattTest, TestSoftbusRegisterAdvCb004, TestSize.Level1)
+HWTEST_F(SoftbusBleGattTest, SoftbusRegisterAdvCb004, TestSize.Level1)
 {
     MockBluetooth mocker;
     int32_t ret = MockBluetooth::interface->Init();
@@ -270,12 +282,12 @@ HWTEST_F(SoftbusBleGattTest, TestSoftbusRegisterAdvCb004, TestSize.Level1)
 }
 
 /**
- * @tc.name: TestSoftbusUnRegisterAdvCb001
+ * @tc.name: SoftbusUnRegisterAdvCb001
  * @tc.desc: Test SoftbusUnRegisterAdvCb will return SOFTBUS_INVALID_PARAM when given invalid param
  * @tc.type: FUNC
  * @tc.require: NONE
  */
-HWTEST_F(SoftbusBleGattTest, TestSoftbusUnRegisterAdvCb001, TestSize.Level1)
+HWTEST_F(SoftbusBleGattTest, SoftbusUnRegisterAdvCb001, TestSize.Level1)
 {
     int32_t ret = MockBluetooth::interface->UnRegisterBroadcaster(GATT_ADV_MAX_NUM);
     EXPECT_EQ(ret, SOFTBUS_INVALID_PARAM);
@@ -286,12 +298,12 @@ HWTEST_F(SoftbusBleGattTest, TestSoftbusUnRegisterAdvCb001, TestSize.Level1)
 }
 
 /**
- * @tc.name: TestSoftbusUnRegisterAdvCb002
+ * @tc.name: SoftbusUnRegisterAdvCb002
  * @tc.desc: Test SoftbusUnRegisterAdvCb will return SOFTBUS_LOCK_ERR when never called init
  * @tc.type: FUNC
  * @tc.require: NONE
  */
-HWTEST_F(SoftbusBleGattTest, TestSoftbusUnRegisterAdvCb002, TestSize.Level1)
+HWTEST_F(SoftbusBleGattTest, SoftbusUnRegisterAdvCb002, TestSize.Level1)
 {
     int32_t advld = 0;
     int32_t ret = MockBluetooth::interface->UnRegisterBroadcaster(advld);
@@ -299,12 +311,12 @@ HWTEST_F(SoftbusBleGattTest, TestSoftbusUnRegisterAdvCb002, TestSize.Level1)
 }
 
 /**
- * @tc.name: TestSoftbusUnRegisterAdvCb003
+ * @tc.name: SoftbusUnRegisterAdvCb003
  * @tc.desc: Test SoftbusUnRegisterAdvCb will return SOFTBUS_OK when given vaild param
  * @tc.type: FUNC
  * @tc.require: NONE
  */
-HWTEST_F(SoftbusBleGattTest, TestSoftbusUnRegisterAdvCb003, TestSize.Level1)
+HWTEST_F(SoftbusBleGattTest, SoftbusUnRegisterAdvCb003, TestSize.Level1)
 {
     int32_t ret = MockBluetooth::interface->Init();
     EXPECT_EQ(ret, SOFTBUS_OK);
@@ -321,38 +333,44 @@ HWTEST_F(SoftbusBleGattTest, TestSoftbusUnRegisterAdvCb003, TestSize.Level1)
 }
 
 /**
- * @tc.name: TestSoftbusRegisterScanCb001
+ * @tc.name: SoftbusRegisterScanCb001
  * @tc.desc: Test SoftbusRegisterScanCb will return SOFTBUS_INVALID_PARAM when given invalid param
  * @tc.type: FUNC
  * @tc.require: NONE
  */
-HWTEST_F(SoftbusBleGattTest, TestSoftbusRegisterScanCb001, TestSize.Level1)
+HWTEST_F(SoftbusBleGattTest, SoftbusRegisterScanCb001, TestSize.Level1)
 {
     int32_t ret = MockBluetooth::interface->RegisterScanListener(nullptr, nullptr);
     EXPECT_EQ(ret, SOFTBUS_INVALID_PARAM);
 }
 
 // 充当参数
-static void FakeScanCallback(int32_t adapterScanld, int32_t status)
+static void FakeScanCallback(BroadcastProtocol protocol, int32_t adapterScanld, int32_t status)
 {
+    (void)protocol;
     (void)adapterScanld;
     (void)status;
 }
 
-static void FakeReportScanDataCallback(int32_t adapterScanld, const SoftBusBcScanResult *reportData)
+static void FakeReportScanDataCallback(BroadcastProtocol protocol,
+    int32_t adapterScanld, const SoftBusBcScanResult *reportData)
 {
+    (void)protocol;
     (void)adapterScanld;
     (void)reportData;
 }
 
-static void FakeScanStateChanged(int32_t resultCode, bool isStartScan)
+static void FakeScanStateChanged(BroadcastProtocol protocol, int32_t resultCode, bool isStartScan)
 {
+    (void)protocol;
     (void)resultCode;
     (void)isStartScan;
 }
 
-static void FakeLpDeviceInfoCallback(const SoftbusBroadcastUuid *uuid, int32_t type, uint8_t *data, uint32_t dataSize)
+static void FakeLpDeviceInfoCallback(BroadcastProtocol protocol,
+    const SoftbusBroadcastUuid *uuid, int32_t type, uint8_t *data, uint32_t dataSize)
 {
+    (void)protocol;
     (void)uuid;
     (void)type;
     (void)data;
@@ -368,12 +386,12 @@ static SoftbusScanCallback g_softbusBcBleScanCbTest = {
 };
 
 /**
- * @tc.name: TestSoftbusRegisterScanCb002
+ * @tc.name: SoftbusRegisterScanCb002
  * @tc.desc: Test SoftbusRegisterScanCb will return SOFTBUS_LOCK_ERR when never called init
  * @tc.type: FUNC
  * @tc.require: NONE
  */
-HWTEST_F(SoftbusBleGattTest, TestSoftbusRegisterScanCb002, TestSize.Level1)
+HWTEST_F(SoftbusBleGattTest, SoftbusRegisterScanCb002, TestSize.Level1)
 {
     int32_t scannerld = 0;
     int32_t ret = MockBluetooth::interface->RegisterScanListener(&scannerld, &g_softbusBcBleScanCbTest);
@@ -381,12 +399,12 @@ HWTEST_F(SoftbusBleGattTest, TestSoftbusRegisterScanCb002, TestSize.Level1)
 }
 
 /**
- * @tc.name: TestSoftbusRegisterScanCb003
+ * @tc.name: SoftbusRegisterScanCb003
  * @tc.desc: Test SoftbusRegisterScanCb will return OHOS_BT_STATUS_FAIL
  * @tc.type: FUNC
  * @tc.require: NONE
  */
-HWTEST_F(SoftbusBleGattTest, TestSoftbusRegisterScanCb003, TestSize.Level1)
+HWTEST_F(SoftbusBleGattTest, SoftbusRegisterScanCb003, TestSize.Level1)
 {
     MockBluetooth mocker;
     int32_t ret = MockBluetooth::interface->Init();
@@ -402,12 +420,12 @@ HWTEST_F(SoftbusBleGattTest, TestSoftbusRegisterScanCb003, TestSize.Level1)
 }
 
 /**
- * @tc.name: TestSoftbusRegisterScanCb004
+ * @tc.name: SoftbusRegisterScanCb004
  * @tc.desc: Test SoftbusRegisterScanCb will return SOFTBUS_BC_ADAPTER_REGISTER_FAIL when scan channel are all uesd
  * @tc.type: FUNC
  * @tc.require: NONE
  */
-HWTEST_F(SoftbusBleGattTest, TestSoftbusRegisterScanCb004, TestSize.Level1)
+HWTEST_F(SoftbusBleGattTest, SoftbusRegisterScanCb004, TestSize.Level1)
 {
     MockBluetooth mocker;
     int32_t ret = MockBluetooth::interface->Init();
@@ -415,11 +433,11 @@ HWTEST_F(SoftbusBleGattTest, TestSoftbusRegisterScanCb004, TestSize.Level1)
 
     int32_t scannerld = 0;
     EXPECT_CALL(mocker, BleRegisterScanCallbacks).WillRepeatedly(Return(OHOS_BT_STATUS_SUCCESS));
-    ret = MockBluetooth::interface->RegisterScanListener(&scannerld, &g_softbusBcBleScanCbTest);
-    EXPECT_EQ(ret, OHOS_BT_STATUS_SUCCESS);
 
-    ret = MockBluetooth::interface->RegisterScanListener(&scannerld, &g_softbusBcBleScanCbTest);
-    EXPECT_EQ(ret, OHOS_BT_STATUS_SUCCESS);
+    for (size_t i = 0; i < GATT_SCAN_MAX_NUM; i++) {
+        ret = MockBluetooth::interface->RegisterScanListener(&scannerld, &g_softbusBcBleScanCbTest);
+        EXPECT_EQ(ret, OHOS_BT_STATUS_SUCCESS);
+    }
 
     ret = MockBluetooth::interface->RegisterScanListener(&scannerld, &g_softbusBcBleScanCbTest);
     EXPECT_EQ(ret, SOFTBUS_BC_ADAPTER_REGISTER_FAIL);
@@ -429,12 +447,12 @@ HWTEST_F(SoftbusBleGattTest, TestSoftbusRegisterScanCb004, TestSize.Level1)
 }
 
 /**
- * @tc.name: TestSoftbusUnRegisterScanCb001
+ * @tc.name: SoftbusUnRegisterScanCb001
  * @tc.desc: Test SoftbusUnRegisterScanCb will return SOFTBUS_INVALID_PARAM when given invalid param
  * @tc.type: FUNC
  * @tc.require: NONE
  */
-HWTEST_F(SoftbusBleGattTest, TestSoftbusUnRegisterScanCb001, TestSize.Level1)
+HWTEST_F(SoftbusBleGattTest, SoftbusUnRegisterScanCb001, TestSize.Level1)
 {
     int32_t scannerld = -1;
     int32_t ret = MockBluetooth::interface->UnRegisterScanListener(GATT_SCAN_MAX_NUM);
@@ -445,12 +463,12 @@ HWTEST_F(SoftbusBleGattTest, TestSoftbusUnRegisterScanCb001, TestSize.Level1)
 }
 
 /**
- * @tc.name: TestSoftbusUnRegisterScanCb002
+ * @tc.name: SoftbusUnRegisterScanCb002
  * @tc.desc: Test SoftbusUnRegisterScanCb will return SOFTBUS_LOCK_ERR when never called init
  * @tc.type: FUNC
  * @tc.require: NONE
  */
-HWTEST_F(SoftbusBleGattTest, TestSoftbusUnRegisterScanCb002, TestSize.Level1)
+HWTEST_F(SoftbusBleGattTest, SoftbusUnRegisterScanCb002, TestSize.Level1)
 {
     int32_t scannerld = 0;
     int32_t ret = MockBluetooth::interface->UnRegisterScanListener(scannerld);
@@ -458,12 +476,12 @@ HWTEST_F(SoftbusBleGattTest, TestSoftbusUnRegisterScanCb002, TestSize.Level1)
 }
 
 /**
- * @tc.name: TestSoftbusUnRegisterScanCb003
+ * @tc.name: SoftbusUnRegisterScanCb003
  * @tc.desc: Test SoftbusUnRegisterScanCb will return SOFTBUS_OK when successfully unregistered
  * @tc.type: FUNC
  * @tc.require: NONE
  */
-HWTEST_F(SoftbusBleGattTest, TestSoftbusUnRegisterScanCb003, TestSize.Level1)
+HWTEST_F(SoftbusBleGattTest, SoftbusUnRegisterScanCb003, TestSize.Level1)
 {
     MockBluetooth mocker;
     int32_t ret = MockBluetooth::interface->Init();
@@ -482,19 +500,18 @@ HWTEST_F(SoftbusBleGattTest, TestSoftbusUnRegisterScanCb003, TestSize.Level1)
 }
 
 /**
- * @tc.name: TestSoftbusStartAdv001
+ * @tc.name: SoftbusStartAdv001
  * @tc.desc: Test SoftbusStartAdv will return SOFTBUS_INVALID_PARAM when given invalid param
  * @tc.type: FUNC
  * @tc.require: NONE
  */
-HWTEST_F(SoftbusBleGattTest, TestSoftbusStartAdv001, TestSize.Level1)
+HWTEST_F(SoftbusBleGattTest, SoftbusStartAdv001, TestSize.Level1)
 {
     int32_t advld = 0;
     int32_t ret = MockBluetooth::interface->StartBroadcasting(advld, nullptr, nullptr);
     EXPECT_EQ(ret, SOFTBUS_INVALID_PARAM);
 }
 
-// SoftbusBroadcastData类型的数据填充
 const char ADV_DATA_EXAMPLE[] = {
     0x02,
     0x01,
@@ -527,44 +544,46 @@ const char ADV_DATA_EXAMPLE[] = {
 };
 const unsigned char SCAN_RSP_DATA_EXAMPLE[] = { 0x03, 0xFF, 0x7D, 0x02 };
 
-/**
- * @tc.name: TestSoftbusStartAdv002
- * @tc.desc: Test SoftbusStartAdv will return SOFTBUS_LOCK_ERR when never called init
- * @tc.type: FUNC
- * @tc.require: NONE
- */
-HWTEST_F(SoftbusBleGattTest, TestSoftbusStartAdv002, TestSize.Level1)
+static SoftbusBroadcastData BuildBcData(void)
 {
-    int32_t advld = 0;
-    SoftbusBroadcastParam params = {};
     SoftbusBroadcastData data = {};
     data.bcData.payloadLen = sizeof(ADV_DATA_EXAMPLE);
     data.bcData.payload = (uint8_t *)ADV_DATA_EXAMPLE;
     data.rspData.payloadLen = sizeof(SCAN_RSP_DATA_EXAMPLE);
     data.rspData.payload = (uint8_t *)SCAN_RSP_DATA_EXAMPLE;
+    return data;
+}
+
+/**
+ * @tc.name: SoftbusStartAdv002
+ * @tc.desc: Test SoftbusStartAdv will return SOFTBUS_LOCK_ERR when never called init
+ * @tc.type: FUNC
+ * @tc.require: NONE
+ */
+HWTEST_F(SoftbusBleGattTest, SoftbusStartAdv002, TestSize.Level1)
+{
+    int32_t advld = 0;
+    SoftbusBroadcastParam params = {};
+    SoftbusBroadcastData data = BuildBcData();
 
     int32_t ret = MockBluetooth::interface->StartBroadcasting(advld, &params, &data);
     EXPECT_EQ(ret, SOFTBUS_LOCK_ERR);
 }
 
 /**
- * @tc.name: TestSoftbusStartAdv003
+ * @tc.name: SoftbusStartAdv003
  * @tc.desc: Test SoftbusStartAdv will return SOFTBUS_BC_ADAPTER_NOT_IN_USED_FAIL when advld is not used
  * @tc.type: FUNC
  * @tc.require: NONE
  */
-HWTEST_F(SoftbusBleGattTest, TestSoftbusStartAdv003, TestSize.Level1)
+HWTEST_F(SoftbusBleGattTest, SoftbusStartAdv003, TestSize.Level1)
 {
     int32_t ret = MockBluetooth::interface->Init();
     EXPECT_EQ(ret, SOFTBUS_OK);
 
     int32_t advld = 0;
     SoftbusBroadcastParam params = {};
-    SoftbusBroadcastData data = {};
-    data.bcData.payloadLen = sizeof(ADV_DATA_EXAMPLE);
-    data.bcData.payload = (uint8_t *)ADV_DATA_EXAMPLE;
-    data.rspData.payloadLen = sizeof(SCAN_RSP_DATA_EXAMPLE);
-    data.rspData.payload = (uint8_t *)SCAN_RSP_DATA_EXAMPLE;
+    SoftbusBroadcastData data = BuildBcData();
 
     ret = MockBluetooth::interface->StartBroadcasting(GATT_ADV_MAX_NUM, &params, &data);
     EXPECT_EQ(ret, SOFTBUS_BC_ADAPTER_NOT_IN_USED_FAIL);
@@ -577,12 +596,39 @@ HWTEST_F(SoftbusBleGattTest, TestSoftbusStartAdv003, TestSize.Level1)
 }
 
 /**
- * @tc.name: TestSoftbusStopAdv001
+ * @tc.name: SoftbusStartAdv004
+ * @tc.desc: Test SoftbusStartAdv will return SOFTBUS_ALREADY_TRIGGERED
+ * @tc.type: FUNC
+ * @tc.require: NONE
+ */
+HWTEST_F(SoftbusBleGattTest, SoftbusStartAdv004, TestSize.Level1)
+{
+    MockBluetooth mocker;
+    int32_t ret = MockBluetooth::interface->Init();
+    EXPECT_EQ(ret, SOFTBUS_OK);
+
+    int32_t advld = 0;
+    ret = MockBluetooth::interface->RegisterBroadcaster(&advld, &g_softbusBcBleCbTest);
+    EXPECT_EQ(ret, SOFTBUS_OK);
+
+    EXPECT_CALL(mocker, BleStartAdvEx).WillRepeatedly(Return(OHOS_BT_STATUS_SUCCESS));
+    SoftbusBroadcastParam params = {};
+    SoftbusBroadcastData data = BuildBcData();
+
+    ret = MockBluetooth::interface->StartBroadcasting(advld, &params, &data);
+    ret = MockBluetooth::interface->StartBroadcasting(advld, &params, &data);
+    EXPECT_EQ(ret, SOFTBUS_ALREADY_TRIGGERED);
+    ret = MockBluetooth::interface->DeInit();
+    EXPECT_EQ(ret, SOFTBUS_OK);
+}
+
+/**
+ * @tc.name: SoftbusStopAdv001
  * @tc.desc: Test SoftbusStopAdv will return SOFTBUS_LOCK_ERR when never called lnit
  * @tc.type: FUNC
  * @tc.require: NONE
  */
-HWTEST_F(SoftbusBleGattTest, TestSoftbusStopAdv001, TestSize.Level1)
+HWTEST_F(SoftbusBleGattTest, SoftbusStopAdv001, TestSize.Level1)
 {
     int32_t advld = 0;
     int32_t ret = MockBluetooth::interface->StopBroadcasting(advld);
@@ -590,12 +636,12 @@ HWTEST_F(SoftbusBleGattTest, TestSoftbusStopAdv001, TestSize.Level1)
 }
 
 /**
- * @tc.name: TestSoftbusStopAdv002
+ * @tc.name: SoftbusStopAdv002
  * @tc.desc: Test SoftbusStopAdv will return SOFTBUS_BC_ADAPTER_NOT_IN_USED_FAIL when advld never registed
  * @tc.type: FUNC
  * @tc.require: NONE
  */
-HWTEST_F(SoftbusBleGattTest, TestSoftbusStopAdv002, TestSize.Level1)
+HWTEST_F(SoftbusBleGattTest, SoftbusStopAdv002, TestSize.Level1)
 {
     int32_t ret = MockBluetooth::interface->Init();
     EXPECT_EQ(ret, SOFTBUS_OK);
@@ -608,12 +654,12 @@ HWTEST_F(SoftbusBleGattTest, TestSoftbusStopAdv002, TestSize.Level1)
 }
 
 /**
- * @tc.name: TestSoftbusStopAdv004
+ * @tc.name: SoftbusStopAdv004
  * @tc.desc: Test SoftbusStopAdv will return SOFTBUS_OK when advld has been registed
  * @tc.type: FUNC
  * @tc.require: NONE
  */
-HWTEST_F(SoftbusBleGattTest, TestSoftbusStopAdv004, TestSize.Level1)
+HWTEST_F(SoftbusBleGattTest, SoftbusStopAdv004, TestSize.Level1)
 {
     MockBluetooth mocker;
     int32_t ret = MockBluetooth::interface->Init();
@@ -633,12 +679,12 @@ HWTEST_F(SoftbusBleGattTest, TestSoftbusStopAdv004, TestSize.Level1)
 }
 
 /**
- * @tc.name: TestSoftbusStopAdv005
+ * @tc.name: SoftbusStopAdv005
  * @tc.desc: Test SoftbusStopAdv will return SOFTBUS_OK when advld has been stopped
  * @tc.type: FUNC
  * @tc.require: NONE
  */
-HWTEST_F(SoftbusBleGattTest, TestSoftbusStopAdv005, TestSize.Level1)
+HWTEST_F(SoftbusBleGattTest, SoftbusStopAdv005, TestSize.Level1)
 {
     MockBluetooth mocker;
     int32_t ret = MockBluetooth::interface->Init();
@@ -661,12 +707,12 @@ HWTEST_F(SoftbusBleGattTest, TestSoftbusStopAdv005, TestSize.Level1)
 }
 
 /**
- * @tc.name: TestSoftbusSetAdvData001
+ * @tc.name: SoftbusSetAdvData001
  * @tc.desc: Test SoftbusSetAdvData will return SOFTBUS_INVALID_PARAM when given invalid param
  * @tc.type: FUNC
  * @tc.require: NONE
  */
-HWTEST_F(SoftbusBleGattTest, TestSoftbusSetAdvData001, TestSize.Level1)
+HWTEST_F(SoftbusBleGattTest, SoftbusSetAdvData001, TestSize.Level1)
 {
     int32_t advld = 0;
     int32_t ret = MockBluetooth::interface->SetBroadcastingData(advld, nullptr);
@@ -674,41 +720,32 @@ HWTEST_F(SoftbusBleGattTest, TestSoftbusSetAdvData001, TestSize.Level1)
 }
 
 /**
- * @tc.name: TestSoftbusSetAdvData002
+ * @tc.name: SoftbusSetAdvData002
  * @tc.desc: Test SoftbusSetAdvData will return SOFTBUS_LOCK_ERR when never lnit
  * @tc.type: FUNC
  * @tc.require: NONE
  */
-HWTEST_F(SoftbusBleGattTest, TestSoftbusSetAdvData002, TestSize.Level1)
+HWTEST_F(SoftbusBleGattTest, SoftbusSetAdvData002, TestSize.Level1)
 {
     int32_t advld = 0;
-    SoftbusBroadcastData data = {};
-    data.bcData.payloadLen = sizeof(ADV_DATA_EXAMPLE);
-    data.bcData.payload = (uint8_t *)ADV_DATA_EXAMPLE;
-    data.rspData.payloadLen = sizeof(SCAN_RSP_DATA_EXAMPLE);
-    data.rspData.payload = (uint8_t *)SCAN_RSP_DATA_EXAMPLE;
+    SoftbusBroadcastData data = BuildBcData();
 
     int32_t ret = MockBluetooth::interface->SetBroadcastingData(advld, &data);
     EXPECT_EQ(ret, SOFTBUS_LOCK_ERR);
 }
 
 /**
- * @tc.name: TestSoftbusSetAdvData003
+ * @tc.name: SoftbusSetAdvData003
  * @tc.desc: Test SoftbusSetAdvData will return SOFTBUS_BC_ADAPTER_NOT_IN_USED_FAIL when advld is not used
  * @tc.type: FUNC
  * @tc.require: NONE
  */
-HWTEST_F(SoftbusBleGattTest, TestSoftbusSetAdvData003, TestSize.Level1)
+HWTEST_F(SoftbusBleGattTest, SoftbusSetAdvData003, TestSize.Level1)
 {
     int32_t ret = MockBluetooth::interface->Init();
     EXPECT_EQ(ret, SOFTBUS_OK);
 
-    SoftbusBroadcastData data = {};
-    data.bcData.payloadLen = sizeof(ADV_DATA_EXAMPLE);
-    data.bcData.payload = (uint8_t *)ADV_DATA_EXAMPLE;
-    data.rspData.payloadLen = sizeof(SCAN_RSP_DATA_EXAMPLE);
-    data.rspData.payload = (uint8_t *)SCAN_RSP_DATA_EXAMPLE;
-
+    SoftbusBroadcastData data = BuildBcData();
     ret = MockBluetooth::interface->SetBroadcastingData(GATT_ADV_MAX_NUM, &data);
     EXPECT_EQ(ret, SOFTBUS_BC_ADAPTER_NOT_IN_USED_FAIL);
 
@@ -717,12 +754,12 @@ HWTEST_F(SoftbusBleGattTest, TestSoftbusSetAdvData003, TestSize.Level1)
 }
 
 /**
- * @tc.name: TestSoftbusSetAdvData005
+ * @tc.name: SoftbusSetAdvData005
  * @tc.desc: Test SoftbusSetAdvData will return SOFTBUS_ALREADY_TRIGGERED when broadcast has already registed
  * @tc.type: FUNC
  * @tc.require: NONE
  */
-HWTEST_F(SoftbusBleGattTest, TestSoftbusSetAdvData005, TestSize.Level1)
+HWTEST_F(SoftbusBleGattTest, SoftbusSetAdvData005, TestSize.Level1)
 {
     MockBluetooth mocker;
     int32_t ret = MockBluetooth::interface->Init();
@@ -733,12 +770,7 @@ HWTEST_F(SoftbusBleGattTest, TestSoftbusSetAdvData005, TestSize.Level1)
     ret = MockBluetooth::interface->RegisterBroadcaster(&advld, &g_softbusBcBleCbTest);
     EXPECT_EQ(ret, SOFTBUS_OK);
 
-    SoftbusBroadcastData data = {};
-    data.bcData.payloadLen = sizeof(ADV_DATA_EXAMPLE);
-    data.bcData.payload = (uint8_t *)ADV_DATA_EXAMPLE;
-    data.rspData.payloadLen = sizeof(SCAN_RSP_DATA_EXAMPLE);
-    data.rspData.payload = (uint8_t *)SCAN_RSP_DATA_EXAMPLE;
-
+    SoftbusBroadcastData data = BuildBcData();
     ret = MockBluetooth::interface->SetBroadcastingData(advld, &data);
     EXPECT_EQ(ret, SOFTBUS_ALREADY_TRIGGERED);
 
@@ -747,25 +779,27 @@ HWTEST_F(SoftbusBleGattTest, TestSoftbusSetAdvData005, TestSize.Level1)
 }
 
 /**
- * @tc.name: TestSoftbusUpdateAdvData001
+ * @tc.name: SoftbusUpdateAdvData001
  * @tc.desc: Test SoftbusUpdateAdvData will return SOFTBUS_LOCK_ERR when never called init
  * @tc.type: FUNC
  * @tc.require: NONE
  */
-HWTEST_F(SoftbusBleGattTest, TestSoftbusUpdateAdvData001, TestSize.Level1)
+HWTEST_F(SoftbusBleGattTest, SoftbusUpdateAdvData001, TestSize.Level1)
 {
     int32_t advld = 0;
-    int32_t ret = MockBluetooth::interface->UpdateBroadcasting(advld, nullptr, nullptr);
+    SoftbusBroadcastParam param;
+    SoftbusBroadcastData packet;
+    int32_t ret = MockBluetooth::interface->UpdateBroadcasting(advld, &param, &packet);
     EXPECT_EQ(ret, SOFTBUS_LOCK_ERR);
 }
 
 /**
- * @tc.name: TestSoftbusUpdateAdvData002
+ * @tc.name: SoftbusUpdateAdvData002
  * @tc.desc: Test SoftbusUpdateAdvData will return SOFTBUS_INVALID_PARAM when given invalid params
  * @tc.type: FUNC
  * @tc.require: NONE
  */
-HWTEST_F(SoftbusBleGattTest, TestSoftbusUpdateAdvData002, TestSize.Level1)
+HWTEST_F(SoftbusBleGattTest, SoftbusUpdateAdvData002, TestSize.Level1)
 {
     MockBluetooth mocker;
     int32_t ret = MockBluetooth::interface->Init();
@@ -785,12 +819,12 @@ HWTEST_F(SoftbusBleGattTest, TestSoftbusUpdateAdvData002, TestSize.Level1)
 }
 
 /**
- * @tc.name: TestSoftbusStartScan001
+ * @tc.name: SoftbusStartScan001
  * @tc.desc: Test SoftbusStartScan will return SOFTBUS_INVALID_PARAM when given invalid params
  * @tc.type: FUNC
  * @tc.require: NONE
  */
-HWTEST_F(SoftbusBleGattTest, TestSoftbusStartScan001, TestSize.Level1)
+HWTEST_F(SoftbusBleGattTest, SoftbusStartScan001, TestSize.Level1)
 {
     int32_t scannerld = 0;
     int32_t ret = MockBluetooth::interface->StartScan(scannerld, nullptr, nullptr, 0);
@@ -798,12 +832,12 @@ HWTEST_F(SoftbusBleGattTest, TestSoftbusStartScan001, TestSize.Level1)
 }
 
 /**
- * @tc.name: TestSoftbusStartScan002
+ * @tc.name: SoftbusStartScan002
  * @tc.desc: Test SoftbusStartScan will return SOFTBUS_LOCK_ERR when never called init
  * @tc.type: FUNC
  * @tc.require: NONE
  */
-HWTEST_F(SoftbusBleGattTest, TestSoftbusStartScan002, TestSize.Level1)
+HWTEST_F(SoftbusBleGattTest, SoftbusStartScan002, TestSize.Level1)
 {
     SoftBusBcScanParams scanParam = {
         .scanInterval = SOFTBUS_BC_SCAN_WINDOW_P10,
@@ -828,12 +862,12 @@ HWTEST_F(SoftbusBleGattTest, TestSoftbusStartScan002, TestSize.Level1)
 }
 
 /**
- * @tc.name: TestSoftbusStartScan003
+ * @tc.name: SoftbusStartScan003
  * @tc.desc: Test SoftbusStartScan will return SOFTBUS_BC_ADAPTER_NOT_IN_USED_FAIL when given invalid params scannerld
  * @tc.type: FUNC
  * @tc.require: NONE
  */
-HWTEST_F(SoftbusBleGattTest, TestSoftbusStartScan003, TestSize.Level1)
+HWTEST_F(SoftbusBleGattTest, SoftbusStartScan003, TestSize.Level1)
 {
     int32_t ret = MockBluetooth::interface->Init();
     EXPECT_EQ(ret, SOFTBUS_OK);
@@ -911,12 +945,12 @@ HWTEST_F(SoftbusBleGattTest, SoftbusGetBroadcastHandle002, TestSize.Level1)
 }
 
 /**
- * @tc.name: SoftbusEnableSyncDataToLp
+ * @tc.name: SoftbusEnableSyncDataToLp001
  * @tc.desc: Test SoftbusEnableSyncDataToLp is  SOFTBUS_OK
  * @tc.type: FUNC
  * @tc.require: NONE
  */
-HWTEST_F(SoftbusBleGattTest, SoftbusEnableSyncDataToLp, TestSize.Level1)
+HWTEST_F(SoftbusBleGattTest, SoftbusEnableSyncDataToLp001, TestSize.Level1)
 {
     MockBluetooth mocker;
     int32_t ret = MockBluetooth::interface->Init();
@@ -931,12 +965,12 @@ HWTEST_F(SoftbusBleGattTest, SoftbusEnableSyncDataToLp, TestSize.Level1)
 }
 
 /**
- * @tc.name: SoftbusDisableSyncDataToLp
+ * @tc.name: DisableSyncDataToLpDevice001
  * @tc.desc: Test DisableSyncDataToLpDevice is  SOFTBUS_OK
  * @tc.type: FUNC
  * @tc.require: NONE
  */
-HWTEST_F(SoftbusBleGattTest, DisableSyncDataToLpDevice, TestSize.Level1)
+HWTEST_F(SoftbusBleGattTest, DisableSyncDataToLpDevice001, TestSize.Level1)
 {
     MockBluetooth mocker;
     int32_t ret = MockBluetooth::interface->Init();
@@ -970,12 +1004,12 @@ HWTEST_F(SoftbusBleGattTest, SoftbusSetScanReportChanToLp001, TestSize.Level1)
 }
 
 /**
- * @tc.name: SoftbusSetLpAdvParam
+ * @tc.name: SoftbusSetLpAdvParam001
  * @tc.desc: Test SoftbusSetLpAdvParam is  SOFTBUS_OK
  * @tc.type: FUNC
  * @tc.require: NONE
  */
-HWTEST_F(SoftbusBleGattTest, SoftbusSetLpAdvParam, TestSize.Level1)
+HWTEST_F(SoftbusBleGattTest, SoftbusSetLpAdvParam001, TestSize.Level1)
 {
     MockBluetooth mocker;
     int32_t ret = MockBluetooth::interface->Init();
@@ -1015,40 +1049,613 @@ HWTEST_F(SoftbusBleGattTest, SoftbusStopScan001, TestSize.Level1)
 }
 
 /**
- * @tc.name: TestWrapperAdvEnableCb
- * @tc.desc: Test WrapperAdvEnableCb
+ * @tc.name: WrapperAdvEnableCb001
+ * @tc.desc: WrapperAdvEnableCb will traverse when not Regist, will traverse when btAdvId is invalid
+    will make true isAdvertising when BtStatus=OHOS_BT_STATUS_SUCCESS,
+    will make false isAdvertising when BtStatus=OHOS_BT_STATUS_FAIL
  * @tc.type: FUNC
  * @tc.require: NONE
  */
-HWTEST_F(SoftbusBleGattTest, TestWrapperAdvEnableCb, TestSize.Level1)
+HWTEST_F(SoftbusBleGattTest, WrapperAdvEnableCb001, TestSize.Level1)
 {
-    DISC_LOGI(DISC_TEST, "TestWrapperAdvEnableCb enter");
-    MockBluetooth mocker;
+    DISC_LOGI(DISC_TEST, "WrapperAdvEnableCb001 enter");
+    MockBluetooth mock;
+    ASSERT_NE(MockBluetooth::interface, nullptr);
     int32_t ret = MockBluetooth::interface->Init();
     EXPECT_EQ(ret, SOFTBUS_OK);
 
-    int32_t advld = 0;
-
+    SoftbusBleGattTest::g_adapterBcld = -1;
+    SoftbusBleGattTest::g_status = -1;
+    int32_t advld = -1;
+    int32_t invalidBtAdvId = -1;
+    MockBluetooth::btGattCallback->advEnableCb(invalidBtAdvId, OHOS_BT_STATUS_SUCCESS);
+    EXPECT_FALSE(SoftbusBleGattTest::g_adapterBcld == advld && SoftbusBleGattTest::g_status == OHOS_BT_STATUS_SUCCESS);
     ret = MockBluetooth::interface->RegisterBroadcaster(&advld, &g_softbusBcBleCbTest);
     EXPECT_EQ(ret, SOFTBUS_OK);
+    DISC_LOGI(DISC_TEST, "advld = %{public}d", advld);
 
-    MockBluetooth::btGattCallback->advDataCb(advld, 1);
+    SoftbusBroadcastParam params = {};
+    SoftbusBroadcastData data = BuildBcData();
+    EXPECT_CALL(mock, BleStartAdvEx).WillRepeatedly(MockBluetooth::ActionBleStartAdvEx);
+    ret = MockBluetooth::interface->StartBroadcasting(advld, &params, &data);
+    EXPECT_EQ(ret, SOFTBUS_OK);
+    MockBluetooth::btGattCallback->advEnableCb(invalidBtAdvId, OHOS_BT_STATUS_SUCCESS);
+    EXPECT_FALSE(SoftbusBleGattTest::g_adapterBcld == advld && SoftbusBleGattTest::g_status == OHOS_BT_STATUS_SUCCESS);
 
-    MockBluetooth::btGattCallback->advUpdateCb(advld, 1);
+    MockBluetooth::btGattCallback->advEnableCb(MockBluetooth::g_btAdvId, OHOS_BT_STATUS_FAIL);
+    EXPECT_FALSE(SoftbusBleGattTest::g_adapterBcld == advld && SoftbusBleGattTest::g_status == OHOS_BT_STATUS_SUCCESS);
 
+    MockBluetooth::interface->StopBroadcasting(advld);
+    MockBluetooth::interface->UnRegisterBroadcaster(advld);
     ret = MockBluetooth::interface->DeInit();
     EXPECT_EQ(ret, SOFTBUS_OK);
 }
 
 /**
- * @tc.name: TestWrapperScanStateChangeCb0
- * @tc.desc: Test WrapperScanStateChangeCb0
+ * @tc.name: WrapperAdvEnableCb002
+ * @tc.desc: WrapperAdvEnableCb will keep traverse when advCallback.OnStartBroadcastingCallback=nullptr
  * @tc.type: FUNC
  * @tc.require: NONE
  */
-HWTEST_F(SoftbusBleGattTest, TestWrapperScanStateChangeCb0, TestSize.Level1)
+HWTEST_F(SoftbusBleGattTest, WrapperAdvEnableCb002, TestSize.Level1)
 {
-    DISC_LOGI(DISC_TEST, "TestWrapperAdvEnableCb enter");
+    DISC_LOGI(DISC_TEST, "WrapperAdvEnableCb002 enter");
+    MockBluetooth mock;
+    ASSERT_NE(MockBluetooth::interface, nullptr);
+    int32_t ret = MockBluetooth::interface->Init();
+    EXPECT_EQ(ret, SOFTBUS_OK);
+
+    SoftbusBleGattTest::g_adapterBcld = -1;
+    SoftbusBleGattTest::g_status = -1;
+    int32_t advld = -1;
+    g_softbusBcBleCbTest.OnStartBroadcastingCallback = nullptr;
+    ret = MockBluetooth::interface->RegisterBroadcaster(&advld, &g_softbusBcBleCbTest);
+    EXPECT_EQ(ret, SOFTBUS_OK);
+    DISC_LOGI(DISC_TEST, "advld = %{public}d", advld);
+
+    SoftbusBroadcastParam params = {};
+    SoftbusBroadcastData data = BuildBcData();
+    EXPECT_CALL(mock, BleStartAdvEx).WillRepeatedly(MockBluetooth::ActionBleStartAdvEx);
+    ret = MockBluetooth::interface->StartBroadcasting(advld, &params, &data);
+    EXPECT_EQ(ret, SOFTBUS_OK);
+    MockBluetooth::btGattCallback->advEnableCb(MockBluetooth::g_btAdvId, OHOS_BT_STATUS_SUCCESS);
+    EXPECT_FALSE(SoftbusBleGattTest::g_adapterBcld == advld && SoftbusBleGattTest::g_status == OHOS_BT_STATUS_SUCCESS);
+
+    MockBluetooth::interface->StopBroadcasting(advld);
+    MockBluetooth::interface->UnRegisterBroadcaster(advld);
+
+    g_softbusBcBleCbTest.OnStartBroadcastingCallback = FakeBcBleCallback;
+    MockBluetooth::interface->RegisterBroadcaster(&advld, &g_softbusBcBleCbTest);
+    ret = MockBluetooth::interface->StartBroadcasting(advld, &params, &data);
+    EXPECT_EQ(ret, SOFTBUS_OK);
+    MockBluetooth::btGattCallback->advEnableCb(MockBluetooth::g_btAdvId, OHOS_BT_STATUS_SUCCESS);
+    EXPECT_TRUE(SoftbusBleGattTest::g_adapterBcld == advld && SoftbusBleGattTest::g_status == OHOS_BT_STATUS_SUCCESS);
+
+    MockBluetooth::interface->StopBroadcasting(advld);
+    MockBluetooth::interface->UnRegisterBroadcaster(advld);
+    ret = MockBluetooth::interface->DeInit();
+    EXPECT_EQ(ret, SOFTBUS_OK);
+}
+
+/**
+ * @tc.name: WrapperAdvDisableCb001
+ * @tc.desc: WrapperAdvDisableCb will keep traverse when not Regist, will keep traverse when btAdvId is invalid
+ * @tc.type: FUNC
+ * @tc.require: NONE
+ */
+HWTEST_F(SoftbusBleGattTest, WrapperAdvDisableCb001, TestSize.Level1)
+{
+    DISC_LOGI(DISC_TEST, "WrapperAdvDisableCb001 enter");
+    MockBluetooth mock;
+    ASSERT_NE(MockBluetooth::interface, nullptr);
+    int32_t ret = MockBluetooth::interface->Init();
+    EXPECT_EQ(ret, SOFTBUS_OK);
+
+    SoftbusBleGattTest::g_adapterBcld = -1;
+    SoftbusBleGattTest::g_status = -1;
+    int32_t advld = -1;
+    int32_t invalidBtAdvId = -1;
+    MockBluetooth::btGattCallback->advDisableCb(invalidBtAdvId, OHOS_BT_STATUS_SUCCESS);
+    EXPECT_FALSE(SoftbusBleGattTest::g_adapterBcld == advld && SoftbusBleGattTest::g_status == OHOS_BT_STATUS_SUCCESS);
+    ret = MockBluetooth::interface->RegisterBroadcaster(&advld, &g_softbusBcBleCbTest);
+    EXPECT_EQ(ret, SOFTBUS_OK);
+    DISC_LOGI(DISC_TEST, "advld = %{public}d", advld);
+
+    SoftbusBroadcastParam params = {};
+    SoftbusBroadcastData data = BuildBcData();
+    EXPECT_CALL(mock, BleStartAdvEx).WillRepeatedly(MockBluetooth::ActionBleStartAdvEx);
+    ret = MockBluetooth::interface->StartBroadcasting(advld, &params, &data);
+    EXPECT_EQ(ret, SOFTBUS_OK);
+    MockBluetooth::btGattCallback->advDisableCb(invalidBtAdvId, OHOS_BT_STATUS_SUCCESS);
+    EXPECT_FALSE(SoftbusBleGattTest::g_adapterBcld == advld && SoftbusBleGattTest::g_status == OHOS_BT_STATUS_SUCCESS);
+
+    MockBluetooth::interface->StopBroadcasting(advld);
+    MockBluetooth::interface->UnRegisterBroadcaster(advld);
+    ret = MockBluetooth::interface->DeInit();
+    EXPECT_EQ(ret, SOFTBUS_OK);
+}
+
+/**
+ * @tc.name: WrapperAdvDisableCb002
+ * @tc.desc: WrapperAdvDisableCb will keep traverse when advCallback.OnStopBroadcastingCallback=nullptr
+ * @tc.type: FUNC
+ * @tc.require: NONE
+ */
+HWTEST_F(SoftbusBleGattTest, WrapperAdvDisableCb002, TestSize.Level1)
+{
+    DISC_LOGI(DISC_TEST, "WrapperAdvDisableCb002 enter");
+    MockBluetooth mock;
+    ASSERT_NE(MockBluetooth::interface, nullptr);
+    int32_t ret = MockBluetooth::interface->Init();
+    EXPECT_EQ(ret, SOFTBUS_OK);
+
+    SoftbusBleGattTest::g_adapterBcld = -1;
+    SoftbusBleGattTest::g_status = -1;
+    int32_t advld = -1;
+    g_softbusBcBleCbTest.OnStopBroadcastingCallback = nullptr;
+    ret = MockBluetooth::interface->RegisterBroadcaster(&advld, &g_softbusBcBleCbTest);
+    EXPECT_EQ(ret, SOFTBUS_OK);
+    DISC_LOGI(DISC_TEST, "advld = %{public}d", advld);
+
+    SoftbusBroadcastParam params = {};
+    SoftbusBroadcastData data = BuildBcData();
+    EXPECT_CALL(mock, BleStartAdvEx).WillRepeatedly(MockBluetooth::ActionBleStartAdvEx);
+    ret = MockBluetooth::interface->StartBroadcasting(advld, &params, &data);
+    EXPECT_EQ(ret, SOFTBUS_OK);
+    MockBluetooth::btGattCallback->advDisableCb(MockBluetooth::g_btAdvId, OHOS_BT_STATUS_SUCCESS);
+    EXPECT_FALSE(SoftbusBleGattTest::g_adapterBcld == advld && SoftbusBleGattTest::g_status == OHOS_BT_STATUS_SUCCESS);
+
+    MockBluetooth::interface->StopBroadcasting(advld);
+    MockBluetooth::interface->UnRegisterBroadcaster(advld);
+
+    g_softbusBcBleCbTest.OnStopBroadcastingCallback = FakeBcBleCallback;
+    MockBluetooth::interface->RegisterBroadcaster(&advld, &g_softbusBcBleCbTest);
+    ret = MockBluetooth::interface->StartBroadcasting(advld, &params, &data);
+    EXPECT_EQ(ret, SOFTBUS_OK);
+    MockBluetooth::btGattCallback->advDisableCb(MockBluetooth::g_btAdvId, OHOS_BT_STATUS_SUCCESS);
+    EXPECT_TRUE(SoftbusBleGattTest::g_adapterBcld == advld && SoftbusBleGattTest::g_status == OHOS_BT_STATUS_SUCCESS);
+
+    MockBluetooth::interface->StopBroadcasting(advld);
+    MockBluetooth::interface->UnRegisterBroadcaster(advld);
+    ret = MockBluetooth::interface->DeInit();
+    EXPECT_EQ(ret, SOFTBUS_OK);
+}
+
+/**
+ * @tc.name: WrapperAdvSetDataCb001
+ * @tc.desc: WrapperAdvSetDataCb will keep traverse when not Regist, will keep traverse when btAdvId is invalid
+ * @tc.type: FUNC
+ * @tc.require: NONE
+ */
+HWTEST_F(SoftbusBleGattTest, WrapperAdvSetDataCb001, TestSize.Level1)
+{
+    DISC_LOGI(DISC_TEST, "WrapperAdvSetDataCb001 enter");
+    MockBluetooth mock;
+    ASSERT_NE(MockBluetooth::interface, nullptr);
+    int32_t ret = MockBluetooth::interface->Init();
+    EXPECT_EQ(ret, SOFTBUS_OK);
+
+    SoftbusBleGattTest::g_adapterBcld = -1;
+    SoftbusBleGattTest::g_status = -1;
+    int32_t advld = -1;
+    int32_t invalidBtAdvId = -1;
+    MockBluetooth::btGattCallback->advDataCb(invalidBtAdvId, OHOS_BT_STATUS_SUCCESS);
+    EXPECT_FALSE(SoftbusBleGattTest::g_adapterBcld == advld && SoftbusBleGattTest::g_status == OHOS_BT_STATUS_SUCCESS);
+
+    ret = MockBluetooth::interface->RegisterBroadcaster(&advld, &g_softbusBcBleCbTest);
+    EXPECT_EQ(ret, SOFTBUS_OK);
+    DISC_LOGI(DISC_TEST, "advld = %{public}d", advld);
+
+    SoftbusBroadcastParam params = {};
+    SoftbusBroadcastData data = BuildBcData();
+    EXPECT_CALL(mock, BleStartAdvEx).WillRepeatedly(MockBluetooth::ActionBleStartAdvEx);
+    ret = MockBluetooth::interface->StartBroadcasting(advld, &params, &data);
+    EXPECT_EQ(ret, SOFTBUS_OK);
+
+    MockBluetooth::btGattCallback->advDataCb(invalidBtAdvId, OHOS_BT_STATUS_SUCCESS);
+    EXPECT_FALSE(SoftbusBleGattTest::g_adapterBcld == advld && SoftbusBleGattTest::g_status == OHOS_BT_STATUS_SUCCESS);
+
+    MockBluetooth::interface->StopBroadcasting(advld);
+    MockBluetooth::interface->UnRegisterBroadcaster(advld);
+    ret = MockBluetooth::interface->DeInit();
+    EXPECT_EQ(ret, SOFTBUS_OK);
+}
+
+/**
+ * @tc.name: WrapperAdvSetDataCb002
+ * @tc.desc: WrapperAdvSetDataCb will keep traverse when advCallback.OnSetBroadcastingCallback=nullptr
+ * @tc.type: FUNC
+ * @tc.require: NONE
+ */
+HWTEST_F(SoftbusBleGattTest, WrapperAdvSetDataCb002, TestSize.Level1)
+{
+    DISC_LOGI(DISC_TEST, "WrapperAdvSetDataCb002 enter");
+    MockBluetooth mock;
+    ASSERT_NE(MockBluetooth::interface, nullptr);
+    int32_t ret = MockBluetooth::interface->Init();
+    EXPECT_EQ(ret, SOFTBUS_OK);
+
+    SoftbusBleGattTest::g_adapterBcld = -1;
+    SoftbusBleGattTest::g_status = -1;
+    int32_t advld = -1;
+    g_softbusBcBleCbTest.OnSetBroadcastingCallback = nullptr;
+    ret = MockBluetooth::interface->RegisterBroadcaster(&advld, &g_softbusBcBleCbTest);
+    EXPECT_EQ(ret, SOFTBUS_OK);
+    DISC_LOGI(DISC_TEST, "advld = %{public}d", advld);
+
+    SoftbusBroadcastParam params = {};
+    SoftbusBroadcastData data = BuildBcData();
+    EXPECT_CALL(mock, BleStartAdvEx).WillRepeatedly(MockBluetooth::ActionBleStartAdvEx);
+    ret = MockBluetooth::interface->StartBroadcasting(advld, &params, &data);
+    EXPECT_EQ(ret, SOFTBUS_OK);
+    MockBluetooth::btGattCallback->advDataCb(MockBluetooth::g_btAdvId, OHOS_BT_STATUS_SUCCESS);
+    EXPECT_FALSE(SoftbusBleGattTest::g_adapterBcld == advld && SoftbusBleGattTest::g_status == OHOS_BT_STATUS_SUCCESS);
+
+    MockBluetooth::interface->StopBroadcasting(advld);
+    MockBluetooth::interface->UnRegisterBroadcaster(advld);
+
+    g_softbusBcBleCbTest.OnSetBroadcastingCallback = FakeBcBleCallback;
+    MockBluetooth::interface->RegisterBroadcaster(&advld, &g_softbusBcBleCbTest);
+    ret = MockBluetooth::interface->StartBroadcasting(advld, &params, &data);
+    EXPECT_EQ(ret, SOFTBUS_OK);
+    MockBluetooth::btGattCallback->advDataCb(MockBluetooth::g_btAdvId, OHOS_BT_STATUS_SUCCESS);
+    EXPECT_TRUE(SoftbusBleGattTest::g_adapterBcld == advld && SoftbusBleGattTest::g_status == OHOS_BT_STATUS_SUCCESS);
+
+    MockBluetooth::interface->StopBroadcasting(advld);
+    MockBluetooth::interface->UnRegisterBroadcaster(advld);
+    ret = MockBluetooth::interface->DeInit();
+    EXPECT_EQ(ret, SOFTBUS_OK);
+}
+
+/**
+ * @tc.name: WrapperAdvUpdateDataCb001
+ * @tc.desc: WrapperAdvUpdateDataCb will keep traverse when not Regist, will keep traverse when btAdvId is invalid
+ * @tc.type: FUNC
+ * @tc.require: NONE
+ */
+HWTEST_F(SoftbusBleGattTest, WrapperAdvUpdateDataCb001, TestSize.Level1)
+{
+    DISC_LOGI(DISC_TEST, "WrapperAdvUpdateDataCb001 enter");
+    MockBluetooth mock;
+    ASSERT_NE(MockBluetooth::interface, nullptr);
+    int32_t ret = MockBluetooth::interface->Init();
+    EXPECT_EQ(ret, SOFTBUS_OK);
+
+    SoftbusBleGattTest::g_adapterBcld = -1;
+    SoftbusBleGattTest::g_status = -1;
+    int32_t advld = -1;
+    int32_t invalidBtAdvId = -1;
+    MockBluetooth::btGattCallback->advUpdateCb(invalidBtAdvId, OHOS_BT_STATUS_SUCCESS);
+    EXPECT_FALSE(SoftbusBleGattTest::g_adapterBcld == advld && SoftbusBleGattTest::g_status == OHOS_BT_STATUS_SUCCESS);
+
+    ret = MockBluetooth::interface->RegisterBroadcaster(&advld, &g_softbusBcBleCbTest);
+    EXPECT_EQ(ret, SOFTBUS_OK);
+    DISC_LOGI(DISC_TEST, "advld = %{public}d", advld);
+
+    SoftbusBroadcastParam params = {};
+    SoftbusBroadcastData data = BuildBcData();
+    EXPECT_CALL(mock, BleStartAdvEx).WillRepeatedly(MockBluetooth::ActionBleStartAdvEx);
+    ret = MockBluetooth::interface->StartBroadcasting(advld, &params, &data);
+    EXPECT_EQ(ret, SOFTBUS_OK);
+
+    MockBluetooth::btGattCallback->advUpdateCb(invalidBtAdvId, OHOS_BT_STATUS_SUCCESS);
+    EXPECT_FALSE(SoftbusBleGattTest::g_adapterBcld == advld && SoftbusBleGattTest::g_status == OHOS_BT_STATUS_SUCCESS);
+
+    MockBluetooth::interface->StopBroadcasting(advld);
+    MockBluetooth::interface->UnRegisterBroadcaster(advld);
+    ret = MockBluetooth::interface->DeInit();
+    EXPECT_EQ(ret, SOFTBUS_OK);
+}
+
+/**
+ * @tc.name: WrapperAdvUpdateDataCb002
+ * @tc.desc: WrapperAdvUpdateDataCb will keep traverse when advCallback.OnUpdateBroadcastingCallback=nullptr
+ * @tc.type: FUNC
+ * @tc.require: NONE
+ */
+HWTEST_F(SoftbusBleGattTest, WrapperAdvUpdateDataCb002, TestSize.Level1)
+{
+    DISC_LOGI(DISC_TEST, "WrapperAdvUpdateDataCb002 enter");
+    MockBluetooth mock;
+    ASSERT_NE(MockBluetooth::interface, nullptr);
+    int32_t ret = MockBluetooth::interface->Init();
+    EXPECT_EQ(ret, SOFTBUS_OK);
+
+    SoftbusBleGattTest::g_adapterBcld = -1;
+    SoftbusBleGattTest::g_status = -1;
+    int32_t advld = -1;
+    g_softbusBcBleCbTest.OnUpdateBroadcastingCallback = nullptr;
+    ret = MockBluetooth::interface->RegisterBroadcaster(&advld, &g_softbusBcBleCbTest);
+    EXPECT_EQ(ret, SOFTBUS_OK);
+    DISC_LOGI(DISC_TEST, "advld = %{public}d", advld);
+
+    SoftbusBroadcastParam params = {};
+    SoftbusBroadcastData data = BuildBcData();
+    EXPECT_CALL(mock, BleStartAdvEx).WillRepeatedly(MockBluetooth::ActionBleStartAdvEx);
+    ret = MockBluetooth::interface->StartBroadcasting(advld, &params, &data);
+    EXPECT_EQ(ret, SOFTBUS_OK);
+    MockBluetooth::btGattCallback->advUpdateCb(MockBluetooth::g_btAdvId, OHOS_BT_STATUS_SUCCESS);
+    EXPECT_FALSE(SoftbusBleGattTest::g_adapterBcld == advld && SoftbusBleGattTest::g_status == OHOS_BT_STATUS_SUCCESS);
+
+    MockBluetooth::interface->StopBroadcasting(advld);
+    MockBluetooth::interface->UnRegisterBroadcaster(advld);
+
+    g_softbusBcBleCbTest.OnUpdateBroadcastingCallback = FakeBcBleCallback;
+    MockBluetooth::interface->RegisterBroadcaster(&advld, &g_softbusBcBleCbTest);
+    ret = MockBluetooth::interface->StartBroadcasting(advld, &params, &data);
+    EXPECT_EQ(ret, SOFTBUS_OK);
+    MockBluetooth::btGattCallback->advUpdateCb(MockBluetooth::g_btAdvId, OHOS_BT_STATUS_SUCCESS);
+    EXPECT_TRUE(SoftbusBleGattTest::g_adapterBcld == advld && SoftbusBleGattTest::g_status == OHOS_BT_STATUS_SUCCESS);
+
+    MockBluetooth::interface->StopBroadcasting(advld);
+    MockBluetooth::interface->UnRegisterBroadcaster(advld);
+    ret = MockBluetooth::interface->DeInit();
+    EXPECT_EQ(ret, SOFTBUS_OK);
+}
+
+/**
+ * @tc.name: WrapperAdvUpdateParamCb001
+ * @tc.desc: WrapperAdvUpdateParamCb will keep traverse when not regist, will keep traverse when btAdvId is invalid
+ * @tc.type: FUNC
+ * @tc.require: NONE
+ */
+HWTEST_F(SoftbusBleGattTest, WrapperAdvUpdateParamCb001, TestSize.Level1)
+{
+    DISC_LOGI(DISC_TEST, "WrapperAdvUpdateParamCb001 enter");
+    MockBluetooth mock;
+    ASSERT_NE(MockBluetooth::interface, nullptr);
+    int32_t ret = MockBluetooth::interface->Init();
+    EXPECT_EQ(ret, SOFTBUS_OK);
+
+    SoftbusBleGattTest::g_adapterBcld = -1;
+    SoftbusBleGattTest::g_status = -1;
+    int32_t advld = -1;
+    int32_t invalidBtAdvId = -1;
+    MockBluetooth::btGattCallback->advChangeCb(invalidBtAdvId, OHOS_BT_STATUS_SUCCESS);
+    EXPECT_FALSE(SoftbusBleGattTest::g_adapterBcld == advld && SoftbusBleGattTest::g_status == OHOS_BT_STATUS_SUCCESS);
+
+    ret = MockBluetooth::interface->RegisterBroadcaster(&advld, &g_softbusBcBleCbTest);
+    EXPECT_EQ(ret, SOFTBUS_OK);
+    DISC_LOGI(DISC_TEST, "advld = %{public}d", advld);
+
+    SoftbusBroadcastParam params = {};
+    SoftbusBroadcastData data = BuildBcData();
+    EXPECT_CALL(mock, BleStartAdvEx).WillRepeatedly(MockBluetooth::ActionBleStartAdvEx);
+    ret = MockBluetooth::interface->StartBroadcasting(advld, &params, &data);
+    EXPECT_EQ(ret, SOFTBUS_OK);
+    MockBluetooth::btGattCallback->advChangeCb(invalidBtAdvId, OHOS_BT_STATUS_SUCCESS);
+    EXPECT_FALSE(SoftbusBleGattTest::g_adapterBcld == advld && SoftbusBleGattTest::g_status == OHOS_BT_STATUS_SUCCESS);
+
+    MockBluetooth::interface->StopBroadcasting(advld);
+    MockBluetooth::interface->UnRegisterBroadcaster(advld);
+    ret = MockBluetooth::interface->DeInit();
+    EXPECT_EQ(ret, SOFTBUS_OK);
+}
+
+/**
+ * @tc.name: WrapperAdvUpdateParamCb002
+ * @tc.desc: WrapperAdvUpdateParamCb will keep traverse when advCallback.OnSetBroadcastingParamCallback=nullptr
+ * @tc.type: FUNC
+ * @tc.require: NONE
+ */
+HWTEST_F(SoftbusBleGattTest, WrapperAdvUpdateParamCb002, TestSize.Level1)
+{
+    DISC_LOGI(DISC_TEST, "WrapperAdvUpdateParamCb002 enter");
+    MockBluetooth mock;
+    ASSERT_NE(MockBluetooth::interface, nullptr);
+    int32_t ret = MockBluetooth::interface->Init();
+    EXPECT_EQ(ret, SOFTBUS_OK);
+
+    SoftbusBleGattTest::g_adapterBcld = -1;
+    SoftbusBleGattTest::g_status = -1;
+    int32_t advld = -1;
+    g_softbusBcBleCbTest.OnSetBroadcastingParamCallback = nullptr;
+    ret = MockBluetooth::interface->RegisterBroadcaster(&advld, &g_softbusBcBleCbTest);
+    EXPECT_EQ(ret, SOFTBUS_OK);
+    DISC_LOGI(DISC_TEST, "advld = %{public}d", advld);
+
+    SoftbusBroadcastParam params = {};
+    SoftbusBroadcastData data = BuildBcData();
+    EXPECT_CALL(mock, BleStartAdvEx).WillRepeatedly(MockBluetooth::ActionBleStartAdvEx);
+    ret = MockBluetooth::interface->StartBroadcasting(advld, &params, &data);
+    EXPECT_EQ(ret, SOFTBUS_OK);
+    MockBluetooth::btGattCallback->advChangeCb(MockBluetooth::g_btAdvId, OHOS_BT_STATUS_SUCCESS);
+    EXPECT_FALSE(SoftbusBleGattTest::g_adapterBcld == advld && SoftbusBleGattTest::g_status == OHOS_BT_STATUS_SUCCESS);
+
+    MockBluetooth::interface->StopBroadcasting(advld);
+    MockBluetooth::interface->UnRegisterBroadcaster(advld);
+
+    g_softbusBcBleCbTest.OnSetBroadcastingParamCallback = FakeBcBleCallback;
+    MockBluetooth::interface->RegisterBroadcaster(&advld, &g_softbusBcBleCbTest);
+    ret = MockBluetooth::interface->StartBroadcasting(advld, &params, &data);
+    EXPECT_EQ(ret, SOFTBUS_OK);
+
+    MockBluetooth::btGattCallback->advChangeCb(MockBluetooth::g_btAdvId, OHOS_BT_STATUS_SUCCESS);
+    EXPECT_TRUE(SoftbusBleGattTest::g_adapterBcld == advld && SoftbusBleGattTest::g_status == OHOS_BT_STATUS_SUCCESS);
+
+    MockBluetooth::interface->StopBroadcasting(advld);
+    MockBluetooth::interface->UnRegisterBroadcaster(advld);
+    ret = MockBluetooth::interface->DeInit();
+    EXPECT_EQ(ret, SOFTBUS_OK);
+}
+
+/**
+ * @tc.name: WrapperOnAdvEnableExCb001
+ * @tc.desc: WrapperOnAdvEnableExCb will keep traverse when not regist, will keep traverse when btAdvId is invalid
+ * @tc.type: FUNC
+ * @tc.require: NONE
+ */
+HWTEST_F(SoftbusBleGattTest, WrapperOnAdvEnableExCb001, TestSize.Level1)
+{
+    DISC_LOGI(DISC_TEST, "WrapperOnAdvEnableExCb001 enter");
+    MockBluetooth mock;
+    ASSERT_NE(MockBluetooth::interface, nullptr);
+    int32_t ret = MockBluetooth::interface->Init();
+    EXPECT_EQ(ret, SOFTBUS_OK);
+
+    SoftbusBleGattTest::g_adapterBcld = -1;
+    SoftbusBleGattTest::g_status = -1;
+    int32_t advld = -1;
+    int32_t invalidBtAdvId = -1;
+    MockBluetooth::btGattCallback->onEnableExCb(invalidBtAdvId, OHOS_BT_STATUS_SUCCESS);
+    EXPECT_FALSE(SoftbusBleGattTest::g_adapterBcld == advld && SoftbusBleGattTest::g_status == OHOS_BT_STATUS_SUCCESS);
+    ret = MockBluetooth::interface->RegisterBroadcaster(&advld, &g_softbusBcBleCbTest);
+    EXPECT_EQ(ret, SOFTBUS_OK);
+    DISC_LOGI(DISC_TEST, "advld = %{public}d", advld);
+
+    SoftbusBroadcastParam params = {};
+    SoftbusBroadcastData data = BuildBcData();
+    EXPECT_CALL(mock, BleStartAdvEx).WillRepeatedly(MockBluetooth::ActionBleStartAdvEx);
+    ret = MockBluetooth::interface->StartBroadcasting(advld, &params, &data);
+    EXPECT_EQ(ret, SOFTBUS_OK);
+    MockBluetooth::btGattCallback->onEnableExCb(invalidBtAdvId, OHOS_BT_STATUS_SUCCESS);
+    EXPECT_FALSE(SoftbusBleGattTest::g_adapterBcld == advld && SoftbusBleGattTest::g_status == OHOS_BT_STATUS_SUCCESS);
+
+    MockBluetooth::interface->StopBroadcasting(advld);
+    MockBluetooth::interface->UnRegisterBroadcaster(advld);
+    ret = MockBluetooth::interface->DeInit();
+    EXPECT_EQ(ret, SOFTBUS_OK);
+}
+
+/**
+ * @tc.name: WrapperOnAdvEnableExCb002
+ * @tc.desc: WrapperOnAdvEnableExCb will keep traverse when advCallback.OnSetBroadcastingParamCallback=nullptr
+ * @tc.type: FUNC
+ * @tc.require: NONE
+ */
+HWTEST_F(SoftbusBleGattTest, WrapperOnAdvEnableExCb002, TestSize.Level1)
+{
+    DISC_LOGI(DISC_TEST, "WrapperOnAdvEnableExCb002 enter");
+    MockBluetooth mock;
+    ASSERT_NE(MockBluetooth::interface, nullptr);
+    int32_t ret = MockBluetooth::interface->Init();
+    EXPECT_EQ(ret, SOFTBUS_OK);
+
+    SoftbusBleGattTest::g_adapterBcld = -1;
+    SoftbusBleGattTest::g_status = -1;
+    int32_t advld = -1;
+    g_softbusBcBleCbTest.OnEnableBroadcastingCallback = nullptr;
+    ret = MockBluetooth::interface->RegisterBroadcaster(&advld, &g_softbusBcBleCbTest);
+    EXPECT_EQ(ret, SOFTBUS_OK);
+    DISC_LOGI(DISC_TEST, "advld = %{public}d", advld);
+
+    SoftbusBroadcastParam params = {};
+    SoftbusBroadcastData data = BuildBcData();
+    EXPECT_CALL(mock, BleStartAdvEx).WillRepeatedly(MockBluetooth::ActionBleStartAdvEx);
+    ret = MockBluetooth::interface->StartBroadcasting(advld, &params, &data);
+    EXPECT_EQ(ret, SOFTBUS_OK);
+    MockBluetooth::btGattCallback->onEnableExCb(MockBluetooth::g_btAdvId, OHOS_BT_STATUS_SUCCESS);
+    EXPECT_FALSE(SoftbusBleGattTest::g_adapterBcld == advld && SoftbusBleGattTest::g_status == OHOS_BT_STATUS_SUCCESS);
+
+    MockBluetooth::interface->StopBroadcasting(advld);
+    MockBluetooth::interface->UnRegisterBroadcaster(advld);
+
+    g_softbusBcBleCbTest.OnEnableBroadcastingCallback = FakeBcBleCallback;
+    MockBluetooth::interface->RegisterBroadcaster(&advld, &g_softbusBcBleCbTest);
+    ret = MockBluetooth::interface->StartBroadcasting(advld, &params, &data);
+    EXPECT_EQ(ret, SOFTBUS_OK);
+    MockBluetooth::btGattCallback->onEnableExCb(MockBluetooth::g_btAdvId, OHOS_BT_STATUS_SUCCESS);
+    EXPECT_TRUE(SoftbusBleGattTest::g_adapterBcld == advld && SoftbusBleGattTest::g_status == OHOS_BT_STATUS_SUCCESS);
+
+    MockBluetooth::interface->StopBroadcasting(advld);
+    MockBluetooth::interface->UnRegisterBroadcaster(advld);
+    ret = MockBluetooth::interface->DeInit();
+    EXPECT_EQ(ret, SOFTBUS_OK);
+}
+
+/**
+ * @tc.name: WrapperOnAdvDisableExCb001
+ * @tc.desc: WrapperOnAdvDisableExCb will keep traverse when not regist, will keep traverse when btAdvId is invalid
+ * @tc.type: FUNC
+ * @tc.require: NONE
+ */
+HWTEST_F(SoftbusBleGattTest, WrapperOnAdvDisableExCb001, TestSize.Level1)
+{
+    DISC_LOGI(DISC_TEST, "WrapperOnAdvDisableExCb001 enter");
+    MockBluetooth mock;
+    ASSERT_NE(MockBluetooth::interface, nullptr);
+    int32_t ret = MockBluetooth::interface->Init();
+    EXPECT_EQ(ret, SOFTBUS_OK);
+
+    SoftbusBleGattTest::g_adapterBcld = -1;
+    SoftbusBleGattTest::g_status = -1;
+    int32_t advld = -1;
+    int32_t invalidBtAdvId = -1;
+    MockBluetooth::btGattCallback->onDisableExCb(invalidBtAdvId, OHOS_BT_STATUS_SUCCESS);
+    EXPECT_FALSE(SoftbusBleGattTest::g_adapterBcld == advld && SoftbusBleGattTest::g_status == OHOS_BT_STATUS_SUCCESS);
+    ret = MockBluetooth::interface->RegisterBroadcaster(&advld, &g_softbusBcBleCbTest);
+    EXPECT_EQ(ret, SOFTBUS_OK);
+    DISC_LOGI(DISC_TEST, "advld = %{public}d", advld);
+
+    SoftbusBroadcastParam params = {};
+    SoftbusBroadcastData data = BuildBcData();
+    EXPECT_CALL(mock, BleStartAdvEx).WillRepeatedly(MockBluetooth::ActionBleStartAdvEx);
+    ret = MockBluetooth::interface->StartBroadcasting(advld, &params, &data);
+    EXPECT_EQ(ret, SOFTBUS_OK);
+    MockBluetooth::btGattCallback->onDisableExCb(invalidBtAdvId, OHOS_BT_STATUS_SUCCESS);
+    EXPECT_FALSE(SoftbusBleGattTest::g_adapterBcld == advld && SoftbusBleGattTest::g_status == OHOS_BT_STATUS_SUCCESS);
+
+    MockBluetooth::interface->StopBroadcasting(advld);
+    MockBluetooth::interface->UnRegisterBroadcaster(advld);
+    ret = MockBluetooth::interface->DeInit();
+    EXPECT_EQ(ret, SOFTBUS_OK);
+}
+
+/**
+ * @tc.name: WrapperOnAdvDisableExCb002
+ * @tc.desc: WrapperOnAdvDisableExCb will keep traverse when advCallback.OnDisableBroadcastingCallback=nullptr
+ * @tc.type: FUNC
+ * @tc.require: NONE
+ */
+HWTEST_F(SoftbusBleGattTest, WrapperOnAdvDisableExCb002, TestSize.Level1)
+{
+    DISC_LOGI(DISC_TEST, "WrapperOnAdvDisableExCb002 enter");
+    MockBluetooth mock;
+    ASSERT_NE(MockBluetooth::interface, nullptr);
+    int32_t ret = MockBluetooth::interface->Init();
+    EXPECT_EQ(ret, SOFTBUS_OK);
+
+    SoftbusBleGattTest::g_adapterBcld = -1;
+    SoftbusBleGattTest::g_status = -1;
+    int32_t advld = -1;
+    g_softbusBcBleCbTest.OnDisableBroadcastingCallback = nullptr;
+    ret = MockBluetooth::interface->RegisterBroadcaster(&advld, &g_softbusBcBleCbTest);
+    EXPECT_EQ(ret, SOFTBUS_OK);
+    DISC_LOGI(DISC_TEST, "advld = %{public}d", advld);
+
+    SoftbusBroadcastParam params = {};
+    SoftbusBroadcastData data = BuildBcData();
+    EXPECT_CALL(mock, BleStartAdvEx).WillRepeatedly(MockBluetooth::ActionBleStartAdvEx);
+    ret = MockBluetooth::interface->StartBroadcasting(advld, &params, &data);
+    EXPECT_EQ(ret, SOFTBUS_OK);
+    MockBluetooth::btGattCallback->onDisableExCb(MockBluetooth::g_btAdvId, OHOS_BT_STATUS_SUCCESS);
+    EXPECT_FALSE(SoftbusBleGattTest::g_adapterBcld == advld && SoftbusBleGattTest::g_status == OHOS_BT_STATUS_SUCCESS);
+
+    MockBluetooth::interface->StopBroadcasting(advld);
+    MockBluetooth::interface->UnRegisterBroadcaster(advld);
+
+    g_softbusBcBleCbTest.OnDisableBroadcastingCallback = FakeBcBleCallback;
+    MockBluetooth::interface->RegisterBroadcaster(&advld, &g_softbusBcBleCbTest);
+    ret = MockBluetooth::interface->StartBroadcasting(advld, &params, &data);
+    EXPECT_EQ(ret, SOFTBUS_OK);
+    MockBluetooth::btGattCallback->onDisableExCb(MockBluetooth::g_btAdvId, OHOS_BT_STATUS_SUCCESS);
+    EXPECT_TRUE(SoftbusBleGattTest::g_adapterBcld == advld && SoftbusBleGattTest::g_status == OHOS_BT_STATUS_SUCCESS);
+
+    MockBluetooth::interface->StopBroadcasting(advld);
+    MockBluetooth::interface->UnRegisterBroadcaster(advld);
+    ret = MockBluetooth::interface->DeInit();
+    EXPECT_EQ(ret, SOFTBUS_OK);
+}
+
+/**
+ * @tc.name: WrapperScanStateChangeCb0001
+ * @tc.desc: Test WrapperScanStateChangeCb
+ * @tc.type: FUNC
+ * @tc.require: NONE
+ */
+HWTEST_F(SoftbusBleGattTest, WrapperScanStateChangeCb0001, TestSize.Level1)
+{
+    DISC_LOGI(DISC_TEST, "WrapperScanStateChangeCb enter");
     MockBluetooth mocker;
     int32_t ret = MockBluetooth::interface->Init();
     EXPECT_EQ(ret, SOFTBUS_OK);
@@ -1066,14 +1673,14 @@ HWTEST_F(SoftbusBleGattTest, TestWrapperScanStateChangeCb0, TestSize.Level1)
 }
 
 /**
- * @tc.name: TestWrapperLpDeviceInfoCb
+ * @tc.name: WrapperLpDeviceInfoCb001
  * @tc.desc: Test WrapperLpDeviceInfoCb
  * @tc.type: FUNC
  * @tc.require: NONE
  */
-HWTEST_F(SoftbusBleGattTest, TestWrapperLpDeviceInfoCb, TestSize.Level1)
+HWTEST_F(SoftbusBleGattTest, WrapperLpDeviceInfoCb001, TestSize.Level1)
 {
-    DISC_LOGI(DISC_TEST, "TestWrapperAdvEnableCb enter");
+    DISC_LOGI(DISC_TEST, "WrapperLpDeviceInfoCb enter");
     MockBluetooth mocker;
     int32_t ret = MockBluetooth::interface->Init();
     EXPECT_EQ(ret, SOFTBUS_OK);
@@ -1094,31 +1701,31 @@ HWTEST_F(SoftbusBleGattTest, TestWrapperLpDeviceInfoCb, TestSize.Level1)
 }
 
 /**
- * @tc.name: TestIsLpAvailable
+ * @tc.name: IsLpAvailable001
  * @tc.desc: Test IsLpAvailable
  * @tc.type: FUNC
  * @tc.require: NONE
  */
-HWTEST_F(SoftbusBleGattTest, TestIsLpAvailable, TestSize.Level1)
+HWTEST_F(SoftbusBleGattTest, IsLpAvailable001, TestSize.Level1)
 {
     MockBluetooth mocker;
     int32_t ret = MockBluetooth::interface->Init();
     EXPECT_EQ(ret, SOFTBUS_OK);
 
     ret = MockBluetooth::interface->IsLpDeviceAvailable();
-    EXPECT_EQ(ret, false);
+    EXPECT_EQ(ret, true);
 
     ret = MockBluetooth::interface->DeInit();
     EXPECT_EQ(ret, SOFTBUS_OK);
 }
 
 /**
- * @tc.name: TestSoftbusSetLpParam
+ * @tc.name: SoftbusSetLpParam001
  * @tc.desc: Test SoftbusSetLpParam
  * @tc.type: FUNC
  * @tc.require: NONE
  */
-HWTEST_F(SoftbusBleGattTest, TestSoftbusSetLpParam, TestSize.Level1)
+HWTEST_F(SoftbusBleGattTest, SoftbusSetLpParam001, TestSize.Level1)
 {
     MockBluetooth mocker;
     int32_t ret = MockBluetooth::interface->Init();
@@ -1135,12 +1742,35 @@ HWTEST_F(SoftbusBleGattTest, TestSoftbusSetLpParam, TestSize.Level1)
 }
 
 /**
- * @tc.name: AdapterBleGattTest_RegisterScanListener
+ * @tc.name: SoftbusSetLpParam002
+ * @tc.desc: Test SoftbusSetLpParam when SetBtUuidByBroadCastType return error
+ * @tc.type: FUNC
+ * @tc.require: NONE
+ */
+HWTEST_F(SoftbusBleGattTest, SoftbusSetLpParam002, TestSize.Level1)
+{
+    MockBluetooth mocker;
+    int32_t ret = MockBluetooth::interface->Init();
+    EXPECT_EQ(ret, SOFTBUS_OK);
+
+    SoftBusLpBroadcastParam bcParam = {};
+    SoftBusLpScanParam scanParam = {};
+    scanParam.filterSize = 1;
+
+    ret = MockBluetooth::interface->SetAdvFilterParam(SOFTBUS_UNKNOW_TYPE, &bcParam, &scanParam);
+    EXPECT_EQ(ret, false);
+
+    ret = MockBluetooth::interface->DeInit();
+    EXPECT_EQ(ret, SOFTBUS_OK);
+}
+
+/**
+ * @tc.name: RegisterScanListener001
  * @tc.desc: test register scan listener
  * @tc.type: FUNC
  * @tc.require: NONE
  */
-HWTEST_F(SoftbusBleGattTest, RegisterScanListener, TestSize.Level3)
+HWTEST_F(SoftbusBleGattTest, RegisterScanListener001, TestSize.Level3)
 {
     MockBluetooth mocker;
     int32_t scannerId = -1;
@@ -1160,12 +1790,12 @@ HWTEST_F(SoftbusBleGattTest, RegisterScanListener, TestSize.Level3)
 }
 
 /**
- * @tc.name: AdapterBleGattTest_UnRegisterScanListener
+ * @tc.name: UnRegisterScanListener001
  * @tc.desc: test unregister scan listener
  * @tc.type: FUNC
  * @tc.require: NONE
  */
-HWTEST_F(SoftbusBleGattTest, UnRegisterScanListener, TestSize.Level3)
+HWTEST_F(SoftbusBleGattTest, UnRegisterScanListener001, TestSize.Level3)
 {
     MockBluetooth mocker;
     int32_t scannerId = -1;
@@ -1177,12 +1807,12 @@ HWTEST_F(SoftbusBleGattTest, UnRegisterScanListener, TestSize.Level3)
 }
 
 /**
- * @tc.name: AdapterBleGattTest_ScanLifecycle
+ * @tc.name: ScanLifecycle001
  * @tc.desc: test complete scan life cycle
  * @tc.type: FUNC
  * @tc.require: NONE
  */
-HWTEST_F(SoftbusBleGattTest, ScanLifecycle, TestSize.Level3)
+HWTEST_F(SoftbusBleGattTest, ScanLifecycle001, TestSize.Level3)
 {
     MockBluetooth mocker;
     int32_t scannerId = -1;
@@ -1209,12 +1839,12 @@ HWTEST_F(SoftbusBleGattTest, ScanLifecycle, TestSize.Level3)
 }
 
 /**
- * @tc.name: AdapterBleGattTest_ScanResultCb
+ * @tc.name: ScanResultCb001
  * @tc.desc: test scan result callback
  * @tc.type: FUNC
  * @tc.require: NONE
  */
-HWTEST_F(SoftbusBleGattTest, ScanResultCb, TestSize.Level3)
+HWTEST_F(SoftbusBleGattTest, ScanResultCb001, TestSize.Level3)
 {
     MockBluetooth mocker;
     int32_t scannerId = -1;
@@ -1265,12 +1895,12 @@ HWTEST_F(SoftbusBleGattTest, ScanResultCb, TestSize.Level3)
 }
 
 /**
- * @tc.name: AdapterBleGattTest_RegisterBroadcaster
+ * @tc.name: RegisterBroadcaster001
  * @tc.desc: test register adv callback
  * @tc.type: FUNC
  * @tc.require: NONE
  */
-HWTEST_F(SoftbusBleGattTest, RegisterBroadcaster, TestSize.Level3)
+HWTEST_F(SoftbusBleGattTest, RegisterBroadcaster001, TestSize.Level3)
 {
     int32_t advId = -1;
     ASSERT_EQ(MockBluetooth::interface->RegisterBroadcaster(&advId, nullptr), SOFTBUS_INVALID_PARAM);
@@ -1342,4 +1972,167 @@ ClEANUP:
     return result;
 }
 
+/**
+ * @tc.name: SoftbusSetAdvParamterTest001
+ * @tc.desc: Test SoftbusSetAdvParamter when param == NULL
+ * @tc.type: FUNC
+ * @tc.require: NONE
+ */
+HWTEST_F(SoftbusBleGattTest, SoftbusSetAdvParamterTest001, TestSize.Level1)
+{
+    int32_t advId = 0;
+    int32_t ret = MockBluetooth::interface->SetBroadcastingParam(advId, nullptr);
+    EXPECT_EQ(ret, SOFTBUS_INVALID_PARAM);
+}
+
+/**
+ * @tc.name: SoftbusSetAdvParamterTest002
+ * @tc.desc: Test SoftbusSetAdvParamter when CheckAdvChanInUsed return false
+ * @tc.type: FUNC
+ * @tc.require: NONE
+ */
+HWTEST_F(SoftbusBleGattTest, SoftbusSetAdvParamterTest002, TestSize.Level1)
+{
+    int32_t advId = GATT_ADV_MAX_NUM;
+    SoftbusBroadcastParam params = {};
+    MockBluetooth mocker;
+    int32_t ret = MockBluetooth::interface->Init();
+    EXPECT_EQ(ret, SOFTBUS_OK);
+
+    ret = MockBluetooth::interface->SetBroadcastingParam(advId, &params);
+    EXPECT_EQ(ret, SOFTBUS_BC_ADAPTER_NOT_IN_USED_FAIL);
+
+    ret = MockBluetooth::interface->DeInit();
+    EXPECT_EQ(ret, SOFTBUS_OK);
+}
+
+/**
+ * @tc.name: SoftbusSetAdvParamterTest003
+ * @tc.desc: Test SoftbusSetAdvParamter when isAdvertising is false
+ * @tc.type: FUNC
+ * @tc.require: NONE
+ */
+HWTEST_F(SoftbusBleGattTest, SoftbusSetAdvParamterTest003, TestSize.Level1)
+{
+    MockBluetooth mocker;
+    int32_t ret = MockBluetooth::interface->Init();
+    EXPECT_EQ(ret, SOFTBUS_OK);
+
+    int32_t advId = 0;
+    EXPECT_CALL(mocker, BleGattRegisterCallbacks).WillRepeatedly(Return(OHOS_BT_STATUS_SUCCESS));
+    ret = MockBluetooth::interface->RegisterBroadcaster(&advId, &g_softbusBcBleCbTest);
+    EXPECT_EQ(ret, SOFTBUS_OK);
+
+    SoftbusBroadcastParam params = {};
+
+    ret = MockBluetooth::interface->SetBroadcastingParam(advId, &params);
+    EXPECT_EQ(ret, SOFTBUS_ALREADY_TRIGGERED);
+
+    ret = MockBluetooth::interface->DeInit();
+    EXPECT_EQ(ret, SOFTBUS_OK);
+}
+
+/**
+ * @tc.name: SoftbusEnableBroadcasting001
+ * @tc.desc: Test SoftbusEnableBroadcasting when CheckAdvChanInUsed return false
+ * @tc.type: FUNC
+ * @tc.require: NONE
+ */
+HWTEST_F(SoftbusBleGattTest, SoftbusEnableBroadcasting001, TestSize.Level1)
+{
+    int32_t advId = GATT_ADV_MAX_NUM;
+    MockBluetooth mocker;
+    int32_t ret = MockBluetooth::interface->Init();
+    EXPECT_EQ(ret, SOFTBUS_OK);
+
+    ret = MockBluetooth::interface->EnableBroadcasting(advId);
+    EXPECT_EQ(ret, SOFTBUS_BC_ADAPTER_NOT_IN_USED_FAIL);
+
+    ret = MockBluetooth::interface->DeInit();
+    EXPECT_EQ(ret, SOFTBUS_OK);
+}
+
+/**
+ * @tc.name: SoftbusEnableBroadcastingTest002
+ * @tc.desc: Test SoftbusEnableBroadcasting when isAdvertising is false
+ * @tc.type: FUNC
+ * @tc.require: NONE
+ */
+HWTEST_F(SoftbusBleGattTest, SoftbusEnableBroadcastingTest002, TestSize.Level1)
+{
+    MockBluetooth mocker;
+    int32_t ret = MockBluetooth::interface->Init();
+    EXPECT_EQ(ret, SOFTBUS_OK);
+
+    int32_t advId = 0;
+    EXPECT_CALL(mocker, BleGattRegisterCallbacks).WillRepeatedly(Return(OHOS_BT_STATUS_SUCCESS));
+    ret = MockBluetooth::interface->RegisterBroadcaster(&advId, &g_softbusBcBleCbTest);
+    EXPECT_EQ(ret, SOFTBUS_OK);
+
+    ret = MockBluetooth::interface->EnableBroadcasting(advId);
+    EXPECT_EQ(ret, SOFTBUS_ALREADY_TRIGGERED);
+
+    ret = MockBluetooth::interface->DeInit();
+    EXPECT_EQ(ret, SOFTBUS_OK);
+}
+
+/**
+ * @tc.name: SoftbusDisableBroadcasting001
+ * @tc.desc: Test SoftbusDisableBroadcasting when CheckAdvChanInUsed return false
+ * @tc.type: FUNC
+ * @tc.require: NONE
+ */
+HWTEST_F(SoftbusBleGattTest, SoftbusDisableBroadcasting001, TestSize.Level1)
+{
+    int32_t advId = GATT_ADV_MAX_NUM;
+    MockBluetooth mocker;
+    int32_t ret = MockBluetooth::interface->Init();
+    EXPECT_EQ(ret, SOFTBUS_OK);
+
+    ret = MockBluetooth::interface->DisableBroadcasting(advId);
+    EXPECT_EQ(ret, SOFTBUS_BC_ADAPTER_NOT_IN_USED_FAIL);
+
+    ret = MockBluetooth::interface->DeInit();
+    EXPECT_EQ(ret, SOFTBUS_OK);
+}
+
+/**
+ * @tc.name: SoftbusDisableBroadcastingTest002
+ * @tc.desc: Test SoftbusDisableBroadcasting when isAdvertising is false
+ * @tc.type: FUNC
+ * @tc.require: NONE
+ */
+HWTEST_F(SoftbusBleGattTest, SoftbusDisableBroadcastingTest002, TestSize.Level1)
+{
+    MockBluetooth mocker;
+    int32_t ret = MockBluetooth::interface->Init();
+    EXPECT_EQ(ret, SOFTBUS_OK);
+
+    int32_t advId = 0;
+    EXPECT_CALL(mocker, BleGattRegisterCallbacks).WillRepeatedly(Return(OHOS_BT_STATUS_SUCCESS));
+    ret = MockBluetooth::interface->RegisterBroadcaster(&advId, &g_softbusBcBleCbTest);
+    EXPECT_EQ(ret, SOFTBUS_OK);
+
+    ret = MockBluetooth::interface->DisableBroadcasting(advId);
+    EXPECT_EQ(ret, SOFTBUS_ALREADY_TRIGGERED);
+
+    ret = MockBluetooth::interface->DeInit();
+    EXPECT_EQ(ret, SOFTBUS_OK);
+}
+
+/**
+ * @tc.name: SoftbusSetScanParamsTest001
+ * @tc.desc: Test SoftbusSetScanParams when param is nullptr
+ * @tc.type: FUNC
+ * @tc.require: NONE
+ */
+HWTEST_F(SoftbusBleGattTest, SoftbusSetScanParamsTest001, TestSize.Level1)
+{
+    int32_t scannerId = 0;
+    SoftBusBcScanFilter scanFilter = {};
+    int32_t filterSize = 0;
+    SoftbusSetFilterCmd cmdId = {};
+    int32_t ret = MockBluetooth::interface->SetScanParams(scannerId, nullptr, &scanFilter, filterSize, cmdId);
+    EXPECT_EQ(ret, SOFTBUS_INVALID_PARAM);
+}
 } // namespace OHOS

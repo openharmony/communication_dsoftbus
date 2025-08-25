@@ -19,14 +19,11 @@
 #include <securec.h>
 
 #include "anonymizer.h"
-#include "auth_attest_interface.h"
 #include "auth_common.h"
 #include "auth_connection.h"
-#include "auth_device_common_key.h"
 #include "auth_hichain_adapter.h"
 #include "auth_log.h"
 #include "auth_manager.h"
-#include "auth_meta_manager.h"
 #include "auth_request.h"
 #include "auth_session_json.h"
 #include "bus_center_manager.h"
@@ -35,9 +32,12 @@
 #include "lnn_event.h"
 #include "lnn_extdata_config.h"
 #include "lnn_feature_capability.h"
+#include "lnn_lane_link.h"
+#include "lnn_lane_listener.h"
 #include "lnn_local_net_ledger.h"
 #include "lnn_network_manager.h"
 #include "lnn_node_info.h"
+#include "lnn_trans_lane.h"
 #include "softbus_adapter_json.h"
 #include "softbus_adapter_mem.h"
 #include "softbus_adapter_socket.h"
@@ -48,6 +48,7 @@
 #include "softbus_feature_config.h"
 #include "softbus_json_utils.h"
 #include "softbus_socket.h"
+#include "wifi_direct_manager.h"
 
 #define FLAG_COMPRESS_DEVICE_INFO   1
 #define FLAG_UNCOMPRESS_DEVICE_INFO 0
@@ -103,7 +104,7 @@ static int32_t PostWifiV1DevId(int64_t authSeq, const AuthSessionInfo *info)
         AUTH_LOGE(AUTH_FSM, "client don't send wifi-v1 devId");
         return SOFTBUS_AUTH_NOT_NEED_SEND_V1_DEV_ID;
     }
-    char *msg = PackDeviceIdJson(info);
+    char *msg = PackDeviceIdJson(info, authSeq);
     if (msg == NULL) {
         AUTH_LOGE(AUTH_FSM, "pack devId fail");
         return SOFTBUS_AUTH_PACK_DEV_ID_FAIL;
@@ -128,7 +129,7 @@ static int32_t PostDeviceIdV1(int64_t authSeq, const AuthSessionInfo *info)
 
 static int32_t PostDeviceIdNew(int64_t authSeq, const AuthSessionInfo *info)
 {
-    char *msg = PackDeviceIdJson(info);
+    char *msg = PackDeviceIdJson(info, authSeq);
     if (msg == NULL) {
         AUTH_LOGE(AUTH_FSM, "pack devId fail");
         return SOFTBUS_AUTH_PACK_DEV_ID_FAIL;
@@ -163,15 +164,16 @@ int32_t PostDeviceIdMessage(int64_t authSeq, const AuthSessionInfo *info)
     }
 }
 
-int32_t ProcessDeviceIdMessage(AuthSessionInfo *info, const uint8_t *data, uint32_t len)
+int32_t ProcessDeviceIdMessage(AuthSessionInfo *info, const uint8_t *data, uint32_t len, int64_t authSeq)
 {
     AUTH_CHECK_AND_RETURN_RET_LOGE(info != NULL, SOFTBUS_INVALID_PARAM, AUTH_FSM, "info is NULL");
     AUTH_CHECK_AND_RETURN_RET_LOGE(data != NULL, SOFTBUS_INVALID_PARAM, AUTH_FSM, "data is NULL");
-    if ((info->connInfo.type != AUTH_LINK_TYPE_WIFI) && (len == DEVICE_ID_STR_LEN) && (info->isServer)) {
+    if ((info->connInfo.type != AUTH_LINK_TYPE_WIFI && info->connInfo.type != AUTH_LINK_TYPE_USB) &&
+        (len == DEVICE_ID_STR_LEN) && (info->isServer)) {
         info->version = SOFTBUS_OLD_V1;
         return UnPackBtDeviceIdV1(info, data, len);
     }
-    return UnpackDeviceIdJson((const char *)data, len, info);
+    return UnpackDeviceIdJson((const char *)data, len, info, authSeq);
 }
 
 static void GetDumpSessionKeyList(int64_t authSeq, const AuthSessionInfo *info, SessionKeyList *list)
@@ -211,7 +213,8 @@ static void DfxRecordLnnPostDeviceInfoStart(int64_t authSeq, const AuthSessionIn
 static void SetCompressFlagByAuthInfo(
     const AuthSessionInfo *info, char *msg, int32_t *compressFlag, uint8_t **compressData, uint32_t *compressLen)
 {
-    if ((info->connInfo.type != AUTH_LINK_TYPE_WIFI) && info->isSupportCompress) {
+    if ((info->connInfo.type != AUTH_LINK_TYPE_WIFI && info->connInfo.type != AUTH_LINK_TYPE_USB) &&
+        info->isSupportCompress) {
         AUTH_LOGI(AUTH_FSM, "before compress, datalen=%{public}zu", strlen(msg) + 1);
         if (DataCompress((uint8_t *)msg, strlen(msg) + 1, compressData, compressLen) != SOFTBUS_OK) {
             *compressFlag = FLAG_UNCOMPRESS_DEVICE_INFO;
@@ -262,9 +265,9 @@ int32_t PostDeviceInfoMessage(int64_t authSeq, const AuthSessionInfo *info)
     JSON_Free(msg);
     SoftBusFree(compressData);
     DestroySessionKeyList(&sessionKeyList);
-    if (info->connInfo.type == AUTH_LINK_TYPE_WIFI && info->isServer) {
+    if ((info->connInfo.type == AUTH_LINK_TYPE_WIFI || info->connInfo.type == AUTH_LINK_TYPE_USB) && info->isServer) {
         compressFlag = FLAG_RELAY_DEVICE_INFO;
-        authSeq = 0;
+        authSeq = info->headSeq;
     }
     AuthDataHead head = {
         .dataType = DATA_TYPE_DEVICE_INFO,
@@ -279,6 +282,24 @@ int32_t PostDeviceInfoMessage(int64_t authSeq, const AuthSessionInfo *info)
         return SOFTBUS_AUTH_SEND_FAIL;
     }
     SoftBusFree(data);
+    return SOFTBUS_OK;
+}
+
+int32_t TryUpdateLaneResourceLaneId(AuthSessionInfo *info)
+{
+    AUTH_CHECK_AND_RETURN_RET_LOGE(info != NULL, SOFTBUS_INVALID_PARAM, AUTH_FSM, "info is NULL");
+    int32_t ret;
+    char localUDID[UDID_BUF_LEN] = { 0 };
+    ret = LnnGetLocalStrInfo(STRING_KEY_DEV_UDID, localUDID, UDID_BUF_LEN);
+    AUTH_CHECK_AND_RETURN_RET_LOGE(ret == SOFTBUS_OK, ret, AUTH_FSM, "get local udid fail");
+    uint64_t oldLaneId = GenerateLaneId(localUDID, info->connInfo.info.ipInfo.ip, LANE_HML_RAW);
+    uint64_t newLaneId = GenerateLaneId(localUDID, info->nodeInfo.deviceInfo.deviceUdid, LANE_HML_RAW);
+    ret = UpdateLaneResourceLaneId(oldLaneId, newLaneId, info->nodeInfo.deviceInfo.deviceUdid);
+    AUTH_CHECK_AND_RETURN_RET_LOGE(ret == SOFTBUS_OK, ret, AUTH_FSM, "update lane resource laneid fail");
+    ret = UpdateLaneBusinessInfoItem(oldLaneId, newLaneId);
+    AUTH_CHECK_AND_RETURN_RET_LOGE(ret == SOFTBUS_OK, ret, AUTH_FSM, "update lane business info fail");
+    ret = UpdateReqListLaneId(oldLaneId, newLaneId);
+    AUTH_CHECK_AND_RETURN_RET_LOGE(ret == SOFTBUS_OK, ret, AUTH_FSM, "update req list laneid fail");
     return SOFTBUS_OK;
 }
 
@@ -298,7 +319,8 @@ int32_t ProcessDeviceInfoMessage(int64_t authSeq, AuthSessionInfo *info, const u
     DestroySessionKeyList(&sessionKeyList);
     uint8_t *decompressData = NULL;
     uint32_t decompressLen = 0;
-    if ((info->connInfo.type != AUTH_LINK_TYPE_WIFI) && info->isSupportCompress) {
+    if ((info->connInfo.type != AUTH_LINK_TYPE_WIFI && info->connInfo.type != AUTH_LINK_TYPE_USB) &&
+        info->isSupportCompress) {
         AUTH_LOGI(AUTH_FSM, "before decompress, msgSize=%{public}u", msgSize);
         if (DataDecompress((uint8_t *)msg, msgSize, &decompressData, &decompressLen) != SOFTBUS_OK) {
             AUTH_LOGE(AUTH_FSM, "data decompress fail");
@@ -317,11 +339,12 @@ int32_t ProcessDeviceInfoMessage(int64_t authSeq, AuthSessionInfo *info, const u
         devInfo.msg = (const char *)msg;
         devInfo.len = msgSize;
     }
-    if (UnpackDeviceInfoMessage(&devInfo, &info->nodeInfo, false, info) != SOFTBUS_OK) {
+    int32_t ret = UnpackDeviceInfoMessage(&devInfo, &info->nodeInfo, false, info);
+    if (ret != SOFTBUS_OK) {
         AUTH_LOGE(AUTH_FSM, "unpack device info fail");
         SoftBusFree(msg);
         SoftBusFree(decompressData);
-        return SOFTBUS_AUTH_UNPACK_DEVINFO_FAIL;
+        return ret;
     }
     SoftBusFree(msg);
     SoftBusFree(decompressData);
@@ -402,7 +425,7 @@ static char *PackKeepaliveMessage(const char *uuid, ModeCycle cycle)
 bool IsDeviceMessagePacket(const AuthConnInfo *connInfo, const AuthDataHead *head, const uint8_t *data, bool isServer,
     DeviceMessageParse *messageParse)
 {
-    if (connInfo->type != AUTH_LINK_TYPE_WIFI) {
+    if (connInfo->type != AUTH_LINK_TYPE_WIFI && connInfo->type != AUTH_LINK_TYPE_USB) {
         return false;
     }
     int64_t authId = AuthDeviceGetIdByConnInfo(connInfo, isServer);

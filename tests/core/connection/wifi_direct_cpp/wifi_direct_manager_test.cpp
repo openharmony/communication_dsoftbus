@@ -56,40 +56,6 @@ HWTEST_F(WifiDirectManagerCppTest, AllocateListenerModuleIdTest, TestSize.Level1
 }
 
 /*
- * @tc.name: SetElementTypeTest
- * @tc.desc: check SetElementType method
- * @tc.type: FUNC
- * @tc.require:
- */
-HWTEST_F(WifiDirectManagerCppTest, SetElementTypeTest, TestSize.Level1)
-{
-    struct WifiDirectConnectInfo info = { 0 };
-    ConnEventExtra extra = { 0 };
-    info.connectType = WIFI_DIRECT_CONNECT_TYPE_AUTH_NEGO_P2P;
-    info.negoChannel.type = NEGO_CHANNEL_AUTH;
-    SetElementTypeExtra(&info, &extra);
-    EXPECT_EQ(info.dfxInfo.linkType, STATISTIC_P2P);
-    EXPECT_EQ(info.dfxInfo.bootLinkType, STATISTIC_NONE);
-
-    info.connectType = WIFI_DIRECT_CONNECT_TYPE_AUTH_NEGO_HML;
-    info.negoChannel.type = NEGO_CHANNEL_COC;
-    SetElementTypeExtra(&info, &extra);
-    EXPECT_EQ(info.dfxInfo.linkType, STATISTIC_HML);
-    EXPECT_EQ(info.dfxInfo.bootLinkType, STATISTIC_COC);
-
-    info.connectType = WIFI_DIRECT_CONNECT_TYPE_BLE_TRIGGER_HML;
-    info.negoChannel.type = NEGO_CHANNEL_NULL;
-    SetElementTypeExtra(&info, &extra);
-    EXPECT_EQ(info.dfxInfo.linkType, STATISTIC_TRIGGER_HML);
-    EXPECT_EQ(info.dfxInfo.bootLinkType, STATISTIC_NONE);
-
-    info.connectType = WIFI_DIRECT_CONNECT_TYPE_AUTH_TRIGGER_HML;
-    info.dfxInfo.linkType = STATISTIC_P2P;
-    SetElementTypeExtra(&info, &extra);
-    EXPECT_EQ(info.dfxInfo.linkType, STATISTIC_TRIGGER_HML);
-}
-
-/*
  * @tc.name: SavePtkTest
  * @tc.desc: check SavePtk method
  * @tc.type: FUNC
@@ -317,20 +283,18 @@ HWTEST_F(WifiDirectManagerCppTest, WifiDirectStatusListenerTest, TestSize.Level1
     std::string remoteUuid("0123456789ABCDEF");
     bool isSource = true;
     std::string localIp("170.30.1.1");
-    bool beCalled = false;
     struct WifiDirectSinkLink sinkLink { };
     struct WifiDirectStatusListener listener1 = { 0 };
     g_listeners.push_back(listener1);
-    NotifyOnline(remoteMac.c_str(), remoteIp.c_str(), remoteUuid.c_str(), isSource);
+    EXPECT_NO_FATAL_FAILURE(NotifyOnline(remoteMac.c_str(), remoteIp.c_str(), remoteUuid.c_str(), isSource));
 
-    NotifyOffline(remoteMac.c_str(), remoteIp.c_str(), remoteUuid.c_str(), localIp.c_str());
+    EXPECT_NO_FATAL_FAILURE(NotifyOffline(remoteMac.c_str(), remoteIp.c_str(), remoteUuid.c_str(), localIp.c_str()));
 
-    NotifyRoleChange(WIFI_DIRECT_ROLE_GO, WIFI_DIRECT_ROLE_GC);
+    EXPECT_NO_FATAL_FAILURE(NotifyRoleChange(WIFI_DIRECT_ROLE_GO, WIFI_DIRECT_ROLE_GC));
 
-    NotifyConnectedForSink(&sinkLink);
+    EXPECT_NO_FATAL_FAILURE(NotifyConnectedForSink(&sinkLink));
 
-    NotifyDisconnectedForSink(&sinkLink);
-    EXPECT_EQ(beCalled, false);
+    EXPECT_NO_FATAL_FAILURE(NotifyDisconnectedForSink(&sinkLink));
 
     struct WifiDirectStatusListener listener2 = {
         .onDeviceOnLine = [](const char *remoteMac, const char *remoteIp, const char *remoteUuid, bool isSource) {},
@@ -341,17 +305,15 @@ HWTEST_F(WifiDirectManagerCppTest, WifiDirectStatusListenerTest, TestSize.Level1
         .onDisconnectedForSink = [](const struct WifiDirectSinkLink *link) {},
     };
     g_listeners.push_back(listener2);
-    beCalled = true;
-    NotifyOnline(remoteMac.c_str(), remoteIp.c_str(), remoteUuid.c_str(), isSource);
+    EXPECT_NO_FATAL_FAILURE(NotifyOnline(remoteMac.c_str(), remoteIp.c_str(), remoteUuid.c_str(), isSource));
 
-    NotifyOffline(remoteMac.c_str(), remoteIp.c_str(), remoteUuid.c_str(), localIp.c_str());
+    EXPECT_NO_FATAL_FAILURE(NotifyOffline(remoteMac.c_str(), remoteIp.c_str(), remoteUuid.c_str(), localIp.c_str()));
 
-    NotifyRoleChange(WIFI_DIRECT_ROLE_GO, WIFI_DIRECT_ROLE_GC);
+    EXPECT_NO_FATAL_FAILURE(NotifyRoleChange(WIFI_DIRECT_ROLE_GO, WIFI_DIRECT_ROLE_GC));
 
-    NotifyConnectedForSink(&sinkLink);
+    EXPECT_NO_FATAL_FAILURE(NotifyConnectedForSink(&sinkLink));
 
-    NotifyDisconnectedForSink(&sinkLink);
-    EXPECT_EQ(beCalled, true);
+    EXPECT_NO_FATAL_FAILURE(NotifyDisconnectedForSink(&sinkLink));
 }
 
 /*
@@ -398,16 +360,12 @@ HWTEST_F(WifiDirectManagerCppTest, IsNegotiateChannelNeededTest, TestSize.Level1
  */
 HWTEST_F(WifiDirectManagerCppTest, NotifyPtkSyncResultTest, TestSize.Level1)
 {
-    bool beCalled = false;
     std::string remoteUuid("0123456789ABCDEF");
     int32_t result = 0;
-    NotifyPtkSyncResult(remoteUuid.c_str(), result);
-    EXPECT_EQ(beCalled, false);
+    EXPECT_NO_FATAL_FAILURE(NotifyPtkSyncResult(remoteUuid.c_str(), result));
 
     g_syncPtkListener = [](const char *remoteDeviceId, int32_t result) {};
-    beCalled = true;
-    NotifyPtkSyncResult(remoteUuid.c_str(), result);
-    EXPECT_EQ(beCalled, true);
+    EXPECT_NO_FATAL_FAILURE(NotifyPtkSyncResult(remoteUuid.c_str(), result));
 }
 
 /*
@@ -469,4 +427,71 @@ HWTEST_F(WifiDirectManagerCppTest, RefreshRelationShipTest002, TestSize.Level1)
     LinkManager::GetInstance().RemoveLinks(InnerLink::LinkType::HML);
 }
 
+/*
+ * @tc.name: ForceDisconnectDeviceSync001
+ * @tc.desc: check ForceDisconnectDeviceSync001 method
+ * @tc.type: FUNC
+ * @tc.require:
+ */
+HWTEST_F(WifiDirectManagerCppTest, ForceDisconnectDeviceSync001, TestSize.Level1)
+{
+    CONN_LOGI(CONN_WIFI_DIRECT, "RefreshRelationShipTest001 enter");
+    LinkManager::GetInstance().RemoveLinks(InnerLink::LinkType::HML);
+    auto result = ForceDisconnectDeviceSync(WIFI_DIRECT_LINK_TYPE_HML);
+    EXPECT_EQ(result, SOFTBUS_OK);
+    CONN_LOGI(CONN_WIFI_DIRECT, "RefreshRelationShipTest001 exit");
+}
+
+static int g_frequency = -1;
+static void FrequencyChangedListener(int32_t frequency)
+{
+    g_frequency = frequency;
+}
+
+/*
+ * @tc.name: NotifyFrequencyChanged
+ * @tc.desc: check NotifyFrequencyChanged method
+ * @tc.type: FUNC
+ * @tc.require:
+ */
+HWTEST_F(WifiDirectManagerCppTest, NotifyFrequencyChanged, TestSize.Level1)
+{
+    CONN_LOGI(CONN_WIFI_DIRECT, "NotifyFrequencyChanged enter");
+    NotifyFrequencyChanged(0);
+    EXPECT_EQ(g_frequency, -1);
+
+    AddFrequencyChangedListener(FrequencyChangedListener);
+    NotifyFrequencyChanged(0);
+    EXPECT_EQ(g_frequency, 0);
+    CONN_LOGI(CONN_WIFI_DIRECT, "NotifyFrequencyChanged exit");
+}
+
+/*
+ * @tc.name: GetHmlLinkCount
+ * @tc.desc: check GetHmlLinkCount method
+ * @tc.type: FUNC
+ * @tc.require:
+ */
+HWTEST_F(WifiDirectManagerCppTest, GetHmlLinkCount, TestSize.Level1)
+{
+    CONN_LOGI(CONN_WIFI_DIRECT, "GetHmlLinkCount enter");
+    std::string remoteDeviceIdConnected("0123456789ABCDEF");
+    LinkManager::GetInstance().ProcessIfAbsent(
+        InnerLink::LinkType::HML, remoteDeviceIdConnected, [](InnerLink &link) {
+        link.SetState(OHOS::SoftBus::InnerLink::LinkState::CONNECTED);
+    });
+    std::string remoteDeviceIdConnecting("012");
+    LinkManager::GetInstance().ProcessIfAbsent(
+        InnerLink::LinkType::HML, remoteDeviceIdConnecting, [](InnerLink &link) {
+        link.SetState(OHOS::SoftBus::InnerLink::LinkState::CONNECTING);
+    });
+    std::string remoteUuid("123");
+    LinkManager::GetInstance().ProcessIfAbsent(InnerLink::LinkType::P2P, remoteUuid, [](InnerLink &link) {
+        link.SetState(OHOS::SoftBus::InnerLink::LinkState::CONNECTING);
+    });
+
+    auto ret = GetHmlLinkCount();
+    EXPECT_EQ(ret, 1);
+    CONN_LOGI(CONN_WIFI_DIRECT, "GetHmlLinkCount exit");
+}
 } // namespace OHOS::SoftBus

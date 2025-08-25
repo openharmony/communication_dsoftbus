@@ -18,10 +18,10 @@
 
 #include <stdint.h>
 
+#include "ble_range.h"
 #include "data_level.h"
 #include "softbus_bus_center.h"
 
-void BusCenterExProxyDeInit(void);
 #ifdef __cplusplus
 #if __cplusplus
 extern "C" {
@@ -38,7 +38,9 @@ int32_t ServerIpcSetNodeDataChangeFlag(const char *pkgName, const char *networkI
 int32_t ServerIpcRegDataLevelChangeCb(const char *pkgName);
 int32_t ServerIpcUnregDataLevelChangeCb(const char *pkgName);
 int32_t ServerIpcSetDataLevel(const DataLevel *dataLevel);
-int32_t ServerIpcJoinLNN(const char *pkgName, void *addr, uint32_t addrTypeLen);
+int32_t ServerIpcRegRangeCbForMsdp(const char *pkgName);
+int32_t ServerIpcUnregRangeCbForMsdp(const char *pkgName);
+int32_t ServerIpcJoinLNN(const char *pkgName, void *addr, uint32_t addrTypeLen, bool isForceJoin);
 int32_t ServerIpcLeaveLNN(const char *pkgName, const char *networkId);
 int32_t ServerIpcStartTimeSync(const char *pkgName, const char *targetNetworkId, int32_t accuracy, int32_t period);
 int32_t ServerIpcStopTimeSync(const char *pkgName, const char *targetNetworkId);
@@ -51,7 +53,10 @@ int32_t ServerIpcDeactiveMetaNode(const char *pkgName, const char *metaNodeId);
 int32_t ServerIpcGetAllMetaNodeInfo(const char *pkgName, MetaNodeInfo *infos, int32_t *infoNum);
 int32_t ServerIpcShiftLNNGear(const char *pkgName, const char *callerId, const char *targetNetworkId,
     const GearMode *mode);
+int32_t ServerIpcTriggerRangeForMsdp(const char *pkgName, const RangeConfig *config);
+int32_t ServerIpcStopRangeForMsdp(const char *pkgName, const RangeConfig *config);
 int32_t ServerIpcSyncTrustedRelationShip(const char *pkgName, const char *msg, uint32_t msgLen);
+int32_t ServerIpcSetDisplayName(const char *pkgName, const char *nameData, uint32_t len);
 
 #ifdef __cplusplus
 #if __cplusplus

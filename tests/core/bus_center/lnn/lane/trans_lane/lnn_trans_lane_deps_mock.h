@@ -18,7 +18,9 @@
 
 #include <gmock/gmock.h>
 
+#include "g_enhance_lnn_func.h"
 #include "lnn_lane_common.h"
+#include "lnn_lane_dfx.h"
 #include "lnn_lane_link.h"
 #include "lnn_lane_model.h"
 #include "lnn_lane_select.h"
@@ -56,6 +58,8 @@ public:
     virtual void DetectEnableWifiDirectApply(void) = 0;
     virtual void DetectDisableWifiDirectApply(void) = 0;
     virtual int32_t CheckLinkConflictByReleaseLink(LaneLinkType releaseLink) = 0;
+    virtual int32_t FindLaneResourceByLinkType(const char *peerUdid, LaneLinkType type, LaneResource *resource) = 0;
+    virtual LnnEnhanceFuncList *LnnEnhanceFuncListGet(void) = 0;
 };
 
 class TransLaneDepsInterfaceMock : public TransLaneDepsInterface {
@@ -85,9 +89,11 @@ public:
     MOCK_METHOD0(DetectEnableWifiDirectApply, void (void));
     MOCK_METHOD0(DetectDisableWifiDirectApply, void (void));
     MOCK_METHOD1(CheckLinkConflictByReleaseLink, int32_t (LaneLinkType releaseLink));
+    MOCK_METHOD3(FindLaneResourceByLinkType, int32_t (const char *peerUdid, LaneLinkType type, LaneResource *resource));
+    MOCK_METHOD0(LnnEnhanceFuncListGet, LnnEnhanceFuncList * (void));
 
-    static int32_t ActionOfLaneLinkSuccess(const LinkRequest *reqInfo, uint32_t reqId, const LaneLinkCb *cb);
-    static int32_t ActionOfLaneLinkFail(const LinkRequest *reqInfo, uint32_t reqId, const LaneLinkCb *cb);
+    static int32_t ActionOfBuildLinkSuccess(const LinkRequest *reqInfo, uint32_t reqId, const LaneLinkCb *cb);
+    static int32_t ActionOfBuildLinkFail(const LinkRequest *reqInfo, uint32_t reqId, const LaneLinkCb *cb);
 };
 } // namespace OHOS
 #endif // LNN_TRANS_LANE_DEPS_MOCK_H

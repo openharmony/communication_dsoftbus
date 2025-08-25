@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2025 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -28,11 +28,13 @@ void ClientTransUdpMgrDeinit(void)
     return;
 }
 
-int32_t TransOnUdpChannelOpened(const char *sessionName, const ChannelInfo *channel, int32_t *udpPort)
+int32_t TransOnUdpChannelOpened(
+    const char *sessionName, const ChannelInfo *channel, int32_t *udpPort, SocketAccessInfo *accessInfo)
 {
     (void)sessionName;
     (void)channel;
     (void)udpPort;
+    (void)accessInfo;
     return SOFTBUS_FUNC_NOT_SUPPORT;
 }
 
@@ -109,7 +111,7 @@ int32_t TransLimitChange(int32_t channelId, uint8_t tos)
     return SOFTBUS_FUNC_NOT_SUPPORT;
 }
 
-int32_t TransSetUdpChanelSessionId(int32_t channelId, int32_t sessionId)
+int32_t TransSetUdpChannelSessionId(int32_t channelId, int32_t sessionId)
 {
     (void)channelId;
     (void)sessionId;

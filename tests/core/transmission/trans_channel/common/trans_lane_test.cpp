@@ -88,7 +88,7 @@ void TransLaneTest::TearDownTestCase(void)
 SessionParam* GenerateCommParamTest()
 {
     SessionParam *sessionParam = (SessionParam *)SoftBusCalloc(sizeof(SessionParam));
-    if (sessionParam == NULL) {
+    if (sessionParam == nullptr) {
         return nullptr;
     }
     sessionParam->sessionName = g_sessionName;
@@ -106,7 +106,7 @@ SessionParam* GenerateCommParamTest()
 SessionParam* GenerateParamTest(SessionAttribute *sessionAttr)
 {
     SessionParam *sessionParam = (SessionParam *)SoftBusCalloc(sizeof(SessionParam));
-    if (sessionParam == NULL) {
+    if (sessionParam == nullptr) {
         return nullptr;
     }
     sessionParam->sessionName = g_sessionName;
@@ -188,7 +188,7 @@ HWTEST_F(TransLaneTest, TransLaneTest003, TestSize.Level1)
     ret = TransGetLaneReqItemByLaneHandle(laneHandle, &bSucc, connInfo, &errCode);
     EXPECT_EQ(SOFTBUS_OK, ret);
 
-    ret = TransGetLaneReqItemByLaneHandle(laneHandle, &bSucc, NULL, &errCode);
+    ret = TransGetLaneReqItemByLaneHandle(laneHandle, &bSucc, nullptr, &errCode);
     EXPECT_EQ(SOFTBUS_MEM_ERR, ret);
 
     ret = TransDelLaneReqFromPendingList(laneHandle, false);
@@ -326,7 +326,7 @@ HWTEST_F(TransLaneTest, TransLaneTest007, TestSize.Level1)
  */
 HWTEST_F(TransLaneTest, TransLaneTest008, TestSize.Level1)
 {
-    int32_t ret = TransGetLaneTransTypeBySession(NULL);
+    int32_t ret = TransGetLaneTransTypeBySession(nullptr);
     EXPECT_EQ(ret, LANE_T_BUTT);
 
     SessionParam* sessionParam = GenerateCommParamTest();
@@ -405,7 +405,9 @@ HWTEST_F(TransLaneTest, TransLaneTest010, TestSize.Level1)
     LanePreferredLinkList *preferred = (LanePreferredLinkList *)SoftBusCalloc(sizeof(LanePreferredLinkList));
     ASSERT_TRUE(preferred != nullptr);
     (void)memset_s(preferred, sizeof(LanePreferredLinkList), 0, sizeof(LanePreferredLinkList));
-    TransformSessionPreferredToLanePreferred(sessionParam, preferred, NULL);
+    TransformSessionPreferredToLanePreferred(sessionParam, preferred, nullptr);
+    TransformSessionPreferredToLanePreferred(sessionParam, nullptr, nullptr);
+    TransformSessionPreferredToLanePreferred(nullptr, preferred, nullptr);
     SoftBusFree(sessionParam);
     SoftBusFree(preferred);
 }
@@ -421,7 +423,7 @@ HWTEST_F(TransLaneTest, TransLaneTest011, TestSize.Level1)
     SoftBusCond *cond = 0;
     SoftBusMutex *mutex = 0;
     uint32_t timeMillis = 0;
-    int32_t ret = TransSoftBusCondWait(NULL, NULL, timeMillis);
+    int32_t ret = TransSoftBusCondWait(nullptr, nullptr, timeMillis);
     EXPECT_EQ(SOFTBUS_INVALID_PARAM, ret);
 
     timeMillis = 1;
@@ -539,7 +541,7 @@ HWTEST_F(TransLaneTest, TransLaneTest014, TestSize.Level1)
         .isNetWorkingChannel = false,
     };
     (void)memcpy_s(info.sessionName, SESSION_NAME_SIZE_MAX, g_sessionName, SESSION_NAME_SIZE_MAX);
-    int32_t ret = TransGetLaneInfoByOption(NULL, &connInfo, &laneHandle, &info);
+    int32_t ret = TransGetLaneInfoByOption(nullptr, &connInfo, &laneHandle, &info);
     EXPECT_EQ(SOFTBUS_INVALID_PARAM, ret);
 
     ret = TransGetLaneInfoByOption(&requestOption, &connInfo, &laneHandle, &info);
@@ -589,7 +591,7 @@ HWTEST_F(TransLaneTest, TransLaneTest015, TestSize.Level1)
     };
     SessionParam *sessionParam = GenerateParamTest(&sessionNormalAttr);
     SoftBusFree(sessionParam);
-    ret = TransGetLaneInfo(NULL, &connInfo, &laneHandle);
+    ret = TransGetLaneInfo(nullptr, &connInfo, &laneHandle);
     EXPECT_EQ(SOFTBUS_INVALID_PARAM, ret);
 
     TransSessionServerDelItem(g_sessionName);
@@ -653,7 +655,7 @@ HWTEST_F(TransLaneTest, TransLaneTest019, TestSize.Level1)
         .type = LANE_P2P,
     };
     ConnectOption connOpt;
-    int32_t ret = TransGetConnectOptByConnInfo(NULL, &connOpt);
+    int32_t ret = TransGetConnectOptByConnInfo(nullptr, &connOpt);
     EXPECT_EQ(SOFTBUS_INVALID_PARAM, ret);
 
     info.type = LANE_P2P;
@@ -744,7 +746,7 @@ HWTEST_F(TransLaneTest, TransLaneTest022, TestSize.Level1)
     LanePreferredLinkList *preferred = (LanePreferredLinkList*)SoftBusCalloc(sizeof(LanePreferredLinkList));
     ASSERT_TRUE(preferred != nullptr);
     (void)memset_s(preferred, sizeof(LanePreferredLinkList), 0, sizeof(LanePreferredLinkList));
-    TransformSessionPreferredToLanePreferred(sessionParam, preferred, NULL);
+    TransformSessionPreferredToLanePreferred(sessionParam, preferred, nullptr);
     SoftBusFree(sessionParam);
     SoftBusFree(preferred);
     SessionAttribute sessionAttr1 = {
@@ -756,7 +758,7 @@ HWTEST_F(TransLaneTest, TransLaneTest022, TestSize.Level1)
     LanePreferredLinkList *preferred1 = (LanePreferredLinkList*)SoftBusCalloc(sizeof(LanePreferredLinkList));
     ASSERT_TRUE(preferred1 != nullptr);
     (void)memset_s(preferred1, sizeof(LanePreferredLinkList), 0, sizeof(LanePreferredLinkList));
-    TransformSessionPreferredToLanePreferred(sessionParam1, preferred1, NULL);
+    TransformSessionPreferredToLanePreferred(sessionParam1, preferred1, nullptr);
     SoftBusFree(sessionParam1);
     SoftBusFree(preferred1);
     SessionAttribute sessionAttr2 = {
@@ -768,7 +770,7 @@ HWTEST_F(TransLaneTest, TransLaneTest022, TestSize.Level1)
     LanePreferredLinkList *preferred2 = (LanePreferredLinkList*)SoftBusCalloc(sizeof(LanePreferredLinkList));
     ASSERT_TRUE(preferred2 != nullptr);
     (void)memset_s(preferred2, sizeof(LanePreferredLinkList), 0, sizeof(LanePreferredLinkList));
-    TransformSessionPreferredToLanePreferred(sessionParam2, preferred2, NULL);
+    TransformSessionPreferredToLanePreferred(sessionParam2, preferred2, nullptr);
     SoftBusFree(sessionParam2);
     SoftBusFree(preferred2);
 }

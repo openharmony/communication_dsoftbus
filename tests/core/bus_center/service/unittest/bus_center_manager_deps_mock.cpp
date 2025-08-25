@@ -138,6 +138,11 @@ int32_t LnnInitEventMoniterDelay(void)
     return GetBusCenterManagerDepsInterface()->LnnInitEventMoniterDelay();
 }
 
+int32_t LnnInitHuksCeParamsDelay(void)
+{
+    return GetBusCenterManagerDepsInterface()->LnnInitHuksCeParamsDelay();
+}
+
 int32_t LnnInitNetworkManagerDelay(void)
 {
     return GetBusCenterManagerDepsInterface()->LnnInitNetworkManagerDelay();
@@ -151,6 +156,21 @@ int32_t LnnInitNetBuilderDelay(void)
 int32_t LnnInitLaneHubDelay(void)
 {
     return GetBusCenterManagerDepsInterface()->LnnInitLaneHubDelay();
+}
+
+int32_t LnnLoadLocalDeviceAccountIdInfo(void)
+{
+    return GetBusCenterManagerDepsInterface()->LnnLoadLocalDeviceAccountIdInfo();
+}
+
+int32_t InitUdidChangedEvent(void)
+{
+    return GetBusCenterManagerDepsInterface()->InitUdidChangedEvent();
+}
+
+int32_t LnnInitPermission(void)
+{
+    return GetBusCenterManagerDepsInterface()->LnnInitPermission();
 }
 }
 } // namespace OHOS

@@ -18,16 +18,13 @@
 
 #include <list>
 #include <functional>
+#include <string>
 
 namespace OHOS::SoftBus {
 class WifiDirectInitiator {
 public:
-    static WifiDirectInitiator& GetInstance()
-    {
-        static WifiDirectInitiator instance;
-        return instance;
-    }
-
+    static WifiDirectInitiator& GetInstance();
+    
     using InitFuncion = std::function<void()>;
 
     void Init();

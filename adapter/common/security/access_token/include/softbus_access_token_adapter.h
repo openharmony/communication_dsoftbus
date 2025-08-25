@@ -41,14 +41,17 @@ bool SoftBusCheckIsNormalApp(uint64_t fullTokenId, const char *sessionName);
 bool SoftBusCheckIsAccessAndRecordAccessToken(uint64_t tokenId, const char *permission);
 int32_t SoftBusCalcPermType(uint64_t fullTokenId, pid_t uid, pid_t pid);
 int32_t SoftBusCheckDynamicPermission(uint64_t tokenId);
-void SoftBusRegisterDataSyncPermission(
-    const uint64_t tokenId, const char *permissionName, const char *pkgName, int32_t pid);
+void SoftBusRegisterDataSyncPermission(uint64_t tokenId, const char *permissionName, const char *pkgName, int32_t pid);
+void SoftBusUnRegisterDataSyncPermission(int32_t pid);
 void SoftBusRegisterPermissionChangeCb(PermissionChangeCb cb);
 int32_t SoftBusGetAccessTokenType(uint64_t tokenId);
 void SoftBusGetTokenNameByTokenType(
     char *tokenName, int32_t nameLen, uint64_t tokenId, SoftBusAccessTokenType tokenType);
 int32_t SoftBusCheckDmsServerPermission(uint64_t tokenId);
-bool SoftBusCheckIsApp(uint64_t fullTokenId, const char *sessionName);
+bool SoftBusCheckIsCollabApp(uint64_t fullTokenId, const char *sessionName);
+bool SoftBusCheckIsAccess(void);
+bool SoftBusSaCanUseDeviceKey(uint64_t tokenId);
+bool SoftBusCheckIsSystemApp(uint64_t tokenId, const char *sessionName);
 #ifdef __cplusplus
 #if __cplusplus
 }

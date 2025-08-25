@@ -60,6 +60,11 @@ void SoftBusRegisterDataSyncPermission(
     (void)pid;
 }
 
+void SoftBusUnRegisterDataSyncPermission(int32_t pid)
+{
+    (void)pid;
+}
+
 void SoftBusRegisterPermissionChangeCb(PermissionChangeCb cb)
 {
     (void)cb;
@@ -86,9 +91,27 @@ int32_t SoftBusCheckDmsServerPermission(uint64_t tokenId)
     return SOFTBUS_PERMISSION_DENIED;
 }
 
-bool SoftBusCheckIsApp(uint64_t fullTokenId, const char *sessionName)
+bool SoftBusCheckIsCollabApp(uint64_t fullTokenId, const char *sessionName)
 {
     (void)fullTokenId;
+    (void)sessionName;
+    return false;
+}
+
+bool SoftBusCheckIsAccess(void)
+{
+    return false;
+}
+
+bool SoftBusSaCanUseDeviceKey(uint64_t tokenId)
+{
+    (void)tokenId;
+    return false;
+}
+
+bool SoftBusCheckIsSystemApp(uint64_t tokenId, const char *sessionName)
+{
+    (void)tokenId;
     (void)sessionName;
     return false;
 }

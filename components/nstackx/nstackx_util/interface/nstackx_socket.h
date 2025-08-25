@@ -16,7 +16,6 @@
 #ifndef NSTACKX_SOCKET_H
 #define NSTACKX_SOCKET_H
 
-#include "sys_common_header.h"
 #include "nstackx_common_header.h"
 
 typedef enum SocketProtocol {

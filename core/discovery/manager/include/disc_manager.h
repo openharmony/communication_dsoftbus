@@ -17,57 +17,13 @@
 #define DISC_MANAGER_H
 
 #include "disc_interface.h"
+#include "disc_manager_struct.h"
 
 #ifdef __cplusplus
 #if __cplusplus
 extern "C" {
 #endif
 #endif
-
-#define CAPABILITY_NUM 1
-#define CAPABILITY_MAX_BITNUM 16
-
-typedef struct {
-    int32_t freq;
-    uint32_t capabilityBitmap[CAPABILITY_NUM];
-    uint8_t *capabilityData;
-    uint32_t dataLen;
-    bool ranging;
-} PublishOption;
-
-typedef struct {
-    bool isSameAccount;
-    bool isWakeRemote;
-    int32_t freq;
-    uint32_t capabilityBitmap[CAPABILITY_NUM];
-    uint32_t dataLen;
-    uint8_t *capabilityData;
-} SubscribeOption;
-
-typedef enum {
-    PUBLISH_FUNC = 0,
-    UNPUBLISH_FUNC = 1,
-    STARTDISCOVERTY_FUNC = 2,
-    STOPDISCOVERY_FUNC = 3
-} InterfaceFuncType;
-
-typedef struct {
-    int32_t (*Publish)(const PublishOption *option);
-    int32_t (*StartScan)(const PublishOption *option);
-    int32_t (*Unpublish)(const PublishOption *option);
-    int32_t (*StopScan)(const PublishOption *option);
-    int32_t (*StartAdvertise)(const SubscribeOption *option);
-    int32_t (*Subscribe)(const SubscribeOption *option);
-    int32_t (*Unsubscribe)(const SubscribeOption *option);
-    int32_t (*StopAdvertise)(const SubscribeOption *option);
-    void (*LinkStatusChanged)(LinkStatus status);
-    void (*UpdateLocalDeviceInfo)(InfoTypeChanged type);
-} DiscoveryFuncInterface;
-
-typedef struct {
-    int32_t (*OnServerDeviceFound)(const char *packageName, const DeviceInfo *device,
-                                   const InnerDeviceInfoAddtions *additions);
-} IServerDiscInnerCallback;
 
 /**
  * @brief Publish service to start publishing its own information to other devices.
@@ -88,7 +44,7 @@ typedef struct {
  * @return <b>SOFTBUS_DISCOVER_MANAGER_INNERFUNCTION_FAIL</b> Internal function error.
  * @return <b>SOFTBUS_OK</b> Published self information successfully.
  */
-int32_t DiscPublishService(const char *packageName, const PublishInfo *info);
+int32_t DiscPublishService(const char *packageName, const PublishInfo *info, int32_t callingPid);
 
 /**
  * @brief If the service is cancelled, the remote device cannot obtain its own information.
@@ -103,7 +59,7 @@ int32_t DiscPublishService(const char *packageName, const PublishInfo *info);
  * @return <b>SOFTBUS_DISCOVER_MANAGER_INNERFUNCTION_FAIL</b> Internal function error.
  * @return <b>SOFTBUS_OK</b> Unpublished service succeeded.
  */
-int32_t DiscUnPublishService(const char *packageName, int32_t publishId);
+int32_t DiscUnPublishService(const char *packageName, int32_t publishId, int32_t callingPid);
 
 /**
  * @brief Start discovery, other devices can be discovered.
@@ -127,7 +83,8 @@ int32_t DiscUnPublishService(const char *packageName, int32_t publishId);
  * @return <b>SOFTBUS_DISCOVER_MANAGER_INNERFUNCTION_FAIL</b> Internal function error.
  * @return <b>SOFTBUS_OK</b> Passive discovery function successfully started.
  */
-int32_t DiscStartDiscovery(const char *packageName, const SubscribeInfo *info, const IServerDiscInnerCallback *cb);
+int32_t DiscStartDiscovery(const char *packageName, const SubscribeInfo *info, const IServerDiscInnerCallback *cb,
+    int32_t callingPid);
 
 /**
  * @brief Stop discovering, stop discovering other devices.
@@ -142,11 +99,11 @@ int32_t DiscStartDiscovery(const char *packageName, const SubscribeInfo *info, c
  * @return <b>SOFTBUS_DISCOVER_MANAGER_INNERFUNCTION_FAIL</b> Internal function error.
  * @return <b>SOFTBUS_OK</b> Passive stop discovery function stopped successfully
  */
-int32_t DiscStopDiscovery(const char *packageName, int32_t subscribeId);
+int32_t DiscStopDiscovery(const char *packageName, int32_t subscribeId, int32_t callingPid);
 
-int32_t DiscMgrEventInit(void);
+int32_t DiscSetDisplayName(const char *pkgName, const char *nameData, uint32_t len);
 
-void DiscMgrEventDeinit(void);
+int32_t DiscGetDisplayName(char *displayName, uint32_t length, uint32_t remainLen);
 
 #ifdef __cplusplus
 #if __cplusplus

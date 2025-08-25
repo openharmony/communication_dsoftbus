@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2022-2023 Huawei Device Co., Ltd.
+ * Copyright (c) 2022-2024 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -19,6 +19,8 @@
 #include "lnn_auth_mock.h"
 #include "lnn_connection_fsm.c"
 #include "lnn_connection_fsm.h"
+#include "lnn_connection_fsm_process.c"
+#include "lnn_connection_fsm_process.h"
 #include "lnn_devicename_info.h"
 #include "lnn_net_builder.h"
 #include "lnn_net_ledger_mock.h"
@@ -93,14 +95,14 @@ HWTEST_F(LNNConnectionFsmMockTest, LNN_IS_NODE_INFO_CHANGED_TEST_001, TestSize.L
     ConnectionAddrType type;
     (void)strcpy_s(oldNodeInfo.networkId, NETWORK_ID_BUF_LEN, NETWORKID1);
     (void)strcpy_s(newNodeInfo.networkId, NETWORK_ID_BUF_LEN, NETWORKID1);
-    (void)strcpy_s(oldNodeInfo.connectInfo.deviceIp, MAX_ADDR_LEN, DEVICE_IP1);
-    (void)strcpy_s(newNodeInfo.connectInfo.deviceIp, MAX_ADDR_LEN, DEVICE_IP1);
-    oldNodeInfo.connectInfo.authPort = PORT1;
-    newNodeInfo.connectInfo.authPort = PORT1;
-    oldNodeInfo.connectInfo.proxyPort = PORT1;
-    newNodeInfo.connectInfo.proxyPort = PORT1;
-    oldNodeInfo.connectInfo.sessionPort = PORT1;
-    newNodeInfo.connectInfo.sessionPort = PORT1;
+    (void)strcpy_s(oldNodeInfo.connectInfo.ifInfo[WLAN_IF].deviceIp, MAX_ADDR_LEN, DEVICE_IP1);
+    (void)strcpy_s(newNodeInfo.connectInfo.ifInfo[WLAN_IF].deviceIp, MAX_ADDR_LEN, DEVICE_IP1);
+    oldNodeInfo.connectInfo.ifInfo[WLAN_IF].authPort = PORT1;
+    newNodeInfo.connectInfo.ifInfo[WLAN_IF].authPort = PORT1;
+    oldNodeInfo.connectInfo.ifInfo[WLAN_IF].proxyPort = PORT1;
+    newNodeInfo.connectInfo.ifInfo[WLAN_IF].proxyPort = PORT1;
+    oldNodeInfo.connectInfo.ifInfo[WLAN_IF].sessionPort = PORT1;
+    newNodeInfo.connectInfo.ifInfo[WLAN_IF].sessionPort = PORT1;
 
     NiceMock<LnnNetLedgertInterfaceMock> netLedgerMock;
     EXPECT_CALL(netLedgerMock, LnnHasDiscoveryType).WillOnce(Return(false)).WillRepeatedly(Return(true));
@@ -114,19 +116,18 @@ HWTEST_F(LNNConnectionFsmMockTest, LNN_IS_NODE_INFO_CHANGED_TEST_001, TestSize.L
     EXPECT_TRUE(ret1 == false);
     ret1 = IsNodeInfoChanged(connFsm, &oldNodeInfo, &newNodeInfo, &type);
     EXPECT_TRUE(ret1 == false);
-    newNodeInfo.connectInfo.sessionPort = PORT2;
+    newNodeInfo.connectInfo.ifInfo[WLAN_IF].sessionPort = PORT2;
     ret1 = IsNodeInfoChanged(connFsm, &oldNodeInfo, &newNodeInfo, &type);
     EXPECT_TRUE(ret1 == true);
-    newNodeInfo.connectInfo.proxyPort = PORT2;
+    newNodeInfo.connectInfo.ifInfo[WLAN_IF].proxyPort = PORT2;
     ret1 = IsNodeInfoChanged(connFsm, &oldNodeInfo, &newNodeInfo, &type);
     EXPECT_TRUE(ret1 == true);
-    newNodeInfo.connectInfo.authPort = PORT2;
+    newNodeInfo.connectInfo.ifInfo[WLAN_IF].authPort = PORT2;
     ret1 = IsNodeInfoChanged(connFsm, &oldNodeInfo, &newNodeInfo, &type);
     EXPECT_TRUE(ret1 == true);
-    (void)strcpy_s(newNodeInfo.connectInfo.deviceIp, MAX_ADDR_LEN, DEVICE_IP2);
+    (void)strcpy_s(newNodeInfo.connectInfo.ifInfo[WLAN_IF].deviceIp, MAX_ADDR_LEN, DEVICE_IP2);
     ret1 = IsNodeInfoChanged(connFsm, &oldNodeInfo, &newNodeInfo, &type);
     EXPECT_TRUE(ret1 == true);
-
     LnnDestroyConnectionFsm(connFsm);
 }
 
@@ -149,6 +150,7 @@ HWTEST_F(LNNConnectionFsmMockTest, AUTH_STATE_PROCESS_TEST_001, TestSize.Level1)
     para1 = reinterpret_cast<void *>(SoftBusMalloc(sizeof(int32_t)));
     EXPECT_TRUE(para1 != nullptr);
     connFsm->connInfo.authHandle.authId = AUTH_ID;
+    connFsm->isSession = false;
     EXPECT_CALL(serviceMock, LnnNotifyJoinResult).WillRepeatedly(Return());
     bool ret = AuthStateProcess(nullptr, FSM_MSG_TYPE_JOIN_LNN, para);
     EXPECT_TRUE(ret == false);
@@ -199,7 +201,6 @@ HWTEST_F(LNNConnectionFsmMockTest, AUTH_STATE_PROCESS_TEST_002, TestSize.Level1)
 
     bool ret1 = AuthStateProcess(&connFsm->fsm, FSM_MSG_TYPE_JOIN_LNN, reinterpret_cast<void *>(retCode));
     EXPECT_TRUE(ret1 == true);
-
     LnnDestroyConnectionFsm(connFsm);
 }
 
@@ -260,7 +261,6 @@ HWTEST_F(LNNConnectionFsmMockTest, AUTH_STATE_PROCESS_TEST_003, TestSize.Level1)
     (void)strcpy_s(connFsm->connInfo.nodeInfo->uuid, UUID_BUF_LEN, NODE_UDID);
     ret1 = AuthStateProcess(&connFsm->fsm, FSM_MSG_TYPE_AUTH_DONE, reinterpret_cast<void *>(retCode3));
     EXPECT_TRUE(ret1 == true);
-
     LnnDestroyConnectionFsm(connFsm);
 }
 
@@ -291,7 +291,6 @@ HWTEST_F(LNNConnectionFsmMockTest, ONLINE_STATE_ENTER_TEST_001, TestSize.Level1)
     connFsm->connInfo.nodeInfo = reinterpret_cast<NodeInfo *>(SoftBusMalloc(sizeof(NodeInfo)));
     EXPECT_TRUE(connFsm->connInfo.nodeInfo != nullptr);
     OnlineStateEnter(&connFsm->fsm);
-
     LnnDestroyConnectionFsm(connFsm);
 }
 
@@ -343,7 +342,6 @@ HWTEST_F(LNNConnectionFsmMockTest, CLEAN_INVALID_CONNSTATE_PROCESS_TEST_001, Tes
     EXPECT_TRUE(ret1 == true);
     ret1 = CleanInvalidConnStateProcess(&connFsm->fsm, FSM_MSG_TYPE_JOIN_LNN, reinterpret_cast<void *>(retCode));
     EXPECT_TRUE(ret1 == false);
-
     LnnDestroyConnectionFsm(connFsm);
 }
 
@@ -372,7 +370,6 @@ HWTEST_F(LNNConnectionFsmMockTest, ONLINE_STATE_PROCESS_TEST_001, TestSize.Level
     EXPECT_TRUE(ret1 == true);
     ret1 = OnlineStateProcess(&connFsm->fsm, FSM_MSG_TYPE_LEAVE_LNN, reinterpret_cast<void *>(retCode));
     EXPECT_TRUE(ret1 == true);
-
     LnnDestroyConnectionFsm(connFsm);
 }
 
@@ -397,7 +394,6 @@ HWTEST_F(LNNConnectionFsmMockTest, LEAVING_STATE_ENTER_TEST_001, TestSize.Level1
     NiceMock<LnnServicetInterfaceMock> serviceMock;
     LeavingStateEnter(nullptr);
     LeavingStateEnter(&connFsm->fsm);
-
     LnnDestroyConnectionFsm(connFsm);
 }
 
@@ -427,7 +423,6 @@ HWTEST_F(LNNConnectionFsmMockTest, LEAVING_STATE_PROCESS_TEST_001, TestSize.Leve
     EXPECT_TRUE(ret1 == true);
     ret1 = LeavingStateProcess(&connFsm->fsm, FSM_MSG_TYPE_AUTH_DONE, reinterpret_cast<void *>(retCode));
     EXPECT_TRUE(ret1 == false);
-
     LnnDestroyConnectionFsm(connFsm);
 }
 
@@ -454,7 +449,6 @@ HWTEST_F(LNNConnectionFsmMockTest, LNN_STOP_CONNECTION_FSM_TEST_001, TestSize.Le
     EXPECT_TRUE(ret == SOFTBUS_INVALID_PARAM);
     ret = LnnStopConnectionFsm(connFsm, LnnConnectionFsmStopCallback);
     EXPECT_TRUE(ret == SOFTBUS_OK);
-
     LnnDestroyConnectionFsm(connFsm);
 }
 } // namespace OHOS

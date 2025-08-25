@@ -20,8 +20,9 @@
 
 #include "anonymizer.h"
 #include "bus_center_manager.h"
-#include "lnn_log.h"
+#include "g_enhance_lnn_func_pack.h"
 #include "lnn_distributed_net_ledger.h"
+#include "lnn_log.h"
 #include "lnn_net_builder.h"
 #include "softbus_adapter_mem.h"
 #include "softbus_error_code.h"
@@ -201,7 +202,16 @@ int32_t InitDecisionCenter(void)
         g_exceptionConnMgr.initFlag = false;
         return SOFTBUS_CREATE_LIST_ERR;
     }
+    if (RegistAuthTransListenerPacked() != SOFTBUS_OK) {
+        LNN_LOGE(LNN_INIT, "regist auth trans failed");
+        g_exceptionConnMgr.initFlag = false;
+        return SOFTBUS_SLE_RANGING_REGIST_TRANS_ERROR;
+    }
     g_exceptionConnMgr.initFlag = true;
+    if (LnnVirtualLinkInitPacked() != SOFTBUS_OK) {
+        /* optional case, ignore result */
+        LNN_LOGW(LNN_LANE, "init virtual link err");
+    }
     LNN_LOGD(LNN_INIT, "init ok");
     return SOFTBUS_OK;
 }
@@ -212,6 +222,10 @@ void DeinitDecisionCenter(void)
     if (g_exceptionConnMgr.connections != NULL) {
         DestroySoftBusList(g_exceptionConnMgr.connections);
         g_exceptionConnMgr.connections = NULL;
+    }
+    LnnVirtualLinkDeinitPacked();
+    if (UnregistAuthTransListenerPacked() != SOFTBUS_OK) {
+        LNN_LOGE(LNN_INIT, "unregist auth trans failed");
     }
     LNN_LOGD(LNN_INIT, "deinit ok");
 }

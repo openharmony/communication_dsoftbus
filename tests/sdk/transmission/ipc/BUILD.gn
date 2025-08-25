@@ -14,7 +14,7 @@
 import("//build/test.gni")
 import("../../../../dsoftbus.gni")
 
-module_output_path = "dsoftbus/transmission"
+module_output_path = "dsoftbus/soft_bus/transmission"
 
 ohos_unittest("TransIpcStandardTest") {
   sanitize = {
@@ -36,6 +36,7 @@ ohos_unittest("TransIpcStandardTest") {
     "$dsoftbus_sdk_path/transmission/ipc/standard/include",
     "$dsoftbus_sdk_path/transmission/ipc/standard/src",
     "$dsoftbus_sdk_path/transmission/session/include",
+    "$dsoftbus_root_path/interfaces/kits/connection",
   ]
 
   deps = [

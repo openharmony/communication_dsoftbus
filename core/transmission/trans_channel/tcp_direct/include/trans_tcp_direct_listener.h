@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2025 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -15,7 +15,6 @@
 #ifndef SOFTBUS_SESSION_LISTENER
 #define SOFTBUS_SESSION_LISTENER
 
-#include "auth_interface.h"
 #include "softbus_base_listener.h"
 
 #ifdef __cplusplus
@@ -28,6 +27,7 @@ typedef struct {
     int32_t myPort;
     ListenerModule moudleType;
     char peerUuid[UUID_BUF_LEN];
+    ProtocolType protocol;
 } HmlListenerInfo;
 
 int32_t GetCipherFlagByAuthId(AuthHandle authHandle, uint32_t *flag, bool *isAuthServer, bool isLegacyOs);
@@ -38,7 +38,7 @@ int32_t TransTdcStopSessionListener(ListenerModule module);
 
 void TransTdcSocketReleaseFd(ListenerModule module, int32_t fd);
 
-void CloseTcpDirectFd(int32_t fd);
+void CloseTcpDirectFd(ListenerModule module, int32_t fd);
 
 #ifdef __cplusplus
 }

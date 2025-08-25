@@ -30,12 +30,12 @@ namespace OHOS {
 class TransLogTest : public testing::Test { };
 
 /**
- * @tc.name: TransLogTest002
+ * @tc.name: TransLogTest001
  * @tc.desc: Test TRANS_LOGD
  * @tc.type: FUNC
  * @tc.require: I8DW1W
  */
-HWTEST_F(TransLogTest, TransLogTest002, TestSize.Level0)
+HWTEST_F(TransLogTest, TransLogTest001, TestSize.Level0)
 {
     int32_t index = 0;
     int32_t transDomainBase = 0xd005740;
@@ -49,6 +49,7 @@ HWTEST_F(TransLogTest, TransLogTest002, TestSize.Level0)
     ExpectMatchSoftBusLogAttrs(TRANS_LABELS[++index], TRANS_MSG, ++transDomainBase, "TransMsg");
     ExpectMatchSoftBusLogAttrs(TRANS_LABELS[++index], TRANS_STREAM, ++transDomainBase, "TransStream");
     ExpectMatchSoftBusLogAttrs(TRANS_LABELS[++index], TRANS_QOS, ++transDomainBase, "TransQos");
+    ExpectMatchSoftBusLogAttrs(TRANS_LABELS[++index], TRANS_EVENT, ++transDomainBase, "TransEvent");
     ExpectMatchSoftBusLogAttrs(TRANS_LABELS[++index], TRANS_TEST, DOMAIN_ID_TEST, "TransTest");
     SoftBusLogLabel label = TRANS_LABELS[TRANS_TEST];
     HilogMock mock;
@@ -57,12 +58,12 @@ HWTEST_F(TransLogTest, TransLogTest002, TestSize.Level0)
 }
 
 /**
- * @tc.name: TransLogTest003
+ * @tc.name: TransLogTest002
  * @tc.desc: Test TRANS_LOGI
  * @tc.type: FUNC
  * @tc.require: I8DW1W
  */
-HWTEST_F(TransLogTest, TransLogTest003, TestSize.Level0)
+HWTEST_F(TransLogTest, TransLogTest002, TestSize.Level0)
 {
     SoftBusLogLabel label = TRANS_LABELS[TRANS_TEST];
     HilogMock mock;
@@ -71,12 +72,12 @@ HWTEST_F(TransLogTest, TransLogTest003, TestSize.Level0)
 }
 
 /**
- * @tc.name: TransLogTest004
+ * @tc.name: TransLogTest003
  * @tc.desc: Test TRANS_LOGW
  * @tc.type: FUNC
  * @tc.require: I8DW1W
  */
-HWTEST_F(TransLogTest, TransLogTest004, TestSize.Level0)
+HWTEST_F(TransLogTest, TransLogTest003, TestSize.Level0)
 {
     SoftBusLogLabel label = TRANS_LABELS[TRANS_TEST];
     HilogMock mock;
@@ -85,12 +86,12 @@ HWTEST_F(TransLogTest, TransLogTest004, TestSize.Level0)
 }
 
 /**
- * @tc.name: TransLogTest005
+ * @tc.name: TransLogTest004
  * @tc.desc: Test TRANS_LOGE
  * @tc.type: FUNC
  * @tc.require: I8DW1W
  */
-HWTEST_F(TransLogTest, TransLogTest005, TestSize.Level0)
+HWTEST_F(TransLogTest, TransLogTest004, TestSize.Level0)
 {
     SoftBusLogLabel label = TRANS_LABELS[TRANS_TEST];
     HilogMock mock;
@@ -99,12 +100,12 @@ HWTEST_F(TransLogTest, TransLogTest005, TestSize.Level0)
 }
 
 /**
- * @tc.name: TransLogTest006
+ * @tc.name: TransLogTest005
  * @tc.desc: Test TRANS_LOGF
  * @tc.type: FUNC
  * @tc.require: I8DW1W
  */
-HWTEST_F(TransLogTest, TransLogTest006, TestSize.Level0)
+HWTEST_F(TransLogTest, TransLogTest005, TestSize.Level0)
 {
     SoftBusLogLabel label = TRANS_LABELS[TRANS_TEST];
     HilogMock mock;

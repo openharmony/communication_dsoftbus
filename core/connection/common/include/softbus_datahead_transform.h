@@ -16,8 +16,6 @@
 #ifndef SOFTBUS_DATAHEAD_TRANSFORM_H
 #define SOFTBUS_DATAHEAD_TRANSFORM_H
 
-#include <stdbool.h>
-#include <stdint.h>
 #include "softbus_conn_manager.h"
 #include "softbus_proxychannel_message.h"
 
@@ -31,6 +29,8 @@ void PackConnPktHead(ConnPktHead *data);
 void UnpackConnPktHead(ConnPktHead *data);
 void UnpackProxyMessageHead(ProxyMessageHead *msg);
 void PackProxyMessageHead(ProxyMessageHead *msg);
+
+void PackProxyMessageShortHead(ProxyMessageShortHead *msg);
 
 #ifdef __cplusplus
 #if __cplusplus

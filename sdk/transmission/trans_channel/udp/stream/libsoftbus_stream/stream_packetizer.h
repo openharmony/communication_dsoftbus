@@ -16,10 +16,6 @@
 #ifndef STREAM_PACKETIZER_H
 #define STREAM_PACKETIZER_H
 
-#include <memory>
-#include <sys/types.h>
-#include <utility>
-
 #include "i_stream.h"
 
 namespace Communication {

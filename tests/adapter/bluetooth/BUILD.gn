@@ -20,7 +20,7 @@ import("../../../dsoftbus.gni")
 dsoftbus_root_path = "../../.."
 
 if (!defined(ohos_lite)) {
-  module_output_path = "dsoftbus/adapter"
+  module_output_path = "dsoftbus/soft_bus/adapter"
   bt_test_sources = [ "bluetooth_mock.cpp" ]
   bt_test_sources += adapter_ble_src
 
@@ -30,6 +30,7 @@ if (!defined(ohos_lite)) {
   bt_test_deps = [
     "$dsoftbus_dfx_path:softbus_dfx",
     "$dsoftbus_root_path/core/common:softbus_utils",
+    "$dsoftbus_root_path/adapter:softbus_adapter",
   ]
 
   bt_test_external_deps = [
@@ -38,6 +39,10 @@ if (!defined(ohos_lite)) {
     "googletest:gtest_main",
     "hilog:libhilog",
   ]
+
+  if (dsoftbus_feature_deps_sle) {
+    bt_test_external_deps += [ "nearlink_service:nearlink_framework" ]
+  }
 
   if (support_bluetooth &&
       (dsoftbus_feature_conn_ble || dsoftbus_feature_conn_br)) {
@@ -64,16 +69,6 @@ if (!defined(ohos_lite)) {
     external_deps = bt_test_external_deps
   }
 
-  ohos_unittest("AdapterBtUtilsTest") {
-    module_out_path = module_output_path
-    sources = [ "adapter_bt_utils_test.cpp" ]
-    sources += adapter_ble_src
-
-    include_dirs = bt_test_inc
-    deps = bt_test_deps
-    external_deps = bt_test_external_deps
-  }
-
   ohos_unittest("AdapterBtCommonTest") {
     module_out_path = module_output_path
     sources = bt_test_sources
@@ -93,7 +88,6 @@ if (!defined(ohos_lite)) {
         ":AdapterBleGattClientTest",
         ":AdapterBleGattServerTest",
         ":AdapterBtCommonTest",
-        ":AdapterBtUtilsTest",
         "broadcast:unittest",
       ]
     }

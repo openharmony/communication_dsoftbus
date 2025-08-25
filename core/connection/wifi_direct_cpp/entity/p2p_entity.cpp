@@ -14,21 +14,18 @@
  */
 #include "p2p_entity.h"
 
-#include <algorithm>
-#include <future>
-
-#include "conn_log.h"
-#include "softbus_error_code.h"
-
 #include "data/interface_manager.h"
 #include "data/link_manager.h"
-#include "p2p_available_state.h"
-#include "p2p_broadcast_receiver.h"
-#include "utils/wifi_direct_anonymous.h"
 #include "wifi_direct_scheduler_factory.h"
 
 namespace OHOS::SoftBus {
 using InterfaceType = InterfaceInfo::InterfaceType;
+
+P2pEntity& P2pEntity::GetInstance()
+{
+    static P2pEntity instance;
+    return instance;
+}
 
 static void P2pStateChangeCallback(P2pState state)
 {
@@ -40,14 +37,14 @@ static void P2pStateChangeCallback(P2pState state)
 
 static void P2pConnectionChangeCallback(const WifiP2pLinkedInfo info)
 {
-    CONN_LOGI(CONN_WIFI_DIRECT, "ConnectionState=%{public}d, isGroupOwner=%{public}d", info.connectState,
+    CONN_LOGI(CONN_WIFI_DIRECT, "ConnectionState=%{public}d, isGO=%{public}d", info.connectState,
         info.isP2pGroupOwner);
     BroadcastParam param;
     param.p2pLinkInfo = info;
     param.groupInfo = std::make_shared<P2pAdapter::WifiDirectP2pGroupInfo>();
     auto ret = P2pAdapter::GetGroupInfo(*(param.groupInfo));
     if (ret != SOFTBUS_OK) {
-        CONN_LOGI(CONN_WIFI_DIRECT, "get group info failed, error=%{public}d", ret);
+        CONN_LOGI(CONN_WIFI_DIRECT, "get group info fail, error=%{public}d", ret);
         param.groupInfo = nullptr;
     }
     P2pBroadcast::GetInstance()->DispatchWorkHandler(
@@ -65,9 +62,13 @@ void P2pEntity::Listener(BroadcastReceiverAction action, const struct BroadcastP
     }
 }
 
+static bool g_p2pEntityInit = false;
 void P2pEntity::Init()
 {
-    CONN_LOGI(CONN_WIFI_DIRECT, "enter");
+    if (g_p2pEntityInit) {
+        return;
+    }
+    g_p2pEntityInit = true;
     BroadcastReceiverAction actions[2] = {
         BroadcastReceiverAction::WIFI_P2P_STATE_CHANGED_ACTION,
         BroadcastReceiverAction::WIFI_P2P_CONNECTION_CHANGED_ACTION,
@@ -92,7 +93,7 @@ void P2pEntity::DisconnectLink(const std::string &remoteMac)
     CONN_LOGI(CONN_WIFI_DIRECT, "enter");
     P2pAdapter::WifiDirectP2pGroupInfo groupInfo {};
     auto ret = P2pAdapter::GetGroupInfo(groupInfo);
-    CONN_CHECK_AND_RETURN_LOGE(ret == SOFTBUS_OK, CONN_WIFI_DIRECT, "get group info failed");
+    CONN_CHECK_AND_RETURN_LOGE(ret == SOFTBUS_OK, CONN_WIFI_DIRECT, "get group info fail");
     bool isNeedRemove = true;
     if (groupInfo.isGroupOwner) {
         if (groupInfo.clientDevices.size() > 1) {
@@ -171,7 +172,7 @@ static void SendClientJoinEvent(const std::string &remoteMac, int32_t result)
     WifiDirectSchedulerFactory::GetInstance().GetScheduler().ProcessEvent(remoteDeviceId, event);
 }
 
-void P2pEntity::NotifyNewClientJoining(const std::string &remoteMac)
+void P2pEntity::NotifyNewClientJoining(const std::string &remoteMac, int waitTime)
 {
     CONN_LOGI(CONN_WIFI_DIRECT, "enter");
     CONN_CHECK_AND_RETURN_LOGW(!remoteMac.empty(), CONN_WIFI_DIRECT, "remote mac is empty, skip");
@@ -190,7 +191,7 @@ void P2pEntity::NotifyNewClientJoining(const std::string &remoteMac)
                 timer_.Shutdown(false);
             }
         },
-        TIMEOUT_WAIT_CLIENT_JOIN_MS, true);
+        waitTime, true);
     joiningClients_[remoteMac] = timerId;
     CONN_LOGI(CONN_WIFI_DIRECT, "remoteMac=%{public}s, joining client count=%{public}zu",
         WifiDirectAnonymizeMac(remoteMac).c_str(), joiningClients_.size());
@@ -270,7 +271,7 @@ P2pOperationResult P2pEntity::Disconnect(const P2pDestroyGroupParam &param)
                 return SOFTBUS_OK;
             });
         if (ret != SOFTBUS_OK) {
-            CONN_LOGI(CONN_WIFI_DIRECT, "get reuse cnt from interface info failed, error=%{public}d", ret);
+            CONN_LOGI(CONN_WIFI_DIRECT, "get reuse cnt from interface info fail, error=%{public}d", ret);
             result.errorCode_ = ret;
             return result;
         }
@@ -341,13 +342,13 @@ void P2pEntity::ExecuteNextOperation()
     P2pOperationResult result {};
     switch (operation->type_) {
         case P2pOperationType::CREATE_GROUP:
-            ret = state_->CreateGroup(std::dynamic_pointer_cast<P2pOperationWrapper<P2pCreateGroupParam>>(operation));
+            ret = state_->CreateGroup(std::static_pointer_cast<P2pOperationWrapper<P2pCreateGroupParam>>(operation));
             break;
         case P2pOperationType::CONNECT:
-            ret = state_->Connect(std::dynamic_pointer_cast<P2pOperationWrapper<P2pConnectParam>>(operation));
+            ret = state_->Connect(std::static_pointer_cast<P2pOperationWrapper<P2pConnectParam>>(operation));
             break;
         case P2pOperationType::DESTROY_GROUP:
-            ret = state_->DestroyGroup(std::dynamic_pointer_cast<P2pOperationWrapper<P2pDestroyGroupParam>>(operation));
+            ret = state_->DestroyGroup(std::static_pointer_cast<P2pOperationWrapper<P2pDestroyGroupParam>>(operation));
             break;
         default:
             CONN_LOGE(CONN_WIFI_DIRECT, "operation type invalid");
@@ -380,7 +381,7 @@ void P2pEntity::OnP2pStateChangeEvent(P2pState state)
 {
     std::lock_guard lock(operationLock_);
     UpdateInterfaceManagerWhenStateChanged(state);
-    WifiDirectUtils::SyncLnnInfoForP2p(WIFI_DIRECT_ROLE_NONE, P2pAdapter::GetMacAddress(), "");
+    WifiDirectUtils::SyncLnnInfoForP2p(WIFI_DIRECT_API_ROLE_NONE, P2pAdapter::GetMacAddress(), "");
     state_->OnP2pStateChangeEvent(state);
 }
 
@@ -394,8 +395,18 @@ void P2pEntity::OnP2pConnectionChangeEvent(
         currentFrequency_ = 0;
     }
 
-    state_->PreprocessP2pConnectionChangeEvent(info, groupInfo);
+    bool result = true;
+    if (groupInfo != nullptr && !groupInfo->isGroupOwner) {
+        CONN_LOGI(CONN_WIFI_DIRECT, "local is GC, goMac=%{public}s",
+            WifiDirectAnonymizeMac(groupInfo->groupOwner.address).c_str());
+        result = LinkManager::GetInstance().ProcessIfPresent(groupInfo->groupOwner.address, [] (InnerLink &link) {
+            });
+    }
+    if (result) {
+        state_->PreprocessP2pConnectionChangeEvent(info, groupInfo);
+    }
     UpdateInterfaceManager(info, groupInfo);
+    CONN_CHECK_AND_RETURN_LOGE(result, CONN_WIFI_DIRECT, "not found link");
     UpdateLinkManager(info, groupInfo);
     state_->OnP2pConnectionChangeEvent(info, groupInfo);
 }
@@ -430,21 +441,21 @@ static void ResetInterfaceInfo(const std::string &localMac)
 static void UpdateInterfaceInfo(
     const std::string &localMac, const std::shared_ptr<P2pAdapter::WifiDirectP2pGroupInfo> &groupInfo)
 {
-    CONN_LOGI(CONN_WIFI_DIRECT, "isGroupOwner=%{public}d, clientDeviceSize=%{public}zu", groupInfo->isGroupOwner,
+    CONN_LOGI(CONN_WIFI_DIRECT, "isGO=%{public}d, clientDeviceSize=%{public}zu", groupInfo->isGroupOwner,
         groupInfo->clientDevices.size());
     std::string groupConfig;
     if (groupInfo->isGroupOwner) {
         auto ret = P2pAdapter::GetGroupConfig(groupConfig);
         CONN_CHECK_AND_RETURN_LOGE(
-            ret == SOFTBUS_OK, CONN_WIFI_DIRECT, "get group config failed, error=%{public}d", ret);
+            ret == SOFTBUS_OK, CONN_WIFI_DIRECT, "get group config fail, error=%{public}d", ret);
     }
     std::string dynamicMac;
     auto ret = P2pAdapter::GetDynamicMacAddress(dynamicMac);
-    CONN_CHECK_AND_RETURN_LOGE(ret == SOFTBUS_OK, CONN_WIFI_DIRECT, "get dynamic mac failed, error=%{public}d", ret);
+    CONN_CHECK_AND_RETURN_LOGE(ret == SOFTBUS_OK, CONN_WIFI_DIRECT, "get dynamic mac fail, error=%{public}d", ret);
     std::string ip;
     ret = P2pAdapter::GetIpAddress(ip);
     if (ret != SOFTBUS_OK) {
-        CONN_LOGE(CONN_WIFI_DIRECT, "get ip failed, error=%{public}d", ret);
+        CONN_LOGE(CONN_WIFI_DIRECT, "get ip fail, error=%{public}d", ret);
     } else {
         CONN_LOGI(CONN_WIFI_DIRECT, "localIp=%{public}s", WifiDirectAnonymizeIp(ip).c_str());
     }
@@ -482,7 +493,7 @@ static void UpdateInnerLink(const std::shared_ptr<P2pAdapter::WifiDirectP2pGroup
 {
     auto frequency = groupInfo->frequency;
     if (!groupInfo->isGroupOwner) {
-        CONN_LOGI(CONN_WIFI_DIRECT, "not group owner, groupOwnerMac=%{public}s",
+        CONN_LOGI(CONN_WIFI_DIRECT, "not group owner, goMac=%{public}s",
             WifiDirectAnonymizeMac(groupInfo->groupOwner.address).c_str());
         LinkManager::GetInstance().ProcessIfPresent(groupInfo->groupOwner.address, [frequency, groupInfo, localMac]
             (InnerLink &link) {
@@ -540,7 +551,7 @@ void P2pEntity::UpdateLinkManager(
     CONN_CHECK_AND_RETURN_LOGE(groupInfo, CONN_WIFI_DIRECT, "groupInfo is null");
     std::string dynamicMac;
     auto ret = P2pAdapter::GetDynamicMacAddress(dynamicMac);
-    CONN_CHECK_AND_RETURN_LOGE(ret == SOFTBUS_OK, CONN_WIFI_DIRECT, "get dynamic mac failed, error=%{public}d", ret);
+    CONN_CHECK_AND_RETURN_LOGE(ret == SOFTBUS_OK, CONN_WIFI_DIRECT, "get dynamic mac fail, error=%{public}d", ret);
     UpdateInnerLink(groupInfo, dynamicMac);
 }
 
@@ -565,4 +576,21 @@ void P2pEntity::UpdateInterfaceManagerWhenStateChanged(P2pState state)
     });
 }
 
+void P2pEntity::Dump(P2pEntitySnapshot &snapshot)
+{
+    {
+        std::lock_guard lock(operationLock_);
+        snapshot.state_ = state_->GetName();
+        snapshot.frequency_ = currentFrequency_;
+    }
+    std::map<std::string, uint32_t> joinClients;
+    {
+        std::lock_guard lock(joiningClientsLock_);
+        std::string macString;
+        for (const auto &client : joiningClients_) {
+            macString += client.first + " ";
+        }
+        snapshot.joiningClients_ = macString;
+    }
+}
 } // namespace OHOS::SoftBus

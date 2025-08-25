@@ -14,7 +14,7 @@
 import("//build/test.gni")
 import("../../../../dsoftbus.gni")
 
-module_output_path = "dsoftbus/connection"
+module_output_path = "dsoftbus/soft_bus/connection"
 dsoftbus_root_path = "../../../.."
 softbus_adapter_common = "${dsoftbus_root_path}/adapter/common"
 
@@ -24,17 +24,20 @@ ohos_unittest("TcpManagerTest") {
   include_dirs = [
     "$dsoftbus_root_path/core/common/include",
     "$softbus_adapter_common/include",
+    "$dsoftbus_root_path/interfaces/kits/connect",
     "$dsoftbus_root_path/core/connection/interface",
     "$dsoftbus_root_path/core/connection/common/include",
     "$dsoftbus_root_path/interfaces/kits/common",
     "$dsoftbus_root_path/core/connection/manager",
     "$dsoftbus_root_path/core/connection/tcp/include",
     "$dsoftbus_root_path/core/common/softbus_property/include",
+    "$dsoftbus_root_path/adapter/default_config/spec_config",
   ]
-  sources = [ "tcp_manager_test.cpp" ]
+  sources = [ "softbus_tcp_connect_manager_test.cpp" ]
   deps = [
     "$dsoftbus_root_path/core/common:softbus_utils",
     "$dsoftbus_root_path/core/frame:softbus_server",
+    "$dsoftbus_root_path/adapter:softbus_adapter",
   ]
 
   external_deps = [

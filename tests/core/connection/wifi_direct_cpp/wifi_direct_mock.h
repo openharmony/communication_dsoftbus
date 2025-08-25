@@ -16,22 +16,25 @@
 #ifndef WIFI_DIRECT_MOCK_H
 #define WIFI_DIRECT_MOCK_H
 
-#include "auth_interface.h"
-#include "bus_center_manager.h"
-#include "lnn_feature_capability.h"
-#include "lnn_p2p_info.h"
-#include "lnn_distributed_net_ledger.h"
-#include "softbus_proxychannel_pipeline.h"
-#include "wifi_direct_types.h"
-#include "kits/c/wifi_device.h"
-#include "kits/c/wifi_hid2d.h"
-#include "kits/c/wifi_p2p.h"
 #include <atomic>
 #include <gmock/gmock.h>
-
+#include "auth_interface.h"
+#include "bus_center_event_struct.h"
+#include "bus_center_manager.h"
 #include "data/negotiate_message.h"
+#include "dfx/wifi_direct_hidumper.h"
+#include "kits/c/wifi_device.h"
+#include "kits/c/wifi_hid2d.h"
+#include "kits/c/wifi_hotspot_config.h"
+#include "kits/c/wifi_p2p.h"
+#include "lnn_distributed_net_ledger.h"
+#include "lnn_feature_capability.h"
+#include "lnn_p2p_info.h"
+#include "softbus_proxychannel_pipeline.h"
+#include "wifi_direct_types.h"
 
 namespace OHOS::SoftBus {
+static constexpr int P2P_V1_WAITING_CLIENT_JOIN_MS = 10000;
 class WifiDirectInterface {
 public:
     WifiDirectInterface() = default;
@@ -56,6 +59,7 @@ public:
     virtual int32_t LnnGetRemoteBoolInfoIgnoreOnline(const std::string &networkId, InfoKey key, bool *info) = 0;
     virtual int32_t LnnGetRemoteNumU64Info(const std::string &networkId, InfoKey key, uint64_t *info) = 0;
     virtual bool LnnGetOnlineStateById(const char *id, IdCategory type) = 0;
+
     virtual void AuthCloseConn(AuthHandle authHandle) = 0;
     virtual void AuthStopListeningForWifiDirect(AuthLinkType type, ListenerModule moduleId) = 0;
     virtual int32_t AuthStartListeningForWifiDirect(AuthLinkType type, const char *ip,
@@ -73,6 +77,7 @@ public:
     virtual int32_t LnnGetLocalDefaultPtkByUuid(const char *uuid, char *localPtk, uint32_t len) = 0;
     virtual int32_t LnnGetRemoteByteInfo(const char *networkId, InfoKey key, uint8_t *info, uint32_t len) = 0;
     virtual int32_t LnnGetRemoteDefaultPtkByUuid(const char *uuid, char *remotePtk, uint32_t len) = 0;
+    virtual int32_t LnnGetLocalBoolInfo(InfoKey key, bool *info, uint32_t len) = 0;
 
     // Defines dependencies short-reach interface here
     virtual int IsWifiActive() = 0;
@@ -96,6 +101,8 @@ public:
     virtual WifiErrorCode RemoveGroup() = 0;
     virtual WifiErrorCode Hid2dRemoveGcGroup(const char gcIfName[IF_NAME_LEN]) = 0;
     virtual int32_t Hid2dIsWideBandwidthSupported() = 0;
+    virtual int IsHotspotActive() = 0;
+    virtual WifiErrorCode GetHotspotConfig(HotspotConfig *result) = 0;
 
     virtual int32_t TransProxyPipelineRegisterListener(TransProxyPipelineMsgType type,
         const ITransProxyPipelineListener *listener) = 0;
@@ -114,6 +121,14 @@ public:
     virtual std::string ProxyNegotiateChannelGetRemoteDeviceId(int32_t channelId) const = 0;
     virtual int32_t LnnGetOsTypeByNetworkId(const char *networkId, int32_t *osType) = 0;
     virtual int32_t GetInterfaceIpString(const std::string &interface, std::string &ip) = 0;
+    virtual void HidumpInit() = 0;
+    using Hidumper = std::function<int()>;
+    virtual void Register(const Hidumper &hidumper) = 0;
+    virtual int32_t LnnGetRecommendChannel(const char *udid, int32_t *preferChannel) = 0;
+    virtual int32_t LnnGetRemoteNodeInfoByKey(const char *key, NodeInfo *info) = 0;
+    virtual int32_t LnnGetRemoteNodeInfoById(const char *id, IdCategory type, NodeInfo *info) = 0;
+    virtual int32_t LnnRegisterEventHandler(LnnEventType event, LnnEventHandler handler) = 0;
+    virtual int32_t LnnGetAllOnlineNodeInfo(NodeBasicInfo **info, int32_t *infoNum) = 0;
 };
 
 class WifiDirectInterfaceMock : public WifiDirectInterface {
@@ -184,6 +199,8 @@ public:
     MOCK_METHOD(WifiErrorCode, Hid2dRemoveGcGroup, (const char gcIfName[IF_NAME_LEN]), (override));
     MOCK_METHOD(WifiErrorCode, RemoveGroup, (), (override));
     MOCK_METHOD(int, Hid2dIsWideBandwidthSupported, (), (override));
+    MOCK_METHOD(int, IsHotspotActive, (), (override));
+    MOCK_METHOD(WifiErrorCode, GetHotspotConfig, (HotspotConfig *result), (override));
 
     MOCK_METHOD(int32_t, TransProxyPipelineRegisterListener,
         (TransProxyPipelineMsgType, const ITransProxyPipelineListener *), (override));
@@ -202,6 +219,16 @@ public:
     MOCK_METHOD(std::string, ProxyNegotiateChannelGetRemoteDeviceId, (int32_t channelId), (const override));
     MOCK_METHOD(int32_t, LnnGetOsTypeByNetworkId, (const char *networkId, int32_t *osType), (override));
     MOCK_METHOD(int32_t, GetInterfaceIpString, (const std::string &interface, std::string &ip), (override));
+    MOCK_METHOD(void, HidumpInit, (), (override));
+    using Hidumper = std::function<int()>;
+    MOCK_METHOD(void, Register, (const Hidumper &hidumper), (override));
+    MOCK_METHOD(int32_t, LnnGetRecommendChannel, (const char *udid, int32_t *preferChannel), (override));
+    MOCK_METHOD(int32_t, LnnGetRemoteNodeInfoByKey, (const char *key, NodeInfo *info), (override));
+    MOCK_METHOD(int32_t, LnnGetRemoteNodeInfoById, (const char *id, IdCategory type, NodeInfo *info), (override));
+
+    MOCK_METHOD(int32_t, LnnRegisterEventHandler, (LnnEventType event, LnnEventHandler handler), (override));
+    MOCK_METHOD(int32_t, LnnGetAllOnlineNodeInfo, (NodeBasicInfo **info, int32_t *infoNum), (override));
+    MOCK_METHOD(int32_t, LnnGetLocalBoolInfo, (InfoKey key, bool *info, uint32_t len), (override));
 
     static void InjectWifiDirectConnectCallbackMock(WifiDirectConnectCallback &callback);
     static void InjectWifiDirectDisconnectCallbackMock(WifiDirectDisconnectCallback &callback);

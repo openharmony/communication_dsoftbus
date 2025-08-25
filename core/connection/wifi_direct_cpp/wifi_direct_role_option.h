@@ -21,11 +21,7 @@
 namespace OHOS::SoftBus {
 class WifiDirectRoleOption {
 public:
-    static WifiDirectRoleOption &GetInstance()
-    {
-        static WifiDirectRoleOption instance;
-        return instance;
-    }
+    static WifiDirectRoleOption &GetInstance();
 
     int GetExpectedRole(
         const std::string &networkId, enum WifiDirectConnectType type, uint32_t &expectedRole, bool &isStrict);

@@ -66,9 +66,9 @@ int32_t SoftbusGetConfig(ConfigType type, unsigned char *val, uint32_t len)
     return GetNetworkManagerInterface()->SoftbusGetConfig(type, val, len);
 }
 
-void DiscLinkStatusChanged(LinkStatus status, ExchangeMedium medium)
+void DiscLinkStatusChanged(LinkStatus status, ExchangeMedium medium, int32_t ifnameIdx)
 {
-    return GetNetworkManagerInterface()->DiscLinkStatusChanged(status, medium);
+    return GetNetworkManagerInterface()->DiscLinkStatusChanged(status, medium, ifnameIdx);
 }
 
 void LnnStopPublish(void)
@@ -140,6 +140,11 @@ void LnnUnregisterEventHandler(LnnEventType event, LnnEventHandler handler)
 void DfxRecordTriggerTime(LnnTriggerReason reason, LnnEventLnnStage stage)
 {
     return GetNetworkManagerInterface()->DfxRecordTriggerTime(reason, stage);
+}
+
+int32_t RegistUsbProtocolManager(void)
+{
+    return GetNetworkManagerInterface()->RegistUsbProtocolManager();
 }
 }
 } // namespace OHOS

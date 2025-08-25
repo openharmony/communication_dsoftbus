@@ -16,10 +16,7 @@
 #ifndef SOFTBUS_TCP_DIRECT_CALLBACK_H
 #define SOFTBUS_TCP_DIRECT_CALLBACK_H
 
-#include <stdint.h>
-
 #include "client_trans_session_callback.h"
-#include "softbus_def.h"
 
 #ifdef __cplusplus
 #if __cplusplus
@@ -29,7 +26,8 @@ extern "C" {
 
 int32_t ClientTransTdcSetCallBack(const IClientSessionCallBack *cb);
 
-int32_t ClientTransTdcOnSessionOpened(const char *sessionName, const ChannelInfo *channel);
+int32_t ClientTransTdcOnSessionOpened(
+    const char *sessionName, const ChannelInfo *channel, SocketAccessInfo *accessInfo);
 
 int32_t ClientTransTdcOnSessionClosed(int32_t channelId, ShutdownReason reason);
 

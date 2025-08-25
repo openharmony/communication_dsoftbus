@@ -82,9 +82,9 @@ int32_t LnnHbMediumMgrSetParam(void *param)
     return HeartBeatCtrlDepsInterface()->LnnHbMediumMgrSetParam(param);
 }
 
-bool LnnIslocalSupportBurstFeature(void)
+bool LnnIsLocalSupportBurstFeature(void)
 {
-    return HeartBeatCtrlDepsInterface()->LnnIslocalSupportBurstFeature();
+    return HeartBeatCtrlDepsInterface()->LnnIsLocalSupportBurstFeature();
 }
 
 int32_t AuthSendKeepaliveOption(const char *uuid, ModeCycle cycle)
@@ -92,9 +92,9 @@ int32_t AuthSendKeepaliveOption(const char *uuid, ModeCycle cycle)
     return HeartBeatCtrlDepsInterface()->AuthSendKeepaliveOption(uuid, cycle);
 }
 
-int32_t LnnGenerateCeParams(void)
+int32_t LnnGenerateCeParams(bool isUnlocked)
 {
-    return HeartBeatCtrlDepsInterface()->LnnGenerateCeParams();
+    return HeartBeatCtrlDepsInterface()->LnnGenerateCeParams(isUnlocked);
 }
 }
 } // namespace OHOS

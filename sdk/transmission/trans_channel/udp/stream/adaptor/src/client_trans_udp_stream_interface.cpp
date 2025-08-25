@@ -17,14 +17,10 @@
 
 #include <map>
 #include <mutex>
-#include <string>
 
-#include "securec.h"
 #include "softbus_error_code.h"
 #include "stream_adaptor.h"
 #include "stream_adaptor_listener.h"
-#include "stream_common.h"
-#include "trans_log.h"
 
 using namespace OHOS;
 

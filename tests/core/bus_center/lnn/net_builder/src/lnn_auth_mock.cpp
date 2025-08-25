@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2022 Huawei Device Co., Ltd.
+ * Copyright (c) 2022-2025 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -36,10 +36,10 @@ static LnnAuthInterface *GetAuthInterface()
 }
 
 extern "C" {
-int32_t AuthStartVerify(const AuthConnInfo *connInfo, uint32_t requestId, const AuthVerifyCallback *callback,
-    AuthVerifyModule module, bool isFastAuth)
+int32_t AuthStartVerify(
+    const AuthConnInfo *connInfo, const AuthVerifyParam *authVerifyParam, const AuthVerifyCallback *callback)
 {
-    return GetAuthInterface()->AuthStartVerify(connInfo, requestId, callback, module, isFastAuth);
+    return GetAuthInterface()->AuthStartVerify(connInfo, authVerifyParam, callback);
 }
 
 int32_t AuthGetVersion(int64_t authId, SoftBusVersion *version)
@@ -51,5 +51,10 @@ int32_t RegGroupChangeListener(const GroupChangeListener *listener)
 {
     return GetAuthInterface()->RegGroupChangeListener(listener);
 }
+
+bool IsSameAccountId(int64_t accountId)
+{
+    return GetAuthInterface()->IsSameAccountId(accountId);
 }
 }
+} // namespace OHOS

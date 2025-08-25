@@ -144,9 +144,11 @@ bool IsExistLnnDfxNodeByUdidHash(const char *udidHash, LnnBleReportExtra *bleExt
     return HeartBeatStrategyInterface()->IsExistLnnDfxNodeByUdidHash(udidHash, bleExtra);
 }
 
+extern "C" {
 int32_t LnnRetrieveDeviceInfo(const char *udid, NodeInfo *deviceInfo)
 {
     return HeartBeatStrategyInterface()->LnnRetrieveDeviceInfo(udid, deviceInfo);
+}
 }
 
 bool IsSameAccountGroupDevice(void)
@@ -159,10 +161,10 @@ uint32_t AuthGenRequestId(void)
     return HeartBeatStrategyInterface()->AuthGenRequestId();
 }
 
-int32_t AuthStartVerify(const AuthConnInfo *connInfo, uint32_t requestId, const AuthVerifyCallback *verifyCallback,
-    AuthVerifyModule module, bool isFastAuth)
+int32_t AuthStartVerify(
+    const AuthConnInfo *connInfo, const AuthVerifyParam *authVerifyParam, const AuthVerifyCallback *verifyCallback)
 {
-    return HeartBeatStrategyInterface()->AuthStartVerify(connInfo, requestId, verifyCallback, module, isFastAuth);
+    return HeartBeatStrategyInterface()->AuthStartVerify(connInfo, authVerifyParam, verifyCallback);
 }
 
 void AddNodeToLnnBleReportExtraMap(const char *udidHash, const LnnBleReportExtra *bleExtra)
@@ -203,6 +205,11 @@ void LnnNotifyDeviceTrustedChange(int32_t type, const char *msg, uint32_t msgLen
 void NotifyForegroundUseridChange(char *networkId, uint32_t discoveryType, bool isChange)
 {
     return HeartBeatStrategyInterface()->NotifyForegroundUseridChange(networkId, discoveryType, isChange);
+}
+
+bool IdServiceIsPotentialTrustedDevice(const char *udidHash, const char *accountIdHash, bool isSameAccount)
+{
+    return HeartBeatStrategyInterface()->IdServiceIsPotentialTrustedDevice(udidHash, accountIdHash, isSameAccount);
 }
 }
 } // namespace OHOS

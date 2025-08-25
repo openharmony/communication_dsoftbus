@@ -172,7 +172,7 @@ HWTEST_F(AuthHichainTest, IS_POTENTIAL_TRUSTED_DEVICE_TEST_001, TestSize.Level1)
     grounpManager.unRegDataChangeListener = LnnHichainInterfaceMock::ActionofunRegDataChangeListener;
     grounpManager.getRelatedGroups = LnnHichainInterfaceMock::getRelatedGroups;
     grounpManager.destroyInfo = LnnHichainInterfaceMock::destroyInfo;
-    EXPECT_CALL(hichainMock, GetGmInstance).WillOnce(Return(NULL)).WillRepeatedly(Return(&grounpManager));
+    EXPECT_CALL(hichainMock, GetGmInstance).WillOnce(Return(nullptr)).WillRepeatedly(Return(&grounpManager));
     AuthNetLedgertInterfaceMock ledgermock;
     EXPECT_CALL(ledgermock, LnnGetLocalStrInfo)
         .WillOnce(Return(SOFTBUS_NETWORK_NOT_FOUND))
@@ -268,7 +268,7 @@ HWTEST_F(AuthHichainTest, IS_SAME_ACCOUNT_GROUP_DEVICE_TEST_001, TestSize.Level1
     grounpManager.unRegDataChangeListener = LnnHichainInterfaceMock::ActionofunRegDataChangeListener;
     grounpManager.getJoinedGroups = LnnHichainInterfaceMock::InvokeGetJoinedGroups2;
     grounpManager.destroyInfo = LnnHichainInterfaceMock::destroyInfo;
-    EXPECT_CALL(hichainMock, GetGmInstance).WillOnce(Return(NULL)).WillRepeatedly(Return(&grounpManager));
+    EXPECT_CALL(hichainMock, GetGmInstance).WillOnce(Return(nullptr)).WillRepeatedly(Return(&grounpManager));
     bool ret = IsSameAccountGroupDevice();
     EXPECT_TRUE(ret == false);
     ret = IsSameAccountGroupDevice();

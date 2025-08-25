@@ -28,22 +28,20 @@
 namespace OHOS::SoftBus {
 class WifiDirectDfx {
 public:
-    static WifiDirectDfx &GetInstance()
-    {
-        static WifiDirectDfx instance;
-        return instance;
-    }
-    void DfxRecord(bool success, int32_t reason, WifiDirectConnectInfo &connectInfo);
+    static WifiDirectDfx &GetInstance();
+    void DfxRecord(bool success, int32_t reason, const WifiDirectConnectInfo &connectInfo);
     void Record(uint32_t requestId, uint16_t challengeCode);
     void Clear(uint32_t requestId);
-    static void SetLinkType(WifiDirectConnectInfo &info);
     void SetReuseFlag(uint32_t requestId);
     bool IsReuse(uint32_t requestId);
     std::string GetChallengeCode(uint32_t requestId);
     static void ReportReceiveAuthLinkMsg(const NegotiateMessage &msg, const std::string &remoteDeviceId);
 
 private:
-    void ReportConnEventExtra(ConnEventExtra &extra, WifiDirectConnectInfo &connectInfo);
+    void ReportConnEventExtra(ConnEventExtra &extra, const WifiDirectConnectInfo &connectInfo);
+    void SetReportExtraLinkType(ConnEventExtra &extra, const WifiDirectConnectInfo &connectInfo);
+    void SetBootLinkType(ConnEventExtra &extra, const WifiDirectConnectInfo &connectInfo);
+    void SetBootLinkTypeByAuthHandle(ConnEventExtra &extra, const WifiDirectConnectInfo &info);
     
     std::map<uint32_t, uint16_t> challengeCodeMap_;
     std::map<uint32_t, bool> reuseFlagMap_;

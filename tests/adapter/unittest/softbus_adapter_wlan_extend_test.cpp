@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2023 Huawei Device Co., Ltd.
+ * Copyright (c) 2023-2025 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -27,8 +27,9 @@
 #define WLAN_IFNAME              "wlan0"
 #define MEAS_TIME_PER_CHAN_MS    (15)
 #define GET_MEAS_RESULT_DELAY_MS (1000)
-static struct IWlanInterface *g_wlanObj = NULL;
-static WlanChannelInfoCb *g_wlanChannelInfoCb = NULL;
+
+static struct IWlanInterface *g_wlanObj = nullptr;
+static WlanChannelInfoCb *g_wlanChannelInfoCb = nullptr;
 
 namespace OHOS {
 using namespace testing::ext;
@@ -57,7 +58,7 @@ void AdapterWlanExtendTest::TearDown() { }
  */
 HWTEST_F(AdapterWlanExtendTest, Wlan_Extend_Test_001, TestSize.Level0)
 {
-    g_wlanChannelInfoCb = NULL;
+    g_wlanChannelInfoCb = nullptr;
     WlanChannelInfoCb *g_wlanChannelInfoCbInit = new WlanChannelInfoCb();
     int32_t laneReqId = 0;
 
@@ -87,7 +88,7 @@ HWTEST_F(AdapterWlanExtendTest, Wlan_Extend_Test_002, TestSize.Level0)
     laneReqId = SoftBusRequestWlanChannelInfo(channelId, num);
     EXPECT_TRUE(laneReqId == SOFTBUS_INVALID_PARAM);
     num = 1;
-    g_wlanObj = NULL;
+    g_wlanObj = nullptr;
     laneReqId = SoftBusRequestWlanChannelInfo(channelId, num);
     EXPECT_TRUE(laneReqId == SOFTBUS_OK);
 }

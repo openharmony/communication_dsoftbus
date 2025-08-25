@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021-2022 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2025 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -12,10 +12,11 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
- 
+
 #include <arpa/inet.h>
 #include <unistd.h>
 #include <securec.h>
+#include <gtest/gtest.h>
 
 #include "auth_interface.h"
 #include "auth_manager.h"
@@ -44,9 +45,12 @@
 #include "bus_center_manager.h"
 #include "trans_session_service.h"
 #include "disc_event_manager.h"
-#include "softbus_conn_ble_direct.h"
 #include "message_handler.h"
+#include "dsoftbus_enhance_interface.h"
+#include "g_enhance_lnn_func.h"
+#include "trans_tcp_direct_common_mock.h"
 
+using namespace testing;
 using namespace testing::ext;
 
 namespace OHOS {
@@ -75,7 +79,7 @@ namespace OHOS {
 static const char *g_sessionKey = "www.test.com";
 static const char *g_uuid = "ABCDEF00ABCDEF00ABCDEF00ABCDEF00ABCDEF00ABCDEF00ABCDEF00ABCDEF00";
 static const char *g_udid = "ABCDEF00ABCDEF00ABCDEF00ABCDEF00ABCDEF00ABCDEF00ABCDEF00ABCDEF00";
-static SessionConn *g_conn = NULL;
+static SessionConn *g_conn = nullptr;
 
 class TransServerTcpDirectTest : public testing::Test {
 public:
@@ -95,7 +99,7 @@ void TestAddTestSessionConn(void)
 {
     g_conn = CreateNewSessinConn(DIRECT_CHANNEL_CLIENT, false);
     g_conn = (SessionConn *)SoftBusCalloc(sizeof(SessionConn));
-    if (g_conn == NULL) {
+    if (g_conn == nullptr) {
         printf("create session conn failed.\n");
         return;
     }
@@ -158,7 +162,7 @@ static int32_t TestAddAuthManager(int64_t authSeq, const char *sessionKeyStr, bo
     }
 
     AuthSessionInfo *info = (AuthSessionInfo*)SoftBusCalloc(sizeof(AuthSessionInfo));
-    if (info == NULL) {
+    if (info == nullptr) {
         return SOFTBUS_MALLOC_ERR;
     }
 
@@ -175,7 +179,7 @@ static int32_t TestAddAuthManager(int64_t authSeq, const char *sessionKeyStr, bo
     }
 
     SessionKey *sessionKey = (SessionKey*)SoftBusCalloc(sizeof(SessionKey));
-    if (sessionKey ==  NULL) {
+    if (sessionKey ==  nullptr) {
         SoftBusFree(info);
         return SOFTBUS_MALLOC_ERR;
     }
@@ -194,7 +198,7 @@ static int32_t TestAddAuthManager(int64_t authSeq, const char *sessionKeyStr, bo
 static void TestDelAuthManager(int64_t authId)
 {
     AuthManager *auth = GetAuthManagerByAuthId(authId);
-    if (auth != NULL) {
+    if (auth != nullptr) {
         DelAuthManager(auth, AUTH_LINK_TYPE_MAX);
     }
 }
@@ -202,7 +206,7 @@ static void TestDelAuthManager(int64_t authId)
 static int32_t TestAddSessionConn(bool isServerSide)
 {
     SessionConn *session = CreateNewSessinConn(DIRECT_CHANNEL_CLIENT, isServerSide);
-    if (session == NULL) {
+    if (session == nullptr) {
         return SOFTBUS_MALLOC_ERR;
     }
 
@@ -232,13 +236,16 @@ static void TestDelSessionConnNode(int32_t channelId)
  */
 HWTEST_F(TransServerTcpDirectTest, GetCipherFlagByAuthId001, TestSize.Level1)
 {
+    LnnEnhanceFuncList *pfnLnnEnhanceFuncList = LnnEnhanceFuncListGet();
+    pfnLnnEnhanceFuncList->authMetaGetServerSide = AuthMetaGetServerSide;
     AuthHandle authHandle = { .authId = 0, .type = AUTH_LINK_TYPE_WIFI };
     uint32_t flag = 0;
     bool isAuthServer = false;
     bool isLegacyOs = false;
-
+    NiceMock<TransTcpDirectCommonInterfaceMock> TransServerTcpDirectMock;
+    EXPECT_CALL(TransServerTcpDirectMock, AuthMetaGetServerSide).WillOnce(Return(SOFTBUS_NOT_FIND));
     int32_t ret = GetCipherFlagByAuthId(authHandle, &flag, &isAuthServer, isLegacyOs);
-    EXPECT_EQ(ret, SOFTBUS_NOT_IMPLEMENT);
+    EXPECT_EQ(ret, SOFTBUS_NOT_FIND);
 }
 
 /**
@@ -249,16 +256,18 @@ HWTEST_F(TransServerTcpDirectTest, GetCipherFlagByAuthId001, TestSize.Level1)
  */
 HWTEST_F(TransServerTcpDirectTest, GetCipherFlagByAuthId002, TestSize.Level1)
 {
+    LnnEnhanceFuncList *pfnLnnEnhanceFuncList = LnnEnhanceFuncListGet();
+    pfnLnnEnhanceFuncList->authMetaGetServerSide = AuthMetaGetServerSide;
     AuthHandle authHandle = { .authId = TRANS_TEST_AUTH_SEQ, .type = AUTH_LINK_TYPE_WIFI };
     int32_t ret = TestAddAuthManager(TRANS_TEST_AUTH_SEQ, g_sessionKey, false);
     ASSERT_EQ(ret, SOFTBUS_OK);
     uint32_t flag = 0;
     bool isAuthServer = false;
     bool isLegacyOs = false;
-
+    NiceMock<TransTcpDirectCommonInterfaceMock> TransServerTcpDirectMock;
+    EXPECT_CALL(TransServerTcpDirectMock, AuthMetaGetServerSide).WillOnce(Return(SOFTBUS_NOT_FIND));
     ret = GetCipherFlagByAuthId(authHandle, &flag, &isAuthServer, isLegacyOs);
-    EXPECT_EQ(ret, SOFTBUS_NOT_IMPLEMENT);
-    EXPECT_EQ(ret, SOFTBUS_NOT_IMPLEMENT);
+    EXPECT_EQ(ret, SOFTBUS_NOT_FIND);
     EXPECT_FALSE(isAuthServer);
     TestDelAuthManager(TRANS_TEST_AUTH_SEQ);
 }
@@ -291,9 +300,9 @@ HWTEST_F(TransServerTcpDirectTest, StartVerifySession001, TestSize.Level1)
  */
 HWTEST_F(TransServerTcpDirectTest, StartVerifySession002, TestSize.Level1)
 {
-    static SessionConn *tmpSessionConn = NULL;
+    static SessionConn *tmpSessionConn = nullptr;
     tmpSessionConn = CreateNewSessinConn(DIRECT_CHANNEL_CLIENT, false);
-    if (tmpSessionConn == NULL) {
+    if (tmpSessionConn == nullptr) {
         printf("create session conn failed.\n");
         return;
     }
@@ -472,10 +481,10 @@ HWTEST_F(TransServerTcpDirectTest, TransTdcPostBytes001, TestSize.Level1)
     };
     int32_t channelId = 0;
 
-    int32_t ret = TransTdcPostBytes(channelId, NULL, bytes);
+    int32_t ret = TransTdcPostBytes(channelId, nullptr, bytes);
     EXPECT_EQ(ret, SOFTBUS_INVALID_PARAM);
 
-    ret = TransTdcPostBytes(channelId, &packetHead, NULL);
+    ret = TransTdcPostBytes(channelId, &packetHead, nullptr);
     EXPECT_EQ(ret, SOFTBUS_INVALID_PARAM);
 
     packetHead.dataLen = 0;
@@ -527,11 +536,15 @@ HWTEST_F(TransServerTcpDirectTest, GetAuthHandleByChanId001, TestSize.Level1)
  */
 HWTEST_F(TransServerTcpDirectTest, SendAuthData001, TestSize.Level1)
 {
+    LnnEnhanceFuncList *pfnLnnEnhanceFuncList = LnnEnhanceFuncListGet();
+    pfnLnnEnhanceFuncList->authMetaPostTransData = AuthMetaPostTransData;
     AuthHandle authHandle = { .authId = 1, .type = AUTH_LINK_TYPE_WIFI };
     int64_t seq = 0;
     const char *data = TEST_MESSAGE;
+    NiceMock<TransTcpDirectCommonInterfaceMock> TransServerTcpDirectMock;
+    EXPECT_CALL(TransServerTcpDirectMock, AuthMetaPostTransData).WillOnce(Return(SOFTBUS_AUTH_NOT_FOUND));
     int32_t ret = SendAuthData(authHandle, MODULE_P2P_LISTEN, MSG_FLAG_REQUEST, seq, data);
-    EXPECT_EQ(ret, SOFTBUS_NOT_IMPLEMENT);
+    EXPECT_EQ(ret, SOFTBUS_AUTH_NOT_FOUND);
 }
 
 /**
@@ -582,8 +595,10 @@ HWTEST_F(TransServerTcpDirectTest, TransTdcStopSessionProc001, TestSize.Level1)
 
     int32_t ret = TestAddSessionConn(false);
     ASSERT_EQ(ret, SOFTBUS_OK);
-    
+
     TransTdcTimerProc();
+    NotifyTdcChannelTimeOut(nullptr);
+    NotifyTdcChannelStopProc(nullptr);
     TransTdcStopSessionProc(AUTH);
 
     TransDelSessionConnById(channelId);
@@ -636,13 +651,13 @@ HWTEST_F(TransServerTcpDirectTest, TransOpenDirectChannel001, TestSize.Level1)
     }
     int32_t fd = 1;
 
-    int32_t ret = TransOpenDirectChannel(NULL, &connInfo, &fd);
+    int32_t ret = TransOpenDirectChannel(nullptr, &connInfo, &fd);
     EXPECT_EQ(ret, SOFTBUS_INVALID_PARAM);
 
-    ret = TransOpenDirectChannel(&appInfo, NULL, &fd);
+    ret = TransOpenDirectChannel(&appInfo, nullptr, &fd);
     EXPECT_EQ(ret, SOFTBUS_INVALID_PARAM);
 
-    ret = TransOpenDirectChannel(&appInfo, &connInfo, NULL);
+    ret = TransOpenDirectChannel(&appInfo, &connInfo, nullptr);
     EXPECT_EQ(ret, SOFTBUS_INVALID_PARAM);
 
     ret = TransOpenDirectChannel(&appInfo, &connInfo, &fd);
@@ -659,15 +674,15 @@ HWTEST_F(TransServerTcpDirectTest, TransOpenDirectChannel001, TestSize.Level1)
 HWTEST_F(TransServerTcpDirectTest, UnpackReplyErrCode001, TestSize.Level1)
 {
     int32_t errCode = SOFTBUS_MEM_ERR;
-    int32_t ret = UnpackReplyErrCode(NULL, &errCode);
+    int32_t ret = UnpackReplyErrCode(nullptr, &errCode);
     EXPECT_NE(SOFTBUS_OK, ret);
 
-    ret = UnpackReplyErrCode(NULL, NULL);
+    ret = UnpackReplyErrCode(nullptr, nullptr);
     EXPECT_NE(SOFTBUS_OK, ret);
 
     std::string str = TEST_JSON;
     cJSON *msg = cJSON_Parse(str.c_str());
-    ret = UnpackReplyErrCode(msg, NULL);
+    ret = UnpackReplyErrCode(msg, nullptr);
     EXPECT_NE(SOFTBUS_OK, ret);
     cJSON_Delete(msg);
 
@@ -696,7 +711,7 @@ HWTEST_F(TransServerTcpDirectTest, TransServerOnChannelOpenFailed001, TestSize.L
     int32_t ret = TransServerOnChannelOpenFailed(pkgName, pid, channelId, channelType, errCode);
     EXPECT_EQ(SOFTBUS_OK, ret);
 
-    ret = TransServerOnChannelOpenFailed(NULL, pid, channelId, channelType, errCode);
+    ret = TransServerOnChannelOpenFailed(nullptr, pid, channelId, channelType, errCode);
     EXPECT_EQ(SOFTBUS_INVALID_PARAM, ret);
 }
 
@@ -712,5 +727,10 @@ HWTEST_F(TransServerTcpDirectTest, TransGetAuthTypeByNetWorkId001, TestSize.Leve
     std::string networkId = TEST_NETWORK_ID;
     bool ret = TransGetAuthTypeByNetWorkId(networkId.c_str());
     EXPECT_NE(true, ret);
+
+    SessionConn *node = static_cast<SessionConn *>(SoftBusCalloc(sizeof(SessionConn)));
+    EXPECT_NE(nullptr, node);
+    OnSessionOpenFailProc(node, SOFTBUS_TRANS_HANDSHAKE_TIMEOUT);
+    SoftBusFree(node);
 }
 } // namespace OHOS

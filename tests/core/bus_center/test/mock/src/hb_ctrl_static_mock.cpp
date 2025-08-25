@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2024 Huawei Device Co., Ltd.
+ * Copyright (c) 2025 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -122,9 +122,9 @@ int32_t LnnGetLocalNodeInfoSafe(NodeInfo *info)
     return HeartBeatCtrlStaticInterface()->LnnGetLocalNodeInfoSafe(info);
 }
 
-int32_t LnnLedgerAllDataSyncToDB(NodeInfo *info)
+int32_t LnnLedgerAllDataSyncToDB(NodeInfo *info, bool isAckSeq, char *peerudid)
 {
-    return HeartBeatCtrlStaticInterface()->LnnLedgerAllDataSyncToDB(info);
+    return HeartBeatCtrlStaticInterface()->LnnLedgerAllDataSyncToDB(info, isAckSeq, peerudid);
 }
 
 ConnectionAddrType LnnConvertHbTypeToConnAddrType(LnnHeartbeatType type)
@@ -177,9 +177,9 @@ void AuthLoadDeviceKey(void)
     return HeartBeatCtrlStaticInterface()->AuthLoadDeviceKey();
 }
 
-int32_t LnnGenerateCeParams(void)
+int32_t LnnGenerateCeParams(bool isUnlocked)
 {
-    return HeartBeatCtrlStaticInterface()->LnnGenerateCeParams();
+    return HeartBeatCtrlStaticInterface()->LnnGenerateCeParams(isUnlocked);
 }
 
 void DfxRecordTriggerTime(LnnTriggerReason reason, LnnEventLnnStage stage)
@@ -247,24 +247,43 @@ int32_t LnnSetLocalByteInfo(InfoKey key, const uint8_t *info, uint32_t len)
     return HeartBeatCtrlStaticInterface()->LnnSetLocalByteInfo(key, info, len);
 }
 
-void LnnUpdateDeviceName(void)
-{
-    return HeartBeatCtrlStaticInterface()->LnnUpdateDeviceName();
-}
-
 int32_t LnnStartHbByTypeAndStrategyEx(LnnProcessSendOnceMsgPara *msgPara)
 {
     return HeartBeatCtrlStaticInterface()->LnnStartHbByTypeAndStrategyEx(msgPara);
 }
 
-void RegisterNameMonitor(void)
-{
-    return HeartBeatCtrlStaticInterface()->RegisterNameMonitor();
-}
-
 int32_t LnnSyncBleOfflineMsg(void)
 {
     return HeartBeatCtrlStaticInterface()->LnnSyncBleOfflineMsg();
+}
+void LnnRemoveV0BroadcastAndCheckDev(void)
+{
+    return HeartBeatCtrlStaticInterface()->LnnRemoveV0BroadcastAndCheckDev();
+}
+
+int32_t UpdateRecoveryDeviceInfoFromDb(void)
+{
+    return HeartBeatCtrlStaticInterface()->UpdateRecoveryDeviceInfoFromDb();
+}
+
+int32_t LnnGetDLSleHbTimestamp(const char *networkId, uint64_t *timestamp)
+{
+    return HeartBeatCtrlStaticInterface()->LnnGetDLSleHbTimestamp(networkId, timestamp);
+}
+
+int32_t LnnSetDLSleHbTimestamp(const char *networkId, const uint64_t timestamp)
+{
+    return HeartBeatCtrlStaticInterface()->LnnSetDLSleHbTimestamp(networkId, timestamp);
+}
+
+int32_t LnnStartSleOfflineTimingStrategy(const char *networkId)
+{
+    return HeartBeatCtrlStaticInterface()->LnnStartSleOfflineTimingStrategy(networkId);
+}
+
+int32_t LnnStopSleOfflineTimingStrategy(const char *networkId)
+{
+    return HeartBeatCtrlStaticInterface()->LnnStopSleOfflineTimingStrategy(networkId);
 }
 }
 } // namespace OHOS

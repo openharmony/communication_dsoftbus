@@ -16,6 +16,7 @@
 #define WIFI_DIRECT_EXECUTOR_H
 
 #include <condition_variable>
+#include <list>
 #include <memory>
 #include <queue>
 #include <thread>
@@ -54,6 +55,8 @@ public:
     }
 
     WifiDirectEventDispatcher WaitEvent();
+
+    void Dump(std::list<std::shared_ptr<ProcessorSnapshot>> &snapshots);
 
 protected:
     WifiDirectEventSender GetSender() { return receiver_; }

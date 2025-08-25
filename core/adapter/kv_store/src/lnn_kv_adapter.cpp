@@ -12,20 +12,17 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+#include "lnn_kv_adapter.h"
 
-#include <cinttypes>
-#include <functional>
-#include <mutex>
 #include <unistd.h>
-#include <vector>
 
 #include "anonymizer.h"
-#include "lnn_kv_adapter.h"
-#include "lnn_log.h"
-#include "lnn_parameter_utils.h"
-#include "softbus_error_code.h"
-
 #include "datetime_ex.h"
+#include "g_enhance_lnn_func.h"
+#include "g_enhance_lnn_func_pack.h"
+#include "lnn_log.h"
+#include "softbus_init_common.h"
+
 namespace OHOS {
 using namespace OHOS::DistributedKv;
 namespace {
@@ -33,7 +30,7 @@ constexpr int32_t MAX_STRING_LEN = 4096;
 constexpr int32_t MAX_INIT_RETRY_TIMES = 3;
 constexpr int32_t INIT_RETRY_SLEEP_INTERVAL = 100 * 1000; // 100ms
 constexpr int32_t MAX_MAP_SIZE = 10000;
-const std::string DATABASE_DIR = "/data/service/el1/public/database/dsoftbus";
+const char *DATABASE_DIR = "/data/service/el1/public/database/dsoftbus";
 } // namespace
 
 KVAdapter::KVAdapter(const std::string &appId, const std::string &storeId)
@@ -87,7 +84,7 @@ int32_t KVAdapter::RegisterDataChangeListener(
     const std::shared_ptr<DistributedKv::KvStoreObserver> &dataChangeListener)
 {
     LNN_LOGI(LNN_LEDGER, "Register db data change listener");
-    if (!IsCloudSyncEnabled()) {
+    if (!IsCloudSyncEnabledPacked()) {
         LNN_LOGW(LNN_LEDGER, "not support cloud sync");
         return SOFTBUS_KV_CLOUD_DISABLED;
     }
@@ -115,7 +112,7 @@ int32_t KVAdapter::RegisterDataChangeListener(
 int32_t KVAdapter::UnRegisterDataChangeListener()
 {
     LNN_LOGI(LNN_LEDGER, "UnRegister db data change listener");
-    if (!IsCloudSyncEnabled()) {
+    if (!IsCloudSyncEnabledPacked()) {
         LNN_LOGW(LNN_LEDGER, "not support cloud sync");
         return SOFTBUS_KV_CLOUD_DISABLED;
     }
@@ -270,10 +267,6 @@ int32_t KVAdapter::DeleteByPrefix(const std::string &keyPrefix)
 
 int32_t KVAdapter::Get(const std::string &key, std::string &value)
 {
-    char *anonyKey = nullptr;
-    Anonymize(key.c_str(), &anonyKey);
-    LNN_LOGI(LNN_LEDGER, "Get data by key: %{public}s", AnonymizeWrapper(anonyKey));
-    AnonymizeFree(anonyKey);
     DistributedKv::Key kvKey(key);
     DistributedKv::Value kvValue;
     DistributedKv::Status status;
@@ -286,10 +279,6 @@ int32_t KVAdapter::Get(const std::string &key, std::string &value)
         status = kvStorePtr_->Get(kvKey, kvValue);
     }
     if (status != DistributedKv::Status::SUCCESS) {
-        anonyKey = nullptr;
-        Anonymize(key.c_str(), &anonyKey);
-        LNN_LOGE(LNN_LEDGER, "Get data from kv failed, key=%{public}s", AnonymizeWrapper(anonyKey));
-        AnonymizeFree(anonyKey);
         return SOFTBUS_KV_GET_DB_FAIL;
     }
     value = kvValue.ToString();
@@ -304,7 +293,7 @@ DistributedKv::Status KVAdapter::GetKvStorePtr()
         .encrypt = true,
         .autoSync = false,
         .isPublic = true,
-        .securityLevel = DistributedKv::SecurityLevel::S1,
+        .securityLevel = DistributedKv::SecurityLevel::S3,
         .area = 1,
         .kvStoreType = KvStoreType::SINGLE_VERSION,
         .baseDir = DATABASE_DIR,
@@ -342,7 +331,7 @@ int32_t KVAdapter::DeleteKvStorePtr()
 int32_t KVAdapter::CloudSync()
 {
     LNN_LOGI(LNN_LEDGER, "call!");
-    if (!IsCloudSyncEnabled()) {
+    if (!IsCloudSyncEnabledPacked()) {
         LNN_LOGW(LNN_LEDGER, "not support cloud sync");
         return SOFTBUS_KV_CLOUD_DISABLED;
     }

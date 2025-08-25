@@ -16,7 +16,7 @@ import("//build/test.gni")
 import("../../../../../../core/discovery/coap/disc_coap.gni")
 import("../../../../../../dsoftbus.gni")
 
-module_output_path = "dsoftbus/discovery"
+module_output_path = "dsoftbus/soft_bus/discovery"
 
 ohos_unittest("DiscCoapParserTest") {
   module_out_path = module_output_path
@@ -30,6 +30,7 @@ ohos_unittest("DiscCoapParserTest") {
   deps = [
     "$dsoftbus_dfx_path:softbus_dfx",
     "$dsoftbus_root_path/core/common:softbus_utils",
+    "$dsoftbus_root_path/adapter:softbus_adapter",
   ]
 
   external_deps = [

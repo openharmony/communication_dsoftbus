@@ -17,16 +17,10 @@
 #define STREAM_PACKET_HEADER_H
 
 #include <arpa/inet.h>
-#include <chrono>
-#include <cstdint>
-#include <memory>
-#include <sys/types.h>
-#include <utility>
-#include <vector>
 
-#include "securec.h"
-#include "stream_common.h"
 #include "i_stream.h"
+#include "securec.h"
+#include "trans_log.h"
 
 using ::std::chrono::duration_cast;
 using ::std::chrono::milliseconds;
@@ -141,7 +135,8 @@ public:
             tl.type = ntohs(*tmp++);
             tl.length = ntohs(*tmp++);
 
-            if (tl.length == 0 || sizeof(uint16_t) * extFiledNum + tl.length > size) {
+            if (tl.length == 0 ||
+                sizeof(uint16_t) * extFiledNum + AlignTo4Bytes(tl.length) + sizeof(checkSum_) > size) {
                 return;
             }
             ext_ = std::make_unique<char[]>(tl.length);
@@ -149,9 +144,12 @@ public:
             if (ret == 0) {
                 extLen_ = static_cast<ssize_t>(tl.length);
             }
+            checkSum_ = ntohl(*reinterpret_cast<uint32_t *>((reinterpret_cast<char *>(tmp) + AlignTo4Bytes(extLen_))));
+            if (checkSum_ > sizeof(uint16_t) * extFiledNum + AlignTo4Bytes(tl.length)) {
+                TRANS_LOGE(TRANS_STREAM, "checkSum=%{public}u, length=%{public}u", checkSum_, tl.length);
+                checkSum_ = 0;
+            }
         }
-
-        checkSum_ = ntohl(*reinterpret_cast<uint32_t *>((reinterpret_cast<char *>(tmp) + AlignTo4Bytes(extLen_))));
     }
 
     uint16_t GetTlvNums() const
@@ -238,6 +236,7 @@ public:
     static constexpr uint32_t FLAG_OFFSET = 22;
     static constexpr uint32_t LEVEL_OFFSET = 18;
     static constexpr uint32_t SEQ_NUM_OFFSET = 0;
+    static constexpr uint32_t MAX_LEVEL = 15;
 
     static constexpr uint32_t WORD_SIZE = 16;
 
@@ -259,7 +258,9 @@ public:
         commonHeader_.streamType = streamType;
         commonHeader_.marker = 0;
         commonHeader_.flag = 0;
-        commonHeader_.level = streamFrameInfo->level;
+        if (streamFrameInfo->level <= MAX_LEVEL) {
+            commonHeader_.level = streamFrameInfo->level;
+        }
         commonHeader_.pad = 0;
         commonHeader_.streamId = streamFrameInfo->streamId;
         commonHeader_.timestamp = ts;

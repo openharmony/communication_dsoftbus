@@ -18,9 +18,10 @@
 #include <securec.h>
 #include <string.h>
 
+#include "ble_range.h"
 #include "client_bus_center_manager.h"
-#include "data_level.h"
 #include "client_trans_session_manager.h"
+#include "data_level.h"
 #include "lnn_event.h"
 #include "lnn_log.h"
 #include "softbus_adapter_mem.h"
@@ -30,7 +31,12 @@
 #include "softbus_type_def.h"
 #include "softbus_utils.h"
 
+#define MODULE_LNN      "MODULE_LNN"
+#define MODULE_CONN     "MODULE_CONN"
+
 static const char *g_dbPkgName = "distributeddata-default";
+#define DM_PKG_NAME "ohos.distributedhardware.devicemanager"
+static const char *g_msdpPkgName = "ohos.msdp.spatialawareness";
 
 static int32_t CommonInit(const char *pkgName)
 {
@@ -347,7 +353,40 @@ int32_t SetDataLevel(const DataLevel *dataLevel)
     return SetDataLevelInner(dataLevel);
 }
 
-int32_t JoinLNN(const char *pkgName, ConnectionAddr *target, OnJoinLNNResult cb)
+int32_t RegisterRangeCallbackForMsdp(const char *pkgName, IRangeCallback *callback)
+{
+    LNN_LOGI(LNN_STATE, "enter");
+    if (pkgName == NULL || callback == NULL || callback->onRangeResult == NULL ||
+        callback->onRangeStateChange == NULL) {
+        LNN_LOGE(LNN_STATE, "pkgName or callback is null");
+        return SOFTBUS_INVALID_PARAM;
+    }
+    if (strcmp(g_msdpPkgName, pkgName) != 0) {
+        LNN_LOGE(LNN_STATE, "pkgName is invalid");
+        return SOFTBUS_INVALID_PARAM;
+    }
+    int32_t ret = CommonInit(pkgName);
+    if (ret != SOFTBUS_OK) {
+        LNN_LOGE(LNN_STATE, "CommonInit failed");
+        return ret;
+    }
+    return RegRangeCbForMsdpInner(pkgName, callback);
+}
+
+int32_t UnregisterRangeCallbackForMsdp(const char *pkgName)
+{
+    if (pkgName == NULL) {
+        LNN_LOGE(LNN_STATE, "pkgName is null");
+        return SOFTBUS_INVALID_PARAM;
+    }
+    if (strcmp(g_msdpPkgName, pkgName) != 0) {
+        LNN_LOGE(LNN_STATE, "pkgName is invalid");
+        return SOFTBUS_INVALID_PARAM;
+    }
+    return UnregRangeCbForMsdpInner(pkgName);
+}
+
+int32_t JoinLNN(const char *pkgName, ConnectionAddr *target, OnJoinLNNResult cb, bool isForceJoin)
 {
     if (pkgName == NULL || target == NULL || cb == NULL) {
         DfxRecordSdkJoinLnnEnd(pkgName, SOFTBUS_INVALID_PARAM);
@@ -359,7 +398,22 @@ int32_t JoinLNN(const char *pkgName, ConnectionAddr *target, OnJoinLNNResult cb)
         DfxRecordSdkJoinLnnEnd(pkgName, ret);
         return ret;
     }
-    ret = JoinLNNInner(pkgName, target, cb);
+    if (target->type == CONNECTION_ADDR_SESSION_WITH_KEY) {
+        ret = ClientGetChannelBySessionId(target->info.session.sessionId, &(target->info.session.channelId),
+            &(target->info.session.type), NULL);
+        if (ret != SOFTBUS_OK) {
+            DfxRecordSdkJoinLnnEnd(pkgName, ret);
+            LNN_LOGE(LNN_STATE, "get channel failed, sessionId=%{public}d", target->info.session.sessionId);
+            return ret;
+        }
+        if (strcmp(pkgName, DM_PKG_NAME) == 0) {
+            ret = ClientCancelAuthSessionTimer(target->info.session.sessionId);
+            if (ret != SOFTBUS_OK) {
+                LNN_LOGE(LNN_STATE, "fail : cancel timer error, sessionId=%{public}d", target->info.session.sessionId);
+            }
+        }
+    }
+    ret = JoinLNNInner(pkgName, target, cb, isForceJoin);
     DfxRecordSdkJoinLnnEnd(pkgName, ret);
     return ret;
 }
@@ -427,6 +481,15 @@ int32_t StopTimeSync(const char *pkgName, const char *targetNetworkId)
     return StopTimeSyncInner(pkgName, targetNetworkId);
 }
 
+static int32_t ValidatePkgName(const char *pkgName)
+{
+    if (strcmp(pkgName, MODULE_LNN) == 0 || strcmp(pkgName, MODULE_CONN) == 0) {
+        LNN_LOGE(LNN_STATE, "package name is not allowed");
+        return SOFTBUS_INVALID_PARAM;
+    }
+    return SOFTBUS_OK;
+}
+
 int32_t PublishLNN(const char *pkgName, const PublishInfo *info, const IPublishCb *cb)
 {
     if (pkgName == NULL || info == NULL || cb == NULL) {
@@ -434,6 +497,10 @@ int32_t PublishLNN(const char *pkgName, const PublishInfo *info, const IPublishC
         LNN_LOGE(LNN_STATE, "invalid parameters");
         return SOFTBUS_INVALID_PARAM;
     }
+    if (ValidatePkgName(pkgName) != SOFTBUS_OK) {
+        return SOFTBUS_INVALID_PARAM;
+    }
+
     int32_t ret = CommonInit(pkgName);
     if (ret != SOFTBUS_OK) {
         DfxRecordLnnDiscServerEnd(DISC_SERVER_PUBLISH, pkgName, ret);
@@ -455,6 +522,10 @@ int32_t StopPublishLNN(const char *pkgName, int32_t publishId)
         LNN_LOGE(LNN_STATE, "invalid parameters");
         return SOFTBUS_INVALID_PARAM;
     }
+    if (ValidatePkgName(pkgName) != SOFTBUS_OK) {
+        return SOFTBUS_INVALID_PARAM;
+    }
+
     int32_t ret = CommonInit(pkgName);
     if (ret != SOFTBUS_OK) {
         DfxRecordLnnDiscServerEnd(DISC_SERVER_STOP_PUBLISH, pkgName, ret);
@@ -472,6 +543,10 @@ int32_t RefreshLNN(const char *pkgName, const SubscribeInfo *info, const IRefres
         LNN_LOGE(LNN_STATE, "invalid parameters");
         return SOFTBUS_INVALID_PARAM;
     }
+    if (ValidatePkgName(pkgName) != SOFTBUS_OK) {
+        return SOFTBUS_INVALID_PARAM;
+    }
+
     int32_t ret = CommonInit(pkgName);
     if (ret != SOFTBUS_OK) {
         DfxRecordLnnDiscServerEnd(DISC_SERVER_DISCOVERY, pkgName, ret);
@@ -493,6 +568,10 @@ int32_t StopRefreshLNN(const char *pkgName, int32_t refreshId)
         LNN_LOGE(LNN_STATE, "invalid parameters");
         return SOFTBUS_INVALID_PARAM;
     }
+    if (ValidatePkgName(pkgName) != SOFTBUS_OK) {
+        return SOFTBUS_INVALID_PARAM;
+    }
+
     int32_t ret = CommonInit(pkgName);
     if (ret != SOFTBUS_OK) {
         DfxRecordLnnDiscServerEnd(DISC_SERVER_STOP_DISCOVERY, pkgName, ret);
@@ -566,6 +645,28 @@ int32_t ShiftLNNGear(const char *pkgName, const char *callerId, const char *targ
     return ShiftLNNGearInner(pkgName, callerId, targetNetworkId, mode);
 }
 
+int32_t TriggerRangeForMsdp(const char *pkgName, const RangeConfig *config)
+{
+    if (pkgName == NULL || config == NULL) {
+        LNN_LOGE(LNN_STATE, "invalid range para");
+        return SOFTBUS_INVALID_PARAM;
+    }
+    int32_t ret = CommonInit(pkgName);
+    if (ret != SOFTBUS_OK) {
+        return ret;
+    }
+    return TriggerRangeForMsdpInner(pkgName, config);
+}
+
+int32_t StopRangeForMsdp(const char *pkgName, const RangeConfig *config)
+{
+    if (pkgName == NULL || config == NULL) {
+        LNN_LOGE(LNN_STATE, "invalid range para");
+        return SOFTBUS_INVALID_PARAM;
+    }
+    return StopRangeForMsdpInner(pkgName, config);
+}
+
 int32_t SyncTrustedRelationShip(const char *pkgName, const char *msg, uint32_t msgLen)
 {
     if (pkgName == NULL || msg == NULL) {
@@ -578,4 +679,18 @@ int32_t SyncTrustedRelationShip(const char *pkgName, const char *msg, uint32_t m
         return ret;
     }
     return SyncTrustedRelationShipInner(pkgName, msg, msgLen);
+}
+
+int32_t SetDisplayName(const char *pkgName, const char *nameData, uint32_t len)
+{
+    if (!IsValidString(pkgName, PKG_NAME_SIZE_MAX - 1) || nameData == NULL) {
+        LNN_LOGE(LNN_STATE, "invalid SetDisplayName para");
+        return SOFTBUS_INVALID_PARAM;
+    }
+    int32_t ret = CommonInit(pkgName);
+    if (ret != SOFTBUS_OK) {
+        LNN_LOGE(LNN_STATE, "common init fail, ret=%{public}d", ret);
+        return ret;
+    }
+    return SetDisplayNameInner(pkgName, nameData, len);
 }

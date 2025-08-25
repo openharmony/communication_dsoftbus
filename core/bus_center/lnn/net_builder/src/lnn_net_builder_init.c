@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021-2024 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2025 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -23,25 +23,25 @@
 #include "auth_common.h"
 #include "auth_deviceprofile.h"
 #include "auth_interface.h"
+#include "auth_manager.h"
 #include "auth_request.h"
 #include "auth_request.h"
 #include "auth_hichain_adapter.h"
 #include "bus_center_event.h"
 #include "bus_center_manager.h"
 #include "common_list.h"
+#include "g_enhance_lnn_func.h"
+#include "g_enhance_lnn_func_pack.h"
 #include "lnn_async_callback_utils.h"
 #include "lnn_battery_info.h"
-#include "lnn_cipherkey_manager.h"
 #include "lnn_connection_addr_utils.h"
 #include "lnn_connection_fsm.h"
 #include "lnn_deviceinfo_to_profile.h"
 #include "lnn_devicename_info.h"
 #include "lnn_discovery_manager.h"
 #include "lnn_distributed_net_ledger.h"
-#include "lnn_fast_offline.h"
 #include "lnn_heartbeat_utils.h"
 #include "lnn_kv_adapter_wrapper.h"
-#include "lnn_link_finder.h"
 #include "lnn_local_net_ledger.h"
 #include "lnn_log.h"
 #include "lnn_map.h"
@@ -51,12 +51,15 @@
 #include "lnn_node_info.h"
 #include "lnn_node_weight.h"
 #include "lnn_ohos_account.h"
-#include "lnn_oobe_manager.h"
 #include "lnn_p2p_info.h"
 #include "lnn_physical_subnet_manager.h"
+#include "lnn_sa_status_monitor.h"
+#include "lnn_sle_capability.h"
 #include "lnn_sync_info_manager.h"
 #include "lnn_sync_item_info.h"
 #include "lnn_topo_manager.h"
+#include "lnn_net_builder_process.h"
+#include "lnn_init_monitor.h"
 #include "softbus_adapter_bt_common.h"
 #include "softbus_adapter_crypto.h"
 #include "softbus_adapter_json.h"
@@ -68,15 +71,14 @@
 #include "softbus_adapter_json.h"
 #include "softbus_utils.h"
 #include "softbus_wifi_api_adapter.h"
+#include "softbus_init_common.h"
 #include "trans_channel_manager.h"
-#include "lnn_net_builder.h"
-#include "lnn_net_builder_process.h"
-
 
 #define DEFAULT_PKG_NAME                 "com.huawei.nearby"
 #define DEFAULT_MAX_LNN_CONNECTION_COUNT 10
 #define NOT_TRUSTED_DEVICE_MSG_DELAY     5000
-
+#define DELAY_REG_DP_TIME                1000
+#define RETRY_TIMES                      5
 
 void SetBeginJoinLnnTime(LnnConnectionFsm *connFsm)
 {
@@ -117,11 +119,40 @@ static void DfxRecordDeviceInfoExchangeEndTime(const NodeInfo *info)
     SoftBusFree(udidHash);
 }
 
+static void GetSessionKeyByNodeInfo(const NodeInfo *info, AuthHandle authHandle)
+{
+    NodeInfo nodeInfo;
+    SessionKey sessionKey;
+    (void)memset_s(&sessionKey, sizeof(SessionKey), 0, sizeof(SessionKey));
+    (void)memset_s(&nodeInfo, sizeof(NodeInfo), 0, sizeof(NodeInfo));
+    (void)LnnGetRemoteNodeInfoById(info->deviceInfo.deviceUdid, CATEGORY_UDID, &nodeInfo);
+    UpdateDpAclParams aclParams = {
+        .accountId = nodeInfo.accountId,
+        .deviceId = nodeInfo.deviceInfo.deviceUdid,
+        .peerUserId = nodeInfo.userId
+    };
+    UpdateDpSameAccount(&aclParams, sessionKey, false, info->aclState);
+}
+
+static bool IsDeviceOnlineByTargetType(const char *networkId, DiscoveryType onlineType)
+{
+    NodeInfo node;
+    (void)memset_s(&node, sizeof(NodeInfo), 0, sizeof(NodeInfo));
+    if (LnnGetRemoteNodeInfoById(networkId, CATEGORY_NETWORK_ID, &node) != SOFTBUS_OK) {
+        char *anonyNetworkId = NULL;
+        Anonymize(networkId, &anonyNetworkId);
+        LNN_LOGE(LNN_LANE, "getRemoteInfo fail, networkId=%{public}s", AnonymizeWrapper(anonyNetworkId));
+        AnonymizeFree(anonyNetworkId);
+        return false;
+    }
+    return LnnHasDiscoveryType(&node, onlineType);
+}
+
 static void OnReAuthVerifyPassed(uint32_t requestId, AuthHandle authHandle, const NodeInfo *info)
 {
-    LNN_LOGI(LNN_BUILDER, "reAuth verify passed: requestId=%{public}u, authId=%{public}" PRId64,
-        requestId, authHandle.authId);
     LNN_CHECK_AND_RETURN_LOGE(info != NULL, LNN_BUILDER, "reAuth verify result error");
+    LNN_LOGI(LNN_BUILDER, "reAuth verify passed: requestId=%{public}u, aclState=%{public}d, authId=%{public}" PRId64,
+        requestId, info->aclState, authHandle.authId);
     AuthRequest authRequest = { 0 };
     if (GetAuthRequest(requestId, &authRequest) != SOFTBUS_OK) {
         LNN_LOGE(LNN_BUILDER, "auth request not found");
@@ -129,7 +160,8 @@ static void OnReAuthVerifyPassed(uint32_t requestId, AuthHandle authHandle, cons
     }
     ConnectionAddr addr;
     (void)memset_s(&addr, sizeof(ConnectionAddr), 0, sizeof(ConnectionAddr));
-    if (!LnnConvertAuthConnInfoToAddr(&addr, &authRequest.connInfo, GetCurrentConnectType())) {
+    if (!LnnConvertAuthConnInfoToAddr(&addr, &authRequest.connInfo,
+        GetCurrentConnectType(authRequest.connInfo.type))) {
         LNN_LOGE(LNN_BUILDER, "ConvertToConnectionAddr failed");
         return;
     }
@@ -142,12 +174,12 @@ static void OnReAuthVerifyPassed(uint32_t requestId, AuthHandle authHandle, cons
     LnnConnectionFsm *connFsm = FindConnectionFsmByAddr(&addr, true);
     if (connFsm != NULL && !connFsm->isDead && !LnnIsNeedCleanConnectionFsm(info, addr.type)) {
         if (info != NULL && LnnUpdateGroupType(info) == SOFTBUS_OK && LnnUpdateAccountInfo(info) == SOFTBUS_OK) {
+            if (IsSameAccountId(info->accountId) && IsDeviceOnlineByTargetType(info->networkId, DISCOVERY_TYPE_BLE)) {
+                TriggerSparkGroupJoinAgainPacked(info->deviceInfo.deviceUdid, SPARK_GROUP_DELAY_TIME_MS);
+            }
             UpdateProfile(info);
             LnnUpdateRemoteDeviceName(info);
-            NodeInfo nodeInfo;
-            (void)memset_s(&nodeInfo, sizeof(NodeInfo), 0, sizeof(NodeInfo));
-            (void)LnnGetRemoteNodeInfoById(info->deviceInfo.deviceUdid, CATEGORY_UDID, &nodeInfo);
-            UpdateDpSameAccount(nodeInfo.accountId, nodeInfo.deviceInfo.deviceUdid, nodeInfo.userId);
+            GetSessionKeyByNodeInfo(info, authHandle);
         }
     } else {
         connFsm = StartNewConnectionFsm(&addr, DEFAULT_PKG_NAME, true);
@@ -170,9 +202,22 @@ static void OnReAuthVerifyPassed(uint32_t requestId, AuthHandle authHandle, cons
 static void OnReAuthVerifyFailed(uint32_t requestId, int32_t reason)
 {
     LNN_LOGI(LNN_BUILDER, "verify failed. requestId=%{public}u, reason=%{public}d", requestId, reason);
-    if (reason >= SOFTBUS_HICHAIN_MIN && reason <= SOFTBUS_HICHAIN_MAX) {
-        AuthHandle authHandle = { .authId = AUTH_INVALID_ID };
-        PostVerifyResult(requestId, reason, authHandle, NULL);
+    AuthRequest authRequest = { 0 };
+    if (GetAuthRequest(requestId, &authRequest) != SOFTBUS_OK) {
+        LNN_LOGE(LNN_BUILDER, "auth request not found");
+        LnnConnectionFsm *connFsm = FindConnectionFsmByRequestId(requestId);
+        if (connFsm == NULL || connFsm->isDead) {
+            LNN_LOGE(LNN_BUILDER, "can not find connection fsm by requestId. requestId=%{public}d", requestId);
+            return;
+        }
+        if ((connFsm->connInfo.flag & LNN_CONN_INFO_FLAG_JOIN_REQUEST) != 0) {
+            LnnNotifyJoinResult(&connFsm->connInfo.addr, connFsm->connInfo.peerNetworkId, reason);
+        }
+        return;
+    }
+    if (authRequest.forceJoinInfo.isForceJoin) {
+        LNN_LOGI(LNN_BUILDER, "notify joinLnn result");
+        LnnNotifyJoinResult(&authRequest.forceJoinInfo.addr, authRequest.forceJoinInfo.networkId, reason);
     }
 }
 
@@ -184,6 +229,22 @@ static AuthVerifyCallback g_reAuthVerifyCallback = {
 AuthVerifyCallback *LnnGetReAuthVerifyCallback(void)
 {
     return &g_reAuthVerifyCallback;
+}
+
+void NotifyStateForSession(const ConnectionAddr *addr)
+{
+    if (addr == NULL) {
+        LNN_LOGE(LNN_BUILDER, "addr is null.");
+        return;
+    }
+    ConnIdCbInfo connIdCbInfo;
+    (void)memset_s(&connIdCbInfo, sizeof(ConnIdCbInfo), 0, sizeof(ConnIdCbInfo));
+    int32_t ret = GetConnIdCbInfoByAddr(addr, &connIdCbInfo);
+    if (ret != SOFTBUS_OK) {
+        LNN_LOGE(LNN_BUILDER, "get connIdCbInfo fail.");
+        return;
+    }
+    LnnNotifyStateForSession(connIdCbInfo.udid, SOFTBUS_NETWORK_JOIN_REQUEST_ERR);
 }
 
 int32_t PostJoinRequestToConnFsm(LnnConnectionFsm *connFsm, const JoinLnnMsgPara *para, bool needReportFailure)
@@ -205,10 +266,15 @@ int32_t PostJoinRequestToConnFsm(LnnConnectionFsm *connFsm, const JoinLnnMsgPara
         }
         isCreate = true;
     }
-    if (connFsm == NULL || LnnSendJoinRequestToConnFsm(connFsm) != SOFTBUS_OK) {
+    if (connFsm != NULL && para->isSession) {
+        connFsm->isSession = true;
+    }
+
+    if (connFsm == NULL || LnnSendJoinRequestToConnFsm(connFsm, false) != SOFTBUS_OK) {
         LNN_LOGE(LNN_BUILDER, "process join lnn request failed");
         if (needReportFailure) {
             LnnNotifyJoinResult((ConnectionAddr *)&para->addr, NULL, SOFTBUS_NETWORK_JOIN_REQUEST_ERR);
+            NotifyStateForSession(&para->addr);
         }
         if (connFsm != NULL && isCreate) {
             LnnFsmRemoveMessageByType(&connFsm->fsm, FSM_CTRL_MSG_START);
@@ -321,7 +387,8 @@ void TryDisconnectAllConnection(const LnnConnectionFsm *connFsm)
             if (strncmp(item->connInfo.addr.info.br.brMac, addr2->info.br.brMac, BT_MAC_LEN) == 0) {
                 return;
             }
-        } else if (addr1->type == CONNECTION_ADDR_WLAN || addr1->type == CONNECTION_ADDR_ETH) {
+        } else if (addr1->type == CONNECTION_ADDR_WLAN || addr1->type == CONNECTION_ADDR_ETH ||
+            addr1->type == CONNECTION_ADDR_NCM) {
             if (strncmp(addr1->info.ip.ip, addr2->info.ip.ip, strlen(addr1->info.ip.ip)) == 0) {
                 return;
             }
@@ -477,6 +544,7 @@ static void DeinitNodeInfoSync(void)
     LnnDeinitOffline();
     LnnDeinitBatteryInfo();
     LnnDeinitWifiDirect();
+    LnnDeinitSleInfo();
 }
 
 static void NetBuilderConfigInit(void)
@@ -522,7 +590,7 @@ static int32_t InitNodeInfoSync(void)
         LNN_LOGE(LNN_INIT, "LnnInitBatteryInfo fail, rc=%{public}d", rc);
         return rc;
     }
-    rc = LnnInitCipherKeyManager();
+    rc = LnnInitCipherKeyManagerPacked();
     if (rc != SOFTBUS_OK) {
         LNN_LOGE(LNN_INIT, "LnnInitCipherKeyManager fail, rc=%{public}d", rc);
         return rc;
@@ -530,6 +598,11 @@ static int32_t InitNodeInfoSync(void)
     rc = LnnInitWifiDirect();
     if (rc != SOFTBUS_OK) {
         LNN_LOGE(LNN_INIT, "init lnn wifidirect addr fail, rc=%{public}d", rc);
+        return rc;
+    }
+    rc = LnnInitSleInfo();
+    if (rc != SOFTBUS_OK) {
+        LNN_LOGE(LNN_INIT, "init lnn sle info fail, rx=%{public}d", rc);
         return rc;
     }
     return SOFTBUS_OK;
@@ -592,8 +665,8 @@ static void OnDeviceVerifyPass(AuthHandle authHandle, const NodeInfo *info)
         return;
     }
 
-    if (authHandle.type != AUTH_LINK_TYPE_ENHANCED_P2P) {
-        if (!LnnConvertAuthConnInfoToAddr(&para->addr, &connInfo, GetCurrentConnectType())) {
+    if (authHandle.type != AUTH_LINK_TYPE_ENHANCED_P2P && authHandle.type != AUTH_LINK_TYPE_SESSION) {
+        if (!LnnConvertAuthConnInfoToAddr(&para->addr, &connInfo, GetCurrentConnectType(connInfo.type))) {
             LNN_LOGE(LNN_BUILDER, "convert connInfo to addr fail");
             SoftBusFree(para);
             return;
@@ -601,7 +674,7 @@ static void OnDeviceVerifyPass(AuthHandle authHandle, const NodeInfo *info)
     } else {
         para->addr.type = CONNECTION_ADDR_BR;
         if (strcpy_s(para->addr.info.br.brMac, BT_MAC_LEN, info->connectInfo.macAddr) != EOK) {
-            LNN_LOGE(LNN_STATE, "copy br mac to addr fail");
+            LNN_LOGE(LNN_BUILDER, "copy br mac to addr fail");
         }
     }
 
@@ -617,10 +690,8 @@ static void OnDeviceVerifyPass(AuthHandle authHandle, const NodeInfo *info)
         SoftBusFree(para->nodeInfo);
         SoftBusFree(para);
     }
-    if (info != NULL) {
-        LnnNotifyDeviceVerified(info->deviceInfo.deviceUdid);
-        DfxRecordDeviceInfoExchangeEndTime(info);
-    }
+    LnnNotifyDeviceVerified(info->deviceInfo.deviceUdid);
+    DfxRecordDeviceInfoExchangeEndTime(info);
 }
 
 static void OnDeviceDisconnect(AuthHandle authHandle)
@@ -712,7 +783,8 @@ static void OnDeviceNotTrusted(const char *peerUdid)
         SoftBusFree(info);
         return;
     }
-    if (LnnSendNotTrustedInfo(info, DISCOVERY_TYPE_COUNT, LnnProcessCompleteNotTrustedMsg) != SOFTBUS_OK) {
+    if (LnnSendNotTrustedInfoPacked(info, DISCOVERY_TYPE_COUNT,
+        LnnProcessCompleteNotTrustedMsg) != SOFTBUS_OK) {
         LNN_LOGE(LNN_BUILDER, "send NotTrustedInfo fail");
         OnLnnProcessNotTrustedMsgDelay((void *)info);
         return;
@@ -744,7 +816,7 @@ static void UserSwitchedHandler(const LnnEventBasicInfo *info)
             LNN_LOGI(LNN_BUILDER, "SOFTBUS_USER_SWITCHED");
             LnnGetDataShareInitResult(&isDataShareInit);
             if (isDataShareInit) {
-                RegisterOOBEMonitor(NULL);
+                RegisterOOBEMonitorPacked(NULL);
             }
             LnnSetUnlockState();
             break;
@@ -785,7 +857,7 @@ static int32_t InitSyncInfoReg(void)
     }
     return SOFTBUS_OK;
 }
- 
+
 int32_t LnnInitNetBuilder(void)
 {
     if (LnnGetNetBuilder()->isInit == true) {
@@ -800,9 +872,10 @@ int32_t LnnInitNetBuilder(void)
     LnnInitTopoManager();
     UpdateLocalNetCapability();
     InitNodeInfoSync();
+    LnnInitConnIdCallbackManager();
     NetBuilderConfigInit();
     // link finder init fail will not cause softbus init fail
-    if (LnnLinkFinderInit() != SOFTBUS_OK) {
+    if (LnnLinkFinderInitPacked() != SOFTBUS_OK) {
         LNN_LOGE(LNN_INIT, "link finder init fail");
     }
     rc = RegAuthVerifyListener(&g_verifyListener);
@@ -814,7 +887,7 @@ int32_t LnnInitNetBuilder(void)
     if (rc != SOFTBUS_OK) {
         return rc;
     }
-    rc = ConifgLocalLedger();
+    rc = ConfigLocalLedger();
     if (rc != SOFTBUS_OK) {
         LNN_LOGE(LNN_INIT, "config local ledger fail, rc=%{public}d", rc);
         return rc;
@@ -829,12 +902,13 @@ int32_t LnnInitNetBuilder(void)
         LNN_LOGE(LNN_INIT, "regist user switch evt handler fail, rc=%{public}d", rc);
         return rc;
     }
-    if (!LnnSubcribeKvStoreService()) {
+    if (LnnInitModuleNotifyWithRetrySync(INIT_DEPS_KVSTORE, LnnSubcribeKvStoreService, RETRY_TIMES,
+        DELAY_REG_DP_TIME) != SOFTBUS_OK) {
         LNN_LOGE(LNN_INIT, "regist kv store service fail!");
     }
+    LnnInitSaStatusMonitor();
     return InitNetBuilderLooper();
 }
-
 
 int32_t LnnInitNetBuilderDelay(void)
 {
@@ -847,11 +921,17 @@ int32_t LnnInitNetBuilderDelay(void)
     }
     LnnSetLocalStrInfo(STRING_KEY_MASTER_NODE_UDID, udid);
     LnnSetLocalNumInfo(NUM_KEY_MASTER_NODE_WEIGHT, LnnGetLocalWeight());
-    ret = LnnInitFastOffline();
+    ret = LnnInitFastOfflinePacked();
     if (ret != SOFTBUS_OK) {
         LNN_LOGE(LNN_INIT, "fast offline init fail!");
         return ret;
     }
+    ret = LnnDeviceCloudConvergenceInitPacked();
+    LNN_LOGW(LNN_INIT, "init device cloud convergence init ret=%{public}d", ret);
+#ifndef ENABLE_FEATURE_DATAMGR_SERVICE
+    LNN_LOGI(LNN_INIT, "no data manager, release datashare init monitor");
+    LnnNotifyDataShareStateChangeEvent(SOFTBUS_DATA_SHARE_READY);
+#endif
     return SOFTBUS_OK;
 }
 
@@ -869,10 +949,13 @@ void LnnDeinitNetBuilder(void)
     LnnUnregSyncInfoHandler(LNN_INFO_TYPE_MASTER_ELECT, OnReceiveMasterElectMsg);
     LnnUnregSyncInfoHandler(LNN_INFO_TYPE_NODE_ADDR, OnReceiveNodeAddrChangedMsg);
     LnnUnregisterEventHandler(LNN_EVENT_ACCOUNT_CHANGED, AccountStateChangeHandler);
+    LnnUnregisterEventHandler(LNN_EVENT_USER_SWITCHED, UserSwitchedHandler);
     UnregAuthVerifyListener();
     LnnDeinitTopoManager();
     DeinitNodeInfoSync();
-    LnnDeinitFastOffline();
+    LnnDeinitFastOfflinePacked();
     LnnDeinitSyncInfoManager();
+    LnnDeInitSaStatusMonitor();
+    LnnDeinitConnIdCallbackManager();
     LnnGetNetBuilder()->isInit = false;
 }

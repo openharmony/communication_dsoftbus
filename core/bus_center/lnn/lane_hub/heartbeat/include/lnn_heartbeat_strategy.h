@@ -18,7 +18,6 @@
 
 #include "lnn_heartbeat_fsm.h"
 #include "softbus_bus_center.h"
-#include "softbus_common.h"
 
 #ifdef __cplusplus
 extern "C" {
@@ -53,6 +52,8 @@ int32_t LnnStopScreenChangeOfflineTiming(const char *networkId, ConnectionAddrTy
 int32_t LnnStopHeartBeatAdvByTypeNow(LnnHeartbeatType registedHbType);
 int32_t LnnUpdateSendInfoStrategy(LnnHeartbeatUpdateInfoType type);
 LnnHeartbeatStrategyType GetStrategyTypeByPolicy(int32_t policy);
+int32_t LnnStartSleOfflineTimingStrategy(const char *networkId);
+int32_t LnnStopSleOfflineTimingStrategy(const char *networkId);
 
 bool LnnIsHeartbeatEnable(LnnHeartbeatType type);
 int32_t LnnEnableHeartbeatByType(LnnHeartbeatType type, bool isEnable);
@@ -62,6 +63,7 @@ void LnnUnRegistParamMgrByType(LnnHeartbeatType type);
 
 int32_t LnnHbStrategyInit(void);
 void LnnHbStrategyDeinit(void);
+void LnnRemoveV0BroadcastAndCheckDev(void);
 
 #ifdef __cplusplus
 }

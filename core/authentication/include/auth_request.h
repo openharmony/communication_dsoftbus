@@ -16,8 +16,6 @@
 #ifndef AUTH_REQUEST_H
 #define AUTH_REQUEST_H
 
-#include <stdint.h>
-#include <stdbool.h>
 #include "auth_interface.h"
 
 #ifdef __cplusplus
@@ -44,6 +42,9 @@ typedef struct {
     ListNode node;
     uint64_t addTime;
     bool isFastAuth;
+    DeviceKeyId deviceKeyId;
+    ForceJoinInfo forceJoinInfo;
+    uint16_t deviceTypeId;
 } AuthRequest;
 
 bool CheckVerifyCallback(const AuthVerifyCallback *verifyCb);

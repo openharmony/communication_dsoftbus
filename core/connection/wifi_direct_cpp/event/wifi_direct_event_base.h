@@ -14,11 +14,13 @@
  */
 #ifndef WIFI_DIRECT_EVENT_BASE_H
 #define WIFI_DIRECT_EVENT_BASE_H
+#define DLL_EXPORT __attribute__((visibility("default")))
 
 namespace OHOS::SoftBus {
-class WifiDirectEventBase {
+class DLL_EXPORT WifiDirectEventBase {
 public:
     virtual ~WifiDirectEventBase() {};
+    virtual std::string getContentTypeid() {return "null";}
 };
 }
 #endif

@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2025 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -19,19 +19,19 @@
 #include "softbus_error_code.h"
 
 namespace OHOS {
-int32_t ISoftBusServer::GrantPermission(int uid, int pid, const char *sessionName)
+int32_t ISoftBusServer::GrantPermission(int32_t uid, int32_t pid, const char *sessionName)
 {
     (void)uid;
     (void)pid;
     (void)sessionName;
-    COMM_LOGI(COMM_SVC, "GrantPermission ipc default impl");
+    COMM_LOGI(COMM_SVC, "ipc default impl");
     return SOFTBUS_IPC_ERR;
 }
 
 int32_t ISoftBusServer::RemovePermission(const char *sessionName)
 {
     (void)sessionName;
-    COMM_LOGI(COMM_SVC, "RemovePermission ipc default impl");
+    COMM_LOGI(COMM_SVC, "ipc default impl");
     return SOFTBUS_IPC_ERR;
 }
 
@@ -39,7 +39,7 @@ int32_t ISoftBusServer::PublishLNN(const char *pkgName, const PublishInfo *info)
 {
     (void)pkgName;
     (void)info;
-    COMM_LOGI(COMM_SVC, "PublishLNN ipc default impl");
+    COMM_LOGI(COMM_SVC, "ipc default impl");
     return SOFTBUS_IPC_ERR;
 }
 
@@ -47,7 +47,7 @@ int32_t ISoftBusServer::StopPublishLNN(const char *pkgName, int32_t publishId)
 {
     (void)pkgName;
     (void)publishId;
-    COMM_LOGI(COMM_SVC, "StopPublishLNN ipc default impl");
+    COMM_LOGI(COMM_SVC, "ipc default impl");
     return SOFTBUS_IPC_ERR;
 }
 
@@ -55,7 +55,7 @@ int32_t ISoftBusServer::RefreshLNN(const char *pkgName, const SubscribeInfo *inf
 {
     (void)pkgName;
     (void)info;
-    COMM_LOGI(COMM_SVC, "RefreshLNN ipc default impl");
+    COMM_LOGI(COMM_SVC, "ipc default impl");
     return SOFTBUS_IPC_ERR;
 }
 
@@ -63,7 +63,7 @@ int32_t ISoftBusServer::StopRefreshLNN(const char *pkgName, int32_t refreshId)
 {
     (void)pkgName;
     (void)refreshId;
-    COMM_LOGI(COMM_SVC, "StopRefreshLNN ipc default impl");
+    COMM_LOGI(COMM_SVC, "ipc default impl");
     return SOFTBUS_IPC_ERR;
 }
 
@@ -71,14 +71,14 @@ int32_t ISoftBusServer::ActiveMetaNode(const MetaNodeConfigInfo *info, char *met
 {
     (void)info;
     (void)metaNodeId;
-    COMM_LOGE(COMM_SVC, "ActiveMetaNode ipc default impl");
+    COMM_LOGE(COMM_SVC, "ipc default impl");
     return SOFTBUS_IPC_ERR;
 }
 
 int32_t ISoftBusServer::DeactiveMetaNode(const char *metaNodeId)
 {
     (void)metaNodeId;
-    COMM_LOGE(COMM_SVC, "DeactiveMetaNode ipc default impl");
+    COMM_LOGE(COMM_SVC, "ipc default impl");
     return SOFTBUS_IPC_ERR;
 }
 
@@ -86,7 +86,7 @@ int32_t ISoftBusServer::GetAllMetaNodeInfo(MetaNodeInfo *info, int32_t *infoNum)
 {
     (void)info;
     (void)infoNum;
-    COMM_LOGE(COMM_SVC, "GetAllMetaNodeInfo ipc default impl");
+    COMM_LOGE(COMM_SVC, "ipc default impl");
     return SOFTBUS_IPC_ERR;
 }
 
@@ -97,8 +97,24 @@ int32_t ISoftBusServer::ShiftLNNGear(const char *pkgName, const char *callerId, 
     (void)callerId;
     (void)targetNetworkId;
     (void)mode;
-    COMM_LOGE(COMM_SVC, "ShiftLNNGear ipc default impl");
+    COMM_LOGE(COMM_SVC, "ipc default impl");
     return SOFTBUS_IPC_ERR;
+}
+
+int32_t ISoftBusServer::TriggerRangeForMsdp(const char *pkgName, const RangeConfig *config)
+{
+    (void)pkgName;
+    (void)config;
+    COMM_LOGE(COMM_SVC, "ipc default impl");
+    return SOFTBUS_IPC_ERR;
+}
+
+int32_t ISoftBusServer::StopRangeForMsdp(const char *pkgName, const RangeConfig *config)
+{
+    (void)pkgName;
+    (void)config;
+    COMM_LOGE(COMM_SVC, "ipc default impl");
+    return SOFTBUS_NOT_IMPLEMENT;
 }
 
 int32_t ISoftBusServer::SyncTrustedRelationShip(const char *pkgName, const char *msg, uint32_t msgLen)
@@ -112,13 +128,126 @@ int32_t ISoftBusServer::SyncTrustedRelationShip(const char *pkgName, const char 
 
 int32_t ISoftBusServer::GetSoftbusSpecObject(sptr<IRemoteObject> &object)
 {
-    COMM_LOGE(COMM_SVC, "GetSoftbusSpecObject ipc default impl");
+    COMM_LOGE(COMM_SVC, "ipc default impl");
     return SOFTBUS_IPC_ERR;
 }
 
 int32_t ISoftBusServer::GetBusCenterExObj(sptr<IRemoteObject> &object)
 {
-    COMM_LOGE(COMM_SVC, "GetBusCenterExObj ipc default impl");
+    COMM_LOGE(COMM_SVC, "ipc default impl");
+    return SOFTBUS_IPC_ERR;
+}
+
+int32_t ISoftBusServer::SetDisplayName(const char *pkgName, const char *nameData, uint32_t len)
+{
+    (void)pkgName;
+    (void)nameData;
+    (void)len;
+    COMM_LOGE(COMM_SVC, "ipc default impl");
+    return SOFTBUS_FUNC_NOT_SUPPORT;
+}
+
+int32_t ISoftBusServer::CreateServer(const char *pkgName, const char *name)
+{
+    (void)pkgName;
+    (void)name;
+    COMM_LOGE(COMM_SVC, "CreateServer ipc default impl");
+    return SOFTBUS_IPC_ERR;
+}
+
+int32_t ISoftBusServer::RemoveServer(const char *pkgName, const char *name)
+{
+    (void)pkgName;
+    (void)name;
+    COMM_LOGE(COMM_SVC, "RemoveServer ipc default impl");
+    return SOFTBUS_IPC_ERR;
+}
+
+int32_t ISoftBusServer::Connect(const char *pkgName, const char *name, const Address *address)
+{
+    (void)pkgName;
+    (void)name;
+    (void)address;
+    COMM_LOGE(COMM_SVC, "Connect ipc default impl");
+    return SOFTBUS_IPC_ERR;
+}
+
+int32_t ISoftBusServer::Disconnect(uint32_t handle)
+{
+    (void)handle;
+    COMM_LOGE(COMM_SVC, "Disconnect ipc default impl");
+    return SOFTBUS_IPC_ERR;
+}
+
+int32_t ISoftBusServer::Send(uint32_t handle, const uint8_t *data, uint32_t len)
+{
+    (void)handle;
+    (void)data;
+    (void)len;
+    COMM_LOGE(COMM_SVC, "Send ipc default impl");
+    return SOFTBUS_IPC_ERR;
+}
+
+int32_t ISoftBusServer::ConnGetPeerDeviceId(uint32_t handle, char *deviceId, uint32_t len)
+{
+    (void)handle;
+    (void)deviceId;
+    (void)len;
+    COMM_LOGE(COMM_SVC, "GetPeerDeviceId ipc default impl");
+    return SOFTBUS_IPC_ERR;
+}
+
+int32_t ISoftBusServer::RegisterBrProxyService(const char *clientPkgName, const sptr<IRemoteObject>& object)
+{
+    (void)clientPkgName;
+    (void)object;
+    COMM_LOGE(COMM_SVC, "RegisterBrProxyService ipc default impl");
+    return SOFTBUS_IPC_ERR;
+}
+ 
+int32_t ISoftBusServer::OpenBrProxy(const char *brMac, const char *uuid)
+{
+    (void)brMac;
+    (void)uuid;
+    COMM_LOGE(COMM_SVC, "OpenBrProxy ipc default impl");
+    return SOFTBUS_IPC_ERR;
+}
+ 
+int32_t ISoftBusServer::CloseBrProxy(int32_t channelId)
+{
+    (void)channelId;
+    COMM_LOGE(COMM_SVC, "CloseBrProxy ipc default impl");
+    return SOFTBUS_IPC_ERR;
+}
+ 
+int32_t ISoftBusServer::SendBrProxyData(int32_t channelId, char *data, uint32_t dataLen)
+{
+    (void)channelId;
+    (void)data;
+    (void)dataLen;
+    COMM_LOGE(COMM_SVC, "SendBrProxyData ipc default impl");
+    return SOFTBUS_IPC_ERR;
+}
+ 
+int32_t ISoftBusServer::SetListenerState(int32_t channelId, int32_t type, bool CbEnabled)
+{
+    (void)channelId;
+    (void)type;
+    (void)CbEnabled;
+    COMM_LOGE(COMM_SVC, "SetListenerState ipc default impl");
+    return SOFTBUS_IPC_ERR;
+}
+ 
+bool ISoftBusServer::IsProxyChannelEnabled(int32_t uid)
+{
+    (void)uid;
+    COMM_LOGE(COMM_SVC, "IsProxyChannelEnabled ipc default impl");
+    return SOFTBUS_IPC_ERR;
+}
+
+int32_t ISoftBusServer::PushRegisterHook()
+{
+    COMM_LOGE(COMM_SVC, "PushRegisterHook ipc default impl");
     return SOFTBUS_IPC_ERR;
 }
 } // namespace OHOS

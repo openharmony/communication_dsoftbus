@@ -66,7 +66,7 @@ int P2pAvailableState::CreateGroup(const std::shared_ptr<P2pOperationWrapper<P2p
         }
     }
     int ret = P2pAdapter::P2pCreateGroup(operation->content_);
-    CONN_CHECK_AND_RETURN_RET_LOGE(ret == SOFTBUS_OK, ret, CONN_WIFI_DIRECT, "create group failed");
+    CONN_CHECK_AND_RETURN_RET_LOGE(ret == SOFTBUS_OK, ret, CONN_WIFI_DIRECT, "create group fail");
     ChangeState(P2pCreateGroupState::Instance(), operation);
     return SOFTBUS_OK;
 }
@@ -95,10 +95,7 @@ int P2pAvailableState::RemoveLink(const std::shared_ptr<P2pOperationWrapper<P2pD
 {
     CONN_LOGI(CONN_WIFI_DIRECT, "start remove group");
     auto ret = P2pAdapter::P2pShareLinkRemoveGroup(operation->content_);
-    if (ret != SOFTBUS_OK) {
-        CONN_LOGI(CONN_WIFI_DIRECT, "remove group failed, error=%{public}d", ret);
-        return ret;
-    }
+    CONN_CHECK_AND_RETURN_RET_LOGE(ret == SOFTBUS_OK, ret, CONN_WIFI_DIRECT, "remove group fail, ret=%{public}d", ret);
     ChangeState(P2pDestroyGroupState::Instance(), operation);
     return SOFTBUS_OK;
 }

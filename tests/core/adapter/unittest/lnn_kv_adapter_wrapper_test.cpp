@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2024 Huawei Device Co., Ltd.
+ * Copyright (c) 2024-2025 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -15,14 +15,19 @@
 
 #include <cstdint>
 #include <cstring>
+#include <securec.h>
 #include <string>
 
 #include "lnn_kv_adapter_wrapper.h"
 #include "softbus_adapter_mem.h"
 #include "softbus_error_code.h"
 #include "gtest/gtest.h"
+#include "dsoftbus_enhance_interface.h"
+#include "g_enhance_lnn_func.h"
+#include "lnn_kv_adapter_wrapper_mock.h"
 
 using namespace std;
+using namespace testing;
 using namespace testing::ext;
 
 namespace OHOS {
@@ -180,22 +185,6 @@ HWTEST_F(KVAdapterWrapperTest, LnnGet001, TestSize.Level1)
 }
 
 /**
- * @tc.name: LnnCloudSync
- * @tc.desc: LnnCloudSync
- * @tc.type: FUNC
- * @tc.require:
- */
-HWTEST_F(KVAdapterWrapperTest, LnnCloudSync001, TestSize.Level1)
-{
-    int32_t dbId = g_dbId;
-    int32_t lnnCloudRet = LnnCloudSync(dbId);
-    EXPECT_EQ(lnnCloudRet, SOFTBUS_ERR);
-
-    lnnCloudRet = LnnCloudSync(dbId + 1);
-    EXPECT_EQ(lnnCloudRet, SOFTBUS_INVALID_PARAM);
-}
-
-/**
  * @tc.name: LnnSubcribeKvStoreService
  * @tc.desc: LnnSubcribeKvStoreService
  * @tc.type: FUNC
@@ -203,22 +192,8 @@ HWTEST_F(KVAdapterWrapperTest, LnnCloudSync001, TestSize.Level1)
  */
 HWTEST_F(KVAdapterWrapperTest, LnnSubcribeKvStoreService001, TestSize.Level1)
 {
-    bool lnnSubcribeKvStoreRet = LnnSubcribeKvStoreService();
-    EXPECT_EQ(lnnSubcribeKvStoreRet, true);
-}
-
-/**
- * @tc.name: LnnDestroyKvAdapter
- * @tc.desc: LnnDestroyKvAdapter
- * @tc.type: FUNC
- * @tc.require:
- */
-HWTEST_F(KVAdapterWrapperTest, LnnDestroy001, TestSize.Level1)
-{
-    int32_t dbId;
-    int32_t createRet = LnnCreateKvAdapter(&dbId, APP_ID.c_str(), APP_ID_LEN, STORE_ID.c_str(), STORE_ID_LEN);
-    EXPECT_EQ(createRet, SOFTBUS_OK);
-    EXPECT_EQ(LnnDestroyKvAdapter(dbId), SOFTBUS_OK);
+    int32_t lnnSubcribeKvStoreRet = LnnSubcribeKvStoreService();
+    EXPECT_EQ(lnnSubcribeKvStoreRet, SOFTBUS_OK);
 }
 
 /**
@@ -839,4 +814,61 @@ HWTEST_F(KVAdapterWrapperTest, LnnSetCloudAbilityInner_Dbid_LessThanMin, TestSiz
     EXPECT_EQ(ret, SOFTBUS_INVALID_PARAM);
 }
 
+/**
+ * @tc.name: LnnCloudSync002
+ * @tc.desc: test LnnCloudSync
+ * @tc.type: FUNC
+ * @tc.require:
+ */
+HWTEST_F(KVAdapterWrapperTest, LnnCloudSync002, TestSize.Level1)
+{
+    LnnEnhanceFuncList *pfnLnnEnhanceFuncList = LnnEnhanceFuncListGet();
+    ASSERT_TRUE(pfnLnnEnhanceFuncList != nullptr);
+    pfnLnnEnhanceFuncList->isCloudSyncEnabled = IsCloudSyncEnabled;
+    int32_t dbId = g_dbId;
+    constexpr int32_t idOffset = 1;
+    int32_t lnnCloudRet = LnnCloudSync(dbId + idOffset);
+    EXPECT_EQ(lnnCloudRet, SOFTBUS_INVALID_PARAM);
+}
+
+/**
+ * @tc.name: LnnDeleteDBDataByNull
+ * @tc.desc: LnnDeleteDBData Invalid Param
+ * @tc.type: FUNC
+ * @tc.require:
+ */
+HWTEST_F(KVAdapterWrapperTest, LnnDeleteDBDataByNull, TestSize.Level1)
+{
+    int32_t dbId = g_dbId;
+    const char * keyStr = nullptr;
+    string valueStr = "ccc";
+    EXPECT_EQ(LnnPutDBData(dbId, keyStr, 3, valueStr.c_str(), 3), SOFTBUS_INVALID_PARAM);
+}
+
+/**
+ * @tc.name: LnnGetDBDataByKey
+ * @tc.desc: LnnGetDBData  Invalid Param
+ * @tc.type: FUNC
+ * @tc.require:
+ */
+HWTEST_F(KVAdapterWrapperTest, LnnGetDBDataByKey, TestSize.Level1)
+{
+    int32_t dbId = g_dbId;
+    const char * keyStr = nullptr;
+    char *value = nullptr;
+    EXPECT_EQ(LnnGetDBData(dbId, keyStr, 3, &value), SOFTBUS_INVALID_PARAM);
+}
+
+/**
+ * @tc.name: LnnDeleteDBDataByInvalid
+ * @tc.desc: LnnDeleteDBDataByPrefix  Invalid Param
+ * @tc.type: FUNC
+ * @tc.require:
+ */
+HWTEST_F(KVAdapterWrapperTest, LnnDeleteDBDataByInvalid, TestSize.Level1)
+{
+    int32_t dbId = g_dbId;
+    char *keyPtr = nullptr;
+    EXPECT_EQ(LnnDeleteDBDataByPrefix(dbId, keyPtr, MIN_STRING_LEN - 1), SOFTBUS_INVALID_PARAM);
+}
 } // namespace OHOS

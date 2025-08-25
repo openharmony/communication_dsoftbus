@@ -18,15 +18,6 @@ softbus_adapter_common = "${dsoftbus_root_path}/adapter/common"
 dsoftbus_feature_product_config_path =
     "${dsoftbus_root_path}/adapter/default_config"
 softbus_adapter_config = "${dsoftbus_root_path}/adapter/default_config"
-native_source_path = rebase_path("$dsoftbus_root_path")
-dep_feature = "dsoftbus_enhance/adapter/default_config/spec_config/softbus_config_adapter.c"
-enhance_feature = exec_script("$dsoftbus_root_path/check_sub_module.py",
-                              [
-                                "$native_source_path",
-                                "$dep_feature",
-                              ],
-                              "value")
-
 if (defined(ohos_lite)) {
   import("//build/lite/config/component/lite_component.gni")
   config("dsoftbus_adapter_common_interface") {
@@ -47,6 +38,7 @@ if (defined(ohos_lite)) {
   common_include = [
     "$dsoftbus_dfx_path/interface/include",
     "$dsoftbus_root_path/interfaces/kits",
+    "$dsoftbus_root_path/adapter/common/net/bluetooth/broadcast/adapter/include",
     "$dsoftbus_root_path/interfaces/kits/common",
     "$softbus_adapter_common/security/access_token/include",
   ]
@@ -54,7 +46,10 @@ if (defined(ohos_lite)) {
   if (ohos_kernel_type == "liteos_m") {
     static_library("softbus_adapter") {
       include_dirs = common_include
-      include_dirs += [ "//kernel/liteos_m/kal/cmsis" ]
+      include_dirs += [
+        "//kernel/liteos_m/kal/cmsis",
+        "$dsoftbus_root_path/interfaces/inner_kits/lnn",
+      ]
       external_deps = [
         "bounds_checking_function:libsec_static",
         "init:libbegetutil",
@@ -104,12 +99,7 @@ if (defined(ohos_lite)) {
         sources += [ "$softbus_adapter_common/security/access_token/common/softbus_access_token_adapter_virtual.c" ]
       }
 
-      if (enhance_feature) {
-        sources += [ "$dsoftbus_root_path/dsoftbus_enhance/adapter/default_config/spec_config/softbus_config_adapter.c" ]
-      } else {
-        sources +=
-            [ "$softbus_adapter_config/spec_config/softbus_config_adapter.c" ]
-      }
+      sources += [ "$softbus_adapter_config/spec_config/softbus_config_adapter.c" ]
 
       if (board_name == "v200zr") {
         external_deps += [ "json:nlohmann_json_static" ]
@@ -128,12 +118,7 @@ if (defined(ohos_lite)) {
           "$softbus_adapter_common/range/softbus_adapter_range.c",
         ]
 
-        if (enhance_feature) {
-          sources += [ "$dsoftbus_root_path/dsoftbus_enhance/adapter/default_config/spec_config/softbus_config_adapter.c" ]
-        } else {
-          sources +=
-              [ "$softbus_adapter_config/spec_config/softbus_config_adapter.c" ]
-        }
+        sources += [ "$softbus_adapter_config/spec_config/softbus_config_adapter.c" ]
       }
 
       deps = [
@@ -152,13 +137,14 @@ if (defined(ohos_lite)) {
           "$softbus_adapter_common/openssl/softbus_adapter_crypto.c",
           "$softbus_adapter_common/openssl/softbus_aes_encrypt.c",
         ]
-        deps += [ "//third_party/openssl/ohos_lite:openssl_shared" ]
+        deps += [ "//third_party/openssl:libcrypto_shared" ]
       }
       public_configs = [ ":dsoftbus_adapter_common_interface" ]
     }
   } else {
     shared_library("softbus_adapter") {
       include_dirs = common_include
+      include_dirs += [ "$dsoftbus_root_path/interfaces/inner_kits/lnn" ]
       cflags = [
         "-Wall",
         "-Werror",
@@ -195,12 +181,7 @@ if (defined(ohos_lite)) {
         sources += [ "$softbus_adapter_common/security/access_token/common/softbus_access_token_adapter_virtual.c" ]
       }
 
-      if (enhance_feature) {
-        sources += [ "$dsoftbus_root_path/dsoftbus_enhance/adapter/default_config/spec_config/softbus_config_adapter.c" ]
-      } else {
-        sources +=
-            [ "$softbus_adapter_config/spec_config/softbus_config_adapter.c" ]
-      }
+      sources += [ "$softbus_adapter_config/spec_config/softbus_config_adapter.c" ]
 
       deps = [
         "$dsoftbus_dfx_path:softbus_dfx",
@@ -223,7 +204,7 @@ if (defined(ohos_lite)) {
           "$softbus_adapter_common/openssl/softbus_adapter_crypto.c",
           "$softbus_adapter_common/openssl/softbus_aes_encrypt.c",
         ]
-        deps += [ "//third_party/openssl/ohos_lite:openssl_shared" ]
+        deps += [ "//third_party/openssl:libcrypto_shared" ]
       }
       public_configs = [ ":dsoftbus_adapter_common_interface" ]
     }
@@ -237,6 +218,7 @@ if (defined(ohos_lite)) {
       "$softbus_adapter_common/include",
       "$softbus_adapter_common/include/OS_adapter_define/linux",
       "$softbus_adapter_common/security/access_token/include",
+      "$dsoftbus_root_path/interfaces/inner_kits/lnn",
     ]
   }
 
@@ -292,40 +274,22 @@ if (defined(ohos_lite)) {
       sources += [ "$softbus_adapter_common/security/access_token/common/softbus_access_token_adapter_virtual.c" ]
     }
 
-    if (enhance_feature) {
-      sources += [ "$dsoftbus_root_path/dsoftbus_enhance/adapter/default_config/spec_config/softbus_config_adapter.c" ]
-    } else {
-      sources +=
-          [ "$softbus_adapter_config/spec_config/softbus_config_adapter.c" ]
-    }
+    sources += [ "$softbus_adapter_config/spec_config/softbus_config_adapter.c" ]
 
-    public_deps = [ "$dsoftbus_dfx_path:softbus_dfx" ]
+    deps = [ "$dsoftbus_dfx_path:softbus_dfx" ]
     public_external_deps = [
       "bounds_checking_function:libsec_shared",
       "json:nlohmann_json_static",
     ]
 
-    ble_enhanced_impl =
-        "dsoftbus_enhance/adapter/common/range/softbus_adapter_range.c"
-    enhanced_range = exec_script("$dsoftbus_root_path/check_sub_module.py",
-                                 [
-                                   "$native_source_path",
-                                   "$ble_enhanced_impl",
-                                 ],
-                                 "value")
-    if (enhanced_range && defined(global_parts_info.msdp_algorithm)) {
-      sources += [ "$dsoftbus_root_path/dsoftbus_enhance/adapter/common/range/softbus_adapter_range.c" ]
-      external_deps += [ "algorithm:msdp_ble_range" ]
-    } else {
-      sources += [ "$softbus_adapter_common/range/softbus_adapter_range.c" ]
-    }
+    sources += [ "$softbus_adapter_common/range/softbus_adapter_range.c" ]
 
     if (dsoftbus_feature_encrypt == 0) {
       sources += [
         "$softbus_adapter_common/mbedtls/softbus_adapter_crypto.c",
         "$softbus_adapter_common/mbedtls/softbus_aes_encrypt_virtual.c",
       ]
-      public_deps += [ "//third_party/mbedtls" ]
+      external_deps += [ "//third_party/mbedtls" ]
     } else if (dsoftbus_feature_encrypt == 1) {
       sources += [
         "$softbus_adapter_common/openssl/softbus_adapter_crypto.c",

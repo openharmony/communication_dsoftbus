@@ -18,18 +18,15 @@
 
 #include <stdint.h>
 #include "bus_center_event.h"
+#include "lnn_event_monitor_impl_struct.h"
 
 #ifdef __cplusplus
 extern "C" {
 #endif
 
-#define BOOTEVENT_ACCOUNT_READY "bootevent.account.ready"
-
-typedef int32_t (*LnnInitEventMonitorImpl)(void);
-typedef void (*LnnDeinitEventMonitorImpl)(void);
-typedef void (*AccountEventHandle)(const char *key, const char *value, void *context);
-
 int32_t LnnInitNetlinkMonitorImpl(void);
+
+int32_t LnnInitNetlinkMonitorImplNotify(void);
 
 int32_t LnnInitProductMonitorImpl(void);
 

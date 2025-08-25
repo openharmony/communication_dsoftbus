@@ -21,15 +21,15 @@
 #include "ble_mock.h"
 #include "bus_center_adapter.h"
 #include "distribute_net_ledger_mock.h"
+#include "dsoftbus_enhance_interface.h"
+#include "hb_medium_mgr_mock.h"
 #include "hb_strategy_mock.h"
-#include "lnn_ble_heartbeat.h"
 #include "lnn_connection_fsm_mock.h"
 #include "lnn_heartbeat_ctrl_virtual.c"
 #include "lnn_heartbeat_medium_mgr.c"
 #include "lnn_heartbeat_utils.h"
 #include "lnn_net_builder.h"
 #include "lnn_net_ledger_mock.h"
-#include "lnn_parameter_utils_virtual.c"
 #include "softbus_common.h"
 
 namespace OHOS {
@@ -324,8 +324,7 @@ HWTEST_F(HeartBeatMediumTest, HbMediumMgrRecvProcessTest_01, TestSize.Level1)
     EXPECT_CALL(hbStrateMock, IsExistLnnDfxNodeByUdidHash).WillRepeatedly(Return(true));
     int32_t ret = HbMediumMgrRecvProcess(&device, &mediumWeight, HEARTBEAT_TYPE_BLE_V1, false, &hbResp);
     EXPECT_TRUE(ret == SOFTBUS_NETWORK_NOT_CONNECTABLE);
-    HbFirstSaveRecvTime(
-        &storedInfo, &device, mediumWeight.weight, mediumWeight.localMasterWeight, TEST_RECVTIME_FIRST);
+    HbFirstSaveRecvTime(&storedInfo, &device, mediumWeight.weight, mediumWeight.localMasterWeight, TEST_RECVTIME_FIRST);
     EXPECT_CALL(ledgerMock, LnnGetAllOnlineNodeInfo).WillRepeatedly(Return(SOFTBUS_INVALID_PARAM));
     ret = HbMediumMgrRecvProcess(&device, &mediumWeight, HEARTBEAT_TYPE_BLE_V1, false, &hbResp);
     EXPECT_NE(ret, SOFTBUS_OK);
@@ -476,12 +475,15 @@ HWTEST_F(HeartBeatMediumTest, LnnDumpHbOnlineNodeList_TEST01, TestSize.Level1)
  */
 HWTEST_F(HeartBeatMediumTest, VisitHbMediumMgrSendBegin_TEST01, TestSize.Level1)
 {
+    LnnEnhanceFuncList *pfnLnnEnhanceFuncList = LnnEnhanceFuncListGet();
+    pfnLnnEnhanceFuncList->lnnRegisterBleLpDeviceMediumMgr = LnnRegisterBleLpDeviceMediumMgr;
     bool ret = VisitHbMediumMgrSendBegin(nullptr, HEARTBEAT_TYPE_MAX, nullptr);
     EXPECT_FALSE(ret);
     LnnHeartbeatSendBeginData data = {
         .hbType = HEARTBEAT_TYPE_BLE_V1,
         .wakeupFlag = false,
         .isRelay = false,
+        .isMsdpRange = false,
     };
     NiceMock<LnnNetLedgertInterfaceMock> ledgerMock;
     EXPECT_CALL(ledgerMock, LnnRegisterBleLpDeviceMediumMgr)
@@ -514,6 +516,7 @@ HWTEST_F(HeartBeatMediumTest, LnnHbMediumMgrSendBegin_TEST01, TestSize.Level1)
         .hbType = HEARTBEAT_TYPE_MAX,
         .wakeupFlag = false,
         .isRelay = false,
+        .isMsdpRange = false,
     };
     NiceMock<LnnNetLedgertInterfaceMock> ledgerMock;
     EXPECT_CALL(ledgerMock, LnnRegisterBleLpDeviceMediumMgr).WillRepeatedly(Return(SOFTBUS_OK));
@@ -534,6 +537,8 @@ HWTEST_F(HeartBeatMediumTest, VisitHbMediumMgrSendEnd_TEST01, TestSize.Level1)
 {
     int32_t num;
     LnnHeartbeatSendEndData custData;
+    LnnEnhanceFuncList *pfnLnnEnhanceFuncList = LnnEnhanceFuncListGet();
+    pfnLnnEnhanceFuncList->lnnRegisterBleLpDeviceMediumMgr = LnnRegisterBleLpDeviceMediumMgr;
     bool ret = VisitHbMediumMgrSendEnd(nullptr, HEARTBEAT_TYPE_MAX, nullptr);
     EXPECT_FALSE(ret);
     ret = VisitHbMediumMgrSendEnd(nullptr, HEARTBEAT_TYPE_BLE_V3, static_cast<void *>(&num));
@@ -903,6 +908,8 @@ HWTEST_F(HeartBeatMediumTest, LnnDumpHbOnlineNodeList_TEST02, TestSize.Level1)
  */
 HWTEST_F(HeartBeatMediumTest, LnnHbMediumMgrInit_TEST01, TestSize.Level1)
 {
+    LnnEnhanceFuncList *pfnLnnEnhanceFuncList = LnnEnhanceFuncListGet();
+    pfnLnnEnhanceFuncList->lnnRegisterBleLpDeviceMediumMgr = LnnRegisterBleLpDeviceMediumMgr;
     NiceMock<LnnNetLedgertInterfaceMock> ledgerMock;
     EXPECT_CALL(ledgerMock, LnnRegisterBleLpDeviceMediumMgr)
         .WillOnce(Return(SOFTBUS_NETWORK_HB_MGR_REG_FAIL))
@@ -936,6 +943,8 @@ HWTEST_F(HeartBeatMediumTest, LnnHeartbeatCtrlVirtual_TEST01, TestSize.Level1)
     LnnDeinitHeartbeat();
     ret = LnnInitHeartbeat();
     EXPECT_TRUE(ret == SOFTBUS_OK);
+    EXPECT_TRUE(LnnIsNeedInterceptBroadcast(true) == false);
+    EXPECT_TRUE(LnnIsNeedInterceptBroadcast(false) == false);
 }
 
 /*
@@ -972,6 +981,8 @@ HWTEST_F(HeartBeatMediumTest, IsLocalSupportThreeState_TEST01, TestSize.Level1)
  */
 HWTEST_F(HeartBeatMediumTest, HbIsValidJoinLnnRequest_TEST01, TestSize.Level1)
 {
+    LnnEnhanceFuncList *pfnLnnEnhanceFuncList = LnnEnhanceFuncListGet();
+    pfnLnnEnhanceFuncList->lnnRetrieveDeviceInfo = LnnRetrieveDeviceInfo;
     NiceMock<LnnNetLedgertInterfaceMock> netLedgertMock;
     uint64_t localFeatureCap = 0x0;
     EXPECT_CALL(netLedgertMock, LnnGetLocalNumU64Info)
@@ -1005,5 +1016,92 @@ HWTEST_F(HeartBeatMediumTest, HbIsValidJoinLnnRequest_TEST01, TestSize.Level1)
     EXPECT_CALL(bleMock, SoftBusGetBrState).WillOnce(Return(BR_DISABLE));
     ret = HbIsValidJoinLnnRequest(nullptr, nullptr);
     EXPECT_TRUE(ret == false);
+}
+
+/*
+ * @tc.name: IsNeedTriggerSparkGroup_TEST01
+ * @tc.desc: three state test
+ * @tc.type: FUNC
+ * @tc.require:
+ */
+HWTEST_F(HeartBeatMediumTest, IsNeedTriggerSparkGroup_TEST01, TestSize.Level1)
+{
+    NodeInfo nodeInfo;
+    (void)memset_s(&nodeInfo, sizeof(NodeInfo), 0, sizeof(NodeInfo));
+    LnnHeartbeatRecvInfo storedInfo = {
+        .triggerSparkCount = SLE_JOIN_SPARK_TIMES + 1,
+        .triggerSparkTime = SLE_JOIN_SPARK_TIMES,
+    };
+    uint64_t nowTime = GetNowTime();
+    bool ret = IsNeedTriggerSparkGroup(nullptr, nullptr, nowTime);
+    EXPECT_EQ(ret, false);
+    ret = IsNeedTriggerSparkGroup(&nodeInfo, nullptr, nowTime);
+    EXPECT_EQ(ret, false);
+
+    NiceMock<LnnNetLedgertInterfaceMock> netLedgertMock;
+    EXPECT_CALL(netLedgertMock, LnnHasDiscoveryType).WillOnce(Return(false)).WillRepeatedly(Return(true));
+    ret = IsNeedTriggerSparkGroup(&nodeInfo, &storedInfo, nowTime);
+    EXPECT_EQ(ret, false);
+
+    ret = IsNeedTriggerSparkGroup(&nodeInfo, &storedInfo, nowTime); // triggerSparkCount > SLE_JOIN_SPARK_TIMES
+    EXPECT_EQ(ret, false);
+
+    storedInfo.triggerSparkCount = SLE_JOIN_SPARK_TIMES;
+    nowTime = LOW_FREQ_CYCLE * HB_TIME_FACTOR + storedInfo.triggerSparkTime;
+    ret = IsNeedTriggerSparkGroup(&nodeInfo, &storedInfo, nowTime);
+    EXPECT_EQ(ret, true);
+
+    storedInfo.triggerSparkTime = 0;
+    nowTime = GetNowTime();
+    ret = IsNeedTriggerSparkGroup(&nodeInfo, &storedInfo, nowTime);
+    EXPECT_EQ(ret, true);
+}
+
+/*
+ * @tc.name: LnnCleanTriggerSparkInfo_TEST01
+ * @tc.desc: three state test
+ * @tc.type: FUNC
+ * @tc.require:
+ */
+HWTEST_F(HeartBeatMediumTest, LnnCleanTriggerSparkInfo_TEST01, TestSize.Level1)
+{
+    char udid[] = "testUdid";
+    int32_t ret = LnnCleanTriggerSparkInfo(nullptr, CONNECTION_ADDR_BLE);
+    EXPECT_EQ(ret, SOFTBUS_INVALID_PARAM);
+    ret = LnnCleanTriggerSparkInfo(udid, CONNECTION_ADDR_BLE);
+    EXPECT_EQ(ret, SOFTBUS_OK);
+    ret = LnnCleanTriggerSparkInfo(udid, CONNECTION_ADDR_ETH);
+    EXPECT_EQ(ret, SOFTBUS_OK);
+}
+
+/*
+ * @tc.name: HbMediumMgrRecvSleInfo_TEST01
+ * @tc.desc: three state test
+ * @tc.type: FUNC
+ * @tc.require:
+ */
+HWTEST_F(HeartBeatMediumTest, HbMediumMgrRecvSleInfo_TEST01, TestSize.Level1)
+{
+    char networkId[] = TEST_NETWORK_ID;
+    SleDeviceInfo info = {
+        .isOffline = 1,
+    };
+    EXPECT_NO_FATAL_FAILURE(HbMediumMgrRecvSleInfo(nullptr, nullptr));
+    EXPECT_NO_FATAL_FAILURE(HbMediumMgrRecvSleInfo(networkId, nullptr));
+    NiceMock<DistributeLedgerInterfaceMock> disLedgerMock;
+    EXPECT_CALL(disLedgerMock, LnnGetDLSleHbTimestamp)
+        .WillOnce(Return(SOFTBUS_NETWORK_GENERATE_STR_HASH_ERR))
+        .WillRepeatedly(Return(SOFTBUS_OK));
+    EXPECT_NO_FATAL_FAILURE(HbMediumMgrRecvSleInfo(networkId, &info));
+
+    EXPECT_CALL(disLedgerMock, LnnSetDLSleHbTimestamp)
+        .WillOnce(Return(SOFTBUS_NETWORK_GENERATE_STR_HASH_ERR))
+        .WillRepeatedly(Return(SOFTBUS_OK));
+    EXPECT_NO_FATAL_FAILURE(HbMediumMgrRecvSleInfo(networkId, &info));
+    NiceMock<HbMediumMgrExtInterfaceMock> hbStrateMock;
+    EXPECT_CALL(hbStrateMock, LnnStartSleOfflineTimingStrategy)
+        .WillOnce(Return(SOFTBUS_NETWORK_GENERATE_STR_HASH_ERR))
+        .WillRepeatedly(Return(SOFTBUS_OK));
+    EXPECT_NO_FATAL_FAILURE(HbMediumMgrRecvSleInfo(networkId, &info));
 }
 } // namespace OHOS

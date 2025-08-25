@@ -51,6 +51,7 @@ DISC_ASSIGNER(Int32, BroadcastType, broadcastType)
 DISC_ASSIGNER(Int32, BroadcastFreq, broadcastFreq)
 DISC_ASSIGNER(Int32, MinInterval, minInterval)
 DISC_ASSIGNER(Int32, MaxInterval, maxInterval)
+DISC_ASSIGNER(Int32, CurrentNum, currentNum)
 DISC_ASSIGNER(Int32, ScanType, scanType)
 DISC_ASSIGNER(Int32, ScanCount, scanCount)
 DISC_ASSIGNER(String, ScanCycle, scanCycle)
@@ -58,8 +59,8 @@ DISC_ASSIGNER(Int32, DiscType, discType)
 DISC_ASSIGNER(Int32, DiscMode, discMode)
 DISC_ASSIGNER(Int32, SuccessCnt, successCnt)
 DISC_ASSIGNER(Int32, FailCnt, failCnt)
-DISC_ASSIGNER(Int32, StartTime, startTime)
-DISC_ASSIGNER(Int32, CostTime, costTime)
+DISC_ASSIGNER(Int64, StartTime, startTime)
+DISC_ASSIGNER(Int64, CostTime, costTime)
 DISC_ASSIGNER(AnonymizeString, LocalNetworkId, localNetworkId)
 DISC_ASSIGNER(AnonymizeString, PeerIp, peerIp)
 DISC_ASSIGNER(AnonymizeString, PeerBrMac, peerBrMac)
@@ -70,7 +71,7 @@ DISC_ASSIGNER(AnonymizeString, PeerNetworkId, peerNetworkId)
 DISC_ASSIGNER(String, PeerDeviceType, peerDeviceType)
 DISC_ASSIGNER(String, CallerPkg, callerPkg)
 
-#define DISC_ASSIGNER_SIZE 34 // Size of g_discAssigners
+#define DISC_ASSIGNER_SIZE 35 // Size of g_discAssigners
 static HiSysEventParamAssigner g_discAssigners[] = {
     { "STAGE_RES",            HISYSEVENT_INT32,  DiscAssignerResult         },
     { "ERROR_CODE",           HISYSEVENT_INT32,  DiscAssignerErrcode        },
@@ -88,6 +89,7 @@ static HiSysEventParamAssigner g_discAssigners[] = {
     { "BROADCAST_FREQ",       HISYSEVENT_INT32,  DiscAssignerBroadcastFreq  },
     { "MIN_INTERVAL",         HISYSEVENT_INT32,  DiscAssignerMinInterval    },
     { "MAX_INTERVAL",         HISYSEVENT_INT32,  DiscAssignerMaxInterval    },
+    { "CURRENT_NUM",          HISYSEVENT_INT32,  DiscAssignerCurrentNum     },
     { "SCAN_TYPE",            HISYSEVENT_INT32,  DiscAssignerScanType       },
     { "SCAN_COUNT",           HISYSEVENT_INT32,  DiscAssignerScanCount      },
     { "SCAN_CYCLE",           HISYSEVENT_STRING, DiscAssignerScanCycle      },
@@ -95,8 +97,8 @@ static HiSysEventParamAssigner g_discAssigners[] = {
     { "DISC_MODE",            HISYSEVENT_INT32,  DiscAssignerDiscMode       },
     { "SUCCESS_CNT",          HISYSEVENT_INT32,  DiscAssignerSuccessCnt     },
     { "FAIL_CNT",             HISYSEVENT_INT32,  DiscAssignerFailCnt        },
-    { "START_TIME",           HISYSEVENT_INT32,  DiscAssignerStartTime      },
-    { "COST_TIME",            HISYSEVENT_INT32,  DiscAssignerCostTime       },
+    { "START_TIME",           HISYSEVENT_INT64,  DiscAssignerStartTime      },
+    { "COST_TIME",            HISYSEVENT_INT64,  DiscAssignerCostTime       },
     { "LOCAL_NET_ID",         HISYSEVENT_STRING, DiscAssignerLocalNetworkId },
     { "PEER_IP",              HISYSEVENT_STRING, DiscAssignerPeerIp         },
     { "PEER_BR_MAC",          HISYSEVENT_STRING, DiscAssignerPeerBrMac      },

@@ -29,6 +29,7 @@ if (defined(ohos_lite)) {
         "-DLWIP_LITEOS_A_COMPAT",
         "-DMBEDTLS_INCLUDED",
         "-DENABLE_USER_LOG",
+        "-Os",
       ]
       cflags_cc = cflags
       include_dirs = [
@@ -46,9 +47,10 @@ if (defined(ohos_lite)) {
     } else if (ohos_kernel_type == "linux") {
       cflags = [
         "-Wall",
-        "-DNSTACKX_WITH_HMOS_LINUX",
+        "-DNSTACKX_WITH_LINUX",
         "-DMBEDTLS_INCLUDED",
         "-DENABLE_USER_LOG",
+        "-Os",
       ]
       cflags_cc = cflags
       include_dirs = [
@@ -82,7 +84,7 @@ if (defined(ohos_lite)) {
     cflags = [
       "-Wall",
       "-DMBEDTLS_INCLUDED",
-      "-DNSTACKX_WITH_HMOS_LINUX",
+      "-DNSTACKX_WITH_LINUX",
       "-DENABLE_USER_LOG",
     ]
     cflags_cc = cflags
@@ -91,6 +93,7 @@ if (defined(ohos_lite)) {
       "$NSTACKX_ROOT/nstackx_util/platform/unix",
       "interface",
       "platform/unix",
+      "-Os",
     ]
     sources = [
       "core/nstackx_congestion.c",

@@ -34,7 +34,7 @@ void DiscServerDeinit(void)
     DiscMgrDeinit();
 }
 
-void DiscServerDeathCallback(const char *pkgName)
+void DiscServerDeathCallback(const char *pkgName, int32_t pid)
 {
-    DiscMgrDeathCallback(pkgName);
+    DiscMgrDeathCallback(pkgName, pid);
 }

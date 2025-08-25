@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2022 Huawei Device Co., Ltd.
+ * Copyright (c) 2022-2025 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -50,13 +50,13 @@ static LnnNetLedgerInterface *GetNetLedgerInterface()
 
 int32_t LnnNetLedgertInterfaceMock::ActionOfLnnGetAllOnline(NodeBasicInfo **info, int32_t *infoNum)
 {
-    if (info == NULL || infoNum == NULL) {
+    if (info == nullptr || infoNum == nullptr) {
         LNN_LOGW(LNN_TEST, "invalid para");
         return SOFTBUS_INVALID_PARAM;
     }
     *infoNum = 1;
     *info = reinterpret_cast<NodeBasicInfo *>(SoftBusMalloc((*infoNum) * sizeof(NodeBasicInfo)));
-    if (*info == NULL) {
+    if (*info == nullptr) {
         LNN_LOGI(LNN_TEST, "malloc info fail");
         return SOFTBUS_MALLOC_ERR;
     }
@@ -70,7 +70,7 @@ int32_t LnnNetLedgertInterfaceMock::ActionOfLnnGetAllOnline(NodeBasicInfo **info
 int32_t LnnNetLedgertInterfaceMock::ActionOfLnnConvertDlId(
     const char *srcId, IdCategory srcIdType, IdCategory dstIdType, char *dstIdBuf, uint32_t dstIdBufLen)
 {
-    if (srcId == NULL || dstIdBuf == NULL) {
+    if (srcId == nullptr || dstIdBuf == nullptr) {
         LNN_LOGW(LNN_TEST, "invalid para");
         return SOFTBUS_INVALID_PARAM;
     }
@@ -84,7 +84,7 @@ int32_t LnnNetLedgertInterfaceMock::ActionOfLnnConvertDlId(
 int32_t LnnNetLedgertInterfaceMock::ActionOfLnnConvertDlId1(
     const char *srcId, IdCategory srcIdType, IdCategory dstIdType, char *dstIdBuf, uint32_t dstIdBufLen)
 {
-    if (srcId == NULL || dstIdBuf == NULL) {
+    if (srcId == nullptr || dstIdBuf == nullptr) {
         LNN_LOGW(LNN_TEST, "invalid para");
         return SOFTBUS_INVALID_PARAM;
     }
@@ -97,13 +97,13 @@ int32_t LnnNetLedgertInterfaceMock::ActionOfLnnConvertDlId1(
 
 int32_t LnnNetLedgertInterfaceMock::ActionOfLnnGetAllOnlineNodeInfo(NodeBasicInfo **info, int32_t *infoNum)
 {
-    if (info == NULL || infoNum == NULL) {
+    if (info == nullptr || infoNum == nullptr) {
         LNN_LOGW(LNN_TEST, "invalid para");
         return SOFTBUS_INVALID_PARAM;
     }
     *infoNum = 1;
     *info = reinterpret_cast<NodeBasicInfo *>(SoftBusMalloc((*infoNum) * sizeof(NodeBasicInfo)));
-    if (*info == NULL) {
+    if (*info == nullptr) {
         LNN_LOGI(LNN_TEST, "malloc info fail");
         return SOFTBUS_MALLOC_ERR;
     }
@@ -116,13 +116,13 @@ int32_t LnnNetLedgertInterfaceMock::ActionOfLnnGetAllOnlineNodeInfo(NodeBasicInf
 
 int32_t LnnNetLedgertInterfaceMock::ActionOfLnnGetAllOnlineNodeInfo1(NodeBasicInfo **info, int32_t *infoNum)
 {
-    if (info == NULL || infoNum == NULL) {
+    if (info == nullptr || infoNum == nullptr) {
         LNN_LOGW(LNN_TEST, "invalid para");
         return SOFTBUS_INVALID_PARAM;
     }
     *infoNum = LNN_MOCK_ONLINE_NODE_CNT;
     *info = reinterpret_cast<NodeBasicInfo *>(SoftBusMalloc((*infoNum) * sizeof(NodeBasicInfo)));
-    if (*info == NULL) {
+    if (*info == nullptr) {
         LNN_LOGI(LNN_TEST, "malloc info fail");
         return SOFTBUS_MALLOC_ERR;
     }
@@ -162,7 +162,7 @@ int32_t LnnNetLedgertInterfaceMock::ActionOfLnnGetLnnRelation1(
 
 int32_t LnnNetLedgertInterfaceMock::ActionOfLnnGetLocalStrInfo(InfoKey key, char *info, uint32_t len)
 {
-    if (info == NULL) {
+    if (info == nullptr) {
         LNN_LOGW(LNN_TEST, "invalid para");
         return SOFTBUS_INVALID_PARAM;
     }
@@ -175,7 +175,7 @@ int32_t LnnNetLedgertInterfaceMock::ActionOfLnnGetLocalStrInfo(InfoKey key, char
 
 int32_t LnnNetLedgertInterfaceMock::ActionOfLnnGetLocalStrInfo1(InfoKey key, char *info, uint32_t len)
 {
-    if (info == NULL) {
+    if (info == nullptr) {
         LNN_LOGW(LNN_TEST, "invalid para");
         return SOFTBUS_INVALID_PARAM;
     }
@@ -194,7 +194,7 @@ int32_t LnnNetLedgertInterfaceMock::ActionOfLnnGetLocalStrInfo2(InfoKey key, cha
         }
         return SOFTBUS_OK;
     }
-    if (key == STRING_KEY_WLAN_IP) {
+    if (key == STRING_KEY_IP) {
         if (strcpy_s(info, len, "127.0.0.2") != EOK) {
             return SOFTBUS_STRCPY_ERR;
         }
@@ -207,7 +207,7 @@ int32_t LnnNetLedgertInterfaceMock::ActionOfLnnGetAuthHandle(
     const char *uuid, AuthLinkType type, AuthHandle *authHandle)
 {
     (void)uuid;
-    if (authHandle == NULL) {
+    if (authHandle == nullptr) {
         LNN_LOGW(LNN_TEST, "invalid para");
         return SOFTBUS_INVALID_PARAM;
     }
@@ -230,10 +230,39 @@ int32_t LnnNetLedgertInterfaceMock::ActionOfLnnGetAuthSeqList(
     return SOFTBUS_OK;
 }
 
+int32_t LnnNetLedgertInterfaceMock::ActionOfLnnGetLocalStrInfoByIfnameIdx(
+    InfoKey key, char *info, uint32_t len, int32_t ifIdx)
+{
+    (void)ifIdx;
+    if (key == STRING_KEY_NET_IF_NAME) {
+        if (strcpy_s(info, len, "deviceName") != EOK) {
+            return SOFTBUS_STRCPY_ERR;
+        }
+        return SOFTBUS_OK;
+    }
+    if (key == STRING_KEY_IP) {
+        if (strcpy_s(info, len, "127.0.0.2") != EOK) {
+            return SOFTBUS_STRCPY_ERR;
+        }
+        return SOFTBUS_OK;
+    }
+    return SOFTBUS_INVALID_PARAM;
+}
+
 extern "C" {
 int32_t LnnGetLocalStrInfo(InfoKey key, char *info, uint32_t len)
 {
     return GetNetLedgerInterface()->LnnGetLocalStrInfo(key, info, len);
+}
+
+int32_t LnnGetLocalStrInfoByIfnameIdx(InfoKey key, char *info, uint32_t len, int32_t ifIdx)
+{
+    return GetNetLedgerInterface()->LnnGetLocalStrInfoByIfnameIdx(key, info, len, ifIdx);
+}
+
+int32_t LnnGetLocalNumInfoByIfnameIdx(InfoKey key, int32_t *info, int32_t ifIdx)
+{
+    return GetNetLedgerInterface()->LnnGetLocalNumInfoByIfnameIdx(key, info, ifIdx);
 }
 
 const NodeInfo *LnnGetLocalNodeInfo(void)
@@ -241,19 +270,19 @@ const NodeInfo *LnnGetLocalNodeInfo(void)
     return GetNetLedgerInterface()->LnnGetLocalNodeInfo();
 }
 
-int32_t LnnGetAuthPort(const NodeInfo *info)
+int32_t LnnGetAuthPort(const NodeInfo *info, int32_t ifnameIdx)
 {
-    return GetNetLedgerInterface()->LnnGetAuthPort(info);
+    return GetNetLedgerInterface()->LnnGetAuthPort(info, ifnameIdx);
 }
 
-int32_t LnnGetSessionPort(const NodeInfo *info)
+int32_t LnnGetSessionPort(const NodeInfo *info, int32_t ifnameIdx)
 {
-    return GetNetLedgerInterface()->LnnGetSessionPort(info);
+    return GetNetLedgerInterface()->LnnGetSessionPort(info, ifnameIdx);
 }
 
-int32_t LnnGetProxyPort(const NodeInfo *info)
+int32_t LnnGetProxyPort(const NodeInfo *info, int32_t ifnameIdx)
 {
-    return GetNetLedgerInterface()->LnnGetProxyPort(info);
+    return GetNetLedgerInterface()->LnnGetProxyPort(info, ifnameIdx);
 }
 
 const char *LnnGetBtMac(const NodeInfo *info)
@@ -472,11 +501,6 @@ int32_t LnnGetNodeKeyInfo(const char *networkId, int32_t key, uint8_t *info, uin
     return GetNetLedgerInterface()->LnnGetNodeKeyInfo(networkId, key, info, infoLen);
 }
 
-int32_t LnnGetRemoteNumInfo(const char *netWorkId, InfoKey key, int32_t *info)
-{
-    return GetNetLedgerInterface()->LnnGetRemoteNumInfo(netWorkId, key, info);
-}
-
 int32_t LnnGetLocalDeviceInfo(NodeBasicInfo *info)
 {
     return GetNetLedgerInterface()->LnnGetLocalDeviceInfo(info);
@@ -532,8 +556,7 @@ int32_t AuthDeviceGetLatestIdByUuid(const char *uuid, AuthLinkType type, AuthHan
     return GetNetLedgerInterface()->AuthDeviceGetLatestIdByUuid(uuid, type, authHandle);
 }
 
-int32_t AuthGetLatestAuthSeqListByType(
-    const char *udid, int64_t *seqList, uint64_t *authVerifyTime, DiscoveryType type)
+int32_t AuthGetLatestAuthSeqListByType(const char *udid, int64_t *seqList, uint64_t *authVerifyTime, DiscoveryType type)
 {
     return GetNetLedgerInterface()->AuthGetLatestAuthSeqListByType(udid, seqList, authVerifyTime, type);
 }
@@ -601,6 +624,31 @@ bool LnnSetDLDeviceNickName(const char *networkId, const char *name)
 int32_t LnnUpdateLocalScreenStatus(bool isScreenOn)
 {
     return GetNetLedgerInterface()->LnnUpdateLocalScreenStatus(isScreenOn);
+}
+
+int32_t LnnClearStaticNetCap(uint32_t *capability, StaticNetCapability type)
+{
+    return GetNetLedgerInterface()->LnnClearStaticNetCap(capability, type);
+}
+
+int32_t LnnSetLocalStrInfoByIfnameIdx(InfoKey key, const char *info, int32_t ifIdx)
+{
+    return GetNetLedgerInterface()->LnnSetLocalStrInfoByIfnameIdx(key, info, ifIdx);
+}
+
+int32_t LnnSetLocalNumInfoByIfnameIdx(InfoKey key, int32_t info, int32_t ifIdx)
+{
+    return GetNetLedgerInterface()->LnnSetLocalNumInfoByIfnameIdx(key, info, ifIdx);
+}
+
+int32_t LnnSetStaticNetCap(uint32_t *capability, StaticNetCapability type)
+{
+    return GetNetLedgerInterface()->LnnSetStaticNetCap(capability, type);
+}
+
+int32_t LnnSetLocalNumU32Info(InfoKey key, uint32_t info)
+{
+    return GetNetLedgerInterface()->LnnSetLocalNumU32Info(key, info);
 }
 }
 } // namespace OHOS

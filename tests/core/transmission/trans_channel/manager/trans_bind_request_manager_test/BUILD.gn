@@ -14,7 +14,7 @@
 import("//build/test.gni")
 import("../../../../../../dsoftbus.gni")
 
-module_output_path = "dsoftbus/transmission"
+module_output_path = "dsoftbus/soft_bus/transmission"
 
 ohos_unittest("TransBindRequestManagerTest") {
   module_out_path = module_output_path
@@ -30,6 +30,7 @@ ohos_unittest("TransBindRequestManagerTest") {
   deps = [
     "$dsoftbus_core_path/common:softbus_utils",
     "$dsoftbus_core_path/frame:softbus_server",
+    "$dsoftbus_root_path/adapter:softbus_adapter",
   ]
 
   external_deps = [

@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2025 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -17,6 +17,7 @@
 #define TRANS_SESSION_MANAGER_H
 
 #include "softbus_def.h"
+#include "softbus_app_info.h"
 
 #ifdef __cplusplus
 extern "C" {
@@ -38,8 +39,11 @@ typedef struct {
     char sessionName[SESSION_NAME_SIZE_MAX];
     int32_t uid;
     int32_t pid;
+    int32_t tokenType;
     uint64_t tokenId;
+    uint64_t timestamp;
     CallerType callerType;
+    AccessInfo accessInfo;
 } SessionServer;
 
 int32_t TransSessionMgrInit(void);
@@ -67,6 +71,16 @@ int32_t TransGetPidAndPkgName(const char *sessionName, const int32_t uid, int32_
 
 int32_t TransGetTokenIdBySessionName(const char *sessionName, uint64_t *tokenId);
 
+int32_t AddAccessInfoBySessionName(const char *sessionName, const AccessInfo *accessInfo, pid_t callingPid);
+
+int32_t GetAccessInfoBySessionName(
+    const char *sessionName, int32_t *userId, uint64_t *tokenId, char *businessAccountId, char *extraAccessInfo);
+
+int32_t GetTokenTypeBySessionName(const char *sessionName, int32_t *tokenType);
+
+int32_t TransGetAclInfoBySessionName(const char *sessionName, uint64_t *tokenId, int32_t *pid, int32_t *userId);
+
+int32_t CheckAndUpdateTimeBySessionName(const char *sessionName, uint64_t timestamp);
 #ifdef __cplusplus
 }
 #endif

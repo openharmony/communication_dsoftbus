@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2022 Huawei Device Co., Ltd.
+ * Copyright (c) 2022-2025 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -19,6 +19,7 @@
 #include <securec.h>
 #include <sys/time.h>
 
+#include "auth_common_mock.h"
 #include "auth_connection.c"
 #include "auth_connection.h"
 #include "auth_device.c"
@@ -33,10 +34,8 @@
 #include "auth_session_key.c"
 #include "auth_session_key.h"
 #include "auth_tcp_connection_mock.h"
-#include "lnn_connection_mock.h"
 #include "lnn_ctrl_lane.h"
 #include "lnn_lane_interface.h"
-#include "lnn_lane_score.h"
 #include "softbus_adapter_json.h"
 #include "softbus_error_code.h"
 #include "softbus_socket.h"
@@ -456,9 +455,9 @@ HWTEST_F(AuthOtherTest, RMOVE_UPDATE_SESSION_KEY_FUNC_TEST_001, TestSize.Level1)
     int32_t ret = RemoveUpdateSessionKeyFunc(nullptr, nullptr);
     EXPECT_NE(ret, SOFTBUS_OK);
     ret = RemoveUpdateSessionKeyFunc(&authId, nullptr);
-    EXPECT_NE(ret, SOFTBUS_OK);
+    EXPECT_EQ(ret, SOFTBUS_INVALID_PARAM);
     ret = RemoveUpdateSessionKeyFunc(&authId, &para);
-    EXPECT_NE(ret, SOFTBUS_OK);
+    EXPECT_EQ(ret, SOFTBUS_INVALID_PARAM);
     ret = RemoveUpdateSessionKeyFunc(&authId, &authId);
     EXPECT_TRUE(ret == SOFTBUS_OK);
 }
@@ -489,13 +488,13 @@ HWTEST_F(AuthOtherTest, POST_CLOSE_ACK_MESSAGE_TEST_001, TestSize.Level1)
 HWTEST_F(AuthOtherTest, PACK_AUTH_DATA_TEST_001, TestSize.Level1)
 {
     AuthDataHead head;
-    uint8_t *buf = NULL;
+    uint8_t *buf = nullptr;
     const uint8_t data[TEST_DATA_LEN] = { 0 };
     uint32_t len = 32;
 
     (void)memset_s(&head, sizeof(AuthDataHead), AUTH_CONN_DATA_HEAD_SIZE, sizeof(AuthDataHead));
     int32_t ret = PackAuthData(&head, data, buf, len);
-    EXPECT_TRUE(ret == SOFTBUS_INVALID_PARAM);
+    EXPECT_TRUE(ret != SOFTBUS_OK);
 }
 
 /*
@@ -506,7 +505,7 @@ HWTEST_F(AuthOtherTest, PACK_AUTH_DATA_TEST_001, TestSize.Level1)
  */
 HWTEST_F(AuthOtherTest, GET_CONN_SIDE_TYPE_TEST_001, TestSize.Level1)
 {
-    LnnConnectInterfaceMock connMock;
+    AuthCommonInterfaceMock connMock;
     EXPECT_CALL(connMock, ConnGetConnectionInfo).WillRepeatedly(Return(true));
     uint64_t connId = 0;
     connId = GetConnType(connId);
@@ -544,7 +543,7 @@ HWTEST_F(AuthOtherTest, ON_COMM_DATA_RECEVIED_TEST_001, TestSize.Level1)
     moduleId = MODULE_CONNECTION;
     int32_t ret = memcpy_s(data, SEND_DATA_SIZE_1KB, testData, strlen(testData));
     EXPECT_EQ(ret, SOFTBUS_OK);
-    OnCommDataReceived(connectionId, moduleId, seq, NULL, len);
+    OnCommDataReceived(connectionId, moduleId, seq, nullptr, len);
     OnCommDataReceived(connectionId, moduleId, seq, data, len);
 
     free(data);
@@ -560,14 +559,14 @@ HWTEST_F(AuthOtherTest, IS_FLUSH_DEVICE_PACKET_TEST_001, TestSize.Level1)
 {
     const char *sessionKeyStr = "www.test.com";
     AuthConnInfo *connInfo = (AuthConnInfo *)SoftBusCalloc(sizeof(AuthConnInfo));
-    if (connInfo == NULL) {
+    if (connInfo == nullptr) {
         return;
     }
     (void)memset_s(connInfo, sizeof(AuthConnInfo), 0, sizeof(AuthConnInfo));
     connInfo->type = AUTH_LINK_TYPE_BLE;
 
     AuthDataHead *head = (AuthDataHead *)SoftBusCalloc(sizeof(AuthDataHead));
-    if (head == NULL) {
+    if (head == nullptr) {
         return;
     }
     (void)memset_s(head, sizeof(AuthDataHead), 0, sizeof(AuthDataHead));
@@ -615,14 +614,14 @@ HWTEST_F(AuthOtherTest, AUTH_MANAGER_SET_SESSION_KEY_TEST_001, TestSize.Level1)
 {
     int64_t authSeq = 0;
     AuthSessionInfo *info = (AuthSessionInfo *)SoftBusCalloc(sizeof(AuthSessionInfo));
-    if (info == NULL) {
+    if (info == nullptr) {
         return;
     }
     info->requestId = 1;
     info->isServer = false;
     info->connInfo.type = AUTH_LINK_TYPE_WIFI;
     SessionKey *sessionKey = (SessionKey *)SoftBusCalloc(sizeof(SessionKey));
-    if (sessionKey == NULL) {
+    if (sessionKey == nullptr) {
         return;
     }
     sessionKey->len = 0;
@@ -650,10 +649,10 @@ HWTEST_F(AuthOtherTest, AUTH_DEVICE_CLOSE_CONN_TEST_001, TestSize.Level1)
     AuthHandle authHandle = { .authId = 111, .type = AUTH_LINK_TYPE_WIFI };
     AuthDeviceCloseConn(authHandle);
     AuthTransData *dataInfo = (AuthTransData *)SoftBusCalloc(sizeof(AuthTransData));
-    if (dataInfo == NULL) {
+    if (dataInfo == nullptr) {
         return;
     }
-    int32_t ret = AuthDevicePostTransData(authHandle, NULL);
+    int32_t ret = AuthDevicePostTransData(authHandle, nullptr);
     EXPECT_TRUE(ret == SOFTBUS_INVALID_PARAM);
     dataInfo->module = 1;
     dataInfo->seq = 2;
@@ -672,13 +671,13 @@ HWTEST_F(AuthOtherTest, AUTH_DEVICE_CLOSE_CONN_TEST_001, TestSize.Level1)
 HWTEST_F(AuthOtherTest, AUTH_DEVICE_GET_PREFER_CONN_INFO_TEST_001, TestSize.Level1)
 {
     const char *uuid = "";
-    int32_t ret = AuthDeviceGetPreferConnInfo(uuid, NULL);
+    int32_t ret = AuthDeviceGetPreferConnInfo(uuid, nullptr);
     EXPECT_TRUE(ret == SOFTBUS_INVALID_PARAM);
     AuthConnInfo *connInfo = (AuthConnInfo *)SoftBusCalloc(sizeof(AuthConnInfo));
-    if (connInfo == NULL) {
+    if (connInfo == nullptr) {
         return;
     }
-    ret = AuthDeviceGetPreferConnInfo(NULL, connInfo);
+    ret = AuthDeviceGetPreferConnInfo(nullptr, connInfo);
     connInfo->type = AUTH_LINK_TYPE_BLE;
     EXPECT_TRUE(ret == SOFTBUS_INVALID_PARAM);
     SoftBusFree(connInfo);
@@ -743,7 +742,7 @@ HWTEST_F(AuthOtherTest, CONVERT_AUTH_LINK_TYPE_TO_HISYSEVENT_LINKTYPE_TEST_001, 
     authFsm->info = authSessionInfo;
     authFsm->authSeq = 512;
     const uint8_t *data = reinterpret_cast<const uint8_t *>(malloc(sizeof(uint8_t)));
-    if (data == NULL) {
+    if (data == nullptr) {
         SoftBusFree(authFsm);
         return;
     }
@@ -785,8 +784,8 @@ HWTEST_F(AuthOtherTest, AUTH_FSM_TEST_001, TestSize.Level1)
     uint64_t connId = 111;
     bool isServer = true;
     AuthFsm *ret = GetAuthFsmByConnId(connId, isServer, false);
-    EXPECT_TRUE(ret == NULL);
-    int32_t ret1 = AuthSessionHandleDeviceDisconnected(connId);
+    EXPECT_TRUE(ret == nullptr);
+    int32_t ret1 = AuthSessionHandleDeviceDisconnected(connId, true);
     EXPECT_TRUE(ret1 == SOFTBUS_OK);
 }
 
@@ -799,31 +798,31 @@ HWTEST_F(AuthOtherTest, AUTH_FSM_TEST_001, TestSize.Level1)
 HWTEST_F(AuthOtherTest, AUTH_RESTORE_MANAGER_TEST_001, TestSize.Level1)
 {
     AuthConnInfo *connInfo = (AuthConnInfo *)SoftBusCalloc(sizeof(AuthConnInfo));
-    if (connInfo == NULL) {
+    if (connInfo == nullptr) {
         return;
     }
     connInfo->type = AUTH_LINK_TYPE_BLE;
     uint32_t requestId = 1;
     NodeInfo *nodeInfo = (NodeInfo *)SoftBusCalloc(sizeof(NodeInfo));
-    if (nodeInfo == NULL) {
+    if (nodeInfo == nullptr) {
         SoftBusFree(connInfo);
         return;
     }
     int64_t *authId = reinterpret_cast<int64_t *>(malloc(sizeof(int64_t)));
-    int32_t ret = AuthRestoreAuthManager(NULL, connInfo, requestId, nodeInfo, authId);
-    EXPECT_NE(ret, SOFTBUS_OK);
+    int32_t ret = AuthRestoreAuthManager(nullptr, connInfo, requestId, nodeInfo, authId);
+    EXPECT_EQ(ret, SOFTBUS_INVALID_PARAM);
     const char *udidHash = "1234uuid";
-    ret = AuthRestoreAuthManager(udidHash, NULL, requestId, nodeInfo, authId);
-    EXPECT_NE(ret, SOFTBUS_OK);
-    ret = AuthRestoreAuthManager(udidHash, connInfo, requestId, NULL, authId);
-    EXPECT_NE(ret, SOFTBUS_OK);
-    ret = AuthRestoreAuthManager(udidHash, connInfo, requestId, nodeInfo, NULL);
-    EXPECT_NE(ret, SOFTBUS_OK);
+    ret = AuthRestoreAuthManager(udidHash, nullptr, requestId, nodeInfo, authId);
+    EXPECT_EQ(ret, SOFTBUS_INVALID_PARAM);
+    ret = AuthRestoreAuthManager(udidHash, connInfo, requestId, nullptr, authId);
+    EXPECT_EQ(ret, SOFTBUS_INVALID_PARAM);
+    ret = AuthRestoreAuthManager(udidHash, connInfo, requestId, nodeInfo, nullptr);
+    EXPECT_EQ(ret, SOFTBUS_INVALID_PARAM);
     ret = AuthRestoreAuthManager(udidHash, connInfo, requestId, nodeInfo, authId);
-    EXPECT_NE(ret, SOFTBUS_OK);
+    EXPECT_EQ(ret, SOFTBUS_AUTH_MANAGER_RESTORE_FAIL);
     const char *udidHash1 = "testudidhashpass";
     ret = AuthRestoreAuthManager(udidHash1, connInfo, requestId, nodeInfo, authId);
-    EXPECT_NE(ret, SOFTBUS_OK);
+    EXPECT_EQ(ret, SOFTBUS_AUTH_MANAGER_RESTORE_FAIL);
     SoftBusFree(connInfo);
     SoftBusFree(nodeInfo);
 }
@@ -853,7 +852,7 @@ HWTEST_F(AuthOtherTest, GET_PEER_UDID_BY_NETWORK_ID_TEST_001, TestSize.Level1)
  */
 HWTEST_F(AuthOtherTest, GET_LATEST_ID_BY_CONNINFO_TEST_001, TestSize.Level1)
 {
-    int64_t ret = GetLatestIdByConnInfo(NULL);
+    int64_t ret = GetLatestIdByConnInfo(nullptr);
     EXPECT_TRUE(ret == AUTH_INVALID_ID);
     AuthConnInfo *connInfo = (AuthConnInfo *)SoftBusCalloc(sizeof(AuthConnInfo));
     ASSERT_TRUE(connInfo != nullptr);
@@ -880,7 +879,7 @@ HWTEST_F(AuthOtherTest, START_RECONNECT_DEVICE_TEST_001, TestSize.Level1)
     AuthConnCallback connCb;
     AuthHandle authHandle = { .authId = 1, .type = AUTH_LINK_TYPE_WIFI };
     int32_t ret = AuthStartReconnectDevice(authHandle, &connInfo, 1, &connCb);
-    EXPECT_TRUE(ret == SOFTBUS_AUTH_NOT_FOUND);
+    EXPECT_TRUE(ret == SOFTBUS_INVALID_PARAM);
 
     NodeInfo nodeInfo;
     ReportAuthRequestPassed(11, authHandle, &nodeInfo);
@@ -903,13 +902,13 @@ HWTEST_F(AuthOtherTest, AUTH_GET_LATEST_AUTHSEQ_LIST_TEST_001, TestSize.Level1)
 {
     int64_t seqList = 1024;
     uint32_t num = 1;
-    int32_t ret = AuthGetLatestAuthSeqList(NULL, &seqList, num);
+    int32_t ret = AuthGetLatestAuthSeqList(nullptr, &seqList, num);
     EXPECT_TRUE(ret == SOFTBUS_INVALID_PARAM);
     const char *udid = "";
     ret = AuthGetLatestAuthSeqList(udid, &seqList, num);
     EXPECT_TRUE(ret == SOFTBUS_INVALID_PARAM);
     const char *udid1 = "11";
-    ret = AuthGetLatestAuthSeqList(udid1, NULL, num);
+    ret = AuthGetLatestAuthSeqList(udid1, nullptr, num);
     EXPECT_TRUE(ret == SOFTBUS_INVALID_PARAM);
     ret = AuthGetLatestAuthSeqList(udid1, &seqList, num);
     EXPECT_TRUE(ret == SOFTBUS_INVALID_PARAM);
@@ -939,32 +938,32 @@ HWTEST_F(AuthOtherTest, SYNC_DEVINFO_STATE_PROCESS_TEST_001, TestSize.Level1)
     FsmStateMachine *fsm = (FsmStateMachine *)SoftBusCalloc(sizeof(FsmStateMachine));
     ASSERT_TRUE(fsm != nullptr);
     int32_t msgType = 1;
-    bool ret = SyncDevInfoStateProcess(fsm, msgType, NULL);
+    bool ret = SyncDevInfoStateProcess(fsm, msgType, nullptr);
     EXPECT_TRUE(ret == false);
     SoftBusFree(fsm);
     FsmStateMachine *testFsm = (FsmStateMachine *)SoftBusCalloc(sizeof(FsmStateMachine));
     ASSERT_TRUE(testFsm != nullptr);
     testFsm->flag = 1;
 
-    ret = SyncDevInfoStateProcess(testFsm, msgType, NULL);
+    ret = SyncDevInfoStateProcess(testFsm, msgType, nullptr);
     EXPECT_TRUE(ret == false);
 
     msgType = FSM_MSG_AUTH_TIMEOUT;
-    ret = SyncDevInfoStateProcess(testFsm, msgType, NULL);
+    ret = SyncDevInfoStateProcess(testFsm, msgType, nullptr);
     msgType = FSM_MSG_RECV_DEVICE_INFO;
-    ret = SyncDevInfoStateProcess(testFsm, msgType, NULL);
+    ret = SyncDevInfoStateProcess(testFsm, msgType, nullptr);
     EXPECT_TRUE(ret == false);
 
     msgType = FSM_MSG_RECV_CLOSE_ACK;
-    ret = SyncDevInfoStateProcess(testFsm, msgType, NULL);
+    ret = SyncDevInfoStateProcess(testFsm, msgType, nullptr);
     EXPECT_TRUE(ret == false);
 
     msgType = FSM_MSG_RECV_AUTH_DATA;
-    ret = SyncDevInfoStateProcess(testFsm, msgType, NULL);
+    ret = SyncDevInfoStateProcess(testFsm, msgType, nullptr);
     EXPECT_TRUE(ret == false);
 
     msgType = FSM_MSG_AUTH_FINISH;
-    ret = SyncDevInfoStateProcess(testFsm, msgType, NULL);
+    ret = SyncDevInfoStateProcess(testFsm, msgType, nullptr);
     EXPECT_TRUE(ret == false);
     SoftBusFree(testFsm);
 }
@@ -1066,12 +1065,14 @@ HWTEST_F(AuthOtherTest, AUTH_CHECK_SESSION_KEY_VALID_BY_CONN_INFO_TEST_001, Test
     AuthCloseConn(authHandle);
     EXPECT_TRUE(AuthPostTransData(authHandle, &dataInfo) == SOFTBUS_INVALID_PARAM);
     EXPECT_TRUE(AuthGetConnInfo(authHandle, &connInfo) == SOFTBUS_INVALID_PARAM);
-    AuthFreeConn(nullptr);
-    AuthFreeConn(&authHandle);
+    AuthFreeLane(nullptr);
+    DelAuthReqInfoByAuthHandle(nullptr);
+    AuthFreeLane(&authHandle);
+    DelAuthReqInfoByAuthHandle(&authHandle);
     AuthConnCallback callback;
-    EXPECT_TRUE(AuthAllocConn(nullptr, 1, &callback) == SOFTBUS_INVALID_PARAM);
-    EXPECT_TRUE(AuthAllocConn(networkId, 1, nullptr) == SOFTBUS_INVALID_PARAM);
-    EXPECT_TRUE(AuthAllocConn(nullptr, 1, nullptr) == SOFTBUS_INVALID_PARAM);
+    EXPECT_TRUE(AuthAllocLane(nullptr, 1, &callback) == SOFTBUS_INVALID_PARAM);
+    EXPECT_TRUE(AuthAllocLane(networkId, 1, nullptr) == SOFTBUS_INVALID_PARAM);
+    EXPECT_TRUE(AuthAllocLane(nullptr, 1, nullptr) == SOFTBUS_INVALID_PARAM);
     EXPECT_TRUE(AuthGetP2pConnInfo(nullptr, nullptr, true) == AUTH_INVALID_ID);
     EXPECT_TRUE(AuthGetHmlConnInfo(nullptr, nullptr, true) == AUTH_INVALID_ID);
     AuthGetLatestIdByUuid(nullptr, AUTH_LINK_TYPE_WIFI, true, nullptr);
@@ -1095,8 +1096,8 @@ HWTEST_F(AuthOtherTest, AUTH_DIRECT_ONLINE_PROCESS_SESSION_KEY_TEST_001, TestSiz
         .connInfo.type = AUTH_LINK_TYPE_BR,
     };
     int64_t authId;
-    EXPECT_NE(AuthDirectOnlineProcessSessionKey(&info, &keyInfo, &authId), SOFTBUS_OK);
-    EXPECT_NE(AuthDirectOnlineWithoutSessionKey(&info, &keyInfo, &authId), SOFTBUS_OK);
+    EXPECT_EQ(AuthDirectOnlineProcessSessionKey(&info, &keyInfo, &authId), SOFTBUS_AUTH_NOT_FOUND);
+    EXPECT_EQ(AuthDirectOnlineWithoutSessionKey(&info, &keyInfo, &authId), SOFTBUS_AUTH_UNEXPECTED_CONN_TYPE);
     EXPECT_TRUE(AuthEncrypt(nullptr, nullptr, 0, nullptr, nullptr) == SOFTBUS_INVALID_PARAM);
     EXPECT_TRUE(AuthDecrypt(nullptr, nullptr, 0, nullptr, nullptr) == SOFTBUS_INVALID_PARAM);
 }
@@ -1112,12 +1113,12 @@ HWTEST_F(AuthOtherTest, IS_SAME_ACCOUNT_DEVICE_TEST_001, TestSize.Level1)
     EXPECT_TRUE(LnnInitLocalLedger() == SOFTBUS_OK);
     uint8_t accountHash[SHA_256_HASH_LEN] = "accounthashtest";
     EXPECT_TRUE(LnnSetLocalByteInfo(BYTE_KEY_ACCOUNT_HASH, accountHash, SHA_256_HASH_LEN) == SOFTBUS_OK);
-    EXPECT_TRUE(AuthIsPotentialTrusted(nullptr) == false);
+    EXPECT_TRUE(AuthIsPotentialTrusted(nullptr, true) == false);
     DeviceInfo device = {
         .devId = "testId",
         .accountHash = "accounthashtest",
     };
-    EXPECT_TRUE(AuthIsPotentialTrusted(&device) == true);
+    EXPECT_TRUE(AuthIsPotentialTrusted(&device, true) == true);
     EXPECT_TRUE(IsSameAccountDevice(nullptr) == false);
     EXPECT_TRUE(IsSameAccountDevice(&device) == true);
     EXPECT_TRUE(AuthHasSameAccountGroup() == false);
@@ -1181,12 +1182,12 @@ HWTEST_F(AuthOtherTest, DEL_AUTH_REQ_INFO_BY_AUTH_HANDLE_TEST_001, TestSize.Leve
 }
 
 /*
- * @tc.name: IS_ENHANCE_P2P_MODULE_ID_Test_001
+ * @tc.name: IS_ENHANCE_P2P_MODULE_ID_TEST_001
  * @tc.desc: IsEnhanceP2pModuleId test
  * @tc.type: FUNC
  * @tc.require:
  */
-HWTEST_F(AuthOtherTest, IS_ENHANCE_P2P_MODULE_ID_Test_001, TestSize.Level1)
+HWTEST_F(AuthOtherTest, IS_ENHANCE_P2P_MODULE_ID_TEST_001, TestSize.Level1)
 {
     EXPECT_EQ(IsEnhanceP2pModuleId(AUTH_ENHANCED_P2P_START), true);
     EXPECT_EQ(IsEnhanceP2pModuleId(DIRECT_CHANNEL_SERVER_P2P), false);
@@ -1194,15 +1195,15 @@ HWTEST_F(AuthOtherTest, IS_ENHANCE_P2P_MODULE_ID_Test_001, TestSize.Level1)
 }
 
 /*
- * @tc.name: AUTH_START_LISTENING_FOR_WIFI_DIRECT_Test_001
+ * @tc.name: AUTH_START_LISTENING_FOR_WIFI_DIRECT_TEST_001
  * @tc.desc: AuthStartListeningForWifiDirect test
  * @tc.type: FUNC
  * @tc.require:
  */
-HWTEST_F(AuthOtherTest, AUTH_START_LISTENING_FOR_WIFI_DIRECT_Test_001, TestSize.Level1)
+HWTEST_F(AuthOtherTest, AUTH_START_LISTENING_FOR_WIFI_DIRECT_TEST_001, TestSize.Level1)
 {
     AsyncCallDeviceIdReceived(nullptr);
-    LnnConnectInterfaceMock connMock;
+    AuthCommonInterfaceMock connMock;
     EXPECT_CALL(connMock, ConnStopLocalListening).WillRepeatedly(Return(SOFTBUS_OK));
     EXPECT_CALL(connMock, ConnStartLocalListening).WillRepeatedly(Return(0));
     AuthStopListeningForWifiDirect(AUTH_LINK_TYPE_P2P, AUTH_ENHANCED_P2P_START);
@@ -1220,5 +1221,94 @@ HWTEST_F(AuthOtherTest, AUTH_START_LISTENING_FOR_WIFI_DIRECT_Test_001, TestSize.
     EXPECT_NE(AuthStartListeningForWifiDirect(AUTH_LINK_TYPE_P2P, ip, 37025, &moduleId), SOFTBUS_INVALID_PORT);
     EXPECT_NE(AuthStartListeningForWifiDirect(AUTH_LINK_TYPE_ENHANCED_P2P, ip, 37025, &moduleId), SOFTBUS_INVALID_PORT);
     EXPECT_EQ(AuthStartListeningForWifiDirect(AUTH_LINK_TYPE_WIFI, ip, 37025, &moduleId), SOFTBUS_INVALID_PARAM);
+}
+
+/*
+ * @tc.name: IS_AUTH_SESSION_KEY_MODULE_TEST_001
+ * @tc.desc: IsAuthSessionKeyModule test
+ * @tc.type: FUNC
+ * @tc.require:
+ */
+HWTEST_F(AuthOtherTest, IS_AUTH_SESSION_KEY_MODULE_TEST_001, TestSize.Level1)
+{
+    AuthDataHead head;
+
+    (void)memset_s(&head, sizeof(AuthDataHead), 0, sizeof(AuthDataHead));
+    head.dataType = DATA_TYPE_AUTH;
+    bool ret = IsAuthSessionKeyModule(&head);
+    EXPECT_TRUE(ret);
+    head.dataType = DATA_TYPE_DEVICE_INFO;
+    ret = IsAuthSessionKeyModule(&head);
+    EXPECT_TRUE(ret);
+    head.dataType = DATA_TYPE_DEVICE_ID;
+    ret = IsAuthSessionKeyModule(&head);
+    EXPECT_TRUE(ret);
+    head.dataType = DATA_TYPE_CLOSE_ACK;
+    ret = IsAuthSessionKeyModule(&head);
+    EXPECT_TRUE(ret);
+    head.dataType = DATA_TYPE_CONNECTION;
+    ret = IsAuthSessionKeyModule(&head);
+    EXPECT_FALSE(ret);
+}
+
+/*
+ * @tc.name: ON_WIFI_CONNECTED_TEST_001
+ * @tc.desc: OnWiFiConnected test
+ * @tc.type: FUNC
+ * @tc.require:
+ */
+HWTEST_F(AuthOtherTest, ON_WIFI_CONNECTED_TEST_001, TestSize.Level1)
+{
+    ListenerModule module = AUTH;
+    int32_t fd = 1;
+    bool isClient = false;
+
+    OnWiFiConnected(module, fd, isClient);
+    isClient = true;
+    OnWiFiConnected(module, fd, isClient);
+
+    bool ret = IsSessionAuth(module);
+    EXPECT_FALSE(ret);
+}
+
+/*
+ * @tc.name: ON_TCP_SESSION_CONNECTED_TEST_001
+ * @tc.desc: OnTcpSessionConnected test
+ * @tc.type: FUNC
+ * @tc.require:
+ */
+HWTEST_F(AuthOtherTest, ON_TCP_SESSION_CONNECTED_TEST_001, TestSize.Level1)
+{
+    ListenerModule module = AUTH;
+    int32_t fd = 1;
+    bool isClient = false;
+
+    OnTcpSessionConnected(module, fd, isClient);
+    isClient = true;
+    OnTcpSessionConnected(module, fd, isClient);
+
+    bool ret = IsSessionAuth(module);
+    EXPECT_FALSE(ret);
+}
+
+/*
+ * @tc.name: ON_WIFI_DISCONNECTED_TEST_001
+ * @tc.desc: OnWiFiDisconnected test
+ * @tc.type: FUNC
+ * @tc.require:
+ */
+HWTEST_F(AuthOtherTest, ON_WIFI_DISCONNECTED_TEST_001, TestSize.Level1)
+{
+    ListenerModule module = AUTH;
+    int32_t fd = 1;
+
+    OnWiFiDisconnected(module, fd);
+    module = AUTH_USB;
+    OnWiFiDisconnected(module, fd);
+    module = AUTH_SESSION_KEY;
+    OnWiFiDisconnected(module, fd);
+
+    bool ret = IsSessionAuth(module);
+    EXPECT_FALSE(ret);
 }
 } // namespace OHOS

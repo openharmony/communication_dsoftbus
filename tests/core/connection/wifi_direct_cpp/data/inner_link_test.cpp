@@ -165,4 +165,54 @@ HWTEST_F(InnerLinkTest, SetAndGetGrocery, TestSize.Level1)
     sleep(PROTECT_DURATION_MS / 1000 + 1);
     EXPECT_EQ(info.IsProtected(), false);
 }
+
+/*
+ * @tc.name: ToString
+ * @tc.desc: test the to string method
+ * @tc.type: FUNC
+ * @tc.require:
+ */
+HWTEST_F(InnerLinkTest, TypeToString, TestSize.Level1)
+{
+    InnerLink info("");
+    EXPECT_EQ(info.ToString(InnerLink::LinkType::INVALID_TYPE), "INVALID_TYPE");
+    EXPECT_EQ(info.ToString(InnerLink::LinkType::HML), "HML");
+    EXPECT_EQ(info.ToString(InnerLink::LinkType::P2P), "P2P");
+    EXPECT_EQ(info.ToString(InnerLink::LinkState::INVALID_STATE), "INVALID_STATE");
+    EXPECT_EQ(info.ToString(InnerLink::LinkState::DISCONNECTED), "DISCONNECTED");
+    EXPECT_EQ(info.ToString(InnerLink::LinkState::CONNECTED), "CONNECTED");
+    EXPECT_EQ(info.ToString(InnerLink::LinkState::CONNECTING), "CONNECTING");
+    EXPECT_EQ(info.ToString(InnerLink::LinkState::DISCONNECTING), "DISCONNECTING");
+}
+
+/*
+ * @tc.name: SetKeepaliveState
+ * @tc.desc: test SetKeepaliveState
+ * @tc.type: FUNC
+ * @tc.require:
+ */
+HWTEST_F(InnerLinkTest, SetKeepaliveState, TestSize.Level1)
+{
+    InnerLink info("");
+    EXPECT_EQ(info.SetKeepaliveState(false), SOFTBUS_INVALID_PARAM);
+}
+
+/*
+ * @tc.name: CheckOnlyVirtualLinks
+ * @tc.desc: test CheckOnlyVirtualLinks
+ * @tc.type: FUNC
+ * @tc.require:
+ */
+HWTEST_F(InnerLinkTest, CheckOnlyVirtualLinks, TestSize.Level1)
+{
+    InnerLink info("");
+
+    WifiDirectLink link {};
+    info.GenerateLink(1, 2, link, true);
+    EXPECT_EQ(info.CheckOnlyVirtualLinks(), true);
+    info.RemoveId(link.linkId);
+
+    info.GenerateLink(1, 2, link, false);
+    EXPECT_EQ(info.CheckOnlyVirtualLinks(), false);
+}
 } // namespace OHOS::SoftBus

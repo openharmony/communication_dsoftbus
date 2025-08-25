@@ -71,6 +71,20 @@ void TransPermissionDeinit(void)
     DeinitPermissionJson();
 }
 
+int32_t LnnInitPermission(void)
+{
+    return SOFTBUS_OK;
+}
+
+int32_t CheckLnnPermission(const char *interfaceName, const char *processName)
+{
+    (void)interfaceName;
+    (void)processName;
+    return SOFTBUS_OK;
+}
+
+void LnnDeinitPermission(void) { }
+
 int32_t CheckTransPermission(pid_t callingUid, pid_t callingPid,
     const char *pkgName, const char *sessionName, uint32_t actions)
 {

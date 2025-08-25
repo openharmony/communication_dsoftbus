@@ -27,6 +27,13 @@ int32_t ConnSetTcpKeepalive(int32_t fd, int32_t seconds, int32_t keepAliveIntvl,
     return SOFTBUS_NOT_IMPLEMENT;
 }
 
+int32_t ConnSetTcpKeepaliveState(int32_t fd, bool needKeepalive)
+{
+    (void)fd;
+    (void)needKeepalive;
+    return SOFTBUS_NOT_IMPLEMENT;
+}
+
 int32_t ConnSetTcpUserTimeOut(int32_t fd, uint32_t millSec)
 {
     (void)fd;

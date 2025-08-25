@@ -13,7 +13,6 @@
  * limitations under the License.
  */
 
-#include "link_info.h"
 #include "conn_log.h"
 #include "softbus_error_code.h"
 #include "protocol/wifi_direct_protocol.h"
@@ -45,6 +44,9 @@ template<> InfoContainer<LinkInfoKey>::KeyTypeTable InfoContainer<LinkInfoKey>::
     { LinkInfoKey::REMOTE_IPV6, Serializable::ValueType::STRING },
     { LinkInfoKey::CUSTOM_PORT, Serializable::ValueType::INT },
     { LinkInfoKey::IPADDR_TYPE, Serializable::ValueType::INT },
+    { LinkInfoKey::ENABLE_POWER_MODE, Serializable::ValueType::INT },
+    { LinkInfoKey::IS_BEING_USED_BY_REMOTE, Serializable::ValueType::BOOL },
+    { LinkInfoKey::IS_DBAC, Serializable::ValueType::BOOL },
 };
 
 LinkInfo::LinkInfo(const std::string &localInterface, const std::string &remoteInterface, LinkMode localMode,
@@ -103,12 +105,19 @@ int LinkInfo::Unmarshalling(WifiDirectProtocol &protocol, const std::vector<uint
     while (protocol.Read(key, data, size)) {
         auto valueType = keyTypeTable_[LinkInfoKey(key)];
         switch (valueType) {
-            case Serializable::ValueType::BOOL:
-                Set(LinkInfoKey(key), *(bool *)(data));
+            case Serializable::ValueType::BOOL: {
+                // Consistent with where data is added, use the uint8_t type
+                if (size >= sizeof(uint8_t)) {
+                    bool value = *reinterpret_cast<uint8_t *>(data);
+                    Set(LinkInfoKey(key), value);
+                }
                 break;
-            case Serializable::ValueType::INT:
-                Set(LinkInfoKey(key), *(int *)(data));
+            }
+            case Serializable::ValueType::INT: {
+                int intKey = (int)WifiDirectUtils::BytesToInt((uint8_t *)data, size);
+                Set(LinkInfoKey(key), intKey);
                 break;
+            }
             case Serializable::ValueType::STRING:
                 size = WifiDirectUtils::CalculateStringLength((char *)data, size);
                 Set(LinkInfoKey(key), std::string(reinterpret_cast<const char *>(data), size));
@@ -378,5 +387,67 @@ enum IpAddrType LinkInfo::GetIpAddrType()
 {
     auto ret = Get(LinkInfoKey::IPADDR_TYPE, 0);
     return static_cast<enum IpAddrType>(ret);
+}
+
+void LinkInfo::SetRatePreference(bool ratePreference)
+{
+    Set(LinkInfoKey::RATE_PREFERENCE, ratePreference);
+}
+
+bool LinkInfo::IsRatePreference() const
+{
+    return Get(LinkInfoKey::RATE_PREFERENCE, false);
+}
+
+void LinkInfo::SetLinkPowerMode(int mode)
+{
+    Set(LinkInfoKey::ENABLE_POWER_MODE, mode);
+}
+
+int LinkInfo::GetLinkPowerMode() const
+{
+    return Get(LinkInfoKey::ENABLE_POWER_MODE, static_cast<int>(INVALID_POWER));
+}
+
+void LinkInfo::SetIsBeingUsedByRemote(bool isUsed)
+{
+    Set(LinkInfoKey::IS_BEING_USED_BY_REMOTE, isUsed);
+}
+
+bool LinkInfo::GetIsBeingUsedByRemote() const
+{
+    return Get(LinkInfoKey::IS_BEING_USED_BY_REMOTE, false);
+}
+
+void LinkInfo::SetIsDbac(bool isDbac)
+{
+    Set(LinkInfoKey::IS_DBAC, isDbac);
+}
+
+bool LinkInfo::GetIsDbac() const
+{
+    return Get(LinkInfoKey::IS_DBAC, false);
+}
+
+std::string LinkInfo::ToString(LinkMode mode)
+{
+    switch (mode) {
+        case LinkMode::INVALID:
+            return "INVALID";
+        case LinkMode::NONE:
+            return "NONE";
+        case LinkMode::STA:
+            return "STA";
+        case LinkMode::AP:
+            return "AP";
+        case LinkMode::GO:
+            return "GO";
+        case LinkMode::GC:
+            return "GC";
+        case LinkMode::HML:
+            return "HML";
+        default:
+            return "UNKNOWN_MODE(" + std::to_string(static_cast<int>(mode)) + ")";
+    }
 }
 }

@@ -44,7 +44,7 @@ namespace OHOS {
             return false;
         }
 
-        SetAceessTokenPermission("busCenterTest");
+        SetAccessTokenPermission("busCenterTest");
         SetDataLevel(reinterpret_cast<const DataLevel *>(tmp));
         free(tmp);
         return true;

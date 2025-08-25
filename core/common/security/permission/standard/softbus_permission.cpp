@@ -30,15 +30,15 @@
 #include "trans_session_manager.h"
 
 namespace {
-    const std::string PERMISSION_JSON_FILE = "/system/etc/communication/softbus/softbus_trans_permission.json";
-    const std::string DANGER_APP_PERMISSION = "ohos.permission.DISTRIBUTED_DATASYNC";
+    const char *PERMISSION_JSON_FILE = "/system/etc/communication/softbus/softbus_trans_permission.json";
+    const char *LNN_PERMISSION_JSON_FILE = "/system/etc/communication/softbus/softbus_lnn_permission.json";
     const int32_t SYSTEM_UID = 1000;
     const int32_t MULTE_USER_RADIX = 100000;
 }
 
 int32_t TransPermissionInit(void)
 {
-    int32_t ret = LoadPermissionJson(PERMISSION_JSON_FILE.c_str());
+    int32_t ret = LoadPermissionJson(PERMISSION_JSON_FILE);
     if (ret != SOFTBUS_OK) {
         COMM_LOGI(COMM_PERM, "load permission json fail");
         return ret;
@@ -49,6 +49,30 @@ int32_t TransPermissionInit(void)
 void TransPermissionDeinit(void)
 {
     DeinitPermissionJson();
+}
+
+int32_t CheckLnnPermission(const char *interfaceName, const char *processName)
+{
+    if (interfaceName == nullptr || processName == nullptr) {
+        COMM_LOGE(COMM_PERM, "invalid param");
+        return SOFTBUS_INVALID_PARAM;
+    }
+    return CheckLnnPermissionEntry(interfaceName, processName);
+}
+
+int32_t LnnInitPermission(void)
+{
+    int32_t ret = LoadLnnPermissionJson(LNN_PERMISSION_JSON_FILE);
+    if (ret != SOFTBUS_OK) {
+        COMM_LOGE(COMM_PERM, "load permission json fail");
+        return ret;
+    }
+    return SOFTBUS_OK;
+}
+
+void LnnDeinitPermission(void)
+{
+    DeinitLnnPermissionJson();
 }
 
 int32_t CheckTransPermission(

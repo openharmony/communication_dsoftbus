@@ -15,7 +15,7 @@ import("//build/test.gni")
 import("../../../../dsoftbus.gni")
 import("../../../../sdk/frame/frame_sdk.gni")
 
-module_output_path = "dsoftbus/transmission"
+module_output_path = "dsoftbus/soft_bus/transmission"
 
 ohos_unittest("SoftBusFrameStandardTest") {
   sanitize = {
@@ -27,6 +27,7 @@ ohos_unittest("SoftBusFrameStandardTest") {
   sources = [ "softbus_frame_standard_test.cpp" ]
 
   include_dirs = [
+    "${dsoftbus_root_path}/br_proxy",
     "${dsoftbus_root_path}/core/frame/standard/init/include",
     "${dsoftbus_root_path}/interfaces/kits/common",
     "${dsoftbus_root_path}/interfaces/kits/discovery",
@@ -39,6 +40,11 @@ ohos_unittest("SoftBusFrameStandardTest") {
     "${dsoftbus_root_path}/sdk/transmission/ipc/include",
     "${dsoftbus_root_path}/sdk/transmission/trans_channel/manager/include",
     "${dsoftbus_root_path}/sdk/transmission/trans_channel/udp/common/include",
+    "${dsoftbus_root_path}/interfaces/kits/connection",
+    "${dsoftbus_root_path}/sdk/connection/service/include",
+    "${dsoftbus_root_path}/sdk/connection/ipc/include",
+    "${dsoftbus_root_path}/components/nstackx/fillp/include",
+    "$dsoftbus_root_path/adapter/common/security/access_token/include",
   ]
 
   deps = [

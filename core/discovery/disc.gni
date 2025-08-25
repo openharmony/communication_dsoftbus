@@ -15,6 +15,7 @@ import("../../core/discovery/ble/disc_ble.gni")
 import("../../core/discovery/coap/disc_coap.gni")
 import("../../core/discovery/event_manager/disc_event_manager.gni")
 import("../../core/discovery/usb/disc_usb.gni")
+import("../../core/discovery/virlink/disc_virlink.gni")
 import("../../dsoftbus.gni")
 
 DISC_SERVER_DEFINES = []
@@ -27,6 +28,8 @@ disc_server_inc += [
   "$dsoftbus_root_path/core/discovery/manager/include",
   "$dsoftbus_root_path/core/discovery/interface",
   "$dsoftbus_root_path/core/discovery/coap/interface",
+  "$dsoftbus_root_path/interfaces/kits/disc",
+  "$dsoftbus_root_path/core/discovery/interface",
 ]
 disc_server_inc += disc_event_manager_inc
 disc_server_src += disc_event_manager_src
@@ -36,17 +39,24 @@ disc_server_src += [
   "$dsoftbus_root_path/core/discovery/manager/src/softbus_disc_server.c",
 ]
 
-if (!dsoftbus_feature_ex_kits) {
-  DISC_SERVER_DEFINES += [ "DISC_COMMUNITY" ]
-}
+DISC_SERVER_DEFINES += [ "DISC_COMMUNITY" ]
 if (defined(ohos_lite)) {
   if (ohos_kernel_type != "liteos_m") {
     disc_server_deps += [
       "//foundation/communication/ipc/interfaces/innerkits/c/ipc:ipc_single",
     ]
   }
+  disc_server_src += [ "$dsoftbus_root_path/core/discovery/common/src/locale_config_wrapper_mock.cpp" ]
 } else {
   disc_server_external_deps += [ "c_utils:utils" ]
+
+  if (qemu_arm_disable) {
+    disc_server_src += [
+      "$dsoftbus_root_path/core/discovery/common/src/locale_config_wrapper.cpp",
+    ]
+  } else {
+    disc_server_src += [ "$dsoftbus_root_path/core/discovery/common/src/locale_config_wrapper_mock.cpp" ]
+  }
 }
 
 disc_server_src += ble_discovery_src
@@ -62,3 +72,7 @@ disc_server_src += usb_disc_src
 disc_server_inc += usb_disc_inc
 disc_server_deps += usb_disc_deps
 disc_server_external_deps += usb_disc_external_deps
+
+disc_server_src += disc_virlink_src
+disc_server_inc += disc_virlink_inc
+disc_server_deps += disc_virlink_deps

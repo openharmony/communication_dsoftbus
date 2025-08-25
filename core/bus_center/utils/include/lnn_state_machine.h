@@ -16,52 +16,13 @@
 #ifndef LNN_STATE_MACHINE_H
 #define LNN_STATE_MACHINE_H
 
-#include <stdint.h>
-
 #include "common_list.h"
 #include "message_handler.h"
+#include "lnn_state_machine_struct.h"
 
 #ifdef __cplusplus
 extern "C" {
 #endif
-
-#define FSM_FLAG_RUNNING 0x1
-
-#define FSM_CTRL_MSG_START 0
-#define FSM_CTRL_MSG_DATA 1
-#define FSM_CTRL_MSG_STOP 2
-#define FSM_CTRL_MSG_DEINIT 3
-
-struct tagFsmStateMachine;
-
-typedef void (*StateEnterFunc)(struct tagFsmStateMachine *fsm);
-typedef void (*StateExitFunc)(struct tagFsmStateMachine *fsm);
-typedef bool (*StateProcessFunc)(struct tagFsmStateMachine *fsm, int32_t msgType, void *para);
-
-typedef struct {
-    ListNode list;
-    StateEnterFunc enter;
-    StateProcessFunc process;
-    StateExitFunc exit;
-} FsmState;
-
-typedef void (*FsmDeinitCallback)(struct tagFsmStateMachine *fsm);
-
-typedef struct tagFsmStateMachine {
-    FsmState *curState;
-    uint32_t flag;
-
-    ListNode stateList;
-    SoftBusLooper *looper;
-    SoftBusHandler handler;
-
-    FsmDeinitCallback deinitCallback;
-} FsmStateMachine;
-
-typedef struct {
-    FsmStateMachine *fsm;
-    void *obj;
-} FsmCtrlMsgObj;
 
 int32_t LnnFsmInit(FsmStateMachine *fsm, SoftBusLooper *looper, char *name, FsmDeinitCallback cb);
 int32_t LnnFsmDeinit(FsmStateMachine *fsm);

@@ -667,7 +667,7 @@ static bool CheckWifiOfflineMsgResult(const char *networkId, int32_t authPort, c
     char *anonyNetworkId = NULL;
     Anonymize(networkId, &anonyNetworkId);
 
-    if (LnnGetRemoteNumInfo(networkId, NUM_KEY_AUTH_PORT, &port) != 0) {
+    if (LnnGetRemoteNumInfoByIfnameIdx(networkId, NUM_KEY_AUTH_PORT, &port, WLAN_IF) != 0) {
         LNN_LOGE(LNN_BUILDER, "get remote port fail, neteorkId:%{public}s", AnonymizeWrapper(anonyNetworkId));
         AnonymizeFree(anonyNetworkId);
         return false;
@@ -705,7 +705,7 @@ static void WlanOffLineProcess(const AuthTransData *data, AuthHandle authHandle)
         return;
     }
     if (!JSON_GetInt32FromOject(json, NETWORK_OFFLINE_PORT, &authPort) ||
-        !JSON_GetStringFromOject(json, NETWORK_OFFLINE_CODE, convertOfflineCode,
+        !JSON_GetStringFromObject(json, NETWORK_OFFLINE_CODE, convertOfflineCode,
             WIFI_OFFLINE_CODE_LEN * HEXIFY_UNIT_LEN + 1)) {
         LNN_LOGE(LNN_BUILDER, "wifi json parse object fail");
         JSON_Delete(json);
@@ -828,10 +828,10 @@ static void OnWifiDirectSyncMsgRecv(AuthHandle authHandle, const AuthTransData *
     AnonymizeFree(anonyUdid);
     if (LnnGetNetworkIdByUdid(auth->udid, networkId, sizeof(networkId)) != SOFTBUS_OK) {
         LNN_LOGE(LNN_BUILDER, "LnnGetNetworkIdByUdid fail");
-        DelAuthManager(auth, false);
+        DelDupAuthManager(auth);
         return;
     }
-    DelAuthManager(auth, false);
+    DelDupAuthManager(auth);
     type = (LnnSyncInfoType)(*(int32_t *)data->data);
     if (type < 0 || type >= LNN_INFO_TYPE_COUNT) {
         LNN_LOGE(LNN_BUILDER, "received data is exception, type=%{public}d", type);
@@ -1141,7 +1141,8 @@ static bool IsNeedSyncByAuth(const char *networkId)
         LNN_LOGE(LNN_BUILDER, "get feature fail");
         return false;
     }
-    if ((local & (1 << BIT_BLE_TRIGGER_CONNECTION)) == 0 || (remote & (1 << BIT_BLE_TRIGGER_CONNECTION)) == 0) {
+    if ((local & (1 << BIT_WIFI_DIRECT_ENHANCE_CAPABILITY)) == 0 ||
+        (remote & (1 << BIT_WIFI_DIRECT_ENHANCE_CAPABILITY)) == 0) {
         LNN_LOGI(LNN_BUILDER, "not support wifi direct");
         return false;
     }
@@ -1279,7 +1280,7 @@ int32_t LnnSendWifiOfflineInfoMsg(void)
 {
     int32_t authPort = 0;
     char localOfflineCode[WIFI_OFFLINE_CODE_LEN] = {0};
-    if (LnnGetLocalNumInfo(NUM_KEY_AUTH_PORT, &authPort) != SOFTBUS_OK) {
+    if (LnnGetLocalNumInfoByIfnameIdx(NUM_KEY_AUTH_PORT, &authPort, WLAN_IF) != SOFTBUS_OK) {
         LNN_LOGE(LNN_BUILDER, "get local authPort fail");
         return SOFTBUS_NETWORK_GET_LOCAL_NODE_INFO_ERR;
     }
@@ -1321,4 +1322,53 @@ int32_t LnnSendWifiOfflineInfoMsg(void)
     SoftBusFree(authHandle);
     AnonymizeFree(anonyOfflineCode);
     return SOFTBUS_OK;
+}
+
+void LnnSendAsyncInfoMsg(void *param)
+{
+    SendSyncInfoParam *data = (SendSyncInfoParam *)param;
+    if (data == NULL) {
+        LNN_LOGE(LNN_BUILDER, "invalid para");
+        return;
+    }
+    if (data->msg == NULL) {
+        LNN_LOGE(LNN_BUILDER, "invalid para");
+        SoftBusFree(data);
+        return;
+    }
+    int32_t ret =
+        LnnSendSyncInfoMsg(data->type, data->networkId, data->msg, data->len, data->complete);
+    if (ret != SOFTBUS_OK) {
+        LNN_LOGE(LNN_BUILDER, "send info msg type=%{public}d fail, ret:%{public}d", data->type, ret);
+    }
+    SoftBusFree(data->msg);
+    SoftBusFree(data);
+}
+
+SendSyncInfoParam *CreateSyncInfoParam(
+    LnnSyncInfoType type, const char *networkId, const uint8_t *msg, uint32_t len, LnnSyncInfoMsgComplete complete)
+{
+    SendSyncInfoParam *data = (SendSyncInfoParam *)SoftBusCalloc(sizeof(SendSyncInfoParam));
+    if (data == NULL) {
+        LNN_LOGE(LNN_BUILDER, "malloc SendSyncInfoParam fail");
+        return NULL;
+    }
+
+    data->msg = (uint8_t *)SoftBusCalloc(len);
+    if (data->msg == NULL) {
+        SoftBusFree(data);
+        LNN_LOGE(LNN_BUILDER, "malloc SendSyncInfoParam fail");
+        return NULL;
+    }
+
+    if (strcpy_s(data->networkId, strlen(networkId) + 1, networkId) != SOFTBUS_OK ||
+        memcpy_s(data->msg, len, (uint8_t *)msg, len) != SOFTBUS_OK) {
+        SoftBusFree(data->msg);
+        SoftBusFree(data);
+        return NULL;
+    }
+    data->type = type;
+    data->len = len;
+    data->complete = complete;
+    return data;
 }

@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2022 Huawei Device Co., Ltd.
+ * Copyright (c) 2022-2025 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -19,7 +19,9 @@
 
 #include "auth_common.h"
 #include "auth_log.h"
+#include "auth_manager.h"
 #include "auth_request.h"
+#include "auth_pre_link.h"
 #include "auth_tcp_connection.h"
 #include "lnn_async_callback_utils.h"
 #include "softbus_adapter_bt_common.h"
@@ -53,6 +55,9 @@ typedef struct {
 
 static ListNode g_connRequestList = { &g_connRequestList, &g_connRequestList };
 static AuthConnListener g_listener = { 0 };
+
+static void OnWiFiConnected(ListenerModule module, int32_t fd, bool isClient);
+static void OnTcpSessionConnected(ListenerModule module, int32_t fd, bool isClient);
 
 void __attribute__((weak)) RouteBuildClientAuthManager(int32_t cfd)
 {
@@ -98,6 +103,13 @@ const char *GetConnTypeStr(uint64_t connId)
             return "p2p";
         case AUTH_LINK_TYPE_ENHANCED_P2P:
             return "enhanced_p2p";
+        case AUTH_LINK_TYPE_SESSION:
+        case AUTH_LINK_TYPE_SESSION_KEY:
+            return "session";
+        case AUTH_LINK_TYPE_SLE:
+            return "sle";
+        case AUTH_LINK_TYPE_USB:
+            return "usb";
         default:
             break;
     }
@@ -265,6 +277,8 @@ const uint8_t *UnpackAuthData(const uint8_t *data, uint32_t len, AuthDataHead *h
 static int32_t GetAuthTimeoutErrCode(AuthLinkType type)
 {
     switch (type) {
+        case AUTH_LINK_TYPE_USB:
+            return SOFTBUS_AUTH_USB_CONN_TIMEOUT;
         case AUTH_LINK_TYPE_WIFI:
             return SOFTBUS_AUTH_WIFI_CONN_TIMEOUT;
         case AUTH_LINK_TYPE_BR:
@@ -275,6 +289,10 @@ static int32_t GetAuthTimeoutErrCode(AuthLinkType type)
             return SOFTBUS_AUTH_P2P_CONN_TIMEOUT;
         case AUTH_LINK_TYPE_ENHANCED_P2P:
             return SOFTBUS_AUTH_ENHANCEP2P_CONN_TIMEOUT;
+        case AUTH_LINK_TYPE_SESSION_KEY:
+            return SOFTBUS_AUTH_SESSION_KEY_CONN_TIMEOUT;
+        case AUTH_LINK_TYPE_SLE:
+            return SOFTBUS_AUTH_SLE_CONN_TIMEOUT;
         default:
             AUTH_LOGE(AUTH_CONN, "auth conn timeout type=%{public}d", type);
     }
@@ -328,20 +346,67 @@ static void RemoveConnConnectTimeout(uint32_t requestId)
 /* EVENT_CONNECT_CMD */
 static void HandleConnConnectCmd(const void *para)
 {
+    int32_t fd = AUTH_INVALID_FD;
     CHECK_NULL_PTR_RETURN_VOID(para);
     ConnCmdInfo *info = (ConnCmdInfo *)para;
-    if (info->connInfo.type != AUTH_LINK_TYPE_WIFI) {
+    bool isFindAuthPreLinkNode = false;
+    if (info->connInfo.type != AUTH_LINK_TYPE_WIFI && info->connInfo.type != AUTH_LINK_TYPE_USB) {
         AUTH_LOGE(AUTH_CONN, "invalid connType=%{public}d", info->connInfo.type);
         return;
     }
-    int32_t fd = SocketConnectDevice(info->connInfo.info.ipInfo.ip, info->connInfo.info.ipInfo.port, false);
+    AuthPreLinkNode reuseKeyNode;
+    (void)memset_s(&reuseKeyNode, sizeof(AuthPreLinkNode), 0, sizeof(AuthPreLinkNode));
+    if (FindAuthPreLinkNodeById(info->requestId, &reuseKeyNode) == SOFTBUS_OK) {
+        AUTH_LOGI(AUTH_CONN, "find reuse devicekey id");
+        fd = reuseKeyNode.fd;
+        isFindAuthPreLinkNode = true;
+        SocketSetDevice(fd, true);
+    } else {
+        int32_t ifnameIdx = (info->connInfo.type == AUTH_LINK_TYPE_USB) ? USB_IF : WLAN_IF;
+        fd = SocketConnectDevice(info->connInfo.info.ipInfo.ip, info->connInfo.info.ipInfo.port, false, ifnameIdx);
+    }
     if (fd < 0) {
         AUTH_LOGE(AUTH_CONN, "SocketConnectDevice fail");
         RemoveConnConnectTimeout(info->requestId);
         NotifyClientConnected(info->requestId, 0, SOFTBUS_AUTH_CONN_FAIL, NULL);
+        DelAuthPreLinkById(info->requestId);
         return;
     }
     (void)AddConnRequest(&info->connInfo, info->requestId, fd);
+    if (isFindAuthPreLinkNode) {
+        AUTH_LOGI(AUTH_CONN, "reuse socket directly");
+        OnWiFiConnected(AUTH, fd, true);
+    }
+}
+
+static void HandleTcpSessionConnConnectCmd(const void *para)
+{
+    int32_t fd = AUTH_INVALID_FD;
+    CHECK_NULL_PTR_RETURN_VOID(para);
+    ConnCmdInfo *info = (ConnCmdInfo *)para;
+    if (info->connInfo.type != AUTH_LINK_TYPE_SESSION_KEY) {
+        AUTH_LOGE(AUTH_CONN, "invalid connType=%{public}d", info->connInfo.type);
+        return;
+    }
+    AuthPreLinkNode reuseKeyNode;
+    (void)memset_s(&reuseKeyNode, sizeof(AuthPreLinkNode), 0, sizeof(AuthPreLinkNode));
+    if (FindAuthPreLinkNodeById(info->requestId, &reuseKeyNode) != SOFTBUS_OK) {
+        AUTH_LOGE(AUTH_CONN, "not find reuse devicekey id");
+        return;
+    }
+    AUTH_LOGI(AUTH_CONN, "find reuse devicekey id");
+    fd = reuseKeyNode.fd;
+    if (fd < 0) {
+        AUTH_LOGE(AUTH_CONN, "SocketConnectDevice fail");
+        RemoveConnConnectTimeout(info->requestId);
+        NotifyClientConnected(info->requestId, 0, SOFTBUS_AUTH_CONN_FAIL, NULL);
+        DelAuthPreLinkById(info->requestId);
+        return;
+    }
+    SocketSetDevice(fd, true);
+    (void)AddConnRequest(&info->connInfo, info->requestId, fd);
+    AUTH_LOGI(AUTH_CONN, "reuse socket directly");
+    OnTcpSessionConnected(AUTH, fd, true);
 }
 
 /* EVENT_CONNECT_RESULT */
@@ -357,7 +422,28 @@ static void HandleConnConnectResult(const void *para)
     }
     RemoveConnConnectTimeout(item->requestId);
     if (connResult->ret == SOFTBUS_OK) {
-        NotifyClientConnected(item->requestId, GenConnId(AUTH_LINK_TYPE_WIFI, connResult->fd),
+        AuthLinkType type = (item->connInfo.type == AUTH_LINK_TYPE_USB) ? AUTH_LINK_TYPE_USB : AUTH_LINK_TYPE_WIFI;
+        NotifyClientConnected(item->requestId, GenConnId(type, connResult->fd),
+            SOFTBUS_OK, &item->connInfo);
+    } else {
+        NotifyClientConnected(item->requestId, 0, connResult->ret, NULL);
+    }
+    DelConnRequest(item);
+}
+
+static void HandleTcpSessionConnConnectResult(const void *para)
+{
+    CHECK_NULL_PTR_RETURN_VOID(para);
+    AuthConnectResult *connResult = (AuthConnectResult *)(para);
+    RouteBuildClientAuthManager(connResult->fd);
+    ConnRequest *item = FindConnRequestByFd(connResult->fd);
+    if (item == NULL) {
+        AUTH_LOGE(AUTH_CONN, "ConnRequest not found, fd=%{public}d", connResult->fd);
+        return;
+    }
+    RemoveConnConnectTimeout(item->requestId);
+    if (connResult->ret == SOFTBUS_OK) {
+        NotifyClientConnected(item->requestId, GenConnId(AUTH_LINK_TYPE_SESSION_KEY, connResult->fd),
             SOFTBUS_OK, &item->connInfo);
     } else {
         NotifyClientConnected(item->requestId, 0, connResult->ret, NULL);
@@ -415,12 +501,45 @@ static void OnWiFiConnected(ListenerModule module, int32_t fd, bool isClient)
     (void)PostAuthEvent(EVENT_CONNECT_RESULT, HandleConnConnectResult, &info, sizeof(AuthConnectResult), 0);
 }
 
-static void OnWiFiDisconnected(int32_t fd)
+static void OnTcpSessionConnected(ListenerModule module, int32_t fd, bool isClient)
 {
-    AUTH_LOGI(AUTH_CONN, "OnWiFiDisconnected: fd=%{public}d", fd);
+    AUTH_LOGI(AUTH_CONN, "OnTcpSessionConnected: fd=%{public}d, side=%{public}s", fd,
+        isClient ? "client" : "server(ignored)");
+    if (!isClient) {
+        /* do nothing, wait auth message. */
+        return;
+    }
+    AuthConnectResult info = {
+        .fd = fd,
+        .ret = SOFTBUS_OK,
+    };
+    (void)PostAuthEvent(EVENT_CONNECT_RESULT, HandleTcpSessionConnConnectResult, &info, sizeof(AuthConnectResult), 0);
+}
+
+static void OnWiFiDisconnected(ListenerModule module, int32_t fd)
+{
+    AUTH_LOGI(AUTH_CONN, "OnWiFiDisconnected: module=%{public}d, fd=%{public}d", module, fd);
     AuthConnInfo connInfo;
     (void)memset_s(&connInfo, sizeof(AuthConnInfo), 0, sizeof(AuthConnInfo));
-    connInfo.type = AUTH_LINK_TYPE_WIFI;
+    if (module == AUTH_USB) {
+        connInfo.type = AUTH_LINK_TYPE_USB;
+    } else if (module == AUTH_SESSION_KEY) {
+        connInfo.type = AUTH_LINK_TYPE_SESSION_KEY;
+    } else {
+        connInfo.type = AUTH_LINK_TYPE_WIFI;
+    }
+    if (connInfo.type == AUTH_LINK_TYPE_SESSION_KEY) {
+        StopSessionKeyListening(fd);
+        NotifyDisconnected(GenConnId(connInfo.type, fd), &connInfo);
+        AuthConnectResult info = {
+            .fd = fd,
+            .ret = SOFTBUS_AUTH_CONN_FAIL,
+        };
+        (void)PostAuthEvent(EVENT_CONNECT_RESULT, HandleTcpSessionConnConnectResult, &info,
+            sizeof(AuthConnectResult), 0);
+        RouteClearAuthChannelId(fd);
+        return;
+    }
     NotifyDisconnected(GenConnId(connInfo.type, fd), &connInfo);
     AuthConnectResult info = {
         .fd = fd,
@@ -430,20 +549,45 @@ static void OnWiFiDisconnected(int32_t fd)
     RouteClearAuthChannelId(fd);
 }
 
+static bool IsSessionAuth(int32_t module)
+{
+    return (module == MODULE_SESSION_AUTH);
+}
+
+static bool IsSessionKeyAuth(int32_t module)
+{
+    return (module == MODULE_SESSION_KEY_AUTH);
+}
+
 static void OnWiFiDataReceived(ListenerModule module, int32_t fd, const AuthDataHead *head, const uint8_t *data)
 {
     CHECK_NULL_PTR_RETURN_VOID(head);
     CHECK_NULL_PTR_RETURN_VOID(data);
 
-    if (module != AUTH && module != AUTH_P2P && module != AUTH_RAW_P2P_SERVER && !IsEnhanceP2pModuleId(module)) {
+    if (module != AUTH && module != AUTH_P2P && module != AUTH_RAW_P2P_SERVER && !IsEnhanceP2pModuleId(module) &&
+        !IsSessionAuth(head->module) && !IsSessionKeyAuth(head->module) && module != AUTH_USB
+        && module != AUTH_SESSION_KEY) {
         return;
     }
     bool fromServer = false;
     AuthConnInfo connInfo;
     (void)memset_s(&connInfo, sizeof(AuthConnInfo), 0, sizeof(AuthConnInfo));
-    if (SocketGetConnInfo(fd, &connInfo, &fromServer) != SOFTBUS_OK) {
-        AUTH_LOGE(AUTH_CONN, "get connInfo fail, fd=%{public}d", fd);
-        return;
+    if (IsSessionAuth(head->module)) {
+        connInfo.type = AUTH_LINK_TYPE_SESSION;
+        connInfo.info.sessionInfo.connId = (uint32_t)fd;
+        AUTH_LOGI(AUTH_CONN, "set connInfo for AUTH_LINK_TYPE_SESSION, fd=%{public}d", fd);
+    } else if (IsSessionKeyAuth(head->module)) {
+        if (SocketGetConnInfo(fd, &connInfo, &fromServer, WLAN_IF) != SOFTBUS_OK) {
+            AUTH_LOGE(AUTH_CONN, "session key get connInfo fail, fd=%{public}d", fd);
+            return;
+        }
+        connInfo.type = AUTH_LINK_TYPE_SESSION_KEY;
+    } else {
+        int32_t ifnameIdx = (module == AUTH_USB) ? USB_IF : WLAN_IF;
+        if (SocketGetConnInfo(fd, &connInfo, &fromServer, ifnameIdx) != SOFTBUS_OK) {
+            AUTH_LOGE(AUTH_CONN, "get connInfo fail, fd=%{public}d", fd);
+            return;
+        }
     }
     HandleDataReceivedProcess(GenConnId(connInfo.type, fd), &connInfo, fromServer, head, data);
 }
@@ -629,6 +773,11 @@ int32_t AuthConnInit(const AuthConnListener *listener)
         AUTH_LOGE(AUTH_CONN, "init br/ble/p2p conn fail");
         return SOFTBUS_AUTH_CONN_INIT_FAIL;
     }
+    if (AuthTcpConnFdLockInit() != SOFTBUS_OK) {
+        (void)memset_s(&g_listener, sizeof(g_listener), 0, sizeof(AuthConnListener));
+        AUTH_LOGE(AUTH_CONN, "init AuthTcpConnFdLockInit fail");
+        return SOFTBUS_LOCK_ERR;
+    }
     if (InitWiFiConn() != SOFTBUS_OK) {
         (void)memset_s(&g_listener, sizeof(g_listener), 0, sizeof(AuthConnListener));
         AUTH_LOGE(AUTH_CONN, "init wifi conn fail");
@@ -642,7 +791,15 @@ void AuthConnDeinit(void)
     UnsetSocketCallback();
     ConnUnSetConnectCallback(MODULE_DEVICE_AUTH);
     ClearConnRequest();
+    AuthTcpConnFdLockDeinit();
     (void)memset_s(&g_listener, sizeof(g_listener), 0, sizeof(AuthConnListener));
+}
+
+static void SessionConnectSucc(uint32_t requestId, const AuthConnInfo *connInfo)
+{
+    AUTH_LOGI(AUTH_CONN, "no need connect.");
+    uint64_t connId = GenConnId(connInfo->type, (int32_t)connInfo->info.sessionInfo.connId);
+    NotifyClientConnected(requestId, connId, SOFTBUS_OK, connInfo);
 }
 
 int32_t ConnectAuthDevice(uint32_t requestId, const AuthConnInfo *connInfo, ConnSideType sideType)
@@ -653,12 +810,9 @@ int32_t ConnectAuthDevice(uint32_t requestId, const AuthConnInfo *connInfo, Conn
     PostConnConnectTimeout(requestId, connInfo->type);
     int32_t ret = 0;
     switch (connInfo->type) {
-        case AUTH_LINK_TYPE_WIFI: {
-            ConnCmdInfo info = {
-                .requestId = requestId,
-                .connInfo = *connInfo,
-                .retryTimes = 0,
-            };
+        case AUTH_LINK_TYPE_WIFI:
+        case AUTH_LINK_TYPE_USB: {
+            ConnCmdInfo info = { requestId, *connInfo, 0 };
             ret = PostAuthEvent(EVENT_CONNECT_CMD, HandleConnConnectCmd, &info, sizeof(ConnCmdInfo), 0);
             break;
         }
@@ -670,10 +824,20 @@ int32_t ConnectAuthDevice(uint32_t requestId, const AuthConnInfo *connInfo, Conn
                 break;
             }
             __attribute__((fallthrough));
+        case AUTH_LINK_TYPE_SLE:
+            __attribute__((fallthrough));
         case AUTH_LINK_TYPE_P2P:
         case AUTH_LINK_TYPE_ENHANCED_P2P:
             ret = ConnectCommDevice(connInfo, requestId, sideType);
             break;
+        case AUTH_LINK_TYPE_SESSION:
+            SessionConnectSucc(requestId, connInfo);
+            break;
+        case AUTH_LINK_TYPE_SESSION_KEY: {
+            ConnCmdInfo info = { requestId, *connInfo, 0 };
+            ret = PostAuthEvent(EVENT_CONNECT_CMD, HandleTcpSessionConnConnectCmd, &info, sizeof(ConnCmdInfo), 0);
+            break;
+        }
         default:
             ret = SOFTBUS_OK;
             break;
@@ -710,25 +874,105 @@ void DisconnectAuthDevice(uint64_t *connId)
     AUTH_LOGI(AUTH_CONN, "connType=%{public}d, connectionId=%{public}u", GetConnType(*connId), GetConnId(*connId));
     switch (GetConnType(*connId)) {
         case AUTH_LINK_TYPE_RAW_ENHANCED_P2P:
+            if (IsExistAuthTcpConnFdItemByConnId(GetFd(*connId))) {
+                DeleteAuthTcpConnFdItemByConnId(GetFd(*connId));
+            }
             SocketDisconnectDevice(AUTH_RAW_P2P_SERVER, GetFd(*connId));
             UpdateFd(connId, AUTH_INVALID_FD);
             break;
         case AUTH_LINK_TYPE_WIFI:
+            if (IsExistAuthTcpConnFdItemByConnId(GetFd(*connId))) {
+                DeleteAuthTcpConnFdItemByConnId(GetFd(*connId));
+            }
             SocketDisconnectDevice(AUTH, GetFd(*connId));
+            UpdateFd(connId, AUTH_INVALID_FD);
+            break;
+        case AUTH_LINK_TYPE_USB:
+            if (IsExistAuthTcpConnFdItemByConnId(GetFd(*connId))) {
+                DeleteAuthTcpConnFdItemByConnId(GetFd(*connId));
+            }
+            SocketDisconnectDevice(AUTH_USB, GetFd(*connId));
             UpdateFd(connId, AUTH_INVALID_FD);
             break;
         case AUTH_LINK_TYPE_BLE:
             __attribute__((fallthrough));
         case AUTH_LINK_TYPE_BR:
+            __attribute__((fallthrough));
+        case AUTH_LINK_TYPE_SLE:
             ConnDisconnectDevice(GetConnId(*connId));
             __attribute__((fallthrough));
         case AUTH_LINK_TYPE_P2P:
         case AUTH_LINK_TYPE_ENHANCED_P2P:
+        case AUTH_LINK_TYPE_SESSION_KEY:
             break;
         default:
             AUTH_LOGI(AUTH_CONN, "unknown connType");
             break;
     }
+}
+
+static int32_t PostBytesForSession(int32_t fd, const AuthDataHead *head, const uint8_t *data)
+{
+    uint32_t size = GetAuthDataSize(head->len);
+    uint8_t *buf = (uint8_t *)SoftBusCalloc(size);
+    if (buf == NULL) {
+        AUTH_LOGE(AUTH_CONN, "calloc fail");
+        return SOFTBUS_MALLOC_ERR;
+    }
+    AuthDataHead tmpHead = *head;
+    tmpHead.module = MODULE_SESSION_AUTH;
+    int32_t ret = PackAuthData(&tmpHead, data, buf, size);
+    if (ret != SOFTBUS_OK) {
+        AUTH_LOGE(AUTH_CONN, "PackAuthData fail");
+        SoftBusFree(buf);
+        return ret;
+    }
+    tmpHead.len = size;
+    ret = SocketPostBytes(fd, &tmpHead, buf);
+    if (ret != SOFTBUS_OK) {
+        AUTH_LOGE(AUTH_CONN, "SocketPostBytes fail");
+    }
+    SoftBusFree(buf);
+    return ret;
+}
+
+static bool IsAuthSessionKeyModule(const AuthDataHead *head)
+{
+    if (head->dataType == DATA_TYPE_AUTH || head->dataType == DATA_TYPE_DEVICE_INFO ||
+        head->dataType == DATA_TYPE_DEVICE_ID || head->dataType == DATA_TYPE_CLOSE_ACK) {
+        return true;
+    }
+    return false;
+}
+
+static int32_t PostBytesForSessionKey(int32_t fd, const AuthDataHead *head, const uint8_t *data)
+{
+    int32_t ret = SOFTBUS_MALLOC_ERR;
+    if (IsAuthSessionKeyModule(head)) {
+        uint32_t size = GetAuthDataSize(head->len);
+        uint8_t *buf = (uint8_t *)SoftBusCalloc(size);
+        if (buf == NULL) {
+            AUTH_LOGE(AUTH_CONN, "calloc fail");
+            return SOFTBUS_MALLOC_ERR;
+        }
+        AuthDataHead tmpHead = *head;
+        tmpHead.module = MODULE_SESSION_KEY_AUTH;
+        ret = PackAuthData(&tmpHead, data, buf, size);
+        if (ret != SOFTBUS_OK) {
+            AUTH_LOGE(AUTH_CONN, "PackAuthData fail");
+            SoftBusFree(buf);
+            return ret;
+        }
+        tmpHead.len = size;
+        ret = SocketPostBytes(fd, &tmpHead, buf);
+        SoftBusFree(buf);
+    } else {
+        ret = SocketPostBytes(fd, head, data);
+    }
+    if (ret != SOFTBUS_OK) {
+        AUTH_LOGE(AUTH_CONN, "SocketPostBytes fail");
+    }
+    return ret;
 }
 
 int32_t PostAuthData(uint64_t connId, bool toServer, const AuthDataHead *head, const uint8_t *data)
@@ -742,12 +986,18 @@ int32_t PostAuthData(uint64_t connId, bool toServer, const AuthDataHead *head, c
         GetAuthSideStr(toServer));
     switch (GetConnType(connId)) {
         case AUTH_LINK_TYPE_WIFI:
+        case AUTH_LINK_TYPE_USB:
             return SocketPostBytes(GetFd(connId), head, data);
         case AUTH_LINK_TYPE_BLE:
         case AUTH_LINK_TYPE_BR:
+        case AUTH_LINK_TYPE_SLE:
         case AUTH_LINK_TYPE_P2P:
         case AUTH_LINK_TYPE_ENHANCED_P2P:
             return PostCommData(GetConnId(connId), toServer, head, data);
+        case AUTH_LINK_TYPE_SESSION:
+            return PostBytesForSession(GetFd(connId), head, data);
+        case AUTH_LINK_TYPE_SESSION_KEY:
+            return PostBytesForSessionKey(GetFd(connId), head, data);
         default:
             AUTH_LOGI(AUTH_CONN, "unknown connType");
             break;
@@ -757,7 +1007,7 @@ int32_t PostAuthData(uint64_t connId, bool toServer, const AuthDataHead *head, c
 
 ConnSideType GetConnSideType(uint64_t connId)
 {
-    if (GetConnType(connId) == AUTH_LINK_TYPE_WIFI) {
+    if (GetConnType(connId) == AUTH_LINK_TYPE_WIFI || GetConnType(connId) == AUTH_LINK_TYPE_USB) {
         AUTH_LOGE(AUTH_CONN, "WiFi not supported, " CONN_INFO, CONN_DATA(connId));
         return CONN_SIDE_ANY;
     }
@@ -816,8 +1066,13 @@ int32_t AuthStartListening(AuthLinkType type, const char *ip, int32_t port)
         }
         case AUTH_LINK_TYPE_RAW_ENHANCED_P2P: {
             info.socketOption.moduleId = AUTH_RAW_P2P_SERVER;
-            info.socketOption.port = 0;
             return StartSocketListening(AUTH_RAW_P2P_SERVER, &info);
+        }
+        case AUTH_LINK_TYPE_USB: {
+            info.socketOption.moduleId = AUTH_USB;
+            info.socketOption.port = 0;
+            info.socketOption.protocol = LNN_PROTOCOL_USB;
+            return StartSocketListening(AUTH_USB, &info);
         }
         default:
             AUTH_LOGE(AUTH_CONN, "unsupport linkType=%{public}d", type);
@@ -835,6 +1090,9 @@ void AuthStopListening(AuthLinkType type)
             break;
         case AUTH_LINK_TYPE_RAW_ENHANCED_P2P:
             StopSocketListening(AUTH_RAW_P2P_SERVER);
+            break;
+        case AUTH_LINK_TYPE_USB:
+            StopSocketListening(AUTH_USB);
             break;
         default:
             AUTH_LOGE(AUTH_CONN, "unsupport linkType=%{public}d", type);

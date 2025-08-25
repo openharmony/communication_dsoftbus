@@ -48,10 +48,10 @@ public:
     static std::string ToString(const std::vector<uint8_t> &input);
     static std::vector<uint8_t> ToBinary(const std::string &input);
 
-    static bool Is2GBand(int frequency);
-    static bool Is5GBand(int frequency);
+    static bool Is2GBand(int freq);
+    static bool Is5GBand(int freq);
     static int ChannelToFrequency(int channel);
-    static int FrequencyToChannel(int frequency);
+    static int FrequencyToChannel(int freq);
 
     static std::string NetworkIdToUuid(const std::string &networkId);
     static std::string UuidToNetworkId(const std::string &uuid);
@@ -82,6 +82,7 @@ public:
     static int32_t IpStringToIntArray(const char *addrString, uint32_t *addrArray, size_t addrArraySize);
 
     static std::string ChannelListToString(const std::vector<int> &channels);
+    static bool StringToInt(const std::string &channelString, int32_t &result);
     static std::vector<int> StringToChannelList(std::string channels);
 
     static WifiDirectRole ToWifiDirectRole(LinkInfo::LinkMode mode);
@@ -92,13 +93,12 @@ public:
     static WifiDirectBandWidth BandWidthNumberToEnum(int bandWidth);
     static int BandWidthEnumToNumber(WifiDirectBandWidth bandWidth);
     static int GetRecommendChannelFromLnn(const std::string &networkId);
-
     static void SerialFlowEnter();
     static void SerialFlowExit();
     static void ParallelFlowEnter();
     static void ParallelFlowExit();
     static uint32_t CalculateStringLength(const char *str, uint32_t size);
-    static void SyncLnnInfoForP2p(WifiDirectRole role, const std::string &localMac, const std::string &goMac);
+    static void SyncLnnInfoForP2p(WifiDirectApiRole role, const std::string &localMac, const std::string &goMac);
     static bool IsDfsChannel(const int &frequency);
     static bool CheckLinkAtDfsChannelConflict(const std::string &remoteDeviceId, InnerLink::LinkType type);
     static int32_t GetOsType(const char *networkId);
@@ -107,6 +107,12 @@ public:
     static int32_t GetRemoteConnSubFeature(const std::string &remoteNetworkId, uint64_t &feature);
     static std::string GetRemoteOsVersion(const char *remoteNetworkId);
     static int32_t GetRemoteScreenStatus(const char *remoteNetworkId);
+    static int GetChload();
+
+    static bool IsDeviceId(const std::string &remoteId);
+    static std::string RemoteDeviceIdToMac(const std::string &remoteDeviceId);
+    static std::string RemoteMacToDeviceId(const std::string &remoteMac);
+    static int GetLocalScreenStatus();
 
 private:
     static inline std::mutex serialParallelLock_;

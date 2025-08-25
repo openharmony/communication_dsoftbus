@@ -18,9 +18,6 @@
 
 #include "hks_api.h"
 #include "hks_param.h"
-#include "hks_type.h"
-
-#include "softbus_common.h"
 
 #ifdef __cplusplus
 extern "C" {
@@ -29,7 +26,7 @@ extern "C" {
 #define LNN_HUKS_AES_COMMON_SIZE 1024
 
 int32_t LnnGenerateKeyByHuks(struct HksBlob *keyAlias);
-int32_t LnnGenerateCeKeyByHuks(struct HksBlob *keyAlias);
+int32_t LnnGenerateCeKeyByHuks(struct HksBlob *keyAlias, bool isUnlocked);
 int32_t LnnDeleteKeyByHuks(struct HksBlob *keyAlias);
 int32_t LnnDeleteCeKeyByHuks(struct HksBlob *keyAlias);
 int32_t LnnEncryptDataByHuks(const struct HksBlob *keyAlias, const struct HksBlob *inData, struct HksBlob *outData);

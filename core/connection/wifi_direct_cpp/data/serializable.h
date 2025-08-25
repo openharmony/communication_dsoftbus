@@ -17,7 +17,6 @@
 
 #include <any>
 #include <string>
-#include <vector>
 
 namespace OHOS::SoftBus {
 class WifiDirectProtocol;

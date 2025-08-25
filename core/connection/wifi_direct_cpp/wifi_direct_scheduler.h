@@ -21,14 +21,16 @@
 #include <memory>
 #include <string>
 #include <thread>
-#include "wifi_direct_types.h"
-#include "wifi_direct_executor.h"
-#include "command/wifi_direct_command.h"
 #include "command/connect_command.h"
+#include "command/wifi_direct_command.h"
+#include "dfx/processor_snapshot.h"
 #include "event/wifi_direct_event_wrapper.h"
 #include "utils/wifi_direct_anonymous.h"
 #include "utils/wifi_direct_utils.h"
+#include "wifi_direct_executor.h"
 #include "wifi_direct_executor_factory.h"
+#include "wifi_direct_types.h"
+#include "wifi_direct_executor_manager.h"
 
 namespace OHOS::SoftBus {
 class WifiDirectSchedulerFactory;
@@ -46,15 +48,16 @@ public:
     template<typename Command>
     void ProcessNegotiateData(const std::string &remoteDeviceId, Command &command)
     {
+        CONN_CHECK_AND_RETURN_LOGE(!remoteDeviceId.empty(), CONN_WIFI_DIRECT, "remote device id is empty");
         auto aDeviceId = WifiDirectAnonymizeDeviceId(remoteDeviceId);
         CONN_LOGD(CONN_WIFI_DIRECT, "remoteDeviceId=%{public}s", aDeviceId.c_str());
-        std::lock_guard executorLock(executorLock_);
-        auto it = executors_.find(remoteDeviceId);
-        if (it != executors_.end()) {
-            if (it->second->CanAcceptNegotiateData(command)) {
+        std::lock_guard lock(executorLock_);
+        auto executor = executorManager_.Find(remoteDeviceId);
+        if (executor != nullptr) {
+            if (executor->CanAcceptNegotiateData(command)) {
                 CONN_LOGI(CONN_WIFI_DIRECT, "send command to executor=%{public}s, commandId=%{public}d",
                           aDeviceId.c_str(), command.GetId());
-                it->second->SendEvent(std::make_shared<Command>(command));
+                executor->SendEvent(std::make_shared<Command>(command));
                 return;
             }
             std::lock_guard commandLock(commandLock_);
@@ -63,7 +66,7 @@ public:
             return;
         }
 
-        if (executors_.size() == MAX_EXECUTOR) {
+        if (executorManager_.Size() == MAX_EXECUTOR) {
             CONN_LOGI(CONN_WIFI_DIRECT, "push command to list, commandId=%{public}u", command.GetId());
             std::lock_guard commandLock(commandLock_);
             commandList_.push_back(std::make_shared<Command>(command));
@@ -75,11 +78,11 @@ public:
             CONN_LOGE(CONN_WIFI_DIRECT, "get processor failed");
             return;
         }
-        auto executor =  WifiDirectExecutorFactory::GetInstance().NewExecutor(remoteDeviceId, *this, processor, false);
+        executor = WifiDirectExecutorFactory::GetInstance().NewExecutor(remoteDeviceId, *this, processor, false);
         if (executor == nullptr) {
             return;
         }
-        executors_.insert({ remoteDeviceId, executor });
+        executorManager_.Insert(remoteDeviceId, executor);
         CONN_LOGI(CONN_WIFI_DIRECT, "send command to executor=%{public}s, commandId=%{public}d",
                   aDeviceId.c_str(), command.GetId());
         executor->SendEvent(std::make_shared<Command>(command));
@@ -89,8 +92,8 @@ public:
     void ProcessEvent(const std::string &remoteDeviceId, const Event &event)
     {
         std::lock_guard lock(executorLock_);
-        auto it = executors_.find(remoteDeviceId);
-        if (it == executors_.end()) {
+        auto executor = executorManager_.Find(remoteDeviceId);
+        if (executor == nullptr) {
             CONN_LOGE(CONN_WIFI_DIRECT, "executor not exist, remoteDeviceId=%{public}s",
                       WifiDirectAnonymizeDeviceId(remoteDeviceId).c_str());
             return;
@@ -99,7 +102,7 @@ public:
         CONN_LOGI(CONN_WIFI_DIRECT, "send event to executor=%{public}s",
                   WifiDirectAnonymizeDeviceId(remoteDeviceId).c_str());
         auto content = std::make_shared<Event>(event);
-        it->second->SendEvent(content);
+        executor->SendEvent(content);
     }
 
     template<typename Command>
@@ -119,11 +122,11 @@ public:
     }
 
     template<typename Command>
-    void FetchAndDispatchCommand(const std::string &remoteDeviceId)
+    void FetchAndDispatchCommand(const std::string &remoteDeviceId, CommandType type)
     {
         std::lock_guard executorLock(executorLock_);
-        auto eit = executors_.find(remoteDeviceId);
-        if (eit == executors_.end()) {
+        auto executor = executorManager_.Find(remoteDeviceId);
+        if (executor == nullptr) {
             return;
         }
 
@@ -133,11 +136,11 @@ public:
             if (command->GetRemoteDeviceId() != remoteDeviceId) {
                 continue;
             }
-            auto cmd = std::dynamic_pointer_cast<Command>(command);
-            if (cmd != nullptr) {
+            if (command->GetType() == type) {
+                auto cmd = std::static_pointer_cast<Command>(command);
                 CONN_LOGI(CONN_WIFI_DIRECT, "type=%{public}d, commandId=%{public}u",
                           static_cast<int>(command->GetType()), command->GetId());
-                eit->second->SendEvent(cmd);
+                executor->SendEvent(cmd);
                 commandList_.erase(cit);
                 return;
             }
@@ -154,10 +157,11 @@ public:
 
     bool CheckExecutorRunning(const std::string &remoteDeviceId)
     {
-        std::lock_guard executorLock(executorLock_);
-        auto iterator = executors_.find(remoteDeviceId);
-        return iterator != executors_.end();
+        std::lock_guard lock(executorLock_);
+        return executorManager_.Find(remoteDeviceId) != nullptr;
     }
+
+    void Dump(std::list<std::shared_ptr<ProcessorSnapshot>> &snapshots);
 
 protected:
     int ScheduleActiveCommand(const std::shared_ptr<WifiDirectCommand> &command,
@@ -166,17 +170,13 @@ protected:
 
     static constexpr int MAX_EXECUTOR = 8;
     std::recursive_mutex executorLock_;
-    std::map<std::string, std::shared_ptr<WifiDirectExecutor>> executors_;
+    WifiDirectExecutorManager executorManager_;
     std::recursive_mutex commandLock_;
     std::list<std::shared_ptr<WifiDirectCommand>> commandList_;
 
 private:
     friend WifiDirectSchedulerFactory;
-    static WifiDirectScheduler& GetInstance()
-    {
-        static WifiDirectScheduler instance;
-        return instance;
-    }
+    static WifiDirectScheduler& GetInstance();
 };
 }
 #endif

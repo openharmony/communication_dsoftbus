@@ -249,5 +249,20 @@ int32_t LnnGetNetworkIdByUdidHash(
 {
     return GetTransAuthInterface()->LnnGetNetworkIdByUdidHash(udidHash, udidHashLen, buf, len, needOnline);
 }
+
+int32_t AuthDecryptByUkId(int32_t ukId, const uint8_t *inData, uint32_t inLen, uint8_t *outData, uint32_t *outLen)
+{
+    return GetTransAuthInterface()->AuthDecryptByUkId(ukId, inData, inLen, outData, outLen);
+}
+
+int32_t AuthFindUkIdByAclInfo(const AuthACLInfo *acl, int32_t *ukId)
+{
+    return GetTransAuthInterface()->AuthFindUkIdByAclInfo(acl, ukId);
+}
+
+int32_t AuthGetAuthHandleByIndex(const AuthConnInfo *connInfo, bool isServer, int32_t index, AuthHandle *authHandle)
+{
+    return GetTransAuthInterface()->AuthGetAuthHandleByIndex(connInfo, isServer, index, authHandle);
+}
 }
 }

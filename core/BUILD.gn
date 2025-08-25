@@ -27,6 +27,9 @@ if (defined(ohos_lite)) {
   }
 } else {
   group("softbus_server") {
-    deps = [ "frame:softbus_server" ]
+    deps = [
+      "frame:softbus_server",
+      "../sdk/napi/link_enhance:linkenhance",
+      ]
   }
 }

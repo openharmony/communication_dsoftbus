@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2022 Huawei Device Co., Ltd.
+ * Copyright (c) 2024 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -25,8 +25,8 @@
 #include "lnn_async_callback_utils.h"
 #include "lnn_connection_fsm.h"
 #include "lnn_distributed_net_ledger.h"
-#include "lnn_ohos_account.h"
 #include "lnn_network_manager.h"
+#include "lnn_ohos_account.h"
 #include "message_handler.h"
 #include "softbus_adapter_bt_common.h"
 #include "softbus_common.h"
@@ -43,7 +43,7 @@ public:
     virtual void LnnStopDiscovery(void) = 0;
     virtual int32_t LnnStartDiscovery(void) = 0;
     virtual int32_t SoftbusGetConfig(ConfigType type, unsigned char *val, uint32_t len) = 0;
-    virtual void DiscLinkStatusChanged(LinkStatus status, ExchangeMedium medium) = 0;
+    virtual void DiscLinkStatusChanged(LinkStatus status, ExchangeMedium medium, int32_t ifnameIdx) = 0;
     virtual void LnnStopPublish(void) = 0;
     virtual int32_t LnnStartPublish(void) = 0;
     virtual void LnnUpdateOhosAccount(UpdateAccountReason reason) = 0;
@@ -57,9 +57,11 @@ public:
     virtual int32_t LnnRegisterEventHandler(LnnEventType event, LnnEventHandler handler) = 0;
     virtual void LnnNotifyOOBEStateChangeEvent(SoftBusOOBEState state) = 0;
     virtual void LnnNotifyAccountStateChangeEvent(SoftBusAccountState state) = 0;
+    virtual void DfxRecordTriggerTime(LnnTriggerReason reason, LnnEventLnnStage stage) = 0;
     virtual void LnnDeinitPhysicalSubnetManager(void) = 0;
     virtual void LnnUnregisterEventHandler(LnnEventType event, LnnEventHandler handler) = 0;
-    virtual void DfxRecordTriggerTime(LnnTriggerReason reason, LnnEventLnnStage stage) = 0;
+    virtual int32_t LnnInitDeviceNameMonitorImpl(void) = 0;
+    virtual int32_t RegistUsbProtocolManager(void) = 0;
 };
 
 class LnnNetworkManagerInterfaceMock : public LnnNetworkManagerInterface {
@@ -72,7 +74,7 @@ public:
     MOCK_METHOD0(LnnStopDiscovery, void(void));
     MOCK_METHOD0(LnnStartDiscovery, int32_t(void));
     MOCK_METHOD3(SoftbusGetConfig, int32_t(ConfigType, unsigned char *, uint32_t));
-    MOCK_METHOD2(DiscLinkStatusChanged, void(LinkStatus, ExchangeMedium));
+    MOCK_METHOD3(DiscLinkStatusChanged, void(LinkStatus, ExchangeMedium, int32_t));
     MOCK_METHOD0(LnnStopPublish, void(void));
     MOCK_METHOD0(LnnStartPublish, int32_t(void));
     MOCK_METHOD1(LnnUpdateOhosAccount, void(UpdateAccountReason));
@@ -84,9 +86,11 @@ public:
     MOCK_METHOD2(LnnRegisterEventHandler, int32_t(LnnEventType, LnnEventHandler));
     MOCK_METHOD1(LnnNotifyOOBEStateChangeEvent, void(SoftBusOOBEState));
     MOCK_METHOD1(LnnNotifyAccountStateChangeEvent, void(SoftBusAccountState));
+    MOCK_METHOD2(DfxRecordTriggerTime, void(LnnTriggerReason, LnnEventLnnStage));
     MOCK_METHOD0(LnnDeinitPhysicalSubnetManager, void(void));
     MOCK_METHOD2(LnnUnregisterEventHandler, void(LnnEventType, LnnEventHandler));
-    MOCK_METHOD2(DfxRecordTriggerTime, void(LnnTriggerReason, LnnEventLnnStage));
+    MOCK_METHOD0(LnnInitDeviceNameMonitorImpl, int32_t(void));
+    MOCK_METHOD0(RegistUsbProtocolManager, int32_t(void));
 };
 } // namespace OHOS
 #endif // LNN_NETWORK_MANAGER_MOCK_H

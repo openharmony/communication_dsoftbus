@@ -17,6 +17,7 @@
 
 #include <stdint.h>
 
+#include "g_enhance_lnn_func_pack.h"
 #include "lnn_log.h"
 #include "softbus_error_code.h"
 #include "softbus_feature_config.h"
@@ -56,9 +57,12 @@ uint64_t LnnGetFeatureCapabilty(void)
         LNN_LOGE(LNN_LEDGER, "get lnn feature fail, use default value");
         configValue = DEFAUTL_LNN_FEATURE;
     }
-#ifndef DSOFTBUS_FEATURE_CONN_HV2
+#if !defined(DSOFTBUS_FEATURE_CONN_PV2) && !defined(DSOFTBUS_FEATURE_CONN_HV1)
     LnnClearFeatureCapability(&configValue, BIT_WIFI_DIRECT_TLV_NEGOTIATION);
-    LnnClearFeatureCapability(&configValue, BIT_BLE_TRIGGER_CONNECTION);
+    LNN_LOGI(LNN_LEDGER, "clear feature TLV configValue=%{public}" PRIu64, configValue);
+#endif
+#ifndef DSOFTBUS_FEATURE_CONN_HV2
+    LnnClearFeatureCapability(&configValue, BIT_WIFI_DIRECT_ENHANCE_CAPABILITY);
     LNN_LOGI(LNN_LEDGER, "clear feature CONN_HV2 configValue=%{public}" PRIu64, configValue);
 #endif
 #ifndef DSOFTBUS_FEATURE_CONN_COC
@@ -70,6 +74,15 @@ uint64_t LnnGetFeatureCapabilty(void)
     LnnClearFeatureCapability(&configValue, BIT_SUPPORT_NEGO_P2P_BY_CHANNEL_CAPABILITY);
     LNN_LOGI(LNN_LEDGER, "clear feature CONN_BLE_DIRECT configValue=%{public}" PRIu64, configValue);
 #endif
+#ifndef DSOFTBUS_DEVICE_CLOUD_CONVERGENCE
+    LnnClearFeatureCapability(&configValue, BIT_DEVICE_CLOUD_CONVERGENCE_CAPABILITY);
+    LNN_LOGI(LNN_LEDGER, "clear feature DEVICE_CLOUD_CONVERGENCE configValue=%{public}" PRIu64, configValue);
+#endif
+    if (IsSparkGroupEnabledPacked()) {
+        LnnSetFeatureCapability(&configValue, BIT_SUPPORT_SPARK_GROUP_CAPABILITY);
+        LNN_LOGI(LNN_LEDGER, "set feature BIT_SUPPORT_SPARK_GROUP_CAPABILITY configValue=%{public}" PRIu64,
+            configValue);
+    }
     LNN_LOGI(LNN_LEDGER, "lnn feature configValue=%{public}" PRIu64, configValue);
     return configValue;
 }

@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2025 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -16,16 +16,20 @@
 #include "lnn_coap_discovery_impl.h"
 
 #include <securec.h>
+#include <unistd.h>
 
 #include "anonymizer.h"
 #include "auth_interface.h"
 #include "bus_center_manager.h"
+#include "g_enhance_lnn_func.h"
+#include "g_enhance_lnn_func_pack.h"
 #include "lnn_log.h"
 #include "softbus_adapter_crypto.h"
 #include "softbus_adapter_mem.h"
 #include "softbus_def.h"
 #include "softbus_error_code.h"
 #include "softbus_utils.h"
+#include "softbus_init_common.h"
 
 #define LNN_DISC_CAPABILITY "ddmpCapability"
 #define LNN_SUBSCRIBE_ID 0
@@ -51,7 +55,7 @@ static int32_t LnnCheckDiscoveryDeviceInfo(const DeviceInfo *device)
     }
     if (device->addr[0].info.ip.port == 0) {
         LNN_LOGD(LNN_BUILDER, "discovery get port is 0!");
-        LnnCoapConnect(device->addr[0].info.ip.ip);
+        LnnCoapConnectPacked(device->addr[0].info.ip.ip);
         return SOFTBUS_INVALID_PARAM;
     }
     return SOFTBUS_OK;
@@ -89,12 +93,12 @@ static void DeviceFound(const DeviceInfo *device, const InnerDeviceInfoAddtions 
     char *anonyDevId = NULL;
     Anonymize(device->devId, &anonyDevId);
     char *anonyDevName = NULL;
-    Anonymize(device->devName, &anonyDevName);
+    AnonymizeDeviceName(device->devName, &anonyDevName);
     // devId format is hex hash string here
     LNN_LOGI(LNN_BUILDER, "DeviceFound devName=%{public}s, devId=%{public}s, devType=%{public}03X, port=%{public}u",
         AnonymizeWrapper(anonyDevName), AnonymizeWrapper(anonyDevId), device->devType, device->addr[0].info.ip.port);
     AnonymizeFree(anonyDevName);
-    if (!AuthIsPotentialTrusted(device)) {
+    if (!AuthIsPotentialTrusted(device, true)) {
         LNN_LOGW(LNN_BUILDER, "discovery device is not potential trusted, devId=%{public}s, "
             "accountHash=%{public}02X%{public}02X", AnonymizeWrapper(anonyDevId),
             device->accountHash[0], device->accountHash[1]);
@@ -134,18 +138,21 @@ int32_t LnnStartCoapPublish(void)
         .dataLen = strlen(LNN_DISC_CAPABILITY),
     };
     LNN_LOGD(LNN_BUILDER, "lnn start coap publish");
-    return LnnPublishService(NULL, &publishInfo, true);
+    int32_t pid = getpid();
+    return LnnPublishService(NULL, &publishInfo, true, pid);
 }
 
 int32_t LnnStopCoapPublish(void)
 {
     LNN_LOGD(LNN_BUILDER, "lnn stop coap publish");
-    return LnnUnPublishService(NULL, LNN_PUBLISH_ID, true);
+    int32_t pid = getpid();
+    return LnnUnPublishService(NULL, LNN_PUBLISH_ID, true, pid);
 }
 
 int32_t LnnStopCoapDiscovery(void)
 {
-    return LnnStopDiscDevice(NULL, LNN_SUBSCRIBE_ID, true);
+    int32_t pid = getpid();
+    return LnnStopDiscDevice(NULL, LNN_SUBSCRIBE_ID, true, pid);
 }
 
 int32_t LnnStartCoapDiscovery(void)
@@ -164,8 +171,9 @@ int32_t LnnStartCoapDiscovery(void)
     InnerCallback callback = {
         .innerCb = g_discCb,
     };
-    LnnDestroyCoapConnectList();
-    return LnnStartDiscDevice(NULL, &subscribeInfo, &callback, true);
+    LnnDestroyCoapConnectListPacked();
+    int32_t pid = getpid();
+    return LnnStartDiscDevice(NULL, &subscribeInfo, &callback, true, pid);
 }
 
 int32_t LnnInitCoapDiscovery(LnnDiscoveryImplCallback *callback)

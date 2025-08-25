@@ -22,6 +22,7 @@
 #include <stdbool.h>
 
 #include "nstackx.h"
+#include "nstackx_inet.h"
 #include "coap_discover.h"
 #include "coap_app.h"
 
@@ -32,6 +33,7 @@ extern "C" {
 enum {
     IFACE_TYPE_ETH,
     IFACE_TYPE_WLAN,
+    IFACE_TYPE_USB_SCALE,
     IFACE_TYPE_P2P,
     IFACE_TYPE_USB,
     IFACE_TYPE_UNKNOWN,
@@ -95,7 +97,8 @@ typedef struct {
 } NetworkInterfacePrefiexPossible;
 
 typedef struct {
-    struct in_addr ip;
+    union InetAddr addr;
+    uint8_t af;
     uint8_t state;
 } WifiApChannelInfo;
 
@@ -109,8 +112,15 @@ typedef struct BusinessDataAll {
     char businessDataUnicast[NSTACKX_MAX_BUSINESS_DATA_LEN];
 } BusinessDataAll;
 
+typedef enum {
+    DFINDER_SEQ_TYPE_NONE,
+    DFINDER_SEQ_TYPE_BCAST,
+    DFINDER_SEQ_TYPE_UNICAST,
+} SeqType;
+
 typedef struct SeqAll {
-    uint8_t dealBcast;
+    /* Is there a sequence number in the payload */
+    uint8_t seqType;
     uint16_t seqBcast;
     uint16_t seqUcast;
 } SeqAll;
@@ -168,8 +178,10 @@ void UpdateAllNetworkInterfaceNameIfNeed(const NetworkInterfaceInfo *interfaceIn
 void SetMaxDeviceNum(uint32_t maxDeviceNum);
 uint32_t GetMaxDeviceNum(void);
 uint32_t *GetFilterCapability(uint32_t *capabilityBitmapNum);
-void IncreaseSequenceNumber(uint8_t sendBcast);
-uint16_t GetSequenceNumber(uint8_t sendBcast);
+
+void IncreaseUcastSequenceNumber(uint8_t af);
+void IncreaseBcastSequenceNumber(void);
+uint16_t GetSequenceNumber(uint8_t af, uint8_t sendBcast);
 void ResetSequenceNumber(void);
 
 int32_t RegisterCapability(uint32_t capabilityBitmapNum, uint32_t capabilityBitmap[]);

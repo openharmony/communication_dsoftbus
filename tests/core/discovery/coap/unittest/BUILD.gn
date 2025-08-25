@@ -16,14 +16,16 @@ import("//build/ohos.gni")
 import("//build/test.gni")
 import("../../../../../dsoftbus.gni")
 
-module_output_path = "dsoftbus/discovery"
+module_output_path = "dsoftbus/soft_bus/discovery"
 
 ohos_unittest("DiscNstackxAdapterTest") {
   module_out_path = module_output_path
   sources = [ "disc_nstackx_adapter_test.cpp" ]
+  sources += [ "../nstackx_coap_mock/disc_nstackx_adapter_mock.cpp" ]
 
   include_dirs = [
     "$dsoftbus_root_path/adapter/common/include",
+    "$dsoftbus_root_path/core/adapter/bus_center/include",
     "$dsoftbus_root_path/adapter/default_config/spec_config",
     "$dsoftbus_root_path/components/nstackx/nstackx_util/interface",
     "$dsoftbus_root_path/components/nstackx/nstackx_ctrl/include",
@@ -31,6 +33,7 @@ ohos_unittest("DiscNstackxAdapterTest") {
     "$dsoftbus_root_path/core/bus_center/lnn/lane_hub/lane_manager/include",
     "$dsoftbus_root_path/core/bus_center/lnn/net_ledger/common/include",
     "$dsoftbus_root_path/core/bus_center/lnn/net_ledger/local_ledger/include",
+    "$dsoftbus_root_path/core/broadcast/common/include",
     "$dsoftbus_dfx_path/interface/include",
     "$dsoftbus_root_path/core/common/include",
     "$dsoftbus_root_path/core/discovery/ble/dispatcher/include",
@@ -38,22 +41,27 @@ ohos_unittest("DiscNstackxAdapterTest") {
     "$dsoftbus_root_path/core/discovery/coap/nstackx_coap/include",
     "$dsoftbus_root_path/core/discovery/coap/nstackx_coap/src",
     "$dsoftbus_root_path/core/discovery/coap/common/include",
+    "$dsoftbus_root_path/core/discovery/common/include",
     "$dsoftbus_root_path/core/discovery/interface",
     "$dsoftbus_root_path/core/discovery/manager/include",
     "$dsoftbus_root_path/interfaces/kits/common",
+    "$dsoftbus_root_path/tests/core/discovery/coap/nstackx_coap_mock",
   ]
 
   deps = [
     "$dsoftbus_dfx_path:softbus_dfx",
     "$dsoftbus_root_path/components/nstackx/nstackx_ctrl:nstackx_ctrl",
+    "$dsoftbus_root_path/components/nstackx/nstackx_util:nstackx_util.open",
     "$dsoftbus_root_path/core/common:softbus_utils",
-    "$dsoftbus_root_path/tests/core/frame:softbus_server_static",
+    "$dsoftbus_root_path/core/frame:softbus_server",
   ]
 
   external_deps = [
+    "bounds_checking_function:libsec_shared",
     "cJSON:cjson",
     "c_utils:utils",
     "dsoftbus:softbus_client",
+    "googletest:gmock_main",
     "googletest:gtest_main",
     "hilog:libhilog",
   ]
@@ -62,6 +70,7 @@ ohos_unittest("DiscNstackxAdapterTest") {
 ohos_unittest("DiscCoapTest") {
   module_out_path = module_output_path
   sources = [ "disc_coap_test.cpp" ]
+  sources += [ "../nstackx_coap_mock/disc_coap_mock.cpp" ]
 
   include_dirs = [
     "$dsoftbus_root_path/adapter/common/include",
@@ -79,18 +88,21 @@ ohos_unittest("DiscCoapTest") {
     "$dsoftbus_root_path/core/discovery/coap/nstackx_coap/src",
     "$dsoftbus_root_path/core/discovery/interface",
     "$dsoftbus_root_path/core/discovery/manager/include",
+    "$dsoftbus_root_path/interfaces/kits/bus_center",
     "$dsoftbus_root_path/interfaces/kits/common",
+    "$dsoftbus_root_path/tests/core/discovery/coap/nstackx_coap_mock",
   ]
 
   deps = [
     "$dsoftbus_root_path/components/nstackx/nstackx_ctrl:nstackx_ctrl",
     "$dsoftbus_root_path/core/common:softbus_utils",
-    "$dsoftbus_root_path/tests/core/frame:softbus_server_static",
+    "$dsoftbus_root_path/core/frame:softbus_server",
   ]
 
   external_deps = [
     "cJSON:cjson",
     "c_utils:utils",
+    "googletest:gmock_main",
     "googletest:gtest_main",
     "hilog:libhilog",
   ]
@@ -98,8 +110,8 @@ ohos_unittest("DiscCoapTest") {
 
 group("unittest") {
   testonly = true
-  deps = [
-    ":DiscCoapTest",
-    ":DiscNstackxAdapterTest",
-  ]
+  deps = [ ":DiscCoapTest" ]
+  if (dsoftbus_feature_ex_kits) {
+    deps += [ ":DiscNstackxAdapterTest" ]
+  }
 }

@@ -1,4 +1,4 @@
-# Copyright (c) 2024 Huawei Device Co., Ltd.
+# Copyright (c) 2024-2025 Huawei Device Co., Ltd.
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
 # You may obtain a copy of the License at
@@ -14,35 +14,49 @@
 import("//build/test.gni")
 import("../../../../../dsoftbus.gni")
 
-module_output_path = "dsoftbus/connection/wifi_direct_cpp"
+module_output_path = "dsoftbus/soft_bus/connection/wifi_direct_cpp"
 wifi_direct_cpp_path = "$dsoftbus_root_path/core/connection/wifi_direct_cpp"
 ohos_unittest("WifiDirectUtilsTest") {
   module_out_path = module_output_path
 
   include_dirs = [
-    "$dsoftbus_root_path/interfaces/kits/common",
-    "$dsoftbus_root_path/interfaces/kits/discovery",
-    "$dsoftbus_root_path/interfaces/kits/bus_center",
-    "$dsoftbus_root_path/interfaces/inner_kits/lnn",
-    "$wifi_direct_cpp_path/utils",
-    "$wifi_direct_cpp_path/adapter",
-    "$wifi_direct_cpp_path/channel",
-    "$wifi_direct_cpp_path",
     "$dsoftbus_dfx_path/interface/include",
     "$dsoftbus_dfx_path/interface/include/form",
     "$dsoftbus_root_path/adapter/common/include",
+    "$dsoftbus_root_path/core/authentication/interface",
     "$dsoftbus_root_path/core/bus_center/interface",
+    "$dsoftbus_root_path/core/bus_center/lnn/lane_hub/lane_manager/include",
     "$dsoftbus_root_path/core/bus_center/lnn/net_builder/include",
     "$dsoftbus_root_path/core/bus_center/lnn/net_ledger/common/include",
     "$dsoftbus_root_path/core/bus_center/lnn/net_ledger/distributed_ledger/include",
-    "$dsoftbus_root_path/core/bus_center/lnn/lane_hub/lane_manager/include",
-    "$dsoftbus_root_path/core/discovery/manager/include",
-    "$dsoftbus_root_path/core/discovery/interface",
-    "$dsoftbus_root_path/core/transmission/trans_channel/proxy/include",
+    "$dsoftbus_root_path/core/bus_center/service/include",
     "$dsoftbus_root_path/core/common/include",
-    "$dsoftbus_root_path/core/authentication/interface",
     "$dsoftbus_root_path/core/connection/interface",
+    "$dsoftbus_root_path/core/connection/wifi_direct_cpp/dbinder",
+    "$dsoftbus_root_path/core/discovery/interface",
+    "$dsoftbus_root_path/core/discovery/manager/include",
+    "$dsoftbus_root_path/core/frame/common/include",
+    "$dsoftbus_root_path/core/frame/init/include",
+    "$dsoftbus_root_path/core/transmission/trans_channel/proxy/include",
+    "$dsoftbus_root_path/interfaces/inner_kits/lnn",
+    "$dsoftbus_root_path/interfaces/inner_kits/transport",
+    "$dsoftbus_root_path/interfaces/kits/adapter",
+    "$dsoftbus_root_path/interfaces/kits/authentication",
+    "$dsoftbus_root_path/interfaces/kits/authentication/enhance",
+    "$dsoftbus_root_path/interfaces/kits/bus_center",
+    "$dsoftbus_root_path/interfaces/kits/common",
+    "$dsoftbus_root_path/interfaces/kits/connect",
+    "$dsoftbus_root_path/interfaces/kits/disc",
+    "$dsoftbus_root_path/interfaces/kits/discovery",
+    "$dsoftbus_root_path/interfaces/kits/lnn",
+    "$dsoftbus_root_path/interfaces/kits/lnn/enhance",
+    "$dsoftbus_root_path/interfaces/kits/transport",
     "$dsoftbus_root_path/tests/core/connection/wifi_direct_cpp",
+    "$dsoftbus_root_path/tests/interface/enhance",
+    "$wifi_direct_cpp_path",
+    "$wifi_direct_cpp_path/adapter",
+    "$wifi_direct_cpp_path/channel",
+    "$wifi_direct_cpp_path/utils",
   ]
   sources = [
     "$dsoftbus_root_path/core/connection/wifi_direct_cpp/adapter/p2p_adapter.cpp",
@@ -64,6 +78,9 @@ ohos_unittest("WifiDirectUtilsTest") {
     "$dsoftbus_root_path/core/connection/wifi_direct_cpp/data/link_manager.cpp",
     "$dsoftbus_root_path/core/connection/wifi_direct_cpp/data/negotiate_message.cpp",
     "$dsoftbus_root_path/core/connection/wifi_direct_cpp/dfx/duration_statistic.cpp",
+    "$dsoftbus_root_path/core/connection/wifi_direct_cpp/dfx/interface_snapshot.cpp",
+    "$dsoftbus_root_path/core/connection/wifi_direct_cpp/dfx/link_snapshot.cpp",
+    "$dsoftbus_root_path/core/connection/wifi_direct_cpp/dfx/processor_snapshot.cpp",
     "$dsoftbus_root_path/core/connection/wifi_direct_cpp/dfx/wifi_direct_dfx.cpp",
     "$dsoftbus_root_path/core/connection/wifi_direct_cpp/dfx/wifi_direct_trace.cpp",
     "$dsoftbus_root_path/core/connection/wifi_direct_cpp/entity/p2p_available_state.cpp",
@@ -82,13 +99,19 @@ ohos_unittest("WifiDirectUtilsTest") {
     "$dsoftbus_root_path/core/connection/wifi_direct_cpp/utils/wifi_direct_anonymous.cpp",
     "$dsoftbus_root_path/core/connection/wifi_direct_cpp/utils/wifi_direct_utils.cpp",
     "$dsoftbus_root_path/core/connection/wifi_direct_cpp/wifi_direct_executor.cpp",
+    "$dsoftbus_root_path/core/connection/wifi_direct_cpp/wifi_direct_executor_manager.cpp",
     "$dsoftbus_root_path/core/connection/wifi_direct_cpp/wifi_direct_initiator.cpp",
     "$dsoftbus_root_path/core/connection/wifi_direct_cpp/wifi_direct_ip_manager.cpp",
     "$dsoftbus_root_path/core/connection/wifi_direct_cpp/wifi_direct_manager.cpp",
     "$dsoftbus_root_path/core/connection/wifi_direct_cpp/wifi_direct_role_option.cpp",
     "$dsoftbus_root_path/core/connection/wifi_direct_cpp/wifi_direct_scheduler.cpp",
+    "$dsoftbus_root_path/core/frame/common/src/softbus_init_common.c",
+    "$dsoftbus_root_path/core/frame/init/src/g_enhance_lnn_func.c",
     "$dsoftbus_root_path/tests/core/connection/wifi_direct_cpp/net_conn_client.cpp",
     "$dsoftbus_root_path/tests/core/connection/wifi_direct_cpp/wifi_direct_mock.cpp",
+    "$wifi_direct_cpp_path/entity/entity_factory.cpp",
+    "$wifi_direct_cpp_path/wifi_direct_executor_factory.cpp",
+    "$wifi_direct_cpp_path/wifi_direct_scheduler_factory.cpp",
     "wifi_direct_utils_test.cpp",
   ]
   remove_configs = [
@@ -108,16 +131,19 @@ ohos_unittest("WifiDirectUtilsTest") {
   deps = [
     "$dsoftbus_dfx_path:softbus_dfx",
     "$dsoftbus_root_path/adapter:softbus_adapter",
+    "$dsoftbus_root_path/core/connection/wifi_direct_cpp:wifi_direct",
   ]
   external_deps = [
     "bounds_checking_function:libsec_shared",
     "cJSON:cjson",
     "c_utils:utils",
-    "googletest:gmock_main",
     "googletest:gmock_rtti",
     "googletest:gtest_rtti",
     "hilog:libhilog",
     "init:libbegetutil",
+    "ipc:ipc_single",
+    "safwk:system_ability_fwk",
+    "samgr:samgr_proxy",
     "wifi:wifi_sdk",
   ]
 }

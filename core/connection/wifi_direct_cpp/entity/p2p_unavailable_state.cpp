@@ -14,12 +14,6 @@
  */
 
 #include "p2p_unavailable_state.h"
-
-#include "conn_log.h"
-#include "softbus_error_code.h"
-
-#include "adapter/p2p_adapter.h"
-#include "p2p_available_state.h"
 #include "p2p_entity.h"
 
 namespace OHOS::SoftBus {

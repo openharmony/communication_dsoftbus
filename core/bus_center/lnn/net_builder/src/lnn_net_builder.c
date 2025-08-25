@@ -29,19 +29,18 @@
 #include "bus_center_event.h"
 #include "bus_center_manager.h"
 #include "common_list.h"
+#include "g_enhance_lnn_func.h"
+#include "g_enhance_lnn_func_pack.h"
 #include "lnn_async_callback_utils.h"
 #include "lnn_battery_info.h"
-#include "lnn_cipherkey_manager.h"
 #include "lnn_connection_addr_utils.h"
 #include "lnn_connection_fsm.h"
 #include "lnn_deviceinfo_to_profile.h"
 #include "lnn_devicename_info.h"
 #include "lnn_discovery_manager.h"
 #include "lnn_distributed_net_ledger.h"
-#include "lnn_fast_offline.h"
 #include "lnn_heartbeat_utils.h"
 #include "lnn_kv_adapter_wrapper.h"
-#include "lnn_link_finder.h"
 #include "lnn_local_net_ledger.h"
 #include "lnn_log.h"
 #include "lnn_map.h"
@@ -56,6 +55,8 @@
 #include "lnn_sync_info_manager.h"
 #include "lnn_sync_item_info.h"
 #include "lnn_topo_manager.h"
+#include "lnn_net_builder_process.h"
+#include "lnn_net_builder_init.h"
 #include "softbus_adapter_bt_common.h"
 #include "softbus_adapter_crypto.h"
 #include "softbus_adapter_json.h"
@@ -67,8 +68,8 @@
 #include "softbus_adapter_json.h"
 #include "softbus_utils.h"
 #include "softbus_wifi_api_adapter.h"
-#include "lnn_net_builder_process.h"
-#include "lnn_net_builder_init.h"
+#include "softbus_init_common.h"
+#include "trans_auth_manager.h"
 
 #define LNN_CONN_CAPABILITY_MSG_LEN      8
 #define JSON_KEY_MASTER_UDID             "MasterUdid"
@@ -159,7 +160,7 @@ static bool IsNeedSyncElectMsg(const char *networkId)
     if (LnnGetRemoteNodeInfoById(networkId, CATEGORY_NETWORK_ID, &nodeInfo) != SOFTBUS_OK) {
         return false;
     }
-    return LnnHasDiscoveryType(&nodeInfo, DISCOVERY_TYPE_WIFI);
+    return LnnHasDiscoveryType(&nodeInfo, DISCOVERY_TYPE_WIFI) || LnnHasDiscoveryType(&nodeInfo, DISCOVERY_TYPE_USB);
 }
 
 int32_t SyncElectMessage(const char *networkId)
@@ -233,6 +234,42 @@ static void FreeJoinLnnMsgPara(const JoinLnnMsgPara *para)
     SoftBusFree((void *)para);
 }
 
+static void SetAuthVerifyParam(AuthVerifyParam *authVerifyParam, uint32_t requestId)
+{
+    (void)memset_s(authVerifyParam, sizeof(*authVerifyParam), 0, sizeof(*authVerifyParam));
+    authVerifyParam->isFastAuth = false;
+    authVerifyParam->module = AUTH_MODULE_LNN;
+    authVerifyParam->requestId = requestId;
+    authVerifyParam->deviceKeyId.hasDeviceKeyId = false;
+    authVerifyParam->deviceKeyId.localDeviceKeyId = AUTH_INVALID_DEVICEKEY_ID;
+    authVerifyParam->deviceKeyId.remoteDeviceKeyId = AUTH_INVALID_DEVICEKEY_ID;
+}
+
+static int32_t UpdateConnFsmBleMac(LnnConnectionFsm *connFsm, const JoinLnnMsgPara *para,
+    bool needReportFailure)
+{
+    if (connFsm->connInfo.addr.type == CONNECTION_ADDR_BLE && para->isForceJoin) {
+        if (strcpy_s(connFsm->connInfo.addr.info.ble.bleMac, BT_MAC_LEN, para->addr.info.ble.bleMac) != EOK) {
+            LNN_LOGE(LNN_BUILDER, "force join update bleMac failed");
+            if (needReportFailure) {
+                LnnNotifyJoinResult((ConnectionAddr *)&para->addr, NULL, SOFTBUS_NETWORK_JOIN_REQUEST_ERR);
+            }
+            return SOFTBUS_STRCPY_ERR;
+        }
+    }
+    return SOFTBUS_OK;
+}
+
+static void FlushDeviceInfo(const LnnConnectionFsm *connFsm)
+{
+    if (connFsm->connInfo.addr.type != CONNECTION_ADDR_WLAN && connFsm->connInfo.addr.type != CONNECTION_ADDR_ETH) {
+        return;
+    }
+    char uuid[UUID_BUF_LEN] = {0};
+    (void)LnnConvertDlId(connFsm->connInfo.peerNetworkId, CATEGORY_NETWORK_ID, CATEGORY_UUID, uuid, UUID_BUF_LEN);
+    (void)AuthFlushDevice(uuid);
+}
+
 int32_t TrySendJoinLNNRequest(const JoinLnnMsgPara *para, bool needReportFailure, bool isShort)
 {
     int32_t ret = SOFTBUS_OK;
@@ -252,16 +289,19 @@ int32_t TrySendJoinLNNRequest(const JoinLnnMsgPara *para, bool needReportFailure
     }
     connFsm->connInfo.flag |= (needReportFailure ? LNN_CONN_INFO_FLAG_JOIN_REQUEST : LNN_CONN_INFO_FLAG_JOIN_AUTO);
     connFsm->connInfo.infoReport = para->infoReport;
+    connFsm->isSession = para->isSession ? true : connFsm->isSession;
     if ((connFsm->connInfo.flag & LNN_CONN_INFO_FLAG_ONLINE) != 0) {
-        if (connFsm->connInfo.addr.type == CONNECTION_ADDR_WLAN || connFsm->connInfo.addr.type == CONNECTION_ADDR_ETH) {
-            char uuid[UUID_BUF_LEN] = {0};
-            (void)LnnConvertDlId(connFsm->connInfo.peerNetworkId, CATEGORY_NETWORK_ID, CATEGORY_UUID,
-                uuid, UUID_BUF_LEN);
-            (void)AuthFlushDevice(uuid);
+        FlushDeviceInfo(connFsm);
+        if (UpdateConnFsmBleMac(connFsm, para, needReportFailure) != SOFTBUS_OK) {
+            FreeJoinLnnMsgPara(para);
+            return SOFTBUS_STRCPY_ERR;
         }
-        if ((LnnSendJoinRequestToConnFsm(connFsm) != SOFTBUS_OK) && needReportFailure) {
+        if ((LnnSendJoinRequestToConnFsm(connFsm, para->isForceJoin) != SOFTBUS_OK) && needReportFailure) {
             LNN_LOGE(LNN_BUILDER, "online status, process join lnn request failed");
             LnnNotifyJoinResult((ConnectionAddr *)&para->addr, NULL, SOFTBUS_NETWORK_JOIN_REQUEST_ERR);
+        }
+        if (para->isSession && para->dupInfo != NULL) {
+            LnnNotifyStateForSession(para->dupInfo->deviceInfo.deviceUdid, SOFTBUS_OK);
         }
     }
     LNN_LOGI(LNN_BUILDER, "addr same to before, peerAddr=%{public}s", LnnPrintConnectionAddr(&para->addr));
@@ -274,14 +314,12 @@ int32_t TrySendJoinLNNRequest(const JoinLnnMsgPara *para, bool needReportFailure
     }
     AuthConnInfo authConn;
     uint32_t requestId = AuthGenRequestId();
+    AuthVerifyParam authVerifyParam;
+    SetAuthVerifyParam(&authVerifyParam, requestId);
     (void)LnnConvertAddrToAuthConnInfo(&addr, &authConn);
     DfxRecordLnnAuthStart(&authConn, para, requestId);
     FreeJoinLnnMsgPara(para);
-    if (AuthStartVerify(&authConn, requestId, LnnGetReAuthVerifyCallback(), AUTH_MODULE_LNN, false) != SOFTBUS_OK) {
-        LNN_LOGI(LNN_BUILDER, "AuthStartVerify error");
-        return SOFTBUS_AUTH_START_VERIFY_FAIL;
-    }
-    return SOFTBUS_OK;
+    return AuthStartVerify(&authConn, &authVerifyParam, LnnGetReAuthVerifyCallback());
 }
 
 bool NeedPendingJoinRequest(void)
@@ -421,6 +459,7 @@ static void BuildLnnEvent(LnnEventExtra *lnnEventExtra, const ConnectionAddr *ad
         case CONNECTION_ADDR_WLAN:
             /* fall-through */
         case CONNECTION_ADDR_ETH:
+        case CONNECTION_ADDR_NCM:
             lnnEventExtra->peerIp = addr->info.ip.ip;
             break;
         default:
@@ -475,12 +514,13 @@ NodeInfo *DupNodeInfo(const NodeInfo *nodeInfo)
     return node;
 }
 
-ConnectionAddrType GetCurrentConnectType(void)
+ConnectionAddrType GetCurrentConnectType(AuthLinkType linkType)
 {
     char ifCurrentName[NET_IF_NAME_LEN] = { 0 };
     ConnectionAddrType type = CONNECTION_ADDR_MAX;
-
-    if (LnnGetLocalStrInfo(STRING_KEY_NET_IF_NAME, ifCurrentName, NET_IF_NAME_LEN) != SOFTBUS_OK) {
+    int32_t ifIdx = (linkType == AUTH_LINK_TYPE_USB) ? USB_IF : WLAN_IF;
+    if (LnnGetLocalStrInfoByIfnameIdx(
+        STRING_KEY_NET_IF_NAME, ifCurrentName, NET_IF_NAME_LEN, ifIdx) != SOFTBUS_OK) {
         LNN_LOGE(LNN_BUILDER, "LnnGetLocalStrInfo getCurrentConnectType failed");
         return type;
     }
@@ -514,8 +554,9 @@ void OnLnnProcessNotTrustedMsgDelay(void *para)
         SoftBusFree(info);
         return;
     }
-    uint32_t type;
-    for (type = DISCOVERY_TYPE_WIFI; type < DISCOVERY_TYPE_P2P; type++) {
+    DiscoveryType typeList[] = { DISCOVERY_TYPE_WIFI, DISCOVERY_TYPE_BLE, DISCOVERY_TYPE_BR, DISCOVERY_TYPE_USB };
+    for (size_t i = 0; i < sizeof(typeList) / sizeof(DiscoveryType); i++) {
+        DiscoveryType type = typeList[i];
         LNN_LOGI(
             LNN_BUILDER, "after 5s, authSeq:%{public}" PRId64 "->%{public}" PRId64, info->authSeq[type], authSeq[type]);
         if (authSeq[type] == info->authSeq[type] && authSeq[type] != 0 && info->authSeq[type] != 0) {
@@ -551,6 +592,7 @@ void LnnProcessCompleteNotTrustedMsg(LnnSyncInfoType syncType, const char *netwo
     (void)JSON_GetInt64FromOject(json, NETWORK_TYPE_WIFI, &authSeq[DISCOVERY_TYPE_WIFI]);
     (void)JSON_GetInt64FromOject(json, NETWORK_TYPE_BLE, &authSeq[DISCOVERY_TYPE_BLE]);
     (void)JSON_GetInt64FromOject(json, NETWORK_TYPE_BR, &authSeq[DISCOVERY_TYPE_BR]);
+    (void)JSON_GetInt64FromOject(json, NETWORK_TYPE_USB, &authSeq[DISCOVERY_TYPE_USB]);
     JSON_Delete(json);
     int64_t curAuthSeq[DISCOVERY_TYPE_COUNT] = { 0 };
     char udid[UDID_BUF_LEN] = { 0 };
@@ -559,8 +601,9 @@ void LnnProcessCompleteNotTrustedMsg(LnnSyncInfoType syncType, const char *netwo
         LNN_LOGE(LNN_BUILDER, "get latest authSeq fail");
         return;
     }
-    uint32_t type;
-    for (type = DISCOVERY_TYPE_WIFI; type < DISCOVERY_TYPE_P2P; type++) {
+    DiscoveryType typeList[] = { DISCOVERY_TYPE_WIFI, DISCOVERY_TYPE_BLE, DISCOVERY_TYPE_BR, DISCOVERY_TYPE_USB };
+    for (size_t i = 0; i < sizeof(typeList) / sizeof(DiscoveryType); i++) {
+        DiscoveryType type = typeList[i];
         LNN_LOGI(LNN_BUILDER, "authSeq:%{public}" PRId64 "->%{public}" PRId64, curAuthSeq[type], authSeq[type]);
         if (authSeq[type] == curAuthSeq[type] && authSeq[type] != 0 && curAuthSeq[type] != 0) {
             if (type == DISCOVERY_TYPE_WIFI) {
@@ -639,7 +682,7 @@ void LnnDeleteLinkFinderInfo(const char *peerUdid)
         return;
     }
 
-    if (LnnRemoveLinkFinderInfo(networkId) != SOFTBUS_OK) {
+    if (LnnRemoveLinkFinderInfoPacked(networkId) != SOFTBUS_OK) {
         LNN_LOGE(LNN_BUILDER, "remove a rpa info fail.");
         return;
     }
@@ -714,7 +757,7 @@ static ConnectionAddr *CreateConnectionAddrMsgPara(const ConnectionAddr *addr)
 }
 
 static JoinLnnMsgPara *CreateJoinLnnMsgPara(const ConnectionAddr *addr, const LnnDfxDeviceInfoReport *infoReport,
-    const char *pkgName, bool isNeedConnect)
+    const char *pkgName, bool isNeedConnect, bool isForceJoin)
 {
     JoinLnnMsgPara *para = NULL;
 
@@ -733,6 +776,7 @@ static JoinLnnMsgPara *CreateJoinLnnMsgPara(const ConnectionAddr *addr, const Ln
         return NULL;
     }
     para->isNeedConnect = isNeedConnect;
+    para->isForceJoin = isForceJoin;
     para->addr = *addr;
     para->infoReport = *infoReport;
     return para;
@@ -759,7 +803,7 @@ static char *CreateNetworkIdMsgPara(const char *networkId)
     return para;
 }
 
-int32_t ConifgLocalLedger(void)
+int32_t ConfigLocalLedger(void)
 {
     char uuid[UUID_BUF_LEN] = { 0 };
     char networkId[NETWORK_ID_BUF_LEN] = { 0 };
@@ -767,13 +811,13 @@ int32_t ConifgLocalLedger(void)
 
     // set local networkId and uuid
     if (LnnGenLocalNetworkId(networkId, NETWORK_ID_BUF_LEN) != SOFTBUS_OK ||
-        LnnGenLocalUuid(uuid, UUID_BUF_LEN) != SOFTBUS_OK) {
+        LnnGenLocalUuid(uuid, UUID_BUF_LEN, false) != SOFTBUS_OK) {
         LNN_LOGE(LNN_BUILDER, "get local id fail");
         return SOFTBUS_NOT_FIND;
     }
 
     // irk fail should not cause softbus init fail
-    if (LnnGenLocalIrk(irk, LFINDER_IRK_LEN) != SOFTBUS_OK) {
+    if (LnnGenLocalIrk(irk, LFINDER_IRK_LEN, false) != SOFTBUS_OK) {
         LNN_LOGE(LNN_BUILDER, "get local irk fail");
     }
 
@@ -809,7 +853,7 @@ void OnReceiveMasterElectMsg(LnnSyncInfoType type, const char *networkId, const 
         return;
     }
     if (!JSON_GetInt32FromOject(json, JSON_KEY_MASTER_WEIGHT, &para->masterWeight) ||
-        !JSON_GetStringFromOject(json, JSON_KEY_MASTER_UDID, para->masterUdid, UDID_BUF_LEN)) {
+        !JSON_GetStringFromObject(json, JSON_KEY_MASTER_UDID, para->masterUdid, UDID_BUF_LEN)) {
         LNN_LOGE(LNN_BUILDER, "parse master info json fail");
         JSON_Delete(json);
         SoftBusFree(para);
@@ -965,7 +1009,7 @@ void UpdateLocalNetCapability(void)
         oldNetCap, netCapability, brState, isWifiActive);
 }
 
-int32_t JoinLnnWithNodeInfo(ConnectionAddr *addr, NodeInfo *info)
+int32_t JoinLnnWithNodeInfo(ConnectionAddr *addr, NodeInfo *info, bool isSession)
 {
     if (addr == NULL || info == NULL) {
         LNN_LOGE(LNN_BUILDER, "prepare join with nodeinfo message fail");
@@ -973,7 +1017,7 @@ int32_t JoinLnnWithNodeInfo(ConnectionAddr *addr, NodeInfo *info)
     }
     LnnDfxDeviceInfoReport infoReport;
     (void)memset_s(&infoReport, sizeof(LnnDfxDeviceInfoReport), 0, sizeof(LnnDfxDeviceInfoReport));
-    JoinLnnMsgPara *para = CreateJoinLnnMsgPara(addr, &infoReport, DEFAULT_PKG_NAME, false);
+    JoinLnnMsgPara *para = CreateJoinLnnMsgPara(addr, &infoReport, DEFAULT_PKG_NAME, false, false);
     if (para == NULL) {
         LNN_LOGE(LNN_BUILDER, "prepare join with nodeinfo create lnn msg para fail");
         return SOFTBUS_MALLOC_ERR;
@@ -984,6 +1028,7 @@ int32_t JoinLnnWithNodeInfo(ConnectionAddr *addr, NodeInfo *info)
         SoftBusFree(para);
         return SOFTBUS_MEM_ERR;
     }
+    para->isSession = isSession;
     if (PostBuildMessageToHandler(MSG_TYPE_DISCOVERY_DEVICE, para) != SOFTBUS_OK) {
         LNN_LOGE(LNN_BUILDER, "post notify discovery device message failed");
         SoftBusFree(para->dupInfo);
@@ -993,7 +1038,7 @@ int32_t JoinLnnWithNodeInfo(ConnectionAddr *addr, NodeInfo *info)
     return SOFTBUS_OK;
 }
 
-int32_t LnnServerJoin(ConnectionAddr *addr, const char *pkgName)
+int32_t LnnServerJoin(ConnectionAddr *addr, const char *pkgName, bool isForceJoin)
 {
     JoinLnnMsgPara *para = NULL;
 
@@ -1004,7 +1049,7 @@ int32_t LnnServerJoin(ConnectionAddr *addr, const char *pkgName)
     }
     LnnDfxDeviceInfoReport infoReport;
     (void)memset_s(&infoReport, sizeof(LnnDfxDeviceInfoReport), 0, sizeof(LnnDfxDeviceInfoReport));
-    para = CreateJoinLnnMsgPara(addr, &infoReport, pkgName, true);
+    para = CreateJoinLnnMsgPara(addr, &infoReport, pkgName, true, isForceJoin);
     if (para == NULL) {
         LNN_LOGE(LNN_BUILDER, "prepare join lnn message fail");
         return SOFTBUS_MALLOC_ERR;
@@ -1012,6 +1057,91 @@ int32_t LnnServerJoin(ConnectionAddr *addr, const char *pkgName)
     if (PostBuildMessageToHandler(MSG_TYPE_JOIN_LNN, para) != SOFTBUS_OK) {
         LNN_LOGE(LNN_BUILDER, "post join lnn message fail");
         SoftBusFree(para);
+        return SOFTBUS_NETWORK_LOOPER_ERR;
+    }
+    return SOFTBUS_OK;
+}
+
+static bool AuthCapabilityIsSupport(char *peerUdid, AuthCapability capaBit)
+{
+    if (peerUdid == NULL) {
+        LNN_LOGE(LNN_BUILDER, "invalid peerUdid.");
+        return false;
+    }
+    NodeInfo nodeInfo;
+    (void)memset_s(&nodeInfo, sizeof(NodeInfo), 0, sizeof(NodeInfo));
+    int32_t ret = LnnRetrieveDeviceInfoByUdidPacked(peerUdid, &nodeInfo);
+    if (ret != SOFTBUS_OK) {
+        char *anonyPeerUdid = NULL;
+        Anonymize(peerUdid, &anonyPeerUdid);
+        LNN_LOGE(LNN_BUILDER, "retrieve device info fail, peerUdid:%{public}s", AnonymizeWrapper(anonyPeerUdid));
+        AnonymizeFree(anonyPeerUdid);
+        return false;
+    }
+    return IsSupportFeatureByCapaBit(nodeInfo.authCapacity, capaBit);
+}
+
+static int32_t PostJoinLnnExtMsg(ConnectionAddr *addr, int32_t connId)
+{
+    LnnDfxDeviceInfoReport infoReport;
+    (void)memset_s(&infoReport, sizeof(LnnDfxDeviceInfoReport), 0, sizeof(LnnDfxDeviceInfoReport));
+    JoinLnnMsgPara *para = CreateJoinLnnMsgPara(addr, &infoReport, DEFAULT_PKG_NAME, true, false);
+    if (para == NULL) {
+        LNN_LOGE(LNN_BUILDER, "prepare join lnn message fail");
+        DelConnIdCallbackInfoItem((uint32_t)connId);
+        return SOFTBUS_MALLOC_ERR;
+    }
+    para->isSession = true;
+    if (PostBuildMessageToHandler(MSG_TYPE_JOIN_LNN, para) != SOFTBUS_OK) {
+        LNN_LOGE(LNN_BUILDER, "post join lnn message fail");
+        DelConnIdCallbackInfoItem((uint32_t)connId);
+        SoftBusFree(para);
+        return SOFTBUS_NETWORK_LOOPER_ERR;
+    }
+    return SOFTBUS_OK;
+}
+
+int32_t LnnServerJoinExt(ConnectionAddr *addr, LnnServerJoinExtCallBack *callback)
+{
+    if (callback == NULL || addr == NULL || (addr->type != CONNECTION_ADDR_SESSION &&
+        addr->type != CONNECTION_ADDR_SESSION_WITH_KEY)) {
+        LNN_LOGE(LNN_BUILDER, "invalid callback");
+        return SOFTBUS_INVALID_PARAM;
+    }
+    if (g_netBuilder.isInit == false) {
+        LNN_LOGE(LNN_BUILDER, "no init");
+        return SOFTBUS_NO_INIT;
+    }
+    int32_t connId = 0;
+    char peerUdid[UDID_BUF_LEN] = { 0 };
+    int32_t ret = TransAuthGetConnIdByChanId(addr->info.session.channelId, &connId);
+    if (ret != SOFTBUS_OK) {
+        LNN_LOGE(LNN_BUILDER, "get connId fail");
+        return ret;
+    }
+    ret = TransAuthGetPeerUdidByChanId(addr->info.session.channelId, peerUdid, UDID_BUF_LEN);
+    if (ret != SOFTBUS_OK) {
+        LNN_LOGE(LNN_BUILDER, "get peerUdid fail");
+        return ret;
+    }
+    LNN_LOGI(LNN_BUILDER, "addr.type=%{public}d, connId=%{public}d, chanId=%{public}d",
+        addr->type, connId, addr->info.session.channelId);
+    if (!AuthCapabilityIsSupport(peerUdid, BIT_SUPPORT_SESSION_DUP_BLE)) {
+        return SOFTBUS_FUNC_NOT_SUPPORT;
+    }
+    ret = AddConnIdCallbackInfoItem(addr, callback, (uint32_t)connId, peerUdid);
+    if (ret != SOFTBUS_OK) {
+        LNN_LOGW(LNN_BUILDER, "add connId callback ret = %{public}d.", ret);
+        return (ret == SOFTBUS_ALREADY_EXISTED ? SOFTBUS_OK : ret);
+    }
+
+    return PostJoinLnnExtMsg(addr, connId);
+}
+
+int32_t LnnSetReSyncDeviceName(void)
+{
+    if (PostBuildMessageToHandler(MSG_TYPE_RE_SYNC_DEVICE_NAME, NULL) != SOFTBUS_OK) {
+        LNN_LOGE(LNN_BUILDER, "post resync device name message fail");
         return SOFTBUS_NETWORK_LOOPER_ERR;
     }
     return SOFTBUS_OK;
@@ -1058,7 +1188,7 @@ int32_t LnnNotifyDiscoveryDevice(
         LNN_LOGE(LNN_BUILDER, "infoReport is null");
         return SOFTBUS_INVALID_PARAM;
     }
-    para = CreateJoinLnnMsgPara(addr, infoReport, DEFAULT_PKG_NAME, isNeedConnect);
+    para = CreateJoinLnnMsgPara(addr, infoReport, DEFAULT_PKG_NAME, isNeedConnect, false);
     if (para == NULL) {
         LNN_LOGE(LNN_BUILDER, "malloc discovery device message fail");
         return SOFTBUS_MALLOC_ERR;
@@ -1233,8 +1363,9 @@ int32_t LnnRequestLeaveByAddrType(const bool *type, uint32_t typeLen)
         LNN_LOGE(LNN_BUILDER, "invalid typeLen");
         return SOFTBUS_INVALID_PARAM;
     }
-    LNN_LOGD(LNN_BUILDER, "wlan=%{public}d, br=%{public}d, ble=%{public}d, eth=%{public}d", type[CONNECTION_ADDR_WLAN],
-        type[CONNECTION_ADDR_BR], type[CONNECTION_ADDR_BLE], type[CONNECTION_ADDR_ETH]);
+    LNN_LOGD(LNN_BUILDER, "wlan=%{public}d, br=%{public}d, ble=%{public}d, eth=%{public}d, usb=%{public}d",
+        type[CONNECTION_ADDR_WLAN], type[CONNECTION_ADDR_BR], type[CONNECTION_ADDR_BLE], type[CONNECTION_ADDR_ETH],
+        type[CONNECTION_ADDR_NCM]);
     if (g_netBuilder.isInit == false) {
         LNN_LOGE(LNN_BUILDER, "no init");
         return SOFTBUS_NO_INIT;
@@ -1607,11 +1738,29 @@ void NotifyForegroundUseridChange(char *networkId, uint32_t discoveryType, bool 
     }
     char *msg = cJSON_PrintUnformatted(json);
     cJSON_Delete(json);
-    if(msg == NULL) {
+    if (msg == NULL) {
         LNN_LOGE(LNN_BUILDER, "msg is null!");
         return;
     }
     LnnNotifyDeviceTrustedChange(DEVICE_FOREGROUND_USERID_CHANGE, msg, strlen(msg));
     cJSON_free(msg);
     LNN_LOGI(LNN_BUILDER, "notify change to service! isChange:%{public}s", isChange ? "true":"false");
+}
+
+int32_t LnnUpdateLocalUuidAndIrk(void)
+{
+    char uuid[UUID_BUF_LEN] = { 0 };
+    unsigned char irk[LFINDER_IRK_LEN] = { 0 };
+
+    if (LnnGenLocalUuid(uuid, UUID_BUF_LEN, true) != SOFTBUS_OK) {
+        LNN_LOGE(LNN_BUILDER, "get local uuid fail");
+        return SOFTBUS_NOT_FIND;
+    }
+    if (LnnGenLocalIrk(irk, LFINDER_IRK_LEN, true) != SOFTBUS_OK) {
+        LNN_LOGW(LNN_BUILDER, "get local irk fail");
+    }
+    LnnSetLocalStrInfo(STRING_KEY_UUID, uuid);
+    LnnSetLocalByteInfo(BYTE_KEY_IRK, irk, LFINDER_IRK_LEN);
+    (void)memset_s(irk, LFINDER_IRK_LEN, 0, LFINDER_IRK_LEN);
+    return SOFTBUS_OK;
 }

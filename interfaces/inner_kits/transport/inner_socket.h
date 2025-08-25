@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2023-2024 Huawei Device Co., Ltd.
+ * Copyright (c) 2023-2025 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -38,11 +38,51 @@
 
 #include "socket.h"
 #include "softbus_common.h"
-#include "trans_type.h"
 
 #ifdef __cplusplus
 extern "C" {
 #endif
+/**
+ * @brief Enumerates flow session types.
+ *
+ * @since 2.0
+ * @version 2.0
+ */
+typedef enum {
+    LONG_BACKGROUND_SESSION = 0,  /**< Long duration and background session. */
+    LONG_FOREGROUND_SESSION = 1,  /**< Long duration and foreground session. */
+    SHORT_BACKGROUND_SESSION = 2, /**< Short duration and background session. */
+    SHORT_FOREGROUND_SESSION = 3  /**< Short duration and foreground session. */
+} FlowSessionType;
+
+/**
+ * @brief Enumerates flow qos types.
+ *
+ * @since 2.0
+ * @version 2.0
+ */
+typedef enum {
+    LOW_LATENCY_10MS = 0x01,  /**< Low latency 10ms. */
+    LOW_LATENCY_30MS = 0x02,  /**< Low latency 30ms. */
+    LOW_LATENCY_50MS = 0x03,  /**< Low latency 50ms. */
+    LOW_LATENCY_100MS = 0x04, /**< Low latency 100ms. */
+    HIGH_THROUGHPUT = 0x08,   /**< High throughput. */
+    HIGH_RELIABILITY = 0x10,  /**< High reliability. */
+    SEMI_RELIABILITY = 0x20,  /**< Semi reliability. */
+} FlowQosType;
+
+/**
+ * @brief Transmission flow information.
+ *
+ * @since 2.0
+ * @version 2.0
+ */
+typedef struct {
+    uint64_t flowSize;           /**< Flow size, the unit is byte. */
+    FlowSessionType sessionType; /**< Flow session type. */
+    FlowQosType flowQosType;     /**< Flow qos type. */
+} TransFlowInfo;
+
 /**
  * @brief Get maximum transmission unit of socket
  *
@@ -166,7 +206,7 @@ typedef struct {
      * @since 2.0
      * @version 2.0
     */
-    int32_t (*CheckCollabRelation)(CollabInfo sourceInfo, CollabInfo sinkInfo);
+    int32_t (*CheckCollabRelation)(const CollabInfo *sourceInfo, const CollabInfo *sinkInfo);
 } IFeatureAbilityRelationChecker;
 
 /**

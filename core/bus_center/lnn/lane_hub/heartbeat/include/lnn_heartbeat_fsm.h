@@ -16,7 +16,6 @@
 #ifndef LNN_HEARTBEAT_FSM_H
 #define LNN_HEARTBEAT_FSM_H
 
-#include "common_list.h"
 #include "lnn_heartbeat_medium_mgr.h"
 #include "lnn_state_machine.h"
 
@@ -48,6 +47,7 @@ typedef enum {
     EVENT_HB_SET_MEDIUM_PARAM = 10,
     EVENT_HB_UPDATE_SEND_INFO,
     EVENT_HB_SCREEN_OFF_CHECK_STATUS,
+    EVENT_HB_CHECK_SLE_DEV_STATUS,
     EVENT_HB_MAX,
 } LnnHeartbeatEventType;
 
@@ -65,6 +65,7 @@ typedef struct {
 typedef struct {
     bool wakeupFlag;
     bool isRelay;
+    bool isMsdpRange;
     LnnHeartbeatType hbType;
     bool *isRemoved;
 } LnnRemoveSendEndMsgPara;
@@ -86,9 +87,11 @@ typedef struct {
     bool isFirstBegin;
     bool isFast;
     bool isDirectBoardcast;
+    bool isMsdpRange;
     char networkId[NETWORK_ID_BUF_LEN];
     LnnHeartbeatType hbType;
     LnnHeartbeatStrategyType strategyType;
+    int32_t duration;
     uint64_t checkDelay;
     char callerId[PKG_NAME_SIZE_MAX];
 } LnnProcessSendOnceMsgPara;
@@ -110,12 +113,15 @@ int32_t LnnPostCheckDevStatusMsgToHbFsm(
 int32_t LnnPostUpdateSendInfoMsgToHbFsm(LnnHeartbeatFsm *hbFsm, LnnHeartbeatUpdateInfoType type);
 int32_t LnnPostScreenOffCheckDevMsgToHbFsm(
     LnnHeartbeatFsm *hbFsm, const LnnCheckDevStatusMsgPara *para, uint64_t delayMillis);
+int32_t LnnPostSleCheckDevStatusMsgToHbFsm(
+    LnnHeartbeatFsm *hbFsm, const LnnCheckDevStatusMsgPara *para, uint64_t delayMillis);
 
-void LnnRemoveSendEndMsg(LnnHeartbeatFsm *hbFsm, LnnHeartbeatType type, bool wakeupFlag, bool isRelay, bool *isRemoved);
+void LnnRemoveSendEndMsg(LnnHeartbeatFsm *hbFsm, LnnProcessSendOnceMsgPara *msg, bool wakeupFlag, bool *isRemoved);
 void LnnRemoveCheckDevStatusMsg(LnnHeartbeatFsm *hbFsm, LnnCheckDevStatusMsgPara *msgPara);
 void LnnRemoveScreenOffCheckStatusMsg(LnnHeartbeatFsm *hbFsm, LnnCheckDevStatusMsgPara *msgPara);
 void LnnRemoveProcessSendOnceMsg(
     LnnHeartbeatFsm *hbFsm, LnnHeartbeatType hbType, LnnHeartbeatStrategyType strategyType);
+void LnnRemoveSleCheckStatusMsg(LnnHeartbeatFsm *hbFsm, LnnCheckDevStatusMsgPara *msgPara);
 
 LnnHeartbeatFsm *LnnCreateHeartbeatFsm(void);
 void LnnDestroyHeartbeatFsm(LnnHeartbeatFsm *hbFsm);

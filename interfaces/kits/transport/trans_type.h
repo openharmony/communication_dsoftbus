@@ -24,6 +24,8 @@ extern "C" {
 #define MAX_IP_LEN  46
 #define MAX_PATH_LEN 4096
 #define DEVICE_ID_LEN_MAX 65
+#define ACCOUNT_UID_LEN_MAX 65
+#define EXTRA_ACCESS_INFO_LEN_MAX 256
 
 /**
  * @brief Enumerates the data types.
@@ -40,6 +42,8 @@ typedef enum {
     DATA_TYPE_AUDIO_STREAM,        /**< Audio data stream */
     DATA_TYPE_SLICE_STREAM,        /**< Video slice stream */
     DATA_TYPE_RAW_STREAM_ENCRYPED, /**< Encryped raw stream data */
+    DATA_TYPE_D2D_MESSAGE = 10,    /**< D2D Message */
+    DATA_TYPE_D2D_VOICE = 11,      /**< D2D Voice */
     DATA_TYPE_BUTT,
 } TransDataType;
 
@@ -47,6 +51,7 @@ typedef enum {
     EVENT_TYPE_CHANNEL_OPENED,
     EVENT_TYPE_TRANS_LIMIT_CHANGE,
     EVENT_TYPE_COLLAB_CHECK,
+    EVENT_TYPE_SET_ACCESS_INFO,
     EVENT_TYPE_BUTT,
 } TransEventType;
 
@@ -65,6 +70,19 @@ typedef struct {
 } SocketInfo;
 
 /**
+ * @brief Defines the socket access information.
+ *
+ * @since 2.0
+ * @version 2.0
+ */
+typedef struct {
+    int32_t userId;          /**< User ID of the application that initiates link setup */
+    uint64_t localTokenId;   /**< Token ID of the application that initiates link setup */
+    char *businessAccountId; /**< Business account ID of the application that initiates link setup (reserved)*/
+    char *extraAccessInfo;   /**< Extra Info of the application that initiates link setup, maximum length 256 bytes */
+} SocketAccessInfo;
+
+/**
  * @brief Defines the description of the socket.
  *
  * @since 2.0
@@ -74,7 +92,10 @@ typedef struct {
     char *name;              /**< Peer socket name, maximum length 255 bytes */
     char *networkId;         /**< Peer network ID, maximum length 64 bytes */
     char *pkgName;           /**< Peer package name, maximum length 64 bytes */
-    TransDataType dataType; /**< Data type of peer socket*/
+    TransDataType dataType;  /**< Data type of peer socket*/
+    char *accountId;         /**< Peer accountId, maximum length 64 bytes */
+    void *extraData;         /**< Peer extradata, maximum length 5 bytes */
+    uint32_t dataLen;        /**< Peer dataLen, maximum 5 */
 } PeerSocketInfo;
 
 /**
@@ -143,6 +164,7 @@ typedef enum {
     QOS_TYPE_TRANS_RELIABILITY, /**< @reserved Transmission reliability. */
     QOS_TYPE_TRANS_CONTINUOUS,   /**< Continuous transmission */
     QOS_TYPE_REUSE_BE,           /**< Best Effort Reuse >**/
+    QOS_TYPE_TRANS_RATE_PREFERENCE, /**< Perference Rate of LnnAllocLane */
     QOS_TYPE_BUTT,
 } QosType;
 
@@ -263,6 +285,8 @@ typedef enum {
     OPT_TYPE_MAX_BUFFER = OPT_TYPE_BEGIN,  /**< @reserved Maximum cache. */
     OPT_TYPE_FIRST_PACKAGE,                /**< @reserved First packet size. */
     OPT_TYPE_MAX_IDLE_TIMEOUT,             /**< @reserved Maximum idle time. */
+    OPT_TYPE_SUPPORT_ACK,
+    OPT_TYPE_NEED_ACK,
     OPT_TYPE_END,
 } OptType;
 
@@ -321,8 +345,8 @@ typedef int (*OnFrameEvt)(int fd, const FrameEvtCbInfo *info);
  */
 typedef struct {
     char deviceId[DEVICE_ID_LEN_MAX];
+    char accountId[ACCOUNT_UID_LEN_MAX];
     int32_t userId;
-    int64_t accountId;
     uint64_t tokenId;
     int32_t pid;
 } CollabInfo;

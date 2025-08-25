@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021-2024 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2025 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -18,7 +18,6 @@
 
 #include <map>
 #include "if_softbus_client.h"
-#include "iremote_object.h"
 #include "iremote_stub.h"
 
 namespace OHOS {
@@ -58,12 +57,16 @@ public:
     void OnRefreshLNNResult(int32_t refreshId, int32_t reason) override;
     void OnRefreshDeviceFound(const void *device, uint32_t deviceLen) override;
     void OnDataLevelChanged(const char *networkId, const DataLevelInfo *dataLevelInfo) override;
+    void OnMsdpRangeResult(const RangeResultInnerInfo *rangeInfo) override;
     int32_t OnClientTransLimitChange(int32_t channelId, uint8_t tos) override;
     int32_t OnChannelBind(int32_t channelId, int32_t channelType) override;
     int32_t OnClientChannelOnQos(
         int32_t channelId, int32_t channelType, QoSEvent event, const QosTV *qos, uint32_t count) override;
-    int32_t OnCheckCollabRelation(
-        const CollabInfo *sourceInfo, const CollabInfo *sinkInfo, int32_t channelId, int32_t channelType) override;
+    int32_t OnCheckCollabRelation(const CollabInfo *sourceInfo,
+        bool isSinkSide, const CollabInfo *sinkInfo, int32_t channelId, int32_t channelType) override;
+    int32_t OnConnectionStateChange(uint32_t handle, int32_t state, int32_t reason) override;
+    int32_t OnAcceptConnect(const char *name, uint32_t handle) override;
+    int32_t OnDataReceived(uint32_t handle, const uint8_t *data, uint32_t len) override;
 
 private:
     int32_t OnChannelOpenedInner(MessageParcel &data, MessageParcel &reply);
@@ -87,10 +90,18 @@ private:
     int32_t OnRefreshDeviceFoundInner(MessageParcel &data, MessageParcel &reply);
     int32_t OnClientPermissonChangeInner(MessageParcel &data, MessageParcel &reply);
     int32_t OnDataLevelChangedInner(MessageParcel &data, MessageParcel &reply);
+    int32_t OnMsdpRangeResultInner(MessageParcel &data, MessageParcel &reply);
     int32_t OnClientTransLimitChangeInner(MessageParcel &data, MessageParcel &reply);
     int32_t OnChannelBindInner(MessageParcel &data, MessageParcel &reply);
     int32_t OnChannelOnQosInner(MessageParcel &data, MessageParcel &reply);
     int32_t OnCheckCollabRelationInner(MessageParcel &data, MessageParcel &reply);
+    int32_t OnConnectionStateChangeInner(MessageParcel &data, MessageParcel &reply);
+    int32_t OnAcceptConnectInner(MessageParcel &data, MessageParcel &reply);
+    int32_t OnDataReceivedInner(MessageParcel &data, MessageParcel &reply);
+    int32_t OnBrProxyOpenedInner(MessageParcel &data, MessageParcel &reply);
+    int32_t OnBrProxyDataRecvInner(MessageParcel &data, MessageParcel &reply);
+    int32_t OnBrProxyStateChangedInner(MessageParcel &data, MessageParcel &reply);
+    int32_t OnBrProxyQueryPermissionInner(MessageParcel &data, MessageParcel &reply);
     using SoftBusClientStubFunc =
         int32_t (SoftBusClientStub::*)(MessageParcel &data, MessageParcel &reply);
     std::map<uint32_t, SoftBusClientStubFunc> memberFuncMap_;

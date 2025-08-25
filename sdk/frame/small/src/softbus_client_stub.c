@@ -126,7 +126,7 @@ static void *DeathProcTask(void *arg)
     CLIENT_NotifyObserver(EVENT_SERVER_DEATH, NULL, 0);
 
     ServerProxyDeInit();
-    TransServerProxyDeInit();
+    TransServerProxyClear();
     BusCenterServerProxyDeInit();
 
     ListNode sessionServerInfoList;

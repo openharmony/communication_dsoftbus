@@ -344,4 +344,25 @@ HWTEST_F(AdapterDsoftbusWifiTest, SoftBusIsWifiP2pEnabledTest001, TestSize.Level
     ret = SoftBusIsWifiP2pEnabled();
     EXPECT_TRUE(ret == true);
 }
+
+/*
+ * @tc.name: SoftBusGetHotspotConfigTest001
+ * @tc.desc: SoftBusGetHotspotConfig test
+ * @tc.type: FUNC
+ * @tc.require:
+ */
+HWTEST_F(AdapterDsoftbusWifiTest, SoftBusGetHotspotConfigTest001, TestSize.Level1)
+{
+    NiceMock<WifiInterfaceMock> wifiMock;
+    EXPECT_CALL(wifiMock, GetHotspotConfig).WillRepeatedly(Return(ERROR_WIFI_UNKNOWN));
+
+    int32_t ret = SoftBusGetHotspotConfig(nullptr);
+    EXPECT_EQ(ret, SOFTBUS_INVALID_PARAM);
+    int32_t apChannel = 0;
+    ret = SoftBusGetHotspotConfig(&apChannel);
+    EXPECT_EQ(ret, SOFTBUS_WIFI_STATE_UNKNOWN);
+    EXPECT_CALL(wifiMock, GetHotspotConfig).WillRepeatedly(Return(WIFI_SUCCESS));
+    ret = SoftBusGetHotspotConfig(&apChannel);
+    EXPECT_EQ(ret, SOFTBUS_OK);
+}
 } // namespace OHOS

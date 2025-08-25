@@ -21,6 +21,9 @@
 #include "softbus_adapter_mem.h"
 #include "softbus_error_code.h"
 
+#define MAX_STR_LEN (512 * 1024)
+#define MAX_DEPTH 10
+
 int32_t GetStringItemByJsonObject(const cJSON *json, const char * const string, char *target,
     uint32_t targetLen)
 {
@@ -286,6 +289,25 @@ bool AddNumber64ToJsonObject(cJSON *json, const char * const string, int64_t num
     return true;
 }
 
+bool AddDoubleToJsonObject(cJSON *json, const char * const string, double num)
+{
+    if (json == NULL || string == NULL) {
+        COMM_LOGE(COMM_UTILS, "invalid param");
+        return false;
+    }
+    cJSON *item = cJSON_CreateNumber(num);
+    if (item == NULL) {
+        COMM_LOGE(COMM_UTILS, "Cannot create cJSON number object. string=%{public}s", string);
+        return false;
+    }
+    if (!cJSON_AddItemToObject(json, string, item)) {
+        COMM_LOGE(COMM_UTILS, "Cannot add double object to json. string=%{public}s", string);
+        cJSON_Delete(item);
+        return false;
+    }
+    return true;
+}
+
 bool AddBoolToJsonObject(cJSON *json, const char * const string, bool value)
 {
     if (json == NULL || string == NULL) {
@@ -385,4 +407,56 @@ bool GetJsonObjectIntArrayItem(const cJSON *json, const char *string, int32_t *a
         array[index++] = item->valueint;
     }
     return true;
+}
+
+static int32_t GetCjsonMaxDepth(const char *jsonStr)
+{
+    COMM_CHECK_AND_RETURN_RET_LOGE(jsonStr != NULL, SOFTBUS_INVALID_PARAM, COMM_UTILS, "jsonStr is nullptr");
+
+    int32_t max = 0;
+    uint32_t len = strlen(jsonStr);
+    int32_t cnt = 0;
+    for (uint32_t i = 0; i < len; i++) {
+        if (jsonStr[i] == '{' || jsonStr[i] == '[') {
+            cnt++;
+            if (cnt > max) {
+                max = cnt;
+            }
+        } else if (jsonStr[i] == '}' || jsonStr[i] == ']') {
+            cnt--;
+        }
+    }
+    return max;
+}
+
+cJSON *CreateJsonObjectFromString(const char *jsonStr)
+{
+    if (jsonStr == NULL) {
+        COMM_LOGE(COMM_UTILS, "parameter is null");
+        return NULL;
+    }
+    int32_t depth = GetCjsonMaxDepth(jsonStr);
+    if (depth > MAX_DEPTH) {
+        COMM_LOGE(COMM_UTILS, "jsonStr depth=%{public}d over 10", depth);
+        return NULL;
+    }
+    return cJSON_Parse(jsonStr);
+}
+
+int GetArrayItemNum(const cJSON *jsonObj)
+{
+    if (jsonObj == NULL) {
+        COMM_LOGE(COMM_UTILS, "parameter is null");
+        return 0;
+    }
+    return cJSON_GetArraySize(jsonObj);
+}
+
+cJSON *GetArrayItemFromArray(const cJSON *jsonArr, int index)
+{
+    if (jsonArr == NULL) {
+        COMM_LOGE(COMM_UTILS, "parameter is null");
+        return NULL;
+    }
+    return cJSON_GetArrayItem(jsonArr, index);
 }

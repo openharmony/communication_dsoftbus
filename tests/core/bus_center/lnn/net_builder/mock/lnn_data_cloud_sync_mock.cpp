@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2024 Huawei Device Co., Ltd.
+ * Copyright (c) 2024-2025 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -42,25 +42,7 @@ static NetBuilderDepsInterface *GetNetBuilderDepsInterface()
     return reinterpret_cast<NetBuilderDepsInterfaceMock *>(g_netBuilderDepsInterface);
 }
 
-int32_t NetBuilderDepsInterfaceMock::ActionOfLnnGetSettingDeviceName(char *deviceName, uint32_t len)
-{
-    if (deviceName == NULL) {
-        LNN_LOGE(LNN_TEST, "invalid para");
-        return SOFTBUS_INVALID_PARAM;
-    }
-    if (memcpy_s(deviceName, len, "abc", strlen("abc") + 1) != EOK) {
-        LNN_LOGE(LNN_TEST, "memcpy info fail");
-        return SOFTBUS_MEM_ERR;
-    }
-    return SOFTBUS_OK;
-}
-
 extern "C" {
-int32_t LnnGetSettingDeviceName(char *deviceName, uint32_t len)
-{
-    return GetNetBuilderDepsInterface()->LnnGetSettingDeviceName(deviceName, len);
-}
-
 int32_t AuthGetDeviceUuid(int64_t authId, char *uuid, uint16_t size)
 {
     return GetNetBuilderDepsInterface()->AuthGetDeviceUuid(authId, uuid, size);
@@ -296,14 +278,14 @@ int32_t ConnDisconnectDeviceAllConn(const ConnectOption *option)
     return GetNetBuilderDepsInterface()->ConnDisconnectDeviceAllConn(option);
 }
 
-int32_t LnnGenLocalUuid(char *uuid, uint32_t len)
+int32_t LnnGenLocalUuid(char *uuid, uint32_t len, bool isUpdate)
 {
-    return GetNetBuilderDepsInterface()->LnnGenLocalUuid(uuid, len);
+    return GetNetBuilderDepsInterface()->LnnGenLocalUuid(uuid, len, isUpdate);
 }
 
-int32_t LnnGenLocalIrk(unsigned char *irk, uint32_t len)
+int32_t LnnGenLocalIrk(unsigned char *irk, uint32_t len, bool isUpdate)
 {
-    return GetNetBuilderDepsInterface()->LnnGenLocalIrk(irk, len);
+    return GetNetBuilderDepsInterface()->LnnGenLocalIrk(irk, len, isUpdate);
 }
 
 int32_t LnnGenLocalNetworkId(char *networkId, uint32_t len)
@@ -451,9 +433,9 @@ void AuthMetaReleaseVerify(int64_t authId)
     return GetNetBuilderDepsInterface()->AuthMetaReleaseVerify(authId);
 }
 
-int32_t LnnSendJoinRequestToConnFsm(LnnConnectionFsm *connFsm)
+int32_t LnnSendJoinRequestToConnFsm(LnnConnectionFsm *connFsm, bool isForceJoin)
 {
-    return GetNetBuilderDepsInterface()->LnnSendJoinRequestToConnFsm(connFsm);
+    return GetNetBuilderDepsInterface()->LnnSendJoinRequestToConnFsm(connFsm, isForceJoin);
 }
 
 void LnnNotifyJoinResult(ConnectionAddr *addr, const char *networkId, int32_t retCode)
@@ -646,10 +628,10 @@ void LnnDeinitBusCenterEvent(void)
     return GetNetBuilderDepsInterface()->LnnDeinitBusCenterEvent();
 }
 
-int32_t AuthStartVerify(const AuthConnInfo *connInfo, uint32_t requestId, const AuthVerifyCallback *callback,
-    AuthVerifyModule module, bool isFastAuth)
+int32_t AuthStartVerify(
+    const AuthConnInfo *connInfo, const AuthVerifyParam *authVerifyParam, const AuthVerifyCallback *callback)
 {
-    return GetNetBuilderDepsInterface()->AuthStartVerify(connInfo, requestId, callback, module, isFastAuth);
+    return GetNetBuilderDepsInterface()->AuthStartVerify(connInfo, authVerifyParam, callback);
 }
 
 bool LnnIsNeedCleanConnectionFsm(const NodeInfo *nodeInfo, ConnectionAddrType type)

@@ -30,5 +30,6 @@ if (dsoftbus_feature_trans_proxy_file == true) {
 
 trans_proxy_channel_sdk_inc = [
   "$dsoftbus_sdk_path/transmission/trans_channel/proxy/include/",
+  "$dsoftbus_root_path/interfaces/kits/lnn",
   "$dsoftbus_root_path/core/bus_center/lnn/lane_hub/lane_manager/include",
 ]

@@ -40,6 +40,7 @@
 #define FLAGS_BLOCK 0x01
 #define DEFAULT_COAP_BUFFER_LENGTH 256
 #define COAP_CERT_CHAIN_DEPTH 2
+#define COAP_MULTICAST_ADDR "ff02::1"
 
 /*
  * the initial timeout will be set to a random duration between COAP_ACK_TIMEOUT and
@@ -56,7 +57,8 @@ int32_t CoapResolveAddress(const coap_str_const_t *server, struct sockaddr *dst)
     struct addrinfo hints;
     char addrstr[DEFAULT_COAP_BUFFER_LENGTH]; /* Get a char array with length 256 to save host name. */
 
-    if (server == NULL || server->s == NULL || dst == NULL) {
+    if (server == NULL || server->s == NULL || dst == NULL ||
+        (dst->sa_family != AF_INET && dst->sa_family != AF_INET6)) {
         return NSTACKX_EINVAL;
     }
     (void)memset_s(addrstr, sizeof(addrstr), 0, sizeof(addrstr));
@@ -84,23 +86,17 @@ int32_t CoapResolveAddress(const coap_str_const_t *server, struct sockaddr *dst)
 
     socklen_t len = 0;
     for (ainfo = res; ainfo != NULL; ainfo = ainfo->ai_next) {
-        switch (ainfo->ai_family) {
-            case AF_INET6:
-                /* fall-through */
-            case AF_INET:
-                len = ainfo->ai_addrlen;
-                if (memcpy_s(dst, sizeof(struct sockaddr), ainfo->ai_addr, (size_t)len) != EOK) {
-                    DFINDER_LOGE(TAG, "ai_addr copy error");
-                    error = NSTACKX_EFAILED;
-                    goto finish;
-                }
-                break;
-            default:
-                break;
+        if (ainfo->ai_family != dst->sa_family) {
+            continue;
         }
+        len = ainfo->ai_addrlen;
+        size_t dstLen = dst->sa_family == AF_INET ? sizeof(struct sockaddr_in) : sizeof(struct sockaddr_in6);
+        if (memcpy_s(dst, dstLen, ainfo->ai_addr, len) != EOK) {
+            DFINDER_LOGE(TAG, "ai_addr copy error");
+            error = NSTACKX_EFAILED;
+        }
+        break;
     }
-
-finish:
     freeaddrinfo(res);
     return (error == NSTACKX_EFAILED) ? error : (int32_t)len;
 }
@@ -156,8 +152,57 @@ static void InitAddrinfo(struct addrinfo *hints)
     hints->ai_flags = AI_PASSIVE | AI_NUMERICHOST;
 }
 
+static int CoapBindToDevice(int sockfd, uint8_t af, const union InetAddr *addr)
+{
+    struct sockaddr_in sockIp;
+    if (af == AF_INET) {
+        (void)memset_s(&sockIp, sizeof(struct sockaddr_in), 0, sizeof(struct sockaddr_in));
+        (void)memcpy_s(&sockIp.sin_addr, sizeof(struct in_addr), &(addr->in), sizeof(struct in_addr));
+        return BindToDevice(sockfd, &sockIp);
+    }
+    return NSTACKX_EOK;
+}
+
+static int CoapAddIpv6Multicast(int sockfd)
+{
+    struct ipv6_mreq mreq;
+    if (inet_pton(AF_INET6, COAP_MULTICAST_ADDR, &mreq.ipv6mr_multiaddr) <= 0) {
+        DFINDER_LOGE(TAG, "inet_pton multicast addr fail");
+        return NSTACKX_EFAILED;
+    }
+    mreq.ipv6mr_interface = 0; // use the default interface
+    if (setsockopt(sockfd, IPPROTO_IPV6, IPV6_JOIN_GROUP, &mreq, sizeof(mreq)) == -1) {
+        DFINDER_LOGE(TAG, "setsockopt add multicast group fail");
+        return NSTACKX_EFAILED;
+    }
+
+    return NSTACKX_EOK;
+}
+
+coap_endpoint_t *CoapCreateEndpoint(coap_context_t *ctx, coap_address_t *addr,
+    uint8_t af,  const union InetAddr *ip)
+{
+    DFINDER_LOGI(TAG, "Initializing CoapCreateEndpoint");
+    coap_endpoint_t *ep = coap_new_endpoint(ctx, addr, COAP_PROTO_UDP);
+    if (ep == NULL) {
+        DFINDER_LOGE(TAG, "coap_new_endpoint get null");
+        return NULL;
+    }
+    if (CoapBindToDevice(ep->sock.fd, af, ip) != NSTACKX_EOK) {
+        DFINDER_LOGE(TAG, "bind to device fail");
+        coap_free_endpoint(ep);
+        return NULL;
+    }
+    if (af == AF_INET6 && CoapAddIpv6Multicast(ep->sock.fd) != NSTACKX_EOK) {
+        DFINDER_LOGE(TAG, "add ipv6 multicast fail");
+        coap_free_endpoint(ep);
+        return NULL;
+    }
+    return ep;
+}
+
 static coap_context_t *CoapGetContextEx(const char *node, const char *port,
-    uint8_t needBind, const struct in_addr *ip)
+    uint8_t af, const union InetAddr *ip)
 {
     struct addrinfo hints;
     struct addrinfo *result = NULL;
@@ -165,11 +210,13 @@ static coap_context_t *CoapGetContextEx(const char *node, const char *port,
     coap_endpoint_t *ep = NULL;
     coap_context_t *ctx = coap_new_context(NULL);
     if (ctx == NULL) {
+        DFINDER_LOGE(TAG, "coap_new_context return null");
         return NULL;
     }
     InitAddrinfo(&hints);
 
     if (getaddrinfo(node, port, &hints, &result) != 0) {
+        DFINDER_LOGE(TAG, "getaddrinfo fail, errno: %d, desc: %s", errno, strerror(errno));
         coap_free_context(ctx);
         return NULL;
     }
@@ -182,27 +229,12 @@ static coap_context_t *CoapGetContextEx(const char *node, const char *port,
 
         coap_address_init(&addr);
         addr.size = rp->ai_addrlen;
-        if (memcpy_s(&addr.addr, sizeof(addr.addr), rp->ai_addr, rp->ai_addrlen) != EOK ||
-            (addr.addr.sa.sa_family != AF_INET && addr.addr.sa.sa_family != AF_INET6)) {
+        if (rp->ai_family != af || memcpy_s(&addr.addr, sizeof(addr.addr), rp->ai_addr, rp->ai_addrlen) != EOK) {
             continue;
         }
-
-        ep = coap_new_endpoint(ctx, &addr, COAP_PROTO_UDP);
-        if (ep != NULL) {
-            struct sockaddr_in sockIp;
-            struct sockaddr_in *sockIpPtr = NULL;
-            (void)memset_s(&sockIp, sizeof(struct sockaddr_in), 0, sizeof(struct sockaddr_in));
-            if (ip != NULL && needBind) {
-                (void)memcpy_s(&sockIp.sin_addr, sizeof(struct in_addr), ip, sizeof(struct in_addr));
-                sockIpPtr = &sockIp;
-            }
-            if (needBind && BindToDevice(ep->sock.fd, sockIpPtr) != NSTACKX_EOK) {
-                DFINDER_LOGE(TAG, "bind to device fail");
-                coap_free_context(ctx);
-                ctx = NULL;
-            }
-        } else {
-            DFINDER_LOGE(TAG, "coap_new_endpoint get null");
+        ep = CoapCreateEndpoint(ctx, &addr, af, ip);
+        if (ep == NULL) {
+            DFINDER_LOGE(TAG, "coap_new_endpoint return null");
             coap_free_context(ctx);
             ctx = NULL;
         }
@@ -212,9 +244,10 @@ static coap_context_t *CoapGetContextEx(const char *node, const char *port,
     return ctx;
 }
 
-coap_context_t *CoapGetContext(const char *node, const char *port, uint8_t needBind, const struct in_addr *ip)
+coap_context_t *CoapGetContext(const char *node, const char *port,
+    uint8_t af, const union InetAddr *ip)
 {
-    coap_context_t *context = CoapGetContextEx(node, port, needBind, ip);
+    coap_context_t *context = CoapGetContextEx(node, port, af, ip);
     if (context == NULL) {
         IncStatistics(STATS_CREATE_CONTEX_FAILED);
     }
@@ -236,18 +269,28 @@ static coap_session_t *CoapGetSessionInner(struct addrinfo *result, coap_context
 
     for (rp = result; rp != NULL; rp = rp->ai_next) {
         coap_address_t bindAddr;
-        if (rp->ai_addrlen > (socklen_t)sizeof(bindAddr.addr) || rp->ai_addr == NULL) {
+        if (rp->ai_addrlen > (socklen_t)sizeof(bindAddr.addr) || rp->ai_addr == NULL ||
+            dst->addr.sa.sa_family != rp->ai_addr->sa_family) {
             continue;
         }
+        (void)memset_s(&bindAddr, sizeof(bindAddr), 0, sizeof(bindAddr));
         coap_address_init(&bindAddr);
         bindAddr.size = rp->ai_addrlen;
         if (memcpy_s(&bindAddr.addr, sizeof(bindAddr.addr), rp->ai_addr, rp->ai_addrlen) != EOK) {
             DFINDER_LOGE(TAG, "ai_addr copy error");
             continue;
         }
+        char ip[NSTACKX_MAX_IP_STRING_LEN];
+        if (bindAddr.addr.sa.sa_family == AF_INET) {
+            (void)inet_ntop(AF_INET, &(bindAddr.addr.sin.sin_addr), ip, sizeof(ip));
+        } else {
+            (void)inet_ntop(AF_INET6, &(bindAddr.addr.sin6.sin6_addr), ip, sizeof(ip));
+        }
         session = coap_new_client_session(ctx, &bindAddr, dst, proto);
         if (session != NULL) {
             break;
+        } else {
+            DFINDER_LOGE(TAG, "coap_new_client_session error");
         }
     }
     return session;
@@ -296,20 +339,22 @@ static coap_session_t *CoapGetSessionEx(coap_context_t *ctx, const char *localAd
     if (localAddr != NULL) {
         struct addrinfo hints;
         struct addrinfo *result = NULL;
-
         (void)memset_s(&hints, sizeof(struct addrinfo), 0, sizeof(struct addrinfo));
         hints.ai_family = AF_UNSPEC;  /* Allow IPv4 or IPv6 */
         hints.ai_socktype = COAP_PROTO_RELIABLE(proto) ? SOCK_STREAM : SOCK_DGRAM; /* Coap uses UDP */
         hints.ai_flags = AI_PASSIVE | AI_NUMERICHOST;
         int s = getaddrinfo(localAddr, localPort, &hints, &result);
         if (s != 0) {
-            DFINDER_LOGE(TAG, "getaddrinfo error");
+            DFINDER_LOGE(TAG, "getaddrinfo failed, error: %d, desc: %s", errno, strerror(errno));
             return NULL;
         }
         session = CoapGetSessionInner(result, ctx, coapServerParameter);
         freeaddrinfo(result);
     } else {
         session = coap_new_client_session(ctx, NULL, dst, proto);
+        if (session == NULL) {
+            DFINDER_LOGE(TAG, "coap_new_client_session failed with null local addr");
+        }
     }
     CoapSetAckTimeOut(session);
     return session;
@@ -331,6 +376,7 @@ uint8_t IsCoapCtxEndpointSocket(const coap_context_t *ctx, int fd)
     coap_endpoint_t *listeningEndpoints = NULL;
     coap_endpoint_t *tmp = NULL;
     if (ctx == NULL) {
+        DFINDER_LOGW(TAG, "coap context passed in is null");
         return NSTACKX_FALSE;
     }
     listeningEndpoints = coap_context_get_endpoint(ctx);

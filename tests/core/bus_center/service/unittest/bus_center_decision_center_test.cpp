@@ -37,6 +37,17 @@ using namespace testing::ext;
 #define NODE_NETWORK_ID "ABCDEF00ABCDEF00ABCDEF00ABCDEF00ABCDEF00ABCDEF00ABCDEF00ABCDEF0"
 
 namespace OHOS {
+LnnEnhanceFuncList g_lnnEnhanceFuncListTest = { nullptr };
+
+static int32_t MockLnnVirtualLinkInit(void)
+{
+    return SOFTBUS_OK;
+}
+
+static void MockLnnVirtualLinkDeinit(void)
+{
+    return;
+}
 
 class BusCenterDecisionTest : public testing::Test {
 protected:
@@ -73,9 +84,9 @@ HWTEST_F(BusCenterDecisionTest, BusCenterDecisionTest001, TestSize.Level1)
     ConnectOption option;
     memset_s(&option, sizeof(ConnectOption), 0, sizeof(ConnectOption));
     option.type = CONNECT_BR;
-    LnnDCReportConnectException(&option, 1);
+    EXPECT_NO_FATAL_FAILURE(LnnDCReportConnectException(&option, 1));
     option.type = CONNECT_P2P;
-    LnnDCReportConnectException(&option, 1);
+    EXPECT_NO_FATAL_FAILURE(LnnDCReportConnectException(&option, 1));
 }
 
 /*
@@ -89,9 +100,9 @@ HWTEST_F(BusCenterDecisionTest, BusCenterDecisionTest002, TestSize.Level1)
     ConnectOption option;
     memset_s(&option, sizeof(ConnectOption), 0, sizeof(ConnectOption));
     option.type = CONNECT_BR;
-    LnnDCClearConnectException(&option);
+    EXPECT_NO_FATAL_FAILURE(LnnDCClearConnectException(&option));
     option.type = CONNECT_P2P;
-    LnnDCClearConnectException(&option);
+    EXPECT_NO_FATAL_FAILURE(LnnDCClearConnectException(&option));
 }
 
 /*
@@ -105,11 +116,11 @@ HWTEST_F(BusCenterDecisionTest, BusCenterDecisionTest003, TestSize.Level1)
     NodeBasicInfo info;
     (void)memset_s(&info, sizeof(info), 0, sizeof(info));
     bool isOnline = true;
-    LnnDCProcessOnlineState(isOnline, &info);
+    EXPECT_NO_FATAL_FAILURE(LnnDCProcessOnlineState(isOnline, &info));
     isOnline = false;
-    LnnDCProcessOnlineState(isOnline, &info);
+    EXPECT_NO_FATAL_FAILURE(LnnDCProcessOnlineState(isOnline, &info));
     (void)strncpy_s(info.networkId, NETWORK_ID_BUF_LEN, NODE_NETWORK_ID, strlen(NODE_NETWORK_ID));
-    LnnDCProcessOnlineState(isOnline, &info);
+    EXPECT_NO_FATAL_FAILURE(LnnDCProcessOnlineState(isOnline, &info));
 }
 
 /*
@@ -128,7 +139,7 @@ HWTEST_F(BusCenterDecisionTest, BusCenterDecisionTest004, TestSize.Level1)
 
 /*
 * @tc.name: BusCenterDecisionTest005
-* @tc.desc:bus center decision test
+* @tc.desc:InitDecisionCenter test
 * @tc.type: FUNC
 * @tc.require: 1
 */
@@ -136,15 +147,68 @@ HWTEST_F(BusCenterDecisionTest, BusCenterDecisionTest005, TestSize.Level1)
 {
     // list will free when go to TransSrvDataListDeinit
     SoftBusList *list = (SoftBusList *)SoftBusCalloc(sizeof(SoftBusList));
+    ASSERT_TRUE(list != nullptr);
     SoftBusMutexAttr mutexAttr;
     mutexAttr.type = SOFTBUS_MUTEX_RECURSIVE;
     SoftBusMutexInit(&list->lock, &mutexAttr);
     ListInit(&list->list);
     NiceMock<BusCenterDecisionCenterDepsInterfaceMock> BusCenterDecisionMock;
     EXPECT_CALL(BusCenterDecisionMock, CreateSoftBusList).WillOnce(Return(list));
+    EXPECT_CALL(BusCenterDecisionMock, LnnEnhanceFuncListGet).WillRepeatedly(Return(&g_lnnEnhanceFuncListTest));
+    g_lnnEnhanceFuncListTest.lnnVirtualLinkInit = MockLnnVirtualLinkInit;
+    g_lnnEnhanceFuncListTest.lnnVirtualLinkDeinit = MockLnnVirtualLinkDeinit;
     int32_t ret = InitDecisionCenter();
     EXPECT_EQ(SOFTBUS_OK, ret);
-    DeinitDecisionCenter();
+    EXPECT_NO_FATAL_FAILURE(DeinitDecisionCenter());
+}
+
+/*
+* @tc.name: BusCenterDecisionTest006
+* @tc.desc: InitDecisionCenter test
+* @tc.type: FUNC
+* @tc.require: 1
+*/
+HWTEST_F(BusCenterDecisionTest, BusCenterDecisionTest006, TestSize.Level1)
+{
+    // list will free when go to TransSrvDataListDeinit
+    SoftBusList *list = (SoftBusList *)SoftBusCalloc(sizeof(SoftBusList));
+    ASSERT_TRUE(list != nullptr);
+    SoftBusMutexAttr mutexAttr;
+    mutexAttr.type = SOFTBUS_MUTEX_RECURSIVE;
+    SoftBusMutexInit(&list->lock, &mutexAttr);
+    ListInit(&list->list);
+    NiceMock<BusCenterDecisionCenterDepsInterfaceMock> BusCenterDecisionMock;
+    EXPECT_CALL(BusCenterDecisionMock, CreateSoftBusList).WillOnce(Return(list));
+    EXPECT_CALL(BusCenterDecisionMock, LnnEnhanceFuncListGet).WillRepeatedly(Return(&g_lnnEnhanceFuncListTest));
+    g_lnnEnhanceFuncListTest.lnnVirtualLinkInit = nullptr;
+    g_lnnEnhanceFuncListTest.lnnVirtualLinkDeinit = nullptr;
+    int32_t ret = InitDecisionCenter();
+    EXPECT_EQ(SOFTBUS_OK, ret);
+    EXPECT_NO_FATAL_FAILURE(DeinitDecisionCenter());
+}
+
+/*
+* @tc.name: BusCenterDecisionTest007
+* @tc.desc: InitDecisionCenter test
+* @tc.type: FUNC
+* @tc.require: 1
+*/
+HWTEST_F(BusCenterDecisionTest, BusCenterDecisionTest007, TestSize.Level1)
+{
+    // list will free when go to TransSrvDataListDeinit
+    SoftBusList *list = (SoftBusList *)SoftBusCalloc(sizeof(SoftBusList));
+    ASSERT_TRUE(list != nullptr);
+    SoftBusMutexAttr mutexAttr;
+    mutexAttr.type = SOFTBUS_MUTEX_RECURSIVE;
+    SoftBusMutexInit(&list->lock, &mutexAttr);
+    ListInit(&list->list);
+    NiceMock<BusCenterDecisionCenterDepsInterfaceMock> BusCenterDecisionMock;
+    EXPECT_CALL(BusCenterDecisionMock, CreateSoftBusList).WillOnce(Return(list));
+    EXPECT_CALL(BusCenterDecisionMock, LnnEnhanceFuncListGet).WillRepeatedly(Return(&g_lnnEnhanceFuncListTest));
+    g_lnnEnhanceFuncListTest.registAuthTransListener = nullptr;
+    int32_t ret = InitDecisionCenter();
+    EXPECT_EQ(SOFTBUS_OK, ret);
+    EXPECT_NO_FATAL_FAILURE(DeinitDecisionCenter());
 }
 }
        

@@ -117,3 +117,9 @@ bool SoftBusIsHotspotActive(void)
 {
     return false;
 }
+
+int32_t SoftBusGetHotspotConfig(int32_t *apChannel)
+{
+    (void)apChannel;
+    return SOFTBUS_OK;
+}

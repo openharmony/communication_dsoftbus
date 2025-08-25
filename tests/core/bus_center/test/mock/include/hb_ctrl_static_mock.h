@@ -31,7 +31,6 @@
 #include "lnn_network_manager.h"
 #include "lnn_ohos_account.h"
 #include "lnn_settingdata_event_monitor.h"
-#include "lnn_fast_offline.h"
 
 namespace OHOS {
 class HeartBeatCtrlStaticInterface {
@@ -58,7 +57,7 @@ public:
     virtual bool IsEnableSoftBusHeartbeat(void) = 0;
     virtual int32_t LnnSetMediumParamBySpecificType(const LnnHeartbeatMediumParam *param) = 0;
     virtual int32_t LnnGetLocalNodeInfoSafe(NodeInfo *info) = 0;
-    virtual int32_t LnnLedgerAllDataSyncToDB(NodeInfo *info) = 0;
+    virtual int32_t LnnLedgerAllDataSyncToDB(NodeInfo *info, bool isAckSeq, char *peerudid) = 0;
     virtual ConnectionAddrType LnnConvertHbTypeToConnAddrType(LnnHeartbeatType type) = 0;
     virtual int32_t LnnStopScreenChangeOfflineTiming(const char *networkId, ConnectionAddrType addrType) = 0;
     virtual int32_t LnnStartScreenChangeOfflineTiming(const char *networkId, ConnectionAddrType addrType) = 0;
@@ -69,13 +68,12 @@ public:
     virtual bool LnnIsLocalSupportBurstFeature(void) = 0;
     virtual void LnnNotifyAccountStateChangeEvent(SoftBusAccountState state) = 0;
     virtual void AuthLoadDeviceKey(void) = 0;
-    virtual int32_t LnnGenerateCeParams(void) = 0;
+    virtual int32_t LnnGenerateCeParams(bool isUnlocked) = 0;
     virtual void DfxRecordTriggerTime(LnnTriggerReason reason, LnnEventLnnStage stage) = 0;
     virtual int32_t LnnHbMediumMgrInit(void) = 0;
     virtual int32_t LnnStartNewHbStrategyFsm(void) = 0;
     virtual int32_t AuthSendKeepaliveOption(const char *uuid, ModeCycle cycle) = 0;
-    virtual int32_t LnnSetGearModeBySpecificType(
-        const char *callerId, const GearMode *mode, LnnHeartbeatType type) = 0;
+    virtual int32_t LnnSetGearModeBySpecificType(const char *callerId, const GearMode *mode, LnnHeartbeatType type) = 0;
     virtual void LnnDumpLocalBasicInfo(void) = 0;
     virtual bool LnnGetOnlineStateById(const char *id, IdCategory type) = 0;
     virtual int32_t AuthFlushDevice(const char *uuid) = 0;
@@ -84,10 +82,14 @@ public:
     virtual int32_t LnnStopOfflineTimingStrategy(const char *networkId, ConnectionAddrType addrType) = 0;
     virtual int32_t HbBuildUserIdCheckSum(const int32_t *userIdArray, int32_t num, uint8_t *custData, int32_t len) = 0;
     virtual int32_t LnnSetLocalByteInfo(InfoKey key, const uint8_t *info, uint32_t len) = 0;
-    virtual void LnnUpdateDeviceName(void) = 0;
     virtual int32_t LnnStartHbByTypeAndStrategyEx(LnnProcessSendOnceMsgPara *msgPara) = 0;
-    virtual void RegisterNameMonitor(void) = 0;
     virtual int32_t LnnSyncBleOfflineMsg(void) = 0;
+    virtual void LnnRemoveV0BroadcastAndCheckDev(void) = 0;
+    virtual int32_t UpdateRecoveryDeviceInfoFromDb(void) = 0;
+    virtual int32_t LnnGetDLSleHbTimestamp(const char *networkId, uint64_t *timestamp) = 0;
+    virtual int32_t LnnSetDLSleHbTimestamp(const char *networkId, const uint64_t timestamp) = 0;
+    virtual int32_t LnnStopSleOfflineTimingStrategy(const char *networkId) = 0;
+    virtual int32_t LnnStartSleOfflineTimingStrategy(const char *networkId) = 0;
 };
 class HeartBeatCtrlStaticInterfaceMock : public HeartBeatCtrlStaticInterface {
 public:
@@ -111,7 +113,7 @@ public:
     MOCK_METHOD0(IsEnableSoftBusHeartbeat, bool(void));
     MOCK_METHOD1(LnnSetMediumParamBySpecificType, int32_t(const LnnHeartbeatMediumParam *));
     MOCK_METHOD1(LnnGetLocalNodeInfoSafe, int32_t(NodeInfo *info));
-    MOCK_METHOD1(LnnLedgerAllDataSyncToDB, int32_t(NodeInfo *info));
+    MOCK_METHOD3(LnnLedgerAllDataSyncToDB, int32_t(NodeInfo *info, bool, char *));
     MOCK_METHOD1(LnnConvertHbTypeToConnAddrType, ConnectionAddrType(LnnHeartbeatType type));
     MOCK_METHOD2(LnnStopScreenChangeOfflineTiming, int32_t(const char *, ConnectionAddrType));
     MOCK_METHOD2(LnnStartScreenChangeOfflineTiming, int32_t(const char *, ConnectionAddrType));
@@ -122,7 +124,7 @@ public:
     MOCK_METHOD0(LnnIsLocalSupportBurstFeature, bool(void));
     MOCK_METHOD1(LnnNotifyAccountStateChangeEvent, void(SoftBusAccountState));
     MOCK_METHOD0(AuthLoadDeviceKey, void(void));
-    MOCK_METHOD0(LnnGenerateCeParams, int32_t(void));
+    MOCK_METHOD1(LnnGenerateCeParams, int32_t(bool));
     MOCK_METHOD2(DfxRecordTriggerTime, void(LnnTriggerReason, LnnEventLnnStage));
     MOCK_METHOD0(LnnHbMediumMgrInit, int32_t(void));
     MOCK_METHOD0(LnnStartNewHbStrategyFsm, int32_t(void));
@@ -137,10 +139,14 @@ public:
     MOCK_METHOD4(
         HbBuildUserIdCheckSum, int32_t(const int32_t *userIdArray, int32_t num, uint8_t *custData, int32_t len));
     MOCK_METHOD3(LnnSetLocalByteInfo, int32_t(InfoKey, const uint8_t *, uint32_t));
-    MOCK_METHOD0(LnnUpdateDeviceName, void(void));
-    MOCK_METHOD1(LnnStartHbByTypeAndStrategyEx, int32_t (LnnProcessSendOnceMsgPara *));
-    MOCK_METHOD0(RegisterNameMonitor, void(void));
-    MOCK_METHOD0(LnnSyncBleOfflineMsg, int32_t (void));
+    MOCK_METHOD1(LnnStartHbByTypeAndStrategyEx, int32_t(LnnProcessSendOnceMsgPara *));
+    MOCK_METHOD0(LnnSyncBleOfflineMsg, int32_t(void));
+    MOCK_METHOD0(LnnRemoveV0BroadcastAndCheckDev, void(void));
+    MOCK_METHOD0(UpdateRecoveryDeviceInfoFromDb, int32_t(void));
+    MOCK_METHOD2(LnnGetDLSleHbTimestamp, int32_t(const char *, uint64_t *));
+    MOCK_METHOD2(LnnSetDLSleHbTimestamp, int32_t(const char *, const uint64_t));
+    MOCK_METHOD1(LnnStartSleOfflineTimingStrategy, int32_t(const char *));
+    MOCK_METHOD1(LnnStopSleOfflineTimingStrategy, int32_t(const char *));
 };
 } // namespace OHOS
 #endif // OHOS_LNN_CTRL_STATIC_MOCK_H

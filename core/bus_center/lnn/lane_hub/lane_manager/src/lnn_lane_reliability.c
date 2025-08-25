@@ -18,6 +18,7 @@
 #include <securec.h>
 #include <string.h>
 #include "bus_center_manager.h"
+#include "lnn_lane_dfx.h"
 #include "lnn_lane_link.h"
 #include "lnn_log.h"
 #include "lnn_trans_lane.h"
@@ -35,6 +36,7 @@ typedef struct {
         uint32_t wlanFd;
     } connId;
     uint32_t laneDetectId;
+    uint64_t laneDetectTime;
     LaneLinkInfo link;
     ListNode node;
     LaneLinkCb cb;
@@ -89,7 +91,7 @@ static int32_t ClientConnectTcp(LaneDetectInfo *infoItem)
     }
     char localIp[IP_LEN] = {0};
     int32_t fd = SOFTBUS_INVALID_FD;
-    if (LnnGetLocalStrInfo(STRING_KEY_WLAN_IP, localIp, IP_LEN) != SOFTBUS_OK) {
+    if (LnnGetLocalStrInfoByIfnameIdx(STRING_KEY_IP, localIp, IP_LEN, WLAN_IF) != SOFTBUS_OK) {
         LNN_LOGE(LNN_LANE, "get local ip fail");
         fd = ConnOpenClientSocket(&option, BIND_ADDR_ALL, true);
     } else {
@@ -167,7 +169,7 @@ static uint32_t GetLaneDetectIdWithoutLock()
 
 static int32_t WlanDetectReliability(uint32_t laneReqId, const LaneLinkInfo *laneInfo, const LaneLinkCb *callback)
 {
-    LaneDetectInfo *infoItem = (LaneDetectInfo *)SoftBusMalloc(sizeof(LaneDetectInfo));
+    LaneDetectInfo *infoItem = (LaneDetectInfo *)SoftBusCalloc(sizeof(LaneDetectInfo));
     if (infoItem == NULL) {
         return SOFTBUS_MALLOC_ERR;
     }
@@ -185,6 +187,7 @@ static int32_t WlanDetectReliability(uint32_t laneReqId, const LaneLinkInfo *lan
             infoItem->laneReqId);
         return SOFTBUS_OK;
     }
+    infoItem->laneDetectTime = SoftBusGetSysTimeMs();
     int32_t fd = ClientConnectTcp(infoItem);
     if (fd < 0) {
         LNN_LOGE(LNN_LANE, "wlan detect connect fail, port=%{public}d, laneReqId=%{public}u",
@@ -245,6 +248,39 @@ static int32_t GetAllDetectInfoWithDetectId(uint32_t detectId, ListNode *detectI
     return SOFTBUS_OK;
 }
 
+static uint64_t GetDetectTime(uint64_t startTime)
+{
+    uint64_t currentSysTime = SoftBusGetSysTimeMs();
+    if (currentSysTime < startTime) {
+        LNN_LOGE(LNN_LANE, "get delay fail");
+        return 0;
+    }
+    return currentSysTime - startTime;
+}
+
+static void UpdateLaneEventWithDetectInfo(uint32_t laneReqId, uint64_t startTime, bool detectState)
+{
+    LaneProcess laneProcess;
+    WifiDetectState wifiDetectState;
+    (void)memset_s(&laneProcess, sizeof(LaneProcess), 0, sizeof(LaneProcess));
+    if (GetLaneEventInfo(laneReqId, &laneProcess) != SOFTBUS_OK) {
+        LNN_LOGE(LNN_LANE, "get laneProcess fail, laneReqId=%{public}u", laneReqId);
+        return;
+    }
+    if (laneProcess.laneProcessList32Bit[EVENT_WIFI_DETECT_STATE] == WIFI_DETECT_BUTT) {
+        if (detectState) {
+            wifiDetectState = WIFI_DETECT_SUCC;
+        } else {
+            wifiDetectState = WIFI_DETECT_FAIL;
+        }
+        UpdateLaneEventInfo(laneReqId, EVENT_WIFI_DETECT_STATE,
+            LANE_PROCESS_TYPE_UINT32, (void *)(&wifiDetectState));
+        uint64_t wifiDetectTime = GetDetectTime(startTime);
+        UpdateLaneEventInfo(laneReqId, EVENT_WIFI_DETECT_TIME,
+            LANE_PROCESS_TYPE_UINT64, (void *)(&wifiDetectTime));
+    }
+}
+
 static int32_t NotifyWlanDetectResult(LaneDetectInfo *requestItem, bool isSendSuc)
 {
     ListNode detectInfoList;
@@ -257,6 +293,7 @@ static int32_t NotifyWlanDetectResult(LaneDetectInfo *requestItem, bool isSendSu
     LaneDetectInfo *item = NULL;
     LaneDetectInfo *next = NULL;
     LIST_FOR_EACH_ENTRY_SAFE(item, next, &detectInfoList, LaneDetectInfo, node) {
+        UpdateLaneEventWithDetectInfo(item->laneReqId, item->laneDetectTime, isSendSuc);
         if (!isSendSuc) {
             LNN_LOGI(LNN_LANE, "detect failed, wlan=%{public}d, laneReqId=%{public}u, detectId=%{public}u",
                 item->link.type, item->laneReqId, requestItem->laneDetectId);
@@ -322,6 +359,7 @@ int32_t LaneDetectReliability(uint32_t laneReqId, const LaneLinkInfo *linkInfo, 
     }
     LNN_LOGI(LNN_LANE, "lane detect start, linktype=%{public}d, laneReqId=%{public}u", linkInfo->type, laneReqId);
     int32_t result = SOFTBUS_LANE_DETECT_FAIL;
+    uint64_t detectStartTime = SoftBusGetSysTimeMs();
     switch (linkInfo->type) {
         case LANE_WLAN_2P4G:
         case LANE_WLAN_5G:
@@ -329,6 +367,9 @@ int32_t LaneDetectReliability(uint32_t laneReqId, const LaneLinkInfo *linkInfo, 
             break;
         default:
             break;
+    }
+    if (result != SOFTBUS_OK) {
+        UpdateLaneEventWithDetectInfo(laneReqId, detectStartTime, false);
     }
     return result;
 }

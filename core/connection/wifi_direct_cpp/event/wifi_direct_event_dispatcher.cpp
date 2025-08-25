@@ -13,8 +13,6 @@
  * limitations under the License.
  */
 #include "wifi_direct_event_dispatcher.h"
-#include "wifi_direct_event_wrapper.h"
-#include "wifi_direct_event_template_dispatcher.h"
 #include "conn_log.h"
 
 namespace OHOS::SoftBus {

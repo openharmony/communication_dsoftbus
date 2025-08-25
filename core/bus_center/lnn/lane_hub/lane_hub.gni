@@ -16,13 +16,6 @@ import("../../../../dsoftbus.gni")
 core_lane_hub_path = "$dsoftbus_root_path/core/bus_center/lnn/lane_hub"
 
 native_source_path = rebase_path("$dsoftbus_root_path")
-dep_dir = "dsoftbus_enhance/core/bus_center/lnn/lane_hub"
-enhanced = exec_script("$dsoftbus_root_path/check_sub_module.py",
-                       [
-                         "$native_source_path",
-                         "$dep_dir",
-                       ],
-                       "value")
 
 bus_center_hub_inc = [
   "$core_lane_hub_path/common/include",
@@ -42,34 +35,26 @@ if (dsoftbus_feature_lnn_frame) {
   bus_center_hub_inc += [ "$dsoftbus_core_path/connection/wifi_direct_cpp" ]
 }
 
-if (dsoftbus_feature_lnn_frame && enhanced) {
-  lane_src_enhance_path =
-      "$dsoftbus_root_path/dsoftbus_enhance/core/bus_center/lnn/lane_hub"
-  bus_center_hub_src += [ "$dsoftbus_root_path/dsoftbus_enhance/core/bus_center/lnn/lane_hub/lane/src/lnn_lane_conflict_manager.c" ]
-  bus_center_hub_deps += [
-    "$dsoftbus_root_path/dsoftbus_enhance/core/bus_center/lnn/lane_hub/heartbeat:dsoftbus_ble_heartbeat",
-    "$dsoftbus_root_path/dsoftbus_enhance/core/bus_center/lnn/lane_hub/heartbeat:dsoftbus_ble_lpdevice",
-  ]
-} else if (enhanced) {
-  bus_center_hub_src += [ "$dsoftbus_root_path/dsoftbus_enhance/core/bus_center/lnn/lane_hub/lane/src/lnn_lane_conflict_manager_virtual.c" ]
-}
-
 if (dsoftbus_feature_lnn_frame && dsoftbus_feature_lnn_lane_mgr) {
   bus_center_hub_src += [
     "$core_lane_hub_path/common/src/lnn_lane_hub.c",
-    "$core_lane_hub_path/lane_manager/src/lnn_ctrl_lane.c",
     "$core_lane_hub_path/lane_manager/src/lnn_lane_link.c",
     "$core_lane_hub_path/lane_manager/src/lnn_lane_link_conflict.c",
     "$core_lane_hub_path/lane_manager/src/lnn_lane_link_wifi_direct.c",
     "$core_lane_hub_path/lane_manager/src/lnn_lane.c",
     "$core_lane_hub_path/lane_manager/src/lnn_lane_common.c",
+    "$core_lane_hub_path/lane_manager/src/lnn_lane_dfx.c",
     "$core_lane_hub_path/lane_manager/src/lnn_lane_model.c",
     "$core_lane_hub_path/lane_manager/src/lnn_lane_select.c",
     "$core_lane_hub_path/lane_manager/src/lnn_lane_query.c",
+
     "$core_lane_hub_path/lane_manager/src/lnn_select_rule.c",
+    "$core_lane_hub_path/lane_manager/src/lnn_trans_free_lane.c",
     "$core_lane_hub_path/lane_manager/src/lnn_trans_lane.c",
     "$core_lane_hub_path/lane_manager/src/lnn_lane_reliability.c",
     "$core_lane_hub_path/lane_manager/src/lnn_lane_listener.c",
+    "$core_lane_hub_path/lane_manager/src/lnn_lane_communication_capability.c",
+    "$core_lane_hub_path/lane_manager/src/lnn_lane_link_ledger.c",
   ]
 } else {
   bus_center_hub_src += [
@@ -82,18 +67,11 @@ if (dsoftbus_feature_lnn_frame && dsoftbus_feature_lnn_lane_mgr &&
     dsoftbus_feature_conn_pv1 && softbus_communication_wifi_feature) {
   bus_center_hub_src +=
       [ "$core_lane_hub_path/lane_manager/src/lnn_lane_link_p2p.c" ]
+  bus_center_hub_inc +=
+      [ "$dsoftbus_root_path/interfaces/kits/lnn" ]
 } else {
   bus_center_hub_src +=
       [ "$core_lane_hub_path/lane_manager/src/lnn_lane_link_p2p_virtual.c" ]
-}
-
-if (!enhanced || !dsoftbus_feature_lnn_lane_mgr) {
-  bus_center_hub_src += [
-    "$core_lane_hub_path/lane_manager/src/lnn_lane_score_virtual.c",
-    "$core_lane_hub_path/lane_manager/src/lnn_lane_vap_info_virtual.c",
-    "$core_lane_hub_path/lane_manager/src/lnn_lane_power_control_virtual.c",
-    "$core_lane_hub_path/lane_manager/src/lnn_parameter_utils_virtual.c",
-  ]
 }
 
 if (dsoftbus_feature_lnn_frame && dsoftbus_feature_lnn_ble) {
@@ -113,14 +91,6 @@ if (dsoftbus_feature_lnn_frame && dsoftbus_feature_lnn_ble) {
     "$core_lane_hub_path/heartbeat/src/lnn_heartbeat_strategy.c",
     "$core_lane_hub_path/heartbeat/src/lnn_heartbeat_utils.c",
   ]
-  if (!enhanced) {
-    bus_center_hub_src +=
-        [ "$core_lane_hub_path/heartbeat/src/lnn_ble_heartbeat_virtual.c" ]
-  }
-  if (!dsoftbus_feature_lnn_sh || !enhanced) {
-    bus_center_hub_src +=
-        [ "$core_lane_hub_path/heartbeat/src/lnn_ble_lpdevice_virtual.c" ]
-  }
 } else {
   bus_center_hub_src += [
     "$core_lane_hub_path/heartbeat/src/lnn_heartbeat_ctrl_virtual.c",
@@ -131,38 +101,4 @@ if (dsoftbus_feature_lnn_frame && dsoftbus_feature_lnn_ble) {
   ]
 }
 
-if (dsoftbus_feature_lnn_time_sync) {
-  bus_center_hub_src +=
-      [ "$core_lane_hub_path/time_sync/src/lnn_time_sync_manager.c" ]
-  if (enhanced) {
-    bus_center_hub_deps += [ "$dsoftbus_root_path/dsoftbus_enhance/core/bus_center/lnn/lane_hub/time_sync:dsoftbus_time_sync_impl" ]
-  } else {
-    bus_center_hub_src +=
-        [ "$core_lane_hub_path/time_sync/src/lnn_time_sync_impl_virtual.c" ]
-  }
-} else {
-  bus_center_hub_src +=
-      [ "$core_lane_hub_path/time_sync/src/lnn_time_sync_manager_virtual.c" ]
-}
-
-if (dsoftbus_feature_lnn_lane_mgr && dsoftbus_feature_lnn_frame &&
-    dsoftbus_feature_lnn_lane_qos && enhanced) {
-  bus_center_hub_src +=
-      [ "$core_lane_hub_path/lane_qos/lnn_lane_qos_virtual.c" ]
-} else {
-  bus_center_hub_src +=
-      [ "$core_lane_hub_path/lane_qos/lnn_lane_qos_virtual.c" ]
-}
-
-if (enhanced) {
-  lane_channel_rating_src_path = "$dsoftbus_root_path/dsoftbus_enhance/core/bus_center/lnn/lane_hub/lane_channel_rating"
-  bus_center_hub_inc += [
-    "$lane_channel_rating_src_path/include",
-    "$dsoftbus_root_path/dsoftbus_enhance/adapter/common/mlps/interface",
-  ]
-  bus_center_hub_src += [
-    "$lane_channel_rating_src_path/src/lnn_rating_manager.c",
-    "$lane_channel_rating_src_path/src/wlan_channel_collector.c",
-    "$lane_channel_rating_src_path/src/wlan_channel_sync.c",
-  ]
-}
+bus_center_hub_src += [ "$core_lane_hub_path/time_sync/src/lnn_time_sync_manager.c" ]

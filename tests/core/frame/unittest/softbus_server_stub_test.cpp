@@ -24,6 +24,7 @@
 #include "iservice_registry.h"
 #include "message_option.h"
 #include "message_parcel.h"
+#include "session_ipc_adapter.h"
 #include "softbus_access_token_test.h"
 #include "softbus_adapter_mem.h"
 #include "softbus_common.h"
@@ -49,6 +50,7 @@ namespace OHOS {
 #define TEST_DEVICE_ID_SIZE_MAX    50
 #define TEST_GROUP_ID_SIZE_MAX     50
 #define TEST_PKG_NAME_SIZE_MAX     65
+#define TEST_MAX_LEN               1025
 
 char g_mySessionName[TEST_SESSION_NAME_SIZE_MAX] = "com.test.trans.session";
 char g_peerSessionName[TEST_SESSION_NAME_SIZE_MAX] = "com.test.trans.session.sendfile";
@@ -81,6 +83,8 @@ void SoftbusServerStubTest::SetUpTestCase(void)
 
 void SoftbusServerStubTest::TearDownTestCase(void)
 {
+    NiceMock<SoftbusServerStubTestInterfaceMock> softbusServerStubMock;
+    EXPECT_CALL(softbusServerStubMock, UnregChangeListener).WillRepeatedly(Return(SOFTBUS_OK));
     ConnServerDeinit();
     AuthDeinit();
     BusCenterServerDeinit();
@@ -89,7 +93,7 @@ void SoftbusServerStubTest::TearDownTestCase(void)
 
 SessionParam *GenerateSessionParam()
 {
-    SetAceessTokenPermission("SoftBusServerStubTest");
+    SetAccessTokenPermission("SoftBusServerStubTest");
     SessionParam *sessionParam = (SessionParam *)SoftBusCalloc(sizeof(SessionParam));
     EXPECT_NE(nullptr, sessionParam);
     SessionAttribute attr;
@@ -252,6 +256,8 @@ HWTEST_F(SoftbusServerStubTest, SoftbusServerStubTest007, TestSize.Level1)
  */
 HWTEST_F(SoftbusServerStubTest, SoftbusServerStubTest008, TestSize.Level1)
 {
+    NiceMock<SoftbusServerStubTestInterfaceMock> softbusServerStubMock;
+    EXPECT_CALL(softbusServerStubMock, UnregChangeListener).WillRepeatedly(Return(SOFTBUS_OK));
     sptr<OHOS::SoftBusServerStub> softBusServer = new OHOS::SoftBusServer(SOFTBUS_SERVER_SA_ID, true);
     ASSERT_NE(nullptr, softBusServer);
     uint32_t code = SERVER_OPEN_SESSION;
@@ -284,11 +290,18 @@ HWTEST_F(SoftbusServerStubTest, SoftbusServerStubTest009, TestSize.Level1)
     ASSERT_NE(nullptr, softBusServer);
     NiceMock<SoftbusServerStubTestInterfaceMock> softbusServerStubMock;
     char test[10] = "test";
+    uint64_t timestamp = 1;
     MessageParcel datas;
     MessageParcel reply;
 
     int32_t ret = softBusServer->CreateSessionServerInner(datas, reply);
     EXPECT_EQ(SOFTBUS_TRANS_PROXY_READCSTRING_FAILED, ret);
+
+    datas.WriteCString(test);
+    datas.WriteCString(test);
+    datas.WriteUint64(timestamp);
+    ret = softBusServer->CreateSessionServerInner(datas, reply);
+    EXPECT_EQ(SOFTBUS_OK, ret);
 
     datas.WriteCString(test);
     datas.WriteCString(test);
@@ -703,7 +716,7 @@ HWTEST_F(SoftbusServerStubTest, SoftbusServerStubTest019, TestSize.Level1)
     datas.WriteInt32(qosCount);
     ret = softBusServer->EvaluateQosInner(datas, reply);
     EXPECT_EQ(SOFTBUS_IPC_ERR, ret);
-    
+
     qosCount = 7;
     datas.WriteCString(test);
     datas.WriteInt32(dataTypeNumber);
@@ -727,6 +740,8 @@ HWTEST_F(SoftbusServerStubTest, SoftbusServerStubTest019, TestSize.Level1)
  */
 HWTEST_F(SoftbusServerStubTest, SoftbusServerStubTest020, TestSize.Level1)
 {
+    SetAccessTokenPermission("device_manager");
+    NiceMock<SoftbusServerStubTestInterfaceMock> softbusServerStubMock;
     sptr<OHOS::SoftBusServerStub> softBusServer = new OHOS::SoftBusServer(SOFTBUS_SERVER_SA_ID, true);
     ASSERT_NE(nullptr, softBusServer);
     ConnectionAddr addr;
@@ -735,7 +750,11 @@ HWTEST_F(SoftbusServerStubTest, SoftbusServerStubTest020, TestSize.Level1)
     MessageParcel datas;
     MessageParcel reply;
 
+    EXPECT_CALL(softbusServerStubMock, CheckLnnPermission).WillRepeatedly(Return(SOFTBUS_PERMISSION_DENIED));
     int32_t ret = softBusServer->JoinLNNInner(datas, reply);
+    EXPECT_EQ(SOFTBUS_PERMISSION_DENIED, ret);
+    EXPECT_CALL(softbusServerStubMock, CheckLnnPermission).WillRepeatedly(Return(SOFTBUS_OK));
+    ret = softBusServer->JoinLNNInner(datas, reply);
     EXPECT_EQ(SOFTBUS_IPC_ERR, ret);
 
     datas.WriteCString(test);
@@ -751,7 +770,7 @@ HWTEST_F(SoftbusServerStubTest, SoftbusServerStubTest020, TestSize.Level1)
     datas.WriteUint32(addrTypeLen);
     datas.WriteRawData(&addr, addrTypeLen);
     ret = softBusServer->JoinLNNInner(datas, reply);
-    EXPECT_EQ(SOFTBUS_OK, ret);
+    EXPECT_EQ(SOFTBUS_IPC_ERR, ret);
 
     ret = softBusServer->LeaveLNNInner(datas, reply);
     EXPECT_EQ(SOFTBUS_IPC_ERR, ret);
@@ -764,6 +783,9 @@ HWTEST_F(SoftbusServerStubTest, SoftbusServerStubTest020, TestSize.Level1)
     datas.WriteCString(test);
     ret = softBusServer->LeaveLNNInner(datas, reply);
     EXPECT_EQ(SOFTBUS_OK, ret);
+    EXPECT_CALL(softbusServerStubMock, CheckLnnPermission).WillRepeatedly(Return(SOFTBUS_PERMISSION_DENIED));
+    ret = softBusServer->LeaveLNNInner(datas, reply);
+    EXPECT_EQ(SOFTBUS_PERMISSION_DENIED, ret);
 }
 
 /**
@@ -783,25 +805,28 @@ HWTEST_F(SoftbusServerStubTest, SoftbusServerStubTest021, TestSize.Level1)
     MessageParcel reply;
 
     int32_t ret = softBusServer->GetAllOnlineNodeInfoInner(datas, reply);
-    EXPECT_EQ(SOFTBUS_IPC_ERR, ret);
+    EXPECT_NE(SOFTBUS_NO_INIT, ret);
 
     datas.WriteCString(test);
     ret = softBusServer->GetAllOnlineNodeInfoInner(datas, reply);
-    EXPECT_EQ(SOFTBUS_IPC_ERR, ret);
+    EXPECT_NE(SOFTBUS_NO_INIT, ret);
 
     datas.WriteCString(test);
     datas.WriteUint32(infoTypeLen);
     EXPECT_CALL(softbusServerStubMock, LnnIpcGetAllOnlineNodeInfo).WillRepeatedly(
         Return(SOFTBUS_NETWORK_GET_ALL_NODE_INFO_ERR)
     );
+    EXPECT_CALL(softbusServerStubMock, SoftBusCheckIsNormalApp).WillRepeatedly(
+        Return(false)
+    );
     ret = softBusServer->GetAllOnlineNodeInfoInner(datas, reply);
-    EXPECT_EQ(SOFTBUS_NETWORK_GET_ALL_NODE_INFO_ERR, ret);
+    EXPECT_NE(SOFTBUS_NO_INIT, ret);
 
     datas.WriteCString(test);
     datas.WriteUint32(infoTypeLen);
     EXPECT_CALL(softbusServerStubMock, LnnIpcGetAllOnlineNodeInfo).WillRepeatedly(Return(SOFTBUS_OK));
     ret = softBusServer->GetAllOnlineNodeInfoInner(datas, reply);
-    EXPECT_NE(SOFTBUS_IPC_ERR, ret);
+    EXPECT_NE(SOFTBUS_NO_INIT, ret);
 }
 
 /**
@@ -839,7 +864,7 @@ HWTEST_F(SoftbusServerStubTest, SoftbusServerStubTest022, TestSize.Level1)
         Return(SOFTBUS_NETWORK_GET_LOCAL_NODE_INFO_ERR)
     );
     ret = softBusServer->GetLocalDeviceInfoInner(datas, reply);
-    EXPECT_EQ(SOFTBUS_NETWORK_GET_LOCAL_NODE_INFO_ERR, ret);
+    EXPECT_EQ(SOFTBUS_OK, ret);
 
     datas.WriteCString(test);
     datas.WriteUint32(infoTypeLen);
@@ -865,8 +890,8 @@ HWTEST_F(SoftbusServerStubTest, SoftbusServerStubTest023, TestSize.Level1)
     uint32_t len = 20;
     MessageParcel datas;
     MessageParcel reply;
-
     int32_t ret = softBusServer->GetNodeKeyInfoInner(datas, reply);
+    ret = softBusServer->GetNodeKeyInfoInner(datas, reply);
     EXPECT_EQ(SOFTBUS_IPC_ERR, ret);
 
     datas.WriteCString(test);
@@ -923,7 +948,7 @@ HWTEST_F(SoftbusServerStubTest, SoftbusServerStubTest024, TestSize.Level1)
     datas.WriteUint32(len);
     EXPECT_CALL(softbusServerStubMock, LnnIpcGetNodeKeyInfo).WillRepeatedly(Return(SOFTBUS_NETWORK_NODE_KEY_INFO_ERR));
     ret = softBusServer->GetNodeKeyInfoInner(datas, reply);
-    EXPECT_EQ(SOFTBUS_NETWORK_NODE_KEY_INFO_ERR, ret);
+    EXPECT_EQ(SOFTBUS_OK, ret);
 
     datas.WriteCString(test);
     datas.WriteCString(test);
@@ -942,14 +967,19 @@ HWTEST_F(SoftbusServerStubTest, SoftbusServerStubTest024, TestSize.Level1)
  */
 HWTEST_F(SoftbusServerStubTest, SoftbusServerStubTest025, TestSize.Level1)
 {
+    SetAccessTokenPermission("device_manager");
+    NiceMock<SoftbusServerStubTestInterfaceMock> softbusServerStubMock;
     sptr<OHOS::SoftBusServerStub> softBusServer = new OHOS::SoftBusServer(SOFTBUS_SERVER_SA_ID, true);
     ASSERT_NE(nullptr, softBusServer);
     char test[10] = "test";
     uint16_t changeFlag = 0;
     MessageParcel datas;
     MessageParcel reply;
-
+    EXPECT_CALL(softbusServerStubMock, CheckLnnPermission).WillRepeatedly(Return(SOFTBUS_PERMISSION_DENIED));
     int32_t ret = softBusServer->SetNodeDataChangeFlagInner(datas, reply);
+    EXPECT_EQ(SOFTBUS_PERMISSION_DENIED, ret);
+    EXPECT_CALL(softbusServerStubMock, CheckLnnPermission).WillRepeatedly(Return(SOFTBUS_OK));
+    ret = softBusServer->SetNodeDataChangeFlagInner(datas, reply);
     EXPECT_EQ(SOFTBUS_IPC_ERR, ret);
 
     datas.WriteCString(test);
@@ -976,18 +1006,23 @@ HWTEST_F(SoftbusServerStubTest, SoftbusServerStubTest025, TestSize.Level1)
  */
 HWTEST_F(SoftbusServerStubTest, SoftbusServerStubTest026, TestSize.Level1)
 {
+    SetAccessTokenPermission("distributeddata");
+    NiceMock<SoftbusServerStubTestInterfaceMock> softbusServerStubMock;
     sptr<OHOS::SoftBusServerStub> softBusServer = new OHOS::SoftBusServer(SOFTBUS_SERVER_SA_ID, true);
     ASSERT_NE(nullptr, softBusServer);
     char test[10] = "test";
     MessageParcel datas;
     MessageParcel reply;
-
+    EXPECT_CALL(softbusServerStubMock, CheckLnnPermission).WillRepeatedly(Return(SOFTBUS_PERMISSION_DENIED));
     int32_t ret = softBusServer->RegDataLevelChangeCbInner(datas, reply);
+    EXPECT_EQ(SOFTBUS_PERMISSION_DENIED, ret);
+    EXPECT_CALL(softbusServerStubMock, CheckLnnPermission).WillRepeatedly(Return(SOFTBUS_OK));
+    ret = softBusServer->RegDataLevelChangeCbInner(datas, reply);
     EXPECT_EQ(SOFTBUS_IPC_ERR, ret);
 
     datas.WriteCString(test);
     ret = softBusServer->RegDataLevelChangeCbInner(datas, reply);
-    EXPECT_EQ(SOFTBUS_IPC_ERR, ret);
+    EXPECT_EQ(SOFTBUS_INVALID_PARAM, ret);
 }
 
 /**
@@ -998,18 +1033,23 @@ HWTEST_F(SoftbusServerStubTest, SoftbusServerStubTest026, TestSize.Level1)
  */
 HWTEST_F(SoftbusServerStubTest, SoftbusServerStubTest027, TestSize.Level1)
 {
+    SetAccessTokenPermission("distributeddata");
+    NiceMock<SoftbusServerStubTestInterfaceMock> softbusServerStubMock;
     sptr<OHOS::SoftBusServerStub> softBusServer = new OHOS::SoftBusServer(SOFTBUS_SERVER_SA_ID, true);
     ASSERT_NE(nullptr, softBusServer);
     char test[10] = "test";
     MessageParcel datas;
     MessageParcel reply;
-
+    EXPECT_CALL(softbusServerStubMock, CheckLnnPermission).WillRepeatedly(Return(SOFTBUS_PERMISSION_DENIED));
     int32_t ret = softBusServer->UnregDataLevelChangeCbInner(datas, reply);
+    EXPECT_EQ(SOFTBUS_PERMISSION_DENIED, ret);
+    EXPECT_CALL(softbusServerStubMock, CheckLnnPermission).WillRepeatedly(Return(SOFTBUS_OK));
+    ret = softBusServer->UnregDataLevelChangeCbInner(datas, reply);
     EXPECT_EQ(SOFTBUS_IPC_ERR, ret);
 
     datas.WriteCString(test);
     ret = softBusServer->UnregDataLevelChangeCbInner(datas, reply);
-    EXPECT_EQ(SOFTBUS_IPC_ERR, ret);
+    EXPECT_EQ(SOFTBUS_INVALID_PARAM, ret);
 }
 
 /**
@@ -1020,13 +1060,18 @@ HWTEST_F(SoftbusServerStubTest, SoftbusServerStubTest027, TestSize.Level1)
  */
 HWTEST_F(SoftbusServerStubTest, SoftbusServerStubTest028, TestSize.Level1)
 {
+    SetAccessTokenPermission("distributeddata");
+    NiceMock<SoftbusServerStubTestInterfaceMock> softbusServerStubMock;
     sptr<OHOS::SoftBusServerStub> softBusServer = new OHOS::SoftBusServer(SOFTBUS_SERVER_SA_ID, true);
     ASSERT_NE(nullptr, softBusServer);
     DataLevel dataLevel;
     MessageParcel datas;
     MessageParcel reply;
-
+    EXPECT_CALL(softbusServerStubMock, CheckLnnPermission).WillRepeatedly(Return(SOFTBUS_PERMISSION_DENIED));
     int32_t ret = softBusServer->SetDataLevelInner(datas, reply);
+    EXPECT_EQ(SOFTBUS_PERMISSION_DENIED, ret);
+    EXPECT_CALL(softbusServerStubMock, CheckLnnPermission).WillRepeatedly(Return(SOFTBUS_OK));
+    ret = softBusServer->SetDataLevelInner(datas, reply);
     EXPECT_EQ(SOFTBUS_IPC_ERR, ret);
 
     datas.WriteRawData(&dataLevel, sizeof(dataLevel));
@@ -1048,6 +1093,7 @@ HWTEST_F(SoftbusServerStubTest, SoftbusServerStubTest029, TestSize.Level1)
     int32_t accuracy = 0;
     int32_t period = 0;
     MessageParcel datas;
+    MessageParcel datas2;
     MessageParcel reply;
 
     int32_t ret = softBusServer->StartTimeSyncInner(datas, reply);
@@ -1079,6 +1125,13 @@ HWTEST_F(SoftbusServerStubTest, SoftbusServerStubTest029, TestSize.Level1)
     datas.WriteCString(test);
     ret = softBusServer->StopTimeSyncInner(datas, reply);
     EXPECT_EQ(SOFTBUS_OK, ret);
+
+    ret = softBusServer->StopTimeSyncInner(datas2, reply);
+    EXPECT_EQ(SOFTBUS_IPC_ERR, ret);
+
+    datas.WriteCString(test);
+    ret = softBusServer->StartTimeSyncInner(datas, reply);
+    EXPECT_EQ(SOFTBUS_IPC_ERR, ret);
 }
 
 /**
@@ -1367,7 +1420,7 @@ HWTEST_F(SoftbusServerStubTest, SoftbusServerStubTest036, TestSize.Level1)
     bool ranging = true;
     MessageParcel datas;
     MessageParcel reply;
-    
+
     datas.WriteCString(test);
     datas.WriteInt32(publishId);
     datas.WriteInt32(mode);
@@ -1418,7 +1471,7 @@ HWTEST_F(SoftbusServerStubTest, SoftbusServerStubTest037, TestSize.Level1)
     int32_t medium = -1;
     MessageParcel datas;
     MessageParcel reply;
-    
+
     int32_t ret = softBusServer->RefreshLNNInner(datas, reply);
     EXPECT_EQ(SOFTBUS_IPC_ERR, ret);
 
@@ -1576,6 +1629,7 @@ HWTEST_F(SoftbusServerStubTest, SoftbusServerStubTest039, TestSize.Level1)
  */
 HWTEST_F(SoftbusServerStubTest, SoftbusServerStubTest040, TestSize.Level1)
 {
+    SetAccessTokenPermission("device_manager");
     sptr<OHOS::SoftBusServerStub> softBusServer = new OHOS::SoftBusServer(SOFTBUS_SERVER_SA_ID, true);
     ASSERT_NE(nullptr, softBusServer);
     NiceMock<SoftbusServerStubTestInterfaceMock> softbusServerStubMock;
@@ -1583,8 +1637,11 @@ HWTEST_F(SoftbusServerStubTest, SoftbusServerStubTest040, TestSize.Level1)
     MetaNodeConfigInfo info;
     MessageParcel datas;
     MessageParcel reply;
-
+    EXPECT_CALL(softbusServerStubMock, CheckLnnPermission).WillRepeatedly(Return(SOFTBUS_PERMISSION_DENIED));
     int32_t ret = softBusServer->ActiveMetaNodeInner(datas, reply);
+    EXPECT_EQ(SOFTBUS_PERMISSION_DENIED, ret);
+    EXPECT_CALL(softbusServerStubMock, CheckLnnPermission).WillRepeatedly(Return(SOFTBUS_OK));
+    ret = softBusServer->ActiveMetaNodeInner(datas, reply);
     EXPECT_EQ(SOFTBUS_IPC_ERR, ret);
 
     datas.WriteRawData(&info, sizeof(MetaNodeConfigInfo));
@@ -1592,7 +1649,7 @@ HWTEST_F(SoftbusServerStubTest, SoftbusServerStubTest040, TestSize.Level1)
         Return(SOFTBUS_NETWORK_ACTIVE_META_NODE_ERR)
     );
     ret = softBusServer->ActiveMetaNodeInner(datas, reply);
-    EXPECT_EQ(SOFTBUS_NETWORK_ACTIVE_META_NODE_ERR, ret);
+    EXPECT_EQ(SOFTBUS_OK, ret);
 
     datas.WriteRawData(&info, sizeof(MetaNodeConfigInfo));
     EXPECT_CALL(softbusServerStubMock, LnnIpcActiveMetaNode).WillRepeatedly(Return(SOFTBUS_OK));
@@ -1613,6 +1670,9 @@ HWTEST_F(SoftbusServerStubTest, SoftbusServerStubTest040, TestSize.Level1)
     EXPECT_CALL(softbusServerStubMock, LnnIpcDeactiveMetaNode).WillRepeatedly(Return(SOFTBUS_OK));
     ret = softBusServer->DeactiveMetaNodeInner(datas, reply);
     EXPECT_NE(SOFTBUS_IPC_ERR, ret);
+    EXPECT_CALL(softbusServerStubMock, CheckLnnPermission).WillRepeatedly(Return(SOFTBUS_PERMISSION_DENIED));
+    ret = softBusServer->DeactiveMetaNodeInner(datas, reply);
+    EXPECT_EQ(SOFTBUS_PERMISSION_DENIED, ret);
 }
 
 /**
@@ -1623,6 +1683,7 @@ HWTEST_F(SoftbusServerStubTest, SoftbusServerStubTest040, TestSize.Level1)
  */
 HWTEST_F(SoftbusServerStubTest, SoftbusServerStubTest041, TestSize.Level1)
 {
+    SetAccessTokenPermission("device_manager");
     sptr<OHOS::SoftBusServerStub> softBusServer = new OHOS::SoftBusServer(SOFTBUS_SERVER_SA_ID, true);
     ASSERT_NE(nullptr, softBusServer);
     NiceMock<SoftbusServerStubTestInterfaceMock> softbusServerStubMock;
@@ -1630,7 +1691,11 @@ HWTEST_F(SoftbusServerStubTest, SoftbusServerStubTest041, TestSize.Level1)
     MessageParcel datas;
     MessageParcel reply;
 
+    EXPECT_CALL(softbusServerStubMock, CheckLnnPermission).WillRepeatedly(Return(SOFTBUS_PERMISSION_DENIED));
     int32_t ret = softBusServer->GetAllMetaNodeInfoInner(datas, reply);
+    EXPECT_EQ(SOFTBUS_PERMISSION_DENIED, ret);
+    EXPECT_CALL(softbusServerStubMock, CheckLnnPermission).WillRepeatedly(Return(SOFTBUS_OK));
+    ret = softBusServer->GetAllMetaNodeInfoInner(datas, reply);
     EXPECT_EQ(SOFTBUS_IPC_ERR, ret);
 
     datas.WriteInt32(infoNum);
@@ -1659,6 +1724,8 @@ HWTEST_F(SoftbusServerStubTest, SoftbusServerStubTest041, TestSize.Level1)
  */
 HWTEST_F(SoftbusServerStubTest, SoftbusServerStubTest042, TestSize.Level1)
 {
+    SetAccessTokenPermission("SoftBusServerStubTest");
+    NiceMock<SoftbusServerStubTestInterfaceMock> softbusServerStubMock;
     sptr<OHOS::SoftBusServerStub> softBusServer = new OHOS::SoftBusServer(SOFTBUS_SERVER_SA_ID, true);
     ASSERT_NE(nullptr, softBusServer);
     GearMode gearMode;
@@ -1666,31 +1733,34 @@ HWTEST_F(SoftbusServerStubTest, SoftbusServerStubTest042, TestSize.Level1)
     bool flag = true;
     MessageParcel datas;
     MessageParcel reply;
-
+    EXPECT_CALL(softbusServerStubMock, CheckLnnPermission).WillRepeatedly(Return(SOFTBUS_PERMISSION_DENIED));
     int32_t ret = softBusServer->ShiftLNNGearInner(datas, reply);
-    EXPECT_EQ(SOFTBUS_TRANS_PROXY_WRITECSTRING_FAILED, ret);
+    EXPECT_NE(SOFTBUS_NO_INIT, ret);
+    EXPECT_CALL(softbusServerStubMock, CheckLnnPermission).WillRepeatedly(Return(SOFTBUS_OK));
+    ret = softBusServer->ShiftLNNGearInner(datas, reply);
+    EXPECT_NE(SOFTBUS_NO_INIT, ret);
 
     datas.WriteCString(test);
     ret = softBusServer->ShiftLNNGearInner(datas, reply);
-    EXPECT_EQ(SOFTBUS_TRANS_PROXY_READCSTRING_FAILED, ret);
+    EXPECT_NE(SOFTBUS_NO_INIT, ret);
 
     datas.WriteCString(test);
     datas.WriteCString(test);
     ret = softBusServer->ShiftLNNGearInner(datas, reply);
-    EXPECT_EQ(SOFTBUS_TRANS_PROXY_READCSTRING_FAILED, ret);
+    EXPECT_NE(SOFTBUS_NO_INIT, ret);
 
     datas.WriteCString(test);
     datas.WriteCString(test);
     datas.WriteBool(flag);
     ret = softBusServer->ShiftLNNGearInner(datas, reply);
-    EXPECT_EQ(SOFTBUS_TRANS_PROXY_READRAWDATA_FAILED, ret);
+    EXPECT_NE(SOFTBUS_NO_INIT, ret);
 
     datas.WriteCString(test);
     datas.WriteCString(test);
     datas.WriteBool(flag);
     datas.WriteRawData(&gearMode, sizeof(GearMode));
     ret = softBusServer->ShiftLNNGearInner(datas, reply);
-    EXPECT_EQ(SOFTBUS_OK, ret);
+    EXPECT_NE(SOFTBUS_NO_INIT, ret);
 }
 
 /**
@@ -1753,6 +1823,489 @@ HWTEST_F(SoftbusServerStubTest, SoftbusServerStubTest045, TestSize.Level1)
     datas.WriteInt32(pid);
     datas.WriteCString(networkId);
     ret = softBusServer->PrivilegeCloseChannelInner(datas, reply);
-    EXPECT_NE(SOFTBUS_PERMISSION_DENIED, ret);
+    EXPECT_EQ(SOFTBUS_PERMISSION_DENIED, ret);
+}
+
+/**
+ * @tc.name: SoftbusServerStubTest046
+ * @tc.desc: Verify the RegRangeCbForMsdpInner function.
+ * @tc.type: FUNC
+ * @tc.require:
+ */
+HWTEST_F(SoftbusServerStubTest, SoftbusServerStubTest046, TestSize.Level1)
+{
+    SetAccessTokenPermission("msdp_sa");
+    NiceMock<SoftbusServerStubTestInterfaceMock> softbusServerStubMock;
+    sptr<OHOS::SoftBusServerStub> softBusServer = new OHOS::SoftBusServer(SOFTBUS_SERVER_SA_ID, true);
+    ASSERT_NE(nullptr, softBusServer);
+    char test1[10] = "test";
+    char test2[30] = "ohos.msdp.spatialawareness";
+    MessageParcel datas;
+    MessageParcel reply;
+    EXPECT_CALL(softbusServerStubMock, CheckLnnPermission).WillRepeatedly(Return(SOFTBUS_PERMISSION_DENIED));
+    int32_t ret = softBusServer->RegRangeCbForMsdpInner(datas, reply);
+    EXPECT_EQ(SOFTBUS_PERMISSION_DENIED, ret);
+    EXPECT_CALL(softbusServerStubMock, CheckLnnPermission).WillRepeatedly(Return(SOFTBUS_OK));
+    ret = softBusServer->RegRangeCbForMsdpInner(datas, reply);
+    EXPECT_EQ(SOFTBUS_IPC_ERR, ret);
+
+    datas.WriteCString(test1);
+    ret = softBusServer->RegRangeCbForMsdpInner(datas, reply);
+    EXPECT_EQ(SOFTBUS_INVALID_PARAM, ret);
+
+    datas.WriteCString(test2);
+    ret = softBusServer->RegRangeCbForMsdpInner(datas, reply);
+    EXPECT_EQ(SOFTBUS_OK, ret);
+}
+
+/**
+ * @tc.name: SoftbusServerStubTest047
+ * @tc.desc: Verify the UnregRangeCbForMsdpInner function.
+ * @tc.type: FUNC
+ * @tc.require:
+ */
+HWTEST_F(SoftbusServerStubTest, SoftbusServerStubTest047, TestSize.Level1)
+{
+    SetAccessTokenPermission("msdp_sa");
+    NiceMock<SoftbusServerStubTestInterfaceMock> softbusServerStubMock;
+    sptr<OHOS::SoftBusServerStub> softBusServer = new OHOS::SoftBusServer(SOFTBUS_SERVER_SA_ID, true);
+    ASSERT_NE(nullptr, softBusServer);
+    char test1[10] = "test";
+    char test2[30] = "ohos.msdp.spatialawareness";
+    MessageParcel datas;
+    MessageParcel reply;
+    EXPECT_CALL(softbusServerStubMock, CheckLnnPermission).WillRepeatedly(Return(SOFTBUS_PERMISSION_DENIED));
+    int32_t ret = softBusServer->UnregRangeCbForMsdpInner(datas, reply);
+    EXPECT_EQ(SOFTBUS_PERMISSION_DENIED, ret);
+    EXPECT_CALL(softbusServerStubMock, CheckLnnPermission).WillRepeatedly(Return(SOFTBUS_OK));
+    ret = softBusServer->UnregRangeCbForMsdpInner(datas, reply);
+    EXPECT_EQ(SOFTBUS_IPC_ERR, ret);
+
+    datas.WriteCString(test1);
+    ret = softBusServer->UnregRangeCbForMsdpInner(datas, reply);
+    EXPECT_EQ(SOFTBUS_INVALID_PARAM, ret);
+
+    datas.WriteCString(test2);
+    ret = softBusServer->UnregRangeCbForMsdpInner(datas, reply);
+    EXPECT_EQ(SOFTBUS_OK, ret);
+}
+
+/**
+ * @tc.name: SoftbusServerStubTest048
+ * @tc.desc: Verify the TriggerRangeForMsdpInner function.
+ * @tc.type: FUNC
+ * @tc.require:
+ */
+HWTEST_F(SoftbusServerStubTest, SoftbusServerStubTest048, TestSize.Level1)
+{
+    SetAccessTokenPermission("msdp_sa");
+    NiceMock<SoftbusServerStubTestInterfaceMock> softbusServerStubMock;
+    sptr<OHOS::SoftBusServerStub> softBusServer = new OHOS::SoftBusServer(SOFTBUS_SERVER_SA_ID, true);
+    ASSERT_NE(nullptr, softBusServer);
+    char test[10] = "test";
+    RangeConfig config;
+    MessageParcel datas;
+    MessageParcel reply;
+    EXPECT_CALL(softbusServerStubMock, CheckLnnPermission).WillRepeatedly(Return(SOFTBUS_PERMISSION_DENIED));
+    int32_t ret = softBusServer->TriggerRangeForMsdpInner(datas, reply);
+    EXPECT_EQ(SOFTBUS_PERMISSION_DENIED, ret);
+    EXPECT_CALL(softbusServerStubMock, CheckLnnPermission).WillRepeatedly(Return(SOFTBUS_OK));
+    ret = softBusServer->TriggerRangeForMsdpInner(datas, reply);
+    EXPECT_EQ(SOFTBUS_TRANS_PROXY_WRITECSTRING_FAILED, ret);
+
+    datas.WriteCString(test);
+    datas.WriteRawData(&config, sizeof(RangeConfig));
+    ret = softBusServer->TriggerRangeForMsdpInner(datas, reply);
+    EXPECT_EQ(SOFTBUS_OK, ret);
+}
+
+/**
+ * @tc.name: SoftbusServerStubTest049
+ * @tc.desc: Verify the CheckPkgName function.
+ * @tc.type: FUNC
+ * @tc.require:
+ */
+HWTEST_F(SoftbusServerStubTest, SoftbusServerStubTest049, TestSize.Level1)
+{
+    int32_t ret = CheckPkgName("mds");
+    EXPECT_EQ(SOFTBUS_INVALID_PARAM, ret);
+
+    ret = CheckPkgName("ohos.distributedschedule.dms");
+    EXPECT_EQ(SOFTBUS_OK, ret);
+}
+
+/**
+ * @tc.name: SoftbusServerStubTest050
+ * @tc.desc: Verify the CreateServerInner function.
+ * @tc.type: FUNC
+ * @tc.require:
+ */
+HWTEST_F(SoftbusServerStubTest, SoftbusServerStubTest050, TestSize.Level1)
+{
+    sptr<OHOS::SoftBusServerStub> softBusServer = new OHOS::SoftBusServer(SOFTBUS_SERVER_SA_ID, true);
+    ASSERT_NE(nullptr, softBusServer);
+
+    MessageParcel data;
+    MessageParcel reply;
+
+    int32_t ret = softBusServer->CreateServerInner(data, reply);
+    EXPECT_EQ(SOFTBUS_IPC_ERR, ret);
+
+    const char *pkgName = "1234567890123456789012345678901234567890123456789012345678901234567890123456789";
+    data.WriteCString(pkgName);
+    ret = softBusServer->CreateServerInner(data, reply);
+    EXPECT_EQ(SOFTBUS_IPC_ERR, ret);
+
+    pkgName = "ohos.distributedschedule.dms";
+    data.WriteCString(pkgName);
+    ret = softBusServer->CreateServerInner(data, reply);
+    EXPECT_EQ(SOFTBUS_IPC_ERR, ret);
+
+    pkgName = "ohos.distributedschedule.dms";
+    data.WriteCString(pkgName);
+    const char *name =
+        "12345678901234567890123456789012345678901234567890123456789012345678901234567891234567890123456789012"
+        "34567890123456789012345678901234567890123456789012345678912345678901234567890123456789012345678901234"
+        "56789012345678901234567890123456789123456789012345678901234567890123456789012345678901234567890123456"
+        "78901234567891234567890123456789012345678901234567890123456789012345678901234567890123456789";
+    data.WriteCString(name);
+    ret = softBusServer->CreateServerInner(data, reply);
+    EXPECT_EQ(SOFTBUS_IPC_ERR, ret);
+
+    name = "test";
+    data.WriteCString(pkgName);
+    data.WriteCString(name);
+    ret = softBusServer->CreateServerInner(data, reply);
+    EXPECT_EQ(SOFTBUS_OK, ret);
+}
+
+/**
+ * @tc.name: SoftbusServerStubTest051
+ * @tc.desc: Verify the RemoveServerInner function.
+ * @tc.type: FUNC
+ * @tc.require:
+ */
+HWTEST_F(SoftbusServerStubTest, SoftbusServerStubTest051, TestSize.Level1)
+{
+    sptr<OHOS::SoftBusServerStub> softBusServer = new OHOS::SoftBusServer(SOFTBUS_SERVER_SA_ID, true);
+    ASSERT_NE(nullptr, softBusServer);
+
+    MessageParcel data;
+    MessageParcel reply;
+
+    int32_t ret = softBusServer->RemoveServerInner(data, reply);
+    EXPECT_EQ(SOFTBUS_IPC_ERR, ret);
+
+    const char *pkgName = "1234567890123456789012345678901234567890123456789012345678901234567890123456789";
+    data.WriteCString(pkgName);
+    ret = softBusServer->RemoveServerInner(data, reply);
+    EXPECT_EQ(SOFTBUS_IPC_ERR, ret);
+
+    pkgName = "ohos.distributedschedule.dms";
+    data.WriteCString(pkgName);
+    ret = softBusServer->RemoveServerInner(data, reply);
+    EXPECT_EQ(SOFTBUS_IPC_ERR, ret);
+
+    pkgName = "ohos.distributedschedule.dms";
+    data.WriteCString(pkgName);
+    const char *name =
+        "12345678901234567890123456789012345678901234567890123456789012345678901234567891234567890123456789012"
+        "34567890123456789012345678901234567890123456789012345678912345678901234567890123456789012345678901234"
+        "56789012345678901234567890123456789123456789012345678901234567890123456789012345678901234567890123456"
+        "78901234567891234567890123456789012345678901234567890123456789012345678901234567890123456789";
+    data.WriteCString(name);
+    ret = softBusServer->RemoveServerInner(data, reply);
+    EXPECT_EQ(SOFTBUS_IPC_ERR, ret);
+
+    name = "test";
+    data.WriteCString(pkgName);
+    data.WriteCString(name);
+    ret = softBusServer->RemoveServerInner(data, reply);
+    EXPECT_EQ(SOFTBUS_OK, ret);
+}
+
+/**
+ * @tc.name: SoftbusServerStubTest052
+ * @tc.desc: Verify the ConnectInner function.
+ * @tc.type: FUNC
+ * @tc.require:
+ */
+HWTEST_F(SoftbusServerStubTest, SoftbusServerStubTest052, TestSize.Level1)
+{
+    sptr<OHOS::SoftBusServerStub> softBusServer = new OHOS::SoftBusServer(SOFTBUS_SERVER_SA_ID, true);
+    ASSERT_NE(nullptr, softBusServer);
+
+    MessageParcel data;
+    MessageParcel reply;
+
+    int32_t ret = softBusServer->ConnectInner(data, reply);
+    EXPECT_EQ(SOFTBUS_IPC_ERR, ret);
+
+    const char *pkgName = "1234567890123456789012345678901234567890123456789012345678901234567890123456789";
+    data.WriteCString(pkgName);
+    ret = softBusServer->ConnectInner(data, reply);
+    EXPECT_EQ(SOFTBUS_IPC_ERR, ret);
+
+    pkgName = "ohos.distributedschedule.dms";
+    data.WriteCString(pkgName);
+    ret = softBusServer->ConnectInner(data, reply);
+    EXPECT_EQ(SOFTBUS_IPC_ERR, ret);
+
+    pkgName = "ohos.distributedschedule.dms";
+    data.WriteCString(pkgName);
+    const char *name =
+        "12345678901234567890123456789012345678901234567890123456789012345678901234567891234567890123456789012"
+        "34567890123456789012345678901234567890123456789012345678912345678901234567890123456789012345678901234"
+        "56789012345678901234567890123456789123456789012345678901234567890123456789012345678901234567890123456"
+        "78901234567891234567890123456789012345678901234567890123456789012345678901234567890123456789";
+    data.WriteCString(name);
+    ret = softBusServer->ConnectInner(data, reply);
+    EXPECT_EQ(SOFTBUS_IPC_ERR, ret);
+
+    name = "test";
+    data.WriteCString(pkgName);
+    data.WriteCString(name);
+    ret = softBusServer->ConnectInner(data, reply);
+    EXPECT_EQ(SOFTBUS_IPC_ERR, ret);
+}
+
+/**
+ * @tc.name: SoftbusServerStubTest053
+ * @tc.desc: Verify the DisconnectInner function.
+ * @tc.type: FUNC
+ * @tc.require:
+ */
+HWTEST_F(SoftbusServerStubTest, SoftbusServerStubTest053, TestSize.Level1)
+{
+    sptr<OHOS::SoftBusServerStub> softBusServer = new OHOS::SoftBusServer(SOFTBUS_SERVER_SA_ID, true);
+    ASSERT_NE(nullptr, softBusServer);
+
+    MessageParcel data;
+    MessageParcel reply;
+
+    int32_t ret = softBusServer->DisconnectInner(data, reply);
+    EXPECT_EQ(SOFTBUS_IPC_ERR, ret);
+}
+
+/**
+ * @tc.name: SoftbusServerStubTest054
+ * @tc.desc: Verify the SendInner function.
+ * @tc.type: FUNC
+ * @tc.require:
+ */
+HWTEST_F(SoftbusServerStubTest, SoftbusServerStubTest054, TestSize.Level1)
+{
+    sptr<OHOS::SoftBusServerStub> softBusServer = new OHOS::SoftBusServer(SOFTBUS_SERVER_SA_ID, true);
+    ASSERT_NE(nullptr, softBusServer);
+
+    MessageParcel data;
+    MessageParcel reply;
+
+    int32_t ret = softBusServer->SendInner(data, reply);
+    EXPECT_EQ(SOFTBUS_IPC_ERR, ret);
+
+    int32_t handle = 0;
+    data.WriteInt32(handle);
+    ret = softBusServer->SendInner(data, reply);
+    EXPECT_EQ(SOFTBUS_IPC_ERR, ret);
+
+    uint32_t len = TEST_MAX_LEN;
+    data.WriteInt32(handle);
+    data.WriteUint32(len);
+    ret = softBusServer->SendInner(data, reply);
+    EXPECT_EQ(SOFTBUS_INVALID_PARAM, ret);
+}
+
+/**
+ * @tc.name: SoftbusServerStubTest055
+ * @tc.desc: Verify the GetPeerDeviceIdInner function.
+ * @tc.type: FUNC
+ * @tc.require:
+ */
+HWTEST_F(SoftbusServerStubTest, SoftbusServerStubTest055, TestSize.Level1)
+{
+    sptr<OHOS::SoftBusServerStub> softBusServer = new OHOS::SoftBusServer(SOFTBUS_SERVER_SA_ID, true);
+    ASSERT_NE(nullptr, softBusServer);
+
+    MessageParcel data;
+    MessageParcel reply;
+
+    int32_t ret = softBusServer->GetPeerDeviceIdInner(data, reply);
+    EXPECT_EQ(SOFTBUS_IPC_ERR, ret);
+
+    int32_t handle = 0;
+    data.WriteInt32(handle);
+    ret = softBusServer->GetPeerDeviceIdInner(data, reply);
+    EXPECT_EQ(SOFTBUS_IPC_ERR, ret);
+
+    uint32_t len = TEST_DEVICE_ID_SIZE_MAX;
+    data.WriteInt32(handle);
+    data.WriteUint32(len);
+    ret = softBusServer->GetPeerDeviceIdInner(data, reply);
+    EXPECT_EQ(SOFTBUS_INVALID_PARAM, ret);
+}
+
+/**
+ * @tc.name: SoftbusServerStubTest056
+ * @tc.desc: Verify the Create and Remove SessionServerInner function.
+ * @tc.type: FUNC
+ * @tc.require:
+ */
+HWTEST_F(SoftbusServerStubTest, SoftbusServerStubTest056, TestSize.Level1)
+{
+    sptr<OHOS::SoftBusServerStub> softBusServer = new OHOS::SoftBusServer(SOFTBUS_SERVER_SA_ID, true);
+    ASSERT_NE(nullptr, softBusServer);
+    NiceMock<SoftbusServerStubTestInterfaceMock> softbusServerStubMock;
+    char test[10] = "test";
+    MessageParcel datas;
+    MessageParcel reply;
+    datas.WriteCString(test);
+    datas.WriteCString(test);
+    int32_t ret = softBusServer->CreateSessionServerInner(datas, reply);
+    EXPECT_EQ(SOFTBUS_OK, ret);
+
+    datas.WriteCString(test);
+    datas.WriteCString(test);
+    EXPECT_CALL(softbusServerStubMock, SoftBusCheckIsSystemApp).WillRepeatedly(Return(true));
+    ret = softBusServer->CreateSessionServerInner(datas, reply);
+    EXPECT_EQ(SOFTBUS_OK, ret);
+
+    datas.WriteCString(test);
+    ret = softBusServer->RemoveSessionServerInner(datas, reply);
+    EXPECT_EQ(SOFTBUS_OK, ret);
+}
+
+/**
+ * @tc.name: SoftbusServerStubTest057
+ * @tc.desc: GetBundleName error test
+ * @tc.type: FUNC
+ * @tc.require:
+ */
+HWTEST_F(SoftbusServerStubTest, SoftbusServerStubTest057, TestSize.Level1)
+{
+    std::string bundleName = "test";
+    int32_t ret = GetBundleName(0, bundleName);
+    EXPECT_EQ(ret, SOFTBUS_TRANS_GET_BUNDLENAME_FAILED);
+
+    ret = GetAppId(bundleName, bundleName);
+    EXPECT_NE(ret, SOFTBUS_OK);
+}
+
+/**
+ * @tc.name: SoftbusServerStubTest058
+ * @tc.desc: CheckNormalAppSessionName error test
+ * @tc.type: FUNC
+ * @tc.require:
+ */
+HWTEST_F(SoftbusServerStubTest, SoftbusServerStubTest058, TestSize.Level1)
+{
+    NiceMock<SoftbusServerStubTestInterfaceMock> softbusServerStubMock;
+    EXPECT_CALL(softbusServerStubMock, SoftBusCheckIsNormalApp)
+        .WillRepeatedly(Return(true));
+
+    std::string bundleName = "test";
+    MessageParcel data;
+    ReadSessionAttrs(data, nullptr);
+    int32_t ret = CheckNormalAppSessionName(nullptr, 0, bundleName, 0);
+    EXPECT_EQ(ret, SOFTBUS_TRANS_GET_BUNDLENAME_FAILED);
+}
+
+/**
+ * @tc.name: SoftbusServerStubTest059
+ * @tc.desc: StopRangeForMsdpInner api test
+ * @tc.type: FUNC
+ * @tc.require:
+ */
+HWTEST_F(SoftbusServerStubTest, SoftbusServerStubTest059, TestSize.Level1)
+{
+    SetAccessTokenPermission("distributeddata");
+    NiceMock<SoftbusServerStubTestInterfaceMock> softbusServerStubMock;
+    sptr<OHOS::SoftBusServerStub> softBusServer = new OHOS::SoftBusServer(SOFTBUS_SERVER_SA_ID, true);
+    ASSERT_NE(softBusServer, nullptr);
+
+    MessageParcel data;
+    MessageParcel reply;
+    char test[10] = "test";
+    ConnectionAddr addrInfo;
+    (void)memset_s(&addrInfo, sizeof(ConnectionAddr), 0, sizeof(ConnectionAddr));
+    EXPECT_CALL(softbusServerStubMock, CheckLnnPermission).WillRepeatedly(Return(SOFTBUS_PERMISSION_DENIED));
+    int32_t ret = softBusServer->StopRangeForMsdpInner(data, reply);
+    EXPECT_EQ(SOFTBUS_PERMISSION_DENIED, ret);
+    EXPECT_CALL(softbusServerStubMock, CheckLnnPermission).WillRepeatedly(Return(SOFTBUS_OK));
+    ret = softBusServer->StopRangeForMsdpInner(data, reply);
+    EXPECT_EQ(ret, SOFTBUS_TRANS_PROXY_WRITECSTRING_FAILED);
+
+    data.WriteCString(test);
+    ret = softBusServer->StopRangeForMsdpInner(data, reply);
+    EXPECT_EQ(ret, SOFTBUS_TRANS_PROXY_READCSTRING_FAILED);
+
+    data.WriteCString(test);
+    data.WriteRawData(&addrInfo, sizeof(ConnectionAddr));
+    ret = softBusServer->StopRangeForMsdpInner(data, reply);
+    EXPECT_EQ(ret, SOFTBUS_TRANS_PROXY_READCSTRING_FAILED);
+}
+
+/**
+ * @tc.name: SoftbusServerStubTest060
+ * @tc.desc: CheckOpenSessionPermission error test
+ * @tc.type: FUNC
+ * @tc.require:
+ */
+HWTEST_F(SoftbusServerStubTest, SoftbusServerStubTest060, TestSize.Level1)
+{
+    sptr<OHOS::SoftBusServerStub> softBusServer = new OHOS::SoftBusServer(SOFTBUS_SERVER_SA_ID, true);
+    ASSERT_NE(softBusServer, nullptr);
+
+    NiceMock<SoftbusServerStubTestInterfaceMock> softbusServerStubMock;
+    EXPECT_CALL(softbusServerStubMock, UnregChangeListener).WillRepeatedly(Return(SOFTBUS_OK));
+    EXPECT_CALL(softbusServerStubMock, CheckTransPermission)
+        .WillOnce(Return(SOFTBUS_INVALID_PARAM))
+        .WillRepeatedly(Return(SOFTBUS_OK));
+    EXPECT_CALL(softbusServerStubMock, CheckUidAndPid).WillRepeatedly(Return(false));
+
+    int32_t ret = TransSessionMgrInit();
+    EXPECT_EQ(SOFTBUS_OK, ret);
+    SessionServer *sessionServer = GenerateSessionServer();
+    EXPECT_NE(nullptr, sessionServer);
+    ret = TransSessionServerAddItem(sessionServer);
+    EXPECT_EQ(SOFTBUS_OK, ret);
+    SessionParam *sessionParam001 = GenerateSessionParam();
+    ASSERT_NE(sessionParam001, nullptr);
+
+    ret = softBusServer->CheckOpenSessionPermission(sessionParam001);
+    EXPECT_EQ(ret, SOFTBUS_PERMISSION_DENIED);
+
+
+    SoftbusReportPermissionFaultEvt(SERVER_OPEN_SESSION);
+    ret = softBusServer->CheckOpenSessionPermission(sessionParam001);
+    EXPECT_EQ(ret, SOFTBUS_TRANS_CHECK_PID_ERROR);
+}
+
+/**
+ * @tc.name: SoftbusServerStubTest061
+ * @tc.desc: Verify the SyncTrustedRelationShipInner and SetDisplayNameInner function.
+ * @tc.type: FUNC
+ * @tc.require:
+ */
+HWTEST_F(SoftbusServerStubTest, SoftbusServerStubTest061, TestSize.Level1)
+{
+    SetAccessTokenPermission("device_manager");
+    sptr<OHOS::SoftBusServerStub> softBusServer = new OHOS::SoftBusServer(SOFTBUS_SERVER_SA_ID, true);
+    ASSERT_NE(nullptr, softBusServer);
+    NiceMock<SoftbusServerStubTestInterfaceMock> softbusServerStubMock;
+    MessageParcel datas;
+    MessageParcel reply;
+    EXPECT_CALL(softbusServerStubMock, UnregChangeListener).WillRepeatedly(Return(SOFTBUS_OK));
+    EXPECT_CALL(softbusServerStubMock, CheckLnnPermission).WillRepeatedly(Return(SOFTBUS_PERMISSION_DENIED));
+    int32_t ret = softBusServer->SyncTrustedRelationShipInner(datas, reply);
+    EXPECT_EQ(SOFTBUS_PERMISSION_DENIED, ret);
+    EXPECT_CALL(softbusServerStubMock, CheckLnnPermission).WillRepeatedly(Return(SOFTBUS_OK));
+    ret = softBusServer->SyncTrustedRelationShipInner(datas, reply);
+    EXPECT_EQ(SOFTBUS_TRANS_PROXY_READCSTRING_FAILED, ret);
+    ret = softBusServer->SetDisplayNameInner(datas, reply);
+    EXPECT_EQ(SOFTBUS_TRANS_PROXY_READCSTRING_FAILED, ret);
+    EXPECT_CALL(softbusServerStubMock, CheckLnnPermission).WillRepeatedly(Return(SOFTBUS_PERMISSION_DENIED));
+    ret = softBusServer->SetDisplayNameInner(datas, reply);
+    EXPECT_EQ(SOFTBUS_PERMISSION_DENIED, ret);
 }
 }

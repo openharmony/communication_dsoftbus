@@ -24,25 +24,4 @@ usb_disc_src = []
 usb_disc_deps = [ "$dsoftbus_dfx_path:softbus_dfx" ]
 usb_disc_external_deps = []
 
-if (dsoftbus_feature_disc_usb && has_ces_part) {
-  dsoftbus_feature_disc_usb_support = true
-} else {
-  dsoftbus_feature_disc_usb_support = false
-}
-
-if (!dsoftbus_feature_disc_usb_support || !dsoftbus_feature_ex_kits) {
-  usb_disc_src += [
-    "$dsoftbus_root_path/core/discovery/usb/dispatcher/src/disc_usb_dispatcher_virtual.c",
-    "$dsoftbus_root_path/core/discovery/usb/disc_usb/src/disc_usb_virtual.c",
-  ]
-} else {
-  import(
-      "$dsoftbus_root_path/dsoftbus_enhance/core/discovery/usb/disc_usb/disc_usb.gni")
-
-  usb_disc_src += [ "$dsoftbus_root_path/core/discovery/usb/dispatcher/src/disc_usb_dispatcher.c" ]
-
-  usb_disc_src += usb_discovery_sources
-  usb_disc_inc += usb_discovery_dirs
-  usb_disc_deps += usb_discovery_deps
-  usb_disc_external_deps += usb_discovery_external_deps
-}
+usb_disc_src += [ "$dsoftbus_root_path/core/discovery/usb/dispatcher/src/disc_usb_dispatcher.c" ]

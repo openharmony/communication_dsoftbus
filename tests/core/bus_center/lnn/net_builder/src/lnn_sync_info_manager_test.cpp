@@ -17,6 +17,7 @@
 #include <securec.h>
 
 #include "auth_interface.h"
+#include "distribute_net_ledger_mock.h"
 #include "lnn_net_builder.c"
 #include "lnn_net_builder_mock.h"
 #include "lnn_net_ledger_mock.h"
@@ -166,7 +167,7 @@ HWTEST_F(LNNSyncInfoManagerTest, LNN_SEND_P2P_SYNC_INFO_MSG_TEST_001, TestSize.L
 
 /*
  * @tc.name: LNN_SEND_P2P_SYNC_INFO_MSG_TEST_002
- * @tc.desc: networkId == NULL
+ * @tc.desc: networkId == nullptr
  * @tc.type: FUNC
  * @tc.require: I5OMIK
  */
@@ -221,7 +222,7 @@ HWTEST_F(LNNSyncInfoManagerTest, LNN_SEND_P2P_SYNC_INFO_MSG_TEST_004, TestSize.L
 
 /*
  * @tc.name: LNN_SEND_P2P_SYNC_INFO_MSG_TEST_005
- * @tc.desc: msg == NULL
+ * @tc.desc: msg == nullptr
  * @tc.type: FUNC
  * @tc.require: I5OMIK
  */
@@ -360,14 +361,14 @@ HWTEST_F(LNNSyncInfoManagerTest, LNN_SEND_P2P_SYNC_INFO_MSG_TEST_008, TestSize.L
 
 /*
  * @tc.name: FindSyncChannelInfoByChannelId_001
- * @tc.desc: return NULL
+ * @tc.desc: return nullptr
  * @tc.type: FUNC
  * @tc.require: 1
  */
 HWTEST_F(LNNSyncInfoManagerTest, FindSyncChannelInfoByChannelId_001, TestSize.Level1)
 {
     ClearSyncChannelInfo();
-    EXPECT_EQ(FindSyncChannelInfoByChannelId(10), NULL);
+    EXPECT_EQ(FindSyncChannelInfoByChannelId(10), nullptr);
 }
 
 /*
@@ -379,7 +380,7 @@ HWTEST_F(LNNSyncInfoManagerTest, FindSyncChannelInfoByChannelId_001, TestSize.Le
 HWTEST_F(LNNSyncInfoManagerTest, SendSyncInfoMsg_001, TestSize.Level1)
 {
     SyncChannelInfo *info = CreateSyncChannelInfo(NETWORKID);
-    if (info == NULL) {
+    if (info == nullptr) {
         LNN_LOGE(LNN_BUILDER, "create sync channel info error!");
         return;
     }
@@ -388,7 +389,7 @@ HWTEST_F(LNNSyncInfoManagerTest, SendSyncInfoMsg_001, TestSize.Level1)
     SoftBusSysTime sysTime;
     info->accessTime = sysTime;
     SyncInfoMsg *msg = CreateSyncInfoMsg(LNN_INFO_TYPE_CAPABILITY, MSG, LEN, Complete);
-    if (msg == NULL) {
+    if (msg == nullptr) {
         LNN_LOGE(LNN_BUILDER, "create sync info sync error!");
         return;
     }
@@ -410,7 +411,7 @@ HWTEST_F(LNNSyncInfoManagerTest, DumpMsgExcludeListNode_001, TestSize.Level1)
     EXPECT_EQ(DumpMsgExcludeListNode(nullptr), nullptr);
 
     SyncInfoMsg *newItem = CreateSyncInfoMsg(LNN_INFO_TYPE_CAPABILITY, MSG, LEN, Complete);
-    if (newItem == NULL) {
+    if (newItem == nullptr) {
         LNN_LOGE(LNN_BUILDER, "create sync info sync error!");
         return;
     }
@@ -430,12 +431,12 @@ HWTEST_F(LNNSyncInfoManagerTest, DumpSyncInfoMsgList_001, TestSize.Level1)
     EXPECT_EQ(DumpSyncInfoMsgList(nullptr, nullptr), SOFTBUS_INVALID_PARAM);
 
     SyncChannelInfo *newInfo = CreateSyncChannelInfo(NETWORKID);
-    if (newInfo == NULL) {
+    if (newInfo == nullptr) {
         LNN_LOGE(LNN_BUILDER, "create sync channel info error!");
         return;
     }
     SyncChannelInfo *info = CreateSyncChannelInfo(NETWORKID);
-    if (info == NULL) {
+    if (info == nullptr) {
         LNN_LOGE(LNN_BUILDER, "create sync channel info error!");
         return;
     }
@@ -457,7 +458,7 @@ HWTEST_F(LNNSyncInfoManagerTest, DumpSyncChannelInfo_001, TestSize.Level1)
     SoftBusSysTime now;
     SoftBusGetTime(&now);
     SyncChannelInfo *info = CreateSyncChannelInfo(NETWORKID);
-    if (info == NULL) {
+    if (info == nullptr) {
         LNN_LOGE(LNN_BUILDER, "create sync channel info error!");
         return;
     }
@@ -480,13 +481,13 @@ HWTEST_F(LNNSyncInfoManagerTest, DumpSyncChannelInfo_001, TestSize.Level1)
 HWTEST_F(LNNSyncInfoManagerTest, SendSyncInfoMsgFromList_001, TestSize.Level1)
 {
     SyncChannelInfo *info = CreateSyncChannelInfo(NETWORKID);
-    if (info == NULL) {
+    if (info == nullptr) {
         LNN_LOGE(LNN_BUILDER, "create sync channel info error!");
         return;
     }
     info->clientChannelId = 10;
     SyncInfoMsg *newItem = CreateSyncInfoMsg(LNN_INFO_TYPE_CAPABILITY, MSG, LEN, Complete);
-    if (newItem == NULL) {
+    if (newItem == nullptr) {
         LNN_LOGE(LNN_BUILDER, "create sync info sync error!");
         return;
     }
@@ -512,7 +513,7 @@ HWTEST_F(LNNSyncInfoManagerTest, ResetOpenChannelInfo_001, TestSize.Level1)
     int32_t channelId = 10;
     unsigned char isServer = true;
     SyncChannelInfo *info = CreateSyncChannelInfo(NETWORKID);
-    if (info == NULL) {
+    if (info == nullptr) {
         LNN_LOGE(LNN_BUILDER, "create sync channel info error!");
         return;
     }
@@ -536,7 +537,7 @@ HWTEST_F(LNNSyncInfoManagerTest, ResetOpenChannelInfo_002, TestSize.Level1)
     int32_t *oldChannelId = new int32_t(0);
     int32_t channelId = 10;
     SyncChannelInfo *info = CreateSyncChannelInfo(NETWORKID);
-    if (info == NULL) {
+    if (info == nullptr) {
         LNN_LOGE(LNN_BUILDER, "create sync channel info error!");
         return;
     }
@@ -592,12 +593,12 @@ HWTEST_F(LNNSyncInfoManagerTest, OnChannelOpened_002, TestSize.Level1)
     const char *peerUuid = nullptr;
     ClearSyncChannelInfo();
     SyncInfoMsg *msg = CreateSyncInfoMsg(LNN_INFO_TYPE_CAPABILITY, MSG, LEN, Complete);
-    if (msg == NULL) {
+    if (msg == nullptr) {
         LNN_LOGE(LNN_BUILDER, "create sync info msg error!");
         return;
     }
     SyncChannelInfo *info = CreateSyncChannelInfo(NETWORKID);
-    if (info == NULL) {
+    if (info == nullptr) {
         LNN_LOGE(LNN_BUILDER, "create sync channel info error!");
         return;
     }
@@ -627,7 +628,7 @@ HWTEST_F(LNNSyncInfoManagerTest, OnChannelOpened_003, TestSize.Level1)
     ClearSyncChannelInfo();
 
     SyncChannelInfo *info = CreateSyncChannelInfo(NODE_NETWORK_ID);
-    if (info == NULL) {
+    if (info == nullptr) {
         LNN_LOGE(LNN_BUILDER, "create sync channel info error!");
         return;
     }
@@ -651,7 +652,7 @@ HWTEST_F(LNNSyncInfoManagerTest, OnChannelCloseCommon_001, TestSize.Level1)
 {
     int32_t channelId = 10;
     SyncChannelInfo *info = CreateSyncChannelInfo(NETWORKID);
-    if (info == NULL) {
+    if (info == nullptr) {
         LNN_LOGE(LNN_BUILDER, "create sync channel info error!");
         return;
     }
@@ -672,7 +673,7 @@ HWTEST_F(LNNSyncInfoManagerTest, OnChannelCloseCommon_002, TestSize.Level1)
 {
     int32_t channelId = 10;
     SyncChannelInfo *info = CreateSyncChannelInfo(NETWORKID);
-    if (info == NULL) {
+    if (info == nullptr) {
         LNN_LOGE(LNN_BUILDER, "create sync channel info error!");
         return;
     }
@@ -693,7 +694,7 @@ HWTEST_F(LNNSyncInfoManagerTest, OnChannelCloseCommon_003, TestSize.Level1)
 {
     int32_t channelId = 10;
     SyncChannelInfo *info = CreateSyncChannelInfo(NETWORKID);
-    if (info == NULL) {
+    if (info == nullptr) {
         LNN_LOGE(LNN_BUILDER, "create sync channel info error!");
         return;
     }
@@ -720,7 +721,7 @@ HWTEST_F(LNNSyncInfoManagerTest, OnChannelOpenFailed_001, TestSize.Level1)
 
 /*
  * @tc.name: OnChannelOpenFailed_002
- * @tc.desc: info == NULL
+ * @tc.desc: info == nullptr
  * @tc.type: FUNC
  * @tc.require: 1
  */
@@ -741,12 +742,12 @@ HWTEST_F(LNNSyncInfoManagerTest, OnChannelOpenFailed_002, TestSize.Level1)
     ClearSyncChannelInfo();
 
     SyncInfoMsg *msg = CreateSyncInfoMsg(LNN_INFO_TYPE_CAPABILITY, MSG, LEN, Complete);
-    if (msg == NULL) {
+    if (msg == nullptr) {
         LNN_LOGE(LNN_BUILDER, "create sync info msg error!");
         return;
     }
     SyncChannelInfo *info = CreateSyncChannelInfo(NETWORKID);
-    if (info == NULL) {
+    if (info == nullptr) {
         LNN_LOGE(LNN_BUILDER, "create sync channel info error!");
         return;
     }
@@ -779,12 +780,12 @@ HWTEST_F(LNNSyncInfoManagerTest, OnChannelOpenFailed_003, TestSize.Level1)
     EXPECT_CALL(mock, LnnConvertDlId(_, _, _, _, _)).Times(1).WillOnce(Invoke(mockHandler));
 
     SyncInfoMsg *msg = CreateSyncInfoMsg(LNN_INFO_TYPE_CAPABILITY, MSG, LEN, Complete);
-    if (msg == NULL) {
+    if (msg == nullptr) {
         LNN_LOGE(LNN_BUILDER, "create sync info msg error!");
         return;
     }
     SyncChannelInfo *info = CreateSyncChannelInfo(NETWORKID);
-    if (info == NULL) {
+    if (info == nullptr) {
         LNN_LOGE(LNN_BUILDER, "create sync channel info error!");
         return;
     }
@@ -800,7 +801,7 @@ HWTEST_F(LNNSyncInfoManagerTest, OnChannelOpenFailed_003, TestSize.Level1)
 
 /*
  * @tc.name: OnChannelClosed_001
- * @tc.desc: info == NULL
+ * @tc.desc: info == nullptr
  * @tc.type: FUNC
  * @tc.require: 1
  */
@@ -814,7 +815,7 @@ HWTEST_F(LNNSyncInfoManagerTest, OnChannelClosed_001, TestSize.Level1)
 
 /*
  * @tc.name: OnChannelClosed_002
- * @tc.desc: info == NULL
+ * @tc.desc: info == nullptr
  * @tc.type: FUNC
  * @tc.require: 1
  */
@@ -824,7 +825,7 @@ HWTEST_F(LNNSyncInfoManagerTest, OnChannelClosed_002, TestSize.Level1)
 
     ClearSyncChannelInfo();
     SyncChannelInfo *info = CreateSyncChannelInfo(NETWORKID);
-    if (info == NULL) {
+    if (info == nullptr) {
         LNN_LOGE(LNN_BUILDER, "create sync channel info error!");
         return;
     }
@@ -836,7 +837,7 @@ HWTEST_F(LNNSyncInfoManagerTest, OnChannelClosed_002, TestSize.Level1)
 
 /*
  * @tc.name: OnMessageReceived_001
- * @tc.desc: len <= MSG_HEAD_LEN   &   len <= MSG_HEAD_LEN   &   info == NULL
+ * @tc.desc: len <= MSG_HEAD_LEN   &   len <= MSG_HEAD_LEN   &   info == nullptr
  * @tc.type: FUNC
  * @tc.require: 1
  */
@@ -867,7 +868,7 @@ HWTEST_F(LNNSyncInfoManagerTest, OnMessageReceived_002, TestSize.Level1)
 
     ListDelete(&g_syncInfoManager.channelInfoList);
     SyncChannelInfo *info = CreateSyncChannelInfo(NETWORKID);
-    if (info == NULL) {
+    if (info == nullptr) {
         LNN_LOGE(LNN_BUILDER, "create sync channel info error!");
         return;
     }
@@ -880,7 +881,7 @@ HWTEST_F(LNNSyncInfoManagerTest, OnMessageReceived_002, TestSize.Level1)
 
 /*
  * @tc.name: OnMessageReceived_003
- * @tc.desc: handler == NULL
+ * @tc.desc: handler == nullptr
  * @tc.type: FUNC
  * @tc.require: 1
  */
@@ -891,7 +892,7 @@ HWTEST_F(LNNSyncInfoManagerTest, OnMessageReceived_003, TestSize.Level1)
 
     ListDelete(&g_syncInfoManager.channelInfoList);
     SyncChannelInfo *info = CreateSyncChannelInfo(NETWORKID);
-    if (info == NULL) {
+    if (info == nullptr) {
         LNN_LOGE(LNN_BUILDER, "create sync channel info error!");
         return;
     }
@@ -905,7 +906,7 @@ HWTEST_F(LNNSyncInfoManagerTest, OnMessageReceived_003, TestSize.Level1)
 
 /*
  * @tc.name: PackBleOfflineMsg_001
- * @tc.desc: json == NULL
+ * @tc.desc: json == nullptr
  * @tc.type: FUNC
  * @tc.require: 1
  */
@@ -970,7 +971,7 @@ HWTEST_F(LNNSyncInfoManagerTest, PackBleOfflineMsg_003, TestSize.Level1)
 
 /*
  * @tc.name: PackWifiOfflineMsg_001
- * @tc.desc: json == NULL
+ * @tc.desc: json == nullptr
  * @tc.type: FUNC
  * @tc.require: 1
  */
@@ -1247,8 +1248,8 @@ HWTEST_F(LNNSyncInfoManagerTest, CheckWifiOfflineMsgResult_001, TestSize.Level1)
     int32_t authPort = 0;
     const char *offlineCode = nullptr;
 
-    NiceMock<LnnNetLedgertInterfaceMock> ledgerMock;
-    EXPECT_CALL(ledgerMock, LnnGetRemoteNumInfo(_, _, _)).WillRepeatedly(Return(SOFTBUS_ERR));
+    NiceMock<DistributeLedgerInterfaceMock> distributeLedgerMock;
+    EXPECT_CALL(distributeLedgerMock, LnnGetRemoteNumInfoByIfnameIdx(_, _, _, _)).WillRepeatedly(Return(SOFTBUS_ERR));
 
     EXPECT_EQ(CheckWifiOfflineMsgResult(NETWORKID, authPort, offlineCode), false);
 }
@@ -1265,7 +1266,8 @@ HWTEST_F(LNNSyncInfoManagerTest, CheckWifiOfflineMsgResult_002, TestSize.Level1)
     const char *offlineCode = nullptr;
 
     NiceMock<LnnNetLedgertInterfaceMock> ledgerMock;
-    EXPECT_CALL(ledgerMock, LnnGetRemoteNumInfo(_, _, _)).WillOnce(Return(SOFTBUS_OK));
+    NiceMock<DistributeLedgerInterfaceMock> distributeLedgerMock;
+    EXPECT_CALL(distributeLedgerMock, LnnGetRemoteNumInfoByIfnameIdx(_, _, _, _)).WillOnce(Return(SOFTBUS_OK));
     EXPECT_CALL(ledgerMock, LnnGetNodeKeyInfo(_, _, _, _)).WillRepeatedly(Return(SOFTBUS_ERR));
 
     EXPECT_EQ(CheckWifiOfflineMsgResult(NETWORKID, authPort, offlineCode), false);
@@ -1284,8 +1286,9 @@ HWTEST_F(LNNSyncInfoManagerTest, CheckWifiOfflineMsgResult_003, TestSize.Level1)
 
     NiceMock<LnnNetLedgertInterfaceMock> ledgerMock;
     NiceMock<LnnSyncInfoManagerInterfaceMock> lnnSyncInfoMgrMock;
+    NiceMock<DistributeLedgerInterfaceMock> distributeLedgerMock;
 
-    EXPECT_CALL(ledgerMock, LnnGetRemoteNumInfo(_, _, _)).WillOnce(Return(SOFTBUS_OK));
+    EXPECT_CALL(distributeLedgerMock, LnnGetRemoteNumInfoByIfnameIdx(_, _, _, _)).WillOnce(Return(SOFTBUS_OK));
     EXPECT_CALL(ledgerMock, LnnGetNodeKeyInfo(_, _, _, _)).WillRepeatedly(Return(SOFTBUS_OK));
     EXPECT_CALL(lnnSyncInfoMgrMock, ConvertBytesToHexString(_, _, _, _)).WillRepeatedly(Return(SOFTBUS_ERR));
 
@@ -1306,8 +1309,9 @@ HWTEST_F(LNNSyncInfoManagerTest, CheckWifiOfflineMsgResult_004, TestSize.Level1)
 
     NiceMock<LnnNetLedgertInterfaceMock> ledgerMock;
     NiceMock<LnnSyncInfoManagerInterfaceMock> lnnSyncInfoMgrMock;
+    NiceMock<DistributeLedgerInterfaceMock> distributeLedgerMock;
 
-    EXPECT_CALL(ledgerMock, LnnGetRemoteNumInfo(_, _, _))
+    EXPECT_CALL(distributeLedgerMock, LnnGetRemoteNumInfoByIfnameIdx(_, _, _, _))
         .Times(1)
         .WillOnce(DoAll(SetArgPointee<2>(newAuthPort), Return(SOFTBUS_OK)));
     EXPECT_CALL(ledgerMock, LnnGetNodeKeyInfo(_, _, _, _)).WillRepeatedly(Return(SOFTBUS_OK));
@@ -1330,8 +1334,9 @@ HWTEST_F(LNNSyncInfoManagerTest, CheckWifiOfflineMsgResult_005, TestSize.Level1)
 
     NiceMock<LnnNetLedgertInterfaceMock> ledgerMock;
     NiceMock<LnnSyncInfoManagerInterfaceMock> lnnSyncInfoMgrMock;
+    NiceMock<DistributeLedgerInterfaceMock> distributeLedgerMock;
 
-    EXPECT_CALL(ledgerMock, LnnGetRemoteNumInfo(_, _, _))
+    EXPECT_CALL(distributeLedgerMock, LnnGetRemoteNumInfoByIfnameIdx(_, _, _, _))
         .Times(1)
         .WillOnce(DoAll(SetArgPointee<2>(newAuthPort), Return(SOFTBUS_OK)));
     EXPECT_CALL(ledgerMock, LnnGetNodeKeyInfo(_, _, _, _)).WillRepeatedly(Return(SOFTBUS_OK));
@@ -1343,7 +1348,7 @@ HWTEST_F(LNNSyncInfoManagerTest, CheckWifiOfflineMsgResult_005, TestSize.Level1)
 
 /*
  * @tc.name: WlanOffLineProcess_001
- * @tc.desc: json == NULL
+ * @tc.desc: json == nullptr
  * @tc.type: FUNC
  * @tc.require: 1
  */
@@ -1402,7 +1407,7 @@ HWTEST_F(LNNSyncInfoManagerTest, WlanOffLineProcess_003, TestSize.Level1)
     NiceMock<LnnServicetInterfaceMock> lnnServerMock;
     EXPECT_CALL(mock, JSON_Parse(_, _)).WillRepeatedly(Return(&json));
     EXPECT_CALL(mock, JSON_GetInt32FromOject(_, _, _)).WillRepeatedly(Return(true));
-    EXPECT_CALL(mock, JSON_GetStringFromOject(_, _, _, _)).WillRepeatedly(Return(true));
+    EXPECT_CALL(mock, JSON_GetStringFromObject(_, _, _, _)).WillRepeatedly(Return(true));
     EXPECT_CALL(lnnServerMock, AuthGetDeviceUuid(_, _, _)).WillRepeatedly(Return(SOFTBUS_ERR));
 
     WlanOffLineProcess(&data, authHandle);
@@ -1429,7 +1434,7 @@ HWTEST_F(LNNSyncInfoManagerTest, WlanOffLineProcess_004, TestSize.Level1)
     NiceMock<LnnNetLedgertInterfaceMock> lnnNetLedgertmock;
     EXPECT_CALL(mock, JSON_Parse(_, _)).WillRepeatedly(Return(&json));
     EXPECT_CALL(mock, JSON_GetInt32FromOject(_, _, _)).WillRepeatedly(Return(true));
-    EXPECT_CALL(mock, JSON_GetStringFromOject(_, _, _, _)).WillRepeatedly(Return(true));
+    EXPECT_CALL(mock, JSON_GetStringFromObject(_, _, _, _)).WillRepeatedly(Return(true));
     EXPECT_CALL(lnnServerMock, AuthGetDeviceUuid(_, _, _)).WillRepeatedly(Return(SOFTBUS_OK));
     EXPECT_CALL(lnnNetLedgertmock, LnnConvertDlId(_, _, _, _, _)).WillRepeatedly(Return(SOFTBUS_ERR));
 
@@ -1458,14 +1463,15 @@ HWTEST_F(LNNSyncInfoManagerTest, WlanOffLineProcess_005, TestSize.Level1)
     NiceMock<LnnSyncInfoManagerInterfaceMock> mock;
     NiceMock<LnnServicetInterfaceMock> lnnServerMock;
     NiceMock<LnnNetLedgertInterfaceMock> ledgerMock;
+    NiceMock<DistributeLedgerInterfaceMock> distributeLedgerMock;
     EXPECT_CALL(mock, JSON_Parse(_, _)).WillRepeatedly(Return(&json));
     EXPECT_CALL(mock, JSON_GetInt32FromOject(_, _, _)).WillOnce(DoAll(SetArgPointee<2>(newAuthPort), Return(true)));
-    EXPECT_CALL(mock, JSON_GetStringFromOject(_, _, _, _))
+    EXPECT_CALL(mock, JSON_GetStringFromObject(_, _, _, _))
         .WillOnce(DoAll(SetArrayArgument<2>(offlineCode, offlineCode + 3), Return(true)));
     EXPECT_CALL(lnnServerMock, AuthGetDeviceUuid(_, _, _)).WillRepeatedly(Return(SOFTBUS_OK));
     EXPECT_CALL(ledgerMock, LnnConvertDlId(_, _, _, _, _)).WillRepeatedly(Return(SOFTBUS_OK));
 
-    EXPECT_CALL(ledgerMock, LnnGetRemoteNumInfo(_, _, _))
+    EXPECT_CALL(distributeLedgerMock, LnnGetRemoteNumInfoByIfnameIdx(_, _, _, _))
         .Times(1)
         .WillOnce(DoAll(SetArgPointee<2>(newAuthPort), Return(SOFTBUS_OK)));
     EXPECT_CALL(ledgerMock, LnnGetNodeKeyInfo(_, _, _, _)).WillRepeatedly(Return(SOFTBUS_OK));
@@ -1479,7 +1485,7 @@ HWTEST_F(LNNSyncInfoManagerTest, WlanOffLineProcess_005, TestSize.Level1)
 
 /*
  * @tc.name: OnP2pNetworkingDataRecv_001
- * @tc.desc: data == NULL
+ * @tc.desc: data == nullptr
  * @tc.type: FUNC
  * @tc.require: 1
  */
@@ -1514,7 +1520,7 @@ HWTEST_F(LNNSyncInfoManagerTest, OnP2pNetworkingDataRecv_002, TestSize.Level1)
 
 /*
  * @tc.name: OnP2pNetworkingDataRecv_003
- * @tc.desc: json == NULL
+ * @tc.desc: json == nullptr
  * @tc.type: FUNC
  * @tc.require: 1
  */
@@ -1613,7 +1619,7 @@ HWTEST_F(LNNSyncInfoManagerTest, OnP2pNetworkingDataRecv_006, TestSize.Level1)
 
 /*
  * @tc.name: LnnSyncManagerHandleOffline_001
- * @tc.desc: item == NULL
+ * @tc.desc: item == nullptr
  * @tc.type: FUNC
  * @tc.require: 1
  */
@@ -1633,7 +1639,7 @@ HWTEST_F(LNNSyncInfoManagerTest, LnnSyncManagerHandleOffline_001, TestSize.Level
 HWTEST_F(LNNSyncInfoManagerTest, LnnSyncManagerHandleOffline_002, TestSize.Level1)
 {
     SyncChannelInfo *info = CreateSyncChannelInfo(NETWORKID);
-    if (info == NULL) {
+    if (info == nullptr) {
         LNN_LOGE(LNN_BUILDER, "create sync channel info error!");
         return;
     }
@@ -1666,7 +1672,7 @@ HWTEST_F(LNNSyncInfoManagerTest, OnLnnOnlineStateChange_001, TestSize.Level1)
 
 /*
  * @tc.name: OnWifiDirectSyncMsgRecv_001
- * @tc.desc: data == NULL
+ * @tc.desc: data == nullptr
  * @tc.type: FUNC
  * @tc.require: 1
  */
@@ -1674,7 +1680,7 @@ HWTEST_F(LNNSyncInfoManagerTest, OnWifiDirectSyncMsgRecv_001, TestSize.Level1)
 {
     AuthTransData *data = nullptr;
     AuthHandle authHandle;
-    OnWifiDirectSyncMsgRecv(authHandle, data);
+    EXPECT_NO_FATAL_FAILURE(OnWifiDirectSyncMsgRecv(authHandle, data));
 }
 
 /*
@@ -1690,14 +1696,14 @@ HWTEST_F(LNNSyncInfoManagerTest, OnWifiDirectSyncMsgRecv_002, TestSize.Level1)
     data.data = new uint8_t(0);
     AuthHandle authHandle;
 
-    OnWifiDirectSyncMsgRecv(authHandle, &data);
+    EXPECT_NO_FATAL_FAILURE(OnWifiDirectSyncMsgRecv(authHandle, &data));
     delete (data.data);
     data.data = nullptr;
 }
 
 /*
  * @tc.name: OnWifiDirectSyncMsgRecv_003
- * @tc.desc: auth == NULL
+ * @tc.desc: auth == nullptr
  * @tc.type: FUNC
  * @tc.require: 1
  */
@@ -1711,7 +1717,7 @@ HWTEST_F(LNNSyncInfoManagerTest, OnWifiDirectSyncMsgRecv_003, TestSize.Level1)
     NiceMock<LnnSyncInfoManagerInterfaceMock> lnnSyncInfoMgrMock;
     EXPECT_CALL(lnnSyncInfoMgrMock, GetAuthManagerByAuthId(_)).Times(1).WillOnce(Return(nullptr));
 
-    OnWifiDirectSyncMsgRecv(authHandle, &data);
+    EXPECT_NO_FATAL_FAILURE(OnWifiDirectSyncMsgRecv(authHandle, &data));
     delete (data.data);
     data.data = nullptr;
 }
@@ -1733,9 +1739,9 @@ HWTEST_F(LNNSyncInfoManagerTest, OnWifiDirectSyncMsgRecv_004, TestSize.Level1)
     NiceMock<LnnSyncInfoManagerInterfaceMock> lnnSyncInfoMgrMock;
     EXPECT_CALL(lnnSyncInfoMgrMock, GetAuthManagerByAuthId(_)).Times(1).WillOnce(Return(&authManager));
     EXPECT_CALL(lnnSyncInfoMgrMock, LnnGetNetworkIdByUdid(_, _, _)).Times(1).WillOnce(Return(SOFTBUS_ERR));
-    EXPECT_CALL(lnnSyncInfoMgrMock, DelAuthManager(_, _)).Times(1);
+    EXPECT_CALL(lnnSyncInfoMgrMock, DelDupAuthManager(_)).Times(1);
 
-    OnWifiDirectSyncMsgRecv(authHandle, &data);
+    EXPECT_NO_FATAL_FAILURE(OnWifiDirectSyncMsgRecv(authHandle, &data));
     delete (data.data);
     data.data = nullptr;
 }
@@ -1757,16 +1763,16 @@ HWTEST_F(LNNSyncInfoManagerTest, OnWifiDirectSyncMsgRecv_005, TestSize.Level1)
     NiceMock<LnnSyncInfoManagerInterfaceMock> lnnSyncInfoMgrMock;
     EXPECT_CALL(lnnSyncInfoMgrMock, GetAuthManagerByAuthId(_)).Times(1).WillOnce(Return(&authManager));
     EXPECT_CALL(lnnSyncInfoMgrMock, LnnGetNetworkIdByUdid(_, _, _)).Times(1).WillOnce(Return(SOFTBUS_OK));
-    EXPECT_CALL(lnnSyncInfoMgrMock, DelAuthManager(_, _)).Times(1);
+    EXPECT_CALL(lnnSyncInfoMgrMock, DelDupAuthManager(_)).Times(1);
 
-    OnWifiDirectSyncMsgRecv(authHandle, &data);
+    EXPECT_NO_FATAL_FAILURE(OnWifiDirectSyncMsgRecv(authHandle, &data));
     delete (data.data);
     data.data = nullptr;
 }
 
 /*
  * @tc.name: OnWifiDirectSyncMsgRecv_006
- * @tc.desc: handler == NULL
+ * @tc.desc: handler == nullptr
  * @tc.type: FUNC
  * @tc.require: 1
  */
@@ -1781,9 +1787,9 @@ HWTEST_F(LNNSyncInfoManagerTest, OnWifiDirectSyncMsgRecv_006, TestSize.Level1)
     NiceMock<LnnSyncInfoManagerInterfaceMock> lnnSyncInfoMgrMock;
     EXPECT_CALL(lnnSyncInfoMgrMock, GetAuthManagerByAuthId(_)).Times(1).WillOnce(Return(&authManager));
     EXPECT_CALL(lnnSyncInfoMgrMock, LnnGetNetworkIdByUdid(_, _, _)).Times(1).WillOnce(Return(SOFTBUS_OK));
-    EXPECT_CALL(lnnSyncInfoMgrMock, DelAuthManager(_, _)).Times(1);
+    EXPECT_CALL(lnnSyncInfoMgrMock, DelDupAuthManager(_)).Times(1);
 
-    OnWifiDirectSyncMsgRecv(authHandle, &data);
+    EXPECT_NO_FATAL_FAILURE(OnWifiDirectSyncMsgRecv(authHandle, &data));
 
     delete (data.data);
     data.data = nullptr;
@@ -1791,7 +1797,7 @@ HWTEST_F(LNNSyncInfoManagerTest, OnWifiDirectSyncMsgRecv_006, TestSize.Level1)
 
 /*
  * @tc.name: OnWifiDirectSyncMsgRecv_007
- * @tc.desc: handler == NULL
+ * @tc.desc: handler == nullptr
  * @tc.type: FUNC
  * @tc.require: 1
  */
@@ -1807,9 +1813,9 @@ HWTEST_F(LNNSyncInfoManagerTest, OnWifiDirectSyncMsgRecv_007, TestSize.Level1)
     NiceMock<LnnSyncInfoManagerInterfaceMock> lnnSyncInfoMgrMock;
     EXPECT_CALL(lnnSyncInfoMgrMock, GetAuthManagerByAuthId(_)).Times(1).WillOnce(Return(&authManager));
     EXPECT_CALL(lnnSyncInfoMgrMock, LnnGetNetworkIdByUdid(_, _, _)).Times(1).WillOnce(Return(SOFTBUS_OK));
-    EXPECT_CALL(lnnSyncInfoMgrMock, DelAuthManager(_, _)).Times(1);
+    EXPECT_CALL(lnnSyncInfoMgrMock, DelDupAuthManager(_)).Times(1);
 
-    OnWifiDirectSyncMsgRecv(authHandle, &data);
+    EXPECT_NO_FATAL_FAILURE(OnWifiDirectSyncMsgRecv(authHandle, &data));
 
     delete (data.data);
     data.data = nullptr;
@@ -1833,9 +1839,9 @@ HWTEST_F(LNNSyncInfoManagerTest, OnWifiDirectSyncMsgRecv_008, TestSize.Level1)
     NiceMock<LnnSyncInfoManagerInterfaceMock> lnnSyncInfoMgrMock;
     EXPECT_CALL(lnnSyncInfoMgrMock, GetAuthManagerByAuthId(_)).Times(1).WillOnce(Return(&authManager));
     EXPECT_CALL(lnnSyncInfoMgrMock, LnnGetNetworkIdByUdid(_, _, _)).Times(1).WillOnce(Return(SOFTBUS_OK));
-    EXPECT_CALL(lnnSyncInfoMgrMock, DelAuthManager(_, _)).Times(1);
+    EXPECT_CALL(lnnSyncInfoMgrMock, DelDupAuthManager(_)).Times(1);
 
-    OnWifiDirectSyncMsgRecv(authHandle, &data);
+    EXPECT_NO_FATAL_FAILURE(OnWifiDirectSyncMsgRecv(authHandle, &data));
 
     delete (data.data);
     data.data = nullptr;
@@ -1942,7 +1948,7 @@ HWTEST_F(LNNSyncInfoManagerTest, ResetSendSyncInfo_003, TestSize.Level1)
     };
 
     SyncInfoMsg *msg = CreateSyncInfoMsg(LNN_INFO_TYPE_CAPABILITY, MSG, LEN, Complete);
-    if (msg == NULL) {
+    if (msg == nullptr) {
         LNN_LOGE(LNN_BUILDER, "create sync info msg error!");
         return;
     }
@@ -1996,7 +2002,7 @@ HWTEST_F(LNNSyncInfoManagerTest, SendSyncInfoByNewChannel_002, TestSize.Level1)
 HWTEST_F(LNNSyncInfoManagerTest, TrySendSyncInfoMsg_001, TestSize.Level1)
 {
     SyncInfoMsg *msg = CreateSyncInfoMsg(LNN_INFO_TYPE_CAPABILITY, MSG, LEN, Complete);
-    if (msg == NULL) {
+    if (msg == nullptr) {
         LNN_LOGE(LNN_BUILDER, "create sync info msg error!");
         return;
     }
@@ -2004,7 +2010,7 @@ HWTEST_F(LNNSyncInfoManagerTest, TrySendSyncInfoMsg_001, TestSize.Level1)
     ListDelete(&g_syncInfoManager.channelInfoList);
 
     SyncChannelInfo *info = CreateSyncChannelInfo(NETWORKID);
-    if (info == NULL) {
+    if (info == nullptr) {
         LNN_LOGE(LNN_BUILDER, "create sync channel info error!");
         return;
     }
@@ -2098,14 +2104,14 @@ HWTEST_F(LNNSyncInfoManagerTest, TrySendSyncInfoMsgByAuth_002, TestSize.Level1)
 
 /*
  * @tc.name: TrySendSyncInfoMsgByAuth_003
- * @tc.desc: msg->complete != NULL
+ * @tc.desc: msg->complete != nullptr
  * @tc.type: FUNC
  * @tc.require: 1
  */
 HWTEST_F(LNNSyncInfoManagerTest, TrySendSyncInfoMsgByAuth_003, TestSize.Level1)
 {
     SyncInfoMsg *msg = CreateSyncInfoMsg(LNN_INFO_TYPE_CAPABILITY, MSG, LEN, Complete);
-    if (msg == NULL) {
+    if (msg == nullptr) {
         LNN_LOGE(LNN_BUILDER, "create sync info msg error!");
         return;
     }
@@ -2151,8 +2157,8 @@ HWTEST_F(LNNSyncInfoManagerTest, GetFeatureCap_002, TestSize.Level1)
     NiceMock<LnnNetLedgertInterfaceMock> ledgerMock;
     EXPECT_CALL(ledgerMock, LnnGetLocalNumU64Info(_, _)).Times(1).WillOnce(Return(SOFTBUS_OK));
 
-    NiceMock<LnnSyncInfoManagerInterfaceMock> mock;
-    EXPECT_CALL(mock, LnnGetRemoteNumU64Info(_, _, _)).Times(1).WillOnce(Return(SOFTBUS_ERR));
+    NiceMock<DistributeLedgerInterfaceMock> distributeLedgerMock;
+    EXPECT_CALL(distributeLedgerMock, LnnGetRemoteNumU64Info(_, _, _)).Times(1).WillOnce(Return(SOFTBUS_ERR));
     EXPECT_NE(GetFeatureCap(NETWORKID, &local, &remote), SOFTBUS_OK);
 }
 
@@ -2170,8 +2176,8 @@ HWTEST_F(LNNSyncInfoManagerTest, GetFeatureCap_003, TestSize.Level1)
     NiceMock<LnnNetLedgertInterfaceMock> ledgerMock;
     EXPECT_CALL(ledgerMock, LnnGetLocalNumU64Info(_, _)).Times(1).WillOnce(Return(SOFTBUS_OK));
 
-    NiceMock<LnnSyncInfoManagerInterfaceMock> mock;
-    EXPECT_CALL(mock, LnnGetRemoteNumU64Info(_, _, _)).Times(1).WillOnce(Return(SOFTBUS_OK));
+    NiceMock<DistributeLedgerInterfaceMock> distributeLedgerMock;
+    EXPECT_CALL(distributeLedgerMock, LnnGetRemoteNumU64Info(_, _, _)).Times(1).WillOnce(Return(SOFTBUS_OK));
     EXPECT_EQ(GetFeatureCap(NETWORKID, &local, &remote), SOFTBUS_OK);
 }
 
@@ -2200,10 +2206,11 @@ HWTEST_F(LNNSyncInfoManagerTest, IsNeedSyncByAuth_002, TestSize.Level1)
     uint32_t local = 0;
     NiceMock<LnnNetLedgertInterfaceMock> ledgerMock;
     NiceMock<LnnSyncInfoManagerInterfaceMock> lnnSyncInfoMgrMock;
+    NiceMock<DistributeLedgerInterfaceMock> distributeLedgerMock;
     EXPECT_CALL(ledgerMock, LnnGetLocalNumU32Info(_, _))
         .Times(1)
         .WillOnce(DoAll(SetArgPointee<1>(local), Return(SOFTBUS_OK)));
-    EXPECT_CALL(lnnSyncInfoMgrMock, LnnGetRemoteNumU32Info(_, _, _)).Times(1).WillOnce(Return(SOFTBUS_OK));
+    EXPECT_CALL(distributeLedgerMock, LnnGetRemoteNumU32Info(_, _, _)).Times(1).WillOnce(Return(SOFTBUS_OK));
 
     EXPECT_EQ(IsNeedSyncByAuth(NETWORKID), false);
 }
@@ -2220,10 +2227,11 @@ HWTEST_F(LNNSyncInfoManagerTest, IsNeedSyncByAuth_003, TestSize.Level1)
     uint32_t remote1 = 8;
     NiceMock<LnnNetLedgertInterfaceMock> ledgerMock;
     NiceMock<LnnSyncInfoManagerInterfaceMock> lnnSyncInfoMgrMock;
+    NiceMock<DistributeLedgerInterfaceMock> distributeLedgerMock;
     EXPECT_CALL(ledgerMock, LnnGetLocalNumU32Info(_, _))
         .Times(1)
         .WillOnce(DoAll(SetArgPointee<1>(local1), Return(SOFTBUS_OK)));
-    EXPECT_CALL(lnnSyncInfoMgrMock, LnnGetRemoteNumU32Info(_, _, _))
+    EXPECT_CALL(distributeLedgerMock, LnnGetRemoteNumU32Info(_, _, _))
         .WillOnce(DoAll(SetArgPointee<2>(remote1), Return(SOFTBUS_OK)));
     EXPECT_CALL(ledgerMock, LnnGetLocalNumU64Info(_, _)).Times(1).WillOnce(Return(SOFTBUS_ERR));
 
@@ -2232,7 +2240,7 @@ HWTEST_F(LNNSyncInfoManagerTest, IsNeedSyncByAuth_003, TestSize.Level1)
 
 /*
  * @tc.name: IsNeedSyncByAuth_004
- * @tc.desc: (local & (1 << BIT_BLE_TRIGGER_CONNECTION)) == 0
+ * @tc.desc: (local & (1 << BIT_WIFI_DIRECT_ENHANCE_CAPABILITY)) == 0
  * @tc.type: FUNC
  * @tc.require: 1
  */
@@ -2242,10 +2250,11 @@ HWTEST_F(LNNSyncInfoManagerTest, IsNeedSyncByAuth_004, TestSize.Level1)
     uint32_t remote1 = 8;
     NiceMock<LnnNetLedgertInterfaceMock> ledgerMock;
     NiceMock<LnnSyncInfoManagerInterfaceMock> lnnSyncInfoMgrMock;
+    NiceMock<DistributeLedgerInterfaceMock> distributeLedgerMock;
     EXPECT_CALL(ledgerMock, LnnGetLocalNumU32Info(_, _))
         .Times(1)
         .WillOnce(DoAll(SetArgPointee<1>(local1), Return(SOFTBUS_OK)));
-    EXPECT_CALL(lnnSyncInfoMgrMock, LnnGetRemoteNumU32Info(_, _, _))
+    EXPECT_CALL(distributeLedgerMock, LnnGetRemoteNumU32Info(_, _, _))
         .WillOnce(DoAll(SetArgPointee<2>(remote1), Return(SOFTBUS_OK)));
 
     uint32_t local2 = 1;
@@ -2253,7 +2262,7 @@ HWTEST_F(LNNSyncInfoManagerTest, IsNeedSyncByAuth_004, TestSize.Level1)
     EXPECT_CALL(ledgerMock, LnnGetLocalNumU64Info(_, _))
         .Times(1)
         .WillOnce(DoAll(SetArgPointee<1>(local2), Return(SOFTBUS_OK)));
-    EXPECT_CALL(lnnSyncInfoMgrMock, LnnGetRemoteNumU64Info(_, _, _))
+    EXPECT_CALL(distributeLedgerMock, LnnGetRemoteNumU64Info(_, _, _))
         .Times(1)
         .WillOnce(DoAll(SetArgPointee<2>(remote2), Return(SOFTBUS_OK)));
 
@@ -2272,10 +2281,11 @@ HWTEST_F(LNNSyncInfoManagerTest, IsNeedSyncByAuth_005, TestSize.Level1)
     uint32_t remote1 = 8;
     NiceMock<LnnNetLedgertInterfaceMock> ledgerMock;
     NiceMock<LnnSyncInfoManagerInterfaceMock> lnnSyncInfoMgrMock;
+    NiceMock<DistributeLedgerInterfaceMock> distributeLedgerMock;
     EXPECT_CALL(ledgerMock, LnnGetLocalNumU32Info(_, _))
         .Times(1)
         .WillOnce(DoAll(SetArgPointee<1>(local1), Return(SOFTBUS_OK)));
-    EXPECT_CALL(lnnSyncInfoMgrMock, LnnGetRemoteNumU32Info(_, _, _))
+    EXPECT_CALL(distributeLedgerMock, LnnGetRemoteNumU32Info(_, _, _))
         .WillOnce(DoAll(SetArgPointee<2>(remote1), Return(SOFTBUS_OK)));
 
     uint32_t local2 = 32768;
@@ -2283,7 +2293,7 @@ HWTEST_F(LNNSyncInfoManagerTest, IsNeedSyncByAuth_005, TestSize.Level1)
     EXPECT_CALL(ledgerMock, LnnGetLocalNumU64Info(_, _))
         .Times(1)
         .WillOnce(DoAll(SetArgPointee<1>(local2), Return(SOFTBUS_OK)));
-    EXPECT_CALL(lnnSyncInfoMgrMock, LnnGetRemoteNumU64Info(_, _, _))
+    EXPECT_CALL(distributeLedgerMock, LnnGetRemoteNumU64Info(_, _, _))
         .Times(1)
         .WillOnce(DoAll(SetArgPointee<2>(remote2), Return(SOFTBUS_OK)));
 
@@ -2304,10 +2314,11 @@ HWTEST_F(LNNSyncInfoManagerTest, IsNeedSyncByAuth_006, TestSize.Level1)
     uint32_t remote1 = 8;
     NiceMock<LnnNetLedgertInterfaceMock> ledgerMock;
     NiceMock<LnnSyncInfoManagerInterfaceMock> lnnSyncInfoMgrMock;
+    NiceMock<DistributeLedgerInterfaceMock> distributeLedgerMock;
     EXPECT_CALL(ledgerMock, LnnGetLocalNumU32Info(_, _))
         .Times(1)
         .WillOnce(DoAll(SetArgPointee<1>(local1), Return(SOFTBUS_OK)));
-    EXPECT_CALL(lnnSyncInfoMgrMock, LnnGetRemoteNumU32Info(_, _, _))
+    EXPECT_CALL(distributeLedgerMock, LnnGetRemoteNumU32Info(_, _, _))
         .WillOnce(DoAll(SetArgPointee<2>(remote1), Return(SOFTBUS_OK)));
 
     uint32_t local2 = 32768;
@@ -2315,7 +2326,7 @@ HWTEST_F(LNNSyncInfoManagerTest, IsNeedSyncByAuth_006, TestSize.Level1)
     EXPECT_CALL(ledgerMock, LnnGetLocalNumU64Info(_, _))
         .Times(1)
         .WillOnce(DoAll(SetArgPointee<1>(local2), Return(SOFTBUS_OK)));
-    EXPECT_CALL(lnnSyncInfoMgrMock, LnnGetRemoteNumU64Info(_, _, _))
+    EXPECT_CALL(distributeLedgerMock, LnnGetRemoteNumU64Info(_, _, _))
         .Times(1)
         .WillOnce(DoAll(SetArgPointee<2>(remote2), Return(SOFTBUS_OK)));
 
@@ -2337,10 +2348,11 @@ HWTEST_F(LNNSyncInfoManagerTest, IsNeedSyncByAuth_007, TestSize.Level1)
     uint32_t remote1 = 10;
     NiceMock<LnnNetLedgertInterfaceMock> ledgerMock;
     NiceMock<LnnSyncInfoManagerInterfaceMock> lnnSyncInfoMgrMock;
+    NiceMock<DistributeLedgerInterfaceMock> distributeLedgerMock;
     EXPECT_CALL(ledgerMock, LnnGetLocalNumU32Info(_, _))
         .Times(1)
         .WillOnce(DoAll(SetArgPointee<1>(local1), Return(SOFTBUS_OK)));
-    EXPECT_CALL(lnnSyncInfoMgrMock, LnnGetRemoteNumU32Info(_, _, _))
+    EXPECT_CALL(distributeLedgerMock, LnnGetRemoteNumU32Info(_, _, _))
         .WillOnce(DoAll(SetArgPointee<2>(remote1), Return(SOFTBUS_OK)));
 
     uint32_t local2 = 32768;
@@ -2348,7 +2360,7 @@ HWTEST_F(LNNSyncInfoManagerTest, IsNeedSyncByAuth_007, TestSize.Level1)
     EXPECT_CALL(ledgerMock, LnnGetLocalNumU64Info(_, _))
         .Times(1)
         .WillOnce(DoAll(SetArgPointee<1>(local2), Return(SOFTBUS_OK)));
-    EXPECT_CALL(lnnSyncInfoMgrMock, LnnGetRemoteNumU64Info(_, _, _))
+    EXPECT_CALL(distributeLedgerMock, LnnGetRemoteNumU64Info(_, _, _))
         .Times(1)
         .WillOnce(DoAll(SetArgPointee<2>(remote2), Return(SOFTBUS_OK)));
 
@@ -2370,10 +2382,11 @@ HWTEST_F(LNNSyncInfoManagerTest, IsNeedSyncByAuth_008, TestSize.Level1)
     uint32_t remote1 = 8;
     NiceMock<LnnNetLedgertInterfaceMock> ledgerMock;
     NiceMock<LnnSyncInfoManagerInterfaceMock> lnnSyncInfoMgrMock;
+    NiceMock<DistributeLedgerInterfaceMock> distributeLedgerMock;
     EXPECT_CALL(ledgerMock, LnnGetLocalNumU32Info(_, _))
         .Times(1)
         .WillOnce(DoAll(SetArgPointee<1>(local1), Return(SOFTBUS_OK)));
-    EXPECT_CALL(lnnSyncInfoMgrMock, LnnGetRemoteNumU32Info(_, _, _))
+    EXPECT_CALL(distributeLedgerMock, LnnGetRemoteNumU32Info(_, _, _))
         .WillOnce(DoAll(SetArgPointee<2>(remote1), Return(SOFTBUS_OK)));
 
     uint32_t local2 = 32768;
@@ -2381,7 +2394,7 @@ HWTEST_F(LNNSyncInfoManagerTest, IsNeedSyncByAuth_008, TestSize.Level1)
     EXPECT_CALL(ledgerMock, LnnGetLocalNumU64Info(_, _))
         .Times(1)
         .WillOnce(DoAll(SetArgPointee<1>(local2), Return(SOFTBUS_OK)));
-    EXPECT_CALL(lnnSyncInfoMgrMock, LnnGetRemoteNumU64Info(_, _, _))
+    EXPECT_CALL(distributeLedgerMock, LnnGetRemoteNumU64Info(_, _, _))
         .Times(1)
         .WillOnce(DoAll(SetArgPointee<2>(remote2), Return(SOFTBUS_OK)));
 
@@ -2405,10 +2418,11 @@ HWTEST_F(LNNSyncInfoManagerTest, LnnSendSyncInfoMsg_001, TestSize.Level1)
     uint32_t remote1 = 8;
     NiceMock<LnnNetLedgertInterfaceMock> ledgerMock;
     NiceMock<LnnSyncInfoManagerInterfaceMock> lnnSyncInfoMgrMock;
+    NiceMock<DistributeLedgerInterfaceMock> distributeLedgerMock;
     EXPECT_CALL(ledgerMock, LnnGetLocalNumU32Info(_, _))
         .Times(1)
         .WillOnce(DoAll(SetArgPointee<1>(local1), Return(SOFTBUS_OK)));
-    EXPECT_CALL(lnnSyncInfoMgrMock, LnnGetRemoteNumU32Info(_, _, _))
+    EXPECT_CALL(distributeLedgerMock, LnnGetRemoteNumU32Info(_, _, _))
         .WillOnce(DoAll(SetArgPointee<2>(remote1), Return(SOFTBUS_OK)));
 
     uint32_t local2 = 32768;
@@ -2416,7 +2430,7 @@ HWTEST_F(LNNSyncInfoManagerTest, LnnSendSyncInfoMsg_001, TestSize.Level1)
     EXPECT_CALL(ledgerMock, LnnGetLocalNumU64Info(_, _))
         .Times(1)
         .WillOnce(DoAll(SetArgPointee<1>(local2), Return(SOFTBUS_OK)));
-    EXPECT_CALL(lnnSyncInfoMgrMock, LnnGetRemoteNumU64Info(_, _, _))
+    EXPECT_CALL(distributeLedgerMock, LnnGetRemoteNumU64Info(_, _, _))
         .Times(1)
         .WillOnce(DoAll(SetArgPointee<2>(remote2), Return(SOFTBUS_OK)));
 
@@ -2468,14 +2482,14 @@ HWTEST_F(LNNSyncInfoManagerTest, GetAuthHandleByNetworkId_002, TestSize.Level1)
 
 /*
  * @tc.name: LnnSendWifiOfflineInfoMsg_001
- * @tc.desc: LnnGetLocalNumInfo(NUM_KEY_AUTH_PORT, &authPort) != SOFTBUS_OK
+ * @tc.desc: LnnGetLocalNumInfoByIfnameIdx(NUM_KEY_AUTH_PORT, &authPort, WLAN_IF) != SOFTBUS_OK
  * @tc.type: FUNC
  * @tc.require: 1
  */
 HWTEST_F(LNNSyncInfoManagerTest, LnnSendWifiOfflineInfoMsg_001, TestSize.Level1)
 {
     NiceMock<LnnNetLedgertInterfaceMock> ledgerMock;
-    EXPECT_CALL(ledgerMock, LnnGetLocalNumInfo(_, _))
+    EXPECT_CALL(ledgerMock, LnnGetLocalNumInfoByIfnameIdx(_, _, _))
         .Times(2)
         .WillOnce(Return(SOFTBUS_ERR))
         .WillOnce(Return(SOFTBUS_OK));
@@ -2495,7 +2509,7 @@ HWTEST_F(LNNSyncInfoManagerTest, LnnSendWifiOfflineInfoMsg_002, TestSize.Level1)
 {
     NiceMock<LnnNetLedgertInterfaceMock> ledgerMock;
     NiceMock<LnnSyncInfoManagerInterfaceMock> lnnSyncInfoMgrMock;
-    EXPECT_CALL(ledgerMock, LnnGetLocalNumInfo(_, _)).Times(1).WillOnce(Return(SOFTBUS_OK));
+    EXPECT_CALL(ledgerMock, LnnGetLocalNumInfoByIfnameIdx(_, _, _)).Times(1).WillOnce(Return(SOFTBUS_OK));
     EXPECT_CALL(ledgerMock, LnnGetLocalStrInfo(_, _, _)).Times(1).WillOnce(Return(SOFTBUS_OK));
     EXPECT_CALL(lnnSyncInfoMgrMock, ConvertBytesToHexString(_, _, _, _)).WillRepeatedly(Return(SOFTBUS_INVALID_PARAM));
 
@@ -2504,7 +2518,7 @@ HWTEST_F(LNNSyncInfoManagerTest, LnnSendWifiOfflineInfoMsg_002, TestSize.Level1)
 
 /*
  * @tc.name: LnnSendWifiOfflineInfoMsg_003
- * @tc.desc: msg == NULL
+ * @tc.desc: msg == nullptr
  * @tc.type: FUNC
  * @tc.require: 1
  */
@@ -2512,7 +2526,7 @@ HWTEST_F(LNNSyncInfoManagerTest, LnnSendWifiOfflineInfoMsg_003, TestSize.Level1)
 {
     NiceMock<LnnNetLedgertInterfaceMock> ledgerMock;
     NiceMock<LnnSyncInfoManagerInterfaceMock> lnnSyncInfoMgrMock;
-    EXPECT_CALL(ledgerMock, LnnGetLocalNumInfo(_, _)).Times(1).WillOnce(Return(SOFTBUS_OK));
+    EXPECT_CALL(ledgerMock, LnnGetLocalNumInfoByIfnameIdx(_, _, _)).Times(1).WillOnce(Return(SOFTBUS_OK));
     EXPECT_CALL(ledgerMock, LnnGetLocalStrInfo(_, _, _)).Times(1).WillOnce(Return(SOFTBUS_OK));
     EXPECT_CALL(lnnSyncInfoMgrMock, ConvertBytesToHexString(_, _, _, _)).WillRepeatedly(Return(SOFTBUS_OK));
     EXPECT_CALL(lnnSyncInfoMgrMock, JSON_CreateObject()).WillRepeatedly(Return(nullptr));
@@ -2538,7 +2552,7 @@ HWTEST_F(LNNSyncInfoManagerTest, LnnSendWifiOfflineInfoMsg_004, TestSize.Level1)
 
     NiceMock<LnnNetLedgertInterfaceMock> ledgerMock;
     NiceMock<LnnSyncInfoManagerInterfaceMock> lnnSyncInfoMgrMock;
-    EXPECT_CALL(ledgerMock, LnnGetLocalNumInfo(_, _)).Times(1).WillOnce(Return(SOFTBUS_OK));
+    EXPECT_CALL(ledgerMock, LnnGetLocalNumInfoByIfnameIdx(_, _, _)).Times(1).WillOnce(Return(SOFTBUS_OK));
     EXPECT_CALL(ledgerMock, LnnGetLocalStrInfo(_, _, _)).Times(1).WillOnce(Return(SOFTBUS_OK));
     EXPECT_CALL(lnnSyncInfoMgrMock, ConvertBytesToHexString(_, _, _, _)).WillRepeatedly(Return(SOFTBUS_OK));
 
@@ -2577,7 +2591,7 @@ HWTEST_F(LNNSyncInfoManagerTest, LnnSendWifiOfflineInfoMsg_005, TestSize.Level1)
 
     NiceMock<LnnNetLedgertInterfaceMock> ledgerMock;
     NiceMock<LnnSyncInfoManagerInterfaceMock> lnnSyncInfoMgrMock;
-    EXPECT_CALL(ledgerMock, LnnGetLocalNumInfo(_, _)).Times(1).WillOnce(Return(SOFTBUS_OK));
+    EXPECT_CALL(ledgerMock, LnnGetLocalNumInfoByIfnameIdx(_, _, _)).Times(1).WillOnce(Return(SOFTBUS_OK));
     EXPECT_CALL(ledgerMock, LnnGetLocalStrInfo(_, _, _)).Times(1).WillOnce(Return(SOFTBUS_OK));
     EXPECT_CALL(lnnSyncInfoMgrMock, ConvertBytesToHexString(_, _, _, _)).WillRepeatedly(Return(SOFTBUS_OK));
 
@@ -2619,7 +2633,7 @@ HWTEST_F(LNNSyncInfoManagerTest, LnnSendWifiOfflineInfoMsg_006, TestSize.Level1)
 
     NiceMock<LnnNetLedgertInterfaceMock> ledgerMock;
     NiceMock<LnnSyncInfoManagerInterfaceMock> lnnSyncInfoMgrMock;
-    EXPECT_CALL(ledgerMock, LnnGetLocalNumInfo(_, _)).Times(1).WillOnce(Return(SOFTBUS_OK));
+    EXPECT_CALL(ledgerMock, LnnGetLocalNumInfoByIfnameIdx(_, _, _)).Times(1).WillOnce(Return(SOFTBUS_OK));
     EXPECT_CALL(ledgerMock, LnnGetLocalStrInfo(_, _, _)).Times(1).WillOnce(Return(SOFTBUS_OK));
     EXPECT_CALL(lnnSyncInfoMgrMock, ConvertBytesToHexString(_, _, _, _)).WillRepeatedly(Return(SOFTBUS_OK));
 

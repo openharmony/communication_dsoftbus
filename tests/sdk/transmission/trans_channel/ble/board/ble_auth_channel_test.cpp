@@ -179,7 +179,7 @@ static int32_t TestOpenSession()
 {
     printf("[test]TestOpenSession enter\r\n");
     g_addr1.type = CONNECTION_ADDR_BLE;
-    int32_t ret = OpenAuthSession(g_sessionName, &g_addr1, 1, NULL);
+    int32_t ret = OpenAuthSession(g_sessionName, &g_addr1, 1, nullptr);
     EXPECT_TRUE(ret >= 0);
     printf("[test]TestOpenSession end\r\n");
     return ret;
@@ -219,7 +219,7 @@ static int32_t TestRemoveSessionServer()
  * @tc.type: FUNC
  * @tc.require:
  */
-HWTEST_F(BleAuthChannelTest, ProcessActive001, TestSize.Level0)
+HWTEST_F(BleAuthChannelTest, ProcessActive001, TestSize.Level1)
 {
     if (g_testWay != ACTIVE_OPENAUTHSESSION_WAY) {
         printf("[test]active test skip...\r\n");
@@ -259,7 +259,7 @@ END:
  * @tc.type: FUNC
  * @tc.require:
  */
-HWTEST_F(BleAuthChannelTest, ProcessPassive001, TestSize.Level0)
+HWTEST_F(BleAuthChannelTest, ProcessPassive001, TestSize.Level1)
 {
     if (g_testWay != PASSIVE_OPENAUTHSESSION_WAY) {
         printf("[test]passive test skip...\r\n");

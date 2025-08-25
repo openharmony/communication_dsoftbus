@@ -29,18 +29,20 @@
 
 class BleInterface {
 public:
-    virtual int32_t SoftBusAddBtStateListener(const SoftBusBtStateListener *listener) = 0;
+    virtual int32_t SoftBusAddBtStateListener(const SoftBusBtStateListener *listener, int32_t *listenerId) = 0;
     virtual int32_t SoftBusRemoveBtStateListener(int32_t listenerId) = 0;
 
     virtual int32_t InitBroadcastMgr() = 0;
     virtual int32_t DeInitBroadcastMgr() = 0;
 
-    virtual int32_t RegisterScanListener(BaseServiceType type, int32_t *listenerId, const ScanCallback *cb) = 0;
+    virtual int32_t RegisterScanListener(BroadcastProtocol protocol,
+        BaseServiceType type, int32_t *listenerId, const ScanCallback *cb) = 0;
     virtual int32_t UnRegisterScanListener(int32_t listenerId) = 0;
 
     virtual int32_t SetScanFilter(int32_t listenerId, const BcScanFilter *scanFilter, uint8_t filterNum) = 0;
 
-    virtual int32_t RegisterBroadcaster(BaseServiceType type, int32_t *bcId, const BroadcastCallback *cb) = 0;
+    virtual int32_t RegisterBroadcaster(BroadcastProtocol protocol,
+        BaseServiceType type, int32_t *bcId, const BroadcastCallback *cb) = 0;
     virtual int32_t UnRegisterBroadcaster(int32_t bcId) = 0;
 
     virtual int32_t StartScan(int32_t listenerId, const BcScanParams *param) = 0;
@@ -67,17 +69,18 @@ public:
     BleMock();
     ~BleMock();
 
-    MOCK_METHOD(int32_t, SoftBusAddBtStateListener, (const SoftBusBtStateListener *listener), (override));
+    MOCK_METHOD(int32_t, SoftBusAddBtStateListener,
+        (const SoftBusBtStateListener *listener, int32_t *listenerId), (override));
     MOCK_METHOD(int32_t, SoftBusRemoveBtStateListener, (int32_t listenerId), (override));
     MOCK_METHOD(int32_t, InitBroadcastMgr, (), (override));
     MOCK_METHOD(int32_t, DeInitBroadcastMgr, (), (override));
-    MOCK_METHOD(
-        int32_t, RegisterScanListener, (BaseServiceType type, int32_t *listenerId, const ScanCallback *cb), (override));
+    MOCK_METHOD(int32_t, RegisterScanListener,
+        (BroadcastProtocol protocol, BaseServiceType type, int32_t *listenerId, const ScanCallback *cb), (override));
     MOCK_METHOD(int32_t, UnRegisterScanListener, (int32_t listenerId), (override));
     MOCK_METHOD(
         int32_t, SetScanFilter, (int32_t listenerId, const BcScanFilter *scanFilter, uint8_t filterNum), (override));
-    MOCK_METHOD(
-        int32_t, RegisterBroadcaster, (BaseServiceType type, int32_t *bcId, const BroadcastCallback *cb), (override));
+    MOCK_METHOD(int32_t, RegisterBroadcaster,
+        (BroadcastProtocol protocol, BaseServiceType type, int32_t *bcId, const BroadcastCallback *cb), (override));
     MOCK_METHOD(int32_t, UnRegisterBroadcaster, (int32_t bcId), (override));
     MOCK_METHOD(int32_t, StartScan, (int32_t listenerId, const BcScanParams *param), (override));
     MOCK_METHOD(int32_t, StopScan, (int32_t listenerId), (override));
@@ -97,14 +100,16 @@ public:
     bool GetAsyncAdvertiseResult();
     bool IsScanning();
 
-    static int32_t ActionOfAddBtStateListener(const SoftBusBtStateListener *listener);
+    static int32_t ActionOfAddBtStateListener(const SoftBusBtStateListener *listener, int32_t *listenerId);
     static int32_t ActionOfRemoveBtStateListener(int32_t listenerId);
     static int32_t ActionOfInitBroadcastMgr();
     static int32_t ActionOfDeInitBroadcastMgr();
-    static int32_t ActionOfRegisterScanListener(BaseServiceType type, int32_t *listenerId, const ScanCallback *cb);
+    static int32_t ActionOfRegisterScanListener(BroadcastProtocol protocol,
+        BaseServiceType type, int32_t *listenerId, const ScanCallback *cb);
     static int32_t ActionOfUnRegisterScanListener(int32_t listenerId);
     static int32_t ActionOfSetScanFilter(int32_t listenerId, const BcScanFilter *scanFilter, uint8_t filterNum);
-    static int32_t ActionOfRegisterBroadcaster(BaseServiceType type, int32_t *bcId, const BroadcastCallback *cb);
+    static int32_t ActionOfRegisterBroadcaster(BroadcastProtocol protocol,
+        BaseServiceType type, int32_t *bcId, const BroadcastCallback *cb);
     static int32_t ActionOfUnRegisterBroadcaster(int32_t bcId);
     static int32_t ActionOfStartScan(int32_t listenerId, const BcScanParams *param);
     static int32_t ActionOfStopScan(int32_t listenerId);

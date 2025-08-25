@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2023-2024 Huawei Device Co., Ltd.
+ * Copyright (c) 2023-2025 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -18,7 +18,6 @@
 #include <string.h>
 
 #include "auth_common.h"
-#include "auth_hichain.h"
 #include "auth_log.h"
 #include "auth_session_fsm.h"
 #include "bus_center_manager.h"
@@ -38,6 +37,55 @@
 #define SAME_ACCOUNT_GROUY_TYPE 1
 static const GroupAuthManager *g_hichain = NULL;
 #define CUST_UDID_LEN 16
+#define KEY_LENGTH 16 /* Note: WinPc's special nearby only support 128 bits key */
+#define FIELD_META_NODE_TYPE "metaNodeType"
+#define META_NODE_TYPE_PC "0x0C"
+
+char *GenDeviceLevelParam(HiChainAuthParam *hiChainParam)
+{
+    if (hiChainParam == NULL) {
+        AUTH_LOGE(AUTH_HICHAIN, "parameter is null");
+        return NULL;
+    }
+
+    cJSON *msg = cJSON_CreateObject();
+    if (msg == NULL) {
+        AUTH_LOGE(AUTH_HICHAIN, "create json fail");
+        return NULL;
+    }
+    if (!AddStringToJsonObject(msg, FIELD_PEER_CONN_DEVICE_ID, hiChainParam->udid) ||
+        !AddStringToJsonObject(msg, FIELD_SERVICE_PKG_NAME, AUTH_APPID) ||
+        !AddBoolToJsonObject(msg, FIELD_IS_DEVICE_LEVEL, true) ||
+        !AddBoolToJsonObject(msg, FIELD_IS_CLIENT, true) ||
+        !AddBoolToJsonObject(msg, FIELD_IS_UDID_HASH, false) ||
+        !AddNumberToJsonObject(msg, FIELD_KEY_LENGTH, KEY_LENGTH)) {
+        AUTH_LOGE(AUTH_HICHAIN, "add json object fail");
+        cJSON_Delete(msg);
+        return NULL;
+    }
+    if (hiChainParam->deviceTypeId == TYPE_PC_ID) {
+        if (!AddStringToJsonObject(msg, FIELD_META_NODE_TYPE, META_NODE_TYPE_PC)) {
+            AUTH_LOGE(AUTH_HICHAIN, "add json meta node fail");
+        }
+    }
+    if (hiChainParam->userId != 0 && !AddNumberToJsonObject(msg, "peerOsAccountId", hiChainParam->userId)) {
+        AUTH_LOGE(AUTH_HICHAIN, "add json userId fail");
+    }
+#ifdef AUTH_ACCOUNT
+    AUTH_LOGI(AUTH_HICHAIN, "in account auth mode");
+    if (!AddStringToJsonObject(msg, FIELD_UID_HASH, hiChainParam->uid)) {
+        AUTH_LOGE(AUTH_HICHAIN, "add uid into json fail");
+        cJSON_Delete(msg);
+        return NULL;
+    }
+#endif
+    char *data = cJSON_PrintUnformatted(msg);
+    if (data == NULL) {
+        AUTH_LOGE(AUTH_HICHAIN, "cJSON_PrintUnformatted fail");
+    }
+    cJSON_Delete(msg);
+    return data;
+}
 
 static const GroupAuthManager *InitHichain(void)
 {
@@ -93,8 +141,10 @@ int32_t UnregChangeListener(const char *appId)
     return SOFTBUS_OK;
 }
 
-int32_t AuthDevice(int64_t authReqId, const char *authParams, const DeviceAuthCallback *cb)
+int32_t AuthDevice(int32_t userId, int64_t authReqId, const char *authParams, const DeviceAuthCallback *cb)
 {
+    (void)userId;
+
     AUTH_CHECK_AND_RETURN_RET_LOGE(authParams != NULL && cb != NULL, SOFTBUS_INVALID_PARAM,
         AUTH_HICHAIN, "authParams or cb is null");
     if (g_hichain == NULL) {

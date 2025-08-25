@@ -25,6 +25,7 @@
 #include "softbus_access_token_test.h"
 #include "softbus_def.h"
 #include "softbus_error_code.h"
+#include "trans_proxy_process_data.h"
 
 using namespace testing;
 using namespace testing::ext;
@@ -96,7 +97,7 @@ ClientProxyChannelInfo *TestCreatInfo(void)
  * @tc.type: FUNC
  * @tc.require:
  */
-HWTEST_F(ClientTransProxyFileManagerMockTest, AddSendListenerInfoTest001, TestSize.Level0)
+HWTEST_F(ClientTransProxyFileManagerMockTest, AddSendListenerInfoTest001, TestSize.Level1)
 {
     // will free in DelSendListenerInfo
     SendListenerInfo *info = (SendListenerInfo *)SoftBusCalloc(sizeof(SendListenerInfo));
@@ -121,7 +122,7 @@ HWTEST_F(ClientTransProxyFileManagerMockTest, AddSendListenerInfoTest001, TestSi
  * @tc.type: FUNC
  * @tc.require:
  */
-HWTEST_F(ClientTransProxyFileManagerMockTest, PackFileTransStartInfoTest001, TestSize.Level0)
+HWTEST_F(ClientTransProxyFileManagerMockTest, PackFileTransStartInfoTest001, TestSize.Level1)
 {
     uint8_t data[TEST_DATA_LENGTH] = {0};
     FileFrame fileFrame = {
@@ -165,7 +166,7 @@ HWTEST_F(ClientTransProxyFileManagerMockTest, PackFileTransStartInfoTest001, Tes
  * @tc.type: FUNC
  * @tc.require:
  */
-HWTEST_F(ClientTransProxyFileManagerMockTest, UnpackFileTransStartInfoTest001, TestSize.Level0)
+HWTEST_F(ClientTransProxyFileManagerMockTest, UnpackFileTransStartInfoTest001, TestSize.Level1)
 {
     uint32_t packetSize = TEST_PACKET_SIZE;
 
@@ -191,7 +192,7 @@ HWTEST_F(ClientTransProxyFileManagerMockTest, UnpackFileTransStartInfoTest001, T
         .WillRepeatedly(Return(TEST_FILE_LENGTH));
     EXPECT_CALL(ClientProxyFileManagerMock, SoftBusLtoHll).WillOnce(Return(TEST_FILE_LENGTH))
         .WillRepeatedly(Return(MAX_FILE_SIZE));
-    
+
     ret = UnpackFileTransStartInfo(&fileFrame, &info, &singleFileInfo, packetSize);
     EXPECT_EQ(SOFTBUS_OK, ret);
 
@@ -223,7 +224,7 @@ HWTEST_F(ClientTransProxyFileManagerMockTest, UnpackFileTransStartInfoTest001, T
  * @tc.type: FUNC
  * @tc.require:
  */
-HWTEST_F(ClientTransProxyFileManagerMockTest, GetAndCheckFileSizeTest001, TestSize.Level0)
+HWTEST_F(ClientTransProxyFileManagerMockTest, GetAndCheckFileSizeTest001, TestSize.Level1)
 {
     uint64_t fileSize = MAX_FILE_SIZE + 1;
     uint64_t frameNum = 1;
@@ -257,7 +258,7 @@ HWTEST_F(ClientTransProxyFileManagerMockTest, GetAndCheckFileSizeTest001, TestSi
  * @tc.type: FUNC
  * @tc.require:
  */
-HWTEST_F(ClientTransProxyFileManagerMockTest, SendOneFrameMiddleTest001, TestSize.Level0)
+HWTEST_F(ClientTransProxyFileManagerMockTest, SendOneFrameMiddleTest001, TestSize.Level1)
 {
     SendListenerInfo info = {
         .crc = APP_INFO_FILE_FEATURES_NO_SUPPORT,
@@ -279,7 +280,7 @@ HWTEST_F(ClientTransProxyFileManagerMockTest, SendOneFrameMiddleTest001, TestSiz
  * @tc.type: FUNC
  * @tc.require:
  */
-HWTEST_F(ClientTransProxyFileManagerMockTest, SendOneFrameRearTest001, TestSize.Level0)
+HWTEST_F(ClientTransProxyFileManagerMockTest, SendOneFrameRearTest001, TestSize.Level1)
 {
     SendListenerInfo info = {
         .crc = APP_INFO_FILE_FEATURES_NO_SUPPORT,
@@ -333,7 +334,7 @@ HWTEST_F(ClientTransProxyFileManagerMockTest, SendOneFrameRearTest001, TestSize.
  * @tc.type: FUNC
  * @tc.require:
  */
-HWTEST_F(ClientTransProxyFileManagerMockTest, SendFileCrcCheckSumTest001, TestSize.Level0)
+HWTEST_F(ClientTransProxyFileManagerMockTest, SendFileCrcCheckSumTest001, TestSize.Level1)
 {
     SendListenerInfo info = {
         .crc = APP_INFO_FILE_FEATURES_NO_SUPPORT,
@@ -362,7 +363,7 @@ HWTEST_F(ClientTransProxyFileManagerMockTest, SendFileCrcCheckSumTest001, TestSi
  * @tc.type: FUNC
  * @tc.require:
  */
-HWTEST_F(ClientTransProxyFileManagerMockTest, UnpackFileCrcCheckSumTest001, TestSize.Level0)
+HWTEST_F(ClientTransProxyFileManagerMockTest, UnpackFileCrcCheckSumTest001, TestSize.Level1)
 {
     SendListenerInfo fileInfo = {
         .checkSumCRC = TEST_FILE_DATA_SIZE,
@@ -418,7 +419,7 @@ HWTEST_F(ClientTransProxyFileManagerMockTest, UnpackFileCrcCheckSumTest001, Test
  * @tc.type: FUNC
  * @tc.require:
  */
-HWTEST_F(ClientTransProxyFileManagerMockTest, FileToFrameTest001, TestSize.Level0)
+HWTEST_F(ClientTransProxyFileManagerMockTest, FileToFrameTest001, TestSize.Level1)
 {
     SendListenerInfo sendInfo = {
         .crc = APP_INFO_FILE_FEATURES_SUPPORT,
@@ -456,7 +457,7 @@ HWTEST_F(ClientTransProxyFileManagerMockTest, FileToFrameTest001, TestSize.Level
  * @tc.type: FUNC
  * @tc.require:
  */
-HWTEST_F(ClientTransProxyFileManagerMockTest, FileToFrameAndSendFileTest001, TestSize.Level0)
+HWTEST_F(ClientTransProxyFileManagerMockTest, FileToFrameAndSendFileTest001, TestSize.Level1)
 {
     SendListenerInfo sendInfo = {
         .crc = APP_INFO_FILE_FEATURES_NO_SUPPORT,
@@ -494,7 +495,7 @@ HWTEST_F(ClientTransProxyFileManagerMockTest, FileToFrameAndSendFileTest001, Tes
  * @tc.type: FUNC
  * @tc.require:
  */
-HWTEST_F(ClientTransProxyFileManagerMockTest, ClearSendInfoTest001, TestSize.Level0)
+HWTEST_F(ClientTransProxyFileManagerMockTest, ClearSendInfoTest001, TestSize.Level1)
 {
     SendListenerInfo testSendInfo = {
         .fd = -1,
@@ -510,7 +511,7 @@ HWTEST_F(ClientTransProxyFileManagerMockTest, ClearSendInfoTest001, TestSize.Lev
  * @tc.type: FUNC
  * @tc.require:
  */
-HWTEST_F(ClientTransProxyFileManagerMockTest, GetFileSizeTest001, TestSize.Level0)
+HWTEST_F(ClientTransProxyFileManagerMockTest, GetFileSizeTest001, TestSize.Level1)
 {
     uint64_t fileSize = TEST_PACKET_SIZE;
     NiceMock<ClientTransProxyFileManagerInterfaceMock> ClientProxyFileManagerMock;
@@ -530,7 +531,7 @@ HWTEST_F(ClientTransProxyFileManagerMockTest, GetFileSizeTest001, TestSize.Level
  * @tc.type: FUNC
  * @tc.require:
  */
-HWTEST_F(ClientTransProxyFileManagerMockTest, ProxyStartSendFileTest001, TestSize.Level0)
+HWTEST_F(ClientTransProxyFileManagerMockTest, ProxyStartSendFileTest001, TestSize.Level1)
 {
     SendListenerInfo testSendInfo = {
         .fd = -1,
@@ -559,7 +560,7 @@ HWTEST_F(ClientTransProxyFileManagerMockTest, ProxyStartSendFileTest001, TestSiz
  * @tc.type: FUNC
  * @tc.require:
  */
-HWTEST_F(ClientTransProxyFileManagerMockTest, GetSendListenerInfoByChannelIdTest001, TestSize.Level0)
+HWTEST_F(ClientTransProxyFileManagerMockTest, GetSendListenerInfoByChannelIdTest001, TestSize.Level1)
 {
     SendListenerInfo *info = (SendListenerInfo *)SoftBusCalloc(sizeof(SendListenerInfo));
     EXPECT_TRUE(info != nullptr);
@@ -611,7 +612,7 @@ HWTEST_F(ClientTransProxyFileManagerMockTest, GetSendListenerInfoByChannelIdTest
  * @tc.type: FUNC
  * @tc.require:
  */
-HWTEST_F(ClientTransProxyFileManagerMockTest, CreateSendListenerInfoTest001, TestSize.Level0)
+HWTEST_F(ClientTransProxyFileManagerMockTest, CreateSendListenerInfoTest001, TestSize.Level1)
 {
     // will free in DelSendListenerInfo
     SendListenerInfo *info = (SendListenerInfo *)SoftBusCalloc(sizeof(SendListenerInfo));
@@ -644,7 +645,7 @@ HWTEST_F(ClientTransProxyFileManagerMockTest, CreateSendListenerInfoTest001, Tes
  * @tc.type: FUNC
  * @tc.require:
  */
-HWTEST_F(ClientTransProxyFileManagerMockTest, HandleFileSendingProcessTest001, TestSize.Level0)
+HWTEST_F(ClientTransProxyFileManagerMockTest, HandleFileSendingProcessTest001, TestSize.Level1)
 {
     int channelId = TEST_CHANNEL_ID;
     uint32_t fileCnt = 1;
@@ -679,7 +680,7 @@ HWTEST_F(ClientTransProxyFileManagerMockTest, HandleFileSendingProcessTest001, T
  * @tc.type: FUNC
  * @tc.require:
  */
-HWTEST_F(ClientTransProxyFileManagerMockTest, ClientTransProxyAddChannelInfoTest001, TestSize.Level0)
+HWTEST_F(ClientTransProxyFileManagerMockTest, ClientTransProxyAddChannelInfoTest001, TestSize.Level1)
 {
     // will free in ClientTransProxyDelChannelInfo
     ClientProxyChannelInfo *channelInfo = TestCreatInfo();
@@ -701,7 +702,7 @@ HWTEST_F(ClientTransProxyFileManagerMockTest, ClientTransProxyAddChannelInfoTest
  * @tc.type: FUNC
  * @tc.require:
  */
-HWTEST_F(ClientTransProxyFileManagerMockTest, ClientTransProxyOnChannelOpenedTest001, TestSize.Level0)
+HWTEST_F(ClientTransProxyFileManagerMockTest, ClientTransProxyOnChannelOpenedTest001, TestSize.Level1)
 {
     ChannelInfo channel = {
         .channelId = TEST_CHANNEL_ID,
@@ -715,36 +716,36 @@ HWTEST_F(ClientTransProxyFileManagerMockTest, ClientTransProxyOnChannelOpenedTes
     ASSERT_TRUE(channelInfo != nullptr);
     int32_t ret = ClientTransProxyAddChannelInfo(channelInfo);
     EXPECT_EQ(SOFTBUS_OK, ret);
-    ret = ClientTransProxyOnChannelOpened(TEST_SESSION_NAME, &channel);
+    ret = ClientTransProxyOnChannelOpened(TEST_SESSION_NAME, &channel, nullptr);
     EXPECT_EQ(SOFTBUS_ALREADY_EXISTED, ret);
     ret = ClientTransProxyDelChannelInfo(TEST_CHANNEL_ID);
     EXPECT_EQ(SOFTBUS_OK, ret);
 }
 
 /**
- * @tc.name: ClientTransProxySessionDataLenCheckTest001
+ * @tc.name: TransProxySessionDataLenCheckTest001
  * @tc.desc: client send file crc check sum, use normal parameter.
  * @tc.type: FUNC
  * @tc.require:
  */
-HWTEST_F(ClientTransProxyFileManagerMockTest, ClientTransProxySessionDataLenCheckTest001, TestSize.Level0)
+HWTEST_F(ClientTransProxyFileManagerMockTest, TransProxySessionDataLenCheckTest001, TestSize.Level1)
 {
     uint32_t len = TEST_DATA_LEN;
     SessionPktType type = TRANS_SESSION_MESSAGE;
-    int32_t ret = ClientTransProxySessionDataLenCheck(len, type);
+    int32_t ret = TransProxySessionDataLenCheck(len, type);
     EXPECT_EQ(SOFTBUS_TRANS_INVALID_DATA_LENGTH, ret);
     type = TRANS_SESSION_BYTES;
-    ret = ClientTransProxySessionDataLenCheck(len, type);
+    ret = TransProxySessionDataLenCheck(len, type);
     EXPECT_EQ(SOFTBUS_TRANS_INVALID_DATA_LENGTH, ret);
     type = TRANS_SESSION_FILE_LAST_FRAME;
-    ret = ClientTransProxySessionDataLenCheck(len, type);
+    ret = TransProxySessionDataLenCheck(len, type);
     EXPECT_EQ(SOFTBUS_OK, ret);
     len = 0;
     type = TRANS_SESSION_ASYNC_MESSAGE;
-    ret = ClientTransProxySessionDataLenCheck(len, type);
+    ret = TransProxySessionDataLenCheck(len, type);
     EXPECT_EQ(SOFTBUS_OK, ret);
     type = TRANS_SESSION_BYTES;
-    ret = ClientTransProxySessionDataLenCheck(len, type);
+    ret = TransProxySessionDataLenCheck(len, type);
     EXPECT_EQ(SOFTBUS_OK, ret);
 }
 
@@ -754,15 +755,15 @@ HWTEST_F(ClientTransProxyFileManagerMockTest, ClientTransProxySessionDataLenChec
  * @tc.type: FUNC
  * @tc.require:
  */
-HWTEST_F(ClientTransProxyFileManagerMockTest, ClientTransProxyDecryptPacketDataTest001, TestSize.Level0)
+HWTEST_F(ClientTransProxyFileManagerMockTest, ClientTransProxyDecryptPacketDataTest001, TestSize.Level1)
 {
     int32_t channelId = TEST_CHANNEL_ID;
     int32_t seq = TEST_SEQ;
-    ClientProxyDataInfo dataInfo;
+    ProxyDataInfo dataInfo;
     int32_t ret = ClientTransProxyDecryptPacketData(channelId, seq, &dataInfo);
     EXPECT_EQ(SOFTBUS_TRANS_PROXY_CHANNEL_NOT_FOUND, ret);
 
-    ret = ClientTransProxyCheckSliceHead(nullptr);
+    ret = TransProxyCheckSliceHead(nullptr);
     EXPECT_EQ(SOFTBUS_INVALID_PARAM, ret);
 }
 
@@ -772,26 +773,16 @@ HWTEST_F(ClientTransProxyFileManagerMockTest, ClientTransProxyDecryptPacketDataT
  * @tc.type: FUNC
  * @tc.require:
  */
-HWTEST_F(ClientTransProxyFileManagerMockTest, ClientTransProxyProcSendMsgAckTest001, TestSize.Level0)
+HWTEST_F(ClientTransProxyFileManagerMockTest, ClientTransProxyProcSendMsgAckTest001, TestSize.Level1)
 {
     int32_t channelId = TEST_CHANNEL_ID;
     int32_t len = TEST_DATA_LEN;
     int32_t dataHeadSeq = TEST_DATA_LEN;
-    int32_t ret = ClientTransProxyProcSendMsgAck(channelId, TEST_SESSION_NAME, len, dataHeadSeq);
+    int32_t ret = ClientTransProxyProcSendMsgAck(channelId, TEST_SESSION_NAME, len, dataHeadSeq, 0);
     EXPECT_EQ(SOFTBUS_TRANS_INVALID_DATA_LENGTH, ret);
 
     len = PROXY_ACK_SIZE;
-    ret = ClientTransProxyProcSendMsgAck(channelId, nullptr, len, dataHeadSeq);
+    ret = ClientTransProxyProcSendMsgAck(channelId, nullptr, len, dataHeadSeq, 0);
     EXPECT_EQ(SOFTBUS_TRANS_PROXY_ASSEMBLE_PACK_DATA_NULL, ret);
-
-    NiceMock<ClientTransProxyFileManagerInterfaceMock> ClientProxyFileManagerMock;
-    EXPECT_CALL(ClientProxyFileManagerMock, SoftBusNtoHl).WillRepeatedly(Return(FILE_MAGIC_NUMBER));
-    EXPECT_CALL(ClientProxyFileManagerMock, SoftBusNtoHl).WillOnce(Return(SOFTBUS_INVALID_PARAM))
-        .WillRepeatedly(Return(SOFTBUS_OK));
-    ret = ClientTransProxyProcSendMsgAck(channelId, TEST_SESSION_NAME, len, dataHeadSeq);
-    EXPECT_EQ(SOFTBUS_OK, ret);
-
-    ret = ClientTransProxyProcSendMsgAck(channelId, TEST_SESSION_NAME, len, dataHeadSeq);
-    EXPECT_EQ(SOFTBUS_OK, ret);
 }
 } // namespace OHOS

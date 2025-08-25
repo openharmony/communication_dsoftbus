@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2024 Huawei Device Co., Ltd.
+ * Copyright (c) 2024-2025 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -40,23 +40,29 @@ static AuthChannelInterface *GetAuthChannelInterface()
 }
 
 extern "C" {
-int32_t LnnInitGetDeviceName(LnnDeviceNameHandler handler)
+int32_t LnnServerJoinExt(ConnectionAddr *addr, LnnServerJoinExtCallBack *callback)
 {
-    return GetAuthChannelInterface()->LnnInitGetDeviceName(handler);
+    return GetAuthChannelInterface()->LnnServerJoinExt(addr, callback);
 }
 
-int32_t LnnGetSettingDeviceName(char *deviceName, uint32_t len)
+bool AddNumberToJsonObject(cJSON *json, const char *const string, int32_t num)
 {
-    return GetAuthChannelInterface()->LnnGetSettingDeviceName(deviceName, len);
+    return GetAuthChannelInterface()->AddNumberToJsonObject(json, string, num);
 }
 
-int32_t AuthChannelInterfaceMock::ActionOfLnnInitGetDeviceName(LnnDeviceNameHandler handler)
+int32_t GenerateRandomStr(char *str, uint32_t size)
 {
-    if (handler == NULL) {
-        return SOFTBUS_INVALID_PARAM;
-    }
-    g_deviceNameHandler = handler;
-    return SOFTBUS_OK;
+    return GetAuthChannelInterface()->GenerateRandomStr(str, size);
+}
+
+bool AddStringToJsonObject(cJSON *json, const char * const string, const char *value)
+{
+    return GetAuthChannelInterface()->AddStringToJsonObject(json, string, value);
+}
+
+char *cJSON_PrintUnformatted(const cJSON *json)
+{
+    return GetAuthChannelInterface()->cJSON_PrintUnformatted(json);
 }
 }
 }

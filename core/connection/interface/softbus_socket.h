@@ -16,12 +16,8 @@
 #ifndef SOFTBUS_SOCKET_H
 #define SOFTBUS_SOCKET_H
 
-#include <sys/types.h>
-#include <sys/uio.h>
-
 #include "softbus_adapter_socket.h"
 #include "softbus_conn_interface.h"
-#include "softbus_protocol_def.h"
 
 #ifdef __cplusplus
 #if __cplusplus
@@ -77,12 +73,14 @@ ssize_t ConnRecvSocketData(int32_t fd, char *buf, size_t len, int32_t timeout);
 void ConnCloseSocket(int32_t fd);
 void ConnShutdownSocket(int32_t fd);
 int32_t ConnSetTcpKeepalive(int32_t fd, int32_t seconds, int32_t keepAliveIntvl, int32_t keepAliveCount);
+int32_t ConnSetTcpKeepaliveState(int32_t fd, bool needKeepalive);
 int32_t ConnSetTcpUserTimeOut(int32_t fd, uint32_t millSec);
 
 int32_t ConnToggleNonBlockMode(int32_t fd, bool isNonBlock);
 int32_t ConnGetSocketError(int32_t fd);
 int32_t ConnGetLocalSocketPort(int32_t fd);
 int32_t ConnGetPeerSocketAddr(int32_t fd, SocketAddr *socketAddr);
+int32_t ConnGetPeerSocketAddr6(int32_t fd, SocketAddr *socketAddr);
 
 int32_t ConnPreAssignPort(int32_t domain);
 int32_t GetDomainByAddr(const char *addr);

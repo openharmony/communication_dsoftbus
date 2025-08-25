@@ -23,7 +23,7 @@
 #include "assert_helper.h"
 #include "bluetooth_mock.h"
 
-#define STATE_LISTENER_MAX_NUM 16
+#define STATE_LISTENER_MAX_NUM 20
 
 using namespace testing::ext;
 using ::testing::_;
@@ -38,12 +38,12 @@ static StRecordCtx g_btStateChangedCtx("OnBtStateChanged");
 static BtAddrRecordCtx g_btAclStateChangedCtx("OnBtAclStateChanged");
 
 /**
- * @tc.name: AdapterBtCommonTest_ConvertStatus
+ * @tc.name: AdapterBtCommonTest_SoftBusEnableBt001
  * @tc.desc: test enable bt
  * @tc.type: FUNC
  * @tc.require: NONE
  */
-HWTEST(AdapterBtCommonTest, SoftBusEnableBt, TestSize.Level3)
+HWTEST(AdapterBtCommonTest, SoftBusEnableBt001, TestSize.Level3)
 {
     MockBluetooth mocker;
     EXPECT_CALL(mocker, EnableBle()).Times(2).WillOnce(Return(true)).WillOnce(Return(false));
@@ -52,12 +52,12 @@ HWTEST(AdapterBtCommonTest, SoftBusEnableBt, TestSize.Level3)
 }
 
 /**
- * @tc.name: AdapterBtCommonTest_SoftBusDisableBt
+ * @tc.name: AdapterBtCommonTest_SoftBusDisableBt001
  * @tc.desc: test disable bt
  * @tc.type: FUNC
  * @tc.require: NONE
  */
-HWTEST(AdapterBtCommonTest, SoftBusDisableBt, TestSize.Level3)
+HWTEST(AdapterBtCommonTest, SoftBusDisableBt001, TestSize.Level3)
 {
     MockBluetooth mocker;
     EXPECT_CALL(mocker, DisableBle()).Times(2).WillOnce(Return(true)).WillOnce(Return(false));
@@ -66,12 +66,12 @@ HWTEST(AdapterBtCommonTest, SoftBusDisableBt, TestSize.Level3)
 }
 
 /**
- * @tc.name: AdapterBtCommonTest_SoftBusGetBtState
+ * @tc.name: AdapterBtCommonTest_SoftBusGetBtState001
  * @tc.desc: test get bt status
  * @tc.type: FUNC
  * @tc.require: NONE
  */
-HWTEST(AdapterBtCommonTest, SoftBusGetBtState, TestSize.Level3)
+HWTEST(AdapterBtCommonTest, SoftBusGetBtState001, TestSize.Level3)
 {
     MockBluetooth mocker;
     EXPECT_CALL(mocker, IsBleEnabled()).Times(2).WillOnce(Return(true)).WillOnce(Return(false));
@@ -80,14 +80,14 @@ HWTEST(AdapterBtCommonTest, SoftBusGetBtState, TestSize.Level3)
 }
 
 /**
- * @tc.name: AdapterBtCommonTest_SoftBusGetBtMacAddr
+ * @tc.name: AdapterBtCommonTest_SoftBusGetBtMacAddr001
  * @tc.desc: test get bt mac address
  * @tc.type: FUNC
  * @tc.require: NONE
  */
-HWTEST(AdapterBtCommonTest, SoftBusGetBtMacAddr, TestSize.Level3)
+HWTEST(AdapterBtCommonTest, SoftBusGetBtMacAddr001, TestSize.Level3)
 {
-    EXPECT_EQ(SoftBusGetBtMacAddr(NULL), SOFTBUS_INVALID_PARAM);
+    EXPECT_EQ(SoftBusGetBtMacAddr(nullptr), SOFTBUS_INVALID_PARAM);
     MockBluetooth mocker;
     SoftBusBtAddr mac = { 0 };
     EXPECT_CALL(mocker, GetLocalAddr(mac.addr, BT_ADDR_LEN)).Times(2).WillOnce(Return(true)).WillOnce(Return(false));
@@ -96,12 +96,12 @@ HWTEST(AdapterBtCommonTest, SoftBusGetBtMacAddr, TestSize.Level3)
 }
 
 /**
- * @tc.name: AdapterBtCommonTest_SoftBusSetBtName
+ * @tc.name: AdapterBtCommonTest_SoftBusSetBtName001
  * @tc.desc: test set bt name
  * @tc.type: FUNC
  * @tc.require: NONE
  */
-HWTEST(AdapterBtCommonTest, SoftBusSetBtName, TestSize.Level3)
+HWTEST(AdapterBtCommonTest, SoftBusSetBtName001, TestSize.Level3)
 {
     MockBluetooth mocker;
     const char *name = "awesome";
@@ -116,12 +116,13 @@ HWTEST(AdapterBtCommonTest, SoftBusSetBtName, TestSize.Level3)
 static testing::AssertionResult PrepareBtStateListener(MockBluetooth &mocker, int32_t *outlistenerId)
 {
     EXPECT_CALL(mocker, BleStopScan).WillRepeatedly(Return(OHOS_BT_STATUS_SUCCESS));
-    auto listenerId = SoftBusAddBtStateListener(GetMockBtStateListener());
+    auto listenerId = -1;
+    int32_t ret = SoftBusAddBtStateListener(GetMockBtStateListener(), &listenerId);
     if (listenerId < 0) {
         return testing::AssertionFailure() << "SoftBusAddBtStateListener failed";
     }
 
-    int32_t ret = SoftBusBtInit();
+    ret = SoftBusBtInit();
     EXPECT_EQ(ret, SOFTBUS_OK);
 
     if (MockBluetooth::btGapCallback == nullptr) {
@@ -132,12 +133,12 @@ static testing::AssertionResult PrepareBtStateListener(MockBluetooth &mocker, in
 }
 
 /**
- * @tc.name: AdapterBtCommonTest_StateChangeCallback
+ * @tc.name: AdapterBtCommonTest_StateChangeCallback001
  * @tc.desc: test bt state listener callback stateChangeCallback
  * @tc.type: FUNC
  * @tc.require: NONE
  */
-HWTEST(AdapterBtCommonTest, StateChangeCallback, TestSize.Level3)
+HWTEST(AdapterBtCommonTest, StateChangeCallback001, TestSize.Level3)
 {
     int32_t listenerId = -1;
     MockBluetooth mocker;
@@ -182,12 +183,12 @@ HWTEST(AdapterBtCommonTest, StateChangeCallback, TestSize.Level3)
 }
 
 /**
- * @tc.name: AdapterBtCommonTest_StateChangeCallback
+ * @tc.name: AdapterBtCommonTest_StateChangeCallback001
  * @tc.desc: test bt state listener callback aclStateChangedCallbak
  * @tc.type: FUNC
  * @tc.require: NONE
  */
-HWTEST(AdapterBtCommonTest, AclStateChangedCallbak, TestSize.Level3)
+HWTEST(AdapterBtCommonTest, AclStateChangedCallbak001, TestSize.Level3)
 {
     int32_t listenerId = -1;
     MockBluetooth mocker;
@@ -227,12 +228,12 @@ HWTEST(AdapterBtCommonTest, AclStateChangedCallbak, TestSize.Level3)
 }
 
 /**
- * @tc.name: AdapterBtCommonTest_BluetoothPair
+ * @tc.name: AdapterBtCommonTest_BluetoothPair001
  * @tc.desc: test bt state listener callback pairRequestedCallback
  * @tc.type: FUNC
  * @tc.require: NONE
  */
-HWTEST(AdapterBtCommonTest, PairRequestedCallback, TestSize.Level3)
+HWTEST(AdapterBtCommonTest, PairRequestedCallback001, TestSize.Level3)
 {
     BdAddr bdAddr = {
         .addr = { 0x11, 0x22, 0x33, 0x44, 0x55, 0x66 },
@@ -254,12 +255,12 @@ HWTEST(AdapterBtCommonTest, PairRequestedCallback, TestSize.Level3)
 }
 
 /**
- * @tc.name: AdapterBtCommonTest_PairConfiremedCallback
+ * @tc.name: AdapterBtCommonTest_PairConfiremedCallback001
  * @tc.desc: test bt state listener callback pairConfiremedCallback
  * @tc.type: FUNC
  * @tc.require: NONE
  */
-HWTEST(AdapterBtCommonTest, PairConfiremedCallback, TestSize.Level3)
+HWTEST(AdapterBtCommonTest, PairConfiremedCallback001, TestSize.Level3)
 {
     BdAddr bdAddr = {
         .addr = { 0x11, 0x22, 0x33, 0x44, 0x55, 0x66 },
@@ -280,20 +281,25 @@ HWTEST(AdapterBtCommonTest, PairConfiremedCallback, TestSize.Level3)
 }
 
 /**
- * @tc.name: SoftBusAddBtStateListener
+ * @tc.name: SoftBusAddBtStateListener001
  * @tc.desc: test SoftBusAddBtStateListener
  * @tc.type: FUNC
  * @tc.require: NONE
  */
-HWTEST(AdapterBtCommonTest, SoftBusAddBtStateListener, TestSize.Level3)
+HWTEST(AdapterBtCommonTest, SoftBusAddBtStateListener001, TestSize.Level3)
 {
-    int32_t ret = SoftBusAddBtStateListener(NULL);
+    auto listenerId = -1;
+    int32_t ret = SoftBusAddBtStateListener(nullptr, &listenerId);
     EXPECT_EQ(ret, SOFTBUS_INVALID_PARAM);
+
+    ret = SoftBusAddBtStateListener(GetMockBtStateListener(), nullptr);
+    EXPECT_EQ(ret, SOFTBUS_INVALID_PARAM);
+
     for (int i = 0; i < STATE_LISTENER_MAX_NUM; ++i) {
-        ret = SoftBusAddBtStateListener(GetMockBtStateListener());
-        EXPECT_TRUE(ret >= 0);
+        ret = SoftBusAddBtStateListener(GetMockBtStateListener(), &listenerId);
+        EXPECT_TRUE(ret == SOFTBUS_OK);
     }
-    ret = SoftBusAddBtStateListener(GetMockBtStateListener());
+    ret = SoftBusAddBtStateListener(GetMockBtStateListener(), &listenerId);
     EXPECT_EQ(ret, SOFTBUS_COMM_BLUETOOTH_ADD_STATE_LISTENER_ERR);
 }
 
@@ -307,7 +313,7 @@ static void StubOnBtAclStateChanged(int32_t listenerId, const SoftBusBtAddr *add
     g_btAclStateChangedCtx.Update(listenerId, addr, aclState);
 }
 
-static SoftBusBtStateListener *GetMockBtStateListener()
+static SoftBusBtStateListener *GetMockBtStateListener(void)
 {
     static SoftBusBtStateListener listener = {
         .OnBtStateChanged = StubOnBtStateChanged,

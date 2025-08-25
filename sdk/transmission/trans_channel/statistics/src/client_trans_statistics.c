@@ -180,6 +180,29 @@ static void CloseChannelAndSendStatistics(SocketResource *resource)
     cJSON_free(str);
 }
 
+void DeleteSocketResourceBySocketId(int32_t socketId)
+{
+    TRANS_CHECK_AND_RETURN_LOGE(socketId > 0, TRANS_SDK, "invalid socketId.");
+    TRANS_CHECK_AND_RETURN_LOGE(g_channelStatisticsList != NULL, TRANS_SDK, "channel statistices list init fail.");
+    TRANS_CHECK_AND_RETURN_LOGE(SoftBusMutexLock(&g_channelStatisticsList->lock) == SOFTBUS_OK,
+        TRANS_SDK, "channel statistics list lock fail.");
+    SocketResource *item = NULL;
+    SocketResource *next = NULL;
+    LIST_FOR_EACH_ENTRY_SAFE(item, next, &g_channelStatisticsList->list, SocketResource, node) {
+        if (item->socketId == socketId) {
+            CloseChannelAndSendStatistics(item);
+            ListDelete(&item->node);
+            g_channelStatisticsList->cnt--;
+            SoftBusFree(item);
+            (void)SoftBusMutexUnlock(&g_channelStatisticsList->lock);
+            TRANS_LOGI(TRANS_SDK, "delete socket resource by socket=%{public}d", socketId);
+            return;
+        }
+    }
+    (void)SoftBusMutexUnlock(&g_channelStatisticsList->lock);
+    TRANS_LOGE(TRANS_SDK, "not found channel statistics by socket=%{public}d", socketId);
+}
+
 void DeleteSocketResourceByChannelId(int32_t channelId, int32_t channelType)
 {
     if (channelId < 0) {

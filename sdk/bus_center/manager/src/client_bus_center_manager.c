@@ -23,6 +23,7 @@
 #include "common_list.h"
 #include "lnn_log.h"
 #include "softbus_adapter_mem.h"
+#include "softbus_client_frame_manager.h"
 #include "softbus_adapter_thread.h"
 #include "softbus_def.h"
 #include "softbus_error_code.h"
@@ -54,7 +55,9 @@ typedef struct {
 typedef struct {
     ListNode node;
     char networkId[NETWORK_ID_BUF_LEN];
+    TimeSyncSocketInfo socketInfo;
     ITimeSyncCb cb;
+    ITimeSyncCbWithSocket cbWithSocket;
 } TimeSyncCallbackItem;
 
 typedef struct {
@@ -72,6 +75,7 @@ typedef struct {
     IPublishCb publishCb;
     IRefreshCallback refreshCb;
     IDataLevelCb dataLevelCb;
+    IRangeCallback rangeCb;
     bool isInit;
     SoftBusMutex lock;
 } BusCenterClient;
@@ -95,6 +99,8 @@ static BusCenterClient g_busCenterClient = {
     .refreshCb.OnDiscoverResult = NULL,
     .dataLevelCb.onDataLevelChanged = NULL,
     .isInit = false,
+    .rangeCb.onRangeResult = NULL,
+    .rangeCb.onRangeStateChange = NULL,
 };
 
 static bool IsUdidHashEmpty(const ConnectionAddr *addr)
@@ -122,11 +128,12 @@ static bool IsSameConnectionAddr(const ConnectionAddr *addr1, const ConnectionAd
         return memcmp(addr1->info.ble.udidHash, addr2->info.ble.udidHash, UDID_HASH_LEN) == 0 ||
             strncmp(addr1->info.ble.bleMac, addr2->info.ble.bleMac, BT_MAC_LEN) == 0;
     }
-    if (addr1->type == CONNECTION_ADDR_WLAN || addr1->type == CONNECTION_ADDR_ETH) {
+    if (addr1->type == CONNECTION_ADDR_WLAN || addr1->type == CONNECTION_ADDR_ETH ||
+        addr1->type == CONNECTION_ADDR_NCM) {
         return (strncmp(addr1->info.ip.ip, addr2->info.ip.ip, IP_STR_MAX_LEN) == 0)
             && (addr1->info.ip.port == addr2->info.ip.port);
     }
-    if (addr1->type == CONNECTION_ADDR_SESSION) {
+    if (addr1->type == CONNECTION_ADDR_SESSION || addr1->type == CONNECTION_ADDR_SESSION_WITH_KEY) {
         return ((addr1->info.session.sessionId == addr2->info.session.sessionId) &&
             (addr1->info.session.channelId == addr2->info.session.channelId) &&
             (addr1->info.session.type == addr2->info.session.type));
@@ -222,9 +229,10 @@ static int32_t AddTimeSyncCbItem(const char *networkId, ITimeSyncCb *cb)
     if (strncpy_s(item->networkId, NETWORK_ID_BUF_LEN, networkId, strlen(networkId)) != EOK) {
         LNN_LOGE(LNN_STATE, "strcpy network id fail");
         SoftBusFree(item);
-        return SOFTBUS_MEM_ERR;
+        return SOFTBUS_STRCPY_ERR;
     }
     item->cb = *cb;
+    item->cbWithSocket.onTimeSyncResultWithSocket = NULL;
     ListAdd(&g_busCenterClient.timeSyncCbList, &item->node);
     return SOFTBUS_OK;
 }
@@ -310,8 +318,12 @@ static void DuplicateTimeSyncResultCbList(ListNode *list, const char *networkId)
             continue;
         }
         copyItem->cb = item->cb;
+        copyItem->cbWithSocket = item->cbWithSocket;
+        copyItem->socketInfo.peerPort = item->socketInfo.peerPort;
         ListInit(&copyItem->node);
-        if (strncpy_s(copyItem->networkId, NETWORK_ID_BUF_LEN, item->networkId, strlen(item->networkId)) != EOK) {
+        if (strncpy_s(copyItem->networkId, NETWORK_ID_BUF_LEN, item->networkId, strlen(item->networkId)) != EOK ||
+            strncpy_s(copyItem->socketInfo.peerIp, IP_STR_MAX_LEN, item->socketInfo.peerIp,
+                strlen(item->socketInfo.peerIp)) != EOK) {
             LNN_LOGE(LNN_STATE, "copy networkId fail");
             SoftBusFree(copyItem);
             continue;
@@ -593,6 +605,8 @@ void BusCenterClientDeinit(void)
         LNN_LOGE(LNN_INIT, "unlock in deinit");
     }
     g_busCenterClient.dataLevelCb.onDataLevelChanged = NULL;
+    g_busCenterClient.rangeCb.onRangeResult = NULL;
+    g_busCenterClient.rangeCb.onRangeStateChange = NULL;
     SoftBusMutexDestroy(&g_busCenterClient.lock);
     BusCenterServerProxyDeInit();
 }
@@ -716,14 +730,36 @@ int32_t SetDataLevelInner(const DataLevel *dataLevel)
     return ret;
 }
 
-int32_t JoinLNNInner(const char *pkgName, ConnectionAddr *target, OnJoinLNNResult cb)
+int32_t RegRangeCbForMsdpInner(const char *pkgName, IRangeCallback *callback)
+{
+    LNN_LOGI(LNN_STATE, "enter");
+    g_busCenterClient.rangeCb = *callback;
+    int32_t ret = ServerIpcRegRangeCbForMsdp(pkgName);
+    if (ret != SOFTBUS_OK) {
+        LNN_LOGE(LNN_STATE, "Server RegRangeCbForMsdpInner failed, ret=%{public}d", ret);
+    }
+    return ret;
+}
+
+int32_t UnregRangeCbForMsdpInner(const char *pkgName)
+{
+    LNN_LOGI(LNN_STATE, "enter");
+    g_busCenterClient.rangeCb.onRangeResult = NULL;
+    g_busCenterClient.rangeCb.onRangeStateChange = NULL;
+    int32_t ret = ServerIpcUnregRangeCbForMsdp(pkgName);
+    if (ret != SOFTBUS_OK) {
+        LNN_LOGE(LNN_STATE, "Server UnregRangeCbForMsdpInner failed, ret=%{public}d", ret);
+    }
+    return ret;
+}
+
+int32_t JoinLNNInner(const char *pkgName, ConnectionAddr *target, OnJoinLNNResult cb, bool isForceJoin)
 {
     if (target == NULL) {
         LNN_LOGE(LNN_STATE, "target is null");
         return SOFTBUS_INVALID_PARAM;
     }
     int32_t rc;
-
     if (!g_busCenterClient.isInit) {
         LNN_LOGE(LNN_STATE, "join lnn not init");
         return SOFTBUS_NO_INIT;
@@ -739,7 +775,7 @@ int32_t JoinLNNInner(const char *pkgName, ConnectionAddr *target, OnJoinLNNResul
             rc = SOFTBUS_ALREADY_EXISTED;
             break;
         }
-        rc = ServerIpcJoinLNN(pkgName, target, sizeof(*target));
+        rc = ServerIpcJoinLNN(pkgName, target, sizeof(*target), isForceJoin);
         if (rc != SOFTBUS_OK) {
             LNN_LOGE(LNN_STATE, "request join lnn failed, ret=%{public}d", rc);
         } else {
@@ -896,6 +932,132 @@ int32_t UnregNodeDeviceStateCbInner(INodeStateCb *callback)
     return SOFTBUS_OK;
 }
 
+static TimeSyncCallbackItem *FindTimeSyncCbItemWithSocket(const TimeSyncSocketInfo *socketInfo,
+    ITimeSyncCbWithSocket *cbWithSocket)
+{
+    TimeSyncCallbackItem *item = NULL;
+
+    LIST_FOR_EACH_ENTRY(item, &g_busCenterClient.timeSyncCbList, TimeSyncCallbackItem, node) {
+        if (strcmp(item->networkId, socketInfo->targetNetworkId) == 0 &&
+            strcmp(item->socketInfo.peerIp, socketInfo->peerIp) == 0 &&
+            item->socketInfo.peerPort == socketInfo->peerPort && (cbWithSocket == NULL ||
+            cbWithSocket->onTimeSyncResultWithSocket == item->cbWithSocket.onTimeSyncResultWithSocket)) {
+            return item;
+        }
+    }
+    return NULL;
+}
+
+static int32_t AddTimeSyncCbItemWithSocket(const TimeSyncSocketInfo *socketInfo,
+    ITimeSyncCbWithSocket *cbWithSocket)
+{
+    TimeSyncCallbackItem *item = NULL;
+
+    item = (TimeSyncCallbackItem *)SoftBusCalloc(sizeof(*item));
+    if (item == NULL) {
+        LNN_LOGE(LNN_STATE, "malloc time sync cb item fail");
+        return SOFTBUS_MALLOC_ERR;
+    }
+    ListInit(&item->node);
+    if (strncpy_s(item->networkId, NETWORK_ID_BUF_LEN,
+        socketInfo->targetNetworkId, strlen(socketInfo->targetNetworkId)) != EOK ||
+        strncpy_s(item->socketInfo.peerIp, IP_STR_MAX_LEN,
+        socketInfo->peerIp, strlen(socketInfo->peerIp)) != EOK) {
+        LNN_LOGE(LNN_STATE, "strcpy network id or peerIp fail");
+        SoftBusFree(item);
+        return SOFTBUS_STRCPY_ERR;
+    }
+    item->socketInfo.peerPort = socketInfo->peerPort;
+    item->cb.onTimeSyncResult = NULL;
+    item->cbWithSocket = *cbWithSocket;
+    ListAdd(&g_busCenterClient.timeSyncCbList, &item->node);
+    return SOFTBUS_OK;
+}
+
+int32_t StartTimeSyncWithSocketInner(const char *pkgName, const TimeSyncSocketInfo *socketInfo,
+    TimeSyncAccuracy accuracy, TimeSyncPeriod period, ITimeSyncCbWithSocket *cbWithSocket)
+{
+    if (pkgName == NULL || socketInfo == NULL || !IsValidString(socketInfo->peerIp, IP_STR_MAX_LEN) ||
+        cbWithSocket == NULL || cbWithSocket->onTimeSyncResultWithSocket == NULL) {
+        LNN_LOGE(LNN_STATE, "invalid para");
+        return SOFTBUS_INVALID_PARAM;
+    }
+    if (InitSoftBus(pkgName) != SOFTBUS_OK) {
+        LNN_LOGE(LNN_INIT, "init softbus failed");
+        return SOFTBUS_NETWORK_NOT_INIT;
+    }
+    if (CheckPackageName(pkgName) != SOFTBUS_OK) {
+        LNN_LOGE(LNN_INIT, "check packageName failed");
+        return SOFTBUS_INVALID_PARAM;
+    }
+
+    if (!g_busCenterClient.isInit) {
+        LNN_LOGE(LNN_STATE, "start time sync with socket not init");
+        return SOFTBUS_NO_INIT;
+    }
+    if (SoftBusMutexLock(&g_busCenterClient.lock) != SOFTBUS_OK) {
+        LNN_LOGE(LNN_STATE, "lock time sync cbWithSocket list");
+        return SOFTBUS_LOCK_ERR;
+    }
+    int32_t rc = SOFTBUS_NETWORK_START_TIME_SYNC_FAILED;
+    do {
+        if (FindTimeSyncCbItemWithSocket(socketInfo, cbWithSocket) != NULL) {
+            LNN_LOGE(LNN_STATE, "repeat pkgName request, StopTimeSync first! pkgName=%{public}s", pkgName);
+            break;
+        }
+        rc = ServerIpcStartTimeSync(pkgName, socketInfo->targetNetworkId, accuracy, period);
+        if (rc != SOFTBUS_OK) {
+            LNN_LOGE(LNN_STATE, "start time sync failed, ret=%{public}d", rc);
+        } else {
+            rc = AddTimeSyncCbItemWithSocket(socketInfo, cbWithSocket);
+        }
+    } while (false);
+    if (SoftBusMutexUnlock(&g_busCenterClient.lock) != SOFTBUS_OK) {
+        LNN_LOGE(LNN_STATE, "unlock time sync cbWithSocket list");
+    }
+    return rc;
+}
+
+int32_t StopTimeSyncWithSocketInner(const char *pkgName, const TimeSyncSocketInfo *socketInfo)
+{
+    if (pkgName == NULL || socketInfo == NULL || !IsValidString(socketInfo->peerIp, IP_STR_MAX_LEN)) {
+        LNN_LOGE(LNN_STATE, "invalid para");
+        return SOFTBUS_INVALID_PARAM;
+    }
+    if (InitSoftBus(pkgName) != SOFTBUS_OK) {
+        LNN_LOGE(LNN_INIT, "init softbus failed");
+        return SOFTBUS_NETWORK_NOT_INIT;
+    }
+    if (CheckPackageName(pkgName) != SOFTBUS_OK) {
+        LNN_LOGE(LNN_INIT, "check packageName failed");
+        return SOFTBUS_INVALID_PARAM;
+    }
+    if (!g_busCenterClient.isInit) {
+        LNN_LOGE(LNN_STATE, "stop time sync cb list not init");
+        return SOFTBUS_NO_INIT;
+    }
+    if (SoftBusMutexLock(&g_busCenterClient.lock) != SOFTBUS_OK) {
+        LNN_LOGE(LNN_STATE, "lock time sync cb list");
+        return SOFTBUS_LOCK_ERR;
+    }
+    int32_t rc = SOFTBUS_NETWORK_STOP_TIME_SYNC_FAILED;
+    TimeSyncCallbackItem *item = NULL;
+    while ((item = FindTimeSyncCbItemWithSocket(socketInfo, NULL)) != NULL) {
+        rc = ServerIpcStopTimeSync(pkgName, socketInfo->targetNetworkId);
+        if (rc != SOFTBUS_OK) {
+            LNN_LOGE(LNN_STATE, "stop time sync failed, ret=%{public}d", rc);
+        } else {
+            ListDelete(&item->node);
+            SoftBusFree(item);
+            item = NULL;
+        }
+    }
+    if (SoftBusMutexUnlock(&g_busCenterClient.lock) != SOFTBUS_OK) {
+        LNN_LOGE(LNN_STATE, "unlock time sync cb list");
+    }
+    return rc;
+}
+
 int32_t StartTimeSyncInner(const char *pkgName, const char *targetNetworkId, TimeSyncAccuracy accuracy,
     TimeSyncPeriod period, ITimeSyncCb *cb)
 {
@@ -909,7 +1071,7 @@ int32_t StartTimeSyncInner(const char *pkgName, const char *targetNetworkId, Tim
         LNN_LOGE(LNN_STATE, "lock time sync cb list");
         return SOFTBUS_LOCK_ERR;
     }
-    
+
     do {
         if (FindTimeSyncCbItem(targetNetworkId, cb) != NULL) {
             LNN_LOGE(LNN_STATE, "repeat pkgName request, StopTimeSync first! pkgName=%{public}s", pkgName);
@@ -941,7 +1103,7 @@ int32_t StopTimeSyncInner(const char *pkgName, const char *targetNetworkId)
         LNN_LOGE(LNN_STATE, "lock time sync cb list");
         return SOFTBUS_LOCK_ERR;
     }
-    
+
     while ((item = FindTimeSyncCbItem(targetNetworkId, NULL)) != NULL) {
         rc = ServerIpcStopTimeSync(pkgName, targetNetworkId);
         if (rc != SOFTBUS_OK) {
@@ -1031,9 +1193,24 @@ int32_t ShiftLNNGearInner(const char *pkgName, const char *callerId, const char 
     return ServerIpcShiftLNNGear(pkgName, callerId, targetNetworkId, mode);
 }
 
+int32_t TriggerRangeForMsdpInner(const char *pkgName, const RangeConfig *config)
+{
+    return ServerIpcTriggerRangeForMsdp(pkgName, config);
+}
+
+int32_t StopRangeForMsdpInner(const char *pkgName, const RangeConfig *config)
+{
+    return ServerIpcStopRangeForMsdp(pkgName, config);
+}
+
 int32_t SyncTrustedRelationShipInner(const char *pkgName, const char *msg, uint32_t msgLen)
 {
     return ServerIpcSyncTrustedRelationShip(pkgName, msg, msgLen);
+}
+
+int32_t SetDisplayNameInner(const char *pkgName, const char *nameData, uint32_t len)
+{
+    return ServerIpcSetDisplayName(pkgName, nameData, len);
 }
 
 int32_t LnnOnJoinResult(void *addr, const char *networkId, int32_t retCode)
@@ -1368,8 +1545,22 @@ int32_t LnnOnTimeSyncResult(const void *info, int32_t retCode)
         LNN_LOGE(LNN_STATE, "unlock time sync cb list in time sync result");
     }
     LIST_FOR_EACH_ENTRY(item, &dupList, TimeSyncCallbackItem, node) {
+        if (item->cbWithSocket.onTimeSyncResultWithSocket != NULL) {
+            TimeSyncResultWithSocket basicInfoWithSocket;
+            (void)memset_s(&basicInfoWithSocket, sizeof(basicInfoWithSocket), 0, sizeof(basicInfoWithSocket));
+            basicInfoWithSocket.flag = basicInfo->flag;
+            basicInfoWithSocket.result.accuracy = basicInfo->result.accuracy;
+            basicInfoWithSocket.result.microsecond = basicInfo->result.microsecond;
+            basicInfoWithSocket.result.millisecond = basicInfo->result.millisecond;
+            if (strncpy_s(basicInfoWithSocket.targetSocketInfo.peerIp, IP_STR_MAX_LEN, item->socketInfo.peerIp,
+                strlen(item->socketInfo.peerIp)) != EOK) {
+                LNN_LOGE(LNN_STATE, "strcpy peer ip fail");
+            }
+            basicInfoWithSocket.targetSocketInfo.peerPort = item->socketInfo.peerPort;
+            item->cbWithSocket.onTimeSyncResultWithSocket(&basicInfoWithSocket, retCode);
+        }
         if (item->cb.onTimeSyncResult != NULL) {
-            item->cb.onTimeSyncResult((TimeSyncResultInfo *)info, retCode);
+            item->cb.onTimeSyncResult((TimeSyncResultInfo *)basicInfo, retCode);
         }
     }
     ClearTimeSyncList(&dupList);
@@ -1410,6 +1601,30 @@ void LnnOnDataLevelChanged(const char *networkId, const DataLevelInfo *dataLevel
         .switchLength = dataLevelInfo->switchLength
     };
     g_busCenterClient.dataLevelCb.onDataLevelChanged(networkId, dataLevel);
+}
+
+void LnnOnRangeResult(const RangeResultInnerInfo *rangeInfo)
+{
+    if (g_busCenterClient.rangeCb.onRangeResult == NULL) {
+        LNN_LOGW(LNN_STATE, "ble range callback is null");
+        return;
+    }
+    RangeResult rst = {
+        .medium = rangeInfo->medium,
+        .distance = rangeInfo->distance,
+        .length = rangeInfo->length,
+        .addition = rangeInfo->addition,
+    };
+    if (strcpy_s(rst.networkId, NETWORK_ID_BUF_LEN, rangeInfo->networkId) != EOK) {
+        LNN_LOGW(LNN_STATE, "copy networkId fail");
+        return;
+    }
+    char *anonyNetworkId = NULL;
+    Anonymize(rst.networkId, &anonyNetworkId);
+    LNN_LOGD(LNN_STATE, "medium=%{public}d, distance=%{public}f, networkId=%{public}s", rst.medium, rst.distance,
+        AnonymizeWrapper(anonyNetworkId));
+    AnonymizeFree(anonyNetworkId);
+    g_busCenterClient.rangeCb.onRangeResult(&rst);
 }
 
 int32_t DiscRecoveryPublish()

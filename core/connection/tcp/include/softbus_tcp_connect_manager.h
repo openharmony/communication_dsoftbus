@@ -16,12 +16,7 @@
 #ifndef SOFTBUS_TCP_CONNECT_MANAGER_H
 #define SOFTBUS_TCP_CONNECT_MANAGER_H
 
-#include <sys/select.h>
-
-#include "common_list.h"
-#include "softbus_conn_interface.h"
 #include "softbus_conn_manager.h"
-#include "softbus_base_listener.h"
 
 #ifdef __cplusplus
 #if __cplusplus
@@ -51,6 +46,8 @@ int32_t TcpStopListening(const LocalListenerInfo *info);
 ConnectFuncInterface *ConnInitTcp(const ConnectCallback *callback);
 
 int32_t ConnGetSocketError(int32_t fd);
+
+int32_t TcpConnSetKeepalive(int32_t fd, bool needKeepalive);
 
 #ifdef __cplusplus
 #if __cplusplus

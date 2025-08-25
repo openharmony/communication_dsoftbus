@@ -25,6 +25,8 @@
 #include "auth_session_message.h"
 #include "bus_center_manager.h"
 #include "device_profile_listener.h"
+#include "g_enhance_lnn_func.h"
+#include "g_enhance_lnn_func_pack.h"
 #include "lnn_app_bind_interface.h"
 #include "lnn_decision_db.h"
 #include "lnn_heartbeat_ctrl.h"
@@ -32,8 +34,10 @@
 #include "lnn_ohos_account_adapter.h"
 #include "lnn_map.h"
 #include "lnn_net_builder.h"
+#include "lnn_log.h"
 #include "legacy/softbus_adapter_hitrace.h"
 #include "softbus_adapter_mem.h"
+#include "softbus_init_common.h"
 
 #define DELAY_AUTH_TIME                    (8 * 1000L)
 
@@ -341,7 +345,7 @@ void AuthDeviceNotTrust(const char *peerUdid)
     AuthSessionHandleDeviceNotTrusted(peerUdid);
     LnnDeleteSpecificTrustedDevInfo(peerUdid, GetActiveOsAccountIds());
     LnnHbOnTrustedRelationReduced();
-    AuthRemoveDeviceKeyByUdid(peerUdid);
+    AuthRemoveDeviceKeyByUdidPacked(peerUdid);
     if (LnnRequestLeaveSpecific(networkId, CONNECTION_ADDR_MAX) != SOFTBUS_OK) {
         AUTH_LOGE(AUTH_HICHAIN, "request leave specific fail");
     } else {
@@ -357,8 +361,9 @@ void AuthNotifyDeviceVerifyPassed(AuthHandle authHandle, const NodeInfo *nodeInf
         AUTH_LOGE(AUTH_FSM, "get auth manager failed");
         return;
     }
-    if (auth->connInfo[authHandle.type].type == AUTH_LINK_TYPE_P2P) {
-        /* P2P auth no need notify to LNN. */
+    if (auth->connInfo[authHandle.type].type == AUTH_LINK_TYPE_P2P ||
+        auth->connInfo[authHandle.type].type == AUTH_LINK_TYPE_SLE) {
+        /* P2P auth and sle auth no need notify to LNN. */
         DelDupAuthManager(auth);
         return;
     }
@@ -397,7 +402,7 @@ static void OnDeviceNotTrusted(const char *peerUdid, int32_t localUserId)
     }
     g_verifyListener.onDeviceNotTrusted(peerUdid);
     LnnHbOnTrustedRelationReduced();
-    AuthRemoveDeviceKeyByUdid(peerUdid);
+    AuthRemoveDeviceKeyByUdidPacked(peerUdid);
 }
 
 int32_t RegAuthVerifyListener(const AuthVerifyListener *listener)
@@ -437,7 +442,7 @@ static void OnDeviceBound(const char *udid, const char *groupInfo)
     }
 }
 
-static int32_t RetryRegTrustDataChangeListener()
+static int32_t RetryRegTrustDataChangeListener(void)
 {
     TrustDataChangeListener trustListener = {
         .onGroupCreated = OnGroupCreated,
@@ -494,13 +499,22 @@ void UnregGroupChangeListener(void)
     g_groupChangeListener.onDeviceBound = NULL;
 }
 
-void AuthRegisterToDpDelay(void *para)
+int32_t AuthRegisterToDpDelay(void)
 {
     DeviceProfileChangeListener deviceProfileChangeListener = {
         .onDeviceProfileAdd = OnDeviceBound,
         .onDeviceProfileDeleted = OnDeviceNotTrusted,
     };
-    RegisterToDp(&deviceProfileChangeListener);
+    int32_t ret = RegisterToDp(&deviceProfileChangeListener);
+    if (ret != SOFTBUS_OK) {
+        AUTH_LOGE(AUTH_FSM, "register dp error");
+        return ret;
+    }
+    ret = InitDbListDelay();
+    if (ret != SOFTBUS_OK) {
+        AUTH_LOGE(AUTH_FSM, "init trusted list error");
+    }
+    return ret;
 }
 
 int32_t AuthDirectOnlineCreateAuthManager(int64_t authSeq, const AuthSessionInfo *info)
@@ -592,22 +606,25 @@ static int32_t StartConnVerifyDevice(uint32_t requestId, const AuthConnInfo *con
     return VerifyDevice(&request);
 }
 
-static int32_t StartVerifyDevice(uint32_t requestId, const AuthConnInfo *connInfo, const AuthVerifyCallback *verifyCb,
-    AuthVerifyModule module, bool isFastAuth)
+static int32_t StartVerifyDevice(const AuthVerifyParam *authVerifyParam, const AuthConnInfo *connInfo,
+    const AuthVerifyCallback *verifyCb)
 {
-    if (connInfo == NULL || verifyCb == NULL) {
+    if (connInfo == NULL || verifyCb == NULL || authVerifyParam == NULL) {
         AUTH_LOGE(AUTH_CONN, "invalid param");
         return SOFTBUS_INVALID_PARAM;
     }
     AuthRequest request;
     (void)memset_s(&request, sizeof(AuthRequest), 0, sizeof(AuthRequest));
     request.verifyCb = *verifyCb;
-    request.module = module;
-    request.requestId = requestId;
+    request.module = authVerifyParam->module;
+    request.requestId = authVerifyParam->requestId;
     request.connInfo = *connInfo;
     request.authId = AUTH_INVALID_ID;
     request.type = REQUEST_TYPE_VERIFY;
-    request.isFastAuth = isFastAuth;
+    request.isFastAuth = authVerifyParam->isFastAuth;
+    request.deviceKeyId = authVerifyParam->deviceKeyId;
+    request.forceJoinInfo = authVerifyParam->forceJoinInfo;
+    request.deviceTypeId = authVerifyParam->deviceTypeId;
     return VerifyDevice(&request);
 }
 
@@ -616,6 +633,10 @@ int32_t AuthStartReconnectDevice(
 {
     AUTH_CHECK_AND_RETURN_RET_LOGE(connInfo != NULL, SOFTBUS_INVALID_PARAM, AUTH_CONN, "connInfo is NULL");
     AUTH_CHECK_AND_RETURN_RET_LOGE(connCb != NULL, SOFTBUS_INVALID_PARAM, AUTH_CONN, "connCb is NULL");
+    if (connInfo->type < AUTH_LINK_TYPE_WIFI || connInfo->type >= AUTH_LINK_TYPE_MAX) {
+        AUTH_LOGE(AUTH_CONN, "connInfo type error");
+        return SOFTBUS_INVALID_PARAM;
+    }
     AUTH_LOGI(AUTH_CONN, "start reconnect device. requestId=%{public}u, authId=%{public}" PRId64,
         requestId, authHandle.authId);
     AuthManager *auth = GetAuthManagerByAuthId(authHandle.authId);
@@ -673,12 +694,16 @@ int32_t AuthDeviceOpenConn(const AuthConnInfo *info, uint32_t requestId, const A
     bool judgeTimeOut = false;
     switch (info->type) {
         case AUTH_LINK_TYPE_WIFI:
+        case AUTH_LINK_TYPE_SESSION_KEY:
+        case AUTH_LINK_TYPE_USB:
             authHandle.authId = GetLatestIdByConnInfo(info);
             if (authHandle.authId == AUTH_INVALID_ID) {
                 return SOFTBUS_AUTH_NOT_FOUND;
             }
             callback->onConnOpened(requestId, authHandle);
             break;
+        case AUTH_LINK_TYPE_SLE:
+            /* fall-through */
         case AUTH_LINK_TYPE_BR:
             /* fall-through */
         case AUTH_LINK_TYPE_BLE:
@@ -719,10 +744,13 @@ void AuthDeviceCloseConn(AuthHandle authHandle)
         case AUTH_LINK_TYPE_WIFI:
         case AUTH_LINK_TYPE_P2P:
         case AUTH_LINK_TYPE_ENHANCED_P2P:
+        case AUTH_LINK_TYPE_SESSION_KEY:
+        case AUTH_LINK_TYPE_USB:
             /* Do nothing. */
             break;
         case AUTH_LINK_TYPE_BR:
         case AUTH_LINK_TYPE_BLE:
+        case AUTH_LINK_TYPE_SLE:
             DisconnectAuthDevice(&auth->connId[authHandle.type]);
             break;
         default:
@@ -732,16 +760,16 @@ void AuthDeviceCloseConn(AuthHandle authHandle)
     return;
 }
 
-int32_t AuthStartVerify(const AuthConnInfo *connInfo, uint32_t requestId, const AuthVerifyCallback *callback,
-    AuthVerifyModule module, bool isFastAuth)
+int32_t AuthStartVerify(const AuthConnInfo *connInfo, const AuthVerifyParam *authVerifyParam,
+    const AuthVerifyCallback *callback)
 {
-    if (connInfo == NULL || !CheckVerifyCallback(callback)) {
+    if (connInfo == NULL || authVerifyParam == NULL || !CheckVerifyCallback(callback)) {
         AUTH_LOGE(AUTH_CONN, "invalid param");
         return SOFTBUS_INVALID_PARAM;
     }
     AUTH_CHECK_AND_RETURN_RET_LOGE(CheckAuthConnInfoType(connInfo), SOFTBUS_INVALID_PARAM,
         AUTH_FSM, "connInfo type error");
-    return StartVerifyDevice(requestId, connInfo, callback, module, isFastAuth);
+    return StartVerifyDevice(authVerifyParam, connInfo, callback);
 }
 
 int32_t AuthStartConnVerify(const AuthConnInfo *connInfo, uint32_t requestId, const AuthConnCallback *connCallback,

@@ -13,29 +13,16 @@
 
 import("../../core/transmission/trans_channel/trans_channel.gni")
 import("../../dsoftbus.gni")
+import("$dsoftbus_root_path/br_proxy/br_proxy.gni")
 
 native_source_path = rebase_path("$dsoftbus_root_path")
-broadcast_dep_dir = "dsoftbus_enhance/core/broadcast/notification_message"
-enhanced_broadcast = exec_script("$dsoftbus_root_path/check_sub_module.py",
-                                 [
-                                   "$native_source_path",
-                                   "$broadcast_dep_dir",
-                                 ],
-                                 "value")
-
-qos_info_dep_dir = "dsoftbus_enhance/core/transmission/trans_channel/common"
-enhanced_qos_info = exec_script("$dsoftbus_root_path/check_sub_module.py",
-                                [
-                                  "$native_source_path",
-                                  "$qos_info_dep_dir",
-                                ],
-                                "value")
 
 trans_session_src = trans_channel_src
 trans_session_inc = trans_channel_inc
 trans_session_deps = trans_channel_deps
 trans_session_deps += [ "$dsoftbus_dfx_path:softbus_dfx" ]
 trans_session_external_deps = []
+trans_session_inc += br_proxy_include_dirs
 
 trans_session_src += [
   "$dsoftbus_root_path/core/transmission/session/src/trans_session_manager.c",
@@ -53,14 +40,6 @@ if (softbus_os_account) {
   trans_session_external_deps += [ "os_account:os_account_innerkits" ]
 } else {
   trans_session_src += [ "$dsoftbus_root_path/core/transmission/session/cpp/src/trans_session_account_adapter_virtual.c" ]
-}
-
-if (enhanced_qos_info) {
-  trans_session_src += [ "$dsoftbus_root_path/dsoftbus_enhance/core/transmission/trans_channel/common/src/trans_qos_info.c" ]
-  trans_session_inc +=
-      [ "$dsoftbus_root_path/dsoftbus_enhance/interfaces/kits/transport" ]
-} else {
-  trans_session_src += [ "$dsoftbus_root_path/core/transmission/trans_channel/common/src/trans_qos_info.c" ]
 }
 
 if (defined(ohos_lite)) {
@@ -93,19 +72,17 @@ if (defined(ohos_lite)) {
     "$dsoftbus_root_path/core/transmission/ipc/$os_type/src/trans_client_proxy_standard.cpp",
     "$dsoftbus_root_path/core/transmission/session/cpp/src/trans_session_ipc_adapter.cpp",
   ]
-  if (enhanced_broadcast) {
-    import(
-        "$dsoftbus_root_path/dsoftbus_enhance/core/broadcast/notification_message/notification_message.gni")
 
-    trans_session_src += broadcast_sources
-    trans_session_inc += broadcast_include_dirs
-    trans_session_deps +=
-        [ "$dsoftbus_root_path/components/nstackx/nstackx_ctrl:nstackx_ctrl" ]
-  } else {
-    trans_session_inc +=
-        [ "$dsoftbus_root_path/core/transmission/broadcast/include" ]
-    trans_session_src += [ "$dsoftbus_root_path/core/transmission/broadcast/src/trans_spec_object_stub.cpp" ]
-  }
+  trans_session_src += br_proxy_sa_sources
+  trans_session_external_deps += br_proxy_external_deps
+  trans_session_inc +=
+  [
+    "$dsoftbus_root_path/core/transmission/broadcast/include",
+    "$dsoftbus_root_path/interfaces/kits/broadcast/enhance",
+    "$dsoftbus_root_path/interfaces/kits/transport",
+  ]
+  trans_session_src += [ "$dsoftbus_root_path/core/transmission/broadcast/src/trans_spec_object_stub.cpp" ]
+
   trans_session_external_deps += [
     "bounds_checking_function:libsec_shared",
     "cJSON:cjson",

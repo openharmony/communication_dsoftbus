@@ -16,11 +16,9 @@
 #ifndef AUTH_CONNECTION_H
 #define AUTH_CONNECTION_H
 
-#include <stdbool.h>
-#include <stdint.h>
-
 #include "auth_common.h"
 #include "auth_interface.h"
+#include "auth_connection_struct.h"
 #include "softbus_conn_interface.h"
 
 #ifdef __cplusplus
@@ -28,27 +26,6 @@
 extern "C" {
 #endif
 #endif
-
-typedef struct {
-    uint64_t connId;
-    AuthConnInfo connInfo;
-    bool fromServer;
-    AuthDataHead head;
-    uint32_t len;
-    uint8_t data[0];
-} RepeatDeviceIdData;
-
-typedef struct {
-    void (*onConnectResult)(uint32_t requestId, uint64_t connId, int32_t result, const AuthConnInfo *connInfo);
-    void (*onDisconnected)(uint64_t connId, const AuthConnInfo *connInfo);
-    void (*onDataReceived)(
-        uint64_t connId, const AuthConnInfo *connInfo, bool fromServer, const AuthDataHead *head, const uint8_t *data);
-} AuthConnListener;
-
-typedef struct {
-    int32_t fd;
-    int32_t ret;
-} AuthConnectResult;
 
 int32_t AuthConnInit(const AuthConnListener *listener);
 void AuthConnDeinit(void);
@@ -75,9 +52,6 @@ int32_t GetConnInfoByConnectionId(uint32_t connectionId, AuthConnInfo *connInfo)
 
 void HandleRepeatDeviceIdDataDelay(uint64_t connId, const AuthConnInfo *connInfo, bool fromServer,
     const AuthDataHead *head, const uint8_t *data);
-
-#define CONN_INFO         "conn=%{public}s:%{public}u"
-#define CONN_DATA(connId) GetConnTypeStr(connId), GetConnId(connId)
 
 #ifdef __cplusplus
 #if __cplusplus

@@ -45,10 +45,10 @@ using namespace testing::ext;
 using namespace std;
 namespace OHOS {
 
-const std::string FILE_TEST_PKG_NAME = "com.huawei.plrdtest.dsoftbus";
-const std::string FILE_TEST_PKG_NAME_DEMO = "com.huawei.plrdtest.dsoftbus1";
-const std::string FILE_SESSION_NAME = "com.huawei.plrdtest.dsoftbus.JtSendFile_10";
-const std::string FILE_SESSION_NAME_DEMO = "com.huawei.plrdtest.dsoftbus.JtSendFile_demo";
+const std::string FILE_TEST_PKG_NAME = "com.plrdtest.dsoftbus";
+const std::string FILE_TEST_PKG_NAME_DEMO = "com.plrdtest.dsoftbus1";
+const std::string FILE_SESSION_NAME = "com.plrdtest.dsoftbus.JtSendFile_10";
+const std::string FILE_SESSION_NAME_DEMO = "com.plrdtest.dsoftbus.JtSendFile_demo";
 
 const int32_t SEND_DATA_SIZE_1K = 1024;
 const int32_t SEND_DATA_SIZE_4K = 4 * 1024;

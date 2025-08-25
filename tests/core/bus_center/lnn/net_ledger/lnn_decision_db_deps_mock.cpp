@@ -41,7 +41,7 @@ static DecisionDbDepsInterfaceMock *GetDecisionDbDepsInterface()
 int32_t DecisionDbDepsInterfaceMock::DecisionDbAsyncCallbackHelper(
     SoftBusLooper *looper, LnnAsyncCallbackFunc callback, void *para)
 {
-    if (callback != NULL) {
+    if (callback != nullptr) {
         callback(para);
         return SOFTBUS_OK;
     }
@@ -199,5 +199,75 @@ int32_t LnnCeDecryptDataByHuks(const struct HksBlob *keyAlias, const struct HksB
     return GetDecisionDbDepsInterface()->LnnCeDecryptDataByHuks(keyAlias, inData, outData);
 }
 
+int64_t SoftBusGetRealTimeMs(void)
+{
+    return GetDecisionDbDepsInterface()->SoftBusGetRealTimeMs();
+}
+
+int32_t LnnGetLocalNum64Info(InfoKey key, int64_t *info)
+{
+    return GetDecisionDbDepsInterface()->LnnGetLocalNum64Info(key, info);
+}
+
+int32_t LnnSetLocalNum64Info(InfoKey key, int64_t info)
+{
+    return GetDecisionDbDepsInterface()->LnnSetLocalNum64Info(key, info);
+}
+
+int32_t LnnAsyncCallbackDelayHelper(
+    SoftBusLooper *looper, LnnAsyncCallbackFunc callback, void *para, uint64_t delayMillis)
+{
+    return GetDecisionDbDepsInterface()->LnnAsyncCallbackDelayHelper(looper, callback, para, delayMillis);
+}
+
+SoftBusLooper *GetLooper(int32_t looper)
+{
+    return GetDecisionDbDepsInterface()->GetLooper(looper);
+}
+
+int32_t LnnSaveDeviceData(const char *data, LnnDataType dataType)
+{
+    return GetDecisionDbDepsInterface()->LnnSaveDeviceData(data, dataType);
+}
+
+int32_t LnnRetrieveDeviceData(LnnDataType dataType, char **data, uint32_t *dataLen)
+{
+    return GetDecisionDbDepsInterface()->LnnRetrieveDeviceData(dataType, data, dataLen);
+}
+
+int32_t LnnSaveLocalDeviceInfo(const NodeInfo *deviceInfo)
+{
+    return GetDecisionDbDepsInterface()->LnnSaveLocalDeviceInfo(deviceInfo);
+}
+
+int32_t LnnSaveRemoteDeviceInfo(const NodeInfo *deviceInfo)
+{
+    return GetDecisionDbDepsInterface()->LnnSaveRemoteDeviceInfo(deviceInfo);
+}
+
+int32_t LnnDeleteCeKeyByHuks(struct HksBlob *keyAlias)
+{
+    return GetDecisionDbDepsInterface()->LnnDeleteCeKeyByHuks(keyAlias);
+}
+
+int32_t LnnGenerateCeKeyByHuks(struct HksBlob *keyAlias, bool isUnlocked)
+{
+    return GetDecisionDbDepsInterface()->LnnGenerateCeKeyByHuks(keyAlias, isUnlocked);
+}
+
+int32_t LnnGetLocalDevInfo(NodeInfo *deviceInfo)
+{
+    return GetDecisionDbDepsInterface()->LnnGetLocalDevInfo(deviceInfo);
+}
+
+int32_t LnnGetAllRemoteDevInfo(NodeInfo **info, int32_t *nums)
+{
+    return GetDecisionDbDepsInterface()->LnnGetAllRemoteDevInfo(info, nums);
+}
+
+int32_t LnnGetLocalNumInfo(InfoKey key, int32_t *info)
+{
+    return GetDecisionDbDepsInterface()->LnnGetLocalNumInfo(key, info);
+}
 } // extern "C"
 } // namespace OHOS

@@ -13,8 +13,6 @@
  * limitations under the License.
  */
 
-#include <any>
-#include <string>
 #include "conn_log.h"
 #include "interface_info.h"
 #include "protocol/wifi_direct_protocol.h"
@@ -143,7 +141,11 @@ int InterfaceInfo::Unmarshalling(WifiDirectProtocol &protocol, const std::vector
 
         switch (type) {
             case Serializable::ValueType::BOOL: {
-                Set(InterfaceInfoKey(key), *(bool *)(data));
+                // Consistent with where data is added, use the uint8_t type
+                if (size >= sizeof(uint8_t)) {
+                    bool value = *reinterpret_cast<uint8_t *>(data);
+                    Set(InterfaceInfoKey(key), value);
+                }
                 break;
             }
             case Serializable::ValueType::INT: {
@@ -249,7 +251,10 @@ void InterfaceInfo::SetP2pGroupConfig(const std::string &groupConfig)
         Set(InterfaceInfoKey::DYNAMIC_MAC, ret[P2P_GROUP_CONFIG_INDEX_BSSID]);
     }
     Set(InterfaceInfoKey::PSK, ret[P2P_GROUP_CONFIG_INDEX_SHARE_KEY]);
-    Set(InterfaceInfoKey::CENTER_20M, std::stoi(ret[P2P_GROUP_CONFIG_INDEX_FREQ]));
+    int32_t freq = 0;
+    bool result = WifiDirectUtils::StringToInt(ret[P2P_GROUP_CONFIG_INDEX_FREQ], freq);
+    CONN_CHECK_AND_RETURN_LOGE(result, CONN_WIFI_DIRECT, "freq in group config is not valid number string");
+    Set(InterfaceInfoKey::CENTER_20M, freq);
 }
 
 std::string InterfaceInfo::GetP2pGroupConfig() const
@@ -399,7 +404,7 @@ void InterfaceInfo::IncreaseRefCount()
     int count = Get(InterfaceInfoKey::REUSE_COUNT, 0);
     count++;
     Set(InterfaceInfoKey::REUSE_COUNT, count);
-    CONN_LOGI(CONN_WIFI_DIRECT, "reuseCount = %{public}d", count);
+    CONN_LOGI(CONN_WIFI_DIRECT, "reuseCnt = %{public}d", count);
 }
 
 void InterfaceInfo::DecreaseRefCount()
@@ -407,6 +412,6 @@ void InterfaceInfo::DecreaseRefCount()
     int count = Get(InterfaceInfoKey::REUSE_COUNT, 0);
     --count;
     Set(InterfaceInfoKey::REUSE_COUNT, count);
-    CONN_LOGI(CONN_WIFI_DIRECT, "reuseCount = %{public}d", count);
+    CONN_LOGI(CONN_WIFI_DIRECT, "reuseCnt = %{public}d", count);
 }
 } // namespace OHOS::SoftBus

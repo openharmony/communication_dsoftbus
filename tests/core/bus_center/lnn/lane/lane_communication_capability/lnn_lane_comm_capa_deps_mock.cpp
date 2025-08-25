@@ -13,7 +13,7 @@
  * limitations under the License.
  */
 
-#include "lnn_ctrl_lane_deps_mock.h"
+#include "lnn_lane_comm_capa_deps_mock.h"
 #include "softbus_error_code.h"
 
 using namespace testing::ext;
@@ -37,14 +37,14 @@ static LaneCommCapaDepsInterface *GetLaneCommCapaIf()
 }
 
 extern "C" {
-int32_t LnnGetLocalNumU64Info(InfoKey key, uint64_t *info)
+int32_t LnnGetLocalNumU32Info(InfoKey key, uint32_t *info)
 {
-    return GetLaneCommCapaIf()->LnnGetLocalNumU64Info(key, info);
+    return GetLaneCommCapaIf()->LnnGetLocalNumU32Info(key, info);
 }
 
-int32_t LnnGetRemoteNumU64Info(const char *networkId, InfoKey key, uint64_t *info)
+int32_t LnnGetRemoteNumU32Info(const char *networkId, InfoKey key, uint32_t *info)
 {
-    return GetLaneCommCapaIf()->LnnGetRemoteNumU64Info(networkId, key, info);
+    return GetLaneCommCapaIf()->LnnGetRemoteNumU32Info(networkId, key, info);
 }
 
 int32_t LnnGetRemoteNodeInfoById(const char *id, IdCategory type, NodeInfo *info)
@@ -55,6 +55,16 @@ int32_t LnnGetRemoteNodeInfoById(const char *id, IdCategory type, NodeInfo *info
 bool LnnHasDiscoveryType(const NodeInfo *info, DiscoveryType type)
 {
     return GetLaneCommCapaIf()->LnnHasDiscoveryType(info, type);
+}
+
+SoftBusWifiDetailState SoftBusGetWifiState(void)
+{
+    return GetLaneCommCapaIf()->SoftBusGetWifiState();
+}
+
+int32_t LnnGetNetworkIdByUdid(const char *udid, char *buf, uint32_t len)
+{
+    return GetLaneCommCapaIf()->LnnGetNetworkIdByUdid(udid, buf, len);
 }
 }
 } // namespace OHOS

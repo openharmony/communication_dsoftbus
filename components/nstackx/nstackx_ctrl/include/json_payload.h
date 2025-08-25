@@ -16,14 +16,13 @@
 #ifndef JSON_PAYLOAD_H
 #define JSON_PAYLOAD_H
 
-#include <stdint.h>
 #include "nstackx.h"
 
 #ifdef __cplusplus
 extern "C" {
 #endif
 
-#define NSTACKX_MAX_URI_BUFFER_LENGTH 64
+#define NSTACKX_MAX_URI_BUFFER_LENGTH 72
 
 #define JSON_COAP_URI "coapUri"
 #define JSON_CAPABILITY_BITMAP "capabilityBitmap"
@@ -47,7 +46,8 @@ extern "C" {
 
 struct DeviceInfo;
 
-char *PrepareServiceDiscover(const char *localIpStr, uint8_t isBroadcast, uint8_t businessType);
+char *PrepareServiceDiscover(uint8_t af, const char *localIpStr,
+    uint8_t isBroadcast, uint8_t businessType, const char *serviceData);
 int32_t ParseServiceDiscover(const uint8_t *buf, struct DeviceInfo *deviceInfo, char **remoteUrlPtr);
 char *PrepareServiceNotification(void);
 int32_t ParseServiceNotification(const uint8_t *buf, NSTACKX_NotificationConfig *config);

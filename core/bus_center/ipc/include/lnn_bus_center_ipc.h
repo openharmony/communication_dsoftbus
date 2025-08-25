@@ -19,6 +19,7 @@
 #include <stdbool.h>
 #include <stdint.h>
 
+#include "ble_range.h"
 #include "data_level.h"
 #include "softbus_bus_center.h"
 
@@ -28,7 +29,7 @@ extern "C" {
 
 int32_t LnnIpcInit(void);
 void LnnIpcDeinit(void);
-int32_t LnnIpcServerJoin(const char *pkgName, int32_t callingPid, void *addr, uint32_t addrTypeLen);
+int32_t LnnIpcServerJoin(const char *pkgName, int32_t callingPid, void *addr, uint32_t addrTypeLen, bool isForceJoin);
 int32_t LnnIpcServerLeave(const char *pkgName, int32_t callingPid, const char *networkId);
 int32_t LnnIpcGetAllOnlineNodeInfo(const char *pkgName, void **info, uint32_t infoTypeLen, int32_t *infoNum);
 int32_t LnnIpcGetLocalDeviceInfo(const char *pkgName, void *info, uint32_t infoTypeLen);
@@ -41,8 +42,8 @@ int32_t LnnIpcGetNodeKeyInfoLen(int32_t key);
 int32_t LnnIpcStartTimeSync(
     const char *pkgName, int32_t callingPid, const char *targetNetworkId, int32_t accuracy, int32_t period);
 int32_t LnnIpcStopTimeSync(const char *pkgName, const char *targetNetworkId, int32_t callingPid);
-int32_t LnnIpcPublishLNN(const char *pkgName, const PublishInfo *info);
-int32_t LnnIpcStopPublishLNN(const char *pkgName, int32_t publishId);
+int32_t LnnIpcPublishLNN(const char *pkgName, int32_t callingPid, const PublishInfo *info);
+int32_t LnnIpcStopPublishLNN(const char *pkgName, int32_t callingPid, int32_t publishId);
 int32_t LnnIpcRefreshLNN(const char *pkgName, int32_t callingPid, const SubscribeInfo *info);
 int32_t LnnIpcStopRefreshLNN(const char *pkgName, int32_t callingPid, int32_t refreshId);
 int32_t LnnIpcActiveMetaNode(const MetaNodeConfigInfo *info, char *metaNodeId);
@@ -63,7 +64,12 @@ int32_t LnnIpcNotifyTimeSyncResult(
 
 int32_t LnnIpcShiftLNNGear(const char *pkgName, const char *callerId, const char *targetNetworkId,
     const GearMode *mode);
+int32_t LnnIpcTriggerRangeForMsdp(const char *pkgName, const RangeConfig *config);
+int32_t LnnIpcStopRangeForMsdp(const char *pkgName, const RangeConfig *config);
+int32_t LnnIpcRegRangeCbForMsdp(const char *pkgName, int32_t callingPid);
+int32_t LnnIpcUnregRangeCbForMsdp(const char *pkgName, int32_t callingPid);
 int32_t LnnIpcSyncTrustedRelationShip(const char *pkgName, const char *msg, uint32_t msgLen);
+int32_t LnnIpcSetDisplayName(const char *pkgName, const char *nameData, uint32_t len);
 
 void BusCenterServerDeathCallback(const char *pkgName);
 

@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2024 Huawei Device Co., Ltd.
+ * Copyright (c) 2024-2025 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -19,6 +19,7 @@
 #include <gtest/gtest.h>
 #include <securec.h>
 
+#include "dsoftbus_enhance_interface.h"
 #include "lnn_data_cloud_sync.c"
 #include "lnn_data_cloud_sync.h"
 #include "lnn_data_cloud_sync_deps_mock.h"
@@ -36,6 +37,9 @@ constexpr int32_t STATE_VERSION = 2;
 constexpr uint64_t TIMES_STAP0 = 0;
 constexpr uint64_t TIMES_STAP1 = 1;
 constexpr uint64_t TIMES_STAP2 = 2;
+constexpr int32_t STATE_VERSION2 = 12;
+constexpr int32_t KEY_SIZE0 = 0;
+constexpr int32_t KEY_SIZE1 = 1;
 
 namespace OHOS {
 using namespace testing;
@@ -308,8 +312,8 @@ HWTEST_F(LNNDataCloudSyncMockTest, DBDataChangeBatchSyncToCacheInternal_Test_001
         DBDataChangeBatchSyncToCacheInternal(nullptr, fieldName, value, valueLength, udid), SOFTBUS_INVALID_PARAM);
     EXPECT_EQ(
         DBDataChangeBatchSyncToCacheInternal(&cacheInfo, nullptr, value, valueLength, udid), SOFTBUS_INVALID_PARAM);
-    EXPECT_EQ(DBDataChangeBatchSyncToCacheInternal(&cacheInfo, fieldName, nullptr, valueLength, udid),
-        SOFTBUS_INVALID_PARAM);
+    EXPECT_EQ(
+        DBDataChangeBatchSyncToCacheInternal(&cacheInfo, fieldName, nullptr, valueLength, udid), SOFTBUS_INVALID_PARAM);
     EXPECT_EQ(DBDataChangeBatchSyncToCacheInternal(&cacheInfo, fieldName, value, valueLength, nullptr),
         SOFTBUS_INVALID_PARAM);
     const char *udid1 = "123456789123456789123456789123456789123456789123456789123456789123456789";
@@ -334,7 +338,7 @@ HWTEST_F(LNNDataCloudSyncMockTest, GetInfoFromSplitKey_Test_001, TestSize.Level1
         "234567",
         "345678",
     };
-    int64_t accountId;
+    int64_t accountId = 0;
     char deviceUdid[UDID_BUF_LEN] = { 0 };
     char fieldName[FIELDNAME_MAX_LEN] = { 0 };
     EXPECT_EQ(GetInfoFromSplitKey(splitKey, &accountId, deviceUdid, fieldName), SOFTBUS_OK);
@@ -362,10 +366,12 @@ HWTEST_F(LNNDataCloudSyncMockTest, GetInfoFromSplitKey_Test_001, TestSize.Level1
 HWTEST_F(LNNDataCloudSyncMockTest, HandleDBAddChangeInternal_Test_001, TestSize.Level1)
 {
     NodeInfo localCaheInfo = {
-        .stateVersion = 12,
+        .stateVersion = STATE_VERSION2,
     };
     EXPECT_EQ(EOK, strcpy_s(localCaheInfo.deviceInfo.deviceUdid, UDID_BUF_LEN, PEERUDID));
     NiceMock<LnnDataCloudSyncInterfaceMock> DataCloudSyncMock;
+    LnnEnhanceFuncList *pfnLnnEnhanceFuncList = LnnEnhanceFuncListGet();
+    pfnLnnEnhanceFuncList->lnnGetLocalCacheNodeInfo = LnnGetLocalCacheNodeInfo;
     EXPECT_CALL(DataCloudSyncMock, LnnGetLocalCacheNodeInfo)
         .WillOnce(Return(SOFTBUS_INVALID_PARAM))
         .WillRepeatedly(DoAll(SetArgPointee<0>(localCaheInfo), Return(SOFTBUS_OK)));
@@ -498,6 +504,9 @@ HWTEST_F(LNNDataCloudSyncMockTest, IsIgnoreUpdate_Test_001, TestSize.Level1)
 HWTEST_F(LNNDataCloudSyncMockTest, HandleDBUpdateInternal_Test_001, TestSize.Level1)
 {
     NiceMock<LnnDataCloudSyncInterfaceMock> DataCloudSyncMock;
+    LnnEnhanceFuncList *pfnLnnEnhanceFuncList = LnnEnhanceFuncListGet();
+    pfnLnnEnhanceFuncList->lnnRetrieveDeviceInfo = LnnRetrieveDeviceInfo;
+    pfnLnnEnhanceFuncList->lnnSaveRemoteDeviceInfo = LnnSaveRemoteDeviceInfo;
     EXPECT_CALL(DataCloudSyncMock, LnnGenerateHexStringHash)
         .WillOnce(Return(SOFTBUS_ENCRYPT_ERR))
         .WillRepeatedly(Return(SOFTBUS_OK));
@@ -532,11 +541,9 @@ HWTEST_F(LNNDataCloudSyncMockTest, LnnDBDataAddChangeSyncToCache_Test_001, TestS
 {
     const char **key = reinterpret_cast<const char **>(SoftBusCalloc(TMP_LEN * TMP_LEN));
     const char **value = reinterpret_cast<const char **>(SoftBusCalloc(TMP_LEN * TMP_LEN));
-    int32_t keySize = 0;
+    int32_t keySize = KEY_SIZE0;
     EXPECT_EQ(LnnDBDataAddChangeSyncToCache(nullptr, value, keySize), SOFTBUS_INVALID_PARAM);
     EXPECT_EQ(LnnDBDataAddChangeSyncToCache(key, nullptr, keySize), SOFTBUS_INVALID_PARAM);
-    SoftBusFree(key);
-    SoftBusFree(value);
 }
 
 /*
@@ -550,6 +557,10 @@ HWTEST_F(LNNDataCloudSyncMockTest, LnnDBDataChangeSyncToCacheInner_Test_001, Tes
     NodeInfo cacheInfo = {
         .accountId = 12345,
     };
+    LnnEnhanceFuncList *pfnLnnEnhanceFuncList = LnnEnhanceFuncListGet();
+    pfnLnnEnhanceFuncList->lnnUnPackCloudSyncDeviceInfo = LnnUnPackCloudSyncDeviceInfo;
+    pfnLnnEnhanceFuncList->lnnRetrieveDeviceInfo = LnnRetrieveDeviceInfo;
+    pfnLnnEnhanceFuncList->lnnGetLocalCacheNodeInfo = LnnGetLocalCacheNodeInfo;
     EXPECT_EQ(EOK, strcpy_s(cacheInfo.p2pInfo.p2pMac, MAC_LEN, MACTEST));
     EXPECT_EQ(EOK, strcpy_s(cacheInfo.connectInfo.macAddr, MAC_LEN, MACTEST));
     EXPECT_EQ(EOK, strcpy_s(cacheInfo.deviceInfo.deviceUdid, UDID_BUF_LEN, PEERUDID));
@@ -590,8 +601,10 @@ HWTEST_F(LNNDataCloudSyncMockTest, LnnLedgerDataChangeSyncToDB_Test_001, TestSiz
 {
     NodeInfo localCaheInfo = {
         .accountId = 0,
-        .stateVersion = 12,
+        .stateVersion = STATE_VERSION2,
     };
+    LnnEnhanceFuncList *pfnLnnEnhanceFuncList = LnnEnhanceFuncListGet();
+    pfnLnnEnhanceFuncList->lnnGetLocalCacheNodeInfo = LnnGetLocalCacheNodeInfo;
     EXPECT_EQ(EOK, strcpy_s(localCaheInfo.deviceInfo.deviceUdid, UDID_BUF_LEN, PEERUDID));
     NiceMock<LnnDataCloudSyncInterfaceMock> DataCloudSyncMock;
     EXPECT_CALL(DataCloudSyncMock, LnnGetLocalCacheNodeInfo)
@@ -616,6 +629,9 @@ HWTEST_F(LNNDataCloudSyncMockTest, LnnLedgerDataChangeSyncToDB_Test_001, TestSiz
 HWTEST_F(LNNDataCloudSyncMockTest, PackBroadcastCipherKeyInner_Test_001, TestSize.Level1)
 {
     CloudSyncInfo syncInfo;
+    LnnEnhanceFuncList *pfnLnnEnhanceFuncList = LnnEnhanceFuncListGet();
+    pfnLnnEnhanceFuncList->lnnPackCloudSyncDeviceInfo = LnnPackCloudSyncDeviceInfo;
+    pfnLnnEnhanceFuncList->lnnGetLocalBroadcastCipherInfo = LnnGetLocalBroadcastCipherInfo;
     (void)memset_s(&syncInfo, sizeof(CloudSyncInfo), 0, sizeof(CloudSyncInfo));
     syncInfo.broadcastCipherKey = reinterpret_cast<char *>(SoftBusCalloc(TMP_LEN));
     ASSERT_TRUE(syncInfo.broadcastCipherKey != nullptr);
@@ -635,4 +651,130 @@ HWTEST_F(LNNDataCloudSyncMockTest, PackBroadcastCipherKeyInner_Test_001, TestSiz
     EXPECT_EQ(PackBroadcastCipherKeyInner(json, &info), SOFTBUS_OK);
     cJSON_Delete(json);
 }
+
+/*
+ * @tc.name: HandleDBAddChangeInternal_Test_002
+ * @tc.desc: HandleDBAddChangeInternal
+ * @tc.type: FUNC
+ * @tc.require:
+ */
+HWTEST_F(LNNDataCloudSyncMockTest, HandleDBAddChangeInternal_Test_002, TestSize.Level1)
+{
+    NodeInfo cacheInfo = { 0 };
+    int32_t ret = HandleDBAddChangeInternal(nullptr, nullptr, &cacheInfo);
+    EXPECT_EQ(ret, SOFTBUS_INVALID_PARAM);
+    const char *key = "key";
+    ret = HandleDBAddChangeInternal(key, nullptr, &cacheInfo);
+    EXPECT_EQ(ret, SOFTBUS_INVALID_PARAM);
+}
+
+/*
+ * @tc.name: HandleDBUpdateChangeInternal_Test_001
+ * @tc.desc: HandleDBUpdateChangeInternal
+ * @tc.type: FUNC
+ * @tc.require:
+ */
+HWTEST_F(LNNDataCloudSyncMockTest, HandleDBUpdateChangeInternal_Test_001, TestSize.Level1)
+{
+    const char *key = "key";
+    int32_t ret = HandleDBUpdateChangeInternal(nullptr, nullptr);
+    EXPECT_EQ(ret, SOFTBUS_INVALID_PARAM);
+    ret = HandleDBUpdateChangeInternal(key, nullptr);
+    EXPECT_EQ(ret, SOFTBUS_INVALID_PARAM);
+    ret = HandleDBUpdateChangeInternal(nullptr, nullptr);
+    EXPECT_EQ(ret, SOFTBUS_INVALID_PARAM);
+}
+
+/*
+ * @tc.name: CheckParamValidity_Test_001
+ * @tc.desc: CheckParamValidity
+ * @tc.type: FUNC
+ * @tc.require:
+ */
+HWTEST_F(LNNDataCloudSyncMockTest, CheckParamValidity_Test_001, TestSize.Level1)
+{
+    const char **key = reinterpret_cast<const char **>(SoftBusCalloc(TMP_LEN * TMP_LEN));
+    const char **value = reinterpret_cast<const char **>(SoftBusCalloc(TMP_LEN * TMP_LEN));
+    int32_t keySize = KEY_SIZE1;
+    int32_t ret = CheckParamValidity(nullptr, nullptr, keySize);
+    EXPECT_EQ(ret, SOFTBUS_INVALID_PARAM);
+    ret = CheckParamValidity(nullptr, value, keySize);
+    EXPECT_EQ(ret, SOFTBUS_INVALID_PARAM);
+    ret = CheckParamValidity(key, nullptr, keySize);
+    EXPECT_EQ(ret, SOFTBUS_INVALID_PARAM);
+    keySize = KEY_SIZE0;
+    ret = CheckParamValidity(key, value, keySize);
+    EXPECT_EQ(ret, SOFTBUS_INVALID_PARAM);
+    keySize = KEY_SIZE1;
+    ret = CheckParamValidity(key, value, keySize);
+    EXPECT_EQ(ret, SOFTBUS_OK);
+}
+
+/*
+ * @tc.name: LnnDBDataAddChangeSyncToCache_Test_002
+ * @tc.desc: LnnDBDataAddChangeSyncToCache
+ * @tc.type: FUNC
+ * @tc.require:
+ */
+HWTEST_F(LNNDataCloudSyncMockTest, LnnDBDataAddChangeSyncToCache_Test_002, TestSize.Level1)
+{
+    const char **key = reinterpret_cast<const char **>(SoftBusCalloc(TMP_LEN * TMP_LEN));
+    const char **value = reinterpret_cast<const char **>(SoftBusCalloc(TMP_LEN * TMP_LEN));
+    int32_t keySize = KEY_SIZE1;
+    EXPECT_NE(LnnDBDataAddChangeSyncToCache(key, value, keySize), SOFTBUS_OK);
+}
+
+/*
+ * @tc.name: LnnUpdateOldCacheInfo_Test_001
+ * @tc.desc: LnnUpdateOldCacheInfo
+ * @tc.type: FUNC
+ * @tc.require:
+ */
+HWTEST_F(LNNDataCloudSyncMockTest, LnnUpdateOldCacheInfo_Test_001, TestSize.Level1)
+{
+    NiceMock<LnnDataCloudSyncInterfaceMock> DataCloudSyncMock;
+    NodeInfo newInfo;
+    NodeInfo oldInfo;
+    UpdateDeviceNameToCache(&newInfo, &oldInfo);
+    UpdateDeviceNameToCache(&newInfo, &oldInfo);
+    UpdateDevBasicInfoToCache(&newInfo, &oldInfo);
+    int32_t ret = LnnUpdateOldCacheInfo(nullptr, nullptr);
+    EXPECT_EQ(ret, SOFTBUS_INVALID_PARAM);
+    ret = LnnUpdateOldCacheInfo(&newInfo, nullptr);
+    EXPECT_EQ(ret, SOFTBUS_INVALID_PARAM);
+    EXPECT_CALL(DataCloudSyncMock, LnnFindDeviceUdidTrustedInfoFromDb).WillRepeatedly(Return(SOFTBUS_OK));
+    ret = LnnUpdateOldCacheInfo(&newInfo, &oldInfo);
+    EXPECT_EQ(ret, SOFTBUS_OK);
+    EXPECT_CALL(DataCloudSyncMock, LnnFindDeviceUdidTrustedInfoFromDb).WillRepeatedly(Return(SOFTBUS_NOT_FIND));
+    ret = LnnUpdateOldCacheInfo(&newInfo, &oldInfo);
+    EXPECT_EQ(ret, SOFTBUS_OK);
+}
+
+/*
+ * @tc.name: LnnSaveAndUpdateDistributedNode_Test_001
+ * @tc.desc: LnnSaveAndUpdateDistributedNode
+ * @tc.type: FUNC
+ * @tc.require:
+ */
+HWTEST_F(LNNDataCloudSyncMockTest, LnnSaveAndUpdateDistributedNode_Test_001, TestSize.Level1)
+{
+    NodeInfo cacheInfo;
+    NodeInfo oldCacheInfo;
+    EXPECT_EQ(LnnSaveAndUpdateDistributedNode(nullptr, &oldCacheInfo), SOFTBUS_INVALID_PARAM);
+    EXPECT_EQ(LnnSaveAndUpdateDistributedNode(&cacheInfo, nullptr), SOFTBUS_INVALID_PARAM);
+}
+
+/*
+ * @tc.name: LnnDeleteDevInfoSyncToDB_Test_001
+ * @tc.desc: LnnDeleteDevInfoSyncToDB
+ * @tc.type: FUNC
+ * @tc.require:
+ */
+HWTEST_F(LNNDataCloudSyncMockTest, LnnDeleteDevInfoSyncToDB_Test_001, TestSize.Level1)
+{
+    EXPECT_EQ(LnnLedgerAllDataSyncToDB(nullptr, false, nullptr), SOFTBUS_INVALID_PARAM);
+    auto ret = LnnDeleteDevInfoSyncToDB(nullptr, 1);
+    EXPECT_EQ(ret, SOFTBUS_INVALID_PARAM);
+}
+
 } // namespace OHOS

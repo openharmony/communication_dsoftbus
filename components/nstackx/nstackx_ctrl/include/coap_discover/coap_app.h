@@ -19,6 +19,7 @@
 #include <coap3/coap.h>
 
 #include "nstackx_epoll.h"
+#include "nstackx_inet.h"
 #include "nstackx_list.h"
 
 #ifdef __cplusplus
@@ -44,7 +45,7 @@ List *GetCoapContextList(void);
 bool IsCoapContextReady(void);
 CoapCtxType *CoapGetCoapCtxType(const coap_context_t *ctx);
 
-CoapCtxType *CoapServerInit(const struct in_addr *ip, void *iface);
+CoapCtxType *CoapServerInit(uint8_t af, const union InetAddr *ip, void *iface);
 void CoapServerDestroy(CoapCtxType *ctx, bool moduleDeinit);
 
 uint32_t RegisterCoAPEpollTask(EpollDesc epollfd);

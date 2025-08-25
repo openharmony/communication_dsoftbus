@@ -38,6 +38,12 @@ typedef struct {
     char myIp[IP_LEN];
     SoftBusMutex fdLock;
     SoftBusList *pendingPacketsList;
+    bool isLowLatency;
+    ProtocolType fdProtocol;
+    char peerIp[IP_LEN];
+    int32_t peerPort;
+    char pkgName[PKG_NAME_SIZE_MAX];
+    char peerDeviceId[DEVICE_ID_SIZE_MAX];
 } TcpDirectChannelDetail;
 
 typedef struct {
@@ -46,7 +52,8 @@ typedef struct {
     TcpDirectChannelDetail detail;
 } TcpDirectChannelInfo;
 
-int32_t ClientTransTdcOnChannelOpened(const char *sessionName, const ChannelInfo *channel);
+int32_t ClientTransTdcOnChannelOpened(
+    const char *sessionName, const ChannelInfo *channel, SocketAccessInfo *accessInfo);
 int32_t ClientTransTdcOnChannelOpenFailed(int32_t channelId, int32_t errCode);
 
 void TransTdcCloseChannel(int32_t channelId);
@@ -64,6 +71,7 @@ int32_t TransDisableSessionListener(int32_t channelId);
 int32_t TransTdcSetListenerStateById(int32_t channelId, bool needStopListener);
 
 void TransUpdateFdState(int32_t channelId);
+int32_t TransStopTimeSync(int32_t channelId);
 
 #ifdef __cplusplus
 }
