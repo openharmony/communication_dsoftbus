@@ -334,7 +334,6 @@ int32_t TransCheckServerAccessControl(const AppInfo *appInfo)
     }
     int32_t peerTokenType = SoftBusGetAccessTokenType(callingTokenId);
     int32_t myTokenType = SoftBusGetAccessTokenType(myTokenId);
-    
     if (peerTokenType != myTokenType) {
         const char *mySessionName = appInfo->myData.sessionName;
         const char *peerSessionName = appInfo->peerData.sessionName;
