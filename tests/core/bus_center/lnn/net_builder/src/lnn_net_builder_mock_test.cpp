@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2022-2023 Huawei Device Co., Ltd.
+ * Copyright (c) 2022-2025 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -16,6 +16,8 @@
 #include <gtest/gtest.h>
 #include <securec.h>
 
+#include "dsoftbus_enhance_interface.h"
+#include "g_enhance_lnn_func.h"
 #include "lnn_log.h"
 #include "lnn_net_builder.c"
 #include "lnn_net_builder.h"
@@ -26,8 +28,6 @@
 #include "softbus_adapter_bt_common.h"
 #include "softbus_common.h"
 #include "softbus_error_code.h"
-#include "dsoftbus_enhance_interface.h"
-#include "g_enhance_lnn_func.h"
 
 namespace OHOS {
 using namespace testing::ext;
@@ -85,7 +85,7 @@ static void ClearNetBuilderFsmList()
     }
     LnnConnectionFsm *item = nullptr;
     LnnConnectionFsm *next = nullptr;
-    LIST_FOR_EACH_ENTRY_SAFE(item, next, &netBuilder->fsmList, LnnConnectionFsm, node) {
+    LIST_FOR_EACH_ENTRY_SAFE (item, next, &netBuilder->fsmList, LnnConnectionFsm, node) {
         ListDelete(&item->node);
         --netBuilder->connCount;
     }
@@ -2226,8 +2226,8 @@ HWTEST_F(LNNNetBuilderMockTest, AccountStateChangeHandler_Test_001, TestSize.Lev
     EXPECT_NO_FATAL_FAILURE(AccountStateChangeHandler(&info.basic));
     NiceMock<NetBuilderDepsInterfaceMock> NetBuilderMock;
     EXPECT_CALL(NetBuilderMock, LnnGetLocalStrInfo(_, _, _))
-            .WillOnce(Return(SOFTBUS_INVALID_PARAM))
-            .WillRepeatedly(Return(SOFTBUS_OK));
+        .WillOnce(Return(SOFTBUS_INVALID_PARAM))
+        .WillRepeatedly(Return(SOFTBUS_OK));
     auto ret = LnnInitNetBuilderDelay();
     EXPECT_EQ(ret, SOFTBUS_INVALID_PARAM);
 }
@@ -2247,5 +2247,55 @@ HWTEST_F(LNNNetBuilderMockTest, InitSyncInfoReg_Test_001, TestSize.Level1)
         .WillRepeatedly(Return(SOFTBUS_OK));
     auto ret = InitSyncInfoReg();
     EXPECT_EQ(ret, SOFTBUS_INVALID_PARAM);
+}
+
+/*
+ * @tc.name: TryTriggerSparkGroupBuild_Test_001
+ * @tc.desc: TryTriggerSparkGroupBuild test
+ * @tc.type: FUNC
+ * @tc.require:
+ */
+HWTEST_F(LNNNetBuilderMockTest, TryTriggerSparkGroupBuild_Test_001, TestSize.Level1)
+{
+    DeviceVerifyPassMsgPara msgPara = {};
+    NodeInfo nodeInfo = {};
+    msgPara.nodeInfo = &nodeInfo;
+    NiceMock<NetBuilderDepsInterfaceMock> NetBuilderMock;
+    EXPECT_CALL(NetBuilderMock, IsSameAccountId(_)).WillRepeatedly(Return(true));
+    EXPECT_CALL(NetBuilderMock, LnnHasDiscoveryType(_, _)).WillRepeatedly(Return(true));
+    EXPECT_NO_FATAL_FAILURE(TryTriggerSparkGroupBuild(&msgPara));
+}
+
+/*
+ * @tc.name: OnReAuthVerifyPassed_Test_001
+ * @tc.desc: OnReAuthVerifyPassed test
+ * @tc.type: FUNC
+ * @tc.require:
+ */
+HWTEST_F(LNNNetBuilderMockTest, OnReAuthVerifyPassed_Test_001, TestSize.Level1)
+{
+    NodeInfo info = {};
+    AuthHandle authHandle = { .authId = AUTH_META_ID, .type = AUTH_LINK_TYPE_WIFI };
+    uint32_t requestId = 1;
+    NiceMock<NetBuilderDepsInterfaceMock> NetBuilderMock;
+    EXPECT_CALL(NetBuilderMock, GetAuthRequest(_, _)).WillRepeatedly(Return(SOFTBUS_OK));
+    EXPECT_CALL(NetBuilderMock, LnnConvertAuthConnInfoToAddr(_, _, _)).WillRepeatedly(Return(true));
+    EXPECT_CALL(NetBuilderMock, SoftBusGenerateStrHash(_, _, _)).WillRepeatedly(Return(SOFTBUS_OK));
+    LnnConnectionFsm *connFsm = reinterpret_cast<LnnConnectionFsm *>(SoftBusMalloc(sizeof(LnnConnectionFsm)));
+    ListInit(&connFsm->node);
+    connFsm->isDead = false;
+    ListAdd(&g_netBuilder.fsmList, &connFsm->node);
+    EXPECT_CALL(NetBuilderMock, LnnIsSameConnectionAddr(_, _, _)).WillRepeatedly(Return(true));
+    EXPECT_CALL(NetBuilderMock, LnnIsNeedCleanConnectionFsm(_, _)).WillRepeatedly(Return(false));
+    EXPECT_CALL(NetBuilderMock, LnnUpdateGroupType(_)).WillRepeatedly(Return(SOFTBUS_OK));
+    EXPECT_CALL(NetBuilderMock, LnnUpdateAccountInfo(_)).WillRepeatedly(Return(SOFTBUS_OK));
+    EXPECT_CALL(NetBuilderMock, IsSameAccountId(_)).WillRepeatedly(Return(true));
+    EXPECT_CALL(NetBuilderMock, LnnGetRemoteNodeInfoById(_, _, _))
+        .WillOnce(Return(SOFTBUS_INVALID_PARAM))
+        .WillRepeatedly(Return(SOFTBUS_OK));
+    EXPECT_CALL(NetBuilderMock, LnnHasDiscoveryType(_, _)).WillRepeatedly(Return(true));
+    EXPECT_NO_FATAL_FAILURE(OnReAuthVerifyPassed(requestId, authHandle, &info));
+    ListDelete(&connFsm->node);
+    SoftBusFree(connFsm);
 }
 } // namespace OHOS

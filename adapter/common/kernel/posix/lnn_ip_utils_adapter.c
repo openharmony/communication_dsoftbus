@@ -102,7 +102,7 @@ int32_t GetNetworkIpv6ByIfName(const char *ifName, char *ip, uint32_t len)
     }
     for (struct ifaddrs *ifa = allAddr; ifa != NULL; ifa = ifa->ifa_next) {
         if (ifa->ifa_addr == NULL || ifa->ifa_addr->sa_family != AF_INET6 || ifa->ifa_netmask == NULL ||
-            strcmp(ifa->ifa_name, ifName) != 0) {
+            ifa->ifa_name == NULL || strcmp(ifa->ifa_name, ifName) != 0) {
             continue;
         }
         struct sockaddr_in6 *addr = (struct sockaddr_in6 *)(ifa->ifa_addr);

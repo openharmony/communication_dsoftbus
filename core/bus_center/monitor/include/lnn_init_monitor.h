@@ -74,7 +74,7 @@ bool IsLnnInitCheckSucceed(uint32_t netType);
 void LnnInitMonitorInit(void);
 void LnnModuleInitMonitorCheckStart(void);
 
-void LnnInitModuleReturnSet(uint32_t module, uint32_t ret);
+void LnnInitModuleReturnSet(uint32_t module, int32_t ret);
 void LnnInitModuleStatusSet(uint32_t module, InitDepsStatus status);
 void LnnInitDeviceInfoStatusSet(uint32_t module, InitDepsStatus status);
 

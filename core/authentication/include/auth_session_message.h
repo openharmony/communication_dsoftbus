@@ -18,8 +18,8 @@
 
 #include "auth_manager.h"
 #include "auth_session_fsm.h"
-#include "auth_session_message_struct.h"
 #include "softbus_json_utils.h"
+#include "auth_session_message_struct.h"
 
 #ifdef __cplusplus
 #if __cplusplus

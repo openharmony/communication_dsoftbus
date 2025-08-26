@@ -84,8 +84,8 @@ public:
         ConnectionAddr *addr, const AuthConnInfo *connInfo, ConnectionAddrType hintType);
     virtual bool AddStringToJsonObject(cJSON *json, const char * const string, const char *value);
     virtual bool AddNumberToJsonObject(cJSON *json, const char * const string, int32_t num);
-    virtual int32_t LnnSendSyncInfoMsg(LnnSyncInfoType type, const char *networkId, const uint8_t *msg, uint32_t len,
-        LnnSyncInfoMsgComplete complete);
+    virtual int32_t LnnSendSyncInfoMsg(
+        LnnSyncInfoType type, const char *networkId, const uint8_t *msg, uint32_t len, LnnSyncInfoMsgComplete complete);
     virtual NodeInfo *LnnGetNodeInfoById(const char *id, IdCategory type);
     virtual int32_t LnnUpdateNodeInfo(NodeInfo *newInfo, int32_t connectionType);
     virtual int32_t LnnAddMetaInfo(NodeInfo *info);

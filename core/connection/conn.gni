@@ -68,9 +68,13 @@ if (dsoftbus_feature_conn_coc) {
 conn_manager_inc += [ "$dsoftbus_root_path/core/connection/ipc/include" ]
 if (defined(ohos_lite)) {
   if (ohos_kernel_type == "liteos_m") {
-    conn_manager_src += [ "$dsoftbus_root_path/core/connection/ipc/mini/general_connection_client_proxy.c" ]
+    conn_manager_src += [
+      "$dsoftbus_root_path/core/connection/ipc/mini/general_connection_client_proxy.c",
+    ]
   } else {
-    conn_manager_src += [ "$dsoftbus_root_path/core/connection/ipc/small/general_connection_client_proxy.c" ]
+    conn_manager_src += [
+      "$dsoftbus_root_path/core/connection/ipc/small/general_connection_client_proxy.c",
+    ]
   }
 } else {
   conn_manager_src += [

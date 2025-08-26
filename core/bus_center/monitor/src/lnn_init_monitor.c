@@ -49,7 +49,7 @@ static InitDepsInfo g_lnnEnableModuleDeps[INIT_DEPS_MODULE_BUTT];
 static InitDepsInfo g_lnnDeviceInfoDeps[LEDGER_INFO_BUTT];
 static LnnInitMonitorInfo g_lnnInitMonitorInfoMgr = { 0 };
 
-void LnnInitModuleReturnSet(uint32_t module, uint32_t ret)
+void LnnInitModuleReturnSet(uint32_t module, int32_t ret)
 {
     if (module < INIT_DEPS_MODULE_BUTT) {
         SoftBusMutexLock(&g_lnnEnableModuleDeps[module].lock);
@@ -297,7 +297,7 @@ static void LnnInitModuleFailedLog(void *param)
                 LNN_LOGE(LNN_LEDGER, "snprintf_s failed");
                 break;
             }
-            offset += ret;
+            offset += (size_t)ret;
             reCheck = true;
         } else if (LnnInitModuleStatusGet(depModule) == DEPS_STATUS_INIT_PROGRESS) {
             reCheck = true;
@@ -328,7 +328,7 @@ static void LnnInitDeviceInfoFailLog(void *param)
                 LNN_LOGE(LNN_LEDGER, "snprintf_s failed");
                 break;
             }
-            offset += ret;
+            offset += (size_t)ret;
             reCheck = true;
         } else if (status == DEPS_STATUS_NOT_INIT) {
             reCheck = true;

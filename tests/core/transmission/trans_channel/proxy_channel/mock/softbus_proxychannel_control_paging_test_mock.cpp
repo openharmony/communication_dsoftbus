@@ -63,9 +63,11 @@ int32_t ConvertBytesToHexString(
     return GetSoftbusProxychannelControlPagingInterface()->ConvertBytesToHexString(outBuf, outBufLen, inBuf, inLen);
 }
 
-int32_t AuthFindApplyKey(const RequestBusinessInfo *info, uint8_t *applyKey)
+int32_t AuthFindApplyKey(
+    const RequestBusinessInfo *info, uint8_t *applyKey, char *accountHash, uint32_t accountHashLen)
 {
-    return GetSoftbusProxychannelControlPagingInterface()->AuthFindApplyKey(info, applyKey);
+    return GetSoftbusProxychannelControlPagingInterface()->AuthFindApplyKey(
+        info, applyKey, accountHash, accountHashLen);
 }
 
 char *TransPagingPackHandshakeAckMsg(ProxyChannelInfo *chan)

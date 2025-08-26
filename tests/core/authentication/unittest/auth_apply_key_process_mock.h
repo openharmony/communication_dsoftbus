@@ -33,7 +33,7 @@ namespace OHOS {
 class AuthApplyKeyProcessInterface {
 public:
     AuthApplyKeyProcessInterface() {};
-    virtual ~AuthApplyKeyProcessInterface() { };
+    virtual ~AuthApplyKeyProcessInterface() {};
     virtual int32_t LnnAsyncCallbackDelayHelper(
         SoftBusLooper *looper, LnnAsyncCallbackFunc callback, void *para, uint64_t delayMillis) = 0;
     virtual int32_t LnnGetLocalStrInfo(InfoKey key, char *info, uint32_t len) = 0;
@@ -44,7 +44,8 @@ public:
     virtual uint32_t ConnGetHeadSize(void) = 0;
     virtual uint32_t GetAuthDataSize(uint32_t len) = 0;
     virtual int32_t PackAuthData(const AuthDataHead *head, const uint8_t *data, uint8_t *buf, uint32_t size) = 0;
-    virtual int32_t GetApplyKeyByBusinessInfo(const RequestBusinessInfo *info, uint8_t *uk, uint32_t ukLen) = 0;
+    virtual int32_t GetApplyKeyByBusinessInfo(
+        const RequestBusinessInfo *info, uint8_t *uk, uint32_t ukLen, char *accountHash, uint32_t accountHashLen) = 0;
     virtual const uint8_t *UnpackAuthData(const uint8_t *data, uint32_t len, AuthDataHead *head) = 0;
     virtual cJSON *cJSON_ParseWithLength(const char *string, size_t length) = 0;
     virtual bool GetJsonObjectStringItem(
@@ -55,7 +56,7 @@ public:
     virtual int32_t ConnSetConnectCallback(ConnModule moduleId, const ConnectCallback *callback) = 0;
     virtual const char *GetAuthSideStr(bool isServer) = 0;
     virtual int32_t AuthInsertApplyKey(
-        const RequestBusinessInfo *info, const uint8_t *uk, uint32_t ukLen, uint64_t time) = 0;
+        const RequestBusinessInfo *info, const uint8_t *uk, uint32_t ukLen, uint64_t time, char *accountHash) = 0;
     virtual int32_t ConnPostBytes(uint32_t connectionId, ConnPostData *data) = 0;
 };
 
@@ -73,7 +74,8 @@ public:
     MOCK_METHOD0(ConnGetHeadSize, uint32_t(void));
     MOCK_METHOD1(GetAuthDataSize, uint32_t(uint32_t));
     MOCK_METHOD4(PackAuthData, int32_t(const AuthDataHead *, const uint8_t *, uint8_t *, uint32_t));
-    MOCK_METHOD3(GetApplyKeyByBusinessInfo, int32_t(const RequestBusinessInfo *, uint8_t *, uint32_t));
+    MOCK_METHOD5(
+        GetApplyKeyByBusinessInfo, int32_t(const RequestBusinessInfo *, uint8_t *, uint32_t, char *, uint32_t));
     MOCK_METHOD3(UnpackAuthData, const uint8_t *(const uint8_t *, uint32_t, AuthDataHead *));
     MOCK_METHOD2(cJSON_ParseWithLength, cJSON *(const char *, size_t));
     MOCK_METHOD4(GetJsonObjectStringItem, bool(const cJSON *, const char * const, char *, uint32_t));
@@ -82,7 +84,7 @@ public:
     MOCK_METHOD0(GetLightAccountVerifierInstance, const LightAccountVerifier *(void));
     MOCK_METHOD2(ConnSetConnectCallback, int32_t(ConnModule, const ConnectCallback *));
     MOCK_METHOD1(GetAuthSideStr, const char *(bool));
-    MOCK_METHOD4(AuthInsertApplyKey, int32_t(const RequestBusinessInfo *, const uint8_t *, uint32_t, uint64_t));
+    MOCK_METHOD5(AuthInsertApplyKey, int32_t(const RequestBusinessInfo *, const uint8_t *, uint32_t, uint64_t, char *));
     MOCK_METHOD2(ConnPostBytes, int32_t(uint32_t, ConnPostData *));
 };
 

@@ -174,6 +174,7 @@ typedef const NodeInfo *(*LnnGetLocalNodeInfoFunc)(void);
 typedef int32_t (*LnnGetLocalNodeInfoSafeFunc)(NodeInfo *info);
 typedef int32_t (*LnnGetRemoteNumInfoFunc)(const char *networkId, InfoKey key, int32_t *info);
 typedef int32_t (*LnnGetRemoteNumU64InfoFunc)(const char *networkId, InfoKey key, uint64_t *info);
+typedef int32_t (*LnnGetRemoteNumU32InfoFunc)(const char *networkId, InfoKey key, uint32_t *info);
 typedef int32_t (*LnnGetRemoteByteInfoFunc)(const char *networkId, InfoKey key, uint8_t *info, uint32_t len);
 typedef int32_t (*LnnSetLocalStrInfoFunc)(InfoKey key, const char *info);
 typedef int32_t (*LnnSetLocalNumInfoFunc)(InfoKey key, int32_t info);
@@ -362,7 +363,7 @@ typedef int32_t (*GetSupportBandWidthFunc)(const char *peerNetworkId, LaneTransT
 typedef int32_t (*GetAllSupportReuseBandWidthFunc)(const char *peerNetworkId, LaneTransType transType,
     uint32_t **supportBw, uint8_t *bwCnt);
 typedef int32_t (*FindLaneResourceByLinkTypeFunc)(const char *peerUdid, LaneLinkType type, LaneResource *resource);
-typedef bool (*LnnIsNeedInterceptBroadcastFunc)(void);
+typedef bool (*LnnIsNeedInterceptBroadcastFunc)(bool disableGlass);
 typedef int32_t (*CheckLnnPermissionFunc)(const char *interfaceName, const char *processName);
 
 #ifdef __cplusplus

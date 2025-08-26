@@ -81,6 +81,24 @@ int32_t TransGetPkgnameByBusinessFlagPacked(const uint32_t businessFlag, char *p
     return pfnTransEnhanceFuncList->transGetPkgnameByBusinessFlag(businessFlag, pkgName, pkgLen);
 }
 
+int32_t InitSoftbusPagingResPullPacked(void)
+{
+    TransEnhanceFuncList *pfnTransEnhanceFuncList = TransEnhanceFuncListGet();
+    if (TransCheckFuncPointer((void *)pfnTransEnhanceFuncList->initSoftbusPagingResPull) != SOFTBUS_OK) {
+        return SOFTBUS_OK;
+    }
+    return pfnTransEnhanceFuncList->initSoftbusPagingResPull();
+}
+
+void DeInitSoftbusPagingResPullPacked(void)
+{
+    TransEnhanceFuncList *pfnTransEnhanceFuncList = TransEnhanceFuncListGet();
+    if (TransCheckFuncPointer((void *)pfnTransEnhanceFuncList->deInitSoftbusPagingResPull) != SOFTBUS_OK) {
+        return;
+    }
+    return pfnTransEnhanceFuncList->deInitSoftbusPagingResPull();
+}
+
 int32_t InitSoftbusPagingPacked(void)
 {
     TransEnhanceFuncList *pfnTransEnhanceFuncList = TransEnhanceFuncListGet();
@@ -136,24 +154,6 @@ int32_t TransDelPagingInfoByBusinessFlagPacked(uint32_t businessFlag)
     return pfnTransEnhanceFuncList->transDelPagingInfoByBusinessFlag(businessFlag);
 }
 
-int32_t InitSoftbusPagingResPullPacked(void)
-{
-    TransEnhanceFuncList *pfnTransEnhanceFuncList = TransEnhanceFuncListGet();
-    if (TransCheckFuncPointer((void *)pfnTransEnhanceFuncList->initSoftbusPagingResPull) != SOFTBUS_OK) {
-        return SOFTBUS_OK;
-    }
-    return pfnTransEnhanceFuncList->initSoftbusPagingResPull();
-}
-
-void DeInitSoftbusPagingResPullPacked(void)
-{
-    TransEnhanceFuncList *pfnTransEnhanceFuncList = TransEnhanceFuncListGet();
-    if (TransCheckFuncPointer((void *)pfnTransEnhanceFuncList->deInitSoftbusPagingResPull) != SOFTBUS_OK) {
-        return;
-    }
-    return pfnTransEnhanceFuncList->deInitSoftbusPagingResPull();
-}
-
 int32_t ClientOpenHtpChannelPacked(int32_t channelId, int64_t requestId, const char *localMac, const char *remoteMac)
 {
     TransEnhanceFuncList *pfnTransEnhanceFuncList = TransEnhanceFuncListGet();
@@ -190,6 +190,15 @@ void ServerUpdateHtpChannelPacked(int64_t flIdentity, int32_t channelId)
     return pfnTransEnhanceFuncList->serverUpdateHtpChannel(flIdentity, channelId);
 }
 
+bool CheckHtpPermissionPacked(int32_t uid)
+{
+    TransEnhanceFuncList *pfnTransEnhanceFuncList = TransEnhanceFuncListGet();
+    if (TransCheckFuncPointer((void *)pfnTransEnhanceFuncList->checkHtpPermission) != SOFTBUS_OK) {
+        return false;
+    }
+    return pfnTransEnhanceFuncList->checkHtpPermission(uid);
+}
+
 void TransProcessGroupTalkieInfoPacked(const char *pkgName)
 {
     TransEnhanceFuncList *pfnTransEnhanceFuncList = TransEnhanceFuncListGet();
@@ -197,4 +206,16 @@ void TransProcessGroupTalkieInfoPacked(const char *pkgName)
         return;
     }
     return pfnTransEnhanceFuncList->transProcessGroupTalkieInfo(pkgName);
+}
+
+bool IsInWhitelistPacked(const char *app)
+{
+    TransEnhanceFuncList *pfnTransEnhanceFuncList = TransEnhanceFuncListGet();
+    if (pfnTransEnhanceFuncList == NULL) {
+        return true;
+    }
+    if (TransCheckFuncPointer((void *)pfnTransEnhanceFuncList->isInWhitelist) != SOFTBUS_OK) {
+        return true;
+    }
+    return pfnTransEnhanceFuncList->isInWhitelist(app);
 }

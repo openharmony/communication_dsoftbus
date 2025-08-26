@@ -47,6 +47,12 @@ int32_t TransProxyPackD2DBytes(ProxyDataInfo *dataInfo, const char *sessionKey, 
     return GetProxyManagerD2DInterface()->TransProxyPackD2DBytes(dataInfo, sessionKey, sessionIv, flag);
 }
 
+uint8_t *TransProxyPackD2DData(ProxyDataInfo *dataInfo, uint32_t sliceNum, SessionPktType pktType,
+    uint32_t cnt, uint32_t *dataLen)
+{
+    return GetProxyManagerD2DInterface()->TransProxyPackD2DData(dataInfo, sliceNum, pktType, cnt, dataLen);
+}
+
 int32_t ServerIpcSendMessage(int32_t channelId, int32_t channelType, const void *data, uint32_t len, int32_t msgType)
 {
     return GetProxyManagerD2DInterface()->ServerIpcSendMessage(channelId, channelType, data, len, msgType);
@@ -59,10 +65,9 @@ int32_t TransProxyProcessD2DData(ProxyDataInfo *dataInfo, const PacketD2DHead *d
 }
 
 int32_t TransProxyDecryptD2DData(int32_t businessType, ProxyDataInfo *dataInfo, const char *sessionKey,
-    const char *sessionBytesIv, const unsigned char *sessionMsgIv)
+    const unsigned char *sessionCommonIv)
 {
-    return GetProxyManagerD2DInterface()->TransProxyDecryptD2DData(businessType, dataInfo, sessionKey,
-        sessionBytesIv, sessionMsgIv);
+    return GetProxyManagerD2DInterface()->TransProxyDecryptD2DData(businessType, dataInfo, sessionKey, sessionCommonIv);
 }
 
 int32_t TransProxySessionDataLenCheck(uint32_t dataLen, SessionPktType type)

@@ -398,7 +398,7 @@ HWTEST_F(SoftbusGEnhanceTest, SoftbusGEnhanceTest012, TestSize.Level1)
     EXPECT_EQ(ret, SOFTBUS_NOT_IMPLEMENT);
     ret = UpdateConcurrencyReuseLaneReqIdByActionIdPacked(0, 0, 0);
     EXPECT_EQ(ret, SOFTBUS_NOT_IMPLEMENT);
-    ret = UpdateConcurrencyReuseLaneReqIdByUdidPacked(nullptr, 0, 0);
+    ret = UpdateConcurrencyReuseLaneReqIdByUdidPacked(nullptr, 0, 0, 0);
     EXPECT_EQ(ret, SOFTBUS_INVALID_PARAM);
     ret = LnnAddLocalVapInfoPacked(LNN_VAP_UNKNOWN, nullptr);
     EXPECT_EQ(ret, SOFTBUS_NOT_IMPLEMENT);
@@ -691,5 +691,18 @@ HWTEST_F(SoftbusGEnhanceTest, SoftbusGEnhanceTest022, TestSize.Level1)
     EXPECT_EQ(QueryControlPlaneNodeValidPacked(networkId), SOFTBUS_NOT_IMPLEMENT);
     EXPECT_EQ(LnnDumpControlLaneGroupInfoPacked(0), SOFTBUS_OK);
     EXPECT_FALSE(IsSparkGroupEnabledPacked());
+}
+
+/**
+ * @tc.name: IsInWhitelistPacked023
+ * @tc.desc: IsInWhitelistPacked function test
+ * @tc.type: FUNC
+ * @tc.require:
+ */
+HWTEST_F(SoftbusGEnhanceTest, IsInWhitelistPacked023, TestSize.Level1)
+{
+    const char *appName = "ohos.samples.distributedmusicplayer";
+    bool ret = IsInWhitelistPacked(appName);
+    EXPECT_EQ(ret, true);
 }
 }

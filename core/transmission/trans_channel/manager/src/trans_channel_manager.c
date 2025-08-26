@@ -20,6 +20,7 @@
 #include "access_control.h"
 #include "anonymizer.h"
 #include "bus_center_manager.h"
+
 #include "g_enhance_lnn_func.h"
 #include "g_enhance_lnn_func_pack.h"
 #include "g_enhance_trans_func.h"

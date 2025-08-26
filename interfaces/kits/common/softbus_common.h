@@ -413,6 +413,8 @@ typedef enum {
     SUPER_HIGH = 3,
     /** Extreme-high */
     EXTREME_HIGH = 4,
+    /** 60/240 duty cycle */
+    SCREEN_ON_INSTANT = 5,
     FREQ_BUTT
 } ExchangeFreq;
 

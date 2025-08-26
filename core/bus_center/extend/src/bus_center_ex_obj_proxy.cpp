@@ -55,7 +55,8 @@ int32_t BusCenterExObjProxy::RegPreLinkParamListener(const char *pkgName, const 
     return SOFTBUS_NOT_IMPLEMENT;
 }
 
-int32_t BusCenterExObjProxy::LeaveMetaNode(const char *pkgName, const char *metaNodeId, const sptr<IRemoteObject> &callback)
+int32_t BusCenterExObjProxy::LeaveMetaNode(const char *pkgName,
+                                           const char *metaNodeId, const sptr<IRemoteObject> &callback)
 {
     return SOFTBUS_NOT_IMPLEMENT;
 }

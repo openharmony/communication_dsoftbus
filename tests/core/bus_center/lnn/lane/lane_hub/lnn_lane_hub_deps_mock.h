@@ -19,6 +19,7 @@
 #include <gmock/gmock.h>
 
 #include "lnn_lane_hub.h"
+#include "legacy/softbus_hidumper.h"
 
 namespace OHOS {
 class LaneHubDepsInterface {

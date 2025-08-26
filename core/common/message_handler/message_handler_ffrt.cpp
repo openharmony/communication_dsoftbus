@@ -264,6 +264,7 @@ static int32_t SubmitMsgToFfrt(SoftBusMessageNode *msgNode, const SoftBusLooper 
         FreeSoftBusMsg(currentMsg);
         delete (currentMsgNode->msgHandle);
         SoftBusFree(currentMsgNode);
+        ffrt_this_task_set_legacy_mode(false);
     }, ffrt::task_attr().delay(delayMicros));
     return SOFTBUS_OK;
 }

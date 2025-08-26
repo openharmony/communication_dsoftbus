@@ -189,4 +189,72 @@ HWTEST_F(LNNOhosAccountTest, LNN_IS_DEFAULT_OHOS_ACCOUNT_002, TestSize.Level1)
     bool ret = LnnIsDefaultOhosAccount();
     EXPECT_FALSE(ret);
 }
+
+/**
+ * @tc.name: LnnGetOhosAccountInfoByUserIdTest_001
+ * @tc.desc: test LnnGetOhosAccountInfoByUserId invalid param
+ * @tc.type: FUNC
+ * @tc.require:
+ */
+HWTEST_F(LNNOhosAccountTest, LnnGetOhosAccountInfoByUserIdTest_001, TestSize.Level1)
+{
+    int32_t userId = 100;
+    uint8_t *accountHash = nullptr;
+    uint32_t len = SHA_256_HASH_LEN;
+    int32_t ret = LnnGetOhosAccountInfoByUserId(userId, accountHash, len);
+    EXPECT_EQ(ret, SOFTBUS_INVALID_PARAM);
+}
+
+/**
+ * @tc.name: LnnGetOhosAccountInfoByUserIdTest_002
+ * @tc.desc: test LnnGetOhosAccountInfoByUserId invalid param
+ * @tc.type: FUNC
+ * @tc.require:
+ */
+HWTEST_F(LNNOhosAccountTest, LnnGetOhosAccountInfoByUserIdTest_002, TestSize.Level1)
+{
+    int32_t userId = 100;
+    uint8_t accountHash[SHA_256_HASH_LEN] = { 0 };
+    uint32_t len = 0;
+    int32_t ret = LnnGetOhosAccountInfoByUserId(userId, accountHash, len);
+    EXPECT_EQ(ret, SOFTBUS_INVALID_PARAM);
+}
+
+/**
+ * @tc.name: LnnGetOhosAccountInfoByUserIdTest_003
+ * @tc.desc: test LnnGetOhosAccountInfoByUserId invalid param
+ * @tc.type: FUNC
+ * @tc.require:
+ */
+HWTEST_F(LNNOhosAccountTest, LnnGetOhosAccountInfoByUserIdTest_003, TestSize.Level1)
+{
+    int32_t userId = 0;
+    uint8_t accountHash[SHA_256_HASH_LEN] = { 0 };
+    uint32_t len = SHA_256_HASH_LEN;
+    int32_t ret = LnnGetOhosAccountInfoByUserId(userId, accountHash, len);
+    EXPECT_EQ(ret, SOFTBUS_INVALID_PARAM);
+}
+
+/**
+ * @tc.name: LnnGetOhosAccountInfoByUserIdTest_004
+ * @tc.desc: test LnnGetOhosAccountInfoByUserId abnormal
+ * @tc.type: FUNC
+ * @tc.require:
+ */
+HWTEST_F(LNNOhosAccountTest, LnnGetOhosAccountInfoByUserIdTest_004, TestSize.Level1)
+{
+    int32_t userId = 100;
+    uint8_t accountHash[SHA_256_HASH_LEN] = { 0 };
+    uint32_t len = SHA_256_HASH_LEN;
+
+    NiceMock<LnnOhosAccountInterfaceMock> mock;
+    EXPECT_CALL(mock, GetOsAccountIdByUserId).WillOnce(DoAll(Return(SOFTBUS_ERR)));
+
+    int32_t ret = LnnGetOhosAccountInfoByUserId(userId, accountHash, len);
+    EXPECT_EQ(ret, SOFTBUS_ERR);
+
+    EXPECT_CALL(mock, GetOsAccountIdByUserId).WillOnce(DoAll(Return(SOFTBUS_OK)));
+    ret = LnnGetOhosAccountInfoByUserId(userId, accountHash, len);
+    EXPECT_EQ(ret, SOFTBUS_OK);
+}
 } // namespace OHOS

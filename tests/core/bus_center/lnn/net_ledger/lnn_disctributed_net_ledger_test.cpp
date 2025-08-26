@@ -20,8 +20,11 @@
 #include <securec.h>
 
 #include "bus_center_manager.h"
+#include "dsoftbus_enhance_interface.h"
+#include "g_enhance_lnn_func.h"
 #include "legacy/softbus_hidumper_buscenter.h"
 #include "lnn_connection_addr_utils.h"
+#include "lnn_disctributed_net_ledger_mock.h"
 #include "lnn_distributed_net_ledger.c"
 #include "lnn_distributed_net_ledger.h"
 #include "lnn_distributed_net_ledger_manager.c"
@@ -33,9 +36,6 @@
 #include "softbus_bus_center.h"
 #include "softbus_error_code.h"
 #include "softbus_utils.h"
-#include "dsoftbus_enhance_interface.h"
-#include "g_enhance_lnn_func.h"
-#include "lnn_disctributed_net_ledger_mock.h"
 
 namespace OHOS {
 using namespace testing;
@@ -122,8 +122,8 @@ HWTEST_F(LNNDisctributedLedgerTest, LNN_ADD_ONLINE_NODE_Test_001, TestSize.Level
 {
     LnnEnhanceFuncList *pfnLnnEnhanceFuncList = LnnEnhanceFuncListGet();
     pfnLnnEnhanceFuncList->lnnRetrieveDeviceInfo = LnnRetrieveDeviceInfo;
-	
-	NiceMock<LnnDisctributedNetLedgerInterfaceMock> mock;
+
+    NiceMock<LnnDisctributedNetLedgerInterfaceMock> mock;
     EXPECT_CALL(mock, LnnRetrieveDeviceInfo).WillRepeatedly(Return(SOFTBUS_OK));
     NodeInfo info;
     (void)memset_s(&info, sizeof(NodeInfo), 0, sizeof(NodeInfo));
@@ -144,9 +144,8 @@ HWTEST_F(LNNDisctributedLedgerTest, LNN_ADD_ONLINE_NODE_Test_001, TestSize.Level
 HWTEST_F(LNNDisctributedLedgerTest, LNN_GET_REMOTE_STRINFO_Test_001, TestSize.Level1)
 {
     static InfoKey keyStringTable[] = { STRING_KEY_HICE_VERSION, STRING_KEY_DEV_UDID, STRING_KEY_UUID,
-        STRING_KEY_DEV_TYPE, STRING_KEY_DEV_NAME, STRING_KEY_BT_MAC, STRING_KEY_MASTER_NODE_UDID,
-        STRING_KEY_P2P_MAC, STRING_KEY_P2P_GO_MAC, STRING_KEY_NODE_ADDR, STRING_KEY_OFFLINE_CODE,
-        STRING_KEY_WIFIDIRECT_ADDR };
+        STRING_KEY_DEV_TYPE, STRING_KEY_DEV_NAME, STRING_KEY_BT_MAC, STRING_KEY_MASTER_NODE_UDID, STRING_KEY_P2P_MAC,
+        STRING_KEY_P2P_GO_MAC, STRING_KEY_NODE_ADDR, STRING_KEY_OFFLINE_CODE, STRING_KEY_WIFIDIRECT_ADDR };
     char buf[UDID_BUF_LEN] = { 0 };
     int32_t ret = LnnGetRemoteStrInfo(nullptr, STRING_KEY_HICE_VERSION, buf, UDID_BUF_LEN);
     EXPECT_EQ(ret, SOFTBUS_INVALID_PARAM);
@@ -309,7 +308,7 @@ HWTEST_F(LNNDisctributedLedgerTest, LNN_UPDATE_NODE_INFO_Test_001, TestSize.Leve
     pfnLnnEnhanceFuncList->lnnRetrieveDeviceInfo = LnnRetrieveDeviceInfo;
     pfnLnnEnhanceFuncList->lnnSaveRemoteDeviceInfo = LnnSaveRemoteDeviceInfo;
 
-	NiceMock<LnnDisctributedNetLedgerInterfaceMock> mock;
+    NiceMock<LnnDisctributedNetLedgerInterfaceMock> mock;
     EXPECT_CALL(mock, LnnRetrieveDeviceInfo).WillRepeatedly(Return(SOFTBUS_OK));
     EXPECT_CALL(mock, LnnSaveRemoteDeviceInfo).WillRepeatedly(Return(SOFTBUS_OK));
 
@@ -800,7 +799,7 @@ HWTEST_F(LNNDisctributedLedgerTest, ADD_CNN_CODE_Test_001, TestSize.Level1)
 
     char *key = CreateCnnCodeKey(uuid, type);
     EXPECT_NE(key, nullptr);
-    short* code = (short *)LnnMapGet(&cnnCode, key);
+    short *code = (short *)LnnMapGet(&cnnCode, key);
     EXPECT_NE(code, nullptr);
 
     (void)RemoveCnnCode(&cnnCode, nullptr, type);
@@ -897,7 +896,7 @@ HWTEST_F(LNNDisctributedLedgerTest, LNN_ISLSA_NODE_Test_001, TestSize.Level1)
  */
 HWTEST_F(LNNDisctributedLedgerTest, LNN_GETNETWORKID_BYUDIDHASH_Test_001, TestSize.Level1)
 {
-    uint8_t udidHash[UDID_HASH_LEN] = {0};
+    uint8_t udidHash[UDID_HASH_LEN] = { 0 };
     char buf = '0';
     uint32_t len = 0;
     int32_t ret = LnnGetNetworkIdByUdidHash(nullptr, len, nullptr, len, true);
@@ -1408,10 +1407,10 @@ HWTEST_F(LNNDisctributedLedgerTest, Lnn_IsAvailableMeta_Test_004, TestSize.Level
 {
     LnnEnhanceFuncList *pfnLnnEnhanceFuncList = LnnEnhanceFuncListGet();
     pfnLnnEnhanceFuncList->lnnRetrieveDeviceInfo = LnnRetrieveDeviceInfo;
-	
-	NiceMock<LnnDisctributedNetLedgerInterfaceMock> mock;
+
+    NiceMock<LnnDisctributedNetLedgerInterfaceMock> mock;
     EXPECT_CALL(mock, LnnRetrieveDeviceInfo).WillRepeatedly(Return(SOFTBUS_OK));
-    
+
     NodeInfo info;
     (void)memset_s(&info, sizeof(NodeInfo), 0, sizeof(NodeInfo));
     info.discoveryType = DISCOVERY_TYPE;
@@ -1657,19 +1656,20 @@ HWTEST_F(LNNDisctributedLedgerTest, LNN_CONVERT_DL_ID_Test_001, TestSize.Level1)
 {
     const char *srcId = "123456ABCDEF";
     char dstIdBuf[UDID_BUF_LEN] = { 0 };
-    EXPECT_EQ(SOFTBUS_OK, LnnConvertDlId(const_cast<char *>(srcId), CATEGORY_UDID,
-        CATEGORY_UDID, dstIdBuf, UDID_BUF_LEN));
+    EXPECT_EQ(
+        SOFTBUS_OK, LnnConvertDlId(const_cast<char *>(srcId), CATEGORY_UDID, CATEGORY_UDID, dstIdBuf, UDID_BUF_LEN));
     const char *srcId1 = "123456ABCDEFGHI";
     char dstIdBuf1[UUID_BUF_LEN] = { 0 };
-    EXPECT_EQ(SOFTBUS_NOT_FIND, LnnConvertDlId(const_cast<char *>(srcId1), CATEGORY_UUID,
-        CATEGORY_UUID, dstIdBuf1, UUID_BUF_LEN));
+    EXPECT_EQ(SOFTBUS_NOT_FIND,
+        LnnConvertDlId(const_cast<char *>(srcId1), CATEGORY_UUID, CATEGORY_UUID, dstIdBuf1, UUID_BUF_LEN));
     const char *srcId2 = "235689BNHFCF";
     char dstIdBuf2[NETWORK_ID_BUF_LEN] = { 0 };
-    EXPECT_EQ(SOFTBUS_OK, LnnConvertDlId(const_cast<char *>(srcId2), CATEGORY_NETWORK_ID,
-        CATEGORY_NETWORK_ID, dstIdBuf2, NETWORK_ID_BUF_LEN));
+    EXPECT_EQ(SOFTBUS_OK,
+        LnnConvertDlId(
+            const_cast<char *>(srcId2), CATEGORY_NETWORK_ID, CATEGORY_NETWORK_ID, dstIdBuf2, NETWORK_ID_BUF_LEN));
     EXPECT_EQ(SOFTBUS_INVALID_PARAM, LnnConvertDlId(nullptr, CATEGORY_UDID, CATEGORY_UDID, dstIdBuf, UDID_BUF_LEN));
-    EXPECT_EQ(SOFTBUS_NOT_FIND, LnnConvertDlId(const_cast<char *>(srcId2), CATEGORY_UDID,
-        CATEGORY_UDID, dstIdBuf, UDID_BUF_LEN));
+    EXPECT_EQ(SOFTBUS_NOT_FIND,
+        LnnConvertDlId(const_cast<char *>(srcId2), CATEGORY_UDID, CATEGORY_UDID, dstIdBuf, UDID_BUF_LEN));
 }
 
 /*
@@ -1700,6 +1700,7 @@ HWTEST_F(LNNDisctributedLedgerTest, UPDATE_DEVICE_NAME_TO_DLEDGER_Test_001, Test
  */
 HWTEST_F(LNNDisctributedLedgerTest, UPDATE_DEV_BASIC_INFO_TO_DLEDGER_Test_001, TestSize.Level1)
 {
+    NiceMock<LnnDisctributedNetLedgerInterfaceMock> mock;
     NodeInfo newInfo;
     (void)memset_s(&newInfo, sizeof(NodeInfo), 0, sizeof(NodeInfo));
     EXPECT_EQ(EOK, strcpy_s(newInfo.networkId, NETWORK_ID_BUF_LEN, NODE1_NETWORK_ID));
@@ -1716,6 +1717,10 @@ HWTEST_F(LNNDisctributedLedgerTest, UPDATE_DEV_BASIC_INFO_TO_DLEDGER_Test_001, T
     oldInfo.discoveryType = 2;
     EXPECT_NO_FATAL_FAILURE(UpdateDevBasicInfoToDLedger(&newInfo, &oldInfo));
     oldInfo.discoveryType = 4;
+    EXPECT_NO_FATAL_FAILURE(UpdateDevBasicInfoToDLedger(&newInfo, &oldInfo));
+    EXPECT_CALL(mock, LnnFindDeviceUdidTrustedInfoFromDb).WillRepeatedly(Return(SOFTBUS_NOT_FIND));
+    EXPECT_NO_FATAL_FAILURE(UpdateDevBasicInfoToDLedger(&newInfo, &oldInfo));
+    EXPECT_CALL(mock, LnnFindDeviceUdidTrustedInfoFromDb).WillRepeatedly(Return(SOFTBUS_OK));
     EXPECT_NO_FATAL_FAILURE(UpdateDevBasicInfoToDLedger(&newInfo, &oldInfo));
 }
 
@@ -1761,5 +1766,23 @@ HWTEST_F(LNNDisctributedLedgerTest, IS_IGNORE_UPDATE_TO_LEDGER_Test_001, TestSiz
     EXPECT_EQ(true, IsIgnoreUpdateToLedger(oldStateVersion, oldTimestamp, newStateVersion, newTimestamp));
     newTimestamp = 1;
     EXPECT_EQ(false, IsIgnoreUpdateToLedger(oldStateVersion, oldTimestamp, newStateVersion, newTimestamp));
+}
+
+/*
+ * @tc.name: GetNodeInfoDiscovery_Test_001
+ * @tc.desc: GetNodeInfoDiscovery BLE online update heartbeatTimestamp
+ * @tc.type: FUNC
+ * @tc.require: IBH09C
+ */
+HWTEST_F(LNNDisctributedLedgerTest, GetNodeInfoDiscovery_Test_001, TestSize.Level1)
+{
+    NodeInfo info;
+    NodeInfoAbility infoAbility;
+    (void)memset_s(&infoAbility, sizeof(NodeInfoAbility), 0, sizeof(infoAbility));
+    (void)memset_s(&info, sizeof(NodeInfo), 0, sizeof(info));
+    info.discoveryType = 1 << DISCOVERY_TYPE_BLE;
+    EXPECT_NO_FATAL_FAILURE(GetNodeInfoDiscovery(NULL, &info, &infoAbility));
+    info.discoveryType = 1 << DISCOVERY_TYPE_WIFI;
+    EXPECT_NO_FATAL_FAILURE(GetNodeInfoDiscovery(NULL, &info, &infoAbility));
 }
 } // namespace OHOS

@@ -48,6 +48,8 @@ bool IsExistAuthTcpConnFdItemByConnId(int32_t fd);
 void DeleteAuthTcpConnFdItemByConnId(int32_t fd);
 int32_t AuthTcpConnFdLockInit(void);
 void AuthTcpConnFdLockDeinit(void);
+bool RequireAuthTcpConnFdListLock(void);
+void ReleaseAuthTcpConnFdListLock(void);
 
 #ifdef __cplusplus
 #if __cplusplus

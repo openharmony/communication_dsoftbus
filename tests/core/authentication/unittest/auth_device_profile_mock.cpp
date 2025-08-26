@@ -104,4 +104,4 @@ int32_t CheckAclInfoIsAccesser(const AuthACLInfo *acl, bool *isAccesser)
     return GetInterface()->CheckAclInfoIsAccesser(acl, isAccesser);
 }
 }
-}
+} // namespace OHOS

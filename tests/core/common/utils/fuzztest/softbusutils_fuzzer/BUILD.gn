@@ -31,5 +31,8 @@ ohos_fuzztest("SoftBusUtilsFuzzTest") {
   ]
   sources = [ "softbusutils_fuzzer.cpp" ]
   deps = [ "$dsoftbus_root_path/core/common:softbus_utils" ]
-  external_deps = [ "hilog:libhilog" ]
+  external_deps = [
+    "c_utils:utils",
+    "hilog:libhilog",
+  ]
 }

@@ -17,12 +17,12 @@
 #include <securec.h>
 
 #include "bus_center_mock.h"
+#include "dsoftbus_enhance_interface.h"
+#include "g_enhance_lnn_func.h"
 #include "lnn_data_cloud_sync_deps_mock.h"
 #include "lnn_distributed_net_ledger.h"
 #include "lnn_distributed_net_ledger_manager.c"
 #include "lnn_net_ledger.c"
-#include "dsoftbus_enhance_interface.h"
-#include "g_enhance_lnn_func.h"
 
 namespace OHOS {
 using namespace testing::ext;
@@ -36,19 +36,13 @@ public:
     void TearDown();
 };
 
-void LNNNetLedgerMockTest::SetUpTestCase()
-{
-}
+void LNNNetLedgerMockTest::SetUpTestCase() { }
 
-void LNNNetLedgerMockTest::TearDownTestCase()
-{
-}
+void LNNNetLedgerMockTest::TearDownTestCase() { }
 
 void LNNNetLedgerMockTest::SetUp() { }
 
-void LNNNetLedgerMockTest::TearDown()
-{
-}
+void LNNNetLedgerMockTest::TearDown() { }
 
 /*
  * @tc.name: IsLocalIrkInfoChangeTest001
@@ -106,8 +100,7 @@ HWTEST_F(LNNNetLedgerMockTest, IsLocalBroadcastLinKeyChangeTest002, TestSize.Lev
     NodeInfo info;
     (void)memset_s(&info, sizeof(NodeInfo), 0, sizeof(NodeInfo));
     BusCenterMock busCenterMock;
-    EXPECT_CALL(busCenterMock, LnnGetLocalByteInfo).WillOnce(Return(SOFTBUS_OK))
-    .WillRepeatedly(Return(SOFTBUS_ERR));
+    EXPECT_CALL(busCenterMock, LnnGetLocalByteInfo).WillOnce(Return(SOFTBUS_OK)).WillRepeatedly(Return(SOFTBUS_ERR));
     EXPECT_EQ(IsLocalBroadcastLinKeyChange(&info), false);
 }
 

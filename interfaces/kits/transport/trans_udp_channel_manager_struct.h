@@ -19,7 +19,6 @@
 #include <stdint.h>
 #include "softbus_app_info.h"
 #include "softbus_common.h"
-// 需要改成struct
 #include "trans_uk_manager.h"
 
 #ifdef __cplusplus

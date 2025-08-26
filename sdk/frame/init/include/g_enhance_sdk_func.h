@@ -16,10 +16,6 @@
 #ifndef G_ENHANCE_SDK_FUNC_H
 #define G_ENHANCE_SDK_FUNC_H
 
-#ifdef __cplusplus
-extern "C" {
-#endif
-
 #include "client_trans_file_struct.h"
 
 #define FILLP_TYPES_ERR_OK_INVALID true
@@ -31,12 +27,18 @@ extern "C" {
 #include "stdint.h"
 #include "trans_type.h"
 
+#ifdef __cplusplus
+extern "C" {
+#endif
+
 typedef void (*BusCenterExProxyDeInitFunc)(void);
 typedef int32_t (*DiscRecoveryPolicyFunc)(void);
 typedef int32_t (*CheckFileSchemaFunc)(int32_t sessionId, FileSchemaListener *fileSchemaListener);
 typedef int32_t (*SetSchemaCallbackFunc)(FileSchema fileSchema, const char *sFileList[], uint32_t fileCnt);
-typedef int32_t (*SetExtSocketOptFunc)(int32_t socket, OptLevel level, OptType optType, void *optValue, uint32_t optValueSize);
-typedef int32_t (*GetExtSocketOptFunc)(int32_t socket, OptLevel level, OptType optType, void *optValue, int32_t *optValueSize);
+typedef int32_t (*SetExtSocketOptFunc)(
+    int32_t socket, OptLevel level, OptType optType, void *optValue, uint32_t optValueSize);
+typedef int32_t (*GetExtSocketOptFunc)(
+    int32_t socket, OptLevel level, OptType optType, void *optValue, int32_t *optValueSize);
 typedef int32_t (*TransFileSchemaInitFunc)(void);
 typedef void (*TransFileSchemaDeinitFunc)(void);
 typedef int32_t (*VtpSetSocketMultiLayerFunc)(int fd, OnFrameEvt *cb, const void *para);

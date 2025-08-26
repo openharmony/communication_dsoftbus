@@ -34,16 +34,16 @@ public:
     virtual int32_t BusCenterServerProxyInit(void);
     virtual void BusCenterServerProxyDeInit(void);
     virtual int32_t SoftbusGetConfig(ConfigType type, unsigned char *val, uint32_t len);
-    virtual int32_t ServerIpcGetAllOnlineNodeInfo(
-        const char *pkgName, void **info, uint32_t infoTypeLen, int32_t *infoNum);
+    virtual int32_t ServerIpcGetAllOnlineNodeInfo(const char *pkgName,
+        void **info, uint32_t infoTypeLen, int32_t *infoNum);
     virtual int32_t ServerIpcGetLocalDeviceInfo(const char *pkgName, void *info, uint32_t infoTypeLen);
     virtual int32_t ServerIpcGetNodeKeyInfo(
         const char *pkgName, const char *networkId, int32_t key, unsigned char *buf, uint32_t len);
     virtual int32_t ServerIpcSetNodeDataChangeFlag(const char *pkgName, const char *networkId, uint16_t dataChangeFlag);
     virtual int32_t ServerIpcJoinLNN(const char *pkgName, void *addr, unsigned int addrTypeLen, bool isForceJoin);
     virtual int32_t ServerIpcLeaveLNN(const char *pkgName, const char *networkId);
-    virtual int32_t ServerIpcStartTimeSync(
-        const char *pkgName, const char *targetNetworkId, int32_t accuracy, int32_t period);
+    virtual int32_t ServerIpcStartTimeSync(const char *pkgName,
+        const char *targetNetworkId, int32_t accuracy, int32_t period);
     virtual int32_t ServerIpcStopTimeSync(const char *pkgName, const char *targetNetworkId);
     virtual int32_t ServerIpcPublishLNN(const char *pkgName, const PublishInfo *info);
     virtual int32_t ServerIpcStopPublishLNN(const char *pkgName, int32_t publishId);

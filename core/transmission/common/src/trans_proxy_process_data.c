@@ -145,6 +145,10 @@ int32_t TransProxyPackBytes(
 
 static uint8_t *TransProxyPackTlvData(DataHead *pktHead, int32_t tlvBufferSize, uint32_t dataLen)
 {
+    if (pktHead == NULL) {
+        TRANS_LOGE(TRANS_CTRL, "param invalid");
+        return NULL;
+    }
     int32_t newDataHeadSize = MAGICNUM_SIZE + TLVCOUNT_SIZE + tlvBufferSize;
     uint8_t *buf = (uint8_t *)SoftBusCalloc(dataLen + newDataHeadSize);
     if (buf == NULL) {
@@ -773,10 +777,10 @@ int32_t TransProxyProcessD2DData(
     return SOFTBUS_OK;
 }
 
-int32_t TransProxyDecryptD2DData(int32_t businessType, ProxyDataInfo *dataInfo, const char *sessionKey,
-    const char *sessionBytesIv, const unsigned char *sessionMsgIv)
+int32_t TransProxyDecryptD2DData(
+    int32_t businessType, ProxyDataInfo *dataInfo, const char *sessionKey, const unsigned char *sessionCommonIv)
 {
-    if (dataInfo == NULL || sessionKey == NULL || sessionBytesIv == NULL || sessionMsgIv == NULL) {
+    if (dataInfo == NULL || sessionKey == NULL || sessionCommonIv == NULL) {
         TRANS_LOGE(TRANS_CTRL, "invalid param");
         return SOFTBUS_INVALID_PARAM;
     }
@@ -787,7 +791,7 @@ int32_t TransProxyDecryptD2DData(int32_t businessType, ProxyDataInfo *dataInfo, 
             TRANS_LOGE(TRANS_CTRL, "memcpy key fail");
             return SOFTBUS_MEM_ERR;
         }
-        if (memcpy_s(cipherKey.iv, GCM_IV_LEN, sessionMsgIv, GCM_IV_LEN) != EOK) {
+        if (memcpy_s(cipherKey.iv, GCM_IV_LEN, sessionCommonIv, GCM_IV_LEN) != EOK) {
             TRANS_LOGE(TRANS_CTRL, "memcpy iv fail");
             (void)memset_s(cipherKey.key, SHORT_SESSION_KEY_LENGTH, 0, SHORT_SESSION_KEY_LENGTH);
             return SOFTBUS_MEM_ERR;
@@ -807,7 +811,7 @@ int32_t TransProxyDecryptD2DData(int32_t businessType, ProxyDataInfo *dataInfo, 
         TRANS_LOGE(TRANS_CTRL, "memcpy key fail");
         return SOFTBUS_MEM_ERR;
     }
-    if (memcpy_s(cipherKey.iv, BLE_BROADCAST_IV_LEN, sessionBytesIv, BLE_BROADCAST_IV_LEN) != EOK) {
+    if (memcpy_s(cipherKey.iv, SHORT_SESSION_KEY_LENGTH, sessionCommonIv, GCM_IV_LEN) != EOK) {
         TRANS_LOGE(TRANS_CTRL, "memcpy iv fail");
         (void)memset_s(cipherKey.key, SHORT_SESSION_KEY_LENGTH, 0, SHORT_SESSION_KEY_LENGTH);
         return SOFTBUS_MEM_ERR;
@@ -867,6 +871,42 @@ int32_t TransProxyD2DFirstSliceProcess(
     return SOFTBUS_OK;
 }
 
+int32_t TransGenerateToBytesRandIv(unsigned char *sessionIv, const uint32_t *nonce)
+{
+    if (sessionIv == NULL || nonce == NULL) {
+        TRANS_LOGE(TRANS_CTRL, "invalid param.");
+        return SOFTBUS_INVALID_PARAM;
+    }
+    uint8_t shortIv[SHORT_SESSION_IV_LENGTH];
+    if (memcpy_s(shortIv, SHORT_SESSION_IV_LENGTH, nonce, NONCE_LEN) != EOK) {
+        TRANS_LOGE(TRANS_CTRL, "memcpys_s nonce failed.");
+        return SOFTBUS_MEM_ERR;
+    }
+    if (SoftBusCalcHKDF(shortIv, SHORT_SESSION_IV_LENGTH, sessionIv, GCM_IV_LEN) != SOFTBUS_OK) {
+        TRANS_LOGE(TRANS_CTRL, "calc HKDF failed.");
+        return SOFTBUS_CALC_HKDF_FAIL;
+    }
+    return SOFTBUS_OK;
+}
+
+static int32_t TransPackD2DToBytesExtraData(ProxyDataInfo *dataInfo, SessionPktType flag, uint32_t nonce)
+{
+    if (dataInfo == NULL) {
+        TRANS_LOGE(TRANS_CTRL, "invalid param.");
+        return SOFTBUS_INVALID_PARAM;
+    }
+    if (memcpy_s(dataInfo->outData + sizeof(PacketD2DHead), NONCE_LEN, &nonce, NONCE_LEN) != EOK) {
+        TRANS_LOGE(TRANS_CTRL, "memcpy nonce failed.");
+        return SOFTBUS_MEM_ERR;
+    }
+    PacketD2DHead *pktHead = (PacketD2DHead *)dataInfo->outData;
+    pktHead->flags = flag;
+    pktHead->dataLen = (int32_t)((int32_t)dataInfo->outLen - sizeof(PacketD2DHead)- NONCE_LEN);
+    pktHead->flags = (int32_t)SoftBusHtoLl((uint32_t)pktHead->flags);
+    pktHead->dataLen = (int32_t)SoftBusHtoLl((uint32_t)pktHead->dataLen);
+    return SOFTBUS_OK;
+}
+
 int32_t TransProxyPackD2DBytes(
     ProxyDataInfo *dataInfo, const char *sessionKey, const char *sessionIv, SessionPktType flag)
 {
@@ -874,32 +914,37 @@ int32_t TransProxyPackD2DBytes(
         TRANS_LOGE(TRANS_CTRL, "invalid para");
         return SOFTBUS_INVALID_PARAM;
     }
-    dataInfo->outLen = dataInfo->inLen + sizeof(PacketD2DHead);
-    dataInfo->outData = (uint8_t *)SoftBusCalloc(dataInfo->outLen);
-    if (dataInfo->outData == NULL) {
-        TRANS_LOGE(TRANS_CTRL, "malloc failed");
-        return SOFTBUS_MEM_ERR;
+
+    uint32_t nonce = 0;
+    if (SoftBusGenerateRandomArray((unsigned char *)&nonce, sizeof(uint32_t)) != SOFTBUS_OK) {
+        TRANS_LOGE(TRANS_CTRL, "generate nonce failed.");
+        return SOFTBUS_GENERATE_RANDOM_ARRAY_FAIL;
     }
 
-    uint32_t outLen = 0;
     AesCtrCipherKey cipherKey = { 0 };
     cipherKey.keyLen = SHORT_SESSION_KEY_LENGTH;
     if (memcpy_s(cipherKey.key, SHORT_SESSION_KEY_LENGTH, sessionKey, SHORT_SESSION_KEY_LENGTH) != EOK) {
         TRANS_LOGE(TRANS_CTRL, "memcpy key failed");
-        SoftBusFree(dataInfo->outData);
         return SOFTBUS_MEM_ERR;
     }
-    if (memcpy_s(cipherKey.iv, BLE_BROADCAST_IV_LEN, sessionIv, PAGING_NONCE_LEN) != EOK) {
-        TRANS_LOGE(TRANS_CTRL, "memcpy key failed");
-        (void)memset_s(cipherKey.key, SHORT_SESSION_KEY_LENGTH, 0, SHORT_SESSION_KEY_LENGTH);
-        SoftBusFree(dataInfo->outData);
-        return SOFTBUS_MEM_ERR;
+    if (TransGenerateToBytesRandIv(cipherKey.iv, &nonce) != SOFTBUS_OK) {
+        TRANS_LOGE(TRANS_CTRL, "generate iv failed");
+        (void)memset_s(&cipherKey, sizeof(AesCtrCipherKey), 0, sizeof(AesCtrCipherKey));
+        return SOFTBUS_GCM_SET_IV_FAIL;
     }
-    char *outData = (char *)dataInfo->outData + sizeof(PacketD2DHead);
+    dataInfo->outLen = dataInfo->inLen + NONCE_LEN + sizeof(PacketD2DHead);
+    dataInfo->outData = (uint8_t *)SoftBusCalloc(dataInfo->outLen);
+    if (dataInfo->outData == NULL) {
+        TRANS_LOGE(TRANS_CTRL, "malloc failed");
+        (void)memset_s(&cipherKey, sizeof(AesCtrCipherKey), 0, sizeof(AesCtrCipherKey));
+        return SOFTBUS_MALLOC_ERR;
+    }
+
+    uint32_t outLen = 0;
+    char *outData = (char *)dataInfo->outData + NONCE_LEN + sizeof(PacketD2DHead);
     int32_t ret = SoftBusEncryptDataByCtr(&cipherKey, (const unsigned char *)dataInfo->inData,
         dataInfo->inLen, (unsigned char *)outData, &outLen);
-    (void)memset_s(cipherKey.key, SHORT_SESSION_KEY_LENGTH, 0, SHORT_SESSION_KEY_LENGTH);
-    (void)memset_s(cipherKey.iv, GCM_IV_LEN, 0, GCM_IV_LEN);
+    (void)memset_s(&cipherKey, sizeof(AesCtrCipherKey), 0, sizeof(AesCtrCipherKey));
 
     if (ret != SOFTBUS_OK || outLen != dataInfo->inLen) {
         outData = NULL;
@@ -907,10 +952,11 @@ int32_t TransProxyPackD2DBytes(
         TRANS_LOGE(TRANS_CTRL, "encrypt error, outlen=%{public}d, inlen=%{public}d", outLen, dataInfo->inLen);
         return SOFTBUS_TRANS_PROXY_SESS_ENCRYPT_ERR;
     }
-    PacketD2DHead *pktHead = (PacketD2DHead *)dataInfo->outData;
-    pktHead->flags = flag;
-    pktHead->dataLen = (int32_t)((int32_t)dataInfo->outLen - sizeof(PacketD2DHead));
-    pktHead->flags = (int32_t)SoftBusHtoLl((uint32_t)pktHead->flags);
-    pktHead->dataLen = (int32_t)SoftBusHtoLl((uint32_t)pktHead->dataLen);
-    return SOFTBUS_OK;
+    ret = TransPackD2DToBytesExtraData(dataInfo, flag, nonce);
+    if (ret != SOFTBUS_OK) {
+        outData = NULL;
+        SoftBusFree(dataInfo->outData);
+        TRANS_LOGE(TRANS_CTRL, "pack extra error, ret=%{public}d", ret);
+    }
+    return ret;
 }

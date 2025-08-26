@@ -17,12 +17,13 @@
 
 #include <stdint.h>
 #include "lnn_log.h"
+#include "softbus_def.h"
 #include "softbus_error_code.h"
 #include "softbus_feature_config.h"
 
 /* support bit1:br, bit2:wifi, bit4:wifi 2.4G */
 #define DEFAUTL_LNN_CAPBILITY 0x16
-#define DEFAUTL_LNN_STATIC_CAPABILITY 0xFF
+#define DEFAUTL_LNN_STATIC_CAPABILITY 0x1FF
 
 bool LnnHasCapability(uint32_t capability, NetCapability type)
 {
@@ -161,6 +162,9 @@ uint32_t LnnGetDefaultStaticNetCap(void)
     }
     if ((configValue & (1 << STATIC_CAP_BIT_SLE)) != 0) {
         (void)LnnSetStaticNetCap(&capability, STATIC_CAP_BIT_SLE);
+    }
+    if ((configValue & (1 << STATIC_CAP_BIT_VIRTUAL_LINK)) != 0) {
+        (void)LnnSetStaticNetCap(&capability, STATIC_CAP_BIT_VIRTUAL_LINK);
     }
     return capability;
 }

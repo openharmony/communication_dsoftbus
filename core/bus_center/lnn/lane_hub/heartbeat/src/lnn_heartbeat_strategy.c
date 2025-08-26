@@ -35,6 +35,7 @@
 #include "softbus_error_code.h"
 
 #define HB_GEARMODE_MAX_SET_CNT        100
+#define HB_DUMP_GEAR_MODE_LIST_MAX_NUM 10
 #define HB_GEARMODE_LIFETIME_PERMANENT (-1)
 #define HB_DEFAULT_CALLER_ID           "HEARTBEAT_DEFAULT_CALLER_ID"
 #define HB_SUPER_DEVICE_CALLER_ID      "hmos.collaborationfwk.deviceDetect"
@@ -93,7 +94,6 @@ static LnnHeartbeatStrategyManager g_hbStrategyMgr[] = {
 
 static void DumpGearModeSettingList(int64_t nowTime, const ListNode *gearModeList)
 {
-#define HB_DUMP_GEAR_MODE_LIST_MAX_NUM 10
     int32_t dumpCount = 0;
     GearModeStorageInfo *info = NULL;
 
@@ -179,7 +179,7 @@ int32_t LnnGetGearModeBySpecificType(GearMode *mode, char *callerId, LnnHeartbea
         LNN_LOGE(LNN_HEART_BEAT, "HB get Gearmode invalid param");
         return SOFTBUS_INVALID_PARAM;
     }
-    if (memset_s(mode, sizeof(GearMode), 0, sizeof(GearMode) != EOK)) {
+    if (memset_s(mode, sizeof(GearMode), 0, sizeof(GearMode)) != EOK) {
         LNN_LOGE(LNN_HEART_BEAT, "HB get Gearmode memset_s err");
         return SOFTBUS_MEM_ERR;
     }
@@ -568,8 +568,8 @@ static int32_t SendDirectBoardcast(LnnHeartbeatFsm *hbFsm, LnnProcessSendOnceMsg
         .isLastEnd = true,
         .isMsdpRange = msgPara->isMsdpRange,
     };
-    delayTime +=
-        (msgPara->duration <= 0 || msgPara->duration > HB_SEND_ONCE_LEN) ? HB_SEND_DIRECT_LEN_ONCE : msgPara->duration;
+    delayTime += (msgPara->duration <= 0 || msgPara->duration > HB_SEND_ONCE_LEN) ?
+        HB_SEND_DIRECT_LEN_ONCE : (uint32_t)msgPara->duration;
     ret = LnnPostSendEndMsgToHbFsm(hbFsm, &endData, delayTime);
     if (ret != SOFTBUS_OK) {
         LNN_LOGE(LNN_HEART_BEAT, "HB send once last end fail, hbType=%{public}d", registedHbType);
@@ -773,7 +773,11 @@ static int32_t DirectAdvSendStrategy(LnnHeartbeatFsm *hbFsm, void *obj)
 static int32_t RegistParamMgrBySpecificType(LnnHeartbeatType type)
 {
     LnnHeartbeatParamManager *paramMgr = NULL;
-
+    int32_t typeId = LnnConvertHbTypeToId(type);
+    if (typeId < 0 || typeId >= HB_MAX_TYPE_COUNT) {
+        LNN_LOGE(LNN_HEART_BEAT, "HB type invalid");
+        return SOFTBUS_INVALID_PARAM;
+    }
     GearMode mode = {
         .cycle = LOW_FREQ_CYCLE,
         .duration = LONG_DURATION,
@@ -798,7 +802,7 @@ static int32_t RegistParamMgrBySpecificType(LnnHeartbeatType type)
         }
         paramMgr->gearModeCnt++;
     }
-    g_hbParamMgr[LnnConvertHbTypeToId(type)] = paramMgr;
+    g_hbParamMgr[typeId] = paramMgr;
     return SOFTBUS_OK;
 }
 
@@ -1169,7 +1173,7 @@ int32_t LnnStartHbByTypeAndStrategyDirectly(LnnHeartbeatType hbType, LnnHeartbea
 
 int32_t LnnStartHeartbeat(uint64_t delayMillis)
 {
-    if (LnnIsNeedInterceptBroadcast()) {
+    if (LnnIsNeedInterceptBroadcast(true)) {
         LNN_LOGI(LNN_HEART_BEAT, "local heartbeat disable");
         return SOFTBUS_FUNC_NOT_SUPPORT;
     }

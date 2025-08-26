@@ -478,8 +478,7 @@ void NotifyWifiByDelScenario(StreamType streamType, int32_t pid)
     }
 }
 
-static int32_t ProcessUdpChannelState(
-    AppInfo *appInfo, bool isServerSide, AuthHandle *authHandle, int64_t seq)
+static int32_t ProcessUdpChannelState(AppInfo *appInfo, bool isServerSide, AuthHandle *authHandle, int64_t seq)
 {
     int32_t ret = SOFTBUS_OK;
     switch (appInfo->udpChannelOptType) {
@@ -623,7 +622,7 @@ static int32_t ParseRequestAppInfo(AuthHandle authHandle, const cJSON *msg, AppI
     if (appInfo->callingTokenId != TOKENID_NOT_SET) {
         (void)LnnGetNetworkIdByUuid(appInfo->peerData.deviceId, appInfo->peerNetWorkId, NETWORK_ID_BUF_LEN);
         int32_t osType = 0;
-        (void)GetOsTypeByNetworkId(appInfo->peerNetWorkId, &osType);
+        GetOsTypeByNetworkId(appInfo->peerNetWorkId, &osType);
         if (osType != OH_OS_TYPE) {
             TRANS_LOGI(TRANS_CTRL, "not support acl check osType=%{public}d", osType);
         } else if (GetCapabilityBit(appInfo->channelCapability, TRANS_CHANNEL_ACL_CHECK_OFFSET)) {
@@ -1482,6 +1481,7 @@ int32_t TransDealUdpChannelOpenResult(
 {
     UdpChannelInfo channel;
     (void)memset_s(&channel, sizeof(UdpChannelInfo), 0, sizeof(UdpChannelInfo));
+
     int32_t ret = TransGetUdpChannelById(channelId, &channel);
     TRANS_CHECK_AND_RETURN_RET_LOGE(ret == SOFTBUS_OK, ret,
         TRANS_CTRL, "get udpChannel failed, channelId=%{public}d, ret=%{public}d", channelId, ret);

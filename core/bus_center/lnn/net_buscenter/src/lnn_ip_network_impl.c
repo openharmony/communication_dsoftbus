@@ -33,7 +33,6 @@
 #include "lnn_async_callback_utils.h"
 #include "lnn_common_utils.h"
 #include "lnn_discovery_manager.h"
-
 #include "lnn_ip_utils_adapter.h"
 #include "lnn_linkwatch.h"
 #include "lnn_log.h"
@@ -453,6 +452,7 @@ static int32_t ChangeIpSubnetAddress(LnnPhysicalSubnet *subnet)
 
 static void DestroyIpSubnetManager(LnnPhysicalSubnet *subnet)
 {
+    LNN_CHECK_AND_RETURN_LOGE(subnet != NULL, LNN_BUILDER, "invalid param");
     if (subnet->status == LNN_SUBNET_RUNNING) {
         DisableIpSubnet(subnet);
     }
@@ -520,6 +520,7 @@ static IpSubnetManagerEvent GetIpEventInRunning(LnnPhysicalSubnet *subnet)
 
 static void OnSoftbusIpNetworkDisconnected(LnnPhysicalSubnet *subnet)
 {
+    LNN_CHECK_AND_RETURN_LOGE(subnet != NULL, LNN_BUILDER, "invalid param");
     if (subnet->status == LNN_SUBNET_RESETTING || subnet->status == LNN_SUBNET_IDLE) {
         int32_t ret = EnableIpSubnet(subnet);
         TransactIpSubnetState(subnet, IP_SUBNET_MANAGER_EVENT_IF_READY, (ret == SOFTBUS_OK));
@@ -528,6 +529,14 @@ static void OnSoftbusIpNetworkDisconnected(LnnPhysicalSubnet *subnet)
 
 static void OnIpNetifStatusChanged(LnnPhysicalSubnet *subnet, void *status)
 {
+    if (subnet == NULL) {
+        LNN_LOGE(LNN_BUILDER, "invaild subnet paramter");
+        if (status != NULL) {
+            SoftBusFree(status);
+        }
+        return;
+    }
+    
     IpSubnetManagerEvent event = IP_SUBNET_MANAGER_EVENT_MAX;
     if (status == NULL) {
         if (subnet->status == LNN_SUBNET_RUNNING) {

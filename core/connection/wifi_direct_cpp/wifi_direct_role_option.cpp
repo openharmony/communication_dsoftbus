@@ -59,7 +59,7 @@ int WifiDirectRoleOption::GetExpectedRole(
         return SOFTBUS_INVALID_PARAM;
     }
 
-    CONN_LOGI(CONN_WIFI_DIRECT, "expectRole=0x%{public}x, isStrict=%{public}d", expectedRole, isStrict);
+    CONN_LOGI(CONN_WIFI_DIRECT, "expectedRole=0x%{public}x, isStrict=%{public}d", expectedRole, isStrict);
     return SOFTBUS_OK;
 }
 
@@ -77,7 +77,8 @@ WifiDirectRole WifiDirectRoleOption::GetExpectedP2pRole(const std::string &netWo
     }
 
     int32_t remoteDevTypeId = 0;
-    ret = DBinderSoftbusServer::GetInstance().LnnGetRemoteNumInfo(netWorkId.data(), NUM_KEY_DEV_TYPE_ID, &remoteDevTypeId);
+    ret = DBinderSoftbusServer::GetInstance().LnnGetRemoteNumInfo(netWorkId.data(),
+                                                                  NUM_KEY_DEV_TYPE_ID, &remoteDevTypeId);
     CONN_CHECK_AND_RETURN_RET_LOGW(
         ret == SOFTBUS_OK, WIFI_DIRECT_ROLE_AUTO, CONN_WIFI_DIRECT, "get remote dev type id failed");
     CONN_LOGD(CONN_WIFI_DIRECT, "remoteDevTypeId=0x%{public}03X", remoteDevTypeId);

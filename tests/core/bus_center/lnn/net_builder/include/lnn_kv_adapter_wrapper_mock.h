@@ -16,9 +16,10 @@
 #ifndef LNN_KV_ADAPTER_WRAPPER_MOCK_H
 #define LNN_KV_ADAPTER_WRAPPER_MOCK_H
 
-#include "lnn_kv_adapter_wrapper.h"
 #include <gmock/gmock.h>
 #include <mutex>
+
+#include "lnn_kv_adapter_wrapper.h"
 
 namespace OHOS {
 class LnnKvAdapterInterface {

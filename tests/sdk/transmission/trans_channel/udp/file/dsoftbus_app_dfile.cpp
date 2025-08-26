@@ -35,9 +35,9 @@ const int32_t NETWORK_ID_LEN = 65;
 const int32_t ARG_NUM = 2;
 const int32_t FILE_NUM = 4;
 
-const char *g_testModuleName   = "com.huawei.plrdtest.dsoftbus";
-const char *g_testSessionName  = "com.huawei.plrdtest.dsoftbus.JtOnOpenFileSession";
-const char *g_testSessionNamE2 = "com.huawei.plrdtest.dsoftbus.JtOpenFileSession";
+const char *g_testModuleName   = "com.plrdtest.dsoftbus";
+const char *g_testSessionName  = "com.plrdtest.dsoftbus.JtOnOpenFileSession";
+const char *g_testSessionNamE2 = "com.plrdtest.dsoftbus.JtOpenFileSession";
 const char *g_testGroupId = "g_testGroupId";
 
 enum StatusNum {

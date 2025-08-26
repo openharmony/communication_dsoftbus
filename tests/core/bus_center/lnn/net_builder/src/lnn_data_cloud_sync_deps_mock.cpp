@@ -106,5 +106,10 @@ int32_t LnnPackCloudSyncAckSeq(cJSON *json, char *peerudid)
 {
     return GetDataCloudSyncInterface()->LnnPackCloudSyncAckSeq(json, peerudid);
 }
+
+int32_t LnnFindDeviceUdidTrustedInfoFromDb(const char *udid)
+{
+    return GetDataCloudSyncInterface()->LnnFindDeviceUdidTrustedInfoFromDb(udid);
+}
 }
 } // namespace OHOS

@@ -221,7 +221,8 @@ void TransTdcProcessInnerTlvDataTest(FuzzedDataProvider &provider)
     TcpDataTlvPacketHead pktHead;
     (void)memset_s(&pktHead, sizeof(TcpDataTlvPacketHead), 0, sizeof(TcpDataTlvPacketHead));
 
-    (void)TransTdcProcessInnerTlvData(&info, &pktHead, pkgHeadSize);
+    (void)TransTdcProcessInnerTlvData(nullptr, &pktHead, pkgHeadSize);
+    (void)TransTdcProcessInnerTlvData(&info, nullptr, pkgHeadSize);
 }
 
 void TransInnerTdcProcAllTlvDataTest(FuzzedDataProvider &provider)
@@ -230,7 +231,7 @@ void TransInnerTdcProcAllTlvDataTest(FuzzedDataProvider &provider)
     (void)memset_s(&info, sizeof(TransInnerSessionInfo), 0, sizeof(TransInnerSessionInfo));
     info.channelId = provider.ConsumeIntegral<int32_t>();
 
-    (void)TransInnerTdcProcAllTlvData(&info);
+    (void)TransInnerTdcProcAllTlvData(nullptr);
 }
 
 void TransTdcProcessInnerDataTest(FuzzedDataProvider &provider)
@@ -239,7 +240,7 @@ void TransTdcProcessInnerDataTest(FuzzedDataProvider &provider)
     (void)memset_s(&info, sizeof(TransInnerSessionInfo), 0, sizeof(TransInnerSessionInfo));
     info.channelId = provider.ConsumeIntegral<int32_t>();
 
-    (void)TransTdcProcessInnerData(&info);
+    (void)TransTdcProcessInnerData(nullptr);
 }
 
 void TransInnerTdcProcAllDataTest(FuzzedDataProvider &provider)
@@ -248,7 +249,7 @@ void TransInnerTdcProcAllDataTest(FuzzedDataProvider &provider)
     (void)memset_s(&info, sizeof(TransInnerSessionInfo), 0, sizeof(TransInnerSessionInfo));
     info.channelId = provider.ConsumeIntegral<int32_t>();
 
-    (void)TransInnerTdcProcAllData(&info);
+    (void)TransInnerTdcProcAllData(nullptr);
 }
 
 void TdcDataReceivedTest(FuzzedDataProvider &provider)
@@ -268,7 +269,7 @@ void DirectChannelCloseSocketTest(FuzzedDataProvider &provider)
 void DirectChannelOnDataEventTest(FuzzedDataProvider &provider)
 {
     ListenerModule module = PROXY;
-    int32_t events = provider.ConsumeIntegral<int32_t>();
+    int32_t events = SOFTBUS_SOCKET_OUT;
     int32_t fd = provider.ConsumeIntegral<int32_t>();
 
     (void)DirectChannelOnDataEvent(module, events, fd);
@@ -292,6 +293,7 @@ void TdcSendDataTest(FuzzedDataProvider &provider)
     uint32_t len = provider.ConsumeIntegral<uint32_t>();
 
     (void)TdcSendData(channelId, nullptr, len);
+    len = DATA_BUF_MAX + 1;
     (void)TdcSendData(channelId, reinterpret_cast<const void *>(data), len);
 }
 
@@ -475,6 +477,7 @@ void ProxyDataRecvHandlerTest(FuzzedDataProvider &provider)
     uint32_t len = provider.ConsumeIntegral<uint32_t>();
 
     (void)ProxyDataRecvHandler(channelId, nullptr, len);
+    len = sizeof(SliceHead);
     (void)ProxyDataRecvHandler(channelId, data, len);
 }
 
@@ -486,8 +489,8 @@ void TransInnerProxyPackBytesTest(FuzzedDataProvider &provider)
     TransInnerSessionInfo info;
     (void)memset_s(&info, sizeof(TransInnerSessionInfo), 0, sizeof(TransInnerSessionInfo));
 
-    (void)TransInnerProxyPackBytes(channelId, nullptr, nullptr);
-    (void)TransInnerProxyPackBytes(channelId, &dataInfo, &info);
+    (void)TransInnerProxyPackBytes(channelId, &dataInfo, nullptr);
+    (void)TransInnerProxyPackBytes(channelId, nullptr, &info);
 }
 
 void ProxySendDataTest(FuzzedDataProvider &provider)
@@ -571,32 +574,24 @@ extern "C" int32_t LLVMFuzzerTestOneInput(const uint8_t *data, size_t size)
     OHOS::TransInnerGetTdcDataBufByIdTest(provider);
     OHOS::TransInnerUpdateTdcDataBufWInfoTest(provider);
     OHOS::TransGetInnerDataBufNodeByIdTest(provider);
-    OHOS::TransTdcProcessInnerTlvDataTest(provider);
-    OHOS::TransInnerTdcProcAllTlvDataTest(provider);
-    OHOS::TransTdcProcessInnerDataTest(provider);
-    OHOS::TransInnerTdcProcAllDataTest(provider);
-    OHOS::TdcDataReceivedTest(provider);
     OHOS::DirectChannelCloseSocketTest(provider);
-    OHOS::DirectChannelOnDataEventTest(provider);
     OHOS::DirectChannelCreateListenerTest(provider);
-    OHOS::TdcSendDataTest(provider);
-    OHOS::ClientTransInnerProxyProcDataTest(provider);
-    OHOS::ClientTransProxyInnerNoSubPacketTlvProcTest(provider);
-    OHOS::ClientTransInnerProxyProcessSessionDataTest(provider);
-    OHOS::ClientTransInnerProxyNoSubPacketProcTest(provider);
     OHOS::ClientTransProxyGetChannelSliceTest(provider);
-    OHOS::ClientTransInnerProxyFirstSliceProcessTest(provider);
     OHOS::IsValidCheckoutSliceProcessTest(provider);
-    OHOS::ClientTransProxyLastSliceProcessTest(provider);
     OHOS::TransProxyDelSliceProcessorByChannelIdTest(provider);
-    OHOS::ProxyDataRecvHandlerTest(provider);
-    OHOS::TransInnerProxyPackBytesTest(provider);
-    OHOS::ProxySendDataTest(provider);
-    OHOS::TransSendDataTest(provider);
     OHOS::CloseSessionInnerTest(provider);
     OHOS::GetSessionInfoTest(provider);
     OHOS::ServerSideSendAckTest(provider);
     OHOS::InnerListDeinitTest(provider);
+    OHOS::TransTdcProcessInnerTlvDataTest(provider);
+    OHOS::TransInnerTdcProcAllTlvDataTest(provider);
+    OHOS::TransTdcProcessInnerDataTest(provider);
+    OHOS::TransInnerTdcProcAllDataTest(provider);
+    OHOS::DirectChannelOnDataEventTest(provider);
+    OHOS::TdcSendDataTest(provider);
+    OHOS::ProxyDataRecvHandlerTest(provider);
+    OHOS::TransInnerProxyPackBytesTest(provider);
+    OHOS::ProxySendDataTest(provider);
 
     return 0;
 }

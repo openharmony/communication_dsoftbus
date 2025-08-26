@@ -174,9 +174,9 @@ static int32_t AddBusinessJsonData(cJSON *data, const DeviceInfo *deviceInfo, ui
     return NSTACKX_EOK;
 }
 
-static int32_t AddSequenceNumber(cJSON *data, uint8_t sendBcast)
+static int32_t AddSequenceNumber(cJSON *data, uint8_t af, uint8_t sendBcast)
 {
-    cJSON *item = cJSON_CreateNumber(GetSequenceNumber(sendBcast));
+    cJSON *item = cJSON_CreateNumber(GetSequenceNumber(af, sendBcast));
     if (item == NULL || !cJSON_AddItemToObject(data, JSON_SEQUENCE_NUMBER, item)) {
         cJSON_Delete(item);
         DFINDER_LOGE(TAG, "cJSON_CreateNumber for sequence number failed");
@@ -401,14 +401,15 @@ static void ParseSequenceNumber(const cJSON *data, DeviceInfo *dev, uint8_t isBr
 {
     cJSON *item = cJSON_GetObjectItemCaseSensitive(data, JSON_SEQUENCE_NUMBER);
     if (item == NULL) {
+        dev->seq.seqType = DFINDER_SEQ_TYPE_NONE;
         return;
     }
     if (!cJSON_IsNumber(item) || (item->valueint < 0) || (item->valueint > UINT16_MAX)) {
         DFINDER_LOGE(TAG, "invalid sequence number");
         return;
     }
-    dev->seq.dealBcast = isBroadcast;
-    if (isBroadcast) {
+    dev->seq.seqType = isBroadcast == NSTACKX_TRUE ? DFINDER_SEQ_TYPE_BCAST : DFINDER_SEQ_TYPE_UNICAST;
+    if (isBroadcast == NSTACKX_TRUE) {
         dev->seq.seqBcast = (uint16_t)item->valueint;
     } else {
         dev->seq.seqUcast = (uint16_t)item->valueint;
@@ -441,7 +442,7 @@ static char *PrepareServiceDiscoverEx(uint8_t af, const char *locaIpStr, uint8_t
         (JsonAddStr(data, JSON_DEVICE_WLAN_IP, locaIpStr) != NSTACKX_EOK) ||
         (AddCapabilityBitmap(data, deviceInfo) != NSTACKX_EOK) ||
         (AddBusinessJsonData(data, deviceInfo, isBroadcast, businessType) != NSTACKX_EOK) ||
-        (AddSequenceNumber(data, isBroadcast) != NSTACKX_EOK)) {
+        (AddSequenceNumber(data, af, isBroadcast) != NSTACKX_EOK)) {
         DFINDER_LOGE(TAG, "Add json data failed");
         goto L_END_JSON;
     }
@@ -608,7 +609,7 @@ int32_t ParseServiceNotification(const uint8_t *buf, NSTACKX_NotificationConfig 
     }
     config->msgLen = strlen(item->valuestring);
     if (strcpy_s(config->msg, NSTACKX_MAX_NOTIFICATION_DATA_LEN, item->valuestring) != EOK) {
-        DFINDER_LOGE(TAG, "copy notification fail, errno: %d, desc: %s", errno, strerror(errno));
+        DFINDER_LOGE(TAG, "copy notification fail");
         goto LERR;
     }
     cJSON_Delete(data);

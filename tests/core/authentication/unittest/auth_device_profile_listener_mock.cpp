@@ -41,12 +41,9 @@ void DelNotTrustDevice(const char *udid)
     (void)udid;
 }
 
-void RestartCoapDiscovery(void)
-{
-}
+void RestartCoapDiscovery(void) { }
 
-int32_t LnnStartHbByTypeAndStrategy(
-    LnnHeartbeatType hbType, LnnHeartbeatStrategyType strategyType, bool isRelay)
+int32_t LnnStartHbByTypeAndStrategy(LnnHeartbeatType hbType, LnnHeartbeatStrategyType strategyType, bool isRelay)
 {
     return GetInterface()->LnnStartHbByTypeAndStrategy(hbType, strategyType, isRelay);
 }

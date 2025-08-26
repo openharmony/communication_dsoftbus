@@ -84,7 +84,7 @@ static void BrConnectCallback(const BdAddr *bdAddr, BtUuid uuid, int32_t status,
 static int32_t StartClientConnect(struct ProxyConnection *connection)
 {
     uint8_t binaryAddr[BT_ADDR_LEN] = { 0 };
-    int32_t ret = ConvertBtMacToBinary(connection->proxyChannel.brMac, BT_MAC_LEN, binaryAddr, BT_ADDR_LEN);
+    int32_t ret = ConvertBtMacToBinary(connection->brMac, BT_MAC_LEN, binaryAddr, BT_ADDR_LEN);
     CONN_CHECK_AND_RETURN_RET_LOGE(ret == SOFTBUS_OK,
         ret, CONN_PROXY, "convert btMac to binary failed, error=%{public}d", ret);
     BtSocketConnectionCallback callback = {
@@ -133,7 +133,7 @@ static void *ProxyBrClientConnect(void *data)
     CONN_CHECK_AND_RETURN_RET_LOGW(
         connection != NULL, NULL, CONN_PROXY, "connection is null, channelId=%{public}u", channelId);
     char anomizeAddress[BT_MAC_LEN] = { 0 };
-    ConvertAnonymizeMacAddress(anomizeAddress, BT_MAC_LEN, connection->proxyChannel.brMac, BT_MAC_LEN);
+    ConvertAnonymizeMacAddress(anomizeAddress, BT_MAC_LEN, connection->brMac, BT_MAC_LEN);
     CONN_LOGI(CONN_PROXY,
         "start legacy br connect, channelId=%{public}u, addr=%{public}s", channelId, anomizeAddress);
     int32_t ret = SOFTBUS_OK;

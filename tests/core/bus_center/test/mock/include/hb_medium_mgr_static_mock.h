@@ -61,27 +61,27 @@ class HbMediumMgrInterfaceMock : public HbMediumMgrInterface {
 public:
     HbMediumMgrInterfaceMock();
     ~HbMediumMgrInterfaceMock() override;
-    MOCK_METHOD0(IsCloudSyncEnabled, bool (void));
-    MOCK_METHOD2(IsFeatureSupport, bool (uint64_t, FeatureCapability));
-    MOCK_METHOD3(AuthFindDeviceKey, int32_t (const char *, int32_t, AuthDeviceKeyInfo *));
-    MOCK_METHOD1(IsCipherManagerFindKey, bool (const char *));
-    MOCK_METHOD3(AuthFindLatestNormalizeKey, int32_t (const char *, AuthDeviceKeyInfo *, bool));
-    MOCK_METHOD1(LnnConvAddrTypeToDiscType, DiscoveryType (ConnectionAddrType));
-    MOCK_METHOD2(LnnConvertAddrToAuthConnInfo, bool (const ConnectionAddr *, AuthConnInfo *));
-    MOCK_METHOD0(SoftBusGetBrState, int32_t (void));
-    MOCK_METHOD2(LnnAddRemoteChannelCode, int32_t (const char *, int32_t));
-    MOCK_METHOD0(LnnRegistBleHeartbeatMediumMgr, int32_t (void));
-    MOCK_METHOD2(LnnGetDLHeartbeatTimestamp, int32_t (const char *, uint64_t *));
-    MOCK_METHOD2(LnnSetDLHeartbeatTimestamp, int32_t (const char *, const uint64_t));
-    MOCK_METHOD3(SoftBusGenerateStrHash, int32_t (const unsigned char *, uint32_t, unsigned char *));
-    MOCK_METHOD4(ConvertBytesToUpperCaseHexString, int32_t (char *, uint32_t, const unsigned char *, uint32_t));
-    MOCK_METHOD4(ConvertBytesToHexString, int32_t (char *, uint32_t, const unsigned char *, uint32_t));
-    MOCK_METHOD2(AuthIsPotentialTrusted, bool (const DeviceInfo *, bool));
-    MOCK_METHOD3(DecryptUserId, int32_t (NodeInfo *, uint8_t *, uint32_t));
+    MOCK_METHOD0(IsCloudSyncEnabled, bool(void));
+    MOCK_METHOD2(IsFeatureSupport, bool(uint64_t, FeatureCapability));
+    MOCK_METHOD3(AuthFindDeviceKey, int32_t(const char *, int32_t, AuthDeviceKeyInfo *));
+    MOCK_METHOD1(IsCipherManagerFindKey, bool(const char *));
+    MOCK_METHOD3(AuthFindLatestNormalizeKey, int32_t(const char *, AuthDeviceKeyInfo *, bool));
+    MOCK_METHOD1(LnnConvAddrTypeToDiscType, DiscoveryType(ConnectionAddrType));
+    MOCK_METHOD2(LnnConvertAddrToAuthConnInfo, bool(const ConnectionAddr *, AuthConnInfo *));
+    MOCK_METHOD0(SoftBusGetBrState, int32_t(void));
+    MOCK_METHOD2(LnnAddRemoteChannelCode, int32_t(const char *, int32_t));
+    MOCK_METHOD0(LnnRegistBleHeartbeatMediumMgr, int32_t(void));
+    MOCK_METHOD2(LnnGetDLHeartbeatTimestamp, int32_t(const char *, uint64_t *));
+    MOCK_METHOD2(LnnSetDLHeartbeatTimestamp, int32_t(const char *, const uint64_t));
+    MOCK_METHOD3(SoftBusGenerateStrHash, int32_t(const unsigned char *, uint32_t, unsigned char *));
+    MOCK_METHOD4(ConvertBytesToUpperCaseHexString, int32_t(char *, uint32_t, const unsigned char *, uint32_t));
+    MOCK_METHOD4(ConvertBytesToHexString, int32_t(char *, uint32_t, const unsigned char *, uint32_t));
+    MOCK_METHOD2(AuthIsPotentialTrusted, bool(const DeviceInfo *, bool));
+    MOCK_METHOD3(DecryptUserId, int32_t(NodeInfo *, uint8_t *, uint32_t));
     MOCK_METHOD2(LnnGetDLSleHbTimestamp, int32_t(const char *, uint64_t *));
     MOCK_METHOD2(LnnSetDLSleHbTimestamp, int32_t(const char *, const uint64_t));
-    MOCK_METHOD1(LnnStartSleOfflineTimingStrategy, int32_t (const char *));
-    MOCK_METHOD1(LnnStopSleOfflineTimingStrategy, int32_t (const char *));
+    MOCK_METHOD1(LnnStartSleOfflineTimingStrategy, int32_t(const char *));
+    MOCK_METHOD1(LnnStopSleOfflineTimingStrategy, int32_t(const char *));
 };
 } // namespace OHOS
 #endif // HB_MEDIUM_MGR_STATIC_MOCK_H

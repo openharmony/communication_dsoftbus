@@ -17,6 +17,7 @@
 #include <unistd.h>
 
 #include "trans_uk_manager.h"
+
 #include "bus_center_manager.h"
 #include "lnn_distributed_net_ledger.h"
 #include "lnn_ohos_account_adapter.h"
@@ -147,6 +148,10 @@ int32_t TransUkRequestDeleteItem(uint32_t requestId)
 
 int32_t GetUkPolicy(const AppInfo *appInfo)
 {
+    if (appInfo == NULL) {
+        TRANS_LOGE(TRANS_CTRL, "invalid param.");
+        return SOFTBUS_INVALID_PARAM;
+    }
 #ifdef SOFTBUS_STANDARD_OS
     NodeInfo nodeInfo;
     (void)memset_s(&nodeInfo, sizeof(NodeInfo), 0, sizeof(NodeInfo));
@@ -200,9 +205,19 @@ int32_t GetLocalAccountUidByUserId(char *id, uint32_t idLen, uint32_t *len, int3
     int32_t ret = LnnGetLocalStrInfo(STRING_KEY_ACCOUNT_UID, id, idLen);
     if (ret != SOFTBUS_OK) {
         TRANS_LOGE(TRANS_CTRL, "get local account uid failed, ret=%{public}d", ret);
-        id = DEFAULT_ACCOUNT_UID;
+        if (idLen < (strlen(DEFAULT_ACCOUNT_UID) + 1)) {
+            TRANS_LOGE(TRANS_CTRL, "idLen is not enough to hold DEFAULT_ACCOUNT_UID.");
+            return SOFTBUS_INVALID_PARAM;
+        }
+        if (strcpy_s(id, idLen, DEFAULT_ACCOUNT_UID) != EOK) {
+            TRANS_LOGE(TRANS_CTRL, "str copy id failed.");
+            return SOFTBUS_STRCPY_ERR;
+        }
         *len = strlen(id);
-        return ret;
+        if (id[*len] != '\0') {
+            TRANS_LOGE(TRANS_CTRL, "id buffer is not null-terminated.");
+            return SOFTBUS_INVALID_PARAM;
+        }
     }
     *len = strnlen(id, idLen);
     return SOFTBUS_OK;
@@ -389,6 +404,23 @@ int32_t EncryptAndAddSinkSessionKey(cJSON *msg, const AppInfo *appInfo)
     return SOFTBUS_OK;
 }
 
+static void OnGenUkSuccess(uint32_t requestId, int32_t ukId)
+{
+    (void)requestId;
+    (void)ukId;
+}
+
+static void OnGenUkFailed(uint32_t requestId, int32_t reason)
+{
+    (void)requestId;
+    (void)reason;
+}
+
+static AuthGenUkCallback authGenUkCallback = {
+    .onGenSuccess = OnGenUkSuccess,
+    .onGenFailed = OnGenUkFailed,
+};
+
 int32_t DecryptAndAddSinkSessionKey(const cJSON *msg, AppInfo *appInfo)
 {
     if (appInfo == NULL || msg == NULL) {
@@ -409,7 +441,16 @@ int32_t DecryptAndAddSinkSessionKey(const cJSON *msg, AppInfo *appInfo)
                 return ret;
             }
             ret = AuthFindUkIdByAclInfo(&aclInfo, &appInfo->myData.userKeyId);
-            TRANS_CHECK_AND_RETURN_RET_LOGE(ret == SOFTBUS_OK, ret, TRANS_CTRL, "find uk failed, ret=%{public}d", ret);
+            if (ret == SOFTBUS_AUTH_ACL_NOT_FOUND) {
+                TRANS_LOGE(TRANS_CTRL, "find uk failed no acl, ret=%{public}d", ret);
+                return ret;
+            }
+            if (ret != SOFTBUS_OK) {
+                uint32_t requestId = AuthGenRequestId();
+                (void)AuthGenUkIdByAclInfo(&aclInfo, requestId, &authGenUkCallback);
+                TRANS_LOGE(TRANS_CTRL, "find uk failed and get uk, ret=%{public}d", ret);
+                return ret;
+            }
             char decodeEncryptKey[ENCRYPT_KEY_LENGTH] = { 0 };
             size_t len = 0;
             if (SoftBusBase64Decode((unsigned char *)decodeEncryptKey, ENCRYPT_KEY_LENGTH, &len,

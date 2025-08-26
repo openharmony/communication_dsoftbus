@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021-2024 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2025 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -40,7 +40,8 @@ static void NotifySendResult(int32_t sessionId, DFileMsgType msgType,
 
     switch (msgType) {
         case DFILE_ON_FILE_SEND_SUCCESS:
-            if (listener->sendListener.OnSendFileFinished != NULL) {
+            if (listener->sendListener.OnSendFileFinished != NULL &&
+                msgData->fileList.files != NULL && msgData->fileList.fileNum > 0) {
                 listener->sendListener.OnSendFileFinished(sessionId, msgData->fileList.files[0]);
             }
             break;
@@ -63,6 +64,10 @@ static void NotifySendResult(int32_t sessionId, DFileMsgType msgType,
 
 static void FillFileStatusList(const DFileMsg *msgData, FileEvent *event)
 {
+    if (msgData == NULL || event == NULL) {
+        TRANS_LOGI(TRANS_SDK, "invalid param.");
+        return;
+    }
     int32_t fileNum = msgData->clearPolicyFileList.fileNum;
     if (fileNum <= 0) {
         TRANS_LOGI(TRANS_SDK, "invalid fileNum.");
@@ -77,11 +82,14 @@ static void FillFileStatusList(const DFileMsg *msgData, FileEvent *event)
     event->statusList.notCompletedList.files = (char **)SoftBusCalloc(fileNum * sizeof(char *));
     if (event->statusList.notCompletedList.files == NULL) {
         TRANS_LOGE(TRANS_SDK, "mem malloc failed");
+        SoftBusFree(event->statusList.completedList.files);
         return;
     }
     event->statusList.notStartedList.files = (char **)SoftBusCalloc(fileNum * sizeof(char *));
     if (event->statusList.notStartedList.files == NULL) {
         TRANS_LOGE(TRANS_SDK, "mem malloc failed");
+        SoftBusFree(event->statusList.completedList.files);
+        SoftBusFree(event->statusList.notCompletedList.files);
         return;
     }
     int32_t completedIndex = 0;
@@ -280,7 +288,7 @@ static void FileSendListener(int32_t dfileId, DFileMsgType msgType, const DFileM
 static void NotifyRecvResult(int32_t sessionId, DFileMsgType msgType, const DFileMsg *msgData,
     FileListener *listener)
 {
-    if (msgData == NULL || listener == NULL) {
+    if (msgData == NULL || listener == NULL || msgData->fileList.fileNum <= 0) {
         TRANS_LOGE(TRANS_SDK, "param invalid");
         return;
     }

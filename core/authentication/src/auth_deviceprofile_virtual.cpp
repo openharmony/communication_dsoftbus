@@ -39,6 +39,12 @@ void UpdateDpSameAccount(UpdateDpAclParams *aclParams, SessionKey sessionKey, bo
     (void)aclState;
 }
 
+void UpdateDpSameAccountWithoutUserKey(UpdateDpAclParams *aclParams, AclWriteState aclState)
+{
+    (void)aclParams;
+    (void)aclState;
+}
+
 void DelNotTrustDevice(const char *udid)
 {
     (void)udid;

@@ -44,9 +44,14 @@ void InitProxyChannelManagerWrapper(void)
     return ProxyChannelMock::GetMock()->InitProxyChannelManagerWrapper();
 }
 
-bool IsPairedDevice(const char *addr)
+bool IsPairedDevice(const char *addr, bool isRealMac)
 {
-    return ProxyChannelMock::GetMock()->IsPairedDevice(addr);
+    return ProxyChannelMock::GetMock()->IsPairedDevice(addr, isRealMac);
+}
+
+int32_t GetRealMac(char *realAddr, uint32_t realAddrLen, const char *hashAddr)
+{
+    return ProxyChannelMock::GetMock()->GetRealMac(realAddr, realAddrLen, hashAddr);
 }
 }
 

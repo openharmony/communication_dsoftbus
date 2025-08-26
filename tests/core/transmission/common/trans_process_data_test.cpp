@@ -725,28 +725,33 @@ HWTEST_F(TransProcessDataTest, TransProxyDecryptD2DDataTest001, TestSize.Level1)
     ProxyDataInfo dataInfo;
     int32_t businessType = 0;
     char sessionKey[SHORT_SESSION_KEY_LENGTH] = "11111";
-    char sessionIv[GCM_IV_LEN] = "11111";
-    unsigned char sessionMsgIv[BLE_BROADCAST_IV_LEN] = "111111";
-    int32_t ret = TransProxyDecryptD2DData(businessType, nullptr, sessionKey, sessionIv, sessionMsgIv);
+    unsigned char sessionCommonIv[BLE_BROADCAST_IV_LEN] = "111111";
+    int32_t ret = TransProxyDecryptD2DData(businessType, nullptr, sessionKey, sessionCommonIv);
     EXPECT_EQ(SOFTBUS_INVALID_PARAM, ret);
 
-    ret = TransProxyDecryptD2DData(businessType, &dataInfo, nullptr, sessionIv, sessionMsgIv);
+    ret = TransProxyDecryptD2DData(businessType, &dataInfo, nullptr, sessionCommonIv);
     EXPECT_EQ(SOFTBUS_INVALID_PARAM, ret);
 
-    ret = TransProxyDecryptD2DData(businessType, &dataInfo, sessionKey, nullptr, sessionMsgIv);
+    ret = TransProxyDecryptD2DData(businessType, &dataInfo, sessionKey, sessionCommonIv);
     EXPECT_EQ(SOFTBUS_INVALID_PARAM, ret);
 
-    ret = TransProxyDecryptD2DData(businessType, &dataInfo, sessionKey, sessionIv, nullptr);
+    ret = TransProxyDecryptD2DData(businessType, &dataInfo, sessionKey, nullptr);
     EXPECT_EQ(SOFTBUS_INVALID_PARAM, ret);
 
     businessType = BUSINESS_TYPE_D2D_VOICE;
     dataInfo.inData = (uint8_t *)"11111";
     dataInfo.inLen = 6;
-    ret = TransProxyDecryptD2DData(businessType, &dataInfo, sessionKey, sessionIv, sessionMsgIv);
+    ret = TransProxyDecryptD2DData(businessType, &dataInfo, sessionKey, sessionCommonIv);
     EXPECT_EQ(SOFTBUS_INVALID_PARAM, ret);
     
     businessType = BUSINESS_TYPE_D2D_MESSAGE;
-    ret = TransProxyDecryptD2DData(businessType, &dataInfo, sessionKey, sessionIv, sessionMsgIv);
+    ret = TransProxyDecryptD2DData(businessType, &dataInfo, sessionKey, sessionCommonIv);
+    EXPECT_EQ(SOFTBUS_INVALID_PARAM, ret);
+
+    businessType = BUSINESS_TYPE_D2D_MESSAGE;
+    dataInfo.inData = (uint8_t *)"11111111111";
+    dataInfo.inLen = 12;
+    ret = TransProxyDecryptD2DData(businessType, &dataInfo, sessionKey, sessionCommonIv);
     EXPECT_EQ(SOFTBUS_INVALID_PARAM, ret);
 }
 

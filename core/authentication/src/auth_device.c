@@ -25,9 +25,9 @@
 #include "auth_session_message.h"
 #include "bus_center_manager.h"
 #include "device_profile_listener.h"
-#include "lnn_app_bind_interface.h"
 #include "g_enhance_lnn_func.h"
 #include "g_enhance_lnn_func_pack.h"
+#include "lnn_app_bind_interface.h"
 #include "lnn_decision_db.h"
 #include "lnn_heartbeat_ctrl.h"
 #include "lnn_local_net_ledger.h"
@@ -106,7 +106,7 @@ bool IsNeedAuthLimit(const char *udidHash)
         return false;
     }
     if (time == 0) {
-        AUTH_LOGD(AUTH_FSM, "no need delay authentication");
+        AUTH_LOGI(AUTH_FSM, "no need delay authentication");
         return false;
     }
     currentTime = GetCurrentTimeMs();
@@ -633,6 +633,10 @@ int32_t AuthStartReconnectDevice(
 {
     AUTH_CHECK_AND_RETURN_RET_LOGE(connInfo != NULL, SOFTBUS_INVALID_PARAM, AUTH_CONN, "connInfo is NULL");
     AUTH_CHECK_AND_RETURN_RET_LOGE(connCb != NULL, SOFTBUS_INVALID_PARAM, AUTH_CONN, "connCb is NULL");
+    if (connInfo->type < AUTH_LINK_TYPE_WIFI || connInfo->type >= AUTH_LINK_TYPE_MAX) {
+        AUTH_LOGE(AUTH_CONN, "connInfo type error");
+        return SOFTBUS_INVALID_PARAM;
+    }
     AUTH_LOGI(AUTH_CONN, "start reconnect device. requestId=%{public}u, authId=%{public}" PRId64,
         requestId, authHandle.authId);
     AuthManager *auth = GetAuthManagerByAuthId(authHandle.authId);

@@ -754,7 +754,7 @@ static void CoapServiceDiscoverTimerHandle(void *argument)
         DFINDER_LOGE(TAG, "failed when posting service discover request");
         goto L_ERR_DISCOVER;
     }
-    DFINDER_LOGI(TAG, "the %u time for device discovery", g_discoverCount + 1);
+    DFINDER_LOGD(TAG, "the %u time for device discovery", g_discoverCount + 1);
 
     /* Restart timer */
     discoverInterval = GetDiscoverInterval(g_discoverCount);
@@ -1364,7 +1364,7 @@ static int32_t SendDiscoveryRspEx(CoapCtxType *ctx, const NSTACKX_ResponseSettin
         host, COAP_DEVICE_DISCOVER_URI) != NSTACKX_EOK) {
         return NSTACKX_EFAILED;
     }
-    IncreaseSequenceNumber(NSTACKX_FALSE);
+    IncreaseUcastSequenceNumber(GetLocalIfaceAf((const struct LocalIface *)ctx->iface));
     return CoapResponseService(ctx, remoteUrl, responseSettings->businessType);
 }
 

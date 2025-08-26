@@ -117,17 +117,19 @@ int32_t SoftBusServerProxyFrame::RegisterBrProxyService(const char *clientPkgNam
     return serverRet;
 }
 
-int32_t SoftBusServerProxyFrame::CreateSessionServer(const char *pkgName, const char *sessionName)
+int32_t SoftBusServerProxyFrame::CreateSessionServer(const char *pkgName, const char *sessionName, uint64_t timestamp)
 {
     (void)pkgName;
     (void)sessionName;
+    (void)timestamp;
     return SOFTBUS_OK;
 }
 
-int32_t SoftBusServerProxyFrame::RemoveSessionServer(const char *pkgName, const char *sessionName)
+int32_t SoftBusServerProxyFrame::RemoveSessionServer(const char *pkgName, const char *sessionName, uint64_t timestamp)
 {
     (void)pkgName;
     (void)sessionName;
+    (void)timestamp;
     return SOFTBUS_OK;
 }
 

@@ -541,7 +541,11 @@ static void UpdateDpAclSKId(AuthFsm *authFsm)
         IsSupportFeatureByCapaBit(info->nodeInfo.authCapacity, BIT_SUPPORT_USERKEY_NEGO);
     AUTH_LOGI(AUTH_FSM, "judge insert user key aclState=%{public}d, authCapacity=%{public}d", info->nodeInfo.aclState,
         info->nodeInfo.authCapacity);
-    UpdateDpSameAccount(&aclParams, sessionKey, isNeedUpdateDk, info->nodeInfo.aclState);
+    if (info->authVersion <= AUTH_VERSION_V2) {
+        UpdateDpSameAccount(&aclParams, sessionKey, isNeedUpdateDk, info->nodeInfo.aclState);
+    } else {
+        UpdateDpSameAccountWithoutUserKey(&aclParams, info->nodeInfo.aclState);
+    }
     (void)memset_s(&sessionKey, sizeof(SessionKey), 0, sizeof(SessionKey));
 }
 
@@ -1000,7 +1004,7 @@ static void HandleMsgRecvDeviceId(AuthFsm *authFsm, const MessagePara *para)
             LNN_AUDIT(AUDIT_SCENE_HANDLE_MSG_DEV_ID, lnnAuditExtra);
             break;
         }
-        if (info->connInfo.type == AUTH_LINK_TYPE_BLE && LnnIsNeedInterceptBroadcast()) {
+        if (info->connInfo.type == AUTH_LINK_TYPE_BLE && LnnIsNeedInterceptBroadcast(false)) {
             ret = SOFTBUS_FUNC_NOT_SUPPORT;
             AUTH_LOGI(AUTH_FSM, "not support ble online");
             break;
@@ -1062,7 +1066,7 @@ static void HandleMsgRecvDeviceIdNego(AuthFsm *authFsm, const MessagePara *para)
             LNN_AUDIT(AUDIT_SCENE_HANDLE_MSG_DEV_ID, lnnAuditExtra);
             break;
         }
-        if (info->connInfo.type == AUTH_LINK_TYPE_BLE && LnnIsNeedInterceptBroadcast()) {
+        if (info->connInfo.type == AUTH_LINK_TYPE_BLE && LnnIsNeedInterceptBroadcast(false)) {
             ret = SOFTBUS_FUNC_NOT_SUPPORT;
             AUTH_LOGI(AUTH_FSM, "not support ble online");
             break;
@@ -1587,14 +1591,14 @@ static void TryAddSyncPtkListenerServer(void)
     wdMgr->addSyncPtkListener(listener);
 }
 
-static void TryCompleteAuthSessionForError(AuthFsm *authFsm, AuthSessionInfo *info)
+static void TryCompleteAuthSessionForError(AuthFsm *authFsm, AuthSessionInfo *info, int32_t result)
 {
     LnnAuditExtra lnnAuditExtra = { 0 };
-    BuildLnnAuditEvent(&lnnAuditExtra, info, AUDIT_HANDLE_MSG_FAIL_END_AUTH, SOFTBUS_AUTH_UNPACK_DEVINFO_FAIL,
+    BuildLnnAuditEvent(&lnnAuditExtra, info, AUDIT_HANDLE_MSG_FAIL_END_AUTH, result,
         AUDIT_EVENT_PACKETS_ERROR);
     LNN_AUDIT(AUDIT_SCENE_HANDLE_MSG_DEV_INFO, lnnAuditExtra);
     AUTH_LOGE(AUTH_FSM, "process device info msg fail");
-    CompleteAuthSession(authFsm, SOFTBUS_AUTH_UNPACK_DEVINFO_FAIL);
+    CompleteAuthSession(authFsm, result);
 }
 
 static void ClientTryCompleteAuthSession(AuthFsm *authFsm, AuthSessionInfo *info)
@@ -1622,8 +1626,9 @@ static void TryRefreshAuthPreLinkInfo(AuthSessionInfo *info)
 static void HandleMsgRecvDeviceInfo(AuthFsm *authFsm, const MessagePara *para)
 {
     AuthSessionInfo *info = &authFsm->info;
-    if (ProcessDeviceInfoMessage(authFsm->authSeq, info, para->data, para->len) != SOFTBUS_OK) {
-        TryCompleteAuthSessionForError(authFsm, info);
+    int32_t ret = ProcessDeviceInfoMessage(authFsm->authSeq, info, para->data, para->len);
+    if (ret != SOFTBUS_OK) {
+        TryCompleteAuthSessionForError(authFsm, info, ret);
         return;
     }
     TryRefreshAuthPreLinkInfo(info);

@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2022-2024 Huawei Device Co., Ltd.
+ * Copyright (c) 2022-2025 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -44,7 +44,8 @@
 #include "trans_tcp_direct_sessionconn.h"
 #include "wifi_direct_manager.h"
 
-#define ID_OFFSET          (0xABAB0000)
+#define ID_OFFSET          (1)
+
 #define P2P_VERIFY_REQUEST 0
 #define P2P_VERIFY_REPLY   1
 
@@ -328,6 +329,10 @@ static int32_t CreateP2pListenerList(void)
 
 ListenerModule GetModuleByHmlIp(const char *ip)
 {
+    if (ip == NULL) {
+        TRANS_LOGE(TRANS_CTRL, "ip is null.");
+        return UNUSE_BUTT;
+    }
     HmlListenerInfo *item = NULL;
     HmlListenerInfo *nextItem = NULL;
     if (SoftBusMutexLock(&g_hmlListenerList->lock) != SOFTBUS_OK) {

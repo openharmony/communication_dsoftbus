@@ -28,12 +28,12 @@ class HbHeartbeatUtilsInterface {
 public:
     HbHeartbeatUtilsInterface() {};
     virtual ~HbHeartbeatUtilsInterface() {};
-    virtual int32_t ConvertBtMacToStrNoColon(char *strMac, uint32_t strMacLen, const uint8_t *binMac,
-        uint32_t binMacLen) = 0;
+    virtual int32_t ConvertBtMacToStrNoColon(
+        char *strMac, uint32_t strMacLen, const uint8_t *binMac, uint32_t binMacLen) = 0;
     virtual int32_t StringToUpperCase(const char *str, char *buf, int32_t size) = 0;
     virtual int32_t SoftBusGenerateStrHash(const unsigned char *str, uint32_t len, unsigned char *hash) = 0;
-    virtual int32_t ConvertBytesToHexString(char *outBuf, uint32_t outBufLen, const unsigned char *inBuf,
-        uint32_t inLen) = 0;
+    virtual int32_t ConvertBytesToHexString(
+        char *outBuf, uint32_t outBufLen, const unsigned char *inBuf, uint32_t inLen) = 0;
     virtual struct WifiDirectManager *GetWifiDirectManager(void) = 0;
 };
 class HbHeartbeatUtilsInterfaceMock : public HbHeartbeatUtilsInterface {

@@ -59,6 +59,7 @@ public:
     virtual int32_t LnnGetRemoteBoolInfoIgnoreOnline(const std::string &networkId, InfoKey key, bool *info) = 0;
     virtual int32_t LnnGetRemoteNumU64Info(const std::string &networkId, InfoKey key, uint64_t *info) = 0;
     virtual bool LnnGetOnlineStateById(const char *id, IdCategory type) = 0;
+
     virtual void AuthCloseConn(AuthHandle authHandle) = 0;
     virtual void AuthStopListeningForWifiDirect(AuthLinkType type, ListenerModule moduleId) = 0;
     virtual int32_t AuthStartListeningForWifiDirect(AuthLinkType type, const char *ip,

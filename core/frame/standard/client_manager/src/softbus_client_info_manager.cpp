@@ -96,6 +96,8 @@ int32_t SoftbusClientInfoManager::SoftbusRemoveService(const sptr<IRemoteObject>
             break;
         }
     }
+
+    SoftBusUnRegisterDataSyncPermission((*pid));
     COMM_LOGI(COMM_SVC, "SoftbusRemoveService, pid=%{public}d, pkgName=%{public}s", (*pid), pkgName.c_str());
     return SOFTBUS_OK;
 }

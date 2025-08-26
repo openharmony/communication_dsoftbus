@@ -158,20 +158,12 @@ static void RestartAuthParaNotify(void)
     COMM_LOGI(COMM_SDK, "Restart AuthPara notify success!");
 }
 
-static int32_t ClientCheckFuncPointer(void *func)
-{
-    if (func == NULL) {
-        COMM_LOGE(COMM_SDK, "enhance func not register");
-        return SOFTBUS_FUNC_NOT_REGISTER;
-    }
-    return SOFTBUS_OK;
-}
-
 static int32_t DiscRecoveryPolicyPacked(void)
 {
     ClientEnhanceFuncList *pfnClientEnhanceFuncList = ClientEnhanceFuncListGet();
     ClientRegisterEnhanceFuncCheck((void *)pfnClientEnhanceFuncList->discRecoveryPolicy);
-    if (ClientCheckFuncPointer((void *)pfnClientEnhanceFuncList->discRecoveryPolicy) != SOFTBUS_OK) {
+    if (pfnClientEnhanceFuncList->discRecoveryPolicy == nullptr) {
+        COMM_LOGE(COMM_SDK, "discRecoveryPolicy func not register");
         return SOFTBUS_OK;
     }
     return pfnClientEnhanceFuncList->discRecoveryPolicy();

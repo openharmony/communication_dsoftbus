@@ -78,7 +78,7 @@ static std::vector<MsdpRangeReqInfo *> g_msdpRangeReqInfo;
 static std::vector<TimeSyncReqInfo *> g_timeSyncRequestInfo;
 
 static int32_t OnRefreshDeviceFound(const char *pkgName, const DeviceInfo *device,
-    const InnerDeviceInfoAddtions *additions);
+    const InnerDeviceInfoAddtions *additions, int32_t subscribeId);
 
 static IServerDiscInnerCallback g_discInnerCb = {
     .OnServerDeviceFound = OnRefreshDeviceFound,
@@ -190,7 +190,7 @@ static int32_t AddLeaveLNNInfo(const char *pkgName, int32_t callingPid, const ch
 }
 
 static int32_t OnRefreshDeviceFound(const char *pkgName, const DeviceInfo *device,
-    const InnerDeviceInfoAddtions *additions)
+    const InnerDeviceInfoAddtions *additions, int32_t subscribeId)
 {
     LNN_CHECK_AND_RETURN_RET_LOGE(additions != nullptr, SOFTBUS_INVALID_PARAM, LNN_EVENT, "additions is null");
     LNN_CHECK_AND_RETURN_RET_LOGE(device != nullptr, SOFTBUS_INVALID_PARAM, LNN_EVENT, "device is null");
@@ -205,7 +205,7 @@ static int32_t OnRefreshDeviceFound(const char *pkgName, const DeviceInfo *devic
 
     std::lock_guard<std::mutex> autoLock(g_lock);
     for (const auto &iter : g_refreshLnnRequestInfo) {
-        if (strncmp(pkgName, iter->pkgName, pkgNameLen) != 0) {
+        if (strncmp(pkgName, iter->pkgName, pkgNameLen) != 0 || subscribeId != iter->subscribeId) {
             continue;
         }
         LnnRefreshDeviceOnlineStateAndDevIdInfo(pkgName, &newDevice, additions);

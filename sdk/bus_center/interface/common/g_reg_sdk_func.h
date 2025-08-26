@@ -61,7 +61,8 @@ typedef int32_t (*ClientGetChannelIdAndTypeBySocketIdFunc)(
 typedef int32_t (*ClientForkSocketByIdFunc)(int32_t socketId, BusinessType type, int32_t *newSocketId);
 typedef int32_t (*ClientTransSetChannelInfoFunc)(const char *sessionName, int32_t sessionId,
     int32_t channelId, int32_t channelType);
-typedef int32_t (*ClientAddSocketServerFunc)(SoftBusSecType type, const char *pkgName, const char *sessionName);
+typedef int32_t (*ClientAddSocketServerFunc)(
+    SoftBusSecType type, const char *pkgName, const char *sessionName, uint64_t *timestamp);
 typedef int32_t (*GeneratePagingIdFunc)(void);
 typedef void (*DestroyPagingIdFunc)(void);
 typedef void (*SocketServerStateUpdateFunc)(const char *sessionName);

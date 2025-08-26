@@ -140,7 +140,8 @@ bool IsHeartbeatEnable(void)
     return false;
 }
 
-bool LnnIsNeedInterceptBroadcast(void)
+bool LnnIsNeedInterceptBroadcast(bool disableGlass)
 {
+    (void)disableGlass;
     return false;
 }

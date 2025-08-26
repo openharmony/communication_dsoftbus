@@ -98,7 +98,7 @@ if (defined(ohos_lite)) {
     if (ohos_kernel_type == "liteos_a") {
       cflags += [ "-DNSTACKX_WITH_LITEOS" ]
     } else {
-      cflags += [ "-DNSTACKX_WITH_HMOS_LINUX" ]
+      cflags += [ "-DNSTACKX_WITH_LINUX" ]
     }
   }
 } else {
@@ -124,7 +124,7 @@ if (defined(ohos_lite)) {
     cflags = fillp_cflags
     cflags += [
       "-Wall",
-      "-DNSTACKX_WITH_HMOS_LINUX",
+      "-DNSTACKX_WITH_LINUX",
     ]
 
     include_dirs = fillp_include

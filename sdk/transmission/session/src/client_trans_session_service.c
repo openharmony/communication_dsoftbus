@@ -34,6 +34,7 @@
 #include "session_ipc_adapter.h"
 #include "softbus_access_token_adapter.h"
 #include "softbus_adapter_mem.h"
+#include "softbus_adapter_timer.h"
 #include "softbus_client_frame_manager.h"
 #include "softbus_def.h"
 #include "softbus_error_code.h"
@@ -122,8 +123,9 @@ int CreateSessionServer(const char *pkgName, const char *sessionName, const ISes
         TRANS_LOGE(TRANS_SDK, "invalid pkg name");
         return SOFTBUS_INVALID_PKGNAME;
     }
+    uint64_t timestamp = 0;
 
-    int ret = ClientAddSessionServer(SEC_TYPE_CIPHERTEXT, pkgName, sessionName, listener);
+    int ret = ClientAddSessionServer(SEC_TYPE_CIPHERTEXT, pkgName, sessionName, listener, &timestamp);
     if (ret == SOFTBUS_SERVER_NAME_REPEATED) {
         TRANS_LOGI(TRANS_SDK, "SessionServer is already created in client");
     } else if (ret != SOFTBUS_OK) {
@@ -131,7 +133,7 @@ int CreateSessionServer(const char *pkgName, const char *sessionName, const ISes
         return ret;
     }
 
-    ret = ServerIpcCreateSessionServer(pkgName, sessionName);
+    ret = ServerIpcCreateSessionServer(pkgName, sessionName, timestamp);
     if (ret == SOFTBUS_SERVER_NAME_REPEATED) {
         TRANS_LOGW(TRANS_SDK, "ok, SessionServer is already created in server");
         return SOFTBUS_OK;
@@ -153,8 +155,9 @@ int RemoveSessionServer(const char *pkgName, const char *sessionName)
     char *tmpName = NULL;
     Anonymize(sessionName, &tmpName);
     TRANS_LOGI(TRANS_SDK, "pkgName=%{public}s, sessionName=%{public}s", pkgName, AnonymizeWrapper(tmpName));
+    uint64_t timestamp = SoftBusGetSysTimeMs();
 
-    int32_t ret = ServerIpcRemoveSessionServer(pkgName, sessionName);
+    int32_t ret = ServerIpcRemoveSessionServer(pkgName, sessionName, timestamp);
     if (ret != SOFTBUS_OK) {
         TRANS_LOGE(TRANS_SDK, "remove in server failed, ret=%{public}d.", ret);
         AnonymizeFree(tmpName);
@@ -936,14 +939,15 @@ int CreateSocket(const char *pkgName, const char *sessionName)
             return SOFTBUS_TRANS_NOT_FIND_APPID;
         }
     }
-    ret = ClientAddSocketServer(SEC_TYPE_CIPHERTEXT, pkgName, (const char*)newSessionName);
+    uint64_t timestamp = 0;
+    ret = ClientAddSocketServer(SEC_TYPE_CIPHERTEXT, pkgName, (const char*)newSessionName, &timestamp);
     if (ret == SOFTBUS_SERVER_NAME_REPEATED) {
         TRANS_LOGD(TRANS_SDK, "SocketServer is already created in client");
     } else if (ret != SOFTBUS_OK) {
         TRANS_LOGE(TRANS_SDK, "add socket server err, ret=%{public}d", ret);
         return ret;
     }
-    ret = ServerIpcCreateSessionServer(pkgName, sessionName);
+    ret = ServerIpcCreateSessionServer(pkgName, sessionName, timestamp);
     if (ret == SOFTBUS_SERVER_NAME_REPEATED) {
         TRANS_LOGD(TRANS_SDK, "ok, SocketServer is already created in server");
         return SOFTBUS_OK;
@@ -957,15 +961,19 @@ int CreateSocket(const char *pkgName, const char *sessionName)
     return SOFTBUS_OK;
 }
 
-static SessionAttribute *CreateSessionAttributeBySocketInfoTrans(const SocketInfo *info, bool *isEncyptedRawStream)
+static SessionAttribute *CreateSessionAttributeBySocketInfoTrans(const SocketInfo *info, bool *isEncryptedRawStream)
 {
+    if (info == NULL ||isEncryptedRawStream == NULL) {
+        TRANS_LOGE(TRANS_SDK, "Invalid param");
+        return NULL;
+    }
     SessionAttribute *tmpAttr = (SessionAttribute *)SoftBusCalloc(sizeof(SessionAttribute));
     if (tmpAttr == NULL) {
         TRANS_LOGE(TRANS_SDK, "SoftBusCalloc SessionAttribute failed");
         return NULL;
     }
 
-    *isEncyptedRawStream = false;
+    *isEncryptedRawStream = false;
     tmpAttr->fastTransData = NULL;
     tmpAttr->fastTransDataSize = 0;
     switch (info->dataType) {
@@ -982,7 +990,7 @@ static SessionAttribute *CreateSessionAttributeBySocketInfoTrans(const SocketInf
         case DATA_TYPE_RAW_STREAM_ENCRYPED:
             tmpAttr->dataType = TYPE_STREAM;
             tmpAttr->attr.streamAttr.streamType = RAW_STREAM;
-            *isEncyptedRawStream = (info->dataType == DATA_TYPE_RAW_STREAM_ENCRYPED);
+            *isEncryptedRawStream = (info->dataType == DATA_TYPE_RAW_STREAM_ENCRYPED);
             break;
         case DATA_TYPE_VIDEO_STREAM:
             tmpAttr->dataType = TYPE_STREAM;
@@ -1010,8 +1018,8 @@ int32_t ClientAddSocket(const SocketInfo *info, int32_t *sessionId)
         return SOFTBUS_INVALID_PARAM;
     }
 
-    bool isEncyptedRawStream = false;
-    SessionAttribute *tmpAttr = CreateSessionAttributeBySocketInfoTrans(info, &isEncyptedRawStream);
+    bool isEncryptedRawStream = false;
+    SessionAttribute *tmpAttr = CreateSessionAttributeBySocketInfoTrans(info, &isEncryptedRawStream);
     if (tmpAttr == NULL) {
         TRANS_LOGE(TRANS_SDK, "Create SessionAttribute failed");
         return SOFTBUS_MALLOC_ERR;
@@ -1027,7 +1035,7 @@ int32_t ClientAddSocket(const SocketInfo *info, int32_t *sessionId)
     };
 
     SessionEnableStatus isEnabled = ENABLE_STATUS_INIT;
-    int32_t ret = ClientAddSocketSession(&param, isEncyptedRawStream, sessionId, &isEnabled);
+    int32_t ret = ClientAddSocketSession(&param, isEncryptedRawStream, sessionId, &isEnabled);
     if (ret != SOFTBUS_OK) {
         SoftBusFree(tmpAttr);
         if (ret == SOFTBUS_TRANS_SESSION_REPEATED) {

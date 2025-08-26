@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2024 Huawei Device Co., Ltd.
+ * Copyright (c) 2024-2025 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -30,6 +30,7 @@ const std::string APP_ID = "dsoftbus";
 const std::string STORE_ID = "dsoftbus_kv_db_test";
 shared_ptr<KVAdapter> kvStore = nullptr;
 shared_ptr<DistributedKv::KvStoreObserver> kvStoreObserver = nullptr;
+shared_ptr<KvDataChangeListener> kvDataChangeListener = nullptr;
 constexpr int32_t MAX_STRING_LEN = 4096;
 constexpr int32_t MAX_MAP_SIZE = 10000;
 const std::string DATABASE_DIR = "/data/service/el1/public/database/dsoftbus";
@@ -380,5 +381,62 @@ HWTEST_F(KVAdapterTest, CloudSyncCallback002, TestSize.Level1)
     detail.code = DistributedKv::Status::ERROR;
     detail.progress = DistributedKv::Progress::SYNC_FINISH;
     kvStore->CloudSyncCallback(std::move(detail));
+}
+
+/**
+ * @tc.name: DeleteDataChangeListener001
+ * @tc.desc: DeleteDataChangeListener is ok.
+ * @tc.type: FUNC
+ * @tc.require:
+ */
+HWTEST_F(KVAdapterTest, DeleteDataChangeListener001, TestSize.Level1)
+{
+    DistributedKv::ProgressDetail detail;
+    detail.code = DistributedKv::Status::SUCCESS;
+    detail.progress = DistributedKv::Progress::SYNC_FINISH;
+    EXPECT_NO_FATAL_FAILURE(kvStore->CloudSyncCallback(std::move(detail)));
+    detail.code = DistributedKv::Status::TIME_OUT;
+    EXPECT_NO_FATAL_FAILURE(kvStore->CloudSyncCallback(std::move(detail)));
+}
+
+/**
+ * @tc.name: DeleteKvStore001
+ * @tc.desc: DeleteKvStore is SOFTBUS_OK.
+ * @tc.type: FUNC
+ * @tc.require:
+ */
+HWTEST_F(KVAdapterTest, DeleteKvStore001, TestSize.Level1)
+{
+    const std::string appId = "appId";
+    const std::string storeId = "storeId";
+    KVAdapter(appId, storeId);
+    EXPECT_EQ(SOFTBUS_OK, kvStore->DeleteKvStore());
+}
+
+/**
+ * @tc.name: OnChange001
+ * @tc.desc: OnChange is ok.
+ * @tc.type: FUNC
+ * @tc.require:
+ */
+HWTEST_F(KVAdapterTest, OnChange001, TestSize.Level1)
+{
+    KvDataChangeListener::Keys changeKeys;
+    changeKeys[0].push_back("opinsert");
+    changeKeys[1].push_back("opupdate");
+    changeKeys[2].push_back("opupdate");
+    changeKeys[3].push_back("opupdate");
+    changeKeys[4].push_back("opupdate");
+
+    DistributedKv::DataOrigin origin;
+    origin.store = "opinsert";
+    std::vector<std::string> id;
+    id.push_back("opinsert");
+    id.push_back("opupdate");
+    origin.id = id;
+    const std::string appId = "appId";
+    const std::string storeId = "storeId";
+    KvDataChangeListener kvDataChangeListener(appId, storeId);
+    EXPECT_NO_FATAL_FAILURE(kvDataChangeListener.OnChange(origin, std::move(changeKeys)));
 }
 } // namespace OHOS

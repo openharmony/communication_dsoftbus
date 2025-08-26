@@ -26,10 +26,12 @@ extern "C" {
 #endif
 
 #define UUID_STRING_LEN 38
+// the length of the latter half of the hexString representing the sha256 hash value of mac address
+#define BT_MAC_MAX_LEN 33
 
 typedef struct {
     uint32_t requestId;
-    char brMac[BT_MAC_LEN];
+    char brMac[BT_MAC_MAX_LEN];
     char uuid[UUID_STRING_LEN];
     uint64_t timeoutMs;
 } ProxyChannelParam;
@@ -45,7 +47,7 @@ typedef enum {
 struct ProxyChannel {
     uint32_t requestId;
     uint32_t channelId;
-    char brMac[BT_MAC_LEN];
+    char brMac[BT_MAC_MAX_LEN];
     char uuid[UUID_STRING_LEN];
     int32_t (*send)(struct ProxyChannel *channel, const uint8_t *data, uint32_t dataLen);
     void (*close)(struct ProxyChannel *channel);
@@ -53,6 +55,7 @@ struct ProxyChannel {
 
 struct ProxyConnection {
     struct ProxyChannel proxyChannel;
+    char brMac[BT_MAC_LEN];
     SoftBusMutex lock;
     uint32_t channelId;
     void (*reference)(struct ProxyConnection *proxyConnection);
@@ -78,7 +81,9 @@ typedef struct {
     uint32_t requestId;
     bool isInnerRequest;
     uint32_t innerRetryNum;
+    bool isRealMac;
     char brMac[BT_MAC_LEN];
+    char brHashMac[BT_MAC_MAX_LEN];
     char uuid[UUID_STRING_LEN];
     uint64_t timeoutMs;
     OpenProxyChannelCallback result;

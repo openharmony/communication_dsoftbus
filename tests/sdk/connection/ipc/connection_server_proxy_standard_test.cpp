@@ -48,9 +48,9 @@ HWTEST_F(ConnectionServerProxyStandardTest, ConnectionServerProxyVirtualTest001,
     ConnectionServerProxy testProxy(impl);
     int32_t ret = testProxy.SoftbusRegisterService(nullptr, nullptr);
     ASSERT_EQ(ret, SOFTBUS_OK);
-    ret = testProxy.CreateSessionServer(nullptr, nullptr);
+    ret = testProxy.CreateSessionServer(nullptr, nullptr, 1);
     ASSERT_EQ(ret, SOFTBUS_OK);
-    ret = testProxy.RemoveSessionServer(nullptr, nullptr);
+    ret = testProxy.RemoveSessionServer(nullptr, nullptr, 1);
     ASSERT_EQ(ret, SOFTBUS_OK);
     ret = testProxy.OpenSession(nullptr, nullptr);
     ASSERT_EQ(ret, SOFTBUS_OK);

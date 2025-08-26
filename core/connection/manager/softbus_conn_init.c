@@ -29,17 +29,14 @@ int32_t ConnOpenFuncInit(void *soHandle)
         return SOFTBUS_NETWORK_DLOPEN_FAILED;
     }
     int32_t (*connRegisterOpenfunc)(void);
-
-    int ret = SOFTBUS_OK;
-
-    ret = SoftBusDlsym(soHandle, "ConnRegisterOpenFunc", (void**)&connRegisterOpenfunc);
+    int ret = SoftBusDlsym(soHandle, "ConnRegisterOpenFunc", (void**)&connRegisterOpenfunc);
     if (ret != SOFTBUS_OK) {
-        COMM_LOGE(COMM_SVC, "dlsym ConnRegisterOpenFunc failed, ret=%d", ret);
+        COMM_LOGE(COMM_SVC, "dlsym ConnRegisterOpenFunc fail, ret=%d", ret);
         return SOFTBUS_NETWORK_DLSYM_FAILED;
     }
 
     if (connRegisterOpenfunc() != SOFTBUS_OK) {
-        COMM_LOGE(COMM_SVC, "ConnRegisterOpenFunc return failed, ret=%d", ret);
+        COMM_LOGE(COMM_SVC, "ConnRegisterOpenFunc return fail, ret=%d", ret);
         return SOFTBUS_NETWORK_CONN_OPEN_FUNC_INIT_FAILED;
     }
 
