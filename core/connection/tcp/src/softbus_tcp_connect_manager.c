@@ -764,7 +764,7 @@ static bool TcpCheckActiveConnection(const ConnectOption *info, bool needOccupy)
 
 int32_t TcpConnSetKeepalive(int32_t fd, bool needKeepalive)
 {
-    CONN_CHECK_AND_RETURN_RET_LOGE(fd > 0, SOFTBUS_INVALID_PARAM, CONN_COMMON, "invalid param");
+    CONN_CHECK_AND_RETURN_RET_LOGE(fd >= 0, SOFTBUS_INVALID_PARAM, CONN_COMMON, "invalid param");
     return needKeepalive ? ConnSetTcpKeepalive(
         fd, AUTH_P2P_KEEP_ALIVE_TIME, AUTH_P2P_KEEP_ALIVE_INTERVAL, AUTH_P2P_KEEP_ALIVE_COUNT) :
         ConnSetTcpKeepaliveState(fd, false);

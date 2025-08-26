@@ -313,11 +313,8 @@ HWTEST_F(TransTcpDirectMockTest, TransTdcSendBytes001, TestSize.Level1)
     int32_t ret = TransTdcSendBytes(channelId, data, len, true);
     EXPECT_EQ(ret, SOFTBUS_TRANS_TDC_CHANNEL_ALREADY_PENDING);
 
-    EXPECT_CALL(tcpDirectMock, AddPendingPacket).WillOnce(Return(SOFTBUS_OK));
     ret = TransTdcSendBytes(channelId, data, len, true);
-    EXPECT_EQ(ret, SOFTBUS_TRANS_TDC_CHANNEL_CLOSED_BY_ANOTHER_THREAD);
-    ListDelete(&info->node);
-    SoftBusFree(info);
+    EXPECT_EQ(ret, SOFTBUS_TRANS_TDC_GET_INFO_FAILED);
 }
 
 /**

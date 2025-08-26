@@ -264,7 +264,8 @@ static int32_t ClientCheckFuncPointer(void *func)
     return SOFTBUS_OK;
 }
 
-static int32_t SetExtSocketOptPacked(int32_t socket, OptLevel level, OptType optType, void *optValue, uint32_t optValueSize)
+static int32_t SetExtSocketOptPacked(
+    int32_t socket, OptLevel level, OptType optType, void *optValue, uint32_t optValueSize)
 {
     ClientEnhanceFuncList *pfnClientEnhanceFuncList = ClientEnhanceFuncListGet();
     if (ClientCheckFuncPointer((void *)pfnClientEnhanceFuncList->setExtSocketOpt) != SOFTBUS_OK) {
@@ -291,7 +292,8 @@ int32_t SetSocketOpt(int32_t socket, OptLevel level, OptType optType, void *optV
     return ret;
 }
 
-static int32_t GetExtSocketOptPacked(int32_t socket, OptLevel level, OptType optType, void *optValue, int32_t *optValueSize)
+static int32_t GetExtSocketOptPacked(
+    int32_t socket, OptLevel level, OptType optType, void *optValue, int32_t *optValueSize)
 {
     ClientEnhanceFuncList *pfnClientEnhanceFuncList = ClientEnhanceFuncListGet();
     if (ClientCheckFuncPointer((void *)pfnClientEnhanceFuncList->getExtSocketOpt) != SOFTBUS_OK) {

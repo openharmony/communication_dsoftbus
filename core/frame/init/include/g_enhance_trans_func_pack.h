@@ -24,7 +24,7 @@
 
 #ifdef __cplusplus
 extern "C" {
-#endif
+#endif // __cplusplus
 
 int32_t SetDefaultQdiscPacked(void);
 int32_t InitQosPacked(void);
@@ -33,6 +33,8 @@ void GetExtQosInfoPacked(const SessionParam *param, QosInfo *qosInfo, uint32_t i
 int32_t NotifyQosChannelOpenedPacked(const ChannelInfo *chanInfo);
 int32_t TransReversePullUpPacked(const uint32_t chatMode, const uint32_t businessFlag, const char *pkgName);
 int32_t TransGetPkgnameByBusinessFlagPacked(const uint32_t businessFlag, char *pkgName, const uint32_t pkgLen);
+int32_t InitSoftbusPagingResPullPacked(void);
+void DeInitSoftbusPagingResPullPacked(void);
 int32_t InitSoftbusPagingPacked(void);
 void DeInitSoftbusPagingPacked(void);
 void TransPagingDeathCallbackPacked(const char *pkgName, int32_t pid);
@@ -40,16 +42,15 @@ bool TransHasAndUpdatePagingListenPacked(ProxyChannelInfo *info);
 int32_t TransPagingGetPidAndDataByFlgPacked(
     bool isClient, uint32_t businessFlag, int32_t *pid, char *data, uint32_t *len);
 int32_t TransDelPagingInfoByBusinessFlagPacked(uint32_t businessFlag);
-int32_t InitSoftbusPagingResPullPacked(void);
-void DeInitSoftbusPagingResPullPacked(void);
 int32_t ClientOpenHtpChannelPacked(int32_t channelId, int64_t requestId, const char *localMac, const char *remoteMac);
 int32_t ServerOpenHtpChannelPacked(const char *remoteIp, int64_t flIdentity);
 int32_t CloseHtpChannelPacked(int32_t channelId);
 void ServerUpdateHtpChannelPacked(int64_t flIdentity, int32_t channelId);
+bool CheckHtpPermissionPacked(int32_t uid);
 void TransProcessGroupTalkieInfoPacked(const char *pkgName);
+bool IsInWhitelistPacked(const char *app);
 
 #ifdef __cplusplus
 }
-#endif
-
-#endif
+#endif // __cplusplus
+#endif // G_ENHANCE_TRANS_FUNC_PACK

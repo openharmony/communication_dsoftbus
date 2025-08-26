@@ -37,13 +37,15 @@ void TransServerProxyClear(void)
     return;
 }
 
-int32_t ServerIpcCreateSessionServer(const char *pkgName, const char *sessionName)
+int32_t ServerIpcCreateSessionServer(const char *pkgName, const char *sessionName, uint64_t timestamp)
 {
+    (void)timestamp;
     return TransCreateSessionServer(pkgName, sessionName, 0, 0);
 }
 
-int32_t ServerIpcRemoveSessionServer(const char *pkgName, const char *sessionName)
+int32_t ServerIpcRemoveSessionServer(const char *pkgName, const char *sessionName, uint64_t timestamp)
 {
+    (void)timestamp;
     return TransRemoveSessionServer(pkgName, sessionName);
 }
 

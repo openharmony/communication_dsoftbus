@@ -73,8 +73,7 @@ public:
     virtual int32_t LnnHbMediumMgrInit(void) = 0;
     virtual int32_t LnnStartNewHbStrategyFsm(void) = 0;
     virtual int32_t AuthSendKeepaliveOption(const char *uuid, ModeCycle cycle) = 0;
-    virtual int32_t LnnSetGearModeBySpecificType(
-        const char *callerId, const GearMode *mode, LnnHeartbeatType type) = 0;
+    virtual int32_t LnnSetGearModeBySpecificType(const char *callerId, const GearMode *mode, LnnHeartbeatType type) = 0;
     virtual void LnnDumpLocalBasicInfo(void) = 0;
     virtual bool LnnGetOnlineStateById(const char *id, IdCategory type) = 0;
     virtual int32_t AuthFlushDevice(const char *uuid) = 0;
@@ -89,8 +88,8 @@ public:
     virtual int32_t UpdateRecoveryDeviceInfoFromDb(void) = 0;
     virtual int32_t LnnGetDLSleHbTimestamp(const char *networkId, uint64_t *timestamp) = 0;
     virtual int32_t LnnSetDLSleHbTimestamp(const char *networkId, const uint64_t timestamp) = 0;
-    virtual int32_t LnnStartSleOfflineTimingStrategy(const char *networkId) = 0;
     virtual int32_t LnnStopSleOfflineTimingStrategy(const char *networkId) = 0;
+    virtual int32_t LnnStartSleOfflineTimingStrategy(const char *networkId) = 0;
 };
 class HeartBeatCtrlStaticInterfaceMock : public HeartBeatCtrlStaticInterface {
 public:
@@ -140,14 +139,14 @@ public:
     MOCK_METHOD4(
         HbBuildUserIdCheckSum, int32_t(const int32_t *userIdArray, int32_t num, uint8_t *custData, int32_t len));
     MOCK_METHOD3(LnnSetLocalByteInfo, int32_t(InfoKey, const uint8_t *, uint32_t));
-    MOCK_METHOD1(LnnStartHbByTypeAndStrategyEx, int32_t (LnnProcessSendOnceMsgPara *));
-    MOCK_METHOD0(LnnSyncBleOfflineMsg, int32_t (void));
-    MOCK_METHOD0(LnnRemoveV0BroadcastAndCheckDev, void (void));
-    MOCK_METHOD0(UpdateRecoveryDeviceInfoFromDb, int32_t (void));
+    MOCK_METHOD1(LnnStartHbByTypeAndStrategyEx, int32_t(LnnProcessSendOnceMsgPara *));
+    MOCK_METHOD0(LnnSyncBleOfflineMsg, int32_t(void));
+    MOCK_METHOD0(LnnRemoveV0BroadcastAndCheckDev, void(void));
+    MOCK_METHOD0(UpdateRecoveryDeviceInfoFromDb, int32_t(void));
     MOCK_METHOD2(LnnGetDLSleHbTimestamp, int32_t(const char *, uint64_t *));
     MOCK_METHOD2(LnnSetDLSleHbTimestamp, int32_t(const char *, const uint64_t));
-    MOCK_METHOD1(LnnStartSleOfflineTimingStrategy, int32_t (const char *));
-    MOCK_METHOD1(LnnStopSleOfflineTimingStrategy, int32_t (const char *));
+    MOCK_METHOD1(LnnStartSleOfflineTimingStrategy, int32_t(const char *));
+    MOCK_METHOD1(LnnStopSleOfflineTimingStrategy, int32_t(const char *));
 };
 } // namespace OHOS
 #endif // OHOS_LNN_CTRL_STATIC_MOCK_H

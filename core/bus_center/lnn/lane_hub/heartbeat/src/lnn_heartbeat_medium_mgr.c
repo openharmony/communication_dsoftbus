@@ -198,6 +198,22 @@ static void UpdateCapacity(NodeInfo *nodeInfo, HbRespData *hbResp)
     (void)LnnSetNetCapability(&(nodeInfo->netCapacity), BIT_BLE);
 }
 
+static void UpdateDeviceInfoToMlps(const char *udid)
+{
+    LpDeviceStateInfo *info = (LpDeviceStateInfo *)SoftBusCalloc(sizeof(LpDeviceStateInfo));
+    if (info == NULL) {
+        LNN_LOGE(LNN_LEDGER, "calloc info fail");
+        return;
+    }
+    if (strcpy_s(info->udid, UDID_BUF_LEN, udid) != EOK) {
+        LNN_LOGE(LNN_LEDGER, "strcpy_s outUdid fail");
+        SoftBusFree(info);
+        return;
+    }
+    info->isOnline = true;
+    SendDeviceStateToMlpsPacked(info);
+}
+
 static void UpdateOnlineInfoNoConnection(const char *networkId, HbRespData *hbResp)
 {
     if (hbResp == NULL || hbResp->stateVersion == STATE_VERSION_INVALID) {
@@ -224,6 +240,7 @@ static void UpdateOnlineInfoNoConnection(const char *networkId, HbRespData *hbRe
         LNN_LOGE(LNN_HEART_BEAT, "update net capability fail");
         return;
     }
+    UpdateDeviceInfoToMlps(nodeInfo.deviceInfo.deviceUdid);
     char *anonyNetworkId = NULL;
     Anonymize(networkId, &anonyNetworkId);
     LNN_LOGI(LNN_HEART_BEAT, "networkId=%{public}s capability change:%{public}u->%{public}u",
@@ -363,11 +380,15 @@ static bool HbIsRepeatedJoinLnnRequest(LnnHeartbeatRecvInfo *storedInfo, uint64_
         return false;
     }
     if (nowTime - storedInfo->lastJoinLnnTime < HB_REPEAD_JOIN_LNN_THRESHOLD) {
-        char *anonyUdid = NULL;
-        Anonymize(storedInfo->device->devId, &anonyUdid);
-        LNN_LOGD(LNN_HEART_BEAT, "recv but ignore repeated join lnn request, udidHash=%{public}s",
-            AnonymizeWrapper(anonyUdid));
-        AnonymizeFree(anonyUdid);
+        if (storedInfo->device != NULL) {
+            char *anonyUdid = NULL;
+            Anonymize(storedInfo->device->devId, &anonyUdid);
+            LNN_LOGD(LNN_HEART_BEAT, "recv but ignore repeated join lnn request, udidHash=%{public}s",
+                AnonymizeWrapper(anonyUdid));
+            AnonymizeFree(anonyUdid);
+        } else {
+            LNN_LOGD(LNN_HEART_BEAT, "recv but ignore repeated join lnn request without udid");
+        }
         return true;
     }
     storedInfo->lastJoinLnnTime = nowTime;
@@ -583,7 +604,7 @@ static bool IsAccountChange(DeviceInfo *device, NodeInfo *cacheDeviceInfo)
 
 static bool IsNeedConnectOnLine(DeviceInfo *device, HbRespData *hbResp, ConnectOnlineReason *connectReason)
 {
-    LNN_CHECK_AND_RETURN_RET_LOGE((hbResp != NULL) && (hbResp->stateVersion != STATE_VERSION_INVALID),
+    LNN_CHECK_AND_RETURN_RET_LOGW((hbResp != NULL) && (hbResp->stateVersion != STATE_VERSION_INVALID),
         true, LNN_HEART_BEAT,  "ble don't support ble direct online");
     int32_t ret, stateVersion;
     NodeInfo deviceInfo;
@@ -845,10 +866,6 @@ static void DfxRecordHeartBeatAuthStart(const AuthConnInfo *connInfo, const char
 
 static int32_t HbOnlineNodeAuth(DeviceInfo *device, LnnHeartbeatRecvInfo *storedInfo, uint64_t nowTime)
 {
-    if (!device->isOnline) {
-        LNN_LOGW(LNN_HEART_BEAT, "ignore lnn request, not support connect");
-        return SOFTBUS_OK;
-    }
     if (HbIsRepeatedReAuthRequest(storedInfo, nowTime)) {
         LNN_LOGE(LNN_HEART_BEAT, "reauth request repeated");
         return SOFTBUS_NETWORK_HEARTBEAT_REPEATED;
@@ -1184,9 +1201,15 @@ static int32_t HbNotifyReceiveDevice(DeviceInfo *device, const LnnHeartbeatWeigh
             (void)SoftBusMutexUnlock(&g_hbRecvList->lock);
             return HbUpdateOfflineTimingByRecvInfo(nodeInfo.networkId, device->addr[0].type, hbType, nowTime);
         }
-        res = HbOnlineNodeAuth(device, storedInfo, nowTime);
-        (void)SoftBusMutexUnlock(&g_hbRecvList->lock);
-        return res;
+        if (!device->isOnline) {
+            LNN_LOGW(LNN_HEART_BEAT, "ignore lnn request, not support connect");
+            (void)SoftBusMutexUnlock(&g_hbRecvList->lock);
+            return HbUpdateOfflineTimingByRecvInfo(nodeInfo.networkId, device->addr[0].type, hbType, nowTime);
+        } else {
+            res = HbOnlineNodeAuth(device, storedInfo, nowTime);
+            (void)SoftBusMutexUnlock(&g_hbRecvList->lock);
+            return res;
+        }
     }
     res = CheckJoinLnnConnectResult(device, hbResp, isDirectlyHb, storedInfo, nowTime);
     (void)SoftBusMutexUnlock(&g_hbRecvList->lock);

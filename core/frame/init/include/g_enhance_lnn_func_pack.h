@@ -106,7 +106,8 @@ int32_t LnnRequestCheckOnlineStatusPacked(const char *networkId, uint64_t timeou
 int32_t LnnSyncPtkPacked(const char *networkId);
 int32_t GetConcurrencyLaneReqIdByActionIdPacked(uint32_t actionId, uint32_t *laneReqId);
 int32_t UpdateConcurrencyReuseLaneReqIdByActionIdPacked(uint32_t actionId, uint32_t reuseLaneReqId, uint32_t connReqId);
-int32_t UpdateConcurrencyReuseLaneReqIdByUdidPacked(char *udidHash, uint32_t reuseLaneReqId, uint32_t connReqId);
+int32_t UpdateConcurrencyReuseLaneReqIdByUdidPacked(char *udidHash, uint32_t udidHashLen, uint32_t reuseLaneReqId,
+    uint32_t connReqId);
 int32_t LnnAddLocalVapInfoPacked(LnnVapType type, const LnnVapAttr *vapAttr);
 int32_t LnnDeleteLocalVapInfoPacked(LnnVapType type);
 void DisablePowerControlPacked(const WifiDirectLinkInfo *wifiDirectInfo);

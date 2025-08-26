@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2024 Huawei Device Co., Ltd.
+ * Copyright (c) 2024-2025 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -56,8 +56,8 @@ public:
     MOCK_METHOD1(JSON_PrintUnformatted, char *(const JsonObj *obj));
     MOCK_METHOD2(JSON_Parse, JsonObj *(const char *str, uint32_t len));
     MOCK_METHOD3(JSON_GetInt64FromOject, bool(const JsonObj *obj, const char *key, int64_t *value));
-    MOCK_METHOD4(ConvertBytesToHexString,
-        int32_t(char *outBuf, uint32_t outBufLen, const unsigned char *inBuf, uint32_t inLen));
+    MOCK_METHOD4(
+        ConvertBytesToHexString, int32_t(char *outBuf, uint32_t outBufLen, const unsigned char *inBuf, uint32_t inLen));
     MOCK_METHOD3(JSON_GetInt32FromOject, bool(const JsonObj *obj, const char *key, int32_t *value));
     MOCK_METHOD4(JSON_GetStringFromObject, bool(const JsonObj *obj, const char *key, char *value, uint32_t size));
     MOCK_METHOD1(GetAuthManagerByAuthId, AuthManager *(int64_t authId));

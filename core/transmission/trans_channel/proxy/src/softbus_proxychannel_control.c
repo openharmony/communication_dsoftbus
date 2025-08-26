@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021-2023 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2025 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -21,6 +21,7 @@
 #include "auth_interface.h"
 #include "auth_apply_key_process.h"
 #include "cJSON.h"
+#include "legacy/softbus_hisysevt_transreporter.h"
 #include "softbus_adapter_crypto.h"
 #include "softbus_adapter_mem.h"
 #include "softbus_def.h"
@@ -198,6 +199,17 @@ int32_t TransPagingHandshake(int32_t channelId, uint8_t *authKey, uint32_t keyLe
         TRANS_LOGE(TRANS_CTRL, "send handshake buf fail");
         return ret;
     }
+    info.appInfo.timeStart = GetSoftbusRecordTimeMillis();
+    TransEventExtra extra = {
+        .channelId = channelId,
+        .connectionId = (int32_t)info.connId,
+        .result = EVENT_STAGE_RESULT_OK,
+        .peerUdid = info.appInfo.peerUdid,
+        .callerAccountId = info.appInfo.myData.callerAccountId,
+        .calleeAccountId = info.appInfo.myData.calleeAccountId,
+        .businessFlag = info.appInfo.myData.businessFlag
+    };
+    TRANS_EVENT(EVENT_SCENE_PAGING_CONNECT, EVENT_STAGE_PAGING_SOURCE_HANDSHAKE_START, extra);
     return SOFTBUS_OK;
 }
 
@@ -260,7 +272,8 @@ static int32_t TransPagingGetAuthKey(ProxyChannelInfo *chan, PagingProxyMessage 
         return SOFTBUS_NETWORK_BYTES_TO_HEX_STR_ERR;
     }
     uint8_t applyKey[SESSION_KEY_LENGTH] = { 0 };
-    int32_t ret = AuthFindApplyKey(&businessInfo, applyKey);
+    char accountHash[SHA_256_HEX_HASH_LEN] = { 0 };
+    int32_t ret = AuthFindApplyKey(&businessInfo, applyKey, accountHash, SHA_256_HEX_HASH_LEN);
     if (ret != SOFTBUS_OK) {
         TRANS_LOGE(TRANS_CTRL, "get auth key fail");
         return ret;
@@ -270,6 +283,22 @@ static int32_t TransPagingGetAuthKey(ProxyChannelInfo *chan, PagingProxyMessage 
         return SOFTBUS_MEM_ERR;
     }
     return SOFTBUS_OK;
+}
+
+static void ReportPagingAckHandshakeExtra(const ProxyChannelInfo *chan, int32_t retCode)
+{
+    TransEventExtra extra = {
+        .channelId = chan->channelId,
+        .peerChannelId = chan->peerId,
+        .connectionId = (int32_t)chan->connId,
+        .callerAccountId = chan->appInfo.myData.callerAccountId,
+        .calleeAccountId = chan->appInfo.myData.calleeAccountId,
+        .socketName = chan->appInfo.myData.sessionName,
+        .costTime = GetSoftbusRecordTimeMillis() - chan->appInfo.timeStart,
+        .errcode = retCode
+    };
+    extra.result = (retCode == SOFTBUS_OK) ? EVENT_STAGE_RESULT_OK : EVENT_STAGE_RESULT_FAILED;
+    TRANS_EVENT(EVENT_SCENE_PAGING_CONNECT, EVENT_STAGE_PAGING_SINK_HANDSHAKE_END, extra);
 }
 
 int32_t TransPagingAckHandshake(ProxyChannelInfo *chan, int32_t retCode)
@@ -292,6 +321,7 @@ int32_t TransPagingAckHandshake(ProxyChannelInfo *chan, int32_t retCode)
     }
     if (payLoad == NULL) {
         TRANS_LOGE(TRANS_CTRL, "pack handshake ack fail");
+        ReportPagingAckHandshakeExtra(chan, SOFTBUS_TRANS_PROXY_PACKMSG_ERR);
         return SOFTBUS_TRANS_PROXY_PACKMSG_ERR;
     }
     dataInfo.inData = (uint8_t *)payLoad;
@@ -300,17 +330,24 @@ int32_t TransPagingAckHandshake(ProxyChannelInfo *chan, int32_t retCode)
     if (ret != SOFTBUS_OK) {
         TRANS_LOGE(TRANS_CTRL, "get auth key fail");
         cJSON_free(payLoad);
+        ReportPagingAckHandshakeExtra(chan, ret);
         return ret;
     }
     if (TransPagingPackMessage(&msg, &dataInfo, chan, false) != SOFTBUS_OK) {
         TRANS_LOGE(TRANS_CTRL, "pack handshake ack head fail");
         cJSON_free(payLoad);
+        ReportPagingAckHandshakeExtra(chan, SOFTBUS_TRANS_PROXY_PACKMSG_ERR);
         return SOFTBUS_TRANS_PROXY_PACKMSG_ERR;
     }
     cJSON_free(payLoad);
     ret = TransProxyTransSendMsg(chan->connId, dataInfo.outData, dataInfo.outLen,
         CONN_HIGH, chan->appInfo.myData.pid);
-    TRANS_CHECK_AND_RETURN_RET_LOGE(ret == SOFTBUS_OK, ret, TRANS_CTRL, "send handshake ack buf fail");
+    if (ret != SOFTBUS_OK) {
+        TRANS_LOGE(TRANS_CTRL, "send handshake ack buf fail");
+        ReportPagingAckHandshakeExtra(chan, ret);
+        return ret;
+    }
+    ReportPagingAckHandshakeExtra(chan, ret);
     return SOFTBUS_OK;
 }
 

@@ -90,8 +90,7 @@ bool IsNeedUDIDAbatement(const AuthSessionInfo *info)
     return GetInterface()->IsNeedUDIDAbatement(info);
 }
 
-bool IsPotentialTrustedDevice(TrustedRelationIdType idType, const char *deviceId, bool isPrecise,
-    bool isPointToPoint)
+bool IsPotentialTrustedDevice(TrustedRelationIdType idType, const char *deviceId, bool isPrecise, bool isPointToPoint)
 {
     return GetInterface()->IsPotentialTrustedDevice(idType, deviceId, isPrecise, isPointToPoint);
 }
@@ -136,8 +135,8 @@ int32_t PostAuthData(uint64_t connId, bool toServer, const AuthDataHead *head, c
     return GetInterface()->PostAuthData(connId, toServer, head, data);
 }
 
-int32_t EncryptInner(const SessionKeyList *list, AuthLinkType type, const InDataInfo *inDataInfo,
-    uint8_t **outData, uint32_t *outLen)
+int32_t EncryptInner(
+    const SessionKeyList *list, AuthLinkType type, const InDataInfo *inDataInfo, uint8_t **outData, uint32_t *outLen)
 {
     return GetInterface()->EncryptInner(list, type, inDataInfo, outData, outLen);
 }
@@ -172,14 +171,14 @@ uint32_t AuthGetDecryptSize(uint32_t inLen)
     return GetInterface()->AuthGetDecryptSize(inLen);
 }
 
-int32_t AuthDeviceDecrypt(AuthHandle *authHandle, const uint8_t *inData, uint32_t inLen, uint8_t *outData,
-    uint32_t *outLen)
+int32_t AuthDeviceDecrypt(
+    AuthHandle *authHandle, const uint8_t *inData, uint32_t inLen, uint8_t *outData, uint32_t *outLen)
 {
     return GetInterface()->AuthDeviceDecrypt(authHandle, inData, inLen, outData, outLen);
 }
 
-int32_t AuthManagerSetSessionKey(int64_t authSeq, AuthSessionInfo *info, const SessionKey *sessionKey,
-    bool isConnect, bool isOldKey)
+int32_t AuthManagerSetSessionKey(
+    int64_t authSeq, AuthSessionInfo *info, const SessionKey *sessionKey, bool isConnect, bool isOldKey)
 {
     return GetInterface()->AuthManagerSetSessionKey(authSeq, info, sessionKey, isConnect, isOldKey);
 }
@@ -205,8 +204,8 @@ void RefreshRelationShip(const char *remoteUuid, const char *remoteMac)
     (void)remoteMac;
 }
 
-int32_t DecryptInner(const SessionKeyList *list, AuthLinkType type, const InDataInfo *inDataInfo,
-    uint8_t **outData, uint32_t *outLen)
+int32_t DecryptInner(
+    const SessionKeyList *list, AuthLinkType type, const InDataInfo *inDataInfo, uint8_t **outData, uint32_t *outLen)
 {
     return GetInterface()->DecryptInner(list, type, inDataInfo, outData, outLen);
 }
@@ -419,14 +418,14 @@ bool LnnIsDefaultOhosAccount(void)
     return GetInterface()->LnnIsDefaultOhosAccount();
 }
 
-int32_t IdServiceQueryCredential(int32_t userId, const char *udidHash, const char *accountidHash,
-    bool isSameAccount, char **credList)
+int32_t IdServiceQueryCredential(
+    int32_t userId, const char *udidHash, const char *accountidHash, bool isSameAccount, char **credList)
 {
     return GetInterface()->IdServiceQueryCredential(userId, udidHash, accountidHash, isSameAccount, credList);
 }
 
-int32_t AuthIdServiceQueryCredential(int32_t peerUserId, const char *udidHash, const char *accountidHash,
-    bool isSameAccount, char **credList)
+int32_t AuthIdServiceQueryCredential(
+    int32_t peerUserId, const char *udidHash, const char *accountidHash, bool isSameAccount, char **credList)
 {
     return GetInterface()->AuthIdServiceQueryCredential(peerUserId, udidHash, accountidHash, isSameAccount, credList);
 }
@@ -446,8 +445,7 @@ int32_t GetActiveOsAccountIds(void)
     return GetInterface()->GetActiveOsAccountIds();
 }
 
-bool IsSKIdInvalid(int32_t sessionKeyId, const char *accountHash, const char *udidShortHash,
-    int32_t userId)
+bool IsSKIdInvalid(int32_t sessionKeyId, const char *accountHash, const char *udidShortHash, int32_t userId)
 {
     return GetInterface()->IsSKIdInvalid(sessionKeyId, accountHash, udidShortHash, userId);
 }
@@ -457,4 +455,4 @@ bool IsTrustedDeviceFromAccess(const char *peerAccountHash, const char *peerUdid
     return GetInterface()->IsTrustedDeviceFromAccess(peerAccountHash, peerUdid, peerUserId);
 }
 }
-}
+} // namespace OHOS

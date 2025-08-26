@@ -53,6 +53,7 @@ static ConnEventExtra g_validExtra = {
     .peerBrMac = "dd-15-bc-b9-f2-04",
     .peerBleMac = "dd-15-bc-b9-f2-04",
     .peerWifiMac = "dd-15-bc-b9-f2-04",
+    .peerSleMac = "dd-15-bc-b9-f2-04",
     .peerPort = "testPeerPort",
     .peerNetworkId = "a8ynvpdaihw1f6nknjd2hkfhxljxypkr6kvjsbhnhpp16974uo4fvsrpfa6t50fm",
     .peerUdid = "testPeerUdid",
@@ -60,6 +61,8 @@ static ConnEventExtra g_validExtra = {
     .localNetworkId = "a8ynvpdaihw1f6nknjd2hkfhxljxypkr6kvjsbhnhpp16974uo4fvsrpfa6t50fm",
     .callerPkg = "testCallerPkg",
     .calleePkg = "testCalleePkg",
+    .srcAccountIdHash = "1122334455",
+    .dstAccountIdHash = "6677889900",
     .bootLinkType = 13,
     .isRenegotiate = 14,
     .isReuse = 15,
@@ -74,6 +77,7 @@ static ConnEventExtra g_validExtra = {
     .apChannel = 22,
     .peerDevVer = "peerDevVer",
     .remoteScreenStatus = 1,
+    .localScreenStatus = 1,
     .businessType = 1,
     .businessId = 1,
     .timeout = 1,
@@ -83,6 +87,12 @@ static ConnEventExtra g_validExtra = {
     .p2pRole = 1,
     .needHmlConnect = 1,
     .businessTag = "test",
+    .staChload = 50,
+    .sameAccount = 1,
+    .discoveryCnt = 1,
+    .connectingCnt = 0,
+    .connectSuccessCnt = 1,
+    .connectFailCnt = 0,
 };
 
 /**
@@ -149,6 +159,7 @@ static ConnEventExtra g_invalidExtra = {
     .peerBrMac = "",
     .peerBleMac = "",
     .peerWifiMac = "\0",
+    .peerSleMac = nullptr,
     .peerPort = nullptr,
     .peerNetworkId = "",
     .peerUdid = "\0",
@@ -156,11 +167,38 @@ static ConnEventExtra g_invalidExtra = {
     .localNetworkId = "",
     .callerPkg = "\0",
     .calleePkg = nullptr,
+    .srcAccountIdHash = nullptr,
+    .dstAccountIdHash = nullptr,
     .bootLinkType = -13,
     .isRenegotiate = -14,
     .isReuse = -15,
     .negotiateTime = 0,
     .linkTime = 0,
+    .osType = -1,
+    .localDeviceType = nullptr,
+    .remoteDeviceType = nullptr,
+    .p2pChannel = -1,
+    .hmlChannel = -1,
+    .staChannel = -1,
+    .apChannel = -1,
+    .peerDevVer = nullptr,
+    .remoteScreenStatus = -1,
+    .localScreenStatus = -1,
+    .businessType = -1,
+    .businessId = -1,
+    .timeout = -1,
+    .fastestConnectEnable = -1,
+    .coapDataChannel = -1,
+    .enableWideBandwidth = -1,
+    .p2pRole = -1,
+    .needHmlConnect = -1,
+    .businessTag = nullptr,
+    .staChload = -1,
+    .sameAccount = -1,
+    .discoveryCnt = -1,
+    .connectingCnt = -1,
+    .connectSuccessCnt = -1,
+    .connectFailCnt = -1,
 };
 
 /**
@@ -172,7 +210,7 @@ static ConnEventExtra g_invalidExtra = {
 HWTEST_F(ConnEventTest, ConnEventTest003, TestSize.Level0)
 {
     constexpr int32_t TWO_VALID_EXTRA_SIZE = 2; // result, errcode is valid
-    constexpr int32_t VALID_EXTRA_SIZE = 25;
+    constexpr int32_t VALID_EXTRA_SIZE = 29;
 
     HiSysEventMock mock;
     EXPECT_CALL(mock,
@@ -192,7 +230,7 @@ HWTEST_F(ConnEventTest, ConnEventTest004, TestSize.Level0)
 {
     ConnEventExtra emptyExtra = { 0 };
     constexpr int32_t TWO_VALID_EXTRA_SIZE = 2; // result, errcode is valid
-    constexpr int32_t VALID_EXTRA_SIZE = 25;
+    constexpr int32_t VALID_EXTRA_SIZE = 29;
 
     HiSysEventMock mock;
     EXPECT_CALL(mock,
@@ -231,7 +269,7 @@ static ConnAuditExtra g_extra = {
 };
 
 /**
- * @tc.name: ConnEventTest001
+ * @tc.name: ConnEventTest005
  * @tc.desc: Test conn event form size
  * @tc.type: FUNC
  * @tc.require: I8HA59

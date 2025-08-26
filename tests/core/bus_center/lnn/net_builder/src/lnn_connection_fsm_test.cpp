@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2023 Huawei Device Co., Ltd.
+ * Copyright (c) 2023-2025 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -18,23 +18,24 @@
 #include <securec.h>
 
 #include "distribute_net_ledger_mock.h"
+#include "dsoftbus_enhance_interface.h"
+#include "g_enhance_lnn_func.h"
 #include "lnn_auth_mock.h"
 #include "lnn_connection_fsm.c"
 #include "lnn_connection_fsm.h"
+#include "lnn_connection_fsm_mock.h"
 #include "lnn_connection_fsm_process.c"
 #include "lnn_connection_fsm_process.h"
-#include "lnn_connection_fsm_mock.h"
 #include "lnn_devicename_info.h"
 #include "lnn_map.h"
 #include "lnn_net_builder.h"
 #include "lnn_net_ledger_mock.h"
+#include "lnn_node_info.h"
 #include "lnn_service_mock.h"
 #include "message_handler.h"
 #include "softbus_adapter_mem.h"
 #include "softbus_common.h"
 #include "softbus_error_code.h"
-#include "dsoftbus_enhance_interface.h"
-#include "g_enhance_lnn_func.h"
 
 #define FUNC_SLEEP_MS 10
 constexpr char IP[IP_STR_MAX_LEN] = "127.0.0.1";
@@ -836,8 +837,8 @@ HWTEST_F(LNNConnectionFsmTest, IS_WIFI_CONNECT_INFO_CHANGED_TEST_001, TestSize.L
     oldNodeInfo.connectInfo.ifInfo[WLAN_IF].authPort = PORT + 1;
     ret = IsWifiConnectInfoChanged(&oldNodeInfo, &newNodeInfo, CONNECTION_ADDR_WLAN);
     EXPECT_EQ(ret, true);
-    EXPECT_EQ(EOK, memcpy_s(oldNodeInfo.connectInfo.ifInfo[WLAN_IF].deviceIp,
-        IP_STR_MAX_LEN, PEERUDID, strlen(PEERUDID)));
+    EXPECT_EQ(
+        EOK, memcpy_s(oldNodeInfo.connectInfo.ifInfo[WLAN_IF].deviceIp, IP_STR_MAX_LEN, PEERUDID, strlen(PEERUDID)));
     ret = IsWifiConnectInfoChanged(&oldNodeInfo, &newNodeInfo, CONNECTION_ADDR_WLAN);
     EXPECT_EQ(ret, true);
 }

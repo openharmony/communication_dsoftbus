@@ -185,6 +185,7 @@ typedef struct {
     bool isSupportTlv;
     bool isD2D;
     int32_t sessionId;
+    int32_t pagingId;
     int32_t channelId;
     int32_t channelType;
     int32_t businessType;

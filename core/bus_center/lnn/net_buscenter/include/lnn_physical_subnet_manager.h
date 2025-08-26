@@ -16,9 +16,9 @@
 #ifndef LNN_SUBNET_MANAGER_H
 #define LNN_SUBNET_MANAGER_H
 
+#include "stdint.h"
 #include "lnn_network_manager.h"
 #include "lnn_physical_subnet_manager_struct.h"
-#include "stdint.h"
 
 #ifdef __cplusplus
 #if __cplusplus

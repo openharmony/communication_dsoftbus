@@ -16,9 +16,9 @@
 #ifndef AUTH_PRE_LINK_H
 #define AUTH_PRE_LINK_H
 
+#include <stdatomic.h>
 #include <stdbool.h>
 #include <stdint.h>
-#include <stdatomic.h>
 #include "common_list.h"
 #include "softbus_common.h"
 #include "auth_attest_interface_struct.h"
@@ -45,6 +45,7 @@ typedef struct {
 
 int32_t InitAuthPreLinkList(void);
 bool IsAuthPreLinkNodeExist(uint32_t requestId);
+bool AuthPreLinkCheckNeedPtk(uint32_t requestId, const char *uuid);
 int32_t AddToAuthPreLinkList(uint32_t requestId, int32_t fd, ConnectionAddr *connAddr);
 int32_t FindAuthPreLinkNodeById(uint32_t requestId, AuthPreLinkNode *reuseNode);
 int32_t FindAuthPreLinkNodeByUuid(const char *uuid, AuthPreLinkNode *reuseNode);

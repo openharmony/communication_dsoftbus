@@ -22,7 +22,6 @@
 #include "softbus_adapter_crypto.h"
 #include "softbus_adapter_thread.h"
 #include "softbus_adapter_socket.h"
-#include "softbus_conn_ble_direct.h"
 #include "softbus_feature_config.h"
 #include "legacy/softbus_hisysevt_transreporter.h"
 #include "softbus_message_open_channel.h"
@@ -108,7 +107,7 @@ AppInfo *TestSetAppInfo()
     if (appInfo == nullptr) {
         return nullptr;
     }
-    
+
     (void)memset_s(appInfo, sizeof(AppInfo), 0, sizeof(AppInfo));
     appInfo->businessType = BUSINESS_TYPE_BYTE;
     appInfo->appType = APP_TYPE_NORMAL;
@@ -890,6 +889,8 @@ HWTEST_F(TransTcpDirectMessageStaticTest, TransDealTdcChannelOpenResultTest001, 
     int32_t channelId = 1;
     int32_t fd = 1;
     AccessInfo accessInfo = { 0 };
+    CreatSessionConnList();
+    TransSrvDataListInit();
     int32_t ret = TransDealTdcChannelOpenResult(channelId, openResult, &accessInfo, TEST_TDC_PID);
     EXPECT_EQ(ret, SOFTBUS_TRANS_GET_SESSION_CONN_FAILED);
     SessionConn *conn = TestSetSessionConn();

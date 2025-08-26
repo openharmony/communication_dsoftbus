@@ -51,7 +51,7 @@ static char *ToJson(ListNode *connectionSnapshots)
 {
     cJSON *root = cJSON_CreateObject();
     if (root == NULL) {
-        CONN_LOGE(CONN_BR, "create json object failed");
+        CONN_LOGE(CONN_BR, "create json object fail");
         return NULL;
     }
 
@@ -59,7 +59,7 @@ static char *ToJson(ListNode *connectionSnapshots)
 
     char *result = cJSON_Print(root);
     if (result == NULL) {
-        CONN_LOGE(CONN_BR, "br print hidumper json failed");
+        CONN_LOGE(CONN_BR, "br print hidumper json fail");
         cJSON_Delete(root);
         return NULL;
     }
@@ -70,7 +70,7 @@ static char *ToJson(ListNode *connectionSnapshots)
 ConnBrConnectionSnapshot *ConnBrCreateConnectionSnapshot(const ConnBrConnection *connection)
 {
     ConnBrConnectionSnapshot *snapshot = (ConnBrConnectionSnapshot *)SoftBusCalloc(sizeof(ConnBrConnectionSnapshot));
-    CONN_CHECK_AND_RETURN_RET_LOGE(snapshot != NULL, NULL, CONN_BR, "br hidumper malloc failed");
+    CONN_CHECK_AND_RETURN_RET_LOGE(snapshot != NULL, NULL, CONN_BR, "br hidumper malloc fail");
 
     ListInit(&snapshot->node);
     snapshot->connectionId = connection->connectionId;
@@ -78,7 +78,7 @@ ConnBrConnectionSnapshot *ConnBrCreateConnectionSnapshot(const ConnBrConnection 
     char anonymizedAddress[BT_MAC_LEN] = { 0 };
     ConvertAnonymizeMacAddress(anonymizedAddress, BT_MAC_LEN, connection->addr, BT_MAC_LEN);
     if (strcpy_s(snapshot->addr, BT_MAC_LEN, anonymizedAddress) != EOK) {
-        CONN_LOGE(CONN_BR, "br hidumper copy addr failed");
+        CONN_LOGE(CONN_BR, "br hidumper copy addr fail");
     }
     snapshot->state = connection->state;
     snapshot->mtu = connection->mtu;
@@ -109,7 +109,7 @@ int32_t BrHiDumper(int fd)
 
     do {
         if (ret != SOFTBUS_OK) {
-            CONN_LOGE(CONN_BR, "get br snapshot failed");
+            CONN_LOGE(CONN_BR, "get br snapshot fail");
             break;
         }
 

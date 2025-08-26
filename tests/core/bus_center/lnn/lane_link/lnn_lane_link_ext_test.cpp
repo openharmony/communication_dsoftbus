@@ -683,4 +683,18 @@ HWTEST_F(LNNLaneLinkExtTest, LNN_LANE_LINK_RATE_PRE_TEST_001, TestSize.Level1)
     EXPECT_NO_FATAL_FAILURE(LnnDisconnectP2p(NODE_NETWORK_ID, laneReqId));
     EXPECT_NO_FATAL_FAILURE(LnnDestroyP2p());
 }
+
+/*
+* @tc.name: LNN_LANE_DISCONNECT_P2P_TEST_001
+* @tc.desc: test LnnDisconnectP2p
+* @tc.type: FUNC
+* @tc.require:
+*/
+HWTEST_F(LNNLaneLinkExtTest, LNN_LANE_DISCONNECT_P2P_TEST_001, TestSize.Level1)
+{
+    int32_t ret = LnnDisconnectP2p(nullptr, 0);
+    EXPECT_EQ(ret, SOFTBUS_INVALID_PARAM);
+    ret = LnnDisconnectP2p(NODE_NETWORK_ID, 0);
+    EXPECT_EQ(ret, SOFTBUS_INVALID_PARAM);
+}
 } // namespace OHOS

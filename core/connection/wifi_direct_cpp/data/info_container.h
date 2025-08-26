@@ -18,6 +18,7 @@
 
 #include <map>
 
+#include "conn_log.h"
 #include "serializable.h"
 
 namespace OHOS::SoftBus {
@@ -33,7 +34,15 @@ protected:
     T Get(Key key, const T &defaultValue) const
     {
         const auto it = values_.find(key);
-        return it != values_.end() ? std::any_cast<T>(it->second) : defaultValue;
+        if (it == values_.end()) {
+            return defaultValue;
+        }
+        auto ptr = std::any_cast<T>(&it->second);
+        if (ptr == nullptr) {
+            CONN_LOGE(CONN_WIFI_DIRECT, "Warning! Type conversion failure is not allowed! Pls check type!");
+            return defaultValue;
+        }
+        return *ptr;
     }
 
     using KeyTypeTable = std::map<Key, Serializable::ValueType>;

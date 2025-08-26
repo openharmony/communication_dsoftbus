@@ -17,7 +17,6 @@
 
 #include <securec.h>
 
-#include "lnn_device_info_recovery.h"
 #include "message_handler.h"
 #include "g_enhance_lnn_func.h"
 #include "g_enhance_lnn_func_pack.h"
@@ -44,7 +43,7 @@
 #include "trans_event.h"
 #include "trans_log.h"
 
-#define ID_OFFSET (0xABAB0000)
+#define ID_OFFSET (1)
 #define WAIT_LISTEN_CHECK_DELAY     (200)
 #define WAIT_LISTEN_CHECK_NUM       (50)
 

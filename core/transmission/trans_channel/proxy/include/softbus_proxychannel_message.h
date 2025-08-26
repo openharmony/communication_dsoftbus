@@ -46,7 +46,8 @@ int32_t TransPagingPackMessage(PagingProxyMessage *msg, ProxyDataInfo *dataInfo,
     ProxyChannelInfo *chan, bool needHash);
 int32_t TransParseMessageHeadType(char *data, int32_t len, ProxyMessage *msg);
 char *TransPagingPackHandshakeAckMsg(ProxyChannelInfo *chan);
-void TransPagingProcessHandshakeMsg(const ProxyMessage *msg, uint8_t *accountHash, uint8_t *udidHash);
+void TransPagingProcessHandshakeMsg(
+    const ProxyMessage *msg, uint8_t *accountHash, uint8_t *udidHash, const char *authAccountHash);
 int32_t TransPagingParseMessage(char *data, int32_t len, ProxyMessage *msg);
 void TransWaitListenResult(uint32_t businessFlag, int32_t reason);
 char *TransPagingPackHandshakeErrMsg(int32_t errCode, int32_t channelId);

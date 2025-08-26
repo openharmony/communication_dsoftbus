@@ -84,13 +84,12 @@ int32_t SoftBusGenerateStrHash(const unsigned char *str, uint32_t len, unsigned 
     return SoftbusTransProxyTransceiverMock::GetMockObj().SoftBusGenerateStrHash(str, len, hash);
 }
 
-
 namespace OHOS {
 
 #define TEST_STRING_IDENTITY "11"
 #define TEST_VALID_CHANNEL_ID 1
-#define TEST_DATALEN 10
 #define TEST_DATA_LEN 128
+#define TEST_DATALEN 10
 
 class SoftbusProxyTransceiverTest : public testing::Test {
 public:
@@ -1092,30 +1091,6 @@ HWTEST_F(SoftbusProxyTransceiverTest, TransProxyLoopMsgHandler001, TestSize.Leve
 }
 
 /**
- * @tc.name: TransProxyOnDataReceived001
- * @tc.desc: test TransProxyOnDataReceived.
- * @tc.type: FUNC
- * @tc.require:
- */
-HWTEST_F(SoftbusProxyTransceiverTest, TransProxyOnDataReceived001, TestSize.Level1)
-{
-    ProxyMessageShortHead msgHead = { 0 };
-    char data[TEST_DATALEN];
-    int32_t len = TEST_DATALEN;
-    msgHead.type = (PROXYCHANNEL_MSG_TYPE_D2D & FOUR_BIT_MASK) | (VERSION << VERSION_SHIFT);
-    msgHead.myId = 1;
-    msgHead.peerId = 1;
-    (void)memcpy_s(data, TEST_DATALEN, &msgHead, sizeof(ProxyMessageShortHead));
-    uint32_t connectionId = 1;
-    ConnModule moduleId = MODULE_CONNECTION;
-    int64_t seq = 1;
-    EXPECT_NO_FATAL_FAILURE(TransProxyOnDataReceived(connectionId, moduleId, seq, data, len));
-
-    msgHead.type = (PROXYCHANNEL_MSG_TYPE_NORMAL & FOUR_BIT_MASK) | (VERSION << VERSION_SHIFT);
-    EXPECT_NO_FATAL_FAILURE(TransProxyOnDataReceived(connectionId, moduleId, seq, data, len));
-}
-
-/**
  * @tc.name: TransProxyPostResetPeerMsgToLoopTest001
  * @tc.desc: TransProxyPostResetPeerMsgToLoop
  * @tc.type: FUNC
@@ -1262,7 +1237,7 @@ HWTEST_F(SoftbusProxyTransceiverTest, TransProxyOnDataReceivedTest005, TestSize.
     char data[TEST_DATA_LEN];
     
     SoftbusTransProxyTransceiverMock transceiverMockObj;
-    EXPECT_CALL(transceiverMockObj, TransProxyParseMessage).WillOnce(Return(SOFTBUS_TRANS_RECV_DATA_OVER_LEN));
+    EXPECT_CALL(transceiverMockObj, TransProxyParseMessage).WillRepeatedly(Return(SOFTBUS_TRANS_RECV_DATA_OVER_LEN));
 
     EXPECT_NO_FATAL_FAILURE(
         TransProxyOnDataReceived(connectionId, MODULE_PROXY_CHANNEL, seq, data, TEST_DATA_LEN));
@@ -1281,7 +1256,7 @@ HWTEST_F(SoftbusProxyTransceiverTest, TransProxyOnDataReceivedTest006, TestSize.
     char data[TEST_DATA_LEN];
     
     SoftbusTransProxyTransceiverMock transceiverMockObj;
-    EXPECT_CALL(transceiverMockObj, TransProxyParseMessage).WillOnce(Return(SOFTBUS_OK));
+    EXPECT_CALL(transceiverMockObj, TransProxyParseMessage).WillRepeatedly(Return(SOFTBUS_OK));
 
     EXPECT_NO_FATAL_FAILURE(
         TransProxyOnDataReceived(connectionId, MODULE_PROXY_CHANNEL, seq, data, TEST_DATA_LEN));
@@ -1365,5 +1340,29 @@ HWTEST_F(SoftbusProxyTransceiverTest, TransProxyResetAndCloseConnTest001, TestSi
     chan.deviceTypeIsWinpc = false;
     ret = TransProxyResetAndCloseConn(&chan);
     EXPECT_EQ(ret, SOFTBUS_OK);
+}
+
+/**
+ * @tc.name: TransProxyOnDataReceived001
+ * @tc.desc: test TransProxyOnDataReceived.
+ * @tc.type: FUNC
+ * @tc.require:
+ */
+HWTEST_F(SoftbusProxyTransceiverTest, TransProxyOnDataReceived001, TestSize.Level1)
+{
+    ProxyMessageShortHead msgHead = { 0 };
+    char data[TEST_DATALEN];
+    int32_t len = TEST_DATALEN;
+    msgHead.type = (PROXYCHANNEL_MSG_TYPE_D2D & FOUR_BIT_MASK) | (VERSION << VERSION_SHIFT);
+    msgHead.myId = 1;
+    msgHead.peerId = 1;
+    (void)memcpy_s(data, TEST_DATALEN, &msgHead, sizeof(ProxyMessageShortHead));
+    uint32_t connectionId = 1;
+    ConnModule moduleId = MODULE_CONNECTION;
+    int64_t seq = 1;
+    EXPECT_NO_FATAL_FAILURE(TransProxyOnDataReceived(connectionId, moduleId, seq, data, len));
+
+    msgHead.type = (PROXYCHANNEL_MSG_TYPE_NORMAL & FOUR_BIT_MASK) | (VERSION << VERSION_SHIFT);
+    EXPECT_NO_FATAL_FAILURE(TransProxyOnDataReceived(connectionId, moduleId, seq, data, len));
 }
 } // namespace OHOS

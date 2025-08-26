@@ -16,10 +16,9 @@
 #ifndef G_ENHANCE_AUTH_FUNC_H
 #define G_ENHANCE_AUTH_FUNC_H
 
-#include "auth_common_struct.h"
 #include "auth_attest_interface_struct.h"
+#include "auth_common_struct.h"
 #include "auth_interface_struct.h"
-#include "stdint.h"
 #include "auth_session_fsm_struct.h"
 #include "auth_session_key_struct.h"
 
@@ -28,15 +27,16 @@ extern "C" {
 #endif
 
 typedef int32_t (*AuthMetaInitFunc)(const AuthTransCallback *callback);
-typedef void (*AuthMetaNotifyDataReceivedFunc)(uint32_t connectionId, const SocketPktHead *pktHead, const uint8_t *data);
+typedef void (*AuthMetaNotifyDataReceivedFunc)(
+    uint32_t connectionId, const SocketPktHead *pktHead, const uint8_t *data);
 typedef bool (*IsNeedUDIDAbatementFunc)(const AuthSessionInfo *info);
 typedef int32_t (*GenerateCertificateFunc)(SoftbusCertChain *softbusCertChain, const AuthSessionInfo *info);
-typedef int32_t (*VerifyCertificateFunc)(SoftbusCertChain *softbusCertChain, const NodeInfo *nodeInfo, const AuthSessionInfo *info);
-typedef void (*AuthUpdateNormalizeKeyIndexFunc)(const char *udidHash, int64_t index, AuthLinkType type, SessionKey *normalizedKey,
-    bool isServer);
+typedef int32_t (*VerifyCertificateFunc)(
+    SoftbusCertChain *softbusCertChain, const NodeInfo *nodeInfo, const AuthSessionInfo *info);
+typedef void (*AuthUpdateNormalizeKeyIndexFunc)(
+    const char *udidHash, int64_t index, AuthLinkType type, SessionKey *normalizedKey, bool isServer);
 typedef void (*DelAuthMetaManagerByConnectionIdFunc)(uint32_t connectionId);
 typedef int32_t (*AuthMetaGetConnInfoBySideFunc)(const char *uuid, bool isClient, AuthConnInfo *connInfo);
-typedef bool (*AuthIsLatestNormalizeKeyInTimeFunc)(const char *udidHash, uint64_t time);
 typedef void (*AuthClearDeviceKeyFunc)(void);
 typedef struct TagAuthEnhanceFuncList {
     AuthMetaInitFunc authMetaInit;
@@ -47,7 +47,6 @@ typedef struct TagAuthEnhanceFuncList {
     AuthUpdateNormalizeKeyIndexFunc authUpdateNormalizeKeyIndex;
     DelAuthMetaManagerByConnectionIdFunc delAuthMetaManagerByConnectionId;
     AuthMetaGetConnInfoBySideFunc authMetaGetConnInfoBySide;
-    AuthIsLatestNormalizeKeyInTimeFunc authIsLatestNormalizeKeyInTime;
     AuthClearDeviceKeyFunc authClearDeviceKey;
 } AuthEnhanceFuncList;
 

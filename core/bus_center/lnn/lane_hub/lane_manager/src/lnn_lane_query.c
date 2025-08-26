@@ -119,12 +119,12 @@ static bool GetNetCap(const char *networkId, uint32_t *local, uint32_t *remote)
 {
     int32_t ret = LnnGetLocalNumU32Info(NUM_KEY_NET_CAP, local);
     if (ret != SOFTBUS_OK) {
-        LNN_LOGE(LNN_LANE, "LnnGetLocalNumInfo err, ret=%{public}d, local=%{public}u", ret, *local);
+        LNN_LOGE(LNN_LANE, "LnnGetLocalNumInfo err, ret=%{public}d", ret);
         return false;
     }
     ret = LnnGetRemoteNumU32Info(networkId, NUM_KEY_NET_CAP, remote);
     if (ret != SOFTBUS_OK) {
-        LNN_LOGE(LNN_LANE, "LnnGetRemoteNumInfo err, ret=%{public}d, remote=%{public}u", ret, *remote);
+        LNN_LOGE(LNN_LANE, "LnnGetRemoteNumInfo err, ret=%{public}d", ret);
         return false;
     }
     return true;
@@ -132,8 +132,8 @@ static bool GetNetCap(const char *networkId, uint32_t *local, uint32_t *remote)
 
 static int32_t BrLinkState(const char *networkId)
 {
-    uint32_t local;
-    uint32_t remote;
+    uint32_t local = 0;
+    uint32_t remote = 0;
     if (!GetNetCap(networkId, &local, &remote)) {
         LNN_LOGE(LNN_LANE, "GetNetCap error");
         return SOFTBUS_LANE_GET_LEDGER_INFO_ERR;
@@ -152,8 +152,8 @@ static int32_t BrLinkState(const char *networkId)
 
 static int32_t BleLinkState(const char *networkId)
 {
-    uint32_t local;
-    uint32_t remote;
+    uint32_t local = 0;
+    uint32_t remote = 0;
     if (!GetNetCap(networkId, &local, &remote)) {
         LNN_LOGE(LNN_LANE, "GetNetCap error");
         return SOFTBUS_LANE_GET_LEDGER_INFO_ERR;
@@ -185,8 +185,8 @@ static int32_t WlanLinkState(const char *networkId)
         LNN_LOGE(LNN_LANE, "peer node not wifi online");
         return SOFTBUS_NETWORK_NODE_OFFLINE;
     }
-    uint32_t local;
-    uint32_t remote;
+    uint32_t local = 0;
+    uint32_t remote = 0;
     if (!GetNetCap(networkId, &local, &remote)) {
         LNN_LOGE(LNN_LANE, "GetNetCap error");
         return SOFTBUS_LANE_GET_LEDGER_INFO_ERR;
@@ -214,8 +214,8 @@ static int32_t P2pLinkState(const char *networkId)
     if (wifiState == SOFTBUS_WIFI_STATE_INACTIVE || wifiState == SOFTBUS_WIFI_STATE_DEACTIVATING) {
         return SOFTBUS_WIFI_OFF;
     }
-    uint32_t local;
-    uint32_t remote;
+    uint32_t local = 0;
+    uint32_t remote = 0;
     if (!GetNetCap(networkId, &local, &remote)) {
         LNN_LOGE(LNN_LANE, "GetNetCap error");
         return SOFTBUS_LANE_GET_LEDGER_INFO_ERR;

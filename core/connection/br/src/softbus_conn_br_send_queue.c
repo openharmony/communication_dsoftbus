@@ -144,7 +144,7 @@ int32_t ConnBrDequeueBlock(void **msg)
     ConnectionQueue *next = NULL;
     SoftBusSysTime waitTime = {0};
     int32_t ret = SoftBusGetTime(&waitTime);
-    CONN_CHECK_AND_RETURN_RET_LOGE(ret == SOFTBUS_OK, SOFTBUS_INVALID_PARAM, CONN_BR, "softbus get time failed");
+    CONN_CHECK_AND_RETURN_RET_LOGE(ret == SOFTBUS_OK, SOFTBUS_INVALID_PARAM, CONN_BR, "softbus get time fail");
     waitTime.sec += BR_WAIT_TIME_SEC;
 
     CONN_CHECK_AND_RETURN_RET_LOGE(msg != NULL, SOFTBUS_INVALID_PARAM, CONN_BR, "msg is null");
@@ -208,7 +208,7 @@ int32_t ConnBrInnerQueueInit(void)
     }
     g_innerQueue = CreateBrQueue(0);
     if (g_innerQueue == NULL) {
-        CONN_LOGE(CONN_BR, "CreateBrQueue failed");
+        CONN_LOGE(CONN_BR, "CreateBrQueue fail");
         (void)SoftBusMutexDestroy(&g_brQueueLock);
         (void)SoftBusCondDestroy(&g_sendWaitCond);
         (void)SoftBusCondDestroy(&g_sendCond);

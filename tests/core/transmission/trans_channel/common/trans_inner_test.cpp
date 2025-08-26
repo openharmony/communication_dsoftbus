@@ -79,7 +79,7 @@ HWTEST_F(TransInnerTest, TransInnerAddDataBufNodeTest001, TestSize.Level1)
     int32_t ret = TransInnerAddDataBufNode(TRANS_TEST_CHANNEL_ID, TRANS_TEST_FD, CHANNEL_TYPE_PROXY);
     EXPECT_EQ(SOFTBUS_OK, ret);
     ret = TransInnerAddDataBufNode(TRANS_TEST_CHANNEL_ID, TRANS_TEST_FD, CHANNEL_TYPE_TCP_DIRECT);
-    EXPECT_EQ(SOFTBUS_MALLOC_ERR, ret);
+    EXPECT_EQ(SOFTBUS_LOCK_ERR, ret);
     TransSrvDelInnerDataBufNode(TRANS_TEST_CHANNEL_ID);
     InnerListInit();
     ret = TransInnerAddDataBufNode(TRANS_TEST_CHANNEL_ID, TRANS_TEST_FD, CHANNEL_TYPE_TCP_DIRECT);
@@ -106,6 +106,8 @@ HWTEST_F(TransInnerTest, InnerAddSessionTest001, TestSize.Level1)
     };
     int32_t ret = InnerAddSession(&innerInfo);
     EXPECT_EQ(SOFTBUS_NO_INIT, ret);
+    ret = InnerAddSession(nullptr);
+    EXPECT_EQ(SOFTBUS_INVALID_PARAM, ret);
     ret = DeleteSession(TRANS_TEST_FD, TRANS_TEST_CHANNEL_ID);
     EXPECT_EQ(SOFTBUS_NO_INIT, ret);
     InnerListInit();
@@ -155,8 +157,12 @@ HWTEST_F(TransInnerTest, GetSessionInfoByFdTest001, TestSize.Level1)
     TransInnerSessionInfo info = {};
     int32_t ret = GetSessionInfoByFd(TRANS_TEST_FD, &info);
     EXPECT_EQ(SOFTBUS_NO_INIT, ret);
+    ret = GetSessionInfoByFd(TRANS_TEST_FD, nullptr);
+    EXPECT_EQ(SOFTBUS_INVALID_PARAM, ret);
     ret = GetSessionInfoByChanId(TRANS_TEST_CHANNEL_ID, &info);
     EXPECT_EQ(SOFTBUS_NO_INIT, ret);
+    ret = GetSessionInfoByChanId(TRANS_TEST_CHANNEL_ID, nullptr);
+    EXPECT_EQ(SOFTBUS_INVALID_PARAM, ret);
     InnerListInit();
     ret = InnerAddSession(&innerInfo);
     EXPECT_EQ(SOFTBUS_OK, ret);
@@ -293,6 +299,10 @@ HWTEST_F(TransInnerTest, TransTdcProcessInnerTlvDataTest001, TestSize.Level1)
     info.listener.func = nullptr;
     int32_t ret = TransTdcProcessInnerTlvData(&info, &pktHead, newPktHeadSize);
     EXPECT_EQ(SOFTBUS_NO_INIT, ret);
+    ret = TransTdcProcessInnerTlvData(nullptr, &pktHead, newPktHeadSize);
+    EXPECT_EQ(SOFTBUS_NO_INIT, ret);
+    ret = TransTdcProcessInnerTlvData(&info, nullptr, newPktHeadSize);
+    EXPECT_EQ(SOFTBUS_NO_INIT, ret);
     memcpy_s(&info.listener, sizeof(info.listener), &Innerlistener, sizeof(SessionInnerCallback));
     ret = TransTdcProcessInnerTlvData(&info, &pktHead, newPktHeadSize);
     EXPECT_EQ(SOFTBUS_LOCK_ERR, ret);
@@ -337,6 +347,8 @@ HWTEST_F(TransInnerTest, TransInnerTdcProcAllTlvDataTest001, TestSize.Level1)
     memcpy_s(&info.listener, sizeof(info.listener), &Innerlistener, sizeof(SessionInnerCallback));
     int32_t ret = TransInnerTdcProcAllTlvData(&info);
     EXPECT_EQ(SOFTBUS_NO_INIT, ret);
+    ret = TransInnerTdcProcAllTlvData(nullptr);
+    EXPECT_EQ(SOFTBUS_INVALID_PARAM, ret);
     InnerListInit();
     ret = TransInnerTdcProcAllTlvData(&info);
     EXPECT_EQ(SOFTBUS_TRANS_NODE_NOT_FOUND, ret);
@@ -371,6 +383,8 @@ HWTEST_F(TransInnerTest, TransTdcProcessInnerDataTest001, TestSize.Level1)
     info.listener.func = nullptr;
     int32_t ret = TransTdcProcessInnerData(&info);
     EXPECT_EQ(SOFTBUS_NO_INIT, ret);
+    ret = TransTdcProcessInnerData(nullptr);
+    EXPECT_EQ(SOFTBUS_NO_INIT, ret);
     memcpy_s(&info.listener, sizeof(info.listener), &Innerlistener, sizeof(SessionInnerCallback));
     ret = TransTdcProcessInnerData(&info);
     EXPECT_EQ(SOFTBUS_LOCK_ERR, ret);
@@ -403,6 +417,8 @@ HWTEST_F(TransInnerTest, TransInnerTdcProcAllDataTest001, TestSize.Level1)
     memcpy_s(&info.listener, sizeof(info.listener), &Innerlistener, sizeof(SessionInnerCallback));
     int32_t ret = TransInnerTdcProcAllData(&info);
     EXPECT_EQ(SOFTBUS_NO_INIT, ret);
+    ret = TransInnerTdcProcAllData(nullptr);
+    EXPECT_EQ(SOFTBUS_INVALID_PARAM, ret);
     InnerListInit();
     ret = TransInnerTdcProcAllData(&info);
     EXPECT_EQ(SOFTBUS_TRANS_NODE_NOT_FOUND, ret);

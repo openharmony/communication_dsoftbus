@@ -14,16 +14,16 @@
  */
 
 #include <cinttypes>
-#include <gtest/gtest.h>
-#include <securec.h>
 #include <cstdint>
 #include <cstring>
+#include <gtest/gtest.h>
+#include <securec.h>
 #include <sys/time.h>
 
-#include "cJSON.h"
 #include "auth_hichain_id_service_mock.h"
 #include "auth_identity_service_adapter.c"
 #include "auth_log.h"
+#include "cJSON.h"
 #include "softbus_adapter_json.h"
 #include "softbus_adapter_mem.h"
 #include "softbus_error_code.h"
@@ -60,13 +60,13 @@ public:
     void TearDown();
 };
 
-void AuthHichainIdServiceTest::SetUpTestCase() {}
+void AuthHichainIdServiceTest::SetUpTestCase() { }
 
-void AuthHichainIdServiceTest::TearDownTestCase() {}
+void AuthHichainIdServiceTest::TearDownTestCase() { }
 
-void AuthHichainIdServiceTest::SetUp() {}
+void AuthHichainIdServiceTest::SetUp() { }
 
-void AuthHichainIdServiceTest::TearDown() {}
+void AuthHichainIdServiceTest::TearDown() { }
 
 void cleanCJSONMsgList(cJSON **msgList, int index)
 {
@@ -155,7 +155,7 @@ HWTEST_F(AuthHichainIdServiceTest, ID_SERVICE_GENERATE_QUERY_PARAM_TEST_001, Tes
     char accountHash[BUF_LEN] = { 0 };
     const char *data = "1234";
     cJSON *msg[4] = { 0 };
-    
+
     for (int i = 0; i < 4; i++) {
         msg[i] = reinterpret_cast<cJSON *>(SoftBusCalloc(sizeof(cJSON)));
         if (msg[i] == nullptr) {
@@ -164,8 +164,12 @@ HWTEST_F(AuthHichainIdServiceTest, ID_SERVICE_GENERATE_QUERY_PARAM_TEST_001, Tes
         }
     }
 
-    EXPECT_CALL(IdServiceMock, cJSON_CreateObject).WillOnce(Return(nullptr)).WillOnce(Return(msg[0]))
-        .WillOnce(Return(msg[1])).WillOnce(Return(msg[2])).WillOnce(Return(msg[3]));
+    EXPECT_CALL(IdServiceMock, cJSON_CreateObject)
+        .WillOnce(Return(nullptr))
+        .WillOnce(Return(msg[0]))
+        .WillOnce(Return(msg[1]))
+        .WillOnce(Return(msg[2]))
+        .WillOnce(Return(msg[3]));
     EXPECT_CALL(IdServiceMock, AddStringToJsonObject).WillOnce(Return(false)).WillRepeatedly(Return(true));
     EXPECT_CALL(IdServiceMock, AddNumberToJsonObject).WillOnce(Return(false)).WillRepeatedly(Return(true));
     EXPECT_CALL(IdServiceMock, cJSON_PrintUnformatted).WillOnce(Return(nullptr)).WillRepeatedly(Return((char *)data));
@@ -214,7 +218,7 @@ HWTEST_F(AuthHichainIdServiceTest, ID_SERVICE_QUERY_CRED_TEST_001, TestSize.Leve
     int32_t ret;
     CredManager credManager;
     cJSON *msg[2] = { 0 };
-    
+
     for (int i = 0; i < 2; i++) {
         msg[i] = reinterpret_cast<cJSON *>(SoftBusCalloc(sizeof(cJSON)));
         if (msg[i] == nullptr) {
@@ -241,7 +245,8 @@ HWTEST_F(AuthHichainIdServiceTest, ID_SERVICE_QUERY_CRED_TEST_001, TestSize.Leve
     EXPECT_CALL(IdServiceMock, AddNumberToJsonObject).WillRepeatedly(Return(true));
     EXPECT_CALL(IdServiceMock, cJSON_PrintUnformatted).WillOnce(Return(data)).WillOnce(Return(data1));
 
-    EXPECT_CALL(IdServiceMock, InitDeviceAuthService).WillOnce(Return(SOFTBUS_INVALID_PARAM))
+    EXPECT_CALL(IdServiceMock, InitDeviceAuthService)
+        .WillOnce(Return(SOFTBUS_INVALID_PARAM))
         .WillRepeatedly(Return(SOFTBUS_OK));
     credManager.queryCredentialByParams = QueryCredentialByParamsTest;
     EXPECT_CALL(IdServiceMock, GetCredMgrInstance).WillRepeatedly(Return(&credManager));
@@ -269,7 +274,7 @@ HWTEST_F(AuthHichainIdServiceTest, ID_SERVICE_GENERATE_AUTH_PARAM_001, TestSize.
     char *param;
     const char *data = "1234";
     HiChainAuthParam hiChainParam = {};
-    
+
     cJSON *msg = reinterpret_cast<cJSON *>(SoftBusCalloc(sizeof(cJSON)));
     if (msg == nullptr) {
         return;
@@ -288,8 +293,11 @@ HWTEST_F(AuthHichainIdServiceTest, ID_SERVICE_GENERATE_AUTH_PARAM_001, TestSize.
         return;
     }
 
-    EXPECT_CALL(IdServiceMock, cJSON_CreateObject).WillOnce(Return(nullptr)).WillOnce(Return(msg))
-        .WillOnce(Return(msg1)).WillOnce(Return(msg2));
+    EXPECT_CALL(IdServiceMock, cJSON_CreateObject)
+        .WillOnce(Return(nullptr))
+        .WillOnce(Return(msg))
+        .WillOnce(Return(msg1))
+        .WillOnce(Return(msg2));
     EXPECT_CALL(IdServiceMock, AddStringToJsonObject).WillOnce(Return(false)).WillRepeatedly(Return(true));
     EXPECT_CALL(IdServiceMock, cJSON_PrintUnformatted).WillOnce(Return(nullptr)).WillRepeatedly(Return((char *)data));
 
@@ -306,8 +314,8 @@ HWTEST_F(AuthHichainIdServiceTest, ID_SERVICE_GENERATE_AUTH_PARAM_001, TestSize.
     EXPECT_NE(param, nullptr);
 }
 
-int32_t AuthCredentialTest(int32_t osAccountId, int64_t authReqId, const char *authParams,
-    const DeviceAuthCallback *gaCallback)
+int32_t AuthCredentialTest(
+    int32_t osAccountId, int64_t authReqId, const char *authParams, const DeviceAuthCallback *gaCallback)
 {
     (void)osAccountId;
     (void)authParams;
@@ -336,7 +344,8 @@ HWTEST_F(AuthHichainIdServiceTest, ID_SERVICE_AUTH_CRED_001, TestSize.Level1)
     int32_t ret;
     CredAuthManager authMgr;
 
-    EXPECT_CALL(IdServiceMock, InitDeviceAuthService).WillOnce(Return(SOFTBUS_INVALID_PARAM))
+    EXPECT_CALL(IdServiceMock, InitDeviceAuthService)
+        .WillOnce(Return(SOFTBUS_INVALID_PARAM))
         .WillRepeatedly(Return(SOFTBUS_OK));
     authMgr.authCredential = AuthCredentialTest;
     EXPECT_CALL(IdServiceMock, GetCredAuthInstance).WillRepeatedly(Return(&authMgr));
@@ -352,8 +361,8 @@ HWTEST_F(AuthHichainIdServiceTest, ID_SERVICE_AUTH_CRED_001, TestSize.Level1)
     EXPECT_EQ(ret, SOFTBUS_OK);
 }
 
-int32_t ProcessCredDataTest(int64_t authReqId, const uint8_t *data, uint32_t dataLen,
-    const DeviceAuthCallback *gaCallback)
+int32_t ProcessCredDataTest(
+    int64_t authReqId, const uint8_t *data, uint32_t dataLen, const DeviceAuthCallback *gaCallback)
 {
     (void)data;
     (void)dataLen;
@@ -381,7 +390,8 @@ HWTEST_F(AuthHichainIdServiceTest, ID_SERVICE_PROCESS_CRED_DATA_001, TestSize.Le
     int32_t ret;
     CredAuthManager authMgr;
 
-    EXPECT_CALL(IdServiceMock, InitDeviceAuthService).WillOnce(Return(SOFTBUS_INVALID_PARAM))
+    EXPECT_CALL(IdServiceMock, InitDeviceAuthService)
+        .WillOnce(Return(SOFTBUS_INVALID_PARAM))
         .WillRepeatedly(Return(SOFTBUS_OK));
 
     authMgr.processCredData = ProcessCredDataTest;
@@ -538,7 +548,8 @@ HWTEST_F(AuthHichainIdServiceTest, ID_SERVICE_DESTROY_CREDLIST_001, TestSize.Lev
     CredManager credManager;
     char *data = nullptr;
 
-    EXPECT_CALL(IdServiceMock, InitDeviceAuthService).WillOnce(Return(SOFTBUS_INVALID_PARAM))
+    EXPECT_CALL(IdServiceMock, InitDeviceAuthService)
+        .WillOnce(Return(SOFTBUS_INVALID_PARAM))
         .WillRepeatedly(Return(SOFTBUS_OK));
     credManager.destroyInfo = DestroyInfoTest;
     EXPECT_CALL(IdServiceMock, GetCredMgrInstance).WillRepeatedly(Return(&credManager));

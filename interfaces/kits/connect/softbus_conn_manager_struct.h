@@ -21,9 +21,7 @@
 #define CONNECT_TYPE_SHIFT 16
 
 #ifdef __cplusplus
-#if __cplusplus
 extern "C" {
-#endif
 #endif
 
 typedef struct {

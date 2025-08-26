@@ -141,13 +141,13 @@ HWTEST_F(TransIpcStandardTest, SoftbusRegisterServiceTest002, TestSize.Level1)
 HWTEST_F(TransIpcStandardTest, CreateSessionServerTest001, TestSize.Level1)
 {
     TransServerProxy transServerProxy(nullptr);
-    int32_t ret = transServerProxy.CreateSessionServer(nullptr, g_sessionName);
+    int32_t ret = transServerProxy.CreateSessionServer(nullptr, g_sessionName, 1);
     EXPECT_EQ(ret, SOFTBUS_INVALID_PARAM);
 
-    ret = transServerProxy.CreateSessionServer(g_pkgName, nullptr);
+    ret = transServerProxy.CreateSessionServer(g_pkgName, nullptr, 1);
     EXPECT_EQ(ret, SOFTBUS_INVALID_PARAM);
 
-    ret = transServerProxy.CreateSessionServer(g_pkgName, g_sessionName);
+    ret = transServerProxy.CreateSessionServer(g_pkgName, g_sessionName, 1);
     EXPECT_EQ(ret, SOFTBUS_ACCESS_TOKEN_DENIED);
 }
 
@@ -160,13 +160,13 @@ HWTEST_F(TransIpcStandardTest, CreateSessionServerTest001, TestSize.Level1)
 HWTEST_F(TransIpcStandardTest, RemoveSessionServerTest001, TestSize.Level1)
 {
     TransServerProxy transServerProxy(nullptr);
-    int32_t ret = transServerProxy.RemoveSessionServer(nullptr, g_sessionName);
+    int32_t ret = transServerProxy.RemoveSessionServer(nullptr, g_sessionName, 1);
     EXPECT_EQ(ret, SOFTBUS_INVALID_PARAM);
 
-    ret = transServerProxy.RemoveSessionServer(g_pkgName, nullptr);
+    ret = transServerProxy.RemoveSessionServer(g_pkgName, nullptr, 1);
     EXPECT_EQ(ret, SOFTBUS_INVALID_PARAM);
 
-    ret = transServerProxy.RemoveSessionServer(g_pkgName, g_sessionName);
+    ret = transServerProxy.RemoveSessionServer(g_pkgName, g_sessionName, 1);
     EXPECT_EQ(ret, SOFTBUS_ACCESS_TOKEN_DENIED);
 }
 
@@ -213,10 +213,6 @@ HWTEST_F(TransIpcStandardTest, OpenSessionTest001, TestSize.Level1)
     sessionAttribute.dataType = 1;
     sessionAttribute.linkTypeNum= 1;
     param->attr = &sessionAttribute;
-    ret = transServerProxy.OpenSession(param, info);
-    EXPECT_EQ(ret, SOFTBUS_ACCESS_TOKEN_DENIED);
-    sessionAttribute.fastTransData = reinterpret_cast<uint8_t *>(const_cast<char *>(g_peerDeviceId));
-    sessionAttribute.fastTransDataSize = LEN;
     ret = transServerProxy.OpenSession(param, info);
     EXPECT_EQ(ret, SOFTBUS_ACCESS_TOKEN_DENIED);
     SoftBusFree(param);
@@ -413,19 +409,19 @@ HWTEST_F(TransIpcStandardTest, RemovePermissionTest001, TestSize.Level1)
  */
 HWTEST_F(TransIpcStandardTest, ServerIpcCreateSessionServerTest001, TestSize.Level1)
 {
-    int32_t ret = ServerIpcCreateSessionServer(g_pkgName, g_sessionName);
+    int32_t ret = ServerIpcCreateSessionServer(g_pkgName, g_sessionName, 1);
     EXPECT_EQ(ret, SOFTBUS_ACCESS_TOKEN_DENIED);
 
     ret = TransServerProxyInit();
     ASSERT_EQ(ret, SOFTBUS_OK);
 
-    ret = ServerIpcCreateSessionServer(nullptr, g_sessionName);
+    ret = ServerIpcCreateSessionServer(nullptr, g_sessionName, 1);
     EXPECT_EQ(ret, SOFTBUS_INVALID_PARAM);
 
-    ret = ServerIpcCreateSessionServer(g_pkgName, nullptr);
+    ret = ServerIpcCreateSessionServer(g_pkgName, nullptr, 1);
     EXPECT_EQ(ret, SOFTBUS_INVALID_PARAM);
 
-    ret = ServerIpcCreateSessionServer(g_pkgName, g_sessionName);
+    ret = ServerIpcCreateSessionServer(g_pkgName, g_sessionName, 1);
     EXPECT_EQ(ret, SOFTBUS_ACCESS_TOKEN_DENIED);
 
     TransClientDeinit();
@@ -439,19 +435,19 @@ HWTEST_F(TransIpcStandardTest, ServerIpcCreateSessionServerTest001, TestSize.Lev
  */
 HWTEST_F(TransIpcStandardTest, ServerIpcRemoveSessionServerTest001, TestSize.Level1)
 {
-    int32_t ret = ServerIpcRemoveSessionServer(g_pkgName, g_sessionName);
+    int32_t ret = ServerIpcRemoveSessionServer(g_pkgName, g_sessionName, 1);
     EXPECT_EQ(ret, SOFTBUS_ACCESS_TOKEN_DENIED);
 
     ret = TransServerProxyInit();
     ASSERT_EQ(ret, SOFTBUS_OK);
 
-    ret = ServerIpcRemoveSessionServer(nullptr, g_sessionName);
+    ret = ServerIpcRemoveSessionServer(nullptr, g_sessionName, 1);
     EXPECT_EQ(ret, SOFTBUS_INVALID_PARAM);
 
-    ret = ServerIpcRemoveSessionServer(g_pkgName, nullptr);
+    ret = ServerIpcRemoveSessionServer(g_pkgName, nullptr, 1);
     EXPECT_EQ(ret, SOFTBUS_INVALID_PARAM);
 
-    ret = ServerIpcRemoveSessionServer(g_pkgName, g_sessionName);
+    ret = ServerIpcRemoveSessionServer(g_pkgName, g_sessionName, 1);
     EXPECT_EQ(ret, SOFTBUS_ACCESS_TOKEN_DENIED);
 
     TransClientDeinit();

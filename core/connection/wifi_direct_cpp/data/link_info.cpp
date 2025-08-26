@@ -419,12 +419,12 @@ bool LinkInfo::GetIsBeingUsedByRemote() const
     return Get(LinkInfoKey::IS_BEING_USED_BY_REMOTE, false);
 }
 
-void LinkInfo::SetIsDBAC(bool isDBAC)
+void LinkInfo::SetIsDbac(bool isDbac)
 {
-    Set(LinkInfoKey::IS_DBAC, isDBAC);
+    Set(LinkInfoKey::IS_DBAC, isDbac);
 }
 
-bool LinkInfo::GetIsDBAC() const
+bool LinkInfo::GetIsDbac() const
 {
     return Get(LinkInfoKey::IS_DBAC, false);
 }

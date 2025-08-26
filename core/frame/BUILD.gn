@@ -118,8 +118,8 @@ if (defined(ohos_lite)) {
         cflags_cc = cflags
       } else {
         include_dirs += [
-          "//kernel/liteos_m/components/net/lwip-2.1/porting/include",
-          "//third_party/lwip/src/include",
+          "$kernel_path",
+          "$third_party_path",
         ]
         cflags = [
           "--diag_suppress",
@@ -136,7 +136,7 @@ if (defined(ohos_lite)) {
         "$dsoftbus_dfx_path/dumper/legacy:softbus_dfx_dump",
         "$dsoftbus_root_path/adapter:softbus_adapter",
         "$dsoftbus_root_path/core/connection/wifi_direct_cpp:wifi_direct",
-        "//build/lite/config/component/cJSON:cjson_static",
+        "$build_lite_path",
       ]
       external_deps = [ "device_auth:deviceauth_sdk" ]
       external_deps += auth_server_ex_deps
@@ -160,11 +160,11 @@ if (defined(ohos_lite)) {
       if (support_bluetooth &&
           (dsoftbus_feature_conn_br || dsoftbus_feature_conn_ble)) {
         deps += [
-          "//foundation/communication/bluetooth/frameworks/inner:btframework",
+          "$btframework_path",
         ]
         include_dirs += [
-          "//foundation/communication/bluetooth/interfaces/inner_api/include",
-          "//foundation/communication/bluetooth/interfaces/inner_api/include/c_header",
+          "$inner_api_path",
+          "$inner_api_path/c_header",
         ]
       }
     }
@@ -188,7 +188,7 @@ if (defined(ohos_lite)) {
         "$dsoftbus_root_path/interfaces/kits/transport",
         "$softbus_adapter_common/include",
         "$softbus_adapter_config/spec_config",
-        "//commonlibrary/utils_lite/include",
+        "$commonlibrary_path",
         "common/include",
         "small/client_manager/include",
         "small/init/include",
@@ -257,9 +257,9 @@ if (defined(ohos_lite)) {
 
         "$dsoftbus_dfx_path/dumper/legacy:softbus_dfx_dump",
         "$dsoftbus_root_path/adapter:softbus_adapter",
-        "//build/lite/config/component/cJSON:cjson_shared",
-        "//foundation/communication/ipc/interfaces/innerkits/c/ipc:ipc_single",
-        "//foundation/systemabilitymgr/samgr_lite/samgr:samgr",
+        "$cjson_shared_path",
+        "$ipc_single_path",
+        "$samgr_path",
       ]
       external_deps = [
         "bounds_checking_function:libsec_shared",
@@ -286,11 +286,11 @@ if (defined(ohos_lite)) {
       if (support_bluetooth &&
           (dsoftbus_feature_conn_br || dsoftbus_feature_conn_ble)) {
         deps += [
-          "//foundation/communication/bluetooth/frameworks/inner:btframework",
+          "$btframework_path",
         ]
         include_dirs += [
-          "//foundation/communication/bluetooth/interfaces/inner_api/include",
-          "//foundation/communication/bluetooth/interfaces/inner_api/include/c_header",
+          "$inner_api_path",
+          "$inner_api_path/c_header",
         ]
       }
     }
@@ -366,7 +366,6 @@ if (defined(ohos_lite)) {
       "$os_type/client_manager/src/softbus_client_info_manager.cpp",
       "$os_type/init/src/if_softbus_server.cpp",
       "$os_type/init/src/softbus_server.cpp",
-      "$dsoftbus_root_path/core/transmission/broadcast/src/trans_spec_object.cpp",
       "$os_type/init/src/softbus_server_death_recipient.cpp",
       "$os_type/init/src/softbus_server_stub.cpp",
       "common/src/softbus_ddos.c",

@@ -50,7 +50,7 @@ int32_t RegistSocketProtocol(const SocketInterface *interface)
     }
     int ret = SoftBusMutexLock(&g_socketsMutex);
     if (ret != SOFTBUS_OK) {
-        CONN_LOGE(CONN_COMMON, "get lock failed! ret=%{public}" PRId32, ret);
+        CONN_LOGE(CONN_COMMON, "get lock fail! ret=%{public}" PRId32, ret);
         return ret;
     }
 
@@ -73,7 +73,7 @@ const SocketInterface *GetSocketInterface(ProtocolType protocolType)
 {
     int ret = SoftBusMutexLock(&g_socketsMutex);
     if (ret != SOFTBUS_OK) {
-        CONN_LOGE(CONN_COMMON, "get lock failed! ret=%{public}" PRId32, ret);
+        CONN_LOGE(CONN_COMMON, "get lock fail! ret=%{public}" PRId32, ret);
         return NULL;
     }
     const SocketInterface *result = NULL;
@@ -98,7 +98,7 @@ int32_t ConnInitSockets(void)
 {
     int32_t ret = SoftBusMutexInit(&g_socketsMutex, NULL);
     if (ret != SOFTBUS_OK) {
-        CONN_LOGE(CONN_INIT, "init mutex failed! ret=%{public}" PRId32, ret);
+        CONN_LOGE(CONN_INIT, "init mutex fail! ret=%{public}" PRId32, ret);
         return ret;
     }
 
@@ -106,7 +106,7 @@ int32_t ConnInitSockets(void)
 
     ret = RegistSocketProtocol(GetTcpProtocol());
     if (ret != SOFTBUS_OK) {
-        CONN_LOGE(CONN_INIT, "regist tcp failed!! ret=%{public}" PRId32, ret);
+        CONN_LOGE(CONN_INIT, "regist tcp fail!! ret=%{public}" PRId32, ret);
         (void)SoftBusMutexDestroy(&g_socketsMutex);
         return ret;
     }
@@ -114,14 +114,14 @@ int32_t ConnInitSockets(void)
 
     ret = RegistNewIpSocket();
     if (ret != SOFTBUS_OK) {
-        CONN_LOGE(CONN_INIT, "regist newip failed!! ret=%{public}" PRId32, ret);
+        CONN_LOGE(CONN_INIT, "regist newip fail!! ret=%{public}" PRId32, ret);
         (void)SoftBusMutexDestroy(&g_socketsMutex);
         return ret;
     }
 
     ret = RegistSocketProtocol(GetUsbProtocol());
     if (ret != SOFTBUS_OK) {
-        CONN_LOGE(CONN_INIT, "regist usb failed!! ret=%{public}" PRId32, ret);
+        CONN_LOGE(CONN_INIT, "regist usb fail!! ret=%{public}" PRId32, ret);
         (void)SoftBusMutexDestroy(&g_socketsMutex);
         return ret;
     }
@@ -129,7 +129,7 @@ int32_t ConnInitSockets(void)
 
     ret = RegistSocketProtocol(GetMintpProtocol());
     if (ret != SOFTBUS_OK) {
-        CONN_LOGE(CONN_INIT, "regist mintp failed!! ret=%{public}" PRId32, ret);
+        CONN_LOGE(CONN_INIT, "regist mintp fail!! ret=%{public}" PRId32, ret);
         (void)SoftBusMutexDestroy(&g_socketsMutex);
         return ret;
     }
@@ -137,7 +137,7 @@ int32_t ConnInitSockets(void)
 
     ret = RegistSocketProtocol(GetHtpProtocol());
     if (ret != SOFTBUS_OK) {
-        CONN_LOGE(CONN_INIT, "regist htp failed!! ret=%{public}" PRId32, ret);
+        CONN_LOGE(CONN_INIT, "regist htp fail!! ret=%{public}" PRId32, ret);
         (void)SoftBusMutexDestroy(&g_socketsMutex);
         return ret;
     }
@@ -170,7 +170,7 @@ int32_t ConnToggleNonBlockMode(int32_t fd, bool isNonBlock)
     }
     int32_t flags = fcntl(fd, F_GETFL, 0);
     if (flags < 0) {
-        CONN_LOGE(CONN_COMMON, "fcntl get flag failed, fd=%{public}d, errno=%{public}d(%{public}s)",
+        CONN_LOGE(CONN_COMMON, "fcntl get flag fail, fd=%{public}d, errno=%{public}d(%{public}s)",
             fd, errno, strerror(errno));
         return SOFTBUS_CONN_SOCKET_FCNTL_ERR;
     }
@@ -369,7 +369,7 @@ static int32_t ConnPreAssignPortBind(int32_t socketFd, int32_t domain)
         SoftBusSockAddrIn6 addrIn6 = {0};
         ret = Ipv6AddrToAddrIn(&addrIn6, "::", 0);
         if (ret != SOFTBUS_ADAPTER_OK) {
-            CONN_LOGE(CONN_COMMON, "convert address to net order failed");
+            CONN_LOGE(CONN_COMMON, "convert address to net order fail");
             return SOFTBUS_TCPCONNECTION_SOCKET_ERR;
         }
         return SoftBusSocketBind(socketFd, (SoftBusSockAddr *)&addrIn6, sizeof(SoftBusSockAddrIn6));
@@ -377,7 +377,7 @@ static int32_t ConnPreAssignPortBind(int32_t socketFd, int32_t domain)
     SoftBusSockAddrIn addrIn = {0};
     ret = Ipv4AddrToAddrIn(&addrIn, "0.0.0.0", 0);
     if (ret != SOFTBUS_ADAPTER_OK) {
-        CONN_LOGE(CONN_COMMON, "convert address to net order failed");
+        CONN_LOGE(CONN_COMMON, "convert address to net order fail");
         return SOFTBUS_TCPCONNECTION_SOCKET_ERR;
     }
     return SoftBusSocketBind(socketFd, (SoftBusSockAddr *)&addrIn, sizeof(SoftBusSockAddrIn));
@@ -388,20 +388,20 @@ int32_t ConnPreAssignPort(int32_t domain)
     int socketFd = -1;
     int ret = SoftBusSocketCreate(domain, SOFTBUS_SOCK_STREAM, 0, &socketFd);
     if (ret < 0) {
-        CONN_LOGE(CONN_COMMON, "create socket failed, ret=%{public}d", ret);
+        CONN_LOGE(CONN_COMMON, "create socket fail, ret=%{public}d", ret);
         return SOFTBUS_TCPCONNECTION_SOCKET_ERR;
     }
     int reuse = 1;
     ret = SoftBusSocketSetOpt(socketFd, SOL_SOCKET, SO_REUSEPORT, &reuse, sizeof(reuse));
     if (ret != SOFTBUS_OK) {
-        CONN_LOGE(CONN_COMMON, "set reuse port option failed");
+        CONN_LOGE(CONN_COMMON, "set reuse port option fail");
         SoftBusSocketClose(socketFd);
         return SOFTBUS_TCPCONNECTION_SOCKET_ERR;
     }
     ret = ConnPreAssignPortBind(socketFd, domain);
     if (ret != SOFTBUS_ADAPTER_OK) {
         SoftBusSocketClose(socketFd);
-        CONN_LOGE(CONN_COMMON, "bind address failed");
+        CONN_LOGE(CONN_COMMON, "bind address fail");
         return SOFTBUS_TCPCONNECTION_SOCKET_ERR;
     }
     return socketFd;
@@ -455,7 +455,7 @@ int32_t Ipv6AddrToAddrIn(SoftBusSockAddrIn6 *addrIn6, const char *ip, uint16_t p
     char *nextToken = NULL;
     char tmpIp[IP_LEN] = { 0 };
     if (strcpy_s(tmpIp, sizeof(tmpIp), ip) != EOK) {
-        CONN_LOGE(CONN_COMMON, "copy local id failed");
+        CONN_LOGE(CONN_COMMON, "copy local id fail");
         return SOFTBUS_MEM_ERR;
     }
     addr = strtok_s(tmpIp, ADDR_SPLIT_IPV6, &nextToken);
@@ -466,7 +466,7 @@ int32_t Ipv6AddrToAddrIn(SoftBusSockAddrIn6 *addrIn6, const char *ip, uint16_t p
     if (ifName != NULL) {
         addrIn6->sin6ScopeId = SoftBusIfNameToIndex(ifName);
         if (addrIn6->sin6ScopeId == 0) {
-            CONN_LOGE(CONN_WIFI_DIRECT, "nameToIndex failed, errno=%{public}d(%{public}s)", errno, strerror(errno));
+            CONN_LOGE(CONN_WIFI_DIRECT, "nameToIndex fail, errno=%{public}d(%{public}s)", errno, strerror(errno));
             return SOFTBUS_SOCKET_ADDR_ERR;
         }
     }
@@ -519,12 +519,12 @@ static int32_t GetIfNameByIp(const char *myIp, int32_t domain, char *ifName, int
 
     int32_t ret = getifaddrs(&ifList);
     if (ret != 0) {
-        COMM_LOGE(CONN_COMMON, "ip=%{public}s getifaddrs ifList failed, ret=%{public}d, errno=%{public}d(%{public}s)",
+        COMM_LOGE(CONN_COMMON, "ip=%{public}s getifaddrs ifList fail, ret=%{public}d, errno=%{public}d(%{public}s)",
             animizedIp, ret, errno, strerror(errno));
         return SOFTBUS_SOCKET_ADDR_ERR;
     }
     if (inet_aton(myIp, &inAddr) == 0) {
-        COMM_LOGE(CONN_COMMON, "inet_aton ip=%{public}s failed.", animizedIp);
+        COMM_LOGE(CONN_COMMON, "inet_aton ip=%{public}s fail.", animizedIp);
         freeifaddrs(ifList);
         return SOFTBUS_TCP_SOCKET_ERR;
     }

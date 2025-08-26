@@ -104,7 +104,6 @@ if (defined(ohos_lite)) {
     deps = [
       "$dsoftbus_root_path/core/common:softbus_utils",
       "$dsoftbus_root_path/core/frame:softbus_server",
-      "$dsoftbus_root_path/components/nstackx/fillp:FillpSo.open",
       "$dsoftbus_root_path/tests/sdk:softbus_client_static",
     ]
     dep_file = "components/nstackx_enhanced/nstackx_core/dfile/BUILD.gn"

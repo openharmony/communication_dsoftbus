@@ -69,7 +69,7 @@ void LnnIpcDeinit(void)
 }
 
 static int32_t OnRefreshDeviceFound(const char *pkgName, const DeviceInfo *device,
-    const InnerDeviceInfoAddtions *additions);
+    const InnerDeviceInfoAddtions *additions, int32_t subscribeId);
 
 static IServerDiscInnerCallback g_discInnerCb = {
     .OnServerDeviceFound = OnRefreshDeviceFound,
@@ -132,6 +132,10 @@ static bool IsRepeatJoinLNNRequest(const char *pkgName, const ConnectionAddr *ad
 static int32_t AddJoinLNNInfo(const char *pkgName, const ConnectionAddr *addr)
 {
     SoftBusList *list = g_lnnRequestInfo.joinLNNRequestInfo;
+    if (list == NULL) {
+        LNN_LOGE(LNN_EVENT, "request info list empty");
+        return SOFTBUS_LIST_EMPTY;
+    }
     JoinLnnRequestInfo *info = (JoinLnnRequestInfo *)SoftBusMalloc(sizeof(JoinLnnRequestInfo));
     if (info == NULL) {
         LNN_LOGE(LNN_EVENT, "request info malloc fail");
@@ -153,6 +157,10 @@ static bool IsRepeatLeaveLNNRequest(const char *pkgName, const char *networkId)
 {
     LeaveLnnRequestInfo *info = NULL;
     SoftBusList *list = g_lnnRequestInfo.leaveLNNRequestInfo;
+    if (list == NULL) {
+        LNN_LOGE(LNN_EVENT, "request info list empty");
+        return false;
+    }
     LIST_FOR_EACH_ENTRY(info, &list->list, LeaveLnnRequestInfo, node) {
         if (strncmp(pkgName, info->pkgName, strlen(pkgName)) != 0) {
             continue;
@@ -167,6 +175,10 @@ static bool IsRepeatLeaveLNNRequest(const char *pkgName, const char *networkId)
 static int32_t AddLeaveLNNInfo(const char *pkgName, const char *networkId)
 {
     SoftBusList *list = g_lnnRequestInfo.leaveLNNRequestInfo;
+    if (list == NULL) {
+        LNN_LOGE(LNN_EVENT, "request info list empty");
+        return SOFTBUS_LIST_EMPTY;
+    }
     LeaveLnnRequestInfo *info = (LeaveLnnRequestInfo *)SoftBusMalloc(sizeof(LeaveLnnRequestInfo));
     if (info == NULL) {
         LNN_LOGE(LNN_EVENT, "malloc request info fail");
@@ -189,8 +201,9 @@ static int32_t AddLeaveLNNInfo(const char *pkgName, const char *networkId)
 }
 
 static int32_t OnRefreshDeviceFound(const char *pkgName, const DeviceInfo *device,
-    const InnerDeviceInfoAddtions *additions)
+    const InnerDeviceInfoAddtions *additions, int32_t subscribeId)
 {
+    (void)subscribeId;
     DeviceInfo newDevice;
     if (memcpy_s(&newDevice, sizeof(DeviceInfo), device, sizeof(DeviceInfo)) != EOK) {
         LNN_LOGE(LNN_EVENT, "copy new device info error");

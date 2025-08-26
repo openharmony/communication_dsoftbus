@@ -336,7 +336,7 @@ static int32_t GetChannelInfoParam(napi_env env, napi_value arg, AsyncOpenChanne
         napi_get_value_string_utf8(env, peerBRUuidValue, NULL, 0, &uuidLen)) {
         goto EXIT;
     }
-    if (macLen < MAC_MIN_LENGTH || macLen > MAC_MAX_LENGTH) {
+    if (macLen < MAC_MIN_LENGTH || (macLen > MAC_MAX_LENGTH && macLen != MAC_SHA256_LEN)) {
         TRANS_LOGE(TRANS_SDK, "[br_proxy] mac len is wrong, macLen:%{public}zu", macLen);
         goto EXIT;
     }
@@ -791,7 +791,11 @@ static void OnDataReceived(int32_t channelId, const char* data, uint32_t dataLen
         return;
     }
 
-    napi_call_threadsafe_function(tsfn_data_received, args, napi_tsfn_nonblocking);
+    napi_status status = napi_call_threadsafe_function(tsfn_data_received, args, napi_tsfn_nonblocking);
+    if (status != napi_ok) {
+        SoftBusFree(args->data);
+        SoftBusFree(args);
+    }
 }
 
 static void OnChannelStatusChanged(int32_t channelId, int32_t status)
@@ -808,7 +812,10 @@ static void OnChannelStatusChanged(int32_t channelId, int32_t status)
     args->channelId = channelId;
     args->status = status;
 
-    napi_call_threadsafe_function(tsfn_channel_status, args, napi_tsfn_nonblocking);
+    napi_status ret = napi_call_threadsafe_function(tsfn_channel_status, args, napi_tsfn_nonblocking);
+    if (ret != napi_ok) {
+        SoftBusFree(args);
+    }
 }
 
 static void SetCallbackInternal(napi_env env, napi_value callback, int32_t channelId, ListenerType type)

@@ -864,12 +864,29 @@ static int32_t RemoteNodeInfoRetrieve(NodeInfo *newInfo, int32_t connectionType)
     return SOFTBUS_OK;
 }
 
+static void UpdateDeviceInfoToMlps(const char *udid)
+{
+    LpDeviceStateInfo *info = (LpDeviceStateInfo *)SoftBusCalloc(sizeof(LpDeviceStateInfo));
+    if (info == NULL) {
+        LNN_LOGE(LNN_LEDGER, "calloc info fail");
+        return;
+    }
+    if (strcpy_s(info->udid, UDID_BUF_LEN, udid) != EOK) {
+        LNN_LOGE(LNN_LEDGER, "strcpy_s outUdid fail");
+        SoftBusFree(info);
+        return;
+    }
+    info->isOnline = true;
+    SendDeviceStateToMlpsPacked(info);
+}
+
 int32_t LnnUpdateNodeInfo(NodeInfo *newInfo, int32_t connectionType)
 {
     const char *udid = NULL;
     DoubleHashMap *map = NULL;
     NodeInfo *oldInfo = NULL;
     bool isIrkChanged = false;
+    bool isAccountChanged = false;
     char deviceName[DEVICE_NAME_BUF_LEN] = { 0 };
     UpdateNewNodeAccountHash(newInfo);
     udid = LnnGetDeviceUdid(newInfo);
@@ -884,6 +901,7 @@ int32_t LnnUpdateNodeInfo(NodeInfo *newInfo, int32_t connectionType)
         SoftBusMutexUnlock(&g_distributedNetLedger.lock);
         return SOFTBUS_NETWORK_MAP_GET_FAILED;
     }
+    isAccountChanged = !(memcmp(oldInfo->accountHash, newInfo->accountHash, sizeof(oldInfo->accountHash)) == 0);
     if (memcmp(newInfo->rpaInfo.peerIrk, oldInfo->rpaInfo.peerIrk, LFINDER_IRK_LEN) != 0) {
         isIrkChanged = true;
     }
@@ -901,6 +919,9 @@ int32_t LnnUpdateNodeInfo(NodeInfo *newInfo, int32_t connectionType)
     }
     CheckUserIdCheckSumChange(oldInfo, newInfo);
     ret = RemoteNodeInfoRetrieve(newInfo, connectionType);
+    if (isAccountChanged) {
+        UpdateDeviceInfoToMlps(udid);
+    }
     return ret;
 }
 
@@ -1254,6 +1275,11 @@ static void GetNodeInfoDiscovery(NodeInfo *oldInfo, NodeInfo *info, NodeInfoAbil
     if (oldInfo != NULL) {
         info->metaInfo = oldInfo->metaInfo;
     }
+    if (LnnHasDiscoveryType(info, DISCOVERY_TYPE_BLE)) {
+        SoftBusSysTime time = { 0 };
+        (void)SoftBusGetTime(&time);
+        info->heartbeatTimestamp = (uint64_t)time.sec * HB_TIME_FACTOR + (uint64_t)time.usec / HB_TIME_FACTOR;
+    }
     if (oldInfo != NULL && LnnIsNodeOnline(oldInfo)) {
         char *anonyUuid = NULL;
         Anonymize(oldInfo->uuid, &anonyUuid);
@@ -1439,6 +1465,7 @@ int32_t LnnUpdateAccountInfo(const NodeInfo *info)
     DoubleHashMap *map = NULL;
     NodeInfo *oldInfo = NULL;
     udid = LnnGetDeviceUdid(info);
+    bool isAccountChanged = false;
 
     map = &g_distributedNetLedger.distributedInfo;
     if (SoftBusMutexLock(&g_distributedNetLedger.lock) != 0) {
@@ -1447,11 +1474,15 @@ int32_t LnnUpdateAccountInfo(const NodeInfo *info)
     }
     oldInfo = (NodeInfo *)LnnMapGet(&map->udidMap, udid);
     if (oldInfo != NULL) {
+        isAccountChanged = !(memcmp(oldInfo->accountHash, info->accountHash, sizeof(oldInfo->accountHash)) == 0);
         oldInfo->accountId = info->accountId;
         UpdateNewNodeAccountHash(oldInfo);
         oldInfo->userId = info->userId;
     }
     SoftBusMutexUnlock(&g_distributedNetLedger.lock);
+    if (isAccountChanged) {
+        UpdateDeviceInfoToMlps(udid);
+    }
     return SOFTBUS_OK;
 }
 
@@ -1780,7 +1811,8 @@ static void UpdateDeviceNameToDLedger(NodeInfo *newInfo, NodeInfo *oldInfo)
 static void UpdateDevBasicInfoToDLedger(NodeInfo *newInfo, NodeInfo *oldInfo)
 {
     if (strcmp(newInfo->networkId, oldInfo->networkId) == 0 || oldInfo->status != STATUS_ONLINE ||
-        !LnnHasDiscoveryType(oldInfo, DISCOVERY_TYPE_BLE)) {
+        !LnnHasDiscoveryType(oldInfo, DISCOVERY_TYPE_BLE)
+        || LnnFindDeviceUdidTrustedInfoFromDb(newInfo->deviceInfo.deviceUdid) != SOFTBUS_OK) {
         oldInfo->stateVersion = newInfo->stateVersion;
     }
 

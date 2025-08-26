@@ -12,6 +12,17 @@
 # limitations under the License.
 
 hispark_pegasus_sdk_path = "//device/soc/hisilicon/hi3861v100/sdk_liteos"
+kernel_path = "//kernel/liteos_m/components/net/lwip-2.1/porting/include"
+third_party_path = "//third_party/lwip/src/include"
+build_lite_path = "//build/lite/config/component/cJSON:cjson_static"
+btframework_path = "//foundation/communication/bluetooth/frameworks/inner:btframework"
+inner_api_path = "//foundation/communication/bluetooth/interfaces/inner_api/include"
+commonlibrary_path = "//commonlibrary/utils_lite/include"
+cjson_shared_path = "//build/lite/config/component/cJSON:cjson_shared"
+ipc_single_path = "//foundation/communication/ipc/interfaces/innerkits/c/ipc:ipc_single"
+samgr_path = "//foundation/systemabilitymgr/samgr_lite/samgr:samgr"
+btframework_path = "//foundation/communication/bluetooth/frameworks/inner:btframework"
+
 dsoftbus_root_path = rebase_path(".")
 dsoftbus_sdk_path = "${dsoftbus_root_path}/sdk"
 dsoftbus_core_path = "${dsoftbus_root_path}/core"

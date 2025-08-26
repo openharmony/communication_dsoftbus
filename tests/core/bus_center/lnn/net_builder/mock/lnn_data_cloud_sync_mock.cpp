@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2024 Huawei Device Co., Ltd.
+ * Copyright (c) 2024-2025 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -628,8 +628,8 @@ void LnnDeinitBusCenterEvent(void)
     return GetNetBuilderDepsInterface()->LnnDeinitBusCenterEvent();
 }
 
-int32_t AuthStartVerify(const AuthConnInfo *connInfo, const AuthVerifyParam *authVerifyParam,
-    const AuthVerifyCallback *callback)
+int32_t AuthStartVerify(
+    const AuthConnInfo *connInfo, const AuthVerifyParam *authVerifyParam, const AuthVerifyCallback *callback)
 {
     return GetNetBuilderDepsInterface()->AuthStartVerify(connInfo, authVerifyParam, callback);
 }

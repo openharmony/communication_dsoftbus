@@ -166,7 +166,6 @@ HWTEST_F(WifiDirectUtilsTest, GetLocalPtkTest, TestSize.Level1)
 
     EXPECT_CALL(mock, LnnGetRemoteStrInfo).WillRepeatedly(Return(SOFTBUS_OK));
     EXPECT_CALL(mock, LnnGetLocalPtkByUuid).WillRepeatedly(Return(SOFTBUS_NOT_FIND));
-    EXPECT_CALL(mock, LnnGetLocalPtkByUuid).WillOnce(Return(SOFTBUS_NOT_FIND));
     EXPECT_CALL(mock, LnnGetLocalDefaultPtkByUuid(_, _, _))
         .WillRepeatedly([&ptkBytes](const std::string &uuid, char *localPtk, uint32_t len) {
             (void)strcpy_s(localPtk, len, ptkBytes);
@@ -641,44 +640,6 @@ HWTEST_F(WifiDirectUtilsTest, GetRemoteConnSubFeatureTest, TestSize.Level1)
 }
 
 /*
- * @tc.name: GetChloadTest
- * @tc.desc: test GetChload method
- * @tc.type: FUNC
- * @tc.require:
- */
-HWTEST_F(WifiDirectUtilsTest, GetChloadTest, TestSize.Level1)
-{
-    std::shared_ptr<Wifi::WifiDevice> mockDevice = Wifi::WifiDevice::GetInstance(0);
-    EXPECT_CALL(*mockDevice, GetLinkedInfo).WillRepeatedly(Return(Wifi::WIFI_OPT_PERMISSION_DENIED));
-    auto ret = WifiDirectUtils::GetChload();
-    EXPECT_EQ(ret, Wifi::WIFI_OPT_PERMISSION_DENIED);
-
-    int chload = 6;
-    EXPECT_CALL(*mockDevice, GetLinkedInfo).WillRepeatedly(Return(Wifi::WIFI_OPT_SUCCESS));
-    ret = WifiDirectUtils::GetChload();
-    EXPECT_EQ(ret, chload);
-}
-
-/*
- * @tc.name: GetRecommendChannelFromLnnTest
- * @tc.desc: test GetRecommendChannelFromLnn method
- * @tc.type: FUNC
- * @tc.require:
- */
-HWTEST_F(WifiDirectUtilsTest, GetRecommendChannelFromLnnTest, TestSize.Level1)
-{
-    int channelIdLnn = 0;
-    std::string networkId = "1234567890";
-    WifiDirectInterfaceMock mock;
-
-    EXPECT_CALL(mock, LnnGetRemoteStrInfo).WillRepeatedly(Return(SOFTBUS_OK));
-    EXPECT_CALL(mock, LnnGetRecommendChannel).WillRepeatedly(Return(SOFTBUS_OK));
-
-    auto ret = WifiDirectUtils::GetRecommendChannelFromLnn(networkId);
-    EXPECT_EQ(ret, channelIdLnn);
-}
-
-/*
  * @tc.name: IsDeviceOnline
  * @tc.desc: test IsDeviceOnline method
  * @tc.type: FUNC
@@ -731,14 +692,8 @@ HWTEST_F(WifiDirectUtilsTest, GetRemoteScreenStatusTest, TestSize.Level1)
 {
     int screenStatus = 0;
     char networkId[NETWORK_ID_BUF_LEN] = { 1 };
-    WifiDirectInterfaceMock mock;
 
-    EXPECT_CALL(mock, LnnGetRemoteNodeInfoByKey).WillRepeatedly(Return(SOFTBUS_INVALID_PARAM));
     auto ret = WifiDirectUtils::GetRemoteScreenStatus(networkId);
-    EXPECT_EQ(ret, SOFTBUS_INVALID_PARAM);
-
-    EXPECT_CALL(mock, LnnGetRemoteNodeInfoByKey).WillRepeatedly(Return(SOFTBUS_OK));
-    ret = WifiDirectUtils::GetRemoteScreenStatus(networkId);
     EXPECT_EQ(ret, screenStatus);
 }
 

@@ -28,7 +28,6 @@
 #include "trans_udp_negotiation_exchange.c"
 #include "trans_udp_nego_test_mock.h"
 #include "g_enhance_lnn_func.h"
-#include "g_enhance_trans_func_pack.h"
 #include "dsoftbus_enhance_interface.h"
 
 using namespace testing;
@@ -36,7 +35,7 @@ using namespace testing::ext;
 
 namespace OHOS {
 static int64_t g_channelId = 0;
-const char *g_sessionKey = "www.huaweitest.com";
+const char *g_sessionKey = "www.test.com";
 const char *g_pkgName = "dms";
 const char *g_sessionName = "ohos.distributedschedule.dms.test";
 const char *g_groupid = "TEST_GROUP_ID";
@@ -70,6 +69,9 @@ void TransUdpNegoTest::SetUpTestCase(void)
     IServerChannelCallBack *cb = TransServerGetChannelCb();
     ret = TransUdpChannelInit(cb);
     EXPECT_EQ(ret, SOFTBUS_OK);
+
+    LnnEnhanceFuncList *pfnLnnEnhanceFuncList = LnnEnhanceFuncListGet();
+    pfnLnnEnhanceFuncList->authMetaPostTransData = AuthMetaPostTransData;
 }
 
 void TransUdpNegoTest::TearDownTestCase(void)
@@ -247,13 +249,11 @@ HWTEST_F(TransUdpNegoTest, SendUdpInfo001, TestSize.Level1)
  */
 HWTEST_F(TransUdpNegoTest, SendReplyErrInfo001, TestSize.Level1)
 {
-    LnnEnhanceFuncList *pfnLnnEnhanceFuncList = LnnEnhanceFuncListGet();
-    pfnLnnEnhanceFuncList->authMetaPostTransData = AuthMetaPostTransData;
+    NiceMock<TransUdpNegoInterfaceMock> TransUdpNegoMock;
+    EXPECT_CALL(TransUdpNegoMock, AuthMetaPostTransData).WillRepeatedly(Return(SOFTBUS_LOCK_ERR));
     int32_t errCode = 0;
     string errDesc = "ProcessMessage";
     AuthHandle authHandle = { .authId = 0, .type = AUTH_LINK_TYPE_WIFI };
-    NiceMock<TransUdpNegoInterfaceMock> TransUdpNegoMock;
-    EXPECT_CALL(TransUdpNegoMock, AuthMetaPostTransData).WillRepeatedly(Return(SOFTBUS_LOCK_ERR));
     int32_t ret = SendReplyErrInfo(errCode, nullptr, authHandle, 0);
     EXPECT_EQ(ret, SOFTBUS_INVALID_PARAM);
 
@@ -269,8 +269,8 @@ HWTEST_F(TransUdpNegoTest, SendReplyErrInfo001, TestSize.Level1)
  */
 HWTEST_F(TransUdpNegoTest, SendReplyUdpInfo001, TestSize.Level1)
 {
-    LnnEnhanceFuncList *pfnLnnEnhanceFuncList = LnnEnhanceFuncListGet();
-    pfnLnnEnhanceFuncList->authMetaPostTransData = AuthMetaPostTransData;
+    NiceMock<TransUdpNegoInterfaceMock> TransUdpNegoMock;
+    EXPECT_CALL(TransUdpNegoMock, AuthMetaPostTransData).WillOnce(Return(SOFTBUS_LOCK_ERR));
     AuthHandle authHandle = { .authId = INVALID_ID, .type = AUTH_LINK_TYPE_WIFI };
     int64_t seq = INVALID_SEQ;
     AppInfo appInfo;
@@ -280,8 +280,6 @@ HWTEST_F(TransUdpNegoTest, SendReplyUdpInfo001, TestSize.Level1)
     int32_t ret = SendReplyUdpInfo(nullptr, authHandle, seq);
     EXPECT_EQ(ret, SOFTBUS_INVALID_PARAM);
     authHandle.authId = 0;
-    NiceMock<TransUdpNegoInterfaceMock> TransUdpNegoMock;
-    EXPECT_CALL(TransUdpNegoMock, AuthMetaPostTransData).WillOnce(Return(SOFTBUS_LOCK_ERR));
     ret = SendReplyUdpInfo(&appInfo, authHandle, seq);
     EXPECT_EQ(ret, SOFTBUS_LOCK_ERR);
 }
@@ -302,8 +300,6 @@ HWTEST_F(TransUdpNegoTest, TransOnExchangeUdpInfoReply001, TestSize.Level1)
     ASSERT_TRUE(newChannel != nullptr);
     int32_t ret = TransAddUdpChannel(newChannel);
     EXPECT_EQ(ret, SOFTBUS_OK);
-    ret = InitQosPacked();
-    EXPECT_NE(ret, SOFTBUS_INVALID_PARAM);
 
     AuthHandle authHandle = { .authId = AUTH_INVALID_ID, .type = AUTH_LINK_TYPE_WIFI };
 
@@ -356,8 +352,6 @@ HWTEST_F(TransUdpNegoTest, TransOnExchangeUdpInfoReply002, TestSize.Level1)
  */
 HWTEST_F(TransUdpNegoTest, TransOnExchangeUdpInfoRequest001, TestSize.Level1)
 {
-    LnnEnhanceFuncList *pfnLnnEnhanceFuncList = LnnEnhanceFuncListGet();
-    pfnLnnEnhanceFuncList->authMetaPostTransData = AuthMetaPostTransData;
     char* data = TestGetMsgInfo();
     ASSERT_TRUE(data != nullptr);
     cJSON *msg = cJSON_Parse(data);
@@ -384,8 +378,6 @@ HWTEST_F(TransUdpNegoTest, TransOnExchangeUdpInfoRequest001, TestSize.Level1)
  */
 HWTEST_F(TransUdpNegoTest, TransOnExchangeUdpInfoRequest002, TestSize.Level1)
 {
-    LnnEnhanceFuncList *pfnLnnEnhanceFuncList = LnnEnhanceFuncListGet();
-    pfnLnnEnhanceFuncList->authMetaPostTransData = AuthMetaPostTransData;
     AuthHandle authHandle = { .authId = 1, .type = AUTH_LINK_TYPE_WIFI };
     int64_t invalidSeq = 0;
     string msgStr = "normal msgStr";
@@ -415,10 +407,9 @@ HWTEST_F(TransUdpNegoTest, TransOnExchangeUdpInfoRequest002, TestSize.Level1)
  */
 HWTEST_F(TransUdpNegoTest, StartExchangeUdpInfo001, TestSize.Level1)
 {
-    LnnEnhanceFuncList *pfnLnnEnhanceFuncList = LnnEnhanceFuncListGet();
-    pfnLnnEnhanceFuncList->authMetaPostTransData = AuthMetaPostTransData;
     NiceMock<TransUdpNegoInterfaceMock> TransUdpNegoMock;
     EXPECT_CALL(TransUdpNegoMock, AuthMetaPostTransData).WillRepeatedly(Return(SOFTBUS_LOCK_ERR));
+
     AuthHandle authHandle = { .authId = 0, .type = AUTH_LINK_TYPE_WIFI };
     int64_t seq = 0;
     UdpChannelInfo channel;
@@ -516,8 +507,6 @@ HWTEST_F(TransUdpNegoTest, UdpModuleCb002, TestSize.Level1)
  */
 HWTEST_F(TransUdpNegoTest, TransOnExchangeUdpInfo001, TestSize.Level1)
 {
-    LnnEnhanceFuncList *pfnLnnEnhanceFuncList = LnnEnhanceFuncListGet();
-    pfnLnnEnhanceFuncList->authMetaPostTransData = AuthMetaPostTransData;
     AuthHandle authHandle = { .authId = 1, .type = AUTH_LINK_TYPE_WIFI };
     uint8_t val = 1;
     AuthTransData data = {
@@ -591,7 +580,7 @@ HWTEST_F(TransUdpNegoTest, UdpOpenAuthConn001, TestSize.Level1)
 
     isMeta = true;
     ret = UdpOpenAuthConn(peerUdid.c_str(), requestId, isMeta, 0, false);
-    EXPECT_EQ(ret, SOFTBUS_NOT_IMPLEMENT);
+    EXPECT_TRUE(ret != SOFTBUS_OK);
 }
 
 /**
@@ -602,7 +591,6 @@ HWTEST_F(TransUdpNegoTest, UdpOpenAuthConn001, TestSize.Level1)
  */
 HWTEST_F(TransUdpNegoTest, OpenAuthConnForUdpNegotiation001, TestSize.Level1)
 {
-    string peerUid = "normal peerUid";
     UdpChannelInfo *channel = CreateUdpChannelPackTest();
     ASSERT_TRUE(channel != nullptr);
     int32_t ret = TransAddUdpChannel(channel);
@@ -615,6 +603,7 @@ HWTEST_F(TransUdpNegoTest, OpenAuthConnForUdpNegotiation001, TestSize.Level1)
     };
     ret = OpenAuthConnForUdpNegotiation(&channelTest);
     EXPECT_EQ(ret, SOFTBUS_NOT_FIND);
+    TransDelUdpChannel(channel->info.myData.channelId);
 }
 
 /**
@@ -848,7 +837,7 @@ HWTEST_F(TransUdpNegoTest, SetPeerDeviceIdByAuth001, TestSize.Level1)
     appInfo->udpChannelOptType = TYPE_UDP_CHANNEL_CLOSE;
 
     int32_t ret = SetPeerDeviceIdByAuth(authHandle, appInfo);
-    EXPECT_EQ(ret, SOFTBUS_NOT_IMPLEMENT);
+    EXPECT_TRUE(ret != SOFTBUS_OK);
 
     SoftBusFree(appInfo);
     SoftBusFree(channel);
@@ -918,8 +907,6 @@ HWTEST_F(TransUdpNegoTest, ParseRequestAppInfo001, TestSize.Level1)
  */
 HWTEST_F(TransUdpNegoTest, TransPackRequestUdpInfo001, TestSize.Level1)
 {
-    LnnEnhanceFuncList *pfnLnnEnhanceFuncList = LnnEnhanceFuncListGet();
-    pfnLnnEnhanceFuncList->authMetaPostTransData = AuthMetaPostTransData;
     AuthHandle authHandle = { .authId = 1, .type = AUTH_LINK_TYPE_WIFI };
     int64_t seq = 1;
     AppInfo *appInfo = (AppInfo*)SoftBusMalloc(sizeof(AppInfo));

@@ -20,13 +20,13 @@
 
 #define CHECK_INSTANCE_EXIT(flag)                \
     if (flag) {                                  \
-        CONN_LOGW(CONN_EVENT, "[wifi_direct_init] instance is exiting."); \
+        CONN_LOGW(CONN_WIFI_DIRECT, "[wifi_direct_init] instance is exiting."); \
         return;                                  \
     }
 
 #define CHECK_INSTANCE_EXIT_WITH_RETVAL(flag, retVal) \
     if (flag) {                                       \
-        CONN_LOGW(CONN_EVENT, "[wifi_direct_init] instance is exiting."); \
+        CONN_LOGW(CONN_WIFI_DIRECT, "[wifi_direct_init] instance is exiting."); \
         return retVal;                                \
     }
 

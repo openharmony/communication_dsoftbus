@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2025 Huawei Device Co., Ltd.
+ * Copyright (c) 2022 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -16,7 +16,7 @@
 #ifndef DISC_BLE_DISPATCHER_STRUCT_H
 #define DISC_BLE_DISPATCHER_STRUCT_H
 
-#include "disc_manager.h"
+#include "disc_manager_struct.h"
 
 #ifdef __cplusplus
 #if __cplusplus

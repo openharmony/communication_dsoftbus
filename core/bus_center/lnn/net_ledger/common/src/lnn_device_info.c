@@ -46,6 +46,7 @@ static TypeToId g_typeToIdMap[] = {
     {TYPE_IPCAMERA, TYPE_IPCAMERA_ID},
     {TYPE_PC, TYPE_PC_ID},
     {TYPE_SMART_DISPLAY, TYPE_SMART_DISPLAY_ID},
+    {TYPE_GLASS, TYPE_GLASS_ID},
 };
 
 static __thread char g_stringTypeId[DEVICE_TYPE_MAX_LENGTH + 1] = {0};

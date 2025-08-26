@@ -147,6 +147,7 @@ void ClientDeleteChannelFromListTest(FuzzedDataProvider &provider)
         return;
     }
 
+    (void)ClientDeleteChannelFromList(channelId, nullptr, uuid);
     (void)ClientDeleteChannelFromList(channelId, brMac, uuid);
 }
 
@@ -232,6 +233,16 @@ void ClientTransOnBrProxyOpenedTest(FuzzedDataProvider &provider)
     (void)ClientTransOnBrProxyOpened(channelId, brMac, uuid, result);
 }
 
+void RegisterAccessHookTest(FuzzedDataProvider &provider)
+{
+    (void)provider;
+    PermissonHookCb cb;
+    (void)memset_s(&cb, sizeof(PermissonHookCb), 0, sizeof(PermissonHookCb));
+
+    (void)RegisterAccessHook(nullptr);
+    (void)RegisterAccessHook(&cb);
+}
+
 void ClientTransBrProxyQueryPermissionTest(FuzzedDataProvider &provider)
 {
     std::string providerBundleName = provider.ConsumeBytesAsString(UINT8_MAX - 1);
@@ -258,7 +269,6 @@ extern "C" int32_t LLVMFuzzerTestOneInput(const uint8_t *data, size_t size)
     OHOS::IsProxyChannelEnabledTest(provider);
     OHOS::TransClientInitTest(provider);
     OHOS::ClientAddChannelToListTest(provider);
-    OHOS::ClientDeleteChannelFromListTest(provider);
     OHOS::ClientUpdateListtTest(provider);
     OHOS::ClientQueryListTest(provider);
     OHOS::ClientRecordListenerStateTest(provider);
@@ -266,7 +276,9 @@ extern "C" int32_t LLVMFuzzerTestOneInput(const uint8_t *data, size_t size)
     OHOS::SoftbusErrConvertChannelStateTest(provider);
     OHOS::ClientTransBrProxyChannelChangeTest(provider);
     OHOS::ClientTransOnBrProxyOpenedTest(provider);
+    OHOS::RegisterAccessHookTest(provider);
     OHOS::ClientTransBrProxyQueryPermissionTest(provider);
+    OHOS::ClientDeleteChannelFromListTest(provider);
 
     return 0;
 }

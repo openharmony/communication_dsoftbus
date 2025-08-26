@@ -69,7 +69,7 @@ int32_t InitGeneralConnection(void)
 {
     int32_t ret = InitGeneralConnectionManager();
     if (ret != SOFTBUS_OK) {
-        COMM_LOGE(CONN_COMMON, "init general manager failed, err=%{public}d", ret);
+        COMM_LOGE(CONN_COMMON, "init general manager fail, err=%{public}d", ret);
         return SOFTBUS_NO_INIT;
     }
 
@@ -80,7 +80,7 @@ int32_t InitGeneralConnection(void)
     }
     ret = manager->registerListener(&g_baseListener);
     if (ret != SOFTBUS_OK) {
-        COMM_LOGE(CONN_COMMON, "init general manager failed, err=%{public}d", ret);
+        COMM_LOGE(CONN_COMMON, "init general manager fail, err=%{public}d", ret);
         return SOFTBUS_NO_INIT;
     }
     COMM_LOGI(CONN_COMMON, "init and refister listener success");

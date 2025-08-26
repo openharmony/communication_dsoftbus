@@ -349,4 +349,27 @@ HWTEST_F(PermissionEntrystaticTest, NewDynamicPermissionEntryTest001, TestSize.L
     ret = NewDynamicPermissionEntry(permissionEntry, DBINDER_SERVICE_NAME, callingUid, callingPid);
     EXPECT_TRUE(ret == false);
 }
+
+/**
+ * @tc.name: DynamicPermissionTest001
+ * @tc.desc: call AddDynamicPermission and DeleteDynamicPermission.
+ * @tc.type: FUNC
+ * @tc.require:
+ */
+HWTEST_F(PermissionEntrystaticTest, DynamicPermissionTest001, TestSize.Level1)
+{
+    int32_t callingUid = 0;
+    int32_t callingPid = 0;
+    char sessionName[] = "testSessionName";
+
+    int32_t ret = AddDynamicPermission(callingUid, callingPid, nullptr);
+    EXPECT_EQ(ret, SOFTBUS_INVALID_PARAM);
+    ret = AddDynamicPermission(callingUid, callingPid, sessionName);
+    EXPECT_EQ(ret, SOFTBUS_INVALID_PARAM);
+
+    ret = DeleteDynamicPermission(nullptr);
+    EXPECT_EQ(ret, SOFTBUS_INVALID_PARAM);
+    ret = DeleteDynamicPermission(sessionName);
+    EXPECT_EQ(ret, SOFTBUS_INVALID_PARAM);
+}
 } // namespace OHOS

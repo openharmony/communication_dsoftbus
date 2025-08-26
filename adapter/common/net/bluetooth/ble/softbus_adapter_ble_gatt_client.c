@@ -133,6 +133,7 @@ static void GattcConfigureMtuSizeCallback(int clientId, int mtuSize, int status)
         return;
     }
     cb.configureMtuSizeCallback(clientId, mtuSize, status);
+    SoftbusGattcDeleteMacAddrFromList(clientId);
 }
 
 static void GattcRegisterNotificationCallback(int clientId, int status)
@@ -282,6 +283,8 @@ bool SoftbusGattcCheckExistConnectionByAddr(const SoftBusBtAddr *btAddr)
             ConvertAnonymizeMacAddress(anomizeAddress, BT_MAC_LEN, macStr, BT_MAC_LEN);
             CONN_LOGE(CONN_BLE, "connection exist, addr=%{public}s", anomizeAddress);
             isExist = true;
+            ListDelete(&it->node);
+            SoftBusFree(it);
             break;
         }
     }
@@ -303,7 +306,12 @@ static int32_t SoftbusGattcAddMacAddrToList(int32_t clientId, const SoftBusBtAdd
     }
     bleConnAddr->clientId = clientId;
 
-    CONN_CHECK_AND_RETURN_RET_LOGE(g_btAddrs != NULL, SOFTBUS_INVALID_PARAM, CONN_BLE, "BtAddrs is null");
+    if (g_btAddrs == NULL) {
+        CONN_LOGE(CONN_BLE, "BtAddrs is null.");
+        SoftBusFree(bleConnAddr);
+        return SOFTBUS_INVALID_PARAM;
+    }
+
     if (SoftBusMutexLock(&g_btAddrs->lock) != SOFTBUS_OK) {
         SoftBusFree(bleConnAddr);
         CONN_LOGE(CONN_BLE, "try to lock failed");
@@ -339,16 +347,18 @@ int32_t SoftbusGattcConnect(int32_t clientId, SoftBusBtAddr *addr)
         CONN_LOGE(CONN_BLE, "memcpy error");
         return SOFTBUS_INVALID_PARAM;
     }
-    int32_t status = SoftbusGattcAddMacAddrToList(clientId, addr);
-    if (status != SOFTBUS_OK) {
-        // fall-through
-        CONN_LOGW(CONN_BLE, "add mac addr fail, status=%{public}d", status);
-    }
-    status = BleOhosStatusToSoftBus(
+
+    int32_t status = BleOhosStatusToSoftBus(
         BleGattcConnect(clientId, &g_btGattClientCallbacks, &bdAddr, false, OHOS_BT_TRANSPORT_TYPE_LE));
     if (status != SOFTBUS_OK) {
         CONN_LOGE(CONN_BLE, "status=%{public}d", status);
         return SOFTBUS_GATTC_INTERFACE_FAILED;
+    }
+
+    status = SoftbusGattcAddMacAddrToList(clientId, addr);
+    if (status != SOFTBUS_OK) {
+        // fall-through
+        CONN_LOGW(CONN_BLE, "add mac addr fail, status=%{public}d", status);
     }
 
     return SOFTBUS_OK;
@@ -356,6 +366,7 @@ int32_t SoftbusGattcConnect(int32_t clientId, SoftBusBtAddr *addr)
 
 int32_t SoftbusBleGattcDisconnect(int32_t clientId, bool refreshGatt)
 {
+    SoftbusGattcDeleteMacAddrFromList(clientId);
     (void)refreshGatt;
     if (BleGattcDisconnect(clientId) != SOFTBUS_OK) {
         CONN_LOGE(CONN_BLE, "BleGattcDisconnect error");

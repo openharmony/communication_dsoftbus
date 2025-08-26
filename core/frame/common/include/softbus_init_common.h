@@ -13,6 +13,9 @@
  * limitations under the License.
  */
 
+#ifndef SOFTBUS_INIT_COMMON_H
+#define SOFTBUS_INIT_COMMON_H
+
 #include <dlfcn.h>
 #include "stdint.h"
 #include "stdbool.h"
@@ -21,9 +24,6 @@
 #ifndef NULL
 #define NULL 0
 #endif
-
-#ifndef SOFTBUS_INIT_COMMON_H
-#define SOFTBUS_INIT_COMMON_H
 
 typedef enum {
     SOFTBUS_HANDLE_SERVER_PLUGIN,

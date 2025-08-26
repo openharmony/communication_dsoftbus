@@ -194,12 +194,12 @@ void FillAppInfo(AppInfo *appInfo, const SessionParam *param, TransInfo *transIn
     transInfo->channelType = TransGetChannelType(param, connInfo->type);
     appInfo->linkType = connInfo->type;
     appInfo->channelType = transInfo->channelType;
-    appInfo->isFlashLight = connInfo->isLowLatency;
     appInfo->flowInfo.flowSize = param->flowInfo.flowSize;
     appInfo->flowInfo.sessionType = param->flowInfo.sessionType;
     appInfo->flowInfo.flowQosType = param->flowInfo.flowQosType;
     (void)TransCommonGetLocalConfig(appInfo->channelType, appInfo->businessType, &appInfo->myData.dataConfig);
-    if (connInfo->isLowLatency) {
+    if (connInfo->isLowLatency && CheckHtpPermissionPacked(appInfo->myData.uid)) {
+        appInfo->isFlashLight = true;
         struct WifiDirectManager *mgr = GetWifiDirectManager();
         if (mgr != NULL && mgr->getLocalAndRemoteMacByRemoteIp != NULL) {
             ret = mgr->getLocalAndRemoteMacByRemoteIp(
@@ -393,6 +393,10 @@ void TransOpenChannelSetModule(int32_t channelType, ConnectOption *connOpt)
 
 int32_t TransOpenChannelProc(ChannelType type, AppInfo *appInfo, const ConnectOption *connOpt, int32_t *channelId)
 {
+    if (appInfo == NULL || connOpt == NULL) {
+        TRANS_LOGE(TRANS_CTRL, "invalid param.");
+        return SOFTBUS_INVALID_PARAM;
+    }
     if (type == CHANNEL_TYPE_BUTT) {
         TRANS_LOGE(TRANS_CTRL, "open invalid channel type.");
         return SOFTBUS_TRANS_INVALID_CHANNEL_TYPE;

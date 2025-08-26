@@ -28,6 +28,8 @@ void *g_localLedgerDepsInterface;
 constexpr char DEFAULT_DEVICE_NAME[] = "OpenHarmony";
 constexpr char DEFAULT_DEVICE_UDID[] = "aaabbbcccdddeeefffggghhh";
 constexpr char DEFAULT_DEVICE_TYPE[] = "default_type";
+constexpr char GLASS_TYPE[] = "A31";
+constexpr char WATCH_TYPE[] = "WATCH";
 constexpr int32_t SOFTBUS_BUSCENTER_DUMP_LOCALDEVICEINFO_FD = -1;
 
 LocalLedgerDepsInterfaceMock::LocalLedgerDepsInterfaceMock()
@@ -69,6 +71,36 @@ int32_t LocalLedgerDepsInterfaceMock::LedgerGetCommonDevInfo(const CommonDeviceK
         default:
             break;
     }
+    return SOFTBUS_OK;
+}
+
+int32_t LocalLedgerDepsInterfaceMock::LedgerGetCommonDevInfoGlass(const CommonDeviceKey key, char *value, uint32_t len)
+{
+    static bool isFirst = true;
+    const char *type = isFirst ? GLASS_TYPE : WATCH_TYPE;
+    if (value == nullptr) {
+        return SOFTBUS_INVALID_PARAM;
+    }
+    switch (key) {
+        case COMM_DEVICE_KEY_DEVNAME:
+            if (strncpy_s(value, len, DEFAULT_DEVICE_NAME, strlen(DEFAULT_DEVICE_NAME)) != EOK) {
+                return SOFTBUS_STRCPY_ERR;
+            }
+            break;
+        case COMM_DEVICE_KEY_UDID:
+            if (strncpy_s(value, len, DEFAULT_DEVICE_UDID, UDID_BUF_LEN) != EOK) {
+                return SOFTBUS_STRCPY_ERR;
+            }
+            break;
+        case COMM_DEVICE_KEY_DEVTYPE:
+            if (strncpy_s(value, len, type, strlen(type)) != EOK) {
+                return SOFTBUS_STRCPY_ERR;
+            }
+            break;
+        default:
+            break;
+    }
+    isFirst = false;
     return SOFTBUS_OK;
 }
 
@@ -359,8 +391,8 @@ int32_t SoftbusGetConfig(ConfigType type, unsigned char *val, uint32_t len)
     return GetLocalLedgerDepsInterface()->SoftbusGetConfig(type, val, len);
 }
 
-int32_t LnnNotifyDiscoveryDevice(const ConnectionAddr *addr, const LnnDfxDeviceInfoReport *infoReport,
-    bool isNeedConnect)
+int32_t LnnNotifyDiscoveryDevice(
+    const ConnectionAddr *addr, const LnnDfxDeviceInfoReport *infoReport, bool isNeedConnect)
 {
     return GetLocalLedgerDepsInterface()->LnnNotifyDiscoveryDevice(addr, infoReport, isNeedConnect);
 }
@@ -370,8 +402,8 @@ int32_t LnnRequestLeaveByAddrType(const bool *type, uint32_t typeLen)
     return GetLocalLedgerDepsInterface()->LnnRequestLeaveByAddrType(type, typeLen);
 }
 
-int32_t LnnAsyncCallbackDelayHelper(SoftBusLooper *looper, LnnAsyncCallbackFunc callback, void *para,
-    uint64_t delayMillis)
+int32_t LnnAsyncCallbackDelayHelper(
+    SoftBusLooper *looper, LnnAsyncCallbackFunc callback, void *para, uint64_t delayMillis)
 {
     return GetLocalLedgerDepsInterface()->LnnAsyncCallbackDelayHelper(looper, callback, para, delayMillis);
 }
@@ -539,8 +571,8 @@ int32_t TransGetConnByChanId(int32_t channelId, int32_t channelType, int32_t *co
 int32_t AuthMetaStartVerify(uint32_t connectionId, const AuthKeyInfo *authKeyInfo, uint32_t requestId,
     int32_t callingPid, const AuthVerifyCallback *callBack)
 {
-    return GetLocalLedgerDepsInterface()->AuthMetaStartVerify(connectionId, authKeyInfo, requestId, callingPid,
-        callBack);
+    return GetLocalLedgerDepsInterface()->AuthMetaStartVerify(
+        connectionId, authKeyInfo, requestId, callingPid, callBack);
 }
 
 uint32_t AuthGenRequestId(void)
@@ -593,8 +625,8 @@ bool AddNumberToJsonObject(cJSON *json, const char * const string, int32_t num)
     return GetLocalLedgerDepsInterface()->AddNumberToJsonObject(json, string, num);
 }
 
-int32_t LnnSendSyncInfoMsg(LnnSyncInfoType type, const char *networkId, const uint8_t *msg, uint32_t len,
-    LnnSyncInfoMsgComplete complete)
+int32_t LnnSendSyncInfoMsg(
+    LnnSyncInfoType type, const char *networkId, const uint8_t *msg, uint32_t len, LnnSyncInfoMsgComplete complete)
 {
     return GetLocalLedgerDepsInterface()->LnnSendSyncInfoMsg(type, networkId, msg, len, complete);
 }
@@ -919,8 +951,8 @@ void LnnDeinitBusCenterEvent(void)
     return GetLocalLedgerDepsInterface()->LnnDeinitBusCenterEvent();
 }
 
-int32_t AuthStartVerify(const AuthConnInfo *connInfo, const AuthVerifyParam *authVerifyParam,
-    const AuthVerifyCallback *callback)
+int32_t AuthStartVerify(
+    const AuthConnInfo *connInfo, const AuthVerifyParam *authVerifyParam, const AuthVerifyCallback *callback)
 {
     return GetLocalLedgerDepsInterface()->AuthStartVerify(connInfo, authVerifyParam, callback);
 }
@@ -1055,14 +1087,12 @@ int32_t SoftBusBtInit(void)
     return GetLocalLedgerDepsInterface()->SoftBusBtInit();
 }
 
-int32_t SoftBusBase64Encode(unsigned char *dst, size_t dlen,
-    size_t *olen, const unsigned char *src, size_t slen)
+int32_t SoftBusBase64Encode(unsigned char *dst, size_t dlen, size_t *olen, const unsigned char *src, size_t slen)
 {
     return GetLocalLedgerDepsInterface()->SoftBusBase64Encode(dst, dlen, olen, src, slen);
 }
 
-int32_t SoftBusBase64Decode(unsigned char *dst, size_t dlen,
-    size_t *olen, const unsigned char *src, size_t slen)
+int32_t SoftBusBase64Decode(unsigned char *dst, size_t dlen, size_t *olen, const unsigned char *src, size_t slen)
 {
     return GetLocalLedgerDepsInterface()->SoftBusBase64Decode(dst, dlen, olen, src, slen);
 }

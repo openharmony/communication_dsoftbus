@@ -1148,6 +1148,8 @@ HWTEST_F(TransSdkFileTest, FillFileStatusListTest005, TestSize.Level1)
     FileRecvErrorEvent(channel, listener, &msgData, msgType, sessionId);
     listener->socketSendCallback = nullptr;
     FileRecvErrorEvent(channel, listener, &msgData, msgType, sessionId);
+    msgData.fileList.fileNum = -1;
+    NotifyRecvResult(sessionId, msgType, &msgData, listener);
     SoftBusFree(listener);
     SoftBusFree(fileInfo);
 }

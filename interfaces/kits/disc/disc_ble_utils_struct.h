@@ -19,9 +19,9 @@
 #include <stdbool.h>
 #include <stdint.h>
 
+#include "broadcast_protocol_constant_struct.h"
 #include "disc_action_common.h"
 #include "disc_ble_constant_struct.h"
-#include "broadcast_protocol_constant.h"
 #include "softbus_common.h"
 
 #ifdef __cplusplus

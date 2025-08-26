@@ -18,7 +18,7 @@
 #include <cstddef>
 #include <cstdint>
 #include <securec.h>
-#include "fuzz_data_generator.h"
+#include "fuzzer/FuzzedDataProvider.h"
 #include "softbus_error_code.h"
 #include "legacy/softbus_hisysevt_bus_center.h"
 #include "legacy/softbus_hisysevt_common.h"
@@ -26,138 +26,156 @@
 #include "legacy/softbus_hisysevt_discreporter.h"
 #include "legacy/softbus_hisysevt_transreporter.h"
 
+using namespace std;
+
 namespace OHOS {
 static constexpr int32_t BUFF_MAX_LEN = 65;
+
+#define CODE_MIN       SOFTBUS_PUBLIC_ERR_BASE
+#define CODE_MAX       SOFTBUS_ERR
+#define STAGE_MIN      AUTH_CONNECT_STAGE
+#define STAGE_MAX      AUTH_STAGE_BUTT
+#define LINK_TYPE_MIN  SOFTBUS_HISYSEVT_LINK_TYPE_BR
+#define LINK_TYPE_MAX  SOFTBUS_HISYSEVT_LINK_TYPE_BUTT
+#define DISC_STAGE_MIN START_DISCOVERY
+#define DISC_STAGE_MAX BUSINESS_DISCOVERY
+#define EVENT_TYPE_MIN SOFTBUS_STATISTIC_EVT_START
+#define EVENT_TYPE_MAX SOFTBUS_STATISTIC_EVT_BUTT
+#define TIME_MIN       0
+#define TIME_MAX       (UINT64_MAX - 1)
+
+class TestEnv {
+public:
+    TestEnv()
+    {
+        InitBusCenterDfx();
+        isInited_ = true;
+    }
+
+    ~TestEnv()
+    {
+        DeinitBusCenterDfx();
+        isInited_ = false;
+    }
+
+    bool IsEnvInit()
+    {
+        return isInited_;
+    }
+
+private:
+    volatile bool isInited_ = false;
+};
+
 int32_t ReportStatisticEvt()
 {
     return 0;
 }
 
-void SoftBusRecordAuthResultFuzzTest(const uint8_t *data, size_t size)
+void SoftBusRecordAuthResultFuzzTest(FuzzedDataProvider &provider)
 {
-    InitBusCenterDfx();
-    SoftBusLinkType linkType = *(reinterpret_cast<const SoftBusLinkType *>(data));
-    int32_t ret = 0;
-    uint64_t constTime = 0;
-    DataGenerator::Write(data, size);
-    GenerateInt32(ret);
-    GenerateUint64(constTime);
-    DataGenerator::Clear();
-    AuthFailStage stage = *(reinterpret_cast<const AuthFailStage *>(data));
+    SoftBusLinkType linkType = (SoftBusLinkType)provider.ConsumeIntegralInRange<uint32_t>(LINK_TYPE_MIN,
+        LINK_TYPE_MAX);
+    int32_t ret = provider.ConsumeIntegralInRange<int32_t>(CODE_MIN, CODE_MAX);
+    uint64_t constTime = provider.ConsumeIntegralInRange<uint64_t>(TIME_MIN, TIME_MAX);
+    AuthFailStage stage = (AuthFailStage)provider.ConsumeIntegralInRange<uint32_t>(STAGE_MIN, STAGE_MAX);
     SoftBusRecordAuthResult(linkType, ret, constTime, stage);
 }
 
-void SoftBusRecordBusCenterResultFuzzTest(const uint8_t *data, size_t size)
+void SoftBusRecordBusCenterResultFuzzTest(FuzzedDataProvider &provider)
 {
-    InitBusCenterDfx();
-    SoftBusLinkType linkType = *(reinterpret_cast<const SoftBusLinkType *>(data));
-    uint64_t constTime = 0;
-    DataGenerator::Write(data, size);
-    GenerateUint64(constTime);
-    DataGenerator::Clear();
+    SoftBusLinkType linkType = (SoftBusLinkType)provider.ConsumeIntegralInRange<uint32_t>(LINK_TYPE_MIN,
+        LINK_TYPE_MAX);
+    uint64_t constTime = provider.ConsumeIntegralInRange<uint64_t>(TIME_MIN, TIME_MAX);
     SoftBusRecordBusCenterResult(linkType, constTime);
 }
 
-void SoftBusRecordDevOnlineDurResultFuzzTest(const uint8_t *data, size_t size)
+void SoftBusRecordDevOnlineDurResultFuzzTest(FuzzedDataProvider &provider)
 {
-    InitBusCenterDfx();
-    uint64_t constTime = 0;
-    DataGenerator::Write(data, size);
-    GenerateUint64(constTime);
-    DataGenerator::Clear();
+    uint64_t constTime = provider.ConsumeIntegralInRange<uint64_t>(TIME_MIN, TIME_MAX);
     SoftBusRecordDevOnlineDurResult(constTime);
 }
 
-void SoftBusReportDevOnlineEvtFuzzTest(const uint8_t *data, size_t size)
+void SoftBusReportDevOnlineEvtFuzzTest(FuzzedDataProvider &provider)
 {
-    InitBusCenterDfx();
-    char udid[BUFF_MAX_LEN] = {0};
-    if (memcpy_s(udid, sizeof(udid) - 1, data, size) != EOK) {
-        return;
-    }
+    string udid = provider.ConsumeRandomLengthString(UDID_BUF_LEN);
     OnlineDeviceInfo info = {0};
-    DataGenerator::Write(data, size);
-    GenerateUint32(info.onlineDevNum);
-    GenerateUint32(info.btOnlineDevNum);
-    GenerateUint32(info.wifiOnlineDevNum);
-    GenerateUint32(info.peerDevType);
-    GenerateInt32(info.insertFileResult);
-    DataGenerator::Clear();
-    SoftBusReportDevOnlineEvt(&info, udid);
+    info.onlineDevNum = provider.ConsumeIntegral<uint32_t>();
+    info.btOnlineDevNum = provider.ConsumeIntegral<uint32_t>();
+    info.wifiOnlineDevNum = provider.ConsumeIntegral<uint32_t>();
+    info.peerDevType = provider.ConsumeIntegral<uint32_t>();
+    info.insertFileResult = provider.ConsumeIntegral<int32_t>();
+    SoftBusReportDevOnlineEvt(&info, udid.c_str());
 }
 
-void SoftBusReportBusCenterFaultEvtFuzzTest(const uint8_t *data, size_t size)
+void SoftBusReportBusCenterFaultEvtFuzzTest(FuzzedDataProvider &provider)
 {
-    InitBusCenterDfx();
     SoftBusFaultEvtInfo info = {0};
-    DataGenerator::Write(data, size);
-    GenerateUint8(info.moduleType);
-    GenerateUint8(info.linkType);
-    GenerateFloat(info.channelQuality);
-    GenerateInt32(info.errorCode);
-    GenerateInt32(info.peerDevType);
-    GenerateInt32(info.onLineDevNum);
-    GenerateInt32(info.connNum);
-    GenerateInt32(info.nightMode);
-    GenerateInt32(info.wifiStatue);
-    GenerateInt32(info.bleStatue);
-    GenerateInt32(info.callerAppMode);
-    GenerateInt32(info.subErrCode);
-    GenerateInt32(info.connBrNum);
-    GenerateInt32(info.connBleNum);
-    GenerateBool(info.bleBradStatus);
-    GenerateBool(info.bleScanStatus);
-    DataGenerator::Clear();
+    info.moduleType = provider.ConsumeIntegral<uint8_t>();
+    info.linkType = provider.ConsumeIntegral<uint8_t>();
+    info.channelQuality = provider.ConsumeFloatingPoint<float>();
+    info.errorCode = provider.ConsumeIntegralInRange<int32_t>(CODE_MIN, CODE_MAX);
+    info.peerDevType = provider.ConsumeIntegral<int32_t>();
+    info.onLineDevNum = provider.ConsumeIntegral<int32_t>();
+    info.connNum = provider.ConsumeIntegral<int32_t>();
+    info.nightMode = provider.ConsumeIntegral<int32_t>();
+    info.wifiStatue = provider.ConsumeIntegral<int32_t>();
+    info.bleStatue = provider.ConsumeIntegral<int32_t>();
+    info.callerAppMode = provider.ConsumeIntegral<int32_t>();
+    info.subErrCode = provider.ConsumeIntegral<int32_t>();
+    info.connBrNum = provider.ConsumeIntegral<int32_t>();
+    info.connBleNum = provider.ConsumeIntegral<int32_t>();
+    info.bleBradStatus = provider.ConsumeBool();
+    info.bleScanStatus = provider.ConsumeBool();
     SoftBusReportBusCenterFaultEvt(&info);
 }
 
-void SoftBusRecordDiscoveryResultFuzzTest(const uint8_t *data, size_t size)
+void SoftBusRecordDiscoveryResultFuzzTest(FuzzedDataProvider &provider)
 {
     InitBusCenterDfx();
-    DiscoveryStage stage = *(reinterpret_cast<const DiscoveryStage *>(data));
+    DiscoveryStage stage = (DiscoveryStage)provider.ConsumeIntegralInRange<uint32_t>(DISC_STAGE_MIN, DISC_STAGE_MAX);
     AppDiscNode node = {0};
-    DataGenerator::Write(data, size);
-    GenerateInt32(node.appDiscCnt);
-    DataGenerator::Clear();
+    node.appDiscCnt = provider.ConsumeIntegral<int32_t>();
     SoftBusRecordDiscoveryResult(stage, &node);
 }
 
-void SoftBusHiSysEvtCommonFuzzTest(const uint8_t *data, size_t size)
+void SoftBusHiSysEvtCommonFuzzTest(FuzzedDataProvider &provider)
 {
-    StatisticEvtType evtType = *(reinterpret_cast<const StatisticEvtType *>(data));
+    StatisticEvtType evtType = (StatisticEvtType)provider.ConsumeIntegralInRange<uint32_t>(EVENT_TYPE_MIN,
+        EVENT_TYPE_MAX);
     SetStatisticEvtReportFunc(evtType, ReportStatisticEvt);
     GetStatisticEvtReportFunc(evtType);
 }
 
-void SoftBusHiSysEvtTransReporterFuzzTest(const uint8_t *data, size_t size)
+void SoftBusHiSysEvtTransReporterFuzzTest(FuzzedDataProvider &provider)
 {
-    char tmp[BUFF_MAX_LEN] = {0};
-    if (memcpy_s(tmp, sizeof(tmp) - 1, data, size) != EOK) {
-        return;
-    }
     InitTransStatisticSysEvt();
     GetSoftbusRecordTimeMillis();
-    SoftbusReportTransErrorEvt(SOFTBUS_ACCESS_TOKEN_DENIED);
-    SoftbusReportTransInfoEvt(reinterpret_cast<const char *>(tmp));
-    SoftbusRecordOpenSession(SOFTBUS_EVT_OPEN_SESSION_SUCC, 0);
+    int32_t errCode = provider.ConsumeIntegralInRange<uint32_t>(CODE_MIN, CODE_MAX);
+    SoftbusReportTransErrorEvt(errCode);
+    string msg = provider.ConsumeRandomLengthString(BUFF_MAX_LEN);
+    SoftbusReportTransInfoEvt(msg.c_str());
+    bool isSucc = provider.ConsumeBool();
+    SoftbusRecordOpenSession(isSucc ? SOFTBUS_EVT_OPEN_SESSION_SUCC : SOFTBUS_EVT_OPEN_SESSION_FAIL, 0);
 }
 } // namespace OHOS
 
 /* Fuzzer entry point */
 extern "C" int32_t LLVMFuzzerTestOneInput(const uint8_t *data, size_t size)
 {
-    if (data == nullptr || size < sizeof(uint64_t)) {
-        return 0;
+    static OHOS::TestEnv env;
+    if (!env.IsEnvInit()) {
+        return false;
     }
-
-    OHOS::SoftBusRecordAuthResultFuzzTest(data, size);
-    OHOS::SoftBusRecordBusCenterResultFuzzTest(data, size);
-    OHOS::SoftBusRecordDevOnlineDurResultFuzzTest(data, size);
-    OHOS::SoftBusReportDevOnlineEvtFuzzTest(data, size);
-    OHOS::SoftBusReportBusCenterFaultEvtFuzzTest(data, size);
-    OHOS::SoftBusRecordDiscoveryResultFuzzTest(data, size);
-    OHOS::SoftBusHiSysEvtCommonFuzzTest(data, size);
-    OHOS::SoftBusHiSysEvtTransReporterFuzzTest(data, size);
+    FuzzedDataProvider provider(data, size);
+    OHOS::SoftBusRecordAuthResultFuzzTest(provider);
+    OHOS::SoftBusRecordBusCenterResultFuzzTest(provider);
+    OHOS::SoftBusRecordDevOnlineDurResultFuzzTest(provider);
+    OHOS::SoftBusReportDevOnlineEvtFuzzTest(provider);
+    OHOS::SoftBusReportBusCenterFaultEvtFuzzTest(provider);
+    OHOS::SoftBusRecordDiscoveryResultFuzzTest(provider);
+    OHOS::SoftBusHiSysEvtCommonFuzzTest(provider);
+    OHOS::SoftBusHiSysEvtTransReporterFuzzTest(provider);
 
     return 0;
 }

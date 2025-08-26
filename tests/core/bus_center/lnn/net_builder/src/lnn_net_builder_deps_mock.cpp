@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2022-2023 Huawei Device Co., Ltd.
+ * Copyright (c) 2022-2025 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -667,8 +667,8 @@ void LnnDeinitBusCenterEvent(void)
     return GetNetBuilderDepsInterface()->LnnDeinitBusCenterEvent();
 }
 
-int32_t AuthStartVerify(const AuthConnInfo *connInfo, const AuthVerifyParam *authVerifyParam,
-    const AuthVerifyCallback *callback)
+int32_t AuthStartVerify(
+    const AuthConnInfo *connInfo, const AuthVerifyParam *authVerifyParam, const AuthVerifyCallback *callback)
 {
     return GetNetBuilderDepsInterface()->AuthStartVerify(connInfo, authVerifyParam, callback);
 }
@@ -777,6 +777,11 @@ void LnnDeInitSaStatusMonitor()
 int32_t LnnGetLocalStrInfoByIfnameIdx(InfoKey key, char *info, uint32_t len, int32_t ifIdx)
 {
     return GetNetBuilderDepsInterface()->LnnGetLocalStrInfoByIfnameIdx(key, info, len, ifIdx);
+}
+
+bool IsSameAccountId(int64_t accountId)
+{
+    return GetNetBuilderDepsInterface()->IsSameAccountId(accountId);
 }
 } // extern "C"
 } // namespace OHOS

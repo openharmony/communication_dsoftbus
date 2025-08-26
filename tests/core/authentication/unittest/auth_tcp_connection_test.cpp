@@ -42,8 +42,7 @@ public:
     int32_t SetSocketPktHead(SocketPktHead *head);
     static void OnWiFiConnected(ListenerModule module, int32_t fd, bool isClient);
     static void OnWiFiDisconnected(ListenerModule module, int32_t fd);
-    static void OnWiFiDataReceived(ListenerModule module, int32_t fd, const AuthDataHead *head,
-        const uint8_t *data);
+    static void OnWiFiDataReceived(ListenerModule module, int32_t fd, const AuthDataHead *head, const uint8_t *data);
     static void OnDataReceived(int32_t authId, const AuthChannelData *data);
     static void OnDisconnect(int32_t authId);
     static bool isOnWiFiConnectedSuccess;
@@ -86,8 +85,8 @@ int32_t AuthTcpConnectionTest::SetSocketPktHead(SocketPktHead *head)
 
 void AuthTcpConnectionTest::OnWiFiConnected(ListenerModule module, int32_t fd, bool isClient)
 {
-    AUTH_LOGI(AUTH_TEST, "OnWiFiConnected: fd=%{public}d, side=%{public}s", fd,
-        isClient ? "client" : "server(ignored)");
+    AUTH_LOGI(
+        AUTH_TEST, "OnWiFiConnected: fd=%{public}d, side=%{public}s", fd, isClient ? "client" : "server(ignored)");
     isOnWiFiConnectedSuccess = true;
 }
 
@@ -97,8 +96,8 @@ void AuthTcpConnectionTest::OnWiFiDisconnected(ListenerModule module, int32_t fd
     isOnWiFiDisconnectedSuccess = true;
 }
 
-void AuthTcpConnectionTest::OnWiFiDataReceived(ListenerModule module, int32_t fd,
-    const AuthDataHead *head, const uint8_t *data)
+void AuthTcpConnectionTest::OnWiFiDataReceived(
+    ListenerModule module, int32_t fd, const AuthDataHead *head, const uint8_t *data)
 {
     AUTH_LOGI(AUTH_TEST, "OnWiFiDataReceived: module=%{public}d, fd=%{public}d", module, fd);
     isOnWiFiDataReceivedSuccess = true;
@@ -484,11 +483,11 @@ HWTEST_F(AuthTcpConnectionTest, ADD_AUTH_TCP_CONN_FD_ITEM_TEST_001, TestSize.Lev
 {
     int32_t fd = 1;
 
-    int32_t ret = AddAuthTcpConnFdItem(fd);
+    int32_t ret = AddAuthTcpConnFdItem(fd, AUTH_P2P);
     EXPECT_EQ(ret, SOFTBUS_LOCK_ERR);
     ret = AuthTcpConnFdLockInit();
     EXPECT_EQ(ret, SOFTBUS_OK);
-    ret = AddAuthTcpConnFdItem(fd);
+    ret = AddAuthTcpConnFdItem(fd, AUTH_P2P);
     EXPECT_EQ(ret, SOFTBUS_OK);
     DeleteAuthTcpConnFdItemByConnId(fd);
     AuthTcpConnFdLockDeinit();
@@ -511,7 +510,7 @@ HWTEST_F(AuthTcpConnectionTest, IS_EXIST_AUTH_TCP_CONN_FD_ITEM_BY_COON_ID_TEST_0
     EXPECT_EQ(result, SOFTBUS_OK);
     ret = IsExistAuthTcpConnFdItemByConnId(fd);
     EXPECT_FALSE(ret);
-    result = AddAuthTcpConnFdItem(fd);
+    result = AddAuthTcpConnFdItem(fd, AUTH_P2P);
     EXPECT_EQ(result, SOFTBUS_OK);
     ret = IsExistAuthTcpConnFdItemByConnId(fd);
     EXPECT_TRUE(ret);
@@ -556,7 +555,7 @@ HWTEST_F(AuthTcpConnectionTest, PROCESS_SOCKET_IN_EVENT_TEST_001, TestSize.Level
     ret = ProcessSocketInEvent(AUTH_USB, fd);
     EXPECT_EQ(ret, SOFTBUS_INVALID_PARAM);
 
-    ret = AddAuthTcpConnFdItem(fd);
+    ret = AddAuthTcpConnFdItem(fd, AUTH_P2P);
     EXPECT_EQ(result, SOFTBUS_OK);
     ret = ProcessSocketInEvent(AUTH_USB, fd);
     EXPECT_EQ(ret, SOFTBUS_INVALID_DATA_HEAD);

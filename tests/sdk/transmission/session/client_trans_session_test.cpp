@@ -62,7 +62,7 @@ namespace OHOS {
 
 const char *g_pkgName = "dms";
 const char *g_sessionName = "ohos.distributedschedule.dms.test";
-const char *g_sessionKey = "www.huaweitest.com";
+const char *g_sessionKey = "www.test.com";
 const char *g_networkId = "ABCDEF00ABCDEF00ABCDEF00ABCDEF00ABCDEF00ABCDEF00ABCDEF00ABCDEF0";
 const char *g_deviceId = "ABCDEF00ABCDEF00ABCDEF00ABCDEF00ABCDEF00ABCDEF00ABCDEF00ABCDEF0";
 const char *g_groupId = "TEST_GROUP_ID";
@@ -246,7 +246,8 @@ static int32_t AddSessionServerAndSession(const char *sessionName, int32_t chann
 
     TestGenerateCommParam(sessionParam);
     sessionParam->sessionName = sessionName;
-    int32_t ret = ClientAddSessionServer(SEC_TYPE_PLAINTEXT, g_pkgName, sessionName, &g_sessionlistener);
+    uint64_t timestamp = 0;
+    int32_t ret = ClientAddSessionServer(SEC_TYPE_PLAINTEXT, g_pkgName, sessionName, &g_sessionlistener, &timestamp);
     if (ret != SOFTBUS_OK) {
         return ret;
     }
@@ -294,7 +295,8 @@ HWTEST_F(TransClientSessionTest, TransClientSessionTest01, TestSize.Level1)
     isEnabled = true;
     ret = OpenSessionWithExistSession(TRANS_TEST_SESSION_ID, isEnabled);
     EXPECT_EQ(ret, SOFTBUS_TRANS_INVALID_SESSION_ID);
-    ret = ClientAddSessionServer(SEC_TYPE_PLAINTEXT, g_pkgName, g_sessionName, &g_sessionlistener);
+    uint64_t timestamp = 0;
+    ret = ClientAddSessionServer(SEC_TYPE_PLAINTEXT, g_pkgName, g_sessionName, &g_sessionlistener, &timestamp);
     ASSERT_EQ(ret, SOFTBUS_OK);
     SessionParam *sessionParam = (SessionParam*)SoftBusMalloc(sizeof(SessionParam));
     ASSERT_TRUE(sessionParam != nullptr);
@@ -329,7 +331,8 @@ HWTEST_F(TransClientSessionTest, TransClientSessionTest02, TestSize.Level1)
         .OnStreamReceived = OnStreamReceived,
         .OnQosEvent = OnQosEvent,
     };
-    int32_t ret = ClientAddSessionServer(SEC_TYPE_PLAINTEXT, g_pkgName, g_sessionName, &sessionlistener);
+    uint64_t timestamp = 0;
+    int32_t ret = ClientAddSessionServer(SEC_TYPE_PLAINTEXT, g_pkgName, g_sessionName, &sessionlistener, &timestamp);
     ASSERT_EQ(ret, SOFTBUS_OK);
     SessionParam *sessionParam = (SessionParam*)SoftBusMalloc(sizeof(SessionParam));
     ASSERT_TRUE(sessionParam != nullptr);

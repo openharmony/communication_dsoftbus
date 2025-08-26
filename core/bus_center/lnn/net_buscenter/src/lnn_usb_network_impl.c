@@ -454,6 +454,13 @@ static void OnSoftbusIpNetworkDisconnected(LnnPhysicalSubnet *subnet)
 
 static void OnIpNetifStatusChanged(LnnPhysicalSubnet *subnet, void *status)
 {
+    if (subnet == NULL) {
+        LNN_LOGE(LNN_BUILDER, "invaild subnet paramter");
+        if (status != NULL) {
+            SoftBusFree(status);
+        }
+        return;
+    }
     LNN_LOGI(LNN_BUILDER, "subnet now status=%{public}d", subnet->status);
     IpSubnetManagerEvent event = USB_SUBNET_MANAGER_EVENT_MAX;
     if (status == NULL) {

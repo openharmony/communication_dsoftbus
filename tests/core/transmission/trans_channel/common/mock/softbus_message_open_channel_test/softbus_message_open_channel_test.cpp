@@ -28,7 +28,7 @@ namespace OHOS {
 #define PKG_NAME_SIZE_MAX_LEN 65
 #define TEST_SESSION_KEY "session key"
 
-const char *g_sessionKey = "www.huaweitest.com";
+const char *g_sessionKey = "www.test.com";
 const char *g_groupid = "TEST_GROUP_ID";
 static const char *g_sessionName = "com.test.trans.auth.demo";
 static const char *g_pkgName = "dms";

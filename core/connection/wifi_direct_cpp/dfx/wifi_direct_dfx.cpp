@@ -119,6 +119,7 @@ void WifiDirectDfx::SetReportExtraLinkType(ConnEventExtra &extra, const WifiDire
         case WIFI_DIRECT_CONNECT_TYPE_AUTH_NEGO_HML:
             extra.linkType = CONNECT_HML;
             break;
+        case WIFI_DIRECT_CONNECT_TYPE_SPARKLINK_TRIGGER_HML:
         case WIFI_DIRECT_CONNECT_TYPE_BLE_TRIGGER_HML:
         case WIFI_DIRECT_CONNECT_TYPE_AUTH_TRIGGER_HML:
             extra.linkType = CONNECT_TRIGGER_HML;
@@ -189,6 +190,9 @@ void WifiDirectDfx::SetBootLinkType(ConnEventExtra &extra, const WifiDirectConne
     
     if (type == NEGO_CHANNEL_NULL && info.connectType == WIFI_DIRECT_CONNECT_TYPE_BLE_TRIGGER_HML) {
         extra.bootLinkType = STATISTIC_BLE_TRIGGER;
+    }
+    if (type == NEGO_CHANNEL_NULL && info.connectType == WIFI_DIRECT_CONNECT_TYPE_SPARKLINK_TRIGGER_HML) {
+        extra.bootLinkType = STATISTIC_SPARK_LINK_TRIGGER;
     }
     if (info.dfxInfo.bootLinkType == STATISTIC_BLE_AND_ACTION) {
         extra.bootLinkType = STATISTIC_BLE_AND_ACTION;
