@@ -24,7 +24,6 @@ extern "C" {
 
 typedef struct TagLnnOpenFuncList {
     // heartbeat
-    LnnDeinitHeartbeatFunc lnnDeinitHeartbeat;
     IsHeartbeatEnableFunc isHeartbeatEnable;
     LnnRegistHeartbeatMediumMgrFunc lnnRegistHeartbeatMediumMgr;
     LnnSetMediumParamBySpecificTypeFunc lnnSetMediumParamBySpecificType;
@@ -41,7 +40,7 @@ typedef struct TagLnnOpenFuncList {
     LnnIsSupportHeartbeatCapFunc lnnIsSupportHeartbeatCap;
     LnnRequestBleDiscoveryProcessFunc lnnRequestBleDiscoveryProcess;
     GetScreenStateFunc getScreenState;
-    GetScreenLockStateFunc getscreenLockState;
+    GetScreenLockStateFunc getScreenLockState;
     LnnTriggerSleHeartbeatFunc lnnTriggerSleHeartbeat;
     LnnCleanTriggerSparkInfoFunc lnnCleanTriggerSparkInfo;
     LnnOfflineTimingBySleHbFunc lnnOfflineTimingBySleHb;
@@ -204,9 +203,6 @@ typedef struct TagLnnOpenFuncList {
     LnnIsNeedInterceptBroadcastFunc lnnIsNeedInterceptBroadcast;
 
     // common
-    StrCmpIgnoreCaseFunc strCmpIgnoreCase;
-    SoftBusChannelToFrequencyFunc softBusChannelToFrequency;
-    SoftBusIs5GBandFunc softBusIs5GBand;
     SoftBusFrequencyToChannelFunc softBusFrequencyToChannel;
     GetLooperFunc getLooper;
 
@@ -271,10 +267,6 @@ typedef struct TagLnnOpenFuncList {
     // adapter
     SoftBusGetCurrentGroupFunc softBusGetCurrentGroup;
     SoftBusGetHotspotConfigFunc softBusGetHotspotConfig;
-    SoftBusAccessFileFunc softBusAccessFile;
-    SoftBusRemoveFileFunc softBusRemoveFile;
-    SoftBusWriteFileFunc softBusWriteFile;
-    SoftBusReadFullFileAndSizeFunc softBusReadFullFileAndSize;
     SoftBusGetPublicKeyFunc softBusGetPublicKey;
     SoftBusRsaEncryptFunc softBusRsaEncrypt;
     SoftBusRsaDecryptFunc softBusRsaDecrypt;

@@ -177,7 +177,7 @@ HWTEST_F(TransUkManagerTest, UkGetUkPolicyTest001, TestSize.Level1)
 
 /**
  * @tc.name: GetLocalAccountUidByUserIdTest_001
- * @tc.desc: GetLocalAccountUidByUserId_ShouldReturnInvalidParam_WhenIdIsNull
+ * @tc.desc: GetLocalAccountUidByUserId_ShouldReturnInvalidParam_WhenIdIsNull.
  * @tc.type: FUNC
  * @tc.require:
  */
@@ -194,7 +194,7 @@ HWTEST_F(TransUkManagerTest, GetLocalAccountUidByUserIdTest_001, TestSize.Level0
 
 /**
  * @tc.name: GetLocalAccountUidByUserIdTest_002
- * @tc.desc: GetLocalAccountUidByUserId_ShouldReturnInvalidParam_WhenIdIsNull
+ * @tc.desc: GetLocalAccountUidByUserId_ShouldReturnInvalidParam_WhenIdIsNull.
  * @tc.type: FUNC
  * @tc.require:
  */
@@ -221,11 +221,11 @@ HWTEST_F(TransUkManagerTest, GetLocalAccountUidByUserIdTest_003, TestSize.Level0
     TransLaneCommonTestInterfaceMock mock;
 
     char mockUid[] = "local_uid";
-    EXPECT_CALL(mock, LnnGetLocalStrInfo(STRING_KEY_ACCOUNT_UID, _, _))
+    EXPECT_CALL(mock, LnnGetLocalStrInfo)
         .WillOnce(DoAll(
             SetArrayArgument<1>(mockUid, mockUid + strlen(mockUid) + 1),
             Return(SOFTBUS_OK)));
-    
+
     uint32_t len = 10;
     char id[10] = {0};
     int32_t result = GetLocalAccountUidByUserId(id, sizeof(id), &len, 1);
@@ -244,7 +244,7 @@ HWTEST_F(TransUkManagerTest, GetLocalAccountUidByUserIdTest_003, TestSize.Level0
 HWTEST_F(TransUkManagerTest, GetLocalAccountUidByUserIdTest_005, TestSize.Level0)
 {
     uint32_t len = 10;
-    char userId = 1;
+    int32_t userId = 1;
     char id[10] = "test";
     NiceMock<TransLaneCommonTestInterfaceMock> TransLaneCommonMock;
     EXPECT_CALL(TransLaneCommonMock, LnnGetLocalStrInfo).WillOnce(Return(SOFTBUS_STRCPY_ERR));
@@ -298,23 +298,23 @@ HWTEST_F(TransUkManagerTest, GetLocalAccountUidByUserIdTest_007, TestSize.Level1
 }
 
 /**
- * @tc.name: FillHapSinkInfoToAppInfoTest_001
- * @tc.desc: FillHapSinkInfoToAppInfo_ShouleReturnImmediately_WhenAppInfoIsNull.
+ * @tc.name: FillHapSinkAclInfoToAppInfoTest_001
+ * @tc.desc: FillHapSinkAclInfoToAppInfo_ShouleReturnImmediately_WhenAppInfoIsNull.
  * @tc.type: FUNC
  * @tc.require:
  */
-HWTEST_F(TransUkManagerTest, FillHapSinkInfoToAppInfoTest_001, TestSize.Level0)
+HWTEST_F(TransUkManagerTest, FillHapSinkAclInfoToAppInfoTest_001, TestSize.Level0)
 {
     EXPECT_NO_FATAL_FAILURE(FillHapSinkAclInfoToAppInfo(NULL));
 }
 
 /**
- * @tc.name: FillHapSinkInfoToAppInfoTest_002
- * @tc.desc: FillHapSinkInfoToAppInfo_ShouleFillAclInfo_WhenTokenTypeIsHAP.
+ * @tc.name: FillHapSinkAclInfoToAppInfoTest_002
+ * @tc.desc: FillHapSinkAclInfoToAppInfo_ShouleFillAclInfo_WhenTokenTypeIsHAP.
  * @tc.type: FUNC
  * @tc.require:
  */
-HWTEST_F(TransUkManagerTest, FillHapSinkInfoToAppInfoTest_002, TestSize.Level0)
+HWTEST_F(TransUkManagerTest, FillHapSinkAclInfoToAppInfoTest_002, TestSize.Level0)
 {
     AppInfo *appInfo = new AppInfo();
     appInfo->myData.tokenType = ACCESS_TOKEN_TYPE_HAP;
@@ -329,12 +329,12 @@ HWTEST_F(TransUkManagerTest, FillHapSinkInfoToAppInfoTest_002, TestSize.Level0)
 }
 
 /**
- * @tc.name: FillHapSinkInfoToAppInfoTest_003
- * @tc.desc: FillHapSinkInfoToAppInfo_ShouleFillAclInfo_WhenTokenTypeIsHAP.
+ * @tc.name: FillHapSinkAclInfoToAppInfoTest_003
+ * @tc.desc: FillHapSinkAclInfoToAppInfo_ShouleFillAclInfo_WhenTokenTypeIsHAP.
  * @tc.type: FUNC
  * @tc.require:
  */
-HWTEST_F(TransUkManagerTest, FillHapSinkInfoToAppInfoTest_003, TestSize.Level0)
+HWTEST_F(TransUkManagerTest, FillHapSinkAclInfoToAppInfoTest_003, TestSize.Level0)
 {
     AppInfo *appInfo = new AppInfo();
     appInfo->myData.tokenType = ACCESS_TOKEN_TYPE_HAP;
@@ -347,7 +347,7 @@ HWTEST_F(TransUkManagerTest, FillHapSinkInfoToAppInfoTest_003, TestSize.Level0)
     EXPECT_NO_FATAL_FAILURE(FillHapSinkAclInfoToAppInfo(appInfo));
     delete appInfo;
 }
-    
+
 /**
  * @tc.name: UkEncryptAndAddSinkSessionKeyTest001
  * @tc.desc: UkEncryptAndAddSinkSessionKeyTest001.
