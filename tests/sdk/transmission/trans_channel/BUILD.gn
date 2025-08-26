@@ -255,10 +255,8 @@ if (defined(ohos_lite)) {
     include_dirs += trans_sdk_proxy_test_inc
     deps = trans_sdk_test_common_deps
     deps += trans_sdk_proxy_test_deps
-    dep_file = "components/nstackx_enhanced/nstackx_core/dfile/BUILD.gn"
-    native_source_path = rebase_path(dep_file, "$dsoftbus_root_path")
-    enhanced_path = get_path_info(native_source_path, "name")
-    if (enhanced_path == "BUILD.gn") {
+    if (!defined(global_parts_info) ||
+      defined(global_parts_info.communication_dsoftbus_service_ext)) {
       include_dirs += [ "$dsoftbus_root_path/components/nstackx_enhanced/nstackx_util/interface" ]
       deps += [ "$dsoftbus_root_path/components/nstackx_enhanced/nstackx_core/dfile:nstackx_dfile" ]
     } else {
@@ -289,12 +287,9 @@ if (defined(ohos_lite)) {
     ]
     deps = trans_sdk_test_common_deps
     deps += trans_sdk_proxy_test_deps
-    dep_file = "components/nstackx_enhanced/nstackx_core/dfile/BUILD.gn"
-    native_source_path = rebase_path(dep_file, "$dsoftbus_root_path")
-    
-    enhanced_path = get_path_info(native_source_path, "name")
 
-    if (enhanced_path == "BUILD.gn") {
+    if (!defined(global_parts_info) ||
+      defined(global_parts_info.communication_dsoftbus_service_ext)) {
       include_dirs += [ "$dsoftbus_root_path/components/nstackx_enhanced/nstackx_util/interface" ]
       deps += [ "$dsoftbus_root_path/components/nstackx_enhanced/nstackx_core/dfile:nstackx_dfile" ]
     } else {
