@@ -36,6 +36,9 @@ typedef uint8_t BT_ADDR[BT_ADDR_LEN];
 #define BR_READ_SOCKET_CLOSED 0
 #define BR_READ_FAILED (-1)
 
+#define CONN_BR_SEND_DATA_FAIL_UNDERLAYER_ERR_QUEUE_FULL   (-11)
+#define CONN_BR_SEND_DATA_FAIL_UNDERLAYER_ERR_INTERRUPTION (-4)
+
 typedef struct {
     BT_UUIDL uuid;
     BT_ADDR mac;
