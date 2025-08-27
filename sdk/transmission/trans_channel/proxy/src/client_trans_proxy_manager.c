@@ -439,6 +439,10 @@ static int32_t ClientTransProxyProcSendMsgAck(int32_t channelId, const char *dat
             TRANS_LOGE(TRANS_SDK, "proxychannel delete dataSeqInfoList failed, channelId=%{public}d", channelId);
             return ret;
         }
+        if (sessionCallback.socketClient.OnBytesSent == NULL) {
+            TRANS_LOGE(TRANS_SDK, "OnBytesSent is null, channelId=%{public}d", channelId);
+            return SOFTBUS_INVALID_PARAM;
+        }
         sessionCallback.socketClient.OnBytesSent(socketId, dataSeq, SOFTBUS_OK);
         return SOFTBUS_OK;
     }
