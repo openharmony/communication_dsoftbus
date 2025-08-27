@@ -1185,6 +1185,9 @@ static void RemoveBadFd(void)
 
 static void *WatchTask(void *arg)
 {
+    const char *name = "Watch_Tsk";
+    SoftBusThread threadSelf = SoftBusThreadGetSelf();
+    SoftBusThreadSetName(threadSelf, name);
     static int32_t wakeupTraceIdGenerator = 0;
 
     CONN_CHECK_AND_RETURN_RET_LOGW(arg != NULL, NULL, CONN_COMMON, "invalid param");
@@ -1273,7 +1276,7 @@ static int32_t StartWatchThread(void)
             break;
         }
         state->referenceCount = 1;
-        status = ConnStartActionAsync(state, WatchTask, "Watch_Tsk");
+        status = ConnStartActionAsync(state, WatchTask, NULL);
         if (status != SOFTBUS_OK) {
             CONN_LOGE(CONN_COMMON, "start watch task async fail, error=%{public}d", status);
             CleanupWatchThreadState(&state);

@@ -117,6 +117,9 @@ static int32_t StartClientConnect(struct ProxyConnection *connection)
 
 static void *ProxyBrClientConnect(void *data)
 {
+    const char *name = "Proxy_Conn";
+    SoftBusThread threadSelf = SoftBusThreadGetSelf();
+    SoftBusThreadSetName(threadSelf, name);
     ProxyBrConnectContext *ctx = (ProxyBrConnectContext *)(data);
     CONN_CHECK_AND_RETURN_RET_LOGW(ctx != NULL, NULL, CONN_PROXY, "ctx is null");
     uint32_t channelId = ctx->channelId;
@@ -173,7 +176,7 @@ int32_t ProxyBrConnect(struct ProxyConnection *connection, const ProxyBrConnectS
         "calloc failed, connId=%{public}u", connection->channelId);
     ctx->channelId = connection->channelId;
     ctx->callback = *callback;
-    int32_t status = ConnStartActionAsync(ctx, ProxyBrClientConnect, "Proxy_Conn");
+    int32_t status = ConnStartActionAsync(ctx, ProxyBrClientConnect, NULL);
     if (status != SOFTBUS_OK) {
         CONN_LOGE(CONN_PROXY, "start connect thread failed, connId=%{public}u, error=%{public}d",
             connection->channelId, status);
