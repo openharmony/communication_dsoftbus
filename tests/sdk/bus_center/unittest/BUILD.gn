@@ -224,8 +224,8 @@ if (defined(ohos_lite)) {
     module_out_path = module_output_path
     sources = [
       "$dsoftbus_root_path/core/bus_center/service/src/bus_center_manager.c",
-      "bus_center_heartbeat_sdk_test.cpp",
       "$dsoftbus_root_path/core/frame/init/src/g_enhance_lnn_func.c",
+      "bus_center_heartbeat_sdk_test.cpp",
     ]
     include_dirs = bus_center_sdk_test_inc
     include_dirs += [
