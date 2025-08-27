@@ -198,6 +198,22 @@ static void UpdateCapacity(NodeInfo *nodeInfo, HbRespData *hbResp)
     (void)LnnSetNetCapability(&(nodeInfo->netCapacity), BIT_BLE);
 }
 
+static void UpdateDeviceInfoToMlps(const char *udid)
+{
+    LpDeviceStateInfo *info = (LpDeviceStateInfo *)SoftBusCalloc(sizeof(LpDeviceStateInfo));
+    if (info == NULL) {
+        LNN_LOGE(LNN_LEDGER, "calloc info fail");
+        return;
+    }
+    if (strcpy_s(info->udid, UDID_BUF_LEN, udid) != EOK) {
+        LNN_LOGE(LNN_LEDGER, "strcpy_s outUdid fail");
+        SoftBusFree(info);
+        return;
+    }
+    info->isOnline = true;
+    SendDeviceStateToMlpsPacked(info);
+}
+
 static void UpdateOnlineInfoNoConnection(const char *networkId, HbRespData *hbResp)
 {
     if (hbResp == NULL || hbResp->stateVersion == STATE_VERSION_INVALID) {
@@ -224,6 +240,7 @@ static void UpdateOnlineInfoNoConnection(const char *networkId, HbRespData *hbRe
         LNN_LOGE(LNN_HEART_BEAT, "update net capability fail");
         return;
     }
+    UpdateDeviceInfoToMlps(nodeInfo.deviceInfo.deviceUdid);
     char *anonyNetworkId = NULL;
     Anonymize(networkId, &anonyNetworkId);
     LNN_LOGI(LNN_HEART_BEAT, "networkId=%{public}s capability change:%{public}u->%{public}u",

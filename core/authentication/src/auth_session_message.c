@@ -339,11 +339,12 @@ int32_t ProcessDeviceInfoMessage(int64_t authSeq, AuthSessionInfo *info, const u
         devInfo.msg = (const char *)msg;
         devInfo.len = msgSize;
     }
-    if (UnpackDeviceInfoMessage(&devInfo, &info->nodeInfo, false, info) != SOFTBUS_OK) {
+    int32_t ret = UnpackDeviceInfoMessage(&devInfo, &info->nodeInfo, false, info);
+    if (ret != SOFTBUS_OK) {
         AUTH_LOGE(AUTH_FSM, "unpack device info fail");
         SoftBusFree(msg);
         SoftBusFree(decompressData);
-        return SOFTBUS_AUTH_UNPACK_DEVINFO_FAIL;
+        return ret;
     }
     SoftBusFree(msg);
     SoftBusFree(decompressData);

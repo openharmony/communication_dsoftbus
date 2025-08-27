@@ -30,7 +30,7 @@
 #include "trans_tcp_direct_p2p.h"
 #include "wifi_direct_manager.h"
 
-#define ID_OFFSET (0xABAB0000)
+#define ID_OFFSET (1)
 
 static void FreeFastTransData(AppInfo *appInfo)
 {

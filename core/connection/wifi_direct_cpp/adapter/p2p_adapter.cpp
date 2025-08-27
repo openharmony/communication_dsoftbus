@@ -132,7 +132,8 @@ int32_t P2pAdapter::P2pConnectGroup(const ConnectParam &param)
     CONN_CHECK_AND_RETURN_RET_LOGW(ret == EOK, SOFTBUS_CONN_PV2_COPY_SSID_FAILED, CONN_WIFI_DIRECT, "copy ssid fail");
 
     std::vector<uint8_t> bssid = WifiDirectUtils::MacStringToArray(configs[P2P_GROUP_CONFIG_INDEX_BSSID]);
-    memcpy_s(connectConfig.bssid, sizeof(connectConfig.bssid), bssid.data(), sizeof(connectConfig.bssid));
+    ret = memcpy_s(connectConfig.bssid, sizeof(connectConfig.bssid), bssid.data(), bssid.size());
+    CONN_CHECK_AND_RETURN_RET_LOGW(ret == EOK, SOFTBUS_MEM_ERR, CONN_WIFI_DIRECT, "copy bssid fail");
 
     ret = strcpy_s(connectConfig.preSharedKey, sizeof(connectConfig.preSharedKey),
         configs[P2P_GROUP_CONFIG_INDEX_SHARE_KEY].c_str());

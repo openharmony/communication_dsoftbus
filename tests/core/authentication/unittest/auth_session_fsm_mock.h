@@ -37,8 +37,8 @@ public:
     virtual int32_t LnnRetrieveDeviceInfoByUdidPacked(const char *udid, NodeInfo *deviceInfo) = 0;
     virtual int32_t LnnGetRemoteNodeInfoById(const char *id, IdCategory type, NodeInfo *info) = 0;
     virtual int32_t PostDeviceInfoMessage(int64_t authSeq, const AuthSessionInfo *info) = 0;
-    virtual int32_t ProcessDeviceIdMessage(AuthSessionInfo *info, const uint8_t *data, uint32_t len,
-        int64_t authSeq) = 0;
+    virtual int32_t ProcessDeviceIdMessage(
+        AuthSessionInfo *info, const uint8_t *data, uint32_t len, int64_t authSeq) = 0;
     virtual int32_t PostDeviceIdMessage(int64_t authSeq, const AuthSessionInfo *info) = 0;
     virtual bool LnnIsNeedInterceptBroadcast(bool disableGlass) = 0;
 };
@@ -48,17 +48,17 @@ public:
     AuthSessionFsmInterfaceMock();
     ~AuthSessionFsmInterfaceMock() override;
 
-    MOCK_METHOD0(SoftBusGetBrState, int32_t (void));
-    MOCK_METHOD3(GetUdidShortHash, bool (const AuthSessionInfo *, char *, uint32_t));
-    MOCK_METHOD2(LnnRetrieveDeviceInfoPacked, int32_t (const char *, NodeInfo *));
-    MOCK_METHOD2(IsSupportFeatureByCapaBit, bool (uint32_t, AuthCapability));
-    MOCK_METHOD2(GetAuthRequest, int32_t (uint32_t, AuthRequest *));
-    MOCK_METHOD2(LnnRetrieveDeviceInfoByUdidPacked, int32_t (const char *, NodeInfo *));
-    MOCK_METHOD3(LnnGetRemoteNodeInfoById, int32_t (const char *, IdCategory, NodeInfo *));
-    MOCK_METHOD2(PostDeviceInfoMessage, int32_t (int64_t, const AuthSessionInfo *));
-    MOCK_METHOD4(ProcessDeviceIdMessage, int32_t (AuthSessionInfo *, const uint8_t *, uint32_t, int64_t));
-    MOCK_METHOD2(PostDeviceIdMessage, int32_t (int64_t, const AuthSessionInfo *));
-    MOCK_METHOD1(LnnIsNeedInterceptBroadcast, bool (bool));
+    MOCK_METHOD0(SoftBusGetBrState, int32_t(void));
+    MOCK_METHOD3(GetUdidShortHash, bool(const AuthSessionInfo *, char *, uint32_t));
+    MOCK_METHOD2(LnnRetrieveDeviceInfoPacked, int32_t(const char *, NodeInfo *));
+    MOCK_METHOD2(IsSupportFeatureByCapaBit, bool(uint32_t, AuthCapability));
+    MOCK_METHOD2(GetAuthRequest, int32_t(uint32_t, AuthRequest *));
+    MOCK_METHOD2(LnnRetrieveDeviceInfoByUdidPacked, int32_t(const char *, NodeInfo *));
+    MOCK_METHOD3(LnnGetRemoteNodeInfoById, int32_t(const char *, IdCategory, NodeInfo *));
+    MOCK_METHOD2(PostDeviceInfoMessage, int32_t(int64_t, const AuthSessionInfo *));
+    MOCK_METHOD4(ProcessDeviceIdMessage, int32_t(AuthSessionInfo *, const uint8_t *, uint32_t, int64_t));
+    MOCK_METHOD2(PostDeviceIdMessage, int32_t(int64_t, const AuthSessionInfo *));
+    MOCK_METHOD1(LnnIsNeedInterceptBroadcast, bool(bool));
 };
-}
+} // namespace OHOS
 #endif // AUTH_AUTH_SESSION_FSM_MOCK_H

@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2022-2023 Huawei Device Co., Ltd.
+ * Copyright (c) 2022-2025 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -24,7 +24,6 @@
 #include "lnn_net_builder_deps_mock.h"
 #include "lnn_net_builder_init.c"
 #include "lnn_net_builder_process.c"
-#include "lnn_net_builder.h"
 #include "lnn_ohos_account.h"
 #include "softbus_adapter_bt_common.h"
 #include "softbus_common.h"
@@ -86,7 +85,7 @@ static void ClearNetBuilderFsmList()
     }
     LnnConnectionFsm *item = nullptr;
     LnnConnectionFsm *next = nullptr;
-    LIST_FOR_EACH_ENTRY_SAFE(item, next, &netBuilder->fsmList, LnnConnectionFsm, node) {
+    LIST_FOR_EACH_ENTRY_SAFE (item, next, &netBuilder->fsmList, LnnConnectionFsm, node) {
         ListDelete(&item->node);
         --netBuilder->connCount;
     }
@@ -2227,8 +2226,8 @@ HWTEST_F(LNNNetBuilderMockTest, AccountStateChangeHandler_Test_001, TestSize.Lev
     EXPECT_NO_FATAL_FAILURE(AccountStateChangeHandler(&info.basic));
     NiceMock<NetBuilderDepsInterfaceMock> NetBuilderMock;
     EXPECT_CALL(NetBuilderMock, LnnGetLocalStrInfo(_, _, _))
-            .WillOnce(Return(SOFTBUS_INVALID_PARAM))
-            .WillRepeatedly(Return(SOFTBUS_OK));
+        .WillOnce(Return(SOFTBUS_INVALID_PARAM))
+        .WillRepeatedly(Return(SOFTBUS_OK));
     auto ret = LnnInitNetBuilderDelay();
     EXPECT_EQ(ret, SOFTBUS_INVALID_PARAM);
 }
@@ -2291,7 +2290,8 @@ HWTEST_F(LNNNetBuilderMockTest, OnReAuthVerifyPassed_Test_001, TestSize.Level1)
     EXPECT_CALL(NetBuilderMock, LnnUpdateGroupType(_)).WillRepeatedly(Return(SOFTBUS_OK));
     EXPECT_CALL(NetBuilderMock, LnnUpdateAccountInfo(_)).WillRepeatedly(Return(SOFTBUS_OK));
     EXPECT_CALL(NetBuilderMock, IsSameAccountId(_)).WillRepeatedly(Return(true));
-    EXPECT_CALL(NetBuilderMock, LnnGetRemoteNodeInfoById(_, _, _)).WillOnce(Return(SOFTBUS_INVALID_PARAM))
+    EXPECT_CALL(NetBuilderMock, LnnGetRemoteNodeInfoById(_, _, _))
+        .WillOnce(Return(SOFTBUS_INVALID_PARAM))
         .WillRepeatedly(Return(SOFTBUS_OK));
     EXPECT_CALL(NetBuilderMock, LnnHasDiscoveryType(_, _)).WillRepeatedly(Return(true));
     EXPECT_NO_FATAL_FAILURE(OnReAuthVerifyPassed(requestId, authHandle, &info));

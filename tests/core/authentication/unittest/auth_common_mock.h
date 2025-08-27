@@ -31,7 +31,6 @@
 #include "lnn_net_builder.h"
 #include "lnn_node_info.h"
 #include "lnn_ohos_account_adapter.h"
-#include "lnn_node_info.h"
 #include "map"
 #include "securec.h"
 #include "softbus_adapter_bt_common.h"
@@ -44,8 +43,8 @@ public:
     AuthCommonInterface() {};
     virtual ~AuthCommonInterface() {};
 
-    virtual int32_t LnnAsyncCallbackDelayHelper(SoftBusLooper *looper, LnnAsyncCallbackFunc callback,
-        void *para, uint64_t delayMillis);
+    virtual int32_t LnnAsyncCallbackDelayHelper(
+        SoftBusLooper *looper, LnnAsyncCallbackFunc callback, void *para, uint64_t delayMillis);
     virtual int32_t LnnGetLocalNumU64Info(InfoKey key, uint64_t *info) = 0;
     virtual int32_t SoftBusGetBtState(void) = 0;
     virtual int32_t SoftBusGetBrState(void) = 0;
@@ -73,8 +72,7 @@ public:
     virtual int32_t ConnGetConnectionInfo(uint32_t connectionId, ConnectionInfo *info) = 0;
     virtual int32_t ConnSetConnectCallback(ConnModule moduleId, const ConnectCallback *callback) = 0;
     virtual void ConnUnSetConnectCallback(ConnModule moduleId) = 0;
-    virtual int32_t ConnConnectDevice(
-        const ConnectOption *option, uint32_t requestId, const ConnectResult *result) = 0;
+    virtual int32_t ConnConnectDevice(const ConnectOption *option, uint32_t requestId, const ConnectResult *result) = 0;
     virtual int32_t ConnDisconnectDevice(uint32_t connectionId) = 0;
     virtual uint32_t ConnGetHeadSize(void) = 0;
     virtual int32_t ConnPostBytes(uint32_t connectionId, ConnPostData *data) = 0;
@@ -90,29 +88,29 @@ public:
     AuthCommonInterfaceMock();
     ~AuthCommonInterfaceMock() override;
     MOCK_METHOD3(LnnGetRemoteNumU64Info, int32_t(const char *, InfoKey, uint64_t *));
-    MOCK_METHOD4(LnnAsyncCallbackDelayHelper, int32_t (SoftBusLooper *, LnnAsyncCallbackFunc, void *, uint64_t));
-    MOCK_METHOD2(LnnGetLocalNumU64Info, int32_t (InfoKey, uint64_t *));
-    MOCK_METHOD0(SoftBusGetBtState, int32_t (void));
-    MOCK_METHOD0(SoftBusGetBrState, int32_t (void));
-    MOCK_METHOD0(LnnHbOnTrustedRelationReduced, void ());
-    MOCK_METHOD1(LnnInsertSpecificTrustedDevInfo, int32_t (const char *));
-    MOCK_METHOD3(LnnGetNetworkIdByUuid, int32_t (const char *, char *, uint32_t));
-    MOCK_METHOD1(LnnGetStaFrequency, int32_t (const NodeInfo *));
-    MOCK_METHOD4(LnnEncryptAesGcm, int32_t (AesGcmInputParam *, int32_t, uint8_t **, uint32_t *));
-    MOCK_METHOD3(LnnDecryptAesGcm, int32_t (AesGcmInputParam *, uint8_t **, uint32_t *));
-    MOCK_METHOD2(LnnGetTrustedDevInfoFromDb, int32_t (char **, uint32_t *));
-    MOCK_METHOD1(LnnGetAllOnlineNodeNum, int32_t (int32_t *));
-    MOCK_METHOD2(LnnSetLocalStrInfo, int32_t (InfoKey, const char *));
-    MOCK_METHOD1(LnnNotifyEmptySessionKey, int32_t (int64_t));
-    MOCK_METHOD1(LnnNotifyLeaveLnnByAuthHandle, int32_t (AuthHandle *));
-    MOCK_METHOD2(LnnRequestLeaveSpecific, int32_t (const char *, ConnectionAddrType));
-    MOCK_METHOD1(SoftBusGetBtMacAddr, int32_t (SoftBusBtAddr *));
-    MOCK_METHOD2(GetNodeFromPcRestrictMap, int32_t (const char *, uint32_t *));
-    MOCK_METHOD1(DeleteNodeFromPcRestrictMap, void (const char *));
-    MOCK_METHOD3(AuthFailNotifyProofInfo, int32_t (int32_t, const char *, uint32_t));
-    MOCK_METHOD1(LnnDeleteLinkFinderInfo, void (const char *));
-    MOCK_METHOD3(SoftBusGenerateStrHash, int32_t (const unsigned char *, uint32_t, unsigned char *));
-    MOCK_METHOD3(IdServiceIsPotentialTrustedDevice, bool (const char *, const char *, bool));
+    MOCK_METHOD4(LnnAsyncCallbackDelayHelper, int32_t(SoftBusLooper *, LnnAsyncCallbackFunc, void *, uint64_t));
+    MOCK_METHOD2(LnnGetLocalNumU64Info, int32_t(InfoKey, uint64_t *));
+    MOCK_METHOD0(SoftBusGetBtState, int32_t(void));
+    MOCK_METHOD0(SoftBusGetBrState, int32_t(void));
+    MOCK_METHOD0(LnnHbOnTrustedRelationReduced, void());
+    MOCK_METHOD1(LnnInsertSpecificTrustedDevInfo, int32_t(const char *));
+    MOCK_METHOD3(LnnGetNetworkIdByUuid, int32_t(const char *, char *, uint32_t));
+    MOCK_METHOD1(LnnGetStaFrequency, int32_t(const NodeInfo *));
+    MOCK_METHOD4(LnnEncryptAesGcm, int32_t(AesGcmInputParam *, int32_t, uint8_t **, uint32_t *));
+    MOCK_METHOD3(LnnDecryptAesGcm, int32_t(AesGcmInputParam *, uint8_t **, uint32_t *));
+    MOCK_METHOD2(LnnGetTrustedDevInfoFromDb, int32_t(char **, uint32_t *));
+    MOCK_METHOD1(LnnGetAllOnlineNodeNum, int32_t(int32_t *));
+    MOCK_METHOD2(LnnSetLocalStrInfo, int32_t(InfoKey, const char *));
+    MOCK_METHOD1(LnnNotifyEmptySessionKey, int32_t(int64_t));
+    MOCK_METHOD1(LnnNotifyLeaveLnnByAuthHandle, int32_t(AuthHandle *));
+    MOCK_METHOD2(LnnRequestLeaveSpecific, int32_t(const char *, ConnectionAddrType));
+    MOCK_METHOD1(SoftBusGetBtMacAddr, int32_t(SoftBusBtAddr *));
+    MOCK_METHOD2(GetNodeFromPcRestrictMap, int32_t(const char *, uint32_t *));
+    MOCK_METHOD1(DeleteNodeFromPcRestrictMap, void(const char *));
+    MOCK_METHOD3(AuthFailNotifyProofInfo, int32_t(int32_t, const char *, uint32_t));
+    MOCK_METHOD1(LnnDeleteLinkFinderInfo, void(const char *));
+    MOCK_METHOD3(SoftBusGenerateStrHash, int32_t(const unsigned char *, uint32_t, unsigned char *));
+    MOCK_METHOD3(IdServiceIsPotentialTrustedDevice, bool(const char *, const char *, bool));
     MOCK_METHOD2(ConnGetConnectionInfo, int32_t(uint32_t, ConnectionInfo *));
     MOCK_METHOD2(ConnSetConnectCallback, int32_t(ConnModule, const ConnectCallback *));
     MOCK_METHOD1(ConnUnSetConnectCallback, void(ConnModule));

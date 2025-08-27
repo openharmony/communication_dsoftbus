@@ -18,8 +18,8 @@
 
 #include <gmock/gmock.h>
 
-#include "lnn_distributed_net_ledger_common.h"
 #include "lnn_distributed_net_ledger.h"
+#include "lnn_distributed_net_ledger_common.h"
 #include "lnn_node_info.h"
 
 namespace OHOS {
@@ -54,8 +54,8 @@ public:
     MOCK_METHOD2(LnnRetrieveDeviceInfo, int32_t(const char *, NodeInfo *));
 };
 extern "C" {
-    int32_t LnnSaveRemoteDeviceInfo(const NodeInfo *deviceInfo);
-    NodeInfo *LnnGetNodeInfoById(const char *id, IdCategory type);
+int32_t LnnSaveRemoteDeviceInfo(const NodeInfo *deviceInfo);
+NodeInfo *LnnGetNodeInfoById(const char *id, IdCategory type);
 }
 } // namespace OHOS
 #endif // LNN_DECISION_DB_DEPS_MOCK_H

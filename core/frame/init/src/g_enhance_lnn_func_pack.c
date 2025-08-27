@@ -18,6 +18,7 @@
 #include "g_enhance_lnn_func.h"
 #include "lnn_heartbeat_utils_struct.h"
 #include "lnn_heartbeat_medium_mgr.h"
+#include "lnn_lane_prelink.h"
 #include "softbus_adapter_mem.h"
 #include "softbus_error_code.h"
 #include "softbus_init_common.h"
@@ -550,6 +551,9 @@ bool HaveConcurrencyPreLinkReqIdByReuseConnReqIdPacked(uint32_t connReqId, bool 
 bool HaveConcurrencyPreLinkNodeByLaneReqIdPacked(uint32_t laneReqId, bool isCheckPreLink)
 {
     LnnEnhanceFuncList *pfnLnnEnhanceFuncList = LnnEnhanceFuncListGet();
+    if (pfnLnnEnhanceFuncList == NULL) {
+        return false;
+    }
     if (LnnCheckFuncPointer((void *)pfnLnnEnhanceFuncList->haveConcurrencyPreLinkNodeByLaneReqId) != SOFTBUS_OK) {
         return false;
     }
@@ -610,13 +614,22 @@ int32_t UpdateConcurrencyReuseLaneReqIdByActionIdPacked(uint32_t actionId, uint3
     return pfnLnnEnhanceFuncList->updateConcurrencyReuseLaneReqIdByActionId(actionId, reuseLaneReqId, connReqId);
 }
 
-int32_t UpdateConcurrencyReuseLaneReqIdByUdidPacked(char *udidHash, uint32_t reuseLaneReqId, uint32_t connReqId)
+int32_t UpdateConcurrencyReuseLaneReqIdByUdidPacked(char *udidHash, uint32_t udidHashLen, uint32_t reuseLaneReqId,
+    uint32_t connReqId)
 {
+    if (udidHash == NULL || udidHashLen < AUTH_UDID_HASH_LEN) {
+        LNN_LOGE(LNN_LANE, "invalid param");
+        return SOFTBUS_INVALID_PARAM;
+    }
     LnnEnhanceFuncList *pfnLnnEnhanceFuncList = LnnEnhanceFuncListGet();
+    if (pfnLnnEnhanceFuncList == NULL) {
+        return SOFTBUS_NOT_IMPLEMENT;
+    }
     if (LnnCheckFuncPointer((void *)pfnLnnEnhanceFuncList->updateConcurrencyReuseLaneReqIdByUdid) != SOFTBUS_OK) {
         return SOFTBUS_NOT_IMPLEMENT;
     }
-    return pfnLnnEnhanceFuncList->updateConcurrencyReuseLaneReqIdByUdid(udidHash, reuseLaneReqId, connReqId);
+    return pfnLnnEnhanceFuncList->updateConcurrencyReuseLaneReqIdByUdid(udidHash, udidHashLen, reuseLaneReqId,
+        connReqId);
 }
 
 int32_t LnnAddLocalVapInfoPacked(LnnVapType type, const LnnVapAttr *vapAttr)

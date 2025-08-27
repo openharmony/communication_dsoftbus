@@ -1713,7 +1713,8 @@ HWTEST_F(AuthTest, AUTH_SESSION_START_AUTH_Test_001, TestSize.Level1)
         .isFastAuth = true,
     };
     DeviceKeyId deviceKeyId = {
-        .hasDeviceKeyId = false, .localDeviceKeyId = AUTH_INVALID_DEVICEKEY_ID,
+        .hasDeviceKeyId = false,
+        .localDeviceKeyId = AUTH_INVALID_DEVICEKEY_ID,
         .remoteDeviceKeyId = AUTH_INVALID_DEVICEKEY_ID,
     };
     int32_t ret = AuthSessionStartAuth(&authInfo, connInfo, &deviceKeyId);

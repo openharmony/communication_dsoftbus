@@ -706,7 +706,7 @@ static int32_t SetConnIdAndAddr(int connId, int serverId, const SoftBusBtAddr *b
     target->connId = connId;
     target->notifyConnected = false;
     target->handle = -1;
-    (void)memcpy_s(&target->btAddr, sizeof(SoftBusBtAddr), btAddr, sizeof(SoftBusBtAddr));
+    target->btAddr = *btAddr;
     (void)SoftBusMutexUnlock(&g_softBusGattsManager.lock);
     return SOFTBUS_OK;
 }

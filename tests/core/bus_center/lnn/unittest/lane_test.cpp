@@ -195,7 +195,6 @@ HWTEST_F(LaneTest, LANE_REQ_ID_APPLY_Test_002, TestSize.Level1)
     SoftBusFree(laneReqIdList);
 }
 
-
 /*
  * @tc.name: LANE_LINK_Test_001
  * @tc.desc: LaneLink of wlan5G

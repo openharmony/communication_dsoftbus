@@ -439,6 +439,10 @@ static int32_t ClientTransProxyProcSendMsgAck(int32_t channelId, const char *dat
             TRANS_LOGE(TRANS_SDK, "proxychannel delete dataSeqInfoList failed, channelId=%{public}d", channelId);
             return ret;
         }
+        if (sessionCallback.socketClient.OnBytesSent == NULL) {
+            TRANS_LOGE(TRANS_SDK, "OnBytesSent is null, channelId=%{public}d", channelId);
+            return SOFTBUS_INVALID_PARAM;
+        }
         sessionCallback.socketClient.OnBytesSent(socketId, dataSeq, SOFTBUS_OK);
         return SOFTBUS_OK;
     }
@@ -972,7 +976,7 @@ static int32_t ClientTransProxyNoSubPacketD2DDataProc(
                 TRANS_SDK, "dataLen=%{public}d, channelId=%{public}d, inlen=%{public}d", head.dataLen, channelId, len);
             return SOFTBUS_INVALID_DATA_HEAD;
         }
-        if (memcpy_s(&nonce, NONCE_LEN, data + offSet, NONCE_LEN) != EOK) {
+        if (memcpy_s(&nonce, sizeof(uint16_t), data + offSet, NONCE_LEN) != EOK) {
             TRANS_LOGE(TRANS_SDK, "memcpy nonce failed");
             return SOFTBUS_MEM_ERR;
         }

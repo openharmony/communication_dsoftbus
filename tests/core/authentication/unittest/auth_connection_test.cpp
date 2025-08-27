@@ -39,8 +39,8 @@ public:
     void TearDown();
     static void OnConnectResult(uint32_t requestId, uint64_t connId, int32_t result, const AuthConnInfo *connInfo);
     static void OnDisconnected(uint64_t connId, const AuthConnInfo *connInfo);
-    static void OnDataReceived(uint64_t connId, const AuthConnInfo *connInfo, bool fromServer,
-        const AuthDataHead *head, const uint8_t *data);
+    static void OnDataReceived(
+        uint64_t connId, const AuthConnInfo *connInfo, bool fromServer, const AuthDataHead *head, const uint8_t *data);
     static bool isOnConnectResultSuccess;
     static bool isOnDisconnectedSuccess;
     static bool isOnDataReceivedSuccess;
@@ -58,8 +58,8 @@ void AuthConnectionTest::SetUp() { }
 
 void AuthConnectionTest::TearDown() { }
 
-void AuthConnectionTest::OnConnectResult(uint32_t requestId, uint64_t connId, int32_t result,
-    const AuthConnInfo *connInfo)
+void AuthConnectionTest::OnConnectResult(
+    uint32_t requestId, uint64_t connId, int32_t result, const AuthConnInfo *connInfo)
 {
     (void)requestId;
     (void)connInfo;
@@ -76,8 +76,8 @@ void AuthConnectionTest::OnDisconnected(uint64_t connId, const AuthConnInfo *con
     AUTH_LOGI(AUTH_TEST, "Auth Connection Disconnected.");
 }
 
-void AuthConnectionTest::OnDataReceived(uint64_t connId, const AuthConnInfo *connInfo, bool fromServer,
-    const AuthDataHead *head, const uint8_t *data)
+void AuthConnectionTest::OnDataReceived(
+    uint64_t connId, const AuthConnInfo *connInfo, bool fromServer, const AuthDataHead *head, const uint8_t *data)
 {
     (void)connId;
     (void)connInfo;
@@ -135,7 +135,6 @@ HWTEST_F(AuthConnectionTest, CET_CONN_TYPE_TEST_001, TestSize.Level1)
     int32_t ret = GetConnType(connId);
     EXPECT_EQ(ret, 1);
 }
-
 
 /*
  * @tc.name: CET_CONN_TYPE_TEST_001
@@ -745,7 +744,7 @@ HWTEST_F(AuthConnectionTest, POST_BY_TEST_FOR_SESSION_TEST_001, TestSize.Level1)
 HWTEST_F(AuthConnectionTest, POST_BY_TEST_FOR_SESSION_TEST_002, TestSize.Level1)
 {
     AuthDataHead head;
-    uint8_t data[TEST_DATA_LEN] = {0};
+    uint8_t data[TEST_DATA_LEN] = { 0 };
     (void)memset_s(&head, sizeof(head), 0, sizeof(head));
     AuthConnectionInterfaceMock mock;
     int32_t ret = PostBytesForSession(TEST_FD, &head, data);
@@ -765,7 +764,7 @@ HWTEST_F(AuthConnectionTest, POST_BY_TEST_FOR_SESSION_TEST_002, TestSize.Level1)
 HWTEST_F(AuthConnectionTest, POST_BY_TEST_FOR_SESSION_TEST_003, TestSize.Level1)
 {
     AuthDataHead head;
-    uint8_t data[TEST_DATA_LEN] = {0};
+    uint8_t data[TEST_DATA_LEN] = { 0 };
     (void)memset_s(&head, sizeof(head), 0, sizeof(head));
     head.len = TEST_DATA_LEN;
     AuthConnectionInterfaceMock mock;
@@ -1038,4 +1037,4 @@ HWTEST_F(AuthConnectionTest, AUTH_START_LISTENING_FOR_WIFI_DIRECT_TEST_001, Test
     ret = AuthStartListeningForWifiDirect(type, addr, port, &moduleId);
     EXPECT_EQ(ret, SOFTBUS_INVALID_PARAM);
 }
-}
+} // namespace OHOS

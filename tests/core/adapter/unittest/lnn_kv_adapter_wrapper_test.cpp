@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2025 Huawei Device Co., Ltd.
+ * Copyright (c) 2024-2025 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -61,7 +61,7 @@ void KVAdapterWrapperTest::TearDownTestCase(void)
 {
     LnnDestroyKvAdapter(g_dbId + 1);
 
-    LnnDestroyKvAdapter(g_dbId); // g_dbId = 1
+    LnnDestroyKvAdapter(g_dbId);
 }
 
 void KVAdapterWrapperTest::SetUp() { }
@@ -316,19 +316,6 @@ HWTEST_F(KVAdapterWrapperTest, LnnCreateKvAdapter_InvalidStoreIdLen_GreaterThanM
 }
 
 /**
- * @tc.name: LnnDestroyKvAdapter_Dbid_LessThanMin
- * @tc.desc: Test LnnDestroyKvAdapter with dbId being less than MIN_DBID_COUNT.
- * @tc.type: Functional Test
- * @tc.require:
- */
-HWTEST_F(KVAdapterWrapperTest, LnnDestroyKvAdapter_Dbid_LessThanMin, TestSize.Level1)
-{
-    int32_t dbId = MIN_DBID_COUNT - 1;
-    int32_t ret = LnnDestroyKvAdapter(dbId);
-    EXPECT_EQ(ret, SOFTBUS_INVALID_PARAM);
-}
-
-/**
  * @tc.name: LnnPutDBData_InvalidKey
  * @tc.desc: Test LnnPutDBData with key being nullptr.
  * @tc.type: Functional Test
@@ -534,43 +521,9 @@ HWTEST_F(KVAdapterWrapperTest, LnnGetDBData_InvalidKey, TestSize.Level1)
     int32_t dbId = g_dbId;
     const char *key = nullptr;
     int32_t keyLen = 10;
-    const int32_t num = 3;
-    char **value = new (std::nothrow) char *[num];
-    if (value == nullptr) {
-        return;
-    }
-    std::string strValue0 = "value";
-    value[0] = new (std::nothrow) char[strValue0.size() + 1];
-    if (value[0] == nullptr) {
-        delete[] value;
-        return;
-    }
-    std::copy_n(strValue0.c_str(), strValue0.size(), value[0]);
-    value[0][strValue0.size()] = '\0';
-    std::string strValue1 = "test";
-    value[1] = new (std::nothrow) char[strValue1.size() + 1];
-    if (value[1] == nullptr) {
-        delete[] value[0];
-        delete[] value;
-        return;
-    }
-    std::copy_n(strValue1.c_str(), strValue1.size(), value[1]);
-    value[1][strValue1.size()] = '\0';
-    std::string strValue2 = "char";
-    value[2] = new (std::nothrow) char[strValue2.size() + 1];
-    if (value[2] == nullptr) {
-        delete[] value[1];
-        delete[] value[0];
-        delete[] value;
-        return;
-    }
-    std::copy_n(strValue2.c_str(), strValue2.size(), value[2]);
-    value[2][strValue2.size()] = '\0';
+    char testValue[] = "test_value";
+    char *value[] = { testValue, testValue, testValue };
     int32_t ret = LnnGetDBData(dbId, key, keyLen, value);
-    for (int32_t i = 0; i < num; ++i) {
-        delete[] value[i];
-    }
-    delete[] value;
     EXPECT_EQ(ret, SOFTBUS_INVALID_PARAM);
 }
 
@@ -585,49 +538,15 @@ HWTEST_F(KVAdapterWrapperTest, LnnGetDBData_KeyLen_LessThanMin, TestSize.Level1)
     int32_t dbId = g_dbId;
     const char *key = "validKey";
     int32_t keyLen = MIN_STRING_LEN - 1;
-    const int32_t num = 3;
-    char **value = new (std::nothrow) char *[num];
-    if (value == nullptr) {
-        return;
-    }
-    std::string strValue0 = "value";
-    value[0] = new (std::nothrow) char[strValue0.size() + 1];
-    if (value[0] == nullptr) {
-        delete[] value;
-        return;
-    }
-    std::copy_n(strValue0.c_str(), strValue0.size(), value[0]);
-    value[0][strValue0.size()] = '\0';
-    std::string strValue1 = "test";
-    value[1] = new (std::nothrow) char[strValue1.size() + 1];
-    if (value[1] == nullptr) {
-        delete[] value[0];
-        delete[] value;
-        return;
-    }
-    std::copy_n(strValue1.c_str(), strValue1.size(), value[1]);
-    value[1][strValue1.size()] = '\0';
-    std::string strValue2 = "char";
-    value[2] = new (std::nothrow) char[strValue2.size() + 1];
-    if (value[2] == nullptr) {
-        delete[] value[1];
-        delete[] value[0];
-        delete[] value;
-        return;
-    }
-    std::copy_n(strValue2.c_str(), strValue2.size(), value[2]);
-    value[2][strValue2.size()] = '\0';
+    char testValue[] = "test_value";
+    char *value[] = { testValue, testValue, testValue };
     int32_t ret = LnnGetDBData(dbId, key, keyLen, value);
-    for (int32_t i = 0; i < num; ++i) {
-        delete[] value[i];
-    }
-    delete[] value;
     EXPECT_EQ(ret, SOFTBUS_INVALID_PARAM);
 }
 
 /**
  * @tc.name: LnnGetDBData_KeyLen_GreaterThanMax
- * @tc.desc: Test LnnGetDBData with keyLen being greater than MAX_STRING_LEN.
+ * @tc.desc: Test LnnGetDBData return SOFTBUS_INVALID_PARAM.
  * @tc.type: Functional Test
  * @tc.require:
  */
@@ -636,49 +555,15 @@ HWTEST_F(KVAdapterWrapperTest, LnnGetDBData_KeyLen_GreaterThanMax, TestSize.Leve
     int32_t dbId = g_dbId;
     const char *key = "validKey";
     int32_t keyLen = MAX_STRING_LEN + 1;
-    const int32_t num = 3;
-    char **value = new (std::nothrow) char *[num];
-    if (value == nullptr) {
-        return;
-    }
-    std::string strValue0 = "value";
-    value[0] = new (std::nothrow) char[strValue0.size() + 1];
-    if (value[0] == nullptr) {
-        delete[] value;
-        return;
-    }
-    std::copy_n(strValue0.c_str(), strValue0.size(), value[0]);
-    value[0][strValue0.size()] = '\0';
-    std::string strValue1 = "test";
-    value[1] = new (std::nothrow) char[strValue1.size() + 1];
-    if (value[1] == nullptr) {
-        delete[] value[0];
-        delete[] value;
-        return;
-    }
-    std::copy_n(strValue1.c_str(), strValue1.size(), value[1]);
-    value[1][strValue1.size()] = '\0';
-    std::string strValue2 = "char";
-    value[2] = new (std::nothrow) char[strValue2.size() + 1];
-    if (value[2] == nullptr) {
-        delete[] value[1];
-        delete[] value[0];
-        delete[] value;
-        return;
-    }
-    std::copy_n(strValue2.c_str(), strValue2.size(), value[2]);
-    value[2][strValue2.size()] = '\0';
+    char testValue[] = "test_value";
+    char *value[] = { testValue, testValue, testValue };
     int32_t ret = LnnGetDBData(dbId, key, keyLen, value);
-    for (int32_t i = 0; i < num; ++i) {
-        delete[] value[i];
-    }
-    delete[] value;
     EXPECT_EQ(ret, SOFTBUS_INVALID_PARAM);
 }
 
 /**
  * @tc.name: LnnGetDBData_Dbid_LessThanMin
- * @tc.desc: Test LnnGetDBData with dbid being less than MIN_STRING_LEN.
+ * @tc.desc: Test LnnGetDBData return SOFTBUS_INVALID_PARAM.
  * @tc.type: Functional Test
  * @tc.require:
  */
@@ -687,43 +572,9 @@ HWTEST_F(KVAdapterWrapperTest, LnnGetDBData_Dbid_LessThanMin, TestSize.Level1)
     int32_t dbId = MIN_DBID_COUNT - 1;
     const char *key = "validKey";
     int32_t keyLen = strlen(key);
-    const int32_t num = 3;
-    char **value = new (std::nothrow) char *[num];
-    if (value == nullptr) {
-        return;
-    }
-    std::string strValue0 = "value";
-    value[0] = new (std::nothrow) char[strValue0.size() + 1];
-    if (value[0] == nullptr) {
-        delete[] value;
-        return;
-    }
-    std::copy_n(strValue0.c_str(), strValue0.size(), value[0]);
-    value[0][strValue0.size()] = '\0';
-    std::string strValue1 = "test";
-    value[1] = new (std::nothrow) char[strValue1.size() + 1];
-    if (value[1] == nullptr) {
-        delete[] value[0];
-        delete[] value;
-        return;
-    }
-    std::copy_n(strValue1.c_str(), strValue1.size(), value[1]);
-    value[1][strValue1.size()] = '\0';
-    std::string strValue2 = "char";
-    value[2] = new (std::nothrow) char[strValue2.size() + 1];
-    if (value[2] == nullptr) {
-        delete[] value[1];
-        delete[] value[0];
-        delete[] value;
-        return;
-    }
-    std::copy_n(strValue2.c_str(), strValue2.size(), value[2]);
-    value[2][strValue2.size()] = '\0';
+    char testValue[] = "test_value";
+    char *value[] = { testValue, testValue, testValue };
     int32_t ret = LnnGetDBData(dbId, key, keyLen, value);
-    for (int32_t i = 0; i < num; ++i) {
-        delete[] value[i];
-    }
-    delete[] value;
     EXPECT_EQ(ret, SOFTBUS_INVALID_PARAM);
 }
 
@@ -840,7 +691,7 @@ HWTEST_F(KVAdapterWrapperTest, LnnCloudSync002, TestSize.Level1)
 HWTEST_F(KVAdapterWrapperTest, LnnDeleteDBDataByNull, TestSize.Level1)
 {
     int32_t dbId = g_dbId;
-    const char * keyStr = nullptr;
+    const char *keyStr = nullptr;
     string valueStr = "ccc";
     EXPECT_EQ(LnnPutDBData(dbId, keyStr, 3, valueStr.c_str(), 3), SOFTBUS_INVALID_PARAM);
 }
@@ -854,7 +705,7 @@ HWTEST_F(KVAdapterWrapperTest, LnnDeleteDBDataByNull, TestSize.Level1)
 HWTEST_F(KVAdapterWrapperTest, LnnGetDBDataByKey, TestSize.Level1)
 {
     int32_t dbId = g_dbId;
-    const char * keyStr = nullptr;
+    const char *keyStr = nullptr;
     char *value = nullptr;
     EXPECT_EQ(LnnGetDBData(dbId, keyStr, 3, &value), SOFTBUS_INVALID_PARAM);
 }

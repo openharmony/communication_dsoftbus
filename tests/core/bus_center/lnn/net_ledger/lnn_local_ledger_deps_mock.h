@@ -26,11 +26,11 @@
 #include "disc_interface.h"
 #include "legacy/softbus_hidumper_buscenter.h"
 #include "lnn_async_callback_utils.h"
+#include "lnn_cipherkey_manager_struct.h"
 #include "lnn_connection_fsm.h"
 #include "lnn_device_info.h"
 #include "lnn_distributed_net_ledger.h"
 #include "lnn_event_form.h"
-#include "lnn_cipherkey_manager_struct.h"
 #include "lnn_fast_offline_struct.h"
 #include "lnn_feature_capability.h"
 #include "lnn_file_utils.h"
@@ -44,8 +44,8 @@
 #include "message_handler.h"
 #include "softbus_adapter_bt_common.h"
 #include "softbus_adapter_crypto.h"
-#include "softbus_adapter_thread.h"
 #include "softbus_adapter_sle_common_struct.h"
+#include "softbus_adapter_thread.h"
 #include "softbus_config_type.h"
 #include "sqlite3_utils.h"
 
@@ -76,10 +76,10 @@ public:
     virtual int32_t GetLocalSleAddr(char *sleAddr, uint32_t sleAddrLen);
     virtual int32_t LnnGenerateKeyByHuks(struct HksBlob *keyAlias);
     virtual int32_t LnnDeleteKeyByHuks(struct HksBlob *keyAlias);
-    virtual int32_t LnnEncryptDataByHuks(const struct HksBlob *keyAlias, const struct HksBlob *inData,
-        struct HksBlob *outData);
-    virtual int32_t LnnDecryptDataByHuks(const struct HksBlob *keyAlias, const struct HksBlob *inData,
-        struct HksBlob *outData);
+    virtual int32_t LnnEncryptDataByHuks(
+        const struct HksBlob *keyAlias, const struct HksBlob *inData, struct HksBlob *outData);
+    virtual int32_t LnnDecryptDataByHuks(
+        const struct HksBlob *keyAlias, const struct HksBlob *inData, struct HksBlob *outData);
     virtual int32_t LnnGenerateRandomByHuks(uint8_t *randomKey, uint32_t len);
     virtual int32_t OpenDatabase(DbContext **ctx);
     virtual int32_t CloseDatabase(DbContext *ctx);
@@ -89,15 +89,15 @@ public:
     virtual int32_t GetRecordNumByKey(DbContext *ctx, TableNameID id, uint8_t *data);
     virtual int32_t EncryptedDb(DbContext *ctx, const uint8_t *password, uint32_t len);
     virtual int32_t UpdateDbPassword(DbContext *ctx, const uint8_t *password, uint32_t len);
-    virtual int32_t QueryRecordByKey(DbContext *ctx, TableNameID id, uint8_t *data, uint8_t **replyInfo,
-        int32_t infoNum);
+    virtual int32_t QueryRecordByKey(
+        DbContext *ctx, TableNameID id, uint8_t *data, uint8_t **replyInfo, int32_t infoNum);
     virtual int32_t LnnGetFullStoragePath(LnnFileId id, char *path, uint32_t len);
     virtual int32_t SoftBusReadFullFile(const char *fileName, char *readBuf, uint32_t maxLen);
     virtual int32_t SoftBusWriteFile(const char *fileName, const char *writeBuf, uint32_t len);
     virtual int32_t SoftBusAccessFile(const char *pathName, int32_t mode);
     virtual int32_t LnnAsyncCallbackHelper(SoftBusLooper *looper, LnnAsyncCallbackFunc callback, void *para);
-    virtual int32_t ConvertBytesToHexString(char *outBuf, uint32_t outBufLen, const unsigned char *inBuf,
-        uint32_t inLen);
+    virtual int32_t ConvertBytesToHexString(
+        char *outBuf, uint32_t outBufLen, const unsigned char *inBuf, uint32_t inLen);
     virtual void LnnNotifyNetworkStateChanged(SoftBusNetworkState state);
     virtual TrustedReturnType AuthHasTrustedRelation(void);
     virtual bool IsEnableSoftBusHeartbeat(void);
@@ -105,10 +105,10 @@ public:
     virtual void LnnHbClearRecvList(void);
     virtual int32_t LnnConvertHbTypeToId(LnnHeartbeatType type);
     virtual bool LnnVisitHbTypeSet(VisitHbTypeCb callback, LnnHeartbeatType *typeSet, void *data);
-    virtual int32_t LnnCeEncryptDataByHuks(const struct HksBlob *keyAlias, const struct HksBlob *inData,
-        struct HksBlob *outData);
-    virtual int32_t LnnCeDecryptDataByHuks(const struct HksBlob *keyAlias, const struct HksBlob *inData,
-        struct HksBlob *outData);
+    virtual int32_t LnnCeEncryptDataByHuks(
+        const struct HksBlob *keyAlias, const struct HksBlob *inData, struct HksBlob *outData);
+    virtual int32_t LnnCeDecryptDataByHuks(
+        const struct HksBlob *keyAlias, const struct HksBlob *inData, struct HksBlob *outData);
     virtual int32_t RegistIPProtocolManager(void);
     virtual int32_t LnnInitPhysicalSubnetManager(void);
     virtual void LnnOnOhosAccountChanged(void);
@@ -120,11 +120,11 @@ public:
     virtual int32_t LnnStartPublish(void);
     virtual void LnnUpdateOhosAccount(UpdateAccountReason reason);
     virtual void LnnOnOhosAccountLogout(void);
-    virtual int32_t LnnNotifyDiscoveryDevice(const ConnectionAddr *addr, const LnnDfxDeviceInfoReport *infoReport,
-        bool isNeedConnect);
+    virtual int32_t LnnNotifyDiscoveryDevice(
+        const ConnectionAddr *addr, const LnnDfxDeviceInfoReport *infoReport, bool isNeedConnect);
     virtual int32_t LnnRequestLeaveByAddrType(const bool *type, uint32_t typeLen);
-    virtual int32_t LnnAsyncCallbackDelayHelper(SoftBusLooper *looper, LnnAsyncCallbackFunc callback, void *para,
-        uint64_t delayMillis);
+    virtual int32_t LnnAsyncCallbackDelayHelper(
+        SoftBusLooper *looper, LnnAsyncCallbackFunc callback, void *para, uint64_t delayMillis);
     virtual int32_t LnnRegisterEventHandler(LnnEventType event, LnnEventHandler handler);
     virtual void LnnNotifyOOBEStateChangeEvent(SoftBusOOBEState state);
     virtual void LnnNotifyAccountStateChangeEvent(SoftBusAccountState state);
@@ -157,30 +157,30 @@ public:
     virtual uint32_t AuthGenRequestId(void);
     virtual void LnnSetUnlockState(void);
     virtual void AuthHandleLeaveLNN(AuthHandle authHandle);
-    virtual LnnConnectionFsm *LnnCreateConnectionFsm(const ConnectionAddr *target, const char *pkgName,
-        bool isNeedConnect);
+    virtual LnnConnectionFsm *LnnCreateConnectionFsm(
+        const ConnectionAddr *target, const char *pkgName, bool isNeedConnect);
     virtual bool LnnIsSameConnectionAddr(const ConnectionAddr *addr1, const ConnectionAddr *addr2, bool isShort);
     virtual bool LnnConvertAddrToOption(const ConnectionAddr *addr, ConnectOption *option);
     virtual DiscoveryType LnnConvAddrTypeToDiscType(ConnectionAddrType type);
     virtual ConnectionAddrType LnnDiscTypeToConnAddrType(DiscoveryType type);
-    virtual bool LnnConvertAuthConnInfoToAddr(ConnectionAddr *addr, const AuthConnInfo *connInfo,
-        ConnectionAddrType hintType);
+    virtual bool LnnConvertAuthConnInfoToAddr(
+        ConnectionAddr *addr, const AuthConnInfo *connInfo, ConnectionAddrType hintType);
     virtual bool AddStringToJsonObject(cJSON *json, const char * const string, const char *value);
     virtual bool AddNumberToJsonObject(cJSON *json, const char * const string, int32_t num);
-    virtual int32_t LnnSendSyncInfoMsg(LnnSyncInfoType type, const char *networkId, const uint8_t *msg, uint32_t len,
-        LnnSyncInfoMsgComplete complete);
+    virtual int32_t LnnSendSyncInfoMsg(
+        LnnSyncInfoType type, const char *networkId, const uint8_t *msg, uint32_t len, LnnSyncInfoMsgComplete complete);
     virtual int32_t AuthGetLatestAuthSeqList(const char *udid, int64_t *authSeq, uint32_t num);
     virtual int32_t LnnSetSupportDiscoveryType(char *info, const char *type);
     virtual bool LnnHasSupportDiscoveryType(const char *destType, const char *type);
     virtual bool LnnPeerHasExchangeDiscoveryType(const NodeInfo *info, DiscoveryType type);
-    virtual int32_t LnnCompareNodeWeight(int32_t weight1, const char *masterUdid1, int32_t weight2,
-        const char *masterUdid2);
+    virtual int32_t LnnCompareNodeWeight(
+        int32_t weight1, const char *masterUdid1, int32_t weight2, const char *masterUdid2);
     virtual void LnnNotifyAllTypeOffline(ConnectionAddrType type);
     virtual int32_t SoftBusGetTime(SoftBusSysTime *sysTime);
     virtual int32_t AuthGetConnInfo(AuthHandle authHandle, AuthConnInfo *connInfo);
     virtual void LnnNotifyLeaveResult(const char *networkId, int32_t retCode);
-    virtual int32_t LnnSendNotTrustedInfo(const NotTrustedDelayInfo *info, uint32_t num,
-        LnnSyncInfoMsgComplete complete);
+    virtual int32_t LnnSendNotTrustedInfo(
+        const NotTrustedDelayInfo *info, uint32_t num, LnnSyncInfoMsgComplete complete);
     virtual SoftBusLooper *GetLooper(int32_t looper);
     virtual int32_t ConnDisconnectDeviceAllConn(const ConnectOption *option);
     virtual int32_t LnnGenLocalIrk(unsigned char *irk, uint32_t len);
@@ -235,8 +235,8 @@ public:
     virtual bool LnnConvertAddrToAuthConnInfo(const ConnectionAddr *addr, AuthConnInfo *connInfo);
     virtual int32_t LnnFsmRemoveMessageByType(FsmStateMachine *fsm, int32_t what);
     virtual void LnnDeinitBusCenterEvent(void);
-    virtual int32_t AuthStartVerify(const AuthConnInfo *connInfo, const AuthVerifyParam *authVerifyParam,
-        const AuthVerifyCallback *callback);
+    virtual int32_t AuthStartVerify(
+        const AuthConnInfo *connInfo, const AuthVerifyParam *authVerifyParam, const AuthVerifyCallback *callback);
     virtual bool LnnSubcribeKvStoreService(void);
     virtual int32_t LnnPutDBData(int32_t dbId, char *putKey, uint32_t putKeyLen, char *putValue, uint32_t putValueLen);
     virtual int32_t LnnCloudSync(int32_t dbId);
@@ -265,10 +265,10 @@ public:
     virtual int32_t SoftBusRemoveBtStateListener(int listenerId) = 0;
     virtual int32_t SoftBusBtInit(void) = 0;
 
-    virtual int32_t SoftBusBase64Encode(unsigned char *dst, size_t dlen,
-        size_t *olen, const unsigned char *src, size_t slen);
-    virtual int32_t SoftBusBase64Decode(unsigned char *dst, size_t dlen,
-        size_t *olen, const unsigned char *src, size_t slen);
+    virtual int32_t SoftBusBase64Encode(
+        unsigned char *dst, size_t dlen, size_t *olen, const unsigned char *src, size_t slen);
+    virtual int32_t SoftBusBase64Decode(
+        unsigned char *dst, size_t dlen, size_t *olen, const unsigned char *src, size_t slen);
     virtual int32_t SoftBusGenerateStrHash(const unsigned char *str, uint32_t len, unsigned char *hash);
     virtual int32_t SoftBusGenerateSessionKey(char *key, uint32_t len);
     virtual uint32_t SoftBusCryptoRand(void);
@@ -371,8 +371,8 @@ public:
     MOCK_METHOD0(ConnCoapStopServerListen, void(void));
     MOCK_METHOD3(AuthGetDeviceUuid, int32_t(int64_t, char *, uint16_t));
     MOCK_METHOD3(TransGetConnByChanId, int32_t(int32_t, int32_t, int32_t *));
-    MOCK_METHOD5(AuthMetaStartVerify,
-        int32_t(uint32_t, const AuthKeyInfo *, uint32_t, int32_t, const AuthVerifyCallback *));
+    MOCK_METHOD5(
+        AuthMetaStartVerify, int32_t(uint32_t, const AuthKeyInfo *, uint32_t, int32_t, const AuthVerifyCallback *));
     MOCK_METHOD0(AuthGenRequestId, uint32_t());
     MOCK_METHOD0(LnnSetUnlockState, void());
     MOCK_METHOD1(AuthHandleLeaveLNN, void(AuthHandle));
@@ -383,8 +383,8 @@ public:
     MOCK_METHOD3(LnnConvertAuthConnInfoToAddr, bool(ConnectionAddr *, const AuthConnInfo *, ConnectionAddrType));
     MOCK_METHOD3(AddStringToJsonObject, bool(cJSON *, const char * const, const char *));
     MOCK_METHOD3(AddNumberToJsonObject, bool(cJSON *, const char * const, int));
-    MOCK_METHOD5(LnnSendSyncInfoMsg,
-        int32_t(LnnSyncInfoType, const char *, const uint8_t *, uint32_t, LnnSyncInfoMsgComplete));
+    MOCK_METHOD5(
+        LnnSendSyncInfoMsg, int32_t(LnnSyncInfoType, const char *, const uint8_t *, uint32_t, LnnSyncInfoMsgComplete));
     MOCK_METHOD3(AuthGetLatestAuthSeqList, int32_t(const char *, int64_t *, uint32_t));
     MOCK_METHOD2(LnnSetSupportDiscoveryType, int32_t(char *, const char *));
     MOCK_METHOD2(LnnHasSupportDiscoveryType, bool(const char *, const char *));
@@ -450,12 +450,11 @@ public:
     MOCK_METHOD2(LnnConvertAddrToAuthConnInfo, bool(const ConnectionAddr *, AuthConnInfo *));
     MOCK_METHOD2(LnnFsmRemoveMessageByType, int32_t(FsmStateMachine *, int32_t));
     MOCK_METHOD0(LnnDeinitBusCenterEvent, void());
-    MOCK_METHOD3(AuthStartVerify,
-        int32_t(const AuthConnInfo *, const AuthVerifyParam *, const AuthVerifyCallback *));
+    MOCK_METHOD3(AuthStartVerify, int32_t(const AuthConnInfo *, const AuthVerifyParam *, const AuthVerifyCallback *));
     MOCK_METHOD2(LnnIsNeedCleanConnectionFsm, bool(const NodeInfo *, ConnectionAddrType));
     MOCK_METHOD1(AuthFlushDevice, int32_t(const char *uuid));
-    MOCK_METHOD5(LnnPutDBData,
-        int32_t(int32_t dbId, char *putKey, uint32_t putKeyLen, char *putValue, uint32_t putValueLen));
+    MOCK_METHOD5(
+        LnnPutDBData, int32_t(int32_t dbId, char *putKey, uint32_t putKeyLen, char *putValue, uint32_t putValueLen));
     MOCK_METHOD1(LnnCloudSync, int32_t(int32_t dbId));
 
     MOCK_METHOD0(LnnSyncP2pInfo, int32_t());
@@ -482,10 +481,8 @@ public:
     MOCK_METHOD1(SoftBusRemoveBtStateListener, int32_t(int));
     MOCK_METHOD0(SoftBusBtInit, int32_t());
 
-    MOCK_METHOD5(SoftBusBase64Encode, int32_t(unsigned char *, size_t,
-        size_t *, const unsigned char *, size_t));
-    MOCK_METHOD5(SoftBusBase64Decode, int32_t(unsigned char *, size_t,
-        size_t *, const unsigned char *, size_t));
+    MOCK_METHOD5(SoftBusBase64Encode, int32_t(unsigned char *, size_t, size_t *, const unsigned char *, size_t));
+    MOCK_METHOD5(SoftBusBase64Decode, int32_t(unsigned char *, size_t, size_t *, const unsigned char *, size_t));
     MOCK_METHOD3(SoftBusGenerateStrHash, int32_t(const unsigned char *, uint32_t, unsigned char *));
     MOCK_METHOD2(SoftBusGenerateSessionKey, int32_t(char *, uint32_t));
     MOCK_METHOD0(SoftBusCryptoRand, uint32_t());

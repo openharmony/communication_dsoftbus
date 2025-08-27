@@ -116,6 +116,7 @@ static int32_t LoopRead(ConnBrConnection *connection)
 
 static void BrConnectStatusCallback(const BdAddr *bdAddr, BtUuid uuid, int32_t status, int32_t result)
 {
+    CONN_CHECK_AND_RETURN_LOGE(bdAddr != NULL, CONN_BR, "bdAddr is null");
     char copyMac[BT_MAC_LEN] = { 0 };
     int32_t ret = ConvertBtMacToStr(copyMac, BT_MAC_LEN, bdAddr->addr, sizeof(bdAddr->addr));
     CONN_CHECK_AND_RETURN_LOGE(ret == SOFTBUS_OK, CONN_BR,

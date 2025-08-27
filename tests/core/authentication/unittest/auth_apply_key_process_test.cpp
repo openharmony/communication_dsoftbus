@@ -17,11 +17,11 @@
 #include <gtest/gtest.h>
 #include <securec.h>
 
-#include "auth_log.h"
 #include "auth_apply_key_manager.h"
 #include "auth_apply_key_process.c"
 #include "auth_apply_key_process.h"
 #include "auth_apply_key_process_mock.h"
+#include "auth_log.h"
 #include "lnn_distributed_net_ledger.h"
 #include "lnn_local_net_ledger.h"
 #include "lnn_net_ledger.h"
@@ -368,8 +368,8 @@ HWTEST_F(AuthApplyKeyProcessTest, AUTH_GEN_APPLY_KEY_ID_Test_001, TestSize.Level
     EXPECT_EQ(ret, SOFTBUS_INVALID_PARAM);
 }
 
-int32_t startLightAccountAuthStub(int32_t osAccountId, int64_t requestId, const char *serviceId,
-    const DeviceAuthCallback *laCallBack)
+int32_t startLightAccountAuthStub(
+    int32_t osAccountId, int64_t requestId, const char *serviceId, const DeviceAuthCallback *laCallBack)
 {
     (void)osAccountId;
     (void)requestId;
@@ -379,8 +379,8 @@ int32_t startLightAccountAuthStub(int32_t osAccountId, int64_t requestId, const 
     return SOFTBUS_ERR;
 }
 
-int32_t processLightAccountAuthStub(int32_t osAccountId, int64_t requestId, DataBuff *inMsg,
-    const DeviceAuthCallback *laCallBack)
+int32_t processLightAccountAuthStub(
+    int32_t osAccountId, int64_t requestId, DataBuff *inMsg, const DeviceAuthCallback *laCallBack)
 {
     (void)osAccountId;
     (void)requestId;
@@ -443,8 +443,7 @@ HWTEST_F(AuthApplyKeyProcessTest, ON_REQUEST_Test_001, TestSize.Level1)
     const char *reqParams = "123456";
     AuthApplyKeyProcessInterfaceMock authApplyKeyMock;
 
-    EXPECT_CALL(authApplyKeyMock, AddStringToJsonObject).WillOnce(Return(false)).
-        WillRepeatedly(Return(true));
+    EXPECT_CALL(authApplyKeyMock, AddStringToJsonObject).WillOnce(Return(false)).WillRepeatedly(Return(true));
     char *msg = OnRequest(authSeq, operationCode, reqParams);
     EXPECT_EQ(msg, nullptr);
 
@@ -671,8 +670,8 @@ HWTEST_F(AuthApplyKeyProcessTest, APPLY_KEY_GET_LIGHT_ACCOUNT_Test_001, TestSize
     SoftBusFree((void *)verifier);
 }
 
-int32_t StartLightAccountAuth(int32_t osAccountId, int64_t requestId, const char *serviceId,
-    const DeviceAuthCallback *laCallBack)
+int32_t StartLightAccountAuth(
+    int32_t osAccountId, int64_t requestId, const char *serviceId, const DeviceAuthCallback *laCallBack)
 {
     return g_ret;
 }

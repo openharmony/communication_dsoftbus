@@ -16,12 +16,12 @@
 #include "authusercommonkey_fuzzer.h"
 #include <cstddef>
 #include <cstring>
-#include <securec.h>
 #include <fuzzer/FuzzedDataProvider.h>
+#include <securec.h>
 
 #include "auth_manager.h"
-#include "auth_user_common_key.h"
 #include "auth_user_common_key.c"
+#include "auth_user_common_key.h"
 #include "fuzz_environment.h"
 #include "softbus_access_token_test.h"
 
@@ -46,10 +46,11 @@ public:
     {
         return isInited_;
     }
+
 private:
     volatile bool isInited_ = false;
 };
-}
+} // namespace
 
 namespace OHOS {
 void UpdateUserKeyList(const AuthACLInfo aclInfo, AuthUserKeyInfo userKeyInfo)
@@ -132,7 +133,7 @@ bool AuthUserCommonkeyFuzzTest(FuzzedDataProvider &provider)
     ClearInValidAclFromUserKeyList();
     return true;
 }
-}
+} // namespace OHOS
 
 /* Fuzzer entry point */
 extern "C" int32_t LLVMFuzzerTestOneInput(const uint8_t *data, size_t size)
