@@ -79,11 +79,11 @@ bool SoftBusCheckIsSystemApp(uint64_t tokenId, const char *sessionName)
     if (strlen(sessionName) >= dmsCollabPrefixLen &&
         strncmp(sessionName, DMS_COLLABATION_NAME_PREFIX, dmsCollabPrefixLen) == 0) {
         return false;
+    }
     uint32_t objectStorePrefixLen = strlen(OBJECT_STORE_DB_NAME_PERFIX);
     if (strlen(sessionName) >= objectStorePrefixLen &&
         strncmp(sessionName, OBJECT_STORE_DB_NAME_PERFIX, objectStorePrefixLen) == 0) {
             return false;
-        }     
     }
     return TokenIdKit::IsSystemAppByFullTokenID(tokenId);
 }
