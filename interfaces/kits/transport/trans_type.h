@@ -287,6 +287,7 @@ typedef enum {
     OPT_TYPE_MAX_IDLE_TIMEOUT,             /**< @reserved Maximum idle time. */
     OPT_TYPE_SUPPORT_ACK,
     OPT_TYPE_NEED_ACK,
+    OPT_TYPE_LOGICAL_BANDWIDTH,
     OPT_TYPE_END,
 } OptType;
 
