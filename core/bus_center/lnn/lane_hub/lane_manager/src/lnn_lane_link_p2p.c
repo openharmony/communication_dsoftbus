@@ -695,7 +695,7 @@ static int32_t GetP2pLinkReqParamByChannelRequetId(
     return SOFTBUS_LANE_NOT_FOUND;
 }
 
-static int32_t GetWifiDirectInfoByAuthRequestIdAndUpdateItem(uint32_t authRequestId, uint32_t p2pRequestId,
+static int32_t GetP2pLinkReqParamByAuthHandle(uint32_t authRequestId, uint32_t p2pRequestId,
     struct WifiDirectConnectInfo *wifiDirectInfo, AuthHandle authHandle)
 {
     P2pLinkReqList *item = NULL;
