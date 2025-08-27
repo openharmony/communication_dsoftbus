@@ -1158,17 +1158,17 @@ static int ClientTransProxySubPacketProc(int32_t channelId, const SliceHead *hea
         TRANS_LOGE(TRANS_SDK, "lock err");
         return SOFTBUS_LOCK_ERR;
     }
-
     ChannelSliceProcessor *channelProcessor = ClientTransProxyGetChannelSliceProcessor(channelId);
     if (channelProcessor == NULL) {
         SoftBusMutexUnlock(&g_channelSliceProcessorList->lock);
         return SOFTBUS_TRANS_GET_CLIENT_PROXY_NULL;
     }
-
-    int ret;
     int32_t index = head->priority;
-    TRANS_CHECK_AND_RETURN_RET_LOGE(index >= PROXY_CHANNEL_PRORITY_MESSAGE  && index < PROXY_CHANNEL_PRORITY_BUTT,
-        SOFTBUS_INVALID_PARAM, TRANS_SDK, "invalid index=%{public}d", index);
+    if (index < PROXY_CHANNEL_PRORITY_MESSAGE || index >= PROXY_CHANNEL_PRORITY_BUTT) {
+        TRANS_LOGE(TRANS_SDK, "invalid index=%{public}d", index);
+        SoftBusMutexUnlock(&g_channelSliceProcessorList->lock);
+    }
+    int ret;
     SliceProcessor *processor = &(channelProcessor->processor[index]);
     if (head->sliceSeq == 0) {
         ret = ClientTransProxyFirstSliceProcess(processor, head, data, len, channelId);
