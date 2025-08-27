@@ -399,8 +399,9 @@ HWTEST_F(AuthSessionJsonTest, PackCommonDevInfo_TEST_001, TestSize.Level1)
     EXPECT_CALL(mock, LnnGetUnifiedDeviceName).WillRepeatedly(Return(SOFTBUS_OK));
     EXPECT_CALL(mock, LnnConvertIdToDeviceType).WillRepeatedly(Return(nullptr));
     (void)memset_s(&info, sizeof(NodeInfo), 0, sizeof(NodeInfo));
-    EXPECT_EQ(memcpy_s(info.deviceInfo.unifiedName, DEVICE_NAME_BUF_LEN, INVALID_UNIFIED_NAME,
-    strlen(INVALID_UNIFIED_NAME)), EOK);
+    EXPECT_EQ(
+        memcpy_s(info.deviceInfo.unifiedName, DEVICE_NAME_BUF_LEN, INVALID_UNIFIED_NAME, strlen(INVALID_UNIFIED_NAME)),
+        EOK);
     EXPECT_EQ(memcpy_s(info.uuid, UUID_BUF_LEN, INVALID_UDID, strlen(INVALID_UDID)), EOK);
     EXPECT_CALL(mock, LnnGetLocalStrInfo).WillOnce(Return(SOFTBUS_INVALID_PARAM));
     int32_t ret = PackCommonDevInfo(json, &info, true);
@@ -412,7 +413,7 @@ HWTEST_F(AuthSessionJsonTest, PackCommonDevInfo_TEST_001, TestSize.Level1)
     EXPECT_EQ(memcpy_s(info.deviceInfo.unifiedName, DEVICE_NAME_BUF_LEN, UNIFIED_NAME, strlen(UNIFIED_NAME)), EOK);
     EXPECT_EQ(memcpy_s(info.networkId, NETWORK_ID_BUF_LEN, NETWORK_ID_TEST, strlen(NETWORK_ID_TEST)), EOK);
     EXPECT_EQ(
-    memcpy_s(info.deviceInfo.deviceName, DEVICE_NAME_BUF_LEN, DEVICE_NAME_TEST, strlen(DEVICE_NAME_TEST)), EOK);
+        memcpy_s(info.deviceInfo.deviceName, DEVICE_NAME_BUF_LEN, DEVICE_NAME_TEST, strlen(DEVICE_NAME_TEST)), EOK);
     info.deviceInfo.deviceTypeId = 12;
     EXPECT_EQ(memcpy_s(info.uuid, UUID_BUF_LEN, UUID_TEST, strlen(UUID_TEST)), EOK);
     ret = PackCommonDevInfo(json, &info, false);
@@ -647,18 +648,16 @@ HWTEST_F(AuthSessionJsonTest, CHECK_BUS_VERSION_TEST_001, TestSize.Level1)
     NodeInfo *info = (NodeInfo *)SoftBusCalloc(sizeof(NodeInfo));
     if (info == NULL) {
         JSON_Delete(obj);
-    return;
+        return;
     }
     (void)memset_s(info, sizeof(NodeInfo), 0, sizeof(NodeInfo));
 
     SoftBusVersion version = SOFTBUS_NEW_V1;
-    if (!JSON_AddInt32ToObject(obj, "CODE", (int32_t)1) ||
-        !JSON_AddInt32ToObject(obj, "BUS_MAX_VERSION", (int32_t)2) ||
+    if (!JSON_AddInt32ToObject(obj, "CODE", (int32_t)1) || !JSON_AddInt32ToObject(obj, "BUS_MAX_VERSION", (int32_t)2) ||
         !JSON_AddInt32ToObject(obj, "BUS_MIN_VERSION", (int32_t)1) ||
         !JSON_AddInt32ToObject(obj, "AUTH_PORT", (int32_t)8710) ||
         !JSON_AddInt32ToObject(obj, "SESSION_PORT", (int32_t)26) ||
-        !JSON_AddInt32ToObject(obj, "PROXY_PORT", (int32_t)80) ||
-        !JSON_AddStringToObject(obj, "DEV_IP", "127.0.0.1")) {
+        !JSON_AddInt32ToObject(obj, "PROXY_PORT", (int32_t)80) || !JSON_AddStringToObject(obj, "DEV_IP", "127.0.0.1")) {
         JSON_Delete(obj);
         return;
     }
@@ -856,4 +855,4 @@ HWTEST_F(AuthSessionJsonTest, GenerateUdidShortHash_TEST_001, TestSize.Level1)
     EXPECT_TRUE(GenerateUdidShortHash(udid, udidHashHexStr, SHA_256_HEX_HASH_LEN));
     EXPECT_TRUE(!GenerateUdidShortHash(udid, udidHashHexStr, 10));
 }
-}
+} // namespace OHOS

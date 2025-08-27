@@ -57,14 +57,14 @@ public:
     AuthHichainIdServiceInterfaceMock();
     ~AuthHichainIdServiceInterfaceMock() override;
 
-    MOCK_METHOD0(cJSON_CreateObject, cJSON * ());
-    MOCK_METHOD3(AddStringToJsonObject, bool (cJSON *, const char * const, const char *));
-    MOCK_METHOD3(AddNumberToJsonObject, bool (cJSON *, const char * const, int32_t));
-    MOCK_METHOD1(cJSON_PrintUnformatted, char * (const cJSON *));
+    MOCK_METHOD0(cJSON_CreateObject, cJSON *());
+    MOCK_METHOD3(AddStringToJsonObject, bool(cJSON *, const char * const, const char *));
+    MOCK_METHOD3(AddNumberToJsonObject, bool(cJSON *, const char * const, int32_t));
+    MOCK_METHOD1(cJSON_PrintUnformatted, char *(const cJSON *));
 
-    MOCK_METHOD0(InitDeviceAuthService, int32_t ());
-    MOCK_METHOD0(GetCredMgrInstance, const CredManager * ());
-    MOCK_METHOD0(GetCredAuthInstance, const CredAuthManager * ());
+    MOCK_METHOD0(InitDeviceAuthService, int32_t());
+    MOCK_METHOD0(GetCredMgrInstance, const CredManager *());
+    MOCK_METHOD0(GetCredAuthInstance, const CredAuthManager *());
     MOCK_METHOD3(LnnGetLocalStrInfo, int32_t(InfoKey, char *, uint32_t));
     MOCK_METHOD0(GetActiveOsAccountIds, int32_t());
     MOCK_METHOD2(LnnDeleteSpecificTrustedDevInfo, int32_t(const char *, int32_t));
@@ -74,8 +74,8 @@ public:
     MOCK_METHOD1(LnnHbOnTrustedRelationIncreased, void(int32_t));
     MOCK_METHOD3(LnnGetLocalByteInfo, int32_t(InfoKey key, uint8_t *info, uint32_t len));
     MOCK_METHOD1(LnnUpdateHeartbeatInfo, void(LnnHeartbeatUpdateInfoType));
-    MOCK_METHOD0(IdServiceGetCredMgrInstance, const CredManager * ());
-    MOCK_METHOD3(IdServiceQueryCredentialByUdid, int32_t (int32_t, const char *, char **));
+    MOCK_METHOD0(IdServiceGetCredMgrInstance, const CredManager *());
+    MOCK_METHOD3(IdServiceQueryCredentialByUdid, int32_t(int32_t, const char *, char **));
 };
 
 } // namespace OHOS

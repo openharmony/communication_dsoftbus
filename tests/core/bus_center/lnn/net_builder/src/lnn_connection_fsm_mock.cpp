@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2024 Huawei Device Co., Ltd.
+ * Copyright (c) 2024-2025 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -81,8 +81,8 @@ int32_t LnnRetrieveDeviceInfoByNetworkId(const char *networkId, NodeInfo *info)
     return GetLnnConnInterface()->LnnRetrieveDeviceInfo(networkId, info);
 }
 
-int32_t AuthRestoreAuthManager(const char *udidHash, const AuthConnInfo *connInfo, uint32_t requestId,
-    NodeInfo *nodeInfo, int64_t *authId)
+int32_t AuthRestoreAuthManager(
+    const char *udidHash, const AuthConnInfo *connInfo, uint32_t requestId, NodeInfo *nodeInfo, int64_t *authId)
 {
     return GetLnnConnInterface()->AuthRestoreAuthManager(udidHash, connInfo, requestId, nodeInfo, authId);
 }
@@ -177,10 +177,15 @@ int32_t GetAuthRequest(uint32_t requestId, AuthRequest *request)
     return GetLnnConnInterface()->GetAuthRequest(requestId, request);
 }
 
-void UpdateDpSameAccount(UpdateDpAclParams *aclParams, SessionKey sessionKey, bool isNeedUpdateDk,
-    AclWriteState aclState)
+void UpdateDpSameAccount(
+    UpdateDpAclParams *aclParams, SessionKey sessionKey, bool isNeedUpdateDk, AclWriteState aclState)
 {
     return GetLnnConnInterface()->UpdateDpSameAccount(aclParams, sessionKey, isNeedUpdateDk, aclState);
+}
+
+void UpdateDpSameAccountWithoutUserKey(UpdateDpAclParams *aclParams, AclWriteState aclState)
+{
+    return GetLnnConnInterface()->UpdateDpSameAccountWithoutUserKey(aclParams, aclState);
 }
 
 int32_t LnnGetAddrTypeByIfName(const char *ifName, ConnectionAddrType *type)

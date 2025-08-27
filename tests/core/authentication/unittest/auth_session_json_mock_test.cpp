@@ -40,13 +40,13 @@ public:
     void TearDown();
 };
 
-void AuthSessionJsonMockTest::SetUpTestCase() {}
+void AuthSessionJsonMockTest::SetUpTestCase() { }
 
-void AuthSessionJsonMockTest::TearDownTestCase() {}
+void AuthSessionJsonMockTest::TearDownTestCase() { }
 
-void AuthSessionJsonMockTest::SetUp() {}
+void AuthSessionJsonMockTest::SetUp() { }
 
-void AuthSessionJsonMockTest::TearDown() {}
+void AuthSessionJsonMockTest::TearDown() { }
 
 /*
  * @tc.name: GET_ENHANCED_P2P_AUTH_KEY_TEST_001
@@ -57,9 +57,9 @@ void AuthSessionJsonMockTest::TearDown() {}
 HWTEST_F(AuthSessionJsonMockTest, GET_ENHANCED_P2P_AUTH_KEY_TEST_001, TestSize.Level1)
 {
     NiceMock<AuthSessionJsonDepsInterfaceMock> mocker;
-    char udidHash[SHA_256_HEX_HASH_LEN] = {0};
-    AuthSessionInfo info = {0};
-    AuthDeviceKeyInfo deviceKey = {0};
+    char udidHash[SHA_256_HEX_HASH_LEN] = { 0 };
+    AuthSessionInfo info = { 0 };
+    AuthDeviceKeyInfo deviceKey = { 0 };
     int32_t ret = GetEnhancedP2pAuthKey(udidHash, &info, &deviceKey);
     EXPECT_EQ(ret, SOFTBUS_AUTH_NOT_FOUND);
     ret = GetEnhancedP2pAuthKey(udidHash, &info, &deviceKey);
@@ -67,12 +67,13 @@ HWTEST_F(AuthSessionJsonMockTest, GET_ENHANCED_P2P_AUTH_KEY_TEST_001, TestSize.L
 
     AuthHandle authHandle = { .authId = TEST_AUTH_ID };
     EXPECT_CALL(mocker, AuthGetLatestIdByUuid).WillRepeatedly(DoAll(SetArgPointee<3>(authHandle), Return()));
-    AuthManager auth = {0};
+    AuthManager auth = { 0 };
     EXPECT_CALL(mocker, GetAuthManagerByAuthId).WillOnce(Return(nullptr)).WillRepeatedly(Return(&auth));
     EXPECT_CALL(mocker, DelDupAuthManager).WillRepeatedly(Return());
     SessionKey sessionKey = { .len = SESSION_KEY_LENGTH };
     EXPECT_EQ(memcpy_s(sessionKey.value, SESSION_KEY_LENGTH, KEY_VALUE, KEY_VALUE_LEN), EOK);
-    EXPECT_CALL(mocker, GetLatestSessionKey).WillOnce(Return(SOFTBUS_INVALID_PARAM))
+    EXPECT_CALL(mocker, GetLatestSessionKey)
+        .WillOnce(Return(SOFTBUS_INVALID_PARAM))
         .WillRepeatedly(DoAll(SetArgPointee<3>(sessionKey), Return(SOFTBUS_OK)));
 
     ret = GetEnhancedP2pAuthKey(udidHash, &info, &deviceKey);
@@ -97,24 +98,26 @@ HWTEST_F(AuthSessionJsonMockTest, PACK_NORMALIZED_KEY_VALUE_TEST_001, TestSize.L
     if (data == nullptr) {
         return;
     }
-    EXPECT_CALL(mocker, ConvertHexStringToBytes).WillOnce(Return(SOFTBUS_INVALID_PARAM))
+    EXPECT_CALL(mocker, ConvertHexStringToBytes)
+        .WillOnce(Return(SOFTBUS_INVALID_PARAM))
         .WillRepeatedly(Return(SOFTBUS_OK));
-    EXPECT_CALL(mocker, LnnDecryptAesGcm).WillOnce(Return(SOFTBUS_INVALID_PARAM))
+    EXPECT_CALL(mocker, LnnDecryptAesGcm)
+        .WillOnce(Return(SOFTBUS_INVALID_PARAM))
         .WillOnce(DoAll(SetArgPointee<1>(nullptr), Return(SOFTBUS_OK)))
         .WillOnce(DoAll(SetArgPointee<1>(data), SetArgPointee<2>(0), Return(SOFTBUS_OK)));
-    AuthSessionInfo info = {0};
-    AuthDeviceKeyInfo deviceKey = {0};
+    AuthSessionInfo info = { 0 };
+    AuthDeviceKeyInfo deviceKey = { 0 };
     const char *fastAuth = "encryptedFastAuth";
     ParseFastAuthValue(&info, fastAuth, &deviceKey);
     ParseFastAuthValue(&info, fastAuth, &deviceKey);
     ParseFastAuthValue(&info, fastAuth, &deviceKey);
     ParseFastAuthValue(&info, fastAuth, &deviceKey);
-    EXPECT_CALL(mocker, LnnEncryptAesGcm).WillOnce(Return(SOFTBUS_INVALID_PARAM))
+    EXPECT_CALL(mocker, LnnEncryptAesGcm)
+        .WillOnce(Return(SOFTBUS_INVALID_PARAM))
         .WillOnce(DoAll(SetArgPointee<2>(nullptr), Return(SOFTBUS_OK)))
         .WillOnce(DoAll(SetArgPointee<2>(data), SetArgPointee<3>(0), Return(SOFTBUS_OK)))
         .WillRepeatedly(DoAll(SetArgPointee<2>(data), SetArgPointee<3>(dataLen), Return(SOFTBUS_OK)));
-    EXPECT_CALL(mocker, ConvertBytesToUpperCaseHexString)
-        .WillOnce(Return(SOFTBUS_INVALID_PARAM));
+    EXPECT_CALL(mocker, ConvertBytesToUpperCaseHexString).WillOnce(Return(SOFTBUS_INVALID_PARAM));
     EXPECT_CALL(mocker, JSON_AddStringToObject).WillRepeatedly(Return(true));
     JsonObj obj;
     (void)memset_s(&obj, sizeof(JsonObj), 0, sizeof(JsonObj));
@@ -145,13 +148,15 @@ HWTEST_F(AuthSessionJsonMockTest, PARSE_NORMALIZED_KEY_VALUE_TEST_001, TestSize.
         return;
     }
     (void)memcpy_s(data, dataLen, "true", strlen("true"));
-    EXPECT_CALL(mocker, ConvertHexStringToBytes).WillOnce(Return(SOFTBUS_INVALID_PARAM))
+    EXPECT_CALL(mocker, ConvertHexStringToBytes)
+        .WillOnce(Return(SOFTBUS_INVALID_PARAM))
         .WillRepeatedly(Return(SOFTBUS_OK));
-    EXPECT_CALL(mocker, LnnDecryptAesGcm).WillOnce(Return(SOFTBUS_INVALID_PARAM))
+    EXPECT_CALL(mocker, LnnDecryptAesGcm)
+        .WillOnce(Return(SOFTBUS_INVALID_PARAM))
         .WillOnce(DoAll(SetArgPointee<1>(nullptr), Return(SOFTBUS_OK)))
         .WillOnce(DoAll(SetArgPointee<1>(data), SetArgPointee<2>(0), Return(SOFTBUS_OK)))
         .WillRepeatedly(DoAll(SetArgPointee<1>(data), SetArgPointee<2>(dataLen), Return(SOFTBUS_OK)));
-    AuthSessionInfo info = {0};
+    AuthSessionInfo info = { 0 };
     SessionKey sessionKey;
     (void)memset_s(&sessionKey, sizeof(SessionKey), 0, sizeof(SessionKey));
     const char *fastAuth = "encryptedFastAuth";
@@ -177,14 +182,16 @@ HWTEST_F(AuthSessionJsonMockTest, PARSE_NORMALIZE_DATA_TEST_001, TestSize.Level1
 {
     int64_t authSeq = 1;
     NiceMock<AuthSessionJsonDepsInterfaceMock> mocker;
-    EXPECT_CALL(mocker, SoftBusGenerateStrHash).WillOnce(Return(SOFTBUS_INVALID_PARAM))
+    EXPECT_CALL(mocker, SoftBusGenerateStrHash)
+        .WillOnce(Return(SOFTBUS_INVALID_PARAM))
         .WillRepeatedly(Return(SOFTBUS_OK));
-    EXPECT_CALL(mocker, ConvertBytesToUpperCaseHexString).WillOnce(Return(SOFTBUS_INVALID_PARAM))
+    EXPECT_CALL(mocker, ConvertBytesToUpperCaseHexString)
+        .WillOnce(Return(SOFTBUS_INVALID_PARAM))
         .WillRepeatedly(Return(SOFTBUS_OK));
     EXPECT_CALL(mocker, ConvertHexStringToBytes).WillRepeatedly(Return(SOFTBUS_INVALID_PARAM));
     EXPECT_CALL(mocker, AuthUpdateCreateTime).WillRepeatedly(Return());
-    AuthSessionInfo info = {0};
-    AuthDeviceKeyInfo deviceKey = {0};
+    AuthSessionInfo info = { 0 };
+    AuthDeviceKeyInfo deviceKey = { 0 };
     const char *key = "encnormalizedkeytest";
     int32_t ret = ParseNormalizeData(&info, const_cast<char *>(key), &deviceKey, authSeq);
     EXPECT_NE(ret, SOFTBUS_OK);
@@ -214,9 +221,11 @@ HWTEST_F(AuthSessionJsonMockTest, VERIFY_SESSION_INFO_ID_TYPE_TEST_001, TestSize
     JsonObj obj;
     (void)memset_s(&obj, sizeof(JsonObj), 0, sizeof(JsonObj));
     NiceMock<AuthSessionJsonDepsInterfaceMock> mocker;
-    EXPECT_CALL(mocker, LnnGetLocalStrInfoByIfnameIdx).WillOnce(Return(SOFTBUS_INVALID_PARAM))
+    EXPECT_CALL(mocker, LnnGetLocalStrInfoByIfnameIdx)
+        .WillOnce(Return(SOFTBUS_INVALID_PARAM))
         .WillRepeatedly(Return(SOFTBUS_OK));
-    EXPECT_CALL(mocker, SoftBusGenerateStrHash).WillOnce(Return(SOFTBUS_INVALID_PARAM))
+    EXPECT_CALL(mocker, SoftBusGenerateStrHash)
+        .WillOnce(Return(SOFTBUS_INVALID_PARAM))
         .WillRepeatedly(Return(SOFTBUS_OK));
     EXPECT_CALL(mocker, ConvertBytesToUpperCaseHexString)
         .WillOnce(Return(SOFTBUS_INVALID_PARAM))
@@ -227,7 +236,9 @@ HWTEST_F(AuthSessionJsonMockTest, VERIFY_SESSION_INFO_ID_TYPE_TEST_001, TestSize
     PackWifiSinglePassInfo(&obj, &info);
     PackWifiSinglePassInfo(&obj, &info);
     PackWifiSinglePassInfo(&obj, &info);
-    EXPECT_CALL(mocker, JSON_AddStringToObject).WillOnce(Return(false)).WillOnce(Return(false))
+    EXPECT_CALL(mocker, JSON_AddStringToObject)
+        .WillOnce(Return(false))
+        .WillOnce(Return(false))
         .WillRepeatedly(Return(true));
     bool ret = VerifySessionInfoIdType(&info, &obj, networkId, udid);
     EXPECT_NE(ret, true);
@@ -250,12 +261,12 @@ HWTEST_F(AuthSessionJsonMockTest, PACK_DEVICE_JSON_INFO_TEST_001, TestSize.Level
     EXPECT_CALL(mocker, IsSupportUDIDAbatement).WillRepeatedly(Return(true));
     EXPECT_CALL(mocker, JSON_AddBoolToObject).WillRepeatedly(Return(false));
     EXPECT_CALL(mocker, IsNeedUDIDAbatement).WillRepeatedly(Return(false));
-    EXPECT_CALL(mocker, JSON_AddStringToObject).WillOnce(Return(false))
+    EXPECT_CALL(mocker, JSON_AddStringToObject)
+        .WillOnce(Return(false))
         .WillOnce(Return(false))
         .WillRepeatedly(Return(true));
-    EXPECT_CALL(mocker, JSON_AddInt32ToObject).WillOnce(Return(false))
-        .WillRepeatedly(Return(true));
-    AuthSessionInfo info = {.connInfo.type = AUTH_LINK_TYPE_WIFI, .isConnectServer = false };
+    EXPECT_CALL(mocker, JSON_AddInt32ToObject).WillOnce(Return(false)).WillRepeatedly(Return(true));
+    AuthSessionInfo info = { .connInfo.type = AUTH_LINK_TYPE_WIFI, .isConnectServer = false };
     JsonObj obj;
     (void)memset_s(&obj, sizeof(JsonObj), 0, sizeof(JsonObj));
     PackUDIDAbatementFlag(&obj, &info);
@@ -282,8 +293,7 @@ HWTEST_F(AuthSessionJsonMockTest, PACK_NORMALIZED_DATA_TEST_001, TestSize.Level1
     NiceMock<AuthSessionJsonDepsInterfaceMock> mocker;
     EXPECT_CALL(mocker, IsSupportFeatureByCapaBit).WillRepeatedly(Return(false));
     EXPECT_CALL(mocker, GetSessionKeyProfile).WillRepeatedly(Return(true));
-    EXPECT_CALL(mocker, JSON_AddBoolToObject).WillOnce(Return(false))
-        .WillRepeatedly(Return(true));
+    EXPECT_CALL(mocker, JSON_AddBoolToObject).WillOnce(Return(false)).WillRepeatedly(Return(true));
     AuthSessionInfo info = { .isServer = true, .connInfo.type = AUTH_LINK_TYPE_WIFI };
     NodeInfo nodeInfo;
     (void)memset_s(&nodeInfo, sizeof(NodeInfo), 0, sizeof(NodeInfo));
@@ -291,9 +301,9 @@ HWTEST_F(AuthSessionJsonMockTest, PACK_NORMALIZED_DATA_TEST_001, TestSize.Level1
     (void)memset_s(&obj, sizeof(JsonObj), 0, sizeof(JsonObj));
     int32_t ret = PackNormalizedData(&info, &obj, &nodeInfo, authSeq);
     EXPECT_NE(ret, SOFTBUS_OK);
-    EXPECT_CALL(mocker, JSON_GetStringFromObject).WillOnce(Return(false))
-        .WillRepeatedly(Return(false));
-    EXPECT_CALL(mocker, SoftBusGenerateStrHash).WillOnce(Return(SOFTBUS_INVALID_PARAM))
+    EXPECT_CALL(mocker, JSON_GetStringFromObject).WillOnce(Return(false)).WillRepeatedly(Return(false));
+    EXPECT_CALL(mocker, SoftBusGenerateStrHash)
+        .WillOnce(Return(SOFTBUS_INVALID_PARAM))
         .WillRepeatedly(Return(SOFTBUS_OK));
     UnpackNormalizedKey(&obj, &info, NORMALIZED_KEY_ERROR, authSeq);
     UnpackNormalizedKey(&obj, &info, NORMALIZED_KEY_ERROR, authSeq);
@@ -327,12 +337,11 @@ HWTEST_F(AuthSessionJsonMockTest, PACK_DEVICE_ID_JSON_TEST_001, TestSize.Level1)
     JsonObj obj;
     int64_t authSeq = 1;
     (void)memset_s(&obj, sizeof(JsonObj), 0, sizeof(JsonObj));
-    EXPECT_CALL(mocker, JSON_CreateObject).WillOnce(Return(nullptr))
-        .WillRepeatedly(Return(&obj));
+    EXPECT_CALL(mocker, JSON_CreateObject).WillOnce(Return(nullptr)).WillRepeatedly(Return(&obj));
     EXPECT_CALL(mocker, JSON_Delete).WillRepeatedly(Return());
     EXPECT_CALL(mocker, LnnGetLocalStrInfo).WillRepeatedly(Return(SOFTBUS_INVALID_PARAM));
     EXPECT_CALL(mocker, FindAuthPreLinkNodeById).WillRepeatedly(Return(SOFTBUS_OK));
-    AuthSessionInfo info = {0};
+    AuthSessionInfo info = { 0 };
     char *ret = PackDeviceIdJson(&info, authSeq);
     EXPECT_EQ(ret, nullptr);
     ret = PackDeviceIdJson(&info, authSeq);
@@ -349,7 +358,8 @@ HWTEST_F(AuthSessionJsonMockTest, UNPACK_WIFI_SINGLE_PASS_INFO_TEST_001, TestSiz
 {
     NiceMock<AuthSessionJsonDepsInterfaceMock> mocker;
     EXPECT_CALL(mocker, JSON_GetStringFromObject).WillRepeatedly(Return(true));
-    EXPECT_CALL(mocker, SoftBusSocketGetPeerName).WillOnce(Return(SOFTBUS_INVALID_PARAM))
+    EXPECT_CALL(mocker, SoftBusSocketGetPeerName)
+        .WillOnce(Return(SOFTBUS_INVALID_PARAM))
         .WillRepeatedly(Return(SOFTBUS_OK));
     JsonObj obj;
     (void)memset_s(&obj, sizeof(JsonObj), 0, sizeof(JsonObj));
@@ -375,9 +385,11 @@ HWTEST_F(AuthSessionJsonMockTest, UNPACK_WIFI_SINGLE_PASS_INFO_TEST_001, TestSiz
 HWTEST_F(AuthSessionJsonMockTest, VERIFY_EXCHANGE_ID_TYPE_AND_INFO_TEST_001, TestSize.Level1)
 {
     NiceMock<AuthSessionJsonDepsInterfaceMock> mocker;
-    EXPECT_CALL(mocker, GetPeerUdidByNetworkId).WillOnce(Return(SOFTBUS_INVALID_PARAM))
+    EXPECT_CALL(mocker, GetPeerUdidByNetworkId)
+        .WillOnce(Return(SOFTBUS_INVALID_PARAM))
         .WillRepeatedly(Return(SOFTBUS_OK));
-    EXPECT_CALL(mocker, GetIsExchangeUdidByNetworkId).WillOnce(Return(SOFTBUS_OK))
+    EXPECT_CALL(mocker, GetIsExchangeUdidByNetworkId)
+        .WillOnce(Return(SOFTBUS_OK))
         .WillRepeatedly(Return(SOFTBUS_INVALID_PARAM));
     AuthSessionInfo info;
     (void)memset_s(&info, sizeof(AuthSessionInfo), 0, sizeof(AuthSessionInfo));
@@ -416,15 +428,15 @@ HWTEST_F(AuthSessionJsonMockTest, SET_EXCHANGE_ID_TYPE_AND_VALUE_TEST_001, TestS
     EXPECT_EQ(ret, SOFTBUS_OK);
     EXPECT_CALL(mocker, AuthMetaGetConnIdByInfo).WillRepeatedly(Return(SOFTBUS_OK));
     EXPECT_CALL(mocker, LnnDumpRemotePtk).WillRepeatedly(Return());
-    EXPECT_CALL(mocker, SoftBusBase64Encode).WillOnce(Return(SOFTBUS_INVALID_PARAM))
-        .WillRepeatedly(Return(SOFTBUS_OK));
-    EXPECT_CALL(mocker, JSON_AddStringToObject).WillOnce(Return(false))
+    EXPECT_CALL(mocker, SoftBusBase64Encode).WillOnce(Return(SOFTBUS_INVALID_PARAM)).WillRepeatedly(Return(SOFTBUS_OK));
+    EXPECT_CALL(mocker, JSON_AddStringToObject)
+        .WillOnce(Return(false))
         .WillOnce(Return(true))
         .WillOnce(Return(false))
         .WillRepeatedly(Return(true));
-    EXPECT_CALL(mocker, JSON_AddInt32ToObject).WillOnce(Return(false))
-        .WillRepeatedly(Return(true));
-    EXPECT_CALL(mocker, ConvertBytesToHexString).WillOnce(Return(SOFTBUS_INVALID_PARAM))
+    EXPECT_CALL(mocker, JSON_AddInt32ToObject).WillOnce(Return(false)).WillRepeatedly(Return(true));
+    EXPECT_CALL(mocker, ConvertBytesToHexString)
+        .WillOnce(Return(SOFTBUS_INVALID_PARAM))
         .WillRepeatedly(Return(SOFTBUS_OK));
     AuthConnInfo connInfo;
     (void)memset_s(&connInfo, sizeof(AuthConnInfo), 0, sizeof(AuthConnInfo));
@@ -463,16 +475,17 @@ HWTEST_F(AuthSessionJsonMockTest, PACK_CIPHER_RPA_INFO_TEST_001, TestSize.Level1
     EXPECT_CALL(mocker, ConvertBytesToHexString).WillOnce(Return(SOFTBUS_INVALID_PARAM));
     int32_t ret = PackCipherRpaInfo(&json, &info);
     EXPECT_NE(ret, SOFTBUS_OK);
-    EXPECT_CALL(mocker, ConvertBytesToHexString).WillOnce(Return(SOFTBUS_OK))
-        .WillOnce(Return(SOFTBUS_INVALID_PARAM));
+    EXPECT_CALL(mocker, ConvertBytesToHexString).WillOnce(Return(SOFTBUS_OK)).WillOnce(Return(SOFTBUS_INVALID_PARAM));
     ret = PackCipherRpaInfo(&json, &info);
     EXPECT_NE(ret, SOFTBUS_OK);
-    EXPECT_CALL(mocker, ConvertBytesToHexString).WillOnce(Return(SOFTBUS_OK))
+    EXPECT_CALL(mocker, ConvertBytesToHexString)
+        .WillOnce(Return(SOFTBUS_OK))
         .WillOnce(Return(SOFTBUS_OK))
         .WillOnce(Return(SOFTBUS_INVALID_PARAM));
     ret = PackCipherRpaInfo(&json, &info);
     EXPECT_NE(ret, SOFTBUS_OK);
-    EXPECT_CALL(mocker, ConvertBytesToHexString).WillOnce(Return(SOFTBUS_OK))
+    EXPECT_CALL(mocker, ConvertBytesToHexString)
+        .WillOnce(Return(SOFTBUS_OK))
         .WillOnce(Return(SOFTBUS_OK))
         .WillOnce(Return(SOFTBUS_OK))
         .WillOnce(Return(SOFTBUS_INVALID_PARAM));
@@ -495,8 +508,7 @@ HWTEST_F(AuthSessionJsonMockTest, PACK_CIPHER_RPA_INFO_TEST_001, TestSize.Level1
 HWTEST_F(AuthSessionJsonMockTest, PACK_COMMON_EX_TEST_001, TestSize.Level1)
 {
     NiceMock<AuthSessionJsonDepsInterfaceMock> mocker;
-    EXPECT_CALL(mocker, JSON_AddStringToObject).WillOnce(Return(false))
-        .WillRepeatedly(Return(true));
+    EXPECT_CALL(mocker, JSON_AddStringToObject).WillOnce(Return(false)).WillRepeatedly(Return(true));
     EXPECT_CALL(mocker, JSON_AddInt32ToObject).WillRepeatedly(Return(true));
     EXPECT_CALL(mocker, JSON_AddInt16ToObject).WillRepeatedly(Return(true));
     EXPECT_CALL(mocker, JSON_AddBoolToObject).WillRepeatedly(Return(true));
@@ -513,10 +525,10 @@ HWTEST_F(AuthSessionJsonMockTest, PACK_COMMON_EX_TEST_001, TestSize.Level1)
     EXPECT_CALL(mocker, JSON_GetStringFromObject).WillRepeatedly(Return(true));
     EXPECT_CALL(mocker, ConvertHexStringToBytes).WillOnce(Return(SOFTBUS_INVALID_PARAM));
     UnpackCipherRpaInfo(&json, &info);
-    EXPECT_CALL(mocker, ConvertHexStringToBytes).WillOnce(Return(SOFTBUS_OK))
-        .WillOnce(Return(SOFTBUS_INVALID_PARAM));
+    EXPECT_CALL(mocker, ConvertHexStringToBytes).WillOnce(Return(SOFTBUS_OK)).WillOnce(Return(SOFTBUS_INVALID_PARAM));
     UnpackCipherRpaInfo(&json, &info);
-    EXPECT_CALL(mocker, ConvertHexStringToBytes).WillOnce(Return(SOFTBUS_OK))
+    EXPECT_CALL(mocker, ConvertHexStringToBytes)
+        .WillOnce(Return(SOFTBUS_OK))
         .WillOnce(Return(SOFTBUS_OK))
         .WillOnce(Return(SOFTBUS_INVALID_PARAM));
     UnpackCipherRpaInfo(&json, &info);
@@ -549,8 +561,7 @@ HWTEST_F(AuthSessionJsonMockTest, PACK_COMMON_TEST_001, TestSize.Level1)
     EXPECT_CALL(mocker, JSON_AddInt32ToObject).WillOnce(Return(false));
     ret = PackCommon(&json, &info, SOFTBUS_NEW_V1, true);
     EXPECT_NE(ret, SOFTBUS_OK);
-    EXPECT_CALL(mocker, JSON_AddStringToObject).WillOnce(Return(true))
-        .WillOnce(Return(false));
+    EXPECT_CALL(mocker, JSON_AddStringToObject).WillOnce(Return(true)).WillOnce(Return(false));
     EXPECT_CALL(mocker, JSON_AddInt32ToObject).WillOnce(Return(true));
     ret = PackCommon(&json, &info, SOFTBUS_NEW_V1, true);
     EXPECT_NE(ret, SOFTBUS_OK);
@@ -573,7 +584,8 @@ HWTEST_F(AuthSessionJsonMockTest, PACK_BT_TEST_001, TestSize.Level1)
     NodeInfo info;
     (void)memset_s(&info, sizeof(NodeInfo), 0, sizeof(NodeInfo));
     EXPECT_CALL(mocker, JSON_AddInt32ToObject).WillOnce(Return(false));
-    EXPECT_CALL(mocker, LnnGetNetworkIdByUuid).WillOnce(Return(SOFTBUS_INVALID_PARAM))
+    EXPECT_CALL(mocker, LnnGetNetworkIdByUuid)
+        .WillOnce(Return(SOFTBUS_INVALID_PARAM))
         .WillRepeatedly(Return(SOFTBUS_OK));
     const char *remoteUuid = "remoteUuidTest";
     AddDiscoveryType(&json, nullptr);
@@ -688,10 +700,10 @@ HWTEST_F(AuthSessionJsonMockTest, PACK_USER_ID_CHECK_SUM_TEST_001, TestSize.Leve
     (void)memset_s(&json, sizeof(JsonObj), 0, sizeof(JsonObj));
     NodeInfo nodeInfo;
     (void)memset_s(&nodeInfo, sizeof(NodeInfo), 0, sizeof(NodeInfo));
-    EXPECT_CALL(mocker, ConvertBytesToHexString).WillOnce(Return(SOFTBUS_INVALID_PARAM))
+    EXPECT_CALL(mocker, ConvertBytesToHexString)
+        .WillOnce(Return(SOFTBUS_INVALID_PARAM))
         .WillRepeatedly(Return(SOFTBUS_OK));
-    EXPECT_CALL(mocker, JSON_AddStringToObject).WillOnce(Return(false))
-        .WillRepeatedly(Return(true));
+    EXPECT_CALL(mocker, JSON_AddStringToObject).WillOnce(Return(false)).WillRepeatedly(Return(true));
     int32_t ret = PackUserIdCheckSum(&json, &nodeInfo);
     EXPECT_NE(ret, SOFTBUS_OK);
     ret = PackUserIdCheckSum(&json, &nodeInfo);
@@ -715,17 +727,18 @@ HWTEST_F(AuthSessionJsonMockTest, PACK_DEVICE_INFO_MESSAGE_TEST_001, TestSize.Le
     (void)memset_s(&info, sizeof(AuthSessionInfo), 0, sizeof(AuthSessionInfo));
     NodeInfo nodeInfo;
     (void)memset_s(&nodeInfo, sizeof(NodeInfo), 0, sizeof(NodeInfo));
-    EXPECT_CALL(mocker, LnnGetLocalNodeInfoSafe).WillOnce(Return(SOFTBUS_INVALID_PARAM))
+    EXPECT_CALL(mocker, LnnGetLocalNodeInfoSafe)
+        .WillOnce(Return(SOFTBUS_INVALID_PARAM))
         .WillRepeatedly(Return(SOFTBUS_OK));
     const char *brMacTempNull = "";
     const char *brMacTempInvalid = "00:00:00:00:00:00";
     const char *brMacTemp = "00:11:22:33:44:55";
-    EXPECT_CALL(mocker, LnnGetBtMac).WillOnce(Return(brMacTempNull)).WillOnce(Return(brMacTempInvalid))
+    EXPECT_CALL(mocker, LnnGetBtMac)
+        .WillOnce(Return(brMacTempNull))
+        .WillOnce(Return(brMacTempInvalid))
         .WillRepeatedly(Return(brMacTemp));
-    EXPECT_CALL(mocker, SoftBusGetBtState).WillOnce(Return(BLE_DISABLE))
-        .WillRepeatedly(Return(BLE_ENABLE));
-    EXPECT_CALL(mocker, SoftBusGetBtMacAddr).WillOnce(Return(SOFTBUS_INVALID_PARAM))
-        .WillRepeatedly(Return(SOFTBUS_OK));
+    EXPECT_CALL(mocker, SoftBusGetBtState).WillOnce(Return(BLE_DISABLE)).WillRepeatedly(Return(BLE_ENABLE));
+    EXPECT_CALL(mocker, SoftBusGetBtMacAddr).WillOnce(Return(SOFTBUS_INVALID_PARAM)).WillRepeatedly(Return(SOFTBUS_OK));
     EXPECT_CALL(mocker, LnnGetLocalNodeInfo).WillRepeatedly(Return(nullptr));
     const char *remoteUuid = "remoteUuidTest";
     char *ret = PackDeviceInfoMessage(&connInfo, SOFTBUS_NEW_V1, false, remoteUuid, &info);

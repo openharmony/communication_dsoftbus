@@ -2359,10 +2359,11 @@ static int32_t UnpackCertificateInfo(JsonObj *json, NodeInfo *nodeInfo, const Au
         AUTH_LOGE(AUTH_FSM, "unpack certChain fail.");
         return SOFTBUS_OK;
     }
-    if (VerifyCertificatePacked(&softbusCertChain, nodeInfo, info) != SOFTBUS_OK) {
+    int32_t ret = VerifyCertificatePacked(&softbusCertChain, nodeInfo, info);
+    if (ret != SOFTBUS_OK) {
         AUTH_LOGE(AUTH_FSM, "attest cert fail.");
         FreeSoftbusChainPacked(&softbusCertChain);
-        return SOFTBUS_AUTH_ATTEST_CERT_FAIL;
+        return ret;
     }
     FreeSoftbusChainPacked(&softbusCertChain);
     return SOFTBUS_OK;
@@ -2626,9 +2627,10 @@ int32_t UnpackDeviceInfoMessage(
     if (JSON_GetInt32FromOject(json, STATE_VERSION, &target)) {
         nodeInfo->isSupportSv = true;
     }
-    if (UnpackCertificateInfo(json, nodeInfo, info) != SOFTBUS_OK) {
+    int32_t result = UnpackCertificateInfo(json, nodeInfo, info);
+    if (result != SOFTBUS_OK) {
         JSON_Delete(json);
-        return SOFTBUS_AUTH_UNPACK_DEVINFO_FAIL;
+        return result;
     }
     UnpackUserIdCheckSum(json, nodeInfo);
     if (IsInvalidDeviceInfo(json, nodeInfo, info)) {

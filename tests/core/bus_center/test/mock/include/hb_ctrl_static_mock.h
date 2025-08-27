@@ -73,8 +73,7 @@ public:
     virtual int32_t LnnHbMediumMgrInit(void) = 0;
     virtual int32_t LnnStartNewHbStrategyFsm(void) = 0;
     virtual int32_t AuthSendKeepaliveOption(const char *uuid, ModeCycle cycle) = 0;
-    virtual int32_t LnnSetGearModeBySpecificType(
-        const char *callerId, const GearMode *mode, LnnHeartbeatType type) = 0;
+    virtual int32_t LnnSetGearModeBySpecificType(const char *callerId, const GearMode *mode, LnnHeartbeatType type) = 0;
     virtual void LnnDumpLocalBasicInfo(void) = 0;
     virtual bool LnnGetOnlineStateById(const char *id, IdCategory type) = 0;
     virtual int32_t AuthFlushDevice(const char *uuid) = 0;

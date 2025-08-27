@@ -182,7 +182,6 @@ int32_t LnnGenerateCeParams(bool isUnlocked)
     return HeartBeatCtrlStaticInterface()->LnnGenerateCeParams(isUnlocked);
 }
 
-
 void DfxRecordTriggerTime(LnnTriggerReason reason, LnnEventLnnStage stage)
 {
     return HeartBeatCtrlStaticInterface()->DfxRecordTriggerTime(reason, stage);

@@ -42,8 +42,7 @@ public:
     int32_t SetSocketPktHead(SocketPktHead *head);
     static void OnWiFiConnected(ListenerModule module, int32_t fd, bool isClient);
     static void OnWiFiDisconnected(ListenerModule module, int32_t fd);
-    static void OnWiFiDataReceived(ListenerModule module, int32_t fd, const AuthDataHead *head,
-        const uint8_t *data);
+    static void OnWiFiDataReceived(ListenerModule module, int32_t fd, const AuthDataHead *head, const uint8_t *data);
     static void OnDataReceived(int32_t authId, const AuthChannelData *data);
     static void OnDisconnect(int32_t authId);
     static bool isOnWiFiConnectedSuccess;
@@ -86,8 +85,8 @@ int32_t AuthTcpConnectionTest::SetSocketPktHead(SocketPktHead *head)
 
 void AuthTcpConnectionTest::OnWiFiConnected(ListenerModule module, int32_t fd, bool isClient)
 {
-    AUTH_LOGI(AUTH_TEST, "OnWiFiConnected: fd=%{public}d, side=%{public}s", fd,
-        isClient ? "client" : "server(ignored)");
+    AUTH_LOGI(
+        AUTH_TEST, "OnWiFiConnected: fd=%{public}d, side=%{public}s", fd, isClient ? "client" : "server(ignored)");
     isOnWiFiConnectedSuccess = true;
 }
 
@@ -97,8 +96,8 @@ void AuthTcpConnectionTest::OnWiFiDisconnected(ListenerModule module, int32_t fd
     isOnWiFiDisconnectedSuccess = true;
 }
 
-void AuthTcpConnectionTest::OnWiFiDataReceived(ListenerModule module, int32_t fd,
-    const AuthDataHead *head, const uint8_t *data)
+void AuthTcpConnectionTest::OnWiFiDataReceived(
+    ListenerModule module, int32_t fd, const AuthDataHead *head, const uint8_t *data)
 {
     AUTH_LOGI(AUTH_TEST, "OnWiFiDataReceived: module=%{public}d, fd=%{public}d", module, fd);
     isOnWiFiDataReceivedSuccess = true;

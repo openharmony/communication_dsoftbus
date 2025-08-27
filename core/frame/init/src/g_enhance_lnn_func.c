@@ -238,6 +238,10 @@ void Register5thPartFunc(void *soHandle)
 {
     g_lnnEnhanceFuncList.lnnRetrieveDeviceInfo = dlsym(soHandle, "LnnRetrieveDeviceInfo");
     g_lnnEnhanceFuncList.lnnRetrieveDeviceInfoByNetworkId = dlsym(soHandle, "LnnRetrieveDeviceInfoByNetworkId");
+    g_lnnEnhanceFuncList.haveConcurrencyPreLinkNodeByLaneReqId = dlsym(soHandle,
+        "HaveConcurrencyPreLinkNodeByLaneReqId");
+    g_lnnEnhanceFuncList.updateConcurrencyReuseLaneReqIdByUdid = dlsym(soHandle,
+        "UpdateConcurrencyReuseLaneReqIdByUdid");
     g_lnnEnhanceFuncList.lnnTimeChangeNotify = dlsym(soHandle, "LnnTimeChangeNotify");
     g_lnnEnhanceFuncList.isSupportLowLatency = dlsym(soHandle, "IsSupportLowLatency");
     g_lnnEnhanceFuncList.lnnVirtualLinkInit = dlsym(soHandle, "LnnVirtualLinkInit");

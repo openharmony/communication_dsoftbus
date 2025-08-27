@@ -12,7 +12,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
- 
+
 #include <cstring>
 #include <gtest/gtest.h>
 #include <securec.h>
@@ -42,11 +42,11 @@ void LNNFeatureCapabilityTest::SetUp() { }
 void LNNFeatureCapabilityTest::TearDown() { }
 
 /*
-* @tc.name:LnnSetFeatureCapability_Test_001
-* @tc.desc: Testing the LnnSetFeatureCapability interface returns normal values
-* @tc.type: FUNC
-* @tc.require: I5RHYE
-*/
+ * @tc.name:LnnSetFeatureCapability_Test_001
+ * @tc.desc: Testing the LnnSetFeatureCapability interface returns normal values
+ * @tc.type: FUNC
+ * @tc.require: I5RHYE
+ */
 HWTEST_F(LNNFeatureCapabilityTest, LnnSetFeatureCapability_Test_001, TestSize.Level1)
 {
     uint64_t feature = 0;
@@ -56,11 +56,11 @@ HWTEST_F(LNNFeatureCapabilityTest, LnnSetFeatureCapability_Test_001, TestSize.Le
 }
 
 /*
-* @tc.name: LnnSetFeatureCapability_Test_002
-* @tc.desc: Testing the LnnSetFeatureCapability interface returns an abnormal value
-* @tc.type: FUNC
-* @tc.require: I5RHYE
-*/
+ * @tc.name: LnnSetFeatureCapability_Test_002
+ * @tc.desc: Testing the LnnSetFeatureCapability interface returns an abnormal value
+ * @tc.type: FUNC
+ * @tc.require: I5RHYE
+ */
 HWTEST_F(LNNFeatureCapabilityTest, LnnSetFeatureCapability_Test_002, TestSize.Level1)
 {
     FeatureCapability capaBit = BIT_WIFI_P2P_REUSE;
@@ -69,11 +69,11 @@ HWTEST_F(LNNFeatureCapabilityTest, LnnSetFeatureCapability_Test_002, TestSize.Le
 }
 
 /*
-* @tc.name: LnnSetFeatureCapability_Test_003
-* @tc.desc: Testing the LnnSetFeatureCapability interface returns an abnormal value
-* @tc.type: FUNC
-* @tc.require: I5RHYE
-*/
+ * @tc.name: LnnSetFeatureCapability_Test_003
+ * @tc.desc: Testing the LnnSetFeatureCapability interface returns an abnormal value
+ * @tc.type: FUNC
+ * @tc.require: I5RHYE
+ */
 HWTEST_F(LNNFeatureCapabilityTest, LnnSetFeatureCapability_Test_003, TestSize.Level1)
 {
     uint64_t feature = 0;
@@ -83,11 +83,11 @@ HWTEST_F(LNNFeatureCapabilityTest, LnnSetFeatureCapability_Test_003, TestSize.Le
 }
 
 /*
-* @tc.name: LnnClearFeatureCapability_Test_001
-* @tc.desc: Testing the LnnSetFeatureCapability interface returns normal values
-* @tc.type: FUNC
-* @tc.require: I5RHYE
-*/
+ * @tc.name: LnnClearFeatureCapability_Test_001
+ * @tc.desc: Testing the LnnSetFeatureCapability interface returns normal values
+ * @tc.type: FUNC
+ * @tc.require: I5RHYE
+ */
 HWTEST_F(LNNFeatureCapabilityTest, LnnClearFeatureCapability_Test_001, TestSize.Level1)
 {
     uint64_t feature = 0;
@@ -97,11 +97,11 @@ HWTEST_F(LNNFeatureCapabilityTest, LnnClearFeatureCapability_Test_001, TestSize.
 }
 
 /*
-* @tc.name: LnnClearFeatureCapability_Test_002
-* @tc.desc: Testing the LnnSetFeatureCapability interface returns an abnormal value
-* @tc.type: FUNC
-* @tc.require: I5RHYE
-*/
+ * @tc.name: LnnClearFeatureCapability_Test_002
+ * @tc.desc: Testing the LnnSetFeatureCapability interface returns an abnormal value
+ * @tc.type: FUNC
+ * @tc.require: I5RHYE
+ */
 HWTEST_F(LNNFeatureCapabilityTest, LnnClearFeatureCapability_Test_002, TestSize.Level1)
 {
     FeatureCapability capaBit = BIT_FEATURE_COUNT;
@@ -110,11 +110,11 @@ HWTEST_F(LNNFeatureCapabilityTest, LnnClearFeatureCapability_Test_002, TestSize.
 }
 
 /*
-* @tc.name: LnnClearFeatureCapability_Test_003
-* @tc.desc: Testing the LnnSetFeatureCapability interface returns an abnormal value
-* @tc.type: FUNC
-* @tc.require: I5RHYE
-*/
+ * @tc.name: LnnClearFeatureCapability_Test_003
+ * @tc.desc: Testing the LnnSetFeatureCapability interface returns an abnormal value
+ * @tc.type: FUNC
+ * @tc.require: I5RHYE
+ */
 HWTEST_F(LNNFeatureCapabilityTest, LnnClearFeatureCapability_Test_003, TestSize.Level1)
 {
     uint64_t feature = 0;
@@ -124,11 +124,11 @@ HWTEST_F(LNNFeatureCapabilityTest, LnnClearFeatureCapability_Test_003, TestSize.
 }
 
 /*
-* @tc.name: LnnNodeInfo_Test_001
-* @tc.desc: Testing the LnnSetUserIdCheckSum interface returns an abnormal value
-* @tc.type: FUNC
-* @tc.require: I5RHYE
-*/
+ * @tc.name: LnnNodeInfo_Test_001
+ * @tc.desc: Testing the LnnSetUserIdCheckSum interface returns an abnormal value
+ * @tc.type: FUNC
+ * @tc.require: I5RHYE
+ */
 HWTEST_F(LNNFeatureCapabilityTest, LnnNodeInfo_Test_001, TestSize.Level1)
 {
     NodeInfo info;
@@ -140,11 +140,11 @@ HWTEST_F(LNNFeatureCapabilityTest, LnnNodeInfo_Test_001, TestSize.Level1)
 }
 
 /*
-* @tc.name: LnnNodeInfo_Test_002
-* @tc.desc: Testing the LnnSetUserIdCheckSum interface returns an abnormal value
-* @tc.type: FUNC
-* @tc.require: I5RHYE
-*/
+ * @tc.name: LnnNodeInfo_Test_002
+ * @tc.desc: Testing the LnnSetUserIdCheckSum interface returns an abnormal value
+ * @tc.type: FUNC
+ * @tc.require: I5RHYE
+ */
 HWTEST_F(LNNFeatureCapabilityTest, LnnNodeInfo_Test_002, TestSize.Level1)
 {
     uint8_t data = 0;
@@ -154,11 +154,11 @@ HWTEST_F(LNNFeatureCapabilityTest, LnnNodeInfo_Test_002, TestSize.Level1)
 }
 
 /*
-* @tc.name: LnnNodeInfo_Test_003
-* @tc.desc: Testing the LnnSetUserIdCheckSum interface returns normal value
-* @tc.type: FUNC
-* @tc.require: I5RHYE
-*/
+ * @tc.name: LnnNodeInfo_Test_003
+ * @tc.desc: Testing the LnnSetUserIdCheckSum interface returns normal value
+ * @tc.type: FUNC
+ * @tc.require: I5RHYE
+ */
 HWTEST_F(LNNFeatureCapabilityTest, LnnNodeInfo_Test_003, TestSize.Level1)
 {
     NodeInfo info;
@@ -172,11 +172,11 @@ HWTEST_F(LNNFeatureCapabilityTest, LnnNodeInfo_Test_003, TestSize.Level1)
 }
 
 /*
-* @tc.name: LnnNodeInfo_Test_004
-* @tc.desc: Testing the LnnGetUserIdCheckSum interface returns an abnormal value
-* @tc.type: FUNC
-* @tc.require: I5RHYE
-*/
+ * @tc.name: LnnNodeInfo_Test_004
+ * @tc.desc: Testing the LnnGetUserIdCheckSum interface returns an abnormal value
+ * @tc.type: FUNC
+ * @tc.require: I5RHYE
+ */
 HWTEST_F(LNNFeatureCapabilityTest, LnnNodeInfo_Test_004, TestSize.Level1)
 {
     NodeInfo info;
@@ -188,11 +188,11 @@ HWTEST_F(LNNFeatureCapabilityTest, LnnNodeInfo_Test_004, TestSize.Level1)
 }
 
 /*
-* @tc.name: LnnNodeInfo_Test_005
-* @tc.desc: Testing the LnnGetUserIdCheckSum interface returns an abnormal value
-* @tc.type: FUNC
-* @tc.require: I5RHYE
-*/
+ * @tc.name: LnnNodeInfo_Test_005
+ * @tc.desc: Testing the LnnGetUserIdCheckSum interface returns an abnormal value
+ * @tc.type: FUNC
+ * @tc.require: I5RHYE
+ */
 HWTEST_F(LNNFeatureCapabilityTest, LnnNodeInfo_Test_005, TestSize.Level1)
 {
     uint8_t data = 0;

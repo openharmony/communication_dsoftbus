@@ -80,8 +80,8 @@ public:
     MOCK_METHOD3(DecryptUserId, int32_t(NodeInfo *, uint8_t *, uint32_t));
     MOCK_METHOD2(LnnGetDLSleHbTimestamp, int32_t(const char *, uint64_t *));
     MOCK_METHOD2(LnnSetDLSleHbTimestamp, int32_t(const char *, const uint64_t));
-    MOCK_METHOD1(LnnStartSleOfflineTimingStrategy, int32_t (const char *));
-    MOCK_METHOD1(LnnStopSleOfflineTimingStrategy, int32_t (const char *));
+    MOCK_METHOD1(LnnStartSleOfflineTimingStrategy, int32_t(const char *));
+    MOCK_METHOD1(LnnStopSleOfflineTimingStrategy, int32_t(const char *));
 };
 } // namespace OHOS
 #endif // HB_MEDIUM_MGR_STATIC_MOCK_H

@@ -16,8 +16,8 @@
 
 #include <cstddef>
 #include <cstring>
-#include <securec.h>
 #include <fuzzer/FuzzedDataProvider.h>
+#include <securec.h>
 
 #include "auth_common_struct.h"
 #include "auth_identity_service_adapter.c"
@@ -44,10 +44,11 @@ public:
     {
         return isInited_;
     }
+
 private:
     volatile bool isInited_ = false;
 };
-}
+} // namespace
 namespace OHOS {
 
 void ProcessServiceGetCred(FuzzedDataProvider &provider, HiChainAuthParam &hiChainParam, SoftBusCredInfo &credInfo)
@@ -71,11 +72,11 @@ void ProcessServiceGetCred(FuzzedDataProvider &provider, HiChainAuthParam &hiCha
     IdServiceIsPotentialTrustedDevice(shortUdidHash.c_str(), shortAccountIdHash.c_str(), true);
     string credList1 = provider.ConsumeRandomLengthString(CREATE_LIST_LEN);
     string credList2 = provider.ConsumeRandomLengthString(CREATE_LIST_LEN);
-    const char *ptrCredList[] = {credList1.c_str(), credList2.c_str()};
-    AuthIdServiceQueryCredential(hiChainParam.userId, shortUdidHash.c_str(), shortAccountIdHash.c_str(),
-        true, (char **)ptrCredList);
-    IdServiceQueryCredential(hiChainParam.userId, shortUdidHash.c_str(), shortAccountIdHash.c_str(),
-        true, (char **)ptrCredList);
+    const char *ptrCredList[] = { credList1.c_str(), credList2.c_str() };
+    AuthIdServiceQueryCredential(
+        hiChainParam.userId, shortUdidHash.c_str(), shortAccountIdHash.c_str(), true, (char **)ptrCredList);
+    IdServiceQueryCredential(
+        hiChainParam.userId, shortUdidHash.c_str(), shortAccountIdHash.c_str(), true, (char **)ptrCredList);
     IdServiceGenerateQueryParam(shortUdidHash.c_str(), shortAccountIdHash.c_str(), true);
 }
 
@@ -118,7 +119,7 @@ bool AuthIdentityServiceAdapterFuzzTest(FuzzedDataProvider &provider)
     ProcessServiceGetCred(provider, hiChainParam, credInfo);
     return true;
 }
-}
+} // namespace OHOS
 
 /* Fuzzer entry point */
 extern "C" int32_t LLVMFuzzerTestOneInput(const uint8_t *data, size_t size)
@@ -129,7 +130,7 @@ extern "C" int32_t LLVMFuzzerTestOneInput(const uint8_t *data, size_t size)
     }
     FuzzedDataProvider provider(data, size);
     /* Run your code on data */
-    
+
     if (!OHOS::AuthIdentityServiceAdapterFuzzTest(provider)) {
         return -1;
     }

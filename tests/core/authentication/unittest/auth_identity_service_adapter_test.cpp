@@ -15,9 +15,9 @@
 
 #include <gtest/gtest.h>
 
-#include "auth_identity_service_adapter_mock.h"
 #include "auth_identity_service_adapter.c"
 #include "auth_identity_service_adapter.h"
+#include "auth_identity_service_adapter_mock.h"
 
 namespace OHOS {
 using namespace testing;
@@ -535,4 +535,4 @@ HWTEST_F(AuthIdentityServiceAdapterTest, ID_SERVICE_GENERATE_AUTH_PARAM_TEST_001
     char *param = IdServiceGenerateAuthParam(nullptr);
     EXPECT_EQ(param, nullptr);
 }
-}
+} // namespace OHOS

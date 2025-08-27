@@ -17,12 +17,12 @@
 #include <securec.h>
 
 #include "bus_center_manager.h"
+#include "g_enhance_lnn_func.h"
+#include "g_reg_lnn_func.h"
 #include "lnn_connection_addr_utils.h"
 #include "lnn_distributed_net_ledger_manager_mock.h"
 #include "lnn_log.h"
 #include "softbus_adapter_mem.h"
-#include "g_enhance_lnn_func.h"
-#include "g_reg_lnn_func.h"
 #include "softbus_init_common.h"
 
 namespace OHOS {
@@ -62,13 +62,9 @@ int32_t LnnSaveRemoteDeviceInfoStub(const NodeInfo *deviceInfo)
     return SOFTBUS_OK;
 }
 
-void LNNDistributedNetLedgerManagerTest::SetUpTestCase()
-{
-}
+void LNNDistributedNetLedgerManagerTest::SetUpTestCase() { }
 
-void LNNDistributedNetLedgerManagerTest::TearDownTestCase()
-{
-}
+void LNNDistributedNetLedgerManagerTest::TearDownTestCase() { }
 
 void LNNDistributedNetLedgerManagerTest::SetUp()
 {
@@ -553,7 +549,7 @@ HWTEST_F(LNNDistributedNetLedgerManagerTest, LNN_GET_REMOTE_BYTE_INFO_TEST_001, 
     LnnDistributedNetLedgerManagerInterfaceMock mock;
     EXPECT_CALL(mock, LnnGetNodeInfoById).WillOnce(Return(nullptr)).WillRepeatedly(Return(nodeInfo));
 
-    unsigned char irk[LFINDER_IRK_LEN] = {0};
+    unsigned char irk[LFINDER_IRK_LEN] = { 0 };
     int32_t ret = LnnGetRemoteByteInfo(nullptr, BYTE_KEY_PUB_MAC, irk, LFINDER_IRK_LEN);
     EXPECT_EQ(ret, SOFTBUS_INVALID_PARAM);
     ret = LnnGetRemoteByteInfo(NODE_NETWORK_ID, BYTE_KEY_PUB_MAC, nullptr, LFINDER_IRK_LEN);
@@ -578,7 +574,7 @@ HWTEST_F(LNNDistributedNetLedgerManagerTest, LNN_GET_REMOTE_BYTE_INFO_TEST_002, 
     LnnDistributedNetLedgerManagerInterfaceMock mock;
     EXPECT_CALL(mock, LnnGetNodeInfoById).WillOnce(Return(nullptr)).WillRepeatedly(Return(nodeInfo));
 
-    unsigned char irk[LFINDER_UDID_LEN] = {0};
+    unsigned char irk[LFINDER_UDID_LEN] = { 0 };
     int32_t ret = LnnGetRemoteByteInfo(nullptr, BYTE_KEY_ACCOUNT_HASH, irk, LFINDER_UDID_LEN);
     EXPECT_EQ(ret, SOFTBUS_INVALID_PARAM);
     ret = LnnGetRemoteByteInfo(NODE_NETWORK_ID, BYTE_KEY_ACCOUNT_HASH, nullptr, LFINDER_UDID_LEN);
@@ -605,7 +601,7 @@ HWTEST_F(LNNDistributedNetLedgerManagerTest, LNN_GET_REMOTE_BYTE_INFO_TEST_003, 
     LnnDistributedNetLedgerManagerInterfaceMock mock;
     EXPECT_CALL(mock, LnnGetNodeInfoById).WillOnce(Return(nullptr)).WillRepeatedly(Return(nodeInfo));
 
-    unsigned char irk[LFINDER_UDID_HASH_LEN] = {0};
+    unsigned char irk[LFINDER_UDID_HASH_LEN] = { 0 };
     int32_t ret = LnnGetRemoteByteInfo(NODE_NETWORK_ID, BYTE_KEY_REMOTE_PTK, irk, LFINDER_UDID_HASH_LEN);
     EXPECT_EQ(ret, SOFTBUS_NETWORK_GET_NODE_INFO_ERR);
     ret = LnnGetRemoteByteInfo(NODE_NETWORK_ID, BYTE_KEY_REMOTE_PTK, irk, LFINDER_UDID_HASH_LEN);
@@ -823,8 +819,8 @@ HWTEST_F(LNNDistributedNetLedgerManagerTest, LNN_SET_DL_UNIFIED_DEFAULT_DEVICE_N
     ret = LnnSetDLUnifiedDefaultDeviceName(devUdid, devName);
     EXPECT_EQ(ret, SOFTBUS_OK);
 
-    ASSERT_EQ(strncpy_s(nodeInfo->deviceInfo.unifiedDefaultName,
-        DEVICE_NAME_DEFAULT_LEN, devName, strlen(devName)), EOK);
+    ASSERT_EQ(
+        strncpy_s(nodeInfo->deviceInfo.unifiedDefaultName, DEVICE_NAME_DEFAULT_LEN, devName, strlen(devName)), EOK);
     ret = LnnSetDLUnifiedDefaultDeviceName(devUdid, devName);
     EXPECT_EQ(ret, SOFTBUS_OK);
     SoftBusFree(nodeInfo);
@@ -906,8 +902,8 @@ HWTEST_F(LNNDistributedNetLedgerManagerTest, LNN_SET_DL_DEVICE_INFO_NAME_TEST_00
     ret = LnnSetDLDeviceInfoName(devNetworkId, devName);
     EXPECT_TRUE(ret);
 
-    const char *devNameError = "abcdefghijabcdefghijabcdefghijabcdefghijabcdefghijabcdefghij" \
-        "abcdefghijabcdefghijabcdefghijabcdefghijabcdefghijabcdefghijabcdefghij";
+    const char *devNameError = "abcdefghijabcdefghijabcdefghijabcdefghijabcdefghijabcdefghij"
+                               "abcdefghijabcdefghijabcdefghijabcdefghijabcdefghijabcdefghijabcdefghij";
     ret = LnnSetDLDeviceInfoName(devNetworkId, devNameError);
     EXPECT_FALSE(ret);
     SoftBusFree(nodeInfo);
@@ -1113,7 +1109,7 @@ HWTEST_F(LNNDistributedNetLedgerManagerTest, LNN_GET_REMOTE_STR_INFO_TEST_001, T
     LnnDistributedNetLedgerManagerInterfaceMock mock;
     EXPECT_CALL(mock, LnnGetNodeInfoById).WillOnce(Return(nullptr)).WillOnce(Return(nodeInfo));
 
-    char udid[UDID_BUF_LEN] = {0};
+    char udid[UDID_BUF_LEN] = { 0 };
     nodeInfo->metaInfo.isMetaNode = false;
     int32_t ret = LnnGetRemoteStrInfo(NODE_NETWORK_ID, STRING_KEY_CHAN_LIST_5G, udid, sizeof(udid));
     EXPECT_EQ(ret, SOFTBUS_NETWORK_GET_NODE_INFO_ERR);
@@ -1139,7 +1135,7 @@ HWTEST_F(LNNDistributedNetLedgerManagerTest, LNN_GET_REMOTE_STR_INFO_TEST_002, T
     LnnDistributedNetLedgerManagerInterfaceMock mock;
     EXPECT_CALL(mock, LnnGetNodeInfoById).WillOnce(Return(nullptr)).WillOnce(Return(nodeInfo));
 
-    char udid[UDID_BUF_LEN] = {0};
+    char udid[UDID_BUF_LEN] = { 0 };
     nodeInfo->metaInfo.isMetaNode = false;
     int32_t ret = LnnGetRemoteStrInfo(NODE_NETWORK_ID, STRING_KEY_WIFI_CFG, udid, sizeof(udid));
     EXPECT_EQ(ret, SOFTBUS_NETWORK_GET_NODE_INFO_ERR);
@@ -1165,7 +1161,7 @@ HWTEST_F(LNNDistributedNetLedgerManagerTest, LNN_GET_REMOTE_STR_INFO_TEST_003, T
     LnnDistributedNetLedgerManagerInterfaceMock mock;
     EXPECT_CALL(mock, LnnGetNodeInfoById).WillOnce(Return(nullptr)).WillOnce(Return(nodeInfo));
 
-    char udid[UDID_BUF_LEN] = {0};
+    char udid[UDID_BUF_LEN] = { 0 };
     nodeInfo->metaInfo.isMetaNode = false;
     int32_t ret = LnnGetRemoteStrInfo(NODE_NETWORK_ID, STRING_KEY_P2P_GO_MAC, udid, sizeof(udid));
     EXPECT_EQ(ret, SOFTBUS_NETWORK_GET_NODE_INFO_ERR);
@@ -1191,7 +1187,7 @@ HWTEST_F(LNNDistributedNetLedgerManagerTest, LNN_GET_REMOTE_STR_INFO_TEST_004, T
     LnnDistributedNetLedgerManagerInterfaceMock mock;
     EXPECT_CALL(mock, LnnGetNodeInfoById).WillOnce(Return(nullptr)).WillOnce(Return(nodeInfo));
 
-    char udid[UDID_BUF_LEN] = {0};
+    char udid[UDID_BUF_LEN] = { 0 };
     int32_t ret = LnnGetRemoteStrInfo(NODE_NETWORK_ID, STRING_KEY_NODE_ADDR, udid, sizeof(udid));
     EXPECT_EQ(ret, SOFTBUS_NETWORK_GET_NODE_INFO_ERR);
     ret = LnnGetRemoteStrInfo(NODE_NETWORK_ID, STRING_KEY_NODE_ADDR, udid, sizeof(udid));
@@ -1216,7 +1212,7 @@ HWTEST_F(LNNDistributedNetLedgerManagerTest, LNN_GET_REMOTE_STR_INFO_TEST_005, T
     LnnDistributedNetLedgerManagerInterfaceMock mock;
     EXPECT_CALL(mock, LnnGetNodeInfoById).WillOnce(Return(nullptr)).WillOnce(Return(nodeInfo));
 
-    char udid[UDID_BUF_LEN] = {0};
+    char udid[UDID_BUF_LEN] = { 0 };
     nodeInfo->metaInfo.isMetaNode = false;
     int32_t ret = LnnGetRemoteStrInfo(NODE_NETWORK_ID, STRING_KEY_WIFIDIRECT_ADDR, udid, sizeof(udid));
     EXPECT_EQ(ret, SOFTBUS_NETWORK_GET_NODE_INFO_ERR);
@@ -1242,7 +1238,7 @@ HWTEST_F(LNNDistributedNetLedgerManagerTest, LNN_GET_REMOTE_STR_INFO_TEST_006, T
     LnnDistributedNetLedgerManagerInterfaceMock mock;
     EXPECT_CALL(mock, LnnGetNodeInfoById).WillOnce(Return(nullptr)).WillOnce(Return(nodeInfo));
 
-    char udid[UDID_BUF_LEN] = {0};
+    char udid[UDID_BUF_LEN] = { 0 };
     nodeInfo->metaInfo.isMetaNode = false;
     int32_t ret = LnnGetRemoteStrInfo(NODE_NETWORK_ID, STRING_KEY_P2P_MAC, udid, sizeof(udid));
     EXPECT_EQ(ret, SOFTBUS_NETWORK_GET_NODE_INFO_ERR);

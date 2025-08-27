@@ -254,8 +254,8 @@ typedef void (*LnnFreePreLinkFunc)(void *para);
 typedef int32_t (*GetConcurrencyLaneReqIdByActionIdFunc)(uint32_t actionId, uint32_t *laneReqId);
 typedef int32_t (*UpdateConcurrencyReuseLaneReqIdByActionIdFunc)(uint32_t actionId, uint32_t reuseLaneReqId,
     uint32_t connRequestId);
-typedef int32_t (*UpdateConcurrencyReuseLaneReqIdByUdidFunc)(char *udidHash, uint32_t reuseLaneReqId,
-    uint32_t connReqId);
+typedef int32_t (*UpdateConcurrencyReuseLaneReqIdByUdidFunc)(const char *udidHash, uint32_t udidHashLen,
+    uint32_t reuseLaneReqId, uint32_t connReqId);
 typedef int32_t (*LnnPackCloudSyncAckSeqFunc)(cJSON *json, char *peerudid);
 typedef void (*LnnClearPtkListFunc)(void);
 typedef int32_t (*GenerateNewLocalCipherKeyFunc)(void);
