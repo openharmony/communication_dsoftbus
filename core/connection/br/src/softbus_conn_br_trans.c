@@ -30,11 +30,15 @@
 #include "softbus_error_code.h"
 #include "softbus_json_utils.h"
 
+#define CONN_BR_SEND_DATA_FAIL_TRY_SEND_COUNT_MAX          (5)
+#define CONN_BR_SEND_DATA_FAIL_WAIT_TIME_MS                (100)
+
 static SppSocketDriver *g_sppDriver = NULL;
 static ConnBrTransEventListener g_transEventListener = { 0 };
 static struct ConnSlideWindowController *g_flowController = NULL;
 static void *SendHandlerLoop(void *arg);
 static StartBrSendLPInfo g_startBrSendLPInfo = { 0 };
+static int32_t g_trySendCount = 0;
 
 static uint8_t *BrRecvDataParse(uint32_t connectionId, LimitedBuffer *buffer, int32_t *outLen)
 {
@@ -126,23 +130,40 @@ int32_t ConnBrTransReadOneFrame(uint32_t connectionId, int32_t socketHandle, Lim
     }
 }
 
+static bool IsNeedRetrySend(int32_t writeLen)
+{
+    bool isNeedRetrySend = false;
+    if ((writeLen == CONN_BR_SEND_DATA_FAIL_UNDERLAYER_ERR_QUEUE_FULL
+        || writeLen == CONN_BR_SEND_DATA_FAIL_UNDERLAYER_ERR_INTERRUPTION)
+        && g_trySendCount < CONN_BR_SEND_DATA_FAIL_TRY_SEND_COUNT_MAX) {
+        isNeedRetrySend = true;
+    }
+    return isNeedRetrySend;
+}
+
 int32_t BrTransSend(uint32_t connectionId, int32_t socketHandle, uint32_t mtu, const uint8_t *data, uint32_t dataLen)
 {
     uint32_t waitWriteLen = dataLen;
+    g_trySendCount = 0;
     while (waitWriteLen > 0) {
         uint32_t expect = waitWriteLen > mtu ? mtu : waitWriteLen;
         int32_t amount = g_flowController->apply(g_flowController, (int32_t)expect);
         int32_t writeLen = g_sppDriver->Write(socketHandle, data, amount);
         if (writeLen < 0) {
-            CONN_LOGE(CONN_BR,
-                "br send data fail: underlayer bluetooth write fail, connId=%{public}u, "
+            CONN_LOGE(CONN_BR, "underlayer br send data fail, connId=%{public}u, "
                 "socketHandle=%{public}d, mtu=%{public}d, totalLen=%{public}d, waitWriteLen=%{public}d, "
-                "alreadyWriteLen=%{public}d, error=%{public}d",
-                connectionId, socketHandle, mtu, dataLen, waitWriteLen, dataLen - waitWriteLen, writeLen);
+                "alreadyWriteLen=%{public}d, error=%{public}d, trySendCount=%{public}d", connectionId,
+                socketHandle, mtu, dataLen, waitWriteLen, dataLen - waitWriteLen, writeLen, g_trySendCount);
+            if (IsNeedRetrySend(writeLen)) {
+                g_trySendCount++;
+                SoftBusSleepMs(CONN_BR_SEND_DATA_FAIL_WAIT_TIME_MS);
+                continue;
+            }
             return SOFTBUS_CONN_BR_UNDERLAY_WRITE_FAIL;
         }
         data += writeLen;
         waitWriteLen -= (uint32_t)writeLen;
+        g_trySendCount = 0;
     }
     return SOFTBUS_OK;
 }
