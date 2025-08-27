@@ -3109,6 +3109,42 @@ int32_t TransSetNeedAckBySocket(int32_t socket, bool needAck)
     return SOFTBUS_OK;
 }
 
+int32_t GetLogicalBandwidth(int32_t socket, int32_t *optValue, int32_t *optValueSize)
+{
+    if (socket <= 0 || optValue == NULL || optValueSize == NULL) {
+        TRANS_LOGE(TRANS_SDK, "invalid param");
+        return SOFTBUS_INVALID_PARAM;
+    }
+
+    int32_t ret = LockClientSessionServerList();
+    if (ret != SOFTBUS_OK) {
+        TRANS_LOGE(TRANS_SDK, "lock failed");
+        return ret;
+    }
+
+    ClientSessionServer *serverNode = NULL;
+    SessionInfo *sessionNode = NULL;
+    if (GetSessionById(socket, &serverNode, &sessionNode) != SOFTBUS_OK) {
+        UnlockClientSessionServerList();
+        TRANS_LOGE(TRANS_SDK, "socket not found. socket=%{public}d", socket);
+        return SOFTBUS_TRANS_SESSION_INFO_NOT_FOUND;
+    }
+    *optValue = BANDWIDTH_BUTT;
+    if (sessionNode->routeType == BT_BR || sessionNode->routeType == BT_BLE || sessionNode->routeType == BT_SLE) {
+        *optValue = LOW_BANDWIDTH;
+    } else if (sessionNode->routeType == WIFI_STA) {
+        *optValue = MEDIUM_BANDWIDTH;
+    } else if (sessionNode->routeType == WIFI_P2P || sessionNode->routeType == WIFI_P2P_REUSE ||
+        sessionNode->routeType == WIFI_USB) {
+        *optValue = HIGH_BANDWIDTH;
+    }
+    TRANS_LOGI(TRANS_SDK, "get medium bandwidth success socket=%{public}d, routeType=%{public}d",
+        socket, sessionNode->routeType);
+    *optValueSize = sizeof(int32_t);
+    UnlockClientSessionServerList();
+    return SOFTBUS_OK;
+}
+
 bool IsRawAuthSession(const char *sessionName)
 {
     TRANS_CHECK_AND_RETURN_RET_LOGE(sessionName != NULL, false, TRANS_CTRL, "invalid param.");
