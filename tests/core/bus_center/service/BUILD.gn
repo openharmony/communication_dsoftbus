@@ -88,6 +88,8 @@ ohos_unittest("BusCenterEventTest") {
     "$dsoftbus_root_path/core/bus_center/service/src/bus_center_event.c",
     "unittest/bus_center_event_deps_mock.cpp",
     "unittest/bus_center_event_test.cpp",
+    "$dsoftbus_root_path/core/frame/init/src/g_enhance_lnn_func.c",
+    "$dsoftbus_root_path/core/frame/init/src/g_enhance_trans_func.c",
   ]
 
   include_dirs = [
@@ -149,10 +151,8 @@ ohos_unittest("BusCenterManagerTest") {
   module_out_path = module_output_path
   sources = [
     "$dsoftbus_root_path/core/bus_center/service/src/bus_center_manager.c",
-    "$dsoftbus_root_path/core/frame/init/src/g_enhance_auth_func.c",
     "unittest/bus_center_manager_deps_mock.cpp",
     "unittest/bus_center_manager_test.cpp",
-    "$dsoftbus_root_path/core/frame/init/src/g_enhance_lnn_func_pack.c",
     "$dsoftbus_root_path/core/frame/init/src/g_enhance_lnn_func.c",
   ]
 
@@ -202,8 +202,8 @@ ohos_unittest("BusCenterManagerTest") {
   deps = [
     "$dsoftbus_root_path/adapter:softbus_adapter",
     "$dsoftbus_root_path/core/common:softbus_utils",
-    "$dsoftbus_root_path/core/frame:softbus_server",
     "$dsoftbus_root_path/tests/sdk/common:softbus_access_token_test",
+    "$dsoftbus_root_path/core/frame:softbus_server",
   ]
 
   bus_center_manager_test_external_deps = [
