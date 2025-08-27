@@ -419,6 +419,8 @@ HWTEST_F(ConnectionBrConnectionTest, ConnBrTransReadOneFrame, TestSize.Level1)
     uint8_t *outData = nullptr;
     uint32_t connectionId = 1;
     int32_t socketHandle = 1;
+    NiceMock<ConnectionBrInterfaceMock> brMock;
+    ON_CALL(brMock, ConnBrDelBrPendingPacketById).WillByDefault(Return());
     int32_t ret = ConnBrTransReadOneFrame(connectionId, socketHandle, &buffer, &outData);
     EXPECT_EQ(SOFTBUS_CONN_BR_UNDERLAY_SOCKET_CLOSED, ret);
 }
