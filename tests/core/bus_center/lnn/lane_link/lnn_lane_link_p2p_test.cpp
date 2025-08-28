@@ -42,6 +42,9 @@ constexpr int32_t AUTHTYPE = 2;
 constexpr int32_t AUTH_REQ_ID = 112;
 constexpr int32_t REQUEST_ID = 1;
 constexpr int32_t ACTION_ADDR = 1;
+constexpr int32_t GUIDE_TYPE_NUMBERS_ONE = 1;
+constexpr int32_t GUIDE_TYPE_NUMBERS_TWO = 2;
+constexpr int32_t GUIDE_TYPE_NUMBERS_THREE = 3;
 
 class LNNLaneLinkP2pTest : public testing::Test {
 public:
@@ -116,6 +119,18 @@ int32_t UpdateConcurrencyReuseLaneReqIdByUdidTest(const char *udidHash, uint32_t
     return SOFTBUS_OK;
 }
 
+int32_t QueryControlPlaneNodeValidOk(const char *deviceId)
+{
+    (void)deviceId;
+    return SOFTBUS_OK;
+}
+
+int32_t QueryControlPlaneNodeValidFail(const char *deviceId)
+{
+    (void)deviceId;
+    return SOFTBUS_INVALID_PARAM;
+}
+
 static struct WifiDirectManager g_manager = {
     .isNegotiateChannelNeeded = nullptr,
     .getRequestId = GetRequestId,
@@ -150,11 +165,11 @@ HWTEST_F(LNNLaneLinkP2pTest, TRY_CONCURRENCY_PRE_LINK_CONN_TEST_001, TestSize.Le
     EXPECT_EQ(strcpy_s(connectInfo.remoteNetworkId, sizeof(connectInfo.remoteNetworkId),
         REMOTE_NETWORK_ID), EOK);
 
-    LnnEnhanceFuncList funcList;
+    LnnEnhanceFuncList funcList = { nullptr };
     funcList.updateConcurrencyReuseLaneReqIdByUdid = nullptr;
-    NiceMock<LaneLinkDepsInterfaceMock> laneLinkMock;
-    NiceMock<LaneDepsInterfaceMock> linkMock;
     NiceMock<LaneLinkP2pDepsInterfaceMock> linkP2pMock;
+    EXPECT_CALL(linkP2pMock, LnnEnhanceFuncListGet).WillRepeatedly(Return(&funcList));
+    NiceMock<LaneDepsInterfaceMock> linkMock;
     EXPECT_CALL(linkMock, LnnConvertDlId).WillOnce(Return(SOFTBUS_INVALID_PARAM))
         .WillRepeatedly(Return(SOFTBUS_OK));
     EXPECT_CALL(linkMock, SoftBusGenerateStrHash).WillOnce(Return(SOFTBUS_INVALID_PARAM))
@@ -220,7 +235,7 @@ HWTEST_F(LNNLaneLinkP2pTest, OPEN_BLE_TRIGGER_TO_CONN_TEST_001, TestSize.Level1)
     NiceMock<LaneLinkDepsInterfaceMock> laneLinkMock;
     NiceMock<LaneDepsInterfaceMock> linkMock;
     NiceMock<LaneLinkP2pDepsInterfaceMock> linkP2pMock;
-    LnnEnhanceFuncList funcList;
+    LnnEnhanceFuncList funcList = { nullptr };
     funcList.updateConcurrencyReuseLaneReqIdByUdid = UpdateConcurrencyReuseLaneReqIdByUdidTest;
     EXPECT_CALL(linkP2pMock, LnnEnhanceFuncListGet).WillRepeatedly(Return(&funcList));
     EXPECT_CALL(linkMock, GetWifiDirectManager).WillRepeatedly(Return(&g_manager));
@@ -251,7 +266,7 @@ HWTEST_F(LNNLaneLinkP2pTest, CONNECT_WIFI_DIRECT_WITH_REUSE_TEST_001, TestSize.L
     NiceMock<LaneLinkDepsInterfaceMock> laneLinkMock;
     NiceMock<LaneDepsInterfaceMock> linkMock;
     NiceMock<LaneLinkP2pDepsInterfaceMock> linkP2pMock;
-    LnnEnhanceFuncList funcList;
+    LnnEnhanceFuncList funcList = { nullptr };
     funcList.updateConcurrencyReuseLaneReqIdByUdid = UpdateConcurrencyReuseLaneReqIdByUdidTest;
     EXPECT_CALL(linkP2pMock, LnnEnhanceFuncListGet).WillRepeatedly(Return(&funcList));
     EXPECT_CALL(linkMock, GetWifiDirectManager).WillRepeatedly(Return(&g_manager));
@@ -327,7 +342,7 @@ HWTEST_F(LNNLaneLinkP2pTest, TRY_ADD_PRE_LINK_CONN_TEST_001, TestSize.Level1)
     LaneLinkCb callback;
     (void)memset_s(&callback, sizeof(LaneLinkCb), 0, sizeof(LaneLinkCb));
     NiceMock<LaneLinkP2pDepsInterfaceMock> linkP2pMock;
-    LnnEnhanceFuncList funcList;
+    LnnEnhanceFuncList funcList = { nullptr };
     funcList.updateConcurrencyReuseLaneReqIdByUdid = UpdateConcurrencyReuseLaneReqIdByUdidTest;
     EXPECT_CALL(linkP2pMock, LnnEnhanceFuncListGet).WillRepeatedly(Return(&funcList));
     NiceMock<LaneDepsInterfaceMock> linkMock;
@@ -416,5 +431,113 @@ HWTEST_F(LNNLaneLinkP2pTest, RECYCLE_P2P_LINK_REQ_BY_LINK_TYPE_TEST_001, TestSiz
     EXPECT_NO_FATAL_FAILURE(HandleRawLinkResultByReqId(p2pRequestId, reason));
     EXPECT_NO_FATAL_FAILURE(LnnDestroyWifiDirectInfo());
     EXPECT_EQ(g_rawLinkList, nullptr);
+}
+
+/*
+* @tc.name: GET_HML_TWO_GUIDE_TYPE_TEST_001
+* @tc.desc: GetHmlTwoGuideType test no availbe guide type
+* @tc.type: FUNC
+* @tc.require:
+*/
+HWTEST_F(LNNLaneLinkP2pTest, GET_HML_TWO_GUIDE_TYPE_TEST_001, TestSize.Level1)
+{
+    LinkRequest request = {};
+    WdGuideType guideChannelList[LANE_CHANNEL_BUTT];
+    (void)memset_s(guideChannelList, sizeof(guideChannelList), -1, sizeof(guideChannelList));
+    uint32_t guideChannelNum = 0;
+
+    NiceMock<LaneLinkP2pDepsInterfaceMock> linkP2pMock;
+    LnnEnhanceFuncList funcList = { nullptr };
+    funcList.queryControlPlaneNodeValid = QueryControlPlaneNodeValidFail;
+    EXPECT_CALL(linkP2pMock, LnnEnhanceFuncListGet).WillRepeatedly(Return(&funcList));
+    NiceMock<LaneDepsInterfaceMock> linkMock;
+    EXPECT_CALL(linkMock, LnnGetRemoteStrInfo).WillRepeatedly(Return(SOFTBUS_INVALID_PARAM));
+    EXPECT_CALL(linkMock, LnnGetRemoteNodeInfoById).WillRepeatedly(Return(SOFTBUS_INVALID_PARAM));
+
+    EXPECT_NO_FATAL_FAILURE(GetHmlTwoGuideType(&request, guideChannelList, &guideChannelNum));
+    EXPECT_EQ(guideChannelNum, GUIDE_TYPE_NUMBERS_ONE);
+    EXPECT_EQ(guideChannelList[0], LANE_ACTIVE_AUTH_TRIGGER);
+}
+
+/*
+* @tc.name: GET_HML_TWO_GUIDE_TYPE_TEST_002
+* @tc.desc: GetHmlTwoGuideType test LANE_SPARKLINK_TRIGGER
+* @tc.type: FUNC
+* @tc.require:
+*/
+HWTEST_F(LNNLaneLinkP2pTest, GET_HML_TWO_GUIDE_TYPE_TEST_002, TestSize.Level1)
+{
+    LinkRequest request = {};
+    WdGuideType guideChannelList[LANE_CHANNEL_BUTT];
+    (void)memset_s(guideChannelList, sizeof(guideChannelList), -1, sizeof(guideChannelList));
+    uint32_t guideChannelNum = 0;
+
+    NiceMock<LaneLinkP2pDepsInterfaceMock> linkP2pMock;
+    LnnEnhanceFuncList funcList = { nullptr };
+    funcList.queryControlPlaneNodeValid = QueryControlPlaneNodeValidOk;
+    EXPECT_CALL(linkP2pMock, LnnEnhanceFuncListGet).WillRepeatedly(Return(&funcList));
+    NiceMock<LaneDepsInterfaceMock> linkMock;
+    EXPECT_CALL(linkMock, LnnGetRemoteStrInfo).WillRepeatedly(Return(SOFTBUS_INVALID_PARAM));
+    EXPECT_CALL(linkMock, LnnGetRemoteNodeInfoById).WillRepeatedly(Return(SOFTBUS_INVALID_PARAM));
+
+    EXPECT_NO_FATAL_FAILURE(GetHmlTwoGuideType(&request, guideChannelList, &guideChannelNum));
+    EXPECT_EQ(guideChannelNum, GUIDE_TYPE_NUMBERS_ONE);
+    EXPECT_EQ(guideChannelList[0], LANE_SPARKLINK_TRIGGER);
+}
+
+/*
+* @tc.name: GET_HML_TWO_GUIDE_TYPE_TEST_003
+* @tc.desc: GetHmlTwoGuideType test LANE_ACTIVE_AUTH_TRIGGER
+* @tc.type: FUNC
+* @tc.require:
+*/
+HWTEST_F(LNNLaneLinkP2pTest, GET_HML_TWO_GUIDE_TYPE_TEST_003, TestSize.Level1)
+{
+    LinkRequest request = {};
+    WdGuideType guideChannelList[LANE_CHANNEL_BUTT];
+    (void)memset_s(guideChannelList, sizeof(guideChannelList), -1, sizeof(guideChannelList));
+    uint32_t guideChannelNum = 0;
+
+    NiceMock<LaneLinkP2pDepsInterfaceMock> linkP2pMock;
+    LnnEnhanceFuncList funcList = { nullptr };
+    funcList.queryControlPlaneNodeValid = QueryControlPlaneNodeValidOk;
+    EXPECT_CALL(linkP2pMock, LnnEnhanceFuncListGet).WillRepeatedly(Return(&funcList));
+    NiceMock<LaneDepsInterfaceMock> linkMock;
+    EXPECT_CALL(linkMock, LnnGetRemoteStrInfo).WillRepeatedly(Return(SOFTBUS_OK));
+    EXPECT_CALL(linkMock, AuthDeviceCheckConnInfo).WillRepeatedly(Return(true));
+    EXPECT_CALL(linkMock, LnnGetRemoteNodeInfoById).WillRepeatedly(Return(SOFTBUS_OK));
+    EXPECT_CALL(linkMock, LnnHasDiscoveryType).WillRepeatedly(Return(false));
+
+    EXPECT_NO_FATAL_FAILURE(GetHmlTwoGuideType(&request, guideChannelList, &guideChannelNum));
+    EXPECT_EQ(guideChannelNum, GUIDE_TYPE_NUMBERS_TWO);
+    EXPECT_EQ(guideChannelList[1], LANE_ACTIVE_AUTH_TRIGGER);
+}
+
+/*
+* @tc.name: GET_HML_TWO_GUIDE_TYPE_TEST_004
+* @tc.desc: GetHmlTwoGuideType test LANE_BLE_TRIGGER
+* @tc.type: FUNC
+* @tc.require:
+*/
+HWTEST_F(LNNLaneLinkP2pTest, GET_HML_TWO_GUIDE_TYPE_TEST_004, TestSize.Level1)
+{
+    LinkRequest request = {};
+    WdGuideType guideChannelList[LANE_CHANNEL_BUTT];
+    (void)memset_s(guideChannelList, sizeof(guideChannelList), -1, sizeof(guideChannelList));
+    uint32_t guideChannelNum = 0;
+
+    NiceMock<LaneLinkP2pDepsInterfaceMock> linkP2pMock;
+    LnnEnhanceFuncList funcList = { nullptr };
+    funcList.queryControlPlaneNodeValid = QueryControlPlaneNodeValidOk;
+    EXPECT_CALL(linkP2pMock, LnnEnhanceFuncListGet).WillRepeatedly(Return(&funcList));
+    NiceMock<LaneDepsInterfaceMock> linkMock;
+    EXPECT_CALL(linkMock, LnnGetRemoteStrInfo).WillRepeatedly(Return(SOFTBUS_OK));
+    EXPECT_CALL(linkMock, AuthDeviceCheckConnInfo).WillRepeatedly(Return(true));
+    EXPECT_CALL(linkMock, LnnGetRemoteNodeInfoById).WillRepeatedly(Return(SOFTBUS_OK));
+    EXPECT_CALL(linkMock, LnnHasDiscoveryType).WillRepeatedly(Return(true));
+
+    EXPECT_NO_FATAL_FAILURE(GetHmlTwoGuideType(&request, guideChannelList, &guideChannelNum));
+    EXPECT_EQ(guideChannelNum, GUIDE_TYPE_NUMBERS_THREE);
+    EXPECT_EQ(guideChannelList[2], LANE_BLE_TRIGGER);
 }
 }

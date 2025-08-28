@@ -2676,7 +2676,7 @@ static void GetHmlTwoGuideType(const LinkRequest *request, WdGuideType *guideLis
         guideList[(*linksNum)++] = LANE_BLE_TRIGGER;
     }
     if (*linksNum == 0) {
-        guideList[(*linksNum)++] = LANE_NEW_AUTH_NEGO;
+        guideList[(*linksNum)++] = LANE_ACTIVE_AUTH_TRIGGER;
     }
 }
 

@@ -640,7 +640,7 @@ static int32_t UpdateHmlStaticCap(void)
             return ret;
         }
     }
-    if (code == CONN_HML_CAP_UNKNOWN || code == CONN_HML_NOT_SUPPORT) {
+    if (code == CONN_HML_NOT_SUPPORT) {
         ret = LnnClearStaticNetCap(&staticNetCap, STATIC_CAP_BIT_ENHANCED_P2P);
         if (ret != SOFTBUS_OK) {
             LNN_LOGE(LNN_BUILDER, "clear staticNetCap failed, ret=%{public}d.", ret);
