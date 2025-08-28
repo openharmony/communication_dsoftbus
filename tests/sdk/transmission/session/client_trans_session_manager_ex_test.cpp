@@ -408,4 +408,46 @@ HWTEST_F(TransClientSessionManagerExTest, TransClientSessionManagerExTest10, Tes
     ret = ClientWaitSyncBind(1);
     EXPECT_EQ(ret, SOFTBUS_OK);
 }
+
+/**
+ * @tc.name: TransClientSessionManagerExTest11
+ * @tc.desc: GetLogicalBandwidth with invalid parameters.
+ * @tc.type: FUNC
+ * @tc.require:
+ */
+HWTEST_F(TransClientSessionManagerExTest, TransClientSessionManagerExTest11, TestSize.Level1)
+{
+    int32_t optValueSize = 0;
+    int32_t optValue = 0;
+    int32_t ret = GetLogicalBandwidth(0, &optValue, &optValueSize);
+    EXPECT_EQ(ret, SOFTBUS_INVALID_PARAM);
+
+    ret = GetLogicalBandwidth(1, nullptr, &optValueSize);
+    EXPECT_EQ(ret, SOFTBUS_INVALID_PARAM);
+
+    ret = GetLogicalBandwidth(1, &optValue, nullptr);
+    EXPECT_EQ(ret, SOFTBUS_INVALID_PARAM);
+
+    ret = GetLogicalBandwidth(0, nullptr, &optValueSize);
+    EXPECT_EQ(ret, SOFTBUS_INVALID_PARAM);
+
+    ret = GetLogicalBandwidth(0, &optValue, nullptr);
+    EXPECT_EQ(ret, SOFTBUS_INVALID_PARAM);
+
+    ret = GetLogicalBandwidth(1, nullptr, nullptr);
+    EXPECT_EQ(ret, SOFTBUS_INVALID_PARAM);
+
+    ret = GetLogicalBandwidth(0, nullptr, nullptr);
+    EXPECT_EQ(ret, SOFTBUS_INVALID_PARAM);
+
+    ret = GetLogicalBandwidth(1, &optValue, &optValueSize);
+    EXPECT_EQ(ret, SOFTBUS_OK);
+    EXPECT_EQ(optValue, 0);
+    EXPECT_EQ(optValueSize, sizeof(int32_t));
+
+    ret = GetLogicalBandwidth(2, &optValue, &optValueSize);
+    EXPECT_EQ(ret, SOFTBUS_TRANS_SESSION_INFO_NOT_FOUND);
+    ListDelete(&g_server.node);
+    ListDelete(&g_sessionNode.node);
+}
 }
