@@ -800,7 +800,7 @@ static int32_t ClientTransProxyInnerNoSubPacketTlvProc(int32_t channelId, const 
         TRANS_LOGE(TRANS_CTRL, "proxy channel parse tlv failed, ret=%{public}d", ret);
         return ret;
     }
-    ret = TransProxyNoSubPacketTlvProc(channelId, data, len, &pktHead, newPktHeadSize);
+    ret = TransProxyNoSubPacketTlvProc(channelId, len, &pktHead, newPktHeadSize);
     if (ret != SOFTBUS_OK) {
         TRANS_LOGE(TRANS_CTRL, "process data err, channelId=%{public}d, len=%{public}u", channelId, len);
         return ret;
@@ -970,7 +970,7 @@ static int32_t TransProxyDelSliceProcessorByChannelId(int32_t channelId)
     }
     LIST_FOR_EACH_ENTRY_SAFE(node, next, &g_innerChannelSliceProcessorList->list, ChannelSliceProcessor, head) {
         if (node->channelId == channelId) {
-            for (int32_t i = PROXY_CHANNEL_PRORITY_MESSAGE; i < PROXY_CHANNEL_PRORITY_BUTT; i++) {
+            for (int32_t i = PROXY_CHANNEL_PRIORITY_MESSAGE; i < PROXY_CHANNEL_PRIORITY_BUTT; i++) {
                 TransProxyClearProcessor(&(node->processor[i]));
             }
             ListDelete(&(node->head));

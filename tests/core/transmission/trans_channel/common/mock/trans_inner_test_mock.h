@@ -56,7 +56,7 @@ public:
     virtual int32_t TransProxyParseTlv(
         uint32_t len, const char *data, DataHeadTlvPacketHead *head, uint32_t *headSize) = 0;
     virtual int32_t TransProxyNoSubPacketTlvProc(int32_t channelId,
-        const char *data, uint32_t len, DataHeadTlvPacketHead *pktHead, uint32_t newPktHeadSize) = 0;
+        uint32_t len, DataHeadTlvPacketHead *pktHead, uint32_t newPktHeadSize) = 0;
     virtual int32_t TransProxyProcessSessionData(
         ProxyDataInfo *dataInfo, const PacketHead *dataHead, const char *data) = 0;
     virtual int32_t TransProxySliceProcessChkPkgIsValid(
@@ -103,8 +103,8 @@ public:
         ProxyDataInfo *dataInfo, const DataHeadTlvPacketHead *dataHead, const char *data));
     MOCK_METHOD4(TransProxyParseTlv, int32_t (
         uint32_t len, const char *data, DataHeadTlvPacketHead *head, uint32_t *headSize));
-    MOCK_METHOD5(TransProxyNoSubPacketTlvProc, int32_t (
-        int32_t channelId, const char *data, uint32_t len, DataHeadTlvPacketHead *pktHead, uint32_t newPktHeadSize));
+    MOCK_METHOD4(TransProxyNoSubPacketTlvProc, int32_t (
+        int32_t channelId, uint32_t len, DataHeadTlvPacketHead *pktHead, uint32_t newPktHeadSize));
     MOCK_METHOD3(TransProxyProcessSessionData, int32_t (
         ProxyDataInfo *dataInfo, const PacketHead *dataHead, const char *data));
     MOCK_METHOD4(TransProxySliceProcessChkPkgIsValid, int32_t (

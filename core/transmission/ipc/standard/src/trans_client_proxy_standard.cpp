@@ -30,7 +30,7 @@
     } while (false)
 
 namespace OHOS {
-int32_t TransClientProxy::OnClientPermissonChange(const char *pkgName, int32_t state)
+int32_t TransClientProxy::OnClientPermissionChange(const char *pkgName, int32_t state)
 {
     if (pkgName == NULL) {
         TRANS_LOGE(TRANS_SDK, "invalid param.");

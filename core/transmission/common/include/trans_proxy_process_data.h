@@ -85,16 +85,16 @@ typedef struct {
 } DataHeadTlvPacketHead;
 
 typedef enum {
-    PROXY_CHANNEL_PRORITY_MESSAGE = 0,
-    PROXY_CHANNEL_PRORITY_BYTES = 1,
-    PROXY_CHANNEL_PRORITY_FILE = 2,
-    PROXY_CHANNEL_PRORITY_BUTT = 3,
+    PROXY_CHANNEL_PRIORITY_MESSAGE = 0,
+    PROXY_CHANNEL_PRIORITY_BYTES = 1,
+    PROXY_CHANNEL_PRIORITY_FILE = 2,
+    PROXY_CHANNEL_PRIORITY_BUTT = 3,
 } ProxyChannelPriority;
 
 typedef struct {
     ListNode head;
     int32_t channelId;
-    SliceProcessor processor[PROXY_CHANNEL_PRORITY_BUTT];
+    SliceProcessor processor[PROXY_CHANNEL_PRIORITY_BUTT];
 } ChannelSliceProcessor;
 
 void TransGetProxyDataBufMaxSize(void);
@@ -119,7 +119,7 @@ int32_t TransGetActualDataLen(const SliceHead *head, uint32_t *actualDataLen);
 int32_t TransProxySessionDataLenCheck(uint32_t dataLen, SessionPktType type);
 int32_t TransProxyParseTlv(uint32_t len, const char *data, DataHeadTlvPacketHead *head, uint32_t *headSize);
 int32_t TransProxyNoSubPacketTlvProc(
-    int32_t channelId, const char *data, uint32_t len, DataHeadTlvPacketHead *pktHead, uint32_t newPktHeadSize);
+    int32_t channelId, uint32_t len, DataHeadTlvPacketHead *pktHead, uint32_t newPktHeadSize);
 int32_t TransProxyProcData(ProxyDataInfo *dataInfo, const DataHeadTlvPacketHead *pktHead, const char *data);
 
 uint8_t *TransProxyPackD2DData(
