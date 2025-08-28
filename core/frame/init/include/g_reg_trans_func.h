@@ -91,6 +91,7 @@ typedef void (*TransProxyPagingHandshakeMsgToLoopFunc)(int32_t channelId, uint8_
 typedef int32_t (*TransPagingWaitListenStatusFunc)(const uint32_t businessFlag, PagingWaitListenStatus status);
 typedef int32_t (*TransAddConnItemFunc)(ProxyConnInfo *chan);
 typedef int32_t (*TransAddConnRefByConnIdFunc)(uint32_t connId, bool isServer);
+typedef int32_t (*StopHmlListenerFunc)(ListenerModule module);
 
 typedef struct TagTransOpenFuncList {
     TransProxyGetAppInfoByChanIdFunc transProxyGetAppInfoByChanId;
@@ -137,6 +138,7 @@ typedef struct TagTransOpenFuncList {
     TransPagingWaitListenStatusFunc transPagingWaitListenStatus;
     TransAddConnItemFunc transAddConnItem;
     TransAddConnRefByConnIdFunc transAddConnRefByConnId;
+    StopHmlListenerFunc stopHmlListener;
 } TransOpenFuncList;
 
 #ifdef __cplusplus
