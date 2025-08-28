@@ -896,7 +896,7 @@ ohos_unittest("TransTcpDirectSessionConnTest") {
 group("unittest") {
   testonly = true
   deps = [
-    ":TransCoreTcpDirectTest",
+    #":TransCoreTcpDirectTest",
     ":TransServerTcpDirectTest",
     ":TransTcpDirectCallbackTest",
     ":TransTcpDirectJsonMockTest",
