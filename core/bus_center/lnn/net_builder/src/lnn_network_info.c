@@ -577,47 +577,6 @@ static void UpdateLocalFeatureByWifiVspRes()
     LNN_LOGI(LNN_BUILDER, "local feature changed:%{public}" PRIu64 "->%{public}" PRIu64, oldFeature, localFeatureCap);
 }
 
-static void UpdateVirtualLinkStaticCap(void)
-{
-    uint32_t staticNetCap = 0;
-    int32_t ret = LnnGetLocalNumU32Info(NUM_KEY_STATIC_NET_CAP, &staticNetCap);
-    if (ret != SOFTBUS_OK) {
-        LNN_LOGE(LNN_BUILDER, "get staticNetCap failed, ret=%{public}d.", ret);
-        return;
-    }
-    uint32_t oldCap = staticNetCap;
-    if (GetWifiDirectManager() == NULL || GetWifiDirectManager()->getVirtualLinkCapabilityCode == NULL) {
-        LNN_LOGE(LNN_BUILDER, "failed to get wifi direct manager.");
-        return;
-    }
-    VirtualLinkCapabilityCode code = GetWifiDirectManager()->getVirtualLinkCapabilityCode();
-    LNN_LOGI(LNN_BUILDER, "virtual link capability code=%{public}d.", code);
-    if (code != CONN_VIRTUAL_LINK_NOT_SUPPORT) {
-        ret = LnnSetStaticNetCap(&staticNetCap, STATIC_CAP_BIT_VIRTUAL_LINK);
-        if (ret != SOFTBUS_OK) {
-            LNN_LOGE(LNN_BUILDER, "set staticNetCap failed, ret=%{public}d.", ret);
-            return;
-        }
-    } else {
-        ret = LnnClearStaticNetCap(&staticNetCap, STATIC_CAP_BIT_VIRTUAL_LINK);
-        if (ret != SOFTBUS_OK) {
-            LNN_LOGE(LNN_BUILDER, "clear staticNetCap failed, ret=%{public}d.", ret);
-            return;
-        }
-    }
-    if (oldCap == staticNetCap) {
-        LNN_LOGI(LNN_BUILDER, "static netCap same");
-        return;
-    }
-    ret = LnnSetLocalNumU32Info(NUM_KEY_STATIC_NET_CAP, staticNetCap);
-    if (ret != SOFTBUS_OK) {
-        LNN_LOGE(LNN_BUILDER, "set staticNetCap failed, ret=%{public}d.", ret);
-        return;
-    }
-    LNN_LOGI(LNN_BUILDER, "static netCap changed:%{public}u->%{public}u.", oldCap, staticNetCap);
-    return;
-}
-
 static int32_t UpdateHmlStaticCap(void)
 {
     uint32_t staticNetCap = 0;
@@ -761,7 +720,6 @@ static bool IsSupportApCoexist(const char *coexistCap)
 
 static void InitWifiDirectCapability(void)
 {
-    UpdateVirtualLinkStaticCap();
     g_isWifiDirectSupported = SoftBusHasWifiDirectCapability();
     char *coexistCap = SoftBusGetWifiInterfaceCoexistCap();
     LNN_CHECK_AND_RETURN_LOGE(coexistCap != NULL, LNN_INIT, "coexistCap is null");
