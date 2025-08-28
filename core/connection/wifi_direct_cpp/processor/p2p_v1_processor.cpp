@@ -332,7 +332,7 @@ void P2pV1Processor::ProcessDisconnectCommand(std::shared_ptr<DisconnectCommand>
     SoftBusSleepMs(DISCONNECT_WAIT_POST_REQUEST_MS);
     ret = RemoveLink(command->GetRemoteDeviceId());
     if (ret != SOFTBUS_OK) {
-        CONN_LOGI(CONN_WIFI_DIRECT, "remove link failed, ret=%{public}d", ret);
+        CONN_LOGE(CONN_WIFI_DIRECT, "remove link failed, ret=%{public}d", ret);
         command->OnFailure(ret);
         Terminate();
     }
@@ -358,7 +358,7 @@ void P2pV1Processor::ProcessForceDisconnectCommand(std::shared_ptr<ForceDisconne
     }
 
     auto ret = SendForceDisconnectRequest(*command->GetNegotiateChannel());
-    CONN_LOGE(CONN_WIFI_DIRECT, "send force disconnect req, ret=%{public}d", ret);
+    CONN_LOGI(CONN_WIFI_DIRECT, "send force disconnect req, ret=%{public}d", ret);
     if (ret == SOFTBUS_OK) {
         CONN_LOGI(
             CONN_WIFI_DIRECT, "wait for p2p auth to send data, sleep %{public}dms", DISCONNECT_WAIT_POST_REQUEST_MS);

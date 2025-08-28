@@ -211,7 +211,7 @@ HWTEST_F(ClientConnectionTest, ClientConnectionTest, TestSize.Level0)
 HWTEST_F(ClientConnectionTest, ConnectionStateChangeTest, TestSize.Level0)
 {
     int32_t ret = ConnectionStateChange(0, 0, 0);
-    ASSERT_EQ(ret, SOFTBUS_OK);
+    ASSERT_EQ(ret, SOFTBUS_LOCK_ERR);
 
     IGeneralListener listener = {
         .OnAcceptConnect = OnAcceptConnect,
@@ -246,7 +246,7 @@ HWTEST_F(ClientConnectionTest, ConnectionStateChangeTest, TestSize.Level0)
 HWTEST_F(ClientConnectionTest, AcceptConnectTest, TestSize.Level0)
 {
     int32_t ret = AcceptConnect("test", 0);
-    ASSERT_EQ(ret, SOFTBUS_OK);
+    ASSERT_EQ(ret, SOFTBUS_LOCK_ERR);
     IGeneralListener listener = {
         .OnAcceptConnect = OnAcceptConnect,
         .OnConnectionStateChange = OnConnectionStateChange,

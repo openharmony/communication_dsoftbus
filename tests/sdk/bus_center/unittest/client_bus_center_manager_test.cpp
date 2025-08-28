@@ -50,6 +50,7 @@ constexpr int32_t TYPE = 1;
 constexpr int32_t LNN_REFRESH_ID = 0;
 constexpr int32_t RESULT_REASON = -1;
 constexpr char PKGNAME[] = "softbustest";
+constexpr char IP_TEST[IP_LEN] = "192.168.51.170";
 class ClientBusCentManagerTest : public testing::Test {
 public:
     static void SetUpTestCase();
@@ -316,6 +317,68 @@ HWTEST_F(ClientBusCentManagerTest, STOP_TIME_SYNC_INNER_Test_002, TestSize.Level
         .WillRepeatedly(Return(SOFTBUS_OK));
     EXPECT_TRUE(StopTimeSyncInner(nullptr, NODE1_NETWORK_ID) == SOFTBUS_OK);
     EXPECT_NE(StopTimeSyncInner(nullptr, NODE1_NETWORK_ID), SOFTBUS_OK);
+    BusCenterClientDeinit();
+}
+
+/*
+ * @tc.name: StartTimeSyncWithSocketInner_Test_001
+ * @tc.desc: start time sync with socket inner test
+ * @tc.type: FUNC
+ * @tc.require:
+ */
+HWTEST_F(ClientBusCentManagerTest, StartTimeSyncWithSocketInner_Test_001, TestSize.Level1)
+{
+    ITimeSyncCbWithSocket cb;
+    ClientBusCenterManagerInterfaceMock busCentManagerMock;
+    EXPECT_CALL(busCentManagerMock, SoftbusGetConfig(_, _, _)).WillRepeatedly(Return(SOFTBUS_OK));
+    EXPECT_CALL(busCentManagerMock, BusCenterServerProxyInit()).WillRepeatedly(Return(SOFTBUS_OK));
+    EXPECT_CALL(busCentManagerMock, BusCenterServerProxyDeInit()).WillRepeatedly(Return());
+    EXPECT_TRUE(BusCenterClientInit() == SOFTBUS_OK);
+    EXPECT_EQ(StartTimeSyncWithSocketInner(nullptr, nullptr, LOW_ACCURACY, SHORT_PERIOD, &cb), SOFTBUS_INVALID_PARAM);
+    BusCenterClientDeinit();
+}
+
+/*
+ * @tc.name: STOP_TIME_SYNC_WITH_SOCKET_INNER_Test_001
+ * @tc.desc: stop time sync with socket inner test
+ * @tc.type: FUNC
+ * @tc.require:
+ */
+HWTEST_F(ClientBusCentManagerTest, STOP_TIME_SYNC_WITH_SOCKET_INNER_Test_001, TestSize.Level1)
+{
+    ClientBusCenterManagerInterfaceMock busCentManagerMock;
+    EXPECT_CALL(busCentManagerMock, SoftbusGetConfig(_, _, _)).WillRepeatedly(Return(SOFTBUS_OK));
+    EXPECT_CALL(busCentManagerMock, BusCenterServerProxyInit()).WillRepeatedly(Return(SOFTBUS_OK));
+    EXPECT_CALL(busCentManagerMock, BusCenterServerProxyDeInit()).WillRepeatedly(Return());
+    EXPECT_TRUE(BusCenterClientInit() == SOFTBUS_OK);
+    TimeSyncSocketInfo info;
+    ASSERT_TRUE(memcpy_s(info.targetNetworkId, NETWORK_ID_BUF_LEN, NODE1_NETWORK_ID, strlen(NODE1_NETWORK_ID)) == EOK);
+    ASSERT_TRUE(memcpy_s(info.peerIp, IP_STR_MAX_LEN, IP_TEST, strlen(IP_TEST)) == EOK);
+    info.peerPort = 0;
+    EXPECT_EQ(StopTimeSyncWithSocketInner(nullptr, &info), SOFTBUS_INVALID_PARAM);
+    BusCenterClientDeinit();
+}
+
+/*
+ * @tc.name: STOP_TIME_SYNC_WITH_SOCKET_INNER_Test_002
+ * @tc.desc: stop time sync with socket inner test
+ * @tc.type: FUNC
+ * @tc.require:
+ */
+HWTEST_F(ClientBusCentManagerTest, STOP_TIME_SYNC_WITH_SOCKET_INNER_Test_002, TestSize.Level1)
+{
+    ITimeSyncCbWithSocket cb;
+    ClientBusCenterManagerInterfaceMock busCentManagerMock;
+    EXPECT_CALL(busCentManagerMock, SoftbusGetConfig(_, _, _)).WillRepeatedly(Return(SOFTBUS_OK));
+    EXPECT_CALL(busCentManagerMock, BusCenterServerProxyInit()).WillRepeatedly(Return(SOFTBUS_OK));
+    EXPECT_CALL(busCentManagerMock, BusCenterServerProxyDeInit()).WillRepeatedly(Return());
+    EXPECT_TRUE(BusCenterClientInit() == SOFTBUS_OK);
+    EXPECT_CALL(busCentManagerMock, ServerIpcStartTimeSync(_, _, _, _)).WillRepeatedly(Return(SOFTBUS_OK));
+    TimeSyncSocketInfo info;
+    ASSERT_TRUE(memcpy_s(info.targetNetworkId, NETWORK_ID_BUF_LEN, NODE1_NETWORK_ID, strlen(NODE1_NETWORK_ID)) == EOK);
+    ASSERT_TRUE(memcpy_s(info.peerIp, IP_STR_MAX_LEN, IP_TEST, strlen(IP_TEST)) == EOK);
+    info.peerPort = 0;
+    EXPECT_TRUE(StartTimeSyncWithSocketInner(nullptr, &info, LOW_ACCURACY, SHORT_PERIOD, &cb) != SOFTBUS_OK);
     BusCenterClientDeinit();
 }
 

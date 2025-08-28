@@ -169,6 +169,10 @@ static void FillFileEventErrorCode(const DFileMsg *msgData, FileEvent *event)
 static void NotifySocketSendResult(
     int32_t socket, DFileMsgType msgType, const DFileMsg *msgData, const FileListener *listener)
 {
+    if (msgData == NULL || listener == NULL || listener->socketSendCallback == NULL) {
+        TRANS_LOGE(TRANS_SDK, "param invalid");
+        return;
+    }
     FileEvent event;
     (void)memset_s(&event, sizeof(FileEvent), 0, sizeof(FileEvent));
     switch (msgType) {
@@ -326,6 +330,10 @@ static void NotifyRecvResult(int32_t sessionId, DFileMsgType msgType, const DFil
 static void NotifySocketRecvResult(
     int32_t socket, DFileMsgType msgType, const DFileMsg *msgData, const FileListener *listener)
 {
+    if (msgData == NULL || listener == NULL || listener->socketRecvCallback == NULL) {
+        TRANS_LOGE(TRANS_SDK, "param invalid");
+        return;
+    }
     FileEvent event;
     (void)memset_s(&event, sizeof(FileEvent), 0, sizeof(FileEvent));
     switch (msgType) {

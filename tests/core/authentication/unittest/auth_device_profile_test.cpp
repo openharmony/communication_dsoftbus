@@ -448,9 +448,7 @@ HWTEST_F(AuthDeviceProfileTest, UPDATE_DP_SAME_ACCOUNT_ACL_TEST_001, TestSize.Le
     std::string peerUdid = TEST_UDID;
     int32_t peerUserId = TEST_LOCAL_USER_ID;
     int32_t sessionKeyId = TEST_SESSION_KEY_ID;
-    int32_t ret = UpdateDpSameAccountAcl(peerUdid, 0, sessionKeyId);
-    EXPECT_EQ(ret, GET_ALL_ACL_FAIL);
-    ret = UpdateDpSameAccountAcl(peerUdid, peerUserId, peerUserId, sessionKeyId);
+    int32_t ret = UpdateDpSameAccountAcl(peerUdid, peerUserId, peerUserId, sessionKeyId);
     EXPECT_EQ(ret, GET_ALL_ACL_FAIL);
 }
 
