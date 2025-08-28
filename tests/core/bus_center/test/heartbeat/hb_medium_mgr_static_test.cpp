@@ -346,7 +346,6 @@ HWTEST_F(HeartBeatMediumStaticTest, IsNeedConnectOnLineTest_01, TestSize.Level1)
     ConnectOnlineReason connectReason;
     LnnEnhanceFuncList *pfnLnnEnhanceFuncList = LnnEnhanceFuncListGet();
     pfnLnnEnhanceFuncList->lnnRetrieveDeviceInfo = LnnRetrieveDeviceInfo;
-
     (void)memset_s(&device, sizeof(DeviceInfo), 0, sizeof(DeviceInfo));
     (void)memset_s(&hbResp, sizeof(HbRespData), 0, sizeof(HbRespData));
     (void)memset_s(&deviceInfo, sizeof(NodeInfo), 0, sizeof(NodeInfo));
@@ -403,7 +402,6 @@ HWTEST_F(HeartBeatMediumStaticTest, IsNeedConnectOnLineTest_02, TestSize.Level1)
     pfnLnnEnhanceFuncList->authFindDeviceKey = AuthFindDeviceKey;
     pfnLnnEnhanceFuncList->authFindLatestNormalizeKey = AuthFindLatestNormalizeKey;
     pfnLnnEnhanceFuncList->lnnUpdateRemoteDeviceInfo = LnnUpdateRemoteDeviceInfo;
-
     (void)memset_s(&device, sizeof(DeviceInfo), 0, sizeof(DeviceInfo));
     (void)memset_s(&hbResp, sizeof(HbRespData), 0, sizeof(HbRespData));
     (void)memset_s(&deviceInfo, sizeof(NodeInfo), 0, sizeof(NodeInfo));
@@ -907,7 +905,6 @@ HWTEST_F(HeartBeatMediumStaticTest, LnnHbMediumMgrInitTest_01, TestSize.Level1)
 {
     LnnEnhanceFuncList *pfnLnnEnhanceFuncList = LnnEnhanceFuncListGet();
     pfnLnnEnhanceFuncList->lnnRegistBleHeartbeatMediumMgr = LnnRegistBleHeartbeatMediumMgr;
-
     NiceMock<HbMediumMgrInterfaceMock> hbMediumMock;
     EXPECT_CALL(hbMediumMock, LnnRegistBleHeartbeatMediumMgr).WillRepeatedly(Return(SOFTBUS_INVALID_PARAM));
     CheckUserIdCheckSumChange(nullptr, nullptr);
