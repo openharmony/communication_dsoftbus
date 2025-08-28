@@ -253,9 +253,10 @@ void TransCloseInnerSessionByNetworkId(const char *networkId)
         if (strcmp(pos->peerNetworkId, networkId) == 0) {
             TRANS_LOGI(TRANS_CTRL, "DeleteSession session when link down, channelId=%{public}d", pos->channelId);
             char pkgName[PKG_NAME_SIZE_MAX] = {0};
-            TransGetPkgNameByChanId(pos->channelId, pkgName);
-            CloseSessionInner(pos->channelId);
-            DirectOnChannelClose(pos->channelId, pkgName);
+            int32_t channelId = pos->channelId;
+            TransGetPkgNameByChanId(channelId, pkgName);
+            CloseSessionInner(channelId);
+            DirectOnChannelClose(channelId, pkgName);
         }
     }
     (void)SoftBusMutexUnlock(&(g_sessionList->lock));

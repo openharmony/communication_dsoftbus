@@ -129,6 +129,11 @@ void ConnBrDelBrPendingPacket(uint32_t id, int64_t seq)
     return GetConnectionBrInterface()->ConnBrDelBrPendingPacket(id, seq);
 }
 
+void ConnBrDelBrPendingPacketById(uint32_t id)
+{
+    return GetConnectionBrInterface()->ConnBrDelBrPendingPacketById(id);
+}
+
 int32_t ConnBrGetBrPendingPacket(uint32_t id, int64_t seq, uint32_t waitMillis, void **data)
 {
     return GetConnectionBrInterface()->ConnBrGetBrPendingPacket(id, seq, waitMillis, data);
