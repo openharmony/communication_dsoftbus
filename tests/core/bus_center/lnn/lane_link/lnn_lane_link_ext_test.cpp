@@ -229,6 +229,11 @@ static bool SupportHmlTwo(void)
     return true;
 }
 
+static bool SupportHmlTwoFalse(void)
+{
+    return false;
+}
+
 static struct WifiDirectManager g_manager = {
     .isNegotiateChannelNeeded= IsNegotiateChannelNeeded,
     .getRequestId = GetRequestId,
@@ -314,6 +319,7 @@ HWTEST_F(LNNLaneLinkExtTest, LNN_LANE_LINK_CONNDEVICE_TEST_002, TestSize.Level1)
     g_manager.connectDevice = ConnectDevice;
     g_manager.disconnectDevice = DisconnectDevice;
     g_manager.isNegotiateChannelNeeded = IsNegotiateChannelNeeded;
+    g_manager.supportHmlTwo = SupportHmlTwoFalse;
     EXPECT_CALL(laneMock, GetWifiDirectManager).WillRepeatedly(Return(&g_manager));
     EXPECT_CALL(laneMock, AuthGetConnInfoByType)
         .WillRepeatedly(DoAll(SetArgPointee<LANE_MOCK_PARAM3>(connInfo), Return(SOFTBUS_OK)));
@@ -326,6 +332,7 @@ HWTEST_F(LNNLaneLinkExtTest, LNN_LANE_LINK_CONNDEVICE_TEST_002, TestSize.Level1)
     CondWait();
     EXPECT_NO_FATAL_FAILURE(LnnDisconnectP2p(NODE_NETWORK_ID, laneReqId));
     EXPECT_NO_FATAL_FAILURE(LnnDestroyP2p());
+    g_manager.supportHmlTwo = SupportHmlTwo;
 }
 
 /*
