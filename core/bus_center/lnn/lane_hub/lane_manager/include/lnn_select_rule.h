@@ -37,7 +37,7 @@ int32_t FinalDecideLinkType(const char *networkId, LaneLinkType *linkList,
 int32_t LaneCheckLinkValid(const char *networkId, LaneLinkType linkType, LaneTransType transType);
 int32_t DecideReuseLane(const char *networkId, const LaneSelectParam *request,
     LanePreferredLinkList *recommendList);
-bool IsSupportWifiDirectEnhance(const char *networkId);
+bool IsEnhancedWifiDirectSupported(const char *networkId);
 int32_t InitLaneSelectRule(void);
 void DeinitLaneSelectRule(void);
 int32_t GetAllSupportReuseBandWidth(const char *peerNetworkId, LaneTransType transType,

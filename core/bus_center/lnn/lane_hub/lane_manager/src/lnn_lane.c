@@ -463,7 +463,7 @@ static int32_t LnnFreeLink(uint32_t laneReqId)
     return SOFTBUS_OK;
 }
 
-static LnnLaneManager g_LaneManager = {
+static LnnLaneManager g_laneManager = {
     .lnnQueryLaneResource = LnnQueryLaneResource,
     .lnnGetLaneHandle = ApplyLaneReqId,
     .lnnAllocLane = LnnAllocLane,
@@ -478,7 +478,7 @@ static LnnLaneManager g_LaneManager = {
 
 LnnLaneManager *GetLaneManager(void)
 {
-    return &g_LaneManager;
+    return &g_laneManager;
 }
 
 int32_t LnnRequestLane(uint32_t laneReqId, const LaneRequestOption *request,

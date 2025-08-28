@@ -664,7 +664,7 @@ HWTEST_F(LNNLaneLinkExtTest, LNN_LANE_LINK_RATE_PRE_TEST_001, TestSize.Level1)
         .WillRepeatedly(Return(SOFTBUS_OK));
     g_manager.connectDevice = ConnectDeviceRawHml;
     EXPECT_CALL(laneMock, GetWifiDirectManager).WillRepeatedly(Return(&g_manager));
-    EXPECT_CALL(laneLinkMock, CheckLaneLinkExistByType).WillRepeatedly(Return(true));
+    EXPECT_CALL(laneLinkMock, ExistsLaneLinkByType).WillRepeatedly(Return(true));
     NiceMock<LaneNetCapInterfaceMock> capMock;
     EXPECT_CALL(capMock, SetRemoteDynamicNetCap).WillRepeatedly(Return());
 

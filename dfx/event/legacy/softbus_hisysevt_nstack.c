@@ -81,6 +81,7 @@ static int32_t CopyEventParamVal(SoftBusEvtParamType type, void *dst, const void
 {
     switch (type) {
         case SOFTBUS_EVT_PARAMTYPE_BOOL:
+        /* fall-through */
         case SOFTBUS_EVT_PARAMTYPE_UINT8:
             *(uint8_t *)dst = *(uint8_t *)src;
             break;
@@ -88,11 +89,13 @@ static int32_t CopyEventParamVal(SoftBusEvtParamType type, void *dst, const void
             *(uint16_t *)dst = *(uint16_t *)src;
             break;
         case SOFTBUS_EVT_PARAMTYPE_INT32:
+        /* fall-through */
         case SOFTBUS_EVT_PARAMTYPE_UINT32:
         case SOFTBUS_EVT_PARAMTYPE_FLOAT:
             *(uint32_t *)dst = *(uint32_t *)src;
             break;
         case SOFTBUS_EVT_PARAMTYPE_UINT64:
+        /* fall-through */
         case SOFTBUS_EVT_PARAMTYPE_DOUBLE:
             *(uint64_t *)dst = *(uint64_t *)src;
             break;

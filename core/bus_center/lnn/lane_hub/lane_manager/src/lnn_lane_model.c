@@ -235,7 +235,8 @@ int32_t GetLaneIdList(uint32_t profileId, uint64_t **laneIdList, uint32_t *listS
     if (cnt != laneModel->ref) {
         LNN_LOGE(LNN_LANE, "ref count and cnt are not equal");
         ModelUnlock();
-        return SOFTBUS_INVALID_PARAM;
+        SoftBusFree(*laneIdList);
+        return SOFTBUS_FILE_ERR;
     }
     *listSize = cnt;
     ModelUnlock();

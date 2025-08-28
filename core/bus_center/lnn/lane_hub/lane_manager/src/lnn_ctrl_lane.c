@@ -95,18 +95,18 @@ static int32_t ConvertAuthLinkToLaneLink(AuthLinkTypeList *authLinkType, LanePre
 
 bool IsAuthReuseP2p(const char *networkId, const char *udid, AuthLinkType authType)
 {
-    LaneResource resoureItem;
-    if (memset_s(&resoureItem, sizeof(LaneResource), 0, sizeof(LaneResource)) != EOK) {
+    LaneResource resourceItem;
+    if (memset_s(&resourceItem, sizeof(LaneResource), 0, sizeof(LaneResource)) != EOK) {
         LNN_LOGE(LNN_LANE, "memset_s LaneResource fail");
         return false;
     }
     if (authType == AUTH_LINK_TYPE_ENHANCED_P2P &&
-        FindLaneResourceByLinkType(udid, LANE_HML, &resoureItem) == SOFTBUS_OK &&
+        FindLaneResourceByLinkType(udid, LANE_HML, &resourceItem) == SOFTBUS_OK &&
         !GetWifiDirectManager()->isNegotiateChannelNeeded(networkId, WIFI_DIRECT_LINK_TYPE_HML)) {
         LNN_LOGI(LNN_LANE, "can use HML");
         return true;
     } else if (authType == AUTH_LINK_TYPE_P2P &&
-        FindLaneResourceByLinkType(udid, LANE_P2P, &resoureItem) == SOFTBUS_OK &&
+        FindLaneResourceByLinkType(udid, LANE_P2P, &resourceItem) == SOFTBUS_OK &&
         !GetWifiDirectManager()->isNegotiateChannelNeeded(networkId, WIFI_DIRECT_LINK_TYPE_P2P)) {
         LNN_LOGI(LNN_LANE, "can use P2P");
         return true;
