@@ -257,6 +257,7 @@ if (defined(ohos_lite)) {
 
         "$dsoftbus_dfx_path/dumper/legacy:softbus_dfx_dump",
         "$dsoftbus_root_path/adapter:softbus_adapter",
+        "$dsoftbus_root_path/core/connection/wifi_direct_cpp:wifi_direct",
         "$cjson_shared_path",
         "$ipc_single_path",
         "$samgr_path",
