@@ -54,6 +54,7 @@ static int32_t GetSameLaneDetectInfo(LaneDetectInfo *infoItem)
     LIST_FOR_EACH_ENTRY_SAFE(item, next, &g_laneDetectList.list, LaneDetectInfo, node) {
         switch (infoItem->link.type) {
             case LANE_WLAN_2P4G:
+            /* fall-through */
             case LANE_WLAN_5G:
                 if ((strncmp(infoItem->link.linkInfo.wlan.connInfo.addr,
                     item->link.linkInfo.wlan.connInfo.addr, MAX_SOCKET_ADDR_LEN) == 0) &&
@@ -362,6 +363,7 @@ int32_t LaneDetectReliability(uint32_t laneReqId, const LaneLinkInfo *linkInfo, 
     uint64_t detectStartTime = SoftBusGetSysTimeMs();
     switch (linkInfo->type) {
         case LANE_WLAN_2P4G:
+        /* fall-through */
         case LANE_WLAN_5G:
             result = WlanDetectReliability(laneReqId, linkInfo, callback);
             break;

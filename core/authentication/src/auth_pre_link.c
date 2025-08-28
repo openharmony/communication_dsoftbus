@@ -203,7 +203,11 @@ void DelAuthGenCertParaNodeById(int32_t requestId)
             SoftBusFree(item->softbusCertChain);
             item->softbusCertChain = NULL;
             SoftBusFree(item);
-            g_authGenCertParallelList.cnt--;
+            if (g_authGenCertParallelList.cnt == 0) {
+                AUTH_LOGI(AUTH_CONN, "auth gencert parallel list cnt is 0.");
+            } else {
+                g_authGenCertParallelList.cnt--;
+            }
             AuthGenCertParallelUnLock();
             return;
         }

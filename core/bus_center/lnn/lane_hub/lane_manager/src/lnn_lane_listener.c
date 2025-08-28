@@ -217,7 +217,7 @@ static int32_t FindLaneBusinessInfoByLinkInfo(const LaneLinkInfo *laneLinkInfo,
         if (item->laneId == laneId) {
             if (memcpy_s(&laneBusinessInfo[(*resNum)++], sizeof(LaneBusinessInfo),
                 item, sizeof(LaneBusinessInfo)) != EOK) {
-                LNN_LOGE(LNN_LANE, "memcpy lane bussiness info fail");
+                LNN_LOGE(LNN_LANE, "memcpy lane business info fail");
                 LaneListenerUnlock();
                 return SOFTBUS_MEM_ERR;
             }
