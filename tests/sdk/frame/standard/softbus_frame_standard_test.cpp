@@ -247,26 +247,26 @@ HWTEST_F(SoftBusServerProxyFrameTest, OnRemoteRequestTest, TestSize.Level1)
 }
 
 /**
- * @tc.name: OnClientPermissonChangeInnerTest
- * @tc.desc: OnClientPermissonChangeInnerTest, ReadInt32 faild return SOFTBUS_ERR
- * @tc.desc: OnClientPermissonChangeInnerTest, ReadCString faild return SOFTBUS_ERR
- * @tc.desc: OnClientPermissonChangeInnerTest, success return SOFTBUS_OK
+ * @tc.name: OnClientPermissionChangeInnerTest
+ * @tc.desc: OnClientPermissionChangeInnerTest, ReadInt32 faild return SOFTBUS_ERR
+ * @tc.desc: OnClientPermissionChangeInnerTest, ReadCString faild return SOFTBUS_ERR
+ * @tc.desc: OnClientPermissionChangeInnerTest, success return SOFTBUS_OK
  * @tc.type: FUNC
  * @tc.require:
  */
-HWTEST_F(SoftBusServerProxyFrameTest, OnClientPermissonChangeInnerTest, TestSize.Level1)
+HWTEST_F(SoftBusServerProxyFrameTest, OnClientPermissionChangeInnerTest, TestSize.Level1)
 {
     ASSERT_TRUE(g_stub != nullptr);
     MessageParcel data;
     MessageParcel reply;
-    EXPECT_EQ(g_stub->OnClientPermissonChangeInner(data, reply), SOFTBUS_TRANS_PROXY_READINT_FAILED);
+    EXPECT_EQ(g_stub->OnClientPermissionChangeInner(data, reply), SOFTBUS_TRANS_PROXY_READINT_FAILED);
 
     data.WriteInt32(0);
-    EXPECT_EQ(g_stub->OnClientPermissonChangeInner(data, reply), SOFTBUS_TRANS_PROXY_READCSTRING_FAILED);
+    EXPECT_EQ(g_stub->OnClientPermissionChangeInner(data, reply), SOFTBUS_TRANS_PROXY_READCSTRING_FAILED);
 
     data.WriteInt32(0);
-    data.WriteCString("OnClientPermissonChangeInnerTest");
-    EXPECT_EQ(g_stub->OnClientPermissonChangeInner(data, reply), SOFTBUS_OK);
+    data.WriteCString("OnClientPermissionChangeInnerTest");
+    EXPECT_EQ(g_stub->OnClientPermissionChangeInner(data, reply), SOFTBUS_OK);
 }
 
 /**

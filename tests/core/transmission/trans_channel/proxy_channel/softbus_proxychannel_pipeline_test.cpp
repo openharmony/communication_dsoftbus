@@ -383,7 +383,7 @@ HWTEST_F(SoftbusProxyChannelPipelineTest, TransProxyPipelineHandleMessageTest001
     msg.obj = clone;
     TransProxyPipelineHandleMessage(&msg);
 
-    msg.what = LOOPER_MSG_TYPE_DELEY_CLOSE_CHANNEL;
+    msg.what = LOOPER_MSG_TYPE_CLOSE_CHANNEL_DELAY;
     TransProxyPipelineHandleMessage(&msg);
 
     msg.what = LOOPER_MSG_TYPE_ON_CHANNEL_OPEN_FAILED;

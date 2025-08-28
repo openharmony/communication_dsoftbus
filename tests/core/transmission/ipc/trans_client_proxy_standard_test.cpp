@@ -113,10 +113,10 @@ HWTEST_F(TransClientProxyStandardTest, TransClientProxyStandardTest002, TestSize
     int32_t ret = clientProxy->OnChannelLinkDown(nullptr, TEST_TMP_DATE);
     EXPECT_EQ(SOFTBUS_INVALID_PARAM, ret);
 
-    ret = clientProxy->OnClientPermissonChange(nullptr, TEST_TMP_DATE);
+    ret = clientProxy->OnClientPermissionChange(nullptr, TEST_TMP_DATE);
     EXPECT_EQ(SOFTBUS_INVALID_PARAM, ret);
     
-    ret = clientProxy->OnClientPermissonChange(pkgName, TEST_ERRTMP_DATE);
+    ret = clientProxy->OnClientPermissionChange(pkgName, TEST_ERRTMP_DATE);
     EXPECT_EQ(SOFTBUS_OK, ret);
 }
 
