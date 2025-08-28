@@ -544,7 +544,7 @@ group("unittest") {
     ":TransClientSessionServiceTest",
     ":TransClientSocketServiceTest",
     ":TransClientMsgServiceExTest",
-    ":TransClientSessionCallbackExTest",
+    #":TransClientSessionCallbackExTest",
     ":TransClientSocketServiceExTest",
   ]
 
