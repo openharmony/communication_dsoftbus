@@ -26,9 +26,9 @@
 #include "auth_device_common_key.h"
 #include "bus_center_info_key.h"
 #include "bus_center_manager.h"
-#include "g_enhance_lnn_func_pack.h"
 #include "lnn_async_callback_utils.h"
-#include "lnn_device_info_recovery.h"
+#include "lnn_cipherkey_manager_struct.h"
+#include "lnn_device_info_recovery_struct.h"
 #include "lnn_ohos_account.h"
 #include "lnn_file_utils.h"
 #include "lnn_heartbeat_ctrl.h"
@@ -38,6 +38,7 @@
 #include "lnn_p2p_info.h"
 #include "lnn_secure_storage_struct.h"
 #include "sqlite3_utils.h"
+#include "g_enhance_lnn_func_pack.h"
 
 #include "softbus_adapter_crypto.h"
 #include "softbus_adapter_file.h"
@@ -45,6 +46,7 @@
 #include "softbus_adapter_thread.h"
 #include "softbus_adapter_timer.h"
 #include "softbus_common.h"
+#include "softbus_def.h"
 #include "softbus_error_code.h"
 #include "softbus_utils.h"
 
@@ -102,6 +104,73 @@ static void DeviceDbListUnlock(void)
         return;
     }
     (void)SoftBusMutexUnlock(&g_deviceDbMutex);
+}
+
+static int32_t DbLock(void)
+{
+    if (!g_isDbListInit) {
+        if (!DeviceDbRecoveryInit()) {
+            LNN_LOGE(LNN_LEDGER, "g_isDbListInit init fail");
+            return SOFTBUS_NETWORK_DB_LOCK_INIT_FAILED;
+        }
+    }
+    return SoftBusMutexLock(&g_dbMutex);
+}
+
+static void DbUnlock(void)
+{
+    if (!g_isDbListInit) {
+        if (!DeviceDbRecoveryInit()) {
+            LNN_LOGE(LNN_LEDGER, "g_isDbListInit init fail");
+            return;
+        }
+    }
+    (void)SoftBusMutexUnlock(&g_dbMutex);
+}
+
+static bool IsNeedUpdateHukKey(uint64_t *diffTime)
+{
+    uint64_t nowTime = SoftBusGetSysTimeMs();
+    uint64_t huksTime = 0;
+    if (LnnGetLocalNumU64Info(NUM_KEY_HUKS_TIME, &huksTime) != SOFTBUS_OK) {
+        LNN_LOGW(LNN_LEDGER, "get huk time fail");
+        return false;
+    }
+    if (huksTime == 0) {
+        if (LnnSetLocalNum64Info(NUM_KEY_HUKS_TIME, nowTime) != SOFTBUS_OK) {
+            LNN_LOGE(LNN_LEDGER, "set huks Key time fail");
+            return false;
+        }
+    }
+    if (huksTime + WAIT_SEVEN_DAYS_QUERY_INTERVAL > nowTime) {
+        *diffTime = huksTime + WAIT_SEVEN_DAYS_QUERY_INTERVAL - nowTime;
+        LNN_LOGI(LNN_LEDGER, "nowTime=%{public}" PRIu64 ",huksTime=%{public}" PRIu64 ",diffTime=%{public}" PRIu64 "",
+        nowTime, huksTime, *diffTime);
+        return false;
+    }
+    return true;
+}
+
+static void StartCheckHukKeyTimeProc(void *para)
+{
+    (void)para;
+    int32_t ret = SOFTBUS_ERR;
+    uint64_t diffTime = WAIT_ONE_HOUR_QUERY_INTERVAL;
+    if ((IsNeedUpdateHukKey(&diffTime)) && (UpdateKeyAndLocalInfo() == SOFTBUS_OK)) {
+        LNN_LOGI(LNN_LEDGER, "update key and local info success");
+        LnnAsyncCallbackDelayHelper(
+            GetLooper(LOOP_TYPE_DEFAULT), StartCheckHukKeyTimeProc, NULL, WAIT_SEVEN_DAYS_QUERY_INTERVAL);
+        return;
+    }
+    if (diffTime > WAIT_SEVEN_DAYS_QUERY_INTERVAL) {
+        diffTime = WAIT_ONE_HOUR_QUERY_INTERVAL;
+    }
+    LNN_LOGI(LNN_LEDGER, "diffTime= %{public}" PRIu64 "", diffTime);
+    ret = LnnAsyncCallbackDelayHelper(GetLooper(LOOP_TYPE_DEFAULT), StartCheckHukKeyTimeProc, NULL, diffTime);
+    if (ret != SOFTBUS_OK) {
+        LNN_LOGE(LNN_INIT, "LnnAsyncCallbackDelayHelper errno:%d", ret);
+        return;
+    }
 }
 
 int32_t EncryptStorageData(LnnEncryptDataLevel level, uint8_t *dbKey, uint32_t len)
@@ -554,7 +623,13 @@ bool LnnIsPotentialHomeGroup(const char *udid)
 
 int32_t LnnGenerateCeParams(bool isUnlocked)
 {
-    return LnnGenerateCeKeyByHuks(&g_ceKeyAlias, isUnlocked);
+    int32_t ret = LnnGenerateCeKeyByHuks(&g_ceKeyAlias, isUnlocked);
+    if (ret != SOFTBUS_OK) {
+        LNN_LOGE(LNN_LEDGER, "gen huks ce key fail, ret=%{public}d", ret);
+        return ret;
+    }
+    StartCheckHukKeyTimeProc(NULL);
+    return SOFTBUS_OK;
 }
 
 int32_t LnnCheckGenerateSoftBusKeyByHuks(void)
@@ -600,5 +675,198 @@ int32_t LnnFindDeviceUdidTrustedInfoFromDb(const char *deviceUdid)
         return SOFTBUS_NOT_FIND;
     }
     DeviceDbListUnlock();
+    return SOFTBUS_OK;
+}
+
+static int32_t LnnUpdateDecisionDbKey()
+{
+    uint8_t dbKey[LNN_DB_KEY_LEN] = {0};
+    DbContext *ctx = NULL;
+    int32_t ret = SOFTBUS_HUKS_UPDATE_ERR;
+    if (DbLock() != SOFTBUS_OK) {
+        LNN_LOGE(LNN_LEDGER, "lock fail");
+        return SOFTBUS_LOCK_ERR;
+    }
+    if (OpenDatabase(&ctx) != SOFTBUS_OK) {
+        LNN_LOGE(LNN_LEDGER, "open database failed");
+        DbUnlock();
+        return SOFTBUS_NETWORK_DATABASE_FAILED;
+    }
+    do {
+        if (LnnDeleteKeyByHuks(&g_keyAlias) != SOFTBUS_OK) {
+            LNN_LOGE(LNN_LEDGER, "delete key by huks key fail");
+            break;
+        }
+        if (LnnDeleteCeKeyByHuks(&g_ceKeyAlias, false) != SOFTBUS_OK) {
+            LNN_LOGE(LNN_LEDGER, "delete  ce key by huks key fail");
+            break;
+        }
+        if (LnnGenerateKeyByHuks(&g_keyAlias) != SOFTBUS_OK) {
+            LNN_LOGE(LNN_LEDGER, "update decision db de key fail");
+            break;
+        }
+        if (LnnGenerateCeKeyByHuks(&g_ceKeyAlias, false) != SOFTBUS_OK) {
+            LNN_LOGE(LNN_LEDGER, "update decision db ce key fail");
+            break;
+        }
+        ret = GetDecisionDbKey(dbKey, sizeof(dbKey), true);
+        if (ret != SOFTBUS_OK) {
+            LNN_LOGE(LNN_LEDGER, "get decision dbKey fail");
+            break;
+        }
+        ret = UpdateDbPassword(ctx, dbKey, sizeof(dbKey));
+        if (ret != SOFTBUS_OK) {
+            LNN_LOGE(LNN_LEDGER, "encrypt decision db fail");
+            break;
+        }
+        ret = SOFTBUS_OK;
+    } while (false);
+    if (CloseDatabase(ctx) != SOFTBUS_OK) {
+        LNN_LOGE(LNN_LEDGER, "close database failed");
+    }
+    DbUnlock();
+    (void)memset_s(dbKey, sizeof(dbKey), 0x0, sizeof(dbKey));
+    return ret;
+}
+
+static int32_t RetrieveDeviceInfoAndKeys(UpdateKeyRes *res)
+{
+    if (res == NULL) {
+        LNN_LOGE(LNN_LEDGER, "input param is null");
+        return SOFTBUS_INVALID_PARAM;
+    }
+    int32_t ret = LnnRetrieveDeviceDataPacked(
+        LNN_DATA_TYPE_REMOTE_DEVINFO, &res->remoteDevinfoData, &res->remoteDevinfoLen);
+    if (ret != SOFTBUS_OK) {
+        LNN_LOGE(LNN_LEDGER, "retrieve remote devinfo fail");
+        return ret;
+    }
+    ret = LnnRetrieveDeviceDataPacked(LNN_DATA_TYPE_DEVICE_KEY, &res->deviceKey, &res->deviceKeyLen);
+    if (ret != SOFTBUS_OK) {
+        LNN_LOGE(LNN_LEDGER, "retrieve device key fail");
+        return ret;
+    }
+    ret = LnnRetrieveDeviceDataPacked(LNN_DATA_TYPE_BLE_BROADCAST_KEY, &res->broadcastKey, &res->broadcastKeyLen);
+    if (ret != SOFTBUS_OK) {
+        LNN_LOGE(LNN_LEDGER, "retrieve broadcast key fail");
+        return ret;
+    }
+    ret = LnnRetrieveDeviceDataPacked(LNN_DATA_TYPE_PTK_KEY, &res->ptkKey, &res->ptkKeyLen);
+    if (ret != SOFTBUS_OK) {
+        LNN_LOGE(LNN_LEDGER, "retrieve ptk key fail");
+        return ret;
+    }
+    ret = LnnRetrieveDeviceDataPacked(
+        LNN_DATA_TYPE_LOCAL_BROADCAST_KEY, &res->localBroadcastKey, &res->localBroadcastKeyLen);
+    if (ret != SOFTBUS_OK) {
+        LNN_LOGE(LNN_LEDGER, "retrieve local broadcast key fail");
+        return ret;
+    }
+    return SOFTBUS_OK;
+}
+
+static int32_t SaveDeviceInfoAndKeys(UpdateKeyRes *res)
+{
+    if (res == NULL) {
+        LNN_LOGE(LNN_LEDGER, "input param is null");
+        return SOFTBUS_INVALID_PARAM;
+    }
+    int32_t ret = LnnSaveDeviceDataPacked(res->remoteDevinfoData, LNN_DATA_TYPE_REMOTE_DEVINFO);
+    if (ret != SOFTBUS_OK) {
+        LNN_LOGE(LNN_LEDGER, "retrieve remote devinfo fail");
+        return ret;
+    }
+    ret = LnnSaveDeviceDataPacked(res->deviceKey, LNN_DATA_TYPE_DEVICE_KEY);
+    if (ret != SOFTBUS_OK) {
+        LNN_LOGE(LNN_LEDGER, "save device key fail");
+        return ret;
+    }
+    ret = LnnSaveDeviceDataPacked(res->broadcastKey, LNN_DATA_TYPE_BLE_BROADCAST_KEY);
+    if (ret != SOFTBUS_OK) {
+        LNN_LOGE(LNN_LEDGER, "save broadcast key fail");
+        return ret;
+    }
+    ret = LnnSaveDeviceDataPacked(res->ptkKey, LNN_DATA_TYPE_PTK_KEY);
+    if (ret != SOFTBUS_OK) {
+        LNN_LOGE(LNN_LEDGER, "save ptk key fail");
+        return ret;
+    }
+    ret = LnnSaveDeviceDataPacked(res->localBroadcastKey, LNN_DATA_TYPE_LOCAL_BROADCAST_KEY);
+    if (ret != SOFTBUS_OK) {
+        LNN_LOGE(LNN_LEDGER, "save local broadcast key fail");
+        return ret;
+    }
+    return SOFTBUS_OK;
+}
+
+
+void FreeUpdateKeyResources(UpdateKeyRes *res)
+{
+    if (res == NULL) {
+        LNN_LOGE(LNN_LEDGER, "param invalid");
+        return;
+    }
+    if (res->remoteDevinfoData != NULL) {
+        SoftBusFree(res->remoteDevinfoData);
+        res->remoteDevinfoData = NULL;
+    }
+    if (res->deviceKey != NULL) {
+        (void)memset_s(res->deviceKey, res->deviceKeyLen, 0, res->deviceKeyLen);
+        SoftBusFree(res->deviceKey);
+        res->deviceKey = NULL;
+    }
+    if (res->broadcastKey != NULL) {
+        (void)memset_s(res->broadcastKey, res->broadcastKeyLen, 0, res->broadcastKeyLen);
+        SoftBusFree(res->broadcastKey);
+        res->broadcastKey = NULL;
+    }
+    if (res->ptkKey != NULL) {
+        (void)memset_s(res->ptkKey, res->ptkKeyLen, 0, res->ptkKeyLen);
+        SoftBusFree(res->ptkKey);
+        res->ptkKey = NULL;
+    }
+    if (res->localBroadcastKey != NULL) {
+        (void)memset_s(res->localBroadcastKey, res->localBroadcastKeyLen, 0, res->localBroadcastKeyLen);
+        SoftBusFree(res->localBroadcastKey);
+        res->localBroadcastKey = NULL;
+    }
+}
+
+int32_t UpdateKeyAndLocalInfo(void)
+{
+    uint64_t keyTime = SoftBusGetSysTimeMs();
+    UpdateKeyRes res = { 0 };
+    NodeInfo localNodeInfo;
+    (void)memset_s(&localNodeInfo, sizeof(localNodeInfo), 0, sizeof(localNodeInfo));
+    (void)LnnGetLocalDevInfoPacked(&localNodeInfo);
+    int32_t  ret = RetrieveDeviceInfoAndKeys(&res);
+    if (ret != SOFTBUS_OK) {
+        LNN_LOGE(LNN_LEDGER, "retrieve device key failed");
+        return ret;
+    }
+    if (LnnUpdateDecisionDbKey() != SOFTBUS_OK) {
+        LNN_LOGE(LNN_LEDGER, "update database dbKey failed");
+        FreeUpdateKeyResources(&res);
+        return SOFTBUS_GENERATE_KEY_FAIL;
+    }
+    if (LnnSetLocalNum64Info(NUM_KEY_HUKS_TIME, keyTime) != SOFTBUS_OK) {
+        LNN_LOGE(LNN_LEDGER, "set huks key time fail");
+        FreeUpdateKeyResources(&res);
+        return SOFTBUS_HUKS_ERR;
+    }
+    localNodeInfo.huksKeyTime = keyTime;
+    ret = LnnSaveLocalDeviceInfoPacked(&localNodeInfo);
+    if (ret != SOFTBUS_OK) {
+        LNN_LOGE(LNN_LEDGER, "save local device info fail");
+        FreeUpdateKeyResources(&res);
+        return ret;
+    }
+    ret = SaveDeviceInfoAndKeys(&res);
+    if (ret != SOFTBUS_OK) {
+        LNN_LOGE(LNN_LEDGER, "save device info or key fail");
+        FreeUpdateKeyResources(&res);
+        return ret;
+    }
+    FreeUpdateKeyResources(&res);
     return SOFTBUS_OK;
 }
