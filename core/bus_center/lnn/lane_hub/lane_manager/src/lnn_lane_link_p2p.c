@@ -1161,7 +1161,6 @@ static int32_t CreateWDLinkInfo(uint32_t p2pRequestId, const struct WifiDirectLi
             LNN_LOGE(LNN_LANE, "strcpy localIp fail");
             return SOFTBUS_STRCPY_ERR;
         }
-        linkInfo->linkInfo.p2p.channel = link->channelId;
     }
     return SOFTBUS_OK;
 }
@@ -1338,7 +1337,8 @@ static void TryDelPreLinkByConnReqId(uint32_t connReqId)
             SoftBusFree(laneReqIdPtr);
             return;
         }
-        if (LnnAsyncCallbackHelper(GetLooper(LOOP_TYPE_DEFAULT), LnnFreePreLinkPacked, (void *)laneReqIdPtr) != SOFTBUS_OK) {
+        if (LnnAsyncCallbackHelper(GetLooper(LOOP_TYPE_DEFAULT),
+                                   LnnFreePreLinkPacked, (void *)laneReqIdPtr) != SOFTBUS_OK) {
             LNN_LOGE(LNN_LANE, "async call LnnFreePreLink fail");
             SoftBusFree(laneReqIdPtr);
             laneReqIdPtr = NULL;
@@ -2347,8 +2347,8 @@ static void TryConcurrencyPreLinkConn(const LinkRequest *request, uint32_t laneL
     }
 }
 
-static int32_t OpenHmlTriggerToConn(
-    const LinkRequest *request, uint32_t laneReqId, enum WifiDirectConnectType connectType, const LaneLinkCb *callback)
+static int32_t OpenHmlTriggerToConn(const LinkRequest *request, uint32_t laneReqId,
+    enum WifiDirectConnectType connectType, const LaneLinkCb *callback)
 {
     if (CheckTransReqInfo(request, laneReqId) != SOFTBUS_OK) {
         LNN_LOGI(LNN_LANE, "hml trigger not support p2p");
