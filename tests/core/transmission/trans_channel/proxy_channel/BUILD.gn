@@ -637,10 +637,7 @@ ohos_unittest("SoftbusTransProxyChannelManagerTest") {
   ]
 
   external_deps = [
-    "cJSON:cjson",
     "c_utils:utils",
-    "device_auth:deviceauth_sdk",
-    "dsoftbus:softbus_client",
     "googletest:gmock",
     "hilog:libhilog",
   ]
