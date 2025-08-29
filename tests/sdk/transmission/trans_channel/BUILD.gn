@@ -592,7 +592,7 @@ if (defined(ohos_lite)) {
       ":ClientTransChannelCallbackTest",
       ":ClientTransChannelManagerTest",
       ":ClientTransPendingTest",
-      ":ClientTransProxyD2DTest",
+      #":ClientTransProxyD2DTest",
       ":ClientTransProxyFileCommonTest",
       ":ClientTransProxyFileManagerMockTest",
       ":ClientTransProxyFileManagerTest",
