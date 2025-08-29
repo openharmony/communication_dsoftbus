@@ -245,13 +245,21 @@ HWTEST_F(BrProxyTest, BrProxyTest0010, TestSize.Level1)
     EXPECT_EQ(SOFTBUS_INVALID_PARAM, ret);
     ret = ServerAddDataToList(&baseInfo, (const uint8_t *)data, dataLen);
     EXPECT_EQ(SOFTBUS_OK, ret);
-    uint8_t qdata[10];
+    uint8_t *qData = nullptr;
     uint32_t realLen = 0;
     bool isEmpty;
-    GetDataFromList(&baseInfo, qdata, sizeof(qdata), &realLen, &isEmpty);
+    GetDataFromList(&baseInfo, &qData, &realLen, &isEmpty);
+    if (qData != nullptr) {
+        SoftBusFree(qData);
+        qData = nullptr;
+    }
     EXPECT_EQ(true, dataLen == realLen);
     EXPECT_EQ(false, isEmpty);
-    GetDataFromList(&baseInfo, qdata, sizeof(qdata), &realLen, &isEmpty);
+    GetDataFromList(&baseInfo, &qData, &realLen, &isEmpty);
+    if (qData != nullptr) {
+        SoftBusFree(qData);
+        qData = nullptr;
+    }
     EXPECT_EQ(true, isEmpty);
 }
 

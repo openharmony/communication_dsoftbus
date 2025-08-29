@@ -452,7 +452,10 @@ if (defined(ohos_lite)) {
       }
       if (!defined(global_parts_info) ||
           defined(global_parts_info.ability_ability_runtime)) {
-        cflags += [ "-DSUPPORT_ABILITY_RUNTIME" ]
+        cflags += [
+          "-DSUPPORT_ABILITY_RUNTIME",
+          "-DENHANCED_FLAG",
+        ]
       }
     }
     if (defined(global_parts_info) &&
