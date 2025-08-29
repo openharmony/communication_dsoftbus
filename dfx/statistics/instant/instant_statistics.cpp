@@ -19,8 +19,8 @@
 #include "bt_statistic.h"
 #include "bus_center_manager.h"
 #include "comm_log.h"
-#include "communication_radar.h"
 #include "data/link_manager.h"
+#include "g_enhance_adapter_func_pack.h"
 #include "legacy/softbus_hisysevt_transreporter.h"
 #include "lnn_distributed_net_ledger.h"
 #include "lnn_lane_interface.h"
@@ -1008,8 +1008,6 @@ void InstRegister(SoftBusMessage *msg)
     if (msg == nullptr) {
         (void)InstantRegisterMsgDelay(GetLooper(LOOP_TYPE_DEFAULT), InstRegister, INST_MINUTE_TIME);
     } else {
-        struct RadarCallback callback = { 0 };
-        callback.resourceNotificationCallback = InstGetAllInfo;
-        (void)OHOS::CommunicationRadar::CommunicationRadar::GetInstance().RegisterRadarCallback(callback);
+        RegisterRadarCbForOpenSrcPacked((void *)InstGetAllInfo);
     }
 }
