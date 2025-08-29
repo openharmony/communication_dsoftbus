@@ -18,29 +18,30 @@
 #include <stdint.h>
 #include <stdbool.h>
 
-#include "auth_interface_struct.h"
 #include "auth_attest_interface_struct.h"
 #include "auth_device_common_key_struct.h"
+#include "auth_interface_struct.h"
 #include "bus_center_event_struct.h"
 #include "cJSON.h"
 #include "lnn_cipherkey_manager_struct.h"
-#include "lnn_node_info_struct.h"
-#include "lnn_heartbeat_utils_struct.h"
-#include "lnn_lane_vap_info_struct.h"
-#include "lnn_lane_power_control_struct.h"
-#include "lnn_lane_score_struct.h"
-#include "lnn_lane_link_struct.h"
-#include "lnn_trans_lane_struct.h"
-#include "lnn_fast_offline_struct.h"
 #include "lnn_data_cloud_sync_struct.h"
-#include "lnn_sync_info_manager_struct.h"
-#include "lnn_lane_qos_struct.h"
-#include "lnn_time_sync_impl_struct.h"
+#include "lnn_fast_offline_struct.h"
 #include "lnn_heartbeat_medium_mgr_struct.h"
+#include "lnn_heartbeat_utils_struct.h"
+#include "lnn_lane_link_struct.h"
+#include "lnn_lane_power_control_struct.h"
+#include "lnn_lane_qos_struct.h"
+#include "lnn_lane_score_struct.h"
+#include "lnn_lane_vap_info_struct.h"
 #include "lnn_log.h"
+#include "lnn_node_info_struct.h"
 #include "lnn_ranging_manager_struct.h"
 #include "lnn_secure_storage_struct.h"
+#include "lnn_sync_info_manager_struct.h"
+#include "lnn_time_sync_impl_struct.h"
+#include "lnn_trans_lane_struct.h"
 #include "softbus_bus_center.h"
+
 #ifdef __cplusplus
 extern "C" {
 #endif
@@ -106,7 +107,7 @@ int32_t LnnRequestCheckOnlineStatusPacked(const char *networkId, uint64_t timeou
 int32_t LnnSyncPtkPacked(const char *networkId);
 int32_t GetConcurrencyLaneReqIdByActionIdPacked(uint32_t actionId, uint32_t *laneReqId);
 int32_t UpdateConcurrencyReuseLaneReqIdByActionIdPacked(uint32_t actionId, uint32_t reuseLaneReqId, uint32_t connReqId);
-int32_t UpdateConcurrencyReuseLaneReqIdByUdidPacked(char *udidHash, uint32_t udidHashLen, uint32_t reuseLaneReqId,
+int32_t UpdateConcurrencyReuseLaneReqIdByUdidPacked(const char *udidHash, uint32_t udidHashLen, uint32_t reuseLaneReqId,
     uint32_t connReqId);
 int32_t LnnAddLocalVapInfoPacked(LnnVapType type, const LnnVapAttr *vapAttr);
 int32_t LnnDeleteLocalVapInfoPacked(LnnVapType type);

@@ -15,10 +15,10 @@
  
 #ifndef BROADCAST_DFX_EVENT_H
 #define BROADCAST_DFX_EVENT_H
- 
+
 #include "disc_event.h"
 #include "broadcast_dfx_event_struct.h"
- 
+
 #ifdef __cplusplus
 extern "C" {
 #endif
