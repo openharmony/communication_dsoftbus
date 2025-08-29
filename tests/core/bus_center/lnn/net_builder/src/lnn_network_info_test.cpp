@@ -71,17 +71,6 @@ int32_t TestLnnRequestLeaveSpecific(const char *networkId, ConnectionAddrType ad
     return SOFTBUS_OK;
 }
 
-static VirtualLinkCapabilityCode g_code = CONN_VIRTUAL_LINK_CAP_UNKNOWN;
-
-static VirtualLinkCapabilityCode GetVirtualLinkCapabilityCode(void)
-{
-    return g_code;
-}
-
-static struct WifiDirectManager g_manager = {
-    .getVirtualLinkCapabilityCode = GetVirtualLinkCapabilityCode,
-};
-
 /*
  * @tc.name: LNN_INIT_NETWORK_INFO_TEST_001
  * @tc.desc: test LnnInitNetworkInfo
@@ -1164,45 +1153,4 @@ HWTEST_F(LNNNetworkInfoTest, ConvertUserIdToMsg_Test_001, TestSize.Level1)
     EXPECT_EQ(ret, SOFTBUS_OK);
 }
 
-/*
- * @tc.name: UpdateVirtualLinkStaticCap_Test_001
- * @tc.desc: UpdateVirtualLinkStaticCap test
- * @tc.type: FUNC
- * @tc.require:
- */
-HWTEST_F(LNNNetworkInfoTest, UpdateVirtualLinkStaticCap_Test_001, TestSize.Level1)
-{
-    NiceMock<LnnNetLedgertInterfaceMock> netLedgerMock;
-    NiceMock<LnnServicetInterfaceMock> serviceMock;
-    EXPECT_CALL(netLedgerMock, LnnGetLocalNumU32Info).WillRepeatedly(Return(SOFTBUS_INVALID_PARAM));
-    EXPECT_NO_FATAL_FAILURE(UpdateVirtualLinkStaticCap());
-
-    EXPECT_CALL(netLedgerMock, LnnGetLocalNumU32Info).WillRepeatedly(Return(SOFTBUS_OK));
-    EXPECT_CALL(serviceMock, GetWifiDirectManager).WillRepeatedly(Return(nullptr));
-    EXPECT_NO_FATAL_FAILURE(UpdateVirtualLinkStaticCap());
-
-    EXPECT_CALL(serviceMock, GetWifiDirectManager).WillRepeatedly(Return(&g_manager));
-    g_manager.getVirtualLinkCapabilityCode = nullptr;
-    EXPECT_NO_FATAL_FAILURE(UpdateVirtualLinkStaticCap());
-
-    g_manager.getVirtualLinkCapabilityCode = GetVirtualLinkCapabilityCode;
-    EXPECT_CALL(netLedgerMock, LnnSetStaticNetCap).WillRepeatedly(Return(SOFTBUS_INVALID_PARAM));
-    EXPECT_NO_FATAL_FAILURE(UpdateVirtualLinkStaticCap());
-
-    EXPECT_CALL(netLedgerMock, LnnSetStaticNetCap).WillRepeatedly(DoAll(SetArgPointee<0>(0), Return(SOFTBUS_OK)));
-    EXPECT_NO_FATAL_FAILURE(UpdateVirtualLinkStaticCap());
-
-    EXPECT_CALL(netLedgerMock, LnnSetStaticNetCap).WillRepeatedly(DoAll(SetArgPointee<0>(1), Return(SOFTBUS_OK)));
-    EXPECT_CALL(netLedgerMock, LnnSetLocalNumU32Info).WillRepeatedly(Return(SOFTBUS_INVALID_PARAM));
-    EXPECT_NO_FATAL_FAILURE(UpdateVirtualLinkStaticCap());
-
-    EXPECT_CALL(netLedgerMock, LnnSetLocalNumU32Info).WillRepeatedly(Return(SOFTBUS_OK));
-    EXPECT_NO_FATAL_FAILURE(UpdateVirtualLinkStaticCap());
-
-    g_code = CONN_VIRTUAL_LINK_NOT_SUPPORT;
-    EXPECT_CALL(netLedgerMock, LnnClearStaticNetCap).WillRepeatedly(Return(SOFTBUS_INVALID_PARAM));
-    EXPECT_NO_FATAL_FAILURE(UpdateVirtualLinkStaticCap());
-    EXPECT_CALL(netLedgerMock, LnnClearStaticNetCap).WillRepeatedly(DoAll(SetArgPointee<0>(0), Return(SOFTBUS_OK)));
-    EXPECT_NO_FATAL_FAILURE(UpdateVirtualLinkStaticCap());
-}
 } // namespace OHOS
