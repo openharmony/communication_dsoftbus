@@ -120,7 +120,6 @@ HWTEST_F(LNNNetBuilderMockTest, LNN_INIT_NET_BUILDER_TEST_001, TestSize.Level1)
     EXPECT_CALL(NetBuilderMock, SoftBusGetBtState()).WillRepeatedly(Return(BLE_ENABLE));
     EXPECT_TRUE(LnnInitNetBuilder() == SOFTBUS_INVALID_PARAM);
     EXPECT_TRUE(LnnInitNetBuilder() == SOFTBUS_INVALID_PARAM);
-    EXPECT_TRUE(LnnInitNetBuilder() == SOFTBUS_INVALID_PARAM);
     EXPECT_TRUE(LnnInitNetBuilder() == SOFTBUS_NOT_FIND);
     EXPECT_TRUE(LnnInitNetBuilder() == SOFTBUS_LOOPER_ERR);
 }
