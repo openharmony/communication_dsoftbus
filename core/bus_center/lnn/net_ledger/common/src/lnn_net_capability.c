@@ -23,7 +23,7 @@
 
 /* support bit1:br, bit2:wifi, bit4:wifi 2.4G */
 #define DEFAUTL_LNN_CAPBILITY 0x16
-#define DEFAUTL_LNN_STATIC_CAPABILITY 0x1FF
+#define DEFAUTL_LNN_STATIC_CAPABILITY 0xFF
 
 bool LnnHasCapability(uint32_t capability, NetCapability type)
 {
@@ -162,9 +162,6 @@ uint32_t LnnGetDefaultStaticNetCap(void)
     }
     if ((configValue & (1 << STATIC_CAP_BIT_SLE)) != 0) {
         (void)LnnSetStaticNetCap(&capability, STATIC_CAP_BIT_SLE);
-    }
-    if ((configValue & (1 << STATIC_CAP_BIT_VIRTUAL_LINK)) != 0) {
-        (void)LnnSetStaticNetCap(&capability, STATIC_CAP_BIT_VIRTUAL_LINK);
     }
     return capability;
 }

@@ -110,7 +110,6 @@ typedef struct TagLnnOpenFuncList {
     LnnGetLocalNodeInfoSafeFunc lnnGetLocalNodeInfoSafe;
     LnnGetRemoteNumInfoFunc lnnGetRemoteNumInfo;
     LnnGetRemoteNumU64InfoFunc lnnGetRemoteNumU64Info;
-    LnnGetRemoteNumU32InfoFunc lnnGetRemoteNumU32Info;
     LnnGetRemoteByteInfoFunc lnnGetRemoteByteInfo;
     LnnSetLocalStrInfoFunc lnnSetLocalStrInfo;
     LnnSetLocalNumInfoFunc lnnSetLocalNumInfo;
