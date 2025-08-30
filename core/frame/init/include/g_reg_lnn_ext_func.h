@@ -19,6 +19,7 @@
 #include <string.h>
 
 #include "auth_interface_struct.h"
+#include "auth_manager_struct.h"
 #include "auth_hichain_adapter_struct.h"
 #include "bus_center_event_struct.h"
 #include "bus_center_info_key_struct.h"
@@ -137,6 +138,12 @@ typedef int32_t (*AuthOpenConnFunc)(const AuthConnInfo *info, uint32_t requestId
 typedef void (*AuthCloseConnFunc)(AuthHandle authHandle);
 typedef int32_t (*AuthPostTransDataFunc)(AuthHandle authHandle, const AuthTransData *dataInfo);
 typedef int32_t (*LnnGetRemoteNodeInfoByIdFunc)(const char *id, IdCategory type, NodeInfo *info);
+typedef AuthManager *(*GetAuthManagerByAuthIdFunc)(int64_t authId);
+typedef int32_t (*GetLatestSessionKeyFunc)(const SessionKeyList *list, AuthLinkType type,
+    int32_t *index, SessionKey *key);
+typedef void (*DelDupAuthManagerFunc)(AuthManager *auth);
+typedef int32_t (*GetSessionKeyByIndexFunc)(const SessionKeyList *list, int32_t index,
+    AuthLinkType type, SessionKey *key);
 
 typedef MapIterator *(*LnnMapInitIteratorFunc)(Map *map);
 typedef bool (*LnnMapHasNextFunc)(MapIterator *it);
