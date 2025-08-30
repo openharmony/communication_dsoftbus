@@ -25,6 +25,7 @@
 #include "client_trans_tcp_direct_manager.h"
 #include "client_trans_udp_manager.h"
 #include "softbus_adapter_mem.h"
+#include "softbus_adapter_timer.h"
 #include "softbus_app_info.h"
 #include "softbus_def.h"
 #include "softbus_error_code.h"
@@ -845,7 +846,8 @@ int32_t ReCreateSessionServerToServer(ListNode *sessionServerInfoList)
     SessionServerInfo *infoNodeNext = NULL;
     char *tmpName = NULL;
     LIST_FOR_EACH_ENTRY_SAFE(infoNode, infoNodeNext, sessionServerInfoList, SessionServerInfo, node) {
-        int32_t ret = ServerIpcCreateSessionServer(infoNode->pkgName, infoNode->sessionName);
+        uint64_t timestamp = SoftBusGetSysTimeMs();
+        int32_t ret = ServerIpcCreateSessionServer(infoNode->pkgName, infoNode->sessionName, timestamp);
         Anonymize(infoNode->sessionName, &tmpName);
         TRANS_LOGI(TRANS_SDK, "sessionName=%{public}s, pkgName=%{public}s, ret=%{public}d",
             AnonymizeWrapper(tmpName), infoNode->pkgName, ret);

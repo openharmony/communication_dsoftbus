@@ -168,7 +168,8 @@ static int32_t AddSessionServerAndSession(const char *sessionName, int32_t chann
 
     TestGenerateCommParam(sessionParam);
     sessionParam->sessionName = sessionName;
-    int32_t ret = ClientAddSessionServer(SEC_TYPE_PLAINTEXT, g_pkgName, sessionName, &g_sessionlistener);
+    uint64_t timestamp = 0;
+    int32_t ret = ClientAddSessionServer(SEC_TYPE_PLAINTEXT, g_pkgName, sessionName, &g_sessionlistener, &timestamp);
     if (ret != SOFTBUS_OK) {
         SoftBusFree(sessionParam);
         return ret;
@@ -282,7 +283,8 @@ HWTEST_F(TransClientSessionServiceTest, TransClientSessionServiceTest02, TestSiz
 {
     int32_t ret = TransClientInit();
     EXPECT_EQ(ret,  SOFTBUS_OK);
-    ret = ClientAddSessionServer(SEC_TYPE_PLAINTEXT, g_pkgName, g_sessionName, &g_sessionlistener);
+    uint64_t timestamp = 0;
+    ret = ClientAddSessionServer(SEC_TYPE_PLAINTEXT, g_pkgName, g_sessionName, &g_sessionlistener, &timestamp);
     EXPECT_EQ(ret,  SOFTBUS_OK);
     SessionParam *sessionParam = (SessionParam*)SoftBusMalloc(sizeof(SessionParam));
     EXPECT_TRUE(sessionParam != nullptr);
@@ -330,7 +332,8 @@ HWTEST_F(TransClientSessionServiceTest, TransClientSessionServiceTest03, TestSiz
     EXPECT_TRUE(sessionParam != nullptr);
     memset_s(sessionParam, sizeof(SessionParam), 0, sizeof(SessionParam));
     GenerateCommParam(sessionParam);
-    int32_t ret = ClientAddSessionServer(SEC_TYPE_PLAINTEXT, g_pkgName, g_sessionName, &g_sessionlistener);
+    uint64_t timestamp = 0;
+    int32_t ret = ClientAddSessionServer(SEC_TYPE_PLAINTEXT, g_pkgName, g_sessionName, &g_sessionlistener, &timestamp);
     EXPECT_EQ(ret,  SOFTBUS_OK);
     ret = ClientAddSession(sessionParam, &sessionId, &isEnabled);
     EXPECT_EQ(ret,  SOFTBUS_OK);
@@ -440,11 +443,12 @@ HWTEST_F(TransClientSessionServiceTest, TransClientSessionServiceTest07, TestSiz
     ASSERT_NE(sessionParam, nullptr);
     memset_s(sessionParam, sizeof(SessionParam), 0, sizeof(SessionParam));
     GenerateCommParam(sessionParam);
+    uint64_t timestamp = 0;
 
     int32_t ret = TransClientInit();
     ASSERT_EQ(ret,  SOFTBUS_OK);
 
-    ret = ClientAddSessionServer(SEC_TYPE_PLAINTEXT, g_pkgName, g_sessionName, &g_sessionlistener);
+    ret = ClientAddSessionServer(SEC_TYPE_PLAINTEXT, g_pkgName, g_sessionName, &g_sessionlistener, &timestamp);
     ASSERT_EQ(ret, SOFTBUS_OK);
     ret = ClientAddSession(sessionParam, &sessionId, &isSessionEnabled);
     ASSERT_EQ(ret, SOFTBUS_OK);

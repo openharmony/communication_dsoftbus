@@ -901,7 +901,7 @@ HWTEST_F(TransTcpDirectP2pTest, TransGetRemoteUuidByAuthHandleTest001, TestSize.
 HWTEST_F(TransTcpDirectP2pTest, OnVerifyP2pRequestTest002, TestSize.Level1)
 {
     NiceMock<TransTcpDirectCommonInterfaceMock> TransTcpDirectP2pMock;
-    EXPECT_CALL(TransTcpDirectP2pMock, AuthMetaPostTransData).WillRepeatedly(Return(SOFTBUS_LOCK_ERR));
+    EXPECT_CALL(TransTcpDirectP2pMock, AuthMetaPostTransData).WillOnce(Return(SOFTBUS_LOCK_ERR));
     AuthHandle authHandle = { .authId = AUTH_INVALID_ID, .type = AUTH_LINK_TYPE_BLE };
     int64_t seq = 0;
     char *data = VerifyP2pPack(g_ip, g_port, g_ip, 0);
@@ -947,7 +947,7 @@ HWTEST_F(TransTcpDirectP2pTest, AddHmlTriggerTest001, TestSize.Level1)
     int64_t seq = 1;
     int32_t ret = StartHmlListener(g_localIp, &g_port, g_udid, LNN_PROTOCOL_IP);
     EXPECT_EQ(ret, SOFTBUS_OK);
-    ret = AddHmlTrigger(fd, g_ip, seq, 0, g_udid);
+    ret = AddHmlTrigger(fd, g_ip, seq, 0, nullptr);
     EXPECT_NE(SOFTBUS_OK, ret);
     ClearHmlListenerByUuid(g_uuid);
 }

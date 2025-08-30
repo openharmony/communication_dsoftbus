@@ -29,6 +29,7 @@
 #include "session_ipc_adapter.h"
 #include "softbus_access_token_adapter.h"
 #include "softbus_adapter_mem.h"
+#include "softbus_adapter_timer.h"
 #include "softbus_app_info.h"
 #include "softbus_def.h"
 #include "softbus_error_code.h"
@@ -287,11 +288,12 @@ int32_t TryDeleteEmptySessionServer(const char *pkgName, const char *sessionName
             ListDelete(&(serverNode->node));
             SoftBusFree(serverNode);
             g_clientSessionServerList->cnt--;
+            uint64_t timestamp = SoftBusGetSysTimeMs();
             UnlockClientSessionServerList();
             // calling the ipc interface by locking here may block other threads for a long time
             char *tmpName = NULL;
             Anonymize(sessionName, &tmpName);
-            ret = ServerIpcRemoveSessionServer(pkgName, sessionName);
+            ret = ServerIpcRemoveSessionServer(pkgName, sessionName, timestamp);
             if (ret != SOFTBUS_OK) {
                 TRANS_LOGE(TRANS_SDK, "remove session server failed, ret=%{public}d", ret);
                 AnonymizeFree(tmpName);
@@ -415,9 +417,9 @@ static void ShowClientSessionServer(void)
 }
 
 int32_t ClientAddSessionServer(SoftBusSecType type, const char *pkgName, const char *sessionName,
-    const ISessionListener *listener)
+    const ISessionListener *listener, uint64_t *timestamp)
 {
-    if (pkgName == NULL || sessionName == NULL || listener == NULL) {
+    if (pkgName == NULL || sessionName == NULL || listener == NULL || timestamp == NULL) {
         return SOFTBUS_INVALID_PARAM;
     }
 
@@ -427,6 +429,7 @@ int32_t ClientAddSessionServer(SoftBusSecType type, const char *pkgName, const c
         return ret;
     }
     if (SessionServerIsExist(sessionName)) {
+        *timestamp = SoftBusGetSysTimeMs();
         UnlockClientSessionServerList();
         return SOFTBUS_SERVER_NAME_REPEATED;
     }
@@ -446,6 +449,7 @@ int32_t ClientAddSessionServer(SoftBusSecType type, const char *pkgName, const c
     server->permissionState = true;
     ListAdd(&g_clientSessionServerList->list, &server->node);
     g_clientSessionServerList->cnt++;
+    *timestamp = SoftBusGetSysTimeMs();
 
     UnlockClientSessionServerList();
     char *tmpName = NULL;
@@ -1577,9 +1581,9 @@ void ClientCleanAllSessionWhenServerDeath(ListNode *sessionServerInfoList)
     TRANS_LOGI(TRANS_SDK, "client destroy session cnt=%{public}d.", destroyCnt);
 }
 
-int32_t ClientAddSocketServer(SoftBusSecType type, const char *pkgName, const char *sessionName)
+int32_t ClientAddSocketServer(SoftBusSecType type, const char *pkgName, const char *sessionName, uint64_t *timestamp)
 {
-    if (pkgName == NULL || sessionName == NULL) {
+    if (pkgName == NULL || sessionName == NULL || timestamp == NULL) {
         return SOFTBUS_INVALID_PARAM;
     }
 
@@ -1589,6 +1593,7 @@ int32_t ClientAddSocketServer(SoftBusSecType type, const char *pkgName, const ch
         return ret;
     }
     if (SocketServerIsExistAndUpdate(sessionName)) {
+        *timestamp = SoftBusGetSysTimeMs();
         UnlockClientSessionServerList();
         return SOFTBUS_SERVER_NAME_REPEATED;
     }
@@ -1608,6 +1613,7 @@ int32_t ClientAddSocketServer(SoftBusSecType type, const char *pkgName, const ch
     server->permissionState = true;
     ListAdd(&g_clientSessionServerList->list, &server->node);
     g_clientSessionServerList->cnt++;
+    *timestamp = SoftBusGetSysTimeMs();
 
     UnlockClientSessionServerList();
     char *anonymizePkgName = NULL;
@@ -3099,6 +3105,42 @@ int32_t TransSetNeedAckBySocket(int32_t socket, bool needAck)
         return SOFTBUS_TRANS_NOT_SUPPORT_TLV_HEAD;
     }
     sessionNode->needAck = needAck;
+    UnlockClientSessionServerList();
+    return SOFTBUS_OK;
+}
+
+int32_t GetLogicalBandwidth(int32_t socket, int32_t *optValue, int32_t *optValueSize)
+{
+    if (socket <= 0 || optValue == NULL || optValueSize == NULL) {
+        TRANS_LOGE(TRANS_SDK, "invalid param");
+        return SOFTBUS_INVALID_PARAM;
+    }
+
+    int32_t ret = LockClientSessionServerList();
+    if (ret != SOFTBUS_OK) {
+        TRANS_LOGE(TRANS_SDK, "lock failed");
+        return ret;
+    }
+
+    ClientSessionServer *serverNode = NULL;
+    SessionInfo *sessionNode = NULL;
+    if (GetSessionById(socket, &serverNode, &sessionNode) != SOFTBUS_OK) {
+        UnlockClientSessionServerList();
+        TRANS_LOGE(TRANS_SDK, "socket not found. socket=%{public}d", socket);
+        return SOFTBUS_TRANS_SESSION_INFO_NOT_FOUND;
+    }
+    *optValue = BANDWIDTH_BUTT;
+    if (sessionNode->routeType == BT_BR || sessionNode->routeType == BT_BLE || sessionNode->routeType == BT_SLE) {
+        *optValue = LOW_BANDWIDTH;
+    } else if (sessionNode->routeType == WIFI_STA) {
+        *optValue = MEDIUM_BANDWIDTH;
+    } else if (sessionNode->routeType == WIFI_P2P || sessionNode->routeType == WIFI_P2P_REUSE ||
+        sessionNode->routeType == WIFI_USB) {
+        *optValue = HIGH_BANDWIDTH;
+    }
+    TRANS_LOGI(TRANS_SDK, "get medium bandwidth success socket=%{public}d, routeType=%{public}d",
+        socket, sessionNode->routeType);
+    *optValueSize = sizeof(int32_t);
     UnlockClientSessionServerList();
     return SOFTBUS_OK;
 }

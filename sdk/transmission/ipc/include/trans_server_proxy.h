@@ -26,8 +26,8 @@ extern "C" {
 int32_t TransServerProxyInit(void);
 void TransServerProxyDeInit(void);
 void TransServerProxyClear(void);
-int32_t ServerIpcCreateSessionServer(const char *pkgName, const char *sessionName);
-int32_t ServerIpcRemoveSessionServer(const char *pkgName, const char *sessionName);
+int32_t ServerIpcCreateSessionServer(const char *pkgName, const char *sessionName, uint64_t timestamp);
+int32_t ServerIpcRemoveSessionServer(const char *pkgName, const char *sessionName, uint64_t timestamp);
 int32_t ServerIpcOpenSession(const SessionParam *param, TransInfo *info);
 int32_t ServerIpcOpenAuthSession(const char *sessionName, const ConnectionAddr *addrInfo);
 int32_t ServerIpcNotifyAuthSuccess(int32_t channelId, int32_t channelType);
