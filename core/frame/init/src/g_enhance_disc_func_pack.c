@@ -101,12 +101,14 @@ int32_t DiscCoapProcessDeviceInfoPacked(const NSTACKX_DeviceInfo *nstackxInfo, D
     return pfnDiscEnhanceFuncList->discCoapProcessDeviceInfo(nstackxInfo, devInfo, discCb, discCbLock);
 }
 
-int32_t DiscCoapAssembleBdataPacked(const unsigned char*capabilityData, uint32_t dataLen, char *businessData,
+int32_t DiscCoapAssembleBdataPacked(const unsigned char *capabilityData, uint32_t dataLen, char *businessData,
     uint32_t businessDataLen)
 {
     DiscEnhanceFuncList *pfnDiscEnhanceFuncList = DiscEnhanceFuncListGet();
-    int32_t ret = DiscCheckFuncPointer((void *)pfnDiscEnhanceFuncList->discCoapAssembleBdata);
-    DISC_CHECK_AND_RETURN_RET_LOGD(ret == SOFTBUS_OK, SOFTBUS_OK, DISC_COAP, "not find DiscCoapAssembleBdata");
+    if (pfnDiscEnhanceFuncList == NULL ||
+        DiscCheckFuncPointer((void *)pfnDiscEnhanceFuncList->discCoapAssembleBdata) != SOFTBUS_OK) {
+        return DiscCoapAssembleBdata(capabilityData, dataLen, businessData, businessDataLen);
+    }
     return pfnDiscEnhanceFuncList->discCoapAssembleBdata(capabilityData, dataLen, businessData, businessDataLen);
 }
 

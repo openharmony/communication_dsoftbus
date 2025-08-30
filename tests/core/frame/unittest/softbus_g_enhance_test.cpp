@@ -705,4 +705,120 @@ HWTEST_F(SoftbusGEnhanceTest, IsInWhitelistPacked023, TestSize.Level1)
     bool ret = IsInWhitelistPacked(appName);
     EXPECT_EQ(ret, true);
 }
+
+int32_t SchedulerSetBroadcastParamStub(int32_t bcId, const BroadcastParam *bcParam)
+{
+    (void)bcId;
+    (void)bcParam;
+    return SOFTBUS_OK;
+}
+ 
+int32_t InitBroadcastMgrStub(void)
+{
+    return SOFTBUS_OK;
+}
+ 
+int32_t DeInitBroadcastMgrStub(void)
+{
+    return SOFTBUS_OK;
+}
+ 
+int32_t DiscCoapProcessDeviceInfoStub(const NSTACKX_DeviceInfo *nstackxInfo, DeviceInfo *devInfo,
+    const DiscInnerCallback *discCb, SoftBusMutex *discCbLock)
+{
+    (void)nstackxInfo;
+    (void)devInfo;
+    (void)discCb;
+    (void)discCbLock;
+    return SOFTBUS_OK;
+}
+ 
+int32_t DiscCoapAssembleBdataStub(const unsigned char *capabilityData, uint32_t dataLen, char *businessData,
+    uint32_t businessDataLen)
+{
+    (void)capabilityData;
+    (void)dataLen;
+    (void)businessData;
+    (void)businessDataLen;
+    return SOFTBUS_OK;
+}
+ 
+int32_t DiscCoapAssembleCapDataStub(uint32_t capability, const char *capabilityData, uint32_t dataLen, char *outData,
+    uint32_t outLen)
+{
+    (void)capability;
+    (void)capabilityData;
+    (void)dataLen;
+    (void)outData;
+    (void)outLen;
+    return SOFTBUS_OK;
+}
+ 
+int32_t DiscFillBtypeStub(uint32_t capability, uint32_t allCap, NSTACKX_DiscoverySettings *discSet)
+{
+    (void)capability;
+    (void)allCap;
+    (void)discSet;
+    return SOFTBUS_OK;
+}
+ 
+/**
+ * @tc.name: SoftbusGEnhanceTest024
+ * @tc.desc: SoftbusGEnhanceTest function test
+ * @tc.type: FUNC
+ * @tc.require:
+ */
+HWTEST_F(SoftbusGEnhanceTest, SoftbusGEnhanceTest024, TestSize.Level1)
+{
+    DiscEnhanceFuncList *pfnDiscEnhanceFuncList = DiscEnhanceFuncListGet();
+    pfnDiscEnhanceFuncList->schedulerSetBroadcastParam = nullptr;
+    uint32_t ret = SchedulerSetBroadcastParamPacked(0, nullptr);
+    EXPECT_EQ(ret, SOFTBUS_INVALID_PARAM);
+    pfnDiscEnhanceFuncList->schedulerSetBroadcastParam = SchedulerSetBroadcastParamStub;
+    ret = SchedulerSetBroadcastParamPacked(0, nullptr);
+    EXPECT_EQ(ret, SOFTBUS_OK);
+ 
+    pfnDiscEnhanceFuncList->schedulerInitBroadcast = nullptr;
+    ret = SchedulerInitBroadcastPacked();
+    EXPECT_EQ(ret, SOFTBUS_OK);
+    pfnDiscEnhanceFuncList->schedulerInitBroadcast = InitBroadcastMgrStub;
+    ret = SchedulerInitBroadcastPacked();
+    EXPECT_EQ(ret, SOFTBUS_OK);
+ 
+    pfnDiscEnhanceFuncList->schedulerDeinitBroadcast = nullptr;
+    ret = SchedulerDeinitBroadcastPacked();
+    EXPECT_EQ(ret, SOFTBUS_OK);
+    pfnDiscEnhanceFuncList->schedulerDeinitBroadcast = DeInitBroadcastMgrStub;
+    ret = SchedulerDeinitBroadcastPacked();
+    EXPECT_EQ(ret, SOFTBUS_OK);
+ 
+    pfnDiscEnhanceFuncList->discCoapProcessDeviceInfo = nullptr;
+    ret = DiscCoapProcessDeviceInfoPacked(nullptr, nullptr, nullptr, nullptr);
+    EXPECT_EQ(ret, SOFTBUS_INVALID_PARAM);
+    pfnDiscEnhanceFuncList->discCoapProcessDeviceInfo = DiscCoapProcessDeviceInfoStub;
+    ret = DiscCoapProcessDeviceInfoPacked(nullptr, nullptr, nullptr, nullptr);
+    EXPECT_EQ(ret, SOFTBUS_OK);
+#if !defined(__G_ENHANCE_DISC_FUNC_PACK_INNER_DISC_COAP_VIRTUAL)
+    pfnDiscEnhanceFuncList->discCoapAssembleBdata = nullptr;
+    ret = DiscCoapAssembleBdataPacked(nullptr, 0, nullptr, 0);
+    EXPECT_EQ(ret, SOFTBUS_OK);
+    pfnDiscEnhanceFuncList->discCoapAssembleBdata = DiscCoapAssembleBdataStub;
+    ret = DiscCoapAssembleBdataPacked(nullptr, 0, nullptr, 0);
+    EXPECT_EQ(ret, SOFTBUS_OK);
+#ifdef DSOFTBUS_FEATURE_DISC_SHARED_COAP
+    pfnDiscEnhanceFuncList->discCoapAssembleCapData = nullptr;
+    ret = DiscCoapAssembleCapDataPacked(0, nullptr, 0, nullptr, 0);
+    EXPECT_EQ(ret, SOFTBUS_FUNC_NOT_SUPPORT);
+    pfnDiscEnhanceFuncList->discCoapAssembleCapData = DiscCoapAssembleCapDataStub;
+    ret = DiscCoapAssembleCapDataPacked(0, nullptr, 0, nullptr, 0);
+    EXPECT_EQ(ret, SOFTBUS_OK);
+#endif
+#endif
+    pfnDiscEnhanceFuncList->discFillBtype = nullptr;
+    ret = DiscFillBtypePacked(0, 0, nullptr);
+    EXPECT_EQ(ret, SOFTBUS_INVALID_PARAM);
+    pfnDiscEnhanceFuncList->discFillBtype = DiscFillBtypeStub;
+    ret = DiscFillBtypePacked(0, 0, nullptr);
+    EXPECT_EQ(ret, SOFTBUS_OK);
+}
 }
