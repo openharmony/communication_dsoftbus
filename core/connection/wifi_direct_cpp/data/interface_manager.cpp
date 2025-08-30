@@ -39,6 +39,17 @@ int InterfaceManager::ReadInterface(InterfaceInfo::InterfaceType type, const Rea
     return reader(interfaces_[static_cast<int>(type)]);
 }
 
+void InterfaceManager::RefreshAddress(InterfaceInfo::InterfaceType type)
+{
+    if (type == InterfaceInfo::InterfaceType::P2P) {
+        interfaces_[type].SetBaseMac(P2pAdapter::GetMacAddress());
+    }
+    if (type == InterfaceInfo::InterfaceType::HML) {
+        interfaces_[type].SetBaseMac(
+            WifiDirectUtils::MacArrayToString(WifiDirectUtils::GetInterfaceMacAddr(IF_NAME_HML)));
+    }
+}
+
 bool InterfaceManager::IsInterfaceAvailable(InterfaceInfo::InterfaceType type, bool forShare) const
 {
     std::shared_lock lock(lock_);
