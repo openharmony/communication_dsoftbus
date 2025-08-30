@@ -198,7 +198,7 @@ void TransProxyCheckSliceHeadTest(FuzzedDataProvider &provider)
     (void)TransProxyCheckSliceHead(&head);
 
     head.priority =
-        provider.ConsumeIntegralInRange<uint16_t>(PROXY_CHANNEL_PRORITY_MESSAGE, PROXY_CHANNEL_PRORITY_FILE);
+        provider.ConsumeIntegralInRange<uint16_t>(PROXY_CHANNEL_PRIORITY_MESSAGE, PROXY_CHANNEL_PRIORITY_FILE);
     head.sliceSeq += head.sliceNum;
     (void)TransProxyCheckSliceHead(&head);
 
@@ -432,27 +432,22 @@ void TransProxyNoSubPacketTlvProcTest(FuzzedDataProvider &provider)
 {
     int32_t channelId = provider.ConsumeIntegral<int32_t>();
     uint32_t len = provider.ConsumeIntegral<uint32_t>();
-    std::string providerData = provider.ConsumeBytesAsString(UINT8_MAX - 1);
-    char data[UINT8_MAX] = { 0 };
-    if (strcpy_s(data, UINT8_MAX, providerData.c_str()) != EOK) {
-        return;
-    }
     uint32_t newPktHeadSize = provider.ConsumeIntegral<uint32_t>();
     DataHeadTlvPacketHead pktHead;
     (void)memset_s(&pktHead, sizeof(DataHeadTlvPacketHead), 0, sizeof(DataHeadTlvPacketHead));
     FillDataHeadTlvPacketHead(provider, &pktHead);
 
-    (void)TransProxyNoSubPacketTlvProc(channelId, data, len, nullptr, newPktHeadSize);
-    (void)TransProxyNoSubPacketTlvProc(channelId, data, len, &pktHead, newPktHeadSize);
+    (void)TransProxyNoSubPacketTlvProc(channelId, len, nullptr, newPktHeadSize);
+    (void)TransProxyNoSubPacketTlvProc(channelId, len, &pktHead, newPktHeadSize);
     pktHead.magicNumber = MAGIC_NUMBER;
-    (void)TransProxyNoSubPacketTlvProc(channelId, data, len, &pktHead, newPktHeadSize);
+    (void)TransProxyNoSubPacketTlvProc(channelId, len, &pktHead, newPktHeadSize);
     pktHead.dataLen = 0;
-    (void)TransProxyNoSubPacketTlvProc(channelId, data, len, &pktHead, newPktHeadSize);
+    (void)TransProxyNoSubPacketTlvProc(channelId, len, &pktHead, newPktHeadSize);
     len = newPktHeadSize;
-    (void)TransProxyNoSubPacketTlvProc(channelId, data, len, &pktHead, newPktHeadSize);
+    (void)TransProxyNoSubPacketTlvProc(channelId, len, &pktHead, newPktHeadSize);
     pktHead.dataLen = len;
     len += newPktHeadSize;
-    (void)TransProxyNoSubPacketTlvProc(channelId, data, len, &pktHead, newPktHeadSize);
+    (void)TransProxyNoSubPacketTlvProc(channelId, len, &pktHead, newPktHeadSize);
 }
 
 void TransProxyProcDataTest(FuzzedDataProvider &provider)
@@ -583,7 +578,7 @@ void TransProxyD2DFirstSliceProcessTest(FuzzedDataProvider &provider)
     int32_t businessType = provider.ConsumeIntegral<int32_t>();
     (void)TransProxyD2DFirstSliceProcess(&processor, &head, data, len, businessType);
     head.priority =
-        provider.ConsumeIntegralInRange<uint16_t>(PROXY_CHANNEL_PRORITY_MESSAGE, PROXY_CHANNEL_PRORITY_FILE);
+        provider.ConsumeIntegralInRange<uint16_t>(PROXY_CHANNEL_PRIORITY_MESSAGE, PROXY_CHANNEL_PRIORITY_FILE);
     head.sliceNum = provider.ConsumeIntegral<uint32_t>();
     (void)TransProxyD2DFirstSliceProcess(&processor, &head, data, len, businessType);
     (void)TransProxyD2DFirstSliceProcess(nullptr, &head, data, len, businessType);

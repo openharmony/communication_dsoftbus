@@ -617,7 +617,7 @@ bool OnRefreshDeviceFoundInnerTest(const uint8_t *data, size_t size)
     return true;
 }
 
-bool OnClientPermissonChangeInnerTest(const uint8_t *data, size_t size)
+bool OnClientPermissionChangeInnerTest(const uint8_t *data, size_t size)
 {
     uint8_t *dataWithEndCharacter = TestDataSwitch(data, size);
     if (dataWithEndCharacter == nullptr) {
@@ -967,7 +967,7 @@ extern "C" int32_t LLVMFuzzerTestOneInput(const uint8_t *data, size_t size)
     OHOS::OnPublishLNNResultInnerTest(data, size);
     OHOS::OnRefreshLNNResultInnerTest(data, size);
     OHOS::OnRefreshDeviceFoundInnerTest(data, size);
-    OHOS::OnClientPermissonChangeInnerTest(data, size);
+    OHOS::OnClientPermissionChangeInnerTest(data, size);
     OHOS::OnDiscoverFailedInnerTest(data, size);
     OHOS::OnDiscoverySuccessInnerTest(data, size);
     OHOS::OnPublishSuccessInnerTest(data, size);

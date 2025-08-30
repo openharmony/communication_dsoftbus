@@ -124,9 +124,6 @@ static int32_t NotifyNormalChannelOpened(int32_t channelId, const AppInfo *appIn
             return ret;
         }
         info.peerDeviceId = buf;
-        if (LnnGetOsTypeByNetworkId(buf, &(info.osType)) != SOFTBUS_OK) {
-            TRANS_LOGE(TRANS_CTRL, "get remote osType fail, channelId=%{public}d", channelId);
-        }
         info.tokenType = appInfo->myData.tokenType;
         if (isServer && appInfo->myData.tokenType > ACCESS_TOKEN_TYPE_HAP) {
             info.peerUserId = appInfo->peerData.userId;
