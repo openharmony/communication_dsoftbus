@@ -2437,11 +2437,19 @@ int32_t ClientGetSessionNameByChannelId(int32_t channelId, int32_t channelType, 
         }
 
         LIST_FOR_EACH_ENTRY(sessionNode, &(serverNode->sessionList), SessionInfo, node) {
-            if (sessionNode->channelId == channelId && sessionNode->channelType == (ChannelType)channelType) {
-                (void)memcpy_s(sessionName, len, serverNode->sessionName, SESSION_NAME_SIZE_MAX);
+            if (sessionNode->channelId != channelId || sessionNode->channelType != (ChannelType)channelType) {
+                TRANS_LOGE(
+                    TRANS_SDK, "channelId mismatch sessionNode:%{public}d channelId:%{public}d", sessionNode->channelId, channelId);
                 UnlockClientSessionServerList();
-                return SOFTBUS_OK;
+                return SOFTBUS_INVALID_PARAM;
             }
+            if (memcpy_s(sessionName, len, serverNode->sessionName, SESSION_NAME_SIZE_MAX)!= EOK) {
+                TRANS_LOGE(TRANS_SDK, "sessionName copy failed");
+                UnlockClientSessionServerList();
+                return SOFTBUS_MEM_ERR;
+            }
+            UnlockClientSessionServerList();
+            return SOFTBUS_OK;
         }
     }
 

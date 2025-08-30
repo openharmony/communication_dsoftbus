@@ -35,7 +35,7 @@ const std::string DEVICE_KEY_SA_PROCESS_NAME[DEVICE_KEY_SA_CNT] = { "distributed
     "distributeddata" };
 #define DMS_COLLABATION_NAME_PREFIX "ohos.dtbcollab.dms"
 #define DBINDER_BUS_NAME_PREFIX "DBinder"
-#define OBJECT_STORE_DB_NAME_PERFIX "objectstoreDB"
+#define OBJECT_STORE_DB_NAME_PREFIX "objectstoreDB"
 
 static PermissionChangeCb g_permissionChangeCb = nullptr;
 
@@ -80,9 +80,9 @@ bool SoftBusCheckIsSystemApp(uint64_t tokenId, const char *sessionName)
         strncmp(sessionName, DMS_COLLABATION_NAME_PREFIX, dmsCollabPrefixLen) == 0) {
         return false;
     }
-    uint32_t objectStorePrefixLen = strlen(OBJECT_STORE_DB_NAME_PERFIX);
+    uint32_t objectStorePrefixLen = strlen(OBJECT_STORE_DB_NAME_PREFIX);
     if (strlen(sessionName) >= objectStorePrefixLen &&
-        strncmp(sessionName, OBJECT_STORE_DB_NAME_PERFIX, objectStorePrefixLen) == 0) {
+        strncmp(sessionName, OBJECT_STORE_DB_NAME_PREFIX, objectStorePrefixLen) == 0) {
             return false;
     }
     return TokenIdKit::IsSystemAppByFullTokenID(tokenId);

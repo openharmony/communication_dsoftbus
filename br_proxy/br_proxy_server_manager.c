@@ -318,7 +318,7 @@ static int32_t BrProxyServerInit(void)
         return SOFTBUS_TRANS_INIT_FAILED;
     }
     lockInited = true;
-    TRANS_LOGI(TRANS_SVC, "[br_proxy] init trans server success, channleIdLock init success");
+    TRANS_LOGI(TRANS_SVC, "[br_proxy] init trans server success, channelIdLock init success");
     return SOFTBUS_OK;
 }
 
@@ -1185,7 +1185,7 @@ static void DealWithDataRecv(ProxyBaseInfo *baseInfo, const uint8_t *data, uint3
 static void OnDataReceived(struct ProxyChannel *channel, const uint8_t *data, uint32_t dataLen)
 {
     if (channel == NULL || data == NULL || dataLen == 0 || dataLen > BR_PROXY_SEND_MAX_LEN) {
-        TRANS_LOGE(TRANS_SVC, "[br_proxy] channle or data is null or invalid dataLen:%{public}u", dataLen);
+        TRANS_LOGE(TRANS_SVC, "[br_proxy] channel or data is null or invalid dataLen:%{public}u", dataLen);
         return;
     }
     TRANS_LOGI(TRANS_SVC, "[br_proxy] data recv, requestId:%{public}u, dataLen:%{public}u",
@@ -1204,7 +1204,7 @@ static void OnDataReceived(struct ProxyChannel *channel, const uint8_t *data, ui
 static void OnDisconnected(struct ProxyChannel *channel, int32_t reason)
 {
     if (channel == NULL) {
-        TRANS_LOGE(TRANS_SVC, "[br_proxy] channle is null");
+        TRANS_LOGE(TRANS_SVC, "[br_proxy] channel is null");
         return;
     }
     char *tmpMacName = NULL;
