@@ -83,7 +83,7 @@ bool SoftBusCheckIsSystemApp(uint64_t tokenId, const char *sessionName)
     uint32_t objectStorePrefixLen = strlen(OBJECT_STORE_DB_NAME_PREFIX);
     if (strlen(sessionName) >= objectStorePrefixLen &&
         strncmp(sessionName, OBJECT_STORE_DB_NAME_PREFIX, objectStorePrefixLen) == 0) {
-            return false;
+        return false;
     }
     return TokenIdKit::IsSystemAppByFullTokenID(tokenId);
 }
