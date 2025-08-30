@@ -14,17 +14,13 @@
 import("../../../../../../dsoftbus.gni")
 libsoftbus_stream_sdk_path = "$dsoftbus_root_path/sdk/transmission/trans_channel/udp/stream/libsoftbus_stream"
 
-dstream_dep_file = "components/nstackx_enhanced/fillp/BUILD.gn"
-dstream_native_source_path = rebase_path(dstream_dep_file, "$dsoftbus_root_path")
-
-enhanced_path = get_path_info(dstream_native_source_path, "name")
-
 libsoftbus_stream_inc = [
   "$libsoftbus_stream_sdk_path/include",
   "$libsoftbus_stream_sdk_path",
 ]
 
-if (enhanced_path == "BUILD.gn") {
+if (!defined(global_parts_info) ||
+  defined(global_parts_info.communication)) {
   libsoftbus_stream_inc += [
     "$dsoftbus_root_path/components/nstackx_enhanced/fillp/include/",
     "$dsoftbus_root_path/components/nstackx_enhanced/nstackx_adapter/include/",
@@ -53,7 +49,8 @@ if (defined(ohos_lite)) {
     "//third_party/openssl/include",
     "//third_party/bounds_checking_function/include",
   ]
-  if (enhanced_path == "BUILD.gn") {
+  if (!defined(global_parts_info) ||
+    defined(global_parts_info.communication)) {
     libsoftbus_stream_deps =
         [ "$dsoftbus_root_path/components/nstackx_enhanced/fillp:FillpSo" ]
   } else {
@@ -62,12 +59,13 @@ if (defined(ohos_lite)) {
   }
   libsoftbus_stream_deps += [ "//third_party/openssl:libcrypto_shared" ]
 } else {
-  libsoftbus_stream_ext_deps += [
+  libsoftbus_stream_ext_deps = [
     "bounds_checking_function:libsec_shared",
     "cJSON:cjson",
     "openssl:libcrypto_shared",
   ]
-  if (enhanced_path == "BUILD.gn") {
+  if (!defined(global_parts_info) ||
+    defined(global_parts_info.communication)) {
     if (dsoftbus_feature_vtp == true) {
       libsoftbus_stream_src += [ "$dsoftbus_root_path/components/nstackx_enhanced/nstackx_adapter/src/softbus_fillp_inner_api.c" ]
     }

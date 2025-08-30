@@ -439,6 +439,10 @@ static int32_t ClientTransProxyProcSendMsgAck(int32_t channelId, const char *dat
             TRANS_LOGE(TRANS_SDK, "proxychannel delete dataSeqInfoList failed, channelId=%{public}d", channelId);
             return ret;
         }
+        if (sessionCallback.socketClient.OnBytesSent == NULL) {
+            TRANS_LOGE(TRANS_SDK, "OnBytesSent is null, channelId=%{public}d", channelId);
+            return SOFTBUS_INVALID_PARAM;
+        }
         sessionCallback.socketClient.OnBytesSent(socketId, dataSeq, SOFTBUS_OK);
         return SOFTBUS_OK;
     }
@@ -972,7 +976,7 @@ static int32_t ClientTransProxyNoSubPacketD2DDataProc(
                 TRANS_SDK, "dataLen=%{public}d, channelId=%{public}d, inlen=%{public}d", head.dataLen, channelId, len);
             return SOFTBUS_INVALID_DATA_HEAD;
         }
-        if (memcpy_s(&nonce, NONCE_LEN, data + offSet, NONCE_LEN) != EOK) {
+        if (memcpy_s(&nonce, sizeof(uint16_t), data + offSet, NONCE_LEN) != EOK) {
             TRANS_LOGE(TRANS_SDK, "memcpy nonce failed");
             return SOFTBUS_MEM_ERR;
         }
@@ -1154,17 +1158,18 @@ static int ClientTransProxySubPacketProc(int32_t channelId, const SliceHead *hea
         TRANS_LOGE(TRANS_SDK, "lock err");
         return SOFTBUS_LOCK_ERR;
     }
-
     ChannelSliceProcessor *channelProcessor = ClientTransProxyGetChannelSliceProcessor(channelId);
     if (channelProcessor == NULL) {
         SoftBusMutexUnlock(&g_channelSliceProcessorList->lock);
         return SOFTBUS_TRANS_GET_CLIENT_PROXY_NULL;
     }
-
-    int ret;
     int32_t index = head->priority;
-    TRANS_CHECK_AND_RETURN_RET_LOGE(index >= PROXY_CHANNEL_PRORITY_MESSAGE  && index < PROXY_CHANNEL_PRORITY_BUTT,
-        SOFTBUS_INVALID_PARAM, TRANS_SDK, "invalid index=%{public}d", index);
+    if (index < PROXY_CHANNEL_PRORITY_MESSAGE || index >= PROXY_CHANNEL_PRORITY_BUTT) {
+        TRANS_LOGE(TRANS_SDK, "invalid index=%{public}d", index);
+        SoftBusMutexUnlock(&g_channelSliceProcessorList->lock);
+        return SOFTBUS_INVALID_PARAM;
+    }
+    int ret;
     SliceProcessor *processor = &(channelProcessor->processor[index]);
     if (head->sliceSeq == 0) {
         ret = ClientTransProxyFirstSliceProcess(processor, head, data, len, channelId);

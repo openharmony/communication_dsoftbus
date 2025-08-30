@@ -128,10 +128,15 @@ bool CreateSessionServerFuzzTest(const uint8_t *data, size_t size)
         return false;
     }
     sessionName[INPUT_NAME_SIZE_MAX - 1] = '\0';
+    uint64_t timestamp = 0;
+    DataGenerator::Write(data, size);
+    GenerateUint64(timestamp);
+    DataGenerator::Clear();
 
     MessageParcel datas;
     datas.WriteCString(pkgName);
     datas.WriteCString(sessionName);
+    datas.WriteUint64(timestamp);
     MessageParcel reply;
     sptr<OHOS::SoftBusServerStub> SoftBusServer = new OHOS::SoftBusServer(SOFTBUS_SERVER_SA_ID, true);
     if (SoftBusServer == nullptr) {
@@ -161,10 +166,16 @@ bool RemoveSessionServerFuzzTest(const uint8_t *data, size_t size)
         return false;
     }
     sessionName[INPUT_NAME_SIZE_MAX - 1] = '\0';
+    uint64_t timestamp = 0;
+    DataGenerator::Write(data, size);
+    GenerateUint64(timestamp);
+    DataGenerator::Clear();
 
     MessageParcel datas;
     datas.WriteCString(pkgName);
     datas.WriteCString(sessionName);
+    datas.WriteUint64(timestamp);
+
     MessageParcel reply;
     sptr<OHOS::SoftBusServerStub> SoftBusServer = new OHOS::SoftBusServer(SOFTBUS_SERVER_SA_ID, true);
     if (SoftBusServer == nullptr) {
