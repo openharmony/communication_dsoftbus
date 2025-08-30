@@ -50,7 +50,7 @@ SoftBusClientStub::SoftBusClientStub()
     memberFuncMap_[CLIENT_ON_PUBLISH_LNN_RESULT] = &SoftBusClientStub::OnPublishLNNResultInner;
     memberFuncMap_[CLIENT_ON_REFRESH_LNN_RESULT] = &SoftBusClientStub::OnRefreshLNNResultInner;
     memberFuncMap_[CLIENT_ON_REFRESH_DEVICE_FOUND] = &SoftBusClientStub::OnRefreshDeviceFoundInner;
-    memberFuncMap_[CLIENT_ON_PERMISSION_CHANGE] = &SoftBusClientStub::OnClientPermissonChangeInner;
+    memberFuncMap_[CLIENT_ON_PERMISSION_CHANGE] = &SoftBusClientStub::OnClientPermissionChangeInner;
     memberFuncMap_[CLIENT_SET_CHANNEL_INFO] = &SoftBusClientStub::SetChannelInfoInner;
     memberFuncMap_[CLIENT_ON_DATA_LEVEL_CHANGED] = &SoftBusClientStub::OnDataLevelChangedInner;
     memberFuncMap_[CLIENT_ON_RANGE_RESULT] = &SoftBusClientStub::OnMsdpRangeResultInner;
@@ -86,7 +86,7 @@ int32_t SoftBusClientStub::OnRemoteRequest(uint32_t code,
     return IPCObjectStub::OnRemoteRequest(code, data, reply, option);
 }
 
-int32_t SoftBusClientStub::OnClientPermissonChangeInner(MessageParcel &data, MessageParcel &reply)
+int32_t SoftBusClientStub::OnClientPermissionChangeInner(MessageParcel &data, MessageParcel &reply)
 {
     int32_t state;
     COMM_CHECK_AND_RETURN_RET_LOGE(

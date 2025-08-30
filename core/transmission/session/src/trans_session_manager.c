@@ -407,7 +407,7 @@ static int32_t TransListCopy(ListNode *sessionServerList)
         return SOFTBUS_LOCK_ERR;
     }
     LIST_FOR_EACH_ENTRY_SAFE(pos, tmp, &g_sessionServerList->list, SessionServer, node) {
-        SessionServer *newPos = (SessionServer *)SoftBusMalloc(sizeof(SessionServer));
+        SessionServer *newPos = (SessionServer *)SoftBusCalloc(sizeof(SessionServer));
         if (newPos == NULL) {
             TransListDelete(sessionServerList);
             TRANS_LOGE(TRANS_CTRL, "SoftBusMalloc failed");

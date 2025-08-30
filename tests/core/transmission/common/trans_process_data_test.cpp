@@ -247,7 +247,7 @@ HWTEST_F(TransProcessDataTest, TransProcessDataTest007, TestSize.Level1)
     ret = TransProxyFirstSliceProcess(processor, head, nullptr, len, supportTlv);
     EXPECT_EQ(SOFTBUS_INVALID_PARAM, ret);
 
-    head->priority = PROXY_CHANNEL_PRORITY_MESSAGE;
+    head->priority = PROXY_CHANNEL_PRIORITY_MESSAGE;
     head->sliceNum = -1; // test value
     ret = TransProxyFirstSliceProcess(processor, head, data, len, supportTlv);
     EXPECT_EQ(SOFTBUS_INVALID_DATA_HEAD, ret);
@@ -348,11 +348,10 @@ HWTEST_F(TransProcessDataTest, TransProcessDataTest009, TestSize.Level1)
 HWTEST_F(TransProcessDataTest, TransProcessDataTest010, TestSize.Level1)
 {
     int32_t channelId = TEST_CHANNEL_ID;
-    const char *data = "121212"; // test value
     uint32_t len = 1;
     uint32_t newPktHeadSize = 1;
 
-    int32_t ret = TransProxyNoSubPacketTlvProc(channelId, data, len, nullptr, newPktHeadSize);
+    int32_t ret = TransProxyNoSubPacketTlvProc(channelId, len, nullptr, newPktHeadSize);
     EXPECT_EQ(SOFTBUS_INVALID_PARAM, ret);
 }
 
@@ -777,22 +776,22 @@ HWTEST_F(TransProcessDataTest, TransProxyD2DFirstSliceProcessTest001, TestSize.L
     ret = TransProxyD2DFirstSliceProcess(&sliceProcessor, &head, nullptr, len, businessType);
     EXPECT_EQ(SOFTBUS_INVALID_PARAM, ret);
 
-    head.priority = PROXY_CHANNEL_PRORITY_BYTES;
+    head.priority = PROXY_CHANNEL_PRIORITY_BYTES;
     businessType = BUSINESS_TYPE_D2D_VOICE;
     ret = TransProxyD2DFirstSliceProcess(&sliceProcessor, &head, data, len, businessType);
     EXPECT_EQ(SOFTBUS_OK, ret);
 
-    head.priority = PROXY_CHANNEL_PRORITY_MESSAGE;
+    head.priority = PROXY_CHANNEL_PRIORITY_MESSAGE;
     ret = TransProxyD2DFirstSliceProcess(&sliceProcessor, &head, data, len, businessType);
     EXPECT_EQ(SOFTBUS_OK, ret);
 
     head.sliceNum = -1;
-    head.priority = PROXY_CHANNEL_PRORITY_MESSAGE;
+    head.priority = PROXY_CHANNEL_PRIORITY_MESSAGE;
     ret = TransProxyD2DFirstSliceProcess(&sliceProcessor, &head, data, len, businessType);
     EXPECT_EQ(SOFTBUS_INVALID_DATA_HEAD, ret);
 
     head.sliceNum = 1;
-    head.priority = PROXY_CHANNEL_PRORITY_MESSAGE;
+    head.priority = PROXY_CHANNEL_PRIORITY_MESSAGE;
     ret = TransProxyD2DFirstSliceProcess(&sliceProcessor, &head, data, len, businessType);
     EXPECT_EQ(SOFTBUS_OK, ret);
     if (sliceProcessor.data != nullptr) {

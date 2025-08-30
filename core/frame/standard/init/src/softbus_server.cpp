@@ -118,7 +118,7 @@ int32_t SoftBusServer::OpenSession(const SessionParam *param, TransInfo *info)
 
 static bool IsNcmAddrType(ConnectionAddrType addrType)
 {
-    return (addrType == CONNECTION_ADDR_NCM) ? true : false;
+    return addrType == CONNECTION_ADDR_NCM;
 }
 
 int32_t SoftBusServer::OpenAuthSession(const char *sessionName, const ConnectionAddr *addrInfo)
