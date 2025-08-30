@@ -32,6 +32,7 @@ public:
 
     int UpdateInterface(InterfaceInfo::InterfaceType type, const Updater &updater);
     int ReadInterface(InterfaceInfo::InterfaceType type, const Reader &reader);
+    void RefreshAddress(InterfaceInfo::InterfaceType type);
 
     bool IsInterfaceAvailable(InterfaceInfo::InterfaceType type, bool forShare) const;
 
