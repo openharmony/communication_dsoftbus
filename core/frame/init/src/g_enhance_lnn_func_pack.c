@@ -1030,6 +1030,16 @@ int32_t LnnInitMetaNodeExtLedgerPacked(void)
     return pfnLnnEnhanceFuncList->lnnInitMetaNodeExtLedger();
 }
 
+void LnnDeinitMetaNodeExtLedgerPacked(void)
+{
+    LnnEnhanceFuncList *pfnLnnEnhanceFuncList = LnnEnhanceFuncListGet();
+    if (pfnLnnEnhanceFuncList == NULL ||
+        LnnCheckFuncPointer((void *)pfnLnnEnhanceFuncList->lnnDeinitMetaNodeExtLedger) != SOFTBUS_OK) {
+        return;
+    }
+    return pfnLnnEnhanceFuncList->lnnDeinitMetaNodeExtLedger();
+}
+
 bool IsSupportLpFeaturePacked(void)
 {
     LnnEnhanceFuncList *pfnLnnEnhanceFuncList = LnnEnhanceFuncListGet();
@@ -1476,6 +1486,16 @@ int32_t LnnRetrieveDeviceDataPacked(LnnDataType dataType, char **data, uint32_t 
     return pfnLnnEnhanceFuncList->lnnRetrieveDeviceData(dataType, data, dataLen);
 }
 
+int32_t LnnSaveDeviceDataPacked(const char *data, LnnDataType dataType)
+{
+    LnnEnhanceFuncList *pfnLnnEnhanceFuncList = LnnEnhanceFuncListGet();
+    if (pfnLnnEnhanceFuncList == NULL ||
+        LnnCheckFuncPointer((void *)pfnLnnEnhanceFuncList->lnnSaveDeviceData) != SOFTBUS_OK) {
+        return SOFTBUS_NOT_IMPLEMENT;
+    }
+    return pfnLnnEnhanceFuncList->lnnSaveDeviceData(data, dataType);
+}
+
 int32_t LnnVirtualLinkInitPacked(void)
 {
     LnnEnhanceFuncList *pfnLnnEnhanceFuncList = LnnEnhanceFuncListGet();
@@ -1651,13 +1671,4 @@ void CheckNeedCloudSyncOfflinePacked(DiscoveryType type)
         return;
     }
     pfnLnnEnhanceFuncList->checkNeedCloudSyncOffline(type);
-}
-
-int32_t LnnSaveDeviceDataPacked(const char *data, LnnDataType dataType)
-{
-    LnnEnhanceFuncList *pfnLnnEnhanceFuncList = LnnEnhanceFuncListGet();
-    if (LnnCheckFuncPointer((void *)pfnLnnEnhanceFuncList->lnnSaveDeviceData) != SOFTBUS_OK) {
-        return SOFTBUS_NOT_IMPLEMENT;
-    }
-    return pfnLnnEnhanceFuncList->lnnSaveDeviceData(data, dataType);
 }

@@ -33,6 +33,7 @@
 #include "lnn_physical_subnet_manager_struct.h"
 #include "lnn_decision_db_struct.h"
 #include "lnn_feature_capability_struct.h"
+#include "lnn_lane_link_struct.h"
 #include "lnn_local_net_ledger_struct.h"
 #include "lnn_file_utils_struct.h"
 #include "lnn_lane_interface_struct.h"
@@ -127,7 +128,6 @@ typedef int32_t (*LnnCreateDataFunc)(Map *map, uint32_t key, const void *value, 
 typedef void (*LnnDeleteDataFunc)(Map *map, uint32_t key);
 typedef int32_t (*LnnDeleteDevInfoSyncToDBFunc)(const char *udid, int64_t accountId);
 typedef int32_t (*SoftBusGetCurrentGroupFunc)(SoftBusWifiP2pGroupInfo *groupInfo);
-typedef int32_t (*SoftBusGetHotspotConfigFunc)(int32_t *apChannel);
 typedef uint64_t (*LnnGetSysTimeMsFunc)(void);
 typedef int32_t (*LnnGetRemoteStrInfoFunc)(const char *networkId, InfoKey key, char *info, uint32_t len);
 typedef int32_t (*AuthGetHmlConnInfoFunc)(const char *uuid, AuthConnInfo *connInfo, bool isMeta);
@@ -343,8 +343,6 @@ typedef void (*LnnUpdateNodeBleMacFunc)(const char *networkId, char *bleMac, uin
 typedef int32_t (*HandleForceDownWifiDirectTransFunc)(const char *udidhashStr, LinkConflictType conflictType);
 
 typedef LinkConflictType (*GetConflictTypeWithErrcodeFunc)(int32_t conflictErrcode);
-typedef int32_t (*HandleForceDownVirtualLinkFunc)(void);
-typedef bool (*CheckVirtualLinkOnlyFunc)(void);
 typedef LnnLaneManager* (*GetLaneManagerFunc)(void);
 typedef void (*AddChannelStatisticsInfoFunc)(int32_t channelId, int32_t channelType);
 typedef int32_t (*AddLinkConflictInfoFunc)(const LinkConflictInfo *inputInfo);
@@ -364,6 +362,10 @@ typedef int32_t (*GetAllSupportReuseBandWidthFunc)(const char *peerNetworkId, La
 typedef int32_t (*FindLaneResourceByLinkTypeFunc)(const char *peerUdid, LaneLinkType type, LaneResource *resource);
 typedef bool (*LnnIsNeedInterceptBroadcastFunc)(bool disableGlass);
 typedef int32_t (*CheckLnnPermissionFunc)(const char *interfaceName, const char *processName);
+
+typedef int32_t (*HandleForceDownVirtualLinkFunc)(void);
+typedef bool (*CheckVirtualLinkOnlyFunc)(void);
+typedef int32_t (*SoftBusGetHotspotConfigFunc)(int32_t *apChannel);
 
 #ifdef __cplusplus
 }
