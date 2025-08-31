@@ -375,11 +375,14 @@ HWTEST_F(SoftBusTlvUtilsTest, TlvUtilsGetTlvMemberWithBufferTest, TestSize.Level
     EXPECT_EQ(ret, SOFTBUS_OK);
     EXPECT_EQ(memcmp(value1, mac, sizeof(mac)), 0);
 
-    uint8_t name[16]; // 16: max name len
+    uint8_t name[16] = {}; // 16: max name len
     uint32_t nameSize = sizeof(name);
     ret = GetTlvMemberWithEstimatedBuffer(obj, type2, name, &nameSize);
     EXPECT_EQ(ret, SOFTBUS_OK);
-    EXPECT_EQ(memcmp(value2, name, sizeof(name)), 0);
+    for (uint32_t i = 0; i < nameSize; i++) {
+        GTEST_LOG_(INFO) << "name=" << name[i];
+    }
+    EXPECT_EQ(memcmp(value2, name, nameSize), 0);
 
     uint32_t empty = 0;
     uint8_t emptyBuf[16]; // 16: not use
