@@ -62,11 +62,6 @@ void LnnSetUnlockState(void)
     return GetAuthLaneMockInterface()->LnnSetUnlockState();
 }
 
-int32_t SoftbusGetConfig(ConfigType type, unsigned char *val, uint32_t len)
-{
-    return GetAuthLaneMockInterface()->SoftbusGetConfig(type, val, len);
-}
-
 int32_t LnnSetLocalStrInfo(InfoKey key, const char *info)
 {
     return GetAuthLaneMockInterface()->LnnSetLocalStrInfo(key, info);
@@ -209,11 +204,6 @@ void LnnNotifyAllTypeOffline(ConnectionAddrType type)
     return GetAuthLaneMockInterface()->LnnNotifyAllTypeOffline(type);
 }
 
-int32_t SoftBusGetTime(SoftBusSysTime *sysTime)
-{
-    return GetAuthLaneMockInterface()->SoftBusGetTime(sysTime);
-}
-
 void LnnNotifyLeaveResult(const char *networkId, int32_t retCode)
 {
     return GetAuthLaneMockInterface()->LnnNotifyLeaveResult(networkId, retCode);
@@ -227,17 +217,6 @@ int32_t LnnGetAddrTypeByIfName(const char *ifName, ConnectionAddrType *type)
 int32_t LnnSendNotTrustedInfo(const NotTrustedDelayInfo *info, uint32_t num, LnnSyncInfoMsgComplete complete)
 {
     return GetAuthLaneMockInterface()->LnnSendNotTrustedInfo(info, num, complete);
-}
-
-int32_t LnnAsyncCallbackDelayHelper(
-    SoftBusLooper *looper, LnnAsyncCallbackFunc callback, void *para, uint64_t delayMillis)
-{
-    return GetAuthLaneMockInterface()->LnnAsyncCallbackDelayHelper(looper, callback, para, delayMillis);
-}
-
-SoftBusLooper *GetLooper(int32_t looper)
-{
-    return GetAuthLaneMockInterface()->GetLooper(looper);
 }
 
 int32_t ConnDisconnectDeviceAllConn(const ConnectOption *option)
@@ -533,11 +512,6 @@ void LnnDeinitNetworkInfo(void)
 void LnnDeinitDevicename(void)
 {
     return GetAuthLaneMockInterface()->LnnDeinitDevicename();
-}
-
-const NodeInfo *LnnGetLocalNodeInfo(void)
-{
-    return GetAuthLaneMockInterface()->LnnGetLocalNodeInfo();
 }
 
 void LnnRemoveNode(const char *udid)
