@@ -452,6 +452,7 @@ void NSTACKX_ThreadDeinit(void)
     }
     g_nstackThreadInitState = NSTACKX_INIT_STATE_START;
     (void)PthreadMutexUnlock(&g_threadInitLock);
+    DFINDER_LOGI(TAG, "nstack deinit thread success");
 }
 
 #if !defined(DFINDER_USE_MINI_NSTACKX) && !defined(DFINDER_ENABLE_COAP_LOG)
