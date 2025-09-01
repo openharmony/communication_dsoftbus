@@ -1529,6 +1529,43 @@ uint32_t GenUkSeq(void)
     return seq;
 }
 
+static int32_t CheckAclWithLocalUdid(const AuthACLInfo *oldAcl, AuthACLInfo *newAcl)
+{
+    if (oldAcl == NULL || newAcl == NULL) {
+        AUTH_LOGE(AUTH_CONN, "acl info is invalid param");
+        return SOFTBUS_INVALID_PARAM;
+    }
+    char localUdid[UDID_BUF_LEN] = { 0 };
+
+    if (LnnGetLocalStrInfo(STRING_KEY_DEV_UDID, localUdid, UDID_BUF_LEN) != SOFTBUS_OK) {
+        AUTH_LOGE(AUTH_CONN, "get local udid fail");
+        return SOFTBUS_NETWORK_GET_LOCAL_NODE_INFO_ERR;
+    }
+    if (strcmp(localUdid, oldAcl->sinkUdid) == 0) {
+        if (memcpy_s(newAcl, sizeof(AuthACLInfo), oldAcl, sizeof(AuthACLInfo)) != EOK) {
+            AUTH_LOGE(AUTH_CONN, "memcpy_s uknego info fail");
+            return SOFTBUS_MEM_ERR;
+        }
+        newAcl->isServer = false;
+        return SOFTBUS_OK;
+    } else if (strcmp(localUdid, oldAcl->sourceUdid) == 0) {
+        if (strcpy_s(newAcl->sourceUdid, UDID_BUF_LEN, oldAcl->sinkUdid) != EOK ||
+            strcpy_s(newAcl->sinkUdid, UDID_BUF_LEN, oldAcl->sourceUdid) != EOK ||
+            strcpy_s(newAcl->sourceAccountId, ACCOUNT_ID_BUF_LEN, oldAcl->sinkAccountId) != EOK ||
+            strcpy_s(newAcl->sinkAccountId, ACCOUNT_ID_BUF_LEN, oldAcl->sourceAccountId) != EOK) {
+            AUTH_LOGE(AUTH_CONN, "copy acl info fail");
+            return SOFTBUS_STRCPY_ERR;
+        }
+        newAcl->sourceUserId = oldAcl->sinkUserId;
+        newAcl->sinkUserId = oldAcl->sourceUserId;
+        newAcl->sourceTokenId = oldAcl->sinkTokenId;
+        newAcl->sinkTokenId = oldAcl->sourceTokenId;
+        newAcl->isServer = false;
+        return SOFTBUS_OK;
+    }
+    return SOFTBUS_AUTH_NOT_FIND_LARGER_UDID;
+}
+
 int32_t AuthGenUkIdByAclInfo(const AuthACLInfo *acl, uint32_t requestId, const AuthGenUkCallback *genCb)
 {
     if (acl == NULL || genCb == NULL) {
@@ -1538,12 +1575,12 @@ int32_t AuthGenUkIdByAclInfo(const AuthACLInfo *acl, uint32_t requestId, const A
     char networkId[NETWORK_ID_BUF_LEN] = { 0 };
     AuthACLInfo info;
 
-    if (memcpy_s(&info, sizeof(AuthACLInfo), (const uint8_t *)acl, sizeof(AuthACLInfo)) != EOK) {
-        AUTH_LOGE(AUTH_CONN, "memcpy_s uknego info fail");
-        return SOFTBUS_MEM_ERR;
+    int32_t ret = CheckAclWithLocalUdid(acl, &info);
+    if (ret != SOFTBUS_OK) {
+        AUTH_LOGE(AUTH_CONN, "check acl with local udid fail");
+        return ret;
     }
-    info.isServer = (!info.isServer);
-    int32_t ret = LnnGetNetworkIdByUdid(info.sourceUdid, networkId, sizeof(networkId));
+    ret = LnnGetNetworkIdByUdid(info.sourceUdid, networkId, sizeof(networkId));
     if (ret != SOFTBUS_OK) {
         AUTH_LOGE(AUTH_CONN, "get networkId by udid fail");
         return ret;
