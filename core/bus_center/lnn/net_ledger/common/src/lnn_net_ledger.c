@@ -246,6 +246,23 @@ static void LnnSetLocalFeature(void)
     }
 }
 
+static void UpdateStaticFeature(NodeInfo *info)
+{
+    uint64_t feature = 0;
+    int32_t ret = SOFTBUS_OK;
+    if (LnnGetLocalNumU64Info(NUM_KEY_FEATURE_CAPA, &feature) != SOFTBUS_OK) {
+        LNN_LOGE(LNN_LEDGER, "get feature fail");
+        return;
+    }
+    if (IsFeatureSupport(info->feature, BIT_FL_CAPABILITY) &&
+        LnnSetFeatureCapability(&feature, BIT_FL_CAPABILITY) == SOFTBUS_OK) {
+        ret = LnnSetLocalNum64Info(NUM_KEY_FEATURE_CAPA, feature);
+    }
+    if (ret != SOFTBUS_OK) {
+        LNN_LOGE(LNN_LEDGER, "set localFeatureCap failed, ret=%{public}d.", ret);
+    }
+}
+
 static void ProcessLocalDeviceInfo(void)
 {
     g_isRestore = true;
@@ -253,6 +270,7 @@ static void ProcessLocalDeviceInfo(void)
     (void)memset_s(&info, sizeof(NodeInfo), 0, sizeof(NodeInfo));
     (void)LnnGetLocalDevInfoPacked(&info);
     LnnDumpNodeInfo(&info, "load local deviceInfo success");
+    UpdateStaticFeature(&info);
     if (IsBleDirectlyOnlineFactorChange(&info)) {
         info.stateVersion++;
         if (info.stateVersion > MAX_STATE_VERSION) {
