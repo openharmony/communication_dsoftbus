@@ -461,8 +461,10 @@ int32_t DecryptAndAddSinkSessionKey(const cJSON *msg, AppInfo *appInfo)
             uint32_t decDataLen = SESSION_KEY_LENGTH;
             if (AuthDecryptByUkId(appInfo->myData.userKeyId, (uint8_t *)decodeEncryptKey, ENCRYPT_KEY_LENGTH,
                 (uint8_t *)appInfo->sinkSessionKey, &decDataLen) != SOFTBUS_OK) {
-                TRANS_LOGE(
-                    TRANS_CTRL, "srv process recv data: decrypt failed. ukid=%{public}d", appInfo->myData.userKeyId);
+                uint32_t requestId = AuthGenRequestId();
+                (void)AuthGenUkIdByAclInfo(&aclInfo, requestId, &authGenUkCallback);
+                TRANS_LOGE(TRANS_CTRL, "srv process recv data: decrypt failed. ukid=%{public}d, requestId=%{public}u",
+                    appInfo->myData.userKeyId, requestId);
                 return SOFTBUS_DECRYPT_ERR;
             }
             return SOFTBUS_OK;
