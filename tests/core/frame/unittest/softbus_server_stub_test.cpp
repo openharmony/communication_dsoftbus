@@ -290,11 +290,18 @@ HWTEST_F(SoftbusServerStubTest, SoftbusServerStubTest009, TestSize.Level1)
     ASSERT_NE(nullptr, softBusServer);
     NiceMock<SoftbusServerStubTestInterfaceMock> softbusServerStubMock;
     char test[10] = "test";
+    uint64_t timestamp = 1;
     MessageParcel datas;
     MessageParcel reply;
 
     int32_t ret = softBusServer->CreateSessionServerInner(datas, reply);
     EXPECT_EQ(SOFTBUS_TRANS_PROXY_READCSTRING_FAILED, ret);
+
+    datas.WriteCString(test);
+    datas.WriteCString(test);
+    datas.WriteUint64(timestamp);
+    ret = softBusServer->CreateSessionServerInner(datas, reply);
+    EXPECT_EQ(SOFTBUS_OK, ret);
 
     datas.WriteCString(test);
     datas.WriteCString(test);

@@ -16,15 +16,14 @@
 #include "softbusproxychannelmanagermock_fuzzer.h"
 
 #include <cstddef>
-#include <fuzzer/FuzzedDataProvider.h>
-#include <vector>
 
 #include "gtest/gtest.h"
 
 namespace OHOS {
-void TransRunAllTest(FuzzedDataProvider &provider)
+void TransRunAllTest(const uint8_t *data, size_t size)
 {
-    (void)provider;
+    (void)data;
+    (void)size;
     (void)RUN_ALL_TESTS();
 }
 } // namespace OHOS
@@ -37,8 +36,8 @@ extern "C" int32_t LLVMFuzzerTestOneInput(const uint8_t *data, size_t size)
 
     if (isFirst) {
         testing::InitGoogleTest();
-        FuzzedDataProvider provider(data, size);
-        OHOS::TransRunAllTest(provider);
+        testing::GTEST_FLAG(filter) = "*Fuzz";
+        OHOS::TransRunAllTest(data, size);
         isFirst = false;
     }
 

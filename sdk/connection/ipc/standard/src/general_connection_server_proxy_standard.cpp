@@ -66,19 +66,22 @@ int32_t ConnectionServerProxy::SoftbusRegisterService(const char *clientPkgName,
     return SOFTBUS_OK;
 }
 
-int32_t ConnectionServerProxy::CreateSessionServer(const char *pkgName, const char *sessionName)
+int32_t ConnectionServerProxy::CreateSessionServer(const char *pkgName, const char *sessionName, uint64_t timestamp)
 {
     (void)pkgName;
     (void)sessionName;
+    (void)timestamp;
     return SOFTBUS_OK;
 }
 
-int32_t ConnectionServerProxy::RemoveSessionServer(const char *pkgName, const char *sessionName)
+int32_t ConnectionServerProxy::RemoveSessionServer(const char *pkgName, const char *sessionName, uint64_t timestamp)
 {
     (void)pkgName;
     (void)sessionName;
+    (void)timestamp;
     return SOFTBUS_OK;
 }
+
 
 int32_t ConnectionServerProxy::OpenSession(const SessionParam *param, TransInfo *info)
 {

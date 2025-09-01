@@ -97,15 +97,17 @@ int32_t SoftBusServer::SoftbusRegisterService(const char *clientPkgName, const s
     return SOFTBUS_OK;
 }
 
-int32_t SoftBusServer::CreateSessionServer(const char *pkgName, const char *sessionName)
+int32_t SoftBusServer::CreateSessionServer(const char *pkgName, const char *sessionName, uint64_t timestamp)
 {
+    (void)timestamp;
     pid_t callingUid = OHOS::IPCSkeleton::GetCallingUid();
     pid_t callingPid = OHOS::IPCSkeleton::GetCallingPid();
     return TransCreateSessionServer(pkgName, sessionName, (int32_t)callingUid, (int32_t)callingPid);
 }
 
-int32_t SoftBusServer::RemoveSessionServer(const char *pkgName, const char *sessionName)
+int32_t SoftBusServer::RemoveSessionServer(const char *pkgName, const char *sessionName, uint64_t timestamp)
 {
+    (void)timestamp;
     return TransRemoveSessionServer(pkgName, sessionName);
 }
 
