@@ -681,7 +681,7 @@ int32_t DelScenario(const char *localMac, const char *peerMac, int32_t localPid,
 }
 
 
-int32_t ScenarioManagerGetInstance()
+ScenarioManager *ScenarioManagerGetInstance()
 {
     static ScenarioManager manager;
     if (g_manager == NULL) {
@@ -690,7 +690,7 @@ int32_t ScenarioManagerGetInstance()
         g_manager = &manager;
     }
     TRANS_LOGI(TRANS_CTRL, "creat g_manager success!");
-    return SOFTBUS_OK;
+    return g_manager;
 }
 
 void ScenarioManagerdestroyInstance()

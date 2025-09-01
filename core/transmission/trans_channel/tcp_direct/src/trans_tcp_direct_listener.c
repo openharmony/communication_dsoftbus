@@ -41,7 +41,7 @@
 #include "wifi_direct_manager_struct.h"
 #include "wifi_direct_manager.h"
 
-#define ID_OFFSET (0xABAB0000)
+#define ID_OFFSET (1)
 #define OHOS_TYPE_UNKNOWN (-1)
 #define OH_OS_TYPE 10
 #define HO_OS_TYPE 11

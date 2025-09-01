@@ -31,8 +31,8 @@ public:
     virtual int32_t SoftbusRegisterService(const char *clientPkgName, const sptr<IRemoteObject> &object) = 0;
     virtual int32_t RegisterBrProxyService(const char *clientPkgName, const sptr<IRemoteObject>& object);
 
-    virtual int32_t CreateSessionServer(const char *pkgName, const char *sessionName) = 0;
-    virtual int32_t RemoveSessionServer(const char *pkgName, const char *sessionName) = 0;
+    virtual int32_t CreateSessionServer(const char *pkgName, const char *sessionName, uint64_t timestamp) = 0;
+    virtual int32_t RemoveSessionServer(const char *pkgName, const char *sessionName, uint64_t timestamp) = 0;
     virtual int32_t OpenSession(const SessionParam *param, TransInfo *info) = 0;
     virtual int32_t OpenAuthSession(const char *sessionName, const ConnectionAddr *addrInfo) = 0;
     virtual int32_t NotifyAuthSuccess(int32_t channelId, int32_t channelType) = 0;

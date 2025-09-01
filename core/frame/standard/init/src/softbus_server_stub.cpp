@@ -458,6 +458,20 @@ static int32_t TransCheckSystemAppList(pid_t callingUid)
 }
 #endif
 
+static int32_t SoftBusCheckTimestamp(MessageParcel &data, const char *sessionName)
+{
+    uint64_t timestamp = 0;
+    if (!data.ReadUint64(timestamp)) {
+        COMM_LOGE(COMM_SVC, "CreateSessionServerInner read timestamp failed!");
+        return SOFTBUS_TRANS_PROXY_READUINT_FAILED;
+    }
+    int32_t ret = CheckAndUpdateTimeBySessionName(sessionName, timestamp);
+    if (ret == SOFTBUS_TRANS_SESSION_NAME_NO_EXIST || ret == SOFTBUS_OK) {
+        return SOFTBUS_OK;
+    }
+    return SOFTBUS_TRANS_SESSION_TIME_NOT_EQUAL;
+}
+
 int32_t SoftBusServerStub::CreateSessionServerInner(MessageParcel &data, MessageParcel &reply)
 {
     COMM_LOGD(COMM_SVC, "enter");
@@ -502,7 +516,8 @@ int32_t SoftBusServerStub::CreateSessionServerInner(MessageParcel &data, Message
     }
     sessionName = strName.c_str();
 #endif
-    retReply = CreateSessionServer(pkgName, sessionName);
+    (void)SoftBusCheckTimestamp(data, sessionName);
+    retReply = CreateSessionServer(pkgName, sessionName, 0);
 EXIT:
     if (!reply.WriteInt32(retReply)) {
         COMM_LOGE(COMM_SVC, "CreateSessionServerInner write reply failed!");
@@ -543,7 +558,11 @@ int32_t SoftBusServerStub::RemoveSessionServerInner(MessageParcel &data, Message
         COMM_LOGE(COMM_SVC, "Check Uid and Pid failed!");
         return SOFTBUS_TRANS_CHECK_PID_ERROR;
     }
-    retReply = RemoveSessionServer(pkgName, sessionName);
+    if (SoftBusCheckTimestamp(data, sessionName) != SOFTBUS_OK) {
+        retReply = SOFTBUS_TRANS_PROXY_READUINT_FAILED;
+        goto EXIT;
+    }
+    retReply = RemoveSessionServer(pkgName, sessionName, 0);
 EXIT:
     if (!reply.WriteInt32(retReply)) {
         COMM_LOGE(COMM_SVC, "RemoveSessionServerInner write reply failed!");

@@ -146,7 +146,7 @@ HWTEST_F(BrProxyServerManagerExtTest, BrProxyServerManagerExtTest001, TestSize.L
     EXPECT_EQ(SOFTBUS_TRANS_SESSION_SERVER_NOINIT, ret);
     ret = SelectClient(nullptr, nullptr, nullptr);
     EXPECT_EQ(SOFTBUS_TRANS_SESSION_SERVER_NOINIT, ret);
-    GetDataFromList(nullptr, nullptr, 0, nullptr, nullptr);
+    GetDataFromList(nullptr, nullptr, nullptr, nullptr);
     bool ret1 = IsForegroundProcess(nullptr);
     EXPECT_EQ(false, ret1);
     DealDataWhenForeground(nullptr, nullptr, 0);
