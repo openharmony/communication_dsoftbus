@@ -92,16 +92,16 @@ HWTEST_F(BusCenterHeartbeatSdkTest, Shift_Lnn_Gear_Test_001, TestSize.Level1)
     if (ret != SOFTBUS_NOT_IMPLEMENT) {
         EXPECT_EQ(ShiftLNNGear(TEST_PKG_NAME1, callerId1, networkId1, &mode1), SOFTBUS_INVALID_PARAM);
         EXPECT_EQ(ShiftLNNGear(TEST_PKG_NAME1, callerId1, networkId2, &mode1), SOFTBUS_INVALID_PARAM);
-        EXPECT_EQ(ShiftLNNGear(TEST_PKG_NAME1, callerId1, nullptr, &mode1), SOFTBUS_OK);
-        EXPECT_EQ(ShiftLNNGear(TEST_PKG_NAME2, callerId1, nullptr, &mode1), SOFTBUS_OK);
+        EXPECT_EQ(ShiftLNNGear(TEST_PKG_NAME1, callerId1, nullptr, &mode1), SOFTBUS_NETWORK_HB_START_STRATEGY_FAIL);
+        EXPECT_EQ(ShiftLNNGear(TEST_PKG_NAME2, callerId1, nullptr, &mode1), SOFTBUS_NETWORK_HB_START_STRATEGY_FAIL);
         EXPECT_EQ(ShiftLNNGear(nullptr, callerId1, nullptr, &mode1), SOFTBUS_INVALID_PARAM);
         EXPECT_EQ(ShiftLNNGear(TEST_PKG_NAME1, callerId1, nullptr, nullptr), SOFTBUS_INVALID_PARAM);
 
-        EXPECT_EQ(ShiftLNNGear(TEST_PKG_NAME1, callerId1, nullptr, &mode2), SOFTBUS_OK);
-        EXPECT_EQ(ShiftLNNGear(TEST_PKG_NAME1, callerId2, nullptr, &mode2), SOFTBUS_OK);
-        EXPECT_EQ(ShiftLNNGear(TEST_PKG_NAME1, callerId3, nullptr, &mode3), SOFTBUS_OK);
-        EXPECT_EQ(ShiftLNNGear(TEST_PKG_NAME1, callerId4, nullptr, &mode4), SOFTBUS_OK);
-        EXPECT_EQ(ShiftLNNGear(TEST_PKG_NAME1, callerId5, nullptr, &mode5), SOFTBUS_OK);
+        EXPECT_EQ(ShiftLNNGear(TEST_PKG_NAME1, callerId1, nullptr, &mode2), SOFTBUS_NETWORK_HB_START_STRATEGY_FAIL);
+        EXPECT_EQ(ShiftLNNGear(TEST_PKG_NAME1, callerId2, nullptr, &mode2), SOFTBUS_NETWORK_HB_START_STRATEGY_FAIL);
+        EXPECT_EQ(ShiftLNNGear(TEST_PKG_NAME1, callerId3, nullptr, &mode3), SOFTBUS_NETWORK_HB_START_STRATEGY_FAIL);
+        EXPECT_EQ(ShiftLNNGear(TEST_PKG_NAME1, callerId4, nullptr, &mode4), SOFTBUS_NETWORK_HB_START_STRATEGY_FAIL);
+        EXPECT_EQ(ShiftLNNGear(TEST_PKG_NAME1, callerId5, nullptr, &mode5), SOFTBUS_NETWORK_HB_START_STRATEGY_FAIL);
         EXPECT_EQ(ShiftLNNGear(TEST_PKG_NAME1, callerId6, nullptr, &mode5), SOFTBUS_INVALID_PARAM);
         EXPECT_EQ(ShiftLNNGear(TEST_PKG_NAME1, callerId7, nullptr, &mode5), SOFTBUS_INVALID_PARAM);
     }

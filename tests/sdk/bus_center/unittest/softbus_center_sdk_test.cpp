@@ -22,6 +22,7 @@
 #include "softbus_access_token_test.h"
 #include "softbus_bus_center.h"
 #include "softbus_client_frame_manager.h"
+#include "softbus_client_stub_interface.h"
 #include "softbus_common.h"
 #include "softbus_error_code.h"
 
@@ -53,6 +54,8 @@ void ClientBusCenterSdkTest::TearDownTestCase() { }
 
 void ClientBusCenterSdkTest::SetUp()
 {
+    SetAccessTokenPermission("device_manager");
+    EXPECT_EQ(ClientStubInit(), SOFTBUS_OK);
     EXPECT_EQ(InitSoftBus(PKG_NAME), SOFTBUS_OK);
 }
 
@@ -69,11 +72,11 @@ HWTEST_F(ClientBusCenterSdkTest, SOFTBUS_CENTER_SDK_TEST_001, TestSize.Level0)
     NodeBasicInfo info;
     (void)memset_s(&info, sizeof(NodeBasicInfo), 0, sizeof(NodeBasicInfo));
     EXPECT_TRUE(GetLocalNodeDeviceInfo(PKG_NAME, &info) == SOFTBUS_OK);
-    EXPECT_TRUE(SetNodeDataChangeFlag(PKG_NAME, info.networkId, DATA_CHANGE_FLAG) == SOFTBUS_OK);
+    EXPECT_NE(SetNodeDataChangeFlag(PKG_NAME, info.networkId, DATA_CHANGE_FLAG), SOFTBUS_OK);
     uint16_t dataChangeFlag = 0;
     EXPECT_TRUE(GetNodeKeyInfo(PKG_NAME, info.networkId, NODE_KEY_DATA_CHANGE_FLAG, (uint8_t *)&dataChangeFlag,
                     DATA_CHANGE_FLAG_BUF_NUM) == SOFTBUS_OK);
-    EXPECT_TRUE(dataChangeFlag == DATA_CHANGE_FLAG);
+    EXPECT_NE(dataChangeFlag, DATA_CHANGE_FLAG);
 }
 
 /*

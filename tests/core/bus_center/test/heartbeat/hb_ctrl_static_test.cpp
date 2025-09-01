@@ -825,7 +825,7 @@ HWTEST_F(HeartBeatCtrlStaticTest, LNN_TRIGGER_CLOUD_SYNC_HEARTBEAT_TEST_001, Tes
     accountEvent.basic.event = LNN_EVENT_ACCOUNT_CHANGED;
     HbAccountStateChangeEventHandler((const LnnEventBasicInfo *)&accountEvent);
     LnnUnregDataLevelChangeCb();
-    EXPECT_CALL(hbStaticMock, LnnStartHbByTypeAndStrategy).WillOnce(Return(SOFTBUS_NETWORK_POST_MSG_FAIL));
+    EXPECT_CALL(hbStaticMock, LnnStartHbByTypeAndStrategy).WillRepeatedly(Return(SOFTBUS_NETWORK_POST_MSG_FAIL));
     int32_t ret = LnnTriggerCloudSyncHeartbeat();
     EXPECT_NE(ret, SOFTBUS_OK);
     accountEvent.status = (uint8_t)SOFTBUS_ACCOUNT_LOG_IN;

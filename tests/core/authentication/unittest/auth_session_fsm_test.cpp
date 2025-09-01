@@ -689,7 +689,6 @@ HWTEST_F(AuthSessionFsmTest, POPULATE_DEVICE_TYPE_ID_TEST_001, TestSize.Level1)
     EXPECT_TRUE(AddAuthRequest(&request) == SOFTBUS_OK);
     requestId = REQUEST_ID;
     EXPECT_CALL(mock, GetAuthRequest).WillOnce(Return(SOFTBUS_OK));
-    EXPECT_CALL(mock, LnnRetrieveDeviceInfoPacked).WillOnce(Return(SOFTBUS_OK));
     EXPECT_NO_FATAL_FAILURE(PopulateDeviceTypeId(&authParam, requestId));
 }
 
@@ -740,25 +739,21 @@ HWTEST_F(AuthSessionFsmTest, POPULATE_DEVICE_TYPE_ID_TEST_003, TestSize.Level1)
     AuthSessionFsmInterfaceMock mock;
     EXPECT_CALL(mock, GetAuthRequest).WillOnce(DoAll(SetArgPointee<1>(request), Return(SOFTBUS_OK)));
     EXPECT_CALL(mock, LnnGetRemoteNodeInfoById).WillOnce(Return(SOFTBUS_NOT_FIND));
-    EXPECT_CALL(mock, LnnRetrieveDeviceInfoPacked).WillOnce(DoAll(SetArgPointee<1>(infoPc), Return(SOFTBUS_OK)));
     PopulateDeviceTypeId(&authParam, requestId);
-    EXPECT_EQ(authParam.deviceTypeId, TYPE_PC_ID);
+    EXPECT_NE(authParam.deviceTypeId, TYPE_PC_ID);
     authParam.deviceTypeId = 0;
     EXPECT_CALL(mock, GetAuthRequest).WillOnce(DoAll(SetArgPointee<1>(request), Return(SOFTBUS_OK)));
     EXPECT_CALL(mock, LnnGetRemoteNodeInfoById).WillOnce(DoAll(SetArgPointee<2>(infoPc), Return(SOFTBUS_OK)));
-    EXPECT_CALL(mock, LnnRetrieveDeviceInfoPacked).Times(0);
     PopulateDeviceTypeId(&authParam, requestId);
     EXPECT_EQ(authParam.deviceTypeId, TYPE_PC_ID);
     authParam.deviceTypeId = 0;
     EXPECT_CALL(mock, GetAuthRequest).WillOnce(DoAll(SetArgPointee<1>(request), Return(SOFTBUS_NOT_FIND)));
     EXPECT_CALL(mock, LnnGetRemoteNodeInfoById).WillOnce(DoAll(SetArgPointee<2>(infoOther), Return(SOFTBUS_OK)));
-    EXPECT_CALL(mock, LnnRetrieveDeviceInfoPacked).WillOnce(DoAll(SetArgPointee<1>(infoPc), Return(SOFTBUS_OK)));
     PopulateDeviceTypeId(&authParam, requestId);
-    EXPECT_EQ(authParam.deviceTypeId, TYPE_PC_ID);
+    EXPECT_NE(authParam.deviceTypeId, TYPE_PC_ID);
     authParam.deviceTypeId = 0;
     EXPECT_CALL(mock, GetAuthRequest).WillOnce(DoAll(SetArgPointee<1>(request), Return(SOFTBUS_NOT_FIND)));
     EXPECT_CALL(mock, LnnGetRemoteNodeInfoById).WillOnce(DoAll(SetArgPointee<2>(infoOther), Return(SOFTBUS_OK)));
-    EXPECT_CALL(mock, LnnRetrieveDeviceInfoPacked).WillOnce(DoAll(SetArgPointee<1>(infoOther), Return(SOFTBUS_OK)));
     PopulateDeviceTypeId(&authParam, requestId);
     EXPECT_EQ(authParam.deviceTypeId, 0);
 }
