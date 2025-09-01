@@ -100,8 +100,8 @@ static int32_t TransGetLogicalBandwidth(
     int32_t socket, OptLevel level, OptType optType, void *optValue, int32_t *optValueSize)
 {
     (void)optType;
-    if (socket <= 0 && level == OPT_LEVEL_SOFTBUS) {
-        TRANS_LOGE(TRANS_SDK, "invalid socket, socket=%{public}d", socket);
+    if (level != OPT_LEVEL_SOFTBUS) {
+        TRANS_LOGE(TRANS_SDK, "invalid level, socket=%{public}d, level=%{public}d", socket, level);
         return SOFTBUS_INVALID_PARAM;
     }
     return GetLogicalBandwidth(socket, (int32_t *)optValue, optValueSize);

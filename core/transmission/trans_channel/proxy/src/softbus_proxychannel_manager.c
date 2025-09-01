@@ -1106,16 +1106,22 @@ void TransProxyProcessHandshakeAckMsg(const ProxyMessage *msg)
         goto EXIT;
     }
     if (TransProxyHandshakeUnpackRightMsg(&info, msg, errCode, &fastDataSize) != SOFTBUS_OK) {
+        TransProxyCloseProxyChannel(info.channelId);
+        (void)TransProxyOpenProxyChannelFail(info.channelId, &(info.appInfo), errCode);
         goto EXIT;
     }
 
     if (TransProxyProcessDataConfig(&(info.appInfo)) != SOFTBUS_OK) {
         TRANS_LOGE(TRANS_CTRL, "ProcessDataConfig failed");
+        TransProxyCloseProxyChannel(info.channelId);
+        (void)TransProxyOpenProxyChannelFail(info.channelId, &(info.appInfo), errCode);
         goto EXIT;
     }
 
     if (TransProxyUpdateAckInfo(&info) != SOFTBUS_OK) {
         TRANS_LOGE(TRANS_CTRL, "UpdateAckInfo failed");
+        TransProxyCloseProxyChannel(info.channelId);
+        (void)TransProxyOpenProxyChannelFail(info.channelId, &(info.appInfo), errCode);
         goto EXIT;
     }
 
@@ -1127,6 +1133,8 @@ void TransProxyProcessHandshakeAckMsg(const ProxyMessage *msg)
         char *buf = TransProxyPackFastData(&(info.appInfo), &outLen);
         if (buf == NULL) {
             TRANS_LOGE(TRANS_CTRL, "failed to pack bytes.");
+            TransProxyCloseProxyChannel(info.channelId);
+            (void)TransProxyOpenProxyChannelFail(info.channelId, &(info.appInfo), errCode);
             goto EXIT;
         }
         (void)TransSendMsg(info.channelId, CHANNEL_TYPE_PROXY, buf, outLen, info.appInfo.businessType);
