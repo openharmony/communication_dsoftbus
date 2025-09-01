@@ -712,8 +712,10 @@ static void TransOnExchangeUdpInfoReply(AuthHandle authHandle, int64_t seq, cons
     }
     int32_t ret = TransUnpackReplyUdpInfo(msg, &(channel.info));
     if (ret != SOFTBUS_OK) {
-        TRANS_LOGE(TRANS_CTRL, "unpack reply udp info fail channelId=%{public}" PRId64, channel.info.myData.channelId);
+        TRANS_LOGE(TRANS_CTRL, "unpack reply udp info fail and close channel channelId=%{public}" PRId64,
+            channel.info.myData.channelId);
         ProcessAbnormalUdpChannelState(&(channel.info), ret, true);
+        (void)TransCloseUdpChannel(channel.info.myData.channelId);
         return;
     }
     TransUpdateUdpChannelInfo(seq, &(channel.info), true);
