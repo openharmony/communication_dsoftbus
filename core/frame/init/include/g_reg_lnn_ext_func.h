@@ -19,6 +19,7 @@
 #include <string.h>
 
 #include "auth_interface_struct.h"
+#include "auth_manager_struct.h"
 #include "auth_hichain_adapter_struct.h"
 #include "bus_center_event_struct.h"
 #include "bus_center_info_key_struct.h"
@@ -33,6 +34,7 @@
 #include "lnn_physical_subnet_manager_struct.h"
 #include "lnn_decision_db_struct.h"
 #include "lnn_feature_capability_struct.h"
+#include "lnn_lane_link_struct.h"
 #include "lnn_local_net_ledger_struct.h"
 #include "lnn_file_utils_struct.h"
 #include "lnn_lane_interface_struct.h"
@@ -127,7 +129,6 @@ typedef int32_t (*LnnCreateDataFunc)(Map *map, uint32_t key, const void *value, 
 typedef void (*LnnDeleteDataFunc)(Map *map, uint32_t key);
 typedef int32_t (*LnnDeleteDevInfoSyncToDBFunc)(const char *udid, int64_t accountId);
 typedef int32_t (*SoftBusGetCurrentGroupFunc)(SoftBusWifiP2pGroupInfo *groupInfo);
-typedef int32_t (*SoftBusGetHotspotConfigFunc)(int32_t *apChannel);
 typedef uint64_t (*LnnGetSysTimeMsFunc)(void);
 typedef int32_t (*LnnGetRemoteStrInfoFunc)(const char *networkId, InfoKey key, char *info, uint32_t len);
 typedef int32_t (*AuthGetHmlConnInfoFunc)(const char *uuid, AuthConnInfo *connInfo, bool isMeta);
@@ -137,6 +138,12 @@ typedef int32_t (*AuthOpenConnFunc)(const AuthConnInfo *info, uint32_t requestId
 typedef void (*AuthCloseConnFunc)(AuthHandle authHandle);
 typedef int32_t (*AuthPostTransDataFunc)(AuthHandle authHandle, const AuthTransData *dataInfo);
 typedef int32_t (*LnnGetRemoteNodeInfoByIdFunc)(const char *id, IdCategory type, NodeInfo *info);
+typedef AuthManager *(*GetAuthManagerByAuthIdFunc)(int64_t authId);
+typedef int32_t (*GetLatestSessionKeyFunc)(const SessionKeyList *list, AuthLinkType type,
+    int32_t *index, SessionKey *key);
+typedef void (*DelDupAuthManagerFunc)(AuthManager *auth);
+typedef int32_t (*GetSessionKeyByIndexFunc)(const SessionKeyList *list, int32_t index,
+    AuthLinkType type, SessionKey *key);
 
 typedef MapIterator *(*LnnMapInitIteratorFunc)(Map *map);
 typedef bool (*LnnMapHasNextFunc)(MapIterator *it);
@@ -174,7 +181,6 @@ typedef const NodeInfo *(*LnnGetLocalNodeInfoFunc)(void);
 typedef int32_t (*LnnGetLocalNodeInfoSafeFunc)(NodeInfo *info);
 typedef int32_t (*LnnGetRemoteNumInfoFunc)(const char *networkId, InfoKey key, int32_t *info);
 typedef int32_t (*LnnGetRemoteNumU64InfoFunc)(const char *networkId, InfoKey key, uint64_t *info);
-typedef int32_t (*LnnGetRemoteNumU32InfoFunc)(const char *networkId, InfoKey key, uint32_t *info);
 typedef int32_t (*LnnGetRemoteByteInfoFunc)(const char *networkId, InfoKey key, uint8_t *info, uint32_t len);
 typedef int32_t (*LnnSetLocalStrInfoFunc)(InfoKey key, const char *info);
 typedef int32_t (*LnnSetLocalNumInfoFunc)(InfoKey key, int32_t info);
@@ -344,8 +350,6 @@ typedef void (*LnnUpdateNodeBleMacFunc)(const char *networkId, char *bleMac, uin
 typedef int32_t (*HandleForceDownWifiDirectTransFunc)(const char *udidhashStr, LinkConflictType conflictType);
 
 typedef LinkConflictType (*GetConflictTypeWithErrcodeFunc)(int32_t conflictErrcode);
-typedef int32_t (*HandleForceDownVirtualLinkFunc)(void);
-typedef bool (*CheckVirtualLinkOnlyFunc)(void);
 typedef LnnLaneManager* (*GetLaneManagerFunc)(void);
 typedef void (*AddChannelStatisticsInfoFunc)(int32_t channelId, int32_t channelType);
 typedef int32_t (*AddLinkConflictInfoFunc)(const LinkConflictInfo *inputInfo);
@@ -365,6 +369,10 @@ typedef int32_t (*GetAllSupportReuseBandWidthFunc)(const char *peerNetworkId, La
 typedef int32_t (*FindLaneResourceByLinkTypeFunc)(const char *peerUdid, LaneLinkType type, LaneResource *resource);
 typedef bool (*LnnIsNeedInterceptBroadcastFunc)(bool disableGlass);
 typedef int32_t (*CheckLnnPermissionFunc)(const char *interfaceName, const char *processName);
+
+typedef int32_t (*HandleForceDownVirtualLinkFunc)(void);
+typedef bool (*CheckVirtualLinkOnlyFunc)(void);
+typedef int32_t (*SoftBusGetHotspotConfigFunc)(int32_t *apChannel);
 
 #ifdef __cplusplus
 }

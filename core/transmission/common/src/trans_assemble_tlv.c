@@ -23,7 +23,7 @@
 #include "softbus_error_code.h"
 #include "trans_log.h"
 
-#define TLV_TYPE_AND_LENTH 2
+#define TLV_TYPE_AND_LENGTH 2
 
 int32_t TransAssembleTlvData(DataHead *pktHead, uint8_t type, uint8_t *buffer, uint8_t bufferLen, int32_t *bufferSize)
 {
@@ -45,7 +45,7 @@ int32_t TransAssembleTlvData(DataHead *pktHead, uint8_t type, uint8_t *buffer, u
     }
     element->length = bufferLen;
     pktHead->tlvElement += sizeof(TlvElement);
-    *bufferSize += (TLV_TYPE_AND_LENTH * sizeof(uint8_t) + bufferLen);
+    *bufferSize += (TLV_TYPE_AND_LENGTH * sizeof(uint8_t) + bufferLen);
     pktHead->tlvCount++;
     return SOFTBUS_OK;
 }
@@ -60,4 +60,5 @@ void ReleaseTlvValueBuffer(DataHead *pktHead)
         pktHead->tlvElement += sizeof(TlvElement);
     }
     pktHead->tlvElement -= ((pktHead->tlvCount) * sizeof(TlvElement));
+    pktHead->tlvCount = 0;
 }

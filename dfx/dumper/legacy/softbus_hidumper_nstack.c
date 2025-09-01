@@ -26,8 +26,8 @@
 #define SOFTBUS_DSTREAM_MODULE_HELP "List all the dump item of dstream"
 #define SOFTBUS_DFILE_MODULE_NAME "dfile"
 #define SOFTBUS_DFILE_MODULE_HELP "List all the dump item of dfile"
-#define SOFTBUS_DFINDLER_MODULE_NAME "dfinder"
-#define SOFTBUS_DFINDLER_MODULE_HELP "List all the dump item of dfinder"
+#define SOFTBUS_DFINDER_MODULE_NAME "dfinder"
+#define SOFTBUS_DFINDER_MODULE_HELP "List all the dump item of dfinder"
 #define SOFTBUS_DMSG_MODULE_NAME "dmsg"
 #define SOFTBUS_DMSG_MODULE_HELP "List all the dump item of dmsg"
 
@@ -35,10 +35,14 @@
 
 void SoftBufNstackDumpFunc(void *softObj, const char *data, uint32_t len)
 {
+    if (softObj == NULL || data == NULL) {
+        COMM_LOGE(COMM_DFX, "softObj or data is null!");
+        return;
+    }
     int fd = *(int *)softObj;
     size_t dataLen = strnlen(data, SOFTBUF_NSTACK_DUMP_BUF_LEN);
     if (dataLen == 0 || dataLen == SOFTBUF_NSTACK_DUMP_BUF_LEN || dataLen != len) {
-        COMM_LOGE(COMM_DFX, "SoftBufNstackDumpFunc len error, dataStrlen=%{public}zu, len=%{public}d.", dataLen, len);
+        COMM_LOGE(COMM_DFX, "SoftBufNstackDumpFunc len error, dataStrlen=%{public}zu, len=%{public}u.", dataLen, len);
         return;
     }
     SOFTBUS_DPRINTF(fd, "%s", data);
@@ -109,21 +113,21 @@ int32_t SoftBusNStackHiDumperInit(void)
     ret = SoftBusRegHiDumperHandler(SOFTBUS_DFILE_MODULE_NAME, SOFTBUS_DFILE_MODULE_HELP,
         &SoftBusNStackDfileDumpHander);
     if (ret != SOFTBUS_OK) {
-        COMM_LOGE(COMM_INIT, "SoftBusNStackHiDumperInit regist dstream handler fail");
+        COMM_LOGE(COMM_INIT, "SoftBusNStackHiDumperInit regist dfile handler fail");
         return ret;
     }
 
-    ret = SoftBusRegHiDumperHandler(SOFTBUS_DFINDLER_MODULE_NAME, SOFTBUS_DFINDLER_MODULE_HELP,
+    ret = SoftBusRegHiDumperHandler(SOFTBUS_DFINDER_MODULE_NAME, SOFTBUS_DFINDER_MODULE_HELP,
         &SoftBusNStackDumpDfinderHander);
     if (ret != SOFTBUS_OK) {
-        COMM_LOGE(COMM_INIT, "SoftBusNStackHiDumperInit regist dstream handler fail");
+        COMM_LOGE(COMM_INIT, "SoftBusNStackHiDumperInit regist dfinder handler fail");
         return ret;
     }
 
     ret = SoftBusRegHiDumperHandler(SOFTBUS_DMSG_MODULE_NAME, SOFTBUS_DMSG_MODULE_HELP,
         &SoftBusNStackDmsgDumpHander);
     if (ret != SOFTBUS_OK) {
-        COMM_LOGE(COMM_INIT, "SoftBusNStackHiDumperInit regist dstream handler fail");
+        COMM_LOGE(COMM_INIT, "SoftBusNStackHiDumperInit regist dmsg handler fail");
         return ret;
     }
     return ret;

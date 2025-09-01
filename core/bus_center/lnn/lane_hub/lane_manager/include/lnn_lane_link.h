@@ -55,7 +55,7 @@ int32_t GetAllDevIdWithLinkType(LaneLinkType type, char **devIdList, uint8_t *de
 int32_t QueryOtherLaneResource(const DevIdentifyInfo *inputInfo, LaneLinkType type);
 bool FindLaneResourceByDevInfo(const DevIdentifyInfo *inputInfo, LaneLinkType type);
 int32_t GetAllLinkWithDevId(const char *peerUdid, LaneLinkType **linkList, uint8_t *linkCnt);
-bool CheckLaneLinkExistByType(LaneLinkType linkType);
+bool ExistsLaneLinkByType(LaneLinkType linkType);
 
 #ifdef __cplusplus
 }

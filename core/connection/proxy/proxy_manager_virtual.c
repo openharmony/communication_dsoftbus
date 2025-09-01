@@ -57,5 +57,5 @@ ProxyChannelManager *GetProxyChannelManager(void)
 
 int32_t ProxyChannelManagerInit(void)
 {
-    return SOFTBUS_CONN_PROXY_NOT_SUPPORT_ERR;
+    return SOFTBUS_OK;
 }

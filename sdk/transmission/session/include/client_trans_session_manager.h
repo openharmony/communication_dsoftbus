@@ -180,6 +180,8 @@ int32_t TransGetSupportTlvBySocket(int32_t socket, bool *supportTlv, int32_t *op
 
 int32_t TransSetNeedAckBySocket(int32_t socket, bool needAck);
 
+int32_t GetLogicalBandwidth(int32_t socket, int32_t *optValue, int32_t *optValueSize);
+
 bool IsRawAuthSession(const char *sessionName);
 
 int32_t ClientGetSessionNameBySessionId(int32_t sessionId, char *sessionName);

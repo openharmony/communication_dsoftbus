@@ -742,7 +742,7 @@ static void OnAuthMsgDataRecv(int32_t authId, const AuthChannelData *data)
 static void OnDisconnect(int32_t authId)
 {
     AuthChannelInfo dstInfo;
-    if (GetChannelInfoByAuthId(authId, &dstInfo) != EOK) {
+    if (GetChannelInfoByAuthId(authId, &dstInfo) != SOFTBUS_OK) {
         TRANS_LOGE(TRANS_SVC, "channel already removed. authId=%{public}d", authId);
         return;
     }

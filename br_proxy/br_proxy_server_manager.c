@@ -1064,9 +1064,9 @@ static int32_t SelectClient(ProxyBaseInfo *baseInfo, pid_t *pid, int32_t *channe
     return SOFTBUS_NOT_FIND;
 }
 
-static void GetDataFromList(ProxyBaseInfo *baseInfo, uint8_t *data, uint32_t dataLen, uint32_t *realLen, bool *isEmpty)
+static void GetDataFromList(ProxyBaseInfo *baseInfo, uint8_t **data, uint32_t *realLen, bool *isEmpty)
 {
-    if (g_dataList == NULL) {
+    if (g_dataList == NULL || baseInfo == NULL || realLen == NULL || isEmpty == NULL) {
         TRANS_LOGE(TRANS_SVC, "[br_proxy] not init");
         return;
     }
@@ -1083,8 +1083,15 @@ static void GetDataFromList(ProxyBaseInfo *baseInfo, uint8_t *data, uint32_t dat
             strcmp(baseInfo->uuid, nodeInfo->uuid) != 0) {
             continue;
         }
-        ret = memcpy_s(data, dataLen, nodeInfo->data, nodeInfo->dataLen);
+        *data = (uint8_t *)SoftBusCalloc(nodeInfo->dataLen * sizeof(uint8_t));
+        if (*data == NULL) {
+            TRANS_LOGE(TRANS_SVC, "[br_proxy] calloc failed!");
+            (void)SoftBusMutexUnlock(&(g_dataList->lock));
+            return;
+        }
+        ret = memcpy_s(*data, nodeInfo->dataLen, nodeInfo->data, nodeInfo->dataLen);
         if (ret != EOK) {
+            SoftBusFree(*data);
             TRANS_LOGE(TRANS_SVC, "[br_proxy] memcpy_s failed! ret:%{public}d", ret);
             (void)SoftBusMutexUnlock(&(g_dataList->lock));
             return;
@@ -1105,13 +1112,14 @@ static void CleanUpDataListWithSameMac(ProxyBaseInfo *baseInfo, int32_t channelI
 {
     bool isEmpty = false;
     while (!isEmpty) {
-        uint8_t data[SINGLE_TIME_MAX_BYTES] = {0};
+        uint8_t *data = NULL;
         uint32_t realLen = 0;
-        GetDataFromList(baseInfo, data, sizeof(data), &realLen, &isEmpty);
+        GetDataFromList(baseInfo, &data, &realLen, &isEmpty);
         if (isEmpty) {
             return;
         }
         ClientIpcBrProxyReceivedData(COMM_PKGNAME_BRPROXY, channelId, (const uint8_t *)data, realLen);
+        SoftBusFree(data);
     }
 }
 
@@ -1184,11 +1192,11 @@ static void DealWithDataRecv(ProxyBaseInfo *baseInfo, const uint8_t *data, uint3
 
 static void OnDataReceived(struct ProxyChannel *channel, const uint8_t *data, uint32_t dataLen)
 {
-    if (channel == NULL || data == NULL) {
-        TRANS_LOGE(TRANS_SVC, "[br_proxy] channle or data is null");
+    if (channel == NULL || data == NULL || dataLen == 0 || dataLen > BR_PROXY_SEND_MAX_LEN) {
+        TRANS_LOGE(TRANS_SVC, "[br_proxy] channle or data is null or invalid dataLen:%{public}u", dataLen);
         return;
     }
-    TRANS_LOGI(TRANS_SVC, "[br_proxy] data recv, requestId:%{public}d, dataLen:%{public}d",
+    TRANS_LOGI(TRANS_SVC, "[br_proxy] data recv, requestId:%{public}u, dataLen:%{public}u",
         channel->requestId, dataLen);
 
     ProxyBaseInfo info;

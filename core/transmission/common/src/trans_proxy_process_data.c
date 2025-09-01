@@ -31,7 +31,7 @@
 #define SLICE_LEN (4 * 1024)
 #define SHORT_SLICE_LEN (1024)
 #define PROXY_TLV_ELEMENT 5
-#define TLV_TYPE_AND_LENTH 2
+#define TLV_TYPE_AND_LENGTH 2
 #define PROXY_TLV_PKT_HEAD 32
 #define MAGICNUM_SIZE sizeof(uint32_t)
 #define TLVCOUNT_SIZE sizeof(uint8_t)
@@ -145,49 +145,46 @@ int32_t TransProxyPackBytes(
 
 static uint8_t *TransProxyPackTlvData(DataHead *pktHead, int32_t tlvBufferSize, uint32_t dataLen)
 {
-    if (pktHead == NULL) {
-        TRANS_LOGE(TRANS_CTRL, "param invalid");
-        return NULL;
-    }
+    TRANS_CHECK_AND_RETURN_RET_LOGE(pktHead != NULL, NULL, TRANS_CTRL, "invalid param");
     int32_t newDataHeadSize = MAGICNUM_SIZE + TLVCOUNT_SIZE + tlvBufferSize;
-    uint8_t *buf = (uint8_t *)SoftBusCalloc(dataLen + newDataHeadSize);
+    int32_t bufLen = dataLen + newDataHeadSize;
+    uint8_t *buf = (uint8_t *)SoftBusCalloc(bufLen);
     if (buf == NULL) {
         TRANS_LOGE(TRANS_CTRL, "malloc buf failed");
         return NULL;
     }
-    if (memcpy_s(buf, dataLen + newDataHeadSize, &pktHead->magicNum, MAGICNUM_SIZE) != EOK) {
+    if (memcpy_s(buf, bufLen, &pktHead->magicNum, MAGICNUM_SIZE) != EOK) {
         SoftBusFree(buf);
         TRANS_LOGE(TRANS_CTRL, "memcpy magicNum failed");
         return NULL;
     }
-    if (memcpy_s(buf + MAGICNUM_SIZE, dataLen + newDataHeadSize, &pktHead->tlvCount, TLVCOUNT_SIZE) != EOK) {
+    if (memcpy_s(buf + MAGICNUM_SIZE, bufLen - MAGICNUM_SIZE, &pktHead->tlvCount, TLVCOUNT_SIZE) != EOK) {
         SoftBusFree(buf);
         TRANS_LOGE(TRANS_CTRL, "memcpy tlvCound failed");
         return NULL;
     }
     uint8_t *temp = buf + MAGICNUM_SIZE + TLVCOUNT_SIZE;
+    int32_t tempLen = bufLen - MAGICNUM_SIZE - TLVCOUNT_SIZE;
     for (int32_t index = 0; index < pktHead->tlvCount; index++) {
         TlvElement *ement = (TlvElement *)pktHead->tlvElement;
-        if (memcpy_s(temp, dataLen + newDataHeadSize, &ement->type, sizeof(ement->type)) != EOK) {
+        if (memcpy_s(temp, tempLen, &ement->type, sizeof(ement->type)) != EOK) {
             SoftBusFree(buf);
             TRANS_LOGE(TRANS_CTRL, "memcpy tlvEment type failed");
             return NULL;
         }
-
         temp += sizeof(ement->type);
-        if (memcpy_s(temp, dataLen + newDataHeadSize, &ement->length, sizeof(ement->length)) != EOK) {
+        if (memcpy_s(temp, tempLen - sizeof(ement->type), &ement->length, sizeof(ement->length)) != EOK) {
             SoftBusFree(buf);
             TRANS_LOGE(TRANS_CTRL, "memcpy tlvEment length failed");
             return NULL;
         }
-
         temp += sizeof(ement->length);
-        if (memcpy_s(temp, dataLen + newDataHeadSize, ement->value, ement->length) != EOK) {
+        if (memcpy_s(temp, tempLen - sizeof(ement->type) - sizeof(ement->length), ement->value, ement->length)
+            != EOK) {
             SoftBusFree(buf);
             TRANS_LOGE(TRANS_CTRL, "memcpy tlvEment value failed");
             return NULL;
         }
-
         temp += ement->length;
         pktHead->tlvElement += sizeof(TlvElement);
     }
@@ -313,11 +310,11 @@ static int32_t SessionPktTypeToProxyIndex(SessionPktType packetType)
         case TRANS_SESSION_MESSAGE:
         case TRANS_SESSION_ASYNC_MESSAGE:
         case TRANS_SESSION_ACK:
-            return PROXY_CHANNEL_PRORITY_MESSAGE;
+            return PROXY_CHANNEL_PRIORITY_MESSAGE;
         case TRANS_SESSION_BYTES:
-            return PROXY_CHANNEL_PRORITY_BYTES;
+            return PROXY_CHANNEL_PRIORITY_BYTES;
         default:
-            return PROXY_CHANNEL_PRORITY_FILE;
+            return PROXY_CHANNEL_PRIORITY_FILE;
     }
 }
 
@@ -355,7 +352,7 @@ int32_t TransProxyCheckSliceHead(const SliceHead *head)
         TRANS_LOGE(TRANS_CTRL, "invalid param");
         return SOFTBUS_INVALID_PARAM;
     }
-    if (head->priority < 0 || head->priority >= PROXY_CHANNEL_PRORITY_BUTT) {
+    if (head->priority < 0 || head->priority >= PROXY_CHANNEL_PRIORITY_BUTT) {
         TRANS_LOGE(TRANS_CTRL, "invalid index=%{public}d", head->priority);
         return SOFTBUS_INVALID_DATA_HEAD;
     }
@@ -495,7 +492,7 @@ int32_t TransProxyFirstSliceProcess(
     }
     uint32_t actualDataLen = 0;
     uint32_t maxDataLen =
-        (head->priority == PROXY_CHANNEL_PRORITY_MESSAGE) ? g_proxyMaxMessageBufSize : g_proxyMaxByteBufSize;
+        (head->priority == PROXY_CHANNEL_PRIORITY_MESSAGE) ? g_proxyMaxMessageBufSize : g_proxyMaxByteBufSize;
     // The encrypted data length is longer then the actual data length
     maxDataLen += SLICE_LEN;
 
@@ -563,7 +560,7 @@ int32_t TransGetActualDataLen(const SliceHead *head, uint32_t *actualDataLen)
         return SOFTBUS_INVALID_PARAM;
     }
     uint32_t maxDataLen =
-        (head->priority == PROXY_CHANNEL_PRORITY_MESSAGE) ? g_proxyMaxMessageBufSize : g_proxyMaxByteBufSize;
+        (head->priority == PROXY_CHANNEL_PRIORITY_MESSAGE) ? g_proxyMaxMessageBufSize : g_proxyMaxByteBufSize;
     // The encrypted data length is longer than actual data length
     maxDataLen += SLICE_LEN;
 
@@ -629,16 +626,16 @@ int32_t TransProxyParseTlv(uint32_t len, const char *data, DataHeadTlvPacketHead
     char *temp = (char *)data + MAGICNUM_SIZE + TLVCOUNT_SIZE;
     for (uint8_t index = 0; index < head->tlvCount; index++) {
         uint8_t *type = (uint8_t *)temp;
-        if (len < (*headSize + (TLV_TYPE_AND_LENTH * sizeof(uint8_t)))) {
+        if (len < (*headSize + (TLV_TYPE_AND_LENGTH * sizeof(uint8_t)))) {
             TRANS_LOGE(TRANS_CTRL, "check len contains tlv segment data fail, len=%{public}u", len);
             return SOFTBUS_DATA_NOT_ENOUGH;
         }
         uint8_t *length = (uint8_t *)(temp + sizeof(uint8_t));
-        if (len < (*headSize + (TLV_TYPE_AND_LENTH * sizeof(uint8_t)) + *length)) {
+        if (len < (*headSize + (TLV_TYPE_AND_LENGTH * sizeof(uint8_t)) + *length)) {
             TRANS_LOGE(TRANS_CTRL, "data len not enough. len=%{public}u", len);
             return SOFTBUS_DATA_NOT_ENOUGH;
         }
-        temp += (TLV_TYPE_AND_LENTH * sizeof(uint8_t));
+        temp += (TLV_TYPE_AND_LENGTH * sizeof(uint8_t));
         switch (*type) {
             case TLV_TYPE_INNER_SEQ:
                 ret = memcpy_s(&head->seq, sizeof(head->seq), temp, *length);
@@ -660,7 +657,7 @@ int32_t TransProxyParseTlv(uint32_t len, const char *data, DataHeadTlvPacketHead
                 continue;
         }
         temp += *length;
-        *headSize += (TLV_TYPE_AND_LENTH * sizeof(uint8_t) + *length);
+        *headSize += (TLV_TYPE_AND_LENGTH * sizeof(uint8_t) + *length);
         TRANS_CHECK_AND_RETURN_RET_LOGE(ret == EOK, SOFTBUS_MEM_ERR, TRANS_CTRL,
             "parse tlv memcpy failed, tlvType=%{public}d, ret=%{public}d", *type, ret);
     }
@@ -668,7 +665,7 @@ int32_t TransProxyParseTlv(uint32_t len, const char *data, DataHeadTlvPacketHead
 }
 
 int32_t TransProxyNoSubPacketTlvProc(
-    int32_t channelId, const char *data, uint32_t len, DataHeadTlvPacketHead *pktHead, uint32_t newPktHeadSize)
+    int32_t channelId, uint32_t len, DataHeadTlvPacketHead *pktHead, uint32_t newPktHeadSize)
 {
     if (pktHead == NULL) {
         TRANS_LOGE(TRANS_CTRL, "param invalid.");
@@ -835,7 +832,7 @@ int32_t TransProxyD2DFirstSliceProcess(
     }
     uint32_t actualDataLen = 0;
     uint32_t maxDataLen =
-        (head->priority == PROXY_CHANNEL_PRORITY_MESSAGE) ? g_proxyMaxMessageBufSize : g_proxyMaxByteBufSize;
+        (head->priority == PROXY_CHANNEL_PRIORITY_MESSAGE) ? g_proxyMaxMessageBufSize : g_proxyMaxByteBufSize;
     // The encrypted data length is longer then the actual data length
     maxDataLen += SHORT_SLICE_LEN;
 

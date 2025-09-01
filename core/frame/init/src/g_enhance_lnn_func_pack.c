@@ -18,7 +18,6 @@
 #include "g_enhance_lnn_func.h"
 #include "lnn_heartbeat_utils_struct.h"
 #include "lnn_heartbeat_medium_mgr.h"
-#include "lnn_lane_prelink.h"
 #include "softbus_adapter_mem.h"
 #include "softbus_error_code.h"
 #include "softbus_init_common.h"
@@ -614,13 +613,9 @@ int32_t UpdateConcurrencyReuseLaneReqIdByActionIdPacked(uint32_t actionId, uint3
     return pfnLnnEnhanceFuncList->updateConcurrencyReuseLaneReqIdByActionId(actionId, reuseLaneReqId, connReqId);
 }
 
-int32_t UpdateConcurrencyReuseLaneReqIdByUdidPacked(char *udidHash, uint32_t udidHashLen, uint32_t reuseLaneReqId,
+int32_t UpdateConcurrencyReuseLaneReqIdByUdidPacked(const char *udidHash, uint32_t udidHashLen, uint32_t reuseLaneReqId,
     uint32_t connReqId)
 {
-    if (udidHash == NULL || udidHashLen < AUTH_UDID_HASH_LEN) {
-        LNN_LOGE(LNN_LANE, "invalid param");
-        return SOFTBUS_INVALID_PARAM;
-    }
     LnnEnhanceFuncList *pfnLnnEnhanceFuncList = LnnEnhanceFuncListGet();
     if (pfnLnnEnhanceFuncList == NULL) {
         return SOFTBUS_NOT_IMPLEMENT;
@@ -762,8 +757,9 @@ int32_t LnnStopTimeSyncImplPacked(const char *targetNetworkId)
 int32_t LnnTimeSyncImplInitPacked(void)
 {
     LnnEnhanceFuncList *pfnLnnEnhanceFuncList = LnnEnhanceFuncListGet();
-    if (LnnCheckFuncPointer((void *)pfnLnnEnhanceFuncList->lnnTimeSyncImplInit) != SOFTBUS_OK) {
-        LNN_LOGI(LNN_INIT, "LnnTimeSyncImplInit get fail");
+    if (pfnLnnEnhanceFuncList == NULL ||
+        LnnCheckFuncPointer((void *)pfnLnnEnhanceFuncList->lnnTimeSyncImplInit) != SOFTBUS_OK) {
+        LNN_LOGE(LNN_INIT, "LnnTimeSyncImplInit get fail");
         return SOFTBUS_OK;
     }
     return pfnLnnEnhanceFuncList->lnnTimeSyncImplInit();
@@ -772,8 +768,9 @@ int32_t LnnTimeSyncImplInitPacked(void)
 int32_t LnnTimeChangeNotifyPacked(void)
 {
     LnnEnhanceFuncList *pfnLnnEnhanceFuncList = LnnEnhanceFuncListGet();
-    if (LnnCheckFuncPointer((void *)pfnLnnEnhanceFuncList->lnnTimeChangeNotify) != SOFTBUS_OK) {
-        LNN_LOGI(LNN_INIT, "LnnTimeChangeNotify get fail");
+    if (pfnLnnEnhanceFuncList == NULL ||
+        LnnCheckFuncPointer((void *)pfnLnnEnhanceFuncList->lnnTimeChangeNotify) != SOFTBUS_OK) {
+        LNN_LOGE(LNN_INIT, "LnnTimeChangeNotify get fail");
         return SOFTBUS_OK;
     }
     return pfnLnnEnhanceFuncList->lnnTimeChangeNotify();
@@ -1031,6 +1028,16 @@ int32_t LnnInitMetaNodeExtLedgerPacked(void)
         return SOFTBUS_OK;
     }
     return pfnLnnEnhanceFuncList->lnnInitMetaNodeExtLedger();
+}
+
+void LnnDeinitMetaNodeExtLedgerPacked(void)
+{
+    LnnEnhanceFuncList *pfnLnnEnhanceFuncList = LnnEnhanceFuncListGet();
+    if (pfnLnnEnhanceFuncList == NULL ||
+        LnnCheckFuncPointer((void *)pfnLnnEnhanceFuncList->lnnDeinitMetaNodeExtLedger) != SOFTBUS_OK) {
+        return;
+    }
+    return pfnLnnEnhanceFuncList->lnnDeinitMetaNodeExtLedger();
 }
 
 bool IsSupportLpFeaturePacked(void)
@@ -1450,7 +1457,7 @@ void LnnUnregSleRangeCbPacked(void)
     return pfnLnnEnhanceFuncList->lnnUnregSleRangeCb();
 }
 
-void SleRangeDeathCallbackPacked()
+void SleRangeDeathCallbackPacked(void)
 {
     LnnEnhanceFuncList *pfnLnnEnhanceFuncList = LnnEnhanceFuncListGet();
     if (LnnCheckFuncPointer((void *)pfnLnnEnhanceFuncList->sleRangeDeathCallback) != SOFTBUS_OK) {
@@ -1467,6 +1474,26 @@ bool IsSupportLowLatencyPacked(const TransReqInfo *reqInfo, const LaneLinkInfo *
         return false;
     }
     return pfnLnnEnhanceFuncList->isSupportLowLatency(reqInfo, laneLinkInfo);
+}
+
+int32_t LnnRetrieveDeviceDataPacked(LnnDataType dataType, char **data, uint32_t *dataLen)
+{
+    LnnEnhanceFuncList *pfnLnnEnhanceFuncList = LnnEnhanceFuncListGet();
+    if (pfnLnnEnhanceFuncList == NULL ||
+        LnnCheckFuncPointer((void *)pfnLnnEnhanceFuncList->lnnRetrieveDeviceData) != SOFTBUS_OK) {
+        return SOFTBUS_NOT_IMPLEMENT;
+    }
+    return pfnLnnEnhanceFuncList->lnnRetrieveDeviceData(dataType, data, dataLen);
+}
+
+int32_t LnnSaveDeviceDataPacked(const char *data, LnnDataType dataType)
+{
+    LnnEnhanceFuncList *pfnLnnEnhanceFuncList = LnnEnhanceFuncListGet();
+    if (pfnLnnEnhanceFuncList == NULL ||
+        LnnCheckFuncPointer((void *)pfnLnnEnhanceFuncList->lnnSaveDeviceData) != SOFTBUS_OK) {
+        return SOFTBUS_NOT_IMPLEMENT;
+    }
+    return pfnLnnEnhanceFuncList->lnnSaveDeviceData(data, dataType);
 }
 
 int32_t LnnVirtualLinkInitPacked(void)
@@ -1609,6 +1636,16 @@ bool IsSparkGroupEnabledPacked(void)
     return pfnLnnEnhanceFuncList->isSparkGroupEnabled();
 }
 
+bool IsDeviceHasRiskFactorPacked(void)
+{
+    LnnEnhanceFuncList *pfnLnnEnhanceFuncList = LnnEnhanceFuncListGet();
+    if (pfnLnnEnhanceFuncList == NULL ||
+        LnnCheckFuncPointer((void *)pfnLnnEnhanceFuncList->isDeviceHasRiskFactor) != SOFTBUS_OK) {
+        return false;
+    }
+    return pfnLnnEnhanceFuncList->isDeviceHasRiskFactor();
+}
+
 int32_t LnnAsyncSaveDeviceDataPacked(const char *data, LnnDataType dataType)
 {
     LnnEnhanceFuncList *pfnLnnEnhanceFuncList = LnnEnhanceFuncListGet();
@@ -1626,6 +1663,7 @@ int32_t LnnDeleteDeviceDataPacked(LnnDataType dataType)
     }
     return pfnLnnEnhanceFuncList->lnnDeleteDeviceData(dataType);
 }
+
 void CheckNeedCloudSyncOfflinePacked(DiscoveryType type)
 {
     LnnEnhanceFuncList *pfnLnnEnhanceFuncList = LnnEnhanceFuncListGet();
@@ -1633,22 +1671,4 @@ void CheckNeedCloudSyncOfflinePacked(DiscoveryType type)
         return;
     }
     pfnLnnEnhanceFuncList->checkNeedCloudSyncOffline(type);
-}
-
-int32_t LnnRetrieveDeviceDataPacked(LnnDataType dataType, char **data, uint32_t *dataLen)
-{
-    LnnEnhanceFuncList *pfnLnnEnhanceFuncList = LnnEnhanceFuncListGet();
-    if (LnnCheckFuncPointer((void *)pfnLnnEnhanceFuncList->lnnRetrieveDeviceData) != SOFTBUS_OK) {
-        return SOFTBUS_NOT_IMPLEMENT;
-    }
-    return pfnLnnEnhanceFuncList->lnnRetrieveDeviceData(dataType, data, dataLen);
-}
-
-bool IsDeviceHasRiskFactorPacked(void)
-{
-    LnnEnhanceFuncList *pfnLnnEnhanceFuncList = LnnEnhanceFuncListGet();
-    if (LnnCheckFuncPointer((void *)pfnLnnEnhanceFuncList->isDeviceHasRiskFactor) != SOFTBUS_OK) {
-        return false;
-    }
-    return pfnLnnEnhanceFuncList->isDeviceHasRiskFactor();
 }

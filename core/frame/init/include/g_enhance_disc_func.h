@@ -72,7 +72,8 @@ typedef void (*DiscVLinkBleEventDeinitFunc)(void);
 typedef void (*DiscTouchBleEventDeinitFunc)(void);
 typedef void (*DiscCoapReportNotificationFunc)(const NSTACKX_NotificationConfig *notification);
 #ifdef DSOFTBUS_FEATURE_DISC_COAP
-typedef int32_t (*DiscCoapFillServiceDataFunc)(const PublishOption *option, char *outData, uint32_t outDataLen, uint32_t allCap);
+typedef int32_t (*DiscCoapFillServiceDataFunc)(const PublishOption *option,
+                                               char *outData, uint32_t outDataLen, uint32_t allCap);
 #endif /* DSOFTBUS_FEATURE_DISC_COAP */
 typedef int32_t (*DiscCoapAssembleBdataFunc)(
     const unsigned char *capabilityData, uint32_t dataLen, char *businessData, uint32_t businessDataLen);

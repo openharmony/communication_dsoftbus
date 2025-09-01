@@ -250,7 +250,7 @@ HWTEST_F(TransUdpNegoTest, SendUdpInfo001, TestSize.Level1)
 HWTEST_F(TransUdpNegoTest, SendReplyErrInfo001, TestSize.Level1)
 {
     NiceMock<TransUdpNegoInterfaceMock> TransUdpNegoMock;
-    EXPECT_CALL(TransUdpNegoMock, AuthMetaPostTransData).WillRepeatedly(Return(SOFTBUS_LOCK_ERR));
+    EXPECT_CALL(TransUdpNegoMock, AuthMetaPostTransData).WillOnce(Return(SOFTBUS_LOCK_ERR));
     int32_t errCode = 0;
     string errDesc = "ProcessMessage";
     AuthHandle authHandle = { .authId = 0, .type = AUTH_LINK_TYPE_WIFI };

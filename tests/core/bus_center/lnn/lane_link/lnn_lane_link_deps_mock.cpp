@@ -205,9 +205,9 @@ void DeinitLinkLedger(void)
     GetLaneLinkDepsInterface()->DeinitLinkLedger();
 }
 
-bool CheckLaneLinkExistByType(LaneLinkType linkType)
+bool ExistsLaneLinkByType(LaneLinkType linkType)
 {
-    return GetLaneLinkDepsInterface()->CheckLaneLinkExistByType(linkType);
+    return GetLaneLinkDepsInterface()->ExistsLaneLinkByType(linkType);
 }
 
 int32_t CreateWDLinkInfo(uint32_t p2pRequestId, const struct WifiDirectLink *link, LaneLinkInfo *linkInfo)

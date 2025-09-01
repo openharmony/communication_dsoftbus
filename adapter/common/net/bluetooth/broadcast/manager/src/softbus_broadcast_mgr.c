@@ -174,6 +174,7 @@ static void HandleOnStateOff(int32_t timer, void *arg)
 {
     BroadcastProtocol protocol = *(BroadcastProtocol *)arg;
     SoftBusFree(arg);
+    DISC_CHECK_AND_RETURN_LOGE(CheckProtocolIsValid(protocol), DISC_BROADCAST, "type is invalid");
     for (uint32_t managerId = 0; managerId < BC_NUM_MAX; managerId++) {
         DISC_CHECK_AND_RETURN_LOGE(SoftBusMutexLock(&g_bcLock) == SOFTBUS_OK, DISC_BROADCAST, "bcLock mutex error");
 

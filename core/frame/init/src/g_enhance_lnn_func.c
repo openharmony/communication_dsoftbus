@@ -177,8 +177,6 @@ void Register3rdPartFunc(void *soHandle)
     g_lnnEnhanceFuncList.lnnFreePreLink = dlsym(soHandle, "LnnFreePreLink");
     g_lnnEnhanceFuncList.updateConcurrencyReuseLaneReqIdByActionId =
         dlsym(soHandle, "UpdateConcurrencyReuseLaneReqIdByActionId");
-    g_lnnEnhanceFuncList.updateConcurrencyReuseLaneReqIdByUdid = dlsym(soHandle,
-        "UpdateConcurrencyReuseLaneReqIdByUdid");
     g_lnnEnhanceFuncList.lnnPackCloudSyncAckSeq = dlsym(soHandle, "LnnPackCloudSyncAckSeq");
     g_lnnEnhanceFuncList.generateNewLocalCipherKey = dlsym(soHandle, "GenerateNewLocalCipherKey");
 }
@@ -230,8 +228,6 @@ void Register4thPartFunc(void *soHandle)
     g_lnnEnhanceFuncList.initActionBleConcurrency = dlsym(soHandle, "InitActionBleConcurrency");
     g_lnnEnhanceFuncList.initActionStateAdapter = dlsym(soHandle, "InitActionStateAdapter");
     g_lnnEnhanceFuncList.lnnDeleteDeviceData = dlsym(soHandle, "LnnDeleteDeviceData");
-    g_lnnEnhanceFuncList.haveConcurrencyPreLinkNodeByLaneReqId = dlsym(soHandle,
-        "HaveConcurrencyPreLinkNodeByLaneReqId");
 }
 
 void Register5thPartFunc(void *soHandle)
@@ -243,7 +239,6 @@ void Register5thPartFunc(void *soHandle)
     g_lnnEnhanceFuncList.updateConcurrencyReuseLaneReqIdByUdid = dlsym(soHandle,
         "UpdateConcurrencyReuseLaneReqIdByUdid");
     g_lnnEnhanceFuncList.lnnTimeChangeNotify = dlsym(soHandle, "LnnTimeChangeNotify");
-    g_lnnEnhanceFuncList.isSupportLowLatency = dlsym(soHandle, "IsSupportLowLatency");
     g_lnnEnhanceFuncList.lnnVirtualLinkInit = dlsym(soHandle, "LnnVirtualLinkInit");
     g_lnnEnhanceFuncList.lnnVirtualLinkDeinit = dlsym(soHandle, "LnnVirtualLinkDeinit");
     g_lnnEnhanceFuncList.dcTriggerVirtualLink = dlsym(soHandle, "DcTriggerVirtualLink");
@@ -258,9 +253,10 @@ void Register5thPartFunc(void *soHandle)
     g_lnnEnhanceFuncList.lnnDumpControlLaneGroupInfo = dlsym(soHandle, "LnnDumpControlLaneGroupInfo");
     g_lnnEnhanceFuncList.isSparkGroupEnabled = dlsym(soHandle, "IsSparkGroupEnabled");
     g_lnnEnhanceFuncList.lnnRegisterSleHeartbeatMediumMgr = dlsym(soHandle, "LnnRegisterSleHeartbeatMediumMgr");
+    g_lnnEnhanceFuncList.isDeviceHasRiskFactor = dlsym(soHandle, "IsDeviceHasRiskFactor");
     g_lnnEnhanceFuncList.checkNeedCloudSyncOffline = dlsym(soHandle, "CheckNeedCloudSyncOffline");
     g_lnnEnhanceFuncList.lnnDeviceCloudConvergenceInit = dlsym(soHandle, "LnnDeviceCloudConvergenceInit");
-    g_lnnEnhanceFuncList.isDeviceHasRiskFactor = dlsym(soHandle, "IsDeviceHasRiskFactor");
+    g_lnnEnhanceFuncList.isSupportLowLatency = dlsym(soHandle, "IsSupportLowLatency");
     g_lnnEnhanceFuncList.lnnIsSupportLpSparkFeature = dlsym(soHandle, "LnnIsSupportLpSparkFeature");
 }
 

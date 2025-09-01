@@ -203,7 +203,11 @@ void DelAuthGenCertParaNodeById(int32_t requestId)
             SoftBusFree(item->softbusCertChain);
             item->softbusCertChain = NULL;
             SoftBusFree(item);
-            g_authGenCertParallelList.cnt--;
+            if (g_authGenCertParallelList.cnt == 0) {
+                AUTH_LOGI(AUTH_CONN, "auth gencert parallel list cnt is 0.");
+            } else {
+                g_authGenCertParallelList.cnt--;
+            }
             AuthGenCertParallelUnLock();
             return;
         }
@@ -358,7 +362,7 @@ int32_t FindAuthPreLinkNodeById(uint32_t requestId, AuthPreLinkNode *reuseNode)
 int32_t FindAuthPreLinkNodeByUuid(const char *uuid, AuthPreLinkNode *preLinkNode)
 {
     AUTH_CHECK_AND_RETURN_RET_LOGE(uuid != NULL, SOFTBUS_INVALID_PARAM, AUTH_CONN, "uuid is NULL");
-    AUTH_CHECK_AND_RETURN_RET_LOGE(preLinkNode != NULL, SOFTBUS_INVALID_PARAM, AUTH_CONN, "uuid is NULL");
+    AUTH_CHECK_AND_RETURN_RET_LOGE(preLinkNode != NULL, SOFTBUS_INVALID_PARAM, AUTH_CONN, "preLinkNode is NULL");
     if (AuthPreLinkLock() != SOFTBUS_OK) {
         AUTH_LOGE(AUTH_CONN, "auth pre link lock fail");
         return SOFTBUS_LOCK_ERR;

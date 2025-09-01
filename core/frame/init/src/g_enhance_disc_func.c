@@ -30,7 +30,7 @@ DiscEnhanceFuncList *DiscEnhanceFuncListGet(void)
     return &g_discEnhanceFuncList;
 }
 
-int32_t DiscRegisterEnhanceFunc(void *soHandle)
+static void DiscFeatureRegisterEnhanceFunc(void *soHandle)
 {
 #if !defined(__G_ENHANCE_DISC_FUNC_PACK_BROADCAST_MGR_VIRTUAL)
     g_discEnhanceFuncList.schedulerStartBroadcast = dlsym(soHandle, "SchedulerStartBroadcast");
@@ -51,6 +51,14 @@ int32_t DiscRegisterEnhanceFunc(void *soHandle)
     g_discEnhanceFuncList.discCoapAssembleBdata = dlsym(soHandle, "DiscCoapAssembleBdata");
 #endif
 
+#ifdef DSOFTBUS_FEATURE_DISC_COAP
+    g_discEnhanceFuncList.discCoapFillServiceData = dlsym(soHandle, "DiscCoapFillServiceData");
+#endif /* DSOFTBUS_FEATURE_DISC_COAP */
+    return;
+}
+
+int32_t DiscRegisterEnhanceFunc(void *soHandle)
+{
     g_discEnhanceFuncList.discTouchBleInit = dlsym(soHandle, "DiscTouchBleInit");
     g_discEnhanceFuncList.discShareBleInit = dlsym(soHandle, "DiscShareBleInit");
     g_discEnhanceFuncList.discApproachBleInit = dlsym(soHandle, "DiscApproachBleInit");
@@ -67,9 +75,6 @@ int32_t DiscRegisterEnhanceFunc(void *soHandle)
     g_discEnhanceFuncList.discVLinkBleEventDeinit = dlsym(soHandle, "DiscVLinkBleEventDeinit");
     g_discEnhanceFuncList.discTouchBleEventDeinit = dlsym(soHandle, "DiscTouchBleEventDeinit");
     g_discEnhanceFuncList.discCoapReportNotification = dlsym(soHandle, "DiscCoapReportNotification");
-#ifdef DSOFTBUS_FEATURE_DISC_COAP
-    g_discEnhanceFuncList.discCoapFillServiceData = dlsym(soHandle, "DiscCoapFillServiceData");
-#endif /* DSOFTBUS_FEATURE_DISC_COAP */
  
     g_discEnhanceFuncList.discUsbDeinit = dlsym(soHandle, "DiscUsbDeinit");
     g_discEnhanceFuncList.discUsbInit = dlsym(soHandle, "DiscUsbInit");
@@ -87,5 +92,7 @@ int32_t DiscRegisterEnhanceFunc(void *soHandle)
     g_discEnhanceFuncList.distActionProcessConPacket = dlsym(soHandle, "DistActionProcessConPacket");
     g_discEnhanceFuncList.distActionInit = dlsym(soHandle, "DistActionInit");
     g_discEnhanceFuncList.distActionDeinit = dlsym(soHandle, "DistActionDeinit");
+
+    (void)DiscFeatureRegisterEnhanceFunc(soHandle);
     return SOFTBUS_OK;
 }

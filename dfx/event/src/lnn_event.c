@@ -66,6 +66,10 @@ void LnnAuditInner(int32_t scene, const char *func, int32_t line, LnnAuditExtra 
 
 void LnnEventExtraInit(LnnEventExtra *extra)
 {
+    if (extra == NULL) {
+        COMM_LOGE(COMM_DFX, "extra is NUll");
+        return;
+    }
     extra->peerDeviceInfo = NULL;
     extra->peerIp = NULL;
     extra->peerBrMac = NULL;
