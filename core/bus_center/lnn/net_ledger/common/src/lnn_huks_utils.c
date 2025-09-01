@@ -550,17 +550,22 @@ int32_t LnnGenerateKeyByHuks(struct HksBlob *keyAlias)
     return SOFTBUS_OK;
 }
 
-int32_t LnnDeleteCeKeyByHuks(struct HksBlob *keyAlias)
+int32_t LnnDeleteCeKeyByHuks(struct HksBlob *keyAlias, bool isUnlocked)
 {
     if (keyAlias == NULL) {
         LNN_LOGE(LNN_LEDGER, "delete ce invalid param");
         return SOFTBUS_INVALID_PARAM;
+    }
+    if (!isUnlocked && !IsActiveOsAccountUnlocked()) {
+        LNN_LOGE(LNN_LEDGER, "user not unlocked");
+        return SOFTBUS_HUKS_DELETE_KEY_ERR;
     }
     int32_t ret = DeleteCeKeyByHuks(keyAlias);
     if (ret != SOFTBUS_OK) {
         LNN_LOGE(LNN_LEDGER, "delete ce key fail");
         return ret;
     }
+    g_isGenCeParams = false;
     return SOFTBUS_OK;
 }
 

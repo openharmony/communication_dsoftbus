@@ -15,6 +15,7 @@
 
 #include "legacy/softbus_hisysevt_connreporter.h"
 
+#include "anonymizer.h"
 #include "comm_log.h"
 #include "securec.h"
 #include "softbus_adapter_thread.h"
@@ -209,7 +210,10 @@ static int32_t AddPIdOfPkgNameNode(PIdOfPkgNameNode **pIdOfNameNode, uint32_t pI
     PIdOfPkgNameNode *newNode = (PIdOfPkgNameNode *)SoftBusCalloc(sizeof(PIdOfPkgNameNode));
     COMM_CHECK_AND_RETURN_RET_LOGE(newNode != NULL, SOFTBUS_MALLOC_ERR, COMM_EVENT, "malloc fail");
     if (strcpy_s(newNode->pkgName, PKG_NAME_SIZE_MAX, pkgName) != EOK) {
-        COMM_LOGE(COMM_EVENT, "strcpy pkgName fail. pkgName=%{public}s", pkgName);
+        char *anonyPkgName = NULL;
+        Anonymize(pkgName, &anonyPkgName);
+        COMM_LOGE(COMM_EVENT, "strcpy pkgName fail. pkgName=%{public}s", AnonymizeWrapper(anonyPkgName));
+        AnonymizeFree(anonyPkgName);
         SoftBusFree(newNode);
         return SOFTBUS_STRCPY_ERR;
     }
@@ -255,7 +259,10 @@ static int32_t AddConnResultApiRecordNode(ConnResultApiRecordNode **connResultNo
     ConnResultApiRecordNode *newNode = (ConnResultApiRecordNode *)SoftBusCalloc(sizeof(ConnResultApiRecordNode));
     COMM_CHECK_AND_RETURN_RET_LOGE(newNode != NULL, SOFTBUS_MALLOC_ERR, COMM_EVENT, "malloc fail");
     if (strcpy_s(newNode->pkgName, PKG_NAME_SIZE_MAX, pkgName) != EOK) {
-        COMM_LOGE(COMM_EVENT, "strcpy pkgName fail. pkgName=%{public}s", pkgName);
+        char *anonyPkgName = NULL;
+        Anonymize(pkgName, &anonyPkgName);
+        COMM_LOGE(COMM_EVENT, "strcpy pkgName fail. pkgName=%{public}s", AnonymizeWrapper(anonyPkgName));
+        AnonymizeFree(anonyPkgName);
         SoftBusFree(newNode);
         return SOFTBUS_STRCPY_ERR;
     }
@@ -471,7 +478,11 @@ int32_t SoftBusRecordPIdAndPkgName(uint32_t pId, const char *pkgName)
 {
     COMM_CHECK_AND_RETURN_RET_LOGE(IsValidString(pkgName, PKG_NAME_SIZE_MAX), SOFTBUS_INVALID_PKGNAME, COMM_EVENT,
         "invalid param!");
-    COMM_LOGD(COMM_EVENT, "record pid and pkg name, pid=%{public}d, pkgName=%{public}s", pId, pkgName);
+    char *anonyPkgName = NULL;
+    Anonymize(pkgName, &anonyPkgName);
+    COMM_LOGD(
+        COMM_EVENT, "record pid and pkg name, pid=%{public}d, pkgName=%{public}s", pId, AnonymizeWrapper(anonyPkgName));
+    AnonymizeFree(anonyPkgName);
     int32_t ret = SoftBusMutexLock(&g_pIdOfNameLock);
     COMM_CHECK_AND_RETURN_RET_LOGE(ret == SOFTBUS_OK, SOFTBUS_LOCK_ERR, COMM_EVENT, "pId of name lock fail");
     PIdOfPkgNameNode *pIdOfPkgNameNode = GetPkgNameByPId(pId);
@@ -517,7 +528,10 @@ static int32_t SoftbusReportConnFault(SoftBusConnType connType, int32_t errCode,
     connFaultInfo.linkType = connType;
     connFaultInfo.errorCode = errCode;
     if (strcpy_s(connFaultInfo.callerPackName, PKG_NAME_SIZE_MAX, pkgName) != EOK) {
-        COMM_LOGE(COMM_EVENT, "strcpy pkgName fail. pkgName=%{public}s", pkgName);
+        char *anonyPkgName = NULL;
+        Anonymize(pkgName, &anonyPkgName);
+        COMM_LOGE(COMM_EVENT, "strcpy pkgName fail. pkgName=%{public}s", AnonymizeWrapper(anonyPkgName));
+        AnonymizeFree(anonyPkgName);
         return SOFTBUS_STRCPY_ERR;
     }
     int32_t ret = SoftBusReportBusCenterFaultEvt(&connFaultInfo);

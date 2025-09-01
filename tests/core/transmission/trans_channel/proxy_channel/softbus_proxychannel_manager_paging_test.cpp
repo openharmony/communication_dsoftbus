@@ -21,10 +21,8 @@
 #include "softbus_error_code.h"
 #include "softbus_json_utils.h"
 #include "softbus_proxychannel_common.h"
-#include "softbus_proxychannel_manager.h"
 #include "softbus_proxychannel_manager.c"
 #include "softbus_proxychannel_manager_paging_test_mock.h"
-#include "softbus_proxychannel_message_paging_test_mock.h"
 
 using namespace testing;
 using namespace testing::ext;

@@ -40,7 +40,7 @@
 #define SHORT_SLICE_LEN (1024)
 #define PROXY_ACK_SIZE 4
 #define OH_TYPE 10
-#define TLV_TYPE_AND_LENTH 2
+#define TLV_TYPE_AND_LENGTH 2
 
 static IClientSessionCallBack g_sessionCb;
 
@@ -620,7 +620,7 @@ static int32_t ClientTransProxyNoSubPacketTlvProc(int32_t channelId, const char 
         TRANS_LOGE(TRANS_SDK, "proxy channel parse tlv failed, ret=%{public}d", ret);
         return ret;
     }
-    ret = TransProxyNoSubPacketTlvProc(channelId, data, len, &pktHead, newPktHeadSize);
+    ret = TransProxyNoSubPacketTlvProc(channelId, len, &pktHead, newPktHeadSize);
     if (ret != SOFTBUS_OK) {
         TRANS_LOGE(TRANS_SDK, "process data failed, channelId=%{public}d, len=%{public}d", channelId, len);
         return ret;
@@ -1064,7 +1064,7 @@ int32_t TransProxyDelSliceProcessorByChannelId(int32_t channelId)
     }
     LIST_FOR_EACH_ENTRY_SAFE(node, next, &g_channelSliceProcessorList->list, ChannelSliceProcessor, head) {
         if (node->channelId == channelId) {
-            for (int i = PROXY_CHANNEL_PRORITY_MESSAGE; i < PROXY_CHANNEL_PRORITY_BUTT; i++) {
+            for (int i = PROXY_CHANNEL_PRIORITY_MESSAGE; i < PROXY_CHANNEL_PRIORITY_BUTT; i++) {
                 TransProxyClearProcessor(&(node->processor[i]));
             }
             ListDelete(&(node->head));
@@ -1158,17 +1158,17 @@ static int ClientTransProxySubPacketProc(int32_t channelId, const SliceHead *hea
         TRANS_LOGE(TRANS_SDK, "lock err");
         return SOFTBUS_LOCK_ERR;
     }
-
     ChannelSliceProcessor *channelProcessor = ClientTransProxyGetChannelSliceProcessor(channelId);
     if (channelProcessor == NULL) {
         SoftBusMutexUnlock(&g_channelSliceProcessorList->lock);
         return SOFTBUS_TRANS_GET_CLIENT_PROXY_NULL;
     }
-
-    int ret;
     int32_t index = head->priority;
-    TRANS_CHECK_AND_RETURN_RET_LOGE(index >= PROXY_CHANNEL_PRORITY_MESSAGE  && index < PROXY_CHANNEL_PRORITY_BUTT,
-        SOFTBUS_INVALID_PARAM, TRANS_SDK, "invalid index=%{public}d", index);
+    if (index < PROXY_CHANNEL_PRIORITY_MESSAGE || index >= PROXY_CHANNEL_PRIORITY_BUTT) {
+        TRANS_LOGE(TRANS_SDK, "invalid index=%{public}d", index);
+        SoftBusMutexUnlock(&g_channelSliceProcessorList->lock);
+    }
+    int ret;
     SliceProcessor *processor = &(channelProcessor->processor[index]);
     if (head->sliceSeq == 0) {
         ret = ClientTransProxyFirstSliceProcess(processor, head, data, len, channelId);
@@ -1224,7 +1224,7 @@ static void ClientTransProxySliceTimerProc(void)
     }
 
     LIST_FOR_EACH_ENTRY_SAFE(removeNode, nextNode, &g_channelSliceProcessorList->list, ChannelSliceProcessor, head) {
-        for (int i = PROXY_CHANNEL_PRORITY_MESSAGE; i < PROXY_CHANNEL_PRORITY_BUTT; i++) {
+        for (int i = PROXY_CHANNEL_PRIORITY_MESSAGE; i < PROXY_CHANNEL_PRIORITY_BUTT; i++) {
             if (removeNode->processor[i].active == true) {
                 removeNode->processor[i].timeout++;
                 if (removeNode->processor[i].timeout >= SLICE_PACKET_TIMEOUT) {

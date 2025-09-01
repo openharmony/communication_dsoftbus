@@ -25,7 +25,7 @@
 #define SOFTBUS_BROADCAST_MODULE_NAME "broadcast"
 #define SOFTBUS_BROADCAST_MODULE_HELP "List all the dump item of broadcast"
 #define SOFTBUS_BROADCAST_DUMP_HANDLER_NAME "bc_dump_handler"
-#define EVENT_BROADCAT_DUMP 0
+#define EVENT_BROADCAST_DUMP 0
 typedef int32_t (*BroadcastExecuteFunc)(SoftbusBroadcastDumpTask cb, uint64_t delayMillis);
 
 static bool g_isInit = false;
@@ -53,8 +53,12 @@ static SoftBusMessage *CreateBroadcastHandlerMsg(int32_t what, uint64_t arg1, ui
 
 static int32_t ExecuteBroadcastTask(SoftbusBroadcastDumpTask cb, uint64_t delayMillis)
 {
+    if (cb == NULL) {
+        COMM_LOGE(COMM_DFX, "invalid param cb");
+        return SOFTBUS_INVALID_PARAM;
+    }
     cb();
-    SoftBusMessage *msg = CreateBroadcastHandlerMsg(EVENT_BROADCAT_DUMP, delayMillis, 0, (void *)cb);
+    SoftBusMessage *msg = CreateBroadcastHandlerMsg(EVENT_BROADCAST_DUMP, delayMillis, 0, (void *)cb);
     if (msg == NULL) {
         COMM_LOGE(COMM_DFX, "create msg failed");
         return SOFTBUS_MALLOC_ERR;
@@ -77,7 +81,7 @@ int32_t SoftbusRegBroadcastDumpTask(const SoftbusBroadcastDumpTask cb, uint64_t 
         return ret;
     }
 
-    SoftBusMessage *msg = CreateBroadcastHandlerMsg(EVENT_BROADCAT_DUMP, delayMillis, 0, (void *)cb);
+    SoftBusMessage *msg = CreateBroadcastHandlerMsg(EVENT_BROADCAST_DUMP, delayMillis, 0, (void *)cb);
     if (msg == NULL) {
         COMM_LOGE(COMM_DFX, "create msg failed");
         return SOFTBUS_MALLOC_ERR;
@@ -98,7 +102,7 @@ int32_t SoftBusRegBroadcastVarDump(const char *dumpVar, const SoftBusVarDumpCb c
     return SoftBusAddDumpVarToList(dumpVar, cb, &g_bc_var_list);
 }
 
-static int32_t SoftBusBroadcastDumpHander(int fd, int32_t argc, const char **argv)
+static int32_t SoftBusBroadcastDumpHandler(int fd, int32_t argc, const char **argv)
 {
     if (fd < 0 || argc < 0 || argv == NULL) {
         COMM_LOGE(COMM_DFX, "invalid param");
@@ -142,7 +146,7 @@ static void BroadcastMsgHandler(SoftBusMessage *msg)
         return;
     }
 
-    if (msg->what != EVENT_BROADCAT_DUMP) {
+    if (msg->what != EVENT_BROADCAST_DUMP) {
         return;
     }
     ExecuteBroadcastTask((SoftbusBroadcastDumpTask)msg->obj, msg->arg1);
@@ -173,9 +177,9 @@ int32_t SoftBusHiDumperBroadcastInit(void)
     }
 
     int32_t ret = SoftBusRegHiDumperHandler(SOFTBUS_BROADCAST_MODULE_NAME, SOFTBUS_BROADCAST_MODULE_HELP,
-        &SoftBusBroadcastDumpHander);
+        &SoftBusBroadcastDumpHandler);
     if (ret != SOFTBUS_OK) {
-        COMM_LOGE(COMM_INIT, "SoftBusBroadcastDumpHander register fail");
+        COMM_LOGE(COMM_INIT, "SoftBusBroadcastDumpHandler register fail");
         return ret;
     }
 

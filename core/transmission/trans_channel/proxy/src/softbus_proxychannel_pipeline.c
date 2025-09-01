@@ -39,7 +39,7 @@
 
 enum PipelineLooperMsgType {
     LOOPER_MSG_TYPE_OPEN_CHANNEL,
-    LOOPER_MSG_TYPE_DELEY_CLOSE_CHANNEL,
+    LOOPER_MSG_TYPE_CLOSE_CHANNEL_DELAY,
 
     LOOPER_MSG_TYPE_ON_CHANNEL_OPENED,
     LOOPER_MSG_TYPE_ON_CHANNEL_OPEN_FAILED,
@@ -337,7 +337,7 @@ int32_t TransProxyPipelineCloseChannelDelay(int32_t channelId)
         TRANS_LOGE(TRANS_CTRL, "malloc msg failed, channelId=%{public}d", channelId);
         return SOFTBUS_MALLOC_ERR;
     }
-    msg->what = LOOPER_MSG_TYPE_DELEY_CLOSE_CHANNEL;
+    msg->what = LOOPER_MSG_TYPE_CLOSE_CHANNEL_DELAY;
     msg->arg1 = (uint64_t)channelId;
     msg->handler = &g_manager.handler;
     msg->FreeMessage = TransProxyPipelineFreeMessage;
@@ -620,7 +620,7 @@ static void TransProxyPipelineHandleMessage(SoftBusMessage *msg)
         case LOOPER_MSG_TYPE_OPEN_CHANNEL:
             InnerOpenProxyChannel(msg->arg1);
             break;
-        case LOOPER_MSG_TYPE_DELEY_CLOSE_CHANNEL:
+        case LOOPER_MSG_TYPE_CLOSE_CHANNEL_DELAY:
             TransProxyPipelineCloseChannel(msg->arg1);
             break;
         case LOOPER_MSG_TYPE_ON_CHANNEL_OPEN_FAILED:

@@ -84,6 +84,19 @@ typedef struct {
 } TransFlowInfo;
 
 /**
+ * @brief Media bandwidth type.
+ *
+ * @since 2.0
+ * @version 2.0
+ */
+typedef enum {
+    LOW_BANDWIDTH = 0, /**< Low bandwidth. */
+    MEDIUM_BANDWIDTH,  /**< Medium bandwidth. */
+    HIGH_BANDWIDTH,    /**< High bandwidth. */
+    BANDWIDTH_BUTT,    /**< Bandwidth buff. */
+} LogicalBandwidth;
+
+/**
  * @brief Get maximum transmission unit of socket
  *
  * @param socket Indicates the unique socket fd.

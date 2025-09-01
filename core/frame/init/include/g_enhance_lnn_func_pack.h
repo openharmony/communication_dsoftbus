@@ -18,29 +18,30 @@
 #include <stdint.h>
 #include <stdbool.h>
 
-#include "auth_interface_struct.h"
 #include "auth_attest_interface_struct.h"
 #include "auth_device_common_key_struct.h"
+#include "auth_interface_struct.h"
 #include "bus_center_event_struct.h"
 #include "cJSON.h"
 #include "lnn_cipherkey_manager_struct.h"
-#include "lnn_node_info_struct.h"
-#include "lnn_heartbeat_utils_struct.h"
-#include "lnn_lane_vap_info_struct.h"
-#include "lnn_lane_power_control_struct.h"
-#include "lnn_lane_score_struct.h"
-#include "lnn_lane_link_struct.h"
-#include "lnn_trans_lane_struct.h"
-#include "lnn_fast_offline_struct.h"
 #include "lnn_data_cloud_sync_struct.h"
-#include "lnn_sync_info_manager_struct.h"
-#include "lnn_lane_qos_struct.h"
-#include "lnn_time_sync_impl_struct.h"
+#include "lnn_fast_offline_struct.h"
 #include "lnn_heartbeat_medium_mgr_struct.h"
+#include "lnn_heartbeat_utils_struct.h"
+#include "lnn_lane_link_struct.h"
+#include "lnn_lane_power_control_struct.h"
+#include "lnn_lane_qos_struct.h"
+#include "lnn_lane_score_struct.h"
+#include "lnn_lane_vap_info_struct.h"
 #include "lnn_log.h"
+#include "lnn_node_info_struct.h"
 #include "lnn_ranging_manager_struct.h"
 #include "lnn_secure_storage_struct.h"
+#include "lnn_sync_info_manager_struct.h"
+#include "lnn_time_sync_impl_struct.h"
+#include "lnn_trans_lane_struct.h"
 #include "softbus_bus_center.h"
+
 #ifdef __cplusplus
 extern "C" {
 #endif
@@ -106,7 +107,7 @@ int32_t LnnRequestCheckOnlineStatusPacked(const char *networkId, uint64_t timeou
 int32_t LnnSyncPtkPacked(const char *networkId);
 int32_t GetConcurrencyLaneReqIdByActionIdPacked(uint32_t actionId, uint32_t *laneReqId);
 int32_t UpdateConcurrencyReuseLaneReqIdByActionIdPacked(uint32_t actionId, uint32_t reuseLaneReqId, uint32_t connReqId);
-int32_t UpdateConcurrencyReuseLaneReqIdByUdidPacked(char *udidHash, uint32_t udidHashLen, uint32_t reuseLaneReqId,
+int32_t UpdateConcurrencyReuseLaneReqIdByUdidPacked(const char *udidHash, uint32_t udidHashLen, uint32_t reuseLaneReqId,
     uint32_t connReqId);
 int32_t LnnAddLocalVapInfoPacked(LnnVapType type, const LnnVapAttr *vapAttr);
 int32_t LnnDeleteLocalVapInfoPacked(LnnVapType type);
@@ -155,6 +156,7 @@ void LnnIpAddrChangeEventHandlerPacked(void);
 void LnnInitOOBEStateMonitorImplPacked(void);
 void EhLoginEventHandlerPacked(void);
 int32_t LnnInitMetaNodeExtLedgerPacked(void);
+void LnnDeinitMetaNodeExtLedgerPacked(void);
 bool IsSupportLpFeaturePacked(void);
 bool LnnIsSupportLpSparkFeaturePacked(void);
 void AuthLoadDeviceKeyPacked(void);
@@ -198,11 +200,10 @@ int32_t LnnGetLocalPtkByUuidPacked(const char *uuid, char *localPtk, uint32_t le
 int32_t RegistAuthTransListenerPacked(void);
 void LnnUnregSleRangeCbPacked(void);
 void LnnRegSleRangeCbPacked(const ISleRangeInnerCallback *callback);
-void SleRangeDeathCallbackPacked(void);
 int32_t LnnStopRangePacked(const RangeConfig *config);
 int32_t LnnStartRangePacked(const RangeConfig *config);
 int32_t UnregistAuthTransListenerPacked(void);
-void LnnDeinitMetaNodeExtLedgerPacked(void);
+void SleRangeDeathCallbackPacked(void);
 int32_t LnnRetrieveDeviceDataPacked(LnnDataType dataType, char **data, uint32_t *dataLen);
 int32_t LnnSaveDeviceDataPacked(const char *data, LnnDataType dataType);
 void TriggerSparkGroupBuildPacked(uint32_t delayTime);
@@ -213,10 +214,10 @@ void DeinitControlPlanePacked(void);
 int32_t QueryControlPlaneNodeValidPacked(const char *deviceId);
 int32_t LnnDumpControlLaneGroupInfoPacked(int32_t fd);
 bool IsSparkGroupEnabledPacked(void);
-void CheckNeedCloudSyncOfflinePacked(DiscoveryType type);
+bool IsDeviceHasRiskFactorPacked(void);
 int32_t LnnAsyncSaveDeviceDataPacked(const char *data, LnnDataType dataType);
 int32_t LnnDeleteDeviceDataPacked(LnnDataType dataType);
-bool IsDeviceHasRiskFactorPacked(void);
+void CheckNeedCloudSyncOfflinePacked(DiscoveryType type);
 int32_t LnnGetLocalChannelInfoPacked(VapChannelInfo *channelInfo);
 int32_t LnnSetLocalChannelInfoPacked(LnnVapType type, int32_t channelId);
 int32_t LnnVirtualLinkInitPacked(void);

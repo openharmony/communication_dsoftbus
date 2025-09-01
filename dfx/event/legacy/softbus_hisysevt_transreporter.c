@@ -477,20 +477,20 @@ void SoftbusRecordOpenSession(SoftBusOpenSessionStatus isSucc, uint32_t time)
 
 static inline void ClearOpenSessionKpi(void)
 {
-    memset_s(&g_openSessionKpi.linkType, sizeof(OpenSessionKpiStruct) - sizeof(SoftBusMutex),
-        0, sizeof(OpenSessionKpiStruct) - sizeof(SoftBusMutex));
+    (void)memset_s(&g_openSessionKpi.linkType, sizeof(OpenSessionKpiStruct) - sizeof(SoftBusMutex), 0,
+        sizeof(OpenSessionKpiStruct) - sizeof(SoftBusMutex));
 }
 
 static inline void ClearOpenSessionCnt(void)
 {
-    memset_s(&g_openSessionCnt.failCnt, sizeof(OpenSessionCntStruct) - sizeof(SoftBusMutex),
-        0, sizeof(OpenSessionCntStruct) - sizeof(SoftBusMutex));
+    (void)memset_s(&g_openSessionCnt.failCnt, sizeof(OpenSessionCntStruct) - sizeof(SoftBusMutex), 0,
+        sizeof(OpenSessionCntStruct) - sizeof(SoftBusMutex));
 }
 
 static inline void ClearOpenSessionTime(void)
 {
-    memset_s(&g_openSessionTime.maxTimeCost, sizeof(OpenSessionTimeStruct) - sizeof(SoftBusMutex),
-        0, sizeof(OpenSessionTimeStruct) - sizeof(SoftBusMutex));
+    (void)memset_s(&g_openSessionTime.maxTimeCost, sizeof(OpenSessionTimeStruct) - sizeof(SoftBusMutex), 0,
+        sizeof(OpenSessionTimeStruct) - sizeof(SoftBusMutex));
 }
 
 static inline int32_t InitOpenSessionEvtMutexLock(void)

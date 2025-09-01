@@ -246,7 +246,7 @@ HWTEST_F(ClientTransProxyManagerTest, ClientTransProxyOnDataReceivedTest001, Tes
     EXPECT_EQ(SOFTBUS_INVALID_PARAM, ret);
 
     SliceHead sliceHead;
-    sliceHead.priority = PROXY_CHANNEL_PRORITY_BUTT;
+    sliceHead.priority = PROXY_CHANNEL_PRIORITY_BUTT;
     char buf[TEST_DATA_LENGTH_2];
     ret = memcpy_s(buf, TEST_DATA_LENGTH_2, &sliceHead, sizeof(SliceHead));
     EXPECT_EQ(EOK, ret);
@@ -256,7 +256,7 @@ HWTEST_F(ClientTransProxyManagerTest, ClientTransProxyOnDataReceivedTest001, Tes
     ret = ClientTransProxyOnDataReceived(channelId, buf, TEST_DATA_LENGTH_2, TRANS_SESSION_BYTES);
     EXPECT_EQ(SOFTBUS_TRANS_PROXY_INVALID_SLICE_HEAD, ret);
 
-    sliceHead.priority = PROXY_CHANNEL_PRORITY_MESSAGE;
+    sliceHead.priority = PROXY_CHANNEL_PRIORITY_MESSAGE;
     sliceHead.sliceNum = 0;
     sliceHead.sliceSeq = 0;
     ret = memcpy_s(buf, TEST_DATA_LENGTH_2, &sliceHead, sizeof(SliceHead));
@@ -264,7 +264,7 @@ HWTEST_F(ClientTransProxyManagerTest, ClientTransProxyOnDataReceivedTest001, Tes
     ret = ClientTransProxyOnDataReceived(channelId, buf, TEST_DATA_LENGTH_2, TRANS_SESSION_BYTES);
     EXPECT_EQ(SOFTBUS_TRANS_PROXY_INVALID_SLICE_HEAD, ret);
 
-    sliceHead.priority = PROXY_CHANNEL_PRORITY_MESSAGE;
+    sliceHead.priority = PROXY_CHANNEL_PRIORITY_MESSAGE;
     sliceHead.sliceNum = 1;
     ret = memcpy_s(buf, TEST_DATA_LENGTH_2, &sliceHead, sizeof(SliceHead));
     EXPECT_EQ(EOK, ret);
@@ -301,7 +301,7 @@ HWTEST_F(ClientTransProxyManagerTest, ClientTransProxyOnDataReceivedTest002, Tes
     int32_t channelId = 1;
 
     SliceHead sliceHead;
-    sliceHead.priority = PROXY_CHANNEL_PRORITY_MESSAGE;
+    sliceHead.priority = PROXY_CHANNEL_PRIORITY_MESSAGE;
     sliceHead.sliceNum = 1;
     char buf[TEST_DATA_LENGTH_2];
     int32_t ret = memcpy_s(buf, TEST_DATA_LENGTH_2, &sliceHead, sizeof(SliceHead));
@@ -321,7 +321,7 @@ HWTEST_F(ClientTransProxyManagerTest, ClientTransProxyOnDataReceivedTest002, Tes
     ret = ClientTransProxyOnDataReceived(channelId, buf, TEST_DATA_LENGTH_2, TRANS_SESSION_BYTES);
     EXPECT_EQ(SOFTBUS_TRANS_SESSION_INFO_NOT_FOUND, ret);
 
-    sliceHead.priority = PROXY_CHANNEL_PRORITY_BYTES;
+    sliceHead.priority = PROXY_CHANNEL_PRIORITY_BYTES;
     int32_t dataLen = sizeof(SliceHead) + sizeof(PacketHead) + 1;
     char buf2[dataLen];
     ret = memcpy_s(buf2, dataLen, &sliceHead, sizeof(SliceHead));
@@ -550,24 +550,24 @@ HWTEST_F(ClientTransProxyManagerTest, TransGetActualDataLenTest, TestSize.Level1
 
     // Test case 1: Valid sliceNum, priority message
     head.sliceNum = 1;
-    head.priority = PROXY_CHANNEL_PRORITY_MESSAGE;
+    head.priority = PROXY_CHANNEL_PRIORITY_MESSAGE;
     EXPECT_EQ(SOFTBUS_OK, TransGetActualDataLen(&head, &actualDataLen));
     EXPECT_EQ(head.sliceNum * SLICE_LEN, actualDataLen);
 
     // Test case 2: Valid sliceNum, priority bytes
     head.sliceNum = 10;
-    head.priority = PROXY_CHANNEL_PRORITY_BYTES;
+    head.priority = PROXY_CHANNEL_PRIORITY_BYTES;
     EXPECT_EQ(SOFTBUS_OK, TransGetActualDataLen(&head, &actualDataLen));
     EXPECT_EQ(head.sliceNum * SLICE_LEN, actualDataLen);
 
     // Test case 3: Invalid sliceNum (exceeds MAX_MALLOC_SIZE / SLICE_LEN)
     head.sliceNum = (MAX_MALLOC_SIZE / SLICE_LEN) + 1;
-    head.priority = PROXY_CHANNEL_PRORITY_MESSAGE;
+    head.priority = PROXY_CHANNEL_PRIORITY_MESSAGE;
     EXPECT_EQ(SOFTBUS_INVALID_DATA_HEAD, TransGetActualDataLen(&head, &actualDataLen));
 
     // Test case 4: Invalid sliceNum (actualLen exceeds maxDataLen)
     head.sliceNum = (g_proxyMaxMessageBufSize / SLICE_LEN) + 2;
-    head.priority = PROXY_CHANNEL_PRORITY_MESSAGE;
+    head.priority = PROXY_CHANNEL_PRIORITY_MESSAGE;
     EXPECT_EQ(SOFTBUS_INVALID_DATA_HEAD, TransGetActualDataLen(&head, &actualDataLen));
 }
 
@@ -955,14 +955,14 @@ HWTEST_F(ClientTransProxyManagerTest, SessionPktTypeToProxyIndex001, TestSize.Le
 {
     SessionPktType packetType = TRANS_SESSION_ACK;
     int32_t ret = SessionPktTypeToProxyIndex(packetType);
-    EXPECT_EQ(PROXY_CHANNEL_PRORITY_MESSAGE, ret);
+    EXPECT_EQ(PROXY_CHANNEL_PRIORITY_MESSAGE, ret);
 
     packetType = TRANS_SESSION_BYTES;
     ret = SessionPktTypeToProxyIndex(packetType);
-    EXPECT_EQ(PROXY_CHANNEL_PRORITY_BYTES, ret);
+    EXPECT_EQ(PROXY_CHANNEL_PRIORITY_BYTES, ret);
 
     packetType = TRANS_SESSION_FILE_FIRST_FRAME;
     ret = SessionPktTypeToProxyIndex(packetType);
-    EXPECT_EQ(PROXY_CHANNEL_PRORITY_FILE, ret);
+    EXPECT_EQ(PROXY_CHANNEL_PRIORITY_FILE, ret);
 }
 } // namespace OHOS

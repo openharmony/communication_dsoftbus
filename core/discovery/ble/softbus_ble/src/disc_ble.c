@@ -479,7 +479,7 @@ static void ProcessDisConPacket(const BroadcastReportInfo *reportInfo, DeviceInf
     }
     (void)SoftBusMutexUnlock(&g_bleInfoLock);
 
-    char key[SHA_HASH_LEN];
+    char key[SHA_HASH_LEN] = {0};
     ret = SoftbusBleGeneratePacketHash(key, reportInfo);
     DISC_CHECK_AND_RETURN_LOGE(ret == SOFTBUS_OK, DISC_BLE, "generate packetHash failed, ret=%{public}d", ret);
     if (DistActionProcessConPacketPacked(&device, (const uint8_t *)key, SHA_HASH_LEN)) {

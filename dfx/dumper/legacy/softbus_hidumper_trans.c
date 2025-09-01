@@ -89,7 +89,8 @@ void SoftBusTransDumpRegisterSession(int fd, const char* pkgName, const char* se
 
 void SoftBusTransDumpRunningSession(int fd, TransDumpLaneLinkType type, AppInfo* appInfo)
 {
-    if (fd < 0 || type < DUMPER_LANE_BR || type >= DUMPER_LANE_LINK_TYPE_BUTT || appInfo == NULL) {
+    if (fd < 0 || type < DUMPER_LANE_BR || type >= DUMPER_LANE_LINK_TYPE_BUTT || appInfo == NULL ||
+        appInfo->businessType >= BUSINESS_TYPE_BUTT) {
         COMM_LOGE(COMM_DFX, "param is invalid");
         return;
     }

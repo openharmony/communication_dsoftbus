@@ -67,7 +67,6 @@ public:
     virtual void LnnSetUnlockState(void) = 0;
     virtual LnnConnectionFsm *LnnCreateConnectionFsm(
         const ConnectionAddr *target, const char *pkgName, bool isNeedConnect);
-    virtual int32_t SoftbusGetConfig(ConfigType type, unsigned char *val, uint32_t len);
     virtual int32_t LnnSetLocalStrInfo(InfoKey key, const char *info);
     virtual int32_t LnnSetLocalNumInfo(InfoKey key, int32_t info);
     virtual int32_t LnnGetLocalStrInfo(InfoKey key, char *info, uint32_t len);
@@ -100,14 +99,10 @@ public:
     virtual int32_t LnnCompareNodeWeight(
         int32_t weight1, const char *masterUdid1, int32_t weight2, const char *masterUdid2);
     virtual void LnnNotifyAllTypeOffline(ConnectionAddrType type);
-    virtual int32_t SoftBusGetTime(SoftBusSysTime *sysTime);
     virtual void LnnNotifyLeaveResult(const char *networkId, int32_t retCode);
     virtual int32_t LnnGetAddrTypeByIfName(const char *ifName, ConnectionAddrType *type);
     virtual int32_t LnnSendNotTrustedInfo(
         const NotTrustedDelayInfo *info, uint32_t num, LnnSyncInfoMsgComplete complete);
-    virtual int32_t LnnAsyncCallbackDelayHelper(
-        SoftBusLooper *looper, LnnAsyncCallbackFunc callback, void *para, uint64_t delayMillis);
-    virtual SoftBusLooper *GetLooper(int32_t looper);
     virtual int32_t ConnDisconnectDeviceAllConn(const ConnectOption *option);
     virtual int32_t LnnGenLocalIrk(unsigned char *irk, uint32_t len, bool isUpdate);
     virtual int32_t LnnGenLocalUuid(char *uuid, uint32_t len, bool isUpdate);
@@ -167,7 +162,6 @@ public:
     virtual int32_t LnnSetLocalByteInfo(InfoKey key, const uint8_t *info, uint32_t len);
     virtual void LnnDeinitNetworkInfo(void);
     virtual void LnnDeinitDevicename(void);
-    virtual const NodeInfo *LnnGetLocalNodeInfo(void);
     virtual void LnnRemoveNode(const char *udid);
     virtual int32_t LnnClearDiscoveryType(NodeInfo *info, DiscoveryType type);
     virtual const char *LnnPrintConnectionAddr(const ConnectionAddr *addr);
@@ -191,7 +185,6 @@ public:
     MOCK_METHOD5(
         AuthMetaStartVerify, int32_t(uint32_t, const AuthKeyInfo *, uint32_t, int32_t, const AuthVerifyCallback *));
     MOCK_METHOD0(LnnSetUnlockState, void());
-    MOCK_METHOD3(SoftbusGetConfig, int32_t(ConfigType, unsigned char *, uint32_t));
     MOCK_METHOD2(LnnSetLocalStrInfo, int32_t(InfoKey, const char *));
     MOCK_METHOD2(LnnSetLocalNumInfo, int32_t(InfoKey, int32_t));
     MOCK_METHOD3(LnnGetLocalStrInfo, int32_t(InfoKey, char *, uint32_t));
@@ -221,12 +214,9 @@ public:
     MOCK_METHOD1(LnnGetDeviceUdid, const char *(const NodeInfo *));
     MOCK_METHOD4(LnnCompareNodeWeight, int32_t(int32_t, const char *, int32_t, const char *));
     MOCK_METHOD1(LnnNotifyAllTypeOffline, void(ConnectionAddrType));
-    MOCK_METHOD1(SoftBusGetTime, int32_t(SoftBusSysTime *));
     MOCK_METHOD2(LnnNotifyLeaveResult, void(const char *, int32_t));
     MOCK_METHOD2(LnnGetAddrTypeByIfName, int32_t(const char *, ConnectionAddrType *));
     MOCK_METHOD3(LnnSendNotTrustedInfo, int32_t(const NotTrustedDelayInfo *, uint32_t, LnnSyncInfoMsgComplete));
-    MOCK_METHOD4(LnnAsyncCallbackDelayHelper, int32_t(SoftBusLooper *, LnnAsyncCallbackFunc, void *, uint64_t));
-    MOCK_METHOD1(GetLooper, SoftBusLooper *(int));
     MOCK_METHOD1(ConnDisconnectDeviceAllConn, int32_t(const ConnectOption *));
     MOCK_METHOD3(LnnGenLocalUuid, int32_t(char *, uint32_t, bool));
     MOCK_METHOD3(LnnGenLocalIrk, int32_t(unsigned char *, uint32_t, bool));
@@ -288,7 +278,6 @@ public:
     MOCK_METHOD3(LnnSetLocalByteInfo, int32_t(InfoKey, const uint8_t *, uint32_t));
     MOCK_METHOD0(LnnDeinitNetworkInfo, void());
     MOCK_METHOD0(LnnDeinitDevicename, void());
-    MOCK_METHOD0(LnnGetLocalNodeInfo, NodeInfo *());
     MOCK_METHOD1(LnnRemoveNode, void(const char *));
     MOCK_METHOD2(LnnClearDiscoveryType, int32_t(NodeInfo *, DiscoveryType));
     MOCK_METHOD1(LnnPrintConnectionAddr, const char *(const ConnectionAddr *));

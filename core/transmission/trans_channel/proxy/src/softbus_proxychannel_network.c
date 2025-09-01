@@ -87,20 +87,20 @@ static int32_t TransNotifyDecryptNetworkingMsg(
     char sessionKey[SESSION_KEY_LENGTH] = { 0 };
     int32_t ret = TransProxyGetSessionKeyByChanId(channelId, sessionKey, SESSION_KEY_LENGTH);
     if (ret != SOFTBUS_OK) {
-        (void)memset_s(sessionKey, sizeof(SESSION_KEY_LENGTH), 0, sizeof(SESSION_KEY_LENGTH));
+        (void)memset_s(sessionKey, SESSION_KEY_LENGTH, 0, SESSION_KEY_LENGTH);
         TRANS_LOGE(TRANS_CTRL, "get sessionKey failed, channelId=%{public}d", channelId);
         return ret;
     }
 
     if (len <= OVERHEAD_LEN) {
-        (void)memset_s(sessionKey, sizeof(SESSION_KEY_LENGTH), 0, sizeof(SESSION_KEY_LENGTH));
+        (void)memset_s(sessionKey, SESSION_KEY_LENGTH, 0, SESSION_KEY_LENGTH);
         TRANS_LOGE(TRANS_CTRL, "the length of len is invalid, len=%{public}d", len);
         return SOFTBUS_TRANS_INVALID_DATA_LENGTH;
     }
     uint32_t outDataLen = len - OVERHEAD_LEN;
     char *outData = (char *)SoftBusCalloc(outDataLen);
     if (outData == NULL) {
-        (void)memset_s(sessionKey, sizeof(SESSION_KEY_LENGTH), 0, sizeof(SESSION_KEY_LENGTH));
+        (void)memset_s(sessionKey, SESSION_KEY_LENGTH, 0, SESSION_KEY_LENGTH);
         TRANS_LOGE(TRANS_CTRL, "malloc len failed");
         return SOFTBUS_MALLOC_ERR;
     }
@@ -108,12 +108,12 @@ static int32_t TransNotifyDecryptNetworkingMsg(
     AesGcmCipherKey cipherKey = { 0 };
     cipherKey.keyLen = SESSION_KEY_LENGTH;
     if (memcpy_s(cipherKey.key, SESSION_KEY_LENGTH, sessionKey, SESSION_KEY_LENGTH) != EOK) {
-        (void)memset_s(sessionKey, sizeof(SESSION_KEY_LENGTH), 0, sizeof(SESSION_KEY_LENGTH));
+        (void)memset_s(sessionKey, SESSION_KEY_LENGTH, 0, SESSION_KEY_LENGTH);
         SoftBusFree(outData);
         TRANS_LOGE(TRANS_CTRL, "memcpy key error.");
         return SOFTBUS_MEM_ERR;
     }
-    (void)memset_s(sessionKey, sizeof(SESSION_KEY_LENGTH), 0, sizeof(SESSION_KEY_LENGTH));
+    (void)memset_s(sessionKey, SESSION_KEY_LENGTH, 0, SESSION_KEY_LENGTH);
     ret = SoftBusDecryptData(&cipherKey, (unsigned char *)data, len, (unsigned char *)outData, &outDataLen);
     (void)memset_s(&cipherKey, sizeof(AesGcmCipherKey), 0, sizeof(AesGcmCipherKey));
     if (ret != SOFTBUS_OK) {

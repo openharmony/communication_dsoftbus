@@ -768,12 +768,12 @@ HWTEST_F(SoftbusProxyChannelMessagePagingTest, TransProxyFillPagingChannelInfoTe
     EXPECT_EQ(true, res);
     res = AddStringToJsonObject(testRoot, JSON_KEY_DEVICE_ID, data);
     EXPECT_EQ(true, res);
-    EXPECT_CALL(ProxyPagingMock, cJSON_ParseWithLength).WillRepeatedly(Return(testRoot));
+    EXPECT_CALL(ProxyPagingMock, cJSON_ParseWithLength).WillOnce(Return(testRoot));
     unsigned char str[SHA_256_HASH_LEN] = "TEST_";
     EXPECT_CALL(ProxyPagingMock, ConvertHexStringToBytes)
         .WillRepeatedly(DoAll(SetArrayArgument<0>(str, str + SHA_256_HASH_LEN), Return(SOFTBUS_OK)));
-    EXPECT_CALL(ProxyPagingMock, SoftBusGenerateSessionKey).WillRepeatedly(Return(SOFTBUS_OK));
-    EXPECT_CALL(ProxyPagingMock, SoftBusGenerateRandomArray).WillRepeatedly(Return(SOFTBUS_OK));
+    EXPECT_CALL(ProxyPagingMock, SoftBusGenerateSessionKey).WillOnce(Return(SOFTBUS_OK));
+    EXPECT_CALL(ProxyPagingMock, SoftBusGenerateRandomArray).WillOnce(Return(SOFTBUS_OK));
     EXPECT_CALL(ProxyPagingMock, LnnGetLocalStrInfo).WillRepeatedly(Return(SOFTBUS_OK));
     EXPECT_CALL(ProxyPagingMock, AddNumberToSocketName).WillRepeatedly(Return(SOFTBUS_OK));
     EXPECT_CALL(ProxyPagingMock, GenerateChannelId).WillRepeatedly(Return(TEST_CHANNEL_ID));
@@ -940,7 +940,7 @@ HWTEST_F(SoftbusProxyChannelMessagePagingTest, TransPagingProcessHandshakeMsgTes
     EXPECT_CALL(ProxyPagingMock, SoftBusGenerateRandomArray).WillOnce(Return(SOFTBUS_OK));
     EXPECT_CALL(ProxyPagingMock, AddNumberToSocketName).WillOnce(Return(SOFTBUS_OK));
     EXPECT_CALL(ProxyPagingMock, GenerateChannelId).WillOnce(Return(TEST_CHANNEL_ID));
-    EXPECT_CALL(ProxyPagingMock, TransGetPkgnameByBusinessFlagPacked).WillOnce(Return(SOFTBUS_INVALID_PARAM));
+    EXPECT_CALL(ProxyPagingMock, TransGetPkgnameByBusinessFlagPacked).WillRepeatedly(Return(SOFTBUS_INVALID_PARAM));
     TransPagingProcessHandshakeMsg(&msg, accountHash, udidHash, authAccountHash);
 }
 
@@ -984,8 +984,8 @@ HWTEST_F(SoftbusProxyChannelMessagePagingTest, TransPagingProcessHandshakeMsgTes
     EXPECT_CALL(ProxyPagingMock, SoftBusGenerateRandomArray).WillOnce(Return(SOFTBUS_OK));
     EXPECT_CALL(ProxyPagingMock, AddNumberToSocketName).WillOnce(Return(SOFTBUS_OK));
     EXPECT_CALL(ProxyPagingMock, GenerateChannelId).WillOnce(Return(TEST_CHANNEL_ID));
-    EXPECT_CALL(ProxyPagingMock, TransGetPkgnameByBusinessFlagPacked).WillOnce(Return(SOFTBUS_OK));
-    EXPECT_CALL(ProxyPagingMock, TransProxyCreatePagingChanInfo).WillOnce(Return(SOFTBUS_INVALID_PARAM));
+    EXPECT_CALL(ProxyPagingMock, TransGetPkgnameByBusinessFlagPacked).WillRepeatedly(Return(SOFTBUS_OK));
+    EXPECT_CALL(ProxyPagingMock, TransProxyCreatePagingChanInfo).WillRepeatedly(Return(SOFTBUS_INVALID_PARAM));
     TransPagingProcessHandshakeMsg(&msg, accountHash, udidHash, authAccountHash);
 }
 
@@ -1029,10 +1029,10 @@ HWTEST_F(SoftbusProxyChannelMessagePagingTest, TransPagingProcessHandshakeMsgTes
     EXPECT_CALL(ProxyPagingMock, SoftBusGenerateRandomArray).WillOnce(Return(SOFTBUS_OK));
     EXPECT_CALL(ProxyPagingMock, AddNumberToSocketName).WillOnce(Return(SOFTBUS_OK));
     EXPECT_CALL(ProxyPagingMock, GenerateChannelId).WillOnce(Return(TEST_CHANNEL_ID));
-    EXPECT_CALL(ProxyPagingMock, TransGetPkgnameByBusinessFlagPacked).WillOnce(Return(SOFTBUS_OK));
-    EXPECT_CALL(ProxyPagingMock, TransProxyCreatePagingChanInfo).WillOnce(Return(SOFTBUS_OK));
+    EXPECT_CALL(ProxyPagingMock, TransGetPkgnameByBusinessFlagPacked).WillRepeatedly(Return(SOFTBUS_OK));
+    EXPECT_CALL(ProxyPagingMock, TransProxyCreatePagingChanInfo).WillRepeatedly(Return(SOFTBUS_OK));
     EXPECT_CALL(ProxyPagingMock, TransHasAndUpdatePagingListenPacked).WillRepeatedly(Return(true));
-    EXPECT_CALL(ProxyPagingMock, TransPagingGetPidAndDataByFlgPacked).WillOnce(Return(SOFTBUS_INVALID_PARAM));
+    EXPECT_CALL(ProxyPagingMock, TransPagingGetPidAndDataByFlgPacked).WillRepeatedly(Return(SOFTBUS_INVALID_PARAM));
     TransPagingProcessHandshakeMsg(&msg, accountHash, udidHash, authAccountHash);
 }
 
@@ -1076,13 +1076,13 @@ HWTEST_F(SoftbusProxyChannelMessagePagingTest, TransPagingProcessHandshakeMsgTes
     EXPECT_CALL(ProxyPagingMock, SoftBusGenerateRandomArray).WillOnce(Return(SOFTBUS_OK));
     EXPECT_CALL(ProxyPagingMock, AddNumberToSocketName).WillOnce(Return(SOFTBUS_OK));
     EXPECT_CALL(ProxyPagingMock, GenerateChannelId).WillOnce(Return(TEST_CHANNEL_ID));
-    EXPECT_CALL(ProxyPagingMock, TransGetPkgnameByBusinessFlagPacked).WillOnce(Return(SOFTBUS_OK));
-    EXPECT_CALL(ProxyPagingMock, TransProxyCreatePagingChanInfo).WillOnce(Return(SOFTBUS_OK));
+    EXPECT_CALL(ProxyPagingMock, TransGetPkgnameByBusinessFlagPacked).WillRepeatedly(Return(SOFTBUS_OK));
+    EXPECT_CALL(ProxyPagingMock, TransProxyCreatePagingChanInfo).WillRepeatedly(Return(SOFTBUS_OK));
     EXPECT_CALL(ProxyPagingMock, TransHasAndUpdatePagingListenPacked).WillRepeatedly(Return(true));
     EXPECT_CALL(ProxyPagingMock, TransPagingGetPidAndDataByFlgPacked).WillRepeatedly(DoAll(
         SetArgPointee<2>(1), Return(SOFTBUS_OK)));
     EXPECT_CALL(ProxyPagingMock, TransPagingUpdatePidAndData).WillRepeatedly(Return(SOFTBUS_OK));
-    EXPECT_CALL(ProxyPagingMock, OnProxyChannelOpened).WillOnce(Return(SOFTBUS_OK));
+    EXPECT_CALL(ProxyPagingMock, OnProxyChannelOpened).WillRepeatedly(Return(SOFTBUS_OK));
     TransPagingProcessHandshakeMsg(&msg, accountHash, udidHash, authAccountHash);
 }
 
@@ -1139,7 +1139,7 @@ HWTEST_F(SoftbusProxyChannelMessagePagingTest, TransWaitListenResult001, TestSiz
  * @tc.type: FUNC
  * @tc.require:
  */
-HWTEST_F(SoftbusProxyChannelMessagePagingTest, TransPagingPackHandshakeErrMsg001, TestSize.Level2)
+HWTEST_F(SoftbusProxyChannelMessagePagingTest, TransPagingPackHandshakeErrMsg001, TestSize.Level1)
 {
     char *buf = TransPagingPackHandshakeErrMsg(SOFTBUS_OK, TEST_CHANNEL_ID);
     EXPECT_TRUE(buf != nullptr);
@@ -1162,7 +1162,7 @@ HWTEST_F(SoftbusProxyChannelMessagePagingTest, TransPagingPackHandshakeErrMsg001
  * @tc.type: FUNC
  * @tc.require:
  */
-HWTEST_F(SoftbusProxyChannelMessagePagingTest, TransPagingPackHandshakeMsg001, TestSize.Level2)
+HWTEST_F(SoftbusProxyChannelMessagePagingTest, TransPagingPackHandshakeMsg001, TestSize.Level1)
 {
     ProxyChannelInfo info = {
         .appInfo.myData.dataLen = 1,
@@ -1186,7 +1186,7 @@ HWTEST_F(SoftbusProxyChannelMessagePagingTest, TransPagingPackHandshakeMsg001, T
  * @tc.type: FUNC
  * @tc.require:
  */
-HWTEST_F(SoftbusProxyChannelMessagePagingTest, TransPagingPackHandshakeAckMsg001, TestSize.Level2)
+HWTEST_F(SoftbusProxyChannelMessagePagingTest, TransPagingPackHandshakeAckMsg001, TestSize.Level1)
 {
     ProxyChannelInfo info = {
         .appInfo.myData.dataLen = 1,
@@ -1218,7 +1218,7 @@ HWTEST_F(SoftbusProxyChannelMessagePagingTest, TransPagingPackHandshakeAckMsg001
  * @tc.type: FUNC
  * @tc.require:
  */
-HWTEST_F(SoftbusProxyChannelMessagePagingTest, TransPagingPackHandshakeAckMsg002, TestSize.Level2)
+HWTEST_F(SoftbusProxyChannelMessagePagingTest, TransPagingPackHandshakeAckMsg002, TestSize.Level1)
 {
     int16_t channelId = -1;
     char *buf = TransProxyPagingPackChannelId(channelId);
