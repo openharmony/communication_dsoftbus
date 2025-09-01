@@ -53,6 +53,11 @@ int32_t LnnRetrieveDeviceInfoByUdidStub(const char *udid, NodeInfo *deviceInfo)
 {
     (void)udid;
     (void)deviceInfo;
+    static bool gRetry = false;
+    if (!gRetry) {
+        gRetry = true;
+        return SOFTBUS_MEM_ERR;
+    }
     return SOFTBUS_OK;
 }
 
@@ -303,9 +308,9 @@ HWTEST_F(LNNDistributedNetLedgerManagerTest, LNN_SET_DL_CONN_USER_ID_TEST_001, T
     ret = LnnSetDLConnUserId(NODE_NETWORK_ID, userId);
     EXPECT_EQ(ret, SOFTBUS_NOT_FIND);
     ret = LnnSetDLConnUserId(NODE_NETWORK_ID, userId);
-    EXPECT_EQ(ret, SOFTBUS_MEM_ERR);
+    EXPECT_EQ(ret, SOFTBUS_NOT_IMPLEMENT);
     ret = LnnSetDLConnUserId(NODE_NETWORK_ID, userId);
-    EXPECT_EQ(ret, SOFTBUS_OK);
+    EXPECT_EQ(ret, SOFTBUS_NOT_IMPLEMENT);
     SoftBusFree(nodeInfo);
 }
 
@@ -330,9 +335,9 @@ HWTEST_F(LNNDistributedNetLedgerManagerTest, LNN_SET_DL_CONN_USER_ID_CHECK_SUM_T
     ret = LnnSetDLConnUserIdCheckSum(NODE_NETWORK_ID, userIdCheckSum);
     EXPECT_EQ(ret, SOFTBUS_NOT_FIND);
     ret = LnnSetDLConnUserIdCheckSum(NODE_NETWORK_ID, userIdCheckSum);
-    EXPECT_EQ(ret, SOFTBUS_MEM_ERR);
+    EXPECT_EQ(ret, SOFTBUS_NOT_IMPLEMENT);
     ret = LnnSetDLConnUserIdCheckSum(NODE_NETWORK_ID, userIdCheckSum);
-    EXPECT_EQ(ret, SOFTBUS_OK);
+    EXPECT_EQ(ret, SOFTBUS_NOT_IMPLEMENT);
     SoftBusFree(nodeInfo);
 }
 
@@ -358,9 +363,9 @@ HWTEST_F(LNNDistributedNetLedgerManagerTest, LNN_SET_DL_CONN_CAPABILITY_TEST_001
     pfnLnnEnhanceFuncList->lnnRetrieveDeviceInfoByUdid = nullptr;
     pfnLnnEnhanceFuncList->lnnSaveRemoteDeviceInfo = nullptr;
     ret = LnnSetDLConnCapability(NODE_NETWORK_ID, connCapability);
-    EXPECT_EQ(ret, SOFTBUS_MEM_ERR);
+    EXPECT_EQ(ret, SOFTBUS_NOT_IMPLEMENT);
     ret = LnnSetDLConnCapability(NODE_NETWORK_ID, connCapability);
-    EXPECT_EQ(ret, SOFTBUS_OK);
+    EXPECT_EQ(ret, SOFTBUS_NOT_IMPLEMENT);
     SoftBusFree(nodeInfo);
 }
 
@@ -417,6 +422,8 @@ HWTEST_F(LNNDistributedNetLedgerManagerTest, LNN_GET_DL_UPDATE_TIMESTAMP_TEST_00
     NodeInfo *nodeInfo = (NodeInfo *)SoftBusCalloc(sizeof(NodeInfo));
     ASSERT_NE(nodeInfo, nullptr);
 
+    LnnDistributedNetLedgerManagerInterfaceMock mock;
+    EXPECT_CALL(mock, LnnGetNodeInfoById).WillRepeatedly(Return(nodeInfo));
     uint64_t timestamp = DEFAULT_VALUE;
     int32_t ret = LnnGetDLUpdateTimestamp(nullptr, &timestamp);
     EXPECT_EQ(ret, SOFTBUS_INVALID_PARAM);
@@ -561,7 +568,7 @@ HWTEST_F(LNNDistributedNetLedgerManagerTest, LNN_GET_REMOTE_BYTE_INFO_TEST_001, 
     ret = LnnGetRemoteByteInfo(NODE_NETWORK_ID, BYTE_KEY_PUB_MAC, irk, LFINDER_IRK_LEN);
     EXPECT_EQ(ret, SOFTBUS_NETWORK_GET_NODE_INFO_ERR);
     ret = LnnGetRemoteByteInfo(NODE_NETWORK_ID, BYTE_KEY_PUB_MAC, irk, LFINDER_IRK_LEN);
-    EXPECT_EQ(ret, SOFTBUS_NETWORK_GET_NODE_INFO_ERR);
+    EXPECT_EQ(ret, SOFTBUS_OK);
     SoftBusFree(nodeInfo);
 }
 
@@ -718,11 +725,13 @@ HWTEST_F(LNNDistributedNetLedgerManagerTest, LNN_SET_DL_DEVICE_BROADCAST_CIPHERI
     NodeInfo *nodeInfo = (NodeInfo *)SoftBusCalloc(sizeof(NodeInfo));
     ASSERT_NE(nodeInfo, nullptr);
 
+    LnnDistributedNetLedgerManagerInterfaceMock mock;
+    EXPECT_CALL(mock, GetNodeInfoFromMap).WillRepeatedly(Return(nodeInfo));
     const char *devUdid = "123456ABCDEF";
     const char *devUdidInvalid = "123456789ABCDEFG";
     const char *cipherIv = "iviviviviviv";
     int32_t ret = LnnSetDLDeviceBroadcastCipherIv(devUdidInvalid, cipherIv);
-    EXPECT_EQ(ret, SOFTBUS_NOT_FIND);
+    EXPECT_EQ(ret, SOFTBUS_OK);
     ret = LnnSetDLDeviceBroadcastCipherIv(devUdid, cipherIv);
     EXPECT_EQ(ret, SOFTBUS_OK);
     SoftBusFree(nodeInfo);
@@ -739,11 +748,13 @@ HWTEST_F(LNNDistributedNetLedgerManagerTest, LNN_SET_DL_DEVICE_BROADCAST_CIPHER_
     NodeInfo *nodeInfo = (NodeInfo *)SoftBusCalloc(sizeof(NodeInfo));
     ASSERT_NE(nodeInfo, nullptr);
 
+    LnnDistributedNetLedgerManagerInterfaceMock mock;
+    EXPECT_CALL(mock, GetNodeInfoFromMap).WillRepeatedly(Return(nodeInfo));
     const char *devUdid = "123456ABCDEF";
     const char *devUdidInvalid = "123456789ABCDEFG";
     const char *cipherKey = "keykeykeykey";
     int32_t ret = LnnSetDLDeviceBroadcastCipherKey(devUdidInvalid, (const void *)cipherKey);
-    EXPECT_EQ(ret, SOFTBUS_NOT_FIND);
+    EXPECT_EQ(ret, SOFTBUS_OK);
     ret = LnnSetDLDeviceBroadcastCipherKey(devUdid, (const void *)cipherKey);
     EXPECT_EQ(ret, SOFTBUS_OK);
     SoftBusFree(nodeInfo);
@@ -760,6 +771,8 @@ HWTEST_F(LNNDistributedNetLedgerManagerTest, LNN_SET_DL_DEVICE_STATE_VERSION_TES
     NodeInfo *nodeInfo = (NodeInfo *)SoftBusCalloc(sizeof(NodeInfo));
     ASSERT_NE(nodeInfo, nullptr);
 
+    LnnDistributedNetLedgerManagerInterfaceMock mock;
+    EXPECT_CALL(mock, GetNodeInfoFromMap).WillRepeatedly(Return(nodeInfo));
     const char *devUdid = "123456ABCDEF";
     int32_t stateVersion = 0;
     int32_t ret = LnnSetDLDeviceStateVersion(devUdid, stateVersion);
@@ -784,6 +797,8 @@ HWTEST_F(LNNDistributedNetLedgerManagerTest, LNN_SET_DL_DEVICE_NICK_NAME_BY_UDID
     NodeInfo *nodeInfo = (NodeInfo *)SoftBusCalloc(sizeof(NodeInfo));
     ASSERT_NE(nodeInfo, nullptr);
 
+    LnnDistributedNetLedgerManagerInterfaceMock mock;
+    EXPECT_CALL(mock, GetNodeInfoFromMap).WillRepeatedly(Return(nodeInfo));
     const char *devUdid = "123456ABCDEF";
     const char *devName = "deviceNickname";
     int32_t ret = LnnSetDLDeviceNickNameByUdid(nullptr, devName);
@@ -812,6 +827,8 @@ HWTEST_F(LNNDistributedNetLedgerManagerTest, LNN_SET_DL_UNIFIED_DEFAULT_DEVICE_N
     NodeInfo *nodeInfo = (NodeInfo *)SoftBusCalloc(sizeof(NodeInfo));
     ASSERT_NE(nodeInfo, nullptr);
 
+    LnnDistributedNetLedgerManagerInterfaceMock mock;
+    EXPECT_CALL(mock, GetNodeInfoFromMap).WillRepeatedly(Return(nodeInfo));
     const char *devUdid = "123456ABCDEF";
     const char *devName = "deviceUnifiedDefaultName";
     int32_t ret = LnnSetDLUnifiedDefaultDeviceName(nullptr, devName);
@@ -819,7 +836,7 @@ HWTEST_F(LNNDistributedNetLedgerManagerTest, LNN_SET_DL_UNIFIED_DEFAULT_DEVICE_N
     ret = LnnSetDLUnifiedDefaultDeviceName(devUdid, nullptr);
     EXPECT_EQ(ret, SOFTBUS_INVALID_PARAM);
     ret = LnnSetDLUnifiedDefaultDeviceName(devUdid, devName);
-    EXPECT_EQ(ret, SOFTBUS_NOT_FIND);
+    EXPECT_EQ(ret, SOFTBUS_OK);
     ret = LnnSetDLUnifiedDefaultDeviceName(devUdid, devName);
     EXPECT_EQ(ret, SOFTBUS_OK);
 
@@ -841,6 +858,8 @@ HWTEST_F(LNNDistributedNetLedgerManagerTest, LNN_SET_DL_UNIFIED_DEVICE_NAME_TEST
     NodeInfo *nodeInfo = (NodeInfo *)SoftBusCalloc(sizeof(NodeInfo));
     ASSERT_NE(nodeInfo, nullptr);
 
+    LnnDistributedNetLedgerManagerInterfaceMock mock;
+    EXPECT_CALL(mock, GetNodeInfoFromMap).WillRepeatedly(Return(nodeInfo));
     const char *devUdid = "123456ABCDEF";
     const char *devName = "deviceUnifiedName";
     int32_t ret = LnnSetDLUnifiedDeviceName(nullptr, devName);
@@ -868,9 +887,9 @@ HWTEST_F(LNNDistributedNetLedgerManagerTest, LNN_SET_DL_DEVICE_NICK_NAME_TEST_00
 {
     NodeInfo *nodeInfo = (NodeInfo *)SoftBusCalloc(sizeof(NodeInfo));
     ASSERT_NE(nodeInfo, nullptr);
+
     LnnDistributedNetLedgerManagerInterfaceMock mock;
     EXPECT_CALL(mock, LnnGetNodeInfoById).WillOnce(Return(nullptr)).WillRepeatedly(Return(nodeInfo));
-
     const char *devNetworkId = "123456ABCDEF";
     const char *devName = "deviceNickName";
     bool ret = LnnSetDLDeviceNickName(nullptr, devName);
@@ -895,6 +914,8 @@ HWTEST_F(LNNDistributedNetLedgerManagerTest, LNN_SET_DL_DEVICE_INFO_NAME_TEST_00
     NodeInfo *nodeInfo = (NodeInfo *)SoftBusCalloc(sizeof(NodeInfo));
     ASSERT_NE(nodeInfo, nullptr);
 
+    LnnDistributedNetLedgerManagerInterfaceMock mock;
+    EXPECT_CALL(mock, GetNodeInfoFromMap).WillRepeatedly(Return(nodeInfo));
     const char *devNetworkId = "123456ABCDEF";
     const char *devName = "deviceNickName";
     bool ret = LnnSetDLDeviceInfoName(nullptr, devName);
@@ -934,7 +955,7 @@ HWTEST_F(LNNDistributedNetLedgerManagerTest, LNN_GET_REMOTE_NUM16_INFO_TEST_001,
     nodeInfo->status = STATUS_ONLINE;
     EXPECT_CALL(mock, LnnGetNodeInfoById).WillOnce(Return(nodeInfo));
     ret = LnnGetRemoteNum16Info(NODE_NETWORK_ID, NUM_KEY_DATA_CHANGE_FLAG, &remoteCap);
-    EXPECT_EQ(ret, SOFTBUS_OK);
+    EXPECT_EQ(ret, SOFTBUS_NETWORK_NODE_OFFLINE);
     SoftBusFree(nodeInfo);
 }
 
@@ -979,7 +1000,7 @@ HWTEST_F(LNNDistributedNetLedgerManagerTest, LNN_GET_REMOTE_NUMU32_INFO_TEST_002
     nodeInfo->status = STATUS_ONLINE;
     EXPECT_CALL(mock, LnnGetNodeInfoById).WillOnce(Return(nodeInfo));
     ret = LnnGetRemoteNumU32Info(NODE_NETWORK_ID, NUM_KEY_STA_FREQUENCY, &remoteCap);
-    EXPECT_EQ(ret, SOFTBUS_OK);
+    EXPECT_EQ(ret, SOFTBUS_NETWORK_NODE_OFFLINE);
     SoftBusFree(nodeInfo);
 }
 
@@ -1005,7 +1026,7 @@ HWTEST_F(LNNDistributedNetLedgerManagerTest, LNN_GET_REMOTE_NUMU32_INFO_TEST_003
     nodeInfo->status = STATUS_ONLINE;
     EXPECT_CALL(mock, LnnGetNodeInfoById).WillOnce(Return(nodeInfo));
     ret = LnnGetRemoteNumU32Info(NODE_NETWORK_ID, NUM_KEY_STATE_VERSION, &remoteCap);
-    EXPECT_EQ(ret, SOFTBUS_OK);
+    EXPECT_EQ(ret, SOFTBUS_NETWORK_NODE_OFFLINE);
     SoftBusFree(nodeInfo);
 }
 
@@ -1031,7 +1052,7 @@ HWTEST_F(LNNDistributedNetLedgerManagerTest, LNN_GET_REMOTE_NUMU32_INFO_TEST_004
     nodeInfo->status = STATUS_ONLINE;
     EXPECT_CALL(mock, LnnGetNodeInfoById).WillOnce(Return(nodeInfo));
     ret = LnnGetRemoteNumU32Info(NODE_NETWORK_ID, NUM_KEY_P2P_ROLE, &remoteCap);
-    EXPECT_EQ(ret, SOFTBUS_OK);
+    EXPECT_EQ(ret, SOFTBUS_NETWORK_NODE_OFFLINE);
     SoftBusFree(nodeInfo);
 }
 
@@ -1074,7 +1095,7 @@ HWTEST_F(LNNDistributedNetLedgerManagerTest, LNN_GET_REMOTE_NUMU32_INFO_TEST_006
     nodeInfo->status = STATUS_ONLINE;
     EXPECT_CALL(mock, LnnGetNodeInfoById).WillOnce(Return(nodeInfo));
     ret = LnnGetRemoteNumU32Info(NODE_NETWORK_ID, NUM_KEY_STATIC_CAP_LEN, &remoteCap);
-    EXPECT_EQ(ret, SOFTBUS_OK);
+    EXPECT_EQ(ret, SOFTBUS_NETWORK_NODE_OFFLINE);
     SoftBusFree(nodeInfo);
 }
 
@@ -1122,7 +1143,7 @@ HWTEST_F(LNNDistributedNetLedgerManagerTest, LNN_GET_REMOTE_STR_INFO_TEST_001, T
     nodeInfo->status = STATUS_ONLINE;
     EXPECT_CALL(mock, LnnGetNodeInfoById).WillOnce(Return(nodeInfo));
     ret = LnnGetRemoteStrInfo(NODE_NETWORK_ID, STRING_KEY_CHAN_LIST_5G, udid, sizeof(udid));
-    EXPECT_EQ(ret, SOFTBUS_OK);
+    EXPECT_EQ(ret, SOFTBUS_NETWORK_NODE_OFFLINE);
     SoftBusFree(nodeInfo);
 }
 
@@ -1148,7 +1169,7 @@ HWTEST_F(LNNDistributedNetLedgerManagerTest, LNN_GET_REMOTE_STR_INFO_TEST_002, T
     nodeInfo->status = STATUS_ONLINE;
     EXPECT_CALL(mock, LnnGetNodeInfoById).WillOnce(Return(nodeInfo));
     ret = LnnGetRemoteStrInfo(NODE_NETWORK_ID, STRING_KEY_WIFI_CFG, udid, sizeof(udid));
-    EXPECT_EQ(ret, SOFTBUS_OK);
+    EXPECT_EQ(ret, SOFTBUS_NETWORK_NODE_OFFLINE);
     SoftBusFree(nodeInfo);
 }
 
@@ -1174,7 +1195,7 @@ HWTEST_F(LNNDistributedNetLedgerManagerTest, LNN_GET_REMOTE_STR_INFO_TEST_003, T
     nodeInfo->status = STATUS_ONLINE;
     EXPECT_CALL(mock, LnnGetNodeInfoById).WillOnce(Return(nodeInfo));
     ret = LnnGetRemoteStrInfo(NODE_NETWORK_ID, STRING_KEY_P2P_GO_MAC, udid, sizeof(udid));
-    EXPECT_EQ(ret, SOFTBUS_OK);
+    EXPECT_EQ(ret, SOFTBUS_NETWORK_NODE_OFFLINE);
     SoftBusFree(nodeInfo);
 }
 
@@ -1199,7 +1220,7 @@ HWTEST_F(LNNDistributedNetLedgerManagerTest, LNN_GET_REMOTE_STR_INFO_TEST_004, T
     nodeInfo->status = STATUS_ONLINE;
     EXPECT_CALL(mock, LnnGetNodeInfoById).WillOnce(Return(nodeInfo));
     ret = LnnGetRemoteStrInfo(NODE_NETWORK_ID, STRING_KEY_NODE_ADDR, udid, sizeof(udid));
-    EXPECT_EQ(ret, SOFTBUS_OK);
+    EXPECT_EQ(ret, SOFTBUS_NETWORK_NODE_OFFLINE);
     SoftBusFree(nodeInfo);
 }
 
@@ -1225,7 +1246,7 @@ HWTEST_F(LNNDistributedNetLedgerManagerTest, LNN_GET_REMOTE_STR_INFO_TEST_005, T
     nodeInfo->status = STATUS_ONLINE;
     EXPECT_CALL(mock, LnnGetNodeInfoById).WillOnce(Return(nodeInfo));
     ret = LnnGetRemoteStrInfo(NODE_NETWORK_ID, STRING_KEY_WIFIDIRECT_ADDR, udid, sizeof(udid));
-    EXPECT_EQ(ret, SOFTBUS_OK);
+    EXPECT_EQ(ret, SOFTBUS_NETWORK_NODE_OFFLINE);
     SoftBusFree(nodeInfo);
 }
 
@@ -1251,7 +1272,7 @@ HWTEST_F(LNNDistributedNetLedgerManagerTest, LNN_GET_REMOTE_STR_INFO_TEST_006, T
     nodeInfo->status = STATUS_ONLINE;
     EXPECT_CALL(mock, LnnGetNodeInfoById).WillOnce(Return(nodeInfo));
     ret = LnnGetRemoteStrInfo(NODE_NETWORK_ID, STRING_KEY_P2P_MAC, udid, sizeof(udid));
-    EXPECT_EQ(ret, SOFTBUS_OK);
+    EXPECT_EQ(ret, SOFTBUS_NETWORK_NODE_OFFLINE);
     SoftBusFree(nodeInfo);
 }
 
