@@ -624,6 +624,8 @@ HWTEST_F(AuthOtherTest, AUTH_MANAGER_SET_SESSION_KEY_TEST_001, TestSize.Level1)
     if (sessionKey == nullptr) {
         return;
     }
+    AuthCommonInterfaceMock connMock;
+    EXPECT_CALL(connMock, LnnGetLocalNumU64Info).WillRepeatedly(Return(SOFTBUS_OK));
     sessionKey->len = 0;
     int32_t ret = AuthManagerSetSessionKey(authSeq, info, sessionKey, false, false);
     EXPECT_TRUE(ret == SOFTBUS_OK);
@@ -731,6 +733,8 @@ HWTEST_F(AuthOtherTest, CONVERT_AUTH_LINK_TYPE_TO_HISYSEVENT_LINKTYPE_TEST_001, 
     ReportAuthResultEvt(authFsm, SOFTBUS_AUTH_DEVICE_DISCONNECTED);
     ReportAuthResultEvt(authFsm, SOFTBUS_AUTH_HICHAIN_PROCESS_FAIL);
     ReportAuthResultEvt(authFsm, 11);
+    AuthCommonInterfaceMock connMock;
+    EXPECT_CALL(connMock, SoftBusGenerateStrHash).WillRepeatedly(Return(SOFTBUS_OK));
     int32_t ret1 = RecoveryFastAuthKey(authFsm);
     EXPECT_TRUE(ret1 != SOFTBUS_OK);
     AuthSessionInfo authSessionInfo;
@@ -1110,6 +1114,8 @@ HWTEST_F(AuthOtherTest, AUTH_DIRECT_ONLINE_PROCESS_SESSION_KEY_TEST_001, TestSiz
  */
 HWTEST_F(AuthOtherTest, IS_SAME_ACCOUNT_DEVICE_TEST_001, TestSize.Level1)
 {
+    AuthCommonInterfaceMock connMock;
+    EXPECT_CALL(connMock, SoftBusGenerateStrHash).WillRepeatedly(Return(SOFTBUS_OK));
     EXPECT_TRUE(LnnInitLocalLedger() == SOFTBUS_OK);
     uint8_t accountHash[SHA_256_HASH_LEN] = "accounthashtest";
     EXPECT_TRUE(LnnSetLocalByteInfo(BYTE_KEY_ACCOUNT_HASH, accountHash, SHA_256_HASH_LEN) == SOFTBUS_OK);
@@ -1132,6 +1138,8 @@ HWTEST_F(AuthOtherTest, IS_SAME_ACCOUNT_DEVICE_TEST_001, TestSize.Level1)
  */
 HWTEST_F(AuthOtherTest, FILL_AUTH_SESSION_INFO_TEST_001, TestSize.Level1)
 {
+    AuthCommonInterfaceMock connMock;
+    EXPECT_CALL(connMock, SoftBusGenerateStrHash).WillRepeatedly(Return(SOFTBUS_OK));
     AuthSessionInfo info = {
         .connInfo.info.bleInfo.deviceIdHash = "123456789udidhashtest",
     };

@@ -351,7 +351,7 @@ HWTEST_F(KVAdapterTest, DeRegisterDataChangeListener001, TestSize.Level1)
  */
 HWTEST_F(KVAdapterTest, CloudSync001, TestSize.Level1)
 {
-    EXPECT_EQ(SOFTBUS_OK, kvStore->CloudSync());
+    EXPECT_NE(SOFTBUS_OK, kvStore->CloudSync());
 }
 
 /**

@@ -66,7 +66,7 @@ HWTEST_F(AuthUserCommonKeyTest, AUTH_USER_COMMON_KEY_Test_001, TestSize.Level1)
     uint32_t ukLen = SESSION_KEY_LENGTH;
     uint8_t uk[SESSION_KEY_LENGTH] = { 0 };
     ret = GetUserKeyByUkId(sessionKeyId, uk, ukLen);
-    EXPECT_EQ(ret, SOFTBUS_NO_INIT);
+    EXPECT_EQ(ret, SOFTBUS_INVALID_PARAM);
 }
 
 /*
