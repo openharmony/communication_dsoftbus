@@ -397,7 +397,7 @@ static void DestroyAllLocalIfaceOfList(List *list, uint8_t af)
         if (iface->af != af) {
             continue;
         }
-        DestroyLocalIface(iface, true);
+        DestroyLocalIface(iface, false);
     }
 }
 
