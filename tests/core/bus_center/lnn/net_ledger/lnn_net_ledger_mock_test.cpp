@@ -146,24 +146,19 @@ HWTEST_F(LNNNetLedgerMockTest, LnnSaveBroadcastLinkKeyTest001, TestSize.Level0)
     (void)memcpy_s(info.key, SESSION_KEY_LENGTH, "testkey", strlen("testkey"));
     (void)memcpy_s(info.iv, BROADCAST_IV_LEN, "testiv", strlen("testiv"));
     EXPECT_EQ(LnnSaveBroadcastLinkKey(udid, &info), false);
-
-    EXPECT_CALL(syncMock, LnnRetrieveDeviceInfo).WillOnce(Return(SOFTBUS_INVALID_PARAM));
     EXPECT_EQ(LnnSaveBroadcastLinkKey(udid, &info), true);
 
     NodeInfo deviceInfo;
     (void)memset_s(&deviceInfo, sizeof(NodeInfo), 0, sizeof(NodeInfo));
     (void)memcpy_s(deviceInfo.cipherInfo.key, SESSION_KEY_LENGTH, "changekey", strlen("changekey"));
     (void)memcpy_s(deviceInfo.cipherInfo.iv, BROADCAST_IV_LEN, "changeiv", strlen("changeiv"));
-    EXPECT_CALL(syncMock, LnnRetrieveDeviceInfo).WillOnce(DoAll(SetArgPointee<1>(deviceInfo), Return(SOFTBUS_OK)));
     EXPECT_EQ(LnnSaveBroadcastLinkKey(udid, &info), true);
 
     (void)memcpy_s(deviceInfo.cipherInfo.key, SESSION_KEY_LENGTH, "testkey", strlen("testkey"));
     (void)memcpy_s(deviceInfo.cipherInfo.iv, BROADCAST_IV_LEN, "changeiv", strlen("changeiv"));
-    EXPECT_CALL(syncMock, LnnRetrieveDeviceInfo).WillOnce(DoAll(SetArgPointee<1>(deviceInfo), Return(SOFTBUS_OK)));
     EXPECT_EQ(LnnSaveBroadcastLinkKey(udid, &info), true);
 
     (void)memcpy_s(&deviceInfo.cipherInfo, sizeof(BroadcastCipherInfo), &info, sizeof(BroadcastCipherInfo));
-    EXPECT_CALL(syncMock, LnnRetrieveDeviceInfo).WillOnce(DoAll(SetArgPointee<1>(deviceInfo), Return(SOFTBUS_OK)));
     EXPECT_EQ(LnnSaveBroadcastLinkKey(udid, &info), true);
 }
 } // namespace OHOS
