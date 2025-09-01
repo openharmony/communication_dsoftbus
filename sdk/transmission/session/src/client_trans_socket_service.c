@@ -168,6 +168,7 @@ int32_t Bind(int32_t socket, const QosTV qos[], uint32_t qosCount, const ISocket
     TRANS_LOGI(TRANS_SDK, "Bind end, stop timer, socket=%{public}d", socket);
     (void)ClientHandleBindWaitTimer(socket, 0, TIMER_ACTION_STOP);
     if (ret != SOFTBUS_OK) {
+        (void)ClientSetEnableStatusBySocket(socket, ENABLE_STATUS_INIT);
         (void)SetSessionStateBySessionId(socket, SESSION_STATE_INIT, 0);
     }
     return ret;
