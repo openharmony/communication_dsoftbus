@@ -107,7 +107,7 @@ HWTEST_F(AuthUkManagerTest, AUTH_UK_MANAGER_Test_002, TestSize.Level1)
     ret = AuthGenUkIdByAclInfo(&aclInfo, requestId, nullptr);
     EXPECT_EQ(ret, SOFTBUS_INVALID_PARAM);
     ret = AuthGenUkIdByAclInfo(&aclInfo, requestId, &genCb);
-    EXPECT_EQ(ret, SOFTBUS_NOT_FIND);
+    EXPECT_EQ(ret, SOFTBUS_AUTH_NOT_FIND_LARGER_UDID);
 }
 
 /*
@@ -204,6 +204,30 @@ HWTEST_F(AuthUkManagerTest, AUTH_UK_MANAGER_Test_007, TestSize.Level1)
 {
     uint32_t ret = GenUkSeq();
     EXPECT_GT(ret, 0);
+}
+
+/*
+ * @tc.name: AUTH_CHECK_ACL_WITH_UDID_Test_001
+ * @tc.desc: CheckAclWithLocalUdid test
+ * @tc.type: FUNC
+ * @tc.require:
+ */
+HWTEST_F(AuthUkManagerTest, AUTH_CHECK_ACL_WITH_UDID_Test_001, TestSize.Level1)
+{
+    AuthACLInfo oldInfo = { 0 };
+    AuthACLInfo newInfo = { 0 };
+    int32_t ret = CheckAclWithLocalUdid(nullptr, nullptr);
+    EXPECT_EQ(ret, SOFTBUS_INVALID_PARAM);
+    ret = CheckAclWithLocalUdid(&oldInfo, &newInfo);
+    EXPECT_EQ(ret, SOFTBUS_AUTH_NOT_FIND_LARGER_UDID);
+    ret = LnnGetLocalStrInfo(STRING_KEY_DEV_UDID, oldInfo.sourceUdid, UDID_BUF_LEN);
+    EXPECT_EQ(ret, SOFTBUS_OK);
+    ret = CheckAclWithLocalUdid(&oldInfo, &newInfo);
+    EXPECT_EQ(ret, SOFTBUS_OK);
+    ret = LnnGetLocalStrInfo(STRING_KEY_DEV_UDID, oldInfo.sinkUdid, UDID_BUF_LEN);
+    EXPECT_EQ(ret, SOFTBUS_OK);
+    ret = CheckAclWithLocalUdid(&oldInfo, &newInfo);
+    EXPECT_EQ(ret, SOFTBUS_OK);
 }
 
 /*
