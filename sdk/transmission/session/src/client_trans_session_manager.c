@@ -2440,8 +2440,7 @@ int32_t ClientGetSessionNameByChannelId(int32_t channelId, int32_t channelType, 
             if (sessionNode->channelId != channelId || sessionNode->channelType != (ChannelType)channelType) {
                 TRANS_LOGE(TRANS_SDK, "channelId mismatch sessionNode->channelId:%{public}d channelId:%{public}d",
                     sessionNode->channelId, channelId);
-                UnlockClientSessionServerList();
-                return SOFTBUS_INVALID_PARAM;
+                continue;
             }
             if (memcpy_s(sessionName, len, serverNode->sessionName, SESSION_NAME_SIZE_MAX)!= EOK) {
                 TRANS_LOGE(TRANS_SDK, "sessionName copy failed");
