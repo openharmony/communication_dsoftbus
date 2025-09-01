@@ -296,7 +296,7 @@ HWTEST_F(AuthLaneTest, AUTH_ALLOC_LANE_WLAN_001, TestSize.Level1)
     laneConnInfo.type = LANE_WLAN_5G;
     AuthOnLaneAllocSuccess(laneReqId, &laneConnInfo);
 
-    DupAuthManager(auth);
+    DelAuthManager(auth, connInfo.type);
     DestroyAuthManagerList();
     AuthCommonDeinit();
     DeInitAuthReqInfo();
@@ -340,7 +340,7 @@ HWTEST_F(AuthLaneTest, AUTH_ALLOC_LANE_WLAN_002, TestSize.Level1)
     laneConnInfo.type = LANE_WLAN_5G;
     AuthOnLaneAllocSuccess(laneReqId, &laneConnInfo);
 
-    DupAuthManager(auth);
+    DelAuthManager(auth, connInfo.type);
     DestroyAuthManagerList();
     AuthCommonDeinit();
     DeInitAuthReqInfo();
@@ -380,7 +380,7 @@ HWTEST_F(AuthLaneTest, AUTH_ALLOC_LANE_WLAN_003, TestSize.Level1)
     uint32_t laneReqId = GetLaneManager()->lnnGetLaneHandle(LANE_TYPE_CTRL);
     AuthOnLaneAllocFail(laneReqId, SOFTBUS_INVALID_PARAM);
 
-    DupAuthManager(auth);
+    DelAuthManager(auth, connInfo.type);
     DestroyAuthManagerList();
     AuthCommonDeinit();
     DeInitAuthReqInfo();
@@ -426,7 +426,7 @@ HWTEST_F(AuthLaneTest, AUTH_ALLOC_LANE_BLE_001, TestSize.Level1)
     laneConnInfo.type = LANE_BLE;
     AuthOnLaneAllocSuccess(laneReqId, &laneConnInfo);
 
-    DupAuthManager(auth);
+    DelAuthManager(auth, connInfo.type);
     DestroyAuthManagerList();
     AuthCommonDeinit();
     DeInitAuthReqInfo();
@@ -472,7 +472,7 @@ HWTEST_F(AuthLaneTest, AUTH_ALLOC_LANE_BR_001, TestSize.Level1)
     laneConnInfo.type = LANE_BR;
     AuthOnLaneAllocSuccess(laneReqId, &laneConnInfo);
 
-    DupAuthManager(auth);
+    DelAuthManager(auth, connInfo.type);
     DestroyAuthManagerList();
     AuthCommonDeinit();
     DeInitAuthReqInfo();
@@ -515,7 +515,7 @@ HWTEST_F(AuthLaneTest, AUTH_ALLOC_LANE_P2P_001, TestSize.Level1)
     uint32_t laneReqId = GetLaneManager()->lnnGetLaneHandle(LANE_TYPE_CTRL);
     AuthOnLaneAllocFail(laneReqId, SOFTBUS_INVALID_PARAM);
 
-    DupAuthManager(auth);
+    DelAuthManager(auth, connInfo.type);
     DestroyAuthManagerList();
     AuthCommonDeinit();
     DeInitAuthReqInfo();

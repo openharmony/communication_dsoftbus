@@ -32,6 +32,7 @@ const int32_t TEST_MODULE = 2;
 const int64_t TSET_SEQ = 3;
 const int32_t TEST_FLAG = 4;
 const uint32_t TEST_LEN = 5;
+constexpr uint8_t PACK_DATA[AUTH_PKT_HEAD_LEN] = "123456ABCDEF";
 
 class AuthTcpConnectionTest : public testing::Test {
 public:
@@ -238,7 +239,7 @@ HWTEST_F(AuthTcpConnectionTest, MODULE_TO_DATA_TYPE_TEST_001, TestSize.Level1)
  */
 HWTEST_F(AuthTcpConnectionTest, SESSION_NOTIFY_DATA_RECEIVED_TEST_001, TestSize.Level1)
 {
-    const uint8_t data[AUTH_PKT_HEAD_LEN] = { 0 };
+    uint8_t data[AUTH_PKT_HEAD_LEN] = { 0 };
     uint32_t len = 1;
     ListenerModule module = ListenerModule::LISTENER_MODULE_DYNAMIC_START;
     int32_t fd = 1;
@@ -247,6 +248,7 @@ HWTEST_F(AuthTcpConnectionTest, SESSION_NOTIFY_DATA_RECEIVED_TEST_001, TestSize.
     EXPECT_FALSE(isOnWiFiDataReceivedSuccess);
 
     len = AUTH_PKT_HEAD_LEN;
+    ASSERT_TRUE(memcpy_s(data, AUTH_PKT_HEAD_LEN, PACK_DATA, sizeof(PACK_DATA)) == EOK);
     SessionNotifyDataReceived(module, fd, len, data);
     EXPECT_FALSE(isOnWiFiDataReceivedSuccess);
 
@@ -270,7 +272,7 @@ HWTEST_F(AuthTcpConnectionTest, SESSION_NOTIFY_DATA_RECEIVED_TEST_001, TestSize.
  */
 HWTEST_F(AuthTcpConnectionTest, SESSION_KEY_NOTIFY_DATA_RECEIVED_TEST_001, TestSize.Level1)
 {
-    const uint8_t data[AUTH_PKT_HEAD_LEN] = { 0 };
+    uint8_t data[AUTH_PKT_HEAD_LEN] = { 0 };
     uint32_t len = 1;
     ListenerModule module = ListenerModule::LISTENER_MODULE_DYNAMIC_START;
     int32_t fd = 1;
@@ -356,7 +358,7 @@ HWTEST_F(AuthTcpConnectionTest, NOTIFY_DATA_RECEIVED_TEST_002, TestSize.Level1)
     EXPECT_EQ(ret, SOFTBUS_OK);
     pktHead.module = MODULE_SESSION_AUTH;
     pktHead.len = AUTH_PKT_HEAD_LEN;
-    const uint8_t data[AUTH_PKT_HEAD_LEN] = { 0 };
+    uint8_t data[AUTH_PKT_HEAD_LEN] = { 0 };
     isOnWiFiDataReceivedSuccess = false;
     SocketCallback socketCb = {
         .onConnected = OnWiFiConnected,
@@ -385,7 +387,7 @@ HWTEST_F(AuthTcpConnectionTest, NOTIFY_DATA_RECEIVED_TEST_003, TestSize.Level1)
     EXPECT_EQ(ret, SOFTBUS_OK);
     pktHead.module = MODULE_SESSION_KEY_AUTH;
     pktHead.len = AUTH_PKT_HEAD_LEN;
-    const uint8_t data[AUTH_PKT_HEAD_LEN] = { 0 };
+    uint8_t data[AUTH_PKT_HEAD_LEN] = { 0 };
     isOnWiFiDataReceivedSuccess = false;
     SocketCallback socketCb = {
         .onConnected = OnWiFiConnected,
@@ -905,7 +907,7 @@ HWTEST_F(AuthTcpConnectionTest, NOTIFY_CHANNEL_DATA_RECEIVED_TEST_001, TestSize.
     SocketPktHead pktHead;
     int32_t ret = SetSocketPktHead(&pktHead);
     EXPECT_EQ(ret, SOFTBUS_OK);
-    const uint8_t data[AUTH_PKT_HEAD_LEN] = { 0 };
+    uint8_t data[AUTH_PKT_HEAD_LEN] = { 0 };
     int32_t channelId = 1;
     isOnDataReceivedSuccess = false;
     NotifyChannelDataReceived(channelId, &pktHead, data);
