@@ -430,7 +430,9 @@ HWTEST_F(ConnectionBrConnectionTest, BrTransSend, TestSize.Level1)
     uint32_t connectionId = 1;
     int32_t socketHandle = 1;
     uint8_t data = {0};
-    int32_t ret = BrTransSend(connectionId, socketHandle, 0, &data, 0);
+    int32_t ret = BrTransSend(connectionId, socketHandle, 0, &data, 1);
+    EXPECT_EQ(SOFTBUS_CONN_BR_UNDERLAY_WRITE_FAIL, ret);
+    ret = BrTransSend(connectionId, socketHandle, 0, &data, 0);
     EXPECT_EQ(SOFTBUS_OK, ret);
 }
 
