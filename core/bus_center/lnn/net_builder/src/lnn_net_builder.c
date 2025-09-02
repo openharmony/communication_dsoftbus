@@ -658,7 +658,7 @@ const char *SelectUseUdid(const char *peerUdid, const char *lowerUdid)
         return peerUdid;
     } else if (LnnGetOnlineStateById(lowerUdid, CATEGORY_UDID)) {
         char *anonyLowerUdid = NULL;
-        Anonymize(peerUdid, &anonyLowerUdid);
+        Anonymize(lowerUdid, &anonyLowerUdid);
         LNN_LOGD(LNN_BUILDER, "not trusted device online! peerUdid=%{public}s", AnonymizeWrapper(anonyLowerUdid));
         AnonymizeFree(anonyLowerUdid);
         AnonymizeFree(anonyPeerUdid);
