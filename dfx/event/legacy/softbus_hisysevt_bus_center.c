@@ -1478,22 +1478,9 @@ int32_t SoftBusRecordBusCenterResult(SoftBusLinkType linkType, uint64_t constTim
     return SOFTBUS_OK;
 }
 
-static void ProcRecordAuthFailResult(SoftBusLinkType linkType, uint64_t constTime, AuthFailStage stage)
+static void ProcRecordAuthFailResult(AuthResultRecord *reCord, SoftBusLinkType linkType, uint64_t constTime,
+    AuthFailStage stage)
 {
-    if (linkType >= SOFTBUS_HISYSEVT_LINK_TYPE_BUTT) {
-        COMM_LOGE(COMM_EVENT, "param is invalid");
-        return;
-    }
-    AuthResultRecord *reCord = &g_authResultRecord[linkType];
-    if (SoftBusMutexLock(&reCord->lock) != SOFTBUS_OK) {
-        COMM_LOGE(COMM_EVENT, "auth result record lock fail");
-        return;
-    }
-    if (constTime > UINT64_MAX - reCord->failTotalTime) {
-        COMM_LOGE(COMM_EVENT, "fail total time exceed max limit");
-        (void)SoftBusMutexUnlock(&reCord->lock);
-        return;
-    }
     reCord->failTotalTime += constTime;
     reCord->failTotalCount++;
     switch (stage) {
@@ -1509,7 +1496,6 @@ static void ProcRecordAuthFailResult(SoftBusLinkType linkType, uint64_t constTim
         default:
             break;
     }
-    (void)SoftBusMutexUnlock(&reCord->lock);
 }
 
 int32_t SoftBusRecordAuthResult(SoftBusLinkType linkType, int32_t ret, uint64_t constTime, AuthFailStage stage)
@@ -1545,10 +1531,10 @@ int32_t SoftBusRecordAuthResult(SoftBusLinkType linkType, int32_t ret, uint64_t 
     if (constTime > AUTH_TIME_STANDARD_D) {
         reCord->authCount5++;
     }
-    (void)SoftBusMutexUnlock(&reCord->lock);
     if (ret != SOFTBUS_OK) {
-        ProcRecordAuthFailResult(linkType, constTime, stage);
+        ProcRecordAuthFailResult(reCord, linkType, constTime, stage);
     }
+    (void)SoftBusMutexUnlock(&reCord->lock);
     return SOFTBUS_OK;
 }
 
