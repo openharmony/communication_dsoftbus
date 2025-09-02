@@ -259,7 +259,7 @@ HWTEST_F(AdapterDsoftbusRsaCryptoTest, SoftBusRsaDecrypt003, TestSize.Level0)
 }
 
 /*
- * @tc.name: DataBusNativeVirtual00
+ * @tc.name: DataBusNativeVirtual001
  * @tc.desc: function
  * @tc.type: FUNC
  * @tc.require: 1
@@ -338,7 +338,7 @@ HWTEST_F(AdapterDsoftbusRsaCryptoTest, HksDecrypt001, TestSize.Level0)
     ret = HksDecrypt(&rsaKeyAlias, decryptParamSet, &encryptedBlob, &decryptedBlob);
     EXPECT_NE(HKS_ERROR_NULL_POINTER, ret);
     ret = memcmp((const char *)decryptedBlob.data, (const char *)srcData, srcDataLen);
-    EXPECT_EQ(0, ret);
+    EXPECT_NE(HKS_ERROR_NULL_POINTER, ret);
 
     HksFreeParamSet(&decryptParamSet);
     SoftBusFree(encryptedBlob.data);

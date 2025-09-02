@@ -351,7 +351,7 @@ HWTEST_F(PermissionEntrystaticTest, NewDynamicPermissionEntryTest001, TestSize.L
 }
 
 /**
- * @tc.name: DynamicPermissionest001
+ * @tc.name: DynamicPermissionTest001
  * @tc.desc: call AddDynamicPermission and DeleteDynamicPermission.
  * @tc.type: FUNC
  * @tc.require:
