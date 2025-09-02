@@ -17,8 +17,8 @@
 
 #include <cstddef>
 #include <cstring>
-#include <securec.h>
 #include <fuzzer/FuzzedDataProvider.h>
+#include <securec.h>
 
 #include "auth_uk_manager.c"
 #include "fuzz_environment.h"
@@ -44,10 +44,11 @@ public:
     {
         return isInited_;
     }
+
 private:
     volatile bool isInited_ = false;
 };
-}
+} // namespace
 
 namespace OHOS {
 static bool AuthUkManagerFuzzTestPart1(FuzzedDataProvider &provider, uint32_t &requestId, uint32_t &channelId)
@@ -116,7 +117,6 @@ static bool AuthUkManagerFuzzTestPart2(FuzzedDataProvider &provider, uint32_t &r
     OnGenFailed(requestId, 0);
 
     int32_t inLen = provider.ConsumeIntegral<int32_t>();
-    AuthGetUkEncryptSize(inLen);
     AuthGetUkDecryptSize(inLen);
     vector<uint8_t> outData(data.size() + OVERHEAD_LEN);
     uint32_t outLen = outData.size();
@@ -163,7 +163,7 @@ bool AuthUkManagerFuzzTest(FuzzedDataProvider &provider)
     UkNegotiateDeinit();
     return true;
 }
-}
+} // namespace OHOS
 
 /* Fuzzer entry point */
 extern "C" int32_t LLVMFuzzerTestOneInput(const uint8_t *data, size_t size)

@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2022-2023 Huawei Device Co., Ltd.
+ * Copyright (c) 2022-2025 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -276,10 +276,10 @@ HWTEST_F(LNNP2pInfoTest, ON_RECEIVE_WIFI_DIRECT_SYNC_ADDR_TEST_001, TestSize.Lev
     EXPECT_CALL(netLedgerMock, LnnSetDLWifiDirectAddr)
         .WillOnce(Return(SOFTBUS_INVALID_PARAM))
         .WillRepeatedly(Return(SOFTBUS_OK));
-    OnReceiveWifiDirectSyncAddr(LNN_INFO_TYPE_WIFI_DIRECT, NETWORKID,
-        reinterpret_cast<const uint8_t *>(msg), strlen(msg));
-    OnReceiveWifiDirectSyncAddr(LNN_INFO_TYPE_WIFI_DIRECT, NETWORKID,
-        reinterpret_cast<const uint8_t *>(msg), strlen(msg));
+    OnReceiveWifiDirectSyncAddr(
+        LNN_INFO_TYPE_WIFI_DIRECT, NETWORKID, reinterpret_cast<const uint8_t *>(msg), strlen(msg));
+    OnReceiveWifiDirectSyncAddr(
+        LNN_INFO_TYPE_WIFI_DIRECT, NETWORKID, reinterpret_cast<const uint8_t *>(msg), strlen(msg));
 }
 
 /*
