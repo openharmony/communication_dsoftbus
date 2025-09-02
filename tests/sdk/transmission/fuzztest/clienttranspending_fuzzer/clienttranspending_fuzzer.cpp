@@ -28,7 +28,7 @@
 #include "softbus_type_def.h"
 
 namespace OHOS {
-void ClientTransPendingTest(const uint8_t* data, size_t size)
+void ClientTransPendingTest(const uint8_t *data, size_t size)
 {
     if ((data == nullptr) || (size < sizeof(uint64_t))) {
         return;
@@ -54,7 +54,7 @@ void ClientTransPendingTest(const uint8_t* data, size_t size)
 } // namespace OHOS
 
 /* Fuzzer entry point */
-extern "C" int32_t LLVMFuzzerTestOneInput(const uint8_t* data, size_t size)
+extern "C" int32_t LLVMFuzzerTestOneInput(const uint8_t *data, size_t size)
 {
     /* Run your code on data */
     OHOS::ClientTransPendingTest(data, size);

@@ -22,7 +22,7 @@
 #include "softbus_adapter_mem.h"
 
 namespace OHOS {
-void SendStreamTest(const uint8_t* data, size_t size)
+void SendStreamTest(const uint8_t *data, size_t size)
 {
     if (data == nullptr || size < sizeof(int64_t)) {
         return;
@@ -64,7 +64,7 @@ void SendStreamTest(const uint8_t* data, size_t size)
 } // namespace OHOS
 
 /* Fuzzer entry point */
-extern "C" int32_t LLVMFuzzerTestOneInput(const uint8_t* data, size_t size)
+extern "C" int32_t LLVMFuzzerTestOneInput(const uint8_t *data, size_t size)
 {
     /* Run your code on data */
     OHOS::SendStreamTest(data, size);
