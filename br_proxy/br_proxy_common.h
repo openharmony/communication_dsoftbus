@@ -29,4 +29,4 @@ int32_t CheckPushPermission();
 #ifdef __cplusplus
 }
 #endif /* __cplusplus */
-#endif // BR_PROXY_H
+#endif // BR_PROXY_COMMON_H
