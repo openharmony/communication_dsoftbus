@@ -327,7 +327,7 @@ int32_t ConnBrPostBytes(
     }
     g_startBrSendLPInfo.messagePosted = true;
     if (!g_startBrSendLPInfo.sendTaskRunning) {
-        status = ConnStartActionAsync(NULL, SendHandlerLoop, "BrSend_Tsk");
+        status = ConnStartActionAsync(NULL, SendHandlerLoop, NULL);
         if (status != SOFTBUS_OK) {
             CONN_LOGE(CONN_BR, "start br send task fail errno=%{public}d", status);
             SoftBusMutexUnlock(&g_startBrSendLPInfo.lock);
@@ -435,6 +435,9 @@ static void WaitAck(ConnBrConnection *connection)
 
 void *SendHandlerLoop(void *arg)
 {
+    const char *name = "BrSend_Tsk";
+    SoftBusThread threadSelf = SoftBusThreadGetSelf();
+    SoftBusThreadSetName(threadSelf, name);
     (void)arg;
     CONN_LOGI(CONN_BR, "br send data: send loop start");
     SendBrQueueNode *sendNode = NULL;
