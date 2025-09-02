@@ -122,14 +122,14 @@ std::vector<uint8_t> WifiDirectUtils::ToBinary(const std::string &input)
     return result;
 }
 
-bool WifiDirectUtils::Is2GBand(int frequency)
+bool WifiDirectUtils::Is2GBand(int freq)
 {
-    return frequency >= FREQUENCY_2G_FIRST && frequency <= FREQUENCY_2G_LAST;
+    return freq >= FREQUENCY_2G_FIRST && freq <= FREQUENCY_2G_LAST;
 }
 
-bool WifiDirectUtils::Is5GBand(int frequency)
+bool WifiDirectUtils::Is5GBand(int freq)
 {
-    return frequency >= FREQUENCY_5G_FIRST && frequency <= FREQUENCY_5G_LAST;
+    return freq >= FREQUENCY_5G_FIRST && freq <= FREQUENCY_5G_LAST;
 }
 
 int WifiDirectUtils::ChannelToFrequency(int channel)
@@ -143,12 +143,12 @@ int WifiDirectUtils::ChannelToFrequency(int channel)
     }
 }
 
-int WifiDirectUtils::FrequencyToChannel(int frequency)
+int WifiDirectUtils::FrequencyToChannel(int freq)
 {
-    if (Is2GBand(frequency)) {
-        return (frequency - FREQUENCY_2G_FIRST) / FREQUENCY_STEP + CHANNEL_2G_FIRST;
-    } else if (Is5GBand(frequency)) {
-        return (frequency - FREQUENCY_5G_FIRST) / FREQUENCY_STEP + CHANNEL_5G_FIRST;
+    if (Is2GBand(freq)) {
+        return (freq - FREQUENCY_2G_FIRST) / FREQUENCY_STEP + CHANNEL_2G_FIRST;
+    } else if (Is5GBand(freq)) {
+        return (freq - FREQUENCY_5G_FIRST) / FREQUENCY_STEP + CHANNEL_5G_FIRST;
     } else {
         return CHANNEL_INVALID;
     }
@@ -171,11 +171,11 @@ int WifiDirectUtils::GetRecommendChannelFromLnn(const std::string &networkId)
     char udid[UDID_BUF_LEN] {};
     int ret = DBinderSoftbusServer::GetInstance().LnnGetRemoteStrInfo(networkId.c_str(), STRING_KEY_DEV_UDID, udid,
         UDID_BUF_LEN);
-    CONN_CHECK_AND_RETURN_RET_LOGE(ret == SOFTBUS_OK, ret, CONN_WIFI_DIRECT, "get udid failed, ret = %{public}d", ret);
+    CONN_CHECK_AND_RETURN_RET_LOGE(ret == SOFTBUS_OK, ret, CONN_WIFI_DIRECT, "get udid failed, ret=%{public}d", ret);
     int channelIdLnn = 0;
     ret = LnnGetRecommendChannelPacked(udid, &channelIdLnn);
     CONN_CHECK_AND_RETURN_RET_LOGE(
-        ret == SOFTBUS_OK, ret, CONN_WIFI_DIRECT, "get channel from Lnn fail, ret = %{public}d", ret);
+        ret == SOFTBUS_OK, ret, CONN_WIFI_DIRECT, "get channel from Lnn fail, ret=%{public}d", ret);
     return channelIdLnn;
 }
 
@@ -321,7 +321,7 @@ bool WifiDirectUtils::IsDeviceOnline(const std::string &remoteNetworkId)
 static constexpr int MAC_BYTE_HEX_SIZE = 4;
 std::string WifiDirectUtils::MacArrayToString(const std::vector<uint8_t> &macArray)
 {
-    CONN_CHECK_AND_RETURN_RET_LOGE(!macArray.empty(), "", CONN_WIFI_DIRECT, "mac empty");
+    CONN_CHECK_AND_RETURN_RET_LOGE(!macArray.empty(), "", CONN_WIFI_DIRECT, "mac is empty");
     std::string macString;
     char buf[MAC_BYTE_HEX_SIZE] {};
     for (const auto byte : macArray) {
@@ -344,7 +344,7 @@ static constexpr int BASE_HEX = 16;
 std::vector<uint8_t> WifiDirectUtils::MacStringToArray(const std::string &macString)
 {
     std::vector<uint8_t> array;
-    CONN_CHECK_AND_RETURN_RET_LOGE(!macString.empty(), array, CONN_WIFI_DIRECT, "mac empty");
+    CONN_CHECK_AND_RETURN_RET_LOGE(!macString.empty(), array, CONN_WIFI_DIRECT, "mac is empty");
     auto tokens = SplitString(macString, ":");
     for (const auto &token : tokens) {
         size_t idx {};
@@ -456,7 +456,7 @@ bool WifiDirectUtils::SupportHmlTwo()
 
 int32_t WifiDirectUtils::GetInterfaceIpString(const std::string &interface, std::string &ip)
 {
-    CONN_LOGI(CONN_WIFI_DIRECT, "interface=%{public}s", interface.c_str());
+    CONN_LOGI(CONN_WIFI_DIRECT, "interfaceName=%{public}s", interface.c_str());
 
     int32_t socketFd = socket(AF_INET, SOCK_DGRAM, 0);
     CONN_CHECK_AND_RETURN_RET_LOGW(socketFd >= 0, SOFTBUS_CONN_OPEN_SOCKET_FAILED, CONN_WIFI_DIRECT,
@@ -468,7 +468,7 @@ int32_t WifiDirectUtils::GetInterfaceIpString(const std::string &interface, std:
     int32_t ret =
         strcpy_s(request.ifr_name, sizeof(request.ifr_name), reinterpret_cast<const char *>(interface.c_str()));
     if (ret != EOK) {
-        CONN_LOGW(CONN_WIFI_DIRECT, "copy interface name failed");
+        CONN_LOGW(CONN_WIFI_DIRECT, "strcpy interface name failed");
         fdsan_close_with_tag(socketFd, CONN_WIFI_DIRECT_FD_TAG);
         return SOFTBUS_CONN_COPY_INTERFACE_NAME_FAILED;
     }
@@ -772,7 +772,7 @@ int WifiDirectUtils::GetChload()
 
     auto ret = wifiDevicePtr->GetLinkedInfo(*wifiLinkedInfo);
     CONN_CHECK_AND_RETURN_RET_LOGE(
-        ret == Wifi::WIFI_OPT_SUCCESS, ret, CONN_WIFI_DIRECT, "get link info fail,err=%{public}d", ret);
+        ret == Wifi::WIFI_OPT_SUCCESS, ret, CONN_WIFI_DIRECT, "get link info fail, ret=%{public}d", ret);
 
     auto chload = wifiLinkedInfo->chload;
     CONN_LOGI(CONN_WIFI_DIRECT, "current sta chload=%{public}d", chload);

@@ -59,7 +59,7 @@ int WifiDirectRoleOption::GetExpectedRole(
         return SOFTBUS_INVALID_PARAM;
     }
 
-    CONN_LOGI(CONN_WIFI_DIRECT, "expectRole=0x%{public}x, isStrict=%{public}d", expectedRole, isStrict);
+    CONN_LOGI(CONN_WIFI_DIRECT, "expectedRole=0x%{public}x, isStrict=%{public}d", expectedRole, isStrict);
     return SOFTBUS_OK;
 }
 

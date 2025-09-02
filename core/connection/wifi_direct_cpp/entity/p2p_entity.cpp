@@ -37,7 +37,7 @@ static void P2pStateChangeCallback(P2pState state)
 
 static void P2pConnectionChangeCallback(const WifiP2pLinkedInfo info)
 {
-    CONN_LOGI(CONN_WIFI_DIRECT, "ConnectionState=%{public}d, isGroupOwner=%{public}d", info.connectState,
+    CONN_LOGI(CONN_WIFI_DIRECT, "ConnectionState=%{public}d, isGO=%{public}d", info.connectState,
         info.isP2pGroupOwner);
     BroadcastParam param;
     param.p2pLinkInfo = info;
@@ -397,7 +397,7 @@ void P2pEntity::OnP2pConnectionChangeEvent(
 
     bool result = true;
     if (groupInfo != nullptr && !groupInfo->isGroupOwner) {
-        CONN_LOGI(CONN_WIFI_DIRECT, "local is GC, groupOwnerMac=%{public}s",
+        CONN_LOGI(CONN_WIFI_DIRECT, "local is GC, goMac=%{public}s",
             WifiDirectAnonymizeMac(groupInfo->groupOwner.address).c_str());
         result = LinkManager::GetInstance().ProcessIfPresent(groupInfo->groupOwner.address, [] (InnerLink &link) {
             });
@@ -406,7 +406,7 @@ void P2pEntity::OnP2pConnectionChangeEvent(
         state_->PreprocessP2pConnectionChangeEvent(info, groupInfo);
     }
     UpdateInterfaceManager(info, groupInfo);
-    CONN_CHECK_AND_RETURN_LOGE(result, CONN_WIFI_DIRECT, "not found innerlink");
+    CONN_CHECK_AND_RETURN_LOGE(result, CONN_WIFI_DIRECT, "not found link");
     UpdateLinkManager(info, groupInfo);
     state_->OnP2pConnectionChangeEvent(info, groupInfo);
 }
@@ -441,7 +441,7 @@ static void ResetInterfaceInfo(const std::string &localMac)
 static void UpdateInterfaceInfo(
     const std::string &localMac, const std::shared_ptr<P2pAdapter::WifiDirectP2pGroupInfo> &groupInfo)
 {
-    CONN_LOGI(CONN_WIFI_DIRECT, "isGroupOwner=%{public}d, clientDeviceSize=%{public}zu", groupInfo->isGroupOwner,
+    CONN_LOGI(CONN_WIFI_DIRECT, "isGO=%{public}d, clientDeviceSize=%{public}zu", groupInfo->isGroupOwner,
         groupInfo->clientDevices.size());
     std::string groupConfig;
     if (groupInfo->isGroupOwner) {
@@ -493,7 +493,7 @@ static void UpdateInnerLink(const std::shared_ptr<P2pAdapter::WifiDirectP2pGroup
 {
     auto frequency = groupInfo->frequency;
     if (!groupInfo->isGroupOwner) {
-        CONN_LOGI(CONN_WIFI_DIRECT, "not group owner, groupOwnerMac=%{public}s",
+        CONN_LOGI(CONN_WIFI_DIRECT, "not group owner, goMac=%{public}s",
             WifiDirectAnonymizeMac(groupInfo->groupOwner.address).c_str());
         LinkManager::GetInstance().ProcessIfPresent(groupInfo->groupOwner.address, [frequency, groupInfo, localMac]
             (InnerLink &link) {
