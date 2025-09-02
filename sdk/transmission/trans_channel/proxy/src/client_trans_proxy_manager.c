@@ -1167,6 +1167,7 @@ static int ClientTransProxySubPacketProc(int32_t channelId, const SliceHead *hea
     if (index < PROXY_CHANNEL_PRIORITY_MESSAGE || index >= PROXY_CHANNEL_PRIORITY_BUTT) {
         TRANS_LOGE(TRANS_SDK, "invalid index=%{public}d", index);
         SoftBusMutexUnlock(&g_channelSliceProcessorList->lock);
+        return SOFTBUS_INVALID_PARAM;
     }
     int ret;
     SliceProcessor *processor = &(channelProcessor->processor[index]);
