@@ -39,7 +39,7 @@ DBinderSoftbusServer::DBinderSoftbusServer()
 DBinderSoftbusServer::~DBinderSoftbusServer()
 {
     exitFlag_ = true;
-    CONN_LOGI(CONN_WIFI_DIRECT, "[wifi_direct_init] dBinderSoftbusServer destroy.");
+    CONN_LOGI(CONN_WIFI_DIRECT, "[wd_init] ~dBinderSoftbusServer");
 }
 
 bool DBinderSoftbusServer::OpenSoftbusServerSo()
@@ -53,12 +53,12 @@ bool DBinderSoftbusServer::OpenSoftbusServerSo()
 
     soHandle_ = dlopen(SOFTBUS_SERVER_PATH_NAME, RTLD_NOW | RTLD_GLOBAL);
     if (soHandle_ == nullptr) {
-        CONN_LOGE(CONN_WIFI_DIRECT, "[wifi_direct_init] dlopen libsoftbus_server.z.so fail.");
+        CONN_LOGE(CONN_WIFI_DIRECT, "[wd_init] dlopen libsoftbus_server.z.so fail.");
         return false;
     }
 
     isLoaded_ = true;
-    CONN_LOGI(CONN_WIFI_DIRECT, "[wifi_direct_init] dlopen libsoftbus_server.z.so success.");
+    CONN_LOGI(CONN_WIFI_DIRECT, "[wd_init] dlopen libsoftbus_server.z.so success.");
 
     return true;
 }
@@ -76,7 +76,7 @@ int32_t DBinderSoftbusServer::RegAuthTransListener(int32_t module, const AuthTra
 
     regAuthTransListenerFunc_ = (RegAuthTransListenerFunc)dlsym(soHandle_, "RegAuthTransListener");
     if (regAuthTransListenerFunc_ == nullptr) {
-        CONN_LOGE(CONN_WIFI_DIRECT, "[wifi_direct_init] dlsym RegAuthTransListener fail.");
+        CONN_LOGE(CONN_WIFI_DIRECT, "[wd_init] dlsym RegAuthTransListener fail.");
         return SOFTBUS_WIFI_DIRECT_DLSYM_FAILED;
     }
 
@@ -96,7 +96,7 @@ int32_t DBinderSoftbusServer::AuthGetDeviceUuid(int64_t authId, char *uuid, uint
 
     authGetDeviceUuidFunc_ = (AuthGetDeviceUuidFunc)dlsym(soHandle_, "AuthGetDeviceUuid");
     if (authGetDeviceUuidFunc_ == nullptr) {
-        CONN_LOGE(CONN_WIFI_DIRECT, "[wifi_direct_init] dlsym AuthGetDeviceUuid fail.");
+        CONN_LOGE(CONN_WIFI_DIRECT, "[wd_init] dlsym AuthGetDeviceUuid fail.");
         return SOFTBUS_WIFI_DIRECT_DLSYM_FAILED;
     }
 
@@ -116,7 +116,7 @@ int32_t DBinderSoftbusServer::AuthPostTransData(AuthHandle authHandle, const Aut
 
     authPostTransDataFunc_ = (AuthPostTransDataFunc)dlsym(soHandle_, "AuthPostTransData");
     if (authPostTransDataFunc_ == nullptr) {
-        CONN_LOGE(CONN_WIFI_DIRECT, "[wifi_direct_init] dlsym AuthPostTransData fail.");
+        CONN_LOGE(CONN_WIFI_DIRECT, "[wd_init] dlsym AuthPostTransData fail.");
         return SOFTBUS_WIFI_DIRECT_DLSYM_FAILED;
     }
 
@@ -136,7 +136,7 @@ void DBinderSoftbusServer::AuthCloseConn(AuthHandle authHandle)
 
     authCloseConnFunc_ = (AuthCloseConnFunc)dlsym(soHandle_, "AuthCloseConn");
     if (authCloseConnFunc_ == nullptr) {
-        CONN_LOGE(CONN_WIFI_DIRECT, "[wifi_direct_init] dlsym AuthCloseConn fail.");
+        CONN_LOGE(CONN_WIFI_DIRECT, "[wd_init] dlsym AuthCloseConn fail.");
         return;
     }
 
@@ -156,7 +156,7 @@ int32_t DBinderSoftbusServer::AuthGetMetaType(int64_t authId, bool *isMetaAuth)
 
     authGetMetaTypeFunc_ = (AuthGetMetaTypeFunc)dlsym(soHandle_, "AuthGetMetaType");
     if (authGetMetaTypeFunc_ == nullptr) {
-        CONN_LOGE(CONN_WIFI_DIRECT, "[wifi_direct_init] dlsym AuthGetMetaType fail.");
+        CONN_LOGE(CONN_WIFI_DIRECT, "[wd_init] dlsym AuthGetMetaType fail.");
         return SOFTBUS_WIFI_DIRECT_DLSYM_FAILED;
     }
 
@@ -178,7 +178,7 @@ int32_t DBinderSoftbusServer::AuthStartListeningForWifiDirect(AuthLinkType type,
     authStartListeningForWifiDirectFunc_ = (AuthStartListeningForWifiDirectFunc)dlsym(soHandle_,
         "AuthStartListeningForWifiDirect");
     if (authStartListeningForWifiDirectFunc_ == nullptr) {
-        CONN_LOGE(CONN_WIFI_DIRECT, "[wifi_direct_init] dlsym AuthStartListeningForWifiDirect fail.");
+        CONN_LOGE(CONN_WIFI_DIRECT, "[wd_init] dlsym AuthStartListeningForWifiDirect fail.");
         return SOFTBUS_WIFI_DIRECT_DLSYM_FAILED;
     }
 
@@ -199,7 +199,7 @@ void DBinderSoftbusServer::AuthStopListeningForWifiDirect(AuthLinkType type, Lis
     authStopListeningForWifiDirectFunc_ = (AuthStopListeningForWifiDirectFunc)dlsym(soHandle_,
         "AuthStopListeningForWifiDirect");
     if (authStopListeningForWifiDirectFunc_ == nullptr) {
-        CONN_LOGE(CONN_WIFI_DIRECT, "[wifi_direct_init] dlsym AuthStopListeningForWifiDirect fail.");
+        CONN_LOGE(CONN_WIFI_DIRECT, "[wd_init] dlsym AuthStopListeningForWifiDirect fail.");
         return;
     }
 
@@ -219,7 +219,7 @@ uint32_t DBinderSoftbusServer::AuthGenRequestId(void)
 
     authGenRequestIdFunc_ = (AuthGenRequestIdFunc)dlsym(soHandle_, "AuthGenRequestId");
     if (authGenRequestIdFunc_ == nullptr) {
-        CONN_LOGE(CONN_WIFI_DIRECT, "[wifi_direct_init] dlsym AuthGenRequestId fail.");
+        CONN_LOGE(CONN_WIFI_DIRECT, "[wd_init] dlsym AuthGenRequestId fail.");
         return SOFTBUS_WIFI_DIRECT_DLSYM_FAILED;
     }
 
@@ -240,7 +240,7 @@ int32_t DBinderSoftbusServer::AuthOpenConn(const AuthConnInfo *info, uint32_t re
 
     authOpenConnFunc_ = (AuthOpenConnFunc)dlsym(soHandle_, "AuthOpenConn");
     if (authOpenConnFunc_ == nullptr) {
-        CONN_LOGE(CONN_WIFI_DIRECT, "[wifi_direct_init] dlsym AuthOpenConn fail.");
+        CONN_LOGE(CONN_WIFI_DIRECT, "[wd_init] dlsym AuthOpenConn fail.");
         return SOFTBUS_WIFI_DIRECT_DLSYM_FAILED;
     }
 
@@ -259,7 +259,7 @@ const char *DBinderSoftbusServer::LnnConvertDLidToUdid(const char *id, IdCategor
 
     lnnConvertDLidToUdidFunc_ = (LnnConvertDLidToUdidFunc)dlsym(soHandle_, "LnnConvertDLidToUdid");
     if (lnnConvertDLidToUdidFunc_ == nullptr) {
-        CONN_LOGE(CONN_WIFI_DIRECT, "[wifi_direct_init] dlsym LnnConvertDLidToUdid fail.");
+        CONN_LOGE(CONN_WIFI_DIRECT, "[wd_init] dlsym LnnConvertDLidToUdid fail.");
         return nullptr;
     }
 
@@ -278,7 +278,7 @@ void DBinderSoftbusServer::AuthStopListening(AuthLinkType type)
 
     authStopListeningFunc_ = (AuthStopListeningFunc)dlsym(soHandle_, "AuthStopListening");
     if (authStopListeningFunc_ == nullptr) {
-        CONN_LOGE(CONN_WIFI_DIRECT, "[wifi_direct_init] dlsym AuthStopListening fail.");
+        CONN_LOGE(CONN_WIFI_DIRECT, "[wd_init] dlsym AuthStopListening fail.");
         return;
     }
 
@@ -299,7 +299,7 @@ int32_t DBinderSoftbusServer::TransProxyPipelineRegisterListener(TransProxyPipel
     transProxyPipelineRegisterListenerFunc_ = (TransProxyPipelineRegisterListenerFunc)dlsym(soHandle_,
         "TransProxyPipelineRegisterListener");
     if (transProxyPipelineRegisterListenerFunc_ == nullptr) {
-        CONN_LOGE(CONN_WIFI_DIRECT, "[wifi_direct_init] dlsym TransProxyPipelineRegisterListener fail");
+        CONN_LOGE(CONN_WIFI_DIRECT, "[wd_init] dlsym TransProxyPipelineRegisterListener fail");
         return SOFTBUS_WIFI_DIRECT_DLSYM_FAILED;
     }
 
@@ -319,7 +319,7 @@ int32_t DBinderSoftbusServer::TransProxyPipelineGetUuidByChannelId(int32_t chann
     transProxyPipelineGetUuidByChannelIdFunc_ = (TransProxyPipelineGetUuidByChannelIdFunc)dlsym(soHandle_,
         "TransProxyPipelineGetUuidByChannelId");
     if (transProxyPipelineGetUuidByChannelIdFunc_ == nullptr) {
-        CONN_LOGE(CONN_WIFI_DIRECT, "[wifi_direct_init] dlsym TransProxyPipelineGetUuidByChannelId fail.");
+        CONN_LOGE(CONN_WIFI_DIRECT, "[wd_init] dlsym TransProxyPipelineGetUuidByChannelId fail.");
         return SOFTBUS_WIFI_DIRECT_DLSYM_FAILED;
     }
 
@@ -341,7 +341,7 @@ int32_t DBinderSoftbusServer::TransProxyPipelineSendMessage(
     transProxyPipelineSendMessageFunc_ = (TransProxyPipelineSendMessageFunc)dlsym(soHandle_,
         "TransProxyPipelineSendMessage");
     if (transProxyPipelineSendMessageFunc_ == nullptr) {
-        CONN_LOGE(CONN_WIFI_DIRECT, "[wifi_direct_init] dlsym TransProxyPipelineSendMessage fail.");
+        CONN_LOGE(CONN_WIFI_DIRECT, "[wd_init] dlsym TransProxyPipelineSendMessage fail.");
         return SOFTBUS_WIFI_DIRECT_DLSYM_FAILED;
     }
 
@@ -360,7 +360,7 @@ LnnEnhanceFuncList *DBinderSoftbusServer::LnnEnhanceFuncListGet(void)
 
     lnnEnhanceFuncListGetFunc_ = (LnnEnhanceFuncListGetFunc)dlsym(soHandle_, "LnnEnhanceFuncListGet");
     if (lnnEnhanceFuncListGetFunc_ == nullptr) {
-        CONN_LOGE(CONN_WIFI_DIRECT, "[wifi_direct_init] dlsym LnnEnhanceFuncListGet fail.");
+        CONN_LOGE(CONN_WIFI_DIRECT, "[wd_init] dlsym LnnEnhanceFuncListGet fail.");
         return nullptr;
     }
 
@@ -379,7 +379,7 @@ int32_t DBinderSoftbusServer::LnnGetRemoteStrInfo(const char *networkId, InfoKey
 
     lnnGetRemoteStrInfoFunc_ = (LnnGetRemoteStrInfoFunc)dlsym(soHandle_, "LnnGetRemoteStrInfo");
     if (lnnGetRemoteStrInfoFunc_ == nullptr) {
-        CONN_LOGE(CONN_WIFI_DIRECT, "[wifi_direct_init] dlsym LnnGetRemoteStrInfo fail.");
+        CONN_LOGE(CONN_WIFI_DIRECT, "[wd_init] dlsym LnnGetRemoteStrInfo fail.");
         return SOFTBUS_WIFI_DIRECT_DLSYM_FAILED;
     }
     return lnnGetRemoteStrInfoFunc_(networkId, key, info, len);
@@ -397,7 +397,7 @@ int32_t DBinderSoftbusServer::LnnGetNetworkIdByUuid(const char *uuid, char *buf,
 
     lnnGetNetworkIdByUuidFunc_ = (LnnGetNetworkIdByUuidFunc)dlsym(soHandle_, "LnnGetNetworkIdByUuid");
     if (lnnGetNetworkIdByUuidFunc_ == nullptr) {
-        CONN_LOGE(CONN_WIFI_DIRECT, "[wifi_direct_init] dlsym LnnGetNetworkIdByUuid fail.");
+        CONN_LOGE(CONN_WIFI_DIRECT, "[wd_init] dlsym LnnGetNetworkIdByUuid fail.");
         return SOFTBUS_WIFI_DIRECT_DLSYM_FAILED;
     }
 
@@ -416,7 +416,7 @@ int32_t DBinderSoftbusServer::LnnGetLocalStrInfo(InfoKey key, char *info, uint32
 
     lnnGetLocalStrInfoFunc_ = (LnnGetLocalStrInfoFunc)dlsym(soHandle_, "LnnGetLocalStrInfo");
     if (lnnGetLocalStrInfoFunc_ == nullptr) {
-        CONN_LOGE(CONN_WIFI_DIRECT, "[wifi_direct_init] dlsym LnnGetLocalStrInfo fail.");
+        CONN_LOGE(CONN_WIFI_DIRECT, "[wd_init] dlsym LnnGetLocalStrInfo fail.");
         return SOFTBUS_WIFI_DIRECT_DLSYM_FAILED;
     }
 
@@ -435,7 +435,7 @@ int32_t DBinderSoftbusServer::LnnGetLocalNumU64Info(InfoKey key, uint64_t *info)
 
     lnnGetLocalNumU64InfoFunc_ = (LnnGetLocalNumU64InfoFunc)dlsym(soHandle_, "LnnGetLocalNumU64Info");
     if (lnnGetLocalNumU64InfoFunc_ == nullptr) {
-        CONN_LOGE(CONN_WIFI_DIRECT, "[wifi_direct_init] dlsym LnnGetLocalNumU64Info fail.");
+        CONN_LOGE(CONN_WIFI_DIRECT, "[wd_init] dlsym LnnGetLocalNumU64Info fail.");
         return SOFTBUS_WIFI_DIRECT_DLSYM_FAILED;
     }
 
@@ -454,7 +454,7 @@ int32_t DBinderSoftbusServer::LnnGetRemoteByteInfo(const char *networkId, InfoKe
 
     lnnGetRemoteByteInfoFunc_ = (LnnGetRemoteByteInfoFunc)dlsym(soHandle_, "LnnGetRemoteByteInfo");
     if (lnnGetRemoteByteInfoFunc_ == nullptr) {
-        CONN_LOGE(CONN_WIFI_DIRECT, "[wifi_direct_init] dlsym LnnGetRemoteByteInfo fail.");
+        CONN_LOGE(CONN_WIFI_DIRECT, "[wd_init] dlsym LnnGetRemoteByteInfo fail.");
         return SOFTBUS_WIFI_DIRECT_DLSYM_FAILED;
     }
 
@@ -474,7 +474,7 @@ int32_t DBinderSoftbusServer::LnnGetRemoteBoolInfoIgnoreOnline(const char *netwo
     lnnGetRemoteBoolInfoIgnoreOnlineFunc_ = (LnnGetRemoteBoolInfoIgnoreOnlineFunc)dlsym(soHandle_,
         "LnnGetRemoteBoolInfoIgnoreOnline");
     if (lnnGetRemoteBoolInfoIgnoreOnlineFunc_ == nullptr) {
-        CONN_LOGE(CONN_WIFI_DIRECT, "[wifi_direct_init] dlsym LnnGetRemoteBoolInfoIgnoreOnline fail.");
+        CONN_LOGE(CONN_WIFI_DIRECT, "[wd_init] dlsym LnnGetRemoteBoolInfoIgnoreOnline fail.");
         return SOFTBUS_WIFI_DIRECT_DLSYM_FAILED;
     }
 
@@ -494,7 +494,7 @@ uint64_t DBinderSoftbusServer::LnnGetFeatureCapabilty(void)
     lnnGetFeatureCapabiltyFunc_ = (LnnGetFeatureCapabiltyFunc)dlsym(soHandle_,
         "LnnGetFeatureCapabilty");
     if (lnnGetFeatureCapabiltyFunc_ == nullptr) {
-        CONN_LOGE(CONN_WIFI_DIRECT, "[wifi_direct_init] dlsym LnnGetFeatureCapabilty fail.");
+        CONN_LOGE(CONN_WIFI_DIRECT, "[wd_init] dlsym LnnGetFeatureCapabilty fail.");
         return SOFTBUS_WIFI_DIRECT_DLSYM_FAILED;
     }
 
@@ -514,7 +514,7 @@ bool DBinderSoftbusServer::IsFeatureSupport(uint64_t feature, FeatureCapability 
     isFeatureSupportFunc_ = (IsFeatureSupportFunc)dlsym(soHandle_,
         "IsFeatureSupport");
     if (isFeatureSupportFunc_ == nullptr) {
-        CONN_LOGE(CONN_WIFI_DIRECT, "[wifi_direct_init] dlsym IsFeatureSupport fail.");
+        CONN_LOGE(CONN_WIFI_DIRECT, "[wd_init] dlsym IsFeatureSupport fail.");
         return false;
     }
 
@@ -533,7 +533,7 @@ int32_t DBinderSoftbusServer::LnnSetLocalStrInfo(InfoKey key, const char *info)
 
     lnnSetLocalStrInfoFunc_ = (LnnSetLocalStrInfoFunc)dlsym(soHandle_, "LnnSetLocalStrInfo");
     if (lnnSetLocalStrInfoFunc_ == nullptr) {
-        CONN_LOGE(CONN_WIFI_DIRECT, "[wifi_direct_init] dlsym LnnSetLocalStrInfo fail.");
+        CONN_LOGE(CONN_WIFI_DIRECT, "[wd_init] dlsym LnnSetLocalStrInfo fail.");
         return SOFTBUS_WIFI_DIRECT_DLSYM_FAILED;
     }
 
@@ -552,7 +552,7 @@ bool DBinderSoftbusServer::LnnGetOnlineStateById(const char *id, IdCategory type
 
     lnnGetOnlineStateByIdFunc_ = (LnnGetOnlineStateByIdFunc)dlsym(soHandle_, "LnnGetOnlineStateById");
     if (lnnGetOnlineStateByIdFunc_ == nullptr) {
-        CONN_LOGE(CONN_WIFI_DIRECT, "[wifi_direct_init] dlsym LnnGetOnlineStateById fail");
+        CONN_LOGE(CONN_WIFI_DIRECT, "[wd_init] dlsym LnnGetOnlineStateById fail");
         return false;
     }
 
@@ -571,7 +571,7 @@ int32_t DBinderSoftbusServer::LnnSetLocalNumInfo(InfoKey key, int32_t info)
 
     lnnSetLocalNumInfoFunc_ = (LnnSetLocalNumInfoFunc)dlsym(soHandle_, "LnnSetLocalNumInfo");
     if (lnnSetLocalNumInfoFunc_ == nullptr) {
-        CONN_LOGE(CONN_WIFI_DIRECT, "[wifi_direct_init] dlsym LnnSetLocalNumInfo fail.");
+        CONN_LOGE(CONN_WIFI_DIRECT, "[wd_init] dlsym LnnSetLocalNumInfo fail.");
         return SOFTBUS_WIFI_DIRECT_DLSYM_FAILED;
     }
 
@@ -590,7 +590,7 @@ int32_t DBinderSoftbusServer::LnnSyncP2pInfo(void)
 
     lnnSyncP2pInfoFunc_ = (LnnSyncP2pInfoFunc)dlsym(soHandle_, "LnnSyncP2pInfo");
     if (lnnSyncP2pInfoFunc_ == nullptr) {
-        CONN_LOGE(CONN_WIFI_DIRECT, "[wifi_direct_init] dlsym LnnSyncP2pInfo fail.");
+        CONN_LOGE(CONN_WIFI_DIRECT, "[wd_init] dlsym LnnSyncP2pInfo fail.");
         return SOFTBUS_WIFI_DIRECT_DLSYM_FAILED;
     }
 
@@ -609,7 +609,7 @@ int32_t DBinderSoftbusServer::LnnGetOsTypeByNetworkId(const char *networkId, int
 
     lnnGetOsTypeByNetworkIdFunc_ = (LnnGetOsTypeByNetworkIdFunc)dlsym(soHandle_, "LnnGetOsTypeByNetworkId");
     if (lnnGetOsTypeByNetworkIdFunc_ == nullptr) {
-        CONN_LOGE(CONN_WIFI_DIRECT, "[wifi_direct_init] dlsym LnnGetOsTypeByNetworkId fail.");
+        CONN_LOGE(CONN_WIFI_DIRECT, "[wd_init] dlsym LnnGetOsTypeByNetworkId fail.");
         return SOFTBUS_WIFI_DIRECT_DLSYM_FAILED;
     }
 
@@ -628,7 +628,7 @@ int32_t DBinderSoftbusServer::LnnGetRemoteNumInfo(const char *networkId, InfoKey
 
     lnnGetRemoteNumInfoFunc_ = (LnnGetRemoteNumInfoFunc)dlsym(soHandle_, "LnnGetRemoteNumInfo");
     if (lnnGetRemoteNumInfoFunc_ == nullptr) {
-        CONN_LOGE(CONN_WIFI_DIRECT, "[wifi_direct_init] dlsym LnnGetRemoteNumInfo fail.");
+        CONN_LOGE(CONN_WIFI_DIRECT, "[wd_init] dlsym LnnGetRemoteNumInfo fail.");
         return SOFTBUS_WIFI_DIRECT_DLSYM_FAILED;
     }
 
@@ -647,7 +647,7 @@ int32_t DBinderSoftbusServer::LnnGetLocalNumInfo(InfoKey key, int32_t *info)
 
     lnnGetLocalNumInfoFunc_ = (LnnGetLocalNumInfoFunc)dlsym(soHandle_, "LnnGetLocalNumInfo");
     if (lnnGetLocalNumInfoFunc_ == nullptr) {
-        CONN_LOGE(CONN_WIFI_DIRECT, "[wifi_direct_init] dlsym LnnGetLocalNumInfo fail.");
+        CONN_LOGE(CONN_WIFI_DIRECT, "[wd_init] dlsym LnnGetLocalNumInfo fail.");
         return SOFTBUS_WIFI_DIRECT_DLSYM_FAILED;
     }
 
@@ -666,7 +666,7 @@ int32_t DBinderSoftbusServer::LnnGetRemoteNumU64Info(const char *networkId, Info
 
     lnnGetRemoteNumU64InfoFunc_ = (LnnGetRemoteNumU64InfoFunc)dlsym(soHandle_, "LnnGetRemoteNumU64Info");
     if (lnnGetRemoteNumU64InfoFunc_ == nullptr) {
-        CONN_LOGE(CONN_WIFI_DIRECT, "[wifi_direct_init] dlsym LnnGetRemoteNumU64Info fail.");
+        CONN_LOGE(CONN_WIFI_DIRECT, "[wd_init] dlsym LnnGetRemoteNumU64Info fail.");
         return SOFTBUS_WIFI_DIRECT_DLSYM_FAILED;
     }
 
@@ -685,7 +685,7 @@ int32_t DBinderSoftbusServer::LnnGetRemoteNodeInfoById(const char *id, IdCategor
 
     lnnGetRemoteNodeInfoByIdFunc_ = (LnnGetRemoteNodeInfoByIdFunc)dlsym(soHandle_, "LnnGetRemoteNodeInfoById");
     if (lnnGetRemoteNodeInfoByIdFunc_ == nullptr) {
-        CONN_LOGE(CONN_WIFI_DIRECT, "[wifi_direct_init] dlsym LnnGetRemoteNodeInfoById fail.");
+        CONN_LOGE(CONN_WIFI_DIRECT, "[wd_init] dlsym LnnGetRemoteNodeInfoById fail.");
         return SOFTBUS_WIFI_DIRECT_DLSYM_FAILED;
     }
 
@@ -704,7 +704,7 @@ int32_t DBinderSoftbusServer::LnnGetRemoteNodeInfoByKey(const char *key, NodeInf
 
     lnnGetRemoteNodeInfoByKeyFunc_ = (LnnGetRemoteNodeInfoByKeyFunc)dlsym(soHandle_, "LnnGetRemoteNodeInfoByKey");
     if (lnnGetRemoteNodeInfoByKeyFunc_ == nullptr) {
-        CONN_LOGE(CONN_WIFI_DIRECT, "[wifi_direct_init] dlsym LnnGetRemoteNodeInfoByKey fail.");
+        CONN_LOGE(CONN_WIFI_DIRECT, "[wd_init] dlsym LnnGetRemoteNodeInfoByKey fail.");
         return SOFTBUS_WIFI_DIRECT_DLSYM_FAILED;
     }
 
@@ -724,7 +724,7 @@ int32_t DBinderSoftbusServer::LnnGetAllOnlineNodeInfo(NodeBasicInfo **info, int3
 
     lnnGetAllOnlineNodeInfoFunc_ = (LnnGetAllOnlineNodeInfoFunc)dlsym(soHandle_, "LnnGetAllOnlineNodeInfo");
     if (lnnGetAllOnlineNodeInfoFunc_ == nullptr) {
-        CONN_LOGE(CONN_WIFI_DIRECT, "[wifi_direct_init] dlsym LnnGetAllOnlineNodeInfo fail.");
+        CONN_LOGE(CONN_WIFI_DIRECT, "[wd_init] dlsym LnnGetAllOnlineNodeInfo fail.");
         return SOFTBUS_WIFI_DIRECT_DLSYM_FAILED;
     }
 
@@ -744,7 +744,7 @@ int32_t DBinderSoftbusServer::LnnRegisterEventHandler(LnnEventType event, LnnEve
 
     lnnRegisterEventHandlerFunc_ = (LnnRegisterEventHandlerFunc)dlsym(soHandle_, "LnnRegisterEventHandler");
     if (lnnRegisterEventHandlerFunc_ == nullptr) {
-        CONN_LOGE(CONN_WIFI_DIRECT, "[wifi_direct_init] dlsym LnnRegisterEventHandler fail.");
+        CONN_LOGE(CONN_WIFI_DIRECT, "[wd_init] dlsym LnnRegisterEventHandler fail.");
         return SOFTBUS_WIFI_DIRECT_DLSYM_FAILED;
     }
 
@@ -764,7 +764,7 @@ int32_t DBinderSoftbusServer::LnnGetLocalBoolInfo(InfoKey key, bool *info, uint3
 
     lnnGetLocalBoolInfoFunc_ = (LnnGetLocalBoolInfoFunc)dlsym(soHandle_, "LnnGetLocalBoolInfo");
     if (lnnGetLocalBoolInfoFunc_ == nullptr) {
-        CONN_LOGE(CONN_WIFI_DIRECT, "[wifi_direct_init] dlsym LnnGetLocalBoolInfo fail.");
+        CONN_LOGE(CONN_WIFI_DIRECT, "[wd_init] dlsym LnnGetLocalBoolInfo fail.");
         return SOFTBUS_WIFI_DIRECT_DLSYM_FAILED;
     }
 
@@ -785,7 +785,7 @@ int32_t DBinderSoftbusServer::LnnConvertDlId(
 
     lnnConvertDlIdFunc_ = (LnnConvertDlIdFunc)dlsym(soHandle_, "LnnConvertDlId");
     if (lnnConvertDlIdFunc_ == nullptr) {
-        CONN_LOGE(CONN_WIFI_DIRECT, "[wifi_direct_init] dlsym LnnConvertDlId fail.");
+        CONN_LOGE(CONN_WIFI_DIRECT, "[wd_init] dlsym LnnConvertDlId fail.");
         return SOFTBUS_WIFI_DIRECT_DLSYM_FAILED;
     }
 
@@ -805,7 +805,7 @@ int32_t DBinderSoftbusServer::GetConnectionIdByHandle(AuthHandle handle)
 
     getConnectionIdByHandleFunc_ = (GetConnectionIdByHandleFunc)dlsym(soHandle_, "GetConnectionIdByHandle");
     if (getConnectionIdByHandleFunc_ == nullptr) {
-        CONN_LOGE(CONN_WIFI_DIRECT, "[wifi_direct_init] dlsym GetConnectionIdByHandle fail.");
+        CONN_LOGE(CONN_WIFI_DIRECT, "[wd_init] dlsym GetConnectionIdByHandle fail.");
         return SOFTBUS_WIFI_DIRECT_DLSYM_FAILED;
     }
 
@@ -826,7 +826,7 @@ int32_t DBinderSoftbusServer::ConnSetKeepaliveByConnectionId(uint32_t connection
     connSetKeepaliveByConnectionIdFunc_ = (ConnSetKeepaliveByConnectionIdFunc)dlsym(
         soHandle_, "ConnSetKeepaliveByConnectionId");
     if (connSetKeepaliveByConnectionIdFunc_ == nullptr) {
-        CONN_LOGE(CONN_WIFI_DIRECT, "[wifi_direct_init] dlsym ConnSetKeepaliveByConnectionId fail.");
+        CONN_LOGE(CONN_WIFI_DIRECT, "[wd_init] dlsym ConnSetKeepaliveByConnectionId fail.");
         return SOFTBUS_WIFI_DIRECT_DLSYM_FAILED;
     }
 
