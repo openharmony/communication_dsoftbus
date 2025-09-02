@@ -767,7 +767,7 @@ HWTEST_F(SoftbusThreadTest, SoftBusThreadSetNameTest006, TestSize.Level0)
 }
 
 /*
- * @tc.name: SoftBusThreadSetNameTest006
+ * @tc.name: SoftBusThreadSetNameTest007
  * @tc.desc: SoftBusThreadSetName will return SOFTBUS_INVALID_PARAM when thread=0
  * @tc.type: FUNC
  * @tc.require: 1
