@@ -607,6 +607,25 @@ HWTEST_F(AuthUkManagerTest, CREATE_UK_NEGOTIATE_INSTANCE_Test_001, TestSize.Leve
 }
 
 /*
+ * @tc.name: CHECK_ACL_INFO_IS_EMPTY_Test_001
+ * @tc.desc: CheckAclInfoIsEmpty test
+ * @tc.type: FUNC
+ * @tc.require:
+ */
+HWTEST_F(AuthUkManagerTest, CHECK_ACL_INFO_IS_EMPTY_Test_001, TestSize.Level1)
+{
+    AuthACLInfo info;
+    (void)memset_s(&info, sizeof(AuthACLInfo), 0, sizeof(AuthACLInfo));
+    bool ret = CheckAclInfoIsEmpty(nullptr);
+    EXPECT_EQ(ret, true);
+    ret = CheckAclInfoIsEmpty(&info);
+    EXPECT_EQ(ret, true);
+    EXPECT_EQ(EOK, strcpy_s(info.sourceUdid, UDID_BUF_LEN, NODE1_UDID));
+    ret = CheckAclInfoIsEmpty(&info);
+    EXPECT_EQ(ret, false);
+}
+
+/*
  * @tc.name: PACK_UK_ACL_PARAM_Test_001
  * @tc.desc: PackUkAclParam test
  * @tc.type: FUNC
@@ -1094,7 +1113,33 @@ HWTEST_F(AuthUkManagerTest, PROCESS_UK_DEVICE_ID_Test_001, TestSize.Level1)
     EXPECT_EQ(ret, SOFTBUS_NETWORK_GET_NODE_INFO_ERR);
     requestId = 1;
     ret = ProcessUkDeviceId(channelId, requestId, data, dataLen);
-    EXPECT_EQ(ret, SOFTBUS_NETWORK_GET_NODE_INFO_ERR);
+    EXPECT_EQ(ret, SOFTBUS_AUTH_UK_UPDATE_ACL_FAIL);
+    DeleteUkNegotiateInstance(requestId);
+    DeInitUkNegoInstanceList();
+    UkNegotiateDeinit();
+}
+
+/*
+ * @tc.name: UPDATE_EXIST_ACL_INFO_Test_001
+ * @tc.desc: UpdateExistAclInfo test
+ * @tc.type: FUNC
+ * @tc.require:
+ */
+HWTEST_F(AuthUkManagerTest, UPDATE_EXIST_ACL_INFO_Test_001, TestSize.Level1)
+{
+    AuthACLInfo info = { 0 };
+    UkNegotiateInstance instance = { 0 };
+    EXPECT_EQ(CreateUkNegotiateInstanceInner(), SOFTBUS_OK);
+    uint32_t requestId = 1;
+    int32_t ret = GetGenUkInstanceByReq(requestId, &instance);
+    EXPECT_EQ(ret, SOFTBUS_OK);
+    ret = UpdateExistAclInfo(instance.channelId, instance.requestId, info, nullptr);
+    EXPECT_EQ(ret, SOFTBUS_INVALID_PARAM);
+    ret = UpdateExistAclInfo(instance.channelId, instance.requestId, info, &instance);
+    EXPECT_EQ(ret, SOFTBUS_AUTH_UK_UPDATE_ACL_FAIL);
+    instance.isRecvDeviceId = false;
+    ret = UpdateExistAclInfo(instance.channelId, instance.requestId, info, &instance);
+    EXPECT_EQ(ret, SOFTBUS_OK);
     DeleteUkNegotiateInstance(requestId);
     DeInitUkNegoInstanceList();
     UkNegotiateDeinit();
