@@ -386,7 +386,7 @@ int32_t ConnBlePostBytesInner(uint32_t connectionId, uint8_t *data, uint32_t dat
     }
     g_startBleSendLPInfo.messagePosted = true;
     if (!g_startBleSendLPInfo.sendTaskRunning) {
-        status = ConnStartActionAsync(NULL, BleSendTask, "BleSend_Tsk");
+        status = ConnStartActionAsync(NULL, BleSendTask, NULL);
         if (status != SOFTBUS_OK) {
             CONN_LOGE(CONN_BLE, "start send task fail errno=%{public}d", status);
             SoftBusMutexUnlock(&g_startBleSendLPInfo.lock);
@@ -585,6 +585,9 @@ static int32_t ConnCocTransSend(ConnBleConnection *connection, const uint8_t *da
 
 void *BleSendTask(void *arg)
 {
+    const char *name = "BleSend_Tsk";
+    SoftBusThread threadSelf = SoftBusThreadGetSelf();
+    SoftBusThreadSetName(threadSelf, name);
 #define WAIT_TIME 10
     SendQueueNode *sendNode = NULL;
     while (true) {
