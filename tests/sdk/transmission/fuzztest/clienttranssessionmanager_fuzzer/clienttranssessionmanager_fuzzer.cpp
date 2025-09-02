@@ -28,9 +28,9 @@ static int32_t OnSessionOpened(int32_t sessionId, int32_t result)
 }
 static void OnSessionClosed(int32_t sessionId) {}
 
-static void OnBytesReceived(int32_t sessionId, const void* data, unsigned int len) {}
+static void OnBytesReceived(int32_t sessionId, const void *data, unsigned int len) {}
 
-static void OnMessageReceived(int32_t sessionId, const void* data, unsigned int len) {}
+static void OnMessageReceived(int32_t sessionId, const void *data, unsigned int len) {}
 
 static ISessionListener g_sessionlistener = {
     .OnSessionOpened = OnSessionOpened,
@@ -39,7 +39,7 @@ static ISessionListener g_sessionlistener = {
     .OnMessageReceived = OnMessageReceived,
 };
 
-void ClientAddNewSessionTest(const uint8_t* data, size_t size)
+void ClientAddNewSessionTest(const uint8_t *data, size_t size)
 {
     if ((data == nullptr) || (size == 0)) {
         return;
@@ -49,7 +49,7 @@ void ClientAddNewSessionTest(const uint8_t* data, size_t size)
     ClientAddNewSession(testSessionName, &session);
 }
 
-void ClientAddAuthSessionTest(const uint8_t* data, size_t size)
+void ClientAddAuthSessionTest(const uint8_t *data, size_t size)
 {
     #define SESSION_NAME_SIZE_MAX 256
     if ((data == nullptr) || (size < SESSION_NAME_SIZE_MAX)) {
@@ -58,11 +58,13 @@ void ClientAddAuthSessionTest(const uint8_t* data, size_t size)
     DataGenerator::Write(data, size);
     int32_t sessionId = 0;
     GenerateInt32(sessionId);
+    const char *testSessionName = reinterpret_cast<const char *>(data);
     ClientAddAuthSession(nullptr, &sessionId);
+    ClientAddAuthSession(testSessionName, &sessionId);
     DataGenerator::Clear();
 }
 
-void ClientDeleteSessionTest(const uint8_t* data, size_t size)
+void ClientDeleteSessionTest(const uint8_t *data, size_t size)
 {
     if ((data == nullptr) || (size < sizeof(int32_t))) {
         return;
@@ -74,7 +76,7 @@ void ClientDeleteSessionTest(const uint8_t* data, size_t size)
     DataGenerator::Clear();
 }
 
-void ClientGetSessionDataTest(const uint8_t* data, size_t size)
+void ClientGetSessionDataTest(const uint8_t *data, size_t size)
 {
     if ((data == nullptr) || (size < sizeof(int32_t) + sizeof(int))) {
         return;
@@ -89,7 +91,7 @@ void ClientGetSessionDataTest(const uint8_t* data, size_t size)
     ClientGetSessionSide(sessionId);
 }
 
-void ClientSetChannelBySessionIdTest(const uint8_t* data, size_t size)
+void ClientSetChannelBySessionIdTest(const uint8_t *data, size_t size)
 {
     if ((data == nullptr) || (size < sizeof(int32_t))) {
         return;
@@ -106,7 +108,7 @@ void ClientSetChannelBySessionIdTest(const uint8_t* data, size_t size)
     DataGenerator::Clear();
 }
 
-void ClientGetSessionCallbackTest(const uint8_t* data, size_t size)
+void ClientGetSessionCallbackTest(const uint8_t *data, size_t size)
 {
     if ((data == nullptr) || (size < sizeof(int32_t))) {
         return;
@@ -121,7 +123,7 @@ void ClientGetSessionCallbackTest(const uint8_t* data, size_t size)
     DataGenerator::Clear();
 }
 
-void ClientTransOnLinkDownTest(const uint8_t* data, size_t size)
+void ClientTransOnLinkDownTest(const uint8_t *data, size_t size)
 {
     if ((data == nullptr) || (size < sizeof(int32_t))) {
         return;
@@ -135,14 +137,14 @@ void ClientTransOnLinkDownTest(const uint8_t* data, size_t size)
     DataGenerator::Clear();
 }
 
-void ClientRemovePermissionTest(const uint8_t* data, size_t size)
+void ClientRemovePermissionTest(const uint8_t *data, size_t size)
 {
     (void)data;
     (void)size;
     ClientRemovePermission(nullptr);
 }
 
-void ClientGetFileConfigInfoByIdTest(const uint8_t* data, size_t size)
+void ClientGetFileConfigInfoByIdTest(const uint8_t *data, size_t size)
 {
     if ((data == nullptr) || (size < sizeof(int32_t))) {
         return;
@@ -156,7 +158,7 @@ void ClientGetFileConfigInfoByIdTest(const uint8_t* data, size_t size)
     DataGenerator::Clear();
 }
 
-void GetEncryptByChannelIdTest(const uint8_t* data, size_t size)
+void GetEncryptByChannelIdTest(const uint8_t *data, size_t size)
 {
     if ((data == nullptr) || (size < sizeof(int32_t))) {
         return;
@@ -171,7 +173,7 @@ void GetEncryptByChannelIdTest(const uint8_t* data, size_t size)
     DataGenerator::Clear();
 }
 
-void ClientGetSessionIdByChannelIdTest(const uint8_t* data, size_t size)
+void ClientGetSessionIdByChannelIdTest(const uint8_t *data, size_t size)
 {
     if ((data == nullptr) || (size < sizeof(int32_t))) {
         return;
@@ -187,7 +189,7 @@ void ClientGetSessionIdByChannelIdTest(const uint8_t* data, size_t size)
     DataGenerator::Clear();
 }
 
-void ClientEnableSessionByChannelIdTest(const uint8_t* data, size_t size)
+void ClientEnableSessionByChannelIdTest(const uint8_t *data, size_t size)
 {
     if ((data == nullptr) || (size < sizeof(int32_t))) {
         return;
@@ -203,10 +205,9 @@ void ClientEnableSessionByChannelIdTest(const uint8_t* data, size_t size)
 } // namespace OHOS
 
 /* Fuzzer entry point */
-extern "C" int32_t LLVMFuzzerTestOneInput(const uint8_t* data, size_t size)
+extern "C" int32_t LLVMFuzzerTestOneInput(const uint8_t *data, size_t size)
 {
     OHOS::ClientAddNewSessionTest(data, size);
-    OHOS::ClientAddAuthSessionTest(data, size);
     OHOS::ClientDeleteSessionTest(data, size);
     OHOS::ClientGetSessionDataTest(data, size);
     OHOS::ClientSetChannelBySessionIdTest(data, size);

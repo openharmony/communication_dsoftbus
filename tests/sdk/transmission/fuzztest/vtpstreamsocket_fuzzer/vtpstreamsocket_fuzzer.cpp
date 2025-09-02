@@ -26,7 +26,7 @@
 namespace OHOS {
     Communication::SoftBus::VtpStreamSocket vtpStreamSocket;
 
-    void VtpCreateClientTest(const uint8_t* data, size_t size)
+    void VtpCreateClientTest(const uint8_t *data, size_t size)
     {
         if (data == nullptr || size < sizeof(int32_t)) {
             return;
@@ -40,7 +40,7 @@ namespace OHOS {
         vtpStreamSocket.CreateClient(ipPort, ipPort, streamType, sessionKey);
     }
 
-    void VtpCreateServerTest(const uint8_t* data, size_t size)
+    void VtpCreateServerTest(const uint8_t *data, size_t size)
     {
         if (data == nullptr || size < sizeof(int32_t)) {
             return;
@@ -53,7 +53,7 @@ namespace OHOS {
         vtpStreamSocket.CreateServer(ipPort, streamType, sessionKey);
     }
 
-    void VtpDestroyStreamSocketTest(const uint8_t* data, size_t size)
+    void VtpDestroyStreamSocketTest(const uint8_t *data, size_t size)
     {
         (void)data;
         (void)size;
@@ -61,7 +61,7 @@ namespace OHOS {
         vtpStreamSocket.DestroyStreamSocket();
     }
 
-    void VtpConnectTest(const uint8_t* data, size_t size)
+    void VtpConnectTest(const uint8_t *data, size_t size)
     {
         if (data == nullptr || size < sizeof(int32_t)) {
             return;
@@ -73,7 +73,7 @@ namespace OHOS {
         vtpStreamSocket.Connect(ipPort);
     }
 
-    void VtpSetOptionTest(const uint8_t* data, size_t size)
+    void VtpSetOptionTest(const uint8_t *data, size_t size)
     {
         if (data == nullptr || size < sizeof(int32_t)) {
             return;
@@ -85,7 +85,7 @@ namespace OHOS {
         vtpStreamSocket.SetOption(type, tmp);
     }
 
-    void VtpGetOptionTest(const uint8_t* data, size_t size)
+    void VtpGetOptionTest(const uint8_t *data, size_t size)
     {
         if (data == nullptr || size < sizeof(int32_t)) {
             return;
@@ -96,7 +96,7 @@ namespace OHOS {
         vtpStreamSocket.GetOption(type);
     }
 
-    void VtpSetStreamListenerTest(const uint8_t* data, size_t size)
+    void VtpSetStreamListenerTest(const uint8_t *data, size_t size)
     {
         (void)data;
         (void)size;
@@ -106,7 +106,7 @@ namespace OHOS {
         vtpStreamSocket.SetStreamListener(receiver);
     }
 
-    void VtpGetEncryptOverheadTest(const uint8_t* data, size_t size)
+    void VtpGetEncryptOverheadTest(const uint8_t *data, size_t size)
     {
         (void)data;
         (void)size;
@@ -114,7 +114,7 @@ namespace OHOS {
         vtpStreamSocket.GetEncryptOverhead();
     }
 
-    void VtpEncrypt(const uint8_t* data, size_t size)
+    void VtpEncrypt(const uint8_t *data, size_t size)
     {
         if (data == nullptr || size < sizeof(size_t)) {
             return;
@@ -131,7 +131,7 @@ namespace OHOS {
         DataGenerator::Clear();
     }
 
-    void VtpDecrypt(const uint8_t* data, size_t size)
+    void VtpDecrypt(const uint8_t *data, size_t size)
     {
         if (data == nullptr || size < sizeof(size_t)) {
             return;
@@ -150,7 +150,7 @@ namespace OHOS {
 }
 
 /* Fuzzer entry point */
-extern "C" int32_t LLVMFuzzerTestOneInput(const uint8_t* data, size_t size)
+extern "C" int32_t LLVMFuzzerTestOneInput(const uint8_t *data, size_t size)
 {
     /* Run your code on data */
     OHOS::VtpCreateServerTest(data, size);

@@ -20,7 +20,7 @@
 #include "session.h"
 
 namespace OHOS {
-void SoftBusSendMessageTest(const uint8_t* data, size_t size)
+void SoftBusSendMessageTest(const uint8_t *data, size_t size)
 {
     if ((data == nullptr) || (size <= 0)) {
         return;
@@ -31,7 +31,7 @@ void SoftBusSendMessageTest(const uint8_t* data, size_t size)
 } // namespace OHOS
 
 /* Fuzzer entry point */
-extern "C" int32_t LLVMFuzzerTestOneInput(const uint8_t* data, size_t size)
+extern "C" int32_t LLVMFuzzerTestOneInput(const uint8_t *data, size_t size)
 {
     OHOS::SoftBusSendMessageTest(data, size);
 

@@ -20,7 +20,7 @@
 #include "session.h"
 
 namespace OHOS {
-    void GetSessionSideTest(const uint8_t* data, size_t size)
+    void GetSessionSideTest(const uint8_t *data, size_t size)
     {
         if (data == nullptr || size < sizeof(int)) {
             return;
@@ -32,7 +32,7 @@ namespace OHOS {
 } // namespace OHOS
 
 /* Fuzzer entry point */
-extern "C" int32_t LLVMFuzzerTestOneInput(const uint8_t* data, size_t size)
+extern "C" int32_t LLVMFuzzerTestOneInput(const uint8_t *data, size_t size)
 {
     /* Run your code on data */
     OHOS::GetSessionSideTest(data, size);

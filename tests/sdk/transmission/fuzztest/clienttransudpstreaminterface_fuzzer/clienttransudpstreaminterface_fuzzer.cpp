@@ -22,7 +22,7 @@
 #include "softbus_def.h"
 
 namespace OHOS {
-    void SendVtpStreamTest(const uint8_t* data, size_t size)
+    void SendVtpStreamTest(const uint8_t *data, size_t size)
     {
         if (data == nullptr || size < sizeof(int64_t)) {
             return;
@@ -63,7 +63,7 @@ namespace OHOS {
         SoftBusFree(ptr);
     }
 
-    void StartVtpStreamChannelServerTest(const uint8_t* data, size_t size)
+    void StartVtpStreamChannelServerTest(const uint8_t *data, size_t size)
     {
         if (data == nullptr || size < sizeof(int64_t)) {
             return;
@@ -93,7 +93,7 @@ namespace OHOS {
         SoftBusFree(ptr);
     }
 
-    void StartVtpStreamChannelClientTest(const uint8_t* data, size_t size)
+    void StartVtpStreamChannelClientTest(const uint8_t *data, size_t size)
     {
         if (data == nullptr || size < sizeof(int64_t)) {
             return;
@@ -123,7 +123,7 @@ namespace OHOS {
         SoftBusFree(ptr);
     }
 
-    void CloseVtpStreamChannelTest(const uint8_t* data, size_t size)
+    void CloseVtpStreamChannelTest(const uint8_t *data, size_t size)
     {
         if (data == nullptr || size < PKG_NAME_SIZE_MAX) {
             return;
@@ -138,7 +138,7 @@ namespace OHOS {
 } // namespace OHOS
 
 /* Fuzzer entry point */
-extern "C" int32_t LLVMFuzzerTestOneInput(const uint8_t* data, size_t size)
+extern "C" int32_t LLVMFuzzerTestOneInput(const uint8_t *data, size_t size)
 {
     /* Run your code on data */
     OHOS::SendVtpStreamTest(data, size);
