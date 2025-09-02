@@ -228,6 +228,7 @@ int32_t LnnIpcServerJoin(const char *pkgName, int32_t callingPid, void *addr, ui
     }
     if (SoftBusMutexLock(&g_lnnRequestInfo.lock) != 0) {
         LNN_LOGE(LNN_EVENT, "get lock fail");
+        return SOFTBUS_LOCK_ERR;
     }
     if (g_lnnRequestInfo.joinLNNRequestInfo == NULL) {
         g_lnnRequestInfo.joinLNNRequestInfo = CreateSoftBusList();
@@ -261,6 +262,7 @@ int32_t LnnIpcServerLeave(const char *pkgName, int32_t callingPid, const char *n
     }
     if (SoftBusMutexLock(&g_lnnRequestInfo.lock) != 0) {
         LNN_LOGE(LNN_EVENT, "get lock fail");
+        return SOFTBUS_LOCK_ERR;
     }
     if (g_lnnRequestInfo.leaveLNNRequestInfo == NULL) {
         g_lnnRequestInfo.leaveLNNRequestInfo = CreateSoftBusList();
