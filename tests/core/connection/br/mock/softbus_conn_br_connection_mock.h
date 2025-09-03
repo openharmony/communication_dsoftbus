@@ -54,6 +54,7 @@ public:
     virtual int32_t ConnBrDequeueBlock(void **msg) = 0;
     virtual int32_t ConnBrCreateBrPendingPacket(uint32_t id, int64_t seq) = 0;
     virtual void ConnBrDelBrPendingPacket(uint32_t id, int64_t seq) = 0;
+    virtual void ConnBrDelBrPendingPacketById(uint32_t id) = 0;
     virtual int32_t ConnBrGetBrPendingPacket(uint32_t id, int64_t seq, uint32_t waitMillis, void **data) = 0;
     virtual int32_t ConnBrInnerQueueInit(void) = 0;
     virtual void ConnBrInnerQueueDeinit(void) = 0;
@@ -84,6 +85,7 @@ public:
     MOCK_METHOD1(ConnBrDequeueBlock, int32_t(void **));
     MOCK_METHOD2(ConnBrCreateBrPendingPacket, int32_t(uint32_t, int64_t));
     MOCK_METHOD2(ConnBrDelBrPendingPacket, void(uint32_t, int64_t));
+    MOCK_METHOD1(ConnBrDelBrPendingPacketById, void(uint32_t));
     MOCK_METHOD4(ConnBrGetBrPendingPacket, int32_t(uint32_t, int64_t, uint32_t, void **));
     MOCK_METHOD0(ConnBrInnerQueueInit, int32_t());
     MOCK_METHOD0(ConnBrInnerQueueDeinit, void());
