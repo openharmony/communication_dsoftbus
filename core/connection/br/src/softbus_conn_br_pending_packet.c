@@ -87,18 +87,34 @@ int32_t ConnBrCreateBrPendingPacket(uint32_t id, int64_t seq)
 
 void ConnBrDelBrPendingPacket(uint32_t id, int64_t seq)
 {
-    if (SoftBusMutexLock(&g_pendingLock) != SOFTBUS_OK) {
-        return;
-    }
-    PendingPacket *pending = NULL;
-    LIST_FOR_EACH_ENTRY(pending, &g_pendingList, PendingPacket, node) {
-        if (pending->id == id && pending->seq == seq) {
-            ListDelete(&pending->node);
-            SoftBusCondSignal(&pending->cond);
-            SoftBusMutexDestroy(&pending->lock);
-            SoftBusCondDestroy(&pending->cond);
-            SoftBusFree(pending);
+    CONN_CHECK_AND_RETURN_LOGW(SoftBusMutexLock(&g_pendingLock) == SOFTBUS_OK, CONN_BR, "lock failed");
+    PendingPacket *it = NULL;
+    PendingPacket *next = NULL;
+    LIST_FOR_EACH_ENTRY_SAFE(it, next, &g_pendingList, PendingPacket, node) {
+        if (it->id == id && it->seq == seq) {
+            ListDelete(&it->node);
+            SoftBusCondSignal(&it->cond);
+            SoftBusMutexDestroy(&it->lock);
+            SoftBusCondDestroy(&it->cond);
+            SoftBusFree(it);
             break;
+        }
+    }
+    (void)SoftBusMutexUnlock(&g_pendingLock);
+}
+
+void ConnBrDelBrPendingPacketById(uint32_t id)
+{
+    CONN_CHECK_AND_RETURN_LOGW(SoftBusMutexLock(&g_pendingLock) == SOFTBUS_OK, CONN_BR, "lock failed");
+    PendingPacket *it = NULL;
+    PendingPacket *next = NULL;
+    LIST_FOR_EACH_ENTRY_SAFE(it, next, &g_pendingList, PendingPacket, node) {
+        if (it->id == id) {
+            ListDelete(&it->node);
+            SoftBusCondSignal(&it->cond);
+            SoftBusMutexDestroy(&it->lock);
+            SoftBusCondDestroy(&it->cond);
+            SoftBusFree(it);
         }
     }
     (void)SoftBusMutexUnlock(&g_pendingLock);
