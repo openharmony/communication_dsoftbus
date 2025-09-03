@@ -754,4 +754,46 @@ HWTEST_F(AuthSessionJsonMockTest, PACK_DEVICE_INFO_MESSAGE_TEST_001, TestSize.Le
     ret = PackDeviceInfoMessage(&connInfo, SOFTBUS_NEW_V1, false, remoteUuid, &info);
     EXPECT_EQ(ret, nullptr);
 }
+
+/*
+ @tc.name: PackSparkCheck_TEST_001
+ @tc.desc: pack spark check test
+ @tc.type: FUNC
+ @tc.require:
+ */
+HWTEST_F(AuthSessionJsonMockTest, PackSparkCheck_TEST_001, TestSize.Level1)
+{
+    JsonObj json;
+    (void)memset_s(&json, sizeof(JsonObj), 0, sizeof(JsonObj));
+    NodeInfo info;
+    (void)memset_s(&info, sizeof(NodeInfo), 0, sizeof(NodeInfo));
+    NiceMock<AuthSessionJsonDepsInterfaceMock> mockDeps;
+    EXPECT_CALL(mockDeps, ConvertBytesToHexString).WillOnce(Return(SOFTBUS_INVALID_PARAM))
+        .WillRepeatedly(Return(SOFTBUS_OK));
+    EXPECT_CALL(mockDeps, JSON_AddStringToObject).WillOnce(Return(false)).WillRepeatedly(Return(true));
+    EXPECT_NO_FATAL_FAILURE(PackSparkCheck(&json, &info));
+    EXPECT_NO_FATAL_FAILURE(PackSparkCheck(&json, &info));
+    EXPECT_NO_FATAL_FAILURE(PackSparkCheck(&json, &info));
+}
+
+/*
+ @tc.name: UnpackSparkCheck_TEST_001
+ @tc.desc: unpack spark check test
+ @tc.type: FUNC
+ @tc.require:
+ */
+HWTEST_F(AuthSessionJsonMockTest, UnpackSparkCheck_TEST_001, TestSize.Level1)
+{
+    JsonObj json;
+    (void)memset_s(&json, sizeof(JsonObj), 0, sizeof(JsonObj));
+    NodeInfo info;
+    (void)memset_s(&info, sizeof(NodeInfo), 0, sizeof(NodeInfo));
+    NiceMock<AuthSessionJsonDepsInterfaceMock> mockDeps;
+    EXPECT_CALL(mockDeps, JSON_GetStringFromObject).WillOnce(Return(false)).WillRepeatedly(Return(true));
+    EXPECT_CALL(mockDeps, ConvertHexStringToBytes).WillOnce(Return(SOFTBUS_INVALID_PARAM))
+        .WillRepeatedly(Return(SOFTBUS_OK));
+    EXPECT_NO_FATAL_FAILURE(UnpackSparkCheck(&json, &info));
+    EXPECT_NO_FATAL_FAILURE(UnpackSparkCheck(&json, &info));
+    EXPECT_NO_FATAL_FAILURE(UnpackSparkCheck(&json, &info));
+}
 } // namespace OHOS
