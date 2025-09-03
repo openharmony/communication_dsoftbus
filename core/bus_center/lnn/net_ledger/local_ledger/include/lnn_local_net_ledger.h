@@ -38,6 +38,7 @@ int32_t LnnUpdateLocalScreenStatus(bool isScreenOn);
 void LnnUpdateStateVersion(StateVersionChangeReason reason);
 int32_t LnnUpdateLocalDeviceName(const DeviceBasicInfo *info);
 int32_t LnnGenBroadcastCipherInfo(void);
+int32_t LnnGenSparkCheck(void);
 int32_t HandleDeviceInfoIfUdidChanged(void);
 int32_t LnnUpdateSleCapacityAndVersion(int32_t slecap);
 

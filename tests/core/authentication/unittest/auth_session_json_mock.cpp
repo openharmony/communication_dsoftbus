@@ -454,5 +454,10 @@ bool IsTrustedDeviceFromAccess(const char *peerAccountHash, const char *peerUdid
 {
     return GetInterface()->IsTrustedDeviceFromAccess(peerAccountHash, peerUdid, peerUserId);
 }
+
+void LnnDumpSparkCheck(const unsigned char* sparkCheck, const char *log)
+{
+    return GetInterface()->LnnDumpSparkCheck(sparkCheck, log);
+}
 }
 } // namespace OHOS

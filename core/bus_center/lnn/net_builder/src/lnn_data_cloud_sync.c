@@ -969,6 +969,9 @@ static int32_t LnnUpdateOldCacheInfo(const NodeInfo *newInfo, NodeInfo *oldInfo)
     if (memcpy_s(oldInfo->remotePtk, PTK_DEFAULT_LEN, newInfo->remotePtk, PTK_DEFAULT_LEN) != EOK) {
         LNN_LOGE(LNN_LEDGER, "memcpy_s remotePtk to cache info fail");
     }
+    if (memcpy_s(oldInfo->sparkCheck, SPARK_CHECK_LENGTH, newInfo->sparkCheck, SPARK_CHECK_LENGTH) != EOK) {
+        LNN_LOGE(LNN_LEDGER, "memcpy_s sparkCheck to cache info fail");
+    }
     UpdateDevBasicInfoToCache(newInfo, oldInfo);
     return SOFTBUS_OK;
 }

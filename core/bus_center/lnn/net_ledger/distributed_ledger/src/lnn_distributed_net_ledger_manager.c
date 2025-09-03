@@ -824,6 +824,18 @@ static int32_t DlGetSleAddr(const char *networkId, bool checkOnline, void *buf, 
     return SOFTBUS_OK;
 }
 
+static int32_t DlGetDeviceSparkCheck(const char *networkId, bool checkOnline, void *buf, uint32_t len)
+{
+    (void)checkOnline;
+    NodeInfo *info = NULL;
+    RETURN_IF_GET_NODE_VALID(networkId, buf, info);
+    if (memcpy_s(buf, len, info->sparkCheck, SPARK_CHECK_LENGTH) != EOK) {
+        LNN_LOGE(LNN_LEDGER, "memcpy spark check fail");
+        return SOFTBUS_MEM_ERR;
+    }
+    return SOFTBUS_OK;
+}
+
 static DistributedLedgerKey g_dlKeyTable[] = {
     {STRING_KEY_HICE_VERSION, DlGetNodeSoftBusVersion},
     {STRING_KEY_DEV_UDID, DlGetDeviceUdid},
@@ -866,7 +878,8 @@ static DistributedLedgerKey g_dlKeyTable[] = {
     {BYTE_KEY_BROADCAST_CIPHER_KEY, DlGetDeviceCipherInfoKey},
     {BYTE_KEY_BROADCAST_CIPHER_IV, DlGetDeviceCipherInfoIv},
     {BYTE_KEY_REMOTE_PTK, DlGetRemotePtk},
-    {BYTE_KEY_STATIC_CAPABILITY, DlGetStaticCap}
+    {BYTE_KEY_STATIC_CAPABILITY, DlGetStaticCap},
+    {BYTE_KEY_SPARK_CHECK, DlGetDeviceSparkCheck}
 };
 
 static DistributedLedgerKeyByIfname g_dlKeyByIfnameTable[] = {
