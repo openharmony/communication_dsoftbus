@@ -564,9 +564,11 @@ static void AsyncWorkExecute(napi_env env, void* data);
 
 static void ProcessTaskQueue()
 {
-    while (1) {
+    bool shouldExit = false;
+    while (!shouldExit) {
         pthread_mutex_lock(&g_taskQueue.mutex);
         if (g_taskQueue.head == NULL || g_taskQueue.isProcessing) {
+            shouldExit = true;
             pthread_mutex_unlock(&g_taskQueue.mutex);
             return;
         }
@@ -574,6 +576,7 @@ static void ProcessTaskQueue()
         QueueNode* node = g_taskQueue.head;
         g_taskQueue.head = g_taskQueue.head->next;
         if (g_taskQueue.head == NULL) {
+            shouldExit = true;
             g_taskQueue.tail = NULL;
         }
         pthread_mutex_unlock(&g_taskQueue.mutex);
