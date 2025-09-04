@@ -422,6 +422,12 @@ static void NotifyEvent(const LnnEventBasicInfo *info)
         return;
     }
     uint32_t count = g_eventCtrl.regCnt[info->event];
+
+    if (count == 0) {
+        (void)SoftBusMutexUnlock(&g_eventCtrl.lock);
+        return;
+    }
+    
     LnnEventHandler *handlesArray = (LnnEventHandler *)SoftBusCalloc(sizeof(LnnEventHandlerItem) * count);
     if (handlesArray == NULL) {
         LNN_LOGE(LNN_EVENT, "malloc failed");

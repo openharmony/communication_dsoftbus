@@ -149,12 +149,12 @@ int32_t AuthDeviceProfileTest::SetSoftBusAclInfo(SoftBusAclInfo *info, int32_t u
 }
 
 /*
- * @tc.name: IS_POTENTIAL_TRUSTED_DEVCIE_TEST_003
+ * @tc.name: IS_POTENTIAL_TRUSTED_DEVICE_TEST_003
  * @tc.desc:
  * @tc.type: FUNC
  * @tc.require:
  */
-HWTEST_F(AuthDeviceProfileTest, IS_POTENTIAL_DEVCIE_TEST_003, TestSize.Level1)
+HWTEST_F(AuthDeviceProfileTest, IS_POTENTIAL_DEVICE_TEST_003, TestSize.Level1)
 {
     const char *deviceIdHash = nullptr;
     bool ret = IsPotentialTrustedDeviceDp(deviceIdHash, true);
@@ -168,12 +168,12 @@ HWTEST_F(AuthDeviceProfileTest, IS_POTENTIAL_DEVCIE_TEST_003, TestSize.Level1)
 }
 
 /*
- * @tc.name: IS_POTENTIAL_TRUSTED_DEVCIE_TEST_004
+ * @tc.name: IS_POTENTIAL_TRUSTED_DEVICE_TEST_004
  * @tc.desc:add ut for DelNotTrustDevice and UpdateDpSameAccount
  * @tc.type: FUNC
  * @tc.require:
  */
-HWTEST_F(AuthDeviceProfileTest, IS_POTENTIAL_DEVCIE_TEST_004, TestSize.Level1)
+HWTEST_F(AuthDeviceProfileTest, IS_POTENTIAL_DEVICE_TEST_004, TestSize.Level1)
 {
     const char *deviceIdHash = nullptr;
     deviceIdHash = "dev/ice%Id()Hash()";
@@ -193,12 +193,12 @@ HWTEST_F(AuthDeviceProfileTest, IS_POTENTIAL_DEVCIE_TEST_004, TestSize.Level1)
 }
 
 /*
- * @tc.name: IS_NOT_TRUSTED_DEVCIE_TEST_001
+ * @tc.name: IS_NOT_TRUSTED_DEVICE_TEST_001
  * @tc.desc: Insert not truste device
  * @tc.type: FUNC
  * @tc.require:
  */
-HWTEST_F(AuthDeviceProfileTest, IS_NOT_TRUSTED_DEVCIE_TEST_001, TestSize.Level1)
+HWTEST_F(AuthDeviceProfileTest, IS_NOT_TRUSTED_DEVICE_TEST_001, TestSize.Level1)
 {
     const char udid[] = "testUdid";
     char hashStr[CUST_UDID_LEN + 1] = { 0 };
@@ -216,12 +216,12 @@ HWTEST_F(AuthDeviceProfileTest, IS_NOT_TRUSTED_DEVCIE_TEST_001, TestSize.Level1)
 }
 
 /*
- * @tc.name: IS_NOT_TRUSTED_DEVCIE_TEST_002
+ * @tc.name: IS_NOT_TRUSTED_DEVICE_TEST_002
  * @tc.desc: Do not insert not trust device
  * @tc.type: FUNC
  * @tc.require:
  */
-HWTEST_F(AuthDeviceProfileTest, IS_NOT_TRUSTED_DEVCIE_TEST_002, TestSize.Level1)
+HWTEST_F(AuthDeviceProfileTest, IS_NOT_TRUSTED_DEVICE_TEST_002, TestSize.Level1)
 {
     std::string deviceIdHash = "testDeviceHash";
     std::string peerUdid = "peerUdid";

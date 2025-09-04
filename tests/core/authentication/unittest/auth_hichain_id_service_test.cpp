@@ -247,7 +247,7 @@ HWTEST_F(AuthHichainIdServiceTest, ID_SERVICE_QUERY_CRED_TEST_001, TestSize.Leve
     EXPECT_CALL(IdServiceMock, GetCredMgrInstance).WillRepeatedly(Return(&credManager));
 
     ret = IdServiceQueryCredential(userId, udidHash, accountHash, false, &credList);
-    EXPECT_EQ(ret, SOFTBUS_AUTH_GET_CRED_INSTANCE_FALI);
+    EXPECT_EQ(ret, SOFTBUS_AUTH_GET_CRED_INSTANCE_FAIL);
 
     ret = IdServiceQueryCredential(userId, udidHash, accountHash, false, &credList);
     EXPECT_EQ(ret, SOFTBUS_INVALID_PARAM);
@@ -282,7 +282,7 @@ HWTEST_F(AuthHichainIdServiceTest, ID_SERVICE_GENERATE_AUTH_PARAM_001, TestSize.
     }
 
     cJSON *msg2 = reinterpret_cast<cJSON *>(SoftBusCalloc(sizeof(cJSON)));
-    if (msg1 == nullptr) {
+    if (msg2 == nullptr) {
         SoftBusFree(msg);
         SoftBusFree(msg1);
         return;
@@ -342,7 +342,7 @@ HWTEST_F(AuthHichainIdServiceTest, ID_SERVICE_AUTH_CRED_001, TestSize.Level1)
     EXPECT_CALL(IdServiceMock, GetCredAuthInstance).WillRepeatedly(Return(&authMgr));
 
     ret = IdServiceAuthCredential(userId, authReqId, authParams, &cb);
-    EXPECT_EQ(ret, SOFTBUS_AUTH_GET_CRED_INSTANCE_FALI);
+    EXPECT_EQ(ret, SOFTBUS_AUTH_GET_CRED_INSTANCE_FAIL);
 
     ret = IdServiceAuthCredential(userId, authReqId, authParams, &cb);
     EXPECT_EQ(ret, SOFTBUS_INVALID_PARAM);
@@ -388,7 +388,7 @@ HWTEST_F(AuthHichainIdServiceTest, ID_SERVICE_PROCESS_CRED_DATA_001, TestSize.Le
     EXPECT_CALL(IdServiceMock, GetCredAuthInstance).WillRepeatedly(Return(&authMgr));
 
     ret = IdServiceProcessCredData(authReqId, (unsigned char *)data, strlen(data), &cb);
-    EXPECT_EQ(ret, SOFTBUS_AUTH_GET_CRED_INSTANCE_FALI);
+    EXPECT_EQ(ret, SOFTBUS_AUTH_GET_CRED_INSTANCE_FAIL);
 
     ret = IdServiceProcessCredData(authReqId, (unsigned char *)data, strlen(data), &cb);
     EXPECT_EQ(ret, SOFTBUS_INVALID_PARAM);
