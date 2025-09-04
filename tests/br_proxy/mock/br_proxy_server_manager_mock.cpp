@@ -36,14 +36,16 @@ static BrProxyServerManagerInterface *GetBrProxyServerManagerInterface()
 }
 
 extern "C" {
-int32_t PullUpHap(const char *bundleName, const char *abilityName)
+int32_t PullUpHap(const char *bundleName, const char *abilityName, int32_t appIndex)
 {
-    return GetBrProxyServerManagerInterface()->PullUpHap(bundleName, abilityName);
+    return GetBrProxyServerManagerInterface()->PullUpHap(bundleName, abilityName, appIndex);
 }
 
-int32_t GetCallerHapInfo(char *bundleName, uint32_t bundleNamelen, char *abilityName, uint32_t abilityNameLen)
+int32_t GetCallerHapInfo(char *bundleName, uint32_t bundleNamelen,
+    char *abilityName, uint32_t abilityNameLen, int32_t *appIndex)
 {
-    return GetBrProxyServerManagerInterface()->GetCallerHapInfo(bundleName, bundleNamelen, abilityName, abilityNameLen);
+    return GetBrProxyServerManagerInterface()->GetCallerHapInfo(bundleName, bundleNamelen,
+        abilityName, abilityNameLen, appIndex);
 }
 
 pid_t GetCallerPid()
