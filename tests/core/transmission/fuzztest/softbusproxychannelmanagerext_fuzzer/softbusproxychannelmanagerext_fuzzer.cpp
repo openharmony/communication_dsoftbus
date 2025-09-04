@@ -411,6 +411,9 @@ void TransProxyUpdateBlePriorityTest(FuzzedDataProvider &provider)
     BlePriority priority = static_cast<BlePriority>(
         provider.ConsumeIntegralInRange<int16_t>(BLE_PRIORITY_DEFAULT, BLE_PRIORITY_MAX));
     (void)TransProxyUpdateBlePriority(channelId, connId, priority);
+    priority = static_cast<BlePriority>(
+        provider.ConsumeIntegralInRange<int16_t>(BLE_PRIORITY_BALANCED, BLE_PRIORITY_LOW_POWER));
+    (void)TransProxyUpdateBlePriority(channelId, connId, priority);
     (void)TransProxyTimerProc();
 }
 
@@ -491,6 +494,8 @@ void TransProxyCloseChannelByRequestIdTest(FuzzedDataProvider &provider)
     info->channelId = provider.ConsumeIntegral<int32_t>();
     info->appInfo.myData.pid = provider.ConsumeIntegral<int32_t>();
     info->isD2D = provider.ConsumeBool();
+    info->status = static_cast<ProxyChannelStatus>(
+        provider.ConsumeIntegralInRange<int16_t>(PROXY_CHANNEL_STATUS_PYH_CONNECTED, PROXY_CHANNEL_STATUS_COMPLETED));
     AppInfo appInfo;
     (void)memset_s(&appInfo, sizeof(AppInfo), 0, sizeof(AppInfo));
     FillAppInfo(provider, &appInfo);
@@ -503,8 +508,68 @@ void TransProxyCloseChannelByRequestIdTest(FuzzedDataProvider &provider)
     (void)TransProxyGetChannelByFlag(info->appInfo.myData.businessFlag, &info1, info->appInfo.isClient);
     (void)TransProxyGetPrivilegeCloseList(&privilegeCloseList, info->appInfo.callingTokenId, info->appInfo.myData.pid);
     (void)TransProxyResetReplyCnt(info->channelId);
+    channelId = provider.ConsumeIntegral<int32_t>();
+    (void)TransProxyResetReplyCnt(channelId);
     (void)TransProxyCloseChannelByRequestId(-1);
     (void)TransProxyCloseChannelByRequestId(info->reqId);
+}
+
+void TransDealProxyCheckCollabResultTest(FuzzedDataProvider &provider)
+{
+    (void)TransSessionMgrInit();
+    SessionServer *newNode = reinterpret_cast<SessionServer *>(SoftBusCalloc(sizeof(SessionServer)));
+    if (newNode == nullptr) {
+        return;
+    }
+    if (strcpy_s(newNode->sessionName, sizeof(newNode->sessionName), DMS_SESSIONNAME) != EOK) {
+        SoftBusFree(newNode);
+        return;
+    }
+    newNode->uid = provider.ConsumeIntegral<int32_t>();
+    newNode->pid = provider.ConsumeIntegral<int32_t>();
+    int32_t channelId = provider.ConsumeIntegral<int32_t>();
+    int32_t checkResult = provider.ConsumeIntegral<int32_t>();
+    (void)TransSessionServerAddItem(newNode);
+    ProxyChannelInfo *info = reinterpret_cast<ProxyChannelInfo *>(SoftBusCalloc(sizeof(ProxyChannelInfo)));
+    if (info == nullptr) {
+        SoftBusFree(newNode);
+        return;
+    }
+    info->channelId = channelId;
+    info->appInfo.myData.pid = newNode->pid;
+    AppInfo appInfo;
+    (void)memset_s(&appInfo, sizeof(AppInfo), 0, sizeof(AppInfo));
+    FillAppInfo(provider, &appInfo);
+    (void)TransProxyCreateChanInfo(info, info->channelId, &appInfo);
+    (void)TransDealProxyCheckCollabResult(channelId, checkResult, newNode->pid);
+    (void)TransSessionServerDelItem(DMS_SESSIONNAME);
+    (void)TransProxyDelChanByChanId(channelId);
+    (void)TransSessionMgrDeinit();
+}
+
+void TransProxyTimerItemProcTest(FuzzedDataProvider &provider)
+{
+    ListNode proxyProcList;
+    ListInit(&proxyProcList);
+    ProxyChannelInfo *info = reinterpret_cast<ProxyChannelInfo *>(SoftBusCalloc(sizeof(ProxyChannelInfo)));
+    if (info == nullptr) {
+        return;
+    }
+    uint16_t maxDataSize = 100;
+    info->appInfo.fastTransDataSize = provider.ConsumeIntegral<uint16_t>() % maxDataSize;
+    uint8_t *tmp = reinterpret_cast<uint8_t *>(SoftBusCalloc(info->appInfo.fastTransDataSize));
+    if (tmp == nullptr) {
+        SoftBusFree(info);
+        return;
+    }
+    info->appInfo.fastTransData = tmp;
+    int32_t channelId = provider.ConsumeIntegral<int32_t>();
+    info->channelId = channelId;
+    info->status = static_cast<ProxyChannelStatus>(
+        provider.ConsumeIntegralInRange<int16_t>(PROXY_CHANNEL_STATUS_PYH_CONNECTED, PROXY_CHANNEL_STATUS_COMPLETED));
+    ListAdd(&proxyProcList, &(info->node));
+    (void)TransProxyTimerItemProc(&proxyProcList);
+    (void)TransProxyDelChanByChanId(channelId);
 }
 } // namespace OHOS
 
@@ -534,5 +599,7 @@ extern "C" int32_t LLVMFuzzerTestOneInput(const uint8_t *data, size_t size)
     OHOS::TransWifiStateChangeTest(provider);
     OHOS::TransProxyGetNameByChanIdTest(provider);
     OHOS::TransProxyCloseChannelByRequestIdTest(provider);
+    OHOS::TransDealProxyCheckCollabResultTest(provider);
+    OHOS::TransProxyTimerItemProcTest(provider);
     return 0;
 }
