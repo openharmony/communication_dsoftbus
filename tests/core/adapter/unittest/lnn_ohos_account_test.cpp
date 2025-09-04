@@ -129,7 +129,7 @@ HWTEST_F(LNNOhosAccountTest, LNN_UPDATE_OHOS_ACCOUNT_001, TestSize.Level1)
 }
 
 /**
- * @tc.name: LNN_UPDATE_OHOS_ACCOUNT_001
+ * @tc.name: LNN_UPDATE_OHOS_ACCOUNT_002
  * @tc.desc:  generate default str hash fail
  * @tc.type: FUNC
  * @tc.require:
@@ -176,7 +176,7 @@ HWTEST_F(LNNOhosAccountTest, LNN_IS_DEFAULT_OHOS_ACCOUNT_001, TestSize.Level1)
 }
 
 /**
- * @tc.name: LNN_IS_DEFAULT_OHOS_ACCOUNT_001
+ * @tc.name: LNN_IS_DEFAULT_OHOS_ACCOUNT_002
  * @tc.desc:  generate default str hash fail
  * @tc.type: FUNC
  * @tc.require:

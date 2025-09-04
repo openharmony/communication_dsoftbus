@@ -926,6 +926,9 @@ HWTEST_F(LNNNetworkInfoTest, DoSendUserId_Test_004, TestSize.Level1)
     DoSendUserId(udid, msg);
     uint32_t ret = ConvertMsgToUserId(&userId, msg, len);
     EXPECT_EQ(ret, SOFTBUS_OK);
+    if (data != nullptr) {
+        SoftBusFree(data);
+    }
 }
 
 /*
@@ -985,6 +988,9 @@ HWTEST_F(LNNNetworkInfoTest, DoSendUserId_Test_006, TestSize.Level1)
     DoSendUserId(udid, msg);
     uint32_t ret = ConvertMsgToUserId(&userId, msg, len);
     EXPECT_EQ(ret, SOFTBUS_OK);
+    if (data != nullptr) {
+        SoftBusFree(data);
+    }
 }
 
 /*
