@@ -23,6 +23,10 @@ extern "C" {
 #endif
 
 #define DUMP_MSG_ADD_CHECK(ret, data, index, size, fmt, ...) do { \
+    if (size <= index) { \
+        DFINDER_LOGE(TAG, "dumper index more than size"); \
+        return NSTACKX_EFAILED; \
+    } \
     ret = sprintf_s(data + index, size - index, fmt, ##__VA_ARGS__); \
     if (ret < 0) { \
         DFINDER_LOGE(TAG, "dumper buffer over %u bytes", size); \
