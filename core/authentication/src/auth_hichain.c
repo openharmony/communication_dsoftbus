@@ -576,6 +576,7 @@ int32_t HichainProcessUkNegoData(
     int64_t authSeq, const uint8_t *data, uint32_t len, HiChainAuthMode authMode, DeviceAuthCallback *cb)
 {
     AUTH_CHECK_AND_RETURN_RET_LOGE(data != NULL, SOFTBUS_INVALID_PARAM, AUTH_HICHAIN, "data is null");
+    AUTH_CHECK_AND_RETURN_RET_LOGE(cb != NULL, SOFTBUS_INVALID_PARAM, AUTH_HICHAIN, "callback is null");
     int32_t ret = g_hiChainAuthInterface[authMode].processAuthData(authSeq, data, len, cb);
     if (ret != SOFTBUS_OK) {
         AUTH_LOGE(AUTH_HICHAIN, "hichain processData err=%{public}d", ret);

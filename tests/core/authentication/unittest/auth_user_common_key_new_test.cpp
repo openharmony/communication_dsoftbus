@@ -108,9 +108,9 @@ HWTEST_F(AuthUserCommonKeyNewTest, InitUkNegoInstanceList001, TestSize.Level0)
  */
 HWTEST_F(AuthUserCommonKeyNewTest, InitUkNegoInstanceList002, TestSize.Level0)
 {
-    g_ukNegotiateList = NULL;
+    g_ukNegotiateList = nullptr;
     EXPECT_EQ(InitUkNegoInstanceList(), SOFTBUS_OK);
-    EXPECT_NE(g_ukNegotiateList, NULL);
+    EXPECT_NE(g_ukNegotiateList, nullptr);
     EXPECT_EQ(g_ukNegotiateList->cnt, 0);
 }
 
@@ -133,7 +133,7 @@ HWTEST_F(AuthUserCommonKeyNewTest, InitUkNegoInstanceList003, TestSize.Level0)
  */
 HWTEST_F(AuthUserCommonKeyNewTest, GetGenUkInstanceByChannelTest001, TestSize.Level0)
 {
-    g_ukNegotiateList = NULL;
+    g_ukNegotiateList = nullptr;
     UkNegotiateInstance instance;
     (void)memset_s(&instance, sizeof(UkNegotiateInstance), 0, sizeof(UkNegotiateInstance));
     EXPECT_EQ(GetGenUkInstanceByChannel(1, &instance), SOFTBUS_NO_INIT);
@@ -149,7 +149,7 @@ HWTEST_F(AuthUserCommonKeyNewTest, GetGenUkInstanceByChannelTest002, TestSize.Le
 {
     g_ukNegotiateList = (SoftBusList *)SoftBusMalloc(sizeof(SoftBusList));
     ASSERT_NE(g_ukNegotiateList, nullptr);
-    EXPECT_EQ(GetGenUkInstanceByChannel(1, NULL), SOFTBUS_INVALID_PARAM);
+    EXPECT_EQ(GetGenUkInstanceByChannel(1, nullptr), SOFTBUS_INVALID_PARAM);
     SoftBusFree(g_ukNegotiateList);
 }
 
@@ -295,7 +295,7 @@ HWTEST_F(AuthUserCommonKeyNewTest, GetSameUkInstanceNumTest003, TestSize.Level0)
  */
 HWTEST_F(AuthUserCommonKeyNewTest, GetGenUkInstanceByReqTest001, TestSize.Level0)
 {
-    g_ukNegotiateList = NULL;
+    g_ukNegotiateList = nullptr;
     UkNegotiateInstance instance;
     (void)memset_s(&instance, sizeof(UkNegotiateInstance), 0, sizeof(UkNegotiateInstance));
     int32_t result = GetGenUkInstanceByReq(1, &instance);
@@ -350,7 +350,7 @@ HWTEST_F(AuthUserCommonKeyNewTest, GetGenUkInstanceByReqTest004, TestSize.Level0
     UkNegotiateInstance instance;
     (void)memset_s(&instance, sizeof(UkNegotiateInstance), 0, sizeof(UkNegotiateInstance));
     instance.requestId = 1;
-    int32_t result = GetGenUkInstanceByReq(1, NULL);
+    int32_t result = GetGenUkInstanceByReq(1, nullptr);
     EXPECT_EQ(result, SOFTBUS_LOCK_ERR);
     DestroySoftBusList(g_ukNegotiateList);
 }
@@ -382,7 +382,7 @@ HWTEST_F(AuthUserCommonKeyNewTest, PrintfAuthAclInfoTest001, TestSize.Level0)
 {
     uint32_t requestId = 1;
     uint32_t channelId = 2;
-    const AuthACLInfo *info = NULL;
+    const AuthACLInfo *info = nullptr;
     EXPECT_NO_FATAL_FAILURE(PrintfAuthAclInfo(requestId, channelId, info));
 }
 
