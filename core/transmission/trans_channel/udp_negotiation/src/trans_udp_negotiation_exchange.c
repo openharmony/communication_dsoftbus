@@ -48,7 +48,7 @@ static inline CodeType getCodeType(const AppInfo *appInfo)
 
 int32_t TransUnpackReplyErrInfo(const cJSON *msg, int32_t *errCode)
 {
-    if ((msg == NULL) && (errCode == NULL)) {
+    if (msg == NULL || errCode == NULL) {
         TRANS_LOGW(TRANS_CTRL, "invalid param.");
         return SOFTBUS_INVALID_PARAM;
     }
