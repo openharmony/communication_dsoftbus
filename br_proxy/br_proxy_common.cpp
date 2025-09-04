@@ -185,7 +185,7 @@ extern "C" int32_t CheckPushPermission()
     return SOFTBUS_OK;
 }
 
-const char *g_brProxyHandlerName = "brProxyHandlerName";
+const char *g_BrProxyHandlerName = "brProxyHandlerName";
 SoftBusHandler g_brProxyLooperHandler = { 0 };
 typedef enum {
     LOOP_DCLOSE_MSG,
@@ -252,7 +252,7 @@ static int32_t BrProxyLoopInit(void)
     if (hasInit.load()) {
         return SOFTBUS_OK;
     }
-    g_brProxyLooperHandler.name = (char *)g_brProxyHandlerName;
+    g_brProxyLooperHandler.name = (char *)g_BrProxyHandlerName;
     g_brProxyLooperHandler.looper = GetLooper(LOOP_TYPE_DEFAULT);
     if (g_brProxyLooperHandler.looper == nullptr) {
         TRANS_LOGE(TRANS_SVC, "[br_proxy] loop init failed");
