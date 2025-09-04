@@ -320,7 +320,7 @@ static int32_t BrProxyServerInit(void)
         return SOFTBUS_TRANS_INIT_FAILED;
     }
     lockInited = true;
-    TRANS_LOGI(TRANS_SVC, "[br_proxy] init trans server success, channleIdLock init success");
+    TRANS_LOGI(TRANS_SVC, "[br_proxy] init trans server success, channelIdLock init success");
     return SOFTBUS_OK;
 }
 
@@ -1129,7 +1129,7 @@ static void GetDataFromList(ProxyBaseInfo *baseInfo, uint8_t **data, uint32_t *r
             strcmp(baseInfo->uuid, nodeInfo->uuid) != 0) {
             continue;
         }
-        *data = (uint8_t *) SoftBusCalloc(nodeInfo->dataLen * sizeof(uint8_t));
+        *data = (uint8_t *)SoftBusCalloc(nodeInfo->dataLen * sizeof(uint8_t));
         if (*data == NULL) {
             TRANS_LOGE(TRANS_SVC, "[br_proxy] calloc failed!");
             (void)SoftBusMutexUnlock(&(g_dataList->lock));
@@ -1274,7 +1274,7 @@ static void OnDataReceived(struct ProxyChannel *channel, const uint8_t *data, ui
 static void OnDisconnected(struct ProxyChannel *channel, int32_t reason)
 {
     if (channel == NULL) {
-        TRANS_LOGE(TRANS_SVC, "[br_proxy] channle is null");
+        TRANS_LOGE(TRANS_SVC, "[br_proxy] channel is null");
         return;
     }
     char *tmpMacName = NULL;
