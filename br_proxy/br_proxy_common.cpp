@@ -185,7 +185,7 @@ extern "C" int32_t CheckPushPermission()
     return SOFTBUS_OK;
 }
 
-const char *g_BrProxyHandlerName = "brProxyHandlerName";
+const char *g_brProxyHandlerName = "brProxyHandlerName";
 SoftBusHandler g_brProxyLooperHandler = { 0 };
 typedef enum {
     LOOP_DCLOSE_MSG,
@@ -239,26 +239,26 @@ static void BrProxyLoopMsgHandler(SoftBusMessage *msg)
     }
 }
  
-static std::atomic<bool> hasInit(false);
-static std::mutex initMutex;
+static std::atomic<bool> g_hasInit(false);
+static std::mutex g_initMutex;
  
 static int32_t BrProxyLoopInit(void)
 {
-    if (hasInit.load()) {
+    if (g_hasInit.load()) {
         return SOFTBUS_OK;
     }
  
-    std::lock_guard<std::mutex> lock(initMutex);
-    if (hasInit.load()) {
+    std::lock_guard<std::mutex> lock(g_initMutex);
+    if (g_hasInit.load()) {
         return SOFTBUS_OK;
     }
-    g_brProxyLooperHandler.name = (char *)g_BrProxyHandlerName;
+    g_brProxyLooperHandler.name = (char *)g_brProxyHandlerName;
     g_brProxyLooperHandler.looper = GetLooper(LOOP_TYPE_DEFAULT);
     if (g_brProxyLooperHandler.looper == nullptr) {
         TRANS_LOGE(TRANS_SVC, "[br_proxy] loop init failed");
         return SOFTBUS_TRANS_INIT_FAILED;
     }
     g_brProxyLooperHandler.HandleMessage = BrProxyLoopMsgHandler;
-    hasInit.store(true);
+    g_hasInit.store(true);
     return SOFTBUS_OK;
 }
