@@ -19,7 +19,7 @@
 #include "softbus_utils.h"
 
 namespace OHOS {
-void GetMySessionNameTest(const uint8_t* data, size_t size)
+void GetMySessionNameTest(const uint8_t *data, size_t size)
 {
     if ((data == nullptr) || (size <= 0)) {
         return;
@@ -30,7 +30,7 @@ void GetMySessionNameTest(const uint8_t* data, size_t size)
 } // namespace OHOS
 
 /* Fuzzer entry point */
-extern "C" int32_t LLVMFuzzerTestOneInput(const uint8_t* data, size_t size)
+extern "C" int32_t LLVMFuzzerTestOneInput(const uint8_t *data, size_t size)
 {
     OHOS::GetMySessionNameTest(data, size);
 

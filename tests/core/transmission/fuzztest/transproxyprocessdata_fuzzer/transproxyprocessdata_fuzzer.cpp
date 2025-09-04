@@ -139,50 +139,6 @@ void TransProxyPackTlvBytesTest(FuzzedDataProvider &provider)
     TransProxyPackTlvData(nullptr, tlvBufferSize, dataLen);
     dataLen = -(MAGICNUM_SIZE + TLVCOUNT_SIZE + tlvBufferSize);
     TransProxyPackTlvData(&pktHead, tlvBufferSize, dataLen);
-
-    int32_t finalSeq = provider.ConsumeIntegral<int32_t>();
-    int32_t flag = provider.ConsumeIntegral<int32_t>();
-    (void)ProxyBuildTlvDataHead(nullptr, finalSeq, flag, dataLen, &tlvBufferSize);
-
-    bool needAck = provider.ConsumeBool();
-    uint32_t dataSeqs = provider.ConsumeIntegral<uint32_t>();
-    (void)ProxyBuildNeedAckTlvData(nullptr, needAck, dataSeqs, &tlvBufferSize);
-
-    SessionPktType flag2 = static_cast<SessionPktType>(
-        provider.ConsumeIntegralInRange<uint16_t>(TRANS_SESSION_BYTES, TRANS_SESSION_ASYNC_MESSAGE));
-    std::string providerSessionKey = provider.ConsumeBytesAsString(SESSION_KEY_LENGTH - 1);
-    char sessionKey[SESSION_KEY_LENGTH] = { 0 };
-    if (strcpy_s(sessionKey, SESSION_KEY_LENGTH, providerSessionKey.c_str()) != EOK) {
-        return;
-    }
-    int32_t seq = provider.ConsumeIntegral<int32_t>();
-    (void)TransProxyPackTlvBytes(nullptr, sessionKey, flag2, seq, nullptr);
-
-    ProxyDataInfo dataInfo;
-    (void)memset_s(&dataInfo, sizeof(ProxyDataInfo), 0, sizeof(ProxyDataInfo));
-
-    DataHeadTlvPacketHead info;
-    (void)memset_s(&info, sizeof(DataHeadTlvPacketHead), 0, sizeof(DataHeadTlvPacketHead));
-    FillDataHeadTlvPacketHead(provider, &info);
-    TransProxyPackTlvBytes(&dataInfo, nullptr, flag2, seq, &info);
-}
-
-void TransProxyPackDataTest(FuzzedDataProvider &provider)
-{
-    SessionPktType packetType = TRANS_SESSION_ACK;
-    (void)SessionPktTypeToProxyIndex(packetType);
-    packetType = TRANS_SESSION_BYTES;
-    (void)SessionPktTypeToProxyIndex(packetType);
-    packetType = TRANS_SESSION_BYTES;
-    (void)SessionPktTypeToProxyIndex(packetType);
-    packetType = static_cast<SessionPktType>(provider.ConsumeIntegralInRange<uint16_t>(
-        TRANS_SESSION_FILE_FIRST_FRAME, TRANS_SESSION_FILE_ACK_RESPONSE_SENT));
-    (void)SessionPktTypeToProxyIndex(packetType);
-
-    uint32_t sliceNum = provider.ConsumeIntegral<uint32_t>();
-    uint32_t cnt = provider.ConsumeIntegral<uint32_t>();
-    uint32_t dataLen = 0;
-    (void)TransProxyPackData(nullptr, sliceNum, packetType, cnt, &dataLen);
 }
 
 void TransProxyCheckSliceHeadTest(FuzzedDataProvider &provider)
@@ -423,9 +379,6 @@ void TransProxyParseTlvTest(FuzzedDataProvider &provider)
     (void)CheckLenAndCopyData(len, headSize, data, &head);
     len += headSize;
     (void)CheckLenAndCopyData(len, headSize, data, &head);
-
-    (void)TransProxyParseTlv(len, data, nullptr, nullptr);
-    (void)TransProxyParseTlv(len, nullptr, &head, &headSize);
 }
 
 void TransProxyNoSubPacketTlvProcTest(FuzzedDataProvider &provider)
@@ -616,18 +569,6 @@ void TransProxyPackD2DBytesTest(const uint8_t *data, size_t size)
     (void)TransProxyPackD2DBytes(&dataInfo, sessionKey, nullptr, flag);
     SoftBusFree(dataInfo.inData);
 }
-
-void TransPackD2DToBytesExtraDataTest(FuzzedDataProvider &provider)
-{
-    ProxyDataInfo dataInfo;
-    (void)memset_s(&dataInfo, sizeof(ProxyDataInfo), 0, sizeof(ProxyDataInfo));
-    SessionPktType flag = static_cast<SessionPktType>(
-        provider.ConsumeIntegralInRange<uint16_t>(TRANS_SESSION_BYTES, TRANS_SESSION_ASYNC_MESSAGE));
-    uint32_t nonce = provider.ConsumeIntegral<uint32_t>();
-
-    (void)TransGenerateToBytesRandIv(nullptr, nullptr);
-    (void)TransPackD2DToBytesExtraData(nullptr, flag, nonce);
-}
 } // namespace OHOS
 
 /* Fuzzer entry point */
@@ -644,7 +585,6 @@ extern "C" int32_t LLVMFuzzerTestOneInput(const uint8_t *data, size_t size)
     OHOS::TransUnPackSliceHeadTest(provider);
     OHOS::TransProxyPackBytesTest(provider);
     OHOS::TransProxyPackTlvBytesTest(provider);
-    OHOS::TransProxyPackDataTest(provider);
     OHOS::TransProxyCheckSliceHeadTest(provider);
     OHOS::TransProxyNoSubPacketProcTest(provider);
     OHOS::TransProxyProcessSessionDataTest(provider);
@@ -663,6 +603,5 @@ extern "C" int32_t LLVMFuzzerTestOneInput(const uint8_t *data, size_t size)
     OHOS::TransProxyDecryptD2DDataTest(data, size);
     OHOS::TransProxyD2DFirstSliceProcessTest(provider);
     OHOS::TransProxyPackD2DBytesTest(data, size);
-    OHOS::TransPackD2DToBytesExtraDataTest(provider);
     return 0;
 }

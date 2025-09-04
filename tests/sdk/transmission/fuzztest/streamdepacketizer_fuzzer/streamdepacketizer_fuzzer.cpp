@@ -26,7 +26,7 @@
 using namespace std;
 
 namespace OHOS {
-    void DepacketizeHeaderTest(const uint8_t* data, size_t size)
+    void DepacketizeHeaderTest(const uint8_t *data, size_t size)
     {
         if ((data == nullptr) || (size < Communication::SoftBus::MAX_STREAM_LEN - OVERHEAD_LEN)) {
             return;
@@ -40,7 +40,7 @@ namespace OHOS {
         decode.DepacketizeHeader((const char *)tmp);
     }
 
-    void DepacketizeBufferTest(const uint8_t* data, size_t size)
+    void DepacketizeBufferTest(const uint8_t *data, size_t size)
     {
         if ((data == nullptr) || (size < Communication::SoftBus::MAX_STREAM_LEN - OVERHEAD_LEN)) {
             return;
@@ -56,7 +56,7 @@ namespace OHOS {
 } // namespace OHOS
 
 /* Fuzzer entry point */
-extern "C" int32_t LLVMFuzzerTestOneInput(const uint8_t* data, size_t size)
+extern "C" int32_t LLVMFuzzerTestOneInput(const uint8_t *data, size_t size)
 {
     /* Run your code on data */
     OHOS::DepacketizeHeaderTest(data, size);

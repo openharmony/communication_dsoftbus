@@ -24,7 +24,7 @@
 using namespace std;
 
 namespace OHOS {
-    void InitStreamDataTest(const uint8_t* data, size_t size)
+    void InitStreamDataTest(const uint8_t *data, size_t size)
     {
         if ((data == nullptr) || (size < Communication::SoftBus::MAX_STREAM_LEN)) {
             return;
@@ -63,7 +63,7 @@ namespace OHOS {
 } // namespace OHOS
 
 /* Fuzzer entry point */
-extern "C" int32_t LLVMFuzzerTestOneInput(const uint8_t* data, size_t size)
+extern "C" int32_t LLVMFuzzerTestOneInput(const uint8_t *data, size_t size)
 {
     /* Run your code on data */
     OHOS::InitStreamDataTest(data, size);

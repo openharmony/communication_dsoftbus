@@ -22,7 +22,7 @@
 using namespace std;
 
 namespace OHOS {
-    void SendTest(const uint8_t* data, size_t size)
+    void SendTest(const uint8_t *data, size_t size)
     {
         if (data == nullptr || size < sizeof(int) + sizeof(int) + sizeof(int) + sizeof(int)) {
             return;
@@ -41,7 +41,7 @@ namespace OHOS {
         streamMsgManager.Send((const Communication::SoftBus::HistoryStats &)stats);
     }
 
-    void RecvTest(const uint8_t* data, size_t size)
+    void RecvTest(const uint8_t *data, size_t size)
     {
         if (data == nullptr || size < sizeof(int) + sizeof(int) + sizeof(int) + sizeof(int)) {
             return;
@@ -60,7 +60,7 @@ namespace OHOS {
         streamMsgManager.Recv((const Communication::SoftBus::HistoryStats &)stats);
     }
 
-    void UpdateTest(const uint8_t* data, size_t size)
+    void UpdateTest(const uint8_t *data, size_t size)
     {
         if (data == nullptr || size < sizeof(int) + sizeof(int) + sizeof(int) + sizeof(int)) {
             return;
@@ -82,7 +82,7 @@ namespace OHOS {
 } // namespace OHOS
 
 /* Fuzzer entry point */
-extern "C" int32_t LLVMFuzzerTestOneInput(const uint8_t* data, size_t size)
+extern "C" int32_t LLVMFuzzerTestOneInput(const uint8_t *data, size_t size)
 {
     /* Run your code on data */
     OHOS::SendTest(data, size);

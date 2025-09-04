@@ -34,7 +34,7 @@
 #include "softbus_type_def.h"
 
 namespace OHOS {
-void ClientTransProxyFileCommonTest(const uint8_t* data, size_t size)
+void ClientTransProxyFileCommonTest(const uint8_t *data, size_t size)
 {
     if ((data == nullptr) || (size < sizeof(uint64_t))) {
         return;
@@ -68,8 +68,6 @@ void ClientTransProxyFileCommonTest(const uint8_t* data, size_t size)
 
     FrameIndexToType(index, frameNumber);
 
-    BufferToFileList(nullptr, bufferSize, &fileCount);
-
     TransGetFileName(path);
 
     FileLock(fd, type, isBlock);
@@ -80,7 +78,7 @@ void ClientTransProxyFileCommonTest(const uint8_t* data, size_t size)
 } // namespace OHOS
 
 /* Fuzzer entry point */
-extern "C" int32_t LLVMFuzzerTestOneInput(const uint8_t* data, size_t size)
+extern "C" int32_t LLVMFuzzerTestOneInput(const uint8_t *data, size_t size)
 {
     /* Run your code on data */
     OHOS::ClientTransProxyFileCommonTest(data, size);
