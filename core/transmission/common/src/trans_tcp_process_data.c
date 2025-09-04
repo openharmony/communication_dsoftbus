@@ -332,7 +332,7 @@ char *TransTdcPackTlvData(DataHead *pktHead, int32_t tlvBufferSize, uint32_t dat
 {
     TRANS_CHECK_AND_RETURN_RET_LOGE(pktHead != NULL, NULL, TRANS_CTRL, "invalid param");
     int32_t headSize = MAGICNUM_SIZE + TLVCOUNT_SIZE + tlvBufferSize;
-    int32_t bufLen = dataLen + headSize;
+    int32_t bufLen = (int32_t)dataLen + headSize;
     char *buf = (char *)SoftBusCalloc(bufLen);
     if (buf == NULL) {
         TRANS_LOGE(TRANS_CTRL, "malloc buf failed");
