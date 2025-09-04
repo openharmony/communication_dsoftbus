@@ -57,6 +57,8 @@ int32_t UpdateRecoveryDeviceInfoFromDb(void)
     return GetLnnOhosAccountInterface()->UpdateRecoveryDeviceInfoFromDb();
 }
 
+int32_t GetCurrentAccount(int64_t *account)
+
 bool AddNumberToJsonObject(cJSON *json, const char * const string, int32_t num)
 {
     return GetLnnOhosAccountInterface()->AddNumberToJsonObject(json, string, num);
