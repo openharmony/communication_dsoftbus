@@ -13,6 +13,7 @@
  * limitations under the License.
  */
 #include <gtest/gtest.h>
+#include <securec.h>
 #include <string>
 
 #include "lnn_ohos_account.h"
@@ -30,8 +31,8 @@ using ::testing::Return;
 namespace OHOS {
 class LNNOhosAccountMockTest : public testing::Test {
 public:
-    static constexpr const char* DEFAULT_ACCOUNT_UID = "ohosAnonymousUid";
-    static constexpr const char* DEFAULT_USER_ID = "0";
+    static constexpr const char* defaultAccountUid = "ohosAnonymousUid";
+    static constexpr const char* defaultUserId = "0";
 
 protected:
     static void SetUpTestCase(void);
@@ -206,7 +207,7 @@ HWTEST_F(LNNOhosAccountMockTest, LNN_UPDATE_OHOS_ACCOUNT_004, TestSize.Level0) {
     EXPECT_CALL(mocker, GetOsAccountUid(_, _, _))
         .WillOnce(Return(SOFTBUS_ERR));
     
-    const char* expectedUid = DEFAULT_ACCOUNT_UID;
+    const char* expectedUid = defaultAccountUid;
     
     EXPECT_CALL(mocker, LnnSetLocalStrInfo(
         STRING_KEY_ACCOUNT_UID,
