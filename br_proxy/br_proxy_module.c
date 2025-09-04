@@ -552,7 +552,8 @@ static TaskQueue g_taskQueue = {
     .isProcessing = false
 };
 
-void InitTaskQueue() {
+void InitTaskQueue()
+{
     pthread_mutex_init(&g_taskQueue.mutex, NULL);
     g_taskQueue.head = g_taskQueue.tail = NULL;
     g_taskQueue.isProcessing = false;
@@ -561,7 +562,8 @@ void InitTaskQueue() {
 static void AsyncWorkComplete(napi_env env, napi_status status, void* data);
 static void AsyncWorkExecute(napi_env env, void* data);
 
-static void ProcessTaskQueue() {
+static void ProcessTaskQueue()
+{
     while (1) {
         pthread_mutex_lock(&g_taskQueue.mutex);
         if (g_taskQueue.head == NULL || g_taskQueue.isProcessing) {
@@ -913,7 +915,7 @@ static void SetCallbackInternal(napi_env env, napi_value callback, int32_t chann
                 0, 1, NULL, NULL, NULL,
                 DataReceivedCallback, &tsfn_data_received);
             ret = SetListenerState(channelId, DATA_RECEIVE, true);
-            if(ret != SOFTBUS_OK) {
+            if (ret != SOFTBUS_OK) {
                 napi_release_threadsafe_function(tsfn_data_received, napi_tsfn_abort);
                 tsfn_data_received = NULL;
             }
