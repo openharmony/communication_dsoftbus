@@ -1212,7 +1212,7 @@ static void DealDataWhenForeground(ProxyBaseInfo *baseInfo, const uint8_t *data,
 
 static void DealDataWhenBackground(ProxyBaseInfo *baseInfo, const uint8_t *data, uint32_t dataLen)
 {
-    #define Min_INTERVAL_TIME 5
+    #define MIN_INTERVAL_TIME 5
     int32_t ret = ServerAddDataToList(baseInfo, data, dataLen);
     if (ret != SOFTBUS_OK) {
         TRANS_LOGE(TRANS_SVC, "[br_proxy] add to datalist failed. ret:%{public}d", ret);
@@ -1223,8 +1223,8 @@ static void DealDataWhenBackground(ProxyBaseInfo *baseInfo, const uint8_t *data,
     (void)SoftBusGetTime(&currentTime);
     int64_t secDiff = currentTime.sec - lastTime.sec;
  
-    if (currentTime.sec >= lastTime.sec && secDiff < 5) {
-        TRANS_LOGI(TRANS_SVC, "[br_proxy] timediff:%{public}zu", secDiff);
+    if (currentTime.sec >= lastTime.sec && secDiff < MIN_INTERVAL_TIME) {
+        TRANS_LOGI(TRANS_SVC, "[br_proxy] timediff:%{public}lld", secDiff);
         return;
     }
     BrProxyInfo info;
