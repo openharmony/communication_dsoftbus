@@ -36,10 +36,11 @@ typedef struct {
     void (*onDataReceived)(int32_t channelId, const AuthChannelData *data);
     void (*onDisconnected)(int32_t channelId);
 } AuthChannelListener;
+
 int32_t RegAuthChannelListener(int32_t module, const AuthChannelListener *listener);
 void UnregAuthChannelListener(int32_t module);
 
-/* NOTO: open successfully, return channelId. Otherwise, return -1. */
+/* NOTE: open successfully, return channelId. Otherwise, return -1. */
 int32_t AuthOpenChannelWithAllIp(const char *localIp, const char *remoteIp, int32_t port);
 int32_t AuthOpenChannel(const char *ip, int32_t port, int32_t ifnameIdx);
 void AuthCloseChannel(int32_t channelId, int32_t moduleId);
