@@ -811,7 +811,7 @@ static void onOpenSuccess(uint32_t requestId, struct ProxyChannel *channel)
 
 static int32_t SetCurrentConnect(const char *brMac, const char *uuid, bool isVirtualConnect)
 {
-    if (brMac == NULL || g_proxyList == NULL) {
+    if (brMac == NULL || uuid == NULL || g_proxyList == NULL) {
         TRANS_LOGE(TRANS_SVC, "[br_proxy] Something that couldn't have happened!");
         return SOFTBUS_INVALID_PARAM;
     }
@@ -843,13 +843,11 @@ void onOpenFail(uint32_t requestId, int32_t reason)
     }
     BrProxyInfo proxyInfo;
     ret = GetBrProxy(info.proxyInfo.brMac, info.proxyInfo.uuid, &proxyInfo);
-    if (ret == SOFTBUS_OK) {
-        if (proxyInfo.isEnable) {
-            (void)SetCurrentConnect(info.proxyInfo.brMac, info.proxyInfo.uuid, true);
-            ClientIpcBrProxyOpened(COMM_PKGNAME_BRPROXY, proxyInfo.channelId,
-                (const char *)info.proxyInfo.brMac, (const char *)info.proxyInfo.uuid, SOFTBUS_OK);
-            return;
-        }
+    if (ret == SOFTBUS_OK && proxyInfo.isEnable) {
+        (void)SetCurrentConnect(info.proxyInfo.brMac, info.proxyInfo.uuid, true);
+        ClientIpcBrProxyOpened(COMM_PKGNAME_BRPROXY, proxyInfo.channelId,
+            (const char *)info.proxyInfo.brMac, (const char *)info.proxyInfo.uuid, SOFTBUS_OK);
+        return;
     }
     ret = ServerDeleteChannelFromList(info.channelId);
     if (ret != SOFTBUS_OK) {
@@ -938,11 +936,15 @@ static int32_t GetChannelId(const char *mac, const char *uuid, int32_t *channelI
 
 static void PrintSession(const char *brMac, const char *uuid)
 {
+    if (brMac == NULL || uuid == NULL) {
+        TRANS_LOGI(TRANS_SVC, "[br_proxy] brMac or uuid is NULL");
+        return;
+    }
     char *brMactmpName = NULL;
     char *uuidtmpName = NULL;
     Anonymize(brMac, &brMactmpName);
     Anonymize(uuid, &uuidtmpName);
-    TRANS_LOGI(TRANS_SVC, "[br_proxy] brproxy open! brMac:%{public}s,uuid:%{public}s", brMactmpName, uuidtmpName);
+    TRANS_LOGI(TRANS_SVC, "[br_proxy] brproxy open! brMac=%{public}s,uuid=%{public}s", brMactmpName, uuidtmpName);
     AnonymizeFree(brMactmpName);
     AnonymizeFree(uuidtmpName);
 }
