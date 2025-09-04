@@ -769,6 +769,10 @@ cleanup:
 
 static void OnDataReceived(int32_t channelId, const char* data, uint32_t dataLen)
 {
+    if (data == NULL || dataLen == 0 || dataLen > BR_PROXY_SEND_MAX_LEN) {
+        TRANS_LOGE(TRANS_SVC, "[br_proxy] channel or data is null or invalid dataLen:%{public}u", dataLen);
+        return;
+    }
     if (tsfn_data_received == NULL) {
         return;
     }
