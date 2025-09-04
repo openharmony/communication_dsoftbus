@@ -212,7 +212,9 @@ static bool IsUuidValid(const char *uuid)
             if (len != UUID_STD_LENGTH) {
                 return false;
             } // 非标准格式不允许连字符
-            
+            if (hyphenCount >= UUID_HYPHEN_COUNT) {
+                return false;
+            }
             // 连字符位置必须符合8-4-4-4-12模式
             if (i != hyphenPositions[hyphenCount]) {
                 return false;

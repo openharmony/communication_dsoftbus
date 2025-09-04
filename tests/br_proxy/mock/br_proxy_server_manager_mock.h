@@ -26,9 +26,9 @@ public:
     BrProxyServerManagerInterface() {};
     virtual ~BrProxyServerManagerInterface() {};
 
-    virtual int32_t PullUpHap(const char *bundleName, const char *abilityName) = 0;
+    virtual int32_t PullUpHap(const char *bundleName, const char *abilityName, int32_t appIndex) = 0;
     virtual int32_t GetCallerHapInfo(char *bundleName, uint32_t bundleNamelen, char *abilityName,
-        uint32_t abilityNameLen) = 0;
+        uint32_t abilityNameLen, int32_t *appIndex) = 0;
     virtual pid_t GetCallerPid() = 0;
     virtual pid_t GetCallerUid() = 0;
     virtual uint32_t GetCallerTokenId() = 0;
@@ -40,8 +40,8 @@ public:
     BrProxyServerManagerInterfaceMock();
     ~BrProxyServerManagerInterfaceMock() override;
 
-    MOCK_METHOD2(PullUpHap, int32_t (const char *, const char *));
-    MOCK_METHOD4(GetCallerHapInfo, int32_t (char *, uint32_t, char *, uint32_t));
+    MOCK_METHOD3(PullUpHap, int32_t (const char *, const char *, int32_t));
+    MOCK_METHOD5(GetCallerHapInfo, int32_t (char *, uint32_t, char *, uint32_t, int32_t *));
     MOCK_METHOD0(GetCallerPid, pid_t (void));
     MOCK_METHOD0(GetCallerUid, pid_t (void));
     MOCK_METHOD0(GetCallerTokenId, uint32_t (void));
