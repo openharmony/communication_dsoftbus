@@ -73,5 +73,4 @@ public:
     MOCK_METHOD1(LnnFindDeviceUdidTrustedInfoFromDb, int32_t(const char *));
 };
 } // namespace OHOS
-
 #endif // LNN_DATA_CLOUD_SYNC_DEPS_MOCK_H

@@ -654,7 +654,7 @@ HWTEST_F(LNNDataCloudSyncMockTest, PackBroadcastCipherKeyInner_Test_001, TestSiz
 
 /*
  * @tc.name: HandleDBAddChangeInternal_Test_002
- * @tc.desc: HandleDBAddChangeInternal
+ * @tc.desc: HandleDBAddChangeInternal test parameter error
  * @tc.type: FUNC
  * @tc.require:
  */
@@ -670,7 +670,7 @@ HWTEST_F(LNNDataCloudSyncMockTest, HandleDBAddChangeInternal_Test_002, TestSize.
 
 /*
  * @tc.name: HandleDBUpdateChangeInternal_Test_001
- * @tc.desc: HandleDBUpdateChangeInternal
+ * @tc.desc: HandleDBUpdateChangeInternal test parameter error
  * @tc.type: FUNC
  * @tc.require:
  */
@@ -687,7 +687,7 @@ HWTEST_F(LNNDataCloudSyncMockTest, HandleDBUpdateChangeInternal_Test_001, TestSi
 
 /*
  * @tc.name: CheckParamValidity_Test_001
- * @tc.desc: CheckParamValidity
+ * @tc.desc: CheckParamValidity test parameter error
  * @tc.type: FUNC
  * @tc.require:
  */
@@ -712,7 +712,7 @@ HWTEST_F(LNNDataCloudSyncMockTest, CheckParamValidity_Test_001, TestSize.Level1)
 
 /*
  * @tc.name: LnnDBDataAddChangeSyncToCache_Test_002
- * @tc.desc: LnnDBDataAddChangeSyncToCache
+ * @tc.desc: LnnDBDataAddChangeSyncToCache test execute success
  * @tc.type: FUNC
  * @tc.require:
  */
@@ -726,15 +726,15 @@ HWTEST_F(LNNDataCloudSyncMockTest, LnnDBDataAddChangeSyncToCache_Test_002, TestS
 
 /*
  * @tc.name: LnnUpdateOldCacheInfo_Test_001
- * @tc.desc: LnnUpdateOldCacheInfo
+ * @tc.desc: LnnUpdateOldCacheInfo test execute success
  * @tc.type: FUNC
  * @tc.require:
  */
 HWTEST_F(LNNDataCloudSyncMockTest, LnnUpdateOldCacheInfo_Test_001, TestSize.Level1)
 {
     NiceMock<LnnDataCloudSyncInterfaceMock> DataCloudSyncMock;
-    NodeInfo newInfo;
-    NodeInfo oldInfo;
+    NodeInfo newInfo = {};
+    NodeInfo oldInfo = {};
     UpdateDeviceNameToCache(&newInfo, &oldInfo);
     UpdateDeviceNameToCache(&newInfo, &oldInfo);
     UpdateDevBasicInfoToCache(&newInfo, &oldInfo);
@@ -752,21 +752,21 @@ HWTEST_F(LNNDataCloudSyncMockTest, LnnUpdateOldCacheInfo_Test_001, TestSize.Leve
 
 /*
  * @tc.name: LnnSaveAndUpdateDistributedNode_Test_001
- * @tc.desc: LnnSaveAndUpdateDistributedNode
+ * @tc.desc: LnnSaveAndUpdateDistributedNode test parameter error
  * @tc.type: FUNC
  * @tc.require:
  */
 HWTEST_F(LNNDataCloudSyncMockTest, LnnSaveAndUpdateDistributedNode_Test_001, TestSize.Level1)
 {
-    NodeInfo cacheInfo;
-    NodeInfo oldCacheInfo;
+    NodeInfo cacheInfo = {};
+    NodeInfo oldCacheInfo = {};
     EXPECT_EQ(LnnSaveAndUpdateDistributedNode(nullptr, &oldCacheInfo), SOFTBUS_INVALID_PARAM);
     EXPECT_EQ(LnnSaveAndUpdateDistributedNode(&cacheInfo, nullptr), SOFTBUS_INVALID_PARAM);
 }
 
 /*
  * @tc.name: LnnDeleteDevInfoSyncToDB_Test_001
- * @tc.desc: LnnDeleteDevInfoSyncToDB
+ * @tc.desc: LnnDeleteDevInfoSyncToDB test parameter error
  * @tc.type: FUNC
  * @tc.require:
  */

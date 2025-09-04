@@ -221,7 +221,7 @@ HWTEST_F(LNNDeviceNameInfoTest, NOTIFY_DEVICE_DISPLAY_NAME_CHANGE_TEST_001, Test
 
 /*
  * @tc.name: LNN_INIT_DEVICE_NAME_TEST_001
- * @tc.desc: LnnInitDevicename test
+ * @tc.desc: LnnInitDevicename test LnnRegSyncInfoHandler return error
  * @tc.type: FUNC
  * @tc.require:
  */
@@ -235,7 +235,7 @@ HWTEST_F(LNNDeviceNameInfoTest, LNN_INIT_DEVICE_NAME_TEST_001, TestSize.Level1)
 
 /*
  * @tc.name: LNN_INIT_DEVICE_NAME_TEST_002
- * @tc.desc: LnnInitDevicename test
+ * @tc.desc: LnnInitDevicename test LnnRegSyncInfoHandler return success
  * @tc.type: FUNC
  * @tc.require:
  */
@@ -256,8 +256,8 @@ HWTEST_F(LNNDeviceNameInfoTest, LNN_INIT_DEVICE_NAME_TEST_002, TestSize.Level1)
 HWTEST_F(LNNDeviceNameInfoTest, LNN_SET_LOCAL_DEVICE_NAME_TEST_001, TestSize.Level1)
 {
     NiceMock<LnnServicetInterfaceMock> serviceMock;
-    EXPECT_CALL(serviceMock, LnnNotifyLocalNetworkIdChanged).WillRepeatedly(Return());
     EXPECT_CALL(serviceMock, LnnNotifyDeviceInfoChanged).WillRepeatedly(Return());
+    EXPECT_CALL(serviceMock, LnnNotifyLocalNetworkIdChanged).WillRepeatedly(Return());
     int32_t ret = LnnSetLocalDeviceName(DEVICE_NAME1);
     EXPECT_EQ(ret, SOFTBUS_INVALID_PARAM);
     ret = LnnSetLocalDeviceName(DEVICE_NAME3);
@@ -296,8 +296,9 @@ HWTEST_F(LNNDeviceNameInfoTest, LNN_SET_LOCAL_DEVICE_NAME_TEST_001, TestSize.Lev
 HWTEST_F(LNNDeviceNameInfoTest, LNN_ASYNC_DEVICE_NAME_DALEY_TEST_001, TestSize.Level1)
 {
     NodeInfo nodeInfo;
-    SendSyncInfoParam *data = (SendSyncInfoParam *)SoftBusMalloc(sizeof(SendSyncInfoParam));
-    EXPECT_TRUE(data != nullptr);
+    (void)memset_s(&nodeInfo, sizeof(nodeInfo), 0, sizeof(nodeInfo));
+    SendSyncInfoParam *data = (SendSyncInfoParam *)SoftBusCalloc(sizeof(SendSyncInfoParam));
+    ASSERT_TRUE(data != nullptr);
     memset_s(data, sizeof(SendSyncInfoParam), 0, sizeof(SendSyncInfoParam));
 
     NiceMock<LnnNetLedgertInterfaceMock> ledgerMock;
@@ -324,7 +325,7 @@ HWTEST_F(LNNDeviceNameInfoTest, LNN_ASYNC_DEVICE_NAME_DALEY_TEST_001, TestSize.L
 
 /*
  * @tc.name: LNN_ASYNC_DEVICE_NAME_DELAY_TEST_001
- * @tc.desc: LnnAsyncDeviceNameDelay test
+ * @tc.desc: LnnAsyncDeviceNameDelay test get info failed
  * @tc.type: FUNC
  * @tc.require:
  */
@@ -349,7 +350,7 @@ HWTEST_F(LNNDeviceNameInfoTest, LNN_ASYNC_DEVICE_NAME_DELAY_TEST_001, TestSize.L
 
 /*
  * @tc.name: LNN_ASYNC_DEVICE_NAME_DELAY_TEST_002
- * @tc.desc: LnnAsyncDeviceNameDelay test
+ * @tc.desc: LnnAsyncDeviceNameDelay test send sync info failed
  * @tc.type: FUNC
  * @tc.require:
  */
@@ -359,10 +360,7 @@ HWTEST_F(LNNDeviceNameInfoTest, LNN_ASYNC_DEVICE_NAME_DELAY_TEST_002, TestSize.L
     ASSERT_NE(nodeInfo, nullptr);
     const char *devName = "deviceNickname";
     SendSyncInfoParam *data = (SendSyncInfoParam *)SoftBusCalloc(sizeof(SendSyncInfoParam));
-    if (data == nullptr) {
-        SoftBusFree(nodeInfo);
-        ASSERT_NE(data, nullptr);
-    }
+    ASSERT_NE(data, nullptr);
     NiceMock<LnnNetLedgertInterfaceMock> ledgerMock;
     EXPECT_CALL(ledgerMock, LnnGetLocalNodeInfo).WillRepeatedly(Return(nodeInfo));
     EXPECT_CALL(ledgerMock, LnnGetDeviceName).WillRepeatedly(Return(devName));
@@ -377,7 +375,7 @@ HWTEST_F(LNNDeviceNameInfoTest, LNN_ASYNC_DEVICE_NAME_DELAY_TEST_002, TestSize.L
 
 /*
  * @tc.name: LNN_ASYNC_DEVICE_NAME_DELAY_TEST_003
- * @tc.desc: LnnAsyncDeviceNameDelay test
+ * @tc.desc: LnnAsyncDeviceNameDelay test get nodeInfo success
  * @tc.type: FUNC
  * @tc.require:
  */
@@ -387,10 +385,7 @@ HWTEST_F(LNNDeviceNameInfoTest, LNN_ASYNC_DEVICE_NAME_DELAY_TEST_003, TestSize.L
     ASSERT_NE(nodeInfo, nullptr);
     const char *devName = "deviceNickname";
     SendSyncInfoParam *data = (SendSyncInfoParam *)SoftBusCalloc(sizeof(SendSyncInfoParam));
-    if (data == nullptr) {
-        SoftBusFree(nodeInfo);
-        ASSERT_NE(data, nullptr);
-    }
+    ASSERT_NE(data, nullptr);
     NiceMock<LnnNetLedgertInterfaceMock> ledgerMock;
     EXPECT_CALL(ledgerMock, LnnGetLocalNodeInfo).WillRepeatedly(Return(nodeInfo));
     EXPECT_CALL(ledgerMock, LnnGetDeviceName).WillRepeatedly(Return(devName));
@@ -402,5 +397,41 @@ HWTEST_F(LNNDeviceNameInfoTest, LNN_ASYNC_DEVICE_NAME_DELAY_TEST_003, TestSize.L
     EXPECT_EQ(ret, SOFTBUS_OK);
     SoftBusFree(nodeInfo);
     SoftBusFree(data);
+}
+
+/*
+ * @tc.name: LNN_SET_DISPLAY_NAME_TEST_001
+ * @tc.desc: LnnSetDisplayName test
+ * @tc.type: FUNC
+ * @tc.require:
+ */
+HWTEST_F(LNNDeviceNameInfoTest, LNN_SET_DISPLAY_NAME_TEST_001, TestSize.Level1)
+{
+    NodeInfo peerNodeInfo = {
+        .deviceInfo.nickName = "diffNickName",
+        .deviceInfo.unifiedName = "unifiedName",
+        .deviceInfo.unifiedDefaultName = "unifiedDefaultName",
+        .deviceInfo.deviceName = "deviceName",
+    };
+    NodeInfo localNodeInfo = {
+        .deviceInfo.nickName = "diffNickName",
+        .deviceInfo.unifiedName = "",
+        .deviceInfo.unifiedDefaultName = "unifiedDefaultName",
+        .deviceInfo.deviceName = "deviceName",
+        .accountId = ACCOUNT_ID,
+    };
+    NiceMock<LnnServicetInterfaceMock> serviceMock;
+    EXPECT_CALL(serviceMock, LnnGetDeviceDisplayName).WillRepeatedly(Return(SOFTBUS_OK));
+    char displayName[] = "displayName";
+    const char *nickName = "";
+    int64_t accountId = ACCOUNT_ID;
+    EXPECT_NO_FATAL_FAILURE(LnnSetDisplayName(displayName, nickName, &peerNodeInfo, &localNodeInfo, accountId));
+    EXPECT_EQ(EOK, strcpy_s(peerNodeInfo.deviceInfo.unifiedName, DEVICE_NAME_BUF_LEN, "unifiedDefaultName"));
+    EXPECT_NO_FATAL_FAILURE(LnnSetDisplayName(displayName, nickName, &peerNodeInfo, &localNodeInfo, accountId));
+    const char *nickNameNew = "nickNameNew";
+    EXPECT_NO_FATAL_FAILURE(LnnSetDisplayName(displayName, nickNameNew, &peerNodeInfo, &localNodeInfo, accountId));
+    accountId = ACCOUNT_ID + 1;
+    (void)memset_s(peerNodeInfo.deviceInfo.unifiedName, DEVICE_NAME_BUF_LEN, 0, DEVICE_NAME_BUF_LEN);
+    EXPECT_NO_FATAL_FAILURE(LnnSetDisplayName(displayName, nickNameNew, &peerNodeInfo, &localNodeInfo, accountId));
 }
 } // namespace OHOS

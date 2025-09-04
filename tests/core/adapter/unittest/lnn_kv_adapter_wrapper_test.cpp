@@ -666,8 +666,27 @@ HWTEST_F(KVAdapterWrapperTest, LnnSetCloudAbilityInner_Dbid_LessThanMin, TestSiz
 }
 
 /**
+ * @tc.name: LnnCloudSync001
+ * @tc.desc: LnnCloudSync
+ * @tc.type: FUNC
+ * @tc.require:
+ */
+HWTEST_F(KVAdapterWrapperTest, LnnCloudSync001, TestSize.Level1)
+{
+    LnnEnhanceFuncList *pfnLnnEnhanceFuncList = LnnEnhanceFuncListGet();
+    pfnLnnEnhanceFuncList->isCloudSyncEnabled = IsCloudSyncEnabled;
+    int32_t dbId = g_dbId;
+    NiceMock<LnnKvAdapterWrapperInterfaceMock> LnnKvAdapterWrapperMock;
+    EXPECT_CALL(LnnKvAdapterWrapperMock, IsCloudSyncEnabled).WillOnce(Return(true));
+    int32_t lnnCloudRet = LnnCloudSync(dbId);
+    EXPECT_EQ(lnnCloudRet, SOFTBUS_KV_CLOUD_SYNC_FAIL);
+    lnnCloudRet = LnnCloudSync(dbId + 1);
+    EXPECT_EQ(lnnCloudRet, SOFTBUS_INVALID_PARAM);
+}
+
+/**
  * @tc.name: LnnCloudSync002
- * @tc.desc: test LnnCloudSync
+ * @tc.desc: test LnnCloudSync param invalid
  * @tc.type: FUNC
  * @tc.require:
  */
@@ -680,6 +699,27 @@ HWTEST_F(KVAdapterWrapperTest, LnnCloudSync002, TestSize.Level1)
     constexpr int32_t idOffset = 1;
     int32_t lnnCloudRet = LnnCloudSync(dbId + idOffset);
     EXPECT_EQ(lnnCloudRet, SOFTBUS_INVALID_PARAM);
+}
+
+/**
+ * @tc.name: LnnCloudSync004
+ * @tc.desc: LnnCloudSync cloud_disabled
+ * @tc.type: FUNC
+ * @tc.require:
+ */
+HWTEST_F(KVAdapterWrapperTest, LnnCloudSync004, TestSize.Level1)
+{
+    int32_t dbId = g_dbId;
+    int32_t createRet = LnnCreateKvAdapter(&dbId, APP_ID.c_str(), APP_ID_LEN, STORE_ID.c_str(), STORE_ID_LEN);
+    EXPECT_EQ(createRet, SOFTBUS_OK);
+    std::shared_ptr<KVAdapter> kvAdapter = nullptr;
+    kvAdapter = std::make_shared<KVAdapter>(APP_ID, STORE_ID);
+    int32_t initRet = kvAdapter->Init();
+    EXPECT_EQ(initRet, SOFTBUS_OK);
+    NiceMock<LnnKvAdapterWrapperInterfaceMock> LnnKvAdapterWrapperMock;
+    EXPECT_CALL(LnnKvAdapterWrapperMock, FindKvStorePtr).WillRepeatedly(Return(kvAdapter));
+    int32_t lnnCloudRet = LnnCloudSync(dbId);
+    EXPECT_EQ(lnnCloudRet, SOFTBUS_KV_CLOUD_DISABLED);
 }
 
 /**

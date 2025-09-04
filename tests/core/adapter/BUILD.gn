@@ -96,20 +96,19 @@ ohos_unittest("LnnSettingdataEventMonitorTest") {
   external_deps = []
   if (dsoftbus_feature_lnn_cloud_sync) {
     external_deps += [
-        "ability_base:want",
-        "ability_base:zuri",
-        "ability_runtime:dataobs_manager",
-        "c_utils:utils",
-        "data_share:datashare_consumer",
-        "googletest:gmock_main",
-        "googletest:gtest_main",
-        "hilog:libhilog",
-        "kv_store:distributeddata_inner",
-        "samgr:samgr_proxy",
-        "init:libbegetutil",
-  ]
+      "ability_base:want",
+      "ability_base:zuri",
+      "ability_runtime:dataobs_manager",
+      "c_utils:utils",
+      "data_share:datashare_consumer",
+      "googletest:gmock_main",
+      "googletest:gtest_main",
+      "hilog:libhilog",
+      "kv_store:distributeddata_inner",
+      "samgr:samgr_proxy",
+      "init:libbegetutil",
+    ]
   }
-    
   if (is_standard_system && has_ces_part) {
     external_deps += [ "common_event_service:cesfwk_innerkits" ]
   }
@@ -221,6 +220,48 @@ ohos_unittest("LNNKvStoreLaunchListenerTest") {
   ]
 }
 
+ohos_unittest("LNNOhosAccountMockTest") {
+  module_out_path = module_output_path
+  sources = [
+    "unittest/lnn_ohos_account_mock.cpp",
+    "unittest/lnn_ohos_account_mock_test.cpp",
+  ]
+  include_dirs = [
+    "$dsoftbus_root_path/core/adapter/kv_store/include",
+    "$dsoftbus_root_path/core/adapter/bus_center/include",
+    "$dsoftbus_root_path/core/common/include",
+    "$dsoftbus_root_path/core/bus_center/lnn/net_builder/include",
+    "$dsoftbus_root_path/core/bus_center/lnn/net_buscenter/include",
+    "$dsoftbus_root_path/core/bus_center/lnn/net_ledger/common/include",
+    "$dsoftbus_root_path/core/bus_center/interface",
+    "$dsoftbus_root_path/interfaces/kits/common",
+    "$dsoftbus_root_path/core/bus_center/lnn/net_ledger/local_ledger/include",
+    "$dsoftbus_root_path/core/adapter/bus_center/include",
+    "$dsoftbus_root_path/interfaces/kits/bus_center",
+    "$dsoftbus_root_path/interfaces/kits/disc",
+    "$dsoftbus_root_path/interfaces/kits/lnn",
+    "$dsoftbus_root_path/core/bus_center/lnn/lane_hub/heartbeat/include",
+    "$dsoftbus_root_path/core/bus_center/service/include",
+    "$dsoftbus_root_path/core/discovery/manager/include",
+    "$dsoftbus_root_path/core/discovery/interface",
+    "$dsoftbus_root_path/core/bus_center/utils/include",
+    "$dsoftbus_root_path/adapter/common/net/bluetooth/include",
+    "$dsoftbus_root_path/core/bus_center/monitor/include",
+  ]
+  deps = [
+    "$dsoftbus_root_path/adapter:softbus_adapter",
+    "$dsoftbus_root_path/core/common:softbus_utils",
+    "$dsoftbus_root_path/core/frame:softbus_server",
+  ]
+  external_deps = [
+    "bounds_checking_function:libsec_static",
+    "c_utils:utils",
+    "googletest:gmock_main",
+    "googletest:gtest_main",
+    "hilog:libhilog",
+  ]
+}
+
 ohos_unittest("LnnOhosAccountAdapterTest") {
   module_out_path = module_output_path
   sources = [
@@ -230,6 +271,7 @@ ohos_unittest("LnnOhosAccountAdapterTest") {
   ]
 
   include_dirs = [
+    "$dsoftbus_root_path/adapter/common/include",
     "$dsoftbus_root_path/core/adapter/bus_center/include",
     "$dsoftbus_root_path/core/authentication/include",
     "$dsoftbus_root_path/core/transmission/common/include",
@@ -244,20 +286,22 @@ ohos_unittest("LnnOhosAccountAdapterTest") {
   ]
 
   if (is_standard_system) {
-    external_deps = [
-      "ability_base:base",
-      "ability_base:want",
-      "ability_base:zuri",
-      "bounds_checking_function:libsec_static",
-      "c_utils:utils",
-      "device_auth:deviceauth_sdk",
-      "googletest:gmock_main",
-      "googletest:gtest_main",
-      "hilog:libhilog",
-      "ipc:ipc_single",
-      "os_account:libaccountkits",
-      "os_account:os_account_innerkits",
-    ]
+    if (dsoftbus_feature_lnn_cloud_sync) {
+      external_deps = [
+        "ability_base:base",
+        "ability_base:want",
+        "ability_base:zuri",
+        "bounds_checking_function:libsec_static",
+        "c_utils:utils",
+        "device_auth:deviceauth_sdk",
+        "googletest:gmock_main",
+        "googletest:gtest_main",
+        "hilog:libhilog",
+        "ipc:ipc_single",
+        "os_account:libaccountkits",
+        "os_account:os_account_innerkits",
+      ]
+    }
   } else {
     external_deps = [
       "c_utils:utils",
@@ -342,14 +386,15 @@ group("unittest") {
     ":AdapterDsoftbusRsaCryptoTest",
     ":LNNKvStoreLaunchListenerTest",
     ":LNNOhosAccountTest",
-    ":LnnOhosAccountAdapterTest",
+    ":LNNOhosAccountMockTest",
     ":LnnSaStatusMonitorTest",
-    ":LnnSettingdataEventMonitorTest",
   ]
   if (dsoftbus_feature_lnn_cloud_sync) {
     deps += [
       ":LnnKVAdapterTest",
       ":LnnKVAdapterWrapperTest",
+      ":LnnSettingdataEventMonitorTest",
+      ":LnnOhosAccountAdapterTest",      
     ]
   }
   if (dsoftbus_feature_lnn_usb_ncm && dsoftbus_feature_deps_usb_manager) {

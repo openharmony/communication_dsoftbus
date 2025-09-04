@@ -15,15 +15,15 @@
 
 #include "authmanager_fuzzer.h"
 
-#include "auth_manager.h"
-#include "fuzz_environment.h"
-#include "softbus_access_token_test.h"
 #include <cstddef>
 #include <cstring>
 #include <fuzzer/FuzzedDataProvider.h>
 #include <securec.h>
 
 #include "auth_manager.c"
+#include "auth_manager.h"
+#include "fuzz_environment.h"
+#include "softbus_access_token_test.h"
 
 using namespace std;
 
@@ -234,7 +234,7 @@ bool NewAuthManagerFuzzTest(FuzzedDataProvider &provider)
     ProcessAuthHandle(provider, authHandle);
     auth = FindAuthManagerByAuthId(authSeq);
     if (auth != nullptr) {
-        DelAuthManager(auth, AUTH_LINK_TYPE_MAX);
+        DelAuthManager(auth, info.connInfo.type);
     }
     return true;
 }
