@@ -147,7 +147,7 @@ static uint8_t *TransProxyPackTlvData(DataHead *pktHead, int32_t tlvBufferSize, 
 {
     TRANS_CHECK_AND_RETURN_RET_LOGE(pktHead != NULL, NULL, TRANS_CTRL, "invalid param");
     int32_t newDataHeadSize = MAGICNUM_SIZE + TLVCOUNT_SIZE + tlvBufferSize;
-    int32_t bufLen = dataLen + newDataHeadSize;
+    int32_t bufLen = (int32_t)dataLen + newDataHeadSize;
     uint8_t *buf = (uint8_t *)SoftBusCalloc(bufLen);
     if (buf == NULL) {
         TRANS_LOGE(TRANS_CTRL, "malloc buf failed");
