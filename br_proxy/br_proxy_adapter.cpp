@@ -13,19 +13,46 @@
  * limitations under the License.
  */
 #include <securec.h>
+#include "ability_connect_callback_stub.h"
 #include "ability_manager_client.h"
 #include "bundle_mgr_interface.h"
 #include "iservice_registry.h"
 #include "softbus_error_code.h"
 #include "system_ability_definition.h"
+#include "trans_log.h"
 
 using namespace OHOS;
 
-extern "C" int32_t StartAbility(const char *bundleName, const char *abilityName)
+class BrProxyAbility : public AAFwk::AbilityConnectionStub {
+public:
+    BrProxyAbility() {
+    }
+    ~BrProxyAbility() {
+    }
+    void OnAbilityConnectDone(const AppExecFwk::ElementName &element,
+                             const sptr<IRemoteObject> &remoteObject,
+                             int resultCode) override {
+        TRANS_LOGI(TRANS_SVC, "[br_proxy] OnAbilityConnectDone");
+        OHOS::AAFwk::AbilityManagerClient::GetInstance()->ReleaseCall(this, element);
+    }
+ 
+    void OnAbilityDisconnectDone(const AppExecFwk::ElementName &element,
+                                int resultCode) override {
+        TRANS_LOGI(TRANS_SVC, "[br_proxy] OnAbilityDisconnectDone");
+    }
+};
+
+
+extern "C" int32_t StartAbility(const char *bundleName, const char *abilityName, int32_t appIndex)
 {
+    TRANS_LOGI(TRANS_SVC, "[br_proxy] appIndex:%{public}d", appIndex);
     OHOS::AAFwk::Want want;
     want.SetElementName(bundleName, abilityName);
-    return OHOS::AAFwk::AbilityManagerClient::GetInstance()->StartAbility(want);
+    want.SetParam(AAFwk::Want::PARAM_APP_CLONE_INDEX_KEY, appIndex);
+    sptr<AAFwk::IAbilityConnection> abilityConnection = new BrProxyAbility();
+    std::string errMsg = "error";
+    return OHOS::AAFwk::AbilityManagerClient::GetInstance()->
+        StartAbilityByCallWithErrMsg(want, abilityConnection, nullptr, -1, errMsg);
 }
 
 static sptr<AppExecFwk::IBundleMgr> GetBundleMgr()
@@ -43,8 +70,11 @@ static sptr<AppExecFwk::IBundleMgr> GetBundleMgr()
 }
 
 extern "C" int32_t ProxyChannelMgrGetAbilityName(char *abilityName, int32_t userId, uint32_t abilityNameLen,
-    std::string bundleName)
+    std::string bundleName, int32_t *appIndex)
 {
+    if (abilityName == nullptr || appIndex == nullptr || bundleName.empty()) {
+        return SOFTBUS_INVALID_PARAM;
+    }
     AAFwk::Want want;
     want.SetElementName(bundleName, "");
     want.SetAction("action.ohos.pull.listener");
@@ -62,5 +92,7 @@ extern "C" int32_t ProxyChannelMgrGetAbilityName(char *abilityName, int32_t user
     if (strcpy_s(abilityName, abilityNameLen, abilityInfos[0].name.c_str()) != EOK) {
         return SOFTBUS_STRCPY_ERR;
     }
+    *appIndex = abilityInfos[0].appIndex;
+    TRANS_LOGI(TRANS_SVC, "[br_proxy] get appIndex:%{public}d", *appIndex);
     return SOFTBUS_OK;
 }
