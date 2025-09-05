@@ -47,7 +47,7 @@ int32_t OHOS::AccountSA::OhosAccountKits::GetOsAccountDistributedInfo(int32_t lo
 {
     auto mock = OHOS::AccountSA::OhosAccountKitsMock::GetMock();
     if (mock == nullptr) {
-        return OHOS::ERR_OK;
+        return -1;
     }
     return mock->GetOsAccountDistributedInfo(localId, accountInfo);
 }

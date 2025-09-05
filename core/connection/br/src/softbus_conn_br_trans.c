@@ -98,6 +98,9 @@ int32_t ConnBrTransReadOneFrame(uint32_t connectionId, int32_t socketHandle, Lim
         }
         int32_t recvLen = g_sppDriver->Read(
             socketHandle, buffer->buffer + buffer->length, (int32_t)(buffer->capacity - buffer->length));
+        if (recvLen <= 0) {
+            ConnBrDelBrPendingPacketById(connectionId);
+        }
         if (recvLen == BR_READ_SOCKET_CLOSED) {
             CONN_LOGW(CONN_BR,
                 "br connection read return, connection closed. connId=%{public}u, socketHandle=%{public}d",
@@ -327,7 +330,7 @@ int32_t ConnBrPostBytes(
     }
     g_startBrSendLPInfo.messagePosted = true;
     if (!g_startBrSendLPInfo.sendTaskRunning) {
-        status = ConnStartActionAsync(NULL, SendHandlerLoop, "BrSend_Tsk");
+        status = ConnStartActionAsync(NULL, SendHandlerLoop, NULL);
         if (status != SOFTBUS_OK) {
             CONN_LOGE(CONN_BR, "start br send task fail errno=%{public}d", status);
             SoftBusMutexUnlock(&g_startBrSendLPInfo.lock);
@@ -435,6 +438,9 @@ static void WaitAck(ConnBrConnection *connection)
 
 void *SendHandlerLoop(void *arg)
 {
+    const char *name = "BrSend_Tsk";
+    SoftBusThread threadSelf = SoftBusThreadGetSelf();
+    SoftBusThreadSetName(threadSelf, name);
     (void)arg;
     CONN_LOGI(CONN_BR, "br send data: send loop start");
     SendBrQueueNode *sendNode = NULL;
