@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2022 Huawei Device Co., Ltd.
+ * Copyright (c) 2022-2025 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -556,8 +556,7 @@ int32_t AuthDeviceGetLatestIdByUuid(const char *uuid, AuthLinkType type, AuthHan
     return GetNetLedgerInterface()->AuthDeviceGetLatestIdByUuid(uuid, type, authHandle);
 }
 
-int32_t AuthGetLatestAuthSeqListByType(
-    const char *udid, int64_t *seqList, uint64_t *authVerifyTime, DiscoveryType type)
+int32_t AuthGetLatestAuthSeqListByType(const char *udid, int64_t *seqList, uint64_t *authVerifyTime, DiscoveryType type)
 {
     return GetNetLedgerInterface()->AuthGetLatestAuthSeqListByType(udid, seqList, authVerifyTime, type);
 }

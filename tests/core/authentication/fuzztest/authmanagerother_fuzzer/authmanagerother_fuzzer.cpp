@@ -16,22 +16,22 @@
 #include "authmanagerother_fuzzer.h"
 #include <cstddef>
 #include <cstring>
-#include <securec.h>
 #include <fuzzer/FuzzedDataProvider.h>
+#include <securec.h>
 
-#include "auth_manager.h"
 #include "auth_manager.c"
+#include "auth_manager.h"
 #include "fuzz_environment.h"
 #include "softbus_access_token_test.h"
 
 using namespace std;
 
-#define AUTH_TYPE_MIN AUTH_LINK_TYPE_WIFI
-#define AUTH_TYPE_MAX AUTH_LINK_TYPE_MAX
-#define TYPE_MIN DATA_TYPE_AUTH
-#define TYPE_MAX DATA_TYPE_APPLY_KEY_CONNECTION
-#define MODULE_MIN MODULE_TRUST_ENGINE
-#define MODULE_MAX MODULE_OLD_NEARBY
+#define AUTH_LINK_TYPE_MIN AUTH_LINK_TYPE_WIFI
+#define AUTH_LINK_TYPE_MAX AUTH_LINK_TYPE_MAX
+#define TYPE_MIN           DATA_TYPE_AUTH
+#define TYPE_MAX           DATA_TYPE_APPLY_KEY_CONNECTION
+#define MODULE_MIN         MODULE_TRUST_ENGINE
+#define MODULE_MAX         MODULE_OLD_NEARBY
 
 namespace {
 class TestEnv {
@@ -51,16 +51,17 @@ public:
     {
         return isInited_;
     }
+
 private:
     volatile bool isInited_ = false;
 };
-}
+} // namespace
 
 namespace OHOS {
 static bool ProcSessionKeyInfo(FuzzedDataProvider &provider, AuthSessionInfo *info, int64_t authSeq)
 {
     info->connInfo.type = AUTH_LINK_TYPE_SESSION_KEY;
-    info->connId = 1ULL << (uint64_t)info->connInfo.type;
+    info->connId = (uint64_t)info->connInfo.type << INT32_BIT_NUM;
     info->isServer = provider.ConsumeBool();
     info->isConnectServer = provider.ConsumeBool();
     AuthManager *auth = NewAuthManager(authSeq, info);
@@ -70,7 +71,7 @@ static bool ProcSessionKeyInfo(FuzzedDataProvider &provider, AuthSessionInfo *in
     RawLinkNeedUpdateAuthManager(info->uuid, info->isServer);
     RawLinkNeedUpdateAuthManager(nullptr, info->isServer);
     FindNormalizedKeyAuthManagerByUdid(info->udid, info->isServer);
-    DelAuthManager(auth, AUTH_LINK_TYPE_MAX);
+    DelAuthManager(auth, info->connInfo.type);
     return true;
 }
 
@@ -91,7 +92,8 @@ bool AuthManagerOtherFuzzTest(FuzzedDataProvider &provider)
     if (!ProcSessionKeyInfo(provider, &info, authSeq)) {
         return false;
     }
-    info.connInfo.type = (AuthLinkType)provider.ConsumeIntegralInRange<uint32_t>(AUTH_TYPE_MIN, AUTH_TYPE_MAX);
+    info.connInfo.type =
+        (AuthLinkType)provider.ConsumeIntegralInRange<uint32_t>(AUTH_LINK_TYPE_MIN, AUTH_LINK_TYPE_MAX);
     info.connId = (uint64_t)info.connInfo.type << INT32_BIT_NUM;
     info.isConnectServer = provider.ConsumeBool();
     AuthManager *auth = NewAuthManager(authSeq, &info);
@@ -124,8 +126,7 @@ bool AuthManagerOtherFuzzTest(FuzzedDataProvider &provider)
     RemoveAuthManagerByAuthId(authHandle);
     return true;
 }
-}
-
+} // namespace OHOS
 
 /* Fuzzer entry point */
 extern "C" int32_t LLVMFuzzerTestOneInput(const uint8_t *data, size_t size)
@@ -139,6 +140,6 @@ extern "C" int32_t LLVMFuzzerTestOneInput(const uint8_t *data, size_t size)
     if (!OHOS::AuthManagerOtherFuzzTest(provider)) {
         return -1;
     }
-    
+
     return 0;
 }

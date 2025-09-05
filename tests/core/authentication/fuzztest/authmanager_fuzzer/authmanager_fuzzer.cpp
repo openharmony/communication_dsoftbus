@@ -17,13 +17,13 @@
 
 #include <cstddef>
 #include <cstring>
-#include <securec.h>
 #include <fuzzer/FuzzedDataProvider.h>
+#include <securec.h>
+
+#include "auth_manager.c"
 #include "auth_manager.h"
 #include "fuzz_environment.h"
 #include "softbus_access_token_test.h"
-
-#include "auth_manager.c"
 
 using namespace std;
 
@@ -31,9 +31,9 @@ using namespace std;
 #define AUTH_TYPE_MAX AUTH_LINK_TYPE_MAX
 #define DISC_TYPE_MIN DISCOVERY_TYPE_UNKNOWN
 #define DISC_TYPE_MAX DISCOVERY_TYPE_COUNT
-#define MODE_MIN 30
-#define MODE_MAX 600
-#define LIST_LEN DISCOVERY_TYPE_COUNT
+#define MODE_MIN      30
+#define MODE_MAX      600
+#define LIST_LEN      DISCOVERY_TYPE_COUNT
 namespace {
 class TestEnv {
 public:
@@ -57,11 +57,11 @@ public:
 private:
     volatile bool isInited_ = false;
 };
-}
+} // namespace
 
 namespace OHOS {
-static void HandleOfServerData(uint64_t connId, const AuthConnInfo *connInfo, bool fromServer, const AuthDataHead *head,
-    const uint8_t *data)
+static void HandleOfServerData(
+    uint64_t connId, const AuthConnInfo *connInfo, bool fromServer, const AuthDataHead *head, const uint8_t *data)
 {
     HandleUkConnectionData(connId, connInfo, fromServer, head, data);
     HandleConnectionDataInner(connId, connInfo, fromServer, head, data);
@@ -128,8 +128,8 @@ static void ProcessAuthSessionInfo(FuzzedDataProvider &provider, AuthSessionInfo
     FindNormalizedKeyAuthManagerByUdid(info.udid, isServer);
 }
 
-static void ProcessAuthManager(FuzzedDataProvider &provider, int64_t authSeq, AuthConnInfo connInfo,
-    AuthSessionInfo info)
+static void ProcessAuthManager(
+    FuzzedDataProvider &provider, int64_t authSeq, AuthConnInfo connInfo, AuthSessionInfo info)
 {
     AuthManager inAuth;
     (void)memset_s(&inAuth, sizeof(AuthManager), 0, sizeof(AuthManager));
@@ -213,8 +213,8 @@ bool NewAuthManagerFuzzTest(FuzzedDataProvider &provider)
     AuthConnInfo connInfo;
     (void)memset_s(&connInfo, sizeof(AuthConnInfo), 0, sizeof(AuthConnInfo));
     TryGetBrConnInfo(uuid.c_str(), &connInfo);
-    int64_t seqList[LIST_LEN] = {0};
-    uint64_t verifyTime[LIST_LEN] = {0};
+    int64_t seqList[LIST_LEN] = { 0 };
+    uint64_t verifyTime[LIST_LEN] = { 0 };
     DiscoveryType type = (DiscoveryType)provider.ConsumeIntegralInRange<uint32_t>(DISC_TYPE_MIN, DISC_TYPE_MAX);
     AuthGetLatestAuthSeqListByType(udid.c_str(), seqList, verifyTime, type);
     AuthGetLatestAuthSeqList(udid.c_str(), seqList, type);
@@ -234,11 +234,11 @@ bool NewAuthManagerFuzzTest(FuzzedDataProvider &provider)
     ProcessAuthHandle(provider, authHandle);
     auth = FindAuthManagerByAuthId(authSeq);
     if (auth != nullptr) {
-        DelAuthManager(auth, AUTH_LINK_TYPE_MAX);
+        DelAuthManager(auth, info.connInfo.type);
     }
     return true;
 }
-}
+} // namespace OHOS
 
 /* Fuzzer entry point */
 extern "C" int32_t LLVMFuzzerTestOneInput(const uint8_t *data, size_t size)
