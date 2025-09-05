@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2022 Huawei Device Co., Ltd.
+ * Copyright (c) 2022-2025 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -91,7 +91,7 @@ public:
     virtual void LnnNotifyOnlineNetType(const char *networkId, ConnectionAddrType addrType) = 0;
     virtual void LnnNotifyDeviceInfoChanged(SoftBusDeviceInfoState state) = 0;
     virtual bool IsHeartbeatEnable(void) = 0;
-    virtual struct WifiDirectManager* GetWifiDirectManager(void) = 0;
+    virtual struct WifiDirectManager *GetWifiDirectManager(void) = 0;
 };
 
 class LnnServicetInterfaceMock : public LnnServiceInterface {
@@ -140,8 +140,8 @@ public:
     MOCK_METHOD1(LnnSubscribeAccountBootEvent, int32_t(AccountEventHandle handle));
     MOCK_METHOD2(LnnNotifyOnlineNetType, void(const char *, ConnectionAddrType));
     MOCK_METHOD1(LnnNotifyDeviceInfoChanged, void(SoftBusDeviceInfoState));
-    MOCK_METHOD0(IsHeartbeatEnable, bool ());
-    MOCK_METHOD0(GetWifiDirectManager, struct WifiDirectManager* (void));
+    MOCK_METHOD0(IsHeartbeatEnable, bool());
+    MOCK_METHOD0(GetWifiDirectManager, struct WifiDirectManager *(void));
     static int32_t ActionOfLnnRegisterEventHandler(LnnEventType event, LnnEventHandler handler);
     static inline std::map<LnnEventType, LnnEventHandler> g_lnnEventHandlers;
 };
