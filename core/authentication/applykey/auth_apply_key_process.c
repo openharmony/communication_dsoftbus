@@ -828,7 +828,7 @@ static const LightAccountVerifier *ApplyKeyGetLightAccountInstance()
 static int32_t ProcessAuthHichainParam(uint32_t requestId, const DeviceAuthCallback *genCb)
 {
     const LightAccountVerifier *lightAccountVerifier = ApplyKeyGetLightAccountInstance();
-    AUTH_CHECK_AND_RETURN_RET_LOGE(lightAccountVerifier != NULL, SOFTBUS_AUTH_GET_LIGHT_ACCOUNT_FALI, AUTH_CONN,
+    AUTH_CHECK_AND_RETURN_RET_LOGE(lightAccountVerifier != NULL, SOFTBUS_AUTH_GET_LIGHT_ACCOUNT_FAIL, AUTH_CONN,
         "light account verify not initialized");
 
     int32_t activeUserId = GetActiveOsAccountIds();
@@ -1065,7 +1065,7 @@ static int32_t ProcessApplyKeyData(uint32_t requestId, const uint8_t *data, uint
         return ret;
     }
     const LightAccountVerifier *lightAccountVerifier = ApplyKeyGetLightAccountInstance();
-    AUTH_CHECK_AND_RETURN_RET_LOGE(lightAccountVerifier != NULL, SOFTBUS_AUTH_GET_LIGHT_ACCOUNT_FALI, AUTH_CONN,
+    AUTH_CHECK_AND_RETURN_RET_LOGE(lightAccountVerifier != NULL, SOFTBUS_AUTH_GET_LIGHT_ACCOUNT_FAIL, AUTH_CONN,
         "light account verify not initialized");
 
     int32_t activeUserId = GetActiveOsAccountIds();
