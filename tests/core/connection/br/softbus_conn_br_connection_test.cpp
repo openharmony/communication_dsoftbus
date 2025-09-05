@@ -91,13 +91,41 @@ int32_t Read(int32_t clientFd, uint8_t *buf, const int32_t length)
     return length;
 }
 
+// Check test short distance to confirm that the return value will not be 0, so it will not be processed for now.
+// length can not be 0, because it is return value.
 int32_t Write(int32_t clientFd, const uint8_t *buf, const int32_t length)
 {
     (void)clientFd;
     (void)buf;
-    if (length <= 0) {
+    // test other send failed and disconnect directly
+    if (length <= 1) {
         return BR_WRITE_FAILED;
     }
+    // test try send
+    if (length == DEFAULT_BR_MTU) {
+        return CONN_BR_SEND_DATA_FAIL_UNDERLAYER_ERR_QUEUE_FULL;
+    }
+    // test send success
+    return length;
+}
+
+int32_t Apply(struct ConnSlideWindowController *self, int32_t expect)
+{
+    (void)self;
+    return expect;
+}
+
+int32_t Enable(struct ConnSlideWindowController *self, int32_t windowInMillis, int32_t quotaInBytes)
+{
+    (void)self;
+    (void)windowInMillis;
+    (void)quotaInBytes;
+    return SOFTBUS_INVALID_PARAM;
+}
+
+int32_t Disable(struct ConnSlideWindowController *self)
+{
+    (void)self;
     return SOFTBUS_OK;
 }
 
@@ -151,6 +179,12 @@ SppSocketDriver g_sppDriver = {
     .Init = Init,
     .Read = Read,
     .Write = Write,
+};
+
+struct ConnSlideWindowController g_controller = {
+    .apply = Apply,
+    .enable = Enable,
+    .disable = Disable,
 };
 
 ConnBrTransEventListener g_transEventlistener = {
@@ -430,9 +464,20 @@ HWTEST_F(ConnectionBrConnectionTest, BrTransSend, TestSize.Level1)
     uint32_t connectionId = 1;
     int32_t socketHandle = 1;
     uint8_t data = {0};
-    int32_t ret = BrTransSend(connectionId, socketHandle, 0, &data, 1);
+    uint32_t dataLen = 1;
+    uint32_t mtu = 0;
+    NiceMock<ConnectionBrInterfaceMock> brMock;
+    EXPECT_CALL(brMock, ConnSlideWindowControllerNew).WillRepeatedly(Return(&g_controller));
+    int32_t ret = BrTransSend(connectionId, socketHandle, mtu, &data, dataLen);
     EXPECT_EQ(SOFTBUS_CONN_BR_UNDERLAY_WRITE_FAIL, ret);
-    ret = BrTransSend(connectionId, socketHandle, 0, &data, 0);
+
+    dataLen = 1000;
+    mtu = DEFAULT_BR_MTU;
+    ret = BrTransSend(connectionId, socketHandle, mtu, &data, dataLen);
+    EXPECT_EQ(SOFTBUS_CONN_BR_UNDERLAY_WRITE_FAIL, ret);
+
+    dataLen = 10;
+    ret = BrTransSend(connectionId, socketHandle, mtu, &data, dataLen);
     EXPECT_EQ(SOFTBUS_OK, ret);
 }
 
