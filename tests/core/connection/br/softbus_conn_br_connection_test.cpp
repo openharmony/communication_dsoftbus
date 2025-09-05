@@ -206,6 +206,7 @@ ConnectFuncInterface *ConnInit(void)
     NiceMock<ConnectionBrInterfaceMock> brMock;
 
     EXPECT_CALL(brMock, InitSppSocketDriver).WillOnce(Return(&g_sppDriver));
+    EXPECT_CALL(brMock, ConnSlideWindowControllerNew).WillOnce(Return(&g_controller));
     EXPECT_CALL(brMock, SoftbusGetConfig)
         .WillOnce(ConnectionBrInterfaceMock::ActionOfSoftbusGetConfig1)
         .WillOnce(ConnectionBrInterfaceMock::ActionOfSoftbusGetConfig2);
@@ -232,6 +233,7 @@ HWTEST_F(ConnectionBrConnectionTest, BrManagerTest001, TestSize.Level1)
     };
 
     EXPECT_CALL(brMock, InitSppSocketDriver).WillOnce(Return(&g_sppDriver));
+    EXPECT_CALL(brMock, ConnSlideWindowControllerNew).WillRepeatedly(Return(&g_controller));
     EXPECT_CALL(brMock, SoftbusGetConfig).WillOnce(Return(SOFTBUS_NO_INIT));
     ConnectFuncInterface *ret = ConnInitBr(&callback);
     EXPECT_EQ(nullptr, ret);
@@ -262,6 +264,7 @@ HWTEST_F(ConnectionBrConnectionTest, BrManagerTest002, TestSize.Level1)
 
     EXPECT_CALL(brMock, SoftBusThreadCreate).WillRepeatedly(Return(SOFTBUS_OK));
     EXPECT_CALL(brMock, InitSppSocketDriver).WillOnce(Return(&g_sppDriver));
+    EXPECT_CALL(brMock, ConnSlideWindowControllerNew).WillRepeatedly(Return(&g_controller));
     EXPECT_CALL(brMock, SoftbusGetConfig)
         .WillOnce(ConnectionBrInterfaceMock::ActionOfSoftbusGetConfig1)
         .WillOnce(ConnectionBrInterfaceMock::ActionOfSoftbusGetConfig2);
