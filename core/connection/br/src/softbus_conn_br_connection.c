@@ -753,6 +753,9 @@ static int32_t CheckBrServerStateAndOpenSppServer(int32_t *serverId, uint32_t tr
 
 static void *ListenTask(void *arg)
 {
+    const char *name = "BrListen_Tsk";
+    SoftBusThread threadSelf = SoftBusThreadGetSelf();
+    SoftBusThreadSetName(threadSelf, name);
     CONN_CHECK_AND_RETURN_RET_LOGW(arg != NULL, NULL, CONN_BR, "invalid param");
     ServerState *serverState = (ServerState *)arg;
     CONN_CHECK_AND_RETURN_RET_LOGE(serverState != NULL, NULL, CONN_BLE, "serverState is null");
@@ -772,8 +775,7 @@ static void *ListenTask(void *arg)
         while (true) {
             int32_t socketHandle = g_sppDriver->Accept(serverId);
             if (socketHandle == SOFTBUS_CONN_BR_SPP_SERVER_ERR) {
-                CONN_LOGE(CONN_BR, "accept fail, traceId=%{public}u, serverId=%{public}d", traceId,
-                    serverId);
+                CONN_LOGE(CONN_BR, "accept fail, traceId=%{public}u, serverId=%{public}d", traceId, serverId);
                 break;
             }
             ServerServeContext *ctx = (ServerServeContext *)SoftBusCalloc(sizeof(ServerServeContext));
@@ -826,7 +828,7 @@ int32_t ConnBrStartServer(void)
         return SOFTBUS_MALLOC_ERR;
     }
     serverState->traceId = traceId;
-    status = ConnStartActionAsync(serverState, ListenTask, "BrListen_Tsk");
+    status = ConnStartActionAsync(serverState, ListenTask, NULL);
     if (status != SOFTBUS_OK) {
         CONN_LOGE(CONN_BR, "start br server fail: error=%{public}d", status);
         SoftBusFree(serverState);

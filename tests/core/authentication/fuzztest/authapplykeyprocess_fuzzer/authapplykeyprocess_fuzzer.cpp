@@ -16,18 +16,18 @@
 #include "authapplykeyprocess_fuzzer.h"
 #include <cstddef>
 #include <cstring>
-#include <securec.h>
 #include <fuzzer/FuzzedDataProvider.h>
+#include <securec.h>
 
-#include "comm_log.h"
-#include "auth_manager.h"
-#include "auth_apply_key_process.h"
 #include "auth_apply_key_process.c"
+#include "auth_apply_key_process.h"
+#include "auth_manager.h"
+#include "comm_log.h"
 #include "fuzz_environment.h"
 #include "softbus_access_token_test.h"
 
-#define BUF_LEN 30
-#define OPERATION_CODE  25
+#define BUF_LEN            30
+#define OPERATION_CODE     25
 #define AUTH_LINK_TYPE_MIN AUTH_LINK_TYPE_WIFI
 #define AUTH_LINK_TYPE_MAX AUTH_LINK_TYPE_MAX
 
@@ -51,10 +51,11 @@ public:
     {
         return isInited_;
     }
+
 private:
     volatile bool isInited_ = false;
 };
-}
+} // namespace
 
 namespace OHOS {
 
@@ -117,17 +118,17 @@ void ProcessApplyKey(FuzzedDataProvider &provider, AuthSessionInfo &sessionInfo,
     string udidHash = provider.ConsumeRandomLengthString(D2D_UDID_HASH_STR_LEN);
     if (strcpy_s(reqBusInfo.udidHash, D2D_UDID_HASH_STR_LEN, udidHash.c_str()) != EOK) {
         COMM_LOGE(COMM_TEST, "strcpy_s udidHash failed !");
-        return ;
+        return;
     }
     string accountHash = provider.ConsumeRandomLengthString(D2D_ACCOUNT_HASH_STR_LEN);
     if (strcpy_s(reqBusInfo.accountHash, D2D_ACCOUNT_HASH_STR_LEN, accountHash.c_str()) != EOK) {
         COMM_LOGE(COMM_TEST, "strcpy_s accountHash failed !");
-        return ;
+        return;
     }
     string peerAccountHash = provider.ConsumeRandomLengthString(SHA_256_HEX_HASH_LEN);
     if (strcpy_s(reqBusInfo.peerAccountHash, SHA_256_HEX_HASH_LEN, peerAccountHash.c_str()) != EOK) {
         COMM_LOGE(COMM_TEST, "strcpy_s peerAccountHash failed !");
-        return ;
+        return;
     }
     reqBusInfo.type = BUSINESS_TYPE_D2D;
     GetSameApplyKeyInstanceNum(&reqBusInfo);
@@ -176,8 +177,8 @@ bool AuthApplyKeyProcessFuzzTest(FuzzedDataProvider &provider)
         COMM_LOGE(COMM_TEST, "strcpy_s uuid failed !");
         return false;
     }
-    sessionInfo.connInfo.type = (AuthLinkType)provider.ConsumeIntegralInRange<uint32_t>(AUTH_LINK_TYPE_MIN,
-    AUTH_LINK_TYPE_MAX);
+    sessionInfo.connInfo.type =
+        (AuthLinkType)provider.ConsumeIntegralInRange<uint32_t>(AUTH_LINK_TYPE_MIN, AUTH_LINK_TYPE_MAX);
     sessionInfo.connId = (uint64_t)sessionInfo.connInfo.type << INT32_BIT_NUM;
     sessionInfo.isConnectServer = provider.ConsumeBool();
     ApplyKeyNegoInit();
@@ -188,8 +189,8 @@ bool AuthApplyKeyProcessFuzzTest(FuzzedDataProvider &provider)
     OnRequest(authSeq, OPERATION_CODE, reqParams.c_str());
     PackApplyKeyAclParam(BUSINESS_TYPE_D2D);
     ProcessApplyKey(provider, sessionInfo, authSeq, requestId);
-    SetApplyKeyNegoInfo(requestId, true, GEN_APPLY_KEY_STATE_START);
-    SetApplyKeyNegoInfo(requestId, true, GEN_APPLY_KEY_STATE_UNKNOW);
+    SetApplyKeyNegoInfo(provider, requestId, true, GEN_APPLY_KEY_STATE_START);
+    SetApplyKeyNegoInfo(provider, requestId, true, GEN_APPLY_KEY_STATE_UNKNOW);
     ApplyKeyGetLightAccountInstance();
     OnGenSuccess(requestId);
     uint32_t len = provider.ConsumeIntegral<uint32_t>();
@@ -205,7 +206,7 @@ bool AuthApplyKeyProcessFuzzTest(FuzzedDataProvider &provider)
     ReleaseApplyKeyNegoListLock();
     return true;
 }
-}
+} // namespace OHOS
 
 /* Fuzzer entry point */
 extern "C" int32_t LLVMFuzzerTestOneInput(const uint8_t *data, size_t size)

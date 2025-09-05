@@ -29,7 +29,6 @@ char g_peerUdud[] = "123456ABCDEF";
 namespace OHOS {
 using namespace testing::ext;
 
-
 class LnnConnIdCbManagerTest : public testing::Test {
 public:
     static void SetUpTestCase(void);
@@ -41,7 +40,6 @@ public:
 void LnnConnIdCbManagerTest::SetUpTestCase(void) { }
 
 void LnnConnIdCbManagerTest::TearDownTestCase(void) { }
-
 
 void LnnConnIdCbManagerTest::SetUp()
 {
@@ -59,9 +57,7 @@ static void OnLnnServerJoinExtCb(const ConnectionAddr *addr, int32_t ret)
     return;
 }
 
-static LnnServerJoinExtCallBack cb = {
-    .lnnServerJoinExtCallback = OnLnnServerJoinExtCb
-};
+static LnnServerJoinExtCallBack cb = { .lnnServerJoinExtCallback = OnLnnServerJoinExtCb };
 
 /**
  * @tc.name: LnnConnIdCbManagerTest001
