@@ -50,13 +50,41 @@ int32_t Read(int32_t clientFd, uint8_t *buf, const int32_t length)
     return length;
 }
 
+// Check test short distance to confirm that the return value will not be 0, so it will not be processed for now.
+// length can not be 0, because it is return value.
 int32_t Write(int32_t clientFd, const uint8_t *buf, const int32_t length)
 {
     (void)clientFd;
     (void)buf;
-    if (length <= 0) {
+    // test other send failed and disconnect directly
+    if (length <= 1) {
         return BR_WRITE_FAILED;
     }
+    // test try send
+    if (length == DEFAULT_BR_MTU) {
+        return CONN_BR_SEND_DATA_FAIL_UNDERLAYER_ERR_QUEUE_FULL;
+    }
+    // test send success
+    return length;
+}
+
+int32_t Apply(struct ConnSlideWindowController *self, int32_t expect)
+{
+    (void)self;
+    return expect;
+}
+
+int32_t Enable(struct ConnSlideWindowController *self, int32_t windowInMillis, int32_t quotaInBytes)
+{
+    (void)self;
+    (void)windowInMillis;
+    (void)quotaInBytes;
+    return SOFTBUS_INVALID_PARAM;
+}
+
+int32_t Disable(struct ConnSlideWindowController *self)
+{
+    (void)self;
     return SOFTBUS_OK;
 }
 
@@ -64,6 +92,12 @@ SppSocketDriver g_sppDriver = {
     .Init = Init,
     .Read = Read,
     .Write = Write,
+};
+
+struct ConnSlideWindowController g_controller = {
+    .apply = Apply,
+    .enable = Enable,
+    .disable = Disable,
 };
 
 void OnConnected(uint32_t connectionId, const ConnectionInfo *info)
@@ -106,6 +140,7 @@ void SoftbusConnBrHiDumperTest::SetUpTestCase(void)
     SoftbusConfigInit();
     ConnectionBrInterfaceMock brMock;
     EXPECT_CALL(brMock, InitSppSocketDriver).WillRepeatedly(Return(&g_sppDriver));
+    EXPECT_CALL(brMock, ConnSlideWindowControllerNew).WillRepeatedly(Return(&g_controller));
     EXPECT_CALL(brMock, SoftbusGetConfig).WillRepeatedly(ConnectionBrInterfaceMock::ActionOfSoftbusGetConfig1);
     ConnServerInit();
 }
@@ -137,6 +172,7 @@ ConnectFuncInterface *ConnInit(void)
     NiceMock<ConnectionBrInterfaceMock> brMock;
 
     EXPECT_CALL(brMock, InitSppSocketDriver).WillOnce(Return(&g_sppDriver));
+    EXPECT_CALL(brMock, ConnSlideWindowControllerNew).WillOnce(Return(&g_controller));
     EXPECT_CALL(brMock, SoftbusGetConfig)
         .WillOnce(ConnectionBrInterfaceMock::ActionOfSoftbusGetConfig1)
         .WillOnce(ConnectionBrInterfaceMock::ActionOfSoftbusGetConfig2);
