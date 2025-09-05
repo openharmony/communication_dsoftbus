@@ -31,7 +31,7 @@
 #include "trans_log.h"
 
 #define RETRY_GET_INFO_TIMES_MS 300
-#define MAX_PAGING_IDLE_TIME 300000
+#define MAX_PAGING_IDLE_TIME_MS (5 * 60 * 1000) // 5min
 
 static IClientSessionCallBack g_sessionCb;
 
@@ -84,8 +84,10 @@ static int32_t FillSessionInfo(SessionInfo *session, const ChannelInfo *channel,
     if (channel->isD2D) {
         session->isD2D = channel->isD2D;
         session->dataLen = channel->dataLen;
-        session->role = SESSION_ROLE_CLIENT;
-        session->maxIdleTime = MAX_PAGING_IDLE_TIME;
+        if (!channel->isServer) {
+            session->role = SESSION_ROLE_CLIENT;
+            session->maxIdleTime = MAX_PAGING_IDLE_TIME_MS;
+        }
         if (channel->dataLen > 0 && channel->dataLen <= EXTRA_DATA_MAX_LEN &&
             memcpy_s(session->extraData, EXTRA_DATA_MAX_LEN, channel->extraData, channel->dataLen) != EOK) {
             TRANS_LOGE(TRANS_SDK, "copy extraData failed");
