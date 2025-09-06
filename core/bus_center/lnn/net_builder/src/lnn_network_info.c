@@ -574,7 +574,6 @@ static void UpdateLocalFeatureByWifiVspRes()
         LNN_LOGE(LNN_BUILDER, "set localFeatureCap failed, ret=%{public}d.", ret);
         return;
     }
-    LnnUpdateStateVersion(UPDATE_FEATURE);
     LNN_LOGI(LNN_BUILDER, "local feature changed:%{public}" PRIu64 "->%{public}" PRIu64, oldFeature, localFeatureCap);
 }
 

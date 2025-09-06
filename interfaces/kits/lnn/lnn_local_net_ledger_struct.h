@@ -54,7 +54,6 @@ typedef enum {
     UPDATE_CONCURRENT_AUTH = 64,
     UPDATE_CIPHERKEY = 128,
     UPDATE_SLE_CAP = 256,
-    UPDATE_FEATURE = 512,
 } StateVersionChangeReason;
 
 #ifdef __cplusplus
