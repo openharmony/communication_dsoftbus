@@ -155,4 +155,21 @@ HWTEST_F(LNNNetLedgerMockTest, LnnSaveBroadcastLinkKeyTest001, TestSize.Level0)
     (void)memcpy_s(&deviceInfo.cipherInfo, sizeof(BroadcastCipherInfo), &info, sizeof(BroadcastCipherInfo));
     EXPECT_EQ(LnnSaveBroadcastLinkKey(udid, &info), true);
 }
+
+/*
+ * @tc.name: IsStaticFeatureChangeTest001
+ * @tc.desc: IsStaticFeatureChange test
+ * @tc.type: FUNC
+ * @tc.require:
+ */
+HWTEST_F(LNNNetLedgerMockTest, IsStaticFeatureChangeTest001, TestSize.Level0)
+{
+    uint64_t softbusFeature = 1 << BIT_FL_CAPABILITY;
+    uint64_t feature = softbusFeature;
+    bool ret = IsStaticFeatureChange(softbusFeature, feature);
+    EXPECT_FALSE(ret);
+    feature |= (1 << BIT_BLE_DIRECT_ONLINE);
+    ret = IsStaticFeatureChange(softbusFeature, feature);
+    EXPECT_TRUE(ret);
+}
 } // namespace OHOS
