@@ -504,6 +504,17 @@ static void BtStateChangeEventHandler(const LnnEventBasicInfo *info)
     return;
 }
 
+static void UpdateLocalDeviceInfoToSH()
+{
+    NodeInfo nodeInfo;
+    (void)memset_s(&nodeInfo, sizeof(NodeInfo), 0, sizeof(NodeInfo));
+    if (LnnGetLocalNodeInfoSafe(&nodeInfo) != SOFTBUS_OK) {
+        LNN_LOGE(LNN_BUILDER, "get local device info fail");
+        return;
+    }
+    UpdateLocalDeviceInfoToMlpsPacked(&nodeInfo);
+}
+
 static void SleStateChangeEventHandle(const LnnEventBasicInfo *info)
 {
     if (info == NULL || info->event != LNN_EVENT_SLE_STATE_CHANGED) {
@@ -515,6 +526,7 @@ static void SleStateChangeEventHandle(const LnnEventBasicInfo *info)
         LNN_LOGE(LNN_BUILDER, "get netcap fail");
         return;
     }
+    uint32_t oldCapability = netCapability;
     const LnnMonitorSleStateChangedEvent *event = (const LnnMonitorSleStateChangedEvent *)info;
     SoftBusSleState sleState = (SoftBusSleState)event->status;
     uint32_t delayTime = 0;
@@ -529,6 +541,9 @@ static void SleStateChangeEventHandle(const LnnEventBasicInfo *info)
         return;
     }
     LNN_LOGI(LNN_BUILDER, "sle netCapability=%{public}d", netCapability);
+    if (oldCapability != netCapability) {
+        UpdateLocalDeviceInfoToSH();
+    }
     SendNetCapabilityToRemote(netCapability, 0, true);
 }
 
