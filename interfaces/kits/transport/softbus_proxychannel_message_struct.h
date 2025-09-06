@@ -84,6 +84,8 @@ typedef enum {
 #define JSON_KEY_PAGING_SINK_CHANNEL_ID "PAGING_SINK_CHANNEL_ID"
 #define JSON_KEY_PAGING_BUSINESS_FLAG "PAGING_BUSINESS_FLAG"
 #define JSON_KEY_DEVICETYPE_ID "DEVICETYPE_ID"
+#define JSON_KEY_D2D_CHANNEL_CAPABILITY "D2D_CHANNEL_CAPABILITY"
+#define JSON_KEY_D2D_SUPPORT_NEW_HEAD "D2D_SUPPORT_NEW_HEAD"
 
 typedef struct {
     uint8_t type; // MsgType
@@ -166,6 +168,7 @@ typedef struct {
     int8_t isServer;
     bool isD2D;
     bool retried;
+    uint32_t d2dChannelCap;
     int8_t status;
     uint16_t timeout;
     int16_t myId;

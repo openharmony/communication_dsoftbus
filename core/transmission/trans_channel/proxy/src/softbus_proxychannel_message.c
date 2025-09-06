@@ -371,8 +371,12 @@ static bool TransUnPackPagingExtraData(cJSON *root, void *extraData)
     return true;
 }
 
-static int32_t TransPagingUnPackHandshakeMsg(const ProxyMessage *msg, AppInfo *appInfo)
+static int32_t TransPagingUnPackHandshakeMsg(const ProxyMessage *msg, AppInfo *appInfo, uint32_t *channelCap)
 {
+    if (msg == NULL || appInfo == NULL || channelCap == NULL) {
+        TRANS_LOGE(TRANS_CTRL, "invalied param");
+        return SOFTBUS_INVALID_PARAM;
+    }
     cJSON *root = cJSON_ParseWithLength(msg->data, msg->dataLen);
     TRANS_CHECK_AND_RETURN_RET_LOGE(root != NULL, SOFTBUS_PARSE_JSON_ERR, TRANS_CTRL, "parse json failed.");
     uint32_t dataLen = 0;
@@ -398,11 +402,42 @@ static int32_t TransPagingUnPackHandshakeMsg(const ProxyMessage *msg, AppInfo *a
     } else {
         appInfo->peerData.dataLen = 0;
     }
+    *channelCap = 0;
+    if (!GetJsonObjectNumberItem(root, JSON_KEY_D2D_CHANNEL_CAPABILITY, (int32_t *)channelCap) ||
+        !GetJsonObjectBoolItem(root, JSON_KEY_D2D_SUPPORT_NEW_HEAD, &appInfo->isSupportNewHead)) {
+        TRANS_LOGI(TRANS_CTRL, "the remote end version is too old!");
+    }
     cJSON_Delete(root);
     return SOFTBUS_OK;
 }
 
-static int32_t TransPagingUnPackHandshakeAckMsg(const ProxyMessage *msg, AppInfo *appInfo)
+static int32_t TransPagingHandshakeAckBase64Decode(char *sessionKey, char *nonce, AppInfo *appInfo)
+{
+    if (sessionKey == NULL || nonce == NULL || appInfo == NULL) {
+        return SOFTBUS_INVALID_PARAM;
+    }
+    size_t len = 0;
+    if (strlen(sessionKey) != 0) {
+        int32_t ret = SoftBusBase64Decode((uint8_t *)appInfo->pagingSessionkey,
+            sizeof(appInfo->pagingSessionkey), &len, (uint8_t *)sessionKey, strlen(sessionKey));
+        if (len != sizeof(appInfo->pagingSessionkey) || ret != SOFTBUS_OK) {
+            TRANS_LOGE(TRANS_CTRL, "decode session key fail ret=%{public}d, len=%{public}zu", ret, len);
+            return SOFTBUS_DECRYPT_ERR;
+        }
+    }
+    len = 0;
+    if (strlen(nonce) != 0) {
+        int32_t ret = SoftBusBase64Decode((uint8_t *)appInfo->pagingNonce, sizeof(appInfo->pagingNonce),
+            &len, (uint8_t *)nonce, strlen(nonce));
+        if (len != sizeof(appInfo->pagingNonce) || ret != SOFTBUS_OK) {
+            TRANS_LOGE(TRANS_CTRL, "decode nonce fail ret=%{public}d, len=%{public}zu", ret, len);
+            return SOFTBUS_DECRYPT_ERR;
+        }
+    }
+    return SOFTBUS_OK;
+}
+
+static int32_t TransPagingUnPackHandshakeAckMsg(const ProxyMessage *msg, AppInfo *appInfo, uint32_t *channelCap)
 {
     cJSON *root = cJSON_ParseWithLength(msg->data, msg->dataLen);
     TRANS_CHECK_AND_RETURN_RET_LOGE(root != NULL, SOFTBUS_PARSE_JSON_ERR, TRANS_CTRL, "parse json failed.");
@@ -420,6 +455,11 @@ static int32_t TransPagingUnPackHandshakeAckMsg(const ProxyMessage *msg, AppInfo
         cJSON_Delete(root);
         return SOFTBUS_PARSE_JSON_ERR;
     }
+    *channelCap = 0;
+    if (!GetJsonObjectNumberItem(root, JSON_KEY_D2D_CHANNEL_CAPABILITY, (int32_t *)channelCap) ||
+        !GetJsonObjectBoolItem(root, JSON_KEY_D2D_SUPPORT_NEW_HEAD, &appInfo->isSupportNewHead)) {
+        TRANS_LOGI(TRANS_CTRL, "the remote end version is too old!");
+    }
     if (dataLen > 0 && dataLen <= EXTRA_DATA_MAX_LEN) {
         appInfo->peerData.dataLen = dataLen;
         if (!TransUnPackPagingExtraData(root, appInfo->peerData.extraData)) {
@@ -430,28 +470,9 @@ static int32_t TransPagingUnPackHandshakeAckMsg(const ProxyMessage *msg, AppInfo
     } else {
         appInfo->peerData.dataLen = 0;
     }
-    size_t len = 0;
-    if (strlen(sessionKey) != 0) {
-        int32_t ret = SoftBusBase64Decode((uint8_t *)appInfo->pagingSessionkey,
-            sizeof(appInfo->pagingSessionkey), &len, (uint8_t *)sessionKey, strlen(sessionKey));
-        if (len != sizeof(appInfo->pagingSessionkey) || ret != SOFTBUS_OK) {
-            TRANS_LOGE(TRANS_CTRL, "decode session key fail ret=%{public}d, len=%{public}zu", ret, len);
-            cJSON_Delete(root);
-            return SOFTBUS_DECRYPT_ERR;
-        }
-    }
-    len = 0;
-    if (strlen(nonce) != 0) {
-        int32_t ret = SoftBusBase64Decode((uint8_t *)appInfo->pagingNonce, sizeof(appInfo->pagingNonce),
-            &len, (uint8_t *)nonce, strlen(nonce));
-        if (len != sizeof(appInfo->pagingNonce) || ret != SOFTBUS_OK) {
-            TRANS_LOGE(TRANS_CTRL, "decode nonce fail ret=%{public}d, len=%{public}zu", ret, len);
-            cJSON_Delete(root);
-            return SOFTBUS_DECRYPT_ERR;
-        }
-    }
+    int32_t ret = TransPagingHandshakeAckBase64Decode(sessionKey, nonce, appInfo);
     cJSON_Delete(root);
-    return SOFTBUS_OK;
+    return ret;
 }
 
 static void ReportPagingProcessHandshakeAckExtra(const ProxyChannelInfo *chan, int32_t retCode)
@@ -480,7 +501,7 @@ static void TransPagingProcessHandshakeAckMsg(const ProxyMessage *msg)
         ReportPagingProcessHandshakeAckExtra(&chan, errCode);
         return;
     }
-    int32_t ret = TransPagingUnPackHandshakeAckMsg(msg, &chan.appInfo);
+    int32_t ret = TransPagingUnPackHandshakeAckMsg(msg, &chan.appInfo, &chan.d2dChannelCap);
     if (ret != SOFTBUS_OK) {
         TransProxyProcessErrMsg(&chan, SOFTBUS_TRANS_UNPACK_REPLY_FAILED);
         ReportPagingProcessHandshakeAckExtra(&chan, ret);
@@ -595,13 +616,17 @@ static int32_t TransProxyFillPagingLocalInfo(ProxyChannelInfo *chan)
         TRANS_LOGE(TRANS_CTRL, "cpy accounthash or deviceidhash failed");
         return SOFTBUS_MEM_ERR;
     }
-    return SOFTBUS_OK;
+    ret = TransPagingUpdateDataConfig(&chan->appInfo);
+    if (ret != SOFTBUS_OK) {
+        TRANS_LOGE(TRANS_CTRL, "update data config fail ret=%{public}d", ret);
+    }
+    return ret;
 }
 
 static int32_t TransProxyFillPagingChannelInfo(const ProxyMessage *msg, ProxyChannelInfo *chan,
     uint8_t *accountHash, uint8_t *udidHash, const char *authAccountHash)
 {
-    int32_t ret = TransPagingUnPackHandshakeMsg(msg, &chan->appInfo);
+    int32_t ret = TransPagingUnPackHandshakeMsg(msg, &chan->appInfo, &chan->d2dChannelCap);
     TRANS_CHECK_AND_RETURN_RET_LOGE(ret == SOFTBUS_OK, ret, TRANS_CTRL, "Paging unpack failed.");
     TRANS_CHECK_AND_RETURN_RET_LOGE(strcmp(chan->appInfo.peerData.callerAccountId, authAccountHash) == 0,
         SOFTBUS_INVALID_PARAM, TRANS_CTRL, "account is invalid.");
@@ -1278,7 +1303,9 @@ char *TransPagingPackHandshakeMsg(ProxyChannelInfo *info)
         !AddNumberToJsonObject(root, JSON_KEY_PAGING_DATA_LEN, appInfo->myData.dataLen) ||
         !AddNumberToJsonObject(root, JSON_KEY_PAGING_BUSINESS_FLAG, appInfo->myData.businessFlag) ||
         !AddNumberToJsonObject(root, JSON_KEY_BUSINESS_TYPE, appInfo->businessType) ||
-        !AddStringToJsonObject(root, JSON_KEY_DEVICE_ID, shortDeviceId)) {
+        !AddStringToJsonObject(root, JSON_KEY_DEVICE_ID, shortDeviceId) ||
+        !AddNumberToJsonObject(root, JSON_KEY_D2D_CHANNEL_CAPABILITY, info->d2dChannelCap) ||
+        !AddBoolToJsonObject(root, JSON_KEY_D2D_SUPPORT_NEW_HEAD, true)) {
         cJSON_Delete(root);
         return NULL;
     }
@@ -1388,7 +1415,9 @@ char *TransPagingPackHandshakeAckMsg(ProxyChannelInfo *chan)
         !AddStringToJsonObject(root, JSON_KEY_DEVICE_ID, shortDeviceId) ||
         !AddNumberToJsonObject(root, JSON_KEY_DEVICETYPE_ID, localDevTypeId) ||
         !TransPackPagingExtraData(root, appInfo->myData.extraData) ||
-        !AddNumberToJsonObject(root, JSON_KEY_PAGING_DATA_LEN, appInfo->myData.dataLen)) {
+        !AddNumberToJsonObject(root, JSON_KEY_PAGING_DATA_LEN, appInfo->myData.dataLen) ||
+        !AddNumberToJsonObject(root, JSON_KEY_D2D_CHANNEL_CAPABILITY, chan->d2dChannelCap) ||
+        !AddBoolToJsonObject(root, JSON_KEY_D2D_SUPPORT_NEW_HEAD, true)) {
         cJSON_Delete(root);
         return NULL;
     }
