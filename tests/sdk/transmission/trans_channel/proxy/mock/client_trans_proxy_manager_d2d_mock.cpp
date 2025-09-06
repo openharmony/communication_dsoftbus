@@ -41,10 +41,9 @@ int32_t ClientGetChannelBusinessTypeByChannelId(int32_t channelId, int32_t *busi
     return GetProxyManagerD2DInterface()->ClientGetChannelBusinessTypeByChannelId(channelId, businessType);
 }
 
-int32_t TransProxyPackD2DBytes(ProxyDataInfo *dataInfo, const char *sessionKey, const char *sessionIv,
-    SessionPktType flag)
+int32_t TransProxyPackD2DBytes(ProxyDataInfo *dataInfo, const char *sessionKey, SessionPktType flag, bool isNewHead)
 {
-    return GetProxyManagerD2DInterface()->TransProxyPackD2DBytes(dataInfo, sessionKey, sessionIv, flag);
+    return GetProxyManagerD2DInterface()->TransProxyPackD2DBytes(dataInfo, sessionKey, flag, isNewHead);
 }
 
 uint8_t *TransProxyPackD2DData(ProxyDataInfo *dataInfo, uint32_t sliceNum, SessionPktType pktType,
@@ -99,6 +98,12 @@ int32_t GetSupportTlvAndNeedAckById(int32_t channelId, int32_t channelType, bool
 int32_t DataSeqInfoListAddItem(uint32_t dataSeq, int32_t channelId, int32_t socketId, int32_t channelType)
 {
     return GetProxyManagerD2DInterface()->DataSeqInfoListAddItem(dataSeq, channelId, socketId, channelType);
+}
+
+uint8_t *TransProxyPackNewHeadD2DData(
+    ProxyDataInfo *dataInfo, uint16_t sliceNum, SessionPktType pktType, uint16_t cnt, uint16_t *dataLen)
+{
+    return GetProxyManagerD2DInterface()->TransProxyPackNewHeadD2DData(dataInfo, sliceNum, pktType, cnt, dataLen);
 }
 }
 }

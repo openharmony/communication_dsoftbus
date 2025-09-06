@@ -56,6 +56,7 @@ public:
     virtual int32_t DataSeqInfoListAddItem(uint32_t dataSeq, int32_t channelId,
         int32_t socketId, int32_t channelType);
     virtual int32_t ClientGetChannelBusinessTypeByChannelId(int32_t channelId, int32_t *businessType) = 0;
+    virtual int32_t TransProxyD2dDataLenCheck(uint32_t dataLen, BusinessType type) = 0;
 };
 
 class ClientTransProxyManagerInterfaceMock : public ClientTransProxyManagerInterface {
@@ -88,6 +89,7 @@ public:
     MOCK_METHOD4(DataSeqInfoListAddItem, int32_t (uint32_t dataSeq, int32_t channelId,
         int32_t socketId, int32_t channelType));
     MOCK_METHOD2(ClientGetChannelBusinessTypeByChannelId, int32_t(int32_t channelId, int32_t *businessType));
+    MOCK_METHOD2(TransProxyD2dDataLenCheck, int32_t(uint32_t dataLen, BusinessType type));
 };
 }
 #endif
