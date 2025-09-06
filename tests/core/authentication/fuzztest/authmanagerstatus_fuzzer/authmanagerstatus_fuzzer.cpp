@@ -14,6 +14,7 @@
  */
 
 #include "authmanagerstatus_fuzzer.h"
+
 #include <cstddef>
 #include <cstring>
 #include <fuzzer/FuzzedDataProvider.h>
@@ -26,11 +27,11 @@
 
 using namespace std;
 
-#define UDID_HASH_LEN   32
-#define AUTH_TYPE_MIN   AUTH_LINK_TYPE_WIFI
-#define AUTH_TYPE_MAX   AUTH_LINK_TYPE_MAX
-#define NORMAL_TYPE_MIN NORMALIZED_NOT_SUPPORT
-#define NORMAL_TYPE_MAX NORMALIZED_SUPPORT
+#define UDID_HASH_LEN        32
+#define AUTH_LINK_TYPE_MIN   AUTH_LINK_TYPE_WIFI
+#define AUTH_LINK_TYPE_MAX   AUTH_LINK_TYPE_MAX
+#define NORMAL_TYPE_MIN      NORMALIZED_NOT_SUPPORT
+#define NORMAL_TYPE_MAX      NORMALIZED_SUPPORT
 
 namespace {
 
@@ -136,7 +137,6 @@ static void ProcAuthRequest(FuzzedDataProvider &provider, AuthHandle *authHandle
     AuthManagerSetAuthFailed(authHandle->authId, info, reason);
     int32_t result = provider.ConsumeIntegral<int32_t>();
     HandleReconnectResult(&request, info->connId, result, (int32_t)info->connInfo.type);
-    DfxRecordLnnConnectEnd(request.requestId, info->connId, &info->connInfo, result);
     OnConnectResult(request.requestId, info->connId, result, &info->connInfo);
     HandleBleDisconnectDelay(info->uuid);
     DelAuthRequest(request.requestId);
@@ -156,7 +156,8 @@ bool AuthManagerStatusFuzzTest(FuzzedDataProvider &provider)
     if (strcpy_s(info.uuid, UUID_BUF_LEN, uuid.c_str()) != EOK) {
         return false;
     }
-    info.connInfo.type = (AuthLinkType)provider.ConsumeIntegralInRange<uint32_t>(AUTH_TYPE_MIN, AUTH_TYPE_MAX);
+    info.connInfo.type =
+        (AuthLinkType)provider.ConsumeIntegralInRange<uint32_t>(AUTH_LINK_TYPE_MIN, AUTH_LINK_TYPE_MAX);
     info.connId = (uint64_t)info.connInfo.type << INT32_BIT_NUM;
     info.isConnectServer = provider.ConsumeBool();
     info.normalizedType = (NormalizedType)provider.ConsumeIntegralInRange<uint32_t>(NORMAL_TYPE_MIN, NORMAL_TYPE_MAX);
