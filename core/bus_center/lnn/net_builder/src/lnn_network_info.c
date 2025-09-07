@@ -309,7 +309,7 @@ static void WifiStateProcess(uint32_t netCapability, bool isSend)
     }
     uint32_t type = (1 << (uint32_t)DISCOVERY_TYPE_BLE) | (1 << (uint32_t)DISCOVERY_TYPE_BR);
     SendNetCapabilityToRemote(netCapability, type, false);
-    LNN_LOGI(LNN_BUILDER, "WifiStateEventHandler exit");
+    LNN_LOGD(LNN_BUILDER, "WifiStateEventHandler exit");
     return;
 }
 
@@ -440,20 +440,20 @@ static void GetNetworkCapability(SoftBusWifiState wifiState, uint32_t *capabilit
 static void WifiStateEventHandler(const LnnEventBasicInfo *info)
 {
     if (info == NULL || info->event != LNN_EVENT_WIFI_STATE_CHANGED) {
-        LNN_LOGE(LNN_BUILDER, "bt state change evt handler get invalid param");
+        LNN_LOGE(LNN_EVENT, "bt state change evt handler get invalid param");
         return;
     }
     const LnnMonitorWlanStateChangedEvent *event = (const LnnMonitorWlanStateChangedEvent *)info;
     SoftBusWifiState wifiState = (SoftBusWifiState)event->status;
     uint32_t oldNetCap = 0;
     if (LnnGetLocalNumU32Info(NUM_KEY_NET_CAP, &oldNetCap) != SOFTBUS_OK) {
-        LNN_LOGE(LNN_BUILDER, "wifi state handler get capability fail from local.");
+        LNN_LOGE(LNN_EVENT, "wifi state handler get capability fail from local.");
         return;
     }
     bool needSync = false;
     uint32_t netCapability = oldNetCap;
     GetNetworkCapability(wifiState, &netCapability, &needSync);
-    LNN_LOGI(LNN_BUILDER, "WifiState=%{public}d, local capabilty change:%{public}u->%{public}u, needSync=%{public}d",
+    LNN_LOGI(LNN_EVENT, "WifiState=%{public}d, local capabilty change:%{public}u->%{public}u, needSync=%{public}d",
         wifiState, oldNetCap, netCapability, needSync);
     WifiStateProcess(netCapability, needSync);
 }

@@ -125,7 +125,7 @@ void WifiServiceMonitor::OnReceiveEvent(const CommonEventData &data)
     int code = data.GetCode();
     std::string action = data.GetWant().GetAction();
     SoftBusWifiState state = SOFTBUS_WIFI_UNKNOWN;
-    LNN_LOGI(LNN_BUILDER, "notify wifiservice event=%{public}s, code=%{public}d", action.c_str(), code);
+    LNN_LOGI(LNN_EVENT, "notify wifiservice event=%{public}s, code=%{public}d", action.c_str(), code);
     if (action == CommonEventSupport::COMMON_EVENT_WIFI_CONN_STATE) {
         SetSoftBusWifiConnState(code, &state);
     }
@@ -144,14 +144,14 @@ void WifiServiceMonitor::OnReceiveEvent(const CommonEventData &data)
     if (state != SOFTBUS_WIFI_UNKNOWN) {
         SoftBusWifiState *notifyState = (SoftBusWifiState *)SoftBusMalloc(sizeof(SoftBusWifiState));
         if (notifyState == NULL) {
-            LNN_LOGE(LNN_BUILDER, "notifyState malloc err");
+            LNN_LOGE(LNN_EVENT, "notifyState malloc err");
             return;
         }
         *notifyState = state;
         int32_t ret = LnnAsyncCallbackHelper(GetLooper(LOOP_TYPE_DEFAULT), LnnNotifyWlanStateChangeEvent,
             (void *)notifyState);
         if (ret != SOFTBUS_OK) {
-            LNN_LOGE(LNN_BUILDER, "async notify wifi state err, ret=%{public}d", ret);
+            LNN_LOGE(LNN_EVENT, "async notify wifi state err, ret=%{public}d", ret);
             SoftBusFree(notifyState);
         }
     }

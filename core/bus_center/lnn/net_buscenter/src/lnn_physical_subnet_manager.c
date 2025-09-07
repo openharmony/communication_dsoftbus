@@ -142,7 +142,6 @@ void DoNotifyStatusChange(const char *ifName, ProtocolType protocolType, void *s
             strcmp(g_physicalSubnets[i]->ifName, ifName) != 0) {
             continue;
         }
-        
         if (g_physicalSubnets[i]->onNetifStatusChanged != NULL) {
             g_physicalSubnets[i]->onNetifStatusChanged(g_physicalSubnets[i], status);
         }
