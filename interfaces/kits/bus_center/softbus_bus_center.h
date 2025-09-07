@@ -250,7 +250,7 @@ typedef enum {
     NORMAL_ACCURACY,               /**< Normal accuracy */
     HIGH_ACCURACY,                 /**< High accuracy */
     SUPER_HIGH_ACCURACY,           /**< Super high accuracy */
-    UNAVAIL_ACCURACY,     /**< Invalid accuracy */
+    UNAVAIL_ACCURACY,              /**< Invalid accuracy */
 } TimeSyncAccuracy;
 
 /**
