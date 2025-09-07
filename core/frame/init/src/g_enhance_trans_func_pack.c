@@ -219,3 +219,63 @@ bool IsInWhitelistPacked(const char *app)
     }
     return pfnTransEnhanceFuncList->isInWhitelist(app);
 }
+
+bool CheckAuthChannelSessionNameValidPacked(const char *sessionName)
+{
+    TransEnhanceFuncList *pfnTransEnhanceFuncList = TransEnhanceFuncListGet();
+    if (pfnTransEnhanceFuncList == NULL) {
+        return false;
+    }
+    if (TransCheckFuncPointer((void *)pfnTransEnhanceFuncList->checkAuthChannelSessionNameValid) != SOFTBUS_OK) {
+        return false;
+    }
+    return pfnTransEnhanceFuncList->checkAuthChannelSessionNameValid(sessionName);
+}
+
+bool TransCheckNetworkDelegatePacked(const char *sessionName)
+{
+    TransEnhanceFuncList *pfnTransEnhanceFuncList = TransEnhanceFuncListGet();
+    if (pfnTransEnhanceFuncList == NULL) {
+        return false;
+    }
+    if (TransCheckFuncPointer((void *)pfnTransEnhanceFuncList->transCheckNetworkDelegate) != SOFTBUS_OK) {
+        return false;
+    }
+    return pfnTransEnhanceFuncList->transCheckNetworkDelegate(sessionName);
+}
+
+bool TransCheckP2pOnlyPacked(const char *sessionName)
+{
+    TransEnhanceFuncList *pfnTransEnhanceFuncList = TransEnhanceFuncListGet();
+    if (pfnTransEnhanceFuncList == NULL) {
+        return false;
+    }
+    if (TransCheckFuncPointer((void *)pfnTransEnhanceFuncList->transCheckP2pOnly) != SOFTBUS_OK) {
+        return false;
+    }
+    return pfnTransEnhanceFuncList->transCheckP2pOnly(sessionName);
+}
+
+bool TransCheckDcTriggerVirtualLinkPacked(const char *sessionName)
+{
+    TransEnhanceFuncList *pfnTransEnhanceFuncList = TransEnhanceFuncListGet();
+    if (pfnTransEnhanceFuncList == NULL) {
+        return false;
+    }
+    if (TransCheckFuncPointer((void *)pfnTransEnhanceFuncList->transCheckDcTriggerVirtualLink) != SOFTBUS_OK) {
+        return false;
+    }
+    return pfnTransEnhanceFuncList->transCheckDcTriggerVirtualLink(sessionName);
+}
+
+int32_t LoadTransPermissionJsonPacked(void)
+{
+    TransEnhanceFuncList *pfnTransEnhanceFuncList = TransEnhanceFuncListGet();
+    if (pfnTransEnhanceFuncList == NULL) {
+        return SOFTBUS_OK;
+    }
+    if (TransCheckFuncPointer((void *)pfnTransEnhanceFuncList->loadTransPermissionJson) != SOFTBUS_OK) {
+        return SOFTBUS_OK;
+    }
+    return pfnTransEnhanceFuncList->loadTransPermissionJson();
+}

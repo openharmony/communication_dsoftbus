@@ -52,6 +52,11 @@ typedef void (*ServerUpdateHtpChannelFunc)(int64_t flIdentity, int32_t channelId
 typedef bool (*CheckHtpPermissionFunc)(int32_t uid);
 typedef void (*TransProcessGroupTalkieInfoFunc)(const char *pkgName);
 typedef bool (*IsInWhitelistFunc)(const char *app);
+typedef bool (*CheckAuthChannelSessionNameValidFunc)(const char *sessionName);
+typedef bool (*TransCheckNetworkDelegateFunc)(const char *sessionName);
+typedef bool (*TransCheckP2pOnlyFunc)(const char *sessionName);
+typedef bool (*TransCheckDcTriggerVirtualLinkFunc)(const char *sessionName);
+typedef int32_t (*LoadTransPermissionJsonFunc)(void);
 
 typedef struct TagTransEnhanceFuncList {
     InitQosFunc initQos;
@@ -76,6 +81,11 @@ typedef struct TagTransEnhanceFuncList {
     CheckHtpPermissionFunc checkHtpPermission;
     TransProcessGroupTalkieInfoFunc transProcessGroupTalkieInfo;
     IsInWhitelistFunc isInWhitelist;
+    CheckAuthChannelSessionNameValidFunc checkAuthChannelSessionNameValid;
+    TransCheckNetworkDelegateFunc transCheckNetworkDelegate;
+    TransCheckP2pOnlyFunc transCheckP2pOnly;
+    TransCheckDcTriggerVirtualLinkFunc transCheckDcTriggerVirtualLink;
+    LoadTransPermissionJsonFunc loadTransPermissionJson;
 } TransEnhanceFuncList;
 
 TransEnhanceFuncList *TransEnhanceFuncListGet(void);

@@ -251,11 +251,11 @@ HWTEST_F(TransUdpNegotiationExchangeTest, TransUdpNegotiationExchangeTest006, Te
     int32_t ret = TransPackReplyErrInfo(msg, errCode, nullptr);
     EXPECT_EQ(ret, SOFTBUS_INVALID_PARAM);
     ret = TransUnpackReplyErrInfo(nullptr, &errCode);
-    EXPECT_EQ(ret, SOFTBUS_PARSE_JSON_ERR);
+    EXPECT_EQ(ret, SOFTBUS_INVALID_PARAM);
     ret = TransPackReplyErrInfo(nullptr, errCode, "error descriptor test");
     EXPECT_EQ(ret, SOFTBUS_INVALID_PARAM);
     ret = TransUnpackReplyErrInfo(msg, nullptr);
-    EXPECT_EQ(ret, SOFTBUS_PARSE_JSON_ERR);
+    EXPECT_EQ(ret, SOFTBUS_INVALID_PARAM);
     cJSON_Delete(msg);
 }
 

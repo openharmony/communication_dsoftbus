@@ -18,6 +18,7 @@
 #include <securec.h>
 
 #include "anonymizer.h"
+#include "g_enhance_trans_func_pack.h"
 #include "permission_entry.h"
 #include "regex.h"
 #include "softbus_def.h"
@@ -39,26 +40,6 @@ static const SessionWhiteList g_sessionWhiteList[] = {
         .regexp = false,
     },
     {
-        .sessionName = "IShareAuthSession",
-        .regexp = false,
-    },
-    {
-        .sessionName = "com.huawei.devicemanager.resident",
-        .regexp = false,
-    },
-    {
-        .sessionName = "com.huawei.*CastPlusDiscoveryModule",
-        .regexp = true,
-    },
-    {
-        .sessionName = "com.huawei.dmsdp+dmsdp",
-        .regexp = false,
-    },
-    {
-        .sessionName = "com.huawei.devicemanager.dynamic",
-        .regexp = false,
-    },
-    {
         .sessionName = "ohos.distributedhardware.devicemanager.pinholder",
         .regexp = false,
     }
@@ -76,6 +57,9 @@ bool CheckSessionNameValidOnAuthChannel(const char *sessionName)
                 g_sessionWhiteList[index].regexp) == SOFTBUS_OK) {
             return true;
         }
+    }
+    if (CheckAuthChannelSessionNameValidPacked(sessionName)) {
+        return true;
     }
     char *tmpName = NULL;
     Anonymize(sessionName, &tmpName);

@@ -51,19 +51,6 @@
     ]
   },
   {
-    "SESSION_NAME": "glasses_collaboration_service.*",
-    "REGEXP": "true",
-    "DEVID": "NETWORKID",
-    "SEC_LEVEL":"private",
-    "APP_INFO": [
-      {
-        "TYPE": "native_app",
-        "PKG_NAME": "glasses_collaboration_service",
-        "ACTIONS": "create,open"
-      }
-    ]
-  },
-  {
     "SESSION_NAME": "ohos.dtbcollab.dms.*",
     "REGEXP": "true",
     "DEVID": "UUID",
@@ -72,18 +59,6 @@
       {
         "PKG_NAME": "dms",
         "TYPE": "normal_app",
-        "ACTIONS": "create,open"
-      }
-    ]
-  },
-  {
-    "SESSION_NAME": "com.huawei.dmsdp.*",
-    "REGEXP": "true",
-    "DEVID": "UDID",
-    "APP_INFO": [
-      {
-        "TYPE": "system_app",
-        "PKG_NAME": "com.huawei.dmsdp",
         "ACTIONS": "create,open"
       }
     ]
@@ -229,56 +204,6 @@
     ]
   },
   {
-    "SESSION_NAME": "ohos.msdp.user_status_awareness.*",
-    "REGEXP": "true",
-    "DEVID": "UUID",
-    "SEC_LEVEL": "public",
-    "APP_INFO": [
-      {
-        "TYPE": "system_app",
-        "PKG_NAME": "ohos.msdp.user_status_awareness",
-        "ACTIONS": "create,open"
-      }
-    ]
-  },
-  {
-    "SESSION_NAME": "IShare*",
-    "REGEXP": "true",
-    "DEVID": "NETWORKID",
-    "SEC_LEVEL": "public",
-    "APP_INFO": [
-      {
-        "PKG_NAME": "ohos.InterConnection.iShare",
-        "TYPE": "native_app",
-        "ACTIONS": "create,open"
-      }
-    ]
-  },
-  {
-    "SESSION_NAME": "DeviceCollaboration.*",
-    "REGEXP": "true",
-    "DEVID": "NETWORKID",
-    "APP_INFO": [
-      {
-        "PKG_NAME": "ohos.InterConnection.device_collaboration_service",
-        "TYPE": "native_app",
-        "ACTIONS": "create,open"
-      }
-    ]
-  },
-  {
-    "SESSION_NAME": "com.huawei.pcassistant.*",
-    "REGEXP": "true",
-    "DEVID": "NETWORKID",
-    "APP_INFO": [
-      {
-        "PKG_NAME": "ohos.InterConnection.device_collaboration_service",
-        "TYPE": "native_app",
-        "ACTIONS": "create,open"
-      }
-    ]
-  },
-  {
     "SESSION_NAME": "^CastPlus*",
     "REGEXP": "true",
     "DEVID": "NETWORKID",
@@ -342,66 +267,6 @@
     ]
   },
   {
-    "SESSION_NAME": "com.huawei.devicemanager.*",
-    "REGEXP": "true",
-    "DEVID": "UUID",
-    "APP_INFO": [
-      {
-        "PKG_NAME": "ohos.distributedhardware.devicemanager",
-        "TYPE": "native_app",
-        "ACTIONS": "create,open"
-      }
-    ]
-  },
-  {
-    "SESSION_NAME": "^com.huawei[a-z.+]{20}CastPlusDiscoveryModule$",
-    "REGEXP": "true",
-    "DEVID": "UDID",
-    "APP_INFO": [
-      {
-        "PKG_NAME": "ohos.distributedhardware.devicemanager",
-        "TYPE": "native_app",
-        "ACTIONS": "create,open"
-      }
-    ]
-  },
-  {
-    "SESSION_NAME": "^com.huawei.profile-session*",
-    "REGEXP": "true",
-    "DEVID": "UDID",
-    "APP_INFO": [
-      {
-        "PKG_NAME": "com.huawei.profile",
-        "TYPE": "system_app",
-        "ACTIONS": "create,open"
-      }
-    ]
-  },
-  {
-    "SESSION_NAME": "com.huawei.ohos.cardsde.channel-session",
-    "REGEXP": "true",
-    "DEVID": "NETWORKID",
-    "SEC_LEVEL": "public",
-    "APP_INFO": [
-      {
-        "TYPE": "native_app",
-        "PKG_NAME": "carservice.distributedengine",
-        "ACTIONS": "create,open"
-      }
-    ]
-  },
-  {
-    "SESSION_NAME": "carservice.distributedengine.rescueassist",
-    "DEVID": "NETWORKID",
-    "APP_INFO": [
-      {
-        "TYPE": "native_app",
-        "PKG_NAME": "carservice.distributedengine",
-        "ACTIONS": "create,open"
-      }
-    ]
-  },
-  {
     "SESSION_NAME": "^com.*security.devicesec",
     "REGEXP": "true",
     "DEVID": "UDID",
@@ -415,18 +280,6 @@
     ]
   },
   {
-    "SESSION_NAME": "super_launcher_session",
-    "DEVID": "NETWORKID",
-    "SEC_LEVEL": "public",
-    "APP_INFO": [
-      {
-        "PKG_NAME": "carservice.distributedengine",
-        "TYPE": "native_app",
-        "ACTIONS": "create,open"
-      }
-    ]
-  },
-  {
     "SESSION_NAME": "ohos.communication.network_connectivity_ext.*",
     "REGEXP": "true",
     "DEVID": "NETWORKID",
@@ -434,19 +287,6 @@
     "APP_INFO": [
       {
         "PKG_NAME": "ohos.communication.network_connectivity_ext",
-        "TYPE": "native_app",
-        "ACTIONS": "create,open"
-      }
-    ]
-  },
-  {
-    "SESSION_NAME": "ohos.dstb.tee.*",
-    "REGEXP": "true",
-    "DEVID": "NETWORKID",
-    "SEC_LEVEL": "public",
-    "APP_INFO": [
-      {
-        "PKG_NAME": "ohos.dstb.tee",
         "TYPE": "native_app",
         "ACTIONS": "create,open"
       }
@@ -478,63 +318,6 @@
     ]
   },
   {
-    "SESSION_NAME": "com.huawei.systemserver_CHANNEL_DPMS",
-    "DEVID": "NETWORKID",
-    "APP_INFO": [
-      {
-        "PKG_NAME": "ohos.security.distributed_access_token",
-        "TYPE": "native_app",
-        "ACTIONS": "create,open"
-      }
-    ]
-  },
-  {
-    "SESSION_NAME": "^com.huawei.boosterd.*",
-    "REGEXP": "true",
-    "DEVID": "NETWORKID",
-    "APP_INFO": [
-      {
-        "PKG_NAME": "boosterd",
-        "TYPE": "native_app",
-        "ACTIONS": "create,open"
-      }
-    ]
-  },
-  {
-    "SESSION_NAME": "hiview_distributed_network_softbus",
-    "DEVID": "NETWORKID",
-    "APP_INFO": [
-      {
-        "PKG_NAME": "com.huawei.hmos.hiviewcare",
-        "TYPE": "system_app",
-        "ACTIONS": "create,open"
-      }
-    ]
-  },
-  {
-    "SESSION_NAME": "^ohos.telephony.callmanager.*",
-    "REGEXP": "true",
-    "DEVID": "NETWORKID",
-    "APP_INFO": [
-      {
-        "PKG_NAME": "ohos.telephony.callmanager",
-        "TYPE": "native_app",
-        "ACTIONS": "create,open"
-      }
-    ]
-  },
-  {
-    "SESSION_NAME": "com.huawei.systemserver_CHANNEL_DBINDER",
-    "DEVID": "NETWORKID",
-    "APP_INFO": [
-      {
-        "PKG_NAME": "com.huawei.systemserver",
-        "TYPE": "native_app",
-        "ACTIONS": "create,open"
-      }
-    ]
-  },
-  {
     "SESSION_NAME": "notification_service.*",
     "REGEXP": "true",
     "DEVID": "NETWORKID",
@@ -543,41 +326,6 @@
         "PKG_NAME": "ohos.distributed_notification",
         "UID": "5523",
         "TYPE": "native_app",
-        "ACTIONS": "create,open"
-      }
-    ]
-  },
-  {
-    "SESSION_NAME": "com.huawei.wearlink",
-    "DEVID": "NETWORKID",
-    "APP_INFO": [
-      {
-        "PKG_NAME": "com.huawei.wearlink",
-        "TYPE": "native_app",
-        "ACTIONS": "create,open"
-      }
-    ]
-  },
-  {
-    "SESSION_NAME": "carservice.distributedengine.carsatellite",
-    "DEVID": "NETWORKID",
-    "APP_INFO": [
-      {
-        "TYPE": "native_app",
-        "PKG_NAME": "carservice.distributedengine",
-        "ACTIONS": "create,open"
-      }
-    ]
-  },
-  {
-    "SESSION_NAME": "ohos.security.huks.dks*",
-    "REGEXP": "true",
-    "DEVID": "NETWORKID",
-    "SEC_LEVEL": "public",
-    "APP_INFO": [
-      {
-        "TYPE": "native_app",
-        "PKG_NAME": "ohos.security.huks.dks",
         "ACTIONS": "create,open"
       }
     ]
