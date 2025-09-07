@@ -32,7 +32,6 @@
 #include "wifi_direct_scheduler_factory.h"
 #include "wifi_direct_manager.h"
 #include "wifi_direct_types.h"
-#include "utils/wifi_direct_dfx.h"
 
 namespace OHOS::SoftBus {
 static constexpr int DECIMAL_BASE = 10;
