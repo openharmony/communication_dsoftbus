@@ -128,6 +128,7 @@ typedef struct {
     char pagingSessionkey[SHORT_SESSION_KEY_LENGTH];
     bool isClient;
     bool isD2D;
+    bool isSupportNewHead;
     bool isLowLatency;
     bool isFlashLight;
     uint16_t fastTransDataSize;

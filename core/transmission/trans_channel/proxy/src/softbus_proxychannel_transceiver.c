@@ -429,7 +429,7 @@ static int32_t TransProxyLoopInit(void)
 int32_t TransProxyTransSendMsg(uint32_t connectionId, uint8_t *buf, uint32_t len, int32_t priority, int32_t pid)
 {
     ConnPostData data = { 0 };
-    static uint64_t seq = 1;
+    static uint32_t seq = 1;
 
     data.module = MODULE_PROXY_CHANNEL;
     data.seq = seq++;

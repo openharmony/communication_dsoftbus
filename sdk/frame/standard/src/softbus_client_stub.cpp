@@ -181,19 +181,9 @@ static int32_t MessageTcpParcelRead(MessageParcel &data, ChannelInfo *channel)
 
 static int32_t MessageParcelReadEx(MessageParcel &data, ChannelInfo *channel)
 {
-    READ_PARCEL_WITH_RET(data, Int32, channel->routeType, SOFTBUS_IPC_ERR);
-    READ_PARCEL_WITH_RET(data, Int32, channel->encrypt, SOFTBUS_IPC_ERR);
-    READ_PARCEL_WITH_RET(data, Int32, channel->algorithm, SOFTBUS_IPC_ERR);
-    READ_PARCEL_WITH_RET(data, Int32, channel->crc, SOFTBUS_IPC_ERR);
-    READ_PARCEL_WITH_RET(data, Uint32, channel->dataConfig, SOFTBUS_IPC_ERR);
-    READ_PARCEL_WITH_RET(data, Int32, channel->linkType, SOFTBUS_IPC_ERR);
-    READ_PARCEL_WITH_RET(data, Int32, channel->osType, SOFTBUS_IPC_ERR);
-    READ_PARCEL_WITH_RET(data, Bool, channel->isSupportTlv, SOFTBUS_IPC_ERR);
-    channel->peerDeviceId = (char *)data.ReadCString();
-    COMM_CHECK_AND_RETURN_RET_LOGE(channel->peerDeviceId != nullptr,
-        SOFTBUS_IPC_ERR, COMM_SDK, "read peerDeviceId failed");
     READ_PARCEL_WITH_RET(data, Bool, channel->isD2D, SOFTBUS_IPC_ERR);
     if (channel->isD2D) {
+        READ_PARCEL_WITH_RET(data, Bool, channel->isSupportNewHead, SOFTBUS_IPC_ERR);
         READ_PARCEL_WITH_RET(data, Int32, channel->pagingId, SOFTBUS_IPC_ERR);
         READ_PARCEL_WITH_RET(data, Uint32, channel->businessFlag, SOFTBUS_IPC_ERR);
         READ_PARCEL_WITH_RET(data, Uint32, channel->deviceTypeId, SOFTBUS_IPC_ERR);
@@ -264,6 +254,17 @@ static int32_t MessageParcelRead(MessageParcel &data, ChannelInfo *channel)
                 channel->peerIp != nullptr, SOFTBUS_IPC_ERR, COMM_SDK, "read channel.peerIp failed");
         }
     }
+    READ_PARCEL_WITH_RET(data, Int32, channel->routeType, SOFTBUS_IPC_ERR);
+    READ_PARCEL_WITH_RET(data, Int32, channel->encrypt, SOFTBUS_IPC_ERR);
+    READ_PARCEL_WITH_RET(data, Int32, channel->algorithm, SOFTBUS_IPC_ERR);
+    READ_PARCEL_WITH_RET(data, Int32, channel->crc, SOFTBUS_IPC_ERR);
+    READ_PARCEL_WITH_RET(data, Uint32, channel->dataConfig, SOFTBUS_IPC_ERR);
+    READ_PARCEL_WITH_RET(data, Int32, channel->linkType, SOFTBUS_IPC_ERR);
+    READ_PARCEL_WITH_RET(data, Int32, channel->osType, SOFTBUS_IPC_ERR);
+    READ_PARCEL_WITH_RET(data, Bool, channel->isSupportTlv, SOFTBUS_IPC_ERR);
+    channel->peerDeviceId = (char *)data.ReadCString();
+    COMM_CHECK_AND_RETURN_RET_LOGE(channel->peerDeviceId != nullptr,
+        SOFTBUS_IPC_ERR, COMM_SDK, "read peerDeviceId failed");
     return MessageParcelReadEx(data, channel);
 }
 

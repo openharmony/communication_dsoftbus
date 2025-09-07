@@ -178,5 +178,10 @@ int32_t SetPendingPacket(int32_t channelId, int32_t seqNum, int32_t type)
 {
     return GetClientTransProxyFileManagerInterface()->SetPendingPacket(channelId, seqNum, type);
 }
+
+int32_t TransProxyD2dDataLenCheck(uint32_t dataLen, BusinessType type)
+{
+    return GetClientTransProxyFileManagerInterface()->TransProxyD2dDataLenCheck(dataLen, type);
+}
 }
 }

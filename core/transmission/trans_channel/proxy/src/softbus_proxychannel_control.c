@@ -161,6 +161,38 @@ static int32_t SetCipherOfHandshakeMsg(ProxyChannelInfo *info, uint8_t *cipher)
     return SOFTBUS_OK;
 }
 
+static void TransUpdateSlePowerLevel(uint32_t connId, ConnectSlePowerLevel level)
+{
+    UpdateOption option = {
+        .type = CONNECT_SLE,
+        .sleOption = {
+            .slePowerLevel = level,
+        }
+    };
+    int32_t ret = ConnUpdateConnection(connId, &option);
+    TRANS_LOGI(TRANS_CTRL, "update connection option, connId=%{public}u, level=%{public}d, ret=%{public}d",
+        connId, level, ret);
+}
+
+static void TransPagingHandshakeEvent(int32_t channelId, ProxyChannelInfo *info)
+{
+    if (info == NULL) {
+        TRANS_LOGE(TRANS_CTRL, "channel info is null");
+        return;
+    }
+    info->appInfo.timeStart = GetSoftbusRecordTimeMillis();
+    TransEventExtra extra = {
+        .channelId = channelId,
+        .connectionId = (int32_t)info->connId,
+        .result = EVENT_STAGE_RESULT_OK,
+        .peerUdid = info->appInfo.peerUdid,
+        .callerAccountId = info->appInfo.myData.callerAccountId,
+        .calleeAccountId = info->appInfo.myData.calleeAccountId,
+        .businessFlag = info->appInfo.myData.businessFlag
+    };
+    TRANS_EVENT(EVENT_SCENE_PAGING_CONNECT, EVENT_STAGE_PAGING_SOURCE_HANDSHAKE_START, extra);
+}
+
 int32_t TransPagingHandshake(int32_t channelId, uint8_t *authKey, uint32_t keyLen)
 {
     TRANS_CHECK_AND_RETURN_RET_LOGE(keyLen != 0 && keyLen <= SESSION_KEY_LENGTH && authKey != NULL,
@@ -192,6 +224,7 @@ int32_t TransPagingHandshake(int32_t channelId, uint8_t *authKey, uint32_t keyLe
     }
     cJSON_free(payLoad);
     dataInfo.inData = NULL;
+    TransUpdateSlePowerLevel(info.connId, CONN_SLE_POWER_LEVEL_8);
     TRANS_LOGI(TRANS_CTRL, "send paging handshake, myChannelId=%{public}d", channelId);
     ret = TransProxyTransSendMsg(info.connId, dataInfo.outData, dataInfo.outLen,
         CONN_HIGH, info.appInfo.myData.pid);
@@ -199,17 +232,7 @@ int32_t TransPagingHandshake(int32_t channelId, uint8_t *authKey, uint32_t keyLe
         TRANS_LOGE(TRANS_CTRL, "send handshake buf fail");
         return ret;
     }
-    info.appInfo.timeStart = GetSoftbusRecordTimeMillis();
-    TransEventExtra extra = {
-        .channelId = channelId,
-        .connectionId = (int32_t)info.connId,
-        .result = EVENT_STAGE_RESULT_OK,
-        .peerUdid = info.appInfo.peerUdid,
-        .callerAccountId = info.appInfo.myData.callerAccountId,
-        .calleeAccountId = info.appInfo.myData.calleeAccountId,
-        .businessFlag = info.appInfo.myData.businessFlag
-    };
-    TRANS_EVENT(EVENT_SCENE_PAGING_CONNECT, EVENT_STAGE_PAGING_SOURCE_HANDSHAKE_START, extra);
+    TransPagingHandshakeEvent(channelId, &info);
     return SOFTBUS_OK;
 }
 
@@ -340,6 +363,7 @@ int32_t TransPagingAckHandshake(ProxyChannelInfo *chan, int32_t retCode)
         return SOFTBUS_TRANS_PROXY_PACKMSG_ERR;
     }
     cJSON_free(payLoad);
+    TransUpdateSlePowerLevel(chan->connId, CONN_SLE_POWER_LEVEL_8);
     ret = TransProxyTransSendMsg(chan->connId, dataInfo.outData, dataInfo.outLen,
         CONN_HIGH, chan->appInfo.myData.pid);
     if (ret != SOFTBUS_OK) {

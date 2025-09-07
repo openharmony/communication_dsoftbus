@@ -224,7 +224,6 @@ int32_t SendMessageAsync(int32_t socket, uint16_t dataSeq, const void *data, uin
             "no permission, socket=%{public}d, len=%{public}u, ret=%{public}d", socket, len, ret);
         return ret;
     }
-
     int32_t channelId = INVALID_CHANNEL_ID;
     int32_t channelType = CHANNEL_TYPE_BUTT;
     SessionEnableStatus enableStatus = ENABLE_STATUS_INIT;

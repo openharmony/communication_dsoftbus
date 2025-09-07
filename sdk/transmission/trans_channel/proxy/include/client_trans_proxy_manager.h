@@ -32,6 +32,7 @@ typedef struct {
     int32_t linkType;
     int32_t osType;
     bool isD2D;
+    bool isSupportNewHead;
     uint32_t dataLen;
     char extraData[EXTRA_DATA_MAX_LEN];
     char pagingNonce[PAGING_NONCE_LEN];

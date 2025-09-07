@@ -143,6 +143,74 @@ int32_t TransProxyGetAppInfoType(int16_t myId, const char *identity, AppType *ap
     return SOFTBUS_TRANS_PROXY_ERROR_APP_TYPE;
 }
 
+static const ConfigTypeMap g_configTypeMap[] = {
+    {CHANNEL_TYPE_AUTH, BUSINESS_TYPE_BYTE, SOFTBUS_INT_AUTH_MAX_BYTES_LENGTH},
+    {CHANNEL_TYPE_AUTH, BUSINESS_TYPE_MESSAGE, SOFTBUS_INT_AUTH_MAX_MESSAGE_LENGTH},
+    {CHANNEL_TYPE_PROXY, BUSINESS_TYPE_BYTE, SOFTBUS_INT_MAX_BYTES_NEW_LENGTH},
+    {CHANNEL_TYPE_PROXY, BUSINESS_TYPE_MESSAGE, SOFTBUS_INT_MAX_MESSAGE_NEW_LENGTH},
+    {CHANNEL_TYPE_PROXY, BUSINESS_TYPE_D2D_VOICE, SOFTBUS_INT_D2D_MAX_VOICE_LENGTH},
+    {CHANNEL_TYPE_PROXY, BUSINESS_TYPE_D2D_MESSAGE, SOFTBUS_INT_D2D_MAX_MESSAGE_LENGTH},
+};
+
+static int32_t FindConfigType(int32_t channelType, int32_t businessType)
+{
+    uint32_t size = (uint32_t)sizeof(g_configTypeMap) / sizeof(ConfigTypeMap);
+    for (uint32_t i = 0; i < size; i++) {
+        if ((g_configTypeMap[i].channelType == channelType) && (g_configTypeMap[i].businessType == businessType)) {
+            return g_configTypeMap[i].configType;
+        }
+    }
+    return SOFTBUS_CONFIG_TYPE_MAX;
+}
+
+static int32_t TransGetLocalConfig(int32_t channelType, int32_t businessType, uint32_t *len)
+{
+    ConfigType configType = (ConfigType)FindConfigType(channelType, businessType);
+    if (configType == SOFTBUS_CONFIG_TYPE_MAX) {
+        TRANS_LOGE(TRANS_CTRL, "Invalid channelType=%{public}d, businessType=%{public}d", channelType, businessType);
+        return SOFTBUS_INVALID_PARAM;
+    }
+    uint32_t maxLen;
+    if (SoftbusGetConfig(configType, (unsigned char *)&maxLen, sizeof(maxLen)) != SOFTBUS_OK) {
+        TRANS_LOGE(TRANS_CTRL, "get fail configType=%{public}d", configType);
+        return SOFTBUS_GET_CONFIG_VAL_ERR;
+    }
+    *len = maxLen;
+    TRANS_LOGI(TRANS_CTRL, "get local config len=%{public}u", *len);
+    return SOFTBUS_OK;
+}
+
+int32_t TransPagingUpdateDataConfig(AppInfo *info)
+{
+    if (info == NULL) {
+        TRANS_LOGE(TRANS_CTRL, "appInfo is null");
+        return SOFTBUS_INVALID_PARAM;
+    }
+    if (info->businessType != BUSINESS_TYPE_D2D_MESSAGE && info->businessType != BUSINESS_TYPE_D2D_VOICE) {
+        TRANS_LOGI(TRANS_CTRL, "invalid businessType=%{public}d", info->businessType);
+        return SOFTBUS_OK;
+    }
+    if (!info->isSupportNewHead) {
+        ConfigType configType = info->businessType == BUSINESS_TYPE_D2D_VOICE ?
+            SOFTBUS_INT_PROXY_MAX_BYTES_LENGTH : SOFTBUS_INT_PROXY_MAX_MESSAGE_LENGTH;
+        if (SoftbusGetConfig(configType, (unsigned char *)&info->myData.dataConfig,
+            sizeof(info->myData.dataConfig)) != SOFTBUS_OK) {
+            TRANS_LOGE(TRANS_CTRL, "get config failed, configType=%{public}d", configType);
+            return SOFTBUS_GET_CONFIG_VAL_ERR;
+        }
+        TRANS_LOGI(TRANS_CTRL, "update local config success, channelId=%{public}" PRId64 ", businessType=%{public}u",
+            info->myData.channelId, info->myData.dataConfig);
+        return SOFTBUS_OK;
+    }
+    if (TransGetLocalConfig(CHANNEL_TYPE_PROXY, info->businessType, &info->myData.dataConfig) != SOFTBUS_OK) {
+        TRANS_LOGE(TRANS_CTRL, "get local config failed, businessType=%{public}d", info->businessType);
+        return SOFTBUS_GET_CONFIG_VAL_ERR;
+    }
+    TRANS_LOGI(TRANS_CTRL, "update local config success, channelId=%{public}" PRId64 ", businessType=%{public}u",
+        info->myData.channelId, info->myData.dataConfig);
+    return SOFTBUS_OK;
+}
+
 int32_t TransPagingUpdatePagingChannelInfo(ProxyChannelInfo *info)
 {
     TRANS_CHECK_AND_RETURN_RET_LOGE((g_proxyChannelList != NULL && info != NULL), SOFTBUS_INVALID_PARAM, TRANS_CTRL,
@@ -153,6 +221,7 @@ int32_t TransPagingUpdatePagingChannelInfo(ProxyChannelInfo *info)
     LIST_FOR_EACH_ENTRY(item, &g_proxyChannelList->list, ProxyChannelInfo, node) {
         if (item->myId == (int16_t)info->appInfo.myData.channelId) {
             item->peerId = (int16_t)info->appInfo.peerData.channelId;
+            item->appInfo.isSupportNewHead = info->appInfo.isSupportNewHead;
             item->status = PROXY_CHANNEL_STATUS_COMPLETED;
             item->timeout = 0;
             if (memcpy_s(item->appInfo.pagingSessionkey, SHORT_SESSION_KEY_LENGTH, info->appInfo.pagingSessionkey,
@@ -175,6 +244,11 @@ int32_t TransPagingUpdatePagingChannelInfo(ProxyChannelInfo *info)
                 (void)SoftBusMutexUnlock(&g_proxyChannelList->lock);
                 TRANS_LOGE(TRANS_SVC, "memcpy_s failed");
                 return SOFTBUS_MEM_ERR;
+            }
+            if (TransPagingUpdateDataConfig(&item->appInfo) != SOFTBUS_OK) {
+                (void)SoftBusMutexUnlock(&g_proxyChannelList->lock);
+                TRANS_LOGE(TRANS_SVC, "update data config failed");
+                return SOFTBUS_GET_CONFIG_VAL_ERR;
             }
             (void)SoftBusMutexUnlock(&g_proxyChannelList->lock);
             return SOFTBUS_OK;
@@ -930,41 +1004,6 @@ static int32_t TransProxyGetReqIdAndStatus(int32_t myId, int32_t *reqId, int8_t 
     (void)SoftBusMutexUnlock(&g_proxyChannelList->lock);
     TRANS_LOGE(TRANS_CTRL, "not found proxyChannelInfo by channelId=%{public}d", myId);
     return SOFTBUS_TRANS_PROXY_CHANNEL_NOT_FOUND;
-}
-
-static const ConfigTypeMap g_configTypeMap[] = {
-    { CHANNEL_TYPE_AUTH,  BUSINESS_TYPE_BYTE,    SOFTBUS_INT_AUTH_MAX_BYTES_LENGTH   },
-    { CHANNEL_TYPE_AUTH,  BUSINESS_TYPE_MESSAGE, SOFTBUS_INT_AUTH_MAX_MESSAGE_LENGTH },
-    { CHANNEL_TYPE_PROXY, BUSINESS_TYPE_BYTE,    SOFTBUS_INT_MAX_BYTES_NEW_LENGTH    },
-    { CHANNEL_TYPE_PROXY, BUSINESS_TYPE_MESSAGE, SOFTBUS_INT_MAX_MESSAGE_NEW_LENGTH  },
-};
-
-static int32_t FindConfigType(int32_t channelType, int32_t businessType)
-{
-    uint32_t size = (uint32_t)sizeof(g_configTypeMap) / sizeof(ConfigTypeMap);
-    for (uint32_t i = 0; i < size; i++) {
-        if ((g_configTypeMap[i].channelType == channelType) && (g_configTypeMap[i].businessType == businessType)) {
-            return g_configTypeMap[i].configType;
-        }
-    }
-    return SOFTBUS_CONFIG_TYPE_MAX;
-}
-
-static int32_t TransGetLocalConfig(int32_t channelType, int32_t businessType, uint32_t *len)
-{
-    ConfigType configType = (ConfigType)FindConfigType(channelType, businessType);
-    if (configType == SOFTBUS_CONFIG_TYPE_MAX) {
-        TRANS_LOGE(TRANS_CTRL, "Invalid channelType=%{public}d, businessType=%{public}d", channelType, businessType);
-        return SOFTBUS_INVALID_PARAM;
-    }
-    uint32_t maxLen;
-    if (SoftbusGetConfig(configType, (unsigned char *)&maxLen, sizeof(maxLen)) != SOFTBUS_OK) {
-        TRANS_LOGE(TRANS_CTRL, "get fail configType=%{public}d", configType);
-        return SOFTBUS_GET_CONFIG_VAL_ERR;
-    }
-    *len = maxLen;
-    TRANS_LOGI(TRANS_CTRL, "get local config len=%{public}u", *len);
-    return SOFTBUS_OK;
 }
 
 static int32_t TransProxyProcessDataConfig(AppInfo *appInfo)

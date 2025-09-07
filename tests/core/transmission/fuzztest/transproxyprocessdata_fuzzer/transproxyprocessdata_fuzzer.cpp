@@ -550,24 +550,28 @@ void TransProxyPackD2DBytesTest(const uint8_t *data, size_t size)
         return;
     }
     std::string providerSessionKey2 = provider.ConsumeBytesAsString(GCM_IV_LEN - 1);
-    char sessionIv[GCM_IV_LEN] = { 0 };
-    if (strcpy_s(sessionIv, GCM_IV_LEN, providerSessionKey2.c_str()) != EOK) {
-        return;
-    }
     SessionPktType flag = static_cast<SessionPktType>(
         provider.ConsumeIntegralInRange<uint16_t>(TRANS_SESSION_BYTES, TRANS_SESSION_ASYNC_MESSAGE));
-    (void)TransProxyPackD2DBytes(&dataInfo, sessionKey, sessionIv, flag);
+    bool isNewHead = provider.ConsumeBool();
+    (void)TransProxyPackD2DBytes(&dataInfo, sessionKey, flag, isNewHead);
     GenerateUint32(dataInfo.inLen);
     GenerateUint32(dataInfo.outLen);
     dataInfo.inData = TestDataSwitch(data, size);
     if (dataInfo.inData == nullptr) {
         return;
     }
-    (void)TransProxyPackD2DBytes(&dataInfo, sessionKey, sessionIv, flag);
-    (void)TransProxyPackD2DBytes(nullptr, sessionKey, sessionIv, flag);
-    (void)TransProxyPackD2DBytes(&dataInfo, nullptr, sessionIv, flag);
-    (void)TransProxyPackD2DBytes(&dataInfo, sessionKey, nullptr, flag);
+    (void)TransProxyPackD2DBytes(&dataInfo, sessionKey, flag, isNewHead);
+    (void)TransProxyPackD2DBytes(nullptr, sessionKey, flag, isNewHead);
+    (void)TransProxyPackD2DBytes(&dataInfo, nullptr, flag, isNewHead);
     SoftBusFree(dataInfo.inData);
+}
+
+void TransProxyD2dDataLenCheckTest(FuzzedDataProvider &provider)
+{
+    uint32_t len = provider.ConsumeIntegral<uint32_t>();
+    BusinessType type = static_cast<BusinessType>(
+        provider.ConsumeIntegralInRange<uint16_t>(BUSINESS_TYPE_D2D_MESSAGE, BUSINESS_TYPE_BUTT));
+    (void)TransProxyD2dDataLenCheck(len, type);
 }
 } // namespace OHOS
 
@@ -603,5 +607,6 @@ extern "C" int32_t LLVMFuzzerTestOneInput(const uint8_t *data, size_t size)
     OHOS::TransProxyDecryptD2DDataTest(data, size);
     OHOS::TransProxyD2DFirstSliceProcessTest(provider);
     OHOS::TransProxyPackD2DBytesTest(data, size);
+    OHOS::TransProxyD2dDataLenCheckTest(provider);
     return 0;
 }
