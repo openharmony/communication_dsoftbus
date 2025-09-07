@@ -92,6 +92,8 @@ typedef int32_t (*TransPagingWaitListenStatusFunc)(const uint32_t businessFlag, 
 typedef int32_t (*TransAddConnItemFunc)(ProxyConnInfo *chan);
 typedef int32_t (*TransAddConnRefByConnIdFunc)(uint32_t connId, bool isServer);
 typedef void (*StopHmlListenerFunc)(ListenerModule module);
+typedef int32_t (*CompareStringFunc)(const char *src, const char *dest, bool regexp);
+typedef int32_t (*LoadPermissionJsonFunc)(const char *fileName);
 
 typedef struct TagTransOpenFuncList {
     TransProxyGetAppInfoByChanIdFunc transProxyGetAppInfoByChanId;
@@ -139,6 +141,8 @@ typedef struct TagTransOpenFuncList {
     TransAddConnItemFunc transAddConnItem;
     TransAddConnRefByConnIdFunc transAddConnRefByConnId;
     StopHmlListenerFunc stopHmlListener;
+    CompareStringFunc compareString;
+    LoadPermissionJsonFunc loadPermissionJson;
 } TransOpenFuncList;
 
 #ifdef __cplusplus

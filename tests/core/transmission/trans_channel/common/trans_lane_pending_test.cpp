@@ -1251,7 +1251,7 @@ HWTEST_F(TransLanePendingTest, GetAllocInfoBySessionParam001, TestSize.Level1)
     ModuleLaneAdapter(&preferred);
     NiceMock<TransLanePendingTestInterfaceMock> TransLanePendingMock;
     EXPECT_CALL(TransLanePendingMock, TransGetLaneTransTypeBySession).WillOnce(Return(LANE_T_BUTT));
-    SessionParam *param = TestCreateSessionParamWithPara(SESSION_NAME_PHONEPAD);
+    SessionParam *param = TestCreateSessionParamWithPara(TEST_SESSION_NAME);
     ASSERT_TRUE(param != nullptr);
     LaneAllocInfo allocInfo;
     int32_t ret = GetAllocInfoBySessionParam(param, &allocInfo);
@@ -1284,7 +1284,7 @@ HWTEST_F(TransLanePendingTest, GetAllocInfoBySessionParam001, TestSize.Level1)
 HWTEST_F(TransLanePendingTest, GetRequestOptionBySessionParam001, TestSize.Level1)
 {
     LaneRequestOption requestOption;
-    SessionParam *param = TestCreateSessionParamWithPara(SESSION_NAME_PHONEPAD);
+    SessionParam *param = TestCreateSessionParamWithPara(TEST_SESSION_NAME);
     ASSERT_TRUE(param != nullptr);
     NiceMock<TransLanePendingTestInterfaceMock> TransLanePendingMock;
     EXPECT_CALL(TransLanePendingMock, TransGetLaneTransTypeBySession).WillOnce(Return(LANE_T_BUTT));
@@ -1295,7 +1295,7 @@ HWTEST_F(TransLanePendingTest, GetRequestOptionBySessionParam001, TestSize.Level
     SoftBusFree(param);
     param = nullptr;
 
-    param = TestCreateSessionParamWithPara(SESSION_NAME_DISTRIBUTE_COMMUNICATION);
+    param = TestCreateSessionParamWithPara(TEST_NEW_SESSION_NAME);
     ASSERT_TRUE(param != nullptr);
     EXPECT_CALL(TransLanePendingMock, TransGetLaneTransTypeBySession).WillRepeatedly(Return(LANE_T_MSG));
     EXPECT_CALL(TransLanePendingMock, LnnGetRemoteNodeInfoById).WillRepeatedly(Return(SOFTBUS_OK));
@@ -1371,7 +1371,7 @@ HWTEST_F(TransLanePendingTest, TransAsyncGetLaneInfo002, TestSize.Level1)
     uint32_t laneHandle;
     NiceMock<TransLanePendingTestInterfaceMock> TransLanePendingMock;
     EXPECT_CALL(TransLanePendingMock, TransGetLaneTransTypeBySession).WillOnce(Return(LANE_T_BUTT));
-    SessionParam *param = TestCreateSessionParamWithPara(SESSION_NAME_PHONEPAD);
+    SessionParam *param = TestCreateSessionParamWithPara(TEST_SESSION_NAME);
     ASSERT_TRUE(param != nullptr);
     int32_t ret = TransAsyncGetLaneInfo(param, &laneHandle, 0, 0);
     EXPECT_EQ(SOFTBUS_TRANS_INVALID_SESSION_TYPE, ret);

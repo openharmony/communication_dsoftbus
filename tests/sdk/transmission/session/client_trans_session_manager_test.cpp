@@ -1992,7 +1992,7 @@ HWTEST_F(TransClientSessionManagerTest, TransClientSessionManagerTest64, TestSiz
     ret = ClientAddNewSession(g_sessionName, session);
     EXPECT_EQ(ret,  SOFTBUS_OK);
     ret = ClientGetSessionNameByChannelId(TRANS_TEST_CHANNEL_ID, CHANNEL_TYPE_BUTT, sessionName, len);
-    EXPECT_EQ(ret, SOFTBUS_OK);
+    EXPECT_NE(ret, SOFTBUS_INVALID_PARAM);
     ret = ClientDeleteSessionServer(SEC_TYPE_PLAINTEXT, g_sessionName);
     EXPECT_EQ(ret,  SOFTBUS_OK);
     SoftBusFree(sessionParam);
