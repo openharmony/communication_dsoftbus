@@ -216,7 +216,7 @@ static bool CheckRemoveHbMsgParams(const SoftBusMessage *msg, void *args)
     }
     FsmCtrlMsgObj *ctrlMsgObj = (FsmCtrlMsgObj *)msg->obj;
     if (ctrlMsgObj == NULL || ctrlMsgObj->obj == NULL) {
-        LNN_LOGE(LNN_HEART_BEAT, "ctrlMsgObj or obj is NULL");
+        LNN_LOGD(LNN_HEART_BEAT, "ctrlMsgObj or obj is NULL");
         return false;
     }
     SoftBusMessage *delMsg = (SoftBusMessage *)args;
