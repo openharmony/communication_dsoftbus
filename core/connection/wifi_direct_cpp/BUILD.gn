@@ -24,6 +24,7 @@ config("wifi_direct_interface") {
     "$dsoftbus_root_path/core/connection/wifi_direct_cpp/adapter",
     "$dsoftbus_root_path/core/connection/wifi_direct_cpp/command",
     "$dsoftbus_root_path/core/connection/wifi_direct_cpp/data",
+    "$dsoftbus_root_path/core/connection/wifi_direct_cpp/dfx",
     "$dsoftbus_root_path/core/connection/wifi_direct_cpp/protocol",
     "$dsoftbus_root_path/core/connection/wifi_direct_cpp/utils",
     "$dsoftbus_root_path/interfaces/kits/transport",
