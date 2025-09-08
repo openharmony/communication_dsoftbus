@@ -240,6 +240,10 @@
         "ClientSetLowLatencyBySocket";
         "ClientGetSessionTypeBySocket";
         "ClientSetFLTos";
+        "PublishService";
+        "UnPublishService";
+        "StartServiceDiscovery";
+        "StopServiceDiscovery";
     local:
         *;
 };
