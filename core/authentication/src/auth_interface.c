@@ -411,7 +411,7 @@ int32_t AuthGetAuthHandleByIndex(const AuthConnInfo *connInfo, bool isServer, in
             }
             break;
         case AUTH_LINK_TYPE_BLE:
-            ret = AuthGetAuthHandleByIndexForBle(connInfo, networkId, &info, authHandle);
+            ret = AuthGetNodeInfoByIndexForBle(connInfo, networkId, &info);
             if (ret != SOFTBUS_OK) {
                 return ret;
             }
@@ -441,7 +441,7 @@ int32_t AuthGetAuthHandleByIndex(const AuthConnInfo *connInfo, bool isServer, in
     return AuthDeviceGetAuthHandleByIndex(info.deviceInfo.deviceUdid, isServer, index, authHandle);
 }
 
-int32_t AuthGetAuthHandleByIndexForBle(const AuthConnInfo *connInfo, char *networkId, NodeInfo *info, AuthHandle *authHandle)
+int32_t AuthGetNodeInfoByIndexForBle(const AuthConnInfo *connInfo, char *networkId, NodeInfo *info)
 {
     if (LnnGetNetworkIdByUdidHash(connInfo->info.bleInfo.deviceIdHash, UDID_HASH_LEN, networkId, NETWORK_ID_BUF_LEN,
         true) != SOFTBUS_OK) {

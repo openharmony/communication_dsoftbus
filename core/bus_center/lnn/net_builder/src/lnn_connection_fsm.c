@@ -1725,11 +1725,6 @@ bool LnnIsNeedCleanConnectionFsm(const NodeInfo *nodeInfo, ConnectionAddrType ty
         return false;
     }
 
-    if (type != CONNECTION_ADDR_ETH && type != CONNECTION_ADDR_WLAN && type != CONNECTION_ADDR_NCM) {
-        LNN_LOGE(LNN_BUILDER, "invalid connection type: %{public}d", type);
-        return false;
-    }
-
     NodeInfo oldNodeInfo ;
     (void)memset_s(&oldNodeInfo, sizeof(NodeInfo), 0, sizeof(NodeInfo));
 

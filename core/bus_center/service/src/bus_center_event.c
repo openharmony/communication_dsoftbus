@@ -425,6 +425,7 @@ static void NotifyEvent(const LnnEventBasicInfo *info)
 
     if (count == 0) {
         (void)SoftBusMutexUnlock(&g_eventCtrl.lock);
+        LNN_LOGE(LNN_EVENT, "count is 0");
         return;
     }
     
