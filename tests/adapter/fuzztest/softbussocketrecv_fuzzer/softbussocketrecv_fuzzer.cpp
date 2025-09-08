@@ -25,6 +25,7 @@
 #include "softbus_adapter_define.h"
 #include "softbus_adapter_mem.h"
 
+using namespace std;
 namespace OHOS {
 const int32_t PROTOCOL_MAXLEN = 100;
 
@@ -33,44 +34,30 @@ struct SocketProtocol {
     char data[PROTOCOL_MAXLEN];
 };
 
-void SoftBusSocketRecvFuzzTest(const uint8_t* data, size_t size)
+void SoftBusSocketRecvFuzzTest()
 {
-    if (data == nullptr || size < sizeof(int32_t)) {
-        COMM_LOGE(COMM_TEST, "Invalid param");
-        return;
-    }
-
     struct SocketProtocol buf;
     memset_s(&buf, sizeof(struct SocketProtocol), 0, sizeof(struct SocketProtocol));
     int32_t socketFd = 0;
     uint32_t len = 0;
     int32_t flags = 0;
-    DataGenerator::Write(data, size);
     GenerateInt32(socketFd);
     GenerateUint32(len);
     GenerateInt32(flags);
-    DataGenerator::Clear();
     SoftBusSocketRecv(socketFd, &buf, len, flags);
     return;
 }
 
-void SoftBusSocketRecvFromFuzzTest(const uint8_t* data, size_t size)
+void SoftBusSocketRecvFromFuzzTest()
 {
-    if (data == nullptr || size < sizeof(int32_t)) {
-        COMM_LOGE(COMM_TEST, "Invalid param");
-        return;
-    }
-
     struct SocketProtocol buf;
     memset_s(&buf, sizeof(struct SocketProtocol), 0, sizeof(struct SocketProtocol));
     int32_t socketFd = 0;
     uint32_t len = 0;
     int32_t flags = 0;
-    DataGenerator::Write(data, size);
     GenerateInt32(socketFd);
     GenerateUint32(len);
     GenerateInt32(flags);
-    DataGenerator::Clear();
     SoftBusSockAddr  fromAddr;
     memset_s(&fromAddr, sizeof(SoftBusSockAddr), 0, sizeof(SoftBusSockAddr));
     int32_t fromAddrLen;
@@ -78,8 +65,12 @@ void SoftBusSocketRecvFromFuzzTest(const uint8_t* data, size_t size)
     return;
 }
 
-void SoftBusSocketSendFuzzTest(const uint8_t* data, size_t size)
+void SoftBusSocketSendFuzzTest()
 {
+    string stringData;
+    GenerateString(stringData);
+    const uint8_t *data = reinterpret_cast<const uint8_t *>(stringData.data());
+    size_t size = stringData.size();
     if (data == nullptr || size < sizeof(int32_t)) {
         COMM_LOGE(COMM_TEST, "Invalid param");
         return;
@@ -98,18 +89,20 @@ void SoftBusSocketSendFuzzTest(const uint8_t* data, size_t size)
     uint32_t len = size;
     int32_t socketFd = 0;
     int32_t flags = 0;
-    DataGenerator::Write(data, size);
     GenerateInt32(socketFd);
     GenerateInt32(flags);
-    DataGenerator::Clear();
 
     SoftBusSocketSend(socketFd, buf, len, flags);
     SoftBusFree(buf);
     return;
 }
 
-void SoftBusSocketSendToFuzzTest(const uint8_t* data, size_t size)
+void SoftBusSocketSendToFuzzTest()
 {
+    string stringData;
+    GenerateString(stringData);
+    const uint8_t *data = reinterpret_cast<const uint8_t *>(stringData.data());
+    size_t size = stringData.size();
     if (data == nullptr || size < sizeof(SoftBusSockAddr)) {
         COMM_LOGE(COMM_TEST, "Invalid param");
         return;
@@ -128,11 +121,9 @@ void SoftBusSocketSendToFuzzTest(const uint8_t* data, size_t size)
     int32_t socketFd = 0;
     int32_t flags = 0;
     int32_t toAddrLen = 0;
-    DataGenerator::Write(data, size);
     GenerateInt32(socketFd);
     GenerateInt32(flags);
     GenerateInt32(toAddrLen);
-    DataGenerator::Clear();
     SoftBusSockAddr toAddr = {0};
     if (memcpy_s(&toAddr, sizeof(SoftBusSockAddr), data, sizeof(SoftBusSockAddr)) != EOK) {
         COMM_LOGE(COMM_TEST, "memcpy err");
@@ -150,9 +141,11 @@ void SoftBusSocketSendToFuzzTest(const uint8_t* data, size_t size)
 extern "C" int32_t LLVMFuzzerTestOneInput(const uint8_t* data, size_t size)
 {
     /* Run your code on data */
-    OHOS::SoftBusSocketRecvFuzzTest(data, size);
-    OHOS::SoftBusSocketRecvFromFuzzTest(data, size);
-    OHOS::SoftBusSocketSendFuzzTest(data, size);
-    OHOS::SoftBusSocketSendToFuzzTest(data, size);
+    DataGenerator::Write(data, size);
+    OHOS::SoftBusSocketRecvFuzzTest();
+    OHOS::SoftBusSocketRecvFromFuzzTest();
+    OHOS::SoftBusSocketSendFuzzTest();
+    OHOS::SoftBusSocketSendToFuzzTest();
+    DataGenerator::Clear();
     return 0;
 }
