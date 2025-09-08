@@ -63,6 +63,9 @@ public:
     virtual int32_t AuthMetaInit(const AuthTransCallback *callback) = 0;
     virtual int32_t AuthFindDeviceKey(const char *udidHash, int32_t keyType, AuthDeviceKeyInfo *deviceKey) = 0;
     virtual AuthManager *GetAuthManagerByAuthId(int64_t authId) = 0;
+    virtual int32_t LnnGetLocalNum64Info(InfoKey key, int64_t *info) = 0;
+    virtual int32_t CustomizedSecurityProtocolInitPacked(void) = 0;
+    virtual int32_t LnnRetrieveDeviceInfoByNetworkIdPacked(const char *networkId, NodeInfo *info) = 0;
 };
 class AuthOtherInterfaceMock : public AuthOtherInterface {
 public:
@@ -90,8 +93,11 @@ public:
     MOCK_METHOD1(AuthMetaInit, int32_t(const AuthTransCallback *));
     MOCK_METHOD3(AuthFindDeviceKey, int32_t (const char *, int32_t, AuthDeviceKeyInfo *));
     MOCK_METHOD1(GetAuthManagerByAuthId, AuthManager *(int64_t));
+    MOCK_METHOD2(LnnGetLocalNum64Info, int32_t (InfoKey, int64_t *));
     static int32_t ActionOfLnnGetRemoteNodeInfoByKey(const char *key, NodeInfo *info);
     static int32_t ActionOfLnnGetRemoteNodeInfoById(const char *id, IdCategory type, NodeInfo *info);
+    MOCK_METHOD0(CustomizedSecurityProtocolInitPacked, int32_t (void));
+    MOCK_METHOD2(LnnRetrieveDeviceInfoByNetworkIdPacked, int32_t (const char *, NodeInfo *));
 };
 } // namespace OHOS
 #endif // AUTH_INTERFACE_MOCK_H
