@@ -598,17 +598,17 @@ static bool IsNeedDelResource(uint64_t laneId, bool isServerSide, LaneResource *
             }
         }
     }
-    LNN_LOGI(LNN_LANE, "del laneId=%{public}" PRIu64 " resource, isServer=%{public}d, clientRef=%{public}u",
+    LNN_LOGD(LNN_LANE, "del laneId=%{public}" PRIu64 " resource, isServer=%{public}d, clientRef=%{public}u",
         laneId, isServer, ref);
     return true;
 }
 
-static void DumpWifiDirectInfo(const LaneLinkInfo *resource)
+static void DumpWifiDirectInfo(const LaneLinkInfo *resource, uint32_t clientRef)
 {
     char *anonyPeerUdid = NULL;
     Anonymize(resource->peerUdid, &anonyPeerUdid);
-    LNN_LOGI(LNN_LANE, "peerUdid=%{public}s, linkType=%{public}s, channel=%{public}d", AnonymizeWrapper(anonyPeerUdid),
-        resource->type == LANE_HML ? "hml" : "p2p", resource->linkInfo.p2p.channel);
+    LNN_LOGI(LNN_LANE, "peerUdid=%{public}s, linkType=%{public}d, channel=%{public}d, clientRef=%{public}u",
+        AnonymizeWrapper(anonyPeerUdid), resource->type, resource->linkInfo.p2p.channel, clientRef);
     AnonymizeFree(anonyPeerUdid);
 }
 
@@ -625,13 +625,11 @@ static void ProcessVapInfo(void)
     LIST_FOR_EACH_ENTRY_SAFE(item, next, &g_laneResource.list, LaneResource, node) {
         if ((item->clientRef != 0 || item->isServerSide) && item->link.type == LANE_HML) {
             hasHmlVap = true;
-            LNN_LOGI(LNN_LANE, "HML use: ref=%{public}d, server=%{public}d", item->clientRef, item->isServerSide);
-            DumpWifiDirectInfo((const LaneLinkInfo *)&item->link);
+            DumpWifiDirectInfo((const LaneLinkInfo *)&item->link, item->clientRef);
         }
         if (item->clientRef != 0 && item->link.type == LANE_P2P) {
             hasP2pVap = true;
-            LNN_LOGI(LNN_LANE, "P2p use: ref=%{public}d", item->clientRef);
-            DumpWifiDirectInfo((const LaneLinkInfo *)&item->link);
+            DumpWifiDirectInfo((const LaneLinkInfo *)&item->link, item->clientRef);
         }
         if (hasHmlVap && hasP2pVap) {
             break;
@@ -639,11 +637,9 @@ static void ProcessVapInfo(void)
     }
     LaneUnlock();
     if (!hasHmlVap) {
-        LNN_LOGI(LNN_LANE, "delete hml vap info");
         DeleteVapInfo(LANE_HML);
     }
     if (!hasP2pVap) {
-        LNN_LOGI(LNN_LANE, "delete p2p vap info");
         DeleteVapInfo(LANE_P2P);
     }
 }
@@ -654,8 +650,7 @@ int32_t DelLaneResourceByLaneId(uint64_t laneId, bool isServerSide)
         LNN_LOGE(LNN_LANE, "lane lock fail");
         return SOFTBUS_LOCK_ERR;
     }
-    LNN_LOGI(LNN_LANE, "start to del laneId=%{public}" PRIu64 " resource, isServer=%{public}d",
-            laneId, isServerSide);
+    LNN_LOGI(LNN_LANE, "laneId=%{public}" PRIu64 ", isServer=%{public}d", laneId, isServerSide);
     LaneResource *next = NULL;
     LaneResource *item = NULL;
     LIST_FOR_EACH_ENTRY_SAFE(item, next, &g_laneResource.list, LaneResource, node) {
@@ -666,7 +661,7 @@ int32_t DelLaneResourceByLaneId(uint64_t laneId, bool isServerSide)
         }
     }
     LaneUnlock();
-    LNN_LOGI(LNN_LANE, "not found laneId=%{public}" PRIu64 " resource when del", laneId);
+    LNN_LOGD(LNN_LANE, "not found laneId=%{public}" PRIu64, laneId);
     return SOFTBUS_LANE_RESOURCE_NOT_FOUND;
 }
 
@@ -684,13 +679,13 @@ int32_t ClearLaneResourceByLaneId(uint64_t laneId)
             SoftBusFree(item);
             g_laneResource.cnt--;
             LaneUnlock();
-            LNN_LOGI(LNN_LANE, "clear laneId=%{public}" PRIu64 " resource succ", laneId);
+            LNN_LOGI(LNN_LANE, "clear laneId=%{public}" PRIu64, laneId);
             ProcessVapInfo();
             return SOFTBUS_OK;
         }
     }
     LaneUnlock();
-    LNN_LOGI(LNN_LANE, "not found laneId=%{public}" PRIu64 " resource when clear", laneId);
+    LNN_LOGI(LNN_LANE, "not found laneId=%{public}" PRIu64, laneId);
     return SOFTBUS_LANE_RESOURCE_NOT_FOUND;
 }
 

@@ -295,7 +295,7 @@ static int32_t Wlan2P4DynamicCommCapa(const char *networkId)
 {
     if (!IsDeviceOnlineByTargetType(networkId, DISCOVERY_TYPE_WIFI) &&
         !IsDeviceOnlineByTargetType(networkId, DISCOVERY_TYPE_LSA)) {
-        LNN_LOGE(LNN_LANE, "WIFI not online");
+        LNN_LOGD(LNN_LANE, "WIFI not online");
         return SOFTBUS_LANE_WIFI_NOT_ONLINE;
     }
     bool local2P4Enable = false;
@@ -323,7 +323,7 @@ static int32_t Wlan5GDynamicCommCapa(const char *networkId)
 {
     if (!IsDeviceOnlineByTargetType(networkId, DISCOVERY_TYPE_WIFI) &&
         !IsDeviceOnlineByTargetType(networkId, DISCOVERY_TYPE_LSA)) {
-        LNN_LOGE(LNN_LANE, "WIFI not online");
+        LNN_LOGD(LNN_LANE, "WIFI not online");
         return SOFTBUS_LANE_WIFI_NOT_ONLINE;
     }
     bool local5GEnable = false;
