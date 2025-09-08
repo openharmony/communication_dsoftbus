@@ -34,6 +34,7 @@ using namespace testing::ext;
 
 namespace OHOS::SoftBus {
 #define DEFAULT_ACCOUNT_NAME "ohosAnonymousName"
+#define INVALID_ACCOUNT_UID (-1)
 
 constexpr char LNN_OHOS_ACCOUNT_ADAPTER_TEST_ID_LEN = 10;
 
@@ -498,7 +499,7 @@ HWTEST_F(LnnOhosAccountAdapterTest, GetOsAccountUidByUserId_002, TestSize.Level1
     ASSERT_NE(accountInfo, nullptr);
     OHOS::AccountSA::OhosAccountInfo oh_acc_info;
     oh_acc_info.name_ = "teatsa";
-    EXPECT_EQ(GetOsAccountUidByUserId(accountInfo, idLen, &len, userId), SOFTBUS_NETWORK_GET_ACCOUNT_INFO_FAILED);
+    EXPECT_EQ(GetOsAccountUidByUserId(accountInfo, idLen, &len, userId), INVALID_ACCOUNT_UID);
     if (accountInfo != nullptr) {
         SoftBusFree(accountInfo);
     }
@@ -519,7 +520,7 @@ HWTEST_F(LnnOhosAccountAdapterTest, GetOsAccountUidByUserId_003, TestSize.Level1
     ASSERT_NE(accountInfo, nullptr);
     OHOS::AccountSA::OhosAccountInfo oh_acc_info;
     oh_acc_info.name_ = "ohosAnonymousName";
-    EXPECT_EQ(GetOsAccountUidByUserId(accountInfo, idLen, &len, userId), SOFTBUS_NETWORK_GET_ACCOUNT_INFO_FAILED);
+    EXPECT_EQ(GetOsAccountUidByUserId(accountInfo, idLen, &len, userId), INVALID_ACCOUNT_UID);
     if (accountInfo != nullptr) {
         SoftBusFree(accountInfo);
     }
