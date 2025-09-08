@@ -273,5 +273,11 @@ bool IsSKIdInvalid(int32_t sessionKeyId, const char *accountHash, const char *ud
 {
     return GetAuthHichainMockInterface()->IsSKIdInvalid(sessionKeyId, accountHash, udidShortHash, userId);
 }
+
+int32_t IdServiceGetCredTypeByCredId(int32_t userId, const char *credId, int32_t *credType)
+{
+    return GetAuthHichainMockInterface()->IdServiceGetCredTypeByCredId(userId, credId, credType);
+}
+
 } // extern "C"
 } // namespace OHOS

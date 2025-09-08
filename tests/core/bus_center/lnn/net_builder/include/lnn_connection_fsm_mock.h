@@ -34,6 +34,7 @@
 #include "lnn_heartbeat_ctrl.h"
 #include "lnn_heartbeat_utils.h"
 #include "lnn_network_manager.h"
+#include "lnn_cipherkey_manager_struct.h"
 #include "softbus_adapter_bt_common.h"
 
 namespace OHOS {
@@ -88,6 +89,7 @@ public:
     virtual void LnnNotifyAddRawEnhanceP2pEvent(LnnNotifyRawEnhanceP2pEvent *event) = 0;
     virtual bool RawLinkNeedUpdateAuthManager(const char *uuid, bool isServer) = 0;
     virtual AuthManager *GetAuthManagerByAuthId(int64_t authId) = 0;
+    virtual void SetDpGroupShare(const NodeInfo *info, AuthHandle authHandle) = 0;
     virtual void LnnStopOfflineTimingBySleHb(const char *networkId, ConnectionAddrType addrType) = 0;
     virtual int32_t LnnCleanTriggerSparkInfo(const char *udid, ConnectionAddrType addrType) = 0;
     virtual void LnnSetWiFiIp(NodeInfo *info, const char *ip, int32_t ifnameIdx) = 0;
@@ -106,7 +108,8 @@ public:
     MOCK_METHOD2(AuthGetServerSide, int32_t(int64_t, bool *));
     MOCK_METHOD2(LnnRetrieveDeviceInfo, int32_t(const char *, NodeInfo *));
     MOCK_METHOD2(LnnRetrieveDeviceInfoByNetworkId, int32_t(const char *, NodeInfo *));
-    MOCK_METHOD5(AuthRestoreAuthManager, int32_t(const char *, const AuthConnInfo *, uint32_t, NodeInfo *, int64_t *));
+    MOCK_METHOD5(AuthRestoreAuthManager, int32_t(const char *, const AuthConnInfo *, uint32_t, NodeInfo *,
+        int64_t *));
     MOCK_METHOD0(LnnLoadLocalBroadcastCipherKey, int32_t(void));
     MOCK_METHOD1(LnnGetLocalBroadcastCipherKey, int32_t(BroadcastCipherKey *));
     MOCK_METHOD3(LnnSetLocalByteInfo, int32_t(InfoKey, const uint8_t *, uint32_t));
@@ -139,6 +142,7 @@ public:
     MOCK_METHOD1(LnnNotifyAddRawEnhanceP2pEvent, void(LnnNotifyRawEnhanceP2pEvent *));
     MOCK_METHOD2(RawLinkNeedUpdateAuthManager, bool(const char *, bool));
     MOCK_METHOD1(GetAuthManagerByAuthId, AuthManager *(int64_t));
+    MOCK_METHOD2(SetDpGroupShare, void(const NodeInfo *, AuthHandle));
     MOCK_METHOD2(LnnStopOfflineTimingBySleHb, void(const char *, ConnectionAddrType));
     MOCK_METHOD2(LnnCleanTriggerSparkInfo, int32_t(const char *, ConnectionAddrType));
     MOCK_METHOD3(LnnSetWiFiIp, void(NodeInfo *, const char *, int32_t));

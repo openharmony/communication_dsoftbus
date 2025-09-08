@@ -16,11 +16,11 @@
 #ifndef ASSERT_HELPER_H
 #define ASSERT_HELPER_H
 
-#include "softbus_broadcast_adapter_type.h"
-
 #include "gmock/gmock.h"
 #include <cstring>
 #include <securec.h>
+
+#include "softbus_broadcast_adapter_type.h"
 
 class RecordCtx {
 public:

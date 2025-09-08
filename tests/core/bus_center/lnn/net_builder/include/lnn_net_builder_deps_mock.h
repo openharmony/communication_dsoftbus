@@ -360,9 +360,9 @@ public:
     MOCK_METHOD1(AuthRemoveAuthManagerByAuthHandle, void(AuthHandle));
     MOCK_METHOD3(ProcessBleOnline, int32_t(NodeInfo *, const ConnectionAddr *, AuthCapability));
     MOCK_METHOD1(GetLnnTriggerInfo, void(LnnTriggerInfo *));
+    MOCK_METHOD1(LnnGetDataShareInitResult, void (bool *));
     MOCK_METHOD2(LnnSetDLConnUserIdCheckSum, int32_t(const char *networkId, int32_t userIdCheckSum));
     MOCK_METHOD3(LnnNotifyDeviceTrustedChange, void(int32_t type, const char *msg, uint32_t msgLen));
-    MOCK_METHOD1(LnnGetDataShareInitResult, void(bool *));
     MOCK_METHOD0(LnnInitSaStatusMonitor, int32_t());
     MOCK_METHOD0(LnnDeInitSaStatusMonitor, void());
     MOCK_METHOD4(LnnGetLocalStrInfoByIfnameIdx, int32_t(InfoKey, char *, uint32_t, int32_t));

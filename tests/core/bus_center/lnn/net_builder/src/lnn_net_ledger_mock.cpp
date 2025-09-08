@@ -640,5 +640,15 @@ int32_t LnnSetLocalNumInfoByIfnameIdx(InfoKey key, int32_t info, int32_t ifIdx)
 {
     return GetNetLedgerInterface()->LnnSetLocalNumInfoByIfnameIdx(key, info, ifIdx);
 }
+
+int32_t LnnSetStaticNetCap(uint32_t *capability, StaticNetCapability type)
+{
+    return GetNetLedgerInterface()->LnnSetStaticNetCap(capability, type);
+}
+
+int32_t LnnSetLocalNumU32Info(InfoKey key, uint32_t info)
+{
+    return GetNetLedgerInterface()->LnnSetLocalNumU32Info(key, info);
+}
 }
 } // namespace OHOS

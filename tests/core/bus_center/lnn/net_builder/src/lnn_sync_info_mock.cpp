@@ -36,6 +36,11 @@ static LnnSyncInfoInterface *GetSyncInterface()
 }
 
 extern "C" {
+int32_t LnnInitSyncInfoManager(void)
+{
+    return GetSyncInterface()->LnnInitSyncInfoManager();
+}
+
 int32_t LnnRegSyncInfoHandler(LnnSyncInfoType type, LnnSyncInfoMsgHandler handler)
 {
     return GetSyncInterface()->LnnRegSyncInfoHandler(type, handler);

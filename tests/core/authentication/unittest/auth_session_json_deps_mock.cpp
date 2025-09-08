@@ -465,6 +465,11 @@ bool AuthSessionGetIsSameAccount(int64_t authSeq)
     return GetInterface()->AuthSessionGetIsSameAccount(authSeq);
 }
 
+int32_t LnnGetLocalByteInfo(InfoKey key, uint8_t *info, uint32_t len)
+{
+    return GetInterface()->LnnGetLocalByteInfo(key, info, len);
+}
+
 int32_t AuthSessionGetUserId(int64_t authSeq)
 {
     return GetInterface()->AuthSessionGetUserId(authSeq);
@@ -473,11 +478,6 @@ int32_t AuthSessionGetUserId(int64_t authSeq)
 int32_t GetActiveOsAccountIds(void)
 {
     return GetInterface()->GetActiveOsAccountIds();
-}
-
-int32_t LnnGetLocalByteInfo(InfoKey key, uint8_t *info, uint32_t len)
-{
-    return GetInterface()->LnnGetLocalByteInfo(key, info, len);
 }
 
 int32_t LnnGetLocalStrInfoByIfnameIdx(InfoKey key, char *info, uint32_t len, int32_t ifIdx)
