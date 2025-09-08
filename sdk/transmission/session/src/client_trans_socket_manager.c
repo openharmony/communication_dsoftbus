@@ -24,6 +24,7 @@
 #include "client_trans_proxy_file_manager.h"
 #include "client_trans_tcp_direct_manager.h"
 #include "client_trans_udp_manager.h"
+#include "g_enhance_sdk_func.h"
 #include "softbus_adapter_mem.h"
 #include "softbus_adapter_timer.h"
 #include "softbus_app_info.h"
@@ -330,10 +331,26 @@ static bool ClientTransCheckHmlIp(const char *ip)
     return false;
 }
 
+static int32_t ClientCheckFuncPointer(void *func)
+{
+    if (func == NULL) {
+        TRANS_LOGE(TRANS_SDK, "enhance func not register");
+        return SOFTBUS_FUNC_NOT_REGISTER;
+    }
+    return SOFTBUS_OK;
+}
+
+static bool CheckDMHandleSessionPacked(const char *sessionName)
+{
+    ClientEnhanceFuncList *pfnClientEnhanceFuncList = ClientEnhanceFuncListGet();
+    if (ClientCheckFuncPointer((void *)pfnClientEnhanceFuncList->checkDMHandleSession) != SOFTBUS_OK) {
+        return false;
+    }
+    return pfnClientEnhanceFuncList->checkDMHandleSession(sessionName);
+}
+
 static const char *g_dmHandleAgingSessionName[] = {
     "ohos.distributedhardware.devicemanager.resident",
-    "com.huawei.devicemanager.resident",
-    "com.huawei.devicemanager.dynamic",
 };
 
 static bool CheckDMHandleAgingSession(const char *sessionName, const SessionInfo *sessionNode)
@@ -347,6 +364,9 @@ static bool CheckDMHandleAgingSession(const char *sessionName, const SessionInfo
             TRANS_LOGI(TRANS_SDK, "device management handles aging sessions and keeps opening the session");
             return true;
         }
+    }
+    if (CheckDMHandleSessionPacked(sessionName)) {
+        return true;
     }
     return false;
 }

@@ -399,7 +399,7 @@ HWTEST_F(SoftbusGEnhanceTest, SoftbusGEnhanceTest012, TestSize.Level1)
     ret = UpdateConcurrencyReuseLaneReqIdByActionIdPacked(0, 0, 0);
     EXPECT_EQ(ret, SOFTBUS_NOT_IMPLEMENT);
     ret = UpdateConcurrencyReuseLaneReqIdByUdidPacked(nullptr, 0, 0, 0);
-    EXPECT_EQ(ret, SOFTBUS_INVALID_PARAM);
+    EXPECT_EQ(ret, SOFTBUS_NOT_IMPLEMENT);
     ret = LnnAddLocalVapInfoPacked(LNN_VAP_UNKNOWN, nullptr);
     EXPECT_EQ(ret, SOFTBUS_NOT_IMPLEMENT);
     ret = LnnDeleteLocalVapInfoPacked(LNN_VAP_UNKNOWN);
@@ -593,11 +593,32 @@ HWTEST_F(SoftbusGEnhanceTest, SoftbusGEnhanceTest016, TestSize.Level1)
 
 /**
  * @tc.name: SoftbusGEnhanceTest017
- * @tc.desc: AdapterRegisterEnhanceFunc function test
+ * @tc.desc: Lnn6 function test
  * @tc.type: FUNC
  * @tc.require:
  */
 HWTEST_F(SoftbusGEnhanceTest, SoftbusGEnhanceTest017, TestSize.Level1)
+{
+    int32_t ret = CheckAuthChannelSessionNameValidPacked(TEST_PKG_NAME);
+    EXPECT_FALSE(ret);
+    ret = TransCheckNetworkDelegatePacked(TEST_PKG_NAME);
+    EXPECT_FALSE(ret);
+    ret = TransCheckP2pOnlyPacked(TEST_PKG_NAME);
+    EXPECT_FALSE(ret);
+    ret = TransCheckDcTriggerVirtualLinkPacked(TEST_PKG_NAME);
+    EXPECT_FALSE(ret);
+    int32_t res = LoadTransPermissionJsonPacked();
+    EXPECT_EQ(res, SOFTBUS_OK);
+}
+
+
+/**
+ * @tc.name: SoftbusGEnhanceTest018
+ * @tc.desc: AdapterRegisterEnhanceFunc function test
+ * @tc.type: FUNC
+ * @tc.require:
+ */
+HWTEST_F(SoftbusGEnhanceTest, SoftbusGEnhanceTest018, TestSize.Level1)
 {
     ProxyChannelInfo info;
     int32_t ret = InitSoftbusPagingPacked();
@@ -608,12 +629,12 @@ HWTEST_F(SoftbusGEnhanceTest, SoftbusGEnhanceTest017, TestSize.Level1)
 }
 
 /**
- * @tc.name: SoftbusGEnhanceTest018
+ * @tc.name: SoftbusGEnhanceTest019
  * @tc.desc: AdapterRegisterEnhanceFunc function test
  * @tc.type: FUNC
  * @tc.require:
  */
-HWTEST_F(SoftbusGEnhanceTest, SoftbusGEnhanceTest018, TestSize.Level1)
+HWTEST_F(SoftbusGEnhanceTest, SoftbusGEnhanceTest019, TestSize.Level1)
 {
     bool isClient = true;
     uint32_t businessFlag = 1;
@@ -627,21 +648,6 @@ HWTEST_F(SoftbusGEnhanceTest, SoftbusGEnhanceTest018, TestSize.Level1)
 }
 
 /**
- * @tc.name: SoftbusGEnhanceTest019
- * @tc.desc: AdapterRegisterEnhanceFunc function test
- * @tc.type: FUNC
- * @tc.require:
- */
-HWTEST_F(SoftbusGEnhanceTest, SoftbusGEnhanceTest019, TestSize.Level1)
-{
-    uint32_t chatMode = 1;
-    uint32_t businessFlag = 1;
-    char *pkgName = const_cast<char *>(TEST_PKG_NAME);
-    int32_t ret = TransReversePullUpPacked(chatMode, businessFlag, pkgName);
-    EXPECT_EQ(ret, SOFTBUS_OK);
-}
-
-/**
  * @tc.name: SoftbusGEnhanceTest020
  * @tc.desc: AdapterRegisterEnhanceFunc function test
  * @tc.type: FUNC
@@ -649,10 +655,10 @@ HWTEST_F(SoftbusGEnhanceTest, SoftbusGEnhanceTest019, TestSize.Level1)
  */
 HWTEST_F(SoftbusGEnhanceTest, SoftbusGEnhanceTest020, TestSize.Level1)
 {
-    uint32_t pkgLen = 1;
+    uint32_t chatMode = 1;
     uint32_t businessFlag = 1;
     char *pkgName = const_cast<char *>(TEST_PKG_NAME);
-    int32_t ret = TransGetPkgnameByBusinessFlagPacked(businessFlag, pkgName, pkgLen);
+    int32_t ret = TransReversePullUpPacked(chatMode, businessFlag, pkgName);
     EXPECT_EQ(ret, SOFTBUS_OK);
 }
 
@@ -664,6 +670,21 @@ HWTEST_F(SoftbusGEnhanceTest, SoftbusGEnhanceTest020, TestSize.Level1)
  */
 HWTEST_F(SoftbusGEnhanceTest, SoftbusGEnhanceTest021, TestSize.Level1)
 {
+    uint32_t pkgLen = 1;
+    uint32_t businessFlag = 1;
+    char *pkgName = const_cast<char *>(TEST_PKG_NAME);
+    int32_t ret = TransGetPkgnameByBusinessFlagPacked(businessFlag, pkgName, pkgLen);
+    EXPECT_EQ(ret, SOFTBUS_OK);
+}
+
+/**
+ * @tc.name: SoftbusGEnhanceTest022
+ * @tc.desc: AdapterRegisterEnhanceFunc function test
+ * @tc.type: FUNC
+ * @tc.require:
+ */
+HWTEST_F(SoftbusGEnhanceTest, SoftbusGEnhanceTest022, TestSize.Level1)
+{
     bool isClient = true;
     uint32_t businessFlag = 1;
     int32_t pid = 1;
@@ -674,12 +695,12 @@ HWTEST_F(SoftbusGEnhanceTest, SoftbusGEnhanceTest021, TestSize.Level1)
 }
 
 /**
- * @tc.name: SoftbusGEnhanceTest022
+ * @tc.name: SoftbusGEnhanceTest023
  * @tc.desc: SparkGroupEnhanceFunc function test
  * @tc.type: FUNC
  * @tc.require:
  */
-HWTEST_F(SoftbusGEnhanceTest, SoftbusGEnhanceTest022, TestSize.Level1)
+HWTEST_F(SoftbusGEnhanceTest, SoftbusGEnhanceTest023, TestSize.Level1)
 {
     EXPECT_NO_FATAL_FAILURE(TriggerSparkGroupBuildPacked(0));
     EXPECT_NO_FATAL_FAILURE(TriggerSparkGroupClearPacked(0, 0));
@@ -694,16 +715,36 @@ HWTEST_F(SoftbusGEnhanceTest, SoftbusGEnhanceTest022, TestSize.Level1)
 }
 
 /**
- * @tc.name: IsInWhitelistPacked023
+ * @tc.name: IsInWhitelistPacked024
  * @tc.desc: IsInWhitelistPacked function test
  * @tc.type: FUNC
  * @tc.require:
  */
-HWTEST_F(SoftbusGEnhanceTest, IsInWhitelistPacked023, TestSize.Level1)
+HWTEST_F(SoftbusGEnhanceTest, IsInWhitelistPacked024, TestSize.Level1)
 {
     const char *appName = "ohos.samples.distributedmusicplayer";
     bool ret = IsInWhitelistPacked(appName);
     EXPECT_EQ(ret, true);
+}
+
+/**
+ * @tc.name: SoftbusGEnhanceTest025
+ * @tc.desc: Lnn6 function test
+ * @tc.type: FUNC
+ * @tc.require:
+ */
+HWTEST_F(SoftbusGEnhanceTest, SoftbusGEnhanceTest025, TestSize.Level1)
+{
+    int32_t ret = CheckAuthChannelSessionNameValidPacked(TEST_PKG_NAME);
+    EXPECT_FALSE(ret);
+    ret = TransCheckNetworkDelegatePacked(TEST_PKG_NAME);
+    EXPECT_FALSE(ret);
+    ret = TransCheckP2pOnlyPacked(TEST_PKG_NAME);
+    EXPECT_FALSE(ret);
+    ret = TransCheckDcTriggerVirtualLinkPacked(TEST_PKG_NAME);
+    EXPECT_FALSE(ret);
+    int32_t res = LoadTransPermissionJsonPacked();
+    EXPECT_EQ(res, SOFTBUS_OK);
 }
 
 int32_t SchedulerSetBroadcastParamStub(int32_t bcId, const BroadcastParam *bcParam)
@@ -763,12 +804,12 @@ int32_t DiscFillBtypeStub(uint32_t capability, uint32_t allCap, NSTACKX_Discover
 }
  
 /**
- * @tc.name: SoftbusGEnhanceTest024
+ * @tc.name: SoftbusGEnhanceTest026
  * @tc.desc: SoftbusGEnhanceTest function test
  * @tc.type: FUNC
  * @tc.require:
  */
-HWTEST_F(SoftbusGEnhanceTest, SoftbusGEnhanceTest024, TestSize.Level1)
+HWTEST_F(SoftbusGEnhanceTest, SoftbusGEnhanceTest026, TestSize.Level1)
 {
     DiscEnhanceFuncList *pfnDiscEnhanceFuncList = DiscEnhanceFuncListGet();
     pfnDiscEnhanceFuncList->schedulerSetBroadcastParam = nullptr;

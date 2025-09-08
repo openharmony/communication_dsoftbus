@@ -49,6 +49,11 @@ void ServerUpdateHtpChannelPacked(int64_t flIdentity, int32_t channelId);
 bool CheckHtpPermissionPacked(int32_t uid);
 void TransProcessGroupTalkieInfoPacked(const char *pkgName);
 bool IsInWhitelistPacked(const char *app);
+bool CheckAuthChannelSessionNameValidPacked(const char *sessionName);
+bool TransCheckNetworkDelegatePacked(const char *sessionName);
+bool TransCheckP2pOnlyPacked(const char *sessionName);
+bool TransCheckDcTriggerVirtualLinkPacked(const char *sessionName);
+int32_t LoadTransPermissionJsonPacked(void);
 
 #ifdef __cplusplus
 }
