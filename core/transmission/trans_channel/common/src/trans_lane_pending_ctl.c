@@ -50,10 +50,7 @@
 
 #define TRANS_REQUEST_PENDING_TIMEOUT (5000)
 #define TRANS_FREE_LANE_TIMEOUT (2000)
-#define SESSION_NAME_PHONEPAD "com.huawei.pcassistant.phonepad-connect-channel"
 #define SESSION_NAME_CASTPLUS "CastPlusSessionName"
-#define SESSION_NAME_DISTRIBUTE_COMMUNICATION "com.huawei.boosterd.user"
-#define SESSION_NAME_TRIGGER_VIRTUAL_LINK "com.huawei.boosterd.signal"
 #define SESSION_NAME_ISHARE "IShare"
 #define ISHARE_MIN_NAME_LEN 6
 #define SESSION_NAME_DBD "distributeddata-default"
@@ -1272,7 +1269,7 @@ static int32_t GetAllocInfoBySessionParam(const SessionParam *param, LaneAllocIn
     allocInfo->extendInfo.actionAddr = param->actionId;
     allocInfo->extendInfo.isSupportIpv6 = (param->attr->dataType != TYPE_STREAM && param->actionId > 0);
     allocInfo->extendInfo.networkDelegate = false;
-    if (strcmp(param->sessionName, SESSION_NAME_PHONEPAD) == 0 ||
+    if (TransCheckNetworkDelegatePacked(param->sessionName) ||
         strcmp(param->sessionName, SESSION_NAME_CASTPLUS) == 0) {
         allocInfo->extendInfo.networkDelegate = true;
     }
@@ -1321,12 +1318,12 @@ static int32_t GetRequestOptionBySessionParam(const SessionParam *param, LaneReq
         return SOFTBUS_TRANS_INVALID_SESSION_TYPE;
     }
     requestOption->requestInfo.trans.networkDelegate = false;
-    if (strcmp(param->sessionName, SESSION_NAME_PHONEPAD) == 0 ||
+    if (TransCheckNetworkDelegatePacked(param->sessionName) ||
         strcmp(param->sessionName, SESSION_NAME_CASTPLUS) == 0) {
         requestOption->requestInfo.trans.networkDelegate = true;
     }
     requestOption->requestInfo.trans.p2pOnly = false;
-    if (strcmp(param->sessionName, SESSION_NAME_DISTRIBUTE_COMMUNICATION) == 0 || IsShareSession(param->sessionName)) {
+    if (TransCheckP2pOnlyPacked(param->sessionName) || IsShareSession(param->sessionName)) {
         requestOption->requestInfo.trans.p2pOnly = true;
     }
     requestOption->requestInfo.trans.transType = transType;
@@ -1611,7 +1608,7 @@ int32_t TransAsyncGetLaneInfoByQos(const SessionParam *param, const LaneAllocInf
         (void)TransDelLaneReqFromPendingList(*laneHandle, true);
         return ret;
     }
-    if (strcmp(param->sessionName, SESSION_NAME_TRIGGER_VIRTUAL_LINK) == 0) {
+    if (TransCheckDcTriggerVirtualLinkPacked(param->sessionName)) {
         TRANS_LOGE(TRANS_SVC, "trigger begin");
         DcTriggerVirtualLinkPacked(param->peerDeviceId);
     }
