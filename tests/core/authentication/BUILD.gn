@@ -61,10 +61,10 @@ ohos_unittest("AuthTest") {
   ]
 
   deps = [
+    "$dsoftbus_root_path/adapter:softbus_adapter",
     "$dsoftbus_root_path/core/common:softbus_utils",
     "$dsoftbus_root_path/core/frame:softbus_server",
     "$dsoftbus_root_path/tests/sdk/common:softbus_access_token_test",
-    "$dsoftbus_root_path/adapter:softbus_adapter",
   ]
 
   if (is_standard_system) {
@@ -95,6 +95,7 @@ ohos_unittest("AuthConnectionTest") {
     "unittest/auth_connection_mock.cpp",
     "unittest/auth_connection_test.cpp",
   ]
+  sources += [ "$dsoftbus_root_path/core/connection/wifi_direct_cpp/wifi_direct_manager_virtual.c" ]
 
   include_dirs = [
     "$dsoftbus_dfx_path/interface/include/form",
@@ -135,12 +136,10 @@ ohos_unittest("AuthConnectionTest") {
   ]
 
   deps = [
+    "$dsoftbus_root_path/adapter:softbus_adapter",
     "$dsoftbus_root_path/core/common:softbus_utils",
     "$dsoftbus_root_path/core/frame:softbus_server",
     "$dsoftbus_root_path/tests/sdk/common:softbus_access_token_test",
-    "$dsoftbus_root_path/adapter:softbus_adapter",
-    "$dsoftbus_root_path/core/connection/wifi_direct_cpp:wifi_direct",
-    "$dsoftbus_root_path/dfx:softbus_dfx",
   ]
 
   if (is_standard_system) {
@@ -198,18 +197,18 @@ ohos_unittest("AuthEnhanceMockTest") {
     "$dsoftbus_root_path/core/authentication/src/auth_session_message.c",
     "$dsoftbus_root_path/core/authentication/src/auth_tcp_connection.c",
     "$dsoftbus_root_path/core/authentication/src/virtual/auth_hichain_system_ability_monitor_virtual.c",
-    "$dsoftbus_root_path/core/bus_center/monitor/src/lnn_init_monitor.c",
     "$dsoftbus_root_path/core/bus_center/lnn/net_ledger/common/src/lnn_feature_capability.c",
+    "$dsoftbus_root_path/core/bus_center/monitor/src/lnn_init_monitor.c",
+    "$dsoftbus_root_path/core/bus_center/utils/src/lnn_compress.c",
     "$dsoftbus_root_path/core/bus_center/utils/src/lnn_map.c",
     "$dsoftbus_root_path/core/bus_center/utils/src/lnn_state_machine.c",
+    "$dsoftbus_root_path/core/frame/init/src/g_enhance_auth_func.c",
+    "$dsoftbus_root_path/core/frame/init/src/g_enhance_lnn_func.c",
     "$dsoftbus_root_path/tests/core/bus_center/mock_common/src/lnn_hichain_mock.cpp",
     "$dsoftbus_root_path/tests/core/bus_center/mock_common/src/lnn_socket_mock.cpp",
     "unittest/auth_common_mock.cpp",
     "unittest/auth_net_ledger_mock.cpp",
     "unittest/auth_test_enhance.cpp",
-    "$dsoftbus_root_path/core/frame/init/src/g_enhance_lnn_func.c",
-    "$dsoftbus_root_path/core/frame/init/src/g_enhance_auth_func.c",
-    "$dsoftbus_root_path/core/bus_center/utils/src/lnn_compress.c",
   ]
 
   sources += [ "$dsoftbus_root_path/core/connection/wifi_direct_cpp/wifi_direct_manager_virtual.c" ]
@@ -270,6 +269,7 @@ ohos_unittest("AuthEnhanceMockTest") {
     "$dsoftbus_dfx_path:softbus_dfx",
     "$dsoftbus_root_path/adapter:softbus_adapter",
     "$dsoftbus_root_path/core/common:softbus_utils",
+    "$dsoftbus_root_path/core/connection/wifi_direct_cpp:wifi_direct",
     "$dsoftbus_root_path/core/frame:softbus_server",
     "$dsoftbus_root_path/tests/sdk/common:softbus_access_token_test",
   ]
@@ -318,13 +318,13 @@ ohos_unittest("AuthTestCallBackTest") {
     "$dsoftbus_root_path/core/authentication/src/auth_tcp_connection.c",
     "$dsoftbus_root_path/core/bus_center/lnn/net_ledger/common/src/lnn_feature_capability.c",
     "$dsoftbus_root_path/core/bus_center/monitor/src/lnn_init_monitor.c",
+    "$dsoftbus_root_path/core/frame/init/src/g_enhance_auth_func.c",
+    "$dsoftbus_root_path/core/frame/init/src/g_enhance_lnn_func.c",
     "$dsoftbus_root_path/tests/core/bus_center/mock_common/src/lnn_hichain_mock.cpp",
     "$dsoftbus_root_path/tests/core/bus_center/mock_common/src/lnn_socket_mock.cpp",
     "unittest/auth_common_mock.cpp",
     "unittest/auth_net_ledger_mock.cpp",
     "unittest/auth_test_mock.cpp",
-    "$dsoftbus_root_path/core/frame/init/src/g_enhance_lnn_func.c",
-    "$dsoftbus_root_path/core/frame/init/src/g_enhance_auth_func.c",
   ]
 
   include_dirs = [
@@ -379,9 +379,9 @@ ohos_unittest("AuthTestCallBackTest") {
   deps = [
     "$dsoftbus_root_path/adapter:softbus_adapter",
     "$dsoftbus_root_path/core/common:softbus_utils",
+    "$dsoftbus_root_path/core/connection/wifi_direct_cpp:wifi_direct",
     "$dsoftbus_root_path/core/frame:softbus_server",
     "$dsoftbus_root_path/tests/sdk/common:softbus_access_token_test",
-    "$dsoftbus_root_path/core/connection/wifi_direct_cpp:wifi_direct",
   ]
   if (is_standard_system) {
     external_deps = [
@@ -458,9 +458,9 @@ ohos_unittest("AuthOtherMockTest") {
   deps = [
     "$dsoftbus_root_path/adapter:softbus_adapter",
     "$dsoftbus_root_path/core/common:softbus_utils",
+    "$dsoftbus_root_path/core/connection/wifi_direct_cpp:wifi_direct",
     "$dsoftbus_root_path/core/frame:softbus_server",
     "$dsoftbus_root_path/tests/sdk/common:softbus_access_token_test",
-    "$dsoftbus_root_path/core/connection/wifi_direct_cpp:wifi_direct",
   ]
 
   if (is_standard_system) {
@@ -537,11 +537,11 @@ ohos_unittest("AuthOtherTest") {
   ]
 
   deps = [
+    "$dsoftbus_root_path/adapter:softbus_adapter",
     "$dsoftbus_root_path/core/common:softbus_utils",
+    "$dsoftbus_root_path/core/connection/wifi_direct_cpp:wifi_direct",
     "$dsoftbus_root_path/core/frame:softbus_server",
     "$dsoftbus_root_path/tests/sdk/common:softbus_access_token_test",
-    "$dsoftbus_root_path/adapter:softbus_adapter",
-    "$dsoftbus_root_path/core/connection/wifi_direct_cpp:wifi_direct",
   ]
 
   if (is_standard_system) {
@@ -604,10 +604,10 @@ ohos_unittest("AuthTcpConnectionTest") {
   ]
 
   deps = [
+    "$dsoftbus_root_path/adapter:softbus_adapter",
     "$dsoftbus_root_path/core/common:softbus_utils",
     "$dsoftbus_root_path/core/frame:softbus_server",
     "$dsoftbus_root_path/tests/sdk/common:softbus_access_token_test",
-    "$dsoftbus_root_path/adapter:softbus_adapter",
   ]
 
   if (is_standard_system) {
@@ -678,10 +678,10 @@ ohos_unittest("AuthHichainMockTest") {
   ]
 
   deps = [
-    "$dsoftbus_root_path/core/common:softbus_utils",
-    "$dsoftbus_root_path/tests/sdk/common:softbus_access_token_test",
     "$dsoftbus_root_path/adapter:softbus_adapter",
+    "$dsoftbus_root_path/core/common:softbus_utils",
     "$dsoftbus_root_path/dfx:softbus_dfx",
+    "$dsoftbus_root_path/tests/sdk/common:softbus_access_token_test",
   ]
 
   if (is_standard_system) {
@@ -751,10 +751,10 @@ ohos_unittest("AuthHichainTest") {
   ]
 
   deps = [
+    "$dsoftbus_root_path/adapter:softbus_adapter",
     "$dsoftbus_root_path/core/common:softbus_utils",
     "$dsoftbus_root_path/core/frame:softbus_server",
     "$dsoftbus_root_path/tests/sdk/common:softbus_access_token_test",
-    "$dsoftbus_root_path/adapter:softbus_adapter",
   ]
 
   if (is_standard_system) {
@@ -843,17 +843,16 @@ ohos_unittest("AuthDeviceProfileTest") {
   }
 }
 
-
 ohos_unittest("AuthSessionJsonTest") {
   module_out_path = module_output_path
   sources = [
     "$dsoftbus_root_path/core/authentication/src/auth_common.c",
+    "$dsoftbus_root_path/core/frame/init/src/g_enhance_auth_func.c",
+    "$dsoftbus_root_path/core/frame/init/src/g_enhance_auth_func_pack.c",
+    "$dsoftbus_root_path/core/frame/init/src/g_enhance_lnn_func.c",
+    "$dsoftbus_root_path/core/frame/init/src/g_enhance_lnn_func_pack.c",
     "unittest/auth_session_json_mock.cpp",
     "unittest/auth_session_json_test.cpp",
-    "$dsoftbus_root_path/core/frame/init/src/g_enhance_lnn_func_pack.c",
-    "$dsoftbus_root_path/core/frame/init/src/g_enhance_lnn_func.c",
-    "$dsoftbus_root_path/core/frame/init/src/g_enhance_auth_func_pack.c",
-    "$dsoftbus_root_path/core/frame/init/src/g_enhance_auth_func.c",
   ]
 
   include_dirs = [
@@ -894,10 +893,10 @@ ohos_unittest("AuthSessionJsonTest") {
   ]
 
   deps = [
-    "$dsoftbus_root_path/core/common:softbus_utils",
-    "$dsoftbus_root_path/tests/sdk/common:softbus_access_token_test",
     "$dsoftbus_root_path/adapter:softbus_adapter",
+    "$dsoftbus_root_path/core/common:softbus_utils",
     "$dsoftbus_root_path/dfx:softbus_dfx",
+    "$dsoftbus_root_path/tests/sdk/common:softbus_access_token_test",
   ]
 
   if (is_standard_system) {
@@ -965,10 +964,11 @@ ohos_unittest("AuthSessionMessageTest") {
   ]
 
   deps = [
+    "$dsoftbus_root_path/adapter:softbus_adapter",
     "$dsoftbus_root_path/core/common:softbus_utils",
+    "$dsoftbus_root_path/core/connection/wifi_direct_cpp:wifi_direct",
     "$dsoftbus_root_path/core/frame:softbus_server",
     "$dsoftbus_root_path/tests/sdk/common:softbus_access_token_test",
-    "$dsoftbus_root_path/adapter:softbus_adapter",
   ]
 
   if (is_standard_system) {
@@ -1000,10 +1000,10 @@ ohos_unittest("AuthManagerTest") {
   include_dirs = auth_manager_include
 
   deps = [
+    "$dsoftbus_root_path/adapter:softbus_adapter",
     "$dsoftbus_root_path/core/common:softbus_utils",
     "$dsoftbus_root_path/core/frame:softbus_server",
     "$dsoftbus_root_path/tests/sdk/common:softbus_access_token_test",
-    "$dsoftbus_root_path/adapter:softbus_adapter",
   ]
 
   if (is_standard_system) {
@@ -1087,8 +1087,6 @@ ohos_unittest("AuthSessionFsmTest") {
     "$dsoftbus_root_path/core/connection/wifi_direct_cpp:wifi_direct",
     "$dsoftbus_root_path/core/frame:softbus_server",
     "$dsoftbus_root_path/tests/sdk/common:softbus_access_token_test",
-    "$dsoftbus_root_path/adapter:softbus_adapter",
-    "$dsoftbus_root_path/core/connection/wifi_direct_cpp:wifi_direct",
   ]
 
   if (is_standard_system) {
@@ -1135,10 +1133,10 @@ ohos_unittest("AuthSessionKeyTest") {
   ]
 
   deps = [
+    "$dsoftbus_root_path/adapter:softbus_adapter",
     "$dsoftbus_root_path/core/common:softbus_utils",
     "$dsoftbus_root_path/core/frame:softbus_server",
     "$dsoftbus_root_path/tests/sdk/common:softbus_access_token_test",
-    "$dsoftbus_root_path/adapter:softbus_adapter",
   ]
 
   if (is_standard_system) {
@@ -1174,10 +1172,10 @@ ohos_unittest("AuthNormalizeRequestTest") {
   ]
 
   deps = [
+    "$dsoftbus_root_path/adapter:softbus_adapter",
     "$dsoftbus_root_path/core/common:softbus_utils",
     "$dsoftbus_root_path/core/frame:softbus_server",
     "$dsoftbus_root_path/tests/sdk/common:softbus_access_token_test",
-    "$dsoftbus_root_path/adapter:softbus_adapter",
   ]
 
   if (is_standard_system) {
@@ -1252,10 +1250,10 @@ ohos_unittest("AuthLaneTest") {
   ]
 
   deps = [
+    "$dsoftbus_root_path/adapter:softbus_adapter",
     "$dsoftbus_root_path/core/common:softbus_utils",
     "$dsoftbus_root_path/core/frame:softbus_server",
     "$dsoftbus_root_path/dfx:softbus_dfx",
-    "$dsoftbus_root_path/adapter:softbus_adapter",
   ]
 
   if (is_standard_system) {
@@ -1282,80 +1280,113 @@ ohos_unittest("AuthLaneTest") {
   }
 }
 
-# ohos_unittest("AuthDeviceProfileListenerTest") {
-#   module_out_path = module_output_path
-#   sources = [
-#     "$dsoftbus_root_path/core/authentication/bind/auth_device_profile_listener.cpp",
-#     "unittest/auth_device_profile_listener_mock.cpp",
-#     "unittest/auth_device_profile_listener_test.cpp",
-#   ]
+ohos_unittest("AuthDeviceProfileListenerTest") {
+  module_out_path = module_output_path
+  sources = [
+    "$dsoftbus_root_path/core/authentication/bind/auth_device_profile_listener.cpp",
+    "unittest/auth_device_profile_listener_mock.cpp",
+    "unittest/auth_device_profile_listener_test.cpp",
+  ]
+  include_dirs = [
+    "$dsoftbus_root_path/core/authentication/interface",
+    "$dsoftbus_root_path/core/authentication/include",
+    "$dsoftbus_root_path/core/adapter/bus_center/include",
+    "$dsoftbus_root_path/core/bus_center/interface",
+    "$dsoftbus_root_path/core/bus_center/lnn/lane_hub/heartbeat/include",
+    "$dsoftbus_root_path/core/bus_center/lnn/net_builder/include",
+    "$dsoftbus_root_path/core/bus_center/lnn/net_buscenter/include",
+    "$dsoftbus_root_path/core/bus_center/lnn/net_ledger/common/include",
+    "$dsoftbus_root_path/core/bus_center/lnn/net_ledger/decision_db/include",
+    "$dsoftbus_root_path/core/bus_center/lnn/net_ledger/distributed_ledger/include",
+    "$dsoftbus_root_path/core/bus_center/service/include",
+    "$dsoftbus_root_path/core/bus_center/utils/include",
+    "$dsoftbus_root_path/core/discovery/interface",
+    "$dsoftbus_root_path/core/discovery/manager/include",
+    "$dsoftbus_root_path/interfaces/inner_kits/lnn",
+    "$dsoftbus_root_path/interfaces/kits",
+    "$dsoftbus_root_path/interfaces/kits/bus_center",
+  ]
 
-#   include_dirs = [
-#     "$dsoftbus_root_path/core/authentication/interface",
-#     "$dsoftbus_root_path/core/authentication/include",
-#     "$dsoftbus_root_path/core/adapter/bus_center/include",
-#     "$dsoftbus_root_path/core/bus_center/interface",
-#     "$dsoftbus_root_path/core/bus_center/lnn/lane_hub/heartbeat/include",
-#     "$dsoftbus_root_path/core/bus_center/lnn/net_builder/include",
-#     "$dsoftbus_root_path/core/bus_center/lnn/net_buscenter/include",
-#     "$dsoftbus_root_path/core/bus_center/lnn/net_ledger/common/include",
-#     "$dsoftbus_root_path/core/bus_center/lnn/net_ledger/decision_db/include",
-#     "$dsoftbus_root_path/core/bus_center/lnn/net_ledger/distributed_ledger/include",
-#     "$dsoftbus_root_path/core/bus_center/service/include",
-#     "$dsoftbus_root_path/core/bus_center/utils/include",
-#     "$dsoftbus_root_path/core/discovery/interface",
-#     "$dsoftbus_root_path/core/discovery/manager/include",
-#     "$dsoftbus_root_path/interfaces/inner_kits/lnn",
-#     "$dsoftbus_root_path/interfaces/kits",
-#     "$dsoftbus_root_path/interfaces/kits/bus_center",
-#   ]
+  deps = [
+    "$dsoftbus_root_path/core/common:softbus_utils",
+    "$dsoftbus_root_path/dfx:softbus_dfx",
+  ]
 
-#   deps = [
-#     "$dsoftbus_root_path/core/common:softbus_utils",
-#     "$dsoftbus_root_path/adapter:softbus_adapter",
-#     "$dsoftbus_root_path/dfx:softbus_dfx",
-#   ]
+  if (!defined(global_parts_info) ||
+      defined(global_parts_info.deviceprofile_device_info_manager)) {
+    external_deps = [
+      "device_info_manager:distributed_device_profile_common",
+      "device_info_manager:distributed_device_profile_sdk",
+      "hilog:libhilog",
+      "ipc:ipc_core",
+    ]
+  } else {
+    external_deps = [
+      "hilog:libhilog",
+      "ipc:ipc_core",
+    ]
+  }
+  external_deps += [
+    "bounds_checking_function:libsec_shared",
+    "c_utils:utils",
+    "device_auth:deviceauth_sdk",
+    "googletest:gmock_main",
+    "googletest:gtest_main",
+    "samgr:samgr_proxy",
+  ]
+}
 
-#   if (!defined(global_parts_info) ||
-#       defined(global_parts_info.deviceprofile_device_info_manager)) {
-#     external_deps = [
-#       "device_info_manager:distributed_device_profile_common",
-#       "device_info_manager:distributed_device_profile_sdk",
-#       "hilog:libhilog",
-#       "ipc:ipc_core",
-#     ]
-#   } else {
-#     external_deps = [
-#       "hilog:libhilog",
-#       "ipc:ipc_core",
-#     ]
-#   }
-#   external_deps += [
-#     "bounds_checking_function:libsec_shared",
-#     "c_utils:utils",
-#     "device_auth:deviceauth_sdk",
-#     "googletest:gmock_main",
-#     "googletest:gtest_main",
-#     "samgr:samgr_proxy",
-#   ]
-#   # if (defined(ohos_lite)) {
-#   #  if (ohos_kernel_type == "liteos_m") {
+ohos_unittest("AuthHichainIdServiceTest") {
+  module_out_path = module_output_path
+  sources = [
+    "unittest/auth_hichain_id_service_mock.cpp",
+    "unittest/auth_hichain_id_service_test.cpp",
+  ]
 
-#   #  }
-#   # }
-#   external_deps += [ "device_info_manager:distributed_device_profile_sdk" ]
-# }
+  include_dirs = [
+    "$dsoftbus_dfx_path/interface/include/form",
+    "$dsoftbus_dfx_path/interface/include/legacy",
+    "$dsoftbus_root_path/core/adapter/bus_center/include",
+    "$dsoftbus_root_path/core/authentication/include",
+    "$dsoftbus_root_path/core/authentication/interface",
+    "$dsoftbus_root_path/core/authentication/src",
+    "$dsoftbus_root_path/core/bus_center/interface",
+    "$dsoftbus_root_path/core/bus_center/lnn/lane_hub/heartbeat/include",
+    "$dsoftbus_root_path/core/bus_center/lnn/net_builder/include",
+    "$dsoftbus_root_path/core/bus_center/lnn/net_ledger/common/include",
+    "$dsoftbus_root_path/core/bus_center/lnn/net_ledger/decision_db/include",
+    "$dsoftbus_root_path/core/bus_center/service/include",
+    "$dsoftbus_root_path/core/bus_center/utils/include",
+    "$dsoftbus_root_path/core/discovery/interface",
+    "$dsoftbus_root_path/core/discovery/manager/include",
+    "$dsoftbus_root_path/interfaces/kits/bus_center",
+  ]
+
+  deps = [
+    "$dsoftbus_root_path/dfx:softbus_dfx",
+    "$dsoftbus_root_path/adapter:softbus_adapter",
+    "$dsoftbus_root_path/core/common:softbus_utils",
+  ]
+
+  external_deps = [
+    "bounds_checking_function:libsec_shared",
+    "cJSON:cjson",
+    "c_utils:utils",
+    "device_auth:deviceauth_sdk",
+    "googletest:gmock_main",
+    "googletest:gtest_main",
+    "hilog:libhilog",
+  ]
+}
 
 ohos_unittest("AuthSessionJsonMockTest") {
   module_out_path = module_output_path
   sources = [
+    "$dsoftbus_root_path/core/frame/common/src/softbus_init_common.c",
+    "$dsoftbus_root_path/core/frame/init/src/g_enhance_auth_func.c",
+    "$dsoftbus_root_path/core/frame/init/src/g_enhance_lnn_func.c",
     "unittest/auth_session_json_deps_mock.cpp",
     "unittest/auth_session_json_mock_test.cpp",
-    "$dsoftbus_root_path/core/frame/init/src/g_enhance_lnn_func.c",
-    "$dsoftbus_root_path/core/frame/init/src/g_enhance_auth_func.c",
-    "$dsoftbus_root_path/core/frame/common/src/softbus_init_common.c",
-    "$dsoftbus_root_path/core/frame/init/src/g_enhance_lnn_func_pack.c",
-    "$dsoftbus_root_path/core/frame/init/src/g_enhance_auth_func_pack.c",
   ]
 
   include_dirs = [
@@ -1389,11 +1420,11 @@ ohos_unittest("AuthSessionJsonMockTest") {
   ]
 
   deps = [
+    "$dsoftbus_root_path/adapter:softbus_adapter",
     "$dsoftbus_root_path/core/common:softbus_utils",
     "$dsoftbus_root_path/core/frame:softbus_server",
-    "$dsoftbus_root_path/tests/sdk/common:softbus_access_token_test",
-    "$dsoftbus_root_path/adapter:softbus_adapter",
     "$dsoftbus_root_path/dfx:softbus_dfx",
+    "$dsoftbus_root_path/tests/sdk/common:softbus_access_token_test",
   ]
 
   external_deps = [
@@ -1408,8 +1439,8 @@ ohos_unittest("AuthSessionJsonMockTest") {
 ohos_unittest("AuthPreLinkTest") {
   module_out_path = module_output_path
   sources = [
-    "$dsoftbus_root_path/core/frame/init/src/g_enhance_lnn_func_pack.c",
     "$dsoftbus_root_path/core/frame/init/src/g_enhance_lnn_func.c",
+    "$dsoftbus_root_path/core/frame/init/src/g_enhance_lnn_func_pack.c",
     "unittest/auth_pre_link_mock.cpp",
     "unittest/auth_pre_link_test.cpp",
   ]
@@ -1433,60 +1464,17 @@ ohos_unittest("AuthPreLinkTest") {
     "$dsoftbus_root_path/core/discovery/interface",
     "$dsoftbus_root_path/core/discovery/manager/include",
     "$dsoftbus_root_path/interfaces/inner_kits/lnn",
-    "$dsoftbus_root_path/interfaces/inner_kits/transport",
     "$dsoftbus_root_path/interfaces/kits/bus_center",
   ]
 
   deps = [
-    "$dsoftbus_root_path/core/common:softbus_utils",
     "$dsoftbus_root_path/adapter:softbus_adapter",
+    "$dsoftbus_root_path/core/common:softbus_utils",
+    "$dsoftbus_root_path/core/frame:softbus_server",
   ]
 
   external_deps = [
     "c_utils:utils",
-    "googletest:gmock_main",
-    "googletest:gtest_main",
-    "hilog:libhilog",
-  ]
-}
-
-ohos_unittest("AuthHichainIdServiceTest") {
-  module_out_path = module_output_path
-  sources = [
-    "unittest/auth_hichain_id_service_mock.cpp",
-    "unittest/auth_hichain_id_service_test.cpp",
-  ]
-
-  include_dirs = [
-    "$dsoftbus_dfx_path/interface/include/form",
-    "$dsoftbus_dfx_path/interface/include/legacy",
-    "$dsoftbus_root_path/core/adapter/bus_center/include",
-    "$dsoftbus_root_path/core/authentication/include",
-    "$dsoftbus_root_path/core/authentication/interface",
-    "$dsoftbus_root_path/core/authentication/src",
-    "$dsoftbus_root_path/core/bus_center/interface",
-    "$dsoftbus_root_path/core/bus_center/lnn/lane_hub/heartbeat/include",
-    "$dsoftbus_root_path/core/bus_center/lnn/net_builder/include",
-    "$dsoftbus_root_path/core/bus_center/lnn/net_ledger/common/include",
-    "$dsoftbus_root_path/core/bus_center/lnn/net_ledger/decision_db/include",
-    "$dsoftbus_root_path/core/bus_center/service/include",
-    "$dsoftbus_root_path/core/bus_center/utils/include",
-    "$dsoftbus_root_path/core/discovery/interface",
-    "$dsoftbus_root_path/core/discovery/manager/include",
-    "$dsoftbus_root_path/interfaces/kits/bus_center",
-  ]
-
-  deps = [
-    "$dsoftbus_root_path/core/common:softbus_utils",
-    "$dsoftbus_root_path/adapter:softbus_adapter",
-    "$dsoftbus_root_path/dfx:softbus_dfx",
-  ]
-
-  external_deps = [
-    "bounds_checking_function:libsec_shared",
-    "cJSON:cjson",
-    "c_utils:utils",
-    "device_auth:deviceauth_sdk",
     "googletest:gmock_main",
     "googletest:gtest_main",
     "hilog:libhilog",
@@ -1531,10 +1519,10 @@ ohos_unittest("AuthUkManagerTest") {
   ]
 
   deps = [
+    "$dsoftbus_root_path/adapter:softbus_adapter",
     "$dsoftbus_root_path/core/common:softbus_utils",
     "$dsoftbus_root_path/core/frame:softbus_server",
     "$dsoftbus_root_path/tests/sdk/common:softbus_access_token_test",
-    "$dsoftbus_root_path/adapter:softbus_adapter",
   ]
 
   if (is_standard_system) {
@@ -1590,6 +1578,7 @@ ohos_unittest("AuthUserCommonKeyTest") {
   ]
 
   deps = [
+    "$dsoftbus_root_path/adapter:softbus_adapter",
     "$dsoftbus_root_path/core/common:softbus_utils",
     "$dsoftbus_root_path/core/frame:softbus_server",
     "$dsoftbus_root_path/tests/sdk/common:softbus_access_token_test",
@@ -1648,11 +1637,11 @@ ohos_unittest("AuthRequestTest") {
   ]
 
   deps = [
+    "$dsoftbus_root_path/adapter:softbus_adapter",
     "$dsoftbus_root_path/core/common:softbus_utils",
+    "$dsoftbus_root_path/core/connection/wifi_direct_cpp:wifi_direct",
     "$dsoftbus_root_path/core/frame:softbus_server",
     "$dsoftbus_root_path/tests/sdk/common:softbus_access_token_test",
-    "$dsoftbus_root_path/adapter:softbus_adapter",
-    "$dsoftbus_root_path/core/connection/wifi_direct_cpp:wifi_direct",
   ]
 
   if (is_standard_system) {
@@ -1758,9 +1747,9 @@ ohos_unittest("AuthApplyKeyProcessTest") {
 group("unittest") {
   testonly = true
   deps = [
+    ":AuthApplyKeyProcessTest",
     ":AuthConnectionTest",
-    # ":AuthDeviceProfileListenerTest",
-    # ":AuthDeviceProfileTest",
+    ":AuthDeviceProfileTest",
     ":AuthEnhanceMockTest",
     ":AuthHichainIdServiceTest",
     ":AuthHichainMockTest",
@@ -1770,6 +1759,7 @@ group("unittest") {
     ":AuthOtherMockTest",
     ":AuthOtherTest",
     ":AuthPreLinkTest",
+    ":AuthRequestTest",
     ":AuthSessionFsmTest",
     ":AuthSessionJsonMockTest",
     ":AuthSessionJsonTest",
@@ -1780,9 +1770,11 @@ group("unittest") {
     ":AuthTestCallBackTest",
     ":AuthUkManagerTest",
     ":AuthUserCommonKeyTest",
-    ":AuthRequestTest",
-    ":AuthApplyKeyProcessTest",
   ]
+  if (!defined(global_parts_info) ||
+      defined(global_parts_info.deviceprofile_device_info_manager)) {
+      deps += [ ":AuthDeviceProfileListenerTest" ]
+  }
   if (dsoftbus_feature_lnn_lane_mgr) {
     deps += [ ":AuthLaneTest" ]
   }
