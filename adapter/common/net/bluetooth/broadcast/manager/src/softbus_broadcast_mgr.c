@@ -941,7 +941,7 @@ static void BcReportScanDataCallback(BroadcastProtocol protocol,
         callback.OnReportScanDataCallback((int32_t)managerId, &bcInfo);
     }
     if (!isFindMatchFiter) {
-        DISC_LOGW(DISC_BROADCAST, "not find matched filter, adapterScanId=%{public}d", adapterScanId);
+        DISC_LOGD(DISC_BROADCAST, "not find matched filter, adapterScanId=%{public}d", adapterScanId);
     }
     ReleaseBroadcastReportInfo(&bcInfo);
 }
@@ -2278,7 +2278,7 @@ int32_t PerformSetBroadcastingParam(int32_t bcId, SoftbusBroadcastParam *softbus
     if (!g_bcManager[bcId].isDisableCb) {
         ret = DisableBroadcastingWaitSignal(bcId, &g_bcLock);
         SoftBusMutexUnlock(&g_bcLock);
-        DISC_CHECK_AND_RETURN_RET_LOGE(ret == SOFTBUS_OK, ret, DISC_BROADCAST,
+        DISC_CHECK_AND_RETURN_RET_LOGD(ret == SOFTBUS_OK, ret, DISC_BROADCAST,
             "wait pausecondition fail managerId=%{public}d", bcId);
     } else {
         SoftBusMutexUnlock(&g_bcLock);
@@ -2525,7 +2525,7 @@ static int32_t ProcessFliterChanged(int32_t listenerId, SoftBusBcScanParams *ada
             GetSrvType(scanManager->srvType), listenerId, scanManager->adapterScanId,
             adapterParam->scanInterval, adapterParam->scanWindow);
     } else {
-        DISC_LOGI(DISC_BROADCAST, "channel is scanning, add filter");
+        DISC_LOGI(DISC_BROADCAST, "sanId=%{public}d is scanning, add filter", scanManager->adapterScanId);
         ret = GetScanFiltersForOneListener(listenerId, &adapterFilter, &filterSize);
         DISC_CHECK_AND_RETURN_RET_LOGE(ret == SOFTBUS_OK, ret, DISC_BROADCAST, "get bc scan filters failed");
         ret = g_interface[protocol]->SetScanParams(scanManager->adapterScanId, adapterParam,
