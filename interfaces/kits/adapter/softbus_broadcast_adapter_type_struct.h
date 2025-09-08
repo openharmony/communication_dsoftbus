@@ -14,7 +14,7 @@
  */
 
 /**
- * @file softbus_broadcast_adapter_type.h
+ * @file softbus_broadcast_adapter_type_struct.h
  * @brief Declare functions and constants for the soft bus broadcast adaptation
  *
  * @since 4.1

@@ -24,8 +24,8 @@
 #ifndef SOFTBUS_BROADCAST_ADAPTER_INTERFACE_H
 #define SOFTBUS_BROADCAST_ADAPTER_INTERFACE_H
 
-#include "softbus_broadcast_adapter_type.h"
 #include "softbus_broadcast_adapter_interface_struct.h"
+#include "softbus_broadcast_adapter_type_struct.h"
 #include "softbus_broadcast_type.h"
 
 #ifdef __cplusplus
