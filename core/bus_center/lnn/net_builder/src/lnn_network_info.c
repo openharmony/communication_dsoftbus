@@ -789,7 +789,7 @@ int32_t LnnInitNetworkInfo(void)
     if (ret != SOFTBUS_OK) {
         return ret;
     }
-    LNN_LOGE(LNN_BUILDER, "lnn init network info sync done");
+    LNN_LOGI(LNN_BUILDER, "lnn init network info sync done");
     return SOFTBUS_OK;
 }
 
@@ -873,12 +873,12 @@ static void DoSendUserId(const char *udid, uint8_t *msg)
 
     char *networkId = (char *)SoftBusCalloc(NETWORK_ID_BUF_LEN);
     if (networkId == NULL) {
-        LNN_LOGI(LNN_BUILDER, "malloc fail");
+        LNN_LOGE(LNN_BUILDER, "malloc fail");
         return;
     }
     ret = memcpy_s(networkId, NETWORK_ID_BUF_LEN, nodeInfo.networkId, NETWORK_ID_BUF_LEN);
     if (ret != EOK) {
-        LNN_LOGI(LNN_BUILDER, "memcpy_s failed! ret:%{public}d", ret);
+        LNN_LOGE(LNN_BUILDER, "memcpy_s failed! ret:%{public}d", ret);
         SoftBusFree(networkId);
         return;
     }

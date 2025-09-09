@@ -24,7 +24,6 @@
 #include "auth_deviceprofile.h"
 #include "auth_interface.h"
 #include "auth_request.h"
-#include "auth_request.h"
 #include "auth_hichain_adapter.h"
 #include "bus_center_event.h"
 #include "bus_center_manager.h"
