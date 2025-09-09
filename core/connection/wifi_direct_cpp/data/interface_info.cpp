@@ -414,4 +414,14 @@ void InterfaceInfo::DecreaseRefCount()
     Set(InterfaceInfoKey::REUSE_COUNT, count);
     CONN_LOGI(CONN_WIFI_DIRECT, "reuseCnt = %{public}d", count);
 }
+
+void InterfaceInfo::SetLocalCustomPort(int32_t value)
+{
+    Set(InterfaceInfoKey::LOCAL_CUSTOM_PORT, value);
+}
+
+int32_t InterfaceInfo::GetLocalCustomPort() const
+{
+    return Get(InterfaceInfoKey::LOCAL_CUSTOM_PORT, 0);
+}
 } // namespace OHOS::SoftBus
