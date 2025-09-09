@@ -15,6 +15,7 @@
 
 #include "softbus_rsa_encrypt.h"
 
+#include <fuzzer/FuzzedDataProvider.h>
 #include <hks_api.h>
 #include <hks_param.h>
 #include <hks_type.h>
@@ -24,9 +25,14 @@
 #include "softbus_adapter_mem.h"
 #include "softbus_error_code.h"
 
+using namespace std;
 namespace OHOS {
-bool SoftBusRsaEncryptFuzzTest(const uint8_t *data, size_t size)
+bool SoftBusRsaEncryptFuzzTest(FuzzedDataProvider &provider)
 {
+    uint32_t size = provider.ConsumeIntegral<int32_t>();
+    string stringData = provider.ConsumeBytesAsString(size);
+    size = stringData.size();
+    const uint8_t *data = reinterpret_cast<const uint8_t *>(stringData.data());
     uint32_t encryptedDataLen = 0;
     uint8_t *encryptedData = nullptr;
     PublicKey peerPublicKey = { data, size };
@@ -39,8 +45,12 @@ bool SoftBusRsaEncryptFuzzTest(const uint8_t *data, size_t size)
     return true;
 }
 
-bool SoftBusRsaDecryptFuzzTest(const uint8_t *data, size_t size)
+bool SoftBusRsaDecryptFuzzTest(FuzzedDataProvider &provider)
 {
+    uint32_t size = provider.ConsumeIntegral<int32_t>();
+    string stringData = provider.ConsumeBytesAsString(size);
+    size = stringData.size();
+    const uint8_t *data = reinterpret_cast<const uint8_t *>(stringData.data());
     uint32_t decryptedDataLen = 0;
     uint8_t *decryptedData = nullptr;
 
@@ -60,7 +70,8 @@ extern "C" int32_t LLVMFuzzerTestOneInput(const uint8_t *data, size_t size)
         return 0;
     }
 
-    OHOS::SoftBusRsaEncryptFuzzTest(data, size);
-    OHOS::SoftBusRsaDecryptFuzzTest(data, size);
+    FuzzedDataProvider provider(data, size);
+    OHOS::SoftBusRsaEncryptFuzzTest(provider);
+    OHOS::SoftBusRsaDecryptFuzzTest(provider);
     return 0;
 }
