@@ -58,7 +58,7 @@ void SoftBusSocketRecvFromFuzzTest()
     GenerateInt32(socketFd);
     GenerateUint32(len);
     GenerateInt32(flags);
-    SoftBusSockAddr  fromAddr;
+    SoftBusSockAddr fromAddr;
     memset_s(&fromAddr, sizeof(SoftBusSockAddr), 0, sizeof(SoftBusSockAddr));
     int32_t fromAddrLen = 0;
     SoftBusSocketRecvFrom(socketFd, &buf, len, flags, &fromAddr, &fromAddrLen);
