@@ -1226,7 +1226,6 @@ static void DealDataWhenBackground(ProxyBaseInfo *baseInfo, const uint8_t *data,
     int64_t secDiff = currentTime.sec - lastTime.sec;
  
     if (currentTime.sec >= lastTime.sec && secDiff < MIN_INTERVAL_TIME) {
-        TRANS_LOGI(TRANS_SVC, "[br_proxy] timediff:%{public}lld", secDiff);
         return;
     }
     BrProxyInfo info;
