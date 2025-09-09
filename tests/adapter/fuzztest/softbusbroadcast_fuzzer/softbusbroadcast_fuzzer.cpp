@@ -19,6 +19,7 @@
 #include "softbus_ble_gatt_public.h"
 
 #include <cstddef>
+#include <fuzzer/FuzzedDataProvider.h>
 #include <type_traits>
 #include <securec.h>
 
@@ -37,6 +38,7 @@
 #define BROADCAST_MAX_LEN (ADV_DATA_MAX_LEN + RESP_DATA_MAX_LEN)
 #define FILTER_SIZE 1
 
+using namespace std;
 namespace OHOS {
 
 const uint8_t *BASE_FUZZ_DATA = nullptr;
@@ -316,30 +318,44 @@ static ScanCallback g_scanListener = {
     .OnReportScanDataCallback = BleScanResultCallback,
 };
 
-void StartBroadcastingFuzzTest(int32_t bcId, const uint8_t* data, size_t size)
+void StartBroadcastingFuzzTest(int32_t bcId, FuzzedDataProvider &provider)
 {
+    uint32_t size = provider.ConsumeIntegral<int32_t>();
+    string stringData = provider.ConsumeBytesAsString(size);
+    const uint8_t *data = reinterpret_cast<const uint8_t *>(stringData.data());
     BroadcastParam param;
-    BuildBroadcastParam(data, size, &param);
+    BuildBroadcastParam(data, stringData.size(), &param);
+    string stringData1 = provider.ConsumeBytesAsString(size);
+    const uint8_t *data1 = reinterpret_cast<const uint8_t *>(stringData1.data());
     BroadcastPacket packet;
-    BuildBroadcastPacket(data, size, &packet);
+    BuildBroadcastPacket(data1, stringData1.size(), &packet);
 
     StartBroadcasting(bcId, &param, &packet);
     DestroyBleConfigAdvData(&packet);
 }
 
-void UpdateBroadcastingFuzzTest(int32_t bcId, const uint8_t* data, size_t size)
+void UpdateBroadcastingFuzzTest(int32_t bcId, FuzzedDataProvider &provider)
 {
+    uint32_t size = provider.ConsumeIntegral<int32_t>();
+    string stringData = provider.ConsumeBytesAsString(size);
+    const uint8_t *data = reinterpret_cast<const uint8_t *>(stringData.data());
     BroadcastParam param;
-    BuildBroadcastParam(data, size, &param);
+    BuildBroadcastParam(data, stringData.size(), &param);
+    string stringData1 = provider.ConsumeBytesAsString(size);
+    const uint8_t *data1 = reinterpret_cast<const uint8_t *>(stringData1.data());
     BroadcastPacket packet;
-    BuildBroadcastPacket(data, size, &packet);
+    BuildBroadcastPacket(data1, stringData1.size(), &packet);
 
     UpdateBroadcasting(bcId, &param, &packet);
     DestroyBleConfigAdvData(&packet);
 }
 
-void SetBroadcastingDataFuzzTest(int32_t bcId, const uint8_t* data, size_t size)
+void SetBroadcastingDataFuzzTest(int32_t bcId, FuzzedDataProvider &provider)
 {
+    uint32_t size = provider.ConsumeIntegral<int32_t>();
+    string stringData = provider.ConsumeBytesAsString(size);
+    size = stringData.size();
+    const uint8_t *data = reinterpret_cast<const uint8_t *>(stringData.data());
     BroadcastPacket packet;
     BuildBroadcastPacket(data, size, &packet);
 
@@ -364,8 +380,12 @@ void StopScanFuzzTest(int32_t listenerId)
     StopScan(listenerId);
 }
 
-void BroadcastSetAdvDeviceParamFuzzTest(int32_t listenerId, const uint8_t* data, size_t size)
+void BroadcastSetAdvDeviceParamFuzzTest(int32_t listenerId, FuzzedDataProvider &provider)
 {
+    uint32_t size = provider.ConsumeIntegral<int32_t>();
+    string stringData = provider.ConsumeBytesAsString(size);
+    size = stringData.size();
+    const uint8_t *data = reinterpret_cast<const uint8_t *>(stringData.data());
     g_baseFuzzPos = 0;
     uint8_t type = GetData<uint8_t>();
     LpScanParam lpScanParam = BuildLpScanParam();
@@ -405,8 +425,12 @@ void BroadcastSetLpAdvParamFuzzTest()
     BroadcastSetLpAdvParam(duration, maxExtAdvEvents, window, interval, lpAdvBCHandle);
 }
 
-void SetBroadcastingParamFuzzTest(int32_t bcId, const uint8_t* data, size_t size)
+void SetBroadcastingParamFuzzTest(int32_t bcId, FuzzedDataProvider &provider)
 {
+    uint32_t size = provider.ConsumeIntegral<int32_t>();
+    string stringData = provider.ConsumeBytesAsString(size);
+    size = stringData.size();
+    const uint8_t *data = reinterpret_cast<const uint8_t *>(stringData.data());
     BroadcastParam param;
     BuildBroadcastParam(data, size, &param);
 
@@ -546,21 +570,26 @@ void AssembleAdvDataFuzzTest()
     data.flag = GetData<uint8_t>();
     data.bcData = BuildSoftbusBroadcastPayload();
     data.rspData = BuildSoftbusBroadcastPayload();
-
-    AssembleAdvData(&data, &dataLen);
+    uint8_t *advData = AssembleAdvData(&data, &dataLen);
+    if (advData != NULL) {
+        SoftBusFree(advData);
+    }
 }
 
 void AssembleRspDataFuzzTest()
 {
     SoftbusBroadcastPayload payload = BuildSoftbusBroadcastPayload();
     uint16_t dataLen = GetData<uint16_t>();
-    
-    AssembleRspData(&payload, &dataLen);
+    uint8_t *rspData = AssembleRspData(&payload, &dataLen);
+    if (rspData != NULL) {
+        SoftBusFree(rspData);
+    }
 }
 
 void ParseScanResultFuzzTest()
 {
     SoftBusBcScanResult dst;
+    (void)memset_s(&dst, sizeof(SoftBusBcScanResult), 0, sizeof(SoftBusBcScanResult));
     dst.eventType = GetData<uint8_t>();
     dst.dataStatus = GetData<uint8_t>();
     dst.primaryPhy = GetData<uint8_t>();
@@ -579,6 +608,9 @@ void ParseScanResultFuzzTest()
     uint8_t *data = GetDataArray<uint8_t>();
 
     ParseScanResult(data, g_baseFuzzSize, &dst);
+    if (dst.data.bcData.payload != NULL) {
+        SoftBusFree(dst.data.bcData.payload);
+    }
 }
 
 void DumpSoftbusAdapterDataFuzzTest()
@@ -603,17 +635,18 @@ extern "C" int32_t LLVMFuzzerTestOneInput(const uint8_t* data, size_t size)
     RegisterBroadcaster(BROADCAST_PROTOCOL_BLE, SRV_TYPE_DIS, &bcId, &OHOS::g_advCallback);
     RegisterScanListener(BROADCAST_PROTOCOL_BLE, SRV_TYPE_DIS, &listenerId, &OHOS::g_scanListener);
 
-    OHOS::StartBroadcastingFuzzTest(bcId, data, size);
-    OHOS::UpdateBroadcastingFuzzTest(bcId, data, size);
-    OHOS::SetBroadcastingDataFuzzTest(bcId, data, size);
+    FuzzedDataProvider provider(data, size);
+    OHOS::StartBroadcastingFuzzTest(bcId, provider);
+    OHOS::UpdateBroadcastingFuzzTest(bcId, provider);
+    OHOS::SetBroadcastingDataFuzzTest(bcId, provider);
     OHOS::StopBroadcastingFuzzTest(bcId);
     OHOS::StartScanFuzzTest(listenerId);
     OHOS::StopScanFuzzTest(listenerId);
-    OHOS::BroadcastSetAdvDeviceParamFuzzTest(listenerId, data, size);
+    OHOS::BroadcastSetAdvDeviceParamFuzzTest(listenerId, provider);
     OHOS::BroadcastGetBroadcastHandleFuzzTest(bcId);
     OHOS::BroadcastSetScanReportChannelToLpDeviceFuzzTest(listenerId);
     OHOS::BroadcastSetLpAdvParamFuzzTest();
-    OHOS::SetBroadcastingParamFuzzTest(bcId, data, size);
+    OHOS::SetBroadcastingParamFuzzTest(bcId, provider);
     OHOS::GetScanFilterFuzzTest(listenerId);
     OHOS::QueryBroadcastStatusFuzzTest(bcId);
     OHOS::BtStatusToSoftBusFuzzTest();
