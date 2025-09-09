@@ -122,6 +122,7 @@ ohos_unittest("BrConnectionTest") {
     "$dsoftbus_root_path/interfaces/kits/connect",
     "$dsoftbus_root_path/interfaces/kits/lnn",
     "$dsoftbus_root_path/tests/core/connection/br/mock",
+    "$dsoftbus_root_path/core/connection/manager",
   ]
 
   deps = [
@@ -141,7 +142,6 @@ ohos_unittest("BrConnectionTest") {
     "$dsoftbus_root_path/core/connection/br/src/softbus_conn_br_connection.c",
     "$dsoftbus_root_path/core/connection/br/src/softbus_conn_br_manager.c",
     "$dsoftbus_root_path/core/connection/br/src/softbus_conn_br_trans.c",
-    "$dsoftbus_root_path/core/connection/manager/softbus_conn_flow_control.c",
     "$dsoftbus_root_path/tests/core/connection/br/mock/softbus_conn_br_connection_mock.cpp",
     "softbus_conn_br_connection_test.cpp",
   ]
@@ -166,6 +166,7 @@ ohos_unittest("BrHidumperTest") {
     "$dsoftbus_root_path/core/connection/common/include",
     "$dsoftbus_root_path/interfaces/kits/bus_center",
     "$dsoftbus_root_path/tests/core/connection/br/mock",
+    "$dsoftbus_root_path/core/connection/manager",
   ]
 
   deps = [
@@ -186,7 +187,6 @@ ohos_unittest("BrHidumperTest") {
     "$dsoftbus_root_path/core/connection/br/src/softbus_conn_br_manager.c",
     "$dsoftbus_root_path/core/connection/br/src/softbus_conn_br_snapshot.c",
     "$dsoftbus_root_path/core/connection/br/src/softbus_conn_br_trans.c",
-    "$dsoftbus_root_path/core/connection/manager/softbus_conn_flow_control.c",
     "$dsoftbus_root_path/tests/core/connection/br/mock/softbus_conn_br_connection_mock.cpp",
     "connection_br_hidumper_test.cpp",
   ]
