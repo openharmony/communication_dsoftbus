@@ -363,7 +363,12 @@ bool JSON_GetBytesFromObject(const JsonObj *obj, const char *key, uint8_t *value
         COMM_LOGE(COMM_ADAPTER, "key does not exist");
         return false;
     }
-    std::vector<uint8_t> bytes = (*json)[key];
+    nlohmann::json item = (*json)[key];
+    if (!item.is_array()) {
+        COMM_LOGW(COMM_ADAPTER, "cannot find or invalid key. key=%{public}s", key);
+        return false;
+    }
+    std::vector<uint8_t> bytes = item.get<std::vector<uint8_t>>();
     if (bufLen < bytes.size()) {
         COMM_LOGE(COMM_ADAPTER, "item size invalid, size=%{public}zu", bytes.size());
         return false;
