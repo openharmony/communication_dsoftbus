@@ -128,6 +128,7 @@ typedef struct {
     char pagingSessionkey[SHORT_SESSION_KEY_LENGTH];
     bool isClient;
     bool isD2D;
+    bool isSupportNewHead;
     bool isLowLatency;
     bool isFlashLight;
     uint16_t fastTransDataSize;
@@ -141,6 +142,7 @@ typedef struct {
     int fd;
     AppType appType;
     ProtocolType protocol;
+    int32_t pagingId;
     int32_t encrypt;
     int32_t algorithm;
     int32_t crc;

@@ -31,6 +31,8 @@ public:
     {
         isInited_ = false;
         (void)TransProxyManagerInit(TransServerGetChannelCb());
+        (void)TransGetDataBufSize();
+        (void)TransGetTdcDataBufMaxSize();
         isInited_ = true;
     }
 
@@ -48,18 +50,6 @@ public:
 private:
     volatile bool isInited_;
 };
-
-void TransGetDataBufSizeTest(FuzzedDataProvider &provider)
-{
-    (void)provider;
-    (void)TransGetDataBufSize();
-}
-
-void TransGetTdcDataBufMaxSizeTest(FuzzedDataProvider &provider)
-{
-    (void)provider;
-    (void)TransGetTdcDataBufMaxSize();
-}
 
 static void FillTcpDataPacketHead(FuzzedDataProvider &provider, TcpDataPacketHead *data)
 {
@@ -200,64 +190,12 @@ void CheckBufLenAndCopyDataTest(FuzzedDataProvider &provider)
     (void)CheckBufLenAndCopyData(bufLen, headSize, data, &head);
 }
 
-void TransTdcParseTlvTest(FuzzedDataProvider &provider)
-{
-    uint32_t bufLen = provider.ConsumeIntegral<uint32_t>();
-    uint32_t headSize = 0;
-    TcpDataTlvPacketHead head;
-    (void)memset_s(&head, sizeof(TcpDataTlvPacketHead), 0, sizeof(TcpDataTlvPacketHead));
-    FillTcpDataTlvPacketHead(provider, &head);
-    char data[MAGICNUM_SIZE + TLVCOUNT_SIZE] = { 0 };
-
-    (void)TransTdcParseTlv(bufLen, data, nullptr, nullptr);
-
-    bufLen += (MAGICNUM_SIZE + TLVCOUNT_SIZE);
-    (void)TransTdcParseTlv(bufLen, nullptr, &head, &headSize);
-}
-
-void TransTdcUnPackAllTlvDataTest(FuzzedDataProvider &provider)
-{
-    int32_t channelId = provider.ConsumeIntegral<int32_t>();
-    TcpDataTlvPacketHead head;
-    (void)memset_s(&head, sizeof(TcpDataTlvPacketHead), 0, sizeof(TcpDataTlvPacketHead));
-    FillTcpDataTlvPacketHead(provider, &head);
-    uint32_t headSize = 0;
-    DataBuf node;
-    (void)memset_s(&node, sizeof(DataBuf), 0, sizeof(DataBuf));
-    bool flag = false;
-
-    (void)TransTdcUnPackAllTlvData(channelId, nullptr, nullptr, nullptr, nullptr);
-    (void)TransTdcUnPackAllTlvData(channelId, &head, &headSize, &node, &flag);
-}
-
 void ReleaseDataHeadResourceTest(FuzzedDataProvider &provider)
 {
     DataHead pktHead;
     (void)memset_s(&pktHead, sizeof(DataHead), 0, sizeof(DataHead));
 
     ReleaseDataHeadResource(&pktHead);
-}
-
-void TransTdcPackTlvDataTest(FuzzedDataProvider &provider)
-{
-    int32_t tlvBufferSize = provider.ConsumeIntegralInRange<int32_t>(0, MAGICNUM_SIZE + TLVCOUNT_SIZE);
-    uint32_t dataLen = provider.ConsumeIntegralInRange<uint32_t>(0, MAGICNUM_SIZE + TLVCOUNT_SIZE);
-
-    (void)TransTdcPackTlvData(nullptr, tlvBufferSize, dataLen);
-}
-
-void BuildNeedAckTlvDataTest(FuzzedDataProvider &provider)
-{
-    DataHead pktHead;
-    (void)memset_s(&pktHead, sizeof(DataHead), 0, sizeof(DataHead));
-    pktHead.magicNum = provider.ConsumeIntegral<uint32_t>();
-    pktHead.tlvCount = provider.ConsumeIntegral<uint8_t>();
-    bool needAck = provider.ConsumeBool();
-    uint32_t dataSeqs = provider.ConsumeIntegral<uint32_t>();
-    int32_t tlvBufferSize = provider.ConsumeIntegral<int8_t>();
-
-    (void)BuildNeedAckTlvData(nullptr, needAck, dataSeqs, &tlvBufferSize);
-    (void)BuildNeedAckTlvData(&pktHead, needAck, dataSeqs, nullptr);
 }
 
 void BuildDataHeadTest(FuzzedDataProvider &provider)
@@ -306,15 +244,6 @@ void TransPackDataTest(FuzzedDataProvider &provider)
     int32_t flags = provider.ConsumeIntegral<int32_t>();
 
     (void)TransPackData(dataLen, finalSeq, flags);
-}
-
-void BuildInnerTdcSendDataInfoTest(FuzzedDataProvider &provider)
-{
-    uint32_t inLen = provider.ConsumeIntegral<uint32_t>();
-    EncrptyInfo info;
-    (void)memset_s(&info, sizeof(EncrptyInfo), 0, sizeof(EncrptyInfo));
-
-    BuildInnerTdcSendDataInfo(&info, nullptr, inLen, nullptr, nullptr);
 }
 
 static void FillTransTdcPackDataInfo(FuzzedDataProvider &provider, TransTdcPackDataInfo *info)
@@ -391,8 +320,6 @@ extern "C" int32_t LLVMFuzzerTestOneInput(const uint8_t *data, size_t size)
 
     /* Run your code on data */
     FuzzedDataProvider provider(data, size);
-    OHOS::TransGetDataBufSizeTest(provider);
-    OHOS::TransGetTdcDataBufMaxSizeTest(provider);
     OHOS::UnPackTcpDataPacketHeadTest(provider);
     OHOS::TransTcpDataTlvUnpackTest(provider);
     OHOS::TransResizeDataBufferTest(provider);
@@ -402,14 +329,9 @@ extern "C" int32_t LLVMFuzzerTestOneInput(const uint8_t *data, size_t size)
     OHOS::TransTdcUnPackAllDataTest(provider);
     OHOS::TransTdcUnPackDataTest(provider);
     OHOS::CheckBufLenAndCopyDataTest(provider);
-    OHOS::TransTdcParseTlvTest(provider);
-    OHOS::TransTdcUnPackAllTlvDataTest(provider);
-    OHOS::TransTdcPackTlvDataTest(provider);
-    OHOS::BuildNeedAckTlvDataTest(provider);
     OHOS::BuildDataHeadTest(provider);
     OHOS::TransTdcEncryptWithSeqTest(provider);
     OHOS::PackTcpDataPacketHeadTest(provider);
-    OHOS::BuildInnerTdcSendDataInfoTest(provider);
     OHOS::TransTdcPackAllDataTest(provider);
     OHOS::TransTdcSendDataTest(provider);
 

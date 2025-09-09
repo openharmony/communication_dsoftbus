@@ -47,6 +47,7 @@ void TransProxyOpenProxyChannelSuccess(int32_t channelId);
 void TransProxyOpenProxyChannelFail(int32_t channelId, const AppInfo *appInfo, int32_t errCode);
 void TransProxyOnMessageReceived(const ProxyMessage *msg);
 
+int32_t TransProxyGetChannelCapaByChanId(int32_t channelId, uint32_t *channelCapability);
 int32_t TransProxyGetSessionKeyByChanId(int32_t channelId, char *sessionKey, uint32_t sessionKeySize);
 int32_t TransProxyGetSendMsgChanInfo(int32_t channelId, ProxyChannelInfo *chanInfo);
 
@@ -91,6 +92,7 @@ void TransProxyProcessErrMsg(ProxyChannelInfo *info, int32_t errCode);
 int32_t TransPagingUpdatePagingChannelInfo(ProxyChannelInfo *info);
 int32_t TransPagingUpdatePidAndData(int32_t channelId, int32_t pid, char *data, uint32_t len);
 void TransPagingBadKeyRetry(int32_t channelId);
+int32_t TransPagingUpdateDataConfig(AppInfo *info);
 #ifdef __cplusplus
 }
 #endif

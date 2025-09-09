@@ -139,7 +139,6 @@ ohos_unittest("AuthNegotiateChannelTest") {
 
   deps = [
     "$dsoftbus_root_path/adapter:softbus_adapter",
-    "$dsoftbus_root_path/core/connection/wifi_direct_cpp:wifi_direct",
     "$dsoftbus_root_path/dfx:softbus_dfx",
   ]
 
@@ -279,7 +278,6 @@ ohos_unittest("ProxyNegotiateChannelTest") {
 
   deps = [
     "$dsoftbus_root_path/adapter:softbus_adapter",
-    "$dsoftbus_root_path/core/connection/wifi_direct_cpp:wifi_direct",
     "$dsoftbus_root_path/dfx:softbus_dfx",
   ]
 

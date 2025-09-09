@@ -145,10 +145,10 @@ bool IsExistLnnDfxNodeByUdidHash(const char *udidHash, LnnBleReportExtra *bleExt
 }
 
 extern "C" {
-    int32_t LnnRetrieveDeviceInfo(const char *udid, NodeInfo *deviceInfo)
-    {
-        return HeartBeatStrategyInterface()->LnnRetrieveDeviceInfo(udid, deviceInfo);
-    }
+int32_t LnnRetrieveDeviceInfo(const char *udid, NodeInfo *deviceInfo)
+{
+    return HeartBeatStrategyInterface()->LnnRetrieveDeviceInfo(udid, deviceInfo);
+}
 }
 
 bool IsSameAccountGroupDevice(void)
@@ -161,8 +161,8 @@ uint32_t AuthGenRequestId(void)
     return HeartBeatStrategyInterface()->AuthGenRequestId();
 }
 
-int32_t AuthStartVerify(const AuthConnInfo *connInfo, const AuthVerifyParam *authVerifyParam,
-    const AuthVerifyCallback *verifyCallback)
+int32_t AuthStartVerify(
+    const AuthConnInfo *connInfo, const AuthVerifyParam *authVerifyParam, const AuthVerifyCallback *verifyCallback)
 {
     return HeartBeatStrategyInterface()->AuthStartVerify(connInfo, authVerifyParam, verifyCallback);
 }

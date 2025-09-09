@@ -57,7 +57,8 @@ int32_t CoapResolveAddress(const coap_str_const_t *server, struct sockaddr *dst)
     struct addrinfo hints;
     char addrstr[DEFAULT_COAP_BUFFER_LENGTH]; /* Get a char array with length 256 to save host name. */
 
-    if (server == NULL || server->s == NULL || dst == NULL) {
+    if (server == NULL || server->s == NULL || dst == NULL ||
+        (dst->sa_family != AF_INET && dst->sa_family != AF_INET6)) {
         return NSTACKX_EINVAL;
     }
     (void)memset_s(addrstr, sizeof(addrstr), 0, sizeof(addrstr));

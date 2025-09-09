@@ -15,8 +15,8 @@
 
 #include "g_enhance_trans_func.h"
 
-#include <securec.h>
 #include <dlfcn.h>
+#include <securec.h>
 
 TransEnhanceFuncList g_transEnhanceFuncList = { NULL };
 
@@ -35,18 +35,25 @@ int32_t TransRegisterEnhanceFunc(void *soHandle)
 
     g_transEnhanceFuncList.transReversePullUp = dlsym(soHandle, "TransReversePullUp");
     g_transEnhanceFuncList.transGetPkgnameByBusinessFlag = dlsym(soHandle, "TransGetPkgnameByBusinessFlag");
+    g_transEnhanceFuncList.initSoftbusPagingResPull = dlsym(soHandle, "InitSoftbusPagingResPull");
+    g_transEnhanceFuncList.deInitSoftbusPagingResPull = dlsym(soHandle, "DeInitSoftbusPagingResPull");
     g_transEnhanceFuncList.initSoftbusPaging = dlsym(soHandle, "InitSoftbusPaging");
     g_transEnhanceFuncList.deInitSoftbusPaging = dlsym(soHandle, "DeInitSoftbusPaging");
     g_transEnhanceFuncList.transPagingDeathCallback = dlsym(soHandle, "TransPagingDeathCallback");
     g_transEnhanceFuncList.transHasAndUpdatePagingListen = dlsym(soHandle, "TransHasAndUpdatePagingListen");
     g_transEnhanceFuncList.transPagingGetPidAndDataByFlg = dlsym(soHandle, "TransPagingGetPidAndDataByFlg");
     g_transEnhanceFuncList.transDelPagingInfoByBusinessFlag = dlsym(soHandle, "TransDelPagingInfoByBusinessFlag");
-    g_transEnhanceFuncList.initSoftbusPagingResPull = dlsym(soHandle, "InitSoftbusPagingResPull");
-    g_transEnhanceFuncList.deInitSoftbusPagingResPull = dlsym(soHandle, "DeInitSoftbusPagingResPull");
     g_transEnhanceFuncList.clientOpenHtpChannel = dlsym(soHandle, "ClientOpenHtpChannel");
     g_transEnhanceFuncList.serverOpenHtpChannel = dlsym(soHandle, "ServerOpenHtpChannel");
     g_transEnhanceFuncList.closeHtpChannel = dlsym(soHandle, "CloseHtpChannel");
     g_transEnhanceFuncList.serverUpdateHtpChannel = dlsym(soHandle, "ServerUpdateHtpChannel");
+    g_transEnhanceFuncList.checkHtpPermission = dlsym(soHandle, "CheckHtpPermission");
     g_transEnhanceFuncList.transProcessGroupTalkieInfo = dlsym(soHandle, "TransProcessGroupTalkieInfo");
+    g_transEnhanceFuncList.isInWhitelist = dlsym(soHandle, "IsInWhitelist");
+    g_transEnhanceFuncList.checkAuthChannelSessionNameValid = dlsym(soHandle, "CheckAuthChannelSessionNameValid");
+    g_transEnhanceFuncList.transCheckNetworkDelegate = dlsym(soHandle, "TransCheckNetworkDelegate");
+    g_transEnhanceFuncList.transCheckP2pOnly = dlsym(soHandle, "TransCheckP2pOnly");
+    g_transEnhanceFuncList.transCheckDcTriggerVirtualLink = dlsym(soHandle, "TransCheckDcTriggerVirtualLink");
+    g_transEnhanceFuncList.loadTransPermissionJson = dlsym(soHandle, "LoadTransPermissionJson");
     return SOFTBUS_OK;
 }

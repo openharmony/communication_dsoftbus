@@ -30,7 +30,7 @@ void LnnInitModuleStatusSet(uint32_t module, InitDepsStatus status)
     (void)status;
 }
 
-void LnnInitModuleReturnSet(uint32_t module, uint32_t ret)
+void LnnInitModuleReturnSet(uint32_t module, int32_t ret)
 {
     (void)module;
     (void)ret;

@@ -82,7 +82,6 @@ if (defined(ohos_lite)) {
       ":SoftBusTlvUtilsTest",
       ":SoftBusUtilsTest",
       ":Sqlite3UtilsTest",
-      "permission_state_test:PermissionStateTest",
     ]
   }
 }

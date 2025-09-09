@@ -137,7 +137,7 @@ static int32_t QueryCallRecord(const char* pkgName, enum SoftBusFuncId interface
         LNN_LOGE(LNN_EVENT, "strcpy pkgName fail");
         return SOFTBUS_STRCPY_ERR;
     }
-    ddosInfo->totalCount = g_callRecord->cnt;
+    ddosInfo->totalCount = (int32_t)g_callRecord->cnt;
     int32_t column = 0;
     int32_t ret = SOFTBUS_OK;
     LNN_LOGI(LNN_EVENT, "ddos info, recordCount=%{public}d, idCount=%{public}d, "

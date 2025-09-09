@@ -163,9 +163,11 @@ int32_t ConvertBytesToHexString(char *outBuf, uint32_t outBufLen, const unsigned
     return GetSoftbusProxychannelMessagePagingInterface()->ConvertBytesToHexString(outBuf, outBufLen, inBuf, inLen);
 }
 
-int32_t AuthFindApplyKey(const RequestBusinessInfo *info, uint8_t *applyKey)
+int32_t AuthFindApplyKey(
+    const RequestBusinessInfo *info, uint8_t *applyKey, char *accountHash, uint32_t accountHashLen)
 {
-    return GetSoftbusProxychannelMessagePagingInterface()->AuthFindApplyKey(info, applyKey);
+    return GetSoftbusProxychannelMessagePagingInterface()->AuthFindApplyKey(
+        info, applyKey, accountHash, accountHashLen);
 }
 
 int32_t TransProxyTransSendMsg(
@@ -208,6 +210,11 @@ int32_t SoftBusBase64Encode(unsigned char *dst, size_t dlen,
 int32_t LnnGetLocalStrInfo(InfoKey key, char *info, uint32_t len)
 {
     return GetSoftbusProxychannelMessagePagingInterface()->LnnGetLocalStrInfo(key, info, len);
+}
+
+int32_t SoftBusGenerateStrHash(const unsigned char *str, uint32_t len, unsigned char *hash)
+{
+    return GetSoftbusProxychannelMessagePagingInterface()->SoftBusGenerateStrHash(str, len, hash);
 }
 }
 }

@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2022-2024 Huawei Device Co., Ltd.
+ * Copyright (c) 2022-2025 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -458,7 +458,7 @@ void SoftbusRecordOpenSession(SoftBusOpenSessionStatus isSucc, uint32_t time)
     }
 
     if (g_openSessionCnt.successCnt != 0) {
-        uint64_t totalTimeCost = (g_openSessionTime.aveTimeCost) * (g_openSessionCnt.successCnt - 1) + time;
+        uint64_t totalTimeCost = (uint64_t)(g_openSessionTime.aveTimeCost) * (g_openSessionCnt.successCnt - 1) + time;
         g_openSessionTime.aveTimeCost = (uint32_t)(totalTimeCost / g_openSessionCnt.successCnt);
     }
 
@@ -477,20 +477,20 @@ void SoftbusRecordOpenSession(SoftBusOpenSessionStatus isSucc, uint32_t time)
 
 static inline void ClearOpenSessionKpi(void)
 {
-    memset_s(&g_openSessionKpi.linkType, sizeof(OpenSessionKpiStruct) - sizeof(SoftBusMutex),
-        0, sizeof(OpenSessionKpiStruct) - sizeof(SoftBusMutex));
+    (void)memset_s(&g_openSessionKpi.linkType, sizeof(OpenSessionKpiStruct) - sizeof(SoftBusMutex), 0,
+        sizeof(OpenSessionKpiStruct) - sizeof(SoftBusMutex));
 }
 
 static inline void ClearOpenSessionCnt(void)
 {
-    memset_s(&g_openSessionCnt.failCnt, sizeof(OpenSessionCntStruct) - sizeof(SoftBusMutex),
-        0, sizeof(OpenSessionCntStruct) - sizeof(SoftBusMutex));
+    (void)memset_s(&g_openSessionCnt.failCnt, sizeof(OpenSessionCntStruct) - sizeof(SoftBusMutex), 0,
+        sizeof(OpenSessionCntStruct) - sizeof(SoftBusMutex));
 }
 
 static inline void ClearOpenSessionTime(void)
 {
-    memset_s(&g_openSessionTime.maxTimeCost, sizeof(OpenSessionTimeStruct) - sizeof(SoftBusMutex),
-        0, sizeof(OpenSessionTimeStruct) - sizeof(SoftBusMutex));
+    (void)memset_s(&g_openSessionTime.maxTimeCost, sizeof(OpenSessionTimeStruct) - sizeof(SoftBusMutex), 0,
+        sizeof(OpenSessionTimeStruct) - sizeof(SoftBusMutex));
 }
 
 static inline int32_t InitOpenSessionEvtMutexLock(void)
@@ -928,7 +928,15 @@ int32_t InitTransStatisticSysEvt(void)
     }
 
     g_calledApiInfoList = CreateSoftBusList();
+    if (g_calledApiInfoList == NULL) {
+        COMM_LOGE(COMM_EVENT, "Create g_calledApiInfoList failed.");
+        return SOFTBUS_CREATE_LIST_ERR;
+    }
     g_calledApiCntlist = CreateSoftBusList();
+    if (g_calledApiCntlist == NULL) {
+        COMM_LOGE(COMM_EVENT, "Create g_calledApiCntlist failed.");
+        return SOFTBUS_CREATE_LIST_ERR;
+    }
     ClearOpenSessionCnt();
     ClearOpenSessionKpi();
     ClearOpenSessionTime();

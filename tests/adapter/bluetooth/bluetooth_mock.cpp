@@ -13,9 +13,10 @@
  * limitations under the License.
  */
 
+#include "bluetooth_mock.h"
+
 #include <securec.h>
 
-#include "bluetooth_mock.h"
 #include "softbus_common.h"
 #include "softbus_error_code.h"
 #include "softbus_utils.h"

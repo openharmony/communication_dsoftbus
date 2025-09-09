@@ -26,7 +26,7 @@
 #define TEST_TMP_STR_LEN 50
 #define TEST_TMP_STR "testtmpStr"
 namespace OHOS {
-    void TransOnUdpChannelOpenedTest(const uint8_t* data, size_t size)
+    void TransOnUdpChannelOpenedTest(const uint8_t *data, size_t size)
     {
         if (data == nullptr || size < sizeof(int32_t)) {
             return;
@@ -41,7 +41,7 @@ namespace OHOS {
         DataGenerator::Clear();
     }
 
-    void TransOnUdpChannelOpenFailedTest(const uint8_t* data, size_t size)
+    void TransOnUdpChannelOpenFailedTest(const uint8_t *data, size_t size)
     {
         if (data == nullptr || size < sizeof(int32_t)) {
             return;
@@ -55,7 +55,7 @@ namespace OHOS {
         DataGenerator::Clear();
     }
 
-    void TransOnUdpChannelClosedTest(const uint8_t* data, size_t size)
+    void TransOnUdpChannelClosedTest(const uint8_t *data, size_t size)
     {
         if (data == nullptr || size < sizeof(int32_t)) {
             return;
@@ -67,7 +67,7 @@ namespace OHOS {
         DataGenerator::Clear();
     }
 
-    void TransOnUdpChannelQosEventTest(const uint8_t* data, size_t size)
+    void TransOnUdpChannelQosEventTest(const uint8_t *data, size_t size)
     {
         if (data == nullptr || size < sizeof(int32_t)) {
             return;
@@ -84,7 +84,7 @@ namespace OHOS {
         DataGenerator::Clear();
     }
 
-    void ClientTransCloseUdpChannelTest(const uint8_t* data, size_t size)
+    void ClientTransCloseUdpChannelTest(const uint8_t *data, size_t size)
     {
         if (data == nullptr || size < sizeof(int32_t)) {
             return;
@@ -96,7 +96,7 @@ namespace OHOS {
         DataGenerator::Clear();
     }
 
-    void TransUdpChannelSendStreamTest(const uint8_t* data, size_t size)
+    void TransUdpChannelSendStreamTest(const uint8_t *data, size_t size)
     {
         if (data == nullptr || size < sizeof(int64_t)) {
             return;
@@ -138,27 +138,7 @@ namespace OHOS {
         DataGenerator::Clear();
     }
 
-    void TransUdpChannelSendFileTest(const uint8_t* data, size_t size)
-    {
-        if (data == nullptr || size < sizeof(int32_t)) {
-            return;
-        }
-        const char *sfileList[] = {
-            "/data/big.tar",
-            "/data/richu.jpg",
-            "/data/richu-002.jpg",
-            "/data/richu-003.jpg",
-        };
-        DataGenerator::Write(data, size);
-        int32_t channelId = 0;
-        int32_t fileCnt = 0;
-        GenerateInt32(channelId);
-        GenerateInt32(fileCnt);
-        TransUdpChannelSendFile(channelId, sfileList, nullptr, fileCnt);
-        DataGenerator::Clear();
-    }
-
-    void TransGetUdpChannelByFileIdTest(const uint8_t* data, size_t size)
+    void TransGetUdpChannelByFileIdTest(const uint8_t *data, size_t size)
     {
         if (data == nullptr || size < sizeof(int32_t)) {
             return;
@@ -171,7 +151,7 @@ namespace OHOS {
         DataGenerator::Clear();
     }
 
-    void TransUdpDeleteFileListenerlTest(const uint8_t* data, size_t size)
+    void TransUdpDeleteFileListenerlTest(const uint8_t *data, size_t size)
     {
         if (data == nullptr || size < SESSION_NAME_SIZE_MAX) {
             return;
@@ -185,7 +165,7 @@ namespace OHOS {
 } // namespace OHOS
 
 /* Fuzzer entry point */
-extern "C" int32_t LLVMFuzzerTestOneInput(const uint8_t* data, size_t size)
+extern "C" int32_t LLVMFuzzerTestOneInput(const uint8_t *data, size_t size)
 {
     /* Run your code on data */
     OHOS::TransOnUdpChannelOpenedTest(data, size);
@@ -194,7 +174,6 @@ extern "C" int32_t LLVMFuzzerTestOneInput(const uint8_t* data, size_t size)
     OHOS::TransOnUdpChannelQosEventTest(data, size);
     OHOS::ClientTransCloseUdpChannelTest(data, size);
     OHOS::TransUdpChannelSendStreamTest(data, size);
-    OHOS::TransUdpChannelSendFileTest(data, size);
     OHOS::TransGetUdpChannelByFileIdTest(data, size);
     OHOS::TransUdpDeleteFileListenerlTest(data, size);
     return 0;

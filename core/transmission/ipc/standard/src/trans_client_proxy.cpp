@@ -40,7 +40,7 @@ int32_t InformPermissionChange(int32_t state, const char *pkgName, int32_t pid)
         TRANS_LOGE(TRANS_CTRL, "softbus client proxy is nullptr!");
         return SOFTBUS_TRANS_GET_CLIENT_PROXY_NULL;
     }
-    return clientProxy->OnClientPermissonChange(pkgName, state);
+    return clientProxy->OnClientPermissionChange(pkgName, state);
 }
 
 void RegisterPermissionChangeCallback(void)

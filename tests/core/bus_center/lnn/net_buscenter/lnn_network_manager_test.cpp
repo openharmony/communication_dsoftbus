@@ -242,7 +242,12 @@ HWTEST_F(LNNNetworkManagerMockTest, LNN_NETWORK_MANAGER_TEST_004, TestSize.Level
     NiceMock<LnnNetLedgertInterfaceMock> ledgerMock;
     EXPECT_CALL(ledgerMock, IsActiveOsAccountUnlocked).WillRepeatedly(Return(true));
     EXPECT_CALL(managerMock, SoftbusGetConfig).WillRepeatedly(Return(SOFTBUS_INVALID_PARAM));
+    EXPECT_CALL(ledgerMock, LnnGetLocalNumInfo)
+        .WillOnce(DoAll(SetArgPointee<1>(TYPE_GLASS_ID), Return(SOFTBUS_OK)))
+        .WillRepeatedly(Return(SOFTBUS_OK));
     bool ret = LnnIsAutoNetWorkingEnabled();
+    EXPECT_TRUE(ret == false);
+    ret = LnnIsAutoNetWorkingEnabled();
     EXPECT_TRUE(ret == true);
     EXPECT_CALL(managerMock, SoftbusGetConfig).WillRepeatedly(Return(SOFTBUS_OK));
     ret = LnnIsAutoNetWorkingEnabled();
@@ -648,7 +653,7 @@ HWTEST_F(LNNNetworkManagerMockTest, NetRootDeviceLeaveLnnTest_001, TestSize.Leve
 HWTEST_F(LNNNetworkManagerMockTest, NetDeviceRootStateEventHandler_001, TestSize.Level1)
 {
     LnnDeviceRootStateChangeEvent *event =
-        reinterpret_cast<LnnDeviceRootStateChangeEvent*>(SoftBusCalloc(sizeof(LnnDeviceRootStateChangeEvent)));
+        reinterpret_cast<LnnDeviceRootStateChangeEvent *>(SoftBusCalloc(sizeof(LnnDeviceRootStateChangeEvent)));
     event->basic.event = LNN_EVENT_TYPE_MAX;
     event->status = SOFTBUS_DEVICE_IS_ROOT;
 

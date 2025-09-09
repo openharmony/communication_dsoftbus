@@ -165,7 +165,7 @@ int32_t TransInnerAddDataBufNode(int32_t channelId, int32_t fd, int32_t channelT
     if (SoftBusMutexLock(&(g_innerChannelDataBufList->lock)) != SOFTBUS_OK) {
         SoftBusFree(node->data);
         SoftBusFree(node);
-        return SOFTBUS_MALLOC_ERR;
+        return SOFTBUS_LOCK_ERR;
     }
     ListInit(&node->node);
     ListTailInsert(&g_innerChannelDataBufList->list, &node->node);
@@ -177,6 +177,7 @@ int32_t TransInnerAddDataBufNode(int32_t channelId, int32_t fd, int32_t channelT
 
 int32_t InnerAddSession(InnerSessionInfo *innerInfo)
 {
+    TRANS_CHECK_AND_RETURN_RET_LOGE(innerInfo != NULL, SOFTBUS_INVALID_PARAM, TRANS_CTRL, "invalid param");
     TRANS_CHECK_AND_RETURN_RET_LOGE(g_sessionList != NULL, SOFTBUS_NO_INIT, TRANS_CTRL, "session list not init");
 
     TransInnerSessionInfo *info = (TransInnerSessionInfo *)SoftBusCalloc(sizeof(TransInnerSessionInfo));
@@ -205,7 +206,12 @@ int32_t InnerAddSession(InnerSessionInfo *innerInfo)
         TRANS_CHECK_AND_RETURN_RET_LOGE(ret == EOK, SOFTBUS_MEM_ERR, TRANS_CTRL, "memcpy failed");
     }
 
-    (void)memcpy_s(info->peerNetworkId, NETWORK_ID_BUF_LEN, innerInfo->peerNetworkId, NETWORK_ID_BUF_LEN);
+    ret = memcpy_s(info->peerNetworkId, NETWORK_ID_BUF_LEN, innerInfo->peerNetworkId, NETWORK_ID_BUF_LEN);
+    if (ret != EOK) {
+        SoftBusFree(info);
+        info = NULL;
+        TRANS_CHECK_AND_RETURN_RET_LOGE(ret == EOK, SOFTBUS_MEM_ERR, TRANS_CTRL, "memcpy failed");
+    }
 
     if (SoftBusMutexLock(&g_sessionList->lock) != SOFTBUS_OK) {
         SoftBusFree(info);
@@ -247,9 +253,10 @@ void TransCloseInnerSessionByNetworkId(const char *networkId)
         if (strcmp(pos->peerNetworkId, networkId) == 0) {
             TRANS_LOGI(TRANS_CTRL, "DeleteSession session when link down, channelId=%{public}d", pos->channelId);
             char pkgName[PKG_NAME_SIZE_MAX] = {0};
-            TransGetPkgNameByChanId(pos->channelId, pkgName);
-            CloseSessionInner(pos->channelId);
-            DirectOnChannelClose(pos->channelId, pkgName);
+            int32_t channelId = pos->channelId;
+            TransGetPkgNameByChanId(channelId, pkgName);
+            CloseSessionInner(channelId);
+            DirectOnChannelClose(channelId, pkgName);
         }
     }
     (void)SoftBusMutexUnlock(&(g_sessionList->lock));
@@ -284,6 +291,7 @@ static int32_t DeleteSession(int32_t fd, int32_t channelId)
 
 static int32_t GetSessionInfoByFd(int32_t fd, TransInnerSessionInfo *info)
 {
+    TRANS_CHECK_AND_RETURN_RET_LOGE(info != NULL, SOFTBUS_INVALID_PARAM, TRANS_CTRL, "invalid param");
     TRANS_CHECK_AND_RETURN_RET_LOGE(g_sessionList != NULL, SOFTBUS_NO_INIT, TRANS_CTRL, "session list not init");
 
     if (SoftBusMutexLock(&(g_sessionList->lock)) != SOFTBUS_OK) {
@@ -311,6 +319,7 @@ static int32_t GetSessionInfoByFd(int32_t fd, TransInnerSessionInfo *info)
 
 static int32_t GetSessionInfoByChanId(int32_t channelId, TransInnerSessionInfo *info)
 {
+    TRANS_CHECK_AND_RETURN_RET_LOGE(info != NULL, SOFTBUS_INVALID_PARAM, TRANS_CTRL, "invalid param");
     TRANS_CHECK_AND_RETURN_RET_LOGE(g_sessionList != NULL, SOFTBUS_NO_INIT, TRANS_CTRL, "session list not init");
     int32_t ret = 0;
     if (SoftBusMutexLock(&(g_sessionList->lock)) != SOFTBUS_OK) {
@@ -445,8 +454,8 @@ static DataBuf *TransGetInnerDataBufNodeById(int32_t channelId)
 static int32_t TransTdcProcessInnerTlvData(
     TransInnerSessionInfo *info, TcpDataTlvPacketHead *pktHead, int32_t pkgHeadSize)
 {
-    if (info->listener.func == NULL) {
-        TRANS_LOGE(TRANS_CTRL, "callback func is null, channelId=%{public}d", info->channelId);
+    if (info == NULL || pktHead == NULL || info->listener.func == NULL) {
+        TRANS_LOGE(TRANS_CTRL, "invalid param");
         return SOFTBUS_NO_INIT;
     }
     if (SoftBusMutexLock(&(g_innerChannelDataBufList->lock)) != SOFTBUS_OK) {
@@ -493,6 +502,7 @@ static int32_t TransTdcProcessInnerTlvData(
 
 static int32_t TransInnerTdcProcAllTlvData(TransInnerSessionInfo *info)
 {
+    TRANS_CHECK_AND_RETURN_RET_LOGE(info != NULL, SOFTBUS_INVALID_PARAM, TRANS_CTRL, "invalid param");
     TRANS_CHECK_AND_RETURN_RET_LOGE(g_innerChannelDataBufList != NULL,
         SOFTBUS_NO_INIT, TRANS_CTRL, "g_tcpSrvData list not init");
     while (1) {
@@ -522,8 +532,8 @@ static int32_t TransInnerTdcProcAllTlvData(TransInnerSessionInfo *info)
 
 static int32_t TransTdcProcessInnerData(TransInnerSessionInfo *info)
 {
-    if (info->listener.func == NULL) {
-        TRANS_LOGE(TRANS_CTRL, "callback func is null, channelId=%{public}d", info->channelId);
+    if (info == NULL || info->listener.func == NULL) {
+        TRANS_LOGE(TRANS_CTRL, "invalid param");
         return SOFTBUS_NO_INIT;
     }
     if (SoftBusMutexLock(&(g_innerChannelDataBufList->lock)) != SOFTBUS_OK) {
@@ -564,6 +574,7 @@ static int32_t TransTdcProcessInnerData(TransInnerSessionInfo *info)
 
 static int32_t TransInnerTdcProcAllData(TransInnerSessionInfo *info)
 {
+    TRANS_CHECK_AND_RETURN_RET_LOGE(info != NULL, SOFTBUS_INVALID_PARAM, TRANS_CTRL, "invalid param");
     TRANS_CHECK_AND_RETURN_RET_LOGE(
         g_innerChannelDataBufList != NULL, SOFTBUS_NO_INIT, TRANS_CTRL, "g_tcpSrvDataList is null");
     while (1) {
@@ -789,7 +800,7 @@ static int32_t ClientTransProxyInnerNoSubPacketTlvProc(int32_t channelId, const 
         TRANS_LOGE(TRANS_CTRL, "proxy channel parse tlv failed, ret=%{public}d", ret);
         return ret;
     }
-    ret = TransProxyNoSubPacketTlvProc(channelId, data, len, &pktHead, newPktHeadSize);
+    ret = TransProxyNoSubPacketTlvProc(channelId, len, &pktHead, newPktHeadSize);
     if (ret != SOFTBUS_OK) {
         TRANS_LOGE(TRANS_CTRL, "process data err, channelId=%{public}d, len=%{public}u", channelId, len);
         return ret;
@@ -959,7 +970,7 @@ static int32_t TransProxyDelSliceProcessorByChannelId(int32_t channelId)
     }
     LIST_FOR_EACH_ENTRY_SAFE(node, next, &g_innerChannelSliceProcessorList->list, ChannelSliceProcessor, head) {
         if (node->channelId == channelId) {
-            for (int32_t i = PROXY_CHANNEL_PRORITY_MESSAGE; i < PROXY_CHANNEL_PRORITY_BUTT; i++) {
+            for (int32_t i = PROXY_CHANNEL_PRIORITY_MESSAGE; i < PROXY_CHANNEL_PRIORITY_BUTT; i++) {
                 TransProxyClearProcessor(&(node->processor[i]));
             }
             ListDelete(&(node->head));

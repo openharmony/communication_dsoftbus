@@ -229,6 +229,11 @@ static bool SupportHmlTwo(void)
     return true;
 }
 
+static bool SupportHmlTwoFalse(void)
+{
+    return false;
+}
+
 static struct WifiDirectManager g_manager = {
     .isNegotiateChannelNeeded= IsNegotiateChannelNeeded,
     .getRequestId = GetRequestId,
@@ -314,6 +319,7 @@ HWTEST_F(LNNLaneLinkExtTest, LNN_LANE_LINK_CONNDEVICE_TEST_002, TestSize.Level1)
     g_manager.connectDevice = ConnectDevice;
     g_manager.disconnectDevice = DisconnectDevice;
     g_manager.isNegotiateChannelNeeded = IsNegotiateChannelNeeded;
+    g_manager.supportHmlTwo = SupportHmlTwoFalse;
     EXPECT_CALL(laneMock, GetWifiDirectManager).WillRepeatedly(Return(&g_manager));
     EXPECT_CALL(laneMock, AuthGetConnInfoByType)
         .WillRepeatedly(DoAll(SetArgPointee<LANE_MOCK_PARAM3>(connInfo), Return(SOFTBUS_OK)));
@@ -326,6 +332,7 @@ HWTEST_F(LNNLaneLinkExtTest, LNN_LANE_LINK_CONNDEVICE_TEST_002, TestSize.Level1)
     CondWait();
     EXPECT_NO_FATAL_FAILURE(LnnDisconnectP2p(NODE_NETWORK_ID, laneReqId));
     EXPECT_NO_FATAL_FAILURE(LnnDestroyP2p());
+    g_manager.supportHmlTwo = SupportHmlTwo;
 }
 
 /*
@@ -664,7 +671,7 @@ HWTEST_F(LNNLaneLinkExtTest, LNN_LANE_LINK_RATE_PRE_TEST_001, TestSize.Level1)
         .WillRepeatedly(Return(SOFTBUS_OK));
     g_manager.connectDevice = ConnectDeviceRawHml;
     EXPECT_CALL(laneMock, GetWifiDirectManager).WillRepeatedly(Return(&g_manager));
-    EXPECT_CALL(laneLinkMock, CheckLaneLinkExistByType).WillRepeatedly(Return(true));
+    EXPECT_CALL(laneLinkMock, ExistsLaneLinkByType).WillRepeatedly(Return(true));
     NiceMock<LaneNetCapInterfaceMock> capMock;
     EXPECT_CALL(capMock, SetRemoteDynamicNetCap).WillRepeatedly(Return());
 
@@ -682,5 +689,19 @@ HWTEST_F(LNNLaneLinkExtTest, LNN_LANE_LINK_RATE_PRE_TEST_001, TestSize.Level1)
     CondWait();
     EXPECT_NO_FATAL_FAILURE(LnnDisconnectP2p(NODE_NETWORK_ID, laneReqId));
     EXPECT_NO_FATAL_FAILURE(LnnDestroyP2p());
+}
+
+/*
+* @tc.name: LNN_LANE_DISCONNECT_P2P_TEST_001
+* @tc.desc: test LnnDisconnectP2p
+* @tc.type: FUNC
+* @tc.require:
+*/
+HWTEST_F(LNNLaneLinkExtTest, LNN_LANE_DISCONNECT_P2P_TEST_001, TestSize.Level1)
+{
+    int32_t ret = LnnDisconnectP2p(nullptr, 0);
+    EXPECT_EQ(ret, SOFTBUS_INVALID_PARAM);
+    ret = LnnDisconnectP2p(NODE_NETWORK_ID, 0);
+    EXPECT_EQ(ret, SOFTBUS_INVALID_PARAM);
 }
 } // namespace OHOS

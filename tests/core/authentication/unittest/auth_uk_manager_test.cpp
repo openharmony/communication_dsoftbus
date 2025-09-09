@@ -107,20 +107,7 @@ HWTEST_F(AuthUkManagerTest, AUTH_UK_MANAGER_Test_002, TestSize.Level1)
     ret = AuthGenUkIdByAclInfo(&aclInfo, requestId, nullptr);
     EXPECT_EQ(ret, SOFTBUS_INVALID_PARAM);
     ret = AuthGenUkIdByAclInfo(&aclInfo, requestId, &genCb);
-    EXPECT_EQ(ret, SOFTBUS_NOT_FIND);
-}
-
-/*
- * @tc.name: AUTH_UK_MANAGER_Test_003
- * @tc.desc: AuthGetUkEncryptSize test
- * @tc.type: FUNC
- * @tc.require:
- */
-HWTEST_F(AuthUkManagerTest, AUTH_UK_MANAGER_Test_003, TestSize.Level1)
-{
-    uint32_t inLen = 1;
-    uint32_t ret = AuthGetUkEncryptSize(inLen);
-    EXPECT_EQ(ret, inLen + OVERHEAD_LEN);
+    EXPECT_EQ(ret, SOFTBUS_AUTH_NOT_FIND_LARGER_UDID);
 }
 
 /*
@@ -217,6 +204,30 @@ HWTEST_F(AuthUkManagerTest, AUTH_UK_MANAGER_Test_007, TestSize.Level1)
 {
     uint32_t ret = GenUkSeq();
     EXPECT_GT(ret, 0);
+}
+
+/*
+ * @tc.name: AUTH_CHECK_ACL_WITH_UDID_Test_001
+ * @tc.desc: CheckAclWithLocalUdid test
+ * @tc.type: FUNC
+ * @tc.require:
+ */
+HWTEST_F(AuthUkManagerTest, AUTH_CHECK_ACL_WITH_UDID_Test_001, TestSize.Level1)
+{
+    AuthACLInfo oldInfo = { 0 };
+    AuthACLInfo newInfo = { 0 };
+    int32_t ret = CheckAclWithLocalUdid(nullptr, nullptr);
+    EXPECT_EQ(ret, SOFTBUS_INVALID_PARAM);
+    ret = CheckAclWithLocalUdid(&oldInfo, &newInfo);
+    EXPECT_EQ(ret, SOFTBUS_AUTH_NOT_FIND_LARGER_UDID);
+    ret = LnnGetLocalStrInfo(STRING_KEY_DEV_UDID, oldInfo.sourceUdid, UDID_BUF_LEN);
+    EXPECT_EQ(ret, SOFTBUS_OK);
+    ret = CheckAclWithLocalUdid(&oldInfo, &newInfo);
+    EXPECT_EQ(ret, SOFTBUS_OK);
+    ret = LnnGetLocalStrInfo(STRING_KEY_DEV_UDID, oldInfo.sinkUdid, UDID_BUF_LEN);
+    EXPECT_EQ(ret, SOFTBUS_OK);
+    ret = CheckAclWithLocalUdid(&oldInfo, &newInfo);
+    EXPECT_EQ(ret, SOFTBUS_OK);
 }
 
 /*
@@ -367,6 +378,8 @@ HWTEST_F(AuthUkManagerTest, COMPARE_BY_ACL_SAME_ACCOUNT_Test_001, TestSize.Level
     EXPECT_EQ(ret, false);
     ret = CompareByAclSameAccount(&oldAcl, nullptr, false);
     EXPECT_EQ(ret, false);
+    ret = CompareByAclSameAccount(&oldAcl, &newAcl, true);
+    EXPECT_EQ(ret, false);
     EXPECT_EQ(EOK, strcpy_s(oldAcl.sinkAccountId, ACCOUNT_ID_BUF_LEN, NODE1_ACCOUNT_ID));
     EXPECT_EQ(EOK, strcpy_s(newAcl.sinkAccountId, ACCOUNT_ID_BUF_LEN, NODE1_ACCOUNT_ID));
     ret = CompareByAclSameAccount(&oldAcl, &newAcl, true);
@@ -470,8 +483,8 @@ HWTEST_F(AuthUkManagerTest, UK_NEGOTIATE_SESSION_INIT_Test_001, TestSize.Level1)
  */
 HWTEST_F(AuthUkManagerTest, GET_SHORT_UDID_HASH_Test_001, TestSize.Level1)
 {
-    char udid[SHA_256_HEX_HASH_LEN] = {0};
-    char udidHash[SHA_256_HEX_HASH_LEN] = {0};
+    char udid[SHA_256_HEX_HASH_LEN] = { 0 };
+    char udidHash[SHA_256_HEX_HASH_LEN] = { 0 };
     uint32_t len = 0;
 
     int32_t ret = GetShortUdidHash(nullptr, nullptr, len);
@@ -591,6 +604,25 @@ HWTEST_F(AuthUkManagerTest, CREATE_UK_NEGOTIATE_INSTANCE_Test_001, TestSize.Leve
     DeleteUkNegotiateInstance(requestId);
     DeInitUkNegoInstanceList();
     UkNegotiateDeinit();
+}
+
+/*
+ * @tc.name: CHECK_ACL_INFO_IS_EMPTY_Test_001
+ * @tc.desc: CheckAclInfoIsEmpty test
+ * @tc.type: FUNC
+ * @tc.require:
+ */
+HWTEST_F(AuthUkManagerTest, CHECK_ACL_INFO_IS_EMPTY_Test_001, TestSize.Level1)
+{
+    AuthACLInfo info;
+    (void)memset_s(&info, sizeof(AuthACLInfo), 0, sizeof(AuthACLInfo));
+    bool ret = CheckAclInfoIsEmpty(nullptr);
+    EXPECT_EQ(ret, true);
+    ret = CheckAclInfoIsEmpty(&info);
+    EXPECT_EQ(ret, true);
+    EXPECT_EQ(EOK, strcpy_s(info.sourceUdid, UDID_BUF_LEN, NODE1_UDID));
+    ret = CheckAclInfoIsEmpty(&info);
+    EXPECT_EQ(ret, false);
 }
 
 /*
@@ -783,19 +815,19 @@ HWTEST_F(AuthUkManagerTest, UPDATE_UK_NEGOTIATE_INFO_Test_001, TestSize.Level1)
  */
 HWTEST_F(AuthUkManagerTest, ASYNC_CALL_GEN_UK_RESULT_RECEIVED_Test_001, TestSize.Level1)
 {
-    SyncGenUkResult *res = (SyncGenUkResult*)SoftBusMalloc(sizeof(SyncGenUkResult));
+    SyncGenUkResult *res = (SyncGenUkResult *)SoftBusMalloc(sizeof(SyncGenUkResult));
     ASSERT_TRUE(res != nullptr);
     res->requestId = 0;
     EXPECT_EQ(CreateUkNegotiateInstanceInner(), SOFTBUS_OK);
     EXPECT_NO_FATAL_FAILURE(AsyncCallGenUkResultReceived(nullptr));
     EXPECT_NO_FATAL_FAILURE(AsyncCallGenUkResultReceived(reinterpret_cast<void *>(res)));
-    SyncGenUkResult *res1 = (SyncGenUkResult*)SoftBusMalloc(sizeof(SyncGenUkResult));
+    SyncGenUkResult *res1 = (SyncGenUkResult *)SoftBusMalloc(sizeof(SyncGenUkResult));
     ASSERT_TRUE(res1 != nullptr);
     res1->requestId = 1;
     res1->isGenUkSuccess = true;
     EXPECT_NO_FATAL_FAILURE(AsyncCallGenUkResultReceived(reinterpret_cast<void *>(res1)));
     EXPECT_EQ(CreateUkNegotiateInstanceInner(), SOFTBUS_OK);
-    SyncGenUkResult *res2 = (SyncGenUkResult*)SoftBusMalloc(sizeof(SyncGenUkResult));
+    SyncGenUkResult *res2 = (SyncGenUkResult *)SoftBusMalloc(sizeof(SyncGenUkResult));
     ASSERT_TRUE(res2 != nullptr);
     res2->requestId = 1;
     res2->isGenUkSuccess = false;
@@ -826,14 +858,14 @@ HWTEST_F(AuthUkManagerTest, UPDATE_ALL_GEN_CB_CALLBACK_Test_001, TestSize.Level1
     EXPECT_EQ(EOK, strcpy_s(info.sinkAccountId, ACCOUNT_ID_BUF_LEN, NODE2_ACCOUNT_ID));
     bool isSuccess = true;
     int32_t reason = SOFTBUS_AUTH_UK_INSTANCE_NOT_FIND;
-    EXPECT_NO_FATAL_FAILURE(UpdateAllGenCbCallback(&info, isSuccess, reason));
+    EXPECT_NO_FATAL_FAILURE(UpdateAllGenCbCallback(&info, isSuccess, reason, 0));
     EXPECT_EQ(InitUkNegoInstanceList(), SOFTBUS_OK);
-    EXPECT_NO_FATAL_FAILURE(UpdateAllGenCbCallback(&info, isSuccess, reason));
+    EXPECT_NO_FATAL_FAILURE(UpdateAllGenCbCallback(&info, isSuccess, reason, 0));
     EXPECT_EQ(UkNegotiateInit(), SOFTBUS_OK);
-    EXPECT_NO_FATAL_FAILURE(UpdateAllGenCbCallback(&info, isSuccess, reason));
+    EXPECT_NO_FATAL_FAILURE(UpdateAllGenCbCallback(&info, isSuccess, reason, 0));
     uint32_t requestId = 1;
     EXPECT_EQ(CreateUkNegotiateInstanceInner(), SOFTBUS_OK);
-    EXPECT_NO_FATAL_FAILURE(UpdateAllGenCbCallback(&info, isSuccess, reason));
+    EXPECT_NO_FATAL_FAILURE(UpdateAllGenCbCallback(&info, isSuccess, reason, 0));
     EXPECT_NO_FATAL_FAILURE(OnGenSuccess(reason));
     DeleteUkNegotiateInstance(requestId);
     DeInitUkNegoInstanceList();
@@ -865,8 +897,8 @@ HWTEST_F(AuthUkManagerTest, GET_CRED_ID_BY_ID_SERVICE_Test_001, TestSize.Level1)
     const char *remoteUdidHash = "5fec";
     const char *accountHash = "accountTest";
     int32_t userId = 100;
-    char *ptr = GetCredIdByIdService(const_cast<char *>(localUdidHash),
-        const_cast<char *>(remoteUdidHash), const_cast<char *>(accountHash), userId);
+    char *ptr = GetCredIdByIdService(
+        const_cast<char *>(localUdidHash), const_cast<char *>(remoteUdidHash), const_cast<char *>(accountHash), userId);
     EXPECT_EQ(ptr, nullptr);
 }
 
@@ -1081,7 +1113,33 @@ HWTEST_F(AuthUkManagerTest, PROCESS_UK_DEVICE_ID_Test_001, TestSize.Level1)
     EXPECT_EQ(ret, SOFTBUS_NETWORK_GET_NODE_INFO_ERR);
     requestId = 1;
     ret = ProcessUkDeviceId(channelId, requestId, data, dataLen);
-    EXPECT_EQ(ret, SOFTBUS_NETWORK_GET_NODE_INFO_ERR);
+    EXPECT_EQ(ret, SOFTBUS_AUTH_UK_UPDATE_ACL_FAIL);
+    DeleteUkNegotiateInstance(requestId);
+    DeInitUkNegoInstanceList();
+    UkNegotiateDeinit();
+}
+
+/*
+ * @tc.name: UPDATE_EXIST_ACL_INFO_Test_001
+ * @tc.desc: UpdateExistAclInfo test
+ * @tc.type: FUNC
+ * @tc.require:
+ */
+HWTEST_F(AuthUkManagerTest, UPDATE_EXIST_ACL_INFO_Test_001, TestSize.Level1)
+{
+    AuthACLInfo info = { 0 };
+    UkNegotiateInstance instance = { 0 };
+    EXPECT_EQ(CreateUkNegotiateInstanceInner(), SOFTBUS_OK);
+    uint32_t requestId = 1;
+    int32_t ret = GetGenUkInstanceByReq(requestId, &instance);
+    EXPECT_EQ(ret, SOFTBUS_OK);
+    ret = UpdateExistAclInfo(instance.channelId, instance.requestId, info, nullptr);
+    EXPECT_EQ(ret, SOFTBUS_INVALID_PARAM);
+    ret = UpdateExistAclInfo(instance.channelId, instance.requestId, info, &instance);
+    EXPECT_EQ(ret, SOFTBUS_AUTH_UK_UPDATE_ACL_FAIL);
+    instance.isRecvDeviceId = false;
+    ret = UpdateExistAclInfo(instance.channelId, instance.requestId, info, &instance);
+    EXPECT_EQ(ret, SOFTBUS_OK);
     DeleteUkNegotiateInstance(requestId);
     DeInitUkNegoInstanceList();
     UkNegotiateDeinit();
@@ -1176,7 +1234,7 @@ HWTEST_F(AuthUkManagerTest, SECURITY_ON_BYTES_RECEIVED_Test_001, TestSize.Level1
         .len = len,
     };
     uint32_t size = AUTH_PKT_HEAD_LEN + len;
-    uint8_t *buf = (uint8_t *)SoftBusCalloc(size);
+    uint8_t *buf = static_cast<uint8_t *>(SoftBusCalloc(size));
     ASSERT_TRUE(buf != nullptr);
     int32_t ret = PackAuthData(&head, data, buf, size);
     EXPECT_EQ(ret, SOFTBUS_OK);

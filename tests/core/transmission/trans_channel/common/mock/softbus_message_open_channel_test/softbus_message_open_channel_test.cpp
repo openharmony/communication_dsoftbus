@@ -28,7 +28,7 @@ namespace OHOS {
 #define PKG_NAME_SIZE_MAX_LEN 65
 #define TEST_SESSION_KEY "session key"
 
-const char *g_sessionKey = "www.huaweitest.com";
+const char *g_sessionKey = "www.test.com";
 const char *g_groupid = "TEST_GROUP_ID";
 static const char *g_sessionName = "com.test.trans.auth.demo";
 static const char *g_pkgName = "dms";
@@ -384,6 +384,8 @@ HWTEST_F(SoftBusMessageOpenChannelTest, UnpackFirstData001, TestSize.Level1)
 
     int32_t ret = UnpackFirstData(appInfo, nullptr);
     EXPECT_EQ(SOFTBUS_OK, ret);
+    ret = UnpackFirstData(appInfo, json);
+    EXPECT_EQ(SOFTBUS_DECRYPT_ERR, ret);
 
     ret = UnpackFirstData(appInfo, json);
     EXPECT_EQ(SOFTBUS_DECRYPT_ERR, ret);

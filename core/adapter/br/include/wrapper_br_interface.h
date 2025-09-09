@@ -18,7 +18,7 @@
 
 #include "softbus_adapter_bt_common.h"
 #include "softbus_def.h"
-#include "wrapper_br_interface_struct.h"
+#include "softbus_wrapper_br_interface_struct.h"
 
 #ifdef __cplusplus
 extern "C" {

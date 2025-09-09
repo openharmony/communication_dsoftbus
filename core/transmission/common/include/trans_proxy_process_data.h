@@ -48,6 +48,11 @@ typedef struct {
 } SliceHead;
 
 typedef struct {
+    uint16_t sliceNum;
+    uint16_t sliceSeq;
+} D2dSliceHead;
+
+typedef struct {
     int32_t active;
     int32_t timeout;
     int32_t sliceNumber;
@@ -70,6 +75,11 @@ typedef struct {
 } PacketD2DHead;
 
 typedef struct {
+    uint8_t flags;
+    uint16_t dataLen;
+} PacketD2DNewHead;
+
+typedef struct {
     uint16_t nonce;
     uint16_t dataSeq;
 } PacketD2DIvSource;
@@ -85,16 +95,16 @@ typedef struct {
 } DataHeadTlvPacketHead;
 
 typedef enum {
-    PROXY_CHANNEL_PRORITY_MESSAGE = 0,
-    PROXY_CHANNEL_PRORITY_BYTES = 1,
-    PROXY_CHANNEL_PRORITY_FILE = 2,
-    PROXY_CHANNEL_PRORITY_BUTT = 3,
+    PROXY_CHANNEL_PRIORITY_MESSAGE = 0,
+    PROXY_CHANNEL_PRIORITY_BYTES = 1,
+    PROXY_CHANNEL_PRIORITY_FILE = 2,
+    PROXY_CHANNEL_PRIORITY_BUTT = 3,
 } ProxyChannelPriority;
 
 typedef struct {
     ListNode head;
     int32_t channelId;
-    SliceProcessor processor[PROXY_CHANNEL_PRORITY_BUTT];
+    SliceProcessor processor[PROXY_CHANNEL_PRIORITY_BUTT];
 } ChannelSliceProcessor;
 
 void TransGetProxyDataBufMaxSize(void);
@@ -119,20 +129,24 @@ int32_t TransGetActualDataLen(const SliceHead *head, uint32_t *actualDataLen);
 int32_t TransProxySessionDataLenCheck(uint32_t dataLen, SessionPktType type);
 int32_t TransProxyParseTlv(uint32_t len, const char *data, DataHeadTlvPacketHead *head, uint32_t *headSize);
 int32_t TransProxyNoSubPacketTlvProc(
-    int32_t channelId, const char *data, uint32_t len, DataHeadTlvPacketHead *pktHead, uint32_t newPktHeadSize);
+    int32_t channelId, uint32_t len, DataHeadTlvPacketHead *pktHead, uint32_t newPktHeadSize);
 int32_t TransProxyProcData(ProxyDataInfo *dataInfo, const DataHeadTlvPacketHead *pktHead, const char *data);
 
 uint8_t *TransProxyPackD2DData(
     ProxyDataInfo *dataInfo, uint32_t sliceNum, SessionPktType pktType, uint32_t cnt, uint32_t *dataLen);
 int32_t TransProxyProcessD2DData(ProxyDataInfo *dataInfo, const PacketD2DHead *dataHead,
     const char *data, int32_t businessType);
-int32_t TransProxyDecryptD2DData(int32_t businessType, ProxyDataInfo *dataInfo, const char *sessionKey,
-    const char *sessionBytesIv, const unsigned char *sessionMsgIv);
+int32_t TransProxyDecryptD2DData(
+    int32_t businessType, ProxyDataInfo *dataInfo, const char *sessionKey, const unsigned char *sessionCommonIv);
 int32_t TransProxyD2DFirstSliceProcess(
     SliceProcessor *processor, const SliceHead *head, const char *data, uint32_t len, int32_t busineseeTye);
-int32_t TransProxyPackD2DBytes(ProxyDataInfo *dataInfo, const char *sessionKey, const char *sessionIv,
-    SessionPktType flag);
-
+int32_t TransProxyPackD2DBytes(ProxyDataInfo *dataInfo, const char *sessionKey, SessionPktType flag, bool isNewHead);
+int32_t TransGenerateToBytesRandIv(unsigned char *sessionIv, const uint32_t *nonce);
+uint8_t *TransProxyPackNewHeadD2DData(
+    ProxyDataInfo *dataInfo, uint16_t sliceNum, SessionPktType pktType, uint16_t cnt, uint16_t *dataLen);
+int32_t TransProxyD2dDataLenCheck(uint32_t dataLen, BusinessType type);
+int32_t TransProxyD2DFirstNewHeadSliceProcess(
+    SliceProcessor *processor, const SliceHead *head, const char *data, uint32_t len, int32_t busineseeTye);
 #ifdef __cplusplus
 }
 #endif /* __cplusplus */

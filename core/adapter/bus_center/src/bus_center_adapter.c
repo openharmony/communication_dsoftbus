@@ -61,6 +61,7 @@ static TypeInfo g_typeConvertMap[] = {
     {GET_TYPE_WATCH, TYPE_WATCH},
     {GET_TYPE_IPCAMERA, TYPE_IPCAMERA},
     {GET_TYPE_2IN1, TYPE_2IN1},
+    {GET_TYPE_GLASS, TYPE_GLASS},
 };
 
 static int32_t SoftBusGetBleMacAddr(char *macStr, uint32_t len)
@@ -165,8 +166,8 @@ int32_t GetCommonDevInfo(CommonDeviceKey key, char *value, uint32_t len)
             break;
         case COMM_DEVICE_KEY_DEVTYPE:
             devType = GetDeviceType();
-            LNN_LOGI(LNN_STATE, "get device from GetDeviceType, GetDeviceType=%{public}s", devType);
             if (devType != NULL) {
+                LNN_LOGI(LNN_STATE, "get device from GetDeviceType, deviceType=%{public}s", devType);
                 char softBusDevType[DEVICE_TYPE_BUF_LEN] = {0};
                 int32_t ret = SoftBusConvertDeviceType(devType, softBusDevType, DEVICE_TYPE_BUF_LEN);
                 if (ret != SOFTBUS_OK) {

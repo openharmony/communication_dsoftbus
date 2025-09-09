@@ -16,9 +16,9 @@
 #include "softbusproxychannelmanager_fuzzer.h"
 
 #include <chrono>
+#include <fuzzer/FuzzedDataProvider.h>
 #include <securec.h>
 #include <thread>
-#include <fuzzer/FuzzedDataProvider.h>
 #include <vector>
 
 #include "fuzz_data_generator.h"
@@ -35,6 +35,9 @@ public:
         isInited_ = false;
         (void)ConnServerInit();
         (void)TransProxyManagerInit(TransServerGetChannelCb());
+        (void)GetProxyChannelMgrHead();
+        (void)GetProxyChannelLock();
+        (void)ReleaseProxyChannelLock();
         isInited_ = true;
     }
 
@@ -84,21 +87,19 @@ static void FillAppInfoPart(const uint8_t *data, size_t size, AppInfo *appInfo)
 
 static void FillAppInfoPart(FuzzedDataProvider &provider, AppInfo *appInfo)
 {
-    auto dataSize = provider.ConsumeIntegral<uint32_t>();
-    auto data = provider.ConsumeBytes<uint8_t>(dataSize);
     appInfo->fd = provider.ConsumeIntegral<int32_t>();
     appInfo->fileProtocol = provider.ConsumeIntegral<int32_t>();
     appInfo->autoCloseTime = provider.ConsumeIntegral<int32_t>();
     appInfo->myHandleId = provider.ConsumeIntegral<int32_t>();
     appInfo->peerHandleId = provider.ConsumeIntegral<int32_t>();
     appInfo->transFlag = provider.ConsumeIntegral<int32_t>();
-    appInfo->authSeq = provider.ConsumeIntegral<int64_t >();
+    appInfo->authSeq = provider.ConsumeIntegral<int64_t>();
     appInfo->linkType = provider.ConsumeIntegral<int32_t>();
     appInfo->connectType = provider.ConsumeIntegral<int32_t>();
-    appInfo->channelType= provider.ConsumeIntegral<int32_t>();
+    appInfo->channelType = provider.ConsumeIntegral<int32_t>();
     appInfo->errorCode = provider.ConsumeIntegral<int32_t>();
-    appInfo->timeStart = provider.ConsumeIntegral<int64_t >();
-    appInfo->connectedStart = provider.ConsumeIntegral<int64_t >();
+    appInfo->timeStart = provider.ConsumeIntegral<int64_t>();
+    appInfo->connectedStart = provider.ConsumeIntegral<int64_t>();
     appInfo->callingTokenId = provider.ConsumeIntegral<uint64_t>();
     appInfo->isClient = provider.ConsumeBool();
     appInfo->osType = provider.ConsumeIntegral<int32_t>();
@@ -106,8 +107,6 @@ static void FillAppInfoPart(FuzzedDataProvider &provider, AppInfo *appInfo)
     appInfo->encrypt = provider.ConsumeIntegral<int32_t>();
     appInfo->algorithm = provider.ConsumeIntegral<int32_t>();
     appInfo->crc = provider.ConsumeIntegral<int32_t>();
-    appInfo->fastTransData = data.data();
-    appInfo->fastTransDataSize = dataSize;
 }
 
 static void FillAppInfo(const uint8_t *data, size_t size, AppInfo *appInfo)
@@ -173,21 +172,6 @@ static uint8_t *TestDataSwitch(const uint8_t *data, size_t size)
     return dataWithEndCharacter;
 }
 
-static uint8_t *TestDataSwitch(FuzzedDataProvider &provider)
-{
-    auto dataSize = provider.ConsumeIntegral<uint32_t>();
-    auto data = provider.ConsumeBytes<uint8_t>(dataSize);
-    uint8_t *dataWithEndCharacter = static_cast<uint8_t *>(SoftBusCalloc(dataSize + 1));
-    if (dataWithEndCharacter == nullptr) {
-        return nullptr;
-    }
-    if (memcpy_s(dataWithEndCharacter, dataSize, data.data(), dataSize) != EOK) {
-        SoftBusFree(dataWithEndCharacter);
-        return nullptr;
-    }
-    return dataWithEndCharacter;
-}
-
 void TransProxyGetNewChanSeqTest(const uint8_t *data, size_t size)
 {
     if (data == nullptr || size < sizeof(int32_t)) {
@@ -215,16 +199,20 @@ void TransProxyGetNewChanSeqTest(FuzzedDataProvider &provider)
     AppInfo appInfo;
     (void)memset_s(&appInfo, sizeof(AppInfo), 0, sizeof(AppInfo));
     FillAppInfo(provider, &appInfo);
-    auto dataSize = provider.ConsumeIntegral<uint32_t>();
-    auto data = provider.ConsumeBytes<uint8_t>(dataSize);
-    appInfo.fastTransData = data.data();
-    appInfo.fastTransDataSize = dataSize;
+    std::string providerData = provider.ConsumeBytesAsString(UINT8_MAX - 1);
+    char data[UINT8_MAX] = { 0 };
+    if (strcpy_s(data, UINT8_MAX, providerData.c_str()) != EOK) {
+        return;
+    }
+    appInfo.fastTransData = (uint8_t *)data;
+    appInfo.fastTransDataSize = UINT8_MAX;
 
     ProxyChannelInfo *proxyChannelInfo = static_cast<ProxyChannelInfo *>(SoftBusCalloc(sizeof(ProxyChannelInfo)));
     proxyChannelInfo->channelId = channelId;
     (void)TransProxyCreateChanInfo(proxyChannelInfo, channelId, &appInfo);
 
     (void)TransProxyGetNewChanSeq(channelId);
+    TransProxyDelChanByChanId(channelId);
 }
 
 void TransProxyOpenProxyChannelTest(const uint8_t *data, size_t size)
@@ -249,10 +237,13 @@ void TransProxyOpenProxyChannelTest(FuzzedDataProvider &provider)
     AppInfo appInfo;
     (void)memset_s(&appInfo, sizeof(AppInfo), 0, sizeof(AppInfo));
     FillAppInfo(provider, &appInfo);
-    auto dataSize = provider.ConsumeIntegral<uint32_t>();
-    auto data = provider.ConsumeBytes<uint8_t>(dataSize);
-    appInfo.fastTransData = data.data();
-    appInfo.fastTransDataSize = dataSize;
+    std::string providerData = provider.ConsumeBytesAsString(UINT8_MAX - 1);
+    char data[UINT8_MAX] = { 0 };
+    if (strcpy_s(data, UINT8_MAX, providerData.c_str()) != EOK) {
+        return;
+    }
+    appInfo.fastTransData = (uint8_t *)data;
+    appInfo.fastTransDataSize = UINT8_MAX;
     ConnectOption connectOption;
     FillConnectOption(provider, &connectOption);
 
@@ -275,15 +266,18 @@ void TransProxyCloseProxyChannelTest(const uint8_t *data, size_t size)
 void TransProxyCloseProxyChannelTest(FuzzedDataProvider &provider)
 {
     int32_t channelId = provider.ConsumeIntegral<int32_t>();
- 
+
     AppInfo appInfo;
     (void)memset_s(&appInfo, sizeof(AppInfo), 0, sizeof(AppInfo));
     FillAppInfo(provider, &appInfo);
-    auto dataSize = provider.ConsumeIntegral<uint32_t>();
-    auto data = provider.ConsumeBytes<uint8_t>(dataSize);
-    appInfo.fastTransData = data.data();
-    appInfo.fastTransDataSize = dataSize;
- 
+    std::string providerData = provider.ConsumeBytesAsString(UINT8_MAX - 1);
+    char data[UINT8_MAX] = { 0 };
+    if (strcpy_s(data, UINT8_MAX, providerData.c_str()) != EOK) {
+        return;
+    }
+    appInfo.fastTransData = (uint8_t *)data;
+    appInfo.fastTransDataSize = UINT8_MAX;
+
     ProxyChannelInfo *proxyChannelInfo = static_cast<ProxyChannelInfo *>(SoftBusCalloc(sizeof(ProxyChannelInfo)));
     proxyChannelInfo->channelId = channelId;
     (void)TransProxyCreateChanInfo(proxyChannelInfo, channelId, &appInfo);
@@ -312,11 +306,14 @@ void TransProxyDelByConnIdTest(FuzzedDataProvider &provider)
     AppInfo appInfo;
     (void)memset_s(&appInfo, sizeof(AppInfo), 0, sizeof(AppInfo));
     FillAppInfo(provider, &appInfo);
-    auto dataSize = provider.ConsumeIntegral<uint32_t>();
-    auto data = provider.ConsumeBytes<uint8_t>(dataSize);
-    appInfo.fastTransData = data.data();
-    appInfo.fastTransDataSize = dataSize;
- 
+    std::string providerData = provider.ConsumeBytesAsString(UINT8_MAX - 1);
+    char data[UINT8_MAX] = { 0 };
+    if (strcpy_s(data, UINT8_MAX, providerData.c_str()) != EOK) {
+        return;
+    }
+    appInfo.fastTransData = (uint8_t *)data;
+    appInfo.fastTransDataSize = UINT8_MAX;
+
     ProxyChannelInfo *proxyChannelInfo = static_cast<ProxyChannelInfo *>(SoftBusCalloc(sizeof(ProxyChannelInfo)));
     proxyChannelInfo->channelId = channelId;
     proxyChannelInfo->connId = connId;
@@ -388,16 +385,20 @@ void TransProxyGetChanByChanIdTest(FuzzedDataProvider &provider)
     AppInfo appInfo;
     (void)memset_s(&appInfo, sizeof(AppInfo), 0, sizeof(AppInfo));
     FillAppInfo(provider, &appInfo);
-    auto dataSize = provider.ConsumeIntegral<uint32_t>();
-    auto data = provider.ConsumeBytes<uint8_t>(dataSize);
-    appInfo.fastTransData = data.data();
-    appInfo.fastTransDataSize = dataSize;
+    std::string providerData = provider.ConsumeBytesAsString(UINT8_MAX - 1);
+    char data[UINT8_MAX] = { 0 };
+    if (strcpy_s(data, UINT8_MAX, providerData.c_str()) != EOK) {
+        return;
+    }
+    appInfo.fastTransData = (uint8_t *)data;
+    appInfo.fastTransDataSize = UINT8_MAX;
 
     ProxyChannelInfo *proxyChannelInfo = static_cast<ProxyChannelInfo *>(SoftBusCalloc(sizeof(ProxyChannelInfo)));
     proxyChannelInfo->channelId = channelId;
     (void)TransProxyCreateChanInfo(proxyChannelInfo, channelId, &appInfo);
 
     (void)TransProxyGetChanByChanId(channelId, proxyChannelInfo);
+    TransProxyDelChanByChanId(channelId);
 }
 
 void TransProxyGetChanByReqIdTest(const uint8_t *data, size_t size)
@@ -422,10 +423,13 @@ void TransProxyGetChanByReqIdTest(FuzzedDataProvider &provider)
     AppInfo appInfo;
     (void)memset_s(&appInfo, sizeof(AppInfo), 0, sizeof(AppInfo));
     FillAppInfo(provider, &appInfo);
-    auto dataSize = provider.ConsumeIntegral<uint32_t>();
-    auto data = provider.ConsumeBytes<uint8_t>(dataSize);
-    appInfo.fastTransData = data.data();
-    appInfo.fastTransDataSize = dataSize;
+    std::string providerData = provider.ConsumeBytesAsString(UINT8_MAX - 1);
+    char data[UINT8_MAX] = { 0 };
+    if (strcpy_s(data, UINT8_MAX, providerData.c_str()) != EOK) {
+        return;
+    }
+    appInfo.fastTransData = (uint8_t *)data;
+    appInfo.fastTransDataSize = UINT8_MAX;
 
     ProxyChannelInfo *proxyChannelInfo = static_cast<ProxyChannelInfo *>(SoftBusCalloc(sizeof(ProxyChannelInfo)));
     proxyChannelInfo->channelId = channelId;
@@ -433,6 +437,7 @@ void TransProxyGetChanByReqIdTest(FuzzedDataProvider &provider)
     (void)TransProxyCreateChanInfo(proxyChannelInfo, channelId, &appInfo);
 
     (void)TransProxyGetChanByReqId(reqId, proxyChannelInfo);
+    TransProxyDelChanByChanId(channelId);
 }
 
 void TransProxyOpenProxyChannelSuccessTest(const uint8_t *data, size_t size)
@@ -454,10 +459,13 @@ void TransProxyOpenProxyChannelSuccessTest(FuzzedDataProvider &provider)
     AppInfo appInfo;
     (void)memset_s(&appInfo, sizeof(AppInfo), 0, sizeof(AppInfo));
     FillAppInfo(provider, &appInfo);
-    auto dataSize = provider.ConsumeIntegral<uint32_t>();
-    auto data = provider.ConsumeBytes<uint8_t>(dataSize);
-    appInfo.fastTransData = data.data();
-    appInfo.fastTransDataSize = dataSize;
+    std::string providerData = provider.ConsumeBytesAsString(UINT8_MAX - 1);
+    char data[UINT8_MAX] = { 0 };
+    if (strcpy_s(data, UINT8_MAX, providerData.c_str()) != EOK) {
+        return;
+    }
+    appInfo.fastTransData = (uint8_t *)data;
+    appInfo.fastTransDataSize = UINT8_MAX;
 
     ProxyChannelInfo *proxyChannelInfo = static_cast<ProxyChannelInfo *>(SoftBusCalloc(sizeof(ProxyChannelInfo)));
     proxyChannelInfo->channelId = channelId;
@@ -465,6 +473,7 @@ void TransProxyOpenProxyChannelSuccessTest(FuzzedDataProvider &provider)
     (void)TransProxyCreateChanInfo(proxyChannelInfo, channelId, &appInfo);
 
     TransProxyOpenProxyChannelSuccess(channelId);
+    TransProxyDelChanByChanId(channelId);
 }
 
 void TransProxyOpenProxyChannelFailTest(const uint8_t *data, size_t size)
@@ -494,10 +503,13 @@ void TransProxyOpenProxyChannelFailTest(FuzzedDataProvider &provider)
     AppInfo appInfo;
     (void)memset_s(&appInfo, sizeof(AppInfo), 0, sizeof(AppInfo));
     FillAppInfo(provider, &appInfo);
-    auto dataSize = provider.ConsumeIntegral<uint32_t>();
-    auto data = provider.ConsumeBytes<uint8_t>(dataSize);
-    appInfo.fastTransData = data.data();
-    appInfo.fastTransDataSize = dataSize;
+    std::string providerData = provider.ConsumeBytesAsString(UINT8_MAX - 1);
+    char data[UINT8_MAX] = { 0 };
+    if (strcpy_s(data, UINT8_MAX, providerData.c_str()) != EOK) {
+        return;
+    }
+    appInfo.fastTransData = (uint8_t *)data;
+    appInfo.fastTransDataSize = UINT8_MAX;
 
     TransProxyOpenProxyChannelFail(channelId, &appInfo, errCode);
 }
@@ -523,10 +535,13 @@ void TransProxyGetSessionKeyByChanIdTest(FuzzedDataProvider &provider)
     AppInfo appInfo;
     (void)memset_s(&appInfo, sizeof(AppInfo), 0, sizeof(AppInfo));
     FillAppInfo(provider, &appInfo);
-    auto dataSize = provider.ConsumeIntegral<uint32_t>();
-    auto data = provider.ConsumeBytes<uint8_t>(dataSize);
-    appInfo.fastTransData = data.data();
-    appInfo.fastTransDataSize = dataSize;
+    std::string providerData = provider.ConsumeBytesAsString(UINT8_MAX - 1);
+    char data[UINT8_MAX] = { 0 };
+    if (strcpy_s(data, UINT8_MAX, providerData.c_str()) != EOK) {
+        return;
+    }
+    appInfo.fastTransData = (uint8_t *)data;
+    appInfo.fastTransDataSize = UINT8_MAX;
 
     ProxyChannelInfo *proxyChannelInfo = static_cast<ProxyChannelInfo *>(SoftBusCalloc(sizeof(ProxyChannelInfo)));
     proxyChannelInfo->channelId = channelId;
@@ -537,6 +552,7 @@ void TransProxyGetSessionKeyByChanIdTest(FuzzedDataProvider &provider)
     uint32_t sessionKeySize = SESSION_KEY_LENGTH;
 
     (void)TransProxyGetSessionKeyByChanId(channelId, sessionKey, sessionKeySize);
+    TransProxyDelChanByChanId(channelId);
 }
 
 void TransProxyGetSendMsgChanInfoTest(const uint8_t *data, size_t size)
@@ -559,16 +575,20 @@ void TransProxyGetSendMsgChanInfoTest(FuzzedDataProvider &provider)
     AppInfo appInfo;
     (void)memset_s(&appInfo, sizeof(AppInfo), 0, sizeof(AppInfo));
     FillAppInfo(provider, &appInfo);
-    auto dataSize = provider.ConsumeIntegral<uint32_t>();
-    auto data = provider.ConsumeBytes<uint8_t>(dataSize);
-    appInfo.fastTransData = data.data();
-    appInfo.fastTransDataSize = dataSize;
+    std::string providerData = provider.ConsumeBytesAsString(UINT8_MAX - 1);
+    char data[UINT8_MAX] = { 0 };
+    if (strcpy_s(data, UINT8_MAX, providerData.c_str()) != EOK) {
+        return;
+    }
+    appInfo.fastTransData = (uint8_t *)data;
+    appInfo.fastTransDataSize = UINT8_MAX;
 
     ProxyChannelInfo *proxyChannelInfo = static_cast<ProxyChannelInfo *>(SoftBusCalloc(sizeof(ProxyChannelInfo)));
     proxyChannelInfo->channelId = channelId;
     (void)TransProxyCreateChanInfo(proxyChannelInfo, channelId, &appInfo);
 
     (void)TransProxyGetSendMsgChanInfo(channelId, proxyChannelInfo);
+    TransProxyDelChanByChanId(channelId);
 }
 
 void TransProxyCreateChanInfoTest(const uint8_t *data, size_t size)
@@ -597,10 +617,13 @@ void TransProxyCreateChanInfoTest(FuzzedDataProvider &provider)
     AppInfo appInfo;
     (void)memset_s(&appInfo, sizeof(AppInfo), 0, sizeof(AppInfo));
     FillAppInfo(provider, &appInfo);
-    auto dataSize = provider.ConsumeIntegral<uint32_t>();
-    auto data = provider.ConsumeBytes<uint8_t>(dataSize);
-    appInfo.fastTransData = data.data();
-    appInfo.fastTransDataSize = dataSize;
+    std::string providerData = provider.ConsumeBytesAsString(UINT8_MAX - 1);
+    char data[UINT8_MAX] = { 0 };
+    if (strcpy_s(data, UINT8_MAX, providerData.c_str()) != EOK) {
+        return;
+    }
+    appInfo.fastTransData = (uint8_t *)data;
+    appInfo.fastTransDataSize = UINT8_MAX;
 
     ProxyChannelInfo *proxyChannelInfo = static_cast<ProxyChannelInfo *>(SoftBusCalloc(sizeof(ProxyChannelInfo)));
     proxyChannelInfo->channelId = channelId;
@@ -629,17 +652,20 @@ void TransProxyChanProcessByReqIdTest(const uint8_t *data, size_t size)
 void TransProxyChanProcessByReqIdTest(FuzzedDataProvider &provider)
 {
     int32_t reqId = provider.ConsumeIntegral<int32_t>();
-    uint32_t connId = provider.ConsumeIntegral<int32_t>();
+    uint32_t connId = provider.ConsumeIntegral<uint32_t>();
     int32_t errCode = SOFTBUS_OK;
 
     int32_t channelId = provider.ConsumeIntegral<int32_t>();
     AppInfo appInfo;
     (void)memset_s(&appInfo, sizeof(AppInfo), 0, sizeof(AppInfo));
     FillAppInfo(provider, &appInfo);
-    auto dataSize = provider.ConsumeIntegral<uint32_t>();
-    auto data = provider.ConsumeBytes<uint8_t>(dataSize);
-    appInfo.fastTransData = data.data();
-    appInfo.fastTransDataSize = dataSize;
+    std::string providerData = provider.ConsumeBytesAsString(UINT8_MAX - 1);
+    char data[UINT8_MAX] = { 0 };
+    if (strcpy_s(data, UINT8_MAX, providerData.c_str()) != EOK) {
+        return;
+    }
+    appInfo.fastTransData = (uint8_t *)data;
+    appInfo.fastTransDataSize = UINT8_MAX;
 
     ProxyChannelInfo *proxyChannelInfo = static_cast<ProxyChannelInfo *>(SoftBusCalloc(sizeof(ProxyChannelInfo)));
     proxyChannelInfo->channelId = channelId;
@@ -648,6 +674,7 @@ void TransProxyChanProcessByReqIdTest(FuzzedDataProvider &provider)
     (void)TransProxyCreateChanInfo(proxyChannelInfo, channelId, &appInfo);
 
     TransProxyChanProcessByReqId(reqId, connId, errCode);
+    TransProxyDelChanByChanId(channelId);
 }
 
 void TransProxyGetAuthIdTest(const uint8_t *data, size_t size)
@@ -670,10 +697,13 @@ void TransProxyGetAuthIdTest(FuzzedDataProvider &provider)
     AppInfo appInfo;
     (void)memset_s(&appInfo, sizeof(AppInfo), 0, sizeof(AppInfo));
     FillAppInfo(provider, &appInfo);
-    auto dataSize = provider.ConsumeIntegral<uint32_t>();
-    auto data = provider.ConsumeBytes<uint8_t>(dataSize);
-    appInfo.fastTransData = data.data();
-    appInfo.fastTransDataSize = dataSize;
+    std::string providerData = provider.ConsumeBytesAsString(UINT8_MAX - 1);
+    char data[UINT8_MAX] = { 0 };
+    if (strcpy_s(data, UINT8_MAX, providerData.c_str()) != EOK) {
+        return;
+    }
+    appInfo.fastTransData = (uint8_t *)data;
+    appInfo.fastTransDataSize = UINT8_MAX;
 
     ProxyChannelInfo *proxyChannelInfo = static_cast<ProxyChannelInfo *>(SoftBusCalloc(sizeof(ProxyChannelInfo)));
     proxyChannelInfo->channelId = channelId;
@@ -682,6 +712,7 @@ void TransProxyGetAuthIdTest(FuzzedDataProvider &provider)
     AuthHandle authHandle;
 
     (void)TransProxyGetAuthId(channelId, &authHandle);
+    TransProxyDelChanByChanId(channelId);
 }
 
 void TransProxyGetNameByChanIdTest(const uint8_t *data, size_t size)
@@ -714,16 +745,20 @@ void TransProxyGetNameByChanIdTest(FuzzedDataProvider &provider)
     AppInfo appInfo;
     (void)memset_s(&appInfo, sizeof(AppInfo), 0, sizeof(AppInfo));
     FillAppInfo(provider, &appInfo);
-    auto dataSize = provider.ConsumeIntegral<uint32_t>();
-    auto data = provider.ConsumeBytes<uint8_t>(dataSize);
-    appInfo.fastTransData = data.data();
-    appInfo.fastTransDataSize = dataSize;
+    std::string providerData = provider.ConsumeBytesAsString(UINT8_MAX - 1);
+    char data[UINT8_MAX] = { 0 };
+    if (strcpy_s(data, UINT8_MAX, providerData.c_str()) != EOK) {
+        return;
+    }
+    appInfo.fastTransData = (uint8_t *)data;
+    appInfo.fastTransDataSize = UINT8_MAX;
 
     ProxyChannelInfo *proxyChannelInfo = static_cast<ProxyChannelInfo *>(SoftBusCalloc(sizeof(ProxyChannelInfo)));
     proxyChannelInfo->channelId = chanId;
     (void)TransProxyCreateChanInfo(proxyChannelInfo, chanId, &appInfo);
 
     (void)TransProxyGetNameByChanId(chanId, pkgName, sessionName, pkgLen, sessionLen);
+    TransProxyDelChanByChanId(chanId);
 }
 
 void TransRefreshProxyTimesNativeTest(const uint8_t *data, size_t size)
@@ -745,16 +780,20 @@ void TransRefreshProxyTimesNativeTest(FuzzedDataProvider &provider)
     AppInfo appInfo;
     (void)memset_s(&appInfo, sizeof(AppInfo), 0, sizeof(AppInfo));
     FillAppInfo(provider, &appInfo);
-    auto dataSize = provider.ConsumeIntegral<uint32_t>();
-    auto data = provider.ConsumeBytes<uint8_t>(dataSize);
-    appInfo.fastTransData = data.data();
-    appInfo.fastTransDataSize = dataSize;
+    std::string providerData = provider.ConsumeBytesAsString(UINT8_MAX - 1);
+    char data[UINT8_MAX] = { 0 };
+    if (strcpy_s(data, UINT8_MAX, providerData.c_str()) != EOK) {
+        return;
+    }
+    appInfo.fastTransData = (uint8_t *)data;
+    appInfo.fastTransDataSize = UINT8_MAX;
 
     ProxyChannelInfo *proxyChannelInfo = static_cast<ProxyChannelInfo *>(SoftBusCalloc(sizeof(ProxyChannelInfo)));
     proxyChannelInfo->channelId = channelId;
     (void)TransProxyCreateChanInfo(proxyChannelInfo, channelId, &appInfo);
 
     (void)TransRefreshProxyTimesNative(channelId);
+    TransProxyDelChanByChanId(channelId);
 }
 
 void TransProxyDeathCallbackTest(const uint8_t *data, size_t size)
@@ -775,29 +814,33 @@ void TransProxyDeathCallbackTest(const uint8_t *data, size_t size)
 
 void TransProxyDeathCallbackTest(FuzzedDataProvider &provider)
 {
-    uint8_t *dataWithEndCharacter = TestDataSwitch(provider);
-    if (dataWithEndCharacter == nullptr) {
+    std::string providerPkgName = provider.ConsumeBytesAsString(UINT8_MAX - 1);
+    char pkgName[UINT8_MAX] = { 0 };
+    if (strcpy_s(pkgName, UINT8_MAX, providerPkgName.c_str()) != EOK) {
         return;
     }
     int32_t pid = provider.ConsumeIntegral<int32_t>();
-    char *pkgName = const_cast<char *>(reinterpret_cast<const char *>(dataWithEndCharacter));
 
     int32_t channelId = provider.ConsumeIntegral<int32_t>();
     AppInfo appInfo;
     (void)memset_s(&appInfo, sizeof(AppInfo), 0, sizeof(AppInfo));
     FillAppInfo(provider, &appInfo);
-    auto dataSize = provider.ConsumeIntegral<uint32_t>();
-    auto data = provider.ConsumeBytes<uint8_t>(dataSize);
-    appInfo.fastTransData = data.data();
-    appInfo.fastTransDataSize = dataSize;
+    std::string providerData = provider.ConsumeBytesAsString(UINT8_MAX - 1);
+    char data[UINT8_MAX] = { 0 };
+    if (strcpy_s(data, UINT8_MAX, providerData.c_str()) != EOK) {
+        return;
+    }
+    appInfo.fastTransData = (uint8_t *)data;
+    appInfo.fastTransDataSize = UINT8_MAX;
     appInfo.myData.pid = pid;
 
     ProxyChannelInfo *proxyChannelInfo = static_cast<ProxyChannelInfo *>(SoftBusCalloc(sizeof(ProxyChannelInfo)));
     proxyChannelInfo->channelId = channelId;
     (void)TransProxyCreateChanInfo(proxyChannelInfo, channelId, &appInfo);
 
+    TransProxyDeathCallback(nullptr, pid);
     TransProxyDeathCallback(pkgName, pid);
-    SoftBusFree(dataWithEndCharacter);
+    TransProxyDelChanByChanId(channelId);
 }
 
 void TransProxyGetAppInfoByChanIdTest(const uint8_t *data, size_t size)
@@ -820,17 +863,20 @@ void TransProxyGetAppInfoByChanIdTest(FuzzedDataProvider &provider)
     AppInfo appInfo;
     (void)memset_s(&appInfo, sizeof(AppInfo), 0, sizeof(AppInfo));
     FillAppInfo(provider, &appInfo);
-    auto dataSize = provider.ConsumeIntegral<uint32_t>();
-    auto data = provider.ConsumeBytes<uint8_t>(dataSize);
-    appInfo.fastTransData = data.data();
-    appInfo.fastTransDataSize = dataSize;
+    std::string providerData = provider.ConsumeBytesAsString(UINT8_MAX - 1);
+    char data[UINT8_MAX] = { 0 };
+    if (strcpy_s(data, UINT8_MAX, providerData.c_str()) != EOK) {
+        return;
+    }
+    appInfo.fastTransData = (uint8_t *)data;
+    appInfo.fastTransDataSize = UINT8_MAX;
 
     ProxyChannelInfo *proxyChannelInfo = static_cast<ProxyChannelInfo *>(SoftBusCalloc(sizeof(ProxyChannelInfo)));
     proxyChannelInfo->channelId = chanId;
     (void)TransProxyCreateChanInfo(proxyChannelInfo, chanId, &appInfo);
 
     (void)TransProxyGetAppInfoByChanId(chanId, &appInfo);
-    DataGenerator::Clear();
+    TransProxyDelChanByChanId(chanId);
 }
 
 void TransProxyGetConnIdByChanIdTest(const uint8_t *data, size_t size)
@@ -853,10 +899,13 @@ void TransProxyGetConnIdByChanIdTest(FuzzedDataProvider &provider)
     AppInfo appInfo;
     (void)memset_s(&appInfo, sizeof(AppInfo), 0, sizeof(AppInfo));
     FillAppInfo(provider, &appInfo);
-    auto dataSize = provider.ConsumeIntegral<uint32_t>();
-    auto data = provider.ConsumeBytes<uint8_t>(dataSize);
-    appInfo.fastTransData = data.data();
-    appInfo.fastTransDataSize = dataSize;
+    std::string providerData = provider.ConsumeBytesAsString(UINT8_MAX - 1);
+    char data[UINT8_MAX] = { 0 };
+    if (strcpy_s(data, UINT8_MAX, providerData.c_str()) != EOK) {
+        return;
+    }
+    appInfo.fastTransData = (uint8_t *)data;
+    appInfo.fastTransDataSize = UINT8_MAX;
 
     ProxyChannelInfo *proxyChannelInfo = static_cast<ProxyChannelInfo *>(SoftBusCalloc(sizeof(ProxyChannelInfo)));
     proxyChannelInfo->channelId = channelId;
@@ -864,6 +913,7 @@ void TransProxyGetConnIdByChanIdTest(FuzzedDataProvider &provider)
     int32_t connId;
 
     (void)TransProxyGetConnIdByChanId(channelId, &connId);
+    TransProxyDelChanByChanId(channelId);
 }
 
 void TransProxyGetConnOptionByChanIdTest(const uint8_t *data, size_t size)
@@ -886,10 +936,13 @@ void TransProxyGetConnOptionByChanIdTest(FuzzedDataProvider &provider)
     AppInfo appInfo;
     (void)memset_s(&appInfo, sizeof(AppInfo), 0, sizeof(AppInfo));
     FillAppInfo(provider, &appInfo);
-    auto dataSize = provider.ConsumeIntegral<uint32_t>();
-    auto data = provider.ConsumeBytes<uint8_t>(dataSize);
-    appInfo.fastTransData = data.data();
-    appInfo.fastTransDataSize = dataSize;
+    std::string providerData = provider.ConsumeBytesAsString(UINT8_MAX - 1);
+    char data[UINT8_MAX] = { 0 };
+    if (strcpy_s(data, UINT8_MAX, providerData.c_str()) != EOK) {
+        return;
+    }
+    appInfo.fastTransData = (uint8_t *)data;
+    appInfo.fastTransDataSize = UINT8_MAX;
 
     ProxyChannelInfo *proxyChannelInfo = static_cast<ProxyChannelInfo *>(SoftBusCalloc(sizeof(ProxyChannelInfo)));
     proxyChannelInfo->channelId = channelId;
@@ -897,6 +950,7 @@ void TransProxyGetConnOptionByChanIdTest(FuzzedDataProvider &provider)
     ConnectOption connOpt;
 
     (void)TransProxyGetConnOptionByChanId(channelId, &connOpt);
+    TransProxyDelChanByChanId(channelId);
 }
 
 void TransProxyGetAppInfoTypeTest(const uint8_t *data, size_t size)
@@ -925,10 +979,13 @@ void TransProxyGetAppInfoTypeTest(FuzzedDataProvider &provider)
     AppInfo appInfo;
     (void)memset_s(&appInfo, sizeof(AppInfo), 0, sizeof(AppInfo));
     FillAppInfo(provider, &appInfo);
-    auto dataSize = provider.ConsumeIntegral<uint32_t>();
-    auto data = provider.ConsumeBytes<uint8_t>(dataSize);
-    appInfo.fastTransData = data.data();
-    appInfo.fastTransDataSize = dataSize;
+    std::string providerData = provider.ConsumeBytesAsString(UINT8_MAX - 1);
+    char data[UINT8_MAX] = { 0 };
+    if (strcpy_s(data, UINT8_MAX, providerData.c_str()) != EOK) {
+        return;
+    }
+    appInfo.fastTransData = (uint8_t *)data;
+    appInfo.fastTransDataSize = UINT8_MAX;
 
     ProxyChannelInfo *proxyChannelInfo = static_cast<ProxyChannelInfo *>(SoftBusCalloc(sizeof(ProxyChannelInfo)));
     proxyChannelInfo->channelId = channelId;
@@ -936,6 +993,7 @@ void TransProxyGetAppInfoTypeTest(FuzzedDataProvider &provider)
     (void)TransProxyCreateChanInfo(proxyChannelInfo, channelId, &appInfo);
 
     (void)TransProxyGetAppInfoType(myId, identity, &appType);
+    TransProxyDelChanByChanId(channelId);
 }
 
 static void InitProxyChannelInfo(const uint8_t *data, size_t size, ProxyChannelInfo *proxyChannelInfo)
@@ -998,10 +1056,13 @@ void TransProxySetAuthHandleByChanIdTest(FuzzedDataProvider &provider)
     AppInfo appInfo;
     (void)memset_s(&appInfo, sizeof(AppInfo), 0, sizeof(AppInfo));
     FillAppInfo(provider, &appInfo);
-    auto dataSize = provider.ConsumeIntegral<uint32_t>();
-    auto data = provider.ConsumeBytes<uint8_t>(dataSize);
-    appInfo.fastTransData = data.data();
-    appInfo.fastTransDataSize = dataSize;
+    std::string providerData = provider.ConsumeBytesAsString(UINT8_MAX - 1);
+    char data[UINT8_MAX] = { 0 };
+    if (strcpy_s(data, UINT8_MAX, providerData.c_str()) != EOK) {
+        return;
+    }
+    appInfo.fastTransData = (uint8_t *)data;
+    appInfo.fastTransDataSize = UINT8_MAX;
 
     ProxyChannelInfo *proxyChannelInfo = static_cast<ProxyChannelInfo *>(SoftBusCalloc(sizeof(ProxyChannelInfo)));
     proxyChannelInfo->channelId = channelId;
@@ -1012,6 +1073,7 @@ void TransProxySetAuthHandleByChanIdTest(FuzzedDataProvider &provider)
     authHandle.type = provider.ConsumeIntegral<uint32_t>();
 
     (void)TransProxySetAuthHandleByChanId(channelId, authHandle);
+    TransProxyDelChanByChanId(channelId);
 }
 
 void TransProxyNegoSessionKeySuccTest(const uint8_t *data, size_t size)
@@ -1033,16 +1095,20 @@ void TransProxyNegoSessionKeySuccTest(FuzzedDataProvider &provider)
     AppInfo appInfo;
     (void)memset_s(&appInfo, sizeof(AppInfo), 0, sizeof(AppInfo));
     FillAppInfo(provider, &appInfo);
-    auto dataSize = provider.ConsumeIntegral<uint32_t>();
-    auto data = provider.ConsumeBytes<uint8_t>(dataSize);
-    appInfo.fastTransData = data.data();
-    appInfo.fastTransDataSize = dataSize;
+    std::string providerData = provider.ConsumeBytesAsString(UINT8_MAX - 1);
+    char data[UINT8_MAX] = { 0 };
+    if (strcpy_s(data, UINT8_MAX, providerData.c_str()) != EOK) {
+        return;
+    }
+    appInfo.fastTransData = (uint8_t *)data;
+    appInfo.fastTransDataSize = UINT8_MAX;
 
     ProxyChannelInfo *proxyChannelInfo = static_cast<ProxyChannelInfo *>(SoftBusCalloc(sizeof(ProxyChannelInfo)));
     proxyChannelInfo->channelId = channelId;
     (void)TransProxyCreateChanInfo(proxyChannelInfo, channelId, &appInfo);
 
     TransProxyNegoSessionKeySucc(channelId);
+    TransProxyDelChanByChanId(channelId);
 }
 
 void TransProxyNegoSessionKeyFailTest(const uint8_t *data, size_t size)
@@ -1066,10 +1132,13 @@ void TransProxyNegoSessionKeyFailTest(FuzzedDataProvider &provider)
     AppInfo appInfo;
     (void)memset_s(&appInfo, sizeof(AppInfo), 0, sizeof(AppInfo));
     FillAppInfo(provider, &appInfo);
-    auto dataSize = provider.ConsumeIntegral<uint32_t>();
-    auto data = provider.ConsumeBytes<uint8_t>(dataSize);
-    appInfo.fastTransData = data.data();
-    appInfo.fastTransDataSize = dataSize;
+    std::string providerData = provider.ConsumeBytesAsString(UINT8_MAX - 1);
+    char data[UINT8_MAX] = { 0 };
+    if (strcpy_s(data, UINT8_MAX, providerData.c_str()) != EOK) {
+        return;
+    }
+    appInfo.fastTransData = (uint8_t *)data;
+    appInfo.fastTransDataSize = UINT8_MAX;
 
     ProxyChannelInfo *proxyChannelInfo = static_cast<ProxyChannelInfo *>(SoftBusCalloc(sizeof(ProxyChannelInfo)));
     proxyChannelInfo->channelId = channelId;
@@ -1077,24 +1146,7 @@ void TransProxyNegoSessionKeyFailTest(FuzzedDataProvider &provider)
     int32_t errCode = provider.ConsumeIntegral<int32_t>();
 
     TransProxyNegoSessionKeyFail(channelId, errCode);
-    DataGenerator::Clear();
-}
-
-void ProxyChannelListLockTest(const uint8_t *data, size_t size)
-{
-    (void)data;
-    (void)size;
-    (void)GetProxyChannelMgrHead();
-    (void)GetProxyChannelLock();
-    (void)ReleaseProxyChannelLock();
-}
-
-void ProxyChannelListLockTest(FuzzedDataProvider &provider)
-{
-    (void)provider;
-    (void)GetProxyChannelMgrHead();
-    (void)GetProxyChannelLock();
-    (void)ReleaseProxyChannelLock();
+    TransProxyDelChanByChanId(channelId);
 }
 } // namespace OHOS
 
@@ -1132,7 +1184,6 @@ extern "C" int32_t LLVMFuzzerTestOneInput(const uint8_t *data, size_t size)
     OHOS::TransProxySetAuthHandleByChanIdTest(provider);
     OHOS::TransProxyNegoSessionKeySuccTest(provider);
     OHOS::TransProxyNegoSessionKeyFailTest(provider);
-    OHOS::ProxyChannelListLockTest(provider);
 
     return 0;
 }

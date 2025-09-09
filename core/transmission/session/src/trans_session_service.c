@@ -71,16 +71,15 @@ int32_t TransServerInit(void)
         TRANS_LOGE(TRANS_INIT, "InnerListInit Failed");
         return ret;
     }
-    ret = ScenarioManagerGetInstance();
-    if (ret != SOFTBUS_OK) {
+    if (ScenarioManagerGetInstance() == NULL) {
         TRANS_LOGE(TRANS_INIT, "ScenarioManager init Failed");
-        return ret;
-    }
-    if (InitSoftbusPagingPacked() != SOFTBUS_OK) {
-        TRANS_LOGE(TRANS_INIT, "InitSoftbusPagingPacked Failed");
+        return SOFTBUS_NO_INIT;
     }
     if (InitSoftbusPagingResPullPacked() != SOFTBUS_OK) {
         TRANS_LOGE(TRANS_INIT, "InitSoftbusPagingResPullPacked Failed");
+    }
+    if (InitSoftbusPagingPacked() != SOFTBUS_OK) {
+        TRANS_LOGE(TRANS_INIT, "InitSoftbusPagingPacked Failed");
     }
     RegisterPermissionChangeCallback();
     atomic_store_explicit(&g_transSessionInitFlag, true, memory_order_release);
@@ -99,8 +98,8 @@ void TransServerDeinit(void)
     InnerListDeinit();
     TransPermissionDeinit();
     ScenarioManagerdestroyInstance();
-    DeInitSoftbusPagingPacked();
     DeInitSoftbusPagingResPullPacked();
+    DeInitSoftbusPagingPacked();
     atomic_store_explicit(&g_transSessionInitFlag, false, memory_order_release);
 }
 
@@ -205,7 +204,7 @@ int32_t TransRemoveSessionServer(const char *pkgName, const char *sessionName)
 
 int32_t TransOpenSession(const SessionParam *param, TransInfo *info)
 {
-    if (!IsValidString(param->sessionName, SESSION_NAME_SIZE_MAX) ||
+    if (!param ||!IsValidString(param->sessionName, SESSION_NAME_SIZE_MAX) ||
         !IsValidString(param->peerSessionName, SESSION_NAME_SIZE_MAX) ||
         !IsValidString(param->peerDeviceId, DEVICE_ID_SIZE_MAX) ||
         (param->isQosLane && param->qosCount > QOS_TYPE_BUTT)) {

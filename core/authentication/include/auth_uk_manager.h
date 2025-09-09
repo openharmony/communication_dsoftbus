@@ -54,7 +54,6 @@ typedef struct {
 
 int32_t AuthFindUkIdByAclInfo(const AuthACLInfo *acl, int32_t *ukId);
 int32_t AuthGenUkIdByAclInfo(const AuthACLInfo *acl, uint32_t requestId, const AuthGenUkCallback *genCb);
-uint32_t AuthGetUkEncryptSize(uint32_t inLen);
 uint32_t AuthGetUkDecryptSize(uint32_t inLen);
 int32_t AuthEncryptByUkId(int32_t ukId, const uint8_t *inData, uint32_t inLen, uint8_t *outData, uint32_t *outLen);
 int32_t AuthDecryptByUkId(int32_t ukId, const uint8_t *inData, uint32_t inLen, uint8_t *outData, uint32_t *outLen);

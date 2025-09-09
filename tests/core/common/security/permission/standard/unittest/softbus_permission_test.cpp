@@ -354,6 +354,17 @@ HWTEST_F(SoftbusPermissionTest, SoftBusRegisterDataSyncPermission001, TestSize.L
 }
 
 /**
+ * @tc.name:SoftBusUnRegisterDataSyncPermission001
+ * @tc.desc: SoftBusUnRegisterDataSyncPermission
+ * @tc.type: FUNC
+ * @tc.require:
+ */
+HWTEST_F(SoftbusPermissionTest, SoftBusUnRegisterDataSyncPermission001, TestSize.Level0)
+{
+    EXPECT_NO_FATAL_FAILURE(SoftBusUnRegisterDataSyncPermission(INVALID_TEST_PID));
+}
+
+/**
  * @tc.name:SoftBusGetTokenNameByTokenType001
  * @tc.desc: SoftBusGetTokenNameByTokenType
  * @tc.type: FUNC

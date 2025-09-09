@@ -14,7 +14,7 @@ import("../../adapter/common/net/bluetooth/net_bluetooth.gni")
 import("../../dsoftbus.gni")
 
 br_adapter_src =
-    [ "$dsoftbus_root_path/core/adapter/br/mock/wrapper_br_interface.c" ]
+    [ "$dsoftbus_root_path/core/adapter/br/src/wrapper_br_interface.c" ]
 
 br_adapter_inc = [ "$dsoftbus_root_path/core/adapter/br/include" ]
 

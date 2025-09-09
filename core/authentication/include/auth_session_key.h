@@ -17,10 +17,10 @@
 #define AUTH_SESSION_KEY_H
 
 #include "auth_interface.h"
-#include "auth_session_key_struct.h"
 #include "common_list.h"
 #include "softbus_adapter_crypto.h"
 #include "softbus_def.h"
+#include "auth_session_key_struct.h"
 
 #ifdef __cplusplus
 #if __cplusplus

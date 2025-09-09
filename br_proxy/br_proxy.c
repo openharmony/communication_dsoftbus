@@ -148,6 +148,45 @@ static bool IsMacValid(const char *macAddr)
     return true;
 }
 
+static bool IsHexChar(char c)
+{
+    return (c >= '0' && c <= '9') ||
+           (c >= 'a' && c <= 'f') ||
+           (c >= 'A' && c <= 'F');
+}
+
+static bool IsValidSha256(const char *str)
+{
+    if (str == NULL) {
+        return false;
+    }
+    int32_t len = strlen(str);
+    if (len != MAC_SHA256_LEN) {
+        return false;
+    }
+    for (int32_t i = 0; i < len; i++) {
+        if (!IsHexChar(str[i])) {
+            return false;
+        }
+    }
+    return true;
+}
+
+static bool IsPeerDevAddrValid(const char *addr)
+{
+    if (addr == NULL) {
+        return false;
+    }
+
+    if (IsValidSha256(addr)) {
+        return true;
+    } else if (IsMacValid(addr)) {
+        return true;
+    }
+
+    return false;
+}
+
 static bool IsUuidValid(const char *uuid)
 {
     if (uuid == NULL) {
@@ -173,7 +212,9 @@ static bool IsUuidValid(const char *uuid)
             if (len != UUID_STD_LENGTH) {
                 return false;
             } // 非标准格式不允许连字符
-            
+            if (hyphenCount >= UUID_HYPHEN_COUNT) {
+                return false;
+            }
             // 连字符位置必须符合8-4-4-4-12模式
             if (i != hyphenPositions[hyphenCount]) {
                 return false;
@@ -429,7 +470,7 @@ static int32_t CheckOpenParm(BrProxyChannelInfo *channelInfo, IBrProxyListener *
         return SOFTBUS_INVALID_PARAM;
     }
 
-    if (!IsMacValid(channelInfo->peerBRMacAddr)) {
+    if (!IsPeerDevAddrValid(channelInfo->peerBRMacAddr)) {
         TRANS_LOGE(TRANS_SDK, "[br_proxy] mac is invalid!");
         return SOFTBUS_TRANS_BR_PROXY_INVALID_PARAM;
     }
@@ -644,6 +685,10 @@ bool IsProxyChannelEnabled(int32_t uid)
 static PermissonHookCb g_pushCb;
 int32_t RegisterAccessHook(PermissonHookCb *cb)
 {
+    if (cb == NULL) {
+        TRANS_LOGE(TRANS_SDK, "[br_proxy] cb is NULL");
+        return SOFTBUS_INVALID_PARAM;
+    }
     int32_t ret = ClientStubInit();
     if (ret != SOFTBUS_OK) {
         TRANS_LOGE(TRANS_SDK, "[br_proxy] client stub init failed! ret:%{public}d", ret);

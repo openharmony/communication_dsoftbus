@@ -34,13 +34,13 @@
 
 #define BITS 8
 #define REPORT_INFO_NUM 3
-#define RERORT_UDP_INFO_NUM 4
+#define REPORT_UDP_INFO_NUM 4
 #define REPORT_SYN_INFO_NUM 3
 #define SYN_INFO_LEN (sizeof(uint32_t) * REPORT_SYN_INFO_NUM)
 #define ACCESS_INFO_PARAM_NUM 3
 #define INVALID_USER_ID (-1)
 
-static int32_t WriteAcessInfoToBuf(uint8_t *buf, uint32_t bufLen, int32_t *offSet, const SocketAccessInfo *accessInfo)
+static int32_t WriteAccessInfoToBuf(uint8_t *buf, uint32_t bufLen, int32_t *offSet, const SocketAccessInfo *accessInfo)
 {
     int32_t ret = WriteInt32ToBuf(buf, bufLen, offSet, accessInfo->userId);
     if (ret != SOFTBUS_OK) {
@@ -85,7 +85,7 @@ static int32_t TransSendChannelOpenedDataToCore(
         return ret;
     }
     if (channelType != CHANNEL_TYPE_AUTH) {
-        ret = WriteAcessInfoToBuf(buf, len, &offSet, accessInfo);
+        ret = WriteAccessInfoToBuf(buf, len, &offSet, accessInfo);
         if (ret != SOFTBUS_OK) {
             TRANS_LOGE(TRANS_CTRL, "write accessinfo to buf failed! ret=%{public}d", ret);
             SoftBusFree(buf);
@@ -101,9 +101,10 @@ static int32_t TransSendUdpChannelOpenedDataToCore(
     int32_t channelId, int32_t channelType, int32_t openResult, int32_t udpPort, const SocketAccessInfo *accessInfo)
 {
     uint32_t len = sizeof(uint32_t) *
-        (channelType == CHANNEL_TYPE_AUTH ? RERORT_UDP_INFO_NUM : RERORT_UDP_INFO_NUM + ACCESS_INFO_PARAM_NUM);
+        (channelType == CHANNEL_TYPE_AUTH ? REPORT_UDP_INFO_NUM : REPORT_UDP_INFO_NUM + ACCESS_INFO_PARAM_NUM);
 
     uint8_t *buf = (uint8_t *)SoftBusCalloc(len);
+    TRANS_CHECK_AND_RETURN_RET_LOGE(buf != NULL, SOFTBUS_MALLOC_ERR, TRANS_CTRL, "Calloc buf failed.");
     int32_t offSet = 0;
     int32_t ret = SOFTBUS_OK;
     ret = WriteInt32ToBuf(buf, len, &offSet, channelId);
@@ -131,7 +132,7 @@ static int32_t TransSendUdpChannelOpenedDataToCore(
         return ret;
     }
     if (channelType != CHANNEL_TYPE_AUTH) {
-        ret = WriteAcessInfoToBuf(buf, len, &offSet, accessInfo);
+        ret = WriteAccessInfoToBuf(buf, len, &offSet, accessInfo);
         if (ret != SOFTBUS_OK) {
             TRANS_LOGE(TRANS_CTRL, "write accessinfo to buf failed! ret=%{public}d", ret);
             SoftBusFree(buf);
@@ -235,7 +236,7 @@ int32_t TransOnChannelLinkDown(const char *networkId, uint32_t routeType)
     return SOFTBUS_OK;
 }
 
-static int32_t NofifyChannelClosed(int32_t channelId, int32_t channelType, ShutdownReason reason)
+static int32_t NotifyChannelClosed(int32_t channelId, int32_t channelType, ShutdownReason reason)
 {
     DeleteSocketResourceByChannelId(channelId, channelType);
     switch (channelType) {
@@ -272,7 +273,7 @@ int32_t TransOnChannelClosed(int32_t channelId, int32_t channelType, int32_t mes
         "channelId=%{public}d, channelType=%{public}d, messageType=%{public}d", channelId, channelType, messageType);
     switch (messageType) {
         case MESSAGE_TYPE_NOMAL:
-            return NofifyChannelClosed(channelId, channelType, reason);
+            return NotifyChannelClosed(channelId, channelType, reason);
         case MESSAGE_TYPE_CLOSE_ACK:
             return NofifyCloseAckReceived(channelId, channelType);
         default:
@@ -320,9 +321,9 @@ int32_t TransOnChannelQosEvent(int32_t channelId, int32_t channelType, int32_t e
     }
 }
 
-int32_t TransSetChannelInfo(const char* sessionName, int32_t sessionId, int32_t channleId, int32_t channelType)
+int32_t TransSetChannelInfo(const char* sessionName, int32_t sessionId, int32_t channelId, int32_t channelType)
 {
-    return ClientTransSetChannelInfo(sessionName, sessionId, channleId, channelType);
+    return ClientTransSetChannelInfo(sessionName, sessionId, channelId, channelType);
 }
 
 int32_t TransOnChannelBind(int32_t channelId, int32_t channelType)

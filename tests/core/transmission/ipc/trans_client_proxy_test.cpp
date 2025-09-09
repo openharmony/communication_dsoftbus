@@ -423,7 +423,7 @@ HWTEST_F(TransClientProxyTest, ClientIpcSetChannelInfoTest001, TestSize.Level1)
     ASSERT_NE(nullptr, transInfo);
     transInfo->channelId = TEST_CHANNELID;
     transInfo->channelType = TEST_CHANNELTYPE;
-    ret = ClientIpcSetChannelInfo("iShare", "HWiShare", sessionId, transInfo, pid);
+    ret = ClientIpcSetChannelInfo("iShare", "iShare", sessionId, transInfo, pid);
     EXPECT_EQ(SOFTBUS_TRANS_PROXY_REMOTE_NULL, ret);
 
     static const uint32_t SOFTBUS_SA_ID = 4700;

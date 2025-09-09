@@ -21,15 +21,20 @@
 
 #include "auth_interface.h"
 #include "bus_center_event.h"
+#include "bus_center_event_struct.h"
 #include "bus_center_info_key.h"
 #include "cJSON.h"
 #include "disc_interface.h"
+#include "disc_interface_struct.h"
 #include "lnn_async_callback_utils.h"
 #include "lnn_connection_fsm.h"
 #include "lnn_event_form.h"
 #include "lnn_fast_offline_struct.h"
 #include "lnn_file_utils.h"
+#include "lnn_heartbeat_ctrl.h"
 #include "lnn_heartbeat_utils.h"
+#include "lnn_heartbeat_utils_struct.h"
+#include "lnn_local_net_ledger.h"
 #include "lnn_node_info.h"
 #include "lnn_ohos_account_adapter.h"
 #include "lnn_ohos_account.h"
@@ -50,6 +55,20 @@ public:
     virtual int32_t GetOsAccountId(char *id, uint32_t idLen, uint32_t *len) = 0;
     virtual int32_t LnnGetLocalByteInfo(InfoKey key, uint8_t *info, uint32_t len) = 0;
     virtual int32_t UpdateRecoveryDeviceInfoFromDb(void) = 0;
+    virtual int32_t GetCurrentAccount(int64_t *account) = 0;
+    virtual int32_t GetOsAccountUid(char *id, uint32_t idLen, uint32_t *len) = 0;
+    virtual int32_t LnnGetOhosAccountInfo(uint8_t *accountHash, uint32_t len) = 0;
+    virtual void DiscDeviceInfoChanged(InfoTypeChanged type) = 0;
+    virtual void LnnNotifyDeviceInfoChanged(SoftBusDeviceInfoState state) = 0;
+    virtual void LnnUpdateHeartbeatInfo(LnnHeartbeatUpdateInfoType type) = 0;
+    virtual void ClearAuthLimitMap(void) = 0;
+    virtual void ClearLnnBleReportExtraMap(void) = 0;
+    virtual void ClearPcRestrictMap(void) = 0;
+    virtual int32_t LnnSetLocalStrInfo(InfoKey key, const char *info) = 0;
+    virtual int32_t LnnSetLocalByteInfo(InfoKey key, const uint8_t *info, uint32_t len) = 0;
+    virtual int32_t LnnGetLocalStrInfo(InfoKey key, char *info, uint32_t len) = 0;
+    virtual int32_t LnnSetLocalNum64Info(InfoKey key, int64_t info) = 0;
+    virtual void LnnAccoutIdStatusSet(int64_t accountId) = 0;
     virtual bool AddNumberToJsonObject(cJSON *json, const char * const string, int32_t num);
     virtual bool AddStringToJsonObject(cJSON *json, const char * const string, const char *value);
     virtual bool IsEnableSoftBusHeartbeat(void);
@@ -170,6 +189,7 @@ public:
     virtual void LnnStopPublish(void);
     virtual void LnnUnregisterEventHandler(LnnEventType event, LnnEventHandler handler);
     virtual void LnnUpdateOhosAccount(UpdateAccountReason reason);
+    virtual int32_t GetOsAccountIdByUserId(int32_t userId, char **id, uint32_t *len) = 0;
 };
 
 class LnnOhosAccountInterfaceMock : public LnnOhosAccountInterface {
@@ -181,6 +201,20 @@ public:
     MOCK_METHOD3(GetOsAccountId, int32_t(char *id, uint32_t idLen, uint32_t *len));
     MOCK_METHOD3(LnnGetLocalByteInfo, int32_t(InfoKey key, uint8_t *info, uint32_t len));
     MOCK_METHOD0(UpdateRecoveryDeviceInfoFromDb, int32_t(void));
+    MOCK_METHOD1(GetCurrentAccount, int32_t(int64_t *account));
+    MOCK_METHOD3(GetOsAccountUid, int32_t(char *id, uint32_t idLen, uint32_t *len));
+    MOCK_METHOD2(LnnGetOhosAccountInfo, int32_t(uint8_t *accountHash, uint32_t len));
+    MOCK_METHOD1(DiscDeviceInfoChanged, void(InfoTypeChanged type));
+    MOCK_METHOD1(LnnNotifyDeviceInfoChanged, void(SoftBusDeviceInfoState state));
+    MOCK_METHOD1(LnnUpdateHeartbeatInfo, void(LnnHeartbeatUpdateInfoType type));
+    MOCK_METHOD0(ClearAuthLimitMap, void());
+    MOCK_METHOD0(ClearLnnBleReportExtraMap, void());
+    MOCK_METHOD0(ClearPcRestrictMap, void());
+    MOCK_METHOD2(LnnSetLocalStrInfo, int32_t(InfoKey key, const char *info));
+    MOCK_METHOD3(LnnSetLocalByteInfo, int32_t(InfoKey key, const uint8_t *info, uint32_t len));
+    MOCK_METHOD3(LnnGetLocalStrInfo, int32_t(InfoKey key, char *info, uint32_t len));
+    MOCK_METHOD2(LnnSetLocalNum64Info, int32_t (InfoKey key, int64_t info));
+    MOCK_METHOD1(LnnAccoutIdStatusSet, void(int64_t accountId));
     MOCK_METHOD0(AuthGenRequestId, uint32_t());
     MOCK_METHOD0(AuthHasTrustedRelation, TrustedReturnType(void));
     MOCK_METHOD0(ConnCoapStartServerListen, int32_t(void));
@@ -290,6 +324,7 @@ public:
     MOCK_METHOD5(LnnSendSyncInfoMsg,
         int32_t(LnnSyncInfoType, const char *, const uint8_t *, uint32_t, LnnSyncInfoMsgComplete));
     MOCK_METHOD5(QueryRecordByKey, int32_t(DbContext *, TableNameID, uint8_t *, uint8_t **, int));
+    MOCK_METHOD3(GetOsAccountIdByUserId, int32_t(int32_t userId, char **id, uint32_t *len));
 };
 } // namespace OHOS
 #endif // LNN_OHOS_ACCOUNT_MOCK_H

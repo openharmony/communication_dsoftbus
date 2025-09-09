@@ -188,12 +188,12 @@ static bool GetFeatureCap(const char *networkId, uint64_t *local, uint64_t *remo
 {
     int32_t ret = LnnGetLocalNumU64Info(NUM_KEY_FEATURE_CAPA, local);
     if (ret != SOFTBUS_OK) {
-        LNN_LOGE(LNN_LANE, "LnnGetLocalNumInfo err, ret=%{public}d, local=%{public}" PRIu64, ret, *local);
+        LNN_LOGE(LNN_LANE, "LnnGetLocalNumInfo err, ret=%{public}d", ret);
         return false;
     }
     ret = LnnGetRemoteNumU64Info(networkId, NUM_KEY_FEATURE_CAPA, remote);
     if (ret != SOFTBUS_OK) {
-        LNN_LOGE(LNN_LANE, "LnnGetRemoteNumInfo err, ret=%{public}d, remote=%{public}" PRIu64, ret, *remote);
+        LNN_LOGE(LNN_LANE, "LnnGetRemoteNumInfo err, ret=%{public}d", ret);
         return false;
     }
     return true;
@@ -639,7 +639,7 @@ static bool IsExistWatchDevice(const char *networkId)
     return false;
 }
 
-bool IsSupportWifiDirectEnhance(const char *networkId)
+bool IsEnhancedWifiDirectSupported(const char *networkId)
 {
     uint64_t localFeature = 0;
     uint64_t remoteFeature = 0;
@@ -808,7 +808,7 @@ int32_t FinalDecideLinkType(const char *networkId, LaneLinkType *linkList,
         LNN_LOGE(LNN_LANE, "linkList size exceed limit, size=%{public}d", listNum);
         return SOFTBUS_INVALID_PARAM;
     }
-    bool isFilterP2p = IsSupportWifiDirectEnhance(networkId);
+    bool isFilterP2p = IsEnhancedWifiDirectSupported(networkId);
     uint32_t availableLinkNums = 0;
     for (uint32_t i = 0; i < listNum; i++) {
         if (isFilterP2p && linkList[i] == LANE_P2P) {
@@ -986,6 +986,7 @@ int32_t DecideDefaultLink(const char *networkId, LaneTransType transType, LaneLi
             GetDefaultLinkByDataType(LANE_DATA_FILE, defaultLink, &index);
             break;
         case LANE_T_RAW_STREAM:
+        /* fall-through */
         case LANE_T_COMMON_VIDEO:
         case LANE_T_COMMON_VOICE:
             GetDefaultLinkByDataType(LANE_DATA_STREAM, defaultLink, &index);

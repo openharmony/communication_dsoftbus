@@ -72,7 +72,12 @@ static uint32_t g_filterCapabilityBitmapNum = 0;
 static uint32_t g_filterCapabilityBitmap[NSTACKX_MAX_CAPABILITY_NUM] = {0};
 /* g_interfaceList store the actual interface name prefix for one platform */
 static NetworkInterfaceInfo g_interfaceList[NSTACKX_MAX_INTERFACE_NUM];
-static SeqAll g_seqAll = {0, 0, 0};
+struct LocalSeq {
+    uint16_t seqBcast;
+    uint16_t seqUcastV4;
+    uint16_t seqUcastV6;
+};
+static struct LocalSeq g_localSeq = {0, 0, 0};
 static uint32_t g_notifyTimeoutMs = 0;
 static pthread_mutex_t g_filterCapabilityLock = PTHREAD_MUTEX_INITIALIZER;
 static pthread_mutex_t g_maxDeviceNumLock = PTHREAD_MUTEX_INITIALIZER;
@@ -373,7 +378,7 @@ int32_t ConfigureDiscoverySettings(const NSTACKX_DiscoverySettings *discoverySet
         SetCoapUserDiscoverInfo(advertiseCount, advertiseDuration);
         SetNotifyTimeoutMs(advertiseDuration + NOTIFY_TIMEOUT_FLUCATION_MS);
     }
-    IncreaseSequenceNumber(NSTACKX_TRUE);
+    IncreaseBcastSequenceNumber();
     return NSTACKX_EOK;
 }
 
@@ -435,23 +440,32 @@ uint32_t *GetFilterCapability(uint32_t *capabilityBitmapNum)
     return g_filterCapabilityBitmap;
 }
 
-void IncreaseSequenceNumber(uint8_t sendBcast)
+void IncreaseUcastSequenceNumber(uint8_t af)
 {
-    if (sendBcast) {
-        ++g_seqAll.seqBcast;
+    if (af == AF_INET) {
+        ++g_localSeq.seqUcastV4;
     } else {
-        ++g_seqAll.seqUcast;
+        ++g_localSeq.seqUcastV6;
     }
 }
 
-uint16_t GetSequenceNumber(uint8_t sendBcast)
+void IncreaseBcastSequenceNumber(void)
 {
-    return (sendBcast) ? g_seqAll.seqBcast : g_seqAll.seqUcast;
+    ++g_localSeq.seqBcast;
+    DFINDER_LOGI(TAG, "config bcast seq number %hu", g_localSeq.seqBcast);
+}
+
+uint16_t GetSequenceNumber(uint8_t af, uint8_t sendBcast)
+{
+    if (sendBcast == NSTACKX_TRUE) {
+        return g_localSeq.seqBcast;
+    }
+    return af == AF_INET ? g_localSeq.seqUcastV4 : g_localSeq.seqUcastV6;
 }
 
 void ResetSequenceNumber(void)
 {
-    (void)memset_s(&g_seqAll, sizeof(g_seqAll), 0, sizeof(g_seqAll));
+    (void)memset_s(&g_localSeq, sizeof(g_localSeq), 0, sizeof(g_localSeq));
 }
 
 static void FilterCapabilityInit()

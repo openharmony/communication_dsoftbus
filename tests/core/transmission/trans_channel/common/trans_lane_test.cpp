@@ -406,6 +406,8 @@ HWTEST_F(TransLaneTest, TransLaneTest010, TestSize.Level1)
     ASSERT_TRUE(preferred != nullptr);
     (void)memset_s(preferred, sizeof(LanePreferredLinkList), 0, sizeof(LanePreferredLinkList));
     TransformSessionPreferredToLanePreferred(sessionParam, preferred, nullptr);
+    TransformSessionPreferredToLanePreferred(sessionParam, nullptr, nullptr);
+    TransformSessionPreferredToLanePreferred(nullptr, preferred, nullptr);
     SoftBusFree(sessionParam);
     SoftBusFree(preferred);
 }
@@ -717,12 +719,15 @@ HWTEST_F(TransLaneTest, TransLaneTest021, TestSize.Level1)
     const char *emptyName  = nullptr;
     const char *invalidName  = "invalid name";
     const char *sessionName  = "ohos.distributedhardware.devicemanager.resident";
+    const char *newSessionName  = "IShareAuthSession";
     bool ret = CheckSessionNameValidOnAuthChannel(emptyName);
     EXPECT_FALSE(ret);
     ret = CheckSessionNameValidOnAuthChannel(invalidName);
     EXPECT_FALSE(ret);
     ret = CheckSessionNameValidOnAuthChannel(sessionName);
     EXPECT_TRUE(ret);
+    ret = CheckSessionNameValidOnAuthChannel(newSessionName);
+    EXPECT_NE(ret, -1);
 }
 
 /**

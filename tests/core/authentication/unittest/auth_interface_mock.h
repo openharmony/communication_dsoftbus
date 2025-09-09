@@ -44,8 +44,8 @@ public:
     virtual bool IsSameAccountGroupDevice(void) = 0;
     virtual bool LnnIsDefaultOhosAccount() = 0;
     virtual int32_t LnnGetLocalByteInfo(InfoKey key, uint8_t *info, uint32_t len) = 0;
-    virtual bool IsPotentialTrustedDevice(TrustedRelationIdType idType, const char *deviceId,
-        bool isPrecise, bool isPointToPoint) = 0;
+    virtual bool IsPotentialTrustedDevice(
+        TrustedRelationIdType idType, const char *deviceId, bool isPrecise, bool isPointToPoint) = 0;
     virtual int32_t AuthFindLatestNormalizeKey(
         const char *udidHash, AuthDeviceKeyInfo *deviceKey, bool clearOldKey) = 0;
     virtual bool IsCloudSyncEnabled(void) = 0;
@@ -63,35 +63,41 @@ public:
     virtual int32_t AuthMetaInit(const AuthTransCallback *callback) = 0;
     virtual int32_t AuthFindDeviceKey(const char *udidHash, int32_t keyType, AuthDeviceKeyInfo *deviceKey) = 0;
     virtual AuthManager *GetAuthManagerByAuthId(int64_t authId) = 0;
+    virtual int32_t LnnGetLocalNum64Info(InfoKey key, int64_t *info) = 0;
+    virtual int32_t CustomizedSecurityProtocolInitPacked(void) = 0;
+    virtual int32_t LnnRetrieveDeviceInfoByNetworkIdPacked(const char *networkId, NodeInfo *info) = 0;
 };
 class AuthOtherInterfaceMock : public AuthOtherInterface {
 public:
     AuthOtherInterfaceMock();
     ~AuthOtherInterfaceMock() override;
-    MOCK_METHOD0(RegHichainSaStatusListener, int32_t (void));
-    MOCK_METHOD0(CustomizedSecurityProtocolInit, int32_t (void));
-    MOCK_METHOD2(LnnGetTrustedDevInfoFromDb, int32_t (char **, uint32_t *));
-    MOCK_METHOD0(IsSameAccountGroupDevice, bool (void));
-    MOCK_METHOD0(LnnIsDefaultOhosAccount, bool (void));
-    MOCK_METHOD3(LnnGetLocalByteInfo, int32_t (InfoKey, uint8_t *, uint32_t));
-    MOCK_METHOD4(IsPotentialTrustedDevice, bool (TrustedRelationIdType idType, const char *deviceId,
-        bool isPrecise, bool isPointToPoint));
-    MOCK_METHOD3(AuthFindLatestNormalizeKey, int32_t (const char *, AuthDeviceKeyInfo *, bool));
-    MOCK_METHOD0(IsCloudSyncEnabled, bool (void));
-    MOCK_METHOD2(IsFeatureSupport, bool (uint64_t, FeatureCapability));
-    MOCK_METHOD3(SoftBusGenerateStrHash, int32_t (const unsigned char *, uint32_t, unsigned char *));
-    MOCK_METHOD2(LnnGetRemoteNodeInfoByKey, int32_t (const char *, NodeInfo *));
-    MOCK_METHOD5(LnnGetNetworkIdByUdidHash, int32_t (const uint8_t *, uint32_t, char *, uint32_t, bool));
-    MOCK_METHOD3(LnnGetRemoteNodeInfoById, int32_t (const char *id, IdCategory type, NodeInfo *info));
-    MOCK_METHOD4(ConvertBytesToHexString, int32_t (char *, uint32_t, const unsigned char *, uint32_t));
-    MOCK_METHOD2(LnnRetrieveDeviceInfoByNetworkId, int32_t (const char *, NodeInfo *));
+    MOCK_METHOD0(RegHichainSaStatusListener, int32_t(void));
+    MOCK_METHOD0(CustomizedSecurityProtocolInit, int32_t(void));
+    MOCK_METHOD2(LnnGetTrustedDevInfoFromDb, int32_t(char **, uint32_t *));
+    MOCK_METHOD0(IsSameAccountGroupDevice, bool(void));
+    MOCK_METHOD0(LnnIsDefaultOhosAccount, bool(void));
+    MOCK_METHOD3(LnnGetLocalByteInfo, int32_t(InfoKey, uint8_t *, uint32_t));
+    MOCK_METHOD4(IsPotentialTrustedDevice,
+        bool(TrustedRelationIdType idType, const char *deviceId, bool isPrecise, bool isPointToPoint));
+    MOCK_METHOD3(AuthFindLatestNormalizeKey, int32_t(const char *, AuthDeviceKeyInfo *, bool));
+    MOCK_METHOD0(IsCloudSyncEnabled, bool(void));
+    MOCK_METHOD2(IsFeatureSupport, bool(uint64_t, FeatureCapability));
+    MOCK_METHOD3(SoftBusGenerateStrHash, int32_t(const unsigned char *, uint32_t, unsigned char *));
+    MOCK_METHOD2(LnnGetRemoteNodeInfoByKey, int32_t(const char *, NodeInfo *));
+    MOCK_METHOD5(LnnGetNetworkIdByUdidHash, int32_t(const uint8_t *, uint32_t, char *, uint32_t, bool));
+    MOCK_METHOD3(LnnGetRemoteNodeInfoById, int32_t(const char *id, IdCategory type, NodeInfo *info));
+    MOCK_METHOD4(ConvertBytesToHexString, int32_t(char *, uint32_t, const unsigned char *, uint32_t));
+    MOCK_METHOD2(LnnRetrieveDeviceInfoByNetworkId, int32_t(const char *, NodeInfo *));
     MOCK_METHOD3(SoftbusGetConfig, int32_t(ConfigType, unsigned char *, uint32_t));
     MOCK_METHOD1(AuthDeviceInit, int32_t(const AuthTransCallback *));
     MOCK_METHOD1(AuthMetaInit, int32_t(const AuthTransCallback *));
-    MOCK_METHOD3(AuthFindDeviceKey, int32_t (const char *, int32_t, AuthDeviceKeyInfo *));
+    MOCK_METHOD3(AuthFindDeviceKey, int32_t(const char *, int32_t, AuthDeviceKeyInfo *));
     MOCK_METHOD1(GetAuthManagerByAuthId, AuthManager *(int64_t));
+    MOCK_METHOD2(LnnGetLocalNum64Info, int32_t(InfoKey, int64_t *));
     static int32_t ActionOfLnnGetRemoteNodeInfoByKey(const char *key, NodeInfo *info);
     static int32_t ActionOfLnnGetRemoteNodeInfoById(const char *id, IdCategory type, NodeInfo *info);
+    MOCK_METHOD0(CustomizedSecurityProtocolInitPacked, int32_t(void));
+    MOCK_METHOD2(LnnRetrieveDeviceInfoByNetworkIdPacked, int32_t(const char *, NodeInfo *));
 };
 } // namespace OHOS
-#endif // AUTH_INTERFACE_MOCK_H
+#endif // AUTH_COMMON_MOCK_H

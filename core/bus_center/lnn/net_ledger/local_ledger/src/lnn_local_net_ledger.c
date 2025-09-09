@@ -83,6 +83,7 @@ static void UpdateStateVersionAndStore(StateVersionChangeReason reason)
     if ((ret = LnnSaveLocalDeviceInfoPacked(&g_localNetLedger.localInfo)) != SOFTBUS_OK) {
         LNN_LOGE(LNN_LEDGER, "update local store fail");
     }
+    UpdateLocalDeviceInfoToMlpsPacked(&g_localNetLedger.localInfo);
 }
 
 static int32_t LlGetNodeSoftBusVersion(void *buf, uint32_t len)
@@ -1972,6 +1973,7 @@ static int32_t UpdateLocalUserId(const void *userId)
         return SOFTBUS_INVALID_PARAM;
     }
     g_localNetLedger.localInfo.userId = *(int32_t *)userId;
+    UpdateLocalDeviceInfoToMlpsPacked(&g_localNetLedger.localInfo);
     return SOFTBUS_OK;
 }
 
@@ -2702,7 +2704,7 @@ static void InitUserIdCheckSum(NodeInfo *nodeInfo)
 
 static void UpdateLocalAuthCapacity(NodeInfo *info)
 {
-    if (info->deviceInfo.deviceTypeId == TYPE_WATCH_ID) {
+    if (info->deviceInfo.deviceTypeId == TYPE_WATCH_ID || info->deviceInfo.deviceTypeId == TYPE_GLASS_ID) {
         info->authCapacity &= (~(1 << (uint32_t)BIT_SUPPORT_BR_DUP_BLE));
     }
 }

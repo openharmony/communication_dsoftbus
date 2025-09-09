@@ -26,8 +26,8 @@
 using namespace testing::ext;
 
 namespace OHOS {
-const char *g_pkgName = "com.huawei.plrdtest.dsoftbus";
-const char *g_sessionName = "com.huawei.plrdtest.dsoftbus.test";
+const char *g_pkgName = "com.plrdtest.dsoftbus";
+const char *g_sessionName = "com.plrdtest.dsoftbus.test";
 const char *g_networkid = "ABCDEF00ABCDEF00ABCDEF00ABCDEF00ABCDEF00ABCDEF00ABCDEF00ABCDEF00";
 const char *g_groupid = "TEST_GROUP_ID";
 static SessionAttribute g_sessionAttr = {
@@ -63,7 +63,8 @@ void CheckPermissionTest::SetUpTestCase()
 {
     (void)TransClientInit();
     SoftbusConfigInit();
-    int32_t ret = ClientAddSessionServer(SEC_TYPE_CIPHERTEXT, g_pkgName, g_sessionName, &g_sessionlistener);
+    uint64_t timestamp = 0;
+    int32_t ret = ClientAddSessionServer(SEC_TYPE_CIPHERTEXT, g_pkgName, g_sessionName, &g_sessionlistener, &timestamp);
     EXPECT_EQ(SOFTBUS_OK, ret);
 
     SessionParam param = {

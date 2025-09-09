@@ -19,6 +19,7 @@
 #include <gmock/gmock.h>
 
 #include "lnn_lane_hub.h"
+#include "legacy/softbus_hidumper.h"
 
 namespace OHOS {
 class LaneHubDepsInterface {
@@ -35,7 +36,7 @@ public:
     virtual void DeinitLane(void) = 0;
     virtual void LnnDeinitTimeSync(void) = 0;
     virtual void LnnDeinitHeartbeat(void) = 0;
-    virtual int32_t InitSparkGroupManagerPacked(void) = 0;
+    virtual int32_t InitControlPlanePacked(void) = 0;
     virtual int32_t SoftBusRegBusCenterVarDump(char *dumpVar, SoftBusVarDumpCb cb) = 0;
 };
 
@@ -53,7 +54,7 @@ public:
     MOCK_METHOD0(DeinitLane, void (void));
     MOCK_METHOD0(LnnDeinitTimeSync, void (void));
     MOCK_METHOD0(LnnDeinitHeartbeat, void (void));
-    MOCK_METHOD0(InitSparkGroupManagerPacked, int32_t (void));
+    MOCK_METHOD0(InitControlPlanePacked, int32_t (void));
     MOCK_METHOD2(SoftBusRegBusCenterVarDump, int32_t(char *dumpVar, SoftBusVarDumpCb cb));
 };
 } // namespace OHOS

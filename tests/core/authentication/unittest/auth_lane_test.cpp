@@ -115,8 +115,8 @@ static void SetAuthSessionInfo(AuthSessionInfo *info, uint64_t connId, bool isSe
             break;
         case AUTH_LINK_TYPE_BLE:
             ASSERT_TRUE(memcpy_s(info->connInfo.info.bleInfo.bleMac, BT_MAC_LEN, BLE_MAC, strlen(BLE_MAC)) == EOK);
-            ASSERT_TRUE(memcpy_s(info->connInfo.info.bleInfo.deviceIdHash, UDID_HASH_LEN,
-                DEVICE_ID_HASH, DEVICE_ID_HASH_LEN) == EOK);
+            ASSERT_TRUE(memcpy_s(info->connInfo.info.bleInfo.deviceIdHash, UDID_HASH_LEN, DEVICE_ID_HASH,
+                DEVICE_ID_HASH_LEN) == EOK);
             break;
         case AUTH_LINK_TYPE_BR:
             ASSERT_TRUE(memcpy_s(info->connInfo.info.brInfo.brMac, BT_MAC_LEN, BR_MAC, strlen(BR_MAC)) == EOK);
@@ -296,7 +296,7 @@ HWTEST_F(AuthLaneTest, AUTH_ALLOC_LANE_WLAN_001, TestSize.Level1)
     laneConnInfo.type = LANE_WLAN_5G;
     AuthOnLaneAllocSuccess(laneReqId, &laneConnInfo);
 
-    DupAuthManager(auth);
+    DelAuthManager(auth, connInfo.type);
     DestroyAuthManagerList();
     AuthCommonDeinit();
     DeInitAuthReqInfo();
@@ -340,7 +340,7 @@ HWTEST_F(AuthLaneTest, AUTH_ALLOC_LANE_WLAN_002, TestSize.Level1)
     laneConnInfo.type = LANE_WLAN_5G;
     AuthOnLaneAllocSuccess(laneReqId, &laneConnInfo);
 
-    DupAuthManager(auth);
+    DelAuthManager(auth, connInfo.type);
     DestroyAuthManagerList();
     AuthCommonDeinit();
     DeInitAuthReqInfo();
@@ -380,7 +380,7 @@ HWTEST_F(AuthLaneTest, AUTH_ALLOC_LANE_WLAN_003, TestSize.Level1)
     uint32_t laneReqId = GetLaneManager()->lnnGetLaneHandle(LANE_TYPE_CTRL);
     AuthOnLaneAllocFail(laneReqId, SOFTBUS_INVALID_PARAM);
 
-    DupAuthManager(auth);
+    DelAuthManager(auth, connInfo.type);
     DestroyAuthManagerList();
     AuthCommonDeinit();
     DeInitAuthReqInfo();
@@ -426,7 +426,7 @@ HWTEST_F(AuthLaneTest, AUTH_ALLOC_LANE_BLE_001, TestSize.Level1)
     laneConnInfo.type = LANE_BLE;
     AuthOnLaneAllocSuccess(laneReqId, &laneConnInfo);
 
-    DupAuthManager(auth);
+    DelAuthManager(auth, connInfo.type);
     DestroyAuthManagerList();
     AuthCommonDeinit();
     DeInitAuthReqInfo();
@@ -472,7 +472,7 @@ HWTEST_F(AuthLaneTest, AUTH_ALLOC_LANE_BR_001, TestSize.Level1)
     laneConnInfo.type = LANE_BR;
     AuthOnLaneAllocSuccess(laneReqId, &laneConnInfo);
 
-    DupAuthManager(auth);
+    DelAuthManager(auth, connInfo.type);
     DestroyAuthManagerList();
     AuthCommonDeinit();
     DeInitAuthReqInfo();
@@ -515,7 +515,7 @@ HWTEST_F(AuthLaneTest, AUTH_ALLOC_LANE_P2P_001, TestSize.Level1)
     uint32_t laneReqId = GetLaneManager()->lnnGetLaneHandle(LANE_TYPE_CTRL);
     AuthOnLaneAllocFail(laneReqId, SOFTBUS_INVALID_PARAM);
 
-    DupAuthManager(auth);
+    DelAuthManager(auth, connInfo.type);
     DestroyAuthManagerList();
     AuthCommonDeinit();
     DeInitAuthReqInfo();

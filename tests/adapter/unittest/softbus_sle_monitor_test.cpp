@@ -16,6 +16,7 @@
 #include <securec.h>
 
 #include "bus_center_event.h"
+#include "g_enhance_adapter_func.h"
 #include "lnn_sle_monitor.c"
 #include "lnn_event_monitor_impl.h"
 #include "network_mock.h"
@@ -31,7 +32,13 @@ protected:
     void SetUp();
     void TearDown();
 };
-void SoftbusSleMonitorTest::SetUpTestCase(void) { }
+void SoftbusSleMonitorTest::SetUpTestCase(void)
+{
+    AdapterEnhanceFuncList *pfnAdapterFuncList = AdapterEnhanceFuncListGet();
+    pfnAdapterFuncList->softBusAddSleStateListener = SoftBusAddSleStateListener;
+    pfnAdapterFuncList->isSleEnabled = IsSleEnabled;
+    pfnAdapterFuncList->softBusRemoveSleStateListener = SoftBusRemoveSleStateListener;
+}
 void SoftbusSleMonitorTest::TearDownTestCase(void) { }
 void SoftbusSleMonitorTest::SetUp() { }
 void SoftbusSleMonitorTest::TearDown() { }

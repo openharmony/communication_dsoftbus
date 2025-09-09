@@ -33,7 +33,7 @@ extern "C" {
 #define GROUP_TYPE_MESH (1 << 2)
 #define GROUP_TYPE_COMPATIBLE (1 << 3)
 #define PC_PROOF_NON_CONSISTENT_ERRCODE 2046820418
-#define MAX_CRED_ID_SIZE 65
+#define MAX_CRED_ID_SIZE 300
 
 typedef struct {
     char udid[UDID_BUF_LEN];

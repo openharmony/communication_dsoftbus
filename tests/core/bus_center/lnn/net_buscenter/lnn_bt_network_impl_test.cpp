@@ -201,8 +201,7 @@ HWTEST_F(LNNBtNetworkImplMockTest, LNN_BT_NETWORK_IMPL_TEST_006, TestSize.Level1
         .WillRepeatedly(Return(SOFTBUS_INVALID_PARAM));
     OnBtNetifStatusChanged(nullptr, nullptr);
 
-    EXPECT_CALL(btMock, LnnGetNetIfTypeByName)
-        .WillOnce(LnnBtNetworkImplInterfaceMock::ActionOfLnnGetNetIfTypeByNameBr);
+    EXPECT_CALL(btMock, LnnGetNetIfTypeByName).WillOnce(LnnBtNetworkImplInterfaceMock::ActionOfLnnGetNetIfTypeByNameBr);
     SoftBusBtState btState1 = SOFTBUS_BR_TURN_ON;
     OnBtNetifStatusChanged(&subnet, (void *)(&btState1));
 
@@ -210,8 +209,7 @@ HWTEST_F(LNNBtNetworkImplMockTest, LNN_BT_NETWORK_IMPL_TEST_006, TestSize.Level1
         .WillOnce(LnnBtNetworkImplInterfaceMock::ActionOfLnnGetNetIfTypeByNameBle);
     OnBtNetifStatusChanged(&subnet, (void *)(&btState1));
 
-    EXPECT_CALL(btMock, LnnGetNetIfTypeByName)
-    .WillOnce(LnnBtNetworkImplInterfaceMock::ActionOfLnnGetNetIfTypeByNameBr);
+    EXPECT_CALL(btMock, LnnGetNetIfTypeByName).WillOnce(LnnBtNetworkImplInterfaceMock::ActionOfLnnGetNetIfTypeByNameBr);
     SoftBusBtState btState2 = SOFTBUS_BR_TURN_OFF;
     OnBtNetifStatusChanged(&subnet, (void *)(&btState2));
 
@@ -230,9 +228,7 @@ HWTEST_F(LNNBtNetworkImplMockTest, LNN_BT_NETWORK_IMPL_TEST_007, TestSize.Level1
 {
     char macStr[] = "123456789";
     NiceMock<LnnBtNetworkImplInterfaceMock> btMock;
-    EXPECT_CALL(btMock, SoftBusGetBtMacAddr)
-        .WillOnce(Return(SOFTBUS_INVALID_PARAM))
-        .WillRepeatedly(Return(SOFTBUS_OK));
+    EXPECT_CALL(btMock, SoftBusGetBtMacAddr).WillOnce(Return(SOFTBUS_INVALID_PARAM)).WillRepeatedly(Return(SOFTBUS_OK));
     EXPECT_CALL(btMock, ConvertBtMacToStr).WillOnce(Return(SOFTBUS_INVALID_PARAM)).WillRepeatedly(Return(SOFTBUS_OK));
 
     int32_t ret = GetAvailableBtMac(macStr, NETWORK_ID_BUF_LEN);

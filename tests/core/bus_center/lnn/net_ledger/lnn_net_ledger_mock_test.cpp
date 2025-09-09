@@ -17,12 +17,12 @@
 #include <securec.h>
 
 #include "bus_center_mock.h"
+#include "dsoftbus_enhance_interface.h"
+#include "g_enhance_lnn_func.h"
 #include "lnn_data_cloud_sync_deps_mock.h"
 #include "lnn_distributed_net_ledger.h"
 #include "lnn_distributed_net_ledger_manager.c"
 #include "lnn_net_ledger.c"
-#include "dsoftbus_enhance_interface.h"
-#include "g_enhance_lnn_func.h"
 
 namespace OHOS {
 using namespace testing::ext;
@@ -36,19 +36,13 @@ public:
     void TearDown();
 };
 
-void LNNNetLedgerMockTest::SetUpTestCase()
-{
-}
+void LNNNetLedgerMockTest::SetUpTestCase() { }
 
-void LNNNetLedgerMockTest::TearDownTestCase()
-{
-}
+void LNNNetLedgerMockTest::TearDownTestCase() { }
 
 void LNNNetLedgerMockTest::SetUp() { }
 
-void LNNNetLedgerMockTest::TearDown()
-{
-}
+void LNNNetLedgerMockTest::TearDown() { }
 
 /*
  * @tc.name: IsLocalIrkInfoChangeTest001
@@ -106,8 +100,7 @@ HWTEST_F(LNNNetLedgerMockTest, IsLocalBroadcastLinKeyChangeTest002, TestSize.Lev
     NodeInfo info;
     (void)memset_s(&info, sizeof(NodeInfo), 0, sizeof(NodeInfo));
     BusCenterMock busCenterMock;
-    EXPECT_CALL(busCenterMock, LnnGetLocalByteInfo).WillOnce(Return(SOFTBUS_OK))
-    .WillRepeatedly(Return(SOFTBUS_ERR));
+    EXPECT_CALL(busCenterMock, LnnGetLocalByteInfo).WillOnce(Return(SOFTBUS_OK)).WillRepeatedly(Return(SOFTBUS_ERR));
     EXPECT_EQ(IsLocalBroadcastLinKeyChange(&info), false);
 }
 
@@ -147,23 +140,36 @@ HWTEST_F(LNNNetLedgerMockTest, LnnSaveBroadcastLinkKeyTest001, TestSize.Level0)
     (void)memcpy_s(info.iv, BROADCAST_IV_LEN, "testiv", strlen("testiv"));
     EXPECT_EQ(LnnSaveBroadcastLinkKey(udid, &info), false);
 
-    EXPECT_CALL(syncMock, LnnRetrieveDeviceInfo).WillOnce(Return(SOFTBUS_INVALID_PARAM));
     EXPECT_EQ(LnnSaveBroadcastLinkKey(udid, &info), true);
 
     NodeInfo deviceInfo;
     (void)memset_s(&deviceInfo, sizeof(NodeInfo), 0, sizeof(NodeInfo));
     (void)memcpy_s(deviceInfo.cipherInfo.key, SESSION_KEY_LENGTH, "changekey", strlen("changekey"));
     (void)memcpy_s(deviceInfo.cipherInfo.iv, BROADCAST_IV_LEN, "changeiv", strlen("changeiv"));
-    EXPECT_CALL(syncMock, LnnRetrieveDeviceInfo).WillOnce(DoAll(SetArgPointee<1>(deviceInfo), Return(SOFTBUS_OK)));
     EXPECT_EQ(LnnSaveBroadcastLinkKey(udid, &info), true);
 
     (void)memcpy_s(deviceInfo.cipherInfo.key, SESSION_KEY_LENGTH, "testkey", strlen("testkey"));
     (void)memcpy_s(deviceInfo.cipherInfo.iv, BROADCAST_IV_LEN, "changeiv", strlen("changeiv"));
-    EXPECT_CALL(syncMock, LnnRetrieveDeviceInfo).WillOnce(DoAll(SetArgPointee<1>(deviceInfo), Return(SOFTBUS_OK)));
     EXPECT_EQ(LnnSaveBroadcastLinkKey(udid, &info), true);
 
     (void)memcpy_s(&deviceInfo.cipherInfo, sizeof(BroadcastCipherInfo), &info, sizeof(BroadcastCipherInfo));
-    EXPECT_CALL(syncMock, LnnRetrieveDeviceInfo).WillOnce(DoAll(SetArgPointee<1>(deviceInfo), Return(SOFTBUS_OK)));
     EXPECT_EQ(LnnSaveBroadcastLinkKey(udid, &info), true);
+}
+
+/*
+ * @tc.name: IsStaticFeatureChangeTest001
+ * @tc.desc: IsStaticFeatureChange test
+ * @tc.type: FUNC
+ * @tc.require:
+ */
+HWTEST_F(LNNNetLedgerMockTest, IsStaticFeatureChangeTest001, TestSize.Level0)
+{
+    uint64_t softbusFeature = 1 << BIT_FL_CAPABILITY;
+    uint64_t feature = softbusFeature;
+    bool ret = IsStaticFeatureChange(softbusFeature, feature);
+    EXPECT_FALSE(ret);
+    feature |= (1 << BIT_BLE_DIRECT_ONLINE);
+    ret = IsStaticFeatureChange(softbusFeature, feature);
+    EXPECT_TRUE(ret);
 }
 } // namespace OHOS

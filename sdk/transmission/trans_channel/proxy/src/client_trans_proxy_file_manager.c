@@ -128,11 +128,18 @@ int32_t ClinetTransProxyFileManagerInit(void)
 
     if (!atomic_load_explicit(&(g_recvFileInfoLock.lockInitFlag), memory_order_acquire)) {
         int32_t ret = SoftBusMutexInit(&g_recvFileInfoLock.lock, NULL);
-        TRANS_CHECK_AND_RETURN_RET_LOGE(ret == SOFTBUS_OK, ret, TRANS_FILE, "recvfile mutex init fail!");
+        if (ret != SOFTBUS_OK) {
+            (void)SoftBusMutexDestroy(&g_sendFileInfoLock.lock);
+            return ret;
+        }
         atomic_store_explicit(&(g_recvFileInfoLock.lockInitFlag), true, memory_order_release);
     }
     int32_t ret = InitPendingPacket();
-    TRANS_CHECK_AND_RETURN_RET_LOGE(ret == SOFTBUS_OK, ret, TRANS_FILE, "InitPendingPacket fail!");
+    if (ret != SOFTBUS_OK) {
+        (void)SoftBusMutexDestroy(&g_sendFileInfoLock.lock);
+        (void)SoftBusMutexDestroy(&g_recvFileInfoLock.lock);
+        return ret;
+    }
 
     if (RegisterTimeoutCallback(SOFTBUS_PROXY_SENDFILE_TIMER_FUN, ProxyFileTransTimerProc) != SOFTBUS_OK) {
         TRANS_LOGE(TRANS_FILE, "register sendfile timer fail");
@@ -945,7 +952,7 @@ static int32_t HandleFileSendingProcess(
     SendListenerInfo *sendInfo = NULL;
     int32_t ret = SOFTBUS_FILE_ERR;
     do {
-        int32_t osType;
+        int32_t osType = OHOS_TYPE_UNKNOWN;
         (void)ClientTransProxyGetOsTypeByChannelId(channelId, &osType);
         ret = CreateSendListenerInfo(&sendInfo, channelId, osType);
         if (ret != SOFTBUS_OK || sendInfo == NULL) {
@@ -1901,7 +1908,7 @@ int32_t ProcessRecvFileFrameData(int32_t sessionId, int32_t channelId, const Fil
         TRANS_LOGE(TRANS_FILE, "invalid param.");
         return SOFTBUS_INVALID_PARAM;
     }
-    int32_t osType;
+    int32_t osType = OHOS_TYPE_UNKNOWN;
     uint32_t packetSize;
     int32_t ret = ClientTransProxyGetOsTypeByChannelId(channelId, &osType);
     ret = CheckFrameLength(channelId, oneFrame->frameLength, osType, &packetSize);

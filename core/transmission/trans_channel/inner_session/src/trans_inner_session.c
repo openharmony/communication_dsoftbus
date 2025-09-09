@@ -50,6 +50,7 @@ static int32_t InnerMessageHandler(int32_t sessionId, const void *data, uint32_t
 
 static int32_t GetIsClientInfoById(int32_t channelId, int32_t channelType, bool *isClient)
 {
+    TRANS_CHECK_AND_RETURN_RET_LOGE(isClient != NULL, SOFTBUS_INVALID_PARAM, TRANS_CTRL, "invalid param");
     AppInfo appInfo = {};
     (void)memset_s(&appInfo, sizeof(AppInfo), 0, sizeof(AppInfo));
     int32_t ret = SOFTBUS_OK;
@@ -75,6 +76,7 @@ static int32_t OnSessionOpenedInner(int32_t channelId, char *peerNetworkId, int3
     SessionInnerCallback listener = { 0 };
     listener.func = InnerMessageHandler;
     char sessionKey[SESSION_KEY_LENGTH];
+    (void)memset_s(sessionKey, SESSION_KEY_LENGTH, 0, SESSION_KEY_LENGTH);
     int32_t ret = GetSessionInfo(channelId, &fd, &channelType, sessionKey, SESSION_KEY_LENGTH);
     TRANS_CHECK_AND_RETURN_RET_LOGE(ret == SOFTBUS_OK, ret, TRANS_CTRL, "GetSessionInfo failed!");
     TRANS_LOGI(TRANS_CTRL, "inner session open success, channelId=%{public}d", channelId);

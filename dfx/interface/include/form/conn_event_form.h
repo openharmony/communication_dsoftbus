@@ -36,6 +36,8 @@ typedef enum {
     EVENT_SCENE_SOCKET_CLOSE = 9,
     EVENT_SCENE_LEGACY_CONNECT = 10,
     EVENT_SCENE_PASSIVE_CONNECT = 11,
+    EVENT_SCENE_PAGING = 12,
+    EVENT_SCENE_PAGING_PASSIVE_BROADCAST_RESPONSE = 13,
 } ConnEventScene;
 
 typedef enum {
@@ -53,6 +55,14 @@ typedef enum {
     EVENT_STAGE_CONNECT_CONNECT_GROUP = 18,
     EVENT_STAGE_CONNECT_CONFIG_INFO = 19,
     EVENT_STAGE_CONNECT_START_LISTENING = 20,
+
+    EVENT_STAGE_PAGING_START = 21,
+    EVENT_STAGE_PAGING_DISCOVERY_REPORT = 22,
+    EVENT_STAGE_PAGING_CONNECT_START = 23,
+    EVENT_STAGE_PAGING_CONNECT_REPORT = 24,
+    EVENT_STAGE_PAGING_END = 25,
+    EVENT_STAGE_PAGING_PASSIVE_BROADCAST_RESPONSE = 26,
+
     EVENT_STAGE_CONNECT_DEVICE = 2101,
     EVENT_STAGE_CONNECT_DEVICE_DIRECTLY = 2102,
     EVENT_STAGE_CONNECT_UPDATE_CONNECTION_RC = 2103,
@@ -101,6 +111,8 @@ typedef struct {
     const char *localNetworkId; // LOCAL_NET_ID
     const char *callerPkg;      // HOST_PKG
     const char *calleePkg;      // TO_CALL_PKG
+    const char *srcAccountIdHash; // SRC_ACCOUNT_ID_HASH
+    const char *dstAccountIdHash; // DST_ACCOUNT_ID_HASH
     int32_t bootLinkType;       // BOOT_LINK_TYPE
     int32_t isRenegotiate;      // IS_RENEGOTIATE
     int32_t isReuse;            // IS_REUSE
@@ -127,6 +139,10 @@ typedef struct {
     const char *businessTag;      // BUSINESS_TAG
     int32_t staChload;            // STA_CHLOAD
     int32_t sameAccount;          // SAME_ACCOUNT
+    int32_t discoveryCnt;         // DISCOVERY_CNT
+    int32_t connectingCnt;        // CONNECTING_CNT
+    int32_t connectSuccessCnt;    // CONNECT_SUCCESS_CNT
+    int32_t connectFailCnt;       // CONNECT_FAIL_CNT
 } ConnEventExtra;
 
 typedef enum {
@@ -188,6 +204,7 @@ typedef struct {
     const char *localDeviceName; // LOCAL_DEV_NAME
     const char *peerIp;          // PEER_IP
     const char *localIp;         // LOCAL_IP
+    const char *extra;           // EXTRA
     const char *callerPkg;       // HOST_PKG
     const char *calleePkg;       // TO_CALL_PKG
     const char *peerPort;        // PEER_PORT

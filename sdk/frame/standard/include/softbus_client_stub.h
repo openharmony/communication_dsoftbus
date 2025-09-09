@@ -88,7 +88,7 @@ private:
     int32_t OnPublishLNNResultInner(MessageParcel &data, MessageParcel &reply);
     int32_t OnRefreshLNNResultInner(MessageParcel &data, MessageParcel &reply);
     int32_t OnRefreshDeviceFoundInner(MessageParcel &data, MessageParcel &reply);
-    int32_t OnClientPermissonChangeInner(MessageParcel &data, MessageParcel &reply);
+    int32_t OnClientPermissionChangeInner(MessageParcel &data, MessageParcel &reply);
     int32_t OnDataLevelChangedInner(MessageParcel &data, MessageParcel &reply);
     int32_t OnMsdpRangeResultInner(MessageParcel &data, MessageParcel &reply);
     int32_t OnClientTransLimitChangeInner(MessageParcel &data, MessageParcel &reply);

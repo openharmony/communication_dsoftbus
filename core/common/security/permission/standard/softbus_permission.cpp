@@ -20,6 +20,7 @@
 
 #include "anonymizer.h"
 #include "comm_log.h"
+#include "g_enhance_trans_func_pack.h"
 #include "ipc_skeleton.h"
 #include "permission_entry.h"
 #include "softbus_access_token_adapter.h"
@@ -41,6 +42,11 @@ int32_t TransPermissionInit(void)
     int32_t ret = LoadPermissionJson(PERMISSION_JSON_FILE);
     if (ret != SOFTBUS_OK) {
         COMM_LOGI(COMM_PERM, "load permission json fail");
+        return ret;
+    }
+    ret = LoadTransPermissionJsonPacked();
+    if (ret != SOFTBUS_OK) {
+        COMM_LOGI(COMM_PERM, "load trans permission json fail");
         return ret;
     }
     return InitDynamicPermission();

@@ -1409,14 +1409,15 @@ static int32_t ReportAuthResultRecordEvt(void)
 
 int32_t SoftBusRecordDevOnlineDurResult(uint64_t constTime)
 {
-    if (constTime < 0) {
-        COMM_LOGE(COMM_EVENT, "param is invalid");
-        return SOFTBUS_INVALID_PARAM;
-    }
     DevOnlineDurRecord *reCord = &g_devOnlineDurRecord;
     if (SoftBusMutexLock(&reCord->lock) != SOFTBUS_OK) {
         COMM_LOGE(COMM_EVENT, "lock fail");
         return SOFTBUS_LOCK_ERR;
+    }
+    if (constTime > UINT64_MAX - reCord->totalTime) {
+        COMM_LOGE(COMM_EVENT, "total time exceed max limit");
+        (void)SoftBusMutexUnlock(&reCord->lock);
+        return SOFTBUS_INVALID_PARAM;
     }
     reCord->totalTime += constTime;
     reCord->totalCount++;
@@ -1441,7 +1442,7 @@ int32_t SoftBusRecordDevOnlineDurResult(uint64_t constTime)
 
 int32_t SoftBusRecordBusCenterResult(SoftBusLinkType linkType, uint64_t constTime)
 {
-    if (linkType >= SOFTBUS_HISYSEVT_LINK_TYPE_BUTT || constTime < 0) {
+    if (linkType >= SOFTBUS_HISYSEVT_LINK_TYPE_BUTT) {
         COMM_LOGE(COMM_EVENT, "param is invalid");
         return SOFTBUS_INVALID_PARAM;
     }
@@ -1450,6 +1451,11 @@ int32_t SoftBusRecordBusCenterResult(SoftBusLinkType linkType, uint64_t constTim
     if (SoftBusMutexLock(&reCord->lock) != SOFTBUS_OK) {
         COMM_LOGE(COMM_EVENT, "lnn result record lock fail");
         return SOFTBUS_LOCK_ERR;
+    }
+    if (constTime > UINT64_MAX - reCord->totalTime) {
+        COMM_LOGE(COMM_EVENT, "total time exceed max limit");
+        (void)SoftBusMutexUnlock(&reCord->lock);
+        return SOFTBUS_INVALID_PARAM;
     }
     reCord->totalTime += constTime;
     reCord->totalCount++;
@@ -1472,9 +1478,29 @@ int32_t SoftBusRecordBusCenterResult(SoftBusLinkType linkType, uint64_t constTim
     return SOFTBUS_OK;
 }
 
+static void ProcRecordAuthFailResult(AuthResultRecord *reCord, SoftBusLinkType linkType, uint64_t constTime,
+    AuthFailStage stage)
+{
+    reCord->failTotalTime += constTime;
+    reCord->failTotalCount++;
+    switch (stage) {
+        case AUTH_CONNECT_STAGE:
+            reCord->connFailTotalCount++;
+            break;
+        case AUTH_VERIFY_STAGE:
+            reCord->authFailTotalCount++;
+            break;
+        case AUTH_EXCHANGE_STAGE:
+            reCord->exchangeFailTotalCount++;
+            break;
+        default:
+            break;
+    }
+}
+
 int32_t SoftBusRecordAuthResult(SoftBusLinkType linkType, int32_t ret, uint64_t constTime, AuthFailStage stage)
 {
-    if (linkType >= SOFTBUS_HISYSEVT_LINK_TYPE_BUTT || constTime < 0) {
+    if (linkType >= SOFTBUS_HISYSEVT_LINK_TYPE_BUTT) {
         COMM_LOGE(COMM_EVENT, "param is invalid");
         return SOFTBUS_INVALID_PARAM;
     }
@@ -1482,6 +1508,11 @@ int32_t SoftBusRecordAuthResult(SoftBusLinkType linkType, int32_t ret, uint64_t 
     if (SoftBusMutexLock(&reCord->lock) != SOFTBUS_OK) {
         COMM_LOGE(COMM_EVENT, "auth result record lock fail");
         return SOFTBUS_LOCK_ERR;
+    }
+    if (constTime > UINT64_MAX - reCord->authTotalTime) {
+        COMM_LOGE(COMM_EVENT, "total time exceed max limit");
+        (void)SoftBusMutexUnlock(&reCord->lock);
+        return SOFTBUS_INVALID_PARAM;
     }
     reCord->authTotalTime += constTime;
     reCord->authTotalCount++;
@@ -1501,21 +1532,7 @@ int32_t SoftBusRecordAuthResult(SoftBusLinkType linkType, int32_t ret, uint64_t 
         reCord->authCount5++;
     }
     if (ret != SOFTBUS_OK) {
-        reCord->failTotalTime += constTime;
-        reCord->failTotalCount++;
-        switch (stage) {
-            case AUTH_CONNECT_STAGE:
-                reCord->connFailTotalCount++;
-                break;
-            case AUTH_VERIFY_STAGE:
-                reCord->authFailTotalCount++;
-                break;
-            case AUTH_EXCHANGE_STAGE:
-                reCord->exchangeFailTotalCount++;
-                break;
-            default:
-                break;
-        }
+        ProcRecordAuthFailResult(reCord, linkType, constTime, stage);
     }
     (void)SoftBusMutexUnlock(&reCord->lock);
     return SOFTBUS_OK;

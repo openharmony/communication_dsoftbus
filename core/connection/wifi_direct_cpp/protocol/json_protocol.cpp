@@ -49,11 +49,7 @@ void JsonProtocol::Write(int key, Serializable::ValueType type, const uint8_t *v
 
 bool JsonProtocol::Read(int &key, uint8_t *&value, size_t &size)
 {
-    if (readPos_ == jsonObject_.end()) {
-        CONN_LOGE(CONN_WIFI_DIRECT, "read to end");
-        return false;
-    }
-
+    CONN_CHECK_AND_RETURN_RET_LOGE(readPos_ != jsonObject_.end(), false, CONN_WIFI_DIRECT, "read to end");
     bool found = false;
     std::string jsonKey = readPos_.key();
     for (const auto& [intKey, strKey] : NegotiateMessage::keyStringTable_) {
@@ -83,6 +79,11 @@ bool JsonProtocol::Read(int &key, uint8_t *&value, size_t &size)
             break;
         case nlohmann::detail::value_t::string: {
             std::string orgValue = *readPos_;
+            if (orgValue.size() >= sizeof(data_)) {
+                CONN_LOGE(CONN_WIFI_DIRECT, "string value is invalid, len=%{public}zu", orgValue.size());
+                ret = false;
+                break;
+            }
             std::copy(orgValue.begin(), orgValue.end(), data_);
             value = data_;
             size = orgValue.length();

@@ -28,8 +28,8 @@ public:
     virtual ~AuthConnectionInterface() {};
 
     virtual int32_t SoftBusGetBtState(void) = 0;
-    virtual int32_t PostAuthEvent(EventType event, EventHandler handler, const void *obj, uint32_t size,
-        uint64_t delayMs) = 0;
+    virtual int32_t PostAuthEvent(
+        EventType event, EventHandler handler, const void *obj, uint32_t size, uint64_t delayMs) = 0;
     virtual bool IsHaveAuthIdByConnId(uint64_t connId) = 0;
     virtual int32_t FindAuthPreLinkNodeById(uint32_t requestId, AuthPreLinkNode *reuseNode) = 0;
     virtual int32_t SocketSetDevice(int32_t fd, bool isBlockMode) = 0;
@@ -43,14 +43,14 @@ public:
     AuthConnectionInterfaceMock();
     ~AuthConnectionInterfaceMock() override;
 
-    MOCK_METHOD0(SoftBusGetBtState, int32_t (void));
-    MOCK_METHOD5(PostAuthEvent, int32_t (EventType, EventHandler, const void *, uint32_t, uint64_t));
-    MOCK_METHOD1(IsHaveAuthIdByConnId, bool (uint64_t));
-    MOCK_METHOD2(FindAuthPreLinkNodeById, int32_t (uint32_t, AuthPreLinkNode *));
-    MOCK_METHOD2(SocketSetDevice, int32_t (int32_t, bool));
-    MOCK_METHOD3(SocketPostBytes, int32_t (int32_t, const AuthDataHead *, const uint8_t *));
-    MOCK_METHOD2(StartSocketListening, int32_t (ListenerModule, const LocalListenerInfo *));
-    MOCK_METHOD1(DelAuthPreLinkById, void (uint32_t));
+    MOCK_METHOD0(SoftBusGetBtState, int32_t(void));
+    MOCK_METHOD5(PostAuthEvent, int32_t(EventType, EventHandler, const void *, uint32_t, uint64_t));
+    MOCK_METHOD1(IsHaveAuthIdByConnId, bool(uint64_t));
+    MOCK_METHOD2(FindAuthPreLinkNodeById, int32_t(uint32_t, AuthPreLinkNode *));
+    MOCK_METHOD2(SocketSetDevice, int32_t(int32_t, bool));
+    MOCK_METHOD3(SocketPostBytes, int32_t(int32_t, const AuthDataHead *, const uint8_t *));
+    MOCK_METHOD2(StartSocketListening, int32_t(ListenerModule, const LocalListenerInfo *));
+    MOCK_METHOD1(DelAuthPreLinkById, void(uint32_t));
 };
-}
+} // namespace OHOS
 #endif

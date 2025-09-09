@@ -18,6 +18,11 @@
 
 #include <stdint.h>
 
+#include "ble_range.h"
+#include "data_level_inner.h"
+#include "softbus_common.h"
+
+
 #ifdef __cplusplus
 extern "C" {
 #endif

@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021-2024 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2025 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -70,17 +70,19 @@ static int32_t ClientTdcOnDataEvent(ListenerModule module, int events, int32_t f
 {
     TcpDirectChannelInfo channel;
     (void)memset_s(&channel, sizeof(TcpDirectChannelInfo), 0, sizeof(TcpDirectChannelInfo));
-    if (TransTdcGetInfoByFd(fd, &channel) != SOFTBUS_OK) {
+
+    int32_t ret = TransTdcGetInfoByFd(fd, &channel);
+    if (ret != SOFTBUS_OK) {
         (void)DelTrigger(module, fd, RW_TRIGGER);
-        TRANS_LOGE(TRANS_SDK, "can not match fd. release fd=%{public}d", fd);
-        return SOFTBUS_MEM_ERR;
+        TRANS_LOGE(TRANS_SDK, "can not match fd. release fd=%{public}d, ret=%{public}d", fd, ret);
+        return ret;
     }
 
     if (events == SOFTBUS_SOCKET_IN) {
         int32_t channelId = channel.channelId;
-        int32_t ret = TransTdcRecvData(channelId);
+        ret = TransTdcRecvData(channelId);
         if (ret == SOFTBUS_DATA_NOT_ENOUGH) {
-            TRANS_LOGE(TRANS_SDK, "client process data fail, SOFTBUS_DATA_NOT_ENOUGH. channelId=%{public}d", channelId);
+            TRANS_LOGW(TRANS_SDK, "client process data fail, SOFTBUS_DATA_NOT_ENOUGH. channelId=%{public}d", channelId);
             return SOFTBUS_OK;
         }
         if (ret != SOFTBUS_OK) {
@@ -101,9 +103,7 @@ int32_t TransTdcCreateListener(int32_t fd)
         TRANS_LOGE(TRANS_SDK, "lock failed.");
         return SOFTBUS_LOCK_ERR;
     }
-    if (g_isInitedFlag == false) {
-        g_isInitedFlag = true;
-
+    if (!g_isInitedFlag) {
         static SoftbusBaseListener listener = {
             .onConnectEvent = ClientTdcOnConnectEvent,
             .onDataEvent = ClientTdcOnDataEvent,
@@ -114,6 +114,7 @@ int32_t TransTdcCreateListener(int32_t fd)
             SoftBusMutexUnlock(&g_lock.lock);
             return ret;
         }
+        g_isInitedFlag = true;
         TRANS_LOGI(TRANS_SDK, "create sdk listener success. fd=%{public}d", fd);
     }
     SoftBusMutexUnlock(&g_lock.lock);
@@ -128,8 +129,7 @@ int32_t TransTdcCreateListenerWithoutAddTrigger(int32_t fd)
         TRANS_LOGE(TRANS_SDK, "lock failed.");
         return SOFTBUS_LOCK_ERR;
     }
-    if (g_isInitedFlag == false) {
-        g_isInitedFlag = true;
+    if (!g_isInitedFlag) {
         static SoftbusBaseListener listener = {
             .onConnectEvent = ClientTdcOnConnectEvent,
             .onDataEvent = ClientTdcOnDataEvent,
@@ -140,6 +140,7 @@ int32_t TransTdcCreateListenerWithoutAddTrigger(int32_t fd)
             SoftBusMutexUnlock(&g_lock.lock);
             return ret;
         }
+        g_isInitedFlag = true;
         TRANS_LOGI(TRANS_SDK, "create sdk listener success.fd=%{public}d", fd);
     }
     SoftBusMutexUnlock(&g_lock.lock);

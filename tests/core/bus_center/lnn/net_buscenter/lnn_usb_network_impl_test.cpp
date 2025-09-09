@@ -1,27 +1,27 @@
 /*
-* Copyright (c) 2025 Huawei Device Co., Ltd.
-* Licensed under the Apache License, Version 2.0 (the "License");
-* you may not use this file except in compliance with the License.
-* You may obtain a copy of the License at
-*
-*     http://www.apache.org/licenses/LICENSE-2.0
-*
-* Unless required by applicable law or agreed to in writing, software
-* distributed under the License is distributed on an "AS IS" BASIS,
-* WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
-* See the License for the specific language governing permissions and
-* limitations under the License.
-*/
+ * Copyright (c) 2025 Huawei Device Co., Ltd.
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
 
 #include <gtest/gtest.h>
 #include <securec.h>
 
 #include "bus_center_event.h"
-#include "lnn_usb_network_impl.c"
-#include "lnn_usb_network_impl_mock.h"
 #include "lnn_network_manager.h"
 #include "lnn_physical_subnet_manager.h"
 #include "lnn_trans_mock.h"
+#include "lnn_usb_network_impl.c"
+#include "lnn_usb_network_impl_mock.h"
 #include "message_handler.h"
 #include "softbus_adapter_mem.h"
 #include "softbus_common.h"
@@ -57,11 +57,11 @@ void LNNUsbNetworkImplMockTest::SetUp() { }
 void LNNUsbNetworkImplMockTest::TearDown() { }
 
 /*
-* @tc.name: LNN_USB_NETWORK_IMPL_TEST_001
-* @tc.desc: LnnEnableUsbProtocol Test
-* @tc.type: FUNC
-* @tc.require: NONE
-*/
+ * @tc.name: LNN_USB_NETWORK_IMPL_TEST_001
+ * @tc.desc: LnnEnableUsbProtocol Test
+ * @tc.type: FUNC
+ * @tc.require: NONE
+ */
 HWTEST_F(LNNUsbNetworkImplMockTest, LNN_USB_NETWORK_IMPL_TEST_001, TestSize.Level1)
 {
     NiceMock<LnnUsbNetworkImplInterfaceMock> usbMock;
@@ -84,17 +84,16 @@ HWTEST_F(LNNUsbNetworkImplMockTest, LNN_USB_NETWORK_IMPL_TEST_001, TestSize.Leve
 }
 
 /*
-* @tc.name: LNN_USB_NETWORK_IMPL_TEST_002
-* @tc.desc: LnnInitUsbProtocol Test
-* @tc.type: FUNC
-* @tc.require: NONE
-*/
+ * @tc.name: LNN_USB_NETWORK_IMPL_TEST_002
+ * @tc.desc: LnnInitUsbProtocol Test
+ * @tc.type: FUNC
+ * @tc.require: NONE
+ */
 HWTEST_F(LNNUsbNetworkImplMockTest, LNN_USB_NETWORK_IMPL_TEST_002, TestSize.Level1)
 {
     NiceMock<LnnUsbNetworkImplInterfaceMock> usbMock;
 
-    EXPECT_CALL(usbMock, LnnRegisterEventHandler)
-        .WillOnce(Return(SOFTBUS_INVALID_PARAM));
+    EXPECT_CALL(usbMock, LnnRegisterEventHandler).WillOnce(Return(SOFTBUS_INVALID_PARAM));
     EXPECT_CALL(usbMock, LnnSetLocalStrInfoByIfnameIdx)
         .WillOnce(Return(SOFTBUS_INVALID_PARAM))
         .WillRepeatedly(Return(SOFTBUS_OK));
@@ -115,11 +114,11 @@ HWTEST_F(LNNUsbNetworkImplMockTest, LNN_USB_NETWORK_IMPL_TEST_002, TestSize.Leve
 }
 
 /*
-* @tc.name: LNN_USB_NETWORK_IMPL_TEST_003
-* @tc.desc: LnnGetUsbListenerModule Test
-* @tc.type: FUNC
-* @tc.require: NONE
-*/
+ * @tc.name: LNN_USB_NETWORK_IMPL_TEST_003
+ * @tc.desc: LnnGetUsbListenerModule Test
+ * @tc.type: FUNC
+ * @tc.require: NONE
+ */
 HWTEST_F(LNNUsbNetworkImplMockTest, LNN_USB_NETWORK_IMPL_TEST_003, TestSize.Level1)
 {
     ListenerModule ret = LnnGetUsbListenerModule(LNN_LISTENER_MODE_PROXY);
@@ -133,11 +132,11 @@ HWTEST_F(LNNUsbNetworkImplMockTest, LNN_USB_NETWORK_IMPL_TEST_003, TestSize.Leve
 }
 
 /*
-* @tc.name: LNN_USB_NETWORK_IMPL_TEST_004
-* @tc.desc: NotifyUsbAddressChanged Test
-* @tc.type: FUNC
-* @tc.require: NONE
-*/
+ * @tc.name: LNN_USB_NETWORK_IMPL_TEST_004
+ * @tc.desc: NotifyUsbAddressChanged Test
+ * @tc.type: FUNC
+ * @tc.require: NONE
+ */
 HWTEST_F(LNNUsbNetworkImplMockTest, LNN_USB_NETWORK_IMPL_TEST_004, TestSize.Level1)
 {
     NiceMock<LnnUsbNetworkImplInterfaceMock> usbMock;
@@ -154,11 +153,11 @@ HWTEST_F(LNNUsbNetworkImplMockTest, LNN_USB_NETWORK_IMPL_TEST_004, TestSize.Leve
 }
 
 /*
-* @tc.name: LNN_USB_NETWORK_IMPL_TEST_005
-* @tc.desc: OnIpNetifStatusChanged Test
-* @tc.type: FUNC
-* @tc.require: NONE
-*/
+ * @tc.name: LNN_USB_NETWORK_IMPL_TEST_005
+ * @tc.desc: OnIpNetifStatusChanged Test
+ * @tc.type: FUNC
+ * @tc.require: NONE
+ */
 HWTEST_F(LNNUsbNetworkImplMockTest, LNN_USB_NETWORK_IMPL_TEST_005, TestSize.Level1)
 {
     NiceMock<LnnUsbNetworkImplInterfaceMock> usbMock;
@@ -181,41 +180,41 @@ HWTEST_F(LNNUsbNetworkImplMockTest, LNN_USB_NETWORK_IMPL_TEST_005, TestSize.Leve
     OnIpNetifStatusChanged(&subnet, nullptr);
     EXPECT_EQ(subnet.status, LNN_SUBNET_IDLE);
 
-    IpSubnetManagerEvent *eventPtr = static_cast<IpSubnetManagerEvent*>(SoftBusCalloc(sizeof(IpSubnetManagerEvent)));
+    IpSubnetManagerEvent *eventPtr = static_cast<IpSubnetManagerEvent *>(SoftBusCalloc(sizeof(IpSubnetManagerEvent)));
     ASSERT_TRUE(eventPtr != nullptr);
     *eventPtr = USB_SUBNET_MANAGER_EVENT_IF_READY;
     subnet.status = LNN_SUBNET_IDLE;
-    OnIpNetifStatusChanged(&subnet, (void*)eventPtr);
+    OnIpNetifStatusChanged(&subnet, (void *)eventPtr);
     EXPECT_EQ(subnet.status, LNN_SUBNET_IDLE);
 
-    eventPtr = static_cast<IpSubnetManagerEvent*>(SoftBusCalloc(sizeof(IpSubnetManagerEvent)));
+    eventPtr = static_cast<IpSubnetManagerEvent *>(SoftBusCalloc(sizeof(IpSubnetManagerEvent)));
     ASSERT_TRUE(eventPtr != nullptr);
     *eventPtr = USB_SUBNET_MANAGER_EVENT_IF_CHANGED;
     subnet.status = LNN_SUBNET_IDLE;
-    OnIpNetifStatusChanged(&subnet, (void*)eventPtr);
+    OnIpNetifStatusChanged(&subnet, (void *)eventPtr);
     EXPECT_EQ(subnet.status, LNN_SUBNET_RESETTING);
 
-    eventPtr = static_cast<IpSubnetManagerEvent*>(SoftBusCalloc(sizeof(IpSubnetManagerEvent)));
+    eventPtr = static_cast<IpSubnetManagerEvent *>(SoftBusCalloc(sizeof(IpSubnetManagerEvent)));
     ASSERT_TRUE(eventPtr != nullptr);
     *eventPtr = (IpSubnetManagerEvent)(USB_SUBNET_MANAGER_EVENT_IF_READY - 1);
     subnet.status = LNN_SUBNET_IDLE;
-    OnIpNetifStatusChanged(&subnet, (void*)eventPtr);
+    OnIpNetifStatusChanged(&subnet, (void *)eventPtr);
     EXPECT_EQ(subnet.status, LNN_SUBNET_IDLE);
 
-    eventPtr = static_cast<IpSubnetManagerEvent*>(SoftBusCalloc(sizeof(IpSubnetManagerEvent)));
+    eventPtr = static_cast<IpSubnetManagerEvent *>(SoftBusCalloc(sizeof(IpSubnetManagerEvent)));
     ASSERT_TRUE(eventPtr != nullptr);
     *eventPtr = (IpSubnetManagerEvent)(USB_SUBNET_MANAGER_EVENT_MAX + 1);
     subnet.status = LNN_SUBNET_IDLE;
-    OnIpNetifStatusChanged(&subnet, (void*)eventPtr);
+    OnIpNetifStatusChanged(&subnet, (void *)eventPtr);
     EXPECT_EQ(subnet.status, LNN_SUBNET_IDLE);
 }
 
 /*
-* @tc.name: LNN_USB_NETWORK_IMPL_TEST_006
-* @tc.desc: OnSoftbusIpNetworkDisconnected Test
-* @tc.type: FUNC
-* @tc.require: NONE
-*/
+ * @tc.name: LNN_USB_NETWORK_IMPL_TEST_006
+ * @tc.desc: OnSoftbusIpNetworkDisconnected Test
+ * @tc.type: FUNC
+ * @tc.require: NONE
+ */
 HWTEST_F(LNNUsbNetworkImplMockTest, LNN_USB_NETWORK_IMPL_TEST_006, TestSize.Level1)
 {
     NiceMock<LnnUsbNetworkImplInterfaceMock> usbMock;
@@ -245,29 +244,29 @@ HWTEST_F(LNNUsbNetworkImplMockTest, LNN_USB_NETWORK_IMPL_TEST_006, TestSize.Leve
 }
 
 /*
-* @tc.name: LNN_USB_NETWORK_IMPL_TEST_007
-* @tc.desc: DestroyUsbSubnetManager Test
-* @tc.type: FUNC
-* @tc.require: NONE
-*/
+ * @tc.name: LNN_USB_NETWORK_IMPL_TEST_007
+ * @tc.desc: DestroyUsbSubnetManager Test
+ * @tc.type: FUNC
+ * @tc.require: NONE
+ */
 HWTEST_F(LNNUsbNetworkImplMockTest, LNN_USB_NETWORK_IMPL_TEST_007, TestSize.Level1)
 {
     DestroyUsbSubnetManager(nullptr);
 
     NiceMock<LnnUsbNetworkImplInterfaceMock> usbMock;
     EXPECT_CALL(usbMock, LnnSetLocalNumInfoByIfnameIdx).WillRepeatedly(Return(SOFTBUS_OK));
-    LnnPhysicalSubnet *subnetPtr = static_cast<LnnPhysicalSubnet*>(SoftBusCalloc(sizeof(LnnPhysicalSubnet)));
+    LnnPhysicalSubnet *subnetPtr = static_cast<LnnPhysicalSubnet *>(SoftBusCalloc(sizeof(LnnPhysicalSubnet)));
     ASSERT_TRUE(subnetPtr != nullptr);
     subnetPtr->status = LNN_SUBNET_RUNNING;
     DestroyUsbSubnetManager(subnetPtr);
 }
 
 /*
-* @tc.name: LNN_USB_NETWORK_IMPL_TEST_008
-* @tc.desc: GetAvailableIpAddr Test
-* @tc.type: FUNC
-* @tc.require: NONE
-*/
+ * @tc.name: LNN_USB_NETWORK_IMPL_TEST_008
+ * @tc.desc: GetAvailableIpAddr Test
+ * @tc.type: FUNC
+ * @tc.require: NONE
+ */
 HWTEST_F(LNNUsbNetworkImplMockTest, LNN_USB_NETWORK_IMPL_TEST_008, TestSize.Level1)
 {
     NiceMock<LnnUsbNetworkImplInterfaceMock> usbMock;
@@ -275,7 +274,7 @@ HWTEST_F(LNNUsbNetworkImplMockTest, LNN_USB_NETWORK_IMPL_TEST_008, TestSize.Leve
         .WillOnce(Return(SOFTBUS_INVALID_PARAM))
         .WillOnce(Return(SOFTBUS_INVALID_PARAM))
         .WillRepeatedly(LnnUsbNetworkImplInterfaceMock::ActionOfGetNetworkIpv6ByIfName);
-    char address[IP_LEN] = {0};
+    char address[IP_LEN] = { 0 };
     int32_t ret = GetAvailableIpAddr("usb", address, sizeof(address));
     EXPECT_NE(ret, SOFTBUS_OK);
     ret = GetAvailableIpAddr("ncm0", address, sizeof(address));
@@ -285,11 +284,11 @@ HWTEST_F(LNNUsbNetworkImplMockTest, LNN_USB_NETWORK_IMPL_TEST_008, TestSize.Leve
 }
 
 /*
-* @tc.name: LNN_USB_NETWORK_IMPL_TEST_009
-* @tc.desc: GetIpEventInRunning And GetIpEventInOther Test
-* @tc.type: FUNC
-* @tc.require: NONE
-*/
+ * @tc.name: LNN_USB_NETWORK_IMPL_TEST_009
+ * @tc.desc: GetIpEventInRunning And GetIpEventInOther Test
+ * @tc.type: FUNC
+ * @tc.require: NONE
+ */
 HWTEST_F(LNNUsbNetworkImplMockTest, LNN_USB_NETWORK_IMPL_TEST_009, TestSize.Level1)
 {
     NiceMock<LnnUsbNetworkImplInterfaceMock> usbMock;
@@ -336,11 +335,11 @@ HWTEST_F(LNNUsbNetworkImplMockTest, LNN_USB_NETWORK_IMPL_TEST_009, TestSize.Leve
 }
 
 /*
-* @tc.name: LNN_USB_NETWORK_IMPL_TEST_010
-* @tc.desc: add ip and port to ledger
-* @tc.type: FUNC
-* @tc.require: NONE
-*/
+ * @tc.name: LNN_USB_NETWORK_IMPL_TEST_010
+ * @tc.desc: add ip and port to ledger
+ * @tc.type: FUNC
+ * @tc.require: NONE
+ */
 HWTEST_F(LNNUsbNetworkImplMockTest, LNN_USB_NETWORK_IMPL_TEST_010, TestSize.Level1)
 {
     NiceMock<LnnUsbNetworkImplInterfaceMock> usbMock;
@@ -365,11 +364,11 @@ HWTEST_F(LNNUsbNetworkImplMockTest, LNN_USB_NETWORK_IMPL_TEST_010, TestSize.Leve
 }
 
 /*
-* @tc.name: LNN_USB_NETWORK_IMPL_TEST_011
-* @tc.desc: OpenAuthPort Test
-* @tc.type: FUNC
-* @tc.require: NONE
-*/
+ * @tc.name: LNN_USB_NETWORK_IMPL_TEST_011
+ * @tc.desc: OpenAuthPort Test
+ * @tc.type: FUNC
+ * @tc.require: NONE
+ */
 HWTEST_F(LNNUsbNetworkImplMockTest, LNN_USB_NETWORK_IMPL_TEST_011, TestSize.Level1)
 {
     NiceMock<LnnUsbNetworkImplInterfaceMock> usbMock;
@@ -379,9 +378,7 @@ HWTEST_F(LNNUsbNetworkImplMockTest, LNN_USB_NETWORK_IMPL_TEST_011, TestSize.Leve
     EXPECT_CALL(usbMock, LnnGetLocalStrInfoByIfnameIdx)
         .WillOnce(Return(SOFTBUS_INVALID_PARAM))
         .WillRepeatedly(Return(SOFTBUS_OK));
-    EXPECT_CALL(usbMock, AuthStartListening)
-        .WillOnce(Return(SOFTBUS_INVALID_PARAM))
-        .WillRepeatedly(Return(SOFTBUS_OK));
+    EXPECT_CALL(usbMock, AuthStartListening).WillOnce(Return(SOFTBUS_INVALID_PARAM)).WillRepeatedly(Return(SOFTBUS_OK));
     EXPECT_CALL(usbMock, LnnSetLocalNumInfoByIfnameIdx).WillRepeatedly(Return(SOFTBUS_OK));
     int32_t ret = OpenAuthPort();
     EXPECT_NE(ret, SOFTBUS_OK);
@@ -392,11 +389,11 @@ HWTEST_F(LNNUsbNetworkImplMockTest, LNN_USB_NETWORK_IMPL_TEST_011, TestSize.Leve
 }
 
 /*
-* @tc.name: LNN_USB_NETWORK_IMPL_TEST_012
-* @tc.desc: OpenSessionPort Test
-* @tc.type: FUNC
-* @tc.require: NONE
-*/
+ * @tc.name: LNN_USB_NETWORK_IMPL_TEST_012
+ * @tc.desc: OpenSessionPort Test
+ * @tc.type: FUNC
+ * @tc.require: NONE
+ */
 HWTEST_F(LNNUsbNetworkImplMockTest, LNN_USB_NETWORK_IMPL_TEST_012, TestSize.Level1)
 {
     NiceMock<LnnUsbNetworkImplInterfaceMock> usbMock;
@@ -421,20 +418,18 @@ HWTEST_F(LNNUsbNetworkImplMockTest, LNN_USB_NETWORK_IMPL_TEST_012, TestSize.Leve
 }
 
 /*
-* @tc.name: LNN_USB_NETWORK_IMPL_TEST_013
-* @tc.desc: OpenIpLink Test
-* @tc.type: FUNC
-* @tc.require: NONE
-*/
+ * @tc.name: LNN_USB_NETWORK_IMPL_TEST_013
+ * @tc.desc: OpenIpLink Test
+ * @tc.type: FUNC
+ * @tc.require: NONE
+ */
 HWTEST_F(LNNUsbNetworkImplMockTest, LNN_USB_NETWORK_IMPL_TEST_013, TestSize.Level1)
 {
     NiceMock<LnnUsbNetworkImplInterfaceMock> usbMock;
     EXPECT_CALL(usbMock, LnnGetLocalNumInfoByIfnameIdx).WillRepeatedly(Return(SOFTBUS_INVALID_PARAM));
     EXPECT_CALL(usbMock, LnnGetLocalStrInfoByIfnameIdx).WillRepeatedly(Return(SOFTBUS_OK));
     EXPECT_CALL(usbMock, LnnSetLocalNumInfoByIfnameIdx).WillRepeatedly(Return(SOFTBUS_OK));
-    EXPECT_CALL(usbMock, AuthStartListening)
-        .WillOnce(Return(SOFTBUS_INVALID_PARAM))
-        .WillRepeatedly(Return(SOFTBUS_OK));
+    EXPECT_CALL(usbMock, AuthStartListening).WillOnce(Return(SOFTBUS_INVALID_PARAM)).WillRepeatedly(Return(SOFTBUS_OK));
     EXPECT_CALL(usbMock, TransTdcStartSessionListener)
         .WillOnce(Return(SOFTBUS_INVALID_PARAM))
         .WillRepeatedly(Return(SOFTBUS_OK));
@@ -450,11 +445,11 @@ HWTEST_F(LNNUsbNetworkImplMockTest, LNN_USB_NETWORK_IMPL_TEST_013, TestSize.Leve
 }
 
 /*
-* @tc.name: LNN_USB_NETWORK_IMPL_TEST_014
-* @tc.desc: EnableIpSubnet Test
-* @tc.type: FUNC
-* @tc.require: NONE
-*/
+ * @tc.name: LNN_USB_NETWORK_IMPL_TEST_014
+ * @tc.desc: EnableIpSubnet Test
+ * @tc.type: FUNC
+ * @tc.require: NONE
+ */
 HWTEST_F(LNNUsbNetworkImplMockTest, LNN_USB_NETWORK_IMPL_TEST_014, TestSize.Level1)
 {
     NiceMock<LnnUsbNetworkImplInterfaceMock> usbMock;
@@ -477,9 +472,7 @@ HWTEST_F(LNNUsbNetworkImplMockTest, LNN_USB_NETWORK_IMPL_TEST_014, TestSize.Leve
         .WillRepeatedly(LnnUsbNetworkImplInterfaceMock::ActionOfLnnGetLocalStrInfoByIfnameIdx);
     EXPECT_CALL(usbMock, LnnGetLocalNumInfoByIfnameIdx).WillRepeatedly(Return(SOFTBUS_INVALID_PARAM));
     EXPECT_CALL(usbMock, LnnSetLocalNumInfoByIfnameIdx).WillRepeatedly(Return(SOFTBUS_OK));
-    EXPECT_CALL(usbMock, AuthStartListening)
-        .WillOnce(Return(SOFTBUS_INVALID_PARAM))
-        .WillRepeatedly(Return(SOFTBUS_OK));
+    EXPECT_CALL(usbMock, AuthStartListening).WillOnce(Return(SOFTBUS_INVALID_PARAM)).WillRepeatedly(Return(SOFTBUS_OK));
     EXPECT_CALL(usbMock, TransTdcStartSessionListener).WillRepeatedly(Return(SOFTBUS_OK));
 
     cpyRet = strcpy_s(subnet.ifName, sizeof("deviceName"), "deviceName");
@@ -495,9 +488,7 @@ HWTEST_F(LNNUsbNetworkImplMockTest, LNN_USB_NETWORK_IMPL_TEST_014, TestSize.Leve
         .WillRepeatedly(Return(SOFTBUS_OK));
     EXPECT_CALL(usbMock, LnnSetNetCapability).WillRepeatedly(Return(SOFTBUS_OK));
     EXPECT_CALL(usbMock, LnnClearNetCapability).WillRepeatedly(Return(SOFTBUS_OK));
-    EXPECT_CALL(usbMock, LnnSetLocalNumInfo)
-        .WillOnce(Return(SOFTBUS_INVALID_PARAM))
-        .WillRepeatedly(Return(SOFTBUS_OK));
+    EXPECT_CALL(usbMock, LnnSetLocalNumInfo).WillOnce(Return(SOFTBUS_INVALID_PARAM)).WillRepeatedly(Return(SOFTBUS_OK));
 
     ret = EnableIpSubnet(&subnet);
     EXPECT_EQ(ret, SOFTBUS_OK);
@@ -507,11 +498,11 @@ HWTEST_F(LNNUsbNetworkImplMockTest, LNN_USB_NETWORK_IMPL_TEST_014, TestSize.Leve
 }
 
 /*
-* @tc.name: LNN_USB_NETWORK_IMPL_TEST_015
-* @tc.desc: release ip and port to ledger
-* @tc.type: FUNC
-* @tc.require: NONE
-*/
+ * @tc.name: LNN_USB_NETWORK_IMPL_TEST_015
+ * @tc.desc: release ip and port to ledger
+ * @tc.type: FUNC
+ * @tc.require: NONE
+ */
 HWTEST_F(LNNUsbNetworkImplMockTest, LNN_USB_NETWORK_IMPL_TEST_015, TestSize.Level1)
 {
     NiceMock<LnnUsbNetworkImplInterfaceMock> usbMock;
@@ -548,11 +539,11 @@ HWTEST_F(LNNUsbNetworkImplMockTest, LNN_USB_NETWORK_IMPL_TEST_015, TestSize.Leve
 }
 
 /*
-* @tc.name: LNN_USB_NETWORK_IMPL_TEST_016
-* @tc.desc: IsValidUsbIfname Test
-* @tc.type: FUNC
-* @tc.require: NONE
-*/
+ * @tc.name: LNN_USB_NETWORK_IMPL_TEST_016
+ * @tc.desc: IsValidUsbIfname Test
+ * @tc.type: FUNC
+ * @tc.require: NONE
+ */
 HWTEST_F(LNNUsbNetworkImplMockTest, LNN_USB_NETWORK_IMPL_TEST_016, TestSize.Level1)
 {
     EXPECT_FALSE(IsValidUsbIfname(nullptr));
@@ -562,15 +553,15 @@ HWTEST_F(LNNUsbNetworkImplMockTest, LNN_USB_NETWORK_IMPL_TEST_016, TestSize.Leve
 }
 
 /*
-* @tc.name: LNN_USB_NETWORK_IMPL_TEST_017
-* @tc.desc: IpAddrChangeEventHandler Test
-* @tc.type: FUNC
-* @tc.require: NONE
-*/
+ * @tc.name: LNN_USB_NETWORK_IMPL_TEST_017
+ * @tc.desc: IpAddrChangeEventHandler Test
+ * @tc.type: FUNC
+ * @tc.require: NONE
+ */
 HWTEST_F(LNNUsbNetworkImplMockTest, LNN_USB_NETWORK_IMPL_TEST_017, TestSize.Level1)
 {
     NiceMock<LnnUsbNetworkImplInterfaceMock> usbMock;
-    LnnMonitorAddressChangedEvent event = {.basic.event = LNN_EVENT_WIFI_STATE_CHANGED, .ifName = {0}};
+    LnnMonitorAddressChangedEvent event = { .basic.event = LNN_EVENT_WIFI_STATE_CHANGED, .ifName = { 0 } };
     IpAddrChangeEventHandler(nullptr);
     IpAddrChangeEventHandler((const LnnEventBasicInfo *)&event);
     EXPECT_NE(event.basic.event, LNN_EVENT_IP_ADDR_CHANGED);
@@ -587,15 +578,16 @@ HWTEST_F(LNNUsbNetworkImplMockTest, LNN_USB_NETWORK_IMPL_TEST_017, TestSize.Leve
 }
 
 /*
-* @tc.name: LNN_USB_NETWORK_IMPL_TEST_018
-* @tc.desc: UsbNcmChangeHandler Test
-* @tc.type: FUNC
-* @tc.require: NONE
-*/
+ * @tc.name: LNN_USB_NETWORK_IMPL_TEST_018
+ * @tc.desc: UsbNcmChangeHandler Test
+ * @tc.type: FUNC
+ * @tc.require: NONE
+ */
 HWTEST_F(LNNUsbNetworkImplMockTest, LNN_USB_NETWORK_IMPL_TEST_018, TestSize.Level1)
 {
-    LnnMonitorNetlinkStateInfo event = {.basic.event = LNN_EVENT_DEVICE_INFO_CHANGED,
-        .status = SOFTBUS_NETMANAGER_IFNAME_REMOVED, .ifName = {0}};
+    LnnMonitorNetlinkStateInfo event = {
+        .basic.event = LNN_EVENT_DEVICE_INFO_CHANGED, .status = SOFTBUS_NETMANAGER_IFNAME_REMOVED, .ifName = { 0 }
+    };
     UsbNcmChangeHandler(nullptr);
     UsbNcmChangeHandler((const LnnEventBasicInfo *)&event);
     EXPECT_NE(event.basic.event, LNN_EVENT_NET_LINK_STATE_CHANGE);
@@ -622,11 +614,11 @@ HWTEST_F(LNNUsbNetworkImplMockTest, LNN_USB_NETWORK_IMPL_TEST_018, TestSize.Leve
 }
 
 /*
-* @tc.name: LNN_USB_NETWORK_IMPL_TEST_019
-* @tc.desc: RegistUsbProtocolManager Test
-* @tc.type: FUNC
-* @tc.require: NONE
-*/
+ * @tc.name: LNN_USB_NETWORK_IMPL_TEST_019
+ * @tc.desc: RegistUsbProtocolManager Test
+ * @tc.type: FUNC
+ * @tc.require: NONE
+ */
 HWTEST_F(LNNUsbNetworkImplMockTest, LNN_USB_NETWORK_IMPL_TEST_019, TestSize.Level1)
 {
     NiceMock<LnnUsbNetworkImplInterfaceMock> usbMock;

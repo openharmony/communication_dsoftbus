@@ -89,10 +89,11 @@ void DiscManagerTest::SetUpTestCase(void) { }
 
 void DiscManagerTest::TearDownTestCase(void) { }
 
-static int32_t TestDeviceFound(
-    const char *packageName, const DeviceInfo *device, const InnerDeviceInfoAddtions *additions)
+static int32_t TestDeviceFound(const char *packageName, const DeviceInfo *device,
+    const InnerDeviceInfoAddtions *additions, int32_t subscribeId)
 {
     (void)additions;
+    (void)subscribeId;
     g_devieceFoundCount++;
     DISC_LOGI(DISC_TEST, "[device found]success!\n");
     return 0;

@@ -415,7 +415,7 @@ static void TryTriggerSparkGroupBuild(const DeviceVerifyPassMsgPara *msgPara)
 {
     if (IsSameAccountId(msgPara->nodeInfo->accountId) &&
         LnnHasDiscoveryType(msgPara->nodeInfo, DISCOVERY_TYPE_BLE)) {
-        TriggerSparkGroupBuildPacked(SPARK_GROUP_DELAY_TIME_MS);
+        TriggerSparkGroupJoinAgainPacked(msgPara->nodeInfo->deviceInfo.deviceUdid, SPARK_GROUP_DELAY_TIME_MS);
     }
 }
 

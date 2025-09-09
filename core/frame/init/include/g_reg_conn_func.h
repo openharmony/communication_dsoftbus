@@ -26,7 +26,8 @@
 extern "C" {
 #endif
 
-typedef ConnBleConnection *(*ConnBleGetConnectionByHandleFunc)(int32_t underlayerHandle, ConnSideType side, BleProtocolType protocol);
+typedef ConnBleConnection *(*ConnBleGetConnectionByHandleFunc)(
+    int32_t underlayerHandle, ConnSideType side, BleProtocolType protocol);
 typedef bool (*CheckActiveConnectionFunc)(const ConnectOption *info, bool needOccupy);
 typedef uint32_t (*ConnGetNewRequestIdFunc)(ConnModule moduleId);
 typedef int32_t (*DelTriggerFunc)(ListenerModule module, int32_t fd, TriggerType trigger);

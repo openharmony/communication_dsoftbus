@@ -14,23 +14,24 @@
  */
 
 #include "authmanagerdevice_fuzzer.h"
+
 #include <cstddef>
 #include <cstring>
-#include <securec.h>
 #include <fuzzer/FuzzedDataProvider.h>
-#include "auth_manager.h"
+#include <securec.h>
+
 #include "auth_manager.c"
+#include "auth_manager.h"
 #include "fuzz_environment.h"
 #include "softbus_access_token_test.h"
 
 using namespace std;
 
-#define AUTH_TYPE_MIN AUTH_LINK_TYPE_WIFI
-#define AUTH_TYPE_MAX AUTH_LINK_TYPE_MAX
+#define AUTH_LINK_TYPE_MIN AUTH_LINK_TYPE_WIFI
+#define AUTH_LINK_TYPE_MAX AUTH_LINK_TYPE_MAX
 
 namespace {
-static void AuthOnDataReceivedTest(AuthHandle authHandle, const AuthDataHead *head, const uint8_t *data,
-    uint32_t len)
+static void AuthOnDataReceivedTest(AuthHandle authHandle, const AuthDataHead *head, const uint8_t *data, uint32_t len)
 {
     (void)authHandle;
     (void)head;
@@ -68,10 +69,11 @@ public:
     {
         return isInited_;
     }
+
 private:
     volatile bool isInited_ = false;
 };
-}
+} // namespace
 
 namespace OHOS {
 static void ProcessFuzzConnInfo(FuzzedDataProvider &provider, AuthSessionInfo *info)
@@ -128,7 +130,8 @@ bool AuthDeviceManagerFuzzTest(FuzzedDataProvider &provider)
     if (strcpy_s(info.uuid, UUID_BUF_LEN, uuid.c_str()) != EOK) {
         return false;
     }
-    info.connInfo.type = (AuthLinkType)provider.ConsumeIntegralInRange<uint32_t>(AUTH_TYPE_MIN, AUTH_TYPE_MAX);
+    info.connInfo.type = (AuthLinkType)provider.ConsumeIntegralInRange<uint32_t>(AUTH_LINK_TYPE_MIN,
+        AUTH_LINK_TYPE_MAX);
     info.connId = (uint64_t)info.connInfo.type << INT32_BIT_NUM;
     info.isConnectServer = provider.ConsumeBool();
     ProcessFuzzConnInfo(provider, &info);
@@ -161,10 +164,10 @@ bool AuthDeviceManagerFuzzTest(FuzzedDataProvider &provider)
     OnDisconnected(info.connId, &connInfo);
     AuthFlushDevice(uuid.c_str());
     DelAuthManagerByConnectionId(info.connId);
-    DelAuthManager(auth, AUTH_LINK_TYPE_MAX);
+    DelAuthManager(auth, info.connInfo.type);
     return true;
 }
-}
+} // namespace OHOS
 
 /* Fuzzer entry point */
 extern "C" int32_t LLVMFuzzerTestOneInput(const uint8_t *data, size_t size)
@@ -177,6 +180,6 @@ extern "C" int32_t LLVMFuzzerTestOneInput(const uint8_t *data, size_t size)
     if (!OHOS::AuthDeviceManagerFuzzTest(provider)) {
         return -1;
     }
-    
+
     return 0;
 }

@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2022-2023 Huawei Device Co., Ltd.
+ * Copyright (c) 2022-2025 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -322,6 +322,12 @@ HWTEST_F(TransSdkFileTest, TransFileListenerTest005, TestSize.Level0)
 
     ret = TransSetFileSendListener(sessionName, &g_fileSendListener);
     EXPECT_EQ(ret, SOFTBUS_OK);
+
+    ret = TransGetFileListener(nullptr, fileListener);
+    EXPECT_EQ(ret, SOFTBUS_INVALID_PARAM);
+
+    ret = TransGetFileListener(inValidName, nullptr);
+    EXPECT_EQ(ret, SOFTBUS_INVALID_PARAM);
 
     ret = TransGetFileListener(inValidName, fileListener);
     EXPECT_EQ(ret, SOFTBUS_TRANS_NODE_NOT_FOUND);
@@ -1142,6 +1148,8 @@ HWTEST_F(TransSdkFileTest, FillFileStatusListTest005, TestSize.Level1)
     FileRecvErrorEvent(channel, listener, &msgData, msgType, sessionId);
     listener->socketSendCallback = nullptr;
     FileRecvErrorEvent(channel, listener, &msgData, msgType, sessionId);
+    msgData.fileList.fileNum = -1;
+    NotifyRecvResult(sessionId, msgType, &msgData, listener);
     SoftBusFree(listener);
     SoftBusFree(fileInfo);
 }

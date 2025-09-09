@@ -14,8 +14,6 @@
  */
 
 #include "softbus_trans_init.h"
-#include "softbus_init_common.h"
-#include "softbus_error_code.h"
 #include "comm_log.h"
 
 int32_t TransOpenFuncInit(void *soHandle)
@@ -28,7 +26,7 @@ int32_t TransOpenFuncInit(void *soHandle)
 
     int ret = SOFTBUS_OK;
 
-    ret = SoftBusDlsym(soHandle, "TransRegisterOpenFunc", (void**)&transRegisterOpenfunc);
+    ret = SoftBusDlsym(soHandle, "TransRegisterOpenFunc", (void **)&transRegisterOpenfunc);
     if (ret != SOFTBUS_OK) {
         COMM_LOGE(COMM_SVC, "dlsym TransRegisterOpenFunc failed, ret=%d", ret);
         return SOFTBUS_NETWORK_DLSYM_FAILED;

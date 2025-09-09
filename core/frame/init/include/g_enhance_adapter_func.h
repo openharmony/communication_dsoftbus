@@ -16,20 +16,19 @@
 #ifndef G_ENHANCE_ADAPTER_FUNC_H
 #define G_ENHANCE_ADAPTER_FUNC_H
 
-#ifdef __cplusplus
-extern "C" {
-#endif
-
 #include "stdint.h"
 #include "softbus_adapter_range.h"
 #include "softbus_config_type.h"
 #include "softbus_adapter_sle_common_struct.h"
 
+#ifdef __cplusplus
+extern "C" {
+#endif
+
 typedef int32_t (*SoftBusRegRangeCbFunc)(SoftBusRangeModule module, const SoftBusRangeCallback *callback);
 typedef void (*SoftBusUnregRangeCbFunc)(SoftBusRangeModule module);
 typedef int (*SoftBusBleRangeFunc)(SoftBusRangeParam *param, int32_t *range);
 typedef int (*SoftBusGetBlePowerFunc)(int8_t *power);
-typedef void (*SoftbusConfigAdapterInitFunc)(const ConfigSetProc *sets);
 typedef int32_t (*SoftBusAddSleStateListenerFunc)(const SoftBusSleStateListener *listener, int32_t *listenerId);
 typedef bool (*IsSleEnabledFunc)(void);
 typedef void (*SoftBusRemoveSleStateListenerFunc)(int listenerId);
@@ -37,6 +36,7 @@ typedef int32_t (*GetSleRangeCapacityFunc)(void);
 typedef int32_t (*GetLocalSleAddrFunc)(char *sleAddr, uint32_t sleAddrLen);
 typedef void (*SoftbusBleAdapterInitFunc)(void);
 typedef void (*SoftbusBleAdapterDeInitFunc)(void);
+typedef void (*RegisterRadarCbForOpenSrcFunc)(void *callback);
 typedef void (*SoftbusSleAdapterInit)(void);
 typedef void (*SoftbusSleAdapterDeInit)(void);
 
@@ -45,7 +45,6 @@ typedef struct TagAdapterEnhanceFuncList {
     SoftBusUnregRangeCbFunc softBusUnregRangeCb;
     SoftBusBleRangeFunc softBusBleRange;
     SoftBusGetBlePowerFunc softBusGetBlePower;
-    SoftbusConfigAdapterInitFunc softbusConfigAdapterInit;
     SoftBusAddSleStateListenerFunc softBusAddSleStateListener;
     IsSleEnabledFunc isSleEnabled;
     SoftBusRemoveSleStateListenerFunc softBusRemoveSleStateListener;
@@ -53,6 +52,7 @@ typedef struct TagAdapterEnhanceFuncList {
     GetLocalSleAddrFunc getLocalSleAddr;
     SoftbusBleAdapterInitFunc softbusBleAdapterInit;
     SoftbusBleAdapterDeInitFunc softbusBleAdapterDeInit;
+    RegisterRadarCbForOpenSrcFunc registerRadarCbForOpenSrc;
     SoftbusSleAdapterInit softbusSleAdapterInit;
     SoftbusSleAdapterDeInit softbusSleAdapterDeInit;
 } AdapterEnhanceFuncList;

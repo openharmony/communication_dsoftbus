@@ -22,7 +22,7 @@
 
 namespace OHOS {
 
-void SetFileSendListenerTest(const uint8_t* data, size_t size)
+void SetFileSendListenerTest(const uint8_t *data, size_t size)
 {
     if ((data == nullptr) || (size == 0)) {
         return;
@@ -39,7 +39,7 @@ void SetFileSendListenerTest(const uint8_t* data, size_t size)
 } // namespace OHOS
 
 /* Fuzzer entry point */
-extern "C" int32_t LLVMFuzzerTestOneInput(const uint8_t* data, size_t size)
+extern "C" int32_t LLVMFuzzerTestOneInput(const uint8_t *data, size_t size)
 {
     OHOS::SetFileSendListenerTest(data, size);
 

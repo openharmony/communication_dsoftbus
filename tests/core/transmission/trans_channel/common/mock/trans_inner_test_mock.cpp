@@ -139,9 +139,9 @@ int32_t TransProxyParseTlv(uint32_t len, const char *data, DataHeadTlvPacketHead
 }
 
 int32_t TransProxyNoSubPacketTlvProc(
-    int32_t channelId, const char *data, uint32_t len, DataHeadTlvPacketHead *pktHead, uint32_t newPktHeadSize)
+    int32_t channelId, uint32_t len, DataHeadTlvPacketHead *pktHead, uint32_t newPktHeadSize)
 {
-    return GetTransInnerInterface()->TransProxyNoSubPacketTlvProc(channelId, data, len, pktHead, newPktHeadSize);
+    return GetTransInnerInterface()->TransProxyNoSubPacketTlvProc(channelId, len, pktHead, newPktHeadSize);
 }
 
 int32_t TransProxyProcessSessionData(ProxyDataInfo *dataInfo, const PacketHead *dataHead, const char *data)

@@ -267,7 +267,7 @@ int32_t PostDeviceInfoMessage(int64_t authSeq, const AuthSessionInfo *info)
     DestroySessionKeyList(&sessionKeyList);
     if ((info->connInfo.type == AUTH_LINK_TYPE_WIFI || info->connInfo.type == AUTH_LINK_TYPE_USB) && info->isServer) {
         compressFlag = FLAG_RELAY_DEVICE_INFO;
-        authSeq = 0;
+        authSeq = info->headSeq;
     }
     AuthDataHead head = {
         .dataType = DATA_TYPE_DEVICE_INFO,
@@ -339,11 +339,12 @@ int32_t ProcessDeviceInfoMessage(int64_t authSeq, AuthSessionInfo *info, const u
         devInfo.msg = (const char *)msg;
         devInfo.len = msgSize;
     }
-    if (UnpackDeviceInfoMessage(&devInfo, &info->nodeInfo, false, info) != SOFTBUS_OK) {
+    int32_t ret = UnpackDeviceInfoMessage(&devInfo, &info->nodeInfo, false, info);
+    if (ret != SOFTBUS_OK) {
         AUTH_LOGE(AUTH_FSM, "unpack device info fail");
         SoftBusFree(msg);
         SoftBusFree(decompressData);
-        return SOFTBUS_AUTH_UNPACK_DEVINFO_FAIL;
+        return ret;
     }
     SoftBusFree(msg);
     SoftBusFree(decompressData);

@@ -57,6 +57,8 @@
 #define SINGLE_NIC_CNT 1
 #define TAG "nStackXDFinder"
 #define DFINDER_THREAD_NAME TAG
+#define DFINDER_POST_EVENT_MAX_BLOCK_SECONDS 3
+#define NSEC_TICKS_PER_SEC (1000000000)
 
 enum {
     NSTACKX_INIT_STATE_START = 0,
@@ -391,6 +393,7 @@ int32_t NSTACKX_ThreadInit(void)
     DFINDER_LOGI(TAG, "nstack begin init thread");
     if (g_nstackThreadInitState != NSTACKX_INIT_STATE_START) {
         (void)PthreadMutexUnlock(&g_threadInitLock);
+        DFINDER_LOGI(TAG, "nstack init thread done");
         return NSTACKX_EOK;
     }
     g_nstackThreadInitState = NSTACKX_INIT_STATE_ONGOING;
@@ -421,6 +424,7 @@ int32_t NSTACKX_ThreadInit(void)
     g_validTidFlag = NSTACKX_TRUE;
     g_nstackThreadInitState = NSTACKX_INIT_STATE_DONE;
     (void)PthreadMutexUnlock(&g_threadInitLock);
+    DFINDER_LOGI(TAG, "nstack init thread success");
     return NSTACKX_EOK;
 }
 
@@ -448,6 +452,7 @@ void NSTACKX_ThreadDeinit(void)
     }
     g_nstackThreadInitState = NSTACKX_INIT_STATE_START;
     (void)PthreadMutexUnlock(&g_threadInitLock);
+    DFINDER_LOGI(TAG, "nstack deinit thread success");
 }
 
 #if !defined(DFINDER_USE_MINI_NSTACKX) && !defined(DFINDER_ENABLE_COAP_LOG)
@@ -1048,14 +1053,27 @@ int32_t NSTACKX_RegisterDeviceName(const char *devName)
         DFINDER_LOGE(TAG, "register local device name is invalid");
         return NSTACKX_EINVAL;
     }
+    size_t len = strnlen(devName, NSTACKX_MAX_DEVICE_NAME_LEN);
+    if (len >= NSTACKX_MAX_DEVICE_NAME_LEN) {
+        DFINDER_LOGE(TAG, "devName len %zu is error", len);
+        return NSTACKX_EINVAL;
+    }
+    if (g_nstackInitState != NSTACKX_INIT_STATE_DONE) {
+        DFINDER_LOGE(TAG, "NSTACKX_CTRL is not initiated yet");
+        return NSTACKX_EFAILED;
+    }
     char *dupDevName = (char *)malloc(sizeof(char) * NSTACKX_MAX_DEVICE_NAME_LEN);
     if (dupDevName == NULL) {
         return NSTACKX_ENOMEM;
     }
-    if (strncpy_s(dupDevName, NSTACKX_MAX_DEVICE_NAME_LEN, devName, strlen(devName)) != EOK) {
+    if (strncpy_s(dupDevName, NSTACKX_MAX_DEVICE_NAME_LEN, devName, len) != EOK) {
         DFINDER_LOGE(TAG, "strncpy dupDevName failed");
         free(dupDevName);
         return NSTACKX_EFAILED;
+    }
+    if (g_nstackThreadInitState != NSTACKX_INIT_STATE_DONE) {
+        ConfigureLocalDeviceNameInner((void *)dupDevName);
+        return NSTACKX_EOK;
     }
     if (PostEvent(&g_eventNodeChain, g_epollfd, ConfigureLocalDeviceNameInner, dupDevName) != NSTACKX_EOK) {
         DFINDER_LOGE(TAG, "Failed to configure local device name!");
@@ -1074,22 +1092,280 @@ int32_t NSTACKX_RegisterDeviceAn(const NSTACKX_LocalDeviceInfo *localDeviceInfo,
     return RegisterDeviceWithDeviceHash(localDeviceInfo, NSTACKX_TRUE, deviceHash);
 }
 
+struct NSTACKX_Sem {
+    sem_t wait;
+};
+
+typedef void (*FreeArg)(void *arg);
+
+struct PostEvtBlockArgs {
+    void *arg;
+    FreeArg cb;
+    EventHandle handle;
+    struct NSTACKX_Sem *sem;
+};
+
+static void NSTACKX_PostEventBlockHander(void *argument)
+{
+    if (argument == NULL) {
+        return;
+    }
+
+    struct PostEvtBlockArgs *arg = (struct PostEvtBlockArgs *)argument;
+    if (arg->arg != NULL && arg->handle != NULL) {
+        arg->handle(arg->arg);
+    }
+    if (arg->sem != NULL) {
+        SemPost(&(arg->sem->wait));
+        DFINDER_LOGI(TAG, "post event is done");
+    }
+    if (arg->cb != NULL) {
+        arg->cb(arg->arg);
+    }
+    arg->arg = NULL;
+    free(arg);
+}
+
+static int32_t SemTimedWait(sem_t *sem, struct timespec expire)
+{
+    struct timespec timeout;
+
+    if (clock_gettime(CLOCK_REALTIME, &timeout) != NSTACKX_EOK) {
+        DFINDER_LOGE(TAG, "clock_gettime fail");
+        return NSTACKX_EFAILED;
+    }
+
+    timeout.tv_sec += expire.tv_sec;
+    timeout.tv_nsec += expire.tv_nsec;
+    if (timeout.tv_nsec >= NSEC_TICKS_PER_SEC) {
+        timeout.tv_sec += 1;
+        timeout.tv_nsec -= NSEC_TICKS_PER_SEC;
+    }
+    int ret = sem_timedwait(sem, &timeout);
+    if (ret != 0) {
+        return NSTACKX_EFAILED;
+    }
+
+    return NSTACKX_EOK;
+}
+
+static int32_t NSTACKX_BlockEvtWaitFinish(struct PostEvtBlockArgs *arg, struct NSTACKX_Sem *sem)
+{
+    int32_t ret = NSTACKX_EFAILED;
+    struct timespec expire = {
+        .tv_sec = DFINDER_POST_EVENT_MAX_BLOCK_SECONDS,
+        .tv_nsec = 0,
+    };
+
+    ret = SemTimedWait(&sem->wait, expire);
+    if (ret != NSTACKX_EOK) {
+        DFINDER_LOGE(TAG, "sem wait failed errno %d", GetErrno());
+    } else {
+        DFINDER_LOGI(TAG, "sem wait success");
+    }
+
+    return ret;
+}
+
+static struct NSTACKX_Sem *NSTACKX_CreateSem(void)
+{
+    struct NSTACKX_Sem *sem = (struct NSTACKX_Sem *)calloc(1U, sizeof(struct NSTACKX_Sem));
+    if (sem == NULL) {
+        DFINDER_LOGE(TAG, "calloc sem failed");
+        return NULL;
+    }
+    if (SemInit(&sem->wait, 0, 0)) {
+        DFINDER_LOGE(TAG, "Failed to init sem!");
+        free(sem);
+        return NULL;
+    }
+    return sem;
+}
+
+static void NSTACKX_FreeSem(void *arg)
+{
+    if (arg == NULL) {
+        return;
+    }
+
+    struct NSTACKX_Sem *sem = (struct NSTACKX_Sem *)arg;
+    SemDestroy(&sem->wait);
+    free(sem);
+    DFINDER_LOGI(TAG, "free sem end");
+}
+
+static int32_t NSTACKX_PostEventBlock(EventHandle handle, void *arg, FreeArg cb)
+{
+    struct PostEvtBlockArgs *blockEvtArg = (struct PostEvtBlockArgs *)calloc(1U, sizeof(struct PostEvtBlockArgs));
+    if (blockEvtArg == NULL) {
+        if (cb != NULL) {
+            cb(arg);
+        }
+        DFINDER_LOGE(TAG, "calloc failed");
+        return NSTACKX_EFAILED;
+    }
+
+    struct NSTACKX_Sem *sem = NSTACKX_CreateSem();
+    if (sem == NULL) {
+        if (cb != NULL) {
+            cb(arg);
+        }
+        free(blockEvtArg);
+        DFINDER_LOGE(TAG, "calloc sem failed");
+        return NSTACKX_EFAILED;
+    }
+
+    blockEvtArg->arg = arg;
+    blockEvtArg->cb = cb;
+    blockEvtArg->sem = sem;
+    blockEvtArg->handle = handle;
+    if (PostEvent(&g_eventNodeChain, g_epollfd,
+        NSTACKX_PostEventBlockHander, (void *)blockEvtArg) != NSTACKX_EOK) {
+        if (cb != NULL) {
+            cb(arg);
+        }
+        NSTACKX_FreeSem((void *)sem);
+        free(blockEvtArg);
+        DFINDER_LOGE(TAG, "PostEvent failed");
+        return NSTACKX_EFAILED;
+    }
+
+    if (NSTACKX_BlockEvtWaitFinish(blockEvtArg, sem) != NSTACKX_EOK) {
+        if (PostEvent(&g_eventNodeChain, g_epollfd, NSTACKX_FreeSem, (void*)sem) != NSTACKX_EOK) {
+            DFINDER_LOGE(TAG, "PostEvent failed");
+            NSTACKX_FreeSem((void *)sem);
+            return NSTACKX_EFAILED;
+        }
+        DFINDER_LOGE(TAG, "block wait failed");
+        return NSTACKX_EFAILED;
+    }
+    NSTACKX_FreeSem((void *)sem);
+    DFINDER_LOGI(TAG, "post event success");
+    return NSTACKX_EOK;
+}
+
 struct RegDeviceInfo {
-    const NSTACKX_LocalDeviceInfoV2 *info;
+    NSTACKX_LocalDeviceInfoV2 *info;
     int registerType;
     int32_t err;
-    sem_t wait;
 };
 
 static void RegisterDeviceV2(void *arg)
 {
     struct RegDeviceInfo *regInfo = (struct RegDeviceInfo *)arg;
     regInfo->err = RegisterLocalDeviceV2(regInfo->info, regInfo->registerType);
-    SemPost(&regInfo->wait);
-    DFINDER_LOGI(TAG, "RegisterDeviceV2 post event is done");
+    if (regInfo->err != NSTACKX_EOK) {
+        DFINDER_LOGE(TAG, "register device failed");
+    }
 }
 
 #define NSTACKX_MAX_LOCAL_IFACE_NUM 10
+
+static char *DeviceStrCreate(const char *str, uint32_t maxLen)
+{
+    char *out = (char *)calloc(1u, maxLen);
+    if (out == NULL) {
+        return NULL;
+    }
+
+    if (strcpy_s(out, maxLen, str) != EOK) {
+        free(out);
+        return NULL;
+    }
+    return out;
+}
+
+static void RegisterInfoFree(NSTACKX_LocalDeviceInfoV2 *info)
+{
+    if (info == NULL) {
+        return;
+    }
+    free((void *)info->name);
+    free((void *)info->deviceId);
+    free((void *)info->localIfInfo);
+    free(info);
+}
+
+static void RegisterDeviceFree(void *arg)
+{
+    if (arg == NULL) {
+        return;
+    }
+    struct RegDeviceInfo *regInfo = (struct RegDeviceInfo *)arg;
+    RegisterInfoFree(regInfo->info);
+    regInfo->info = NULL;
+    free(regInfo);
+}
+
+static NSTACKX_LocalDeviceInfoV2 *RegisterInfoCreate(const NSTACKX_LocalDeviceInfoV2 *localDeviceInfo)
+{
+    NSTACKX_LocalDeviceInfoV2 *infoV2 = (NSTACKX_LocalDeviceInfoV2 *)calloc(1u, sizeof(NSTACKX_LocalDeviceInfoV2));
+    if (infoV2 == NULL) {
+        DFINDER_LOGE(TAG, "calloc infov2 failed");
+        return NULL;
+    }
+
+    size_t len = strnlen(localDeviceInfo->deviceId, NSTACKX_MAX_DEVICE_ID_LEN);
+    if (len >= NSTACKX_MAX_DEVICE_ID_LEN) {
+        DFINDER_LOGE(TAG, "deviceId is error");
+        free(infoV2);
+        return NULL;
+    }
+
+    len = strnlen(localDeviceInfo->name, NSTACKX_MAX_DEVICE_NAME_LEN);
+    if (len >= NSTACKX_MAX_DEVICE_NAME_LEN) {
+        DFINDER_LOGE(TAG, "name is error");
+        free(infoV2);
+        return NULL;
+    }
+    infoV2->deviceId = DeviceStrCreate(localDeviceInfo->deviceId, NSTACKX_MAX_DEVICE_ID_LEN);
+    if (infoV2->deviceId == NULL) {
+        DFINDER_LOGE(TAG, "DeviceStrCreate deviceId is error");
+        RegisterInfoFree(infoV2);
+        return NULL;
+    }
+    infoV2->name = DeviceStrCreate(localDeviceInfo->name, NSTACKX_MAX_DEVICE_NAME_LEN);
+    if (infoV2->name == NULL) {
+        DFINDER_LOGE(TAG, "DeviceStrCreate name is error");
+        RegisterInfoFree(infoV2);
+        return NULL;
+    }
+
+    NSTACKX_InterfaceInfo *info = (NSTACKX_InterfaceInfo *)calloc(localDeviceInfo->ifNums,
+        sizeof(NSTACKX_InterfaceInfo));
+    if (info == NULL) {
+        DFINDER_LOGE(TAG, "calloc info is error");
+        RegisterInfoFree(infoV2);
+        return NULL;
+    }
+    (void)memcpy_s(info, localDeviceInfo->ifNums * sizeof(NSTACKX_InterfaceInfo),
+                   localDeviceInfo->localIfInfo, localDeviceInfo->ifNums * sizeof(NSTACKX_InterfaceInfo));
+    infoV2->localIfInfo = info;
+    infoV2->businessType = localDeviceInfo->businessType;
+    infoV2->deviceHash = localDeviceInfo->deviceHash;
+    infoV2->deviceType = localDeviceInfo->deviceType;
+    infoV2->ifNums = localDeviceInfo->ifNums;
+    infoV2->hasDeviceHash = localDeviceInfo->hasDeviceHash;
+    return infoV2;
+}
+
+static struct RegDeviceInfo *RegisterDeviceCreate(const NSTACKX_LocalDeviceInfoV2 *localDeviceInfo, int registerType)
+{
+    struct RegDeviceInfo *regInfo = (struct RegDeviceInfo *)calloc(1u, sizeof(struct RegDeviceInfo));
+    if (regInfo == NULL) {
+        DFINDER_LOGE(TAG, "calloc register info failed");
+        return NULL;
+    }
+
+    regInfo->info = RegisterInfoCreate(localDeviceInfo);
+    if (regInfo->info == NULL) {
+        DFINDER_LOGE(TAG, "calloc infov2 failed");
+        free(regInfo);
+        return NULL;
+    }
+    regInfo->registerType = registerType;
+    return regInfo;
+}
 
 static int32_t RegisterDeviceWithType(const NSTACKX_LocalDeviceInfoV2 *localDeviceInfo, int registerType)
 {
@@ -1105,25 +1381,17 @@ static int32_t RegisterDeviceWithType(const NSTACKX_LocalDeviceInfoV2 *localDevi
         return (int32_t)RegisterLocalDeviceV2(localDeviceInfo, registerType);
     }
 
-    struct RegDeviceInfo regInfo;
-    if (SemInit(&regInfo.wait, 0, 0)) {
-        DFINDER_LOGE(TAG, "sem init fail");
-        return NSTACKX_EBUSY;
+    struct RegDeviceInfo *regInfo = RegisterDeviceCreate(localDeviceInfo, registerType);
+    if (regInfo == NULL) {
+        DFINDER_LOGE(TAG, "Failed to create device info!");
+        return NSTACKX_EFAILED;
     }
-
-    regInfo.info = localDeviceInfo;
-    regInfo.registerType = registerType;
-    regInfo.err = NSTACKX_EOK;
-
-    if (PostEvent(&g_eventNodeChain, g_epollfd, RegisterDeviceV2, &regInfo) != NSTACKX_EOK) {
+    // The abnormal branch regInfo is released internally.
+    if (NSTACKX_PostEventBlock(RegisterDeviceV2, (void*)regInfo, RegisterDeviceFree) != NSTACKX_EOK) {
         DFINDER_LOGE(TAG, "Failed to configure local device info!");
-        SemDestroy(&regInfo.wait);
         return NSTACKX_EBUSY;
     }
-
-    SemWait(&regInfo.wait);
-    SemDestroy(&regInfo.wait);
-    return regInfo.err;
+    return NSTACKX_EOK;
 }
 
 int32_t NSTACKX_RegisterDeviceV2(const NSTACKX_LocalDeviceInfoV2 *localDeviceInfo)
@@ -1224,23 +1492,14 @@ int32_t NSTACKX_SetFilterCapability(uint32_t capabilityBitmapNum, uint32_t capab
     DFINDER_LOGI(TAG, "Set Filter Capability");
     return NSTACKX_CapabilityHandle(capabilityBitmapNum, capabilityBitmap, SetFilterCapabilityInner);
 }
-typedef struct {
-    uint32_t maxDeviceNum;
-    sem_t wait;
-} SetMaxDeviceNumMsg;
 
 static void SetMaxDeviceNumInner(void *argument)
 {
-    SetMaxDeviceNumMsg *msg = (SetMaxDeviceNumMsg *)argument;
-    SetMaxDeviceNum(msg->maxDeviceNum);
-    SemPost(&msg->wait);
+    SetMaxDeviceNum((uint32_t)(uintptr_t)(argument));
 }
 
 int32_t NSTACKX_SetMaxDeviceNum(uint32_t maxDeviceNum)
 {
-    SetMaxDeviceNumMsg msg = {
-        .maxDeviceNum = maxDeviceNum,
-    };
     if (g_nstackInitState != NSTACKX_INIT_STATE_DONE) {
         DFINDER_LOGE(TAG, "NSTACKX_Ctrl is not initiated yet");
         return NSTACKX_EFAILED;
@@ -1249,17 +1508,10 @@ int32_t NSTACKX_SetMaxDeviceNum(uint32_t maxDeviceNum)
         SetMaxDeviceNum(maxDeviceNum);
         return NSTACKX_EOK;
     }
-    if (SemInit(&msg.wait, 0, 0)) {
-        DFINDER_LOGE(TAG, "Failed to init sem!");
-        return NSTACKX_EFAILED;
-    }
-    if (PostEvent(&g_eventNodeChain, g_epollfd, SetMaxDeviceNumInner, &msg) != NSTACKX_EOK) {
+    if (NSTACKX_PostEventBlock(SetMaxDeviceNumInner, (void *)(uintptr_t)maxDeviceNum, NULL) != NSTACKX_EOK) {
         DFINDER_LOGE(TAG, "Failed to set max device num!");
-        SemDestroy(&msg.wait);
         return NSTACKX_EFAILED;
     }
-    SemWait(&msg.wait);
-    SemDestroy(&msg.wait);
     return NSTACKX_EOK;
 }
 
@@ -1334,30 +1586,48 @@ static bool RegisterServiceDataParamCheck(const struct NSTACKX_ServiceData *para
 }
 
 struct ServiceDataInfo {
-    const struct NSTACKX_ServiceData *param;
+    struct NSTACKX_ServiceData *param;
     uint32_t cnt;
-    sem_t wait;
+    int32_t err;
 };
-
-static int32_t ServiceDataInfoInit(struct ServiceDataInfo *info, const struct NSTACKX_ServiceData *param, uint32_t cnt)
-{
-    if (SemInit(&info->wait, 0, 0)) {
-        DFINDER_LOGE(TAG, "Failed to init sem!");
-        return NSTACKX_EFAILED;
-    }
-    info->param = param;
-    info->cnt = cnt;
-    return NSTACKX_EOK;
-}
 
 static void RegisterServiceDataV2(void *arg)
 {
     struct ServiceDataInfo *info = (struct ServiceDataInfo *)arg;
-    if (SetLocalDeviceServiceDataV2(info->param, info->cnt) != NSTACKX_EOK) {
-        DFINDER_LOGE(TAG, "register v2 info failed");
+    info->err = SetLocalDeviceServiceDataV2(info->param, info->cnt);
+}
+
+static struct ServiceDataInfo *ServiceDataV2Create(const struct NSTACKX_ServiceData *param,
+    uint32_t cnt)
+{
+    struct ServiceDataInfo *info = (struct ServiceDataInfo *)calloc(1u, sizeof(struct ServiceDataInfo));
+    if (info == NULL) {
+        DFINDER_LOGE(TAG, "create info failed");
+        return NULL;
     }
-    SemPost(&info->wait);
-    DFINDER_LOGI(TAG, "RegisterServiceDataV2 post event is done");
+
+    struct NSTACKX_ServiceData *data = (struct NSTACKX_ServiceData *)calloc(cnt, sizeof(struct NSTACKX_ServiceData));
+    if (data == NULL) {
+        free(info);
+        DFINDER_LOGE(TAG, "create data failed");
+        return NULL;
+    }
+    (void)memcpy_s(data, cnt * sizeof(struct NSTACKX_ServiceData),
+                   param, cnt * sizeof(struct NSTACKX_ServiceData));
+    info->param = data;
+    info->cnt = cnt;
+    return info;
+}
+
+static void ServiceDataV2Free(void *arg)
+{
+    if (arg == NULL) {
+        return;
+    }
+    struct ServiceDataInfo *info = (struct ServiceDataInfo *)arg;
+    free(info->param);
+    info->param = NULL;
+    free(info);
 }
 
 int32_t NSTACKX_RegisterServiceDataV2(const struct NSTACKX_ServiceData *param, uint32_t cnt)
@@ -1376,21 +1646,19 @@ int32_t NSTACKX_RegisterServiceDataV2(const struct NSTACKX_ServiceData *param, u
         return SetLocalDeviceServiceDataV2(param, cnt);
     }
 
-    struct ServiceDataInfo info;
-    if (ServiceDataInfoInit(&info, param, cnt) != NSTACKX_EOK) {
+    struct ServiceDataInfo *info = ServiceDataV2Create(param, cnt);
+    if (info == NULL) {
+        DFINDER_LOGE(TAG, "create info failed");
         return NSTACKX_EFAILED;
     }
-    if (PostEvent(&g_eventNodeChain, g_epollfd, RegisterServiceDataV2, (void *)&info) != NSTACKX_EOK) {
+    // The abnormal branch info is released internally.
+    if (NSTACKX_PostEventBlock(RegisterServiceDataV2, (void *)info, ServiceDataV2Free) != NSTACKX_EOK) {
         DFINDER_LOGE(TAG, "Failed to register serviceDatav2!");
-        SemDestroy(&info.wait);
         return NSTACKX_EFAILED;
     }
 
-    SemWait(&info.wait);
-    SemDestroy(&info.wait);
     return NSTACKX_EOK;
 }
-
 
 int32_t NSTACKX_RegisterServiceData(const char *serviceData)
 {
@@ -1403,13 +1671,14 @@ int32_t NSTACKX_RegisterServiceData(const char *serviceData)
         DFINDER_LOGE(TAG, "serviceData is null");
         return NSTACKX_EINVAL;
     }
+    size_t len = strnlen(serviceData, NSTACKX_MAX_SERVICE_DATA_LEN);
+    if (len >= NSTACKX_MAX_SERVICE_DATA_LEN) {
+        DFINDER_LOGE(TAG, "serviceData len %zu is err", len);
+        return NSTACKX_EINVAL;
+    }
     if (g_nstackInitState != NSTACKX_INIT_STATE_DONE) {
         DFINDER_LOGE(TAG, "NSTACKX_Ctrl is not initiated yet");
         return NSTACKX_EFAILED;
-    }
-    if (strlen(serviceData) >= NSTACKX_MAX_SERVICE_DATA_LEN) {
-        DFINDER_LOGE(TAG, "serviceData (%u) exceed max number", strlen(serviceData));
-        return NSTACKX_EINVAL;
     }
     if (g_nstackThreadInitState != NSTACKX_INIT_STATE_DONE) {
         return SetLocalDeviceServiceData(serviceData);
@@ -1419,7 +1688,7 @@ int32_t NSTACKX_RegisterServiceData(const char *serviceData)
     if (serviceDataTmp == NULL) {
         return NSTACKX_ENOMEM;
     }
-    if (strncpy_s(serviceDataTmp, NSTACKX_MAX_SERVICE_DATA_LEN, serviceData, strlen(serviceData)) != EOK) {
+    if (strncpy_s(serviceDataTmp, NSTACKX_MAX_SERVICE_DATA_LEN, serviceData, len) != EOK) {
         DFINDER_LOGE(TAG, "Failed to copy serviceData");
         free(serviceDataTmp);
         return NSTACKX_EINVAL;
@@ -1452,13 +1721,15 @@ int32_t NSTACKX_RegisterBusinessData(const char *businessData)
         DFINDER_LOGE(TAG, "businessData is null");
         return NSTACKX_EINVAL;
     }
+
+    size_t len = strnlen(businessData, NSTACKX_MAX_BUSINESS_DATA_LEN);
+    if (len >= NSTACKX_MAX_BUSINESS_DATA_LEN) {
+        DFINDER_LOGE(TAG, "businessData (%zu) exceed max number", len);
+        return NSTACKX_EINVAL;
+    }
     if (g_nstackInitState != NSTACKX_INIT_STATE_DONE) {
         DFINDER_LOGE(TAG, "NSTACKX_Ctrl is not initiated yet");
         return NSTACKX_EFAILED;
-    }
-    if (strlen(businessData) >= NSTACKX_MAX_BUSINESS_DATA_LEN) {
-        DFINDER_LOGE(TAG, "businessData (%u) exceed max data len", strlen(businessData));
-        return NSTACKX_EINVAL;
     }
     if (g_nstackThreadInitState != NSTACKX_INIT_STATE_DONE) {
         return (int32_t)SetLocalDeviceBusinessData(businessData, NSTACKX_TRUE);
@@ -1469,8 +1740,7 @@ int32_t NSTACKX_RegisterBusinessData(const char *businessData)
         DFINDER_LOGE(TAG, "businessDataTmp is null");
         return NSTACKX_ENOMEM;
     }
-    if (strncpy_s(businessDataTmp, NSTACKX_MAX_BUSINESS_DATA_LEN, businessData,
-        strlen(businessData)) != EOK) {
+    if (strncpy_s(businessDataTmp, NSTACKX_MAX_BUSINESS_DATA_LEN, businessData, len) != EOK) {
         DFINDER_LOGE(TAG, "Failed to copy businessData");
         free(businessDataTmp);
         return NSTACKX_EFAILED;
@@ -1504,13 +1774,15 @@ int32_t NSTACKX_RegisterExtendServiceData(const char *extendServiceData)
         DFINDER_LOGE(TAG, "extendServiceData is null");
         return NSTACKX_EINVAL;
     }
+
+    size_t len = strnlen(extendServiceData, NSTACKX_MAX_EXTEND_SERVICE_DATA_LEN);
+    if (len >= NSTACKX_MAX_EXTEND_SERVICE_DATA_LEN) {
+        DFINDER_LOGE(TAG, "extendServiceData len %zu is error", len);
+        return NSTACKX_EINVAL;
+    }
     if (g_nstackInitState != NSTACKX_INIT_STATE_DONE) {
         DFINDER_LOGE(TAG, "NSTACKX_Ctrl is not initiated yet");
         return NSTACKX_EFAILED;
-    }
-    if (strlen(extendServiceData) >= NSTACKX_MAX_EXTEND_SERVICE_DATA_LEN) {
-        DFINDER_LOGE(TAG, "extendServiceData (%u) exceed max number", strlen(extendServiceData));
-        return NSTACKX_EINVAL;
     }
     if (g_nstackThreadInitState != NSTACKX_INIT_STATE_DONE) {
         return SetLocalDeviceExtendServiceData(extendServiceData);
@@ -1520,8 +1792,7 @@ int32_t NSTACKX_RegisterExtendServiceData(const char *extendServiceData)
     if (extendServiceDataTmp == NULL) {
         return NSTACKX_ENOMEM;
     }
-    if (strncpy_s(extendServiceDataTmp, NSTACKX_MAX_EXTEND_SERVICE_DATA_LEN, extendServiceData,
-        strlen(extendServiceData)) != EOK) {
+    if (strncpy_s(extendServiceDataTmp, NSTACKX_MAX_EXTEND_SERVICE_DATA_LEN, extendServiceData, len) != EOK) {
         DFINDER_LOGE(TAG, "Failed to copy extendServiceData");
         free(extendServiceDataTmp);
         return NSTACKX_EINVAL;
@@ -1557,12 +1828,12 @@ static void SendMsgDirectInner(void *arg)
 static int32_t NSTACKX_SendMsgParamCheck(const char *moduleName, const char *deviceId, const uint8_t *data,
     uint32_t len)
 {
-    if (moduleName == NULL || strlen(moduleName) > NSTACKX_MAX_MODULE_NAME_LEN) {
+    if (moduleName == NULL || strnlen(moduleName, NSTACKX_MAX_MODULE_NAME_LEN) > NSTACKX_MAX_MODULE_NAME_LEN) {
         DFINDER_LOGE(TAG, "Invalid module name");
         return NSTACKX_EINVAL;
     }
 
-    if (deviceId == NULL || strlen(deviceId) > NSTACKX_MAX_DEVICE_ID_LEN) {
+    if (deviceId == NULL || strnlen(deviceId, NSTACKX_MAX_DEVICE_ID_LEN) > NSTACKX_MAX_DEVICE_ID_LEN) {
         DFINDER_LOGE(TAG, "Invalid device id");
         return NSTACKX_EINVAL;
     }
@@ -1731,6 +2002,7 @@ static int32_t CopyResponseSettings(NSTACKX_ResponseSettings *dupResponseSetting
             return NSTACKX_EINVAL;
         }
     }
+    // strlen is check in CheckResponseSettings
     if (strncpy_s(dupResponseSettings->localNetworkName, NSTACKX_MAX_INTERFACE_NAME_LEN,
         responseSettings->localNetworkName, strlen(responseSettings->localNetworkName)) != EOK) {
         DFINDER_LOGE(TAG, "localNetworkName strncpy failed");
@@ -1756,6 +2028,16 @@ static int32_t CheckResponseSettings(const NSTACKX_ResponseSettings *responseSet
     }
     if (responseSettings->length >= NSTACKX_MAX_BUSINESS_DATA_LEN) {
         DFINDER_LOGE(TAG, "businessData length is too long");
+        return NSTACKX_EINVAL;
+    }
+    if (strnlen(responseSettings->localNetworkName, NSTACKX_MAX_INTERFACE_NAME_LEN) >=
+        NSTACKX_MAX_INTERFACE_NAME_LEN) {
+        DFINDER_LOGE(TAG, "businessData is error, no terminator");
+        return NSTACKX_EINVAL;
+    }
+    if (strnlen(responseSettings->remoteIp, NSTACKX_MAX_IP_STRING_LEN) >=
+        NSTACKX_MAX_IP_STRING_LEN) {
+        DFINDER_LOGE(TAG, "remoteIp is error, no terminator");
         return NSTACKX_EINVAL;
     }
     return NSTACKX_EOK;
@@ -2023,9 +2305,9 @@ static int32_t CheckNotificationConfig(const NSTACKX_NotificationConfig *config)
         DFINDER_LOGE(TAG, "msg in notification config is null");
         return NSTACKX_EINVAL;
     }
-    if (strlen(config->msg) != config->msgLen || config->msgLen == 0 ||
-        config->msgLen >= NSTACKX_MAX_NOTIFICATION_DATA_LEN) {
-        DFINDER_LOGE(TAG, "actual msg len %zu, msg len %zu in config", strlen(config->msg), config->msgLen);
+    size_t len = strnlen(config->msg, NSTACKX_MAX_NOTIFICATION_DATA_LEN);
+    if (len >= NSTACKX_MAX_NOTIFICATION_DATA_LEN || len != config->msgLen || config->msgLen == 0) {
+        DFINDER_LOGE(TAG, "actual msg len %zu, msg len %zu in config", len, config->msgLen);
         return NSTACKX_EINVAL;
     }
     // advertise count: [0, 100], first interval in intervalMs should be 0

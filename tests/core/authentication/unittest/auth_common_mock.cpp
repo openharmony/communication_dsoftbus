@@ -37,8 +37,8 @@ static AuthCommonInterface *GetCommonInterface()
 }
 
 extern "C" {
-int32_t LnnAsyncCallbackDelayHelper(SoftBusLooper *looper, LnnAsyncCallbackFunc callback,
-    void *para, uint64_t delayMillis)
+int32_t LnnAsyncCallbackDelayHelper(
+    SoftBusLooper *looper, LnnAsyncCallbackFunc callback, void *para, uint64_t delayMillis)
 {
     return GetCommonInterface()->LnnAsyncCallbackDelayHelper(looper, callback, para, delayMillis);
 }

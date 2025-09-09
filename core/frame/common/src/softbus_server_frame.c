@@ -245,7 +245,7 @@ void InitSoftBusServer(void)
     LnnInitModuleStatusSet(INIT_DEPS_BLUETOOTH, DEPS_STATUS_SUCCESS);
     LnnModuleInitMonitorCheckStart();
     UkNegotiateSessionInit();
-    AuthRecoveryApplyKey();
+    InitApplyKeyManager();
     g_isInit = true;
     COMM_LOGI(COMM_SVC, "softbus framework init success.");
 }

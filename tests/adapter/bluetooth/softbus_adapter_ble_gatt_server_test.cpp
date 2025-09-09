@@ -800,6 +800,7 @@ HWTEST_F(AdapterBleGattServerTest, BleRequestWriteCallback001, TestSize.Level3)
  */
 HWTEST_F(AdapterBleGattServerTest, GattServerLifeCycle001, TestSize.Level3)
 {
+    // 注册service
     const char *serviceUuid = "11C8B310-80E4-4276-AFC0-F81590B2177F";
     SoftBusBtUuid service = {
         .uuidLen = strlen(serviceUuid),
@@ -824,6 +825,7 @@ HWTEST_F(AdapterBleGattServerTest, GattServerLifeCycle001, TestSize.Level3)
         .uuidLen = strlen(netCharacteristic),
         .uuid = (char *)netCharacteristic,
     };
+
     int32_t properties = SOFTBUS_GATT_CHARACTER_PROPERTY_BIT_READ | SOFTBUS_GATT_CHARACTER_PROPERTY_BIT_WRITE_NO_RSP |
         SOFTBUS_GATT_CHARACTER_PROPERTY_BIT_WRITE | SOFTBUS_GATT_CHARACTER_PROPERTY_BIT_NOTIFY |
         SOFTBUS_GATT_CHARACTER_PROPERTY_BIT_INDICATE;

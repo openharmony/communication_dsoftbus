@@ -94,7 +94,7 @@ static int32_t CheckBusinessTypeAndOsTypeBySessionId(int32_t sessionId, int32_t 
         return SOFTBUS_TRANS_BUSINESS_TYPE_NOT_MATCH;
     }
     bool isD2D = false;
-    ClientCheckIsD2DypeBySessionId(sessionId, &isD2D);
+    ClientCheckIsD2DBySessionId(sessionId, &isD2D);
     if (isD2D && (businessType != BUSINESS_TYPE_D2D_VOICE)) {
         TRANS_LOGE(TRANS_BYTES,
             "businessType no match d2d, businessType=%{public}d, sessionId=%{public}d", businessType, sessionId);
@@ -224,7 +224,6 @@ int32_t SendMessageAsync(int32_t socket, uint16_t dataSeq, const void *data, uin
             "no permission, socket=%{public}d, len=%{public}u, ret=%{public}d", socket, len, ret);
         return ret;
     }
-
     int32_t channelId = INVALID_CHANNEL_ID;
     int32_t channelType = CHANNEL_TYPE_BUTT;
     SessionEnableStatus enableStatus = ENABLE_STATUS_INIT;
@@ -333,7 +332,7 @@ int SendStream(int sessionId, const StreamData *data, const StreamData *ext, con
 static int32_t ClientCheckFuncPointer(void *func)
 {
     if (func == NULL) {
-        TRANS_LOGE(TRANS_FILE, "enhance func not register.");
+        TRANS_LOGE(TRANS_FILE, "enhance func not register");
         return SOFTBUS_FUNC_NOT_REGISTER;
     }
     return SOFTBUS_OK;

@@ -247,11 +247,13 @@ static int32_t SubmitMsgToFfrt(SoftBusMessageNode *msgNode, const SoftBusLooper 
         ffrt_this_task_set_legacy_mode(true);
         if (looper == nullptr || looper->context == nullptr) {
             COMM_LOGE(COMM_UTILS, "invalid looper para when handle");
+            ffrt_this_task_set_legacy_mode(false);
             return;
         }
         SoftBusMessageNode *currentMsgNode = nullptr;
         if (GetMsgNodeFromContext(&currentMsgNode, &tmpMsg, looper) != SOFTBUS_OK) {
             COMM_LOGE(COMM_UTILS, "get currentMsgNode from context fail");
+            ffrt_this_task_set_legacy_mode(false);
             return;
         }
         SoftBusMessage *currentMsg = currentMsgNode->msg;
@@ -264,6 +266,7 @@ static int32_t SubmitMsgToFfrt(SoftBusMessageNode *msgNode, const SoftBusLooper 
         FreeSoftBusMsg(currentMsg);
         delete (currentMsgNode->msgHandle);
         SoftBusFree(currentMsgNode);
+        ffrt_this_task_set_legacy_mode(false);
     }, ffrt::task_attr().delay(delayMicros));
     return SOFTBUS_OK;
 }

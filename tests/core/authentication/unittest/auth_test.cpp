@@ -982,6 +982,9 @@ HWTEST_F(AuthTest, AUTH_DEVICE_GET_ID_BY_P2P_MAC_Test_001, TestSize.Level1)
     EXPECT_TRUE(ret == AUTH_INVALID_ID);
     ret = AuthDeviceGetIdByUuid(P2P_MAC, type, isServer);
     EXPECT_TRUE(ret == AUTH_INVALID_ID);
+    type = AUTH_LINK_TYPE_MAX;
+    ret = AuthDeviceGetIdByUuid(P2P_MAC, type, isServer);
+    EXPECT_TRUE(ret == AUTH_INVALID_ID);
 }
 
 static void AuthOnDataReceived(AuthHandle authHandle, const AuthTransData *data)
@@ -1710,7 +1713,8 @@ HWTEST_F(AuthTest, AUTH_SESSION_START_AUTH_Test_001, TestSize.Level1)
         .isFastAuth = true,
     };
     DeviceKeyId deviceKeyId = {
-        .hasDeviceKeyId = false, .localDeviceKeyId = AUTH_INVALID_DEVICEKEY_ID,
+        .hasDeviceKeyId = false,
+        .localDeviceKeyId = AUTH_INVALID_DEVICEKEY_ID,
         .remoteDeviceKeyId = AUTH_INVALID_DEVICEKEY_ID,
     };
     int32_t ret = AuthSessionStartAuth(&authInfo, connInfo, &deviceKeyId);

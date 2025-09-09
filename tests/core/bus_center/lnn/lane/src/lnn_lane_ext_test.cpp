@@ -40,6 +40,7 @@
 #include "softbus_error_code.h"
 #include "softbus_wifi_api_adapter.h"
 #include "wifi_direct_error_code.h"
+
 namespace OHOS {
 using namespace testing::ext;
 using namespace testing;
@@ -52,6 +53,7 @@ constexpr char LOCAL_MAC[] = "a2:b2:c3:d4:e5:f6";
 constexpr char PEER_UDID[] = "111122223333abcdef";
 constexpr char LOCAL_UDID[] = "444455556666abcdef";
 constexpr uint64_t LANE_ID_BASE = 1122334455667788;
+constexpr uint16_t PRI = 1;
 
 static NodeInfo g_NodeInfo = {
     .p2pInfo.p2pRole = 1,
@@ -133,6 +135,22 @@ static struct WifiDirectManager g_manager = {
     .getLocalAndRemoteMacByLocalIp = GetLocalAndRemoteMacByLocalIp,
 };
 
+static void OnLaneLinkFail(uint32_t reqId, int32_t reason, LaneLinkType linkType)
+{
+    (void)reqId;
+    (void)reason;
+    (void)linkType;
+    return;
+}
+
+static void OnLaneLinkSuccess(uint32_t reqId, LaneLinkType linkType, const LaneLinkInfo *linkInfo)
+{
+    (void)reqId;
+    (void)linkType;
+    (void)linkInfo;
+    return;
+}
+
 /*
 * @tc.name: LANE_INFO_001
 * @tc.desc: LaneInfoProcess BR
@@ -190,19 +208,19 @@ HWTEST_F(LNNLaneExtMockTest, LANE_INFO_003, TestSize.Level1)
 HWTEST_F(LNNLaneExtMockTest, LANE_INFO_004, TestSize.Level1)
 {
     LaneLinkInfo info = {};
-    info.type = LANE_LINK_TYPE_BUTT;
-    LaneConnInfo *connInfo = nullptr;
-    LaneProfile *profile = nullptr;
-    int32_t ret = LaneInfoProcess(nullptr, connInfo, profile);
+    info.type = LANE_USB;
+    LaneConnInfo connInfo = {};
+    LaneProfile profile = {};
+    int32_t ret = LaneInfoProcess(&info, &connInfo, &profile);
+    EXPECT_EQ(ret, SOFTBUS_OK);
+
+    ret = LaneInfoProcess(nullptr, &connInfo, &profile);
     EXPECT_EQ(ret, SOFTBUS_INVALID_PARAM);
 
-    ret = LaneInfoProcess(&info, nullptr, profile);
+    ret = LaneInfoProcess(&info, nullptr, &profile);
     EXPECT_EQ(ret, SOFTBUS_INVALID_PARAM);
 
-    ret = LaneInfoProcess(&info, connInfo, nullptr);
-    EXPECT_EQ(ret, SOFTBUS_INVALID_PARAM);
-
-    ret = LaneInfoProcess(&info, connInfo, profile);
+    ret = LaneInfoProcess(&info, &connInfo, nullptr);
     EXPECT_EQ(ret, SOFTBUS_INVALID_PARAM);
 }
 
@@ -1024,43 +1042,15 @@ HWTEST_F(LNNLaneExtMockTest, LNN_ADD_LANE_IS_VALID_LINK_ADDR_002, TestSize.Level
 }
 
 /*
-* @tc.name: LANE_INFO_006
-* @tc.desc: LaneInfoProcess fail
-* @tc.type: FAILUE
-* @tc.require:
-*/
-HWTEST_F(LNNLaneExtMockTest, LANE_INFO_006, TestSize.Level1)
-{
-    LaneLinkInfo info = {};
-    info.type = LANE_USB;
-    LaneConnInfo connInfo = {};
-    LaneProfile profile = {};
-    int32_t ret = LaneInfoProcess(&info, &connInfo, &profile);
-    EXPECT_EQ(ret, SOFTBUS_OK);
-
-    ret = LaneInfoProcess(nullptr, &connInfo, &profile);
-    EXPECT_EQ(ret, SOFTBUS_INVALID_PARAM);
-
-    ret = LaneInfoProcess(&info, nullptr, &profile);
-    EXPECT_EQ(ret, SOFTBUS_INVALID_PARAM);
-
-    ret = LaneInfoProcess(&info, &connInfo, nullptr);
-    EXPECT_EQ(ret, SOFTBUS_INVALID_PARAM);
-
-    ret = LaneInfoProcess(&info, nullptr, &profile);
-    EXPECT_EQ(ret, SOFTBUS_INVALID_PARAM);
-}
-
-/*
 * @tc.name: CHECK_LANE_LINK_EXIST_BY_TYPE_001
-* @tc.desc: test CheckLaneLinkExistByType
+* @tc.desc: test ExistsLaneLinkByType
 * @tc.type: FUNC
 * @tc.require:
 */
 HWTEST_F(LNNLaneExtMockTest, CHECK_LANE_LINK_EXIST_BY_TYPE_001, TestSize.Level1)
 {
-    EXPECT_FALSE(CheckLaneLinkExistByType(LANE_LINK_TYPE_BUTT));
-    EXPECT_FALSE(CheckLaneLinkExistByType(LANE_HML));
+    EXPECT_FALSE(ExistsLaneLinkByType(LANE_LINK_TYPE_BUTT));
+    EXPECT_FALSE(ExistsLaneLinkByType(LANE_HML));
 
     NiceMock<LaneDepsInterfaceMock> laneDepMock;
     EXPECT_CALL(laneDepMock, LnnGetLocalStrInfo).WillRepeatedly(Return(SOFTBUS_OK));
@@ -1069,7 +1059,213 @@ HWTEST_F(LNNLaneExtMockTest, CHECK_LANE_LINK_EXIST_BY_TYPE_001, TestSize.Level1)
     ASSERT_EQ(strcpy_s(linkInfo.peerUdid, UDID_BUF_LEN, PEER_UDID), EOK);
     uint64_t laneId = LANE_ID_BASE;
     EXPECT_EQ(SOFTBUS_OK, AddLaneResourceToPool(&linkInfo, laneId, false));
-    EXPECT_TRUE(CheckLaneLinkExistByType(LANE_HML));
+    EXPECT_TRUE(ExistsLaneLinkByType(LANE_HML));
     EXPECT_EQ(SOFTBUS_OK, DelLaneResourceByLaneId(laneId, false));
+}
+
+struct SelectProtocolReq {
+    LnnNetIfType localIfType;
+    ProtocolType selectedProtocol;
+    ProtocolType remoteSupporttedProtocol;
+    uint8_t currPri;
+};
+
+static bool MockLnnVisitPhysicalSubnet(LnnVisitPhysicalSubnetCallback callback, void *data)
+{
+    if (callback == nullptr || data == nullptr) {
+        return false;
+    }
+    LnnProtocolManager protocol = {
+        .supportedNetif = LNN_NETIF_TYPE_USB,
+        .pri = PRI,
+        .id = LNN_PROTOCOL_ALL,
+    };
+    LnnPhysicalSubnet subnet = {
+        .protocol = &protocol,
+        .status = LNN_SUBNET_RUNNING,
+    };
+    struct SelectProtocolReq *req = (struct SelectProtocolReq *)data;
+    req->selectedProtocol = LNN_PROTOCOL_USB;
+    req->remoteSupporttedProtocol = LNN_PROTOCOL_USB;
+    if (callback(nullptr, data) != CHOICE_FINISH_VISITING) {
+        return false;
+    }
+    if (callback(&subnet, nullptr) != CHOICE_FINISH_VISITING) {
+        return false;
+    }
+    if (callback(&subnet, data) != CHOICE_VISIT_NEXT) {
+        return false;
+    }
+    req->selectedProtocol = LNN_PROTOCOL_USB;
+    return true;
+}
+
+/*
+* @tc.name: BUILD_LINK_TEST_001
+* @tc.desc: BuildLink test linkType is LANE_USB
+* @tc.type: FUNC
+* @tc.require:
+*/
+HWTEST_F(LNNLaneExtMockTest, BUILD_LINK_TEST_001, TestSize.Level1)
+{
+    NiceMock<LaneDepsInterfaceMock> mock;
+    LinkRequest reqInfo = {
+        .linkType = LANE_USB,
+        .transType = LANE_T_FILE,
+    };
+    LaneLinkCb cb = {
+        .onLaneLinkSuccess = OnLaneLinkSuccess,
+        .onLaneLinkFail = OnLaneLinkFail,
+    };
+    EXPECT_CALL(mock, LnnGetRemoteStrInfo).WillOnce(Return(SOFTBUS_OK)).WillRepeatedly(Return(SOFTBUS_INVALID_PARAM));
+    int32_t ret = BuildLink(&reqInfo, 0, &cb);
+    EXPECT_EQ(ret, SOFTBUS_LANE_GET_LEDGER_INFO_ERR);
+
+    EXPECT_CALL(mock, LnnGetRemoteStrInfo).WillOnce(Return(SOFTBUS_INVALID_PARAM)).WillRepeatedly(Return(SOFTBUS_OK));
+    reqInfo.transType = LANE_T_BYTE;
+    ret = BuildLink(&reqInfo, 0, &cb);
+    EXPECT_EQ(ret, SOFTBUS_LANE_GET_LEDGER_INFO_ERR);
+    reqInfo.transType = LANE_T_MSG;
+    reqInfo.isInnerCalled = true;
+    ret = BuildLink(&reqInfo, 0, &cb);
+    EXPECT_EQ(ret, SOFTBUS_OK);
+
+    EXPECT_CALL(mock, LnnVisitPhysicalSubnet).WillRepeatedly(Invoke(MockLnnVisitPhysicalSubnet));
+    reqInfo.isInnerCalled = false;
+    ret = BuildLink(&reqInfo, 0, &cb);
+    EXPECT_EQ(ret, SOFTBUS_OK);
+
+    EXPECT_CALL(mock, LnnGetRemoteNumInfoByIfnameIdx)
+        .WillOnce(Return(SOFTBUS_INVALID_PARAM))
+        .WillRepeatedly(Return(SOFTBUS_OK));
+    ret = BuildLink(&reqInfo, 0, &cb);
+    EXPECT_EQ(ret, SOFTBUS_INVALID_PARAM);
+
+    EXPECT_CALL(mock, LnnGetLocalNodeInfo).WillOnce(Return(nullptr)).WillRepeatedly(Return(&g_NodeInfo));
+    ret = BuildLink(&reqInfo, 0, &cb);
+    EXPECT_EQ(ret, SOFTBUS_OK);
+    ret = BuildLink(&reqInfo, 0, &cb);
+    EXPECT_EQ(ret, SOFTBUS_LANE_GET_LEDGER_INFO_ERR);
+}
+
+/*
+* @tc.name: GET_ALL_LINK_WITH_DEVID_TEST_001
+* @tc.desc: GetAllLinkWithDevId test
+* @tc.type: FUNC
+* @tc.require:
+*/
+HWTEST_F(LNNLaneExtMockTest, GET_ALL_LINK_WITH_DEVID_TEST_001, TestSize.Level1)
+{
+    LaneLinkType *linkList = nullptr;
+    uint8_t linkCnt = 0;
+    int32_t ret = GetAllLinkWithDevId(nullptr, &linkList, &linkCnt);
+    EXPECT_EQ(ret, SOFTBUS_INVALID_PARAM);
+    ret = GetAllLinkWithDevId(PEER_UDID, nullptr, &linkCnt);
+    EXPECT_EQ(ret, SOFTBUS_INVALID_PARAM);
+    ret = GetAllLinkWithDevId(PEER_UDID, &linkList, nullptr);
+    EXPECT_EQ(ret, SOFTBUS_INVALID_PARAM);
+    ret = GetAllLinkWithDevId(PEER_UDID, &linkList, &linkCnt);
+    EXPECT_EQ(ret, SOFTBUS_LANE_RESOURCE_NOT_FOUND);
+
+    LaneLinkInfo info = {};
+    ASSERT_EQ(strcpy_s(info.peerUdid, UDID_BUF_LEN, PEER_UDID), EOK);
+    uint64_t laneId = 1;
+    info.type = LANE_USB;
+    NiceMock<LaneDepsInterfaceMock> mock;
+    EXPECT_CALL(mock, LnnGetRemoteStrInfo).WillRepeatedly(Return(SOFTBUS_OK));
+    ret = AddLaneResourceToPool(&info, laneId, false);
+    EXPECT_EQ(ret, SOFTBUS_OK);
+
+    ret = GetAllLinkWithDevId(PEER_UDID, &linkList, &linkCnt);
+    ASSERT_NE(linkList, nullptr);
+    EXPECT_EQ(ret, SOFTBUS_OK);
+    SoftBusFree(linkList);
+
+    ret = ClearLaneResourceByLaneId(laneId);
+    EXPECT_EQ(ret, SOFTBUS_OK);
+}
+
+/*
+* @tc.name: GET_ALL_LINK_WITH_LINK_TYPE_TEST_001
+* @tc.desc: GetAllDevIdWithLinkType test
+* @tc.type: FUNC
+* @tc.require:
+*/
+HWTEST_F(LNNLaneExtMockTest, GET_ALL_LINK_WITH_LINK_TYPE_TEST_001, TestSize.Level1)
+{
+    char *linkList = nullptr;
+    uint8_t linkCnt = 0;
+    int32_t ret = GetAllDevIdWithLinkType(LANE_LINK_TYPE_BUTT, &linkList, &linkCnt);
+    EXPECT_EQ(ret, SOFTBUS_INVALID_PARAM);
+    ret = GetAllDevIdWithLinkType(LANE_HML, nullptr, &linkCnt);
+    EXPECT_EQ(ret, SOFTBUS_INVALID_PARAM);
+    ret = GetAllDevIdWithLinkType(LANE_HML, &linkList, nullptr);
+    EXPECT_EQ(ret, SOFTBUS_INVALID_PARAM);
+    ret = GetAllDevIdWithLinkType(LANE_HML, &linkList, &linkCnt);
+    EXPECT_EQ(ret, SOFTBUS_LANE_RESOURCE_NOT_FOUND);
+
+    LaneLinkInfo info = {};
+    ASSERT_EQ(strcpy_s(info.peerUdid, UDID_BUF_LEN, PEER_UDID), EOK);
+    uint64_t laneId = 1;
+    info.type = LANE_HML;
+    NiceMock<LaneDepsInterfaceMock> mock;
+    EXPECT_CALL(mock, LnnGetRemoteStrInfo).WillRepeatedly(Return(SOFTBUS_OK));
+    ret = AddLaneResourceToPool(&info, laneId, false);
+    EXPECT_EQ(ret, SOFTBUS_OK);
+
+    ret = GetAllDevIdWithLinkType(LANE_HML, &linkList, &linkCnt);
+    ASSERT_NE(linkList, nullptr);
+    EXPECT_EQ(ret, SOFTBUS_OK);
+    SoftBusFree(linkList);
+
+    ret = ClearLaneResourceByLaneId(laneId);
+    EXPECT_EQ(ret, SOFTBUS_OK);
+}
+
+/*
+* @tc.name: GET_VALID_LANE_RESOURCE_TEST_001
+* @tc.desc: GetValidLaneResource test
+* @tc.type: FUNC
+* @tc.require:
+*/
+HWTEST_F(LNNLaneExtMockTest, GET_VALID_LANE_RESOURCE_TEST_001, TestSize.Level1)
+{
+    LaneLinkInfo info = {};
+    ASSERT_EQ(strcpy_s(info.peerUdid, UDID_BUF_LEN, PEER_UDID), EOK);
+    uint64_t laneId = 1;
+    info.type = LANE_USB;
+    NiceMock<LaneDepsInterfaceMock> mock;
+    EXPECT_CALL(mock, LnnGetRemoteStrInfo).WillRepeatedly(Return(SOFTBUS_OK));
+    int32_t ret = AddLaneResourceToPool(&info, laneId, false);
+    EXPECT_EQ(ret, SOFTBUS_OK);
+    LaneResource resource = {0};
+    ret = FindLaneResourceByLinkAddr(&info, &resource);
+    EXPECT_EQ(ret, SOFTBUS_OK);
+    ret = ClearLaneResourceByLaneId(laneId);
+    EXPECT_EQ(ret, SOFTBUS_OK);
+
+    info.type = LANE_BLE_REUSE;
+    ret = AddLaneResourceToPool(&info, laneId, false);
+    EXPECT_EQ(ret, SOFTBUS_OK);
+    ret = FindLaneResourceByLinkAddr(&info, &resource);
+    EXPECT_EQ(ret, SOFTBUS_LANE_RESOURCE_NOT_FOUND);
+    ret = ClearLaneResourceByLaneId(laneId);
+    EXPECT_EQ(ret, SOFTBUS_OK);
+
+    info.type = LANE_SLE;
+    ret = AddLaneResourceToPool(&info, laneId, false);
+    EXPECT_EQ(ret, SOFTBUS_OK);
+    ret = FindLaneResourceByLinkAddr(&info, &resource);
+    EXPECT_EQ(ret, SOFTBUS_OK);
+    ret = ClearLaneResourceByLaneId(laneId);
+    EXPECT_EQ(ret, SOFTBUS_OK);
+
+    info.type = LANE_SLE_DIRECT;
+    ret = AddLaneResourceToPool(&info, laneId, false);
+    EXPECT_EQ(ret, SOFTBUS_OK);
+    ret = FindLaneResourceByLinkAddr(&info, &resource);
+    EXPECT_EQ(ret, SOFTBUS_OK);
+    ret = ClearLaneResourceByLaneId(laneId);
+    EXPECT_EQ(ret, SOFTBUS_OK);
 }
 } // namespace OHOS

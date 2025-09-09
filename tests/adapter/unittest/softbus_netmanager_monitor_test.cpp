@@ -17,6 +17,8 @@
 #include <securec.h>
 
 #include "lnn_event_monitor_impl.h"
+#include "lnn_linkwatch.h"
+#include "lnn_linkwatch.c"
 #include "lnn_netmanager_monitor.h"
 #include "lnn_netlink_monitor.c"
 #include "net_conn_client.h"
@@ -28,6 +30,7 @@
 #define NCM_LINK_NAME           "ncm0"
 #define LOCAL_IP_LINK           "192.168.66.1"
 #define DEFAULT_GATEWAY_POSTFIX "99"
+#define LOCAL_IPV6_LINK         "2001:0db8:85a3:0000:0000:8a2e:0370:7334"
 
 namespace OHOS {
 
@@ -173,6 +176,132 @@ HWTEST_F(AdapterNetManagerMonitorTest, LnnInitNetlinkMonitorImpl_004, TestSize.L
     ON_CALL(NetworkInterfaceMock, SoftBusSocketBind).WillByDefault(Return(SOFTBUS_OK));
     EXPECT_CALL(NetworkInterfaceMock, AddTrigger).WillRepeatedly(Return(SOFTBUS_OK));
     int32_t ret = LnnInitNetlinkMonitorImpl();
+    EXPECT_EQ(ret, SOFTBUS_OK);
+}
+
+/**
+ * @tc.name:ConfigLocalIpv6_001
+ * @tc.desc:ConfigLocalIpv6_001 function return value equal SOFTBUS_NETWORK_CONFIG_NETLINK_IPV6_FAILED.
+ * @tc.type:FUNC
+ * @tc.require: 1
+ */
+HWTEST_F(AdapterNetManagerMonitorTest, ConfigLocalIpv6_001, TestSize.Level1)
+{
+    char ifName[] = NCM_LINK_NAME;
+    char localIpv6[] = LOCAL_IPV6_LINK;
+    int32_t ret = ConfigLocalIpv6(ifName, localIpv6);
+    EXPECT_EQ(ret, SOFTBUS_NETWORK_CONFIG_NETLINK_IPV6_FAILED);
+}
+
+/**
+ * @tc.name:AddAttr_001
+ * @tc.desc:AddAttr_001 function return value equal SOFTBUS_NETWORK_INVALID_NLMSG.
+ * @tc.type:FUNC
+ * @tc.require: 1
+ */
+HWTEST_F(AdapterNetManagerMonitorTest, AddAttr_001, TestSize.Level1)
+{
+    struct nlmsghdr my_nlmsghdr = {
+        .nlmsg_len = NLMSG_LENGTH(sizeof(struct nlmsghdr)),
+        .nlmsg_type = 1,
+        .nlmsg_flags = 0,
+        .nlmsg_seq = 12345,
+        .nlmsg_pid = 6789
+    };
+    uint32_t maxLen = 20;
+    uint16_t type = 1;
+    const uint8_t data[] = {0x01, 0x02, 0x03};
+    uint16_t attrLen = 4;
+    int32_t ret = AddAttr(&my_nlmsghdr, maxLen, type, data, attrLen);
+    EXPECT_EQ(ret, SOFTBUS_NETWORK_INVALID_NLMSG);
+}
+
+/**
+ * @tc.name:LnnIsLinkReady_001
+ * @tc.desc:LnnIsLinkReady_001 function return false.
+ * @tc.type:FUNC
+ * @tc.require: 1
+ */
+HWTEST_F(AdapterNetManagerMonitorTest, LnnIsLinkReady_001, TestSize.Level1)
+{
+    const char *iface = nullptr;
+    EXPECT_FALSE(LnnIsLinkReady(iface));
+}
+
+/**
+ * @tc.name:GetRtAttr_001
+ * @tc.desc:GetRtAttr_001 function return SOFTBUS_NETWORK_NETLINK_GET_ATTR_FAILED.
+ * @tc.type:FUNC
+ * @tc.require: 1
+ */
+HWTEST_F(AdapterNetManagerMonitorTest, GetRtAttr_001, TestSize.Level1)
+{
+    struct rtattr rta;
+    rta.rta_len = sizeof(struct rtattr);
+    rta.rta_type = 1;
+    int32_t len = 10;
+    uint16_t type = 3;
+    uint8_t value[] = {0x01, 0x02, 0x03};
+    uint32_t valueLen = 3;
+    int32_t ret = GetRtAttr(&rta, len, type, value, valueLen);
+    EXPECT_EQ(ret, SOFTBUS_NETWORK_NETLINK_GET_ATTR_FAILED);
+}
+
+/**
+ * @tc.name:GetRtAttr_002
+ * @tc.desc:GetRtAttr_002 function return SOFTBUS_OK.
+ * @tc.type:FUNC
+ * @tc.require: 1
+ */
+HWTEST_F(AdapterNetManagerMonitorTest, GetRtAttr_002, TestSize.Level1)
+{
+    struct rtattr rta;
+    rta.rta_len = sizeof(struct rtattr);
+    rta.rta_type = 1;
+    int32_t len = 4;
+    uint16_t type = 1;
+    uint8_t value[] = {0x01, 0x02, 0x03};
+    uint32_t valueLen = 3;
+    int32_t ret = GetRtAttr(&rta, len, type, value, valueLen);
+    EXPECT_EQ(ret, SOFTBUS_OK);
+}
+
+/**
+ * @tc.name:GetRtAttr_003
+ * @tc.desc:GetRtAttr_003 function return SOFTBUS_OK.
+ * @tc.type:FUNC
+ * @tc.require: 1
+ */
+HWTEST_F(AdapterNetManagerMonitorTest, GetRtAttr_003, TestSize.Level1)
+{
+    struct rtattr rta;
+    rta.rta_len = sizeof(struct rtattr);
+    rta.rta_type = 1;
+    int32_t len = 4;
+    uint16_t type = 1;
+    uint8_t value[] = {0x01, 0x02, 0x03, 0x04};
+    uint32_t valueLen = 4;
+    int32_t ret = GetRtAttr(&rta, len, type, value, valueLen);
+    EXPECT_EQ(ret, SOFTBUS_OK);
+}
+
+/**
+ * @tc.name:ProcessNetlinkAnswer_001
+ * @tc.desc:ProcessNetlinkAnswer_001 function return SOFTBUS_OK.
+ * @tc.type:FUNC
+ * @tc.require: 1
+ */
+HWTEST_F(AdapterNetManagerMonitorTest, ProcessNetlinkAnswer_001, TestSize.Level1)
+{
+    struct nlmsghdr my_nlmsghdr = {
+        .nlmsg_len = sizeof(struct nlmsghdr),
+        .nlmsg_type = 1,
+        .nlmsg_flags = 0,
+        .nlmsg_seq = 12345,
+        .nlmsg_pid = 6789
+    };
+    int32_t seq = 12345;
+    int32_t ret = ProcessNetlinkAnswer(&my_nlmsghdr, sizeof(struct nlmsghdr), seq);
     EXPECT_EQ(ret, SOFTBUS_OK);
 }
 } // namespace OHOS
