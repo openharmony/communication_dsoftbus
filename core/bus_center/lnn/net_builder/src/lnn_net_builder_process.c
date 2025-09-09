@@ -835,7 +835,6 @@ static int32_t ProcessLeaveByAuthId(const void *para)
 
 static int32_t ProcessSetReSyncDeviceName(const void *para)
 {
-    (void)para;
     LnnConnectionFsm *item = NULL;
     LIST_FOR_EACH_ENTRY(item, &LnnGetNetBuilder()->fsmList, LnnConnectionFsm, node) {
         if (!item->isDead && (item->connInfo.flag & LNN_CONN_INFO_FLAG_ONLINE) != 0) {

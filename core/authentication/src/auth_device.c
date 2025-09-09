@@ -307,7 +307,7 @@ int32_t AuthDeviceGetDeviceUuid(int64_t authId, char *uuid, uint16_t size)
         return SOFTBUS_AUTH_NOT_FOUND;
     }
     if (strcpy_s(uuid, size, auth->uuid) != EOK) {
-        AUTH_LOGI(AUTH_CONN, "copy uuid fail, size=%{public}u", size);
+        AUTH_LOGE(AUTH_CONN, "copy uuid fail, size=%{public}u", size);
         DelDupAuthManager(auth);
         return SOFTBUS_STRCPY_ERR;
     }
@@ -476,7 +476,7 @@ int32_t RegTrustListenerOnHichainSaStart(void)
         return SOFTBUS_AUTH_INIT_FAIL;
     }
     g_regDataChangeListener = true;
-    AUTH_LOGE(AUTH_INIT, "OnHichainSaStart add listener succ");
+    AUTH_LOGI(AUTH_INIT, "OnHichainSaStart add listener succ");
     return SOFTBUS_OK;
 }
 

@@ -1335,7 +1335,7 @@ static void FillDeviceKeyId(AuthVerifyParam *authVerifyParam, DeviceKeyId *devic
 
 static void CheckDeviceKeyByPreLinkNode(LnnConntionInfo *connInfo, AuthVerifyParam *authVerifyParam)
 {
-    int32_t connId;
+    int32_t connId = 0;
     int32_t rc = SOFTBUS_MEM_ERR;
     if (TransGetConnByChanId(connInfo->addr.info.session.channelId, connInfo->addr.info.session.type,
         &connId) != SOFTBUS_OK) {
@@ -1766,6 +1766,11 @@ static bool IsNodeInfoChanged(const LnnConnectionFsm *connFsm, const NodeInfo *o
 
 bool LnnIsNeedCleanConnectionFsm(const NodeInfo *nodeInfo, ConnectionAddrType type)
 {
+    if (nodeInfo == NULL) {
+        LNN_LOGE(LNN_BUILDER, "nodeInfo is NULL");
+        return false;
+    }
+
     NodeInfo oldNodeInfo ;
     (void)memset_s(&oldNodeInfo, sizeof(NodeInfo), 0, sizeof(NodeInfo));
 
