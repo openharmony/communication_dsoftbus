@@ -252,7 +252,7 @@ HWTEST_F(AuthIdentityServiceAdapterTest, AUTH_ID_SERVICE_QUERY_CREDENTIAL_TEST_0
     (void)memset_s(accountHash, SHA_256_HEX_HASH_LEN, 0, SHA_256_HEX_HASH_LEN);
     EXPECT_CALL(mock, InitDeviceAuthService).WillOnce(Return(HC_ERROR));
     int32_t ret = AuthIdServiceQueryCredential(peerUserId, udidHash, accountHash, isSameAccount, &credList);
-    EXPECT_EQ(ret, SOFTBUS_AUTH_GET_CRED_INSTANCE_FALI);
+    EXPECT_EQ(ret, SOFTBUS_AUTH_GET_CRED_INSTANCE_FAIL);
 }
 
 /*
@@ -274,7 +274,7 @@ HWTEST_F(AuthIdentityServiceAdapterTest, AUTH_ID_SERVICE_QUERY_CREDENTIAL_TEST_0
     EXPECT_CALL(mock, InitDeviceAuthService).WillOnce(Return(HC_SUCCESS));
     EXPECT_CALL(mock, GetCredMgrInstance).WillOnce(Return(nullptr));
     int32_t ret = AuthIdServiceQueryCredential(peerUserId, udidHash, accountHash, isSameAccount, &credList);
-    EXPECT_EQ(ret, SOFTBUS_AUTH_GET_CRED_INSTANCE_FALI);
+    EXPECT_EQ(ret, SOFTBUS_AUTH_GET_CRED_INSTANCE_FAIL);
 }
 
 /*

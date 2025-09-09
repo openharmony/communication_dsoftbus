@@ -412,7 +412,7 @@ int32_t AuthGetAuthHandleByIndex(const AuthConnInfo *connInfo, bool isServer, in
             }
             break;
         case AUTH_LINK_TYPE_BLE:
-            ret = AuthGetAuthHandleByIndexForBle(connInfo, networkId, &info);
+            ret = AuthGetNodeInfoByIndexForBle(connInfo, networkId, &info);
             if (ret != SOFTBUS_OK) {
                 return ret;
             }
@@ -442,7 +442,7 @@ int32_t AuthGetAuthHandleByIndex(const AuthConnInfo *connInfo, bool isServer, in
     return AuthDeviceGetAuthHandleByIndex(info.deviceInfo.deviceUdid, isServer, index, authHandle);
 }
 
-int32_t AuthGetAuthHandleByIndexForBle(const AuthConnInfo *connInfo, char *networkId, NodeInfo *info)
+int32_t AuthGetNodeInfoByIndexForBle(const AuthConnInfo *connInfo, char *networkId, NodeInfo *info)
 {
     if (connInfo == NULL || networkId == NULL || info == NULL) {
         AUTH_LOGE(AUTH_CONN, "get auth handle by index fail because para error");
