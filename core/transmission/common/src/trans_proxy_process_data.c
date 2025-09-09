@@ -882,7 +882,7 @@ int32_t TransProxyDecryptD2DData(
 }
 
 int32_t TransProxyD2DFirstNewHeadSliceProcess(
-    SliceProcessor *processor, const SliceHead *head, const char *data, uint32_t len, int32_t busineseeTye)
+    SliceProcessor *processor, const SliceHead *head, const char *data, uint32_t len, int32_t businessType)
 {
     if (processor == NULL || head == NULL || data == NULL) {
         TRANS_LOGE(TRANS_CTRL, "invalid param");
@@ -900,7 +900,7 @@ int32_t TransProxyD2DFirstNewHeadSliceProcess(
     }
     actualDataLen = head->sliceNum * SHORT_SLICE_LEN;
     uint32_t maxLen = 0;
-    if (busineseeTye == BUSINESS_TYPE_D2D_MESSAGE) {
+    if (businessType == BUSINESS_TYPE_D2D_MESSAGE) {
         maxLen = actualDataLen + sizeof(PacketD2DNewHead) + SHORT_TAG_LEN;
     } else {
         maxLen = actualDataLen + sizeof(PacketD2DNewHead);
@@ -927,7 +927,7 @@ int32_t TransProxyD2DFirstNewHeadSliceProcess(
 }
 
 int32_t TransProxyD2DFirstSliceProcess(
-    SliceProcessor *processor, const SliceHead *head, const char *data, uint32_t len, int32_t busineseeTye)
+    SliceProcessor *processor, const SliceHead *head, const char *data, uint32_t len, int32_t businessType)
 {
     if (processor == NULL || head == NULL || data == NULL) {
         TRANS_LOGE(TRANS_CTRL, "invalid param");
@@ -945,7 +945,7 @@ int32_t TransProxyD2DFirstSliceProcess(
     }
     actualDataLen = head->sliceNum * SHORT_SLICE_LEN;
     uint32_t maxLen = 0;
-    if (busineseeTye == BUSINESS_TYPE_D2D_MESSAGE) {
+    if (businessType == BUSINESS_TYPE_D2D_MESSAGE) {
         maxLen = actualDataLen + sizeof(PacketD2DHead) + SHORT_TAG_LEN;
     } else {
         maxLen = actualDataLen + sizeof(PacketD2DHead);
