@@ -19,7 +19,6 @@
 
 #include "auth_interface.h"
 #include "bus_center_manager.h"
-#include "g_enhance_lnn_func.h"
 #include "g_enhance_lnn_func_pack.h"
 #include "lnn_distributed_net_ledger.h"
 #include "lnn_lane_dfx.h"
@@ -211,7 +210,6 @@ static void IsNeedDelayFreeLane(uint32_t laneReqId, uint64_t laneId, bool *isDel
         *isDelayFree = false;
         return;
     }
-
     bool isHichain = GetAuthType(networkId);
     LNN_LOGD(LNN_LANE, "isHichain=%{public}d", isHichain);
     if (resourceItem.link.type == LANE_HML && resourceItem.clientRef == 1 && isHichain &&
