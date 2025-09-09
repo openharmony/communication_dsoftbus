@@ -27,6 +27,7 @@
 #include "softbus_proxychannel_manager.h"
 #include "softbus_proxychannel_manager.c"
 #include "softbus_proxychannel_transceiver.h"
+#include "softbus_proxychannel_transceiver.c"
 
 namespace OHOS {
 class SoftBusProxyChannelManagerExt {
@@ -34,12 +35,15 @@ public:
     SoftBusProxyChannelManagerExt()
     {
         (void)TransProxyManagerInit(TransServerGetChannelCb());
+        (void)LooperInit();
+        (void)TransProxyLoopInit();
         isInited_ = true;
     }
 
     ~SoftBusProxyChannelManagerExt()
     {
         isInited_ = false;
+        (void)LooperDeinit();
         TransProxyManagerDeinit();
     }
 
