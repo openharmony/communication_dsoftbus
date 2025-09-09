@@ -56,7 +56,9 @@ HWTEST_F(TransProxyProcessDataTest, TransGetProxyDataBufMaxSize001, TestSize.Lev
 {
     TransCommInterfaceMock commMock;
     EXPECT_CALL(commMock, SoftbusGetConfig)
-    .Times(2)
+    .Times(4)
+    .WillOnce(testing::Return(SOFTBUS_GET_CONFIG_VAL_ERR))
+    .WillOnce(testing::Return(SOFTBUS_GET_CONFIG_VAL_ERR))
     .WillOnce(testing::Return(SOFTBUS_GET_CONFIG_VAL_ERR))
     .WillOnce(testing::Return(SOFTBUS_GET_CONFIG_VAL_ERR));
     EXPECT_NO_FATAL_FAILURE(TransGetProxyDataBufMaxSize());

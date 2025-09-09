@@ -46,6 +46,7 @@
 #define TRANS_TEST_MAX_MSG_LEN (1 * 1024)
 #define TRANS_TEST_MAX_BYTES_LEN (2 * 1024)
 #define TRANS_TEST_BEYOND_MAX_MSG_LEN (6 * 1024)
+#define TRANS_TEST_DEFAULT_MAX_MSG_LEN (4 * 1024)
 #define TRANS_TEST_BEYOND_MAX_BYTES_LEN (6 * 1024 * 1024)
 #define TRANS_TEST_SEND_LEN 123
 #define TRANS_TEST_FILE_COUNT 2
@@ -58,7 +59,7 @@ namespace OHOS {
 
 const char *g_pkgName = "dms";
 const char *g_sessionName = "ohos.distributedschedule.dms.test";
-const char *g_sessionKey = "www.huaweitest.com";
+const char *g_sessionKey = "www.test.com";
 const char *g_networkId = "ABCDEF00ABCDEF00ABCDEF00ABCDEF00ABCDEF00ABCDEF00ABCDEF00ABCDEF0";
 const char *g_deviceId = "ABCDEF00ABCDEF00ABCDEF00ABCDEF00ABCDEF00ABCDEF00ABCDEF00ABCDEF0";
 const char *g_groupId = "TEST_GROUP_ID";
@@ -187,7 +188,8 @@ static int32_t AddSessionServerAndSession(
 
     TestGenerateCommParam(sessionParam);
     sessionParam->sessionName = sessionName;
-    int32_t ret = ClientAddSessionServer(SEC_TYPE_PLAINTEXT, g_pkgName, sessionName, &g_sessionlistener);
+    uint64_t timestamp = 0;
+    int32_t ret = ClientAddSessionServer(SEC_TYPE_PLAINTEXT, g_pkgName, sessionName, &g_sessionlistener, &timestamp);
     if (ret != SOFTBUS_OK) {
         return ret;
     }
@@ -520,6 +522,12 @@ HWTEST_F(TransClientMsgServiceTest, SendMessageAsyncTest01, TestSize.Level1)
     ret = SendMessageAsync(socket, dataSeq, data, len);
     EXPECT_EQ(ret, SOFTBUS_TRANS_SESSION_INFO_NOT_FOUND);
 
+    ret = SendMessageAsync(0, dataSeq, data, len);
+    EXPECT_EQ(ret, SOFTBUS_TRANS_SESSION_INFO_NOT_FOUND);
+
+    ret = SendMessageAsync(-1, dataSeq, data, len);
+    EXPECT_EQ(ret, SOFTBUS_TRANS_SESSION_INFO_NOT_FOUND);
+
     int32_t sessionId = AddSessionServerAndSession(
         g_sessionName, CHANNEL_TYPE_PROXY, BUSINESS_TYPE_MESSAGE, false, ENABLE_STATUS_SUCCESS);
     ASSERT_GT(sessionId, 0);
@@ -536,6 +544,10 @@ HWTEST_F(TransClientMsgServiceTest, SendMessageAsyncTest01, TestSize.Level1)
     len = TRANS_TEST_BEYOND_MAX_MSG_LEN;
     ret = SendMessageAsync(sessionId, dataSeq, data, len);
     EXPECT_EQ(ret, SOFTBUS_TRANS_SEND_LEN_BEYOND_LIMIT);
+
+    len = TRANS_TEST_DEFAULT_MAX_MSG_LEN;
+    ret = SendMessageAsync(sessionId, dataSeq, data, len);
+    EXPECT_EQ(ret, SOFTBUS_TRANS_PROXY_CHANNEL_NOT_FOUND);
     DeleteSessionServerAndSession(g_sessionName, sessionId);
 }
 }

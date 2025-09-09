@@ -17,7 +17,6 @@
 
 #include <securec.h>
 
-#include "lnn_device_info_recovery.h"
 #include "message_handler.h"
 #include "g_enhance_lnn_func.h"
 #include "g_enhance_lnn_func_pack.h"
@@ -44,7 +43,7 @@
 #include "trans_event.h"
 #include "trans_log.h"
 
-#define ID_OFFSET (0xABAB0000)
+#define ID_OFFSET (1)
 #define WAIT_LISTEN_CHECK_DELAY     (200)
 #define WAIT_LISTEN_CHECK_NUM       (50)
 
@@ -201,7 +200,7 @@ static int32_t TransProxyResetAndCloseConn(ProxyChannelInfo *chan)
         TRANS_LOGI(TRANS_CTRL, "reset dis device. isDisconnect=%{public}d, connId=%{public}u, deviceType=%{public}d",
             !chan->isServer, chan->connId, chan->deviceTypeIsWinpc);
         // only client side can disconnect connection
-        if (((!chan->isServer) || ret != SOFTBUS_OK) && (!chan->deviceTypeIsWinpc)) {
+        if (((chan->isD2D) || (!chan->isServer) || ret != SOFTBUS_OK) && (!chan->deviceTypeIsWinpc)) {
             (void)ConnDisconnectDevice(chan->connId);
         }
     }
@@ -430,7 +429,7 @@ static int32_t TransProxyLoopInit(void)
 int32_t TransProxyTransSendMsg(uint32_t connectionId, uint8_t *buf, uint32_t len, int32_t priority, int32_t pid)
 {
     ConnPostData data = { 0 };
-    static uint64_t seq = 1;
+    static uint32_t seq = 1;
 
     data.module = MODULE_PROXY_CHANNEL;
     data.seq = seq++;

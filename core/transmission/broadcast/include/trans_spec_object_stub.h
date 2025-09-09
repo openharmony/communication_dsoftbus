@@ -16,7 +16,6 @@
 #ifndef OHOS_TRANS_SPEC_OBJECT_STUB_H
 #define OHOS_TRANS_SPEC_OBJECT_STUB_H
 
-#include "broadcast_struct.h"
 #include "itrans_spec_object.h"
 #include "iremote_stub.h"
 
@@ -34,7 +33,6 @@ public:
     TransSpecObjectStub();
 
     int32_t OnRemoteRequest(uint32_t code, MessageParcel &data, MessageParcel &reply, MessageOption &option) override;
-
 private:
 
     bool OpenSoftbusPluginSo();

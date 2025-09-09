@@ -118,5 +118,20 @@ int32_t LnnGetLocalByteInfo(InfoKey key, uint8_t *info, uint32_t len)
     return GetAuthHichainIdServiceInterfaceMock()->LnnGetLocalByteInfo(key, info, len);
 }
 
+void LnnUpdateHeartbeatInfo(LnnHeartbeatUpdateInfoType type)
+{
+    return GetAuthHichainIdServiceInterfaceMock()->LnnUpdateHeartbeatInfo(type);
+}
+
+const CredManager *IdServiceGetCredMgrInstance()
+{
+    return GetAuthHichainIdServiceInterfaceMock()->IdServiceGetCredMgrInstance();
+}
+
+int32_t IdServiceQueryCredentialByUdid(int32_t userId, const char *udid, char **credList)
+{
+    return GetAuthHichainIdServiceInterfaceMock()->IdServiceQueryCredentialByUdid(userId, udid, credList);
+}
+
 } // extern "C"
 } // namespace OHOS

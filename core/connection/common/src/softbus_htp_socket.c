@@ -51,7 +51,7 @@ static int32_t HtpConnect(int32_t fd, const char *mac, uint16_t port)
     SoftBusSockAddrHtp htpAddr;
     int32_t ret = MacToHtpAddr(mac, &htpAddr, port);
     if (ret != SOFTBUS_OK) {
-        CONN_LOGE(CONN_COMMON, "convert mac to htp address failed, ret=%{public}d", ret);
+        CONN_LOGE(CONN_COMMON, "convert mac to htp address fail, ret=%{public}d", ret);
         return ret;
     }
     return SOFTBUS_TEMP_FAILURE_RETRY(
@@ -63,7 +63,7 @@ static int32_t BindLocalMac(int32_t fd, const char *mac, uint16_t port)
     SoftBusSockAddrHtp htpAddr;
     int32_t ret = MacToHtpAddr(mac, &htpAddr, port);
     if (ret != SOFTBUS_OK) {
-        CONN_LOGE(CONN_COMMON, "convert mac to htp address failed, ret=%{public}d", ret);
+        CONN_LOGE(CONN_COMMON, "convert mac to htp address fail, ret=%{public}d", ret);
         return ret;
     }
     return SOFTBUS_TEMP_FAILURE_RETRY(SoftBusSocketBind(fd, (SoftBusSockAddr *)&htpAddr, sizeof(SoftBusSockAddrHtp)));
@@ -74,7 +74,7 @@ static int32_t GetHtpSockPort(int32_t fd)
     SoftBusSockAddr addr;
     int32_t rc = SoftBusSocketGetLocalName(fd, &addr);
     if (rc != SOFTBUS_ADAPTER_OK) {
-        CONN_LOGE(CONN_COMMON, "get mintp sock port failed. rc=%{public}d, fd=%{public}d", rc, fd);
+        CONN_LOGE(CONN_COMMON, "get mintp sock port fail. rc=%{public}d, fd=%{public}d", rc, fd);
         return rc;
     }
     if (addr.saFamily == SOFTBUS_AF_INET6) {
@@ -105,12 +105,12 @@ static int32_t OpenHtpClientSocket(const ConnectOption *option, const char *myIp
     int32_t fd = -1;
     int32_t ret = SoftBusSocketCreate(domain, SOFTBUS_SOCK_DGRAM, IPPROTO_HTP, &fd);
     if (ret != SOFTBUS_OK) {
-        CONN_LOGE(CONN_COMMON, "create htp socket failed. serverMac=%{public}s, serverPort=%{public}d, ret=%{public}d",
+        CONN_LOGE(CONN_COMMON, "create htp socket fail. serverMac=%{public}s, serverPort=%{public}d, ret=%{public}d",
             AnonymizeWrapper(animizedMac), option->socketOption.port, ret);
         return ret;
     }
     if (isNonBlock && ConnToggleNonBlockMode(fd, true) != SOFTBUS_OK) {
-        CONN_LOGE(CONN_COMMON, "set nonblock mode failed. serverMac=%{public}s, serverPort=%{public}d",
+        CONN_LOGE(CONN_COMMON, "set nonblock mode fail. serverMac=%{public}s, serverPort=%{public}d",
             AnonymizeWrapper(animizedMac), option->socketOption.port);
         ConnShutdownSocket(fd);
         return SOFTBUS_SOCKET_ERR;
@@ -118,7 +118,7 @@ static int32_t OpenHtpClientSocket(const ConnectOption *option, const char *myIp
     SetClientOption(fd);
     ret = BindLocalMac(fd, option->socketOption.localMac, 0);
     if (ret != SOFTBUS_OK) {
-        CONN_LOGE(CONN_COMMON, "bind client address failed. ret=%{public}d", ret);
+        CONN_LOGE(CONN_COMMON, "bind client address fail. ret=%{public}d", ret);
         ConnShutdownSocket(fd);
         return ret;
     }
@@ -126,7 +126,7 @@ static int32_t OpenHtpClientSocket(const ConnectOption *option, const char *myIp
     ret = HtpConnect(fd, option->socketOption.remoteMac, option->socketOption.port);
     if ((ret != SOFTBUS_ADAPTER_OK) && (ret != SOFTBUS_ADAPTER_SOCKET_EINPROGRESS) &&
         (ret != SOFTBUS_ADAPTER_SOCKET_EAGAIN)) {
-        CONN_LOGE(CONN_COMMON, "connect htp failed. serverMac=%{public}s, serverPort=%{public}d, ret=%{public}d",
+        CONN_LOGE(CONN_COMMON, "connect htp fail. serverMac=%{public}s, serverPort=%{public}d, ret=%{public}d",
             AnonymizeWrapper(animizedMac), option->socketOption.port, ret);
         ConnShutdownSocket(fd);
         return SOFTBUS_SOCKET_ERR;
@@ -155,13 +155,13 @@ static int32_t OpenHtpServerSocket(const LocalListenerInfo *option)
     int32_t ret = SoftBusSocketCreate(
         domain, SOFTBUS_SOCK_DGRAM | SOFTBUS_SOCK_CLOEXEC | SOFTBUS_SOCK_NONBLOCK, IPPROTO_HTP, &fd);
     if (ret != SOFTBUS_ADAPTER_OK) {
-        CONN_LOGE(CONN_COMMON, "create htp socket failed. ret=%{public}d", ret);
+        CONN_LOGE(CONN_COMMON, "create htp socket fail. ret=%{public}d", ret);
         return ret;
     }
     SetServerOption(fd);
     ret = BindLocalMac(fd, option->socketOption.localMac, 0);
     if (ret != SOFTBUS_OK) {
-        CONN_LOGE(CONN_COMMON, "bind client address failed. ret=%{public}d", ret);
+        CONN_LOGE(CONN_COMMON, "bind client address fail. ret=%{public}d", ret);
         ConnShutdownSocket(fd);
         return ret;
     }
@@ -178,7 +178,7 @@ static int32_t AcceptHtpClient(int32_t fd, ConnectOption *clientAddr, int32_t *c
     (void)memset_s(&addr, sizeof(addr), 0, sizeof(addr));
     int32_t ret = SOFTBUS_TEMP_FAILURE_RETRY(SoftBusSocketAccept(fd, &addr, cfd));
     if (ret != SOFTBUS_OK) {
-        CONN_LOGE(CONN_COMMON, "htp accept failed. ret=%{public}d", ret);
+        CONN_LOGE(CONN_COMMON, "htp accept fail. ret=%{public}d", ret);
         return ret;
     }
     clientAddr->type = CONNECT_HML;
@@ -188,10 +188,10 @@ static int32_t AcceptHtpClient(int32_t fd, ConnectOption *clientAddr, int32_t *c
     ret = snprintf_s(clientAddr->socketOption.addr, sizeof(clientAddr->socketOption.addr), MAC_MAX_LEN,
         "%02X:%02X:%02X:%02X:%02X:%02X", mac_addr[0], mac_addr[1], mac_addr[2], mac_addr[3], mac_addr[4], mac_addr[5]);
     if (ret < 0 || ret >= MAC_MAX_LEN) {
-        CONN_LOGE(CONN_COMMON, "snprintf_s failed. ret=%{public}d", ret);
+        CONN_LOGE(CONN_COMMON, "snprintf_s fail. ret=%{public}d", ret);
         return SOFTBUS_STRCPY_ERR;
     }
-    for (int32_t i = 0; i < strlen(clientAddr->socketOption.addr); i++) {
+    for (uint32_t i = 0; i < strlen(clientAddr->socketOption.addr); i++) {
         if (isalpha(clientAddr->socketOption.addr[i])) {
             clientAddr->socketOption.addr[i] = tolower(clientAddr->socketOption.addr[i]);
         }

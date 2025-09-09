@@ -40,7 +40,7 @@ EventWatcher* RegisterEventWatcher(GetAllFdEventCallback callback)
 {
     CONN_CHECK_AND_RETURN_RET_LOGE(callback != NULL, NULL, CONN_COMMON, "callback is NULL");
     EventWatcher *watcher = (EventWatcher *)SoftBusCalloc(sizeof(EventWatcher));
-    CONN_CHECK_AND_RETURN_RET_LOGE(watcher != NULL, NULL, CONN_COMMON, "malloc eventWatcher failed");
+    CONN_CHECK_AND_RETURN_RET_LOGE(watcher != NULL, NULL, CONN_COMMON, "malloc eventWatcher fail");
     watcher->callback = callback;
     CONN_LOGI(CONN_COMMON, "register event watcher success");
     return watcher;
@@ -127,7 +127,7 @@ int32_t WatchEvent(EventWatcher *watcher, int32_t timeoutMS, ListNode *out)
     ListNode fdHeadNode;
     ListInit(&fdHeadNode);
     int32_t status = watcher->callback(&fdHeadNode);
-    CONN_CHECK_AND_RETURN_RET_LOGE(status == SOFTBUS_OK, status, CONN_COMMON, "get all fd event failed");
+    CONN_CHECK_AND_RETURN_RET_LOGE(status == SOFTBUS_OK, status, CONN_COMMON, "get all fd event fail");
     SoftBusFdSets fdSets = {0};
     int32_t maxFd = PrepareFdSets(&fdHeadNode, &fdSets);
             
@@ -136,7 +136,7 @@ int32_t WatchEvent(EventWatcher *watcher, int32_t timeoutMS, ListNode *out)
     CONN_LOGI(CONN_COMMON, "select start");
     int32_t nEvents = SoftBusSocketSelect(maxFd + 1, &fdSets.readSet, &fdSets.writeSet, &fdSets.exceptSet, &timeout);
     if (nEvents <= 0) {
-        CONN_LOGE(CONN_COMMON, "epoll wait failed or not exist ready event, status=%{public}d", nEvents);
+        CONN_LOGE(CONN_COMMON, "epoll wait fail or not exist ready event, status=%{public}d", nEvents);
         ReleaseFdNode(&fdHeadNode);
         return nEvents;
     }

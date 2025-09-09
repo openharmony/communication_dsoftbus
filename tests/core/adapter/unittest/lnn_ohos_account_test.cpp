@@ -63,130 +63,70 @@ HWTEST_F(LNNOhosAccountTest, LNN_GET_OHOS_ACCOUNT_INFO_001, TestSize.Level1)
 }
 
 /**
- * @tc.name: LNN_GET_OHOS_ACCOUNT_INFO_002
- * @tc.desc: test SoftBusGenerateStrHash return not ok
+ * @tc.name: LnnGetOhosAccountInfoByUserIdTest_001
+ * @tc.desc: test LnnGetOhosAccountInfoByUserId invalid param
  * @tc.type: FUNC
  * @tc.require:
  */
-HWTEST_F(LNNOhosAccountTest, LNN_GET_OHOS_ACCOUNT_INFO_002, TestSize.Level1)
+HWTEST_F(LNNOhosAccountTest, LnnGetOhosAccountInfoByUserIdTest_001, TestSize.Level1)
 {
-    LnnOhosAccountInterfaceMock mocker;
-    uint8_t accountHash[SHA_256_HASH_LEN] = { 0 };
-    int32_t ret = SOFTBUS_OK;
-    EXPECT_CALL(mocker, SoftBusGenerateStrHash).WillOnce(Return(SOFTBUS_INVALID_PARAM));
-    ret = LnnGetOhosAccountInfo(accountHash, SHA_256_HASH_LEN);
-    EXPECT_NE(ret, SOFTBUS_OK);
+    int32_t userId = 100;
+    uint8_t *accountHash = nullptr;
+    uint32_t len = SHA_256_HASH_LEN;
+    int32_t ret = LnnGetOhosAccountInfoByUserId(userId, accountHash, len);
+    EXPECT_EQ(ret, SOFTBUS_INVALID_PARAM);
 }
 
 /**
- * @tc.name: LNN_GET_OHOS_ACCOUNT_INFO_003
- * @tc.desc: test LnnGetOhosAccountInfo return success.
+ * @tc.name: LnnGetOhosAccountInfoByUserIdTest_002
+ * @tc.desc: test LnnGetOhosAccountInfoByUserId invalid param
  * @tc.type: FUNC
  * @tc.require:
  */
-HWTEST_F(LNNOhosAccountTest, LNN_GET_OHOS_ACCOUNT_INFO_003, TestSize.Level1)
+HWTEST_F(LNNOhosAccountTest, LnnGetOhosAccountInfoByUserIdTest_002, TestSize.Level1)
 {
-    LnnOhosAccountInterfaceMock mocker;
+    int32_t userId = 100;
     uint8_t accountHash[SHA_256_HASH_LEN] = { 0 };
-    int32_t ret = SOFTBUS_OK;
-    EXPECT_CALL(mocker, SoftBusGenerateStrHash).WillRepeatedly(Return(SOFTBUS_OK));
+    uint32_t len = 0;
+    int32_t ret = LnnGetOhosAccountInfoByUserId(userId, accountHash, len);
+    EXPECT_EQ(ret, SOFTBUS_INVALID_PARAM);
+}
 
-    EXPECT_CALL(mocker, GetOsAccountId).WillOnce(Return(SOFTBUS_OK));
+/**
+ * @tc.name: LnnGetOhosAccountInfoByUserIdTest_003
+ * @tc.desc: test LnnGetOhosAccountInfoByUserId invalid param
+ * @tc.type: FUNC
+ * @tc.require:
+ */
+HWTEST_F(LNNOhosAccountTest, LnnGetOhosAccountInfoByUserIdTest_003, TestSize.Level1)
+{
+    int32_t userId = 0;
+    uint8_t accountHash[SHA_256_HASH_LEN] = { 0 };
+    uint32_t len = SHA_256_HASH_LEN;
+    int32_t ret = LnnGetOhosAccountInfoByUserId(userId, accountHash, len);
+    EXPECT_EQ(ret, SOFTBUS_INVALID_PARAM);
+}
 
-    ret = LnnGetOhosAccountInfo(accountHash, SHA_256_HASH_LEN);
+/**
+ * @tc.name: LnnGetOhosAccountInfoByUserIdTest_004
+ * @tc.desc: test LnnGetOhosAccountInfoByUserId abnormal
+ * @tc.type: FUNC
+ * @tc.require:
+ */
+HWTEST_F(LNNOhosAccountTest, LnnGetOhosAccountInfoByUserIdTest_004, TestSize.Level1)
+{
+    int32_t userId = 100;
+    uint8_t accountHash[SHA_256_HASH_LEN] = { 0 };
+    uint32_t len = SHA_256_HASH_LEN;
+
+    NiceMock<LnnOhosAccountInterfaceMock> mock;
+    EXPECT_CALL(mock, GetOsAccountIdByUserId).WillOnce(DoAll(Return(SOFTBUS_ERR)));
+
+    int32_t ret = LnnGetOhosAccountInfoByUserId(userId, accountHash, len);
+    EXPECT_EQ(ret, SOFTBUS_ERR);
+
+    EXPECT_CALL(mock, GetOsAccountIdByUserId).WillOnce(DoAll(Return(SOFTBUS_OK)));
+    ret = LnnGetOhosAccountInfoByUserId(userId, accountHash, len);
     EXPECT_EQ(ret, SOFTBUS_OK);
-}
-
-/**
- * @tc.name: LNN_INIT_OHOS_ACCOUNT
- * @tc.desc: InitOhosAccount generate default str hash fail.
- * @tc.type: FUNC
- * @tc.require:
- */
-HWTEST_F(LNNOhosAccountTest, LNN_INIT_OHOS_ACCOUNT, TestSize.Level1)
-{
-    LnnOhosAccountInterfaceMock mocker;
-    int32_t ret = SOFTBUS_OK;
-    EXPECT_CALL(mocker, SoftBusGenerateStrHash).WillRepeatedly(Return(SOFTBUS_INVALID_PARAM));
-    ret = LnnInitOhosAccount();
-    EXPECT_NE(ret, SOFTBUS_OK);
-}
-
-/**
- * @tc.name: LNN_UPDATE_OHOS_ACCOUNT_001
- * @tc.desc: OnAccountChanged get local account hash fail
- * @tc.type: FUNC
- * @tc.require:
- */
-HWTEST_F(LNNOhosAccountTest, LNN_UPDATE_OHOS_ACCOUNT_001, TestSize.Level1)
-{
-    NiceMock<LnnOhosAccountInterfaceMock> mocker;
-    ON_CALL(mocker, LnnGetLocalByteInfo).WillByDefault(Return(SOFTBUS_INVALID_PARAM));
-    EXPECT_CALL(mocker, SoftBusGenerateStrHash).Times(0);
-    LnnUpdateOhosAccount(UPDATE_HEARTBEAT);
-    bool ret = LnnIsDefaultOhosAccount();
-    EXPECT_FALSE(ret);
-}
-
-/**
- * @tc.name: LNN_UPDATE_OHOS_ACCOUNT_001
- * @tc.desc:  generate default str hash fail
- * @tc.type: FUNC
- * @tc.require:
- */
-HWTEST_F(LNNOhosAccountTest, LNN_UPDATE_OHOS_ACCOUNT_002, TestSize.Level1)
-{
-    NiceMock<LnnOhosAccountInterfaceMock> mocker;
-    ON_CALL(mocker, SoftBusGenerateStrHash).WillByDefault(Return(SOFTBUS_INVALID_PARAM));
-    ON_CALL(mocker, LnnGetLocalByteInfo).WillByDefault(Return(SOFTBUS_OK));
-    EXPECT_CALL(mocker, UpdateRecoveryDeviceInfoFromDb).Times(0);
-    LnnUpdateOhosAccount(UPDATE_HEARTBEAT);
-    bool ret = LnnIsDefaultOhosAccount();
-    EXPECT_FALSE(ret);
-}
-
-/**
- * @tc.name: LNN_UPDATE_OHOS_ACCOUNT_001
- * @tc.desc:  generate default str hash fail
- * @tc.type: FUNC
- * @tc.require:
- */
-HWTEST_F(LNNOhosAccountTest, LNN_ON_OHOS_ACCOUNT_LOGOUT_001, TestSize.Level1)
-{
-    NiceMock<LnnOhosAccountInterfaceMock> mocker;
-    ON_CALL(mocker, SoftBusGenerateStrHash).WillByDefault(Return(SOFTBUS_INVALID_PARAM));
-    EXPECT_CALL(mocker, UpdateRecoveryDeviceInfoFromDb).Times(0);
-    LnnOnOhosAccountLogout();
-    bool ret = LnnIsDefaultOhosAccount();
-    EXPECT_FALSE(ret);
-}
-
-/**
- * @tc.name: LNN_IS_DEFAULT_OHOS_ACCOUNT_001
- * @tc.desc:  get local accountHash fail
- * @tc.type: FUNC
- * @tc.require:
- */
-HWTEST_F(LNNOhosAccountTest, LNN_IS_DEFAULT_OHOS_ACCOUNT_001, TestSize.Level1)
-{
-    NiceMock<LnnOhosAccountInterfaceMock> mocker;
-    ON_CALL(mocker, LnnGetLocalByteInfo).WillByDefault(Return(SOFTBUS_INVALID_PARAM));
-    bool ret = LnnIsDefaultOhosAccount();
-    EXPECT_FALSE(ret);
-}
-
-/**
- * @tc.name: LNN_IS_DEFAULT_OHOS_ACCOUNT_001
- * @tc.desc:  generate default str hash fail
- * @tc.type: FUNC
- * @tc.require:
- */
-HWTEST_F(LNNOhosAccountTest, LNN_IS_DEFAULT_OHOS_ACCOUNT_002, TestSize.Level1)
-{
-    NiceMock<LnnOhosAccountInterfaceMock> mocker;
-    ON_CALL(mocker, LnnGetLocalByteInfo).WillByDefault(Return(SOFTBUS_OK));
-    ON_CALL(mocker, SoftBusGenerateStrHash).WillByDefault(Return(SOFTBUS_INVALID_PARAM));
-    bool ret = LnnIsDefaultOhosAccount();
-    EXPECT_FALSE(ret);
 }
 } // namespace OHOS

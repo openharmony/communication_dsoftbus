@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2022-2023 Huawei Device Co., Ltd.
+ * Copyright (c) 2022-2025 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -19,9 +19,9 @@
 
 #include "bus_center_manager.h"
 #include "distribute_net_ledger_mock.h"
+#include "g_enhance_lnn_func_pack.h"
 #include "hb_fsm_mock.h"
 #include "hb_strategy_mock.h"
-#include "g_enhance_lnn_func_pack.h"
 #include "lnn_connection_mock.h"
 #include "lnn_heartbeat_fsm.c"
 #include "lnn_heartbeat_utils.h"
@@ -291,8 +291,7 @@ HWTEST_F(HeartBeatFSMTest, RemoveSendOnceMsgTest_01, TestSize.Level1)
 HWTEST_F(HeartBeatFSMTest, OnSendOneHbBeginTest_01, TestSize.Level1)
 {
     NiceMock<HeartBeatFSMInterfaceMock> heartbeatFsmMock;
-    EXPECT_CALL(heartbeatFsmMock, LnnHbMediumMgrSendBegin)
-        .WillRepeatedly(Return(SOFTBUS_NETWORK_HB_SEND_BEGIN_FAILED));
+    EXPECT_CALL(heartbeatFsmMock, LnnHbMediumMgrSendBegin).WillRepeatedly(Return(SOFTBUS_NETWORK_HB_SEND_BEGIN_FAILED));
     void *para = SoftBusCalloc(sizeof(LnnHeartbeatSendBeginData));
     int32_t ret = OnSendOneHbBegin(nullptr, TEST_ARGS, nullptr);
     EXPECT_TRUE(ret == SOFTBUS_INVALID_PARAM);
@@ -411,8 +410,7 @@ HWTEST_F(HeartBeatFSMTest, ProcessLostHeartbeatTest_01, TestSize.Level1)
         .WillRepeatedly(Return(SOFTBUS_OK));
     ret = ProcessLostHeartbeat(TEST_NETWORK_ID, HEARTBEAT_TYPE_BLE_V0, false);
     EXPECT_EQ(ret, SOFTBUS_OK);
-    EXPECT_CALL(heartbeatFsmMock, LnnOfflineTimingByHeartbeat)
-        .WillOnce(Return(SOFTBUS_NETWORK_HB_START_STRATEGY_FAIL));
+    EXPECT_CALL(heartbeatFsmMock, LnnOfflineTimingByHeartbeat).WillOnce(Return(SOFTBUS_NETWORK_HB_START_STRATEGY_FAIL));
     ret = ProcessLostHeartbeat(TEST_NETWORK_ID, HEARTBEAT_TYPE_BLE_V0, false);
     EXPECT_EQ(ret, SOFTBUS_NETWORK_HB_START_STRATEGY_FAIL);
     ret = ProcessLostHeartbeat(TEST_NETWORK_ID, HEARTBEAT_TYPE_TCP_FLUSH, false);
@@ -687,7 +685,7 @@ HWTEST_F(HeartBeatFSMTest, RemoveSendOneEndMsgTest_03, TestSize.Level1)
     delMsgPara.hbType = HEARTBEAT_TYPE_BLE_V1;
     ret = RemoveSendOneEndMsg(&ctrlMsgObj, &delMsg);
     EXPECT_EQ(ret, SOFTBUS_NETWORK_HB_REMOVE_MSG_FAIL);
-    SoftBusFree(msgPara);
+    SoftBusFree(msgPara1);
 }
 /*
  * @tc.name: RemoveSendOneEndMsgTest_04
@@ -1041,7 +1039,7 @@ HWTEST_F(HeartBeatFSMTest, HbFsmStateProcessFunc_01, TestSize.Level1)
 HWTEST_F(HeartBeatFSMTest, LnnPostScreenOffCheckDevMsgToHbFsm_03, TestSize.Level1)
 {
     LnnHeartbeatFsm *hbFsm = LnnCreateHeartbeatFsm();
-    LnnCheckDevStatusMsgPara msgPara = {0};
+    LnnCheckDevStatusMsgPara msgPara = { 0 };
     int32_t ret = LnnPostScreenOffCheckDevMsgToHbFsm(hbFsm, &msgPara, TEST_TIME2);
     SoftBusFree(hbFsm);
     EXPECT_EQ(ret, SOFTBUS_OK);
@@ -1055,8 +1053,10 @@ HWTEST_F(HeartBeatFSMTest, LnnPostScreenOffCheckDevMsgToHbFsm_03, TestSize.Level
  */
 HWTEST_F(HeartBeatFSMTest, LnnPostCheckDevStatusMsgToHbFsm_01, TestSize.Level1)
 {
-    LnnHeartbeatFsm hbFsm = { .fsmName = "test66", };
-    LnnCheckDevStatusMsgPara msgPara = {0};
+    LnnHeartbeatFsm hbFsm = {
+        .fsmName = "test66",
+    };
+    LnnCheckDevStatusMsgPara msgPara = { 0 };
     int32_t ret = LnnPostCheckDevStatusMsgToHbFsm(&hbFsm, &msgPara, TEST_TIME3);
     EXPECT_EQ(ret, SOFTBUS_NETWORK_POST_MSG_DELAY_FAIL);
 }
@@ -1069,8 +1069,10 @@ HWTEST_F(HeartBeatFSMTest, LnnPostCheckDevStatusMsgToHbFsm_01, TestSize.Level1)
  */
 HWTEST_F(HeartBeatFSMTest, LnnPostSendEndMsgToHbFsm_01, TestSize.Level1)
 {
-    LnnHeartbeatFsm hbFsm = { .fsmName = "test66", };
-    LnnHeartbeatSendEndData msgPara = {0};
+    LnnHeartbeatFsm hbFsm = {
+        .fsmName = "test66",
+    };
+    LnnHeartbeatSendEndData msgPara = { 0 };
     int32_t ret = LnnPostSendEndMsgToHbFsm(&hbFsm, &msgPara, TEST_TIME3);
     EXPECT_EQ(ret, SOFTBUS_NETWORK_POST_MSG_DELAY_FAIL);
 }
@@ -1084,7 +1086,7 @@ HWTEST_F(HeartBeatFSMTest, LnnPostSendEndMsgToHbFsm_01, TestSize.Level1)
 HWTEST_F(HeartBeatFSMTest, LnnPostSendBeginMsgToHbFsm_03, TestSize.Level1)
 {
     LnnHeartbeatFsm *hbFsm = LnnCreateHeartbeatFsm();
-    LnnProcessSendOnceMsgPara msgPara = {0};
+    LnnProcessSendOnceMsgPara msgPara = { 0 };
     int32_t ret = LnnPostSendBeginMsgToHbFsm(hbFsm, HEARTBEAT_TYPE_BLE_V0, false, &msgPara, TEST_TIME3);
     SoftBusFree(hbFsm);
     EXPECT_EQ(ret, SOFTBUS_OK);
@@ -1112,7 +1114,9 @@ HWTEST_F(HeartBeatFSMTest, LnnCreateHeartbeatFsm_01, TestSize.Level1)
  */
 HWTEST_F(HeartBeatFSMTest, InitHeartbeatFsm_01, TestSize.Level1)
 {
-    LnnHeartbeatFsm hbFsm = { .fsmName = "test66", };
+    LnnHeartbeatFsm hbFsm = {
+        .fsmName = "test66",
+    };
     LooperDeinit();
     LnnDeinitLnnLooper();
     int32_t ret = InitHeartbeatFsm(&hbFsm);
@@ -1183,8 +1187,8 @@ HWTEST_F(HeartBeatFSMTest, OnScreeOffCheckDevStatus_04, TestSize.Level1)
     LnnHeartbeatFsm *hbFsm = LnnCreateHeartbeatFsm();
     EXPECT_CALL(heartbeatFsmMock, GetScreenState).WillRepeatedly(Return(SOFTBUS_SCREEN_ON));
     EXPECT_CALL(distriLedgerMock, LnnGetDLHeartbeatTimestamp).WillRepeatedly(Return(SOFTBUS_OK));
-    EXPECT_CALL(netLedgerMock, LnnGetAllOnlineNodeInfo).WillOnce(
-        DoAll(SetArgPointee<0>(nodeBasicInfo), SetArgPointee<1>(infoNum), Return(SOFTBUS_OK)));
+    EXPECT_CALL(netLedgerMock, LnnGetAllOnlineNodeInfo)
+        .WillOnce(DoAll(SetArgPointee<0>(nodeBasicInfo), SetArgPointee<1>(infoNum), Return(SOFTBUS_OK)));
     EXPECT_CALL(netLedgerMock, LnnIsLSANode).WillOnce(Return(true)).WillRepeatedly(Return(false));
     msgPara->hasNetworkId = false;
     int32_t ret = OnScreeOffCheckDevStatus(&(hbFsm->fsm), 0, msgPara);
@@ -1207,8 +1211,8 @@ HWTEST_F(HeartBeatFSMTest, OnScreeOffCheckDevStatus_05, TestSize.Level1)
     NodeBasicInfo *nodeBasicInfo = (NodeBasicInfo *)SoftBusCalloc(sizeof(NodeBasicInfo));
     ASSERT_TRUE(nodeBasicInfo != NULL);
     LnnHeartbeatFsm *hbFsm = LnnCreateHeartbeatFsm();
-    EXPECT_CALL(netLedgerMock, LnnGetAllOnlineNodeInfo).WillOnce(
-        DoAll(SetArgPointee<0>(nodeBasicInfo), SetArgPointee<1>(infoNum), Return(SOFTBUS_OK)));
+    EXPECT_CALL(netLedgerMock, LnnGetAllOnlineNodeInfo)
+        .WillOnce(DoAll(SetArgPointee<0>(nodeBasicInfo), SetArgPointee<1>(infoNum), Return(SOFTBUS_OK)));
     msgPara->hasNetworkId = false;
     int32_t ret = OnScreeOffCheckDevStatus(&(hbFsm->fsm), 0, msgPara);
     SoftBusFree(nodeBasicInfo);
@@ -1230,8 +1234,8 @@ HWTEST_F(HeartBeatFSMTest, OnScreeOffCheckDevStatus_06, TestSize.Level1)
     ASSERT_TRUE(msgPara != NULL);
     LnnHeartbeatFsm *hbFsm = LnnCreateHeartbeatFsm();
     msgPara->hasNetworkId = false;
-    EXPECT_CALL(netLedgerMock, LnnGetAllOnlineNodeInfo).WillOnce(
-        DoAll(SetArgPointee<0>(NULL), SetArgPointee<1>(infoNum), Return(SOFTBUS_OK)));
+    EXPECT_CALL(netLedgerMock, LnnGetAllOnlineNodeInfo)
+        .WillOnce(DoAll(SetArgPointee<0>(NULL), SetArgPointee<1>(infoNum), Return(SOFTBUS_OK)));
     int32_t ret = OnScreeOffCheckDevStatus(&(hbFsm->fsm), 0, msgPara);
     SoftBusFree(hbFsm);
     EXPECT_EQ(ret, SOFTBUS_OK);
@@ -1250,8 +1254,8 @@ HWTEST_F(HeartBeatFSMTest, OnScreeOffCheckDevStatus_07, TestSize.Level1)
     LnnCheckDevStatusMsgPara *msgPara = (LnnCheckDevStatusMsgPara *)SoftBusCalloc(sizeof(LnnCheckDevStatusMsgPara));
     ASSERT_TRUE(msgPara != NULL);
     LnnHeartbeatFsm *hbFsm = LnnCreateHeartbeatFsm();
-    EXPECT_CALL(netLedgerMock, LnnGetAllOnlineNodeInfo).WillOnce(
-        DoAll(SetArgPointee<0>(NULL), SetArgPointee<1>(infoNum), Return(SOFTBUS_OK)));
+    EXPECT_CALL(netLedgerMock, LnnGetAllOnlineNodeInfo)
+        .WillOnce(DoAll(SetArgPointee<0>(NULL), SetArgPointee<1>(infoNum), Return(SOFTBUS_OK)));
     msgPara->hasNetworkId = false;
     int32_t ret = OnScreeOffCheckDevStatus(&(hbFsm->fsm), 0, msgPara);
     SoftBusFree(hbFsm);
@@ -1275,7 +1279,7 @@ HWTEST_F(HeartBeatFSMTest, OnCheckDevStatus_01, TestSize.Level1)
     EXPECT_CALL(heartbeatFsmMock, GetScreenState).WillRepeatedly(Return(SOFTBUS_SCREEN_ON));
     EXPECT_CALL(distriLedgerMock, LnnGetDLHeartbeatTimestamp).WillRepeatedly(Return(SOFTBUS_OK));
     int32_t ret = OnCheckDevStatus(&fsm, TEST_ARGS, msgPara);
-    EXPECT_EQ(ret, SOFTBUS_NETWORK_HB_CHECK_DEV_STATUS_ERROR);
+    EXPECT_EQ(ret, SOFTBUS_OK);
     int32_t infoNum = 2;
     LnnCheckDevStatusMsgPara *msgPara1 = (LnnCheckDevStatusMsgPara *)SoftBusCalloc(sizeof(LnnCheckDevStatusMsgPara));
     ASSERT_TRUE(msgPara1 != NULL);
@@ -1283,8 +1287,8 @@ HWTEST_F(HeartBeatFSMTest, OnCheckDevStatus_01, TestSize.Level1)
     ASSERT_TRUE(nodeBasicInfo != NULL);
     LnnHeartbeatFsm *hbFsm = LnnCreateHeartbeatFsm();
     msgPara1->hasNetworkId = false;
-    EXPECT_CALL(netLedgerMock, LnnGetAllOnlineNodeInfo).WillOnce(
-        DoAll(SetArgPointee<0>(nodeBasicInfo), SetArgPointee<1>(infoNum), Return(SOFTBUS_OK)));
+    EXPECT_CALL(netLedgerMock, LnnGetAllOnlineNodeInfo)
+        .WillOnce(DoAll(SetArgPointee<0>(nodeBasicInfo), SetArgPointee<1>(infoNum), Return(SOFTBUS_OK)));
     EXPECT_CALL(netLedgerMock, LnnIsLSANode).WillOnce(Return(true)).WillRepeatedly(Return(false));
     ret = OnCheckDevStatus(&(hbFsm->fsm), TEST_ARGS, msgPara1);
     SoftBusFree(hbFsm);
@@ -1332,8 +1336,8 @@ HWTEST_F(HeartBeatFSMTest, OnCheckDevStatus_03, TestSize.Level1)
     ASSERT_TRUE(nodeBasicInfo != NULL);
     LnnHeartbeatFsm *hbFsm = LnnCreateHeartbeatFsm();
     EXPECT_CALL(heartbeatFsmMock, GetScreenState).WillRepeatedly(Return(SOFTBUS_SCREEN_ON));
-    EXPECT_CALL(netLedgerMock, LnnGetAllOnlineNodeInfo).WillOnce(
-        DoAll(SetArgPointee<0>(nodeBasicInfo), SetArgPointee<1>(infoNum), Return(SOFTBUS_OK)));
+    EXPECT_CALL(netLedgerMock, LnnGetAllOnlineNodeInfo)
+        .WillOnce(DoAll(SetArgPointee<0>(nodeBasicInfo), SetArgPointee<1>(infoNum), Return(SOFTBUS_OK)));
     msgPara->hasNetworkId = false;
     int32_t ret = OnCheckDevStatus(&(hbFsm->fsm), 0, msgPara);
     SoftBusFree(hbFsm);
@@ -1357,8 +1361,8 @@ HWTEST_F(HeartBeatFSMTest, OnCheckDevStatus_04, TestSize.Level1)
     LnnHeartbeatFsm *hbFsm = LnnCreateHeartbeatFsm();
     msgPara->hasNetworkId = false;
     EXPECT_CALL(heartbeatFsmMock, GetScreenState).WillRepeatedly(Return(SOFTBUS_SCREEN_ON));
-    EXPECT_CALL(netLedgerMock, LnnGetAllOnlineNodeInfo).WillOnce(
-        DoAll(SetArgPointee<0>(NULL), SetArgPointee<1>(infoNum), Return(SOFTBUS_OK)));
+    EXPECT_CALL(netLedgerMock, LnnGetAllOnlineNodeInfo)
+        .WillOnce(DoAll(SetArgPointee<0>(NULL), SetArgPointee<1>(infoNum), Return(SOFTBUS_OK)));
     int32_t ret = OnCheckDevStatus(&(hbFsm->fsm), 0, msgPara);
     SoftBusFree(hbFsm);
     EXPECT_EQ(ret, SOFTBUS_OK);
@@ -1379,8 +1383,8 @@ HWTEST_F(HeartBeatFSMTest, OnCheckDevStatus_05, TestSize.Level1)
     ASSERT_TRUE(msgPara != NULL);
     EXPECT_CALL(heartbeatFsmMock, GetScreenState).WillRepeatedly(Return(SOFTBUS_SCREEN_ON));
     LnnHeartbeatFsm *hbFsm = LnnCreateHeartbeatFsm();
-    EXPECT_CALL(netLedgerMock, LnnGetAllOnlineNodeInfo).WillOnce(
-        DoAll(SetArgPointee<0>(NULL), SetArgPointee<1>(infoNum), Return(SOFTBUS_OK)));
+    EXPECT_CALL(netLedgerMock, LnnGetAllOnlineNodeInfo)
+        .WillOnce(DoAll(SetArgPointee<0>(NULL), SetArgPointee<1>(infoNum), Return(SOFTBUS_OK)));
     msgPara->hasNetworkId = false;
     int32_t ret = OnCheckDevStatus(&(hbFsm->fsm), 0, msgPara);
     SoftBusFree(hbFsm);

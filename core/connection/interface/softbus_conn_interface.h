@@ -97,7 +97,7 @@ int32_t ConnTypeIsSupport(ConnectType type);
  * @param[in] needKeepalive tcp need keepalive.
  * @return <b>SOFTBUS_OK</b> set keepalive success.
  */
-int32_t ConnSetKeepAliveByConnectionId(uint32_t connectionId, bool needKeepalive);
+int32_t ConnSetKeepaliveByConnectionId(uint32_t connectionId, bool needKeepalive);
 
 /**
  * @ingroup Softbus_conn_manager
@@ -235,6 +235,7 @@ int32_t ConnGetTypeByConnectionId(uint32_t connectionId, ConnectType *type);
 int32_t ConnConfigPostLimit(const LimitConfiguration *configuration);
 
 void ConnDeathCallback(const char *pkgName, int32_t pid);
+
 #ifdef __cplusplus
 #if __cplusplus
 }

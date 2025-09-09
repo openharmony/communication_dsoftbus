@@ -19,12 +19,12 @@
 #include <gtest/gtest.h>
 #include <securec.h>
 
+#include "dsoftbus_enhance_interface.h"
 #include "lnn_data_cloud_sync.c"
 #include "lnn_data_cloud_sync.h"
 #include "lnn_data_cloud_sync_deps_mock.h"
 #include "lnn_kv_adapter_wrapper_mock.h"
 #include "lnn_net_ledger_mock.h"
-#include "dsoftbus_enhance_interface.h"
 
 constexpr char MACTEST[BT_MAC_LEN] = "00:11:22:33:44";
 constexpr char PEERUUID[UUID_BUF_LEN] = "021315ASD";
@@ -312,8 +312,8 @@ HWTEST_F(LNNDataCloudSyncMockTest, DBDataChangeBatchSyncToCacheInternal_Test_001
         DBDataChangeBatchSyncToCacheInternal(nullptr, fieldName, value, valueLength, udid), SOFTBUS_INVALID_PARAM);
     EXPECT_EQ(
         DBDataChangeBatchSyncToCacheInternal(&cacheInfo, nullptr, value, valueLength, udid), SOFTBUS_INVALID_PARAM);
-    EXPECT_EQ(DBDataChangeBatchSyncToCacheInternal(&cacheInfo, fieldName, nullptr, valueLength, udid),
-        SOFTBUS_INVALID_PARAM);
+    EXPECT_EQ(
+        DBDataChangeBatchSyncToCacheInternal(&cacheInfo, fieldName, nullptr, valueLength, udid), SOFTBUS_INVALID_PARAM);
     EXPECT_EQ(DBDataChangeBatchSyncToCacheInternal(&cacheInfo, fieldName, value, valueLength, nullptr),
         SOFTBUS_INVALID_PARAM);
     const char *udid1 = "123456789123456789123456789123456789123456789123456789123456789123456789";
@@ -654,7 +654,7 @@ HWTEST_F(LNNDataCloudSyncMockTest, PackBroadcastCipherKeyInner_Test_001, TestSiz
 
 /*
  * @tc.name: HandleDBAddChangeInternal_Test_002
- * @tc.desc: HandleDBAddChangeInternal
+ * @tc.desc: HandleDBAddChangeInternal test parameter error
  * @tc.type: FUNC
  * @tc.require:
  */
@@ -670,7 +670,7 @@ HWTEST_F(LNNDataCloudSyncMockTest, HandleDBAddChangeInternal_Test_002, TestSize.
 
 /*
  * @tc.name: HandleDBUpdateChangeInternal_Test_001
- * @tc.desc: HandleDBUpdateChangeInternal
+ * @tc.desc: HandleDBUpdateChangeInternal test parameter error
  * @tc.type: FUNC
  * @tc.require:
  */
@@ -687,7 +687,7 @@ HWTEST_F(LNNDataCloudSyncMockTest, HandleDBUpdateChangeInternal_Test_001, TestSi
 
 /*
  * @tc.name: CheckParamValidity_Test_001
- * @tc.desc: CheckParamValidity
+ * @tc.desc: CheckParamValidity test parameter error
  * @tc.type: FUNC
  * @tc.require:
  */
@@ -712,7 +712,7 @@ HWTEST_F(LNNDataCloudSyncMockTest, CheckParamValidity_Test_001, TestSize.Level1)
 
 /*
  * @tc.name: LnnDBDataAddChangeSyncToCache_Test_002
- * @tc.desc: LnnDBDataAddChangeSyncToCache
+ * @tc.desc: LnnDBDataAddChangeSyncToCache test execute success
  * @tc.type: FUNC
  * @tc.require:
  */
@@ -726,14 +726,15 @@ HWTEST_F(LNNDataCloudSyncMockTest, LnnDBDataAddChangeSyncToCache_Test_002, TestS
 
 /*
  * @tc.name: LnnUpdateOldCacheInfo_Test_001
- * @tc.desc: LnnUpdateOldCacheInfo
+ * @tc.desc: LnnUpdateOldCacheInfo test execute success
  * @tc.type: FUNC
  * @tc.require:
  */
 HWTEST_F(LNNDataCloudSyncMockTest, LnnUpdateOldCacheInfo_Test_001, TestSize.Level1)
 {
-    NodeInfo newInfo;
-    NodeInfo oldInfo;
+    NiceMock<LnnDataCloudSyncInterfaceMock> DataCloudSyncMock;
+    NodeInfo newInfo = {};
+    NodeInfo oldInfo = {};
     UpdateDeviceNameToCache(&newInfo, &oldInfo);
     UpdateDeviceNameToCache(&newInfo, &oldInfo);
     UpdateDevBasicInfoToCache(&newInfo, &oldInfo);
@@ -741,27 +742,31 @@ HWTEST_F(LNNDataCloudSyncMockTest, LnnUpdateOldCacheInfo_Test_001, TestSize.Leve
     EXPECT_EQ(ret, SOFTBUS_INVALID_PARAM);
     ret = LnnUpdateOldCacheInfo(&newInfo, nullptr);
     EXPECT_EQ(ret, SOFTBUS_INVALID_PARAM);
+    EXPECT_CALL(DataCloudSyncMock, LnnFindDeviceUdidTrustedInfoFromDb).WillRepeatedly(Return(SOFTBUS_OK));
+    ret = LnnUpdateOldCacheInfo(&newInfo, &oldInfo);
+    EXPECT_EQ(ret, SOFTBUS_OK);
+    EXPECT_CALL(DataCloudSyncMock, LnnFindDeviceUdidTrustedInfoFromDb).WillRepeatedly(Return(SOFTBUS_NOT_FIND));
     ret = LnnUpdateOldCacheInfo(&newInfo, &oldInfo);
     EXPECT_EQ(ret, SOFTBUS_OK);
 }
 
 /*
  * @tc.name: LnnSaveAndUpdateDistributedNode_Test_001
- * @tc.desc: LnnSaveAndUpdateDistributedNode
+ * @tc.desc: LnnSaveAndUpdateDistributedNode test parameter error
  * @tc.type: FUNC
  * @tc.require:
  */
 HWTEST_F(LNNDataCloudSyncMockTest, LnnSaveAndUpdateDistributedNode_Test_001, TestSize.Level1)
 {
-    NodeInfo cacheInfo;
-    NodeInfo oldCacheInfo;
+    NodeInfo cacheInfo = {};
+    NodeInfo oldCacheInfo = {};
     EXPECT_EQ(LnnSaveAndUpdateDistributedNode(nullptr, &oldCacheInfo), SOFTBUS_INVALID_PARAM);
     EXPECT_EQ(LnnSaveAndUpdateDistributedNode(&cacheInfo, nullptr), SOFTBUS_INVALID_PARAM);
 }
 
 /*
  * @tc.name: LnnDeleteDevInfoSyncToDB_Test_001
- * @tc.desc: LnnDeleteDevInfoSyncToDB
+ * @tc.desc: LnnDeleteDevInfoSyncToDB test parameter error
  * @tc.type: FUNC
  * @tc.require:
  */

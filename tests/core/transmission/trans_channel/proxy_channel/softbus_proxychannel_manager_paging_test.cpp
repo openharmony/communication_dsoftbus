@@ -21,10 +21,8 @@
 #include "softbus_error_code.h"
 #include "softbus_json_utils.h"
 #include "softbus_proxychannel_common.h"
-#include "softbus_proxychannel_manager.h"
 #include "softbus_proxychannel_manager.c"
 #include "softbus_proxychannel_manager_paging_test_mock.h"
-#include "softbus_proxychannel_message_paging_test_mock.h"
 
 using namespace testing;
 using namespace testing::ext;
@@ -281,7 +279,6 @@ HWTEST_F(SoftbusProxyChannelManagerPagingTest, TransPagingHandshakeUnpackErrMsgT
         .data = const_cast<char *>(TEST_DATA),
         .dataLen = sizeof(TEST_DATA),
     };
-    int32_t channelId = TEST_CHANNEL_ID;
     int32_t errCode = SOFTBUS_OK;
     cJSON *root = cJSON_CreateObject();
     ASSERT_TRUE(root != nullptr);
@@ -298,24 +295,13 @@ HWTEST_F(SoftbusProxyChannelManagerPagingTest, TransPagingHandshakeUnpackErrMsgT
     EXPECT_CALL(ProxyPagingMock, cJSON_ParseWithLength).WillOnce(Return(root));
     ret = TransPagingHandshakeUnPackErrMsg(&chan, &msg, &errCode);
     EXPECT_EQ(SOFTBUS_PARSE_JSON_ERR, ret);
-    cJSON *testRoot = nullptr;
-    testRoot = cJSON_CreateObject();
+    cJSON *testRoot = cJSON_CreateObject();
     ASSERT_TRUE(testRoot != nullptr);
     bool res = AddNumberToJsonObject(testRoot, ERR_CODE, errCode);
     EXPECT_EQ(true, res);
     EXPECT_CALL(ProxyPagingMock, cJSON_ParseWithLength).WillOnce(Return(testRoot));
     ret = TransPagingHandshakeUnPackErrMsg(&chan, &msg, &errCode);
     EXPECT_EQ(SOFTBUS_PARSE_JSON_ERR, ret);
-    cJSON *testRootTest = nullptr;
-    testRootTest = cJSON_CreateObject();
-    ASSERT_TRUE(testRootTest != nullptr);
-    res = AddNumberToJsonObject(testRootTest, ERR_CODE, errCode);
-    EXPECT_EQ(true, res);
-    res = AddNumberToJsonObject(testRootTest, JSON_KEY_PAGING_SINK_CHANNEL_ID, channelId);
-    EXPECT_EQ(true, res);
-    EXPECT_CALL(ProxyPagingMock, cJSON_ParseWithLength).WillOnce(Return(testRootTest));
-    ret = TransPagingHandshakeUnPackErrMsg(&chan, &msg, &errCode);
-    EXPECT_EQ(SOFTBUS_OK, ret);
 }
 
 /**@

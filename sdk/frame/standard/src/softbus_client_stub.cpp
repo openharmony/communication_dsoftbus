@@ -50,7 +50,7 @@ SoftBusClientStub::SoftBusClientStub()
     memberFuncMap_[CLIENT_ON_PUBLISH_LNN_RESULT] = &SoftBusClientStub::OnPublishLNNResultInner;
     memberFuncMap_[CLIENT_ON_REFRESH_LNN_RESULT] = &SoftBusClientStub::OnRefreshLNNResultInner;
     memberFuncMap_[CLIENT_ON_REFRESH_DEVICE_FOUND] = &SoftBusClientStub::OnRefreshDeviceFoundInner;
-    memberFuncMap_[CLIENT_ON_PERMISSION_CHANGE] = &SoftBusClientStub::OnClientPermissonChangeInner;
+    memberFuncMap_[CLIENT_ON_PERMISSION_CHANGE] = &SoftBusClientStub::OnClientPermissionChangeInner;
     memberFuncMap_[CLIENT_SET_CHANNEL_INFO] = &SoftBusClientStub::SetChannelInfoInner;
     memberFuncMap_[CLIENT_ON_DATA_LEVEL_CHANGED] = &SoftBusClientStub::OnDataLevelChangedInner;
     memberFuncMap_[CLIENT_ON_RANGE_RESULT] = &SoftBusClientStub::OnMsdpRangeResultInner;
@@ -86,7 +86,7 @@ int32_t SoftBusClientStub::OnRemoteRequest(uint32_t code,
     return IPCObjectStub::OnRemoteRequest(code, data, reply, option);
 }
 
-int32_t SoftBusClientStub::OnClientPermissonChangeInner(MessageParcel &data, MessageParcel &reply)
+int32_t SoftBusClientStub::OnClientPermissionChangeInner(MessageParcel &data, MessageParcel &reply)
 {
     int32_t state;
     COMM_CHECK_AND_RETURN_RET_LOGE(
@@ -181,19 +181,10 @@ static int32_t MessageTcpParcelRead(MessageParcel &data, ChannelInfo *channel)
 
 static int32_t MessageParcelReadEx(MessageParcel &data, ChannelInfo *channel)
 {
-    READ_PARCEL_WITH_RET(data, Int32, channel->routeType, SOFTBUS_IPC_ERR);
-    READ_PARCEL_WITH_RET(data, Int32, channel->encrypt, SOFTBUS_IPC_ERR);
-    READ_PARCEL_WITH_RET(data, Int32, channel->algorithm, SOFTBUS_IPC_ERR);
-    READ_PARCEL_WITH_RET(data, Int32, channel->crc, SOFTBUS_IPC_ERR);
-    READ_PARCEL_WITH_RET(data, Uint32, channel->dataConfig, SOFTBUS_IPC_ERR);
-    READ_PARCEL_WITH_RET(data, Int32, channel->linkType, SOFTBUS_IPC_ERR);
-    READ_PARCEL_WITH_RET(data, Int32, channel->osType, SOFTBUS_IPC_ERR);
-    READ_PARCEL_WITH_RET(data, Bool, channel->isSupportTlv, SOFTBUS_IPC_ERR);
-    channel->peerDeviceId = (char *)data.ReadCString();
-    COMM_CHECK_AND_RETURN_RET_LOGE(channel->peerDeviceId != nullptr,
-        SOFTBUS_IPC_ERR, COMM_SDK, "read peerDeviceId failed");
     READ_PARCEL_WITH_RET(data, Bool, channel->isD2D, SOFTBUS_IPC_ERR);
     if (channel->isD2D) {
+        READ_PARCEL_WITH_RET(data, Bool, channel->isSupportNewHead, SOFTBUS_IPC_ERR);
+        READ_PARCEL_WITH_RET(data, Int32, channel->pagingId, SOFTBUS_IPC_ERR);
         READ_PARCEL_WITH_RET(data, Uint32, channel->businessFlag, SOFTBUS_IPC_ERR);
         READ_PARCEL_WITH_RET(data, Uint32, channel->deviceTypeId, SOFTBUS_IPC_ERR);
         channel->pagingNonce = (char *)data.ReadRawData(PAGING_NONCE_LEN);
@@ -225,8 +216,7 @@ static int32_t MessageParcelReadEx(MessageParcel &data, ChannelInfo *channel)
         COMM_CHECK_AND_RETURN_RET_LOGE(channel->sessionKey != nullptr, SOFTBUS_IPC_ERR,
             COMM_SDK, "read rawData failed");
         channel->groupId = (char *)data.ReadCString();
-        COMM_CHECK_AND_RETURN_RET_LOGE(channel->groupId != nullptr,
-            SOFTBUS_IPC_ERR, COMM_SDK, "read groupId failed");
+        COMM_CHECK_AND_RETURN_RET_LOGE(channel->groupId != nullptr, SOFTBUS_IPC_ERR, COMM_SDK, "read groupId failed");
     }
     return SOFTBUS_OK;
 }
@@ -245,9 +235,9 @@ static int32_t MessageParcelRead(MessageParcel &data, ChannelInfo *channel)
     READ_PARCEL_WITH_RET(data, Bool, channel->isEncrypt, SOFTBUS_IPC_ERR);
     READ_PARCEL_WITH_RET(data, Int32, channel->peerUid, SOFTBUS_IPC_ERR);
     READ_PARCEL_WITH_RET(data, Int32, channel->peerPid, SOFTBUS_IPC_ERR);
+    READ_PARCEL_WITH_RET(data, Uint32, channel->keyLen, SOFTBUS_IPC_ERR);
     COMM_CHECK_AND_RETURN_RET_LOGE(channel->keyLen <= SESSION_KEY_LENGTH, SOFTBUS_IPC_ERR, COMM_SDK,
         "channel->keyLen invalid");
-    READ_PARCEL_WITH_RET(data, Uint32, channel->keyLen, SOFTBUS_IPC_ERR);
     channel->peerSessionName = (char *)data.ReadCString();
     COMM_CHECK_AND_RETURN_RET_LOGE(
         channel->peerSessionName != nullptr, SOFTBUS_IPC_ERR, COMM_SDK, "read peerSessionName failed");
@@ -264,6 +254,17 @@ static int32_t MessageParcelRead(MessageParcel &data, ChannelInfo *channel)
                 channel->peerIp != nullptr, SOFTBUS_IPC_ERR, COMM_SDK, "read channel.peerIp failed");
         }
     }
+    READ_PARCEL_WITH_RET(data, Int32, channel->routeType, SOFTBUS_IPC_ERR);
+    READ_PARCEL_WITH_RET(data, Int32, channel->encrypt, SOFTBUS_IPC_ERR);
+    READ_PARCEL_WITH_RET(data, Int32, channel->algorithm, SOFTBUS_IPC_ERR);
+    READ_PARCEL_WITH_RET(data, Int32, channel->crc, SOFTBUS_IPC_ERR);
+    READ_PARCEL_WITH_RET(data, Uint32, channel->dataConfig, SOFTBUS_IPC_ERR);
+    READ_PARCEL_WITH_RET(data, Int32, channel->linkType, SOFTBUS_IPC_ERR);
+    READ_PARCEL_WITH_RET(data, Int32, channel->osType, SOFTBUS_IPC_ERR);
+    READ_PARCEL_WITH_RET(data, Bool, channel->isSupportTlv, SOFTBUS_IPC_ERR);
+    channel->peerDeviceId = (char *)data.ReadCString();
+    COMM_CHECK_AND_RETURN_RET_LOGE(channel->peerDeviceId != nullptr,
+        SOFTBUS_IPC_ERR, COMM_SDK, "read peerDeviceId failed");
     return MessageParcelReadEx(data, channel);
 }
 

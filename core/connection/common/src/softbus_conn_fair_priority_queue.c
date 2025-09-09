@@ -48,7 +48,7 @@ struct PriorityQueue {
 static struct PriorityQueue *CreatePriorityQueue(int32_t id, uint32_t size)
 {
     struct PriorityQueue *pq = SoftBusCalloc(sizeof(struct PriorityQueue));
-    CONN_CHECK_AND_RETURN_RET_LOGE(pq != NULL, NULL, CONN_COMMON, "malloc failed");
+    CONN_CHECK_AND_RETURN_RET_LOGE(pq != NULL, NULL, CONN_COMMON, "malloc fail");
 
     ListInit(&pq->node);
     pq->id = id;
@@ -78,7 +78,7 @@ static LockFreeQueue *GetQueue(struct PriorityQueue *queue, ConnPriority priorit
         return lfq;
     }
     lfq = CreateQueue(queue->size);
-    CONN_CHECK_AND_RETURN_RET_LOGE(lfq != NULL, NULL, CONN_COMMON, "create queue failed");
+    CONN_CHECK_AND_RETURN_RET_LOGE(lfq != NULL, NULL, CONN_COMMON, "create queue fail");
     queue->queue[priority] = lfq;
     return lfq;
 }
@@ -88,7 +88,7 @@ static int32_t Enqueue(struct PriorityQueue *queue, struct ConnQueueItem *item)
     ConnPriority priority = item->priority;
     LockFreeQueue *lfq = GetQueue(queue, priority, true);
     CONN_CHECK_AND_RETURN_RET_LOGE(lfq != NULL, SOFTBUS_MALLOC_ERR, CONN_COMMON,
-        "get queue failed, id=%{public}d, priority=%{public}d", item->id, priority);
+        "get queue fail, id=%{public}d, priority=%{public}d", item->id, priority);
     int32_t ret = QueueMultiProducerEnqueue(lfq, item);
     return ret;
 }
@@ -123,7 +123,7 @@ struct ConnFairPriorityQueue {
 ConnFairPriorityQueue *ConnCreateQueue(uint32_t size)
 {
     ConnFairPriorityQueue *queue = SoftBusCalloc(sizeof(ConnFairPriorityQueue));
-    CONN_CHECK_AND_RETURN_RET_LOGE(queue != NULL, NULL, CONN_COMMON, "malloc failed");
+    CONN_CHECK_AND_RETURN_RET_LOGE(queue != NULL, NULL, CONN_COMMON, "malloc fail");
 
     queue->size = size;
     SoftBusMutexAttr attr = {
@@ -131,23 +131,23 @@ ConnFairPriorityQueue *ConnCreateQueue(uint32_t size)
     };
     int32_t ret = SoftBusMutexInit(&queue->lock, &attr);
     if (ret != SOFTBUS_OK) {
-        CONN_LOGE(CONN_COMMON, "init lock failed: error=%{public}d", ret);
+        CONN_LOGE(CONN_COMMON, "init lock fail: error=%{public}d", ret);
         goto CLEANUP;
     }
     ret = SoftBusCondInit(&queue->dequeueCondition);
     if (ret != SOFTBUS_OK) {
-        CONN_LOGE(CONN_COMMON, "init dequeue condition failed: error=%{public}d", ret);
+        CONN_LOGE(CONN_COMMON, "init dequeue condition fail: error=%{public}d", ret);
         goto CLEANUP;
     }
     ret = SoftBusCondInit(&queue->enqueueCondition);
     if (ret != SOFTBUS_OK) {
-        CONN_LOGE(CONN_COMMON, "init dequeue condition failed: error=%{public}d", ret);
+        CONN_LOGE(CONN_COMMON, "init dequeue condition fail: error=%{public}d", ret);
         goto CLEANUP;
     }
     ListInit(&queue->queues);
     queue->innerQueue = CreatePriorityQueue(0, queue->size);
     if (queue->innerQueue == NULL) {
-        CONN_LOGE(CONN_COMMON, "create inner priority queue failed");
+        CONN_LOGE(CONN_COMMON, "create inner priority queue fail");
         goto CLEANUP;
     }
     return queue;
@@ -191,7 +191,7 @@ static struct PriorityQueue *GetOrCreatePriorityQueue(ConnFairPriorityQueue *que
     }
 
     struct PriorityQueue *pq = CreatePriorityQueue(id, queue->size);
-    CONN_CHECK_AND_RETURN_RET_LOGE(pq != NULL, NULL, CONN_COMMON, "create priority queue failed");
+    CONN_CHECK_AND_RETURN_RET_LOGE(pq != NULL, NULL, CONN_COMMON, "create priority queue fail");
     ListTailInsert(&queue->queues, &pq->node);
     return pq;
 }
@@ -203,7 +203,7 @@ static int32_t WaitCondition(SoftBusCond *condition, SoftBusMutex *mutex, int32_
     }
     SoftBusSysTime now = { 0 };
     int32_t ret = SoftBusGetTime(&now);
-    CONN_CHECK_AND_RETURN_RET_LOGE(ret == SOFTBUS_OK, ret, CONN_COMMON, "get time failed: error=%{public}d", ret);
+    CONN_CHECK_AND_RETURN_RET_LOGE(ret == SOFTBUS_OK, ret, CONN_COMMON, "get time fail: error=%{public}d", ret);
 
     int64_t us = timeoutMs * FACTOR_S_MS_US + now.usec;
     now.sec += us / (FACTOR_S_MS_US * FACTOR_S_MS_US);
@@ -217,14 +217,14 @@ int32_t ConnEnqueue(ConnFairPriorityQueue *queue, struct ConnQueueItem *item, in
     CONN_CHECK_AND_RETURN_RET_LOGW(item != NULL, SOFTBUS_INVALID_PARAM, CONN_COMMON, "item is null");
 
     int32_t code = SoftBusMutexLock(&queue->lock);
-    CONN_CHECK_AND_RETURN_RET_LOGW(code == SOFTBUS_OK, code, CONN_COMMON, "lock queue failed: error=%{public}d", code);
+    CONN_CHECK_AND_RETURN_RET_LOGW(code == SOFTBUS_OK, code, CONN_COMMON, "lock queue fail: error=%{public}d", code);
     bool afterWait = false;
     do {
         struct PriorityQueue *pq = GetOrCreatePriorityQueue(queue, item->id);
         if (pq == NULL) {
             code = SOFTBUS_MALLOC_ERR;
             CONN_LOGE(CONN_COMMON,
-                "enqueue failed: get queue failed, id=%{public}d, priority=%{public}d, error=%{public}d", item->id,
+                "enqueue fail: get queue fail, id=%{public}d, priority=%{public}d, error=%{public}d", item->id,
                 item->priority, code);
             break;
         }
@@ -233,7 +233,7 @@ int32_t ConnEnqueue(ConnFairPriorityQueue *queue, struct ConnQueueItem *item, in
             break;
         }
         if (code != QUEUE_FULL) {
-            CONN_LOGE(CONN_COMMON, "enqueue failed: id=%{public}d, priority=%{public}d, error=%{public}d", item->id,
+            CONN_LOGE(CONN_COMMON, "enqueue fail: id=%{public}d, priority=%{public}d, error=%{public}d", item->id,
                 item->priority, code);
             break;
         }
@@ -246,7 +246,7 @@ int32_t ConnEnqueue(ConnFairPriorityQueue *queue, struct ConnQueueItem *item, in
         code = WaitCondition(&queue->enqueueCondition, &queue->lock, timeoutMs);
         if (code != SOFTBUS_OK) {
             CONN_LOGE(CONN_COMMON,
-                "wait enqueue condition failed: id=%{public}d, priority=%{public}d, error=%{public}d", item->id,
+                "wait enqueue condition fail: id=%{public}d, priority=%{public}d, error=%{public}d", item->id,
                 item->priority, code);
             break;
         }
@@ -263,7 +263,7 @@ static int32_t DequeueInner(ConnFairPriorityQueue *queue, ConnPriority least, st
 {
     int32_t ret = Dequeue(queue->innerQueue, least, outMsg);
     if (ret != SOFTBUS_OK && ret != QUEUE_EMPTY) {
-        CONN_LOGE(CONN_COMMON, "get item from inner queue failed: error=%{public}d", ret);
+        CONN_LOGE(CONN_COMMON, "get item from inner queue fail: error=%{public}d", ret);
     }
     return ret;
 }
@@ -281,7 +281,7 @@ static int32_t DequeueFairly(ConnFairPriorityQueue *queue, struct ConnQueueItem 
         }
         ListTailInsert(&queue->queues, &it->node);
         if (ret != SOFTBUS_OK) {
-            CONN_LOGE(CONN_COMMON, "get item from queue failed: pid=%{public}d, error=%{public}d", it->id, ret);
+            CONN_LOGE(CONN_COMMON, "get item from queue fail: pid=%{public}d, error=%{public}d", it->id, ret);
         }
         return ret;
     }
@@ -294,7 +294,7 @@ int32_t ConnDequeue(ConnFairPriorityQueue *queue, struct ConnQueueItem **outMsg,
     CONN_CHECK_AND_RETURN_RET_LOGW(outMsg != NULL, SOFTBUS_INVALID_PARAM, CONN_COMMON, "out item is null");
 
     int32_t code = SoftBusMutexLock(&queue->lock);
-    CONN_CHECK_AND_RETURN_RET_LOGW(code == SOFTBUS_OK, code, CONN_COMMON, "lock queue failed: error=%{public}d", code);
+    CONN_CHECK_AND_RETURN_RET_LOGW(code == SOFTBUS_OK, code, CONN_COMMON, "lock queue fail: error=%{public}d", code);
     bool afterWait = false;
     do {
         code = DequeueInner(queue, CONN_PRIORITY_MIDDLE, outMsg);
@@ -321,7 +321,7 @@ int32_t ConnDequeue(ConnFairPriorityQueue *queue, struct ConnQueueItem **outMsg,
             break;
         }
         if (code != SOFTBUS_OK) {
-            CONN_LOGE(CONN_COMMON, "wait dequeue condition failed: error=%{public}d", code);
+            CONN_LOGE(CONN_COMMON, "wait dequeue condition fail: error=%{public}d", code);
             break;
         }
         afterWait = true;

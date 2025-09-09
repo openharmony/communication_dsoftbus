@@ -27,14 +27,17 @@
 #include "softbus_permission.h"
 #include "tokenid_kit.h"
 
-#define DMS_COLLABATION_NAME_PREFIX "ohos.dtbcollab.dms"
-static PermissionChangeCb g_permissionChangeCb = nullptr;
 constexpr int32_t JUDG_CNT = 1;
 constexpr int32_t DEVICE_KEY_SA_CNT = 3;
 const char *SAMGR_PROCESS_NAME = "samgr";
 const char *DMS_PROCESS_NAME = "distributedsched";
 const std::string DEVICE_KEY_SA_PROCESS_NAME[DEVICE_KEY_SA_CNT] = { "distributedsched", "distributedfiledaemon",
     "distributeddata" };
+#define DMS_COLLABATION_NAME_PREFIX "ohos.dtbcollab.dms"
+#define DBINDER_BUS_NAME_PREFIX "DBinder"
+#define OBJECT_STORE_DB_NAME_PREFIX "objectstoreDB"
+
+static PermissionChangeCb g_permissionChangeCb = nullptr;
 
 namespace OHOS {
 using namespace Security::AccessToken;
@@ -50,6 +53,8 @@ private:
     int32_t pid;
 };
 
+std::unordered_map<uint32_t, std::shared_ptr<SoftBusAccessTokenAdapter>> callbackPtrMap_;
+
 extern "C" {
 bool SoftBusCheckIsSystemService(uint64_t tokenId)
 {
@@ -58,8 +63,28 @@ bool SoftBusCheckIsSystemService(uint64_t tokenId)
     return type == ATokenTypeEnum::TOKEN_NATIVE;
 }
 
-bool SoftBusCheckIsSystemApp(uint64_t tokenId)
+bool SoftBusCheckIsSystemApp(uint64_t tokenId, const char *sessionName)
 {
+    if (sessionName == nullptr) {
+        COMM_LOGE(COMM_PERM, "invalid param, sessionName is nullptr");
+        return false;
+    }
+    // The authorization of dbind and dtbcollab are granted through Samgr and DMS, and there is no control here
+    uint32_t dbinderPrefixLen = strlen(DBINDER_BUS_NAME_PREFIX);
+    if (strlen(sessionName) >= dbinderPrefixLen &&
+        strncmp(sessionName, DBINDER_BUS_NAME_PREFIX, dbinderPrefixLen) == 0) {
+        return false;
+    }
+    uint32_t dmsCollabPrefixLen = strlen(DMS_COLLABATION_NAME_PREFIX);
+    if (strlen(sessionName) >= dmsCollabPrefixLen &&
+        strncmp(sessionName, DMS_COLLABATION_NAME_PREFIX, dmsCollabPrefixLen) == 0) {
+        return false;
+    }
+    uint32_t objectStorePrefixLen = strlen(OBJECT_STORE_DB_NAME_PREFIX);
+    if (strlen(sessionName) >= objectStorePrefixLen &&
+        strncmp(sessionName, OBJECT_STORE_DB_NAME_PREFIX, objectStorePrefixLen) == 0) {
+        return false;
+    }
     return TokenIdKit::IsSystemAppByFullTokenID(tokenId);
 }
 
@@ -71,7 +96,6 @@ bool SoftBusCheckIsNormalApp(uint64_t fullTokenId, const char *sessionName)
     }
 
     // The authorization of dbind and dtbcollab are granted through Samgr and DMS, and there is no control here
-    #define DBINDER_BUS_NAME_PREFIX "DBinder"
     if (strncmp(sessionName, DBINDER_BUS_NAME_PREFIX, strlen(DBINDER_BUS_NAME_PREFIX)) == 0) {
         return false;
     }
@@ -166,8 +190,7 @@ void SoftBusAccessTokenAdapter::PermStateChangeCallback(PermStateChangeInfo &res
     }
 }
 
-void SoftBusRegisterDataSyncPermission(
-    const uint64_t tonkenId, const char *permissionName, const char *pkgName, int32_t pid)
+void SoftBusRegisterDataSyncPermission(uint64_t tonkenId, const char *permissionName, const char *pkgName, int32_t pid)
 {
     if (permissionName == nullptr || pkgName == nullptr) {
         COMM_LOGE(COMM_PERM, "invalid param, permissionName or pkgName is nullptr");
@@ -180,8 +203,24 @@ void SoftBusRegisterDataSyncPermission(
     std::shared_ptr<SoftBusAccessTokenAdapter> callbackPtr_ =
         std::make_shared<SoftBusAccessTokenAdapter>(scopeInfo, pkgName, pid);
     COMM_LOGI(COMM_PERM, "after register. tokenId=%{public}" PRIu64, tonkenId);
+    callbackPtrMap_.emplace(pid, callbackPtr_);
     if (AccessTokenKit::RegisterPermStateChangeCallback(callbackPtr_) != SOFTBUS_OK) {
         COMM_LOGE(COMM_PERM, "RegisterPermStateChangeCallback failed.");
+    }
+}
+
+void SoftBusUnRegisterDataSyncPermission(int32_t pid)
+{
+    std::shared_ptr<SoftBusAccessTokenAdapter> callbackPtr_ = nullptr;
+    auto iter = callbackPtrMap_.find(pid);
+    if (iter != callbackPtrMap_.end()) {
+        callbackPtr_ = iter->second;
+        if (AccessTokenKit::UnRegisterPermStateChangeCallback(callbackPtr_) != SOFTBUS_OK) {
+            COMM_LOGE(COMM_PERM, "UnRegisterPermStateChangeCallback failed");
+        }
+        callbackPtrMap_.erase(iter);
+    } else {
+        COMM_LOGE(COMM_PERM, "UnRegisterPermStateChangeCallback not find pid:%{public}d", pid);
     }
 }
 

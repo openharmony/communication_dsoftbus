@@ -337,7 +337,7 @@ static void WrapperScanResultCb(uint8_t channelId, BtScanResultData *data)
     }
     ScanChannel *scanChannel = &g_scanChannel[channelId];
     if (!scanChannel->isUsed || !scanChannel->isScanning) {
-        DISC_LOGE(DISC_BLE_ADAPTER, "scanner is not in used, scannerId=%{public}u, bt-scannerId=%{public}d", channelId,
+        DISC_LOGE(DISC_BLE_ADAPTER, "scanner is not in used, scannerId=%{public}u, btScanId=%{public}d", channelId,
             scanChannel->scannerId);
         SoftBusMutexUnlock(&g_scannerLock);
         return;
@@ -382,13 +382,13 @@ static void WrapperScanStateChangeCb(uint8_t channelId, int32_t resultCode, bool
     }
     ScanChannel *scanChannel = &g_scanChannel[channelId];
     if (!scanChannel->isUsed) {
-        DISC_LOGE(DISC_BLE_ADAPTER, "scanner is not in used, scannerId=%{public}u, bt-scannerId=%{public}d", channelId,
+        DISC_LOGE(DISC_BLE_ADAPTER, "scanner is not in used, scannerId=%{public}u, btScanId=%{public}d", channelId,
             scanChannel->scannerId);
         SoftBusMutexUnlock(&g_scannerLock);
         return;
     }
     DISC_LOGD(DISC_BLE_ADAPTER,
-        "scannerId=%{public}d, bt-scannerId=%{public}d, resultCode=%{public}d, isStartScan=%{public}d", channelId,
+        "scannerId=%{public}d, btScanId=%{public}d, resultCode=%{public}d, isStartScan=%{public}d", channelId,
         scanChannel->scannerId, resultCode, isStartScan);
     if (scanChannel->scanCallback == NULL || scanChannel->scanCallback->OnScanStateChanged == NULL) {
         DISC_LOGE(DISC_BLE_ADAPTER, "scanner callback is null");
@@ -411,7 +411,7 @@ static void WrapperLpDeviceInfoCb(uint8_t channelId, BtUuid *uuid, int32_t type,
     }
     ScanChannel *scanChannel = &g_scanChannel[channelId];
     if (!scanChannel->isUsed) {
-        DISC_LOGE(DISC_BLE_ADAPTER, "scanner is not in used, scannerId=%{public}u, bt-scannerId=%{public}d", channelId,
+        DISC_LOGE(DISC_BLE_ADAPTER, "scanner is not in used, scannerId=%{public}u, btScanId=%{public}d", channelId,
             scanChannel->scannerId);
         SoftBusMutexUnlock(&g_scannerLock);
         return;
@@ -553,7 +553,7 @@ static int32_t SoftbusRegisterScanCb(int32_t *scannerId, const SoftbusScanCallba
         g_scanChannel[channelId].isScanning = false;
         g_scanChannel[channelId].scanCallback = (SoftbusScanCallback *)cb;
         *scannerId = channelId;
-        DISC_LOGI(DISC_BLE_ADAPTER, "scannerId=%{public}u, bt-scannerId=%{public}d", channelId,
+        DISC_LOGI(DISC_BLE_ADAPTER, "scannerId=%{public}u, btScanId=%{public}d", channelId,
             g_scanChannel[channelId].scannerId);
         SoftBusMutexUnlock(&g_scannerLock);
         return SOFTBUS_OK;
@@ -574,13 +574,13 @@ static int32_t SoftbusUnRegisterScanCb(int32_t scannerId)
         return SOFTBUS_LOCK_ERR;
     }
     if (!g_scanChannel[scannerId].isUsed) {
-        DISC_LOGI(DISC_BLE_ADAPTER, "already unregistered, scannerId=%{public}d, bt-scannerId=%{public}d", scannerId,
+        DISC_LOGI(DISC_BLE_ADAPTER, "already unregistered, scannerId=%{public}d, btScanId=%{public}d", scannerId,
             g_scanChannel[scannerId].scannerId);
         SoftBusMutexUnlock(&g_scannerLock);
         return SOFTBUS_OK;
     }
     int32_t ret = BleDeregisterScanCallbacks(g_scanChannel[scannerId].scannerId);
-    DISC_LOGI(DISC_BLE_ADAPTER, "scannerId=%{public}d, bt-scannerId=%{public}d, result=%{public}d",
+    DISC_LOGI(DISC_BLE_ADAPTER, "scannerId=%{public}d, btScanId=%{public}d, result=%{public}d",
         scannerId, g_scanChannel[scannerId].scannerId, ret);
     g_scanChannel[scannerId].scannerId = -1;
     g_scanChannel[scannerId].isUsed = false;
@@ -869,7 +869,7 @@ static bool CheckScanChannelInUsed(int32_t scannerId)
         return false;
     }
     if (!g_scanChannel[scannerId].isUsed) {
-        DISC_LOGE(DISC_BLE_ADAPTER, "scannerId=%{public}d, bt-scannerId=%{public}d", scannerId,
+        DISC_LOGE(DISC_BLE_ADAPTER, "scannerId=%{public}d, btScanId=%{public}d", scannerId,
             g_scanChannel[scannerId].scannerId);
         return false;
     }
@@ -926,7 +926,7 @@ static int32_t SoftbusStartScan(int32_t scannerId, const SoftBusBcScanParams *pa
     }
     int32_t btScannerId = g_scanChannel[scannerId].scannerId;
     if (g_scanChannel[scannerId].isScanning) {
-        DISC_LOGE(DISC_BLE_ADAPTER, "already scanning, scannerId=%{public}d, bt-scannerId=%{public}d",
+        DISC_LOGE(DISC_BLE_ADAPTER, "already scanning, scannerId=%{public}d, btScanId=%{public}d",
             scannerId, btScannerId);
         SoftBusMutexUnlock(&g_scannerLock);
         return SOFTBUS_ALREADY_TRIGGERED;
@@ -936,7 +936,7 @@ static int32_t SoftbusStartScan(int32_t scannerId, const SoftBusBcScanParams *pa
     BleScanNativeFilter *nativeFilter =
         (BleScanNativeFilter *)SoftBusCalloc(sizeof(BleScanNativeFilter) * filterSize);
     if (nativeFilter == NULL) {
-        DISC_LOGE(DISC_BLE_ADAPTER, "malloc filter failed, scannerId=%{public}d, bt-scannerId=%{public}d",
+        DISC_LOGE(DISC_BLE_ADAPTER, "malloc filter failed, scannerId=%{public}d, btScanId=%{public}d",
             scannerId, btScannerId);
         return SOFTBUS_MALLOC_ERR;
     }
@@ -947,10 +947,10 @@ static int32_t SoftbusStartScan(int32_t scannerId, const SoftBusBcScanParams *pa
     scanConfig.phy = (int)param->scanPhy;
     int32_t ret = BleStartScanEx(btScannerId, &scanConfig, nativeFilter, (uint32_t)filterSize);
     FreeBtFilter(nativeFilter, filterSize);
-    DISC_LOGD(DISC_BLE_ADAPTER, "scannerId=%{public}d, bt-scannerId=%{public}d, ret=%{public}d",
+    DISC_LOGD(DISC_BLE_ADAPTER, "scannerId=%{public}d, btScanId=%{public}d, ret=%{public}d",
         scannerId, btScannerId, ret);
     if (SoftBusMutexLock(&g_scannerLock) != SOFTBUS_OK) {
-        DISC_LOGE(DISC_BLE_ADAPTER, "lock failed, scannerId=%{public}d, bt-scannerId=%{public}d",
+        DISC_LOGE(DISC_BLE_ADAPTER, "lock failed, scannerId=%{public}d, btScanId=%{public}d",
             scannerId, btScannerId);
         return SOFTBUS_LOCK_ERR;
     }
@@ -975,7 +975,7 @@ static int32_t SoftbusStopScan(int32_t scannerId)
     }
     int32_t btScannerId = g_scanChannel[scannerId].scannerId;
     if (!g_scanChannel[scannerId].isScanning) {
-        DISC_LOGI(DISC_BLE_ADAPTER, "already stopped, scannerId=%{public}d, bt-scannerId=%{public}d",
+        DISC_LOGI(DISC_BLE_ADAPTER, "already stopped, scannerId=%{public}d, btScanId=%{public}d",
             scannerId, btScannerId);
         SoftBusMutexUnlock(&g_scannerLock);
         return SOFTBUS_ALREADY_TRIGGERED;
@@ -983,7 +983,7 @@ static int32_t SoftbusStopScan(int32_t scannerId)
     g_scanChannel[scannerId].isScanning = false;
     SoftBusMutexUnlock(&g_scannerLock);
     int32_t ret = BleStopScan(btScannerId);
-    DISC_LOGD(DISC_BLE_ADAPTER, "stop scan, scannerId=%{public}d, bt-scannerId=%{public}d, ret=%{public}d",
+    DISC_LOGD(DISC_BLE_ADAPTER, "stop scan, scannerId=%{public}d, btScanId=%{public}d, ret=%{public}d",
         scannerId, btScannerId, ret);
     if (ret != OHOS_BT_STATUS_SUCCESS) {
         return ret;
@@ -1032,6 +1032,7 @@ static void FreeManufactureFilter(BleScanNativeFilter *nativeFilter, int32_t fil
 static bool SoftbusSetLpParam(LpServerType type,
     const SoftBusLpBroadcastParam *bcParam, const SoftBusLpScanParam *scanParam)
 {
+    DISC_CHECK_AND_RETURN_RET_LOGE(bcParam != NULL && scanParam != NULL, false, DISC_BLE_ADAPTER, "invalid param");
     BleScanConfigs scanConfig = {};
     scanConfig.scanMode = GetBtScanMode(scanParam->scanParam.scanInterval, scanParam->scanParam.scanWindow);
     BtLpDeviceParam lpParam = {};
@@ -1138,7 +1139,7 @@ static int32_t SoftbusSetScanReportChanToLp(int32_t scannerId, bool enable)
     SoftBusMutexUnlock(&g_scannerLock);
     int32_t ret = SetScanReportChannelToLpDevice(btScannerId, enable);
     if (ret != OHOS_BT_STATUS_SUCCESS) {
-        DISC_LOGW(DISC_BLE_ADAPTER, "set channel failed, scannerId=%{public}d, bt-scannerId=%{public}d, ret=%{public}d",
+        DISC_LOGW(DISC_BLE_ADAPTER, "set channel failed, scannerId=%{public}d, btScanId=%{public}d, ret=%{public}d",
             scannerId, btScannerId, ret);
         return ret;
     }

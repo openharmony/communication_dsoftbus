@@ -70,6 +70,11 @@ static void MatchConnEventNameTypeExtraStrParamAnony(const HiSysEventParam *para
 
 static int32_t MatchConnEventNameTypeExtraForAddMsg(const HiSysEventParam *params, int32_t index, ConnEventExtra extra)
 {
+    MatchConnEventNameTypeExtraInt32Param(params, ++index, extra.bootLinkType);
+    MatchConnEventNameTypeExtraInt32Param(params, ++index, extra.isRenegotiate);
+    MatchConnEventNameTypeExtraInt32Param(params, ++index, extra.isReuse);
+    MatchConnEventNameTypeExtraUint64Param(params, ++index, extra.negotiateTime);
+    MatchConnEventNameTypeExtraUint64Param(params, ++index, extra.linkTime);
     MatchConnEventNameTypeExtraInt32Param(params, ++index, extra.osType);
     MatchNotConnEventNameExtraStrParam(params, ++index, extra.localDeviceType);
     MatchNotConnEventNameExtraStrParam(params, ++index, extra.remoteDeviceType);
@@ -91,6 +96,10 @@ static int32_t MatchConnEventNameTypeExtraForAddMsg(const HiSysEventParam *param
     MatchConnEventNameTypeExtraStrParam(params, ++index, extra.businessTag);
     MatchConnEventNameTypeExtraInt32Param(params, ++index, extra.staChload);
     MatchConnEventNameTypeExtraInt32Param(params, ++index, extra.sameAccount);
+    MatchConnEventNameTypeExtraInt32Param(params, ++index, extra.discoveryCnt);
+    MatchConnEventNameTypeExtraInt32Param(params, ++index, extra.connectingCnt);
+    MatchConnEventNameTypeExtraInt32Param(params, ++index, extra.connectSuccessCnt);
+    MatchConnEventNameTypeExtraInt32Param(params, ++index, extra.connectFailCnt);
     return ++index;
 }
 
@@ -127,6 +136,7 @@ MATCHER_P2(ConnValidParamArrayMatcher, inExtra, validSize, "conn valid param arr
     MatchConnEventNameTypeExtraStrParamAnony(params, ++index, extra.peerBrMac);
     MatchConnEventNameTypeExtraStrParamAnony(params, ++index, extra.peerBleMac);
     MatchConnEventNameTypeExtraStrParamAnony(params, ++index, extra.peerWifiMac);
+    MatchConnEventNameTypeExtraStrParamAnony(params, ++index, extra.peerSleMac);
     MatchConnEventNameTypeExtraStrParam(params, ++index, extra.peerPort);
     MatchConnEventNameTypeExtraStrParamAnony(params, ++index, extra.peerNetworkId);
     MatchConnEventNameTypeExtraStrParamAnony(params, ++index, extra.peerUdid);
@@ -134,11 +144,8 @@ MATCHER_P2(ConnValidParamArrayMatcher, inExtra, validSize, "conn valid param arr
     MatchConnEventNameTypeExtraStrParamAnony(params, ++index, extra.localNetworkId);
     MatchConnEventNameTypeExtraStrParam(params, ++index, extra.callerPkg);
     MatchConnEventNameTypeExtraStrParam(params, ++index, extra.calleePkg);
-    MatchConnEventNameTypeExtraInt32Param(params, ++index, extra.bootLinkType);
-    MatchConnEventNameTypeExtraInt32Param(params, ++index, extra.isRenegotiate);
-    MatchConnEventNameTypeExtraInt32Param(params, ++index, extra.isReuse);
-    MatchConnEventNameTypeExtraUint64Param(params, ++index, extra.negotiateTime);
-    MatchConnEventNameTypeExtraUint64Param(params, ++index, extra.linkTime);
+    MatchConnEventNameTypeExtraStrParam(params, ++index, extra.srcAccountIdHash);
+    MatchConnEventNameTypeExtraStrParam(params, ++index, extra.dstAccountIdHash);
     auto ret = MatchConnEventNameTypeExtraForAddMsg(params, index, extra);
     EXPECT_EQ(ret, validSize);
     return true;

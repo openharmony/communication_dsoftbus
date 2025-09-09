@@ -30,7 +30,7 @@
     } while (false)
 
 namespace OHOS {
-int32_t TransClientProxy::OnClientPermissonChange(const char *pkgName, int32_t state)
+int32_t TransClientProxy::OnClientPermissionChange(const char *pkgName, int32_t state)
 {
     if (pkgName == NULL) {
         TRANS_LOGE(TRANS_SDK, "invalid param.");
@@ -70,6 +70,8 @@ static int32_t MessageParcelWriteEx(MessageParcel &data, const ChannelInfo *chan
     WRITE_PARCEL_WITH_RET(data, CString, channel->peerDeviceId, SOFTBUS_IPC_ERR);
     WRITE_PARCEL_WITH_RET(data, Bool, channel->isD2D, SOFTBUS_IPC_ERR);
     if (channel->isD2D) {
+        WRITE_PARCEL_WITH_RET(data, Bool, channel->isSupportNewHead, SOFTBUS_IPC_ERR);
+        WRITE_PARCEL_WITH_RET(data, Int32, channel->pagingId, SOFTBUS_IPC_ERR);
         WRITE_PARCEL_WITH_RET(data, Uint32, channel->businessFlag, SOFTBUS_IPC_ERR);
         WRITE_PARCEL_WITH_RET(data, Uint32, channel->deviceTypeId, SOFTBUS_IPC_ERR);
         TRANS_CHECK_AND_RETURN_RET_LOGE(data.WriteRawData(channel->pagingNonce, PAGING_NONCE_LEN),

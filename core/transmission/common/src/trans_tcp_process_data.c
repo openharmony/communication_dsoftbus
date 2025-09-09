@@ -28,7 +28,7 @@
 #include "trans_log.h"
 
 #define TDC_TLV_ELEMENT 5
-#define TLV_TYPE_AND_LENTH 2
+#define TLV_TYPE_AND_LENGTH 2
 #define SLICE_HEAD_LEN 16
 #define DATA_EXTEND_LEN (DC_DATA_HEAD_SIZE + OVERHEAD_LEN)
 #define MIN_BUF_LEN (1024 + DATA_EXTEND_LEN)
@@ -240,16 +240,16 @@ static int32_t TransTdcParseTlv(uint32_t bufLen, char *data, TcpDataTlvPacketHea
     char *temp = data + MAGICNUM_SIZE + TLVCOUNT_SIZE;
     for (int32_t index = 0; index < head->tlvCount; index++) {
         uint8_t *type = (uint8_t *)temp;
-        if (bufLen < (*headSize + (TLV_TYPE_AND_LENTH * sizeof(uint8_t)))) {
+        if (bufLen < (*headSize + (TLV_TYPE_AND_LENGTH * sizeof(uint8_t)))) {
             TRANS_LOGE(TRANS_CTRL, "check bufLen contains tlv segment data fail, bufLen=%{public}u", bufLen);
             return SOFTBUS_DATA_NOT_ENOUGH;
         }
         uint8_t *length = (uint8_t *)(temp + sizeof(uint8_t));
-        if (bufLen < (*headSize + (TLV_TYPE_AND_LENTH * sizeof(uint8_t)) + *length)) {
+        if (bufLen < (*headSize + (TLV_TYPE_AND_LENGTH * sizeof(uint8_t)) + *length)) {
             TRANS_LOGE(TRANS_CTRL, "data bufLen not enough. bufLen=%{public}u", bufLen);
             return SOFTBUS_DATA_NOT_ENOUGH;
         }
-        temp += (TLV_TYPE_AND_LENTH *sizeof(uint8_t));
+        temp += (TLV_TYPE_AND_LENGTH *sizeof(uint8_t));
         switch (*type) {
             case TLV_TYPE_INNER_SEQ:
                 ret = memcpy_s(&head->seq, sizeof(head->seq), temp, *length);
@@ -271,7 +271,7 @@ static int32_t TransTdcParseTlv(uint32_t bufLen, char *data, TcpDataTlvPacketHea
                 break;
         }
         temp += *length;
-        *headSize += (TLV_TYPE_AND_LENTH * sizeof(uint8_t) + *length);
+        *headSize += (TLV_TYPE_AND_LENGTH * sizeof(uint8_t) + *length);
         TRANS_CHECK_AND_RETURN_RET_LOGE(ret == EOK, SOFTBUS_MEM_ERR, TRANS_CTRL,
             "parse tlv memcpy failed, tlvType=%{public}d, ret%{public}d", *type, ret);
     }
@@ -332,43 +332,41 @@ char *TransTdcPackTlvData(DataHead *pktHead, int32_t tlvBufferSize, uint32_t dat
 {
     TRANS_CHECK_AND_RETURN_RET_LOGE(pktHead != NULL, NULL, TRANS_CTRL, "invalid param");
     int32_t headSize = MAGICNUM_SIZE + TLVCOUNT_SIZE + tlvBufferSize;
-    char *buf = (char *)SoftBusCalloc(dataLen + headSize);
+    int32_t bufLen = (int32_t)dataLen + headSize;
+    char *buf = (char *)SoftBusCalloc(bufLen);
     if (buf == NULL) {
         TRANS_LOGE(TRANS_CTRL, "malloc buf failed");
         return NULL;
     }
-    if (memcpy_s(buf, dataLen + headSize, &pktHead->magicNum, MAGICNUM_SIZE) != EOK) {
+    if (memcpy_s(buf, bufLen, &pktHead->magicNum, MAGICNUM_SIZE) != EOK) {
         SoftBusFree(buf);
         TRANS_LOGE(TRANS_CTRL, "memcpy magicNum failed");
         return NULL;
     }
-
-    if (memcpy_s(buf + MAGICNUM_SIZE, dataLen + headSize, &pktHead->tlvCount,
-        TLVCOUNT_SIZE) != EOK) {
+    if (memcpy_s(buf + MAGICNUM_SIZE, bufLen - MAGICNUM_SIZE, &pktHead->tlvCount, TLVCOUNT_SIZE) != EOK) {
         SoftBusFree(buf);
         TRANS_LOGE(TRANS_CTRL, "memcpy tlvCount failed");
         return NULL;
     }
 
     char *temp = buf + MAGICNUM_SIZE + TLVCOUNT_SIZE;
+    int32_t tempLen = bufLen - MAGICNUM_SIZE - TLVCOUNT_SIZE;
     for (int32_t index = 0; index < pktHead->tlvCount; index++) {
         TlvElement *ement = (TlvElement *)pktHead->tlvElement;
-
-        if (memcpy_s(temp, dataLen + headSize, &ement->type, sizeof(ement->type)) != EOK) {
+        if (memcpy_s(temp, tempLen, &ement->type, sizeof(ement->type)) != EOK) {
             SoftBusFree(buf);
             TRANS_LOGE(TRANS_CTRL, "memcpy tlvEment type failed");
             return NULL;
         }
-
         temp += sizeof(ement->type);
-        if (memcpy_s(temp, dataLen + headSize, &ement->length, sizeof(ement->length)) != EOK) {
+        if (memcpy_s(temp, tempLen - sizeof(ement->type), &ement->length, sizeof(ement->length)) != EOK) {
             SoftBusFree(buf);
             TRANS_LOGE(TRANS_CTRL, "memcpy tlvEment length failed");
             return NULL;
         }
-
         temp += sizeof(ement->length);
-        if (memcpy_s(temp, dataLen + headSize, ement->value, ement->length) != EOK) {
+        if (memcpy_s(temp, tempLen - sizeof(ement->type) - sizeof(ement->length), ement->value, ement->length)
+            != EOK) {
             SoftBusFree(buf);
             TRANS_LOGE(TRANS_CTRL, "memcpy tlvEment value failed");
             return NULL;
@@ -481,7 +479,7 @@ static char *TransPackData(uint32_t dataLen, int32_t finalSeq, int32_t flags)
         .flags = (uint32_t)flags,
         .dataLen = dataLen,
     };
-    char *buf = (char *)SoftBusMalloc(dataLen + DC_DATA_HEAD_SIZE);
+    char *buf = (char *)SoftBusCalloc(dataLen + DC_DATA_HEAD_SIZE);
     TRANS_CHECK_AND_RETURN_RET_LOGE(buf != NULL, NULL, TRANS_CTRL, "malloc failed");
     PackTcpDataPacketHead(&pktHead);
     if (memcpy_s(buf, DC_DATA_HEAD_SIZE, &pktHead, sizeof(TcpDataPacketHead)) != EOK) {

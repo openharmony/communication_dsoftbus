@@ -38,14 +38,17 @@
 #define DEFAULT_FILE_PATH "/data/service/el1/public/dsoftbus/applykey"
 #define KEY_LEN           100
 #define MAP_KEY           "mapKey"
-#define VALUE_APPLY_KEY   "applyKey"
-#define VALUE_USER_ID     "userId"
-#define VALUE_TIME        "time"
+
+#define VALUE_APPLY_KEY    "applyKey"
+#define VALUE_USER_ID      "userId"
+#define VALUE_TIME         "time"
+#define VALUE_ACCOUNT_HASH "accountHash"
 
 typedef struct {
     uint8_t applyKey[D2D_APPLY_KEY_LEN];
     int32_t userId;
     uint64_t time;
+    char accountHash[SHA_256_HEX_HASH_LEN];
 } AuthApplyMapValue;
 
 typedef struct {
@@ -56,6 +59,7 @@ typedef struct {
 static Map g_authApplyMap;
 static SoftBusMutex g_authApplyMutex;
 static bool g_isInit = false;
+static bool g_isRecoveryApplyKey = false;
 
 static int32_t AuthApplyMapInit(void)
 {
@@ -69,21 +73,25 @@ static int32_t AuthApplyMapInit(void)
 }
 
 static int32_t InsertToAuthApplyMap(
-    const char *applyMapKey, const uint8_t *applyKey, uint32_t ukLen, int32_t userId, uint64_t time)
+    const char *applyMapKey, const uint8_t *applyKey, int32_t userId, uint64_t time, char *accountHash)
 {
     if (!g_isInit) {
         AUTH_LOGE(AUTH_INIT, "apply map init fail");
         return SOFTBUS_NO_INIT;
     }
-    if (applyMapKey == NULL || applyKey == NULL) {
+    if (applyMapKey == NULL || applyKey == NULL || accountHash == NULL) {
         AUTH_LOGE(AUTH_INIT, "input is invalid param");
         return SOFTBUS_INVALID_PARAM;
     }
 
     AuthApplyMapValue value = { .userId = userId, .time = time };
-    if (memcpy_s(value.applyKey, D2D_APPLY_KEY_LEN, applyKey, ukLen) != SOFTBUS_OK) {
+    if (memcpy_s(value.applyKey, D2D_APPLY_KEY_LEN, applyKey, D2D_APPLY_KEY_LEN) != EOK) {
         AUTH_LOGE(AUTH_CONN, "memcpy fail");
         return SOFTBUS_MEM_ERR;
+    }
+    if (strcpy_s(value.accountHash, SHA_256_HEX_HASH_LEN, accountHash) != EOK) {
+        AUTH_LOGE(AUTH_CONN, "strcpy accountHash fail");
+        return SOFTBUS_STRCPY_ERR;
     }
     if (SoftBusMutexLock(&g_authApplyMutex) != SOFTBUS_OK) {
         (void)memset_s(&value, sizeof(AuthApplyMapValue), 0, sizeof(AuthApplyMapValue));
@@ -169,9 +177,10 @@ static void ClearAuthApplyMap(void)
     (void)SoftBusMutexUnlock(&g_authApplyMutex);
 }
 
-int32_t GetApplyKeyByBusinessInfo(const RequestBusinessInfo *info, uint8_t *uk, uint32_t ukLen)
+int32_t GetApplyKeyByBusinessInfo(
+    const RequestBusinessInfo *info, uint8_t *uk, uint32_t ukLen, char *accountHash, uint32_t accountHashLen)
 {
-    if (info == NULL || uk == NULL) {
+    if (info == NULL || uk == NULL || accountHash == NULL || accountHashLen != SHA_256_HEX_HASH_LEN) {
         AUTH_LOGE(AUTH_CONN, "invalid param");
         return SOFTBUS_INVALID_PARAM;
     }
@@ -198,6 +207,10 @@ int32_t GetApplyKeyByBusinessInfo(const RequestBusinessInfo *info, uint8_t *uk, 
     if (memcpy_s(uk, ukLen, value->applyKey, D2D_APPLY_KEY_LEN) != EOK) {
         AUTH_LOGE(AUTH_CONN, "memcpy key fail");
         return SOFTBUS_MEM_ERR;
+    }
+    if (strcpy_s(accountHash, SHA_256_HEX_HASH_LEN, value->accountHash) != EOK) {
+        AUTH_LOGE(AUTH_CONN, "strcpy accountHash fail");
+        return SOFTBUS_STRCPY_ERR;
     }
     return SOFTBUS_OK;
 }
@@ -233,6 +246,7 @@ static char *PackAllApplyKey(void)
         }
         if (!AddStringToJsonObject(obj, MAP_KEY, it->node->key) ||
             !AddStringToJsonObject(obj, VALUE_APPLY_KEY, (char *)((AuthApplyMapValue *)it->node->value)->applyKey) ||
+            !AddStringToJsonObject(obj, VALUE_ACCOUNT_HASH, ((AuthApplyMapValue *)it->node->value)->accountHash) ||
             !AddNumberToJsonObject(obj, VALUE_USER_ID, ((AuthApplyMapValue *)it->node->value)->userId) ||
             !AddNumber64ToJsonObject(obj, VALUE_TIME, ((AuthApplyMapValue *)it->node->value)->time)) {
             AUTH_LOGE(AUTH_CONN, "add json object fail");
@@ -265,6 +279,23 @@ static void AuthAsyncSaveApplyMapFile(void)
     return;
 }
 
+static bool AuthUnpackApplyKey(const cJSON *json, AuthApplyMap *node)
+{
+    if (json == NULL || node == NULL) {
+        AUTH_LOGE(AUTH_CONN, "invalid param");
+        return false;
+    }
+    if (!GetJsonObjectNumber64Item(json, VALUE_TIME, (int64_t *)&node->value.time) ||
+        !GetJsonObjectNumberItem(json, VALUE_USER_ID, &node->value.userId) ||
+        !GetJsonObjectStringItem(json, MAP_KEY, node->mapKey, KEY_LEN) ||
+        !GetJsonObjectStringItem(json, VALUE_APPLY_KEY, (char *)node->value.applyKey, D2D_APPLY_KEY_LEN) ||
+        !GetJsonObjectStringItem(json, VALUE_ACCOUNT_HASH, node->value.accountHash, SHA_256_HEX_HASH_LEN)) {
+        AUTH_LOGE(AUTH_CONN, "unpack apply key fail");
+        return false;
+    }
+    return true;
+}
+
 static bool AuthPraseApplyKey(const char *applyKey)
 {
     if (applyKey == NULL) {
@@ -282,18 +313,13 @@ static bool AuthPraseApplyKey(const char *applyKey)
     for (int32_t i = 0; i < arraySize; i++) {
         cJSON *item = cJSON_GetArrayItem(json, i);
         (void)memset_s(&node, sizeof(AuthApplyMap), 0, sizeof(AuthApplyMap));
-        if (!GetJsonObjectNumber64Item(item, VALUE_TIME, (int64_t *)&node.value.time) ||
-            !GetJsonObjectNumberItem(item, VALUE_USER_ID, &node.value.userId) ||
-            !GetJsonObjectStringItem(item, MAP_KEY, node.mapKey, KEY_LEN) ||
-            !GetJsonObjectStringItem(item, VALUE_APPLY_KEY, (char *)node.value.applyKey, D2D_APPLY_KEY_LEN)) {
-            AUTH_LOGE(AUTH_CONN, "unpack apply key fail");
+        if (!AuthUnpackApplyKey(item, &node)) {
             cJSON_Delete(json);
             (void)memset_s(&node, sizeof(AuthApplyMap), 0, sizeof(AuthApplyMap));
-            return false;
         }
         if (AuthIsApplyKeyExpired(node.value.time)) {
-            if (InsertToAuthApplyMap(node.mapKey, node.value.applyKey, D2D_APPLY_KEY_LEN, node.value.userId,
-                node.value.time) != SOFTBUS_OK) {
+            if (InsertToAuthApplyMap(node.mapKey, node.value.applyKey, node.value.userId,
+                node.value.time, node.value.accountHash) != SOFTBUS_OK) {
                 AUTH_LOGE(AUTH_CONN, "insert apply key fail");
                 cJSON_Delete(json);
                 (void)memset_s(&node, sizeof(AuthApplyMap), 0, sizeof(AuthApplyMap));
@@ -312,10 +338,21 @@ void AuthRecoveryApplyKey(void)
 {
     char *applyKey = NULL;
     uint32_t applyKeyLen = 0;
+    if (SoftBusMutexLock(&g_authApplyMutex) != SOFTBUS_OK) {
+        AUTH_LOGE(AUTH_CONN, "SoftBusMutexLock fail");
+        return;
+    }
+    if (g_isRecoveryApplyKey) {
+        (void)SoftBusMutexUnlock(&g_authApplyMutex);
+        return;
+    }
     if (LnnRetrieveDeviceDataPacked(LNN_DATA_TYPE_APPLY_KEY, &applyKey, &applyKeyLen) != SOFTBUS_OK) {
+        (void)SoftBusMutexUnlock(&g_authApplyMutex);
         AUTH_LOGE(AUTH_CONN, "retrieve device fail");
         return;
     }
+    g_isRecoveryApplyKey = true;
+    (void)SoftBusMutexUnlock(&g_authApplyMutex);
     if (applyKey == NULL) {
         AUTH_LOGE(AUTH_CONN, "applyKey is empty");
         return;
@@ -334,9 +371,10 @@ void AuthRecoveryApplyKey(void)
     SoftBusFree(applyKey);
 }
 
-int32_t AuthInsertApplyKey(const RequestBusinessInfo *info, const uint8_t *uk, uint32_t ukLen, uint64_t time)
+int32_t AuthInsertApplyKey(
+    const RequestBusinessInfo *info, const uint8_t *uk, uint32_t ukLen, uint64_t time, char *accountHash)
 {
-    if (info == NULL || uk == NULL || ukLen > D2D_APPLY_KEY_LEN) {
+    if (info == NULL || uk == NULL || ukLen != D2D_APPLY_KEY_LEN || accountHash == NULL) {
         AUTH_LOGE(AUTH_CONN, "invalid param");
         return SOFTBUS_INVALID_PARAM;
     }
@@ -355,7 +393,7 @@ int32_t AuthInsertApplyKey(const RequestBusinessInfo *info, const uint8_t *uk, u
         AnonymizeWrapper(anonyUdidHash), AnonymizeWrapper(anonyAccountHash), userId, info->type);
     AnonymizeFree(anonyAccountHash);
     AnonymizeFree(anonyUdidHash);
-    int32_t ret = InsertToAuthApplyMap(key, (const uint8_t *)uk, ukLen, userId, time);
+    int32_t ret = InsertToAuthApplyMap(key, (const uint8_t *)uk, userId, time, accountHash);
     if (ret != SOFTBUS_OK) {
         AUTH_LOGE(AUTH_CONN, "insert apply key fail");
         return ret;
@@ -440,4 +478,5 @@ void DeInitApplyKeyManager(void)
 {
     ClearAuthApplyMap();
     (void)SoftBusMutexDestroy(&g_authApplyMutex);
+    g_isRecoveryApplyKey = false;
 }

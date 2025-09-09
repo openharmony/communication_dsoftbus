@@ -257,15 +257,31 @@ int32_t WifiDirectIpManager::GetNetworkDestination(const std::string &ipString, 
     return SOFTBUS_OK;
 }
 
-int32_t WifiDirectIpManager::ConfigStaticIpv6(
-    const std::string &ipv6Addr, const std::string &macAddr, const std::string &interface)
+void WifiDirectIpManager::ConfigStaticIpv6(
+    const std::string &interface, const std::string &ipv6Addr, const std::string &macAddr)
 {
-    return OHOS::NetManagerStandard::NetConnClient::GetInstance().AddStaticIpv6Addr(ipv6Addr, macAddr, interface);
+    auto ret = OHOS::NetManagerStandard::NetConnClient::GetInstance().AddStaticIpv6Addr(
+        RemoveIpv6Suffix(ipv6Addr), macAddr, interface);
+    CONN_LOGI(CONN_WIFI_DIRECT, "config remoteIpv6=%{public}s, remoteMac=%{public}s, config ret=%{public}d",
+        WifiDirectAnonymizeIp(ipv6Addr).c_str(), WifiDirectAnonymizeMac(macAddr).c_str(), ret);
 }
 
-int32_t WifiDirectIpManager::ReleaseStaticIpv6(
-    const std::string &ipv6Addr, const std::string &macAddr, const std::string &interface)
+void WifiDirectIpManager::ReleaseStaticIpv6(
+    const std::string &interface, const std::string &ipv6Addr, const std::string &macAddr)
 {
-    return OHOS::NetManagerStandard::NetConnClient::GetInstance().DelStaticIpv6Addr(ipv6Addr, macAddr, interface);
+    auto ret = OHOS::NetManagerStandard::NetConnClient::GetInstance().DelStaticIpv6Addr(
+        RemoveIpv6Suffix(ipv6Addr), macAddr, interface);
+    CONN_LOGI(CONN_WIFI_DIRECT, "remove remoteIpv6=%{public}s, remoteMac=%{public}s, remove ret=%{public}d",
+        WifiDirectAnonymizeIp(ipv6Addr).c_str(), WifiDirectAnonymizeMac(macAddr).c_str(), ret);
+}
+
+std::string WifiDirectIpManager::RemoveIpv6Suffix(const std::string &ipv6Addr)
+{
+    std::string ret = ipv6Addr;
+    size_t pos = 0;
+    while ((pos = ret.find(HML_IPV6_SUFFIX, pos)) != std::string::npos) {
+        ret.erase(pos, strlen(HML_IPV6_SUFFIX));
+    }
+    return ret;
 }
 } // namespace OHOS::SoftBus

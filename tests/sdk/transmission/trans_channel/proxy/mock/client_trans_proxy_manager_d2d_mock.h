@@ -34,13 +34,15 @@ public:
     
     virtual int32_t ClientGetChannelBusinessTypeByChannelId(int32_t channelId, int32_t *businessType) = 0;
     virtual int32_t TransProxyPackD2DBytes(ProxyDataInfo *dataInfo, const char *sessionKey,
-        const char *sessionIv, SessionPktType flag) = 0;
+        SessionPktType flag, bool isNewHead) = 0;
+    virtual uint8_t *TransProxyPackD2DData(
+        ProxyDataInfo *dataInfo, uint32_t sliceNum, SessionPktType pktType, uint32_t cnt, uint32_t *dataLen) = 0;
     virtual int32_t ServerIpcSendMessage(
         int32_t channelId, int32_t channelType, const void *data, uint32_t len, int32_t msgType) = 0;
     virtual int32_t TransProxyProcessD2DData(
-    ProxyDataInfo *dataInfo, const PacketD2DHead *dataHead, const char *data, int32_t businessType) = 0;
+        ProxyDataInfo *dataInfo, const PacketD2DHead *dataHead, const char *data, int32_t businessType) = 0;
     virtual int32_t TransProxyDecryptD2DData(int32_t businessType, ProxyDataInfo *dataInfo, const char *sessionKey,
-        const char *sessionBytesIv, const unsigned char *sessionMsgIv) = 0;
+        const unsigned char *sessionCommonIv) = 0;
     virtual int32_t TransProxySessionDataLenCheck(uint32_t dataLen, SessionPktType type);
     virtual int32_t ClientGetSessionIdByChannelId(int32_t channelId, int32_t channelType,
         int32_t *sessionId, bool isClosing) = 0;
@@ -51,6 +53,8 @@ public:
         bool *supportTlv, bool *needAck) = 0;
     virtual int32_t DataSeqInfoListAddItem(uint32_t dataSeq, int32_t channelId, int32_t socketId,
         int32_t channelType) = 0;
+    virtual uint8_t *TransProxyPackNewHeadD2DData(
+        ProxyDataInfo *dataInfo, uint16_t sliceNum, SessionPktType pktType, uint16_t cnt, uint16_t *dataLen) = 0;
 };
 
 class TransClientProxyD2DInterfaceMock : public TransClientProxyManagerD2DInterface {
@@ -59,13 +63,15 @@ public:
     ~TransClientProxyD2DInterfaceMock() override;
     MOCK_METHOD2(ClientGetChannelBusinessTypeByChannelId, int32_t(int32_t channelId, int32_t *businessType));
     MOCK_METHOD4(TransProxyPackD2DBytes, int32_t(ProxyDataInfo *dataInfo, const char *sessionKey,
-        const char *sessionIv, SessionPktType flag));
+        SessionPktType flag, bool isNewHead));
+    MOCK_METHOD5(TransProxyPackD2DData, uint8_t *(ProxyDataInfo *dataInfo, uint32_t sliceNum,
+        SessionPktType pktType, uint32_t cnt, uint32_t *dataLen));
     MOCK_METHOD5(ServerIpcSendMessage, int32_t(int32_t channelId, int32_t channelType, const void *data,
             uint32_t len, int32_t msgType));
     MOCK_METHOD4(TransProxyProcessD2DData, int32_t(ProxyDataInfo *dataInfo, const PacketD2DHead *dataHead,
             const char *data, int32_t businessType));
-    MOCK_METHOD5(TransProxyDecryptD2DData, int32_t(int32_t businessType, ProxyDataInfo *dataInfo,
-            const char *sessionKey, const char *sessionBytesIv, const unsigned char *sessionMsgIv));
+    MOCK_METHOD4(TransProxyDecryptD2DData, int32_t(int32_t businessType, ProxyDataInfo *dataInfo,
+            const char *sessionKey, const unsigned char *sessionCommonIv));
     MOCK_METHOD2(TransProxySessionDataLenCheck, int32_t(uint32_t dataLen, SessionPktType type));
     MOCK_METHOD4(ClientGetSessionIdByChannelId, int32_t (int32_t channelId, int32_t channelType,
         int32_t *sessionId, bool isClosing));
@@ -76,6 +82,8 @@ public:
         bool *supportTlv, bool *needAck));
     MOCK_METHOD4(DataSeqInfoListAddItem, int32_t(uint32_t dataSeq, int32_t channelId, int32_t socketId,
         int32_t channelType));
+    MOCK_METHOD5(TransProxyPackNewHeadD2DData, uint8_t *(
+        ProxyDataInfo *dataInfo, uint16_t sliceNum, SessionPktType pktType, uint16_t cnt, uint16_t *dataLen));
 };
 } // namespace OHOS
 #endif // TRANS_CLIENT_PROXY_FILE_MANAGER_MOCK_H

@@ -13,37 +13,37 @@
  * limitations under the License.
  */
 
-#ifndef G_ENHANCE_FUNC_H
-#define G_ENHANCE_FUNC_H
+#ifndef G_ENHANCE_LNN_FUNC_H
+#define G_ENHANCE_LNN_FUNC_H
 
-#include "auth_interface_struct.h"
 #include "auth_attest_interface_struct.h"
 #include "auth_device_common_key_struct.h"
+#include "auth_interface_struct.h"
 #include "bus_center_event_struct.h"
 #include "ble_range.h"
 #include "cJSON.h"
-#include "lnn_heartbeat_utils_struct.h"
-#include "lnn_data_cloud_sync_struct.h"
-#include "lnn_sync_info_manager_struct.h"
-#include "lnn_lane_interface_struct.h"
 #include "lnn_ble_lpdevice_struct.h"
-#include "lnn_node_info_struct.h"
 #include "lnn_cipherkey_manager_struct.h"
+#include "lnn_data_cloud_sync_struct.h"
 #include "lnn_decision_center_struct.h"
 #include "lnn_device_info_recovery_struct.h"
 #include "lnn_fast_offline_struct.h"
+#include "lnn_heartbeat_utils_struct.h"
+#include "lnn_lane_interface_struct.h"
+#include "lnn_lane_link_struct.h"
 #include "lnn_lane_power_control_struct.h"
 #include "lnn_lane_qos_struct.h"
-#include "lnn_lane_vap_info_struct.h"
-#include "lnn_secure_storage_struct.h"
-#include "lnn_time_sync_impl_struct.h"
-#include "lnn_lane_link_struct.h"
-#include "lnn_trans_lane_struct.h"
 #include "lnn_lane_score_struct.h"
+#include "lnn_lane_vap_info_struct.h"
+#include "lnn_node_info_struct.h"
 #include "lnn_ranging_manager_struct.h"
-#include "softbus_bus_center.h"
-#include "softbus_broadcast_type_struct.h"
+#include "lnn_secure_storage_struct.h"
+#include "lnn_sync_info_manager_struct.h"
+#include "lnn_time_sync_impl_struct.h"
+#include "lnn_trans_lane_struct.h"
 #include "softbus_adapter_crypto.h"
+#include "softbus_broadcast_type_struct.h"
+#include "softbus_bus_center.h"
 
 #ifdef __cplusplus
 extern "C" {
@@ -54,7 +54,7 @@ typedef int32_t (*LnnTimeSyncImplInitFunc)(void);
 typedef void (*LnnTimeSyncImplDeinitFunc)(void);
 typedef int32_t (*LnnTimeChangeNotifyFunc)(void);
 typedef int32_t (*LnnStartTimeSyncImplFunc)(const char *targetNetworkId, TimeSyncAccuracy accuracy,
-                             TimeSyncPeriod period, const TimeSyncImplCallback *cb);
+                                            TimeSyncPeriod period, const TimeSyncImplCallback *cb);
 typedef int32_t (*LnnStopTimeSyncImplFunc)(const char *targetNetworkId);
 typedef int32_t (*LnnInitDecisionCenterFunc)(uint32_t version);
 typedef void (*LnnDeinitDecisionCenterFunc)(void);
@@ -64,8 +64,8 @@ typedef void (*LnnDcDispatchEventFunc)(DcEvent *dcEvent);
 typedef void (*TriggerSparkGroupBuildFunc)(uint32_t delayTime);
 typedef void (*TriggerSparkGroupClearFunc)(uint32_t state, uint32_t delayTime);
 typedef void (*TriggerSparkGroupJoinAgainFunc)(const char *udid, uint32_t delayTime);
-typedef int32_t (*InitSparkGroupManagerFunc)(void);
-typedef void (*DeinitSparkGroupManagerFunc)(void);
+typedef int32_t (*InitControlPlaneFunc)(void);
+typedef void (*DeinitControlPlaneFunc)(void);
 typedef int32_t (*QueryControlPlaneNodeValidFunc)(const char *deviceId);
 typedef int32_t (*LnnDumpControlLaneGroupInfoFunc)(int32_t fd);
 typedef bool (*IsSparkGroupEnabledFunc)(void);
@@ -93,6 +93,7 @@ typedef int32_t (*SendDeviceInfoToSHByTypeFunc)(LpFeatureType type);
 typedef int32_t (*SendAdvInfoToMlpsFunc)(LpBroadcastParam *lpAdvParam, LpServerType type);
 typedef int32_t (*SwitchHeartbeatReportChannelFunc)(bool isToAP, uint16_t scanInterval, uint16_t scanWindow);
 typedef bool (*IsSupportLpFeatureFunc)(void);
+typedef bool (*LnnIsSupportLpSparkFeatureFunc)(void);
 typedef void (*SetLpKeepAliveStateFunc)(void *para);
 typedef int32_t (*LnnRegistBleHeartbeatMediumMgrFunc)(void);
 typedef int32_t (*EnablePowerControlFunc)(const WifiDirectLinkInfo *wifiDirectInfo);
@@ -138,8 +139,9 @@ typedef void (*ClearMetaNodeRequestByPidFunc)(const char *pkgName, int32_t pid);
 /* lnn_cipherkey_manager.h */
 typedef int32_t (*LnnInitCipherKeyManagerFunc)(void);
 typedef void (*LnnDeinitCipherKeyManagerFunc)(void);
-typedef bool (*GetCipherKeyByNetworkIdFunc)(const char *networkId, int32_t seq, uint32_t tableIndex, AesCtrCipherKey *cipherkey,
-    int32_t keyLen);
+typedef bool (*GetCipherKeyByNetworkIdFunc)(const char *networkId,
+                                            int32_t seq, uint32_t tableIndex,
+                                            AesCtrCipherKey *cipherkey, int32_t keyLen);
 typedef bool (*GetLocalCipherKeyFunc)(int32_t seq, uint32_t *tableIndex, AesCtrCipherKey *cipherkey, int32_t keyLen);
 typedef void (*LoadBleBroadcastKeyFunc)(void);
 typedef bool (*IsCipherManagerFindKeyFunc)(const char *udid);
@@ -177,7 +179,8 @@ typedef void (*LnnClearAuthExchangeUdidFunc)(const char *networkId);
 typedef int32_t (*LnnInitFastOfflineFunc)(void);
 typedef int32_t (*LnnDeviceCloudConvergenceInitFunc)(void);
 typedef void (*LnnDeinitFastOfflineFunc)(void);
-typedef int32_t (*LnnSendNotTrustedInfoFunc)(const NotTrustedDelayInfo *info, uint32_t num, LnnSyncInfoMsgComplete complete);
+typedef int32_t (*LnnSendNotTrustedInfoFunc)(const NotTrustedDelayInfo *info,
+                                             uint32_t num, LnnSyncInfoMsgComplete complete);
 typedef int32_t (*LnnBleFastOfflineOnceBeginFunc)(void);
 typedef void (*LnnIpAddrChangeEventHandlerFunc)(void);
 typedef void (*EhLoginEventHandlerFunc)(void);
@@ -210,7 +213,8 @@ typedef void (*LnnInitOOBEStateMonitorImplFunc)(void);
 typedef int32_t (*LnnGetOOBEStateFunc)(SoftBusOOBEState *state);
 typedef void (*AuthLoadDeviceKeyFunc)(void);
 typedef int32_t (*AuthFindLatestNormalizeKeyFunc)(const char *udidHash, AuthDeviceKeyInfo *deviceKey, bool clearOldKey);
-typedef int32_t (*AuthFindNormalizeKeyByServerSideFunc)(const char *udidHash, bool isServer, AuthDeviceKeyInfo *deviceKey);
+typedef int32_t (*AuthFindNormalizeKeyByServerSideFunc)(const char *udidHash,
+                                                        bool isServer, AuthDeviceKeyInfo *deviceKey);
 typedef void (*AuthUpdateCreateTimeFunc)(const char *udidHash, int32_t keyType, bool isServer);
 typedef bool (*IsSupportUDIDAbatementFunc)(void);
 typedef int32_t (*AuthMetaGetConnIdByInfoFunc)(const AuthConnInfo *connInfo, uint32_t *connectionId);
@@ -237,7 +241,8 @@ typedef int32_t (*LnnSyncTrustedRelationShipFunc)(const char *pkgName, const cha
 typedef int32_t (*LnnGetCurrChannelScoreFunc)(int32_t channelId);
 typedef int32_t (*CustomizedSecurityProtocolInitFunc)(void);
 typedef void (*CustomizedSecurityProtocolDeinitFunc)(void);
-typedef int32_t (*AuthInsertDeviceKeyFunc)(const NodeInfo *deviceInfo, const AuthDeviceKeyInfo *deviceKey, AuthLinkType type);
+typedef int32_t (*AuthInsertDeviceKeyFunc)(const NodeInfo *deviceInfo,
+                                           const AuthDeviceKeyInfo *deviceKey, AuthLinkType type);
 typedef void (*AuthUpdateKeyIndexFunc)(const char *udidHash, int32_t keyType, int64_t index, bool isServer);
 typedef bool (*CalcHKDFFunc)(const uint8_t *ikm, uint32_t ikmLen, uint8_t *out, uint32_t outLen);
 typedef int32_t (*LnnRetrieveDeviceInfoByUdidFunc)(const char *udid, NodeInfo *deviceInfo);
@@ -253,8 +258,8 @@ typedef void (*LnnFreePreLinkFunc)(void *para);
 typedef int32_t (*GetConcurrencyLaneReqIdByActionIdFunc)(uint32_t actionId, uint32_t *laneReqId);
 typedef int32_t (*UpdateConcurrencyReuseLaneReqIdByActionIdFunc)(uint32_t actionId, uint32_t reuseLaneReqId,
     uint32_t connRequestId);
-typedef int32_t (*UpdateConcurrencyReuseLaneReqIdByUdidFunc)(char *udidHash, uint32_t reuseLaneReqId,
-    uint32_t connReqId);
+typedef int32_t (*UpdateConcurrencyReuseLaneReqIdByUdidFunc)(const char *udidHash, uint32_t udidHashLen,
+    uint32_t reuseLaneReqId, uint32_t connReqId);
 typedef int32_t (*LnnPackCloudSyncAckSeqFunc)(cJSON *json, char *peerudid);
 typedef void (*LnnClearPtkListFunc)(void);
 typedef int32_t (*GenerateNewLocalCipherKeyFunc)(void);
@@ -269,8 +274,8 @@ typedef int32_t (*UnregistAuthTransListenerFunc)(void);
 typedef void (*SleRangeDeathCallbackFunc)(void);
 typedef int32_t (*LnnInitUsbChannelManagerFunc)(void);
 typedef void (*LnnDeinitUsbChannelManagerFunc)(void);
-typedef void (*CheckNeedCloudSyncOfflineFunc)(DiscoveryType type);
 typedef bool (*IsDeviceHasRiskFactorFunc)(void);
+typedef void (*CheckNeedCloudSyncOfflineFunc)(DiscoveryType type);
 typedef int32_t (*LnnVirtualLinkInitFunc)(void);
 typedef void (*LnnVirtualLinkDeinitFunc)(void);
 typedef int32_t (*DcTriggerVirtualLinkFunc)(const char *peerNetworkId);
@@ -291,8 +296,8 @@ typedef struct TagLnnEnhanceFuncList {
     TriggerSparkGroupBuildFunc triggerSparkGroupBuild;
     TriggerSparkGroupClearFunc triggerSparkGroupClear;
     TriggerSparkGroupJoinAgainFunc triggerSparkGroupJoinAgain;
-    InitSparkGroupManagerFunc initSparkGroupManager;
-    DeinitSparkGroupManagerFunc deinitSparkGroupManager;
+    InitControlPlaneFunc initControlPlane;
+    DeinitControlPlaneFunc deinitControlPlane;
     QueryControlPlaneNodeValidFunc queryControlPlaneNodeValid;
     LnnDumpControlLaneGroupInfoFunc lnnDumpControlLaneGroupInfo;
     IsSparkGroupEnabledFunc isSparkGroupEnabled;
@@ -330,6 +335,7 @@ typedef struct TagLnnEnhanceFuncList {
     SendAdvInfoToMlpsFunc sendAdvInfoToMlps;
     SwitchHeartbeatReportChannelFunc switchHeartbeatReportChannel;
     IsSupportLpFeatureFunc isSupportLpFeature;
+    LnnIsSupportLpSparkFeatureFunc lnnIsSupportLpSparkFeature;
     SetLpKeepAliveStateFunc setLpKeepAliveState;
     LnnRegistBleHeartbeatMediumMgrFunc lnnRegistBleHeartbeatMediumMgr;
     LnnRequestCheckOnlineStatusFunc lnnRequestCheckOnlineStatus;
@@ -495,7 +501,7 @@ typedef struct TagLnnEnhanceFuncList {
     LnnInitUsbChannelManagerFunc lnnInitUsbChannelManager;
     LnnDeinitUsbChannelManagerFunc lnnDeinitUsbChannelManager;
     CheckNeedCloudSyncOfflineFunc checkNeedCloudSyncOffline;
-    
+
     // virtual link
     LnnGetLocalChannelInfoFunc lnnGetLocalChannelInfo;
     LnnSetLocalChannelInfoFunc lnnSetLocalChannelInfo;

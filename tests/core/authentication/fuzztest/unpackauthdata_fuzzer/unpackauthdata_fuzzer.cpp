@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2022 Huawei Device Co., Ltd.
+ * Copyright (c) 2022-2025 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -14,28 +14,28 @@
  */
 
 #include "unpackauthdata_fuzzer.h"
+#include "auth_connection.h"
+#include "softbus_access_token_test.h"
 #include <cstddef>
 #include <cstring>
 #include <securec.h>
-#include "auth_connection.h"
-#include "softbus_access_token_test.h"
 
 namespace OHOS {
-    bool UnpackAuthDataFuzzTest(const uint8_t* data, size_t size)
-    {
-        if (data == nullptr || size < sizeof(AuthDataHead)) {
-            return false;
-        }
-
-        AuthDataHead head = *const_cast<AuthDataHead *>(reinterpret_cast<const AuthDataHead *>(data));
-        SetAccessTokenPermission("AuthTest");
-        UnpackAuthData(data + sizeof(AuthDataHead), size - sizeof(AuthDataHead), &head);
-        return true;
+bool UnpackAuthDataFuzzTest(const uint8_t *data, size_t size)
+{
+    if (data == nullptr || size < sizeof(AuthDataHead)) {
+        return false;
     }
+
+    AuthDataHead head = *const_cast<AuthDataHead *>(reinterpret_cast<const AuthDataHead *>(data));
+    SetAccessTokenPermission("AuthTest");
+    UnpackAuthData(data + sizeof(AuthDataHead), size - sizeof(AuthDataHead), &head);
+    return true;
 }
+} // namespace OHOS
 
 /* Fuzzer entry point */
-extern "C" int32_t LLVMFuzzerTestOneInput(const uint8_t* data, size_t size)
+extern "C" int32_t LLVMFuzzerTestOneInput(const uint8_t *data, size_t size)
 {
     /* Run your code on data */
     OHOS::UnpackAuthDataFuzzTest(data, size);

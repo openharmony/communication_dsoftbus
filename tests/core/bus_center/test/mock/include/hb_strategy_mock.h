@@ -41,8 +41,7 @@ public:
         LnnHeartbeatType hbType, LnnHeartbeatStrategyType strategyType, bool isRelay) = 0;
     virtual int32_t LnnRequestLeaveSpecific(const char *networkId, ConnectionAddrType addrType) = 0;
     virtual AuthVerifyCallback *LnnGetReAuthVerifyCallback(void) = 0;
-    virtual int32_t LnnSetGearModeBySpecificType(
-        const char *callerId, const GearMode *mode, LnnHeartbeatType type) = 0;
+    virtual int32_t LnnSetGearModeBySpecificType(const char *callerId, const GearMode *mode, LnnHeartbeatType type) = 0;
     virtual int32_t LnnEnableHeartbeatByType(LnnHeartbeatType type, bool isEnable) = 0;
     virtual int32_t LnnStopHeartbeatByType(LnnHeartbeatType type) = 0;
     virtual int32_t LnnHbStrategyInit(void) = 0;
@@ -71,6 +70,8 @@ public:
     virtual void NotifyForegroundUseridChange(char *networkId, uint32_t discoveryType, bool isChange) = 0;
     virtual bool IdServiceIsPotentialTrustedDevice(
         const char *udidHash, const char *accountIdHash, bool isSameAccount) = 0;
+    virtual int32_t LnnStartSleOfflineTimingStrategy(const char *networkId) = 0;
+    virtual int32_t LnnStopSleOfflineTimingStrategy(const char *networkId) = 0;
 };
 class HeartBeatStategyInterfaceMock : public HeartBeatStategyInterface {
 public:
@@ -101,8 +102,7 @@ public:
     MOCK_METHOD2(LnnRetrieveDeviceInfo, int32_t(const char *, NodeInfo *));
     MOCK_METHOD0(IsSameAccountGroupDevice, bool(void));
     MOCK_METHOD0(AuthGenRequestId, uint32_t(void));
-    MOCK_METHOD3(
-        AuthStartVerify, int32_t(const AuthConnInfo *, const AuthVerifyParam *, const AuthVerifyCallback *));
+    MOCK_METHOD3(AuthStartVerify, int32_t(const AuthConnInfo *, const AuthVerifyParam *, const AuthVerifyCallback *));
     MOCK_METHOD2(AddNodeToLnnBleReportExtraMap, void(const char *, const LnnBleReportExtra *));
     MOCK_METHOD2(GetNodeFromLnnBleReportExtraMap, int32_t(const char *, LnnBleReportExtra *));
     MOCK_METHOD1(DeleteNodeFromLnnBleReportExtraMap, void(const char *));
@@ -112,6 +112,8 @@ public:
     MOCK_METHOD3(LnnNotifyDeviceTrustedChange, void(int32_t type, const char *msg, uint32_t msgLen));
     MOCK_METHOD3(NotifyForegroundUseridChange, void(char *, uint32_t, bool));
     MOCK_METHOD3(IdServiceIsPotentialTrustedDevice, bool(const char *, const char *, bool));
+    MOCK_METHOD1(LnnStartSleOfflineTimingStrategy, int32_t(const char *));
+    MOCK_METHOD1(LnnStopSleOfflineTimingStrategy, int32_t(const char *));
 };
 } // namespace OHOS
 #endif // HEARTBEAT_STRATEGY_H

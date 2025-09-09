@@ -21,7 +21,7 @@
 #include "softbus_def.h"
 
 namespace OHOS {
-void OpenSessionTest(const uint8_t* data, size_t size)
+void OpenSessionTest(const uint8_t *data, size_t size)
 {
     if ((data == nullptr) || (size == 0)) {
         return;
@@ -40,7 +40,7 @@ void OpenSessionTest(const uint8_t* data, size_t size)
 } // namespace OHOS
 
 /* Fuzzer entry point */
-extern "C" int32_t LLVMFuzzerTestOneInput(const uint8_t* data, size_t size)
+extern "C" int32_t LLVMFuzzerTestOneInput(const uint8_t *data, size_t size)
 {
     OHOS::OpenSessionTest(data, size);
 

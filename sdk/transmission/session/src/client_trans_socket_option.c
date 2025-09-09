@@ -96,12 +96,24 @@ static int32_t TransSetNeedAck(
     return TransSetNeedAckBySocket(socket, needAck);
 }
 
+static int32_t TransGetLogicalBandwidth(
+    int32_t socket, OptLevel level, OptType optType, void *optValue, int32_t *optValueSize)
+{
+    (void)optType;
+    if (level != OPT_LEVEL_SOFTBUS) {
+        TRANS_LOGE(TRANS_SDK, "invalid level, socket=%{public}d, level=%{public}d", socket, level);
+        return SOFTBUS_INVALID_PARAM;
+    }
+    return GetLogicalBandwidth(socket, (int32_t *)optValue, optValueSize);
+}
+
 static SocketOptMap g_socketOptMap[] = {
     { OPT_TYPE_MAX_BUFFER, TransGetSocketMaxBufferLen, NULL },
     { OPT_TYPE_FIRST_PACKAGE, TransGetSocketFirstPackage, NULL },
     { OPT_TYPE_MAX_IDLE_TIMEOUT, TransGetSocketMaxIdleTime, TransSetSocketMaxIdleTime },
     { OPT_TYPE_SUPPORT_ACK, TransGetSupportTlv, NULL },
     { OPT_TYPE_NEED_ACK, NULL, TransSetNeedAck },
+    { OPT_TYPE_LOGICAL_BANDWIDTH, TransGetLogicalBandwidth, NULL},
 };
 
 int32_t GetCommonSocketOpt(int32_t socket, OptLevel level, OptType optType, void *optValue, int32_t *optValueSize)

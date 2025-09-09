@@ -23,7 +23,7 @@ struct DLL_EXPORT WifiDirectEventWrapper : public WifiDirectEventBase {
     Content content_;
     explicit WifiDirectEventWrapper(const Content &content) : content_(content) {};
 
-    ~WifiDirectEventWrapper(){}
+    ~WifiDirectEventWrapper() override {}
 
     std::string getContentTypeid() override {
         return typeid(content_).name();

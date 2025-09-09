@@ -36,10 +36,9 @@ static LnnSyncInfoInterface *GetSyncInterface()
 }
 
 extern "C" {
-int32_t LnnSendSyncInfoMsg(
-    LnnSyncInfoType type, const char *networkId, const uint8_t *msg, uint32_t len, LnnSyncInfoMsgComplete complete)
+int32_t LnnInitSyncInfoManager(void)
 {
-    return GetSyncInterface()->LnnSendSyncInfoMsg(type, networkId, msg, len, complete);
+    return GetSyncInterface()->LnnInitSyncInfoManager();
 }
 
 int32_t LnnRegSyncInfoHandler(LnnSyncInfoType type, LnnSyncInfoMsgHandler handler)
@@ -50,6 +49,12 @@ int32_t LnnRegSyncInfoHandler(LnnSyncInfoType type, LnnSyncInfoMsgHandler handle
 int32_t LnnUnregSyncInfoHandler(LnnSyncInfoType type, LnnSyncInfoMsgHandler handler)
 {
     return GetSyncInterface()->LnnUnregSyncInfoHandler(type, handler);
+}
+
+int32_t LnnSendSyncInfoMsg(
+    LnnSyncInfoType type, const char *networkId, const uint8_t *msg, uint32_t len, LnnSyncInfoMsgComplete complete)
+{
+    return GetSyncInterface()->LnnSendSyncInfoMsg(type, networkId, msg, len, complete);
 }
 
 int32_t LnnSendP2pSyncInfoMsg(const char *networkId, uint32_t netCapability)

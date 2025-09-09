@@ -21,6 +21,7 @@
 #include "client_bus_center_manager.h"
 #include "softbus_access_token_test.h"
 #include "softbus_bus_center.h"
+#include "softbus_client_frame_manager.h"
 #include "softbus_def.h"
 #include "softbus_error_code.h"
 #include "softbus_server_frame.h"
@@ -62,7 +63,12 @@ void BusCenterSdkTest::SetUpTestCase()
 
 void BusCenterSdkTest::TearDownTestCase() { }
 
-void BusCenterSdkTest::SetUp() { }
+void BusCenterSdkTest::SetUp()
+{
+    EXPECT_EQ(InitSoftBus(TEST_PKG_NAME), SOFTBUS_OK);
+    EXPECT_EQ(InitSoftBus(TEST_PKG_NAME_1), SOFTBUS_OK);
+    EXPECT_EQ(InitSoftBus(TEST_MSDP_NAME), SOFTBUS_OK);
+}
 
 void BusCenterSdkTest::TearDown() { }
 
@@ -231,7 +237,7 @@ HWTEST_F(BusCenterSdkTest, BUS_CENTER_SDK_Leave_Lnn_Test_001, TestSize.Level0)
  */
 HWTEST_F(BusCenterSdkTest, BUS_CENTER_SDK_STATE_CB_Test_001, TestSize.Level0)
 {
-    EXPECT_TRUE(RegNodeDeviceStateCb(TEST_PKG_NAME, &g_nodeStateCb) == SOFTBUS_OK);
+    EXPECT_EQ(RegNodeDeviceStateCb(TEST_PKG_NAME, &g_nodeStateCb), SOFTBUS_OK);
     EXPECT_TRUE(UnregNodeDeviceStateCb(&g_nodeStateCb) == SOFTBUS_OK);
 }
 
@@ -693,10 +699,10 @@ HWTEST_F(BusCenterSdkTest, BUS_CENTER_SDK_TRIGGER_RANGE_Test001, TestSize.Level1
     EXPECT_EQ(RegisterRangeCallbackForMsdp(nullptr, nullptr), SOFTBUS_INVALID_PARAM);
     EXPECT_EQ(RegisterRangeCallbackForMsdp(nullptr, &g_bleRangeCb1), SOFTBUS_INVALID_PARAM);
     EXPECT_EQ(RegisterRangeCallbackForMsdp(TEST_PKG_NAME, &g_bleRangeCb), SOFTBUS_INVALID_PARAM);
-    EXPECT_EQ(RegisterRangeCallbackForMsdp(TEST_MSDP_NAME, &g_bleRangeCb), SOFTBUS_OK);
+    EXPECT_EQ(RegisterRangeCallbackForMsdp(TEST_MSDP_NAME, &g_bleRangeCb), SOFTBUS_FUNC_NOT_SUPPORT);
     EXPECT_EQ(UnregisterRangeCallbackForMsdp(nullptr), SOFTBUS_INVALID_PARAM);
     EXPECT_EQ(UnregisterRangeCallbackForMsdp(TEST_PKG_NAME), SOFTBUS_INVALID_PARAM);
-    EXPECT_EQ(UnregisterRangeCallbackForMsdp(TEST_MSDP_NAME), SOFTBUS_OK);
+    EXPECT_EQ(UnregisterRangeCallbackForMsdp(TEST_MSDP_NAME), SOFTBUS_FUNC_NOT_SUPPORT);
 
     RangeConfig config = { .medium = BLE_ADV_HB,
         .configInfo.heartbeat.mode.connFlag = true,
@@ -704,7 +710,7 @@ HWTEST_F(BusCenterSdkTest, BUS_CENTER_SDK_TRIGGER_RANGE_Test001, TestSize.Level1
         .configInfo.heartbeat.mode.replyFlag = false,
     };
     EXPECT_EQ(TriggerRangeForMsdp(nullptr, nullptr), SOFTBUS_INVALID_PARAM);
-    EXPECT_EQ(TriggerRangeForMsdp(TEST_PKG_NAME, nullptr), SOFTBUS_OK);
-    EXPECT_EQ(TriggerRangeForMsdp(TEST_MSDP_NAME, &config), SOFTBUS_OK);
+    EXPECT_EQ(TriggerRangeForMsdp(TEST_PKG_NAME, nullptr), SOFTBUS_INVALID_PARAM);
+    EXPECT_EQ(TriggerRangeForMsdp(TEST_MSDP_NAME, &config), SOFTBUS_NETWORK_SEND_REQUEST_FAILED);
 }
 } // namespace OHOS

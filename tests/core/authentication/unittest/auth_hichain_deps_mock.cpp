@@ -113,8 +113,8 @@ int32_t AuthFailNotifyProofInfo(int32_t errCode, const char *errorReturn, uint32
     return GetAuthHichainMockInterface()->AuthFailNotifyProofInfo(errCode, errorReturn, errorReturnLen);
 }
 
-int32_t LnnAsyncCallbackDelayHelper(SoftBusLooper *looper, LnnAsyncCallbackFunc callback,
-    void *para, uint64_t delayMillis)
+int32_t LnnAsyncCallbackDelayHelper(
+    SoftBusLooper *looper, LnnAsyncCallbackFunc callback, void *para, uint64_t delayMillis)
 {
     return GetAuthHichainMockInterface()->LnnAsyncCallbackDelayHelper(looper, callback, para, delayMillis);
 }
@@ -139,8 +139,7 @@ int32_t SoftBusGenerateStrHash(const unsigned char *str, uint32_t len, unsigned 
     return GetAuthHichainMockInterface()->SoftBusGenerateStrHash(str, len, hash);
 }
 
-int32_t ConvertBytesToHexString(char *outBuf, uint32_t outBufLen,
-    const unsigned char *inBuf, uint32_t inLen)
+int32_t ConvertBytesToHexString(char *outBuf, uint32_t outBufLen, const unsigned char *inBuf, uint32_t inLen)
 {
     return GetAuthHichainMockInterface()->ConvertBytesToHexString(outBuf, outBufLen, inBuf, inLen);
 }
@@ -212,18 +211,18 @@ bool LnnIsDefaultOhosAccount(void)
     return GetAuthHichainMockInterface()->LnnIsDefaultOhosAccount();
 }
 
-int32_t IdServiceQueryCredential(int32_t userId, const char *udidHash, const char *accountidHash,
-    bool isSameAccount, char **credList)
+int32_t IdServiceQueryCredential(
+    int32_t userId, const char *udidHash, const char *accountidHash, bool isSameAccount, char **credList)
 {
-    return GetAuthHichainMockInterface()->IdServiceQueryCredential(userId, udidHash, accountidHash, isSameAccount,
-        credList);
+    return GetAuthHichainMockInterface()->IdServiceQueryCredential(
+        userId, udidHash, accountidHash, isSameAccount, credList);
 }
 
-int32_t AuthIdServiceQueryCredential(int32_t peerUserId, const char *udidHash, const char *accountidHash,
-    bool isSameAccount, char **credList)
+int32_t AuthIdServiceQueryCredential(
+    int32_t peerUserId, const char *udidHash, const char *accountidHash, bool isSameAccount, char **credList)
 {
-    return GetAuthHichainMockInterface()->AuthIdServiceQueryCredential(peerUserId, udidHash, accountidHash,
-        isSameAccount, credList);
+    return GetAuthHichainMockInterface()->AuthIdServiceQueryCredential(
+        peerUserId, udidHash, accountidHash, isSameAccount, credList);
 }
 
 char *IdServiceGetCredIdFromCredList(int32_t userId, const char *credList)
@@ -241,14 +240,12 @@ char *IdServiceGenerateAuthParam(HiChainAuthParam *hiChainParam)
     return GetAuthHichainMockInterface()->IdServiceGenerateAuthParam(hiChainParam);
 }
 
-int32_t IdServiceAuthCredential(int32_t userId, int64_t authReqId, const char *authParams,
-    const DeviceAuthCallback *cb)
+int32_t IdServiceAuthCredential(int32_t userId, int64_t authReqId, const char *authParams, const DeviceAuthCallback *cb)
 {
     return GetAuthHichainMockInterface()->IdServiceAuthCredential(userId, authReqId, authParams, cb);
 }
 
-int32_t IdServiceProcessCredData(int64_t authSeq, const uint8_t *data, uint32_t len,
-    DeviceAuthCallback *cb)
+int32_t IdServiceProcessCredData(int64_t authSeq, const uint8_t *data, uint32_t len, DeviceAuthCallback *cb)
 {
     return GetAuthHichainMockInterface()->IdServiceProcessCredData(authSeq, data, len, cb);
 }
@@ -268,10 +265,15 @@ int32_t GetActiveOsAccountIds(void)
     return GetAuthHichainMockInterface()->GetActiveOsAccountIds();
 }
 
-bool IsSKIdInvalid(int32_t sessionKeyId, const char *accountHash, const char *udidShortHash,
-    int32_t userId)
+bool IsSKIdInvalid(int32_t sessionKeyId, const char *accountHash, const char *udidShortHash, int32_t userId)
 {
     return GetAuthHichainMockInterface()->IsSKIdInvalid(sessionKeyId, accountHash, udidShortHash, userId);
 }
+
+int32_t IdServiceGetCredTypeByCredId(int32_t userId, const char *credId, int32_t *credType)
+{
+    return GetAuthHichainMockInterface()->IdServiceGetCredTypeByCredId(userId, credId, credType);
+}
+
 } // extern "C"
 } // namespace OHOS

@@ -32,9 +32,10 @@
 namespace Communication {
 namespace SoftBus {
 bool g_logOn = false;
-const int FEED_BACK_PERIOD = 1;  /* feedback period of fillp stream traffic statistics is 1s */
-const int MS_PER_SECOND = 1000;
-const int US_PER_MS = 1000;
+const int32_t FEED_BACK_PERIOD = 1;  /* feedback period of fillp stream traffic statistics is 1s */
+const int32_t MS_PER_SECOND = 1000;
+const int32_t US_PER_MS = 1000;
+static constexpr int32_t MAX_PORT = 65535;
 
 namespace {
 void PrintOptionInfo(int type, const StreamAttr &value)
@@ -258,19 +259,11 @@ int VtpStreamSocket::HandleFillpFrameEvt(int fd, const FtEventCbkInfo *info)
     return SOFTBUS_OK;
 }
 
-static int32_t FirstClientCheckFuncPointer(
-    int (*func)(int fd, OnFrameEvt cb, const FtEventCbkInfo *info))
-{
-    if (func == NULL) {
-        return SOFTBUS_FUNC_NOT_REGISTER;
-    }
-    return SOFTBUS_OK;
-}
-
 static int HandleVtpFrameEvtPacked(int fd, OnFrameEvt cb, const FtEventCbkInfo *info)
 {
     ClientEnhanceFuncList *pfnClientEnhanceFuncList = ClientEnhanceFuncListGet();
-    if (FirstClientCheckFuncPointer(pfnClientEnhanceFuncList->handleVtpFrameEvt) != SOFTBUS_OK) {
+    if (pfnClientEnhanceFuncList->handleVtpFrameEvt == nullptr) {
+        TRANS_LOGE(TRANS_STREAM, "func handleVtpFrameEvt is not registered");
         return SOFTBUS_FUNC_NOT_SUPPORT;
     }
     return pfnClientEnhanceFuncList->handleVtpFrameEvt(fd, cb, info);
@@ -319,18 +312,11 @@ void VtpStreamSocket::FillSupportDet(int fd, const FtEventCbkInfo *info, QosTv *
 }
 #endif
 
-static int32_t SecondClientCheckFuncPointer(bool (*func)(const FtEventCbkInfo *info))
-{
-    if (func == NULL) {
-        return SOFTBUS_FUNC_NOT_REGISTER;
-    }
-    return SOFTBUS_OK;
-}
-
 static bool IsVtpFrameSentEvtPacked(const FtEventCbkInfo *info)
 {
     ClientEnhanceFuncList *pfnClientEnhanceFuncList = ClientEnhanceFuncListGet();
-    if (SecondClientCheckFuncPointer(pfnClientEnhanceFuncList->isVtpFrameSentEvt) != SOFTBUS_OK) {
+    if (pfnClientEnhanceFuncList->isVtpFrameSentEvt == nullptr) {
+        TRANS_LOGE(TRANS_STREAM, "Func isVtpFrameSentEvt is not registered");
         return false;
     }
     return pfnClientEnhanceFuncList->isVtpFrameSentEvt(info);
@@ -369,6 +355,10 @@ int VtpStreamSocket::FillpStatistics(int fd, const FtEventCbkInfo *info)
             std::lock_guard<std::mutex> guard(g_streamSocketMapLock_);
             auto itListener = g_streamSocketMap.find(fd);
             if (itListener != g_streamSocketMap.end()) {
+                if (itListener->second->OnQosEvent == nullptr) {
+                    TRANS_LOGE(TRANS_STREAM, "OnQosEvent is empty");
+                    return SOFTBUS_INVALID_PARAM;
+                }
                 std::thread([itListener, eventId, tvCount, metricList, &itLock]() {
                     const std::string threadName = "OS_qosEvent";
                     pthread_setname_np(pthread_self(), threadName.c_str());
@@ -787,6 +777,9 @@ int VtpStreamSocket::CreateAndBindSocket(IpAndPort &local, bool isServer)
         streamFd_ = sockFd;
     }
     SetDefaultConfig(sockFd);
+    if (local.port < 0 || local.port > MAX_PORT) {
+        return -1;
+    }
 
     // bind
     sockaddr_in localSockAddr = { 0 };
@@ -1635,19 +1628,11 @@ ssize_t VtpStreamSocket::Decrypt(const void *in, ssize_t inLen, void *out, ssize
     return outLen;
 }
 
-static int32_t ThirdClientCheckFuncPointer(
-    int32_t (*func)(int fd, OnFrameEvt *cb, const void *para))
-{
-    if (func == NULL) {
-        return SOFTBUS_FUNC_NOT_REGISTER;
-    }
-    return SOFTBUS_OK;
-}
-
 static int32_t VtpSetSocketMultiLayerPacked(int fd, OnFrameEvt *cb, const void *para)
 {
     ClientEnhanceFuncList *pfnClientEnhanceFuncList = ClientEnhanceFuncListGet();
-    if (ThirdClientCheckFuncPointer(pfnClientEnhanceFuncList->vtpSetSocketMultiLayer) != SOFTBUS_OK) {
+    if (pfnClientEnhanceFuncList->vtpSetSocketMultiLayer == nullptr) {
+        TRANS_LOGE(TRANS_STREAM, "Func vtpSetSocketMultiLayer is not registered");
         return SOFTBUS_FUNC_NOT_SUPPORT;
     }
     return pfnClientEnhanceFuncList->vtpSetSocketMultiLayer(fd, cb, para);

@@ -107,7 +107,7 @@ static int32_t DeleteLaneEventInfo(uint32_t laneHandle)
 
 int32_t UpdateLaneEventInfo(uint32_t laneHandle, uint32_t eventType, LaneProcessValueType valueType, void *arg)
 {
-    if (arg == NULL || valueType == LANE_PROCESS_TYPE_BUTT ||
+    if (arg == NULL || valueType >= LANE_PROCESS_TYPE_BUTT ||
         (valueType == LANE_PROCESS_TYPE_UINT32 && eventType >= EVENT_32_BIT_MAX) ||
         (valueType == LANE_PROCESS_TYPE_UINT64 && eventType >= EVENT_64_BIT_MAX) ||
         laneHandle == INVALID_LANE_REQ_ID) {
@@ -188,7 +188,7 @@ int32_t ReportLaneEventInfo(uint32_t laneHandle, int32_t result)
         .laneStage = info.laneProcessList32Bit[EVENT_LANE_STAGE],
         .laneHandle = info.laneProcessList32Bit[EVENT_LANE_HANDLE],
         .laneId = info.laneProcessList64Bit[EVENT_LANE_ID],
-        .laneLinkType = info.laneProcessList32Bit[EVENT_LANE_LINK_TYPE],
+        .laneLinkType = (int32_t)info.laneProcessList32Bit[EVENT_LANE_LINK_TYPE],
         .minBW = info.laneProcessList32Bit[EVENT_LANE_MIN_BW],
         .maxLaneLatency = info.laneProcessList32Bit[EVENT_LANE_MAX_LANE_LATENCY],
         .minLaneLatency = info.laneProcessList32Bit[EVENT_LANE_MIN_LANE_LATENCY],
@@ -198,7 +198,7 @@ int32_t ReportLaneEventInfo(uint32_t laneHandle, int32_t result)
         .localDynamicCap = info.laneProcessList32Bit[EVENT_LOCAL_CAP],
         .remoteDynamicCap = info.laneProcessList32Bit[EVENT_REMOTE_CAP],
         .onlineType = info.laneProcessList32Bit[EVENT_ONLINE_STATE],
-        .guideType = info.laneProcessList32Bit[EVENT_GUIDE_TYPE],
+        .guideType = (int32_t)info.laneProcessList32Bit[EVENT_GUIDE_TYPE],
         .isGuideRetry = info.laneProcessList32Bit[EVENT_GUIDE_RETRY],
         .wifiDetectState = info.laneProcessList32Bit[EVENT_WIFI_DETECT_STATE],
         .wifiDetectTime = info.laneProcessList64Bit[EVENT_WIFI_DETECT_TIME],

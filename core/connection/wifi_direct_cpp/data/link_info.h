@@ -159,8 +159,8 @@ public:
     void SetIsBeingUsedByRemote(bool isUsed);
     bool GetIsBeingUsedByRemote() const;
 
-    void SetIsDBAC(bool isDBAC);
-    bool GetIsDBAC() const;
+    void SetIsDbac(bool isDbac);
+    bool GetIsDbac() const;
 
     static std::string ToString(LinkMode mode);
 };

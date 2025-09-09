@@ -55,7 +55,7 @@ namespace OHOS {
         return 0;
     }
 
-    void TransTdcCreateListenerTest(const uint8_t* data, size_t size)
+    void TransTdcCreateListenerTest(const uint8_t *data, size_t size)
     {
         if (data == nullptr || size < sizeof(int32_t)) {
             return;
@@ -67,7 +67,7 @@ namespace OHOS {
         DataGenerator::Clear();
     }
 
-    void TransTdcStopReadTest(const uint8_t* data, size_t size)
+    void TransTdcStopReadTest(const uint8_t *data, size_t size)
     {
         if (data == nullptr || size < sizeof(int32_t)) {
             return;
@@ -79,7 +79,7 @@ namespace OHOS {
         DataGenerator::Clear();
     }
 
-    void TransTdcSendBytesTest(const uint8_t* data, size_t size)
+    void TransTdcSendBytesTest(const uint8_t *data, size_t size)
     {
         if ((data == nullptr) || (size == 0)) {
             return;
@@ -88,7 +88,7 @@ namespace OHOS {
         TransTdcSendBytes(static_cast<int32_t>(size), &tmp, static_cast<uint32_t>(size), false);
     }
 
-    void TransTdcSendMessageTest(const uint8_t* data, size_t size)
+    void TransTdcSendMessageTest(const uint8_t *data, size_t size)
     {
         if ((data == nullptr) || (size == 0)) {
             return;
@@ -97,7 +97,7 @@ namespace OHOS {
         TransTdcSendMessage((int32_t)size, &tmp, (uint32_t)size);
     }
 
-    void TransAddDataBufNodeTest(const uint8_t* data, size_t size)
+    void TransAddDataBufNodeTest(const uint8_t *data, size_t size)
     {
         if (data == nullptr || size < sizeof(int32_t)) {
             return;
@@ -111,7 +111,7 @@ namespace OHOS {
         DataGenerator::Clear();
     }
 
-    void TransDelDataBufNodeTest(const uint8_t* data, size_t size)
+    void TransDelDataBufNodeTest(const uint8_t *data, size_t size)
     {
         if (data == nullptr || size < sizeof(int32_t)) {
             return;
@@ -123,7 +123,7 @@ namespace OHOS {
         DataGenerator::Clear();
     }
 
-    void TransTdcRecvDataTest(const uint8_t* data, size_t size)
+    void TransTdcRecvDataTest(const uint8_t *data, size_t size)
     {
         if (data == nullptr || size < sizeof(int32_t)) {
             return;
@@ -135,7 +135,7 @@ namespace OHOS {
         DataGenerator::Clear();
     }
 
-    void TransTdcGetInfoByIdTest(const uint8_t* data, size_t size)
+    void TransTdcGetInfoByIdTest(const uint8_t *data, size_t size)
     {
         if (data == nullptr || size < sizeof(int32_t)) {
             return;
@@ -154,12 +154,17 @@ namespace OHOS {
         }
         DataGenerator::Write(data, size);
         int32_t channelId = 0;
-        GenerateInt32(channelId);
-        TransTdcGetInfoIncFdRefById(channelId, nullptr, true);
+        (void)GenerateInt32(channelId);
+        bool withSeq = false;
+        (void)GenerateBool(withSeq);
+        TcpDirectChannelInfo info;
+        (void)memset_s(&info, sizeof(TcpDirectChannelInfo), 0, sizeof(TcpDirectChannelInfo));
+        (void)TransTdcGetInfoIncFdRefById(channelId, nullptr, true);
+        (void)TransTdcGetInfoIncFdRefById(channelId, &info, withSeq);
         DataGenerator::Clear();
     }
 
-    void TransTdcGetInfoByFdTest(const uint8_t* data, size_t size)
+    void TransTdcGetInfoByFdTest(const uint8_t *data, size_t size)
     {
         if (data == nullptr || size < sizeof(int32_t)) {
             return;
@@ -171,7 +176,7 @@ namespace OHOS {
         DataGenerator::Clear();
     }
 
-    void TransTdcCloseChannelTest(const uint8_t* data, size_t size)
+    void TransTdcCloseChannelTest(const uint8_t *data, size_t size)
     {
         if (data == nullptr || size < sizeof(int32_t)) {
             return;
@@ -195,7 +200,7 @@ namespace OHOS {
         ClientTransTdcOnChannelOpened(tmp, nullptr, nullptr);
     }
 
-    void TransDisableSessionListenerTest(const uint8_t* data, size_t size)
+    void TransDisableSessionListenerTest(const uint8_t *data, size_t size)
     {
         if (data == nullptr || size < sizeof(int32_t)) {
             return;
@@ -217,7 +222,7 @@ namespace OHOS {
         cb->OnGetSessionId = nullptr;
         cb->OnQosEvent = nullptr;
     }
-    void ClientTransTdcOnSessionOpenedTest(const uint8_t* data, size_t size)
+    void ClientTransTdcOnSessionOpenedTest(const uint8_t *data, size_t size)
     {
         if (data == nullptr || size < SESSION_NAME_SIZE_MAX) {
             return;
@@ -235,7 +240,7 @@ namespace OHOS {
         ClientTransTdcOnSessionOpened(tmp, &channel, nullptr);
     }
 
-    void ClientTransTdcOnSessionClosedTest(const uint8_t* data, size_t size)
+    void ClientTransTdcOnSessionClosedTest(const uint8_t *data, size_t size)
     {
         if (data == nullptr || size < sizeof(int32_t)) {
             return;
@@ -252,7 +257,7 @@ namespace OHOS {
         DataGenerator::Clear();
     }
 
-    void ClientTransTdcOnSessionOpenFailedTest(const uint8_t* data, size_t size)
+    void ClientTransTdcOnSessionOpenFailedTest(const uint8_t *data, size_t size)
     {
         if (data == nullptr || size < sizeof(int32_t)) {
             return;
@@ -271,7 +276,7 @@ namespace OHOS {
         DataGenerator::Clear();
     }
 
-    void ClientTransTdcOnDataReceivedTest(const uint8_t* data, size_t size)
+    void ClientTransTdcOnDataReceivedTest(const uint8_t *data, size_t size)
     {
         #define PROXY_MAX_MESSAGE_LEN (1 * 1024)
         if (data == nullptr || size < PROXY_MAX_MESSAGE_LEN) {
@@ -291,7 +296,7 @@ namespace OHOS {
 } // namespace OHOS
 
 /* Fuzzer entry point */
-extern "C" int32_t LLVMFuzzerTestOneInput(const uint8_t* data, size_t size)
+extern "C" int32_t LLVMFuzzerTestOneInput(const uint8_t *data, size_t size)
 {
     OHOS::TransTdcCreateListenerTest(data, size);
     OHOS::TransTdcStopReadTest(data, size);
@@ -301,10 +306,8 @@ extern "C" int32_t LLVMFuzzerTestOneInput(const uint8_t* data, size_t size)
     OHOS::TransDelDataBufNodeTest(data, size);
     OHOS::TransTdcRecvDataTest(data, size);
     OHOS::TransTdcGetInfoByIdTest(data, size);
-    OHOS::TransTdcGetInfoByIdWithIncSeqTest(data, size);
     OHOS::TransTdcGetInfoByFdTest(data, size);
     OHOS::TransTdcCloseChannelTest(data, size);
-    OHOS::ClientTransTdcOnChannelOpenedTest(data, size);
     OHOS::TransDisableSessionListenerTest(data, size);
     OHOS::ClientTransTdcOnSessionOpenedTest(data, size);
     OHOS::ClientTransTdcOnSessionClosedTest(data, size);

@@ -247,7 +247,7 @@ HWTEST_F(TransProcessDataTest, TransProcessDataTest007, TestSize.Level1)
     ret = TransProxyFirstSliceProcess(processor, head, nullptr, len, supportTlv);
     EXPECT_EQ(SOFTBUS_INVALID_PARAM, ret);
 
-    head->priority = PROXY_CHANNEL_PRORITY_MESSAGE;
+    head->priority = PROXY_CHANNEL_PRIORITY_MESSAGE;
     head->sliceNum = -1; // test value
     ret = TransProxyFirstSliceProcess(processor, head, data, len, supportTlv);
     EXPECT_EQ(SOFTBUS_INVALID_DATA_HEAD, ret);
@@ -348,11 +348,10 @@ HWTEST_F(TransProcessDataTest, TransProcessDataTest009, TestSize.Level1)
 HWTEST_F(TransProcessDataTest, TransProcessDataTest010, TestSize.Level1)
 {
     int32_t channelId = TEST_CHANNEL_ID;
-    const char *data = "121212"; // test value
     uint32_t len = 1;
     uint32_t newPktHeadSize = 1;
 
-    int32_t ret = TransProxyNoSubPacketTlvProc(channelId, data, len, nullptr, newPktHeadSize);
+    int32_t ret = TransProxyNoSubPacketTlvProc(channelId, len, nullptr, newPktHeadSize);
     EXPECT_EQ(SOFTBUS_INVALID_PARAM, ret);
 }
 
@@ -725,28 +724,33 @@ HWTEST_F(TransProcessDataTest, TransProxyDecryptD2DDataTest001, TestSize.Level1)
     ProxyDataInfo dataInfo;
     int32_t businessType = 0;
     char sessionKey[SHORT_SESSION_KEY_LENGTH] = "11111";
-    char sessionIv[GCM_IV_LEN] = "11111";
-    unsigned char sessionMsgIv[BLE_BROADCAST_IV_LEN] = "111111";
-    int32_t ret = TransProxyDecryptD2DData(businessType, nullptr, sessionKey, sessionIv, sessionMsgIv);
+    unsigned char sessionCommonIv[BLE_BROADCAST_IV_LEN] = "111111";
+    int32_t ret = TransProxyDecryptD2DData(businessType, nullptr, sessionKey, sessionCommonIv);
     EXPECT_EQ(SOFTBUS_INVALID_PARAM, ret);
 
-    ret = TransProxyDecryptD2DData(businessType, &dataInfo, nullptr, sessionIv, sessionMsgIv);
+    ret = TransProxyDecryptD2DData(businessType, &dataInfo, nullptr, sessionCommonIv);
     EXPECT_EQ(SOFTBUS_INVALID_PARAM, ret);
 
-    ret = TransProxyDecryptD2DData(businessType, &dataInfo, sessionKey, nullptr, sessionMsgIv);
+    ret = TransProxyDecryptD2DData(businessType, &dataInfo, sessionKey, sessionCommonIv);
     EXPECT_EQ(SOFTBUS_INVALID_PARAM, ret);
 
-    ret = TransProxyDecryptD2DData(businessType, &dataInfo, sessionKey, sessionIv, nullptr);
+    ret = TransProxyDecryptD2DData(businessType, &dataInfo, sessionKey, nullptr);
     EXPECT_EQ(SOFTBUS_INVALID_PARAM, ret);
 
     businessType = BUSINESS_TYPE_D2D_VOICE;
     dataInfo.inData = (uint8_t *)"11111";
     dataInfo.inLen = 6;
-    ret = TransProxyDecryptD2DData(businessType, &dataInfo, sessionKey, sessionIv, sessionMsgIv);
+    ret = TransProxyDecryptD2DData(businessType, &dataInfo, sessionKey, sessionCommonIv);
     EXPECT_EQ(SOFTBUS_INVALID_PARAM, ret);
     
     businessType = BUSINESS_TYPE_D2D_MESSAGE;
-    ret = TransProxyDecryptD2DData(businessType, &dataInfo, sessionKey, sessionIv, sessionMsgIv);
+    ret = TransProxyDecryptD2DData(businessType, &dataInfo, sessionKey, sessionCommonIv);
+    EXPECT_EQ(SOFTBUS_INVALID_PARAM, ret);
+
+    businessType = BUSINESS_TYPE_D2D_MESSAGE;
+    dataInfo.inData = (uint8_t *)"11111111111";
+    dataInfo.inLen = 12;
+    ret = TransProxyDecryptD2DData(businessType, &dataInfo, sessionKey, sessionCommonIv);
     EXPECT_EQ(SOFTBUS_INVALID_PARAM, ret);
 }
 
@@ -772,22 +776,22 @@ HWTEST_F(TransProcessDataTest, TransProxyD2DFirstSliceProcessTest001, TestSize.L
     ret = TransProxyD2DFirstSliceProcess(&sliceProcessor, &head, nullptr, len, businessType);
     EXPECT_EQ(SOFTBUS_INVALID_PARAM, ret);
 
-    head.priority = PROXY_CHANNEL_PRORITY_BYTES;
+    head.priority = PROXY_CHANNEL_PRIORITY_BYTES;
     businessType = BUSINESS_TYPE_D2D_VOICE;
     ret = TransProxyD2DFirstSliceProcess(&sliceProcessor, &head, data, len, businessType);
     EXPECT_EQ(SOFTBUS_OK, ret);
 
-    head.priority = PROXY_CHANNEL_PRORITY_MESSAGE;
+    head.priority = PROXY_CHANNEL_PRIORITY_MESSAGE;
     ret = TransProxyD2DFirstSliceProcess(&sliceProcessor, &head, data, len, businessType);
     EXPECT_EQ(SOFTBUS_OK, ret);
 
     head.sliceNum = -1;
-    head.priority = PROXY_CHANNEL_PRORITY_MESSAGE;
+    head.priority = PROXY_CHANNEL_PRIORITY_MESSAGE;
     ret = TransProxyD2DFirstSliceProcess(&sliceProcessor, &head, data, len, businessType);
     EXPECT_EQ(SOFTBUS_INVALID_DATA_HEAD, ret);
 
     head.sliceNum = 1;
-    head.priority = PROXY_CHANNEL_PRORITY_MESSAGE;
+    head.priority = PROXY_CHANNEL_PRIORITY_MESSAGE;
     ret = TransProxyD2DFirstSliceProcess(&sliceProcessor, &head, data, len, businessType);
     EXPECT_EQ(SOFTBUS_OK, ret);
     if (sliceProcessor.data != nullptr) {
@@ -805,23 +809,115 @@ HWTEST_F(TransProcessDataTest, TransProxyPackD2DBytesTest001, TestSize.Level1)
 {
     ProxyDataInfo dataInfo;
     char sessionKey[] = "11111";
-    char sessionIv[] = "11111";
     SessionPktType flag = TRANS_SESSION_BYTES;
-    int32_t ret = TransProxyPackD2DBytes(nullptr, sessionKey, sessionIv, flag);
+    int32_t ret = TransProxyPackD2DBytes(nullptr, sessionKey, flag, false);
     EXPECT_EQ(SOFTBUS_INVALID_PARAM, ret);
 
-    ret = TransProxyPackD2DBytes(&dataInfo, nullptr, sessionIv, flag);
+    ret = TransProxyPackD2DBytes(&dataInfo, nullptr, flag, false);
     EXPECT_EQ(SOFTBUS_INVALID_PARAM, ret);
 
-    ret = TransProxyPackD2DBytes(&dataInfo, sessionKey, nullptr, flag);
-    EXPECT_EQ(SOFTBUS_INVALID_PARAM, ret);
-
-    ret = TransProxyPackD2DBytes(&dataInfo, sessionKey, sessionIv, flag);
+    ret = TransProxyPackD2DBytes(&dataInfo, sessionKey, flag, false);
     EXPECT_EQ(SOFTBUS_TRANS_PROXY_SESS_ENCRYPT_ERR, ret);
 
     dataInfo.inData = (uint8_t *)"1111";
     dataInfo.inLen = 4;
-    ret = TransProxyPackD2DBytes(&dataInfo, sessionKey, sessionIv, flag);
+    ret = TransProxyPackD2DBytes(&dataInfo, sessionKey, flag, false);
     EXPECT_EQ(SOFTBUS_OK, ret);
+
+    ret = TransProxyPackD2DBytes(&dataInfo, sessionKey, flag, true);
+    EXPECT_EQ(SOFTBUS_OK, ret);
+}
+
+/**
+ * @tc.name: TransProxyD2dDataLenCheckTest001
+ * @tc.desc: client send file crc check sum, use normal parameter.
+ * @tc.type: FUNC
+ * @tc.require:
+ */
+HWTEST_F(TransProcessDataTest, TransProxyD2dDataLenCheckTest001, TestSize.Level1)
+{
+    uint32_t len = 1;
+    BusinessType  type = BUSINESS_TYPE_D2D_VOICE;
+    int32_t ret = TransProxyD2dDataLenCheck(len, type);
+    EXPECT_EQ(SOFTBUS_TRANS_INVALID_DATA_LENGTH, ret);
+    type = BUSINESS_TYPE_D2D_MESSAGE;
+    ret = TransProxyD2dDataLenCheck(len, type);
+    EXPECT_EQ(SOFTBUS_TRANS_INVALID_DATA_LENGTH, ret);
+    type = BUSINESS_TYPE_MESSAGE;
+    ret = TransProxyD2dDataLenCheck(len, type);
+    EXPECT_EQ(SOFTBUS_OK, ret);
+    len = 0;
+    type = BUSINESS_TYPE_D2D_VOICE;
+    ret = TransProxyD2dDataLenCheck(len, type);
+    EXPECT_EQ(SOFTBUS_OK, ret);
+    type = BUSINESS_TYPE_D2D_MESSAGE;
+    ret = TransProxyD2dDataLenCheck(len, type);
+    EXPECT_EQ(SOFTBUS_OK, ret);
+}
+
+/**
+ * @tc.name: TransProxyPackNewHeadD2DDataTest001
+ * @tc.desc: trans proxy channel pack message
+ * @tc.type: FUNC
+ * @tc.require:
+ */
+HWTEST_F(TransProcessDataTest, TransProxyPackNewHeadD2DDataTest001, TestSize.Level1)
+{
+    uint16_t sliceNum = 1;
+    int32_t cnt = 0;
+    uint16_t dataLen = 1;
+    SessionPktType pktType = TRANS_SESSION_BYTES;
+    ProxyDataInfo dataInfo;
+    uint8_t *sliceData = TransProxyPackNewHeadD2DData(&dataInfo, sliceNum, pktType, cnt, nullptr);
+    EXPECT_EQ(nullptr, sliceData);
+    sliceData = TransProxyPackNewHeadD2DData(nullptr, sliceNum, pktType, cnt, &dataLen);
+    EXPECT_EQ(nullptr, sliceData);
+    dataInfo.outData = (uint8_t *)"1111";
+    dataInfo.outLen = 4;
+    sliceData = TransProxyPackNewHeadD2DData(&dataInfo, sliceNum, pktType, cnt, &dataLen);
+    ASSERT_NE(nullptr, sliceData);
+    SoftBusFree(sliceData);
+}
+
+/**
+ * @tc.name: TransProxyD2DFirstNewHeadSliceProcessTest001
+ * @tc.desc: test trans proxy d2d first slice process.
+ * @tc.type: FUNC
+ * @tc.require:
+ */
+HWTEST_F(TransProcessDataTest, TransProxyD2DFirstNewHeadSliceProcessTest001, TestSize.Level1)
+{
+    SliceProcessor sliceProcessor;
+    SliceHead head;
+    char data[] = "11111";
+    uint32_t len = 6;
+    int32_t businessType = 0;
+    int32_t ret = TransProxyD2DFirstNewHeadSliceProcess(nullptr, &head, data, len, businessType);
+    EXPECT_EQ(SOFTBUS_INVALID_PARAM, ret);
+
+    ret = TransProxyD2DFirstNewHeadSliceProcess(&sliceProcessor, nullptr, data, len, businessType);
+    EXPECT_EQ(SOFTBUS_INVALID_PARAM, ret);
+
+    ret = TransProxyD2DFirstNewHeadSliceProcess(&sliceProcessor, &head, nullptr, len, businessType);
+    EXPECT_EQ(SOFTBUS_INVALID_PARAM, ret);
+
+    head.sliceNum = -1;
+    ret = TransProxyD2DFirstNewHeadSliceProcess(&sliceProcessor, &head, data, len, businessType);
+    EXPECT_EQ(SOFTBUS_INVALID_DATA_HEAD, ret);
+
+    head.sliceNum = 1;
+    head.priority = PROXY_CHANNEL_PRIORITY_BYTES;
+    businessType = BUSINESS_TYPE_D2D_VOICE;
+    ret = TransProxyD2DFirstNewHeadSliceProcess(&sliceProcessor, &head, data, len, businessType);
+    EXPECT_EQ(SOFTBUS_OK, ret);
+    if (sliceProcessor.data != nullptr) {
+        SoftBusFree(sliceProcessor.data);
+    }
+    head.priority = PROXY_CHANNEL_PRIORITY_MESSAGE;
+    ret = TransProxyD2DFirstNewHeadSliceProcess(&sliceProcessor, &head, data, len, businessType);
+    EXPECT_EQ(SOFTBUS_OK, ret);
+    if (sliceProcessor.data != nullptr) {
+        SoftBusFree(sliceProcessor.data);
+    }
 }
 }

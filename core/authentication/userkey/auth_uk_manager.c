@@ -60,6 +60,7 @@
 #define UK_SEQ_INTEGER_BITS     7
 #define UK_SEQ_INTEGER_MAX      0x0FFFFFFF
 #define PEER_OS_ACCOUNT_ID_STR  "peerOsAccountId"
+#define USER_KEY_TRANS_LEN_MAX  20000
 
 static uint32_t g_uniqueId = 0;
 static uint64_t g_ukDecayTime = 15552000000; //180 * 24 * 60 * 60 * 1000L
@@ -75,6 +76,7 @@ typedef struct {
     uint32_t requestId;
     bool isGenUkSuccess;
     int32_t reason;
+    int32_t ukId;
 } SyncGenUkResult;
 
 typedef enum {
@@ -84,6 +86,7 @@ typedef enum {
 } GenUkStartState;
 
 typedef struct {
+    bool isRecvDeviceId;
     int32_t ukId;
     int32_t channelId;
     uint32_t requestId;
@@ -296,12 +299,31 @@ void PrintfAuthAclInfo(uint32_t requestId, uint32_t channelId, const AuthACLInfo
     AnonymizeFree(anonySinkAccountId);
 }
 
+static bool CheckAclInfoIsEmpty(const AuthACLInfo *info)
+{
+    if (info == NULL) {
+        AUTH_LOGE(AUTH_CONN, "info is null");
+        return true;
+    }
+
+    AuthACLInfo defaultInfo = { 0 };
+    if (memcmp(info, &defaultInfo, sizeof(AuthACLInfo)) == 0) {
+        AUTH_LOGE(AUTH_CONN, "info is empty");
+        return true;
+    }
+    return false;
+}
+
 static int32_t CreateUkNegotiateInstance(
     uint32_t requestId, uint32_t channelId, const AuthACLInfo *info, const AuthGenUkCallback *genCb)
 {
     if (g_ukNegotiateList == NULL) {
         AUTH_LOGE(AUTH_INIT, "uknego instance is null");
         return SOFTBUS_NO_INIT;
+    }
+    if (g_ukNegotiateList->cnt >= UK_MAX_INSTANCE_CNT) {
+        AUTH_LOGE(AUTH_INIT, "user key instance num is max limit");
+        return SOFTBUS_CHANNEL_AUTH_INSTANCE_FULL;
     }
 
     if (!RequireUkNegotiateListLock()) {
@@ -315,7 +337,7 @@ static int32_t CreateUkNegotiateInstance(
         ReleaseUkNegotiateListLock();
         return SOFTBUS_MEM_ERR;
     }
-    instance->channelId = channelId;
+    instance->channelId = (int32_t)channelId;
     instance->requestId = requestId;
     instance->info = *info;
     instance->authMode = GetHichainAuthMode(info);
@@ -324,8 +346,10 @@ static int32_t CreateUkNegotiateInstance(
     instance->negoInfo.isRecvSessionKeyEvent = false;
     instance->negoInfo.isRecvFinishEvent = false;
     instance->negoInfo.isRecvCloseAckEvent = false;
+    instance->isRecvDeviceId = !CheckAclInfoIsEmpty(info);
     ListInit(&instance->node);
     ListAdd(&g_ukNegotiateList->list, &instance->node);
+    g_ukNegotiateList->cnt++;
     PrintfAuthAclInfo(requestId, channelId, info);
     ReleaseUkNegotiateListLock();
     AuthGenUkStartTimeout(requestId);
@@ -361,6 +385,7 @@ static int32_t UpdateUkNegotiateInfo(uint32_t requestId, const UkNegotiateInstan
         item->negoInfo.isRecvSessionKeyEvent = instance->negoInfo.isRecvSessionKeyEvent;
         item->negoInfo.isRecvFinishEvent = instance->negoInfo.isRecvFinishEvent;
         item->negoInfo.isRecvCloseAckEvent = instance->negoInfo.isRecvCloseAckEvent;
+        item->isRecvDeviceId = instance->isRecvDeviceId;
         AUTH_LOGI(AUTH_CONN,
             "update uknego requestId=%{public}u, channelId=%{public}d, state=%{public}d, "
             "isCloseAck=%{public}d, isFinish=%{public}d, isSessionKey=%{public}d",
@@ -399,6 +424,7 @@ static void DeleteUkNegotiateInstance(uint32_t requestId)
         AUTH_LOGE(AUTH_CONN, "delete uknego instance, requestId=%{public}u", requestId);
         ListDelete(&(item->node));
         SoftBusFree(item);
+        g_ukNegotiateList->cnt--;
         ReleaseUkNegotiateListLock();
         return;
     }
@@ -539,7 +565,7 @@ static void AsyncCallGenUkResultReceived(void *para)
         AUTH_LOGI(AUTH_CONN, "recv genuk success, requestId=%{public}u", res->requestId);
         if (instance.genCb.onGenSuccess != NULL) {
             AUTH_LOGI(AUTH_CONN, "onGenSuccess callback");
-            instance.genCb.onGenSuccess(instance.requestId, instance.ukId);
+            instance.genCb.onGenSuccess(instance.requestId, res->ukId);
             TransCloseSessionInner(instance.channelId);
             DeleteUkNegotiateInstance(instance.requestId);
         }
@@ -555,7 +581,7 @@ static void AsyncCallGenUkResultReceived(void *para)
     SoftBusFree(res);
 }
 
-static void UpdateAllGenCbCallback(const AuthACLInfo *info, bool isSuccess, int32_t reason)
+static void UpdateAllGenCbCallback(const AuthACLInfo *info, bool isSuccess, int32_t reason, int32_t ukId)
 {
     if (g_ukNegotiateList == NULL) {
         AUTH_LOGE(AUTH_INIT, "uknego instance is null");
@@ -586,6 +612,7 @@ static void UpdateAllGenCbCallback(const AuthACLInfo *info, bool isSuccess, int3
         result->requestId = item->requestId;
         result->isGenUkSuccess = isSuccess;
         result->reason = reason;
+        result->ukId = ukId;
         if (LnnAsyncCallbackDelayHelper(
             GetLooper(LOOP_TYPE_DEFAULT), AsyncCallGenUkResultReceived, (void *)result, 0) != SOFTBUS_OK) {
             AUTH_LOGE(AUTH_CONN, "async uknego success event fail");
@@ -613,7 +640,7 @@ static void OnGenSuccess(uint32_t requestId)
             instance.negoInfo.isRecvCloseAckEvent);
         return;
     }
-    UpdateAllGenCbCallback(&instance.info, true, SOFTBUS_OK);
+    UpdateAllGenCbCallback(&instance.info, true, SOFTBUS_OK, instance.ukId);
 }
 
 static void OnGenFailed(uint32_t requestId, int32_t reason)
@@ -626,7 +653,7 @@ static void OnGenFailed(uint32_t requestId, int32_t reason)
         AUTH_LOGE(AUTH_CONN, "get instance failed! ret=%{public}d", ret);
         return;
     }
-    UpdateAllGenCbCallback(&instance.info, false, reason);
+    UpdateAllGenCbCallback(&instance.info, false, reason, 0);
 }
 
 static char *PackUkAclParam(const AuthACLInfo *info, bool isClient)
@@ -821,8 +848,9 @@ static int32_t GetUkNegoAuthParamInfo(const AuthACLInfo *info, HiChainAuthMode a
 
 static bool OnTransmitted(int64_t authSeq, const uint8_t *data, uint32_t len)
 {
-    if (data == NULL) {
-        AUTH_LOGE(AUTH_CONN, "data is null");
+    if (data == NULL || len == 0 || len >= USER_KEY_TRANS_LEN_MAX ||
+        len >= USER_KEY_TRANS_LEN_MAX - AUTH_PKT_HEAD_LEN) {
+        AUTH_LOGE(AUTH_CONN, "data is invalid param");
         return false;
     }
     AUTH_LOGI(AUTH_CONN, "uknego OnTransmit: authSeq=%{public}" PRId64 ", len=%{public}u", authSeq, len);
@@ -1095,13 +1123,36 @@ static int32_t ProcessUkNegoState(AuthACLInfo *info, bool *isGreater)
     return SOFTBUS_OK;
 }
 
+static int32_t UpdateExistAclInfo(
+    int32_t channelId, uint32_t requestId, const AuthACLInfo info, UkNegotiateInstance *instance)
+{
+    if (instance == NULL) {
+        AUTH_LOGE(AUTH_CONN, "find uknego info is invalid param");
+        return SOFTBUS_INVALID_PARAM;
+    }
+
+    if (!instance->isRecvDeviceId) {
+        AUTH_LOGI(AUTH_CONN, "requestId=%{public}u isRecvDeviceId is false, update acl info", requestId);
+        instance->isRecvDeviceId = true;
+        instance->channelId = channelId;
+        instance->info = info;
+        instance->authMode = GetHichainAuthMode(&instance->info);
+        int32_t ret = UpdateUkNegotiateInfo(requestId, instance);
+        if (ret != SOFTBUS_OK) {
+            AUTH_LOGE(AUTH_CONN, "update uknego instance failed! ret=%{public}d", ret);
+            return ret;
+        }
+        return SOFTBUS_OK;
+    }
+    return SOFTBUS_AUTH_UK_UPDATE_ACL_FAIL;
+}
+
 static int32_t ProcessUkDeviceId(int32_t channelId, uint32_t requestId, const void *data, uint32_t dataLen)
 {
     AUTH_CHECK_AND_RETURN_RET_LOGE(data != NULL, SOFTBUS_INVALID_PARAM, AUTH_CONN, "data is null");
     AuthACLInfo info = { 0 };
-    UkNegotiateInstance instance;
+    UkNegotiateInstance instance = { 0 };
     AuthGenUkCallback cb;
-    (void)memset_s(&instance, sizeof(UkNegotiateInstance), 0, sizeof(UkNegotiateInstance));
     (void)memset_s(&cb, sizeof(AuthGenUkCallback), 0, sizeof(AuthGenUkCallback));
     bool isLocalUdidGreater = false;
     int32_t ret = UnpackUkAclParam((const char *)data, dataLen, &info);
@@ -1111,18 +1162,16 @@ static int32_t ProcessUkDeviceId(int32_t channelId, uint32_t requestId, const vo
     }
     ret = GetGenUkInstanceByReq(requestId, &instance);
     if (ret != SOFTBUS_OK) {
+        AUTH_LOGW(AUTH_CONN, "get instance failed! ret=%{public}d", ret);
         ret = CreateUkNegotiateInstance(requestId, channelId, &info, &cb);
         if (ret != SOFTBUS_OK) {
             AUTH_LOGE(AUTH_CONN, "create new uknego instance failed! ret=%{public}d", ret);
             return ret;
         }
     } else {
-        instance.channelId = channelId;
-        instance.info = info;
-        instance.authMode = GetHichainAuthMode(&instance.info);
-        ret = UpdateUkNegotiateInfo(requestId, &instance);
+        ret = UpdateExistAclInfo(channelId, requestId, info, &instance);
         if (ret != SOFTBUS_OK) {
-            AUTH_LOGE(AUTH_CONN, "create uknego instance failed! ret=%{public}d", ret);
+            AUTH_LOGE(AUTH_CONN, "update acl fail, ret=%{public}d", ret);
             return ret;
         }
     }
@@ -1289,15 +1338,6 @@ int32_t AuthFindUkIdByAclInfo(const AuthACLInfo *acl, int32_t *ukId)
     return SOFTBUS_OK;
 }
 
-uint32_t AuthGetUkEncryptSize(uint32_t inLen)
-{
-    if (inLen > UINT32_MAX - OVERHEAD_LEN) {
-        AUTH_LOGE(AUTH_CONN, "inLen is over head");
-        return inLen;
-    }
-    return inLen + OVERHEAD_LEN;
-}
-
 uint32_t AuthGetUkDecryptSize(uint32_t inLen)
 {
     if (inLen < OVERHEAD_LEN) {
@@ -1425,6 +1465,7 @@ static int32_t SecurityOnSessionOpened(int32_t channelId, int32_t channelType, c
             AUTH_LOGE(AUTH_CONN, "uknego auth failed! result=%{public}d", ret);
             return ret;
         }
+        instance.isRecvDeviceId = true;
         (void)UpdateUkNegotiateInfo(instance.requestId, &instance);
         return SendUkNegoDeviceId(&instance);
     } else {
@@ -1528,30 +1569,71 @@ uint32_t GenUkSeq(void)
     return seq;
 }
 
+static int32_t CheckAclWithLocalUdid(const AuthACLInfo *oldAcl, AuthACLInfo *newAcl)
+{
+    if (oldAcl == NULL || newAcl == NULL) {
+        AUTH_LOGE(AUTH_CONN, "acl info is invalid param");
+        return SOFTBUS_INVALID_PARAM;
+    }
+    char localUdid[UDID_BUF_LEN] = { 0 };
+
+    if (LnnGetLocalStrInfo(STRING_KEY_DEV_UDID, localUdid, UDID_BUF_LEN) != SOFTBUS_OK) {
+        AUTH_LOGE(AUTH_CONN, "get local udid fail");
+        return SOFTBUS_NETWORK_GET_LOCAL_NODE_INFO_ERR;
+    }
+    if (strcmp(localUdid, oldAcl->sinkUdid) == 0) {
+        if (memcpy_s(newAcl, sizeof(AuthACLInfo), oldAcl, sizeof(AuthACLInfo)) != EOK) {
+            AUTH_LOGE(AUTH_CONN, "memcpy_s uknego info fail");
+            return SOFTBUS_MEM_ERR;
+        }
+        newAcl->isServer = false;
+        return SOFTBUS_OK;
+    } else if (strcmp(localUdid, oldAcl->sourceUdid) == 0) {
+        if (strcpy_s(newAcl->sourceUdid, UDID_BUF_LEN, oldAcl->sinkUdid) != EOK ||
+            strcpy_s(newAcl->sinkUdid, UDID_BUF_LEN, oldAcl->sourceUdid) != EOK ||
+            strcpy_s(newAcl->sourceAccountId, ACCOUNT_ID_BUF_LEN, oldAcl->sinkAccountId) != EOK ||
+            strcpy_s(newAcl->sinkAccountId, ACCOUNT_ID_BUF_LEN, oldAcl->sourceAccountId) != EOK) {
+            AUTH_LOGE(AUTH_CONN, "copy acl info fail");
+            return SOFTBUS_STRCPY_ERR;
+        }
+        newAcl->sourceUserId = oldAcl->sinkUserId;
+        newAcl->sinkUserId = oldAcl->sourceUserId;
+        newAcl->sourceTokenId = oldAcl->sinkTokenId;
+        newAcl->sinkTokenId = oldAcl->sourceTokenId;
+        newAcl->isServer = false;
+        return SOFTBUS_OK;
+    }
+    return SOFTBUS_AUTH_NOT_FIND_LARGER_UDID;
+}
+
 int32_t AuthGenUkIdByAclInfo(const AuthACLInfo *acl, uint32_t requestId, const AuthGenUkCallback *genCb)
 {
     if (acl == NULL || genCb == NULL) {
-        AUTH_LOGE(AUTH_CONN, "generate uknogo info is invalid param");
+        AUTH_LOGE(AUTH_CONN, "generate uknego info is invalid param");
         return SOFTBUS_INVALID_PARAM;
     }
     char networkId[NETWORK_ID_BUF_LEN] = { 0 };
-    AuthACLInfo *info = (AuthACLInfo *)acl;
+    AuthACLInfo info;
 
-    info->isServer = (!acl->isServer);
-    int32_t ret = LnnGetNetworkIdByUdid(acl->sourceUdid, networkId, sizeof(networkId));
+    int32_t ret = CheckAclWithLocalUdid(acl, &info);
+    if (ret != SOFTBUS_OK) {
+        AUTH_LOGE(AUTH_CONN, "check acl with local udid fail");
+        return ret;
+    }
+    ret = LnnGetNetworkIdByUdid(info.sourceUdid, networkId, sizeof(networkId));
     if (ret != SOFTBUS_OK) {
         AUTH_LOGE(AUTH_CONN, "get networkId by udid fail");
+        return ret;
+    }
+    ret = CreateUkNegotiateInstance(requestId, DEFAULT_CHANNEL_ID, (const AuthACLInfo *)&info,
+        (AuthGenUkCallback *)genCb);
+    if (ret != SOFTBUS_OK) {
+        AUTH_LOGE(AUTH_CONN, "uk add instance fail, ret=%{public}d", ret);
         return ret;
     }
     ret = TransOpenSessionInner(UK_NEGO_SESSIONNAME, networkId, requestId);
     if (ret != SOFTBUS_OK) {
         AUTH_LOGE(AUTH_CONN, "uknego open session fail, ret=%{public}d", ret);
-        return ret;
-    }
-    ret = CreateUkNegotiateInstance(requestId, DEFAULT_CHANNEL_ID, (const AuthACLInfo *)info,
-        (AuthGenUkCallback *)genCb);
-    if (ret != SOFTBUS_OK) {
-        AUTH_LOGE(AUTH_CONN, "uk add instance fail, ret=%{public}d", ret);
         return ret;
     }
     return SOFTBUS_OK;

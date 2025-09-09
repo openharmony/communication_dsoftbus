@@ -700,6 +700,11 @@ int32_t WifiDirectUtils::GetRemoteScreenStatus(const char *remoteNetworkId)
     return screenStatus;
 }
 
+int WifiDirectUtils::GetChload()
+{
+    return SOFTBUS_OK;
+}
+
 bool WifiDirectUtils::IsDeviceId(const std::string &remoteId)
 {
     return remoteId.length() == UUID_BUF_LEN - 1;
@@ -713,11 +718,6 @@ std::string WifiDirectUtils::RemoteDeviceIdToMac(const std::string &remoteDevice
 std::string WifiDirectUtils::RemoteMacToDeviceId(const std::string &remoteMac)
 {
     return {};
-}
-
-int WifiDirectUtils::GetChload()
-{
-    return SOFTBUS_OK;
 }
 
 // test source not using c++ 17, from_chars is C++17 feature

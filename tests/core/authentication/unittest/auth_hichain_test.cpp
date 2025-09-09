@@ -33,6 +33,10 @@ namespace OHOS {
 using namespace testing;
 using namespace testing::ext;
 
+constexpr int64_t TEST_AUTH_SEQ = 1;
+constexpr uint32_t TMP_DATA_LEN = 10;
+constexpr uint8_t TMP_DATA[TMP_DATA_LEN] = "tmpInData";
+
 class AuthHichainTest : public testing::Test {
 public:
     static void SetUpTestCase();
@@ -281,5 +285,26 @@ HWTEST_F(AuthHichainTest, IS_SAME_ACCOUNT_GROUP_DEVICE_TEST_001, TestSize.Level1
     EXPECT_CALL(hichainMock, GetGmInstance).WillRepeatedly(Return(&grounpManager));
     ret = IsSameAccountGroupDevice();
     EXPECT_TRUE(ret == true);
+}
+
+/*
+ * @tc.name: HICHAIN_PROCESS_UK_NEGO_DATA_TEST_001
+ * @tc.desc: hichain process uk negotiate data test
+ * @tc.type: FUNC
+ * @tc.require:
+ */
+HWTEST_F(AuthHichainTest, HICHAIN_PROCESS_UK_NEGO_DATA_TEST_001, TestSize.Level1)
+{
+    int64_t authSeq = TEST_AUTH_SEQ;
+    const uint8_t *data = reinterpret_cast<const unsigned char *>(TMP_DATA);
+    uint32_t len = TMP_DATA_LEN;
+    HiChainAuthMode authMode = HICHAIN_AUTH_DEVICE;
+    DeviceAuthCallback cb;
+    (void)memset_s(&cb, sizeof(DeviceAuthCallback), 0, sizeof(DeviceAuthCallback));
+
+    int32_t ret = HichainProcessUkNegoData(authSeq, data, len, authMode, nullptr);
+    EXPECT_EQ(ret, SOFTBUS_INVALID_PARAM);
+    ret = HichainProcessUkNegoData(authSeq, nullptr, len, authMode, &cb);
+    EXPECT_EQ(ret, SOFTBUS_INVALID_PARAM);
 }
 } // namespace OHOS

@@ -97,15 +97,17 @@ int32_t SoftBusServer::SoftbusRegisterService(const char *clientPkgName, const s
     return SOFTBUS_OK;
 }
 
-int32_t SoftBusServer::CreateSessionServer(const char *pkgName, const char *sessionName)
+int32_t SoftBusServer::CreateSessionServer(const char *pkgName, const char *sessionName, uint64_t timestamp)
 {
+    (void)timestamp;
     pid_t callingUid = OHOS::IPCSkeleton::GetCallingUid();
     pid_t callingPid = OHOS::IPCSkeleton::GetCallingPid();
     return TransCreateSessionServer(pkgName, sessionName, (int32_t)callingUid, (int32_t)callingPid);
 }
 
-int32_t SoftBusServer::RemoveSessionServer(const char *pkgName, const char *sessionName)
+int32_t SoftBusServer::RemoveSessionServer(const char *pkgName, const char *sessionName, uint64_t timestamp)
 {
+    (void)timestamp;
     return TransRemoveSessionServer(pkgName, sessionName);
 }
 
@@ -116,7 +118,7 @@ int32_t SoftBusServer::OpenSession(const SessionParam *param, TransInfo *info)
 
 static bool IsNcmAddrType(ConnectionAddrType addrType)
 {
-    return (addrType == CONNECTION_ADDR_NCM) ? true : false;
+    return addrType == CONNECTION_ADDR_NCM;
 }
 
 int32_t SoftBusServer::OpenAuthSession(const char *sessionName, const ConnectionAddr *addrInfo)
@@ -397,6 +399,7 @@ int32_t SoftBusServer::GetSoftbusSpecObject(sptr<IRemoteObject> &object)
 
 int32_t SoftBusServer::GetBusCenterExObj(sptr<IRemoteObject> &object)
 {
+    COMM_LOGI(COMM_SVC, "SoftBusServer GetBusCenterExObj enter.");
     sptr<BusCenterExObj> result = new(std::nothrow) BusCenterExObj();
     if (result == nullptr) {
         COMM_LOGE(COMM_SVC, "SoftBusServer GetBusCenterExObj failed!");
@@ -685,8 +688,32 @@ bool SoftBusServer::IsProxyChannelEnabled(int32_t uid)
     return TransIsProxyChannelEnabled(uid);
 }
 
+static int32_t PushIdentifyCheck()
+{
+#define PUSH_SERVICE_UID 7023
+    std::string pkgName = "PUSH_SERVICE";
+    sptr<IRemoteObject> clientObject = SoftbusClientInfoManager::GetInstance().GetSoftbusClientProxy(pkgName);
+    if (clientObject == nullptr) {
+        COMM_LOGE(COMM_SVC, "get remote object failed!");
+        return SOFTBUS_TRANS_PROXY_REMOTE_NULL;
+    }
+    pid_t uid = IPCSkeleton::GetCallingUid();
+    COMM_LOGI(COMM_SVC, "[br_proxy] uid:%{public}d", uid);
+    if (uid != PUSH_SERVICE_UID) {
+        pid_t pid;
+        SoftbusClientInfoManager::GetInstance().SoftbusRemoveService(clientObject, pkgName, &pid);
+        return SOFTBUS_TRANS_BR_PROXY_CALLER_RESTRICTED;
+    }
+    return SOFTBUS_OK;
+}
+
 int32_t SoftBusServer::PushRegisterHook()
 {
+    int32_t ret = PushIdentifyCheck();
+    if (ret != SOFTBUS_OK) {
+        COMM_LOGE(COMM_SVC, "[br_proxy] Push identity verification failed! ret=%{public}d", ret);
+        return ret;
+    }
     return TransRegisterPushHook();
 }
 } // namespace OHOS

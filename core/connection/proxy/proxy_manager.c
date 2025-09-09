@@ -158,8 +158,8 @@ static void ProxyChannelCloseHandler(char *brAddr)
 static void ProxyChannelClose(struct ProxyChannel *channel)
 {
     CONN_CHECK_AND_RETURN_LOGE(channel != NULL, CONN_PROXY, "channel is null");
-    char *copyAddr = (char *)SoftBusCalloc(BT_MAC_LEN);
-    if (copyAddr == NULL || strcpy_s(copyAddr, BT_MAC_LEN, channel->brMac) != EOK) {
+    char *copyAddr = (char *)SoftBusCalloc(BT_MAC_MAX_LEN);
+    if (copyAddr == NULL || strcpy_s(copyAddr, BT_MAC_MAX_LEN, channel->brMac) != EOK) {
         CONN_LOGE(CONN_PROXY, "copyAddr failed");
         SoftBusFree(copyAddr);
         return;
@@ -192,7 +192,15 @@ static struct ProxyConnection *CreateProxyConnection(ProxyConnectInfo *connectIn
     proxyConnection->proxyChannel.send = ProxyChannelSend;
     proxyConnection->proxyChannel.close = ProxyChannelClose;
     proxyConnection->proxyChannel.requestId = connectInfo->requestId;
-    if (strcpy_s(proxyConnection->proxyChannel.brMac, BT_MAC_LEN, connectInfo->brMac) != EOK ||
+    int32_t ret = connectInfo->isRealMac ?
+        strcpy_s(proxyConnection->proxyChannel.brMac, BT_MAC_MAX_LEN, connectInfo->brMac) :
+        strcpy_s(proxyConnection->proxyChannel.brMac, BT_MAC_MAX_LEN, connectInfo->brHashMac);
+    if (ret != EOK) {
+        CONN_LOGE(CONN_PROXY, "copy br mac failed, ret=%{public}d", ret);
+        SoftBusFree(proxyConnection);
+        return NULL;
+    }
+    if (strcpy_s(proxyConnection->brMac, BT_MAC_LEN, connectInfo->brMac) != EOK  ||
         strcpy_s(proxyConnection->proxyChannel.uuid, UUID_STRING_LEN, connectInfo->uuid) != EOK) {
         CONN_LOGE(CONN_PROXY, "cpy br mac or uuid err");
         SoftBusFree(proxyConnection);
@@ -294,7 +302,7 @@ static void NotifyOpenProxyChannelResult(struct ProxyConnection *proxyConnection
         return;
     }
 
-    ProcessConnectFailed(connectingChannel, proxyConnection->proxyChannel.brMac, status);
+    ProcessConnectFailed(connectingChannel, proxyConnection->brMac, status);
     RemoveProxyChannelByChannelId(proxyConnection->channelId);
 }
 
@@ -332,7 +340,7 @@ static void ProxyChannelConnectResultHandler(ProxyChannelNotifyContext *ctx)
     CONN_CHECK_AND_RETURN_LOGE(connection != NULL, CONN_PROXY, "channelId=%{public}u not found", channelId);
 
     ProxyConnectInfo *connectingChannel = GetProxyChannelManager()->proxyChannelRequestInfo;
-    if (connectingChannel == NULL || StrCmpIgnoreCase(connection->proxyChannel.brMac, connectingChannel->brMac) != 0) {
+    if (connectingChannel == NULL || StrCmpIgnoreCase(connection->brMac, connectingChannel->brMac) != 0) {
         CONN_LOGE(CONN_PROXY, "no connecting info channelId=%{public}u", channelId);
         GetProxyBrConnectionManager()->disconnect(connection);
         RemoveProxyChannelByChannelId(channelId);
@@ -350,7 +358,7 @@ static struct ProxyConnection *GetProxyChannelByAddr(char *addr)
     CONN_CHECK_AND_RETURN_RET_LOGE(ret == SOFTBUS_OK, NULL, CONN_PROXY, "lock proxyConnectionList failed");
     struct ProxyConnection *it = NULL;
     LIST_FOR_EACH_ENTRY(it, &GetProxyChannelManager()->proxyConnectionList->list, struct ProxyConnection, node) {
-        if (StrCmpIgnoreCase(addr, it->proxyChannel.brMac) == 0) {
+        if (StrCmpIgnoreCase(addr, it->brMac) == 0) {
             it->reference(it);
             SoftBusMutexUnlock(&GetProxyChannelManager()->proxyConnectionList->lock);
             return it;
@@ -452,12 +460,12 @@ static void OpenProxyChannelTimeout(uint32_t channelId)
     CONN_CHECK_AND_RETURN_LOGE(connection != NULL, CONN_PROXY, "channelId=%{public}u not found", channelId);
     ProxyConnectInfo *connectingChannel = GetProxyChannelManager()->proxyChannelRequestInfo;
     if (connectingChannel == NULL ||
-        StrCmpIgnoreCase(connection->proxyChannel.brMac, connectingChannel->brMac) != 0) {
+        StrCmpIgnoreCase(connection->brMac, connectingChannel->brMac) != 0) {
         CONN_LOGE(CONN_PROXY, "connectingChannel is null, or unexpected device");
         connection->dereference(connection);
         return;
     }
-    ProcessConnectFailed(connectingChannel, connection->proxyChannel.brMac, SOFTBUS_CONN_OPEN_PROXY_TIMEOUT);
+    ProcessConnectFailed(connectingChannel, connection->brMac, SOFTBUS_CONN_OPEN_PROXY_TIMEOUT);
     connection->dereference(connection);
 }
 
@@ -465,7 +473,11 @@ static ProxyConnectInfo *CopyProxyConnectInfo(ProxyConnectInfo *srcInfo)
 {
     ProxyConnectInfo *destInfo = (ProxyConnectInfo *)SoftBusCalloc(sizeof(ProxyConnectInfo));
     CONN_CHECK_AND_RETURN_RET_LOGE(destInfo != NULL, NULL, CONN_PROXY, "data is NULL");
-    (void)memcpy_s(destInfo, sizeof(ProxyConnectInfo), srcInfo, sizeof(ProxyConnectInfo));
+    if (memcpy_s(destInfo, sizeof(ProxyConnectInfo), srcInfo, sizeof(ProxyConnectInfo)) != EOK) {
+        CONN_LOGE(CONN_PROXY, "memcpy ProxyConnectInfo failed");
+        SoftBusFree(destInfo);
+        return NULL;
+    }
     ListInit(&destInfo->node);
     return destInfo;
 }
@@ -506,7 +518,7 @@ static void RemoveReconnectDeviceInfoByAddrUnsafe(const char *addr)
     ProxyConnectInfo *it = NULL;
     ProxyConnectInfo *next = NULL;
     LIST_FOR_EACH_ENTRY_SAFE(it, next, &GetProxyChannelManager()->reconnectDeviceInfos, ProxyConnectInfo, node) {
-        if (StrCmpIgnoreCase(addr, it->brMac) == 0) {
+        if (StrCmpIgnoreCase(addr, it->brMac) == 0 || StrCmpIgnoreCase(addr, it->brHashMac) == 0) {
             char anomizeAddress[BT_MAC_LEN] = { 0 };
             ConvertAnonymizeMacAddress(anomizeAddress, BT_MAC_LEN, it->brMac, BT_MAC_LEN);
             CONN_LOGW(CONN_PROXY, "remove reconnect device addr=%{public}s", anomizeAddress);
@@ -561,7 +573,7 @@ static void OpenProxyChannelHandler(ProxyConnectInfo *connectInfo)
 }
 
 static int32_t CreateProxyConnectInfo(ProxyChannelParam *param, const OpenProxyChannelCallback *callback,
-    ProxyConnectInfo **connectInfo)
+    ProxyConnectInfo **connectInfo, bool isRealMac)
 {
     ProxyConnectInfo *ctx = (ProxyConnectInfo *)SoftBusCalloc(sizeof(ProxyConnectInfo));
     CONN_CHECK_AND_RETURN_RET_LOGE(ctx != NULL, SOFTBUS_MALLOC_ERR, CONN_PROXY, "ctx is NULL");
@@ -571,13 +583,29 @@ static int32_t CreateProxyConnectInfo(ProxyChannelParam *param, const OpenProxyC
     // the default acl is exist
     ctx->isAclConnected = true;
     ctx->isInnerRequest = false;
+    ctx->isRealMac = isRealMac;
 
-    char anomizeAddress[BT_MAC_LEN] = { 0 };
+    char anomizeAddress[BT_MAC_MAX_LEN] = { 0 };
     char anomizeUuid[UUID_STRING_LEN] = { 0 };
-    ConvertAnonymizeMacAddress(anomizeAddress, BT_MAC_LEN, param->brMac, BT_MAC_LEN);
+    ConvertAnonymizeSensitiveString(anomizeAddress, BT_MAC_MAX_LEN, param->brMac);
     ConvertAnonymizeSensitiveString(anomizeUuid, UUID_STRING_LEN, param->uuid);
-    if (strcpy_s(ctx->brMac, BT_MAC_LEN, param->brMac) != EOK ||
-        strcpy_s(ctx->uuid, UUID_STRING_LEN, param->uuid) != EOK) {
+    
+    int32_t ret = isRealMac ? strcpy_s(ctx->brMac, sizeof(ctx->brMac), param->brMac)
+        : strcpy_s(ctx->brHashMac, sizeof(ctx->brHashMac), param->brMac);
+    if (ret != EOK) {
+        CONN_LOGE(CONN_PROXY,
+            "reqId=%{public}u, addr=%{public}s, uuid=%{public}s", param->requestId, anomizeAddress, anomizeUuid);
+        DestoryProxyConnectInfo(&ctx);
+        return SOFTBUS_STRCPY_ERR;
+    }
+    if (!isRealMac && GetRealMac(ctx->brMac, BT_MAC_LEN, param->brMac) != SOFTBUS_OK) {
+        CONN_LOGE(CONN_PROXY, "reqId=%{public}u, addr=%{public}s, uuid=%{public}s",
+            param->requestId, anomizeAddress, anomizeUuid);
+        DestoryProxyConnectInfo(&ctx);
+        return SOFTBUS_CONN_PROXY_INTERNAL_ERR;
+    }
+
+    if (strcpy_s(ctx->uuid, UUID_STRING_LEN, param->uuid) != EOK) {
         CONN_LOGE(CONN_PROXY,
             "reqId=%{public}u, addr=%{public}s, uuid=%{public}s", param->requestId, anomizeAddress, anomizeUuid);
         DestoryProxyConnectInfo(&ctx);
@@ -594,6 +622,29 @@ static void DestoryProxyConnectInfo(ProxyConnectInfo **connectInfo)
     *connectInfo = NULL;
 }
 
+static bool IsRealMac(const char *brMac)
+{
+    if (strlen(brMac) != BT_MAC_LEN - 1) {
+        CONN_LOGW(CONN_PROXY, "brMac length is not match, len=%{public}zu", strlen(brMac));
+        return false;
+    }
+    int32_t macConLonPos = 3;
+    for (int32_t i = 0; i < BT_MAC_LEN - 1; i++) {
+        if ((i + 1) % macConLonPos == 0) {
+            if (brMac[i] != ':') {
+                CONN_LOGE(CONN_PROXY, "brMac format error");
+                return false;
+            }
+        } else if (!(brMac[i] >= '0' && brMac[i] <= '9') &&
+                   !(brMac[i] >= 'a' && brMac[i] <= 'f') &&
+                   !(brMac[i] >= 'A' && brMac[i] <= 'F')) {
+            CONN_LOGE(CONN_PROXY, "brMac format error");
+            return false;
+        }
+    }
+    return true;
+}
+
 static int32_t OpenProxyChannel(ProxyChannelParam *param, const OpenProxyChannelCallback *callback)
 {
     CONN_CHECK_AND_RETURN_RET_LOGE(param != NULL, SOFTBUS_INVALID_PARAM, CONN_PROXY, "param is NULL");
@@ -604,18 +655,19 @@ static int32_t OpenProxyChannel(ProxyChannelParam *param, const OpenProxyChannel
         CONN_PROXY, "onOpenFail is NULL");
     CONN_CHECK_AND_RETURN_RET_LOGE(SoftBusGetBrState() == BR_ENABLE, SOFTBUS_CONN_BR_DISABLE_ERR,
         CONN_PROXY, "br disable");
-    bool isPairedDevice = IsPairedDevice(param->brMac);
+    bool isRealMac = IsRealMac(param->brMac);
+    bool isPairedDevice = IsPairedDevice(param->brMac, isRealMac);
     CONN_CHECK_AND_RETURN_RET_LOGE(isPairedDevice, SOFTBUS_CONN_BR_UNPAIRED,
         CONN_PROXY, "is not paired device");
-    char anomizeAddress[BT_MAC_LEN] = { 0 };
+    char anomizeAddress[BT_MAC_MAX_LEN] = { 0 };
     char anomizeUuid[UUID_STRING_LEN] = { 0 };
-    ConvertAnonymizeMacAddress(anomizeAddress, BT_MAC_LEN, param->brMac, BT_MAC_LEN);
+    ConvertAnonymizeSensitiveString(anomizeAddress, BT_MAC_MAX_LEN, param->brMac);
     ConvertAnonymizeSensitiveString(anomizeUuid, UUID_STRING_LEN, param->uuid);
     CONN_LOGI(CONN_PROXY, "reqId=%{public}u, brMac=%{public}s, uuid=%{public}s, timeoutMs=%{public}" PRIu64,
         param->requestId, anomizeAddress, anomizeUuid, param->timeoutMs);
 
     ProxyConnectInfo *connectInfo = NULL;
-    int32_t ret = CreateProxyConnectInfo(param, callback, &connectInfo);
+    int32_t ret = CreateProxyConnectInfo(param, callback, &connectInfo, isRealMac);
     CONN_CHECK_AND_RETURN_RET_LOGE(ret == SOFTBUS_OK, ret, CONN_PROXY,
         "createProxyConnectInfo failed, ret=%{public}d", ret);
     ret = ConnPostMsgToLooper(&g_proxyChannelAsyncHandler, MSG_OPEN_PROXY_CHANNEL, 0, 0, connectInfo, 0);
@@ -659,7 +711,7 @@ static void ProxyChannelDisconnectHandler(ProxyChannelNotifyContext *ctx)
     NotifyDisconnected(&proxyConnection->proxyChannel, reason);
     RemoveProxyChannelByChannelId(channelId);
     char *copyAddr = (char *)SoftBusCalloc(BT_MAC_LEN);
-    if (copyAddr == NULL || strcpy_s(copyAddr, BT_MAC_LEN, proxyConnection->proxyChannel.brMac) != EOK) {
+    if (copyAddr == NULL || strcpy_s(copyAddr, BT_MAC_LEN, proxyConnection->brMac) != EOK) {
         CONN_LOGE(CONN_PROXY, "copyAddr failed");
         SoftBusFree(copyAddr);
         proxyConnection->dereference(proxyConnection);
@@ -730,7 +782,7 @@ static bool CheckNeedToRetry(char *brAddr, ProxyConnectInfo *reconnectDeviceInfo
     bool isAlreadyConnected = IsTargetDeviceAlreadyConnected(brAddr);
     CONN_CHECK_AND_RETURN_RET_LOGW(!isAlreadyConnected, false, CONN_PROXY, "exist already connection");
 
-    bool isPairedDevice = IsPairedDevice(brAddr);
+    bool isPairedDevice = IsPairedDevice(brAddr, true);
     CONN_CHECK_AND_RETURN_RET_LOGE(isPairedDevice, false, CONN_PROXY, "is not paired device");
     return true;
 }
@@ -749,7 +801,9 @@ static void AttemptReconnectDevice(char *brAddr)
         reconnectDeviceInfo->innerRetryNum = 0;
         CONN_LOGE(CONN_PROXY, "retryNum=%{public}u, is max, retry failed", innerRetryNum);
         struct ProxyChannel proxyChannel = { 0 };
-        int32_t ret = strncpy_s(proxyChannel.brMac, BT_MAC_LEN, brAddr, BT_MAC_LEN);
+        int32_t ret = reconnectDeviceInfo->isRealMac ?
+            strcpy_s(proxyChannel.brMac, BT_MAC_MAX_LEN, reconnectDeviceInfo->brMac) :
+            strcpy_s(proxyChannel.brMac, BT_MAC_MAX_LEN, reconnectDeviceInfo->brHashMac);
         CONN_CHECK_AND_RETURN_LOGE(ret == EOK, CONN_PROXY, "cpy mac err");
         ret = strcpy_s(proxyChannel.uuid, UUID_STRING_LEN, reconnectDeviceInfo->uuid);
         CONN_CHECK_AND_RETURN_LOGE(ret == EOK, CONN_PROXY, "cpy uuid err");
@@ -802,6 +856,8 @@ static void ProxyResetHandler(void)
     }
     SoftBusMutexUnlock(&GetProxyChannelManager()->proxyConnectionList->lock);
 
+    item = NULL;
+    next = NULL;
     LIST_FOR_EACH_ENTRY_SAFE(item, next, &notifyConnectionList, struct ProxyConnection, node) {
         ListDelete(&item->node);
         if (GetProxyChannelState(item) != PROXY_CHANNEL_CONNECTING) {
@@ -829,7 +885,8 @@ static void ProxyDeviceUnpaired(const char *brAddr)
     CONN_CHECK_AND_RETURN_LOGE(target != NULL, CONN_PROXY, "ignore addr=%{public}s", anomizeAddress);
     RemoveReconnectDeviceInfoByAddrUnsafe(brAddr);
     struct ProxyChannel proxyChannel = { 0 };
-    int32_t ret = strncpy_s(proxyChannel.brMac, BT_MAC_LEN, brAddr, BT_MAC_LEN);
+    int32_t ret = target->isRealMac ? strcpy_s(proxyChannel.brMac, BT_MAC_MAX_LEN, target->brMac) :
+        strcpy_s(proxyChannel.brMac, BT_MAC_MAX_LEN, target->brHashMac);
     CONN_CHECK_AND_RETURN_LOGE(ret == EOK, CONN_PROXY, "cpy mac err");
     ret = strcpy_s(proxyChannel.uuid, UUID_STRING_LEN, target->uuid);
     CONN_CHECK_AND_RETURN_LOGE(ret == EOK, CONN_PROXY, "cpy uuid err");
@@ -1005,12 +1062,14 @@ int32_t ProxyChannelManagerInit(void)
     ret = SoftBusAddBtStateListener(&btStateListener, &listenerId);
     if (ret != SOFTBUS_OK) {
         CONN_LOGE(CONN_PROXY, "add bt listener failed, listenerId=%{public}d", listenerId);
+        SoftBusMutexDestroy(&g_reqIdLock);
         DestroySoftBusList(g_proxyChannelManager.proxyConnectionList);
         return ret;
     }
     ret = RegisterHfpListener(OnObserverStateChanged);
     if (ret != SOFTBUS_OK) {
         CONN_LOGE(CONN_PROXY, "register hfp listener failed, ret=%{public}d", ret);
+        SoftBusMutexDestroy(&g_reqIdLock);
         DestroySoftBusList(g_proxyChannelManager.proxyConnectionList);
         SoftBusRemoveBtStateListener(listenerId);
         return ret;

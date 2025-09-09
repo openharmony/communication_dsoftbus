@@ -714,6 +714,5 @@ void DeInitLinkWifiDirect(void)
     SoftBusFree(g_forceDownList);
     g_forceDownList = NULL;
     LinkWifiDirectUnlock();
-    SoftBusMutexUnlock(&g_linkWifiDirectMutex);
     (void)SoftBusMutexDestroy(&g_linkWifiDirectMutex);
 }

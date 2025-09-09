@@ -506,12 +506,12 @@ static void UpdateLaneEventWithCap(uint32_t laneHandle, const char *networkId)
     uint32_t local = 0;
     uint32_t remote = 0;
     if (LnnGetLocalNumU32Info(NUM_KEY_NET_CAP, &local) == SOFTBUS_OK) {
-        LNN_LOGI(LNN_LANE, "local cap=%{public}u", local);
+        LNN_LOGD(LNN_LANE, "local cap=%{public}u", local);
         UpdateLaneEventInfo(laneHandle, EVENT_LOCAL_CAP,
             LANE_PROCESS_TYPE_UINT32, (void *)(&local));
     }
     if (LnnGetRemoteNumU32Info(networkId, NUM_KEY_NET_CAP, &remote) == SOFTBUS_OK) {
-        LNN_LOGI(LNN_LANE, "remote cap=%{public}u", remote);
+        LNN_LOGD(LNN_LANE, "remote cap=%{public}u", remote);
         UpdateLaneEventInfo(laneHandle, EVENT_REMOTE_CAP,
             LANE_PROCESS_TYPE_UINT32, (void *)(&remote));
     }
@@ -1004,7 +1004,7 @@ static void DfxReportLinkResult(uint32_t laneReqId, LaneLinkType linkType, int32
 {
     LnnEventExtra extra = { 0 };
     extra.errcode = reason;
-    extra.laneReqId = (int32_t)laneReqId;
+    extra.laneReqId = laneReqId;
     extra.laneLinkType = (int32_t)linkType;
     LNN_EVENT(EVENT_SCENE_LNN, EVENT_STAGE_LNN_LANE_SELECT_END, extra);
 }
@@ -1487,7 +1487,7 @@ static bool IsNeedNotifyFail(uint32_t laneReqId)
         notifyFail = true;
     }
     if (!notifyFail) {
-        nodeInfo->isCompleted = notifyFail ? true : false;
+        nodeInfo->isCompleted = false;
         Unlock();
         return notifyFail;
     }

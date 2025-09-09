@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2024 Huawei Device Co., Ltd.
+ * Copyright (c) 2024-2025 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -177,10 +177,15 @@ int32_t GetAuthRequest(uint32_t requestId, AuthRequest *request)
     return GetLnnConnInterface()->GetAuthRequest(requestId, request);
 }
 
-void UpdateDpSameAccount(UpdateDpAclParams *aclParams, SessionKey sessionKey, bool isNeedUpdateDk,
-    AclWriteState aclState)
+void UpdateDpSameAccount(
+    UpdateDpAclParams *aclParams, SessionKey sessionKey, bool isNeedUpdateDk, AclWriteState aclState)
 {
     return GetLnnConnInterface()->UpdateDpSameAccount(aclParams, sessionKey, isNeedUpdateDk, aclState);
+}
+
+void UpdateDpSameAccountWithoutUserKey(UpdateDpAclParams *aclParams, AclWriteState aclState)
+{
+    return GetLnnConnInterface()->UpdateDpSameAccountWithoutUserKey(aclParams, aclState);
 }
 
 int32_t LnnGetAddrTypeByIfName(const char *ifName, ConnectionAddrType *type)
@@ -248,6 +253,11 @@ bool RawLinkNeedUpdateAuthManager(const char *uuid, bool isServer)
     return GetLnnConnInterface()->RawLinkNeedUpdateAuthManager(uuid, isServer);
 }
 
+void SetDpGroupShare(const NodeInfo *info, AuthHandle authHandle)
+{
+    return GetLnnConnInterface()->SetDpGroupShare(info, authHandle);
+}
+
 void LnnStopOfflineTimingBySleHb(const char *networkId, ConnectionAddrType addrType)
 {
     return GetLnnConnInterface()->LnnStopOfflineTimingBySleHb(networkId, addrType);
@@ -256,6 +266,11 @@ void LnnStopOfflineTimingBySleHb(const char *networkId, ConnectionAddrType addrT
 int32_t LnnCleanTriggerSparkInfo(const char *udid, ConnectionAddrType addrType)
 {
     return GetLnnConnInterface()->LnnCleanTriggerSparkInfo(udid, addrType);
+}
+
+void LnnSetWiFiIp(NodeInfo *info, const char *ip, int32_t ifnameIdx)
+{
+    return GetLnnConnInterface()->LnnSetWiFiIp(info, ip, ifnameIdx);
 }
 }
 } // namespace OHOS

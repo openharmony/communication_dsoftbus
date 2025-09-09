@@ -60,6 +60,8 @@ typedef enum {
     SOFTBUS_INT_DISC_COAP_MAX_DEVICE_NUM, /* the default val is 20 */
     SOFTBUS_INT_AUTH_CAPACITY, /* the default val is 0x07 */
     SOFTBUS_INT_STATIC_NET_CAPABILITY, /* the default val is 255 */
+    SOFTBUS_INT_D2D_MAX_VOICE_LENGTH, /* the default val is 65535 */
+    SOFTBUS_INT_D2D_MAX_MESSAGE_LENGTH, /* the default val is 4096 */
     SOFTBUS_CONFIG_TYPE_MAX,
 } ConfigType;
 

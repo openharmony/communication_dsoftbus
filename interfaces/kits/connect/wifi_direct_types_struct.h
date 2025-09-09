@@ -28,6 +28,10 @@
 #define NULL 0
 #endif
 
+#ifdef __cplusplus
+extern "C" {
+#endif
+
 enum WifiDirectConnectType {
     WIFI_DIRECT_CONNECT_TYPE_AUTH_NEGO_P2P = 0,
     WIFI_DIRECT_CONNECT_TYPE_AUTH_NEGO_HML = 1,
@@ -89,6 +93,12 @@ typedef enum {
 } HmlCapabilityCode;
 
 typedef enum {
+    CONN_VIRTUAL_LINK_CAP_UNKNOWN = -1,
+    CONN_VIRTUAL_LINK_SUPPORT = 0,
+    CONN_VIRTUAL_LINK_NOT_SUPPORT = 1,
+} VirtualLinkCapabilityCode;
+
+typedef enum {
     CONN_VSP_CAP_UNKNOWN = -1,
     CONN_VSP_SUPPORT = 0,
     CONN_VSP_NOT_SUPPORT = 1,
@@ -105,6 +115,11 @@ typedef enum {
     LOW_POWER,
     DEFAULT_POWER,
 } LinkPowerMode;
+
+typedef enum {
+    WIFI_DIRECT_SCREEN_OFF,
+    WIFI_DIRECT_SCREEN_ON,
+} WifiDirectScreenState;
 
 struct WifiDirectLink {
     int32_t linkId;
@@ -171,7 +186,8 @@ enum StatisticBootLinkType {
     STATISTIC_BLE_AND_ACTION = 6,
     STATISTIC_BLE_TRIGGER = 7,
     STATISTIC_RENEGOTIATE = 8,
-    STATISTIC_BOOT_LINK_TYPE_NUM = 9,
+    STATISTIC_SPARK_LINK_TRIGGER = 9,
+    STATISTIC_BOOT_LINK_TYPE_NUM = 10,
 };
 
 struct WifiDirectDfxInfo {
@@ -203,7 +219,6 @@ struct WifiDirectConnectInfo {
     bool ratePreference;
     int32_t bandWidth;
     enum IpAddrType ipAddrType;
-
     struct WifiDirectDfxInfo dfxInfo;
     bool isVirtualLink;
 };
@@ -232,10 +247,6 @@ struct WifiDirectDisconnectCallback {
     void (*onDisconnectSuccess)(uint32_t requestId);
     void (*onDisconnectFailure)(uint32_t requestId, int32_t reason);
 };
-
-#ifdef __cplusplus
-extern "C" {
-#endif
 
 #ifdef __cplusplus
 }

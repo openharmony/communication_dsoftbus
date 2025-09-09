@@ -73,7 +73,7 @@ char g_writeData[128] = "test111111111111111111111111111111111111111111111111111
 const char *g_rootDir = "/data";
 const char *g_destFile = "test.txt";
 char g_recvFile[] = "/data/test.txt";
-const char *g_sessionKey = "www.huaweitest.com";
+const char *g_sessionKey = "www.test.com";
 
 SessionAttribute g_attr = {
     .dataType = TYPE_MESSAGE,
@@ -288,6 +288,7 @@ HWTEST_F(ClientTransProxyFileManagerTest, ClinetTransRecvFileFrameDataTest001, T
     channel->linkType = LANE_BR;
     channel->sessionKey = (char *)g_sessionKey;
     channel->osType = OH_TYPE;
+    channel->keyLen = TEST_SEQ32;
     ret = ClientTransProxyAddChannelInfo(ClientTransProxyCreateChannelInfo(channel));
     EXPECT_EQ(SOFTBUS_OK, ret);
     SoftBusFree(channel);
@@ -325,6 +326,7 @@ HWTEST_F(ClientTransProxyFileManagerTest, ClientTransProxyCreateChannelInfoTest0
     channel->pagingSessionkey = (char *)g_sessionKey;
     channel->extraData = (char *)g_sessionKey;
     channel->pagingAccountId = (char *)g_sessionKey;
+    channel->keyLen = TEST_SEQ32;
     ClientProxyChannelInfo *info = ClientTransProxyCreateChannelInfo(channel);
     ASSERT_TRUE(info != nullptr);
     SoftBusFree(info);
@@ -357,6 +359,7 @@ HWTEST_F(ClientTransProxyFileManagerTest, ClinetTransRecvFileFrameDataTest002, T
     channel->isEncrypt = 0;
     channel->linkType = LANE_BR;
     channel->sessionKey = (char *)g_sessionKey;
+    channel->keyLen = TEST_SEQ32;
     int32_t ret = ClientTransProxyAddChannelInfo(ClientTransProxyCreateChannelInfo(channel));
     EXPECT_EQ(SOFTBUS_OK, ret);
     SoftBusFree(channel);
@@ -474,13 +477,13 @@ HWTEST_F(ClientTransProxyFileManagerTest, ClinetTransProxyGetSessionFileLockTest
 HWTEST_F(ClientTransProxyFileManagerTest, ClinetTransProxyCreateSendListenerInfoTest001, TestSize.Level1)
 {
     int32_t ret = CreateSessionServer(g_pkgName, g_sessionName, &g_sessionlistener);
-    EXPECT_EQ(SOFTBUS_TRANS_SESSION_SERVER_NOINIT, ret);
+    ASSERT_EQ(SOFTBUS_TRANS_SESSION_SERVER_NOINIT, ret);
 
     int32_t sessionId = 1;
     SessionEnableStatus isEnabled = ENABLE_STATUS_INIT;
 
     ret = ClientAddSession(&g_param, &sessionId, &isEnabled);
-    EXPECT_EQ(SOFTBUS_TRANS_SESSION_SERVER_NOINIT, ret);
+    ASSERT_EQ(SOFTBUS_TRANS_SESSION_SERVER_NOINIT, ret);
 
     SendListenerInfo *sendListenerInfo;
     ret = CreateSendListenerInfo(&sendListenerInfo, TEST_CHANNEL_ID, 0);
@@ -493,15 +496,15 @@ HWTEST_F(ClientTransProxyFileManagerTest, ClinetTransProxyCreateSendListenerInfo
     sessionInfo.channelId = channelId;
     sessionInfo.channelType = CHANNEL_TYPE_PROXY;
     ret = TransClientInit();
-    EXPECT_EQ(SOFTBUS_OK, ret);
+    ASSERT_EQ(SOFTBUS_OK, ret);
     ret = AddSession(g_sessionName, &sessionInfo);
-    EXPECT_EQ(SOFTBUS_TRANS_SESSIONSERVER_NOT_CREATED, ret);
+    ASSERT_EQ(SOFTBUS_TRANS_SESSIONSERVER_NOT_CREATED, ret);
 
     ret = TransSetFileSendListener(g_sessionName, &g_listener);
-    EXPECT_EQ(SOFTBUS_OK, ret);
+    ASSERT_EQ(SOFTBUS_OK, ret);
 
     ret = TransSetFileReceiveListener(g_sessionName, &g_fileRecvListener, g_rootDir);
-    EXPECT_EQ(SOFTBUS_OK, ret);
+    ASSERT_EQ(SOFTBUS_OK, ret);
 
     ret = CreateSendListenerInfo(&sendListenerInfo, channelId, 0);
     EXPECT_EQ(SOFTBUS_TRANS_SESSION_INFO_NOT_FOUND, ret);
@@ -1948,6 +1951,7 @@ HWTEST_F(ClientTransProxyFileManagerTest, CheckFrameLengthTest, TestSize.Level1)
     channel1->isEncrypt = 0;
     channel1->linkType = LANE_BR;
     channel1->sessionKey = (char *)g_sessionKey;
+    channel1->keyLen = TEST_SEQ32;
     ret = ClientTransProxyAddChannelInfo(ClientTransProxyCreateChannelInfo(channel1));
     EXPECT_EQ(SOFTBUS_OK, ret);
     ret = CheckFrameLength(1, PROXY_BR_MAX_PACKET_SIZE + 1, osType, &packetSize);
@@ -1961,6 +1965,7 @@ HWTEST_F(ClientTransProxyFileManagerTest, CheckFrameLengthTest, TestSize.Level1)
     channel2->isEncrypt = 0;
     channel2->linkType = LANE_BLE_DIRECT;
     channel2->sessionKey = (char *)g_sessionKey;
+    channel2->keyLen = TEST_SEQ32;
     ret = ClientTransProxyAddChannelInfo(ClientTransProxyCreateChannelInfo(channel2));
     EXPECT_EQ(SOFTBUS_OK, ret);
     ret = CheckFrameLength(2, PROXY_BLE_MAX_PACKET_SIZE + 1, osType, &packetSize);

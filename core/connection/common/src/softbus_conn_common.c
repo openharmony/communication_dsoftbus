@@ -99,7 +99,7 @@ int32_t ConnPostMsgToLooper(
 {
     SoftBusMessage *msg = (SoftBusMessage *)SoftBusCalloc(sizeof(SoftBusMessage));
     CONN_CHECK_AND_RETURN_RET_LOGE(msg != NULL, SOFTBUS_MEM_ERR, CONN_COMMON,
-        "ATTENTION, calloc message object failed: what=%{public}d", what);
+        "ATTENTION, calloc message object fail: what=%{public}d", what);
     msg->what = what;
     msg->arg1 = arg1;
     msg->arg2 = arg2;
@@ -161,7 +161,7 @@ static int32_t ConnectSoftBusCondWait(SoftBusCond *cond, SoftBusMutex *mutex, ui
     }
     SoftBusSysTime now;
     if (SoftBusGetTime(&now) != SOFTBUS_OK) {
-        CONN_LOGE(CONN_COMMON, "get time failed");
+        CONN_LOGE(CONN_COMMON, "get time fail");
         return SOFTBUS_CONN_GET_TIME_FAIL;
     }
     now.sec += (now.usec + ((int32_t)timeMillis * USECTONSEC)) / MICROSECONDS;

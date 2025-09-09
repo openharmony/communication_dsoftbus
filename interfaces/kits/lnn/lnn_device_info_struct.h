@@ -36,6 +36,7 @@ extern "C" {
 #define TYPE_PC_ID 0x0C
 #define TYPE_SMART_DISPLAY_ID 0xA02
 #define TYPE_2IN1_ID 0xA2F
+#define TYPE_GLASS_ID 0xA31
 
 typedef struct {
     uint16_t deviceTypeId;

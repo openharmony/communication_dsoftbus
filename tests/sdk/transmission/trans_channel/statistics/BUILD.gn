@@ -18,6 +18,7 @@ module_output_path = "dsoftbus/soft_bus/transmission"
 
 ohos_unittest("ClientTransStatisticsTest") {
   module_out_path = module_output_path
+  use_exceptions = true
   sources = [ "client_trans_statistics_test.cpp" ]
 
   include_dirs = [

@@ -478,8 +478,7 @@ void NotifyWifiByDelScenario(StreamType streamType, int32_t pid)
     }
 }
 
-static int32_t ProcessUdpChannelState(
-    AppInfo *appInfo, bool isServerSide, AuthHandle *authHandle, int64_t seq)
+static int32_t ProcessUdpChannelState(AppInfo *appInfo, bool isServerSide, AuthHandle *authHandle, int64_t seq)
 {
     int32_t ret = SOFTBUS_OK;
     switch (appInfo->udpChannelOptType) {
@@ -623,7 +622,7 @@ static int32_t ParseRequestAppInfo(AuthHandle authHandle, const cJSON *msg, AppI
     if (appInfo->callingTokenId != TOKENID_NOT_SET) {
         (void)LnnGetNetworkIdByUuid(appInfo->peerData.deviceId, appInfo->peerNetWorkId, NETWORK_ID_BUF_LEN);
         int32_t osType = 0;
-        (void)GetOsTypeByNetworkId(appInfo->peerNetWorkId, &osType);
+        GetOsTypeByNetworkId(appInfo->peerNetWorkId, &osType);
         if (osType != OH_OS_TYPE) {
             TRANS_LOGI(TRANS_CTRL, "not support acl check osType=%{public}d", osType);
         } else if (GetCapabilityBit(appInfo->channelCapability, TRANS_CHANNEL_ACL_CHECK_OFFSET)) {
@@ -713,8 +712,10 @@ static void TransOnExchangeUdpInfoReply(AuthHandle authHandle, int64_t seq, cons
     }
     int32_t ret = TransUnpackReplyUdpInfo(msg, &(channel.info));
     if (ret != SOFTBUS_OK) {
-        TRANS_LOGE(TRANS_CTRL, "unpack reply udp info fail channelId=%{public}" PRId64, channel.info.myData.channelId);
+        TRANS_LOGE(TRANS_CTRL, "unpack reply udp info fail and close channel channelId=%{public}" PRId64,
+            channel.info.myData.channelId);
         ProcessAbnormalUdpChannelState(&(channel.info), ret, true);
+        (void)TransCloseUdpChannel(channel.info.myData.channelId);
         return;
     }
     TransUpdateUdpChannelInfo(seq, &(channel.info), true);
@@ -1201,7 +1202,7 @@ int32_t TransOpenUdpChannel(AppInfo *appInfo, const ConnectOption *connOpt, int3
         TRANS_LOGE(TRANS_CTRL, "prepare app info for opening udp channel.");
         return SOFTBUS_TRANS_UDP_PREPARE_APP_INFO_FAILED;
     }
-    SoftbusHitraceStart(SOFTBUS_HITRACE_ID_VALID, (uint64_t)(id + ID_OFFSET));
+    SoftbusHitraceStart(SOFTBUS_HITRACE_ID_VALID, (uint64_t)id + (uint64_t)ID_OFFSET);
     TRANS_LOGI(TRANS_CTRL,
         "SoftbusHitraceChainBegin: set HitraceId=%{public}" PRIu64, (uint64_t)(id + ID_OFFSET));
     UdpChannelInfo *newChannel = NewUdpChannelByAppInfo(appInfo);
@@ -1482,6 +1483,7 @@ int32_t TransDealUdpChannelOpenResult(
 {
     UdpChannelInfo channel;
     (void)memset_s(&channel, sizeof(UdpChannelInfo), 0, sizeof(UdpChannelInfo));
+
     int32_t ret = TransGetUdpChannelById(channelId, &channel);
     TRANS_CHECK_AND_RETURN_RET_LOGE(ret == SOFTBUS_OK, ret,
         TRANS_CTRL, "get udpChannel failed, channelId=%{public}d, ret=%{public}d", channelId, ret);

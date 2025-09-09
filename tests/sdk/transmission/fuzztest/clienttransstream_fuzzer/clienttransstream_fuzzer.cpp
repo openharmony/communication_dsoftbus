@@ -20,7 +20,7 @@
 #include "softbus_adapter_mem.h"
 
 namespace OHOS {
-    void TransOnstreamChannelOpenedTest(const uint8_t* data, size_t size)
+    void TransOnstreamChannelOpenedTest(const uint8_t *data, size_t size)
     {
         if (data == nullptr || size < sizeof(int32_t)) {
             return;
@@ -31,7 +31,7 @@ namespace OHOS {
         TransOnstreamChannelOpened(channel, &streamPort, nullptr);
     }
 
-    void TransSendStreamTest(const uint8_t* data, size_t size)
+    void TransSendStreamTest(const uint8_t *data, size_t size)
     {
         if (data == nullptr || size < sizeof(int64_t)) {
             return;
@@ -72,7 +72,7 @@ namespace OHOS {
         SoftBusFree(ptr);
     }
 
-    void TransCloseStreamChannelTest(const uint8_t* data, size_t size)
+    void TransCloseStreamChannelTest(const uint8_t *data, size_t size)
     {
         if (data == nullptr || size < sizeof(int32_t)) {
             return;
@@ -84,7 +84,7 @@ namespace OHOS {
 } // namespace OHOS
 
 /* Fuzzer entry point */
-extern "C" int32_t LLVMFuzzerTestOneInput(const uint8_t* data, size_t size)
+extern "C" int32_t LLVMFuzzerTestOneInput(const uint8_t *data, size_t size)
 {
     /* Run your code on data */
     OHOS::TransOnstreamChannelOpenedTest(data, size);

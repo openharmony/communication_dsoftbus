@@ -322,18 +322,21 @@ static int32_t UnpackLogToStr(DeviceInfo *dev, char *msg, uint32_t size)
 
     uint32_t wroteLen = 0;
     int ret = 0;
+    char *mode = GetModeTypeStr(dev->mode);
+    char *businessType = GetBusinessTypeStr(dev->businessType);
+    if (mode == NULL || businessType == NULL) {
+        DFINDER_LOGE(TAG, "get mode or businessType failed");
+        return NSTACKX_EFAILED;
+    }
     DUMP_MSG_ADD_CHECK(ret, msg, wroteLen, size, "deviceId: %s ", anonyDevId);
     DUMP_MSG_ADD_CHECK(ret, msg, wroteLen, size, "devicename: %s, ", dev->deviceName);
     DUMP_MSG_ADD_CHECK(ret, msg, wroteLen, size, "type: %u, ", dev->deviceType);
-    DUMP_MSG_ADD_CHECK(ret, msg, wroteLen, size, "mode: %s, ", GetModeTypeStr(dev->mode));
-    DUMP_MSG_ADD_CHECK(ret, msg, wroteLen, size,
-        "bType: %s, ", GetBusinessTypeStr(dev->businessType));
+    DUMP_MSG_ADD_CHECK(ret, msg, wroteLen, size, "mode: %s, ", mode);
+    DUMP_MSG_ADD_CHECK(ret, msg, wroteLen, size, "bType: %s, ", businessType);
     DUMP_MSG_ADD_CHECK(ret, msg, wroteLen, size, "wlanIp: %s, ", ipStr);
-    DUMP_MSG_ADD_CHECK(ret, msg, wroteLen, size,
-        "bcast: %hhu, ", dev->businessData.isBroadcast);
+    DUMP_MSG_ADD_CHECK(ret, msg, wroteLen, size, "bcast: %hhu, ", dev->businessData.isBroadcast);
     for (uint32_t i = 0; i < dev->capabilityBitmapNum; ++i) {
-        DUMP_MSG_ADD_CHECK(ret, msg, wroteLen, size,
-            "cap[%u]:%u, ", i, dev->capabilityBitmap[i]);
+        DUMP_MSG_ADD_CHECK(ret, msg, wroteLen, size, "cap[%u]:%u, ", i, dev->capabilityBitmap[i]);
     }
     DFINDER_LOGI(TAG, "%s", msg);
     return NSTACKX_EOK;

@@ -82,11 +82,17 @@ int32_t LnnInitNetLedger(void)
     return SOFTBUS_OK;
 }
 
+static bool IsStaticFeatureChange(uint64_t softbusFeature, uint64_t feature)
+{
+    uint64_t mask = ~ (1 << BIT_FL_CAPABILITY);
+    return ((softbusFeature & mask) != (feature & mask));
+}
+
 static bool IsCapacityChange(NodeInfo *info)
 {
     uint64_t softbusFeature = 0;
     if (LnnGetLocalNumU64Info(NUM_KEY_FEATURE_CAPA, &softbusFeature) == SOFTBUS_OK) {
-        if (softbusFeature != info->feature) {
+        if (IsStaticFeatureChange(softbusFeature, info->feature)) {
             LNN_LOGW(LNN_LEDGER, "feature=%{public}" PRIu64 "->%{public}" PRIu64, info->feature, softbusFeature);
             return true;
         }
@@ -95,6 +101,7 @@ static bool IsCapacityChange(NodeInfo *info)
     if (LnnGetLocalNumU32Info(NUM_KEY_AUTH_CAP, &authCapacity) == SOFTBUS_OK) {
         if (authCapacity != info->authCapacity) {
             LNN_LOGW(LNN_LEDGER, "authCapacity=%{public}u->%{public}u", info->authCapacity, authCapacity);
+            info->authCapacity = authCapacity;
             return true;
         }
     }
@@ -228,13 +235,20 @@ static bool IsBleDirectlyOnlineFactorChange(NodeInfo *info)
 
 static void LnnSetLocalFeature(void)
 {
+    uint64_t feature = 0;
+    if (LnnGetLocalNumU64Info(NUM_KEY_FEATURE_CAPA, &feature) != SOFTBUS_OK) {
+        LNN_LOGE(LNN_LEDGER, "set feature fail");
+        return;
+    }
     if (IsSupportLpFeaturePacked()) {
-        uint64_t feature = 1 << BIT_BLE_SUPPORT_LP_HEARTBEAT;
-        if (LnnSetLocalNum64Info(NUM_KEY_FEATURE_CAPA, feature) != SOFTBUS_OK) {
-            LNN_LOGE(LNN_LEDGER, "set feature fail");
-        }
-    } else {
-        LNN_LOGE(LNN_LEDGER, "not support mlps");
+        feature |= 1 << BIT_BLE_SUPPORT_LP_HEARTBEAT;
+    }
+    if (LnnIsSupportLpSparkFeaturePacked()) {
+        feature |= 1 << BIT_SUPPORT_LP_SPARK_CAPABILITY;
+        (void)LnnClearFeatureCapability(&feature, BIT_SUPPORT_SPARK_GROUP_CAPABILITY);
+    }
+    if (LnnSetLocalNum64Info(NUM_KEY_FEATURE_CAPA, feature) != SOFTBUS_OK) {
+        LNN_LOGE(LNN_LEDGER, "set feature fail");
     }
 }
 

@@ -105,8 +105,8 @@ public:
     MOCK_METHOD3(LnnDumpRemotePtk, void(const char *, const char *, const char *));
     MOCK_METHOD2(LnnGetOnlineStateById, bool(const char *, IdCategory));
     MOCK_METHOD1(LnnGetLocalNodeInfoSafe, int32_t(NodeInfo *));
-    MOCK_METHOD3(LnnGetLocalByteInfo, int32_t (InfoKey, uint8_t *, uint32_t));
-    MOCK_METHOD3(LnnAnonymizePtk, void (const char *ptk, uint32_t len, char **anonymizedStr));
+    MOCK_METHOD3(LnnGetLocalByteInfo, int32_t(InfoKey, uint8_t *, uint32_t));
+    MOCK_METHOD3(LnnAnonymizePtk, void(const char *ptk, uint32_t len, char **anonymizedStr));
 
     static inline bool isRuned;
     static inline SoftBusMutex mutex;

@@ -76,8 +76,7 @@ int32_t SoftBusGenerateStrHash(const unsigned char *str, uint32_t len, unsigned 
     return GetInterface()->SoftBusGenerateStrHash(str, len, hash);
 }
 
-int32_t ConvertBytesToHexString(char *outBuf, uint32_t outBufLen,
-    const unsigned char *inBuf, uint32_t inLen)
+int32_t ConvertBytesToHexString(char *outBuf, uint32_t outBufLen, const unsigned char *inBuf, uint32_t inLen)
 {
     return GetInterface()->ConvertBytesToHexString(outBuf, outBufLen, inBuf, inLen);
 }
@@ -117,8 +116,7 @@ void DelDupAuthManager(AuthManager *auth)
     return GetInterface()->DelDupAuthManager(auth);
 }
 
-bool IsPotentialTrustedDevice(TrustedRelationIdType idType,
-    const char *deviceId, bool isPrecise, bool isPointToPoint)
+bool IsPotentialTrustedDevice(TrustedRelationIdType idType, const char *deviceId, bool isPrecise, bool isPointToPoint)
 {
     return GetInterface()->IsPotentialTrustedDevice(idType, deviceId, isPrecise, isPointToPoint);
 }
@@ -128,14 +126,12 @@ bool IsPotentialTrustedDeviceDp(const char *deviceIdHash, bool isPointToPoint)
     return GetInterface()->IsPotentialTrustedDeviceDp(deviceIdHash, isPointToPoint);
 }
 
-int32_t ConvertBytesToUpperCaseHexString(char *outBuf, uint32_t outBufLen,
-    const unsigned char *inBuf, uint32_t inLen)
+int32_t ConvertBytesToUpperCaseHexString(char *outBuf, uint32_t outBufLen, const unsigned char *inBuf, uint32_t inLen)
 {
     return GetInterface()->ConvertBytesToUpperCaseHexString(outBuf, outBufLen, inBuf, inLen);
 }
 
-int32_t ConvertHexStringToBytes(unsigned char *outBuf, uint32_t outBufLen,
-    const char *inBuf, uint32_t inLen)
+int32_t ConvertHexStringToBytes(unsigned char *outBuf, uint32_t outBufLen, const char *inBuf, uint32_t inLen)
 {
     return GetInterface()->ConvertHexStringToBytes(outBuf, outBufLen, inBuf, inLen);
 }
@@ -270,14 +266,12 @@ void LnnDumpRemotePtk(const char *oldPtk, const char *newPtk, const char *log)
     return GetInterface()->LnnDumpRemotePtk(oldPtk, newPtk, log);
 }
 
-int32_t SoftBusBase64Encode(unsigned char *dst, size_t dlen, size_t *olen,
-    const unsigned char *src, size_t slen)
+int32_t SoftBusBase64Encode(unsigned char *dst, size_t dlen, size_t *olen, const unsigned char *src, size_t slen)
 {
     return GetInterface()->SoftBusBase64Encode(dst, dlen, olen, src, slen);
 }
 
-int32_t SoftBusBase64Decode(unsigned char *dst, size_t dlen, size_t *olen,
-    const unsigned char *src, size_t slen)
+int32_t SoftBusBase64Decode(unsigned char *dst, size_t dlen, size_t *olen, const unsigned char *src, size_t slen)
 {
     return GetInterface()->SoftBusBase64Decode(dst, dlen, olen, src, slen);
 }
@@ -327,8 +321,7 @@ int32_t InitSoftbusChain(SoftbusCertChain *softbusCertChain)
     return GetInterface()->InitSoftbusChain(softbusCertChain);
 }
 
-int32_t VerifyCertificate(SoftbusCertChain *softbusCertChain,
-    const NodeInfo *nodeInfo, const AuthSessionInfo *info)
+int32_t VerifyCertificate(SoftbusCertChain *softbusCertChain, const NodeInfo *nodeInfo, const AuthSessionInfo *info)
 {
     return GetInterface()->VerifyCertificate(softbusCertChain, nodeInfo, info);
 }
@@ -358,8 +351,7 @@ int32_t ConvertBtMacToStr(char *strMac, uint32_t strMacLen, const uint8_t *binMa
     return GetInterface()->ConvertBtMacToStr(strMac, strMacLen, binMac, binMacLen);
 }
 
-int32_t LnnGetDeviceDisplayName(const char *nickName,
-    const char *defaultName, char *deviceName, uint32_t len)
+int32_t LnnGetDeviceDisplayName(const char *nickName, const char *defaultName, char *deviceName, uint32_t len)
 {
     return GetInterface()->LnnGetDeviceDisplayName(nickName, defaultName, deviceName, len);
 }
@@ -399,8 +391,7 @@ bool JSON_AddBytesToObject(JsonObj *obj, const char *key, uint8_t *value, uint32
     return GetInterface()->JSON_AddBytesToObject(obj, key, value, size);
 }
 
-bool JSON_GetBytesFromObject(const JsonObj *obj, const char *key, uint8_t *value,
-    uint32_t bufLen, uint32_t *size)
+bool JSON_GetBytesFromObject(const JsonObj *obj, const char *key, uint8_t *value, uint32_t bufLen, uint32_t *size)
 {
     return GetInterface()->JSON_GetBytesFromObject(obj, key, value, bufLen, size);
 }
@@ -465,6 +456,11 @@ bool AuthSessionGetIsSameAccount(int64_t authSeq)
     return GetInterface()->AuthSessionGetIsSameAccount(authSeq);
 }
 
+int32_t LnnGetLocalByteInfo(InfoKey key, uint8_t *info, uint32_t len)
+{
+    return GetInterface()->LnnGetLocalByteInfo(key, info, len);
+}
+
 int32_t AuthSessionGetUserId(int64_t authSeq)
 {
     return GetInterface()->AuthSessionGetUserId(authSeq);
@@ -473,11 +469,6 @@ int32_t AuthSessionGetUserId(int64_t authSeq)
 int32_t GetActiveOsAccountIds(void)
 {
     return GetInterface()->GetActiveOsAccountIds();
-}
-
-int32_t LnnGetLocalByteInfo(InfoKey key, uint8_t *info, uint32_t len)
-{
-    return GetInterface()->LnnGetLocalByteInfo(key, info, len);
 }
 
 int32_t LnnGetLocalStrInfoByIfnameIdx(InfoKey key, char *info, uint32_t len, int32_t ifIdx)

@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021-2024 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2025 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -39,7 +39,7 @@ static IClientSessionCallBack *g_sessionCb = NULL;
 static int32_t ClientTransAddUdpChannel(UdpChannel *channel)
 {
     if (g_udpChannelMgr == NULL) {
-        TRANS_LOGE(TRANS_INIT, "udp channel manager hasn't init.");
+        TRANS_LOGE(TRANS_INIT, "udp channel manager hasn't been initialized.");
         return SOFTBUS_NO_INIT;
     }
 
@@ -55,7 +55,7 @@ static int32_t ClientTransAddUdpChannel(UdpChannel *channel)
     UdpChannel *channelNode = NULL;
     LIST_FOR_EACH_ENTRY(channelNode, &(g_udpChannelMgr->list), UdpChannel, node) {
         if (channelNode->channelId == channel->channelId) {
-            TRANS_LOGE(TRANS_SDK, "udp channel has exited.channelId=%{public}d.", channel->channelId);
+            TRANS_LOGE(TRANS_SDK, "udp channel has exited. channelId=%{public}d.", channel->channelId);
             (void)SoftBusMutexUnlock(&(g_udpChannelMgr->lock));
             return SOFTBUS_TRANS_UDP_CHANNEL_ALREADY_EXIST;
         }
@@ -240,7 +240,7 @@ static UdpChannel *ConvertChannelInfoToUdpChannel(const char *sessionName, const
         }
         if (channel->peerExtraAccessInfo != NULL &&
             strcpy_s(newChannel->extraAccessInfo, EXTRA_ACCESS_INFO_LEN_MAX, channel->peerExtraAccessInfo) != EOK) {
-            TRANS_LOGE(TRANS_SDK, "copy peerAccountId failed");
+            TRANS_LOGE(TRANS_SDK, "copy extraAccessInfo failed");
             SoftBusFree(newChannel);
             return NULL;
         }
@@ -639,7 +639,7 @@ static UdpChannelMgrCb g_udpChannelCb = {
 static int32_t ClientCheckFuncPointer(void *func)
 {
     if (func == NULL) {
-        TRANS_LOGE(TRANS_INIT, "enhance func not register.");
+        TRANS_LOGE(TRANS_INIT, "enhance func not register");
         return SOFTBUS_FUNC_NOT_REGISTER;
     }
     return SOFTBUS_OK;
@@ -666,8 +666,8 @@ int32_t ClientTransUdpMgrInit(IClientSessionCallBack *callback)
     }
     g_sessionCb = callback;
     RegisterStreamCb(&g_udpChannelCb);
-    TransFileInit();
-    TransFileSchemaInitPacked();
+    (void)TransFileInit();
+    (void)TransFileSchemaInitPacked();
     if (PendingInit(PENDING_TYPE_UDP) != SOFTBUS_OK) {
         TRANS_LOGE(TRANS_INIT, "trans udp pending init failed.");
         return SOFTBUS_TRANS_SERVER_INIT_FAILED;
@@ -818,7 +818,7 @@ int32_t TransLimitChange(int32_t channelId, uint8_t tos)
         return SOFTBUS_NOT_NEED_UPDATE;
     }
     if (channel.businessType != BUSINESS_TYPE_FILE) {
-        TRANS_LOGE(TRANS_FILE, "bussiness type not match");
+        TRANS_LOGE(TRANS_FILE, "business type not match");
         return SOFTBUS_NOT_NEED_UPDATE;
     }
     bool isTosSet = false;
@@ -868,7 +868,7 @@ int32_t ClientEmitFileEvent(int32_t channelId)
     return ret;
 }
 
-int32_t TransSetUdpChanelSessionId(int32_t channelId, int32_t sessionId)
+int32_t TransSetUdpChannelSessionId(int32_t channelId, int32_t sessionId)
 {
     if (g_udpChannelMgr == NULL) {
         TRANS_LOGE(TRANS_SDK, "udp channel manager hasn't init.");
@@ -899,7 +899,7 @@ int32_t TransSetUdpChannelRenameHook(int32_t channelId, OnRenameFileCallback onR
         TRANS_LOGE(TRANS_SDK, "onRenameFile is null");
         return SOFTBUS_INVALID_PARAM;
     }
-    
+
     if (g_udpChannelMgr == NULL) {
         TRANS_LOGE(TRANS_SDK, "udp channel manager hasn't init.");
         return SOFTBUS_NO_INIT;

@@ -82,9 +82,9 @@ void LnnDeinitHeartbeat(void)
     return GetLaneHubDepsInterface()->LnnDeinitHeartbeat();
 }
 
-int32_t InitSparkGroupManagerPacked(void)
+int32_t InitControlPlanePacked(void)
 {
-    return GetLaneHubDepsInterface()->InitSparkGroupManagerPacked();
+    return GetLaneHubDepsInterface()->InitControlPlanePacked();
 }
 
 int32_t SoftBusRegBusCenterVarDump(char *dumpVar, SoftBusVarDumpCb cb)

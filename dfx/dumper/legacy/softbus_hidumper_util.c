@@ -478,6 +478,10 @@ static void UpdateTransSuccessDetail(TransStatsSuccessRateDetail *res, int32_t d
 
 static void TransStatsSuccessDetail(bool success, const char *socketName, int32_t linkTypePara, int32_t delay)
 {
+    if (socketName == NULL) {
+        COMM_LOGE(COMM_DFX, "socketName is null!");
+        return;
+    }
     int linkType = linkTypePara;
     if (linkType < CONNECT_TCP || linkType >= CONNECT_TYPE_MAX) {
         linkType = SOFTBUS_ZERO;

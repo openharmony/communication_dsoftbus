@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2022 Huawei Device Co., Ltd.
+ * Copyright (c) 2022-2025 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -21,8 +21,8 @@
 
 #include "auth_interface.h"
 #include "bus_center_event.h"
-#include "bus_center_manager.h"
 #include "bus_center_info_key.h"
+#include "bus_center_manager.h"
 #include "lnn_async_callback_utils.h"
 #include "lnn_file_utils.h"
 #include "lnn_heartbeat_medium_mgr.h"
@@ -91,7 +91,7 @@ public:
     virtual int32_t LnnGetAllRemoteDevInfo(NodeInfo **info, int32_t *nums) = 0;
     virtual int32_t LnnSaveLocalDeviceInfo(const NodeInfo *deviceInfo) = 0;
     virtual int32_t LnnSaveRemoteDeviceInfo(const NodeInfo *deviceInfo) = 0;
-    virtual int32_t LnnDeleteCeKeyByHuks(struct HksBlob *keyAlias) = 0;
+    virtual int32_t LnnDeleteCeKeyByHuks(struct HksBlob *keyAlias, bool isUnlocked) = 0;
     virtual int32_t LnnGenerateCeKeyByHuks(struct HksBlob *keyAlias, bool isUnlocked) = 0;
     virtual int32_t LnnGetLocalNumInfo(InfoKey key, int32_t *info);
 };
@@ -134,14 +134,14 @@ public:
     MOCK_METHOD2(LnnGetLocalNum64Info, int32_t(InfoKey key, int64_t *));
     MOCK_METHOD2(LnnSetLocalNum64Info, int32_t(InfoKey, int64_t));
     MOCK_METHOD4(LnnAsyncCallbackDelayHelper, int32_t(SoftBusLooper *, LnnAsyncCallbackFunc, void *, uint64_t));
-    MOCK_METHOD1(GetLooper, SoftBusLooper * (int));
+    MOCK_METHOD1(GetLooper, SoftBusLooper *(int));
     MOCK_METHOD2(LnnSaveDeviceData, int32_t(const char *, LnnDataType));
     MOCK_METHOD3(LnnRetrieveDeviceData, int32_t(LnnDataType, char **, uint32_t *));
     MOCK_METHOD1(LnnGetLocalDevInfo, int32_t(NodeInfo *));
     MOCK_METHOD2(LnnGetAllRemoteDevInfo, int32_t(NodeInfo **, int32_t *));
     MOCK_METHOD1(LnnSaveLocalDeviceInfo, int32_t(const NodeInfo *));
     MOCK_METHOD1(LnnSaveRemoteDeviceInfo, int32_t(const NodeInfo *));
-    MOCK_METHOD1(LnnDeleteCeKeyByHuks, int32_t(struct HksBlob *));
+    MOCK_METHOD2(LnnDeleteCeKeyByHuks, int32_t(struct HksBlob *keyAlias, bool isUnlocked));
     MOCK_METHOD2(LnnGenerateCeKeyByHuks, int32_t(struct HksBlob *, bool));
     MOCK_METHOD2(LnnGetLocalNumInfo, int32_t(InfoKey key, int32_t *info));
 };

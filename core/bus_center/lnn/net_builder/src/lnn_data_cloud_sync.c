@@ -15,13 +15,14 @@
 
 #include "lnn_data_cloud_sync.h"
 
-#include "stdlib.h"
 #include <securec.h>
+#include <stdlib.h>
 
 #include "anonymizer.h"
 #include "g_enhance_lnn_func.h"
 #include "g_enhance_lnn_func_pack.h"
 #include "lnn_async_callback_utils.h"
+#include "lnn_decision_db.h"
 #include "lnn_distributed_net_ledger.h"
 #include "lnn_heartbeat_utils.h"
 #include "lnn_kv_adapter_wrapper.h"
@@ -76,7 +77,10 @@ static int32_t DBCipherInfoSyncToCache(
     } else if (strcmp(fieldName, DEVICE_INFO_DISTRIBUTED_SWITCH) == 0) {
         LNN_LOGD(LNN_BUILDER, "distributed switch info no need update into nodeinfo");
     } else {
-        LNN_LOGE(LNN_BUILDER, "fail:cipher info %{public}s valuelength over range", fieldName);
+        char *anonyFieldName = NULL;
+        Anonymize(fieldName, &anonyFieldName);
+        LNN_LOGE(LNN_BUILDER, "fail:cipher info %{public}s valuelength over range", AnonymizeWrapper(anonyFieldName));
+        AnonymizeFree(anonyFieldName);
         return SOFTBUS_INVALID_PARAM;
     }
     LNN_LOGD(LNN_BUILDER, "success.");
@@ -217,7 +221,10 @@ static int32_t DBConnectMacInfoSyncToCache(NodeInfo *cacheInfo, char *fieldName,
             return SOFTBUS_STRCPY_ERR;
         }
     } else {
-        LNN_LOGE(LNN_BUILDER, "fail:connect info %{public}s valuelength over range", fieldName);
+        char *anonyFieldName = NULL;
+        Anonymize(fieldName, &anonyFieldName);
+        LNN_LOGE(LNN_BUILDER, "fail:connect info %{public}s valuelength over range", AnonymizeWrapper(anonyFieldName));
+        AnonymizeFree(anonyFieldName);
         return SOFTBUS_INVALID_PARAM;
     }
     return SOFTBUS_OK;
@@ -505,7 +512,10 @@ static int32_t SetDBNameDataToDLedger(NodeInfo *cacheInfo, char *deviceUdid, cha
             return SOFTBUS_NETWORK_SET_LEDGER_INFO_ERR;
         }
     } else {
-        LNN_LOGD(LNN_BUILDER, "%{public}s no need update to DLedger", fieldName);
+        char *anonyFieldName = NULL;
+        Anonymize(fieldName, &anonyFieldName);
+        LNN_LOGD(LNN_BUILDER, "%{public}s no need update to DLedger", AnonymizeWrapper(anonyFieldName));
+        AnonymizeFree(anonyFieldName);
         return SOFTBUS_OK;
     }
     return SOFTBUS_OK;
@@ -907,12 +917,14 @@ static void UpdateDevBasicInfoToCache(const NodeInfo *newInfo, NodeInfo *oldInfo
     oldInfo->connSubFeature = newInfo->connSubFeature;
     oldInfo->authCapacity = newInfo->authCapacity;
     oldInfo->deviceInfo.osType = newInfo->deviceInfo.osType;
-    oldInfo->stateVersion = newInfo->stateVersion;
     oldInfo->updateTimestamp = newInfo->updateTimestamp;
     oldInfo->deviceSecurityLevel = newInfo->deviceSecurityLevel;
-    oldInfo->localStateVersion = newInfo->localStateVersion;
     oldInfo->heartbeatCapacity = newInfo->heartbeatCapacity;
     oldInfo->staticNetCap = newInfo->staticNetCap;
+    if (LnnFindDeviceUdidTrustedInfoFromDb(newInfo->deviceInfo.deviceUdid) != SOFTBUS_OK) {
+        oldInfo->stateVersion = newInfo->stateVersion;
+        oldInfo->localStateVersion = newInfo->localStateVersion;
+    }
 }
 
 static int32_t LnnUpdateOldCacheInfo(const NodeInfo *newInfo, NodeInfo *oldInfo)

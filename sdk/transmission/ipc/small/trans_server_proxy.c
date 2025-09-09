@@ -51,6 +51,10 @@ static int OpenSessionProxyCallback(IOwner owner, int code, IpcIo *reply)
     }
     uint32_t size;
     ReadUint32(reply, &size);
+    if (size > sizeof(TransSerializer)) {
+        TRANS_LOGE(TRANS_SDK, "pop data size err.");
+        return SOFTBUS_MEM_ERR;
+    }
     void *data = (void *)ReadBuffer(reply, size);
     if (data == NULL) {
         TRANS_LOGE(TRANS_SDK, "pop data is null.");
@@ -130,8 +134,9 @@ void TransServerProxyClear(void)
     return;
 }
 
-int32_t ServerIpcCreateSessionServer(const char *pkgName, const char *sessionName)
+int32_t ServerIpcCreateSessionServer(const char *pkgName, const char *sessionName, uint64_t timestamp)
 {
+    (void)timestamp;
     TRANS_LOGD(TRANS_SDK, "enter.");
     if ((pkgName == NULL) || (sessionName == NULL)) {
         TRANS_LOGW(TRANS_SDK, "Invalid param");
@@ -158,8 +163,9 @@ int32_t ServerIpcCreateSessionServer(const char *pkgName, const char *sessionNam
     return ret;
 }
 
-int32_t ServerIpcRemoveSessionServer(const char *pkgName, const char *sessionName)
+int32_t ServerIpcRemoveSessionServer(const char *pkgName, const char *sessionName, uint64_t timestamp)
 {
+    (void)timestamp;
     TRANS_LOGD(TRANS_SDK, "enter.");
     if ((pkgName == NULL) || (sessionName == NULL)) {
         TRANS_LOGW(TRANS_SDK, "Invalid param");

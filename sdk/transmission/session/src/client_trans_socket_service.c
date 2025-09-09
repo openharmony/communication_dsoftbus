@@ -168,6 +168,7 @@ int32_t Bind(int32_t socket, const QosTV qos[], uint32_t qosCount, const ISocket
     TRANS_LOGI(TRANS_SDK, "Bind end, stop timer, socket=%{public}d", socket);
     (void)ClientHandleBindWaitTimer(socket, 0, TIMER_ACTION_STOP);
     if (ret != SOFTBUS_OK) {
+        (void)ClientSetEnableStatusBySocket(socket, ENABLE_STATUS_INIT);
         (void)SetSessionStateBySessionId(socket, SESSION_STATE_INIT, 0);
     }
     return ret;
@@ -264,7 +265,8 @@ static int32_t ClientCheckFuncPointer(void *func)
     return SOFTBUS_OK;
 }
 
-static int32_t SetExtSocketOptPacked(int32_t socket, OptLevel level, OptType optType, void *optValue, uint32_t optValueSize)
+static int32_t SetExtSocketOptPacked(
+    int32_t socket, OptLevel level, OptType optType, void *optValue, uint32_t optValueSize)
 {
     ClientEnhanceFuncList *pfnClientEnhanceFuncList = ClientEnhanceFuncListGet();
     if (ClientCheckFuncPointer((void *)pfnClientEnhanceFuncList->setExtSocketOpt) != SOFTBUS_OK) {
@@ -291,7 +293,8 @@ int32_t SetSocketOpt(int32_t socket, OptLevel level, OptType optType, void *optV
     return ret;
 }
 
-static int32_t GetExtSocketOptPacked(int32_t socket, OptLevel level, OptType optType, void *optValue, int32_t *optValueSize)
+static int32_t GetExtSocketOptPacked(
+    int32_t socket, OptLevel level, OptType optType, void *optValue, int32_t *optValueSize)
 {
     ClientEnhanceFuncList *pfnClientEnhanceFuncList = ClientEnhanceFuncListGet();
     if (ClientCheckFuncPointer((void *)pfnClientEnhanceFuncList->getExtSocketOpt) != SOFTBUS_OK) {

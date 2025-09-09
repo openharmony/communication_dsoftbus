@@ -114,7 +114,7 @@ static void AddDevicesToArray(
     }
     for (size_t i = 0; i < devices.size(); i++) {
         cJSON *deviceJson = cJSON_CreateObject();
-        (void)AddStringToJsonObject(deviceJson, "Name", devices[i].GetDeviceName().c_str());
+        (void)AddStringToJsonObject(deviceJson, "Name", AnonymizeStr(devices[i].GetDeviceName()).c_str());
         (void)AddStringToJsonObject(deviceJson, "Mac", AnonymizeStr(devices[i].GetDeviceAddr()).c_str());
         (void)AddNumberToJsonObject(deviceJson, "Profile", static_cast<int32_t>(profileId));
         if (profileId == PROFILE_ID_A2DP_SRC) {

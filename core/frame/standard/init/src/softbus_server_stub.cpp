@@ -34,6 +34,7 @@
 
 #ifdef SUPPORT_BUNDLENAME
 #include "bundle_mgr_proxy.h"
+#include "g_enhance_trans_func_pack.h"
 #include "iservice_registry.h"
 #include "ohos_account_kits.h"
 #include "os_account_manager.h"
@@ -74,16 +75,6 @@ namespace OHOS {
         static const char *DB_PACKAGE_NAME = "distributeddata-default";
         static const char *DM_PACKAGE_NAME = "ohos.distributedhardware.devicemanager";
         static const char *MSDP_PACKAGE_NAME = "ohos.msdp.spatialawareness";
-#ifdef SUPPORT_BUNDLENAME
-        constexpr int32_t SYSTEM_APP_NUMS = 5;
-        static constexpr std::array<const char*, SYSTEM_APP_NUMS> systemAppWhitelist = {
-            "com.huawei.hmos.hiviewcare",
-            "com.ohos.plrdtest.hongyan",
-            "com.huawei.hmos.aibase",
-            "ohos.samples.distributedmusicplayer",
-            "com.huawei.hmos.camera"
-        };
-#endif // SUPPORT_BUNDLENAME
     }
 
 int32_t SoftBusServerStub::CheckOpenSessionPermission(const SessionParam *param)
@@ -162,8 +153,8 @@ SoftBusServerStub::SoftBusServerStub()
     memberPermissionMap_[SERVER_CLOSE_BR_PROXY] = OHOS_PERMISSION_ACCESS_BLUETOOTH;
     memberPermissionMap_[SERVER_SEND_BR_PROXY_DATA] = OHOS_PERMISSION_ACCESS_BLUETOOTH;
     memberPermissionMap_[SERVER_SET_BR_PROXY_LISTENER_STATE] = OHOS_PERMISSION_ACCESS_BLUETOOTH;
-    memberPermissionMap_[SERVER_GET_BR_PROXY_CHANNEL_STATE] = OHOS_PERMISSION_ACCESS_BLUETOOTH;
-    memberPermissionMap_[SERVER_REGISTER_PUSH_HOOK] = OHOS_PERMISSION_ACCESS_BLUETOOTH;
+    memberPermissionMap_[SERVER_GET_BR_PROXY_CHANNEL_STATE] = OHOS_PERMISSION_DISTRIBUTED_DATASYNC;
+    memberPermissionMap_[SERVER_REGISTER_PUSH_HOOK] = OHOS_PERMISSION_DISTRIBUTED_DATASYNC;
 }
 
 void SoftBusServerStub::InitMemberFuncMap()
@@ -415,9 +406,8 @@ static int32_t GetAppId(const std::string &bundleName, std::string &appId)
 }
 
 static int32_t CheckNormalAppSessionName(
-    const char *sessionName, pid_t callingUid, std::string &strName)
+    const char *sessionName, pid_t callingUid, std::string &strName, uint64_t callingFullTokenId)
 {
-    uint64_t callingFullTokenId = IPCSkeleton::GetCallingFullTokenID();
     if (SoftBusCheckIsNormalApp(callingFullTokenId, sessionName)) {
         std::string bundleName;
         int32_t result = GetBundleName(callingUid, bundleName);
@@ -454,31 +444,13 @@ static int32_t CheckNormalAppSessionName(
     return SOFTBUS_OK;
 }
 
-static bool IsInWhitelist(std::string_view app)
+static int32_t TransCheckSystemAppList(pid_t callingUid)
 {
-    return std::find(systemAppWhitelist.begin(), systemAppWhitelist.end(), app) != systemAppWhitelist.end();
-}
-
-static int32_t TransCheckSystemAppList(pid_t callingUid, const char *sessionName)
-{
-    // if sessionName is DBinder or DMS should be return
-    #define DBINDER_BUS_NAME_PREFIX "DBinder"
-    if (strncmp(sessionName, DBINDER_BUS_NAME_PREFIX, strlen(DBINDER_BUS_NAME_PREFIX)) == 0) {
-        return SOFTBUS_OK;
-    }
-    #define DMS_COLLABATION_NAME_PREFIX "ohos.dtbcollab.dms"
-    if (strncmp(sessionName, DMS_COLLABATION_NAME_PREFIX, strlen(DMS_COLLABATION_NAME_PREFIX)) == 0) {
-        return SOFTBUS_OK;
-    }
-    uint64_t callingFullTokenId = IPCSkeleton::GetCallingFullTokenID();
-    if (SoftBusCheckIsSystemApp(callingFullTokenId) == false) {
-        return SOFTBUS_OK;
-    }
     std::string bundleName;
     int32_t ret = GetBundleName(callingUid, bundleName);
     COMM_CHECK_AND_RETURN_RET_LOGE(ret == SOFTBUS_OK, ret, COMM_SVC, "get bundle name failed.");
 
-    if (!IsInWhitelist(bundleName)) {
+    if (!IsInWhitelistPacked(bundleName.c_str())) {
         COMM_LOGE(COMM_SVC, "not found bundleName in system app whitelist.");
         return SOFTBUS_TRANS_NOT_FIND_BUNDLENAME;
     }
@@ -486,12 +458,29 @@ static int32_t TransCheckSystemAppList(pid_t callingUid, const char *sessionName
 }
 #endif
 
+static int32_t SoftBusCheckTimestamp(MessageParcel &data, const char *sessionName)
+{
+    uint64_t timestamp = 0;
+    if (!data.ReadUint64(timestamp)) {
+        COMM_LOGE(COMM_SVC, "CreateSessionServerInner read timestamp failed!");
+        return SOFTBUS_TRANS_PROXY_READUINT_FAILED;
+    }
+    int32_t ret = CheckAndUpdateTimeBySessionName(sessionName, timestamp);
+    if (ret == SOFTBUS_TRANS_SESSION_NAME_NO_EXIST || ret == SOFTBUS_OK) {
+        return SOFTBUS_OK;
+    }
+    return SOFTBUS_TRANS_SESSION_TIME_NOT_EQUAL;
+}
+
 int32_t SoftBusServerStub::CreateSessionServerInner(MessageParcel &data, MessageParcel &reply)
 {
     COMM_LOGD(COMM_SVC, "enter");
     int32_t retReply;
     pid_t callingUid;
     pid_t callingPid;
+#ifdef SUPPORT_BUNDLENAME
+    uint64_t callingFullTokenId = IPCSkeleton::GetCallingFullTokenID();
+#endif
     const char *pkgName = data.ReadCString();
     if (pkgName == nullptr) {
         COMM_LOGE(COMM_SVC, "CreateSessionServerInner read pkgName failed!");
@@ -514,17 +503,21 @@ int32_t SoftBusServerStub::CreateSessionServerInner(MessageParcel &data, Message
         goto EXIT;
     }
 #ifdef SUPPORT_BUNDLENAME
-    if (TransCheckSystemAppList(callingUid, sessionName) != SOFTBUS_OK) {
-        retReply = SOFTBUS_PERMISSION_DENIED;
-        goto EXIT;
-    }
-    if (CheckNormalAppSessionName(sessionName, callingUid, strName) != SOFTBUS_OK) {
-        retReply = SOFTBUS_PERMISSION_DENIED;
-        goto EXIT;
+    if (SoftBusCheckIsSystemApp(callingFullTokenId, sessionName) == true) {
+        if (TransCheckSystemAppList(callingUid) != SOFTBUS_OK) {
+            retReply = SOFTBUS_PERMISSION_DENIED;
+            goto EXIT;
+        }
+    } else {
+        if (CheckNormalAppSessionName(sessionName, callingUid, strName, callingFullTokenId) != SOFTBUS_OK) {
+            retReply = SOFTBUS_PERMISSION_DENIED;
+            goto EXIT;
+        }
     }
     sessionName = strName.c_str();
 #endif
-    retReply = CreateSessionServer(pkgName, sessionName);
+    (void)SoftBusCheckTimestamp(data, sessionName);
+    retReply = CreateSessionServer(pkgName, sessionName, 0);
 EXIT:
     if (!reply.WriteInt32(retReply)) {
         COMM_LOGE(COMM_SVC, "CreateSessionServerInner write reply failed!");
@@ -565,7 +558,11 @@ int32_t SoftBusServerStub::RemoveSessionServerInner(MessageParcel &data, Message
         COMM_LOGE(COMM_SVC, "Check Uid and Pid failed!");
         return SOFTBUS_TRANS_CHECK_PID_ERROR;
     }
-    retReply = RemoveSessionServer(pkgName, sessionName);
+    if (SoftBusCheckTimestamp(data, sessionName) != SOFTBUS_OK) {
+        retReply = SOFTBUS_TRANS_PROXY_READUINT_FAILED;
+        goto EXIT;
+    }
+    retReply = RemoveSessionServer(pkgName, sessionName, 0);
 EXIT:
     if (!reply.WriteInt32(retReply)) {
         COMM_LOGE(COMM_SVC, "RemoveSessionServerInner write reply failed!");
@@ -737,7 +734,7 @@ int32_t SoftBusServerStub::OpenAuthSessionInner(MessageParcel &data, MessageParc
     COMM_LOGI(COMM_SVC, "OpenAuthSession channelId=%{public}d", retReply);
 EXIT:
     if (!reply.WriteInt32(retReply)) {
-        COMM_LOGE(COMM_SVC, "OpenSessionInner write reply failed! retReply=%{public}d", retReply);
+        COMM_LOGE(COMM_SVC, "OpenSessionInner write reply failed!");
         return SOFTBUS_TRANS_PROXY_WRITEINT_FAILED;
     }
     return SOFTBUS_OK;
@@ -2188,20 +2185,6 @@ int32_t SoftBusServerStub::GetPeerDeviceIdInner(MessageParcel &data, MessageParc
     return SOFTBUS_OK;
 }
 
-static int32_t PushIdentifyCheck(const char *pkgName)
-{
-    #define COMM_PKGNAME_PUSH   "PUSH_SERVICE"
-    #define PUSH_SERVICE_UID    7023
-    if (strcmp(pkgName, COMM_PKGNAME_PUSH) != 0) {
-        return SOFTBUS_OK;
-    }
-    pid_t uid = IPCSkeleton::GetCallingUid();
-    if (uid != PUSH_SERVICE_UID) {
-        return SOFTBUS_TRANS_BR_PROXY_CALLER_RESTRICTED;
-    }
-    return SOFTBUS_OK;
-}
-
 int32_t SoftBusServerStub::SoftbusRegisterBrProxyServiceInner(MessageParcel &data, MessageParcel &reply)
 {
     COMM_LOGD(COMM_SVC, "enter");
@@ -2214,11 +2197,6 @@ int32_t SoftBusServerStub::SoftbusRegisterBrProxyServiceInner(MessageParcel &dat
     if (pkgName == nullptr) {
         COMM_LOGE(COMM_SVC, "SoftbusRegisterServiceInner read pkgName failed!");
         return SOFTBUS_TRANS_PROXY_READCSTRING_FAILED;
-    }
-    int32_t ret = PushIdentifyCheck(pkgName);
-    if (ret != SOFTBUS_OK) {
-        COMM_LOGE(COMM_SVC, "[br_proxy] Push identity verification failed! ret=%{public}d", ret);
-        return ret;
     }
     uint32_t code = MANAGE_REGISTER_BR_PROXY_SERVICE;
     SoftbusRecordCalledApiInfo(pkgName, code);

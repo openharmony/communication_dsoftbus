@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2025 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -16,10 +16,13 @@
 #include "softbus_proxychannel_network.h"
 
 #include <securec.h>
+#include "softbus_adapter_crypto.h"
+#include "softbus_adapter_mem.h"
 #include "softbus_def.h"
 #include "softbus_error_code.h"
 #include "softbus_proxychannel_manager.h"
 #include "softbus_transmission_interface.h"
+#include "softbus_utils.h"
 #include "trans_log.h"
 
 #define MAX_LISTENER_CNT 2
@@ -78,17 +81,90 @@ void NotifyNetworkingChannelClosed(const char *sessionName, int32_t channelId)
     entry->listener.onChannelClosed(channelId);
 }
 
-void NotifyNetworkingMsgReceived(const char *sessionName, int32_t channelId, const char *data, uint32_t len)
+static int32_t TransNotifyDecryptNetworkingMsg(
+    const char *sessionName, int32_t channelId, const char *data, uint32_t len)
 {
+    char sessionKey[SESSION_KEY_LENGTH] = { 0 };
+    int32_t ret = TransProxyGetSessionKeyByChanId(channelId, sessionKey, SESSION_KEY_LENGTH);
+    if (ret != SOFTBUS_OK) {
+        (void)memset_s(sessionKey, SESSION_KEY_LENGTH, 0, SESSION_KEY_LENGTH);
+        TRANS_LOGE(TRANS_CTRL, "get sessionKey failed, channelId=%{public}d", channelId);
+        return ret;
+    }
+
+    if (len <= OVERHEAD_LEN) {
+        (void)memset_s(sessionKey, SESSION_KEY_LENGTH, 0, SESSION_KEY_LENGTH);
+        TRANS_LOGE(TRANS_CTRL, "the length of len is invalid, len=%{public}d", len);
+        return SOFTBUS_TRANS_INVALID_DATA_LENGTH;
+    }
+    uint32_t outDataLen = len - OVERHEAD_LEN;
+    char *outData = (char *)SoftBusCalloc(outDataLen);
+    if (outData == NULL) {
+        (void)memset_s(sessionKey, SESSION_KEY_LENGTH, 0, SESSION_KEY_LENGTH);
+        TRANS_LOGE(TRANS_CTRL, "malloc len failed");
+        return SOFTBUS_MALLOC_ERR;
+    }
+
+    AesGcmCipherKey cipherKey = { 0 };
+    cipherKey.keyLen = SESSION_KEY_LENGTH;
+    if (memcpy_s(cipherKey.key, SESSION_KEY_LENGTH, sessionKey, SESSION_KEY_LENGTH) != EOK) {
+        (void)memset_s(sessionKey, SESSION_KEY_LENGTH, 0, SESSION_KEY_LENGTH);
+        SoftBusFree(outData);
+        TRANS_LOGE(TRANS_CTRL, "memcpy key error.");
+        return SOFTBUS_MEM_ERR;
+    }
+    (void)memset_s(sessionKey, SESSION_KEY_LENGTH, 0, SESSION_KEY_LENGTH);
+    ret = SoftBusDecryptData(&cipherKey, (unsigned char *)data, len, (unsigned char *)outData, &outDataLen);
+    (void)memset_s(&cipherKey, sizeof(AesGcmCipherKey), 0, sizeof(AesGcmCipherKey));
+    if (ret != SOFTBUS_OK) {
+        SoftBusFree(outData);
+        TRANS_LOGE(TRANS_CTRL, "SoftBusDecryptData failed, ret=%{public}d", ret);
+        return SOFTBUS_DECRYPT_ERR;
+    }
+
     INetworkingListenerEntry *entry = FindListenerEntry(sessionName);
     if (entry == NULL || entry->listener.onMessageReceived == NULL) {
-        return;
+        SoftBusFree(outData);
+        return SOFTBUS_NOT_FIND;
     }
-    entry->listener.onMessageReceived(channelId, data, len);
+    entry->listener.onMessageReceived(channelId, outData, outDataLen);
+    SoftBusFree(outData);
+    return SOFTBUS_OK;
 }
 
-int TransRegisterNetworkingChannelListener(const char *sessionName, const INetworkingListener *listener)
+void NotifyNetworkingMsgReceived(const char *sessionName, int32_t channelId, const char *data, uint32_t len)
 {
+    if (sessionName == NULL || data == NULL || len <= 0) {
+        TRANS_LOGE(TRANS_CTRL, "invalid param.");
+        return;
+    }
+
+    uint32_t channelCapability;
+    if (TransProxyGetChannelCapaByChanId(channelId, &channelCapability) != SOFTBUS_OK) {
+        TRANS_LOGE(TRANS_CTRL, "get channelCapability failed, channelId=%{public}d", channelId);
+        return;
+    }
+
+    if ((channelCapability & TRANS_CHANNEL_INNER_ENCRYPT) != 0) {
+        if (TransNotifyDecryptNetworkingMsg(sessionName, channelId, data, len) != SOFTBUS_OK) {
+            TRANS_LOGE(TRANS_CTRL, "decrypt msg fail channelId=%{public}d", channelId);
+            return;
+        }
+    } else {
+        INetworkingListenerEntry *entry = FindListenerEntry(sessionName);
+        if (entry == NULL || entry->listener.onMessageReceived == NULL) {
+            return;
+        }
+        entry->listener.onMessageReceived(channelId, data, len);
+    }
+}
+
+int32_t TransRegisterNetworkingChannelListener(const char *sessionName, const INetworkingListener *listener)
+{
+    if (sessionName == NULL) {
+        TRANS_LOGE(TRANS_CTRL, "invalid param.");
+        return SOFTBUS_STRCPY_ERR;
+    }
     int32_t unuse = -1;
     for (int32_t i = 0; i < MAX_LISTENER_CNT; i++) {
         if (strlen(g_listeners[i].sessionName) == 0) {

@@ -19,6 +19,7 @@
 #include <securec.h>
 #include <sys/time.h>
 
+#include "auth_common_mock.h"
 #include "auth_connection.c"
 #include "auth_connection.h"
 #include "auth_device.c"
@@ -33,7 +34,6 @@
 #include "auth_session_key.c"
 #include "auth_session_key.h"
 #include "auth_tcp_connection_mock.h"
-#include "auth_common_mock.h"
 #include "lnn_ctrl_lane.h"
 #include "lnn_lane_interface.h"
 #include "softbus_adapter_json.h"
@@ -624,6 +624,8 @@ HWTEST_F(AuthOtherTest, AUTH_MANAGER_SET_SESSION_KEY_TEST_001, TestSize.Level1)
     if (sessionKey == nullptr) {
         return;
     }
+    AuthCommonInterfaceMock connMock;
+    EXPECT_CALL(connMock, LnnGetLocalNumU64Info).WillRepeatedly(Return(SOFTBUS_OK));
     sessionKey->len = 0;
     int32_t ret = AuthManagerSetSessionKey(authSeq, info, sessionKey, false, false);
     EXPECT_TRUE(ret == SOFTBUS_OK);
@@ -731,6 +733,8 @@ HWTEST_F(AuthOtherTest, CONVERT_AUTH_LINK_TYPE_TO_HISYSEVENT_LINKTYPE_TEST_001, 
     ReportAuthResultEvt(authFsm, SOFTBUS_AUTH_DEVICE_DISCONNECTED);
     ReportAuthResultEvt(authFsm, SOFTBUS_AUTH_HICHAIN_PROCESS_FAIL);
     ReportAuthResultEvt(authFsm, 11);
+    AuthCommonInterfaceMock connMock;
+    EXPECT_CALL(connMock, SoftBusGenerateStrHash).WillRepeatedly(Return(SOFTBUS_OK));
     int32_t ret1 = RecoveryFastAuthKey(authFsm);
     EXPECT_TRUE(ret1 != SOFTBUS_OK);
     AuthSessionInfo authSessionInfo;
@@ -879,7 +883,7 @@ HWTEST_F(AuthOtherTest, START_RECONNECT_DEVICE_TEST_001, TestSize.Level1)
     AuthConnCallback connCb;
     AuthHandle authHandle = { .authId = 1, .type = AUTH_LINK_TYPE_WIFI };
     int32_t ret = AuthStartReconnectDevice(authHandle, &connInfo, 1, &connCb);
-    EXPECT_TRUE(ret == SOFTBUS_AUTH_NOT_FOUND);
+    EXPECT_TRUE(ret == SOFTBUS_INVALID_PARAM);
 
     NodeInfo nodeInfo;
     ReportAuthRequestPassed(11, authHandle, &nodeInfo);
@@ -1110,6 +1114,8 @@ HWTEST_F(AuthOtherTest, AUTH_DIRECT_ONLINE_PROCESS_SESSION_KEY_TEST_001, TestSiz
  */
 HWTEST_F(AuthOtherTest, IS_SAME_ACCOUNT_DEVICE_TEST_001, TestSize.Level1)
 {
+    AuthCommonInterfaceMock connMock;
+    EXPECT_CALL(connMock, SoftBusGenerateStrHash).WillRepeatedly(Return(SOFTBUS_OK));
     EXPECT_TRUE(LnnInitLocalLedger() == SOFTBUS_OK);
     uint8_t accountHash[SHA_256_HASH_LEN] = "accounthashtest";
     EXPECT_TRUE(LnnSetLocalByteInfo(BYTE_KEY_ACCOUNT_HASH, accountHash, SHA_256_HASH_LEN) == SOFTBUS_OK);
@@ -1132,6 +1138,8 @@ HWTEST_F(AuthOtherTest, IS_SAME_ACCOUNT_DEVICE_TEST_001, TestSize.Level1)
  */
 HWTEST_F(AuthOtherTest, FILL_AUTH_SESSION_INFO_TEST_001, TestSize.Level1)
 {
+    AuthCommonInterfaceMock connMock;
+    EXPECT_CALL(connMock, SoftBusGenerateStrHash).WillRepeatedly(Return(SOFTBUS_OK));
     AuthSessionInfo info = {
         .connInfo.info.bleInfo.deviceIdHash = "123456789udidhashtest",
     };
@@ -1219,8 +1227,7 @@ HWTEST_F(AuthOtherTest, AUTH_START_LISTENING_FOR_WIFI_DIRECT_TEST_001, TestSize.
     ListenerModule moduleId;
     (void)memset_s(&moduleId, sizeof(ListenerModule), 0, sizeof(ListenerModule));
     EXPECT_NE(AuthStartListeningForWifiDirect(AUTH_LINK_TYPE_P2P, ip, 37025, &moduleId), SOFTBUS_INVALID_PORT);
-    EXPECT_NE(
-        AuthStartListeningForWifiDirect(AUTH_LINK_TYPE_ENHANCED_P2P, ip, 37025, &moduleId), SOFTBUS_INVALID_PORT);
+    EXPECT_NE(AuthStartListeningForWifiDirect(AUTH_LINK_TYPE_ENHANCED_P2P, ip, 37025, &moduleId), SOFTBUS_INVALID_PORT);
     EXPECT_EQ(AuthStartListeningForWifiDirect(AUTH_LINK_TYPE_WIFI, ip, 37025, &moduleId), SOFTBUS_INVALID_PARAM);
 }
 

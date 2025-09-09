@@ -16,12 +16,12 @@
 #include "legacy/softbus_hisysevt_discreporter.h"
 
 #include "comm_log.h"
-#include "securec.h"
-#include "softbus_adapter_thread.h"
-#include "softbus_adapter_mem.h"
-#include "softbus_error_code.h"
 #include "legacy/softbus_hisysevt_bus_center.h"
 #include "legacy/softbus_hisysevt_common.h"
+#include "securec.h"
+#include "softbus_adapter_mem.h"
+#include "softbus_adapter_thread.h"
+#include "softbus_error_code.h"
 #include "softbus_utils.h"
 
 #define MODULE_NAME_MAX_LEN 65
@@ -80,7 +80,7 @@ typedef struct {
     size_t paramSize;
 } SoftBusEvtParamSize;
 
-static SoftBusEvtParamSize g_firstDsicTimeParam[FIRST_DISC_DURATION_PARAM_NUM] = {
+static SoftBusEvtParamSize g_firstDiscTimeParam[FIRST_DISC_DURATION_PARAM_NUM] = {
     {SOFTBUS_EVT_PARAMTYPE_STRING, SOFT_BUS_VERSION_KEY},
     {SOFTBUS_EVT_PARAMTYPE_STRING, PACKAGE_VERSION_KEY},
     {SOFTBUS_EVT_PARAMTYPE_UINT32, LINK_TYPE_KEY},
@@ -182,7 +182,7 @@ static int32_t SoftBusCreateFirstDiscDurMsg(SoftBusEvtReportMsg *msg, uint32_t m
     msg->evtType = SOFTBUS_EVT_TYPE_STATISTIC;
     msg->paramNum = FIRST_DISC_DURATION_PARAM_NUM;
 
-    if (SetMsgParamNameAndType(msg, g_firstDsicTimeParam) != SOFTBUS_OK) {
+    if (SetMsgParamNameAndType(msg, g_firstDiscTimeParam) != SOFTBUS_OK) {
         COMM_LOGE(COMM_EVENT, "set param name and type fail");
         return SOFTBUS_STRCPY_ERR;
     }

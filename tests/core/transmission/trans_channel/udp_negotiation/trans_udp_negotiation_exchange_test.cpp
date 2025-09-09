@@ -26,7 +26,7 @@ namespace OHOS {
 #define TEST_SOCKET_ADDR "192.168.8.119"
 #define TEST_ERROR_CODE (-12345)
 
-const char *g_sessionKey = "www.huaweitest.com";
+const char *g_sessionKey = "www.test.com";
 const char *g_pkgName = "dms";
 const char *g_sessionName = "ohos.distributedschedule.dms.test";
 const char *g_networkid = "ABCDEF00ABCDEF00ABCDEF00ABCDEF00ABCDEF00ABCDEF00ABCDEF00ABCDEF00";
@@ -251,11 +251,11 @@ HWTEST_F(TransUdpNegotiationExchangeTest, TransUdpNegotiationExchangeTest006, Te
     int32_t ret = TransPackReplyErrInfo(msg, errCode, nullptr);
     EXPECT_EQ(ret, SOFTBUS_INVALID_PARAM);
     ret = TransUnpackReplyErrInfo(nullptr, &errCode);
-    EXPECT_EQ(ret, SOFTBUS_PARSE_JSON_ERR);
+    EXPECT_EQ(ret, SOFTBUS_INVALID_PARAM);
     ret = TransPackReplyErrInfo(nullptr, errCode, "error descriptor test");
     EXPECT_EQ(ret, SOFTBUS_INVALID_PARAM);
     ret = TransUnpackReplyErrInfo(msg, nullptr);
-    EXPECT_EQ(ret, SOFTBUS_PARSE_JSON_ERR);
+    EXPECT_EQ(ret, SOFTBUS_INVALID_PARAM);
     cJSON_Delete(msg);
 }
 

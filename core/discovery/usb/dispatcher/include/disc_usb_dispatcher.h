@@ -24,9 +24,6 @@ extern "C" {
 #endif
 
 DiscoveryFuncInterface *DiscUsbDispatcherInit(DiscInnerCallback *discInnerCb);
-// for test
-DiscoveryFuncInterface *DiscUsbInitForTest(DiscoveryUsbDispatcherInterface *interfaceA,
-    DiscoveryUsbDispatcherInterface *interfaceB);
 void DiscUsbDispatcherDeinit(void);
 
 #ifdef __cplusplus

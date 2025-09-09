@@ -217,15 +217,6 @@ DiscoveryFuncInterface *DiscUsbDispatcherInit(DiscInnerCallback *discInnerCb)
     return &g_discUsbFrameFuncInterface;
 }
 
-DiscoveryFuncInterface *DiscUsbInitForTest(DiscoveryUsbDispatcherInterface *interfaceA,
-    DiscoveryUsbDispatcherInterface *interfaceB)
-{
-    g_dispatcherSize = 0;
-    g_usbDispatchers[g_dispatcherSize++] = interfaceA;
-    g_usbDispatchers[g_dispatcherSize++] = interfaceB;
-    return &g_discUsbFrameFuncInterface;
-}
-
 void DiscUsbDispatcherDeinit(void)
 {
     DISC_LOGI(DISC_INIT, "deinit DiscUsbFrameDeinit");

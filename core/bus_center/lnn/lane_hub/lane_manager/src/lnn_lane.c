@@ -311,11 +311,11 @@ static void DfxReportSelectLaneResult(uint32_t laneReqId, const LaneAllocInfo *a
 {
     LnnEventExtra extra = { 0 };
     extra.errcode = reason;
-    extra.laneReqId = (int32_t)laneReqId;
-    extra.minBW = (int32_t)allocInfo->qosRequire.minBW;
-    extra.maxLaneLatency = (int32_t)allocInfo->qosRequire.maxLaneLatency;
-    extra.minLaneLatency = (int32_t)allocInfo->qosRequire.minLaneLatency;
-    int32_t discoveryType = 0;
+    extra.laneReqId = laneReqId;
+    extra.minBW = allocInfo->qosRequire.minBW;
+    extra.maxLaneLatency = allocInfo->qosRequire.maxLaneLatency;
+    extra.minLaneLatency = allocInfo->qosRequire.minLaneLatency;
+    uint32_t discoveryType = 0;
     if (LnnGetRemoteNumInfo(allocInfo->networkId, NUM_KEY_DISCOVERY_TYPE, (int32_t *)&discoveryType) == SOFTBUS_OK) {
         extra.onlineType = discoveryType;
     }
@@ -463,7 +463,7 @@ static int32_t LnnFreeLink(uint32_t laneReqId)
     return SOFTBUS_OK;
 }
 
-static LnnLaneManager g_LaneManager = {
+static LnnLaneManager g_laneManager = {
     .lnnQueryLaneResource = LnnQueryLaneResource,
     .lnnGetLaneHandle = ApplyLaneReqId,
     .lnnAllocLane = LnnAllocLane,
@@ -478,7 +478,7 @@ static LnnLaneManager g_LaneManager = {
 
 LnnLaneManager *GetLaneManager(void)
 {
-    return &g_LaneManager;
+    return &g_laneManager;
 }
 
 int32_t LnnRequestLane(uint32_t laneReqId, const LaneRequestOption *request,

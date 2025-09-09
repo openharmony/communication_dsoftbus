@@ -1015,7 +1015,7 @@ HWTEST_F(AdapterDsoftbusSocketTest, SoftBusSocketAccept001, TestSize.Level0)
     int32_t socketFd = -1;
 
     ClientConnect(&socketFd);
-    EXPECT_TRUE(socketFd != -1);
+    EXPECT_TRUE(socketFd != SOFTBUS_ADAPTER_ERR);
 
     ClientExit(socketFd);
 }
@@ -1088,7 +1088,7 @@ HWTEST_F(AdapterDsoftbusSocketTest, SoftBusSocketConnect001, TestSize.Level0)
     int32_t socketFd = -1;
 
     ClientConnect(&socketFd);
-    EXPECT_TRUE(socketFd != -1);
+    EXPECT_TRUE(socketFd != SOFTBUS_ADAPTER_ERR);
 
     ClientExit(socketFd);
 }

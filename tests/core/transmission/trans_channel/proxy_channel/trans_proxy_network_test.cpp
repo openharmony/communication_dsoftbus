@@ -174,7 +174,7 @@ HWTEST_F(TransProxyNetworkTest, TransRegisterListenerTest001, TestSize.Level1)
     NotifyNetworkingChannelClosed(TEST_SESSION_NAME, 1);
     EXPECT_EQ(true, TransProxyNetworkTest::m_channelClosedFlag);
     NotifyNetworkingMsgReceived(TEST_SESSION_NAME, 1, nullptr, 0);
-    EXPECT_EQ(true, TransProxyNetworkTest::m_messageReceivedFlag);
+    EXPECT_EQ(false, TransProxyNetworkTest::m_messageReceivedFlag);
 }
 
 /**

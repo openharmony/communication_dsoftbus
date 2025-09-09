@@ -70,7 +70,10 @@ MATCHER_P2(TransValidParamArrayMatcher, inExtra, validSize, "trans valid param a
     params += SOFTBUS_ASSIGNER_SIZE; // Skip softbus params, they are matched by SoftbusParamArrayMatcher
     auto extra = static_cast<TransEventExtra>(inExtra);
     int32_t index = 0;
-    MatchTransEventNameTypeExtraInt32Param(params, index, extra.result);
+    MatchTransEventNameTypeExtraUint8Param(params, index, extra.talkieFreq);
+    MatchTransEventNameTypeExtraUint8Param(params, ++index, extra.talkieType);
+    MatchTransEventNameTypeExtraUint8Param(params, ++index, extra.talkieLevel);
+    MatchTransEventNameTypeExtraInt32Param(params, ++index, extra.result);
     MatchTransEventNameTypeExtraInt32Param(params, ++index, extra.errcode);
     MatchTransEventNameTypeExtraStrParamAnony(params, ++index, extra.socketName);
     MatchTransEventNameTypeExtraInt32Param(params, ++index, extra.dataType);
@@ -88,6 +91,12 @@ MATCHER_P2(TransValidParamArrayMatcher, inExtra, validSize, "trans valid param a
     MatchTransEventNameTypeExtraInt32Param(params, ++index, extra.channelScore);
     MatchTransEventNameTypeExtraInt32Param(params, ++index, extra.peerChannelId);
     MatchTransEventNameTypeExtraInt32Param(params, ++index, extra.btFlow);
+    MatchTransEventNameTypeExtraInt32Param(params, ++index, extra.pagingId);
+    MatchTransEventNameTypeExtraInt32Param(params, ++index, extra.callPid);
+    MatchTransEventNameTypeExtraInt32Param(params, ++index, extra.saId);
+    MatchTransEventNameTypeExtraInt32Param(params, ++index, extra.businessFlag);
+    MatchTransEventNameTypeExtraStrParam(params, ++index, extra.groupId);
+    MatchTransEventNameTypeExtraStrParam(params, ++index, extra.subGroupId);
     MatchTransEventNameTypeExtraStrParamAnony(params, ++index, extra.peerNetworkId);
     MatchTransEventNameTypeExtraStrParamAnony(params, ++index, extra.peerUdid);
     MatchTransEventNameTypeExtraStrParam(params, ++index, extra.peerDevVer);
@@ -95,6 +104,8 @@ MATCHER_P2(TransValidParamArrayMatcher, inExtra, validSize, "trans valid param a
     MatchTransEventNameTypeExtraStrParam(params, ++index, extra.callerPkg);
     MatchTransEventNameTypeExtraStrParam(params, ++index, extra.calleePkg);
     MatchTransEventNameTypeExtraStrParam(params, ++index, extra.firstTokenName);
+    MatchTransEventNameTypeExtraStrParamAnony(params, ++index, extra.callerAccountId);
+    MatchTransEventNameTypeExtraStrParamAnony(params, ++index, extra.calleeAccountId);
     MatchTransEventNameTypeExtraInt64Param(params, ++index, extra.firstTokenId);
     MatchTransEventNameTypeExtraInt32Param(params, ++index, extra.firstTokenType);
     MatchTransEventNameTypeExtraStrParam(params, ++index, extra.trafficStats);
@@ -131,14 +142,14 @@ MATCHER_P2(TransInvalidParamArrayMatcher, inExtra, validSize, "trans invalid par
     const auto *params = static_cast<const HiSysEventParam *>(arg);
     params += SOFTBUS_ASSIGNER_SIZE; // Skip softbus params, they are matched by SoftbusParamArrayMatcher
     auto extra = static_cast<TransEventExtra>(inExtra);
-    int32_t index = 0;
+    int32_t index = 3;
     MatchTransEventNameTypeExtraInt32Param(params, index, ((extra.result < 0) ? (-extra.result) : extra.result));
     MatchTransEventNameTypeExtraInt32Param(params, ++index, ((extra.errcode < 0) ? (-extra.errcode) : extra.errcode));
-    int32_t num = 25;
+    int32_t num = 36;
     EXPECT_STREQ(params[++index].name, TRANS_ASSIGNERS[num].name);
     EXPECT_EQ(params[index].t, TRANS_ASSIGNERS[num].type);
     EXPECT_EQ(params[index].v.i64, extra.firstTokenId);
-    num = 36;
+    num = 47;
     EXPECT_STREQ(params[++index].name, TRANS_ASSIGNERS[num].name);
     EXPECT_EQ(params[index].t, TRANS_ASSIGNERS[num].type);
     EXPECT_EQ(params[index].v.i64, extra.localStaChload);

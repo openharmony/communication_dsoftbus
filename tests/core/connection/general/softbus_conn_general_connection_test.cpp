@@ -53,9 +53,10 @@ void GeneralConnectionTest::SetUpTestCase(void) { }
 
 void GeneralConnectionTest::TearDownTestCase(void) { }
 
-void GeneralConnectionTest::SetUp(void) { }
-
-void GeneralConnectionTest::TearDown(void) { }
+void GeneralConnectionTest::TearDown(void)
+{
+    ConnServerDeinit();
+}
 
 static OutData *PackReceiveData(const uint8_t *data, uint32_t dataLen, uint32_t localId, uint32_t peerId)
 {
@@ -126,7 +127,7 @@ static ConnPostData *PackInnerMsg(GeneralConnectionInfo *info, GeneralConnection
 
 static bool GetConnectCallbackFlag()
 {
-    if (g_connectCallbackFlag == true) {
+    if (g_connectCallbackFlag) {
         g_connectCallbackFlag = false;
         return true;
     }
@@ -145,7 +146,7 @@ static int32_t GetFailCallbackReason()
 
 static bool GetRecvDataFlag()
 {
-    if (g_recvDataFlag == true) {
+    if (g_recvDataFlag) {
         g_recvDataFlag = false;
         return true;
     }
@@ -212,47 +213,12 @@ T GetConnGeneralRandomData()
     return objetct;
 }
 
-/*
-* @tc.name: TestInit
-* @tc.desc: test init general connection
-* @tc.type: FUNC
-* @tc.require:
-*/
-HWTEST_F(GeneralConnectionTest, TestInit, TestSize.Level1)
+void GeneralConnectionTest::SetUp(void)
 {
-    CONN_LOGI(CONN_BLE, "test init start");
-    const char *pkgName = "testName";
-    ClearGeneralConnection(pkgName, 0);
-    int32_t ret = InitGeneralConnection();
-    EXPECT_EQ(ret, SOFTBUS_NO_INIT);
-
-    ret = InitGeneralConnection();
-    EXPECT_EQ(ret, SOFTBUS_NO_INIT);
-    ConnUnSetConnectCallback(MODULE_BLE_GENERAL);
-
     LooperInit();
     SoftbusConfigInit();
-    ret = ConnServerInit();
+    auto ret = ConnServerInit();
     EXPECT_EQ(ret, SOFTBUS_OK);
-    ClearGeneralConnection(pkgName, 0);
-    GeneralConnectionManager *manager = GetGeneralConnectionManager();
-    EXPECT_NE(manager, nullptr);
-    GeneralConnectionParam param = {0};
-    manager->closeServer(&param);
-    g_ConnectCallback = GeneralConnectionInterfaceMock::GetConnectCallbackMock();
-    ASSERT_NE(g_ConnectCallback, nullptr);
-    CONN_LOGI(CONN_BLE, "test init end");
-}
-
-/*
-* @tc.name: TestRegisterListener
-* @tc.desc: test register listener
-* @tc.type: FUNC
-* @tc.require:AR000GIRGE
-*/
-HWTEST_F(GeneralConnectionTest, TestRegisterListener, TestSize.Level1)
-{
-    CONN_LOGI(CONN_BLE, "test register listener start");
 
     GeneralConnectionManager *manager = GetGeneralConnectionManager();
     EXPECT_NE(manager, nullptr);
@@ -265,10 +231,30 @@ HWTEST_F(GeneralConnectionTest, TestRegisterListener, TestSize.Level1)
         .onConnectionDisconnected = ConnectionDisconnected,
     };
 
-    int32_t ret = manager->registerListener(&listener);
+    ret = manager->registerListener(&listener);
     EXPECT_EQ(ret, SOFTBUS_OK);
+}
 
-    CONN_LOGI(CONN_BLE, "test register listener end");
+/*
+* @tc.name: TestInit
+* @tc.desc: test init general connection
+* @tc.type: FUNC
+* @tc.require:
+*/
+HWTEST_F(GeneralConnectionTest, TestInit, TestSize.Level1)
+{
+    CONN_LOGI(CONN_BLE, "test init start");
+    const char *pkgName = "testName";
+    ClearGeneralConnection(pkgName, 0);
+    ConnUnSetConnectCallback(MODULE_BLE_GENERAL);
+    ClearGeneralConnection(pkgName, 0);
+    GeneralConnectionManager *manager = GetGeneralConnectionManager();
+    EXPECT_NE(manager, nullptr);
+    GeneralConnectionParam param = {0};
+    manager->closeServer(&param);
+    g_ConnectCallback = GeneralConnectionInterfaceMock::GetConnectCallbackMock();
+    ASSERT_NE(g_ConnectCallback, nullptr);
+    CONN_LOGI(CONN_BLE, "test init end");
 }
 
 /*
@@ -291,7 +277,7 @@ HWTEST_F(GeneralConnectionTest, TestCreateServer, TestSize.Level1)
     ret = strcpy_s(param.pkgName, PKG_NAME_SIZE_MAX, pkgName);
     EXPECT_EQ(ret, EOK);
 
-    ret = strcpy_s(param.bundleName, BUNDLE_NAME_MAX, "testBundleName");
+    ret = strcpy_s(param.bundleName, BUNDLE_NAME_MAX, "testBundleNameServer");
     EXPECT_EQ(ret, EOK);
 
     ret = manager->createServer(&param);
@@ -338,7 +324,7 @@ HWTEST_F(GeneralConnectionTest, TestConnect, TestSize.Level1)
     int32_t ret = strcpy_s(param.pkgName, PKG_NAME_SIZE_MAX, pkgName);
     EXPECT_EQ(ret, EOK);
     
-    ret = strcpy_s(param.bundleName, BUNDLE_NAME_MAX, "testBundleName");
+    ret = strcpy_s(param.bundleName, BUNDLE_NAME_MAX, "testBundleNameConnect");
     EXPECT_EQ(ret, EOK);
     const char *name = "test";
     const char *addr = "11:22:33:44:55:66";
@@ -363,6 +349,7 @@ HWTEST_F(GeneralConnectionTest, TestConnect, TestSize.Level1)
     EXPECT_CALL(mock, BleConnectDeviceMock).WillRepeatedly(Return(SOFTBUS_STRCPY_ERR));
     ret = manager->connect(&param, addr);
     EXPECT_EQ(ret, SOFTBUS_CONN_GENERAL_CONNECT_FAILED);
+    manager->cleanupGeneralConnection(param.pkgName, param.pid);
     CONN_LOGI(CONN_BLE, "test connect end");
 }
 
@@ -379,7 +366,7 @@ HWTEST_F(GeneralConnectionTest, TestSend, TestSize.Level1)
     ASSERT_NE(manager, nullptr);
     GeneralConnectionParam param = {
         .pkgName = "testPkgName1",
-        .bundleName = "testBundleName",
+        .bundleName = "testBundleNameSend",
         .name = "test",
     };
     const char *addr = "11:22:33:44:55:66";
@@ -435,13 +422,32 @@ HWTEST_F(GeneralConnectionTest, TestRecv, TestSize.Level1)
     CONN_LOGI(CONN_BLE, "test recv start");
     GeneralConnectionManager *manager = GetGeneralConnectionManager();
     EXPECT_NE(manager, nullptr);
+    GeneralConnectionParam param = {
+        .pkgName = "testPkgNameRecv",
+        .bundleName = "testBundleNameRecv",
+        .name = "testRecv",
+    };
+    const char *addr = "22:22:33:44:55:66";
+    param.pid = 0;
+    NiceMock<GeneralConnectionInterfaceMock> mock;
+    EXPECT_CALL(mock, BleConnectDeviceMock).WillRepeatedly(Return(SOFTBUS_OK));
+    auto handle = manager->connect(&param, addr);
+    EXPECT_EQ(handle > 0, true);
+
+    auto connectionId = (CONNECT_BLE << CONNECT_TYPE_SHIFT) + 2;
+    ConnectResult *connectResult = GeneralConnectionInterfaceMock::GetConnectResultMock();
+    uint32_t requestId = 69;
+    ConnectionInfo infos = { 0 };
+    connectResult->OnConnectSuccessed(requestId, connectionId, &infos);
+
     uint8_t *data = (uint8_t *)malloc(sizeof(uint8_t));
     EXPECT_NE(data, nullptr);
     g_ConnectCallback->OnDataReceived(0, MODULE_BLE_CONN, 0, (char *)data, GENERAL_CONNECTION_HEADER_SIZE + 1);
     EXPECT_EQ(GetRecvDataFlag(), false);
-    OutData *dataRecv = PackReceiveData(data, sizeof(uint8_t), 0, g_handle);
+    OutData *dataRecv = PackReceiveData(data, sizeof(uint8_t), 0, handle);
     EXPECT_NE(dataRecv, nullptr);
-    g_ConnectCallback->OnDataReceived(g_ConnectionId, MODULE_BLE_GENERAL, 0, (char *)dataRecv->data, dataRecv->dataLen);
+    connectionId = 0;
+    g_ConnectCallback->OnDataReceived(connectionId, MODULE_BLE_GENERAL, 0, (char *)dataRecv->data, dataRecv->dataLen);
     EXPECT_EQ(GetRecvDataFlag(), true);
     // not target connId
     g_ConnectCallback->OnDataReceived(0, MODULE_BLE_GENERAL, 0, (char *)dataRecv->data, dataRecv->dataLen);
@@ -490,7 +496,7 @@ HWTEST_F(GeneralConnectionTest, TestOnConnectDisconnected, TestSize.Level1)
     const char *pkgName = "testPkgName1";
     int32_t ret = strcpy_s(param.pkgName, PKG_NAME_SIZE_MAX, pkgName);
     EXPECT_EQ(ret, EOK);
-    ret = strcpy_s(param.bundleName, BUNDLE_NAME_MAX, "testBundleName1");
+    ret = strcpy_s(param.bundleName, BUNDLE_NAME_MAX, "testBundleNameDisconnected");
     EXPECT_EQ(ret, EOK);
     ret = strcpy_s(param.name, GENERAL_NAME_LEN, "test1");
     EXPECT_EQ(ret, EOK);
@@ -502,7 +508,7 @@ HWTEST_F(GeneralConnectionTest, TestOnConnectDisconnected, TestSize.Level1)
     EXPECT_EQ(handle > 0, true);
 
     ConnectResult *connectResult = GeneralConnectionInterfaceMock::GetConnectResultMock();
-    uint32_t requestId = 13;
+    uint32_t requestId = 14;
     ConnectionInfo infos = {0};
     uint32_t connectionId = (CONNECT_BLE << CONNECT_TYPE_SHIFT) + 1;
     connectResult->OnConnectSuccessed(requestId, connectionId, &infos);

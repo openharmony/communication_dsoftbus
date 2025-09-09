@@ -75,6 +75,8 @@
 #define DEFAULT_AUTH_MAX_MESSAGE_LEN (4 * 1024)
 #define DEFAULT_PROXY_MAX_BYTES_LEN (4 * 1024 * 1024)
 #define DEFAULT_PROXY_MAX_MESSAGE_LEN (4 * 1024)
+#define DEFAULT_D2D_MAX_VOICE_LEN (UINT16_MAX)
+#define DEFAULT_D2D_MAX_MESSAGE_LEN (4 * 1024)
 #define DEFAULT_IS_SUPPORT_TCP_PROXY 1
 #define DEFAULT_BLE_MAC_AUTO_REFRESH 1
 #elif defined SOFTBUS_LITEOS_A
@@ -86,6 +88,8 @@
 #define DEFAULT_AUTH_MAX_MESSAGE_LEN (1 * 1024)
 #define DEFAULT_PROXY_MAX_BYTES_LEN (4 * 1024)
 #define DEFAULT_PROXY_MAX_MESSAGE_LEN (1 * 1024)
+#define DEFAULT_D2D_MAX_VOICE_LEN (UINT16_MAX)
+#define DEFAULT_D2D_MAX_MESSAGE_LEN (4 * 1024)
 #define DEFAULT_IS_SUPPORT_TCP_PROXY 1
 #define DEFAULT_BLE_MAC_AUTO_REFRESH 1
 #else
@@ -97,6 +101,8 @@
 #define DEFAULT_AUTH_MAX_MESSAGE_LEN (1 * 1024)
 #define DEFAULT_PROXY_MAX_BYTES_LEN (2 * 1024)
 #define DEFAULT_PROXY_MAX_MESSAGE_LEN (1 * 1024)
+#define DEFAULT_D2D_MAX_VOICE_LEN (UINT16_MAX)
+#define DEFAULT_D2D_MAX_MESSAGE_LEN (4 * 1024)
 #define DEFAULT_IS_SUPPORT_TCP_PROXY 1
 #define DEFAULT_BLE_MAC_AUTO_REFRESH 0
 #endif
@@ -171,6 +177,8 @@ typedef struct {
     int32_t maxAuthMessageLen;
     uint32_t maxProxyBytesLen;
     uint32_t maxProxyMessageLen;
+    uint32_t maxD2dVoiceLen;
+    uint32_t maxD2dMessageLen;
 } TransConfigItem;
 
 static TransConfigItem g_tranConfig = {0};
@@ -367,6 +375,16 @@ ConfigVal g_configItems[SOFTBUS_CONFIG_TYPE_MAX] = {
         (unsigned char *)&(g_config.staticCapability),
         sizeof(g_config.staticCapability)
     },
+    {
+        SOFTBUS_INT_D2D_MAX_VOICE_LENGTH,
+        (unsigned char *)&(g_tranConfig.maxD2dVoiceLen),
+        sizeof(g_tranConfig.maxD2dVoiceLen)
+    },
+    {
+        SOFTBUS_INT_D2D_MAX_MESSAGE_LENGTH,
+        (unsigned char *)&(g_tranConfig.maxD2dMessageLen),
+        sizeof(g_tranConfig.maxD2dMessageLen)
+    },
 };
 
 int SoftbusSetConfig(ConfigType type, const unsigned char *val, uint32_t len)
@@ -408,6 +426,8 @@ static void SoftbusConfigSetTransDefaultVal(void)
     g_tranConfig.maxAuthMessageLen = DEFAULT_AUTH_MAX_MESSAGE_LEN;
     g_tranConfig.maxProxyBytesLen = DEFAULT_PROXY_MAX_BYTES_LEN;
     g_tranConfig.maxProxyMessageLen = DEFAULT_PROXY_MAX_MESSAGE_LEN;
+    g_tranConfig.maxD2dVoiceLen = DEFAULT_D2D_MAX_VOICE_LEN;
+    g_tranConfig.maxD2dMessageLen = DEFAULT_D2D_MAX_MESSAGE_LEN;
 }
 
 static void SoftbusConfigSetDefaultVal(void)

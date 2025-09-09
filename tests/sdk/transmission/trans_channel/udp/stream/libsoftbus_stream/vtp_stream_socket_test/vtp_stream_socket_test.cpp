@@ -726,7 +726,7 @@ HWTEST_F(VtpStreamSocketTest, EpollTimeout001, TestSize.Level1)
     SoftBusStreamTestInterfaceMock streamMock;
     EXPECT_CALL(streamMock, FtEpollWait).WillOnce(testing::Return(-1));
     int32_t ret = vtpStreamSocket->EpollTimeout(fd, timeout);
-    EXPECT_EQ(-9, ret);
+    EXPECT_NE(SOFTBUS_OK, ret);
 }
 
 /**

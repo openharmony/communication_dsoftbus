@@ -31,6 +31,8 @@ public:
     {
         isInited_ = false;
         (void)TransProxyManagerInit(TransServerGetChannelCb());
+        (void)TransAuthWithParaReqLanePendingInit();
+        TransAuthWithParaReqLanePendingDeinit();
         isInited_ = true;
     }
 
@@ -48,18 +50,6 @@ public:
 private:
     volatile bool isInited_;
 };
-
-void TransAuthWithParaReqLanePendingInitTest(FuzzedDataProvider &provider)
-{
-    (void)provider;
-    (void)TransAuthWithParaReqLanePendingInit();
-}
-
-void TransAuthWithParaReqLanePendingDeinitTest(FuzzedDataProvider &provider)
-{
-    (void)provider;
-    TransAuthWithParaReqLanePendingDeinit();
-}
 
 void FillTransAuthWithParaNodeTest(FuzzedDataProvider &provider)
 {
@@ -124,13 +114,14 @@ extern "C" int32_t LLVMFuzzerTestOneInput(const uint8_t *data, size_t size)
 
     /* Run your code on data */
     FuzzedDataProvider provider(data, size);
-    OHOS::TransAuthWithParaReqLanePendingInitTest(provider);
-    OHOS::TransAuthWithParaReqLanePendingDeinitTest(provider);
+    OHOS::TransUpdateAuthWithParaLaneConnInfoTest(provider);
+    OHOS::TransAuthWithParaDelLaneReqByIdTest(provider);
+    OHOS::TransAuthWithParaGetLaneReqByLaneReqIdTest(provider);
     OHOS::FillTransAuthWithParaNodeTest(provider);
     OHOS::TransAuthWithParaAddLaneReqToListTest(provider);
-    OHOS::TransAuthWithParaDelLaneReqByIdTest(provider);
     OHOS::TransUpdateAuthWithParaLaneConnInfoTest(provider);
     OHOS::TransAuthWithParaGetLaneReqByLaneReqIdTest(provider);
+    OHOS::TransAuthWithParaDelLaneReqByIdTest(provider);
 
     return 0;
 }
