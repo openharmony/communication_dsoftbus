@@ -170,7 +170,7 @@ static int32_t TransGetLocalConfig(int32_t channelType, int32_t businessType, ui
         TRANS_LOGE(TRANS_CTRL, "Invalid channelType=%{public}d, businessType=%{public}d", channelType, businessType);
         return SOFTBUS_INVALID_PARAM;
     }
-    uint32_t maxLen;
+    uint32_t maxLen = 0;
     if (SoftbusGetConfig(configType, (unsigned char *)&maxLen, sizeof(maxLen)) != SOFTBUS_OK) {
         TRANS_LOGE(TRANS_CTRL, "get fail configType=%{public}d", configType);
         return SOFTBUS_GET_CONFIG_VAL_ERR;
@@ -198,7 +198,7 @@ int32_t TransPagingUpdateDataConfig(AppInfo *info)
             TRANS_LOGE(TRANS_CTRL, "get config failed, configType=%{public}d", configType);
             return SOFTBUS_GET_CONFIG_VAL_ERR;
         }
-        TRANS_LOGI(TRANS_CTRL, "update local config success, channelId=%{public}" PRId64 ", businessType=%{public}u",
+        TRANS_LOGI(TRANS_CTRL, "update local config success, channelId=%{public}" PRId64 ", dataConfig=%{public}u",
             info->myData.channelId, info->myData.dataConfig);
         return SOFTBUS_OK;
     }
@@ -206,7 +206,7 @@ int32_t TransPagingUpdateDataConfig(AppInfo *info)
         TRANS_LOGE(TRANS_CTRL, "get local config failed, businessType=%{public}d", info->businessType);
         return SOFTBUS_GET_CONFIG_VAL_ERR;
     }
-    TRANS_LOGI(TRANS_CTRL, "update local config success, channelId=%{public}" PRId64 ", businessType=%{public}u",
+    TRANS_LOGI(TRANS_CTRL, "update local config success, channelId=%{public}" PRId64 ", dataConfig=%{public}u",
         info->myData.channelId, info->myData.dataConfig);
     return SOFTBUS_OK;
 }
@@ -240,15 +240,15 @@ int32_t TransPagingUpdatePagingChannelInfo(ProxyChannelInfo *info)
                 TRANS_LOGE(TRANS_SVC, "memcpy_s peerdata failed");
                 return SOFTBUS_MEM_ERR;
             }
-            if (memcpy_s(info, sizeof(ProxyChannelInfo), item, sizeof(ProxyChannelInfo)) != EOK) {
-                (void)SoftBusMutexUnlock(&g_proxyChannelList->lock);
-                TRANS_LOGE(TRANS_SVC, "memcpy_s failed");
-                return SOFTBUS_MEM_ERR;
-            }
             if (TransPagingUpdateDataConfig(&item->appInfo) != SOFTBUS_OK) {
                 (void)SoftBusMutexUnlock(&g_proxyChannelList->lock);
                 TRANS_LOGE(TRANS_SVC, "update data config failed");
                 return SOFTBUS_GET_CONFIG_VAL_ERR;
+            }
+            if (memcpy_s(info, sizeof(ProxyChannelInfo), item, sizeof(ProxyChannelInfo)) != EOK) {
+                (void)SoftBusMutexUnlock(&g_proxyChannelList->lock);
+                TRANS_LOGE(TRANS_SVC, "memcpy_s failed");
+                return SOFTBUS_MEM_ERR;
             }
             (void)SoftBusMutexUnlock(&g_proxyChannelList->lock);
             return SOFTBUS_OK;
