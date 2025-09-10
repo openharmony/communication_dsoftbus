@@ -24,6 +24,7 @@
 
 #include "channel/auth_negotiate_channel.h"
 #include "data/link_manager.h"
+#include "data/interface_manager.h"
 #include "utils/wifi_direct_anonymous.h"
 #include "wifi_direct_init.h"
 #include "wifi_direct_ip_manager.h"
@@ -43,7 +44,6 @@ InnerLink::InnerLink(LinkType type, const std::string &remoteDeviceId)
 InnerLink::~InnerLink()
 {
     auto listenerModuleId = GetListenerModule();
-    auto customPort = GetLocalCustomPort();
     bool hasAnotherUsed = false;
     LinkManager::GetInstance().ForEach([&hasAnotherUsed, this](InnerLink &innerLink) {
         if (innerLink.GetLinkType() == InnerLink::LinkType::P2P && innerLink.GetLocalIpv4() == this->GetLocalIpv4() &&
@@ -53,9 +53,9 @@ InnerLink::~InnerLink()
         return false;
     });
     CONN_LOGI(CONN_WIFI_DIRECT, "hasAnotherUsed=%{public}d", hasAnotherUsed);
-    if (customPort > 0) {
+    if (GetLinkType() == LinkType::HML) {
         CONN_LOGI(CONN_WIFI_DIRECT, "stop custom listening");
-        StopCustomListen(customPort);
+        StopCustomListen();
     }
     if (listenerModuleId != UNUSE_BUTT) {
         CONN_LOGI(CONN_WIFI_DIRECT, "stop auth listening");
@@ -300,20 +300,29 @@ int32_t InnerLink::GetRemoteCustomPort() const
     return Get(InnerLinKey::REMOTE_CUSTOM_PORT, 0);
 }
 
-void InnerLink::StopCustomListen(int32_t localCustomPort)
+void InnerLink::StopCustomListen()
 {
-    CONN_CHECK_AND_RETURN_LOGE(localCustomPort > 0, CONN_WIFI_DIRECT, "loacl custom port is zero");
-    bool hasMoreLocalCustomPort = false;
-    LinkManager::GetInstance().ForEach([&hasMoreLocalCustomPort] (InnerLink &link) {
-        if (link.GetLocalCustomPort() > 0) {
-            hasMoreLocalCustomPort = true;
+    bool hasHml = false;
+    auto localCustomPort = 0;
+    LinkManager::GetInstance().ForEach([&hasHml] (InnerLink &link) {
+        if (link.GetLinkType() == LinkType::HML) {
+            hasHml = true;
             return true;
         }
         return false;
     });
-    if (!hasMoreLocalCustomPort) {
+    InterfaceManager::GetInstance().ReadInterface(
+        InterfaceInfo::InterfaceType::HML, [&localCustomPort](const InterfaceInfo &info) {
+            localCustomPort = info.GetLocalCustomPort();
+            return SOFTBUS_OK;
+        });
+    if (!hasHml && localCustomPort > 0) {
         CONN_LOGI(CONN_WIFI_DIRECT, "localCustomPort=%{public}d, stop custom listening", localCustomPort);
         AuthNegotiateChannel::StopCustomListening();
+        InterfaceManager::GetInstance().UpdateInterface(InterfaceInfo::HML, [] (InterfaceInfo &info) {
+            info.SetLocalCustomPort(0);
+            return SOFTBUS_OK;
+        });
     }
 }
 
