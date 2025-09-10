@@ -212,6 +212,10 @@ int32_t InitDecisionCenter(void)
         /* optional case, ignore result */
         LNN_LOGW(LNN_LANE, "init virtual link err");
     }
+    if (LnnInitDecisionCenterV2Packed() != SOFTBUS_OK) {
+        /* optional case, ignore result */
+        LNN_LOGW(LNN_LANE, "init decision center err");
+    }
     LNN_LOGD(LNN_INIT, "init ok");
     return SOFTBUS_OK;
 }
@@ -224,6 +228,7 @@ void DeinitDecisionCenter(void)
         g_exceptionConnMgr.connections = NULL;
     }
     LnnVirtualLinkDeinitPacked();
+    LnnDeinitDecisionCenterV2Packed();
     if (UnregistAuthTransListenerPacked() != SOFTBUS_OK) {
         LNN_LOGE(LNN_INIT, "unregist auth trans failed");
     }

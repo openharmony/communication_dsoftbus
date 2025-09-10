@@ -74,6 +74,7 @@ public:
     virtual void LnnUnregBleRangeCb(void) = 0;
     virtual void LnnUnregSleRangeCbPacked(void) = 0;
     virtual int32_t ClientOnRangeResult(const char *pkgName, int32_t pid, const RangeResultInnerInfo *rangeInfo) = 0;
+    virtual void SdMgrDeathCallbackPacked(const char *pkgName);
 };
 class BusCenterIpcInterfaceMock : public BusCenterIpcInterface {
 public:
@@ -113,6 +114,7 @@ public:
     MOCK_METHOD0(LnnUnregBleRangeCb, void(void));
     MOCK_METHOD0(LnnUnregSleRangeCbPacked, void(void));
     MOCK_METHOD3(ClientOnRangeResult, int32_t(const char *pkgName, int32_t pid, const RangeResultInnerInfo *rangeInfo));
+    MOCK_METHOD1(SdMgrDeathCallbackPacked, void(const char *pkgName));
 };
 } // namespace OHOS
 #endif // AUTH_CONNECTION_MOCK_H

@@ -279,6 +279,9 @@ typedef void (*CheckNeedCloudSyncOfflineFunc)(DiscoveryType type);
 typedef int32_t (*LnnVirtualLinkInitFunc)(void);
 typedef void (*LnnVirtualLinkDeinitFunc)(void);
 typedef int32_t (*DcTriggerVirtualLinkFunc)(const char *peerNetworkId);
+typedef int32_t (*LnnInitDecisionCenterV2Func)(void);
+typedef int32_t (*LnnDeinitDecisionCenterV2Func)(void);
+typedef int32_t (*SdMgrDeathCallbackFunc)(const char *pkgName);
 
 typedef struct TagLnnEnhanceFuncList {
     // time_sync
@@ -508,6 +511,9 @@ typedef struct TagLnnEnhanceFuncList {
     LnnVirtualLinkInitFunc lnnVirtualLinkInit;
     LnnVirtualLinkDeinitFunc lnnVirtualLinkDeinit;
     DcTriggerVirtualLinkFunc dcTriggerVirtualLink;
+    LnnInitDecisionCenterV2Func lnnInitDecisionCenterV2;
+    LnnDeinitDecisionCenterV2Func lnnDeinitDecisionCenterV2;
+    SdMgrDeathCallbackFunc sdMgrDeathCallback;
 } LnnEnhanceFuncList;
 
 LnnEnhanceFuncList *LnnEnhanceFuncListGet(void);
