@@ -1404,9 +1404,8 @@ int32_t TransSetListenerState(int32_t channelId, int32_t type, bool isEnable)
 
 static void ServerDeleteChannelByPid(pid_t callingPid)
 {
-    TRANS_LOGE(TRANS_SVC, "[br_proxy] enter");
     if (g_serverList == NULL) {
-        TRANS_LOGE(TRANS_SVC, "[br_proxy] not init");
+        TRANS_LOGD(TRANS_SVC, "[br_proxy] not init");
         return;
     }
     if (SoftBusMutexLock(&(g_serverList->lock)) != SOFTBUS_OK) {

@@ -51,7 +51,7 @@ static sptr<IRemoteObject> GetSystemAbility()
     }
     int32_t err = samgr->SendRequest(g_getSystemAbilityId, data, reply, option);
     if (err != SOFTBUS_OK) {
-        TRANS_LOGE(TRANS_SDK, "Get GetSystemAbility failed!");
+        TRANS_LOGD(TRANS_SDK, "Get GetSystemAbility failed!");
         return nullptr;
     }
     return reply.ReadRemoteObject();
