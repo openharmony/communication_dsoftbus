@@ -1672,3 +1672,42 @@ void CheckNeedCloudSyncOfflinePacked(DiscoveryType type)
     }
     pfnLnnEnhanceFuncList->checkNeedCloudSyncOffline(type);
 }
+
+int32_t LnnInitDecisionCenterV2Packed(void)
+{
+    LnnEnhanceFuncList *pfnLnnEnhanceFuncList = LnnEnhanceFuncListGet();
+    if (pfnLnnEnhanceFuncList == NULL) {
+        return SOFTBUS_OK;
+    }
+    if (LnnCheckFuncPointer((void *)pfnLnnEnhanceFuncList->lnnInitDecisionCenterV2) != SOFTBUS_OK) {
+        LNN_LOGI(LNN_LANE, "init packed, func pointer is NULL");
+        return SOFTBUS_OK;
+    }
+    return pfnLnnEnhanceFuncList->lnnInitDecisionCenterV2();
+}
+
+void LnnDeinitDecisionCenterV2Packed(void)
+{
+    LnnEnhanceFuncList *pfnLnnEnhanceFuncList = LnnEnhanceFuncListGet();
+    if (pfnLnnEnhanceFuncList == NULL) {
+        return;
+    }
+    if (LnnCheckFuncPointer((void *)pfnLnnEnhanceFuncList->lnnDeinitDecisionCenterV2) != SOFTBUS_OK) {
+        LNN_LOGI(LNN_LANE, "init packed, func pointer is NULL");
+        return;
+    }
+    pfnLnnEnhanceFuncList->lnnDeinitDecisionCenterV2();
+}
+
+void SdMgrDeathCallbackPacked(const char *pkgName)
+{
+    LnnEnhanceFuncList *pfnLnnEnhanceFuncList = LnnEnhanceFuncListGet();
+    if (pfnLnnEnhanceFuncList == NULL) {
+        return;
+    }
+    if (LnnCheckFuncPointer((void *)pfnLnnEnhanceFuncList->sdMgrDeathCallback) != SOFTBUS_OK) {
+        LNN_LOGI(LNN_LANE, "init packed, func pointer is NULL");
+        return;
+    }
+    pfnLnnEnhanceFuncList->sdMgrDeathCallback(pkgName);
+}
