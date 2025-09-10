@@ -54,6 +54,7 @@ enum class InterfaceInfoKey {
     COEXIST_RULE = 27,
     LINK_MODE = 28,
     LISTEN_MODULE = 29,
+    LOCAL_CUSTOM_PORT = 30,
 };
 
 class InterfaceInfo : public Serializable, public InfoContainer<InterfaceInfoKey> {
@@ -135,6 +136,9 @@ public:
 
     void IncreaseRefCount();
     void DecreaseRefCount();
+
+    void SetLocalCustomPort(int32_t value);
+    int32_t GetLocalCustomPort() const;
 };
 } // namespace OHOS::SoftBus
 #endif
