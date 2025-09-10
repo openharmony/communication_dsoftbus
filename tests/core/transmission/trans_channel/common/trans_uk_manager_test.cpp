@@ -129,8 +129,8 @@ HWTEST_F(TransUkManagerTest, UkGetUkPolicyTest001, TestSize.Level1)
 
     AppInfo appInfo;
     (void)memset_s(&appInfo, sizeof(AppInfo), 0, sizeof(AppInfo));
-    NiceMock<TransLaneCommonTestInterfaceMock> TransLaneCommonMock;
-    EXPECT_CALL(TransLaneCommonMock, LnnGetRemoteNodeInfoById).WillRepeatedly(Return(SOFTBUS_OK));
+    NiceMock<TransLaneCommonTestInterfaceMock> transLaneCommonMock;
+    EXPECT_CALL(transLaneCommonMock, LnnGetRemoteNodeInfoById).WillRepeatedly(Return(SOFTBUS_OK));
     char sessionName[SESSION_NAME_SIZE_MAX] = "testSessionName";
     int32_t ret = GetUkPolicy(&appInfo);
     EXPECT_EQ(NO_NEED_UK, ret);
@@ -246,8 +246,8 @@ HWTEST_F(TransUkManagerTest, GetLocalAccountUidByUserIdTest_005, TestSize.Level0
     uint32_t len = 10;
     int32_t userId = 1;
     char id[10] = "test";
-    NiceMock<TransLaneCommonTestInterfaceMock> TransLaneCommonMock;
-    EXPECT_CALL(TransLaneCommonMock, LnnGetLocalStrInfo).WillOnce(Return(SOFTBUS_STRCPY_ERR));
+    NiceMock<TransLaneCommonTestInterfaceMock> transLaneCommonMock;
+    EXPECT_CALL(transLaneCommonMock, LnnGetLocalStrInfo).WillOnce(Return(SOFTBUS_STRCPY_ERR));
     int32_t result = GetLocalAccountUidByUserId(id, len, &len, userId);
     EXPECT_EQ(result, SOFTBUS_INVALID_PARAM);
 }
@@ -265,8 +265,8 @@ HWTEST_F(TransUkManagerTest, GetLocalAccountUidByUserIdTest_006, TestSize.Level1
     uint32_t outLen = 0;
     int32_t testUserId = 1001;
 
-    NiceMock<TransLaneCommonTestInterfaceMock> TransLaneCommonMock;
-    EXPECT_CALL(TransLaneCommonMock, LnnGetLocalStrInfo).WillOnce(Return(SOFTBUS_NETWORK_NOT_FOUND));
+    NiceMock<TransLaneCommonTestInterfaceMock> transLaneCommonMock;
+    EXPECT_CALL(transLaneCommonMock, LnnGetLocalStrInfo).WillOnce(Return(SOFTBUS_NETWORK_NOT_FOUND));
 
     int32_t ret = GetLocalAccountUidByUserId(shortId, shortLen, &outLen, testUserId);
 
@@ -288,8 +288,8 @@ HWTEST_F(TransUkManagerTest, GetLocalAccountUidByUserIdTest_007, TestSize.Level1
     uint32_t outLen = 0;
     int32_t testUserId = 1002;
 
-    NiceMock<TransLaneCommonTestInterfaceMock> TransLaneCommonMock;
-    EXPECT_CALL(TransLaneCommonMock, LnnGetLocalStrInfo).WillOnce(Return(SOFTBUS_NETWORK_NOT_FOUND));
+    NiceMock<TransLaneCommonTestInterfaceMock> transLaneCommonMock;
+    EXPECT_CALL(transLaneCommonMock, LnnGetLocalStrInfo).WillOnce(Return(SOFTBUS_NETWORK_NOT_FOUND));
 
     int32_t ret = GetLocalAccountUidByUserId(badId, testLen, &outLen, testUserId);
 
@@ -321,8 +321,8 @@ HWTEST_F(TransUkManagerTest, FillHapSinkAclInfoToAppInfoTest_002, TestSize.Level
     (void)strcpy_s(appInfo->myData.sessionName, sizeof(appInfo->myData.sessionName), "test_session");
     (void)strcpy_s(appInfo->myData.accountId, sizeof(appInfo->myData.accountId), "test_account");
     appInfo->myData.userId = 1001;
-    NiceMock<TransLaneCommonTestInterfaceMock> TransLaneCommonMock;
-    EXPECT_CALL(TransLaneCommonMock, TransGetAclInfoBySessionName).WillOnce(Return(SOFTBUS_OK));
+    NiceMock<TransLaneCommonTestInterfaceMock> transLaneCommonMock;
+    EXPECT_CALL(transLaneCommonMock, TransGetAclInfoBySessionName).WillOnce(Return(SOFTBUS_OK));
 
     EXPECT_NO_FATAL_FAILURE(FillHapSinkAclInfoToAppInfo(appInfo));
     delete appInfo;
@@ -341,8 +341,8 @@ HWTEST_F(TransUkManagerTest, FillHapSinkAclInfoToAppInfoTest_003, TestSize.Level
     (void)strcpy_s(appInfo->myData.sessionName, sizeof(appInfo->myData.sessionName), "test_session");
     (void)strcpy_s(appInfo->myData.accountId, sizeof(appInfo->myData.accountId), "test_account");
     appInfo->myData.userId = 1001;
-    NiceMock<TransLaneCommonTestInterfaceMock> TransLaneCommonMock;
-    EXPECT_CALL(TransLaneCommonMock, TransGetAclInfoBySessionName).WillOnce(Return(SOFTBUS_NO_INIT));
+    NiceMock<TransLaneCommonTestInterfaceMock> transLaneCommonMock;
+    EXPECT_CALL(transLaneCommonMock, TransGetAclInfoBySessionName).WillOnce(Return(SOFTBUS_NO_INIT));
 
     EXPECT_NO_FATAL_FAILURE(FillHapSinkAclInfoToAppInfo(appInfo));
     delete appInfo;
@@ -423,14 +423,14 @@ HWTEST_F(TransUkManagerTest, UkDecryptAndAddSinkSessionKeyTest001, TestSize.Leve
     bool result = AddStringToJsonObject(json, "SESSION_KEY", (char *)"TestData");
     EXPECT_EQ(true, result);
 
-    NiceMock<TransLaneCommonTestInterfaceMock> TransLaneCommonMock;
-    EXPECT_CALL(TransLaneCommonMock, LnnGetRemoteStrInfo).WillRepeatedly(Return(SOFTBUS_OK));
-    EXPECT_CALL(TransLaneCommonMock, LnnGetLocalStrInfo).WillRepeatedly(Return(SOFTBUS_NOT_FIND));
+    NiceMock<TransLaneCommonTestInterfaceMock> transLaneCommonMock;
+    EXPECT_CALL(transLaneCommonMock, LnnGetRemoteStrInfo).WillRepeatedly(Return(SOFTBUS_OK));
+    EXPECT_CALL(transLaneCommonMock, LnnGetLocalStrInfo).WillRepeatedly(Return(SOFTBUS_NOT_FIND));
     ret = DecryptAndAddSinkSessionKey(json, &appInfo);
     EXPECT_NE(SOFTBUS_OK, ret);
 
-    EXPECT_CALL(TransLaneCommonMock, LnnGetRemoteStrInfo).WillRepeatedly(Return(SOFTBUS_OK));
-    EXPECT_CALL(TransLaneCommonMock, LnnGetLocalStrInfo).WillRepeatedly(Return(SOFTBUS_OK));
+    EXPECT_CALL(transLaneCommonMock, LnnGetRemoteStrInfo).WillRepeatedly(Return(SOFTBUS_OK));
+    EXPECT_CALL(transLaneCommonMock, LnnGetLocalStrInfo).WillRepeatedly(Return(SOFTBUS_OK));
     EXPECT_CALL(TransUkManagerMock, AuthFindUkIdByAclInfo).WillRepeatedly(Return(SOFTBUS_NOT_FIND));
     ret = DecryptAndAddSinkSessionKey(json, &appInfo);
     EXPECT_NE(SOFTBUS_OK, ret);
@@ -472,13 +472,13 @@ HWTEST_F(TransUkManagerTest, UkGetUserKeyIdByAclInfoTest001, TestSize.Level1)
     int ret = GetUserkeyIdByAClInfo(nullptr, 0, 0, &userKeyId, &callBack);
     EXPECT_EQ(SOFTBUS_INVALID_PARAM, ret);
 
-    NiceMock<TransLaneCommonTestInterfaceMock> TransLaneCommonMock;
-    EXPECT_CALL(TransLaneCommonMock, LnnGetRemoteStrInfo).WillRepeatedly(Return(SOFTBUS_NOT_FIND));
+    NiceMock<TransLaneCommonTestInterfaceMock> transLaneCommonMock;
+    EXPECT_CALL(transLaneCommonMock, LnnGetRemoteStrInfo).WillRepeatedly(Return(SOFTBUS_NOT_FIND));
     ret = GetUserkeyIdByAClInfo(&appInfo, 0, 0, &userKeyId, &callBack);
     EXPECT_NE(SOFTBUS_OK, ret);
 
-    EXPECT_CALL(TransLaneCommonMock, LnnGetRemoteStrInfo).WillRepeatedly(Return(SOFTBUS_OK));
-    EXPECT_CALL(TransLaneCommonMock, LnnGetLocalStrInfo).WillRepeatedly(Return(SOFTBUS_OK));
+    EXPECT_CALL(transLaneCommonMock, LnnGetRemoteStrInfo).WillRepeatedly(Return(SOFTBUS_OK));
+    EXPECT_CALL(transLaneCommonMock, LnnGetLocalStrInfo).WillRepeatedly(Return(SOFTBUS_OK));
     NiceMock<TransUkManagerTestInterfaceMock> TransUkManagerMock;
     EXPECT_CALL(TransUkManagerMock, AuthFindUkIdByAclInfo).WillOnce(Return(SOFTBUS_AUTH_UK_NOT_FIND));
     ret = GetUserkeyIdByAClInfo(&appInfo, 0, 0, &userKeyId, &callBack);

@@ -122,8 +122,8 @@ HWTEST_F(TransLaneCommonTest, TransCommonGetLocalConfig001, TestSize.Level1)
     int32_t ret = TransCommonGetLocalConfig(channelType, businessType, nullptr);
     EXPECT_EQ(SOFTBUS_INVALID_PARAM, ret);
 
-    NiceMock<TransLaneCommonTestInterfaceMock> TransLaneCommonMock;
-    EXPECT_CALL(TransLaneCommonMock, SoftbusGetConfig).WillOnce(Return(SOFTBUS_INVALID_PARAM));
+    NiceMock<TransLaneCommonTestInterfaceMock> transLaneCommonMock;
+    EXPECT_CALL(transLaneCommonMock, SoftbusGetConfig).WillOnce(Return(SOFTBUS_INVALID_PARAM));
     ret = TransCommonGetLocalConfig(channelType, businessType, &len);
     EXPECT_EQ(SOFTBUS_GET_CONFIG_VAL_ERR, ret);
 }
@@ -257,8 +257,8 @@ HWTEST_F(TransLaneCommonTest, FillAppInfo001, TestSize.Level1)
     connInfo.type = LANE_HML;
 
     appInfo.businessType = BUSINESS_TYPE_BYTE;
-    NiceMock<TransLaneCommonTestInterfaceMock> TransLaneCommonMock;
-    EXPECT_CALL(TransLaneCommonMock, SoftbusGetConfig).WillRepeatedly(Return(SOFTBUS_INVALID_PARAM));
+    NiceMock<TransLaneCommonTestInterfaceMock> transLaneCommonMock;
+    EXPECT_CALL(transLaneCommonMock, SoftbusGetConfig).WillRepeatedly(Return(SOFTBUS_INVALID_PARAM));
     FillAppInfo(&appInfo, &param, &transInfo, &connInfo);
 
     connInfo.type = LANE_P2P;
@@ -282,12 +282,12 @@ HWTEST_F(TransLaneCommonTest, FillAppInfo001, TestSize.Level1)
 HWTEST_F(TransLaneCommonTest, GetOsTypeByNetworkId001, TestSize.Level1)
 {
     int32_t osType = 1;
-    NiceMock<TransLaneCommonTestInterfaceMock> TransLaneCommonMock;
-    EXPECT_CALL(TransLaneCommonMock, LnnGetOsTypeByNetworkId).WillRepeatedly(Return(SOFTBUS_INVALID_PARAM));
+    NiceMock<TransLaneCommonTestInterfaceMock> transLaneCommonMock;
+    EXPECT_CALL(transLaneCommonMock, LnnGetOsTypeByNetworkId).WillRepeatedly(Return(SOFTBUS_INVALID_PARAM));
     GetOsTypeByNetworkId(TEST_NEW_WORK_ID, &osType);
     EXPECT_EQ(osType, 1);
 
-    EXPECT_CALL(TransLaneCommonMock, LnnGetOsTypeByNetworkId).WillRepeatedly(Return(SOFTBUS_OK));
+    EXPECT_CALL(transLaneCommonMock, LnnGetOsTypeByNetworkId).WillRepeatedly(Return(SOFTBUS_OK));
     GetOsTypeByNetworkId(TEST_NEW_WORK_ID, &osType);
     EXPECT_EQ(osType, 1);
 }
@@ -303,12 +303,12 @@ HWTEST_F(TransLaneCommonTest, GetRemoteUdidWithNetworkId001, TestSize.Level1)
     char udid[DEVICE_ID_SIZE_MAX] = {0};
     uint32_t len = DEVICE_ID_SIZE_MAX;
 
-    NiceMock<TransLaneCommonTestInterfaceMock> TransLaneCommonMock;
-    EXPECT_CALL(TransLaneCommonMock, LnnGetRemoteStrInfo).WillRepeatedly(Return(SOFTBUS_INVALID_PARAM));
+    NiceMock<TransLaneCommonTestInterfaceMock> transLaneCommonMock;
+    EXPECT_CALL(transLaneCommonMock, LnnGetRemoteStrInfo).WillRepeatedly(Return(SOFTBUS_INVALID_PARAM));
     GetRemoteUdidWithNetworkId(TEST_NEW_WORK_ID, udid, len);
     EXPECT_EQ(strlen(udid), 0);
 
-    EXPECT_CALL(TransLaneCommonMock, LnnGetRemoteStrInfo).WillRepeatedly(Return(SOFTBUS_OK));
+    EXPECT_CALL(transLaneCommonMock, LnnGetRemoteStrInfo).WillRepeatedly(Return(SOFTBUS_OK));
     GetRemoteUdidWithNetworkId(TEST_NEW_WORK_ID, udid, len);
     EXPECT_EQ(strlen(udid), 0);
 }
@@ -329,8 +329,8 @@ HWTEST_F(TransLaneCommonTest, TransGetRemoteDeviceVersion001, TestSize.Level1)
     
     TransGetRemoteDeviceVersion(TEST_ID, type, nullptr, len);
 
-    NiceMock<TransLaneCommonTestInterfaceMock> TransLaneCommonMock;
-    EXPECT_CALL(TransLaneCommonMock, LnnGetRemoteNodeInfoById).WillRepeatedly(Return(SOFTBUS_INVALID_PARAM));
+    NiceMock<TransLaneCommonTestInterfaceMock> transLaneCommonMock;
+    EXPECT_CALL(transLaneCommonMock, LnnGetRemoteNodeInfoById).WillRepeatedly(Return(SOFTBUS_INVALID_PARAM));
     TransGetRemoteDeviceVersion(TEST_ID, type, deviceVersion, len);
     EXPECT_EQ(strlen(deviceVersion), 0);
 }
@@ -370,8 +370,8 @@ HWTEST_F(TransLaneCommonTest, CopyAppInfoFromSessionParam002, TestSize.Level1)
         .attr = &attr,
     };
 
-    NiceMock<TransLaneCommonTestInterfaceMock> TransLaneCommonMock;
-    EXPECT_CALL(TransLaneCommonMock, TransGetUidAndPid).WillRepeatedly(Return(SOFTBUS_INVALID_PARAM));
+    NiceMock<TransLaneCommonTestInterfaceMock> transLaneCommonMock;
+    EXPECT_CALL(transLaneCommonMock, TransGetUidAndPid).WillRepeatedly(Return(SOFTBUS_INVALID_PARAM));
     int32_t ret = CopyAppInfoFromSessionParam(&appInfo, &Param);
     EXPECT_EQ(ret, SOFTBUS_INVALID_PARAM);
 
@@ -421,8 +421,8 @@ HWTEST_F(TransLaneCommonTest, CopyAppInfoFromSessionParam003, TestSize.Level1)
     EXPECT_EQ(ret, SOFTBUS_TRANS_BUSINESS_TYPE_NOT_MATCH);
 
     appInfo->businessType = BUSINESS_TYPE_BYTE;
-    NiceMock<TransLaneCommonTestInterfaceMock> TransLaneCommonMock;
-    EXPECT_CALL(TransLaneCommonMock, TransGetUidAndPid).WillRepeatedly(Return(SOFTBUS_OK));
+    NiceMock<TransLaneCommonTestInterfaceMock> transLaneCommonMock;
+    EXPECT_CALL(transLaneCommonMock, TransGetUidAndPid).WillRepeatedly(Return(SOFTBUS_OK));
     ret = CopyAppInfoFromSessionParam(appInfo, param);
     EXPECT_EQ(ret, SOFTBUS_MEM_ERR);
 
@@ -434,25 +434,25 @@ HWTEST_F(TransLaneCommonTest, CopyAppInfoFromSessionParam003, TestSize.Level1)
     ret = CopyAppInfoFromSessionParam(appInfo, param);
     EXPECT_EQ(ret, SOFTBUS_MEM_ERR);
 
-    EXPECT_CALL(TransLaneCommonMock, TransGetPkgNameBySessionName).WillOnce(Return(SOFTBUS_TRANS_BAD_KEY));
+    EXPECT_CALL(transLaneCommonMock, TransGetPkgNameBySessionName).WillOnce(Return(SOFTBUS_TRANS_BAD_KEY));
     param->peerDeviceId = TEST_DEVICE_ID;
     ret = CopyAppInfoFromSessionParam(appInfo, param);
     EXPECT_EQ(ret, SOFTBUS_TRANS_BAD_KEY);
 
-    EXPECT_CALL(TransLaneCommonMock, TransGetPkgNameBySessionName).WillOnce(Return(SOFTBUS_OK));
+    EXPECT_CALL(transLaneCommonMock, TransGetPkgNameBySessionName).WillOnce(Return(SOFTBUS_OK));
     ret = CopyAppInfoFromSessionParam(appInfo, param);
     EXPECT_EQ(ret, SOFTBUS_MEM_ERR);
 
-    EXPECT_CALL(TransLaneCommonMock, TransGetPkgNameBySessionName).WillOnce(Return(SOFTBUS_OK));
-    EXPECT_CALL(TransLaneCommonMock, LnnGetRemoteStrInfo).WillOnce(Return(SOFTBUS_TRANS_BAD_KEY));
+    EXPECT_CALL(transLaneCommonMock, TransGetPkgNameBySessionName).WillOnce(Return(SOFTBUS_OK));
+    EXPECT_CALL(transLaneCommonMock, LnnGetRemoteStrInfo).WillOnce(Return(SOFTBUS_TRANS_BAD_KEY));
     param->peerSessionName = TEST_PEER_SESSION_NAME;
     ret = CopyAppInfoFromSessionParam(appInfo, param);
     EXPECT_EQ(ret, SOFTBUS_TRANS_BAD_KEY);
 
-    EXPECT_CALL(TransLaneCommonMock, TransGetPkgNameBySessionName).WillOnce(Return(SOFTBUS_OK));
-    EXPECT_CALL(TransLaneCommonMock, LnnGetRemoteStrInfo).WillRepeatedly(Return(SOFTBUS_OK));
-    EXPECT_CALL(TransLaneCommonMock, LnnGetOsTypeByNetworkId).WillOnce(Return(SOFTBUS_OK));
-    EXPECT_CALL(TransLaneCommonMock, LnnGetRemoteNodeInfoById).WillOnce(Return(SOFTBUS_TRANS_BAD_KEY));
+    EXPECT_CALL(transLaneCommonMock, TransGetPkgNameBySessionName).WillOnce(Return(SOFTBUS_OK));
+    EXPECT_CALL(transLaneCommonMock, LnnGetRemoteStrInfo).WillRepeatedly(Return(SOFTBUS_OK));
+    EXPECT_CALL(transLaneCommonMock, LnnGetOsTypeByNetworkId).WillOnce(Return(SOFTBUS_OK));
+    EXPECT_CALL(transLaneCommonMock, LnnGetRemoteNodeInfoById).WillOnce(Return(SOFTBUS_TRANS_BAD_KEY));
     ret = CopyAppInfoFromSessionParam(appInfo, param);
     EXPECT_EQ(ret, SOFTBUS_OK);
 
@@ -482,8 +482,8 @@ HWTEST_F(TransLaneCommonTest, TransCommonGetAppInfo001, TestSize.Level1)
     };
     SoftBusFree(const_cast<SessionAttribute *>(param->attr));
     param->attr = &attr;
-    NiceMock<TransLaneCommonTestInterfaceMock> TransLaneCommonMock;
-    EXPECT_CALL(TransLaneCommonMock, LnnGetLocalStrInfo).WillRepeatedly(Return(SOFTBUS_TRANS_BAD_KEY));
+    NiceMock<TransLaneCommonTestInterfaceMock> transLaneCommonMock;
+    EXPECT_CALL(transLaneCommonMock, LnnGetLocalStrInfo).WillRepeatedly(Return(SOFTBUS_TRANS_BAD_KEY));
     int32_t ret = TransCommonGetAppInfo(param, appInfo);
     EXPECT_EQ(ret, SOFTBUS_TRANS_BAD_KEY);
 
@@ -527,8 +527,8 @@ HWTEST_F(TransLaneCommonTest, TransCommonGetAppInfo002, TestSize.Level1)
     EXPECT_NE(param, nullptr);
 
     param->peerDeviceId = TEST_DEVICE_ID;
-    NiceMock<TransLaneCommonTestInterfaceMock> TransLaneCommonMock;
-    EXPECT_CALL(TransLaneCommonMock, LnnGetLocalStrInfo).WillRepeatedly(Return(SOFTBUS_OK));
+    NiceMock<TransLaneCommonTestInterfaceMock> transLaneCommonMock;
+    EXPECT_CALL(transLaneCommonMock, LnnGetLocalStrInfo).WillRepeatedly(Return(SOFTBUS_OK));
     int32_t ret = TransCommonGetAppInfo(param, appInfo);
     EXPECT_EQ(ret, SOFTBUS_TRANS_BUSINESS_TYPE_NOT_MATCH);
 
@@ -537,11 +537,11 @@ HWTEST_F(TransLaneCommonTest, TransCommonGetAppInfo002, TestSize.Level1)
     param->sessionName = TEST_SESSION_NAME;
     param->peerDeviceId = TEST_DEVICE_ID;
     param->peerSessionName = TEST_PEER_SESSION_NAME;
-    EXPECT_CALL(TransLaneCommonMock, TransGetUidAndPid).WillRepeatedly(Return(SOFTBUS_OK));
-    EXPECT_CALL(TransLaneCommonMock, TransGetPkgNameBySessionName).WillOnce(Return(SOFTBUS_OK));
-    EXPECT_CALL(TransLaneCommonMock, LnnGetRemoteStrInfo).WillRepeatedly(Return(SOFTBUS_OK));
-    EXPECT_CALL(TransLaneCommonMock, LnnGetOsTypeByNetworkId).WillOnce(Return(SOFTBUS_OK));
-    EXPECT_CALL(TransLaneCommonMock, LnnGetRemoteNodeInfoById).WillRepeatedly(Return(SOFTBUS_TRANS_BAD_KEY));
+    EXPECT_CALL(transLaneCommonMock, TransGetUidAndPid).WillRepeatedly(Return(SOFTBUS_OK));
+    EXPECT_CALL(transLaneCommonMock, TransGetPkgNameBySessionName).WillOnce(Return(SOFTBUS_OK));
+    EXPECT_CALL(transLaneCommonMock, LnnGetRemoteStrInfo).WillRepeatedly(Return(SOFTBUS_OK));
+    EXPECT_CALL(transLaneCommonMock, LnnGetOsTypeByNetworkId).WillOnce(Return(SOFTBUS_OK));
+    EXPECT_CALL(transLaneCommonMock, LnnGetRemoteNodeInfoById).WillRepeatedly(Return(SOFTBUS_TRANS_BAD_KEY));
     ret = TransCommonGetAppInfo(param, appInfo);
     EXPECT_EQ(ret, SOFTBUS_OK);
 
@@ -568,8 +568,8 @@ HWTEST_F(TransLaneCommonTest, TransOpenChannelSetModule001, TestSize.Level1)
     TransOpenChannelSetModule(channelType, &connOpt);
 
     connOpt.socketOption.protocol = LNN_PROTOCOL_NIP;
-    NiceMock<TransLaneCommonTestInterfaceMock> TransLaneCommonMock;
-    EXPECT_CALL(TransLaneCommonMock, LnnGetProtocolListenerModule).WillRepeatedly(Return(LANE));
+    NiceMock<TransLaneCommonTestInterfaceMock> transLaneCommonMock;
+    EXPECT_CALL(transLaneCommonMock, LnnGetProtocolListenerModule).WillRepeatedly(Return(LANE));
     TransOpenChannelSetModule(channelType, &connOpt);
     EXPECT_EQ(connOpt.socketOption.moduleId, LANE);
 
@@ -598,23 +598,23 @@ HWTEST_F(TransLaneCommonTest, TransOpenChannelProc001, TestSize.Level1)
     int32_t ret = TransOpenChannelProc(type, appInfo, &connOpt, &channelId);
     EXPECT_EQ(ret, SOFTBUS_TRANS_INVALID_CHANNEL_TYPE);
 
-    NiceMock<TransLaneCommonTestInterfaceMock> TransLaneCommonMock;
-    EXPECT_CALL(TransLaneCommonMock, TransOpenUdpChannel).WillOnce(Return(SOFTBUS_INVALID_NUM));
+    NiceMock<TransLaneCommonTestInterfaceMock> transLaneCommonMock;
+    EXPECT_CALL(transLaneCommonMock, TransOpenUdpChannel).WillOnce(Return(SOFTBUS_INVALID_NUM));
     type = CHANNEL_TYPE_UDP;
     ret = TransOpenChannelProc(type, appInfo, &connOpt, &channelId);
     EXPECT_EQ(ret, SOFTBUS_INVALID_NUM);
 
-    EXPECT_CALL(TransLaneCommonMock, TransProxyOpenProxyChannel).WillOnce(Return(SOFTBUS_INVALID_NUM));
+    EXPECT_CALL(transLaneCommonMock, TransProxyOpenProxyChannel).WillOnce(Return(SOFTBUS_INVALID_NUM));
     type = CHANNEL_TYPE_PROXY;
     ret = TransOpenChannelProc(type, appInfo, &connOpt, &channelId);
     EXPECT_EQ(ret, SOFTBUS_INVALID_NUM);
 
-    EXPECT_CALL(TransLaneCommonMock, TransOpenDirectChannel).WillOnce(Return(SOFTBUS_INVALID_NUM));
+    EXPECT_CALL(transLaneCommonMock, TransOpenDirectChannel).WillOnce(Return(SOFTBUS_INVALID_NUM));
     type = CHANNEL_TYPE_TCP_DIRECT;
     ret = TransOpenChannelProc(type, appInfo, &connOpt, &channelId);
     EXPECT_EQ(ret, SOFTBUS_INVALID_NUM);
 
-    EXPECT_CALL(TransLaneCommonMock, TransOpenDirectChannel).WillOnce(Return(SOFTBUS_OK));
+    EXPECT_CALL(transLaneCommonMock, TransOpenDirectChannel).WillOnce(Return(SOFTBUS_OK));
     ret = TransOpenChannelProc(type, appInfo, &connOpt, &channelId);
     EXPECT_EQ(ret, SOFTBUS_OK);
 
@@ -636,8 +636,8 @@ HWTEST_F(TransLaneCommonTest, CancelWaitLaneState001, TestSize.Level1)
     int32_t channelId = TEST_CHANNEL_ID;
     int32_t channelType = CHANNEL_TYPE_TCP_DIRECT;
     CoreSessionState state = CORE_SESSION_STATE_WAIT_LANE;
-    NiceMock<TransLaneCommonTestInterfaceMock> TransLaneCommonMock;
-    EXPECT_CALL(TransLaneCommonMock, TransGetUidAndPid).WillRepeatedly(Return(SOFTBUS_TRANS_BAD_KEY));
+    NiceMock<TransLaneCommonTestInterfaceMock> transLaneCommonMock;
+    EXPECT_CALL(transLaneCommonMock, TransGetUidAndPid).WillRepeatedly(Return(SOFTBUS_TRANS_BAD_KEY));
 
     int32_t ret = CancelWaitLaneState(TEST_SESSION_NAME, TEST_INVALID_SESSION_ID);
     EXPECT_EQ(ret, SOFTBUS_TRANS_INVALID_SESSION_ID);
@@ -680,8 +680,8 @@ HWTEST_F(TransLaneCommonTest, TransCommonCloseChannel001, TestSize.Level1)
     int32_t channelId = TEST_CHANNEL_ID;
     CoreSessionState state = CORE_SESSION_STATE_WAIT_LANE;
     int32_t channelType = CHANNEL_TYPE_UNDEFINED;
-    NiceMock<TransLaneCommonTestInterfaceMock> TransLaneCommonMock;
-    EXPECT_CALL(TransLaneCommonMock, TransGetUidAndPid).WillRepeatedly(Return(SOFTBUS_TRANS_BAD_KEY));
+    NiceMock<TransLaneCommonTestInterfaceMock> transLaneCommonMock;
+    EXPECT_CALL(transLaneCommonMock, TransGetUidAndPid).WillRepeatedly(Return(SOFTBUS_TRANS_BAD_KEY));
 
     // will delete in TransCommonCloseChannel
     int32_t ret = TransAddSocketChannelInfo(TEST_SESSION_NAME, TEST_SESSION_ID, channelId, channelType, state);
@@ -726,12 +726,12 @@ HWTEST_F(TransLaneCommonTest, TransBuildTransOpenChannelStartEvent001, TestSize.
     TransBuildTransOpenChannelStartEvent(&extra, appInfo, nullptr, peerRet);
     EXPECT_EQ(extra.result, SOFTBUS_OK);
 
-    NiceMock<TransLaneCommonTestInterfaceMock> TransLaneCommonMock;
-    EXPECT_CALL(TransLaneCommonMock, LnnGetLocalStrInfo).WillRepeatedly(Return(SOFTBUS_TRANS_BAD_KEY));
+    NiceMock<TransLaneCommonTestInterfaceMock> transLaneCommonMock;
+    EXPECT_CALL(transLaneCommonMock, LnnGetLocalStrInfo).WillRepeatedly(Return(SOFTBUS_TRANS_BAD_KEY));
     TransBuildTransOpenChannelStartEvent(&extra, appInfo, &nodeInfo, peerRet);
     EXPECT_EQ(extra.result, EVENT_STAGE_RESULT_OK);
 
-    EXPECT_CALL(TransLaneCommonMock, LnnGetLocalStrInfo).WillRepeatedly(Return(SOFTBUS_OK));
+    EXPECT_CALL(transLaneCommonMock, LnnGetLocalStrInfo).WillRepeatedly(Return(SOFTBUS_OK));
     TransBuildTransOpenChannelStartEvent(&extra, appInfo, &nodeInfo, peerRet);
     EXPECT_EQ(extra.result, EVENT_STAGE_RESULT_OK);
 
@@ -774,14 +774,14 @@ HWTEST_F(TransLaneCommonTest, TransBuildOpenAuthChannelStartEvent001, TestSize.L
     EXPECT_NE(extra.result, EVENT_STAGE_RESULT_OK);
 
     (void)memset_s(&extra, sizeof(extra), 0, sizeof(extra));
-    NiceMock<TransLaneCommonTestInterfaceMock> TransLaneCommonMock;
-    EXPECT_CALL(TransLaneCommonMock, TransGetPkgNameBySessionName).WillRepeatedly(Return(SOFTBUS_TRANS_BAD_KEY));
+    NiceMock<TransLaneCommonTestInterfaceMock> transLaneCommonMock;
+    EXPECT_CALL(transLaneCommonMock, TransGetPkgNameBySessionName).WillRepeatedly(Return(SOFTBUS_TRANS_BAD_KEY));
     TransBuildOpenAuthChannelStartEvent(&extra, TEST_SESSION_NAME, &connOpt, localUdid, callerPkg);
     EXPECT_EQ(extra.result, EVENT_STAGE_RESULT_OK);
 
     (void)memset_s(&extra, sizeof(extra), 0, sizeof(extra));
-    EXPECT_CALL(TransLaneCommonMock, TransGetPkgNameBySessionName).WillRepeatedly(Return(SOFTBUS_OK));
-    EXPECT_CALL(TransLaneCommonMock, LnnGetLocalStrInfo).WillRepeatedly(Return(SOFTBUS_TRANS_BAD_KEY));
+    EXPECT_CALL(transLaneCommonMock, TransGetPkgNameBySessionName).WillRepeatedly(Return(SOFTBUS_OK));
+    EXPECT_CALL(transLaneCommonMock, LnnGetLocalStrInfo).WillRepeatedly(Return(SOFTBUS_TRANS_BAD_KEY));
     TransBuildOpenAuthChannelStartEvent(&extra, TEST_SESSION_NAME, &connOpt, localUdid, callerPkg);
     EXPECT_EQ(extra.result, EVENT_STAGE_RESULT_OK);
 }
