@@ -98,7 +98,7 @@ int32_t TransServerProxyInit(void)
     mallopt(M_DELAYED_FREE, M_DELAYED_FREE_ENABLE);
     TRANS_CHECK_AND_RETURN_RET_LOGE(
         RetryGetProxy() != nullptr, SOFTBUS_NO_INIT, TRANS_SDK, "Failed to initialize the server proxy");
-    TRANS_LOGI(TRANS_SDK, "Init success");
+    TRANS_LOGD(TRANS_SDK, "Init success");
     return SOFTBUS_OK;
 }
 

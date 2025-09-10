@@ -965,7 +965,7 @@ static void TransProxyOnDataReceived(uint32_t connectionId, ConnModule moduleId,
         TRANS_LOGE(TRANS_CTRL, "invalid msg head");
         return;
     }
-    TRANS_LOGI(TRANS_CTRL, "recv data msgType=%{public}d", msg.msgHead.type);
+    TRANS_LOGD(TRANS_CTRL, "recv data msgType=%{public}d", msg.msgHead.type);
     if (msg.msgHead.type == PROXYCHANNEL_MSG_TYPE_D2D) {
         TransProxyParseD2DData(data, len);
         return;
