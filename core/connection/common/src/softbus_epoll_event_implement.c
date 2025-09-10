@@ -56,10 +56,10 @@ static int32_t SoftBusSocketEpollWait(int32_t fd, struct epoll_event *ev, int32_
 {
     int32_t ret = epoll_wait(fd, ev, cnt, timeoutMs);
     if (ret < 0) {
-        CONN_LOGE(CONN_COMMON, "epoll wait fail errno=%{public}s, ret=%{public}d", strerror(errno), ret);
         if (errno == EINTR) {
             return SOFTBUS_ADAPTER_SOCKET_EINTR;
         }
+        CONN_LOGE(CONN_COMMON, "epoll wait fail errno=%{public}s, ret=%{public}d", strerror(errno), ret);
         return SOFTBUS_ERRNO(KERNELS_SUB_MODULE_CODE) + abs(errno);
     }
 
@@ -164,9 +164,9 @@ int32_t WatchEvent(EventWatcher *watcher, int32_t timeoutMS, ListNode *out)
     CONN_CHECK_AND_RETURN_RET_LOGE(watcher->watcherId >= 0, SOFTBUS_INVALID_PARAM, CONN_COMMON,
         "watcher->watcherId < 0, watcherId=%{public}d", watcher->watcherId);
     struct epoll_event events[SOFTBUS_FD_EVENT] = {0};
-    CONN_LOGI(CONN_COMMON, "epoll wait start");
+    CONN_LOGD(CONN_COMMON, "epoll wait start");
     int32_t nEvents = SoftBusSocketEpollWait(watcher->watcherId, events, SOFTBUS_FD_EVENT, timeoutMS);
-    CONN_CHECK_AND_RETURN_RET_LOGW(nEvents > 0, nEvents, CONN_COMMON,
+    CONN_CHECK_AND_RETURN_RET_LOGD(nEvents > 0, nEvents, CONN_COMMON,
         "epoll wait fail or not exist ready event, status=%{public}d", nEvents);
     SetReadyFdEvent(events, nEvents, out);
     return nEvents;
