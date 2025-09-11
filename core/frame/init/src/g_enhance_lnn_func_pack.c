@@ -1061,6 +1061,18 @@ bool LnnIsSupportLpSparkFeaturePacked(void)
     return pfnLnnEnhanceFuncList->lnnIsSupportLpSparkFeature();
 }
 
+bool LnnIsFeatureSupportDetailPacked(void)
+{
+    LnnEnhanceFuncList *pfnLnnEnhanceFuncList = LnnEnhanceFuncListGet();
+    if (pfnLnnEnhanceFuncList == NULL) {
+        return false;
+    }
+    if (LnnCheckFuncPointer((void *)pfnLnnEnhanceFuncList->isFeatureSupportDetail) != SOFTBUS_OK) {
+        return false;
+    }
+    return pfnLnnEnhanceFuncList->isFeatureSupportDetail();
+}
+
 void AuthLoadDeviceKeyPacked(void)
 {
     LnnEnhanceFuncList *pfnLnnEnhanceFuncList = LnnEnhanceFuncListGet();

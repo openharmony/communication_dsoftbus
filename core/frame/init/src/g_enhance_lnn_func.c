@@ -258,6 +258,7 @@ void Register5thPartFunc(void *soHandle)
     g_lnnEnhanceFuncList.lnnDeviceCloudConvergenceInit = dlsym(soHandle, "LnnDeviceCloudConvergenceInit");
     g_lnnEnhanceFuncList.isSupportLowLatency = dlsym(soHandle, "IsSupportLowLatency");
     g_lnnEnhanceFuncList.lnnIsSupportLpSparkFeature = dlsym(soHandle, "LnnIsSupportLpSparkFeature");
+    g_lnnEnhanceFuncList.isFeatureSupportDetail = dlsym(soHandle, "IsFeatureSupportDetail");
 }
 
 int32_t LnnRegisterEnhanceFunc(void *soHandle)

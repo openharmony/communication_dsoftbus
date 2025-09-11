@@ -243,7 +243,7 @@ static void LnnSetLocalFeature(void)
     if (IsSupportLpFeaturePacked()) {
         feature |= 1 << BIT_BLE_SUPPORT_LP_HEARTBEAT;
     }
-    if (LnnIsSupportLpSparkFeaturePacked()) {
+    if (LnnIsSupportLpSparkFeaturePacked() && LnnIsFeatureSupportDetailPacked()) {
         feature |= 1 << BIT_SUPPORT_LP_SPARK_CAPABILITY;
         (void)LnnClearFeatureCapability(&feature, BIT_SUPPORT_SPARK_GROUP_CAPABILITY);
     }
