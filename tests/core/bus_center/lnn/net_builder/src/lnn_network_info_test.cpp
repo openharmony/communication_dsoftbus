@@ -803,6 +803,7 @@ HWTEST_F(LNNNetworkInfoTest, LnnAsyncSendUserId_Test_002, TestSize.Level1)
         ASSERT_NE(dataInfo->msg, nullptr);
     }
     LnnAsyncSendUserId(dataInfo);
+
     dataInfo = (SendSyncInfoParam *)SoftBusCalloc(sizeof(SendSyncInfoParam));
     ASSERT_NE(dataInfo, nullptr);
     dataInfo->msg = (uint8_t *)SoftBusCalloc(sizeof(uint8_t));
@@ -1159,4 +1160,172 @@ HWTEST_F(LNNNetworkInfoTest, ConvertUserIdToMsg_Test_001, TestSize.Level1)
     EXPECT_EQ(ret, SOFTBUS_OK);
 }
 
+static HmlCapabilityCode GetHmlCapabilityCodeFunc1(void)
+{
+    return CONN_HML_SUPPORT;
+}
+
+static HmlCapabilityCode GetHmlCapabilityCodeFunc2(void)
+{
+    return CONN_HML_CAP_UNKNOWN;
+}
+
+static HmlCapabilityCode GetHmlCapabilityCodeFunc3(void)
+{
+    return CONN_HML_NOT_SUPPORT;
+}
+
+static VspCapabilityCode GetVspCapabilityCodeFunc1(void)
+{
+    return CONN_VSP_SUPPORT;
+}
+
+static VspCapabilityCode GetVspCapabilityCodeFunc2(void)
+{
+    return CONN_VSP_CAP_UNKNOWN;
+}
+
+static VspCapabilityCode GetVspCapabilityCodeFunc3(void)
+{
+    return CONN_VSP_NOT_SUPPORT;
+}
+
+/*
+ * @tc.name: GetEnhancedFLFeature_Test_001
+ * @tc.desc: GetEnhancedFLFeature test
+ * @tc.type: FUNC
+ * @tc.require:
+ */
+HWTEST_F(LNNNetworkInfoTest, GetEnhancedFLFeature_Test_001, TestSize.Level1)
+{
+    NiceMock<LnnNetLedgertInterfaceMock> netLedgerMock;
+    uint64_t staticNetCap = 0;
+    int32_t ret = GetEnhancedFLFeature(nullptr);
+    EXPECT_EQ(ret, SOFTBUS_INVALID_PARAM);
+    NiceMock<LnnServicetInterfaceMock> serviceMock;
+    EXPECT_CALL(serviceMock, GetWifiDirectManager).WillOnce(Return(nullptr));
+    ret = GetEnhancedFLFeature(&staticNetCap);
+    EXPECT_EQ(ret, SOFTBUS_WIFI_DIRECT_INIT_FAILED);
+    struct WifiDirectManager invalidManager = {
+        .getVspCapabilityCode = nullptr,
+    };
+    EXPECT_CALL(serviceMock, GetWifiDirectManager)
+        .WillOnce(Return(&invalidManager))
+        .WillOnce(Return(&invalidManager));
+    ret = GetEnhancedFLFeature(&staticNetCap);
+    EXPECT_EQ(ret, SOFTBUS_WIFI_DIRECT_INIT_FAILED);
+    struct WifiDirectManager manager = {
+        .getVspCapabilityCode = GetVspCapabilityCodeFunc1,
+    };
+    EXPECT_CALL(serviceMock, GetWifiDirectManager).WillRepeatedly(Return(&manager));
+    ret = GetEnhancedFLFeature(&staticNetCap);
+    EXPECT_EQ(ret, SOFTBUS_OK);
+    manager.getVspCapabilityCode = GetVspCapabilityCodeFunc2,
+    ret = GetEnhancedFLFeature(&staticNetCap);
+    EXPECT_EQ(ret, SOFTBUS_OK);
+    manager.getVspCapabilityCode = GetVspCapabilityCodeFunc3,
+    ret = GetEnhancedFLFeature(&staticNetCap);
+    EXPECT_EQ(ret, SOFTBUS_OK);
+}
+
+/*
+ * @tc.name: UpdateHmlStaticCap_Test_001
+ * @tc.desc: UpdateHmlStaticCap test
+ * @tc.type: FUNC
+ * @tc.require:
+ */
+HWTEST_F(LNNNetworkInfoTest, UpdateHmlStaticCap_Test_001, TestSize.Level1)
+{
+    NiceMock<LnnNetLedgertInterfaceMock> netLedgerMock;
+    EXPECT_CALL(netLedgerMock, LnnGetLocalNumU32Info).WillOnce(Return(SOFTBUS_NETWORK_NOT_FOUND))
+        .WillRepeatedly(Return(SOFTBUS_OK));
+    int32_t ret = UpdateHmlStaticCap();
+    EXPECT_EQ(ret, SOFTBUS_NETWORK_NOT_FOUND);
+    NiceMock<LnnServicetInterfaceMock> serviceMock;
+    EXPECT_CALL(serviceMock, GetWifiDirectManager).WillOnce(Return(nullptr));
+    ret = UpdateHmlStaticCap();
+    EXPECT_EQ(ret, SOFTBUS_WIFI_DIRECT_INIT_FAILED);
+    struct WifiDirectManager invalidManager = {
+        .getHmlCapabilityCode = nullptr,
+    };
+    EXPECT_CALL(serviceMock, GetWifiDirectManager)
+        .WillOnce(Return(&invalidManager))
+        .WillOnce(Return(&invalidManager));
+    ret = UpdateHmlStaticCap();
+    EXPECT_EQ(ret, SOFTBUS_WIFI_DIRECT_INIT_FAILED);
+    EXPECT_CALL(netLedgerMock, LnnClearStaticNetCap).WillOnce(Return(SOFTBUS_INVALID_PARAM))
+        .WillRepeatedly(Return(SOFTBUS_OK));
+    struct WifiDirectManager manager = {
+        .getHmlCapabilityCode = GetHmlCapabilityCodeFunc1,
+    };
+    EXPECT_CALL(serviceMock, GetWifiDirectManager).WillRepeatedly(Return(&manager));
+    ret = UpdateHmlStaticCap();
+    EXPECT_EQ(ret, SOFTBUS_OK);
+    manager.getHmlCapabilityCode = GetHmlCapabilityCodeFunc2,
+    ret = UpdateHmlStaticCap();
+    EXPECT_EQ(ret, SOFTBUS_OK);
+    manager.getHmlCapabilityCode = GetHmlCapabilityCodeFunc3,
+    ret = UpdateHmlStaticCap();
+    EXPECT_EQ(ret, SOFTBUS_INVALID_PARAM);
+}
+
+/*
+ * @tc.name: WifiServiceOnStartHandle_Test_001
+ * @tc.desc: WifiServiceOnStartHandle test
+ * @tc.type: FUNC
+ * @tc.require:
+ */
+HWTEST_F(LNNNetworkInfoTest, WifiServiceOnStartHandle_Test_001, TestSize.Level1)
+{
+    NiceMock<LnnNetLedgertInterfaceMock> netLedgerMock;
+    LnnEventBasicInfo info = { .event = LNN_EVENT_TYPE_MAX, };
+    EXPECT_NO_FATAL_FAILURE(WifiServiceOnStartHandle(nullptr));
+    EXPECT_NO_FATAL_FAILURE(WifiServiceOnStartHandle(&info));
+    info.event = LNN_EVENT_WIFI_SERVICE_START;
+    uint32_t staticNetCap1 = 0;
+    uint32_t staticNetCap2 = 1;
+    EXPECT_CALL(netLedgerMock, LnnGetLocalNumU32Info).WillOnce(Return(SOFTBUS_NETWORK_NOT_FOUND));
+    EXPECT_CALL(netLedgerMock, LnnGetLocalNumU64Info).WillRepeatedly(Return(SOFTBUS_INVALID_PARAM));
+    EXPECT_NO_FATAL_FAILURE(WifiServiceOnStartHandle(&info));
+    struct WifiDirectManager invalidManager = {
+        .getHmlCapabilityCode = nullptr,
+    };
+    NiceMock<LnnServicetInterfaceMock> serviceMock;
+    EXPECT_CALL(serviceMock, GetWifiDirectManager).WillOnce(Return(&invalidManager)).WillOnce(Return(&invalidManager));
+    EXPECT_CALL(netLedgerMock, LnnGetLocalNumU32Info)
+        .WillOnce(DoAll(SetArgPointee<1>(staticNetCap1), Return(SOFTBUS_OK)));
+    EXPECT_NO_FATAL_FAILURE(WifiServiceOnStartHandle(&info));
+    struct WifiDirectManager manager = {
+        .getHmlCapabilityCode = GetHmlCapabilityCodeFunc2,
+        .getVspCapabilityCode = GetVspCapabilityCodeFunc2,
+    };
+    EXPECT_CALL(netLedgerMock, LnnClearStaticNetCap).WillRepeatedly(Return(SOFTBUS_OK));
+    EXPECT_CALL(serviceMock, GetWifiDirectManager).WillRepeatedly(Return(&manager));
+    EXPECT_CALL(netLedgerMock, LnnGetLocalNumU32Info)
+        .WillOnce(DoAll(SetArgPointee<1>(staticNetCap1), Return(SOFTBUS_OK)))
+        .WillRepeatedly(DoAll(SetArgPointee<1>(staticNetCap2), Return(SOFTBUS_OK)));
+    EXPECT_NO_FATAL_FAILURE(WifiServiceOnStartHandle(&info));
+    EXPECT_NO_FATAL_FAILURE(WifiServiceOnStartHandle(&info));
+}
+
+/*
+ * @tc.name: LnnSetNetBandCapability_Test_001
+ * @tc.desc: LnnSetNetBandCapability test
+ * @tc.type: FUNC
+ * @tc.require:
+ */
+HWTEST_F(LNNNetworkInfoTest, LnnSetNetBandCapability_Test_001, TestSize.Level1)
+{
+    NiceMock<LnnServicetInterfaceMock> serviceMock;
+    EXPECT_CALL(serviceMock, SoftBusGetLinkBand)
+        .WillOnce(Return(BAND_24G))
+        .WillOnce(Return(BAND_5G))
+        .WillRepeatedly(Return(BAND_UNKNOWN));
+    NiceMock<LnnNetLedgertInterfaceMock> netLedgerMock;
+    EXPECT_CALL(netLedgerMock, LnnSetNetCapability).WillRepeatedly(Return(SOFTBUS_OK));
+    EXPECT_CALL(netLedgerMock, LnnClearNetCapability).WillRepeatedly(Return(SOFTBUS_OK));
+    uint32_t capability = 0;
+    EXPECT_NO_FATAL_FAILURE(LnnSetNetBandCapability(&capability));
+    EXPECT_NO_FATAL_FAILURE(LnnSetNetBandCapability(&capability));
+}
 } // namespace OHOS
