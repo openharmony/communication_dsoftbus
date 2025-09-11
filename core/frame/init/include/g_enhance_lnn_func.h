@@ -94,6 +94,7 @@ typedef int32_t (*SendAdvInfoToMlpsFunc)(LpBroadcastParam *lpAdvParam, LpServerT
 typedef int32_t (*SwitchHeartbeatReportChannelFunc)(bool isToAP, uint16_t scanInterval, uint16_t scanWindow);
 typedef bool (*IsSupportLpFeatureFunc)(void);
 typedef bool (*LnnIsSupportLpSparkFeatureFunc)(void);
+typedef bool (*IsFeatureSupportDetailFunc)(void);
 typedef void (*SetLpKeepAliveStateFunc)(void *para);
 typedef int32_t (*LnnRegistBleHeartbeatMediumMgrFunc)(void);
 typedef int32_t (*EnablePowerControlFunc)(const WifiDirectLinkInfo *wifiDirectInfo);
@@ -336,6 +337,7 @@ typedef struct TagLnnEnhanceFuncList {
     SwitchHeartbeatReportChannelFunc switchHeartbeatReportChannel;
     IsSupportLpFeatureFunc isSupportLpFeature;
     LnnIsSupportLpSparkFeatureFunc lnnIsSupportLpSparkFeature;
+    IsFeatureSupportDetailFunc isFeatureSupportDetail;
     SetLpKeepAliveStateFunc setLpKeepAliveState;
     LnnRegistBleHeartbeatMediumMgrFunc lnnRegistBleHeartbeatMediumMgr;
     LnnRequestCheckOnlineStatusFunc lnnRequestCheckOnlineStatus;

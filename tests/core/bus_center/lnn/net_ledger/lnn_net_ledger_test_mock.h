@@ -32,6 +32,7 @@ public:
     virtual int32_t LnnSetLocalNum64Info(InfoKey key, int64_t info) = 0;
     virtual bool IsSupportLpFeaturePacked(void) = 0;
     virtual bool LnnIsSupportLpSparkFeaturePacked(void) = 0;
+    virtual bool LnnIsFeatureSupportDetailPacked(void) = 0;
     virtual int32_t LnnClearFeatureCapability(uint64_t *feature, FeatureCapability capaBit) = 0;
 };
 class LnnNetLedgerInterfaceMock : public LnnNetLedgerInterface {
@@ -42,6 +43,7 @@ public:
     MOCK_METHOD2(LnnSetLocalNum64Info, int32_t(InfoKey, int64_t));
     MOCK_METHOD0(IsSupportLpFeaturePacked, bool(void));
     MOCK_METHOD0(LnnIsSupportLpSparkFeaturePacked, bool(void));
+    MOCK_METHOD0(LnnIsFeatureSupportDetailPacked, bool(void));
     MOCK_METHOD2(LnnClearFeatureCapability, int32_t(uint64_t *, FeatureCapability));
 };
 } // namespace OHOS
