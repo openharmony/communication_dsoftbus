@@ -52,7 +52,7 @@ group("unittest") {
   }
 
   # add wifi_direct cpp unit test here
-  if (softbus_communication_wifi_feature) {
+  if (softbus_communication_wifi_feature && dsoftbus_feature_conn_pv1) {
     deps += [ "wifi_direct_cpp:unittest" ]
   }
 }

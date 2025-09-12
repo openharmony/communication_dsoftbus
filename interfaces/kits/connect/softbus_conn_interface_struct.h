@@ -233,7 +233,8 @@ struct SleOption {
     char networkId[NETWORK_ID_BUF_LEN];
     char address[BT_MAC_LEN];
     uint16_t challengeCode;
-    bool isHighPower;
+    bool isFrameType4;
+    bool isLiteHead;
     SleProtocolType protocol;
 };
 
@@ -260,12 +261,21 @@ typedef enum {
     CONN_BLE_PRIORITY_LOW_POWER,
 } ConnectBlePriority;
 
+typedef enum {
+    CONN_SLE_POWER_LEVEL_DEFAULT = 0x0,
+    CONN_SLE_POWER_LEVEL_7,
+    CONN_SLE_POWER_LEVEL_8,
+} ConnectSlePowerLevel;
+
 typedef struct {
     ConnectType type;
     union {
         struct {
             ConnectBlePriority priority;
         } bleOption;
+        struct {
+            ConnectSlePowerLevel slePowerLevel;
+        } sleOption;
     };
 } UpdateOption;
 

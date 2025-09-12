@@ -133,5 +133,10 @@ int32_t ClientGetChannelBusinessTypeByChannelId(int32_t channelId, int32_t *busi
 {
     return GetClientTransProxyManagerInterface()->ClientGetChannelBusinessTypeByChannelId(channelId, businessType);
 }
+
+int32_t TransProxyD2dDataLenCheck(uint32_t dataLen, BusinessType type)
+{
+    return GetClientTransProxyManagerInterface()->TransProxyD2dDataLenCheck(dataLen, type);
+}
 }
 }

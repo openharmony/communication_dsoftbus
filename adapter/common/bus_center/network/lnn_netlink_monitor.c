@@ -141,7 +141,7 @@ static void WifiBandSetCapability()
 static void ProcessAddrEvent(struct nlmsghdr *nlh)
 {
     if (nlh->nlmsg_len < NLMSG_LENGTH(sizeof(struct ifaddrmsg))) {
-        LNN_LOGE(LNN_BUILDER, "Wrong len");
+        LNN_LOGE(LNN_EVENT, "Wrong len");
         return;
     }
     struct ifaddrmsg *ifa = (struct ifaddrmsg *)NLMSG_DATA(nlh);
@@ -149,12 +149,12 @@ static void ProcessAddrEvent(struct nlmsghdr *nlh)
     char ifnameBuffer[NET_IF_NAME_LEN];
     char *ifName = if_indextoname(ifa->ifa_index, ifnameBuffer);
     if (ifName == NULL) {
-        LNN_LOGE(LNN_BUILDER, "invalid iface index");
+        LNN_LOGE(LNN_EVENT, "invalid iface index");
         return;
     }
     NotifyIpUpdated(ifName, nlh);
     if (LnnGetNetIfTypeByName(ifName, &type) != SOFTBUS_OK) {
-        LNN_LOGE(LNN_BUILDER, "LnnGetNetIfTypeByName error");
+        LNN_LOGE(LNN_EVENT, "LnnGetNetIfTypeByName error");
         return;
     }
     if (type == LNN_NETIF_TYPE_WLAN && nlh->nlmsg_type == RTM_NEWADDR) {
@@ -162,7 +162,7 @@ static void ProcessAddrEvent(struct nlmsghdr *nlh)
     }
     static uint32_t callCount = 0;
     if (type == LNN_NETIF_TYPE_ETH || type == LNN_NETIF_TYPE_WLAN) {
-        LNN_LOGI(LNN_BUILDER, "network addr changed, ifName=%{public}s, netifType=%{public}d, callCount=%{public}u",
+        LNN_LOGI(LNN_EVENT, "network addr changed, ifName=%{public}s, netifType=%{public}d, callCount=%{public}u",
             ifName, type, callCount++);
         LnnNotifyAddressChangedEvent(ifName);
     }

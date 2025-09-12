@@ -13,9 +13,9 @@
  * limitations under the License.
  */
 
-#include "auth_tcp_connection.h"
 #include "auth_channel.h"
 #include "auth_log.h"
+#include "auth_tcp_connection.h"
 #include "softbus_def.h"
 #include "softbus_error_code.h"
 

@@ -12,8 +12,10 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+#include <pthread.h>
 #include <semaphore.h>
 #include <stdio.h>
+#include <stdlib.h>
 
 #include "br_proxy.h"
 #include "comm_log.h"
@@ -531,6 +533,86 @@ typedef struct {
     int32_t ret;
 } AsyncSendData;
 
+typedef struct QueueNode {
+    AsyncSendData* data;
+    struct QueueNode* next;
+} QueueNode;
+
+typedef struct {
+    QueueNode* head;
+    QueueNode* tail;
+    pthread_mutex_t mutex;
+    bool isProcessing;
+} TaskQueue;
+
+// 初始化全局队列
+static TaskQueue g_taskQueue = {
+    .head = NULL,
+    .tail = NULL,
+    .isProcessing = false
+};
+
+void InitTaskQueue()
+{
+    pthread_mutex_init(&g_taskQueue.mutex, NULL);
+    g_taskQueue.head = g_taskQueue.tail = NULL;
+    g_taskQueue.isProcessing = false;
+}
+
+static void AsyncWorkComplete(napi_env env, napi_status status, void* data);
+static void AsyncWorkExecute(napi_env env, void* data);
+
+static void ProcessTaskQueue()
+{
+    bool shouldExit = false;
+    while (!shouldExit) {
+        pthread_mutex_lock(&g_taskQueue.mutex);
+        if (g_taskQueue.head == NULL || g_taskQueue.isProcessing) {
+            shouldExit = true;
+            pthread_mutex_unlock(&g_taskQueue.mutex);
+            return;
+        }
+        g_taskQueue.isProcessing = true;
+        QueueNode* node = g_taskQueue.head;
+        g_taskQueue.head = g_taskQueue.head->next;
+        if (g_taskQueue.head == NULL) {
+            shouldExit = true;
+            g_taskQueue.tail = NULL;
+        }
+        pthread_mutex_unlock(&g_taskQueue.mutex);
+        AsyncSendData* asyncData = node->data;
+        SoftBusFree(node);
+ 
+        napi_env env = asyncData->env;
+        napi_value resourceName;
+        napi_status status = napi_create_string_utf8(env, "SendDataAsyncWork", NAPI_AUTO_LENGTH, &resourceName);
+        if (status != napi_ok) {
+            napi_reject_deferred(env, asyncData->deferred, NULL);
+            goto cleanup;
+        }
+ 
+        status = napi_create_async_work(env, NULL, resourceName, AsyncWorkExecute, AsyncWorkComplete,
+            asyncData, &asyncData->work);
+        if (status != napi_ok) {
+            napi_reject_deferred(env, asyncData->deferred, NULL);
+            goto cleanup;
+        }
+        status = napi_queue_async_work(env, asyncData->work);
+        if (status != napi_ok) {
+            napi_reject_deferred(env, asyncData->deferred, NULL);
+            napi_delete_async_work(env, asyncData->work);
+            goto cleanup;
+        }
+        continue;
+    cleanup:
+        SoftBusFree(asyncData->data);
+        SoftBusFree(asyncData);
+        pthread_mutex_lock(&g_taskQueue.mutex);
+        g_taskQueue.isProcessing = false;
+        pthread_mutex_unlock(&g_taskQueue.mutex);
+    }
+}
+
 static void AsyncWorkExecute(napi_env env, void* data)
 {
     AsyncSendData* asyncData = (AsyncSendData*)data;
@@ -562,6 +644,11 @@ cleanup:
     SoftBusFree(asyncData->data);
     napi_delete_async_work(env, asyncData->work);
     SoftBusFree(asyncData);
+
+    pthread_mutex_lock(&g_taskQueue.mutex);
+    g_taskQueue.isProcessing = false;
+    pthread_mutex_unlock(&g_taskQueue.mutex);
+    ProcessTaskQueue();  // 处理队列中的下一个任务
 }
 
 static bool ChanneIdIsInt(napi_env env, napi_value *args)
@@ -648,24 +735,23 @@ napi_value SendDataAsync(napi_env env, napi_callback_info info)
         goto cleanup;
     }
 
-    napi_value resourceName;
-    status = napi_create_string_utf8(env, "SendDataAsyncWork", NAPI_AUTO_LENGTH, &resourceName);
-    if (status != napi_ok) {
-        napi_reject_deferred(env, asyncData->deferred, NULL);
+    pthread_mutex_lock(&g_taskQueue.mutex);
+    QueueNode* node = (QueueNode*)SoftBusCalloc(sizeof(QueueNode));
+    if (node == NULL) {
+        napi_throw_error(env, NULL, "Memory allocation failed");
         goto cleanup;
     }
-    status = napi_create_async_work(env, NULL, resourceName, AsyncWorkExecute, AsyncWorkComplete,
-        asyncData, &asyncData->work);
-    if (status != napi_ok) {
-        napi_reject_deferred(env, asyncData->deferred, NULL);
-        goto cleanup;
+    node->data = asyncData;
+    node->next = NULL;
+    if (g_taskQueue.tail == NULL) {
+        g_taskQueue.head = g_taskQueue.tail = node;
+    } else {
+        g_taskQueue.tail->next = node;
+        g_taskQueue.tail = node;
     }
-    status = napi_queue_async_work(env, asyncData->work);
-    if (status != napi_ok) {
-        napi_reject_deferred(env, asyncData->deferred, NULL);
-        napi_delete_async_work(env, asyncData->work);
-        goto cleanup;
-    }
+    pthread_mutex_unlock(&g_taskQueue.mutex);
+
+    ProcessTaskQueue();
     return promise;
 cleanup:
     SoftBusFree(asyncData->data);
@@ -769,6 +855,10 @@ cleanup:
 
 static void OnDataReceived(int32_t channelId, const char* data, uint32_t dataLen)
 {
+    if (data == NULL || dataLen == 0 || dataLen > BR_PROXY_SEND_MAX_LEN) {
+        TRANS_LOGE(TRANS_SVC, "[br_proxy] channel or data is null or invalid dataLen=%{public}u", dataLen);
+        return;
+    }
     if (tsfn_data_received == NULL) {
         return;
     }
@@ -832,6 +922,10 @@ static void SetCallbackInternal(napi_env env, napi_value callback, int32_t chann
                 0, 1, NULL, NULL, NULL,
                 DataReceivedCallback, &tsfn_data_received);
             ret = SetListenerState(channelId, DATA_RECEIVE, true);
+            if (ret != SOFTBUS_OK) {
+                napi_release_threadsafe_function(tsfn_data_received, napi_tsfn_abort);
+                tsfn_data_received = NULL;
+            }
             ThrowErrFromC2Js(env, ret);
             break;
         case CHANNEL_STATE:
@@ -844,6 +938,10 @@ static void SetCallbackInternal(napi_env env, napi_value callback, int32_t chann
                 0, 1, NULL, NULL, NULL,
                 ChannelStatusCallback, &tsfn_channel_status);
             ret = SetListenerState(channelId, CHANNEL_STATE, true);
+            if (ret != SOFTBUS_OK) {
+                napi_release_threadsafe_function(tsfn_channel_status, napi_tsfn_abort);
+                tsfn_channel_status = NULL;
+            }
             ThrowErrFromC2Js(env, ret);
             break;
         default:
@@ -1064,6 +1162,7 @@ static napi_module g_module = {
  */
 __attribute__((constructor)) void RegisterSoftbusTransModule(void)
 {
+    InitTaskQueue();
     napi_module_register(&g_module);
 }
 

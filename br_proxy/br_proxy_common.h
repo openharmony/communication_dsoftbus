@@ -19,12 +19,14 @@
 extern "C" {
 #endif /* __cplusplus */
 
-int32_t PullUpHap(const char *bundleName, const char *abilityName);
-int32_t GetCallerHapInfo(char *bundleName, uint32_t bundleNamelen, char *abilityName, uint32_t abilityNameLen);
+int32_t PullUpHap(const char *bundleName, const char *abilityName, int32_t appIndex);
+int32_t GetCallerHapInfo(char *bundleName, uint32_t bundleNamelen,
+    char *abilityName, uint32_t abilityNameLen, int32_t *appIndex);
 pid_t GetCallerPid();
 pid_t GetCallerUid();
 uint32_t GetCallerTokenId();
 int32_t CheckPushPermission();
+void BrProxyPostDcloseMsgToLooperDelay(uint32_t delayTime);
 
 #ifdef __cplusplus
 }

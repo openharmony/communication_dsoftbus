@@ -1556,7 +1556,10 @@ void TransAsyncAuthChannelTask(int32_t channelId)
 static void TransAuthDestroyChannelList(const ListNode *destroyList)
 {
     TRANS_CHECK_AND_RETURN_LOGE(
-        (destroyList != NULL && !IsListEmpty(destroyList)), TRANS_CTRL, "destroyList is null");
+        destroyList != NULL, TRANS_CTRL, "destroyList is null");
+    if (IsListEmpty(destroyList)) {
+        return;
+    }
 
     AuthChannelInfo *destroyNode = NULL;
     AuthChannelInfo *nextDestroyNode = NULL;

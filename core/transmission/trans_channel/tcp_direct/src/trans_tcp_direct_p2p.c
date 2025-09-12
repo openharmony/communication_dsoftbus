@@ -918,6 +918,50 @@ static int32_t AddP2pOrHmlTrigger(int32_t fd, const char *myAddr, int64_t seq, i
     return SOFTBUS_OK;
 }
 
+static bool IsSupportDeterministicTrans(const char *targetNetworkId)
+{
+    uint64_t remote = 0;
+    int32_t ret = LnnGetRemoteNumU64Info(targetNetworkId, NUM_KEY_FEATURE_CAPA, &remote);
+    if (ret != SOFTBUS_OK || remote == 0) {
+        TRANS_LOGE(TRANS_CTRL, "get remote feature capa failed, ret=%{public}d, remote=%{public}" PRIu64, ret, remote);
+        return false;
+    }
+    if (!IsFeatureSupport(remote, BIT_DETERMINISTIC_TRANS_CAPABILITY)) {
+        TRANS_LOGI(TRANS_CTRL, "remote not support deterministic trans");
+        return false;
+    }
+    TRANS_LOGI(TRANS_CTRL, "remote support deterministic trans");
+    return true;
+}
+
+static int32_t StartTransP2pDirectListener(ConnectType type, SessionConn *conn, const AppInfo *appInfo)
+{
+    conn->appInfo.fdProtocol = LNN_PROTOCOL_IP;
+    if (conn->appInfo.isFlashLight) {
+        conn->appInfo.fdProtocol = LNN_PROTOCOL_HTP;
+        int32_t ret = ClientOpenHtpChannelPacked(
+            conn->channelId, conn->req, conn->appInfo.myData.mac, conn->appInfo.peerData.mac);
+        if (ret != SOFTBUS_OK) {
+            TRANS_LOGE(TRANS_CTRL, "start htp falied, degrade to TCP protocol");
+            conn->appInfo.fdProtocol = LNN_PROTOCOL_IP;
+        }
+    } else if (IsSupportDeterministicTrans(conn->appInfo.peerNetWorkId) && IsHmlIpAddr(conn->appInfo.myData.addr) &&
+        conn->appInfo.isLowLatency && conn->appInfo.businessType == BUSINESS_TYPE_BYTE) {
+        conn->appInfo.fdProtocol = LNN_PROTOCOL_MINTP;
+    }
+
+    if (type == CONNECT_P2P) {
+        if (IsHmlIpAddr(conn->appInfo.myData.addr)) {
+            return StartHmlListener(conn->appInfo.myData.addr, &conn->appInfo.myData.port, appInfo->peerData.deviceId,
+                conn->appInfo.fdProtocol);
+        } else {
+            return StartP2pListener(conn->appInfo.myData.addr, &conn->appInfo.myData.port, appInfo->peerData.deviceId);
+        }
+    }
+    return StartHmlListener(
+        conn->appInfo.myData.addr, &conn->appInfo.myData.port, appInfo->peerData.deviceId, conn->appInfo.fdProtocol);
+}
+
 static int32_t OnVerifyP2pReply(int64_t authId, int64_t seq, const cJSON *json)
 {
     TRANS_LOGI(TRANS_CTRL, "authId=%{public}" PRId64 ", seq=%{public}" PRId64, authId, seq);
@@ -955,6 +999,7 @@ static int32_t OnVerifyP2pReply(int64_t authId, int64_t seq, const cJSON *json)
     if (conn->appInfo.fdProtocol == LNN_PROTOCOL_HTP && protocol == LNN_PROTOCOL_IP) {
         CloseHtpChannelPacked(conn->channelId);
         conn->appInfo.fdProtocol = LNN_PROTOCOL_IP;
+        (void)StartTransP2pDirectListener(CONNECT_P2P, conn, &conn->appInfo);
     }
     if (conn->appInfo.fdProtocol == LNN_PROTOCOL_HTP) {
         fd = ConnectSocketDirectPeer(
@@ -1223,22 +1268,6 @@ static int32_t BuildSessionConn(const AppInfo *appInfo, SessionConn **conn)
     return SOFTBUS_OK;
 }
 
-static bool IsSupportDeterministicTrans(const char *targetNetworkId)
-{
-    uint64_t remote = 0;
-    int32_t ret = LnnGetRemoteNumU64Info(targetNetworkId, NUM_KEY_FEATURE_CAPA, &remote);
-    if (ret != SOFTBUS_OK || remote == 0) {
-        TRANS_LOGE(TRANS_CTRL, "get remote feature capa failed, ret=%{public}d, remote=%{public}" PRIu64, ret, remote);
-        return false;
-    }
-    if (!IsFeatureSupport(remote, BIT_DETERMINISTIC_TRANS_CAPABILITY)) {
-        TRANS_LOGI(TRANS_CTRL, "remote not support deterministic trans");
-        return false;
-    }
-    TRANS_LOGI(TRANS_CTRL, "remote support deterministic trans");
-    return true;
-}
-
 static int32_t TransStartTimeSync(SessionConn *conn)
 {
     int32_t ret = SOFTBUS_OK;
@@ -1252,34 +1281,6 @@ static int32_t TransStartTimeSync(SessionConn *conn)
         }
     }
     return ret;
-}
-
-static int32_t StartTransP2pDirectListener(ConnectType type, SessionConn *conn, const AppInfo *appInfo)
-{
-    conn->appInfo.fdProtocol = LNN_PROTOCOL_IP;
-    if (conn->appInfo.isFlashLight) {
-        conn->appInfo.fdProtocol = LNN_PROTOCOL_HTP;
-        int32_t ret = ClientOpenHtpChannelPacked(
-            conn->channelId, conn->req, conn->appInfo.myData.mac, conn->appInfo.peerData.mac);
-        if (ret != SOFTBUS_OK) {
-            TRANS_LOGE(TRANS_CTRL, "start htp falied, degrade to TCP protocol");
-            conn->appInfo.fdProtocol = LNN_PROTOCOL_IP;
-        }
-    } else if (IsSupportDeterministicTrans(conn->appInfo.peerNetWorkId) && IsHmlIpAddr(conn->appInfo.myData.addr) &&
-        conn->appInfo.isLowLatency && conn->appInfo.businessType == BUSINESS_TYPE_BYTE) {
-        conn->appInfo.fdProtocol = LNN_PROTOCOL_MINTP;
-    }
-
-    if (type == CONNECT_P2P) {
-        if (IsHmlIpAddr(conn->appInfo.myData.addr)) {
-            return StartHmlListener(conn->appInfo.myData.addr, &conn->appInfo.myData.port, appInfo->peerData.deviceId,
-                conn->appInfo.fdProtocol);
-        } else {
-            return StartP2pListener(conn->appInfo.myData.addr, &conn->appInfo.myData.port, appInfo->peerData.deviceId);
-        }
-    }
-    return StartHmlListener(
-        conn->appInfo.myData.addr, &conn->appInfo.myData.port, appInfo->peerData.deviceId, conn->appInfo.fdProtocol);
 }
 
 int32_t OpenP2pDirectChannel(const AppInfo *appInfo, const ConnectOption *connInfo, int32_t *channelId)

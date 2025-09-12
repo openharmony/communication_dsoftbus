@@ -777,6 +777,8 @@ HWTEST_F(AuthManagerTest, AUTH_GET_LATEST_AUTH_SEQ_LIST_BY_TYPE_TEST_001, TestSi
     EXPECT_TRUE(ret1 == SOFTBUS_INVALID_PARAM);
     int32_t ret2 = AuthGetLatestAuthSeqListByType(UDID_TEST, authSeq, authVerifyTime, DISCOVERY_TYPE_BLE);
     EXPECT_TRUE(ret2 == SOFTBUS_OK);
+    int32_t ret3 = AuthGetLatestAuthSeqListByType(UDID_TEST, authSeq, authVerifyTime, DISCOVERY_TYPE_COUNT);
+    EXPECT_EQ(ret3, SOFTBUS_AUTH_CONN_TYPE_INVALID);
 }
 
 /*

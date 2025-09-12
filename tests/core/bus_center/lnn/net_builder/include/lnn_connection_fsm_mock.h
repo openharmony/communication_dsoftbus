@@ -71,8 +71,8 @@ public:
         const char *proofInfo, uint32_t proofLen, uint16_t deviceTypeId, int32_t errCode) = 0;
     virtual void LnnNotifyDeviceTrustedChange(int32_t type, const char *msg, uint32_t msgLen) = 0;
     virtual int32_t GetAuthRequest(uint32_t requestId, AuthRequest *request) = 0;
-    virtual void UpdateDpSameAccount(UpdateDpAclParams *aclParams, SessionKey sessionKey, bool isNeedUpdateDk,
-        AclWriteState aclState) = 0;
+    virtual void UpdateDpSameAccount(
+        UpdateDpAclParams *aclParams, SessionKey sessionKey, bool isNeedUpdateDk, AclWriteState aclState) = 0;
     virtual void UpdateDpSameAccountWithoutUserKey(UpdateDpAclParams *aclParams, AclWriteState aclState) = 0;
     virtual int32_t LnnGetAddrTypeByIfName(const char *ifName, ConnectionAddrType *type) = 0;
     virtual bool LnnConvertAuthConnInfoToAddr(

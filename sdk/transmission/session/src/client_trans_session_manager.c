@@ -41,7 +41,6 @@
 #define CONVERSION_BASE 1000LL
 #define CAST_SESSION "CastPlusSessionName"
 #define D2D_FORK_NUM_MAX 5
-#define MAX_PAGING_IDLE_TIME 300000
 static void ClientTransSessionTimerProc(void);
 static void ClientTransAsyncSendBytesTimerProc(void);
 
@@ -1781,8 +1780,6 @@ int32_t ClientForkSocketById(int32_t socketId, BusinessType type, int32_t *newSo
     newSocket->businessType = type;
     newSocket->isServer = false;
     newSocket->isD2D = true;
-    newSocket->role = SESSION_ROLE_CLIENT;
-    newSocket->maxIdleTime = MAX_PAGING_IDLE_TIME;
     newSocket->info.flag = SessionTypeConvert(type);
     if (strcpy_s(newSocket->info.peerDeviceId, DEVICE_ID_SIZE_MAX, sessionNode->info.peerDeviceId)) {
         SoftBusFree(newSocket);

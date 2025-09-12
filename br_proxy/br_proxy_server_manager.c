@@ -54,9 +54,11 @@ typedef struct {
     char bundleName[HAP_NAME_MAX_LEN];
     char abilityName[HAP_NAME_MAX_LEN];
     int32_t channelId;
+    int32_t appIndex;
     pid_t uid;
     bool isEnable;
     bool isConnected;
+    bool isVirtualConnect;
     struct ProxyChannel channel;
     ListNode node;
 } BrProxyInfo;
@@ -468,6 +470,9 @@ static int32_t UpdateConnectState(const char *brMac, const char *uuid, bool isCo
             continue;
         }
         nodeInfo->isConnected = isConnect;
+        if (isConnect == IS_CONNECTED) {
+            nodeInfo->isVirtualConnect = false;
+        }
         (void)SoftBusMutexUnlock(&(g_proxyList->lock));
         return SOFTBUS_OK;
     }
@@ -503,7 +508,8 @@ static int32_t GetCallerInfoAndVerifyPermission(BrProxyInfo *info)
     if (info == NULL) {
         return SOFTBUS_INVALID_PARAM;
     }
-    int32_t ret = GetCallerHapInfo(info->bundleName, HAP_NAME_MAX_LEN, info->abilityName, HAP_NAME_MAX_LEN);
+    int32_t ret = GetCallerHapInfo(info->bundleName, HAP_NAME_MAX_LEN,
+        info->abilityName, HAP_NAME_MAX_LEN, &info->appIndex);
     if (ret != SOFTBUS_OK) {
         TRANS_LOGE(TRANS_SVC, "[br_proxy] get caller hap info failed! ret=%{public}d", ret);
         return ret;
@@ -803,6 +809,29 @@ static void onOpenSuccess(uint32_t requestId, struct ProxyChannel *channel)
     ClearCountInRetryList(nodeInfo.callingUid);
 }
 
+static int32_t SetCurrentConnect(const char *brMac, const char *uuid, bool isVirtualConnect)
+{
+    if (brMac == NULL || uuid == NULL || g_proxyList == NULL) {
+        TRANS_LOGE(TRANS_SVC, "[br_proxy] Something that couldn't have happened!");
+        return SOFTBUS_INVALID_PARAM;
+    }
+    if (SoftBusMutexLock(&(g_proxyList->lock)) != SOFTBUS_OK) {
+        TRANS_LOGE(TRANS_SVC, "[br_proxy] lock failed");
+        return SOFTBUS_LOCK_ERR;
+    }
+    BrProxyInfo *nodeInfo = NULL;
+    LIST_FOR_EACH_ENTRY(nodeInfo, &(g_proxyList->list), BrProxyInfo, node) {
+        if (strcmp(nodeInfo->proxyInfo.brMac, brMac) != 0 || strcmp(nodeInfo->proxyInfo.uuid, uuid) != 0) {
+            continue;
+        }
+        nodeInfo->isVirtualConnect = isVirtualConnect;
+        (void)SoftBusMutexUnlock(&(g_proxyList->lock));
+        return SOFTBUS_OK;
+    }
+    (void)SoftBusMutexUnlock(&(g_proxyList->lock));
+    return SOFTBUS_NOT_FIND;
+}
+
 void onOpenFail(uint32_t requestId, int32_t reason)
 {
     TRANS_LOGE(TRANS_SVC, "[br_proxy] OpenFail requestId=%{public}d, reason = %{public}d",
@@ -810,6 +839,14 @@ void onOpenFail(uint32_t requestId, int32_t reason)
     ServerBrProxyChannelInfo info = {0};
     int32_t ret = GetChannelInfo(NULL, NULL, DEFAULT_INVALID_CHANNEL_ID, requestId, &info);
     if (ret != SOFTBUS_OK) {
+        return;
+    }
+    BrProxyInfo proxyInfo;
+    ret = GetBrProxy(info.proxyInfo.brMac, info.proxyInfo.uuid, &proxyInfo);
+    if (ret == SOFTBUS_OK && proxyInfo.isEnable) {
+        (void)SetCurrentConnect(info.proxyInfo.brMac, info.proxyInfo.uuid, true);
+        ClientIpcBrProxyOpened(COMM_PKGNAME_BRPROXY, proxyInfo.channelId,
+            (const char *)info.proxyInfo.brMac, (const char *)info.proxyInfo.uuid, SOFTBUS_OK);
         return;
     }
     ret = ServerDeleteChannelFromList(info.channelId);
@@ -897,13 +934,27 @@ static int32_t GetChannelId(const char *mac, const char *uuid, int32_t *channelI
     return SOFTBUS_OK;
 }
 
+static void PrintSession(const char *brMac, const char *uuid)
+{
+    if (brMac == NULL || uuid == NULL) {
+        TRANS_LOGI(TRANS_SVC, "[br_proxy] brMac or uuid is NULL");
+        return;
+    }
+    char *brMactmpName = NULL;
+    char *uuidtmpName = NULL;
+    Anonymize(brMac, &brMactmpName);
+    Anonymize(uuid, &uuidtmpName);
+    TRANS_LOGI(TRANS_SVC, "[br_proxy] brproxy open! brMac=%{public}s,uuid=%{public}s", brMactmpName, uuidtmpName);
+    AnonymizeFree(brMactmpName);
+    AnonymizeFree(uuidtmpName);
+}
+
 int32_t TransOpenBrProxy(const char *brMac, const char *uuid)
 {
     if (brMac == NULL || uuid == NULL) {
         TRANS_LOGE(TRANS_SVC, "[br_proxy] brMac or uuid is null");
         return SOFTBUS_INVALID_PARAM;
     }
-
     int32_t ret = BrProxyServerInit();
     if (ret != SOFTBUS_OK) {
         return ret;
@@ -921,25 +972,22 @@ int32_t TransOpenBrProxy(const char *brMac, const char *uuid)
     uint32_t requestId = 0;
     ret = ConnectPeerDevice(brMac, uuid, &requestId);
     if (ret != SOFTBUS_OK) {
+        (void)ServerDeleteProxyFromList(brMac, uuid);
         return ret;
     }
     int32_t channelId = 0;
     ret = GetChannelId(brMac, uuid, &channelId);
     if (ret != SOFTBUS_OK) {
+        (void)ServerDeleteProxyFromList(brMac, uuid);
         return ret;
     }
     ret = ServerAddChannelToList(brMac, uuid, channelId, requestId);
     if (ret != SOFTBUS_OK) {
         TRANS_LOGE(TRANS_SVC, "[br_proxy] failed, ret=%{public}d", ret);
+        (void)ServerDeleteProxyFromList(brMac, uuid);
         return ret;
     }
-    char *brMactmpName = NULL;
-    char *uuidtmpName = NULL;
-    Anonymize(brMac, &brMactmpName);
-    Anonymize(uuid, &uuidtmpName);
-    TRANS_LOGI(TRANS_SVC, "[br_proxy] brproxy open! brMac:%{public}s,uuid:%{public}s", brMactmpName, uuidtmpName);
-    AnonymizeFree(brMactmpName);
-    AnonymizeFree(uuidtmpName);
+    PrintSession(brMac, uuid);
     return SOFTBUS_OK;
 }
 
@@ -1166,9 +1214,18 @@ static void DealDataWhenForeground(ProxyBaseInfo *baseInfo, const uint8_t *data,
 
 static void DealDataWhenBackground(ProxyBaseInfo *baseInfo, const uint8_t *data, uint32_t dataLen)
 {
+    #define MIN_INTERVAL_TIME 5
     int32_t ret = ServerAddDataToList(baseInfo, data, dataLen);
     if (ret != SOFTBUS_OK) {
         TRANS_LOGE(TRANS_SVC, "[br_proxy] add to datalist failed. ret:%{public}d", ret);
+        return;
+    }
+    static SoftBusSysTime lastTime = {0};
+    SoftBusSysTime currentTime = {0};
+    (void)SoftBusGetTime(&currentTime);
+    int64_t secDiff = currentTime.sec - lastTime.sec;
+ 
+    if (currentTime.sec >= lastTime.sec && secDiff < MIN_INTERVAL_TIME) {
         return;
     }
     BrProxyInfo info;
@@ -1177,7 +1234,13 @@ static void DealDataWhenBackground(ProxyBaseInfo *baseInfo, const uint8_t *data,
         TRANS_LOGE(TRANS_SVC, "[br_proxy] get brproxy failed. ret:%{public}d", ret);
         return;
     }
-    PullUpHap(info.bundleName, info.abilityName);
+    TRANS_LOGI(TRANS_SVC, "[br_proxy] start pull up hap");
+    ret = PullUpHap(info.bundleName, info.abilityName, info.appIndex);
+    if (ret != SOFTBUS_OK) {
+        TRANS_LOGE(TRANS_SVC, "[br_proxy] pull up hap failed. ret:%{public}d", ret);
+        return;
+    }
+    lastTime = currentTime;
 }
 
 static void DealWithDataRecv(ProxyBaseInfo *baseInfo, const uint8_t *data, uint32_t dataLen)
@@ -1267,13 +1330,6 @@ static void OnReconnected(char *addr, struct ProxyChannel *channel)
     }
     // the client is dead
     UpdateBrProxy(channel->brMac, channel->uuid, channel, false, 0);
-    BrProxyInfo info;
-    ret = GetBrProxy(channel->brMac, channel->uuid, &info);
-    if (ret != SOFTBUS_OK) {
-        TRANS_LOGE(TRANS_SVC, "[br_proxy] get brproxy failed. ret:%{public}d", ret);
-        return;
-    }
-    PullUpHap(info.bundleName, info.abilityName);
 }
 
 static ProxyConnectListener g_channelListener = {
@@ -1297,6 +1353,19 @@ static void SendDataIfExistsInList(int32_t channelId)
         return;
     }
     CleanUpDataListWithSameMac(&baseInfo, channelId, info.callingPid);
+}
+
+static void NotifyChannelState(const char *brMac, const char *uuid, int32_t channelId)
+{
+    BrProxyInfo info;
+    int32_t ret = GetBrProxy(brMac, uuid, &info);
+    if (ret != SOFTBUS_OK) {
+        TRANS_LOGE(TRANS_SVC, "[br_proxy] get brproxy failed. ret:%{public}d", ret);
+        return;
+    }
+    if (info.isVirtualConnect) {
+        ClientIpcBrProxyStateChanged(COMM_PKGNAME_BRPROXY, channelId, SOFTBUS_CONN_BR_UNDERLAY_SOCKET_CLOSED);
+    }
 }
 
 int32_t TransSetListenerState(int32_t channelId, int32_t type, bool isEnable)
@@ -1327,14 +1396,16 @@ int32_t TransSetListenerState(int32_t channelId, int32_t type, bool isEnable)
     if ((ListenerType)type == DATA_RECEIVE && isEnable) {
         SendDataIfExistsInList(channelId);
     }
+    if ((ListenerType)type == CHANNEL_STATE && isEnable) {
+        NotifyChannelState(info.proxyInfo.brMac, info.proxyInfo.uuid, channelId);
+    }
     return SOFTBUS_OK;
 }
 
 static void ServerDeleteChannelByPid(pid_t callingPid)
 {
-    TRANS_LOGE(TRANS_SVC, "[br_proxy] enter");
     if (g_serverList == NULL) {
-        TRANS_LOGE(TRANS_SVC, "[br_proxy] not init");
+        TRANS_LOGD(TRANS_SVC, "[br_proxy] not init");
         return;
     }
     if (SoftBusMutexLock(&(g_serverList->lock)) != SOFTBUS_OK) {

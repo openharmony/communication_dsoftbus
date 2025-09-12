@@ -150,6 +150,11 @@ bool LnnIsSupportLpSparkFeature(void)
     return true;
 }
 
+bool IsFeatureSupportDetail(void)
+{
+    return true;
+}
+
 int32_t InitControlPlane(void)
 {
     return SOFTBUS_OK;
@@ -1198,6 +1203,28 @@ HWTEST_F(LNNTransLaneMockTest, IS_SUPPORT_LP_SPARK_TEST_001, TestSize.Level1)
 
     lnnEnhanceFunc.lnnIsSupportLpSparkFeature = LnnIsSupportLpSparkFeature;
     ret = LnnIsSupportLpSparkFeaturePacked();
+    EXPECT_EQ(ret, true);
+}
+
+/*
+ * @tc.name: IS_FEATURE_SUPPORT_DETAIL_TEST_001
+ * @tc.desc: LnnIsFeatureSupportDetailPacked func test.
+ * @tc.type: FUNC
+ * @tc.require:
+ */
+HWTEST_F(LNNTransLaneMockTest, IS_FEATURE_SUPPORT_DETAIL_TEST_001, TestSize.Level1)
+{
+    NiceMock<TransLaneDepsInterfaceMock> laneMock;
+    EXPECT_CALL(laneMock, LnnEnhanceFuncListGet).WillRepeatedly(Return(nullptr));
+    bool ret = LnnIsFeatureSupportDetailPacked();
+    EXPECT_EQ(ret, false);
+    LnnEnhanceFuncList lnnEnhanceFunc = { nullptr };
+    EXPECT_CALL(laneMock, LnnEnhanceFuncListGet).WillRepeatedly(Return(&lnnEnhanceFunc));
+    ret = LnnIsFeatureSupportDetailPacked();
+    EXPECT_EQ(ret, false);
+
+    lnnEnhanceFunc.isFeatureSupportDetail = IsFeatureSupportDetail;
+    ret = LnnIsFeatureSupportDetailPacked();
     EXPECT_EQ(ret, true);
 }
 

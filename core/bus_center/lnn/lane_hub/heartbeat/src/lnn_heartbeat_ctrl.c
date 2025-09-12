@@ -134,7 +134,7 @@ bool IsHeartbeatEnable(void)
     bool isInitCheckSuc = IsLnnInitCheckSucceed(MONITOR_BLE_NET);
     bool isDeviceRoot = g_hbConditionState.deviceRootState == SOFTBUS_DEVICE_IS_ROOT;
 
-    LNN_LOGI(LNN_HEART_BEAT,
+    LNN_LOGI(LNN_INIT,
         "HB condition state: bt=%{public}d, screenUnlock=%{public}d, account=%{public}d, trustedRelation=%{public}d, "
         "background=%{public}d, nightMode=%{public}d, OOBEEnd=%{public}d, heartbeatEnable=%{public}d, "
         "request=%{public}d, init check=%{public}d, deviceRoot=%{public}d",
@@ -233,7 +233,7 @@ static void HbSendCheckOffLineMessage(LnnHeartbeatType hbType)
         return;
     }
     if (info == NULL || infoNum == 0) {
-        LNN_LOGE(LNN_HEART_BEAT, "check dev status get online node is 0");
+        LNN_LOGD(LNN_HEART_BEAT, "check dev status get online node is 0");
         return;
     }
     for (i = 0; i < infoNum; ++i) {

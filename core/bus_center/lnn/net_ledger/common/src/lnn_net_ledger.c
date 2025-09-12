@@ -82,11 +82,17 @@ int32_t LnnInitNetLedger(void)
     return SOFTBUS_OK;
 }
 
+static bool IsStaticFeatureChange(uint64_t softbusFeature, uint64_t feature)
+{
+    uint64_t mask = ~ (1 << BIT_FL_CAPABILITY);
+    return ((softbusFeature & mask) != (feature & mask));
+}
+
 static bool IsCapacityChange(NodeInfo *info)
 {
     uint64_t softbusFeature = 0;
     if (LnnGetLocalNumU64Info(NUM_KEY_FEATURE_CAPA, &softbusFeature) == SOFTBUS_OK) {
-        if (softbusFeature != info->feature) {
+        if (IsStaticFeatureChange(softbusFeature, info->feature)) {
             LNN_LOGW(LNN_LEDGER, "feature=%{public}" PRIu64 "->%{public}" PRIu64, info->feature, softbusFeature);
             return true;
         }
@@ -265,29 +271,12 @@ static void LnnSetLocalFeature(void)
     if (IsSupportLpFeaturePacked()) {
         feature |= 1 << BIT_BLE_SUPPORT_LP_HEARTBEAT;
     }
-    if (LnnIsSupportLpSparkFeaturePacked()) {
+    if (LnnIsSupportLpSparkFeaturePacked() && LnnIsFeatureSupportDetailPacked()) {
         feature |= 1 << BIT_SUPPORT_LP_SPARK_CAPABILITY;
         (void)LnnClearFeatureCapability(&feature, BIT_SUPPORT_SPARK_GROUP_CAPABILITY);
     }
     if (LnnSetLocalNum64Info(NUM_KEY_FEATURE_CAPA, feature) != SOFTBUS_OK) {
         LNN_LOGE(LNN_LEDGER, "set feature fail");
-    }
-}
-
-static void UpdateStaticFeature(NodeInfo *info)
-{
-    uint64_t feature = 0;
-    int32_t ret = SOFTBUS_OK;
-    if (LnnGetLocalNumU64Info(NUM_KEY_FEATURE_CAPA, &feature) != SOFTBUS_OK) {
-        LNN_LOGE(LNN_LEDGER, "get feature fail");
-        return;
-    }
-    if (IsFeatureSupport(info->feature, BIT_FL_CAPABILITY) &&
-        LnnSetFeatureCapability(&feature, BIT_FL_CAPABILITY) == SOFTBUS_OK) {
-        ret = LnnSetLocalNum64Info(NUM_KEY_FEATURE_CAPA, feature);
-    }
-    if (ret != SOFTBUS_OK) {
-        LNN_LOGE(LNN_LEDGER, "set localFeatureCap failed, ret=%{public}d.", ret);
     }
 }
 
@@ -298,7 +287,6 @@ static void ProcessLocalDeviceInfo(void)
     (void)memset_s(&info, sizeof(NodeInfo), 0, sizeof(NodeInfo));
     (void)LnnGetLocalDevInfoPacked(&info);
     LnnDumpNodeInfo(&info, "load local deviceInfo success");
-    UpdateStaticFeature(&info);
     if (IsBleDirectlyOnlineFactorChange(&info)) {
         info.stateVersion++;
         if (info.stateVersion > MAX_STATE_VERSION) {

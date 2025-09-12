@@ -1313,9 +1313,9 @@ int32_t LnnSendWifiOfflineInfoMsg(void)
     for (int32_t i = 0; i < num; i++) {
         if (AuthPostTransData(authHandle[i], &dataInfo) == SOFTBUS_OK) {
             LNN_LOGI(LNN_BUILDER, "send wifi offline msg sucess, authPort:%{public}d, offlineCode:%{public}s,"
-                "authId:%{public}" PRId64, authPort, AnonymizeWrapper(anonyOfflineCode), authHandle->authId);
+                "authId:%{public}" PRId64, authPort, AnonymizeWrapper(anonyOfflineCode), authHandle[i].authId);
         } else {
-            LNN_LOGE(LNN_BUILDER, "post trans data fail, authId:%{public}" PRId64, authHandle->authId);
+            LNN_LOGE(LNN_BUILDER, "post trans data fail, authId:%{public}" PRId64, authHandle[i].authId);
         }
     }
     cJSON_free(msg);
@@ -1361,8 +1361,8 @@ SendSyncInfoParam *CreateSyncInfoParam(
         return NULL;
     }
 
-    if (strcpy_s(data->networkId, strlen(networkId) + 1, networkId) != SOFTBUS_OK ||
-        memcpy_s(data->msg, len, (uint8_t *)msg, len) != SOFTBUS_OK) {
+    if (strcpy_s(data->networkId, strlen(networkId) + 1, networkId) != EOK ||
+        memcpy_s(data->msg, len, (uint8_t *)msg, len) != EOK) {
         SoftBusFree(data->msg);
         SoftBusFree(data);
         return NULL;

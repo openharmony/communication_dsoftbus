@@ -359,6 +359,72 @@ static void DumpDpAclInfo(const std::string peerUdid, int32_t localUserId, int32
     AnonymizeFree(anonyUdid);
 }
 
+static int32_t GenerateDsoftbusBundleName(
+    const char *peerUdid, const char *localUdid, int32_t localUserId, char *bundleName)
+{
+    if (peerUdid == NULL || localUdid == NULL || bundleName == NULL) {
+        LNN_LOGE(LNN_STATE, "invalid param");
+        return SOFTBUS_INVALID_PARAM;
+    }
+
+    char localShortUdid[SHORT_UDID_HASH_HEX_LEN + 1] = { 0 };
+    char peerShortUdid[SHORT_UDID_HASH_HEX_LEN + 1] = { 0 };
+    if (strncpy_s(localShortUdid, SHORT_UDID_HASH_HEX_LEN + 1, localUdid, SHORT_UDID_HASH_HEX_LEN) != EOK) {
+        LNN_LOGE(LNN_STATE, "strncpy_s localUdid fail");
+        return SOFTBUS_STRCPY_ERR;
+    }
+    if (strncpy_s(peerShortUdid, SHORT_UDID_HASH_HEX_LEN + 1, peerUdid, SHORT_UDID_HASH_HEX_LEN) != EOK) {
+        LNN_LOGE(LNN_STATE, "strncpy_s peerUdid fail");
+        return SOFTBUS_STRCPY_ERR;
+    }
+    if (sprintf_s(bundleName, MAX_BUNDLE_NAME_LEN, "dsoftbus_%d_%s_%s", localUserId, localShortUdid,
+        peerShortUdid) < 0) {
+        LNN_LOGE(LNN_STATE, "sprintf_s bundleName fail");
+        return SOFTBUS_SPRINTF_ERR;
+    }
+    return SOFTBUS_OK;
+}
+
+static int32_t InsertDpAclWithBundleName(const OHOS::DistributedDeviceProfile::AccessControlProfile &aclProfile)
+{
+    OHOS::DistributedDeviceProfile::AccessControlProfile accessControlProfile(aclProfile);
+    OHOS::DistributedDeviceProfile::Accesser accesser(accessControlProfile.GetAccesser());
+    OHOS::DistributedDeviceProfile::Accessee accessee(accessControlProfile.GetAccessee());
+    std::string peerUdid = accessee.GetAccesseeDeviceId();
+    std::string localUdid = accesser.GetAccesserDeviceId();
+    int32_t localUserId = accesser.GetAccesserUserId();
+    char bundleName[MAX_BUNDLE_NAME_LEN] = { 0 };
+
+    int32_t ret = GenerateDsoftbusBundleName(peerUdid.c_str(), localUdid.c_str(), localUserId, bundleName);
+    if (ret != SOFTBUS_OK) {
+        LNN_LOGE(LNN_STATE, "generate dsoftbus bundle name fail.");
+        return ret;
+    }
+    accesser.SetAccesserBundleName(std::string(bundleName));
+    accessControlProfile.SetAccesser(accesser);
+    ret = DpClient::GetInstance().PutAccessControlProfile(accessControlProfile);
+    if (ret != OHOS::DistributedDeviceProfile::DP_SUCCESS) {
+        LNN_LOGE(LNN_STATE, "PutAccessControlProfile failed, ret=%{public}d", ret);
+        return SOFTBUS_AUTH_INSERT_ACL_FAIL;
+    }
+    return SOFTBUS_OK;
+}
+
+static UpdateDpAclResult UpdateDpAclWithInvalidBundleName(
+    OHOS::DistributedDeviceProfile::AccessControlProfile &aclProfile)
+{
+    std::string bundleName = aclProfile.GetAccesser().GetAccesserBundleName();
+    if (bundleName.length() == 0 && InsertDpAclWithBundleName(aclProfile) == SOFTBUS_OK) {
+        int32_t controlId = aclProfile.GetAccessControlId();
+        int32_t ret = DpClient::GetInstance().DeleteAccessControlProfile(controlId);
+        LNN_LOGW(LNN_STATE, "DeleteAccessControlProfile ret=%{public}d", ret);
+        return UPDATE_ACL_SUCC;
+    }
+    int32_t ret = DpClient::GetInstance().UpdateAccessControlProfile(aclProfile);
+    LNN_LOGI(LNN_STATE, "UpdateAccessControlProfile ret=%{public}d", ret);
+    return UPDATE_ACL_SUCC;
+}
+
 static UpdateDpAclResult UpdateDpSameAccountAcl(const std::string peerUdid, int32_t realityPeerUserId,
     int32_t findPeerUserId, int32_t sessionKeyId)
 {
@@ -403,38 +469,10 @@ static UpdateDpAclResult UpdateDpSameAccountAcl(const std::string peerUdid, int3
         if (aclProfile.GetStatus() != (int32_t)OHOS::DistributedDeviceProfile::Status::ACTIVE) {
             aclProfile.SetStatus((int32_t)OHOS::DistributedDeviceProfile::Status::ACTIVE);
         }
-        ret = DpClient::GetInstance().UpdateAccessControlProfile(aclProfile);
-        LNN_LOGI(LNN_STATE, "UpdateAccessControlProfile ret=%{public}d", ret);
-        updateResult = UPDATE_ACL_SUCC;
+        updateResult = UpdateDpAclWithInvalidBundleName(aclProfile);
         break;
     }
     return updateResult;
-}
-
-static int32_t GenerateDsoftbusBundleName(
-    const char *peerUdid, const char *localUdid, int32_t localUserId, char *bundleName)
-{
-    if (peerUdid == NULL || localUdid == NULL || bundleName == NULL) {
-        LNN_LOGE(LNN_STATE, "invalid param");
-        return SOFTBUS_INVALID_PARAM;
-    }
-
-    char localShortUdid[SHORT_UDID_HASH_HEX_LEN + 1] = { 0 };
-    char peerShortUdid[SHORT_UDID_HASH_HEX_LEN + 1] = { 0 };
-    if (strncpy_s(localShortUdid, SHORT_UDID_HASH_HEX_LEN + 1, localUdid, SHORT_UDID_HASH_HEX_LEN) != EOK) {
-        LNN_LOGE(LNN_STATE, "strncpy_s localUdid fail");
-        return SOFTBUS_STRCPY_ERR;
-    }
-    if (strncpy_s(peerShortUdid, SHORT_UDID_HASH_HEX_LEN + 1, peerUdid, SHORT_UDID_HASH_HEX_LEN) != EOK) {
-        LNN_LOGE(LNN_STATE, "strncpy_s peerUdid fail");
-        return SOFTBUS_STRCPY_ERR;
-    }
-    if (sprintf_s(bundleName, MAX_BUNDLE_NAME_LEN, "dsoftbus_%d_%s_%s", localUserId, localShortUdid,
-        peerShortUdid) < 0) {
-        LNN_LOGE(LNN_STATE, "sprintf_s bundleName fail");
-        return SOFTBUS_SPRINTF_ERR;
-    }
-    return SOFTBUS_OK;
 }
 
 static void InsertDpSameAccountAcl(const std::string &peerUdid, int32_t peerUserId, int32_t sessionKeyId)

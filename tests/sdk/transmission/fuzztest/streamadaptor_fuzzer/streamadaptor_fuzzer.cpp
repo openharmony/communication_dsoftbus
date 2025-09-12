@@ -24,7 +24,7 @@
 using namespace std;
 
 namespace OHOS {
-    void SetAliveStateDataTest(const uint8_t* data, size_t size)
+    void SetAliveStateDataTest(const uint8_t *data, size_t size)
     {
         if (data == nullptr || size < sizeof(int32_t)) {
             return;
@@ -42,7 +42,7 @@ namespace OHOS {
         streamadaptor.SetAliveState(state);
     }
 
-    void InitAdaptorTest(const uint8_t* data, size_t size)
+    void InitAdaptorTest(const uint8_t *data, size_t size)
     {
         if (data == nullptr || size < sizeof(uint32_t)) {
             return;
@@ -68,7 +68,7 @@ namespace OHOS {
 } // namespace OHOS
 
 /* Fuzzer entry point */
-extern "C" int32_t LLVMFuzzerTestOneInput(const uint8_t* data, size_t size)
+extern "C" int32_t LLVMFuzzerTestOneInput(const uint8_t *data, size_t size)
 {
     /* Run your code on data */
     OHOS::SetAliveStateDataTest(data, size);

@@ -47,10 +47,10 @@ private:
 
 static void FillLocalListenerInfo(FuzzedDataProvider &provider, LocalListenerInfo *info)
 {
-    std::string addr = provider.ConsumeRandomLengthString(IP_LEN);
-    std::string ifName = provider.ConsumeRandomLengthString(NETIF_NAME_LEN);
-    std::string localMac = provider.ConsumeRandomLengthString(MAC_MAX_LEN);
-    std::string remoteMac = provider.ConsumeRandomLengthString(MAC_MAX_LEN);
+    std::string addr = provider.ConsumeBytesAsString(IP_LEN);
+    std::string ifName = provider.ConsumeBytesAsString(NETIF_NAME_LEN);
+    std::string localMac = provider.ConsumeBytesAsString(MAC_MAX_LEN);
+    std::string remoteMac = provider.ConsumeBytesAsString(MAC_MAX_LEN);
     if (strcpy_s(info->socketOption.addr, IP_LEN, addr.c_str()) != 0) {
         return;
     }
@@ -64,7 +64,7 @@ static void FillLocalListenerInfo(FuzzedDataProvider &provider, LocalListenerInf
         return;
     }
     info->type = static_cast<ConnectType>(
-        provider.ConsumeIntegralInRange<int32_t>(CONNECT_TCP, CONNECT_TYPE_MAX));
+        provider.ConsumeIntegralInRange<int32_t>(CONNECT_TCP, CONNECT_BLE_DIRECT));
     info->socketOption.port = provider.ConsumeIntegral<int32_t>();
     info->socketOption.moduleId = static_cast<ListenerModule>(
         provider.ConsumeIntegralInRange<int32_t>(PROXY, UNUSE_BUTT));
@@ -73,10 +73,10 @@ static void FillLocalListenerInfo(FuzzedDataProvider &provider, LocalListenerInf
 
 static void FillConnectOption(FuzzedDataProvider &provider, ConnectOption *option)
 {
-    std::string addr = provider.ConsumeRandomLengthString(IP_LEN);
-    std::string ifName = provider.ConsumeRandomLengthString(NETIF_NAME_LEN);
-    std::string localMac = provider.ConsumeRandomLengthString(MAC_MAX_LEN);
-    std::string remoteMac = provider.ConsumeRandomLengthString(MAC_MAX_LEN);
+    std::string addr = provider.ConsumeBytesAsString(IP_LEN);
+    std::string ifName = provider.ConsumeBytesAsString(NETIF_NAME_LEN);
+    std::string localMac = provider.ConsumeBytesAsString(MAC_MAX_LEN);
+    std::string remoteMac = provider.ConsumeBytesAsString(MAC_MAX_LEN);
     if (strcpy_s(option->socketOption.addr, IP_LEN, addr.c_str()) != 0) {
         return;
     }
@@ -90,7 +90,7 @@ static void FillConnectOption(FuzzedDataProvider &provider, ConnectOption *optio
         return;
     }
     option->type = static_cast<ConnectType>(
-        provider.ConsumeIntegralInRange<int32_t>(CONNECT_TCP, CONNECT_TYPE_MAX));
+        provider.ConsumeIntegralInRange<int32_t>(CONNECT_TCP, CONNECT_BLE_DIRECT));
     option->socketOption.port = provider.ConsumeIntegral<int32_t>();
     option->socketOption.moduleId = static_cast<ListenerModule>(
         provider.ConsumeIntegralInRange<int32_t>(PROXY, UNUSE_BUTT));
@@ -144,9 +144,13 @@ void BindMintpTest(FuzzedDataProvider &provider)
 {
     int32_t domain = provider.ConsumeIntegral<int32_t>();
     int32_t fd = provider.ConsumeIntegral<int32_t>();
-    std::string localIp = provider.ConsumeRandomLengthString(IP_LEN);
+    std::string providerLocalIp = provider.ConsumeBytesAsString(IP_LEN - 1);
+    char localIp[IP_LEN] = { 0 };
+    if (strcpy_s(localIp, IP_LEN, providerLocalIp.c_str()) != EOK) {
+        return;
+    }
     (void)BindMintp(domain, fd, nullptr);
-    (void)BindMintp(domain, fd, localIp.c_str());
+    (void)BindMintp(domain, fd, localIp);
 }
 
 void OpenMintpServerSocketTest(FuzzedDataProvider &provider)
@@ -173,11 +177,16 @@ void OpenMintpClientSocketTest(FuzzedDataProvider &provider)
     ConnectOption option;
     (void)memset_s(&option, sizeof(ConnectOption), 0, sizeof(ConnectOption));
     FillConnectOption(provider, &option);
-    std::string myIp = provider.ConsumeRandomLengthString(IP_LEN);
+    std::string providerMyIp = provider.ConsumeBytesAsString(IP_LEN - 1);
+    char myIp[IP_LEN] = { 0 };
+    if (strcpy_s(myIp, IP_LEN, providerMyIp.c_str()) != EOK) {
+        return;
+    }
     bool isNonBlock = provider.ConsumeBool();
-    (void)OpenMintpClientSocket(nullptr, myIp.c_str(), isNonBlock);
+    (void)OpenMintpClientSocket(nullptr, myIp, isNonBlock);
     (void)OpenMintpClientSocket(&option, nullptr, isNonBlock);
-    (void)OpenMintpClientSocket(&option, myIp.c_str(), isNonBlock);
+
+    (void)OpenMintpClientSocket(&option, myIp, isNonBlock);
 }
 
 void GetMintpSockPortTest(FuzzedDataProvider &provider)

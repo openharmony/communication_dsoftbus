@@ -58,6 +58,9 @@ ohos_shared_library("br_proxy_adapter") {
     sources += [
       "br_proxy_adapter.cpp",
     ]
+    deps = [
+      "$dsoftbus_dfx_path:softbus_dfx",
+    ]
     external_deps = [
       "c_utils:utils",
       "ability_runtime:ability_manager",

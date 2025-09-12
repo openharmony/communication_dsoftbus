@@ -70,6 +70,7 @@ static int32_t MessageParcelWriteEx(MessageParcel &data, const ChannelInfo *chan
     WRITE_PARCEL_WITH_RET(data, CString, channel->peerDeviceId, SOFTBUS_IPC_ERR);
     WRITE_PARCEL_WITH_RET(data, Bool, channel->isD2D, SOFTBUS_IPC_ERR);
     if (channel->isD2D) {
+        WRITE_PARCEL_WITH_RET(data, Bool, channel->isSupportNewHead, SOFTBUS_IPC_ERR);
         WRITE_PARCEL_WITH_RET(data, Int32, channel->pagingId, SOFTBUS_IPC_ERR);
         WRITE_PARCEL_WITH_RET(data, Uint32, channel->businessFlag, SOFTBUS_IPC_ERR);
         WRITE_PARCEL_WITH_RET(data, Uint32, channel->deviceTypeId, SOFTBUS_IPC_ERR);

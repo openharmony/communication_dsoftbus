@@ -179,5 +179,15 @@ int32_t BrHiDumperRegister(void)
 {
     return SOFTBUS_OK;
 }
+
+struct ConnSlideWindowController *ConnSlideWindowControllerNew(void)
+{
+    return GetConnectionBrInterface()->ConnSlideWindowControllerNew();
+}
+
+void ConnSlideWindowControllerDelete(struct ConnSlideWindowController *self)
+{
+    (void)self;
+}
 }
 }

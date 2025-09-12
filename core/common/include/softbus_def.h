@@ -184,6 +184,7 @@ typedef struct {
     bool isFastData;
     bool isSupportTlv;
     bool isD2D;
+    bool isSupportNewHead;
     int32_t sessionId;
     int32_t pagingId;
     int32_t channelId;

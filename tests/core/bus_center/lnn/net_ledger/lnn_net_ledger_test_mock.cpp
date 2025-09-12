@@ -60,6 +60,11 @@ bool LnnIsSupportLpSparkFeaturePacked(void)
     return GetLnnNetLedgerInterface()->LnnIsSupportLpSparkFeaturePacked();
 }
 
+bool LnnIsFeatureSupportDetailPacked(void)
+{
+    return GetLnnNetLedgerInterface()->LnnIsFeatureSupportDetailPacked();
+}
+
 int32_t LnnClearFeatureCapability(uint64_t *feature, FeatureCapability capaBit)
 {
     return GetLnnNetLedgerInterface()->LnnClearFeatureCapability(feature, capaBit);

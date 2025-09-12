@@ -14,6 +14,7 @@
  */
 
 #include "authmanagerother_fuzzer.h"
+
 #include <cstddef>
 #include <cstring>
 #include <fuzzer/FuzzedDataProvider.h>
@@ -26,12 +27,12 @@
 
 using namespace std;
 
-#define AUTH_TYPE_MIN AUTH_LINK_TYPE_WIFI
-#define AUTH_TYPE_MAX AUTH_LINK_TYPE_MAX
-#define TYPE_MIN      DATA_TYPE_AUTH
-#define TYPE_MAX      DATA_TYPE_APPLY_KEY_CONNECTION
-#define MODULE_MIN    MODULE_TRUST_ENGINE
-#define MODULE_MAX    MODULE_OLD_NEARBY
+#define AUTH_LINK_TYPE_MIN AUTH_LINK_TYPE_WIFI
+#define AUTH_LINK_TYPE_MAX AUTH_LINK_TYPE_MAX
+#define TYPE_MIN           DATA_TYPE_AUTH
+#define TYPE_MAX           DATA_TYPE_APPLY_KEY_CONNECTION
+#define MODULE_MIN         MODULE_TRUST_ENGINE
+#define MODULE_MAX         MODULE_OLD_NEARBY
 
 namespace {
 class TestEnv {
@@ -61,7 +62,7 @@ namespace OHOS {
 static bool ProcSessionKeyInfo(FuzzedDataProvider &provider, AuthSessionInfo *info, int64_t authSeq)
 {
     info->connInfo.type = AUTH_LINK_TYPE_SESSION_KEY;
-    info->connId = 1ULL << (uint64_t)info->connInfo.type;
+    info->connId = (uint64_t)info->connInfo.type << INT32_BIT_NUM;
     info->isServer = provider.ConsumeBool();
     info->isConnectServer = provider.ConsumeBool();
     AuthManager *auth = NewAuthManager(authSeq, info);
@@ -71,7 +72,7 @@ static bool ProcSessionKeyInfo(FuzzedDataProvider &provider, AuthSessionInfo *in
     RawLinkNeedUpdateAuthManager(info->uuid, info->isServer);
     RawLinkNeedUpdateAuthManager(nullptr, info->isServer);
     FindNormalizedKeyAuthManagerByUdid(info->udid, info->isServer);
-    DelAuthManager(auth, AUTH_LINK_TYPE_MAX);
+    DelAuthManager(auth, info->connInfo.type);
     return true;
 }
 
@@ -92,7 +93,8 @@ bool AuthManagerOtherFuzzTest(FuzzedDataProvider &provider)
     if (!ProcSessionKeyInfo(provider, &info, authSeq)) {
         return false;
     }
-    info.connInfo.type = (AuthLinkType)provider.ConsumeIntegralInRange<uint32_t>(AUTH_TYPE_MIN, AUTH_TYPE_MAX);
+    info.connInfo.type =
+        (AuthLinkType)provider.ConsumeIntegralInRange<uint32_t>(AUTH_LINK_TYPE_MIN, AUTH_LINK_TYPE_MAX);
     info.connId = (uint64_t)info.connInfo.type << INT32_BIT_NUM;
     info.isConnectServer = provider.ConsumeBool();
     AuthManager *auth = NewAuthManager(authSeq, &info);

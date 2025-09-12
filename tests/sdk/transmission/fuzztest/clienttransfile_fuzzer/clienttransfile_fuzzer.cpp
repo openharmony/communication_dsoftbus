@@ -26,15 +26,15 @@
 
 namespace OHOS {
 
-    static int32_t OnReceiveFileStarted(int32_t sessionId, const char* files, int32_t fileCnt)
+    static int32_t OnReceiveFileStarted(int32_t sessionId, const char *files, int32_t fileCnt)
     {
         return 0;
     }
 
-    static void OnReceiveFileFinished(int32_t sessionId, const char* files, int32_t fileCnt)
+    static void OnReceiveFileFinished(int32_t sessionId, const char *files, int32_t fileCnt)
     {}
 
-    static int32_t OnReceiveFileProcess(int32_t sessionId, const char* firstFile,
+    static int32_t OnReceiveFileProcess(int32_t sessionId, const char *firstFile,
                                         uint64_t bytesUpload, uint64_t bytesTotal)
     {
         return 0;
@@ -45,7 +45,7 @@ namespace OHOS {
         return 0;
     }
 
-    static int32_t OnSendFileFinished(int32_t sessionId, const char* firstFile)
+    static int32_t OnSendFileFinished(int32_t sessionId, const char *firstFile)
     {
         return 0;
     }
@@ -53,17 +53,7 @@ namespace OHOS {
     static void OnFileTransError(int32_t sessionId)
     {}
 
-    void TransOnFileChannelOpenedTest(const uint8_t* data, size_t size)
-    {
-        if ((data == nullptr) || (size == 0)) {
-            return;
-        }
-        const char* sessionName = reinterpret_cast<const char*>(data);
-        int32_t fileport = 0;
-        TransOnFileChannelOpened(sessionName, nullptr, &fileport, nullptr);
-    }
-
-    void TransSetFileReceiveListenerTest(const uint8_t* data, size_t size)
+    void TransSetFileReceiveListenerTest(const uint8_t *data, size_t size)
     {
         if ((data == nullptr) || (size == 0)) {
             return;
@@ -74,12 +64,12 @@ namespace OHOS {
             .OnReceiveFileFinished = OnReceiveFileFinished,
             .OnFileTransError = OnFileTransError,
         };
-        const char* sessionName = reinterpret_cast<const char*>(data);
-        const char* rootDir = "/data/recv/";
+        const char *sessionName = reinterpret_cast<const char *>(data);
+        const char *rootDir = "/data/recv/";
         TransSetFileReceiveListener(sessionName, &fileRecvListener, rootDir);
     }
 
-    void TransSetFileSendListenerTest(const uint8_t* data, size_t size)
+    void TransSetFileSendListenerTest(const uint8_t *data, size_t size)
     {
         if ((data == nullptr) || (size == 0)) {
             return;
@@ -90,36 +80,22 @@ namespace OHOS {
             .OnSendFileFinished = OnSendFileFinished,
             .OnFileTransError = OnFileTransError,
         };
-        const char* sessionName = reinterpret_cast<const char*>(data);
+        const char *sessionName = reinterpret_cast<const char *>(data);
         TransSetFileSendListener(sessionName, &sendListener);
     }
 
-    void TransGetFileListenerTest(const uint8_t* data, size_t size)
+    void TransGetFileListenerTest(const uint8_t *data, size_t size)
     {
         if ((data == nullptr) || (size == 0)) {
             return;
         }
 
         FileListener fileListener;
-        const char* sessionName = reinterpret_cast<const char*>(data);
+        const char *sessionName = reinterpret_cast<const char *>(data);
         TransGetFileListener(sessionName, &fileListener);
     }
 
-    void StartNStackXDFileServerTest(const uint8_t* data, size_t size)
-    {
-        if ((data == nullptr) || (size < sizeof(int32_t))) {
-            return;
-        }
-
-        #define DEFAULT_KEY_LENGTH 32
-        DataGenerator::Write(data, size);
-        int32_t len = 0;
-        GenerateInt32(len);
-        StartNStackXDFileServer(nullptr, data, DEFAULT_KEY_LENGTH, nullptr, &len);
-        DataGenerator::Clear();
-    }
-
-    void TransDeleteFileListenerTest(const uint8_t* data, size_t size)
+    void TransDeleteFileListenerTest(const uint8_t *data, size_t size)
     {
         if ((data == nullptr) || (size < SESSION_NAME_SIZE_MAX)) {
             return;
@@ -133,14 +109,12 @@ namespace OHOS {
 } // namespace OHOS
 
 /* Fuzzer entry point */
-extern "C" int32_t LLVMFuzzerTestOneInput(const uint8_t* data, size_t size)
+extern "C" int32_t LLVMFuzzerTestOneInput(const uint8_t *data, size_t size)
 {
     /* Run your code on data */
-    OHOS::TransOnFileChannelOpenedTest(data, size);
     OHOS::TransSetFileReceiveListenerTest(data, size);
     OHOS::TransSetFileSendListenerTest(data, size);
     OHOS::TransGetFileListenerTest(data, size);
-    OHOS::StartNStackXDFileServerTest(data, size);
     OHOS::TransDeleteFileListenerTest(data, size);
     return 0;
 }

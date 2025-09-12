@@ -92,6 +92,7 @@ void TransProxyProcessErrMsg(ProxyChannelInfo *info, int32_t errCode);
 int32_t TransPagingUpdatePagingChannelInfo(ProxyChannelInfo *info);
 int32_t TransPagingUpdatePidAndData(int32_t channelId, int32_t pid, char *data, uint32_t len);
 void TransPagingBadKeyRetry(int32_t channelId);
+int32_t TransPagingUpdateDataConfig(AppInfo *info);
 #ifdef __cplusplus
 }
 #endif
