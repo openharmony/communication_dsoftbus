@@ -159,6 +159,7 @@ int32_t LnnInitMetaNodeExtLedgerPacked(void);
 void LnnDeinitMetaNodeExtLedgerPacked(void);
 bool IsSupportLpFeaturePacked(void);
 bool LnnIsSupportLpSparkFeaturePacked(void);
+bool LnnIsFeatureSupportDetailPacked(void);
 void AuthLoadDeviceKeyPacked(void);
 int32_t LnnLoadLocalDeviceInfoPacked(void);
 void LnnLoadPtkInfoPacked(void);
