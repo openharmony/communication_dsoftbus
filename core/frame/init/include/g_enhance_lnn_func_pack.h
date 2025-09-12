@@ -224,6 +224,9 @@ int32_t LnnSetLocalChannelInfoPacked(LnnVapType type, int32_t channelId);
 int32_t LnnVirtualLinkInitPacked(void);
 void LnnVirtualLinkDeinitPacked(void);
 int32_t DcTriggerVirtualLinkPacked(const char *peerNetworkId);
+int32_t LnnInitDecisionCenterV2Packed(void);
+void LnnDeinitDecisionCenterV2Packed(void);
+void SdMgrDeathCallbackPacked(const char *pkgName);
 
 #ifdef __cplusplus
 }

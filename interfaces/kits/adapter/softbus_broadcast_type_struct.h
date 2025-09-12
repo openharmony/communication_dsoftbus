@@ -117,6 +117,7 @@ typedef enum {
     SRV_TYPE_OH_APPROACH, // The service type is oh approach discovery.
     SRV_TYPE_D2D_PAGING, // The service type is D2D 1v1 communication.
     SRV_TYPE_D2D_GROUP_TALKIE, // The service type is D2D group talkie.
+    SRV_TYPE_SD, // The service type is service discovery.
     SRV_TYPE_BUTT,
 } BaseServiceType;
 
@@ -158,6 +159,7 @@ static const SrvTypeMap g_srvTypeMap[] = {
     {SRV_TYPE_OH_APPROACH, (char *)"oh_approach"},
     {SRV_TYPE_D2D_PAGING, (char *)"d2d paging"},
     {SRV_TYPE_D2D_GROUP_TALKIE, (char *)"d2d group talkie"},
+    {SRV_TYPE_SD, (char *)"service discovery"},
 };
 
 /**
