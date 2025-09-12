@@ -200,5 +200,10 @@ int32_t ClientOnRangeResult(const char *pkgName, int32_t pid, const RangeResultI
 {
     return BusCenterIpcInterfaceInstance()->ClientOnRangeResult(pkgName, pid, rangeInfo);
 }
+
+void SdMgrDeathCallbackPacked(const char *pkgName)
+{
+    return BusCenterIpcInterfaceInstance()->SdMgrDeathCallbackPacked(pkgName);
+}
 }
 } // namespace OHOS

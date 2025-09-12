@@ -451,6 +451,8 @@ typedef enum {
     OOP_CAPABILITY_BITMAP,
     /**Oh Approach capability */
     OH_APPROACH_CAPABILITY_BITMAP,
+    /**Sd capability */
+    SD_CAPABILITY_BITMAP,
     /**Raise Hand capability */
     RAISE_HAND_CAPABILITY_BITMAP
 } DataBitMap;

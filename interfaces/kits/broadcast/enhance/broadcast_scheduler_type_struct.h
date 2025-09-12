@@ -47,6 +47,7 @@ typedef enum {
     BC_TYPE_D2D_PAGING_NON,
     BC_TYPE_D2D_GROUP_TALKIE_CTRL,
     BC_TYPE_D2D_GROUP_TALKIE_DATA,
+    BC_TYPE_SD,
     BC_TYPE_SCHEDULER_BUTT,
 } BroadcastContentType;
 

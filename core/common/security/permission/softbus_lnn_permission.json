@@ -184,5 +184,29 @@
     "PROCESS_NAME": [
       "msdp_sa"
     ]
+  },
+  {
+    "INTERFACE_NAME": "EX_OBJ_CMD_SERVER_PUBLISH_SERVICE",
+    "PROCESS_NAME": [
+      "device_manager"
+    ]
+  },
+  {
+    "INTERFACE_NAME": "EX_OBJ_CMD_SERVER_UNPUBLISH_SERVICE",
+    "PROCESS_NAME": [
+      "device_manager"
+    ]
+  },
+  {
+    "INTERFACE_NAME": "EX_OBJ_CMD_SERVER_START_DISCOVERY_SERVICE",
+    "PROCESS_NAME": [
+      "device_manager"
+    ]
+  },
+  {
+    "INTERFACE_NAME": "EX_OBJ_CMD_SERVER_STOP_DISCOVERY_SERVICE",
+    "PROCESS_NAME": [
+      "device_manager"
+    ]
   }
 ]
