@@ -196,6 +196,18 @@ static int32_t InitTestFfrtLooper(int type)
     return SOFTBUS_OK;
 }
 
+static int32_t InitTestFfrtLooperByName(int type, const char *name)
+{
+    g_testFfrtLoopHandler.name = (char *)name;
+    g_testFfrtLoopHandler.HandleMessage = FfrtMsgHandler;
+    g_testFfrtLoopHandler.looper = GetLooper(type);
+    if (g_testFfrtLoopHandler.looper == nullptr) {
+        GTEST_LOG_(INFO) << "test ffrt init looper fail";
+        return SOFTBUS_NO_INIT;
+    }
+    return SOFTBUS_OK;
+}
+
 static void DeInitTestFfrtLooper(void)
 {
     g_testFfrtLoopHandler.HandleMessage = nullptr;
@@ -513,5 +525,59 @@ HWTEST_F(MessageHandlerFfrtTest, LooperSetDumpable001, TestSize.Level1)
     EXPECT_TRUE(looper->dumpable);
     DumpLooper(nullptr);
     DumpLooper(looper);
+}
+
+/**
+ * @tc.name: LooperCreateByNameTest001
+ * @tc.desc: test looper name with qos_perception_handler
+ * @tc.type: FUNC
+ * @tc.require:
+ */
+HWTEST_F(MessageHandlerFfrtTest, LooperCreateByNameTest001, TestSize.Level1)
+{
+    int32_t ret = InitTestFfrtLooperByName(LOOP_TYPE_LNN, "qos_perception_handler");
+    EXPECT_EQ(ret, SOFTBUS_OK);
+    uint64_t delayMillis1 = 200;
+    uint64_t delayMillis2 = 100;
+    g_isNeedCondWait = true;
+    ret = TestFfrtPostMsgToHandler(0, nullptr, delayMillis1, TestFfrtFreeMessage);
+    EXPECT_EQ(ret, SOFTBUS_OK);
+    ret = TestFfrtPostMsgToHandler(0, nullptr, delayMillis2, TestFfrtFreeMessage);
+    EXPECT_EQ(ret, SOFTBUS_OK);
+    if (g_isNeedCondWait) {
+        CondWait();
+    }
+    g_isNeedCondWait = true;
+    if (g_isNeedCondWait) {
+        CondWait();
+    }
+    EXPECT_NO_FATAL_FAILURE(DeInitTestFfrtLooper());
+}
+
+/**
+ * @tc.name: LooperCreateByNameTest002
+ * @tc.desc: test looper name with nullptr
+ * @tc.type: FUNC
+ * @tc.require:
+ */
+HWTEST_F(MessageHandlerFfrtTest, LooperCreateByNameTest002, TestSize.Level1)
+{
+    int32_t ret = InitTestFfrtLooperByName(LOOP_TYPE_LNN, nullptr);
+    EXPECT_EQ(ret, SOFTBUS_OK);
+    uint64_t delayMillis1 = 200;
+    uint64_t delayMillis2 = 100;
+    g_isNeedCondWait = true;
+    ret = TestFfrtPostMsgToHandler(0, nullptr, delayMillis1, TestFfrtFreeMessage);
+    EXPECT_EQ(ret, SOFTBUS_OK);
+    ret = TestFfrtPostMsgToHandler(0, nullptr, delayMillis2, TestFfrtFreeMessage);
+    EXPECT_EQ(ret, SOFTBUS_OK);
+    if (g_isNeedCondWait) {
+        CondWait();
+    }
+    g_isNeedCondWait = true;
+    if (g_isNeedCondWait) {
+        CondWait();
+    }
+    EXPECT_NO_FATAL_FAILURE(DeInitTestFfrtLooper());
 }
 } // namespace OHOS
