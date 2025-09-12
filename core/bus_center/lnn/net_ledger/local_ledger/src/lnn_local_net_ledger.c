@@ -1885,6 +1885,20 @@ static int32_t LlGetCipherInfoIv(void *buf, uint32_t len)
     return SOFTBUS_OK;
 }
 
+static int32_t LlGetSparkCheck(void *buf, uint32_t len)
+{
+    if (buf == NULL || len == 0) {
+        LNN_LOGE(LNN_LEDGER, "invalid param");
+        return SOFTBUS_INVALID_PARAM;
+    }
+    NodeInfo *info = &g_localNetLedger.localInfo;
+    if (memcpy_s(buf, len, info->sparkCheck, SPARK_CHECK_LENGTH) != EOK) {
+        LNN_LOGE(LNN_LEDGER, "memcpy spark check fail");
+        return SOFTBUS_MEM_ERR;
+    }
+    return SOFTBUS_OK;
+}
+
 static int32_t UpdateLocalIrk(const void *id)
 {
     if (id == NULL) {
@@ -1934,6 +1948,19 @@ static int32_t UpdateLocalCipherInfoIv(const void *id)
     }
     if (memcpy_s((char *)g_localNetLedger.localInfo.cipherInfo.iv, BROADCAST_IV_LEN, id, BROADCAST_IV_LEN) != EOK) {
         LNN_LOGE(LNN_LEDGER, "memcpy cipherInfo.iv fail");
+        return SOFTBUS_MEM_ERR;
+    }
+    return SOFTBUS_OK;
+}
+
+static int32_t UpdateLocalSparkCheck(const void *id)
+{
+    if (id == NULL) {
+        LNN_LOGE(LNN_LEDGER, "id is null");
+        return SOFTBUS_INVALID_PARAM;
+    }
+    if (memcpy_s((char *)g_localNetLedger.localInfo.sparkCheck, SPARK_CHECK_LENGTH, id, SPARK_CHECK_LENGTH) != EOK) {
+        LNN_LOGE(LNN_LEDGER, "memcpy spark check fail");
         return SOFTBUS_MEM_ERR;
     }
     return SOFTBUS_OK;
@@ -2166,6 +2193,7 @@ static LocalLedgerKey g_localKeyTable[] = {
     {BYTE_KEY_USERID_CHECKSUM, USERID_CHECKSUM_LEN, LlGetUserIdCheckSum, LlUpdateUserIdCheckSum},
     {BYTE_KEY_UDID_HASH, SHA_256_HASH_LEN, LlGetUdidHash, NULL},
     {BOOL_KEY_SCREEN_STATUS, NODE_SCREEN_STATUS_LEN, L1GetNodeScreenOnFlag, NULL},
+    {BYTE_KEY_SPARK_CHECK, SPARK_CHECK_LENGTH, LlGetSparkCheck, UpdateLocalSparkCheck},
 };
 
 static LocalLedgerKeyByIfname g_localKeyByIfnameTable[] = {
@@ -2768,6 +2796,26 @@ static void GenerateStateVersion(void)
     g_localNetLedger.localInfo.stateVersion = randNum;
     g_localNetLedger.localInfo.isSupportSv = true;
     LNN_LOGI(LNN_LEDGER, "init local stateVersion=%{public}d", g_localNetLedger.localInfo.stateVersion);
+}
+
+int32_t LnnGenSparkCheck(void)
+{
+    int32_t ret = SOFTBUS_ENCRYPT_ERR;
+    unsigned char sparkCheck[SPARK_CHECK_LENGTH] = {0};
+    do {
+        if (SoftBusGenerateRandomArray(sparkCheck, SPARK_CHECK_LENGTH) != SOFTBUS_OK) {
+            LNN_LOGE(LNN_LEDGER, "generate spark check error.");
+            break;
+        }
+        if (LnnSetLocalByteInfo(BYTE_KEY_SPARK_CHECK, sparkCheck, SPARK_CHECK_LENGTH) != SOFTBUS_OK) {
+            LNN_LOGE(LNN_LEDGER, "set spark check error.");
+            break;
+        }
+        LnnDumpSparkCheck(sparkCheck, "generate sparkCheck success");
+        ret = SOFTBUS_OK;
+    } while (0);
+    (void)memset_s(sparkCheck, sizeof(sparkCheck), 0, sizeof(sparkCheck));
+    return ret;
 }
 
 int32_t LnnInitLocalLedger(void)

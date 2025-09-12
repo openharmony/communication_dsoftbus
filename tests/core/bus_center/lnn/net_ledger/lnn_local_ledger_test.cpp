@@ -88,6 +88,7 @@ static void LocalLedgerKeyTestPackaged(void)
     EXPECT_EQ(LlUpdateStaticCapability(nullptr), SOFTBUS_INVALID_PARAM);
     EXPECT_EQ(LnnUpdateLocalScreenStatus(true), SOFTBUS_OK);
     EXPECT_EQ(UpdateHuksKeyTime(nullptr), SOFTBUS_INVALID_PARAM);
+    EXPECT_EQ(UpdateLocalSparkCheck(nullptr), SOFTBUS_INVALID_PARAM);
 }
 
 /*
@@ -1115,4 +1116,46 @@ HWTEST_F(LNNLedgerMockTest, LNN_GEN_BROAD_CAST_CIPHER_INFO_003, TestSize.Level1)
     EXPECT_EQ(ret, SOFTBUS_NETWORK_GENERATE_CIPHER_INFO_FAILED);
 }
 
+/*
+ * @tc.name: LlGetSparkCheck_001
+ * @tc.desc: LlGetSparkCheck test
+ * @tc.type: FUNC
+ * @tc.require:
+ */
+HWTEST_F(LNNLedgerMockTest, LlGetSparkCheck_001, TestSize.Level1)
+{
+    unsigned char sparkCheck[SPARK_CHECK_LENGTH] = {0};
+    EXPECT_EQ(SOFTBUS_INVALID_PARAM, LlGetSparkCheck(nullptr, 0));
+    EXPECT_EQ(SOFTBUS_INVALID_PARAM, LlGetSparkCheck(sparkCheck, 0));
+    EXPECT_EQ(SOFTBUS_MEM_ERR, LlGetSparkCheck(sparkCheck, SPARK_CHECK_LENGTH - 1));
+    EXPECT_EQ(SOFTBUS_OK, LlGetSparkCheck(sparkCheck, SPARK_CHECK_LENGTH));
+}
+
+/*
+ * @tc.name: UpdateLocalSparkCheck_001
+ * @tc.desc: UpdateLocalSparkCheck test
+ * @tc.type: FUNC
+ * @tc.require:
+ */
+HWTEST_F(LNNLedgerMockTest, UpdateLocalSparkCheck_001, TestSize.Level1)
+{
+    unsigned char sparkCheck2[SPARK_CHECK_LENGTH] = {0};
+    EXPECT_EQ(SOFTBUS_INVALID_PARAM, UpdateLocalSparkCheck(nullptr));
+    EXPECT_EQ(SOFTBUS_OK, UpdateLocalSparkCheck(sparkCheck2));
+}
+
+/*
+ * @tc.name: LnnGenSparkCheck_001
+ * @tc.desc: LnnGenSparkCheck test
+ * @tc.type: FUNC
+ * @tc.require:
+ */
+HWTEST_F(LNNLedgerMockTest, LnnGenSparkCheck_001, TestSize.Level1)
+{
+    NiceMock<LocalLedgerDepsInterfaceMock> localLedgerMock;
+    EXPECT_CALL(localLedgerMock, SoftBusGenerateRandomArray).WillOnce(Return(SOFTBUS_INVALID_PARAM))
+        .WillRepeatedly(Return(SOFTBUS_OK));
+    EXPECT_EQ(SOFTBUS_ENCRYPT_ERR, LnnGenSparkCheck());
+    EXPECT_EQ(SOFTBUS_ENCRYPT_ERR, LnnGenSparkCheck());
+}
 } // namespace OHOS

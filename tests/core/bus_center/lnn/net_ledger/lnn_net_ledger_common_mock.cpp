@@ -47,5 +47,29 @@ int32_t LnnSetLocalNumU16Info(InfoKey key, uint16_t info)
     return GetNetLedgerCommonInterface()->LnnSetLocalNumU16Info(key, info);
 }
 
+int32_t LnnGetLocalNumU32Info(InfoKey key, uint32_t *info)
+{
+    return GetNetLedgerCommonInterface()->LnnGetLocalNumU32Info(key, info);
+}
+
+int32_t LnnGetLocalNumInfo(InfoKey key, int32_t *info)
+{
+    return GetNetLedgerCommonInterface()->LnnGetLocalNumInfo(key, info);
+}
+
+int32_t LnnGetLocalNumU64Info(InfoKey key, uint64_t *info)
+{
+    return GetNetLedgerCommonInterface()->LnnGetLocalNumU64Info(key, info);
+}
+
+int32_t LnnSetLocalNumInfo(InfoKey key, int32_t info)
+{
+    return GetNetLedgerCommonInterface()->LnnSetLocalNumInfo(key, info);
+}
+
+int32_t LnnGenSparkCheck(void)
+{
+    return GetNetLedgerCommonInterface()->LnnGenSparkCheck();
+}
 } // extern "C"
 } // namespace OHOS
