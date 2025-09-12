@@ -122,16 +122,17 @@ HWTEST_F(SoftbusProxyChannelMessagePagingTest, TransPagingUnPackHandshakeMsgTest
     ASSERT_TRUE(root != nullptr);
     ProxyMessage msg;
     AppInfo appInfo;
+    uint32_t capability;
     char *data = const_cast<char *>(TEST_DATA);
     NiceMock<SoftbusProxychannelMessagePagingInterfaceMock> ProxyPagingMock;
     EXPECT_CALL(ProxyPagingMock, ConvertHexStringToBytes).WillRepeatedly(Return(SOFTBUS_OK));
     EXPECT_CALL(ProxyPagingMock, cJSON_ParseWithLength).WillOnce(Return(nullptr));
-    int32_t ret = TransPagingUnPackHandshakeMsg(&msg, &appInfo);
+    int32_t ret = TransPagingUnPackHandshakeMsg(&msg, &appInfo, &capability);
     EXPECT_EQ(SOFTBUS_PARSE_JSON_ERR, ret);
     bool res = AddStringToJsonObject(root, JSON_KEY_CALLER_ACCOUNT_ID, data);
     EXPECT_EQ(true, res);
     EXPECT_CALL(ProxyPagingMock, cJSON_ParseWithLength).WillOnce(Return(root));
-    ret = TransPagingUnPackHandshakeMsg(&msg, &appInfo);
+    ret = TransPagingUnPackHandshakeMsg(&msg, &appInfo, &capability);
     EXPECT_EQ(SOFTBUS_PARSE_JSON_ERR, ret);
     cJSON *testRoot = nullptr;
     testRoot = cJSON_CreateObject();
@@ -141,7 +142,7 @@ HWTEST_F(SoftbusProxyChannelMessagePagingTest, TransPagingUnPackHandshakeMsgTest
     res = AddStringToJsonObject(testRoot, JSON_KEY_CALLEE_ACCOUNT_ID, data);
     EXPECT_EQ(true, res);
     EXPECT_CALL(ProxyPagingMock, cJSON_ParseWithLength).WillOnce(Return(testRoot));
-    ret = TransPagingUnPackHandshakeMsg(&msg, &appInfo);
+    ret = TransPagingUnPackHandshakeMsg(&msg, &appInfo, &capability);
     EXPECT_EQ(SOFTBUS_PARSE_JSON_ERR, ret);
     cJSON *testRootTest = nullptr;
     testRootTest = cJSON_CreateObject();
@@ -153,7 +154,7 @@ HWTEST_F(SoftbusProxyChannelMessagePagingTest, TransPagingUnPackHandshakeMsgTest
     res = AddStringToJsonObject(testRootTest, JSON_KEY_PAGING_EXT_DATA, data);
     EXPECT_EQ(true, res);
     EXPECT_CALL(ProxyPagingMock, cJSON_ParseWithLength).WillOnce(Return(testRootTest));
-    ret = TransPagingUnPackHandshakeMsg(&msg, &appInfo);
+    ret = TransPagingUnPackHandshakeMsg(&msg, &appInfo, &capability);
     EXPECT_EQ(SOFTBUS_PARSE_JSON_ERR, ret);
 }
 
@@ -170,6 +171,7 @@ HWTEST_F(SoftbusProxyChannelMessagePagingTest, TransPagingUnPackHandshakeMsgTest
     ASSERT_TRUE(root != nullptr);
     ProxyMessage msg;
     AppInfo appInfo;
+    uint32_t capability;
     char *data = const_cast<char *>(TEST_DATA);
     int32_t dataLen = TEST_LEN;
     bool res = AddStringToJsonObject(root, JSON_KEY_CALLER_ACCOUNT_ID, data);
@@ -183,7 +185,7 @@ HWTEST_F(SoftbusProxyChannelMessagePagingTest, TransPagingUnPackHandshakeMsgTest
     NiceMock<SoftbusProxychannelMessagePagingInterfaceMock> ProxyPagingMock;
     EXPECT_CALL(ProxyPagingMock, ConvertHexStringToBytes).WillRepeatedly(Return(SOFTBUS_OK));
     EXPECT_CALL(ProxyPagingMock, cJSON_ParseWithLength).WillOnce(Return(root));
-    int32_t ret = TransPagingUnPackHandshakeMsg(&msg, &appInfo);
+    int32_t ret = TransPagingUnPackHandshakeMsg(&msg, &appInfo, &capability);
     EXPECT_EQ(SOFTBUS_PARSE_JSON_ERR, ret);
 
     cJSON *testRoot = nullptr;
@@ -200,7 +202,7 @@ HWTEST_F(SoftbusProxyChannelMessagePagingTest, TransPagingUnPackHandshakeMsgTest
     res = AddNumberToJsonObject(testRoot, JSON_KEY_PAGING_BUSINESS_FLAG, dataLen);
     EXPECT_EQ(true, res);
     EXPECT_CALL(ProxyPagingMock, cJSON_ParseWithLength).WillOnce(Return(testRoot));
-    ret = TransPagingUnPackHandshakeMsg(&msg, &appInfo);
+    ret = TransPagingUnPackHandshakeMsg(&msg, &appInfo, &capability);
     EXPECT_EQ(SOFTBUS_PARSE_JSON_ERR, ret);
 }
 
@@ -214,6 +216,7 @@ HWTEST_F(SoftbusProxyChannelMessagePagingTest, TransPagingUnPackHandshakeMsgTest
 {
     ProxyMessage msg;
     AppInfo appInfo;
+    uint32_t capability;
     char *data = const_cast<char *>(TEST_DATA);
     int32_t dataLen = TEST_LEN;
     cJSON *testRoot = nullptr;
@@ -234,7 +237,7 @@ HWTEST_F(SoftbusProxyChannelMessagePagingTest, TransPagingUnPackHandshakeMsgTest
     NiceMock<SoftbusProxychannelMessagePagingInterfaceMock> ProxyPagingMock;
     EXPECT_CALL(ProxyPagingMock, ConvertHexStringToBytes).WillRepeatedly(Return(SOFTBUS_OK));
     EXPECT_CALL(ProxyPagingMock, cJSON_ParseWithLength).WillOnce(Return(testRoot));
-    int32_t ret = TransPagingUnPackHandshakeMsg(&msg, &appInfo);
+    int32_t ret = TransPagingUnPackHandshakeMsg(&msg, &appInfo, &capability);
     EXPECT_EQ(SOFTBUS_PARSE_JSON_ERR, ret);
 
     cJSON *testRoot1 = nullptr;
@@ -255,7 +258,7 @@ HWTEST_F(SoftbusProxyChannelMessagePagingTest, TransPagingUnPackHandshakeMsgTest
     res = AddStringToJsonObject(testRoot1, JSON_KEY_DEVICE_ID, data);
     EXPECT_EQ(true, res);
     EXPECT_CALL(ProxyPagingMock, cJSON_ParseWithLength).WillOnce(Return(testRoot1));
-    ret = TransPagingUnPackHandshakeMsg(&msg, &appInfo);
+    ret = TransPagingUnPackHandshakeMsg(&msg, &appInfo, &capability);
     EXPECT_EQ(SOFTBUS_OK, ret);
 }
 
@@ -269,6 +272,7 @@ HWTEST_F(SoftbusProxyChannelMessagePagingTest, TransPagingUnPackHandshakeMsgTest
 {
     ProxyMessage msg;
     AppInfo appInfo;
+    uint32_t capability;
     char *data = const_cast<char *>(TEST_DATA);
     int32_t dataLen = TEST_LEN;
     cJSON *testRoot = nullptr;
@@ -289,7 +293,7 @@ HWTEST_F(SoftbusProxyChannelMessagePagingTest, TransPagingUnPackHandshakeMsgTest
     NiceMock<SoftbusProxychannelMessagePagingInterfaceMock> ProxyPagingMock;
     EXPECT_CALL(ProxyPagingMock, ConvertHexStringToBytes).WillRepeatedly(Return(SOFTBUS_OK));
     EXPECT_CALL(ProxyPagingMock, cJSON_ParseWithLength).WillOnce(Return(testRoot));
-    int32_t ret = TransPagingUnPackHandshakeMsg(&msg, &appInfo);
+    int32_t ret = TransPagingUnPackHandshakeMsg(&msg, &appInfo, &capability);
     EXPECT_EQ(SOFTBUS_PARSE_JSON_ERR, ret);
 }
 
@@ -306,6 +310,7 @@ HWTEST_F(SoftbusProxyChannelMessagePagingTest, TransPagingUnPackHandshakeMsgTest
     ASSERT_TRUE(testRoot1 != nullptr);
     ProxyMessage msg;
     AppInfo appInfo;
+    uint32_t capability;
     char *data = const_cast<char *>(TEST_DATA);
     int32_t dataLen = TEST_LEN;
     NiceMock<SoftbusProxychannelMessagePagingInterfaceMock> ProxyPagingMock;
@@ -324,7 +329,7 @@ HWTEST_F(SoftbusProxyChannelMessagePagingTest, TransPagingUnPackHandshakeMsgTest
     EXPECT_EQ(true, res);
     res = AddNumberToJsonObject(testRoot1, JSON_KEY_BUSINESS_TYPE, dataLen);
     EXPECT_EQ(true, res);
-    int32_t ret = TransPagingUnPackHandshakeMsg(&msg, &appInfo);
+    int32_t ret = TransPagingUnPackHandshakeMsg(&msg, &appInfo, &capability);
     EXPECT_EQ(SOFTBUS_PARSE_JSON_ERR, ret);
 }
 
@@ -341,6 +346,7 @@ HWTEST_F(SoftbusProxyChannelMessagePagingTest, TransPagingUnPackHandshakeMsgTest
     ASSERT_TRUE(testRoot1 != nullptr);
     ProxyMessage msg;
     AppInfo appInfo;
+    uint32_t capability;
     char *data = const_cast<char *>(TEST_DATA);
     int32_t dataLen = DATA_LEN;
     NiceMock<SoftbusProxychannelMessagePagingInterfaceMock> ProxyPagingMock;
@@ -359,7 +365,7 @@ HWTEST_F(SoftbusProxyChannelMessagePagingTest, TransPagingUnPackHandshakeMsgTest
     EXPECT_EQ(true, res);
     res = AddNumberToJsonObject(testRoot1, JSON_KEY_BUSINESS_TYPE, dataLen);
     EXPECT_EQ(true, res);
-    int32_t ret = TransPagingUnPackHandshakeMsg(&msg, &appInfo);
+    int32_t ret = TransPagingUnPackHandshakeMsg(&msg, &appInfo, &capability);
     EXPECT_EQ(SOFTBUS_PARSE_JSON_ERR, ret);
 }
 
@@ -378,14 +384,15 @@ HWTEST_F(SoftbusProxyChannelMessagePagingTest, TransPagingUnPackHandshakeAckMsgT
     AppInfo appInfo;
     char *data = const_cast<char *>(TEST_DATA);
     int32_t channelId = TEST_CHANNEL_ID;
+    uint32_t channelCap;
     NiceMock<SoftbusProxychannelMessagePagingInterfaceMock> ProxyPagingMock;
     EXPECT_CALL(ProxyPagingMock, cJSON_ParseWithLength).WillOnce(Return(nullptr));
-    int32_t ret = TransPagingUnPackHandshakeAckMsg(&msg, &appInfo);
+    int32_t ret = TransPagingUnPackHandshakeAckMsg(&msg, &appInfo, &channelCap);
     EXPECT_EQ(SOFTBUS_PARSE_JSON_ERR, ret);
     bool res = AddNumberToJsonObject(root, JSON_KEY_PAGING_SINK_CHANNEL_ID, channelId);
     EXPECT_EQ(true, res);
     EXPECT_CALL(ProxyPagingMock, cJSON_ParseWithLength).WillOnce(Return(root));
-    ret = TransPagingUnPackHandshakeAckMsg(&msg, &appInfo);
+    ret = TransPagingUnPackHandshakeAckMsg(&msg, &appInfo, &channelCap);
     EXPECT_EQ(SOFTBUS_PARSE_JSON_ERR, ret);
 
     cJSON *testRoot = nullptr;
@@ -396,7 +403,7 @@ HWTEST_F(SoftbusProxyChannelMessagePagingTest, TransPagingUnPackHandshakeAckMsgT
     res = AddStringToJsonObject(testRoot, JSON_KEY_SESSION_KEY, data);
     EXPECT_EQ(true, res);
     EXPECT_CALL(ProxyPagingMock, cJSON_ParseWithLength).WillOnce(Return(testRoot));
-    ret = TransPagingUnPackHandshakeAckMsg(&msg, &appInfo);
+    ret = TransPagingUnPackHandshakeAckMsg(&msg, &appInfo, &channelCap);
     EXPECT_EQ(SOFTBUS_PARSE_JSON_ERR, ret);
 
     cJSON *testRootTest = nullptr;
@@ -409,7 +416,7 @@ HWTEST_F(SoftbusProxyChannelMessagePagingTest, TransPagingUnPackHandshakeAckMsgT
     res = AddStringToJsonObject(testRootTest, JSON_KEY_PAGING_NONCE, data);
     EXPECT_EQ(true, res);
     EXPECT_CALL(ProxyPagingMock, cJSON_ParseWithLength).WillOnce(Return(testRootTest));
-    ret = TransPagingUnPackHandshakeAckMsg(&msg, &appInfo);
+    ret = TransPagingUnPackHandshakeAckMsg(&msg, &appInfo, &channelCap);
     EXPECT_EQ(SOFTBUS_PARSE_JSON_ERR, ret);
 }
 
@@ -425,6 +432,7 @@ HWTEST_F(SoftbusProxyChannelMessagePagingTest, TransPagingUnPackHandshakeAckMsgT
     AppInfo appInfo;
     char *data = const_cast<char *>(TEST_DATA);
     int32_t channelId = TEST_CHANNEL_ID;
+    uint32_t channelCap;
 
     cJSON *testRootTest = nullptr;
     testRootTest = cJSON_CreateObject();
@@ -439,7 +447,7 @@ HWTEST_F(SoftbusProxyChannelMessagePagingTest, TransPagingUnPackHandshakeAckMsgT
     EXPECT_EQ(true, res);
     NiceMock<SoftbusProxychannelMessagePagingInterfaceMock> ProxyPagingMock;
     EXPECT_CALL(ProxyPagingMock, cJSON_ParseWithLength).WillOnce(Return(testRootTest));
-    int32_t ret = TransPagingUnPackHandshakeAckMsg(&msg, &appInfo);
+    int32_t ret = TransPagingUnPackHandshakeAckMsg(&msg, &appInfo, &channelCap);
     EXPECT_EQ(SOFTBUS_PARSE_JSON_ERR, ret);
 
     cJSON *testRoot = nullptr;
@@ -456,7 +464,7 @@ HWTEST_F(SoftbusProxyChannelMessagePagingTest, TransPagingUnPackHandshakeAckMsgT
     res = AddNumberToJsonObject(testRoot, JSON_KEY_DEVICETYPE_ID, channelId);
     EXPECT_EQ(true, res);
     EXPECT_CALL(ProxyPagingMock, cJSON_ParseWithLength).WillOnce(Return(testRoot));
-    ret = TransPagingUnPackHandshakeAckMsg(&msg, &appInfo);
+    ret = TransPagingUnPackHandshakeAckMsg(&msg, &appInfo, &channelCap);
     EXPECT_EQ(SOFTBUS_PARSE_JSON_ERR, ret);
 }
 
@@ -472,6 +480,7 @@ HWTEST_F(SoftbusProxyChannelMessagePagingTest, TransPagingUnPackHandshakeAckMsgT
     AppInfo appInfo;
     char *data = const_cast<char *>(TEST_DATA);
     int32_t channelId = TEST_CHANNEL_ID;
+    uint32_t channelCap;
     cJSON *testRootTest = nullptr;
     testRootTest = cJSON_CreateObject();
     ASSERT_TRUE(testRootTest != nullptr);
@@ -490,7 +499,7 @@ HWTEST_F(SoftbusProxyChannelMessagePagingTest, TransPagingUnPackHandshakeAckMsgT
     NiceMock<SoftbusProxychannelMessagePagingInterfaceMock> ProxyPagingMock;
     EXPECT_CALL(ProxyPagingMock, ConvertHexStringToBytes).WillRepeatedly(Return(SOFTBUS_OK));
     EXPECT_CALL(ProxyPagingMock, cJSON_ParseWithLength).WillOnce(Return(testRootTest));
-    int32_t ret = TransPagingUnPackHandshakeAckMsg(&msg, &appInfo);
+    int32_t ret = TransPagingUnPackHandshakeAckMsg(&msg, &appInfo, &channelCap);
     EXPECT_EQ(SOFTBUS_PARSE_JSON_ERR, ret);
     cJSON *testRoot = nullptr;
     testRoot = cJSON_CreateObject();
@@ -511,7 +520,7 @@ HWTEST_F(SoftbusProxyChannelMessagePagingTest, TransPagingUnPackHandshakeAckMsgT
     EXPECT_EQ(true, res);
     EXPECT_CALL(ProxyPagingMock, cJSON_ParseWithLength).WillOnce(Return(testRoot));
     EXPECT_CALL(ProxyPagingMock, SoftBusBase64Decode).WillOnce(Return(SOFTBUS_OK));
-    ret = TransPagingUnPackHandshakeAckMsg(&msg, &appInfo);
+    ret = TransPagingUnPackHandshakeAckMsg(&msg, &appInfo, &channelCap);
     EXPECT_EQ(SOFTBUS_DECRYPT_ERR, ret);
 }
 
@@ -527,6 +536,7 @@ HWTEST_F(SoftbusProxyChannelMessagePagingTest, TransPagingUnPackHandshakeAckMsgT
     AppInfo appInfo;
     char *data = const_cast<char *>(TEST_DATA);
     int32_t channelId = TEST_CHANNEL_ID;
+    uint32_t channelCap;
     int32_t dataLen = DATA_LEN;
     cJSON *testRoot = nullptr;
     testRoot = cJSON_CreateObject();
@@ -545,10 +555,14 @@ HWTEST_F(SoftbusProxyChannelMessagePagingTest, TransPagingUnPackHandshakeAckMsgT
     EXPECT_EQ(true, res);
     res = AddNumberToJsonObject(testRoot, JSON_KEY_PAGING_DATA_LEN, dataLen);
     EXPECT_EQ(true, res);
+    res = AddNumberToJsonObject(testRoot, JSON_KEY_D2D_CHANNEL_CAPABILITY, channelId);
+    EXPECT_EQ(true, res);
+    res = AddBoolToJsonObject(testRoot, JSON_KEY_D2D_SUPPORT_NEW_HEAD, true);
+    EXPECT_EQ(true, res);
     NiceMock<SoftbusProxychannelMessagePagingInterfaceMock> ProxyPagingMock;
     EXPECT_CALL(ProxyPagingMock, cJSON_ParseWithLength).WillOnce(Return(testRoot));
     EXPECT_CALL(ProxyPagingMock, SoftBusBase64Decode).WillOnce(Return(SOFTBUS_OK));
-    int32_t ret = TransPagingUnPackHandshakeAckMsg(&msg, &appInfo);
+    int32_t ret = TransPagingUnPackHandshakeAckMsg(&msg, &appInfo, &channelCap);
     EXPECT_EQ(SOFTBUS_DECRYPT_ERR, ret);
 }
 

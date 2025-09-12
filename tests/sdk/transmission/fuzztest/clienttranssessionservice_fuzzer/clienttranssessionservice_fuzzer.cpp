@@ -22,7 +22,7 @@
 #include "client_trans_session_service.h"
 
 namespace OHOS {
-    void GetSessionKeyTest(const uint8_t* data, size_t size)
+    void GetSessionKeyTest(const uint8_t *data, size_t size)
     {
         #define SESSION_KEY_LENGTH 32
         if ((data == nullptr) || (size < sizeof(int32_t))) {
@@ -40,7 +40,7 @@ namespace OHOS {
         GetSessionKey(sessionId, tmp, len);
     }
 
-    void GetSessionHandleTest(const uint8_t* data, size_t size)
+    void GetSessionHandleTest(const uint8_t *data, size_t size)
     {
         if ((data == nullptr) || (size < sizeof(int32_t))) {
             return;
@@ -50,7 +50,7 @@ namespace OHOS {
         GetSessionHandle(sessionId, &handle);
     }
 
-    void DisableSessionListenerTest(const uint8_t* data, size_t size)
+    void DisableSessionListenerTest(const uint8_t *data, size_t size)
     {
         if ((data == nullptr) || (size < sizeof(int32_t))) {
             return;
@@ -59,7 +59,7 @@ namespace OHOS {
         DisableSessionListener(sessionId);
     }
 
-    void OpenSessionSyncTest(const uint8_t* data, size_t size)
+    void OpenSessionSyncTest(const uint8_t *data, size_t size)
     {
         #define SESSION_NAME_SIZE_MAX 256
         #define DEVICE_ID_SIZE_MAX 65
@@ -91,7 +91,7 @@ namespace OHOS {
 } // namespace OHOS
 
 /* Fuzzer entry point */
-extern "C" int32_t LLVMFuzzerTestOneInput(const uint8_t* data, size_t size)
+extern "C" int32_t LLVMFuzzerTestOneInput(const uint8_t *data, size_t size)
 {
     /* Run your code on data */
     OHOS::GetSessionKeyTest(data, size);

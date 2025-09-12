@@ -525,6 +525,13 @@ static void ProcByteOrder(uint8_t *value, int8_t size)
     ShiftByte(value, size);
 }
 
+uint8_t SoftBusHtoLss(uint8_t value)
+{
+    uint8_t res = value;
+    ProcByteOrder(&res, (int8_t)sizeof(res));
+    return res;
+}
+
 uint16_t SoftBusHtoLs(uint16_t value)
 {
     uint16_t res = value;
@@ -543,6 +550,13 @@ uint64_t SoftBusHtoLll(uint64_t value)
 {
     uint64_t res = value;
     ProcByteOrder((uint8_t *)&res, (int8_t)sizeof(res));
+    return res;
+}
+
+uint8_t SoftBusLtoHss(uint8_t value)
+{
+    uint8_t res = value;
+    ProcByteOrder(&res, (int8_t)sizeof(res));
     return res;
 }
 

@@ -35,6 +35,9 @@ public:
         isInited_ = false;
         (void)ConnServerInit();
         (void)TransProxyManagerInit(TransServerGetChannelCb());
+        (void)GetProxyChannelMgrHead();
+        (void)GetProxyChannelLock();
+        (void)ReleaseProxyChannelLock();
         isInited_ = true;
     }
 
@@ -1145,23 +1148,6 @@ void TransProxyNegoSessionKeyFailTest(FuzzedDataProvider &provider)
     TransProxyNegoSessionKeyFail(channelId, errCode);
     TransProxyDelChanByChanId(channelId);
 }
-
-void ProxyChannelListLockTest(const uint8_t *data, size_t size)
-{
-    (void)data;
-    (void)size;
-    (void)GetProxyChannelMgrHead();
-    (void)GetProxyChannelLock();
-    (void)ReleaseProxyChannelLock();
-}
-
-void ProxyChannelListLockTest(FuzzedDataProvider &provider)
-{
-    (void)provider;
-    (void)GetProxyChannelMgrHead();
-    (void)GetProxyChannelLock();
-    (void)ReleaseProxyChannelLock();
-}
 } // namespace OHOS
 
 /* Fuzzer entry point */
@@ -1198,7 +1184,6 @@ extern "C" int32_t LLVMFuzzerTestOneInput(const uint8_t *data, size_t size)
     OHOS::TransProxySetAuthHandleByChanIdTest(provider);
     OHOS::TransProxyNegoSessionKeySuccTest(provider);
     OHOS::TransProxyNegoSessionKeyFailTest(provider);
-    OHOS::ProxyChannelListLockTest(provider);
 
     return 0;
 }

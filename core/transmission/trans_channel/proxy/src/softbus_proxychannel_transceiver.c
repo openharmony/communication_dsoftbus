@@ -429,7 +429,7 @@ static int32_t TransProxyLoopInit(void)
 int32_t TransProxyTransSendMsg(uint32_t connectionId, uint8_t *buf, uint32_t len, int32_t priority, int32_t pid)
 {
     ConnPostData data = { 0 };
-    static uint64_t seq = 1;
+    static uint32_t seq = 1;
 
     data.module = MODULE_PROXY_CHANNEL;
     data.seq = seq++;
@@ -965,7 +965,7 @@ static void TransProxyOnDataReceived(uint32_t connectionId, ConnModule moduleId,
         TRANS_LOGE(TRANS_CTRL, "invalid msg head");
         return;
     }
-    TRANS_LOGI(TRANS_CTRL, "recv data msgType=%{public}d", msg.msgHead.type);
+    TRANS_LOGD(TRANS_CTRL, "recv data msgType=%{public}d", msg.msgHead.type);
     if (msg.msgHead.type == PROXYCHANNEL_MSG_TYPE_D2D) {
         TransProxyParseD2DData(data, len);
         return;

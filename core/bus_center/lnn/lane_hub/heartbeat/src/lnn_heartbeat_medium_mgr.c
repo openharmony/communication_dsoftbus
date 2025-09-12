@@ -1028,7 +1028,6 @@ static int32_t CheckJoinLnnConnectResult(
 static void CheckUserIdCheckSumChange(HbRespData *hbResp, NodeInfo *nodeInfo)
 {
     if (hbResp == NULL) {
-        LNN_LOGE(LNN_HEART_BEAT, "invalid param");
         return;
     }
     int32_t userIdCheckSum = 0;

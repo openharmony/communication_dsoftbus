@@ -122,7 +122,7 @@ void LnnStopPublish(void)
 
 static void ReportStartDiscoveryResultEvt(void)
 {
-    LNN_LOGI(LNN_BUILDER, "report start discovery result evt enter");
+    LNN_LOGD(LNN_BUILDER, "report start discovery result evt enter");
     if (SoftBusRecordDiscoveryResult(START_DISCOVERY, NULL) != SOFTBUS_OK) {
         LNN_LOGE(LNN_BUILDER, "report start discovery result fail");
     }

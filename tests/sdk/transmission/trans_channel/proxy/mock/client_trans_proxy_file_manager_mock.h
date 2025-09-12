@@ -59,6 +59,7 @@ public:
         uint64_t fileOffset, SendListenerInfo *info) = 0;
     virtual int32_t FileListToBuffer(const char **destFile, uint32_t fileCnt, FileListBuffer *outbufferInfo) = 0;
     virtual int32_t SetPendingPacket(int32_t channelId, int32_t seqNum, int32_t type) = 0;
+    virtual int32_t TransProxyD2dDataLenCheck(uint32_t dataLen, BusinessType type) = 0;
 };
 
 class ClientTransProxyFileManagerInterfaceMock : public ClientTransProxyFileManagerInterface {
@@ -98,6 +99,7 @@ public:
         uint64_t fileOffset, SendListenerInfo *info));
     MOCK_METHOD3(FileListToBuffer, int32_t (const char **destFile, uint32_t fileCnt, FileListBuffer *outbufferInfo));
     MOCK_METHOD3(SetPendingPacket, int32_t (int32_t channelId, int32_t seqNum, int32_t type));
+    MOCK_METHOD2(TransProxyD2dDataLenCheck, int32_t(uint32_t dataLen, BusinessType type));
 };
 } // namespace OHOS
 #endif // CLIENT_TRANS_PROXY_FILE_MANAGER_MOCK_H

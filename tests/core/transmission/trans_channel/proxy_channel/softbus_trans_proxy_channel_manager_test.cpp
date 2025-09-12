@@ -1012,4 +1012,28 @@ HWTEST_F(SoftbusTransProxyChannelManagerTest, TransDealProxyCheckCollabResultTes
     EXPECT_EQ(ret, SOFTBUS_TRANS_PROXY_ERROR_APP_TYPE);
 }
 
+/**
+ * @tc.name: TransPagingUpdateDataConfigTest001
+ * @tc.desc: TransProxyResetReplyCnt
+ * @tc.type: FUNC
+ * @tc.require:
+ */
+HWTEST_F(SoftbusTransProxyChannelManagerTest, TransPagingUpdateDataConfigTest001, TestSize.Level1)
+{
+    int32_t ret = TransPagingUpdateDataConfig(nullptr);
+    EXPECT_EQ(ret, SOFTBUS_INVALID_PARAM);
+    SoftbusTransProxyChannelManagerMock mock;
+    EXPECT_CALL(mock, SoftbusGetConfig).WillRepeatedly(Return(SOFTBUS_OK));
+    AppInfo appInfo;
+    appInfo.businessType = BUSINESS_TYPE_MESSAGE;
+    ret = TransPagingUpdateDataConfig(&appInfo);
+    EXPECT_EQ(ret, SOFTBUS_OK);
+    appInfo.businessType = BUSINESS_TYPE_D2D_MESSAGE ;
+    appInfo.isSupportNewHead = false;
+    ret = TransPagingUpdateDataConfig(&appInfo);
+    EXPECT_EQ(ret, SOFTBUS_OK);
+    appInfo.isSupportNewHead = true;
+    ret = TransPagingUpdateDataConfig(&appInfo);
+    EXPECT_EQ(ret, SOFTBUS_OK);
+}
 } // namespace OHOS

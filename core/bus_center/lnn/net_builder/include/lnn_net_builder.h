@@ -19,10 +19,10 @@
 #include "auth_interface.h"
 #include "lnn_connId_callback_manager.h"
 #include "lnn_event.h"
-#include "lnn_sync_info_manager.h"
-#include "softbus_bus_center.h"
-#include "message_handler.h"
 #include "lnn_net_builder_struct.h"
+#include "lnn_sync_info_manager.h"
+#include "message_handler.h"
+#include "softbus_bus_center.h"
 
 #define SPARK_GROUP_DELAY_TIME_MS 10000
 

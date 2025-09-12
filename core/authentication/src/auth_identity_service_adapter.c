@@ -126,7 +126,7 @@ int32_t IdServiceQueryCredential(int32_t userId, const char *udidHash, const cha
     bool isSameAccount, char **credList)
 {
     const CredManager *credManger = IdServiceGetCredMgrInstance();
-    AUTH_CHECK_AND_RETURN_RET_LOGE(credManger != NULL, SOFTBUS_AUTH_GET_CRED_INSTANCE_FALI,
+    AUTH_CHECK_AND_RETURN_RET_LOGE(credManger != NULL, SOFTBUS_AUTH_GET_CRED_INSTANCE_FAIL,
         AUTH_HICHAIN, "hichain identity service not initialized");
 
     char *authParams = IdServiceGenerateQueryParam(udidHash, accountidHash, isSameAccount);
@@ -176,7 +176,7 @@ int32_t AuthIdServiceQueryCredential(int32_t peerUserId, const char *udidHash, c
     AUTH_CHECK_AND_RETURN_RET_LOGE(udidHash != NULL && accountidHash != NULL && credList != NULL,
         SOFTBUS_INVALID_PARAM, AUTH_HICHAIN, "invalid param");
     const CredManager *credManger = IdServiceGetCredMgrInstance();
-    AUTH_CHECK_AND_RETURN_RET_LOGE(credManger != NULL, SOFTBUS_AUTH_GET_CRED_INSTANCE_FALI,
+    AUTH_CHECK_AND_RETURN_RET_LOGE(credManger != NULL, SOFTBUS_AUTH_GET_CRED_INSTANCE_FAIL,
         AUTH_HICHAIN, "hichain identity service not initialized");
     int32_t localUserId = GetActiveOsAccountIds();
     if (isSameAccount) {
@@ -263,7 +263,7 @@ static char *IdServiceCopyCredId(char *credId)
 static int32_t IdServiceGetCredTypeByCredId(int32_t userId, char *credId, int32_t *credType)
 {
     const CredManager *credManger = IdServiceGetCredMgrInstance();
-    AUTH_CHECK_AND_RETURN_RET_LOGE(credManger != NULL, SOFTBUS_AUTH_GET_CRED_INSTANCE_FALI,
+    AUTH_CHECK_AND_RETURN_RET_LOGE(credManger != NULL, SOFTBUS_AUTH_GET_CRED_INSTANCE_FAIL,
         AUTH_HICHAIN, "hichain identity service not initialized");
     
     char *credInfo = NULL;
@@ -397,7 +397,7 @@ int32_t IdServiceAuthCredential(int32_t userId, int64_t authReqId, const char *a
         "authParams or cb is null");
 
     const CredAuthManager *credAuthManger = IdServiceGetCredAuthInstance();
-    AUTH_CHECK_AND_RETURN_RET_LOGE(credAuthManger != NULL, SOFTBUS_AUTH_GET_CRED_INSTANCE_FALI,
+    AUTH_CHECK_AND_RETURN_RET_LOGE(credAuthManger != NULL, SOFTBUS_AUTH_GET_CRED_INSTANCE_FAIL,
         AUTH_HICHAIN, "hichain identity service not initialized");
 
     AUTH_LOGD(AUTH_HICHAIN, "hichain identity service start authenticate credential");
@@ -420,7 +420,7 @@ int32_t IdServiceProcessCredData(int64_t authSeq, const uint8_t *data, uint32_t 
         "data or cb is null");
 
     const CredAuthManager *credAuthManger = IdServiceGetCredAuthInstance();
-    AUTH_CHECK_AND_RETURN_RET_LOGE(credAuthManger != NULL, SOFTBUS_AUTH_GET_CRED_INSTANCE_FALI,
+    AUTH_CHECK_AND_RETURN_RET_LOGE(credAuthManger != NULL, SOFTBUS_AUTH_GET_CRED_INSTANCE_FAIL,
         AUTH_HICHAIN, "hichain identity service not initialized");
 
     AUTH_LOGD(AUTH_HICHAIN, "hichain identity service start process cred data");
@@ -463,7 +463,7 @@ static int32_t GetCredInfoByUserIdAndCredId(int32_t userId, const char *credId, 
         return SOFTBUS_INVALID_PARAM;
     }
     const CredManager *credManager = IdServiceGetCredMgrInstance();
-    AUTH_CHECK_AND_RETURN_RET_LOGE(credManager != NULL, SOFTBUS_AUTH_GET_CRED_INSTANCE_FALI, AUTH_HICHAIN,
+    AUTH_CHECK_AND_RETURN_RET_LOGE(credManager != NULL, SOFTBUS_AUTH_GET_CRED_INSTANCE_FAIL, AUTH_HICHAIN,
         "hichain identity service not initialized");
     char *credInfoMsg = NULL;
 
@@ -628,7 +628,7 @@ int32_t IdServiceRegCredMgr(void)
 {
     AUTH_LOGI(AUTH_HICHAIN, "id service init reg");
     const CredManager *credManager = IdServiceGetCredMgrInstance();
-    AUTH_CHECK_AND_RETURN_RET_LOGE(credManager != NULL, SOFTBUS_AUTH_GET_CRED_INSTANCE_FALI, AUTH_HICHAIN,
+    AUTH_CHECK_AND_RETURN_RET_LOGE(credManager != NULL, SOFTBUS_AUTH_GET_CRED_INSTANCE_FAIL, AUTH_HICHAIN,
         "hichain identity service not initialized");
     
     if (credManager->registerChangeListener == NULL) {

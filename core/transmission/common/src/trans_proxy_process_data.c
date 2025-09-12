@@ -37,6 +37,8 @@
 #define TLVCOUNT_SIZE sizeof(uint8_t)
 static uint32_t g_proxyMaxByteBufSize = 0;
 static uint32_t g_proxyMaxMessageBufSize = 0;
+static uint32_t g_proxyMaxD2dVoiceBufSize = 0;
+static uint32_t g_proxyMaxD2dMessageBufSize = 0;
 
 void TransGetProxyDataBufMaxSize(void)
 {
@@ -47,6 +49,14 @@ void TransGetProxyDataBufMaxSize(void)
     if (SoftbusGetConfig(SOFTBUS_INT_MAX_MESSAGE_NEW_LENGTH, (unsigned char *)&g_proxyMaxMessageBufSize,
                          sizeof(g_proxyMaxMessageBufSize)) != SOFTBUS_OK) {
         TRANS_LOGE(TRANS_INIT, "get proxy channel max message length fail");
+    }
+    if (SoftbusGetConfig(SOFTBUS_INT_D2D_MAX_VOICE_LENGTH, (unsigned char *)&g_proxyMaxD2dVoiceBufSize,
+                         sizeof(g_proxyMaxD2dVoiceBufSize)) != SOFTBUS_OK) {
+        TRANS_LOGE(TRANS_INIT, "get proxy channel max d2d voice length fail");
+    }
+    if (SoftbusGetConfig(SOFTBUS_INT_D2D_MAX_MESSAGE_LENGTH, (unsigned char *)&g_proxyMaxD2dMessageBufSize,
+                         sizeof(g_proxyMaxD2dMessageBufSize)) != SOFTBUS_OK) {
+        TRANS_LOGE(TRANS_INIT, "get proxy channel max d2d message length fail");
     }
     TRANS_LOGI(TRANS_INIT, "proxy auth byteSize=%{public}u, mesageSize=%{public}u",
         g_proxyMaxByteBufSize, g_proxyMaxMessageBufSize);
@@ -147,7 +157,7 @@ static uint8_t *TransProxyPackTlvData(DataHead *pktHead, int32_t tlvBufferSize, 
 {
     TRANS_CHECK_AND_RETURN_RET_LOGE(pktHead != NULL, NULL, TRANS_CTRL, "invalid param");
     int32_t newDataHeadSize = MAGICNUM_SIZE + TLVCOUNT_SIZE + tlvBufferSize;
-    int32_t bufLen = dataLen + newDataHeadSize;
+    int32_t bufLen = (int32_t)dataLen + newDataHeadSize;
     uint8_t *buf = (uint8_t *)SoftBusCalloc(bufLen);
     if (buf == NULL) {
         TRANS_LOGE(TRANS_CTRL, "malloc buf failed");
@@ -483,6 +493,28 @@ int32_t TransProxySessionDataLenCheck(uint32_t dataLen, SessionPktType type)
     return SOFTBUS_OK;
 }
 
+int32_t TransProxyD2dDataLenCheck(uint32_t dataLen, BusinessType type)
+{
+    switch (type) {
+        case BUSINESS_TYPE_D2D_VOICE: {
+            if (dataLen > g_proxyMaxD2dVoiceBufSize) {
+                return SOFTBUS_TRANS_INVALID_DATA_LENGTH;
+            }
+            break;
+        }
+        case BUSINESS_TYPE_D2D_MESSAGE: {
+            if (dataLen > g_proxyMaxD2dMessageBufSize) {
+                return SOFTBUS_TRANS_INVALID_DATA_LENGTH;
+            }
+            break;
+        }
+        default: {
+            return SOFTBUS_OK;
+        }
+    }
+    return SOFTBUS_OK;
+}
+
 int32_t TransProxyFirstSliceProcess(
     SliceProcessor *processor, const SliceHead *head, const char *data, uint32_t len, bool supportTlv)
 {
@@ -714,6 +746,32 @@ int32_t TransProxyProcData(ProxyDataInfo *dataInfo, const DataHeadTlvPacketHead 
     return SOFTBUS_OK;
 }
 
+uint8_t *TransProxyPackNewHeadD2DData(
+    ProxyDataInfo *dataInfo, uint16_t sliceNum, SessionPktType pktType, uint16_t cnt, uint16_t *dataLen)
+{
+    if (dataLen == NULL || dataInfo == NULL || sliceNum == 0) {
+        TRANS_LOGE(TRANS_CTRL, "param invalid");
+        return NULL;
+    }
+    *dataLen = (cnt == (sliceNum - 1)) ? (dataInfo->outLen - cnt * SHORT_SLICE_LEN) : SHORT_SLICE_LEN;
+    int32_t offset = (int32_t)(cnt * SHORT_SLICE_LEN);
+
+    uint8_t *sliceData = (uint8_t *)SoftBusCalloc(*dataLen + sizeof(D2dSliceHead));
+    if (sliceData == NULL) {
+        TRANS_LOGE(TRANS_CTRL, "malloc sliceData failed");
+        return NULL;
+    }
+    D2dSliceHead *slicehead = (D2dSliceHead *)sliceData;
+    slicehead->sliceNum = SoftBusHtoLs(sliceNum);
+    slicehead->sliceSeq = SoftBusHtoLs(cnt);
+    if (memcpy_s(sliceData + sizeof(D2dSliceHead), *dataLen, dataInfo->outData + offset, *dataLen) != EOK) {
+        TRANS_LOGE(TRANS_CTRL, "memcpy failed");
+        SoftBusFree(sliceData);
+        return NULL;
+    }
+    return sliceData;
+}
+
 uint8_t *TransProxyPackD2DData(
     ProxyDataInfo *dataInfo, uint32_t sliceNum, SessionPktType pktType, uint32_t cnt, uint32_t *dataLen)
 {
@@ -823,8 +881,53 @@ int32_t TransProxyDecryptD2DData(
     return SOFTBUS_OK;
 }
 
+int32_t TransProxyD2DFirstNewHeadSliceProcess(
+    SliceProcessor *processor, const SliceHead *head, const char *data, uint32_t len, int32_t businessType)
+{
+    if (processor == NULL || head == NULL || data == NULL) {
+        TRANS_LOGE(TRANS_CTRL, "invalid param");
+        return SOFTBUS_INVALID_PARAM;
+    }
+    uint32_t actualDataLen = 0;
+    uint32_t maxDataLen =
+        (head->priority == PROXY_CHANNEL_PRIORITY_MESSAGE) ? g_proxyMaxD2dMessageBufSize : g_proxyMaxD2dVoiceBufSize;
+    // The encrypted data length is longer then the actual data length
+    maxDataLen += SHORT_SLICE_LEN;
+
+    if ((head->sliceNum < 0) || ((uint32_t)head->sliceNum > (maxDataLen / SHORT_SLICE_LEN))) {
+        TRANS_LOGE(TRANS_CTRL, "invalid sliceNum=%{public}d", head->sliceNum);
+        return SOFTBUS_INVALID_DATA_HEAD;
+    }
+    actualDataLen = head->sliceNum * SHORT_SLICE_LEN;
+    uint32_t maxLen = 0;
+    if (businessType == BUSINESS_TYPE_D2D_MESSAGE) {
+        maxLen = actualDataLen + sizeof(PacketD2DNewHead) + SHORT_TAG_LEN;
+    } else {
+        maxLen = actualDataLen + sizeof(PacketD2DNewHead);
+    }
+    processor->data = (char *)SoftBusCalloc(maxLen);
+    if (processor->data == NULL) {
+        TRANS_LOGE(TRANS_CTRL, "malloc fail when proc first slice package");
+        return SOFTBUS_MALLOC_ERR;
+    }
+    processor->bufLen = (int32_t)maxLen;
+    if (memcpy_s(processor->data, maxLen, data, len) != EOK) {
+        TRANS_LOGE(TRANS_CTRL, "memcpy fail when proce first slice package");
+        SoftBusFree(processor->data);
+        processor->data = NULL;
+        return SOFTBUS_MEM_ERR;
+    }
+    processor->sliceNumber = head->sliceNum;
+    processor->expectedSeq = 1;
+    processor->dataLen = (int32_t)len;
+    processor->active = true;
+    processor->timeout = 0;
+    TRANS_LOGI(TRANS_CTRL, "TransProxyD2DFirstNewHeadSliceProcess ok");
+    return SOFTBUS_OK;
+}
+
 int32_t TransProxyD2DFirstSliceProcess(
-    SliceProcessor *processor, const SliceHead *head, const char *data, uint32_t len, int32_t busineseeTye)
+    SliceProcessor *processor, const SliceHead *head, const char *data, uint32_t len, int32_t businessType)
 {
     if (processor == NULL || head == NULL || data == NULL) {
         TRANS_LOGE(TRANS_CTRL, "invalid param");
@@ -842,7 +945,7 @@ int32_t TransProxyD2DFirstSliceProcess(
     }
     actualDataLen = head->sliceNum * SHORT_SLICE_LEN;
     uint32_t maxLen = 0;
-    if (busineseeTye == BUSINESS_TYPE_D2D_MESSAGE) {
+    if (businessType == BUSINESS_TYPE_D2D_MESSAGE) {
         maxLen = actualDataLen + sizeof(PacketD2DHead) + SHORT_TAG_LEN;
     } else {
         maxLen = actualDataLen + sizeof(PacketD2DHead);
@@ -886,6 +989,22 @@ int32_t TransGenerateToBytesRandIv(unsigned char *sessionIv, const uint32_t *non
     return SOFTBUS_OK;
 }
 
+static int32_t TransPackNewHeadD2DToBytesExtraData(ProxyDataInfo *dataInfo, SessionPktType flag, uint32_t nonce)
+{
+    if (dataInfo == NULL) {
+        TRANS_LOGE(TRANS_CTRL, "invalid param.");
+        return SOFTBUS_INVALID_PARAM;
+    }
+    if (memcpy_s(dataInfo->outData + sizeof(PacketD2DNewHead), NONCE_LEN, &nonce, NONCE_LEN) != EOK) {
+        TRANS_LOGE(TRANS_CTRL, "memcpy nonce failed.");
+        return SOFTBUS_MEM_ERR;
+    }
+    PacketD2DNewHead *pktHead = (PacketD2DNewHead *)dataInfo->outData;
+    pktHead->flags = SoftBusHtoLss(flag);
+    pktHead->dataLen = SoftBusHtoLs((uint16_t)((uint16_t)dataInfo->outLen - sizeof(PacketD2DNewHead)- NONCE_LEN));
+    return SOFTBUS_OK;
+}
+
 static int32_t TransPackD2DToBytesExtraData(ProxyDataInfo *dataInfo, SessionPktType flag, uint32_t nonce)
 {
     if (dataInfo == NULL) {
@@ -904,32 +1023,43 @@ static int32_t TransPackD2DToBytesExtraData(ProxyDataInfo *dataInfo, SessionPktT
     return SOFTBUS_OK;
 }
 
-int32_t TransProxyPackD2DBytes(
-    ProxyDataInfo *dataInfo, const char *sessionKey, const char *sessionIv, SessionPktType flag)
+static int32_t TransProxyGenerateIv(const char *sessionKey, uint32_t *nonce, AesCtrCipherKey *cipherKey)
 {
-    if (dataInfo == NULL || sessionKey == NULL || sessionIv == NULL) {
+    if (sessionKey == NULL || nonce == NULL || cipherKey == NULL) {
         TRANS_LOGE(TRANS_CTRL, "invalid para");
         return SOFTBUS_INVALID_PARAM;
     }
-
-    uint32_t nonce = 0;
-    if (SoftBusGenerateRandomArray((unsigned char *)&nonce, sizeof(uint32_t)) != SOFTBUS_OK) {
+    if (SoftBusGenerateRandomArray((unsigned char *)nonce, sizeof(uint32_t)) != SOFTBUS_OK) {
         TRANS_LOGE(TRANS_CTRL, "generate nonce failed.");
         return SOFTBUS_GENERATE_RANDOM_ARRAY_FAIL;
     }
-
-    AesCtrCipherKey cipherKey = { 0 };
-    cipherKey.keyLen = SHORT_SESSION_KEY_LENGTH;
-    if (memcpy_s(cipherKey.key, SHORT_SESSION_KEY_LENGTH, sessionKey, SHORT_SESSION_KEY_LENGTH) != EOK) {
+    cipherKey->keyLen = SHORT_SESSION_KEY_LENGTH;
+    if (memcpy_s(cipherKey->key, SHORT_SESSION_KEY_LENGTH, sessionKey, SHORT_SESSION_KEY_LENGTH) != EOK) {
         TRANS_LOGE(TRANS_CTRL, "memcpy key failed");
         return SOFTBUS_MEM_ERR;
     }
-    if (TransGenerateToBytesRandIv(cipherKey.iv, &nonce) != SOFTBUS_OK) {
+    if (TransGenerateToBytesRandIv(cipherKey->iv, nonce) != SOFTBUS_OK) {
         TRANS_LOGE(TRANS_CTRL, "generate iv failed");
-        (void)memset_s(&cipherKey, sizeof(AesCtrCipherKey), 0, sizeof(AesCtrCipherKey));
+        (void)memset_s(cipherKey, sizeof(AesCtrCipherKey), 0, sizeof(AesCtrCipherKey));
         return SOFTBUS_GCM_SET_IV_FAIL;
     }
-    dataInfo->outLen = dataInfo->inLen + NONCE_LEN + sizeof(PacketD2DHead);
+    return SOFTBUS_OK;
+}
+
+int32_t TransProxyPackD2DBytes(ProxyDataInfo *dataInfo, const char *sessionKey, SessionPktType flag, bool isNewHead)
+{
+    if (dataInfo == NULL || sessionKey == NULL) {
+        TRANS_LOGE(TRANS_CTRL, "invalid para");
+        return SOFTBUS_INVALID_PARAM;
+    }
+    uint32_t nonce = 0;
+    AesCtrCipherKey cipherKey = { 0 };
+    int32_t ret = TransProxyGenerateIv(sessionKey, &nonce, &cipherKey);
+    if (ret != SOFTBUS_OK) {
+        return ret;
+    }
+    size_t headSize = isNewHead ? sizeof(PacketD2DNewHead) : sizeof(PacketD2DHead);
+    dataInfo->outLen = dataInfo->inLen + NONCE_LEN + headSize;
     dataInfo->outData = (uint8_t *)SoftBusCalloc(dataInfo->outLen);
     if (dataInfo->outData == NULL) {
         TRANS_LOGE(TRANS_CTRL, "malloc failed");
@@ -938,8 +1068,8 @@ int32_t TransProxyPackD2DBytes(
     }
 
     uint32_t outLen = 0;
-    char *outData = (char *)dataInfo->outData + NONCE_LEN + sizeof(PacketD2DHead);
-    int32_t ret = SoftBusEncryptDataByCtr(&cipherKey, (const unsigned char *)dataInfo->inData,
+    char *outData = (char *)dataInfo->outData + NONCE_LEN + headSize;
+    ret = SoftBusEncryptDataByCtr(&cipherKey, (const unsigned char *)dataInfo->inData,
         dataInfo->inLen, (unsigned char *)outData, &outLen);
     (void)memset_s(&cipherKey, sizeof(AesCtrCipherKey), 0, sizeof(AesCtrCipherKey));
 
@@ -949,7 +1079,11 @@ int32_t TransProxyPackD2DBytes(
         TRANS_LOGE(TRANS_CTRL, "encrypt error, outlen=%{public}d, inlen=%{public}d", outLen, dataInfo->inLen);
         return SOFTBUS_TRANS_PROXY_SESS_ENCRYPT_ERR;
     }
-    ret = TransPackD2DToBytesExtraData(dataInfo, flag, nonce);
+    if (isNewHead) {
+        ret = TransPackNewHeadD2DToBytesExtraData(dataInfo, flag, nonce);
+    } else {
+        ret = TransPackD2DToBytesExtraData(dataInfo, flag, nonce);
+    }
     if (ret != SOFTBUS_OK) {
         outData = NULL;
         SoftBusFree(dataInfo->outData);

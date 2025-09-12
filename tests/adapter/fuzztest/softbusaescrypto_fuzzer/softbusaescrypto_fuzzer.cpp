@@ -16,6 +16,7 @@
 #include "softbus_aes_encrypt.h"
 
 #include <cstring>
+#include <fuzzer/FuzzedDataProvider.h>
 #include <securec.h>
 
 #include "comm_log.h"
@@ -23,17 +24,27 @@
 #include "softbus_adapter_mem.h"
 #include "softbus_error_code.h"
 
+const uint32_t ENCRYPT_RANDOM_MAX = 2000;
+using namespace std;
 namespace OHOS {
-bool SoftBusGenerateHmacHashFuzzTest(const uint8_t *data, size_t size)
+bool SoftBusGenerateHmacHashFuzzTest(FuzzedDataProvider &provider)
 {
+    uint32_t size = provider.ConsumeIntegral<int32_t>();
+    string stringData = provider.ConsumeBytesAsString(size);
+    size = stringData.size();
+    const uint8_t *data = reinterpret_cast<const uint8_t *>(stringData.data());
     uint8_t hash[SHA256_MAC_LEN] = { 0 };
     EncryptKey randomKey = { data, size };
     SoftBusGenerateHmacHash(&randomKey, data, size, hash, SHA256_MAC_LEN);
     return true;
 }
 
-bool SoftBusAesCfbRootEncryptFuzzTest(const uint8_t *data, size_t size)
+bool SoftBusAesCfbRootEncryptFuzzTest(FuzzedDataProvider &provider)
 {
+    uint32_t size = provider.ConsumeIntegral<int32_t>();
+    string stringData = provider.ConsumeBytesAsString(size);
+    size = stringData.size();
+    const uint8_t *data = reinterpret_cast<const uint8_t *>(stringData.data());
     AesOutputData encryptOutData = { 0 };
     AesOutputData decryptOutData = { 0 };
 
@@ -62,8 +73,12 @@ bool SoftBusAesCfbRootEncryptFuzzTest(const uint8_t *data, size_t size)
     return true;
 }
 
-bool SoftBusAesGcmEncryptFuzzTest(const uint8_t *data, size_t size)
+bool SoftBusAesGcmEncryptFuzzTest(FuzzedDataProvider &provider)
 {
+    uint32_t size = provider.ConsumeIntegral<int32_t>();
+    string stringData = provider.ConsumeBytesAsString(size);
+    size = stringData.size();
+    const uint8_t *data = reinterpret_cast<const uint8_t *>(stringData.data());
     AesOutputData encryptOutData = { 0 };
     AesOutputData decryptOutData = { 0 };
 
@@ -91,36 +106,11 @@ bool SoftBusAesGcmEncryptFuzzTest(const uint8_t *data, size_t size)
     return true;
 }
 
-bool SoftBusAesCfbEncryptFuzzTest(const uint8_t *data, size_t size)
+static bool EncryptSubFunctionFuzzTest(AesInputData &encryptInData, AesCipherKey &cipherKey,
+    AesCipherKey &cipherKeyCopy) 
 {
-    uint8_t randomSession[size];
-    uint8_t randomIv[size];
-    uint8_t randomSessionCopy[size];
-    uint8_t randomIvCopy[size];
-    AesOutputData encryptOutData = { 0 };
-    AesOutputData decryptOutData = { 0 };
-
-    if (memcpy_s(randomSession, size, data, size) != EOK) {
-        COMM_LOGE(COMM_TEST, "randomSession memcpy_s failed!");
-        return false;
-    }
-    if (memcpy_s(randomIv, size, data, size) != EOK) {
-        COMM_LOGE(COMM_TEST, "randomIv memcpy_s failed!");
-        return false;
-    }
-    if (memcpy_s(randomSessionCopy, size, data, size) != EOK) {
-        COMM_LOGE(COMM_TEST, "randomSessionCopy memcpy_s failed!");
-        return false;
-    }
-    if (memcpy_s(randomIvCopy, size, data, size) != EOK) {
-        COMM_LOGE(COMM_TEST, "randomIvCopy memcpy_s failed!");
-        return false;
-    }
-
-    AesInputData encryptInData = { data, size };
-    AesCipherKey cipherKey = { randomSession, size, randomIv, size };
-    AesCipherKey cipherKeyCopy = { randomSessionCopy, size, randomIvCopy, size };
-
+    AesOutputData encryptOutData = {0};
+    AesOutputData decryptOutData = {0};
     if (SoftBusAesCfbEncrypt(&encryptInData, &cipherKey, ENCRYPT_MODE, &encryptOutData) != SOFTBUS_OK) {
         COMM_LOGE(COMM_TEST, "SoftBus AesCfbEncrypt failed!");
         return false;
@@ -142,6 +132,43 @@ bool SoftBusAesCfbEncryptFuzzTest(const uint8_t *data, size_t size)
     return true;
 }
 
+bool SoftBusAesCfbEncryptFuzzTest(FuzzedDataProvider &provider)
+{
+    uint32_t size = provider.ConsumeIntegral<int32_t>();
+    string stringData = provider.ConsumeBytesAsString(size);
+    uint8_t randomSession[ENCRYPT_RANDOM_MAX];
+    uint8_t randomIv[ENCRYPT_RANDOM_MAX];
+    uint8_t randomSessionCopy[ENCRYPT_RANDOM_MAX];
+    uint8_t randomIvCopy[ENCRYPT_RANDOM_MAX];
+
+    if (memcpy_s(randomSession, ENCRYPT_RANDOM_MAX - 1, stringData.data(), stringData.size()) != EOK) {
+        COMM_LOGE(COMM_TEST, "randomSession memcpy_s failed!");
+        return false;
+    }
+    string stringData1 = provider.ConsumeBytesAsString(size);
+    if (memcpy_s(randomIv, ENCRYPT_RANDOM_MAX - 1, stringData1.data(), stringData1.size()) != EOK) {
+        COMM_LOGE(COMM_TEST, "randomIv memcpy_s failed!");
+        return false;
+    }
+    string stringData2 = provider.ConsumeBytesAsString(size);
+    if (memcpy_s(randomSessionCopy, ENCRYPT_RANDOM_MAX - 1, stringData2.data(), stringData2.size()) != EOK) {
+        COMM_LOGE(COMM_TEST, "randomSessionCopy memcpy_s failed!");
+        return false;
+    }
+    string stringData3 = provider.ConsumeBytesAsString(size);
+    if (memcpy_s(randomIvCopy, ENCRYPT_RANDOM_MAX - 1, stringData2.data(), stringData2.size()) != EOK) {
+        COMM_LOGE(COMM_TEST, "randomIvCopy memcpy_s failed!");
+        return false;
+    }
+    string stringData4 = provider.ConsumeBytesAsString(size);
+    const uint8_t *data4 = reinterpret_cast<const uint8_t *>(stringData4.data());
+    size_t size4 = stringData4.size();
+    AesInputData encryptInData = { data4, size4 };
+    AesCipherKey cipherKey = { randomSession, ENCRYPT_RANDOM_MAX - 1, randomIv, ENCRYPT_RANDOM_MAX - 1 };
+    AesCipherKey cipherKeyCopy = { randomSessionCopy, ENCRYPT_RANDOM_MAX - 1, randomIvCopy, ENCRYPT_RANDOM_MAX - 1 };
+    return EncryptSubFunctionFuzzTest(encryptInData, cipherKey, cipherKeyCopy);
+}
+
 } // namespace OHOS
 
 /* Fuzzer entry point */
@@ -151,9 +178,10 @@ extern "C" int32_t LLVMFuzzerTestOneInput(const uint8_t *data, size_t size)
         return 0;
     }
 
-    OHOS::SoftBusGenerateHmacHashFuzzTest(data, size);
-    OHOS::SoftBusAesCfbRootEncryptFuzzTest(data, size);
-    OHOS::SoftBusAesGcmEncryptFuzzTest(data, size);
-    OHOS::SoftBusAesCfbEncryptFuzzTest(data, size);
+    FuzzedDataProvider provider(data, size);
+    OHOS::SoftBusGenerateHmacHashFuzzTest(provider);
+    OHOS::SoftBusAesCfbRootEncryptFuzzTest(provider);
+    OHOS::SoftBusAesGcmEncryptFuzzTest(provider);
+    OHOS::SoftBusAesCfbEncryptFuzzTest(provider);
     return 0;
 }

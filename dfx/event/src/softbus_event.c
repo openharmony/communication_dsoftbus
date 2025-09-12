@@ -47,6 +47,8 @@ static void WriteHiSysEvent(
     HiSysEventParam params[], size_t size, HiSysEventParam extraParams[], size_t extraSize, SoftbusEventForm *form)
 {
     size_t validParamSize = size + extraSize;
+    COMM_CHECK_AND_RETURN_LOGE(validParamSize != 0, COMM_DFX,
+        "validParamSize cannot less than 0, validParamSize=%{public}zu", validParamSize);
     HiSysEventParam eventParams[validParamSize];
     ConstructHiSysEventParams(eventParams, params, size, extraParams, extraSize);
     int32_t ret = HiSysEvent_Write(

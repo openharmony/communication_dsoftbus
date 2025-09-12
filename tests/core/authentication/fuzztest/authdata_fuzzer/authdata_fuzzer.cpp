@@ -46,8 +46,12 @@ T GetData()
     return objetct;
 }
 
-bool AuthDataFuzzTest(const uint8_t *data, size_t size)
+bool AuthDataFuzzTest()
 {
+    string stringData;
+    GenerateString(stringData);
+    const uint8_t *data = reinterpret_cast<const uint8_t *>(stringData.data());
+    size_t size = stringData.size();
     if (data == nullptr || size < sizeof(uint64_t) || size < sizeof(AuthTransData)) {
         COMM_LOGE(COMM_TEST, "data or size is invalid!");
         return false;
@@ -76,8 +80,12 @@ bool AuthDataFuzzTest(const uint8_t *data, size_t size)
     return true;
 }
 
-bool AuthCryptFuzzTest(const uint8_t *data, size_t size)
+bool AuthCryptFuzzTest()
 {
+    string stringData;
+    GenerateString(stringData);
+    const uint8_t *data = reinterpret_cast<const uint8_t *>(stringData.data());
+    size_t size = stringData.size();
     if (data == nullptr || size < sizeof(uint64_t)) {
         COMM_LOGE(COMM_TEST, "data or size is invalid!");
         return false;
@@ -102,8 +110,12 @@ bool AuthCryptFuzzTest(const uint8_t *data, size_t size)
     return true;
 }
 
-bool AuthFlushDeviceFuzzTest(const uint8_t *data, size_t size)
+bool AuthFlushDeviceFuzzTest()
 {
+    string stringData;
+    GenerateString(stringData);
+    const uint8_t *data = reinterpret_cast<const uint8_t *>(stringData.data());
+    size_t size = stringData.size();
     if (data == nullptr || size > UDID_BUF_LEN) {
         COMM_LOGE(COMM_TEST, "data or size is invalid!");
         return false;
@@ -124,8 +136,12 @@ bool AuthFlushDeviceFuzzTest(const uint8_t *data, size_t size)
     return true;
 }
 
-bool AuthStartVerifyFuzzTest(const uint8_t *data, size_t size)
+bool AuthStartVerifyFuzzTest()
 {
+    string stringData;
+    GenerateString(stringData);
+    const uint8_t *data = reinterpret_cast<const uint8_t *>(stringData.data());
+    size_t size = stringData.size();
     if (data == nullptr || size < sizeof(AuthConnInfo)) {
         COMM_LOGE(COMM_TEST, "data is nullptr or size less than authConnInfo");
         return false;
@@ -178,10 +194,10 @@ extern "C" int32_t LLVMFuzzerTestOneInput(const uint8_t *data, size_t size)
     DataGenerator::Write(data, size);
 
     /* Run your code on data */
-    OHOS::AuthDataFuzzTest(data, size);
-    OHOS::AuthCryptFuzzTest(data, size);
-    OHOS::AuthFlushDeviceFuzzTest(data, size);
-    OHOS::AuthStartVerifyFuzzTest(data, size);
+    OHOS::AuthDataFuzzTest();
+    OHOS::AuthCryptFuzzTest();
+    OHOS::AuthFlushDeviceFuzzTest();
+    OHOS::AuthStartVerifyFuzzTest();
 
     DataGenerator::Clear();
 

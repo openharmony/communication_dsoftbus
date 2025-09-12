@@ -105,7 +105,7 @@ static int Dump(void *softObj, uint32_t size, DFinderDumpFunc dump, DumpFunc fun
         return NSTACKX_EFAILED;
     }
 
-    if (func(buf, DUMP_BUF_LEN) != NSTACKX_EOK) {
+    if (func(buf, size) != NSTACKX_EOK) {
         DFINDER_LOGE(TAG, "dump func exec failed");
         free(buf);
         return NSTACKX_EFAILED;

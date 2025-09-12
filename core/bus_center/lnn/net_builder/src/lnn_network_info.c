@@ -309,7 +309,7 @@ static void WifiStateProcess(uint32_t netCapability, bool isSend)
     }
     uint32_t type = (1 << (uint32_t)DISCOVERY_TYPE_BLE) | (1 << (uint32_t)DISCOVERY_TYPE_BR);
     SendNetCapabilityToRemote(netCapability, type, false);
-    LNN_LOGI(LNN_BUILDER, "WifiStateEventHandler exit");
+    LNN_LOGD(LNN_BUILDER, "WifiStateEventHandler exit");
     return;
 }
 
@@ -440,20 +440,20 @@ static void GetNetworkCapability(SoftBusWifiState wifiState, uint32_t *capabilit
 static void WifiStateEventHandler(const LnnEventBasicInfo *info)
 {
     if (info == NULL || info->event != LNN_EVENT_WIFI_STATE_CHANGED) {
-        LNN_LOGE(LNN_BUILDER, "bt state change evt handler get invalid param");
+        LNN_LOGE(LNN_EVENT, "bt state change evt handler get invalid param");
         return;
     }
     const LnnMonitorWlanStateChangedEvent *event = (const LnnMonitorWlanStateChangedEvent *)info;
     SoftBusWifiState wifiState = (SoftBusWifiState)event->status;
     uint32_t oldNetCap = 0;
     if (LnnGetLocalNumU32Info(NUM_KEY_NET_CAP, &oldNetCap) != SOFTBUS_OK) {
-        LNN_LOGE(LNN_BUILDER, "wifi state handler get capability fail from local.");
+        LNN_LOGE(LNN_EVENT, "wifi state handler get capability fail from local.");
         return;
     }
     bool needSync = false;
     uint32_t netCapability = oldNetCap;
     GetNetworkCapability(wifiState, &netCapability, &needSync);
-    LNN_LOGI(LNN_BUILDER, "WifiState=%{public}d, local capabilty change:%{public}u->%{public}u, needSync=%{public}d",
+    LNN_LOGI(LNN_EVENT, "WifiState=%{public}d, local capabilty change:%{public}u->%{public}u, needSync=%{public}d",
         wifiState, oldNetCap, netCapability, needSync);
     WifiStateProcess(netCapability, needSync);
 }
@@ -504,6 +504,17 @@ static void BtStateChangeEventHandler(const LnnEventBasicInfo *info)
     return;
 }
 
+static void UpdateLocalDeviceInfoToSH()
+{
+    NodeInfo nodeInfo;
+    (void)memset_s(&nodeInfo, sizeof(NodeInfo), 0, sizeof(NodeInfo));
+    if (LnnGetLocalNodeInfoSafe(&nodeInfo) != SOFTBUS_OK) {
+        LNN_LOGE(LNN_BUILDER, "get local device info fail");
+        return;
+    }
+    UpdateLocalDeviceInfoToMlpsPacked(&nodeInfo);
+}
+
 static void SleStateChangeEventHandle(const LnnEventBasicInfo *info)
 {
     if (info == NULL || info->event != LNN_EVENT_SLE_STATE_CHANGED) {
@@ -515,6 +526,7 @@ static void SleStateChangeEventHandle(const LnnEventBasicInfo *info)
         LNN_LOGE(LNN_BUILDER, "get netcap fail");
         return;
     }
+    uint32_t oldCapability = netCapability;
     const LnnMonitorSleStateChangedEvent *event = (const LnnMonitorSleStateChangedEvent *)info;
     SoftBusSleState sleState = (SoftBusSleState)event->status;
     uint32_t delayTime = 0;
@@ -529,6 +541,9 @@ static void SleStateChangeEventHandle(const LnnEventBasicInfo *info)
         return;
     }
     LNN_LOGI(LNN_BUILDER, "sle netCapability=%{public}d", netCapability);
+    if (oldCapability != netCapability) {
+        UpdateLocalDeviceInfoToSH();
+    }
     SendNetCapabilityToRemote(netCapability, 0, true);
 }
 
@@ -574,7 +589,6 @@ static void UpdateLocalFeatureByWifiVspRes()
         LNN_LOGE(LNN_BUILDER, "set localFeatureCap failed, ret=%{public}d.", ret);
         return;
     }
-    LnnUpdateStateVersion(UPDATE_FEATURE);
     LNN_LOGI(LNN_BUILDER, "local feature changed:%{public}" PRIu64 "->%{public}" PRIu64, oldFeature, localFeatureCap);
 }
 
@@ -775,7 +789,7 @@ int32_t LnnInitNetworkInfo(void)
     if (ret != SOFTBUS_OK) {
         return ret;
     }
-    LNN_LOGE(LNN_BUILDER, "lnn init network info sync done");
+    LNN_LOGI(LNN_BUILDER, "lnn init network info sync done");
     return SOFTBUS_OK;
 }
 
@@ -859,12 +873,12 @@ static void DoSendUserId(const char *udid, uint8_t *msg)
 
     char *networkId = (char *)SoftBusCalloc(NETWORK_ID_BUF_LEN);
     if (networkId == NULL) {
-        LNN_LOGI(LNN_BUILDER, "malloc fail");
+        LNN_LOGE(LNN_BUILDER, "malloc fail");
         return;
     }
     ret = memcpy_s(networkId, NETWORK_ID_BUF_LEN, nodeInfo.networkId, NETWORK_ID_BUF_LEN);
     if (ret != EOK) {
-        LNN_LOGI(LNN_BUILDER, "memcpy_s failed! ret:%{public}d", ret);
+        LNN_LOGE(LNN_BUILDER, "memcpy_s failed! ret:%{public}d", ret);
         SoftBusFree(networkId);
         return;
     }

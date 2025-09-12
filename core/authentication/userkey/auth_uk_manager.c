@@ -86,6 +86,7 @@ typedef enum {
 } GenUkStartState;
 
 typedef struct {
+    bool isRecvDeviceId;
     int32_t ukId;
     int32_t channelId;
     uint32_t requestId;
@@ -298,6 +299,21 @@ void PrintfAuthAclInfo(uint32_t requestId, uint32_t channelId, const AuthACLInfo
     AnonymizeFree(anonySinkAccountId);
 }
 
+static bool CheckAclInfoIsEmpty(const AuthACLInfo *info)
+{
+    if (info == NULL) {
+        AUTH_LOGE(AUTH_CONN, "info is null");
+        return true;
+    }
+
+    AuthACLInfo defaultInfo = { 0 };
+    if (memcmp(info, &defaultInfo, sizeof(AuthACLInfo)) == 0) {
+        AUTH_LOGE(AUTH_CONN, "info is empty");
+        return true;
+    }
+    return false;
+}
+
 static int32_t CreateUkNegotiateInstance(
     uint32_t requestId, uint32_t channelId, const AuthACLInfo *info, const AuthGenUkCallback *genCb)
 {
@@ -330,6 +346,7 @@ static int32_t CreateUkNegotiateInstance(
     instance->negoInfo.isRecvSessionKeyEvent = false;
     instance->negoInfo.isRecvFinishEvent = false;
     instance->negoInfo.isRecvCloseAckEvent = false;
+    instance->isRecvDeviceId = !CheckAclInfoIsEmpty(info);
     ListInit(&instance->node);
     ListAdd(&g_ukNegotiateList->list, &instance->node);
     g_ukNegotiateList->cnt++;
@@ -368,6 +385,7 @@ static int32_t UpdateUkNegotiateInfo(uint32_t requestId, const UkNegotiateInstan
         item->negoInfo.isRecvSessionKeyEvent = instance->negoInfo.isRecvSessionKeyEvent;
         item->negoInfo.isRecvFinishEvent = instance->negoInfo.isRecvFinishEvent;
         item->negoInfo.isRecvCloseAckEvent = instance->negoInfo.isRecvCloseAckEvent;
+        item->isRecvDeviceId = instance->isRecvDeviceId;
         AUTH_LOGI(AUTH_CONN,
             "update uknego requestId=%{public}u, channelId=%{public}d, state=%{public}d, "
             "isCloseAck=%{public}d, isFinish=%{public}d, isSessionKey=%{public}d",
@@ -1105,13 +1123,36 @@ static int32_t ProcessUkNegoState(AuthACLInfo *info, bool *isGreater)
     return SOFTBUS_OK;
 }
 
+static int32_t UpdateExistAclInfo(
+    int32_t channelId, uint32_t requestId, const AuthACLInfo info, UkNegotiateInstance *instance)
+{
+    if (instance == NULL) {
+        AUTH_LOGE(AUTH_CONN, "find uknego info is invalid param");
+        return SOFTBUS_INVALID_PARAM;
+    }
+
+    if (!instance->isRecvDeviceId) {
+        AUTH_LOGI(AUTH_CONN, "requestId=%{public}u isRecvDeviceId is false, update acl info", requestId);
+        instance->isRecvDeviceId = true;
+        instance->channelId = channelId;
+        instance->info = info;
+        instance->authMode = GetHichainAuthMode(&instance->info);
+        int32_t ret = UpdateUkNegotiateInfo(requestId, instance);
+        if (ret != SOFTBUS_OK) {
+            AUTH_LOGE(AUTH_CONN, "update uknego instance failed! ret=%{public}d", ret);
+            return ret;
+        }
+        return SOFTBUS_OK;
+    }
+    return SOFTBUS_AUTH_UK_UPDATE_ACL_FAIL;
+}
+
 static int32_t ProcessUkDeviceId(int32_t channelId, uint32_t requestId, const void *data, uint32_t dataLen)
 {
     AUTH_CHECK_AND_RETURN_RET_LOGE(data != NULL, SOFTBUS_INVALID_PARAM, AUTH_CONN, "data is null");
     AuthACLInfo info = { 0 };
-    UkNegotiateInstance instance;
+    UkNegotiateInstance instance = { 0 };
     AuthGenUkCallback cb;
-    (void)memset_s(&instance, sizeof(UkNegotiateInstance), 0, sizeof(UkNegotiateInstance));
     (void)memset_s(&cb, sizeof(AuthGenUkCallback), 0, sizeof(AuthGenUkCallback));
     bool isLocalUdidGreater = false;
     int32_t ret = UnpackUkAclParam((const char *)data, dataLen, &info);
@@ -1121,18 +1162,16 @@ static int32_t ProcessUkDeviceId(int32_t channelId, uint32_t requestId, const vo
     }
     ret = GetGenUkInstanceByReq(requestId, &instance);
     if (ret != SOFTBUS_OK) {
+        AUTH_LOGW(AUTH_CONN, "get instance failed! ret=%{public}d", ret);
         ret = CreateUkNegotiateInstance(requestId, channelId, &info, &cb);
         if (ret != SOFTBUS_OK) {
             AUTH_LOGE(AUTH_CONN, "create new uknego instance failed! ret=%{public}d", ret);
             return ret;
         }
     } else {
-        instance.channelId = channelId;
-        instance.info = info;
-        instance.authMode = GetHichainAuthMode(&instance.info);
-        ret = UpdateUkNegotiateInfo(requestId, &instance);
+        ret = UpdateExistAclInfo(channelId, requestId, info, &instance);
         if (ret != SOFTBUS_OK) {
-            AUTH_LOGE(AUTH_CONN, "create uknego instance failed! ret=%{public}d", ret);
+            AUTH_LOGE(AUTH_CONN, "update acl fail, ret=%{public}d", ret);
             return ret;
         }
     }
@@ -1426,6 +1465,7 @@ static int32_t SecurityOnSessionOpened(int32_t channelId, int32_t channelType, c
             AUTH_LOGE(AUTH_CONN, "uknego auth failed! result=%{public}d", ret);
             return ret;
         }
+        instance.isRecvDeviceId = true;
         (void)UpdateUkNegotiateInfo(instance.requestId, &instance);
         return SendUkNegoDeviceId(&instance);
     } else {

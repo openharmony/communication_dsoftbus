@@ -45,8 +45,12 @@ T GetData()
     return objetct;
 }
 
-bool LnnNotifyOnlineStateFuzzTest(const uint8_t *data, size_t size)
+bool LnnNotifyOnlineStateFuzzTest()
 {
+    string stringData;
+    GenerateString(stringData);
+    const uint8_t *data = reinterpret_cast<const uint8_t *>(stringData.data());
+    size_t size = stringData.size();
     if (data == nullptr || size < NETWORK_ID_BUF_LEN) {
         COMM_LOGE(COMM_TEST, "data or size is valid");
         return false;
@@ -68,8 +72,12 @@ bool LnnNotifyOnlineStateFuzzTest(const uint8_t *data, size_t size)
     return true;
 }
 
-bool LnnNotifyLnnRelationChangedFuzzTest(const uint8_t *data, size_t size)
+bool LnnNotifyLnnRelationChangedFuzzTest()
 {
+    string stringData;
+    GenerateString(stringData);
+    const uint8_t *data = reinterpret_cast<const uint8_t *>(stringData.data());
+    size_t size = stringData.size();
     if (data == nullptr) {
         COMM_LOGE(COMM_TEST, "data is nullptr");
         return false;
@@ -123,8 +131,12 @@ void LnnNotifyStateChangeEventFuzzTest()
     LnnNotifyBtStateChangeEvent(btState);
 }
 
-bool LnnNotifyBtAclStateChangeEventFuzzTest(const uint8_t *data, size_t size)
+bool LnnNotifyBtAclStateChangeEventFuzzTest()
 {
+    string stringData;
+    GenerateString(stringData);
+    const uint8_t *data = reinterpret_cast<const uint8_t *>(stringData.data());
+    size_t size = stringData.size();
     if (data == nullptr || size < NETWORK_ID_BUF_LEN || size < BT_MAC_LEN) {
         COMM_LOGE(COMM_TEST, "data or size is valid");
         return false;
@@ -190,10 +202,10 @@ extern "C" int32_t LLVMFuzzerTestOneInput(const uint8_t *data, size_t size)
     DataGenerator::Write(data, size);
 
     /* Run your code on data */
-    OHOS::LnnNotifyOnlineStateFuzzTest(data, size);
-    OHOS::LnnNotifyLnnRelationChangedFuzzTest(data, size);
+    OHOS::LnnNotifyOnlineStateFuzzTest();
+    OHOS::LnnNotifyLnnRelationChangedFuzzTest();
     OHOS::LnnNotifyStateChangeEventFuzzTest();
-    OHOS::LnnNotifyBtAclStateChangeEventFuzzTest(data, size);
+    OHOS::LnnNotifyBtAclStateChangeEventFuzzTest();
     OHOS::LnnNotifySingleOffLineEventFuzzTest();
 
     DataGenerator::Clear();

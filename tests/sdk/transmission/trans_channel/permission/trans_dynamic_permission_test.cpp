@@ -198,5 +198,7 @@ HWTEST_F(TransDynamicPermissionTest, DynamicPermissionTest005, TestSize.Level1)
         ret = CheckTransPermission(g_permUid, testPid, "DBinderBus", sessionName.c_str(), ACTION_OPEN);
         ASSERT_NE(ret, SOFTBUS_OK);
     }
+    TransPermissionDeinit();
+    ASSERT_EQ(TransPermissionInit(), SOFTBUS_OK);
 }
 } // namespace OHOS
