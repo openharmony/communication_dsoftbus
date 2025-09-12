@@ -1158,6 +1158,10 @@ static void GetAndSaveRemoteDeviceInfo(NodeInfo *deviceInfo, NodeInfo *info)
         LNN_LOGE(LNN_LEDGER, "memcpy_s ptk fail");
         return;
     }
+    if (memcpy_s(deviceInfo->sparkCheck, SPARK_CHECK_LENGTH, info->sparkCheck, SPARK_CHECK_LENGTH) != EOK) {
+        LNN_LOGE(LNN_LEDGER, "memcpy_s sparkCheck fail");
+        return;
+    }
     deviceInfo->netCapacity = info->netCapacity;
     deviceInfo->accountId = info->accountId;
     deviceInfo->staticNetCap = info->staticNetCap;
@@ -1887,6 +1891,9 @@ static void UpdateDistributedLedger(NodeInfo *newInfo, NodeInfo *oldInfo)
     }
     if (memcpy_s((char *)oldInfo->cipherInfo.iv, BROADCAST_IV_LEN, newInfo->cipherInfo.iv, BROADCAST_IV_LEN) != EOK) {
         LNN_LOGE(LNN_LEDGER, "memcpy_s cipherInfo iv to distributed ledger fail");
+    }
+    if (memcpy_s(oldInfo->sparkCheck, SPARK_CHECK_LENGTH, newInfo->sparkCheck, SPARK_CHECK_LENGTH) != EOK) {
+        LNN_LOGE(LNN_LEDGER, "memcpy_s sparkCheck fail");
     }
     UpdateDevBasicInfoToDLedger(newInfo, oldInfo);
 }

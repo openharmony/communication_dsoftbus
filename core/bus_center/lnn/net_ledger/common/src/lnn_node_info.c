@@ -779,3 +779,54 @@ void LnnAnonymizeIrk(const char *irk, uint32_t len, char **anonymizedStr)
     (void)memset_s(irkHash, SHA_256_HASH_LEN, 0, SHA_256_HASH_LEN);
     (void)memset_s(irkStr, LFINDER_IRK_STR_LEN, 0, LFINDER_IRK_STR_LEN);
 }
+
+static void LnnAnonymizeSparkCheck(const char *sparkCheck, uint32_t len, char **anonymizedStr)
+{
+    if (sparkCheck == NULL || len != SPARK_CHECK_STR_LEN || anonymizedStr == NULL) {
+        LNN_LOGE(LNN_LEDGER, "invalid param");
+        return;
+    }
+    uint8_t emptyByte[SPARK_CHECK_LENGTH] = { 0 };
+    char emptyStr[SPARK_CHECK_STR_LEN] = { 0 };
+    if (ConvertBytesToHexString(emptyStr, SPARK_CHECK_STR_LEN, emptyByte, SPARK_CHECK_LENGTH) != SOFTBUS_OK) {
+        LNN_LOGE(LNN_LEDGER, "convert emptyByte to string fail.");
+        return;
+    }
+    if (memcmp(sparkCheck, emptyStr, SPARK_CHECK_STR_LEN) == 0) {
+        Anonymize(sparkCheck, anonymizedStr);
+        return;
+    }
+    uint8_t sparkCheckHash[SHA_256_HASH_LEN] = { 0 };
+    if (SoftBusGenerateStrHash((const unsigned char *)sparkCheck, len, sparkCheckHash) != SOFTBUS_OK) {
+        LNN_LOGE(LNN_LEDGER, "generate sparkCheckHash fail");
+        return;
+    }
+    char sparkCheckStr[SPARK_CHECK_STR_LEN] = { 0 };
+    if (ConvertBytesToHexString(sparkCheckStr, SPARK_CHECK_STR_LEN, (unsigned char *)sparkCheckHash,
+        SPARK_CHECK_LENGTH) != SOFTBUS_OK) {
+        LNN_LOGE(LNN_LEDGER, "convert sparkCheck to string fail.");
+        (void)memset_s(sparkCheckHash, SHA_256_HASH_LEN, 0, SHA_256_HASH_LEN);
+        return;
+    }
+    Anonymize(sparkCheckStr, anonymizedStr);
+    (void)memset_s(sparkCheckHash, SHA_256_HASH_LEN, 0, SHA_256_HASH_LEN);
+    (void)memset_s(sparkCheckStr, SPARK_CHECK_STR_LEN, 0, SPARK_CHECK_STR_LEN);
+}
+
+void LnnDumpSparkCheck(const unsigned char* sparkCheck, const char *log)
+{
+    if (log == NULL) {
+        LNN_LOGE(LNN_LEDGER, "invalid param");
+        return;
+    }
+    char sparkCheckStr[SPARK_CHECK_STR_LEN] = { 0 };
+    if (sparkCheck != NULL && ConvertBytesToUpperCaseHexString(sparkCheckStr, SPARK_CHECK_STR_LEN,
+        sparkCheck, SPARK_CHECK_LENGTH) != SOFTBUS_OK) {
+        LNN_LOGE(LNN_LEDGER, "convert sparkCheck fail");
+    }
+    char *anonySparkCheck = NULL;
+    LnnAnonymizeSparkCheck(sparkCheckStr, SPARK_CHECK_STR_LEN, &anonySparkCheck);
+    LNN_LOGI(LNN_LEDGER, "%{public}s, dump sparkCheck=%{public}s", log, AnonymizeWrapper(anonySparkCheck));
+    AnonymizeFree(anonySparkCheck);
+    (void)memset_s(sparkCheckStr, SPARK_CHECK_STR_LEN, 0, SPARK_CHECK_STR_LEN);
+}
