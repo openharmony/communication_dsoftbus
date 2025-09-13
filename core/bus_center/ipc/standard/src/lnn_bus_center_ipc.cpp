@@ -835,4 +835,5 @@ void BusCenterServerDeathCallback(const char *pkgName)
     RemoveRefreshRequestInfoByPkgName(pkgName);
     RemoveRangeRequestInfoByPkgName(pkgName);
     StopTimeSyncReq(pkgName);
+    SdMgrDeathCallbackPacked(pkgName);
 }

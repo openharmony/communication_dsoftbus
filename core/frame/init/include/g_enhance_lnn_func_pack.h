@@ -159,6 +159,7 @@ int32_t LnnInitMetaNodeExtLedgerPacked(void);
 void LnnDeinitMetaNodeExtLedgerPacked(void);
 bool IsSupportLpFeaturePacked(void);
 bool LnnIsSupportLpSparkFeaturePacked(void);
+bool LnnIsFeatureSupportDetailPacked(void);
 void AuthLoadDeviceKeyPacked(void);
 int32_t LnnLoadLocalDeviceInfoPacked(void);
 void LnnLoadPtkInfoPacked(void);
@@ -223,6 +224,9 @@ int32_t LnnSetLocalChannelInfoPacked(LnnVapType type, int32_t channelId);
 int32_t LnnVirtualLinkInitPacked(void);
 void LnnVirtualLinkDeinitPacked(void);
 int32_t DcTriggerVirtualLinkPacked(const char *peerNetworkId);
+int32_t LnnInitDecisionCenterV2Packed(void);
+void LnnDeinitDecisionCenterV2Packed(void);
+void SdMgrDeathCallbackPacked(const char *pkgName);
 
 #ifdef __cplusplus
 }

@@ -88,6 +88,7 @@ void LnnAnonymizePtk(const char *ptk, uint32_t len, char **anonymizedStr);
 void LnnAnonymizeBroadcastCipher(const char *broadcastCipher, uint32_t len, char **anonymizedStr);
 void LnnAnonymizeIrk(const char *irk, uint32_t len, char **anonymizedStr);
 bool isIfnameIdxInvalid(int32_t ifnameIdx);
+void LnnDumpSparkCheck(const unsigned char* sparkCheck, const char *log);
 #ifdef __cplusplus
 }
 #endif

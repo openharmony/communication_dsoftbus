@@ -38,6 +38,7 @@ typedef enum {
     EVENT_SCENE_RESERVED_11 = 11,
     EVENT_SCENE_RESERVED_12 = 12,
     EVENT_SCENE_RESERVED_OOP = 13,
+    EVENT_SCENE_RESERVED_SD = 14,
 } DiscEventScene;
 
 typedef enum {
@@ -78,6 +79,11 @@ typedef enum {
     EVENT_STAGE_OOP_DISC = 1,
     EVENT_STAGE_OOP_SCAN = 2,
 } DiscEventOopBleStage;
+
+typedef enum {
+    EVENT_STAGE_SD_DISC = 1,
+    EVENT_STAGE_SD_SCAN = 2,
+} DiscEventSdBleStage;
 
 typedef enum {
     EVENT_STAGE_VLINK_SCAN = 1,

@@ -26,7 +26,12 @@ public:
     NetLedgerCommonInterface() {};
     virtual ~NetLedgerCommonInterface() {};
 
-    virtual int32_t LnnSetLocalNumU16Info(InfoKey key, uint16_t info);
+    virtual int32_t LnnSetLocalNumU16Info(InfoKey key, uint16_t info) = 0;
+    virtual int32_t LnnSetLocalNumInfo(InfoKey key, int32_t info) = 0;
+    virtual int32_t LnnGetLocalNumU32Info(InfoKey key, uint32_t *info) = 0;
+    virtual int32_t LnnGetLocalNumInfo(InfoKey key, int32_t *info) = 0;
+    virtual int32_t LnnGetLocalNumU64Info(InfoKey key, uint64_t *info) = 0;
+    virtual int32_t LnnGenSparkCheck(void) = 0;
 };
 class NetLedgerCommonInterfaceMock : public NetLedgerCommonInterface {
 public:
@@ -34,6 +39,11 @@ public:
     ~NetLedgerCommonInterfaceMock() override;
 
     MOCK_METHOD2(LnnSetLocalNumU16Info, int32_t(InfoKey, uint16_t));
+    MOCK_METHOD2(LnnSetLocalNumInfo, int32_t(InfoKey key, int32_t info));
+    MOCK_METHOD2(LnnGetLocalNumU32Info, int32_t(InfoKey key, uint32_t *info));
+    MOCK_METHOD2(LnnGetLocalNumInfo, int32_t(InfoKey key, int32_t *info));
+    MOCK_METHOD2(LnnGetLocalNumU64Info, int32_t(InfoKey key, uint64_t *info));
+    MOCK_METHOD0(LnnGenSparkCheck, int32_t());
 };
 } // namespace OHOS
 #endif // LNN_NET_LEDGER_COMMON_MOCK_H
