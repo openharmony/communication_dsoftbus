@@ -1180,7 +1180,7 @@ static int32_t GetSrvTypeIndex(BaseServiceType srvType)
         return CHANEL_STEADY;
     } else if (srvType == SRV_TYPE_SHARE || srvType == SRV_TYPE_TOUCH) {
         return CHANEL_SHARE;
-    } else if (srvType == SRV_TYPE_HB || srvType == SRV_TYPE_DIS || srvType == SRV_TYPE_OOP) {
+    } else if (srvType == SRV_TYPE_HB || srvType == SRV_TYPE_DIS || srvType == SRV_TYPE_OOP || srvType == SRV_TYPE_SD) {
         return CHANEL_UNSTEADY;
     } else if (srvType == SRV_TYPE_D2D_PAGING) {
         return CHANEL_SLE_D2D_PAGING;
@@ -1427,7 +1427,7 @@ static int32_t CopySoftBusBcScanFilter(const BcScanFilter *srcFilter, SoftBusBcS
             SOFTBUS_MEM_ERR, DISC_BROADCAST, "copy filter manufactureDataMask failed");
     }
     if (srcFilter->filterIndex == 0) {
-        DISC_LOGW(DISC_BROADCAST, "invaild filterIndex");
+        DISC_LOGD(DISC_BROADCAST, "invaild filterIndex");
     }
     dstFilter->filterIndex = srcFilter->filterIndex;
     dstFilter->advIndReport = srcFilter->advIndReport;
@@ -2647,7 +2647,7 @@ int32_t StartScan(int32_t listenerId, const BcScanParams *param)
                 SoftBusMutexUnlock(&g_scanLock);
                 return ret;
             }
-            DISC_LOGI(DISC_BROADCAST, "add filter filterIndex = %{public}d",
+            DISC_LOGD(DISC_BROADCAST, "add filter filterIndex = %{public}d",
                 g_scanManager[listenerId].filter[i].filterIndex);
         }
     }
@@ -2794,7 +2794,7 @@ static int32_t CompareFilterAndGetIndex(int32_t listenerId, BcScanFilter *filter
 
 int32_t SetScanFilter(int32_t listenerId, const BcScanFilter *scanFilter, uint8_t filterNum)
 {
-    DISC_LOGI(DISC_BROADCAST, "enter set scan filter, filterNum=%{public}d", filterNum);
+    DISC_LOGD(DISC_BROADCAST, "enter set scan filter, filterNum=%{public}d", filterNum);
     DISC_CHECK_AND_RETURN_RET_LOGE(scanFilter != NULL, SOFTBUS_INVALID_PARAM, DISC_BROADCAST, "param is nullptr");
     DISC_CHECK_AND_RETURN_RET_LOGE(!((filterNum <= 0) || (filterNum > MAX_FILTER_SIZE)),
         SOFTBUS_INVALID_PARAM, DISC_BROADCAST, "invalid param filterNum");
@@ -2818,7 +2818,7 @@ int32_t SetScanFilter(int32_t listenerId, const BcScanFilter *scanFilter, uint8_
     } else {
         if (g_scanManager[listenerId].filterSize != 0) {
             for (int i = 0; i < g_scanManager[listenerId].filterSize; i++) {
-                DISC_LOGI(DISC_BROADCAST, "not scanning, just release index, filterIndex=%{public}d",
+                DISC_LOGD(DISC_BROADCAST, "not scanning, just release index, filterIndex=%{public}d",
                     g_scanManager[listenerId].filter[i].filterIndex);
                 g_firstSetIndex[g_scanManager[listenerId].filter[i].filterIndex] = false;
             }
@@ -2827,7 +2827,7 @@ int32_t SetScanFilter(int32_t listenerId, const BcScanFilter *scanFilter, uint8_
         if (filterNum > 0) {
             for (int i = 0; i < filterNum; i++) {
                 GetFilterIndex(&filter[i].filterIndex);
-                DISC_LOGI(DISC_BROADCAST, "add filter index, filterIndex=%{public}d",
+                DISC_LOGD(DISC_BROADCAST, "add filter index, filterIndex=%{public}d",
                     filter[i].filterIndex);
             }
         }

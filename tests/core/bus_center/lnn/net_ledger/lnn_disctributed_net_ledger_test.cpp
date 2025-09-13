@@ -2017,4 +2017,17 @@ HWTEST_F(LNNDisctributedLedgerTest, GetNodeInfoDiscovery_Test_001, TestSize.Leve
     info.discoveryType = 1 << DISCOVERY_TYPE_WIFI;
     EXPECT_NO_FATAL_FAILURE(GetNodeInfoDiscovery(NULL, &info, &infoAbility));
 }
+
+/*
+ * @tc.name: DlGetDeviceSparkCheck_Test_001
+ * @tc.desc: DlGetDeviceSparkCheck
+ * @tc.type: FUNC
+ * @tc.require: IBH09C
+ */
+HWTEST_F(LNNDisctributedLedgerTest, DlGetDeviceSparkCheck_Test_001, TestSize.Level1)
+{
+    unsigned char sparkCheck[SPARK_CHECK_LENGTH] = {0};
+    EXPECT_EQ(SOFTBUS_MEM_ERR, DlGetDeviceSparkCheck(NODE1_NETWORK_ID, true, sparkCheck, 0));
+    EXPECT_EQ(SOFTBUS_OK, DlGetDeviceSparkCheck(NODE1_NETWORK_ID, true, sparkCheck, SPARK_CHECK_LENGTH));
+}
 } // namespace OHOS

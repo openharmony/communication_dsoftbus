@@ -1260,4 +1260,20 @@ HWTEST_F(LNNNetLedgerCommonTest, LNN_SET_DATA_LEVEL_003, TestSize.Level1)
     uint32_t ret = LnnSetDataLevel(&dataLevel, isSwitchLevelChanged);
     EXPECT_EQ(ret, SOFTBUS_INVALID_PARAM);
 }
+
+/*
+ * @tc.name: LnnDumpSparkCheck_001
+ * @tc.desc: LnnDumpSparkCheck test
+ * @tc.type: FUNC
+ * @tc.require:
+ */
+HWTEST_F(LNNNetLedgerCommonTest, LnnDumpSparkCheck_001, TestSize.Level1)
+{
+    unsigned char sparkCheck[SPARK_CHECK_LENGTH] = {0};
+    EXPECT_NO_FATAL_FAILURE(LnnDumpSparkCheck(nullptr, nullptr));
+    EXPECT_NO_FATAL_FAILURE(LnnDumpSparkCheck(sparkCheck, nullptr));
+    EXPECT_NO_FATAL_FAILURE(LnnDumpSparkCheck(sparkCheck, "test"));
+    sparkCheck[0] = 1;
+    EXPECT_NO_FATAL_FAILURE(LnnDumpSparkCheck(sparkCheck, "test"));
+}
 } // namespace OHOS

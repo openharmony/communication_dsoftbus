@@ -1061,6 +1061,18 @@ bool LnnIsSupportLpSparkFeaturePacked(void)
     return pfnLnnEnhanceFuncList->lnnIsSupportLpSparkFeature();
 }
 
+bool LnnIsFeatureSupportDetailPacked(void)
+{
+    LnnEnhanceFuncList *pfnLnnEnhanceFuncList = LnnEnhanceFuncListGet();
+    if (pfnLnnEnhanceFuncList == NULL) {
+        return false;
+    }
+    if (LnnCheckFuncPointer((void *)pfnLnnEnhanceFuncList->isFeatureSupportDetail) != SOFTBUS_OK) {
+        return false;
+    }
+    return pfnLnnEnhanceFuncList->isFeatureSupportDetail();
+}
+
 void AuthLoadDeviceKeyPacked(void)
 {
     LnnEnhanceFuncList *pfnLnnEnhanceFuncList = LnnEnhanceFuncListGet();
@@ -1671,4 +1683,43 @@ void CheckNeedCloudSyncOfflinePacked(DiscoveryType type)
         return;
     }
     pfnLnnEnhanceFuncList->checkNeedCloudSyncOffline(type);
+}
+
+int32_t LnnInitDecisionCenterV2Packed(void)
+{
+    LnnEnhanceFuncList *pfnLnnEnhanceFuncList = LnnEnhanceFuncListGet();
+    if (pfnLnnEnhanceFuncList == NULL) {
+        return SOFTBUS_OK;
+    }
+    if (LnnCheckFuncPointer((void *)pfnLnnEnhanceFuncList->lnnInitDecisionCenterV2) != SOFTBUS_OK) {
+        LNN_LOGI(LNN_LANE, "init packed, func pointer is NULL");
+        return SOFTBUS_OK;
+    }
+    return pfnLnnEnhanceFuncList->lnnInitDecisionCenterV2();
+}
+
+void LnnDeinitDecisionCenterV2Packed(void)
+{
+    LnnEnhanceFuncList *pfnLnnEnhanceFuncList = LnnEnhanceFuncListGet();
+    if (pfnLnnEnhanceFuncList == NULL) {
+        return;
+    }
+    if (LnnCheckFuncPointer((void *)pfnLnnEnhanceFuncList->lnnDeinitDecisionCenterV2) != SOFTBUS_OK) {
+        LNN_LOGI(LNN_LANE, "init packed, func pointer is NULL");
+        return;
+    }
+    pfnLnnEnhanceFuncList->lnnDeinitDecisionCenterV2();
+}
+
+void SdMgrDeathCallbackPacked(const char *pkgName)
+{
+    LnnEnhanceFuncList *pfnLnnEnhanceFuncList = LnnEnhanceFuncListGet();
+    if (pfnLnnEnhanceFuncList == NULL) {
+        return;
+    }
+    if (LnnCheckFuncPointer((void *)pfnLnnEnhanceFuncList->sdMgrDeathCallback) != SOFTBUS_OK) {
+        LNN_LOGI(LNN_LANE, "init packed, func pointer is NULL");
+        return;
+    }
+    pfnLnnEnhanceFuncList->sdMgrDeathCallback(pkgName);
 }

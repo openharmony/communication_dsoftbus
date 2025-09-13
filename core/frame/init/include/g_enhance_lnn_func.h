@@ -94,6 +94,7 @@ typedef int32_t (*SendAdvInfoToMlpsFunc)(LpBroadcastParam *lpAdvParam, LpServerT
 typedef int32_t (*SwitchHeartbeatReportChannelFunc)(bool isToAP, uint16_t scanInterval, uint16_t scanWindow);
 typedef bool (*IsSupportLpFeatureFunc)(void);
 typedef bool (*LnnIsSupportLpSparkFeatureFunc)(void);
+typedef bool (*IsFeatureSupportDetailFunc)(void);
 typedef void (*SetLpKeepAliveStateFunc)(void *para);
 typedef int32_t (*LnnRegistBleHeartbeatMediumMgrFunc)(void);
 typedef int32_t (*EnablePowerControlFunc)(const WifiDirectLinkInfo *wifiDirectInfo);
@@ -279,6 +280,9 @@ typedef void (*CheckNeedCloudSyncOfflineFunc)(DiscoveryType type);
 typedef int32_t (*LnnVirtualLinkInitFunc)(void);
 typedef void (*LnnVirtualLinkDeinitFunc)(void);
 typedef int32_t (*DcTriggerVirtualLinkFunc)(const char *peerNetworkId);
+typedef int32_t (*LnnInitDecisionCenterV2Func)(void);
+typedef int32_t (*LnnDeinitDecisionCenterV2Func)(void);
+typedef int32_t (*SdMgrDeathCallbackFunc)(const char *pkgName);
 
 typedef struct TagLnnEnhanceFuncList {
     // time_sync
@@ -336,6 +340,7 @@ typedef struct TagLnnEnhanceFuncList {
     SwitchHeartbeatReportChannelFunc switchHeartbeatReportChannel;
     IsSupportLpFeatureFunc isSupportLpFeature;
     LnnIsSupportLpSparkFeatureFunc lnnIsSupportLpSparkFeature;
+    IsFeatureSupportDetailFunc isFeatureSupportDetail;
     SetLpKeepAliveStateFunc setLpKeepAliveState;
     LnnRegistBleHeartbeatMediumMgrFunc lnnRegistBleHeartbeatMediumMgr;
     LnnRequestCheckOnlineStatusFunc lnnRequestCheckOnlineStatus;
@@ -508,6 +513,9 @@ typedef struct TagLnnEnhanceFuncList {
     LnnVirtualLinkInitFunc lnnVirtualLinkInit;
     LnnVirtualLinkDeinitFunc lnnVirtualLinkDeinit;
     DcTriggerVirtualLinkFunc dcTriggerVirtualLink;
+    LnnInitDecisionCenterV2Func lnnInitDecisionCenterV2;
+    LnnDeinitDecisionCenterV2Func lnnDeinitDecisionCenterV2;
+    SdMgrDeathCallbackFunc sdMgrDeathCallback;
 } LnnEnhanceFuncList;
 
 LnnEnhanceFuncList *LnnEnhanceFuncListGet(void);
