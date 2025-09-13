@@ -17,7 +17,6 @@
 #include <securec.h>
 
 #include "lnn_event_monitor_impl.h"
-#include "lnn_linkwatch.h"
 #include "lnn_linkwatch.c"
 #include "lnn_netmanager_monitor.h"
 #include "lnn_netlink_monitor.c"
@@ -30,7 +29,15 @@
 #define NCM_LINK_NAME           "ncm0"
 #define LOCAL_IP_LINK           "192.168.66.1"
 #define DEFAULT_GATEWAY_POSTFIX "99"
-#define LOCAL_IPV6_LINK         "2001:0db8:85a3:0000:0000:8a2e:0370:7334"
+#define IPV6_1 "aaaa"
+#define IPV6_2 "bbbb"
+#define IPV6_3 "cccc"
+#define IPV6_4 "dddd"
+#define IPV6_5 "0040"
+#define IPV6_6 "8a2e"
+#define IPV6_7 "0070"
+#define IPV6_8 "7980"
+#define LOCAL_IPV6_LINK IPV6_1 ":" IPV6_2 ":" IPV6_3 ":" IPV6_4 ":" IPV6_5 ":" IPV6_6 ":" IPV6_7 ":" IPV6_8
 
 namespace OHOS {
 
@@ -135,7 +142,7 @@ HWTEST_F(AdapterNetManagerMonitorTest, LnnInitNetlinkMonitorImpl_002, TestSize.L
 {
     NiceMock<NetworkInterfaceMock> NetworkInterfaceMock;
     EXPECT_CALL(NetworkInterfaceMock, StartBaseClient).WillRepeatedly(Return(SOFTBUS_OK));
-	EXPECT_CALL(NetworkInterfaceMock, SoftBusSocketCreate)
+    EXPECT_CALL(NetworkInterfaceMock, SoftBusSocketCreate)
         .WillRepeatedly(Return(SOFTBUS_NETWORK_CREATE_SOCKET_FAILED));
     int32_t ret = LnnInitNetlinkMonitorImpl();
     EXPECT_EQ(ret, SOFTBUS_NETWORK_CREATE_SOCKET_FAILED);
