@@ -112,6 +112,7 @@ typedef struct {
         } heartbeat;
         struct SleConfig {
             char networkId[NETWORK_ID_BUF_LEN];     // SLE_CONN_HADM
+            bool onlyQueryCap;
         } sle;
     } configInfo;
 } RangeConfig;
