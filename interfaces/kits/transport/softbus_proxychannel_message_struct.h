@@ -167,6 +167,7 @@ typedef struct {
     char identity[IDENTITY_LEN + 1];
     int8_t isServer;
     bool isD2D;
+    bool isFork;
     bool retried;
     uint32_t d2dChannelCap;
     int8_t status;
