@@ -29,6 +29,7 @@
 #include "trans_log.h"
 #include "trans_session_manager.h"
 #include "trans_session_service.h"
+#include "trans_split_serviceid.h"
 
 int32_t ServerCreateSessionServer(IpcIo *req, IpcIo *reply)
 {
@@ -50,10 +51,12 @@ int32_t ServerCreateSessionServer(IpcIo *req, IpcIo *reply)
     }
     int32_t callingUid = GetCallingUid();
     int32_t callingPid = GetCallingPid();
-    if (CheckTransPermission(callingUid, callingPid, pkgName, sessionName, ACTION_CREATE) != SOFTBUS_OK) {
-        TRANS_LOGE(TRANS_CTRL, "no permission");
-        WriteInt32(reply, SOFTBUS_PERMISSION_DENIED);
-        return SOFTBUS_PERMISSION_DENIED;
+    if (!CheckNameContainServiceId(sessionName)) {
+        if (CheckTransPermission(callingUid, callingPid, pkgName, sessionName, ACTION_CREATE) != SOFTBUS_OK) {
+            TRANS_LOGE(TRANS_CTRL, "no permission");
+            WriteInt32(reply, SOFTBUS_PERMISSION_DENIED);
+            return SOFTBUS_PERMISSION_DENIED;
+        }
     }
     int32_t ret = TransCreateSessionServer(pkgName, sessionName, callingUid, callingPid);
     (void)WriteInt32(reply, ret);
@@ -78,12 +81,14 @@ int32_t ServerRemoveSessionServer(IpcIo *req, IpcIo *reply)
         TRANS_LOGE(TRANS_CTRL, "ServerRemoveSessionServer sessionName is null");
         return SOFTBUS_IPC_ERR;
     }
-    int32_t callingUid = GetCallingUid();
-    int32_t callingPid = GetCallingPid();
-    if (CheckTransPermission(callingUid, callingPid, pkgName, sessionName, ACTION_CREATE) != SOFTBUS_OK) {
-        TRANS_LOGE(TRANS_CTRL, "no permission");
-        WriteInt32(reply, SOFTBUS_PERMISSION_DENIED);
-        return SOFTBUS_PERMISSION_DENIED;
+    if (!CheckNameContainServiceId(sessionName)) {
+        int32_t callingUid = GetCallingUid();
+        int32_t callingPid = GetCallingPid();
+        if (CheckTransPermission(callingUid, callingPid, pkgName, sessionName, ACTION_CREATE) != SOFTBUS_OK) {
+            TRANS_LOGE(TRANS_CTRL, "no permission");
+            WriteInt32(reply, SOFTBUS_PERMISSION_DENIED);
+            return SOFTBUS_PERMISSION_DENIED;
+        }
     }
     int32_t ret = TransRemoveSessionServer(pkgName, sessionName);
     WriteInt32(reply, ret);
@@ -228,17 +233,18 @@ int32_t ServerOpenSession(IpcIo *req, IpcIo *reply)
         return SOFTBUS_IPC_ERR;
     }
 
-    ret = CheckOpenSessionPremission(param.sessionName, param.peerSessionName);
-    if (ret != SOFTBUS_OK) {
-        transSerializer.ret = ret;
-        WriteUint32(reply, sizeof(TransSerializer));
-        bool value = WriteBuffer(reply, (void *)&transSerializer, sizeof(TransSerializer));
-        if (!value) {
-            return SOFTBUS_TRANS_PROXY_WRITERAWDATA_FAILED;
+    if (!CheckNameContainServiceId(param.sessionName)) {
+        ret = CheckOpenSessionPremission(param.sessionName, param.peerSessionName);
+        if (ret != SOFTBUS_OK) {
+            transSerializer.ret = ret;
+            WriteUint32(reply, sizeof(TransSerializer));
+            bool value = WriteBuffer(reply, (void *)&transSerializer, sizeof(TransSerializer));
+            if (!value) {
+                return SOFTBUS_TRANS_PROXY_WRITERAWDATA_FAILED;
+            }
+            return ret;
         }
-        return ret;
     }
-
     ret = TransOpenSession(&param, &(transSerializer.transInfo));
     transSerializer.ret = ret;
     WriteUint32(reply, sizeof(TransSerializer));

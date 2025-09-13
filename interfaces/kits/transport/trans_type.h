@@ -47,6 +47,13 @@ typedef enum {
     DATA_TYPE_BUTT,
 } TransDataType;
 
+typedef struct {
+    char *peerNetworkId;    /**< Peer network ID, maximum length 64 bytes */
+    int64_t serviceId;      /**< My service id */
+    int64_t peerServiceId;  /**< Peer service id */
+    TransDataType dataType; /**< Data type */
+} ServiceSocketInfo;
+
 typedef enum {
     EVENT_TYPE_CHANNEL_OPENED,
     EVENT_TYPE_TRANS_LIMIT_CHANGE,

@@ -59,6 +59,10 @@ public:
     virtual bool IsSessionExceedLimit(void) = 0;
     virtual int32_t ClientGetSessionIsD2DByChannelId(int32_t channelId, int32_t channelType, bool *isD2D) = 0;
     virtual int32_t ClientCheckIsD2DBySessionId(int32_t sessionId, bool *isD2D) = 0;
+    virtual int32_t ClientGetSessionNameByChannelId(
+        int32_t channelId, int32_t channelType, char *sessionName, int32_t len) = 0;
+    virtual int32_t ClientGetServiceSocketInfoById(int32_t socket, ServiceSocketInfo *socketInfo) = 0;
+    virtual bool IsContainServiceBySocket(int32_t socket) = 0;
 };
 
 class TransSessionMgrMock : public TransSessionMgrInterface {
@@ -99,6 +103,10 @@ public:
     MOCK_METHOD0(IsSessionExceedLimit, bool(void));
     MOCK_METHOD3(ClientGetSessionIsD2DByChannelId, int32_t(int32_t channelId, int32_t channelType, bool *isD2D));
     MOCK_METHOD2(ClientCheckIsD2DBySessionId, int32_t(int32_t sessionId, bool *isD2D));
+    MOCK_METHOD4(ClientGetSessionNameByChannelId,
+        int32_t(int32_t channelId, int32_t channelType, char *sessionName, int32_t len));
+    MOCK_METHOD2(ClientGetServiceSocketInfoById, int32_t(int32_t socket, ServiceSocketInfo *socketInfo));
+    MOCK_METHOD1(IsContainServiceBySocket, bool(int32_t socket));
 
     static int32_t ActionOfClientGetDataConfigByChannelId(
         int32_t channelId, int32_t channelType, uint32_t *dataConfig);

@@ -112,6 +112,10 @@ int32_t ClientGetSessionCallbackAdapterByName(const char *sessionName, SessionLi
 
 int32_t ClientGetSessionCallbackAdapterById(int32_t sessionId, SessionListenerAdapter *callbackAdapter, bool *isServer);
 
+int32_t ClientGetServiceSocketInfoById(int32_t socket, ServiceSocketInfo *socketInfo);
+ 
+bool IsContainServiceBySocket(int32_t socket);
+ 
 int32_t ClientGetPeerSocketInfoById(int32_t sessionId, PeerSocketInfo *peerSocketInfo);
 
 bool IsSessionExceedLimit(void);

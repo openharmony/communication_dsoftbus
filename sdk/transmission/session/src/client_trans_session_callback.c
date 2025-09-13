@@ -29,6 +29,7 @@
 #include "softbus_def.h"
 #include "softbus_error_code.h"
 #include "trans_log.h"
+#include "trans_split_serviceid.h"
 
 #define RETRY_GET_INFO_TIMES_MS 300
 
@@ -211,6 +212,24 @@ NO_SANITIZE("cfi") static int32_t TransOnBindSuccess(int32_t sessionId, const IS
     return SOFTBUS_OK;
 }
 
+NO_SANITIZE("cfi") static int32_t TransOnServiceBindSuccess(int32_t sessionId, const ISocketListener *socketCallback)
+{
+    if (socketCallback == NULL || socketCallback->OnServiceBind == NULL) {
+        TRANS_LOGE(TRANS_SDK, "Invalid OnServiceBind callback function");
+        return SOFTBUS_INVALID_PARAM;
+    }
+ 
+    ServiceSocketInfo info;
+    int32_t ret = ClientGetServiceSocketInfoById(sessionId, &info);
+    if (ret != SOFTBUS_OK) {
+        TRANS_LOGE(TRANS_SDK, "Get service socket info failed, ret=%{public}d", ret);
+        return ret;
+    }
+ 
+    socketCallback->OnServiceBind(sessionId, info);
+    return SOFTBUS_OK;
+}
+
 NO_SANITIZE("cfi")
 static int32_t TransOnBindFailed(int32_t sessionId, const ISocketListener *socketCallback, int32_t errCode)
 {
@@ -263,7 +282,11 @@ static int32_t HandleAsyncBindSuccess(
         return ret;
     }
 
-    return TransOnBindSuccess(sessionId, socketClient);
+    bool isContain = IsContainServiceBySocket(sessionId);
+    if (!isContain) {
+        return TransOnBindSuccess(sessionId, socketClient);
+    }
+    return TransOnServiceBindSuccess(sessionId, socketClient);
 }
 
 NO_SANITIZE("cfi") static int32_t TransOnNegotiate(int32_t socket, const ISocketListener *socketCallback)
@@ -333,12 +356,41 @@ static int32_t TransOnNegotiate2(int32_t socket, const ISocketListener *socketCa
     return SOFTBUS_OK;
 }
 
+NO_SANITIZE("cfi") static int32_t TransOnServiceNegotiate(int32_t socket, const ISocketListener *socketCallback)
+{
+    if (socketCallback == NULL) {
+        TRANS_LOGE(TRANS_SDK, "Invalid socketCallback socket=%{public}d", socket);
+        return SOFTBUS_INVALID_PARAM;
+    }
+ 
+    if (socketCallback->OnServiceNegotiate == NULL) {
+        TRANS_LOGW(TRANS_SDK, "no OnServiceNegotiate callback function socket=%{public}d", socket);
+        return SOFTBUS_OK;
+    }
+ 
+    ServiceSocketInfo info = {0};
+    int32_t ret = ClientGetServiceSocketInfoById(socket, &info);
+    if (ret != SOFTBUS_OK) {
+        TRANS_LOGE(TRANS_SDK, "Get service socket info failed, ret=%{public}d, socket=%{public}d", ret, socket);
+        return ret;
+    }
+ 
+    if (!socketCallback->OnServiceNegotiate(socket, info)) {
+        TRANS_LOGW(TRANS_SDK, "The negotiate rejected the socket=%{public}d", socket);
+        return SOFTBUS_TRANS_NEGOTIATE_REJECTED;
+    }
+ 
+    return SOFTBUS_OK;
+}
+
 static int32_t HandleServerOnNegotiate(int32_t socket, int32_t tokenType, const ISocketListener *socketCallback,
     const ChannelInfo *channel, SocketAccessInfo *localAccessInfo)
 {
-    int32_t ret = TransOnNegotiate(socket, socketCallback);
+    bool isContain = IsContainServiceBySocket(socket);
+    int32_t ret =
+        isContain ? TransOnServiceNegotiate(socket, socketCallback) : TransOnNegotiate(socket, socketCallback);
     if (ret != SOFTBUS_OK) {
-        TRANS_LOGE(TRANS_SDK, "TransOnNegotiate failed, ret=%{public}d", ret);
+        TRANS_LOGE(TRANS_SDK, "TransOn%{public}sNegotiate failed, ret=%{public}d", isContain ? "Service" : "", ret);
         (void)ClientDeleteSocketSession(socket);
         return ret;
     }
@@ -784,10 +836,25 @@ int32_t ClientTransOnChannelBind(int32_t channelId, int32_t channelType)
     }
 
     ISocketListener *listener = &sessionCallback.socketServer;
-    ret = TransOnBindSuccess(socket, listener);
+    char sessionName[SESSION_NAME_SIZE_MAX + 1] = { 0 };
+    ret = ClientGetSessionNameByChannelId(channelId, channelType, sessionName, SESSION_NAME_SIZE_MAX);
     if (ret != SOFTBUS_OK) {
-        TRANS_LOGE(TRANS_SDK, "client on bind failed channelId=%{public}d", channelId);
+        TRANS_LOGE(TRANS_FILE, "failed to get sessionName, channelId=%{public}d", channelId);
         return ret;
+    }
+    bool isContained = CheckNameContainServiceId(sessionName);
+    if (!isContained) {
+        ret = TransOnBindSuccess(socket, listener);
+        if (ret != SOFTBUS_OK) {
+            TRANS_LOGE(TRANS_SDK, "client on bind failed channelId=%{public}d", channelId);
+            return ret;
+        }
+    } else {
+        ret = TransOnServiceBindSuccess(socket, listener);
+        if (ret != SOFTBUS_OK) {
+            TRANS_LOGE(TRANS_SDK, "client on service bind failed channelId=%{public}d", channelId);
+            return ret;
+        }
     }
     TRANS_LOGI(TRANS_SDK, "ok, channelId=%{public}d", channelId);
     return SOFTBUS_OK;
