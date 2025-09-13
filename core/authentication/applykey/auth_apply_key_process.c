@@ -594,7 +594,7 @@ static int32_t PostApplyKeyData(uint32_t connId, bool toServer, const AuthDataHe
     }
     ConnPostData connData = {
         .module = MODULE_APPLY_KEY_CONNECTION,
-        .seq = GenSeq(!toServer),
+        .seq = GenApplyKeySeq(),
         .flag = CONN_HIGH,
         .pid = 0,
         .len = size,
