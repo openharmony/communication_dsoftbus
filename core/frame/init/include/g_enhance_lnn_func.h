@@ -281,8 +281,8 @@ typedef int32_t (*LnnVirtualLinkInitFunc)(void);
 typedef void (*LnnVirtualLinkDeinitFunc)(void);
 typedef int32_t (*DcTriggerVirtualLinkFunc)(const char *peerNetworkId);
 typedef int32_t (*LnnInitDecisionCenterV2Func)(void);
-typedef int32_t (*LnnDeinitDecisionCenterV2Func)(void);
-typedef int32_t (*SdMgrDeathCallbackFunc)(const char *pkgName);
+typedef void (*LnnDeinitDecisionCenterV2Func)(void);
+typedef void (*SdMgrDeathCallbackFunc)(const char *pkgName);
 
 typedef struct TagLnnEnhanceFuncList {
     // time_sync
