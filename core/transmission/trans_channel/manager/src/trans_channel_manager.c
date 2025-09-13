@@ -53,6 +53,7 @@
 #include "trans_log.h"
 #include "trans_network_statistics.h"
 #include "trans_session_manager.h"
+#include "trans_split_serviceid.h"
 #include "trans_tcp_direct_manager.h"
 #include "trans_tcp_direct_message.h"
 #include "trans_tcp_direct_sessionconn.h"

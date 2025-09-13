@@ -37,6 +37,7 @@
 #include "softbus_utils.h"
 #include "trans_log.h"
 #include "trans_server_proxy.h"
+#include "trans_split_serviceid.h"
 
 #define CONVERSION_BASE 1000LL
 #define CAST_SESSION "CastPlusSessionName"
@@ -505,6 +506,30 @@ static int32_t GetSessionById(int32_t sessionId, ClientSessionServer **server, S
         }
     }
     return SOFTBUS_TRANS_SESSION_INFO_NOT_FOUND;
+}
+
+bool IsContainServiceBySocket(int32_t socket)
+{
+    if (socket <= 0) {
+        TRANS_LOGE(TRANS_SDK, "Invalid param");
+        return false;
+    }
+ 
+    if (LockClientSessionServerList() != SOFTBUS_OK) {
+        TRANS_LOGE(TRANS_SDK, "lock failed");
+        return false;
+    }
+ 
+    ClientSessionServer *serverNode = NULL;
+    SessionInfo *sessionNode = NULL;
+    if (GetSessionById(socket, &serverNode, &sessionNode) != SOFTBUS_OK) {
+        UnlockClientSessionServerList();
+        TRANS_LOGE(TRANS_SDK, "socket not found. socketFd=%{public}d", socket);
+        return false;
+    }
+    bool isContain = CheckNameContainServiceId(serverNode->sessionName);
+    UnlockClientSessionServerList();
+    return isContain;
 }
 
 static int32_t GetSessionByChannelId(int32_t channelId, int32_t channelType, ClientSessionServer **server,
@@ -2326,6 +2351,34 @@ int32_t ClientGetPeerSocketInfoById(int32_t socket, PeerSocketInfo *peerSocketIn
             peerSocketInfo->extraData = (void *)sessionNode->extraData;
         }
     }
+    UnlockClientSessionServerList();
+    return SOFTBUS_OK;
+}
+
+int32_t ClientGetServiceSocketInfoById(int32_t socket, ServiceSocketInfo *socketInfo)
+{
+    if (socket <= 0 || socketInfo == NULL) {
+        TRANS_LOGE(TRANS_SDK, "Invalid param");
+        return SOFTBUS_INVALID_PARAM;
+    }
+
+    int32_t ret = LockClientSessionServerList();
+    if (ret != SOFTBUS_OK) {
+        TRANS_LOGE(TRANS_SDK, "lock failed");
+        return ret;
+    }
+
+    ClientSessionServer *serverNode = NULL;
+    SessionInfo *sessionNode = NULL;
+    if (GetSessionById(socket, &serverNode, &sessionNode) != SOFTBUS_OK) {
+        UnlockClientSessionServerList();
+        TRANS_LOGE(TRANS_SDK, "socket not found. socketFd=%{public}d", socket);
+        return SOFTBUS_TRANS_SESSION_INFO_NOT_FOUND;
+    }
+
+    socketInfo->serviceId = SplitToGetServiceId(serverNode->sessionName);
+    socketInfo->peerServiceId = SplitToGetServiceId(sessionNode->info.peerSessionName);
+    socketInfo->dataType = (TransDataType)sessionNode->info.flag;
     UnlockClientSessionServerList();
     return SOFTBUS_OK;
 }

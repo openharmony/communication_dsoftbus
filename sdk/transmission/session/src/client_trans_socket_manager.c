@@ -34,6 +34,7 @@
 #include "softbus_utils.h"
 #include "trans_log.h"
 #include "trans_server_proxy.h"
+#include "trans_split_serviceid.h"
 
 #define NETWORK_ID_LEN 7
 #define GET_ROUTE_TYPE(type) ((uint32_t)(type) & 0xff)

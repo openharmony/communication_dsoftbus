@@ -140,6 +140,7 @@ typedef struct {
     bool permissionState;
     bool isSrvEncryptedRawStream;
     int32_t sessionAddingCnt;
+    int64_t serviceId;
 } ClientSessionServer;
 
 typedef enum {

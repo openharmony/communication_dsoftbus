@@ -37,6 +37,7 @@ typedef enum {
 } SoftBusAccessTokenType;
 
 bool SoftBusCheckIsSystemService(uint64_t tokenId);
+bool SoftBusCheckIsNormalAppByUid(uint64_t fullTokenId, pid_t uid);
 bool SoftBusCheckIsNormalApp(uint64_t fullTokenId, const char *sessionName);
 bool SoftBusCheckIsAccessAndRecordAccessToken(uint64_t tokenId, const char *permission);
 int32_t SoftBusCalcPermType(uint64_t fullTokenId, pid_t uid, pid_t pid);
@@ -51,6 +52,7 @@ int32_t SoftBusCheckDmsServerPermission(uint64_t tokenId);
 bool SoftBusCheckIsCollabApp(uint64_t fullTokenId, const char *sessionName);
 bool SoftBusCheckIsAccess(void);
 bool SoftBusSaCanUseDeviceKey(uint64_t tokenId);
+bool SoftBusCheckIsSystemAppByUid(uint64_t tokenId, pid_t uid);
 bool SoftBusCheckIsSystemApp(uint64_t tokenId, const char *sessionName);
 #ifdef __cplusplus
 #if __cplusplus

@@ -15,6 +15,7 @@
 
 #include "string.h"
 #include <securec.h>
+#include <unistd.h>
 
 #include "anonymizer.h"
 #include "client_trans_session_adapter.h"
@@ -80,6 +81,125 @@ static void PrintSocketInfo(const SocketInfo *info)
     AnonymizeFree(tmpPeerName);
     AnonymizeFree(tmpPeerNetworkId);
     AnonymizeFree(tmpPkgName);
+}
+
+static void PrintServiceSocketInfo(const ServiceSocketInfo *serviceInfo, const SocketInfo *info)
+{
+    if (serviceInfo == NULL || info == NULL) {
+        return;
+    }
+    char *tmpMyName = NULL;
+    char *tmpPeerName = NULL;
+    char *tmpPeerNetworkId = NULL;
+    Anonymize(info->name, &tmpMyName);
+    Anonymize(info->peerName, &tmpPeerName);
+    Anonymize(info->peerNetworkId, &tmpPeerNetworkId);
+    TRANS_LOGI(TRANS_SDK,
+        "Socket: myServiceId=%{public}" PRId64 ", peerServiceId=%{public}" PRId64 ", "
+        "mySocketName=%{public}s, peerSocketName=%{public}s, peerNetworkId=%{public}s, pkgName=%{public}s, "
+        "dataType=%{public}d",
+        serviceInfo->serviceId, serviceInfo->peerServiceId, AnonymizeWrapper(tmpMyName), AnonymizeWrapper(tmpPeerName),
+        AnonymizeWrapper(tmpPeerNetworkId), info->pkgName, info->dataType);
+    AnonymizeFree(tmpMyName);
+    AnonymizeFree(tmpPeerName);
+    AnonymizeFree(tmpPeerNetworkId);
+}
+
+static bool SetNameByServiceId(char **dest, const char* name, uint32_t destLen)
+{
+    *dest = (char *)SoftBusCalloc(destLen * sizeof(char));
+    if (*dest == NULL) {
+        TRANS_LOGE(TRANS_SDK, "SoftBusCalloc failed");
+        return false;
+    }
+
+    if (strcpy_s(*dest, destLen, name) != EOK) {
+        SoftBusFree(*dest);
+        *dest = NULL;
+        TRANS_LOGE(TRANS_SDK, "strcpy_s failed");
+        return false;
+    }
+
+    return true;
+}
+
+static bool GenerateNameByServiceId(SocketInfo *socketInfo, ServiceSocketInfo info)
+{
+    char pkgName[PKG_NAME_SIZE_MAX];
+    int32_t ret = sprintf_s(pkgName, PKG_NAME_SIZE_MAX, "pkg_%d_%d", getpid(), getuid());
+    if (ret < 0 || ret >= (int32_t)sizeof(pkgName)) {
+        TRANS_LOGE(TRANS_SDK, "pkgName err");
+        return false;
+    }
+    char name[PKG_NAME_SIZE_MAX];
+    ret = sprintf_s(name, PKG_NAME_SIZE_MAX, "serviceId_%d", info.serviceId);
+    if (ret < 0 || ret >= (int32_t)sizeof(name)) {
+        TRANS_LOGE(TRANS_SDK, "name err");
+        return false;
+    }
+    char peerName[PKG_NAME_SIZE_MAX];
+    ret = sprintf_s(peerName, PKG_NAME_SIZE_MAX, "serviceId_%d", info.peerServiceId);
+    if (ret < 0 || ret >= (int32_t)sizeof(peerName)) {
+        TRANS_LOGE(TRANS_SDK, "peerName err");
+        return false;
+    }
+
+    if (!SetNameByServiceId(&socketInfo->pkgName, pkgName, PKG_NAME_SIZE_MAX)) {
+        return false;
+    }
+
+    if (!SetNameByServiceId(&socketInfo->name, name, PKG_NAME_SIZE_MAX)) {
+        SoftBusFree(socketInfo->pkgName);
+        socketInfo->pkgName = NULL;
+        return false;
+    }
+
+    if (!SetNameByServiceId(&socketInfo->peerName, peerName, PKG_NAME_SIZE_MAX)) {
+        SoftBusFree(socketInfo->name);
+        socketInfo->name = NULL;
+        SoftBusFree(socketInfo->pkgName);
+        socketInfo->pkgName = NULL;
+        return false;
+    }
+
+    return true;
+}
+ 
+int32_t ServiceSocket(ServiceSocketInfo info)
+{
+    if (info.peerNetworkId == NULL) {
+        TRANS_LOGW(TRANS_SDK, "invalid SocketInfo");
+        return SOFTBUS_INVALID_PARAM;
+    }
+    SocketInfo socket;
+    (void)memset_s(&socket, sizeof(SocketInfo), 0, sizeof(SocketInfo));
+    if (!GenerateNameByServiceId(&socket, info)) {
+        return SOFTBUS_INVALID_PARAM;
+    }
+    socket.dataType = info.dataType;
+    socket.peerNetworkId = info.peerNetworkId;
+    PrintServiceSocketInfo(&info, &socket);
+    int32_t ret = CreateSocket(socket.pkgName, socket.name);
+    int32_t socketFd = INVALID_SESSION_ID;
+    if (ret != SOFTBUS_OK) {
+        TRANS_LOGE(TRANS_SDK, "CreateSocket failed, ret=%{public}d.", ret);
+        goto FREE;
+    }
+    TRANS_LOGI(TRANS_SDK, "gererate socketFd start");
+    ret = ClientAddSocket(&socket, &socketFd);
+    if (ret != SOFTBUS_OK) {
+        TRANS_LOGE(TRANS_SDK, "add socket failed, ret=%{public}d.", ret);
+        goto FREE;
+    }
+    SocketServerStateUpdate(socket.name);
+    TRANS_LOGD(TRANS_SDK, "create socket ok, socket=%{public}d", socketFd);
+    ret = socketFd;
+
+FREE:
+    SoftBusFree(socket.peerName);
+    SoftBusFree(socket.name);
+    SoftBusFree(socket.pkgName);
+    return ret;
 }
 
 int32_t Socket(SocketInfo info)

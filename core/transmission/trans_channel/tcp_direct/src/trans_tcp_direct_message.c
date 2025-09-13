@@ -52,6 +52,7 @@
 #include "trans_lane_manager.h"
 #include "trans_log.h"
 #include "trans_session_manager.h"
+#include "trans_split_serviceid.h"
 #include "trans_tcp_direct_callback.h"
 #include "trans_tcp_direct_listener.h"
 #include "trans_tcp_direct_manager.h"

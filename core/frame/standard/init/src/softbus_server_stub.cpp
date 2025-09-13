@@ -31,6 +31,7 @@
 #include "trans_log.h"
 #include "trans_network_statistics.h"
 #include "trans_session_manager.h"
+#include "trans_split_serviceid.h"
 
 #ifdef SUPPORT_BUNDLENAME
 #include "bundle_mgr_proxy.h"
@@ -405,10 +406,18 @@ static int32_t GetAppId(const std::string &bundleName, std::string &appId)
     return SOFTBUS_OK;
 }
 
+static bool CheckSystemAppSessionName(const char *sessionName, pid_t callingUid, uint64_t callingFullTokenId)
+{
+    return CheckNameContainServiceId(sessionName) ? SoftBusCheckIsSystemAppByUid(callingFullTokenId, callingUid) :
+                                                    SoftBusCheckIsSystemApp(callingFullTokenId, sessionName);
+}
+
 static int32_t CheckNormalAppSessionName(
     const char *sessionName, pid_t callingUid, std::string &strName, uint64_t callingFullTokenId)
 {
-    if (SoftBusCheckIsNormalApp(callingFullTokenId, sessionName)) {
+    bool ret = CheckNameContainServiceId(sessionName) ? SoftBusCheckIsNormalAppByUid(callingFullTokenId, callingUid) :
+                                                        SoftBusCheckIsNormalApp(callingFullTokenId, sessionName);
+    if (ret) {
         std::string bundleName;
         int32_t result = GetBundleName(callingUid, bundleName);
         if (result != SOFTBUS_OK) {
@@ -472,12 +481,40 @@ static int32_t SoftBusCheckTimestamp(MessageParcel &data, const char *sessionNam
     return SOFTBUS_TRANS_SESSION_TIME_NOT_EQUAL;
 }
 
+static bool CheckPkgPidUidServiceId(const char *pkgName, pid_t callingPid, pid_t callingUid)
+{
+#define PKG             "pkg_"
+#define PKG_LENGHT      4
+#define GET_UID_PID_CNT 2
+    if (pkgName == NULL) {
+        return false;
+    }
+    if (strlen(pkgName) <= PKG_LENGHT) {
+        return false;
+    }
+    if (strncmp(pkgName, PKG, PKG_LENGHT) != 0) {
+        return false;
+    }
+
+    int64_t pid = -1;
+    int64_t uid = -1;
+    if (sscanf_s(pkgName, "%" SCNd64 "_%" SCNd64, &pid, &uid) != GET_UID_PID_CNT) {
+        return false;
+    }
+
+    if ((pid_t)pid == callingPid && (pid_t)uid == callingUid) {
+        return true;
+    }
+
+    return false;
+}
+
 int32_t SoftBusServerStub::CreateSessionServerInner(MessageParcel &data, MessageParcel &reply)
 {
     COMM_LOGD(COMM_SVC, "enter");
     int32_t retReply;
-    pid_t callingUid;
-    pid_t callingPid;
+    pid_t callingUid = OHOS::IPCSkeleton::GetCallingUid();
+    pid_t callingPid = OHOS::IPCSkeleton::GetCallingPid();
 #ifdef SUPPORT_BUNDLENAME
     uint64_t callingFullTokenId = IPCSkeleton::GetCallingFullTokenID();
 #endif
@@ -496,14 +533,19 @@ int32_t SoftBusServerStub::CreateSessionServerInner(MessageParcel &data, Message
         goto EXIT;
     }
     strName = sessionName;
-    callingUid = OHOS::IPCSkeleton::GetCallingUid();
-    callingPid = OHOS::IPCSkeleton::GetCallingPid();
-    if (CheckTransPermission(callingUid, callingPid, pkgName, sessionName, ACTION_CREATE) != SOFTBUS_OK) {
-        retReply = SOFTBUS_PERMISSION_DENIED;
-        goto EXIT;
+    if (CheckNameContainServiceId(sessionName)) {
+        if (!CheckPkgPidUidServiceId(pkgName, callingPid, callingUid)) {
+            retReply = SOFTBUS_PERMISSION_DENIED;
+            goto EXIT;
+        }
+    } else {
+        if (CheckTransPermission(callingUid, callingPid, pkgName, sessionName, ACTION_CREATE) != SOFTBUS_OK) {
+            retReply = SOFTBUS_PERMISSION_DENIED;
+            goto EXIT;
+        }
     }
 #ifdef SUPPORT_BUNDLENAME
-    if (SoftBusCheckIsSystemApp(callingFullTokenId, sessionName) == true) {
+    if (CheckSystemAppSessionName(sessionName, callingUid, callingFullTokenId)) {
         if (TransCheckSystemAppList(callingUid) != SOFTBUS_OK) {
             retReply = SOFTBUS_PERMISSION_DENIED;
             goto EXIT;
@@ -545,13 +587,14 @@ int32_t SoftBusServerStub::RemoveSessionServerInner(MessageParcel &data, Message
         retReply = SOFTBUS_TRANS_PROXY_READCSTRING_FAILED;
         goto EXIT;
     }
-
     callingUid = OHOS::IPCSkeleton::GetCallingUid();
     callingPid = OHOS::IPCSkeleton::GetCallingPid();
-    if (CheckTransPermission(callingUid, callingPid, pkgName, sessionName, ACTION_CREATE) != SOFTBUS_OK) {
-        COMM_LOGE(COMM_SVC, "RemoveSessionServerInner check perm failed");
-        retReply = SOFTBUS_PERMISSION_DENIED;
-        goto EXIT;
+    if (!CheckNameContainServiceId(sessionName)) {
+        if (CheckTransPermission(callingUid, callingPid, pkgName, sessionName, ACTION_CREATE) != SOFTBUS_OK) {
+            COMM_LOGE(COMM_SVC, "RemoveSessionServerInner check perm failed");
+            retReply = SOFTBUS_PERMISSION_DENIED;
+            goto EXIT;
+        }
     }
 
     if (!CheckUidAndPid(sessionName, callingUid, callingPid)) {
@@ -666,17 +709,45 @@ int32_t SoftBusServerStub::OpenSessionInner(MessageParcel &data, MessageParcel &
     int64_t timeStart = 0;
     int64_t timediff = 0;
     SoftBusOpenSessionStatus isSucc = SOFTBUS_EVT_OPEN_SESSION_FAIL;
+    char networkId[NETWORK_ID_BUF_LEN] = { 0 };
     ReadSessionInfo(data, param);
     ReadSessionAttrs(data, &getAttr);
     param.attr = &getAttr;
     COMM_CHECK_AND_RETURN_RET_LOGE(ReadQosInfo(data, param), SOFTBUS_IPC_ERR, COMM_SVC, "failed to read qos info");
-
     if (param.sessionName == nullptr || param.peerSessionName == nullptr || param.peerDeviceId == nullptr ||
         param.groupId == nullptr) {
         retReply = SOFTBUS_INVALID_PARAM;
         goto EXIT;
     }
-
+    if (CheckNameContainServiceId(param.sessionName)) {
+        if (LnnGetNetworkIdByUuid(param.peerDeviceId, networkId, sizeof(networkId)) != SOFTBUS_OK) {
+            COMM_LOGE(COMM_SVC, "get networkId by uuid fail");
+            return SOFTBUS_INVALID_PARAM;
+            goto EXIT;
+        }
+        param.peerDeviceId = networkId;
+        if ((retReply = TransCheckClientAccessControl(param.peerDeviceId)) != SOFTBUS_OK) {
+            goto EXIT;
+        }
+        if (!CheckUidAndPid(
+            param.sessionName, OHOS::IPCSkeleton::GetCallingUid(), OHOS::IPCSkeleton::GetCallingPid())) {
+            char *tmpName = NULL;
+            Anonymize(param.sessionName, &tmpName);
+            COMM_LOGE(COMM_SVC, "Check Uid and Pid failed, sessionName=%{public}s", AnonymizeWrapper(tmpName));
+            AnonymizeFree(tmpName);
+            retReply = SOFTBUS_TRANS_CHECK_PID_ERROR;
+            goto EXIT;
+        }
+    } else {
+        if ((retReply = TransCheckClientAccessControl(param.peerDeviceId)) != SOFTBUS_OK) {
+            goto EXIT;
+        }
+        if (CheckOpenSessionPermission(&param) != SOFTBUS_OK) {
+            SoftbusReportTransErrorEvt(SOFTBUS_PERMISSION_DENIED);
+            retReply = SOFTBUS_PERMISSION_DENIED;
+            goto EXIT;
+        }
+    }
 #define DMS_COLLABATION_NAME_PREFIX "ohos.dtbcollab.dms"
     if (strncmp(param.sessionName, DMS_COLLABATION_NAME_PREFIX, strlen(DMS_COLLABATION_NAME_PREFIX)) == 0) {
         COMM_LOGI(COMM_SVC, "DMS bind request, need check collaboration relationship");
@@ -686,15 +757,6 @@ int32_t SoftBusServerStub::OpenSessionInner(MessageParcel &data, MessageParcel &
             retReply = SOFTBUS_TRANS_CHECK_RELATION_FAIL;
             goto EXIT;
         }
-    }
-
-    if ((retReply = TransCheckClientAccessControl(param.peerDeviceId)) != SOFTBUS_OK) {
-        goto EXIT;
-    }
-    if (CheckOpenSessionPermission(&param) != SOFTBUS_OK) {
-        SoftbusReportTransErrorEvt(SOFTBUS_PERMISSION_DENIED);
-        retReply = SOFTBUS_PERMISSION_DENIED;
-        goto EXIT;
     }
 
     timeStart = GetSoftbusRecordTimeMillis();
