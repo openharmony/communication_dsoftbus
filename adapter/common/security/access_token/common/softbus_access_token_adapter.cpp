@@ -34,8 +34,11 @@ const char *DMS_PROCESS_NAME = "distributedsched";
 const std::string DEVICE_KEY_SA_PROCESS_NAME[DEVICE_KEY_SA_CNT] = { "distributedsched", "distributedfiledaemon",
     "distributeddata" };
 #define DMS_COLLABATION_NAME_PREFIX "ohos.dtbcollab.dms"
-#define DBINDER_BUS_NAME_PREFIX "DBinder"
+#define DBINDER_BUS_NAME_PREFIX     "DBinder"
 #define OBJECT_STORE_DB_NAME_PREFIX "objectstoreDB"
+#define SAMGR_UID                   5555
+#define DMS_UID                     5522
+#define OBJECT_STORE_UID            3012
 
 static PermissionChangeCb g_permissionChangeCb = nullptr;
 
@@ -63,6 +66,14 @@ bool SoftBusCheckIsSystemService(uint64_t tokenId)
     return type == ATokenTypeEnum::TOKEN_NATIVE;
 }
 
+bool SoftBusCheckIsSystemAppByUid(uint64_t tokenId, pid_t uid)
+{
+    if (uid == SAMGR_UID || uid == DMS_UID || uid == OBJECT_STORE_UID) {
+        return false;
+    }
+    return TokenIdKit::IsSystemAppByFullTokenID(tokenId);
+}
+
 bool SoftBusCheckIsSystemApp(uint64_t tokenId, const char *sessionName)
 {
     if (sessionName == nullptr) {
@@ -86,6 +97,27 @@ bool SoftBusCheckIsSystemApp(uint64_t tokenId, const char *sessionName)
         return false;
     }
     return TokenIdKit::IsSystemAppByFullTokenID(tokenId);
+}
+
+bool SoftBusCheckIsNormalAppByUid(uint64_t fullTokenId, pid_t uid)
+{
+    // The authorization of dbind and dtbcollab are granted through Samgr and DMS, and there is no control here
+    if (uid == SAMGR_UID || uid == DMS_UID) {
+        return false;
+    }
+
+    auto tokenType = AccessTokenKit::GetTokenTypeFlag((AccessTokenID)fullTokenId);
+    if (tokenType == ATokenTypeEnum::TOKEN_NATIVE) {
+        return false;
+    } else if (tokenType == ATokenTypeEnum::TOKEN_HAP) {
+        bool isSystemApp = TokenIdKit::IsSystemAppByFullTokenID(fullTokenId);
+        if (isSystemApp) {
+            return false;
+        }
+        COMM_LOGI(COMM_ADAPTER, "The caller is a normal app");
+        return true;
+    }
+    return false;
 }
 
 bool SoftBusCheckIsNormalApp(uint64_t fullTokenId, const char *sessionName)

@@ -498,4 +498,60 @@ HWTEST_F(TransClientSocketServiceTest, SetAccessInfo001, TestSize.Level1)
     int32_t ret = SetAccessInfo(socket, accessInfo);
     EXPECT_EQ(ret, SOFTBUS_INVALID_PARAM);
 }
+ 
+/**
+ * @tc.name: GetSocketOpt003
+ * @tc.desc: call GetSocketOpt function with with valid parameter.
+ * @tc.type: FUNC
+ * @tc.require:
+ */
+HWTEST_F(TransClientSocketServiceTest, GetSocketOpt003, TestSize.Level1)
+{
+    OptLevel level = OPT_LEVEL_SOFTBUS;
+    OptType optType = OPT_TYPE_MAX_BUFFER;
+    int socketId = 1;
+    uint32_t optValueValid = 0;
+    void *temp = &optValueValid;
+    int32_t valueSize = sizeof(uint32_t);
+    int32_t *optValueSizeValid = &valueSize;
+    int32_t ret = SetSocketOpt(socketId, level, optType, temp, valueSize);
+    ASSERT_EQ(ret, SOFTBUS_NOT_IMPLEMENT);
+    ret = GetSocketOpt(socketId, level, optType, temp, optValueSizeValid);
+    ASSERT_EQ(ret, SOFTBUS_NOT_IMPLEMENT);
+}
+ 
+/**
+ * @tc.name: RegisterRelationChecker002
+ * @tc.desc: call RegisterRelationChecker function with with invalid parameter.
+ * @tc.type: FUNC
+ * @tc.require:
+ */
+HWTEST_F(TransClientSocketServiceTest, RegisterRelationChecker002, TestSize.Level1)
+{
+    int32_t ret = RegisterRelationChecker(nullptr);
+    ASSERT_EQ(ret, SOFTBUS_INVALID_PARAM);
+}
+
+/**
+ * @tc.name: ServiceSocketPeerNetworkId001
+ * @tc.desc: call ServiceSocket function with with invalid parameter.
+ * @tc.type: FUNC
+ * @tc.require:
+ */
+HWTEST_F(TransClientSocketServiceTest, ServiceSocketPeerNetworkId001, TestSize.Level1)
+{
+    ServiceSocketInfo info;
+    char networkId[SOCKET_NETWORKID_INVALID_LEN + 1];
+    memset_s(networkId, SOCKET_NETWORKID_INVALID_LEN + 1, 0, SOCKET_NETWORKID_INVALID_LEN + 1);
+    info.peerNetworkId = networkId;
+    info.dataType = static_cast<TransDataType>(DATA_TYPE_BYTES);
+    info.serviceId = 50;
+    info.peerServiceId = 58;
+    int32_t socket = ServiceSocket(info);
+    EXPECT_EQ(socket, SOFTBUS_INVALID_PARAM);
+    memset_s(networkId, SOCKET_NETWORKID_INVALID_LEN + 1, 'a', SOCKET_NETWORKID_INVALID_LEN);
+    info.peerNetworkId = networkId;
+    socket = ServiceSocket(info);
+    ASSERT_EQ(socket, SOFTBUS_INVALID_PARAM);
+}
 } // namespace OHOS

@@ -198,6 +198,19 @@ int32_t ClientCheckIsD2DBySessionId(int32_t sessionId, bool *isD2D)
 {
     return GetManagerInterface()->ClientCheckIsD2DBySessionId(sessionId, isD2D);
 }
+
+int32_t ClientGetSessionNameByChannelId(int32_t channelId, int32_t channelType, char *sessionName, int32_t len)
+{
+    return GetManagerInterface()->ClientGetSessionNameByChannelId(channelId, channelType, sessionName, len);
+}
+int32_t ClientGetServiceSocketInfoById(int32_t socket, ServiceSocketInfo *socketInfo)
+{
+    return GetManagerInterface()->ClientGetServiceSocketInfoById(socket, socketInfo);
+}
+bool IsContainServiceBySocket(int32_t socket)
+{
+    return GetManagerInterface()->IsContainServiceBySocket(socket);
+}
 #ifdef __cplusplus
 }
 #endif

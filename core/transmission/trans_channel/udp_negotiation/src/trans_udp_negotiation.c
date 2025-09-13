@@ -42,6 +42,7 @@
 #include "trans_lane_pending_ctl.h"
 #include "trans_log.h"
 #include "trans_session_manager.h"
+#include "trans_split_serviceid.h"
 #include "trans_udp_channel_manager.h"
 #include "trans_udp_negotiation_exchange.h"
 #include "trans_uk_manager.h"
@@ -633,8 +634,10 @@ static int32_t ParseRequestAppInfo(AuthHandle authHandle, const cJSON *msg, AppI
         }
     }
 
-    if (CheckSecLevelPublic(appInfo->myData.sessionName, appInfo->peerData.sessionName) != SOFTBUS_OK) {
-        return SOFTBUS_PERMISSION_SERVER_DENIED;
+    if (!CheckNameContainServiceId(appInfo->myData.sessionName)) {
+        if (CheckSecLevelPublic(appInfo->myData.sessionName, appInfo->peerData.sessionName) != SOFTBUS_OK) {
+            return SOFTBUS_PERMISSION_SERVER_DENIED;
+        }
     }
 
     if (appInfo->udpChannelOptType != TYPE_UDP_CHANNEL_OPEN) {
