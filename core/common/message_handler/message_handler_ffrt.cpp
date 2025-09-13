@@ -31,6 +31,7 @@
 #define MAX_LOOPER_CNT 30U
 #define MAX_LOOPER_PRINT_CNT 64
 #define TASK_HANDLE_TIMEOUT 5000LL
+#define QOS_PERCEPTION_HANDLER "qos_perception_handler"
 
 static std::atomic<uint32_t> g_looperCnt(0);
 
@@ -165,7 +166,10 @@ static void DumpMsgInfo(const SoftBusMessage *msg)
         COMM_LOGE(COMM_UTILS, "invalid para when dump msg info");
         return;
     }
-    COMM_LOGD(COMM_UTILS, "handling msg, %{public}s, %{public}s, %{public}" PRId32 ", %{public}" PRIu64 ", "
+    if (msg->handler->name != nullptr && strcmp(msg->handler->name, QOS_PERCEPTION_HANDLER) == 0) {
+        return;
+    }
+    COMM_LOGI(COMM_UTILS, "handling msg, %{public}s, %{public}s, %{public}" PRId32 ", %{public}" PRIu64 ", "
         "%{public}" PRIu64 ", %{public}" PRId64 "",
         msg->handler->looper->context->name, msg->handler->name, msg->what, msg->arg1, msg->arg2, msg->time);
 }
