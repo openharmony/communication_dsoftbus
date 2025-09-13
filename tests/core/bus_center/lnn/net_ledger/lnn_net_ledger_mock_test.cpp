@@ -24,6 +24,8 @@
 #include "lnn_distributed_net_ledger_manager.c"
 #include "lnn_net_ledger.c"
 #include "lnn_net_ledger_common_mock.h"
+#include "lnn_net_ledger_deps_mock.h"
+#include "lnn_node_info_struct.h"
 
 namespace OHOS {
 using namespace testing::ext;
