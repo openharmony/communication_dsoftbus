@@ -362,7 +362,7 @@ static void DumpDpAclInfo(const std::string peerUdid, int32_t localUserId, int32
 static int32_t GenerateDsoftbusBundleName(
     const char *peerUdid, const char *localUdid, int32_t localUserId, char *bundleName)
 {
-    if (peerUdid == NULL || localUdid == NULL || bundleName == NULL) {
+    if (peerUdid == nullptr || localUdid == nullptr || bundleName == nullptr) {
         LNN_LOGE(LNN_STATE, "invalid param");
         return SOFTBUS_INVALID_PARAM;
     }
