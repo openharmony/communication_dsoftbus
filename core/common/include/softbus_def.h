@@ -232,6 +232,8 @@ typedef struct {
     bool isLowLatency;
     ProtocolType fdProtocol;
     char *pkgName;
+    int64_t serviceId;
+    int64_t peerServiceId;
 } ChannelInfo;
 
 #ifdef __cplusplus

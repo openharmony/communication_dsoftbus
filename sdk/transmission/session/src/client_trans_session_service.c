@@ -44,6 +44,7 @@
 #include "softbus_utils.h"
 #include "trans_log.h"
 #include "trans_server_proxy.h"
+#include "trans_split_serviceid.h"
 
 typedef int (*SessionOptionRead)(int32_t channelId, int32_t type, void* value, uint32_t valueSize);
 typedef int (*SessionOptionWrite)(int32_t channelId, int32_t type, void* value, uint32_t valueSize);
