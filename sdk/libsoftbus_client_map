@@ -244,6 +244,7 @@
         "UnPublishService";
         "StartServiceDiscovery";
         "StopServiceDiscovery";
+        "ServiceSocket";
     local:
         *;
 };
