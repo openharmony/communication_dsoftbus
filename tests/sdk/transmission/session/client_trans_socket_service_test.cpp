@@ -541,17 +541,20 @@ HWTEST_F(TransClientSocketServiceTest, RegisterRelationChecker002, TestSize.Leve
 HWTEST_F(TransClientSocketServiceTest, ServiceSocketPeerNetworkId001, TestSize.Level1)
 {
     ServiceSocketInfo info;
+    info.peerNetworkId = nullptr;
+    int32_t socket = ServiceSocket(info);
+    EXPECT_EQ(socket, SOFTBUS_INVALID_PARAM);
     char networkId[SOCKET_NETWORKID_INVALID_LEN + 1];
     memset_s(networkId, SOCKET_NETWORKID_INVALID_LEN + 1, 0, SOCKET_NETWORKID_INVALID_LEN + 1);
     info.peerNetworkId = networkId;
     info.dataType = static_cast<TransDataType>(DATA_TYPE_BYTES);
     info.serviceId = 50;
     info.peerServiceId = 58;
-    int32_t socket = ServiceSocket(info);
-    EXPECT_EQ(socket, SOFTBUS_INVALID_PARAM);
+    socket = ServiceSocket(info);
+    EXPECT_EQ(socket, SOFTBUS_TRANS_SESSION_ADDPKG_FAILED);
     memset_s(networkId, SOCKET_NETWORKID_INVALID_LEN + 1, 'a', SOCKET_NETWORKID_INVALID_LEN);
     info.peerNetworkId = networkId;
     socket = ServiceSocket(info);
-    ASSERT_EQ(socket, SOFTBUS_INVALID_PARAM);
+    ASSERT_EQ(socket, SOFTBUS_TRANS_SESSION_ADDPKG_FAILED);
 }
 } // namespace OHOS
