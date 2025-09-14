@@ -498,7 +498,7 @@ static bool CheckPkgPidUidServiceId(const char *pkgName, pid_t callingPid, pid_t
 
     int64_t pid = -1;
     int64_t uid = -1;
-    if (sscanf_s(pkgName, "%" SCNd64 "_%" SCNd64, &pid, &uid) != GET_UID_PID_CNT) {
+    if (sscanf_s(pkgName, "pkg_%" SCNd64 "_%" SCNd64, &pid, &uid) != GET_UID_PID_CNT) {
         return false;
     }
 
