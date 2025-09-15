@@ -50,6 +50,7 @@ private:
     int localCustomPort_;
     int remoteCustomPort_;
     int legacyReused_;
+    int powerMode_;
 };
 } // namespace OHOS::SoftBus
 #endif

@@ -65,6 +65,7 @@ void WifiDirectDfx::Clear(uint32_t requestId)
     std::lock_guard lock(mutex_);
     challengeCodeMap_.erase(requestId);
     reuseFlagMap_.erase(requestId);
+    virtualFlagMap_.erase(requestId);
 }
 
 void WifiDirectDfx::ReportConnEventExtra(ConnEventExtra &extra, const WifiDirectConnectInfo &wifiDirectConnectInfo)
@@ -107,6 +108,7 @@ void WifiDirectDfx::ReportConnEventExtra(ConnEventExtra &extra, const WifiDirect
     extra.staChload = WifiDirectUtils::GetChload();
     extra.sameAccount =
         WifiDirectUtils::IsDeviceId(WifiDirectUtils::NetworkIdToUuid(wifiDirectConnectInfo.remoteNetworkId));
+    extra.virtualLinkType = GetVirtualLinkType(requestId);
     CONN_EVENT(EVENT_SCENE_CONNECT, EVENT_STAGE_CONNECT_END, extra);
 }
 
@@ -220,5 +222,24 @@ void WifiDirectDfx::SetBootLinkTypeByAuthHandle(ConnEventExtra &extra, const Wif
             extra.bootLinkType = STATISTIC_NONE;
             break;
     }
+}
+
+void WifiDirectDfx::SetVirtualLinkType(uint32_t requestId, StatisticVirtualLinkType virtualLinkType)
+{
+    std::lock_guard lock(mutex_);
+    if (virtualFlagMap_.find(requestId) != virtualFlagMap_.end()) {
+        virtualFlagMap_[requestId] = virtualLinkType;
+        return;
+    }
+    virtualFlagMap_.insert(std::make_pair(requestId, virtualLinkType));
+}
+
+int WifiDirectDfx::GetVirtualLinkType(uint32_t requestId)
+{
+    std::lock_guard lock(mutex_);
+    auto it = virtualFlagMap_.find(requestId);
+    CONN_CHECK_AND_RETURN_RET_LOGE(
+        it != virtualFlagMap_.end(), STATISTIC_LINK_INVALID, CONN_WIFI_DIRECT, "not find virtual link flag");
+    return it->second;
 }
 } // namespace OHOS::SoftBus
