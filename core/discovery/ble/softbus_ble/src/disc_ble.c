@@ -1167,7 +1167,7 @@ static void CalcDurationTime(int32_t adv, uint32_t capabilityBitmap)
 {
     uint32_t tempCap = 0;
     DeConvertBitMap(&tempCap, &capabilityBitmap, 1);
-    int64_t stamptime = SoftBusGetSysTimeMs();
+    uint64_t stamptime = SoftBusGetSysTimeMs();
 
     const uint32_t event[] = {
         adv == CON_ADV_ID ? CAST_EVENT_CON : CAST_EVENT_NON,

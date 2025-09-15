@@ -230,6 +230,9 @@ static void DumpLooperLocked(const SoftBusLooperContext *context, const SoftBusH
     ListNode *item = NULL;
     LIST_FOR_EACH(item, &context->msgHead) {
         SoftBusMessageNode *itemNode = LIST_ENTRY(item, SoftBusMessageNode, node);
+        if (itemNode == NULL || itemNode->msg == NULL) {
+            continue;
+        }
         SoftBusMessage *msg = itemNode->msg;
         if (i > MAX_LOOPER_PRINT_CNT) {
             COMM_LOGW(COMM_UTILS, "many messages left unprocessed, msgSize=%{public}u",
@@ -237,6 +240,9 @@ static void DumpLooperLocked(const SoftBusLooperContext *context, const SoftBusH
             break;
         }
         if (handler != NULL && handler != msg->handler) {
+            continue;
+        }
+        if (msg->handler == NULL) {
             continue;
         }
         COMM_LOGD(COMM_UTILS,

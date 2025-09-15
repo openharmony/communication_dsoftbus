@@ -649,7 +649,7 @@ static int32_t AllocTargetLane(uint32_t laneHandle, const LaneAllocInfoExt *allo
 static int32_t SpecifiedLinkCheck(const char *networkId, uint32_t linkNum,
     LaneLinkType *optionalLink, LanePreferredLinkList *preferLink)
 {
-    if (linkNum <= 0 || linkNum >= LANE_LINK_TYPE_BUTT || optionalLink == NULL || preferLink == NULL) {
+    if (linkNum == 0 || linkNum >= LANE_LINK_TYPE_BUTT || optionalLink == NULL || preferLink == NULL) {
         LNN_LOGE(LNN_LANE, "invalid link num");
         return SOFTBUS_INVALID_PARAM;
     }
