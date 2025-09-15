@@ -165,6 +165,7 @@ typedef struct {
     char identity[IDENTITY_LEN + 1];
     int8_t isServer;
     bool isD2D;
+    bool isFork;
     bool retried;
     int8_t status;
     uint16_t timeout;
