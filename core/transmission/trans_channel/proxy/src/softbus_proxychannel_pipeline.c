@@ -34,7 +34,6 @@
 #include "trans_log.h"
 
 #define SESSION_NAME "ohos.dsoftbus.inner.p2pchannel"
-#define PIPELINEHANDLER_NAME "ProxyChannelPipelineHandler"
 #define MSG_CNT 2
 
 enum PipelineLooperMsgType {
@@ -669,7 +668,7 @@ int32_t TransProxyPipelineInit(void)
         return SOFTBUS_LOOPER_ERR;
     }
     g_manager.handler.looper = g_manager.looper;
-    strcpy_s(g_manager.handler.name, strlen(PIPELINEHANDLER_NAME) + 1, PIPELINEHANDLER_NAME);
+    g_manager.handler.name = (char *)"ProxyChannelPipelineHandler";
     g_manager.handler.HandleMessage = TransProxyPipelineHandleMessage;
     atomic_store_explicit(&(g_manager.inited), true, memory_order_release);
     return SOFTBUS_OK;
