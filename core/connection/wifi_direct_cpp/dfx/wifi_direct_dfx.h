@@ -36,6 +36,8 @@ public:
     bool IsReuse(uint32_t requestId);
     std::string GetChallengeCode(uint32_t requestId);
     static void ReportReceiveAuthLinkMsg(const NegotiateMessage &msg, const std::string &remoteDeviceId);
+    void SetVirtualLinkType(uint32_t requestId, StatisticVirtualLinkType virtualLinkType);
+    int GetVirtualLinkType(uint32_t requestId);
 
 private:
     void ReportConnEventExtra(ConnEventExtra &extra, const WifiDirectConnectInfo &connectInfo);
@@ -45,6 +47,7 @@ private:
     
     std::map<uint32_t, uint16_t> challengeCodeMap_;
     std::map<uint32_t, bool> reuseFlagMap_;
+    std::map<uint32_t, int> virtualFlagMap_;
     std::recursive_mutex mutex_;
 };
 } // namespace OHOS::SoftBus

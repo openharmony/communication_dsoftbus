@@ -40,6 +40,7 @@ LinkSnapshot::LinkSnapshot(const InnerLink &link)
     localCustomPort_ = link.GetLocalCustomPort();
     remoteCustomPort_ = link.GetRemoteCustomPort();
     legacyReused_ = link.GetLegacyReused();
+    powerMode_ = link.GetLinkPowerMode();
 }
 
 void LinkSnapshot::Marshalling(nlohmann::json &output)
@@ -67,6 +68,7 @@ void LinkSnapshot::Marshalling(nlohmann::json &output)
     json["localCustomPort"] = localCustomPort_;
     json["remoteCustomPort"] = remoteCustomPort_;
     json["legacyReused"] = legacyReused_;
+    json["powerMode"] = powerMode_;
     output.push_back(json);
 }
 } // namespace OHOS::SoftBus

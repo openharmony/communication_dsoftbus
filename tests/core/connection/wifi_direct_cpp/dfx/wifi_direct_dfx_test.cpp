@@ -57,6 +57,8 @@ HWTEST_F(WifiDirectDfxTest, ReportConnEventExtraTest, TestSize.Level1)
     WifiDirectDfx::GetInstance().Record(requestId, challengeCode);
     sleep(1);
     DurationStatistic::GetInstance().Record(requestId, TOTAL_END);
+    WifiDirectDfx::GetInstance().SetVirtualLinkType(requestId, STATISTIC_LINK_VIRTUAL_TO_REAL);
+    WifiDirectDfx::GetInstance().SetVirtualLinkType(requestId, STATISTIC_LINK_VIRTUAL);
     EXPECT_NO_FATAL_FAILURE(WifiDirectDfx::GetInstance().DfxRecord(result, reason, wifiDirectConnectInfo));
     wifiDirectConnectInfo.connectType = WIFI_DIRECT_CONNECT_TYPE_AUTH_NEGO_P2P;
     EXPECT_NO_FATAL_FAILURE(WifiDirectDfx::GetInstance().DfxRecord(result, reason, wifiDirectConnectInfo));
