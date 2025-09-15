@@ -100,6 +100,7 @@ static int32_t MatchConnEventNameTypeExtraForAddMsg(const HiSysEventParam *param
     MatchConnEventNameTypeExtraInt32Param(params, ++index, extra.connectingCnt);
     MatchConnEventNameTypeExtraInt32Param(params, ++index, extra.connectSuccessCnt);
     MatchConnEventNameTypeExtraInt32Param(params, ++index, extra.connectFailCnt);
+    MatchConnEventNameTypeExtraInt32Param(params, ++index, extra.virtualLinkType);
     return ++index;
 }
 

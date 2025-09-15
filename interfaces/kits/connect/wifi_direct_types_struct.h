@@ -190,6 +190,13 @@ enum StatisticBootLinkType {
     STATISTIC_BOOT_LINK_TYPE_NUM = 10,
 };
 
+enum StatisticVirtualLinkType {
+    STATISTIC_LINK_INVALID = -1,
+    STATISTIC_LINK_REAL = 0,
+    STATISTIC_LINK_VIRTUAL = 1,
+    STATISTIC_LINK_VIRTUAL_TO_REAL = 2,
+};
+
 struct WifiDirectDfxInfo {
     enum StatisticLinkType linkType;
     enum StatisticBootLinkType bootLinkType;

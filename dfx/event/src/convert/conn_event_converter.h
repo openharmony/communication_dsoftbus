@@ -101,8 +101,9 @@ CONN_ASSIGNER(Errcode, DiscoveryCnt, discoveryCnt)
 CONN_ASSIGNER(Errcode, ConnectingCnt, connectingCnt)
 CONN_ASSIGNER(Errcode, ConnectSuccessCnt, connectSuccessCnt)
 CONN_ASSIGNER(Errcode, ConnectFailCnt, connectFailCnt)
+CONN_ASSIGNER(Errcode, VirtualLinkType, virtualLinkType)
 
-#define CONN_ASSIGNER_SIZE 67 // Size of g_connAssigners
+#define CONN_ASSIGNER_SIZE 68 // Size of g_connAssigners
 static HiSysEventParamAssigner g_connAssigners[] = {
     { "STAGE_RES",         HISYSEVENT_INT32,  ConnAssignerResult        },
     { "ERROR_CODE",        HISYSEVENT_INT32,  ConnAssignerErrcode       },
@@ -171,6 +172,7 @@ static HiSysEventParamAssigner g_connAssigners[] = {
     { "CONNECTING_CNT",         HISYSEVENT_INT32,  ConnAssignerConnectingCnt        },
     { "CONNECT_SUCCESS_CNT",    HISYSEVENT_INT32,  ConnAssignerConnectSuccessCnt    },
     { "CONNECT_FAIL_CNT",       HISYSEVENT_INT32,  ConnAssignerConnectFailCnt       },
+    { "VIRTUAL_LINK_TYPE",      HISYSEVENT_INT32,  ConnAssignerVirtualLinkType      },
  // Modification Note: remember updating CONN_ASSIGNER_SIZE
 };
 
