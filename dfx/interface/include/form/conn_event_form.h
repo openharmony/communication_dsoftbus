@@ -143,6 +143,7 @@ typedef struct {
     int32_t connectingCnt;        // CONNECTING_CNT
     int32_t connectSuccessCnt;    // CONNECT_SUCCESS_CNT
     int32_t connectFailCnt;       // CONNECT_FAIL_CNT
+    int32_t virtualLinkType;      // VIRTUAL_LINK_TYPE
 } ConnEventExtra;
 
 typedef enum {
