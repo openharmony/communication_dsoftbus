@@ -2552,7 +2552,8 @@ void TransProxyCloseChannelByRequestId(uint32_t requestId)
         return;
     }
     LIST_FOR_EACH_ENTRY_SAFE(item, nextNode, &g_proxyChannelList->list, ProxyChannelInfo, node) {
-        if (item->reqId == (int32_t)requestId && item->status != PROXY_CHANNEL_STATUS_COMPLETED) {
+        if (item->reqId == (int32_t)requestId && item->status != PROXY_CHANNEL_STATUS_COMPLETED &&
+            item->isFork != true) {
             ReleaseProxyChannelId(item->channelId);
             ListDelete(&(item->node));
             g_proxyChannelList->cnt--;
