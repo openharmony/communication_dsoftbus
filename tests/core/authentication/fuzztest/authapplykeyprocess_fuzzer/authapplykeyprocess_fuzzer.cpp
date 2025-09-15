@@ -65,9 +65,9 @@ void SetApplyKeyNegoInfo(
     uint32_t len = provider.ConsumeIntegral<uint32_t>();
     vector<uint8_t> applyKey = provider.ConsumeRemainingBytes<uint8_t>();
     string accountHashBuf = provider.ConsumeRandomLengthString(len);
-    SetApplyKeyNegoInfoRecvSessionKey(requestId, isRecv, applyKey.data(), applyKey.size());
-    SetApplyKeyNegoInfoRecvCloseAck(requestId, isRecv);
-    SetApplyKeyNegoInfoRecvFinish(requestId, isRecv, (char *)accountHashBuf.c_str());
+    SetNegoInfoRecvSessionKey(requestId, isRecv, applyKey.data(), applyKey.size());
+    SetNegoInfoRecvCloseAck(requestId, isRecv);
+    SetNegoInfoRecvFinish(requestId, isRecv, (char *)accountHashBuf.c_str());
     SetApplyKeyStartState(requestId, state);
 }
 
