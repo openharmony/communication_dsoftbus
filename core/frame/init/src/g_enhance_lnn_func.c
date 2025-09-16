@@ -262,6 +262,8 @@ void Register5thPartFunc(void *soHandle)
     g_lnnEnhanceFuncList.lnnInitDecisionCenterV2 = dlsym(soHandle, "LnnInitDecisionCenterV2");
     g_lnnEnhanceFuncList.lnnDeinitDecisionCenterV2 = dlsym(soHandle, "LnnDeinitDecisionCenterV2");
     g_lnnEnhanceFuncList.sdMgrDeathCallback = dlsym(soHandle, "SdMgrDeathCallback");
+    g_lnnEnhanceFuncList.authMetaGetIpByMetaNodeId = dlsym(soHandle, "AuthMetaGetIpByMetaNodeId");
+    g_lnnEnhanceFuncList.authMetaGetLocalIpByMetaNodeId = dlsym(soHandle, "AuthMetaGetLocalIpByMetaNodeId");
 }
 
 int32_t LnnRegisterEnhanceFunc(void *soHandle)

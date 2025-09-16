@@ -1583,7 +1583,7 @@ static bool IsGuideChannelRetryErrcode(uint32_t p2pRequestId, int32_t reason)
         reason == SOFTBUS_CONN_PV1_WAIT_CONNECT_RESPONSE_TIMEOUT ||
         reason == SOFTBUS_CONN_PV2_WAIT_CONNECT_RESPONSE_TIMEOUT ||
         reason == SOFTBUS_CONN_SOURCE_REUSE_LINK_FAILED ||
-        reason == SOFTBUS_SPARK_SNED_MSG_FAILED  ||
+        reason == SOFTBUS_SPARK_SNED_MSG_FAILED ||
         reason == SOFTBUS_INTERACT_CONTROL_SIGNALING_FAIL) {
         return true;
     }

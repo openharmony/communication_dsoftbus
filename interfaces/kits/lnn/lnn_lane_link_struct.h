@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2022 Huawei Device Co., Ltd.
+ * Copyright (c) 2025 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -46,7 +46,7 @@ typedef struct {
     bool p2pOnly;
     //OldInfo
     char peerBleMac[MAX_MAC_LEN];
-    char peerSleMac[MAX_MAC_LEN];
+    char peerSleMac[SLE_MAC_LEN];
     bool isSupportIpv6;
     bool isVirtualLink;
     bool isInnerCalled; // Indicates whether to select a link for TransOpenNetWorkingChannel
@@ -104,7 +104,7 @@ typedef struct {
 } SleDirectInfo;
 
 typedef struct {
-    char sleMac[BT_MAC_LEN];
+    char sleMac[SLE_MAC_LEN];
     char deviceIdHash[UDID_HASH_LEN];
     SleProtocolType protoType;
 } SleLinkInfo;
