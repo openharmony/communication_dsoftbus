@@ -515,7 +515,10 @@ void TransProxyCloseChannelByRequestIdTest(FuzzedDataProvider &provider)
     (void)TransProxyGetProxyChannelInfoByChannelId(info->channelId, &info1);
     (void)TransProxyGetProxyChannelIdByAuthReq(reqId, &channelId);
     (void)TransProxySetAuthHandleByChanId(info->channelId, authHandle);
-    (void)TransProxyGetChannelByFlag(info->appInfo.myData.businessFlag, &info1, info->appInfo.isClient);
+    PagingListenCheckInfo checkInfo;
+    checkInfo.businessFlag = provider.ConsumeIntegral<uint32_t>();
+    checkInfo.channelId = provider.ConsumeIntegral<int32_t>();
+    (void)TransProxyGetChannelByCheckInfo(&checkInfo, &info1, info->appInfo.isClient);
     (void)TransProxyGetPrivilegeCloseList(&privilegeCloseList, info->appInfo.callingTokenId, info->appInfo.myData.pid);
     (void)TransProxyResetReplyCnt(info->channelId);
     channelId = provider.ConsumeIntegral<int32_t>();
