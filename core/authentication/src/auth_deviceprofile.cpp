@@ -1176,3 +1176,50 @@ int32_t SelectAllAcl(TrustedInfo **trustedInfoArray, uint32_t *num)
     }
     return SOFTBUS_OK;
 }
+
+static bool CompareAssetAclWithUdid(
+    OHOS::DistributedDeviceProfile::AccessControlProfile aclProfile, const char *localUdid, const char *peerUdid)
+{
+    std::string itemSourceDeviceId = aclProfile.GetAccesser().GetAccesserDeviceId();
+    std::string itemSinkDeviceId = aclProfile.GetAccessee().GetAccesseeDeviceId();
+    if ((itemSourceDeviceId.compare(std::string(localUdid)) != 0 ||
+        itemSinkDeviceId.compare(std::string(peerUdid)) != 0) &&
+        (itemSourceDeviceId.compare(std::string(peerUdid)) != 0 ||
+        itemSinkDeviceId.compare(std::string(localUdid)) != 0)) {
+        LNN_LOGE(LNN_STATE, "udid compare fail");
+        return false;
+    }
+    return true;
+}
+
+bool IsExistUkInAclProfile(const char *localUdid, const char *peerUdid)
+{
+    if (localUdid == nullptr || peerUdid == nullptr) {
+        LNN_LOGE(LNN_LEDGER, "invalid param");
+        return false;
+    }
+
+    std::vector<OHOS::DistributedDeviceProfile::AccessControlProfile> aclProfiles;
+    int32_t ret = DpClient::GetInstance().GetAllAccessControlProfile(aclProfiles);
+    if (ret != OHOS::DistributedDeviceProfile::DP_SUCCESS) {
+        LNN_LOGE(LNN_STATE, "GetAllAccessControlProfile ret=%{public}d", ret);
+        return false;
+    }
+    if (aclProfiles.empty()) {
+        LNN_LOGE(LNN_STATE, "aclProfiles is empty");
+        return false;
+    }
+    for (auto &aclProfile : aclProfiles) {
+        if (!CompareAssetAclWithUdid(aclProfile, localUdid, peerUdid)) {
+            continue;
+        }
+        int32_t sessionKeyId = aclProfile.GetAccesser().GetAccesserSessionKeyId();
+        if (sessionKeyId == DEFAULT_USER_KEY_INDEX) {
+            continue;
+        }
+        LNN_LOGI(LNN_STATE, "acl exist uk, GetAccesser=%{public}s, GetAccessee=%{public}s",
+            aclProfile.GetAccesser().dump().c_str(), aclProfile.GetAccessee().dump().c_str());
+        return true;
+    }
+    return false;
+}
