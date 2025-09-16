@@ -1677,3 +1677,32 @@ void UkNegotiateSessionInit(void)
     }
     AUTH_LOGI(AUTH_CONN, "ok");
 }
+
+bool IsNeedSinkGenerateUk(const char *peerNetworkId)
+{
+    if (peerNetworkId == NULL) {
+        AUTH_LOGE(AUTH_CONN, "peerNetworkId is invalid param");
+        return false;
+    }
+    char peerUdid[UDID_BUF_LEN] = { 0 };
+    char localUdid[UDID_BUF_LEN] = { 0 };
+    NodeInfo info;
+    (void)memset_s(&info, sizeof(NodeInfo), 0, sizeof(NodeInfo));
+
+    if (LnnGetRemoteNodeInfoById(peerNetworkId, CATEGORY_NETWORK_ID, &info) != SOFTBUS_OK) {
+        char *anonyPeerNetworkId = NULL;
+        Anonymize(peerNetworkId, &anonyPeerNetworkId);
+        AUTH_LOGE(AUTH_CONN, "get peer udid fail, peer networkId=%{public}s", AnonymizeWrapper(anonyPeerNetworkId));
+        AnonymizeFree(anonyPeerNetworkId);
+        return false;
+    }
+    if (strcpy_s(peerUdid, UDID_BUF_LEN, info.deviceInfo.deviceUdid) != EOK) {
+        AUTH_LOGE(AUTH_CONN, "strcpy peer udid fail");
+        return false;
+    }
+    if (LnnGetLocalStrInfo(STRING_KEY_DEV_UDID, localUdid, UDID_BUF_LEN) != SOFTBUS_OK) {
+        AUTH_LOGE(AUTH_CONN, "get local udid fail");
+        return false;
+    }
+    return !IsExistUkInAclProfile(localUdid, peerUdid);
+}
