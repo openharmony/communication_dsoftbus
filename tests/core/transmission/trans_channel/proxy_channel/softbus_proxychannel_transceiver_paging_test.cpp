@@ -112,27 +112,6 @@ HWTEST_F(SoftbusProxyChannelTransceiverPagingTest, TransProxyParseMsgTypeTest001
 }
 
 /**@
- * @tc.name: TransPagingLoadSaFailTest001
- * @tc.desc: test proxy open proxy channel, use wrong param.
- * @tc.type: FUNC
- * @tc.require:
- */
-HWTEST_F(SoftbusProxyChannelTransceiverPagingTest, TransPagingLoadSaFailTest001, TestSize.Level1)
-{
-    uint32_t businessFlag = true;
-    int32_t ret = AddWaitListInfo(businessFlag);
-    EXPECT_EQ(SOFTBUS_OK, ret);
-    ret = TransPagingLoadSaFail(false);
-    EXPECT_EQ(SOFTBUS_TRANS_PAGING_WAIT_LISTEN_NOT_FOUND, ret);
-    ret = TransPagingLoadSaFail(true);
-    EXPECT_EQ(SOFTBUS_OK, ret);
-    ret = DelWaitListenByFlag(false);
-    EXPECT_EQ(SOFTBUS_TRANS_PAGING_WAIT_LISTEN_NOT_FOUND, ret);
-    ret = DelWaitListenByFlag(true);
-    EXPECT_EQ(SOFTBUS_OK, ret);
-}
-
-/**@
  * @tc.name: TransPagingWaitListenStatusTest001
  * @tc.desc: test proxy open proxy channel, use wrong param.
  * @tc.type: FUNC
@@ -141,11 +120,14 @@ HWTEST_F(SoftbusProxyChannelTransceiverPagingTest, TransPagingLoadSaFailTest001,
 HWTEST_F(SoftbusProxyChannelTransceiverPagingTest, TransPagingWaitListenStatusTest001, TestSize.Level1)
 {
     PagingWaitListenStatus status = PAGING_WAIT_LISTEN_LOAD_SA_FAIL;
-    uint32_t businessFlag = true;
-    int32_t ret = AddWaitListInfo(businessFlag);
+    PagingListenCheckInfo checkInfo = {
+        .businessFlag = true,
+        .channelId = TEST_CHANNEL_ID
+    };
+    int32_t ret = AddWaitListInfo(&checkInfo);
     EXPECT_EQ(SOFTBUS_OK, ret);
     ret = TransPagingWaitListenStatus(false, status);
-    EXPECT_EQ(SOFTBUS_TRANS_PAGING_WAIT_LISTEN_NOT_FOUND, ret);
+    EXPECT_EQ(SOFTBUS_OK, ret);
     ret = TransPagingWaitListenStatus(true, status);
     EXPECT_EQ(SOFTBUS_OK, ret);
     status = PAGING_WAIT_LISTEN_DONE;
@@ -157,7 +139,7 @@ HWTEST_F(SoftbusProxyChannelTransceiverPagingTest, TransPagingWaitListenStatusTe
     status = (PagingWaitListenStatus)5;
     ret = TransPagingWaitListenStatus(true, status);
     EXPECT_EQ(SOFTBUS_INVALID_PARAM, ret);
-    ret = DelWaitListenByFlag(true);
+    ret = DelWaitListenByFlag(&checkInfo);
     EXPECT_EQ(SOFTBUS_OK, ret);
 }
 
@@ -170,28 +152,31 @@ HWTEST_F(SoftbusProxyChannelTransceiverPagingTest, TransPagingWaitListenStatusTe
 HWTEST_F(SoftbusProxyChannelTransceiverPagingTest, CheckListenResultTest001, TestSize.Level1)
 {
     PagingWaitListenStatus status = PAGING_WAIT_LISTEN_DONE;
-    uint32_t businessFlag = true;
+    PagingListenCheckInfo checkInfo = {
+        .businessFlag = true,
+        .channelId = TEST_CHANNEL_ID
+    };
     int32_t num = TEST_FOR_NUM;
-    int32_t ret = AddWaitListInfo(businessFlag);
+    int32_t ret = AddWaitListInfo(&checkInfo);
     EXPECT_EQ(SOFTBUS_OK, ret);
-    CheckResultType res = CheckListenResult(false);
+    PagingListenCheckInfo checkInfo1 = {
+        .businessFlag = false,
+        .channelId = TEST_CHANNEL_ID
+    };
+    CheckResultType res = CheckListenResult(&checkInfo1);
     EXPECT_EQ(WAIT_LISTEN_CHECK_INVALID, res);
-    res = CheckListenResult(true);
+    res = CheckListenResult(&checkInfo);
     EXPECT_EQ(WAIT_LISTEN_CHECK_RETRY, res);
     for (int i = 0; i <= num; i++) {
-        (void)CheckListenResult(true);
+        (void)CheckListenResult(&checkInfo);
     }
-    res = CheckListenResult(true);
+    res = CheckListenResult(&checkInfo);
     EXPECT_EQ(WAIT_LISTEN_CHECK_TIMEOUT, res);
-    ret = TransPagingLoadSaFail(true);
-    EXPECT_EQ(SOFTBUS_OK, ret);
-    res = CheckListenResult(true);
-    EXPECT_EQ(WAIT_LISTEN_CHECK_LOAD_FAIL, res);
     ret = TransPagingWaitListenStatus(true, status);
     EXPECT_EQ(SOFTBUS_OK, ret);
-    res = CheckListenResult(true);
+    res = CheckListenResult(&checkInfo);
     EXPECT_EQ(WAIT_LISTEN_CHECK_SUCCESS, res);
-    ret = DelWaitListenByFlag(true);
+    ret = DelWaitListenByFlag(&checkInfo);
     EXPECT_EQ(SOFTBUS_OK, ret);
 }
 
@@ -203,15 +188,19 @@ HWTEST_F(SoftbusProxyChannelTransceiverPagingTest, CheckListenResultTest001, Tes
  */
 HWTEST_F(SoftbusProxyChannelTransceiverPagingTest, CheckPagingListenTest001, TestSize.Level1)
 {
-    uint32_t *tmp = (uint32_t *)SoftBusCalloc(sizeof(uint32_t));
+    PagingListenCheckInfo *tmp = (PagingListenCheckInfo *)SoftBusCalloc(sizeof(PagingListenCheckInfo));
     ASSERT_TRUE(tmp != nullptr);
-    *tmp = false;
-    uint32_t businessFlag = true;
-    int32_t ret = AddWaitListInfo(businessFlag);
+    tmp->businessFlag = false;
+    tmp->channelId = TEST_CHANNEL_ID;
+    PagingListenCheckInfo checkInfo = {
+        .businessFlag = true,
+        .channelId = TEST_CHANNEL_ID
+    };
+    int32_t ret = AddWaitListInfo(&checkInfo);
     EXPECT_EQ(SOFTBUS_OK, ret);
     CheckPagingListen(nullptr);
     NiceMock<SoftbusProxychannelTransceiverPagingInterfaceMock> PagingMock;
-    EXPECT_CALL(PagingMock, TransProxyGetChannelByFlag).WillRepeatedly(Return(SOFTBUS_OK));
+    EXPECT_CALL(PagingMock, TransProxyGetChannelByCheckInfo).WillRepeatedly(Return(SOFTBUS_OK));
     EXPECT_CALL(PagingMock, TransHasAndUpdatePagingListenPacked).WillRepeatedly(Return(true));
     EXPECT_CALL(PagingMock, TransProxyPagingChannelOpened).WillRepeatedly(Return(SOFTBUS_OK));
     CheckPagingListen((void *)tmp);
@@ -225,20 +214,25 @@ HWTEST_F(SoftbusProxyChannelTransceiverPagingTest, CheckPagingListenTest001, Tes
  */
 HWTEST_F(SoftbusProxyChannelTransceiverPagingTest, CheckPagingListenTest002, TestSize.Level1)
 {
-    uint32_t *tmp = (uint32_t *)SoftBusCalloc(sizeof(uint32_t));
+    PagingListenCheckInfo *tmp = (PagingListenCheckInfo *)SoftBusCalloc(sizeof(PagingListenCheckInfo));
     ASSERT_TRUE(tmp != nullptr);
-    *tmp = true;
-    uint32_t businessFlag = true;
-    int32_t ret = AddWaitListInfo(businessFlag);
+    tmp->businessFlag = true;
+    tmp->channelId = TEST_CHANNEL_ID;
+    PagingListenCheckInfo checkInfo = {
+        .businessFlag = true,
+        .channelId = TEST_CHANNEL_ID
+    };
+    int32_t ret = AddWaitListInfo(&checkInfo);
     EXPECT_EQ(SOFTBUS_OK, ret);
     NiceMock<SoftbusProxychannelTransceiverPagingInterfaceMock> PagingMock;
     EXPECT_CALL(PagingMock, LnnAsyncCallbackDelayHelper).WillOnce(Return(SOFTBUS_OK));
     CheckPagingListen((void *)tmp);
-    uint32_t *tmpTest = (uint32_t *)SoftBusCalloc(sizeof(uint32_t));
+    PagingListenCheckInfo *tmpTest = (PagingListenCheckInfo *)SoftBusCalloc(sizeof(PagingListenCheckInfo));
     ASSERT_TRUE(tmpTest != nullptr);
-    *tmpTest = true;
+    tmpTest->businessFlag = true;
+    tmpTest->channelId = TEST_CHANNEL_ID;
     EXPECT_CALL(PagingMock, LnnAsyncCallbackDelayHelper).WillOnce(Return(SOFTBUS_INVALID_PARAM));
-    EXPECT_CALL(PagingMock, TransProxyGetChannelByFlag).WillRepeatedly(Return(SOFTBUS_OK));
+    EXPECT_CALL(PagingMock, TransProxyGetChannelByCheckInfo).WillRepeatedly(Return(SOFTBUS_OK));
     EXPECT_CALL(PagingMock, TransHasAndUpdatePagingListenPacked).WillRepeatedly(Return(true));
     EXPECT_CALL(PagingMock, TransProxyPagingChannelOpened).WillRepeatedly(Return(SOFTBUS_OK));
     CheckPagingListen((void *)tmpTest);
@@ -253,16 +247,20 @@ HWTEST_F(SoftbusProxyChannelTransceiverPagingTest, CheckPagingListenTest002, Tes
 HWTEST_F(SoftbusProxyChannelTransceiverPagingTest, CheckPagingListenTest003, TestSize.Level1)
 {
     PagingWaitListenStatus status = PAGING_WAIT_LISTEN_DONE;
-    uint32_t *tmp = (uint32_t *)SoftBusCalloc(sizeof(uint32_t));
+    PagingListenCheckInfo *tmp = (PagingListenCheckInfo *)SoftBusCalloc(sizeof(PagingListenCheckInfo));
     ASSERT_TRUE(tmp != nullptr);
-    *tmp = true;
-    uint32_t businessFlag = true;
-    int32_t ret = AddWaitListInfo(businessFlag);
+    tmp->businessFlag = true;
+    tmp->channelId = TEST_CHANNEL_ID;
+    PagingListenCheckInfo checkInfo = {
+        .businessFlag = true,
+        .channelId = TEST_CHANNEL_ID
+    };
+    int32_t ret = AddWaitListInfo(&checkInfo);
     EXPECT_EQ(SOFTBUS_OK, ret);
     ret = TransPagingWaitListenStatus(true, status);
     EXPECT_EQ(SOFTBUS_OK, ret);
     NiceMock<SoftbusProxychannelTransceiverPagingInterfaceMock> PagingMock;
-    EXPECT_CALL(PagingMock, TransProxyGetChannelByFlag).WillRepeatedly(Return(SOFTBUS_OK));
+    EXPECT_CALL(PagingMock, TransProxyGetChannelByCheckInfo).WillRepeatedly(Return(SOFTBUS_OK));
     EXPECT_CALL(PagingMock, TransHasAndUpdatePagingListenPacked).WillRepeatedly(Return(true));
     EXPECT_CALL(PagingMock, TransProxyPagingChannelOpened).WillRepeatedly(Return(SOFTBUS_OK));
     CheckPagingListen((void *)tmp);
@@ -277,16 +275,20 @@ HWTEST_F(SoftbusProxyChannelTransceiverPagingTest, CheckPagingListenTest003, Tes
  */
 HWTEST_F(SoftbusProxyChannelTransceiverPagingTest, CheckPagingListenTest004, TestSize.Level1)
 {
-    uint32_t *tmp = (uint32_t *)SoftBusCalloc(sizeof(uint32_t));
+    PagingListenCheckInfo *tmp = (PagingListenCheckInfo *)SoftBusCalloc(sizeof(PagingListenCheckInfo));
     ASSERT_TRUE(tmp != nullptr);
-    *tmp = true;
-    uint32_t businessFlag = true;
-    int32_t ret = AddWaitListInfo(businessFlag);
+    tmp->businessFlag = true;
+    tmp->channelId = TEST_CHANNEL_ID;
+    PagingListenCheckInfo checkInfo = {
+        .businessFlag = true,
+        .channelId = TEST_CHANNEL_ID
+    };
+    int32_t ret = AddWaitListInfo(&checkInfo);
     EXPECT_EQ(SOFTBUS_OK, ret);
-    ret = TransPagingLoadSaFail(true);
+    ret = TransPagingWaitListenStatus(true, PAGING_WAIT_LISTEN_LOAD_SA_FAIL);
     EXPECT_EQ(SOFTBUS_OK, ret);
     NiceMock<SoftbusProxychannelTransceiverPagingInterfaceMock> PagingMock;
-    EXPECT_CALL(PagingMock, TransProxyGetChannelByFlag).WillRepeatedly(Return(SOFTBUS_OK));
+    EXPECT_CALL(PagingMock, TransProxyGetChannelByCheckInfo).WillRepeatedly(Return(SOFTBUS_OK));
     EXPECT_CALL(PagingMock, TransHasAndUpdatePagingListenPacked).WillRepeatedly(Return(true));
     EXPECT_CALL(PagingMock, TransProxyPagingChannelOpened).WillRepeatedly(Return(SOFTBUS_OK));
     CheckPagingListen((void *)tmp);
@@ -300,18 +302,22 @@ HWTEST_F(SoftbusProxyChannelTransceiverPagingTest, CheckPagingListenTest004, Tes
  */
 HWTEST_F(SoftbusProxyChannelTransceiverPagingTest, CheckPagingListenTest005, TestSize.Level1)
 {
-    uint32_t *tmp = (uint32_t *)SoftBusCalloc(sizeof(uint32_t));
+    PagingListenCheckInfo *tmp = (PagingListenCheckInfo *)SoftBusCalloc(sizeof(PagingListenCheckInfo));
     ASSERT_TRUE(tmp != nullptr);
-    *tmp = true;
-    uint32_t businessFlag = true;
-    int32_t ret = AddWaitListInfo(businessFlag);
+    tmp->businessFlag = true;
+    tmp->channelId = TEST_CHANNEL_ID;
+    PagingListenCheckInfo checkInfo = {
+        .businessFlag = true,
+        .channelId = TEST_CHANNEL_ID
+    };
+    int32_t ret = AddWaitListInfo(&checkInfo);
     EXPECT_EQ(SOFTBUS_OK, ret);
     int32_t num = TEST_FOR_NUM;
     for (int i = 0; i <= num; i++) {
-        (void)CheckListenResult(true);
+        (void)CheckListenResult(&checkInfo);
     }
     NiceMock<SoftbusProxychannelTransceiverPagingInterfaceMock> PagingMock;
-    EXPECT_CALL(PagingMock, TransProxyGetChannelByFlag).WillRepeatedly(Return(SOFTBUS_OK));
+    EXPECT_CALL(PagingMock, TransProxyGetChannelByCheckInfo).WillRepeatedly(Return(SOFTBUS_OK));
     EXPECT_CALL(PagingMock, TransHasAndUpdatePagingListenPacked).WillRepeatedly(Return(true));
     EXPECT_CALL(PagingMock, TransProxyPagingChannelOpened).WillRepeatedly(Return(SOFTBUS_OK));
     CheckPagingListen((void *)tmp);
@@ -325,13 +331,16 @@ HWTEST_F(SoftbusProxyChannelTransceiverPagingTest, CheckPagingListenTest005, Tes
  */
 HWTEST_F(SoftbusProxyChannelTransceiverPagingTest, TransCheckPagingListenStateTest001, TestSize.Level1)
 {
-    uint32_t businessFlag = true;
+    PagingListenCheckInfo info = {
+        .businessFlag = true,
+        .channelId = TEST_CHANNEL_ID
+    };
     NiceMock<SoftbusProxychannelTransceiverPagingInterfaceMock> PagingMock;
     EXPECT_CALL(PagingMock, LnnAsyncCallbackDelayHelper).WillOnce(Return(SOFTBUS_OK));
-    int32_t ret = TransCheckPagingListenState(businessFlag);
+    int32_t ret = TransCheckPagingListenState(&info);
     EXPECT_EQ(SOFTBUS_OK, ret);
     EXPECT_CALL(PagingMock, LnnAsyncCallbackDelayHelper).WillRepeatedly(Return(SOFTBUS_INVALID_PARAM));
-    ret = TransCheckPagingListenState(businessFlag);
+    ret = TransCheckPagingListenState(&info);
     EXPECT_EQ(SOFTBUS_TRANS_PAGING_ASYNC_FAIL, ret);
 }
 } // namespace OHOS

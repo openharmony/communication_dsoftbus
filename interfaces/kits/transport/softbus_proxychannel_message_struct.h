@@ -207,6 +207,11 @@ typedef struct {
     int shouldAck;
 } SessionHead;
 
+typedef struct {
+    uint32_t businessFlag;
+    int32_t channelId;
+} PagingListenCheckInfo;
+
 #ifdef __cplusplus
 #if __cplusplus
 }

@@ -2747,17 +2747,18 @@ int32_t TransProxySetAuthHandleByChanId(int32_t channelId, AuthHandle authHandle
     return SOFTBUS_TRANS_PROXY_CHANNEL_NOT_FOUND;
 }
 
-int32_t TransProxyGetChannelByFlag(uint32_t businessFlag, ProxyChannelInfo *chan, bool isClient)
+int32_t TransProxyGetChannelByCheckInfo(const PagingListenCheckInfo *checkInfo, ProxyChannelInfo *chan, bool isClient)
 {
     TRANS_CHECK_AND_RETURN_RET_LOGE(
-        g_proxyChannelList != NULL, SOFTBUS_NO_INIT, TRANS_CTRL, "g_proxyChannelList is null");
+        checkInfo != NULL && chan != NULL, SOFTBUS_INVALID_PARAM, TRANS_CTRL, "chan is null");
     TRANS_CHECK_AND_RETURN_RET_LOGE(
-        chan != NULL, SOFTBUS_INVALID_PARAM, TRANS_CTRL, "chan is null");
+        g_proxyChannelList != NULL, SOFTBUS_NO_INIT, TRANS_CTRL, "g_proxyChannelList is null");
     TRANS_CHECK_AND_RETURN_RET_LOGE(
         SoftBusMutexLock(&g_proxyChannelList->lock) == SOFTBUS_OK, SOFTBUS_LOCK_ERR, TRANS_CTRL, "lock mutex fail!");
     ProxyChannelInfo *item = NULL;
     LIST_FOR_EACH_ENTRY(item, &g_proxyChannelList->list, ProxyChannelInfo, node) {
-        if (item->isD2D && (item->appInfo.isClient == isClient) && item->appInfo.myData.businessFlag == businessFlag) {
+        if (item->isD2D && (item->appInfo.isClient == isClient) &&
+            item->appInfo.myData.businessFlag == checkInfo->businessFlag && item->channelId == checkInfo->channelId) {
             if (memcpy_s(chan, sizeof(ProxyChannelInfo), item, sizeof(ProxyChannelInfo)) != EOK) {
                 (void)SoftBusMutexUnlock(&g_proxyChannelList->lock);
                 TRANS_LOGE(TRANS_CTRL, "memcpy_s failed");

@@ -35,6 +35,7 @@ typedef struct {
 typedef struct {
     ListNode node;
     uint32_t businessFlag;
+    int32_t channelId;
     bool isListened;
     bool isLoadFailed;
     int32_t retryTime;
@@ -62,7 +63,7 @@ int32_t CheckIsProxyAuthChannel(ConnectOption *connInfo);
 void TransProxyNegoSessionKeySucc(int32_t channelId);
 void TransProxyNegoSessionKeyFail(int32_t channelId, int32_t errCode);
 int32_t TransProxyGetConnOptionByChanId(int32_t channelId, ConnectOption *connOpt);
-int32_t TransCheckPagingListenState(uint32_t businessFlag);
+int32_t TransCheckPagingListenState(const PagingListenCheckInfo *checkInfo);
 int32_t TransPagingWaitListenStatus(const uint32_t businessFlag, PagingWaitListenStatus status);
 int32_t TransAddConnItem(ProxyConnInfo *conn);
 
