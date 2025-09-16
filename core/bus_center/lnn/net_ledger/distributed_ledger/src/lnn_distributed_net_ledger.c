@@ -30,6 +30,7 @@
 #include "bus_center_event.h"
 #include "g_enhance_lnn_func.h"
 #include "g_enhance_lnn_func_pack.h"
+#include "lnn_async_callback_utils.h"
 #include "lnn_connection_addr_utils.h"
 
 #include "lnn_map.h"
@@ -877,7 +878,11 @@ static void UpdateDeviceInfoToMlps(const char *udid)
         return;
     }
     info->isOnline = true;
-    SendDeviceStateToMlpsPacked(info);
+    SoftBusLooper *looper = GetLooper(LOOP_TYPE_DEFAULT);
+    if (LnnAsyncCallbackDelayHelper(looper, SendDeviceStateToMlpsPacked, (void *)info, 0) != SOFTBUS_OK) {
+        LNN_LOGE(LNN_BUILDER, "async call send device info fail");
+        SoftBusFree(info);
+    }
 }
 
 int32_t LnnUpdateNodeInfo(NodeInfo *newInfo, int32_t connectionType)

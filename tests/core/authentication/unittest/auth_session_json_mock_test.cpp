@@ -756,10 +756,10 @@ HWTEST_F(AuthSessionJsonMockTest, PACK_DEVICE_INFO_MESSAGE_TEST_001, TestSize.Le
 }
 
 /*
- @tc.name: PackSparkCheck_TEST_001
- @tc.desc: pack spark check test
- @tc.type: FUNC
- @tc.require:
+ * @tc.name: PackSparkCheck_TEST_001
+ * @tc.desc: pack sparkCheck test
+ * @tc.type: FUNC
+ * @tc.require:
  */
 HWTEST_F(AuthSessionJsonMockTest, PackSparkCheck_TEST_001, TestSize.Level1)
 {
@@ -777,10 +777,10 @@ HWTEST_F(AuthSessionJsonMockTest, PackSparkCheck_TEST_001, TestSize.Level1)
 }
 
 /*
- @tc.name: UnpackSparkCheck_TEST_001
- @tc.desc: unpack spark check test
- @tc.type: FUNC
- @tc.require:
+ * @tc.name: UnpackSparkCheck_TEST_001
+ * @tc.desc: unpack sparkCheck test
+ * @tc.type: FUNC
+ * @tc.require:
  */
 HWTEST_F(AuthSessionJsonMockTest, UnpackSparkCheck_TEST_001, TestSize.Level1)
 {

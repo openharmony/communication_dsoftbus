@@ -140,6 +140,7 @@ typedef struct TagLnnOpenFuncList {
     LnnGetRemoteStrInfoByIfnameIdxFunc lnnGetRemoteStrInfoByIfnameIdx;
     LnnGetLocalNumInfoByIfnameIdxFunc lnnGetLocalNumInfoByIfnameIdx;
     LnnGetRemoteNumInfoByIfnameIdxFunc lnnGetRemoteNumInfoByIfnameIdx;
+    LnnDumpSparkCheckFunc lnnDumpSparkCheck;
 
     // lane_manager
     GetAllDevIdWithLinkTypeFunc getAllDevIdWithLinkType;
