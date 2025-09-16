@@ -319,6 +319,10 @@ static int32_t BleConvert2ConnectionInfo(ConnBleConnection *connection, Connecti
             return SOFTBUS_OK;
         }
     }
+    if (connection->isUnknownDevice) {
+        CONN_LOGI(CONN_BLE, "is thirdParty device not exchange udid");
+        return SOFTBUS_OK;
+    }
     status = SoftBusGenerateStrHash(
         (unsigned char *)connection->udid, strlen(connection->udid), (unsigned char *)info->bleInfo.deviceIdHash);
     CONN_CHECK_AND_RETURN_RET_LOGE(status == SOFTBUS_OK, status, CONN_BLE,
