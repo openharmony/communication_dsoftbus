@@ -475,6 +475,22 @@ static UpdateDpAclResult UpdateDpSameAccountAcl(const std::string peerUdid, int3
     return updateResult;
 }
 
+static int32_t GetAccountUid(std::string &uid)
+{
+    OHOS::AccountSA::OhosAccountInfo accountInfo;
+    OHOS::ErrCode ret = OHOS::AccountSA::OhosAccountKits::GetInstance().GetOhosAccountInfo(accountInfo);
+    if (ret != OHOS::ERR_OK || accountInfo.uid_.empty() ||
+        strcmp(DEFAULT_ACCOUNT_UID, accountInfo.uid_.c_str()) == 0) {
+        char *anonyUid = nullptr;
+        Anonymize(accountInfo.uid_.c_str(), &anonyUid);
+        LNN_LOGE(LNN_STATE, "GetOhosAccountInfo fail ret=%{public}d, uid=%{public}s", ret, AnonymizeWrapper(anonyUid));
+        AnonymizeFree(anonyUid);
+        return SOFTBUS_NETWORK_QUERY_ACCOUNT_ID_FAILED;
+    }
+    uid = accountInfo.uid_;
+    return SOFTBUS_OK;
+}
+
 static void InsertDpSameAccountAcl(const std::string &peerUdid, int32_t peerUserId, int32_t sessionKeyId)
 {
     OHOS::DistributedDeviceProfile::AccessControlProfile accessControlProfile;
@@ -489,13 +505,12 @@ static void InsertDpSameAccountAcl(const std::string &peerUdid, int32_t peerUser
     std::string localUdid(udid);
     accesser.SetAccesserDeviceId(localUdid);
     accesser.SetAccesserUserId(GetActiveOsAccountIds());
-    OHOS::AccountSA::OhosAccountInfo accountInfo;
-    OHOS::ErrCode ret = OHOS::AccountSA::OhosAccountKits::GetInstance().GetOhosAccountInfo(accountInfo);
-    if (ret != OHOS::ERR_OK || accountInfo.uid_.empty()) {
-        LNN_LOGE(LNN_STATE, "GetOhosAccountInfo fail ret=%{public}d", ret);
+    std::string uid;
+    if (GetAccountUid(uid) != SOFTBUS_OK) {
+        LNN_LOGE(LNN_STATE, "get account uid fail");
         return;
     }
-    accesser.SetAccesserAccountId(accountInfo.uid_);
+    accesser.SetAccesserAccountId(uid);
     if (sessionKeyId != DEFAULT_USER_KEY_INDEX) {
         accesser.SetAccesserSessionKeyId(sessionKeyId);
         accesser.SetAccesserSKTimeStamp(currentTime);
@@ -510,7 +525,7 @@ static void InsertDpSameAccountAcl(const std::string &peerUdid, int32_t peerUser
     if (peerUserId != 0) {
         accessee.SetAccesseeUserId(peerUserId);
     }
-    accessee.SetAccesseeAccountId(accountInfo.uid_);
+    accessee.SetAccesseeAccountId(uid);
     accessControlProfile.SetBindType((uint32_t)OHOS::DistributedDeviceProfile::BindType::SAME_ACCOUNT);
     accessControlProfile.SetDeviceIdType((uint32_t)OHOS::DistributedDeviceProfile::DeviceIdType::UDID);
     accessControlProfile.SetStatus((uint32_t)OHOS::DistributedDeviceProfile::Status::ACTIVE);
@@ -518,7 +533,7 @@ static void InsertDpSameAccountAcl(const std::string &peerUdid, int32_t peerUser
     accessControlProfile.SetTrustDeviceId(peerUdid);
     accessControlProfile.SetAccesser(accesser);
     accessControlProfile.SetAccessee(accessee);
-    ret = DpClient::GetInstance().PutAccessControlProfile(accessControlProfile);
+    OHOS::ErrCode ret = DpClient::GetInstance().PutAccessControlProfile(accessControlProfile);
     if (ret != OHOS::DistributedDeviceProfile::DP_SUCCESS) {
         LNN_LOGE(LNN_STATE, "PutAccessControlProfile failed, ret=%{public}d", ret);
         return;

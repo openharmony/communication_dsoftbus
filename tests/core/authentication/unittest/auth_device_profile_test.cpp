@@ -232,6 +232,9 @@ HWTEST_F(AuthDeviceProfileTest, IS_NOT_TRUSTED_DEVICE_TEST_002, TestSize.Level1)
     InsertDpSameAccountAcl(peerUdid, peerUserId, sessionKeyId);
     bool result = IsNotTrustDevice(deviceIdHash);
     EXPECT_FALSE(result);
+    std::string uidTest;
+    int32_t ret = GetAccountUid(uidTest);
+    EXPECT_EQ(ret, SOFTBUS_NETWORK_QUERY_ACCOUNT_ID_FAILED);
 }
 
 /*
