@@ -38,7 +38,6 @@ static ConnBrTransEventListener g_transEventListener = { 0 };
 static struct ConnSlideWindowController *g_flowController = NULL;
 static void *SendHandlerLoop(void *arg);
 static StartBrSendLPInfo g_startBrSendLPInfo = { 0 };
-static int32_t g_trySendCount = 0;
 
 static uint8_t *BrRecvDataParse(uint32_t connectionId, LimitedBuffer *buffer, int32_t *outLen)
 {
@@ -133,12 +132,12 @@ int32_t ConnBrTransReadOneFrame(uint32_t connectionId, int32_t socketHandle, Lim
     }
 }
 
-static bool IsNeedRetrySend(int32_t writeLen)
+static bool IsNeedRetrySend(int32_t writeLen, int32_t trySendCount)
 {
     bool isNeedRetrySend = false;
     if ((writeLen == CONN_BR_SEND_DATA_FAIL_UNDERLAYER_ERR_QUEUE_FULL
         || writeLen == CONN_BR_SEND_DATA_FAIL_UNDERLAYER_ERR_INTERRUPTION)
-        && g_trySendCount < CONN_BR_SEND_DATA_FAIL_TRY_SEND_COUNT_MAX) {
+        && trySendCount < CONN_BR_SEND_DATA_FAIL_TRY_SEND_COUNT_MAX) {
         isNeedRetrySend = true;
     }
     return isNeedRetrySend;
@@ -147,7 +146,7 @@ static bool IsNeedRetrySend(int32_t writeLen)
 int32_t BrTransSend(uint32_t connectionId, int32_t socketHandle, uint32_t mtu, const uint8_t *data, uint32_t dataLen)
 {
     uint32_t waitWriteLen = dataLen;
-    g_trySendCount = 0;
+    int32_t trySendCount = 0;
     while (waitWriteLen > 0) {
         uint32_t expect = waitWriteLen > mtu ? mtu : waitWriteLen;
         int32_t amount = g_flowController->apply(g_flowController, (int32_t)expect);
@@ -156,9 +155,9 @@ int32_t BrTransSend(uint32_t connectionId, int32_t socketHandle, uint32_t mtu, c
             CONN_LOGE(CONN_BR, "underlayer br send data fail, connId=%{public}u, "
                 "socketHandle=%{public}d, mtu=%{public}d, totalLen=%{public}d, waitWriteLen=%{public}d, "
                 "alreadyWriteLen=%{public}d, error=%{public}d, trySendCount=%{public}d", connectionId,
-                socketHandle, mtu, dataLen, waitWriteLen, dataLen - waitWriteLen, writeLen, g_trySendCount);
-            if (IsNeedRetrySend(writeLen)) {
-                g_trySendCount++;
+                socketHandle, mtu, dataLen, waitWriteLen, dataLen - waitWriteLen, writeLen, trySendCount);
+            if (IsNeedRetrySend(writeLen, trySendCount)) {
+                trySendCount++;
                 SoftBusSleepMs(CONN_BR_SEND_DATA_FAIL_WAIT_TIME_MS);
                 continue;
             }
@@ -166,7 +165,7 @@ int32_t BrTransSend(uint32_t connectionId, int32_t socketHandle, uint32_t mtu, c
         }
         data += writeLen;
         waitWriteLen -= (uint32_t)writeLen;
-        g_trySendCount = 0;
+        trySendCount = 0;
     }
     return SOFTBUS_OK;
 }
@@ -408,13 +407,13 @@ static int32_t SendAck(const ConnBrConnection *connection, int32_t socketHandle)
         SoftBusFree(data);
         return status;
     }
+    CONN_LOGI(CONN_BR,
+        "br send ack, connectionId=%{public}u, Len=%{public}u, Flg=%{public}d, Module=%{public}d, Seq=%{public}" PRId64
+        ", error=%{public}d", connection->connectionId, dataLen, flag, MODULE_CONNECTION, ctrlMsgSeq, status);
     status = BrTransSend(connection->connectionId, socketHandle, connection->mtu, data, dataLen);
     if (status != SOFTBUS_OK) {
         ConnBrDelBrPendingPacket(connection->connectionId, connection->sequence);
     }
-    CONN_LOGI(CONN_BR,
-        "br send ack, connectionId=%{public}u, Len=%{public}u, Flg=%{public}d, Module=%{public}d, Seq=%{public}" PRId64
-        ", error=%{public}d", connection->connectionId, dataLen, flag, MODULE_CONNECTION, ctrlMsgSeq, status);
     SoftBusFree(data);
     return status;
 }
