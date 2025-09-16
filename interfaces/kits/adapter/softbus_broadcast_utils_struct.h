@@ -65,6 +65,7 @@ extern "C"{
 #define LOCAL_NAME_BC_TYPE              0x09
 #define SERVICE_BC_TYPE                 0x16
 #define MANUFACTURE_BC_TYPE             0xFF
+#define SERVICEUUID_BC_TYPE             0x03
 
 // scan rsp head
 #define RSP_HEAD_LEN                    4

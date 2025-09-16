@@ -253,21 +253,24 @@ void SoftbusFilterToBt(BleScanNativeFilter *nativeFilter, const SoftBusBcScanFil
         (nativeFilter + filterSize)->manufactureDataMask = (unsigned char *)(filter + filterSize)->manufactureDataMask;
         (nativeFilter + filterSize)->manufactureId = (unsigned short)(filter + filterSize)->manufactureId;
         (nativeFilter + filterSize)->advIndReport = (filter + filterSize)->advIndReport;
+        (nativeFilter + filterSize)->serviceUuid = (unsigned char *)(filter + filterSize)->serviceUuid;
+        (nativeFilter + filterSize)->serviceUuidMask = (unsigned char *)(filter + filterSize)->serviceUuidMask;
+        (nativeFilter + filterSize)->serviceUuidLength = (unsigned int)(filter + filterSize)->serviceUuidLength;
 
         if ((filter + filterSize)->serviceData == NULL || (filter + filterSize)->serviceDataMask == NULL) {
             continue;
         }
 
         // serviceData = uuid + serviceData, serviceDataMask = 0xFFFF + serviceDataMask
-        uint16_t serviceUuid = (filter + filterSize)->serviceUuid;
+        uint16_t serviceId = (filter + filterSize)->serviceId;
         uint16_t serviceDataLen = (filter + filterSize)->serviceDataLength + 2;
         uint8_t *serviceData = (uint8_t *)SoftBusCalloc(serviceDataLen);
         if (serviceData == NULL) {
             DISC_LOGW(DISC_BLE_ADAPTER, "malloc service data failed");
             continue;
         }
-        serviceData[0] = serviceUuid & BC_BYTE_MASK;
-        serviceData[1] = (serviceUuid >> BC_SHIFT_BIT) & BC_BYTE_MASK;
+        serviceData[0] = serviceId & BC_BYTE_MASK;
+        serviceData[1] = (serviceId >> BC_SHIFT_BIT) & BC_BYTE_MASK;
         if (memcpy_s(serviceData + UUID_LEN, serviceDataLen - UUID_LEN, (filter + filterSize)->serviceData,
             serviceDataLen - UUID_LEN) != EOK) {
             DISC_LOGW(DISC_BLE_ADAPTER, "copy service data failed");
@@ -501,8 +504,9 @@ int32_t ParseScanResult(const uint8_t *advData, uint8_t advLen, SoftBusBcScanRes
         } else if (type == SHORTENED_LOCAL_NAME_BC_TYPE || type == LOCAL_NAME_BC_TYPE) {
             DISC_CHECK_AND_RETURN_RET_LOGE(ParseLocalName(advData, advLen, dst, index, len) == SOFTBUS_OK,
                 SOFTBUS_BC_ADAPTER_PARSE_FAIL, DISC_BLE_ADAPTER, "parse local name failed");
+                dst->nameTruncated = (type == SHORTENED_LOCAL_NAME_BC_TYPE);
         } else {
-            if (type != SERVICE_BC_TYPE && type != MANUFACTURE_BC_TYPE) {
+            if (type != SERVICE_BC_TYPE && type != MANUFACTURE_BC_TYPE && type != SERVICEUUID_BC_TYPE) {
                 index += len;
                 DISC_LOGD(DISC_BLE_ADAPTER, "unsupported type, type=%{public}hhu", type);
                 continue;

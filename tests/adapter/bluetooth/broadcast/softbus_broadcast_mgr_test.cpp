@@ -198,7 +198,7 @@ static BcScanFilter *GetBcScanFilter(void)
         goto EXIT;
     }
 
-    filter->serviceUuid = SERVICE_UUID;
+    filter->serviceId = SERVICE_UUID;
     filter->serviceData = data;
     filter->serviceDataMask = mask;
     filter->serviceDataLength = serviceDataLength;

@@ -21,6 +21,7 @@
 #include "conn_log.h"
 #include "bus_center_manager.h"
 #include "softbus_adapter_mem.h"
+#include "g_enhance_disc_func_pack.h"
 #include "softbus_conn_ble_manager.h"
 #include "softbus_conn_ble_trans.h"
 #include "softbus_conn_common.h"
@@ -34,6 +35,7 @@
 #define BASIC_INFO_KEY_ROLE    "type"
 #define BASIC_INFO_KEY_DEVTYPE "devtype"
 #define BASIC_INFO_KEY_FEATURE "FEATURE_SUPPORT"
+#define UNKNOWN_DEVICE_TYPE     0xFF
 
 enum ConnectionLoopMsgType {
     MSG_CONNECTION_RETRY_SERVER_STATE_CONSISTENT = 100,
@@ -613,8 +615,11 @@ static int32_t SendBasicInfo(ConnBleConnection *connection)
     char *payload = NULL;
     featureBitSet |= g_featureBitSet;
     do {
-        if (!AddStringToJsonObject(json, BASIC_INFO_KEY_DEVID, devId) ||
-            !AddNumberToJsonObject(json, BASIC_INFO_KEY_ROLE, connection->side) ||
+        if (!connection->isUnknownDevice && !AddStringToJsonObject(json, BASIC_INFO_KEY_DEVID, devId)) {
+            status = SOFTBUS_CREATE_JSON_ERR;
+            break;
+        }
+        if (!AddNumberToJsonObject(json, BASIC_INFO_KEY_ROLE, connection->side) ||
             !AddNumberToJsonObject(json, BASIC_INFO_KEY_DEVTYPE, deviceType) ||
             !AddNumberToJsonObject(json, BASIC_INFO_KEY_FEATURE, featureBitSet)) {
             CONN_LOGE(CONN_BLE, "add json info fail, connId=%{public}u", connection->connectionId);
@@ -698,8 +703,11 @@ static int32_t ParsePeerBasicInfoInner(ConnBleConnection *connection, const uint
         return SOFTBUS_PARSE_JSON_ERR;
     }
     // mandatory fields
-    if (!GetJsonObjectStringItem(json, BASIC_INFO_KEY_DEVID, baseInfo->devId, DEVID_BUFF_LEN) ||
-        !GetJsonObjectNumberItem(json, BASIC_INFO_KEY_ROLE, &(baseInfo->type))) {
+    if (!GetJsonObjectStringItem(json, BASIC_INFO_KEY_DEVID, baseInfo->devId, DEVID_BUFF_LEN)) {
+        CONN_LOGI(CONN_BLE, "parse devId fail, connId=%{public}u", connection->connectionId);
+        // fall through
+    }
+    if (!GetJsonObjectNumberItem(json, BASIC_INFO_KEY_ROLE, &(baseInfo->type))) {
         cJSON_Delete(json);
         CONN_LOGE(CONN_BLE, "basic info field not exist, connId=%{public}u", connection->connectionId);
         return SOFTBUS_CONN_BLE_INTERNAL_ERR;
@@ -726,6 +734,8 @@ static int32_t ParseBasicInfo(ConnBleConnection *connection, const uint8_t *data
     CONN_CHECK_AND_RETURN_RET_LOGE(ret == SOFTBUS_OK, ret, CONN_BLE, "ble parse data fail, error=%{public}d", ret);
     bool isSupportNetWorkIdExchange = ((uint32_t)(baseInfo.feature) &
         (1 << BLE_FEATURE_SUPPORT_SUPPORT_NETWORKID_BASICINFO_EXCAHNGE)) != 0;
+    connection->isUnknownDevice = ((baseInfo.deviceType) == UNKNOWN_DEVICE_TYPE);
+
     ret = SoftBusMutexLock(&connection->lock);
     CONN_CHECK_AND_RETURN_RET_LOGE(ret == SOFTBUS_OK, SOFTBUS_LOCK_ERR, CONN_BLE,
         "try to lock fail, connId=%{public}u, err=%{public}d", connection->connectionId, ret);
@@ -777,6 +787,7 @@ void BleOnClientConnected(uint32_t connectionId)
 {
     ConnBleConnection *connection = ConnBleGetConnectionById(connectionId);
     CONN_CHECK_AND_RETURN_LOGW(connection != NULL, CONN_BLE, "connection not exist, connId=%{public}u", connectionId);
+    connection->isUnknownDevice = IsUnknownDevicePacked(connection->addr);
     int32_t status = SOFTBUS_OK;
     do {
         status = SoftBusMutexLock(&connection->lock);
