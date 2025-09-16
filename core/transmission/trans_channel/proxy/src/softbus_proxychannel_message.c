@@ -704,7 +704,11 @@ static int32_t TransProxyPagingCheckListen(ProxyChannelInfo *chan)
         }
         return SOFTBUS_OK;
     }
-    ret = TransCheckPagingListenState(chan->appInfo.peerData.businessFlag);
+    PagingListenCheckInfo checkInfo = {
+        .businessFlag = chan->appInfo.peerData.businessFlag,
+        .channelId = chan->channelId
+    };
+    ret = TransCheckPagingListenState(&checkInfo);
     if (ret != SOFTBUS_OK) {
         TRANS_LOGE(TRANS_CTRL, "CheckPagingListenState failed, businessFlag=%{public}u",
             chan->appInfo.peerData.businessFlag);
@@ -788,15 +792,15 @@ void TransPagingProcessHandshakeMsg(
     }
 }
 
-void TransWaitListenResult(uint32_t businessFlag, int32_t reason)
+void TransWaitListenResult(const PagingListenCheckInfo *checkInfo, int32_t reason)
 {
-    int32_t ret = reason;
-    if (ret != SOFTBUS_OK) {
-        goto EXIT_ERR;
-    }
     ProxyChannelInfo chan;
     (void)memset_s(&chan, sizeof(ProxyChannelInfo), 0, sizeof(ProxyChannelInfo));
-    ret = TransProxyGetChannelByFlag(businessFlag, &chan, false);
+    int32_t ret = TransProxyGetChannelByCheckInfo(checkInfo, &chan, false);
+    if (ret != SOFTBUS_OK) {
+        return;
+    }
+    ret = reason;
     if (ret != SOFTBUS_OK) {
         goto EXIT_ERR;
     }
