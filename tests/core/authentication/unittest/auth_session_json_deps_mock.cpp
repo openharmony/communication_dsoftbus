@@ -480,5 +480,10 @@ bool IsTrustedDeviceFromAccess(const char *peerAccountHash, const char *peerUdid
 {
     return GetInterface()->IsTrustedDeviceFromAccess(peerAccountHash, peerUdid, peerUserId);
 }
+
+int32_t FindAndWaitAuthGenCertParaNodeById(int32_t requestId, AuthGenCertNode **genCertParaNode)
+{
+    return GetInterface()->FindAndWaitAuthGenCertParaNodeById(requestId, genCertParaNode);
+}
 }
 } // namespace OHOS

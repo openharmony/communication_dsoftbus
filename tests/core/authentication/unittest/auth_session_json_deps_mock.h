@@ -154,6 +154,7 @@ public:
     virtual int32_t AuthSessionGetUserId(int64_t authSeq) = 0;
     virtual int32_t GetActiveOsAccountIds(void) = 0;
     virtual bool IsTrustedDeviceFromAccess(const char *peerAccountHash, const char *peerUdid, int32_t peerUserId) = 0;
+    virtual int32_t FindAndWaitAuthGenCertParaNodeById(int32_t requestId, AuthGenCertNode **genCertParaNode) = 0;
 };
 class AuthSessionJsonDepsInterfaceMock : public AuthSessionJsonDepsInterface {
 public:
@@ -249,6 +250,7 @@ public:
     MOCK_METHOD0(GetActiveOsAccountIds, int32_t(void));
     MOCK_METHOD4(LnnGetLocalStrInfoByIfnameIdx, int32_t(InfoKey, char *, uint32_t, int32_t));
     MOCK_METHOD3(IsTrustedDeviceFromAccess, bool(const char *, const char *, int32_t));
+    MOCK_METHOD2(FindAndWaitAuthGenCertParaNodeById, int32_t(int32_t, AuthGenCertNode **));
 };
 } // namespace OHOS
 #endif // AUTH_TCP_CONNECTION_MOCK_H
