@@ -756,44 +756,314 @@ HWTEST_F(AuthSessionJsonMockTest, PACK_DEVICE_INFO_MESSAGE_TEST_001, TestSize.Le
 }
 
 /*
- @tc.name: PackSparkCheck_TEST_001
- @tc.desc: pack spark check test
- @tc.type: FUNC
- @tc.require:
+ * @tc.name: GENERATE_ACCOUNT_HASH_TEST_001
+ * @tc.desc: GenerateAccountHash test
+ * @tc.type: FUNC
+ * @tc.require:
  */
-HWTEST_F(AuthSessionJsonMockTest, PackSparkCheck_TEST_001, TestSize.Level1)
+HWTEST_F(AuthSessionJsonMockTest, GENERATE_ACCOUNT_HASH_TEST_001, TestSize.Level1)
 {
-    JsonObj json;
-    (void)memset_s(&json, sizeof(JsonObj), 0, sizeof(JsonObj));
-    NodeInfo info;
-    (void)memset_s(&info, sizeof(NodeInfo), 0, sizeof(NodeInfo));
-    NiceMock<AuthSessionJsonDepsInterfaceMock> mockDeps;
-    EXPECT_CALL(mockDeps, ConvertBytesToHexString).WillOnce(Return(SOFTBUS_INVALID_PARAM))
+    int64_t accountId = 100;
+    char accountHashBuf[SHA_256_HEX_HASH_LEN] = { 0 };
+    uint32_t bufLen = SHA_256_HEX_HASH_LEN;
+    NiceMock<AuthSessionJsonDepsInterfaceMock> mocker;
+    EXPECT_CALL(mocker, SoftBusGenerateStrHash)
+        .WillOnce(Return(SOFTBUS_INVALID_PARAM))
         .WillRepeatedly(Return(SOFTBUS_OK));
-    EXPECT_CALL(mockDeps, JSON_AddStringToObject).WillOnce(Return(false)).WillRepeatedly(Return(true));
-    EXPECT_NO_FATAL_FAILURE(PackSparkCheck(&json, &info));
-    EXPECT_NO_FATAL_FAILURE(PackSparkCheck(&json, &info));
-    EXPECT_NO_FATAL_FAILURE(PackSparkCheck(&json, &info));
+    EXPECT_CALL(mocker, ConvertBytesToHexString)
+        .WillOnce(Return(SOFTBUS_INVALID_PARAM))
+        .WillRepeatedly(Return(SOFTBUS_OK));
+    int32_t ret = GenerateAccountHash(accountId, accountHashBuf, bufLen);
+    EXPECT_EQ(ret, SOFTBUS_NETWORK_GENERATE_STR_HASH_ERR);
+
+    ret = GenerateAccountHash(accountId, accountHashBuf, bufLen);
+    EXPECT_EQ(ret, SOFTBUS_NETWORK_BYTES_TO_HEX_STR_ERR);
+
+    ret = GenerateAccountHash(accountId, accountHashBuf, bufLen);
+    EXPECT_EQ(ret, SOFTBUS_OK);
 }
 
 /*
- @tc.name: UnpackSparkCheck_TEST_001
- @tc.desc: unpack spark check test
- @tc.type: FUNC
- @tc.require:
+ * @tc.name: PACK_DEVICE_KEY_ID_TEST_001
+ * @tc.desc: PackDeviceKeyId test
+ * @tc.type: FUNC
+ * @tc.require:
  */
-HWTEST_F(AuthSessionJsonMockTest, UnpackSparkCheck_TEST_001, TestSize.Level1)
+HWTEST_F(AuthSessionJsonMockTest, PACK_DEVICE_KEY_ID_TEST_001, TestSize.Level1)
+{
+    NiceMock<AuthSessionJsonDepsInterfaceMock> mocker;
+    JsonObj obj;
+    (void)memset_s(&obj, sizeof(JsonObj), 0, sizeof(JsonObj));
+    AuthSessionInfo info;
+    (void)memset_s(&info, sizeof(AuthSessionInfo), 0, sizeof(AuthSessionInfo));
+    info.deviceKeyId.localDeviceKeyId = AUTH_INVALID_DEVICEKEY_ID;
+    EXPECT_NO_FATAL_FAILURE(PackDeviceKeyId(&obj, &info));
+
+    info.deviceKeyId.localDeviceKeyId = TEST_AUTH_ID;
+    info.deviceKeyId.remoteDeviceKeyId = AUTH_INVALID_DEVICEKEY_ID;
+    EXPECT_NO_FATAL_FAILURE(PackDeviceKeyId(&obj, &info));
+
+    info.deviceKeyId.remoteDeviceKeyId = TEST_AUTH_ID;
+    EXPECT_CALL(mocker, JSON_AddInt32ToObject).WillOnce(Return(false));
+    EXPECT_NO_FATAL_FAILURE(PackDeviceKeyId(&obj, &info));
+
+    EXPECT_CALL(mocker, JSON_AddInt32ToObject)
+        .WillOnce(Return(true))
+        .WillOnce(Return(false));
+    EXPECT_NO_FATAL_FAILURE(PackDeviceKeyId(&obj, &info));
+
+    EXPECT_CALL(mocker, JSON_AddInt32ToObject).WillRepeatedly(Return(true));
+    EXPECT_NO_FATAL_FAILURE(PackDeviceKeyId(&obj, &info));
+}
+
+/*
+ * @tc.name: TRY_GET_DM_SESSION_KEY_FOR_UNPACK_TEST_001
+ * @tc.desc: TryGetDmSessionKeyForUnpack test
+ * @tc.type: FUNC
+ * @tc.require:
+ */
+HWTEST_F(AuthSessionJsonMockTest, TRY_GET_DM_SESSION_KEY_FOR_UNPACK_TEST_001, TestSize.Level1)
+{
+    AuthDeviceKeyInfo deviceKey;
+    (void)memset_s(&deviceKey, sizeof(AuthDeviceKeyInfo), 0, sizeof(AuthDeviceKeyInfo));
+    const char *tmpKey = "testKey";
+    EXPECT_EQ(memcpy_s(deviceKey.deviceKey, SESSION_KEY_LENGTH, tmpKey, strlen(tmpKey)), EOK);
+    deviceKey.keyLen = strlen(tmpKey);
+    deviceKey.keyIndex = 12345;
+    AuthSessionInfo info;
+    (void)memset_s(&info, sizeof(AuthSessionInfo), 0, sizeof(AuthSessionInfo));
+    const char *encNormalizedKey = "normalizedKey";
+    int64_t authSeq = TEST_AUTH_ID;
+    NiceMock<AuthSessionJsonDepsInterfaceMock> mocker;
+    EXPECT_CALL(mocker, GetSessionKeyProfile).WillOnce(Return(SOFTBUS_INVALID_PARAM));
+    int ret = TryGetDmSessionKeyForUnpack(&info, const_cast<char *>(encNormalizedKey), &deviceKey, authSeq);
+    EXPECT_EQ(ret, SOFTBUS_AUTH_NORMALIZED_KEY_PROC_ERR);
+
+    EXPECT_CALL(mocker, GetSessionKeyProfile).WillRepeatedly(DoAll(SetArgPointee<1>(*deviceKey.deviceKey),
+        SetArgPointee<2>(deviceKey.keyLen), Return(SOFTBUS_OK)));
+    ret = TryGetDmSessionKeyForUnpack(&info, const_cast<char *>(encNormalizedKey), &deviceKey, authSeq);
+    EXPECT_EQ(ret, SOFTBUS_AUTH_NORMALIZED_KEY_PROC_ERR);
+}
+
+/*
+ * @tc.name: UNPACK_SK_ID_TEST_001
+ * @tc.desc: UnpackSKId test
+ * @tc.type: FUNC
+ * @tc.require:
+ */
+HWTEST_F(AuthSessionJsonMockTest, UNPACK_SK_ID_TEST_001, TestSize.Level1)
+{
+    JsonObj obj;
+    (void)memset_s(&obj, sizeof(JsonObj), 0, sizeof(JsonObj));
+    AuthSessionInfo info;
+    (void)memset_s(&info, sizeof(AuthSessionInfo), 0, sizeof(AuthSessionInfo));
+    NiceMock<AuthSessionJsonDepsInterfaceMock> mocker;
+    EXPECT_CALL(mocker, JSON_GetInt32FromOject).WillOnce(Return(false));
+    EXPECT_NO_FATAL_FAILURE(UnpackSKId(&obj, &info));
+
+    int32_t localDeviceKeyId = AUTH_INVALID_DEVICEKEY_ID;
+    EXPECT_CALL(mocker, JSON_GetInt32FromOject)
+        .WillOnce(DoAll(SetArgPointee<2>(localDeviceKeyId), Return(true)))
+        .WillOnce(Return(false));
+    EXPECT_NO_FATAL_FAILURE(UnpackSKId(&obj, &info));
+
+    localDeviceKeyId = TEST_AUTH_ID;
+    EXPECT_CALL(mocker, JSON_GetInt32FromOject)
+        .WillRepeatedly(DoAll(SetArgPointee<2>(localDeviceKeyId), Return(true)));
+    EXPECT_NO_FATAL_FAILURE(UnpackSKId(&obj, &info));
+}
+
+/*
+ * @tc.name: PACK_UDID_ABATEMENT_FLAG_TEST_001
+ * @tc.desc: PackUDIDAbatementFlag test
+ * @tc.type: FUNC
+ * @tc.require:
+ */
+HWTEST_F(AuthSessionJsonMockTest, PACK_UDID_ABATEMENT_FLAG_TEST_001, TestSize.Level1)
+{
+    JsonObj obj;
+    (void)memset_s(&obj, sizeof(JsonObj), 0, sizeof(JsonObj));
+    AuthSessionInfo info;
+    (void)memset_s(&info, sizeof(AuthSessionInfo), 0, sizeof(AuthSessionInfo));
+    NiceMock<AuthSessionJsonDepsInterfaceMock> mocker;
+    EXPECT_NO_FATAL_FAILURE(PackUDIDAbatementFlag(&obj, &info));
+
+    EXPECT_CALL(mocker, IsSupportUDIDAbatement).WillRepeatedly(Return(true));
+    EXPECT_CALL(mocker, IsNeedUDIDAbatement).WillRepeatedly(Return(false));
+    EXPECT_NO_FATAL_FAILURE(PackUDIDAbatementFlag(&obj, &info));
+}
+
+/*
+ * @tc.name: IS_NEED_NORMALIZED_PROCESS_TEST_001
+ * @tc.desc: IsNeedNormalizedProcess test
+ * @tc.type: FUNC
+ * @tc.require:
+ */
+HWTEST_F(AuthSessionJsonMockTest, IS_NEED_NORMALIZED_PROCESS_TEST_001, TestSize.Level1)
+{
+    AuthSessionInfo info;
+    (void)memset_s(&info, sizeof(AuthSessionInfo), 0, sizeof(AuthSessionInfo));
+    info.isConnectServer = false;
+    bool ret = IsNeedNormalizedProcess(&info);
+    EXPECT_TRUE(ret);
+
+    info.isConnectServer = true;
+    info.deviceKeyId.hasDeviceKeyId = true;
+    ret = IsNeedNormalizedProcess(&info);
+    EXPECT_TRUE(ret);
+
+    info.deviceKeyId.hasDeviceKeyId = false;
+    info.authVersion = AUTH_VERSION_V1;
+    ret = IsNeedNormalizedProcess(&info);
+    EXPECT_TRUE(ret);
+
+    info.authVersion = AUTH_VERSION_V2;
+    NiceMock<AuthSessionJsonDepsInterfaceMock> mocker;
+    EXPECT_CALL(mocker, IsTrustedDeviceFromAccess).WillOnce(Return(true));
+    ret = IsNeedNormalizedProcess(&info);
+    EXPECT_TRUE(ret);
+
+    EXPECT_CALL(mocker, IsTrustedDeviceFromAccess).WillOnce(Return(false));
+    ret = IsNeedNormalizedProcess(&info);
+    EXPECT_FALSE(ret);
+}
+
+/*
+ * @tc.name: UNPACK_META_PTK_TEST_001
+ * @tc.desc: UnpackMetaPtk test
+ * @tc.type: FUNC
+ * @tc.require:
+ */
+HWTEST_F(AuthSessionJsonMockTest, UNPACK_META_PTK_TEST_001, TestSize.Level1)
+{
+    const char *remoteMetaPtk = "remoteMetaPtkTest";
+    const char *decodePtk = "decodePtkTest";
+    NiceMock<AuthSessionJsonDepsInterfaceMock> mocker;
+    EXPECT_CALL(mocker, SoftBusBase64Decode).WillOnce(Return(SOFTBUS_INVALID_PARAM));
+    EXPECT_NO_FATAL_FAILURE(UnpackMetaPtk(const_cast<char *>(remoteMetaPtk), const_cast<char *>(decodePtk)));
+
+    EXPECT_CALL(mocker, SoftBusBase64Decode)
+        .WillOnce(DoAll(SetArgPointee<2>(PTK_DEFAULT_LEN + 1), Return(SOFTBUS_OK)));
+    EXPECT_CALL(mocker, LnnDumpRemotePtk).WillRepeatedly(Return());
+    EXPECT_NO_FATAL_FAILURE(UnpackMetaPtk(const_cast<char *>(remoteMetaPtk), const_cast<char *>(decodePtk)));
+
+    EXPECT_CALL(mocker, SoftBusBase64Decode)
+        .WillOnce(DoAll(SetArgPointee<2>(PTK_DEFAULT_LEN), Return(SOFTBUS_OK)));
+    EXPECT_NO_FATAL_FAILURE(UnpackMetaPtk(const_cast<char *>(remoteMetaPtk), const_cast<char *>(decodePtk)));
+}
+
+/*
+ * @tc.name: UNPACK_PTK_TEST_001
+ * @tc.desc: UnpackPtk test
+ * @tc.type: FUNC
+ * @tc.require:
+ */
+HWTEST_F(AuthSessionJsonMockTest, UNPACK_PTK_TEST_001, TestSize.Level1)
+{
+    const char *remotePtk = "remotePtkTest";
+    const char *decodePtk = "decodePtkTest";
+    NiceMock<AuthSessionJsonDepsInterfaceMock> mocker;
+    EXPECT_CALL(mocker, SoftBusBase64Decode).WillOnce(Return(SOFTBUS_INVALID_PARAM));
+    EXPECT_NO_FATAL_FAILURE(UnpackPtk(const_cast<char *>(remotePtk), const_cast<char *>(decodePtk)));
+
+    EXPECT_CALL(mocker, SoftBusBase64Decode)
+        .WillOnce(DoAll(SetArgPointee<2>(PTK_DEFAULT_LEN + 1), Return(SOFTBUS_OK)));
+    EXPECT_CALL(mocker, LnnDumpRemotePtk).WillRepeatedly(Return());
+    EXPECT_NO_FATAL_FAILURE(UnpackPtk(const_cast<char *>(remotePtk), const_cast<char *>(decodePtk)));
+
+    EXPECT_CALL(mocker, SoftBusBase64Decode)
+        .WillOnce(DoAll(SetArgPointee<2>(PTK_DEFAULT_LEN), Return(SOFTBUS_OK)));
+    EXPECT_NO_FATAL_FAILURE(UnpackPtk(const_cast<char *>(remotePtk), const_cast<char *>(decodePtk)));
+}
+
+/*
+ * @tc.name: PACK_CERTIFICATE_INFO_TEST_001
+ * @tc.desc: PackCertificateInfo test
+ * @tc.type: FUNC
+ * @tc.require:
+ */
+HWTEST_F(AuthSessionJsonMockTest, PACK_CERTIFICATE_INFO_TEST_001, TestSize.Level1)
 {
     JsonObj json;
     (void)memset_s(&json, sizeof(JsonObj), 0, sizeof(JsonObj));
-    NodeInfo info;
-    (void)memset_s(&info, sizeof(NodeInfo), 0, sizeof(NodeInfo));
-    NiceMock<AuthSessionJsonDepsInterfaceMock> mockDeps;
-    EXPECT_CALL(mockDeps, JSON_GetStringFromObject).WillOnce(Return(false)).WillRepeatedly(Return(true));
-    EXPECT_CALL(mockDeps, ConvertHexStringToBytes).WillOnce(Return(SOFTBUS_INVALID_PARAM))
-        .WillRepeatedly(Return(SOFTBUS_OK));
-    EXPECT_NO_FATAL_FAILURE(UnpackSparkCheck(&json, &info));
-    EXPECT_NO_FATAL_FAILURE(UnpackSparkCheck(&json, &info));
-    EXPECT_NO_FATAL_FAILURE(UnpackSparkCheck(&json, &info));
+    AuthSessionInfo info;
+    (void)memset_s(&info, sizeof(AuthSessionInfo), 0, sizeof(AuthSessionInfo));
+    int32_t ret = PackCertificateInfo(&json, nullptr);
+    EXPECT_EQ(ret, SOFTBUS_OK);
+
+    NiceMock<AuthSessionJsonDepsInterfaceMock> mocker;
+    ret = PackCertificateInfo(&json, &info);
+    EXPECT_EQ(ret, SOFTBUS_OK);
+
+    EXPECT_CALL(mocker, IsSupportUDIDAbatement).WillRepeatedly(Return(true));
+    info.isNeedPackCert = false;
+    ret = PackCertificateInfo(&json, &info);
+    EXPECT_EQ(ret, SOFTBUS_OK);
+
+    info.isNeedPackCert = true;
+    EXPECT_CALL(mocker, JSON_AddBytesToObject).WillRepeatedly(Return(false));
+    EXPECT_CALL(mocker, FreeSoftbusChain).WillRepeatedly(Return());
+    ret = PackCertificateInfo(&json, &info);
+    EXPECT_EQ(ret, SOFTBUS_OK);
+}
+
+/*
+ * @tc.name: UNPACK_CERTIFICATE_INFO_TEST_001
+ * @tc.desc: UnpackCertificateInfo test
+ * @tc.type: FUNC
+ * @tc.require:
+ */
+HWTEST_F(AuthSessionJsonMockTest, UNPACK_CERTIFICATE_INFO_TEST_001, TestSize.Level1)
+{
+    JsonObj json;
+    (void)memset_s(&json, sizeof(JsonObj), 0, sizeof(JsonObj));
+    NodeInfo nodeInfo;
+    (void)memset_s(&nodeInfo, sizeof(NodeInfo), 0, sizeof(NodeInfo));
+    AuthSessionInfo info;
+    (void)memset_s(&info, sizeof(AuthSessionInfo), 0, sizeof(AuthSessionInfo));
+    int32_t ret = UnpackCertificateInfo(&json, &nodeInfo, nullptr);
+    EXPECT_EQ(ret, SOFTBUS_OK);
+
+    NiceMock<AuthSessionJsonDepsInterfaceMock> mocker;
+    ret = UnpackCertificateInfo(&json, &nodeInfo, &info);
+    EXPECT_EQ(ret, SOFTBUS_OK);
+
+    EXPECT_CALL(mocker, IsSupportUDIDAbatement).WillRepeatedly(Return(true));
+    ret = UnpackCertificateInfo(&json, &nodeInfo, &info);
+    EXPECT_EQ(ret, SOFTBUS_OK);
+
+    EXPECT_CALL(mocker, IsNeedUDIDAbatement).WillRepeatedly(Return(true));
+    ret = UnpackCertificateInfo(&json, &nodeInfo, &info);
+    EXPECT_EQ(ret, SOFTBUS_OK);
+
+    EXPECT_CALL(mocker, InitSoftbusChain).WillRepeatedly(Return(SOFTBUS_OK));
+    EXPECT_CALL(mocker, JSON_GetBytesFromObject).WillRepeatedly(Return(false));
+    EXPECT_CALL(mocker, FreeSoftbusChain).WillRepeatedly(Return());
+    ret = UnpackCertificateInfo(&json, &nodeInfo, &info);
+    EXPECT_EQ(ret, SOFTBUS_OK);
+}
+
+/*
+ * @tc.name: UNPACK_CERTIFICATE_INFO_TEST_002
+ * @tc.desc: UnpackCertificateInfo test
+ * @tc.type: FUNC
+ * @tc.require:
+ */
+HWTEST_F(AuthSessionJsonMockTest, UNPACK_CERTIFICATE_INFO_TEST_002, TestSize.Level1)
+{
+    JsonObj json;
+    (void)memset_s(&json, sizeof(JsonObj), 0, sizeof(JsonObj));
+    NodeInfo nodeInfo;
+    (void)memset_s(&nodeInfo, sizeof(NodeInfo), 0, sizeof(NodeInfo));
+    AuthSessionInfo info;
+    (void)memset_s(&info, sizeof(AuthSessionInfo), 0, sizeof(AuthSessionInfo));
+    NiceMock<AuthSessionJsonDepsInterfaceMock> mocker;
+    EXPECT_CALL(mocker, IsSupportUDIDAbatement).WillRepeatedly(Return(true));
+    EXPECT_CALL(mocker, IsNeedUDIDAbatement).WillRepeatedly(Return(true));
+    EXPECT_CALL(mocker, InitSoftbusChain).WillRepeatedly(Return(SOFTBUS_OK));
+    EXPECT_CALL(mocker, JSON_GetBytesFromObject).WillRepeatedly(Return(true));
+    EXPECT_CALL(mocker, FreeSoftbusChain).WillRepeatedly(Return());
+    int32_t ret = UnpackCertificateInfo(&json, &nodeInfo, &info);
+    EXPECT_EQ(ret, SOFTBUS_OK);
 }
 } // namespace OHOS
