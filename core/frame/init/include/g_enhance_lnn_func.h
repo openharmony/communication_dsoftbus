@@ -284,6 +284,8 @@ typedef int32_t (*DcTriggerVirtualLinkFunc)(const char *peerNetworkId);
 typedef int32_t (*LnnInitDecisionCenterV2Func)(void);
 typedef void (*LnnDeinitDecisionCenterV2Func)(void);
 typedef void (*SdMgrDeathCallbackFunc)(const char *pkgName);
+typedef int32_t (*AuthMetaGetIpByMetaNodeIdFunc)(const char *metaNodeId, char *ip, int32_t len);
+typedef int32_t (*AuthMetaGetLocalIpByMetaNodeIdFunc)(const char *metaNodeId, char *localIp, int32_t len);
 
 typedef struct TagLnnEnhanceFuncList {
     // time_sync
@@ -518,6 +520,10 @@ typedef struct TagLnnEnhanceFuncList {
     LnnInitDecisionCenterV2Func lnnInitDecisionCenterV2;
     LnnDeinitDecisionCenterV2Func lnnDeinitDecisionCenterV2;
     SdMgrDeathCallbackFunc sdMgrDeathCallback;
+
+    // HA interconnection
+    AuthMetaGetIpByMetaNodeIdFunc authMetaGetIpByMetaNodeId;
+    AuthMetaGetLocalIpByMetaNodeIdFunc authMetaGetLocalIpByMetaNodeId;
 } LnnEnhanceFuncList;
 
 LnnEnhanceFuncList *LnnEnhanceFuncListGet(void);
