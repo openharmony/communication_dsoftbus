@@ -17,6 +17,7 @@
 #define TRANS_LANE_PENDING_CTL_H
 
 #include "lnn_lane_interface.h"
+#include "softbus_app_info.h"
 #include "softbus_conn_interface.h"
 #include "softbus_trans_def.h"
 #include "trans_lane_pending_ctl_struct.h"
@@ -34,8 +35,7 @@ void TransFreeLanePendingDeinit(void);
 
 int32_t TransGetConnectOptByConnInfo(const LaneConnInfo *info, ConnectOption *connOpt);
 int32_t TransGetLaneInfo(const SessionParam *param, LaneConnInfo *connInfo, uint32_t *laneHandle);
-int32_t TransAsyncGetLaneInfo(
-    const SessionParam *param, uint32_t *laneHandle, uint64_t callingTokenId, int64_t timeStart);
+int32_t TransAsyncGetLaneInfo(const SessionParam *param, uint32_t *laneHandle, const AppInfo *appInfo);
 int32_t TransGetLaneInfoByOption(const LaneRequestOption *requestOption, LaneConnInfo *connInfo,
     uint32_t *laneHandle, NetWorkingChannelInfo *info);
 bool TransGetAuthTypeByNetWorkId(const char *peerNetWorkId);
