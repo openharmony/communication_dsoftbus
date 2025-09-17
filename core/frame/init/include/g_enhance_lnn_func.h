@@ -227,6 +227,7 @@ typedef void (*AuthMetaCloseConnFunc)(int64_t authId);
 typedef int32_t (*AuthMetaGetPreferConnInfoFunc)(const char *uuid, AuthConnInfo *connInfo);
 typedef int64_t (*AuthMetaGetIdByConnInfoFunc)(const AuthConnInfo *connInfo, bool isServer);
 typedef int64_t (*AuthMetaGetIdByUuidFunc)(const char *uuid, AuthLinkType type, bool isServer);
+typedef int64_t (*AuthMetaGetIdByIpFunc)(const char *ip);
 typedef int32_t (*AuthMetaEncryptFunc)(int64_t authId, const uint8_t *inData, uint32_t inLen,
     uint8_t *outData, uint32_t *outLen);
 typedef int32_t (*AuthMetaDecryptFunc)(int64_t authId, const uint8_t *inData, uint32_t inLen,
@@ -486,6 +487,7 @@ typedef struct TagLnnEnhanceFuncList {
     AuthMetaGetPreferConnInfoFunc authMetaGetPreferConnInfo;
     AuthMetaGetIdByConnInfoFunc authMetaGetIdByConnInfo;
     AuthMetaGetIdByUuidFunc authMetaGetIdByUuid;
+    AuthMetaGetIdByIpFunc authMetaGetIdByIp;
     AuthMetaEncryptFunc authMetaEncrypt;
     AuthMetaDecryptFunc authMetaDecrypt;
     AuthMetaSetP2pMacFunc authMetaSetP2pMac;
