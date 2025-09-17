@@ -228,6 +228,8 @@ int32_t DcTriggerVirtualLinkPacked(const char *peerNetworkId);
 int32_t LnnInitDecisionCenterV2Packed(void);
 void LnnDeinitDecisionCenterV2Packed(void);
 void SdMgrDeathCallbackPacked(const char *pkgName);
+int32_t AuthMetaGetIpByMetaNodeIdPacked(const char *metaNodeId, char *ip, int32_t len);
+int32_t AuthMetaGetLocalIpByMetaNodeIdPacked(const char *metaNodeId, char *localIp, int32_t len);
 
 #ifdef __cplusplus
 }

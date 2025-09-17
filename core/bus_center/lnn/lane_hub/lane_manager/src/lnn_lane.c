@@ -400,16 +400,23 @@ static int32_t LnnAllocTargetLane(uint32_t laneHandle, const LaneAllocInfoExt *a
     const LaneAllocListener *listener)
 {
     if (allocInfo == NULL || listener == NULL || laneHandle == INVALID_LANE_REQ_ID) {
+        LNN_LOGE(LNN_LANE, "invalid param, laneHandle=%{public}u", laneHandle);
         return SOFTBUS_INVALID_PARAM;
     }
     if (allocInfo->type != LANE_TYPE_TRANS) {
+        LNN_LOGE(LNN_LANE, "laneType is invalid. type=%{public}d", allocInfo->type);
+        return SOFTBUS_INVALID_PARAM;
+    }
+    if (allocInfo->linkList.linkTypeNum >= LANE_LINK_TYPE_BUTT || allocInfo->linkList.linkTypeNum == 0) {
+        LNN_LOGE(LNN_LANE, "laneType is invalid. linkTypeNum=%{public}u", allocInfo->linkList.linkTypeNum);
+        return SOFTBUS_INVALID_PARAM;
+    }
+    if (g_laneObject[allocInfo->type] == NULL) {
+        LNN_LOGE(LNN_LANE, "laneType is not supported. type=%{public}d", allocInfo->type);
         return SOFTBUS_INVALID_PARAM;
     }
     LNN_LOGI(LNN_LANE, "targetLinkNum=%{public}u and first targetLinkType=%{public}d",
         allocInfo->linkList.linkTypeNum, allocInfo->linkList.linkType[0]);
-    if (allocInfo->linkList.linkTypeNum >= LANE_LINK_TYPE_BUTT) {
-        return SOFTBUS_INVALID_PARAM;
-    }
     int32_t result = g_laneObject[allocInfo->type]->allocTargetLane(laneHandle, allocInfo, listener);
     if (result != SOFTBUS_OK) {
         LNN_LOGE(LNN_LANE, "alloc target lane fail, handle=%{public}u, result=%{public}d", laneHandle, result);

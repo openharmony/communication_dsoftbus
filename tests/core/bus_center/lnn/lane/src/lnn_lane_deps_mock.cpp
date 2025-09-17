@@ -138,6 +138,7 @@ int32_t LaneDepsInterfaceMock::ActionOfGetRemoteStrInfoByIfnameIdx
 {
     (void)netWorkId;
     (void)len;
+    (void)ifIdx;
     if (info == nullptr) {
         GTEST_LOG_(ERROR) << "invalid param";
         return SOFTBUS_INVALID_PARAM;
