@@ -39,7 +39,7 @@ int32_t VerifyCertificatePacked(SoftbusCertChain *softbusCertChain, const NodeIn
 void AuthMetaNotifyDataReceivedPacked(uint32_t connectionId, const SocketPktHead *pktHead, const uint8_t *data);
 void AuthClearDeviceKeyPacked(void);
 void DelAuthMetaManagerByConnectionIdPacked(uint32_t connectionId);
-
+int32_t AuthMetaGetOsTypeByMetaNodeIdPacked(const char *metaNodeId, int32_t *osType);
 #ifdef __cplusplus
 }
 #endif
