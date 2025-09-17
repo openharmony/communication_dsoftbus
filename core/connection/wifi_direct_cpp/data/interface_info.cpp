@@ -53,7 +53,7 @@ InfoContainer<InterfaceInfoKey>::KeyTypeTable InfoContainer<InterfaceInfoKey>::k
     { InterfaceInfoKey::COEXIST_RULE,           Serializable::ValueType::BOOL      },
     { InterfaceInfoKey::LINK_MODE,              Serializable::ValueType::INT       },
     { InterfaceInfoKey::LISTEN_MODULE,          Serializable::ValueType::INT       },
-    { InterfaceInfoKey::LOCAL_CUSTOM_PORT,          Serializable::ValueType::INT       },
+    { InterfaceInfoKey::LOCAL_CUSTOM_PORT,      Serializable::ValueType::INT       },
 };
 
 void InterfaceInfo::MarshallingString(
