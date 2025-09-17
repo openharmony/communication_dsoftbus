@@ -422,6 +422,7 @@ int32_t TransOpenChannel(const SessionParam *param, TransInfo *transInfo)
         SoftBusHitraceChainEnd();
         return ret;
     }
+    appInfo->forceGenerateUk = IsNeedSinkGenerateUk(appInfo->peerNetWorkId);
     ret = TransAddSocketChannelInfo(
         param->sessionName, param->sessionId, INVALID_CHANNEL_ID, CHANNEL_TYPE_UNDEFINED, CORE_SESSION_STATE_INIT);
     if (ret != SOFTBUS_OK) {

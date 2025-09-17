@@ -118,6 +118,7 @@ static void TransGetCommonUdpInfoFromJson(const cJSON *msg, AppInfo *appInfo)
     (void)GetJsonObjectNumberItem(msg, "STREAM_TYPE", (int32_t *)&(appInfo->streamType));
     (void)GetJsonObjectNumberItem(msg, "CHANNEL_TYPE", (int32_t *)&(appInfo->udpChannelOptType));
     (void)GetJsonObjectNumberItem(msg, "UDP_CONN_TYPE", (int32_t *)&(appInfo->udpConnType));
+    (void)GetJsonObjectBoolItem(msg, "FORCE_GENERATE_UK", &(appInfo->forceGenerateUk));
 }
 
 static void TransGetUdpChannelOpenInfoFromJson(const cJSON *msg, AppInfo *appInfo)
@@ -244,6 +245,7 @@ int32_t TransPackRequestUdpInfo(cJSON *msg, const AppInfo *appInfo)
     (void)AddStringToJsonObject(msg, "PKG_NAME", appInfo->myData.pkgName);
     (void)memset_s(encodeSessionKey, sizeof(encodeSessionKey), 0, sizeof(encodeSessionKey));
     (void)AddNumberToJsonObject(msg, "TRANS_CAPABILITY", (int32_t)appInfo->channelCapability);
+    (void)AddBoolToJsonObject(msg, "FORCE_GENERATE_UK", appInfo->forceGenerateUk);
     return SOFTBUS_OK;
 }
 

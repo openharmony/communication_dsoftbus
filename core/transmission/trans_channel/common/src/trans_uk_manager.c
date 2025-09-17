@@ -329,7 +329,9 @@ int32_t GetUserkeyIdByAClInfo(
         TRANS_LOGE(TRANS_CTRL, "find uk failed no acl, ret=%{public}d", ret);
         return ret;
     }
-    if (ret != SOFTBUS_OK) {
+    if (ret != SOFTBUS_OK || appInfo->forceGenerateUk) {
+        TRANS_LOGI(TRANS_CTRL, "find uk failed, ret=%{public}d, forceGenerateUk=%{public}d",
+            ret, appInfo->forceGenerateUk);
         ret = TransGenUserkey(channelId, channelType, &aclInfo, callback);
         if (ret != SOFTBUS_OK) {
             TRANS_LOGE(TRANS_CTRL, "gen uk failed, ret=%{public}d", ret);
