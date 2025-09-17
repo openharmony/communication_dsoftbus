@@ -99,3 +99,12 @@ void DelAuthMetaManagerByConnectionIdPacked(uint32_t connectionId)
     }
     return pfnAuthEnhanceFuncList->delAuthMetaManagerByConnectionId(connectionId);
 }
+
+int32_t AuthMetaGetOsTypeByMetaNodeIdPacked(const char *metaNodeId, int32_t *osType)
+{
+    AuthEnhanceFuncList *pfnAuthEnhanceFuncList = AuthEnhanceFuncListGet();
+    if (AuthCheckFuncPointer((void *)pfnAuthEnhanceFuncList->authMetaGetOsTypeByMetaNodeId) != SOFTBUS_OK) {
+        return SOFTBUS_NOT_IMPLEMENT;
+    }
+    return pfnAuthEnhanceFuncList->authMetaGetOsTypeByMetaNodeId(metaNodeId, osType);
+}

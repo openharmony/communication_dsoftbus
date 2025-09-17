@@ -52,6 +52,7 @@ void AuthMetaCloseConnPacked(int64_t authId);
 int32_t AuthMetaGetPreferConnInfoPacked(const char *uuid, AuthConnInfo *connInfo);
 int64_t AuthMetaGetIdByConnInfoPacked(const AuthConnInfo *connInfo, bool isServer);
 int64_t AuthMetaGetIdByUuidPacked(const char *uuid, AuthLinkType type, bool isServer);
+int64_t AuthMetaGetIdByIpPacked(const char *ip);
 int32_t AuthMetaEncryptPacked(int64_t authId, const uint8_t *inData, uint32_t inLen,
     uint8_t *outData, uint32_t *outLen);
 int32_t AuthMetaDecryptPacked(int64_t authId, const uint8_t *inData, uint32_t inLen,

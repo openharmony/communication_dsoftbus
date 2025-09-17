@@ -206,6 +206,7 @@ void Register4thPartFunc(void *soHandle)
     g_lnnEnhanceFuncList.authMetaGetPreferConnInfo = dlsym(soHandle, "AuthMetaGetPreferConnInfo");
     g_lnnEnhanceFuncList.authMetaGetIdByConnInfo = dlsym(soHandle, "AuthMetaGetIdByConnInfo");
     g_lnnEnhanceFuncList.authMetaGetIdByUuid = dlsym(soHandle, "AuthMetaGetIdByUuid");
+    g_lnnEnhanceFuncList.authMetaGetIdByIp = dlsym(soHandle, "AuthMetaGetIdByIp");
     g_lnnEnhanceFuncList.authMetaEncrypt = dlsym(soHandle, "AuthMetaEncrypt");
     g_lnnEnhanceFuncList.authMetaDecrypt = dlsym(soHandle, "AuthMetaDecrypt");
     g_lnnEnhanceFuncList.authMetaSetP2pMac = dlsym(soHandle, "AuthMetaSetP2pMac");
