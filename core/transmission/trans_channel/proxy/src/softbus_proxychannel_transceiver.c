@@ -277,11 +277,6 @@ void TransProxyFreeLoopMsg(SoftBusMessage *msg)
 
 static SoftBusMessage *TransProxyCreateLoopMsg(int32_t what, uint64_t arg1, uint64_t arg2, char *data)
 {
-    if (data == NULL) {
-        TRANS_LOGE(TRANS_MSG, "invalid param.");
-        return NULL;
-    }
-
     SoftBusMessage *msg = (SoftBusMessage *)SoftBusCalloc(sizeof(SoftBusMessage));
     if (msg == NULL) {
         TRANS_LOGE(TRANS_MSG, "msg calloc failed");
