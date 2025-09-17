@@ -626,7 +626,7 @@ void TransProxyChanProcessByReqId(int32_t reqId, uint32_t connId, int32_t errCod
     (void)SoftBusMutexUnlock(&g_proxyChannelList->lock);
     if (!isUsing && errCode != SOFTBUS_TRANS_SESSION_INFO_NOT_FOUND) {
         TRANS_LOGW(TRANS_CTRL, "logical channel is already closed, connId=%{public}u", connId);
-        TransProxyCloseConnChannel(connId, false);
+        TransProxyCloseConnChannel(connId, false, false);
     }
 }
 
@@ -1869,7 +1869,8 @@ static void TransProxyProcessResetMsgHelper(const ProxyChannelInfo *info, const 
         TRANS_EVENT(EVENT_SCENE_CLOSE_CHANNEL_PASSIVE, EVENT_STAGE_CLOSE_CHANNEL, extra);
         OnProxyChannelClosed(info->channelId, &(info->appInfo));
     }
-    (void)TransProxyCloseConnChannelReset(msg->connId, (info->isServer == 0), info->isServer, info->deviceTypeIsWinpc);
+    (void)TransProxyCloseConnChannelReset(
+        msg->connId, (info->isServer == 0), info->isServer, info->deviceTypeIsWinpc, info->isD2D);
     if ((msg->msgHead.cipher & BAD_CIPHER) == BAD_CIPHER) {
         TRANS_LOGE(TRANS_CTRL, "clear bad key cipher=%{public}d, authId=%{public}" PRId64 ", keyIndex=%{public}d",
             msg->msgHead.cipher, msg->authHandle.authId, msg->keyIndex);
@@ -2546,7 +2547,7 @@ static void TransProxyDestroyChannelList(const ListNode *destroyList)
     LIST_FOR_EACH_ENTRY_SAFE(destroyNode, nextDestroyNode, destroyList, ProxyChannelInfo, node) {
         ListDelete(&(destroyNode->node));
         TransProxyResetPeer(destroyNode);
-        TransProxyCloseConnChannel(destroyNode->connId, destroyNode->isServer);
+        TransProxyCloseConnChannel(destroyNode->connId, destroyNode->isServer, destroyNode->isD2D);
         if (destroyNode->appInfo.fastTransData != NULL) {
             SoftBusFree((void *)destroyNode->appInfo.fastTransData);
         }
