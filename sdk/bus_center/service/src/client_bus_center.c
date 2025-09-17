@@ -694,3 +694,32 @@ int32_t SetDisplayName(const char *pkgName, const char *nameData, uint32_t len)
     }
     return SetDisplayNameInner(pkgName, nameData, len);
 }
+
+int32_t CreateGroupOwner(const char *pkgName, const struct GroupOwnerConfig *config,
+    struct GroupOwnerResult *result, GroupOwnerDestroyListener listener)
+{
+    if (pkgName == NULL || config == NULL || result == NULL || listener == NULL) {
+        LNN_LOGE(LNN_EVENT, "params are null");
+        return SOFTBUS_INVALID_PARAM;
+    }
+    int32_t ret = CommonInit(pkgName);
+    if (ret != SOFTBUS_OK) {
+        LNN_LOGE(LNN_STATE, "common init fail, ret=%{public}d", ret);
+        return ret;
+    }
+    return CreateGroupOwnerInner(pkgName, config, result, listener);
+}
+
+void DestroyGroupOwner(const char *pkgName)
+{
+    if (pkgName == NULL) {
+        LNN_LOGE(LNN_EVENT, "params are null");
+        return;
+    }
+    int32_t ret = CommonInit(pkgName);
+    if (ret != SOFTBUS_OK) {
+        LNN_LOGE(LNN_STATE, "common init fail, ret=%{public}d", ret);
+        return;
+    }
+    (void)DestroyGroupOwnerInner(pkgName);
+}

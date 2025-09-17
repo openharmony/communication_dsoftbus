@@ -580,6 +580,8 @@ ohos_unittest("ClientProxyTest") {
 ohos_unittest("BusCenterIpcTest") {
   module_out_path = module_output_path
   sources = [
+    "$dsoftbus_root_path/core/bus_center/lnn/conn_mgr/src/lnn_connection_interface.c",
+    "$dsoftbus_root_path/core/connection/wifi_direct_cpp/wifi_direct_manager_virtual.c",
     "$dsoftbus_root_path/core/frame/common/src/softbus_ddos.c",
     "$dsoftbus_root_path/tests/core/bus_center/test/ipc/bus_center_ipc_test.cpp",
     "$dsoftbus_root_path/tests/core/bus_center/test/mock/src/bus_center_ipc_mock.cpp",
@@ -604,6 +606,7 @@ ohos_unittest("BusCenterIpcTest") {
     "$dsoftbus_root_path/core/bus_center/service/include",
     "$dsoftbus_root_path/core/bus_center/utils/include",
     "$dsoftbus_root_path/core/common/include",
+    "$dsoftbus_root_path/core/connection/wifi_direct_cpp",
     "$dsoftbus_root_path/core/discovery/interface",
     "$dsoftbus_root_path/core/discovery/manager/include",
     "$dsoftbus_root_path/core/frame/common/include",

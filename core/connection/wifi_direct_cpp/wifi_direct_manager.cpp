@@ -29,10 +29,12 @@
 #include "dfx/wifi_direct_dfx.h"
 #include "dfx/wifi_direct_hidumper.h"
 #include "entity/entity_factory.h"
+#include "softbus_bus_center.h"
 #include "softbus_error_code.h"
 #include "utils/wifi_direct_anonymous.h"
 #include "utils/wifi_direct_utils.h"
 #include "wifi_direct_initiator.h"
+#include "wifi_direct_p2p_adapter.h"
 #include "wifi_direct_role_option.h"
 #include "wifi_direct_scheduler_factory.h"
 
@@ -736,6 +738,17 @@ static int32_t GetHmlLinkCount(void)
     return ret;
 }
 
+static int32_t ConnCreateGroupOwner(const char *pkgName, const struct GroupOwnerConfig *config,
+    struct GroupOwnerResult *result, GroupOwnerDestroyListener listener)
+{
+    return OHOS::SoftBus::WifiDirectP2pAdapter::GetInstance()->ConnCreateGoOwner(pkgName, config, result, listener);
+}
+
+static void ConnDestroyGroupOwner(const char *pkgName)
+{
+    OHOS::SoftBus::WifiDirectP2pAdapter::GetInstance()->ConnDestroyGoOwner(pkgName);
+}
+
 static struct WifiDirectManager g_manager = {
     .getRequestId = GetRequestId,
     .allocateListenerModuleId = AllocateListenerModuleId,
@@ -790,6 +803,9 @@ static struct WifiDirectManager g_manager = {
     .checkOnlyVirtualLink = CheckOnlyVirtualLink,
     .checkAndForceDisconnectVirtualLink = CheckAndForceDisconnectVirtualLink,
     .getHmlLinkCount = GetHmlLinkCount,
+    
+    .connCreateGroupOwner = ConnCreateGroupOwner,
+    .connDestroyGroupOwner = ConnDestroyGroupOwner,
 };
 
 struct WifiDirectManager *GetWifiDirectManager(void)

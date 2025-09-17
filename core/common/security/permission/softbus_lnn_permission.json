@@ -66,6 +66,18 @@
     ]
   },
   {
+    "INTERFACE_NAME": "SERVER_CREATE_GROUP_OWNER",
+    "PROCESS_NAME": [
+      "CollaborationFwk"
+    ]
+  },
+  {
+    "INTERFACE_NAME": "SERVER_DESTROY_GROUP_OWNER",
+    "PROCESS_NAME": [
+      "CollaborationFwk"
+    ]
+  },
+  {
     "INTERFACE_NAME": "EX_OBJ_CMD_SERVER_JOIN_METANODE",
     "PROCESS_NAME": [
       "CollaborationFwk",

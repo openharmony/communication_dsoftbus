@@ -80,6 +80,8 @@ private:
     int32_t GetSoftbusSpecObjectInner(MessageParcel &data, MessageParcel &reply);
     int32_t GetBusCenterExObjInner(MessageParcel &data, MessageParcel &reply);
     int32_t SetDisplayNameInner(MessageParcel &data, MessageParcel &reply);
+    int32_t CreateGroupOwnerInner(MessageParcel &data, MessageParcel &reply);
+    int32_t DestroyGroupOwnerInner(MessageParcel &data, MessageParcel &reply);
     int32_t CreateServerInner(MessageParcel &data, MessageParcel &reply);
     int32_t RemoveServerInner(MessageParcel &data, MessageParcel &reply);
     int32_t ConnectInner(MessageParcel &data, MessageParcel &reply);

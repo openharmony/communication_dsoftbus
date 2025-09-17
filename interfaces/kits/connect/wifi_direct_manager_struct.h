@@ -16,6 +16,7 @@
 #define WIFI_DIRECT_MANAGER_STRUCT_H
 
 #include "common_list.h"
+#include "softbus_bus_center.h"
 #include "wifi_direct_types_struct.h"
 
 #ifdef __cplusplus
@@ -100,6 +101,11 @@ struct WifiDirectManager {
     bool (*checkOnlyVirtualLink)(void);
     void (*checkAndForceDisconnectVirtualLink)(void);
     int32_t (*getHmlLinkCount)(void);
+
+    /* for share create go*/
+    int32_t (*connCreateGroupOwner)(const char *pkgName, const struct GroupOwnerConfig *config,
+        struct GroupOwnerResult *result, GroupOwnerDestroyListener listener);
+    void (*connDestroyGroupOwner)(const char *pkgName);
 };
 
 #ifdef __cplusplus

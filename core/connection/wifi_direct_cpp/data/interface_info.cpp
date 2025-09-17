@@ -53,6 +53,8 @@ InfoContainer<InterfaceInfoKey>::KeyTypeTable InfoContainer<InterfaceInfoKey>::k
     { InterfaceInfoKey::COEXIST_RULE,           Serializable::ValueType::BOOL      },
     { InterfaceInfoKey::LINK_MODE,              Serializable::ValueType::INT       },
     { InterfaceInfoKey::LISTEN_MODULE,          Serializable::ValueType::INT       },
+    { InterfaceInfoKey::LOCAL_CUSTOM_PORT,      Serializable::ValueType::INT       },
+    { InterfaceInfoKey::IS_CREATE_GO,           Serializable::ValueType::BOOL      },
 };
 
 void InterfaceInfo::MarshallingString(
@@ -423,5 +425,15 @@ void InterfaceInfo::SetLocalCustomPort(int32_t value)
 int32_t InterfaceInfo::GetLocalCustomPort() const
 {
     return Get(InterfaceInfoKey::LOCAL_CUSTOM_PORT, 0);
+}
+
+void InterfaceInfo::SetIsCreateGo(bool value)
+{
+    Set(InterfaceInfoKey::IS_CREATE_GO, value);
+}
+
+bool InterfaceInfo::GetIsCreateGo() const
+{
+    return Get(InterfaceInfoKey::IS_CREATE_GO, false);
 }
 } // namespace OHOS::SoftBus

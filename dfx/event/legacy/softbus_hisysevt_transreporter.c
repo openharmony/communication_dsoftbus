@@ -121,6 +121,8 @@ static ApiNameIdMap g_apiNameIdMapTbl[] = {
     {SERVER_RIPPLE_STATS, "RippleStats"},
     {SERVER_CTRL_LNN_BLE_HB, "CtrlLNNBleHb"},
     {SERVER_SET_DISPLAY_NAME, "SetDisplayName"},
+    {SERVER_CREATE_GROUP_OWNER, "CreateGroupOwner"},
+    {SERVER_DESTROY_GROUP_OWNER, "DestroyGroupOwner"},
 };
 
 typedef struct {

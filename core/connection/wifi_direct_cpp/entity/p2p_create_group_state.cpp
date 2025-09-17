@@ -16,6 +16,7 @@
 #include "p2p_create_group_state.h"
 #include "common_timer_errors.h"
 #include "conn_log.h"
+#include "data/interface_manager.h"
 #include "p2p_entity.h"
 #include "p2p_operation_result.h"
 #include "p2p_unavailable_state.h"
@@ -104,6 +105,10 @@ void P2pCreateGroupState::OnP2pConnectionChangeEvent(
         result.errorCode_ = SOFTBUS_CONN_P2P_ABNORMAL_DISCONNECTION;
         CONN_LOGE(CONN_WIFI_DIRECT, "create group call event fail, error=%{public}d", result.errorCode_);
     } else {
+        InterfaceManager::GetInstance().UpdateInterface(InterfaceInfo::P2P, [this] (InterfaceInfo &info) {
+            info.SetIsCreateGo(true);
+            return SOFTBUS_OK;
+        });
         P2pEntity::GetInstance().currentFrequency_ = groupInfo->frequency;
         result.errorCode_ = SOFTBUS_OK;
     }

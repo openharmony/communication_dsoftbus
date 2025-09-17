@@ -55,6 +55,7 @@ enum class InterfaceInfoKey {
     LINK_MODE = 28,
     LISTEN_MODULE = 29,
     LOCAL_CUSTOM_PORT = 30,
+    IS_CREATE_GO = 31,
 };
 
 class InterfaceInfo : public Serializable, public InfoContainer<InterfaceInfoKey> {
@@ -139,6 +140,9 @@ public:
 
     void SetLocalCustomPort(int32_t value);
     int32_t GetLocalCustomPort() const;
+
+    void SetIsCreateGo(bool value);
+    bool GetIsCreateGo() const;
 };
 } // namespace OHOS::SoftBus
 #endif
