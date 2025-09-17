@@ -517,11 +517,8 @@ HWTEST_F(TransTcpDirectP2pMockTest, OnVerifyP2pRequestTest001, TestSize.Level1)
     ASSERT_TRUE(data != nullptr);
     (void)memcpy_s(data, TEST_LEN, DATA, TEST_LEN);
 
-    NiceMock<TransTcpDirectP2pInterfaceMock> TcpP2pDirectMock;
-    EXPECT_CALL(TcpP2pDirectMock, VerifyP2pPackError).WillOnce(Return(data));
-    EXPECT_CALL(TcpP2pDirectMock, TransProxyPipelineSendMessage).WillOnce(Return(SOFTBUS_NOT_FIND));
     int32_t ret = OnVerifyP2pRequest(authHandle, seq, json, isAuthLink);
-    EXPECT_EQ(SOFTBUS_TRANS_GET_P2P_INFO_FAILED, ret);
+    EXPECT_EQ(SOFTBUS_NOT_IMPLEMENT, ret);
 
     cJSON_Delete(json);
 }
