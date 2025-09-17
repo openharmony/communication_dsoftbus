@@ -143,6 +143,15 @@ int64_t AuthMetaGetIdByUuidPacked(const char *uuid, AuthLinkType type, bool isSe
     return pfnLnnEnhanceFuncList->authMetaGetIdByUuid(uuid, type, isServer);
 }
 
+int64_t AuthMetaGetIdByIpPacked(const char *ip)
+{
+    LnnEnhanceFuncList *pfnLnnEnhanceFuncList = LnnEnhanceFuncListGet();
+    if (LnnCheckFuncPointer((void *)pfnLnnEnhanceFuncList->authMetaGetIdByIp) != SOFTBUS_OK) {
+        return AUTH_INVALID_ID;
+    }
+    return pfnLnnEnhanceFuncList->authMetaGetIdByIp(ip);
+}
+
 int32_t AuthMetaEncryptPacked(int64_t authId, const uint8_t *inData, uint32_t inLen,
     uint8_t *outData, uint32_t *outLen)
 {
