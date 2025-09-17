@@ -58,6 +58,7 @@ public:
     void OnRefreshDeviceFound(const void *device, uint32_t deviceLen) override;
     void OnDataLevelChanged(const char *networkId, const DataLevelInfo *dataLevelInfo) override;
     void OnMsdpRangeResult(const RangeResultInnerInfo *rangeInfo) override;
+    void OnGroupStateChange(int32_t retCode) override;
     int32_t OnClientTransLimitChange(int32_t channelId, uint8_t tos) override;
     int32_t OnChannelBind(int32_t channelId, int32_t channelType) override;
     int32_t OnClientChannelOnQos(
@@ -91,6 +92,7 @@ private:
     int32_t OnClientPermissionChangeInner(MessageParcel &data, MessageParcel &reply);
     int32_t OnDataLevelChangedInner(MessageParcel &data, MessageParcel &reply);
     int32_t OnMsdpRangeResultInner(MessageParcel &data, MessageParcel &reply);
+    int32_t OnGroupStateChangeInner(MessageParcel &data, MessageParcel &reply);
     int32_t OnClientTransLimitChangeInner(MessageParcel &data, MessageParcel &reply);
     int32_t OnChannelBindInner(MessageParcel &data, MessageParcel &reply);
     int32_t OnChannelOnQosInner(MessageParcel &data, MessageParcel &reply);

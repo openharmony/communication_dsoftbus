@@ -256,3 +256,19 @@ int32_t ClientOnRangeResult(const char *pkgName, int32_t pid, const RangeResultI
     clientProxy->OnMsdpRangeResult(rangeInfo);
     return SOFTBUS_OK;
 }
+
+int32_t ClientOnGroupStateChange(const char *pkgName, int32_t pid, int32_t retCode)
+{
+    if (pkgName == nullptr) {
+        LNN_LOGE(LNN_EVENT, "param is invalid");
+        return SOFTBUS_INVALID_PARAM;
+    }
+
+    sptr<BusCenterClientProxy> clientProxy = GetClientProxy(pkgName, pid);
+    if (clientProxy == nullptr) {
+        LNN_LOGE(LNN_EVENT, "bus center client proxy is nullptr");
+        return SOFTBUS_NETWORK_GET_CLIENT_PROXY_NULL;
+    }
+    clientProxy->OnGroupStateChange(retCode);
+    return SOFTBUS_OK;
+}

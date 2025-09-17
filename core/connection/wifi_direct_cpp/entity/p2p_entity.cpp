@@ -393,6 +393,10 @@ void P2pEntity::OnP2pConnectionChangeEvent(
 
     if (info.connectState == P2pConnectionState::P2P_DISCONNECTED) {
         currentFrequency_ = 0;
+        InterfaceManager::GetInstance().UpdateInterface(InterfaceInfo::P2P, [this] (InterfaceInfo &info) {
+            info.SetIsCreateGo(false);
+            return SOFTBUS_OK;
+        });
     }
 
     bool result = true;
