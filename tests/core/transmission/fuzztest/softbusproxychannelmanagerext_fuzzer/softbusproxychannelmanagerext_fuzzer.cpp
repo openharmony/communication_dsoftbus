@@ -37,6 +37,8 @@ public:
         (void)TransProxyManagerInit(TransServerGetChannelCb());
         (void)LooperInit();
         (void)TransProxyLoopInit();
+        (void)TransChannelResultLoopInit();
+        (void)TransChannelInit();
         isInited_ = true;
     }
 
@@ -44,7 +46,8 @@ public:
     {
         isInited_ = false;
         (void)LooperDeinit();
-        TransProxyManagerDeinit();
+        (void)TransProxyManagerDeinit();
+        (void)TransChannelDeinit();
     }
 
     bool IsInited(void)
@@ -155,7 +158,9 @@ void TransPagingUpdatePagingChannelInfoTest(FuzzedDataProvider &provider)
     FillAppInfo(provider, &appInfo);
     (void)TransProxyCreateChanInfo(info, channelId, &appInfo);
     (void)TransPagingUpdatePagingChannelInfo(info);
-    (void)TransProxyDelByChannelId(info->channelId, info);
+    ProxyChannelInfo tmpInfo;
+    (void)memset_s(&tmpInfo, sizeof(ProxyChannelInfo), 0, sizeof(ProxyChannelInfo));
+    (void)TransProxyDelByChannelId(channelId, &tmpInfo);
 }
 
 void TransPagingUpdatePidAndDataTest(FuzzedDataProvider &provider)
@@ -176,12 +181,13 @@ void TransPagingUpdatePidAndDataTest(FuzzedDataProvider &provider)
     (void)memset_s(&appInfo, sizeof(AppInfo), 0, sizeof(AppInfo));
     FillAppInfo(provider, &appInfo);
     (void)TransProxyCreateChanInfo(info, channelId, &appInfo);
-    uint32_t len = provider.ConsumeIntegral<uint32_t>();
-    (void)TransPagingUpdatePidAndData(channelId, pid, data, len);
+    (void)TransPagingUpdatePidAndData(channelId, pid, data, 0);
     (void)TransUpdateAuthSeqByChannelId(channelId, reqId);
-    (void)TransPagingUpdatePidAndData(info->channelId, pid, data, len);
+    (void)TransPagingUpdatePidAndData(info->channelId, pid, data, EXTRA_DATA_MAX_LEN);
     (void)TransUpdateAuthSeqByChannelId(info->channelId, reqId);
-    (void)TransProxyDelByChannelId(info->channelId, info);
+    ProxyChannelInfo tmpInfo;
+    (void)memset_s(&tmpInfo, sizeof(ProxyChannelInfo), 0, sizeof(ProxyChannelInfo));
+    (void)TransProxyDelByChannelId(channelId, &tmpInfo);
 }
 
 void TransPagingBadKeyRetryTest(FuzzedDataProvider &provider)
@@ -191,7 +197,6 @@ void TransPagingBadKeyRetryTest(FuzzedDataProvider &provider)
         return;
     }
     int32_t channelId = provider.ConsumeIntegral<int32_t>();
-    (void)TransPagingBadKeyRetry(channelId);
     AppInfo appInfo;
     (void)memset_s(&appInfo, sizeof(AppInfo), 0, sizeof(AppInfo));
     FillAppInfo(provider, &appInfo);
@@ -199,7 +204,9 @@ void TransPagingBadKeyRetryTest(FuzzedDataProvider &provider)
     (void)TransProxyCreateChanInfo(info, channelId, &appInfo);
     (void)TransProxyUpdateAckInfo(info);
     (void)TransPagingBadKeyRetry(info->channelId);
-    (void)TransProxyDelByChannelId(info->channelId, info);
+    ProxyChannelInfo tmpInfo;
+    (void)memset_s(&tmpInfo, sizeof(ProxyChannelInfo), 0, sizeof(ProxyChannelInfo));
+    (void)TransProxyDelByChannelId(channelId, &tmpInfo);
 }
 
 void TransRefreshProxyTimesNativeTest(FuzzedDataProvider &provider)
@@ -232,7 +239,9 @@ void TransRefreshProxyTimesNativeTest(FuzzedDataProvider &provider)
     (void)TransProxyUpdateSinkAccessInfo(info->channelId, &accessInfo);
     (void)TransProxyDelChanByReqId(reqId, errCode);
     (void)TransProxyDelChanByReqId(info->reqId, errCode);
-    (void)TransProxyDelByChannelId(info->channelId, info);
+    ProxyChannelInfo tmpInfo;
+    (void)memset_s(&tmpInfo, sizeof(ProxyChannelInfo), 0, sizeof(ProxyChannelInfo));
+    (void)TransProxyDelByChannelId(channelId, &tmpInfo);
 }
 
 void TransProxyDelChanByChanIdTest(FuzzedDataProvider &provider)
@@ -336,6 +345,7 @@ void TransPagingHandshakeUnPackErrMsgTest(FuzzedDataProvider &provider)
     (void)memset_s(&msg, sizeof(ProxyMessage), 0, sizeof(ProxyMessage));
     FillProxyMessage(provider, &msg);
     int32_t errCode;
+    (void)TransPagingHandshakeUnPackErrMsg(info, &msg, nullptr);
     (void)TransPagingHandshakeUnPackErrMsg(info, &msg, &errCode);
     if (msg.data != nullptr) {
         SoftBusFree(msg.data);
@@ -740,7 +750,9 @@ void TransProxyHandshakeUnpackErrMsgTest(FuzzedDataProvider &provider)
     uint16_t fastDataSize = info->appInfo.fastTransDataSize;
     (void)TransProxyCreateChanInfo(info, channelId, &appInfo);
     (void)TransProxyProcessHandshakeAckMsg(&msg);
+    (void)TransProxyHandshakeUnpackRightMsg(info, &msg, errCode, nullptr);
     (void)TransProxyHandshakeUnpackRightMsg(info, &msg, errCode, &fastDataSize);
+    (void)TransProxyHandshakeUnpackErrMsg(info, &msg, nullptr);
     (void)TransProxyHandshakeUnpackErrMsg(info, &msg, &errCode);
     (void)TransProxyDelChanByChanId(channelId);
     if (msg.data != nullptr) {
