@@ -127,6 +127,10 @@ ohos_unittest("BleConnectionManagerTest") {
     "$dsoftbus_root_path/adapter/default_config/spec_config",
     "$dsoftbus_root_path/core/frame/common/include",
     "$dsoftbus_root_path/core/connection/proxy",
+    "$dsoftbus_root_path/core/discovery/ble/dispatcher/include",
+    "$dsoftbus_root_path/core/discovery/usb/dispatcher/include",
+    "$dsoftbus_root_path/components/nstackx/nstackx_ctrl/interface",
+    "$dsoftbus_root_path/adapter/common/net/bluetooth/broadcast/interface",
   ]
   public_configs = [ ":softbus_connection_ble_test_config" ]
   sources = [
@@ -221,6 +225,10 @@ ohos_unittest("BleClientTest") {
     "$dsoftbus_root_path/interfaces/kits/connect",
     "$dsoftbus_root_path/interfaces/kits/disc",
     "$dsoftbus_root_path/interfaces/kits/adapter",
+    "$dsoftbus_root_path/core/discovery/ble/dispatcher/include",
+    "$dsoftbus_root_path/core/discovery/usb/dispatcher/include",
+    "$dsoftbus_root_path/components/nstackx/nstackx_ctrl/interface",
+    "$dsoftbus_root_path/adapter/common/net/bluetooth/broadcast/interface",
   ]
   sources = [
     "$dsoftbus_root_path/core/connection/ble/src/ble_protocol_interface_factory.c",
@@ -232,6 +240,8 @@ ohos_unittest("BleClientTest") {
     "./mock/softbus_conn_ble_client_mock.cpp",
     "softbus_conn_client_test.cpp",
     "$dsoftbus_root_path/core/frame/init/src/g_enhance_conn_func_pack.c",
+    "$dsoftbus_root_path/core/frame/init/src/g_enhance_disc_func_pack.c",
+    "$dsoftbus_root_path/core/frame/init/src/g_enhance_disc_func.c",
   ]
 
   deps = [
@@ -273,6 +283,10 @@ ohos_unittest("BleHidumperTest") {
     "$dsoftbus_root_path/core/frame/init/include",
     "$dsoftbus_root_path/core/frame/common/include",
     "$dsoftbus_root_path/core/connection/proxy",
+    "$dsoftbus_root_path/core/discovery/ble/dispatcher/include",
+    "$dsoftbus_root_path/core/discovery/usb/dispatcher/include",
+    "$dsoftbus_root_path/components/nstackx/nstackx_ctrl/interface",
+    "$dsoftbus_root_path/adapter/common/net/bluetooth/broadcast/interface",
   ]
 
   public_configs = [ ":softbus_connection_ble_test_config" ]

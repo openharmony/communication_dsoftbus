@@ -850,7 +850,7 @@ HWTEST_F(SoftbusBleGattTest, SoftbusStartScan002, TestSize.Level1)
     SoftBusBcScanFilter softBusBcScanFilter = {};
     softBusBcScanFilter.address = (int8_t *)"address";
     softBusBcScanFilter.deviceName = (int8_t *)"deviceName";
-    softBusBcScanFilter.serviceUuid = 1;
+    softBusBcScanFilter.serviceId = 1;
     softBusBcScanFilter.serviceDataLength = 1;
     softBusBcScanFilter.manufactureId = 1;
     softBusBcScanFilter.manufactureDataLength = 1;
@@ -883,7 +883,7 @@ HWTEST_F(SoftbusBleGattTest, SoftbusStartScan003, TestSize.Level1)
     SoftBusBcScanFilter softBusBcScanFilter = {};
     softBusBcScanFilter.address = (int8_t *)"address";
     softBusBcScanFilter.deviceName = (int8_t *)"deviceName";
-    softBusBcScanFilter.serviceUuid = 1;
+    softBusBcScanFilter.serviceId = 1;
     softBusBcScanFilter.serviceDataLength = 1;
     softBusBcScanFilter.manufactureId = 1;
     softBusBcScanFilter.manufactureDataLength = 1;

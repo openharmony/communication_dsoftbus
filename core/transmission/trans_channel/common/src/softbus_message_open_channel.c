@@ -139,6 +139,7 @@ static int32_t JsonObjectPackRequestEx(const AppInfo *appInfo, cJSON *json, unsi
     (void)AddNumberToJsonObject(json, USER_ID, appInfo->myData.userId);
     (void)AddNumber64ToJsonObject(json, SOURCE_ACL_TOKEN_ID, (int64_t)appInfo->myData.tokenId);
     (void)AddStringToJsonObject(json, SOURCE_ACL_EXTRA_INFO, appInfo->extraAccessInfo);
+    (void)AddBoolToJsonObject(json, FORCE_GENERATE_UK, appInfo->forceGenerateUk);
     return SOFTBUS_OK;
 }
 
@@ -258,6 +259,7 @@ static int32_t ParseMessageToAppInfo(const cJSON *msg, AppInfo *appInfo)
     (void)GetJsonObjectStringItem(msg, SOURCE_ACL_EXTRA_INFO, appInfo->extraAccessInfo, EXTRA_ACCESS_INFO_LEN_MAX);
     appInfo->myHandleId = -1;
     appInfo->peerHandleId = -1;
+    (void)GetJsonObjectBoolItem(msg, FORCE_GENERATE_UK, &(appInfo->forceGenerateUk));
     if (!GetJsonObjectInt32Item(msg, MY_HANDLE_ID, &(appInfo->peerHandleId)) ||
         !GetJsonObjectInt32Item(msg, PEER_HANDLE_ID, &(appInfo->myHandleId))) {
         appInfo->myHandleId = -1;

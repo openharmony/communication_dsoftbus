@@ -227,6 +227,7 @@ typedef void (*AuthMetaCloseConnFunc)(int64_t authId);
 typedef int32_t (*AuthMetaGetPreferConnInfoFunc)(const char *uuid, AuthConnInfo *connInfo);
 typedef int64_t (*AuthMetaGetIdByConnInfoFunc)(const AuthConnInfo *connInfo, bool isServer);
 typedef int64_t (*AuthMetaGetIdByUuidFunc)(const char *uuid, AuthLinkType type, bool isServer);
+typedef int64_t (*AuthMetaGetIdByIpFunc)(const char *ip);
 typedef int32_t (*AuthMetaEncryptFunc)(int64_t authId, const uint8_t *inData, uint32_t inLen,
     uint8_t *outData, uint32_t *outLen);
 typedef int32_t (*AuthMetaDecryptFunc)(int64_t authId, const uint8_t *inData, uint32_t inLen,
@@ -283,6 +284,8 @@ typedef int32_t (*DcTriggerVirtualLinkFunc)(const char *peerNetworkId);
 typedef int32_t (*LnnInitDecisionCenterV2Func)(void);
 typedef void (*LnnDeinitDecisionCenterV2Func)(void);
 typedef void (*SdMgrDeathCallbackFunc)(const char *pkgName);
+typedef int32_t (*AuthMetaGetIpByMetaNodeIdFunc)(const char *metaNodeId, char *ip, int32_t len);
+typedef int32_t (*AuthMetaGetLocalIpByMetaNodeIdFunc)(const char *metaNodeId, char *localIp, int32_t len);
 
 typedef struct TagLnnEnhanceFuncList {
     // time_sync
@@ -486,6 +489,7 @@ typedef struct TagLnnEnhanceFuncList {
     AuthMetaGetPreferConnInfoFunc authMetaGetPreferConnInfo;
     AuthMetaGetIdByConnInfoFunc authMetaGetIdByConnInfo;
     AuthMetaGetIdByUuidFunc authMetaGetIdByUuid;
+    AuthMetaGetIdByIpFunc authMetaGetIdByIp;
     AuthMetaEncryptFunc authMetaEncrypt;
     AuthMetaDecryptFunc authMetaDecrypt;
     AuthMetaSetP2pMacFunc authMetaSetP2pMac;
@@ -516,6 +520,10 @@ typedef struct TagLnnEnhanceFuncList {
     LnnInitDecisionCenterV2Func lnnInitDecisionCenterV2;
     LnnDeinitDecisionCenterV2Func lnnDeinitDecisionCenterV2;
     SdMgrDeathCallbackFunc sdMgrDeathCallback;
+
+    // HA interconnection
+    AuthMetaGetIpByMetaNodeIdFunc authMetaGetIpByMetaNodeId;
+    AuthMetaGetLocalIpByMetaNodeIdFunc authMetaGetLocalIpByMetaNodeId;
 } LnnEnhanceFuncList;
 
 LnnEnhanceFuncList *LnnEnhanceFuncListGet(void);

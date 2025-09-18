@@ -128,3 +128,10 @@ bool IsTrustedDeviceFromAccess(const char *peerAccountHash, const char *peerUdid
     (void)peerUserId;
     return false;
 }
+
+bool IsExistUkInAclProfile(const char *localUdid, const char *peerUdid)
+{
+    (void)localUdid;
+    (void)peerUdid;
+    return false;
+}

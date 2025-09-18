@@ -129,6 +129,8 @@ typedef struct {
 
     bool isNeedSetIdleTimeout;
     bool isOccupied;
+
+    bool isUnknownDevice;
 } ConnBleConnection;
 
 typedef struct {
