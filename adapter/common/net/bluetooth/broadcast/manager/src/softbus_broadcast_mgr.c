@@ -760,7 +760,7 @@ static bool CheckServiceIsMatch(const BcScanFilter *filter, const BroadcastPaylo
         return false;
     }
     if (filter->serviceId != bcData->id) {
-        DISC_LOGD(DISC_BROADCAST, "serviceUuid not match");
+        DISC_LOGD(DISC_BROADCAST, "serviceId not match");
         return false;
     }
     for (uint32_t i = 0; i < filterLen; i++) {
@@ -1401,7 +1401,7 @@ static int32_t DupData(uint8_t *srcData, uint32_t srcDataLen, uint8_t **outData)
 {
     if (srcData != NULL && srcDataLen > 0) {
         uint8_t *dupData = (uint8_t *)SoftBusCalloc(srcDataLen);
-        DISC_CHECK_AND_RETURN_RET_LOGE(srcData != NULL, SOFTBUS_MALLOC_ERR, DISC_BROADCAST, "calloc failed");
+        DISC_CHECK_AND_RETURN_RET_LOGE(dupData != NULL, SOFTBUS_MALLOC_ERR, DISC_BROADCAST, "calloc failed");
         (void)memcpy_s(dupData, srcDataLen, srcData, srcDataLen);
         *outData = dupData;
     }
@@ -1429,7 +1429,7 @@ static int32_t CopyScanFilterServiceInfo(const BcScanFilter *srcFilter, SoftBusB
 
 static int32_t CopyScanFilterServiceUuid(const BcScanFilter *srcFilter, SoftBusBcScanFilter *dstFilter)
 {
-    dstFilter->serviceId = srcFilter->serviceId;
+    dstFilter->serviceUuid = srcFilter->serviceUuid;
     dstFilter->serviceUuidMask = srcFilter->serviceUuidMask;
     dstFilter->serviceUuidLength = srcFilter->serviceUuidLength;
 
@@ -1450,16 +1450,15 @@ static int32_t CopyScanFilterManufacture(const BcScanFilter *srcFilter, SoftBusB
     dstFilter->manufactureId = srcFilter->manufactureId;
     dstFilter->manufactureDataLength = srcFilter->manufactureDataLength;
     
-    int32_t ret = DupData(srcFilter->manufactureData, srcFilter->serviceUuidDataLength, &dstFilter->manufactureData);
+    int32_t ret = DupData(srcFilter->manufactureData, srcFilter->manufactureDataLength, &dstFilter->manufactureData);
     DISC_CHECK_AND_RETURN_RET_LOGE(ret == SOFTBUS_OK, ret,
-        DISC_BROADCAST, "dup serviceUuidData failed,ret=%{public}d", ret);
+        DISC_BROADCAST, "dup manufactureData failed,ret=%{public}d", ret);
     
-    ret = DupData(srcFilter->manufactureDataMask, srcFilter->serviceUuidDataLength, &dstFilter->manufactureDataMask);
+    ret = DupData(srcFilter->manufactureDataMask, srcFilter->manufactureDataLength, &dstFilter->manufactureDataMask);
     DISC_CHECK_AND_RETURN_RET_LOGE(ret == SOFTBUS_OK, ret, DISC_BROADCAST,
-        "dup serviceUuidDataMask failed, ret=%{public}d", ret);
+        "dup manufactureDataMask failed, ret=%{public}d", ret);
     return SOFTBUS_OK;
 }
-
 
 static int32_t CopySoftBusBcScanFilter(const BcScanFilter *srcFilter, SoftBusBcScanFilter *dstFilter)
 {
