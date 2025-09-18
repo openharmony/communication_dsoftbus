@@ -813,7 +813,7 @@ static void LnnAnonymizeSparkCheck(const char *sparkCheck, uint32_t len, char **
     (void)memset_s(sparkCheckStr, SPARK_CHECK_STR_LEN, 0, SPARK_CHECK_STR_LEN);
 }
 
-void LnnDumpSparkCheck(const unsigned char* sparkCheck, const char *log)
+void LnnDumpSparkCheck(const unsigned char *sparkCheck, const char *log)
 {
     if (log == NULL) {
         LNN_LOGE(LNN_LEDGER, "invalid param");

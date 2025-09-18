@@ -190,23 +190,21 @@ static bool IsLocalSparkCheckInvalid(NodeInfo *info)
 {
     unsigned char sparkCheck[SPARK_CHECK_LENGTH] = {0};
     if (memcmp(info->sparkCheck, sparkCheck, SPARK_CHECK_LENGTH) != 0) {
-        LNN_LOGI(LNN_LEDGER, "load local spark check valid, ignore");
+        LNN_LOGI(LNN_LEDGER, "load local sparkCheck valid, ignore");
         return false;
     }
     if (LnnGenSparkCheck() != SOFTBUS_OK) {
-        LNN_LOGE(LNN_LEDGER, "gen local spark check fail");
+        LNN_LOGE(LNN_LEDGER, "gen local sparkCheck fail");
         return false;
     }
     if (LnnGetLocalByteInfo(BYTE_KEY_SPARK_CHECK, sparkCheck, SPARK_CHECK_LENGTH) == SOFTBUS_OK) {
         if (memcpy_s(info->sparkCheck, SPARK_CHECK_LENGTH, sparkCheck, SPARK_CHECK_LENGTH) != EOK) {
-            LNN_LOGE(LNN_LEDGER, "memcpy local spark check fail");
-            (void)memset_s(sparkCheck, sizeof(sparkCheck), 0, sizeof(sparkCheck));
-            return true;
+            LNN_LOGE(LNN_LEDGER, "memcpy local sparkCheck fail");
         }
         (void)memset_s(sparkCheck, sizeof(sparkCheck), 0, sizeof(sparkCheck));
         return true;
     }
-    LNN_LOGE(LNN_LEDGER, "get local spark check fail, ignore");
+    LNN_LOGE(LNN_LEDGER, "get local sparkCheck fail, ignore");
     (void)memset_s(sparkCheck, sizeof(sparkCheck), 0, sizeof(sparkCheck));
     return false;
 }
@@ -352,11 +350,11 @@ static void LnnSetLocalSparkCheck(void)
     }
     unsigned char sparkCheck[SPARK_CHECK_LENGTH] = {0};
     if (memcmp(localInfo.sparkCheck, sparkCheck, SPARK_CHECK_LENGTH) != 0) {
-        LNN_LOGI(LNN_LEDGER, "load local spark check valid, ignore");
+        LNN_LOGI(LNN_LEDGER, "local sparkCheck valid, ignore");
         return;
     }
     if (LnnGenSparkCheck() != SOFTBUS_OK) {
-        LNN_LOGE(LNN_LEDGER, "gen local spark check fail");
+        LNN_LOGE(LNN_LEDGER, "gen local sparkCheck fail");
     }
 }
 

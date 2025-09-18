@@ -178,7 +178,7 @@ HWTEST_F(LNNNetLedgerMockTest, IsStaticFeatureChangeTest001, TestSize.Level0)
 
 /*
  * @tc.name: IsLocalSparkCheckInvalid001
- * @tc.desc: local spark check invalid test
+ * @tc.desc: local sparkCheck invalid test
  * @tc.type: FUNC
  * @tc.require: IBH09C
  */
