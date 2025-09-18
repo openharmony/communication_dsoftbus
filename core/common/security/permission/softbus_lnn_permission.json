@@ -164,25 +164,25 @@
   {
     "INTERFACE_NAME": "SERVER_TRIGGER_RANGE_FOR_MSDP",
     "PROCESS_NAME": [
-      "msdp_sa"
+      "msdp"
     ]
   },
   {
     "INTERFACE_NAME": "SERVER_STOP_RANGE_FOR_MSDP",
     "PROCESS_NAME": [
-      "msdp_sa"
+      "msdp"
     ]
   },
   {
     "INTERFACE_NAME": "SERVER_REG_RANGE_CB_FOR_MSDP",
     "PROCESS_NAME": [
-      "msdp_sa"
+      "msdp"
     ]
   },
   {
     "INTERFACE_NAME": "SERVER_UNREG_RANGE_CB_FOR_MSDP",
     "PROCESS_NAME": [
-      "msdp_sa"
+      "msdp"
     ]
   },
   {
