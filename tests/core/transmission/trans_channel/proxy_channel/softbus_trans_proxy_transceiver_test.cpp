@@ -226,13 +226,14 @@ HWTEST_F(SoftbusProxyTransceiverTest, TransProxyCloseConnChannelTest001, TestSiz
     ConnectionInfo tcpInfo;
     tcpInfo.type = CONNECT_TCP;
     bool isServer = false;
+    bool isD2d = false;
     TransCreateConnByConnId(1, isServer);
 
-    int32_t ret = TransProxyCloseConnChannel(1, isServer);
+    int32_t ret = TransProxyCloseConnChannel(1, isServer, isD2d);
     EXPECT_EQ(SOFTBUS_OK, ret);
-    ret = TransProxyCloseConnChannel(1, isServer);
+    ret = TransProxyCloseConnChannel(1, isServer, isD2d);
     EXPECT_EQ(SOFTBUS_OK, ret);
-    ret = TransProxyCloseConnChannel(1, isServer);
+    ret = TransProxyCloseConnChannel(1, isServer, isD2d);
     EXPECT_EQ(SOFTBUS_OK, ret);
 }
 
@@ -259,9 +260,10 @@ HWTEST_F(SoftbusProxyTransceiverTest, TransProxyCloseConnChannelTest002, TestSiz
     ConnectionInfo tcpInfo;
     tcpInfo.type = CONNECT_TCP;
     bool isServer = false;
+    bool isD2d = false;
     TransCreateConnByConnId(TEST_VALID_CHANNEL_ID, isServer);
 
-    ret = TransProxyCloseConnChannel(TEST_VALID_CHANNEL_ID, isServer);
+    ret = TransProxyCloseConnChannel(TEST_VALID_CHANNEL_ID, isServer, isD2d);
     EXPECT_EQ(SOFTBUS_OK, ret);
     SoftBusFree(connChan);
     DestroySoftBusList(g_proxyConnectionList);
@@ -281,11 +283,11 @@ HWTEST_F(SoftbusProxyTransceiverTest, TransProxyCloseConnChannelResetTest001, Te
     bool isServer = false;
     TransCreateConnByConnId(2, isServer);
 
-    int32_t ret = TransProxyCloseConnChannelReset(2, false, isServer, false);
+    int32_t ret = TransProxyCloseConnChannelReset(2, false, isServer, false, false);
     EXPECT_EQ(SOFTBUS_OK, ret);
-    ret = TransProxyCloseConnChannelReset(2, false, isServer, false);
+    ret = TransProxyCloseConnChannelReset(2, false, isServer, false, false);
     EXPECT_EQ(SOFTBUS_OK, ret);
-    ret = TransProxyCloseConnChannelReset(2, true, isServer, true);
+    ret = TransProxyCloseConnChannelReset(2, true, isServer, true, false);
     EXPECT_EQ(SOFTBUS_OK, ret);
 }
 
@@ -626,9 +628,9 @@ HWTEST_F(SoftbusProxyTransceiverTest, TransDecConnRefByConnId001, TestSize.Level
     removeNode1->ref = 2;
     ListAdd(&(g_proxyConnectionList->list), &(removeNode2->node));
     g_proxyConnectionList->cnt++;
-    int32_t ret = TransDecConnRefByConnId(connId1, true);
+    int32_t ret = TransDecConnRefByConnId(connId1, true, false);
     EXPECT_EQ(SOFTBUS_OK, ret);
-    ret = TransDecConnRefByConnId(connId2, false);
+    ret = TransDecConnRefByConnId(connId2, false, false);
     EXPECT_EQ(SOFTBUS_OK, ret);
     SoftBusFree(removeNode1);
     SoftBusFree(removeNode2);
@@ -658,7 +660,7 @@ HWTEST_F(SoftbusProxyTransceiverTest, TransDecConnRefByConnId002, TestSize.Level
     chan->connInfo = connectOption;
     int32_t ret = TransAddConnItem(chan);
     EXPECT_EQ(SOFTBUS_OK, ret);
-    ret = TransDecConnRefByConnId(123, true); // test value
+    ret = TransDecConnRefByConnId(123, true, false); // test value
     EXPECT_EQ(SOFTBUS_OK, ret);
 
     DestroySoftBusList(g_proxyConnectionList);
@@ -690,7 +692,7 @@ HWTEST_F(SoftbusProxyTransceiverTest, TransDecConnRefByConnId003, TestSize.Level
 
     ret = TransAddConnItem(chan);
     EXPECT_EQ(SOFTBUS_TRANS_NOT_MATCH, ret);
-    ret = TransDecConnRefByConnId(123, true); // test value
+    ret = TransDecConnRefByConnId(123, true, false); // test value
     EXPECT_EQ(SOFTBUS_TRANS_NOT_MATCH, ret);
 
     SoftBusFree(chan);

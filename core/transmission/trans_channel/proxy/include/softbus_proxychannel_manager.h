@@ -87,7 +87,7 @@ int32_t TransProxyGetProxyChannelIdByAuthReq(uint32_t reqId, int32_t *channelId)
 int32_t TransPagingResetChan(ProxyChannelInfo *chanInfo);
 char *TransPagingPackHandshakeMsg(ProxyChannelInfo *info);
 int32_t TransPagingHandshakeUnPackErrMsg(ProxyChannelInfo *chan, const ProxyMessage *msg, int32_t *errCode);
-int32_t TransProxyGetChannelByFlag(uint32_t businessFlag, ProxyChannelInfo *chan, bool isClient);
+int32_t TransProxyGetChannelByCheckInfo(const PagingListenCheckInfo *checkInfo, ProxyChannelInfo *chan, bool isClient);
 void TransProxyProcessErrMsg(ProxyChannelInfo *info, int32_t errCode);
 int32_t TransPagingUpdatePagingChannelInfo(ProxyChannelInfo *info);
 int32_t TransPagingUpdatePidAndData(int32_t channelId, int32_t pid, char *data, uint32_t len);

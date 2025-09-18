@@ -83,5 +83,9 @@ bool LnnIsNeedInterceptBroadcast(bool disableGlass)
 {
     return GetAuthSessionFsmInterface()->LnnIsNeedInterceptBroadcast(disableGlass);
 }
+int32_t LnnSaveRemoteDeviceInfoPacked(const NodeInfo *deviceInfo)
+{
+    return GetAuthSessionFsmInterface()->LnnSaveRemoteDeviceInfoPacked(deviceInfo);
+}
 }
 } // namespace OHOS

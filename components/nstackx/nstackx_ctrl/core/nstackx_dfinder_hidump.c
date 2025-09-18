@@ -231,7 +231,7 @@ int DumpDeviceInfo(const DeviceInfo *info, char *buf, int size, uint8_t remote)
     if (len > 0) {
         size_t anonyLen = remote == NSTACKX_TRUE ? DFINDER_DEVICE_ID_ANONY_REMOTE_LEN : DFINDER_DEVICE_ID_ANONY_LEN;
         len = len > anonyLen ? anonyLen : len;
-        ret = memcpy_s(deviceid, anonyLen, info->deviceId, len);
+        ret = memcpy_s(deviceid, sizeof(deviceid), info->deviceId, len);
         if (ret != EOK) {
             DFINDER_LOGE(TAG, "memcpy_s failed");
             return NSTACKX_EFAILED;

@@ -131,6 +131,7 @@ typedef struct {
     bool isSupportNewHead;
     bool isLowLatency;
     bool isFlashLight;
+    bool forceGenerateUk;
     uint16_t fastTransDataSize;
     RouteType routeType;
     StreamType streamType;

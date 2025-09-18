@@ -28,6 +28,7 @@
 #include "auth_deviceprofile.h"
 #include "bus_center_manager.h"
 #include "bus_center_event.h"
+#include "g_enhance_auth_func_pack.h"
 #include "g_enhance_lnn_func.h"
 #include "g_enhance_lnn_func_pack.h"
 #include "lnn_async_callback_utils.h"
@@ -2279,6 +2280,9 @@ int32_t LnnGetOsTypeByNetworkId(const char *networkId, int32_t *osType)
     NodeInfo *nodeInfo = LnnGetNodeInfoById(networkId, CATEGORY_NETWORK_ID);
     if (nodeInfo == NULL) {
         SoftBusMutexUnlock(&g_distributedNetLedger.lock);
+        if (AuthMetaGetOsTypeByMetaNodeIdPacked(networkId, osType) == SOFTBUS_OK) {
+            return SOFTBUS_OK;
+        }
         char *anonyNetworkId = NULL;
         Anonymize(networkId, &anonyNetworkId);
         LNN_LOGE(LNN_LEDGER, "get info by networkId=%{public}s failed", AnonymizeWrapper(anonyNetworkId));
