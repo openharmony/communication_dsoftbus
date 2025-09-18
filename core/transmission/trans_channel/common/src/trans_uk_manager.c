@@ -294,7 +294,7 @@ static int32_t FillSourceAclInfoByAppInfo(const AppInfo *appInfo, AuthACLInfo *a
 static int32_t TransGenUserkey(
     int32_t channelId, int32_t channelType, const AuthACLInfo *acl, AuthGenUkCallback *callback)
 {
-    uint32_t requestId = AuthGenRequestId();
+    uint32_t requestId = GenUkSeq();
     int32_t ret = SOFTBUS_OK;
     ret = TransUkRequestAddItem(requestId, channelId, channelType);
     if (ret != SOFTBUS_OK) {
@@ -448,7 +448,7 @@ int32_t DecryptAndAddSinkSessionKey(const cJSON *msg, AppInfo *appInfo)
                 return ret;
             }
             if (ret != SOFTBUS_OK) {
-                uint32_t requestId = AuthGenRequestId();
+                uint32_t requestId = GenUkSeq();
                 (void)AuthGenUkIdByAclInfo(&aclInfo, requestId, &authGenUkCallback);
                 TRANS_LOGE(TRANS_CTRL, "find uk failed and get uk, ret=%{public}d", ret);
                 return ret;
@@ -463,7 +463,7 @@ int32_t DecryptAndAddSinkSessionKey(const cJSON *msg, AppInfo *appInfo)
             uint32_t decDataLen = SESSION_KEY_LENGTH;
             if (AuthDecryptByUkId(appInfo->myData.userKeyId, (uint8_t *)decodeEncryptKey, ENCRYPT_KEY_LENGTH,
                 (uint8_t *)appInfo->sinkSessionKey, &decDataLen) != SOFTBUS_OK) {
-                uint32_t requestId = AuthGenRequestId();
+                uint32_t requestId = GenUkSeq();
                 (void)AuthGenUkIdByAclInfo(&aclInfo, requestId, &authGenUkCallback);
                 TRANS_LOGE(TRANS_CTRL, "srv process recv data: decrypt failed. ukid=%{public}d, requestId=%{public}u",
                     appInfo->myData.userKeyId, requestId);
