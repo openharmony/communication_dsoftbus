@@ -2483,7 +2483,7 @@ static void DiscBleFillSingleFilter(BcScanFilter *filter, DiscBleFilterOption *f
     DISC_CHECK_AND_RETURN_LOGE(filter != NULL, DISC_BLE, "filter is nullptr");
     DISC_CHECK_AND_RETURN_LOGE(filterOption != NULL, DISC_BLE, "filterOption is nullptr");
 
-    filter->serviceUuid = SERVICE_UUID;
+    filter->serviceId = SERVICE_UUID;
     filter->serviceDataLength = BLE_SCAN_FILTER_LEN;
     filter->serviceData[POS_VERSION] = 0x0;
     filter->serviceData[POS_BUSINESS] = DISTRIBUTE_BUSINESS;
