@@ -125,7 +125,7 @@ public:
     virtual bool IsSKIdInvalid(
         int32_t sessionKeyId, const char *accountHash, const char *udidShortHash, int32_t userId) = 0;
     virtual bool IsTrustedDeviceFromAccess(const char *peerAccountHash, const char *peerUdid, int32_t peerUserId) = 0;
-    virtual void LnnDumpSparkCheck(const unsigned char* sparkCheck, const char *log) = 0;
+    virtual void LnnDumpSparkCheck(const unsigned char *sparkCheck, const char *log) = 0;
 };
 
 class AuthSessionJsonInterfaceMock : public AuthSessionJsonInterface {
@@ -207,7 +207,7 @@ public:
     MOCK_METHOD0(GetActiveOsAccountIds, int32_t(void));
     MOCK_METHOD4(IsSKIdInvalid, bool(int32_t, const char *, const char *, int32_t));
     MOCK_METHOD3(IsTrustedDeviceFromAccess, bool(const char *, const char *, int32_t));
-    MOCK_METHOD2(LnnDumpSparkCheck, void(const unsigned char* sparkCheck, const char *log));
+    MOCK_METHOD2(LnnDumpSparkCheck, void(const unsigned char *sparkCheck, const char *log));
 };
 
 extern "C" {

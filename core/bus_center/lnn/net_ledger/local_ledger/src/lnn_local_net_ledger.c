@@ -1887,13 +1887,13 @@ static int32_t LlGetCipherInfoIv(void *buf, uint32_t len)
 
 static int32_t LlGetSparkCheck(void *buf, uint32_t len)
 {
-    if (buf == NULL || len == 0) {
+    if (buf == NULL || len < SPARK_CHECK_LENGTH) {
         LNN_LOGE(LNN_LEDGER, "invalid param");
         return SOFTBUS_INVALID_PARAM;
     }
     NodeInfo *info = &g_localNetLedger.localInfo;
     if (memcpy_s(buf, len, info->sparkCheck, SPARK_CHECK_LENGTH) != EOK) {
-        LNN_LOGE(LNN_LEDGER, "memcpy spark check fail");
+        LNN_LOGE(LNN_LEDGER, "memcpy sparkCheck fail");
         return SOFTBUS_MEM_ERR;
     }
     return SOFTBUS_OK;
@@ -1960,7 +1960,7 @@ static int32_t UpdateLocalSparkCheck(const void *id)
         return SOFTBUS_INVALID_PARAM;
     }
     if (memcpy_s((char *)g_localNetLedger.localInfo.sparkCheck, SPARK_CHECK_LENGTH, id, SPARK_CHECK_LENGTH) != EOK) {
-        LNN_LOGE(LNN_LEDGER, "memcpy spark check fail");
+        LNN_LOGE(LNN_LEDGER, "memcpy sparkCheck fail");
         return SOFTBUS_MEM_ERR;
     }
     return SOFTBUS_OK;
@@ -2804,11 +2804,11 @@ int32_t LnnGenSparkCheck(void)
     unsigned char sparkCheck[SPARK_CHECK_LENGTH] = {0};
     do {
         if (SoftBusGenerateRandomArray(sparkCheck, SPARK_CHECK_LENGTH) != SOFTBUS_OK) {
-            LNN_LOGE(LNN_LEDGER, "generate spark check error.");
+            LNN_LOGE(LNN_LEDGER, "generate sparkCheck error.");
             break;
         }
         if (LnnSetLocalByteInfo(BYTE_KEY_SPARK_CHECK, sparkCheck, SPARK_CHECK_LENGTH) != SOFTBUS_OK) {
-            LNN_LOGE(LNN_LEDGER, "set spark check error.");
+            LNN_LOGE(LNN_LEDGER, "set sparkCheck error.");
             break;
         }
         LnnDumpSparkCheck(sparkCheck, "generate sparkCheck success");
