@@ -82,6 +82,8 @@ static uint16_t BtAdvTypeToSoftbus(uint16_t advType)
             return BC_DATA_TYPE_SERVICE;
         case MANUFACTURE_BC_TYPE:
             return BC_DATA_TYPE_MANUFACTURER;
+        case SERVICE_UUID_BC_TYPE:
+            return BC_DATA_TYPE_SERVICE_UUID;
         default:
             return 0x00;
     }
@@ -506,7 +508,7 @@ int32_t ParseScanResult(const uint8_t *advData, uint8_t advLen, SoftBusBcScanRes
                 SOFTBUS_BC_ADAPTER_PARSE_FAIL, DISC_BLE_ADAPTER, "parse local name failed");
                 dst->nameTruncated = (type == SHORTENED_LOCAL_NAME_BC_TYPE);
         } else {
-            if (type != SERVICE_BC_TYPE && type != MANUFACTURE_BC_TYPE && type != SERVICEUUID_BC_TYPE) {
+            if (type != SERVICE_BC_TYPE && type != MANUFACTURE_BC_TYPE && type != SERVICE_UUID_BC_TYPE) {
                 index += len;
                 DISC_LOGD(DISC_BLE_ADAPTER, "unsupported type, type=%{public}hhu", type);
                 continue;
