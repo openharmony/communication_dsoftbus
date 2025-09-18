@@ -61,6 +61,7 @@ typedef struct {
     int32_t pid;
     bool isServer;
     int32_t channelType;
+    int32_t osType;
     char peerSessionName[SESSION_NAME_SIZE_MAX];
     char peerDeviceId[DEVICE_ID_SIZE_MAX];
     char peerIp[IP_LEN];

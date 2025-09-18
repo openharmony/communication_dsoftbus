@@ -88,6 +88,14 @@ int32_t UnpackReplyErrCode(const cJSON *msg, int32_t *errCode);
 
 char *TransTdcPackFastData(const AppInfo *appInfo, uint32_t *outLen);
 
+int32_t UnpackExternalDeviceRequest(const cJSON *msg, AppInfo *appInfo);
+
+char *PackExternalDeviceRequest(const AppInfo *appInfo, int64_t requestId);
+
+int32_t UnpackExternalDeviceReply(const cJSON *msg, AppInfo *appInfo);
+
+char *PackExternalDeviceReply(const AppInfo *appInfo);
+
 #ifdef __cplusplus
 }
 #endif // __cplusplus

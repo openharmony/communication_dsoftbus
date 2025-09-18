@@ -101,8 +101,12 @@ static int32_t TransPostBytes(SessionConn *conn, bool isAuthServer, uint32_t cip
     if (isAuthServer) {
         seq |= AUTH_CONN_SERVER_SIDE;
     }
-
-    char *bytes = PackRequest(&conn->appInfo, conn->req);
+    char *bytes = NULL;
+    if (conn->appInfo.osType == HA_OS_TYPE) {
+        bytes = PackExternalDeviceRequest(&conn->appInfo, conn->req);
+    } else {
+        bytes = PackRequest(&conn->appInfo, conn->req);
+    }
     if (bytes == NULL) {
         TRANS_LOGE(TRANS_CTRL,
             "Pack Request failed channelId=%{public}d, fd=%{public}d",
@@ -117,7 +121,11 @@ static int32_t TransPostBytes(SessionConn *conn, bool isAuthServer, uint32_t cip
         .dataLen = strlen(bytes), /* reset after encrypt */
     };
     if (conn->isMeta) {
-        packetHead.flags |= FLAG_AUTH_META;
+        if (conn->appInfo.osType == HA_OS_TYPE) {
+            packetHead.flags |= (FLAG_EXTERNAL_DEVICE + FLAG_AUTH_META);
+        } else {
+            packetHead.flags |= FLAG_AUTH_META;
+        }
     }
     int32_t ret = TransTdcPostBytes(conn->channelId, &packetHead, bytes);
     cJSON_free(bytes);

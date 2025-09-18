@@ -20,6 +20,7 @@
 
 #include "auth_interface.h"
 #include "bus_center_manager.h"
+#include "g_enhance_lnn_func_pack.h"
 #include "g_enhance_trans_func_pack.h"
 #include "legacy/softbus_adapter_hitrace.h"
 #include "lnn_bus_center_ipc.h"
@@ -36,6 +37,7 @@
 #include "softbus_proxychannel_manager.h"
 #include "softbus_proxychannel_pipeline.h"
 #include "softbus_socket.h"
+#include "trans_channel_common.h"
 #include "trans_lane_pending_ctl.h"
 #include "trans_log.h"
 #include "trans_tcp_direct_json.h"
@@ -571,6 +573,26 @@ static int32_t VerifyP2p(AuthHandle authHandle, int64_t seq, VerifyP2pInfo *info
     return SOFTBUS_OK;
 }
 
+static int32_t TransGetRemoteUuidByAuthHandle(AuthHandle authHandle, char *peerUuid)
+{
+    int32_t ret = SOFTBUS_OK;
+    if (authHandle.type == AUTH_LINK_TYPE_BLE) {
+        AuthHandle authHandleTmp = { 0 };
+        ret = TransProxyGetAuthId(authHandle.authId, &authHandleTmp);
+        if (ret == SOFTBUS_TRANS_NODE_NOT_FOUND) {
+            authHandleTmp.authId = authHandle.authId;
+        }
+        ret = AuthGetDeviceUuid(authHandleTmp.authId, peerUuid, UUID_BUF_LEN);
+    } else {
+        ret = AuthGetDeviceUuid(authHandle.authId, peerUuid, UUID_BUF_LEN);
+    }
+    if (ret != SOFTBUS_OK) {
+        TRANS_LOGE(TRANS_CTRL, "fail to get device uuid by authId=%{public}" PRId64, authHandle.authId);
+        return ret;
+    }
+    return SOFTBUS_OK;
+}
+
 static void OnAuthConnOpened(uint32_t requestId, AuthHandle authHandle)
 {
     TRANS_LOGI(TRANS_CTRL, "reqId=%{public}u, authId=%{public}" PRId64, requestId, authHandle.authId);
@@ -608,7 +630,7 @@ static void OnAuthConnOpened(uint32_t requestId, AuthHandle authHandle)
     ReleaseSessionConnLock();
     info.myIp = myDataAddr;
     info.myPort = myDataPort;
-    info.peerIp = peerDataAddr;
+    info.peerIp = (conn->appInfo.osType == HA_OS_TYPE) ? NULL : peerDataAddr;
     info.protocol = conn->appInfo.fdProtocol;
     if (VerifyP2p(authHandle, reqNum, &info) != SOFTBUS_OK) {
         TRANS_LOGE(TRANS_CTRL, "verify p2p fail");
@@ -760,22 +782,29 @@ static int32_t PackAndSendVerifyP2pRsp(VerifyP2pInfo *info, int64_t seq, bool is
     return SOFTBUS_OK;
 }
 
-static int32_t TransGetRemoteUuidByAuthHandle(AuthHandle authHandle, char *peerUuid)
+static int32_t TransGetLocalIp(char *myIp, const char *peerIp, const char *peerUuid)
 {
-    int32_t ret = SOFTBUS_OK;
-    if (authHandle.type == AUTH_LINK_TYPE_BLE) {
-        AuthHandle authHandleTmp = { 0 };
-        ret = TransProxyGetAuthId(authHandle.authId, &authHandleTmp);
-        if (ret == SOFTBUS_TRANS_NODE_NOT_FOUND) {
-            authHandleTmp.authId = authHandle.authId;
-        }
-        ret = AuthGetDeviceUuid(authHandleTmp.authId, peerUuid, UUID_BUF_LEN);
-    } else {
-        ret = AuthGetDeviceUuid(authHandle.authId, peerUuid, UUID_BUF_LEN);
+    if (myIp == NULL || peerIp == NULL || peerUuid == NULL) {
+        return SOFTBUS_INVALID_PARAM;
     }
-    if (ret != SOFTBUS_OK) {
-        TRANS_LOGE(TRANS_CTRL, "fail to get device uuid by authId=%{public}" PRId64, authHandle.authId);
-        return ret;
+    int32_t osType = 0;
+    GetOsTypeByNetworkId(peerUuid, &osType);
+    if (osType == HA_OS_TYPE) {
+        if (AuthMetaGetLocalIpByMetaNodeIdPacked(peerUuid, myIp, IP_LEN) != SOFTBUS_OK) {
+            TRANS_LOGE(TRANS_CTRL, "get local ip by metaNodeId failed.");
+            return SOFTBUS_LANE_GET_LEDGER_INFO_ERR;
+        }
+    } else {
+        struct WifiDirectManager *pManager = GetWifiDirectManager();
+        if (pManager == NULL || pManager->getLocalIpByRemoteIp == NULL) {
+            return SOFTBUS_WIFI_DIRECT_INIT_FAILED;
+        }
+        int32_t ret = pManager->getLocalIpByRemoteIp(peerIp, myIp, IP_LEN);
+        if (ret != SOFTBUS_OK) {
+            OutputAnonymizeIpAddress(myIp, peerIp);
+            TRANS_LOGE(TRANS_CTRL, "get Local Ip fail, ret=%{public}d", ret);
+            return SOFTBUS_TRANS_GET_P2P_INFO_FAILED;
+        }
     }
     return SOFTBUS_OK;
 }
@@ -793,19 +822,14 @@ static int32_t OnVerifyP2pRequest(AuthHandle authHandle, int64_t seq, const cJSO
         SendVerifyP2pFailRsp(authHandle, seq, CODE_VERIFY_P2P, ret, "OnVerifyP2pRequest unpack fail", isAuthLink);
         return ret;
     }
-    struct WifiDirectManager *pManager = GetWifiDirectManager();
-    if (pManager == NULL || pManager->getLocalIpByRemoteIp == NULL) {
-        SendVerifyP2pFailRsp(authHandle, seq, CODE_VERIFY_P2P, SOFTBUS_WIFI_DIRECT_INIT_FAILED,
-            "get wifidirectmanager or localip fail", isAuthLink);
-        return SOFTBUS_WIFI_DIRECT_INIT_FAILED;
-    }
-    ret = pManager->getLocalIpByRemoteIp(peerIp, myIp, sizeof(myIp));
+    char peerUuid[UUID_BUF_LEN] = { 0 };
+    ret = TransGetRemoteUuidByAuthHandle(authHandle, peerUuid);
+    TRANS_CHECK_AND_RETURN_RET_LOGE(ret == SOFTBUS_OK, ret, TRANS_CTRL, "get remote uuid failed.");
+    ret = TransGetLocalIp(myIp, peerIp, peerUuid);
     if (ret != SOFTBUS_OK) {
-        OutputAnonymizeIpAddress(myIp, peerIp);
-        TRANS_LOGE(TRANS_CTRL, "get Local Ip fail, ret=%{public}d", ret);
-        SendVerifyP2pFailRsp(authHandle, seq, CODE_VERIFY_P2P, ret, "get p2p ip fail", isAuthLink);
-        return SOFTBUS_TRANS_GET_P2P_INFO_FAILED;
+        SendVerifyP2pFailRsp(authHandle, seq, CODE_VERIFY_P2P, ret, "get local ip fail", isAuthLink);
     }
+    TRANS_CHECK_AND_RETURN_RET_LOGE(ret == SOFTBUS_OK, ret, TRANS_CTRL, "fail to get local ip.");
     if (protocol == LNN_PROTOCOL_HTP) {
         ret = ServerOpenHtpChannelPacked(peerIp, seq);
         if (ret != SOFTBUS_OK) {
@@ -813,9 +837,7 @@ static int32_t OnVerifyP2pRequest(AuthHandle authHandle, int64_t seq, const cJSO
             protocol = LNN_PROTOCOL_IP;
         }
     }
-    char peerUuid[UUID_BUF_LEN] = { 0 };
-    ret = TransGetRemoteUuidByAuthHandle(authHandle, peerUuid);
-    TRANS_CHECK_AND_RETURN_RET_LOGE(ret == SOFTBUS_OK, ret, TRANS_CTRL, "get remote uuid failed.");
+
     if (IsHmlIpAddr(myIp)) {
         ret = StartHmlListener(myIp, &myPort, peerUuid, protocol);
     } else {
@@ -1321,7 +1343,11 @@ int32_t OpenP2pDirectChannel(const AppInfo *appInfo, const ConnectOption *connIn
         TRANS_LOGE(TRANS_CTRL, "start listener fail");
         return ret;
     }
-    conn->isMeta = TransGetAuthTypeByNetWorkId(appInfo->peerNetWorkId);
+    if (appInfo->osType == HA_OS_TYPE) {
+        conn->isMeta = true;
+    } else {
+        conn->isMeta = TransGetAuthTypeByNetWorkId(appInfo->peerNetWorkId);
+    }
     ret = TransTdcAddSessionConn(conn);
     if (ret != SOFTBUS_OK) {
         FreeFastTransData(&(conn->appInfo));

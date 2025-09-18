@@ -615,7 +615,7 @@ HWTEST_F(TransTcpDirectMessageStaticTest, OpenDataBusRequestReplyTest001, TestSi
     uint32_t flags = 1;
 
     int32_t ret = OpenDataBusRequestReply(nullptr, channelId, seq, flags);
-    EXPECT_EQ(ret, SOFTBUS_TRANS_GET_PACK_REPLY_FAILED);
+    EXPECT_EQ(ret, SOFTBUS_INVALID_PARAM);
 }
 
 /**

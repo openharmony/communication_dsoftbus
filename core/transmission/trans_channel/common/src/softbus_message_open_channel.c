@@ -527,3 +527,170 @@ char *TransTdcPackFastData(const AppInfo *appInfo, uint32_t *outLen)
     *outLen = dataLen + FAST_DATA_HEAD_SIZE;
     return buf;
 }
+
+static int32_t PackExternalDeviceJsonObject(const AppInfo *appInfo, cJSON *json, unsigned char *encodeSessionKey)
+{
+    if (!AddNumberToJsonObject(json, CODE, CODE_OPEN_CHANNEL) ||
+        !AddNumberToJsonObject(json, API_VERSION, appInfo->myData.apiVersion) ||
+        !AddStringToJsonObject(json, BUS_NAME, appInfo->peerData.sessionName) ||
+        !AddStringToJsonObject(json, SESSION_KEY, (char *)encodeSessionKey) ||
+        !AddNumberToJsonObject(json, MTU_SIZE, (int32_t)appInfo->myData.dataConfig)) {
+        return SOFTBUS_PARSE_JSON_ERR;
+    }
+
+    if (!AddNumberToJsonObject(json, TRANS_CAPABILITY, (int32_t)appInfo->channelCapability)) {
+        return SOFTBUS_PARSE_JSON_ERR;
+    }
+
+    if (appInfo->myData.apiVersion != API_V1 &&
+        (!AddStringToJsonObject(json, PKG_NAME, appInfo->myData.pkgName) ||
+        !AddStringToJsonObject(json, CLIENT_BUS_NAME, appInfo->myData.sessionName) ||
+        !AddNumberToJsonObject(json, MSG_ROUTE_TYPE, appInfo->routeType))) {
+        return SOFTBUS_PARSE_JSON_ERR;
+    }
+    (void)AddStringToJsonObject(json, DEVICE_ID, appInfo->myData.deviceId);
+    (void)AddNumberToJsonObject(json, BUSINESS_TYPE, appInfo->businessType);
+    (void)AddNumberToJsonObject(json, TRANS_FLAGS, TRANS_FLAG_HAS_CHANNEL_AUTH);
+    return SOFTBUS_OK;
+}
+
+char *PackExternalDeviceRequest(const AppInfo *appInfo, int64_t requestId)
+{
+    if (appInfo == NULL) {
+        TRANS_LOGW(TRANS_CTRL, "invalid param.");
+        return NULL;
+    }
+
+    cJSON *json =  cJSON_CreateObject();
+    if (json == NULL) {
+        TRANS_LOGE(TRANS_CTRL, "Cannot create cJSON object");
+        return NULL;
+    }
+
+    unsigned char encodeSessionKey[BASE64KEY] = {0};
+    size_t keyLen = 0;
+    int32_t ret = SoftBusBase64Encode(encodeSessionKey, BASE64KEY,
+        &keyLen, (unsigned char *)appInfo->sessionKey, SESSION_KEY_LENGTH);
+    if (ret != SOFTBUS_OK) {
+        TRANS_LOGE(TRANS_CTRL, "base64 encode failed ret=%{public}d", ret);
+        cJSON_Delete(json);
+        return NULL;
+    }
+    ret = PackExternalDeviceJsonObject(appInfo, json, encodeSessionKey);
+    (void)memset_s(encodeSessionKey, sizeof(encodeSessionKey), 0, sizeof(encodeSessionKey));
+    if (ret != SOFTBUS_OK) {
+        TRANS_LOGE(TRANS_CTRL, "pack json object failed ret=%{public}d", ret);
+        cJSON_Delete(json);
+        return NULL;
+    }
+    char *data = cJSON_PrintUnformatted(json);
+    if (data == NULL) {
+        TRANS_LOGW(TRANS_CTRL, "cJSON_PrintUnformatted failed");
+    }
+    cJSON_Delete(json);
+    return data;
+}
+
+int32_t UnpackExternalDeviceRequest(const cJSON *msg, AppInfo *appInfo)
+{
+    if (msg == NULL || appInfo == NULL) {
+        TRANS_LOGW(TRANS_CTRL, "invalid param");
+        return SOFTBUS_INVALID_PARAM;
+    }
+
+    int32_t apiVersion = API_V1;
+    (void)GetJsonObjectNumberItem(msg, API_VERSION, &apiVersion);
+    appInfo->peerData.apiVersion = (ApiVersion)apiVersion;
+
+    TRANS_CHECK_AND_RETURN_RET_LOGE(GetJsonObjectStringItem(msg, BUS_NAME, (appInfo->myData.sessionName),
+        SESSION_NAME_SIZE_MAX), SOFTBUS_PARSE_JSON_ERR, TRANS_CTRL, "Failed to get sessionName.");
+    TRANS_CHECK_AND_RETURN_RET_LOGE(GetJsonObjectNumberItem(msg, MTU_SIZE, (int32_t *)&(appInfo->peerData.dataConfig)),
+        SOFTBUS_PARSE_JSON_ERR, TRANS_CTRL, "Failed to get mtu size.");
+
+    uint32_t remoteCapability = 0;
+    (void)GetJsonObjectNumberItem(msg, TRANS_CAPABILITY, (int32_t *)&remoteCapability);
+    appInfo->channelCapability = remoteCapability & TRANS_CHANNEL_CAPABILITY;
+
+    TRANS_CHECK_AND_RETURN_RET_LOGE(GetJsonObjectStringItem(msg, PKG_NAME, (appInfo->peerData.pkgName),
+        PKG_NAME_SIZE_MAX), SOFTBUS_PARSE_JSON_ERR, TRANS_CTRL, "Failed to get pkgName.");
+    TRANS_CHECK_AND_RETURN_RET_LOGE(GetJsonObjectStringItem(msg, CLIENT_BUS_NAME, (appInfo->peerData.sessionName),
+        SESSION_NAME_SIZE_MAX), SOFTBUS_PARSE_JSON_ERR, TRANS_CTRL, "Failed to get client sessionName.");
+
+    int32_t routeType = WIFI_STA;
+    TRANS_CHECK_AND_RETURN_RET_LOGE(GetJsonObjectNumberItem(msg, MSG_ROUTE_TYPE, &routeType),
+        SOFTBUS_PARSE_JSON_ERR, TRANS_CTRL, "Failed to get routeType.");
+    appInfo->routeType = (RouteType)routeType;
+
+    TRANS_CHECK_AND_RETURN_RET_LOGE(GetJsonObjectStringItem(msg, DEVICE_ID, appInfo->peerData.deviceId,
+        DEVICE_ID_SIZE_MAX), SOFTBUS_PARSE_JSON_ERR, TRANS_CTRL, "Failed to get deviceId.");
+    if (!GetJsonObjectNumberItem(msg, BUSINESS_TYPE, (int32_t *)&appInfo->businessType)) {
+        appInfo->businessType = BUSINESS_TYPE_NOT_CARE;
+    }
+    int32_t transFlag = TRANS_FLAG_HAS_CHANNEL_AUTH;
+    (void)GetJsonObjectNumberItem(msg, TRANS_FLAGS, &transFlag);
+    char sessionKey[BASE64KEY] = { 0 };
+    TRANS_CHECK_AND_RETURN_RET_LOGE(GetJsonObjectStringItem(msg, SESSION_KEY, sessionKey, sizeof(sessionKey)),
+        SOFTBUS_PARSE_JSON_ERR, TRANS_CTRL, "Failed to get sessionKey.");
+    size_t len = 0;
+    if (strlen(sessionKey) != 0) {
+        int32_t ret = SoftBusBase64Decode((unsigned char *)appInfo->sessionKey, SESSION_KEY_LENGTH, &len,
+            (unsigned char *)sessionKey, strlen(sessionKey));
+        (void)memset_s(sessionKey, sizeof(sessionKey), 0, sizeof(sessionKey));
+        if (len != SESSION_KEY_LENGTH) {
+            TRANS_LOGE(TRANS_CTRL, "Failed to decode sessionKey ret=%{public}d, len=%{public}zu", ret, len);
+            return SOFTBUS_PARSE_JSON_ERR;
+        }
+    }
+    appInfo->peerData.userId = INVALID_USER_ID;
+    appInfo->osType = HA_OS_TYPE;
+    return SOFTBUS_OK;
+}
+
+char *PackExternalDeviceReply(const AppInfo *appInfo)
+{
+    TRANS_CHECK_AND_RETURN_RET_LOGE(appInfo != NULL, NULL, TRANS_CTRL, "invalid param.");
+    cJSON *json = cJSON_CreateObject();
+    TRANS_CHECK_AND_RETURN_RET_LOGE(json != NULL, NULL, TRANS_CTRL, "create json object failed.");
+    char *data = NULL;
+    if (!AddNumberToJsonObject(json, CODE, CODE_OPEN_CHANNEL) ||
+        !AddNumberToJsonObject(json, API_VERSION, appInfo->myData.apiVersion)||
+        !AddStringToJsonObject(json, DEVICE_ID, appInfo->myData.deviceId) ||
+        !AddNumberToJsonObject(json, TRANS_CAPABILITY, appInfo->channelCapability) ||
+        !AddNumberToJsonObject(json, MTU_SIZE, appInfo->myData.dataConfig) ||
+        !AddStringToJsonObject(json, PKG_NAME, appInfo->myData.pkgName)) {
+        TRANS_LOGE(TRANS_CTRL, "Failed to add trans data size");
+        cJSON_Delete(json);
+        return NULL;
+    }
+
+    data = cJSON_PrintUnformatted(json);
+    if (data == NULL) {
+        TRANS_LOGW(TRANS_CTRL, "cJSON_PrintUnformatted failed");
+    }
+    cJSON_Delete(json);
+    return data;
+}
+
+int32_t UnpackExternalDeviceReply(const cJSON *msg, AppInfo *appInfo)
+{
+    if (msg == NULL || appInfo == NULL) {
+        TRANS_LOGW(TRANS_CTRL, "invalid param");
+        return SOFTBUS_INVALID_PARAM;
+    }
+    int32_t apiVersion = API_V1;
+    (void)GetJsonObjectNumberItem(msg, API_VERSION, &apiVersion);
+    appInfo->peerData.apiVersion = (ApiVersion)apiVersion;
+
+    char uuid[DEVICE_ID_SIZE_MAX] = { 0 };
+    TRANS_CHECK_AND_RETURN_RET_LOGE(GetJsonObjectStringItem(msg, DEVICE_ID, uuid, DEVICE_ID_SIZE_MAX),
+        SOFTBUS_PARSE_JSON_ERR, TRANS_CTRL, "Failed to get deviceId.");
+    if (!GetJsonObjectNumberItem(msg, TRANS_CAPABILITY, (int32_t *)&(appInfo->channelCapability))) {
+        appInfo->channelCapability = 0;
+    }
+    TRANS_CHECK_AND_RETURN_RET_LOGE(GetJsonObjectNumberItem(msg, MTU_SIZE, (int32_t *)&(appInfo->peerData.dataConfig)),
+        SOFTBUS_PARSE_JSON_ERR, TRANS_CTRL, "Failed to get mtu size.");
+    TRANS_CHECK_AND_RETURN_RET_LOGE(GetJsonObjectStringItem(msg, PKG_NAME, (appInfo->peerData.pkgName),
+        PKG_NAME_SIZE_MAX), SOFTBUS_PARSE_JSON_ERR, TRANS_CTRL, "Failed to get pkgName.");
+    return SOFTBUS_OK;
+}
+

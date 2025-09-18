@@ -900,8 +900,6 @@ HWTEST_F(TransTcpDirectP2pTest, TransGetRemoteUuidByAuthHandleTest001, TestSize.
  */
 HWTEST_F(TransTcpDirectP2pTest, OnVerifyP2pRequestTest002, TestSize.Level1)
 {
-    NiceMock<TransTcpDirectCommonInterfaceMock> TransTcpDirectP2pMock;
-    EXPECT_CALL(TransTcpDirectP2pMock, AuthMetaPostTransData).WillOnce(Return(SOFTBUS_LOCK_ERR));
     AuthHandle authHandle = { .authId = AUTH_INVALID_ID, .type = AUTH_LINK_TYPE_BLE };
     int64_t seq = 0;
     char *data = VerifyP2pPack(g_ip, g_port, g_ip, 0);
@@ -914,7 +912,7 @@ HWTEST_F(TransTcpDirectP2pTest, OnVerifyP2pRequestTest002, TestSize.Level1)
     }
 
     int32_t ret = OnVerifyP2pRequest(authHandle, seq, json, true);
-    EXPECT_EQ(SOFTBUS_TRANS_GET_P2P_INFO_FAILED, ret);
+    EXPECT_EQ(SOFTBUS_NOT_IMPLEMENT, ret);
     cJSON_Delete(json);
     cJSON_free(data);
 }
