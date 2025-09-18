@@ -126,7 +126,7 @@ void TransDelConnByConnId(uint32_t connId)
     return;
 }
 
-int32_t TransDecConnRefByConnId(uint32_t connId, bool isServer)
+int32_t TransDecConnRefByConnId(uint32_t connId, bool isServer, bool isD2d)
 {
     ProxyConnInfo *removeNode = NULL;
     ProxyConnInfo *tmpNode = NULL;
@@ -142,7 +142,7 @@ int32_t TransDecConnRefByConnId(uint32_t connId, bool isServer)
     }
 
     LIST_FOR_EACH_ENTRY_SAFE(removeNode, tmpNode, &g_proxyConnectionList->list, ProxyConnInfo, node) {
-        if (removeNode->connId == connId && removeNode->isServerSide == isServer) {
+        if (removeNode->connId == connId && (isD2d || removeNode->isServerSide == isServer)) {
             removeNode->ref--;
             if (removeNode->ref <= 0) {
                 ListDelete(&(removeNode->node));
@@ -196,7 +196,7 @@ static int32_t TransProxyResetAndCloseConn(ProxyChannelInfo *chan)
     if (ret != SOFTBUS_OK) {
         TRANS_LOGW(TRANS_CTRL, "reset to peer msg send failed.");
     }
-    if (TransDecConnRefByConnId(chan->connId, chan->isServer) == SOFTBUS_OK) {
+    if (TransDecConnRefByConnId(chan->connId, chan->isServer, chan->isD2D) == SOFTBUS_OK) {
         TRANS_LOGI(TRANS_CTRL, "reset dis device. isDisconnect=%{public}d, connId=%{public}u, deviceType=%{public}d",
             !chan->isServer, chan->connId, chan->deviceTypeIsWinpc);
         // only client side can disconnect connection
@@ -205,6 +205,23 @@ static int32_t TransProxyResetAndCloseConn(ProxyChannelInfo *chan)
         }
     }
     return SOFTBUS_OK;
+}
+
+static void TransProxyLoopMsgHandlerEx(SoftBusMessage *msg)
+{
+    TRANS_CHECK_AND_RETURN_LOGE(msg != NULL, TRANS_MSG, "param invalid");
+    switch (msg->what) {
+        case LOOP_PAGINGHANDSHAKE_MSG: {
+            int32_t channelId = (int32_t)msg->arg1;
+            uint32_t keyLen = (uint32_t)msg->arg2;
+            uint8_t *authKey = (uint8_t *)msg->obj;
+            TRANS_CHECK_AND_RETURN_LOGE(authKey != NULL, TRANS_MSG, "LOOP_PAGINGHANDSHAKE_MSG, authKey is null");
+            TransPagingHandshake(channelId, authKey, keyLen);
+            break;
+        }
+        default:
+            break;
+    }
 }
 
 static void TransProxyLoopMsgHandler(SoftBusMessage *msg)
@@ -223,7 +240,8 @@ static void TransProxyLoopMsgHandler(SoftBusMessage *msg)
             uint32_t connectionId = (uint32_t)msg->arg2;
             chan = (ProxyChannelInfo *)msg->obj;
             TRANS_CHECK_AND_RETURN_LOGE(chan != NULL, TRANS_MSG, "LOOP_DISCONNECT_MSG, chan is null");
-            TransProxyCloseConnChannelReset(connectionId, (isServer == 0), isServer, chan->deviceTypeIsWinpc);
+            TransProxyCloseConnChannelReset(
+                connectionId, (isServer == 0), isServer, chan->deviceTypeIsWinpc, chan->isD2D);
             break;
         }
         case LOOP_OPENFAIL_MSG:
@@ -252,15 +270,8 @@ static void TransProxyLoopMsgHandler(SoftBusMessage *msg)
             TransAuthNegoTaskManager(authRequestId, channelId);
             break;
         }
-        case LOOP_PAGINGHANDSHAKE_MSG: {
-            channelId = (int32_t)msg->arg1;
-            uint32_t keyLen = (uint32_t)msg->arg2;
-            uint8_t *authKey = (uint8_t *)msg->obj;
-            TRANS_CHECK_AND_RETURN_LOGE(authKey != NULL, TRANS_MSG, "LOOP_PAGINGHANDSHAKE_MSG, authKey is null");
-            TransPagingHandshake(channelId, authKey, keyLen);
-            break;
-        }
         default:
+            TransProxyLoopMsgHandlerEx(msg);
             break;
     }
 }
@@ -715,9 +726,9 @@ static void TransOnConnectFailed(uint32_t requestId, int32_t reason)
     SoftBusHitraceChainEnd();
 }
 
-int32_t TransProxyCloseConnChannel(uint32_t connectionId, bool isServer)
+int32_t TransProxyCloseConnChannel(uint32_t connectionId, bool isServer, bool isD2d)
 {
-    if (TransDecConnRefByConnId(connectionId, isServer) == SOFTBUS_OK) {
+    if (TransDecConnRefByConnId(connectionId, isServer, isD2d) == SOFTBUS_OK) {
         TRANS_LOGI(TRANS_CTRL, "disconnect device connId=%{public}d", connectionId);
         // BR don't disconnect
         (void)ConnDisconnectDevice(connectionId);
@@ -725,9 +736,10 @@ int32_t TransProxyCloseConnChannel(uint32_t connectionId, bool isServer)
     return SOFTBUS_OK;
 }
 
-int32_t TransProxyCloseConnChannelReset(uint32_t connectionId, bool isDisconnect, bool isServer, bool deviceType)
+int32_t TransProxyCloseConnChannelReset(
+    uint32_t connectionId, bool isDisconnect, bool isServer, bool deviceType, bool isD2d)
 {
-    if (TransDecConnRefByConnId(connectionId, isServer) == SOFTBUS_OK) {
+    if (TransDecConnRefByConnId(connectionId, isServer, isD2d) == SOFTBUS_OK) {
         TRANS_LOGI(TRANS_CTRL, "reset dis device. isDisconnect=%{public}d, connId=%{public}u, deviceType=%{public}d",
             isDisconnect, connectionId, deviceType);
         // only client side can disconnect connection
@@ -1173,7 +1185,7 @@ void TransProxyNegoSessionKeyFail(int32_t channelId, int32_t errCode)
         return;
     }
 
-    (void)TransProxyCloseConnChannel(channelInfo->connId, channelInfo->isServer);
+    (void)TransProxyCloseConnChannel(channelInfo->connId, channelInfo->isServer, channelInfo->isD2D);
     (void)OnProxyChannelOpenFailed(channelId, &(channelInfo->appInfo), errCode);
     (void)memset_s(channelInfo->appInfo.sessionKey, sizeof(channelInfo->appInfo.sessionKey), 0,
         sizeof(channelInfo->appInfo.sessionKey));
@@ -1205,7 +1217,7 @@ void TransProxyNegoSessionKeySucc(int32_t channelId)
             .result = EVENT_STAGE_RESULT_FAILED
         };
         TRANS_EVENT(EVENT_SCENE_OPEN_CHANNEL, EVENT_STAGE_HANDSHAKE_START, extra);
-        (void)TransProxyCloseConnChannel(channelInfo->connId, channelInfo->isServer);
+        (void)TransProxyCloseConnChannel(channelInfo->connId, channelInfo->isServer, channelInfo->isD2D);
         TRANS_LOGE(TRANS_CTRL, "channelId=%{public}d handshake err, ret=%{public}d", channelId, ret);
         TransProxyOpenProxyChannelFail(channelInfo->channelId, &(channelInfo->appInfo), ret);
         TransProxyDelChanByChanId(channelId);
