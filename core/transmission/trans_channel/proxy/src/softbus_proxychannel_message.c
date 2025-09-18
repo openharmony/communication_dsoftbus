@@ -1255,6 +1255,7 @@ char *TransProxyPackHandshakeErrMsg(int32_t errCode)
 
 static bool TransProxyAddJsonObject(cJSON *root, ProxyChannelInfo *info)
 {
+    (void)AddBoolToJsonObject(root, FORCE_GENERATE_UK, info->appInfo.forceGenerateUk);
     if (!AddNumberToJsonObject(root, JSON_KEY_TYPE, info->appInfo.appType) ||
         !AddStringToJsonObject(root, JSON_KEY_IDENTITY, info->identity) ||
         !AddStringToJsonObject(root, JSON_KEY_DEVICE_ID, info->appInfo.myData.deviceId) ||
@@ -1761,6 +1762,7 @@ static int32_t TransProxyGetJsonObject(cJSON *root, const char *msg, int32_t len
     if (!GetJsonObjectNumberItem(root, API_VERSION, (int32_t *)&(chan->appInfo.myData.apiVersion))) {
         TRANS_LOGD(TRANS_CTRL, "peer apiVersion is null.");
     }
+    (void)GetJsonObjectBoolItem(root, FORCE_GENERATE_UK, &(chan->appInfo.forceGenerateUk));
     uint32_t remoteCapability = 0;
     (void)GetJsonObjectNumberItem(root, TRANS_CAPABILITY, (int32_t *)&remoteCapability);
     chan->appInfo.channelCapability = remoteCapability & TRANS_CHANNEL_CAPABILITY;
