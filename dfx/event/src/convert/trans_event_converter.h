@@ -81,12 +81,12 @@ TRANS_ASSIGNER(Int32,  SessionId, sessionId)
 TRANS_ASSIGNER(Int32,  MinBW, minBW)
 TRANS_ASSIGNER(Int32,  MaxLatency, maxLatency)
 TRANS_ASSIGNER(Int32,  MinLatency, minLatency)
-TRANS_ASSIGNER(Uint8,  LocalStaChload, localStaChload)
-TRANS_ASSIGNER(Uint8,  RemoteStaChload, remoteStaChload)
-TRANS_ASSIGNER(Uint8,  LocalHmlChload, localHmlChload)
-TRANS_ASSIGNER(Uint8,  RemoteHmlChload, remoteHmlChload)
-TRANS_ASSIGNER(Uint8,  LocalP2pChload, localP2pChload)
-TRANS_ASSIGNER(Uint8,  RemoteP2pChload, remoteP2pChload)
+TRANS_ASSIGNER(Uint16,  LocalStaChload, localStaChload)
+TRANS_ASSIGNER(Uint16,  RemoteStaChload, remoteStaChload)
+TRANS_ASSIGNER(Uint16,  LocalHmlChload, localHmlChload)
+TRANS_ASSIGNER(Uint16,  RemoteHmlChload, remoteHmlChload)
+TRANS_ASSIGNER(Uint16,  LocalP2pChload, localP2pChload)
+TRANS_ASSIGNER(Uint16,  RemoteP2pChload, remoteP2pChload)
 TRANS_ASSIGNER(Uint8,  LocalStaChannel, localStaChannel)
 TRANS_ASSIGNER(Uint8,  RemoteStaChannel, remoteStaChannel)
 TRANS_ASSIGNER(Uint8,  HmlChannel, hmlChannel)
@@ -147,12 +147,12 @@ static const HiSysEventParamAssigner TRANS_ASSIGNERS[] = {
     { "MIN_BW",              HISYSEVENT_INT32,    TransAssignerMinBW           },
     { "MAX_LATENCY",         HISYSEVENT_INT32,    TransAssignerMaxLatency      },
     { "MIN_LATENCY",         HISYSEVENT_INT32,    TransAssignerMinLatency      },
-    { "LOCAL_STA_CHLOAD",    HISYSEVENT_UINT8,    TransAssignerLocalStaChload  },
-    { "REMOTE_STA_CHLOAD",   HISYSEVENT_UINT8,    TransAssignerRemoteStaChload },
-    { "LOCAL_HML_CHLOAD",    HISYSEVENT_UINT8,    TransAssignerLocalHmlChload  },
-    { "REMOTE_HML_CHLOAD",   HISYSEVENT_UINT8,    TransAssignerRemoteHmlChload },
-    { "LOCAL_P2P_CHLOAD",    HISYSEVENT_UINT8,    TransAssignerLocalP2pChload  },
-    { "REMOTE_P2P_CHLOAD",   HISYSEVENT_UINT8,    TransAssignerRemoteP2pChload },
+    { "LOCAL_STA_CHLOAD",    HISYSEVENT_UINT16,   TransAssignerLocalStaChload  },
+    { "REMOTE_STA_CHLOAD",   HISYSEVENT_UINT16,   TransAssignerRemoteStaChload },
+    { "LOCAL_HML_CHLOAD",    HISYSEVENT_UINT16,   TransAssignerLocalHmlChload  },
+    { "REMOTE_HML_CHLOAD",   HISYSEVENT_UINT16,   TransAssignerRemoteHmlChload },
+    { "LOCAL_P2P_CHLOAD",    HISYSEVENT_UINT16,   TransAssignerLocalP2pChload  },
+    { "REMOTE_P2P_CHLOAD",   HISYSEVENT_UINT16,   TransAssignerRemoteP2pChload },
     { "LOCAL_STA_CHANNEL",   HISYSEVENT_UINT8,    TransAssignerLocalStaChannel },
     { "REMOTE_STA_CHANNEL",  HISYSEVENT_UINT8,    TransAssignerRemoteStaChannel},
     { "HML_CHANNEL",         HISYSEVENT_UINT8,    TransAssignerHmlChannel      },
