@@ -611,6 +611,30 @@ typedef struct {
 } GearMode;
 
 /**
+ * @brief Defines a group owner config.
+ *
+ * @since 1.0
+ * @version 1.0
+ */
+struct GroupOwnerConfig {
+    int32_t frequency;        /**< expect p2p frequency */
+};
+
+/**
+ * @brief Defines a result for create group.
+ *
+ * @since 1.0
+ * @version 1.0
+ */
+struct GroupOwnerResult {
+    char ssid[MAX_SSID_LEN];               /**< p2p go ssid */
+    unsigned char bssid[P2P_MAC_LEN];      /**< p2p go bssid */
+    char preSharedKey[MAX_KEY_LEN];        /**< p2p go shared key */
+    char localIp[IP_STR_MAX_LEN];          /**< p2p go local ip */
+    int32_t frequency;                     /**< p2p go frequency*/
+};
+
+/**
  * @brief Called when a device is added to a LNN via {@link JoinLNN}.
  *
  * @param addr Indicates the pointer to the address of the peer device.
@@ -635,6 +659,16 @@ typedef void (*OnJoinLNNResult)(ConnectionAddr *addr, const char *networkId, int
  * @version 1.0
  */
 typedef void (*OnLeaveLNNResult)(const char *networkId, int32_t retCode);
+
+/**
+ * @brief Called When the p2p Group is cleared due to an exception.
+ *
+ * @param retCode Indicates the reason why p2p Group was cleared. Value <b>0</b>
+ *
+ * @since 1.0
+ * @version 1.0
+ */
+typedef void (*GroupOwnerDestroyListener)(int32_t retCode);
 
 /**
  * @brief Adds the current device to the LNN where a specified device resides.
@@ -970,6 +1004,40 @@ int32_t SyncTrustedRelationShip(const char *pkgName, const char *msg, uint32_t m
  * @version 1.0
  */
 int32_t SetDisplayName(const char *pkgName, const char *nameData, uint32_t len);
+
+/**
+ * @brief Set Local device display name.
+ *
+ * @param pkgName Indicates the pointer to the service package name, which can contain a maximum of 64 bytes.
+ * @param config Indicates the pointer to the display name, MUST be cJSON format.
+ * @param result Len Indicates the length of nameData.
+ * @param listener Len Indicates the length of nameData.
+ *
+ * @return Returns <b>SOFTBUS_INVALID_PARAM</b> if parameters is null or invalid.
+ * @return Returns <b>SOFTBUS_DISCOVER_NOT_INIT</b> if the Intelligent Soft Bus client fails to be initialized.
+ * @return Returns <b>SOFTBUS_LOCK_ERR</b> if the mutex fails to be locked.
+ * @return Returns <b>SOFTBUS_OK</b> if the service subscription is successful
+ *
+ * @since 5.1
+ * @version 1.0
+ */
+int32_t CreateGroupOwner(const char *pkgName, const struct GroupOwnerConfig *config,
+    struct GroupOwnerResult *result, GroupOwnerDestroyListener listener);
+
+/**
+ * @brief Set Local device display name.
+ *
+ * @param pkgName Indicates the pointer to the service package name, which can contain a maximum of 64 bytes.
+ *
+ * @return Returns <b>SOFTBUS_INVALID_PARAM</b> if parameters is null or invalid.
+ * @return Returns <b>SOFTBUS_DISCOVER_NOT_INIT</b> if the Intelligent Soft Bus client fails to be initialized.
+ * @return Returns <b>SOFTBUS_LOCK_ERR</b> if the mutex fails to be locked.
+ * @return Returns <b>SOFTBUS_OK</b> if the service subscription is successful
+ *
+ * @since 5.1
+ * @version 1.0
+ */
+void DestroyGroupOwner(const char *pkgName);
 #ifdef __cplusplus
 }
 #endif

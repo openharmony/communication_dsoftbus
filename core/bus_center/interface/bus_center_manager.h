@@ -85,6 +85,9 @@ void SoftBusDumpBusCenterPrintInfo(int fd, NodeBasicInfo *nodeInfo);
 int32_t LnnServerJoin(ConnectionAddr *addr, const char *pkgName, bool isForceJoin);
 int32_t LnnServerLeave(const char *networkId, const char *pkgName);
 int32_t LnnDisSetDisplayName(const char *pkgName, const char *nameData, uint32_t len);
+int32_t LnnCreateGroupOwner(const char *pkgName, const struct GroupOwnerConfig *config,
+    struct GroupOwnerResult *result);
+void LnnDestroyGroupOwner(const char *pkgName);
 
 int32_t BusCenterServerInit(void);
 void BusCenterServerDeinit(void);

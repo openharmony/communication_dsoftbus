@@ -669,4 +669,29 @@ void BusCenterClientProxy::OnMsdpRangeResult(const RangeResultInnerInfo *rangeIn
         LNN_LOGE(LNN_EVENT, "send request failed, ret=%{public}d", ret);
     }
 }
+
+void BusCenterClientProxy::OnGroupStateChange(int32_t retCode)
+{
+    sptr<IRemoteObject> remote = Remote();
+    if (remote == nullptr) {
+        LNN_LOGE(LNN_EVENT, "remote is nullptr");
+        return;
+    }
+    MessageParcel data;
+    if (!data.WriteInterfaceToken(GetDescriptor())) {
+        LNN_LOGE(LNN_EVENT, "write InterfaceToken failed");
+        return;
+    }
+    if (!data.WriteInt32(retCode)) {
+        LNN_LOGE(LNN_EVENT, "write ret code failed");
+        return;
+    }
+
+    MessageParcel reply;
+    MessageOption option;
+    int ret = remote->SendRequest(CLIENT_ON_GROUP_STATE_CHANGE, data, reply, option);
+    if (ret != SOFTBUS_OK) {
+        LNN_LOGE(LNN_EVENT, "send request failed, ret=%{public}d", ret);
+    }
+}
 } // namespace OHOS
