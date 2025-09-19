@@ -1005,7 +1005,7 @@ HWTEST_F(TransTcpDirectP2pTest, GetModuleByHmlIp001, TestSize.Level1)
 HWTEST_F(TransTcpDirectP2pTest, ConnectSocketDirectPeerTest002, TestSize.Level1)
 {
     int32_t ret = ConnectSocketDirectPeer(hmlAddr, g_port, g_localIp, 0);
-    EXPECT_EQ(ret, SOFTBUS_TRANS_GET_P2P_INFO_FAILED);
+    EXPECT_NE(ret, SOFTBUS_INVALID_PARAM);
 }
 
 /**

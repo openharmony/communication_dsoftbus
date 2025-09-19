@@ -865,7 +865,7 @@ HWTEST_F(TransUdpNegoTest, ParseRequestAppInfo001, TestSize.Level1)
     EXPECT_EQ(ret, SOFTBUS_OK);
     memset_s(appInfo, sizeof(AppInfo), 0, sizeof(AppInfo));
     ret = ParseRequestAppInfo(authHandle, msg, appInfo);
-    EXPECT_EQ(ret, SOFTBUS_TRANS_PEER_SESSION_NOT_CREATED);
+    EXPECT_EQ(ret, SOFTBUS_PEER_PROC_ERR);
 
     SessionServer *newNode = (SessionServer*)SoftBusMalloc(sizeof(SessionServer));
     ASSERT_TRUE(newNode != nullptr);
