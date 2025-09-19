@@ -419,7 +419,7 @@ static void ReportCurrentBroadcast(bool startBcResult)
     DiscEventExtra extra = { 0 };
     for (int32_t managerId = 0; managerId < BC_NUM_MAX; managerId++) {
         if (g_bcManager[managerId].isAdvertising) {
-            extra.startTime = g_bcManager[managerId].time;
+            extra.startTime = (uint64_t)g_bcManager[managerId].time;
             extra.advHandle = g_bcManager[managerId].advHandle;
             extra.serverType = GetSrvType(g_bcManager[managerId].srvType);
             extra.minInterval = g_bcManager[managerId].minInterval;
@@ -450,7 +450,7 @@ static void UpdateBcMaxExtra(void)
     for (int32_t managerId = 0; managerId < BC_NUM_MAX; managerId++) {
         if (g_bcManager[managerId].isAdvertising) {
             g_bcManagerExtra[managerId].isOn = 1;
-            g_bcManagerExtra[managerId].startTime = g_bcManager[managerId].time;
+            g_bcManagerExtra[managerId].startTime = (uint64_t)g_bcManager[managerId].time;
             g_bcManagerExtra[managerId].advHandle = g_bcManager[managerId].advHandle;
             g_bcManagerExtra[managerId].serverType = GetSrvType(g_bcManager[managerId].srvType);
             g_bcManagerExtra[managerId].minInterval = g_bcManager[managerId].minInterval;
@@ -2863,7 +2863,7 @@ int32_t SetScanFilter(int32_t listenerId, const BcScanFilter *scanFilter, uint8_
 {
     DISC_LOGD(DISC_BROADCAST, "enter set scan filter, filterNum=%{public}d", filterNum);
     DISC_CHECK_AND_RETURN_RET_LOGE(scanFilter != NULL, SOFTBUS_INVALID_PARAM, DISC_BROADCAST, "param is nullptr");
-    DISC_CHECK_AND_RETURN_RET_LOGE(!((filterNum <= 0) || (filterNum > MAX_FILTER_SIZE)),
+    DISC_CHECK_AND_RETURN_RET_LOGE(!((filterNum == 0) || (filterNum > MAX_FILTER_SIZE)),
         SOFTBUS_INVALID_PARAM, DISC_BROADCAST, "invalid param filterNum");
     int32_t ret = SoftBusMutexLock(&g_scanLock);
     DISC_CHECK_AND_RETURN_RET_LOGE(ret == SOFTBUS_OK, SOFTBUS_LOCK_ERR, DISC_BROADCAST, "mutex error");

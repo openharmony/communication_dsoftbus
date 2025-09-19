@@ -218,7 +218,7 @@ static int32_t GetMsgNodeFromContext(SoftBusMessageNode **msgNode,
     LIST_FOR_EACH_SAFE(item, nextItem, &(looper->context->msgHead)) {
         SoftBusMessageNode *itemNode = LIST_ENTRY(item, SoftBusMessageNode, node);
         SoftBusMessage *msg = itemNode->msg;
-        if (tmpMsg->what == msg->what && tmpMsg->arg1 == msg->arg1 && tmpMsg->arg2 == msg->arg2 &&
+        if (msg != nullptr && tmpMsg->what == msg->what && tmpMsg->arg1 == msg->arg1 && tmpMsg->arg2 == msg->arg2 &&
             tmpMsg->time == msg->time && tmpMsg->handler == msg->handler) {
             ListDelete(&itemNode->node);
             *msgNode = itemNode;
