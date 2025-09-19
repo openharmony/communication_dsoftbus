@@ -218,11 +218,11 @@ HWTEST_F(TransProxyTransceiverTest, TransProxyCloseConnChannelResetTest001, Test
         .WillRepeatedly(Return(SOFTBUS_OK));
     TransCreateConnByConnId(2);
 
-    int32_t ret = TransProxyCloseConnChannelReset(2, false);
+    int32_t ret = TransProxyCloseConnChannelReset(2, false, false);
     EXPECT_EQ(SOFTBUS_OK, ret);
-    ret = TransProxyCloseConnChannelReset(2, false);
+    ret = TransProxyCloseConnChannelReset(2, false, false);
     EXPECT_EQ(SOFTBUS_OK, ret);
-    ret = TransProxyCloseConnChannelReset(2, true);
+    ret = TransProxyCloseConnChannelReset(2, true, false);
     EXPECT_EQ(SOFTBUS_OK, ret);
 }
 

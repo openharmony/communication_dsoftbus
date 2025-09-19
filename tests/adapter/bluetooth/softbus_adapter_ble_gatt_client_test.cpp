@@ -561,7 +561,11 @@ HWTEST_F(AdapterBleGattClientTest, SoftbusGattcCheckExistConnectionByAddr001, Te
         .addr = { 0x11, 0x22, 0x33, 0x44, 0x55, 0x66 }
     };
     EXPECT_FALSE(SoftbusGattcCheckExistConnectionByAddr(nullptr));
+    MockBluetooth mocker;
+    MockAll(mocker);
+    EXPECT_EQ(SoftbusGattcConnect(1, &addr), SOFTBUS_OK);
     EXPECT_TRUE(SoftbusGattcCheckExistConnectionByAddr(&addr));
+    EXPECT_EQ(SoftbusBleGattcDisconnect(1, false), SOFTBUS_OK);
 
     InitSoftbusAdapterClient();
     EXPECT_FALSE(SoftbusGattcCheckExistConnectionByAddr(&addr));

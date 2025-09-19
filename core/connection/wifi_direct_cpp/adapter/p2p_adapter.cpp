@@ -114,7 +114,7 @@ int32_t P2pAdapter::P2pCreateGroup(const CreateGroupParam &param)
         CONN_WIFI_DIRECT, "create group fail, freq=%{public}d, type=%{public}d, error=%{public}d",
         param.frequency, type, ToSoftBusErrorCode(ret));
 
-    CONN_LOGI(CONN_WIFI_DIRECT, "create group succ");
+    CONN_LOGI(CONN_WIFI_DIRECT, "create group succ, freq=%{public}d", param.frequency);
     return SOFTBUS_OK;
 }
 

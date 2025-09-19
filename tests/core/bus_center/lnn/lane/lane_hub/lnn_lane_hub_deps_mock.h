@@ -55,7 +55,7 @@ public:
     MOCK_METHOD0(LnnDeinitTimeSync, void (void));
     MOCK_METHOD0(LnnDeinitHeartbeat, void (void));
     MOCK_METHOD0(InitControlPlanePacked, int32_t (void));
-    MOCK_METHOD2(SoftBusRegBusCenterVarDump, int32_t(char *dumpVar, SoftBusVarDumpCb cb));
+    MOCK_METHOD2(SoftBusRegBusCenterVarDump, int32_t (char *dumpVar, SoftBusVarDumpCb cb));
 };
 } // namespace OHOS
 #endif // LNN_LANE_LINK_DEPS_MOCK_H

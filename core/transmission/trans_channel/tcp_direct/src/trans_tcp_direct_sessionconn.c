@@ -28,6 +28,7 @@
 #include "softbus_error_code.h"
 #include "trans_channel_manager.h"
 #include "trans_log.h"
+#include "trans_tcp_direct_p2p.h"
 #include "trans_uk_manager.h"
 
 #define TRANS_SEQ_STEP 2
@@ -437,6 +438,7 @@ TcpChannelInfo *CreateTcpChannelInfo(const ChannelInfo *channel)
     }
     tcpChannelInfo->callingTokenId = conn.appInfo.callingTokenId;
     tcpChannelInfo->fdProtocol = conn.appInfo.fdProtocol;
+    tcpChannelInfo->osType = conn.appInfo.osType;
     return tcpChannelInfo;
 }
 
@@ -522,6 +524,9 @@ int32_t TransDelTcpChannelInfoByChannelId(int32_t channelId)
             if (item->fdProtocol == LNN_PROTOCOL_MINTP && !item->isServer) {
                 TRANS_LOGI(TRANS_CTRL, "tran stop time sync");
                 (void)LnnIpcStopTimeSync(item->pkgName, item->peerDeviceId, item->pid);
+            }
+            if (item->osType == HA_OS_TYPE) {
+                StopP2pListenerByRemoteUuid(item->peerDeviceId);
             }
             ListDelete(&item->node);
             TRANS_LOGI(TRANS_CTRL, "delete TcpChannelInfo success, channelId=%{public}d", item->channelId);

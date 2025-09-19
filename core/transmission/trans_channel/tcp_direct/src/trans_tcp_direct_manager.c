@@ -271,7 +271,7 @@ static int32_t TransUpdateAppInfo(AppInfo *appInfo, const ConnectOption *connInf
     }
     appInfo->routeType = connInfo->type == CONNECT_TCP ? WIFI_STA : WIFI_P2P;
     appInfo->protocol = connInfo->socketOption.protocol;
-    if (connInfo->socketOption.protocol == LNN_PROTOCOL_NIP) {
+    if (connInfo->socketOption.protocol == LNN_PROTOCOL_NIP && appInfo->osType != HA_OS_TYPE) {
         if (LnnGetLocalStrInfo(STRING_KEY_NODE_ADDR, appInfo->myData.addr, sizeof(appInfo->myData.addr)) !=
             SOFTBUS_OK) {
             TRANS_LOGE(TRANS_CTRL, "Lnn: get local ip fail.");

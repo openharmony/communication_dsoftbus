@@ -92,7 +92,7 @@ int32_t DiscRegisterEnhanceFunc(void *soHandle)
     g_discEnhanceFuncList.distActionProcessConPacket = dlsym(soHandle, "DistActionProcessConPacket");
     g_discEnhanceFuncList.distActionInit = dlsym(soHandle, "DistActionInit");
     g_discEnhanceFuncList.distActionDeinit = dlsym(soHandle, "DistActionDeinit");
-
+    g_discEnhanceFuncList.isUnknownDevice = dlsym(soHandle, "IsUnknownDevice");
     (void)DiscFeatureRegisterEnhanceFunc(soHandle);
     return SOFTBUS_OK;
 }
