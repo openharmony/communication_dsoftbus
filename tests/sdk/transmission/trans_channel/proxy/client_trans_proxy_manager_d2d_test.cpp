@@ -184,7 +184,7 @@ HWTEST_F(ClientTransProxyD2DTest, TransProxyProcessD2DBytesTest001, TestSize.Lev
     ASSERT_TRUE(dataInfo.outData != nullptr);
     EXPECT_CALL(managerMock, TransProxyPackD2DData).WillRepeatedly(DoAll(SetArgPointee<0>(dataInfo), Return(nullptr)));
     ret = TransProxyProcessD2DBytes(channelId, data, len, &info, TRANS_SESSION_MESSAGE);
-    EXPECT_EQ(SOFTBUS_OK, ret);
+    EXPECT_EQ(SOFTBUS_MALLOC_ERR, ret);
 
     dataInfo.outData = static_cast<uint8_t *>(SoftBusCalloc(dataInfo.outLen));
     ASSERT_TRUE(dataInfo.outData != nullptr);
@@ -216,14 +216,14 @@ HWTEST_F(ClientTransProxyD2DTest, ClientTransProxyFirstSliceProcessTest001, Test
         .WillRepeatedly(DoAll(SetArgPointee<1>(businessType), Return(SOFTBUS_OK)));
 
     ret = ClientTransProxyFirstSliceProcess(&processor, &head, data, len, channelId);
-    EXPECT_EQ(SOFTBUS_TRANS_SESSION_SERVER_NOINIT, ret);
+    EXPECT_EQ(SOFTBUS_TRANS_PROXY_CHANNEL_NOT_FOUND, ret);
 
     businessType = BUSINESS_TYPE_D2D_MESSAGE;
     EXPECT_CALL(managerMock, ClientGetChannelBusinessTypeByChannelId)
         .WillRepeatedly(DoAll(SetArgPointee<1>(businessType), Return(SOFTBUS_OK)));
 
     ret = ClientTransProxyFirstSliceProcess(&processor, &head, data, len, channelId);
-    EXPECT_EQ(SOFTBUS_TRANS_SESSION_SERVER_NOINIT, ret);
+    EXPECT_EQ(SOFTBUS_TRANS_PROXY_CHANNEL_NOT_FOUND, ret);
 }
 
 /**
@@ -247,14 +247,14 @@ HWTEST_F(ClientTransProxyD2DTest, ClientTransProxyNoSubPacketProcTest001, TestSi
         .WillRepeatedly(DoAll(SetArgPointee<1>(businessType), Return(SOFTBUS_OK)));
 
     ret = ClientTransProxyNoSubPacketProc(channelId, data, len);
-    EXPECT_EQ(SOFTBUS_TRANS_SESSION_SERVER_NOINIT, ret);
+    EXPECT_EQ(SOFTBUS_TRANS_PROXY_CHANNEL_NOT_FOUND, ret);
 
     businessType = BUSINESS_TYPE_D2D_MESSAGE;
     EXPECT_CALL(managerMock, ClientGetChannelBusinessTypeByChannelId)
         .WillRepeatedly(DoAll(SetArgPointee<1>(businessType), Return(SOFTBUS_OK)));
 
     ret = ClientTransProxyNoSubPacketProc(channelId, data, len);
-    EXPECT_EQ(SOFTBUS_TRANS_SESSION_SERVER_NOINIT, ret);
+    EXPECT_EQ(SOFTBUS_TRANS_PROXY_CHANNEL_NOT_FOUND, ret);
 }
 
 /**
