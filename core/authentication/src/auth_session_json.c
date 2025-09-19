@@ -1804,7 +1804,7 @@ static void PackSparkCheck(JsonObj *json, const NodeInfo *info)
 {
     char sparkCheck[SPARK_CHECK_STR_LEN] = {0};
     if (ConvertBytesToHexString(sparkCheck, SPARK_CHECK_STR_LEN, info->sparkCheck, SPARK_CHECK_LENGTH) != SOFTBUS_OK) {
-        AUTH_LOGE(AUTH_FSM, "convert spark check to string fail.");
+        AUTH_LOGE(AUTH_FSM, "convert sparkCheck to string fail.");
         return;
     }
     if (!JSON_AddStringToObject(json, SPARK_CHECK, sparkCheck)) {
@@ -2010,7 +2010,7 @@ static void UnpackSparkCheck(const JsonObj *json, NodeInfo *info)
         }
         if (ConvertHexStringToBytes(info->sparkCheck, SPARK_CHECK_LENGTH, sparkCheck,
             strlen(sparkCheck)) != SOFTBUS_OK) {
-            AUTH_LOGE(AUTH_FSM, "convert spark check to bytes fail.");
+            AUTH_LOGE(AUTH_FSM, "convert sparkCheck to bytes fail.");
             break;
         }
         LnnDumpSparkCheck(info->sparkCheck, "auth session unpack");

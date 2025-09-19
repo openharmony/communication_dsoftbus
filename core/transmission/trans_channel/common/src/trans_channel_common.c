@@ -268,6 +268,26 @@ void TransGetRemoteDeviceVersion(const char *id, IdCategory type, char *deviceVe
     }
 }
 
+static int32_t TransGetPeerDeviceId(AppInfo *appInfo, const SessionParam *param)
+{
+    TRANS_CHECK_AND_RETURN_RET_LOGE(appInfo != NULL, SOFTBUS_INVALID_PARAM, TRANS_CTRL, "appInfo is null.");
+    TRANS_CHECK_AND_RETURN_RET_LOGE(param != NULL, SOFTBUS_INVALID_PARAM, TRANS_CTRL, "param is null.");
+    int32_t errCode = SOFTBUS_OK;
+    GetOsTypeByNetworkId(param->peerDeviceId, &appInfo->osType);
+    if (appInfo->osType == HA_OS_TYPE) {
+        errCode = strcpy_s(appInfo->peerData.deviceId, sizeof(appInfo->peerData.deviceId), param->peerDeviceId);
+        TRANS_CHECK_AND_RETURN_RET_LOGE(errCode == EOK, SOFTBUS_MEM_ERR, TRANS_CTRL, "copy peerDeviceId failed");
+    } else {
+        errCode = LnnGetRemoteStrInfo(param->peerDeviceId, STRING_KEY_UUID,
+            appInfo->peerData.deviceId, sizeof(appInfo->peerData.deviceId));
+        if (errCode != SOFTBUS_OK) {
+            TRANS_LOGE(TRANS_CTRL, "get remote node uuid err");
+            return errCode;
+        }
+    }
+    return SOFTBUS_OK;
+}
+
 static int32_t CopyAppInfoFromSessionParam(AppInfo *appInfo, const SessionParam *param)
 {
     if (param == NULL || param->attr == NULL) {
@@ -308,15 +328,9 @@ static int32_t CopyAppInfoFromSessionParam(AppInfo *appInfo, const SessionParam 
     }
     errCode = strcpy_s(appInfo->peerData.sessionName, sizeof(appInfo->peerData.sessionName), param->peerSessionName);
     TRANS_CHECK_AND_RETURN_RET_LOGE(errCode == EOK, SOFTBUS_MEM_ERR, TRANS_CTRL, "copy peerData sessionName failed");
-
-    errCode = LnnGetRemoteStrInfo(param->peerDeviceId, STRING_KEY_UUID,
-                                  appInfo->peerData.deviceId, sizeof(appInfo->peerData.deviceId));
-    if (errCode != SOFTBUS_OK) {
-        TRANS_LOGE(TRANS_CTRL, "get remote node uuid err");
-        return errCode;
-    }
+    errCode = TransGetPeerDeviceId(appInfo, param);
+    TRANS_CHECK_AND_RETURN_RET_LOGE(errCode == SOFTBUS_OK, errCode, TRANS_CTRL, "get peerDeviceId failed");
     GetRemoteUdidWithNetworkId(appInfo->peerNetWorkId, appInfo->peerUdid, sizeof(appInfo->peerUdid));
-    GetOsTypeByNetworkId(appInfo->peerNetWorkId, &appInfo->osType);
     TransGetRemoteDeviceVersion(appInfo->peerNetWorkId, CATEGORY_NETWORK_ID, appInfo->peerVersion,
         sizeof(appInfo->peerVersion));
     return SOFTBUS_OK;
@@ -515,7 +529,6 @@ void TransBuildTransOpenChannelStartEvent(TransEventExtra *extra, AppInfo *appIn
     if (LnnGetLocalStrInfo(STRING_KEY_DEV_UDID, nodeInfo->masterUdid, UDID_BUF_LEN) == SOFTBUS_OK) {
         extra->localUdid = nodeInfo->masterUdid;
     }
-    appInfo->osType = nodeInfo->deviceInfo.osType;
     extra->osType = appInfo->osType;
     extra->peerNetworkId = appInfo->peerNetWorkId;
     extra->peerUdid = peerRet == SOFTBUS_OK ? nodeInfo->deviceInfo.deviceUdid : NULL,

@@ -334,6 +334,7 @@ typedef enum {
 typedef enum {
     BC_DATA_TYPE_SERVICE, // The broadcast data type is service data.
     BC_DATA_TYPE_MANUFACTURER, // The broadcast data type is manufacturer data.
+    BC_DATA_TYPE_SERVICE_UUID, // The broadcast data type is service uuid.
     BC_DATA_TYPE_BUTT,
 } BroadcastDataType;
 
@@ -403,6 +404,7 @@ typedef struct {
     uint8_t localName[BC_LOCAL_NAME_LEN_MAX];
     BcMacAddr addr;
     int8_t *deviceName;
+    bool nameTruncated;
     BroadcastPacket packet;
 } BroadcastReportInfo;
 
@@ -439,7 +441,7 @@ typedef struct {
  */
 typedef struct {
     bool advIndReport;
-    uint16_t serviceUuid;
+    uint16_t serviceId;
     uint32_t serviceDataLength;
     uint16_t manufactureId;
     uint32_t manufactureDataLength;
@@ -449,6 +451,15 @@ typedef struct {
     uint8_t *serviceDataMask;
     uint8_t *manufactureData;
     uint8_t *manufactureDataMask;
+
+    uint16_t serviceUuidId;
+    uint8_t *serviceUuidData;
+    uint8_t *serviceUuidDataMask;
+    uint32_t serviceUuidDataLength;
+
+    uint8_t *serviceUuid;
+    uint8_t *serviceUuidMask;
+    uint32_t serviceUuidLength;
     uint8_t filterIndex;
 } BcScanFilter;
 

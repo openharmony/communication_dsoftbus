@@ -27,6 +27,7 @@ extern "C" {
 #define MAC_LEN 18
 #define OH_OS_TYPE 10
 #define HO_OS_TYPE 11
+#define HA_OS_TYPE 12
 
 typedef enum {
     WLAN_IF = 0,

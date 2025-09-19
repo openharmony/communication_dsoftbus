@@ -191,7 +191,7 @@ static BcScanFilter BuildScanFilter()
     g_baseFuzzPos = 0;
     BcScanFilter scanFilter;
     scanFilter.advIndReport = GetData<bool>();
-    scanFilter.serviceUuid = GetData<uint16_t>();
+    scanFilter.serviceId = GetData<uint16_t>();
     scanFilter.serviceDataLength = GetData<uint32_t>();
     scanFilter.manufactureId = GetData<uint16_t>();
     scanFilter.manufactureDataLength = GetData<uint32_t>();

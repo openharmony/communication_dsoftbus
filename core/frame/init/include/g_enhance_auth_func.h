@@ -38,6 +38,7 @@ typedef void (*AuthUpdateNormalizeKeyIndexFunc)(
 typedef void (*DelAuthMetaManagerByConnectionIdFunc)(uint32_t connectionId);
 typedef int32_t (*AuthMetaGetConnInfoBySideFunc)(const char *uuid, bool isClient, AuthConnInfo *connInfo);
 typedef void (*AuthClearDeviceKeyFunc)(void);
+typedef int32_t (*AuthMetaGetOsTypeByMetaNodeIdFunc)(const char *metaNodeId, int32_t *osType);
 typedef struct TagAuthEnhanceFuncList {
     AuthMetaInitFunc authMetaInit;
     AuthMetaNotifyDataReceivedFunc authMetaNotifyDataReceived;
@@ -48,6 +49,7 @@ typedef struct TagAuthEnhanceFuncList {
     DelAuthMetaManagerByConnectionIdFunc delAuthMetaManagerByConnectionId;
     AuthMetaGetConnInfoBySideFunc authMetaGetConnInfoBySide;
     AuthClearDeviceKeyFunc authClearDeviceKey;
+    AuthMetaGetOsTypeByMetaNodeIdFunc authMetaGetOsTypeByMetaNodeId;
 } AuthEnhanceFuncList;
 
 AuthEnhanceFuncList *AuthEnhanceFuncListGet(void);

@@ -62,9 +62,9 @@ int32_t TransCommonGetAppInfo(const SessionParam *param, AppInfo *appInfo)
 }
 
 int32_t TransAsyncGetLaneInfo(
-    const SessionParam *param, uint32_t *laneHandle, uint64_t callingTokenId, int64_t timeStart)
+    const SessionParam *param, uint32_t *laneHandle, const AppInfo *appInfo)
 {
-    return GetTransManagerInterface()->TransAsyncGetLaneInfo(param, laneHandle, callingTokenId, timeStart);
+    return GetTransManagerInterface()->TransAsyncGetLaneInfo(param, laneHandle, appInfo);
 }
 
 int32_t TransGetLaneInfo(const SessionParam *param, LaneConnInfo *connInfo, uint32_t *laneHandle)

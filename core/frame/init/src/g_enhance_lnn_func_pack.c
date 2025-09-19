@@ -143,6 +143,15 @@ int64_t AuthMetaGetIdByUuidPacked(const char *uuid, AuthLinkType type, bool isSe
     return pfnLnnEnhanceFuncList->authMetaGetIdByUuid(uuid, type, isServer);
 }
 
+int64_t AuthMetaGetIdByIpPacked(const char *ip)
+{
+    LnnEnhanceFuncList *pfnLnnEnhanceFuncList = LnnEnhanceFuncListGet();
+    if (LnnCheckFuncPointer((void *)pfnLnnEnhanceFuncList->authMetaGetIdByIp) != SOFTBUS_OK) {
+        return AUTH_INVALID_ID;
+    }
+    return pfnLnnEnhanceFuncList->authMetaGetIdByIp(ip);
+}
+
 int32_t AuthMetaEncryptPacked(int64_t authId, const uint8_t *inData, uint32_t inLen,
     uint8_t *outData, uint32_t *outLen)
 {
@@ -1603,6 +1612,9 @@ void TriggerSparkGroupJoinAgainPacked(const char *udid, uint32_t delayTime)
 int32_t InitControlPlanePacked(void)
 {
     LnnEnhanceFuncList *pfnLnnEnhanceFuncList = LnnEnhanceFuncListGet();
+    if (pfnLnnEnhanceFuncList == NULL) {
+        return SOFTBUS_NOT_IMPLEMENT;
+    }
     if (LnnCheckFuncPointer((void *)pfnLnnEnhanceFuncList->initControlPlane) != SOFTBUS_OK) {
         return SOFTBUS_OK;
     }
@@ -1612,6 +1624,9 @@ int32_t InitControlPlanePacked(void)
 void DeinitControlPlanePacked(void)
 {
     LnnEnhanceFuncList *pfnLnnEnhanceFuncList = LnnEnhanceFuncListGet();
+    if (pfnLnnEnhanceFuncList == NULL) {
+        return;
+    }
     if (LnnCheckFuncPointer((void *)pfnLnnEnhanceFuncList->deinitControlPlane) != SOFTBUS_OK) {
         return;
     }
@@ -1722,4 +1737,30 @@ void SdMgrDeathCallbackPacked(const char *pkgName)
         return;
     }
     pfnLnnEnhanceFuncList->sdMgrDeathCallback(pkgName);
+}
+
+int32_t AuthMetaGetIpByMetaNodeIdPacked(const char *metaNodeId, char *ip, int32_t len)
+{
+    LnnEnhanceFuncList *pfnLnnEnhanceFuncList = LnnEnhanceFuncListGet();
+    if (pfnLnnEnhanceFuncList == NULL) {
+        return SOFTBUS_NOT_IMPLEMENT;
+    }
+    if (LnnCheckFuncPointer((void *)pfnLnnEnhanceFuncList->authMetaGetIpByMetaNodeId) != SOFTBUS_OK) {
+        LNN_LOGE(LNN_LANE, "func pointer is NULL");
+        return SOFTBUS_NOT_IMPLEMENT;
+    }
+    return pfnLnnEnhanceFuncList->authMetaGetIpByMetaNodeId(metaNodeId, ip, len);
+}
+
+int32_t AuthMetaGetLocalIpByMetaNodeIdPacked(const char *metaNodeId, char *localIp, int32_t len)
+{
+    LnnEnhanceFuncList *pfnLnnEnhanceFuncList = LnnEnhanceFuncListGet();
+    if (pfnLnnEnhanceFuncList == NULL) {
+        return SOFTBUS_NOT_IMPLEMENT;
+    }
+    if (LnnCheckFuncPointer((void *)pfnLnnEnhanceFuncList->authMetaGetLocalIpByMetaNodeId) != SOFTBUS_OK) {
+        LNN_LOGE(LNN_LANE, "func pointer is NULL");
+        return SOFTBUS_NOT_IMPLEMENT;
+    }
+    return pfnLnnEnhanceFuncList->authMetaGetLocalIpByMetaNodeId(metaNodeId, localIp, len);
 }

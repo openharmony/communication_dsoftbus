@@ -377,6 +377,8 @@ typedef struct {
             int32_t sessionId;  /**< Session Id in int format */
             int32_t channelId;  /**< Channel Id in int format */
             int32_t type;   /**< Session type in int format */
+            char ip[IP_STR_MAX_LEN]; /**< IP address in string format */
+            char localIp[IP_STR_MAX_LEN]; /**< IP address in string format */
         } session;
     } info;
     char peerUid[MAX_ACCOUNT_HASH_LEN];

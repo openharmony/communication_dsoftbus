@@ -1028,6 +1028,7 @@ HWTEST_F(HeartBeatMediumTest, IsNeedTriggerSparkGroup_TEST01, TestSize.Level1)
 {
     NodeInfo nodeInfo;
     (void)memset_s(&nodeInfo, sizeof(NodeInfo), 0, sizeof(NodeInfo));
+    nodeInfo.netCapacity = nodeInfo.netCapacity | (1 << BIT_SLE);
     LnnHeartbeatRecvInfo storedInfo = {
         .triggerSparkCount = SLE_JOIN_SPARK_TIMES + 1,
         .triggerSparkTime = SLE_JOIN_SPARK_TIMES,
@@ -1037,24 +1038,32 @@ HWTEST_F(HeartBeatMediumTest, IsNeedTriggerSparkGroup_TEST01, TestSize.Level1)
     EXPECT_EQ(ret, false);
     ret = IsNeedTriggerSparkGroup(&nodeInfo, nullptr, nowTime);
     EXPECT_EQ(ret, false);
-
     NiceMock<LnnNetLedgertInterfaceMock> netLedgertMock;
     EXPECT_CALL(netLedgertMock, LnnHasDiscoveryType).WillOnce(Return(false)).WillRepeatedly(Return(true));
+    EXPECT_CALL(netLedgertMock, LnnGetLocalNumU32Info)
+        .WillRepeatedly(DoAll(SetArgPointee<1>(1 << BIT_SLE), Return(SOFTBUS_OK)));
     ret = IsNeedTriggerSparkGroup(&nodeInfo, &storedInfo, nowTime);
     EXPECT_EQ(ret, false);
-
     ret = IsNeedTriggerSparkGroup(&nodeInfo, &storedInfo, nowTime); // triggerSparkCount > SLE_JOIN_SPARK_TIMES
     EXPECT_EQ(ret, false);
-
     storedInfo.triggerSparkCount = SLE_JOIN_SPARK_TIMES;
     nowTime = LOW_FREQ_CYCLE * HB_TIME_FACTOR + storedInfo.triggerSparkTime;
     ret = IsNeedTriggerSparkGroup(&nodeInfo, &storedInfo, nowTime);
     EXPECT_EQ(ret, true);
-
     storedInfo.triggerSparkTime = 0;
     nowTime = GetNowTime();
     ret = IsNeedTriggerSparkGroup(&nodeInfo, &storedInfo, nowTime);
     EXPECT_EQ(ret, true);
+    EXPECT_CALL(netLedgertMock, LnnGetLocalNumU32Info).WillOnce(Return(SOFTBUS_INVALID_PARAM))
+        .WillOnce(DoAll(SetArgPointee<1>(0), Return(SOFTBUS_OK)))
+        .WillRepeatedly(DoAll(SetArgPointee<1>(1 << BIT_SLE), Return(SOFTBUS_OK)));
+    nodeInfo.netCapacity = 0;
+    ret = IsNeedTriggerSparkGroup(&nodeInfo, &storedInfo, nowTime);
+    EXPECT_EQ(ret, false);
+    ret = IsNeedTriggerSparkGroup(&nodeInfo, &storedInfo, nowTime);
+    EXPECT_EQ(ret, false);
+    ret = IsNeedTriggerSparkGroup(&nodeInfo, &storedInfo, nowTime);
+    EXPECT_EQ(ret, false);
 }
 
 /*

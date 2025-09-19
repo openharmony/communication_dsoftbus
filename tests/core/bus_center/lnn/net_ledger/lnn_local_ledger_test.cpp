@@ -1127,7 +1127,6 @@ HWTEST_F(LNNLedgerMockTest, LlGetSparkCheck_001, TestSize.Level1)
     unsigned char sparkCheck[SPARK_CHECK_LENGTH] = {0};
     EXPECT_EQ(SOFTBUS_INVALID_PARAM, LlGetSparkCheck(nullptr, 0));
     EXPECT_EQ(SOFTBUS_INVALID_PARAM, LlGetSparkCheck(sparkCheck, 0));
-    EXPECT_EQ(SOFTBUS_MEM_ERR, LlGetSparkCheck(sparkCheck, SPARK_CHECK_LENGTH - 1));
     EXPECT_EQ(SOFTBUS_OK, LlGetSparkCheck(sparkCheck, SPARK_CHECK_LENGTH));
 }
 

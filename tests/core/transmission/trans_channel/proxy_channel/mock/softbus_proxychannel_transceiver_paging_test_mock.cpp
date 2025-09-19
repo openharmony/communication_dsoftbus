@@ -47,9 +47,10 @@ int32_t TransPagingParseMessage(char *data, int32_t len, ProxyMessage *msg)
     return GetSoftbusProxychannelTransceiverPagingInterface()->TransPagingParseMessage(data, len, msg);
 }
 
-int32_t TransProxyGetChannelByFlag(uint32_t businessFlag, ProxyChannelInfo *chan, bool isClient)
+int32_t TransProxyGetChannelByCheckInfo(const PagingListenCheckInfo *checkInfo, ProxyChannelInfo *chan, bool isClient)
 {
-    return GetSoftbusProxychannelTransceiverPagingInterface()->TransProxyGetChannelByFlag(businessFlag, chan, isClient);
+    return GetSoftbusProxychannelTransceiverPagingInterface()->TransProxyGetChannelByCheckInfo(
+        checkInfo, chan, isClient);
 }
 
 bool TransHasAndUpdatePagingListenPacked(ProxyChannelInfo *info)

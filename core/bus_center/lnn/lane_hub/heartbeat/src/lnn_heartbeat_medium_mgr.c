@@ -211,7 +211,11 @@ static void UpdateDeviceInfoToMlps(const char *udid)
         return;
     }
     info->isOnline = true;
-    SendDeviceStateToMlpsPacked(info);
+    SoftBusLooper *looper = GetLooper(LOOP_TYPE_DEFAULT);
+    if (LnnAsyncCallbackDelayHelper(looper, SendDeviceStateToMlpsPacked, (void *)info, 0) != SOFTBUS_OK) {
+        LNN_LOGE(LNN_BUILDER, "async call send device info fail");
+        SoftBusFree(info);
+    }
 }
 
 static void UpdateOnlineInfoNoConnection(const char *networkId, HbRespData *hbResp)
@@ -1087,10 +1091,32 @@ static bool IsNetworkIdChange(DeviceInfo *device, NodeInfo *remoteInfo, HbRespDa
     return true;
 }
 
+static bool IsSupportSleCap(const NodeInfo *remoteInfo)
+{
+    uint32_t localCap = 0;
+    int32_t ret = LnnGetLocalNumU32Info(NUM_KEY_NET_CAP, &localCap);
+    if (ret != SOFTBUS_OK) {
+        LNN_LOGE(LNN_LANE, "LnnGetLocalNumInfo err, ret=%{public}d", ret);
+        return false;
+    }
+    bool localSleEnable = (localCap & (1 << BIT_SLE)) > 0;
+    bool remoteSleEnable = (remoteInfo->netCapacity & (1 << BIT_SLE)) > 0;
+    if (!localSleEnable || !remoteSleEnable) {
+        LNN_LOGW(LNN_LANE, "local or remote sle not enable, localCap=%{public}u, rempoteCap=%{public}u, ret=%{public}d",
+            localCap, remoteInfo->netCapacity, ret);
+        return false;
+    }
+    return true;
+}
+
 static bool IsNeedTriggerSparkGroup(const NodeInfo *remoteInfo, LnnHeartbeatRecvInfo *storedInfo, uint64_t nowTime)
 {
     if (remoteInfo == NULL || storedInfo == NULL) {
         LNN_LOGW(LNN_HEART_BEAT, "no need handle");
+        return false;
+    }
+    if (!IsSupportSleCap(remoteInfo)) {
+        LNN_LOGD(LNN_HEART_BEAT, "sle not enable");
         return false;
     }
     char *anonyNetworkId = NULL;

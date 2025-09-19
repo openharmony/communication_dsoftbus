@@ -456,7 +456,11 @@ static void UpdateDeviceInfoToMlps(const char *udid)
         return;
     }
     info->isOnline = true;
-    SendDeviceStateToMlpsPacked(info);
+    SoftBusLooper *looper = GetLooper(LOOP_TYPE_DEFAULT);
+    if (LnnAsyncCallbackDelayHelper(looper, SendDeviceStateToMlpsPacked, (void *)info, 0) != SOFTBUS_OK) {
+        LNN_LOGE(LNN_BUILDER, "async call send device info fail");
+        SoftBusFree(info);
+    }
 }
 
 static void TryTriggerSparkJoinAgain(const LnnConntionInfo *connInfo, bool isAccountChanged)

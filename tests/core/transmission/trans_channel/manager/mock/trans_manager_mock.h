@@ -38,7 +38,7 @@ public:
     virtual uint64_t TransAclGetFirstTokenID() = 0;
     virtual int32_t TransCommonGetAppInfo(const SessionParam *param, AppInfo *appInfo) = 0;
     virtual int32_t TransAsyncGetLaneInfo(
-        const SessionParam *param, uint32_t *laneHandle, uint32_t callingTokenId, int64_t timeStart) = 0;
+        const SessionParam *param, uint32_t *laneHandle, const AppInfo *appInfo) = 0;
     virtual int32_t TransGetLaneInfo(const SessionParam *param, LaneConnInfo *connInfo, uint32_t *laneHandle) = 0;
     virtual int32_t TransGetConnectOptByConnInfo(const LaneConnInfo *info, ConnectOption *connOpt) = 0;
     virtual int32_t TransOpenChannelProc(
@@ -58,7 +58,7 @@ public:
     MOCK_METHOD2(ConnGetConnectionInfo, int32_t (uint32_t, ConnectionInfo *));
     MOCK_METHOD0(TransAclGetFirstTokenID, uint64_t ());
     MOCK_METHOD2(TransCommonGetAppInfo, int32_t (const SessionParam *, AppInfo *));
-    MOCK_METHOD4(TransAsyncGetLaneInfo, int32_t (const SessionParam *, uint32_t *, uint32_t, int64_t));
+    MOCK_METHOD3(TransAsyncGetLaneInfo, int32_t (const SessionParam *, uint32_t *, const AppInfo *));
     MOCK_METHOD3(TransGetLaneInfo, int32_t (const SessionParam *, LaneConnInfo *, uint32_t *));
     MOCK_METHOD2(TransGetConnectOptByConnInfo, int32_t (const LaneConnInfo *, ConnectOption *));
     MOCK_METHOD4(TransOpenChannelProc, int32_t (ChannelType, AppInfo *, const ConnectOption *, int32_t *));

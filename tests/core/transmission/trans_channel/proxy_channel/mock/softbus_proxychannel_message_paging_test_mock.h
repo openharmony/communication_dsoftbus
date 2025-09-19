@@ -52,13 +52,14 @@ public:
     virtual int32_t OnProxyChannelOpened(int32_t channelId, const AppInfo *appInfo, unsigned char isServer) = 0;
     virtual int32_t TransPagingAckHandshake(ProxyChannelInfo *chan, int32_t retCode) = 0;
     virtual bool TransHasAndUpdatePagingListenPacked(ProxyChannelInfo *info) = 0;
-    virtual int32_t TransCheckPagingListenState(uint32_t businessFlag) = 0;
+    virtual int32_t TransCheckPagingListenState(const PagingListenCheckInfo *checkInfo) = 0;
     virtual int32_t TransReversePullUpPacked(
         const uint32_t chatMode, const uint32_t businessFlag, const char *pkgName) = 0;
     virtual int32_t TransGetPkgnameByBusinessFlagPacked(
         const uint32_t businessFlag, char *pkgName, const uint32_t pkgLen) = 0;
     virtual int32_t TransProxyCreatePagingChanInfo(ProxyChannelInfo *chan) = 0;
-    virtual int32_t TransProxyGetChannelByFlag(uint32_t businessFlag, ProxyChannelInfo *chan, bool isClient) = 0;
+    virtual int32_t TransProxyGetChannelByCheckInfo(
+        const PagingListenCheckInfo *checkInfo, ProxyChannelInfo *chan, bool isClient) = 0;
     virtual int32_t ConvertBytesToHexString(char *outBuf, uint32_t outBufLen, const unsigned char *inBuf,
         uint32_t inLen) = 0;
     virtual int32_t AuthFindApplyKey(
@@ -103,13 +104,14 @@ public:
     MOCK_METHOD3(OnProxyChannelOpened, int32_t (int32_t channelId, const AppInfo *appInfo, unsigned char isServer));
     MOCK_METHOD2(TransPagingAckHandshake, int32_t (ProxyChannelInfo *chan, int32_t retCode));
     MOCK_METHOD1(TransHasAndUpdatePagingListenPacked, bool (ProxyChannelInfo *info));
-    MOCK_METHOD1(TransCheckPagingListenState, int32_t (uint32_t businessFlag));
+    MOCK_METHOD1(TransCheckPagingListenState, int32_t (const PagingListenCheckInfo *checkInfo));
     MOCK_METHOD3(TransReversePullUpPacked, int32_t (
         const uint32_t chatMode, const uint32_t businessFlag, const char *pkgName));
     MOCK_METHOD3(TransGetPkgnameByBusinessFlagPacked, int32_t (
         const uint32_t businessFlag, char *pkgName, const uint32_t pkgLen));
     MOCK_METHOD1(TransProxyCreatePagingChanInfo, int32_t (ProxyChannelInfo *chan));
-    MOCK_METHOD3(TransProxyGetChannelByFlag, int32_t (uint32_t businessFlag, ProxyChannelInfo *chan, bool isClient));
+    MOCK_METHOD3(TransProxyGetChannelByCheckInfo, int32_t (
+        const PagingListenCheckInfo *checkInfo, ProxyChannelInfo *chan, bool isClient));
     MOCK_METHOD4(ConvertBytesToHexString, int32_t (char *outBuf, uint32_t outBufLen, const unsigned char *inBuf,
         uint32_t inLen));
     MOCK_METHOD4(AuthFindApplyKey,

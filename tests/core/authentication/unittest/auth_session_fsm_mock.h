@@ -41,6 +41,7 @@ public:
         AuthSessionInfo *info, const uint8_t *data, uint32_t len, int64_t authSeq) = 0;
     virtual int32_t PostDeviceIdMessage(int64_t authSeq, const AuthSessionInfo *info) = 0;
     virtual bool LnnIsNeedInterceptBroadcast(bool disableGlass) = 0;
+    virtual int32_t LnnSaveRemoteDeviceInfoPacked(const NodeInfo *deviceInfo) = 0;
 };
 
 class AuthSessionFsmInterfaceMock : public AuthSessionFsmInterface {
@@ -59,6 +60,7 @@ public:
     MOCK_METHOD4(ProcessDeviceIdMessage, int32_t(AuthSessionInfo *, const uint8_t *, uint32_t, int64_t));
     MOCK_METHOD2(PostDeviceIdMessage, int32_t(int64_t, const AuthSessionInfo *));
     MOCK_METHOD1(LnnIsNeedInterceptBroadcast, bool(bool));
+    MOCK_METHOD1(LnnSaveRemoteDeviceInfoPacked, int32_t(const NodeInfo *));
 };
 } // namespace OHOS
 #endif // AUTH_AUTH_SESSION_FSM_MOCK_H
