@@ -147,12 +147,12 @@ typedef struct {
     int32_t minBW;             // MIN_BW
     int32_t maxLatency;        // MAX_LATENCY
     int32_t minLatency;        // MIN_LATENCY
-    uint8_t localStaChload;    // LOCAL_STA_CHLOAD
-    uint8_t remoteStaChload;   // REMOTE_STA_CHLOAD
-    uint8_t localHmlChload;    // LOCAL_HML_CHLOAD
-    uint8_t remoteHmlChload;   // REMOTE_HML_CHLOAD
-    uint8_t localP2pChload;    // LOCAL_P2P_CHLOAD
-    uint8_t remoteP2pChload;   // REMOTE_P2P_CHLOAD
+    uint16_t localStaChload;    // LOCAL_STA_CHLOAD
+    uint16_t remoteStaChload;   // REMOTE_STA_CHLOAD
+    uint16_t localHmlChload;    // LOCAL_HML_CHLOAD
+    uint16_t remoteHmlChload;   // REMOTE_HML_CHLOAD
+    uint16_t localP2pChload;    // LOCAL_P2P_CHLOAD
+    uint16_t remoteP2pChload;   // REMOTE_P2P_CHLOAD
     uint8_t localStaChannel;   // LOCAL_STA_CHANNEL
     uint8_t remoteStaChannel;  // REMOTE_STA_CHANNEL
     uint8_t hmlChannel;        // HML_CHANNEL
