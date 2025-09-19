@@ -30,6 +30,13 @@ static void MatchTransEventNameTypeExtraUint8Param(const HiSysEventParam *params
     EXPECT_EQ(params[index].v.ui8, extraParam);
 }
 
+static void MatchTransEventNameTypeExtraUint16Param(const HiSysEventParam *params, int32_t index, uint16_t extraParam)
+{
+    EXPECT_STREQ(params[index].name, TRANS_ASSIGNERS[index].name);
+    EXPECT_EQ(params[index].t, TRANS_ASSIGNERS[index].type);
+    EXPECT_EQ(params[index].v.ui16, extraParam);
+}
+
 static void MatchTransEventNameTypeExtraInt32Param(const HiSysEventParam *params, int32_t index, int32_t extraParam)
 {
     EXPECT_STREQ(params[index].name, TRANS_ASSIGNERS[index].name);
@@ -117,12 +124,12 @@ MATCHER_P2(TransValidParamArrayMatcher, inExtra, validSize, "trans valid param a
     MatchTransEventNameTypeExtraInt32Param(params, ++index, extra.minBW);
     MatchTransEventNameTypeExtraInt32Param(params, ++index, extra.maxLatency);
     MatchTransEventNameTypeExtraInt32Param(params, ++index, extra.minLatency);
-    MatchTransEventNameTypeExtraUint8Param(params, ++index, extra.localStaChload);
-    MatchTransEventNameTypeExtraUint8Param(params, ++index, extra.remoteStaChload);
-    MatchTransEventNameTypeExtraUint8Param(params, ++index, extra.localHmlChload);
-    MatchTransEventNameTypeExtraUint8Param(params, ++index, extra.remoteHmlChload);
-    MatchTransEventNameTypeExtraUint8Param(params, ++index, extra.localP2pChload);
-    MatchTransEventNameTypeExtraUint8Param(params, ++index, extra.remoteP2pChload);
+    MatchTransEventNameTypeExtraUint16Param(params, ++index, extra.localStaChload);
+    MatchTransEventNameTypeExtraUint16Param(params, ++index, extra.remoteStaChload);
+    MatchTransEventNameTypeExtraUint16Param(params, ++index, extra.localHmlChload);
+    MatchTransEventNameTypeExtraUint16Param(params, ++index, extra.remoteHmlChload);
+    MatchTransEventNameTypeExtraUint16Param(params, ++index, extra.localP2pChload);
+    MatchTransEventNameTypeExtraUint16Param(params, ++index, extra.remoteP2pChload);
     MatchTransEventNameTypeExtraUint8Param(params, ++index, extra.localStaChannel);
     MatchTransEventNameTypeExtraUint8Param(params, ++index, extra.remoteStaChannel);
     MatchTransEventNameTypeExtraUint8Param(params, ++index, extra.hmlChannel);
