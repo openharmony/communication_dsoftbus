@@ -70,7 +70,10 @@ ohos_unittest("WifiDirectIpManagerTest") {
     "wifi_direct_mock.cpp",
     "$dsoftbus_root_path/core/frame/init/src/g_enhance_lnn_func.c",
   ]
-  deps = [ "$dsoftbus_dfx_path:softbus_dfx" ]
+  deps = [ 
+    "$dsoftbus_dfx_path:softbus_dfx",
+    "$dsoftbus_root_path/core/common:softbus_utils",
+    ]
   configs = [ "//build/config/compiler:exceptions" ]
   external_deps = [
     "bounds_checking_function:libsec_shared",
@@ -264,6 +267,7 @@ ohos_unittest("WifiDirectManagerCppTest") {
 
   deps = [
     "$dsoftbus_dfx_path:softbus_dfx",
+    "$dsoftbus_root_path/core/common:softbus_utils",
     "$dsoftbus_root_path/adapter:softbus_adapter",
   ]
   external_deps = [

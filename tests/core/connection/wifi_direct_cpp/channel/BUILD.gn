@@ -141,6 +141,7 @@ ohos_unittest("AuthNegotiateChannelTest") {
 
   deps = [
     "$dsoftbus_root_path/adapter:softbus_adapter",
+    "$dsoftbus_root_path/core/common:softbus_utils",
     "$dsoftbus_root_path/dfx:softbus_dfx",
   ]
 
@@ -282,6 +283,7 @@ ohos_unittest("ProxyNegotiateChannelTest") {
 
   deps = [
     "$dsoftbus_root_path/adapter:softbus_adapter",
+    "$dsoftbus_root_path/core/common:softbus_utils",
     "$dsoftbus_root_path/dfx:softbus_dfx",
   ]
 
