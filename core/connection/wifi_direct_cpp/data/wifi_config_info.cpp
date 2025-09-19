@@ -42,6 +42,10 @@ int WifiConfigInfo::Unmarshalling(WifiDirectProtocol &protocol, const std::vecto
 
     protocol.SetInput(input);
     while (protocol.Read(key, data, size)) {
+        if (keyTypeTable_.find(static_cast<WifiConfigInfoKey>(key)) == keyTypeTable_.end()) {
+            continue;
+        }
+
         auto type = keyTypeTable_[static_cast<WifiConfigInfoKey>(key)];
         switch (Serializable::ValueType(type)) {
             case Serializable::ValueType::INTERFACE_INFO_ARRAY:

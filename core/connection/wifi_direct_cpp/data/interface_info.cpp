@@ -131,6 +131,10 @@ int InterfaceInfo::Unmarshalling(WifiDirectProtocol &protocol, const std::vector
 
     protocol.SetInput(input);
     while (protocol.Read(key, data, size)) {
+        if (keyTypeTable_.find(static_cast<InterfaceInfoKey>(key)) == keyTypeTable_.end()) {
+            continue;
+        }
+
         auto type = keyTypeTable_[InterfaceInfoKey(key)];
         auto keyValue = static_cast<InterfaceInfoKey>(key);
         if (protocolType == ProtocolType::TLV &&
