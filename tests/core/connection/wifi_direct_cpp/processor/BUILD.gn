@@ -31,6 +31,7 @@ ohos_unittest("P2pv1ProcessorTest") {
     "$dsoftbus_root_path/interfaces/kits/lnn",
     "$dsoftbus_root_path/interfaces/kits/lnn/enhance",
     "$dsoftbus_root_path/core/connection/wifi_direct_cpp/dbinder",
+    "$dsoftbus_root_path/core/connection/wifi_direct_cpp/entity",
     "$dsoftbus_root_path/interfaces/kits/authentication",
     "$dsoftbus_root_path/interfaces/kits/authentication/enhance",
     "$dsoftbus_root_path/interfaces/kits/disc",

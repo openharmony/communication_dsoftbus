@@ -79,6 +79,9 @@ public:
     int32_t ProcessInnerEvent(int32_t eventType, uint8_t *buf, uint32_t len) override;
     int32_t PrivilegeCloseChannel(uint64_t tokenId, int32_t pid, const char *peerNetworkId) override;
     int32_t SetDisplayName(const char *pkgName, const char *nameData, uint32_t len) override;
+    int32_t CreateGroupOwner(const char *pkgName, const struct GroupOwnerConfig *config,
+        struct GroupOwnerResult *result) override;
+    void DestroyGroupOwner(const char *pkgName) override;
     int32_t CreateServer(const char *pkgName, const char *name) override;
     int32_t RemoveServer(const char *pkgName, const char *name) override;
     int32_t Connect(const char *pkgName, const char *name, const Address *address) override;

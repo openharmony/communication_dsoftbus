@@ -496,6 +496,18 @@ int32_t SoftBusServer::SetDisplayName(const char *pkgName, const char *nameData,
     return LnnIpcSetDisplayName(pkgName, nameData, len);
 }
 
+int32_t SoftBusServer::CreateGroupOwner(const char *pkgName, const struct GroupOwnerConfig *config,
+    struct GroupOwnerResult *result)
+{
+    pid_t callingPid = OHOS::IPCSkeleton::GetCallingPid();
+    return LnnIpcCreateGroupOwner(pkgName, (int32_t)callingPid, config, result);
+}
+
+void SoftBusServer::DestroyGroupOwner(const char *pkgName)
+{
+    LnnIpcDestroyGroupOwner(pkgName);
+}
+
 #ifdef SUPPORT_BUNDLENAME
 static int32_t FillBundleName(char *bundleNameStr, uint32_t size)
 {

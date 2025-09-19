@@ -360,3 +360,25 @@ int32_t ServerIpcSetDisplayName(const char *pkgName, const char *nameData, uint3
     }
     return ret;
 }
+
+int32_t ServerIpcCreateGroupOwner(const char *pkgName, const struct GroupOwnerConfig *config,
+    struct GroupOwnerResult *result)
+{
+    LNN_LOGI(LNN_EVENT, "enter");
+    LNN_CHECK_AND_RETURN_RET_LOGE(CheckAndInitBusCenterServerProxyInit() == SOFTBUS_OK, SOFTBUS_SERVER_NOT_INIT,
+        LNN_EVENT, "server not init");
+    int32_t ret = g_serverProxy->CreateGroupOwner(pkgName, config, result);
+    if (ret != 0) {
+        LNN_LOGE(LNN_EVENT, "create failed");
+    }
+    return ret;
+}
+
+void ServerIpcDestroyGroupOwner(const char *pkgName)
+{
+    LNN_LOGI(LNN_EVENT, "enter");
+    if (CheckAndInitBusCenterServerProxyInit() != SOFTBUS_OK) {
+        LNN_LOGE(LNN_EVENT, "server not init");
+    }
+    g_serverProxy->DestroyGroupOwner(pkgName);
+}

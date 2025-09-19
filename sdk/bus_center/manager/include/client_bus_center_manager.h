@@ -82,6 +82,9 @@ int32_t TriggerRangeForMsdpInner(const char *pkgName, const RangeConfig *config)
 int32_t StopRangeForMsdpInner(const char *pkgName, const RangeConfig *config);
 int32_t SyncTrustedRelationShipInner(const char *pkgName, const char *msg, uint32_t msgLen);
 int32_t SetDisplayNameInner(const char *pkgName, const char *nameData, uint32_t len);
+int32_t CreateGroupOwnerInner(const char *pkgName, const struct GroupOwnerConfig *config,
+    struct GroupOwnerResult *result, GroupOwnerDestroyListener listener);
+int32_t DestroyGroupOwnerInner(const char *pkgName);
 
 int32_t LnnOnJoinResult(void *addr, const char *networkId, int32_t retCode);
 int32_t LnnOnLeaveResult(const char *networkId, int32_t retCode);
@@ -98,6 +101,7 @@ void LnnOnRefreshLNNResult(int32_t refreshId, int32_t reason);
 void LnnOnRefreshDeviceFound(const void *device);
 void LnnOnDataLevelChanged(const char *networkId, const DataLevelInfo *dataLevelInfo);
 void LnnOnRangeResult(const RangeResultInnerInfo *rangeInfo);
+void LnnOnGroupStateChange(int32_t retCode);
 
 int32_t DiscRecoveryPublish(void);
 int32_t DiscRecoverySubscribe(void);

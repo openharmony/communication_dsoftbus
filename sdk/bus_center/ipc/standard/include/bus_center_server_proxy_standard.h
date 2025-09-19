@@ -71,6 +71,9 @@ public:
     int32_t UnregisterRangeCallbackForMsdp(const char *pkgName) override;
     int32_t SyncTrustedRelationShip(const char *pkgName, const char *msg, uint32_t msgLen) override;
     int32_t SetDisplayName(const char *pkgName, const char *nameData, uint32_t len) override;
+    int32_t CreateGroupOwner(const char *pkgName, const struct GroupOwnerConfig *config,
+        struct GroupOwnerResult *result) override;
+    void DestroyGroupOwner(const char *pkgName) override;
     int32_t GetBusCenterExObj(sptr<IRemoteObject> &object) override;
     int32_t EvaluateQos(const char *peerNetworkId, TransDataType dataType, const QosTV *qos,
         uint32_t qosCount) override;

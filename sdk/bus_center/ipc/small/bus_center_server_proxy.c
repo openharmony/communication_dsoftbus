@@ -865,3 +865,17 @@ int32_t ServerIpcSetDisplayName(const char *pkgName, const char *nameData, uint3
     (void)len;
     return SOFTBUS_FUNC_NOT_SUPPORT;
 }
+
+int32_t ServerIpcCreateGroupOwner(const char *pkgName, const struct GroupOwnerConfig *config,
+    struct GroupOwnerResult *result)
+{
+    (void)pkgName;
+    (void)config;
+    (void)result;
+    return SOFTBUS_FUNC_NOT_SUPPORT;
+}
+
+void ServerIpcDestroyGroupOwner(const char *pkgName)
+{
+    (void)pkgName;
+}
