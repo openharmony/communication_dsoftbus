@@ -29,7 +29,7 @@ using namespace std;
 namespace OHOS {
 bool SoftBusGenerateHmacHashFuzzTest(FuzzedDataProvider &provider)
 {
-    uint32_t size = provider.ConsumeIntegral<int32_t>();
+    uint32_t size = provider.ConsumeIntegral<uint32_t>();
     string stringData = provider.ConsumeBytesAsString(size);
     size = stringData.size();
     const uint8_t *data = reinterpret_cast<const uint8_t *>(stringData.data());
@@ -41,7 +41,7 @@ bool SoftBusGenerateHmacHashFuzzTest(FuzzedDataProvider &provider)
 
 bool SoftBusAesCfbRootEncryptFuzzTest(FuzzedDataProvider &provider)
 {
-    uint32_t size = provider.ConsumeIntegral<int32_t>();
+    uint32_t size = provider.ConsumeIntegral<uint32_t>();
     string stringData = provider.ConsumeBytesAsString(size);
     size = stringData.size();
     const uint8_t *data = reinterpret_cast<const uint8_t *>(stringData.data());
@@ -75,7 +75,7 @@ bool SoftBusAesCfbRootEncryptFuzzTest(FuzzedDataProvider &provider)
 
 bool SoftBusAesGcmEncryptFuzzTest(FuzzedDataProvider &provider)
 {
-    uint32_t size = provider.ConsumeIntegral<int32_t>();
+    uint32_t size = provider.ConsumeIntegral<uint32_t>();
     string stringData = provider.ConsumeBytesAsString(size);
     size = stringData.size();
     const uint8_t *data = reinterpret_cast<const uint8_t *>(stringData.data());
@@ -134,12 +134,12 @@ static bool EncryptSubFunctionFuzzTest(AesInputData &encryptInData, AesCipherKey
 
 bool SoftBusAesCfbEncryptFuzzTest(FuzzedDataProvider &provider)
 {
-    uint32_t size = provider.ConsumeIntegral<int32_t>();
+    uint32_t size = provider.ConsumeIntegral<uint32_t>();
     string stringData = provider.ConsumeBytesAsString(size);
-    uint8_t randomSession[ENCRYPT_RANDOM_MAX];
-    uint8_t randomIv[ENCRYPT_RANDOM_MAX];
-    uint8_t randomSessionCopy[ENCRYPT_RANDOM_MAX];
-    uint8_t randomIvCopy[ENCRYPT_RANDOM_MAX];
+    uint8_t randomSession[ENCRYPT_RANDOM_MAX] = {0};
+    uint8_t randomIv[ENCRYPT_RANDOM_MAX] = {0};
+    uint8_t randomSessionCopy[ENCRYPT_RANDOM_MAX] = {0};
+    uint8_t randomIvCopy[ENCRYPT_RANDOM_MAX] = {0};
 
     if (memcpy_s(randomSession, ENCRYPT_RANDOM_MAX - 1, stringData.data(), stringData.size()) != EOK) {
         COMM_LOGE(COMM_TEST, "randomSession memcpy_s failed!");
@@ -156,7 +156,7 @@ bool SoftBusAesCfbEncryptFuzzTest(FuzzedDataProvider &provider)
         return false;
     }
     string stringData3 = provider.ConsumeBytesAsString(size);
-    if (memcpy_s(randomIvCopy, ENCRYPT_RANDOM_MAX - 1, stringData2.data(), stringData2.size()) != EOK) {
+    if (memcpy_s(randomIvCopy, ENCRYPT_RANDOM_MAX - 1, stringData3.data(), stringData3.size()) != EOK) {
         COMM_LOGE(COMM_TEST, "randomIvCopy memcpy_s failed!");
         return false;
     }
