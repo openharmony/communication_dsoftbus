@@ -29,7 +29,7 @@ using namespace std;
 namespace OHOS {
 bool SoftBusRsaEncryptFuzzTest(FuzzedDataProvider &provider)
 {
-    uint32_t size = provider.ConsumeIntegral<int32_t>();
+    uint32_t size = provider.ConsumeIntegral<uint32_t>();
     string stringData = provider.ConsumeBytesAsString(size);
     size = stringData.size();
     const uint8_t *data = reinterpret_cast<const uint8_t *>(stringData.data());
@@ -47,7 +47,7 @@ bool SoftBusRsaEncryptFuzzTest(FuzzedDataProvider &provider)
 
 bool SoftBusRsaDecryptFuzzTest(FuzzedDataProvider &provider)
 {
-    uint32_t size = provider.ConsumeIntegral<int32_t>();
+    uint32_t size = provider.ConsumeIntegral<uint32_t>();
     string stringData = provider.ConsumeBytesAsString(size);
     size = stringData.size();
     const uint8_t *data = reinterpret_cast<const uint8_t *>(stringData.data());

@@ -65,10 +65,14 @@ bool LnnNotifyOnlineStateFuzzTest()
     GenerateString(outData);
     if (strcpy_s(info.networkId, NETWORK_ID_BUF_LEN, outData.c_str()) != EOK) {
         COMM_LOGE(COMM_TEST, "networkId strcpy_s is failed");
+        g_baseFuzzData = nullptr;
+        g_baseFuzzSize = 0;
         return false;
     }
     LnnNotifyOnlineState(isOnline, &info);
     LnnNotifyMigrate(isOnline, &info);
+    g_baseFuzzData = nullptr;
+    g_baseFuzzSize = 0;
     return true;
 }
 
@@ -97,6 +101,8 @@ bool LnnNotifyLnnRelationChangedFuzzTest()
     string udid2;
     GenerateString(udid2);
     LnnNotifyMasterNodeChanged(isMaster, udid2.c_str(), weight);
+    g_baseFuzzData = nullptr;
+    g_baseFuzzSize = 0;
     return true;
 }
 
@@ -169,6 +175,8 @@ bool LnnNotifyBtAclStateChangeEventFuzzTest()
     LnnNotifyNodeAddressChanged(btMac, networkId, isLocal);
     LnnNotifyBtAclStateChangeEvent(btMac, state);
     LnnNotifyAddressChangedEvent(btMac);
+    g_baseFuzzData = nullptr;
+    g_baseFuzzSize = 0;
     return true;
 }
 
