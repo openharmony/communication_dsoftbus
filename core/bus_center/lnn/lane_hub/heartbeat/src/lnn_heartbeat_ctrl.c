@@ -530,6 +530,7 @@ static void HbBtStateChangeEventHandler(const LnnEventBasicInfo *info)
     switch (btState) {
         case SOFTBUS_BLE_TURN_ON:
         case SOFTBUS_BR_TURN_ON:
+            LnnUpdateHeartbeatInfo(UPDATE_HB_NETWORK_INFO);
             HbHandleBleStateChange(btState);
             break;
         case SOFTBUS_BR_TURN_OFF:
@@ -537,6 +538,7 @@ static void HbBtStateChangeEventHandler(const LnnEventBasicInfo *info)
                 LNN_LOGE(LNN_HEART_BEAT, "ble is off");
                 return;
             }
+            LnnUpdateHeartbeatInfo(UPDATE_HB_NETWORK_INFO);
             g_enableState = false;
             LNN_LOGI(LNN_HEART_BEAT, "HB handle SOFTBUS_BR_TURN_OFF, state=%{public}d", btState);
             (void)HbHandleLeaveLnn();
