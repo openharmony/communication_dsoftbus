@@ -37,12 +37,16 @@ void WifiDirectP2pAdapter::Listener(BroadcastReceiverAction action, const struct
 {
     if (param.p2pLinkInfo.connectState == P2pConnectionState::P2P_DISCONNECTED) {
         CONN_LOGI(CONN_WIFI_DIRECT, "enter");
-        CONN_CHECK_AND_RETURN_LOGE(groupOwnerDestroyListener_ != nullptr, CONN_WIFI_DIRECT, "listener is null");
-        CONN_CHECK_AND_RETURN_LOGE(isCreateGroup_, CONN_WIFI_DIRECT, "not create group");
-        groupOwnerDestroyListener_(SOFTBUS_CONN_P2P_GO_NO_EXIST);
-        std::lock_guard lock(mutex_);
-        groupOwnerDestroyListener_ = nullptr;
-        isCreateGroup_ = false;
+        GroupOwnerDestroyListener groupOwnerDestroyListener = nullptr;
+        {
+            std::lock_guard lock(mutex_);
+            CONN_CHECK_AND_RETURN_LOGE(groupOwnerDestroyListener_ != nullptr, CONN_WIFI_DIRECT, "listener is null");
+            CONN_CHECK_AND_RETURN_LOGE(isCreateGroup_, CONN_WIFI_DIRECT, "not create group");
+            groupOwnerDestroyListener = groupOwnerDestroyListener_;
+            groupOwnerDestroyListener_ = nullptr;
+            isCreateGroup_ = false;
+        }
+        groupOwnerDestroyListener(SOFTBUS_CONN_P2P_GO_NO_EXIST);
     }
 }
 
@@ -103,8 +107,9 @@ int WifiDirectP2pAdapter::CreateGroup(struct GroupOwnerResult *result)
     CONN_CHECK_AND_RETURN_RET_LOGE(p2pEnable, SOFTBUS_P2P_NOT_SUPPORT, CONN_WIFI_DIRECT, "p2p is not enable");
 
     auto freq = WifiDirectUtils::ChannelToFrequency(P2pAdapter::GetRecommendChannel());
-    CONN_CHECK_AND_RETURN_RET_LOGE(freq != FREQUENCY_INVALID, freq, CONN_WIFI_DIRECT, "get frequency failed");
-    int coexCode = P2pAdapter::GetCoexConflictCode(IF_NAME_P2P, freq);
+    CONN_CHECK_AND_RETURN_RET_LOGE(freq != FREQUENCY_INVALID,
+        SOFTBUS_CONN_GET_RECOMMEND_FREQUENCY_FAILED, CONN_WIFI_DIRECT, "get frequency failed");
+    int coexCode = P2pAdapter::GetCoexConflictCode(IF_NAME_P2P, WifiDirectUtils::FrequencyToChannel(freq));
     CONN_CHECK_AND_RETURN_RET_LOGE(
         coexCode == SOFTBUS_OK, coexCode, CONN_WIFI_DIRECT, "coex conflict, ret=%{public}d", coexCode);
     
@@ -223,6 +228,38 @@ int WifiDirectP2pAdapter::ReuseGroup(struct GroupOwnerResult *result)
     return ret;
 }
 
+void WifiDirectP2pAdapter::SetIsCreateGroup(bool isCreateGroup)
+{
+    std::lock_guard lock(mutex_);
+    isCreateGroup_ = isCreateGroup;
+    CONN_LOGI(CONN_WIFI_DIRECT, "current call status is %{public}d", isCreateGroup_);
+}
+
+bool WifiDirectP2pAdapter::GetIsCreateGroup()
+{
+    std::lock_guard lock(mutex_);
+    CONN_LOGI(CONN_WIFI_DIRECT, "current call status is %{public}d", isCreateGroup_);
+    return isCreateGroup_;
+}
+
+int WifiDirectP2pAdapter::CheckRoleAndProcess(LinkInfo::LinkMode role, struct GroupOwnerResult *result)
+{
+    CONN_CHECK_AND_RETURN_RET_LOGE(result != nullptr, SOFTBUS_INVALID_PARAM, CONN_WIFI_DIRECT, "result is null");
+    CONN_LOGI(CONN_WIFI_DIRECT, "myRole=%{public}d", WifiDirectUtils::ToWifiDirectRole(role));
+    switch (role) {
+        case LinkInfo::LinkMode::NONE:
+            return CreateGroup(result);
+        case LinkInfo::LinkMode::GO:
+            return ReuseGroup(result);
+        case LinkInfo::LinkMode::GC:
+            CONN_LOGI(CONN_WIFI_DIRECT, "role is p2p gc, not create group");
+            return SOFTBUS_CONN_P2P_ROLE_IS_GC;
+        default:
+            CONN_LOGI(CONN_WIFI_DIRECT, "not create or reuse p2p go");
+            return SOFTBUS_CONN_P2P_ROLE_INVALID;
+    }
+}
+
 int32_t WifiDirectP2pAdapter::ConnCreateGoOwner(const char *pkgName, const struct GroupOwnerConfig *config,
     struct GroupOwnerResult *result, GroupOwnerDestroyListener listener)
 {
@@ -231,7 +268,8 @@ int32_t WifiDirectP2pAdapter::ConnCreateGoOwner(const char *pkgName, const struc
     CONN_CHECK_AND_RETURN_RET_LOGE(result != nullptr, SOFTBUS_INVALID_PARAM, CONN_WIFI_DIRECT, "result is null");
     CONN_CHECK_AND_RETURN_RET_LOGE(listener != nullptr, SOFTBUS_INVALID_PARAM, CONN_WIFI_DIRECT, "listener is null");
     CONN_CHECK_AND_RETURN_RET_LOGE(
-        !isCreateGroup_, SOFTBUS_INVALID_PARAM, CONN_WIFI_DIRECT, "Duplicate group creation is not allowed");
+        !GetIsCreateGroup(), SOFTBUS_INVALID_PARAM, CONN_WIFI_DIRECT, "Duplicate group creation is not allowed");
+    SetIsCreateGroup(true);
     InterfaceManager::GetInstance().LockInterface(InterfaceInfo::P2P, GROUP_OWNER);
     auto role = LinkInfo::LinkMode::NONE;
     auto ret = InterfaceManager::GetInstance().ReadInterface(
@@ -242,29 +280,15 @@ int32_t WifiDirectP2pAdapter::ConnCreateGoOwner(const char *pkgName, const struc
     if (ret != SOFTBUS_OK) {
         CONN_LOGE(CONN_WIFI_DIRECT, "get current p2p role failed, ret=%{public}d", ret);
         InterfaceManager::GetInstance().UnlockInterface(InterfaceInfo::P2P);
+        SetIsCreateGroup(false);
         return ret;
     }
 
-    CONN_LOGI(CONN_WIFI_DIRECT, "myRole=%{public}d", WifiDirectUtils::ToWifiDirectRole(role));
-    switch (role) {
-        case LinkInfo::LinkMode::NONE:
-            ret = CreateGroup(result);
-            break;
-        case LinkInfo::LinkMode::GO:
-            ret = ReuseGroup(result);
-            break;
-        case LinkInfo::LinkMode::GC:
-            CONN_LOGI(CONN_WIFI_DIRECT, "role is p2p gc, not create group");
-            InterfaceManager::GetInstance().UnlockInterface(InterfaceInfo::P2P);
-            return SOFTBUS_CONN_P2P_ROLE_IS_GC;
-        default:
-            CONN_LOGI(CONN_WIFI_DIRECT, "not create or reuse p2p go");
-            InterfaceManager::GetInstance().UnlockInterface(InterfaceInfo::P2P);
-            return SOFTBUS_CONN_P2P_ROLE_INVALID;
-    }
+    ret = CheckRoleAndProcess(role, result);
     if (ret != SOFTBUS_OK) {
         CONN_LOGE(CONN_WIFI_DIRECT, "create or reuse group failed, ret=%{public}d", ret);
         InterfaceManager::GetInstance().UnlockInterface(InterfaceInfo::P2P);
+        SetIsCreateGroup(false);
         return ret;
     }
     InterfaceManager::GetInstance().UnlockInterface(InterfaceInfo::P2P);
@@ -272,7 +296,6 @@ int32_t WifiDirectP2pAdapter::ConnCreateGoOwner(const char *pkgName, const struc
     if (groupOwnerDestroyListener_ == nullptr) {
         groupOwnerDestroyListener_ = listener;
     }
-    isCreateGroup_ = true;
     return SOFTBUS_OK;
 }
 
