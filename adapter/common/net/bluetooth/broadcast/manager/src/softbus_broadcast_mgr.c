@@ -1784,8 +1784,8 @@ static void GetScanIntervalAndWindow(int32_t freq, SoftBusBcScanParams *adapterP
         adapterParam->scanWindow = SOFTBUS_BC_SCAN_WINDOW_P50;
     }
     if (freq == SCAN_FREQ_P50_60_120) {
-        adapterParam->scanInterval = SOFTBUS_BC_SCAN_INTERVAL_60_P50;
-        adapterParam->scanWindow = SOFTBUS_BC_SCAN_WINDOW_120_P50;
+        adapterParam->scanInterval = SOFTBUS_BC_SCAN_INTERVAL_120_P50;
+        adapterParam->scanWindow = SOFTBUS_BC_SCAN_WINDOW_60_P50;
     }
     if (freq == SCAN_FREQ_P75_30_40) {
         adapterParam->scanInterval = SOFTBUS_BC_SCAN_INTERVAL_P75;
@@ -2487,7 +2487,7 @@ static int32_t GetScanFreq(uint16_t scanInterval, uint16_t scanWindow)
     if (scanInterval == SOFTBUS_BC_SCAN_INTERVAL_P50 && scanWindow == SOFTBUS_BC_SCAN_WINDOW_P50) {
         return SCAN_FREQ_P50_30_60;
     }
-    if (scanInterval == SOFTBUS_BC_SCAN_INTERVAL_60_P50 && scanWindow == SOFTBUS_BC_SCAN_WINDOW_120_P50) {
+    if (scanInterval == SOFTBUS_BC_SCAN_INTERVAL_120_P50 && scanWindow == SOFTBUS_BC_SCAN_WINDOW_60_P50) {
         return SCAN_FREQ_P50_60_120;
     }
     if (scanInterval == SOFTBUS_BC_SCAN_INTERVAL_P75 && scanWindow == SOFTBUS_BC_SCAN_WINDOW_P75) {
