@@ -49,6 +49,7 @@ static SyncPtkListener g_syncPtkListener;
 static PtkMismatchListener g_ptkMismatchListener;
 static HmlStateListener g_hmlStateListener;
 static FrequencyChangedListener g_frequencyChangedListener;
+static OnRefreshNfcData g_onRefreshNfcData;
 
 static uint32_t GetRequestId(void)
 {
@@ -749,6 +750,18 @@ static void ConnDestroyGroupOwner(const char *pkgName)
     OHOS::SoftBus::WifiDirectP2pAdapter::GetInstance()->ConnDestroyGoOwner(pkgName);
 }
 
+static void RegisterRefreshNfcDataListener(OnRefreshNfcData onRefreshNfcData)
+{
+    CONN_CHECK_AND_RETURN_LOGW(g_onRefreshNfcData == nullptr, CONN_WIFI_DIRECT, "listener is not null");
+    g_onRefreshNfcData = onRefreshNfcData;
+}
+
+static void NotifyRefreshNfcData(void)
+{
+    CONN_CHECK_AND_RETURN_LOGW(g_onRefreshNfcData != nullptr, CONN_WIFI_DIRECT, "listener is null");
+    g_onRefreshNfcData();
+}
+
 static struct WifiDirectManager g_manager = {
     .getRequestId = GetRequestId,
     .allocateListenerModuleId = AllocateListenerModuleId,
@@ -806,6 +819,9 @@ static struct WifiDirectManager g_manager = {
     
     .connCreateGroupOwner = ConnCreateGroupOwner,
     .connDestroyGroupOwner = ConnDestroyGroupOwner,
+    
+    .registerRefreshNfcDataListener = RegisterRefreshNfcDataListener,
+    .notifyRefreshNfcData = NotifyRefreshNfcData,
 };
 
 struct WifiDirectManager *GetWifiDirectManager(void)
