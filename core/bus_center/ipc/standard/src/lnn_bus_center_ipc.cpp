@@ -667,36 +667,52 @@ int32_t LnnIpcCreateGroupOwner(const char *pkgName, int32_t callingPid, const st
     LNN_CHECK_AND_RETURN_RET_LOGE(pkgName != nullptr, SOFTBUS_INVALID_PARAM, LNN_EVENT, "pkgName is null");
     LNN_CHECK_AND_RETURN_RET_LOGE(config != nullptr, SOFTBUS_INVALID_PARAM, LNN_EVENT, "config is null");
     LNN_CHECK_AND_RETURN_RET_LOGE(result != nullptr, SOFTBUS_INVALID_PARAM, LNN_EVENT, "result is null");
-    LNN_CHECK_AND_RETURN_RET_LOGE(g_groupStateChangeRequestInfo == nullptr,
-        SOFTBUS_INVALID_PARAM, LNN_EVENT, "duplicate group creation is not allowed ");
-    auto ret = LnnCreateGroupOwner(pkgName, config, result);
-    LNN_CHECK_AND_RETURN_RET_LOGE(ret == SOFTBUS_OK, ret, LNN_EVENT, "create group failed, ret=%{public}d", ret);
-    std::lock_guard<std::mutex> autoLock(g_lock);
-    g_groupStateChangeRequestInfo = std::make_shared<struct GroupStateChangeRequestInfo>();
-    if (strcpy_s(g_groupStateChangeRequestInfo->pkgName, PKG_NAME_SIZE_MAX, pkgName) != EOK) {
-        LNN_LOGE(LNN_EVENT, "copy pkgName fail");
-        g_groupStateChangeRequestInfo = nullptr;
-        return SOFTBUS_MEM_ERR;
+    {
+        std::lock_guard<std::mutex> autoLock(g_lock);
+        LNN_CHECK_AND_RETURN_RET_LOGE(g_groupStateChangeRequestInfo == nullptr,
+            SOFTBUS_INVALID_PARAM, LNN_EVENT, "duplicate group creation is not allowed ");
+        g_groupStateChangeRequestInfo = std::make_shared<struct GroupStateChangeRequestInfo>();
+        if (strcpy_s(g_groupStateChangeRequestInfo->pkgName, PKG_NAME_SIZE_MAX, pkgName) != EOK) {
+            LNN_LOGE(LNN_EVENT, "copy pkgName fail");
+            g_groupStateChangeRequestInfo = nullptr;
+            return SOFTBUS_MEM_ERR;
+        }
+        g_groupStateChangeRequestInfo->pid = callingPid;
     }
-    g_groupStateChangeRequestInfo->pid = callingPid;
+    auto ret = LnnCreateGroupOwner(pkgName, config, result);
+    if (ret != SOFTBUS_OK) {
+        LNN_LOGE(LNN_EVENT, "create group failed, ret=%{public}d", ret);
+        std::lock_guard<std::mutex> autoLock(g_lock);
+        g_groupStateChangeRequestInfo = nullptr;
+    }
     return ret;
 }
 
 void LnnIpcDestroyGroupOwner(const char *pkgName)
 {
     LNN_CHECK_AND_RETURN_LOGE(pkgName != nullptr, LNN_EVENT, "pkgName is null");
-    LNN_CHECK_AND_RETURN_LOGE(g_groupStateChangeRequestInfo != nullptr, LNN_EVENT, "not create group");
+    {
+        std::lock_guard<std::mutex> autoLock(g_lock);
+        LNN_CHECK_AND_RETURN_LOGE(g_groupStateChangeRequestInfo != nullptr, LNN_EVENT, "not create group");
+        g_groupStateChangeRequestInfo = nullptr;
+    }
     LnnDestroyGroupOwner(pkgName);
-    std::lock_guard<std::mutex> autoLock(g_lock);
-    g_groupStateChangeRequestInfo = nullptr;
 }
 
 int32_t LnnIpcNotifyOnGroupStateChange(int32_t retCode)
 {
-    std::lock_guard<std::mutex> autoLock(g_lock);
-    LNN_CHECK_AND_RETURN_RET_LOGE(g_groupStateChangeRequestInfo != nullptr,
-        SOFTBUS_NOT_FIND, LNN_EVENT, "not create group");
-    ClientOnGroupStateChange(g_groupStateChangeRequestInfo->pkgName, g_groupStateChangeRequestInfo->pid, retCode);
+    struct GroupStateChangeRequestInfo groupStateChangeRequestInfo{};
+    {
+        std::lock_guard<std::mutex> autoLock(g_lock);
+        LNN_CHECK_AND_RETURN_RET_LOGE(g_groupStateChangeRequestInfo != nullptr,
+            SOFTBUS_NOT_FIND, LNN_EVENT, "not create group");
+        groupStateChangeRequestInfo.pid = g_groupStateChangeRequestInfo->pid;
+        auto ret = strcpy_s(
+            groupStateChangeRequestInfo.pkgName, PKG_NAME_SIZE_MAX, g_groupStateChangeRequestInfo->pkgName);
+        LNN_CHECK_AND_RETURN_RET_LOGE(ret == EOK, SOFTBUS_MEM_ERR, LNN_EVENT, "copy pkgName failed");
+        g_groupStateChangeRequestInfo = nullptr;
+    }
+    ClientOnGroupStateChange(groupStateChangeRequestInfo.pkgName, groupStateChangeRequestInfo.pid, retCode);
     return SOFTBUS_OK;
 }
 
@@ -848,10 +864,15 @@ static void RemoveRangeRequestInfoByPkgName(const char *pkgName)
 static void RemoveGroupByPkgName(const char *pkgName)
 {
     LNN_CHECK_AND_RETURN_LOGE(pkgName != nullptr, LNN_EVENT, "pkgName is null");
-    LNN_CHECK_AND_RETURN_LOGE(g_groupStateChangeRequestInfo != nullptr, LNN_EVENT, "not create group");
+    {
+        std::lock_guard<std::mutex> autoLock(g_lock);
+        LNN_CHECK_AND_RETURN_LOGE(g_groupStateChangeRequestInfo != nullptr, LNN_EVENT, "not create group");
+        if (strcmp(pkgName, g_groupStateChangeRequestInfo->pkgName) != 0) {
+            return;
+        }
+        g_groupStateChangeRequestInfo = nullptr;
+    }
     LnnDestroyGroupOwner(pkgName);
-    std::lock_guard<std::mutex> autoLock(g_lock);
-    g_groupStateChangeRequestInfo = nullptr;
 }
 
 static void StopTimeSyncReq(const char *pkgName)
