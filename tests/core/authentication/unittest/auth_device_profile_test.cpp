@@ -16,8 +16,11 @@
 #include <gtest/gtest.h>
 #include <securec.h>
 
+#include "auth_device_profile_listener.h"
 #include "auth_device_profile_mock.h"
 #include "auth_deviceprofile.cpp"
+#include "auth_log.h"
+#include "device_profile_listener.h"
 #include "lnn_app_bind_interface.h"
 #include "softbus_error_code.h"
 #include "trust_device_profile.h"
@@ -232,6 +235,22 @@ HWTEST_F(AuthDeviceProfileTest, IS_NOT_TRUSTED_DEVICE_TEST_002, TestSize.Level1)
     InsertDpSameAccountAcl(peerUdid, peerUserId, sessionKeyId);
     bool result = IsNotTrustDevice(deviceIdHash);
     EXPECT_FALSE(result);
+}
+
+/*
+ * @tc.name: GENERATE_DSOFTBUS_BUNDLE_NAME_TEST_001
+ * @tc.desc: Generate Dsoftbus BundleName
+ * @tc.type: FUNC
+ * @tc.require:
+ */
+HWTEST_F(AuthDeviceProfileTest, GENERATE_DSOFTBUS_BUNDLE_NAME_TEST_001, TestSize.Level1)
+{
+    std::string peerUdid = "testDeviceHash123456789";
+    std::string localUdid = "localUdidhash123456789";
+    int32_t localUserId = -100000000;
+    char bundleName[MAX_BUNDLE_NAME_LEN] = { 0 };
+    int32_t ret = GenerateDsoftbusBundleName(peerUdid.c_str(), localUdid.c_str(), localUserId, bundleName);
+    EXPECT_EQ(ret, SOFTBUS_OK);
 }
 
 /*

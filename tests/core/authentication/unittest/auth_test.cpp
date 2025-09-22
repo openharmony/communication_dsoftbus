@@ -2244,4 +2244,16 @@ HWTEST_F(AuthTest, AUTH_GET_CONNINFO_BY_TYPE_Test_001, TestSize.Level1)
     ret = AuthGetConnInfoByType(nullptr, AUTH_LINK_TYPE_WIFI, &connInfo, false);
     EXPECT_EQ(ret, SOFTBUS_INVALID_PARAM);
 }
+
+/*
+ * @tc.name: AUTH_DISCONNECT_Test_001
+ * @tc.desc: DisconnectAuthDevice test
+ * @tc.type: FUNC
+ * @tc.require:
+ */
+HWTEST_F(AuthTest, AUTH_DISCONNECT_Test_001, TestSize.Level1)
+{
+    uint64_t connId = GenConnId(AUTH_LINK_TYPE_RAW_ENHANCED_P2P, 1);
+    EXPECT_NO_FATAL_FAILURE(DisconnectAuthDevice(&connId));
+}
 } // namespace OHOS

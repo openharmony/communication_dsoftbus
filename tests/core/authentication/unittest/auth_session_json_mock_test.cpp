@@ -654,6 +654,28 @@ HWTEST_F(AuthSessionJsonMockTest, PACK_CERTIFICATEINFO_TEST_001, TestSize.Level1
 }
 
 /*
+ * @tc.name: PACK_CERTIFICATEINFO_TEST_002
+ * @tc.desc: credIdType is ACCOUNT_SHARED.
+ * @tc.type: FUNC
+ * @tc.require:
+ */
+HWTEST_F(AuthSessionJsonMockTest, PACK_CERTIFICATEINFO_TEST_002, TestSize.Level1)
+{
+    NiceMock<AuthSessionJsonDepsInterfaceMock> mocker;
+    EXPECT_CALL(mocker, JSON_AddStringToObject).WillRepeatedly(Return(true));
+    JsonObj json;
+    (void)memset_s(&json, sizeof(JsonObj), 0, sizeof(JsonObj));
+    AuthSessionInfo info;
+    (void)memset_s(&info, sizeof(AuthSessionInfo), 0, sizeof(AuthSessionInfo));
+    char id[] = { 'a', 'b', 'c', 'd', 'e', 'f' };
+    info.credId = id;
+    int32_t ret = PackCertificateInfo(&json, &info);
+    EXPECT_EQ(ret, SOFTBUS_OK);
+    ret = PackCertificateInfo(&json, &info);
+    EXPECT_EQ(ret, SOFTBUS_OK);
+}
+
+/*
  * @tc.name: UNPACK_CERTIFICATEINFO_TEST_001
  * @tc.desc: UnpackCertificateInfo test
  * @tc.type: FUNC
