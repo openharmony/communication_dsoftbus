@@ -23,13 +23,13 @@
 #include "auth_session_fsm.h"
 #include "auth_session_key.h"
 #include "cJSON.h"
-#include "gtest/gtest.h"
 #include "lnn_local_net_ledger.h"
 #include "session.h"
 #include "softbus_base_listener.h"
 #include "softbus_error_code.h"
 #include "softbus_json_utils.h"
 #include "softbus_message_open_channel.h"
+#include "softbus_proxychannel_manager.c"
 #include "softbus_protocol_def.h"
 #include "softbus_server_frame.h"
 #include "softbus_socket.h"
@@ -732,5 +732,143 @@ HWTEST_F(TransServerTcpDirectTest, TransGetAuthTypeByNetWorkId001, TestSize.Leve
     EXPECT_NE(nullptr, node);
     OnSessionOpenFailProc(node, SOFTBUS_TRANS_HANDSHAKE_TIMEOUT);
     SoftBusFree(node);
+}
+
+/**
+ * @tc.name: TransGetRemoteUuidByAuthHandle001
+ * @tc.desc: Test TransGetRemoteUuidByAuthHandle
+ * @tc.type: FUNC
+ * @tc.require:
+ */
+HWTEST_F(TransServerTcpDirectTest, TransGetRemoteUuidByAuthHandle001, TestSize.Level1)
+{
+    AuthHandle authHandle = {
+        .authId = 4848448,
+        .type = AUTH_LINK_TYPE_BLE
+    };
+    char peerUid[UUID_BUF_LEN];
+
+    g_proxyChannelList = CreateSoftBusList();
+    ASSERT_TRUE(g_proxyChannelList != nullptr);
+
+    ProxyChannelInfo *proxyChannelInfo = static_cast<ProxyChannelInfo *>(SoftBusCalloc(sizeof(ProxyChannelInfo)));
+    ASSERT_TRUE(proxyChannelInfo != nullptr);
+    proxyChannelInfo->authHandle = authHandle;
+    proxyChannelInfo->channelId = 1024;
+    ListAdd(&(g_proxyChannelList->list), &(proxyChannelInfo->node));
+
+    NiceMock<TransTcpDirectCommonInterfaceMock> TransServerTcpDirectMock;
+    EXPECT_CALL(TransServerTcpDirectMock, AuthGetDeviceUuid).WillOnce(Return(SOFTBUS_NOT_FIND));
+    int32_t ret = TransGetRemoteUuidByAuthHandle(authHandle, peerUid);
+    EXPECT_EQ(ret, SOFTBUS_NOT_FIND);
+
+    EXPECT_CALL(TransServerTcpDirectMock, AuthGetDeviceUuid).WillOnce(Return(SOFTBUS_OK));
+    ret = TransGetRemoteUuidByAuthHandle(authHandle, peerUid);
+    EXPECT_EQ(ret, SOFTBUS_OK);
+
+    authHandle.type = AUTH_LINK_TYPE_WIFI;
+    EXPECT_CALL(TransServerTcpDirectMock, AuthGetDeviceUuid).WillOnce(Return(SOFTBUS_NOT_FIND));
+    ret = TransGetRemoteUuidByAuthHandle(authHandle, peerUid);
+    EXPECT_EQ(ret, SOFTBUS_NOT_FIND);
+
+    EXPECT_CALL(TransServerTcpDirectMock, AuthGetDeviceUuid).WillOnce(Return(SOFTBUS_OK));
+    ret = TransGetRemoteUuidByAuthHandle(authHandle, peerUid);
+    EXPECT_EQ(ret, SOFTBUS_OK);
+
+    ListDelete(&(proxyChannelInfo->node));
+    SoftBusFree(proxyChannelInfo);
+    DestroySoftBusList(g_proxyChannelList);
+    g_proxyChannelList = nullptr;
+}
+
+/**
+ * @tc.name: TransGetRemoteUuidByAuthHandle002
+ * @tc.desc: Test TransGetRemoteUuidByAuthHandle
+ * @tc.type: FUNC
+ * @tc.require:
+ */
+HWTEST_F(TransServerTcpDirectTest, TransGetRemoteUuidByAuthHandle002, TestSize.Level1)
+{
+    AuthHandle authHandle = {
+        .authId = 6666,
+        .type = AUTH_LINK_TYPE_BLE
+    };
+    char peerUid[UUID_BUF_LEN];
+
+    g_proxyChannelList = CreateSoftBusList();
+    ASSERT_TRUE(g_proxyChannelList != nullptr);
+
+    ProxyChannelInfo *proxyChannelInfo = static_cast<ProxyChannelInfo *>(SoftBusCalloc(sizeof(ProxyChannelInfo)));
+    ASSERT_TRUE(proxyChannelInfo != nullptr);
+    proxyChannelInfo->authHandle = authHandle;
+    proxyChannelInfo->channelId = 6666;
+    ListAdd(&(g_proxyChannelList->list), &(proxyChannelInfo->node));
+
+    NiceMock<TransTcpDirectCommonInterfaceMock> TransServerTcpDirectMock;
+    EXPECT_CALL(TransServerTcpDirectMock, AuthGetDeviceUuid).WillOnce(Return(SOFTBUS_OK));
+    int32_t ret = TransGetRemoteUuidByAuthHandle(authHandle, peerUid);
+    EXPECT_EQ(ret, SOFTBUS_OK);
+
+    ListDelete(&(proxyChannelInfo->node));
+    SoftBusFree(proxyChannelInfo);
+    DestroySoftBusList(g_proxyChannelList);
+    g_proxyChannelList = nullptr;
+}
+
+/**
+ * @tc.name: TransGetLocalIp001
+ * @tc.desc: Test TransGetLocalIp
+ * @tc.type: FUNC
+ * @tc.require:
+ */
+HWTEST_F(TransServerTcpDirectTest, TransGetLocalIp001, TestSize.Level1)
+{
+    char myIp[IP_LEN] = { 0 };
+    char *peerIp = const_cast<char *>("test_peer_ip");
+    char *peerUuid = const_cast<char *>("test_peer_uuid");
+
+    int32_t ret = TransGetLocalIp(nullptr, peerIp, peerUuid);
+    EXPECT_EQ(ret, SOFTBUS_INVALID_PARAM);
+
+    ret = TransGetLocalIp(myIp, nullptr, peerUuid);
+    EXPECT_EQ(ret, SOFTBUS_INVALID_PARAM);
+
+    ret = TransGetLocalIp(myIp, peerIp, nullptr);
+    EXPECT_EQ(ret, SOFTBUS_INVALID_PARAM);
+
+    int32_t osType = HA_OS_TYPE;
+    NiceMock<TransTcpDirectCommonInterfaceMock> TransServerTcpDirectMock;
+    EXPECT_CALL(TransServerTcpDirectMock, LnnGetOsTypeByNetworkId)
+        .WillRepeatedly(DoAll(SetArgPointee<1>(osType), Return(SOFTBUS_OK)));
+    EXPECT_CALL(TransServerTcpDirectMock, AuthMetaGetLocalIpByMetaNodeIdPacked)
+        .WillOnce(Return(SOFTBUS_TRANS_GET_LOCAL_IP_FAILED));
+
+    ret = TransGetLocalIp(myIp, peerIp, peerUuid);
+    EXPECT_EQ(ret, SOFTBUS_LANE_GET_LEDGER_INFO_ERR);
+
+    EXPECT_CALL(TransServerTcpDirectMock, AuthMetaGetLocalIpByMetaNodeIdPacked).WillOnce(Return(SOFTBUS_OK));
+    ret = TransGetLocalIp(myIp, peerIp, peerUuid);
+    EXPECT_EQ(ret, SOFTBUS_OK);
+}
+
+/**
+ * @tc.name: TransGetLocalIp002
+ * @tc.desc: Test TransGetLocalIp
+ * @tc.type: FUNC
+ * @tc.require:
+ */
+HWTEST_F(TransServerTcpDirectTest, TransGetLocalIp002, TestSize.Level1)
+{
+    char myIp[IP_LEN] = { 0 };
+    char *peerIp = const_cast<char *>("test_peer_ip");
+    char *peerUuid = const_cast<char *>("test_peer_uuid");
+    int32_t osType = OH_OS_TYPE;
+
+    NiceMock<TransTcpDirectCommonInterfaceMock> TransServerTcpDirectMock;
+    EXPECT_CALL(TransServerTcpDirectMock, LnnGetOsTypeByNetworkId)
+        .WillRepeatedly(DoAll(SetArgPointee<1>(osType), Return(SOFTBUS_OK)));
+
+    int32_t ret = TransGetLocalIp(myIp, peerIp, peerUuid);
+    EXPECT_EQ(ret, SOFTBUS_TRANS_GET_P2P_INFO_FAILED);
 }
 } // namespace OHOS

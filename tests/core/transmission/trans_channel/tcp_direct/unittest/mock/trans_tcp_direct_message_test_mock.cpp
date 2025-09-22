@@ -97,6 +97,11 @@ int32_t UnpackReply(const cJSON *msg, AppInfo *appInfo, uint16_t *fastDataSize)
     return GetTransTcpDirectMessageInterface()->UnpackReply(msg, appInfo, fastDataSize);
 }
 
+int32_t UnpackExternalDeviceReply(const cJSON *msg, AppInfo *appInfo)
+{
+    return GetTransTcpDirectMessageInterface()->UnpackExternalDeviceReply(msg, appInfo);
+}
+
 int32_t SoftbusGetConfig(ConfigType type, unsigned char *val, uint32_t len)
 {
     return GetTransTcpDirectMessageInterface()->SoftbusGetConfig(type, val, len);
@@ -115,6 +120,11 @@ int32_t AuthGetDeviceUuid(int64_t authId, char *uuid, uint16_t size)
 int32_t UnpackRequest(const cJSON *msg, AppInfo *appInfo)
 {
     return GetTransTcpDirectMessageInterface()->UnpackRequest(msg, appInfo);
+}
+
+int32_t UnpackExternalDeviceRequest(const cJSON *msg, AppInfo *appInfo)
+{
+    return GetTransTcpDirectMessageInterface()->UnpackExternalDeviceRequest(msg, appInfo);
 }
 
 int32_t GetAppInfoById(int32_t channelId, AppInfo *appInfo)
@@ -257,6 +267,36 @@ int32_t AuthFindUkIdByAclInfo(const AuthACLInfo *acl, int32_t *ukId)
 int32_t LnnGetLocalStrInfoByIfnameIdx(InfoKey key, char *info, uint32_t len, int32_t ifIdx)
 {
     return GetTransTcpDirectMessageInterface()->LnnGetLocalStrInfoByIfnameIdx(key, info, len, ifIdx);
+}
+
+char *PackReply(const AppInfo *appInfo)
+{
+    return GetTransTcpDirectMessageInterface()->PackReply(appInfo);
+}
+ 
+char *PackExternalDeviceReply(const AppInfo *appInfo)
+{
+    return GetTransTcpDirectMessageInterface()->PackExternalDeviceReply(appInfo);
+}
+ 
+bool GetJsonObjectNumber64Item(const cJSON *json, const char * const string, int64_t *target)
+{
+    return GetTransTcpDirectMessageInterface()->GetJsonObjectNumber64Item(json, string, target);
+}
+ 
+int32_t LnnGetOsTypeByNetworkId(const char *networkId, int32_t *osType)
+{
+    return GetTransTcpDirectMessageInterface()->LnnGetOsTypeByNetworkId(networkId, osType);
+}
+ 
+bool GetCapabilityBit(uint32_t value, uint32_t offset)
+{
+    return GetTransTcpDirectMessageInterface()->GetCapabilityBit(value, offset);
+}
+ 
+int64_t AuthGetIdByIp(const char *ip)
+{
+    return GetTransTcpDirectMessageInterface()->AuthGetIdByIp(ip);
 }
 }
 }

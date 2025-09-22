@@ -46,5 +46,20 @@ int32_t AuthMetaGetServerSide(int64_t authId, bool *isServer)
 {
     return GetTransServerTcpDirectInterface()->AuthMetaGetServerSide(authId, isServer);
 }
+
+int32_t AuthGetDeviceUuid(int64_t authId, char *uuid, uint16_t size)
+{
+    return GetTransServerTcpDirectInterface()->AuthGetDeviceUuid(authId, uuid, size);
+}
+ 
+int32_t LnnGetOsTypeByNetworkId(const char *networkId, int32_t *osType)
+{
+    return GetTransServerTcpDirectInterface()->LnnGetOsTypeByNetworkId(networkId, osType);
+}
+ 
+int32_t AuthMetaGetLocalIpByMetaNodeIdPacked(const char *metaNodeId, char *localIp, int32_t len)
+{
+    return GetTransServerTcpDirectInterface()->AuthMetaGetLocalIpByMetaNodeIdPacked(metaNodeId, localIp, len);
+}
 }
 }
