@@ -344,7 +344,8 @@ bool IsExistMetaAuthTcpConnFdItemWithoutLock(int32_t fd)
 {
     AuthTcpConnInstance *item = NULL;
     LIST_FOR_EACH_ENTRY(item, &g_authTcpConnFdList, AuthTcpConnInstance, node) {
-        if (item->fd != fd || (item->module != AUTH_RAW_P2P_SERVER && item->module != AUTH_RAW_P2P_CLIENT)) {
+        if (item->fd != fd ||
+            (item->module != AUTH_RAW_P2P_SERVER && item->module != AUTH_RAW_P2P_CLIENT && item->module != AUTH)) {
             continue;
         }
         return true;
