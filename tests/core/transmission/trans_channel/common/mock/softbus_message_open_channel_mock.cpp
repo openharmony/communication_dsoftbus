@@ -93,6 +93,11 @@ bool GetJsonObjectNumber16Item(const cJSON *json, const char * const string, uin
     return GetMessageOpenChannelInterface()->GetJsonObjectNumber16Item(json, string, target);
 }
 
+int32_t SoftBusBase64Decode(unsigned char *dst, size_t dlen, size_t *olen, const unsigned char *src, size_t slen)
+{
+    return GetMessageOpenChannelInterface()->SoftBusBase64Decode(dst, dlen, olen, src, slen);
+}
+
 void cJSON_Delete(cJSON *json){ }
 }
 }

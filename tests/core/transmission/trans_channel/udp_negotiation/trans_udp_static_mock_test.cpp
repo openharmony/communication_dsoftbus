@@ -18,6 +18,7 @@
 
 #include "softbus_adapter_mem.h"
 #include "softbus_app_info.h"
+#include "softbus_proxychannel_manager.c"
 #include "trans_channel_callback.h"
 #include "trans_udp_nego_static_test_mock.h"
 #include "trans_udp_negotiation.c"
@@ -110,6 +111,36 @@ IServerChannelCallBack g_callbacks = {
     .GetPkgNameBySessionName = DefaultGetPkgNameBySessionName,
     .GetUidAndPidBySessionName = DefaultGetUidAndPidBySessionName,
     .OnChannelBind = DefaultOnChannelBind
+};
+
+static int32_t GetLocalIpByRemoteIpTrue(const char *remoteIp, char *localIp, int32_t localIpSize)
+{
+    GTEST_LOG_(INFO) << "GetLocalIpByRemoteIpTrue enter";
+    (void)remoteIp;
+    (void)localIpSize;
+    (void)strcpy_s(localIp, IP_LEN, "43.28.11.425");
+    return SOFTBUS_OK;
+}
+
+static int32_t GetLocalIpByRemoteIpFalse(const char *remoteIp, char *localIp, int32_t localIpSize)
+{
+    GTEST_LOG_(INFO) << "GetLocalIpByRemoteIpFalse enter";
+    (void)remoteIp;
+    (void)localIp;
+    (void)localIpSize;
+    return SOFTBUS_CONN_GET_LOCAL_IP_BY_REMOTE_IP_FAILED;
+}
+
+static struct WifiDirectManager g_manager1 = {
+    .getLocalIpByRemoteIp = GetLocalIpByRemoteIpTrue,
+};
+
+static struct WifiDirectManager g_manager2 = {
+    .getLocalIpByRemoteIp = GetLocalIpByRemoteIpFalse,
+};
+
+static struct WifiDirectManager g_manager3 = {
+    .getLocalIpByRemoteIp = nullptr,
 };
 
 
@@ -335,6 +366,47 @@ HWTEST_F(TransUdpStaticMockTest, ParseRequestAppInfoTest001, TestSize.Level1)
     SoftBusFree(authHandle);
     SoftBusFree(appInfo);
     TransUdpChannelDeinit();
+}
+
+/**
+ * @tc.name: ParseRequestAppInfoTest002
+ * @tc.desc: use abnomal parameter
+ * @tc.type: FUNC
+ * @tc.require:
+ */
+HWTEST_F(TransUdpStaticMockTest, ParseRequestAppInfoTest002, TestSize.Level1)
+{
+    AuthHandle authHandle = {
+        .authId = 6859453
+    };
+    cJSON *cJson = cJSON_CreateObject();
+    ASSERT_TRUE(cJson != nullptr);
+    AppInfo appInfo = {
+        .udpChannelOptType = TYPE_INVALID_CHANNEL
+    };
+
+    int32_t ret = ParseRequestAppInfo(authHandle, cJson, nullptr);
+    EXPECT_EQ(ret, SOFTBUS_INVALID_PARAM);
+
+    NiceMock<TransUdpNegoStaticInterfaceMock> TransUdpStaticMock;
+    EXPECT_CALL(TransUdpStaticMock, AuthGetDeviceUuid).WillOnce(Return(SOFTBUS_AUTH_NOT_FOUND));
+    ret = ParseRequestAppInfo(authHandle, cJson, &appInfo);
+    EXPECT_EQ(ret, SOFTBUS_PEER_PROC_ERR);
+
+    int32_t osType = HA_OS_TYPE;
+    char peerUuid[UUID_BUF_LEN] = "test.peer.uid123";
+    (void)strcpy_s(appInfo.peerData.deviceId, DEVICE_ID_SIZE_MAX, "7645723048r4h20test");
+    EXPECT_CALL(TransUdpStaticMock, AuthGetDeviceUuid)
+        .WillOnce(DoAll(SetArrayArgument<1>(peerUuid, peerUuid + 32), Return(SOFTBUS_OK)));
+    EXPECT_CALL(TransUdpStaticMock, LnnGetOsTypeByNetworkId)
+        .WillOnce(DoAll(SetArgPointee<1>(osType), Return(SOFTBUS_OK)));
+    bool tmp = AddNumberToJsonObject(cJson, "CHANNEL_TYPE", appInfo.udpChannelOptType);
+    EXPECT_EQ(tmp, true);
+
+    ret = ParseRequestAppInfo(authHandle, cJson, &appInfo);
+    EXPECT_EQ(ret, SOFTBUS_TRANS_INVALID_CHANNEL_TYPE);
+
+    cJSON_Delete(cJson);
 }
 
 /**
@@ -784,5 +856,210 @@ HWTEST_F(TransUdpStaticMockTest, TransDealUdpChannelOpenResultTest002, TestSize.
     EXPECT_EQ(SOFTBUS_OK, ret);
 
     TransUdpChannelDeinit();
+}
+
+/**
+ * @tc.name: TransGetRemoteUuidByAuthHandle001
+ * @tc.desc: TransGetRemoteUuidByAuthHandle test
+ * @tc.type: FUNC
+ * @tc.require:
+ */
+HWTEST_F(TransUdpStaticMockTest, TransGetRemoteUuidByAuthHandle001, TestSize.Level1)
+{
+    AuthHandle authHandle = {
+        .authId = 4848448,
+        .type = AUTH_LINK_TYPE_BLE
+    };
+    char peerUid[UUID_BUF_LEN];
+
+    g_proxyChannelList = CreateSoftBusList();
+    ASSERT_TRUE(g_proxyChannelList != nullptr);
+
+    ProxyChannelInfo *proxyChannelInfo = static_cast<ProxyChannelInfo *>(SoftBusCalloc(sizeof(ProxyChannelInfo)));
+    ASSERT_TRUE(proxyChannelInfo != nullptr);
+    proxyChannelInfo->authHandle = authHandle;
+    proxyChannelInfo->channelId = 1234;
+    ListAdd(&(g_proxyChannelList->list), &(proxyChannelInfo->node));
+
+    NiceMock<TransUdpNegoStaticInterfaceMock> TransUdpStaticMock;
+    EXPECT_CALL(TransUdpStaticMock, AuthGetDeviceUuid).WillOnce(Return(SOFTBUS_NOT_FIND));
+    int32_t ret = TransGetRemoteUuidByAuthHandle(authHandle, peerUid);
+    EXPECT_EQ(ret, SOFTBUS_NOT_FIND);
+
+    EXPECT_CALL(TransUdpStaticMock, AuthGetDeviceUuid).WillOnce(Return(SOFTBUS_OK));
+    ret = TransGetRemoteUuidByAuthHandle(authHandle, peerUid);
+    EXPECT_EQ(ret, SOFTBUS_OK);
+
+    authHandle.type = AUTH_LINK_TYPE_WIFI;
+    EXPECT_CALL(TransUdpStaticMock, AuthGetDeviceUuid).WillOnce(Return(SOFTBUS_NOT_FIND));
+    ret = TransGetRemoteUuidByAuthHandle(authHandle, peerUid);
+    EXPECT_EQ(ret, SOFTBUS_NOT_FIND);
+
+    EXPECT_CALL(TransUdpStaticMock, AuthGetDeviceUuid).WillOnce(Return(SOFTBUS_OK));
+    ret = TransGetRemoteUuidByAuthHandle(authHandle, peerUid);
+    EXPECT_EQ(ret, SOFTBUS_OK);
+
+    ListDelete(&(proxyChannelInfo->node));
+    SoftBusFree(proxyChannelInfo);
+    DestroySoftBusList(g_proxyChannelList);
+    g_proxyChannelList = nullptr;
+}
+
+/**
+ * @tc.name: TransGetRemoteUuidByAuthHandle002
+ * @tc.desc: TransGetRemoteUuidByAuthHandle test
+ * @tc.type: FUNC
+ * @tc.require:
+ */
+HWTEST_F(TransUdpStaticMockTest, TransGetRemoteUuidByAuthHandle002, TestSize.Level1)
+{
+    AuthHandle authHandle = {
+        .authId = 6666,
+        .type = AUTH_LINK_TYPE_BLE
+    };
+    char peerUid[UUID_BUF_LEN];
+
+    g_proxyChannelList = CreateSoftBusList();
+    ASSERT_TRUE(g_proxyChannelList != nullptr);
+
+    ProxyChannelInfo *proxyChannelInfo = static_cast<ProxyChannelInfo *>(SoftBusCalloc(sizeof(ProxyChannelInfo)));
+    ASSERT_TRUE(proxyChannelInfo != nullptr);
+    proxyChannelInfo->authHandle = authHandle;
+    proxyChannelInfo->channelId = 6666;
+    ListAdd(&(g_proxyChannelList->list), &(proxyChannelInfo->node));
+
+    NiceMock<TransUdpNegoStaticInterfaceMock> TransUdpStaticMock;
+    EXPECT_CALL(TransUdpStaticMock, AuthGetDeviceUuid).WillOnce(Return(SOFTBUS_OK));
+    int32_t ret = TransGetRemoteUuidByAuthHandle(authHandle, peerUid);
+    EXPECT_EQ(ret, SOFTBUS_OK);
+
+    ListDelete(&(proxyChannelInfo->node));
+    SoftBusFree(proxyChannelInfo);
+    DestroySoftBusList(g_proxyChannelList);
+    g_proxyChannelList = nullptr;
+}
+
+/**
+ * @tc.name: TransGetUdpChannelLocalIp001
+ * @tc.desc: TransGetUdpChannelLocalIp test
+ * @tc.type: FUNC
+ * @tc.require:
+ */
+HWTEST_F(TransUdpStaticMockTest, TransGetUdpChannelLocalIp001, TestSize.Level1)
+{
+    AuthHandle authHandle = {
+        .type = AUTH_LINK_TYPE_ENHANCED_P2P
+    };
+    AppInfo appInfo = {
+        .osType = HA_OS_TYPE,
+        .routeType = WIFI_P2P
+    };
+
+    int32_t ret = TransGetUdpChannelLocalIp(authHandle, nullptr);
+    EXPECT_EQ(ret, SOFTBUS_INVALID_PARAM);
+
+    NiceMock<TransUdpNegoStaticInterfaceMock> TransUdpStaticMock;
+    EXPECT_CALL(TransUdpStaticMock, AuthGetDeviceUuid).WillOnce(Return(SOFTBUS_NOT_FIND));
+    ret = TransGetUdpChannelLocalIp(authHandle, &appInfo);
+    EXPECT_EQ(ret, SOFTBUS_NOT_FIND);
+
+    EXPECT_CALL(TransUdpStaticMock, AuthGetDeviceUuid).WillRepeatedly(Return(SOFTBUS_OK));
+    EXPECT_CALL(TransUdpStaticMock, AuthMetaGetLocalIpByMetaNodeIdPacked)
+        .WillOnce(Return(SOFTBUS_TRANS_GET_LOCAL_IP_FAILED));
+    ret = TransGetUdpChannelLocalIp(authHandle, &appInfo);
+    EXPECT_EQ(ret, SOFTBUS_LANE_GET_LEDGER_INFO_ERR);
+
+    char localIp[IP_LEN] = "00.11.22.34";
+    EXPECT_CALL(TransUdpStaticMock, AuthMetaGetLocalIpByMetaNodeIdPacked)
+        .WillOnce(DoAll(SetArrayArgument<1>(localIp, localIp + 15), Return(SOFTBUS_OK)));
+    ret = TransGetUdpChannelLocalIp(authHandle, &appInfo);
+    EXPECT_EQ(ret, SOFTBUS_OK);
+}
+
+/**
+ * @tc.name: TransGetUdpChannelLocalIp002
+ * @tc.desc: TransGetUdpChannelLocalIp test
+ * @tc.type: FUNC
+ * @tc.require:
+ */
+HWTEST_F(TransUdpStaticMockTest, TransGetUdpChannelLocalIp002, TestSize.Level1)
+{
+    AppInfo appInfo = {
+        .osType = OH_OS_TYPE,
+        .udpConnType = UDP_CONN_TYPE_WIFI,
+        .routeType = WIFI_P2P
+    };
+    AuthHandle authHandle;
+
+    NiceMock<TransUdpNegoStaticInterfaceMock> TransUdpStaticMock;
+    EXPECT_CALL(TransUdpStaticMock, LnnGetLocalStrInfoByIfnameIdx).WillOnce(Return(SOFTBUS_INVALID_PARAM));
+    int32_t ret = TransGetUdpChannelLocalIp(authHandle, &appInfo);
+    EXPECT_EQ(ret, SOFTBUS_INVALID_PARAM);
+
+    char localIp[IP_LEN] = "44.33.22.11";
+    EXPECT_CALL(TransUdpStaticMock, LnnGetLocalStrInfoByIfnameIdx)
+        .WillOnce(DoAll(SetArrayArgument<1>(localIp, localIp + 15), Return(SOFTBUS_OK)));
+    ret = TransGetUdpChannelLocalIp(authHandle, &appInfo);
+    EXPECT_EQ(ret, SOFTBUS_OK);
+
+    appInfo.udpConnType = UDP_CONN_TYPE_USB;
+    EXPECT_CALL(TransUdpStaticMock, LnnGetLocalStrInfoByIfnameIdx).WillOnce(Return(SOFTBUS_INVALID_PARAM));
+    ret = TransGetUdpChannelLocalIp(authHandle, &appInfo);
+    EXPECT_EQ(ret, SOFTBUS_INVALID_PARAM);
+
+    EXPECT_CALL(TransUdpStaticMock, LnnGetLocalStrInfoByIfnameIdx)
+        .WillOnce(DoAll(SetArrayArgument<1>(localIp, localIp + 15), Return(SOFTBUS_OK)));
+    ret = TransGetUdpChannelLocalIp(authHandle, &appInfo);
+    EXPECT_EQ(ret, SOFTBUS_OK);
+
+    appInfo.udpConnType = UDP_CONN_TYPE_P2P;
+    EXPECT_CALL(TransUdpStaticMock, GetWifiDirectManager).WillOnce(Return(nullptr));
+    ret = TransGetUdpChannelLocalIp(authHandle, &appInfo);
+    EXPECT_EQ(ret, SOFTBUS_WIFI_DIRECT_INIT_FAILED);
+
+    EXPECT_CALL(TransUdpStaticMock, GetWifiDirectManager).WillOnce(Return(&g_manager3));
+    ret = TransGetUdpChannelLocalIp(authHandle, &appInfo);
+    EXPECT_EQ(ret, SOFTBUS_WIFI_DIRECT_INIT_FAILED);
+
+    (void)strcpy_s(appInfo.peerData.addr, IP_LEN, "77.48.52.11");
+    EXPECT_CALL(TransUdpStaticMock, GetWifiDirectManager).WillOnce(Return(&g_manager2));
+    ret = TransGetUdpChannelLocalIp(authHandle, &appInfo);
+    EXPECT_EQ(ret, SOFTBUS_CONN_GET_LOCAL_IP_BY_REMOTE_IP_FAILED);
+
+    EXPECT_CALL(TransUdpStaticMock, GetWifiDirectManager).WillOnce(Return(&g_manager1));
+    ret = TransGetUdpChannelLocalIp(authHandle, &appInfo);
+    EXPECT_EQ(ret, SOFTBUS_OK);
+}
+
+/**
+ * @tc.name: BuildUdpReplyExtra001
+ * @tc.desc: BuildUdpReplyExtra test
+ * @tc.type: FUNC
+ * @tc.require:
+ */
+HWTEST_F(TransUdpStaticMockTest, BuildUdpReplyExtra001, TestSize.Level1)
+{
+    int64_t authId = 123456789;
+    int64_t channelId = 987654321;
+
+    TransEventExtra extra = BuildUdpReplyExtra(authId, channelId);
+    EXPECT_EQ(extra.socketName, nullptr);
+    EXPECT_EQ(extra.peerNetworkId, nullptr);
+    EXPECT_EQ(extra.calleePkg, nullptr);
+    EXPECT_EQ(extra.callerPkg, nullptr);
+    EXPECT_EQ(extra.channelId, (int32_t)channelId);
+    EXPECT_EQ(extra.authId, (int32_t)authId);
+    EXPECT_EQ(extra.result, EVENT_STAGE_RESULT_OK);
+
+    authId = -123456789;
+    channelId = -987654321;
+    extra = BuildUdpReplyExtra(authId, channelId);
+    EXPECT_EQ(extra.socketName, nullptr);
+    EXPECT_EQ(extra.peerNetworkId, nullptr);
+    EXPECT_EQ(extra.calleePkg, nullptr);
+    EXPECT_EQ(extra.callerPkg, nullptr);
+    EXPECT_EQ(extra.channelId, (int32_t)channelId);
+    EXPECT_EQ(extra.authId, (int32_t)authId);
+    EXPECT_EQ(extra.result, EVENT_STAGE_RESULT_OK);
 }
 }

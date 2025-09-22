@@ -70,6 +70,8 @@ ohos_unittest("TransServerTcpDirectTest") {
     "$dsoftbus_root_path/core/transmission/trans_channel/tcp_direct/include",
     "$dsoftbus_root_path/core/transmission/trans_channel/tcp_direct/src",
     "$dsoftbus_root_path/core/transmission/trans_channel/udp_negotiation/include",
+    "$dsoftbus_root_path/core/transmission/trans_channel/proxy/src",
+    "$dsoftbus_root_path/core/common/security/permission/include", 
     "$dsoftbus_root_path/interfaces/kits",
     "$dsoftbus_root_path/interfaces/kits/adapter",
     "$dsoftbus_root_path/interfaces/kits/authentication",
@@ -325,6 +327,7 @@ ohos_unittest("TransTcpDirectMessageAppendTest") {
     "$dsoftbus_root_path/interfaces/kits/transport",
     "$dsoftbus_root_path/tests/core/transmission/trans_channel/tcp_direct/unittest/mock",
     "$softbus_adapter_common/include",
+    "$dsoftbus_root_path/core/common/include",
     "unittest/common/",
   ]
 

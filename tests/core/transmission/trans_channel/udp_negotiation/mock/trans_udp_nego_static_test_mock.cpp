@@ -175,5 +175,20 @@ int32_t TransDelUdpChannel(int32_t channelId)
 {
     return GetTransUdpNegoStaticInterface()->TransDelUdpChannel(channelId);
 }
+
+int32_t AuthMetaGetLocalIpByMetaNodeIdPacked(const char *metaNodeId, char *localIp, int32_t len)
+{
+    return GetTransUdpNegoStaticInterface()->AuthMetaGetLocalIpByMetaNodeIdPacked(metaNodeId, localIp, len);
+}
+ 
+struct WifiDirectManager *GetWifiDirectManager(void)
+{
+    return GetTransUdpNegoStaticInterface()->GetWifiDirectManager();
+}
+ 
+int32_t LnnGetOsTypeByNetworkId(const char *networkId, int32_t *osType)
+{
+    return GetTransUdpNegoStaticInterface()->LnnGetOsTypeByNetworkId(networkId, osType);
+}
 }
 }
