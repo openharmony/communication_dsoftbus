@@ -22,6 +22,7 @@
 #include "softbus_feature_config.h"
 #include "trans_channel_common.c"
 #include "trans_channel_limit.h"
+#include "trans_lane_manager.c"
 #include "trans_lane_pending_ctl.c"
 #include "trans_session_service.h"
 
@@ -689,6 +690,11 @@ HWTEST_F(TransLaneTest, TransLaneTest019, TestSize.Level1)
     info.type = LANE_LINK_TYPE_BUTT;
     ret = TransGetConnectOptByConnInfo(&info, &connOpt);
     EXPECT_EQ(SOFTBUS_TRANS_GET_CONN_OPT_FAILED, ret);
+
+    info.type = LANE_P2P;
+    (void)strcpy_s(info.connInfo.p2p.peerIp, IP_LEN, "12.34.56.10");
+    ret = TransGetConnectOptByConnInfo(&info, &connOpt);
+    EXPECT_EQ(SOFTBUS_OK, ret);
 }
 
 /**
@@ -808,5 +814,138 @@ HWTEST_F(TransLaneTest, TransLaneTest024, TestSize.Level1)
 
     SoftBusFree(p2pInfo);
     SoftBusFree(connOpt);
+}
+
+/**
+ * @tc.name: GetAllocInfoExtBySessionParam001
+ * @tc.desc: GetAllocInfoExtBySessionParam func test.
+ * @tc.type: FUNC
+ * @tc.require:
+ */
+HWTEST_F(TransLaneTest, GetAllocInfoExtBySessionParam001, TestSize.Level1)
+{
+    SessionParam sessionParam;
+    LaneAllocInfoExt laneInfoExt;
+
+    int32_t ret = GetAllocInfoExtBySessionParam(nullptr, &laneInfoExt);
+    EXPECT_EQ(ret, SOFTBUS_INVALID_PARAM);
+
+    ret = GetAllocInfoExtBySessionParam(&sessionParam, nullptr);
+    EXPECT_EQ(ret, SOFTBUS_INVALID_PARAM);
+}
+
+/**
+ * @tc.name: GetAllocInfoExtBySessionParam002
+ * @tc.desc: GetAllocInfoExtBySessionParam func test.
+ * @tc.type: FUNC
+ * @tc.require:
+ */
+HWTEST_F(TransLaneTest, GetAllocInfoExtBySessionParam002, TestSize.Level1)
+{
+    SessionParam sessionParam = {
+        .peerDeviceId = "test_device_id",
+        .attr = nullptr
+    };
+    LaneAllocInfoExt laneInfoExt;
+
+    int32_t ret = GetAllocInfoExtBySessionParam(&sessionParam, &laneInfoExt);
+    EXPECT_EQ(ret, SOFTBUS_TRANS_INVALID_SESSION_TYPE);
+
+    const SessionAttribute myAttr = {
+        .dataType = TYPE_BYTES,
+    };
+    sessionParam.attr = &myAttr;
+    ret = GetAllocInfoExtBySessionParam(&sessionParam, &laneInfoExt);
+    EXPECT_EQ(ret, SOFTBUS_OK);
+}
+
+/**
+ * @tc.name: TransAsyncGetLaneInfoByExt001
+ * @tc.desc: TransAsyncGetLaneInfoByExt func test.
+ * @tc.type: FUNC
+ * @tc.require:
+ */
+HWTEST_F(TransLaneTest, TransAsyncGetLaneInfoByExt001, TestSize.Level1)
+{
+    SessionParam sessionParam;
+    uint32_t laneHandle = 2;
+    AppInfo appInfo;
+
+    int32_t ret = TransAsyncGetLaneInfoByExt(nullptr, &laneHandle, &appInfo);
+    EXPECT_EQ(ret, SOFTBUS_INVALID_PARAM);
+
+    ret = TransAsyncGetLaneInfoByExt(&sessionParam, nullptr, &appInfo);
+    EXPECT_EQ(ret, SOFTBUS_INVALID_PARAM);
+
+    ret = TransAsyncGetLaneInfoByExt(&sessionParam, &laneHandle, nullptr);
+    EXPECT_EQ(ret, SOFTBUS_INVALID_PARAM);
+
+    sessionParam.attr = nullptr;
+    ret = TransAsyncGetLaneInfoByExt(&sessionParam, &laneHandle, &appInfo);
+    EXPECT_EQ(ret, SOFTBUS_TRANS_GET_LANE_INFO_ERR);
+}
+
+/**
+ * @tc.name: TransAsyncGetLaneInfoByExt002
+ * @tc.desc: TransAsyncGetLaneInfoByExt func test.
+ * @tc.type: FUNC
+ * @tc.require:
+ */
+HWTEST_F(TransLaneTest, TransAsyncGetLaneInfoByExt002, TestSize.Level1)
+{
+    const SessionAttribute myAttr = {
+        .dataType = TYPE_BYTES,
+        .linkType = { LINK_TYPE_BR }
+    };
+    SessionParam sessionParam = {
+        .peerDeviceId = "test_device_id",
+        .sessionName = "test_session_name",
+        .sessionId = 6,
+        .isQosLane = true,
+        .isAsync = false,
+        .attr = &myAttr
+    };
+    AppInfo appInfo = {
+        .callingTokenId = 358,
+        .timeStart = 9181024
+    };
+    uint32_t laneHandle;
+
+    int32_t ret = TransSocketLaneMgrInit();
+    EXPECT_EQ(ret, SOFTBUS_OK);
+
+    SocketWithChannelInfo *socketChannelInfo =
+        static_cast<SocketWithChannelInfo *>(SoftBusCalloc(sizeof(SocketWithChannelInfo)));
+    socketChannelInfo->sessionId = 6;
+    (void)strcpy_s(socketChannelInfo->sessionName, SESSION_NAME_SIZE_MAX, "test_session_name") ;
+    ListAdd(&g_socketChannelList->list, &socketChannelInfo->node);
+
+    ret = TransAsyncReqLanePendingInit();
+    EXPECT_EQ(ret, SOFTBUS_OK);
+
+    ret = TransAsyncGetLaneInfoByExt(&sessionParam, &laneHandle, &appInfo);
+    EXPECT_NE(ret, SOFTBUS_OK);
+
+    TransAsyncReqLanePendingDeinit();
+    ListDelete(&(socketChannelInfo->node));
+    SoftBusFree(socketChannelInfo);
+    TransSocketLaneMgrDeinit();
+}
+
+/**
+ * @tc.name: SetP2pExtConnInfo001
+ * @tc.desc: SetP2pExtConnInfo func test.
+ * @tc.type: FUNC
+ * @tc.require:
+ */
+HWTEST_F(TransLaneTest, SetP2pExtConnInfo001, TestSize.Level1)
+{
+    P2pConnInfo p2pInfo;
+    (void)strcpy_s(p2pInfo.peerIp, IP_LEN, "12.34.45.00");
+
+    ConnectOption connOpt;
+
+    int32_t ret = SetP2pExtConnInfo(&p2pInfo, &connOpt);
+    EXPECT_EQ(ret, SOFTBUS_OK);
 }
 } // namespace OHOS

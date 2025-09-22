@@ -46,6 +46,7 @@ ohos_unittest("TransLaneTest") {
     "$dsoftbus_dfx_path/interface/include/form",
     "$dsoftbus_root_path/interfaces/kits/connect",
     "$softbus_adapter_common/net/wifi/include",
+    "$dsoftbus_core_path/transmission/trans_channel/manager/src",
   ]
 
   deps = [

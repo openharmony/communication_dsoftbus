@@ -58,7 +58,7 @@
 
 #define FLAG_REQUEST 0
 #define FLAG_REPLY 1
-#define ID_OFFSET (0xABAB0000)
+#define ID_OFFSET (1)
 #define MAX_ERRDESC_LEN 128
 
 #define ISHARE_SESSION_NAME "IShare*"
