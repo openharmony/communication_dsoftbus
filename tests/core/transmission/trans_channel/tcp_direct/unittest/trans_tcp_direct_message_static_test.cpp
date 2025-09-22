@@ -963,4 +963,15 @@ HWTEST_F(TransTcpDirectMessageStaticTest, TransAsyncTcpDirectChannelTaskTest001,
     TransAsyncTcpDirectChannelTask(channelId);
     TransDelSessionConnById(channelId);
 }
+
+/**
+ * @tc.name: BuildEventExtra001
+ * @tc.desc: BuildEventExtra test
+ * @tc.type: FUNC
+ * @tc.require:
+ */
+HWTEST_F(TransTcpDirectMessageStaticTest, BuildEventExtra001, TestSize.Level1)
+{
+    EXPECT_NO_FATAL_FAILURE(BuildEventExtra(2688));
+}
 }
