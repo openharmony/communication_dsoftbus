@@ -1006,35 +1006,30 @@ int32_t SyncTrustedRelationShip(const char *pkgName, const char *msg, uint32_t m
 int32_t SetDisplayName(const char *pkgName, const char *nameData, uint32_t len);
 
 /**
- * @brief Set Local device display name.
+ * @brief Create Group Owner.
  *
  * @param pkgName Indicates the pointer to the service package name, which can contain a maximum of 64 bytes.
- * @param config Indicates the pointer to the display name, MUST be cJSON format.
- * @param result Len Indicates the length of nameData.
- * @param listener Len Indicates the length of nameData.
+ * @param config The config of create group.
+ * @param result The result of create group.
+ * @param listener Notify the status of the current group.
  *
  * @return Returns <b>SOFTBUS_INVALID_PARAM</b> if parameters is null or invalid.
  * @return Returns <b>SOFTBUS_DISCOVER_NOT_INIT</b> if the Intelligent Soft Bus client fails to be initialized.
  * @return Returns <b>SOFTBUS_LOCK_ERR</b> if the mutex fails to be locked.
  * @return Returns <b>SOFTBUS_OK</b> if the service subscription is successful
  *
- * @since 5.1
+ * @since 1.0
  * @version 1.0
  */
 int32_t CreateGroupOwner(const char *pkgName, const struct GroupOwnerConfig *config,
     struct GroupOwnerResult *result, GroupOwnerDestroyListener listener);
 
 /**
- * @brief Set Local device display name.
+ * @brief Destroy Group Owner.
  *
  * @param pkgName Indicates the pointer to the service package name, which can contain a maximum of 64 bytes.
  *
- * @return Returns <b>SOFTBUS_INVALID_PARAM</b> if parameters is null or invalid.
- * @return Returns <b>SOFTBUS_DISCOVER_NOT_INIT</b> if the Intelligent Soft Bus client fails to be initialized.
- * @return Returns <b>SOFTBUS_LOCK_ERR</b> if the mutex fails to be locked.
- * @return Returns <b>SOFTBUS_OK</b> if the service subscription is successful
- *
- * @since 5.1
+ * @since 1.0
  * @version 1.0
  */
 void DestroyGroupOwner(const char *pkgName);

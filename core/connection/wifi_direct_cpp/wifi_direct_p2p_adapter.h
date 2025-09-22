@@ -51,6 +51,9 @@ private:
     static int RemoveGroupNotAddReuse();
     static int ReuseP2p();
     static int ReuseGroup(struct GroupOwnerResult *result);
+    static void SetIsCreateGroup(bool isCreateGroup);
+    static bool GetIsCreateGroup();
+    static int CheckRoleAndProcess(LinkInfo::LinkMode role, struct GroupOwnerResult *result);
 
     static inline GroupOwnerDestroyListener groupOwnerDestroyListener_;
     static inline bool isCreateGroup_;

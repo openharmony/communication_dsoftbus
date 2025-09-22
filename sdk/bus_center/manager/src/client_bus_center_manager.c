@@ -1214,43 +1214,6 @@ int32_t SetDisplayNameInner(const char *pkgName, const char *nameData, uint32_t 
     return ServerIpcSetDisplayName(pkgName, nameData, len);
 }
 
-static int32_t FindGroupOwnerDestroyCb()
-{
-    if (SoftBusMutexLock(&g_busCenterClient.lock) != SOFTBUS_OK) {
-        LNN_LOGE(LNN_STATE, "lock group owner destroy cb list");
-        return SOFTBUS_LOCK_ERR;
-    }
-    if (g_busCenterClient.groupOwnerDestroyCb != NULL) {
-        LNN_LOGE(LNN_STATE, "Duplicate group creation is not allowed");
-        (void)SoftBusMutexUnlock(&g_busCenterClient.lock);
-        return SOFTBUS_CONN_ALREADY_CREATE_GROUP;
-    }
-    (void)SoftBusMutexUnlock(&g_busCenterClient.lock);
-    return SOFTBUS_OK;
-}
-
-static int32_t AddGroupOwnerDestroyCb(GroupOwnerDestroyListener cb)
-{
-    if (SoftBusMutexLock(&g_busCenterClient.lock) != SOFTBUS_OK) {
-        LNN_LOGE(LNN_STATE, "lock group owner destroy cb list");
-        return SOFTBUS_LOCK_ERR;
-    }
-    g_busCenterClient.groupOwnerDestroyCb = cb;
-    (void)SoftBusMutexUnlock(&g_busCenterClient.lock);
-    return SOFTBUS_OK;
-}
-
-static int32_t DeleteGroupOwnerDestroyCb()
-{
-    if (SoftBusMutexLock(&g_busCenterClient.lock) != SOFTBUS_OK) {
-        LNN_LOGE(LNN_STATE, "lock group owner destroy cb list");
-        return SOFTBUS_LOCK_ERR;
-    }
-    g_busCenterClient.groupOwnerDestroyCb = NULL;
-    (void)SoftBusMutexUnlock(&g_busCenterClient.lock);
-    return SOFTBUS_OK;
-}
-
 int32_t CreateGroupOwnerInner(const char *pkgName, const struct GroupOwnerConfig *config,
     struct GroupOwnerResult *result, GroupOwnerDestroyListener listener)
 {
@@ -1262,14 +1225,24 @@ int32_t CreateGroupOwnerInner(const char *pkgName, const struct GroupOwnerConfig
         LNN_LOGE(LNN_STATE, "buscenter client not init");
         return SOFTBUS_NO_INIT;
     }
-    LNN_CHECK_AND_RETURN_RET_LOGE(FindGroupOwnerDestroyCb() == SOFTBUS_OK,
-        SOFTBUS_LOCK_ERR, LNN_STATE, "can not create group");
-    LNN_CHECK_AND_RETURN_RET_LOGE(AddGroupOwnerDestroyCb(listener) == SOFTBUS_OK,
-        SOFTBUS_LOCK_ERR, LNN_STATE, "can not create group");
-    int32_t ret = ServerIpcCreateGroupOwner(pkgName, config, result);
+    int32_t ret = SoftBusMutexLock(&g_busCenterClient.lock);
+    LNN_CHECK_AND_RETURN_RET_LOGE(ret == SOFTBUS_OK, SOFTBUS_LOCK_ERR, LNN_STATE,
+        "lock group owner destroy cb, ret=%{public}d", ret);
+    if (g_busCenterClient.groupOwnerDestroyCb != NULL) {
+        LNN_LOGE(LNN_STATE, "group has already been created");
+        (void)SoftBusMutexUnlock(&g_busCenterClient.lock);
+        return SOFTBUS_CONN_ALREADY_CREATE_GROUP;
+    }
+    g_busCenterClient.groupOwnerDestroyCb = listener;
+    (void)SoftBusMutexUnlock(&g_busCenterClient.lock);
+    ret = ServerIpcCreateGroupOwner(pkgName, config, result);
     if (ret != SOFTBUS_OK) {
-        DeleteGroupOwnerDestroyCb();
         LNN_LOGE(LNN_STATE, "request create group failed, ret=%{public}d", ret);
+        ret = SoftBusMutexLock(&g_busCenterClient.lock);
+        LNN_CHECK_AND_RETURN_RET_LOGE(ret == SOFTBUS_OK, SOFTBUS_LOCK_ERR, LNN_STATE,
+            "lock group owner destroy cb, ret=%{public}d", ret);
+        g_busCenterClient.groupOwnerDestroyCb = NULL;
+        (void)SoftBusMutexUnlock(&g_busCenterClient.lock);
     }
     return ret;
 }
@@ -1284,12 +1257,18 @@ int32_t DestroyGroupOwnerInner(const char *pkgName)
         LNN_LOGE(LNN_STATE, "buscenter client not init");
         return SOFTBUS_NO_INIT;
     }
-    if (FindGroupOwnerDestroyCb() == SOFTBUS_CONN_ALREADY_CREATE_GROUP) {
+    int32_t ret = SoftBusMutexLock(&g_busCenterClient.lock);
+    LNN_CHECK_AND_RETURN_RET_LOGE(ret == SOFTBUS_OK, SOFTBUS_LOCK_ERR, LNN_STATE,
+        "lock group owner destroy cb, ret=%{public}d", ret);
+    if (g_busCenterClient.groupOwnerDestroyCb != NULL) {
+        LNN_LOGI(LNN_STATE, "group has already been created");
+        g_busCenterClient.groupOwnerDestroyCb = NULL;
+        (void)SoftBusMutexUnlock(&g_busCenterClient.lock);
         ServerIpcDestroyGroupOwner(pkgName);
-        DeleteGroupOwnerDestroyCb();
         return SOFTBUS_OK;
     }
     LNN_LOGE(LNN_STATE, "no create or reuse group");
+    (void)SoftBusMutexUnlock(&g_busCenterClient.lock);
     return SOFTBUS_NOT_FIND;
 }
 
@@ -1713,11 +1692,19 @@ void LnnOnGroupStateChange(int32_t retCode)
         LNN_LOGE(LNN_STATE, "buscenter client not init");
         return;
     }
-    if (FindGroupOwnerDestroyCb() == SOFTBUS_CONN_ALREADY_CREATE_GROUP) {
-        g_busCenterClient.groupOwnerDestroyCb(retCode);
-        DeleteGroupOwnerDestroyCb();
+    int32_t ret = SoftBusMutexLock(&g_busCenterClient.lock);
+    LNN_CHECK_AND_RETURN_LOGE(ret == SOFTBUS_OK, LNN_STATE,
+        "lock group owner destroy cb, ret=%{public}d", ret);
+    if (g_busCenterClient.groupOwnerDestroyCb != NULL) {
+        LNN_LOGI(LNN_STATE, "group has already been created");
+        GroupOwnerDestroyListener groupOwnerDestroyCb = g_busCenterClient.groupOwnerDestroyCb;
+        g_busCenterClient.groupOwnerDestroyCb = NULL;
+        (void)SoftBusMutexUnlock(&g_busCenterClient.lock);
+        groupOwnerDestroyCb(retCode);
         return;
     }
+    LNN_LOGE(LNN_STATE, "no create or reuse group");
+    (void)SoftBusMutexUnlock(&g_busCenterClient.lock);
     return;
 }
 
