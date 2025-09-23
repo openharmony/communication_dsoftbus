@@ -828,6 +828,8 @@ int32_t TransSendMsg(int32_t channelId, int32_t channelType, const void *data, u
 
 void TransChannelDeathCallback(const char *pkgName, int32_t pid)
 {
+    TRANS_CHECK_AND_RETURN_LOGE((pkgName != NULL), TRANS_CTRL, "pkgName is null.");
+    TRANS_LOGI(TRANS_CTRL, "pkgName=%{public}s, pid=%{public}d", pkgName, pid);
     TransProxyDeathCallback(pkgName, pid);
     TransTdcDeathCallback(pkgName, pid);
     TransTdcChannelInfoDeathCallback(pkgName, pid);

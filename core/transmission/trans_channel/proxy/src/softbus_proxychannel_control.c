@@ -252,7 +252,8 @@ int32_t TransProxyHandshake(ProxyChannelInfo *info)
     }
     msgHead.myId = info->myId;
     msgHead.peerId = INVALID_CHANNEL_ID;
-    TRANS_LOGI(TRANS_CTRL, "handshake myChannelId=%{public}d, cipher=0x%{public}02x", msgHead.myId, msgHead.cipher);
+    TRANS_LOGI(
+        TRANS_CTRL, "send handshake msg myChannelId=%{public}d, cipher=0x%{public}02x", msgHead.myId, msgHead.cipher);
     payLoad = TransProxyPackHandshakeMsg(info);
     if (payLoad == NULL) {
         TRANS_LOGE(TRANS_CTRL, "pack handshake fail");
