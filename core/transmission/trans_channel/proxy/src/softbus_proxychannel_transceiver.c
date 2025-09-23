@@ -616,7 +616,6 @@ void TransCreateConnByConnId(uint32_t connId, bool isServer)
     item->isServerSide = isServer;
     TransConnInfoToConnOpt(&info, &item->connInfo);
     ListAdd(&(g_proxyConnectionList->list), &(item->node));
-    TRANS_LOGI(TRANS_CTRL, "add connId=%{public}u", item->connId);
     g_proxyConnectionList->cnt++;
     (void)SoftBusMutexUnlock(&g_proxyConnectionList->lock);
     return;
