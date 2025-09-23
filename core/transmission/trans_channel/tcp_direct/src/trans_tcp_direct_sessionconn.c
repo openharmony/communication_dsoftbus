@@ -538,11 +538,6 @@ int32_t TransDelTcpChannelInfoByChannelId(int32_t channelId)
 
 void TransTdcChannelInfoDeathCallback(const char *pkgName, int32_t pid)
 {
-    char *anonymizePkgName = NULL;
-    Anonymize(pkgName, &anonymizePkgName);
-    TRANS_LOGI(TRANS_CTRL, "pkgName=%{public}s pid=%{public}d died, clean all resource",
-        AnonymizeWrapper(anonymizePkgName), pid);
-    AnonymizeFree(anonymizePkgName);
     if (g_tcpChannelInfoList == NULL) {
         TRANS_LOGE(TRANS_CTRL, "g_tcpChannelInfoList is null.");
         return;

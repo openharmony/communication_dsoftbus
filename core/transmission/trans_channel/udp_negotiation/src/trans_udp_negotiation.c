@@ -1363,10 +1363,6 @@ void TransUdpDeathCallback(const char *pkgName, int32_t pid)
             }
             *tempNode = *udpChannelNode;
             ListAdd(&destroyList, &tempNode->node);
-            char *anonymizePkgName = NULL;
-            Anonymize(pkgName, &anonymizePkgName);
-            TRANS_LOGW(TRANS_CTRL, "add pkgName=%{public}s, pid=%{public}d", AnonymizeWrapper(anonymizePkgName), pid);
-            AnonymizeFree(anonymizePkgName);
         }
     }
     (void)ReleaseUdpChannelLock();
