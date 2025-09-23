@@ -632,7 +632,10 @@ void TransProxyChanProcessByReqId(int32_t reqId, uint32_t connId, int32_t errCod
 
 static void TransProxyReleaseChannelList(ListNode *proxyChannelList, int32_t errCode)
 {
-    TRANS_CHECK_AND_RETURN_LOGE(!IsListEmpty(proxyChannelList), TRANS_CTRL, "proxyChannelList is empty");
+    TRANS_CHECK_AND_RETURN_LOGE((proxyChannelList != NULL), TRANS_CTRL, "proxyChannelList is null");
+    if (IsListEmpty(proxyChannelList)) {
+        return;
+    }
 
     ProxyChannelInfo *removeNode = NULL;
     ProxyChannelInfo *nextNode = NULL;
@@ -2142,7 +2145,6 @@ static void TransProxyUpdateBlePriority(int32_t channelId, uint32_t connId, BleP
 void TransProxyOpenProxyChannelSuccess(int32_t channelId)
 {
     SoftBusHitraceChainBegin("TransProxyOpenProxyChannelSuccess");
-    TRANS_LOGI(TRANS_CTRL, "send handshake msg. channelId=%{public}d", channelId);
     ProxyChannelInfo *channelInfo = (ProxyChannelInfo *)SoftBusCalloc(sizeof(ProxyChannelInfo));
     if (channelInfo == NULL) {
         TRANS_LOGE(TRANS_CTRL, "malloc proxyChannelInfo failed");
@@ -2540,8 +2542,10 @@ void TransProxyManagerDeinit(void)
 static void TransProxyDestroyChannelList(const ListNode *destroyList)
 {
     TRANS_LOGD(TRANS_CTRL, "enter.");
-    TRANS_CHECK_AND_RETURN_LOGE(
-        (destroyList != NULL && !IsListEmpty(destroyList)), TRANS_INIT, "destroyList is null");
+    TRANS_CHECK_AND_RETURN_LOGE((destroyList != NULL), TRANS_INIT, "destroyList is null");
+    if (IsListEmpty(destroyList)) {
+        return;
+    }
     ProxyChannelInfo *destroyNode = NULL;
     ProxyChannelInfo *nextDestroyNode = NULL;
     LIST_FOR_EACH_ENTRY_SAFE(destroyNode, nextDestroyNode, destroyList, ProxyChannelInfo, node) {
@@ -2562,10 +2566,6 @@ void TransProxyDeathCallback(const char *pkgName, int32_t pid)
 {
     TRANS_CHECK_AND_RETURN_LOGE(
         (pkgName != NULL && g_proxyChannelList != NULL), TRANS_CTRL, "pkgName or proxy channel list is null.");
-    char *anonymizePkgName = NULL;
-    Anonymize(pkgName, &anonymizePkgName);
-    TRANS_LOGW(TRANS_CTRL, "pkgName=%{public}s, pid=%{public}d", AnonymizeWrapper(anonymizePkgName), pid);
-    AnonymizeFree(anonymizePkgName);
     ListNode destroyList;
     ListInit(&destroyList);
     ProxyChannelInfo *item = NULL;
