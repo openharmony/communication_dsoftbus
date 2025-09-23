@@ -2625,12 +2625,12 @@ static int32_t TryWifiDirectReuse(const LinkRequest *request, uint32_t laneReqId
     }
     LaneResource resourceItem;
     (void)memset_s(&resourceItem, sizeof(LaneResource), 0, sizeof(LaneResource));
-    int32_t ret = FindLaneResourceByLinkType(peerUdid, request->linkType, &resourceItem);
-    if (ret != SOFTBUS_OK) {
+    if (FindLaneResourceByLinkType(peerUdid, LANE_HML, &resourceItem) != SOFTBUS_OK &&
+        FindLaneResourceByLinkType(peerUdid, LANE_P2P, &resourceItem) != SOFTBUS_OK) {
         LNN_LOGI(LNN_LANE, "not find lane resource");
-        return ret;
+        return SOFTBUS_LANE_RESOURCE_NOT_FOUND;
     }
-    enum WifiDirectLinkType linkType = (request->linkType == LANE_HML) ? WIFI_DIRECT_LINK_TYPE_HML :
+    enum WifiDirectLinkType linkType = (resourceItem.link.type == LANE_HML) ? WIFI_DIRECT_LINK_TYPE_HML :
         WIFI_DIRECT_LINK_TYPE_P2P;
     LNN_LOGI(LNN_LANE, "ask wifidirect if need nego channel, linkType=%{public}d", linkType);
     if (GetWifiDirectManager()->isNegotiateChannelNeeded(request->peerNetworkId, linkType)) {
