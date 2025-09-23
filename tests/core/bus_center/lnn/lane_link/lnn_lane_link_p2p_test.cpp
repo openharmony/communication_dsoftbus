@@ -328,7 +328,7 @@ HWTEST_F(LNNLaneLinkP2pTest, ON_AUTH_CONN_OPENED_TEST_001, TestSize.Level1)
 
 /*
 * @tc.name: TRY_ADD_PRE_LINK_CONN_TEST_001
-* @tc.desc: OnConnOpenFailedForDisconnect test
+* @tc.desc: TryAddPreLinkConn test
 * @tc.type: FUNC
 * @tc.require:
 */
@@ -378,7 +378,7 @@ HWTEST_F(LNNLaneLinkP2pTest, GET_HML_TWO_GUIDE_TYPE_TEST_001, TestSize.Level1)
 
     EXPECT_NO_FATAL_FAILURE(GetHmlTwoGuideType(&request, guideChannelList, &guideChannelNum));
     EXPECT_EQ(guideChannelNum, GUIDE_TYPE_NUMBERS_ONE);
-    EXPECT_EQ(guideChannelList[0], LANE_ACTIVE_AUTH_TRIGGER);
+    EXPECT_EQ(guideChannelList[0], LANE_BLE_TRIGGER);
 }
 
 /*
@@ -403,8 +403,9 @@ HWTEST_F(LNNLaneLinkP2pTest, GET_HML_TWO_GUIDE_TYPE_TEST_002, TestSize.Level1)
     EXPECT_CALL(linkMock, LnnGetRemoteNodeInfoById).WillRepeatedly(Return(SOFTBUS_INVALID_PARAM));
 
     EXPECT_NO_FATAL_FAILURE(GetHmlTwoGuideType(&request, guideChannelList, &guideChannelNum));
-    EXPECT_EQ(guideChannelNum, GUIDE_TYPE_NUMBERS_ONE);
+    EXPECT_EQ(guideChannelNum, GUIDE_TYPE_NUMBERS_TWO);
     EXPECT_EQ(guideChannelList[0], LANE_SPARKLINK_TRIGGER);
+    EXPECT_EQ(guideChannelList[1], LANE_BLE_TRIGGER);
 }
 
 /*
@@ -427,39 +428,11 @@ HWTEST_F(LNNLaneLinkP2pTest, GET_HML_TWO_GUIDE_TYPE_TEST_003, TestSize.Level1)
     NiceMock<LaneDepsInterfaceMock> linkMock;
     EXPECT_CALL(linkMock, LnnGetRemoteStrInfo).WillRepeatedly(Return(SOFTBUS_OK));
     EXPECT_CALL(linkMock, AuthDeviceCheckConnInfo).WillRepeatedly(Return(true));
-    EXPECT_CALL(linkMock, LnnGetRemoteNodeInfoById).WillRepeatedly(Return(SOFTBUS_OK));
-    EXPECT_CALL(linkMock, LnnHasDiscoveryType).WillRepeatedly(Return(false));
-
-    EXPECT_NO_FATAL_FAILURE(GetHmlTwoGuideType(&request, guideChannelList, &guideChannelNum));
-    EXPECT_EQ(guideChannelNum, GUIDE_TYPE_NUMBERS_TWO);
-    EXPECT_EQ(guideChannelList[1], LANE_ACTIVE_AUTH_TRIGGER);
-}
-
-/*
-* @tc.name: GET_HML_TWO_GUIDE_TYPE_TEST_004
-* @tc.desc: GetHmlTwoGuideType test LANE_BLE_TRIGGER
-* @tc.type: FUNC
-* @tc.require:
-*/
-HWTEST_F(LNNLaneLinkP2pTest, GET_HML_TWO_GUIDE_TYPE_TEST_004, TestSize.Level1)
-{
-    LinkRequest request = {};
-    WdGuideType guideChannelList[LANE_CHANNEL_BUTT];
-    (void)memset_s(guideChannelList, sizeof(guideChannelList), -1, sizeof(guideChannelList));
-    uint32_t guideChannelNum = 0;
-
-    NiceMock<LaneLinkP2pDepsInterfaceMock> linkP2pMock;
-    LnnEnhanceFuncList funcList = { nullptr };
-    funcList.queryControlPlaneNodeValid = QueryControlPlaneNodeValidOk;
-    EXPECT_CALL(linkP2pMock, LnnEnhanceFuncListGet).WillRepeatedly(Return(&funcList));
-    NiceMock<LaneDepsInterfaceMock> linkMock;
-    EXPECT_CALL(linkMock, LnnGetRemoteStrInfo).WillRepeatedly(Return(SOFTBUS_OK));
-    EXPECT_CALL(linkMock, AuthDeviceCheckConnInfo).WillRepeatedly(Return(true));
-    EXPECT_CALL(linkMock, LnnGetRemoteNodeInfoById).WillRepeatedly(Return(SOFTBUS_OK));
-    EXPECT_CALL(linkMock, LnnHasDiscoveryType).WillRepeatedly(Return(true));
 
     EXPECT_NO_FATAL_FAILURE(GetHmlTwoGuideType(&request, guideChannelList, &guideChannelNum));
     EXPECT_EQ(guideChannelNum, GUIDE_TYPE_NUMBERS_THREE);
+    EXPECT_EQ(guideChannelList[0], LANE_SPARKLINK_TRIGGER);
+    EXPECT_EQ(guideChannelList[1], LANE_ACTIVE_AUTH_TRIGGER);
     EXPECT_EQ(guideChannelList[2], LANE_BLE_TRIGGER);
 }
 

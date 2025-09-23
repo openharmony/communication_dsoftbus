@@ -2494,12 +2494,9 @@ static bool IsHasAuthConnInfo(const char *networkId)
         LNN_LOGE(LNN_LANE, "get peer uuid fail");
         return false;
     }
-    bool wifiActive = AuthDeviceCheckConnInfo(uuid, AUTH_LINK_TYPE_WIFI, false);
-    bool brActive = AuthDeviceCheckConnInfo(uuid, AUTH_LINK_TYPE_BR, true);
-    bool bleActive = AuthDeviceCheckConnInfo(uuid, AUTH_LINK_TYPE_BLE, true);
-    LNN_LOGI(LNN_LANE, "wifiActive=%{public}d, brActive=%{public}d, bleActive=%{public}d",
-        wifiActive, brActive, bleActive);
-    if (wifiActive || brActive || bleActive) {
+    if (AuthDeviceCheckConnInfo(uuid, AUTH_LINK_TYPE_WIFI, false) ||
+        AuthDeviceCheckConnInfo(uuid, AUTH_LINK_TYPE_BR, true) ||
+        AuthDeviceCheckConnInfo(uuid, AUTH_LINK_TYPE_BLE, true)) {
         return true;
     }
     return false;
@@ -2652,20 +2649,6 @@ static bool BrAuthIsMostPriority(const char *networkId)
         AuthDeviceCheckConnInfo(uuid, AUTH_LINK_TYPE_BR, true));
 }
 
-static bool IsDeviceOnlineByTargetType(const char *networkId, DiscoveryType onlineType)
-{
-    NodeInfo node;
-    (void)memset_s(&node, sizeof(NodeInfo), 0, sizeof(NodeInfo));
-    if (LnnGetRemoteNodeInfoById(networkId, CATEGORY_NETWORK_ID, &node) != SOFTBUS_OK) {
-        char *anonyNetworkId = NULL;
-        Anonymize(networkId, &anonyNetworkId);
-        LNN_LOGE(LNN_LANE, "getRemoteInfo fail, networkId=%{public}s", AnonymizeWrapper(anonyNetworkId));
-        AnonymizeFree(anonyNetworkId);
-        return false;
-    }
-    return LnnHasDiscoveryType(&node, onlineType);
-}
-
 static void GetHmlTwoGuideType(const LinkRequest *request, WdGuideType *guideList, uint32_t *linksNum)
 {
     if (QueryControlPlaneNodeValidPacked(request->peerNetworkId) == SOFTBUS_OK) {
@@ -2674,12 +2657,7 @@ static void GetHmlTwoGuideType(const LinkRequest *request, WdGuideType *guideLis
     if (IsHasAuthConnInfo(request->peerNetworkId)) {
         guideList[(*linksNum)++] = LANE_ACTIVE_AUTH_TRIGGER;
     }
-    if (IsDeviceOnlineByTargetType(request->peerNetworkId, DISCOVERY_TYPE_BLE)) {
-        guideList[(*linksNum)++] = LANE_BLE_TRIGGER;
-    }
-    if (*linksNum == 0) {
-        guideList[(*linksNum)++] = LANE_ACTIVE_AUTH_TRIGGER;
-    }
+    guideList[(*linksNum)++] = LANE_BLE_TRIGGER;
 }
 
 static int32_t GetGuideChannelInfo(const LinkRequest *request, WdGuideType *guideList, uint32_t *linksNum)
