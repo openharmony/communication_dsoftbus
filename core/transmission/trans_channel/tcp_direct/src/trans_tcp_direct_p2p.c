@@ -809,6 +809,16 @@ static int32_t TransGetLocalIp(char *myIp, const char *peerIp, const char *peerU
     return SOFTBUS_OK;
 }
 
+static void DeleteExternalP2pListener(const char *peerUuid)
+{
+    int32_t osType = 0;
+    GetOsTypeByNetworkId(peerUuid, &osType);
+    if (osType == HA_OS_TYPE) {
+        StopP2pListenerByRemoteUuid(peerUuid);
+    }
+    return;
+}
+
 static int32_t OnVerifyP2pRequest(AuthHandle authHandle, int64_t seq, const cJSON *json, bool isAuthLink)
 {
     TRANS_LOGI(TRANS_CTRL, "authId=%{public}" PRId64 ", seq=%{public}" PRId64, authHandle.authId, seq);
@@ -828,8 +838,9 @@ static int32_t OnVerifyP2pRequest(AuthHandle authHandle, int64_t seq, const cJSO
     ret = TransGetLocalIp(myIp, peerIp, peerUuid);
     if (ret != SOFTBUS_OK) {
         SendVerifyP2pFailRsp(authHandle, seq, CODE_VERIFY_P2P, ret, "get local ip fail", isAuthLink);
+        TRANS_LOGE(TRANS_CTRL, "get Local Ip fail, ret=%{public}d", ret);
+        return ret;
     }
-    TRANS_CHECK_AND_RETURN_RET_LOGE(ret == SOFTBUS_OK, ret, TRANS_CTRL, "fail to get local ip.");
     if (protocol == LNN_PROTOCOL_HTP) {
         ret = ServerOpenHtpChannelPacked(peerIp, seq);
         if (ret != SOFTBUS_OK) {
@@ -846,6 +857,7 @@ static int32_t OnVerifyP2pRequest(AuthHandle authHandle, int64_t seq, const cJSO
     if (ret != SOFTBUS_OK) {
         OutputAnonymizeIpAddress(myIp, peerIp);
         SendVerifyP2pFailRsp(authHandle, seq, CODE_VERIFY_P2P, ret, "invalid p2p port", isAuthLink);
+        DeleteExternalP2pListener(peerUuid);
         return ret;
     }
     VerifyP2pInfo info = {
@@ -855,7 +867,11 @@ static int32_t OnVerifyP2pRequest(AuthHandle authHandle, int64_t seq, const cJSO
         .protocol = protocol,
     };
     ret = PackAndSendVerifyP2pRsp(&info, seq, isAuthLink, authHandle);
-    TRANS_CHECK_AND_RETURN_RET_LOGE(ret == SOFTBUS_OK, ret, TRANS_CTRL, "fail to send VerifyP2pRsp.");
+    if (ret != SOFTBUS_OK) {
+        DeleteExternalP2pListener(peerUuid);
+        TRANS_LOGE(TRANS_CTRL, "fail to send VerifyP2pRsp. ret=%{public}d.", ret);
+        return ret;
+    }
     LaneAddP2pAddressByIp(peerIp, peerPort);
     return SOFTBUS_OK;
 }
