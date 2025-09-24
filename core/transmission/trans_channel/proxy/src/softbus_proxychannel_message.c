@@ -934,7 +934,6 @@ int32_t TransPagingParseMessage(char *data, int32_t len, ProxyMessage *msg)
     uint8_t udidHash[D2D_SHORT_UDID_HASH_LEN] = { 0 };
     int32_t ret = TransPagingParseHeadAndGetHash(data, len, msg, accountHash, udidHash);
     TRANS_CHECK_AND_RETURN_RET_LOGE(ret == SOFTBUS_OK, ret, TRANS_CTRL, "parse msg head fail");
-
     AesGcmCipherKey cipherKey = { 0 };
     cipherKey.keyLen = SESSION_KEY_LENGTH;
     char authAccountHash[SHA_256_HEX_HASH_LEN] = { 0 };
@@ -956,6 +955,7 @@ int32_t TransPagingParseMessage(char *data, int32_t len, ProxyMessage *msg)
         SoftBusFree(decData);
         return SOFTBUS_DECRYPT_ERR;
     }
+    (void)memset_s(&cipherKey, sizeof(AesGcmCipherKey), 0, sizeof(AesGcmCipherKey));
     msg->data = (char *)decData;
     msg->dataLen = (int32_t)decDataLen;
     switch (msg->msgHead.type) {
@@ -1094,6 +1094,7 @@ int32_t TransPagingPackMessage(PagingProxyMessage *msg, ProxyDataInfo *dataInfo,
         return SOFTBUS_MEM_ERR;
     }
     int32_t ret = SoftBusEncryptData(&cipherKey, dataInfo->inData, dataInfo->inLen, encData, &encDataLen);
+    (void)memset_s(&cipherKey, sizeof(AesGcmCipherKey), 0, sizeof(AesGcmCipherKey));
     if (ret != SOFTBUS_OK) {
         TRANS_LOGE(TRANS_CTRL, "encrypt buf fail, myChannelId=%{public}d", msg->msgHead.channelId);
         SoftBusFree(buf);
