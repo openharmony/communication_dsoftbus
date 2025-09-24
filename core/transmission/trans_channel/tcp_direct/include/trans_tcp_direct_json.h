@@ -29,9 +29,9 @@ extern "C" {
 
 char *VerifyP2pPackError(int32_t code, int32_t errCode, const char *errDesc);
 
-char *VerifyP2pPack(const char *myIp, int32_t myPort, const char *peerIp, ProtocolType protocol);
+char *VerifyP2pPack(const char *myIp, int32_t myPort, const char *peerIp, ProtocolType protocol, int32_t myUid);
 
-int32_t VerifyP2pUnPack(const cJSON *json, char *remoteIp, uint32_t ipLen, int32_t *port, ProtocolType *protocol);
+int32_t VerifyP2pUnPack(const cJSON *json, char *remoteIp, int32_t *port, ProtocolType *protocol, int32_t *uid);
 
 #ifdef __cplusplus
 #if __cplusplus
