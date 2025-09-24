@@ -842,6 +842,7 @@ int32_t UpdateKeyAndLocalInfo(void)
     int32_t  ret = RetrieveDeviceInfoAndKeys(&res);
     if (ret != SOFTBUS_OK) {
         LNN_LOGE(LNN_LEDGER, "retrieve device key failed");
+        FreeUpdateKeyResources(&res);
         return ret;
     }
     if (LnnUpdateDecisionDbKey() != SOFTBUS_OK) {
