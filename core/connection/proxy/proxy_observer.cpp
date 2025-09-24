@@ -116,10 +116,10 @@ static std::string ConvertRealMacToHashMac(const std::string addr)
     uint8_t hashAddr[SHA_256_HASH_LEN] = { 0 };
     int32_t ret = SoftBusGenerateStrHash(reinterpret_cast<const unsigned char *>(addr.c_str()),
         addr.length(), hashAddr);
-    CONN_CHECK_AND_RETURN_RET_LOGE(ret == SOFTBUS_OK, "", CONN_PROXY, "hash failed ret=%{public}d", ret);
+    CONN_CHECK_AND_RETURN_RET_LOGE(ret == SOFTBUS_OK, "", CONN_PROXY, "hash fail ret=%{public}d", ret);
     char hashAddrStr[HEXIFY_LEN(SHA_256_HASH_LEN)] = {0};
     ret = ConvertBytesToHexString(hashAddrStr, sizeof(hashAddrStr), hashAddr, sizeof(hashAddr));
-    CONN_CHECK_AND_RETURN_RET_LOGE(ret == SOFTBUS_OK, "", CONN_PROXY, "convert hex string failed, ret=%{public}d", ret);
+    CONN_CHECK_AND_RETURN_RET_LOGE(ret == SOFTBUS_OK, "", CONN_PROXY, "convert hex string fail, ret=%{public}d", ret);
     return std::string(hashAddrStr).substr(SHA_256_HASH_LEN, SHA_256_HASH_LEN);
 }
 
@@ -129,7 +129,7 @@ bool IsPairedDevice(const char *addr, bool isRealMac)
     std::vector<OHOS::Bluetooth::BluetoothRemoteDevice> remoteDeviceLists;
     int32_t ret = OHOS::Bluetooth::BluetoothHost::GetDefaultHost().GetPairedDevices(OHOS::Bluetooth::BT_TRANSPORT_BREDR,
         remoteDeviceLists);
-    CONN_CHECK_AND_RETURN_RET_LOGE(ret == 0, false, CONN_PROXY, "GetPairedDevices failed, ret=%{public}d", ret);
+    CONN_CHECK_AND_RETURN_RET_LOGE(ret == 0, false, CONN_PROXY, "GetPairedDevices fail, ret=%{public}d", ret);
     for (const auto &device : remoteDeviceLists) {
         int32_t state = 0;
         device.GetPairState(state);
@@ -151,7 +151,7 @@ int32_t GetRealMac(char *realAddr, uint32_t realAddrLen, const char *hashAddr)
     int32_t ret = OHOS::Bluetooth::BluetoothHost::GetDefaultHost().GetPairedDevices(OHOS::Bluetooth::BT_TRANSPORT_BREDR,
         remoteDeviceLists);
     CONN_CHECK_AND_RETURN_RET_LOGE(ret == 0, SOFTBUS_CONN_PROXY_INTERNAL_ERR,
-        CONN_PROXY, "GetPairedDevices failed, ret=%{public}d", ret);
+        CONN_PROXY, "GetPairedDevices fail, ret=%{public}d", ret);
     for (const auto &device : remoteDeviceLists) {
         int32_t state = 0;
         device.GetPairState(state);
@@ -159,7 +159,7 @@ int32_t GetRealMac(char *realAddr, uint32_t realAddrLen, const char *hashAddr)
         if (state == OHOS::Bluetooth::PAIR_PAIRED &&
             StrCmpIgnoreCase(ConvertRealMacToHashMac(device.GetDeviceAddr()).c_str(), hashAddr) == 0) {
             if (strncpy_s(realAddr, realAddrLen, device.GetDeviceAddr().c_str(), realAddrLen - 1) != EOK) {
-                CONN_LOGE(CONN_PROXY, "copy real mac address failed");
+                CONN_LOGE(CONN_PROXY, "copy real mac address fail");
                 return SOFTBUS_STRCPY_ERR;
             }
             return SOFTBUS_OK;

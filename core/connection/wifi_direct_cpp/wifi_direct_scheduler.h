@@ -75,7 +75,7 @@ public:
 
         auto processor = command.GetProcessor();
         if (processor == nullptr) {
-            CONN_LOGE(CONN_WIFI_DIRECT, "get processor failed");
+            CONN_LOGE(CONN_WIFI_DIRECT, "get processor fail");
             return;
         }
         executor = WifiDirectExecutorFactory::GetInstance().NewExecutor(remoteDeviceId, *this, processor, false);
