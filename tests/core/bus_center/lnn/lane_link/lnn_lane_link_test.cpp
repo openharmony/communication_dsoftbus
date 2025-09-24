@@ -416,9 +416,7 @@ HWTEST_F(LNNLaneLinkTest, LnnConnectP2p_002, TestSize.Level1)
 HWTEST_F(LNNLaneLinkTest, LnnConnectP2p_003, TestSize.Level1)
 {
     LinkRequest request;
-    LaneLinkCb cb;
     (void)memset_s(&request, sizeof(LinkRequest), 0, sizeof(LinkRequest));
-    (void)memset_s(&cb, sizeof(LaneLinkCb), 0, sizeof(LaneLinkCb));
     int32_t ret = strcpy_s(request.peerNetworkId, NETWORK_ID_BUF_LEN, "123");
     EXPECT_EQ(EOK, ret);
     request.linkType = LANE_HML;
@@ -431,11 +429,21 @@ HWTEST_F(LNNLaneLinkTest, LnnConnectP2p_003, TestSize.Level1)
     EXPECT_CALL(linkMock, LnnGetRemoteNumInfo)
         .WillRepeatedly(DoAll(SetArgPointee<LANE_MOCK_PARAM3>(value), Return(SOFTBUS_OK)));
     EXPECT_CALL(linkMock, LnnGetRemoteStrInfo).WillRepeatedly(Return(SOFTBUS_OK));
-    EXPECT_CALL(laneLinkMock, FindLaneResourceByLinkType).WillRepeatedly(Return(SOFTBUS_OK));
     EXPECT_CALL(linkMock, GetWifiDirectManager).WillRepeatedly(Return(&g_manager));
-    EXPECT_CALL(laneLinkMock, GetTransReqInfoByLaneReqId).WillRepeatedly(Return(SOFTBUS_OK));
+    EXPECT_CALL(laneLinkMock, FindLaneResourceByLinkType)
+        .WillOnce(Return(SOFTBUS_LANE_RESOURCE_NOT_FOUND))
+        .WillOnce(Return(SOFTBUS_LANE_RESOURCE_NOT_FOUND))
+        .WillOnce(Return(SOFTBUS_LANE_RESOURCE_NOT_FOUND))
+        .WillRepeatedly(Return(SOFTBUS_OK));
+    ret = LnnConnectP2p(&request, laneReqId, &g_linkCb);
+    EXPECT_EQ(SOFTBUS_OK, ret);
 
-    ret = LnnConnectP2p(&request, laneReqId, &cb);
+    ret = LnnConnectP2p(&request, laneReqId, &g_linkCb);
+    EXPECT_EQ(SOFTBUS_OK, ret);
+    LnnDisconnectP2p(NODE_NETWORK_ID, laneReqId);
+    LnnDestroyP2p();
+
+    ret = LnnConnectP2p(&request, laneReqId, &g_linkCb);
     EXPECT_EQ(SOFTBUS_OK, ret);
     LnnDisconnectP2p(NODE_NETWORK_ID, laneReqId);
     LnnDestroyP2p();

@@ -47,7 +47,7 @@ using namespace testing;
 
 constexpr char NODE_NETWORK_ID[] = "111122223333abcdef";
 constexpr char PEER_IP_HML[] = "172.30.0.1";
-constexpr char PEER_WLAN_ADDR[] = "172.30.0.1";
+constexpr char PEER_WLAN_ADDR[] = "192.168.30.2";
 constexpr char PEER_MAC[] = "a1:b2:c3:d4:e5:f6";
 constexpr char LOCAL_MAC[] = "a2:b2:c3:d4:e5:f6";
 constexpr char PEER_UDID[] = "111122223333abcdef";
@@ -1266,6 +1266,33 @@ HWTEST_F(LNNLaneExtMockTest, GET_VALID_LANE_RESOURCE_TEST_001, TestSize.Level1)
     ret = FindLaneResourceByLinkAddr(&info, &resource);
     EXPECT_EQ(ret, SOFTBUS_OK);
     ret = ClearLaneResourceByLaneId(laneId);
+    EXPECT_EQ(ret, SOFTBUS_OK);
+}
+
+/*
+* @tc.name: GET_VALID_LANE_RESOURCE_TEST_002
+* @tc.desc: GetValidLaneResource test LANE_WLAN_P2P
+* @tc.type: FUNC
+* @tc.require:
+*/
+HWTEST_F(LNNLaneExtMockTest, GET_VALID_LANE_RESOURCE_TEST_002, TestSize.Level1)
+{
+    LaneLinkInfo info = {};
+    ASSERT_EQ(strcpy_s(info.linkInfo.p2p.connInfo.peerIp, IP_LEN, PEER_WLAN_ADDR), EOK);
+    ASSERT_EQ(strcpy_s(info.peerUdid, UDID_BUF_LEN, PEER_UDID), EOK);
+    info.type = LANE_WLAN_P2P;
+    NiceMock<LaneDepsInterfaceMock> mock;
+    EXPECT_CALL(mock, LnnGetRemoteStrInfo).WillRepeatedly(Return(SOFTBUS_OK));
+    int32_t ret = AddLaneResourceToPool(&info, LANE_ID_BASE, false);
+    EXPECT_EQ(ret, SOFTBUS_OK);
+    LaneResource resource = {0};
+    ret = FindLaneResourceByLinkAddr(&info, &resource);
+    EXPECT_EQ(ret, SOFTBUS_OK);
+
+    ASSERT_EQ(strcpy_s(info.linkInfo.p2p.connInfo.peerIp, IP_LEN, PEER_IP_HML), EOK);
+    ret = FindLaneResourceByLinkAddr(&info, &resource);
+    EXPECT_EQ(ret, SOFTBUS_LANE_RESOURCE_NOT_FOUND);
+    ret = ClearLaneResourceByLaneId(LANE_ID_BASE);
     EXPECT_EQ(ret, SOFTBUS_OK);
 }
 } // namespace OHOS
