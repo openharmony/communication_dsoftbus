@@ -19,6 +19,7 @@
 #include <securec.h>
 
 #include "auth_interface.h"
+#include "bus_center_event.h"
 #include "bus_center_manager.h"
 #include "g_enhance_lnn_func_pack.h"
 #include "g_enhance_trans_func_pack.h"
@@ -1365,6 +1366,16 @@ int32_t OpenP2pDirectChannel(const AppInfo *appInfo, const ConnectOption *connIn
     return ret;
 }
 
+static void TransStopP2pListenerHandle(const LnnEventBasicInfo *info)
+{
+    if (info == NULL || info->event != LNN_EVENT_HA_LEAVE_META_NODE) {
+        TRANS_LOGE(TRANS_CTRL, "invalid param.");
+        return;
+    }
+    LnnHaLeaveMetaNodeEvent *leaveInfo = (LnnHaLeaveMetaNodeEvent *)info;
+    StopP2pListenerByRemoteUuid(leaveInfo->metaNodeId);
+}
+
 int32_t P2pDirectChannelInit(void)
 {
     TRANS_LOGI(TRANS_INIT, "enter.");
@@ -1384,6 +1395,9 @@ int32_t P2pDirectChannelInit(void)
 
     ret = RegAuthTransListener(MODULE_SESSION_KEY_AUTH, &p2pTransCb);
     TRANS_CHECK_AND_RETURN_RET_LOGE(ret == SOFTBUS_OK, ret, TRANS_INIT, "set sessionkey cb fail");
+
+    ret = LnnRegisterEventHandler(LNN_EVENT_HA_LEAVE_META_NODE, TransStopP2pListenerHandle);
+    TRANS_CHECK_AND_RETURN_RET_LOGE(ret == SOFTBUS_OK, ret, TRANS_INIT, "set HA leave Meta handle fail.");
 
     ITransProxyPipelineListener listener = {
         .onDataReceived = OnP2pVerifyMsgReceived,

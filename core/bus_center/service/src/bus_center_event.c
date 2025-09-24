@@ -947,6 +947,21 @@ void LnnNotifyNetworkIdChangeEvent(const char *networkId)
     NotifyEvent((LnnEventBasicInfo *)&eventInfo);
 }
 
+void LnnNotifyHaLeaveMetaNodeEvent(const char *metaNodeId)
+{
+    if (metaNodeId == NULL) {
+        LNN_LOGW(LNN_EVENT, "networkId is null");
+        return;
+    }
+    LnnHaLeaveMetaNodeEvent eventInfo;
+    (void)memset_s(&eventInfo, sizeof(eventInfo), 0, sizeof(eventInfo));
+    eventInfo.basic.event = LNN_EVENT_HA_LEAVE_META_NODE;
+    if (strcpy_s(eventInfo.metaNodeId, NETWORK_ID_BUF_LEN, metaNodeId) != EOK) {
+        return;
+    }
+    NotifyEvent((LnnEventBasicInfo *)&eventInfo);
+}
+
 void LnnNotifyOnlineNetType(const char *networkId, ConnectionAddrType addrType)
 {
     if (networkId == NULL) {

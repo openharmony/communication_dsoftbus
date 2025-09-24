@@ -63,6 +63,7 @@ typedef enum {
     LNN_EVENT_WIFI_SERVICE_START,
     LNN_EVENT_NOTIFY_RAW_ENHANCE_P2P,
     LNN_EVENT_DEVICE_ROOT_STATE_CHANGED,
+    LNN_EVENT_HA_LEAVE_META_NODE,
     LNN_EVENT_TYPE_MAX,
 } LnnEventType;
 
@@ -315,6 +316,10 @@ typedef struct {
     uint8_t status;
 } LnnDeviceRootStateChangeEvent;
 
+typedef struct {
+    LnnEventBasicInfo basic;
+    char metaNodeId[NETWORK_ID_BUF_LEN];
+} LnnHaLeaveMetaNodeEvent;
 typedef void (*LnnEventHandler)(const LnnEventBasicInfo *info);
 
 #ifdef __cplusplus
