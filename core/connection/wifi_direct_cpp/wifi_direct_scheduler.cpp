@@ -40,7 +40,7 @@ int WifiDirectScheduler::ConnectDevice(const WifiDirectConnectInfo &info, const 
     std::shared_ptr<WifiDirectExecutor> executor;
     std::lock_guard executorLock(executorLock_);
     auto ret = ScheduleActiveCommand(command, executor);
-    CONN_CHECK_AND_RETURN_RET_LOGE(ret == SOFTBUS_OK, ret, CONN_WIFI_DIRECT, "schedule active command failed");
+    CONN_CHECK_AND_RETURN_RET_LOGE(ret == SOFTBUS_OK, ret, CONN_WIFI_DIRECT, "schedule active command fail");
     if (executor != nullptr) {
         CONN_LOGI(CONN_WIFI_DIRECT, "commandId=%{public}u", command->GetId());
         executor->SendEvent(command);
@@ -82,7 +82,7 @@ int WifiDirectScheduler::DisconnectDevice(WifiDirectDisconnectInfo &info, WifiDi
     std::shared_ptr<WifiDirectExecutor> executor;
     std::lock_guard executorLock(executorLock_);
     auto ret = ScheduleActiveCommand(command, executor);
-    CONN_CHECK_AND_RETURN_RET_LOGE(ret == SOFTBUS_OK, ret, CONN_WIFI_DIRECT, "schedule active command failed");
+    CONN_CHECK_AND_RETURN_RET_LOGE(ret == SOFTBUS_OK, ret, CONN_WIFI_DIRECT, "schedule active command fail");
     if (executor != nullptr) {
         CONN_LOGI(CONN_WIFI_DIRECT, "commandId=%{public}u", command->GetId());
         executor->SendEvent(command);
@@ -103,7 +103,7 @@ int WifiDirectScheduler::ForceDisconnectDevice(
     std::lock_guard executorLock(executorLock_);
     auto ret = ScheduleActiveCommand(command, executor);
     CONN_CHECK_AND_RETURN_RET_LOGE(
-        ret == SOFTBUS_OK, ret, CONN_WIFI_DIRECT, "schedule active command failed, ret=%{public}d", ret);
+        ret == SOFTBUS_OK, ret, CONN_WIFI_DIRECT, "schedule active command fail, ret=%{public}d", ret);
     if (executor != nullptr) {
         CONN_LOGI(CONN_WIFI_DIRECT, "commandId=%{public}u", command->GetId());
         executor->SendEvent(command);
@@ -175,7 +175,7 @@ int WifiDirectScheduler::ScheduleActiveCommand(const std::shared_ptr<WifiDirectC
 
     auto processor = command->GetProcessor();
     if (processor == nullptr) {
-        CONN_LOGE(CONN_WIFI_DIRECT, "get processor failed");
+        CONN_LOGE(CONN_WIFI_DIRECT, "get processor fail");
         return SOFTBUS_CONN_GET_PROCESSOR_FAILED;
     }
     CONN_LOGI(CONN_WIFI_DIRECT, "create executor=%{public}s", WifiDirectAnonymizeDeviceId(remoteDeviceId).c_str());
