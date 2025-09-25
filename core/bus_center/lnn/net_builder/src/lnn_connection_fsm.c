@@ -488,6 +488,21 @@ static bool IsAccountHashChanged(const LnnConntionInfo *connInfo)
     return (memcmp(oldInfo.accountHash, connInfo->nodeInfo->accountHash, sizeof(oldInfo.accountHash)) != 0);
 }
 
+static bool IsNetCapChanged(const LnnConntionInfo *connInfo)
+{
+    if (connInfo == NULL) {
+        LNN_LOGE(LNN_BUILDER, "invalid param");
+        return false;
+    }
+    NodeInfo oldInfo;
+    (void)memset_s(&oldInfo, sizeof(NodeInfo), 0, sizeof(NodeInfo));
+    if (LnnGetRemoteNodeInfoById(connInfo->nodeInfo->deviceInfo.deviceUdid, CATEGORY_UDID, &oldInfo) != SOFTBUS_OK) {
+        LNN_LOGE(LNN_BUILDER, "get node info fail");
+        return false;
+    }
+    return oldInfo.netCapacity != connInfo->nodeInfo->netCapacity;
+}
+
 static void SetLnnConnNodeInfo(
     LnnConntionInfo *connInfo, const char *networkId, LnnConnectionFsm *connFsm, int32_t retCode)
 {
@@ -502,6 +517,7 @@ static void SetLnnConnNodeInfo(
         connInfo->nodeInfo->isSupportSv = true;
     }
     bool isAccountChanged = IsAccountHashChanged(connInfo);
+    bool isNetCapChanged = IsNetCapChanged(connInfo);
     report = LnnAddOnlineNode(connInfo->nodeInfo);
     TryTriggerSparkJoinAgain(connInfo, isAccountChanged);
     SetAssetSessionKeyByAuthInfo(connInfo->nodeInfo, connInfo->authHandle);
@@ -515,8 +531,9 @@ static void SetLnnConnNodeInfo(
     LNN_LOGI(LNN_BUILDER, "peer feature=%{public}" PRIu64 ", local=%{public}" PRIu64 "",
         connInfo->nodeInfo->feature, localFeature);
     if (IsFeatureSupport(connInfo->nodeInfo->feature, BIT_BLE_SUPPORT_LP_HEARTBEAT) &&
-        IsFeatureSupport(localFeature, BIT_BLE_SUPPORT_LP_HEARTBEAT)) {
-        DeviceStateChangeProcess(connInfo->nodeInfo->deviceInfo.deviceUdid, connInfo->addr.type, true);
+        IsFeatureSupport(localFeature, BIT_BLE_SUPPORT_LP_HEARTBEAT) &&
+        (isNetCapChanged || connInfo->addr.type == CONNECTION_ADDR_BLE)) {
+        UpdateDeviceInfoToMlps(connInfo->nodeInfo->deviceInfo.deviceUdid);
     }
     if (LnnAsyncCallbackDelayHelper(GetLooper(LOOP_TYPE_DEFAULT),
         SetLpKeepAliveStatePacked, NULL, 0) != SOFTBUS_OK) {
