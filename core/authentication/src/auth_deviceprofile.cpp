@@ -481,10 +481,8 @@ static void InsertDpSameAccountAcl(const std::string &peerUdid, int32_t peerUser
     OHOS::DistributedDeviceProfile::Accesser accesser;
     OHOS::DistributedDeviceProfile::Accessee accessee;
     char udid[UDID_BUF_LEN] = { 0 };
-    if (LnnGetLocalStrInfo(STRING_KEY_DEV_UDID, udid, UDID_BUF_LEN) != SOFTBUS_OK) {
-        LNN_LOGE(LNN_STATE, "get local udid fail");
-        return;
-    }
+    LNN_CHECK_AND_RETURN_LOGE(LnnGetLocalStrInfo(STRING_KEY_DEV_UDID, udid, UDID_BUF_LEN) == SOFTBUS_OK,
+        LNN_STATE, "get local udid fail");
     uint64_t currentTime = SoftBusGetSysTimeMs();
     std::string localUdid(udid);
     accesser.SetAccesserDeviceId(localUdid);

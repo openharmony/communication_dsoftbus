@@ -40,7 +40,7 @@ int32_t LnnJudgeDeviceTypeAndGetOsAccountInfo(uint8_t *accountHash, uint32_t len
     }
     if (LnnGetLocalNumInfo(NUM_KEY_DEV_TYPE_ID, &localDevTypeId) != SOFTBUS_OK) {
         LNN_LOGE(LNN_STATE, "GeLocalDevType get invalid param");
-        return SOFTBUS_NETWORK_GET_LEDGER_INFO_ERR;
+        return LnnGetOhosAccountInfo(accountHash, SHA_256_HASH_LEN);
     }
     if (localDevTypeId == TYPE_CAR_ID) {
         LnnGetLocalNumInfo(NUM_KEY_USERID, &userId);

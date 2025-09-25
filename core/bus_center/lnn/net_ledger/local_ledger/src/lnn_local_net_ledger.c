@@ -2012,7 +2012,7 @@ static int32_t UpdateDisplayId(const void *displayId)
     }
     g_localNetLedger.localInfo.displayId = *(uint64_t *)displayId;
     if (LnnSaveLocalDeviceInfoPacked(&g_localNetLedger.localInfo) != SOFTBUS_OK) {
-        LNN_LOGE(LNN_LEDGER, "update Bt mac to localdevinfo store fail");
+        LNN_LOGE(LNN_LEDGER, "save local device info fail");
     }
     return SOFTBUS_OK;
 }

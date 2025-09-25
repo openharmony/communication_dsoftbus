@@ -343,7 +343,7 @@ void AuthDeviceNotTrust(const char *peerUdid)
     }
     RemoveNotPassedAuthManagerByUdid(peerUdid);
     AuthSessionHandleDeviceNotTrusted(peerUdid);
-    LnnDeleteSpecificTrustedDevInfo(peerUdid, JudgeDeviceTypeAndGetOsAccountIds_());
+    LnnDeleteSpecificTrustedDevInfo(peerUdid, JudgeDeviceTypeAndGetOsAccountIds());
     LnnHbOnTrustedRelationReduced();
     AuthRemoveDeviceKeyByUdidPacked(peerUdid);
     if (LnnRequestLeaveSpecific(networkId, CONNECTION_ADDR_MAX) != SOFTBUS_OK) {

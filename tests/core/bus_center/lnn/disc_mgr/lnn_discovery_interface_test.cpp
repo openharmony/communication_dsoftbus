@@ -23,6 +23,7 @@
 #include "lnn_discovery_manager.c"
 #include "lnn_discovery_manager.h"
 #include "lnn_hichain_mock.h"
+#include "lnn_ohos_account_adapter.h"
 #include "softbus_error_code.h"
 
 namespace OHOS {
