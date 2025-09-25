@@ -90,7 +90,7 @@ int WifiDirectP2pAdapter::SetGroupOwnerResult(std::string groupConfig, struct Gr
 
     std::string localIp;
     ret = P2pAdapter::GetIpAddress(localIp);
-    CONN_CHECK_AND_RETURN_RET_LOGE(ret == SOFTBUS_OK, ret, CONN_WIFI_DIRECT, "get ip address failed");
+    CONN_CHECK_AND_RETURN_RET_LOGE(ret == SOFTBUS_OK, ret, CONN_WIFI_DIRECT, "get ip address fail");
     ret = strcpy_s(result->localIp, sizeof(result->localIp), localIp.c_str());
     CONN_CHECK_AND_RETURN_RET_LOGE(ret == EOK, SOFTBUS_MEM_ERR, CONN_WIFI_DIRECT, "copy ip fail");
     return SOFTBUS_OK;
@@ -108,7 +108,7 @@ int WifiDirectP2pAdapter::CreateGroup(struct GroupOwnerResult *result)
 
     auto freq = WifiDirectUtils::ChannelToFrequency(P2pAdapter::GetRecommendChannel());
     CONN_CHECK_AND_RETURN_RET_LOGE(freq != FREQUENCY_INVALID,
-        SOFTBUS_CONN_GET_RECOMMEND_FREQUENCY_FAILED, CONN_WIFI_DIRECT, "get frequency failed");
+        SOFTBUS_CONN_GET_RECOMMEND_FREQUENCY_FAILED, CONN_WIFI_DIRECT, "get frequency fail");
     int coexCode = P2pAdapter::GetCoexConflictCode(IF_NAME_P2P, WifiDirectUtils::FrequencyToChannel(freq));
     CONN_CHECK_AND_RETURN_RET_LOGE(
         coexCode == SOFTBUS_OK, coexCode, CONN_WIFI_DIRECT, "coex conflict, ret=%{public}d", coexCode);
@@ -117,7 +117,7 @@ int WifiDirectP2pAdapter::CreateGroup(struct GroupOwnerResult *result)
     param.frequency = freq;
     auto res = P2pEntity::GetInstance().CreateGroup(param);
     CONN_CHECK_AND_RETURN_RET_LOGE(res.errorCode_ == SOFTBUS_OK, res.errorCode_, CONN_WIFI_DIRECT,
-        "create group failed, errorCode=%{public}d", res.errorCode_);
+        "create group fail, errorCode=%{public}d", res.errorCode_);
     std::string groupConfig;
     auto ret = P2pAdapter::GetGroupConfig(groupConfig);
     if (ret != SOFTBUS_OK) {
@@ -134,7 +134,7 @@ int WifiDirectP2pAdapter::CreateGroup(struct GroupOwnerResult *result)
             return SOFTBUS_OK;
         });
     if (ret != SOFTBUS_OK) {
-        CONN_LOGE(CONN_WIFI_DIRECT, "update interface failed, ret=%{public}d", ret);
+        CONN_LOGE(CONN_WIFI_DIRECT, "update interface fail, ret=%{public}d", ret);
         (void)RemoveGroup();
         return ret;
     }
@@ -150,7 +150,7 @@ int WifiDirectP2pAdapter::RemoveGroupNotAddReuse()
     P2pAdapter::DestroyGroupParam param { IF_NAME_P2P };
     auto result = P2pEntity::GetInstance().Disconnect(param);
     CONN_CHECK_AND_RETURN_RET_LOGE(result.errorCode_ == SOFTBUS_OK, result.errorCode_, CONN_WIFI_DIRECT,
-        "entity disconnect failed, error=%{public}d", result.errorCode_);
+        "entity disconnect fail, error=%{public}d", result.errorCode_);
     return SOFTBUS_OK;
 }
 
@@ -163,7 +163,7 @@ int WifiDirectP2pAdapter::RemoveGroup()
             return SOFTBUS_OK;
         });
     CONN_CHECK_AND_RETURN_RET_LOGE(
-        ret == SOFTBUS_OK, ret, CONN_WIFI_DIRECT, "get reuse count failed, ret=%{public}d", ret);
+        ret == SOFTBUS_OK, ret, CONN_WIFI_DIRECT, "get reuse count fail, ret=%{public}d", ret);
 
     CONN_LOGI(CONN_WIFI_DIRECT, "reuseCnt=%{public}d", reuseCount);
     if (reuseCount == 0) {
@@ -173,7 +173,7 @@ int WifiDirectP2pAdapter::RemoveGroup()
     P2pAdapter::DestroyGroupParam param { IF_NAME_P2P };
     auto result = P2pEntity::GetInstance().Disconnect(param);
     CONN_CHECK_AND_RETURN_RET_LOGE(result.errorCode_ == SOFTBUS_OK, result.errorCode_, CONN_WIFI_DIRECT,
-        "entity disconnect failed, error=%{public}d", result.errorCode_);
+        "entity disconnect fail, error=%{public}d", result.errorCode_);
 
     return InterfaceManager::GetInstance().UpdateInterface(InterfaceInfo::P2P, [](InterfaceInfo &interface) {
         auto reuseCount = interface.GetReuseCount();
@@ -191,7 +191,7 @@ int WifiDirectP2pAdapter::ReuseP2p()
 {
     auto ret = P2pEntity::GetInstance().ReuseLink();
     CONN_CHECK_AND_RETURN_RET_LOGE(
-        ret == SOFTBUS_OK, ret, CONN_WIFI_DIRECT, "reuse p2p group failed, ret=%{public}d", ret);
+        ret == SOFTBUS_OK, ret, CONN_WIFI_DIRECT, "reuse p2p group fail, ret=%{public}d", ret);
     return InterfaceManager::GetInstance().UpdateInterface(InterfaceInfo::P2P, [](InterfaceInfo &interface) {
         auto reuseCnt = interface.GetReuseCount();
         interface.SetReuseCount(reuseCnt + 1);
@@ -213,7 +213,7 @@ int WifiDirectP2pAdapter::ReuseGroup(struct GroupOwnerResult *result)
         isCreateGo, SOFTBUS_CONN_GO_IS_NOT_CREATED_SOFTBUS, CONN_WIFI_DIRECT, "go is not created by softbus");
     ret = ReuseP2p();
     CONN_CHECK_AND_RETURN_RET_LOGE(
-        ret == SOFTBUS_OK, ret, CONN_WIFI_DIRECT, "reuse p2p group failed, ret=%{public}d", ret);
+        ret == SOFTBUS_OK, ret, CONN_WIFI_DIRECT, "reuse p2p group fail, ret=%{public}d", ret);
     std::string groupConfig;
     ret = P2pAdapter::GetGroupConfig(groupConfig);
     if (ret != SOFTBUS_OK) {
@@ -278,7 +278,7 @@ int32_t WifiDirectP2pAdapter::ConnCreateGoOwner(const char *pkgName, const struc
             return SOFTBUS_OK;
         });
     if (ret != SOFTBUS_OK) {
-        CONN_LOGE(CONN_WIFI_DIRECT, "get current p2p role failed, ret=%{public}d", ret);
+        CONN_LOGE(CONN_WIFI_DIRECT, "get current p2p role fail, ret=%{public}d", ret);
         InterfaceManager::GetInstance().UnlockInterface(InterfaceInfo::P2P);
         SetIsCreateGroup(false);
         return ret;
@@ -286,7 +286,7 @@ int32_t WifiDirectP2pAdapter::ConnCreateGoOwner(const char *pkgName, const struc
 
     ret = CheckRoleAndProcess(role, result);
     if (ret != SOFTBUS_OK) {
-        CONN_LOGE(CONN_WIFI_DIRECT, "create or reuse group failed, ret=%{public}d", ret);
+        CONN_LOGE(CONN_WIFI_DIRECT, "create or reuse group fail, ret=%{public}d", ret);
         InterfaceManager::GetInstance().UnlockInterface(InterfaceInfo::P2P);
         SetIsCreateGroup(false);
         return ret;
