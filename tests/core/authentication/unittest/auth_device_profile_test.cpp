@@ -226,7 +226,7 @@ HWTEST_F(AuthDeviceProfileTest, IS_NOT_TRUSTED_DEVICE_TEST_002, TestSize.Level1)
     AuthDeviceProfileInterfaceMock mock;
     EXPECT_CALL(mock, LnnGetLocalStrInfo).WillOnce(Return(SOFTBUS_INVALID_PARAM));
     EXPECT_CALL(mock, SoftBusGetSysTimeMs).WillRepeatedly(Return(0));
-    EXPECT_CALL(mock, GetActiveOsAccountIds).WillRepeatedly(Return(TEST_USER_ID_ONE));
+    EXPECT_CALL(mock, JudgeDeviceTypeAndGetOsAccountIds).WillRepeatedly(Return(TEST_USER_ID_ONE));
     InsertDpSameAccountAcl(peerUdid, peerUserId, sessionKeyId);
     EXPECT_CALL(mock, LnnGetLocalStrInfo).WillRepeatedly(Return(SOFTBUS_OK));
     InsertDpSameAccountAcl(peerUdid, peerUserId, sessionKeyId);
@@ -429,10 +429,10 @@ HWTEST_F(AuthDeviceProfileTest, GET_SESSION_KEY_PROFILE_TEST_003, TestSize.Level
     uint8_t sessionKey = 0;
     uint32_t length = 0;
     AuthDeviceProfileInterfaceMock mock;
-    EXPECT_CALL(mock, GetActiveOsAccountIds).WillOnce(Return(TEST_ERROR_USER_ID));
+    EXPECT_CALL(mock, JudgeDeviceTypeAndGetOsAccountIds).WillOnce(Return(TEST_ERROR_USER_ID));
     bool result = GetSessionKeyProfile(TEST_SESSION_KEY_ID, &sessionKey, &length);
     EXPECT_FALSE(result);
-    EXPECT_CALL(mock, GetActiveOsAccountIds).WillRepeatedly(Return(TEST_USER_ID_ONE));
+    EXPECT_CALL(mock, JudgeDeviceTypeAndGetOsAccountIds).WillRepeatedly(Return(TEST_USER_ID_ONE));
     result = GetSessionKeyProfile(TEST_SESSION_KEY_ID, &sessionKey, &length);
     EXPECT_FALSE(result);
 }
@@ -465,7 +465,7 @@ HWTEST_F(AuthDeviceProfileTest, IS_TRUST_DEVICE_TEST_001, TestSize.Level1)
     const char *anonyDeviceIdHash = "anonyDeviceIdHash";
     bool isOnlyPointToPoint = true;
     AuthDeviceProfileInterfaceMock mock;
-    EXPECT_CALL(mock, GetActiveOsAccountIds).WillRepeatedly(Return(TEST_USER_ID_ONE));
+    EXPECT_CALL(mock, JudgeDeviceTypeAndGetOsAccountIds).WillRepeatedly(Return(TEST_USER_ID_ONE));
     EXPECT_CALL(mock, SoftBusGenerateStrHash).WillRepeatedly(Return(SOFTBUS_OK));
     EXPECT_CALL(mock, ConvertBytesToHexString).WillRepeatedly(Return(SOFTBUS_OK));
     bool result = IsTrustDevice(trustDevices, deviceIdHash, anonyDeviceIdHash, isOnlyPointToPoint);
@@ -535,7 +535,7 @@ HWTEST_F(AuthDeviceProfileTest, IS_TRUST_DEVICE_TEST_002, TestSize.Level1)
     aclProfile.SetAccesser(accesser);
     trustDevices.push_back(aclProfile);
     AuthDeviceProfileInterfaceMock mock;
-    EXPECT_CALL(mock, GetActiveOsAccountIds).WillRepeatedly(Return(TEST_USER_ID_ONE));
+    EXPECT_CALL(mock, JudgeDeviceTypeAndGetOsAccountIds).WillRepeatedly(Return(TEST_USER_ID_ONE));
     EXPECT_CALL(mock, SoftBusGenerateStrHash).WillRepeatedly(Return(SOFTBUS_OK));
     EXPECT_CALL(mock, ConvertBytesToHexString).WillRepeatedly(Return(SOFTBUS_OK));
     bool result = IsTrustDevice(trustDevices, deviceIdHash, anonyDeviceIdHash, isOnlyPointToPoint);
@@ -572,7 +572,7 @@ HWTEST_F(AuthDeviceProfileTest, IS_TRUST_DEVICE_TEST_003, TestSize.Level1)
     aclProfile.SetAccesser(accesser);
     trustDevices.push_back(aclProfile);
     AuthDeviceProfileInterfaceMock mock;
-    EXPECT_CALL(mock, GetActiveOsAccountIds).WillRepeatedly(Return(TEST_USER_ID_ONE));
+    EXPECT_CALL(mock, JudgeDeviceTypeAndGetOsAccountIds).WillRepeatedly(Return(TEST_USER_ID_ONE));
     EXPECT_CALL(mock, SoftBusGenerateStrHash).WillRepeatedly(Return(SOFTBUS_OK));
     EXPECT_CALL(mock, ConvertBytesToHexString).WillRepeatedly(Return(SOFTBUS_OK));
     bool result = IsTrustDevice(trustDevices, deviceIdHash, anonyDeviceIdHash, isOnlyPointToPoint);
@@ -592,7 +592,7 @@ HWTEST_F(AuthDeviceProfileTest, COMPARE_ACL_WITH_PEER_DEVICE_INFO_TEST_001, Test
     const char *peerUdid = "1234567890";
     int32_t peerUserId = 1;
     AuthDeviceProfileInterfaceMock mock;
-    EXPECT_CALL(mock, GetActiveOsAccountIds).WillRepeatedly(Return(TEST_LOCAL_USER_ID));
+    EXPECT_CALL(mock, JudgeDeviceTypeAndGetOsAccountIds).WillRepeatedly(Return(TEST_LOCAL_USER_ID));
     EXPECT_CALL(mock, LnnGetLocalStrInfo).WillOnce(Return(SOFTBUS_NETWORK_NOT_FOUND));
     bool result = CompareAclWithPeerDeviceInfo(aclProfile, peerAccountHash, peerUdid, peerUserId);
     EXPECT_FALSE(result);
@@ -626,7 +626,7 @@ HWTEST_F(AuthDeviceProfileTest, COMPARE_ACL_WITH_PEER_DEVICE_INFO_TEST_002, Test
     DistributedDeviceProfile::Accesser accesser;
     accesser.SetAccesserAccountId(accountId);
     aclProfile.SetAccesser(accesser);
-    EXPECT_CALL(mock, GetActiveOsAccountIds).WillRepeatedly(Return(TEST_LOCAL_USER_ID));
+    EXPECT_CALL(mock, JudgeDeviceTypeAndGetOsAccountIds).WillRepeatedly(Return(TEST_LOCAL_USER_ID));
     EXPECT_CALL(mock, LnnGetLocalStrInfo).WillRepeatedly(Return(SOFTBUS_OK));
     EXPECT_CALL(mock, LnnGetLocalByteInfo).WillRepeatedly(Return(SOFTBUS_OK));
     EXPECT_CALL(mock, ConvertBytesToHexString).WillRepeatedly(Return(SOFTBUS_OK));

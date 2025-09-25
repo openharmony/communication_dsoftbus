@@ -40,6 +40,8 @@ public:
     virtual int32_t LnnInsertSpecificTrustedDevInfo(const char *udid) = 0;
     virtual void LnnHbOnTrustedRelationIncreased(int32_t groupType) = 0;
     virtual void LnnHbOnTrustedRelationReduced(void) = 0;
+    virtual int32_t LnnJudgeDeviceTypeAndGetOsAccountInfo(uint8_t *accountHash, uint32_t len) = 0;
+    virtual int32_t JudgeDeviceTypeAndGetOsAccountIds(void) = 0;
 };
 
 class AuthDeviceProfileListenerInterfaceMock : public AuthDeviceProfileListenerInterface {
@@ -57,6 +59,8 @@ public:
     MOCK_METHOD1(LnnInsertSpecificTrustedDevInfo, int32_t(const char *));
     MOCK_METHOD1(LnnHbOnTrustedRelationIncreased, void(int32_t));
     MOCK_METHOD0(LnnHbOnTrustedRelationReduced, void(void));
+    MOCK_METHOD2(LnnJudgeDeviceTypeAndGetOsAccountInfo, int32_t(uint8_t *, uint32_t));
+    MOCK_METHOD0(JudgeDeviceTypeAndGetOsAccountIds, int32_t(void));
 };
 
 extern "C" {

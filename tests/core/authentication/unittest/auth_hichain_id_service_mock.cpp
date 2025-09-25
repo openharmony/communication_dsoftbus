@@ -133,5 +133,15 @@ int32_t IdServiceQueryCredentialByUdid(int32_t userId, const char *udid, char **
     return GetAuthHichainIdServiceInterfaceMock()->IdServiceQueryCredentialByUdid(userId, udid, credList);
 }
 
+int32_t LnnJudgeDeviceTypeAndGetOsAccountInfo(uint8_t *accountHash, uint32_t len)
+{
+    return GetAuthHichainIdServiceInterfaceMock()->LnnJudgeDeviceTypeAndGetOsAccountInfo(accountHash, len);
+}
+
+int32_t JudgeDeviceTypeAndGetOsAccountIds(void)
+{
+    return GetAuthHichainIdServiceInterfaceMock()->JudgeDeviceTypeAndGetOsAccountIds();
+}
+
 } // extern "C"
 } // namespace OHOS
