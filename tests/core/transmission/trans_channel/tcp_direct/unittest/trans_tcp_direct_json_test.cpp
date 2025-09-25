@@ -82,16 +82,16 @@ HWTEST_F(TransTcpDirectJsonTest, VerifyP2pPackTest001, TestSize.Level1)
 {
     int32_t myPort = MY_PORT;
     const char *peerIp = PEER_IP;
-    char *ret = VerifyP2pPack(nullptr, myPort, peerIp, 0);
+    char *ret = VerifyP2pPack(nullptr, myPort, peerIp, 0, 0);
     EXPECT_EQ(nullptr, ret);
 
     const char *myIp = MY_IP;
     myPort = ERR_PORT;
-    ret = VerifyP2pPack(myIp, myPort, peerIp, 0);
+    ret = VerifyP2pPack(myIp, myPort, peerIp, 0, 0);
     EXPECT_EQ(nullptr, ret);
 
     myPort = MY_PORT;
-    ret = VerifyP2pPack(myIp, myPort, peerIp, 0);
+    ret = VerifyP2pPack(myIp, myPort, peerIp, 0, 0);
     EXPECT_NE(nullptr, ret);
 }
 
@@ -105,18 +105,18 @@ HWTEST_F(TransTcpDirectJsonTest, VerifyP2pUnPackTest001, TestSize.Level1)
 {
     char ip[] = MY_IP;
     int32_t port = MY_PORT;
-    uint32_t ipLen = IP_LENGTH;
     ProtocolType protocol = 0;
-    int32_t ret = VerifyP2pUnPack(nullptr, ip, ipLen, &port, &protocol);
+    int32_t uid = MY_PORT;
+    int32_t ret = VerifyP2pUnPack(nullptr, ip, &port, &protocol, &uid);
     EXPECT_EQ(SOFTBUS_INVALID_PARAM, ret);
     cJSON *json = cJSON_CreateObject();
-    ret = VerifyP2pUnPack(json, ip, ipLen, nullptr, &protocol);
+    ret = VerifyP2pUnPack(json, ip, nullptr, &protocol, &uid);
     EXPECT_EQ(SOFTBUS_INVALID_PARAM, ret);
 
-    ret = VerifyP2pUnPack(json, nullptr, ipLen, &port, &protocol);
+    ret = VerifyP2pUnPack(json, nullptr, &port, &protocol, &uid);
     EXPECT_EQ(SOFTBUS_INVALID_PARAM, ret);
 
-    ret = VerifyP2pUnPack(json, ip, ipLen, &port, &protocol);
+    ret = VerifyP2pUnPack(json, ip, &port, &protocol, &uid);
     EXPECT_NE(SOFTBUS_PEER_PROC_ERR, ret);
 }
 }

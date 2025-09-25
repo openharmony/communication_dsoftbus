@@ -902,7 +902,7 @@ HWTEST_F(TransTcpDirectP2pTest, OnVerifyP2pRequestTest002, TestSize.Level1)
 {
     AuthHandle authHandle = { .authId = AUTH_INVALID_ID, .type = AUTH_LINK_TYPE_BLE };
     int64_t seq = 0;
-    char *data = VerifyP2pPack(g_ip, g_port, g_ip, 0);
+    char *data = VerifyP2pPack(g_ip, g_port, g_ip, 0, 0);
     ASSERT_TRUE(data != nullptr);
     int32_t len = strlen(data);
     cJSON *json = cJSON_ParseWithLength((const char *)(data), len);
@@ -926,7 +926,7 @@ HWTEST_F(TransTcpDirectP2pTest, OnVerifyP2pRequestTest002, TestSize.Level1)
 HWTEST_F(TransTcpDirectP2pTest, OnP2pVerifyMsgReceivedTest001, TestSize.Level1)
 {
     int32_t channelId = 0;
-    char *data = VerifyP2pPack(g_ip, g_port, g_ip, 0);
+    char *data = VerifyP2pPack(g_ip, g_port, g_ip, 0, 0);
     ASSERT_TRUE(data != nullptr);
     int32_t len = strlen(data);
     OnP2pVerifyMsgReceived(channelId, data, len);
