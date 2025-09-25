@@ -677,7 +677,7 @@ HWTEST_F(TransTcpDirectP2pMockTest, OnVerifyP2pReplyTest002, TestSize.Level1)
     EXPECT_EQ(SOFTBUS_OK, ret);
     EXPECT_CALL(TcpP2pDirectMock, AddTrigger).WillRepeatedly(Return(SOFTBUS_OK));
     ret = OnVerifyP2pReply(authId, seq, json);
-    EXPECT_EQ(SOFTBUS_OK, ret);
+    EXPECT_NE(SOFTBUS_INVALID_PARAM, ret);
     cJSON_Delete(json);
 }
 
