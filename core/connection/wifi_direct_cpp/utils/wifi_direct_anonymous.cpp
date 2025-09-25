@@ -14,6 +14,8 @@
  */
 #include "wifi_direct_anonymous.h"
 #include "anonymizer.h"
+#include "softbus_adapter_crypto.h"
+#include "softbus_utils.h"
 #include "wifi_direct_utils.h"
 
 namespace OHOS::SoftBus {
@@ -67,5 +69,17 @@ std::string WifiDirectAnonymize(const std::string &data)
     std::string result = AnonymizeWrapper(temp);
     AnonymizeFree(temp);
     return result;
+}
+
+std::string WifiDirectHashAnonymize(const std::vector<uint8_t> &input)
+{
+    uint8_t hashData[SHA_256_HASH_LEN] = { 0 };
+    int32_t ret = SoftBusGenerateStrHash(input.data(), input.size(), hashData);
+    CONN_CHECK_AND_RETURN_RET_LOGE(ret == SOFTBUS_OK, "", CONN_WIFI_DIRECT, "hash failed ret=%{public}d", ret);
+    char hashStr[HEXIFY_LEN(SHA_256_HASH_LEN)] = { 0 };
+    ret = ConvertBytesToHexString(hashStr, sizeof(hashStr), hashData, sizeof(hashData));
+    CONN_CHECK_AND_RETURN_RET_LOGE(
+        ret == SOFTBUS_OK, "", CONN_WIFI_DIRECT, "convert hex string failed, ret=%{public}d", ret);
+    return WifiDirectAnonymize(std::string(hashStr).substr(SHA_256_HASH_LEN, SHA_256_HASH_LEN));
 }
 } // namespace OHOS::SoftBus
