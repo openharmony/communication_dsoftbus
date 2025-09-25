@@ -31,7 +31,29 @@ static const std::string DEFAULT_ACCOUNT_UID = "ohosAnonymousUid";
 static bool g_accountIdInited = false;
 
 int32_t LnnJudgeDeviceTypeAndGetOsAccountInfo(uint8_t *accountHash, uint32_t len)
-
+{
+    int32_t userId = 0;
+    int32_t localDevTypeId = 0;
+    if (accountHash == nullptr) {
+        LNN_LOGE(LNN_STATE, "GetOhosAccount get invalid param");
+        return SOFTBUS_INVALID_PARAM;
+    }
+    if (LnnGetLocalNumInfo(NUM_KEY_DEV_TYPE_ID, &localDevTypeId) != SOFTBUS_OK) {
+        LNN_LOGE(LNN_STATE, "GeLocalDevType get invalid param");
+        return SOFTBUS_NETWORK_GET_LEDGER_INFO_ERR;
+    }
+    if (localDevTypeId == TYPE_CAR_ID) {
+        LnnGetLocalNumInfo(NUM_KEY_USERID, &userId);
+        if (LnnGetOhosAccountInfoByUserId(userId, accountHash, SHA_256_HASH_LEN) != SOFTBUS_OK) {
+            LNN_LOGE(LNN_STATE, "GetOhosAccountInfo get invalid param");
+            return SOFTBUS_NETWORK_GET_ACCOUNT_INFO_FAILED;
+        }
+    } else if (LnnGetOhosAccountInfo(accountHash, SHA_256_HASH_LEN) != SOFTBUS_OK) {
+        LNN_LOGE(LNN_STATE, "GetOhosAccountInfo get invalid param");
+        return SOFTBUS_NETWORK_GET_ACCOUNT_INFO_FAILED;
+    }
+    return SOFTBUS_OK;
+}
 
 int32_t LnnGetOhosAccountInfo(uint8_t *accountHash, uint32_t len)
 {
