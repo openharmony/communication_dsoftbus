@@ -121,7 +121,12 @@ int32_t LnnSetLocalNum64Info(InfoKey key, int64_t info)
 {
     return GetLnnOhosAccountInterface()->LnnSetLocalNum64Info(key, info);
 }
- 
+
+int32_t LnnGetLocalNumInfo(Info key, int32_t info)
+{
+    return GetLnnOhosAccountInterface()->LnnGetLocalNumInfo(key, info);
+}
+
 void LnnAccoutIdStatusSet(int64_t accountId)
 {
     return GetLnnOhosAccountInterface()->LnnAccoutIdStatusSet(accountId);

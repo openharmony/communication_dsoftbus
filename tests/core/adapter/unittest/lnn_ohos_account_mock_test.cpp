@@ -360,4 +360,11 @@ HWTEST_F(LNNOhosAccountMockTest, LNN_IS_DEFAULT_OHOS_ACCOUNT_002, TestSize.Level
     bool ret = LnnIsDefaultOhosAccount();
     EXPECT_FALSE(ret);
 }
+
+/**
+ * @tc.name: LNN_IS_DEFAULT_OHOS_ACCOUNT_001
+ * @tc.desc:  generate default str hash fail
+ * @tc.type: FUNC
+ * @tc.require:
+ */
 } // namespace OHOS

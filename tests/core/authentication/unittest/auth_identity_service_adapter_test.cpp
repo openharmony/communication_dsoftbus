@@ -298,7 +298,7 @@ HWTEST_F(AuthIdentityServiceAdapterTest, AUTH_ID_SERVICE_QUERY_CREDENTIAL_TEST_0
     (void)memset_s(accountHash, SHA_256_HEX_HASH_LEN, 0, SHA_256_HEX_HASH_LEN);
     EXPECT_CALL(mock, InitDeviceAuthService).WillOnce(Return(HC_SUCCESS));
     EXPECT_CALL(mock, GetCredMgrInstance).WillOnce(Return(manager));
-    EXPECT_CALL(mock, GetActiveOsAccountIds).WillOnce(Return(0));
+    EXPECT_CALL(mock, JudgeDeviceTypeAndGetOsAccountIds).WillOnce(Return(0));
     cJSON *msg = (cJSON *)SoftBusCalloc(sizeof(cJSON));
     if (msg == nullptr) {
         SoftBusFree(manager);
@@ -356,7 +356,7 @@ HWTEST_F(AuthIdentityServiceAdapterTest, AUTH_ID_SERVICE_QUERY_CREDENTIAL_TEST_0
     (void)memset_s(accountHash, SHA_256_HEX_HASH_LEN, 0, SHA_256_HEX_HASH_LEN);
     EXPECT_CALL(mock, InitDeviceAuthService).WillRepeatedly(Return(HC_SUCCESS));
     EXPECT_CALL(mock, GetCredMgrInstance).WillRepeatedly(Return(manager));
-    EXPECT_CALL(mock, GetActiveOsAccountIds).WillOnce(Return(0));
+    EXPECT_CALL(mock, JudgeDeviceTypeAndGetOsAccountIds).WillOnce(Return(0));
     EXPECT_CALL(mock, cJSON_CreateObject).WillOnce(Return(msg));
     EXPECT_CALL(mock, AddStringToJsonObject).WillRepeatedly(Return(true));
     EXPECT_CALL(mock, AddNumberToJsonObject).WillRepeatedly(Return(true));
@@ -413,7 +413,7 @@ HWTEST_F(AuthIdentityServiceAdapterTest, AUTH_ID_SERVICE_QUERY_CREDENTIAL_TEST_0
     (void)memset_s(accountHash, SHA_256_HEX_HASH_LEN, 0, SHA_256_HEX_HASH_LEN);
     EXPECT_CALL(mock, InitDeviceAuthService).WillRepeatedly(Return(HC_SUCCESS));
     EXPECT_CALL(mock, GetCredMgrInstance).WillRepeatedly(Return(manager));
-    EXPECT_CALL(mock, GetActiveOsAccountIds).WillOnce(Return(0));
+    EXPECT_CALL(mock, JudgeDeviceTypeAndGetOsAccountIds).WillOnce(Return(0));
     EXPECT_CALL(mock, cJSON_CreateObject).WillOnce(Return(msg)).WillOnce(Return(msg1));
     EXPECT_CALL(mock, AddStringToJsonObject).WillRepeatedly(Return(true));
     EXPECT_CALL(mock, AddNumberToJsonObject).WillRepeatedly(Return(true));
@@ -448,7 +448,7 @@ HWTEST_F(AuthIdentityServiceAdapterTest, AUTH_ID_SERVICE_QUERY_CREDENTIAL_TEST_0
     (void)memset_s(accountHash, SHA_256_HEX_HASH_LEN, 0, SHA_256_HEX_HASH_LEN);
     EXPECT_CALL(mock, InitDeviceAuthService).WillOnce(Return(HC_SUCCESS));
     EXPECT_CALL(mock, GetCredMgrInstance).WillOnce(Return(manager));
-    EXPECT_CALL(mock, GetActiveOsAccountIds).WillOnce(Return(0));
+    EXPECT_CALL(mock, JudgeDeviceTypeAndGetOsAccountIds).WillOnce(Return(0));
     cJSON *msg = (cJSON *)SoftBusCalloc(sizeof(cJSON));
     if (msg == nullptr) {
         SoftBusFree(manager);
@@ -511,7 +511,7 @@ HWTEST_F(AuthIdentityServiceAdapterTest, AUTH_ID_SERVICE_QUERY_CREDENTIAL_TEST_0
     (void)memset_s(accountHash, SHA_256_HEX_HASH_LEN, 0, SHA_256_HEX_HASH_LEN);
     EXPECT_CALL(mock, InitDeviceAuthService).WillRepeatedly(Return(HC_SUCCESS));
     EXPECT_CALL(mock, GetCredMgrInstance).WillRepeatedly(Return(manager));
-    EXPECT_CALL(mock, GetActiveOsAccountIds).WillOnce(Return(0));
+    EXPECT_CALL(mock, JudgeDeviceTypeAndGetOsAccountIds).WillOnce(Return(0));
     EXPECT_CALL(mock, cJSON_CreateObject).WillOnce(Return(msg)).WillOnce(Return(msg1));
     EXPECT_CALL(mock, AddStringToJsonObject).WillRepeatedly(Return(true));
     EXPECT_CALL(mock, AddNumberToJsonObject).WillRepeatedly(Return(true));
