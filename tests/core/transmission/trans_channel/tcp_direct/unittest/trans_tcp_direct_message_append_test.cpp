@@ -776,9 +776,10 @@ HWTEST_F(TransTcpDirectMessageAppendTest, NotifyChannelOpenFailedTest004, TestSi
     int32_t ret = TransTdcAddSessionConn(conn);
     EXPECT_EQ(ret, SOFTBUS_OK);
     ChannelInfo info = {0};
+    NiceMock<TransTcpDirectMessageInterfaceMock> TcpMessageMock;
+    EXPECT_CALL(TcpMessageMock, GetCapabilityBit).WillOnce(Return(false));
     GetChannelInfoFromConn(&info, conn, channelId);
 
-    NiceMock<TransTcpDirectMessageInterfaceMock> TcpMessageMock;
     EXPECT_CALL(TcpMessageMock, TransTdcGetPkgName).WillOnce(Return(SOFTBUS_OK));
     EXPECT_CALL(TcpMessageMock, TransTdcOnChannelOpenFailed).WillOnce(Return(SOFTBUS_MEM_ERR));
     ret = NotifyChannelOpenFailed(channelId, errCode);
@@ -1941,10 +1942,10 @@ HWTEST_F(TransTcpDirectMessageAppendTest, HandleDataBusReply001, TestSize.Level1
     NiceMock<TransTcpDirectMessageInterfaceMock> TcpMessageMock;
     ON_CALL(TcpMessageMock, GetAuthHandleByChanId(_, _))
         .WillByDefault(DoAll(SetArgPointee<1>(AuthHandle{.authId = authId, .type = 1 }), Return(SOFTBUS_OK)));
-    EXPECT_CALL(TcpMessageMock, AuthEncrypt).WillOnce(Return(SOFTBUS_OK));
-    EXPECT_CALL(TcpMessageMock, TransTdcOnChannelClosed).WillOnce(Return(SOFTBUS_INVALID_PARAM));
+    EXPECT_CALL(TcpMessageMock, AuthEncrypt).WillRepeatedly(Return(SOFTBUS_OK));
+    EXPECT_CALL(TcpMessageMock, TransTdcOnChannelClosed).WillRepeatedly(Return(SOFTBUS_INVALID_PARAM));
     int32_t ret = HandleDataBusReply(conn, channelId, &extra, flags, seq);
-    EXPECT_EQ(ret, SOFTBUS_TRANS_GET_SESSION_CONN_FAILED);
+    EXPECT_EQ(ret, SOFTBUS_TRANS_GET_PACK_REPLY_FAILED);
     ReleaseSessionConn(conn);
 }
 

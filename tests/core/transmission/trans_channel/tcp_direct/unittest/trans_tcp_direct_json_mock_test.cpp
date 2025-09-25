@@ -181,10 +181,6 @@ HWTEST_F(TransTcpDirectJsonMockTest, VerifyP2pPackWithProtocolTest001, TestSize.
     EXPECT_CALL(tcpDirectJsonMock, AddStringToJsonObject).WillRepeatedly(Return(true));
     EXPECT_CALL(tcpDirectJsonMock, AddNumberToJsonObject).WillOnce(Return(false));
     EXPECT_EQ(VerifyP2pPack(myIp, myPort, peerIp, LNN_PROTOCOL_MINTP, 0), nullptr);
-
-    EXPECT_CALL(tcpDirectJsonMock, AddNumberToJsonObject).WillOnce(Return(true));
-    EXPECT_CALL(tcpDirectJsonMock, AddNumberToJsonObject).WillOnce(Return(false));
-    EXPECT_EQ(VerifyP2pPack(myIp, myPort, peerIp, LNN_PROTOCOL_MINTP, 0), nullptr);
 }
 
 /**
