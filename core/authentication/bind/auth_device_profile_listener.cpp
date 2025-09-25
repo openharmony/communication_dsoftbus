@@ -78,7 +78,7 @@ int32_t AuthDeviceProfileListener::OnTrustDeviceProfileDelete(const TrustDeviceP
         AUTH_LOGE(AUTH_INIT, "OnTrustDeviceProfileDelete failed!");
         return SOFTBUS_AUTH_DP_CHANGE_LISTENER_INVALID;
     }
-    if (profile.GetLocalUserId() != GetActiveOsAccountIds()) {
+    if (profile.GetLocalUserId() != JudgeDeviceTypeAndGetOsAccountIds()) {
         AUTH_LOGE(AUTH_INIT, "delete deviceprofile not current user");
         if (!DpHasAccessControlProfile(profile.GetDeviceId().c_str(), true, profile.GetLocalUserId())) {
             LnnDeleteSpecificTrustedDevInfo(profile.GetDeviceId().c_str(), profile.GetLocalUserId());

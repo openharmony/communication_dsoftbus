@@ -226,6 +226,7 @@ typedef struct {
     int32_t sleRangeCapacity;
     AclWriteState aclState;
     unsigned char sparkCheck[SPARK_CHECK_LENGTH];
+    uint64_t displayId;
 } NodeInfo;
 
 #ifdef __cplusplus

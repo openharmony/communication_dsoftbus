@@ -1405,7 +1405,7 @@ static void UpdateTrustedDb(int64_t accountId, const char *deviceId)
         LNN_LOGE(LNN_LEDGER, "get local accountId fail");
         return;
     }
-    int32_t localUserId = GetActiveOsAccountIds();
+    int32_t localUserId = JudgeDeviceTypeAndGetOsAccountIds();
     if ((localAccountId == accountId && LnnIsDefaultOhosAccount()) || localAccountId != accountId) {
         if (LnnFindDeviceUdidTrustedInfoFromDb(deviceId) == SOFTBUS_NOT_FIND &&
             DpHasAccessControlProfile(deviceId, true, localUserId)) {

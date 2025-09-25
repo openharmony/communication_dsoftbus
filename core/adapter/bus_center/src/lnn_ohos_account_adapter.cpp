@@ -162,7 +162,7 @@ int32_t GetActiveOsAccountIds(void)
 
 bool IsActiveOsAccountUnlocked(void)
 {
-    int32_t osAccountId = GetActiveOsAccountIds();
+    int32_t osAccountId = JudgeDeviceTypeAndGetOsAccountIds();
     if (osAccountId == SOFTBUS_NETWORK_QUERY_ACCOUNT_ID_FAILED) {
         LNN_LOGE(LNN_STATE, "accountId is invalid");
         return false;

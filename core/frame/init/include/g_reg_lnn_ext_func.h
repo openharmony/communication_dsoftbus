@@ -210,6 +210,7 @@ typedef DiscoveryType (*LnnConvAddrTypeToDiscTypeFunc)(ConnectionAddrType type);
 typedef int32_t (*GetOsAccountUidFunc)(char *id, uint32_t idLen, uint32_t *len);
 typedef bool (*LnnIsDefaultOhosAccountFunc)(void);
 typedef int32_t (*GetActiveOsAccountIdsFunc)(void);
+typedef int32_t (*JudgeDeviceTypeAndGetOsAccountIdsFunc)(void);
 typedef int32_t (*LnnGetAllMetaNodeInfoFunc)(MetaNodeInfo *infos, int32_t *infoNum);
 typedef void (*LnnNotifyNodeStatusChangedFunc)(NodeStatus *info, NodeStatusType type);
 typedef bool (*LnnIsLSANodeFunc)(const NodeBasicInfo *info);

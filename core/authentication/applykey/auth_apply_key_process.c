@@ -855,7 +855,7 @@ static int32_t ProcessAuthHichainParam(uint32_t requestId, const DeviceAuthCallb
     AUTH_CHECK_AND_RETURN_RET_LOGE(lightAccountVerifier != NULL, SOFTBUS_AUTH_GET_LIGHT_ACCOUNT_FAIL, AUTH_CONN,
         "light account verify not initialized");
 
-    int32_t activeUserId = GetActiveOsAccountIds();
+    int32_t activeUserId = JudgeDeviceTypeAndGetOsAccountIds();
     int32_t ret =
         lightAccountVerifier->startLightAccountAuth(activeUserId, (int64_t)requestId, (const char *)D2D_APPID, genCb);
     if (ret != HC_SUCCESS) {
@@ -1105,7 +1105,7 @@ static int32_t ProcessApplyKeyData(uint32_t requestId, const uint8_t *data, uint
     AUTH_CHECK_AND_RETURN_RET_LOGE(lightAccountVerifier != NULL, SOFTBUS_AUTH_GET_LIGHT_ACCOUNT_FAIL, AUTH_CONN,
         "light account verify not initialized");
 
-    int32_t activeUserId = GetActiveOsAccountIds();
+    int32_t activeUserId = JudgeDeviceTypeAndGetOsAccountIds();
     DataBuff inMsg = { .data = (uint8_t *)data, .length = dataLen };
     int32_t hichainRet =
         lightAccountVerifier->processLightAccountAuth(activeUserId, (int64_t)requestId, &inMsg, &g_hichainCallback);

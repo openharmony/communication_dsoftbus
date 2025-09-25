@@ -75,7 +75,7 @@ void CommonEventMonitor::OnReceiveEvent(const CommonEventData &data)
         action == CommonEventSupport::COMMON_EVENT_DISTRIBUTED_ACCOUNT_LOGOFF) {
         const AAFwk::WantParams &wantParams = data.GetWant().GetParams();
         int32_t eventUserId = -1;
-        int32_t activeUserId = GetActiveOsAccountIds();
+        int32_t activeUserId = JudgeDeviceTypeAndGetOsAccountIds();
         std::string userIdKey = "userId";
         eventUserId = wantParams.GetIntParam(userIdKey, -1);
         LNN_LOGI(LNN_EVENT, "activeUserId=%{public}d, eventUserId=%{public}d", activeUserId, eventUserId);

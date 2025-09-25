@@ -184,7 +184,7 @@ int32_t GetApplyKeyByBusinessInfo(
         return SOFTBUS_INVALID_PARAM;
     }
     char key[KEY_LEN] = { 0 };
-    int32_t userId = GetActiveOsAccountIds();
+    int32_t userId = JudgeDeviceTypeAndGetOsAccountIds();
     if (sprintf_s(key, sizeof(key), "%s_%s_%d_%d", info->udidHash, info->accountHash, userId, info->type) < 0) {
         AUTH_LOGE(AUTH_CONN, "sprintf_s key fail");
         return SOFTBUS_SPRINTF_ERR;
@@ -390,7 +390,7 @@ int32_t AuthInsertApplyKey(
         return SOFTBUS_INVALID_PARAM;
     }
     char key[KEY_LEN] = { 0 };
-    int32_t userId = GetActiveOsAccountIds();
+    int32_t userId = JudgeDeviceTypeAndGetOsAccountIds();
     if (sprintf_s(key, sizeof(key), "%s_%s_%d_%d", info->udidHash, info->accountHash, userId, info->type) < 0) {
         AUTH_LOGE(AUTH_CONN, "sprintf_s key fail");
         return SOFTBUS_SPRINTF_ERR;
@@ -423,8 +423,8 @@ int32_t AuthDeleteApplyKey(const RequestBusinessInfo *info)
         return SOFTBUS_INVALID_PARAM;
     }
     char key[KEY_LEN] = { 0 };
-    if (sprintf_s(key, sizeof(key), "%s_%s_%d_%d", info->udidHash, info->accountHash, GetActiveOsAccountIds(),
-            info->type) < 0) {
+    if (sprintf_s(key, sizeof(key), "%s_%s_%d_%d", info->udidHash, info->accountHash,
+        JudgeDeviceTypeAndGetOsAccountIds(), info->type) < 0) {
         AUTH_LOGE(AUTH_CONN, "sprintf_s key fail");
         return SOFTBUS_SPRINTF_ERR;
     }

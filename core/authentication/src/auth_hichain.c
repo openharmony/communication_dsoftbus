@@ -490,7 +490,7 @@ static void OnDeviceNotTrusted(const char *udid)
         return;
     }
     if (g_dataChangeListener.onDeviceNotTrusted != NULL) {
-        g_dataChangeListener.onDeviceNotTrusted(udid, GetActiveOsAccountIds());
+        g_dataChangeListener.onDeviceNotTrusted(udid, JudgeDeviceTypeAndGetOsAccountIds());
     }
 }
 
@@ -537,10 +537,10 @@ int32_t HichainStartAuth(int64_t authSeq, HiChainAuthParam *hiChainParam, HiChai
     int32_t ret = SOFTBUS_OK;
     if (hiChainParam->cb == NULL) {
         ret = g_hiChainAuthInterface[authMode].authenticate(
-            GetActiveOsAccountIds(), authSeq, authParams, &g_hichainCallback);
+            JudgeDeviceTypeAndGetOsAccountIds(), authSeq, authParams, &g_hichainCallback);
     } else {
         ret = g_hiChainAuthInterface[authMode].authenticate(
-            GetActiveOsAccountIds(), authSeq, authParams, hiChainParam->cb);
+            JudgeDeviceTypeAndGetOsAccountIds(), authSeq, authParams, hiChainParam->cb);
     }
     if (ret == SOFTBUS_OK) {
         AUTH_LOGI(AUTH_HICHAIN, "hichain call authDevice succ");

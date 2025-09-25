@@ -30,6 +30,9 @@ static const std::string DEFAULT_USER_ID = "0";
 static const std::string DEFAULT_ACCOUNT_UID = "ohosAnonymousUid";
 static bool g_accountIdInited = false;
 
+int32_t LnnJudgeDeviceTypeAndGetOsAccountInfo(uint8_t *accountHash, uint32_t len)
+
+
 int32_t LnnGetOhosAccountInfo(uint8_t *accountHash, uint32_t len)
 {
     if (accountHash == nullptr || len != SHA_256_HASH_LEN) {
@@ -109,7 +112,7 @@ int32_t LnnInitOhosAccount(void)
     char accountUid[ACCOUNT_UID_STR_LEN] = {0};
     uint32_t size = 0;
 
-    if (LnnGetOhosAccountInfo(accountHash, SHA_256_HASH_LEN) != SOFTBUS_OK) {
+    if (LnnJudgeDeviceTypeAndGetOsAccountInfo(accountHash, SHA_256_HASH_LEN) != SOFTBUS_OK) {
         if (SoftBusGenerateStrHash(reinterpret_cast<const unsigned char *>(DEFAULT_USER_ID.c_str()),
             DEFAULT_USER_ID.length(), reinterpret_cast<unsigned char *>(accountHash)) != SOFTBUS_OK) {
             LNN_LOGE(LNN_STATE, "InitOhosAccount generate default str hash fail");
@@ -151,7 +154,7 @@ void LnnUpdateOhosAccount(UpdateAccountReason reason)
         LNN_LOGE(LNN_STATE, "OnAccountChanged get local account hash fail");
         return;
     }
-    if (LnnGetOhosAccountInfo(accountHash, SHA_256_HASH_LEN) != SOFTBUS_OK) {
+    if (LnnJudgeDeviceTypeAndGetOsAccountInfo(accountHash, SHA_256_HASH_LEN) != SOFTBUS_OK) {
         LNN_LOGW(LNN_STATE, "OnAccountChanged get account account hash fail");
         if (SoftBusGenerateStrHash(reinterpret_cast<const unsigned char *>(DEFAULT_USER_ID.c_str()),
             DEFAULT_USER_ID.length(), reinterpret_cast<unsigned char *>(accountHash)) != SOFTBUS_OK) {
