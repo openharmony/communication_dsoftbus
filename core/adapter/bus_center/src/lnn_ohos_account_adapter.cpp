@@ -194,14 +194,14 @@ static int32_t GetAllDisplaysForMultiScreen()
             if (displayName == CONTROL_PANEL || displayName == CO_DRIVER_PANEL) {
                 displayId = display->GetId();
             }
-            LNN_LOGI(LNN_STATE, "Found displayName=%{public}s, ID=%{public}" PRIu64"", displayName.c_str(), displayId);
+            LNN_LOGI(LNN_STATE, "Found displayName=%{public}s, ID=%{public}" PRIu64, displayName.c_str(), displayId);
         }
     }
     if (LnnSetLocalNumU64Info(NUM_KEY_DISPLAY_ID, displayId) != SOFTBUS_OK) {
         LNN_LOGE(LNN_LEDGER, "set displayId fail");
-        return;
+        return SOFTBUS_NETWORK_SET_LEDGER_INFO_ERR;
     }
-    return;
+    return SOFTBUS_OK;
 }
 
 int32_t GetActiveOsAccountIds(void)
@@ -221,7 +221,7 @@ int32_t JudgeDeviceTypeAndGetOsAccountIds(void)
     int32_t localDevTypeId = 0;
     int32_t userId = 0;
     if (LnnGetLocalNumInfo(NUM_KEY_DEV_TYPE_ID, &localDevTypeId) != SOFTBUS_OK) {
-        return SOFTBUS_NETWORK_GET_LEDGER_INFO_ERR;
+        return GetActiveOsAccountIds();
     }
     if (localDevTypeId == TYPE_CAR_ID) {
         GetAllDisplaysForMultiScreen();

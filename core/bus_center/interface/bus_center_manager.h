@@ -53,7 +53,7 @@ int32_t LnnGetLocalNumInfoByIfnameIdx(InfoKey key, int32_t *info, int32_t ifIdx)
 int32_t LnnGetLocalNum64Info(InfoKey key, int64_t *info);
 int32_t LnnGetLocalNumU64Info(InfoKey key, uint64_t *info);
 int32_t LnnSetLocalNum64Info(InfoKey key, int64_t info);
-int32_t LnnSetLocalNumU64Info(InfoKey key, int64_t info);
+int32_t LnnSetLocalNumU64Info(InfoKey key, uint64_t info);
 int32_t LnnGetLocalNum16Info(InfoKey key, int16_t *info);
 int32_t LnnSetLocalNum16Info(InfoKey key, int16_t info);
 int32_t LnnGetLocalNumU16Info(InfoKey key, uint16_t *info);
