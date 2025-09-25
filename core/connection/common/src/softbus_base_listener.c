@@ -1211,17 +1211,18 @@ static void *WatchTask(void *arg)
         }
         ListNode fdEvents;
         ListInit(&fdEvents);
-        CONN_LOGI(CONN_COMMON, "WatchEvent is start, traceId=%{public}d", watchState->traceId);
+        CONN_LOGI(CONN_COMMON, "Watch start, traceId=%{public}d, wakeupId=%{public}d",
+            watchState->traceId, wakeupTraceIdGenerator);
         int32_t nEvents = WatchEvent(g_eventWatcher, SOFTBUS_LISTENER_WATCH_TIMEOUT_MSEC, &fdEvents);
         int32_t wakeupTraceId = ++wakeupTraceIdGenerator;
-        if (nEvents == 0) {
+        if (nEvents == 0 || nEvents == SOFTBUS_ADAPTER_SOCKET_EINTR) {
             ReleaseFdNode(&fdEvents);
+            SoftBusSleepMs(WATCH_ABNORMAL_EVENT_RETRY_WAIT_MILLIS);
             continue;
         }
         if (nEvents < 0) {
-            CONN_LOGE(CONN_COMMON, "unexpect wakeup, retry after some times. "
-                                   "waitDelay=%{public}dms, wakeupTraceId=%{public}d, events=%{public}d",
-                WATCH_ABNORMAL_EVENT_RETRY_WAIT_MILLIS, wakeupTraceId, nEvents);
+            CONN_LOGE(CONN_COMMON, "unexpect wakeup, waitDelay=%{public}dms, wakeupTraceId=%{public}d, "
+                "status=%{public}d", WATCH_ABNORMAL_EVENT_RETRY_WAIT_MILLIS, wakeupTraceId, nEvents);
             ReleaseFdNode(&fdEvents);
             if (nEvents == SOFTBUS_ADAPTER_SOCKET_EBADF) {
                 RemoveBadFd();
@@ -1229,7 +1230,7 @@ static void *WatchTask(void *arg)
             SoftBusSleepMs(WATCH_ABNORMAL_EVENT_RETRY_WAIT_MILLIS);
             continue;
         }
-        CONN_LOGI(CONN_COMMON, "watch task, wakeup from watch, watchTrace=%{public}d, wakeupTraceId=%{public}d, "
+        CONN_LOGI(CONN_COMMON, "wakeup, traceId=%{public}d, wakeupId=%{public}d, "
                                "events=%{public}d", watchState->traceId, wakeupTraceId, nEvents);
         ProcessEvent(&fdEvents, watchState, wakeupTraceId);
         ReleaseFdNode(&fdEvents);
