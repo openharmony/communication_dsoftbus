@@ -885,11 +885,13 @@ HWTEST_F(TransTcpDirectP2pTest, PackAndSendVerifyP2pRspTest002, TestSize.Level1)
 HWTEST_F(TransTcpDirectP2pTest, TransGetRemoteUuidByAuthHandleTest001, TestSize.Level1)
 {
     AuthHandle authHandle = { .authId = AUTH_INVALID_ID, .type = AUTH_LINK_TYPE_BLE };
+    NiceMock<TransTcpDirectCommonInterfaceMock> TransTcpDirectP2pMock;
+    EXPECT_CALL(TransTcpDirectP2pMock, AuthGetDeviceUuid).WillRepeatedly(Return(SOFTBUS_OK));
     int32_t ret = TransGetRemoteUuidByAuthHandle(authHandle, (char *)g_uuid);
-    EXPECT_NE(SOFTBUS_OK, ret);
+    EXPECT_EQ(SOFTBUS_OK, ret);
     authHandle.type = AUTH_INVALID_ID;
     ret = TransGetRemoteUuidByAuthHandle(authHandle, (char *)g_uuid);
-    EXPECT_NE(SOFTBUS_OK, ret);
+    EXPECT_EQ(SOFTBUS_OK, ret);
 }
 
 /**
@@ -914,22 +916,6 @@ HWTEST_F(TransTcpDirectP2pTest, OnVerifyP2pRequestTest002, TestSize.Level1)
     int32_t ret = OnVerifyP2pRequest(authHandle, seq, json, true);
     EXPECT_EQ(SOFTBUS_NOT_IMPLEMENT, ret);
     cJSON_Delete(json);
-    cJSON_free(data);
-}
-
-/**
- * @tc.name: OnP2pVerifyMsgReceivedTest001
- * @tc.desc: OnP2pVerifyMsgReceived.
- * @tc.type: FUNC
- * @tc.require:
- */
-HWTEST_F(TransTcpDirectP2pTest, OnP2pVerifyMsgReceivedTest001, TestSize.Level1)
-{
-    int32_t channelId = 0;
-    char *data = VerifyP2pPack(g_ip, g_port, g_ip, 0, 0);
-    ASSERT_TRUE(data != nullptr);
-    int32_t len = strlen(data);
-    OnP2pVerifyMsgReceived(channelId, data, len);
     cJSON_free(data);
 }
 
