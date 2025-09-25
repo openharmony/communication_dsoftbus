@@ -62,16 +62,16 @@ std::string WifiDirectIpManager::ApplyIpv6(const std::string &mac)
     char ip[IP_STR_MAX_LEN] {};
     auto ret = sprintf_s(ip, sizeof(ip), "fe80::%02x%02x:%02x%02x:%02x%02x:%02x%02x%%chba0",
                          array[0], array[1], array[2], array[3], array[4], array[5], array[6], array[7]);
-    CONN_CHECK_AND_RETURN_RET_LOGE(ret > 0, "", CONN_WIFI_DIRECT, "format failed");
+    CONN_CHECK_AND_RETURN_RET_LOGE(ret > 0, "", CONN_WIFI_DIRECT, "format fail");
 
     SoftBusSockAddrIn6 addrIn6 {};
     if (Ipv6AddrToAddrIn(&addrIn6, ip, 0) != SOFTBUS_OK) {
-        CONN_LOGE(CONN_WIFI_DIRECT, "to addrIn6 failed");
+        CONN_LOGE(CONN_WIFI_DIRECT, "to addrIn6 fail");
         return "";
     }
     char result[IP_STR_MAX_LEN] {};
     if (Ipv6AddrInToAddr(&addrIn6, result, sizeof(result)) != SOFTBUS_OK) {
-        CONN_LOGE(CONN_WIFI_DIRECT, "to ip string failed");
+        CONN_LOGE(CONN_WIFI_DIRECT, "to ip string fail");
         return "";
     }
     CONN_LOGI(CONN_WIFI_DIRECT, "scopeId=%{public}u", addrIn6.sin6ScopeId);
@@ -87,16 +87,16 @@ int32_t WifiDirectIpManager::ApplyIpv4(
 {
     std::string subNet = ApplySubNet(localArray, remoteArray);
     CONN_CHECK_AND_RETURN_RET_LOGE(
-        !subNet.empty(), SOFTBUS_CONN_APPLY_SUBNET_FAIL, CONN_WIFI_DIRECT, "apply subnet failed");
+        !subNet.empty(), SOFTBUS_CONN_APPLY_SUBNET_FAIL, CONN_WIFI_DIRECT, "apply subnet fail");
 
     std::string sourceIp = subNet + HML_IP_SOURCE_SUFFIX;
     std::string sinkIp = subNet + HML_IP_SINK_SUFFIX;
     int32_t ret = source.FromIpString(sourceIp);
     CONN_CHECK_AND_RETURN_RET_LOGW(
-        ret == SOFTBUS_OK, ret, CONN_WIFI_DIRECT, "source ip to ipv4 failed");
+        ret == SOFTBUS_OK, ret, CONN_WIFI_DIRECT, "source ip to ipv4 fail");
     ret = sink.FromIpString(sinkIp);
     CONN_CHECK_AND_RETURN_RET_LOGW(
-        ret == SOFTBUS_OK, ret, CONN_WIFI_DIRECT, "sink ip to ipv4 failed");
+        ret == SOFTBUS_OK, ret, CONN_WIFI_DIRECT, "sink ip to ipv4 fail");
 
     return SOFTBUS_OK;
 }
@@ -126,7 +126,7 @@ int32_t WifiDirectIpManager::ConfigIpv6(const std::string &interface, const std:
 {
     auto ret = OHOS::NetManagerStandard::NetConnClient::GetInstance().AddInterfaceAddress(interface, ip, IPV6_PREFIX);
     CONN_CHECK_AND_RETURN_RET_LOGE(
-        ret == 0, SOFTBUS_CONN_CONFIG_IPV6_CONFIG_IP_FAILED, CONN_WIFI_DIRECT, "add ip failed");
+        ret == 0, SOFTBUS_CONN_CONFIG_IPV6_CONFIG_IP_FAILED, CONN_WIFI_DIRECT, "add ip fail");
     return SOFTBUS_OK;
 }
 
@@ -135,19 +135,19 @@ int32_t WifiDirectIpManager::ConfigIpv4(
 {
     std::string localIpStr = local.ToIpString();
     CONN_CHECK_AND_RETURN_RET_LOGE(
-        !localIpStr.empty(), SOFTBUS_CONN_CONVERT_LOCAL_IP_FAIL, CONN_WIFI_DIRECT, "convert local ip failed");
+        !localIpStr.empty(), SOFTBUS_CONN_CONVERT_LOCAL_IP_FAIL, CONN_WIFI_DIRECT, "convert local ip fail");
     std::string remoteIpStr = remote.ToIpString();
     CONN_CHECK_AND_RETURN_RET_LOGE(
-        !remoteIpStr.empty(), SOFTBUS_CONN_CONVERT_REMOTE_IP_FAIL, CONN_WIFI_DIRECT, "convert remote ip failed");
+        !remoteIpStr.empty(), SOFTBUS_CONN_CONVERT_REMOTE_IP_FAIL, CONN_WIFI_DIRECT, "convert remote ip fail");
     CONN_LOGI(CONN_WIFI_DIRECT, "localIp=%{public}s, remoteIp=%{public}s, remoteMac=%{public}s",
         WifiDirectAnonymizeIp(localIpStr).c_str(), WifiDirectAnonymizeIp(remoteIpStr).c_str(),
         WifiDirectAnonymizeMac(remoteMac).c_str());
 
     int32_t ret = AddInterfaceAddress(interface, localIpStr, local.GetPrefixLength());
-    CONN_CHECK_AND_RETURN_RET_LOGE(ret == SOFTBUS_OK, ret, CONN_WIFI_DIRECT, "add ip failed");
+    CONN_CHECK_AND_RETURN_RET_LOGE(ret == SOFTBUS_OK, ret, CONN_WIFI_DIRECT, "add ip fail");
 
     ret = AddStaticArp(interface, remoteIpStr, remoteMac);
-    CONN_CHECK_AND_RETURN_RET_LOGE(ret == SOFTBUS_OK, ret, CONN_WIFI_DIRECT, "add static arp failed");
+    CONN_CHECK_AND_RETURN_RET_LOGE(ret == SOFTBUS_OK, ret, CONN_WIFI_DIRECT, "add static arp fail");
     return SOFTBUS_OK;
 }
 
@@ -155,20 +155,20 @@ void WifiDirectIpManager::ReleaseIpv4(
     const std::string &interface, const Ipv4Info &local, const Ipv4Info &remote, const std::string &remoteMac)
 {
     std::string localIpStr = local.ToIpString();
-    CONN_CHECK_AND_RETURN_LOGE(!localIpStr.empty(), CONN_WIFI_DIRECT, "convert local ip failed");
+    CONN_CHECK_AND_RETURN_LOGE(!localIpStr.empty(), CONN_WIFI_DIRECT, "convert local ip fail");
     std::string remoteIpStr = remote.ToIpString();
-    CONN_CHECK_AND_RETURN_LOGE(!remoteIpStr.empty(), CONN_WIFI_DIRECT, "convert remote ip failed");
+    CONN_CHECK_AND_RETURN_LOGE(!remoteIpStr.empty(), CONN_WIFI_DIRECT, "convert remote ip fail");
 
     CONN_LOGI(CONN_WIFI_DIRECT, "localIp=%{public}s, remoteIp=%{public}s, remoteMac=%{public}s",
         WifiDirectAnonymizeIp(localIpStr).c_str(), WifiDirectAnonymizeIp(remoteIpStr).c_str(),
         WifiDirectAnonymizeMac(remoteMac).c_str());
 
     if (DeleteInterfaceAddress(interface, localIpStr, local.GetPrefixLength()) != SOFTBUS_OK) {
-        CONN_LOGE(CONN_WIFI_DIRECT, "delete ip failed. ip=%{public}s", WifiDirectAnonymizeIp(localIpStr).c_str());
+        CONN_LOGE(CONN_WIFI_DIRECT, "delete ip fail. ip=%{public}s", WifiDirectAnonymizeIp(localIpStr).c_str());
     }
 
     if (DeleteStaticArp(interface, remoteIpStr, remoteMac) != SOFTBUS_OK) {
-        CONN_LOGE(CONN_WIFI_DIRECT, "delete arp failed. remoteIp=%{public}s, remoteMac=%{public}s",
+        CONN_LOGE(CONN_WIFI_DIRECT, "delete arp fail. remoteIp=%{public}s, remoteMac=%{public}s",
             WifiDirectAnonymizeIp(remoteIpStr).c_str(), WifiDirectAnonymizeMac(remoteMac).c_str());
     }
 }
@@ -179,7 +179,7 @@ void WifiDirectIpManager::ClearAllIpv4()
     for (const auto &ipv4 : localIpv4Array) {
         std::string ipStr = ipv4.ToIpString();
         if (DeleteInterfaceAddress(IF_NAME_HML, ipStr, ipv4.GetPrefixLength()) != SOFTBUS_OK) {
-            CONN_LOGE(CONN_WIFI_DIRECT, "delete ip failed. ip=%{public}s", WifiDirectAnonymizeIp(ipStr).c_str());
+            CONN_LOGE(CONN_WIFI_DIRECT, "delete ip fail. ip=%{public}s", WifiDirectAnonymizeIp(ipStr).c_str());
         }
     }
 }
@@ -189,18 +189,18 @@ int32_t WifiDirectIpManager::AddInterfaceAddress(
 {
     std::string gateWay;
     int32_t ret = GetNetworkGateWay(ipString, gateWay);
-    CONN_CHECK_AND_RETURN_RET_LOGE(ret == SOFTBUS_OK, ret, CONN_WIFI_DIRECT, "get gate way failed");
+    CONN_CHECK_AND_RETURN_RET_LOGE(ret == SOFTBUS_OK, ret, CONN_WIFI_DIRECT, "get gate way fail");
     std::string destination;
     ret = GetNetworkDestination(ipString, destination);
-    CONN_CHECK_AND_RETURN_RET_LOGE(ret == SOFTBUS_OK, ret, CONN_WIFI_DIRECT, "get destination failed");
+    CONN_CHECK_AND_RETURN_RET_LOGE(ret == SOFTBUS_OK, ret, CONN_WIFI_DIRECT, "get destination fail");
 
     ret = OHOS::NetManagerStandard::NetConnClient::GetInstance().AddInterfaceAddress(interface, ipString, prefixLength);
     CONN_CHECK_AND_RETURN_RET_LOGE(
-        ret == NetManagerStandard::NETMANAGER_SUCCESS, ret, CONN_WIFI_DIRECT, "add ip failed ret=%{public}d", ret);
+        ret == NetManagerStandard::NETMANAGER_SUCCESS, ret, CONN_WIFI_DIRECT, "add ip fail ret=%{public}d", ret);
     ret = OHOS::NetManagerStandard::NetConnClient::GetInstance().AddNetworkRoute(
         LOCAL_NETWORK_ID, interface, destination, gateWay);
     CONN_CHECK_AND_RETURN_RET_LOGE(
-        ret == NetManagerStandard::NETMANAGER_SUCCESS, ret, CONN_WIFI_DIRECT, "add route failed ret=%{public}d", ret);
+        ret == NetManagerStandard::NETMANAGER_SUCCESS, ret, CONN_WIFI_DIRECT, "add route fail ret=%{public}d", ret);
     return SOFTBUS_OK;
 }
 
@@ -209,18 +209,18 @@ int32_t WifiDirectIpManager::DeleteInterfaceAddress(
 {
     std::string gateWay;
     int32_t ret = GetNetworkGateWay(ipString, gateWay);
-    CONN_CHECK_AND_RETURN_RET_LOGE(ret == 0, ret, CONN_WIFI_DIRECT, "get gate way failed");
+    CONN_CHECK_AND_RETURN_RET_LOGE(ret == 0, ret, CONN_WIFI_DIRECT, "get gate way fail");
     std::string destination;
     ret = GetNetworkDestination(ipString, destination);
-    CONN_CHECK_AND_RETURN_RET_LOGE(ret == 0, ret, CONN_WIFI_DIRECT, "get destination failed");
+    CONN_CHECK_AND_RETURN_RET_LOGE(ret == 0, ret, CONN_WIFI_DIRECT, "get destination fail");
     ret = OHOS::NetManagerStandard::NetConnClient::GetInstance().RemoveNetworkRoute(
         LOCAL_NETWORK_ID, interface, destination, gateWay);
     if (ret != NetManagerStandard::NETMANAGER_SUCCESS) {
-        CONN_LOGE(CONN_WIFI_DIRECT, "remove route failed ret=%{public}d", ret);
+        CONN_LOGE(CONN_WIFI_DIRECT, "remove route fail ret=%{public}d", ret);
     }
     ret = OHOS::NetManagerStandard::NetConnClient::GetInstance().DelInterfaceAddress(interface, ipString, prefixLength);
     if (ret != NetManagerStandard::NETMANAGER_SUCCESS) {
-        CONN_LOGE(CONN_WIFI_DIRECT, "delete ip failed ret=%{public}d", ret);
+        CONN_LOGE(CONN_WIFI_DIRECT, "delete ip fail ret=%{public}d", ret);
     }
     return SOFTBUS_OK;
 }

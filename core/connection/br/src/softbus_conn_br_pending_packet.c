@@ -87,7 +87,7 @@ int32_t ConnBrCreateBrPendingPacket(uint32_t id, int64_t seq)
 
 void ConnBrDelBrPendingPacket(uint32_t id, int64_t seq)
 {
-    CONN_CHECK_AND_RETURN_LOGW(SoftBusMutexLock(&g_pendingLock) == SOFTBUS_OK, CONN_BR, "lock failed");
+    CONN_CHECK_AND_RETURN_LOGW(SoftBusMutexLock(&g_pendingLock) == SOFTBUS_OK, CONN_BR, "lock fail");
     PendingPacket *it = NULL;
     PendingPacket *next = NULL;
     LIST_FOR_EACH_ENTRY_SAFE(it, next, &g_pendingList, PendingPacket, node) {
@@ -105,7 +105,7 @@ void ConnBrDelBrPendingPacket(uint32_t id, int64_t seq)
 
 void ConnBrDelBrPendingPacketById(uint32_t id)
 {
-    CONN_CHECK_AND_RETURN_LOGW(SoftBusMutexLock(&g_pendingLock) == SOFTBUS_OK, CONN_BR, "lock failed");
+    CONN_CHECK_AND_RETURN_LOGW(SoftBusMutexLock(&g_pendingLock) == SOFTBUS_OK, CONN_BR, "lock fail");
     PendingPacket *it = NULL;
     PendingPacket *next = NULL;
     LIST_FOR_EACH_ENTRY_SAFE(it, next, &g_pendingList, PendingPacket, node) {
