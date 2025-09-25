@@ -71,6 +71,7 @@ InfoContainer<NegotiateMessageKey>::KeyTypeTable InfoContainer<NegotiateMessageK
     { NegotiateMessageKey::CHANNEL_5G_LIST,       Serializable::ValueType::STRING               },
     { NegotiateMessageKey::CHANNEL_5G_SCORE,      Serializable::ValueType::STRING               },
     { NegotiateMessageKey::CHALLENGE_CODE,        Serializable::ValueType::UINT                 },
+    { NegotiateMessageKey::NEW_PTK_FRAME,         Serializable::ValueType::BOOL                 },
     { NegotiateMessageKey::REMOTE_NETWORK_ID,     Serializable::ValueType::STRING               },
 
     /* old p2p */
@@ -262,6 +263,10 @@ int NegotiateMessage::Unmarshalling(WifiDirectProtocol &protocol, const std::vec
 
     protocol.SetInput(input);
     while (protocol.Read(key, data, size)) {
+        if (keyTypeTable_.find(static_cast<NegotiateMessageKey>(key)) == keyTypeTable_.end()) {
+            continue;
+        }
+
         auto type = keyTypeTable_[static_cast<NegotiateMessageKey>(key)];
         switch (Serializable::ValueType(type)) {
             case Serializable::ValueType::BOOL: {
