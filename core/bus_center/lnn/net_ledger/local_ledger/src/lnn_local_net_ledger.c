@@ -2004,6 +2004,10 @@ static int32_t UpdateLocalUserId(const void *userId)
     return SOFTBUS_OK;
 }
 
+static int32_t UpdateDisplayId(const void *displayId)
+
+static int32_t L1GetDisplayId(void *displayId, uint32_t len)
+
 static int32_t L1GetUserId(void *userId, uint32_t len)
 {
     if (userId == NULL || len != sizeof(int32_t)) {
@@ -2717,7 +2721,7 @@ int32_t SoftBusDumpBusCenterLocalDeviceInfo(int fd)
 static void InitUserIdCheckSum(NodeInfo *nodeInfo)
 {
     uint8_t userIdCheckSum[USERID_CHECKSUM_LEN] = {0};
-    int32_t userId = GetActiveOsAccountIds();
+    int32_t userId = JudgeDeviceTypeAndGetOsAccountIds();
     LNN_LOGI(LNN_LEDGER, "get userId:%{public}d", userId);
     nodeInfo->userId = userId;
     int32_t ret = HbBuildUserIdCheckSumPacked(&userId, 1, userIdCheckSum, USERID_CHECKSUM_LEN);

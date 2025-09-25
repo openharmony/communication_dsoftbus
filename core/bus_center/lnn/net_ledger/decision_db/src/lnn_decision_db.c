@@ -401,7 +401,7 @@ int32_t LnnInsertSpecificTrustedDevInfo(const char *udid)
         return SOFTBUS_INVALID_PARAM;
     }
     TrustedInfo record;
-    record.userId = GetActiveOsAccountIds();
+    record.userId = JudgeDeviceTypeAndGetOsAccountIds();
     if (strcpy_s(record.udid, sizeof(record.udid), udid) != EOK) {
         LNN_LOGE(LNN_LEDGER, "strcpy_s udid hash failed");
         return SOFTBUS_STRCPY_ERR;
@@ -445,7 +445,7 @@ int32_t LnnGetTrustedDevInfoFromDb(char **udidArray, uint32_t *num)
 {
     LNN_CHECK_AND_RETURN_RET_LOGE((udidArray != NULL) && (num != NULL), SOFTBUS_INVALID_PARAM, LNN_LEDGER,
         "invalid param");
-    int32_t userId = GetActiveOsAccountIds();
+    int32_t userId = JudgeDeviceTypeAndGetOsAccountIds();
     if (DeviceDbListLock() != SOFTBUS_OK) {
         LNN_LOGE(LNN_LEDGER, "lock fail");
         return SOFTBUS_LOCK_ERR;
@@ -668,7 +668,7 @@ int32_t LnnFindDeviceUdidTrustedInfoFromDb(const char *deviceUdid)
         LNN_LOGE(LNN_LEDGER, "lock fail");
         return SOFTBUS_LOCK_ERR;
     }
-    int32_t userId = GetActiveOsAccountIds();
+    int32_t userId = JudgeDeviceTypeAndGetOsAccountIds();
     if (!IsDeviceTrusted(deviceUdid, userId)) {
         LNN_LOGE(LNN_LEDGER, "not find trusted in db");
         DeviceDbListUnlock();
