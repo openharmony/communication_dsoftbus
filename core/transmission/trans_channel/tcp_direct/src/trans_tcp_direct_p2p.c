@@ -72,6 +72,7 @@ typedef struct {
     const char *myIp;
     const char *peerIp;
     int32_t myPort;
+    int32_t myUid;
     ProtocolType protocol;
 } VerifyP2pInfo;
 
@@ -559,7 +560,7 @@ static int32_t SendAuthData(AuthHandle authHandle, int32_t module, int32_t flag,
 static int32_t VerifyP2p(AuthHandle authHandle, int64_t seq, VerifyP2pInfo *info)
 {
     TRANS_LOGI(TRANS_CTRL, "authId=%{public}" PRId64 ", port=%{public}d", authHandle.authId, info->myPort);
-    char *msg = VerifyP2pPack(info->myIp, info->myPort, info->peerIp, info->protocol);
+    char *msg = VerifyP2pPack(info->myIp, info->myPort, info->peerIp, info->protocol, info->myUid);
     if (msg == NULL) {
         TRANS_LOGE(TRANS_CTRL, "verifyp2p pack fail");
         return SOFTBUS_PARSE_JSON_ERR;
@@ -632,6 +633,7 @@ static void OnAuthConnOpened(uint32_t requestId, AuthHandle authHandle)
     info.myPort = myDataPort;
     info.peerIp = (conn->appInfo.osType == HA_OS_TYPE) ? NULL : peerDataAddr;
     info.protocol = conn->appInfo.fdProtocol;
+    info.myUid = conn->appInfo.myData.uid;
     if (VerifyP2p(authHandle, reqNum, &info) != SOFTBUS_OK) {
         TRANS_LOGE(TRANS_CTRL, "verify p2p fail");
         goto EXIT_ERR;
@@ -768,7 +770,7 @@ static void OutputAnonymizeIpAddress(const char *myIp, const char *peerIp)
 
 static int32_t PackAndSendVerifyP2pRsp(VerifyP2pInfo *info, int64_t seq, bool isAuthLink, AuthHandle authHandle)
 {
-    char *reply = VerifyP2pPack(info->myIp, info->myPort, NULL, info->protocol);
+    char *reply = VerifyP2pPack(info->myIp, info->myPort, NULL, info->protocol, info->myUid);
     if (reply == NULL) {
         SendVerifyP2pFailRsp(
             authHandle, seq, CODE_VERIFY_P2P, SOFTBUS_TRANS_PACK_REPLY_FAILED, "pack reply failed", isAuthLink);
@@ -827,7 +829,8 @@ static int32_t OnVerifyP2pRequest(AuthHandle authHandle, int64_t seq, const cJSO
     int32_t myPort = 0;
     char myIp[IP_LEN] = { 0 };
     ProtocolType protocol = 0;
-    int32_t ret = VerifyP2pUnPack(json, peerIp, IP_LEN, &peerPort, &protocol);
+    int32_t peerUid = 0;
+    int32_t ret = VerifyP2pUnPack(json, peerIp, &peerPort, &protocol, &peerUid);
     if (ret != SOFTBUS_OK) {
         SendVerifyP2pFailRsp(authHandle, seq, CODE_VERIFY_P2P, ret, "OnVerifyP2pRequest unpack fail", isAuthLink);
         return ret;
@@ -842,13 +845,12 @@ static int32_t OnVerifyP2pRequest(AuthHandle authHandle, int64_t seq, const cJSO
         return ret;
     }
     if (protocol == LNN_PROTOCOL_HTP) {
-        ret = ServerOpenHtpChannelPacked(peerIp, seq);
-        if (ret != SOFTBUS_OK) {
-            TRANS_LOGE(TRANS_CTRL, "start vsp channel failed ret=%{public}d, degrade to tcp protocol", ret);
+        if ((peerUid != -1 && !CheckHtpPermissionPacked(peerUid)) ||
+            ServerOpenHtpChannelPacked(peerIp, seq) != SOFTBUS_OK) {
+            TRANS_LOGE(TRANS_CTRL, "start vsp channel failed, degrade to tcp protocol");
             protocol = LNN_PROTOCOL_IP;
         }
     }
-
     if (IsHmlIpAddr(myIp)) {
         ret = StartHmlListener(myIp, &myPort, peerUuid, protocol);
     } else {
@@ -865,6 +867,7 @@ static int32_t OnVerifyP2pRequest(AuthHandle authHandle, int64_t seq, const cJSO
         .myPort = myPort,
         .peerIp = NULL,
         .protocol = protocol,
+        .myUid = 1,
     };
     ret = PackAndSendVerifyP2pRsp(&info, seq, isAuthLink, authHandle);
     if (ret != SOFTBUS_OK) {
@@ -1013,6 +1016,7 @@ static int32_t OnVerifyP2pReply(int64_t authId, int64_t seq, const cJSON *json)
     char peerUuid[UUID_BUF_LEN] = { 0 };
     int32_t peerPort = -1;
     ProtocolType protocol = LNN_PROTOCOL_IP;
+    int32_t peerUid = 0;
 
     if (GetSessionConnLock() != SOFTBUS_OK) {
         TRANS_LOGE(TRANS_CTRL, "getsessionconnlock fail");
@@ -1026,7 +1030,7 @@ static int32_t OnVerifyP2pReply(int64_t authId, int64_t seq, const cJSON *json)
     SoftbusHitraceStart(SOFTBUS_HITRACE_ID_VALID, (uint64_t)(conn->channelId + ID_OFFSET));
     channelId = conn->channelId;
 
-    ret = VerifyP2pUnPack(json, conn->appInfo.peerData.addr, IP_LEN, &conn->appInfo.peerData.port, &protocol);
+    ret = VerifyP2pUnPack(json, conn->appInfo.peerData.addr, &conn->appInfo.peerData.port, &protocol, &peerUid);
     if (ret != SOFTBUS_OK) {
         ReleaseSessionConnLock();
         TRANS_LOGE(TRANS_CTRL, "unpack fail: ret=%{public}d", ret);
@@ -1037,6 +1041,7 @@ static int32_t OnVerifyP2pReply(int64_t authId, int64_t seq, const cJSON *json)
     if (conn->appInfo.fdProtocol == LNN_PROTOCOL_HTP && protocol == LNN_PROTOCOL_IP) {
         CloseHtpChannelPacked(conn->channelId);
         conn->appInfo.fdProtocol = LNN_PROTOCOL_IP;
+        conn->appInfo.isFlashLight = false;
         (void)StartTransP2pDirectListener(CONNECT_P2P, conn, &conn->appInfo);
     }
     if (conn->appInfo.fdProtocol == LNN_PROTOCOL_HTP) {
@@ -1217,7 +1222,6 @@ static int32_t StartVerifyP2pInfo(const AppInfo *appInfo, SessionConn *conn, Con
         if (type == CONNECT_P2P_REUSE) {
             type = IsHmlIpAddr(appInfo->myData.addr) ? CONNECT_HML : CONNECT_P2P;
         }
-        TRANS_LOGD(TRANS_CTRL, "type=%{public}d", type);
         ret = OpenNewAuthConn(appInfo, conn, newChannelId, type);
     } else {
         ret = TransProxyReuseByChannelId(pipeLineChannelId);
@@ -1230,7 +1234,8 @@ static int32_t StartVerifyP2pInfo(const AppInfo *appInfo, SessionConn *conn, Con
         TRANS_CHECK_AND_RETURN_RET_LOGE(ret == SOFTBUS_OK, ret, TRANS_CTRL, "get auth id failed");
         conn->requestId = REQUEST_INVALID;
         ProtocolType protocol = conn->appInfo.fdProtocol;
-        char *msg = VerifyP2pPack(conn->appInfo.myData.addr, conn->appInfo.myData.port, NULL, protocol);
+        char *msg = VerifyP2pPack(
+            conn->appInfo.myData.addr, conn->appInfo.myData.port, NULL, protocol, conn->appInfo.myData.uid);
         if (msg == NULL) {
             TRANS_LOGE(TRANS_CTRL, "verify p2p pack failed");
             return SOFTBUS_TRANS_VERIFY_P2P_FAILED;

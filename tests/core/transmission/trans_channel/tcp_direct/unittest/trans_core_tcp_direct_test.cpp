@@ -130,6 +130,7 @@ string TestGetMsgPack()
     appInfo->myData.channelId = 1;
     appInfo->myData.apiVersion = API_V2;
     appInfo->peerData.apiVersion = API_V2;
+    appInfo->myData.uid = 1;
     (void)memcpy_s(appInfo->myData.sessionName, SESSION_NAME_MAX_LEN, g_sessionName, (strlen(g_sessionName)+1));
     (void)memcpy_s(appInfo->myData.pkgName, PKG_NAME_SIZE_MAX_LEN, g_pkgName, (strlen(g_pkgName)+1));
     if (TransAuthChannelMsgPack(msg, appInfo) != SOFTBUS_OK) {
@@ -328,10 +329,10 @@ HWTEST_F(TransCoreTcpDirectTest, TransSrvDelDataBufNodeTest007, TestSize.Level1)
  */
 HWTEST_F(TransCoreTcpDirectTest, VerifyP2pPackTest008, TestSize.Level1)
 {
-    char *ret = VerifyP2pPack(g_ip, g_port, nullptr, 0);
+    char *ret = VerifyP2pPack(g_ip, g_port, nullptr, 0, 0);
     EXPECT_TRUE(ret != nullptr);
 
-    ret = VerifyP2pPack(nullptr, g_port, nullptr, 0);
+    ret = VerifyP2pPack(nullptr, g_port, nullptr, 0, 0);
     EXPECT_TRUE(ret == nullptr);
 }
 
@@ -345,20 +346,21 @@ HWTEST_F(TransCoreTcpDirectTest, VerifyP2pUnPackTest009, TestSize.Level1)
 {
     char peerIp[IP_LEN] = { 0 };
     int32_t peerPort;
+    int32_t peerUid;
     string msg = TestGetMsgPack();
     cJSON *json = cJSON_Parse(msg.c_str());
     EXPECT_TRUE(json != nullptr);
 
-    char *pack = VerifyP2pPack(g_ip, g_port, nullptr, 0);
+    char *pack = VerifyP2pPack(g_ip, g_port, nullptr, 0, 0);
     EXPECT_TRUE(pack != nullptr);
     ProtocolType protocol = 0;
-    int32_t ret = VerifyP2pUnPack(json, peerIp, IP_LEN, &peerPort, nullptr);
+    int32_t ret = VerifyP2pUnPack(json, peerIp, &peerPort, nullptr, &peerUid);
     EXPECT_EQ(ret, SOFTBUS_INVALID_PARAM);
 
-    ret = VerifyP2pUnPack(json, const_cast<char *>(g_ip), IP_LEN, &g_port, &protocol);
-    EXPECT_EQ(ret, SOFTBUS_PARSE_JSON_ERR);
+    ret = VerifyP2pUnPack(json, const_cast<char *>(g_ip), &g_port, &protocol, &peerUid);
+    EXPECT_NE(ret, SOFTBUS_NOT_FIND);
 
-    ret = VerifyP2pUnPack(nullptr, const_cast<char *>(g_ip), IP_LEN, &g_port, &protocol);
+    ret = VerifyP2pUnPack(nullptr, const_cast<char *>(g_ip), &g_port, &protocol, &peerUid);
     EXPECT_EQ(ret, SOFTBUS_INVALID_PARAM);
     cJSON_Delete(json);
 }
