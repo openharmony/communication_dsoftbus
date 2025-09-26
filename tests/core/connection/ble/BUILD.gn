@@ -240,7 +240,6 @@ ohos_unittest("BleClientTest") {
     "./mock/softbus_conn_ble_client_mock.cpp",
     "softbus_conn_client_test.cpp",
     "$dsoftbus_root_path/core/frame/init/src/g_enhance_conn_func_pack.c",
-    "$dsoftbus_root_path/core/frame/init/src/g_enhance_disc_func_pack.c",
     "$dsoftbus_root_path/core/frame/init/src/g_enhance_disc_func.c",
   ]
 
