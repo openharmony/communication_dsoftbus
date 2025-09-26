@@ -64,7 +64,7 @@ void ServiceDatabaseTest::SetUpTestCase(void) { }
 
 void ServiceDatabaseTest::TearDownTestCase(void) { }
 
-/**
+/*
  * @tc.name: ServiceDatabaseInitTest001
  * @tc.desc: Test ServiceDatabaseInit.
  * @tc.type: FUNC
@@ -86,7 +86,7 @@ HWTEST_F(ServiceDatabaseTest, ServiceDatabaseInitTest001, TestSize.Level1)
     DISC_LOGI(DISC_INIT, "ServiceDatabaseInitTest001 end");
 }
 
-/**
+/*
  * @tc.name: ServiceDatabaseDeinitTest001
  * @tc.desc: Test ServiceDatabaseDeinit when softbus_server is dead.
  * @tc.type: FUNC
@@ -109,7 +109,7 @@ HWTEST_F(ServiceDatabaseTest, ServiceDatabaseDeinitTest001, TestSize.Level1)
     DISC_LOGI(DISC_INIT, "ServiceDatabaseDeinitTest001 end");
 }
 
-/**
+/*
  * @tc.name: AddServiceInfoTest001
  * @tc.desc: Test AddServiceInfo when ServiceInfo is invalid.
  * @tc.type: FUNC
@@ -127,7 +127,7 @@ HWTEST_F(ServiceDatabaseTest, AddServiceInfoTest001, TestSize.Level1)
     DISC_LOGI(DISC_INIT, "AddServiceInfoTest001 end");
 }
 
-/**
+/*
  * @tc.name: AddServiceInfoTest002
  * @tc.desc: Test AddServiceInfo when ServiceInfo is valid.
  * @tc.type: FUNC
@@ -150,7 +150,7 @@ HWTEST_F(ServiceDatabaseTest, AddServiceInfoTest002, TestSize.Level1)
     DISC_LOGI(DISC_INIT, "AddServiceInfoTest002 end");
 }
 
-/**
+/*
  * @tc.name: AddServiceInfoTest003
  * @tc.desc: Test AddServiceInfo when customData is invalid.
  * @tc.type: FUNC
@@ -179,7 +179,7 @@ HWTEST_F(ServiceDatabaseTest, AddServiceInfoTest003, TestSize.Level1)
     DISC_LOGI(DISC_INIT, "AddServiceInfoTest003 end");
 }
 
-/**
+/*
  * @tc.name: GetServiceInfoTest001
  * @tc.desc: Test GetServiceInfo when input param is invalid.
  * @tc.type: FUNC
@@ -203,7 +203,7 @@ HWTEST_F(ServiceDatabaseTest, GetServiceInfoTest001, TestSize.Level1)
     DISC_LOGI(DISC_INIT, "GetServiceInfoTest001 end");
 }
 
-/**
+/*
  * @tc.name: GetServiceInfoTest002
  * @tc.desc: Test AddServiceInfo and GetServiceInfo.
  * @tc.type: FUNC
@@ -234,7 +234,7 @@ HWTEST_F(ServiceDatabaseTest, GetServiceInfoTest002, TestSize.Level1)
     DISC_LOGI(DISC_INIT, "GetServiceInfoTest002 end");
 }
 
-/**
+/*
  * @tc.name: GetAllServiceInfosTest001
  * @tc.desc: Test GetAllServiceInfos when input param is invalid.
  * @tc.type: FUNC
@@ -254,7 +254,7 @@ HWTEST_F(ServiceDatabaseTest, GetAllServiceInfosTest001, TestSize.Level1)
     DISC_LOGI(DISC_INIT, "GetAllServiceInfosTest001 end");
 }
 
-/**
+/*
  * @tc.name: GetAllServiceInfosTest002
  * @tc.desc: Test AddServiceInfo and GetAllServiceInfos.
  * @tc.type: FUNC
@@ -293,7 +293,7 @@ HWTEST_F(ServiceDatabaseTest, GetAllServiceInfosTest002, TestSize.Level1)
     DISC_LOGI(DISC_INIT, "GetAllServiceInfosTest002 end");
 }
 
-/**
+/*
  * @tc.name: GetAllServiceInfosTest003
  * @tc.desc: Test GetAllServiceInfos when input param is invalid.
  * @tc.type: FUNC
@@ -320,7 +320,7 @@ HWTEST_F(ServiceDatabaseTest, GetAllServiceInfosTest003, TestSize.Level1)
     DISC_LOGI(DISC_INIT, "GetAllServiceInfosTest003 end");
 }
 
-/**
+/*
  * @tc.name: RemoveServiceInfoTest001
  * @tc.desc: Test RemoveServiceInfo when input param is invalid.
  * @tc.type: FUNC
@@ -339,7 +339,7 @@ HWTEST_F(ServiceDatabaseTest, RemoveServiceInfoTest001, TestSize.Level1)
     DISC_LOGI(DISC_INIT, "RemoveServiceInfoTest001 end");
 }
 
-/**
+/*
  * @tc.name: RemoveServiceInfoTest002
  * @tc.desc: Test RemoveServiceInfo.
  * @tc.type: FUNC
@@ -394,7 +394,7 @@ HWTEST_F(ServiceDatabaseTest, RemoveServiceInfoTest002, TestSize.Level1)
     DISC_LOGI(DISC_INIT, "RemoveServiceInfoTest002 end");
 }
 
-/**
+/*
  * @tc.name: UpdateServiceInfoTest001
  * @tc.desc: Test UpdateServiceInfo when input param is invalid.
  * @tc.type: FUNC
@@ -413,7 +413,7 @@ HWTEST_F(ServiceDatabaseTest, UpdateServiceInfoTest001, TestSize.Level1)
     DISC_LOGI(DISC_INIT, "UpdateServiceInfoTest001 end");
 }
 
-/**
+/*
  * @tc.name: UpdateServiceInfoTest002
  * @tc.desc: Test UpdateServiceInfo when input param is invalid.
  * @tc.type: FUNC
@@ -432,7 +432,7 @@ HWTEST_F(ServiceDatabaseTest, UpdateServiceInfoTest002, TestSize.Level1)
     DISC_LOGI(DISC_INIT, "UpdateServiceInfoTest002 end");
 }
 
-/**
+/*
  * @tc.name: UpdateServiceInfoTest003
  * @tc.desc: Test UpdateServiceInfo and GetServiceInfo.
  * @tc.type: FUNC

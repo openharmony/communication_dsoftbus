@@ -40,7 +40,7 @@ void AdaptorDsoftbusFileTest::TearDownTestCase(void) { }
 void AdaptorDsoftbusFileTest::SetUp() { }
 void AdaptorDsoftbusFileTest::TearDown() { }
 
-/**
+/*
  * @tc.name: SoftBusAdapter_ReadFileTest_001
  * @tc.desc: read file test
  * @tc.type: FUNC
@@ -65,7 +65,7 @@ HWTEST_F(AdaptorDsoftbusFileTest, SoftBusReadFileTest001, TestSize.Level1)
     SoftBusCloseFile(fd);
 }
 
-/**
+/*
  * @tc.name: SoftBusAdapter_OpenFileWithPermsTest_001
  * @tc.desc: softbus open file with perms test
  * @tc.type: FUNC
@@ -83,7 +83,7 @@ HWTEST_F(AdaptorDsoftbusFileTest, SoftBusOpenFileWithPermsTest001, TestSize.Leve
     SoftBusCloseFile(fd);
 }
 
-/**
+/*
  * @tc.name: SoftBusAdapter_PreadFileTest_001
  * @tc.desc: pread file test
  * @tc.type: FUNC
@@ -107,7 +107,7 @@ HWTEST_F(AdaptorDsoftbusFileTest, SoftBusPreadFileTest001, TestSize.Level1)
     SoftBusCloseFile(fd);
 }
 
-/**
+/*
  * @tc.name: SoftBusAdapter_MakeDirTest_001
  * @tc.desc: make dir test
  * @tc.type: FUNC
@@ -119,7 +119,7 @@ HWTEST_F(AdaptorDsoftbusFileTest, SoftBusMakeDirTest001, TestSize.Level1)
     EXPECT_EQ(SOFTBUS_ERR, ret);
 }
 
-/**
+/*
  * @tc.name: SoftBusAdapter_GetFileSizeTest_001
  * @tc.desc: make dir test
  * @tc.type: FUNC
@@ -136,7 +136,7 @@ HWTEST_F(AdaptorDsoftbusFileTest, SoftBusGetFileSize001, TestSize.Level1)
     EXPECT_EQ(SOFTBUS_ERR, ret);
 }
 
-/**
+/*
  * @tc.name: SoftBusAdapter_SoftBusWriteFileFd_001
  * @tc.desc: SoftBusWriteFileFd will return SOFTBUS_FILE_ERR when given invalid param
  * @tc.type: FUNC
@@ -155,7 +155,7 @@ HWTEST_F(AdaptorDsoftbusFileTest, SoftBusWriteFileFd001, TestSize.Level1)
     EXPECT_EQ(SOFTBUS_FILE_ERR, ret);
 }
 
-/**
+/*
  * @tc.name: SoftBusAdapter_SoftBusAccessFile_001
  * @tc.desc: SoftBusAccessFile will return SOFTBUS_ERR when given invalid param
  * @tc.type: FUNC
@@ -168,7 +168,7 @@ HWTEST_F(AdaptorDsoftbusFileTest, SoftBusAccessFile, TestSize.Level1)
     EXPECT_EQ(SOFTBUS_ERR, ret);
 }
 
-/**
+/*
  * @tc.name: SoftBusAdapter_SoftBusRealPath_001
  * @tc.desc: SoftBusRealPath will return NULL when given invalid param
  * @tc.type: FUNC

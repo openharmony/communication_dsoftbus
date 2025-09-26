@@ -41,6 +41,7 @@ void AdapterDsoftbusWifiTest::TearDownTestCase(void) { }
 void AdapterDsoftbusWifiTest::SetUp() { }
 void AdapterDsoftbusWifiTest::TearDown() { }
 void OnSoftBusWifiScanResult(int32_t state, int32_t size) { }
+
 /*
  * @tc.name: SoftBusGetWifiDeviceConfig
  * @tc.desc: softbus wifi test
