@@ -178,7 +178,7 @@ int32_t AuthIdServiceQueryCredential(int32_t peerUserId, const char *udidHash, c
     const CredManager *credManger = IdServiceGetCredMgrInstance();
     AUTH_CHECK_AND_RETURN_RET_LOGE(credManger != NULL, SOFTBUS_AUTH_GET_CRED_INSTANCE_FAIL,
         AUTH_HICHAIN, "hichain identity service not initialized");
-    int32_t localUserId = GetActiveOsAccountIds();
+    int32_t localUserId = JudgeDeviceTypeAndGetOsAccountIds();
     if (isSameAccount) {
         char *authParams = IdServiceGenerateQueryParamByCredType(peerUserId, udidHash, ACCOUNT_RELATED);
         AUTH_CHECK_AND_RETURN_RET_LOGE(authParams != NULL, SOFTBUS_CREATE_JSON_ERR,
@@ -495,7 +495,7 @@ bool IdServiceIsPotentialTrustedDevice(const char *udidHash, const char *account
     }
 
     char *credList = NULL;
-    int32_t userId = GetActiveOsAccountIds();
+    int32_t userId = JudgeDeviceTypeAndGetOsAccountIds();
     SoftBusCredInfo credInfo = { 0 };
     AUTH_LOGI(AUTH_HICHAIN, "get userId=%{public}d", userId);
     int32_t ret = IdServiceQueryCredential(userId, udidHash, accountIdHash, isSameAccount, &credList);
@@ -605,7 +605,7 @@ static void OnCredDelete(const char *credId, const char *credInfo)
         AUTH_LOGI(AUTH_HICHAIN, "id service no need delete");
         return;
     }
-    LnnDeleteSpecificTrustedDevInfo(info.udid, GetActiveOsAccountIds());
+    LnnDeleteSpecificTrustedDevInfo(info.udid, JudgeDeviceTypeAndGetOsAccountIds());
     LnnHbOnTrustedRelationReduced();
 }
 

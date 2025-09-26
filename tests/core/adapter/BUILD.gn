@@ -274,6 +274,10 @@ ohos_unittest("LnnOhosAccountAdapterTest") {
     "$dsoftbus_root_path/adapter/common/include",
     "$dsoftbus_root_path/core/adapter/bus_center/include",
     "$dsoftbus_root_path/core/authentication/include",
+    "$dsoftbus_root_path/core/bus_center/interface",
+    "$dsoftbus_root_path/core/bus_center/utils/include",
+    "$dsoftbus_root_path/core/discovery/manager/include",
+    "$dsoftbus_root_path/core/discovery/interface",
     "$dsoftbus_root_path/core/transmission/common/include",
     "$dsoftbus_root_path/interfaces/kits/common",
     "unittest",
@@ -300,6 +304,7 @@ ohos_unittest("LnnOhosAccountAdapterTest") {
         "ipc:ipc_single",
         "os_account:libaccountkits",
         "os_account:os_account_innerkits",
+        "window_manager:libdm",
       ]
     }
   } else {

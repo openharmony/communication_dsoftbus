@@ -50,6 +50,8 @@ public:
     virtual cJSON *CreateJsonObjectFromString(const char *jsonStr) = 0;
     virtual int GetArrayItemNum(const cJSON *jsonObj) = 0;
     virtual void cJSON_Delete(cJSON *item) = 0;
+    virtual int32_t LnnJudgeDeviceTypeAndGetOsAccountInfo(uint8_t *accountHash, uint32_t len) = 0;
+    virtual int32_t JudgeDeviceTypeAndGetOsAccountIds(void) = 0;
 };
 
 class AuthIdentityServiceAdapterInterfaceMock : public AuthIdentityServiceAdapterInterface {
@@ -79,6 +81,8 @@ public:
     MOCK_METHOD1(CreateJsonObjectFromString, cJSON *(const char *));
     MOCK_METHOD1(GetArrayItemNum, int(const cJSON *));
     MOCK_METHOD1(cJSON_Delete, void(cJSON *));
+    MOCK_METHOD2(LnnJudgeDeviceTypeAndGetOsAccountInfo, int32_t(uint8_t *, uint32_t));
+    MOCK_METHOD0(JudgeDeviceTypeAndGetOsAccountIds, int32_t(void));
 };
 } // namespace OHOS
 #endif // AUTH_IDENTITY_SERVICE_ADPATER_MOCK_H
