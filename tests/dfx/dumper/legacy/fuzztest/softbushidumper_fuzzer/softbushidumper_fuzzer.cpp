@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2022-2024 Huawei Device Co., Ltd.
+ * Copyright (c) 2022-2025 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -34,7 +34,6 @@
 namespace {
 const char *DUMP_CMD = "test";
 
-std::vector<const char *> CMD_ALARM = {"alert", "-l", DUMP_CMD};
 std::vector<const char *> CMD_BCMGR = {"broadcastMgr", "-l", DUMP_CMD};
 std::vector<const char *> CMD_BROADCAST = {"broadcast", "-l", DUMP_CMD};
 std::vector<const char *> CMD_BUSCENTER = {"buscenter", "-l", DUMP_CMD};
@@ -44,12 +43,10 @@ std::vector<const char *> CMD_NSTACK_DSTREAM = {"dstream", "-l", DUMP_CMD};
 std::vector<const char *> CMD_NSTACK_DFILE = {"dfile", "-l", DUMP_CMD};
 std::vector<const char *> CMD_NSTACK_DFINDER = {"dfinder", "-l", DUMP_CMD};
 std::vector<const char *> CMD_NSTACK_DMSG = {"dmsg", "-l", DUMP_CMD};
-std::vector<const char *> CMD_STATS = {"stats", "-l", DUMP_CMD};
 std::vector<const char *> CMD_TRANS = {"trans", "-l", DUMP_CMD};
 
-const std::vector<std::vector<const char *>> DUMP_CMD_LIST = {CMD_ALARM, CMD_BCMGR, CMD_BROADCAST, CMD_BUSCENTER,
-    CMD_CONN, CMD_DISC, CMD_NSTACK_DSTREAM, CMD_NSTACK_DFILE, CMD_NSTACK_DFINDER, CMD_NSTACK_DMSG, CMD_STATS,
-    CMD_TRANS};
+const std::vector<std::vector<const char *>> DUMP_CMD_LIST = {CMD_BCMGR, CMD_BROADCAST, CMD_BUSCENTER,
+    CMD_CONN, CMD_DISC, CMD_NSTACK_DSTREAM, CMD_NSTACK_DFILE, CMD_NSTACK_DFINDER, CMD_NSTACK_DMSG, CMD_TRANS};
 
 void DoDump(void)
 {

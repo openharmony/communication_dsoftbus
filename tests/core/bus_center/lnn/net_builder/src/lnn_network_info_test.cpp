@@ -1167,12 +1167,12 @@ static HmlCapabilityCode GetHmlCapabilityCodeFunc1(void)
 
 static HmlCapabilityCode GetHmlCapabilityCodeFunc2(void)
 {
-    return CONN_HML_CAP_UNKNOWN;
+    return CONN_HML_NOT_SUPPORT;
 }
 
 static HmlCapabilityCode GetHmlCapabilityCodeFunc3(void)
 {
-    return CONN_HML_NOT_SUPPORT;
+    return CONN_HML_CAP_UNKNOWN;
 }
 
 static VspCapabilityCode GetVspCapabilityCodeFunc1(void)
@@ -1230,7 +1230,7 @@ HWTEST_F(LNNNetworkInfoTest, GetEnhancedFLFeature_Test_001, TestSize.Level1)
 
 /*
  * @tc.name: UpdateHmlStaticCap_Test_001
- * @tc.desc: UpdateHmlStaticCap test
+ * @tc.desc: UpdateHmlStaticCap test get hmlCap failed
  * @tc.type: FUNC
  * @tc.require:
  */
@@ -1253,20 +1253,41 @@ HWTEST_F(LNNNetworkInfoTest, UpdateHmlStaticCap_Test_001, TestSize.Level1)
         .WillOnce(Return(&invalidManager));
     ret = UpdateHmlStaticCap();
     EXPECT_EQ(ret, SOFTBUS_WIFI_DIRECT_INIT_FAILED);
-    EXPECT_CALL(netLedgerMock, LnnClearStaticNetCap).WillOnce(Return(SOFTBUS_INVALID_PARAM))
-        .WillRepeatedly(Return(SOFTBUS_OK));
+}
+
+/*
+ * @tc.name: UpdateHmlStaticCap_Test_002
+ * @tc.desc: UpdateHmlStaticCap test get hmlCap success
+ * @tc.type: FUNC
+ * @tc.require:
+ */
+HWTEST_F(LNNNetworkInfoTest, UpdateHmlStaticCap_Test_002, TestSize.Level1)
+{
+    NiceMock<LnnNetLedgertInterfaceMock> netLedgerMock;
+    EXPECT_CALL(netLedgerMock, LnnGetLocalNumU32Info).WillRepeatedly(Return(SOFTBUS_OK));
+    NiceMock<LnnServicetInterfaceMock> serviceMock;
     struct WifiDirectManager manager = {
         .getHmlCapabilityCode = GetHmlCapabilityCodeFunc1,
     };
     EXPECT_CALL(serviceMock, GetWifiDirectManager).WillRepeatedly(Return(&manager));
+    EXPECT_CALL(netLedgerMock, LnnSetStaticNetCap).WillOnce(Return(SOFTBUS_INVALID_PARAM))
+        .WillRepeatedly(Return(SOFTBUS_OK));
+    int32_t ret = UpdateHmlStaticCap();
+    EXPECT_EQ(ret, SOFTBUS_INVALID_PARAM);
     ret = UpdateHmlStaticCap();
     EXPECT_EQ(ret, SOFTBUS_OK);
+
     manager.getHmlCapabilityCode = GetHmlCapabilityCodeFunc2,
-    ret = UpdateHmlStaticCap();
-    EXPECT_EQ(ret, SOFTBUS_OK);
-    manager.getHmlCapabilityCode = GetHmlCapabilityCodeFunc3,
+    EXPECT_CALL(netLedgerMock, LnnClearStaticNetCap).WillOnce(Return(SOFTBUS_INVALID_PARAM))
+        .WillRepeatedly(Return(SOFTBUS_OK));
     ret = UpdateHmlStaticCap();
     EXPECT_EQ(ret, SOFTBUS_INVALID_PARAM);
+    ret = UpdateHmlStaticCap();
+    EXPECT_EQ(ret, SOFTBUS_OK);
+
+    manager.getHmlCapabilityCode = GetHmlCapabilityCodeFunc3,
+    ret = UpdateHmlStaticCap();
+    EXPECT_EQ(ret, SOFTBUS_OK);
 }
 
 /*
