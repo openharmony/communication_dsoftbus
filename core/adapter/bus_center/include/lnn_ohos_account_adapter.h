@@ -29,7 +29,7 @@ int32_t GetActiveOsAccountIds(void);
 bool IsActiveOsAccountUnlocked(void);
 int32_t GetOsAccountUid(char *id, uint32_t idLen, uint32_t *len);
 int32_t GetOsAccountUidByUserId(char *id, uint32_t idLen, uint32_t *len, int32_t userId);
-
+int32_t JudgeDeviceTypeAndGetOsAccountIds(void);
 #ifdef __cplusplus
 }
 #endif

@@ -141,6 +141,16 @@ int32_t GetArrayItemNum(const cJSON *jsonObj)
     return GetInterfaceMock()->GetArrayItemNum(jsonObj);
 }
 
+int32_t LnnJudgeDeviceTypeAndGetOsAccountInfo(uint8_t *accountHash, uint32_t len)
+{
+    return GetInterfaceMock()->LnnJudgeDeviceTypeAndGetOsAccountInfo(accountHash, len);
+}
+
+int32_t JudgeDeviceTypeAndGetOsAccountIds(void)
+{
+    return GetInterfaceMock()->JudgeDeviceTypeAndGetOsAccountIds();
+}
+
 void cJSON_Delete(cJSON *item)
 {
     if (item != nullptr) {

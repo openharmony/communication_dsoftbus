@@ -195,6 +195,7 @@ typedef struct TagLnnOpenFuncList {
     GetOsAccountUidFunc getOsAccountUid;
     LnnIsDefaultOhosAccountFunc lnnIsDefaultOhosAccount;
     GetActiveOsAccountIdsFunc getActiveOsAccountIds;
+    JudgeDeviceTypeAndGetOsAccountIdsFunc judgeDeviceTypeAndGetOsAccountIds;
     LnnNotifyNodeStatusChangedFunc lnnNotifyNodeStatusChanged;
     LnnNotifyOOBEStateChangeEventFunc lnnNotifyOOBEStateChangeEvent;
     LnnNotifyNetlinkStateChangeEventFunc lnnNotifyNetlinkStateChangeEvent;

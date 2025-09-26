@@ -1190,7 +1190,7 @@ char *PackDeviceIdJson(const AuthSessionInfo *info, int64_t authSeq)
     }
     PackCompressInfo(obj, nodeInfo);
     PackFastAuth(obj, (AuthSessionInfo *)info);
-    PackUserId(obj, GetActiveOsAccountIds());
+    PackUserId(obj, JudgeDeviceTypeAndGetOsAccountIds());
     if ((PackNormalizedData(info, obj, nodeInfo, authSeq) != SOFTBUS_OK) || (PackExternalAuthInfo(obj) != SOFTBUS_OK)) {
         JSON_Delete(obj);
         return NULL;
@@ -2447,7 +2447,7 @@ static void UpdateLocalNetBrMac(void)
 #define USERID_CHECKSUM_HEXSTRING_LEN 9
 static int32_t PackUserIdCheckSum(JsonObj *json, const NodeInfo *nodeInfo)
 {
-    if (!JSON_AddInt32ToObject(json, USERID, GetActiveOsAccountIds())) {
+    if (!JSON_AddInt32ToObject(json, USERID, JudgeDeviceTypeAndGetOsAccountIds())) {
         AUTH_LOGW(AUTH_FSM, "pack userId fail");
     }
     char userIdCheckSumHexStr[USERID_CHECKSUM_HEXSTRING_LEN] = { 0 };

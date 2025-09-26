@@ -49,3 +49,10 @@ bool LnnIsDefaultOhosAccount(void)
 {
     return false;
 }
+
+int32_t LnnJudgeDeviceTypeAndGetOsAccountInfo(uint8_t *accountHash, uint32_t len)
+{
+    (void)accountHash;
+    (void)len;
+    return SOFTBUS_OK;
+}

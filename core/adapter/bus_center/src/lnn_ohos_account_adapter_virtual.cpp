@@ -65,3 +65,8 @@ int32_t GetOsAccountUidByUserId(char *id, uint32_t idLen, uint32_t *len, int32_t
     (void)userId;
     return SOFTBUS_OK;
 }
+
+int32_t JudgeDeviceTypeAndGetOsAccountIds(void)
+{
+    return ACCOUNT_ID;
+}

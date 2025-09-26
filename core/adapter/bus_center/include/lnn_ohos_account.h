@@ -34,6 +34,7 @@ int32_t LnnInitOhosAccount(void);
 void LnnUpdateOhosAccount(UpdateAccountReason reason);
 void LnnOnOhosAccountLogout(void);
 bool LnnIsDefaultOhosAccount(void);
+int32_t LnnJudgeDeviceTypeAndGetOsAccountInfo(uint8_t *accountHash, uint32_t len);
 
 #ifdef __cplusplus
 }

@@ -1023,7 +1023,7 @@ static void HbUserSwitchedHandler(const LnnEventBasicInfo *info)
             {
                 LNN_LOGI(LNN_HEART_BEAT, "HB handle SOFTBUS_USER_SWITCHED");
                 uint8_t userIdCheckSum[USERID_CHECKSUM_LEN];
-                int32_t userId = GetActiveOsAccountIds();
+                int32_t userId = JudgeDeviceTypeAndGetOsAccountIds();
                 LNN_LOGI(LNN_HEART_BEAT, "userswitch userId:%{public}d", userId);
                 int32_t ret = LnnSetLocalNumInfo(NUM_KEY_USERID, userId);
                 if (ret != SOFTBUS_OK) {

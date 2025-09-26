@@ -21,6 +21,7 @@
 
 #include "gtest/gtest.h"
 #include <gmock/gmock-actions.h>
+#include "bus_center_info_key.h"
 #include "lnn_log.h"
 #include "lnn_ohos_account_adapter.h"
 #include "lnn_ohos_account_adapter_mock.h"

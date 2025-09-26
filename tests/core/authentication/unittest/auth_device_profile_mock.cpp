@@ -103,5 +103,15 @@ int32_t CheckAclInfoIsAccesser(const AuthACLInfo *acl, bool *isAccesser)
 {
     return GetInterface()->CheckAclInfoIsAccesser(acl, isAccesser);
 }
+
+int32_t LnnJudgeDeviceTypeAndGetOsAccountInfo(uint8_t *accountHash, uint32_t len)
+{
+    return GetInterface()->LnnJudgeDeviceTypeAndGetOsAccountInfo(accountHash, len);
+}
+
+int32_t JudgeDeviceTypeAndGetOsAccountIds(void)
+{
+    return GetInterface()->JudgeDeviceTypeAndGetOsAccountIds();
+}
 }
 } // namespace OHOS

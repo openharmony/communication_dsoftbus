@@ -50,6 +50,8 @@ public:
     virtual void LnnUpdateHeartbeatInfo(LnnHeartbeatUpdateInfoType type);
     virtual const CredManager *IdServiceGetCredMgrInstance() = 0;
     virtual int32_t IdServiceQueryCredentialByUdid(int32_t userId, const char *udid, char **credList) = 0;
+    virtual int32_t LnnJudgeDeviceTypeAndGetOsAccountInfo(uint8_t *accountHash, uint32_t len) = 0;
+    virtual int32_t JudgeDeviceTypeAndGetOsAccountIds(void) = 0;
 };
 
 class AuthHichainIdServiceInterfaceMock : public AuthHichainIdServiceInterface {
@@ -76,6 +78,8 @@ public:
     MOCK_METHOD1(LnnUpdateHeartbeatInfo, void(LnnHeartbeatUpdateInfoType));
     MOCK_METHOD0(IdServiceGetCredMgrInstance, const CredManager *());
     MOCK_METHOD3(IdServiceQueryCredentialByUdid, int32_t(int32_t, const char *, char **));
+    MOCK_METHOD2(LnnJudgeDeviceTypeAndGetOsAccountInfo, int32_t(uint8_t *, uint32_t));
+    MOCK_METHOD0(JudgeDeviceTypeAndGetOsAccountIds, int32_t(void));
 };
 
 } // namespace OHOS
