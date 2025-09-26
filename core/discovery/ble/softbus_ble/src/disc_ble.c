@@ -102,6 +102,7 @@ typedef enum {
     BR_STATE_CHANGED,
     HANDLE_REPORT,
     UPDATE_CON_ADV,
+    UPDATE_LOCAL_DEVICE_INFO,
 } DiscBleMessage;
 
 typedef enum {
@@ -1893,6 +1894,15 @@ static int32_t UpdateAdvertiserDeviceInfo(int32_t adv)
 static void BleUpdateLocalDeviceInfo(InfoTypeChanged type)
 {
     (void)type;
+    DISC_CHECK_AND_RETURN_LOGE(g_discBleHandler.looper != NULL, DISC_BLE, "looper is null");
+    DISC_CHECK_AND_RETURN_LOGE(g_discBleHandler.looper->PostMessage != NULL, DISC_BLE, "looper PostMessage is null");
+    SoftBusMessage *msg = CreateBleHandlerMsg(UPDATE_LOCAL_DEVICE_INFO, 0, 0, NULL);
+    DISC_CHECK_AND_RETURN_LOGE(msg != NULL, DISC_BLE, "malloc msg failed");
+    g_discBleHandler.looper->PostMessage(g_discBleHandler.looper, msg);
+}
+
+static void HandleBleUpdateLocalDeviceInfo(void)
+{
     DISC_CHECK_AND_RETURN_LOGE(
         UpdateAdvertiserDeviceInfo(NON_ADV_ID) == SOFTBUS_OK && UpdateAdvertiserDeviceInfo(CON_ADV_ID) == SOFTBUS_OK,
         DISC_BLE, "update failed");
@@ -2311,6 +2321,9 @@ static void DiscBleMsgHandlerExt(SoftBusMessage *msg)
             break;
         case UPDATE_CON_ADV:
             DistBleUpdateConAdv();
+            break;
+        case UPDATE_LOCAL_DEVICE_INFO:
+            HandleBleUpdateLocalDeviceInfo();
             break;
         default:
             DISC_LOGW(DISC_BLE, "wrong msg what=%{public}d", msg->what);
