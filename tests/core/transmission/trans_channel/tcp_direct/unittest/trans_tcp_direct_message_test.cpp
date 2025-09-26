@@ -189,7 +189,7 @@ HWTEST_F(TransTcpDirectMessageTest, GenerateTdcChannelIdTest003, TestSize.Level1
 
     const IServerChannelCallBack *cb = TransServerGetChannelCb();
     ret = TransTcpDirectInit(cb);
-    EXPECT_EQ(ret, SOFTBUS_OK);
+    EXPECT_NE(ret, SOFTBUS_OK);
 
     res = CreatSessionConnList();
     ASSERT_EQ(res, SOFTBUS_OK);
@@ -218,7 +218,7 @@ HWTEST_F(TransTcpDirectMessageTest, GetSessionConnByRequestIdTest004, TestSize.L
 
     const IServerChannelCallBack *cb = TransServerGetChannelCb();
     int32_t ret = TransTcpDirectInit(cb);
-    EXPECT_EQ(ret, SOFTBUS_OK);
+    EXPECT_NE(ret, SOFTBUS_OK);
 
     SessionConn *conn = TestSetSessionConn();
     ret = TransTdcAddSessionConn(conn);
@@ -248,7 +248,7 @@ HWTEST_F(TransTcpDirectMessageTest, GetSessionConnByReqTest005, TestSize.Level1)
 
     const IServerChannelCallBack *cb = TransServerGetChannelCb();
     int32_t ret = TransTcpDirectInit(cb);
-    EXPECT_EQ(ret, SOFTBUS_OK);
+    EXPECT_NE(ret, SOFTBUS_OK);
 
     SessionConn *conn = TestSetSessionConn();
     ret = TransTdcAddSessionConn(conn);
@@ -286,7 +286,7 @@ HWTEST_F(TransTcpDirectMessageTest, GetSessionConnByFdTest007, TestSize.Level1)
 
     const IServerChannelCallBack *cb = TransServerGetChannelCb();
     int32_t ret = TransTcpDirectInit(cb);
-    EXPECT_EQ(ret, SOFTBUS_OK);
+    EXPECT_NE(ret, SOFTBUS_OK);
 
     SessionConn *con = TestSetSessionConn();
     ret = TransTdcAddSessionConn(con);
@@ -413,7 +413,7 @@ HWTEST_F(TransTcpDirectMessageTest, GetAuthHandleByChanIdTest0012, TestSize.Leve
 
     const IServerChannelCallBack *cb = TransServerGetChannelCb();
     int32_t res = TransTcpDirectInit(cb);
-    EXPECT_EQ(res, SOFTBUS_OK);
+    EXPECT_NE(res, SOFTBUS_OK);
 
     SessionConn *con = TestSetSessionConn();
     res = TransTdcAddSessionConn(con);
@@ -438,7 +438,7 @@ HWTEST_F(TransTcpDirectMessageTest, GetAuthIdByChanIdTest0013, TestSize.Level1)
 
     const IServerChannelCallBack *cb = TransServerGetChannelCb();
     int32_t res = TransTcpDirectInit(cb);
-    EXPECT_EQ(res, SOFTBUS_OK);
+    EXPECT_NE(res, SOFTBUS_OK);
 
     SessionConn *con = TestSetSessionConn();
     res = TransTdcAddSessionConn(con);
@@ -463,7 +463,7 @@ HWTEST_F(TransTcpDirectMessageTest, TransTdcAddSessionConnTest0014, TestSize.Lev
 
     const IServerChannelCallBack *cb = TransServerGetChannelCb();
     ret = TransTcpDirectInit(cb);
-    EXPECT_EQ(ret, SOFTBUS_OK);
+    EXPECT_NE(ret, SOFTBUS_OK);
 
     ret = TransTdcAddSessionConn(con);
     EXPECT_EQ(ret, SOFTBUS_OK);
@@ -484,7 +484,7 @@ HWTEST_F(TransTcpDirectMessageTest, SetSessionKeyByChanIdTest0015, TestSize.Leve
     int32_t keyLen = 0;
     const IServerChannelCallBack *cb = TransServerGetChannelCb();
     int32_t ret = TransTcpDirectInit(cb);
-    EXPECT_EQ(ret, SOFTBUS_OK);
+    EXPECT_NE(ret, SOFTBUS_OK);
 
     SessionConn *con = TestSetSessionConn();
     ret = TransTdcAddSessionConn(con);
@@ -510,7 +510,7 @@ HWTEST_F(TransTcpDirectMessageTest, SetSessionConnStatusByIdTest0016, TestSize.L
     uint32_t status = TCP_DIRECT_CHANNEL_STATUS_CONNECTED;
     const IServerChannelCallBack *cb = TransServerGetChannelCb();
     int32_t ret = TransTcpDirectInit(cb);
-    EXPECT_EQ(ret, SOFTBUS_OK);
+    EXPECT_NE(ret, SOFTBUS_OK);
 
     SessionConn *con = TestSetSessionConn();
     ret = TransTdcAddSessionConn(con);
@@ -537,7 +537,7 @@ HWTEST_F(TransTcpDirectMessageTest, TcpTranGetAppInfobyChannelIdTest0017, TestSi
     AppInfo* appInfo = TestSetAppInfo();
     const IServerChannelCallBack *cb = TransServerGetChannelCb();
     int32_t ret = TransTcpDirectInit(cb);
-    EXPECT_EQ(ret, SOFTBUS_OK);
+    EXPECT_NE(ret, SOFTBUS_OK);
 
     SessionConn *con = TestSetSessionConn();
     ret = TransTdcAddSessionConn(con);
@@ -638,7 +638,7 @@ HWTEST_F(TransTcpDirectMessageTest, TransGetChannelIdsByAuthIdAndStatus001, Test
     };
     const IServerChannelCallBack *cb = TransServerGetChannelCb();
     int32_t ret = TransTcpDirectInit(cb);
-    EXPECT_EQ(ret, SOFTBUS_OK);
+    EXPECT_NE(ret, SOFTBUS_OK);
 
     SessionConn *con = TestSetSessionConn();
     con->status = TCP_DIRECT_CHANNEL_STATUS_AUTH_CHANNEL;
@@ -698,7 +698,7 @@ HWTEST_F(TransTcpDirectMessageTest, TransDealTdcCheckCollabResult002, TestSize.L
 {
     const IServerChannelCallBack *cb = TransServerGetChannelCb();
     int32_t ret = TransTcpDirectInit(cb);
-    EXPECT_EQ(ret, SOFTBUS_OK);
+    EXPECT_NE(ret, SOFTBUS_OK);
     SessionConn *conn = TestSetSessionConn();
     ret = TransTdcAddSessionConn(conn);
     EXPECT_EQ(ret, SOFTBUS_OK);

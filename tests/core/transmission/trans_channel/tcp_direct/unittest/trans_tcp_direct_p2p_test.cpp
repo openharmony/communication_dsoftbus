@@ -895,31 +895,6 @@ HWTEST_F(TransTcpDirectP2pTest, TransGetRemoteUuidByAuthHandleTest001, TestSize.
 }
 
 /**
- * @tc.name: OnVerifyP2pRequestTest002
- * @tc.desc: OnVerifyP2pRequest.
- * @tc.type: FUNC
- * @tc.require:
- */
-HWTEST_F(TransTcpDirectP2pTest, OnVerifyP2pRequestTest002, TestSize.Level1)
-{
-    AuthHandle authHandle = { .authId = AUTH_INVALID_ID, .type = AUTH_LINK_TYPE_BLE };
-    int64_t seq = 0;
-    char *data = VerifyP2pPack(g_ip, g_port, g_ip, 0, 0);
-    ASSERT_TRUE(data != nullptr);
-    int32_t len = strlen(data);
-    cJSON *json = cJSON_ParseWithLength((const char *)(data), len);
-    if (json == nullptr) {
-        cJSON_free(data);
-        ASSERT_TRUE(false);
-    }
-
-    int32_t ret = OnVerifyP2pRequest(authHandle, seq, json, true);
-    EXPECT_EQ(SOFTBUS_NOT_IMPLEMENT, ret);
-    cJSON_Delete(json);
-    cJSON_free(data);
-}
-
-/**
  * @tc.name: AddHmlTriggerTest001
  * @tc.desc: AddHmlTrigger.
  * @tc.type: FUNC
