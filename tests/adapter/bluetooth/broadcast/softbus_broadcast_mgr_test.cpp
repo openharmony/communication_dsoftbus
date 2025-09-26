@@ -290,7 +290,7 @@ static ScanCallback *GetScanCallback()
 
 /*
  * @tc.name: SoftbusBroadcastMgrInit001
- * @tc.desc: Init successful.
+ * @tc.desc: Init successful
  * @tc.type: FUNC
  * @tc.require:
  */
@@ -307,7 +307,7 @@ HWTEST_F(SoftbusBroadcastMgrTest, SoftbusBroadcastMgrInit001, TestSize.Level1)
 
 /*
  * @tc.name: SoftbusBroadcastMgrInit002
- * @tc.desc: Repeated initializations successful.
+ * @tc.desc: Repeated initializations successful
  * @tc.type: FUNC
  * @tc.require:
  */
@@ -325,7 +325,7 @@ HWTEST_F(SoftbusBroadcastMgrTest, SoftbusBroadcastMgrInit002, TestSize.Level1)
 
 /*
  * @tc.name: SoftbusBroadcastMgrInit003
- * @tc.desc: Init successful.
+ * @tc.desc: Init successful
  * @tc.type: FUNC
  * @tc.require:
  */
@@ -344,7 +344,7 @@ HWTEST_F(SoftbusBroadcastMgrTest, SoftbusBroadcastMgrInit003, TestSize.Level1)
 
 /*
  * @tc.name: SoftbusBroadcastMgrDeInit001
- * @tc.desc: Repeated deinitializations successful.
+ * @tc.desc: Repeated deinitializations successful
  * @tc.type: FUNC
  * @tc.require:
  */
@@ -362,7 +362,7 @@ HWTEST_F(SoftbusBroadcastMgrTest, SoftbusBroadcastMgrDeInit001, TestSize.Level1)
 
 /*
  * @tc.name: SoftbusBroadcastMgrDeInit002
- * @tc.desc: Deinit without initialization.
+ * @tc.desc: Deinit without initialization
  * @tc.type: FUNC
  * @tc.require:
  */
@@ -378,7 +378,7 @@ HWTEST_F(SoftbusBroadcastMgrTest, SoftbusBroadcastMgrDeInit002, TestSize.Level1)
 
 /*
  * @tc.name: SoftbusBroadcastInterface001
- * @tc.desc: Calls the interfaces without initialization.
+ * @tc.desc: Calls the interfaces without initialization
  * @tc.type: FUNC
  * @tc.require:
  */
@@ -422,7 +422,7 @@ HWTEST_F(SoftbusBroadcastMgrTest, SoftbusBroadcastInterface001, TestSize.Level1)
 
 /*
  * @tc.name: SoftbusBroadcastInterface002
- * @tc.desc: Calls the interface when the function registered is null.
+ * @tc.desc: Calls the interface when the function registered is null
  * @tc.type: FUNC
  * @tc.require:
  */
@@ -470,7 +470,7 @@ HWTEST_F(SoftbusBroadcastMgrTest, SoftbusBroadcastInterface002, TestSize.Level1)
 
 /*
  * @tc.name: SoftbusBroadcastRegisterBroadcaster001
- * @tc.desc: Invalid parameter, register broadcaster fail.
+ * @tc.desc: Invalid parameter, register broadcaster fail
  * @tc.type: FUNC
  * @tc.require:
  */
@@ -494,7 +494,7 @@ HWTEST_F(SoftbusBroadcastMgrTest, SoftbusBroadcastRegisterBroadcaster001, TestSi
 
 /*
  * @tc.name: SoftbusBroadcastRegisterBroadcaster002
- * @tc.desc: Register broadcaster and unregister broadcaster success.
+ * @tc.desc: Register broadcaster and unregister broadcaster success
  * @tc.type: FUNC
  * @tc.require:
  */
@@ -517,7 +517,7 @@ HWTEST_F(SoftbusBroadcastMgrTest, SoftbusBroadcastRegisterBroadcaster002, TestSi
 
 /*
  * @tc.name: SoftbusBroadcastRegisterBroadcaster003
- * @tc.desc: Duplicate registration.
+ * @tc.desc: Duplicate registration
  * @tc.type: FUNC
  * @tc.require:
  */
@@ -548,7 +548,7 @@ HWTEST_F(SoftbusBroadcastMgrTest, SoftbusBroadcastRegisterBroadcaster003, TestSi
 
 /*
  * @tc.name: SoftbusBroadcastUnRegisterBroadcaster001
- * @tc.desc: Unregister without registration.
+ * @tc.desc: Unregister without registration
  * @tc.type: FUNC
  * @tc.require:
  */
@@ -572,7 +572,7 @@ HWTEST_F(SoftbusBroadcastMgrTest, SoftbusBroadcastUnRegisterBroadcaster001, Test
 
 /*
  * @tc.name: SoftbusBroadcastUnRegisterBroadcaster002
- * @tc.desc: Unregister when broadcasting.
+ * @tc.desc: Unregister when broadcasting
  * @tc.type: FUNC
  * @tc.require:
  */
@@ -607,7 +607,7 @@ HWTEST_F(SoftbusBroadcastMgrTest, SoftbusBroadcastUnRegisterBroadcaster002, Test
 
 /*
  * @tc.name: SoftbusBroadcastRegisterScanListener001
- * @tc.desc: Invalid parameter, register listener fail.
+ * @tc.desc: Invalid parameter, register listener fail
  * @tc.type: FUNC
  * @tc.require:
  */
@@ -631,7 +631,7 @@ HWTEST_F(SoftbusBroadcastMgrTest, SoftbusBroadcastRegisterScanListener001, TestS
 
 /*
  * @tc.name: SoftbusBroadcastRegisterScanListener002
- * @tc.desc: Register listener and unregister listener success.
+ * @tc.desc: Register listener and unregister listener success
  * @tc.type: FUNC
  * @tc.require:
  */
@@ -653,7 +653,7 @@ HWTEST_F(SoftbusBroadcastMgrTest, SoftbusBroadcastRegisterScanListener002, TestS
 
 /*
  * @tc.name: SoftbusBroadcastRegisterScanListener003
- * @tc.desc: Duplicate registration.
+ * @tc.desc: Duplicate registration
  * @tc.type: FUNC
  * @tc.require:
  */
@@ -685,7 +685,7 @@ HWTEST_F(SoftbusBroadcastMgrTest, SoftbusBroadcastRegisterScanListener003, TestS
 
 /*
  * @tc.name: SoftbusBroadcastUnRegisterScanListener001
- * @tc.desc: Unregister without registration.
+ * @tc.desc: Unregister without registration
  * @tc.type: FUNC
  * @tc.require:
  */
@@ -709,7 +709,7 @@ HWTEST_F(SoftbusBroadcastMgrTest, SoftbusBroadcastUnRegisterScanListener001, Tes
 
 /*
  * @tc.name: SoftbusBroadcastUnRegisterScanListener002
- * @tc.desc: Unregister when scanning.
+ * @tc.desc: Unregister when scanning
  * @tc.type: FUNC
  * @tc.require:
  */
@@ -740,7 +740,7 @@ HWTEST_F(SoftbusBroadcastMgrTest, SoftbusBroadcastUnRegisterScanListener002, Tes
 
 /*
  * @tc.name: SoftbusBroadcastStartBroadcasting001
- * @tc.desc: Invalid parameter, start broadcasting fail.
+ * @tc.desc: Invalid parameter, start broadcasting fail
  * @tc.type: FUNC
  * @tc.require:
  */
@@ -781,7 +781,7 @@ HWTEST_F(SoftbusBroadcastMgrTest, SoftbusBroadcastStartBroadcasting001, TestSize
 
 /*
  * @tc.name: SoftbusBroadcastStartBroadcasting002
- * @tc.desc: Start broadcasting and stop broadcasting success.
+ * @tc.desc: Start broadcasting and stop broadcasting success
  * @tc.type: FUNC
  * @tc.require:
  */
@@ -818,7 +818,7 @@ HWTEST_F(SoftbusBroadcastMgrTest, SoftbusBroadcastStartBroadcasting002, TestSize
 
 /*
  * @tc.name: SoftbusBroadcastStartBroadcasting003
- * @tc.desc: Duplicate start broadcasting.
+ * @tc.desc: Duplicate start broadcasting
  * @tc.type: FUNC
  * @tc.require:
  */
@@ -855,7 +855,7 @@ HWTEST_F(SoftbusBroadcastMgrTest, SoftbusBroadcastStartBroadcasting003, TestSize
 
 /*
  * @tc.name: SoftbusBroadcastUpdateBroadcasting001
- * @tc.desc: Invalid parameter, update broadcasting fail.
+ * @tc.desc: Invalid parameter, update broadcasting fail
  * @tc.type: FUNC
  * @tc.require:
  */
@@ -879,7 +879,7 @@ HWTEST_F(SoftbusBroadcastMgrTest, SoftbusBroadcastUpdateBroadcasting001, TestSiz
 
 /*
  * @tc.name: SoftbusBroadcastUpdateBroadcasting002
- * @tc.desc: Update broadcasting success.
+ * @tc.desc: Update broadcasting success
  * @tc.type: FUNC
  * @tc.require:
  */
@@ -915,7 +915,7 @@ HWTEST_F(SoftbusBroadcastMgrTest, SoftbusBroadcastUpdateBroadcasting002, TestSiz
 
 /*
  * @tc.name: SoftbusBroadcastSetBroadcastingData001
- * @tc.desc: Invalid parameter, set broadcasting data fail.
+ * @tc.desc: Invalid parameter, set broadcasting data fail
  * @tc.type: FUNC
  * @tc.require:
  */
@@ -941,7 +941,7 @@ HWTEST_F(SoftbusBroadcastMgrTest, SoftbusBroadcastSetBroadcastingData001, TestSi
 
 /*
  * @tc.name: SoftbusBroadcastSetBroadcastingData002
- * @tc.desc: Set broadcasting data without start.
+ * @tc.desc: Set broadcasting data without start
  * @tc.type: FUNC
  * @tc.require:
  */
@@ -967,7 +967,7 @@ HWTEST_F(SoftbusBroadcastMgrTest, SoftbusBroadcastSetBroadcastingData002, TestSi
 
 /*
  * @tc.name: SoftbusBroadcastSetBroadcastingData003
- * @tc.desc: Set broadcasting data success.
+ * @tc.desc: Set broadcasting data success
  * @tc.type: FUNC
  * @tc.require:
  */
@@ -1004,7 +1004,7 @@ HWTEST_F(SoftbusBroadcastMgrTest, SoftbusBroadcastSetBroadcastingData003, TestSi
 
 /*
  * @tc.name: SoftbusBroadcastSetBroadcastingParam001
- * @tc.desc: Invalid parameter, set broadcasting param fail.
+ * @tc.desc: Invalid parameter, set broadcasting param fail
  * @tc.type: FUNC
  * @tc.require:
  */
@@ -1031,7 +1031,7 @@ HWTEST_F(SoftbusBroadcastMgrTest, SoftbusBroadcastSetBroadcastingParam001, TestS
 
 /*
  * @tc.name: SoftbusBroadcastSetBroadcastingParam002
- * @tc.desc: Set broadcasting param without start.
+ * @tc.desc: Set broadcasting param without start
  * @tc.type: FUNC
  * @tc.require:
  */
@@ -1057,7 +1057,7 @@ HWTEST_F(SoftbusBroadcastMgrTest, SoftbusBroadcastSetBroadcastingParam002, TestS
 
 /*
  * @tc.name: SoftbusBroadcastStopBroadcasting001
- * @tc.desc: Invalid parameter, stop broadcasting fail.
+ * @tc.desc: Invalid parameter, stop broadcasting fail
  * @tc.type: FUNC
  * @tc.require:
  */
@@ -1081,7 +1081,7 @@ HWTEST_F(SoftbusBroadcastMgrTest, SoftbusBroadcastStopBroadcasting001, TestSize.
 
 /*
  * @tc.name: SoftbusBroadcastStopBroadcasting002
- * @tc.desc: Stop broadcasting without start.
+ * @tc.desc: Stop broadcasting without start
  * @tc.type: FUNC
  * @tc.require:
  */
@@ -1105,7 +1105,7 @@ HWTEST_F(SoftbusBroadcastMgrTest, SoftbusBroadcastStopBroadcasting002, TestSize.
 
 /*
  * @tc.name: SoftbusBroadcastSetScanFilter001
- * @tc.desc: Invalid parameter, set filter fail.
+ * @tc.desc: Invalid parameter, set filter fail
  * @tc.type: FUNC
  * @tc.require:
  */
@@ -1134,7 +1134,7 @@ HWTEST_F(SoftbusBroadcastMgrTest, SoftbusBroadcastSetScanFilter001, TestSize.Lev
 
 /*
  * @tc.name: SoftbusBroadcastSetScanFilter002
- * @tc.desc: Set filter success.
+ * @tc.desc: Set filter success
  * @tc.type: FUNC
  * @tc.require:
  */
@@ -1162,7 +1162,7 @@ HWTEST_F(SoftbusBroadcastMgrTest, SoftbusBroadcastSetScanFilter002, TestSize.Lev
 
 /*
  * @tc.name: SoftbusBroadcastStartScan001
- * @tc.desc: Invalid parameter, start scan fail.
+ * @tc.desc: Invalid parameter, start scan fail
  * @tc.type: FUNC
  * @tc.require:
  */
@@ -1190,7 +1190,7 @@ HWTEST_F(SoftbusBroadcastMgrTest, SoftbusBroadcastStartScan001, TestSize.Level1)
 
 /*
  * @tc.name: SoftbusBroadcastStartScan002
- * @tc.desc: Start scan without filter.
+ * @tc.desc: Start scan without filter
  * @tc.type: FUNC
  * @tc.require:
  */
@@ -1218,7 +1218,7 @@ HWTEST_F(SoftbusBroadcastMgrTest, SoftbusBroadcastStartScan002, TestSize.Level1)
 
 /*
  * @tc.name: SoftbusBroadcastStartScan003
- * @tc.desc: Start scan and stop scan success.
+ * @tc.desc: Start scan and stop scan success
  * @tc.type: FUNC
  * @tc.require:
  */
@@ -1250,7 +1250,7 @@ HWTEST_F(SoftbusBroadcastMgrTest, SoftbusBroadcastStartScan003, TestSize.Level1)
 
 /*
  * @tc.name: SoftbusBroadcastStartScan004
- * @tc.desc: Duplicate start scan.
+ * @tc.desc: Duplicate start scan
  * @tc.type: FUNC
  * @tc.require:
  */
@@ -1351,7 +1351,7 @@ HWTEST_F(SoftbusBroadcastMgrTest, SoftbusBroadcastStartScan006, TestSize.Level1)
 
 /*
  * @tc.name: SoftbusBroadcastStopScan001
- * @tc.desc: Invalid parameter, stop scan fail.
+ * @tc.desc: Invalid parameter, stop scan fail
  * @tc.type: FUNC
  * @tc.require:
  */
@@ -1374,7 +1374,7 @@ HWTEST_F(SoftbusBroadcastMgrTest, SoftbusBroadcastStopScan001, TestSize.Level1)
 
 /*
  * @tc.name: SoftbusBroadcastStopScan002
- * @tc.desc: Stop scan without start.
+ * @tc.desc: Stop scan without start
  * @tc.type: FUNC
  * @tc.require:
  */
@@ -1398,7 +1398,7 @@ HWTEST_F(SoftbusBroadcastMgrTest, SoftbusBroadcastStopScan002, TestSize.Level1)
 
 /*
  * @tc.name: SoftbusBroadcastScannerTest001
- * @tc.desc: Scanner start scan success when new listenerId is added.
+ * @tc.desc: Scanner start scan success when new listenerId is added
  * @tc.type: FUNC
  * @tc.require:
  */
@@ -1457,7 +1457,7 @@ HWTEST_F(SoftbusBroadcastMgrTest, SoftbusBroadcastScannerTest001, TestSize.Level
 
 /*
  * @tc.name: SoftbusBroadcastScannerTest002
- * @tc.desc: Two Scanner stop and start success without interfering with each other.
+ * @tc.desc: Two Scanner stop and start success without interfering with each other
  * @tc.type: FUNC
  * @tc.require:
  */
@@ -1517,7 +1517,7 @@ HWTEST_F(SoftbusBroadcastMgrTest, SoftbusBroadcastScannerTest002, TestSize.Level
 
 /*
  * @tc.name: SoftbusBroadcastScannerTest003
- * @tc.desc: Scanner start scan success when updating frequency.
+ * @tc.desc: Scanner start scan success when updating frequency
  * @tc.type: FUNC
  * @tc.require:
  */
@@ -1556,7 +1556,7 @@ HWTEST_F(SoftbusBroadcastMgrTest, SoftbusBroadcastScannerTest003, TestSize.Level
 
 /*
  * @tc.name: SoftbusBroadcastScannerTest004
- * @tc.desc: Scanner start scan success when setting a new filter.
+ * @tc.desc: Scanner start scan success when setting a new filter
  * @tc.type: FUNC
  * @tc.require:
  */
@@ -1597,7 +1597,7 @@ HWTEST_F(SoftbusBroadcastMgrTest, SoftbusBroadcastScannerTest004, TestSize.Level
 
 /*
  * @tc.name: SoftbusBroadcastScannerTest005
- * @tc.desc: Scanner not start scan with same params.
+ * @tc.desc: Scanner not start scan with same params
  * @tc.type: FUNC
  * @tc.require:
  */

@@ -49,9 +49,9 @@ void LNNKvStoreLaunchListenerTest::TearDownTestCase(void)
 void LNNKvStoreLaunchListenerTest::SetUp(void) { }
 void LNNKvStoreLaunchListenerTest::TearDown(void) { }
 
-/**
+/*
  * @tc.name: OnAddSystemAbility
- * @tc.desc: check DISTRIBUTED_KV_DATA_SERVICE_ABILITY_ID.
+ * @tc.desc: check DISTRIBUTED_KV_DATA_SERVICE_ABILITY_ID
  * @tc.type: FUNC
  * @tc.require:
  */
@@ -64,7 +64,7 @@ HWTEST_F(LNNKvStoreLaunchListenerTest, ON_ADD_SYSTEM_ABILITY_001, TestSize.Level
     listener->OnRemoveSystemAbility(DISTRIBUTED_KV_DATA_SERVICE_ABILITY_ID, "");
 }
 
-/**
+/*
  * @tc.name: OnAddSystemAbility
  * @tc.desc: check not DISTRIBUTED_KV_DATA_SERVICE_ABILITY_ID
  * @tc.type: FUNC

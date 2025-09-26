@@ -45,7 +45,7 @@ void LNNOhosAccountTest::SetUp() { }
 
 void LNNOhosAccountTest::TearDown() { }
 
-/**
+/*
  * @tc.name: LNN_GET_OHOS_ACCOUNT_INFO_001
  * @tc.desc: test accountHash == nullptr || len != SHA_256_HASH_LEN
  * @tc.type: FUNC
@@ -62,7 +62,7 @@ HWTEST_F(LNNOhosAccountTest, LNN_GET_OHOS_ACCOUNT_INFO_001, TestSize.Level1)
     EXPECT_EQ(ret, SOFTBUS_INVALID_PARAM);
 }
 
-/**
+/*
  * @tc.name: LnnGetOhosAccountInfoByUserIdTest_001
  * @tc.desc: test LnnGetOhosAccountInfoByUserId invalid param
  * @tc.type: FUNC
@@ -77,7 +77,7 @@ HWTEST_F(LNNOhosAccountTest, LnnGetOhosAccountInfoByUserIdTest_001, TestSize.Lev
     EXPECT_EQ(ret, SOFTBUS_INVALID_PARAM);
 }
 
-/**
+/*
  * @tc.name: LnnGetOhosAccountInfoByUserIdTest_002
  * @tc.desc: test LnnGetOhosAccountInfoByUserId invalid param
  * @tc.type: FUNC
@@ -92,7 +92,7 @@ HWTEST_F(LNNOhosAccountTest, LnnGetOhosAccountInfoByUserIdTest_002, TestSize.Lev
     EXPECT_EQ(ret, SOFTBUS_INVALID_PARAM);
 }
 
-/**
+/*
  * @tc.name: LnnGetOhosAccountInfoByUserIdTest_003
  * @tc.desc: test LnnGetOhosAccountInfoByUserId invalid param
  * @tc.type: FUNC
@@ -107,7 +107,7 @@ HWTEST_F(LNNOhosAccountTest, LnnGetOhosAccountInfoByUserIdTest_003, TestSize.Lev
     EXPECT_EQ(ret, SOFTBUS_INVALID_PARAM);
 }
 
-/**
+/*
  * @tc.name: LnnGetOhosAccountInfoByUserIdTest_004
  * @tc.desc: test LnnGetOhosAccountInfoByUserId abnormal
  * @tc.type: FUNC
