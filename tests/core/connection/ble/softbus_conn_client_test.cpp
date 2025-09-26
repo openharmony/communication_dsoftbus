@@ -719,6 +719,7 @@ HWTEST_F(ClientConnectionTest, ConfigureMtuSizeCallback001, TestSize.Level1)
     NiceMock<ConnectionBleClientInterfaceMock> bleMock;
     EXPECT_CALL(bleMock, SoftbusBleGattcDisconnect)
         .WillRepeatedly(Return(SOFTBUS_CONN_BLE_UNDERLAY_CLIENT_CONNECT_ERR));
+    EXPECT_CALL(bleMock, IsUnknownDevicePacked).WillRepeatedly(Return(false));
     gattCb->configureMtuSizeCallback(bleConnection->underlayerHandle, 20, SOFTBUS_CONN_BLE_UNDERLAY_CLIENT_CONNECT_ERR);
     SoftBusSleepMs(500);
 
