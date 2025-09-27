@@ -1044,8 +1044,6 @@ HWTEST_F(LNNLaneLinkTest, GuideChannelRetryOfAsync_003, TestSize.Level1)
         .WillOnce(DoAll(SetArrayArgument<LANE_MOCK_PARAM3>(BRMAC, BRMAC + BT_MAC_LEN), Return(SOFTBUS_OK)))
         .WillRepeatedly(Return(SOFTBUS_OK));
     EXPECT_CALL(linkMock, CheckActiveConnection).WillRepeatedly(Return(true));
-    EXPECT_CALL(linkMock, LnnGetRemoteNodeInfoById).WillRepeatedly(Return(SOFTBUS_OK));
-    EXPECT_CALL(linkMock, LnnHasDiscoveryType).WillRepeatedly(Return(true));
     EXPECT_CALL(laneLinkMock, GetTransReqInfoByLaneReqId).WillRepeatedly(Return(SOFTBUS_OK));
     EXPECT_CALL(linkMock, AuthGenRequestId).WillRepeatedly(Return(requestId));
     EXPECT_CALL(linkMock, AuthOpenConn(_, requestId, NotNull(), _)).WillRepeatedly(linkMock.ActionOfConnOpenFailed);
@@ -1253,8 +1251,6 @@ HWTEST_F(LNNLaneLinkTest, GuideChannelRetryOfAsync_007, TestSize.Level1)
     EXPECT_CALL(linkMock, LnnGetRemoteStrInfo).WillOnce(Return(SOFTBUS_NOT_FIND)).WillOnce(Return(SOFTBUS_OK))
         .WillRepeatedly(Return(SOFTBUS_OK));
     EXPECT_CALL(linkMock, AuthDeviceCheckConnInfo).WillRepeatedly(Return(true));
-    EXPECT_CALL(linkMock, LnnGetRemoteNodeInfoById).WillRepeatedly(Return(SOFTBUS_OK));
-    EXPECT_CALL(linkMock, LnnHasDiscoveryType).WillRepeatedly(Return(true));
     EXPECT_CALL(linkMock, AuthGetPreferConnInfo).WillRepeatedly(Return(SOFTBUS_OK));
     EXPECT_CALL(laneLinkMock, GetTransReqInfoByLaneReqId).WillRepeatedly(Return(SOFTBUS_OK));
     EXPECT_CALL(linkMock, AuthGenRequestId).WillRepeatedly(Return(requestId));
