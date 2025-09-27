@@ -1238,9 +1238,9 @@ int32_t CreateGroupOwnerInner(const char *pkgName, const struct GroupOwnerConfig
     ret = ServerIpcCreateGroupOwner(pkgName, config, result);
     if (ret != SOFTBUS_OK) {
         LNN_LOGE(LNN_STATE, "request create group failed, ret=%{public}d", ret);
-        ret = SoftBusMutexLock(&g_busCenterClient.lock);
-        LNN_CHECK_AND_RETURN_RET_LOGE(ret == SOFTBUS_OK, SOFTBUS_LOCK_ERR, LNN_STATE,
-            "lock group owner destroy cb, ret=%{public}d", ret);
+        int32_t res = SoftBusMutexLock(&g_busCenterClient.lock);
+        LNN_CHECK_AND_RETURN_RET_LOGE(res == SOFTBUS_OK, SOFTBUS_LOCK_ERR, LNN_STATE,
+            "lock group owner destroy cb, res=%{public}d", res);
         g_busCenterClient.groupOwnerDestroyCb = NULL;
         (void)SoftBusMutexUnlock(&g_busCenterClient.lock);
     }
