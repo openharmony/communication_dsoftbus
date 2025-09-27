@@ -24,6 +24,7 @@
 #include "client_trans_socket_manager.h"
 #include "trans_proxy_process_data.h"
 #include "trans_server_proxy.h"
+#include "g_enhance_sdk_func.h"
 
 namespace OHOS {
 class ClientTransProxyManagerInterface {
@@ -57,6 +58,7 @@ public:
         int32_t socketId, int32_t channelType);
     virtual int32_t ClientGetChannelBusinessTypeByChannelId(int32_t channelId, int32_t *businessType) = 0;
     virtual int32_t TransProxyD2dDataLenCheck(uint32_t dataLen, BusinessType type) = 0;
+    virtual ClientEnhanceFuncList *ClientEnhanceFuncListGet(void) = 0;
 };
 
 class ClientTransProxyManagerInterfaceMock : public ClientTransProxyManagerInterface {
@@ -90,6 +92,7 @@ public:
         int32_t socketId, int32_t channelType));
     MOCK_METHOD2(ClientGetChannelBusinessTypeByChannelId, int32_t(int32_t channelId, int32_t *businessType));
     MOCK_METHOD2(TransProxyD2dDataLenCheck, int32_t(uint32_t dataLen, BusinessType type));
+    MOCK_METHOD0(ClientEnhanceFuncListGet, ClientEnhanceFuncList *(void));
 };
 }
 #endif

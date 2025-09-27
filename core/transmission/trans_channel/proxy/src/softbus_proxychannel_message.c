@@ -566,6 +566,7 @@ static void TransPagingProcessResetMsg(const ProxyMessage *msg)
         SoftBusFree(info);
         return;
     }
+    TransProxyUnRegQosInfo(msg->connId, (int32_t)msg->msgHead.myId, true);
     if (TransDecConnRefByConnId(msg->connId, false, true) == SOFTBUS_OK) {
         TRANS_LOGI(TRANS_CTRL, "recv reset dis connect, connId=%{public}u", msg->connId);
         (void)ConnDisconnectDevice(msg->connId);

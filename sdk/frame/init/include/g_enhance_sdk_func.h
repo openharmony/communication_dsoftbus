@@ -46,6 +46,7 @@ typedef bool (*IsVtpFrameSentEvtFunc)(const FtEventCbkInfo *info);
 typedef int (*HandleVtpFrameEvtFunc)(int fd, OnFrameEvt cb, const FtEventCbkInfo *info);
 typedef int32_t (*TransOnPagingConnectFunc)(const int32_t socket, const ChannelInfo *channel);
 typedef bool (*CheckDMHandleSessionFunc)(const char *sessionName);
+typedef int32_t (*ClientDeleteD2dQosRegFunc)(int32_t channelId);
 
 typedef struct TagClientEnhanceFuncList {
     BusCenterExProxyDeInitFunc busCenterExProxyDeInit;
@@ -61,6 +62,7 @@ typedef struct TagClientEnhanceFuncList {
     HandleVtpFrameEvtFunc handleVtpFrameEvt;
     TransOnPagingConnectFunc transOnPagingConnect;
     CheckDMHandleSessionFunc checkDMHandleSession;
+    ClientDeleteD2dQosRegFunc clientDeleteD2dQosReg;
 } ClientEnhanceFuncList;
 
 ClientEnhanceFuncList *ClientEnhanceFuncListGet(void);
