@@ -1110,29 +1110,30 @@ static int32_t TrySendSyncInfoMsgByAuth(const char *networkId, SyncInfoMsg *msg)
 static int32_t GetFeatureCap(const char *networkId, uint64_t *local, uint64_t *remote)
 {
     int32_t ret = LnnGetLocalNumU64Info(NUM_KEY_FEATURE_CAPA, local);
-    if (ret != SOFTBUS_OK || *local == 0) {
-        LNN_LOGE(LNN_BUILDER, "get local cap fail, ret=%{public}d, local=%{public}" PRIu64, ret, *local);
+    if (ret != SOFTBUS_OK) {
+        LNN_LOGE(LNN_BUILDER, "get local cap fail, ret=%{public}d", ret);
         return SOFTBUS_NETWORK_GET_NODE_INFO_ERR;
     }
     ret = LnnGetRemoteNumU64Info(networkId, NUM_KEY_FEATURE_CAPA, remote);
-    if (ret != SOFTBUS_OK || *remote == 0) {
-        LNN_LOGE(LNN_BUILDER, "get remote cap fail, ret=%{public}d, remote=%{public}" PRIu64, ret, *remote);
+    if (ret != SOFTBUS_OK) {
+        LNN_LOGE(LNN_BUILDER, "get remote cap fail, ret=%{public}d", ret);
         return SOFTBUS_NETWORK_GET_NODE_INFO_ERR;
     }
     return SOFTBUS_OK;
 }
 
-static bool IsNeedSyncByAuth(const char *networkId)
+static bool IsEnhancedP2pSupported(const char *networkId)
 {
-    uint32_t localCap;
-    uint32_t remoteCap;
-    if (LnnGetLocalNumU32Info(NUM_KEY_NET_CAP, &localCap) != SOFTBUS_OK ||
-        LnnGetRemoteNumU32Info(networkId, NUM_KEY_NET_CAP, &remoteCap) != SOFTBUS_OK) {
+    uint32_t localStaticCap = 0;
+    uint32_t remoteStaticCap = 0;
+    if (LnnGetLocalNumU32Info(NUM_KEY_STATIC_NET_CAP, &localStaticCap) != SOFTBUS_OK ||
+        LnnGetRemoteNumU32Info(networkId, NUM_KEY_STATIC_NET_CAP, &remoteStaticCap) != SOFTBUS_OK) {
         LNN_LOGE(LNN_BUILDER, "get cap fail");
         return false;
     }
-    if (((localCap & (1 << BIT_WIFI_P2P)) == 0) || ((remoteCap & (1 << BIT_WIFI_P2P)) == 0)) {
-        LNN_LOGI(LNN_BUILDER, "not support p2p");
+    if (((localStaticCap & (1 << STATIC_CAP_BIT_ENHANCED_P2P)) == 0) ||
+        ((remoteStaticCap & (1 << STATIC_CAP_BIT_ENHANCED_P2P)) == 0)) {
+        LNN_LOGI(LNN_BUILDER, "not support enhanced p2p");
         return false;
     }
     uint64_t local = 0;
@@ -1146,6 +1147,25 @@ static bool IsNeedSyncByAuth(const char *networkId)
         LNN_LOGI(LNN_BUILDER, "not support wifi direct");
         return false;
     }
+    return true;
+}
+
+static bool IsNeedSyncByAuth(const char *networkId)
+{
+    uint32_t localDynamicCap = 0;
+    uint32_t remoteDynamicCap = 0;
+    if (LnnGetLocalNumU32Info(NUM_KEY_NET_CAP, &localDynamicCap) != SOFTBUS_OK ||
+        LnnGetRemoteNumU32Info(networkId, NUM_KEY_NET_CAP, &remoteDynamicCap) != SOFTBUS_OK) {
+        LNN_LOGE(LNN_BUILDER, "get cap fail");
+        return false;
+    }
+    if (((localDynamicCap & (1 << BIT_WIFI_P2P)) == 0) || ((remoteDynamicCap & (1 << BIT_WIFI_P2P)) == 0)) {
+        LNN_LOGI(LNN_BUILDER, "not support p2p");
+        return false;
+    }
+    if (!IsEnhancedP2pSupported(networkId)) {
+        return false;
+    }
     NodeInfo node;
     (void)memset_s(&node, sizeof(NodeInfo), 0, sizeof(NodeInfo));
     if (LnnGetRemoteNodeInfoById(networkId, CATEGORY_NETWORK_ID, &node) != SOFTBUS_OK) {
@@ -1156,7 +1176,7 @@ static bool IsNeedSyncByAuth(const char *networkId)
         LNN_LOGI(LNN_BUILDER, "peer node is wifi online");
         return false;
     }
-    if ((localCap & (1 << BIT_BR)) && (remoteCap & (1 << BIT_BR))) {
+    if ((localDynamicCap & (1 << BIT_BR)) && (remoteDynamicCap & (1 << BIT_BR))) {
         LNN_LOGI(LNN_BUILDER, "both support br");
         return false;
     }
