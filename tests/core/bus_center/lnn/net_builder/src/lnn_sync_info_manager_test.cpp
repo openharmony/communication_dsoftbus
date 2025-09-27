@@ -2190,8 +2190,25 @@ HWTEST_F(LNNSyncInfoManagerTest, GetFeatureCap_003, TestSize.Level1)
 HWTEST_F(LNNSyncInfoManagerTest, IsNeedSyncByAuth_001, TestSize.Level1)
 {
     NiceMock<LnnNetLedgertInterfaceMock> ledgerMock;
-    EXPECT_CALL(ledgerMock, LnnGetLocalNumU32Info(_, _)).Times(1).WillOnce(Return(SOFTBUS_ERR));
+    NiceMock<DistributeLedgerInterfaceMock> distributeLedgerMock;
+    EXPECT_CALL(ledgerMock, LnnGetLocalNumU32Info)
+        .WillOnce(Return(SOFTBUS_INVALID_PARAM))
+        .WillOnce(Return(SOFTBUS_OK))
+        .WillOnce(Return(SOFTBUS_OK))
+        .WillOnce(Return(SOFTBUS_INVALID_PARAM))
+        .WillOnce(Return(SOFTBUS_OK))
+        .WillOnce(Return(SOFTBUS_OK));
+    EXPECT_CALL(distributeLedgerMock, LnnGetRemoteNumU32Info)
+        .WillOnce(Return(SOFTBUS_INVALID_PARAM))
+        .WillOnce(Return(SOFTBUS_OK))
+        .WillOnce(Return(SOFTBUS_INVALID_PARAM))
+        .WillOnce(Return(SOFTBUS_OK));
 
+    EXPECT_EQ(IsNeedSyncByAuth(NETWORKID), false);
+    EXPECT_EQ(IsNeedSyncByAuth(NETWORKID), false);
+    EXPECT_EQ(IsNeedSyncByAuth(NETWORKID), false);
+    EXPECT_EQ(IsNeedSyncByAuth(NETWORKID), false);
+    EXPECT_EQ(IsNeedSyncByAuth(NETWORKID), false);
     EXPECT_EQ(IsNeedSyncByAuth(NETWORKID), false);
 }
 
@@ -2203,15 +2220,17 @@ HWTEST_F(LNNSyncInfoManagerTest, IsNeedSyncByAuth_001, TestSize.Level1)
  */
 HWTEST_F(LNNSyncInfoManagerTest, IsNeedSyncByAuth_002, TestSize.Level1)
 {
-    uint32_t local = 0;
+    uint32_t p2pDynamicCap = 1 << BIT_WIFI_P2P;
     NiceMock<LnnNetLedgertInterfaceMock> ledgerMock;
     NiceMock<LnnSyncInfoManagerInterfaceMock> lnnSyncInfoMgrMock;
     NiceMock<DistributeLedgerInterfaceMock> distributeLedgerMock;
-    EXPECT_CALL(ledgerMock, LnnGetLocalNumU32Info(_, _))
-        .Times(1)
-        .WillOnce(DoAll(SetArgPointee<1>(local), Return(SOFTBUS_OK)));
-    EXPECT_CALL(distributeLedgerMock, LnnGetRemoteNumU32Info(_, _, _)).Times(1).WillOnce(Return(SOFTBUS_OK));
+    EXPECT_CALL(ledgerMock, LnnGetLocalNumU32Info)
+        .WillOnce(DoAll(SetArgPointee<1>(0), Return(SOFTBUS_OK)))
+        .WillOnce(DoAll(SetArgPointee<1>(p2pDynamicCap), Return(SOFTBUS_OK)));
+    EXPECT_CALL(distributeLedgerMock, LnnGetRemoteNumU32Info)
+        .WillRepeatedly(DoAll(SetArgPointee<2>(0), Return(SOFTBUS_OK)));
 
+    EXPECT_EQ(IsNeedSyncByAuth(NETWORKID), false);
     EXPECT_EQ(IsNeedSyncByAuth(NETWORKID), false);
 }
 
@@ -2229,10 +2248,11 @@ HWTEST_F(LNNSyncInfoManagerTest, IsNeedSyncByAuth_003, TestSize.Level1)
     NiceMock<LnnSyncInfoManagerInterfaceMock> lnnSyncInfoMgrMock;
     NiceMock<DistributeLedgerInterfaceMock> distributeLedgerMock;
     EXPECT_CALL(ledgerMock, LnnGetLocalNumU32Info(_, _))
-        .Times(1)
-        .WillOnce(DoAll(SetArgPointee<1>(local1), Return(SOFTBUS_OK)));
+        .WillOnce(DoAll(SetArgPointee<1>(local1), Return(SOFTBUS_OK)))
+        .WillOnce(DoAll(SetArgPointee<1>(1 << STATIC_CAP_BIT_ENHANCED_P2P), Return(SOFTBUS_OK)));
     EXPECT_CALL(distributeLedgerMock, LnnGetRemoteNumU32Info(_, _, _))
-        .WillOnce(DoAll(SetArgPointee<2>(remote1), Return(SOFTBUS_OK)));
+        .WillOnce(DoAll(SetArgPointee<2>(remote1), Return(SOFTBUS_OK)))
+        .WillOnce(DoAll(SetArgPointee<2>(1 << STATIC_CAP_BIT_ENHANCED_P2P), Return(SOFTBUS_OK)));
     EXPECT_CALL(ledgerMock, LnnGetLocalNumU64Info(_, _)).Times(1).WillOnce(Return(SOFTBUS_ERR));
 
     EXPECT_EQ(IsNeedSyncByAuth(NETWORKID), false);
@@ -2252,10 +2272,11 @@ HWTEST_F(LNNSyncInfoManagerTest, IsNeedSyncByAuth_004, TestSize.Level1)
     NiceMock<LnnSyncInfoManagerInterfaceMock> lnnSyncInfoMgrMock;
     NiceMock<DistributeLedgerInterfaceMock> distributeLedgerMock;
     EXPECT_CALL(ledgerMock, LnnGetLocalNumU32Info(_, _))
-        .Times(1)
-        .WillOnce(DoAll(SetArgPointee<1>(local1), Return(SOFTBUS_OK)));
+        .WillOnce(DoAll(SetArgPointee<1>(local1), Return(SOFTBUS_OK)))
+        .WillOnce(DoAll(SetArgPointee<1>(1 << STATIC_CAP_BIT_ENHANCED_P2P), Return(SOFTBUS_OK)));
     EXPECT_CALL(distributeLedgerMock, LnnGetRemoteNumU32Info(_, _, _))
-        .WillOnce(DoAll(SetArgPointee<2>(remote1), Return(SOFTBUS_OK)));
+        .WillOnce(DoAll(SetArgPointee<2>(remote1), Return(SOFTBUS_OK)))
+        .WillOnce(DoAll(SetArgPointee<2>(1 << STATIC_CAP_BIT_ENHANCED_P2P), Return(SOFTBUS_OK)));
 
     uint32_t local2 = 1;
     uint32_t remote2 = 1;
@@ -2283,10 +2304,11 @@ HWTEST_F(LNNSyncInfoManagerTest, IsNeedSyncByAuth_005, TestSize.Level1)
     NiceMock<LnnSyncInfoManagerInterfaceMock> lnnSyncInfoMgrMock;
     NiceMock<DistributeLedgerInterfaceMock> distributeLedgerMock;
     EXPECT_CALL(ledgerMock, LnnGetLocalNumU32Info(_, _))
-        .Times(1)
-        .WillOnce(DoAll(SetArgPointee<1>(local1), Return(SOFTBUS_OK)));
+        .WillOnce(DoAll(SetArgPointee<1>(local1), Return(SOFTBUS_OK)))
+        .WillOnce(DoAll(SetArgPointee<1>(1 << STATIC_CAP_BIT_ENHANCED_P2P), Return(SOFTBUS_OK)));
     EXPECT_CALL(distributeLedgerMock, LnnGetRemoteNumU32Info(_, _, _))
-        .WillOnce(DoAll(SetArgPointee<2>(remote1), Return(SOFTBUS_OK)));
+        .WillOnce(DoAll(SetArgPointee<2>(remote1), Return(SOFTBUS_OK)))
+        .WillOnce(DoAll(SetArgPointee<2>(1 << STATIC_CAP_BIT_ENHANCED_P2P), Return(SOFTBUS_OK)));
 
     uint32_t local2 = 32768;
     uint32_t remote2 = 32768;
@@ -2316,10 +2338,11 @@ HWTEST_F(LNNSyncInfoManagerTest, IsNeedSyncByAuth_006, TestSize.Level1)
     NiceMock<LnnSyncInfoManagerInterfaceMock> lnnSyncInfoMgrMock;
     NiceMock<DistributeLedgerInterfaceMock> distributeLedgerMock;
     EXPECT_CALL(ledgerMock, LnnGetLocalNumU32Info(_, _))
-        .Times(1)
-        .WillOnce(DoAll(SetArgPointee<1>(local1), Return(SOFTBUS_OK)));
+        .WillOnce(DoAll(SetArgPointee<1>(local1), Return(SOFTBUS_OK)))
+        .WillOnce(DoAll(SetArgPointee<1>(1 << STATIC_CAP_BIT_ENHANCED_P2P), Return(SOFTBUS_OK)));
     EXPECT_CALL(distributeLedgerMock, LnnGetRemoteNumU32Info(_, _, _))
-        .WillOnce(DoAll(SetArgPointee<2>(remote1), Return(SOFTBUS_OK)));
+        .WillOnce(DoAll(SetArgPointee<2>(remote1), Return(SOFTBUS_OK)))
+        .WillOnce(DoAll(SetArgPointee<2>(1 << STATIC_CAP_BIT_ENHANCED_P2P), Return(SOFTBUS_OK)));
 
     uint32_t local2 = 32768;
     uint32_t remote2 = 32768;
@@ -2350,10 +2373,11 @@ HWTEST_F(LNNSyncInfoManagerTest, IsNeedSyncByAuth_007, TestSize.Level1)
     NiceMock<LnnSyncInfoManagerInterfaceMock> lnnSyncInfoMgrMock;
     NiceMock<DistributeLedgerInterfaceMock> distributeLedgerMock;
     EXPECT_CALL(ledgerMock, LnnGetLocalNumU32Info(_, _))
-        .Times(1)
-        .WillOnce(DoAll(SetArgPointee<1>(local1), Return(SOFTBUS_OK)));
+        .WillOnce(DoAll(SetArgPointee<1>(local1), Return(SOFTBUS_OK)))
+        .WillOnce(DoAll(SetArgPointee<1>(1 << STATIC_CAP_BIT_ENHANCED_P2P), Return(SOFTBUS_OK)));
     EXPECT_CALL(distributeLedgerMock, LnnGetRemoteNumU32Info(_, _, _))
-        .WillOnce(DoAll(SetArgPointee<2>(remote1), Return(SOFTBUS_OK)));
+        .WillOnce(DoAll(SetArgPointee<2>(remote1), Return(SOFTBUS_OK)))
+        .WillOnce(DoAll(SetArgPointee<2>(1 << STATIC_CAP_BIT_ENHANCED_P2P), Return(SOFTBUS_OK)));
 
     uint32_t local2 = 32768;
     uint32_t remote2 = 32768;
@@ -2384,10 +2408,11 @@ HWTEST_F(LNNSyncInfoManagerTest, IsNeedSyncByAuth_008, TestSize.Level1)
     NiceMock<LnnSyncInfoManagerInterfaceMock> lnnSyncInfoMgrMock;
     NiceMock<DistributeLedgerInterfaceMock> distributeLedgerMock;
     EXPECT_CALL(ledgerMock, LnnGetLocalNumU32Info(_, _))
-        .Times(1)
-        .WillOnce(DoAll(SetArgPointee<1>(local1), Return(SOFTBUS_OK)));
+        .WillOnce(DoAll(SetArgPointee<1>(local1), Return(SOFTBUS_OK)))
+        .WillOnce(DoAll(SetArgPointee<1>(1 << STATIC_CAP_BIT_ENHANCED_P2P), Return(SOFTBUS_OK)));
     EXPECT_CALL(distributeLedgerMock, LnnGetRemoteNumU32Info(_, _, _))
-        .WillOnce(DoAll(SetArgPointee<2>(remote1), Return(SOFTBUS_OK)));
+        .WillOnce(DoAll(SetArgPointee<2>(remote1), Return(SOFTBUS_OK)))
+        .WillOnce(DoAll(SetArgPointee<2>(1 << STATIC_CAP_BIT_ENHANCED_P2P), Return(SOFTBUS_OK)));
 
     uint32_t local2 = 32768;
     uint32_t remote2 = 32768;
@@ -2420,10 +2445,11 @@ HWTEST_F(LNNSyncInfoManagerTest, LnnSendSyncInfoMsg_001, TestSize.Level1)
     NiceMock<LnnSyncInfoManagerInterfaceMock> lnnSyncInfoMgrMock;
     NiceMock<DistributeLedgerInterfaceMock> distributeLedgerMock;
     EXPECT_CALL(ledgerMock, LnnGetLocalNumU32Info(_, _))
-        .Times(1)
-        .WillOnce(DoAll(SetArgPointee<1>(local1), Return(SOFTBUS_OK)));
+        .WillOnce(DoAll(SetArgPointee<1>(local1), Return(SOFTBUS_OK)))
+        .WillOnce(DoAll(SetArgPointee<1>(1 << STATIC_CAP_BIT_ENHANCED_P2P), Return(SOFTBUS_OK)));
     EXPECT_CALL(distributeLedgerMock, LnnGetRemoteNumU32Info(_, _, _))
-        .WillOnce(DoAll(SetArgPointee<2>(remote1), Return(SOFTBUS_OK)));
+        .WillOnce(DoAll(SetArgPointee<2>(remote1), Return(SOFTBUS_OK)))
+        .WillOnce(DoAll(SetArgPointee<2>(1 << STATIC_CAP_BIT_ENHANCED_P2P), Return(SOFTBUS_OK)));
 
     uint32_t local2 = 32768;
     uint32_t remote2 = 32768;
@@ -2651,5 +2677,39 @@ HWTEST_F(LNNSyncInfoManagerTest, LnnSendWifiOfflineInfoMsg_006, TestSize.Level1)
     EXPECT_CALL(lnnSyncInfoMgrMock, AuthPostTransData(_, _)).Times(1).WillOnce(Return(SOFTBUS_ERR));
 
     EXPECT_EQ(LnnSendWifiOfflineInfoMsg(), SOFTBUS_OK);
+}
+
+/*
+ * @tc.name: IsEnhancedP2pSupported_001
+ * @tc.desc: test IsEnhancedP2pSupported
+ * @tc.type: FUNC
+ * @tc.require: 1
+ */
+HWTEST_F(LNNSyncInfoManagerTest, IsEnhancedP2pSupported_001, TestSize.Level1)
+{
+    uint32_t p2pStaticCap = 1 << STATIC_CAP_BIT_ENHANCED_P2P;
+    uint64_t hmlFeature = 1 << BIT_WIFI_DIRECT_ENHANCE_CAPABILITY;
+    NiceMock<LnnNetLedgertInterfaceMock> ledgerMock;
+    NiceMock<DistributeLedgerInterfaceMock> distributeLedgerMock;
+    EXPECT_CALL(ledgerMock, LnnGetLocalNumU32Info)
+        .WillOnce(DoAll(SetArgPointee<1>(0), Return(SOFTBUS_OK)))
+        .WillRepeatedly(DoAll(SetArgPointee<1>(p2pStaticCap), Return(SOFTBUS_OK)));
+    EXPECT_CALL(distributeLedgerMock, LnnGetRemoteNumU32Info)
+        .WillOnce(DoAll(SetArgPointee<2>(0), Return(SOFTBUS_OK)))
+        .WillOnce(DoAll(SetArgPointee<2>(0), Return(SOFTBUS_OK)))
+        .WillRepeatedly(DoAll(SetArgPointee<2>(p2pStaticCap), Return(SOFTBUS_OK)));
+    EXPECT_CALL(ledgerMock, LnnGetLocalNumU64Info)
+        .WillOnce(DoAll(SetArgPointee<1>(0), Return(SOFTBUS_OK)))
+        .WillRepeatedly(DoAll(SetArgPointee<1>(hmlFeature), Return(SOFTBUS_OK)));
+    EXPECT_CALL(distributeLedgerMock, LnnGetRemoteNumU64Info)
+        .WillOnce(DoAll(SetArgPointee<2>(0), Return(SOFTBUS_OK)))
+        .WillOnce(DoAll(SetArgPointee<2>(0), Return(SOFTBUS_OK)))
+        .WillRepeatedly(DoAll(SetArgPointee<2>(hmlFeature), Return(SOFTBUS_OK)));
+
+    EXPECT_EQ(IsEnhancedP2pSupported(NETWORKID), false);
+    EXPECT_EQ(IsEnhancedP2pSupported(NETWORKID), false);
+    EXPECT_EQ(IsEnhancedP2pSupported(NETWORKID), false);
+    EXPECT_EQ(IsEnhancedP2pSupported(NETWORKID), false);
+    EXPECT_EQ(IsEnhancedP2pSupported(NETWORKID), true);
 }
 } // namespace OHOS
