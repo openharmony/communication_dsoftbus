@@ -40,6 +40,7 @@ int32_t ClientRegisterEnhanceFunc(void *soHandle)
     g_clientEnhanceFuncList.handleVtpFrameEvt = dlsym(soHandle, "HandleVtpFrameEvt");
     g_clientEnhanceFuncList.transOnPagingConnect = dlsym(soHandle, "TransOnPagingConnect");
     g_clientEnhanceFuncList.checkDMHandleSession = dlsym(soHandle, "CheckDMHandleSession");
+    g_clientEnhanceFuncList.clientDeleteD2dQosReg = dlsym(soHandle, "ClientDeleteD2dQosReg");
 
     return SOFTBUS_OK;
 }

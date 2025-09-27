@@ -93,6 +93,8 @@ int32_t TransPagingUpdatePagingChannelInfo(ProxyChannelInfo *info);
 int32_t TransPagingUpdatePidAndData(int32_t channelId, int32_t pid, char *data, uint32_t len);
 void TransPagingBadKeyRetry(int32_t channelId);
 int32_t TransPagingUpdateDataConfig(AppInfo *info);
+int32_t TransProxyD2dGetSleMac(int32_t channelId, int32_t pid, char *sleMac, uint32_t macLen);
+void TransProxyUnRegQosInfo(uint32_t connId, int32_t channelId, bool isD2d);
 #ifdef __cplusplus
 }
 #endif
