@@ -799,6 +799,11 @@ HWTEST_F(LNNConnectionFsmTest, LNN_RECOVERY_BROADCAST_KEY_TEST_001, TestSize.Lev
     EXPECT_EQ(ret, SOFTBUS_OK);
     ret = LnnRecoveryBroadcastKey();
     EXPECT_EQ(ret, SOFTBUS_OK);
+    EXPECT_CALL(lnnConnMock, LnnSetLocalByteInfo)
+        .WillOnce(Return(SOFTBUS_OK)).WillOnce(Return(SOFTBUS_OK))
+        .WillRepeatedly(Return(SOFTBUS_INVALID_PARAM));
+    ret = LnnRecoveryBroadcastKey();
+    EXPECT_EQ(ret, SOFTBUS_INVALID_PARAM);
 }
 
 /*

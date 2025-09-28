@@ -177,12 +177,12 @@ HWTEST_F(LNNNetLedgerMockTest, IsStaticFeatureChangeTest001, TestSize.Level0)
 }
 
 /*
- * @tc.name: IsLocalSparkCheckInvalid001
+ * @tc.name: IsLocalSparkCheckChange001
  * @tc.desc: local sparkCheck invalid test
  * @tc.type: FUNC
  * @tc.require: IBH09C
  */
-HWTEST_F(LNNNetLedgerMockTest, IsLocalSparkCheckInvalid001, TestSize.Level0)
+HWTEST_F(LNNNetLedgerMockTest, IsLocalSparkCheckChange001, TestSize.Level0)
 {
     NodeInfo info;
     (void)memset_s(&info, sizeof(NodeInfo), 0, sizeof(NodeInfo));
@@ -190,14 +190,8 @@ HWTEST_F(LNNNetLedgerMockTest, IsLocalSparkCheckInvalid001, TestSize.Level0)
     NiceMock<NetLedgerCommonInterfaceMock> commonMock;
     EXPECT_CALL(busCenterMock, LnnGetLocalByteInfo).WillOnce(Return(SOFTBUS_INVALID_PARAM))
         .WillRepeatedly(Return(SOFTBUS_OK));
-    EXPECT_CALL(commonMock, LnnGenSparkCheck).WillOnce(Return(SOFTBUS_INVALID_PARAM))
-        .WillRepeatedly(Return(SOFTBUS_OK));
-    info.sparkCheck[0] = 1;
-    EXPECT_EQ(IsLocalSparkCheckInvalid(&info), false);
-    info.sparkCheck[0] = 0;
-    EXPECT_EQ(IsLocalSparkCheckInvalid(&info), false);
-    EXPECT_EQ(IsLocalSparkCheckInvalid(&info), false);
-    EXPECT_EQ(IsLocalSparkCheckInvalid(&info), true);
+    EXPECT_EQ(IsLocalSparkCheckChange(&info), false);
+    EXPECT_EQ(IsLocalSparkCheckChange(&info), true);
 }
 
 /*
@@ -215,7 +209,6 @@ HWTEST_F(LNNNetLedgerMockTest, IsBleDirectlyOnlineFactorChange001, TestSize.Leve
     EXPECT_CALL(commonMock, LnnGetLocalNumU64Info).WillRepeatedly(Return(SOFTBUS_INVALID_PARAM));
     EXPECT_CALL(commonMock, LnnGetLocalNumU32Info).WillRepeatedly(Return(SOFTBUS_INVALID_PARAM));
     EXPECT_CALL(commonMock, LnnGetLocalNumInfo).WillRepeatedly(Return(SOFTBUS_INVALID_PARAM));
-    EXPECT_CALL(commonMock, LnnGenSparkCheck).WillRepeatedly(Return(SOFTBUS_OK));
     EXPECT_CALL(busCenterMock, LnnGetLocalStrInfo).WillRepeatedly(Return(SOFTBUS_INVALID_PARAM));
     EXPECT_CALL(busCenterMock, LnnGetLocalByteInfo).WillRepeatedly(Return(SOFTBUS_INVALID_PARAM));
     EXPECT_EQ(IsBleDirectlyOnlineFactorChange(&info), false);
