@@ -81,9 +81,8 @@ HWTEST_F(LnnOhosAccountAdapterTest, GetOsAccountId_002, TestSize.Level1)
     uint32_t len = 0;
     char *accountInfo = (char *)SoftBusCalloc(LNN_OHOS_ACCOUNT_ADAPTER_TEST_ID_LEN * HEXIFY_UNIT_LEN);
     ASSERT_NE(accountInfo, nullptr);
-    AccountSA::OhosAccountKitsMock mock;
-    EXPECT_CALL(mock, IsSameAccountGroupDevice()).Times(1).WillOnce(testing::Return(false));
-    EXPECT_EQ(GetOsAccountId(accountInfo, LNN_OHOS_ACCOUNT_ADAPTER_TEST_ID_LEN, &len), SOFTBUS_AUTH_INNER_ERR);
+    EXPECT_EQ(GetOsAccountId(accountInfo, LNN_OHOS_ACCOUNT_ADAPTER_TEST_ID_LEN, &len),
+        SOFTBUS_NETWORK_GET_ACCOUNT_INFO_FAILED);
     if (accountInfo != nullptr) {
         SoftBusFree(accountInfo);
     }
@@ -103,7 +102,6 @@ HWTEST_F(LnnOhosAccountAdapterTest, GetOsAccountId_003, TestSize.Level1)
     OHOS::AccountSA::OhosAccountInfo oh_acc_info;
     std::pair<bool, OHOS::AccountSA::OhosAccountInfo> oh_acc_info_pair = { false, oh_acc_info };
     AccountSA::OhosAccountKitsMock mock;
-    EXPECT_CALL(mock, IsSameAccountGroupDevice()).Times(1).WillOnce(testing::Return(true));
     EXPECT_CALL(mock, QueryOhosAccountInfo()).Times(1).WillOnce(testing::Return(oh_acc_info_pair));
     EXPECT_EQ(GetOsAccountId(accountInfo, LNN_OHOS_ACCOUNT_ADAPTER_TEST_ID_LEN, &len),
         SOFTBUS_NETWORK_GET_ACCOUNT_INFO_FAILED);
@@ -127,7 +125,6 @@ HWTEST_F(LnnOhosAccountAdapterTest, GetOsAccountId_004, TestSize.Level1)
     oh_acc_info.name_ = "";
     std::pair<bool, OHOS::AccountSA::OhosAccountInfo> oh_acc_info_pair = { true, oh_acc_info };
     OHOS::AccountSA::OhosAccountKitsMock mock;
-    EXPECT_CALL(mock, IsSameAccountGroupDevice()).Times(1).WillOnce(testing::Return(true));
     EXPECT_CALL(mock, QueryOhosAccountInfo()).Times(1).WillOnce(testing::Return(oh_acc_info_pair));
     EXPECT_EQ(GetOsAccountId(accountInfo, LNN_OHOS_ACCOUNT_ADAPTER_TEST_ID_LEN, &len),
         SOFTBUS_NETWORK_GET_ACCOUNT_INFO_FAILED);
@@ -147,9 +144,7 @@ HWTEST_F(LnnOhosAccountAdapterTest, GetCurrentAccount_001, TestSize.Level1)
 {
     int64_t account = 10;
     EXPECT_EQ(GetCurrentAccount(nullptr), SOFTBUS_INVALID_PARAM);
-    OHOS::AccountSA::OhosAccountKitsMock mock;
-    EXPECT_CALL(mock, IsSameAccountGroupDevice()).Times(1).WillOnce(testing::Return(false));
-    EXPECT_EQ(GetCurrentAccount(&account), SOFTBUS_AUTH_INNER_ERR);
+    EXPECT_EQ(GetCurrentAccount(&account), SOFTBUS_NETWORK_GET_ACCOUNT_INFO_FAILED);
 }
 
 /**
@@ -164,7 +159,6 @@ HWTEST_F(LnnOhosAccountAdapterTest, GetCurrentAccount_002, TestSize.Level1)
     OHOS::AccountSA::OhosAccountInfo oh_acc_info;
     std::pair<bool, OHOS::AccountSA::OhosAccountInfo> oh_acc_info_pair = { false, oh_acc_info };
     OHOS::AccountSA::OhosAccountKitsMock mock;
-    EXPECT_CALL(mock, IsSameAccountGroupDevice()).Times(1).WillOnce(testing::Return(true));
     EXPECT_CALL(mock, QueryOhosAccountInfo()).Times(1).WillOnce(testing::Return(oh_acc_info_pair));
     EXPECT_EQ(GetCurrentAccount(&account), SOFTBUS_NETWORK_GET_ACCOUNT_INFO_FAILED);
 }
@@ -182,7 +176,6 @@ HWTEST_F(LnnOhosAccountAdapterTest, GetCurrentAccount_003, TestSize.Level1)
     oh_acc_info.name_ = "";
     std::pair<bool, OHOS::AccountSA::OhosAccountInfo> oh_acc_info_pair = { true, oh_acc_info };
     OHOS::AccountSA::OhosAccountKitsMock mock;
-    EXPECT_CALL(mock, IsSameAccountGroupDevice()).Times(1).WillOnce(testing::Return(true));
     EXPECT_CALL(mock, QueryOhosAccountInfo()).Times(1).WillOnce(testing::Return(oh_acc_info_pair));
     EXPECT_EQ(GetCurrentAccount(&account), SOFTBUS_OK);
 }
@@ -200,7 +193,6 @@ HWTEST_F(LnnOhosAccountAdapterTest, GetCurrentAccount_004, TestSize.Level1)
     oh_acc_info.name_ = DEFAULT_ACCOUNT_NAME;
     std::pair<bool, OHOS::AccountSA::OhosAccountInfo> oh_acc_info_pair = { true, oh_acc_info };
     OHOS::AccountSA::OhosAccountKitsMock mock;
-    EXPECT_CALL(mock, IsSameAccountGroupDevice()).Times(1).WillOnce(testing::Return(true));
     EXPECT_CALL(mock, QueryOhosAccountInfo()).Times(1).WillOnce(testing::Return(oh_acc_info_pair));
     EXPECT_EQ(GetCurrentAccount(&account), SOFTBUS_OK);
 }
@@ -218,7 +210,6 @@ HWTEST_F(LnnOhosAccountAdapterTest, GetCurrentAccount_005, TestSize.Level1)
     oh_acc_info.name_ = "ACCOUNT_NAME";
     std::pair<bool, OHOS::AccountSA::OhosAccountInfo> oh_acc_info_pair = { true, oh_acc_info };
     OHOS::AccountSA::OhosAccountKitsMock mock;
-    EXPECT_CALL(mock, IsSameAccountGroupDevice()).Times(1).WillOnce(testing::Return(true));
     EXPECT_CALL(mock, QueryOhosAccountInfo()).Times(1).WillOnce(testing::Return(oh_acc_info_pair));
     EXPECT_EQ(GetCurrentAccount(&account), SOFTBUS_OK);
 }
@@ -236,7 +227,6 @@ HWTEST_F(LnnOhosAccountAdapterTest, GetCurrentAccount_006, TestSize.Level1)
     oh_acc_info.name_ = "123456";
     std::pair<bool, OHOS::AccountSA::OhosAccountInfo> oh_acc_info_pair = { true, oh_acc_info };
     OHOS::AccountSA::OhosAccountKitsMock mock;
-    EXPECT_CALL(mock, IsSameAccountGroupDevice()).Times(1).WillOnce(testing::Return(true));
     EXPECT_CALL(mock, QueryOhosAccountInfo()).Times(1).WillOnce(testing::Return(oh_acc_info_pair));
     EXPECT_EQ(GetCurrentAccount(&account), SOFTBUS_OK);
 }
@@ -456,7 +446,6 @@ HWTEST_F(LnnOhosAccountAdapterTest, GetOsAccountId_005, TestSize.Level1)
     oh_acc_info.name_ = "ohosAnonymousName";
     std::pair<bool, OHOS::AccountSA::OhosAccountInfo> oh_acc_info_pair = { true, oh_acc_info };
     OHOS::AccountSA::OhosAccountKitsMock mock;
-    EXPECT_CALL(mock, IsSameAccountGroupDevice()).Times(1).WillOnce(testing::Return(true));
     EXPECT_CALL(mock, QueryOhosAccountInfo()).Times(1).WillOnce(testing::Return(oh_acc_info_pair));
     EXPECT_EQ(GetOsAccountId(accountInfo, LNN_OHOS_ACCOUNT_ADAPTER_TEST_ID_LEN, &len),
         SOFTBUS_MEM_ERR);
@@ -500,7 +489,7 @@ HWTEST_F(LnnOhosAccountAdapterTest, GetOsAccountUidByUserId_002, TestSize.Level1
     ASSERT_NE(accountInfo, nullptr);
     OHOS::AccountSA::OhosAccountInfo oh_acc_info;
     oh_acc_info.name_ = "teatsa";
-    EXPECT_EQ(GetOsAccountUidByUserId(accountInfo, idLen, &len, userId), INVALID_ACCOUNT_UID);
+    EXPECT_EQ(GetOsAccountUidByUserId(accountInfo, idLen, &len, userId), -1);
     if (accountInfo != nullptr) {
         SoftBusFree(accountInfo);
     }
@@ -521,7 +510,7 @@ HWTEST_F(LnnOhosAccountAdapterTest, GetOsAccountUidByUserId_003, TestSize.Level1
     ASSERT_NE(accountInfo, nullptr);
     OHOS::AccountSA::OhosAccountInfo oh_acc_info;
     oh_acc_info.name_ = "ohosAnonymousName";
-    EXPECT_EQ(GetOsAccountUidByUserId(accountInfo, idLen, &len, userId), INVALID_ACCOUNT_UID);
+    EXPECT_EQ(GetOsAccountUidByUserId(accountInfo, idLen, &len, userId), -1);
     if (accountInfo != nullptr) {
         SoftBusFree(accountInfo);
     }
