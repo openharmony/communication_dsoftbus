@@ -64,6 +64,7 @@ typedef void (*LnnDcDispatchEventFunc)(DcEvent *dcEvent);
 typedef void (*TriggerSparkGroupBuildFunc)(uint32_t delayTime);
 typedef void (*TriggerSparkGroupClearFunc)(uint32_t state, uint32_t delayTime);
 typedef void (*TriggerSparkGroupJoinAgainFunc)(const char *udid, uint32_t delayTime);
+typedef void (*TriggerClearSparkGroupFunc)(void);
 typedef int32_t (*InitControlPlaneFunc)(void);
 typedef void (*DeinitControlPlaneFunc)(void);
 typedef int32_t (*QueryControlPlaneNodeValidFunc)(const char *deviceId);
@@ -303,6 +304,7 @@ typedef struct TagLnnEnhanceFuncList {
     TriggerSparkGroupBuildFunc triggerSparkGroupBuild;
     TriggerSparkGroupClearFunc triggerSparkGroupClear;
     TriggerSparkGroupJoinAgainFunc triggerSparkGroupJoinAgain;
+    TriggerClearSparkGroupFunc triggerClearSparkGroup;
     InitControlPlaneFunc initControlPlane;
     DeinitControlPlaneFunc deinitControlPlane;
     QueryControlPlaneNodeValidFunc queryControlPlaneNodeValid;
