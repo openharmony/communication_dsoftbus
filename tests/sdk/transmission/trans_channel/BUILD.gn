@@ -146,6 +146,7 @@ if (defined(ohos_lite)) {
     include_dirs = trans_sdk_test_common_inc
     include_dirs += trans_sdk_proxy_test_inc
     include_dirs += [
+      "$dsoftbus_root_path/components/nstackx/fillp/include",
       "$dsoftbus_root_path/sdk/transmission/trans_channel/proxy/src",
       "$dsoftbus_root_path/sdk/transmission/trans_channel/common/include",
       "$dsoftbus_root_path/core/transmission/common/include",
@@ -170,6 +171,7 @@ if (defined(ohos_lite)) {
     ]
     include_dirs = trans_sdk_test_common_inc
     include_dirs += [
+      "$dsoftbus_root_path/components/nstackx/fillp/include",
       "$dsoftbus_root_path/sdk/transmission/trans_channel/common/include",
       "$dsoftbus_root_path/sdk/transmission/trans_channel/proxy/include",
       "$dsoftbus_root_path/core/transmission/common/src",
@@ -315,6 +317,7 @@ if (defined(ohos_lite)) {
     sources = [ "proxy/client_trans_proxy_file_manager_test.cpp" ]
     include_dirs = trans_sdk_test_common_inc
     include_dirs += [
+      "$dsoftbus_root_path/components/nstackx/fillp/include",
       "$dsoftbus_root_path/sdk/frame/common/include",
       "$dsoftbus_root_path/sdk/transmission/trans_channel/common/include",
       "$dsoftbus_root_path/sdk/transmission/trans_channel/proxy/include",
@@ -353,6 +356,7 @@ if (defined(ohos_lite)) {
     ]
     include_dirs = trans_sdk_test_common_inc
     include_dirs += [
+      "$dsoftbus_root_path/components/nstackx/fillp/include",
       "$dsoftbus_root_path/sdk/transmission/trans_channel/common/include",
       "$dsoftbus_root_path/sdk/transmission/trans_channel/proxy/include",
       "$dsoftbus_root_path/sdk/transmission/trans_channel/udp/file/include",
@@ -390,6 +394,7 @@ if (defined(ohos_lite)) {
     ]
     include_dirs = trans_sdk_test_common_inc
     include_dirs += [
+      "$dsoftbus_root_path/components/nstackx/fillp/include",
       "$dsoftbus_root_path/sdk/transmission/trans_channel/common/include",
       "$dsoftbus_root_path/sdk/transmission/trans_channel/proxy/include",
       "$dsoftbus_root_path/sdk/transmission/trans_channel/udp/file/include",
@@ -429,6 +434,7 @@ if (defined(ohos_lite)) {
     sources = [ "manager/client_trans_channel_manager_test.cpp" ]
     include_dirs = trans_sdk_test_common_inc
     include_dirs += [
+      "$dsoftbus_root_path/components/nstackx/fillp/include",
       "$dsoftbus_root_path/sdk/transmission/trans_channel/manager/include",
       "$dsoftbus_root_path/sdk/transmission/trans_channel/auth/include",
       "$dsoftbus_root_path/sdk/transmission/trans_channel/proxy/include",
@@ -539,6 +545,7 @@ if (defined(ohos_lite)) {
     ]
     include_dirs = trans_sdk_test_common_inc
     include_dirs += [
+      "$dsoftbus_root_path/components/nstackx/fillp/include",
       "$dsoftbus_root_path/sdk/frame/common/include",
       "$dsoftbus_root_path/sdk/transmission/trans_channel/common/include",
       "$dsoftbus_root_path/sdk/transmission/trans_channel/proxy/include",

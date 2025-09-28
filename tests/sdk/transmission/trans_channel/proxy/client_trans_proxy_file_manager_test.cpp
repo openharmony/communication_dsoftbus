@@ -25,6 +25,7 @@
 #include "client_trans_session_manager.c"
 #include "client_trans_socket_manager.c"
 #include "client_trans_file_listener.h"
+#include "g_enhance_sdk_func.h"
 #include "softbus_def.h"
 #include "softbus_error_code.h"
 #include "softbus_server_frame.h"

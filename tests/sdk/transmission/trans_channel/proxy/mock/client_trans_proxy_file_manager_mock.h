@@ -21,6 +21,7 @@
 #include "client_trans_proxy_manager.h"
 #include "client_trans_proxy_file_manager.h"
 #include "client_trans_session_manager.h"
+#include "g_enhance_sdk_func.h"
 
 namespace OHOS {
 class ClientTransProxyFileManagerInterface {
@@ -60,6 +61,7 @@ public:
     virtual int32_t FileListToBuffer(const char **destFile, uint32_t fileCnt, FileListBuffer *outbufferInfo) = 0;
     virtual int32_t SetPendingPacket(int32_t channelId, int32_t seqNum, int32_t type) = 0;
     virtual int32_t TransProxyD2dDataLenCheck(uint32_t dataLen, BusinessType type) = 0;
+    virtual ClientEnhanceFuncList *ClientEnhanceFuncListGet(void) = 0;
 };
 
 class ClientTransProxyFileManagerInterfaceMock : public ClientTransProxyFileManagerInterface {
@@ -100,6 +102,7 @@ public:
     MOCK_METHOD3(FileListToBuffer, int32_t (const char **destFile, uint32_t fileCnt, FileListBuffer *outbufferInfo));
     MOCK_METHOD3(SetPendingPacket, int32_t (int32_t channelId, int32_t seqNum, int32_t type));
     MOCK_METHOD2(TransProxyD2dDataLenCheck, int32_t(uint32_t dataLen, BusinessType type));
+    MOCK_METHOD0(ClientEnhanceFuncListGet, ClientEnhanceFuncList *(void));
 };
 } // namespace OHOS
 #endif // CLIENT_TRANS_PROXY_FILE_MANAGER_MOCK_H
