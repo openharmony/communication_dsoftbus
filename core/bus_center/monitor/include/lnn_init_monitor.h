@@ -28,6 +28,13 @@ extern "C" {
 #define DEP_INFO_LEN 1024
 
 typedef enum {
+    D2D_STATE_UPDATE,
+    SLE_DATA_TRANSFER_UPDATE,
+    SLE_RANGING_UPDATE,
+    COMMON_EVENT_UNKNOWN,
+} CommontEventType;
+
+typedef enum {
     NOTIFY_MODULE,
     NOTIFY_LEDGER
 } InitNotifyType;

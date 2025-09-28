@@ -14,7 +14,8 @@
  */
 
 #include "lnn_event_monitor_impl.h"
-
+#include "g_enhance_lnn_func.h"
+#include "g_enhance_lnn_func_pack.h"
 #include "common_event_manager.h"
 #include "common_event_support.h"
 #include "lnn_async_callback_utils.h"
@@ -26,14 +27,25 @@
 
 static const int32_t DELAY_LEN = 1000;
 static const int32_t RETRY_MAX = 20;
-
+static const int32_t OPEN_D2D = 1;
 namespace OHOS {
 namespace EventFwk {
+static const char *COMMON_EVENT_DSOFTBUS_D2D_STATE_CHANGE = "usual.event.DSOFTBUS_D2D_STATE_CHANGE";
+static const char *COMMON_EVENT_NEARLINK_HOST_DATA_TRANSFER_UPDATE = "usual.event.nearlink.host.DATA_TRANSFER_UPDATE";
+static const char *COMMON_EVENT_NEARLINK_HOST_RANGING_UPDATE = "usual.event.nearlink.host.RANGING_UPDATE";
+static const char *KEY_SLE_D2D_PAGING_ADV_STATE = "d2d.paging.advertise";
+static const char *KEY_SLE_D2D_GROUP_ADV_STATE = "d2d.group.advertise";
+static const char *PARAM_KEY_STATE = "state";
+
 class CommonEventMonitor : public CommonEventSubscriber {
 public:
     explicit CommonEventMonitor(const CommonEventSubscribeInfo &subscriberInfo);
     virtual ~CommonEventMonitor() {}
     virtual void OnReceiveEvent(const CommonEventData &data);
+private:
+    void OnReceiveSleEvent(const EventFwk::Want& want);
+    void OnReceiveSleBusinessEvent(const EventFwk::Want& want);
+    void OnReceiveSleD2dEvent(const EventFwk::Want& want);
 };
 
 CommonEventMonitor::CommonEventMonitor(const CommonEventSubscribeInfo &subscriberInfo)
@@ -41,8 +53,43 @@ CommonEventMonitor::CommonEventMonitor(const CommonEventSubscribeInfo &subscribe
 {
 }
 
+void CommonEventMonitor::OnReceiveSleBusinessEvent(const EventFwk::Want& want)
+{
+    int32_t state = want.GetIntParam(PARAM_KEY_STATE, 0);
+    LNN_LOGI(LNN_EVENT, "event state=%{public}d", state);
+    if (state) {
+        TriggerClearSparkGroupPacked();
+    }
+}
+
+void CommonEventMonitor::OnReceiveSleD2dEvent(const EventFwk::Want& want)
+{
+    int32_t pagingState = want.GetIntParam(KEY_SLE_D2D_PAGING_ADV_STATE, INT_MAX);
+    int32_t groupState = want.GetIntParam(KEY_SLE_D2D_GROUP_ADV_STATE, INT_MAX);
+    LNN_LOGI(LNN_EVENT, "d2d adv pagingState=%{public}d, groupState=%{public}d", pagingState, groupState);
+    if (pagingState == OPEN_D2D || groupState == OPEN_D2D) {
+        TriggerClearSparkGroupPacked();
+    }
+}
+void CommonEventMonitor::OnReceiveSleEvent(const EventFwk::Want& want)
+{
+    std::string action = want.GetAction();
+    switch (action) {
+        case COMMON_EVENT_NEARLINK_HOST_RANGING_UPDATE:
+        case COMMON_EVENT_NEARLINK_HOST_DATA_TRANSFER_UPDATE:
+            OnReceiveSleBusinessEvent(want);
+            break;
+        case COMMON_EVENT_DSOFTBUS_D2D_STATE_CHANGE:
+            OnReceiveSleD2dEvent(want);
+            break;
+        default:
+            break;
+    }
+}
+
 void CommonEventMonitor::OnReceiveEvent(const CommonEventData &data)
 {
+    auto want = data.GetWant();
     std::string action = data.GetWant().GetAction();
     LNN_LOGI(LNN_EVENT, "notify common event=%{public}s", action.c_str());
 
@@ -52,7 +99,7 @@ void CommonEventMonitor::OnReceiveEvent(const CommonEventData &data)
     if (action == CommonEventSupport::COMMON_EVENT_BOOT_COMPLETED) {
         LnnNotifyDeviceRootStateChangeEvent();
     }
-
+    OnReceiveSleEvent(want);
     SoftBusScreenState screenState = SOFTBUS_SCREEN_UNKNOWN;
     if (action == CommonEventSupport::COMMON_EVENT_SCREEN_OFF) {
         screenState = SOFTBUS_SCREEN_OFF;
@@ -112,6 +159,9 @@ int32_t SubscribeEvent::SubscribeCommonEvent()
     matchingSkills.AddEvent(CommonEventSupport::COMMON_EVENT_DATA_SHARE_READY);
     matchingSkills.AddEvent(CommonEventSupport::COMMON_EVENT_TIME_CHANGED);
     matchingSkills.AddEvent(CommonEventSupport::COMMON_EVENT_BOOT_COMPLETED);
+    matchingSkills.AddEvent(COMMON_EVENT_NEARLINK_HOST_DATA_TRANSFER_UPDATE);
+    matchingSkills.AddEvent(COMMON_EVENT_NEARLINK_HOST_RANGING_UPDATE);
+    matchingSkills.AddEvent(COMMON_EVENT_DSOFTBUS_D2D_STATE_CHANGE);
     CommonEventSubscribeInfo subscriberInfo(matchingSkills);
     subscriber_ = std::make_shared<CommonEventMonitor>(subscriberInfo);
     if (!CommonEventManager::SubscribeCommonEvent(subscriber_)) {
