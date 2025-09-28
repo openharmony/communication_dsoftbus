@@ -279,3 +279,15 @@ int32_t LoadTransPermissionJsonPacked(void)
     }
     return pfnTransEnhanceFuncList->loadTransPermissionJson();
 }
+
+void TransD2dQosUnregisterPacked(int32_t channelId, char *sleMac, uint32_t macLen)
+{
+    TransEnhanceFuncList *pfnTransEnhanceFuncList = TransEnhanceFuncListGet();
+    if (pfnTransEnhanceFuncList == NULL) {
+        return;
+    }
+    if (TransCheckFuncPointer((void *)pfnTransEnhanceFuncList->transD2dQosUnregister) != SOFTBUS_OK) {
+        return;
+    }
+    return pfnTransEnhanceFuncList->transD2dQosUnregister(channelId, sleMac, macLen);
+}

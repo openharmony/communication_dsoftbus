@@ -140,5 +140,10 @@ int32_t ClientGetChannelBusinessTypeByChannelId(int32_t channelId, int32_t *busi
 {
     return GetTransClientProxyFileManagerInterface()->ClientGetChannelBusinessTypeByChannelId(channelId, businessType);
 }
+
+ClientEnhanceFuncList *ClientEnhanceFuncListGet(void)
+{
+    return GetTransClientProxyFileManagerInterface()->ClientEnhanceFuncListGet();
+}
 }
 }
