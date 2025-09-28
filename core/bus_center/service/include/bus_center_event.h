@@ -96,6 +96,8 @@ void LnnNotifyAddRawEnhanceP2pEvent(LnnNotifyRawEnhanceP2pEvent *event);
 
 void LnnNotifyDeviceRootStateChangeEvent(void);
 
+void LnnNotifyHaLeaveMetaNodeEvent(const char *metaNodeId);
+
 #ifdef __cplusplus
 }
 #endif
