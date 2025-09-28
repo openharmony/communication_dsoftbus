@@ -26,6 +26,7 @@ typedef struct {
     char udid[UDID_BUF_LEN];
     uint64_t endTime;
     BroadcastCipherInfo cipherInfo;
+    unsigned char sparkCheck[SPARK_CHECK_LENGTH];
 } BroadcastCipherKey;
 
 #ifdef __cplusplus

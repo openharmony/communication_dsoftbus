@@ -105,6 +105,7 @@ public:
     virtual int32_t LnnUpdateDistributedNodeInfo(NodeInfo *newInfo, const char *udid) = 0;
     virtual int32_t LnnSetDLDeviceBroadcastCipherKey(const char *udid, const void *cipherKey) = 0;
     virtual int32_t LnnSetDLDeviceBroadcastCipherIv(const char *udid, const void *cipherIv) = 0;
+    virtual int32_t LnnSetDLDeviceSparkCheck(const char *udid, const void *sparkCheck) = 0;
     virtual int32_t LnnSetDLBssTransInfo(const char *networkId, const BssTransInfo *info) = 0;
     virtual int32_t LnnSetDLBatteryInfo(const char *networkId, const BatteryInfo *info) = 0;
     virtual int32_t LnnGetOsTypeByNetworkId(const char *networkId, int32_t *osType) = 0;
@@ -192,6 +193,7 @@ public:
     MOCK_METHOD2(LnnUpdateDistributedNodeInfo, int32_t(NodeInfo *, const char *));
     MOCK_METHOD2(LnnSetDLDeviceBroadcastCipherKey, int32_t(const char *, const void *));
     MOCK_METHOD2(LnnSetDLDeviceBroadcastCipherIv, int32_t(const char *, const void *));
+    MOCK_METHOD2(LnnSetDLDeviceSparkCheck, int32_t(const char *, const void *));
     MOCK_METHOD2(LnnSetDLBssTransInfo, int32_t(const char *, const BssTransInfo *));
     MOCK_METHOD2(LnnSetDLBatteryInfo, int32_t(const char *, const BatteryInfo *));
     MOCK_METHOD2(LnnGetOsTypeByNetworkId, int32_t(const char *, int32_t *));

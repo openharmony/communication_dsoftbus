@@ -66,10 +66,5 @@ int32_t LnnSetLocalNumInfo(InfoKey key, int32_t info)
 {
     return GetNetLedgerCommonInterface()->LnnSetLocalNumInfo(key, info);
 }
-
-int32_t LnnGenSparkCheck(void)
-{
-    return GetNetLedgerCommonInterface()->LnnGenSparkCheck();
-}
 } // extern "C"
 } // namespace OHOS

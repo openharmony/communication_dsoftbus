@@ -1142,6 +1142,33 @@ EXIT:
     return SOFTBUS_NOT_FIND;
 }
 
+int32_t LnnSetDLDeviceSparkCheck(const char *udid, const void *sparkCheck)
+{
+    if (udid == NULL || sparkCheck == NULL) {
+        LNN_LOGE(LNN_LEDGER, "param error");
+        return SOFTBUS_INVALID_PARAM;
+    }
+    if (SoftBusMutexLock(&(LnnGetDistributedNetLedger()->lock)) != 0) {
+        LNN_LOGE(LNN_LEDGER, "lock mutex fail");
+        return SOFTBUS_LOCK_ERR;
+    }
+    DoubleHashMap *map = &(LnnGetDistributedNetLedger()->distributedInfo);
+    NodeInfo *info = NULL;
+    info = GetNodeInfoFromMap(map, udid);
+    if (info == NULL) {
+        LNN_LOGE(LNN_LEDGER, "udid not exist");
+        SoftBusMutexUnlock(&(LnnGetDistributedNetLedger()->lock));
+        return SOFTBUS_NOT_FIND;
+    }
+    if (memcpy_s((char *)info->sparkCheck, SPARK_CHECK_LENGTH, sparkCheck, SPARK_CHECK_LENGTH) != EOK) {
+        LNN_LOGE(LNN_LEDGER, "set sparkCheck error");
+        SoftBusMutexUnlock(&(LnnGetDistributedNetLedger()->lock));
+        return SOFTBUS_MEM_ERR;
+    }
+    SoftBusMutexUnlock(&(LnnGetDistributedNetLedger()->lock));
+    return SOFTBUS_OK;
+}
+
 bool LnnSetDLP2pInfo(const char *networkId, const P2pInfo *info)
 {
     NodeInfo *node = NULL;

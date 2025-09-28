@@ -1108,4 +1108,19 @@ HWTEST_F(AuthSessionJsonMockTest, UNPACK_CERTIFICATE_INFO_TEST_002, TestSize.Lev
     int32_t ret = UnpackCertificateInfo(&json, &nodeInfo, &info);
     EXPECT_EQ(ret, SOFTBUS_OK);
 }
+
+/*
+ * @tc.name: FillBroadcastCipherKey_TEST_001
+ * @tc.desc: fill broadcast cipherkey test
+ * @tc.type: FUNC
+ * @tc.require:
+ */
+HWTEST_F(AuthSessionJsonMockTest, FillBroadcastCipherKey_TEST_001, TestSize.Level1)
+{
+    BroadcastCipherKey cipherKey;
+    (void)memset_s(&cipherKey, sizeof(BroadcastCipherKey), 0, sizeof(BroadcastCipherKey));
+    NodeInfo info;
+    (void)memset_s(&info, sizeof(NodeInfo), 0, sizeof(NodeInfo));
+    EXPECT_EQ(SOFTBUS_OK, FillBroadcastCipherKey(&cipherKey, &info));
+}
 } // namespace OHOS
