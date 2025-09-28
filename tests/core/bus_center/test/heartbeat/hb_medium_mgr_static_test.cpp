@@ -991,4 +991,23 @@ HWTEST_F(HeartBeatMediumStaticTest, LnnRegistHeartbeatMediumMgrTest_01, TestSize
     ret = LnnRegistHeartbeatMediumMgr(&mgr);
     EXPECT_EQ(ret, SOFTBUS_OK);
 }
+
+/*
+ * @tc.name: LnnRegistHeartbeatMediumMgrTest_01
+ * @tc.desc: UpdateDeviceInfoToMlps test
+ * @tc.type: FUNC
+ * @tc.require:
+ */
+HWTEST_F(HeartBeatMediumStaticTest, UpdateDeviceInfoToMlps_01, TestSize.Level1)
+{
+    NiceMock<LnnNetLedgertInterfaceMock> ledgerMock;
+    NiceMock<HeartBeatStategyInterfaceMock> hbStategyMock;
+
+    ON_CALL(hbStategyMock, LnnAsyncCallbackDelayHelper).WillByDefault(Return(SOFTBUS_INVALID_PARAM));
+    EXPECT_CALL(ledgerMock, LnnIsLocalSupportMcuFeature).WillOnce(Return(true)).WillRepeatedly(Return(false));
+
+    const char *udid = "udidTest";
+    UpdateDeviceInfoToMlps(udid);
+    UpdateDeviceInfoToMlps(udid);
+}
 } // namespace OHOS

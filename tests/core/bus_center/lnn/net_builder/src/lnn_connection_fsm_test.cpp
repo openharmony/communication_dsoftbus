@@ -617,6 +617,8 @@ HWTEST_F(LNNConnectionFsmTest, GET_PEER_UDID_HASH_TEST_001, TestSize.Level1)
     const char *udid = "testuuid";
     char udidData[UDID_BUF_LEN] = { 0 };
     ReportDeviceOnlineEvt(udid, &peerDevInfo);
+    EXPECT_CALL(ledgerMock, LnnIsLocalSupportMcuFeature).WillOnce(Return(true)).WillRepeatedly(Return(false));
+    DeviceStateChangeProcess(udidData, CONNECTION_ADDR_BLE, false);
     DeviceStateChangeProcess(udidData, CONNECTION_ADDR_BLE, false);
     DeviceStateChangeProcess(nullptr, CONNECTION_ADDR_BLE, false);
     DeviceStateChangeProcess(nullptr, CONNECTION_ADDR_WLAN, false);
@@ -905,5 +907,23 @@ HWTEST_F(LNNConnectionFsmTest, SYNC_BR_OFFLINE_TEST_001, TestSize.Level1)
     EXPECT_EQ(ret, SOFTBUS_INVALID_PARAM);
     ret = SyncBrOffline(&connFsm);
     EXPECT_EQ(ret, SOFTBUS_INVALID_PARAM);
+}
+/*
+ * @tc.name: UPDATE_DEVICE_INFO_TO_MLPS_TEST_001
+ * @tc.desc: test UpdateDeviceInfoToMlps
+ * @tc.type: FUNC
+ * @tc.require:
+ */
+HWTEST_F(LNNConnectionFsmTest, UPDATE_DEVICE_INFO_TO_MLPS_TEST_001, TestSize.Level1)
+{
+    NiceMock<LnnServicetInterfaceMock> serviceMock;
+    NiceMock<LnnNetLedgertInterfaceMock> ledgerMock;
+
+    ON_CALL(serviceMock, LnnAsyncCallbackDelayHelper).WillByDefault(Return(SOFTBUS_INVALID_PARAM));
+    EXPECT_CALL(ledgerMock, LnnIsLocalSupportMcuFeature).WillOnce(Return(true)).WillRepeatedly(Return(false));
+
+    const char *udid = "udidTest";
+    UpdateDeviceInfoToMlps(udid);
+    UpdateDeviceInfoToMlps(udid);
 }
 } // namespace OHOS

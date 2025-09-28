@@ -98,6 +98,10 @@ void LnnNotifyDeviceRootStateChangeEvent(void);
 
 void LnnNotifyHaLeaveMetaNodeEvent(const char *metaNodeId);
 
+void LnnNotifyLpMcuInit(bool enable);
+
+void LnnNotifyLpMcuUpdateHbInfo(int32_t type);
+
 #ifdef __cplusplus
 }
 #endif

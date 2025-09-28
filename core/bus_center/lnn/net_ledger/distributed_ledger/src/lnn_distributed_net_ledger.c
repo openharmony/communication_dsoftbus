@@ -866,6 +866,16 @@ static int32_t RemoteNodeInfoRetrieve(NodeInfo *newInfo, int32_t connectionType)
     return SOFTBUS_OK;
 }
 
+bool LnnIsLocalSupportMcuFeature(void)
+{
+    uint64_t localFeature;
+    if (LnnGetLocalNumU64Info(NUM_KEY_FEATURE_CAPA, &localFeature) != SOFTBUS_OK) {
+        LNN_LOGE(LNN_LEDGER, "get local feature fail");
+        return false;
+    }
+    return IsFeatureSupport(localFeature, BIT_BLE_SUPPORT_LP_MCU_CAPABILITY);
+}
+
 static void UpdateDeviceInfoToMlps(const char *udid)
 {
     LpDeviceStateInfo *info = (LpDeviceStateInfo *)SoftBusCalloc(sizeof(LpDeviceStateInfo));
@@ -880,7 +890,9 @@ static void UpdateDeviceInfoToMlps(const char *udid)
     }
     info->isOnline = true;
     SoftBusLooper *looper = GetLooper(LOOP_TYPE_DEFAULT);
-    if (LnnAsyncCallbackDelayHelper(looper, SendDeviceStateToMlpsPacked, (void *)info, 0) != SOFTBUS_OK) {
+    LnnAsyncCallbackFunc callback = LnnIsLocalSupportMcuFeature() ? LnnSendDeviceStateToMcuPacked :
+        SendDeviceStateToMlpsPacked;
+    if (LnnAsyncCallbackDelayHelper(looper, callback, (void *)info, 0) != SOFTBUS_OK) {
         LNN_LOGE(LNN_BUILDER, "async call send device info fail");
         SoftBusFree(info);
     }
