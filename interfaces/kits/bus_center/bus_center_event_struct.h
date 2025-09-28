@@ -59,6 +59,8 @@ typedef enum {
     LNN_EVENT_NET_LINK_STATE_CHANGE,
     LNN_EVENT_SLE_STATE_CHANGED,
     LNN_EVENT_SYS_TIME_CHANGE,
+    LNN_EVENT_LP_MCU_ENABLE_HEARTBEAT,
+    LNN_EVENT_LP_MCU_UPDATE_HEARTBEAT_INFO,
     /* event from sa monitor */
     LNN_EVENT_WIFI_SERVICE_START,
     LNN_EVENT_NOTIFY_RAW_ENHANCE_P2P,
@@ -320,6 +322,16 @@ typedef struct {
     LnnEventBasicInfo basic;
     char metaNodeId[NETWORK_ID_BUF_LEN];
 } LnnHaLeaveMetaNodeEvent;
+
+typedef struct {
+    LnnEventBasicInfo basic;
+    bool enable;
+} LnnHBEnableStatusChangedEvent;
+
+typedef struct {
+    LnnEventBasicInfo basic;
+    int32_t type;
+} LnnHBInfoUpdateChangedEvent;
 typedef void (*LnnEventHandler)(const LnnEventBasicInfo *info);
 
 #ifdef __cplusplus

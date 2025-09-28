@@ -1263,4 +1263,74 @@ HWTEST_F(HeartBeatCtrlStaticTest, InitHbSpecificConditionState_001, TestSize.Lev
     InitHbSpecificConditionState();
     EXPECT_EQ(g_hbConditionState.isRequestDisable, true);
 }
+
+/*
+ * @tc.name: IsHeartbeatEnableForMcu
+ * @tc.desc: test IsHeartbeatEnableForMcu func
+ * @tc.type: FUNC
+ * @tc.require:
+ */
+HWTEST_F(HeartBeatCtrlStaticTest, IsHeartbeatEnableForMcu_001, TestSize.Level1)
+{
+    NiceMock<LnnNetLedgertInterfaceMock> ledgerMock;
+
+    g_hbConditionState.heartbeatEnable = true;
+    g_hbConditionState.btState = SOFTBUS_BLE_TURN_ON;
+    g_hbConditionState.lockState = SOFTBUS_SCREEN_UNLOCK;
+    g_hbConditionState.accountState = SOFTBUS_ACCOUNT_LOG_IN;
+    g_hbConditionState.OOBEState = SOFTBUS_OOBE_END;
+    g_hbConditionState.deviceRootState = SOFTBUS_DEVICE_NOT_ROOT;
+
+    g_lnnInitMonitorInfoMgr.depInitEnd = true;
+    g_lnnInitMonitorInfoMgr.deviceInfoReady = true;
+
+    EXPECT_CALL(ledgerMock, IsActiveOsAccountUnlocked).WillOnce(Return(true)).WillRepeatedly(Return(false));
+    g_hbConditionState.lockState = SOFTBUS_SCREEN_LOCK_UNKNOWN;
+    bool ret = IsHeartbeatEnableForMcu();
+    EXPECT_EQ(ret, true);
+
+    g_hbConditionState.lockState = SOFTBUS_USER_UNLOCK;
+    ret = IsHeartbeatEnableForMcu();
+    EXPECT_EQ(ret, false);
+
+    g_hbConditionState.lockState = SOFTBUS_SCREEN_LOCK_UNKNOWN;
+    ret = IsHeartbeatEnableForMcu();
+    EXPECT_EQ(ret, false);
+}
+
+/*
+ * @tc.name: HbUpdateEnableStatusToMcu
+ * @tc.desc: test HbUpdateEnableStatusToMcu func
+ * @tc.type: FUNC
+ * @tc.require:
+ */
+HWTEST_F(HeartBeatCtrlStaticTest, HbUpdateEnableStatusToMcu_001, TestSize.Level1)
+{
+    NiceMock<LnnNetLedgertInterfaceMock> ledgerMock;
+
+    g_hbConditionState.heartbeatEnable = true;
+    g_hbConditionState.btState = SOFTBUS_BLE_TURN_ON;
+    g_hbConditionState.lockState = SOFTBUS_SCREEN_UNLOCK;
+    g_hbConditionState.accountState = SOFTBUS_ACCOUNT_LOG_IN;
+    g_hbConditionState.OOBEState = SOFTBUS_OOBE_END;
+    g_hbConditionState.deviceRootState = SOFTBUS_DEVICE_NOT_ROOT;
+    g_hbConditionState.lockState = SOFTBUS_SCREEN_LOCK_UNKNOWN;
+
+    g_lnnInitMonitorInfoMgr.depInitEnd = true;
+    g_lnnInitMonitorInfoMgr.deviceInfoReady = true;
+    EXPECT_CALL(ledgerMock, IsActiveOsAccountUnlocked).WillRepeatedly(Return(true));
+    EXPECT_CALL(ledgerMock, LnnIsLocalSupportMcuFeature).WillOnce(Return(false)).WillRepeatedly(Return(true));
+
+    g_enableStateMcu = true;
+    HbUpdateEnableStatusToMcu();
+    EXPECT_EQ(g_enableStateMcu, true);
+
+    g_enableStateMcu = true;
+    HbUpdateEnableStatusToMcu();
+    EXPECT_EQ(g_enableStateMcu, true);
+
+    g_enableStateMcu = false;
+    HbUpdateEnableStatusToMcu();
+    EXPECT_EQ(g_enableStateMcu, true);
+}
 } // namespace OHOS
