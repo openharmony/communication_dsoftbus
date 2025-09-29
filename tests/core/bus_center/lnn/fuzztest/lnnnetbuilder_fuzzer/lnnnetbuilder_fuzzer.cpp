@@ -29,6 +29,47 @@ static const std::vector<ConnectionAddrType> CONNECTION_ADDR_TYPE_LIST = { CONNE
     CONNECTION_ADDR_BLE, CONNECTION_ADDR_ETH, CONNECTION_ADDR_SESSION, CONNECTION_ADDR_USB,
     CONNECTION_ADDR_SESSION_WITH_KEY, CONNECTION_ADDR_SLE, CONNECTION_ADDR_NCM };
 
+#ifdef LNN_NET_BUILDER_FULL_TEST
+static const std::vector<LnnSyncInfoType> LNN_SYNC_INFO_TYPE_LIST = {
+    LNN_INFO_TYPE_CAPABILITY,
+    LNN_INFO_TYPE_CONNECTION_INFO,
+    LNN_INFO_TYPE_DEVICE_NAME,
+    LNN_INFO_TYPE_BATTERY_INFO,
+    LNN_INFO_TYPE_SCREEN_STATUS,
+    LNN_INFO_TYPE_OFFLINE,
+    LNN_INFO_TYPE_P2P_INFO,
+    LNN_INFO_TYPE_CHANNEL_NOISE_INFO,
+    LNN_INFO_TYPE_NOT_TRUSTED,
+    LNN_INFO_TYPE_WIFI_DIRECT,
+    LNN_INFO_TYPE_NICK_NAME,
+    LNN_INFO_TYPE_MASTER_ELECT,
+    LNN_INFO_TYPE_BSS_TRANS,
+    LNN_INFO_TYPE_TOPO_UPDATE,
+    LNN_INFO_TYPE_NODE_ADDR,
+    LNN_INFO_TYPE_NODE_ADDR_DETECTION,
+    LNN_INFO_TYPE_SYNC_CIPHERKEY,
+    LNN_INFO_TYPE_ROUTE_LSU,
+    LNN_INFO_TYPE_PTK,
+    LNN_INFO_TYPE_USERID,
+    LNN_INFO_TYPE_SYNC_BROADCASTLINKKEY,
+    LNN_INFO_TYPE_SLE_MAC,
+    LNN_INFO_TYPE_COUNT
+};
+
+static const std::vector<string> NETWORKID_TEST_LIST = {
+    "qqwweerrttyyuuiiooppaassddffgghhjjkkllzzxxccvvbbnnTESTLNN111",
+    "qqwweerrttyyuuiiooppaassddffgghhjjkkllzzxxccvvbbnnTESTLNN222",
+    "qqwweerrttyyuuiiooppaassddffgghhjjkkllzzxxccvvbbnnTESTLNN333",
+    "qqwweerrttyyuuiiooppaassddffgghhjjkkllzzxxccvvbbnnTESTLNN444",
+    "qqwweerrttyyuuiiooppaassddffgghhjjkkllzzxxccvvbbnnTESTLNN555",
+    "qqwweerrttyyuuiiooppaassddffgghhjjkkllzzxxccvvbbnnTESTLNN666",
+    "qqwweerrttyyuuiiooppaassddffgghhjjkkllzzxxccvvbbnnTESTLNN777",
+    "qqwweerrttyyuuiiooppaassddffgghhjjkkllzzxxccvvbbnnTESTLNN888",
+    "qqwweerrttyyuuiiooppaassddffgghhjjkkllzzxxccvvbbnnTESTLNN999",
+    "qqwweerrttyyuuiiooppaassddffgghhjjkkllzzxxccvvbbnnTESTLNN000",
+};
+#endif
+
 static const std::vector<string> IP_ADDR_LIST = { "192.168.1.1", "192.168.1.2", "192.168.3.1", "192.168.1.12",
     "192.168.11.12", "192.168.111.11", "192.168.110.1", "192.168.75.3", "192.168.64.24", "192.168.55.1" };
 
@@ -60,6 +101,15 @@ static void GenerateUint8Array(uint8_t *data, uint8_t len)
         GenerateUint8(data[i]);
     }
 }
+
+#ifdef LNN_NET_BUILDER_FULL_TEST
+static void GenerateBoolArray(bool *data, uint8_t len)
+{
+    for (uint8_t i = 0; i < len; i++) {
+        GenerateBool(data[i]);
+    }
+}
+#endif
 
 namespace OHOS {
 static bool ProcessFuzzAddrCommInfo(ConnectionAddr *addr)
@@ -123,6 +173,42 @@ static bool ProcessFuzzAddrInfo(ConnectionAddr *addr)
     }
 }
 
+#ifdef LNN_NET_BUILDER_FULL_TEST
+static bool GenerateFuzzNetworkId(char *id, uint32_t len)
+{
+    string stringData;
+    GenerateString(stringData);
+    const uint8_t *data = reinterpret_cast<const uint8_t *>(stringData.data());
+    size_t size = stringData.size();
+    if (data == nullptr || size < NETWORK_ID_BUF_LEN) {
+        COMM_LOGE(COMM_TEST, "data or size is valid");
+        return false;
+    }
+    if (strcpy_s(id, NETWORK_ID_BUF_LEN, stringData.c_str())) {
+        COMM_LOGE(COMM_TEST, "cp fail!");
+        return false;
+    }
+    return true;
+}
+
+static bool GenerateFuzzNetworkIdByList(char *id, uint32_t len)
+{
+    string networkId;
+    GenerateFromList(networkId, NETWORKID_TEST_LIST);
+    const uint8_t *data = reinterpret_cast<const uint8_t *>(networkId.data());
+    size_t size = networkId.size();
+    if (data == nullptr || size < NETWORK_ID_BUF_LEN) {
+        COMM_LOGE(COMM_TEST, "data or size is valid");
+        return false;
+    }
+    if (strcpy_s(id, len, networkId.c_str()) != EOK) {
+        COMM_LOGE(COMM_TEST, "strcpy_s networkid from list failed!");
+        return false;
+    }
+    return true;
+}
+#endif
+
 bool LnnNotifyDiscoveryDeviceFuzzTest()
 {
     ConnectionAddr addr;
@@ -140,6 +226,585 @@ bool LnnNotifyDiscoveryDeviceFuzzTest()
     return true;
 }
 
+#ifdef LNN_NET_BUILDER_FULL_TEST
+bool LnnRequestLeaveByAddrTypeFuzzTest1()
+{
+    bool type[CONNECTION_ADDR_MAX] = { 0 };
+    GenerateBoolArray(type, sizeof(type));
+    LnnRequestLeaveByAddrType((const bool *)type, CONNECTION_ADDR_MAX);
+    (void)memset_s(type, sizeof(type), 0, sizeof(type));
+    GenerateBoolArray(type, sizeof(type));
+    LnnRequestLeaveByAddrType((const bool *)type, CONNECTION_ADDR_WLAN);
+    (void)memset_s(type, sizeof(type), 0, sizeof(type));
+    GenerateBoolArray(type, sizeof(type));
+    LnnRequestLeaveByAddrType((const bool *)type, CONNECTION_ADDR_BR);
+    (void)memset_s(type, sizeof(type), 0, sizeof(type));
+    GenerateBoolArray(type, sizeof(type));
+    LnnRequestLeaveByAddrType((const bool *)type, CONNECTION_ADDR_BLE);
+    (void)memset_s(type, sizeof(type), 0, sizeof(type));
+    GenerateBoolArray(type, sizeof(type));
+    LnnRequestLeaveByAddrType((const bool *)type, CONNECTION_ADDR_ETH);
+    (void)memset_s(type, sizeof(type), 0, sizeof(type));
+    GenerateBoolArray(type, sizeof(type));
+    LnnRequestLeaveByAddrType((const bool *)type, CONNECTION_ADDR_SESSION);
+    (void)memset_s(type, sizeof(type), 0, sizeof(type));
+    GenerateBoolArray(type, sizeof(type));
+    LnnRequestLeaveByAddrType((const bool *)type, CONNECTION_ADDR_USB);
+    (void)memset_s(type, sizeof(type), 0, sizeof(type));
+    GenerateBoolArray(type, sizeof(type));
+    LnnRequestLeaveByAddrType((const bool *)type, CONNECTION_ADDR_SESSION_WITH_KEY);
+    (void)memset_s(type, sizeof(type), 0, sizeof(type));
+    GenerateBoolArray(type, sizeof(type));
+    LnnRequestLeaveByAddrType((const bool *)type, CONNECTION_ADDR_SLE);
+    (void)memset_s(type, sizeof(type), 0, sizeof(type));
+    GenerateBoolArray(type, sizeof(type));
+    LnnRequestLeaveByAddrType((const bool *)type, CONNECTION_ADDR_NCM);
+    return true;
+}
+
+bool LnnRequestLeaveByAddrTypeFuzzTest2()
+{
+    bool type[CONNECTION_ADDR_MAX] = { 0 };
+    ConnectionAddrType addrType = CONNECTION_ADDR_MAX;
+    GenerateFromList(addrType, CONNECTION_ADDR_TYPE_LIST);
+    GenerateBoolArray(type, sizeof(type));
+    LnnRequestLeaveByAddrType((const bool *)type, addrType);
+    (void)memset_s(type, sizeof(type), 0, sizeof(type));
+    GenerateBoolArray(type, sizeof(type));
+    GenerateFromList(addrType, CONNECTION_ADDR_TYPE_LIST);
+    LnnRequestLeaveByAddrType((const bool *)type, addrType);
+    (void)memset_s(type, sizeof(type), 0, sizeof(type));
+    GenerateBoolArray(type, sizeof(type));
+    GenerateFromList(addrType, CONNECTION_ADDR_TYPE_LIST);
+    LnnRequestLeaveByAddrType((const bool *)type, addrType);
+    (void)memset_s(type, sizeof(type), 0, sizeof(type));
+    GenerateBoolArray(type, sizeof(type));
+    GenerateFromList(addrType, CONNECTION_ADDR_TYPE_LIST);
+    LnnRequestLeaveByAddrType((const bool *)type, addrType);
+    (void)memset_s(type, sizeof(type), 0, sizeof(type));
+    GenerateBoolArray(type, sizeof(type));
+    GenerateFromList(addrType, CONNECTION_ADDR_TYPE_LIST);
+    LnnRequestLeaveByAddrType((const bool *)type, addrType);
+    (void)memset_s(type, sizeof(type), 0, sizeof(type));
+    GenerateBoolArray(type, sizeof(type));
+    GenerateFromList(addrType, CONNECTION_ADDR_TYPE_LIST);
+    LnnRequestLeaveByAddrType((const bool *)type, addrType);
+    (void)memset_s(type, sizeof(type), 0, sizeof(type));
+    GenerateBoolArray(type, sizeof(type));
+    GenerateFromList(addrType, CONNECTION_ADDR_TYPE_LIST);
+    LnnRequestLeaveByAddrType((const bool *)type, addrType);
+    (void)memset_s(type, sizeof(type), 0, sizeof(type));
+    GenerateBoolArray(type, sizeof(type));
+    GenerateFromList(addrType, CONNECTION_ADDR_TYPE_LIST);
+    LnnRequestLeaveByAddrType((const bool *)type, addrType);
+    (void)memset_s(type, sizeof(type), 0, sizeof(type));
+    GenerateBoolArray(type, sizeof(type));
+    GenerateFromList(addrType, CONNECTION_ADDR_TYPE_LIST);
+    LnnRequestLeaveByAddrType((const bool *)type, addrType);
+    (void)memset_s(type, sizeof(type), 0, sizeof(type));
+    GenerateBoolArray(type, sizeof(type));
+    GenerateFromList(addrType, CONNECTION_ADDR_TYPE_LIST);
+    LnnRequestLeaveByAddrType((const bool *)type, addrType);
+    return true;
+}
+
+bool LnnRequestLeaveSpecificFuzzTest1()
+{
+    char networkId[NETWORK_ID_BUF_LEN] = { 0 };
+    if (!GenerateFuzzNetworkId(networkId, NETWORK_ID_BUF_LEN)) {
+        COMM_LOGE(COMM_TEST, "generate network Id fail!");
+        return false;
+    }
+    LnnRequestLeaveSpecific(networkId, CONNECTION_ADDR_WLAN);
+    (void)memset_s(networkId, NETWORK_ID_BUF_LEN, 0, NETWORK_ID_BUF_LEN);
+    if (!GenerateFuzzNetworkId(networkId, NETWORK_ID_BUF_LEN)) {
+        COMM_LOGE(COMM_TEST, "generate network Id fail!");
+        return false;
+    }
+    LnnRequestLeaveSpecific(networkId, CONNECTION_ADDR_BR);
+    (void)memset_s(networkId, NETWORK_ID_BUF_LEN, 0, NETWORK_ID_BUF_LEN);
+    if (!GenerateFuzzNetworkId(networkId, NETWORK_ID_BUF_LEN)) {
+        COMM_LOGE(COMM_TEST, "generate network Id fail!");
+        return false;
+    }
+    LnnRequestLeaveSpecific(networkId, CONNECTION_ADDR_BLE);
+    (void)memset_s(networkId, NETWORK_ID_BUF_LEN, 0, NETWORK_ID_BUF_LEN);
+    if (!GenerateFuzzNetworkId(networkId, NETWORK_ID_BUF_LEN)) {
+        COMM_LOGE(COMM_TEST, "generate network Id fail!");
+        return false;
+    }
+    LnnRequestLeaveSpecific(networkId, CONNECTION_ADDR_ETH);
+    return true;
+}
+
+bool LnnRequestLeaveSpecificFuzzTest3()
+{
+    char networkId[NETWORK_ID_BUF_LEN] = { 0 };
+    ConnectionAddrType addrType = CONNECTION_ADDR_MAX;
+    if (!GenerateFuzzNetworkId(networkId, NETWORK_ID_BUF_LEN)) {
+        COMM_LOGE(COMM_TEST, "generate network Id fail!");
+        return false;
+    }
+    GenerateFromList(addrType, CONNECTION_ADDR_TYPE_LIST);
+    LnnRequestLeaveSpecific(networkId, addrType);
+    (void)memset_s(networkId, NETWORK_ID_BUF_LEN, 0, NETWORK_ID_BUF_LEN);
+    if (!GenerateFuzzNetworkId(networkId, NETWORK_ID_BUF_LEN)) {
+        COMM_LOGE(COMM_TEST, "generate network Id fail!");
+        return false;
+    }
+    GenerateFromList(addrType, CONNECTION_ADDR_TYPE_LIST);
+    LnnRequestLeaveSpecific(networkId, addrType);
+    (void)memset_s(networkId, NETWORK_ID_BUF_LEN, 0, NETWORK_ID_BUF_LEN);
+    if (!GenerateFuzzNetworkId(networkId, NETWORK_ID_BUF_LEN)) {
+        COMM_LOGE(COMM_TEST, "generate network Id fail!");
+        return false;
+    }
+    GenerateFromList(addrType, CONNECTION_ADDR_TYPE_LIST);
+    LnnRequestLeaveSpecific(networkId, addrType);
+    (void)memset_s(networkId, NETWORK_ID_BUF_LEN, 0, NETWORK_ID_BUF_LEN);
+    if (!GenerateFuzzNetworkId(networkId, NETWORK_ID_BUF_LEN)) {
+        COMM_LOGE(COMM_TEST, "generate network Id fail!");
+        return false;
+    }
+    GenerateFromList(addrType, CONNECTION_ADDR_TYPE_LIST);
+    LnnRequestLeaveSpecific(networkId, addrType);
+    return true;
+}
+
+bool LnnRequestLeaveSpecificFuzzTest4()
+{
+    ConnectionAddrType addrType = CONNECTION_ADDR_MAX;
+    char networkId[NETWORK_ID_BUF_LEN] = { 0 };
+    if (!GenerateFuzzNetworkId(networkId, NETWORK_ID_BUF_LEN)) {
+        COMM_LOGE(COMM_TEST, "generate network Id fail!");
+        return false;
+    }
+    GenerateFromList(addrType, CONNECTION_ADDR_TYPE_LIST);
+    LnnRequestLeaveSpecific(networkId, addrType);
+    (void)memset_s(networkId, NETWORK_ID_BUF_LEN, 0, NETWORK_ID_BUF_LEN);
+    if (!GenerateFuzzNetworkId(networkId, NETWORK_ID_BUF_LEN)) {
+        COMM_LOGE(COMM_TEST, "generate network Id fail!");
+        return false;
+    }
+    GenerateFromList(addrType, CONNECTION_ADDR_TYPE_LIST);
+    LnnRequestLeaveSpecific(networkId, addrType);
+    (void)memset_s(networkId, NETWORK_ID_BUF_LEN, 0, NETWORK_ID_BUF_LEN);
+    if (!GenerateFuzzNetworkId(networkId, NETWORK_ID_BUF_LEN)) {
+        COMM_LOGE(COMM_TEST, "generate network Id fail!");
+        return false;
+    }
+    GenerateFromList(addrType, CONNECTION_ADDR_TYPE_LIST);
+    LnnRequestLeaveSpecific(networkId, addrType);
+    (void)memset_s(networkId, NETWORK_ID_BUF_LEN, 0, NETWORK_ID_BUF_LEN);
+    if (!GenerateFuzzNetworkId(networkId, NETWORK_ID_BUF_LEN)) {
+        COMM_LOGE(COMM_TEST, "generate network Id fail!");
+        return false;
+    }
+    GenerateFromList(addrType, CONNECTION_ADDR_TYPE_LIST);
+    LnnRequestLeaveSpecific(networkId, addrType);
+    (void)memset_s(networkId, NETWORK_ID_BUF_LEN, 0, NETWORK_ID_BUF_LEN);
+    if (!GenerateFuzzNetworkId(networkId, NETWORK_ID_BUF_LEN)) {
+        COMM_LOGE(COMM_TEST, "generate network Id fail!");
+        return false;
+    }
+    GenerateFromList(addrType, CONNECTION_ADDR_TYPE_LIST);
+    LnnRequestLeaveSpecific(networkId, addrType);
+    (void)memset_s(networkId, NETWORK_ID_BUF_LEN, 0, NETWORK_ID_BUF_LEN);
+    if (!GenerateFuzzNetworkId(networkId, NETWORK_ID_BUF_LEN)) {
+        COMM_LOGE(COMM_TEST, "generate network Id fail!");
+        return false;
+    }
+    GenerateFromList(addrType, CONNECTION_ADDR_TYPE_LIST);
+    LnnRequestLeaveSpecific(networkId, addrType);
+    return true;
+}
+
+bool LnnRequestLeaveSpecificFuzzTest2()
+{
+    char networkId[NETWORK_ID_BUF_LEN] = { 0 };
+    if (!GenerateFuzzNetworkId(networkId, NETWORK_ID_BUF_LEN)) {
+        COMM_LOGE(COMM_TEST, "generate network Id fail!");
+        return false;
+    }
+    LnnRequestLeaveSpecific(networkId, CONNECTION_ADDR_SESSION);
+    (void)memset_s(networkId, NETWORK_ID_BUF_LEN, 0, NETWORK_ID_BUF_LEN);
+    if (!GenerateFuzzNetworkId(networkId, NETWORK_ID_BUF_LEN)) {
+        COMM_LOGE(COMM_TEST, "generate network Id fail!");
+        return false;
+    }
+    LnnRequestLeaveSpecific(networkId, CONNECTION_ADDR_USB);
+    (void)memset_s(networkId, NETWORK_ID_BUF_LEN, 0, NETWORK_ID_BUF_LEN);
+    if (!GenerateFuzzNetworkId(networkId, NETWORK_ID_BUF_LEN)) {
+        COMM_LOGE(COMM_TEST, "generate network Id fail!");
+        return false;
+    }
+    LnnRequestLeaveSpecific(networkId, CONNECTION_ADDR_SESSION_WITH_KEY);
+    (void)memset_s(networkId, NETWORK_ID_BUF_LEN, 0, NETWORK_ID_BUF_LEN);
+    if (!GenerateFuzzNetworkId(networkId, NETWORK_ID_BUF_LEN)) {
+        COMM_LOGE(COMM_TEST, "generate network Id fail!");
+        return false;
+    }
+    LnnRequestLeaveSpecific(networkId, CONNECTION_ADDR_SLE);
+    (void)memset_s(networkId, NETWORK_ID_BUF_LEN, 0, NETWORK_ID_BUF_LEN);
+    if (!GenerateFuzzNetworkId(networkId, NETWORK_ID_BUF_LEN)) {
+        COMM_LOGE(COMM_TEST, "generate network Id fail!");
+        return false;
+    }
+    LnnRequestLeaveSpecific(networkId, CONNECTION_ADDR_NCM);
+    (void)memset_s(networkId, NETWORK_ID_BUF_LEN, 0, NETWORK_ID_BUF_LEN);
+    if (!GenerateFuzzNetworkId(networkId, NETWORK_ID_BUF_LEN)) {
+        COMM_LOGE(COMM_TEST, "generate network Id fail!");
+        return false;
+    }
+    LnnRequestLeaveSpecific(networkId, CONNECTION_ADDR_MAX);
+    return true;
+}
+
+bool LnnSyncOfflineCompleteFuzzTest1()
+{
+    LnnSyncInfoType type = LNN_INFO_TYPE_CONNECTION_INFO;
+    GenerateFromList(type, LNN_SYNC_INFO_TYPE_LIST);
+
+    char networkId[NETWORK_ID_BUF_LEN] = { 0 };
+    if (!GenerateFuzzNetworkId(networkId, NETWORK_ID_BUF_LEN)) {
+        COMM_LOGE(COMM_TEST, "generate network Id fail!");
+        return false;
+    }
+    int32_t data = 0;
+    GenerateInt32(data);
+    LnnSyncOfflineComplete(type, networkId, (const uint8_t *)&data, sizeof(int32_t));
+    return true;
+}
+
+bool LnnSyncOfflineCompleteFuzzTest2()
+{
+    int32_t data = 0;
+    GenerateInt32(data);
+    char networkId[NETWORK_ID_BUF_LEN] = { 0 };
+    if (!GenerateFuzzNetworkId(networkId, NETWORK_ID_BUF_LEN)) {
+        COMM_LOGE(COMM_TEST, "generate network Id fail!");
+        return false;
+    }
+    LnnSyncOfflineComplete(LNN_INFO_TYPE_CAPABILITY, networkId, (const uint8_t *)&data, sizeof(int32_t));
+
+    (void)memset_s(networkId, NETWORK_ID_BUF_LEN, 0, NETWORK_ID_BUF_LEN);
+    if (!GenerateFuzzNetworkId(networkId, NETWORK_ID_BUF_LEN)) {
+        COMM_LOGE(COMM_TEST, "generate network Id fail!");
+        return false;
+    }
+    LnnSyncOfflineComplete(LNN_INFO_TYPE_CONNECTION_INFO, networkId, (const uint8_t *)&data, sizeof(int32_t));
+
+    (void)memset_s(networkId, NETWORK_ID_BUF_LEN, 0, NETWORK_ID_BUF_LEN);
+    if (!GenerateFuzzNetworkId(networkId, NETWORK_ID_BUF_LEN)) {
+        COMM_LOGE(COMM_TEST, "generate network Id fail!");
+        return false;
+    }
+    LnnSyncOfflineComplete(LNN_INFO_TYPE_DEVICE_NAME, networkId, (const uint8_t *)&data, sizeof(int32_t));
+
+    (void)memset_s(networkId, NETWORK_ID_BUF_LEN, 0, NETWORK_ID_BUF_LEN);
+    if (!GenerateFuzzNetworkId(networkId, NETWORK_ID_BUF_LEN)) {
+        COMM_LOGE(COMM_TEST, "generate network Id fail!");
+        return false;
+    }
+    LnnSyncOfflineComplete(LNN_INFO_TYPE_BATTERY_INFO, networkId, (const uint8_t *)&data, sizeof(int32_t));
+
+    (void)memset_s(networkId, NETWORK_ID_BUF_LEN, 0, NETWORK_ID_BUF_LEN);
+    if (!GenerateFuzzNetworkId(networkId, NETWORK_ID_BUF_LEN)) {
+        COMM_LOGE(COMM_TEST, "generate network Id fail!");
+        return false;
+    }
+    LnnSyncOfflineComplete(LNN_INFO_TYPE_SCREEN_STATUS, networkId, (const uint8_t *)&data, sizeof(int32_t));
+
+    (void)memset_s(networkId, NETWORK_ID_BUF_LEN, 0, NETWORK_ID_BUF_LEN);
+    if (!GenerateFuzzNetworkId(networkId, NETWORK_ID_BUF_LEN)) {
+        COMM_LOGE(COMM_TEST, "generate network Id fail!");
+        return false;
+    }
+    LnnSyncOfflineComplete(LNN_INFO_TYPE_OFFLINE, networkId, (const uint8_t *)&data, sizeof(int32_t));
+    return true;
+}
+
+bool LnnSyncOfflineCompleteFuzzTest3()
+{
+    int32_t data = 0;
+    GenerateInt32(data);
+    char networkId[NETWORK_ID_BUF_LEN] = { 0 };
+    if (!GenerateFuzzNetworkId(networkId, NETWORK_ID_BUF_LEN)) {
+        COMM_LOGE(COMM_TEST, "generate network Id fail!");
+        return false;
+    }
+    LnnSyncOfflineComplete(LNN_INFO_TYPE_P2P_INFO, networkId, (const uint8_t *)&data, sizeof(int32_t));
+
+    (void)memset_s(networkId, NETWORK_ID_BUF_LEN, 0, NETWORK_ID_BUF_LEN);
+    if (!GenerateFuzzNetworkId(networkId, NETWORK_ID_BUF_LEN)) {
+        COMM_LOGE(COMM_TEST, "generate network Id fail!");
+        return false;
+    }
+    LnnSyncOfflineComplete(LNN_INFO_TYPE_CHANNEL_NOISE_INFO, networkId, (const uint8_t *)&data, sizeof(int32_t));
+
+    (void)memset_s(networkId, NETWORK_ID_BUF_LEN, 0, NETWORK_ID_BUF_LEN);
+    if (!GenerateFuzzNetworkId(networkId, NETWORK_ID_BUF_LEN)) {
+        COMM_LOGE(COMM_TEST, "generate network Id fail!");
+        return false;
+    }
+    LnnSyncOfflineComplete(LNN_INFO_TYPE_NOT_TRUSTED, networkId, (const uint8_t *)&data, sizeof(int32_t));
+
+    (void)memset_s(networkId, NETWORK_ID_BUF_LEN, 0, NETWORK_ID_BUF_LEN);
+    if (!GenerateFuzzNetworkId(networkId, NETWORK_ID_BUF_LEN)) {
+        COMM_LOGE(COMM_TEST, "generate network Id fail!");
+        return false;
+    }
+    LnnSyncOfflineComplete(LNN_INFO_TYPE_WIFI_DIRECT, networkId, (const uint8_t *)&data, sizeof(int32_t));
+
+    (void)memset_s(networkId, NETWORK_ID_BUF_LEN, 0, NETWORK_ID_BUF_LEN);
+    if (!GenerateFuzzNetworkId(networkId, NETWORK_ID_BUF_LEN)) {
+        COMM_LOGE(COMM_TEST, "generate network Id fail!");
+        return false;
+    }
+    LnnSyncOfflineComplete(LNN_INFO_TYPE_NICK_NAME, networkId, (const uint8_t *)&data, sizeof(int32_t));
+
+    (void)memset_s(networkId, NETWORK_ID_BUF_LEN, 0, NETWORK_ID_BUF_LEN);
+    if (!GenerateFuzzNetworkId(networkId, NETWORK_ID_BUF_LEN)) {
+        COMM_LOGE(COMM_TEST, "generate network Id fail!");
+        return false;
+    }
+    LnnSyncOfflineComplete(LNN_INFO_TYPE_MASTER_ELECT, networkId, (const uint8_t *)&data, sizeof(int32_t));
+    return true;
+}
+
+bool LnnSyncOfflineCompleteFuzzTest4()
+{
+    int32_t data = 0;
+    GenerateInt32(data);
+    char networkId[NETWORK_ID_BUF_LEN] = { 0 };
+    if (!GenerateFuzzNetworkId(networkId, NETWORK_ID_BUF_LEN)) {
+        COMM_LOGE(COMM_TEST, "generate network Id fail!");
+        return false;
+    }
+    LnnSyncOfflineComplete(LNN_INFO_TYPE_BSS_TRANS, networkId, (const uint8_t *)&data, sizeof(int32_t));
+
+    (void)memset_s(networkId, NETWORK_ID_BUF_LEN, 0, NETWORK_ID_BUF_LEN);
+    if (!GenerateFuzzNetworkId(networkId, NETWORK_ID_BUF_LEN)) {
+        COMM_LOGE(COMM_TEST, "generate network Id fail!");
+        return false;
+    }
+    LnnSyncOfflineComplete(LNN_INFO_TYPE_TOPO_UPDATE, networkId, (const uint8_t *)&data, sizeof(int32_t));
+
+    (void)memset_s(networkId, NETWORK_ID_BUF_LEN, 0, NETWORK_ID_BUF_LEN);
+    if (!GenerateFuzzNetworkId(networkId, NETWORK_ID_BUF_LEN)) {
+        COMM_LOGE(COMM_TEST, "generate network Id fail!");
+        return false;
+    }
+    LnnSyncOfflineComplete(LNN_INFO_TYPE_NODE_ADDR, networkId, (const uint8_t *)&data, sizeof(int32_t));
+
+    (void)memset_s(networkId, NETWORK_ID_BUF_LEN, 0, NETWORK_ID_BUF_LEN);
+    if (!GenerateFuzzNetworkId(networkId, NETWORK_ID_BUF_LEN)) {
+        COMM_LOGE(COMM_TEST, "generate network Id fail!");
+        return false;
+    }
+    LnnSyncOfflineComplete(LNN_INFO_TYPE_NODE_ADDR_DETECTION, networkId, (const uint8_t *)&data, sizeof(int32_t));
+
+    (void)memset_s(networkId, NETWORK_ID_BUF_LEN, 0, NETWORK_ID_BUF_LEN);
+    if (!GenerateFuzzNetworkId(networkId, NETWORK_ID_BUF_LEN)) {
+        COMM_LOGE(COMM_TEST, "generate network Id fail!");
+        return false;
+    }
+    LnnSyncOfflineComplete(LNN_INFO_TYPE_SYNC_CIPHERKEY, networkId, (const uint8_t *)&data, sizeof(int32_t));
+
+    (void)memset_s(networkId, NETWORK_ID_BUF_LEN, 0, NETWORK_ID_BUF_LEN);
+    if (!GenerateFuzzNetworkId(networkId, NETWORK_ID_BUF_LEN)) {
+        COMM_LOGE(COMM_TEST, "generate network Id fail!");
+        return false;
+    }
+    LnnSyncOfflineComplete(LNN_INFO_TYPE_ROUTE_LSU, networkId, (const uint8_t *)&data, sizeof(int32_t));
+    return true;
+}
+
+bool LnnSyncOfflineCompleteFuzzTest5()
+{
+    int32_t data = 0;
+    GenerateInt32(data);
+    char networkId[NETWORK_ID_BUF_LEN] = { 0 };
+    if (!GenerateFuzzNetworkId(networkId, NETWORK_ID_BUF_LEN)) {
+        COMM_LOGE(COMM_TEST, "generate network Id fail!");
+        return false;
+    }
+    LnnSyncOfflineComplete(LNN_INFO_TYPE_PTK, networkId, (const uint8_t *)&data, sizeof(int32_t));
+
+    (void)memset_s(networkId, NETWORK_ID_BUF_LEN, 0, NETWORK_ID_BUF_LEN);
+    if (!GenerateFuzzNetworkId(networkId, NETWORK_ID_BUF_LEN)) {
+        COMM_LOGE(COMM_TEST, "generate network Id fail!");
+        return false;
+    }
+    LnnSyncOfflineComplete(LNN_INFO_TYPE_USERID, networkId, (const uint8_t *)&data, sizeof(int32_t));
+
+    (void)memset_s(networkId, NETWORK_ID_BUF_LEN, 0, NETWORK_ID_BUF_LEN);
+    if (!GenerateFuzzNetworkId(networkId, NETWORK_ID_BUF_LEN)) {
+        COMM_LOGE(COMM_TEST, "generate network Id fail!");
+        return false;
+    }
+    LnnSyncOfflineComplete(LNN_INFO_TYPE_SYNC_BROADCASTLINKKEY, networkId, (const uint8_t *)&data, sizeof(int32_t));
+
+    (void)memset_s(networkId, NETWORK_ID_BUF_LEN, 0, NETWORK_ID_BUF_LEN);
+    if (!GenerateFuzzNetworkId(networkId, NETWORK_ID_BUF_LEN)) {
+        COMM_LOGE(COMM_TEST, "generate network Id fail!");
+        return false;
+    }
+    LnnSyncOfflineComplete(LNN_INFO_TYPE_SLE_MAC, networkId, (const uint8_t *)&data, sizeof(int32_t));
+
+    (void)memset_s(networkId, NETWORK_ID_BUF_LEN, 0, NETWORK_ID_BUF_LEN);
+    if (!GenerateFuzzNetworkId(networkId, NETWORK_ID_BUF_LEN)) {
+        COMM_LOGE(COMM_TEST, "generate network Id fail!");
+        return false;
+    }
+    LnnSyncOfflineComplete(LNN_INFO_TYPE_COUNT, networkId, (const uint8_t *)&data, sizeof(int32_t));
+    return true;
+}
+
+bool LnnRequestLeaveInvalidConnFuzzTest1()
+{
+    char oldNetworkId[NETWORK_ID_BUF_LEN] = { 0 };
+    char newNetworkId[NETWORK_ID_BUF_LEN] = { 0 };
+    ConnectionAddrType type = CONNECTION_ADDR_MAX;
+    GenerateFromList(type, CONNECTION_ADDR_TYPE_LIST);
+    if (!GenerateFuzzNetworkIdByList(oldNetworkId, NETWORK_ID_BUF_LEN)) {
+        COMM_LOGE(COMM_TEST, "generate old network Id fail!");
+        return false;
+    }
+    if (!GenerateFuzzNetworkIdByList(newNetworkId, NETWORK_ID_BUF_LEN)) {
+        COMM_LOGE(COMM_TEST, "generate new network Id fail!");
+        return false;
+    }
+    LnnRequestLeaveInvalidConn(oldNetworkId, type, newNetworkId);
+    return true;
+}
+
+bool LnnRequestLeaveInvalidConnFuzzTest2()
+{
+    char oldNetworkId[NETWORK_ID_BUF_LEN] = { 0 };
+    char newNetworkId[NETWORK_ID_BUF_LEN] = { 0 };
+    if (!GenerateFuzzNetworkIdByList(oldNetworkId, NETWORK_ID_BUF_LEN)) {
+        COMM_LOGE(COMM_TEST, "generate old network Id fail!");
+        return false;
+    }
+    if (!GenerateFuzzNetworkIdByList(newNetworkId, NETWORK_ID_BUF_LEN)) {
+        COMM_LOGE(COMM_TEST, "generate new network Id fail!");
+        return false;
+    }
+    LnnRequestLeaveInvalidConn(oldNetworkId, CONNECTION_ADDR_WLAN, newNetworkId);
+    (void)memset_s(oldNetworkId, NETWORK_ID_BUF_LEN, 0, NETWORK_ID_BUF_LEN);
+    (void)memset_s(newNetworkId, NETWORK_ID_BUF_LEN, 0, NETWORK_ID_BUF_LEN);
+    if (!GenerateFuzzNetworkIdByList(oldNetworkId, NETWORK_ID_BUF_LEN)) {
+        COMM_LOGE(COMM_TEST, "generate old network Id fail!");
+        return false;
+    }
+    if (!GenerateFuzzNetworkIdByList(newNetworkId, NETWORK_ID_BUF_LEN)) {
+        COMM_LOGE(COMM_TEST, "generate new network Id fail!");
+        return false;
+    }
+    LnnRequestLeaveInvalidConn(oldNetworkId, CONNECTION_ADDR_BR, newNetworkId);
+    (void)memset_s(oldNetworkId, NETWORK_ID_BUF_LEN, 0, NETWORK_ID_BUF_LEN);
+    (void)memset_s(newNetworkId, NETWORK_ID_BUF_LEN, 0, NETWORK_ID_BUF_LEN);
+    if (!GenerateFuzzNetworkIdByList(oldNetworkId, NETWORK_ID_BUF_LEN)) {
+        COMM_LOGE(COMM_TEST, "generate old network Id fail!");
+        return false;
+    }
+    if (!GenerateFuzzNetworkIdByList(newNetworkId, NETWORK_ID_BUF_LEN)) {
+        COMM_LOGE(COMM_TEST, "generate new network Id fail!");
+        return false;
+    }
+    LnnRequestLeaveInvalidConn(oldNetworkId, CONNECTION_ADDR_BLE, newNetworkId);
+    (void)memset_s(oldNetworkId, NETWORK_ID_BUF_LEN, 0, NETWORK_ID_BUF_LEN);
+    (void)memset_s(newNetworkId, NETWORK_ID_BUF_LEN, 0, NETWORK_ID_BUF_LEN);
+    if (!GenerateFuzzNetworkIdByList(oldNetworkId, NETWORK_ID_BUF_LEN)) {
+        COMM_LOGE(COMM_TEST, "generate old network Id fail!");
+        return false;
+    }
+    if (!GenerateFuzzNetworkIdByList(newNetworkId, NETWORK_ID_BUF_LEN)) {
+        COMM_LOGE(COMM_TEST, "generate new network Id fail!");
+        return false;
+    }
+    LnnRequestLeaveInvalidConn(oldNetworkId, CONNECTION_ADDR_ETH, newNetworkId);
+    return true;
+}
+
+bool LnnRequestLeaveInvalidConnFuzzTest3()
+{
+    char oldNetworkId[NETWORK_ID_BUF_LEN] = { 0 };
+    char newNetworkId[NETWORK_ID_BUF_LEN] = { 0 };
+    if (!GenerateFuzzNetworkIdByList(oldNetworkId, NETWORK_ID_BUF_LEN)) {
+        COMM_LOGE(COMM_TEST, "generate old network Id fail!");
+        return false;
+    }
+    if (!GenerateFuzzNetworkIdByList(newNetworkId, NETWORK_ID_BUF_LEN)) {
+        COMM_LOGE(COMM_TEST, "generate new network Id fail!");
+        return false;
+    }
+    LnnRequestLeaveInvalidConn(oldNetworkId, CONNECTION_ADDR_SESSION, newNetworkId);
+    (void)memset_s(oldNetworkId, NETWORK_ID_BUF_LEN, 0, NETWORK_ID_BUF_LEN);
+    (void)memset_s(newNetworkId, NETWORK_ID_BUF_LEN, 0, NETWORK_ID_BUF_LEN);
+    if (!GenerateFuzzNetworkIdByList(oldNetworkId, NETWORK_ID_BUF_LEN)) {
+        COMM_LOGE(COMM_TEST, "generate old network Id fail!");
+        return false;
+    }
+    if (!GenerateFuzzNetworkIdByList(newNetworkId, NETWORK_ID_BUF_LEN)) {
+        COMM_LOGE(COMM_TEST, "generate new network Id fail!");
+        return false;
+    }
+    LnnRequestLeaveInvalidConn(oldNetworkId, CONNECTION_ADDR_USB, newNetworkId);
+    (void)memset_s(oldNetworkId, NETWORK_ID_BUF_LEN, 0, NETWORK_ID_BUF_LEN);
+    (void)memset_s(newNetworkId, NETWORK_ID_BUF_LEN, 0, NETWORK_ID_BUF_LEN);
+    if (!GenerateFuzzNetworkIdByList(oldNetworkId, NETWORK_ID_BUF_LEN)) {
+        COMM_LOGE(COMM_TEST, "generate old network Id fail!");
+        return false;
+    }
+    if (!GenerateFuzzNetworkIdByList(newNetworkId, NETWORK_ID_BUF_LEN)) {
+        COMM_LOGE(COMM_TEST, "generate new network Id fail!");
+        return false;
+    }
+    LnnRequestLeaveInvalidConn(oldNetworkId, CONNECTION_ADDR_SESSION_WITH_KEY, newNetworkId);
+    (void)memset_s(oldNetworkId, NETWORK_ID_BUF_LEN, 0, NETWORK_ID_BUF_LEN);
+    (void)memset_s(newNetworkId, NETWORK_ID_BUF_LEN, 0, NETWORK_ID_BUF_LEN);
+    if (!GenerateFuzzNetworkIdByList(oldNetworkId, NETWORK_ID_BUF_LEN)) {
+        COMM_LOGE(COMM_TEST, "generate old network Id fail!");
+        return false;
+    }
+    if (!GenerateFuzzNetworkIdByList(newNetworkId, NETWORK_ID_BUF_LEN)) {
+        COMM_LOGE(COMM_TEST, "generate new network Id fail!");
+        return false;
+    }
+    LnnRequestLeaveInvalidConn(oldNetworkId, CONNECTION_ADDR_SLE, newNetworkId);
+    return true;
+}
+
+bool LnnRequestLeaveInvalidConnFuzzTest4()
+{
+    char oldNetworkId[NETWORK_ID_BUF_LEN] = { 0 };
+    char newNetworkId[NETWORK_ID_BUF_LEN] = { 0 };
+    if (!GenerateFuzzNetworkIdByList(oldNetworkId, NETWORK_ID_BUF_LEN)) {
+        COMM_LOGE(COMM_TEST, "generate old network Id fail!");
+        return false;
+    }
+    if (!GenerateFuzzNetworkIdByList(newNetworkId, NETWORK_ID_BUF_LEN)) {
+        COMM_LOGE(COMM_TEST, "generate new network Id fail!");
+        return false;
+    }
+    LnnRequestLeaveInvalidConn(oldNetworkId, CONNECTION_ADDR_NCM, newNetworkId);
+    (void)memset_s(oldNetworkId, NETWORK_ID_BUF_LEN, 0, NETWORK_ID_BUF_LEN);
+    (void)memset_s(newNetworkId, NETWORK_ID_BUF_LEN, 0, NETWORK_ID_BUF_LEN);
+    if (!GenerateFuzzNetworkIdByList(oldNetworkId, NETWORK_ID_BUF_LEN)) {
+        COMM_LOGE(COMM_TEST, "generate old network Id fail!");
+        return false;
+    }
+    if (!GenerateFuzzNetworkIdByList(newNetworkId, NETWORK_ID_BUF_LEN)) {
+        COMM_LOGE(COMM_TEST, "generate new network Id fail!");
+        return false;
+    }
+    LnnRequestLeaveInvalidConn(oldNetworkId, CONNECTION_ADDR_MAX, newNetworkId);
+    return true;
+}
+#endif
+
 /* Fuzzer entry point */
 extern "C" int32_t LLVMFuzzerTestOneInput(const uint8_t* data, size_t size)
 {
@@ -152,6 +817,23 @@ extern "C" int32_t LLVMFuzzerTestOneInput(const uint8_t* data, size_t size)
         return ret;
     }
     OHOS::LnnNotifyDiscoveryDeviceFuzzTest();
+#ifdef LNN_NET_BUILDER_FULL_TEST
+    OHOS::LnnRequestLeaveByAddrTypeFuzzTest1();
+    OHOS::LnnRequestLeaveByAddrTypeFuzzTest2();
+    OHOS::LnnRequestLeaveSpecificFuzzTest1();
+    OHOS::LnnRequestLeaveSpecificFuzzTest2();
+    OHOS::LnnRequestLeaveSpecificFuzzTest3();
+    OHOS::LnnRequestLeaveSpecificFuzzTest4();
+    OHOS::LnnSyncOfflineCompleteFuzzTest1();
+    OHOS::LnnSyncOfflineCompleteFuzzTest2();
+    OHOS::LnnSyncOfflineCompleteFuzzTest3();
+    OHOS::LnnSyncOfflineCompleteFuzzTest4();
+    OHOS::LnnSyncOfflineCompleteFuzzTest5();
+    OHOS::LnnRequestLeaveInvalidConnFuzzTest1();
+    OHOS::LnnRequestLeaveInvalidConnFuzzTest2();
+    OHOS::LnnRequestLeaveInvalidConnFuzzTest3();
+    OHOS::LnnRequestLeaveInvalidConnFuzzTest4();
+#endif
     FuzzDeinit();
     return 0;
 }
