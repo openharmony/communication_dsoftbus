@@ -61,6 +61,16 @@ bool OHOS::AccountSA::OhosAccountKits::IsSameAccountGroupDevice()
     return mock->IsSameAccountGroupDevice();
 }
 
+int32_t OHOS::AccountSA::OhosAccountKits::LnnGetLocalNumU64Info(InfoKey key, uint64_t *info)
+{
+    auto mock = OHOS::AccountSA::OhosAccountKitsMock::GetMock();
+    if (mock == nullptr) {
+        return -1;
+    }
+    return mock->LnnGetLocalNumU64Info(key, info);
+}
+
+
 namespace OHOS::AccountSA {
 OhosAccountKitsMock::OhosAccountKitsMock()
 {

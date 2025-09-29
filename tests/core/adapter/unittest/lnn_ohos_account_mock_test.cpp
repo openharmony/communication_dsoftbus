@@ -53,7 +53,7 @@ void LNNOhosAccountMockTest::SetUp() { }
 
 void LNNOhosAccountMockTest::TearDown() { }
 
-/**
+/*
  * @tc.name: LNN_INIT_OHOS_ACCOUNT
  * @tc.desc: InitOhosAccount generate default str hash fail.
  * @tc.type: FUNC
@@ -73,7 +73,7 @@ HWTEST_F(LNNOhosAccountMockTest, LNN_INIT_OHOS_ACCOUNT_001, TestSize.Level1)
     EXPECT_NE(ret, SOFTBUS_OK);
 }
 
- /**
+ /*
  * @tc.name: LNN_INIT_OHOS_ACCOUNT_002
  * @tc.desc: LnnInitOhosAccount_ShouldReturnSuccess_WhenAccountInfoIsAvailable
  * @tc.type: FUNC
@@ -96,7 +96,7 @@ HWTEST_F(LNNOhosAccountMockTest, LNN_INIT_OHOS_ACCOUNT_002, TestSize.Level0) {
 }
 
 
-/**
+/*
  * @tc.name: LNN_INIT_OHOS_ACCOUNT_003
  * @tc.desc: LnnInitOhosAccount_ShouldReturnSuccess_WhenAccountInfoIsUnavailable
  * @tc.type: FUNC
@@ -119,7 +119,7 @@ HWTEST_F(LNNOhosAccountMockTest, LNN_INIT_OHOS_ACCOUNT_003, TestSize.Level0)
     EXPECT_EQ(result, SOFTBUS_OK);
 }
 
-/**
+/*
  * @tc.name: LNN_INIT_OHOS_ACCOUNT_004
  * @tc.desc: LnnInitOhosAccount_ShouldReturnError_WhenGenerateStrHashFails
  * @tc.type: FUNC
@@ -138,7 +138,7 @@ HWTEST_F(LNNOhosAccountMockTest, LNN_INIT_OHOS_ACCOUNT_004, TestSize.Level0) {
     EXPECT_EQ(result, SOFTBUS_NETWORK_GENERATE_STR_HASH_ERR);
 }
 
-/**
+/*
  * @tc.name: LNN_UPDATE_OHOS_ACCOUNT_001
  * @tc.desc: OnAccountChanged get local account hash fail
  * @tc.type: FUNC
@@ -154,7 +154,7 @@ HWTEST_F(LNNOhosAccountMockTest, LNN_UPDATE_OHOS_ACCOUNT_001, TestSize.Level1)
     EXPECT_TRUE(ret);
 }
 
-/**
+/*
  * @tc.name: LNN_UPDATE_OHOS_ACCOUNT_001
  * @tc.desc:  generate default str hash fail
  * @tc.type: FUNC
@@ -171,7 +171,7 @@ HWTEST_F(LNNOhosAccountMockTest, LNN_UPDATE_OHOS_ACCOUNT_002, TestSize.Level1)
     EXPECT_FALSE(ret);
 }
 
-/**
+/*
  * @tc.name: LNN_UPDATE_OHOS_ACCOUNT_003
  * @tc.desc: LnnUpdateOhosAccount_ShouldUpdateAccount_WhenReasonIsUpdateAccountOnly
  * @tc.type: FUNC
@@ -195,7 +195,7 @@ HWTEST_F(LNNOhosAccountMockTest, LNN_UPDATE_OHOS_ACCOUNT_003, TestSize.Level0) {
     LnnUpdateOhosAccount(UPDATE_ACCOUNT_ONLY);
 }
 
-/**
+/*
  * @tc.name: LNN_UPDATE_OHOS_ACCOUNT_004
  * @tc.desc: LnnUpdateOhosAccount_ShouldUseDefaultAccountUid_WhenGetOsAccountUidFails
  * @tc.type: FUNC
@@ -226,7 +226,7 @@ HWTEST_F(LNNOhosAccountMockTest, LNN_UPDATE_OHOS_ACCOUNT_004, TestSize.Level0) {
     EXPECT_STREQ(actualUid, expectedUid);
 }
 
-/**
+/*
  * @tc.name: LNN_UPDATE_OHOS_ACCOUNT_006
  * @tc.desc: LnnUpdateOhosAccount_ShouldNotUpdateAccount_WhenAccountHashNotChanged
  * @tc.type: FUNC
@@ -269,7 +269,7 @@ HWTEST_F(LNNOhosAccountMockTest, LNN_UPDATE_OHOS_ACCOUNT_006, TestSize.Level0)
     EXPECT_EQ(memcmp(finalHash, mockHash, SHA_256_HASH_LEN), 0);
 }
 
-/**
+/*
  * @tc.name: LNN_UPDATE_OHOS_ACCOUNT_001
  * @tc.desc:  generate default str hash fail
  * @tc.type: FUNC
@@ -285,7 +285,7 @@ HWTEST_F(LNNOhosAccountMockTest, LNN_ON_OHOS_ACCOUNT_LOGOUT_001, TestSize.Level1
     EXPECT_FALSE(ret);
 }
 
-/**
+/*
  * @tc.name: LnnOnOhosAccountLogoutTest_002
  * @tc.desc:  LnnOnOhosAccountLogout_ShouldGenerateHashAndSetAccountHash_WhenCalled
  * @tc.type: FUNC
@@ -301,7 +301,7 @@ HWTEST_F(LNNOhosAccountMockTest, LNN_ON_OHOS_ACCOUNT_LOGOUT_002, TestSize.Level0
     LnnOnOhosAccountLogout();
 }
 
-/**
+/*
  * @tc.name: LnnOnOhosAccountLogoutTest_003
  * @tc.desc:  LnnOnOhosAccountLogout_ShouldLogErrorAndReturn_WhenGenerateHashFail
  * @tc.type: FUNC
@@ -315,7 +315,7 @@ HWTEST_F(LNNOhosAccountMockTest, LNN_ON_OHOS_ACCOUNT_LOGOUT_003, TestSize.Level0
     LnnOnOhosAccountLogout();
 }
 
-/**
+/*
  * @tc.name: LnnOnOhosAccountLogoutTest_004
  * @tc.desc:  LnnOnOhosAccountLogout_ShouldSetDefaultAccountUid_WhenGetOsAccountUidFail
  * @tc.type: FUNC
@@ -332,7 +332,7 @@ HWTEST_F(LNNOhosAccountMockTest, LNN_ON_OHOS_ACCOUNT_LOGOUT_004, TestSize.Level0
     LnnOnOhosAccountLogout();
 }
 
-/**
+/*
  * @tc.name: LNN_IS_DEFAULT_OHOS_ACCOUNT_001
  * @tc.desc:  get local accountHash fail
  * @tc.type: FUNC
@@ -346,7 +346,7 @@ HWTEST_F(LNNOhosAccountMockTest, LNN_IS_DEFAULT_OHOS_ACCOUNT_001, TestSize.Level
     EXPECT_TRUE(ret);
 }
 
-/**
+/*
  * @tc.name: LNN_IS_DEFAULT_OHOS_ACCOUNT_001
  * @tc.desc:  generate default str hash fail
  * @tc.type: FUNC
@@ -361,7 +361,7 @@ HWTEST_F(LNNOhosAccountMockTest, LNN_IS_DEFAULT_OHOS_ACCOUNT_002, TestSize.Level
     EXPECT_FALSE(ret);
 }
 
-/**
+/*
  * @tc.name: LNN_JUDGE_DEVICE_TYPE_AND_GET_OHOS_ACCOUNT_INFO_001
  * @tc.desc: get local num info fail
  * @tc.type: FUNC
@@ -371,15 +371,13 @@ HWTEST_F(LNNOhosAccountMockTest, LNN_JUDGE_DEVICE_TYPE_AND_GET_OHOS_ACCOUNT_INFO
 {
     NiceMock<LnnOhosAccountInterfaceMock> mocker;
     uint8_t mockHash[SHA_256_HASH_LEN];
-    EXPECT_CALL(mocker, LnnGetLocalNumInfo).WillOnce(Return(SOFTBUS_NETWORK_GET_LEDGER_INFO_ERR)).
-        WillOnce(Return(SOFTBUS_OK));
     int32_t ret = LnnJudgeDeviceTypeAndGetOsAccountInfo(mockHash, SHA_256_HASH_LEN);
-    EXPECT_EQ(ret, SOFTBUS_INVALID_PARAM);
+    EXPECT_EQ(ret, SOFTBUS_OK);
     ret = LnnJudgeDeviceTypeAndGetOsAccountInfo(mockHash, SHA_256_HASH_LEN);
     EXPECT_EQ(ret, SOFTBUS_OK);
 }
  
-/**
+/*
  * @tc.name: LNN_JUDGE_DEVICE_TYPE_AND_GET_OHOS_ACCOUNT_INFO_002
  * @tc.desc: get ohos account info fail
  * @tc.type: FUNC
@@ -389,11 +387,10 @@ HWTEST_F(LNNOhosAccountMockTest, LNN_JUDGE_DEVICE_TYPE_AND_GET_OHOS_ACCOUNT_INFO
 {
     NiceMock<LnnOhosAccountInterfaceMock> mocker;
     uint8_t mockHash[SHA_256_HASH_LEN];
-    EXPECT_CALL(mocker, LnnGetLocalNumInfo).WillOnce(Return(SOFTBUS_OK));
     EXPECT_CALL(mocker, LnnGetOhosAccountInfo(_, _)).WillOnce(Return(SOFTBUS_INVALID_PARAM)).
         WillOnce(Return(SOFTBUS_OK));
     int32_t ret = LnnJudgeDeviceTypeAndGetOsAccountInfo(mockHash, SHA_256_HASH_LEN);
-    EXPECT_EQ(ret, SOFTBUS_INVALID_PARAM);
+    EXPECT_EQ(ret, SOFTBUS_NETWORK_GET_ACCOUNT_INFO_FAILED);
     ret = LnnJudgeDeviceTypeAndGetOsAccountInfo(mockHash, SHA_256_HASH_LEN);
     EXPECT_EQ(ret, SOFTBUS_OK);
 }

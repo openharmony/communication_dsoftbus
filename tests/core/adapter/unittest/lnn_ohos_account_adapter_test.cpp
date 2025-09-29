@@ -22,6 +22,7 @@
 #include "gtest/gtest.h"
 #include <gmock/gmock-actions.h>
 #include "bus_center_info_key.h"
+#include "bus_center_manager.h"
 #include "lnn_log.h"
 #include "lnn_ohos_account_adapter.h"
 #include "lnn_ohos_account_adapter_mock.h"
@@ -38,6 +39,7 @@ namespace OHOS::SoftBus {
 #define INVALID_ACCOUNT_UID (-1)
 
 constexpr char LNN_OHOS_ACCOUNT_ADAPTER_TEST_ID_LEN = 10;
+constexpr char TYPE_CAR_ID = 0x83;
 
 class LnnOhosAccountAdapterTest : public testing::Test {
 protected:
@@ -51,7 +53,7 @@ void LnnOhosAccountAdapterTest::TearDownTestCase(void) { }
 void LnnOhosAccountAdapterTest::SetUp(void) { }
 void LnnOhosAccountAdapterTest::TearDown(void) { }
 
-/**
+/*
  * @tc.name: GetOsAccountId_001
  * @tc.desc:  GetOsAccountId
  * @tc.type: FUN
@@ -70,7 +72,7 @@ HWTEST_F(LnnOhosAccountAdapterTest, GetOsAccountId_001, TestSize.Level1)
     }
 }
 
-/**
+/*
  * @tc.name: GetOsAccountId_002
  * @tc.desc:  GetOsAccountId
  * @tc.type: FUN
@@ -89,7 +91,7 @@ HWTEST_F(LnnOhosAccountAdapterTest, GetOsAccountId_002, TestSize.Level1)
     }
 }
 
-/**
+/*
  * @tc.name: GetOsAccountId_003
  * @tc.desc:  GetOsAccountId
  * @tc.type: FUN
@@ -112,7 +114,7 @@ HWTEST_F(LnnOhosAccountAdapterTest, GetOsAccountId_003, TestSize.Level1)
     }
 }
 
-/**
+/*
  * @tc.name: GetOsAccountId_004
  * @tc.desc:  GetOsAccountId
  * @tc.type: FUN
@@ -137,7 +139,7 @@ HWTEST_F(LnnOhosAccountAdapterTest, GetOsAccountId_004, TestSize.Level1)
     }
 }
 
-/**
+/*
  * @tc.name: GetCurrentAccount_001
  * @tc.desc:  GetCurrentAccount
  * @tc.type: FUN
@@ -152,7 +154,7 @@ HWTEST_F(LnnOhosAccountAdapterTest, GetCurrentAccount_001, TestSize.Level1)
     EXPECT_EQ(GetCurrentAccount(&account), SOFTBUS_AUTH_INNER_ERR);
 }
 
-/**
+/*
  * @tc.name: GetCurrentAccount_002
  * @tc.desc:  GetCurrentAccount
  * @tc.type: FUN
@@ -169,7 +171,7 @@ HWTEST_F(LnnOhosAccountAdapterTest, GetCurrentAccount_002, TestSize.Level1)
     EXPECT_EQ(GetCurrentAccount(&account), SOFTBUS_NETWORK_GET_ACCOUNT_INFO_FAILED);
 }
 
-/**
+/*
  * @tc.name: GetCurrentAccount_003
  * @tc.desc: GetCurrentAccount
  * @tc.type: FUN
@@ -187,7 +189,7 @@ HWTEST_F(LnnOhosAccountAdapterTest, GetCurrentAccount_003, TestSize.Level1)
     EXPECT_EQ(GetCurrentAccount(&account), SOFTBUS_OK);
 }
 
-/**
+/*
  * @tc.name: GetCurrentAccount_004
  * @tc.desc: GetCurrentAccount
  * @tc.type: FUN
@@ -205,7 +207,7 @@ HWTEST_F(LnnOhosAccountAdapterTest, GetCurrentAccount_004, TestSize.Level1)
     EXPECT_EQ(GetCurrentAccount(&account), SOFTBUS_OK);
 }
 
-/**
+/*
  * @tc.name: GetCurrentAccount_005
  * @tc.desc: GetCurrentAccount
  * @tc.type: FUN
@@ -223,7 +225,7 @@ HWTEST_F(LnnOhosAccountAdapterTest, GetCurrentAccount_005, TestSize.Level1)
     EXPECT_EQ(GetCurrentAccount(&account), SOFTBUS_OK);
 }
 
-/**
+/*
  * @tc.name: GetCurrentAccount_006
  * @tc.desc: GetCurrentAccount
  * @tc.type: FUN
@@ -241,7 +243,7 @@ HWTEST_F(LnnOhosAccountAdapterTest, GetCurrentAccount_006, TestSize.Level1)
     EXPECT_EQ(GetCurrentAccount(&account), SOFTBUS_OK);
 }
 
-/**
+/*
  * @tc.name: GetOsAccountIdByUserId_InvalidParam01
  * @tc.desc: GetOsAccountIdByUserId invalid param
  * @tc.type: FUN
@@ -255,7 +257,7 @@ HWTEST_F(LnnOhosAccountAdapterTest, GetOsAccountIdByUserId_InvalidParam01, TestS
     EXPECT_EQ(ret, SOFTBUS_INVALID_PARAM);
 }
 
-/**
+/*
  * @tc.name: GetOsAccountIdByUserId_InvalidParam02
  * @tc.desc: GetOsAccountIdByUserId invalid param
  * @tc.type: FUN
@@ -269,7 +271,7 @@ HWTEST_F(LnnOhosAccountAdapterTest, GetOsAccountIdByUserId_InvalidParam02, TestS
     EXPECT_EQ(ret, SOFTBUS_INVALID_PARAM);
 }
 
-/**
+/*
  * @tc.name: GetOsAccountIdByUserId_InvalidParam03
  * @tc.desc: GetOsAccountIdByUserId invalid param
  * @tc.type: FUN
@@ -284,7 +286,7 @@ HWTEST_F(LnnOhosAccountAdapterTest, GetOsAccountIdByUserId_InvalidParam03, TestS
     EXPECT_EQ(ret, SOFTBUS_INVALID_PARAM);
 }
 
-/**
+/*
  * @tc.name: GetOsAccountUid_InvalidParam01
  * @tc.desc: GetOsAccountUid invalid param
  * @tc.type: FUN
@@ -298,7 +300,7 @@ HWTEST_F(LnnOhosAccountAdapterTest, GetOsAccountUid_InvalidParam01, TestSize.Lev
     EXPECT_EQ(ret, SOFTBUS_INVALID_PARAM);
 }
 
-/**
+/*
  * @tc.name: GetOsAccountUid_InvalidParam02
  * @tc.desc: GetOsAccountUid invalid param
  * @tc.type: FUN
@@ -312,7 +314,7 @@ HWTEST_F(LnnOhosAccountAdapterTest, GetOsAccountUid_InvalidParam02, TestSize.Lev
     EXPECT_EQ(ret, SOFTBUS_INVALID_PARAM);
 }
 
-/**
+/*
  * @tc.name: GetOsAccountUid_InvalidParam03
  * @tc.desc: GetOsAccountUid invalid param
  * @tc.type: FUN
@@ -331,7 +333,7 @@ HWTEST_F(LnnOhosAccountAdapterTest, GetOsAccountUid_InvalidParam03, TestSize.Lev
     EXPECT_NE(ret, SOFTBUS_INVALID_PARAM);
 }
 
-/**
+/*
  * @tc.name: GetOsAccountUidByUserId_InvalidParam01
  * @tc.desc: GetOsAccountUidByUserId invalid param
  * @tc.type: FUN
@@ -346,7 +348,7 @@ HWTEST_F(LnnOhosAccountAdapterTest, GetOsAccountUidByUserId_InvalidParam01, Test
     EXPECT_EQ(ret, SOFTBUS_INVALID_PARAM);
 }
 
-/**
+/*
  * @tc.name: GetOsAccountUidByUserId_InvalidParam02
  * @tc.desc: GetOsAccountUidByUserId invalid param
  * @tc.type: FUN
@@ -361,7 +363,7 @@ HWTEST_F(LnnOhosAccountAdapterTest, GetOsAccountUidByUserId_InvalidParam02, Test
     EXPECT_EQ(ret, SOFTBUS_INVALID_PARAM);
 }
 
-/**
+/*
  * @tc.name: GetOsAccountUidByUserId_InvalidParam03
  * @tc.desc: GetOsAccountUidByUserId invalid param
  * @tc.type: FUN
@@ -377,7 +379,7 @@ HWTEST_F(LnnOhosAccountAdapterTest, GetOsAccountUidByUserId_InvalidParam03, Test
     EXPECT_EQ(ret, SOFTBUS_INVALID_PARAM);
 }
 
-/**
+/*
  * @tc.name: GetOsAccountUidByUserId_InvalidParam04
  * @tc.desc: GetOsAccountUidByUserId invalid param
  * @tc.type: FUN
@@ -393,7 +395,7 @@ HWTEST_F(LnnOhosAccountAdapterTest, GetOsAccountUidByUserId_InvalidParam04, Test
     EXPECT_EQ(ret, SOFTBUS_INVALID_PARAM);
 }
 
-/**
+/*
  * @tc.name: GetOsAccountIdByUserId_001
  * @tc.desc: GetOsAccountIdByUserId invalid param
  * @tc.type: FUN
@@ -410,7 +412,7 @@ HWTEST_F(LnnOhosAccountAdapterTest, GetOsAccountIdByUserId_001, TestSize.Level1)
     }
 }
 
-/**
+/*
  * @tc.name: GetOsAccountIdByUserId_002
  * @tc.desc: GetOsAccountIdByUserId invalid param
  * @tc.type: FUN
@@ -423,7 +425,7 @@ HWTEST_F(LnnOhosAccountAdapterTest, GetOsAccountIdByUserId_002, TestSize.Level1)
     EXPECT_EQ(GetOsAccountIdByUserId(userId, nullptr, &len), SOFTBUS_INVALID_PARAM);
 }
 
-/**
+/*
  * @tc.name: GetOsAccountIdByUserId_003
  * @tc.desc: GetOsAccountIdByUserId Get Account Info FailInfo
  * @tc.type: FUN
@@ -441,7 +443,7 @@ HWTEST_F(LnnOhosAccountAdapterTest, GetOsAccountIdByUserId_003, TestSize.Level1)
     }
 }
 
-/**
+/*
  * @tc.name: GetOsAccountId_005
  * @tc.desc:  GetOsAccountId Fail
  * @tc.type: FUN
@@ -466,7 +468,7 @@ HWTEST_F(LnnOhosAccountAdapterTest, GetOsAccountId_005, TestSize.Level1)
     }
 }
 
-/**
+/*
  * @tc.name: GetOsAccountUidByUserId_001
  * @tc.desc: GetOsAccountUidByUserId Invalid Param
  * @tc.type: FUN
@@ -485,7 +487,7 @@ HWTEST_F(LnnOhosAccountAdapterTest, GetOsAccountUidByUserId_001, TestSize.Level1
     }
 }
 
-/**
+/*
  * @tc.name: GetOsAccountUidByUserId_002
  * @tc.desc: GetOsAccountUidByUserId Failed
  * @tc.type: FUN
@@ -506,7 +508,7 @@ HWTEST_F(LnnOhosAccountAdapterTest, GetOsAccountUidByUserId_002, TestSize.Level1
     }
 }
 
-/**
+/*
  * @tc.name: GetOsAccountUidByUserId_003
  * @tc.desc:  GetOsAccountUidByUserId Failed
  * @tc.type: FUN
@@ -527,7 +529,7 @@ HWTEST_F(LnnOhosAccountAdapterTest, GetOsAccountUidByUserId_003, TestSize.Level1
     }
 }
 
-/**
+/*
  * @tc.name: GET_OS_ACCOUNT_ID_BY_USER_ID_TEST_001
  * @tc.desc:  GetOsAccountIdByUserId Failed
  * @tc.type: FUN
@@ -540,7 +542,7 @@ HWTEST_F(LnnOhosAccountAdapterTest, GET_OS_ACCOUNT_ID_BY_USER_ID_TEST_001, TestS
     EXPECT_EQ(ret, SOFTBUS_INVALID_PARAM);
 }
 
-/**
+/*
  * @tc.name: GET_OS_ACCOUNT_ID_BY_USER_ID_TEST_002
  * @tc.desc:  GetOsAccountIdByUserId Failed
  * @tc.type: FUN
@@ -553,7 +555,7 @@ HWTEST_F(LnnOhosAccountAdapterTest, GET_OS_ACCOUNT_ID_BY_USER_ID_TEST_002, TestS
     EXPECT_EQ(ret, SOFTBUS_INVALID_PARAM);
 }
 
-/**
+/*
  * @tc.name: GET_OS_ACCOUNT_ID_BY_USER_ID_TEST_003
  * @tc.desc:  GetOsAccountIdByUserId Failed
  * @tc.type: FUN
@@ -568,7 +570,7 @@ HWTEST_F(LnnOhosAccountAdapterTest, GET_OS_ACCOUNT_ID_BY_USER_ID_TEST_003, TestS
     EXPECT_EQ(ret, SOFTBUS_INVALID_PARAM);
 }
 
-/**
+/*
  * @tc.name: GET_OS_ACCOUNT_TEST_001
  * @tc.desc:  GetOsAccountUid Failed with invalid param
  * @tc.type: FUN
@@ -581,7 +583,7 @@ HWTEST_F(LnnOhosAccountAdapterTest, GET_OS_ACCOUNT_TEST_001, TestSize.Level1)
     EXPECT_EQ(ret, SOFTBUS_INVALID_PARAM);
 }
 
-/**
+/*
  * @tc.name: GET_OS_ACCOUNT_TEST_002
  * @tc.desc:  GetOsAccountUid Failed
  * @tc.type: FUN
@@ -596,7 +598,7 @@ HWTEST_F(LnnOhosAccountAdapterTest, GET_OS_ACCOUNT_TEST_002, TestSize.Level1)
     EXPECT_EQ(ret, SOFTBUS_INVALID_PARAM);
 }
 
-/**
+/*
  * @tc.name: GET_OS_ACCOUNT_TEST_003
  * @tc.desc:  GetOsAccountUid Failed
  * @tc.type: FUN
@@ -610,7 +612,7 @@ HWTEST_F(LnnOhosAccountAdapterTest, GET_OS_ACCOUNT_TEST_003, TestSize.Level1)
     EXPECT_EQ(ret, SOFTBUS_INVALID_PARAM);
 }
 
-/**
+/*
  * @tc.name: GET_OS_ACCOUNT_UID_BY_USER_ID_TEST_001
  * @tc.desc:  GetOsAccountUid Failed
  * @tc.type: FUN
@@ -624,7 +626,7 @@ HWTEST_F(LnnOhosAccountAdapterTest, GET_OS_ACCOUNT_UID_BY_USER_ID_TEST_001, Test
     EXPECT_EQ(ret, SOFTBUS_INVALID_PARAM);
 }
 
-/**
+/*
  * @tc.name: GET_OS_ACCOUNT_UID_BY_USER_ID_TEST_002
  * @tc.desc:  GetOsAccountUid Failed with invalid param
  * @tc.type: FUN
@@ -639,7 +641,7 @@ HWTEST_F(LnnOhosAccountAdapterTest, GET_OS_ACCOUNT_UID_BY_USER_ID_TEST_002, Test
     EXPECT_EQ(ret, SOFTBUS_INVALID_PARAM);
 }
 
-/**
+/*
  * @tc.name: GET_OS_ACCOUNT_UID_BY_USER_ID_TEST_003
  * @tc.desc:  GetOsAccountUid Failed
  * @tc.type: FUN
@@ -655,7 +657,7 @@ HWTEST_F(LnnOhosAccountAdapterTest, GET_OS_ACCOUNT_UID_BY_USER_ID_TEST_003, Test
     EXPECT_EQ(ret, SOFTBUS_INVALID_PARAM);
 }
 
-/**
+/*
  * @tc.name: GET_OS_ACCOUNT_UID_BY_USER_ID_TEST_004
  * @tc.desc:  GetOsAccountUid Failed
  * @tc.type: FUN
@@ -671,7 +673,7 @@ HWTEST_F(LnnOhosAccountAdapterTest, GET_OS_ACCOUNT_UID_BY_USER_ID_TEST_004, Test
     EXPECT_EQ(ret, SOFTBUS_INVALID_PARAM);
 }
 
-/**
+/*
  * @tc.name: GET_OS_ACCOUNT_UID_BY_USER_ID_TEST_005
  * @tc.desc:  GetOsAccountUid Failed with invalid param
  * @tc.type: FUN
@@ -685,5 +687,42 @@ HWTEST_F(LnnOhosAccountAdapterTest, GET_OS_ACCOUNT_UID_BY_USER_ID_TEST_005, Test
     (void)memset_s(accountId, ACCOUNT_UID_LEN_MAX, 0, ACCOUNT_UID_LEN_MAX);
     int32_t ret = GetOsAccountUidByUserId(accountId, ACCOUNT_UID_LEN_MAX - 1, &size, userId);
     EXPECT_EQ(ret, SOFTBUS_INVALID_PARAM);
+}
+
+/*
+ * @tc.name: JUDGE_DEVICE_TYPE_AND_GET_OS_ACCOUNT_IDS_001
+ * @tc.desc:  JudgeDeviceTypeAndGetOsAccountIds
+ * @tc.type: FUN
+ * @tc.require: 1
+ */
+HWTEST_F(LnnOhosAccountAdapterTest, JUDGE_DEVICE_TYPE_AND_GET_OS_ACCOUNT_IDS_001, TestSize.Level1)
+{
+    EXPECT_NO_FATAL_FAILURE(JudgeDeviceTypeAndGetOsAccountIds());
+}
+
+/*
+ * @tc.name: JUDGE_DEVICE_TYPE_AND_GET_OS_ACCOUNT_IDS_002
+ * @tc.desc:  JudgeDeviceTypeAndGetOsAccountIds
+ * @tc.type: FUN
+ * @tc.require: 1
+ */
+HWTEST_F(LnnOhosAccountAdapterTest, JUDGE_DEVICE_TYPE_AND_GET_OS_ACCOUNT_IDS_002, TestSize.Level1)
+{
+    LnnSetLocalNumInfo(NUM_KEY_DEV_TYPE_ID, TYPE_CAR_ID);
+    EXPECT_NO_FATAL_FAILURE(JudgeDeviceTypeAndGetOsAccountIds());
+}
+
+/*
+ * @tc.name: JUDGE_DEVICE_TYPE_AND_GET_OS_ACCOUNT_IDS_003
+ * @tc.desc:  JudgeDeviceTypeAndGetOsAccountIds
+ * @tc.type: FUN
+ * @tc.require: 1
+ */
+HWTEST_F(LnnOhosAccountAdapterTest, JUDGE_DEVICE_TYPE_AND_GET_OS_ACCOUNT_IDS_003, TestSize.Level1)
+{
+    uint64_t displayId = 0;
+    LnnSetLocalNumInfo(NUM_KEY_DEV_TYPE_ID, TYPE_CAR_ID);
+    LnnSetLocalNumU64Info(NUM_KEY_DISPLAY_ID, displayId);
+    EXPECT_NO_FATAL_FAILURE(JudgeDeviceTypeAndGetOsAccountIds());
 }
 } // namespace OHOS::SoftBus
