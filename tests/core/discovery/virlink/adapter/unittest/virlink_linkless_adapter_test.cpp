@@ -124,11 +124,11 @@ void VirlinkLinklessAdapterTest::SetUpTestCase(void)
 
 void VirlinkLinklessAdapterTest::TearDownTestCase(void) { }
 
-/**
+/*
  * @tc.name: DiscVirlinkLinklessAdapterTest001
- * @tc.desc: Test send function.
+ * @tc.desc: Test send function
  * @tc.type: FUNC
- * @tc.require: The DiscVirlinkLinklessAdapter operates normally.
+ * @tc.require: The DiscVirlinkLinklessAdapter operates normally
  */
 HWTEST_F(VirlinkLinklessAdapterTest, DiscVirlinkLinklessAdapterTest001, TestSize.Level1)
 {
@@ -138,11 +138,11 @@ HWTEST_F(VirlinkLinklessAdapterTest, DiscVirlinkLinklessAdapterTest001, TestSize
     EXPECT_EQ(ret, SOFTBUS_OK);
 }
 
-/**
+/*
  * @tc.name: DiscVirlinkLinklessAdapterTest002
- * @tc.desc: Test recv function.
+ * @tc.desc: Test recv function
  * @tc.type: FUNC
- * @tc.require: The DiscVirlinkLinklessAdapter operates normally.
+ * @tc.require: The DiscVirlinkLinklessAdapter operates normally
  */
 HWTEST_F(VirlinkLinklessAdapterTest, DiscVirlinkLinklessAdapterTest002, TestSize.Level1)
 {
@@ -154,11 +154,11 @@ HWTEST_F(VirlinkLinklessAdapterTest, DiscVirlinkLinklessAdapterTest002, TestSize
     VirlinkTestAuthClose();
 }
 
-/**
+/*
  * @tc.name: DiscVirlinkLinklessAdapterTest003
- * @tc.desc: Test online function.
+ * @tc.desc: Test online function
  * @tc.type: FUNC
- * @tc.require: The DiscVirlinkLinklessAdapter operates normally.
+ * @tc.require: The DiscVirlinkLinklessAdapter operates normally
  */
 HWTEST_F(VirlinkLinklessAdapterTest, DiscVirlinkLinklessAdapterTest003, TestSize.Level1)
 {
@@ -172,11 +172,11 @@ HWTEST_F(VirlinkLinklessAdapterTest, DiscVirlinkLinklessAdapterTest003, TestSize
     EXPECT_EQ(g_virlinkTestConn.isSource, isSource);
 }
 
-/**
+/*
  * @tc.name: DiscVirlinkLinklessAdapterTest004
- * @tc.desc: Test offline function.
+ * @tc.desc: Test offline function
  * @tc.type: FUNC
- * @tc.require: The DiscVirlinkLinklessAdapter operates normally.
+ * @tc.require: The DiscVirlinkLinklessAdapter operates normally
  */
 HWTEST_F(VirlinkLinklessAdapterTest, DiscVirlinkLinklessAdapterTest004, TestSize.Level1)
 {

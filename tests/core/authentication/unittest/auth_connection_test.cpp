@@ -90,7 +90,7 @@ void AuthConnectionTest::OnDataReceived(
 
 /*
  * @tc.name: IS_ENHANCE_P2P_MODULE_ID_TEST_001
- * @tc.desc: is enhance P2p moduleId test.
+ * @tc.desc: is enhance P2p moduleId test
  * @tc.type: FUNC
  * @tc.require:
  */
@@ -111,7 +111,7 @@ HWTEST_F(AuthConnectionTest, IS_ENHANCE_P2P_MODULE_ID_TEST_001, TestSize.Level1)
 
 /*
  * @tc.name: CEN_CONN_ID_TEST_001
- * @tc.desc: generate conn ID test.
+ * @tc.desc: generate conn ID test
  * @tc.type: FUNC
  * @tc.require:
  */
@@ -125,7 +125,7 @@ HWTEST_F(AuthConnectionTest, CEN_CONN_ID_TEST_001, TestSize.Level1)
 
 /*
  * @tc.name: CET_CONN_TYPE_TEST_001
- * @tc.desc: get conn type test.
+ * @tc.desc: get conn type test
  * @tc.type: FUNC
  * @tc.require:
  */
@@ -138,7 +138,7 @@ HWTEST_F(AuthConnectionTest, CET_CONN_TYPE_TEST_001, TestSize.Level1)
 
 /*
  * @tc.name: CET_CONN_TYPE_TEST_001
- * @tc.desc: get conn type str test.
+ * @tc.desc: get conn type str test
  * @tc.type: FUNC
  * @tc.require:
  */
@@ -187,7 +187,7 @@ HWTEST_F(AuthConnectionTest, CET_CONN_TYPE_STR_TEST_001, TestSize.Level1)
 
 /*
  * @tc.name: CET_CONN_TYPE_TEST_001
- * @tc.desc: get conn id test.
+ * @tc.desc: get conn id test
  * @tc.type: FUNC
  * @tc.require:
  */
@@ -200,7 +200,7 @@ HWTEST_F(AuthConnectionTest, CET_CONN_ID_TEST_001, TestSize.Level1)
 
 /*
  * @tc.name: CET_CONN_TYPE_TEST_001
- * @tc.desc: get fd test.
+ * @tc.desc: get fd test
  * @tc.type: FUNC
  * @tc.require:
  */
@@ -213,7 +213,7 @@ HWTEST_F(AuthConnectionTest, CET_FD_TEST_001, TestSize.Level1)
 
 /*
  * @tc.name: FIND_CONN_REQUEST_BY_FD_TEST_001
- * @tc.desc: Test finding connection request by unused fd.
+ * @tc.desc: Test finding connection request by unused fd
  * @tc.type: FUNC
  * @tc.require:
  */
@@ -225,7 +225,7 @@ HWTEST_F(AuthConnectionTest, FIND_CONN_REQUEST_BY_FD_TEST_001, TestSize.Level1)
 
 /*
  * @tc.name: FIND_CONN_REQUEST_BY_FD_TEST_002
- * @tc.desc: Test findind connection request by added fd.
+ * @tc.desc: Test findind connection request by added fd
  * @tc.type: FUNC
  * @tc.require:
  */
@@ -244,7 +244,7 @@ HWTEST_F(AuthConnectionTest, FIND_CONN_REQUEST_BY_FD_TEST_002, TestSize.Level1)
 
 /*
  * @tc.name: FIND_CONN_REQUEST_BY_REQUEST_ID_TEST_001
- * @tc.desc: Test finding connection request by nonexisted request id.
+ * @tc.desc: Test finding connection request by nonexisted request id
  * @tc.type: FUNC
  * @tc.require:
  */
@@ -256,7 +256,7 @@ HWTEST_F(AuthConnectionTest, FIND_CONN_REQUEST_BY_REQUEST_ID_TEST_001, TestSize.
 
 /*
  * @tc.name: FIND_CONN_REQUEST_BY_REQUEST_ID_TEST_001
- * @tc.desc: Notify client connected.
+ * @tc.desc: Notify client connected
  * @tc.type: FUNC
  * @tc.require:
  */
@@ -288,7 +288,7 @@ HWTEST_F(AuthConnectionTest, NOTIFY_CLIENT_CONNECTED_TEST_001, TestSize.Level1)
 
 /*
  * @tc.name: NOTIFY_CLIENT_DISCONNECTED_TEST_001
- * @tc.desc: Notify client disconnected.
+ * @tc.desc: Notify client disconnected
  * @tc.type: FUNC
  * @tc.require:
  */
@@ -318,7 +318,7 @@ HWTEST_F(AuthConnectionTest, NOTIFY_CLIENT_DISCONNECTED_TEST_001, TestSize.Level
 
 /*
  * @tc.name: NOTIFY_DATE_RECEIVED_TEST_001
- * @tc.desc: Notify data received.
+ * @tc.desc: Notify data received
  * @tc.type: FUNC
  * @tc.require:
  */
@@ -353,7 +353,7 @@ HWTEST_F(AuthConnectionTest, NOTIFY_DATE_RECEIVED_TEST_001, TestSize.Level1)
 
 /*
  * @tc.name: GET_AUTH_DATA_SIZE_TEST_001
- * @tc.desc: Get auth data size.
+ * @tc.desc: Get auth data size
  * @tc.type: FUNC
  * @tc.require:
  */
@@ -366,7 +366,7 @@ HWTEST_F(AuthConnectionTest, GET_AUTH_DATA_SIZE_TEST_001, TestSize.Level1)
 
 /*
  * @tc.name: PACK_AUTH_DATA_TEST_001
- * @tc.desc: Test buffer is not enough while packing auth data.
+ * @tc.desc: Test buffer is not enough while packing auth data
  * @tc.type: FUNC
  * @tc.require:
  */
@@ -396,7 +396,7 @@ HWTEST_F(AuthConnectionTest, PACK_AUTH_DATA_TEST_001, TestSize.Level1)
 
 /*
  * @tc.name: UNPACK_AUTH_DATA_TEST_001
- * @tc.desc: Test the data length is shorter than head length.
+ * @tc.desc: Test the data length is shorter than head length
  * @tc.type: FUNC
  * @tc.require:
  */
@@ -419,7 +419,7 @@ HWTEST_F(AuthConnectionTest, UNPACK_AUTH_DATA_TEST_001, TestSize.Level1)
 
 /*
  * @tc.name: GET_AUTH_TIMEOUT_ERR_CODE_TEST_001
- * @tc.desc: Test GetAuthTimeoutErrCode return the exact error code according to auth link type.
+ * @tc.desc: Test GetAuthTimeoutErrCode return the exact error code according to auth link type
  * @tc.type: FUNC
  * @tc.require:
  */
@@ -447,7 +447,7 @@ HWTEST_F(AuthConnectionTest, GET_AUTH_TIMEOUT_ERR_CODE_TEST_001, TestSize.Level1
 
 /*
  * @tc.name: IS_SESSION_AUTH_TEST_001
- * @tc.desc: Is session auth.
+ * @tc.desc: Is session auth
  * @tc.type: FUNC
  * @tc.require:
  */
@@ -464,7 +464,7 @@ HWTEST_F(AuthConnectionTest, IS_SESSION_AUTH_TEST_001, TestSize.Level1)
 
 /*
  * @tc.name: IS_SESSION_AUTH_TEST_001
- * @tc.desc: Is session key auth.
+ * @tc.desc: Is session key auth
  * @tc.type: FUNC
  * @tc.require:
  */
@@ -481,7 +481,7 @@ HWTEST_F(AuthConnectionTest, IS_SESSION_KEY_AUTH_TEST_001, TestSize.Level1)
 
 /*
  * @tc.name: IS_SESSION_AUTH_TEST_001
- * @tc.desc: Init WiFi conn.
+ * @tc.desc: Init WiFi conn
  * @tc.type: FUNC
  * @tc.require:
  */
@@ -493,7 +493,7 @@ HWTEST_F(AuthConnectionTest, INIT_WIFI_CONN_TEST_001, TestSize.Level1)
 
 /*
  * @tc.name: ON_COMM_DISCONNECTED_TEST_001
- * @tc.desc: notify comm disconnected.
+ * @tc.desc: notify comm disconnected
  * @tc.type: FUNC
  * @tc.require:
  */
@@ -526,7 +526,7 @@ HWTEST_F(AuthConnectionTest, ON_COMM_DISCONNECTED_TEST_001, TestSize.Level1)
 
 /*
  * @tc.name: GET_CONN_INFO_BY_CONNECTION_ID_TEST_001
- * @tc.desc: get connInfo by connection id.
+ * @tc.desc: get connInfo by connection id
  * @tc.type: FUNC
  * @tc.require:
  */
@@ -542,7 +542,7 @@ HWTEST_F(AuthConnectionTest, GET_CONN_INFO_BY_CONNECTION_ID_TEST_001, TestSize.L
 
 /*
  * @tc.name: INIT_COMM_CONN_TEST_001
- * @tc.desc: init comm conn.
+ * @tc.desc: init comm conn
  * @tc.type: FUNC
  * @tc.require:
  */
@@ -555,7 +555,7 @@ HWTEST_F(AuthConnectionTest, INIT_COMM_CONN_TEST_001, TestSize.Level1)
 
 /*
  * @tc.name: SESSION_CONNECT_SUCC_TEST_001
- * @tc.desc: session connect succ.
+ * @tc.desc: session connect succ
  * @tc.type: FUNC
  * @tc.require:
  */
@@ -601,7 +601,7 @@ HWTEST_F(AuthConnectionTest, CONNECT_AUT_DEVICE_TEST_001, TestSize.Level1)
 
 /*
  * @tc.name: CONNECT_AUT_DEVICE_TEST_002
- * @tc.desc: ConnectAuthDevice success, auth link type is AUTH_LINK_TYPE_SESSION.
+ * @tc.desc: ConnectAuthDevice success, auth link type is AUTH_LINK_TYPE_SESSION
  * @tc.type: FUNC
  * @tc.require:
  */
@@ -621,7 +621,7 @@ HWTEST_F(AuthConnectionTest, CONNECT_AUT_DEVICE_TEST_002, TestSize.Level1)
 
 /*
  * @tc.name: CONNECT_AUT_DEVICE_TEST_003
- * @tc.desc: ConnectAuthDevice success, auth link type is AUTH_LINK_TYPE_SESSION_KEY.
+ * @tc.desc: ConnectAuthDevice success, auth link type is AUTH_LINK_TYPE_SESSION_KEY
  * @tc.type: FUNC
  * @tc.require:
  */
@@ -639,7 +639,7 @@ HWTEST_F(AuthConnectionTest, CONNECT_AUT_DEVICE_TEST_003, TestSize.Level1)
 
 /*
  * @tc.name: CONNECT_AUT_DEVICE_TEST_004
- * @tc.desc: ConnectAuthDevice success, auth link type is AUTH_LINK_TYPE_MAX.
+ * @tc.desc: ConnectAuthDevice success, auth link type is AUTH_LINK_TYPE_MAX
  * @tc.type: FUNC
  * @tc.require:
  */
@@ -657,7 +657,7 @@ HWTEST_F(AuthConnectionTest, CONNECT_AUT_DEVICE_TEST_004, TestSize.Level1)
 
 /*
  * @tc.name: CONNECT_AUT_DEVICE_TEST_005
- * @tc.desc: ConnectAuthDevice success, auth link type is AUTH_LINK_TYPE_WIFI or AUTH_LINK_TYPE_USB.
+ * @tc.desc: ConnectAuthDevice success, auth link type is AUTH_LINK_TYPE_WIFI or AUTH_LINK_TYPE_USB
  * @tc.type: FUNC
  * @tc.require:
  */
@@ -679,7 +679,7 @@ HWTEST_F(AuthConnectionTest, CONNECT_AUT_DEVICE_TEST_005, TestSize.Level1)
 
 /*
  * @tc.name: CONNECT_AUT_DEVICE_TEST_006
- * @tc.desc: ConnectAuthDevice fail, auth link type is AUTH_LINK_TYPE_BLE or AUTH_LINK_TYPE_SLE.
+ * @tc.desc: ConnectAuthDevice fail, auth link type is AUTH_LINK_TYPE_BLE or AUTH_LINK_TYPE_SLE
  * @tc.type: FUNC
  * @tc.require:
  */
@@ -701,7 +701,7 @@ HWTEST_F(AuthConnectionTest, CONNECT_AUT_DEVICE_TEST_006, TestSize.Level1)
 
 /*
  * @tc.name: CONNECT_AUT_DEVICE_TEST_007
- * @tc.desc: ConnectAuthDevice fail, auth link type is AUTH_LINK_TYPE_P2P or AUTH_LINK_TYPE_ENHANCED_P2P.
+ * @tc.desc: ConnectAuthDevice fail, auth link type is AUTH_LINK_TYPE_P2P or AUTH_LINK_TYPE_ENHANCED_P2P
  * @tc.type: FUNC
  * @tc.require:
  */
@@ -723,7 +723,7 @@ HWTEST_F(AuthConnectionTest, CONNECT_AUT_DEVICE_TEST_007, TestSize.Level1)
 
 /*
  * @tc.name: POST_BY_TEST_FOR_SESSION_TEST_001
- * @tc.desc: PostBytesForSession test, data is nullptr.
+ * @tc.desc: PostBytesForSession test, data is nullptr
  * @tc.type: FUNC
  * @tc.require:
  */
@@ -737,7 +737,7 @@ HWTEST_F(AuthConnectionTest, POST_BY_TEST_FOR_SESSION_TEST_001, TestSize.Level1)
 
 /*
  * @tc.name: POST_BY_TEST_FOR_SESSION_TEST_002
- * @tc.desc: Mock SocketPostBytes fail.
+ * @tc.desc: Mock SocketPostBytes fail
  * @tc.type: FUNC
  * @tc.require:
  */
@@ -757,7 +757,7 @@ HWTEST_F(AuthConnectionTest, POST_BY_TEST_FOR_SESSION_TEST_002, TestSize.Level1)
 
 /*
  * @tc.name: POST_BY_TEST_FOR_SESSION_TEST_003
- * @tc.desc: PostBytesForSession success.
+ * @tc.desc: PostBytesForSession success
  * @tc.type: FUNC
  * @tc.require:
  */
@@ -775,7 +775,7 @@ HWTEST_F(AuthConnectionTest, POST_BY_TEST_FOR_SESSION_TEST_003, TestSize.Level1)
 
 /*
  * @tc.name: IS_AUTH_SESSION_KEY_MODULE_TEST_001
- * @tc.desc: is auth session key module.
+ * @tc.desc: is auth session key module
  * @tc.type: FUNC
  * @tc.require:
  */
@@ -805,7 +805,7 @@ HWTEST_F(AuthConnectionTest, IS_AUTH_SESSION_KEY_MODULE_TEST_001, TestSize.Level
 
 /*
  * @tc.name: POST_BYTES_FOR_SESSION_KEY_TEST_001
- * @tc.desc: post bytes for sessionKey.
+ * @tc.desc: post bytes for sessionKey
  * @tc.type: FUNC
  * @tc.require:
  */
@@ -830,7 +830,7 @@ HWTEST_F(AuthConnectionTest, POST_BYTES_FOR_SESSION_KEY_TEST_001, TestSize.Level
 
 /*
  * @tc.name: POST_AUTH_DATA_TEST_001
- * @tc.desc: Post auth data.
+ * @tc.desc: Post auth data
  * @tc.type: FUNC
  * @tc.require:
  */
@@ -874,7 +874,7 @@ HWTEST_F(AuthConnectionTest, POST_AUTH_DATA_TEST_001, TestSize.Level1)
 
 /*
  * @tc.name: POST_AUTH_DATA_TEST_002
- * @tc.desc: Post auth data.
+ * @tc.desc: Post auth data
  * @tc.type: FUNC
  * @tc.require:
  */
@@ -912,7 +912,7 @@ HWTEST_F(AuthConnectionTest, POST_AUTH_DATA_TEST_002, TestSize.Level1)
 
 /*
  * @tc.name: GET_CONN_SIDE_TYPE_TEST_001
- * @tc.desc: get conn side type.
+ * @tc.desc: get conn side type
  * @tc.type: FUNC
  * @tc.require:
  */
@@ -933,7 +933,7 @@ HWTEST_F(AuthConnectionTest, GET_CONN_SIDE_TYPE_TEST_001, TestSize.Level1)
 
 /*
  * @tc.name: CHECK_ACTIVE_AUTH_CONNECTION_TEST_001
- * @tc.desc: check active auth connection.
+ * @tc.desc: check active auth connection
  * @tc.type: FUNC
  * @tc.require:
  */
@@ -951,7 +951,7 @@ HWTEST_F(AuthConnectionTest, CHECK_ACTIVE_AUTH_CONNECTION_TEST_001, TestSize.Lev
 
 /*
  * @tc.name: AUTH_START_LISTENING_TEST_001
- * @tc.desc: Auth start wifi listening success.
+ * @tc.desc: Auth start wifi listening success
  * @tc.type: FUNC
  * @tc.require:
  */
@@ -966,7 +966,7 @@ HWTEST_F(AuthConnectionTest, AUTH_START_LISTENING_TEST_001, TestSize.Level1)
 
 /*
  * @tc.name: AUTH_START_LISTENING_TEST_002
- * @tc.desc: Auth start enhanced p2p listening success.
+ * @tc.desc: Auth start enhanced p2p listening success
  * @tc.type: FUNC
  * @tc.require:
  */
@@ -981,7 +981,7 @@ HWTEST_F(AuthConnectionTest, AUTH_START_LISTENING_TEST_002, TestSize.Level1)
 
 /*
  * @tc.name: AUTH_START_LISTENING_TEST_003
- * @tc.desc: Unsupported link type.
+ * @tc.desc: Unsupported link type
  * @tc.type: FUNC
  * @tc.require:
  */
@@ -994,7 +994,7 @@ HWTEST_F(AuthConnectionTest, AUTH_START_LISTENING_TEST_003, TestSize.Level1)
 
 /*
  * @tc.name: AUTH_START_LISTENING_TEST_004
- * @tc.desc: Auth start usb listening success.
+ * @tc.desc: Auth start usb listening success
  * @tc.type: FUNC
  * @tc.require:
  */
@@ -1009,7 +1009,7 @@ HWTEST_F(AuthConnectionTest, AUTH_START_LISTENING_TEST_004, TestSize.Level1)
 
 /*
  * @tc.name: AUTH_START_LISTENING_FOR_WIFI_DIRECT_TEST_001
- * @tc.desc: Auth start AUTH_LINK_TYPE_P2P listening.
+ * @tc.desc: Auth start AUTH_LINK_TYPE_P2P listening
  * @tc.type: FUNC
  * @tc.require:
  */

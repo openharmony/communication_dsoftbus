@@ -150,7 +150,7 @@ int32_t AuthDeviceProfileTest::SetSoftBusAclInfo(SoftBusAclInfo *info, int32_t u
 
 /*
  * @tc.name: IS_POTENTIAL_TRUSTED_DEVICE_TEST_003
- * @tc.desc:
+ * @tc.desc: IsPotentialTrustedDeviceDp test
  * @tc.type: FUNC
  * @tc.require:
  */
@@ -169,7 +169,7 @@ HWTEST_F(AuthDeviceProfileTest, IS_POTENTIAL_DEVICE_TEST_003, TestSize.Level1)
 
 /*
  * @tc.name: IS_POTENTIAL_TRUSTED_DEVICE_TEST_004
- * @tc.desc:add ut for DelNotTrustDevice and UpdateDpSameAccount
+ * @tc.desc: add ut for DelNotTrustDevice and UpdateDpSameAccount
  * @tc.type: FUNC
  * @tc.require:
  */
@@ -236,7 +236,8 @@ HWTEST_F(AuthDeviceProfileTest, IS_NOT_TRUSTED_DEVICE_TEST_002, TestSize.Level1)
 
 /*
  * @tc.name: GET_ACL_LOCAL_USERID_TEST_001
- * @tc.desc: 1.get accessee userId.2.get accesser userId
+ * @tc.desc: 1.get accessee userId
+             2.get accesser userId
  * @tc.type: FUNC
  * @tc.require:
  */
@@ -261,7 +262,8 @@ HWTEST_F(AuthDeviceProfileTest, GET_ACL_LOCAL_USERID_TEST_001, TestSize.Level1)
 
 /*
  * @tc.name: GET_ACL_PEER_USERID_TEST_001
- * @tc.desc: 1.get accessee userId.2.get accesser userId
+ * @tc.desc: 1.get accessee userId
+             2.get accesser userId
  * @tc.type: FUNC
  * @tc.require:
  */
@@ -286,7 +288,7 @@ HWTEST_F(AuthDeviceProfileTest, GET_ACL_PEER_USERID_TEST_001, TestSize.Level1)
 
 /*
  * @tc.name: GET_STRING_HASH_001
- * @tc.desc: test generate hash fail and success.
+ * @tc.desc: test generate hash fail and success
  * @tc.type: FUNC
  * @tc.require:
  */
@@ -581,7 +583,7 @@ HWTEST_F(AuthDeviceProfileTest, IS_TRUST_DEVICE_TEST_003, TestSize.Level1)
 
 /*
  * @tc.name: COMPARE_ACL_WITH_PEER_DEVICE_INFO_TEST_001
- * @tc.desc: LnnGetLocalStrInfo fail.
+ * @tc.desc: LnnGetLocalStrInfo fail
  * @tc.type: FUNC
  * @tc.require:
  */
@@ -608,7 +610,7 @@ HWTEST_F(AuthDeviceProfileTest, COMPARE_ACL_WITH_PEER_DEVICE_INFO_TEST_001, Test
 
 /*
  * @tc.name: COMPARE_ACL_WITH_PEER_DEVICE_INFO_TEST_002
- * @tc.desc: accountId is default.
+ * @tc.desc: accountId is default
  * @tc.type: FUNC
  * @tc.require:
  */
@@ -672,7 +674,7 @@ HWTEST_F(AuthDeviceProfileTest, IS_TRUSTED_DEVICE_FROM_ACCESS_TEST_003, TestSize
 
 /*
  * @tc.name: PUT_DP_ACL_UK_BY_USER_ID_TEST_001
- * @tc.desc: sessionKey or sessionKeyId is nullptr.
+ * @tc.desc: sessionKey or sessionKeyId is nullptr
  * @tc.type: FUNC
  * @tc.require:
  */
@@ -690,7 +692,7 @@ HWTEST_F(AuthDeviceProfileTest, PUT_DP_ACL_UK_BY_USER_ID_TEST_001, TestSize.Leve
 
 /*
  * @tc.name: COMPARE_ASSET_ACL_SAME_ACCOUNT_TEST_001
- * @tc.desc: isSameSide is true.
+ * @tc.desc: isSameSide is true
  * @tc.type: FUNC
  * @tc.require:
  */
@@ -736,7 +738,7 @@ HWTEST_F(AuthDeviceProfileTest, COMPARE_ASSET_ACL_SAME_ACCOUNT_TEST_001, TestSiz
 
 /*
  * @tc.name: COMPARE_ASSET_ACL_SAME_ACCOUNT_TEST_002
- * @tc.desc: isSameSide is true.
+ * @tc.desc: isSameSide is true
  * @tc.type: FUNC
  * @tc.require:
  */
@@ -785,7 +787,7 @@ HWTEST_F(AuthDeviceProfileTest, COMPARE_ASSET_ACL_SAME_ACCOUNT_TEST_002, TestSiz
 
 /*
  * @tc.name: COMPARE_ASSET_ACL_SAME_ACCOUNT_TEST_003
- * @tc.desc: isSameSide is false.
+ * @tc.desc: isSameSide is false
  * @tc.type: FUNC
  * @tc.require:
  */
@@ -831,7 +833,7 @@ HWTEST_F(AuthDeviceProfileTest, COMPARE_ASSET_ACL_SAME_ACCOUNT_TEST_003, TestSiz
 
 /*
  * @tc.name: COMPARE_ASSET_ACL_SAME_ACCOUNT_TEST_004
- * @tc.desc: isSameSide is false.
+ * @tc.desc: isSameSide is false
  * @tc.type: FUNC
  * @tc.require:
  */
@@ -874,7 +876,7 @@ HWTEST_F(AuthDeviceProfileTest, COMPARE_ASSET_ACL_SAME_ACCOUNT_TEST_004, TestSiz
 
 /*
  * @tc.name: COMPARE_ASSET_ACL_DIFF_ACCOUNT_WITH_USER_LEVEL_TEST_001
- * @tc.desc: isSameSide is true.
+ * @tc.desc: isSameSide is true
  * @tc.type: FUNC
  * @tc.require:
  */
@@ -920,7 +922,7 @@ HWTEST_F(AuthDeviceProfileTest, COMPARE_ASSET_ACL_DIFF_ACCOUNT_WITH_USER_LEVEL_T
 
 /*
  * @tc.name: COMPARE_ASSET_ACL_DIFF_ACCOUNT_WITH_USER_LEVEL_TEST_002
- * @tc.desc: isSameSide is true.
+ * @tc.desc: isSameSide is true
  * @tc.type: FUNC
  * @tc.require:
  */
@@ -961,7 +963,7 @@ HWTEST_F(AuthDeviceProfileTest, COMPARE_ASSET_ACL_DIFF_ACCOUNT_WITH_USER_LEVEL_T
 
 /*
  * @tc.name: COMPARE_ASSET_ACL_DIFF_ACCOUNT_001
- * @tc.desc: isSameSide is true.
+ * @tc.desc: isSameSide is true
  * @tc.type: FUNC
  * @tc.require:
  */
@@ -1014,7 +1016,7 @@ HWTEST_F(AuthDeviceProfileTest, COMPARE_ASSET_ACL_DIFF_ACCOUNT_001, TestSize.Lev
 
 /*
  * @tc.name: COMPARE_ASSET_ACL_DIFF_ACCOUNT_002
- * @tc.desc: isSameSide is true.
+ * @tc.desc: isSameSide is true
  * @tc.type: FUNC
  * @tc.require:
  */
@@ -1053,7 +1055,7 @@ HWTEST_F(AuthDeviceProfileTest, COMPARE_ASSET_ACL_DIFF_ACCOUNT_002, TestSize.Lev
 
 /*
  * @tc.name: COMPARE_ASSET_ACL_DIFF_ACCOUNT_003
- * @tc.desc: isSameSide is true.
+ * @tc.desc: isSameSide is true
  * @tc.type: FUNC
  * @tc.require:
  */
@@ -1106,7 +1108,7 @@ HWTEST_F(AuthDeviceProfileTest, COMPARE_ASSET_ACL_DIFF_ACCOUNT_003, TestSize.Lev
 
 /*
  * @tc.name: COMPARE_ASSET_ALL_ACL_TEST_001
- * @tc.desc: isSameAccount is true.
+ * @tc.desc: isSameAccount is true
  * @tc.type: FUNC
  * @tc.require:
  */
@@ -1142,7 +1144,7 @@ HWTEST_F(AuthDeviceProfileTest, COMPARE_ASSET_ALL_ACL_TEST_001, TestSize.Level1)
 
 /*
  * @tc.name: COMPARE_ASSET_ALL_ACL_TEST_002
- * @tc.desc: isSameAccount is false.
+ * @tc.desc: isSameAccount is false
  * @tc.type: FUNC
  * @tc.require:
  */
@@ -1177,7 +1179,7 @@ HWTEST_F(AuthDeviceProfileTest, COMPARE_ASSET_ALL_ACL_TEST_002, TestSize.Level1)
 
 /*
  * @tc.name: COMPARE_ASSET_ALL_ACL_TEST_003
- * @tc.desc: isSameAccount is false.
+ * @tc.desc: isSameAccount is false
  * @tc.type: FUNC
  * @tc.require:
  */
@@ -1205,7 +1207,7 @@ HWTEST_F(AuthDeviceProfileTest, COMPARE_ASSET_ALL_ACL_TEST_003, TestSize.Level1)
 
 /*
  * @tc.name: GET_LOCAL_UK_ID_FROM_ACCESS_TEST_001
- * @tc.desc: isServer is true or false.
+ * @tc.desc: isServer is true or false
  * @tc.type: FUNC
  * @tc.require:
  */
@@ -1245,7 +1247,7 @@ HWTEST_F(AuthDeviceProfileTest, GET_LOCAL_UK_ID_FROM_ACCESS_TEST_001, TestSize.L
 
 /*
  * @tc.name: UPDATE_ACCESS_PROFILE_SESSION_KEY_ID_TEST_001
- * @tc.desc: Set ukid as default value.
+ * @tc.desc: Set ukid as default value
  * @tc.type: FUNC
  * @tc.require:
  */
@@ -1259,7 +1261,7 @@ HWTEST_F(AuthDeviceProfileTest, UPDATE_ACCESS_PROFILE_SESSION_KEY_ID_TEST_001, T
 
 /*
  * @tc.name: GET_ACCESS_UK_ID_SAME_ACCOUNT_TEST_001
- * @tc.desc: acl or ukid or time is nullptr.
+ * @tc.desc: acl or ukid or time is nullptr
  * @tc.type: FUNC
  * @tc.require:
  */
@@ -1280,7 +1282,7 @@ HWTEST_F(AuthDeviceProfileTest, GET_ACCESS_UK_ID_SAME_ACCOUNT_TEST_001, TestSize
 
 /*
  * @tc.name: GET_ACCESS_UK_ID_DIFF_ACCOUNT_WITH_USER_LEVEL_TEST_001
- * @tc.desc: acl or ukid or time is nullptr.
+ * @tc.desc: acl or ukid or time is nullptr
  * @tc.type: FUNC
  * @tc.require:
  */
@@ -1301,7 +1303,7 @@ HWTEST_F(AuthDeviceProfileTest, GET_ACCESS_UK_ID_DIFF_ACCOUNT_WITH_USER_LEVEL_TE
 
 /*
  * @tc.name: GET_ACCESS_UK_ID_DIFF_ACCOUNT_TEST_001
- * @tc.desc: acl or ukid or time is nullptr.
+ * @tc.desc: acl or ukid or time is nullptr
  * @tc.type: FUNC
  * @tc.require:
  */
@@ -1320,7 +1322,7 @@ HWTEST_F(AuthDeviceProfileTest, GET_ACCESS_UK_ID_DIFF_ACCOUNT_TEST_001, TestSize
 
 /*
  * @tc.name: GET_ACCESS_UK_BY_UK_ID_TEST_001
- * @tc.desc: uk is nullptr.
+ * @tc.desc: uk is nullptr
  * @tc.type: FUNC
  * @tc.require:
  */
@@ -1334,7 +1336,7 @@ HWTEST_F(AuthDeviceProfileTest, GET_ACCESS_UK_BY_UK_ID_TEST_001, TestSize.Level1
 
 /*
  * @tc.name: IS_SK_ID_INVALID_INNER_TEST_001
- * @tc.desc: AccountId is default.
+ * @tc.desc: AccountId is default
  * @tc.type: FUNC
  * @tc.require:
  */
@@ -1373,7 +1375,7 @@ HWTEST_F(AuthDeviceProfileTest, IS_SK_ID_INVALID_INNER_TEST_001, TestSize.Level1
 
 /*
  * @tc.name: IS_SK_ID_INVALID_TEST_001
- * @tc.desc: accountHash or udidShortHash is nullptr.
+ * @tc.desc: accountHash or udidShortHash is nullptr
  * @tc.type: FUNC
  * @tc.require:
  */
@@ -1390,7 +1392,8 @@ HWTEST_F(AuthDeviceProfileTest, IS_SK_ID_INVALID_TEST_001, TestSize.Level1)
 
 /*
  * @tc.name: IS_SK_ID_INVALID_TEST_002
- * @tc.desc: 1.accountHash length error.2.udidShortHash length error
+ * @tc.desc: 1.accountHash length error
+            2.udidShortHash length error
  * @tc.type: FUNC
  * @tc.require:
  */
@@ -1410,7 +1413,7 @@ HWTEST_F(AuthDeviceProfileTest, IS_SK_ID_INVALID_TEST_002, TestSize.Level1)
 
 /*
  * @tc.name: SELECT_ALL_ACL_TEST_001
- * @tc.desc: trustedInfoArray or num is nullptr.
+ * @tc.desc: trustedInfoArray or num is nullptr
  * @tc.type: FUNC
  * @tc.require:
  */

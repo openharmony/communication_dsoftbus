@@ -47,7 +47,7 @@ void DiscBleUtilsTest::TearDownTestCase(void) { }
 
 /*
  * @tc.name: CheckBitMapEmptyTest_001
- * @tc.desc: Test CheckBitMapEmpty should return true when all capBitMap are 0.
+ * @tc.desc: Test CheckBitMapEmpty should return true when all capBitMap are 0
  * @tc.type: FUNC
  * @tc.require:Check bitMap is empty
  */
@@ -66,7 +66,7 @@ HWTEST_F(DiscBleUtilsTest, CheckBitMapEmptyTest_001, TestSize.Level1)
 
 /*
  * @tc.name: CheckBitMapEmptyTest_002
- * @tc.desc: Test CheckBitMapEmpty should return false when capBitMap is not 0.
+ * @tc.desc: Test CheckBitMapEmpty should return false when capBitMap is not 0
  * @tc.type: FUNC
  * @tc.require:Check bitMap is not empty
  */
@@ -107,7 +107,7 @@ HWTEST_F(DiscBleUtilsTest, CheckCapBitMapExistTest_001, TestSize.Level1)
 
 /*
  * @tc.name: CheckCapBitMapExistTest_002
- * @tc.desc: Test CheckCapBitMapExist should return false when capBitMap is all 0.
+ * @tc.desc: Test CheckCapBitMapExist should return false when capBitMap is all 0
  * @tc.type: FUNC
  * @tc.require:Check cap bitMap not exist
  */
@@ -148,7 +148,7 @@ HWTEST_F(DiscBleUtilsTest, CheckCapBitMapExistTest_003, TestSize.Level1)
 
 /*
  * @tc.name: SetCapBitMapPosTest_001
- * @tc.desc: Test SetCapBitMapPos should failed when pos greater than or equal to capBitMapNum.
+ * @tc.desc: Test SetCapBitMapPos should failed when pos greater than or equal to capBitMapNum
  * @tc.type: FUNC
  * @tc.require:Set cap bitMap pos is invaild
  */
@@ -170,7 +170,7 @@ HWTEST_F(DiscBleUtilsTest, SetCapBitMapPosTest_001, TestSize.Level1)
 
 /*
  * @tc.name: SetCapBitMapPosTest_002
- * @tc.desc: Test SetCapBitMapPos should success when set cap bit map at pos offset.
+ * @tc.desc: Test SetCapBitMapPos should success when set cap bit map at pos offset
  * @tc.type: FUNC
  * @tc.require:Set cap bitMap at pos offset success
  */
@@ -196,7 +196,7 @@ HWTEST_F(DiscBleUtilsTest, SetCapBitMapPosTest_002, TestSize.Level1)
 
 /*
  * @tc.name: UnsetCapBitMapPosTest_001
- * @tc.desc: Test UnsetCapBitMapPos should failed when pos greater than or equal to capBitMapNum.
+ * @tc.desc: Test UnsetCapBitMapPos should failed when pos greater than or equal to capBitMapNum
  * @tc.type: FUNC
  * @tc.require:Unset cap bitMap pos is invaild
  */
@@ -219,7 +219,7 @@ HWTEST_F(DiscBleUtilsTest, UnsetCapBitMapPosTest_001, TestSize.Level1)
 /*
  * @tc.name: UnsetCapBitMapPosTest_002
  * @tc.desc: Test UnsetCapBitMapPos should success when SetCapBitMapPos is successfully set at the pos offset,
- *           UnsetCapBitMapPos successfully unset the pos offset.
+ *           UnsetCapBitMapPos successfully unset the pos offset
  * @tc.type: FUNC
  * @tc.require:Unset cap bitMap success at pos offset
  */
@@ -249,7 +249,7 @@ HWTEST_F(DiscBleUtilsTest, UnsetCapBitMapPosTest_002, TestSize.Level1)
 
 /*
  * @tc.name: DiscBleGetDeviceName_001
- * @tc.desc: Test DiscBleGetDeviceName should return SOFTBUS_INVALID_PARAM when deviceName is nullptr or size is zero.
+ * @tc.desc: Test DiscBleGetDeviceName should return SOFTBUS_INVALID_PARAM when deviceName is nullptr or size is zero
  * @tc.type: FUNC
  * @tc.require:Invalid input parameter test
  */
@@ -270,7 +270,7 @@ HWTEST_F(DiscBleUtilsTest, DiscBleGetDeviceName_001, TestSize.Level1)
 /*
  * @tc.name: DiscBleGetDeviceIdHash_001
  * @tc.desc: Test DiscBleGetDeviceIdHash should return SOFTBUS_INVALID_PARAM when devIdHash is nullptr or len is greater
- *           then DISC_MAX_DEVICE_ID_LEN.
+ *           then DISC_MAX_DEVICE_ID_LEN
  * @tc.type: FUNC
  * @tc.require:Invalid input parameter test
  */
@@ -291,7 +291,7 @@ HWTEST_F(DiscBleUtilsTest, DiscBleGetDeviceIdHash_001, TestSize.Level1)
 /*
  * @tc.name: DiscBleGetShortUserIdHash_001
  * @tc.desc: Test DiscBleGetShortUserIdHash should return false when hashStr is nullptr or len is greater
- *           then SHORT_USER_ID_HASH_LEN.
+ *           then SHORT_USER_ID_HASH_LEN
  * @tc.type: FUNC
  * @tc.require:Invalid input parameter test
  */
@@ -311,7 +311,7 @@ HWTEST_F(DiscBleUtilsTest, DiscBleGetShortUserIdHash_001, TestSize.Level1)
 
 /*
  * @tc.name: AssembleTLVTest_001
- * @tc.desc: Test AssembleTLV should return SOFTBUS_DISCOVER_BLE_ASSEMBLE_DATA_FAIL when remainLen equals 0.
+ * @tc.desc: Test AssembleTLV should return SOFTBUS_DISCOVER_BLE_ASSEMBLE_DATA_FAIL when remainLen equals 0
  * @tc.type: FUNC
  * @tc.require:Invalid input parameter test
  */
@@ -331,7 +331,7 @@ HWTEST_F(DiscBleUtilsTest, AssembleTLVTest_001, TestSize.Level1)
 
 /*
  * @tc.name: AssembleTLVTest_002
- * @tc.desc: Test AssembleTLV should return SOFTBUS_OK when assemble deviceName length more then 15.
+ * @tc.desc: Test AssembleTLV should return SOFTBUS_OK when assemble deviceName length more then 15
  * @tc.type: FUNC
  * @tc.require:Invalid input parameter test
  */
@@ -439,7 +439,7 @@ HWTEST_F(DiscBleUtilsTest, GetDeviceInfoFromDisAdvData_003, TestSize.Level1)
 /*
  * @tc.name: GetDeviceInfoFromDisAdvData_004
  * @tc.desc: Test GetNeedUpdateAdvertiser should return SOFTBUS_BC_MGR_UNEXPECTED_PACKETS when rspData.payload
- *           is nullptr.
+ *           is nullptr
  * @tc.type: FUNC
  * @tc.require:Invalid input parameter test
  */
@@ -469,7 +469,7 @@ HWTEST_F(DiscBleUtilsTest, GetDeviceInfoFromDisAdvData_004, TestSize.Level1)
 /*
  * @tc.name: GetDeviceInfoFromDisAdvData_005
  * @tc.desc: Test GetDeviceInfoFromDisAdvData should return SOFTBUS_BC_MGR_UNEXPECTED_PACKETS
- *           when rspLenis equals zero.
+ *           when rspLenis equals zero
  * @tc.type: FUNC
  * @tc.require:Invalid input parameter test
  */
@@ -498,7 +498,7 @@ HWTEST_F(DiscBleUtilsTest, GetDeviceInfoFromDisAdvData_005, TestSize.Level1)
 
 /*
  * @tc.name: GetDeviceInfoFromDisAdvData_006
- * @tc.desc: Test GetNeedUpdateAdvertiser should return SOFTBUS_OK when paramter is vaild.
+ * @tc.desc: Test GetNeedUpdateAdvertiser should return SOFTBUS_OK when paramter is vaild
  * @tc.type: FUNC
  * @tc.require:Valid input parameter test
  */

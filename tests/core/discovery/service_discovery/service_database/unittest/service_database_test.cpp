@@ -66,7 +66,7 @@ void ServiceDatabaseTest::TearDownTestCase(void) { }
 
 /*
  * @tc.name: ServiceDatabaseInitTest001
- * @tc.desc: Test ServiceDatabaseInit.
+ * @tc.desc: Test ServiceDatabaseInit
  * @tc.type: FUNC
  * @tc.require:
  */
@@ -76,11 +76,11 @@ HWTEST_F(ServiceDatabaseTest, ServiceDatabaseInitTest001, TestSize.Level1)
 
     EXPECT_EQ(ServiceDatabaseInit(), SOFTBUS_OK);
 
-    // Return SOFTBUS_OK when ServiceDatabaseInit is called multiple times.
+    // Return SOFTBUS_OK when ServiceDatabaseInit is called multiple times
     EXPECT_EQ(ServiceDatabaseInit(), SOFTBUS_OK);
 
     ServiceDatabaseDeinit();
-    // Return SOFTBUS_OK when ServiceDatabaseDeinit is called multiple times.
+    // Return SOFTBUS_OK when ServiceDatabaseDeinit is called multiple times
     ServiceDatabaseDeinit();
 
     DISC_LOGI(DISC_INIT, "ServiceDatabaseInitTest001 end");
@@ -88,7 +88,7 @@ HWTEST_F(ServiceDatabaseTest, ServiceDatabaseInitTest001, TestSize.Level1)
 
 /*
  * @tc.name: ServiceDatabaseDeinitTest001
- * @tc.desc: Test ServiceDatabaseDeinit when softbus_server is dead.
+ * @tc.desc: Test ServiceDatabaseDeinit when softbus_server is dead
  * @tc.type: FUNC
  * @tc.require:
  */
@@ -111,7 +111,7 @@ HWTEST_F(ServiceDatabaseTest, ServiceDatabaseDeinitTest001, TestSize.Level1)
 
 /*
  * @tc.name: AddServiceInfoTest001
- * @tc.desc: Test AddServiceInfo when ServiceInfo is invalid.
+ * @tc.desc: Test AddServiceInfo when ServiceInfo is invalid
  * @tc.type: FUNC
  * @tc.require:
  */
@@ -129,7 +129,7 @@ HWTEST_F(ServiceDatabaseTest, AddServiceInfoTest001, TestSize.Level1)
 
 /*
  * @tc.name: AddServiceInfoTest002
- * @tc.desc: Test AddServiceInfo when ServiceInfo is valid.
+ * @tc.desc: Test AddServiceInfo when ServiceInfo is valid
  * @tc.type: FUNC
  * @tc.require:
  */
@@ -152,7 +152,7 @@ HWTEST_F(ServiceDatabaseTest, AddServiceInfoTest002, TestSize.Level1)
 
 /*
  * @tc.name: AddServiceInfoTest003
- * @tc.desc: Test AddServiceInfo when customData is invalid.
+ * @tc.desc: Test AddServiceInfo when customData is invalid
  * @tc.type: FUNC
  * @tc.require:
  */
@@ -181,7 +181,7 @@ HWTEST_F(ServiceDatabaseTest, AddServiceInfoTest003, TestSize.Level1)
 
 /*
  * @tc.name: GetServiceInfoTest001
- * @tc.desc: Test GetServiceInfo when input param is invalid.
+ * @tc.desc: Test GetServiceInfo when input param is invalid
  * @tc.type: FUNC
  * @tc.require:
  */
@@ -205,7 +205,7 @@ HWTEST_F(ServiceDatabaseTest, GetServiceInfoTest001, TestSize.Level1)
 
 /*
  * @tc.name: GetServiceInfoTest002
- * @tc.desc: Test AddServiceInfo and GetServiceInfo.
+ * @tc.desc: Test AddServiceInfo and GetServiceInfo
  * @tc.type: FUNC
  * @tc.require:
  */
@@ -236,7 +236,7 @@ HWTEST_F(ServiceDatabaseTest, GetServiceInfoTest002, TestSize.Level1)
 
 /*
  * @tc.name: GetAllServiceInfosTest001
- * @tc.desc: Test GetAllServiceInfos when input param is invalid.
+ * @tc.desc: Test GetAllServiceInfos when input param is invalid
  * @tc.type: FUNC
  * @tc.require:
  */
@@ -256,7 +256,7 @@ HWTEST_F(ServiceDatabaseTest, GetAllServiceInfosTest001, TestSize.Level1)
 
 /*
  * @tc.name: GetAllServiceInfosTest002
- * @tc.desc: Test AddServiceInfo and GetAllServiceInfos.
+ * @tc.desc: Test AddServiceInfo and GetAllServiceInfos
  * @tc.type: FUNC
  * @tc.require:
  */
@@ -295,7 +295,7 @@ HWTEST_F(ServiceDatabaseTest, GetAllServiceInfosTest002, TestSize.Level1)
 
 /*
  * @tc.name: GetAllServiceInfosTest003
- * @tc.desc: Test GetAllServiceInfos when input param is invalid.
+ * @tc.desc: Test GetAllServiceInfos when input param is invalid
  * @tc.type: FUNC
  * @tc.require:
  */
@@ -322,7 +322,7 @@ HWTEST_F(ServiceDatabaseTest, GetAllServiceInfosTest003, TestSize.Level1)
 
 /*
  * @tc.name: RemoveServiceInfoTest001
- * @tc.desc: Test RemoveServiceInfo when input param is invalid.
+ * @tc.desc: Test RemoveServiceInfo when input param is invalid
  * @tc.type: FUNC
  * @tc.require:
  */
@@ -341,7 +341,7 @@ HWTEST_F(ServiceDatabaseTest, RemoveServiceInfoTest001, TestSize.Level1)
 
 /*
  * @tc.name: RemoveServiceInfoTest002
- * @tc.desc: Test RemoveServiceInfo.
+ * @tc.desc: Test RemoveServiceInfo
  * @tc.type: FUNC
  * @tc.require:
  */
@@ -396,7 +396,7 @@ HWTEST_F(ServiceDatabaseTest, RemoveServiceInfoTest002, TestSize.Level1)
 
 /*
  * @tc.name: UpdateServiceInfoTest001
- * @tc.desc: Test UpdateServiceInfo when input param is invalid.
+ * @tc.desc: Test UpdateServiceInfo when input param is invalid
  * @tc.type: FUNC
  * @tc.require:
  */
@@ -415,7 +415,7 @@ HWTEST_F(ServiceDatabaseTest, UpdateServiceInfoTest001, TestSize.Level1)
 
 /*
  * @tc.name: UpdateServiceInfoTest002
- * @tc.desc: Test UpdateServiceInfo when input param is invalid.
+ * @tc.desc: Test UpdateServiceInfo when input param is invalid
  * @tc.type: FUNC
  * @tc.require:
  */
@@ -434,7 +434,7 @@ HWTEST_F(ServiceDatabaseTest, UpdateServiceInfoTest002, TestSize.Level1)
 
 /*
  * @tc.name: UpdateServiceInfoTest003
- * @tc.desc: Test UpdateServiceInfo and GetServiceInfo.
+ * @tc.desc: Test UpdateServiceInfo and GetServiceInfo
  * @tc.type: FUNC
  * @tc.require:
  */

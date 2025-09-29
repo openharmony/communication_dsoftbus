@@ -720,7 +720,7 @@ HWTEST_F(AuthSessionMessageTest, POST_BT_V1_DEVID_TEST_001, TestSize.Level1)
 
 /*
  * @tc.name: IS_EMPTY_SHORT_HASH_STR_TEST_001
- * @tc.desc:
+ * @tc.desc: IsEmptyShortHashStr test
  * @tc.type: FUNC
  * @tc.require:
  */
@@ -747,7 +747,7 @@ HWTEST_F(AuthSessionMessageTest, IS_EMPTY_SHORT_HASH_STR_TEST_001, TestSize.Leve
 
 /*
  * @tc.name: GET_LOCAL_UDISHASH_TEST_001
- * @tc.desc:
+ * @tc.desc: GetLocalUdidHash test
  * @tc.type: FUNC
  * @tc.require:
  */
@@ -759,7 +759,7 @@ HWTEST_F(AuthSessionMessageTest, GET_LOCAL_UDISHASH_TEST_001, TestSize.Level1)
 
 /*
  * @tc.name: UPDATE_LOCAL_AUTH_STATE_TEST_001
- * @tc.desc:
+ * @tc.desc: UpdateLocalAuthState test
  * @tc.type: FUNC
  * @tc.require:
  */
