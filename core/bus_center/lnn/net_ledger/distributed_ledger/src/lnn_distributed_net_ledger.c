@@ -28,8 +28,10 @@
 #include "auth_deviceprofile.h"
 #include "bus_center_manager.h"
 #include "bus_center_event.h"
+#include "g_enhance_auth_func_pack.h"
 #include "g_enhance_lnn_func.h"
 #include "g_enhance_lnn_func_pack.h"
+#include "lnn_async_callback_utils.h"
 #include "lnn_connection_addr_utils.h"
 
 #include "lnn_map.h"
@@ -877,7 +879,11 @@ static void UpdateDeviceInfoToMlps(const char *udid)
         return;
     }
     info->isOnline = true;
-    SendDeviceStateToMlpsPacked(info);
+    SoftBusLooper *looper = GetLooper(LOOP_TYPE_DEFAULT);
+    if (LnnAsyncCallbackDelayHelper(looper, SendDeviceStateToMlpsPacked, (void *)info, 0) != SOFTBUS_OK) {
+        LNN_LOGE(LNN_BUILDER, "async call send device info fail");
+        SoftBusFree(info);
+    }
 }
 
 int32_t LnnUpdateNodeInfo(NodeInfo *newInfo, int32_t connectionType)
@@ -1399,7 +1405,7 @@ static void UpdateTrustedDb(int64_t accountId, const char *deviceId)
         LNN_LOGE(LNN_LEDGER, "get local accountId fail");
         return;
     }
-    int32_t localUserId = GetActiveOsAccountIds();
+    int32_t localUserId = JudgeDeviceTypeAndGetOsAccountIds();
     if ((localAccountId == accountId && LnnIsDefaultOhosAccount()) || localAccountId != accountId) {
         if (LnnFindDeviceUdidTrustedInfoFromDb(deviceId) == SOFTBUS_NOT_FIND &&
             DpHasAccessControlProfile(deviceId, true, localUserId)) {
@@ -2274,6 +2280,9 @@ int32_t LnnGetOsTypeByNetworkId(const char *networkId, int32_t *osType)
     NodeInfo *nodeInfo = LnnGetNodeInfoById(networkId, CATEGORY_NETWORK_ID);
     if (nodeInfo == NULL) {
         SoftBusMutexUnlock(&g_distributedNetLedger.lock);
+        if (AuthMetaGetOsTypeByMetaNodeIdPacked(networkId, osType) == SOFTBUS_OK) {
+            return SOFTBUS_OK;
+        }
         char *anonyNetworkId = NULL;
         Anonymize(networkId, &anonyNetworkId);
         LNN_LOGE(LNN_LEDGER, "get info by networkId=%{public}s failed", AnonymizeWrapper(anonyNetworkId));

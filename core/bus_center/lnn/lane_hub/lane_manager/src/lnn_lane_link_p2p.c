@@ -1583,7 +1583,7 @@ static bool IsGuideChannelRetryErrcode(uint32_t p2pRequestId, int32_t reason)
         reason == SOFTBUS_CONN_PV1_WAIT_CONNECT_RESPONSE_TIMEOUT ||
         reason == SOFTBUS_CONN_PV2_WAIT_CONNECT_RESPONSE_TIMEOUT ||
         reason == SOFTBUS_CONN_SOURCE_REUSE_LINK_FAILED ||
-        reason == SOFTBUS_SPARK_SNED_MSG_FAILED  ||
+        reason == SOFTBUS_SPARK_SNED_MSG_FAILED ||
         reason == SOFTBUS_INTERACT_CONTROL_SIGNALING_FAIL) {
         return true;
     }
@@ -2494,12 +2494,9 @@ static bool IsHasAuthConnInfo(const char *networkId)
         LNN_LOGE(LNN_LANE, "get peer uuid fail");
         return false;
     }
-    bool wifiActive = AuthDeviceCheckConnInfo(uuid, AUTH_LINK_TYPE_WIFI, false);
-    bool brActive = AuthDeviceCheckConnInfo(uuid, AUTH_LINK_TYPE_BR, true);
-    bool bleActive = AuthDeviceCheckConnInfo(uuid, AUTH_LINK_TYPE_BLE, true);
-    LNN_LOGI(LNN_LANE, "wifiActive=%{public}d, brActive=%{public}d, bleActive=%{public}d",
-        wifiActive, brActive, bleActive);
-    if (wifiActive || brActive || bleActive) {
+    if (AuthDeviceCheckConnInfo(uuid, AUTH_LINK_TYPE_WIFI, false) ||
+        AuthDeviceCheckConnInfo(uuid, AUTH_LINK_TYPE_BR, true) ||
+        AuthDeviceCheckConnInfo(uuid, AUTH_LINK_TYPE_BLE, true)) {
         return true;
     }
     return false;
@@ -2625,12 +2622,12 @@ static int32_t TryWifiDirectReuse(const LinkRequest *request, uint32_t laneReqId
     }
     LaneResource resourceItem;
     (void)memset_s(&resourceItem, sizeof(LaneResource), 0, sizeof(LaneResource));
-    int32_t ret = FindLaneResourceByLinkType(peerUdid, request->linkType, &resourceItem);
-    if (ret != SOFTBUS_OK) {
+    if (FindLaneResourceByLinkType(peerUdid, LANE_HML, &resourceItem) != SOFTBUS_OK &&
+        FindLaneResourceByLinkType(peerUdid, LANE_P2P, &resourceItem) != SOFTBUS_OK) {
         LNN_LOGI(LNN_LANE, "not find lane resource");
-        return ret;
+        return SOFTBUS_LANE_RESOURCE_NOT_FOUND;
     }
-    enum WifiDirectLinkType linkType = (request->linkType == LANE_HML) ? WIFI_DIRECT_LINK_TYPE_HML :
+    enum WifiDirectLinkType linkType = (resourceItem.link.type == LANE_HML) ? WIFI_DIRECT_LINK_TYPE_HML :
         WIFI_DIRECT_LINK_TYPE_P2P;
     LNN_LOGI(LNN_LANE, "ask wifidirect if need nego channel, linkType=%{public}d", linkType);
     if (GetWifiDirectManager()->isNegotiateChannelNeeded(request->peerNetworkId, linkType)) {
@@ -2652,20 +2649,6 @@ static bool BrAuthIsMostPriority(const char *networkId)
         AuthDeviceCheckConnInfo(uuid, AUTH_LINK_TYPE_BR, true));
 }
 
-static bool IsDeviceOnlineByTargetType(const char *networkId, DiscoveryType onlineType)
-{
-    NodeInfo node;
-    (void)memset_s(&node, sizeof(NodeInfo), 0, sizeof(NodeInfo));
-    if (LnnGetRemoteNodeInfoById(networkId, CATEGORY_NETWORK_ID, &node) != SOFTBUS_OK) {
-        char *anonyNetworkId = NULL;
-        Anonymize(networkId, &anonyNetworkId);
-        LNN_LOGE(LNN_LANE, "getRemoteInfo fail, networkId=%{public}s", AnonymizeWrapper(anonyNetworkId));
-        AnonymizeFree(anonyNetworkId);
-        return false;
-    }
-    return LnnHasDiscoveryType(&node, onlineType);
-}
-
 static void GetHmlTwoGuideType(const LinkRequest *request, WdGuideType *guideList, uint32_t *linksNum)
 {
     if (QueryControlPlaneNodeValidPacked(request->peerNetworkId) == SOFTBUS_OK) {
@@ -2674,12 +2657,7 @@ static void GetHmlTwoGuideType(const LinkRequest *request, WdGuideType *guideLis
     if (IsHasAuthConnInfo(request->peerNetworkId)) {
         guideList[(*linksNum)++] = LANE_ACTIVE_AUTH_TRIGGER;
     }
-    if (IsDeviceOnlineByTargetType(request->peerNetworkId, DISCOVERY_TYPE_BLE)) {
-        guideList[(*linksNum)++] = LANE_BLE_TRIGGER;
-    }
-    if (*linksNum == 0) {
-        guideList[(*linksNum)++] = LANE_ACTIVE_AUTH_TRIGGER;
-    }
+    guideList[(*linksNum)++] = LANE_BLE_TRIGGER;
 }
 
 static int32_t GetGuideChannelInfo(const LinkRequest *request, WdGuideType *guideList, uint32_t *linksNum)

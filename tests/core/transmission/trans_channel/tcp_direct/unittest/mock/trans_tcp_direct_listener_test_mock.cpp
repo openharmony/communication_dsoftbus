@@ -55,6 +55,11 @@ int32_t AuthGetConnInfo(AuthHandle authHandle, AuthConnInfo *connInfo)
 {
     return GetTransTcpDirectListenerInterface()->AuthGetConnInfo(authHandle, connInfo);
 }
+
+char *PackExternalDeviceRequest(const AppInfo *appInfo, int64_t requestId)
+{
+    return GetTransTcpDirectListenerInterface()->PackExternalDeviceRequest(appInfo, requestId);
+}
 }
 }
 

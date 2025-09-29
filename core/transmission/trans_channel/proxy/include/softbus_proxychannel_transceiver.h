@@ -35,6 +35,7 @@ typedef struct {
 typedef struct {
     ListNode node;
     uint32_t businessFlag;
+    int32_t channelId;
     bool isListened;
     bool isLoadFailed;
     int32_t retryTime;
@@ -49,12 +50,13 @@ void TransProxyPostKeepAliveMsgToLoop(const ProxyChannelInfo *chan);
 void TransProxyPostAuthNegoMsgToLooperDelay(uint32_t authRequestId, int32_t channelId, uint32_t delayTime);
 void TransProxyPagingHandshakeMsgToLoop(int32_t channelId, uint8_t *authKey, uint32_t keyLen);
 int32_t TransProxyTransInit(void);
-int32_t TransProxyCloseConnChannel(uint32_t connectionId, bool isServer);
-int32_t TransProxyCloseConnChannelReset(uint32_t connectionId, bool isDisconnect, bool isServer, bool deviceType);
+int32_t TransProxyCloseConnChannel(uint32_t connectionId, bool isServer, bool isD2d);
+int32_t TransProxyCloseConnChannelReset(
+    uint32_t connectionId, bool isDisconnect, bool isServer, bool deviceType, bool isD2d);
 int32_t TransProxyOpenConnChannel(const AppInfo *appInfo, const ConnectOption *connInfo, int32_t *channelId);
 int32_t TransProxyTransSendMsg(uint32_t connectionId, uint8_t *buf, uint32_t len, int32_t priority, int32_t pid);
 void TransCreateConnByConnId(uint32_t connId, bool isServer);
-int32_t TransDecConnRefByConnId(uint32_t connId, bool isServer);
+int32_t TransDecConnRefByConnId(uint32_t connId, bool isServer, bool isD2d);
 int32_t TransAddConnRefByConnId(uint32_t connId, bool isServer);
 int32_t TransProxyGetConnInfoByConnId(uint32_t connId, ConnectOption *connInfo);
 int32_t TransDelConnByReqId(uint32_t requestId);
@@ -62,7 +64,7 @@ int32_t CheckIsProxyAuthChannel(ConnectOption *connInfo);
 void TransProxyNegoSessionKeySucc(int32_t channelId);
 void TransProxyNegoSessionKeyFail(int32_t channelId, int32_t errCode);
 int32_t TransProxyGetConnOptionByChanId(int32_t channelId, ConnectOption *connOpt);
-int32_t TransCheckPagingListenState(uint32_t businessFlag);
+int32_t TransCheckPagingListenState(const PagingListenCheckInfo *checkInfo);
 int32_t TransPagingWaitListenStatus(const uint32_t businessFlag, PagingWaitListenStatus status);
 int32_t TransAddConnItem(ProxyConnInfo *conn);
 

@@ -167,6 +167,8 @@ ohos_unittest("TransUdpNegoStaticTest") {
     "$dsoftbus_root_path/core/frame/init/include",
     "$dsoftbus_root_path/interfaces/kits/connect",
     "$dsoftbus_root_path/core/adapter/bus_center/include",
+    "$dsoftbus_root_path/core/transmission/trans_channel/proxy/src",
+    "$dsoftbus_root_path/core/adapter/transmission/include",
   ]
 
   deps = [

@@ -615,7 +615,7 @@ HWTEST_F(TransTcpDirectMessageStaticTest, OpenDataBusRequestReplyTest001, TestSi
     uint32_t flags = 1;
 
     int32_t ret = OpenDataBusRequestReply(nullptr, channelId, seq, flags);
-    EXPECT_EQ(ret, SOFTBUS_TRANS_GET_PACK_REPLY_FAILED);
+    EXPECT_EQ(ret, SOFTBUS_INVALID_PARAM);
 }
 
 /**
@@ -962,5 +962,16 @@ HWTEST_F(TransTcpDirectMessageStaticTest, TransAsyncTcpDirectChannelTaskTest001,
     testConn->appInfo.waitOpenReplyCnt = LOOPER_REPLY_CNT_MAX - 1;
     TransAsyncTcpDirectChannelTask(channelId);
     TransDelSessionConnById(channelId);
+}
+
+/**
+ * @tc.name: BuildEventExtra001
+ * @tc.desc: BuildEventExtra test
+ * @tc.type: FUNC
+ * @tc.require:
+ */
+HWTEST_F(TransTcpDirectMessageStaticTest, BuildEventExtra001, TestSize.Level1)
+{
+    EXPECT_NO_FATAL_FAILURE(BuildEventExtra(2688));
 }
 }

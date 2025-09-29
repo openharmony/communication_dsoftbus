@@ -129,9 +129,9 @@ bool TransHasAndUpdatePagingListenPacked(ProxyChannelInfo *info)
     return GetSoftbusProxychannelMessagePagingInterface()->TransHasAndUpdatePagingListenPacked(info);
 }
 
-int32_t TransCheckPagingListenState(uint32_t businessFlag)
+int32_t TransCheckPagingListenState(const PagingListenCheckInfo *checkInfo)
 {
-    return GetSoftbusProxychannelMessagePagingInterface()->TransCheckPagingListenState(businessFlag);
+    return GetSoftbusProxychannelMessagePagingInterface()->TransCheckPagingListenState(checkInfo);
 }
 
 int32_t TransReversePullUpPacked(const uint32_t chatMode, const uint32_t businessFlag, const char *pkgName)
@@ -152,9 +152,9 @@ int32_t TransProxyCreatePagingChanInfo(ProxyChannelInfo *chan)
     return GetSoftbusProxychannelMessagePagingInterface()->TransProxyCreatePagingChanInfo(chan);
 }
 
-int32_t TransProxyGetChannelByFlag(uint32_t businessFlag, ProxyChannelInfo *chan, bool isClient)
+int32_t TransProxyGetChannelByCheckInfo(const PagingListenCheckInfo *checkInfo, ProxyChannelInfo *chan, bool isClient)
 {
-    return GetSoftbusProxychannelMessagePagingInterface()->TransProxyGetChannelByFlag(businessFlag, chan, isClient);
+    return GetSoftbusProxychannelMessagePagingInterface()->TransProxyGetChannelByCheckInfo(checkInfo, chan, isClient);
 }
 
 int32_t ConvertBytesToHexString(char *outBuf, uint32_t outBufLen, const unsigned char *inBuf,

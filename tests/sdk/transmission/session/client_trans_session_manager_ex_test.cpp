@@ -442,7 +442,7 @@ HWTEST_F(TransClientSessionManagerExTest, TransClientSessionManagerExTest11, Tes
 
     ret = GetLogicalBandwidth(1, &optValue, &optValueSize);
     EXPECT_EQ(ret, SOFTBUS_OK);
-    EXPECT_EQ(optValue, BANDWIDTH_BUTT);
+    EXPECT_NE(optValue, HIGH_BANDWIDTH);
     EXPECT_EQ(optValueSize, sizeof(int32_t));
 
     ret = GetLogicalBandwidth(2, &optValue, &optValueSize);

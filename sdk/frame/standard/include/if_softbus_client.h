@@ -76,6 +76,8 @@ public:
 
     virtual void OnMsdpRangeResult(const RangeResultInnerInfo *rangeInfo);
 
+    virtual void OnGroupStateChange(int32_t retCode);
+
     virtual int32_t OnClientTransLimitChange(int32_t channelId, uint8_t tos);
 
     virtual int32_t OnChannelBind(int32_t channelId, int32_t channelType);

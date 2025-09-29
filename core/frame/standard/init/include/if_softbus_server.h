@@ -81,6 +81,9 @@ public:
     virtual int32_t ProcessInnerEvent(int32_t eventType, uint8_t *buf, uint32_t len) = 0;
     virtual int32_t PrivilegeCloseChannel(uint64_t tokenId, int32_t pid, const char *peerNetworkId) = 0;
     virtual int32_t SetDisplayName(const char *pkgName, const char *nameData, uint32_t len);
+    virtual int32_t CreateGroupOwner(const char *pkgName, const struct GroupOwnerConfig *config,
+        struct GroupOwnerResult *result);
+    virtual void DestroyGroupOwner(const char *pkgName);
     virtual int32_t CreateServer(const char *pkgName, const char *name);
     virtual int32_t RemoveServer(const char *pkgName, const char *name);
     virtual int32_t Connect(const char *pkgName, const char *name, const Address *address);

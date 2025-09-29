@@ -39,6 +39,7 @@ ohos_unittest("P2pAdapterTest") {
     "$dsoftbus_root_path/core/common/include",
     "$dsoftbus_root_path/core/connection/interface",
     "$dsoftbus_root_path/core/connection/wifi_direct_cpp/dbinder",
+    "$dsoftbus_root_path/core/connection/wifi_direct_cpp/entity",
     "$dsoftbus_root_path/core/discovery/interface",
     "$dsoftbus_root_path/core/discovery/manager/include",
     "$dsoftbus_root_path/core/frame/common/include",
@@ -78,6 +79,7 @@ ohos_unittest("P2pAdapterTest") {
   deps = [
     "$dsoftbus_dfx_path:softbus_dfx",
     "$dsoftbus_root_path/adapter:softbus_adapter",
+    "$dsoftbus_root_path/core/common:softbus_utils",
   ]
 
   sources = [
@@ -126,6 +128,7 @@ ohos_unittest("P2pAdapterTest") {
     "$wifi_direct_cpp_path/wifi_direct_initiator.cpp",
     "$wifi_direct_cpp_path/wifi_direct_ip_manager.cpp",
     "$wifi_direct_cpp_path/wifi_direct_manager.cpp",
+    "$wifi_direct_cpp_path/wifi_direct_p2p_adapter.cpp",
     "$wifi_direct_cpp_path/wifi_direct_role_option.cpp",
     "$wifi_direct_cpp_path/wifi_direct_scheduler.cpp",
     "$wifi_direct_cpp_path/wifi_direct_scheduler_factory.cpp",

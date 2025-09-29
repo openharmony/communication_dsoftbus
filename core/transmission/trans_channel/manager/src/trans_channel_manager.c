@@ -422,6 +422,7 @@ int32_t TransOpenChannel(const SessionParam *param, TransInfo *transInfo)
         SoftBusHitraceChainEnd();
         return ret;
     }
+    appInfo->forceGenerateUk = IsNeedSinkGenerateUk(appInfo->peerNetWorkId);
     ret = TransAddSocketChannelInfo(
         param->sessionName, param->sessionId, INVALID_CHANNEL_ID, CHANNEL_TYPE_UNDEFINED, CORE_SESSION_STATE_INIT);
     if (ret != SOFTBUS_OK) {
@@ -430,10 +431,10 @@ int32_t TransOpenChannel(const SessionParam *param, TransInfo *transInfo)
         SoftBusHitraceChainEnd();
         return ret;
     }
+    GetOsTypeByNetworkId(param->peerDeviceId, &appInfo->osType);
     NodeInfo nodeInfo;
     (void)memset_s(&nodeInfo, sizeof(NodeInfo), 0, sizeof(NodeInfo));
     int32_t peerRet = LnnGetRemoteNodeInfoById(appInfo->peerNetWorkId, CATEGORY_NETWORK_ID, &nodeInfo);
-    appInfo->osType = nodeInfo.deviceInfo.osType;
     TransEventExtra extra;
     (void)memset_s(&extra, sizeof(TransEventExtra), 0, sizeof(TransEventExtra));
     TransBuildTransOpenChannelStartEvent(&extra, appInfo, &nodeInfo, peerRet);
@@ -442,7 +443,7 @@ int32_t TransOpenChannel(const SessionParam *param, TransInfo *transInfo)
     extra.sessionId = param->sessionId;
     TRANS_EVENT(EVENT_SCENE_OPEN_CHANNEL, EVENT_STAGE_OPEN_CHANNEL_START, extra);
     if (param->isQosLane) {
-        ret = TransAsyncGetLaneInfo(param, &laneHandle, appInfo->callingTokenId, appInfo->timeStart);
+        ret = TransAsyncGetLaneInfo(param, &laneHandle, appInfo);
         if (ret != SOFTBUS_OK) {
             Anonymize(param->sessionName, &tmpName);
             TRANS_LOGE(TRANS_CTRL, "Async get Lane failed, sessionName=%{public}s, sessionId=%{public}d",
@@ -828,6 +829,8 @@ int32_t TransSendMsg(int32_t channelId, int32_t channelType, const void *data, u
 
 void TransChannelDeathCallback(const char *pkgName, int32_t pid)
 {
+    TRANS_CHECK_AND_RETURN_LOGE((pkgName != NULL), TRANS_CTRL, "pkgName is null.");
+    TRANS_LOGI(TRANS_CTRL, "pkgName=%{public}s, pid=%{public}d", pkgName, pid);
     TransProxyDeathCallback(pkgName, pid);
     TransTdcDeathCallback(pkgName, pid);
     TransTdcChannelInfoDeathCallback(pkgName, pid);

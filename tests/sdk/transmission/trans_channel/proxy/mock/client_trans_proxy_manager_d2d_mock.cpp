@@ -105,5 +105,10 @@ uint8_t *TransProxyPackNewHeadD2DData(
 {
     return GetProxyManagerD2DInterface()->TransProxyPackNewHeadD2DData(dataInfo, sliceNum, pktType, cnt, dataLen);
 }
+
+ClientEnhanceFuncList *ClientEnhanceFuncListGet(void)
+{
+    return GetProxyManagerD2DInterface()->ClientEnhanceFuncListGet();
+}
 }
 }

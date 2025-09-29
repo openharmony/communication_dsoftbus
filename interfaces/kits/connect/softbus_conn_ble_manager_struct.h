@@ -28,7 +28,8 @@
 extern "C" {
 #endif
 
-#define BLE_CONNECT_TIMEOUT_MILLIS (10 * 1000)
+#define BLE_CONNECT_TIMEOUT_MIN_MILLIS (4 * 1000)
+#define BLE_CONNECT_TIMEOUT_MAX_MILLIS (10 * 1000)
 #define BLE_CONNECT_KEEP_ALIVE_TIMEOUT_MILLIS (10 * 1000)
 #define BLE_GATT_CONNECT_MAX_RETRY_COUNT (2)
 
@@ -53,6 +54,7 @@ typedef struct {
     ListNode requests;
     // The ble connection failed to scan the broadcast due to a timeout of 3.1 seconds and was retried
     uint32_t retryCount;
+    uint32_t connectTimeoutMs;
 } ConnBleDevice;
 
 typedef struct {
@@ -75,6 +77,7 @@ typedef struct {
     uint16_t challengeCode; /* for ble direct */
     ConnectResult result;
     ConnectStatistics statistics;
+    uint32_t connectTimeoutMs;
 } ConnBleConnectRequestContext;
 
 typedef struct {

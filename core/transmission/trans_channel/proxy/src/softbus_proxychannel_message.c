@@ -566,7 +566,8 @@ static void TransPagingProcessResetMsg(const ProxyMessage *msg)
         SoftBusFree(info);
         return;
     }
-    if (TransDecConnRefByConnId(msg->connId, false) == SOFTBUS_OK) {
+    TransProxyUnRegQosInfo(msg->connId, (int32_t)msg->msgHead.myId, true);
+    if (TransDecConnRefByConnId(msg->connId, false, true) == SOFTBUS_OK) {
         TRANS_LOGI(TRANS_CTRL, "recv reset dis connect, connId=%{public}u", msg->connId);
         (void)ConnDisconnectDevice(msg->connId);
     }
@@ -704,7 +705,11 @@ static int32_t TransProxyPagingCheckListen(ProxyChannelInfo *chan)
         }
         return SOFTBUS_OK;
     }
-    ret = TransCheckPagingListenState(chan->appInfo.peerData.businessFlag);
+    PagingListenCheckInfo checkInfo = {
+        .businessFlag = chan->appInfo.peerData.businessFlag,
+        .channelId = chan->channelId
+    };
+    ret = TransCheckPagingListenState(&checkInfo);
     if (ret != SOFTBUS_OK) {
         TRANS_LOGE(TRANS_CTRL, "CheckPagingListenState failed, businessFlag=%{public}u",
             chan->appInfo.peerData.businessFlag);
@@ -788,15 +793,15 @@ void TransPagingProcessHandshakeMsg(
     }
 }
 
-void TransWaitListenResult(uint32_t businessFlag, int32_t reason)
+void TransWaitListenResult(const PagingListenCheckInfo *checkInfo, int32_t reason)
 {
-    int32_t ret = reason;
-    if (ret != SOFTBUS_OK) {
-        goto EXIT_ERR;
-    }
     ProxyChannelInfo chan;
     (void)memset_s(&chan, sizeof(ProxyChannelInfo), 0, sizeof(ProxyChannelInfo));
-    ret = TransProxyGetChannelByFlag(businessFlag, &chan, false);
+    int32_t ret = TransProxyGetChannelByCheckInfo(checkInfo, &chan, false);
+    if (ret != SOFTBUS_OK) {
+        return;
+    }
+    ret = reason;
     if (ret != SOFTBUS_OK) {
         goto EXIT_ERR;
     }
@@ -930,7 +935,6 @@ int32_t TransPagingParseMessage(char *data, int32_t len, ProxyMessage *msg)
     uint8_t udidHash[D2D_SHORT_UDID_HASH_LEN] = { 0 };
     int32_t ret = TransPagingParseHeadAndGetHash(data, len, msg, accountHash, udidHash);
     TRANS_CHECK_AND_RETURN_RET_LOGE(ret == SOFTBUS_OK, ret, TRANS_CTRL, "parse msg head fail");
-
     AesGcmCipherKey cipherKey = { 0 };
     cipherKey.keyLen = SESSION_KEY_LENGTH;
     char authAccountHash[SHA_256_HEX_HASH_LEN] = { 0 };
@@ -952,6 +956,7 @@ int32_t TransPagingParseMessage(char *data, int32_t len, ProxyMessage *msg)
         SoftBusFree(decData);
         return SOFTBUS_DECRYPT_ERR;
     }
+    (void)memset_s(&cipherKey, sizeof(AesGcmCipherKey), 0, sizeof(AesGcmCipherKey));
     msg->data = (char *)decData;
     msg->dataLen = (int32_t)decDataLen;
     switch (msg->msgHead.type) {
@@ -1090,6 +1095,7 @@ int32_t TransPagingPackMessage(PagingProxyMessage *msg, ProxyDataInfo *dataInfo,
         return SOFTBUS_MEM_ERR;
     }
     int32_t ret = SoftBusEncryptData(&cipherKey, dataInfo->inData, dataInfo->inLen, encData, &encDataLen);
+    (void)memset_s(&cipherKey, sizeof(AesGcmCipherKey), 0, sizeof(AesGcmCipherKey));
     if (ret != SOFTBUS_OK) {
         TRANS_LOGE(TRANS_CTRL, "encrypt buf fail, myChannelId=%{public}d", msg->msgHead.channelId);
         SoftBusFree(buf);
@@ -1251,6 +1257,7 @@ char *TransProxyPackHandshakeErrMsg(int32_t errCode)
 
 static bool TransProxyAddJsonObject(cJSON *root, ProxyChannelInfo *info)
 {
+    (void)AddBoolToJsonObject(root, FORCE_GENERATE_UK, info->appInfo.forceGenerateUk);
     if (!AddNumberToJsonObject(root, JSON_KEY_TYPE, info->appInfo.appType) ||
         !AddStringToJsonObject(root, JSON_KEY_IDENTITY, info->identity) ||
         !AddStringToJsonObject(root, JSON_KEY_DEVICE_ID, info->appInfo.myData.deviceId) ||
@@ -1757,6 +1764,7 @@ static int32_t TransProxyGetJsonObject(cJSON *root, const char *msg, int32_t len
     if (!GetJsonObjectNumberItem(root, API_VERSION, (int32_t *)&(chan->appInfo.myData.apiVersion))) {
         TRANS_LOGD(TRANS_CTRL, "peer apiVersion is null.");
     }
+    (void)GetJsonObjectBoolItem(root, FORCE_GENERATE_UK, &(chan->appInfo.forceGenerateUk));
     uint32_t remoteCapability = 0;
     (void)GetJsonObjectNumberItem(root, TRANS_CAPABILITY, (int32_t *)&remoteCapability);
     chan->appInfo.channelCapability = remoteCapability & TRANS_CHANNEL_CAPABILITY;

@@ -167,7 +167,7 @@ EXIT:
     return nullptr;
 }
 
-/**
+/*
  * @tc.name: SoftbusGattInit001
  * @tc.desc: Test lnit will return SOFTBUS_OK when called more than once
  * @tc.type: FUNC
@@ -182,7 +182,7 @@ HWTEST_F(SoftbusBleGattTest, SoftbusGattInit001, TestSize.Level1)
     EXPECT_EQ(ret, SOFTBUS_OK);
 }
 
-/**
+/*
  * @tc.name: SoftbusGattDeInit001
  * @tc.desc: Test DeInit will return SOFTBUS_OK when called more than once
  * @tc.type: FUNC
@@ -197,7 +197,7 @@ HWTEST_F(SoftbusBleGattTest, SoftbusGattDeInit001, TestSize.Level1)
     EXPECT_EQ(ret, SOFTBUS_OK);
 }
 
-/**
+/*
  * @tc.name: SoftbusRegisterAdvCb001
  * @tc.desc: Test SoftbusRegisterAdvCb will return SOFTBUS_INVALID_PARAM when called more than once
  * @tc.type: FUNC
@@ -227,7 +227,7 @@ static SoftbusBroadcastCallback g_softbusBcBleCbTest = {
     .OnEnableBroadcastingCallback = FakeBcBleCallback,
 };
 
-/**
+/*
  * @tc.name: SoftbusRegisterAdvCb002
  * @tc.desc: Test SoftbusRegisterAdvCb will return SOFTBUS_LOCK_ERR when called more than once
  * @tc.type: FUNC
@@ -240,7 +240,7 @@ HWTEST_F(SoftbusBleGattTest, SoftbusRegisterAdvCb002, TestSize.Level1)
     EXPECT_EQ(ret, SOFTBUS_LOCK_ERR);
 }
 
-/**
+/*
  * @tc.name: SoftbusRegisterAdvCb003
  * @tc.desc: Test SoftbusRegisterAdvCb will return OHOS_BT_STATUS_FAIL
  * @tc.type: FUNC
@@ -261,7 +261,7 @@ HWTEST_F(SoftbusBleGattTest, SoftbusRegisterAdvCb003, TestSize.Level1)
     EXPECT_EQ(ret, SOFTBUS_OK);
 }
 
-/**
+/*
  * @tc.name: SoftbusRegisterAdvCb004
  * @tc.desc: Test SoftbusRegisterAdvCb will return SOFTBUS_OK when BleGattRegisterCallbacks
  * @tc.type: FUNC
@@ -281,7 +281,7 @@ HWTEST_F(SoftbusBleGattTest, SoftbusRegisterAdvCb004, TestSize.Level1)
     EXPECT_EQ(ret, SOFTBUS_OK);
 }
 
-/**
+/*
  * @tc.name: SoftbusUnRegisterAdvCb001
  * @tc.desc: Test SoftbusUnRegisterAdvCb will return SOFTBUS_INVALID_PARAM when given invalid param
  * @tc.type: FUNC
@@ -297,7 +297,7 @@ HWTEST_F(SoftbusBleGattTest, SoftbusUnRegisterAdvCb001, TestSize.Level1)
     EXPECT_EQ(ret, SOFTBUS_INVALID_PARAM);
 }
 
-/**
+/*
  * @tc.name: SoftbusUnRegisterAdvCb002
  * @tc.desc: Test SoftbusUnRegisterAdvCb will return SOFTBUS_LOCK_ERR when never called init
  * @tc.type: FUNC
@@ -310,7 +310,7 @@ HWTEST_F(SoftbusBleGattTest, SoftbusUnRegisterAdvCb002, TestSize.Level1)
     EXPECT_EQ(ret, SOFTBUS_LOCK_ERR);
 }
 
-/**
+/*
  * @tc.name: SoftbusUnRegisterAdvCb003
  * @tc.desc: Test SoftbusUnRegisterAdvCb will return SOFTBUS_OK when given vaild param
  * @tc.type: FUNC
@@ -332,7 +332,7 @@ HWTEST_F(SoftbusBleGattTest, SoftbusUnRegisterAdvCb003, TestSize.Level1)
     EXPECT_EQ(ret, SOFTBUS_OK);
 }
 
-/**
+/*
  * @tc.name: SoftbusRegisterScanCb001
  * @tc.desc: Test SoftbusRegisterScanCb will return SOFTBUS_INVALID_PARAM when given invalid param
  * @tc.type: FUNC
@@ -385,7 +385,7 @@ static SoftbusScanCallback g_softbusBcBleScanCbTest = {
     .OnLpDeviceInfoCallback = FakeLpDeviceInfoCallback,
 };
 
-/**
+/*
  * @tc.name: SoftbusRegisterScanCb002
  * @tc.desc: Test SoftbusRegisterScanCb will return SOFTBUS_LOCK_ERR when never called init
  * @tc.type: FUNC
@@ -398,9 +398,9 @@ HWTEST_F(SoftbusBleGattTest, SoftbusRegisterScanCb002, TestSize.Level1)
     EXPECT_EQ(ret, SOFTBUS_LOCK_ERR);
 }
 
-/**
+/*
  * @tc.name: SoftbusRegisterScanCb003
- * @tc.desc: Test SoftbusRegisterScanCb will return OHOS_BT_STATUS_FAIL
+ * @tc.desc: Test SoftbusRegisterScanCb will return OHOS_BT_STATUS_FAIL.
  * @tc.type: FUNC
  * @tc.require: NONE
  */
@@ -419,7 +419,7 @@ HWTEST_F(SoftbusBleGattTest, SoftbusRegisterScanCb003, TestSize.Level1)
     EXPECT_EQ(ret, SOFTBUS_OK);
 }
 
-/**
+/*
  * @tc.name: SoftbusRegisterScanCb004
  * @tc.desc: Test SoftbusRegisterScanCb will return SOFTBUS_BC_ADAPTER_REGISTER_FAIL when scan channel are all uesd
  * @tc.type: FUNC
@@ -446,7 +446,7 @@ HWTEST_F(SoftbusBleGattTest, SoftbusRegisterScanCb004, TestSize.Level1)
     EXPECT_EQ(ret, SOFTBUS_OK);
 }
 
-/**
+/*
  * @tc.name: SoftbusUnRegisterScanCb001
  * @tc.desc: Test SoftbusUnRegisterScanCb will return SOFTBUS_INVALID_PARAM when given invalid param
  * @tc.type: FUNC
@@ -462,7 +462,7 @@ HWTEST_F(SoftbusBleGattTest, SoftbusUnRegisterScanCb001, TestSize.Level1)
     EXPECT_EQ(ret, SOFTBUS_INVALID_PARAM);
 }
 
-/**
+/*
  * @tc.name: SoftbusUnRegisterScanCb002
  * @tc.desc: Test SoftbusUnRegisterScanCb will return SOFTBUS_LOCK_ERR when never called init
  * @tc.type: FUNC
@@ -475,7 +475,7 @@ HWTEST_F(SoftbusBleGattTest, SoftbusUnRegisterScanCb002, TestSize.Level1)
     EXPECT_EQ(ret, SOFTBUS_LOCK_ERR);
 }
 
-/**
+/*
  * @tc.name: SoftbusUnRegisterScanCb003
  * @tc.desc: Test SoftbusUnRegisterScanCb will return SOFTBUS_OK when successfully unregistered
  * @tc.type: FUNC
@@ -499,7 +499,7 @@ HWTEST_F(SoftbusBleGattTest, SoftbusUnRegisterScanCb003, TestSize.Level1)
     EXPECT_EQ(ret, SOFTBUS_OK);
 }
 
-/**
+/*
  * @tc.name: SoftbusStartAdv001
  * @tc.desc: Test SoftbusStartAdv will return SOFTBUS_INVALID_PARAM when given invalid param
  * @tc.type: FUNC
@@ -554,7 +554,7 @@ static SoftbusBroadcastData BuildBcData(void)
     return data;
 }
 
-/**
+/*
  * @tc.name: SoftbusStartAdv002
  * @tc.desc: Test SoftbusStartAdv will return SOFTBUS_LOCK_ERR when never called init
  * @tc.type: FUNC
@@ -570,7 +570,7 @@ HWTEST_F(SoftbusBleGattTest, SoftbusStartAdv002, TestSize.Level1)
     EXPECT_EQ(ret, SOFTBUS_LOCK_ERR);
 }
 
-/**
+/*
  * @tc.name: SoftbusStartAdv003
  * @tc.desc: Test SoftbusStartAdv will return SOFTBUS_BC_ADAPTER_NOT_IN_USED_FAIL when advld is not used
  * @tc.type: FUNC
@@ -595,7 +595,7 @@ HWTEST_F(SoftbusBleGattTest, SoftbusStartAdv003, TestSize.Level1)
     EXPECT_EQ(ret, SOFTBUS_OK);
 }
 
-/**
+/*
  * @tc.name: SoftbusStartAdv004
  * @tc.desc: Test SoftbusStartAdv will return SOFTBUS_ALREADY_TRIGGERED
  * @tc.type: FUNC
@@ -622,7 +622,7 @@ HWTEST_F(SoftbusBleGattTest, SoftbusStartAdv004, TestSize.Level1)
     EXPECT_EQ(ret, SOFTBUS_OK);
 }
 
-/**
+/*
  * @tc.name: SoftbusStopAdv001
  * @tc.desc: Test SoftbusStopAdv will return SOFTBUS_LOCK_ERR when never called lnit
  * @tc.type: FUNC
@@ -635,7 +635,7 @@ HWTEST_F(SoftbusBleGattTest, SoftbusStopAdv001, TestSize.Level1)
     EXPECT_EQ(ret, SOFTBUS_LOCK_ERR);
 }
 
-/**
+/*
  * @tc.name: SoftbusStopAdv002
  * @tc.desc: Test SoftbusStopAdv will return SOFTBUS_BC_ADAPTER_NOT_IN_USED_FAIL when advld never registed
  * @tc.type: FUNC
@@ -653,7 +653,7 @@ HWTEST_F(SoftbusBleGattTest, SoftbusStopAdv002, TestSize.Level1)
     EXPECT_EQ(ret, SOFTBUS_OK);
 }
 
-/**
+/*
  * @tc.name: SoftbusStopAdv004
  * @tc.desc: Test SoftbusStopAdv will return SOFTBUS_OK when advld has been registed
  * @tc.type: FUNC
@@ -678,7 +678,7 @@ HWTEST_F(SoftbusBleGattTest, SoftbusStopAdv004, TestSize.Level1)
     EXPECT_EQ(ret, SOFTBUS_OK);
 }
 
-/**
+/*
  * @tc.name: SoftbusStopAdv005
  * @tc.desc: Test SoftbusStopAdv will return SOFTBUS_OK when advld has been stopped
  * @tc.type: FUNC
@@ -706,7 +706,7 @@ HWTEST_F(SoftbusBleGattTest, SoftbusStopAdv005, TestSize.Level1)
     EXPECT_EQ(ret, SOFTBUS_OK);
 }
 
-/**
+/*
  * @tc.name: SoftbusSetAdvData001
  * @tc.desc: Test SoftbusSetAdvData will return SOFTBUS_INVALID_PARAM when given invalid param
  * @tc.type: FUNC
@@ -719,7 +719,7 @@ HWTEST_F(SoftbusBleGattTest, SoftbusSetAdvData001, TestSize.Level1)
     EXPECT_EQ(ret, SOFTBUS_INVALID_PARAM);
 }
 
-/**
+/*
  * @tc.name: SoftbusSetAdvData002
  * @tc.desc: Test SoftbusSetAdvData will return SOFTBUS_LOCK_ERR when never lnit
  * @tc.type: FUNC
@@ -734,7 +734,7 @@ HWTEST_F(SoftbusBleGattTest, SoftbusSetAdvData002, TestSize.Level1)
     EXPECT_EQ(ret, SOFTBUS_LOCK_ERR);
 }
 
-/**
+/*
  * @tc.name: SoftbusSetAdvData003
  * @tc.desc: Test SoftbusSetAdvData will return SOFTBUS_BC_ADAPTER_NOT_IN_USED_FAIL when advld is not used
  * @tc.type: FUNC
@@ -753,7 +753,7 @@ HWTEST_F(SoftbusBleGattTest, SoftbusSetAdvData003, TestSize.Level1)
     EXPECT_EQ(ret, SOFTBUS_OK);
 }
 
-/**
+/*
  * @tc.name: SoftbusSetAdvData005
  * @tc.desc: Test SoftbusSetAdvData will return SOFTBUS_ALREADY_TRIGGERED when broadcast has already registed
  * @tc.type: FUNC
@@ -778,7 +778,7 @@ HWTEST_F(SoftbusBleGattTest, SoftbusSetAdvData005, TestSize.Level1)
     EXPECT_EQ(ret, SOFTBUS_OK);
 }
 
-/**
+/*
  * @tc.name: SoftbusUpdateAdvData001
  * @tc.desc: Test SoftbusUpdateAdvData will return SOFTBUS_LOCK_ERR when never called init
  * @tc.type: FUNC
@@ -793,7 +793,7 @@ HWTEST_F(SoftbusBleGattTest, SoftbusUpdateAdvData001, TestSize.Level1)
     EXPECT_EQ(ret, SOFTBUS_LOCK_ERR);
 }
 
-/**
+/*
  * @tc.name: SoftbusUpdateAdvData002
  * @tc.desc: Test SoftbusUpdateAdvData will return SOFTBUS_INVALID_PARAM when given invalid params
  * @tc.type: FUNC
@@ -818,7 +818,7 @@ HWTEST_F(SoftbusBleGattTest, SoftbusUpdateAdvData002, TestSize.Level1)
     EXPECT_EQ(ret, SOFTBUS_OK);
 }
 
-/**
+/*
  * @tc.name: SoftbusStartScan001
  * @tc.desc: Test SoftbusStartScan will return SOFTBUS_INVALID_PARAM when given invalid params
  * @tc.type: FUNC
@@ -831,7 +831,7 @@ HWTEST_F(SoftbusBleGattTest, SoftbusStartScan001, TestSize.Level1)
     EXPECT_EQ(ret, SOFTBUS_INVALID_PARAM);
 }
 
-/**
+/*
  * @tc.name: SoftbusStartScan002
  * @tc.desc: Test SoftbusStartScan will return SOFTBUS_LOCK_ERR when never called init
  * @tc.type: FUNC
@@ -850,7 +850,7 @@ HWTEST_F(SoftbusBleGattTest, SoftbusStartScan002, TestSize.Level1)
     SoftBusBcScanFilter softBusBcScanFilter = {};
     softBusBcScanFilter.address = (int8_t *)"address";
     softBusBcScanFilter.deviceName = (int8_t *)"deviceName";
-    softBusBcScanFilter.serviceUuid = 1;
+    softBusBcScanFilter.serviceId = 1;
     softBusBcScanFilter.serviceDataLength = 1;
     softBusBcScanFilter.manufactureId = 1;
     softBusBcScanFilter.manufactureDataLength = 1;
@@ -861,7 +861,7 @@ HWTEST_F(SoftbusBleGattTest, SoftbusStartScan002, TestSize.Level1)
     EXPECT_EQ(ret, SOFTBUS_LOCK_ERR);
 }
 
-/**
+/*
  * @tc.name: SoftbusStartScan003
  * @tc.desc: Test SoftbusStartScan will return SOFTBUS_BC_ADAPTER_NOT_IN_USED_FAIL when given invalid params scannerld
  * @tc.type: FUNC
@@ -883,7 +883,7 @@ HWTEST_F(SoftbusBleGattTest, SoftbusStartScan003, TestSize.Level1)
     SoftBusBcScanFilter softBusBcScanFilter = {};
     softBusBcScanFilter.address = (int8_t *)"address";
     softBusBcScanFilter.deviceName = (int8_t *)"deviceName";
-    softBusBcScanFilter.serviceUuid = 1;
+    softBusBcScanFilter.serviceId = 1;
     softBusBcScanFilter.serviceDataLength = 1;
     softBusBcScanFilter.manufactureId = 1;
     softBusBcScanFilter.manufactureDataLength = 1;
@@ -896,7 +896,7 @@ HWTEST_F(SoftbusBleGattTest, SoftbusStartScan003, TestSize.Level1)
     EXPECT_EQ(ret, SOFTBUS_OK);
 }
 
-/**
+/*
  * @tc.name: SoftbusGetBroadcastHandle001
  * @tc.desc: Test SoftbusGetBroadcastHandle is  SOFTBUS_BC_ADAPTER_NOT_IN_USED_FAIL
  * @tc.type: FUNC
@@ -917,7 +917,7 @@ HWTEST_F(SoftbusBleGattTest, SoftbusGetBroadcastHandle001, TestSize.Level1)
     EXPECT_EQ(ret, SOFTBUS_OK);
 }
 
-/**
+/*
  * @tc.name: SoftbusGetBroadcastHandle002
  * @tc.desc: Test SoftbusGetBroadcastHandle is  SOFTBUS_OK
  * @tc.type: FUNC
@@ -944,7 +944,7 @@ HWTEST_F(SoftbusBleGattTest, SoftbusGetBroadcastHandle002, TestSize.Level1)
     EXPECT_EQ(ret, SOFTBUS_OK);
 }
 
-/**
+/*
  * @tc.name: SoftbusEnableSyncDataToLp001
  * @tc.desc: Test SoftbusEnableSyncDataToLp is  SOFTBUS_OK
  * @tc.type: FUNC
@@ -964,7 +964,7 @@ HWTEST_F(SoftbusBleGattTest, SoftbusEnableSyncDataToLp001, TestSize.Level1)
     EXPECT_EQ(ret, SOFTBUS_OK);
 }
 
-/**
+/*
  * @tc.name: DisableSyncDataToLpDevice001
  * @tc.desc: Test DisableSyncDataToLpDevice is  SOFTBUS_OK
  * @tc.type: FUNC
@@ -984,7 +984,7 @@ HWTEST_F(SoftbusBleGattTest, DisableSyncDataToLpDevice001, TestSize.Level1)
     EXPECT_EQ(ret, SOFTBUS_OK);
 }
 
-/**
+/*
  * @tc.name: SoftbusSetScanReportChanToLp001
  * @tc.desc: Test SoftbusSetScanReportChanToLp is  SOFTBUS_BC_ADAPTER_NOT_IN_USED_FAIL
  * @tc.type: FUNC
@@ -1003,7 +1003,7 @@ HWTEST_F(SoftbusBleGattTest, SoftbusSetScanReportChanToLp001, TestSize.Level1)
     EXPECT_EQ(ret, SOFTBUS_OK);
 }
 
-/**
+/*
  * @tc.name: SoftbusSetLpAdvParam001
  * @tc.desc: Test SoftbusSetLpAdvParam is  SOFTBUS_OK
  * @tc.type: FUNC
@@ -1029,7 +1029,7 @@ HWTEST_F(SoftbusBleGattTest, SoftbusSetLpAdvParam001, TestSize.Level1)
     EXPECT_EQ(ret, SOFTBUS_OK);
 }
 
-/**
+/*
  * @tc.name: SoftbusStopScan001
  * @tc.desc: Test SoftbusStopScan is  SOFTBUS_BC_ADAPTER_NOT_IN_USED_FAIL
  * @tc.type: FUNC
@@ -1048,7 +1048,7 @@ HWTEST_F(SoftbusBleGattTest, SoftbusStopScan001, TestSize.Level1)
     EXPECT_EQ(ret, SOFTBUS_OK);
 }
 
-/**
+/*
  * @tc.name: WrapperAdvEnableCb001
  * @tc.desc: WrapperAdvEnableCb will traverse when not Regist, will traverse when btAdvId is invalid
     will make true isAdvertising when BtStatus=OHOS_BT_STATUS_SUCCESS,
@@ -1091,7 +1091,7 @@ HWTEST_F(SoftbusBleGattTest, WrapperAdvEnableCb001, TestSize.Level1)
     EXPECT_EQ(ret, SOFTBUS_OK);
 }
 
-/**
+/*
  * @tc.name: WrapperAdvEnableCb002
  * @tc.desc: WrapperAdvEnableCb will keep traverse when advCallback.OnStartBroadcastingCallback=nullptr
  * @tc.type: FUNC
@@ -1137,7 +1137,7 @@ HWTEST_F(SoftbusBleGattTest, WrapperAdvEnableCb002, TestSize.Level1)
     EXPECT_EQ(ret, SOFTBUS_OK);
 }
 
-/**
+/*
  * @tc.name: WrapperAdvDisableCb001
  * @tc.desc: WrapperAdvDisableCb will keep traverse when not Regist, will keep traverse when btAdvId is invalid
  * @tc.type: FUNC
@@ -1175,7 +1175,7 @@ HWTEST_F(SoftbusBleGattTest, WrapperAdvDisableCb001, TestSize.Level1)
     EXPECT_EQ(ret, SOFTBUS_OK);
 }
 
-/**
+/*
  * @tc.name: WrapperAdvDisableCb002
  * @tc.desc: WrapperAdvDisableCb will keep traverse when advCallback.OnStopBroadcastingCallback=nullptr
  * @tc.type: FUNC
@@ -1221,7 +1221,7 @@ HWTEST_F(SoftbusBleGattTest, WrapperAdvDisableCb002, TestSize.Level1)
     EXPECT_EQ(ret, SOFTBUS_OK);
 }
 
-/**
+/*
  * @tc.name: WrapperAdvSetDataCb001
  * @tc.desc: WrapperAdvSetDataCb will keep traverse when not Regist, will keep traverse when btAdvId is invalid
  * @tc.type: FUNC
@@ -1261,7 +1261,7 @@ HWTEST_F(SoftbusBleGattTest, WrapperAdvSetDataCb001, TestSize.Level1)
     EXPECT_EQ(ret, SOFTBUS_OK);
 }
 
-/**
+/*
  * @tc.name: WrapperAdvSetDataCb002
  * @tc.desc: WrapperAdvSetDataCb will keep traverse when advCallback.OnSetBroadcastingCallback=nullptr
  * @tc.type: FUNC
@@ -1307,7 +1307,7 @@ HWTEST_F(SoftbusBleGattTest, WrapperAdvSetDataCb002, TestSize.Level1)
     EXPECT_EQ(ret, SOFTBUS_OK);
 }
 
-/**
+/*
  * @tc.name: WrapperAdvUpdateDataCb001
  * @tc.desc: WrapperAdvUpdateDataCb will keep traverse when not Regist, will keep traverse when btAdvId is invalid
  * @tc.type: FUNC
@@ -1347,7 +1347,7 @@ HWTEST_F(SoftbusBleGattTest, WrapperAdvUpdateDataCb001, TestSize.Level1)
     EXPECT_EQ(ret, SOFTBUS_OK);
 }
 
-/**
+/*
  * @tc.name: WrapperAdvUpdateDataCb002
  * @tc.desc: WrapperAdvUpdateDataCb will keep traverse when advCallback.OnUpdateBroadcastingCallback=nullptr
  * @tc.type: FUNC
@@ -1393,7 +1393,7 @@ HWTEST_F(SoftbusBleGattTest, WrapperAdvUpdateDataCb002, TestSize.Level1)
     EXPECT_EQ(ret, SOFTBUS_OK);
 }
 
-/**
+/*
  * @tc.name: WrapperAdvUpdateParamCb001
  * @tc.desc: WrapperAdvUpdateParamCb will keep traverse when not regist, will keep traverse when btAdvId is invalid
  * @tc.type: FUNC
@@ -1432,7 +1432,7 @@ HWTEST_F(SoftbusBleGattTest, WrapperAdvUpdateParamCb001, TestSize.Level1)
     EXPECT_EQ(ret, SOFTBUS_OK);
 }
 
-/**
+/*
  * @tc.name: WrapperAdvUpdateParamCb002
  * @tc.desc: WrapperAdvUpdateParamCb will keep traverse when advCallback.OnSetBroadcastingParamCallback=nullptr
  * @tc.type: FUNC
@@ -1479,7 +1479,7 @@ HWTEST_F(SoftbusBleGattTest, WrapperAdvUpdateParamCb002, TestSize.Level1)
     EXPECT_EQ(ret, SOFTBUS_OK);
 }
 
-/**
+/*
  * @tc.name: WrapperOnAdvEnableExCb001
  * @tc.desc: WrapperOnAdvEnableExCb will keep traverse when not regist, will keep traverse when btAdvId is invalid
  * @tc.type: FUNC
@@ -1517,7 +1517,7 @@ HWTEST_F(SoftbusBleGattTest, WrapperOnAdvEnableExCb001, TestSize.Level1)
     EXPECT_EQ(ret, SOFTBUS_OK);
 }
 
-/**
+/*
  * @tc.name: WrapperOnAdvEnableExCb002
  * @tc.desc: WrapperOnAdvEnableExCb will keep traverse when advCallback.OnSetBroadcastingParamCallback=nullptr
  * @tc.type: FUNC
@@ -1563,7 +1563,7 @@ HWTEST_F(SoftbusBleGattTest, WrapperOnAdvEnableExCb002, TestSize.Level1)
     EXPECT_EQ(ret, SOFTBUS_OK);
 }
 
-/**
+/*
  * @tc.name: WrapperOnAdvDisableExCb001
  * @tc.desc: WrapperOnAdvDisableExCb will keep traverse when not regist, will keep traverse when btAdvId is invalid
  * @tc.type: FUNC
@@ -1601,7 +1601,7 @@ HWTEST_F(SoftbusBleGattTest, WrapperOnAdvDisableExCb001, TestSize.Level1)
     EXPECT_EQ(ret, SOFTBUS_OK);
 }
 
-/**
+/*
  * @tc.name: WrapperOnAdvDisableExCb002
  * @tc.desc: WrapperOnAdvDisableExCb will keep traverse when advCallback.OnDisableBroadcastingCallback=nullptr
  * @tc.type: FUNC
@@ -1647,7 +1647,7 @@ HWTEST_F(SoftbusBleGattTest, WrapperOnAdvDisableExCb002, TestSize.Level1)
     EXPECT_EQ(ret, SOFTBUS_OK);
 }
 
-/**
+/*
  * @tc.name: WrapperScanStateChangeCb0001
  * @tc.desc: Test WrapperScanStateChangeCb
  * @tc.type: FUNC
@@ -1672,7 +1672,7 @@ HWTEST_F(SoftbusBleGattTest, WrapperScanStateChangeCb0001, TestSize.Level1)
     EXPECT_EQ(ret, SOFTBUS_OK);
 }
 
-/**
+/*
  * @tc.name: WrapperLpDeviceInfoCb001
  * @tc.desc: Test WrapperLpDeviceInfoCb
  * @tc.type: FUNC
@@ -1700,7 +1700,7 @@ HWTEST_F(SoftbusBleGattTest, WrapperLpDeviceInfoCb001, TestSize.Level1)
     EXPECT_EQ(ret, SOFTBUS_OK);
 }
 
-/**
+/*
  * @tc.name: IsLpAvailable001
  * @tc.desc: Test IsLpAvailable
  * @tc.type: FUNC
@@ -1719,7 +1719,7 @@ HWTEST_F(SoftbusBleGattTest, IsLpAvailable001, TestSize.Level1)
     EXPECT_EQ(ret, SOFTBUS_OK);
 }
 
-/**
+/*
  * @tc.name: SoftbusSetLpParam001
  * @tc.desc: Test SoftbusSetLpParam
  * @tc.type: FUNC
@@ -1741,7 +1741,7 @@ HWTEST_F(SoftbusBleGattTest, SoftbusSetLpParam001, TestSize.Level1)
     EXPECT_EQ(ret, SOFTBUS_OK);
 }
 
-/**
+/*
  * @tc.name: SoftbusSetLpParam002
  * @tc.desc: Test SoftbusSetLpParam when SetBtUuidByBroadCastType return error
  * @tc.type: FUNC
@@ -1764,7 +1764,7 @@ HWTEST_F(SoftbusBleGattTest, SoftbusSetLpParam002, TestSize.Level1)
     EXPECT_EQ(ret, SOFTBUS_OK);
 }
 
-/**
+/*
  * @tc.name: RegisterScanListener001
  * @tc.desc: test register scan listener
  * @tc.type: FUNC
@@ -1789,7 +1789,7 @@ HWTEST_F(SoftbusBleGattTest, RegisterScanListener001, TestSize.Level3)
     }
 }
 
-/**
+/*
  * @tc.name: UnRegisterScanListener001
  * @tc.desc: test unregister scan listener
  * @tc.type: FUNC
@@ -1806,7 +1806,7 @@ HWTEST_F(SoftbusBleGattTest, UnRegisterScanListener001, TestSize.Level3)
     ASSERT_EQ(MockBluetooth::interface->UnRegisterScanListener(scannerId), SOFTBUS_INVALID_PARAM);
 }
 
-/**
+/*
  * @tc.name: ScanLifecycle001
  * @tc.desc: test complete scan life cycle
  * @tc.type: FUNC
@@ -1838,7 +1838,7 @@ HWTEST_F(SoftbusBleGattTest, ScanLifecycle001, TestSize.Level3)
     ASSERT_EQ(MockBluetooth::interface->UnRegisterScanListener(scannerId), SOFTBUS_INVALID_PARAM);
 }
 
-/**
+/*
  * @tc.name: ScanResultCb001
  * @tc.desc: test scan result callback
  * @tc.type: FUNC
@@ -1894,7 +1894,7 @@ HWTEST_F(SoftbusBleGattTest, ScanResultCb001, TestSize.Level3)
     ASSERT_FALSE(scanResultCtx.Expect(scannerId, &expectScanResult));
 }
 
-/**
+/*
  * @tc.name: RegisterBroadcaster001
  * @tc.desc: test register adv callback
  * @tc.type: FUNC
@@ -1972,7 +1972,7 @@ ClEANUP:
     return result;
 }
 
-/**
+/*
  * @tc.name: SoftbusSetAdvParamterTest001
  * @tc.desc: Test SoftbusSetAdvParamter when param == NULL
  * @tc.type: FUNC
@@ -1985,7 +1985,7 @@ HWTEST_F(SoftbusBleGattTest, SoftbusSetAdvParamterTest001, TestSize.Level1)
     EXPECT_EQ(ret, SOFTBUS_INVALID_PARAM);
 }
 
-/**
+/*
  * @tc.name: SoftbusSetAdvParamterTest002
  * @tc.desc: Test SoftbusSetAdvParamter when CheckAdvChanInUsed return false
  * @tc.type: FUNC
@@ -2006,7 +2006,7 @@ HWTEST_F(SoftbusBleGattTest, SoftbusSetAdvParamterTest002, TestSize.Level1)
     EXPECT_EQ(ret, SOFTBUS_OK);
 }
 
-/**
+/*
  * @tc.name: SoftbusSetAdvParamterTest003
  * @tc.desc: Test SoftbusSetAdvParamter when isAdvertising is false
  * @tc.type: FUNC
@@ -2032,7 +2032,7 @@ HWTEST_F(SoftbusBleGattTest, SoftbusSetAdvParamterTest003, TestSize.Level1)
     EXPECT_EQ(ret, SOFTBUS_OK);
 }
 
-/**
+/*
  * @tc.name: SoftbusEnableBroadcasting001
  * @tc.desc: Test SoftbusEnableBroadcasting when CheckAdvChanInUsed return false
  * @tc.type: FUNC
@@ -2052,7 +2052,7 @@ HWTEST_F(SoftbusBleGattTest, SoftbusEnableBroadcasting001, TestSize.Level1)
     EXPECT_EQ(ret, SOFTBUS_OK);
 }
 
-/**
+/*
  * @tc.name: SoftbusEnableBroadcastingTest002
  * @tc.desc: Test SoftbusEnableBroadcasting when isAdvertising is false
  * @tc.type: FUNC
@@ -2076,7 +2076,7 @@ HWTEST_F(SoftbusBleGattTest, SoftbusEnableBroadcastingTest002, TestSize.Level1)
     EXPECT_EQ(ret, SOFTBUS_OK);
 }
 
-/**
+/*
  * @tc.name: SoftbusDisableBroadcasting001
  * @tc.desc: Test SoftbusDisableBroadcasting when CheckAdvChanInUsed return false
  * @tc.type: FUNC
@@ -2096,7 +2096,7 @@ HWTEST_F(SoftbusBleGattTest, SoftbusDisableBroadcasting001, TestSize.Level1)
     EXPECT_EQ(ret, SOFTBUS_OK);
 }
 
-/**
+/*
  * @tc.name: SoftbusDisableBroadcastingTest002
  * @tc.desc: Test SoftbusDisableBroadcasting when isAdvertising is false
  * @tc.type: FUNC
@@ -2120,7 +2120,7 @@ HWTEST_F(SoftbusBleGattTest, SoftbusDisableBroadcastingTest002, TestSize.Level1)
     EXPECT_EQ(ret, SOFTBUS_OK);
 }
 
-/**
+/*
  * @tc.name: SoftbusSetScanParamsTest001
  * @tc.desc: Test SoftbusSetScanParams when param is nullptr
  * @tc.type: FUNC

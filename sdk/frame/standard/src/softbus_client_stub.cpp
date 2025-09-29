@@ -54,6 +54,7 @@ SoftBusClientStub::SoftBusClientStub()
     memberFuncMap_[CLIENT_SET_CHANNEL_INFO] = &SoftBusClientStub::SetChannelInfoInner;
     memberFuncMap_[CLIENT_ON_DATA_LEVEL_CHANGED] = &SoftBusClientStub::OnDataLevelChangedInner;
     memberFuncMap_[CLIENT_ON_RANGE_RESULT] = &SoftBusClientStub::OnMsdpRangeResultInner;
+    memberFuncMap_[CLIENT_ON_GROUP_STATE_CHANGE] = &SoftBusClientStub::OnGroupStateChangeInner;
     memberFuncMap_[CLIENT_ON_TRANS_LIMIT_CHANGE] = &SoftBusClientStub::OnClientTransLimitChangeInner;
     memberFuncMap_[CLIENT_ON_CHANNEL_BIND] = &SoftBusClientStub::OnChannelBindInner;
     memberFuncMap_[CLIENT_CHANNEL_ON_QOS] = &SoftBusClientStub::OnChannelOnQosInner;
@@ -801,6 +802,18 @@ int32_t SoftBusClientStub::OnMsdpRangeResultInner(MessageParcel &data, MessagePa
     return SOFTBUS_OK;
 }
 
+int32_t SoftBusClientStub::OnGroupStateChangeInner(MessageParcel &data, MessageParcel &reply)
+{
+    int32_t retCode = 0;
+    if (!data.ReadInt32(retCode)) {
+        COMM_LOGE(COMM_SDK, "read retCode fail");
+        return SOFTBUS_TRANS_PROXY_READINT_FAILED;
+    }
+
+    OnGroupStateChange(retCode);
+    return SOFTBUS_OK;
+}
+
 int32_t SoftBusClientStub::OnChannelBind(int32_t channelId, int32_t channelType)
 {
     return TransOnChannelBind(channelId, channelType);
@@ -981,6 +994,11 @@ int32_t SoftBusClientStub::OnTimeSyncResult(const void *info, uint32_t infoTypeL
 {
     (void)infoTypeLen;
     return LnnOnTimeSyncResult(info, retCode);
+}
+
+void SoftBusClientStub::OnGroupStateChange(int32_t retCode)
+{
+    return LnnOnGroupStateChange(retCode);
 }
 
 void SoftBusClientStub::OnPublishLNNResult(int32_t publishId, int32_t reason)

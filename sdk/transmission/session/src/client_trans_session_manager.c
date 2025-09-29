@@ -2737,11 +2737,10 @@ int32_t SetSessionStateBySessionId(int32_t sessionId, SessionState sessionState,
         return SOFTBUS_TRANS_SESSION_INFO_NOT_FOUND;
     }
 
-    TRANS_LOGI(TRANS_SDK, "socket state change:%{public}d -> %{public}d. socket=%{public}d",
-        sessionNode->lifecycle.sessionState, sessionState, sessionId);
+    TRANS_LOGI(TRANS_SDK, "socket state change:%{public}d -> %{public}d. socket=%{public}d, reason=%{public}d",
+        sessionNode->lifecycle.sessionState, sessionState, sessionId, optional);
     sessionNode->lifecycle.sessionState = sessionState;
     if (sessionState == SESSION_STATE_CANCELLING) {
-        TRANS_LOGW(TRANS_SDK, "set socket to cancelling, socket=%{public}d, errCode=%{public}d", sessionId, optional);
         sessionNode->lifecycle.bindErrCode = optional;
     }
     UnlockClientSessionServerList();

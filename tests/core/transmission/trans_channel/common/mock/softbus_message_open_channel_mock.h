@@ -38,6 +38,8 @@ public:
     virtual bool GetJsonObjectNumber64Item(const cJSON *json, const char * const string, int64_t *target) = 0;
     virtual bool GetJsonObjectInt32Item(const cJSON *json, const char * const string, int32_t *target) = 0;
     virtual bool GetJsonObjectNumber16Item(const cJSON *json, const char * const string, uint16_t *target) = 0;
+    virtual int32_t SoftBusBase64Decode(unsigned char *dst, size_t dlen,
+        size_t *olen, const unsigned char *src, size_t slen) = 0;
 };
 
 class SoftbusMessageOpenChannelInterfaceMock : public SoftbusMessageOpenChannelInterface {
@@ -57,6 +59,7 @@ public:
     MOCK_METHOD3(GetJsonObjectNumber64Item, bool(const cJSON *, const char * const, int64_t *));
     MOCK_METHOD3(GetJsonObjectInt32Item, bool(const cJSON *, const char * const, int32_t *));
     MOCK_METHOD3(GetJsonObjectNumber16Item, bool(const cJSON *, const char * const, uint16_t *));
+    MOCK_METHOD5(SoftBusBase64Decode, int32_t (unsigned char *, size_t, size_t *, const unsigned char *, size_t));
 };
 extern "C" {
     void cJSON_Delete(cJSON *json);

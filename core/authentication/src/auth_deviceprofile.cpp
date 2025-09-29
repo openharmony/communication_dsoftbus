@@ -122,7 +122,7 @@ static int32_t GetStringHash(std::string str, char *hashStrBuf, int32_t len)
 static bool IsTrustDevice(std::vector<OHOS::DistributedDeviceProfile::AccessControlProfile> &trustDevices,
     const char *deviceIdHash, const char *anonyDeviceIdHash, bool isOnlyPointToPoint)
 {
-    int32_t localUserId = GetActiveOsAccountIds();
+    int32_t localUserId = JudgeDeviceTypeAndGetOsAccountIds();
     for (const auto &trustDevice : trustDevices) {
         if (isOnlyPointToPoint &&
             trustDevice.GetBindType() == (uint32_t)OHOS::DistributedDeviceProfile::BindType::SAME_ACCOUNT) {
@@ -162,7 +162,7 @@ static bool IsTrustDevice(std::vector<OHOS::DistributedDeviceProfile::AccessCont
 static bool CompareAclWithPeerDeviceInfo(const OHOS::DistributedDeviceProfile::AccessControlProfile &aclProfile,
     const char *peerAccountHash, const char *peerUdid, int32_t peerUserId)
 {
-    int32_t localUserId = GetActiveOsAccountIds();
+    int32_t localUserId = JudgeDeviceTypeAndGetOsAccountIds();
     char udid[UDID_BUF_LEN] = { 0 };
     uint8_t localAccountHash[SHA_256_HASH_LEN] = { 0 };
     char localAccountString[SHA_256_HEX_HASH_LEN] = { 0 };
@@ -436,7 +436,7 @@ static UpdateDpAclResult UpdateDpSameAccountAcl(const std::string peerUdid, int3
         "GetAllAccessControlProfile ret=%{public}d", ret);
     LNN_CHECK_AND_RETURN_RET_LOGE(!aclProfiles.empty(), GET_ALL_ACL_IS_EMPTY, LNN_STATE, "aclProfiles is empty");
     UpdateDpAclResult updateResult = UPDATE_ACL_NOT_MATCH;
-    int32_t localUserId = GetActiveOsAccountIds();
+    int32_t localUserId = JudgeDeviceTypeAndGetOsAccountIds();
     char udid[UDID_BUF_LEN] = {0};
     if (LnnGetLocalStrInfo(STRING_KEY_DEV_UDID, udid, UDID_BUF_LEN) != SOFTBUS_OK) {
         LNN_LOGE(LNN_STATE, "get local udid fail");
@@ -497,14 +497,12 @@ static void InsertDpSameAccountAcl(const std::string &peerUdid, int32_t peerUser
     OHOS::DistributedDeviceProfile::Accesser accesser;
     OHOS::DistributedDeviceProfile::Accessee accessee;
     char udid[UDID_BUF_LEN] = { 0 };
-    if (LnnGetLocalStrInfo(STRING_KEY_DEV_UDID, udid, UDID_BUF_LEN) != SOFTBUS_OK) {
-        LNN_LOGE(LNN_STATE, "get local udid fail");
-        return;
-    }
+    LNN_CHECK_AND_RETURN_LOGE(LnnGetLocalStrInfo(STRING_KEY_DEV_UDID, udid, UDID_BUF_LEN) == SOFTBUS_OK,
+        LNN_STATE, "get local udid fail");
     uint64_t currentTime = SoftBusGetSysTimeMs();
     std::string localUdid(udid);
     accesser.SetAccesserDeviceId(localUdid);
-    accesser.SetAccesserUserId(GetActiveOsAccountIds());
+    accesser.SetAccesserUserId(JudgeDeviceTypeAndGetOsAccountIds());
     std::string uid;
     if (GetAccountUid(uid) != SOFTBUS_OK) {
         LNN_LOGE(LNN_STATE, "get account uid fail");
@@ -516,7 +514,8 @@ static void InsertDpSameAccountAcl(const std::string &peerUdid, int32_t peerUser
         accesser.SetAccesserSKTimeStamp(currentTime);
     }
     char bundleName[MAX_BUNDLE_NAME_LEN] = { 0 };
-    if (GenerateDsoftbusBundleName(peerUdid.c_str(), udid, GetActiveOsAccountIds(), bundleName) != SOFTBUS_OK) {
+    if (GenerateDsoftbusBundleName(peerUdid.c_str(), udid,
+        JudgeDeviceTypeAndGetOsAccountIds(), bundleName) != SOFTBUS_OK) {
         LNN_LOGE(LNN_STATE, "generate dsoftbus bundle name fail.");
         return;
     }
@@ -577,7 +576,8 @@ void UpdateDpSameAccount(UpdateDpAclParams *aclParams, SessionKey sessionKey, bo
     UpdateDpAclResult ret = UPDATE_ACL_SUCC;
 
     if (isNeedUpdateDk) {
-        ret = PutDpAclUkByUserId(GetActiveOsAccountIds(), sessionKey.value, sessionKey.len, &sessionKeyId);
+        ret = PutDpAclUkByUserId(JudgeDeviceTypeAndGetOsAccountIds(), sessionKey.value,
+            sessionKey.len, &sessionKeyId);
         if (ret != UPDATE_ACL_SUCC) {
             LNN_LOGW(LNN_STATE, "not need update uk for acl");
         }
@@ -620,7 +620,7 @@ bool GetSessionKeyProfile(int32_t sessionKeyId, uint8_t *sessionKey, uint32_t *l
     LNN_CHECK_AND_RETURN_RET_LOGE(sessionKey != NULL, false, LNN_EVENT, "sessionKey is null");
     LNN_CHECK_AND_RETURN_RET_LOGE(length != NULL, false, LNN_EVENT, "length is null");
     std::vector<uint8_t> vecSessionKey;
-    int32_t localUserId = GetActiveOsAccountIds();
+    int32_t localUserId = JudgeDeviceTypeAndGetOsAccountIds();
     if (localUserId < 0) {
         LNN_LOGE(LNN_STATE, "GetUserId failed");
         return false;
@@ -637,7 +637,7 @@ bool GetSessionKeyProfile(int32_t sessionKeyId, uint8_t *sessionKey, uint32_t *l
 
 void DelSessionKeyProfile(int32_t sessionKeyId)
 {
-    int32_t localUserId = GetActiveOsAccountIds();
+    int32_t localUserId = JudgeDeviceTypeAndGetOsAccountIds();
     if (localUserId < 0) {
         LNN_LOGE(LNN_STATE, "GetUserId failed");
         return;
@@ -1156,7 +1156,7 @@ int32_t SelectAllAcl(TrustedInfo **trustedInfoArray, uint32_t *num)
         LNN_LOGI(LNN_STATE, "aclProfiles is empty");
         return SOFTBUS_OK;
     }
-    int32_t localUserId = GetActiveOsAccountIds();
+    int32_t localUserId = JudgeDeviceTypeAndGetOsAccountIds();
     std::unordered_set<std::string> matchAcl;
     for (auto &aclProfile : aclProfiles) {
         if (aclProfile.GetDeviceIdType() != (uint32_t)OHOS::DistributedDeviceProfile::DeviceIdType::UDID ||
@@ -1190,4 +1190,51 @@ int32_t SelectAllAcl(TrustedInfo **trustedInfoArray, uint32_t *num)
         (*num)++;
     }
     return SOFTBUS_OK;
+}
+
+static bool CompareAssetAclWithUdid(
+    OHOS::DistributedDeviceProfile::AccessControlProfile aclProfile, const char *localUdid, const char *peerUdid)
+{
+    std::string itemSourceDeviceId = aclProfile.GetAccesser().GetAccesserDeviceId();
+    std::string itemSinkDeviceId = aclProfile.GetAccessee().GetAccesseeDeviceId();
+    if ((itemSourceDeviceId.compare(std::string(localUdid)) != 0 ||
+        itemSinkDeviceId.compare(std::string(peerUdid)) != 0) &&
+        (itemSourceDeviceId.compare(std::string(peerUdid)) != 0 ||
+        itemSinkDeviceId.compare(std::string(localUdid)) != 0)) {
+        LNN_LOGE(LNN_STATE, "udid compare fail");
+        return false;
+    }
+    return true;
+}
+
+bool IsExistUkInAclProfile(const char *localUdid, const char *peerUdid)
+{
+    if (localUdid == nullptr || peerUdid == nullptr) {
+        LNN_LOGE(LNN_LEDGER, "invalid param");
+        return false;
+    }
+
+    std::vector<OHOS::DistributedDeviceProfile::AccessControlProfile> aclProfiles;
+    int32_t ret = DpClient::GetInstance().GetAllAccessControlProfile(aclProfiles);
+    if (ret != OHOS::DistributedDeviceProfile::DP_SUCCESS) {
+        LNN_LOGE(LNN_STATE, "GetAllAccessControlProfile ret=%{public}d", ret);
+        return false;
+    }
+    if (aclProfiles.empty()) {
+        LNN_LOGE(LNN_STATE, "aclProfiles is empty");
+        return false;
+    }
+    for (auto &aclProfile : aclProfiles) {
+        if (!CompareAssetAclWithUdid(aclProfile, localUdid, peerUdid)) {
+            continue;
+        }
+        int32_t sessionKeyId = aclProfile.GetAccesser().GetAccesserSessionKeyId();
+        if (sessionKeyId == DEFAULT_USER_KEY_INDEX) {
+            continue;
+        }
+        LNN_LOGI(LNN_STATE, "acl exist uk, GetAccesser=%{public}s, GetAccessee=%{public}s",
+            aclProfile.GetAccesser().dump().c_str(), aclProfile.GetAccessee().dump().c_str());
+        return true;
+    }
+    return false;
 }

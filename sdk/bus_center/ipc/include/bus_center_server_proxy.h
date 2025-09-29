@@ -57,6 +57,9 @@ int32_t ServerIpcTriggerRangeForMsdp(const char *pkgName, const RangeConfig *con
 int32_t ServerIpcStopRangeForMsdp(const char *pkgName, const RangeConfig *config);
 int32_t ServerIpcSyncTrustedRelationShip(const char *pkgName, const char *msg, uint32_t msgLen);
 int32_t ServerIpcSetDisplayName(const char *pkgName, const char *nameData, uint32_t len);
+int32_t ServerIpcCreateGroupOwner(const char *pkgName, const struct GroupOwnerConfig *config,
+    struct GroupOwnerResult *result);
+void ServerIpcDestroyGroupOwner(const char *pkgName);
 
 #ifdef __cplusplus
 #if __cplusplus

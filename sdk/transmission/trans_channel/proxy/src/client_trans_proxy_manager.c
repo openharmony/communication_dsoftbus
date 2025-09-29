@@ -23,6 +23,7 @@
 #include "client_trans_session_manager.h"
 #include "client_trans_socket_manager.h"
 #include "client_trans_tcp_direct_message.h"
+#include "g_enhance_sdk_func.h"
 #include "softbus_adapter_crypto.h"
 #include "softbus_adapter_mem.h"
 #include "softbus_adapter_socket.h"
@@ -218,6 +219,27 @@ int32_t ClientTransProxyAddChannelInfo(ClientProxyChannelInfo *info)
     return SOFTBUS_OK;
 }
 
+static int32_t ClientCheckFuncPoint(void *func)
+{
+    if (func == NULL) {
+        TRANS_LOGE(TRANS_SDK, "enhance func not register");
+        return SOFTBUS_FUNC_NOT_REGISTER;
+    }
+    return SOFTBUS_OK;
+}
+
+static int32_t ClientDeleteD2dQosRegPacked(int32_t channelId)
+{
+    ClientEnhanceFuncList *pfnClientEnhanceFuncList = ClientEnhanceFuncListGet();
+    if (pfnClientEnhanceFuncList == NULL) {
+        return SOFTBUS_SERVER_NOT_INIT;
+    }
+    if (ClientCheckFuncPoint((void *)pfnClientEnhanceFuncList->clientDeleteD2dQosReg) != SOFTBUS_OK) {
+        return SOFTBUS_FUNC_NOT_SUPPORT;
+    }
+    return pfnClientEnhanceFuncList->clientDeleteD2dQosReg(channelId);
+}
+
 int32_t ClientTransProxyDelChannelInfo(int32_t channelId)
 {
     if (SoftBusMutexLock(&g_proxyChannelInfoList->lock) != SOFTBUS_OK) {
@@ -230,9 +252,13 @@ int32_t ClientTransProxyDelChannelInfo(int32_t channelId)
         if (item->channelId == channelId) {
             ListDelete(&item->node);
             TRANS_LOGI(TRANS_SDK, "delete channelId=%{public}d", channelId);
+            bool isD2D = item->detail.isD2D;
             SoftBusFree(item);
             DelPendingPacket(channelId, PENDING_TYPE_PROXY);
             (void)SoftBusMutexUnlock(&g_proxyChannelInfoList->lock);
+            if (isD2D) {
+                (void)ClientDeleteD2dQosRegPacked(channelId); // no need to lock
+            }
             return SOFTBUS_OK;
         }
     }

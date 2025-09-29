@@ -22,6 +22,7 @@
 #include "client_trans_session_manager.h"
 #include "client_trans_socket_manager.h"
 #include "client_trans_tcp_direct_message.h"
+#include "g_enhance_sdk_func.h"
 #include "session.h"
 #include "softbus_access_token_test.h"
 #include "softbus_def.h"

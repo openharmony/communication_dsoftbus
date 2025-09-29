@@ -147,6 +147,22 @@ int32_t ISoftBusServer::SetDisplayName(const char *pkgName, const char *nameData
     return SOFTBUS_FUNC_NOT_SUPPORT;
 }
 
+int32_t ISoftBusServer::CreateGroupOwner(const char *pkgName, const struct GroupOwnerConfig *config,
+    struct GroupOwnerResult *result)
+{
+    (void)pkgName;
+    (void)config;
+    (void)result;
+    COMM_LOGE(COMM_SVC, "ipc default impl");
+    return SOFTBUS_IPC_ERR;
+}
+
+void ISoftBusServer::DestroyGroupOwner(const char *pkgName)
+{
+    (void)pkgName;
+    COMM_LOGE(COMM_SVC, "ipc default impl");
+}
+
 int32_t ISoftBusServer::CreateServer(const char *pkgName, const char *name)
 {
     (void)pkgName;

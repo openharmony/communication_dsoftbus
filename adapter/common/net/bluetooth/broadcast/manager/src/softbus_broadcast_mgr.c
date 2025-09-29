@@ -80,6 +80,7 @@ typedef enum {
     SCAN_FREQ_P10_30_300,
     SCAN_FREQ_P25_60_240,
     SCAN_FREQ_P50_30_60,
+    SCAN_FREQ_P50_60_120,
     SCAN_FREQ_P75_30_40,
     SCAN_FREQ_P100_1000_1000,
     SCAN_FREQ_P10_400_40_LONG_RANGE,
@@ -419,7 +420,7 @@ static void ReportCurrentBroadcast(bool startBcResult)
     DiscEventExtra extra = { 0 };
     for (int32_t managerId = 0; managerId < BC_NUM_MAX; managerId++) {
         if (g_bcManager[managerId].isAdvertising) {
-            extra.startTime = g_bcManager[managerId].time;
+            extra.startTime = (uint64_t)g_bcManager[managerId].time;
             extra.advHandle = g_bcManager[managerId].advHandle;
             extra.serverType = GetSrvType(g_bcManager[managerId].srvType);
             extra.minInterval = g_bcManager[managerId].minInterval;
@@ -450,7 +451,7 @@ static void UpdateBcMaxExtra(void)
     for (int32_t managerId = 0; managerId < BC_NUM_MAX; managerId++) {
         if (g_bcManager[managerId].isAdvertising) {
             g_bcManagerExtra[managerId].isOn = 1;
-            g_bcManagerExtra[managerId].startTime = g_bcManager[managerId].time;
+            g_bcManagerExtra[managerId].startTime = (uint64_t)g_bcManager[managerId].time;
             g_bcManagerExtra[managerId].advHandle = g_bcManager[managerId].advHandle;
             g_bcManagerExtra[managerId].serverType = GetSrvType(g_bcManager[managerId].srvType);
             g_bcManagerExtra[managerId].minInterval = g_bcManager[managerId].minInterval;
@@ -759,8 +760,8 @@ static bool CheckServiceIsMatch(const BcScanFilter *filter, const BroadcastPaylo
         DISC_LOGD(DISC_BROADCAST, "payload is too short");
         return false;
     }
-    if (filter->serviceUuid != bcData->id) {
-        DISC_LOGD(DISC_BROADCAST, "serviceUuid not match");
+    if (filter->serviceId != bcData->id) {
+        DISC_LOGD(DISC_BROADCAST, "serviceId not match");
         return false;
     }
     for (uint32_t i = 0; i < filterLen; i++) {
@@ -772,11 +773,38 @@ static bool CheckServiceIsMatch(const BcScanFilter *filter, const BroadcastPaylo
     return true;
 }
 
+static bool CheckServiceUuidIsMatch(const BcScanFilter *filter, const BroadcastPayload *bcData)
+{
+    DISC_CHECK_AND_RETURN_RET_LOGE(filter != NULL, false, DISC_BROADCAST, "filter is nullptr");
+    DISC_CHECK_AND_RETURN_RET_LOGE(bcData != NULL, false, DISC_BROADCAST, "bcData is nullptr");
+
+    uint8_t dataLen = bcData->payloadLen;
+    uint32_t filterLen = filter->serviceUuidDataLength;
+    if ((uint32_t)dataLen < filterLen) {
+        DISC_LOGD(DISC_BROADCAST, "payload is too short");
+        return false;
+    }
+    
+    if (filter->serviceUuidId != bcData->id) {
+        DISC_LOGD(DISC_BROADCAST, "serviceUuid not match");
+        return false;
+    }
+
+    for (uint32_t i = 0; i < filterLen; i++) {
+        if ((filter->serviceUuidData[i] & filter->serviceUuidDataMask[i]) !=
+            (bcData->payload[i] & filter->serviceUuidDataMask[i])) {
+            return false;
+        }
+    }
+    return true;
+}
+
 static bool CheckScanResultDataIsMatch(const uint32_t managerId, BroadcastPayload *bcData)
 {
     DISC_CHECK_AND_RETURN_RET_LOGE(bcData != NULL, false, DISC_BROADCAST, "bcData is nullptr");
 
-    if (bcData->type != BC_DATA_TYPE_SERVICE && bcData->type != BC_DATA_TYPE_MANUFACTURER) {
+    if (bcData->type != BC_DATA_TYPE_SERVICE && bcData->type != BC_DATA_TYPE_MANUFACTURER &&
+        bcData->type != BC_DATA_TYPE_SERVICE_UUID) {
         DISC_LOGE(DISC_BROADCAST, "not support type, type=%{public}d", bcData->type);
         return false;
     }
@@ -788,6 +816,9 @@ static bool CheckScanResultDataIsMatch(const uint32_t managerId, BroadcastPayloa
             return true;
         }
         if (bcData->type == BC_DATA_TYPE_MANUFACTURER && CheckManufactureIsMatch(&filter, bcData)) {
+            return true;
+        }
+        if (bcData->type == BC_DATA_TYPE_SERVICE_UUID && CheckServiceUuidIsMatch(&filter, bcData)) {
             return true;
         }
     }
@@ -876,6 +907,10 @@ static int32_t BuildBroadcastReportInfo(const SoftBusBcScanResult *reportData, B
 {
     DISC_CHECK_AND_RETURN_RET_LOGE(reportData != NULL, SOFTBUS_INVALID_PARAM, DISC_BROADCAST, "reportData is nullptr");
     DISC_CHECK_AND_RETURN_RET_LOGE(bcInfo != NULL, SOFTBUS_INVALID_PARAM, DISC_BROADCAST, "bcInfo is nullptr");
+    errno_t result = memcpy_s(bcInfo->localName, sizeof(bcInfo->localName),
+        reportData->localName, sizeof(reportData->localName));
+    DISC_CHECK_AND_RETURN_RET_LOGE(result == EOK, SOFTBUS_MEM_ERR, DISC_BROADCAST,
+        "cpy localName failed, ret=%{public}d", result);
 
     // 1. Build BroadcastReportInfo from SoftBusBcScanResult except BroadcastPacket.
     int32_t ret = BuildBcInfoCommon(reportData, bcInfo);
@@ -1326,6 +1361,8 @@ static void ReleaseBcScanFilter(int listenerId)
         SoftBusFree((filter + filterSize)->serviceDataMask);
         SoftBusFree((filter + filterSize)->manufactureData);
         SoftBusFree((filter + filterSize)->manufactureDataMask);
+        SoftBusFree((filter + filterSize)->serviceUuidData);
+        SoftBusFree((filter + filterSize)->serviceUuidDataMask);
     }
     SoftBusFree(filter);
     g_scanManager[listenerId].filterSize = 0;
@@ -1361,27 +1398,66 @@ static bool CheckNeedUpdateScan(int32_t listenerId, int32_t *liveListenerId)
     return false;
 }
 
+static int32_t DupData(uint8_t *srcData, uint32_t srcDataLen, uint8_t **outData)
+{
+    if (srcData != NULL && srcDataLen > 0) {
+        uint8_t *dupData = (uint8_t *)SoftBusCalloc(srcDataLen);
+        DISC_CHECK_AND_RETURN_RET_LOGE(dupData != NULL, SOFTBUS_MALLOC_ERR, DISC_BROADCAST, "calloc failed");
+        (void)memcpy_s(dupData, srcDataLen, srcData, srcDataLen);
+        *outData = dupData;
+    }
+    
+    return SOFTBUS_OK;
+}
+
 static int32_t CopyScanFilterServiceInfo(const BcScanFilter *srcFilter, SoftBusBcScanFilter *dstFilter)
 {
     DISC_CHECK_AND_RETURN_RET_LOGE(srcFilter != NULL, SOFTBUS_INVALID_PARAM, DISC_BROADCAST, "srcFilter is nullptr");
     DISC_CHECK_AND_RETURN_RET_LOGE(dstFilter != NULL, SOFTBUS_INVALID_PARAM, DISC_BROADCAST, "dstFilter is nullptr");
 
-    dstFilter->serviceUuid = srcFilter->serviceUuid;
+    dstFilter->serviceId = srcFilter->serviceId;
     dstFilter->serviceDataLength = srcFilter->serviceDataLength;
-    if (srcFilter->serviceData != NULL && srcFilter->serviceDataLength > 0) {
-        dstFilter->serviceData = (uint8_t *)SoftBusCalloc(dstFilter->serviceDataLength);
-        DISC_CHECK_AND_RETURN_RET_LOGE(dstFilter->serviceData != NULL &&
-            memcpy_s(dstFilter->serviceData, dstFilter->serviceDataLength,
-            srcFilter->serviceData, srcFilter->serviceDataLength) == EOK,
-            SOFTBUS_MEM_ERR, DISC_BROADCAST, "copy filter serviceData failed");
-    }
-    if (srcFilter->serviceDataMask != NULL && srcFilter->serviceDataLength > 0) {
-        dstFilter->serviceDataMask = (uint8_t *)SoftBusCalloc(dstFilter->serviceDataLength);
-        DISC_CHECK_AND_RETURN_RET_LOGE(dstFilter->serviceDataMask != NULL &&
-            memcpy_s(dstFilter->serviceDataMask, dstFilter->serviceDataLength,
-            srcFilter->serviceDataMask, srcFilter->serviceDataLength) == EOK,
-            SOFTBUS_MEM_ERR, DISC_BROADCAST, "copy filter serviceDataMask failed");
-    }
+    
+    int32_t ret = DupData(srcFilter->serviceData, srcFilter->serviceDataLength, &dstFilter->serviceData);
+    DISC_CHECK_AND_RETURN_RET_LOGE(ret == SOFTBUS_OK, ret, DISC_BROADCAST,
+        "dup serviceData failed, ret=%{public}d", ret);
+
+    ret = DupData(srcFilter->serviceDataMask, srcFilter->serviceDataLength, &dstFilter->serviceDataMask);
+    DISC_CHECK_AND_RETURN_RET_LOGE(ret == SOFTBUS_OK, ret, DISC_BROADCAST,
+        "dup serviceDataMask failed, ret=%{public}d", ret);
+    return SOFTBUS_OK;
+}
+
+static int32_t CopyScanFilterServiceUuid(const BcScanFilter *srcFilter, SoftBusBcScanFilter *dstFilter)
+{
+    dstFilter->serviceUuid = srcFilter->serviceUuid;
+    dstFilter->serviceUuidMask = srcFilter->serviceUuidMask;
+    dstFilter->serviceUuidLength = srcFilter->serviceUuidLength;
+
+    dstFilter->serviceUuidId = srcFilter->serviceUuidId;
+    dstFilter->serviceUuidDataLength = srcFilter->serviceUuidDataLength;
+    int32_t ret = DupData(srcFilter->serviceUuidData, srcFilter->serviceUuidDataLength, &dstFilter->serviceUuidData);
+    DISC_CHECK_AND_RETURN_RET_LOGE(ret == SOFTBUS_OK, ret,
+        DISC_BROADCAST, "dup serviceUuidData failed, ret=%{public}d", ret);
+
+    ret = DupData(srcFilter->serviceUuidDataMask, srcFilter->serviceUuidDataLength, &dstFilter->serviceUuidDataMask);
+    DISC_CHECK_AND_RETURN_RET_LOGE(ret == SOFTBUS_OK, ret, DISC_BROADCAST,
+        "dup serviceUuidDataMask failed, ret=%{public}d", ret);
+    return SOFTBUS_OK;
+}
+
+static int32_t CopyScanFilterManufacture(const BcScanFilter *srcFilter, SoftBusBcScanFilter *dstFilter)
+{
+    dstFilter->manufactureId = srcFilter->manufactureId;
+    dstFilter->manufactureDataLength = srcFilter->manufactureDataLength;
+    
+    int32_t ret = DupData(srcFilter->manufactureData, srcFilter->manufactureDataLength, &dstFilter->manufactureData);
+    DISC_CHECK_AND_RETURN_RET_LOGE(ret == SOFTBUS_OK, ret,
+        DISC_BROADCAST, "dup manufactureData failed,ret=%{public}d", ret);
+    
+    ret = DupData(srcFilter->manufactureDataMask, srcFilter->manufactureDataLength, &dstFilter->manufactureDataMask);
+    DISC_CHECK_AND_RETURN_RET_LOGE(ret == SOFTBUS_OK, ret, DISC_BROADCAST,
+        "dup manufactureDataMask failed, ret=%{public}d", ret);
     return SOFTBUS_OK;
 }
 
@@ -1406,26 +1482,12 @@ static int32_t CopySoftBusBcScanFilter(const BcScanFilter *srcFilter, SoftBusBcS
     }
 
     int ret = CopyScanFilterServiceInfo(srcFilter, dstFilter);
-    if (ret != SOFTBUS_OK) {
-        return ret;
-    }
+    DISC_CHECK_AND_RETURN_RET_LOGE(ret == SOFTBUS_OK, ret, DISC_BROADCAST, "cpy service data failed=%{public}d", ret);
+    ret = CopyScanFilterServiceUuid(srcFilter, dstFilter);
+    DISC_CHECK_AND_RETURN_RET_LOGE(ret == SOFTBUS_OK, ret, DISC_BROADCAST, "cpy service uuid failed=%{public}d", ret);
 
-    dstFilter->manufactureId = srcFilter->manufactureId;
-    dstFilter->manufactureDataLength = srcFilter->manufactureDataLength;
-    if (srcFilter->manufactureData != NULL && srcFilter->manufactureDataLength > 0) {
-        dstFilter->manufactureData = (uint8_t *)SoftBusCalloc(dstFilter->manufactureDataLength);
-        DISC_CHECK_AND_RETURN_RET_LOGE(dstFilter->manufactureData != NULL &&
-            memcpy_s(dstFilter->manufactureData, dstFilter->manufactureDataLength,
-            srcFilter->manufactureData, srcFilter->manufactureDataLength) == EOK,
-            SOFTBUS_MEM_ERR, DISC_BROADCAST, "copy filter manufactureData failed");
-    }
-    if (srcFilter->manufactureDataMask != NULL && srcFilter->manufactureDataLength > 0) {
-        dstFilter->manufactureDataMask = (uint8_t *)SoftBusCalloc(dstFilter->manufactureDataLength);
-        DISC_CHECK_AND_RETURN_RET_LOGE(dstFilter->manufactureDataMask != NULL &&
-            memcpy_s(dstFilter->manufactureDataMask, dstFilter->manufactureDataLength,
-            srcFilter->manufactureDataMask, srcFilter->manufactureDataLength) == EOK,
-            SOFTBUS_MEM_ERR, DISC_BROADCAST, "copy filter manufactureDataMask failed");
-    }
+    ret = CopyScanFilterManufacture(srcFilter, dstFilter);
+    DISC_CHECK_AND_RETURN_RET_LOGE(ret == SOFTBUS_OK, ret, DISC_BROADCAST, "cpy manufacture failed=%{public}d", ret);
     if (srcFilter->filterIndex == 0) {
         DISC_LOGD(DISC_BROADCAST, "invaild filterIndex");
     }
@@ -1470,6 +1532,12 @@ static void ReleaseSoftBusBcScanFilter(SoftBusBcScanFilter *filter, int32_t size
             }
             if ((filter + size)->manufactureDataMask != NULL) {
                 SoftBusFree((filter + size)->manufactureDataMask);
+            }
+            if ((filter + size)->serviceUuidData != NULL) {
+                SoftBusFree((filter + size)->serviceUuidData);
+            }
+            if ((filter + size)->serviceUuidDataMask != NULL) {
+                SoftBusFree((filter + size)->serviceUuidDataMask);
             }
         }
         SoftBusFree(filter);
@@ -1714,6 +1782,10 @@ static void GetScanIntervalAndWindow(int32_t freq, SoftBusBcScanParams *adapterP
     if (freq == SCAN_FREQ_P50_30_60) {
         adapterParam->scanInterval = SOFTBUS_BC_SCAN_INTERVAL_P50;
         adapterParam->scanWindow = SOFTBUS_BC_SCAN_WINDOW_P50;
+    }
+    if (freq == SCAN_FREQ_P50_60_120) {
+        adapterParam->scanInterval = SOFTBUS_BC_SCAN_INTERVAL_120_P50;
+        adapterParam->scanWindow = SOFTBUS_BC_SCAN_WINDOW_60_P50;
     }
     if (freq == SCAN_FREQ_P75_30_40) {
         adapterParam->scanInterval = SOFTBUS_BC_SCAN_INTERVAL_P75;
@@ -2415,6 +2487,9 @@ static int32_t GetScanFreq(uint16_t scanInterval, uint16_t scanWindow)
     if (scanInterval == SOFTBUS_BC_SCAN_INTERVAL_P50 && scanWindow == SOFTBUS_BC_SCAN_WINDOW_P50) {
         return SCAN_FREQ_P50_30_60;
     }
+    if (scanInterval == SOFTBUS_BC_SCAN_INTERVAL_120_P50 && scanWindow == SOFTBUS_BC_SCAN_WINDOW_60_P50) {
+        return SCAN_FREQ_P50_60_120;
+    }
     if (scanInterval == SOFTBUS_BC_SCAN_INTERVAL_P75 && scanWindow == SOFTBUS_BC_SCAN_WINDOW_P75) {
         return SCAN_FREQ_P75_30_40;
     }
@@ -2718,7 +2793,7 @@ bool CompareSameFilter(BcScanFilter *srcFilter, BcScanFilter *dstFilter)
     DISC_CHECK_AND_RETURN_RET_LOGE(dstFilter != NULL, false, DISC_BROADCAST, "right filter is null");
 
     return srcFilter->advIndReport == dstFilter->advIndReport &&
-        srcFilter->serviceUuid == dstFilter->serviceUuid &&
+        srcFilter->serviceId == dstFilter->serviceId &&
         srcFilter->serviceDataLength == dstFilter->serviceDataLength &&
         srcFilter->manufactureId == dstFilter->manufactureId &&
         srcFilter->manufactureDataLength == dstFilter->manufactureDataLength &&
@@ -2796,7 +2871,7 @@ int32_t SetScanFilter(int32_t listenerId, const BcScanFilter *scanFilter, uint8_
 {
     DISC_LOGD(DISC_BROADCAST, "enter set scan filter, filterNum=%{public}d", filterNum);
     DISC_CHECK_AND_RETURN_RET_LOGE(scanFilter != NULL, SOFTBUS_INVALID_PARAM, DISC_BROADCAST, "param is nullptr");
-    DISC_CHECK_AND_RETURN_RET_LOGE(!((filterNum <= 0) || (filterNum > MAX_FILTER_SIZE)),
+    DISC_CHECK_AND_RETURN_RET_LOGE(!((filterNum == 0) || (filterNum > MAX_FILTER_SIZE)),
         SOFTBUS_INVALID_PARAM, DISC_BROADCAST, "invalid param filterNum");
     int32_t ret = SoftBusMutexLock(&g_scanLock);
     DISC_CHECK_AND_RETURN_RET_LOGE(ret == SOFTBUS_OK, SOFTBUS_LOCK_ERR, DISC_BROADCAST, "mutex error");

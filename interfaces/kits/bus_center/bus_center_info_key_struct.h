@@ -27,6 +27,7 @@ extern "C" {
 #define MAC_LEN 18
 #define OH_OS_TYPE 10
 #define HO_OS_TYPE 11
+#define HA_OS_TYPE 12
 
 typedef enum {
     WLAN_IF = 0,
@@ -97,6 +98,7 @@ typedef enum {
     NUM_KEY_STATIC_NET_CAP, /* static network capabilities, depends on the chip */
     NUM_KEY_SLE_RANGE_CAP,
 	NUM_KEY_HUKS_TIME,
+    NUM_KEY_DISPLAY_ID,
     NUM_KEY_END,
     BOOL_KEY_BEGIN,
     BOOL_KEY_TLV_NEGOTIATION = BOOL_KEY_BEGIN,

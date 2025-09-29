@@ -18,6 +18,7 @@
 
 #include "auth_session_json.c"
 #include "auth_session_json_mock.h"
+#include "lnn_ohos_account_adapter.h"
 #include "softbus_adapter_errcode.h"
 
 namespace OHOS {

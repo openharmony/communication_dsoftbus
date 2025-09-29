@@ -37,6 +37,7 @@
 
 #include "entity/p2p_entity.h"
 #include "net_conn_client.h"
+#include "p2p_v1_mock.h"
 #include "wifi_direct_mock.h"
 #include "wifi_direct_test_context.h"
 

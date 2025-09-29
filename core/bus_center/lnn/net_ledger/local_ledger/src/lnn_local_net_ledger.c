@@ -1887,13 +1887,13 @@ static int32_t LlGetCipherInfoIv(void *buf, uint32_t len)
 
 static int32_t LlGetSparkCheck(void *buf, uint32_t len)
 {
-    if (buf == NULL || len == 0) {
+    if (buf == NULL || len < SPARK_CHECK_LENGTH) {
         LNN_LOGE(LNN_LEDGER, "invalid param");
         return SOFTBUS_INVALID_PARAM;
     }
     NodeInfo *info = &g_localNetLedger.localInfo;
     if (memcpy_s(buf, len, info->sparkCheck, SPARK_CHECK_LENGTH) != EOK) {
-        LNN_LOGE(LNN_LEDGER, "memcpy spark check fail");
+        LNN_LOGE(LNN_LEDGER, "memcpy sparkCheck fail");
         return SOFTBUS_MEM_ERR;
     }
     return SOFTBUS_OK;
@@ -1960,7 +1960,7 @@ static int32_t UpdateLocalSparkCheck(const void *id)
         return SOFTBUS_INVALID_PARAM;
     }
     if (memcpy_s((char *)g_localNetLedger.localInfo.sparkCheck, SPARK_CHECK_LENGTH, id, SPARK_CHECK_LENGTH) != EOK) {
-        LNN_LOGE(LNN_LEDGER, "memcpy spark check fail");
+        LNN_LOGE(LNN_LEDGER, "memcpy sparkCheck fail");
         return SOFTBUS_MEM_ERR;
     }
     return SOFTBUS_OK;
@@ -2001,6 +2001,30 @@ static int32_t UpdateLocalUserId(const void *userId)
     }
     g_localNetLedger.localInfo.userId = *(int32_t *)userId;
     UpdateLocalDeviceInfoToMlpsPacked(&g_localNetLedger.localInfo);
+    return SOFTBUS_OK;
+}
+
+static int32_t UpdateDisplayId(const void *displayId)
+{
+    if (displayId == NULL) {
+        LNN_LOGE(LNN_LEDGER, "invalid param");
+        return SOFTBUS_INVALID_PARAM;
+    }
+    g_localNetLedger.localInfo.displayId = *(uint64_t *)displayId;
+    if (LnnSaveLocalDeviceInfoPacked(&g_localNetLedger.localInfo) != SOFTBUS_OK) {
+        LNN_LOGE(LNN_LEDGER, "save local device info fail");
+    }
+    return SOFTBUS_OK;
+}
+
+static int32_t L1GetDisplayId(void *displayId, uint32_t len)
+{
+    NodeInfo *info = &g_localNetLedger.localInfo;
+    if (displayId == NULL || len != sizeof(uint64_t)) {
+        LNN_LOGE(LNN_LEDGER, "invalid param");
+        return SOFTBUS_INVALID_PARAM;
+    }
+    *((uint64_t *)displayId) = info->displayId;
     return SOFTBUS_OK;
 }
 
@@ -2194,6 +2218,7 @@ static LocalLedgerKey g_localKeyTable[] = {
     {BYTE_KEY_UDID_HASH, SHA_256_HASH_LEN, LlGetUdidHash, NULL},
     {BOOL_KEY_SCREEN_STATUS, NODE_SCREEN_STATUS_LEN, L1GetNodeScreenOnFlag, NULL},
     {BYTE_KEY_SPARK_CHECK, SPARK_CHECK_LENGTH, LlGetSparkCheck, UpdateLocalSparkCheck},
+    {NUM_KEY_DISPLAY_ID, sizeof(uint64_t), L1GetDisplayId, UpdateDisplayId},
 };
 
 static LocalLedgerKeyByIfname g_localKeyByIfnameTable[] = {
@@ -2624,6 +2649,11 @@ int32_t LnnSetLocalNum64Info(InfoKey key, int64_t info)
     return LnnSetLocalInfo(key, (void *)&info);
 }
 
+int32_t LnnSetLocalNumU64Info(InfoKey key, uint64_t info)
+{
+    return LnnSetLocalInfo(key, (void *)&info);
+}
+
 int32_t LnnGetLocalNum16Info(InfoKey key, int16_t *info)
 {
     return LnnGetLocalInfo(key, (void *)info, sizeof(int16_t));
@@ -2717,7 +2747,7 @@ int32_t SoftBusDumpBusCenterLocalDeviceInfo(int fd)
 static void InitUserIdCheckSum(NodeInfo *nodeInfo)
 {
     uint8_t userIdCheckSum[USERID_CHECKSUM_LEN] = {0};
-    int32_t userId = GetActiveOsAccountIds();
+    int32_t userId = JudgeDeviceTypeAndGetOsAccountIds();
     LNN_LOGI(LNN_LEDGER, "get userId:%{public}d", userId);
     nodeInfo->userId = userId;
     int32_t ret = HbBuildUserIdCheckSumPacked(&userId, 1, userIdCheckSum, USERID_CHECKSUM_LEN);
@@ -2804,11 +2834,11 @@ int32_t LnnGenSparkCheck(void)
     unsigned char sparkCheck[SPARK_CHECK_LENGTH] = {0};
     do {
         if (SoftBusGenerateRandomArray(sparkCheck, SPARK_CHECK_LENGTH) != SOFTBUS_OK) {
-            LNN_LOGE(LNN_LEDGER, "generate spark check error.");
+            LNN_LOGE(LNN_LEDGER, "generate sparkCheck error.");
             break;
         }
         if (LnnSetLocalByteInfo(BYTE_KEY_SPARK_CHECK, sparkCheck, SPARK_CHECK_LENGTH) != SOFTBUS_OK) {
-            LNN_LOGE(LNN_LEDGER, "set spark check error.");
+            LNN_LOGE(LNN_LEDGER, "set sparkCheck error.");
             break;
         }
         LnnDumpSparkCheck(sparkCheck, "generate sparkCheck success");

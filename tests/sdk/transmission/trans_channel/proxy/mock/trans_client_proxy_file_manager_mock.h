@@ -24,6 +24,7 @@
 #include "softbus_utils.h"
 #include "trans_proxy_process_data.h"
 #include "client_trans_session_manager.h"
+#include "g_enhance_sdk_func.h"
 
 namespace OHOS {
 class TransClientProxyFileManagerInterface {
@@ -55,6 +56,7 @@ public:
     virtual void DeletePendingPacket(uint32_t id, uint64_t seq) = 0;
     virtual int32_t AckResponseDataHandle(const SendListenerInfo *info, const char *data, uint32_t len) = 0;
     virtual int32_t ClientGetChannelBusinessTypeByChannelId(int32_t channelId, int32_t *businessType) = 0;
+    virtual ClientEnhanceFuncList *ClientEnhanceFuncListGet(void) = 0;
 };
 
 class TransClientProxyFileManagerInterfaceMock : public TransClientProxyFileManagerInterface {
@@ -88,6 +90,7 @@ public:
     MOCK_METHOD2(DeletePendingPacket, void (uint32_t id, uint64_t seq));
     MOCK_METHOD3(AckResponseDataHandle, int32_t (const SendListenerInfo *info, const char *data, uint32_t len));
     MOCK_METHOD2(ClientGetChannelBusinessTypeByChannelId, int32_t(int32_t channelId, int32_t *businessType));
+    MOCK_METHOD0(ClientEnhanceFuncListGet, ClientEnhanceFuncList *(void));
 };
 } // namespace OHOS
 #endif // TRANS_CLIENT_PROXY_FILE_MANAGER_MOCK_H

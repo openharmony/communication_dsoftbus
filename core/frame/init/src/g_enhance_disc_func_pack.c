@@ -861,3 +861,12 @@ void DistActionDeinitPacked(void)
     DISC_CHECK_AND_RETURN_LOGD(ret == SOFTBUS_OK, DISC_BLE, "not find DistActionDeinit");
     return pfnDiscEnhanceFuncList->distActionDeinit();
 }
+
+bool IsUnknownDevicePacked(const char *bleMacAddr)
+{
+    DiscEnhanceFuncList *pfnDiscEnhanceFuncList = DiscEnhanceFuncListGet();
+
+    int32_t ret = DiscCheckFuncPointer((void *)pfnDiscEnhanceFuncList->isUnknownDevice(bleMacAddr));
+    DISC_CHECK_AND_RETURN_RET_LOGD(ret == SOFTBUS_OK, false, DISC_BLE, "not find isUnknownDevice");
+    return pfnDiscEnhanceFuncList->isUnknownDevice(bleMacAddr);
+}

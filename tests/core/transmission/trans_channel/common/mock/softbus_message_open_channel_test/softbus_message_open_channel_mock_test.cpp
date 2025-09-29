@@ -416,4 +416,672 @@ HWTEST_F(SoftBusMessageOpenChannelMockTest, ParseMessageToAppInfo002, TestSize.L
         SoftBusFree(appInfo);
     }
 }
+
+/**
+ * @tc.name: PackExternalDeviceRequest001
+ * @tc.desc: PackExternalDeviceRequest
+ * @tc.type: FUNC
+ * @tc.require:
+ */
+HWTEST_F(SoftBusMessageOpenChannelMockTest, PackExternalDeviceRequest001, TestSize.Level1)
+{
+    EXPECT_EQ(PackExternalDeviceRequest(nullptr, 321), nullptr);
+}
+
+/**
+ * @tc.name: PackExternalDeviceRequest002
+ * @tc.desc: PackExternalDeviceRequest
+ * @tc.type: FUNC
+ * @tc.require:
+ */
+HWTEST_F(SoftBusMessageOpenChannelMockTest, PackExternalDeviceRequest002, TestSize.Level1)
+{
+    AppInfo appInfo;
+    OHOS::SoftbusMessageOpenChannelInterfaceMock softbusMOpenChannelMock;
+    EXPECT_CALL(softbusMOpenChannelMock, cJSON_CreateObject).WillOnce(Return(nullptr));
+
+    char *ret = PackExternalDeviceRequest(&appInfo, 123);
+    EXPECT_EQ(ret, nullptr);
+}
+
+/**
+ * @tc.name: PackExternalDeviceRequest003
+ * @tc.desc: PackExternalDeviceRequest
+ * @tc.type: FUNC
+ * @tc.require:
+ */
+HWTEST_F(SoftBusMessageOpenChannelMockTest, PackExternalDeviceRequest003, TestSize.Level1)
+{
+    AppInfo appInfo;
+    cJSON *json = static_cast<cJSON *>(SoftBusCalloc(sizeof(cJSON)));
+    ASSERT_TRUE(json != nullptr);
+
+    OHOS::SoftbusMessageOpenChannelInterfaceMock softbusMOpenChannelMock;
+    EXPECT_CALL(softbusMOpenChannelMock, cJSON_CreateObject).WillOnce(Return(json));
+    EXPECT_CALL(softbusMOpenChannelMock, SoftBusBase64Encode).WillOnce(Return(SOFTBUS_INVALID_PARAM));
+
+    char *ret = PackExternalDeviceRequest(&appInfo, 123);
+    EXPECT_EQ(ret, nullptr);
+}
+
+/**
+ * @tc.name: PackExternalDeviceRequest004
+ * @tc.desc: PackExternalDeviceRequest
+ * @tc.type: FUNC
+ * @tc.require:
+ */
+HWTEST_F(SoftBusMessageOpenChannelMockTest, PackExternalDeviceRequest004, TestSize.Level1)
+{
+    AppInfo appInfo;
+    cJSON *json = static_cast<cJSON *>(SoftBusCalloc(sizeof(cJSON)));
+    ASSERT_TRUE(json != nullptr);
+    unsigned char encodeSessionKey[] = "123";
+
+    OHOS::SoftbusMessageOpenChannelInterfaceMock softbusMOpenChannelMock;
+    EXPECT_CALL(softbusMOpenChannelMock, cJSON_CreateObject).WillOnce(Return(json));
+    EXPECT_CALL(softbusMOpenChannelMock, SoftBusBase64Encode)
+        .WillOnce(DoAll(SetArrayArgument<0>(encodeSessionKey, encodeSessionKey + 3), Return(SOFTBUS_OK)));
+    EXPECT_CALL(softbusMOpenChannelMock, AddNumberToJsonObject).WillOnce(Return(false));
+
+    char *ret = PackExternalDeviceRequest(&appInfo, 123);
+    EXPECT_EQ(ret, nullptr);
+}
+
+/**
+ * @tc.name: PackExternalDeviceRequest005
+ * @tc.desc: PackExternalDeviceRequest
+ * @tc.type: FUNC
+ * @tc.require:
+ */
+HWTEST_F(SoftBusMessageOpenChannelMockTest, PackExternalDeviceRequest005, TestSize.Level1)
+{
+    AppInfo appInfo;
+    appInfo.myData.apiVersion = API_V2;
+    unsigned char encodeSessionKey[] = "123";
+    cJSON *json = static_cast<cJSON *>(SoftBusCalloc(sizeof(cJSON)));
+    ASSERT_TRUE(json != nullptr);
+
+    OHOS::SoftbusMessageOpenChannelInterfaceMock softbusMOpenChannelMock;
+    EXPECT_CALL(softbusMOpenChannelMock, cJSON_CreateObject).WillOnce(Return(json));
+    EXPECT_CALL(softbusMOpenChannelMock, SoftBusBase64Encode)
+        .WillRepeatedly(DoAll(SetArrayArgument<0>(encodeSessionKey, encodeSessionKey + 3), Return(SOFTBUS_OK)));
+    EXPECT_CALL(softbusMOpenChannelMock, AddNumberToJsonObject).WillRepeatedly(Return(true));
+    EXPECT_CALL(softbusMOpenChannelMock, AddStringToJsonObject).WillRepeatedly(Return(true));
+    EXPECT_CALL(softbusMOpenChannelMock, cJSON_PrintUnformatted).WillOnce(Return(nullptr));
+
+    char *ret = PackExternalDeviceRequest(&appInfo, 123);
+    EXPECT_EQ(ret, nullptr);
+
+    char data[] = "test_data";
+    cJSON *jsonTest = static_cast<cJSON *>(SoftBusCalloc(sizeof(cJSON)));
+    ASSERT_TRUE(jsonTest != nullptr);
+    EXPECT_CALL(softbusMOpenChannelMock, cJSON_CreateObject).WillOnce(Return(jsonTest));
+    EXPECT_CALL(softbusMOpenChannelMock, cJSON_PrintUnformatted).WillOnce(Return(data));
+
+    ret = PackExternalDeviceRequest(&appInfo, 123);
+    EXPECT_STREQ(ret, data);
+}
+
+/**
+ * @tc.name: PackExternalDeviceJsonObiect001
+ * @tc.desc: PackExternalDeviceJsonObject.
+ * @tc.type: FUNC
+ * @tc.require:
+ */
+HWTEST_F(SoftBusMessageOpenChannelMockTest, PackExternalDeviceJsonObiect001, TestSize.Level1)
+{
+    AppInfo appInfo;
+    cJSON json = { 0 };
+    unsigned char *encodeSessionKey = reinterpret_cast<unsigned char *>(const_cast<char *>("testEncodeSessionKey"));
+
+    OHOS::SoftbusMessageOpenChannelInterfaceMock softbusMOpenChannelMock;
+    EXPECT_CALL(softbusMOpenChannelMock, AddNumberToJsonObject).WillOnce(Return(false));
+    int32_t ret = PackExternalDeviceJsonObject(&appInfo, &json, encodeSessionKey);
+    EXPECT_EQ(ret, SOFTBUS_PARSE_JSON_ERR);
+
+    EXPECT_CALL(softbusMOpenChannelMock, AddNumberToJsonObject)
+        .Times(2)
+        .WillOnce(Return(true))
+        .WillOnce(Return(false));
+    ret = PackExternalDeviceJsonObject(&appInfo, &json, encodeSessionKey);
+    EXPECT_EQ(ret, SOFTBUS_PARSE_JSON_ERR);
+}
+
+/**
+ * @tc.name: PackExternalDeviceJsonObiect002
+ * @tc.desc: PackExternalDeviceJsonObject.
+ * @tc.type: FUNC
+ * @tc.require:
+ */
+HWTEST_F(SoftBusMessageOpenChannelMockTest, PackExternalDeviceJsonObiect002, TestSize.Level1)
+{
+    AppInfo appInfo;
+    cJSON json = { 0 };
+    unsigned char *encodeSessionKey = reinterpret_cast<unsigned char *>(const_cast<char *>("testEncodeSessionKey"));
+
+    OHOS::SoftbusMessageOpenChannelInterfaceMock softbusMOpenChannelMock;
+    EXPECT_CALL(softbusMOpenChannelMock, AddNumberToJsonObject).WillRepeatedly(Return(true));
+    EXPECT_CALL(softbusMOpenChannelMock, AddStringToJsonObject).WillOnce(Return(false));
+    int32_t ret = PackExternalDeviceJsonObject(&appInfo, &json, encodeSessionKey);
+    EXPECT_EQ(ret, SOFTBUS_PARSE_JSON_ERR);
+}
+
+/**
+ * @tc.name: PackExternalDeviceJsonObiect003
+ * @tc.desc: PackExternalDeviceJsonObject.
+ * @tc.type: FUNC
+ * @tc.require:
+ */
+HWTEST_F(SoftBusMessageOpenChannelMockTest, PackExternalDeviceJsonObiect003, TestSize.Level1)
+{
+    AppInfo appInfo;
+    cJSON json = { 0 };
+    unsigned char *encodeSessionKey = reinterpret_cast<unsigned char *>(const_cast<char *>("testEncodeSessionKey"));
+
+    OHOS::SoftbusMessageOpenChannelInterfaceMock softbusMOpenChannelMock;
+    EXPECT_CALL(softbusMOpenChannelMock, AddNumberToJsonObject).WillRepeatedly(Return(true));
+    EXPECT_CALL(softbusMOpenChannelMock, AddStringToJsonObject)
+        .Times(2)
+        .WillOnce(Return(true))
+        .WillOnce(Return(false));
+    int32_t ret = PackExternalDeviceJsonObject(&appInfo, &json, encodeSessionKey);
+    EXPECT_EQ(ret, SOFTBUS_PARSE_JSON_ERR);
+}
+
+/**
+ * @tc.name: PackExternalDeviceJsonObiect004
+ * @tc.desc: PackExternalDeviceJsonObject.
+ * @tc.type: FUNC
+ * @tc.require:
+ */
+HWTEST_F(SoftBusMessageOpenChannelMockTest, PackExternalDeviceJsonObiect004, TestSize.Level1)
+{
+    AppInfo appInfo;
+    cJSON json = { 0 };
+    unsigned char *encodeSessionKey = reinterpret_cast<unsigned char *>(const_cast<char *>("testEncodeSessionKey"));
+
+    OHOS::SoftbusMessageOpenChannelInterfaceMock softbusMOpenChannelMock;
+    EXPECT_CALL(softbusMOpenChannelMock, AddNumberToJsonObject).WillRepeatedly(Return(true));
+    EXPECT_CALL(softbusMOpenChannelMock, AddStringToJsonObject).WillRepeatedly(Return(true));
+    EXPECT_CALL(softbusMOpenChannelMock, AddNumberToJsonObject).WillOnce(Return(false));
+    int32_t ret = PackExternalDeviceJsonObject(&appInfo, &json, encodeSessionKey);
+    EXPECT_EQ(ret, SOFTBUS_PARSE_JSON_ERR);
+}
+
+/**
+ * @tc.name: PackExternalDeviceJsonObiect005
+ * @tc.desc: PackExternalDeviceJsonObject.
+ * @tc.type: FUNC
+ * @tc.require:
+ */
+HWTEST_F(SoftBusMessageOpenChannelMockTest, PackExternalDeviceJsonObiect005, TestSize.Level1)
+{
+    AppInfo appInfo;
+    cJSON json = { 0 };
+    unsigned char *encodeSessionKey = reinterpret_cast<unsigned char *>(const_cast<char *>("testEncodeSessionKey"));
+
+    OHOS::SoftbusMessageOpenChannelInterfaceMock softbusMOpenChannelMock;
+    EXPECT_CALL(softbusMOpenChannelMock, AddNumberToJsonObject).WillRepeatedly(Return(true));
+    EXPECT_CALL(softbusMOpenChannelMock, AddStringToJsonObject).WillRepeatedly(Return(true));
+    EXPECT_CALL(softbusMOpenChannelMock, AddNumberToJsonObject)
+        .Times(2)
+        .WillOnce(Return(true))
+        .WillOnce(Return(false));
+    int32_t ret = PackExternalDeviceJsonObject(&appInfo, &json, encodeSessionKey);
+    EXPECT_EQ(ret, SOFTBUS_PARSE_JSON_ERR);
+}
+
+/**
+ * @tc.name: PackExternalDeviceJsonObiect006
+ * @tc.desc: PackExternalDeviceJsonObject.
+ * @tc.type: FUNC
+ * @tc.require:
+ */
+HWTEST_F(SoftBusMessageOpenChannelMockTest, PackExternalDeviceJsonObiect006, TestSize.Level1)
+{
+    AppInfo appInfo;
+    appInfo.myData.apiVersion = API_V2;
+    cJSON json = { 0 };
+    unsigned char *encodeSessionKey = reinterpret_cast<unsigned char *>(const_cast<char *>("testEncodeSessionKey"));
+
+    OHOS::SoftbusMessageOpenChannelInterfaceMock softbusMOpenChannelMock;
+    EXPECT_CALL(softbusMOpenChannelMock, AddNumberToJsonObject).WillRepeatedly(Return(true));
+    EXPECT_CALL(softbusMOpenChannelMock, AddStringToJsonObject).WillRepeatedly(Return(true));
+    EXPECT_CALL(softbusMOpenChannelMock, AddStringToJsonObject).WillOnce(Return(false));
+    int32_t ret = PackExternalDeviceJsonObject(&appInfo, &json, encodeSessionKey);
+    EXPECT_EQ(ret, SOFTBUS_PARSE_JSON_ERR);
+}
+
+/**
+ * @tc.name: PackExternalDeviceJsonObiect007
+ * @tc.desc: PackExternalDeviceJsonObject.
+ * @tc.type: FUNC
+ * @tc.require:
+ */
+HWTEST_F(SoftBusMessageOpenChannelMockTest, PackExternalDeviceJsonObiect007, TestSize.Level1)
+{
+    AppInfo appInfo;
+    appInfo.myData.apiVersion = API_V2;
+    cJSON json = { 0 };
+    unsigned char *encodeSessionKey = reinterpret_cast<unsigned char *>(const_cast<char *>("testEncodeSessionKey"));
+
+    OHOS::SoftbusMessageOpenChannelInterfaceMock softbusMOpenChannelMock;
+    EXPECT_CALL(softbusMOpenChannelMock, AddNumberToJsonObject).WillRepeatedly(Return(true));
+    EXPECT_CALL(softbusMOpenChannelMock, AddStringToJsonObject).WillRepeatedly(Return(true));
+    EXPECT_CALL(softbusMOpenChannelMock, AddStringToJsonObject)
+        .Times(2)
+        .WillOnce(Return(true))
+        .WillOnce(Return(false));
+    int32_t ret = PackExternalDeviceJsonObject(&appInfo, &json, encodeSessionKey);
+    EXPECT_EQ(ret, SOFTBUS_PARSE_JSON_ERR);
+
+    EXPECT_CALL(softbusMOpenChannelMock, AddStringToJsonObject).WillRepeatedly(Return(true));
+    EXPECT_CALL(softbusMOpenChannelMock, AddNumberToJsonObject).WillOnce(Return(false));
+    ret = PackExternalDeviceJsonObject(&appInfo, &json, encodeSessionKey);
+    EXPECT_EQ(ret, SOFTBUS_PARSE_JSON_ERR);
+}
+
+/**
+ * @tc.name: PackExternalDeviceJsonObiect008
+ * @tc.desc: PackExternalDeviceJsonObject.
+ * @tc.type: FUNC
+ * @tc.require:
+ */
+HWTEST_F(SoftBusMessageOpenChannelMockTest, PackExternalDeviceJsonObiect008, TestSize.Level1)
+{
+    AppInfo appInfo;
+    appInfo.myData.apiVersion = API_V1;
+    cJSON json = { 0 };
+    unsigned char *encodeSessionKey = reinterpret_cast<unsigned char *>(const_cast<char *>("testEncodeSessionKey"));
+
+    OHOS::SoftbusMessageOpenChannelInterfaceMock softbusMOpenChannelMock;
+    EXPECT_CALL(softbusMOpenChannelMock, AddNumberToJsonObject).WillRepeatedly(Return(true));
+    EXPECT_CALL(softbusMOpenChannelMock, AddStringToJsonObject).WillRepeatedly(Return(true));
+
+    int32_t ret = PackExternalDeviceJsonObject(&appInfo, &json, encodeSessionKey);
+    EXPECT_EQ(ret, SOFTBUS_OK);
+}
+
+/**
+ * @tc.name: UnpackExternalDeviceRequest001
+ * @tc.desc: UnpackExternalDeviceRequest.
+ * @tc.type: FUNC
+ * @tc.require:
+ */
+HWTEST_F(SoftBusMessageOpenChannelMockTest, UnpackExternalDeviceRequest001, TestSize.Level1)
+{
+    cJSON msg;
+    AppInfo appInfo;
+    int32_t ret = UnpackExternalDeviceRequest(nullptr, &appInfo);
+    EXPECT_EQ(ret, SOFTBUS_INVALID_PARAM);
+
+    ret = UnpackExternalDeviceRequest(&msg, nullptr);
+    EXPECT_EQ(ret, SOFTBUS_INVALID_PARAM);
+
+    OHOS::SoftbusMessageOpenChannelInterfaceMock softbusMOpenChannelMock;
+    EXPECT_CALL(softbusMOpenChannelMock, GetJsonObjectNumberItem).WillOnce(Return(true));
+    EXPECT_CALL(softbusMOpenChannelMock, GetJsonObjectStringItem).WillOnce(Return(false));
+    ret = UnpackExternalDeviceRequest(&msg, &appInfo);
+    EXPECT_EQ(ret, SOFTBUS_PARSE_JSON_ERR);
+}
+
+/**
+ * @tc.name: UnpackExternalDeviceRequest002
+ * @tc.desc: UnpackExternalDeviceRequest.
+ * @tc.type: FUNC
+ * @tc.require:
+ */
+HWTEST_F(SoftBusMessageOpenChannelMockTest, UnpackExternalDeviceRequest002, TestSize.Level1)
+{
+    cJSON msg;
+    AppInfo appInfo;
+
+    OHOS::SoftbusMessageOpenChannelInterfaceMock softbusMOpenChannelMock;
+    EXPECT_CALL(softbusMOpenChannelMock, GetJsonObjectNumberItem)
+        .Times(2)
+        .WillOnce(Return(true))
+        .WillOnce(Return(false));
+    EXPECT_CALL(softbusMOpenChannelMock, GetJsonObjectStringItem).WillOnce(Return(true));
+    int32_t ret = UnpackExternalDeviceRequest(&msg, &appInfo);
+    EXPECT_EQ(ret, SOFTBUS_PARSE_JSON_ERR);
+}
+
+/**
+ * @tc.name: UnpackExternalDeviceRequest003
+ * @tc.desc: UnpackExternalDeviceRequest.
+ * @tc.type: FUNC
+ * @tc.require:
+ */
+HWTEST_F(SoftBusMessageOpenChannelMockTest, UnpackExternalDeviceRequest003, TestSize.Level1)
+{
+    cJSON msg;
+    AppInfo appInfo;
+
+    OHOS::SoftbusMessageOpenChannelInterfaceMock softbusMOpenChannelMock;
+    EXPECT_CALL(softbusMOpenChannelMock, GetJsonObjectNumberItem).WillRepeatedly(Return(true));
+    EXPECT_CALL(softbusMOpenChannelMock, GetJsonObjectStringItem)
+        .Times(2)
+        .WillOnce(Return(true))
+        .WillOnce(Return(false));
+    int32_t ret = UnpackExternalDeviceRequest(&msg, &appInfo);
+    EXPECT_EQ(ret, SOFTBUS_PARSE_JSON_ERR);
+}
+
+/**
+ * @tc.name: UnpackExternalDeviceRequest004
+ * @tc.desc: UnpackExternalDeviceRequest.
+ * @tc.type: FUNC
+ * @tc.require:
+ */
+HWTEST_F(SoftBusMessageOpenChannelMockTest, UnpackExternalDeviceRequest004, TestSize.Level1)
+{
+    cJSON msg;
+    AppInfo appInfo;
+
+    OHOS::SoftbusMessageOpenChannelInterfaceMock softbusMOpenChannelMock;
+    EXPECT_CALL(softbusMOpenChannelMock, GetJsonObjectNumberItem).WillRepeatedly(Return(true));
+    EXPECT_CALL(softbusMOpenChannelMock, GetJsonObjectStringItem).WillRepeatedly(Return(true));
+    EXPECT_CALL(softbusMOpenChannelMock, GetJsonObjectStringItem).WillOnce(Return(false));
+    int32_t ret = UnpackExternalDeviceRequest(&msg, &appInfo);
+    EXPECT_EQ(ret, SOFTBUS_PARSE_JSON_ERR);
+}
+
+/**
+ * @tc.name: UnpackExternalDeviceRequest005
+ * @tc.desc: UnpackExternalDeviceRequest.
+ * @tc.type: FUNC
+ * @tc.require:
+ */
+HWTEST_F(SoftBusMessageOpenChannelMockTest, UnpackExternalDeviceRequest005, TestSize.Level1)
+{
+    cJSON msg;
+    AppInfo appInfo;
+
+    OHOS::SoftbusMessageOpenChannelInterfaceMock softbusMOpenChannelMock;
+    EXPECT_CALL(softbusMOpenChannelMock, GetJsonObjectNumberItem).WillRepeatedly(Return(true));
+    EXPECT_CALL(softbusMOpenChannelMock, GetJsonObjectStringItem).WillRepeatedly(Return(true));
+    EXPECT_CALL(softbusMOpenChannelMock, GetJsonObjectNumberItem)
+        .Times(2)
+        .WillOnce(Return(true))
+        .WillOnce(Return(false));
+    int32_t ret = UnpackExternalDeviceRequest(&msg, &appInfo);
+    EXPECT_EQ(ret, SOFTBUS_PARSE_JSON_ERR);
+}
+
+/**
+ * @tc.name: UnpackExternalDeviceRequest006
+ * @tc.desc: UnpackExternalDeviceRequest.
+ * @tc.type: FUNC
+ * @tc.require:
+ */
+HWTEST_F(SoftBusMessageOpenChannelMockTest, UnpackExternalDeviceRequest006, TestSize.Level1)
+{
+    cJSON msg;
+    AppInfo appInfo;
+    size_t len = 2;
+    unsigned char sessionKey[] = "test.sessionkey";
+
+    OHOS::SoftbusMessageOpenChannelInterfaceMock softbusMOpenChannelMock;
+    EXPECT_CALL(softbusMOpenChannelMock, GetJsonObjectNumberItem).WillRepeatedly(Return(true));
+    EXPECT_CALL(softbusMOpenChannelMock, GetJsonObjectStringItem).WillRepeatedly(Return(true));
+    EXPECT_CALL(softbusMOpenChannelMock, GetJsonObjectStringItem)
+        .WillRepeatedly(DoAll(SetArrayArgument<2>(sessionKey, sessionKey + 32), Return(true)));
+    EXPECT_CALL(softbusMOpenChannelMock, SoftBusBase64Decode)
+        .WillOnce(DoAll(SetArgPointee<2>(len), Return(SOFTBUS_OK)));
+    int32_t ret = UnpackExternalDeviceRequest(&msg, &appInfo);
+    EXPECT_EQ(ret, SOFTBUS_PARSE_JSON_ERR);
+}
+
+/**
+ * @tc.name: UnpackExternalDeviceRequest007
+ * @tc.desc: UnpackExternalDeviceRequest.
+ * @tc.type: FUNC
+ * @tc.require:
+ */
+HWTEST_F(SoftBusMessageOpenChannelMockTest, UnpackExternalDeviceRequest007, TestSize.Level1)
+{
+    cJSON msg;
+    AppInfo appInfo;
+    size_t len = 32;
+    unsigned char sessionKey[] = "test.sessionkey";
+
+    OHOS::SoftbusMessageOpenChannelInterfaceMock softbusMOpenChannelMock;
+    EXPECT_CALL(softbusMOpenChannelMock, GetJsonObjectNumberItem).WillRepeatedly(Return(true));
+    EXPECT_CALL(softbusMOpenChannelMock, GetJsonObjectStringItem).WillRepeatedly(Return(true));
+    EXPECT_CALL(softbusMOpenChannelMock, GetJsonObjectStringItem)
+        .WillRepeatedly(DoAll(SetArrayArgument<2>(sessionKey, sessionKey + 32), Return(true)));
+    EXPECT_CALL(softbusMOpenChannelMock, SoftBusBase64Decode)
+        .WillOnce(DoAll(SetArgPointee<2>(len), Return(SOFTBUS_OK)));
+
+    int32_t ret = UnpackExternalDeviceRequest(&msg, &appInfo);
+    EXPECT_EQ(ret, SOFTBUS_OK);
+}
+
+/**
+ * @tc.name: PackExternalDeviceReply001
+ * @tc.desc: PackExternalDeviceReply.
+ * @tc.type: FUNC
+ * @tc.require:
+ */
+HWTEST_F(SoftBusMessageOpenChannelMockTest, PackExternalDeviceReply001, TestSize.Level1)
+{
+    EXPECT_EQ(PackExternalDeviceReply(nullptr), nullptr);
+
+    OHOS::SoftbusMessageOpenChannelInterfaceMock softbusMOpenChannelMock;
+    EXPECT_CALL(softbusMOpenChannelMock, cJSON_CreateObject).WillOnce(Return(nullptr));
+
+    AppInfo appInfo;
+    char *ret = PackExternalDeviceReply(&appInfo);
+    EXPECT_EQ(ret, nullptr);
+}
+
+/**
+ * @tc.name: PackExternalDeviceReply002
+ * @tc.desc: PackExternalDeviceReply.
+ * @tc.type: FUNC
+ * @tc.require:
+ */
+HWTEST_F(SoftBusMessageOpenChannelMockTest, PackExternalDeviceReply002, TestSize.Level1)
+{
+    AppInfo appInfo;
+    cJSON *json = static_cast<cJSON *>(SoftBusCalloc(sizeof(cJSON)));
+    ASSERT_TRUE(json != nullptr);
+
+    OHOS::SoftbusMessageOpenChannelInterfaceMock softbusMOpenChannelMock;
+    EXPECT_CALL(softbusMOpenChannelMock, cJSON_CreateObject).WillOnce(Return(json));
+    EXPECT_CALL(softbusMOpenChannelMock, AddNumberToJsonObject).WillOnce(Return(false));
+    char *ret = PackExternalDeviceReply(&appInfo);
+    EXPECT_EQ(ret, nullptr);
+
+    cJSON *json1 = static_cast<cJSON *>(SoftBusCalloc(sizeof(cJSON)));
+    ASSERT_TRUE(json != nullptr);
+    EXPECT_CALL(softbusMOpenChannelMock, cJSON_CreateObject).WillOnce(Return(json1));
+    EXPECT_CALL(softbusMOpenChannelMock, AddNumberToJsonObject)
+        .Times(2)
+        .WillOnce(Return(true))
+        .WillOnce(Return(false));
+    ret = PackExternalDeviceReply(&appInfo);
+    EXPECT_EQ(ret, nullptr);
+
+    cJSON *json2 = static_cast<cJSON *>(SoftBusCalloc(sizeof(cJSON)));
+    ASSERT_TRUE(json != nullptr);
+    EXPECT_CALL(softbusMOpenChannelMock, cJSON_CreateObject).WillOnce(Return(json2));
+    EXPECT_CALL(softbusMOpenChannelMock, AddNumberToJsonObject).Times(2).WillRepeatedly(Return(true));
+    EXPECT_CALL(softbusMOpenChannelMock, AddStringToJsonObject).WillOnce(Return(false));
+    ret = PackExternalDeviceReply(&appInfo);
+    EXPECT_EQ(ret, nullptr);
+}
+
+/**
+ * @tc.name: PackExternalDeviceReply003
+ * @tc.desc: PackExternalDeviceReply.
+ * @tc.type: FUNC
+ * @tc.require:
+ */
+HWTEST_F(SoftBusMessageOpenChannelMockTest, PackExternalDeviceReply003, TestSize.Level1)
+{
+    AppInfo appInfo;
+    cJSON *json = static_cast<cJSON *>(SoftBusCalloc(sizeof(cJSON)));
+    ASSERT_TRUE(json != nullptr);
+
+    OHOS::SoftbusMessageOpenChannelInterfaceMock softbusMOpenChannelMock;
+    EXPECT_CALL(softbusMOpenChannelMock, cJSON_CreateObject).WillOnce(Return(json));
+    EXPECT_CALL(softbusMOpenChannelMock, AddNumberToJsonObject).WillRepeatedly(Return(true));
+    EXPECT_CALL(softbusMOpenChannelMock, AddStringToJsonObject).WillRepeatedly(Return(true));
+    EXPECT_CALL(softbusMOpenChannelMock, AddNumberToJsonObject).WillOnce(Return(false));
+    char *ret = PackExternalDeviceReply(&appInfo);
+    EXPECT_EQ(ret, nullptr);
+}
+
+/**
+ * @tc.name: PackExternalDeviceReply004
+ * @tc.desc: PackExternalDeviceReply.
+ * @tc.type: FUNC
+ * @tc.require:
+ */
+HWTEST_F(SoftBusMessageOpenChannelMockTest, PackExternalDeviceReply004, TestSize.Level1)
+{
+    AppInfo appInfo;
+    cJSON *json = static_cast<cJSON *>(SoftBusCalloc(sizeof(cJSON)));
+    ASSERT_TRUE(json != nullptr);
+
+    OHOS::SoftbusMessageOpenChannelInterfaceMock softbusMOpenChannelMock;
+    EXPECT_CALL(softbusMOpenChannelMock, cJSON_CreateObject).WillOnce(Return(json));
+    EXPECT_CALL(softbusMOpenChannelMock, AddNumberToJsonObject).WillRepeatedly(Return(true));
+    EXPECT_CALL(softbusMOpenChannelMock, AddStringToJsonObject).WillRepeatedly(Return(true));
+    EXPECT_CALL(softbusMOpenChannelMock, AddNumberToJsonObject)
+        .Times(2)
+        .WillOnce(Return(true))
+        .WillOnce(Return(false));
+    char *ret = PackExternalDeviceReply(&appInfo);
+    EXPECT_EQ(ret, nullptr);
+}
+
+/**
+ * @tc.name: PackExternalDeviceReply005
+ * @tc.desc: PackExternalDeviceReply.
+ * @tc.type: FUNC
+ * @tc.require:
+ */
+HWTEST_F(SoftBusMessageOpenChannelMockTest, PackExternalDeviceReply005, TestSize.Level1)
+{
+    AppInfo appInfo;
+    cJSON *json = static_cast<cJSON *>(SoftBusCalloc(sizeof(cJSON)));
+    ASSERT_TRUE(json != nullptr);
+
+    OHOS::SoftbusMessageOpenChannelInterfaceMock softbusMOpenChannelMock;
+    EXPECT_CALL(softbusMOpenChannelMock, cJSON_CreateObject).WillOnce(Return(json));
+    EXPECT_CALL(softbusMOpenChannelMock, AddNumberToJsonObject).WillRepeatedly(Return(true));
+    EXPECT_CALL(softbusMOpenChannelMock, AddStringToJsonObject)
+        .Times(2)
+        .WillOnce(Return(true))
+        .WillOnce(Return(false));
+    char *ret = PackExternalDeviceReply(&appInfo);
+    EXPECT_EQ(ret, nullptr);
+}
+
+/**
+ * @tc.name: PackExternalDeviceReply006
+ * @tc.desc: PackExternalDeviceReply.
+ * @tc.type: FUNC
+ * @tc.require:
+ */
+HWTEST_F(SoftBusMessageOpenChannelMockTest, PackExternalDeviceReply006, TestSize.Level1)
+{
+    AppInfo appInfo;
+    cJSON *json = static_cast<cJSON *>(SoftBusCalloc(sizeof(cJSON)));
+    ASSERT_TRUE(json != nullptr);
+
+    OHOS::SoftbusMessageOpenChannelInterfaceMock softbusMOpenChannelMock;
+    EXPECT_CALL(softbusMOpenChannelMock, cJSON_CreateObject).WillOnce(Return(json));
+    EXPECT_CALL(softbusMOpenChannelMock, AddNumberToJsonObject).WillRepeatedly(Return(true));
+    EXPECT_CALL(softbusMOpenChannelMock, AddStringToJsonObject).WillRepeatedly(Return(true));
+    EXPECT_CALL(softbusMOpenChannelMock, cJSON_PrintUnformatted).WillOnce(Return(nullptr));
+    char *ret = PackExternalDeviceReply(&appInfo);
+    EXPECT_EQ(ret, nullptr);
+
+    char data[] = "test_data";
+    cJSON *json1 = static_cast<cJSON *>(SoftBusCalloc(sizeof(cJSON)));
+    ASSERT_TRUE(json != nullptr);
+
+    EXPECT_CALL(softbusMOpenChannelMock, cJSON_CreateObject).WillOnce(Return(json1));
+    EXPECT_CALL(softbusMOpenChannelMock, cJSON_PrintUnformatted).WillOnce(Return(data));
+    ret = PackExternalDeviceReply(&appInfo);
+    EXPECT_STREQ(ret, data);
+}
+
+/**
+ * @tc.name: UnpackExternalDeviceReply001
+ * @tc.desc: UnpackExternalDeviceReply.
+ * @tc.type: FUNC
+ * @tc.require:
+ */
+HWTEST_F(SoftBusMessageOpenChannelMockTest, UnpackExternalDeviceReply001, TestSize.Level1)
+{
+    AppInfo *appInfo = static_cast<AppInfo *>(SoftBusCalloc(sizeof(AppInfo)));
+    ASSERT_TRUE(appInfo != nullptr);
+    int32_t ret = UnpackExternalDeviceReply(nullptr, appInfo);
+    EXPECT_EQ(ret, SOFTBUS_INVALID_PARAM);
+
+    cJSON cjson;
+    ret = UnpackExternalDeviceReply(&cjson, nullptr);
+    EXPECT_EQ(ret, SOFTBUS_INVALID_PARAM);
+
+    OHOS::SoftbusMessageOpenChannelInterfaceMock softbusMOpenChannelMock;
+    EXPECT_CALL(softbusMOpenChannelMock, GetJsonObjectNumberItem).WillOnce(Return(true));
+    EXPECT_CALL(softbusMOpenChannelMock, GetJsonObjectStringItem).WillOnce(Return(false));
+    ret = UnpackExternalDeviceReply(&cjson, appInfo);
+    EXPECT_EQ(ret, SOFTBUS_PARSE_JSON_ERR);
+
+    char uuid[] = "test_uuid";
+    EXPECT_CALL(softbusMOpenChannelMock, GetJsonObjectStringItem)
+        .WillOnce(DoAll(SetArrayArgument<2>(uuid, uuid + 12), Return(true)));
+    EXPECT_CALL(softbusMOpenChannelMock, GetJsonObjectNumberItem).Times(3).WillRepeatedly(Return(false));
+    ret = UnpackExternalDeviceReply(&cjson, appInfo);
+    EXPECT_EQ(ret, SOFTBUS_PARSE_JSON_ERR);
+    SoftBusFree(appInfo);
+}
+
+/**
+ * @tc.name: UnpackExternalDeviceReply002
+ * @tc.desc: UnpackExternalDeviceReply.
+ * @tc.type: FUNC
+ * @tc.require:
+ */
+HWTEST_F(SoftBusMessageOpenChannelMockTest, UnpackExternalDeviceReply002, TestSize.Level1)
+{
+    cJSON cjson;
+    AppInfo *appInfo = static_cast<AppInfo *>(SoftBusCalloc(sizeof(AppInfo)));
+    ASSERT_TRUE(appInfo != nullptr);
+
+    OHOS::SoftbusMessageOpenChannelInterfaceMock softbusMOpenChannelMock;
+    EXPECT_CALL(softbusMOpenChannelMock, GetJsonObjectNumberItem).WillRepeatedly(Return(true));
+    EXPECT_CALL(softbusMOpenChannelMock, GetJsonObjectStringItem)
+        .Times(2)
+        .WillOnce(Return(true))
+        .WillOnce(Return(false));
+    int32_t ret = UnpackExternalDeviceReply(&cjson, appInfo);
+    EXPECT_EQ(ret, SOFTBUS_PARSE_JSON_ERR);
+    SoftBusFree(appInfo);
+}
+
+/**
+ * @tc.name: UnpackExternalDeviceReply003
+ * @tc.desc: UnpackExternalDeviceReply.
+ * @tc.type: FUNC
+ * @tc.require:
+ */
+HWTEST_F(SoftBusMessageOpenChannelMockTest, UnpackExternalDeviceReply003, TestSize.Level1)
+{
+    cJSON cjson;
+    AppInfo *appInfo = static_cast<AppInfo *>(SoftBusCalloc(sizeof(AppInfo)));
+    ASSERT_TRUE(appInfo != nullptr);
+
+    OHOS::SoftbusMessageOpenChannelInterfaceMock softbusMOpenChannelMock;
+    EXPECT_CALL(softbusMOpenChannelMock, GetJsonObjectNumberItem).WillRepeatedly(Return(true));
+    EXPECT_CALL(softbusMOpenChannelMock, GetJsonObjectStringItem).WillRepeatedly(Return(true));
+    int32_t ret = UnpackExternalDeviceReply(&cjson, appInfo);
+    EXPECT_EQ(ret, SOFTBUS_OK);
+    SoftBusFree(appInfo);
+}
 } // OHOS

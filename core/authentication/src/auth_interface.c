@@ -392,6 +392,11 @@ int64_t AuthGetIdByUuid(const char *uuid, AuthLinkType type, bool isServer, bool
     return AuthDeviceGetIdByUuid(uuid, type, isServer);
 }
 
+int64_t AuthGetIdByIp(const char *ip)
+{
+    return AuthMetaGetIdByIpPacked(ip);
+}
+
 int32_t AuthGetAuthHandleByIndex(const AuthConnInfo *connInfo, bool isServer, int32_t index, AuthHandle *authHandle)
 {
     if (connInfo == NULL || authHandle == NULL) {

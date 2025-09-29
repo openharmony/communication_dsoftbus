@@ -319,7 +319,7 @@ bool IsPotentialTrustedDevice(TrustedRelationIdType idType, const char *deviceId
         return false;
     }
 
-    int32_t accountId = GetActiveOsAccountIds();
+    int32_t accountId = JudgeDeviceTypeAndGetOsAccountIds();
     if (accountId <= 0) {
         AUTH_LOGE(AUTH_HICHAIN, "accountId is invalid");
         return false;
@@ -361,7 +361,7 @@ bool IsSameAccountGroupDevice(void)
         AUTH_LOGE(AUTH_HICHAIN, "hichain GetGmInstance failed");
         return false;
     }
-    int32_t accountId = GetActiveOsAccountIds();
+    int32_t accountId = JudgeDeviceTypeAndGetOsAccountIds();
     if (accountId <= 0) {
         AUTH_LOGE(AUTH_HICHAIN, "accountId is invalid");
         return false;

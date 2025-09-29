@@ -2027,7 +2027,7 @@ HWTEST_F(LNNDisctributedLedgerTest, GetNodeInfoDiscovery_Test_001, TestSize.Leve
 HWTEST_F(LNNDisctributedLedgerTest, DlGetDeviceSparkCheck_Test_001, TestSize.Level1)
 {
     unsigned char sparkCheck[SPARK_CHECK_LENGTH] = {0};
-    EXPECT_EQ(SOFTBUS_MEM_ERR, DlGetDeviceSparkCheck(NODE1_NETWORK_ID, true, sparkCheck, 0));
+    EXPECT_EQ(SOFTBUS_INVALID_PARAM, DlGetDeviceSparkCheck(NODE1_NETWORK_ID, true, sparkCheck, 0));
     EXPECT_EQ(SOFTBUS_OK, DlGetDeviceSparkCheck(NODE1_NETWORK_ID, true, sparkCheck, SPARK_CHECK_LENGTH));
 }
 } // namespace OHOS

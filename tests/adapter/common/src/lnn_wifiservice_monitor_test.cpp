@@ -50,9 +50,9 @@ void LnnWifiServiceMonitorTest::SetUp() { }
 
 void LnnWifiServiceMonitorTest::TearDown() { }
 
-/**
+/*
  * @tc.name: LNN_WIFISERVICE_MONITOR_SetSoftBusWifiConnState_001
- * @tc.desc: Verify the SetSoftBusWifiConnState function return value equal SOFTBUS_WIFI_UNKNOWN.
+ * @tc.desc: Verify the SetSoftBusWifiConnState function return value equal SOFTBUS_WIFI_UNKNOWN
  * @tc.type: FUNC
  * @tc.require: 1
  */
@@ -74,9 +74,9 @@ HWTEST_F(LnnWifiServiceMonitorTest, LNN_WIFISERVICE_MONITOR_SetSoftBusWifiConnSt
     EXPECT_EQ(state, SOFTBUS_WIFI_UNKNOWN);
 }
 
-/**
+/*
  * @tc.name: LNN_WIFISERVICE_MONITOR_SetSoftBusWifiUseState_001
- * @tc.desc: Verify the SetSoftBusWifiUseState function return value equal SOFTBUS_WIFI_UNKNOWN.
+ * @tc.desc: Verify the SetSoftBusWifiUseState function return value equal SOFTBUS_WIFI_UNKNOWN
  * @tc.type: FUNC
  * @tc.require: 1
  */
@@ -95,9 +95,9 @@ HWTEST_F(LnnWifiServiceMonitorTest, LNN_WIFISERVICE_MONITOR_SetSoftBusWifiUseSta
     EXPECT_EQ(state, SOFTBUS_WIFI_UNKNOWN);
 }
 
-/**
+/*
  * @tc.name: LNN_WIFISERVICE_MONITOR_SetSoftBusWifiHotSpotState_001
- * @tc.desc: Verify the SetSoftBusWifiHotSpotState function return value equal SOFTBUS_WIFI_UNKNOWN.
+ * @tc.desc: Verify the SetSoftBusWifiHotSpotState function return value equal SOFTBUS_WIFI_UNKNOWN
  * @tc.type: FUNC
  * @tc.require: 1
  */
@@ -116,7 +116,7 @@ HWTEST_F(LnnWifiServiceMonitorTest, LNN_WIFISERVICE_MONITOR_SetSoftBusWifiHotSpo
     EXPECT_EQ(state, SOFTBUS_WIFI_UNKNOWN);
 }
 
-/**
+/*
  * @tc.name: SetSoftBusWifiUseStateTest_001
  * @tc.desc: SetSoftBusWifiUseState test
  * @tc.type: FUNC

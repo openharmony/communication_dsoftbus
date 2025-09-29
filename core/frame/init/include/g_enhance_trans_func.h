@@ -57,6 +57,7 @@ typedef bool (*TransCheckNetworkDelegateFunc)(const char *sessionName);
 typedef bool (*TransCheckP2pOnlyFunc)(const char *sessionName);
 typedef bool (*TransCheckDcTriggerVirtualLinkFunc)(const char *sessionName);
 typedef int32_t (*LoadTransPermissionJsonFunc)(void);
+typedef void (*TransD2dQosUnregisterFunc)(int32_t channelId, char *sleMac, uint32_t macLen);
 
 typedef struct TagTransEnhanceFuncList {
     InitQosFunc initQos;
@@ -86,6 +87,7 @@ typedef struct TagTransEnhanceFuncList {
     TransCheckP2pOnlyFunc transCheckP2pOnly;
     TransCheckDcTriggerVirtualLinkFunc transCheckDcTriggerVirtualLink;
     LoadTransPermissionJsonFunc loadTransPermissionJson;
+    TransD2dQosUnregisterFunc transD2dQosUnregister;
 } TransEnhanceFuncList;
 
 TransEnhanceFuncList *TransEnhanceFuncListGet(void);

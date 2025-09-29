@@ -93,6 +93,7 @@ void DistGetActionParamPacked(DiscActionParam *action);
 bool DistActionProcessConPacketPacked(DeviceWrapper *wrapperDevice, const uint8_t *key, uint32_t len);
 int32_t DistActionInitPacked(DiscActionUpdateBleCallback *updateAdvCb, DiscInnerCallback *innerCb);
 void DistActionDeinitPacked(void);
+bool IsUnknownDevicePacked(const char *bleMacAddr);
 #ifdef __cplusplus
 }
 #endif

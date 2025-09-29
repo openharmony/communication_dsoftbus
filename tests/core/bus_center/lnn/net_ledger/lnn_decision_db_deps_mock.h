@@ -19,6 +19,7 @@
 #include <gmock/gmock.h>
 #include <securec.h>
 
+#include "auth_deviceprofile.h"
 #include "auth_interface.h"
 #include "bus_center_event.h"
 #include "bus_center_info_key.h"
@@ -31,7 +32,6 @@
 #include "lnn_node_info.h"
 #include "lnn_secure_storage_struct.h"
 #include "sqlite3_utils.h"
-
 #include "softbus_adapter_file.h"
 #include "softbus_common.h"
 #include "softbus_error_code.h"
@@ -93,7 +93,9 @@ public:
     virtual int32_t LnnSaveRemoteDeviceInfo(const NodeInfo *deviceInfo) = 0;
     virtual int32_t LnnDeleteCeKeyByHuks(struct HksBlob *keyAlias, bool isUnlocked) = 0;
     virtual int32_t LnnGenerateCeKeyByHuks(struct HksBlob *keyAlias, bool isUnlocked) = 0;
-    virtual int32_t LnnGetLocalNumInfo(InfoKey key, int32_t *info);
+    virtual int32_t LnnGetLocalNumInfo(InfoKey key, int32_t *info) = 0;
+    virtual int32_t LnnGetLocalNumU64Info(InfoKey key, uint64_t *info) = 0;
+    virtual int32_t SelectAllAcl(TrustedInfo **trustedInfoArray, uint32_t *num) = 0;
 };
 class DecisionDbDepsInterfaceMock : public DecisionDbDepsInterface {
 public:
@@ -144,6 +146,9 @@ public:
     MOCK_METHOD2(LnnDeleteCeKeyByHuks, int32_t(struct HksBlob *keyAlias, bool isUnlocked));
     MOCK_METHOD2(LnnGenerateCeKeyByHuks, int32_t(struct HksBlob *, bool));
     MOCK_METHOD2(LnnGetLocalNumInfo, int32_t(InfoKey key, int32_t *info));
+    MOCK_METHOD2(LnnGetLocalNumU64Info, int32_t(InfoKey, uint64_t *));
+    MOCK_METHOD2(SelectAllAcl, int32_t(TrustedInfo **, uint32_t *));
+    static int32_t ActionOfSelectAllAcl(TrustedInfo **trustedInfoArray, uint32_t *num);
 };
 } // namespace OHOS
 #endif // LNN_DECISION_DB_DEPS_MOCK_H

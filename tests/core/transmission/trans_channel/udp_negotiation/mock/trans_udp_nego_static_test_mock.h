@@ -22,11 +22,13 @@
 
 #include "auth_interface_struct.h"
 #include "bus_center_manager.h"
+#include "g_enhance_lnn_func_pack.h"
 #include "lnn_distributed_net_ledger.h"
 #include "softbus_scenario_manager.h"
 #include "trans_channel_common.h"
 #include "trans_udp_channel_manager.h"
 #include "trans_udp_negotiation_exchange.h"
+#include "wifi_direct_manager.h"
 
 namespace OHOS {
 class TransUdpNegoStaticInterface {
@@ -62,6 +64,9 @@ public:
     virtual int32_t TransUdpUpdateUdpPort(int32_t channelId, int32_t udpPort) = 0;
     virtual int32_t TransUdpUpdateReplyCnt(int32_t channelId) = 0;
     virtual int32_t TransDelUdpChannel(int32_t channelId) = 0;
+    virtual int32_t AuthMetaGetLocalIpByMetaNodeIdPacked(const char *metaNodeId, char *localIp, int32_t len) = 0;
+    virtual struct WifiDirectManager *GetWifiDirectManager(void) = 0;
+    virtual int32_t LnnGetOsTypeByNetworkId(const char *networkId, int32_t *osType) = 0;
 };
 
 class TransUdpNegoStaticInterfaceMock : public TransUdpNegoStaticInterface {
@@ -100,6 +105,9 @@ public:
     MOCK_METHOD2(TransUdpUpdateUdpPort, int32_t (int32_t channelId, int32_t udpPort));
     MOCK_METHOD1(TransUdpUpdateReplyCnt, int32_t (int32_t channelId));
     MOCK_METHOD1(TransDelUdpChannel, int32_t (int32_t channelId));
+    MOCK_METHOD3(AuthMetaGetLocalIpByMetaNodeIdPacked, int32_t (const char *metaNodeId, char *localIp, int32_t len));
+    MOCK_METHOD0(GetWifiDirectManager, struct WifiDirectManager * (void));
+    MOCK_METHOD2(LnnGetOsTypeByNetworkId, int32_t (const char *networkId, int32_t *osType));
 };
 } // namespace OHOS
 #endif // TRANS_UDP_NEGO_STATIC_TEST_MOCK_H

@@ -36,13 +36,13 @@ static int32_t LegacyBrLoopRead(struct ProxyConnection *connection)
 {
 #define BUFFER_SIZE (1024 * 2)
     uint8_t *buffer = (uint8_t *)SoftBusCalloc(BUFFER_SIZE);
-    CONN_CHECK_AND_RETURN_RET_LOGE(buffer != NULL, SOFTBUS_MALLOC_ERR, CONN_PROXY, "create buffer failed");
+    CONN_CHECK_AND_RETURN_RET_LOGE(buffer != NULL, SOFTBUS_MALLOC_ERR, CONN_PROXY, "create buffer fail");
     uint32_t channelId = connection->channelId;
     int32_t ret = SOFTBUS_OK;
     while (true) {
         ret = SoftBusMutexLock(&connection->lock);
         if (ret != SOFTBUS_OK) {
-            CONN_LOGE(CONN_PROXY, "get lock failed, channelId=%{public}u, err=%{public}d", channelId, ret);
+            CONN_LOGE(CONN_PROXY, "get lock fail, channelId=%{public}u, err=%{public}d", channelId, ret);
             ret = SOFTBUS_LOCK_ERR;
             break;
         }
@@ -86,17 +86,17 @@ static int32_t StartClientConnect(struct ProxyConnection *connection)
     uint8_t binaryAddr[BT_ADDR_LEN] = { 0 };
     int32_t ret = ConvertBtMacToBinary(connection->brMac, BT_MAC_LEN, binaryAddr, BT_ADDR_LEN);
     CONN_CHECK_AND_RETURN_RET_LOGE(ret == SOFTBUS_OK,
-        ret, CONN_PROXY, "convert btMac to binary failed, error=%{public}d", ret);
+        ret, CONN_PROXY, "convert btMac to binary fail, error=%{public}d", ret);
     BtSocketConnectionCallback callback = {
         .connStateCb = BrConnectCallback,
     };
     int32_t socketHandle = g_sppDriver->Connect(connection->proxyChannel.uuid, binaryAddr, &callback);
     if (socketHandle < 0) {
-        CONN_LOGE(CONN_PROXY, "connect failed, socketHandle=%{public}d", socketHandle);
+        CONN_LOGE(CONN_PROXY, "connect fail, socketHandle=%{public}d", socketHandle);
         return SOFTBUS_CONN_BR_UNDERLAY_CONNECT_FAIL;
     }
     if (SoftBusMutexLock(&connection->lock) != SOFTBUS_OK) {
-        CONN_LOGE(CONN_PROXY, "get lock failed, connId=%{public}u", connection->channelId);
+        CONN_LOGE(CONN_PROXY, "get lock fail, connId=%{public}u", connection->channelId);
         g_sppDriver->DisConnect(socketHandle);
         return SOFTBUS_LOCK_ERR;
     }
@@ -148,7 +148,7 @@ static void *ProxyBrClientConnect(void *data)
         CONN_LOGW(CONN_PROXY, "client loop read exit, channelId=%{public}u, socketHandle=%{public}d, error=%{public}d",
             connection->channelId, connection->socketHandle, ret);
         if (SoftBusMutexLock(&connection->lock) != SOFTBUS_OK) {
-            CONN_LOGE(CONN_PROXY, "lock connection failed, channelId=%{public}u", connection->channelId);
+            CONN_LOGE(CONN_PROXY, "lock connection fail, channelId=%{public}u", connection->channelId);
             g_sppDriver->DisConnect(connection->socketHandle);
             g_eventListener.onDisconnected(connection->channelId, SOFTBUS_LOCK_ERR);
             break;
@@ -173,12 +173,12 @@ int32_t ProxyBrConnect(struct ProxyConnection *connection, const ProxyBrConnectS
         "callback is null");
     ProxyBrConnectContext *ctx = (ProxyBrConnectContext *)SoftBusCalloc(sizeof(ProxyBrConnectContext));
     CONN_CHECK_AND_RETURN_RET_LOGE(ctx != NULL, SOFTBUS_LOCK_ERR, CONN_PROXY,
-        "calloc failed, connId=%{public}u", connection->channelId);
+        "calloc fail, connId=%{public}u", connection->channelId);
     ctx->channelId = connection->channelId;
     ctx->callback = *callback;
     int32_t status = ConnStartActionAsync(ctx, ProxyBrClientConnect, NULL);
     if (status != SOFTBUS_OK) {
-        CONN_LOGE(CONN_PROXY, "start connect thread failed, connId=%{public}u, error=%{public}d",
+        CONN_LOGE(CONN_PROXY, "start connect thread fail, connId=%{public}u, error=%{public}d",
             connection->channelId, status);
         SoftBusFree(ctx);
         return status;
@@ -192,7 +192,7 @@ static int32_t Disconnect(struct ProxyConnection *connection)
                                    SOFTBUS_INVALID_PARAM, CONN_PROXY, "connection is null");
     int32_t ret = SoftBusMutexLock(&connection->lock);
     CONN_CHECK_AND_RETURN_RET_LOGE(ret == SOFTBUS_OK, ret, CONN_PROXY,
-        "br disconnect lock failed, connId=%{public}u, ret=%{public}d", connection->channelId, ret);
+        "br disconnect lock fail, connId=%{public}u, error=%{public}d", connection->channelId, ret);
     int32_t socketHandle = connection->socketHandle;
     if (connection->socketHandle == BR_INVALID_SOCKET_HANDLE) {
         connection->state = PROXY_CHANNEL_DISCONNECTED;
@@ -213,7 +213,7 @@ static int32_t Send(struct ProxyConnection *connection, const uint8_t *data, uin
                                    SOFTBUS_INVALID_PARAM, CONN_PROXY, "connection is null");
     int32_t ret = SoftBusMutexLock(&connection->lock);
     CONN_CHECK_AND_RETURN_RET_LOGE(ret == SOFTBUS_OK, ret, CONN_PROXY,
-        "lock connection failed, channelId=%{public}u, ret=%{public}d", connection->channelId, ret);
+        "lock connection fail, channelId=%{public}u, error=%{public}d", connection->channelId, ret);
     if (connection->state != PROXY_CHANNEL_CONNECTED) {
         CONN_LOGE(CONN_PROXY, "connection is not ready, currentState=%{public}d", connection->state);
         SoftBusMutexUnlock(&connection->lock);
@@ -237,7 +237,7 @@ static int32_t Send(struct ProxyConnection *connection, const uint8_t *data, uin
         int32_t written = g_sppDriver->Write(socketHandle, data, waitWriteLen);
         if (written < 0) {
             CONN_LOGE(CONN_PROXY,
-                "send data failed, channelId=%{public}u, totalLen=%{public}u, waitWriteLen=%{public}d, "
+                "send data fail, channelId=%{public}u, totalLen=%{public}u, waitWriteLen=%{public}d, "
                 "alreadyWriteLen=%{public}d, error=%{public}d",
                 connection->channelId, dataLen, waitWriteLen, dataLen - waitWriteLen, written);
             return SOFTBUS_CONN_BR_UNDERLAY_WRITE_FAIL;
@@ -258,7 +258,7 @@ int32_t RegisterEventListener(const ProxyEventListener *listener)
     g_eventListener = *listener;
     g_sppDriver = InitSppSocketDriver();
     CONN_CHECK_AND_RETURN_RET_LOGE(g_sppDriver != NULL, SOFTBUS_CONN_PROXY_INTERNAL_ERR, CONN_INIT,
-        "init spp socket driver failed");
+        "init spp socket driver fail");
     return SOFTBUS_OK;
 }
 

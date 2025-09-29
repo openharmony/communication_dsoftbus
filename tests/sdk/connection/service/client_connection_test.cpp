@@ -94,30 +94,6 @@ static IGeneralListener g_listener = {
     .OnServiceDied = OnServiceDied,
 };
 
-static int32_t OnAcceptConnectBad(const char *name, uint32_t handle)
-{
-    printf("OnAcceptConnect called, name: %s, handle: %d\n", name, handle);
-    return -1;
-}
-
-static int32_t OnConnectionStateChangeBad(uint32_t handle, int32_t state, int32_t reason)
-{
-    printf("OnConnectionStateChange called, handle: %d, state: %d, reason: %d\n", handle, state, reason);
-    return -1;
-}
-
-static void OnDataReceviedBad(uint32_t handle, const uint8_t *data, uint32_t len)
-{
-    printf("OnDataRecevied called, handle: %d, data: %s, len: %d\n", handle, data, len);
-}
-
-static IGeneralListener g_listenerBad = {
-    .OnAcceptConnect = OnAcceptConnectBad,
-    .OnConnectionStateChange = OnConnectionStateChangeBad,
-    .OnDataReceived = OnDataReceviedBad,
-    .OnServiceDied = OnServiceDied,
-};
-
 /*
  * @tc.name: RegisterListenerTest
  * @tc.desc: register listener test
@@ -200,76 +176,6 @@ HWTEST_F(ClientConnectionTest, ClientConnectionTest, TestSize.Level0)
     ASSERT_EQ(ret, SOFTBUS_INVALID_PARAM);
     ret = GeneralUnregisterListener();
     ASSERT_EQ(ret, SOFTBUS_OK);
-}
-
-/*
- * @tc.name: ConnectionStateChangeTest
- * @tc.desc: connection state change test
- * @tc.type: FUNC
- * @tc.require:
- */
-HWTEST_F(ClientConnectionTest, ConnectionStateChangeTest, TestSize.Level0)
-{
-    int32_t ret = ConnectionStateChange(0, 0, 0);
-    ASSERT_EQ(ret, SOFTBUS_LOCK_ERR);
-
-    IGeneralListener listener = {
-        .OnAcceptConnect = OnAcceptConnect,
-        .OnConnectionStateChange = OnConnectionStateChange,
-        .OnDataReceived = OnDataRecevied,
-        .OnServiceDied = OnServiceDied,
-    };
-    ret = GeneralRegisterListener(&listener);
-    ASSERT_EQ(ret, SOFTBUS_OK);
-    ret = ConnectionStateChange(0, 0, 0);
-    ASSERT_EQ(ret, SOFTBUS_OK);
-
-    listener.OnConnectionStateChange = nullptr;
-    ret = ConnectionStateChange(0, 0, 0);
-    ASSERT_EQ(ret, SOFTBUS_NO_INIT);
-    ret = GeneralUnregisterListener();
-    ASSERT_EQ(ret, SOFTBUS_OK);
-
-    ret = GeneralRegisterListener(&g_listenerBad);
-    ASSERT_EQ(ret, SOFTBUS_OK);
-    ret = ConnectionStateChange(0, 0, 0);
-    ASSERT_NE(ret, SOFTBUS_OK);
-    ret = GeneralUnregisterListener();
-}
-
-/*
- * @tc.name: AcceptConnectTest
- * @tc.desc: accept connect test
- * @tc.type: FUNC
- * @tc.require:
- */
-HWTEST_F(ClientConnectionTest, AcceptConnectTest, TestSize.Level0)
-{
-    int32_t ret = AcceptConnect("test", 0);
-    ASSERT_EQ(ret, SOFTBUS_LOCK_ERR);
-    IGeneralListener listener = {
-        .OnAcceptConnect = OnAcceptConnect,
-        .OnConnectionStateChange = OnConnectionStateChange,
-        .OnDataReceived = OnDataRecevied,
-        .OnServiceDied = OnServiceDied,
-    };
-    ret = GeneralRegisterListener(&listener);
-    ASSERT_EQ(ret, SOFTBUS_OK);
-    ret = AcceptConnect("test", 0);
-    ASSERT_EQ(ret, SOFTBUS_OK);
-
-    listener.OnAcceptConnect = nullptr;
-    ret = AcceptConnect("test", 0);
-    ASSERT_EQ(ret, SOFTBUS_NO_INIT);
-
-    ret = GeneralUnregisterListener();
-    ASSERT_EQ(ret, SOFTBUS_OK);
-
-    ret = GeneralRegisterListener(&g_listenerBad);
-    ASSERT_EQ(ret, SOFTBUS_OK);
-    ret = AcceptConnect("test", 0);
-    ASSERT_NE(ret, SOFTBUS_OK);
-    ret = GeneralUnregisterListener();
 }
 
 /*

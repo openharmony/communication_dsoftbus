@@ -53,6 +53,7 @@ int32_t LnnGetLocalNumInfoByIfnameIdx(InfoKey key, int32_t *info, int32_t ifIdx)
 int32_t LnnGetLocalNum64Info(InfoKey key, int64_t *info);
 int32_t LnnGetLocalNumU64Info(InfoKey key, uint64_t *info);
 int32_t LnnSetLocalNum64Info(InfoKey key, int64_t info);
+int32_t LnnSetLocalNumU64Info(InfoKey key, uint64_t info);
 int32_t LnnGetLocalNum16Info(InfoKey key, int16_t *info);
 int32_t LnnSetLocalNum16Info(InfoKey key, int16_t info);
 int32_t LnnGetLocalNumU16Info(InfoKey key, uint16_t *info);
@@ -85,6 +86,9 @@ void SoftBusDumpBusCenterPrintInfo(int fd, NodeBasicInfo *nodeInfo);
 int32_t LnnServerJoin(ConnectionAddr *addr, const char *pkgName, bool isForceJoin);
 int32_t LnnServerLeave(const char *networkId, const char *pkgName);
 int32_t LnnDisSetDisplayName(const char *pkgName, const char *nameData, uint32_t len);
+int32_t LnnCreateGroupOwner(const char *pkgName, const struct GroupOwnerConfig *config,
+    struct GroupOwnerResult *result);
+void LnnDestroyGroupOwner(const char *pkgName);
 
 int32_t BusCenterServerInit(void);
 void BusCenterServerDeinit(void);
