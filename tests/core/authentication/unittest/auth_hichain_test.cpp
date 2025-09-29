@@ -83,6 +83,7 @@ void OnDeviceBound(const char *udid, const char *groupInfo)
  * @tc.name: ON_DEVICE_NOT_TRUSTED_TEST_001
  * @tc.desc: on device not trusted test
  * @tc.type: FUNC
+ * @tc.level: Level1
  * @tc.require:
  */
 HWTEST_F(AuthHichainTest, ON_DEVICE_NOT_TRUSTED_TEST_001, TestSize.Level1)
@@ -136,6 +137,7 @@ HWTEST_F(AuthHichainTest, ON_DEVICE_NOT_TRUSTED_TEST_001, TestSize.Level1)
  * @tc.name: ON_REQUEST_TEST_001
  * @tc.desc: on request test
  * @tc.type: FUNC
+ * @tc.level: Level1
  * @tc.require:
  */
 HWTEST_F(AuthHichainTest, ON_REQUEST_TEST_001, TestSize.Level1)
@@ -163,6 +165,7 @@ HWTEST_F(AuthHichainTest, ON_REQUEST_TEST_001, TestSize.Level1)
  * @tc.name: IS_POTENTIAL_TRUSTED_DEVICE_TEST_001
  * @tc.desc: is potential trusted device test
  * @tc.type: FUNC
+ * @tc.level: Level1
  * @tc.require:
  */
 HWTEST_F(AuthHichainTest, IS_POTENTIAL_TRUSTED_DEVICE_TEST_001, TestSize.Level1)
@@ -197,6 +200,7 @@ HWTEST_F(AuthHichainTest, IS_POTENTIAL_TRUSTED_DEVICE_TEST_001, TestSize.Level1)
  * @tc.name: IS_POTENTIAL_TRUSTED_DEVICE_TEST_002
  * @tc.desc: is potential trusted device test
  * @tc.type: FUNC
+ * @tc.level: Level1
  * @tc.require:
  */
 HWTEST_F(AuthHichainTest, IS_POTENTIAL_TRUSTED_DEVICE_TEST_002, TestSize.Level1)
@@ -236,6 +240,7 @@ HWTEST_F(AuthHichainTest, IS_POTENTIAL_TRUSTED_DEVICE_TEST_002, TestSize.Level1)
  * @tc.name: HI_CHAIN_GET_JOINED_GROUPS_TEST_001
  * @tc.desc: hichain get joined groups test
  * @tc.type: FUNC
+ * @tc.level: Level1
  * @tc.require:
  */
 HWTEST_F(AuthHichainTest, HI_CHAIN_GET_JOINED_GROUPS_TEST_001, TestSize.Level1)
@@ -262,6 +267,7 @@ HWTEST_F(AuthHichainTest, HI_CHAIN_GET_JOINED_GROUPS_TEST_001, TestSize.Level1)
  * @tc.name: IS_SAME_ACCOUNT_GROUP_DEVICE_TEST_001
  * @tc.desc: is potential trusted device test
  * @tc.type: FUNC
+ * @tc.level: Level1
  * @tc.require:
  */
 HWTEST_F(AuthHichainTest, IS_SAME_ACCOUNT_GROUP_DEVICE_TEST_001, TestSize.Level1)
@@ -291,6 +297,7 @@ HWTEST_F(AuthHichainTest, IS_SAME_ACCOUNT_GROUP_DEVICE_TEST_001, TestSize.Level1
  * @tc.name: HICHAIN_PROCESS_UK_NEGO_DATA_TEST_001
  * @tc.desc: hichain process uk negotiate data test
  * @tc.type: FUNC
+ * @tc.level: Level1
  * @tc.require:
  */
 HWTEST_F(AuthHichainTest, HICHAIN_PROCESS_UK_NEGO_DATA_TEST_001, TestSize.Level1)

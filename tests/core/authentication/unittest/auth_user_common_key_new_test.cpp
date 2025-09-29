@@ -44,6 +44,8 @@ void AuthUserCommonKeyNewTest::TearDown() { }
 /*
  * @tc.name: RequireUkNegotiateListLock001
  * @tc.desc: RequireUkNegotiateListLock false
+ * @tc.type: FUNC
+ * @tc.level: Level0
  * @tc.require:
  */
 HWTEST_F(AuthUserCommonKeyNewTest, RequireUkNegotiateListLock001, TestSize.Level0)
@@ -55,6 +57,7 @@ HWTEST_F(AuthUserCommonKeyNewTest, RequireUkNegotiateListLock001, TestSize.Level
  * @tc.name: RequireUkNegotiateListLock002
  * @tc.desc: RequireUkNegotiateListLock false
  * @tc.type: FUNC
+ * @tc.level: Level0
  * @tc.require:
  */
 HWTEST_F(AuthUserCommonKeyNewTest, RequireUkNegotiateListLock002, TestSize.Level0)
@@ -63,9 +66,10 @@ HWTEST_F(AuthUserCommonKeyNewTest, RequireUkNegotiateListLock002, TestSize.Level
 }
 
 /*
- * @tc.name: ReleaseUkNegotiateListLock001, TestSize.Level0)
+ * @tc.name: ReleaseUkNegotiateListLock001
  * @tc.desc: SoftBusMutexUnlock  retur  SOFTBUS_OK
  * @tc.type: FUNC
+ * @tc.level: Level0
  * @tc.require:
  */
 HWTEST_F(AuthUserCommonKeyNewTest, ReleaseUkNegotiateListLock001, TestSize.Level0)
@@ -78,6 +82,7 @@ HWTEST_F(AuthUserCommonKeyNewTest, ReleaseUkNegotiateListLock001, TestSize.Level
  * @tc.name: ReleaseUkNegotiateListLock002
  * @tc.desc: SoftBusMutexUnlock is not SOFTBUS_OK
  * @tc.type: FUNC
+ * @tc.level: Level0
  * @tc.require:
  */
 HWTEST_F(AuthUserCommonKeyNewTest, ReleaseUkNegotiateListLock002, TestSize.Level0)
@@ -90,6 +95,7 @@ HWTEST_F(AuthUserCommonKeyNewTest, ReleaseUkNegotiateListLock002, TestSize.Level
  * @tc.name: InitUkNegoInstanceList001
  * @tc.desc: InitUkNegoInstanceList return SOFTBUS_OK
  * @tc.type: FUNC
+ * @tc.level: Level0
  * @tc.require:
  */
 HWTEST_F(AuthUserCommonKeyNewTest, InitUkNegoInstanceList001, TestSize.Level0)
@@ -104,6 +110,7 @@ HWTEST_F(AuthUserCommonKeyNewTest, InitUkNegoInstanceList001, TestSize.Level0)
  * @tc.name: InitUkNegoInstanceList002
  * @tc.desc: InitUkNegoInstanceList return SOFTBUS_OK
  * @tc.type: FUNC
+ * @tc.level: Level0
  * @tc.require:
  */
 HWTEST_F(AuthUserCommonKeyNewTest, InitUkNegoInstanceList002, TestSize.Level0)
@@ -118,6 +125,7 @@ HWTEST_F(AuthUserCommonKeyNewTest, InitUkNegoInstanceList002, TestSize.Level0)
  * @tc.name: InitUkNegoInstanceList003
  * @tc.desc: InitUkNegoInstanceList return SOFTBUS_OK
  * @tc.type: FUNC
+ * @tc.level: Level0
  * @tc.require:
  */
 HWTEST_F(AuthUserCommonKeyNewTest, InitUkNegoInstanceList003, TestSize.Level0)
@@ -129,6 +137,7 @@ HWTEST_F(AuthUserCommonKeyNewTest, InitUkNegoInstanceList003, TestSize.Level0)
  * @tc.name: GetGenUkInstanceByChannelTest001
  * @tc.desc: GetGenUkInstanceByChannel return SOFTBUS_NO_INIT
  * @tc.type: FUNC
+ * @tc.level: Level0
  * @tc.require:
  */
 HWTEST_F(AuthUserCommonKeyNewTest, GetGenUkInstanceByChannelTest001, TestSize.Level0)
@@ -143,6 +152,7 @@ HWTEST_F(AuthUserCommonKeyNewTest, GetGenUkInstanceByChannelTest001, TestSize.Le
  * @tc.name: GetGenUkInstanceByChannelTest002
  * @tc.desc: GetGenUkInstanceByChannel return SOFTBUS_INVALID_PARAM
  * @tc.type: FUNC
+ * @tc.level: Level0
  * @tc.require:
  */
 HWTEST_F(AuthUserCommonKeyNewTest, GetGenUkInstanceByChannelTest002, TestSize.Level0)
@@ -157,6 +167,7 @@ HWTEST_F(AuthUserCommonKeyNewTest, GetGenUkInstanceByChannelTest002, TestSize.Le
  * @tc.name: GetGenUkInstanceByChannelTest003
  * @tc.desc: GetGenUkInstanceByChannel return SOFTBUS_LOCK_ERR
  * @tc.type: FUNC
+ * @tc.level: Level0
  * @tc.require:
  */
 HWTEST_F(AuthUserCommonKeyNewTest, GetGenUkInstanceByChannelTest003, TestSize.Level0)
@@ -173,6 +184,7 @@ HWTEST_F(AuthUserCommonKeyNewTest, GetGenUkInstanceByChannelTest003, TestSize.Le
  * @tc.name: GetGenUkInstanceByChannelTest004
  * @tc.desc: GetGenUkInstanceByChannel return SOFTBUS_LOCK_ERR
  * @tc.type: FUNC
+ * @tc.level: Level0
  * @tc.require:
  */
 HWTEST_F(AuthUserCommonKeyNewTest, GetGenUkInstanceByChannelTest004, TestSize.Level0)
@@ -191,6 +203,7 @@ HWTEST_F(AuthUserCommonKeyNewTest, GetGenUkInstanceByChannelTest004, TestSize.Le
  * @tc.name: GetGenUkInstanceByChannelTest005
  * @tc.desc: GetGenUkInstanceByChannel return SOFTBUS_LOCK_ERR
  * @tc.type: FUNC
+ * @tc.level: Level0
  * @tc.require:
  */
 HWTEST_F(AuthUserCommonKeyNewTest, GetGenUkInstanceByChannelTest005, TestSize.Level0)
@@ -207,6 +220,7 @@ HWTEST_F(AuthUserCommonKeyNewTest, GetGenUkInstanceByChannelTest005, TestSize.Le
  * @tc.name: GetGenUkInstanceByChannelTest006
  * @tc.desc: GetGenUkInstanceByChannel return SOFTBUS_MEM_ERPR
  * @tc.type: FUNC
+ * @tc.level: Level0
  * @tc.require:
  */
 HWTEST_F(AuthUserCommonKeyNewTest, GetGenUkInstanceByChannelTest006, TestSize.Level0)
@@ -225,6 +239,7 @@ HWTEST_F(AuthUserCommonKeyNewTest, GetGenUkInstanceByChannelTest006, TestSize.Le
  * @tc.name: GetSameUkInstanceNumTest001
  * @tc.desc: GetSameUkInstanceNum return 0
  * @tc.type: FUNC
+ * @tc.level: Level0
  * @tc.require:
  */
 HWTEST_F(AuthUserCommonKeyNewTest, GetSameUkInstanceNumTest001, TestSize.Level0)
@@ -247,6 +262,7 @@ HWTEST_F(AuthUserCommonKeyNewTest, GetSameUkInstanceNumTest001, TestSize.Level0)
  * @tc.name: GetSameUkInstanceNumTest002
  * @tc.desc: GetSameUkInstanceNum return 0
  * @tc.type: FUNC
+ * @tc.level: Level0
  * @tc.require:
  */
 HWTEST_F(AuthUserCommonKeyNewTest, GetSameUkInstanceNumTest002, TestSize.Level0)
@@ -269,6 +285,7 @@ HWTEST_F(AuthUserCommonKeyNewTest, GetSameUkInstanceNumTest002, TestSize.Level0)
  * @tc.name: GetSameUkInstanceNumTest003
  * @tc.desc: GetSameUkInstanceNum return 0
  * @tc.type: FUNC
+ * @tc.level: Level0
  * @tc.require:
  */
 HWTEST_F(AuthUserCommonKeyNewTest, GetSameUkInstanceNumTest003, TestSize.Level0)
@@ -291,6 +308,7 @@ HWTEST_F(AuthUserCommonKeyNewTest, GetSameUkInstanceNumTest003, TestSize.Level0)
  * @tc.name: GetGenUkInstanceByReqTest001
  * @tc.desc: GetGenUkInstanceByReq return SOFTBUS_NO_INIT
  * @tc.type: FUNC
+ * @tc.level: Level0
  * @tc.require:
  */
 HWTEST_F(AuthUserCommonKeyNewTest, GetGenUkInstanceByReqTest001, TestSize.Level0)
@@ -306,6 +324,7 @@ HWTEST_F(AuthUserCommonKeyNewTest, GetGenUkInstanceByReqTest001, TestSize.Level0
  * @tc.name: GetGenUkInstanceByReqTest002
  * @tc.desc: GetGenUkInstanceByReq return SOFTBUS_LOCK_ERR
  * @tc.type: FUNC
+ * @tc.level: Level0
  * @tc.require:
  */
 HWTEST_F(AuthUserCommonKeyNewTest, GetGenUkInstanceByReqTest002, TestSize.Level0)
@@ -323,6 +342,7 @@ HWTEST_F(AuthUserCommonKeyNewTest, GetGenUkInstanceByReqTest002, TestSize.Level0
  * @tc.name: GetGenUkInstanceByReqTest003
  * @tc.desc: GetGenUkInstanceByReq return SOFTBUS_LOCK_ERR
  * @tc.type: FUNC
+ * @tc.level: Level0
  * @tc.require:
  */
 HWTEST_F(AuthUserCommonKeyNewTest, GetGenUkInstanceByReqTest003, TestSize.Level0)
@@ -341,6 +361,7 @@ HWTEST_F(AuthUserCommonKeyNewTest, GetGenUkInstanceByReqTest003, TestSize.Level0
  * @tc.name: GetGenUkInstanceByReqTest004
  * @tc.desc: GetGenUkInstanceByReq return SOFTBUS_LOCK_ERR
  * @tc.type: FUNC
+ * @tc.level: Level0
  * @tc.require:
  */
 HWTEST_F(AuthUserCommonKeyNewTest, GetGenUkInstanceByReqTest004, TestSize.Level0)
@@ -359,6 +380,7 @@ HWTEST_F(AuthUserCommonKeyNewTest, GetGenUkInstanceByReqTest004, TestSize.Level0
  * @tc.name: GetGenUkInstanceByReqTest005
  * @tc.desc: GetGenUkInstanceByReq return SOFTBUS_LOCK_ERR
  * @tc.type: FUNC
+ * @tc.level: Level0
  * @tc.require:
  */
 HWTEST_F(AuthUserCommonKeyNewTest, GetGenUkInstanceByReqTest005, TestSize.Level0)
@@ -376,6 +398,7 @@ HWTEST_F(AuthUserCommonKeyNewTest, GetGenUkInstanceByReqTest005, TestSize.Level0
  * @tc.name: PrintfAuthAclInfoTest001
  * @tc.desc: PrintfAuthAclInfo test
  * @tc.type: FUNC
+ * @tc.level: Level0
  * @tc.require:
  */
 HWTEST_F(AuthUserCommonKeyNewTest, PrintfAuthAclInfoTest001, TestSize.Level0)
@@ -390,6 +413,7 @@ HWTEST_F(AuthUserCommonKeyNewTest, PrintfAuthAclInfoTest001, TestSize.Level0)
  * @tc.name: PrintfAuthAclInfoTest002
  * @tc.desc: PrintfAuthAclInfo test
  * @tc.type: FUNC
+ * @tc.level: Level0
  * @tc.require:
  */
 HWTEST_F(AuthUserCommonKeyNewTest, PrintfAuthAclInfoTest002, TestSize.Level0)
@@ -414,6 +438,7 @@ HWTEST_F(AuthUserCommonKeyNewTest, PrintfAuthAclInfoTest002, TestSize.Level0)
  * @tc.name: CreateUkNegotiateInstanceTest001
  * @tc.desc: CreateUkNegotiateInstance return  SOFTBUS_LOCK_ERR
  * @tc.type: FUNC
+ * @tc.level: Level0
  * @tc.require:
  */
 HWTEST_F(AuthUserCommonKeyNewTest, CreateUkNegotiateInstanceTest001, TestSize.Level0)
@@ -430,6 +455,7 @@ HWTEST_F(AuthUserCommonKeyNewTest, CreateUkNegotiateInstanceTest001, TestSize.Le
  * @tc.name: CreateUkNegotiateInstanceTest002
  * @tc.desc: CreateUkNegotiateInstance return  SOFTBUS_LOCK_ERR
  * @tc.type: FUNC
+ * @tc.level: Level0
  * @tc.require:
  */
 HWTEST_F(AuthUserCommonKeyNewTest, CreateUkNegotiateInstanceTest002, TestSize.Level0)
@@ -446,6 +472,7 @@ HWTEST_F(AuthUserCommonKeyNewTest, CreateUkNegotiateInstanceTest002, TestSize.Le
  * @tc.name: UpdateUkNegotiateInfoTest001
  * @tc.desc: UpdateUkNegotiateInfo return  SOFTBUS_LOCK_ERR
  * @tc.type: FUNC
+ * @tc.level: Level0
  * @tc.require:
  */
 HWTEST_F(AuthUserCommonKeyNewTest, UpdateUkNegotiateInfoTest001, TestSize.Level0)
@@ -462,6 +489,7 @@ HWTEST_F(AuthUserCommonKeyNewTest, UpdateUkNegotiateInfoTest001, TestSize.Level0
  * @tc.name: UpdateUkNegotiateInfoTest002
  * @tc.desc: UpdateUkNegotiateInfo return  SOFTBUS_INVALID_PARAM
  * @tc.type: FUNC
+ * @tc.level: Level0
  * @tc.require:
  */
 HWTEST_F(AuthUserCommonKeyNewTest, UpdateUkNegotiateInfoTest002, TestSize.Level0)
@@ -475,6 +503,7 @@ HWTEST_F(AuthUserCommonKeyNewTest, UpdateUkNegotiateInfoTest002, TestSize.Level0
  * @tc.name: UpdateUkNegotiateInfoTest003
  * @tc.desc: UpdateUkNegotiateInfo return  SOFTBUS_LOCK_ERR
  * @tc.type: FUNC
+ * @tc.level: Level0
  * @tc.require:
  */
 HWTEST_F(AuthUserCommonKeyNewTest, UpdateUkNegotiateInfoTest003, TestSize.Level0)
@@ -489,6 +518,7 @@ HWTEST_F(AuthUserCommonKeyNewTest, UpdateUkNegotiateInfoTest003, TestSize.Level0
  * @tc.name: UpdateUkNegotiateInfoTest004
  * @tc.desc: UpdateUkNegotiateInfo return  SOFTBUS_LOCK_ERR
  * @tc.type: FUNC
+ * @tc.level: Level0
  * @tc.require:
  */
 HWTEST_F(AuthUserCommonKeyNewTest, UpdateUkNegotiateInfoTest004, TestSize.Level0)
@@ -513,6 +543,7 @@ HWTEST_F(AuthUserCommonKeyNewTest, UpdateUkNegotiateInfoTest004, TestSize.Level0
  * @tc.name: UpdateUkNegotiateInfoTest005
  * @tc.desc: UpdateUkNegotiateInfo return  SOFTBUS_LOCK_ERR
  * @tc.type: FUNC
+ * @tc.level: Level0
  * @tc.require:
  */
 HWTEST_F(AuthUserCommonKeyNewTest, UpdateUkNegotiateInfoTest005, TestSize.Level0)
@@ -540,6 +571,7 @@ HWTEST_F(AuthUserCommonKeyNewTest, UpdateUkNegotiateInfoTest005, TestSize.Level0
  * @tc.name: DeleteUkNegotiateInstanceTest001
  * @tc.desc: DeleteUkNegotiateInstance test
  * @tc.type: FUNC
+ * @tc.level: Level0
  * @tc.require:
  */
 HWTEST_F(AuthUserCommonKeyNewTest, DeleteUkNegotiateInstanceTest001, TestSize.Level0)
@@ -555,6 +587,7 @@ HWTEST_F(AuthUserCommonKeyNewTest, DeleteUkNegotiateInstanceTest001, TestSize.Le
  * @tc.name: DeleteUkNegotiateInstanceTest002
  * @tc.desc: DeleteUkNegotiateInstance test
  * @tc.type: FUNC
+ * @tc.level: Level0
  * @tc.require:
  */
 HWTEST_F(AuthUserCommonKeyNewTest, DeleteUkNegotiateInstanceTest002, TestSize.Level0)
@@ -570,6 +603,7 @@ HWTEST_F(AuthUserCommonKeyNewTest, DeleteUkNegotiateInstanceTest002, TestSize.Le
  * @tc.name: DeleteUkNegotiateInstanceTest003
  * @tc.desc: DeleteUkNegotiateInstance test
  * @tc.type: FUNC
+ * @tc.level: Level0
  * @tc.require:
  */
 HWTEST_F(AuthUserCommonKeyNewTest, DeleteUkNegotiateInstanceTest003, TestSize.Level0)
@@ -581,6 +615,7 @@ HWTEST_F(AuthUserCommonKeyNewTest, DeleteUkNegotiateInstanceTest003, TestSize.Le
  * @tc.name: DeleteUkNegotiateInstanceTest004
  * @tc.desc: DeleteUkNegotiateInstance test
  * @tc.type: FUNC
+ * @tc.level: Level0
  * @tc.require:
  */
 HWTEST_F(AuthUserCommonKeyNewTest, DeleteUkNegotiateInstanceTest004, TestSize.Level0)
@@ -597,6 +632,7 @@ HWTEST_F(AuthUserCommonKeyNewTest, DeleteUkNegotiateInstanceTest004, TestSize.Le
  * @tc.name: CompareByAllAclTest001
  * @tc.desc: CompareByAllAcl return false
  * @tc.type: FUNC
+ * @tc.level: Level0
  * @tc.require:
  */
 HWTEST_F(AuthUserCommonKeyNewTest, CompareByAllAclTest001, TestSize.Level0)
@@ -634,6 +670,7 @@ HWTEST_F(AuthUserCommonKeyNewTest, CompareByAllAclTest001, TestSize.Level0)
  * @tc.name: CompareByAllAclTest002
  * @tc.desc: CompareByAllAcl return false
  * @tc.type: FUNC
+ * @tc.level: Level0
  * @tc.require:
  */
 HWTEST_F(AuthUserCommonKeyNewTest, CompareByAllAclTest002, TestSize.Level0)
@@ -671,6 +708,7 @@ HWTEST_F(AuthUserCommonKeyNewTest, CompareByAllAclTest002, TestSize.Level0)
  * @tc.name: CompareByAllAclTest003
  * @tc.desc: CompareByAllAcl return false
  * @tc.type: FUNC
+ * @tc.level: Level0
  * @tc.require:
  */
 HWTEST_F(AuthUserCommonKeyNewTest, CompareByAllAclTest003, TestSize.Level0)
@@ -708,6 +746,7 @@ HWTEST_F(AuthUserCommonKeyNewTest, CompareByAllAclTest003, TestSize.Level0)
  * @tc.name: CompareByAllAclTest004
  * @tc.desc: CompareByAllAcl return false
  * @tc.type: FUNC
+ * @tc.level: Level0
  * @tc.require:
  */
 HWTEST_F(AuthUserCommonKeyNewTest, CompareByAllAclTest004, TestSize.Level0)
@@ -745,6 +784,7 @@ HWTEST_F(AuthUserCommonKeyNewTest, CompareByAllAclTest004, TestSize.Level0)
  * @tc.name: CompareByAllAclTest005
  * @tc.desc: CompareByAllAclTest return false
  * @tc.type: FUNC
+ * @tc.level: Level0
  * @tc.require:
  */
 HWTEST_F(AuthUserCommonKeyNewTest, CompareByAllAclTest005, TestSize.Level0)
@@ -768,6 +808,7 @@ HWTEST_F(AuthUserCommonKeyNewTest, CompareByAllAclTest005, TestSize.Level0)
  * @tc.name: CompareByAllAclTest006
  * @tc.desc: CompareByAllAcl return false
  * @tc.type: FUNC
+ * @tc.level: Level0
  * @tc.require:
  */
 HWTEST_F(AuthUserCommonKeyNewTest, CompareByAllAclTest006, TestSize.Level0)
@@ -791,6 +832,7 @@ HWTEST_F(AuthUserCommonKeyNewTest, CompareByAllAclTest006, TestSize.Level0)
  * @tc.name: CompareByAllAclTest007
  * @tc.desc: CompareByAllAcl return true
  * @tc.type: FUNC
+ * @tc.level: Level0
  * @tc.require:
  */
 HWTEST_F(AuthUserCommonKeyNewTest, CompareByAllAclTest007, TestSize.Level0)
@@ -813,6 +855,7 @@ HWTEST_F(AuthUserCommonKeyNewTest, CompareByAllAclTest007, TestSize.Level0)
  * @tc.name: CompareByAclDiffAccountWithUserLevelTest001
  * @tc.desc: CompareByAclDiffAccountWithUserLevel return true
  * @tc.type: FUNC
+ * @tc.level: Level0
  * @tc.require:
  */
 HWTEST_F(AuthUserCommonKeyNewTest, CompareByAclDiffAccountWithUserLevelTest001, TestSize.Level0)
@@ -836,6 +879,7 @@ HWTEST_F(AuthUserCommonKeyNewTest, CompareByAclDiffAccountWithUserLevelTest001, 
  * @tc.name: CompareByAclDiffAccountWithUserLevelTest002
  * @tc.desc: CompareByAclDiffAccountWithUserLevel return false
  * @tc.type: FUNC
+ * @tc.level: Level0
  * @tc.require:
  */
 HWTEST_F(AuthUserCommonKeyNewTest, CompareByAclDiffAccountWithUserLevelTest002, TestSize.Level0)
@@ -859,6 +903,7 @@ HWTEST_F(AuthUserCommonKeyNewTest, CompareByAclDiffAccountWithUserLevelTest002, 
  * @tc.name: CompareByAclDiffAccountWithUserLevelTest003
  * @tc.desc: CompareByAclDiffAccountWithUserLevel return true
  * @tc.type: FUNC
+ * @tc.level: Level0
  * @tc.require:
  */
 HWTEST_F(AuthUserCommonKeyNewTest, CompareByAclDiffAccountWithUserLevelTest003, TestSize.Level0)
@@ -882,6 +927,7 @@ HWTEST_F(AuthUserCommonKeyNewTest, CompareByAclDiffAccountWithUserLevelTest003, 
  * @tc.name: CompareByAclDiffAccountWithUserLevelTest004
  * @tc.desc: CompareByAclDiffAccountWithUserLevel return false
  * @tc.type: FUNC
+ * @tc.level: Level0
  * @tc.require:
  */
 HWTEST_F(AuthUserCommonKeyNewTest, CompareByAclDiffAccountWithUserLevelTest004, TestSize.Level0)
@@ -899,6 +945,7 @@ HWTEST_F(AuthUserCommonKeyNewTest, CompareByAclDiffAccountWithUserLevelTest004, 
  * @tc.name: CompareByAclDiffAccountWithUserLevelTest005
  * @tc.desc: CompareByAclDiffAccountWithUserLevel return false
  * @tc.type: FUNC
+ * @tc.level: Level0
  * @tc.require:
  */
 HWTEST_F(AuthUserCommonKeyNewTest, CompareByAclDiffAccountWithUserLevelTest005, TestSize.Level0)
