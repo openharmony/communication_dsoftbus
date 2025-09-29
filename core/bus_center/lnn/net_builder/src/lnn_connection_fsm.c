@@ -1255,6 +1255,11 @@ static int32_t LnnRecoveryBroadcastKey()
             LNN_LOGE(LNN_BUILDER, "set iv failed");
             break;
         }
+        ret = LnnSetLocalByteInfo(BYTE_KEY_SPARK_CHECK, broadcastKey.sparkCheck, SPARK_CHECK_LENGTH);
+        if (ret != SOFTBUS_OK) {
+            LNN_LOGE(LNN_LEDGER, "set sparkCheck fail");
+            break;
+        }
         LNN_LOGI(LNN_BUILDER, "recovery broadcastKey success!");
         ret = SOFTBUS_OK;
     } while (0);

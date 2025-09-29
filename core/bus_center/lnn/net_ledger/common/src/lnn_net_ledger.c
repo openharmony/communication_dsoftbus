@@ -186,17 +186,9 @@ static bool IsLocalBroadcastLinKeyChange(NodeInfo *info)
     return false;
 }
 
-static bool IsLocalSparkCheckInvalid(NodeInfo *info)
+static bool IsLocalSparkCheckChange(NodeInfo *info)
 {
     unsigned char sparkCheck[SPARK_CHECK_LENGTH] = {0};
-    if (memcmp(info->sparkCheck, sparkCheck, SPARK_CHECK_LENGTH) != 0) {
-        LNN_LOGI(LNN_LEDGER, "load local sparkCheck valid, ignore");
-        return false;
-    }
-    if (LnnGenSparkCheck() != SOFTBUS_OK) {
-        LNN_LOGE(LNN_LEDGER, "gen local sparkCheck fail");
-        return false;
-    }
     if (LnnGetLocalByteInfo(BYTE_KEY_SPARK_CHECK, sparkCheck, SPARK_CHECK_LENGTH) == SOFTBUS_OK) {
         if (memcpy_s(info->sparkCheck, SPARK_CHECK_LENGTH, sparkCheck, SPARK_CHECK_LENGTH) != EOK) {
             LNN_LOGE(LNN_LEDGER, "memcpy local sparkCheck fail");
@@ -253,7 +245,7 @@ static bool IsBleDirectlyOnlineFactorChange(NodeInfo *info)
     if (IsLocalBroadcastLinKeyChange(info)) {
         return true;
     }
-    if (IsLocalSparkCheckInvalid(info)) {
+    if (IsLocalSparkCheckChange(info)) {
         return true;
     }
     return false;
@@ -310,10 +302,6 @@ static void ProcessLocalDeviceInfo(void)
         LnnUpdateLocalNetworkIdTime(info.networkIdTimestamp);
         LNN_LOGD(LNN_LEDGER, "update networkIdTimestamp=%" PRId64, info.networkIdTimestamp);
     }
-    if (LnnSetLocalByteInfo(BYTE_KEY_SPARK_CHECK, info.sparkCheck, SPARK_CHECK_LENGTH) != SOFTBUS_OK) {
-        LNN_LOGE(LNN_LEDGER, "set sparkCheck fail");
-    }
-    LnnDumpSparkCheck(info.sparkCheck, "init load");
 }
 
 void LnnLedgerInfoStatusSet(void)
@@ -340,24 +328,6 @@ void LnnLedgerInfoStatusSet(void)
     }
 }
 
-static void LnnSetLocalSparkCheck(void)
-{
-    NodeInfo localInfo;
-    (void)memset_s(&localInfo, sizeof(NodeInfo), 0, sizeof(NodeInfo));
-    if (LnnGetLocalNodeInfoSafe(&localInfo) != SOFTBUS_OK) {
-        LNN_LOGE(LNN_BUILDER, "get local device info fail");
-        return;
-    }
-    unsigned char sparkCheck[SPARK_CHECK_LENGTH] = {0};
-    if (memcmp(localInfo.sparkCheck, sparkCheck, SPARK_CHECK_LENGTH) != 0) {
-        LNN_LOGI(LNN_LEDGER, "local sparkCheck valid, ignore");
-        return;
-    }
-    if (LnnGenSparkCheck() != SOFTBUS_OK) {
-        LNN_LOGE(LNN_LEDGER, "gen local sparkCheck fail");
-    }
-}
-
 void RestoreLocalDeviceInfo(void)
 {
     LNN_LOGI(LNN_LEDGER, "restore local device info enter");
@@ -378,7 +348,6 @@ void RestoreLocalDeviceInfo(void)
                 LNN_LOGE(LNN_LEDGER, "update local uuid or irk fail");
             }
         }
-        LnnSetLocalSparkCheck();
         const NodeInfo *temp = LnnGetLocalNodeInfo();
         if (LnnSaveLocalDeviceInfoPacked(temp) != SOFTBUS_OK) {
             LNN_LOGE(LNN_LEDGER, "save local device info fail");

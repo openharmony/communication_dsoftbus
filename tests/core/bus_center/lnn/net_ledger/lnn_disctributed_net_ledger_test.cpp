@@ -1335,29 +1335,35 @@ HWTEST_F(LNNDisctributedLedgerTest, Lnn_UpdateFileInfo_Test_001, TestSize.Level1
     memset_s(&oldInfo, sizeof(NodeInfo), 0, sizeof(NodeInfo));
     int32_t ret = UpdateFileInfo(&newInfo, &oldInfo);
     EXPECT_EQ(ret, SOFTBUS_OK);
-    (void)memcpy_s(newInfo.cipherInfo.key, SESSION_KEY_LENGTH, "newkey", strlen("newkey"));
-    (void)memcpy_s(oldInfo.cipherInfo.key, SESSION_KEY_LENGTH, "oldkey", strlen("oldkey"));
+    EXPECT_EQ(EOK, memcpy_s(newInfo.cipherInfo.key, SESSION_KEY_LENGTH, "newkey", strlen("newkey")));
+    EXPECT_EQ(EOK, memcpy_s(oldInfo.cipherInfo.key, SESSION_KEY_LENGTH, "oldkey", strlen("oldkey")));
     ret = UpdateFileInfo(&newInfo, &oldInfo);
     EXPECT_EQ(ret, SOFTBUS_OK);
 
-    (void)memcpy_s(newInfo.cipherInfo.key, SESSION_KEY_LENGTH, "samekey", strlen("samekey"));
-    (void)memcpy_s(oldInfo.cipherInfo.key, SESSION_KEY_LENGTH, "samekey", strlen("samekey"));
-    (void)memcpy_s(newInfo.cipherInfo.iv, SESSION_KEY_LENGTH, "newiv", strlen("newiv"));
-    (void)memcpy_s(oldInfo.cipherInfo.iv, SESSION_KEY_LENGTH, "oldiv", strlen("oldiv"));
+    EXPECT_EQ(EOK, memcpy_s(newInfo.cipherInfo.key, SESSION_KEY_LENGTH, "samekey", strlen("samekey")));
+    EXPECT_EQ(EOK, memcpy_s(oldInfo.cipherInfo.key, SESSION_KEY_LENGTH, "samekey", strlen("samekey")));
+    EXPECT_EQ(EOK, memcpy_s(newInfo.cipherInfo.iv, SESSION_KEY_LENGTH, "newiv", strlen("newiv")));
+    EXPECT_EQ(EOK, memcpy_s(oldInfo.cipherInfo.iv, SESSION_KEY_LENGTH, "oldiv", strlen("oldiv")));
     ret = UpdateFileInfo(&newInfo, &oldInfo);
     EXPECT_EQ(ret, SOFTBUS_OK);
 
-    (void)memcpy_s(newInfo.cipherInfo.iv, SESSION_KEY_LENGTH, "sameiv", strlen("sameiv"));
-    (void)memcpy_s(oldInfo.cipherInfo.iv, SESSION_KEY_LENGTH, "sameiv", strlen("sameiv"));
-    (void)memcpy_s(newInfo.rpaInfo.peerIrk, LFINDER_IRK_LEN, "newpeerIrk", strlen("newpeerIrk"));
-    (void)memcpy_s(oldInfo.rpaInfo.peerIrk, LFINDER_IRK_LEN, "oldIrk", strlen("oldIrk"));
+    EXPECT_EQ(EOK, memcpy_s(newInfo.cipherInfo.iv, SESSION_KEY_LENGTH, "sameiv", strlen("sameiv")));
+    EXPECT_EQ(EOK, memcpy_s(oldInfo.cipherInfo.iv, SESSION_KEY_LENGTH, "sameiv", strlen("sameiv")));
+    EXPECT_EQ(EOK, memcpy_s(newInfo.rpaInfo.peerIrk, LFINDER_IRK_LEN, "newpeerIrk", strlen("newpeerIrk")));
+    EXPECT_EQ(EOK, memcpy_s(oldInfo.rpaInfo.peerIrk, LFINDER_IRK_LEN, "oldIrk", strlen("oldIrk")));
     ret = UpdateFileInfo(&newInfo, &oldInfo);
     EXPECT_EQ(ret, SOFTBUS_OK);
 
-    (void)memcpy_s(newInfo.rpaInfo.peerIrk, LFINDER_IRK_LEN, "sameIrk", strlen("sameIrk"));
-    (void)memcpy_s(oldInfo.rpaInfo.peerIrk, LFINDER_IRK_LEN, "sameIrk", strlen("sameIrk"));
+    EXPECT_EQ(EOK, memcpy_s(newInfo.rpaInfo.peerIrk, LFINDER_IRK_LEN, "sameIrk", strlen("sameIrk")));
+    EXPECT_EQ(EOK, memcpy_s(oldInfo.rpaInfo.peerIrk, LFINDER_IRK_LEN, "sameIrk", strlen("sameIrk")));
     ret = UpdateFileInfo(&newInfo, &oldInfo);
     EXPECT_EQ(ret, SOFTBUS_OK);
+    EXPECT_EQ(EOK, memcpy_s(newInfo.sparkCheck, SPARK_CHECK_LENGTH, "newSparkCheck", strlen("newSparkCheck")));
+    EXPECT_EQ(EOK, memcpy_s(oldInfo.sparkCheck, SPARK_CHECK_LENGTH, "oldSparkCheck", strlen("oldSparkCheck")));
+    EXPECT_EQ(UpdateFileInfo(&newInfo, &oldInfo), SOFTBUS_OK);
+    EXPECT_EQ(EOK, memcpy_s(newInfo.sparkCheck, SPARK_CHECK_LENGTH, "sameSparkCheck", strlen("sameSparkCheck")));
+    EXPECT_EQ(EOK, memcpy_s(oldInfo.sparkCheck, SPARK_CHECK_LENGTH, "sameSparkCheck", strlen("sameSparkCheck")));
+    EXPECT_EQ(UpdateFileInfo(&newInfo, &oldInfo), SOFTBUS_OK);
 }
 
 /*
@@ -2029,5 +2035,20 @@ HWTEST_F(LNNDisctributedLedgerTest, DlGetDeviceSparkCheck_Test_001, TestSize.Lev
     unsigned char sparkCheck[SPARK_CHECK_LENGTH] = {0};
     EXPECT_EQ(SOFTBUS_INVALID_PARAM, DlGetDeviceSparkCheck(NODE1_NETWORK_ID, true, sparkCheck, 0));
     EXPECT_EQ(SOFTBUS_OK, DlGetDeviceSparkCheck(NODE1_NETWORK_ID, true, sparkCheck, SPARK_CHECK_LENGTH));
+}
+
+/*
+ * @tc.name: LnnSetDLDeviceSparkCheck_Test_001
+ * @tc.desc: LnnSetDLDeviceSparkCheck
+ * @tc.type: FUNC
+ * @tc.require:
+ */
+HWTEST_F(LNNDisctributedLedgerTest, LnnSetDLDeviceSparkCheck_Test_001, TestSize.Level1)
+{
+    const char *sparkCheck = "qqqqqqqqqqqq";
+    const char *devUdid = "123456789";
+    EXPECT_EQ(LnnSetDLDeviceSparkCheck(nullptr, nullptr), SOFTBUS_INVALID_PARAM);
+    EXPECT_EQ(LnnSetDLDeviceSparkCheck(devUdid, nullptr), SOFTBUS_INVALID_PARAM);
+    EXPECT_EQ(LnnSetDLDeviceSparkCheck(devUdid, sparkCheck), SOFTBUS_NOT_FIND);
 }
 } // namespace OHOS
