@@ -1031,6 +1031,46 @@ ohos_unittest("AuthManagerTest") {
   }
 }
 
+ohos_unittest("AuthManagerMockTest") {
+  module_out_path = module_output_path
+  sources = [
+    "$dsoftbus_root_path/tests/core/authentication/unittest/auth_manager_deps_mock.cpp",
+    "$dsoftbus_root_path/tests/core/authentication/unittest/auth_manager_mock_test.cpp",
+  ]
+
+  include_dirs = auth_manager_include
+
+  deps = [
+    "$dsoftbus_dfx_path:softbus_dfx",
+    "$dsoftbus_root_path/adapter:softbus_adapter",
+    "$dsoftbus_root_path/core/common:softbus_utils",
+  ]
+
+  if (is_standard_system) {
+    external_deps = [
+      "bounds_checking_function:libsec_shared",
+      "cJSON:cjson",
+      "c_utils:utils",
+      "device_auth:deviceauth_sdk",
+      "dsoftbus:softbus_client",
+      "googletest:gmock",
+      "googletest:gtest_main",
+      "hilog:libhilog",
+    ]
+  } else {
+    external_deps = [
+      "bounds_checking_function:libsec_shared",
+      "cJSON:cjson",
+      "c_utils:utils",
+      "device_auth:deviceauth_sdk",
+      "dsoftbus:softbus_client",
+      "googletest:gmock",
+      "googletest:gtest_main",
+      "hilog:libhilog",
+    ]
+  }
+}
+
 ohos_unittest("AuthSessionFsmTest") {
   module_out_path = module_output_path
   sources = [
@@ -1881,6 +1921,7 @@ group("unittest") {
     ":AuthHichainMockTest",
     ":AuthHichainTest",
     ":AuthIdentityServiceAdapterTest",
+    ":AuthManagerMockTest",
     ":AuthManagerTest",
     ":AuthNormalizeRequestTest",
     ":AuthOtherMockTest",
@@ -1901,7 +1942,7 @@ group("unittest") {
   ]
   if (!defined(global_parts_info) ||
       defined(global_parts_info.deviceprofile_device_info_manager)) {
-      deps += [ ":AuthDeviceProfileListenerTest" ]
+    deps += [ ":AuthDeviceProfileListenerTest" ]
   }
   if (dsoftbus_feature_lnn_lane_mgr) {
     deps += [ ":AuthLaneTest" ]
