@@ -35,6 +35,7 @@ typedef void (*SyncPtkListener)(const char *remoteDeviceId, int result);
 typedef void (*PtkMismatchListener)(const char *remoteNetworkId, uint32_t len, int32_t reason);
 typedef void (*HmlStateListener)(SoftBusHmlState state);
 typedef void (*FrequencyChangedListener)(int32_t frequency);
+typedef void (*OnRefreshNfcData)(void);
 struct WifiDirectEnhanceManager {
     int32_t (*savePTK)(const char *remoteDeviceId, const char *ptk);
     int32_t (*syncPTK)(const char *remoteDeviceId);
@@ -106,6 +107,9 @@ struct WifiDirectManager {
     int32_t (*connCreateGroupOwner)(const char *pkgName, const struct GroupOwnerConfig *config,
         struct GroupOwnerResult *result, GroupOwnerDestroyListener listener);
     void (*connDestroyGroupOwner)(const char *pkgName);
+
+    void (*registerRefreshNfcDataListener)(OnRefreshNfcData onRefreshNfcData);
+    void (*notifyRefreshNfcData)(void);
 };
 
 #ifdef __cplusplus
