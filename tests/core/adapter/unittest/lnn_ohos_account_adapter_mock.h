@@ -22,6 +22,7 @@
 #include <vector>
 
 #include "account_info.h"
+#include "bus_center_info_key_struct.h"
 
 namespace OHOS::AccountSA {
 class OhosAccountKits {
@@ -35,6 +36,7 @@ public:
     virtual std::pair<bool, OHOS::AccountSA::OhosAccountInfo> QueryOsAccountDistributedInfo(std::int32_t id);
     virtual int32_t  GetOsAccountDistributedInfo(int32_t localId, OHOS::AccountSA::OhosAccountInfo &accountInfo);
     virtual bool IsSameAccountGroupDevice(void);
+    virtual int32_t LnnGetLocalNumU64Info(InfoKey key, uint64_t *info);
 };
 
 class OhosAccountKitsMock : public AccountSA::OhosAccountKits {
@@ -45,6 +47,7 @@ public:
     MOCK_METHOD1(QueryOsAccountDistributedInfo, std::pair<bool, OHOS::AccountSA::OhosAccountInfo>(std::int32_t));
     MOCK_METHOD2(GetOsAccountDistributedInfo, int32_t(int32_t localId, OHOS::AccountSA::OhosAccountInfo &accountInfo));
     MOCK_METHOD0(IsSameAccountGroupDevice, bool(void));
+    MOCK_METHOD2(LnnGetLocalNumU64Info, int32_t(InfoKey key, uint64_t *info));
 
     static OhosAccountKitsMock *GetMock()
     {

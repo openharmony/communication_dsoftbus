@@ -44,7 +44,7 @@ void LnnUsbAdapterTest::SetUp() { }
 
 void LnnUsbAdapterTest::TearDown() { }
 
-/**
+/*
  * @tc.name: LnnUsbAdapterTest_001
  * @tc.desc: StartUsbNcmAdapter
  * @tc.type: FUNC
