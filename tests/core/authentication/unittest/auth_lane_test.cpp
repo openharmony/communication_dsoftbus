@@ -135,6 +135,7 @@ static void SetAuthSessionInfo(AuthSessionInfo *info, uint64_t connId, bool isSe
  * @tc.name: ADD_AUTH_REQUEST_NODE_TEST_001
  * @tc.desc: add auth request node test
  * @tc.type: FUNC
+ * @tc.level: Level1
  * @tc.require:
  */
 HWTEST_F(AuthLaneTest, ADD_AUTH_REQUEST_NODE_TEST_001, TestSize.Level1)
@@ -182,6 +183,7 @@ HWTEST_F(AuthLaneTest, ADD_AUTH_REQUEST_NODE_TEST_001, TestSize.Level1)
  * @tc.name: AUTH_GET_REQUEST_OPTION_TEST_001
  * @tc.desc: auth get request option test test
  * @tc.type: FUNC
+ * @tc.level: Level1
  * @tc.require:
  */
 HWTEST_F(AuthLaneTest, AUTH_GET_REQUEST_OPTION_TEST_001, TestSize.Level1)
@@ -206,6 +208,7 @@ HWTEST_F(AuthLaneTest, AUTH_GET_REQUEST_OPTION_TEST_001, TestSize.Level1)
  * @tc.name: GET_AUTH_LINK_TYPE_LIST_TEST_001
  * @tc.desc: get auth link type list test
  * @tc.type: FUNC
+ * @tc.level: Level1
  * @tc.require:
  */
 HWTEST_F(AuthLaneTest, GET_AUTH_LINK_TYPE_LIST_TEST_001, TestSize.Level1)
@@ -230,6 +233,7 @@ HWTEST_F(AuthLaneTest, GET_AUTH_LINK_TYPE_LIST_TEST_001, TestSize.Level1)
  * @tc.name: AUTH_ALLOC_LANE_001
  * @tc.desc: auth alloc lane test
  * @tc.type: FUNC
+ * @tc.level: Level1
  * @tc.require:
  */
 HWTEST_F(AuthLaneTest, AUTH_ALLOC_LANE_001, TestSize.Level1)
@@ -260,6 +264,7 @@ HWTEST_F(AuthLaneTest, AUTH_ALLOC_LANE_001, TestSize.Level1)
  * @tc.name: AUTH_ALLOC_LANE_WLAN_001
  * @tc.desc: auth alloc lane wlan test
  * @tc.type: FUNC
+ * @tc.level: Level1
  * @tc.require:
  */
 HWTEST_F(AuthLaneTest, AUTH_ALLOC_LANE_WLAN_001, TestSize.Level1)
@@ -306,6 +311,7 @@ HWTEST_F(AuthLaneTest, AUTH_ALLOC_LANE_WLAN_001, TestSize.Level1)
  * @tc.name: AUTH_ALLOC_LANE_WLAN_002
  * @tc.desc: AuthDeviceOpenConn return SOFTBUS_AUTH_NOT_FOUND
  * @tc.type: FUNC
+ * @tc.level: Level1
  * @tc.require:
  */
 HWTEST_F(AuthLaneTest, AUTH_ALLOC_LANE_WLAN_002, TestSize.Level1)
@@ -350,6 +356,7 @@ HWTEST_F(AuthLaneTest, AUTH_ALLOC_LANE_WLAN_002, TestSize.Level1)
  * @tc.name: AUTH_ALLOC_LANE_WLAN_003
  * @tc.desc: AuthOnLaneAllocFail
  * @tc.type: FUNC
+ * @tc.level: Level1
  * @tc.require:
  */
 HWTEST_F(AuthLaneTest, AUTH_ALLOC_LANE_WLAN_003, TestSize.Level1)
@@ -390,6 +397,7 @@ HWTEST_F(AuthLaneTest, AUTH_ALLOC_LANE_WLAN_003, TestSize.Level1)
  * @tc.name: AUTH_ALLOC_LANE_BLE_001
  * @tc.desc: auth alloc lane ble test
  * @tc.type: FUNC
+ * @tc.level: Level1
  * @tc.require:
  */
 HWTEST_F(AuthLaneTest, AUTH_ALLOC_LANE_BLE_001, TestSize.Level1)
@@ -436,6 +444,7 @@ HWTEST_F(AuthLaneTest, AUTH_ALLOC_LANE_BLE_001, TestSize.Level1)
  * @tc.name: AUTH_ALLOC_LANE_BR_001
  * @tc.desc: auth alloc lane br test
  * @tc.type: FUNC
+ * @tc.level: Level1
  * @tc.require:
  */
 HWTEST_F(AuthLaneTest, AUTH_ALLOC_LANE_BR_001, TestSize.Level1)
@@ -482,6 +491,7 @@ HWTEST_F(AuthLaneTest, AUTH_ALLOC_LANE_BR_001, TestSize.Level1)
  * @tc.name: AUTH_ALLOC_LANE_P2P_001
  * @tc.desc: IsReuseP2p return false
  * @tc.type: FUNC
+ * @tc.level: Level1
  * @tc.require:
  */
 HWTEST_F(AuthLaneTest, AUTH_ALLOC_LANE_P2P_001, TestSize.Level1)
@@ -525,6 +535,7 @@ HWTEST_F(AuthLaneTest, AUTH_ALLOC_LANE_P2P_001, TestSize.Level1)
  * @tc.name: AUTH_ALLOC_LANE_ENHANCED_P2P_001
  * @tc.desc: IsReuseP2p return false
  * @tc.type: FUNC
+ * @tc.level: Level1
  * @tc.require:
  */
 HWTEST_F(AuthLaneTest, AUTH_ALLOC_LANE_ENHANCED_P2P_001, TestSize.Level1)

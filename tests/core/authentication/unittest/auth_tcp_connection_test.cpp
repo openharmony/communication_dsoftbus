@@ -120,6 +120,7 @@ void AuthTcpConnectionTest::OnDisconnect(int32_t authId)
  * @tc.name: PACK_SOCKET_PKT_TEST_001
  * @tc.desc: pack socket pkt test
  * @tc.type: FUNC
+ * @tc.level: Level1
  * @tc.require:
  */
 HWTEST_F(AuthTcpConnectionTest, PACK_SOCKET_PKT_TEST_001, TestSize.Level1)
@@ -138,6 +139,7 @@ HWTEST_F(AuthTcpConnectionTest, PACK_SOCKET_PKT_TEST_001, TestSize.Level1)
  * @tc.name: UNPACK_SOCKET_PKT_TEST_001
  * @tc.desc: unpack socket pkt test
  * @tc.type: FUNC
+ * @tc.level: Level1
  * @tc.require:
  */
 HWTEST_F(AuthTcpConnectionTest, UNPACK_SOCKET_PKT_TEST_001, TestSize.Level1)
@@ -157,6 +159,7 @@ HWTEST_F(AuthTcpConnectionTest, UNPACK_SOCKET_PKT_TEST_001, TestSize.Level1)
  * @tc.name: NOTIFY_CONNECTED_TEST_001
  * @tc.desc: notify connected.
  * @tc.type: FUNC
+ * @tc.level: Level1
  * @tc.require:
  */
 HWTEST_F(AuthTcpConnectionTest, NOTIFY_CONNECTED_TEST_001, TestSize.Level1)
@@ -184,6 +187,7 @@ HWTEST_F(AuthTcpConnectionTest, NOTIFY_CONNECTED_TEST_001, TestSize.Level1)
  * @tc.name: NOTIFY_DISCONNECTED_TEST_001
  * @tc.desc: notify disconnected.
  * @tc.type: FUNC
+ * @tc.level: Level1
  * @tc.require:
  */
 HWTEST_F(AuthTcpConnectionTest, NOTIFY_DISCONNECTED_TEST_001, TestSize.Level1)
@@ -210,6 +214,7 @@ HWTEST_F(AuthTcpConnectionTest, NOTIFY_DISCONNECTED_TEST_001, TestSize.Level1)
  * @tc.name: MODULE_TO_DATA_TYPE_TEST_001
  * @tc.desc: module to data type test
  * @tc.type: FUNC
+ * @tc.level: Level1
  * @tc.require:
  */
 HWTEST_F(AuthTcpConnectionTest, MODULE_TO_DATA_TYPE_TEST_001, TestSize.Level1)
@@ -235,6 +240,7 @@ HWTEST_F(AuthTcpConnectionTest, MODULE_TO_DATA_TYPE_TEST_001, TestSize.Level1)
  * @tc.name: SESSION_NOTIFY_DATA_RECEIVED_TEST_001
  * @tc.desc: Notice received the data.
  * @tc.type: FUNC
+ * @tc.level: Level1
  * @tc.require:
  */
 HWTEST_F(AuthTcpConnectionTest, SESSION_NOTIFY_DATA_RECEIVED_TEST_001, TestSize.Level1)
@@ -268,6 +274,7 @@ HWTEST_F(AuthTcpConnectionTest, SESSION_NOTIFY_DATA_RECEIVED_TEST_001, TestSize.
  * @tc.name: SESSION_KEY_NOTIFY_DATA_RECEIVED_TEST_001
  * @tc.desc: Notice received the data.
  * @tc.type: FUNC
+ * @tc.level: Level1
  * @tc.require:
  */
 HWTEST_F(AuthTcpConnectionTest, SESSION_KEY_NOTIFY_DATA_RECEIVED_TEST_001, TestSize.Level1)
@@ -300,6 +307,7 @@ HWTEST_F(AuthTcpConnectionTest, SESSION_KEY_NOTIFY_DATA_RECEIVED_TEST_001, TestS
  * @tc.name: NOTIFY_DATA_RECEIVED_TEST_001
  * @tc.desc: Notify channel data received.
  * @tc.type: FUNC
+ * @tc.level: Level1
  * @tc.require:
  */
 HWTEST_F(AuthTcpConnectionTest, NOTIFY_DATA_RECEIVED_TEST_001, TestSize.Level1)
@@ -347,6 +355,7 @@ HWTEST_F(AuthTcpConnectionTest, NOTIFY_DATA_RECEIVED_TEST_001, TestSize.Level1)
  * @tc.name: NOTIFY_DATA_RECEIVED_TEST_002
  * @tc.desc: Session notify data received.
  * @tc.type: FUNC
+ * @tc.level: Level1
  * @tc.require:
  */
 HWTEST_F(AuthTcpConnectionTest, NOTIFY_DATA_RECEIVED_TEST_002, TestSize.Level1)
@@ -376,6 +385,7 @@ HWTEST_F(AuthTcpConnectionTest, NOTIFY_DATA_RECEIVED_TEST_002, TestSize.Level1)
  * @tc.name: NOTIFY_DATA_RECEIVED_TEST_003
  * @tc.desc: Session notify data received.
  * @tc.type: FUNC
+ * @tc.level: Level1
  * @tc.require:
  */
 HWTEST_F(AuthTcpConnectionTest, NOTIFY_DATA_RECEIVED_TEST_003, TestSize.Level1)
@@ -419,6 +429,7 @@ HWTEST_F(AuthTcpConnectionTest, NOTIFY_DATA_RECEIVED_TEST_003, TestSize.Level1)
  * @tc.name: RECV_PACKET_HEAD_TEST_001
  * @tc.desc: recv packet head test
  * @tc.type: FUNC
+ * @tc.level: Level1
  * @tc.require:
  */
 HWTEST_F(AuthTcpConnectionTest, RECV_PACKET_HEAD_TEST_001, TestSize.Level1)
@@ -434,6 +445,7 @@ HWTEST_F(AuthTcpConnectionTest, RECV_PACKET_HEAD_TEST_001, TestSize.Level1)
  * @tc.name: RECV_PACKET_DATA_TEST_001
  * @tc.desc: recv packet head test
  * @tc.type: FUNC
+ * @tc.level: Level1
  * @tc.require:
  */
 HWTEST_F(AuthTcpConnectionTest, RECV_PACKET_DATA_TEST_001, TestSize.Level1)
@@ -458,6 +470,7 @@ HWTEST_F(AuthTcpConnectionTest, RECV_PACKET_DATA_TEST_001, TestSize.Level1)
  * @tc.name: REQUIRE_AUTH_TCP_CONN_FD_LIST_LOCK_TEST_001
  * @tc.desc: Require list lock.
  * @tc.type: FUNC
+ * @tc.level: Level1
  * @tc.require:
  */
 HWTEST_F(AuthTcpConnectionTest, REQUIRE_AUTH_TCP_CONN_FD_LIST_LOCK_TEST_001, TestSize.Level1)
@@ -479,6 +492,7 @@ HWTEST_F(AuthTcpConnectionTest, REQUIRE_AUTH_TCP_CONN_FD_LIST_LOCK_TEST_001, Tes
  * @tc.name: ADD_AUTH_TCP_CONN_FD_ITEM_TEST_001
  * @tc.desc: AddAuthTcpConnFdItem test
  * @tc.type: FUNC
+ * @tc.level: Level1
  * @tc.require:
  */
 HWTEST_F(AuthTcpConnectionTest, ADD_AUTH_TCP_CONN_FD_ITEM_TEST_001, TestSize.Level1)
@@ -499,6 +513,7 @@ HWTEST_F(AuthTcpConnectionTest, ADD_AUTH_TCP_CONN_FD_ITEM_TEST_001, TestSize.Lev
  * @tc.name: IS_EXIST_AUTH_TCP_CONN_FD_ITEM_BY_COON_ID_TEST_001
  * @tc.desc: is exist FdItem test.
  * @tc.type: FUNC
+ * @tc.level: Level1
  * @tc.require:
  */
 HWTEST_F(AuthTcpConnectionTest, IS_EXIST_AUTH_TCP_CONN_FD_ITEM_BY_COON_ID_TEST_001, TestSize.Level1)
@@ -526,6 +541,7 @@ HWTEST_F(AuthTcpConnectionTest, IS_EXIST_AUTH_TCP_CONN_FD_ITEM_BY_COON_ID_TEST_0
  * @tc.name: PROCESS_SOCKET_OUT_EVENT_TEST_001
  * @tc.desc: process socket out event test
  * @tc.type: FUNC
+ * @tc.level: Level1
  * @tc.require:
  */
 HWTEST_F(AuthTcpConnectionTest, PROCESS_SOCKET_OUT_EVENT_TEST_001, TestSize.Level1)
@@ -544,6 +560,7 @@ HWTEST_F(AuthTcpConnectionTest, PROCESS_SOCKET_OUT_EVENT_TEST_001, TestSize.Leve
  * @tc.name: PROCESS_SOCKET_IN_EVENT_TEST_001
  * @tc.desc: process socket in event test
  * @tc.type: FUNC
+ * @tc.level: Level1
  * @tc.require:
  */
 HWTEST_F(AuthTcpConnectionTest, PROCESS_SOCKET_IN_EVENT_TEST_001, TestSize.Level1)
@@ -578,6 +595,7 @@ HWTEST_F(AuthTcpConnectionTest, PROCESS_SOCKET_IN_EVENT_TEST_001, TestSize.Level
  * @tc.name: IS_ENHANCE_P2P_MODULE_ID_TEST_001
  * @tc.desc: is enhance p2p module id test
  * @tc.type: FUNC
+ * @tc.level: Level1
  * @tc.require:
  */
 HWTEST_F(AuthTcpConnectionTest, IS_ENHANCE_P2P_MODULE_ID_TEST_001, TestSize.Level1)
@@ -599,6 +617,7 @@ HWTEST_F(AuthTcpConnectionTest, IS_ENHANCE_P2P_MODULE_ID_TEST_001, TestSize.Leve
  * @tc.name: ON_CONNECT_EVENT_TEST_001
  * @tc.desc: on connect event test
  * @tc.type: FUNC
+ * @tc.level: Level1
  * @tc.require:
  */
 HWTEST_F(AuthTcpConnectionTest, ON_CONNECT_EVENT_TEST_001, TestSize.Level1)
@@ -630,6 +649,7 @@ HWTEST_F(AuthTcpConnectionTest, ON_CONNECT_EVENT_TEST_001, TestSize.Level1)
  * @tc.name: ON_DATA_EVENT_TEST_001
  * @tc.desc: on data event test
  * @tc.type: FUNC
+ * @tc.level: Level1
  * @tc.require:
  */
 HWTEST_F(AuthTcpConnectionTest, ON_DATA_EVENT_TEST_001, TestSize.Level1)
@@ -651,6 +671,7 @@ HWTEST_F(AuthTcpConnectionTest, ON_DATA_EVENT_TEST_001, TestSize.Level1)
  * @tc.name: SET_SOCKET_CALLBACK_TEST_001
  * @tc.desc: set socket callback test
  * @tc.type: FUNC
+ * @tc.level: Level1
  * @tc.require:
  */
 HWTEST_F(AuthTcpConnectionTest, SET_SOCKET_CALLBACK_TEST_001, TestSize.Level1)
@@ -663,6 +684,7 @@ HWTEST_F(AuthTcpConnectionTest, SET_SOCKET_CALLBACK_TEST_001, TestSize.Level1)
  * @tc.name: START_SOCKET_LISTENING_TEST_001
  * @tc.desc: start socket listening test
  * @tc.type: FUNC
+ * @tc.level: Level1
  * @tc.require:
  */
 HWTEST_F(AuthTcpConnectionTest, START_SOCKET_LISTENING_TEST_001, TestSize.Level1)
@@ -686,6 +708,7 @@ HWTEST_F(AuthTcpConnectionTest, START_SOCKET_LISTENING_TEST_001, TestSize.Level1
  * @tc.name: AUTH_TCP_CREATE_LISTENER_TEST_001
  * @tc.desc: AuthTcpCreateListener test
  * @tc.type: FUNC
+ * @tc.level: Level1
  * @tc.require:
  */
 HWTEST_F(AuthTcpConnectionTest, AUTH_TCP_CREATE_LISTENER_TEST_001, TestSize.Level1)
@@ -702,6 +725,7 @@ HWTEST_F(AuthTcpConnectionTest, AUTH_TCP_CREATE_LISTENER_TEST_001, TestSize.Leve
  * @tc.name: SOCKET_GET_CONN_INFO_TEST_001
  * @tc.desc: socket get conn info test
  * @tc.type: FUNC
+ * @tc.level: Level1
  * @tc.require:
  */
 HWTEST_F(AuthTcpConnectionTest, SOCKET_GET_CONN_INFO_TEST_001, TestSize.Level1)
@@ -724,6 +748,7 @@ HWTEST_F(AuthTcpConnectionTest, SOCKET_GET_CONN_INFO_TEST_001, TestSize.Level1)
  * @tc.name: SOCKET_GET_CONN_INFO_TEST_002
  * @tc.desc: Get conn info test
  * @tc.type: FUNC
+ * @tc.level: Level1
  * @tc.require:
  */
 HWTEST_F(AuthTcpConnectionTest, SOCKET_GET_CONN_INFO_TEST_002, TestSize.Level1)
@@ -759,6 +784,7 @@ HWTEST_F(AuthTcpConnectionTest, SOCKET_GET_CONN_INFO_TEST_002, TestSize.Level1)
  * @tc.name: SOCKET_CONNECT_INNER_TEST_001
  * @tc.desc: SocketConnectInner test
  * @tc.type: FUNC
+ * @tc.level: Level1
  * @tc.require:
  */
 HWTEST_F(AuthTcpConnectionTest, SOCKET_CONNECT_INNER_TEST_001, TestSize.Level1)
@@ -777,6 +803,7 @@ HWTEST_F(AuthTcpConnectionTest, SOCKET_CONNECT_INNER_TEST_001, TestSize.Level1)
  * @tc.name: SOCKET_CONNECT_DEVICE_WITH_APP_IP_TEST_001
  * @tc.desc: SocketConnectDeviceWithAllIp test
  * @tc.type: FUNC
+ * @tc.level: Level1
  * @tc.require:
  */
 HWTEST_F(AuthTcpConnectionTest, SOCKET_CONNECT_DEVICE_WITH_APP_IP_TEST_001, TestSize.Level1)
@@ -791,6 +818,7 @@ HWTEST_F(AuthTcpConnectionTest, SOCKET_CONNECT_DEVICE_WITH_APP_IP_TEST_001, Test
  * @tc.name: SOCKET_SET_DEVICE_TEST_001
  * @tc.desc: Socket set device test
  * @tc.type: FUNC
+ * @tc.level: Level1
  * @tc.require:
  */
 HWTEST_F(AuthTcpConnectionTest, SOCKET_SET_DEVICE_TEST_001, TestSize.Level1)
@@ -809,6 +837,7 @@ HWTEST_F(AuthTcpConnectionTest, SOCKET_SET_DEVICE_TEST_001, TestSize.Level1)
  * @tc.name: SET_TCP_KEEP_ALIVE_AND_IP_TOS_TEST_001
  * @tc.desc: SetTcpKeepaliveAndIpTos test
  * @tc.type: FUNC
+ * @tc.level: Level1
  * @tc.require:
  */
 HWTEST_F(AuthTcpConnectionTest, SET_TCP_KEEP_ALIVE_AND_IP_TOS_TEST_001, TestSize.Level1)
@@ -830,6 +859,7 @@ HWTEST_F(AuthTcpConnectionTest, SET_TCP_KEEP_ALIVE_AND_IP_TOS_TEST_001, TestSize
  * @tc.name: SOCKET_CONNECT_DEVICE_TEST_001
  * @tc.desc: SocketConnectDevice test
  * @tc.type: FUNC
+ * @tc.level: Level1
  * @tc.require:
  */
 HWTEST_F(AuthTcpConnectionTest, SOCKET_CONNECT_DEVICE_TEST_001, TestSize.Level1)
@@ -848,6 +878,7 @@ HWTEST_F(AuthTcpConnectionTest, SOCKET_CONNECT_DEVICE_TEST_001, TestSize.Level1)
  * @tc.name: NIP_SOCKET_CONNECT_DEVICE_TEST_001
  * @tc.desc: NipSocketConnectDevice test
  * @tc.type: FUNC
+ * @tc.level: Level1
  * @tc.require:
  */
 HWTEST_F(AuthTcpConnectionTest, NIP_SOCKET_CONNECT_DEVICE_TEST_001, TestSize.Level1)
@@ -863,6 +894,7 @@ HWTEST_F(AuthTcpConnectionTest, NIP_SOCKET_CONNECT_DEVICE_TEST_001, TestSize.Lev
  * @tc.name: SOCKET_POST_BYTES_TEST_001
  * @tc.desc: Socket post bytes test
  * @tc.type: FUNC
+ * @tc.level: Level1
  * @tc.require:
  */
 HWTEST_F(AuthTcpConnectionTest, SOCKET_POST_BYTES_TEST_001, TestSize.Level1)
@@ -900,6 +932,7 @@ HWTEST_F(AuthTcpConnectionTest, SOCKET_POST_BYTES_TEST_001, TestSize.Level1)
  * @tc.name: NOTIFY_CHANNEL_DATA_RECEIVED_TEST_001
  * @tc.desc: Notification of receipt of data.
  * @tc.type: FUNC
+ * @tc.level: Level1
  * @tc.require:
  */
 HWTEST_F(AuthTcpConnectionTest, NOTIFY_CHANNEL_DATA_RECEIVED_TEST_001, TestSize.Level1)
@@ -936,6 +969,7 @@ HWTEST_F(AuthTcpConnectionTest, NOTIFY_CHANNEL_DATA_RECEIVED_TEST_001, TestSize.
  * @tc.name: NOTIFY_CHANNEL_DISCONNECTED_TEST_001
  * @tc.desc: Notification channel disconnected.
  * @tc.type: FUNC
+ * @tc.level: Level1
  * @tc.require:
  */
 HWTEST_F(AuthTcpConnectionTest, NOTIFY_CHANNEL_DISCONNECTED_TEST_001, TestSize.Level1)
@@ -960,6 +994,7 @@ HWTEST_F(AuthTcpConnectionTest, NOTIFY_CHANNEL_DISCONNECTED_TEST_001, TestSize.L
  * @tc.name: REG_AUTH_CHANNEL_LISTENER_TEST_001
  * @tc.desc: register listener.
  * @tc.type: FUNC
+ * @tc.level: Level1
  * @tc.require:
  */
 HWTEST_F(AuthTcpConnectionTest, REG_AUTH_CHANNEL_LISTENER_TEST_001, TestSize.Level1)
@@ -987,6 +1022,7 @@ HWTEST_F(AuthTcpConnectionTest, REG_AUTH_CHANNEL_LISTENER_TEST_001, TestSize.Lev
  * @tc.name: AUTH_OPEN_CHANNEL_WITH_ALL_IP_TEST_001
  * @tc.desc: AuthOpenChannelWithAllIp test
  * @tc.type: FUNC
+ * @tc.level: Level1
  * @tc.require:
  */
 HWTEST_F(AuthTcpConnectionTest, AUTH_OPEN_CHANNEL_WITH_ALL_IP_TEST_001, TestSize.Level1)
@@ -1004,9 +1040,10 @@ HWTEST_F(AuthTcpConnectionTest, AUTH_OPEN_CHANNEL_WITH_ALL_IP_TEST_001, TestSize
 }
 
 /*
- * @tc.name: AUTH_OPEN_CHANNEL_WITH_ALL_IP_TEST_001
+ * @tc.name: AUTH_OPEN_CHANNEL_TEST_001
  * @tc.desc: open channel test
  * @tc.type: FUNC
+ * @tc.level: Level1
  * @tc.require:
  */
 HWTEST_F(AuthTcpConnectionTest, AUTH_OPEN_CHANNEL_TEST_001, TestSize.Level1)
@@ -1029,6 +1066,7 @@ HWTEST_F(AuthTcpConnectionTest, AUTH_OPEN_CHANNEL_TEST_001, TestSize.Level1)
  * @tc.name: AUTH_POST_CHANNEL_DATA_TEST_001
  * @tc.desc: post channel data test
  * @tc.type: FUNC
+ * @tc.level: Level1
  * @tc.require:
  */
 HWTEST_F(AuthTcpConnectionTest, AUTH_POST_CHANNEL_DATA_TEST_001, TestSize.Level1)
@@ -1064,6 +1102,7 @@ HWTEST_F(AuthTcpConnectionTest, AUTH_POST_CHANNEL_DATA_TEST_001, TestSize.Level1
  * @tc.name: GET_TCP_KEEP_ALIVE_OPTION_BY_CYCLE_TEST_001
  * @tc.desc: get option test
  * @tc.type: FUNC
+ * @tc.level: Level1
  * @tc.require:
  */
 HWTEST_F(AuthTcpConnectionTest, GET_TCP_KEEP_ALIVE_OPTION_BY_CYCLE_TEST_001, TestSize.Level1)
@@ -1097,6 +1136,7 @@ HWTEST_F(AuthTcpConnectionTest, GET_TCP_KEEP_ALIVE_OPTION_BY_CYCLE_TEST_001, Tes
  * @tc.name: AUTH_SET_TCP_KEEP_ALIVE_OPTION_TEST_001
  * @tc.desc: set option test
  * @tc.type: FUNC
+ * @tc.level: Level1
  * @tc.require:
  */
 HWTEST_F(AuthTcpConnectionTest, AUTH_SET_TCP_KEEP_ALIVE_OPTION_TEST_001, TestSize.Level1)
@@ -1123,6 +1163,7 @@ HWTEST_F(AuthTcpConnectionTest, AUTH_SET_TCP_KEEP_ALIVE_OPTION_TEST_001, TestSiz
  * @tc.name: GET_CONNECT_OPTION_BY_IFNAME_TEST_001
  * @tc.desc: GetConnectOptionByIfname test
  * @tc.type: FUNC
+ * @tc.level: Level1
  * @tc.require:
  */
 HWTEST_F(AuthTcpConnectionTest, GET_CONNECT_OPTION_BY_IFNAME_TEST_001, TestSize.Level1)

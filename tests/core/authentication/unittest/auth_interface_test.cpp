@@ -67,6 +67,7 @@ void AuthOtherMockTest::TearDown() { }
  * @tc.name: AUTH_INIT_TEST_001
  * @tc.desc: AuthInit test success
  * @tc.type: FUNC
+ * @tc.level: Level1
  * @tc.require:
  */
 HWTEST_F(AuthOtherMockTest, AUTH_INIT_TEST_001, TestSize.Level1)
@@ -88,6 +89,7 @@ HWTEST_F(AuthOtherMockTest, AUTH_INIT_TEST_001, TestSize.Level1)
  * @tc.name: AUTH_INIT_TEST_002
  * @tc.desc: AuthInit test failed
  * @tc.type: FUNC
+ * @tc.level: Level1
  * @tc.require:
  */
 HWTEST_F(AuthOtherMockTest, AUTH_INIT_TEST_002, TestSize.Level1)
@@ -109,6 +111,7 @@ HWTEST_F(AuthOtherMockTest, AUTH_INIT_TEST_002, TestSize.Level1)
  * @tc.name: AUTH_CHECK_META_EXIST_TEST_001
  * @tc.desc: AuthCheckMetaExist test success
  * @tc.type: FUNC
+ * @tc.level: Level1
  * @tc.require:
  */
 HWTEST_F(AuthOtherMockTest, AUTH_CHECK_META_EXIST_TEST_001, TestSize.Level1)
@@ -127,6 +130,7 @@ HWTEST_F(AuthOtherMockTest, AUTH_CHECK_META_EXIST_TEST_001, TestSize.Level1)
  * @tc.name: AUTH_CHECK_META_EXIST_TEST_002
  * @tc.desc: AuthCheckMetaExist test failed
  * @tc.type: FUNC
+ * @tc.level: Level1
  * @tc.require:
  */
 HWTEST_F(AuthOtherMockTest, AUTH_CHECK_META_EXIST_TEST_002, TestSize.Level1)
@@ -144,6 +148,7 @@ HWTEST_F(AuthOtherMockTest, AUTH_CHECK_META_EXIST_TEST_002, TestSize.Level1)
  * @tc.name: AUTH_HAS_TRUSTED_RELATION_TEST_001
  * @tc.desc: AuthHasTrustedRelation test success
  * @tc.type: FUNC
+ * @tc.level: Level1
  * @tc.require:
  */
 HWTEST_F(AuthOtherMockTest, AUTH_HAS_TRUSTED_RELATION_TEST_001, TestSize.Level1)
@@ -158,6 +163,7 @@ HWTEST_F(AuthOtherMockTest, AUTH_HAS_TRUSTED_RELATION_TEST_001, TestSize.Level1)
  * @tc.name: AUTH_HAS_TRUSTED_RELATION_TEST_002
  * @tc.desc: AuthHasTrustedRelation test failed
  * @tc.type: FUNC
+ * @tc.level: Level1
  * @tc.require:
  */
 HWTEST_F(AuthOtherMockTest, AUTH_HAS_TRUSTED_RELATION_TEST_002, TestSize.Level1)
@@ -172,6 +178,7 @@ HWTEST_F(AuthOtherMockTest, AUTH_HAS_TRUSTED_RELATION_TEST_002, TestSize.Level1)
  * @tc.name: AUTH_HAS_SAME_ACCOUNT_GROUP_TEST_001
  * @tc.desc: AuthHasSameAccountGroup test
  * @tc.type: FUNC
+ * @tc.level: Level1
  * @tc.require:
  */
 HWTEST_F(AuthOtherMockTest, AUTH_HAS_SAME_ACCOUNT_GROUP_TEST_001, TestSize.Level1)
@@ -188,6 +195,7 @@ HWTEST_F(AuthOtherMockTest, AUTH_HAS_SAME_ACCOUNT_GROUP_TEST_001, TestSize.Level
  * @tc.name: IS_SAME_ACCOUNT_DEVICE_TEST_001
  * @tc.desc: IsSameAccountDevice test failed
  * @tc.type: FUNC
+ * @tc.level: Level1
  * @tc.require:
  */
 HWTEST_F(AuthOtherMockTest, IS_SAME_ACCOUNT_DEVICE_TEST_001, TestSize.Level1)
@@ -206,6 +214,7 @@ HWTEST_F(AuthOtherMockTest, IS_SAME_ACCOUNT_DEVICE_TEST_001, TestSize.Level1)
  * @tc.name: IS_SAME_ACCOUNT_DEVICE_TEST_002
  * @tc.desc: IsSameAccountDevice test failed
  * @tc.type: FUNC
+ * @tc.level: Level1
  * @tc.require:
  */
 HWTEST_F(AuthOtherMockTest, IS_SAME_ACCOUNT_DEVICE_TEST_002, TestSize.Level1)
@@ -223,6 +232,7 @@ HWTEST_F(AuthOtherMockTest, IS_SAME_ACCOUNT_DEVICE_TEST_002, TestSize.Level1)
  * @tc.name: AUTH_IS_POTENTIAL_TRUSTED_TEST_001
  * @tc.desc: AuthIsPotentialTrusted test success
  * @tc.type: FUNC
+ * @tc.level: Level1
  * @tc.require:
  */
 HWTEST_F(AuthOtherMockTest, AUTH_IS_POTENTIAL_TRUSTED_TEST_001, TestSize.Level1)
@@ -242,6 +252,7 @@ HWTEST_F(AuthOtherMockTest, AUTH_IS_POTENTIAL_TRUSTED_TEST_001, TestSize.Level1)
  * @tc.name: AUTH_IS_POTENTIAL_TRUSTED_TEST_002
  * @tc.desc: AuthIsPotentialTrusted test failed
  * @tc.type: FUNC
+ * @tc.level: Level1
  * @tc.require:
  */
 HWTEST_F(AuthOtherMockTest, AUTH_IS_POTENTIAL_TRUSTED_TEST_002, TestSize.Level1)
@@ -259,6 +270,7 @@ HWTEST_F(AuthOtherMockTest, AUTH_IS_POTENTIAL_TRUSTED_TEST_002, TestSize.Level1)
  * @tc.name: AUTH_GET_GROUP_TEST_001
  * @tc.desc: AuthGetGroupType test failed
  * @tc.type: FUNC
+ * @tc.level: Level1
  * @tc.require:
  */
 HWTEST_F(AuthOtherMockTest, AUTH_GET_GROUP_TEST_001, TestSize.Level1)
@@ -275,6 +287,7 @@ HWTEST_F(AuthOtherMockTest, AUTH_GET_GROUP_TEST_001, TestSize.Level1)
  * @tc.name: AUTH_GET_META_TYPE_TEST_001
  * @tc.desc: AuthGetMetaType test
  * @tc.type: FUNC
+ * @tc.level: Level1
  * @tc.require:
  */
 HWTEST_F(AuthOtherMockTest, AUTH_GET_META_TYPE_TEST_001, TestSize.Level1)
@@ -309,6 +322,7 @@ HWTEST_F(AuthOtherMockTest, AUTH_GET_META_TYPE_TEST_001, TestSize.Level1)
  * @tc.name: AUTH_RESTORE_AUTH_MANAGER_TEST_001
  * @tc.desc: AuthRestoreAuthManager test failed
  * @tc.type: FUNC
+ * @tc.level: Level1
  * @tc.require:
  */
 HWTEST_F(AuthOtherMockTest, AUTH_RESTORE_AUTH_MANAGER_TEST_001, TestSize.Level1)
@@ -337,6 +351,7 @@ HWTEST_F(AuthOtherMockTest, AUTH_RESTORE_AUTH_MANAGER_TEST_001, TestSize.Level1)
  * @tc.name: AUTH_RESTORE_AUTH_MANAGER_TEST_002
  * @tc.desc: AuthRestoreAuthManager test failed
  * @tc.type: FUNC
+ * @tc.level: Level1
  * @tc.require:
  */
 HWTEST_F(AuthOtherMockTest, AUTH_RESTORE_AUTH_MANAGER_TEST_002, TestSize.Level1)
@@ -364,6 +379,7 @@ HWTEST_F(AuthOtherMockTest, AUTH_RESTORE_AUTH_MANAGER_TEST_002, TestSize.Level1)
  * @tc.name: AUTH_RESTORE_AUTH_MANAGER_TEST_003
  * @tc.desc: AuthRestoreAuthManager mock AuthFindDeviceKey test
  * @tc.type: FUNC
+ * @tc.level: Level1
  * @tc.require:
  */
 HWTEST_F(AuthOtherMockTest, AUTH_RESTORE_AUTH_MANAGER_TEST_003, TestSize.Level1)
@@ -392,6 +408,7 @@ HWTEST_F(AuthOtherMockTest, AUTH_RESTORE_AUTH_MANAGER_TEST_003, TestSize.Level1)
  * @tc.name: AUTH_DIRECT_ONLINE_PROCESS_SESSION_KEY_TEST_001
  * @tc.desc: AuthDirectOnlineProcessSessionKey test
  * @tc.type: FUNC
+ * @tc.level: Level1
  * @tc.require:
  */
 HWTEST_F(AuthOtherMockTest, AUTH_DIRECT_ONLINE_PROCESS_SESSION_KEY_TEST_001, TestSize.Level1)
@@ -413,6 +430,7 @@ HWTEST_F(AuthOtherMockTest, AUTH_DIRECT_ONLINE_PROCESS_SESSION_KEY_TEST_001, Tes
  * @tc.name: FILL_AUTH_SESSION_INFO_TEST_001
  * @tc.desc: FillAuthSessionInfo test failed
  * @tc.type: FUNC
+ * @tc.level: Level1
  * @tc.require:
  */
 HWTEST_F(AuthOtherMockTest, FILL_AUTH_SESSION_INFO_TEST_001, TestSize.Level1)
@@ -437,6 +455,7 @@ HWTEST_F(AuthOtherMockTest, FILL_AUTH_SESSION_INFO_TEST_001, TestSize.Level1)
  * @tc.name: AUTH_GET_AUTH_HANDLE_BY_INDEX_TEST_001
  * @tc.desc: AuthGetAuthHandleByIndex test
  * @tc.type: FUNC
+ * @tc.level: Level1
  * @tc.require:
  */
 HWTEST_F(AuthOtherMockTest, AUTH_GET_AUTH_HANDLE_BY_INDEX_TEST_001, TestSize.Level1)
@@ -463,6 +482,7 @@ HWTEST_F(AuthOtherMockTest, AUTH_GET_AUTH_HANDLE_BY_INDEX_TEST_001, TestSize.Lev
  * @tc.name: AUTH_GET_AUTH_HANDLE_BY_INDEX_TEST_002
  * @tc.desc: AuthGetAuthHandleByIndex test
  * @tc.type: FUNC
+ * @tc.level: Level1
  * @tc.require:
  */
 HWTEST_F(AuthOtherMockTest, AUTH_GET_AUTH_HANDLE_BY_INDEX_TEST_002, TestSize.Level1)
@@ -495,6 +515,7 @@ HWTEST_F(AuthOtherMockTest, AUTH_GET_AUTH_HANDLE_BY_INDEX_TEST_002, TestSize.Lev
  * @tc.name: AUTH_GET_P2P_CONN_INFO_TEST_001
  * @tc.desc: AuthGetHmlConnInfo test failed
  * @tc.type: FUNC
+ * @tc.level: Level1
  * @tc.require:
  */
 HWTEST_F(AuthOtherMockTest, AUTH_GET_P2P_CONN_INFO_TEST_001, TestSize.Level1)
@@ -531,6 +552,7 @@ HWTEST_F(AuthOtherMockTest, AUTH_GET_P2P_CONN_INFO_TEST_001, TestSize.Level1)
  * @tc.name: AUTH_CHECK_SESSION_KEY_VALID_BY_CONN_INFO_TEST_001
  * @tc.desc: AuthCheckSessionKeyValidByConnInfo test
  * @tc.type: FUNC
+ * @tc.level: Level1
  * @tc.require:
  */
 HWTEST_F(AuthOtherMockTest, AUTH_CHECK_SESSION_KEY_VALID_BY_CONN_INFO_TEST_001, TestSize.Level1)
@@ -559,6 +581,7 @@ HWTEST_F(AuthOtherMockTest, AUTH_CHECK_SESSION_KEY_VALID_BY_CONN_INFO_TEST_001, 
  * @tc.name: GET_IS_EXCHANGE_UDID_BY_NETWORKID_TEST_001
  * @tc.desc: GetIsExchangeUdidByNetworkId test
  * @tc.type: FUNC
+ * @tc.level: Level1
  * @tc.require:
  */
 HWTEST_F(AuthOtherMockTest, GET_IS_EXCHANGE_UDID_BY_NETWORKID_TEST_001, TestSize.Level1)
@@ -580,6 +603,7 @@ HWTEST_F(AuthOtherMockTest, GET_IS_EXCHANGE_UDID_BY_NETWORKID_TEST_001, TestSize
  * @tc.name: GET_PEER_UDID_BY_NETWORK_ID_TEST_001
  * @tc.desc: GetPeerUdidByNetworkId test failed
  * @tc.type: FUNC
+ * @tc.level: Level1
  * @tc.require:
  */
 HWTEST_F(AuthOtherMockTest, GET_PEER_UDID_BY_NETWORK_ID_TEST_001, TestSize.Level1)
@@ -594,6 +618,7 @@ HWTEST_F(AuthOtherMockTest, GET_PEER_UDID_BY_NETWORK_ID_TEST_001, TestSize.Level
  * @tc.name: CONVERT_TO_AUTH_LINK_TYPE_TEST_001
  * @tc.desc: ConvertToAuthLinkType test
  * @tc.type: FUNC
+ * @tc.level: Level1
  * @tc.require:
  */
 HWTEST_F(AuthOtherMockTest, CONVERT_TO_AUTH_LINK_TYPE_TEST_001, TestSize.Level1)
@@ -623,6 +648,7 @@ HWTEST_F(AuthOtherMockTest, CONVERT_TO_AUTH_LINK_TYPE_TEST_001, TestSize.Level1)
  * @tc.name: CONVERT_TO_DISCOVERY_TYPE_TEST_001
  * @tc.desc: ConvertToDiscoveryType test
  * @tc.type: FUNC
+ * @tc.level: Level1
  * @tc.require:
  */
 HWTEST_F(AuthOtherMockTest, CONVERT_TO_DISCOVERY_TYPE_TEST_001, TestSize.Level1)
@@ -652,6 +678,7 @@ HWTEST_F(AuthOtherMockTest, CONVERT_TO_DISCOVERY_TYPE_TEST_001, TestSize.Level1)
  * @tc.name: GET_AUTH_CAPACITY_TEST_001
  * @tc.desc: GetAuthCapacity test failed
  * @tc.type: FUNC
+ * @tc.level: Level1
  * @tc.require:
  */
 HWTEST_F(AuthOtherMockTest, GET_AUTH_CAPACITY_TEST_001, TestSize.Level1)
@@ -666,6 +693,7 @@ HWTEST_F(AuthOtherMockTest, GET_AUTH_CAPACITY_TEST_001, TestSize.Level1)
  * @tc.name: GET_CONFIG_SUPPORT_AS_SERVER_TEST_001
  * @tc.desc: GetConfigSupportAsServer test
  * @tc.type: FUNC
+ * @tc.level: Level1
  * @tc.require:
  */
 HWTEST_F(AuthOtherMockTest, GET_CONFIG_SUPPORT_AS_SERVER_TEST_001, TestSize.Level1)
@@ -680,6 +708,7 @@ HWTEST_F(AuthOtherMockTest, GET_CONFIG_SUPPORT_AS_SERVER_TEST_001, TestSize.Leve
  * @tc.name: CONVERT_TO_AUTH_CONN_INFO_TEST_001
  * @tc.desc: ConvertToAuthConnInfo test
  * @tc.type: FUNC
+ * @tc.level: Level1
  * @tc.require:
  */
 HWTEST_F(AuthOtherMockTest, CONVERT_TO_AUTH_CONN_INFO_TEST_001, TestSize.Level1)
@@ -715,6 +744,7 @@ HWTEST_F(AuthOtherMockTest, CONVERT_TO_AUTH_CONN_INFO_TEST_001, TestSize.Level1)
  * @tc.name: CONVERT_TO_CONNECT_OPTION_TEST_001
  * @tc.desc: ConvertToConnectOption test
  * @tc.type: FUNC
+ * @tc.level: Level1
  * @tc.require:
  */
 HWTEST_F(AuthOtherMockTest, CONVERT_TO_CONNECT_OPTION_TEST_001, TestSize.Level1)
@@ -749,6 +779,7 @@ HWTEST_F(AuthOtherMockTest, CONVERT_TO_CONNECT_OPTION_TEST_001, TestSize.Level1)
  * @tc.name: COMPARE_SESSION_CONN_INFO_TEST_001
  * @tc.desc: CompareSessionConnInfo test
  * @tc.type: FUNC
+ * @tc.level: Level1
  * @tc.require:
  */
 HWTEST_F(AuthOtherMockTest, COMPARE_SESSION_CONN_INFO_TEST_001, TestSize.Level1)
@@ -776,6 +807,7 @@ HWTEST_F(AuthOtherMockTest, COMPARE_SESSION_CONN_INFO_TEST_001, TestSize.Level1)
  * @tc.name: AUTH_GET_USB_CONN_INFO_TEST_001
  * @tc.desc: AuthGetUsbConnInfo test failed
  * @tc.type: FUNC
+ * @tc.level: Level1
  * @tc.require:
  */
 HWTEST_F(AuthOtherMockTest, AUTH_GET_USB_CONN_INFO_TEST_001, TestSize.Level1)
