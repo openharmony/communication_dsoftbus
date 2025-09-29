@@ -68,7 +68,7 @@ void KVAdapterWrapperTest::SetUp() { }
 
 void KVAdapterWrapperTest::TearDown() { }
 
-/**
+/*
  * @tc.name: LnnPutDBData
  * @tc.desc: LnnPutDBData
  * @tc.type: FUNC
@@ -100,7 +100,7 @@ HWTEST_F(KVAdapterWrapperTest, LnnPutDBData001, TestSize.Level1)
     EXPECT_EQ(LnnPutDBData(dbId, keyPtr, MIN_STRING_LEN - 1, valuePtr, MIN_STRING_LEN - 1), SOFTBUS_INVALID_PARAM);
 }
 
-/**
+/*
  * @tc.name: LnnDeleteDBData
  * @tc.desc: LnnDeleteDBData
  * @tc.type: FUNC
@@ -123,7 +123,7 @@ HWTEST_F(KVAdapterWrapperTest, LnnDelete001, TestSize.Level1)
     EXPECT_EQ(LnnDeleteDBData(dbId, keyPtr, MIN_STRING_LEN - 1), SOFTBUS_INVALID_PARAM);
 }
 
-/**
+/*
  * @tc.name: LnnDeleteDBDataByPrefix
  * @tc.desc: LnnDeleteDBDataByPrefix
  * @tc.type: FUNC
@@ -154,7 +154,7 @@ HWTEST_F(KVAdapterWrapperTest, LnnDeleteByPrefix001, TestSize.Level1)
     EXPECT_EQ(LnnDeleteDBDataByPrefix(dbId, keyPtr, MIN_STRING_LEN - 1), SOFTBUS_INVALID_PARAM);
 }
 
-/**
+/*
  * @tc.name: LnnGetDBData
  * @tc.desc: LnnGetDBData
  * @tc.type: FUNC
@@ -184,7 +184,7 @@ HWTEST_F(KVAdapterWrapperTest, LnnGet001, TestSize.Level1)
     EXPECT_EQ(LnnGetDBData(dbId, keyPtr, MIN_STRING_LEN - 1, &value), SOFTBUS_INVALID_PARAM);
 }
 
-/**
+/*
  * @tc.name: LnnSubcribeKvStoreService
  * @tc.desc: LnnSubcribeKvStoreService
  * @tc.type: FUNC
@@ -196,9 +196,9 @@ HWTEST_F(KVAdapterWrapperTest, LnnSubcribeKvStoreService001, TestSize.Level1)
     EXPECT_EQ(lnnSubcribeKvStoreRet, SOFTBUS_OK);
 }
 
-/**
+/*
  * @tc.name: LnnCreateKvAdapter_InvalidDbId
- * @tc.desc: Test LnnCreateKvAdapter with dbId being nullptr.
+ * @tc.desc: Test LnnCreateKvAdapter with dbId being nullptr
  * @tc.type: Functional Test
  * @tc.require:
  */
@@ -213,9 +213,9 @@ HWTEST_F(KVAdapterWrapperTest, LnnCreateKvAdapter_InvalidDbId, TestSize.Level1)
     EXPECT_EQ(ret, SOFTBUS_INVALID_PARAM);
 }
 
-/**
+/*
  * @tc.name: LnnCreateKvAdapter_InvalidAppId
- * @tc.desc: Test LnnCreateKvAdapter with appId being nullptr.
+ * @tc.desc: Test LnnCreateKvAdapter with appId being nullptr
  * @tc.type: Functional Test
  * @tc.require:
  */
@@ -230,9 +230,9 @@ HWTEST_F(KVAdapterWrapperTest, LnnCreateKvAdapter_InvalidAppId, TestSize.Level1)
     EXPECT_EQ(ret, SOFTBUS_INVALID_PARAM);
 }
 
-/**
+/*
  * @tc.name: LnnCreateKvAdapter_InvalidAppIdLen_LessThanMin
- * @tc.desc: Test LnnCreateKvAdapter with appIdLen being less than MIN_STRING_LEN.
+ * @tc.desc: Test LnnCreateKvAdapter with appIdLen being less than MIN_STRING_LEN
  * @tc.type: Functional Test
  * @tc.require:
  */
@@ -247,9 +247,9 @@ HWTEST_F(KVAdapterWrapperTest, LnnCreateKvAdapter_InvalidAppIdLen_LessThanMin, T
     EXPECT_EQ(ret, SOFTBUS_INVALID_PARAM);
 }
 
-/**
+/*
  * @tc.name: LnnCreateKvAdapter_InvalidAppIdLen_GreaterThanMax
- * @tc.desc: Test LnnCreateKvAdapter with appIdLen being greater than MAX_STRING_LEN.
+ * @tc.desc: Test LnnCreateKvAdapter with appIdLen being greater than MAX_STRING_LEN
  * @tc.type: Functional Test
  * @tc.require:
  */
@@ -264,9 +264,9 @@ HWTEST_F(KVAdapterWrapperTest, LnnCreateKvAdapter_InvalidAppIdLen_GreaterThanMax
     EXPECT_EQ(ret, SOFTBUS_INVALID_PARAM);
 }
 
-/**
+/*
  * @tc.name: LnnCreateKvAdapter_InvalidStoreId
- * @tc.desc: Test LnnCreateKvAdapter with storeId being nullptr.
+ * @tc.desc: Test LnnCreateKvAdapter with storeId being nullptr
  * @tc.type: Functional Test
  * @tc.require:
  */
@@ -281,9 +281,9 @@ HWTEST_F(KVAdapterWrapperTest, LnnCreateKvAdapter_InvalidStoreId, TestSize.Level
     EXPECT_EQ(ret, SOFTBUS_INVALID_PARAM);
 }
 
-/**
+/*
  * @tc.name: LnnCreateKvAdapter_InvalidStoreIdLen_LessThanMin
- * @tc.desc: Test LnnCreateKvAdapter with storeIdLen being less than MIN_STRING_LEN.
+ * @tc.desc: Test LnnCreateKvAdapter with storeIdLen being less than MIN_STRING_LEN
  * @tc.type: Functional Test
  * @tc.require:
  */
@@ -298,9 +298,9 @@ HWTEST_F(KVAdapterWrapperTest, LnnCreateKvAdapter_InvalidStoreIdLen_LessThanMin,
     EXPECT_EQ(ret, SOFTBUS_INVALID_PARAM);
 }
 
-/**
+/*
  * @tc.name: LnnCreateKvAdapter_InvalidStoreIdLen_GreaterThanMax
- * @tc.desc: Test LnnCreateKvAdapter with storeIdLen being greater than MAX_STRING_LEN.
+ * @tc.desc: Test LnnCreateKvAdapter with storeIdLen being greater than MAX_STRING_LEN
  * @tc.type: Functional Test
  * @tc.require:
  */
@@ -315,9 +315,9 @@ HWTEST_F(KVAdapterWrapperTest, LnnCreateKvAdapter_InvalidStoreIdLen_GreaterThanM
     EXPECT_EQ(ret, SOFTBUS_INVALID_PARAM);
 }
 
-/**
+/*
  * @tc.name: LnnPutDBData_InvalidKey
- * @tc.desc: Test LnnPutDBData with key being nullptr.
+ * @tc.desc: Test LnnPutDBData with key being nullptr
  * @tc.type: Functional Test
  * @tc.require:
  */
@@ -332,9 +332,9 @@ HWTEST_F(KVAdapterWrapperTest, LnnPutDBData_InvalidKey, TestSize.Level1)
     EXPECT_EQ(ret, SOFTBUS_INVALID_PARAM);
 }
 
-/**
+/*
  * @tc.name: LnnPutDBData_KeyLen_LessThanMin
- * @tc.desc: Test LnnPutDBData with keyLen being less than MIN_STRING_LEN.
+ * @tc.desc: Test LnnPutDBData with keyLen being less than MIN_STRING_LEN
  * @tc.type: Functional Test
  * @tc.require:
  */
@@ -349,9 +349,9 @@ HWTEST_F(KVAdapterWrapperTest, LnnPutDBData_KeyLen_LessThanMin, TestSize.Level1)
     EXPECT_EQ(ret, SOFTBUS_INVALID_PARAM);
 }
 
-/**
+/*
  * @tc.name: LnnPutDBData_KeyLen_GreaterThanMax
- * @tc.desc: Test LnnPutDBData with keyLen being greater than MAX_STRING_LEN.
+ * @tc.desc: Test LnnPutDBData with keyLen being greater than MAX_STRING_LEN
  * @tc.type: Functional Test
  * @tc.require:
  */
@@ -366,9 +366,9 @@ HWTEST_F(KVAdapterWrapperTest, LnnPutDBData_KeyLen_GreaterThanMax, TestSize.Leve
     EXPECT_EQ(ret, SOFTBUS_INVALID_PARAM);
 }
 
-/**
+/*
  * @tc.name: LnnPutDBData_InvalidValue
- * @tc.desc: Test LnnPutDBData with value being nullptr.
+ * @tc.desc: Test LnnPutDBData with value being nullptr
  * @tc.type: Functional Test
  * @tc.require:
  */
@@ -383,9 +383,9 @@ HWTEST_F(KVAdapterWrapperTest, LnnPutDBData_InvalidValue, TestSize.Level1)
     EXPECT_EQ(ret, SOFTBUS_INVALID_PARAM);
 }
 
-/**
+/*
  * @tc.name: LnnPutDBData_ValueLen_LessThanMin
- * @tc.desc: Test LnnPutDBData with valueLen being less than MIN_STRING_LEN.
+ * @tc.desc: Test LnnPutDBData with valueLen being less than MIN_STRING_LEN
  * @tc.type: Functional Test
  * @tc.require:
  */
@@ -400,9 +400,9 @@ HWTEST_F(KVAdapterWrapperTest, LnnPutDBData_ValueLen_LessThanMin, TestSize.Level
     EXPECT_EQ(ret, SOFTBUS_INVALID_PARAM);
 }
 
-/**
+/*
  * @tc.name: LnnPutDBData_ValueLen_GreaterThanMax
- * @tc.desc: Test LnnPutDBData with valueLen being greater than MAX_STRING_LEN.
+ * @tc.desc: Test LnnPutDBData with valueLen being greater than MAX_STRING_LEN
  * @tc.type: Functional Test
  * @tc.require:
  */
@@ -417,9 +417,9 @@ HWTEST_F(KVAdapterWrapperTest, LnnPutDBData_ValueLen_GreaterThanMax, TestSize.Le
     EXPECT_EQ(ret, SOFTBUS_INVALID_PARAM);
 }
 
-/**
+/*
  * @tc.name: LnnPutDBData_Dbid_LessThanMin
- * @tc.desc: Test LnnPutDBData with dbid being less than MIN_STRING_LEN.
+ * @tc.desc: Test LnnPutDBData with dbid being less than MIN_STRING_LEN
  * @tc.type: Functional Test
  * @tc.require:
  */
@@ -434,9 +434,9 @@ HWTEST_F(KVAdapterWrapperTest, LnnPutDBData_Dbid_LessThanMin, TestSize.Level1)
     EXPECT_EQ(ret, SOFTBUS_INVALID_PARAM);
 }
 
-/**
+/*
  * @tc.name: LnnDeleteDBData_InvalidKey
- * @tc.desc: Test LnnDeleteDBData with key being nullptr.
+ * @tc.desc: Test LnnDeleteDBData with key being nullptr
  * @tc.type: Functional Test
  * @tc.require:
  */
@@ -449,9 +449,9 @@ HWTEST_F(KVAdapterWrapperTest, LnnDeleteDBData_InvalidKey, TestSize.Level1)
     EXPECT_EQ(ret, SOFTBUS_INVALID_PARAM);
 }
 
-/**
+/*
  * @tc.name: LnnDeleteDBData_KeyLen_LessThanMin
- * @tc.desc: Test LnnDeleteDBData with keyLen being less than MIN_STRING_LEN.
+ * @tc.desc: Test LnnDeleteDBData with keyLen being less than MIN_STRING_LEN
  * @tc.type: Functional Test
  * @tc.require:
  */
@@ -464,9 +464,9 @@ HWTEST_F(KVAdapterWrapperTest, LnnDeleteDBData_KeyLen_LessThanMin, TestSize.Leve
     EXPECT_EQ(ret, SOFTBUS_INVALID_PARAM);
 }
 
-/**
+/*
  * @tc.name: LnnDeleteDBData_KeyLen_GreaterThanMax
- * @tc.desc: Test LnnDeleteDBData with keyLen being greater than MAX_STRING_LEN.
+ * @tc.desc: Test LnnDeleteDBData with keyLen being greater than MAX_STRING_LEN
  * @tc.type: Functional Test
  * @tc.require:
  */
@@ -479,9 +479,9 @@ HWTEST_F(KVAdapterWrapperTest, LnnDeleteDBData_KeyLen_GreaterThanMax, TestSize.L
     EXPECT_EQ(ret, SOFTBUS_INVALID_PARAM);
 }
 
-/**
+/*
  * @tc.name: LnnDeleteDBData_Dbid_LessThanMin
- * @tc.desc: Test LnnDeleteDBData with dbid being less than MIN_STRING_LEN.
+ * @tc.desc: Test LnnDeleteDBData with dbid being less than MIN_STRING_LEN
  * @tc.type: Functional Test
  * @tc.require:
  */
@@ -494,9 +494,9 @@ HWTEST_F(KVAdapterWrapperTest, LnnDeleteDBData_Dbid_LessThanMin, TestSize.Level1
     EXPECT_EQ(ret, SOFTBUS_INVALID_PARAM);
 }
 
-/**
+/*
  * @tc.name: LnnGetDBData_InvalidValue
- * @tc.desc: Test LnnGetDBData with value being nullptr.
+ * @tc.desc: Test LnnGetDBData with value being nullptr
  * @tc.type: Functional Test
  * @tc.require:
  */
@@ -510,9 +510,9 @@ HWTEST_F(KVAdapterWrapperTest, LnnGetDBData_InvalidValue, TestSize.Level1)
     EXPECT_EQ(ret, SOFTBUS_INVALID_PARAM);
 }
 
-/**
+/*
  * @tc.name: LnnGetDBData_InvalidKey
- * @tc.desc: Test LnnGetDBData with key being nullptr.
+ * @tc.desc: Test LnnGetDBData with key being nullptr
  * @tc.type: Functional Test
  * @tc.require:
  */
@@ -527,9 +527,9 @@ HWTEST_F(KVAdapterWrapperTest, LnnGetDBData_InvalidKey, TestSize.Level1)
     EXPECT_EQ(ret, SOFTBUS_INVALID_PARAM);
 }
 
-/**
+/*
  * @tc.name: LnnGetDBData_KeyLen_LessThanMin
- * @tc.desc: Test LnnGetDBData with keyLen being less than MIN_STRING_LEN.
+ * @tc.desc: Test LnnGetDBData with keyLen being less than MIN_STRING_LEN
  * @tc.type: Functional Test
  * @tc.require:
  */
@@ -544,9 +544,9 @@ HWTEST_F(KVAdapterWrapperTest, LnnGetDBData_KeyLen_LessThanMin, TestSize.Level1)
     EXPECT_EQ(ret, SOFTBUS_INVALID_PARAM);
 }
 
-/**
+/*
  * @tc.name: LnnGetDBData_KeyLen_GreaterThanMax
- * @tc.desc: Test LnnGetDBData return SOFTBUS_INVALID_PARAM.
+ * @tc.desc: Test LnnGetDBData return SOFTBUS_INVALID_PARAM
  * @tc.type: Functional Test
  * @tc.require:
  */
@@ -561,9 +561,9 @@ HWTEST_F(KVAdapterWrapperTest, LnnGetDBData_KeyLen_GreaterThanMax, TestSize.Leve
     EXPECT_EQ(ret, SOFTBUS_INVALID_PARAM);
 }
 
-/**
+/*
  * @tc.name: LnnGetDBData_Dbid_LessThanMin
- * @tc.desc: Test LnnGetDBData return SOFTBUS_INVALID_PARAM.
+ * @tc.desc: Test LnnGetDBData return SOFTBUS_INVALID_PARAM
  * @tc.type: Functional Test
  * @tc.require:
  */
@@ -578,9 +578,9 @@ HWTEST_F(KVAdapterWrapperTest, LnnGetDBData_Dbid_LessThanMin, TestSize.Level1)
     EXPECT_EQ(ret, SOFTBUS_INVALID_PARAM);
 }
 
-/**
+/*
  * @tc.name: LnnDeleteDBDataByPrefix_InvalidKeyPrefix
- * @tc.desc: Test LnnDeleteDBDataByPrefix with keyPrefix being nullptr.
+ * @tc.desc: Test LnnDeleteDBDataByPrefix with keyPrefix being nullptr
  * @tc.type: Functional Test
  * @tc.require:
  */
@@ -593,9 +593,9 @@ HWTEST_F(KVAdapterWrapperTest, LnnDeleteDBDataByPrefix_InvalidKeyPrefix, TestSiz
     EXPECT_EQ(ret, SOFTBUS_INVALID_PARAM);
 }
 
-/**
+/*
  * @tc.name: LnnDeleteDBDataByPrefix_KeyPrefixLen_LessThanMin
- * @tc.desc: Test LnnDeleteDBDataByPrefix with keyPrefixLen being less than MIN_STRING_LEN.
+ * @tc.desc: Test LnnDeleteDBDataByPrefix with keyPrefixLen being less than MIN_STRING_LEN
  * @tc.type: Functional Test
  * @tc.require:
  */
@@ -608,9 +608,9 @@ HWTEST_F(KVAdapterWrapperTest, LnnDeleteDBDataByPrefix_KeyPrefixLen_LessThanMin,
     EXPECT_EQ(ret, SOFTBUS_INVALID_PARAM);
 }
 
-/**
+/*
  * @tc.name: LnnDeleteDBDataByPrefix_KeyPrefixLen_GreaterThanMax
- * @tc.desc: Test LnnDeleteDBDataByPrefix with keyPrefixLen being greater than MAX_STRING_LEN.
+ * @tc.desc: Test LnnDeleteDBDataByPrefix with keyPrefixLen being greater than MAX_STRING_LEN
  * @tc.type: Functional Test
  * @tc.require:
  */
@@ -623,9 +623,9 @@ HWTEST_F(KVAdapterWrapperTest, LnnDeleteDBDataByPrefix_KeyPrefixLen_GreaterThanM
     EXPECT_EQ(ret, SOFTBUS_INVALID_PARAM);
 }
 
-/**
+/*
  * @tc.name: LnnDeleteDBDataByPrefix_Dbid_LessThanMin
- * @tc.desc: Test LnnDeleteDBDataByPrefix with dbid being less than MIN_STRING_LEN.
+ * @tc.desc: Test LnnDeleteDBDataByPrefix with dbid being less than MIN_STRING_LEN
  * @tc.type: Functional Test
  * @tc.require:
  */
@@ -638,9 +638,9 @@ HWTEST_F(KVAdapterWrapperTest, LnnDeleteDBDataByPrefix_Dbid_LessThanMin, TestSiz
     EXPECT_EQ(ret, SOFTBUS_INVALID_PARAM);
 }
 
-/**
+/*
  * @tc.name: LnnCloudSync_Dbid_LessThanMin
- * @tc.desc: Test LnnCloudSync with dbId being less than MIN_DBID_COUNT.
+ * @tc.desc: Test LnnCloudSync with dbId being less than MIN_DBID_COUNT
  * @tc.type: Functional Test
  * @tc.require:
  */
@@ -651,9 +651,9 @@ HWTEST_F(KVAdapterWrapperTest, LnnCloudSync_Dbid_LessThanMin, TestSize.Level1)
     EXPECT_EQ(ret, SOFTBUS_INVALID_PARAM);
 }
 
-/**
+/*
  * @tc.name: LnnSetCloudAbilityInner_Dbid_LessThanMin
- * @tc.desc: Test LnnSetCloudAbilityInner with dbId being less than MIN_DBID_COUNT.
+ * @tc.desc: Test LnnSetCloudAbilityInner with dbId being less than MIN_DBID_COUNT
  * @tc.type: Functional Test
  * @tc.require:
  */
@@ -665,7 +665,7 @@ HWTEST_F(KVAdapterWrapperTest, LnnSetCloudAbilityInner_Dbid_LessThanMin, TestSiz
     EXPECT_EQ(ret, SOFTBUS_INVALID_PARAM);
 }
 
-/**
+/*
  * @tc.name: LnnCloudSync001
  * @tc.desc: LnnCloudSync
  * @tc.type: FUNC
@@ -684,7 +684,7 @@ HWTEST_F(KVAdapterWrapperTest, LnnCloudSync001, TestSize.Level1)
     EXPECT_EQ(lnnCloudRet, SOFTBUS_INVALID_PARAM);
 }
 
-/**
+/*
  * @tc.name: LnnCloudSync002
  * @tc.desc: test LnnCloudSync param invalid
  * @tc.type: FUNC
@@ -701,7 +701,7 @@ HWTEST_F(KVAdapterWrapperTest, LnnCloudSync002, TestSize.Level1)
     EXPECT_EQ(lnnCloudRet, SOFTBUS_INVALID_PARAM);
 }
 
-/**
+/*
  * @tc.name: LnnCloudSync004
  * @tc.desc: LnnCloudSync cloud_disabled
  * @tc.type: FUNC
@@ -722,7 +722,7 @@ HWTEST_F(KVAdapterWrapperTest, LnnCloudSync004, TestSize.Level1)
     EXPECT_EQ(lnnCloudRet, SOFTBUS_KV_CLOUD_DISABLED);
 }
 
-/**
+/*
  * @tc.name: LnnDeleteDBDataByNull
  * @tc.desc: LnnDeleteDBData Invalid Param
  * @tc.type: FUNC
@@ -736,7 +736,7 @@ HWTEST_F(KVAdapterWrapperTest, LnnDeleteDBDataByNull, TestSize.Level1)
     EXPECT_EQ(LnnPutDBData(dbId, keyStr, 3, valueStr.c_str(), 3), SOFTBUS_INVALID_PARAM);
 }
 
-/**
+/*
  * @tc.name: LnnGetDBDataByKey
  * @tc.desc: LnnGetDBData  Invalid Param
  * @tc.type: FUNC
@@ -750,7 +750,7 @@ HWTEST_F(KVAdapterWrapperTest, LnnGetDBDataByKey, TestSize.Level1)
     EXPECT_EQ(LnnGetDBData(dbId, keyStr, 3, &value), SOFTBUS_INVALID_PARAM);
 }
 
-/**
+/*
  * @tc.name: LnnDeleteDBDataByInvalid
  * @tc.desc: LnnDeleteDBDataByPrefix  Invalid Param
  * @tc.type: FUNC

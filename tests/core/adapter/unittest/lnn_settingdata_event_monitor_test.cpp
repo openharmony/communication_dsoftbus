@@ -90,7 +90,7 @@ static bool IsZHLanguage(void)
 
 /*
 * @tc.name: LnnGetSettingDeviceNameTest003
-* @tc.desc:
+* @tc.desc: Lnn get setting DeviceName test
 * @tc.type: FUNC
 * @tc.require: 1
 */

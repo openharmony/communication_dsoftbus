@@ -37,7 +37,7 @@ static SoftBusBtStateListener *GetMockBtStateListener();
 static StRecordCtx g_btStateChangedCtx("OnBtStateChanged");
 static BtAddrRecordCtx g_btAclStateChangedCtx("OnBtAclStateChanged");
 
-/**
+/*
  * @tc.name: AdapterBtCommonTest_SoftBusEnableBt001
  * @tc.desc: test enable bt
  * @tc.type: FUNC
@@ -51,7 +51,7 @@ HWTEST(AdapterBtCommonTest, SoftBusEnableBt001, TestSize.Level3)
     EXPECT_EQ(SoftBusEnableBt(), SOFTBUS_COMM_BLE_ENABLE_ERR);
 }
 
-/**
+/*
  * @tc.name: AdapterBtCommonTest_SoftBusDisableBt001
  * @tc.desc: test disable bt
  * @tc.type: FUNC
@@ -65,7 +65,7 @@ HWTEST(AdapterBtCommonTest, SoftBusDisableBt001, TestSize.Level3)
     EXPECT_EQ(SoftBusDisableBt(), SOFTBUS_COMM_BLE_DISABLE_ERR);
 }
 
-/**
+/*
  * @tc.name: AdapterBtCommonTest_SoftBusGetBtState001
  * @tc.desc: test get bt status
  * @tc.type: FUNC
@@ -79,7 +79,7 @@ HWTEST(AdapterBtCommonTest, SoftBusGetBtState001, TestSize.Level3)
     EXPECT_EQ(SoftBusGetBtState(), BLE_DISABLE);
 }
 
-/**
+/*
  * @tc.name: AdapterBtCommonTest_SoftBusGetBtMacAddr001
  * @tc.desc: test get bt mac address
  * @tc.type: FUNC
@@ -95,7 +95,7 @@ HWTEST(AdapterBtCommonTest, SoftBusGetBtMacAddr001, TestSize.Level3)
     EXPECT_EQ(SoftBusGetBtMacAddr(&mac), SOFTBUS_COMM_BLUETOOTH_UNDERLAY_GET_ADDR_ERR);
 }
 
-/**
+/*
  * @tc.name: AdapterBtCommonTest_SoftBusSetBtName001
  * @tc.desc: test set bt name
  * @tc.type: FUNC
@@ -132,7 +132,7 @@ static testing::AssertionResult PrepareBtStateListener(MockBluetooth &mocker, in
     return testing::AssertionSuccess();
 }
 
-/**
+/*
  * @tc.name: AdapterBtCommonTest_StateChangeCallback001
  * @tc.desc: test bt state listener callback stateChangeCallback
  * @tc.type: FUNC
@@ -182,7 +182,7 @@ HWTEST(AdapterBtCommonTest, StateChangeCallback001, TestSize.Level3)
     EXPECT_EQ(SoftBusRemoveBtStateListener(listenerId), SOFTBUS_OK);
 }
 
-/**
+/*
  * @tc.name: AdapterBtCommonTest_StateChangeCallback001
  * @tc.desc: test bt state listener callback aclStateChangedCallbak
  * @tc.type: FUNC
@@ -227,7 +227,7 @@ HWTEST(AdapterBtCommonTest, AclStateChangedCallbak001, TestSize.Level3)
     EXPECT_EQ(SoftBusRemoveBtStateListener(listenerId), SOFTBUS_OK);
 }
 
-/**
+/*
  * @tc.name: AdapterBtCommonTest_BluetoothPair001
  * @tc.desc: test bt state listener callback pairRequestedCallback
  * @tc.type: FUNC
@@ -254,7 +254,7 @@ HWTEST(AdapterBtCommonTest, PairRequestedCallback001, TestSize.Level3)
     EXPECT_EQ(SoftBusRemoveBtStateListener(listenerId), SOFTBUS_OK);
 }
 
-/**
+/*
  * @tc.name: AdapterBtCommonTest_PairConfiremedCallback001
  * @tc.desc: test bt state listener callback pairConfiremedCallback
  * @tc.type: FUNC
@@ -280,7 +280,7 @@ HWTEST(AdapterBtCommonTest, PairConfiremedCallback001, TestSize.Level3)
     EXPECT_EQ(SoftBusRemoveBtStateListener(listenerId), SOFTBUS_OK);
 }
 
-/**
+/*
  * @tc.name: SoftBusAddBtStateListener001
  * @tc.desc: test SoftBusAddBtStateListener
  * @tc.type: FUNC

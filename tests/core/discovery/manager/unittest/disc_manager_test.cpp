@@ -265,7 +265,7 @@ static SubscribeInfo g_sInfo1 = { .subscribeId = TEST_SUBSCRIBE_ID1,
     .capabilityData = nullptr,
     .dataLen = 0 };
 
-/**
+/*
  * @tc.name: DiscPublishTest001
  * @tc.desc: Test inner module active publish, but softbus discover manager is not init.
  * @tc.type: FUNC
@@ -277,7 +277,7 @@ HWTEST_F(DiscManagerTest, DiscPublishTest001, TestSize.Level1)
     TEST_ASSERT_TRUE(ret != 0);
 }
 
-/**
+/*
  * @tc.name: DiscPublishTest002
  * @tc.desc: Test inner module active publish, use wrong Medium and Freq Under the COAP of MODULE_LNN.
  * @tc.type: FUNC
@@ -322,7 +322,7 @@ HWTEST_F(DiscManagerTest, DiscPublishTest002, TestSize.Level1)
     DiscMgrDeinit();
 }
 
-/**
+/*
  * @tc.name: DiscPublishTest003
  * @tc.desc: Inner LNN module active publish, use the normal parameter.
  * @tc.type: FUNC
@@ -341,7 +341,7 @@ HWTEST_F(DiscManagerTest, DiscPublishTest003, TestSize.Level1)
     DiscMgrDeinit();
 }
 
-/**
+/*
  * @tc.name: DiscPublishTest004
  * @tc.desc: Inner module active publish, use the wrong parameter.
  * @tc.type: FUNC
@@ -360,7 +360,7 @@ HWTEST_F(DiscManagerTest, DiscPublishTest004, TestSize.Level1)
     DiscMgrDeinit();
 }
 
-/**
+/*
  * @tc.name: DiscPublishTest005
  * @tc.desc: Test inner module active publish, but softbus discover manager is not init.
  * @tc.type: FUNC
@@ -420,7 +420,7 @@ void DiscPublishTestAbstract001(DiscModule module, PublishInfo *info)
     DiscMgrDeinit();
 }
 
-/**
+/*
  * @tc.name: DiscPublishTest006
  * @tc.desc: Test inner module active publish, use Diff Freq Under the AUTO of MODULE_LNN.
  *           Test inner module active publish, use Diff Freq Under the AUTO of MODULE_CONN.
@@ -477,7 +477,7 @@ void DiscPublishTestAbstract002(DiscModule module, PublishInfo *info)
     DiscMgrDeinit();
 }
 
-/**
+/*
  * @tc.name: DiscPublishTest007
  * @tc.desc: Test inner module active publish, use wrong Medium and Freq Under the COAP of MODULE_LNN.
  *           Test inner module active publish, use wrong Medium and Freq Under the BLE of MODULE_LNN.
@@ -496,7 +496,7 @@ HWTEST_F(DiscManagerTest, DiscPublishTest007, TestSize.Level1)
     DiscPublishTestAbstract002(MODULE_LNN, &discPublishTestAbstractInfo002);
 }
 
-/**
+/*
  * @tc.name: DiscStartScanTest001
  * @tc.desc: Inner CONN module passive publish, the module is not initialized.
  * @tc.type: FUNC
@@ -508,7 +508,7 @@ HWTEST_F(DiscManagerTest, DiscStartScanTest001, TestSize.Level1)
     TEST_ASSERT_TRUE(ret != 0);
 }
 
-/**
+/*
  * @tc.name: DiscStartScanTest002
  * @tc.desc: Inner LNN module passive publish, use the wrong parameter.
  * @tc.type: FUNC
@@ -553,7 +553,7 @@ HWTEST_F(DiscManagerTest, DiscStartScanTest002, TestSize.Level1)
     DiscMgrDeinit();
 }
 
-/**
+/*
  * @tc.name: DiscStartScanTest003
  * @tc.desc: Inner LNN module passive publish, use the normal parameter.
  * @tc.type: FUNC
@@ -569,7 +569,7 @@ HWTEST_F(DiscManagerTest, DiscStartScanTest003, TestSize.Level1)
     DiscMgrDeinit();
 }
 
-/**
+/*
  * @tc.name: DiscStartScanTest004
  * @tc.desc: Inner LNN module passive publish, use the wrong parameter.
  * @tc.type: FUNC
@@ -585,7 +585,7 @@ HWTEST_F(DiscManagerTest, DiscStartScanTest004, TestSize.Level1)
     DiscMgrDeinit();
 }
 
-/**
+/*
  * @tc.name: DiscStartScanTest005
  * @tc.desc: Test passive discover, but softbus discover manager is not initialized.
  * @tc.type: FUNC
@@ -636,7 +636,7 @@ void DiscStartScanTestAbstract001(DiscModule module, PublishInfo *info, DiscModu
     DiscMgrDeinit();
 }
 
-/**
+/*
  * @tc.name: DiscStartScanTest006
  * @tc.desc: Test passive discover,use wrong Medium and Freq Under the COAP of MODULE_LNN.
  *           Test passive discover,use wrong Medium and Freq Under the AUTO of MODULE_LNN.
@@ -655,7 +655,7 @@ HWTEST_F(DiscManagerTest, DiscStartScanTest006, TestSize.Level1)
     DiscStartScanTestAbstract001(MODULE_LNN, &discStartScanTestAbstractInfo001, (DiscModule)TEST_ERRO_MOUDULE2);
 }
 
-/**
+/*
  * @tc.name: DiscStartAdvertiseTest001
  * @tc.desc: Inner CONN module active discover, the module is not initialized.
  * @tc.type: FUNC
@@ -667,7 +667,7 @@ HWTEST_F(DiscManagerTest, DiscStartAdvertiseTest001, TestSize.Level1)
     TEST_ASSERT_TRUE(ret != 0);
 }
 
-/**
+/*
  * @tc.name: DiscStartAdvertiseTest002
  * @tc.desc: Inner LNN module active discover, use the wrong parameter.
  * @tc.type: FUNC
@@ -714,7 +714,7 @@ HWTEST_F(DiscManagerTest, DiscStartAdvertiseTest002, TestSize.Level1)
     DiscMgrDeinit();
 }
 
-/**
+/*
  * @tc.name: DiscStartAdvertiseTest003
  * @tc.desc: Inner CONN module active discover, use the normal parameter.
  * @tc.type: FUNC
@@ -730,7 +730,7 @@ HWTEST_F(DiscManagerTest, DiscStartAdvertiseTest003, TestSize.Level1)
     DiscMgrDeinit();
 }
 
-/**
+/*
  * @tc.name: DiscStartAdvertiseTest004
  * @tc.desc: Inner CONN module active discover, use the wrong parameter.
  * @tc.type: FUNC
@@ -780,7 +780,7 @@ void DiscStartAdvertiseTestAbstract001(DiscModule module, SubscribeInfo *info)
     DiscMgrDeinit();
 }
 
-/**
+/*
  * @tc.name: DiscStartAdvertiseTest005
  * @tc.desc: Test inner start discover, use wrong Medium and Freq Under the COAP of MODULE_LNN.
  *           Test inner start discover, use wrong Medium and Freq Under the BLE of MODULE_LNN.
@@ -846,7 +846,7 @@ void DiscStartAdvertiseTestAbstract002(DiscModule module, SubscribeInfo *info)
     DiscMgrDeinit();
 }
 
-/**
+/*
  * @tc.name: DiscStartAdvertiseTest006
  * @tc.desc: Test inner module active discover, use Diff Freq Under the AUTO of MODULE_LNN.
  *           Test inner module active discover, use Diff Freq Under the AUTO of MODULE_CONN.
@@ -871,7 +871,7 @@ HWTEST_F(DiscManagerTest, DiscStartAdvertiseTest006, TestSize.Level1)
     DiscStartAdvertiseTestAbstract002(MODULE_CONN, &discStartAdvertiseTestAbstractInfo002);
 }
 
-/**
+/*
  * @tc.name: DiscSubscribeTest001
  * @tc.desc: Inner CONN module passive discover, the module is not initialized.
  * @tc.type: FUNC
@@ -883,7 +883,7 @@ HWTEST_F(DiscManagerTest, DiscSubscribeTest001, TestSize.Level1)
     TEST_ASSERT_TRUE(ret != 0);
 }
 
-/**
+/*
  * @tc.name: DiscSubscribeTest002
  * @tc.desc: Inner LNN module passive discover, use the wrong parameter.
  * @tc.type: FUNC
@@ -930,7 +930,7 @@ HWTEST_F(DiscManagerTest, DiscSubscribeTest002, TestSize.Level1)
     DiscMgrDeinit();
 }
 
-/**
+/*
  * @tc.name: DiscSubscribeTest003
  * @tc.desc: Inner CONN module passive discover, use the wrong parameter.
  * @tc.type: FUNC
@@ -946,7 +946,7 @@ HWTEST_F(DiscManagerTest, DiscSubscribeTest003, TestSize.Level1)
     DiscMgrDeinit();
 }
 
-/**
+/*
  * @tc.name: DiscSubscribeTest004
  * @tc.desc: Inner CONN module passive discover, use the normal parameter.
  * @tc.type: FUNC
@@ -962,7 +962,7 @@ HWTEST_F(DiscManagerTest, DiscSubscribeTest004, TestSize.Level1)
     DiscMgrDeinit();
 }
 
-/**
+/*
  * @tc.name: DiscSubscribeTest005
  * @tc.desc: Inner CONN module passive discover, use the same parameter again, Perform two subscriptions.
  * @tc.type: FUNC
@@ -1014,7 +1014,7 @@ void DiscSubscribeTestAbstract001(DiscModule module, SubscribeInfo *info)
     DiscMgrDeinit();
 }
 
-/**
+/*
  * @tc.name: DiscSubscribeTest006
  * @tc.desc: Inner LNN module passive discover, use wrong parameter.
  *           Inner LNN module passive discover, use the wrong parameter.
@@ -1034,7 +1034,7 @@ HWTEST_F(DiscManagerTest, DiscSubscribeTest006, TestSize.Level1)
     TEST_ASSERT_TRUE(ret != 0);
 }
 
-/**
+/*
  * @tc.name: DiscUnpublishTest001
  * @tc.desc: Inner CONN module stop publish, the module is not initialized.
  * @tc.type: FUNC
@@ -1046,7 +1046,7 @@ HWTEST_F(DiscManagerTest, DiscUnpublishTest001, TestSize.Level1)
     TEST_ASSERT_TRUE(ret != 0);
 }
 
-/**
+/*
  * @tc.name: DiscUnpublishTest002
  * @tc.desc: Inner LNN module stop publish, use the wrong parameter.
  * @tc.type: FUNC
@@ -1063,11 +1063,11 @@ HWTEST_F(DiscManagerTest, DiscUnpublishTest002, TestSize.Level1)
     DiscMgrDeinit();
 }
 
-/**
+/*
  * @tc.name: DiscUnpublishTest003
  * @tc.desc: Inner LNN module stop publish, use the normal parameter.
  * @tc.type: FUNC
- * @tc.require: The DiscUnpublish operates normally
+ * @tc.require: The DiscUnpublish operates normally.
  */
 HWTEST_F(DiscManagerTest, DiscUnpublishTest003, TestSize.Level1)
 {
@@ -1080,7 +1080,7 @@ HWTEST_F(DiscManagerTest, DiscUnpublishTest003, TestSize.Level1)
     DiscMgrDeinit();
 }
 
-/**
+/*
  * @tc.name: DiscUnpublishTest004
  * @tc.desc: Inner LNN module stop publish, release the same parameter again, perform two subscriptions.
  * @tc.type: FUNC
@@ -1099,7 +1099,7 @@ HWTEST_F(DiscManagerTest, DiscUnpublishTest004, TestSize.Level1)
     DiscMgrDeinit();
 }
 
-/**
+/*
  * @tc.name: DiscUnpublishTest005
  * @tc.desc: Inner LNN module stop publish, use the wrong parameter.
  * @tc.type: FUNC
@@ -1116,7 +1116,7 @@ HWTEST_F(DiscManagerTest, DiscUnpublishTest005, TestSize.Level1)
     DiscMgrDeinit();
 }
 
-/**
+/*
  * @tc.name: DiscUnpublishTest006
  * @tc.desc: Inner CONN module stop publish, the module initialized, Directly to unpubish.
  * @tc.type: FUNC
@@ -1170,7 +1170,7 @@ void DiscUnpublishTestAbstract001(DiscModule module, PublishInfo *info)
     DiscMgrDeinit();
 }
 
-/**
+/*
  * @tc.name: DiscUnpublishTest007
  * @tc.desc: Inner LNN module active publish, use the normal parameter and different frequencies under AUTO.
  *           Inner CONN module active publish, use the normal parameter and different frequencies under AUTO.
@@ -1195,7 +1195,7 @@ HWTEST_F(DiscManagerTest, DiscUnpublishTest007, TestSize.Level1)
     DiscUnpublishTestAbstract001(MODULE_LNN, &discUnpublishTestAbstractInfo001);
 }
 
-/**
+/*
  * @tc.name: DiscStopAdvertiseTest001
  * @tc.desc: Inner CONN module stop discover, the module is not initialized.
  * @tc.type: FUNC
@@ -1207,7 +1207,7 @@ HWTEST_F(DiscManagerTest, DiscStopAdvertiseTest001, TestSize.Level1)
     TEST_ASSERT_TRUE(ret != 0);
 }
 
-/**
+/*
  * @tc.name: DiscStopAdvertiseTest002
  * @tc.desc: Inner module stop discover, use the wrong parameter.
  * @tc.type: FUNC
@@ -1224,7 +1224,7 @@ HWTEST_F(DiscManagerTest, DiscStopAdvertiseTest002, TestSize.Level1)
     DiscMgrDeinit();
 }
 
-/**
+/*
  * @tc.name: DiscStopAdvertiseTest003
  * @tc.desc: Inner LNN module stop discover, use the normal parameter.
  * @tc.type: FUNC
@@ -1241,7 +1241,7 @@ HWTEST_F(DiscManagerTest, DiscStopAdvertiseTest003, TestSize.Level1)
     DiscMgrDeinit();
 }
 
-/**
+/*
  * @tc.name: DiscStopAdvertiseTest004
  * @tc.desc: Inner LNN module stop discover, use the same parameter again, perform two subscriptions.
  * @tc.type: FUNC
@@ -1259,7 +1259,7 @@ HWTEST_F(DiscManagerTest, DiscStopAdvertiseTest004, TestSize.Level1)
     DiscMgrDeinit();
 }
 
-/**
+/*
  * @tc.name: DiscStopAdvertiseTest005
  * @tc.desc: Test inner module stop discover, use the wrong parameter.
 
@@ -1278,7 +1278,7 @@ HWTEST_F(DiscManagerTest, DiscStopAdvertiseTest005, TestSize.Level1)
     DiscMgrDeinit();
 }
 
-/**
+/*
  * @tc.name: DiscStopAdvertiseTest006
  * @tc.desc: Test inner module stop discover, bur module is not start discover.
  * @tc.type: FUNC
@@ -1334,7 +1334,7 @@ void DiscStopAdvertiseTestAbstract001(DiscModule module, SubscribeInfo *info)
     DiscMgrDeinit();
 }
 
-/**
+/*
  * @tc.name: DiscStopAdvertiseTest007
  * @tc.desc: Test inner module active discover, use Diff Freq Under the AUTO of MODULE_LNN.
  *           Test inner module active discover, use Diff Freq Under the AUTO of MODULE_CONN.
@@ -1359,7 +1359,7 @@ HWTEST_F(DiscManagerTest, DiscStopAdvertiseTest007, TestSize.Level1)
     DiscStopAdvertiseTestAbstract001(MODULE_CONN, &discStopAdvertiseTestAbstractInfo001);
 }
 
-/**
+/*
  * @tc.name: PublishServiceTest001
  * @tc.desc: Extern module publish, the module is not initialized.
  * @tc.type: FUNC
@@ -1371,7 +1371,7 @@ HWTEST_F(DiscManagerTest, PublishServiceTest001, TestSize.Level1)
     TEST_ASSERT_TRUE(ret != 0);
 }
 
-/**
+/*
  * @tc.name: PublishServiceTest002
  * @tc.desc: Extern module active publish, use the wrong parameter.
  * @tc.type: FUNC
@@ -1433,11 +1433,11 @@ HWTEST_F(DiscManagerTest, PublishServiceTest002, TestSize.Level1)
     DiscMgrDeinit();
 }
 
-/**
+/*
  * @tc.name: PublishServiceTest003
  * @tc.desc: Extern module publish, use the normal parameter.
  * @tc.type: FUNC
- * @tc.require: The DiscPublishService operates normally
+ * @tc.require: The DiscPublishService operates normally.
  */
 HWTEST_F(DiscManagerTest, PublishServiceTest003, TestSize.Level1)
 {
@@ -1455,7 +1455,7 @@ HWTEST_F(DiscManagerTest, PublishServiceTest003, TestSize.Level1)
     DiscMgrDeinit();
 }
 
-/**
+/*
  * @tc.name: PublishServiceTest004
  * @tc.desc: Extern module publish, use the same parameter again, perform two subscriptions.
  * @tc.type: FUNC
@@ -1472,7 +1472,7 @@ HWTEST_F(DiscManagerTest, PublishServiceTest004, TestSize.Level1)
     DiscMgrDeinit();
 }
 
-/**
+/*
  * @tc.name: PublishServiceTest005
  * @tc.desc: Test extern module active publish, use the wrong Medium and Freq Under the COAP.
  * @tc.type: FUNC
@@ -1503,7 +1503,7 @@ HWTEST_F(DiscManagerTest, PublishServiceTest005, TestSize.Level1)
     DiscMgrDeinit();
 }
 
-/**
+/*
  * @tc.name: PublishServiceTest006
  * @tc.desc: Test extern module active publish, use wrong Medium and Freq Under the BLE.
  * @tc.type: FUNC
@@ -1534,7 +1534,7 @@ HWTEST_F(DiscManagerTest, PublishServiceTest006, TestSize.Level1)
     DiscMgrDeinit();
 }
 
-/**
+/*
  * @tc.name: PublishServiceTest007
  * @tc.desc: Test extern module active publish, use wrong Medium and Freq Under the AUTO.
  * @tc.type: FUNC
@@ -1605,7 +1605,7 @@ void PublishServiceTestAbstract001(PublishInfo *info)
     DiscMgrDeinit();
 }
 
-/**
+/*
  * @tc.name: PublishServiceTest008
  * @tc.desc: Test extern module active publish, use Diff Freq Under the AUTO.
  *           Test extern module passive publish, use Diff Freq Under the AUTO.
@@ -1638,7 +1638,7 @@ HWTEST_F(DiscManagerTest, PublishServiceTest008, TestSize.Level1)
     PublishServiceTestAbstract001(&publishServiceTestAbstractInfo);
 }
 
-/**
+/*
  * @tc.name: StartDiscoveryTest001
  * @tc.desc: Extern module discover, the module is not initialized.
  * @tc.type: FUNC
@@ -1650,11 +1650,11 @@ HWTEST_F(DiscManagerTest, StartDiscoveryTest001, TestSize.Level1)
     TEST_ASSERT_TRUE(ret != 0);
 }
 
-/**
+/*
  * @tc.name: StartDiscoveryTest002
  * @tc.desc: Extern module active discover, use the wrong parameter.
  * @tc.type: FUNC
- * @tc.require: The DiscStartDiscovery operates normally
+ * @tc.require: The DiscStartDiscovery operates normally.
  */
 HWTEST_F(DiscManagerTest, StartDiscoveryTest002, TestSize.Level1)
 {
@@ -1714,7 +1714,7 @@ HWTEST_F(DiscManagerTest, StartDiscoveryTest002, TestSize.Level1)
     DiscMgrDeinit();
 }
 
-/**
+/*
  * @tc.name: StartDiscoveryTest003
  * @tc.desc: Extern module discover, use the normal parameter.
  * @tc.type: FUNC
@@ -1736,7 +1736,7 @@ HWTEST_F(DiscManagerTest, StartDiscoveryTest003, TestSize.Level1)
     DiscMgrDeinit();
 }
 
-/**
+/*
  * @tc.name: StartDiscoveryTest004
  * @tc.desc: Extern module discover, use the same parameter again, perform two subscriptions.
  * @tc.type: FUNC
@@ -1782,7 +1782,7 @@ void StartDiscoveryTestAbstract002(SubscribeInfo *info)
     DiscMgrDeinit();
 }
 
-/**
+/*
  * @tc.name: StartDiscoveryTest005
  * @tc.desc: Test extern module active discover, use wrong Medium and Freq Under the COAP.
  *           Test extern module active discover, use wrong Medium and Freq Under the BLE.
@@ -1842,7 +1842,7 @@ void StartDiscoveryTestAbstract001(SubscribeInfo *info)
     DiscMgrDeinit();
 }
 
-/**
+/*
  * @tc.name: StartDiscoveryTest006
  * @tc.desc: Test extern module active discover, use Diff Freq Under the AUTO.
  *           Test extern module passive discover, use Diff Freq Under the AUTO.
@@ -1876,7 +1876,7 @@ HWTEST_F(DiscManagerTest, StartDiscoveryTest006, TestSize.Level1)
     StartDiscoveryTestAbstract001(&startDiscoveryTestAbstractInfo001);
 }
 
-/**
+/*
  * @tc.name: UnPublishServiceTest001
  * @tc.desc: Extern module stop publish, the module is not initialized.
  * @tc.type: FUNC
@@ -1888,7 +1888,7 @@ HWTEST_F(DiscManagerTest, UnPublishServiceTest001, TestSize.Level1)
     TEST_ASSERT_TRUE(ret != 0);
 }
 
-/**
+/*
  * @tc.name: UnPublishServiceTest002
  * @tc.desc: Extern module stop publish, use the wrong parameter.
  * @tc.type: FUNC
@@ -1914,7 +1914,7 @@ HWTEST_F(DiscManagerTest, UnPublishServiceTest002, TestSize.Level1)
     DiscMgrDeinit();
 }
 
-/**
+/*
  * @tc.name: UnPublishServiceTest003
  * @tc.desc: Extern module stop publish, use the normal parameter.
  * @tc.type: FUNC
@@ -1939,7 +1939,7 @@ HWTEST_F(DiscManagerTest, UnPublishServiceTest003, TestSize.Level1)
     DiscMgrDeinit();
 }
 
-/**
+/*
  * @tc.name: UnPublishServiceTest004
  * @tc.desc: Extern module stop publish, release the same parameter again, perform two subscriptions.
  * @tc.type: FUNC
@@ -1988,7 +1988,7 @@ void UnPublishServiceTestAbstract001(PublishInfo *info)
     DiscMgrDeinit();
 }
 
-/**
+/*
  * @tc.name: UnPublishServiceTest005
  * @tc.desc: Extern module stop publish, use the normal parameter and different frequencies under active COAP.
  *           Extern module stop publish, use the normal parameter and different frequencies under passive COAP.
@@ -2022,11 +2022,11 @@ HWTEST_F(DiscManagerTest, UnPublishServiceTest005, TestSize.Level1)
     UnPublishServiceTestAbstract001(&publishServiceTestAbstractInfo);
 }
 
-/**
+/*
  * @tc.name: StopDiscoveryTest001
  * @tc.desc: Extern module stop discover, the module is not initialized.
  * @tc.type: FUNC
- * @tc.require: The DiscStopDiscovery operates normally
+ * @tc.require: The DiscStopDiscovery operates normally.
  */
 HWTEST_F(DiscManagerTest, StopDiscoveryTest001, TestSize.Level1)
 {
@@ -2034,11 +2034,11 @@ HWTEST_F(DiscManagerTest, StopDiscoveryTest001, TestSize.Level1)
     TEST_ASSERT_TRUE(ret != 0);
 }
 
-/**
+/*
  * @tc.name: StopDiscoveryTest002
  * @tc.desc: Extern module stop discover, use the wrong parameter.
  * @tc.type: FUNC
- * @tc.require: The DiscStopDiscovery operates normally
+ * @tc.require: The DiscStopDiscovery operates normally.
  */
 HWTEST_F(DiscManagerTest, StopDiscoveryTest002, TestSize.Level1)
 {
@@ -2060,11 +2060,11 @@ HWTEST_F(DiscManagerTest, StopDiscoveryTest002, TestSize.Level1)
     DiscMgrDeinit();
 }
 
-/**
+/*
  * @tc.name: StopDiscoveryTest003
  * @tc.desc: Extern module stop discover, use the normal parameter.
  * @tc.type: FUNC
- * @tc.require: The DiscStopDiscovery operates normally
+ * @tc.require: The DiscStopDiscovery operates normally.
  */
 HWTEST_F(DiscManagerTest, StopDiscoveryTest003, TestSize.Level1)
 {
@@ -2085,11 +2085,11 @@ HWTEST_F(DiscManagerTest, StopDiscoveryTest003, TestSize.Level1)
     DiscMgrDeinit();
 }
 
-/**
+/*
  * @tc.name: StopDiscoveryTest004
  * @tc.desc: Extern module stop discover, release the same parameter again, perform two subscriptions.
  * @tc.type: FUNC
- * @tc.require: The DiscStopDiscovery operates normally
+ * @tc.require: The DiscStopDiscovery operates normally.
  */
 HWTEST_F(DiscManagerTest, StopDiscoveryTest004, TestSize.Level1)
 {
@@ -2144,7 +2144,7 @@ void StopDiscoveryTestAbstract001(SubscribeInfo *info)
     DiscMgrDeinit();
 }
 
-/**
+/*
  * @tc.name: StopDiscoveryTest005
  * @tc.desc: Test extern module stop active discover, use Diff Freq Under the COAP.
  *           Test extern module stop passive discover, use Diff Freq Under the COAP.
@@ -2177,7 +2177,7 @@ HWTEST_F(DiscManagerTest, StopDiscoveryTest005, TestSize.Level1)
     StopDiscoveryTestAbstract001(&stopDiscoveryTestAbstractInfo001);
 }
 
-/**
+/*
  * @tc.name: DiscSetDiscoverCallbackTest001
  * @tc.desc: Callback set process.
  * @tc.type: FUNC
@@ -2199,7 +2199,7 @@ HWTEST_F(DiscManagerTest, DiscSetDiscoverCallbackTest001, TestSize.Level1)
     DiscMgrDeinit();
 }
 
-/**
+/*
  * @tc.name: DiscSetDiscoverCallbackTest002
  * @tc.desc: Callback set process.
  * @tc.type: FUNC
@@ -2221,7 +2221,7 @@ HWTEST_F(DiscManagerTest, DiscSetDiscoverCallbackTest002, TestSize.Level1)
     DiscMgrDeinit();
 }
 
-/**
+/*
  * @tc.name: DiscSetDiscoverCallbackTest003
  * @tc.desc: Extern onDeviceFound test.
  * @tc.type: FUNC
@@ -2239,11 +2239,11 @@ HWTEST_F(DiscManagerTest, DiscSetDiscoverCallbackTest003, TestSize.Level1)
     DiscMgrDeinit();
 }
 
-/**
+/*
  * @tc.name: DiscSetDiscoverCallbackTest004
  * @tc.desc: Inner onDeviceFound test.
  * @tc.type: FUNC
- * @tc.require: DiscStartAdvertise and DiscSetDiscoverCallback and DiscStopAdvertise operates normally
+ * @tc.require: DiscStartAdvertise and DiscSetDiscoverCallback and DiscStopAdvertise operates normally.
  */
 HWTEST_F(DiscManagerTest, DiscSetDiscoverCallbackTest004, TestSize.Level1)
 {
@@ -2265,11 +2265,11 @@ HWTEST_F(DiscManagerTest, DiscSetDiscoverCallbackTest004, TestSize.Level1)
     DiscMgrDeinit();
 }
 
-/**
+/*
  * @tc.name: DiscSetDiscoverCallbackTest005
  * @tc.desc: Inner onDeviceFound test with no callback.
  * @tc.type: FUNC
- * @tc.require: DiscStartAdvertise and DiscStopAdvertise operates normally
+ * @tc.require: DiscStartAdvertise and DiscStopAdvertise operates normally.
  */
 HWTEST_F(DiscManagerTest, DiscSetDiscoverCallbackTest005, TestSize.Level1)
 {
@@ -2288,7 +2288,7 @@ HWTEST_F(DiscManagerTest, DiscSetDiscoverCallbackTest005, TestSize.Level1)
     DiscMgrDeinit();
 }
 
-/**
+/*
  * @tc.name: DiscSetDiscoverCallbackTest006
  * @tc.desc: Callback use the wrong parameter.
  * @tc.type: FUNC
@@ -2310,7 +2310,7 @@ HWTEST_F(DiscManagerTest, DiscSetDiscoverCallbackTest006, TestSize.Level1)
     DiscMgrDeinit();
 }
 
-/**
+/*
  * @tc.name: DiscCoapStopDiscoveryTest001
  * @tc.desc: Active stop discovery, use the normal parameter.
  * @tc.type: FUNC
@@ -2325,7 +2325,7 @@ HWTEST_F(DiscManagerTest, DiscCoapStopDiscoveryTest001, TestSize.Level1)
     TEST_ASSERT_TRUE(ret == 0);
 }
 
-/**
+/*
  * @tc.name: DiscCoapStopDiscoveryTest002
  * @tc.desc: Passive stop discovery, the module is not initialized.
  * @tc.type: FUNC
@@ -2338,7 +2338,7 @@ HWTEST_F(DiscManagerTest, DiscCoapStopDiscoveryTest002, TestSize.Level1)
     TEST_ASSERT_TRUE(ret != 0);
 }
 
-/**
+/*
  * @tc.name: DiscCoapStopDiscoveryTest003
  * @tc.desc: Active stop discovery, the module is not initialized.
  * @tc.type: FUNC
@@ -2350,7 +2350,7 @@ HWTEST_F(DiscManagerTest, DiscCoapStopDiscoveryTest003, TestSize.Level1)
     TEST_ASSERT_TRUE(ret != 0);
 }
 
-/**
+/*
  * @tc.name: DiscCoapPulbishServiceTest001
  * @tc.desc: Inner module publishing, use wrong parameters.
  * @tc.type: FUNC
@@ -2365,7 +2365,7 @@ HWTEST_F(DiscManagerTest, DiscCoapPulbishServiceTest001, TestSize.Level1)
     DiscCoapDeinit();
 }
 
-/**
+/*
  * @tc.name: DiscCoapPulbishServiceTest002
  * @tc.desc: Inner module publishing, use normal parameters.
  * @tc.type: FUNC
@@ -2380,7 +2380,7 @@ HWTEST_F(DiscManagerTest, DiscCoapPulbishServiceTest002, TestSize.Level1)
     DiscCoapDeinit();
 }
 
-/**
+/*
  * @tc.name: DiscCoapStartDiscoveryTest001
  * @tc.desc: Inner module Discovery, use wrong parameters.
  * @tc.type: FUNC
@@ -2395,7 +2395,7 @@ HWTEST_F(DiscManagerTest, DiscCoapStartDiscoveryTest001, TestSize.Level1)
     DiscCoapDeinit();
 }
 
-/**
+/*
  * @tc.name: DiscCoapStartDiscoveryTest002
  * @tc.desc: Test coap discovery, use normal parameters.
  * @tc.type: FUNC
@@ -2410,7 +2410,7 @@ HWTEST_F(DiscManagerTest, DiscCoapStartDiscoveryTest002, TestSize.Level1)
     DiscCoapDeinit();
 }
 
-/**
+/*
  * @tc.name: DiscCoapUnpulbishServiceTest001
  * @tc.desc: Inner modules stop publishing, using wrong parameters.
  * @tc.type: FUNC
@@ -2425,7 +2425,7 @@ HWTEST_F(DiscManagerTest, DiscCoapUnpulbishServiceTest001, TestSize.Level1)
     DiscCoapDeinit();
 }
 
-/**
+/*
  * @tc.name: DiscCoapUnpulbishServiceTest002
  * @tc.desc: Test stop publishing, using the normal parameters.
  * @tc.type: FUNC
@@ -2440,7 +2440,7 @@ HWTEST_F(DiscManagerTest, DiscCoapUnpulbishServiceTest002, TestSize.Level1)
     DiscCoapDeinit();
 }
 
-/**
+/*
  * @tc.name: DiscSetDisplayNameTest001
  * @tc.desc: Test Disc setDisplayName, using wrong parameters.
  * @tc.type: FUNC
@@ -2457,7 +2457,7 @@ HWTEST_F(DiscManagerTest, DiscCoapUnpulbishServiceTest002, TestSize.Level1)
     DISC_LOGI(DISC_TEST, "DiscSetDisplayNameTest001 end ----");
 }
 
- /**
+ /*
  * @tc.name: DiscSetDisplayNameTest002
  * @tc.desc: Test Disc setDisplayName, using wrong parameters.
  * @tc.type: FUNC
@@ -2474,7 +2474,7 @@ HWTEST_F(DiscManagerTest, DiscCoapUnpulbishServiceTest002, TestSize.Level1)
     DISC_LOGI(DISC_TEST, "DiscSetDisplayNameTest002 end ----");
 }
 
- /**
+ /*
  * @tc.name: DiscSetDisplayNameTest003
  * @tc.desc: Test Disc setDisplayName, using wrong parameters.
  * @tc.type: FUNC
@@ -2491,7 +2491,7 @@ HWTEST_F(DiscManagerTest, DiscCoapUnpulbishServiceTest002, TestSize.Level1)
     DISC_LOGI(DISC_TEST, "DiscSetDisplayNameTest001 end ----");
 }
 
-/**
+/*
  * @tc.name: DiscGetDisplayNameTest001
  * @tc.desc: Test Disc setDisplayName, using the normal parameters.
  * @tc.type: FUNC
@@ -2507,7 +2507,7 @@ HWTEST_F(DiscManagerTest, DiscCoapUnpulbishServiceTest002, TestSize.Level1)
     DISC_LOGI(DISC_TEST, "DiscGetDisplayNameTest001 end ----");
 }
 
-/**
+/*
  * @tc.name: DiscGetDisplayNameTest002
  * @tc.desc: Test Disc setDisplayName, using the normal parameters.
  * @tc.type: FUNC
@@ -2523,7 +2523,7 @@ HWTEST_F(DiscManagerTest, DiscCoapUnpulbishServiceTest002, TestSize.Level1)
     DISC_LOGI(DISC_TEST, "DiscGetDisplayNameTest002 end ----");
 }
 
-/**
+/*
  * @tc.name: DiscGetDisplayNameTest003
  * @tc.desc: Test Disc setDisplayName, using the normal parameters.
  * @tc.type: FUNC
