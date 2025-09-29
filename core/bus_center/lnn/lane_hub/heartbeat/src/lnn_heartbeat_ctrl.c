@@ -530,6 +530,7 @@ static void HbBtStateChangeEventHandler(const LnnEventBasicInfo *info)
     switch (btState) {
         case SOFTBUS_BLE_TURN_ON:
         case SOFTBUS_BR_TURN_ON:
+            LnnUpdateHeartbeatInfo(UPDATE_HB_NETWORK_INFO);
             HbHandleBleStateChange(btState);
             break;
         case SOFTBUS_BR_TURN_OFF:
@@ -537,6 +538,7 @@ static void HbBtStateChangeEventHandler(const LnnEventBasicInfo *info)
                 LNN_LOGE(LNN_HEART_BEAT, "ble is off");
                 return;
             }
+            LnnUpdateHeartbeatInfo(UPDATE_HB_NETWORK_INFO);
             g_enableState = false;
             LNN_LOGI(LNN_HEART_BEAT, "HB handle SOFTBUS_BR_TURN_OFF, state=%{public}d", btState);
             (void)HbHandleLeaveLnn();
@@ -1021,7 +1023,7 @@ static void HbUserSwitchedHandler(const LnnEventBasicInfo *info)
             {
                 LNN_LOGI(LNN_HEART_BEAT, "HB handle SOFTBUS_USER_SWITCHED");
                 uint8_t userIdCheckSum[USERID_CHECKSUM_LEN];
-                int32_t userId = GetActiveOsAccountIds();
+                int32_t userId = JudgeDeviceTypeAndGetOsAccountIds();
                 LNN_LOGI(LNN_HEART_BEAT, "userswitch userId:%{public}d", userId);
                 int32_t ret = LnnSetLocalNumInfo(NUM_KEY_USERID, userId);
                 if (ret != SOFTBUS_OK) {

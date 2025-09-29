@@ -51,10 +51,12 @@ public:
     virtual int32_t GetLocalIpByRemoteIp(const char *remoteIp, char *localIp, int32_t localIpSize) = 0;
     virtual int32_t UnpackReplyErrCode(const cJSON *msg, int32_t *errCode) = 0;
     virtual int32_t UnpackReply(const cJSON *msg, AppInfo *appInfo, uint16_t *fastDataSize) = 0;
+    virtual int32_t UnpackExternalDeviceReply(const cJSON *msg, AppInfo *appInfo) = 0;
     virtual int32_t SoftbusGetConfig(ConfigType type, unsigned char *val, uint32_t len) = 0;
     virtual int32_t SetAppInfoById(int32_t channelId, const AppInfo *appInfo) = 0;
     virtual int32_t AuthGetDeviceUuid(int64_t authId, char *uuid, uint16_t size) = 0;
     virtual int32_t UnpackRequest(const cJSON *msg, AppInfo *appInfo) = 0;
+    virtual int32_t UnpackExternalDeviceRequest(const cJSON *msg, AppInfo *appInfo) = 0;
     virtual int32_t GetAppInfoById(int32_t channelId, AppInfo *appInfo) = 0;
     virtual int32_t GetRemoteUuidByIp(const char *remoteIp, char *localIp, int32_t localIpSize) = 0;
     virtual int32_t SetAuthHandleByChanId(int32_t channelId, AuthHandle *authHandle) = 0;
@@ -88,6 +90,12 @@ public:
         int32_t ukId, const uint8_t *inData, uint32_t inLen, uint8_t *outData, uint32_t *outLen) = 0;
     virtual int32_t AuthFindUkIdByAclInfo(const AuthACLInfo *acl, int32_t *ukId) = 0;
     virtual int32_t LnnGetLocalStrInfoByIfnameIdx(InfoKey key, char *info, uint32_t len, int32_t ifIdx) = 0;
+    virtual char *PackReply(const AppInfo *appInfo) = 0;
+    virtual char *PackExternalDeviceReply(const AppInfo *appInfo) = 0;
+    virtual bool GetJsonObjectNumber64Item(const cJSON *json, const char * const string, int64_t *target) = 0;
+    virtual int32_t LnnGetOsTypeByNetworkId(const char *networkId, int32_t *osType) = 0;
+    virtual bool GetCapabilityBit(uint32_t value, uint32_t offset) = 0;
+    virtual int64_t AuthGetIdByIp(const char *ip) = 0;
 };
 
 class TransTcpDirectMessageInterfaceMock : public TransTcpDirectMessageInterface {
@@ -108,10 +116,12 @@ public:
     MOCK_METHOD3(GetLocalIpByRemoteIp, int32_t (const char *remoteIp, char *localIp, int32_t localIpSize));
     MOCK_METHOD2(UnpackReplyErrCode, int32_t (const cJSON *msg, int32_t *errCode));
     MOCK_METHOD3(UnpackReply, int32_t (const cJSON *msg, AppInfo *appInfo, uint16_t *fastDataSize));
+    MOCK_METHOD2(UnpackExternalDeviceReply, int32_t (const cJSON *msg, AppInfo *appInfo));
     MOCK_METHOD3(SoftbusGetConfig, int32_t (ConfigType type, unsigned char *val, uint32_t len));
     MOCK_METHOD2(SetAppInfoById, int32_t (int32_t channelId, const AppInfo *appInfo));
     MOCK_METHOD3(AuthGetDeviceUuid, int32_t (int64_t authId, char *uuid, uint16_t size));
     MOCK_METHOD2(UnpackRequest, int32_t (const cJSON *msg, AppInfo *appInfo));
+    MOCK_METHOD2(UnpackExternalDeviceRequest, int32_t (const cJSON *msg, AppInfo *appInfo));
     MOCK_METHOD2(GetAppInfoById, int32_t (int32_t channelId, AppInfo *appInfo));
     MOCK_METHOD3(GetRemoteUuidByIp, int32_t (const char *remoteIp, char *localIp, int32_t localIpSize));
     MOCK_METHOD2(SetAuthHandleByChanId, int32_t (int32_t channelId, AuthHandle *authHandle));
@@ -145,6 +155,12 @@ public:
         uint32_t *outLen));
     MOCK_METHOD2(AuthFindUkIdByAclInfo, int32_t (const AuthACLInfo *acl, int32_t *ukId));
     MOCK_METHOD4(LnnGetLocalStrInfoByIfnameIdx, int32_t (InfoKey key, char *info, uint32_t len, int32_t ifIdx));
+    MOCK_METHOD1(PackReply, char * (const AppInfo *appInfo));
+    MOCK_METHOD1(PackExternalDeviceReply, char * (const AppInfo *appInfo));
+    MOCK_METHOD3(GetJsonObjectNumber64Item, bool (const cJSON *json, const char * const string, int64_t *target));
+    MOCK_METHOD2(LnnGetOsTypeByNetworkId, int32_t (const char *networkId, int32_t *osType));
+    MOCK_METHOD2(GetCapabilityBit, bool (uint32_t value, uint32_t offset));
+    MOCK_METHOD1(AuthGetIdByIp, int64_t (const char *ip));
 };
 } // namespace OHOS
 #endif // TRANS_TCP_DIRECT_MESSAGE_TEST_MOCK_H

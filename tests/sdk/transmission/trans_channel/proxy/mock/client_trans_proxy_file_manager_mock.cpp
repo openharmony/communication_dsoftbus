@@ -183,5 +183,10 @@ int32_t TransProxyD2dDataLenCheck(uint32_t dataLen, BusinessType type)
 {
     return GetClientTransProxyFileManagerInterface()->TransProxyD2dDataLenCheck(dataLen, type);
 }
+
+ClientEnhanceFuncList *ClientEnhanceFuncListGet(void)
+{
+    return GetClientTransProxyFileManagerInterface()->ClientEnhanceFuncListGet();
+}
 }
 }

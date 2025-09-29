@@ -1108,7 +1108,10 @@ HWTEST_F(SoftbusProxyChannelMessagePagingTest, TransPagingProcessHandshakeMsgTes
  */
 HWTEST_F(SoftbusProxyChannelMessagePagingTest, TransWaitListenResult001, TestSize.Level1)
 {
-    uint32_t businessFlag = 1;
+    PagingListenCheckInfo checkInfo = {
+        .businessFlag = 1,
+        .channelId = TEST_CHANNEL_ID
+    };
     int32_t reason = SOFTBUS_INVALID_PARAM;
     uint8_t *accountHash = reinterpret_cast<uint8_t *>(const_cast<char *>(TEST_DATA));
     uint8_t *udidHash = reinterpret_cast<uint8_t *>(const_cast<char *>(TEST_DATA));
@@ -1116,21 +1119,21 @@ HWTEST_F(SoftbusProxyChannelMessagePagingTest, TransWaitListenResult001, TestSiz
     AesGcmCipherKey cipherKey;
     NiceMock<SoftbusProxychannelMessagePagingInterfaceMock> ProxyPagingMock;
     EXPECT_CALL(ProxyPagingMock, TransPagingAckHandshake).WillRepeatedly(Return(SOFTBUS_OK));
-    TransWaitListenResult(businessFlag, reason);
+    TransWaitListenResult(&checkInfo, reason);
     reason = SOFTBUS_OK;
-    EXPECT_CALL(ProxyPagingMock, TransProxyGetChannelByFlag).WillOnce(Return(SOFTBUS_INVALID_PARAM));
-    TransWaitListenResult(businessFlag, reason);
-    EXPECT_CALL(ProxyPagingMock, TransProxyGetChannelByFlag).WillRepeatedly(Return(SOFTBUS_OK));
+    EXPECT_CALL(ProxyPagingMock, TransProxyGetChannelByCheckInfo).WillOnce(Return(SOFTBUS_INVALID_PARAM));
+    TransWaitListenResult(&checkInfo, reason);
+    EXPECT_CALL(ProxyPagingMock, TransProxyGetChannelByCheckInfo).WillRepeatedly(Return(SOFTBUS_OK));
     EXPECT_CALL(ProxyPagingMock, TransHasAndUpdatePagingListenPacked).WillOnce(Return(false));
-    TransWaitListenResult(businessFlag, reason);
+    TransWaitListenResult(&checkInfo, reason);
     EXPECT_CALL(ProxyPagingMock, TransHasAndUpdatePagingListenPacked).WillRepeatedly(Return(true));
     EXPECT_CALL(ProxyPagingMock, TransPagingGetPidAndDataByFlgPacked).WillOnce(Return(SOFTBUS_INVALID_PARAM));
-    TransWaitListenResult(businessFlag, reason);
+    TransWaitListenResult(&checkInfo, reason);
     EXPECT_CALL(ProxyPagingMock, TransPagingGetPidAndDataByFlgPacked).WillRepeatedly(DoAll(
         SetArgPointee<2>(1), Return(SOFTBUS_OK)));
     EXPECT_CALL(ProxyPagingMock, TransPagingUpdatePidAndData).WillRepeatedly(Return(SOFTBUS_OK));
     EXPECT_CALL(ProxyPagingMock, OnProxyChannelOpened).WillRepeatedly(Return(SOFTBUS_OK));
-    TransWaitListenResult(businessFlag, reason);
+    TransWaitListenResult(&checkInfo, reason);
     EXPECT_CALL(ProxyPagingMock, ConvertBytesToHexString).WillOnce(Return(SOFTBUS_INVALID_PARAM));
     int32_t ret = PagingParseMsgGetAuthKey(accountHash, udidHash, &cipherKey, authAccountHash);
     EXPECT_EQ(SOFTBUS_NETWORK_BYTES_TO_HEX_STR_ERR, ret);

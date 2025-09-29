@@ -55,5 +55,6 @@ int32_t TransRegisterEnhanceFunc(void *soHandle)
     g_transEnhanceFuncList.transCheckP2pOnly = dlsym(soHandle, "TransCheckP2pOnly");
     g_transEnhanceFuncList.transCheckDcTriggerVirtualLink = dlsym(soHandle, "TransCheckDcTriggerVirtualLink");
     g_transEnhanceFuncList.loadTransPermissionJson = dlsym(soHandle, "LoadTransPermissionJson");
+    g_transEnhanceFuncList.transD2dQosUnregister = dlsym(soHandle, "TransD2dQosUnregister");
     return SOFTBUS_OK;
 }

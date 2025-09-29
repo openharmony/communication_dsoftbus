@@ -248,10 +248,6 @@ void TransTdcDeathCallback(const char *pkgName, int32_t pid)
     LIST_FOR_EACH_ENTRY_SAFE(item, nextItem, &sessionList->list, SessionConn, node) {
         if ((strcmp(item->appInfo.myData.pkgName, pkgName) == 0) && (item->appInfo.myData.pid == pid)) {
             ListDelete(&item->node);
-            char *anonymizePkgName = NULL;
-            Anonymize(pkgName, &anonymizePkgName);
-            TRANS_LOGI(TRANS_CTRL, "delete pkgName=%{public}s, pid=%{public}d", anonymizePkgName, pid);
-            AnonymizeFree(anonymizePkgName);
             sessionList->cnt--;
             DelTrigger(item->listenMod, item->appInfo.fd, RW_TRIGGER);
             TransTdcSocketReleaseFd(item->listenMod, item->appInfo.fd);
@@ -271,7 +267,7 @@ static int32_t TransUpdateAppInfo(AppInfo *appInfo, const ConnectOption *connInf
     }
     appInfo->routeType = connInfo->type == CONNECT_TCP ? WIFI_STA : WIFI_P2P;
     appInfo->protocol = connInfo->socketOption.protocol;
-    if (connInfo->socketOption.protocol == LNN_PROTOCOL_NIP) {
+    if (connInfo->socketOption.protocol == LNN_PROTOCOL_NIP && appInfo->osType != HA_OS_TYPE) {
         if (LnnGetLocalStrInfo(STRING_KEY_NODE_ADDR, appInfo->myData.addr, sizeof(appInfo->myData.addr)) !=
             SOFTBUS_OK) {
             TRANS_LOGE(TRANS_CTRL, "Lnn: get local ip fail.");

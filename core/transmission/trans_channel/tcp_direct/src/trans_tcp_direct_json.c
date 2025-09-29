@@ -27,6 +27,7 @@
 #define ERR_CODE "ERR_CODE"
 #define ERR_DESC "ERR_DESC"
 #define PROTOCOL_TYPE "PROTOCOL_TYPE"
+#define UID "UID"
 
 char *VerifyP2pPackError(int32_t code, int32_t errCode, const char *errDesc)
 {
@@ -50,7 +51,7 @@ char *VerifyP2pPackError(int32_t code, int32_t errCode, const char *errDesc)
     return data;
 }
 
-char *VerifyP2pPack(const char *myIp, int32_t myPort, const char *peerIp, ProtocolType protocol)
+char *VerifyP2pPack(const char *myIp, int32_t myPort, const char *peerIp, ProtocolType protocol, int32_t myUid)
 {
     if (myIp == NULL || myPort <= 0) {
         TRANS_LOGE(TRANS_CTRL, "param invalid");
@@ -66,7 +67,8 @@ char *VerifyP2pPack(const char *myIp, int32_t myPort, const char *peerIp, Protoc
     }
     if (!AddNumberToJsonObject(json, MSG_CODE, CODE_VERIFY_P2P) || !AddStringToJsonObject(json, P2P_IP, myIp) ||
         !AddNumberToJsonObject(json, P2P_PORT, myPort) ||
-        !AddNumberToJsonObject(json, PROTOCOL_TYPE, (int32_t)protocol)) {
+        !AddNumberToJsonObject(json, PROTOCOL_TYPE, (int32_t)protocol) ||
+        !AddNumberToJsonObject(json, UID, myUid)) {
         cJSON_Delete(json);
         TRANS_LOGE(TRANS_CTRL, "add json object failed");
         return NULL;
@@ -76,9 +78,9 @@ char *VerifyP2pPack(const char *myIp, int32_t myPort, const char *peerIp, Protoc
     return data;
 }
 
-int32_t VerifyP2pUnPack(const cJSON *json, char *remoteIp, uint32_t ipLen, int32_t *port, ProtocolType *protocol)
+int32_t VerifyP2pUnPack(const cJSON *json, char *remoteIp, int32_t *port, ProtocolType *protocol, int32_t *uid)
 {
-    if (json == NULL || remoteIp == NULL || port == NULL || protocol == NULL) {
+    if (json == NULL || remoteIp == NULL || port == NULL || protocol == NULL || uid == NULL) {
         TRANS_LOGE(TRANS_CTRL, "param invalid");
         return SOFTBUS_INVALID_PARAM;
     }
@@ -87,12 +89,15 @@ int32_t VerifyP2pUnPack(const cJSON *json, char *remoteIp, uint32_t ipLen, int32
         TRANS_LOGE(TRANS_CTRL, "peer proc failed: errCode=%{public}d", errCode);
         return errCode;
     }
-    if (!GetJsonObjectNumberItem(json, P2P_PORT, port) || !GetJsonObjectStringItem(json, P2P_IP, remoteIp, ipLen)) {
+    if (!GetJsonObjectNumberItem(json, P2P_PORT, port) || !GetJsonObjectStringItem(json, P2P_IP, remoteIp, IP_LEN)) {
         TRANS_LOGE(TRANS_INIT, "VerifyP2pUnPack get obj fail");
         return SOFTBUS_PARSE_JSON_ERR;
     }
     if (!GetJsonObjectNumberItem(json, PROTOCOL_TYPE, (int32_t *)protocol)) {
         *protocol = LNN_PROTOCOL_IP;
+    }
+    if (!GetJsonObjectNumberItem(json, UID, uid)) {
+        *uid = -1;
     }
     return SOFTBUS_OK;
 }

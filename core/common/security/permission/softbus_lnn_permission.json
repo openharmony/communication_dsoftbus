@@ -66,6 +66,18 @@
     ]
   },
   {
+    "INTERFACE_NAME": "SERVER_CREATE_GROUP_OWNER",
+    "PROCESS_NAME": [
+      "CollaborationFwk"
+    ]
+  },
+  {
+    "INTERFACE_NAME": "SERVER_DESTROY_GROUP_OWNER",
+    "PROCESS_NAME": [
+      "CollaborationFwk"
+    ]
+  },
+  {
     "INTERFACE_NAME": "EX_OBJ_CMD_SERVER_JOIN_METANODE",
     "PROCESS_NAME": [
       "CollaborationFwk",
@@ -164,25 +176,25 @@
   {
     "INTERFACE_NAME": "SERVER_TRIGGER_RANGE_FOR_MSDP",
     "PROCESS_NAME": [
-      "msdp_sa"
+      "msdp"
     ]
   },
   {
     "INTERFACE_NAME": "SERVER_STOP_RANGE_FOR_MSDP",
     "PROCESS_NAME": [
-      "msdp_sa"
+      "msdp"
     ]
   },
   {
     "INTERFACE_NAME": "SERVER_REG_RANGE_CB_FOR_MSDP",
     "PROCESS_NAME": [
-      "msdp_sa"
+      "msdp"
     ]
   },
   {
     "INTERFACE_NAME": "SERVER_UNREG_RANGE_CB_FOR_MSDP",
     "PROCESS_NAME": [
-      "msdp_sa"
+      "msdp"
     ]
   },
   {

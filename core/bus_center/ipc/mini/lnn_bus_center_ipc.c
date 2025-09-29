@@ -241,3 +241,27 @@ int32_t LnnIpcSetDisplayName(const char *pkgName, const char *nameData, uint32_t
     LNN_LOGI(LNN_EVENT, "not implement");
     return SOFTBUS_OK;
 }
+
+int32_t LnnIpcCreateGroupOwner(const char *pkgName, int32_t callingPid, const struct GroupOwnerConfig *config,
+    struct GroupOwnerResult *result)
+{
+    (void)pkgName;
+    (void)callingPid;
+    (void)config;
+    (void)result;
+    LNN_LOGI(LNN_EVENT, "not implement");
+    return SOFTBUS_OK;
+}
+
+void LnnIpcDestroyGroupOwner(const char *pkgName)
+{
+    (void)pkgName;
+    LNN_LOGI(LNN_EVENT, "not implement");
+}
+
+int32_t LnnIpcNotifyOnGroupStateChange(int32_t retCode)
+{
+    (void)retCode;
+    LNN_LOGI(LNN_EVENT, "not implement");
+    return SOFTBUS_OK;
+}

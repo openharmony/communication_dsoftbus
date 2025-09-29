@@ -285,6 +285,40 @@ HWTEST_F(TransUdpNegoTest, SendReplyUdpInfo001, TestSize.Level1)
 }
 
 /**
+ * @tc.name: SendReplyUdpInfo002
+ * @tc.desc: SendReplyUdpInfo test
+ * @tc.type: FUNC
+ * @tc.require:
+ */
+HWTEST_F(TransUdpNegoTest, SendReplyUdpInfo002, TestSize.Level1)
+{
+    AuthHandle authHandle;
+    int32_t ret = SendReplyUdpInfo(nullptr, authHandle, INVALID_SEQ);
+    EXPECT_EQ(ret, SOFTBUS_INVALID_PARAM);
+}
+
+/**
+ * @tc.name: SendReplyUdpInfo003
+ * @tc.desc: SendReplyUdpInfo test
+ * @tc.type: FUNC
+ * @tc.require:
+ */
+HWTEST_F(TransUdpNegoTest, SendReplyUdpInfo003, TestSize.Level1)
+{
+    AppInfo appInfo = {
+        .osType = HA_OS_TYPE,
+        .udpChannelOptType = TYPE_INVALID_CHANNEL
+    };
+    AuthHandle authHandle;
+    int32_t ret = SendReplyUdpInfo(&appInfo, authHandle, INVALID_SEQ);
+    EXPECT_EQ(ret, SOFTBUS_TRANS_INVALID_CHANNEL_TYPE);
+
+    appInfo.osType = OH_OS_TYPE;
+    ret = SendReplyUdpInfo(&appInfo, authHandle, INVALID_SEQ);
+    EXPECT_EQ(ret, SOFTBUS_TRANS_INVALID_CHANNEL_TYPE);
+}
+
+/**
  * @tc.name: TransOnExchangeUdpInfoReply001
  * @tc.desc: TransOnExchangeUdpInfoReply, extern module active publish, stop session whitout start.
  * @tc.type: FUNC
@@ -441,6 +475,32 @@ HWTEST_F(TransUdpNegoTest, StartExchangeUdpInfo002, TestSize.Level1)
 
     StartExchangeUdpInfo(channel, authHandle, channel->seq);
     EXPECT_EQ(ret, SOFTBUS_OK);
+}
+
+/**
+ * @tc.name: StartExchangeUdpInfo003
+ * @tc.desc: StartExchangeUdpInfo test
+ * @tc.type: FUNC
+ * @tc.require:
+ */
+HWTEST_F(TransUdpNegoTest, StartExchangeUdpInfo003, TestSize.Level1)
+{
+    AuthHandle authHandle = { .authId = 1, .type = AUTH_LINK_TYPE_WIFI };
+    int32_t ret = StartExchangeUdpInfo(nullptr, authHandle, 1);
+    EXPECT_EQ(ret, SOFTBUS_INVALID_PARAM);
+
+    UdpChannelInfo channel = {
+        .info.myData.channelId = 1214,
+        .info.streamType = COMMON_VIDEO_STREAM,
+        .info.osType = HA_OS_TYPE,
+        .info.udpChannelOptType = TYPE_INVALID_CHANNEL
+    };
+    ret = StartExchangeUdpInfo(&channel, authHandle, 1);
+    EXPECT_EQ(ret, SOFTBUS_TRANS_UDP_PACK_INFO_FAILED);
+
+    channel.info.osType = OH_OS_TYPE;
+    ret = StartExchangeUdpInfo(&channel, authHandle, 1);
+    EXPECT_EQ(ret, SOFTBUS_TRANS_UDP_PACK_INFO_FAILED);
 }
 
 /**
@@ -865,7 +925,7 @@ HWTEST_F(TransUdpNegoTest, ParseRequestAppInfo001, TestSize.Level1)
     EXPECT_EQ(ret, SOFTBUS_OK);
     memset_s(appInfo, sizeof(AppInfo), 0, sizeof(AppInfo));
     ret = ParseRequestAppInfo(authHandle, msg, appInfo);
-    EXPECT_EQ(ret, SOFTBUS_TRANS_PEER_SESSION_NOT_CREATED);
+    EXPECT_EQ(ret, SOFTBUS_PEER_PROC_ERR);
 
     SessionServer *newNode = (SessionServer*)SoftBusMalloc(sizeof(SessionServer));
     ASSERT_TRUE(newNode != nullptr);

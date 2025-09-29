@@ -1190,7 +1190,7 @@ char *PackDeviceIdJson(const AuthSessionInfo *info, int64_t authSeq)
     }
     PackCompressInfo(obj, nodeInfo);
     PackFastAuth(obj, (AuthSessionInfo *)info);
-    PackUserId(obj, GetActiveOsAccountIds());
+    PackUserId(obj, JudgeDeviceTypeAndGetOsAccountIds());
     if ((PackNormalizedData(info, obj, nodeInfo, authSeq) != SOFTBUS_OK) || (PackExternalAuthInfo(obj) != SOFTBUS_OK)) {
         JSON_Delete(obj);
         return NULL;
@@ -1804,7 +1804,7 @@ static void PackSparkCheck(JsonObj *json, const NodeInfo *info)
 {
     char sparkCheck[SPARK_CHECK_STR_LEN] = {0};
     if (ConvertBytesToHexString(sparkCheck, SPARK_CHECK_STR_LEN, info->sparkCheck, SPARK_CHECK_LENGTH) != SOFTBUS_OK) {
-        AUTH_LOGE(AUTH_FSM, "convert spark check to string fail.");
+        AUTH_LOGE(AUTH_FSM, "convert sparkCheck to string fail.");
         return;
     }
     if (!JSON_AddStringToObject(json, SPARK_CHECK, sparkCheck)) {
@@ -2010,7 +2010,7 @@ static void UnpackSparkCheck(const JsonObj *json, NodeInfo *info)
         }
         if (ConvertHexStringToBytes(info->sparkCheck, SPARK_CHECK_LENGTH, sparkCheck,
             strlen(sparkCheck)) != SOFTBUS_OK) {
-            AUTH_LOGE(AUTH_FSM, "convert spark check to bytes fail.");
+            AUTH_LOGE(AUTH_FSM, "convert sparkCheck to bytes fail.");
             break;
         }
         LnnDumpSparkCheck(info->sparkCheck, "auth session unpack");
@@ -2447,7 +2447,7 @@ static void UpdateLocalNetBrMac(void)
 #define USERID_CHECKSUM_HEXSTRING_LEN 9
 static int32_t PackUserIdCheckSum(JsonObj *json, const NodeInfo *nodeInfo)
 {
-    if (!JSON_AddInt32ToObject(json, USERID, GetActiveOsAccountIds())) {
+    if (!JSON_AddInt32ToObject(json, USERID, JudgeDeviceTypeAndGetOsAccountIds())) {
         AUTH_LOGW(AUTH_FSM, "pack userId fail");
     }
     char userIdCheckSumHexStr[USERID_CHECKSUM_HEXSTRING_LEN] = { 0 };

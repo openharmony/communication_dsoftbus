@@ -1269,6 +1269,85 @@ int32_t BusCenterServerProxy::SetDisplayName(const char *pkgName, const char *na
     return serverRet;
 }
 
+int32_t BusCenterServerProxy::CreateGroupOwner(const char *pkgName, const struct GroupOwnerConfig *config,
+    struct GroupOwnerResult *result)
+{
+    if (pkgName == nullptr || config == nullptr || result == nullptr) {
+        LNN_LOGE(LNN_EVENT, "params are nullptr");
+        return SOFTBUS_INVALID_PARAM;
+    }
+    sptr<IRemoteObject> remote = GetSystemAbility();
+    if (remote == nullptr) {
+        LNN_LOGE(LNN_EVENT, "remote is nullptr");
+        return SOFTBUS_TRANS_PROXY_REMOTE_NULL;
+    }
+
+    MessageParcel data;
+    if (!data.WriteInterfaceToken(GetDescriptor())) {
+        LNN_LOGE(LNN_EVENT, "write InterfaceToken failed");
+        return SOFTBUS_TRANS_PROXY_WRITEINT_FAILED;
+    }
+    if (!data.WriteCString(pkgName)) {
+        LNN_LOGE(LNN_EVENT, "write pkg name failed");
+        return SOFTBUS_TRANS_PROXY_WRITEINT_FAILED;
+    }
+    if (!data.WriteRawData(config, sizeof(struct GroupOwnerConfig))) {
+        LNN_LOGE(LNN_EVENT, "write group config failed");
+        return SOFTBUS_TRANS_PROXY_WRITEINT_FAILED;
+    }
+    MessageParcel reply;
+    MessageOption option;
+    int32_t ret = remote->SendRequest(SERVER_CREATE_GROUP_OWNER, data, reply, option);
+    if (ret != SOFTBUS_OK) {
+        LNN_LOGE(LNN_EVENT, "send request failed, ret=%{public}d", ret);
+        return SOFTBUS_IPC_ERR;
+    }
+    int32_t serverRet = 0;
+    char *retBuf = reinterpret_cast<char *>(const_cast<void *>(reply.ReadRawData(sizeof(struct GroupOwnerResult))));
+    if (retBuf == nullptr) {
+        LNN_LOGE(LNN_EVENT, "read create group result failed");
+        return SOFTBUS_TRANS_PROXY_READINT_FAILED;
+    }
+    if (memcpy_s(result, sizeof(struct GroupOwnerResult), retBuf, sizeof(struct GroupOwnerResult)) != EOK) {
+        LNN_LOGE(LNN_EVENT, "copy create group result failed");
+        return SOFTBUS_MEM_ERR;
+    }
+    if (!reply.ReadInt32(serverRet)) {
+        LNN_LOGE(LNN_EVENT, "read serverRet failed");
+        return SOFTBUS_TRANS_PROXY_READINT_FAILED;
+    }
+    return serverRet;
+}
+
+void BusCenterServerProxy::DestroyGroupOwner(const char *pkgName)
+{
+    if (pkgName == nullptr) {
+        LNN_LOGE(LNN_EVENT, "params are nullptr");
+        return;
+    }
+    sptr<IRemoteObject> remote = GetSystemAbility();
+    if (remote == nullptr) {
+        LNN_LOGE(LNN_EVENT, "remote is nullptr");
+        return;
+    }
+
+    MessageParcel data;
+    if (!data.WriteInterfaceToken(GetDescriptor())) {
+        LNN_LOGE(LNN_EVENT, "write InterfaceToken failed");
+        return;
+    }
+    if (!data.WriteCString(pkgName)) {
+        LNN_LOGE(LNN_EVENT, "write pkg name failed");
+        return;
+    }
+    MessageParcel reply;
+    MessageOption option;
+    int32_t ret = remote->SendRequest(SERVER_DESTROY_GROUP_OWNER, data, reply, option);
+    if (ret != SOFTBUS_OK) {
+        LNN_LOGE(LNN_EVENT, "send request failed, ret=%{public}d", ret);
+    }
+}
+
 int32_t BusCenterServerProxy::GetBusCenterExObj(sptr<IRemoteObject> &object)
 {
     sptr<IRemoteObject> remote = GetSystemAbility();

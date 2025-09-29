@@ -247,11 +247,8 @@ int32_t BindTcpClientAddr(int32_t domain, int fd, const char *inputAddr)
 
     const char *bindAddr = NULL;
     if (strcmp(inputAddr, BIND_ADDR_ALL) == 0) {
-        if (domain == SOFTBUS_AF_INET6) {
-            bindAddr = "::";
-        } else {
-            bindAddr = "0.0.0.0";
-        }
+        CONN_LOGD(CONN_COMMON, "bind 0, directly connect");
+        return SOFTBUS_OK;
     } else {
         CONN_LOGD(CONN_COMMON, "using specified bind addr");
         bindAddr = inputAddr;

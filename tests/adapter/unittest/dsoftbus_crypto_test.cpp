@@ -37,6 +37,7 @@ void AdaptorDsoftbusCryptTest::SetUp() { }
 void AdaptorDsoftbusCryptTest::TearDown() { }
 unsigned char AdaptorDsoftbusCryptTest::encodeStr[100];
 size_t AdaptorDsoftbusCryptTest::encodeLen;
+
 /*
  * @tc.name: SoftBusBase64Encode001
  * @tc.desc: parameters is Legal

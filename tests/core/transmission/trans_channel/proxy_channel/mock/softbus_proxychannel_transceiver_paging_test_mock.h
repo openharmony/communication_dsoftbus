@@ -34,7 +34,8 @@ public:
     virtual ~SoftbusProxychannelTransceiverPagingInterface() {};
     virtual int32_t TransParseMessageHeadType(char *data, int32_t len, ProxyMessage *msg) = 0;
     virtual int32_t TransPagingParseMessage(char *data, int32_t len, ProxyMessage *msg) = 0;
-    virtual int32_t TransProxyGetChannelByFlag(uint32_t businessFlag, ProxyChannelInfo *chan, bool isClient) = 0;
+    virtual int32_t TransProxyGetChannelByCheckInfo(
+        const PagingListenCheckInfo *checkInfo, ProxyChannelInfo *chan, bool isClient) = 0;
     virtual bool TransHasAndUpdatePagingListenPacked(ProxyChannelInfo *info) = 0;
     virtual int32_t TransProxyPagingChannelOpened(ProxyChannelInfo *chan) = 0;
     virtual int32_t TransPagingAckHandshake(ProxyChannelInfo *chan, int32_t retCode) = 0;
@@ -48,7 +49,8 @@ public:
     ~SoftbusProxychannelTransceiverPagingInterfaceMock() override;
     MOCK_METHOD3(TransParseMessageHeadType, int32_t (char *data, int32_t len, ProxyMessage *msg));
     MOCK_METHOD3(TransPagingParseMessage, int32_t (char *data, int32_t len, ProxyMessage *msg));
-    MOCK_METHOD3(TransProxyGetChannelByFlag, int32_t (uint32_t businessFlag, ProxyChannelInfo *chan, bool isClient));
+    MOCK_METHOD3(TransProxyGetChannelByCheckInfo, int32_t (
+        const PagingListenCheckInfo *checkInfo, ProxyChannelInfo *chan, bool isClient));
     MOCK_METHOD1(TransHasAndUpdatePagingListenPacked, bool (ProxyChannelInfo *info));
     MOCK_METHOD1(TransProxyPagingChannelOpened, int32_t (ProxyChannelInfo *chan));
     MOCK_METHOD2(TransPagingAckHandshake, int32_t (ProxyChannelInfo *chan, int32_t retCode));

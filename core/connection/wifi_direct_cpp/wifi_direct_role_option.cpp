@@ -68,7 +68,7 @@ WifiDirectRole WifiDirectRoleOption::GetExpectedP2pRole(const std::string &netWo
     int32_t localDevTypeId = 0;
     int32_t ret = DBinderSoftbusServer::GetInstance().LnnGetLocalNumInfo(NUM_KEY_DEV_TYPE_ID, &localDevTypeId);
     CONN_CHECK_AND_RETURN_RET_LOGW(
-        ret == SOFTBUS_OK, WIFI_DIRECT_ROLE_AUTO, CONN_WIFI_DIRECT, "get local dev type id failed");
+        ret == SOFTBUS_OK, WIFI_DIRECT_ROLE_AUTO, CONN_WIFI_DIRECT, "get local dev type id fail");
     CONN_LOGD(CONN_WIFI_DIRECT, "localDevTypeId=0x%{public}03X", localDevTypeId);
 
     if (IsPowerAlwaysOn(localDevTypeId)) {
@@ -80,7 +80,7 @@ WifiDirectRole WifiDirectRoleOption::GetExpectedP2pRole(const std::string &netWo
     ret = DBinderSoftbusServer::GetInstance().LnnGetRemoteNumInfo(netWorkId.data(),
                                                                   NUM_KEY_DEV_TYPE_ID, &remoteDevTypeId);
     CONN_CHECK_AND_RETURN_RET_LOGW(
-        ret == SOFTBUS_OK, WIFI_DIRECT_ROLE_AUTO, CONN_WIFI_DIRECT, "get remote dev type id failed");
+        ret == SOFTBUS_OK, WIFI_DIRECT_ROLE_AUTO, CONN_WIFI_DIRECT, "get remote dev type id fail");
     CONN_LOGD(CONN_WIFI_DIRECT, "remoteDevTypeId=0x%{public}03X", remoteDevTypeId);
 
     if (IsPowerAlwaysOn(remoteDevTypeId)) {

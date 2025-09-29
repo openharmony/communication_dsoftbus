@@ -55,6 +55,7 @@ bool TransCheckP2pOnlyPacked(const char *sessionName);
 bool TransCheckDcTriggerVirtualLinkPacked(const char *sessionName);
 int32_t LoadTransPermissionJsonPacked(void);
 
+void TransD2dQosUnregisterPacked(int32_t channelId, char *sleMac, uint32_t macLen);
 #ifdef __cplusplus
 }
 #endif // __cplusplus

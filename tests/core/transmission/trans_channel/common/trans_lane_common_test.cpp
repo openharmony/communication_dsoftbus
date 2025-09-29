@@ -935,4 +935,36 @@ HWTEST_F(TransLaneCommonTest, CheckSourceCollabRelationTest001, TestSize.Level1)
     int32_t ret = CheckSourceCollabRelation(nullptr, TEST_PID, TEST_UID);
     EXPECT_EQ(ret, SOFTBUS_INVALID_PARAM);
 }
+
+/**
+ * @tc.name: TransGetPeerDeviceId001
+ * @tc.desc: test TransGetPeerDeviceId
+ * @tc.type: FUNC
+ * @tc.require:
+ */
+HWTEST_F(TransLaneCommonTest, TransGetPeerDeviceId001, TestSize.Level1)
+{
+    int32_t osType = HA_OS_TYPE;
+    AppInfo appInfo;
+    SessionParam sessionParam = {
+        .peerDeviceId = "11.22.33.44"
+    };
+
+    NiceMock<TransLaneCommonTestInterfaceMock> transLaneCommonMock;
+    EXPECT_CALL(transLaneCommonMock, LnnGetOsTypeByNetworkId)
+        .WillOnce(DoAll(SetArgPointee<1>(osType), Return(SOFTBUS_OK)));
+    int32_t ret = TransGetPeerDeviceId(&appInfo, &sessionParam);
+    EXPECT_EQ(ret, SOFTBUS_OK);
+
+    osType = OH_OS_TYPE;
+    EXPECT_CALL(transLaneCommonMock, LnnGetOsTypeByNetworkId)
+        .WillRepeatedly(DoAll(SetArgPointee<1>(osType), Return(SOFTBUS_OK)));
+    EXPECT_CALL(transLaneCommonMock, LnnGetRemoteStrInfo).WillOnce(Return(SOFTBUS_NOT_FIND));
+    ret = TransGetPeerDeviceId(&appInfo, &sessionParam);
+    EXPECT_EQ(ret, SOFTBUS_NOT_FIND);
+
+    EXPECT_CALL(transLaneCommonMock, LnnGetRemoteStrInfo).WillOnce(Return(SOFTBUS_OK));
+    ret = TransGetPeerDeviceId(&appInfo, &sessionParam);
+    EXPECT_EQ(ret, SOFTBUS_OK);
+}
 } // namespace OHOS

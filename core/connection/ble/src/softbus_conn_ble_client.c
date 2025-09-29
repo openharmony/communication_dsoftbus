@@ -78,9 +78,9 @@ static SoftBusHandlerWrapper g_bleGattClientAsyncHandler = {
 static int32_t UpdateBleConnectionStateInOrder(
     ConnBleConnection *connection, enum ConnBleConnectionState expectedState, enum ConnBleConnectionState nextState)
 {
-    int32_t status = SoftBusMutexLock(&connection->lock);
-    if (status != SOFTBUS_OK) {
-        CONN_LOGE(CONN_BLE, "lock fail, connId=%{public}u, err=%{public}d", connection->connectionId, status);
+    int32_t ret = SoftBusMutexLock(&connection->lock);
+    if (ret != SOFTBUS_OK) {
+        CONN_LOGE(CONN_BLE, "lock fail, connId=%{public}u, err=%{public}d", connection->connectionId, ret);
         return SOFTBUS_LOCK_ERR;
     }
 
@@ -119,16 +119,16 @@ int32_t ConnGattClientConnect(ConnBleConnection *connection)
         "ble client connect fail: invalid param, connection is null");
 
     SoftBusBtAddr binaryAddr = { 0 };
-    int32_t status = ConvertBtMacToBinary(connection->addr, BT_MAC_LEN, binaryAddr.addr, BT_ADDR_LEN);
-    CONN_CHECK_AND_RETURN_RET_LOGW(status == SOFTBUS_OK, status, CONN_BLE, "client connect fail: convert string mac "
-        "to binary fail, connectionId=%{public}u, err=%{public}d", connection->connectionId, status);
+    int32_t ret = ConvertBtMacToBinary(connection->addr, BT_MAC_LEN, binaryAddr.addr, BT_ADDR_LEN);
+    CONN_CHECK_AND_RETURN_RET_LOGW(ret == SOFTBUS_OK, ret, CONN_BLE, "client connect fail: convert string mac "
+        "to binary fail, connectionId=%{public}u, err=%{public}d", connection->connectionId, ret);
     int32_t underlayerHandle = SoftbusGattcRegister();
     CONN_CHECK_AND_RETURN_RET_LOGW(underlayerHandle != INVALID_GATTC_ID, SOFTBUS_CONN_BLE_UNDERLAY_CLIENT_REGISTER_ERR,
         CONN_BLE, "ble client connect fail: underlayer register fail, underlayerHandle=%{public}d",
         underlayerHandle);
-    status = SoftbusGattcRegisterCallback(&g_gattcCallback, underlayerHandle);
-    CONN_CHECK_AND_RETURN_RET_LOGW(status == SOFTBUS_OK, status, CONN_BLE, "client connect %{public}u fail:register "
-        "callback fail, err=%{public}d", connection->connectionId, status);
+    ret = SoftbusGattcRegisterCallback(&g_gattcCallback, underlayerHandle);
+    CONN_CHECK_AND_RETURN_RET_LOGW(ret == SOFTBUS_OK, ret, CONN_BLE, "client connect %{public}u fail:register "
+        "callback fail, err=%{public}d", connection->connectionId, ret);
     bool setFastestConn = true;
     if (connection->fastestConnectEnable && SoftbusGattcSetFastestConn(underlayerHandle) != SOFTBUS_OK) {
         setFastestConn = false;
@@ -142,18 +142,18 @@ int32_t ConnGattClientConnect(ConnBleConnection *connection)
     CONN_EVENT(EVENT_SCENE_CONNECT, EVENT_STAGE_CONNECT_INVOKE_PROTOCOL, extra);
 
     if (connection->fastestConnectEnable && setFastestConn) {
-        status = ConnPostMsgToLooper(&g_bleGattClientAsyncHandler, MSG_CLIENT_WAIT_FAST_CONNECT_TIMEOUT,
+        ret = ConnPostMsgToLooper(&g_bleGattClientAsyncHandler, MSG_CLIENT_WAIT_FAST_CONNECT_TIMEOUT,
             connection->connectionId, 0, 0, BLE_FAST_CONNECT_TIMEOUT);
-        if (status != SOFTBUS_OK) {
+        if (ret != SOFTBUS_OK) {
             CONN_LOGE(CONN_BLE, "post msg to looper fail: connection id=%{public}u, "
                 "underlayer handler handle=%{public}d, error=%{public}d",
-                connection->connectionId, underlayerHandle, status);
+                connection->connectionId, underlayerHandle, ret);
         }
     }
-    status = SoftbusGattcConnect(underlayerHandle, &binaryAddr);
-    if (status != SOFTBUS_OK) {
+    ret = SoftbusGattcConnect(underlayerHandle, &binaryAddr);
+    if (ret != SOFTBUS_OK) {
         CONN_LOGE(CONN_BLE, "client connect fail: underlayer connect fail, connectionId=%{public}u, err=%{public}d",
-            connection->connectionId, status);
+            connection->connectionId, ret);
         (void)SoftbusGattcUnRegister(underlayerHandle);
         return SOFTBUS_CONN_BLE_UNDERLAY_CLIENT_CONNECT_ERR;
     }
@@ -256,27 +256,27 @@ static void ClientWaitFastConnectTimeoutMsgHandler(uint32_t connectionId)
     ConnBleConnection *connection = ConnBleGetConnectionById(connectionId);
     CONN_CHECK_AND_RETURN_LOGE(connection != NULL, CONN_BLE, "connection not exist, connId=%{public}u", connectionId);
     CONN_LOGI(CONN_BLE, "connect fail, connId=%{public}u", connectionId);
-    int32_t rc = SOFTBUS_CONN_BLE_CONNECT_TIMEOUT_ERR;
+    int32_t error = SOFTBUS_CONN_BLE_CONNECT_TIMEOUT_ERR;
     do {
-        int32_t status = SoftBusMutexLock(&connection->lock);
-        if (status != SOFTBUS_OK) {
-            CONN_LOGE(CONN_BLE, "try to lock fail, connId=%{public}u, error=%{public}d", connectionId, status);
-            rc = SOFTBUS_LOCK_ERR;
+        int32_t ret = SoftBusMutexLock(&connection->lock);
+        if (ret != SOFTBUS_OK) {
+            CONN_LOGE(CONN_BLE, "try to lock fail, connId=%{public}u, error=%{public}d", connectionId, ret);
+            error = SOFTBUS_LOCK_ERR;
             break;
         }
         connection->state = BLE_CONNECTION_STATE_CLOSED;
         (void)SoftBusMutexUnlock(&connection->lock);
     } while (false);
-    g_clientEventListener.onClientFailed(connectionId, rc);
+    g_clientEventListener.onClientFailed(connectionId, error);
     ConnBleReturnConnection(&connection);
 }
 
 static int32_t RetrySearchService(ConnBleConnection *connection, enum RetrySearchServiceReason reason)
 {
-    int32_t status = SoftBusMutexLock(&connection->lock);
-    if (status != SOFTBUS_OK) {
+    int32_t ret = SoftBusMutexLock(&connection->lock);
+    if (ret != SOFTBUS_OK) {
         CONN_LOGE(CONN_BLE, "try to lock fail, connId=%{public}u, reason=%{public}d, err=%{public}d",
-            connection->connectionId, reason, status);
+            connection->connectionId, reason, ret);
         return SOFTBUS_LOCK_ERR;
     }
     int32_t state = connection->state;
@@ -298,24 +298,24 @@ static int32_t RetrySearchService(ConnBleConnection *connection, enum RetrySearc
         return SOFTBUS_CONN_BLE_INTERNAL_ERR;
     }
 
-    status = SoftbusGattcRefreshServices(underlayerHandle);
-    if (status != SOFTBUS_OK) {
+    ret = SoftbusGattcRefreshServices(underlayerHandle);
+    if (ret != SOFTBUS_OK) {
         CONN_LOGW(CONN_BLE, "fresh service fail, connId=%{public}u, handle=%{public}d, reason=%{public}d, "
-            "err=%{public}d", connection->connectionId, underlayerHandle, reason, status);
-        return status;
+            "err=%{public}d", connection->connectionId, underlayerHandle, reason, ret);
+        return ret;
     }
-    status = SoftbusGattcSearchServices(underlayerHandle);
-    if (status != SOFTBUS_OK) {
+    ret = SoftbusGattcSearchServices(underlayerHandle);
+    if (ret != SOFTBUS_OK) {
         CONN_LOGW(CONN_BLE, "search service fail, connId=%{public}u, handle=%{public}d, reason=%{public}d, "
-            "err=%{public}d", connection->connectionId, underlayerHandle, reason, status);
-        return status;
+            "err=%{public}d", connection->connectionId, underlayerHandle, reason, ret);
+        return ret;
     }
-    status = UpdateBleConnectionStateInOrder(
+    ret = UpdateBleConnectionStateInOrder(
         connection, BLE_CONNECTION_STATE_CONNECTED, BLE_CONNECTION_STATE_SERVICE_SEARCHING);
-    if (status != SOFTBUS_OK) {
+    if (ret != SOFTBUS_OK) {
         CONN_LOGW(CONN_BLE, " update connection state fail, connId=%{public}u, underlayerHandle=%{public}d, "
-            "reason=%{public}d, error=%{public}d", connection->connectionId, underlayerHandle, reason, status);
-        return status;
+            "reason=%{public}d, error=%{public}d", connection->connectionId, underlayerHandle, reason, ret);
+        return ret;
     }
     CONN_LOGW(CONN_BLE, "connId=%{public}u, handle=%{public}d, reason=%{public}d",
         connection->connectionId, underlayerHandle, reason);
@@ -505,12 +505,12 @@ static void NotificatedMsgHandler(const CommonStatusContext *ctx)
 
 static int32_t NotificatedConnHandler(int32_t underlayerHandle, ConnBleConnection *connection)
 {
-    int32_t status = UpdateBleConnectionStateInOrder(
+    int32_t ret = UpdateBleConnectionStateInOrder(
         connection, BLE_CONNECTION_STATE_CONN_NOTIFICATING, BLE_CONNECTION_STATE_CONN_NOTIFICATED);
-    if (status != SOFTBUS_OK) {
+    if (ret != SOFTBUS_OK) {
         CONN_LOGW(CONN_BLE, "update connection state fail, connId=%{public}u, handle=%{public}d, err=%{public}d",
-            connection->connectionId, underlayerHandle, status);
-        return status;
+            connection->connectionId, underlayerHandle, ret);
+        return ret;
     }
 
     SoftBusBtUuid serviceUuid = {
@@ -525,44 +525,44 @@ static int32_t NotificatedConnHandler(int32_t underlayerHandle, ConnBleConnectio
         .uuid = (char *)SOFTBUS_DESCRIPTOR_CONFIGURE_UUID,
         .uuidLen = strlen(SOFTBUS_DESCRIPTOR_CONFIGURE_UUID),
     };
-    status = SoftbusGattcRegisterNotification(underlayerHandle, &serviceUuid, &netUuid, &descriptorUuid);
-    if (status != SOFTBUS_OK) {
+    ret = SoftbusGattcRegisterNotification(underlayerHandle, &serviceUuid, &netUuid, &descriptorUuid);
+    if (ret != SOFTBUS_OK) {
         CONN_LOGE(CONN_BLE,
             "register conn characteristic notification fail, connId=%{public}u, handle=%{public}d, err=%{public}d",
-            connection->connectionId, underlayerHandle, status);
+            connection->connectionId, underlayerHandle, ret);
         return SOFTBUS_CONN_BLE_UNDERLAY_CLIENT_REGISTER_NOTIFICATION_ERR;
     }
-    status = UpdateBleConnectionStateInOrder(
+    ret = UpdateBleConnectionStateInOrder(
         connection, BLE_CONNECTION_STATE_CONN_NOTIFICATED, BLE_CONNECTION_STATE_NET_NOTIFICATING);
-    if (status != SOFTBUS_OK) {
+    if (ret != SOFTBUS_OK) {
         CONN_LOGE(CONN_BLE, "update connection state fail, connId=%{public}u, handle=%{public}d, err=%{public}d",
-            connection->connectionId, underlayerHandle, status);
+            connection->connectionId, underlayerHandle, ret);
     }
-    return status;
+    return ret;
 }
 
 static int32_t NotificatedNetHandler(int32_t underlayerHandle, ConnBleConnection *connection)
 {
-    int32_t status = UpdateBleConnectionStateInOrder(
+    int32_t ret = UpdateBleConnectionStateInOrder(
         connection, BLE_CONNECTION_STATE_NET_NOTIFICATING, BLE_CONNECTION_STATE_NET_NOTIFICATED);
-    if (status != SOFTBUS_OK) {
+    if (ret != SOFTBUS_OK) {
         CONN_LOGW(CONN_BLE, "update connection state fail, connId=%{public}u, handle=%{public}d, err=%{public}d",
-            connection->connectionId, underlayerHandle, status);
-        return status;
+            connection->connectionId, underlayerHandle, ret);
+        return ret;
     }
-    status = SoftbusGattcConfigureMtuSize(underlayerHandle, DEFAULT_MTU_SIZE);
-    if (status != SOFTBUS_OK) {
+    ret = SoftbusGattcConfigureMtuSize(underlayerHandle, DEFAULT_MTU_SIZE);
+    if (ret != SOFTBUS_OK) {
         CONN_LOGE(CONN_BLE, "configure mtu fail, connId=%{public}u, handle=%{public}d, err=%{public}d",
-            connection->connectionId, underlayerHandle, status);
+            connection->connectionId, underlayerHandle, ret);
         return SOFTBUS_CONN_BLE_UNDERLAY_CLIENT_CONFIGURE_MTU_ERR;
     }
-    status = UpdateBleConnectionStateInOrder(
+    ret = UpdateBleConnectionStateInOrder(
         connection, BLE_CONNECTION_STATE_NET_NOTIFICATED, BLE_CONNECTION_STATE_MTU_SETTING);
-    if (status != SOFTBUS_OK) {
+    if (ret != SOFTBUS_OK) {
         CONN_LOGW(CONN_BLE, "update connection state fail, connId=%{public}u, handle=%{public}d, error=%{public}d",
-            connection->connectionId, underlayerHandle, status);
+            connection->connectionId, underlayerHandle, ret);
     }
-    return status;
+    return ret;
 }
 
 static void BleGattcConfigureMtuSizeCallback(int32_t underlayerHandle, int32_t mtuSize, int32_t status)
@@ -635,9 +635,9 @@ int32_t ConnGattClientDisconnect(ConnBleConnection *connection, bool grace, bool
 {
     CONN_CHECK_AND_RETURN_RET_LOGW(connection != NULL, SOFTBUS_CONN_BLE_INTERNAL_ERR, CONN_BLE,
         "ble client connection disconnect fail: invalid param, connection is null");
-    int32_t status = SoftBusMutexLock(&connection->lock);
-    if (status != SOFTBUS_OK) {
-        CONN_LOGE(CONN_BLE, "lock fail, err=%{public}d", status);
+    int32_t ret = SoftBusMutexLock(&connection->lock);
+    if (ret != SOFTBUS_OK) {
+        CONN_LOGE(CONN_BLE, "lock fail, err=%{public}d", ret);
         return SOFTBUS_LOCK_ERR;
     }
     int32_t underlayerHandle = connection->underlayerHandle;
@@ -650,8 +650,8 @@ int32_t ConnGattClientDisconnect(ConnBleConnection *connection, bool grace, bool
         g_clientEventListener.onClientConnectionClosed(connection->connectionId, SOFTBUS_OK);
         return SOFTBUS_OK;
     }
-    status = SoftbusBleGattcDisconnect(underlayerHandle, refreshGatt);
-    if (status != SOFTBUS_OK || !grace) {
+    ret = SoftbusBleGattcDisconnect(underlayerHandle, refreshGatt);
+    if (ret != SOFTBUS_OK || !grace) {
         (void)SoftbusGattcUnRegister(underlayerHandle);
         g_clientEventListener.onClientConnectionClosed(
             connection->connectionId, SOFTBUS_CONN_BLE_DISCONNECT_DIRECTLY_ERR);
@@ -662,8 +662,8 @@ int32_t ConnGattClientDisconnect(ConnBleConnection *connection, bool grace, bool
     CONN_LOGI(CONN_BLE,
         "ble client disconnect, connectionId=%{public}u, handle=%{public}d, grace=%{public}d, refreshGatt=%{public}d, "
         "err=%{public}d",
-        connection->connectionId, underlayerHandle, grace, refreshGatt, status);
-    return status;
+        connection->connectionId, underlayerHandle, grace, refreshGatt, ret);
+    return ret;
 }
 
 static void DisconnectedMsgHandler(const CommonStatusContext *ctx)
@@ -679,9 +679,9 @@ static void DisconnectedMsgHandler(const CommonStatusContext *ctx)
     int32_t rc = SOFTBUS_OK;
     enum ConnBleConnectionState state = BLE_CONNECTION_STATE_INVALID;
     do {
-        int32_t status = SoftBusMutexLock(&connection->lock);
-        if (status != SOFTBUS_OK) {
-            CONN_LOGE(CONN_BLE, "lock fail, connId=%{public}u, err=%{public}d", connectionId, status);
+        int32_t ret = SoftBusMutexLock(&connection->lock);
+        if (ret != SOFTBUS_OK) {
+            CONN_LOGE(CONN_BLE, "lock fail, connId=%{public}u, err=%{public}d", connectionId, ret);
             rc = SOFTBUS_LOCK_ERR;
             break;
         }
@@ -704,9 +704,9 @@ static void ClientWaitDiconnetTimeoutMsgHandler(uint32_t connectionId)
         "ble client wait disconnect timeout handler fail: connection not exist, connId=%{public}u", connectionId);
     CONN_LOGI(CONN_BLE, "ble client disconnect wait timeout, connId=%{public}u", connectionId);
     do {
-        int32_t status = SoftBusMutexLock(&connection->lock);
-        if (status != SOFTBUS_OK) {
-            CONN_LOGE(CONN_BLE, "lock fail, connId=%{public}u, error=%{public}d", connectionId, status);
+        int32_t ret = SoftBusMutexLock(&connection->lock);
+        if (ret != SOFTBUS_OK) {
+            CONN_LOGE(CONN_BLE, "lock fail, connId=%{public}u, error=%{public}d", connectionId, ret);
             break;
         }
         int32_t underlayerHandle = connection->underlayerHandle;
@@ -776,10 +776,10 @@ int32_t ConnGattClientSend(ConnBleConnection *connection, const uint8_t *data, u
     CONN_CHECK_AND_RETURN_RET_LOGW(
         dataLen != 0, SOFTBUS_INVALID_PARAM, CONN_BLE, "ble client send data fail, invalia param, data len is 0");
 
-    int32_t status = SoftBusMutexLock(&connection->lock);
-    CONN_CHECK_AND_RETURN_RET_LOGE(status == SOFTBUS_OK, SOFTBUS_LOCK_ERR, CONN_BLE,
+    int32_t ret = SoftBusMutexLock(&connection->lock);
+    CONN_CHECK_AND_RETURN_RET_LOGE(ret == SOFTBUS_OK, SOFTBUS_LOCK_ERR, CONN_BLE,
         "ble client send data fail, try to get connection lock fail, connId=%{public}u, err=%{public}d",
-        connection->connectionId, status);
+        connection->connectionId, ret);
     int32_t underlayerHandle = connection->underlayerHandle;
     (void)SoftBusMutexUnlock(&connection->lock);
 
@@ -805,11 +805,11 @@ int32_t ConnGattClientUpdatePriority(ConnBleConnection *connection, ConnectBlePr
     CONN_CHECK_AND_RETURN_RET_LOGW(connection != NULL, SOFTBUS_INVALID_PARAM, CONN_BLE,
         "ble client update priority fail, invalia param, connection is null");
 
-    int32_t status = SoftBusMutexLock(&connection->lock);
-    CONN_CHECK_AND_RETURN_RET_LOGE(status == SOFTBUS_OK, SOFTBUS_LOCK_ERR, CONN_BLE,
+    int32_t ret = SoftBusMutexLock(&connection->lock);
+    CONN_CHECK_AND_RETURN_RET_LOGE(ret == SOFTBUS_OK, SOFTBUS_LOCK_ERR, CONN_BLE,
         "ble client update priority fail, try to get connection lock fail, "
         "connectionId=%{public}u, error=%{public}d",
-        connection->connectionId, status);
+        connection->connectionId, ret);
     int32_t underlayerHandle = connection->underlayerHandle;
     enum ConnBleConnectionState state = connection->state;
     (void)SoftBusMutexUnlock(&connection->lock);
@@ -836,14 +836,14 @@ int32_t ConnGattClientUpdatePriority(ConnBleConnection *connection, ConnectBlePr
             return SOFTBUS_CONN_BLE_INTERNAL_ERR;
     }
     SoftBusBtAddr binaryAddr = { 0 };
-    status = ConvertBtMacToBinary(connection->addr, BT_MAC_LEN, binaryAddr.addr, BT_ADDR_LEN);
-    if (status != SOFTBUS_OK) {
+    ret = ConvertBtMacToBinary(connection->addr, BT_MAC_LEN, binaryAddr.addr, BT_ADDR_LEN);
+    if (ret != SOFTBUS_OK) {
         CONN_LOGW(CONN_BLE, "convert string mac to binary fail, connId=%{public}u, err=%{public}d",
-            connection->connectionId, status);
-        return status;
+            connection->connectionId, ret);
+        return ret;
     }
 
-    int32_t ret = SoftbusGattcSetPriority(underlayerHandle, &binaryAddr, gattPriority);
+    ret = SoftbusGattcSetPriority(underlayerHandle, &binaryAddr, gattPriority);
     return ret;
 }
 
@@ -921,9 +921,9 @@ int32_t ConnGattInitClientModule(SoftBusLooper *looper, const ConnBleClientEvent
         "init ble client fail: invalid param, listener onClientDataReceived is null");
     CONN_CHECK_AND_RETURN_RET_LOGW(listener->onClientConnectionClosed != NULL, SOFTBUS_INVALID_PARAM, CONN_INIT,
         "init ble client fail: invalid param, listener onClientConnectionClosed is null");
-    int32_t status = InitSoftbusAdapterClient();
-    CONN_CHECK_AND_RETURN_RET_LOGW(status == SOFTBUS_OK, status, CONN_INIT,
-        "init softbus adapter fail, err=%{public}d", status);
+    int32_t ret = InitSoftbusAdapterClient();
+    CONN_CHECK_AND_RETURN_RET_LOGW(ret == SOFTBUS_OK, ret, CONN_INIT,
+        "init softbus adapter fail, err=%{public}d", ret);
     g_bleGattClientAsyncHandler.handler.looper = looper;
     g_clientEventListener = *listener;
 

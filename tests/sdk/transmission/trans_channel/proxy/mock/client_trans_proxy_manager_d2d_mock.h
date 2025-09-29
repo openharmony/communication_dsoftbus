@@ -25,6 +25,7 @@
 #include "client_trans_proxy_manager.h"
 #include "softbus_def.h"
 #include "client_trans_session_manager_struct.h"
+#include "g_enhance_sdk_func.h"
 
 namespace OHOS {
 class TransClientProxyManagerD2DInterface {
@@ -55,6 +56,7 @@ public:
         int32_t channelType) = 0;
     virtual uint8_t *TransProxyPackNewHeadD2DData(
         ProxyDataInfo *dataInfo, uint16_t sliceNum, SessionPktType pktType, uint16_t cnt, uint16_t *dataLen) = 0;
+    virtual ClientEnhanceFuncList *ClientEnhanceFuncListGet(void) = 0;
 };
 
 class TransClientProxyD2DInterfaceMock : public TransClientProxyManagerD2DInterface {
@@ -84,6 +86,7 @@ public:
         int32_t channelType));
     MOCK_METHOD5(TransProxyPackNewHeadD2DData, uint8_t *(
         ProxyDataInfo *dataInfo, uint16_t sliceNum, SessionPktType pktType, uint16_t cnt, uint16_t *dataLen));
+    MOCK_METHOD0(ClientEnhanceFuncListGet, ClientEnhanceFuncList *(void));
 };
 } // namespace OHOS
 #endif // TRANS_CLIENT_PROXY_FILE_MANAGER_MOCK_H

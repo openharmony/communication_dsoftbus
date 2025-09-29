@@ -118,10 +118,10 @@ static int32_t BuildBroadcastParam(const uint8_t* data, size_t size, BroadcastPa
     param->isSupportRpa = GetData<bool>();
     param->duration = GetData<int32_t>();
 
-    if (memcpy_s(param->ownIrk, BC_IRK_LEN, data, BC_IRK_LEN) != EOK) {
+    if (memcpy_s(param->ownIrk, BC_IRK_LEN, data, size) != EOK) {
         return SOFTBUS_MEM_ERR;
     }
-    if (memcpy_s(param->ownUdidHash, BC_UDID_HASH_LEN, data, BC_UDID_HASH_LEN) != EOK) {
+    if (memcpy_s(param->ownUdidHash, BC_UDID_HASH_LEN, data, size) != EOK) {
         return SOFTBUS_MEM_ERR;
     }
     return SOFTBUS_OK;
@@ -167,7 +167,7 @@ static int32_t BuildBroadcastPacket(const uint8_t* data, size_t size, BroadcastP
         packet->bcData.payload = nullptr;
         return SOFTBUS_MALLOC_ERR;
     }
-    if (memcpy_s(&packet->rspData.payload[0], RESP_DATA_MAX_LEN, data, packet->rspData.payloadLen) != EOK) {
+    if (memcpy_s(&packet->rspData.payload[0], RESP_DATA_MAX_LEN, data, size) != EOK) {
         DestroyBleConfigAdvData(packet);
         return SOFTBUS_MEM_ERR;
     }
@@ -191,7 +191,7 @@ static BcScanFilter BuildScanFilter()
     g_baseFuzzPos = 0;
     BcScanFilter scanFilter;
     scanFilter.advIndReport = GetData<bool>();
-    scanFilter.serviceUuid = GetData<uint16_t>();
+    scanFilter.serviceId = GetData<uint16_t>();
     scanFilter.serviceDataLength = GetData<uint32_t>();
     scanFilter.manufactureId = GetData<uint16_t>();
     scanFilter.manufactureDataLength = GetData<uint32_t>();
@@ -320,7 +320,7 @@ static ScanCallback g_scanListener = {
 
 void StartBroadcastingFuzzTest(int32_t bcId, FuzzedDataProvider &provider)
 {
-    uint32_t size = provider.ConsumeIntegral<int32_t>();
+    uint32_t size = provider.ConsumeIntegral<uint32_t>();
     string stringData = provider.ConsumeBytesAsString(size);
     const uint8_t *data = reinterpret_cast<const uint8_t *>(stringData.data());
     BroadcastParam param;
@@ -336,7 +336,7 @@ void StartBroadcastingFuzzTest(int32_t bcId, FuzzedDataProvider &provider)
 
 void UpdateBroadcastingFuzzTest(int32_t bcId, FuzzedDataProvider &provider)
 {
-    uint32_t size = provider.ConsumeIntegral<int32_t>();
+    uint32_t size = provider.ConsumeIntegral<uint32_t>();
     string stringData = provider.ConsumeBytesAsString(size);
     const uint8_t *data = reinterpret_cast<const uint8_t *>(stringData.data());
     BroadcastParam param;
@@ -352,7 +352,7 @@ void UpdateBroadcastingFuzzTest(int32_t bcId, FuzzedDataProvider &provider)
 
 void SetBroadcastingDataFuzzTest(int32_t bcId, FuzzedDataProvider &provider)
 {
-    uint32_t size = provider.ConsumeIntegral<int32_t>();
+    uint32_t size = provider.ConsumeIntegral<uint32_t>();
     string stringData = provider.ConsumeBytesAsString(size);
     size = stringData.size();
     const uint8_t *data = reinterpret_cast<const uint8_t *>(stringData.data());
@@ -382,7 +382,7 @@ void StopScanFuzzTest(int32_t listenerId)
 
 void BroadcastSetAdvDeviceParamFuzzTest(int32_t listenerId, FuzzedDataProvider &provider)
 {
-    uint32_t size = provider.ConsumeIntegral<int32_t>();
+    uint32_t size = provider.ConsumeIntegral<uint32_t>();
     string stringData = provider.ConsumeBytesAsString(size);
     size = stringData.size();
     const uint8_t *data = reinterpret_cast<const uint8_t *>(stringData.data());
@@ -427,7 +427,7 @@ void BroadcastSetLpAdvParamFuzzTest()
 
 void SetBroadcastingParamFuzzTest(int32_t bcId, FuzzedDataProvider &provider)
 {
-    uint32_t size = provider.ConsumeIntegral<int32_t>();
+    uint32_t size = provider.ConsumeIntegral<uint32_t>();
     string stringData = provider.ConsumeBytesAsString(size);
     size = stringData.size();
     const uint8_t *data = reinterpret_cast<const uint8_t *>(stringData.data());

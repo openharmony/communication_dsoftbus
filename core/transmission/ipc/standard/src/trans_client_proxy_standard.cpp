@@ -701,6 +701,11 @@ int32_t TransClientProxy::OnTimeSyncResult(const void *info, uint32_t infoTypeLe
     return SOFTBUS_OK;
 }
 
+void TransClientProxy::OnGroupStateChange(int32_t retCode)
+{
+    (void)retCode;
+}
+
 void TransClientProxy::OnPublishLNNResult(int32_t publishId, int32_t reason)
 {
     (void)publishId;

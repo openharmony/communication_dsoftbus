@@ -16,11 +16,14 @@
 #include <securec.h>
 
 #include "lnn_decision_db_deps_mock.h"
+#include "lnn_log.h"
+#include "softbus_adapter_mem.h"
 #include "softbus_common.h"
 #include "softbus_error_code.h"
 
 using namespace testing;
 using namespace testing::ext;
+constexpr int32_t DEFAULT_USERID = 100;
 namespace OHOS {
 void *g_decisionDbDepsInterface;
 DecisionDbDepsInterfaceMock::DecisionDbDepsInterfaceMock()
@@ -46,6 +49,27 @@ int32_t DecisionDbDepsInterfaceMock::DecisionDbAsyncCallbackHelper(
         return SOFTBUS_OK;
     }
     return SOFTBUS_INVALID_PARAM;
+}
+
+int32_t DecisionDbDepsInterfaceMock::ActionOfSelectAllAcl(TrustedInfo **trustedInfoArray, uint32_t *num)
+{
+    if (trustedInfoArray == nullptr || num == nullptr) {
+        LNN_LOGW(LNN_TEST, "invalid para");
+        return SOFTBUS_INVALID_PARAM;
+    }
+    *num = 1;
+    *trustedInfoArray = reinterpret_cast<TrustedInfo *>(SoftBusCalloc((*num) * sizeof(TrustedInfo)));
+    if (*trustedInfoArray == nullptr) {
+        LNN_LOGI(LNN_TEST, "malloc info fail");
+        return SOFTBUS_MALLOC_ERR;
+    }
+    if (strcpy_s((*trustedInfoArray)->udid, UDID_BUF_LEN, "123456ABCDEF") != EOK) {
+        LNN_LOGI(LNN_TEST, "strcpy_s udid fail");
+        SoftBusFree(*trustedInfoArray);
+        return SOFTBUS_MEM_ERR;
+    }
+    (*trustedInfoArray)->userId = DEFAULT_USERID;
+    return SOFTBUS_OK;
 }
 
 extern "C" {
@@ -268,6 +292,16 @@ int32_t LnnGetAllRemoteDevInfo(NodeInfo **info, int32_t *nums)
 int32_t LnnGetLocalNumInfo(InfoKey key, int32_t *info)
 {
     return GetDecisionDbDepsInterface()->LnnGetLocalNumInfo(key, info);
+}
+
+int32_t LnnGetLocalNumU64Info(InfoKey key, uint64_t *info)
+{
+    return GetDecisionDbDepsInterface()->LnnGetLocalNumU64Info(key, info);
+}
+
+int32_t SelectAllAcl(TrustedInfo **trustedInfoArray, uint32_t *num)
+{
+    return GetDecisionDbDepsInterface()->SelectAllAcl(trustedInfoArray, num);
 }
 } // extern "C"
 } // namespace OHOS

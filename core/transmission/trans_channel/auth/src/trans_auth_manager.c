@@ -1586,11 +1586,6 @@ void TransAuthDeathCallback(const char *pkgName, int32_t pid)
         return;
     }
 
-    char *anonymizePkgName = NULL;
-    Anonymize(pkgName, &anonymizePkgName);
-    TRANS_LOGI(TRANS_CTRL, "pkgName=%{public}s, pid=%{public}d.", AnonymizeWrapper(anonymizePkgName), pid);
-    AnonymizeFree(anonymizePkgName);
-
     ListNode destroyList;
     ListInit(&destroyList);
     AuthChannelInfo *item = NULL;

@@ -51,6 +51,7 @@
 #define SINK_ACL_USER_ID "SINK_ACL_USER_ID"
 #define SINK_ACL_TOKEN_ID "SINK_ACL_TOKEN_ID"
 #define TRANS_CAPABILITY "TRANS_CAPABILITY"
+#define FORCE_GENERATE_UK "FORCE_GENERATE_UK"
 
 #ifdef __cplusplus
 extern "C" {
@@ -86,6 +87,14 @@ char *PackError(int errCode, const char *errDesc);
 int32_t UnpackReplyErrCode(const cJSON *msg, int32_t *errCode);
 
 char *TransTdcPackFastData(const AppInfo *appInfo, uint32_t *outLen);
+
+int32_t UnpackExternalDeviceRequest(const cJSON *msg, AppInfo *appInfo);
+
+char *PackExternalDeviceRequest(const AppInfo *appInfo, int64_t requestId);
+
+int32_t UnpackExternalDeviceReply(const cJSON *msg, AppInfo *appInfo);
+
+char *PackExternalDeviceReply(const AppInfo *appInfo);
 
 #ifdef __cplusplus
 }

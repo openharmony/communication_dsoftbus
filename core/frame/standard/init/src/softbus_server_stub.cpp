@@ -51,6 +51,8 @@
 #define SERVER_SHIFT_LNN_GEAR_NAME "SERVER_SHIFT_LNN_GEAR"
 #define SERVER_SYNC_TRUSTED_RELATION_NAME "SERVER_SYNC_TRUSTED_RELATION"
 #define SERVER_SET_DISPLAY_NAME_NAME "SERVER_SET_DISPLAY_NAME"
+#define SERVER_CREATE_GROUP_OWNER_NAME "SERVER_CREATE_GROUP_OWNER"
+#define SERVER_DESTROY_GROUP_OWNER_NAME "SERVER_DESTROY_GROUP_OWNER"
 #define SERVER_SET_DATA_LEVEL_NAME "SERVER_SET_DATA_LEVEL"
 #define SERVER_REG_DATA_LEVEL_CHANGE_CB_NAME "SERVER_REG_DATA_LEVEL_CHANGE_CB"
 #define SERVER_UNREG_DATA_LEVEL_CHANGE_CB_NAME "SERVER_UNREG_DATA_LEVEL_CHANGE_CB"
@@ -76,6 +78,7 @@ namespace OHOS {
         static const char *DB_PACKAGE_NAME = "distributeddata-default";
         static const char *DM_PACKAGE_NAME = "ohos.distributedhardware.devicemanager";
         static const char *MSDP_PACKAGE_NAME = "ohos.msdp.spatialawareness";
+        static const char *SHARE_PACKAGE_NAME = "ohos.InterConnection.iShare";
     }
 
 int32_t SoftBusServerStub::CheckOpenSessionPermission(const SessionParam *param)
@@ -205,6 +208,8 @@ void SoftBusServerStub::InitMemberFuncMap()
     memberFuncMap_[SERVER_PROCESS_INNER_EVENT] = &SoftBusServerStub::ProcessInnerEventInner;
     memberFuncMap_[SERVER_PRIVILEGE_CLOSE_CHANNEL] = &SoftBusServerStub::PrivilegeCloseChannelInner;
     memberFuncMap_[SERVER_SET_DISPLAY_NAME] = &SoftBusServerStub::SetDisplayNameInner;
+    memberFuncMap_[SERVER_CREATE_GROUP_OWNER] = &SoftBusServerStub::CreateGroupOwnerInner;
+    memberFuncMap_[SERVER_DESTROY_GROUP_OWNER] = &SoftBusServerStub::DestroyGroupOwnerInner;
     memberFuncMap_[SERVER_GENERAL_CREATE_SERVER] = &SoftBusServerStub::CreateServerInner;
     memberFuncMap_[SERVER_GENERAL_REMOVE_SERVER] = &SoftBusServerStub::RemoveServerInner;
     memberFuncMap_[SERVER_GENERAL_CONNECT] = &SoftBusServerStub::ConnectInner;
@@ -262,6 +267,8 @@ void SoftBusServerStub::InitMemberPermissionMap()
     memberPermissionMap_[SERVER_PROCESS_INNER_EVENT] = OHOS_PERMISSION_DISTRIBUTED_DATASYNC;
     memberPermissionMap_[SERVER_PRIVILEGE_CLOSE_CHANNEL] = OHOS_PERMISSION_DISTRIBUTED_DATASYNC;
     memberPermissionMap_[SERVER_SET_DISPLAY_NAME] = OHOS_PERMISSION_DISTRIBUTED_SOFTBUS_CENTER;
+    memberPermissionMap_[SERVER_CREATE_GROUP_OWNER] = OHOS_PERMISSION_DISTRIBUTED_SOFTBUS_CENTER;
+    memberPermissionMap_[SERVER_DESTROY_GROUP_OWNER] = OHOS_PERMISSION_DISTRIBUTED_SOFTBUS_CENTER;
     memberPermissionMap_[SERVER_GENERAL_CREATE_SERVER] = OHOS_PERMISSION_DISTRIBUTED_DATASYNC;
     memberPermissionMap_[SERVER_GENERAL_REMOVE_SERVER] = OHOS_PERMISSION_DISTRIBUTED_DATASYNC;
     memberPermissionMap_[SERVER_GENERAL_CONNECT] = OHOS_PERMISSION_DISTRIBUTED_DATASYNC;
@@ -2077,6 +2084,65 @@ int32_t SoftBusServerStub::SetDisplayNameInner(MessageParcel &data, MessageParce
     return SOFTBUS_OK;
 }
 
+int32_t SoftBusServerStub::CreateGroupOwnerInner(MessageParcel &data, MessageParcel &reply)
+{
+    COMM_LOGD(COMM_SVC, "enter");
+    int32_t ret = PermissionVerify(SERVER_CREATE_GROUP_OWNER);
+    if (ret != SOFTBUS_OK) {
+        COMM_LOGE(COMM_SVC, "permission verification failed");
+        return ret;
+    }
+    const char *pkgName = data.ReadCString();
+    const struct GroupOwnerConfig *config = nullptr;
+    struct GroupOwnerResult result{};
+    if (pkgName == nullptr || strnlen(pkgName, PKG_NAME_SIZE_MAX) >= PKG_NAME_SIZE_MAX) {
+        COMM_LOGE(COMM_SVC, "read pkgName failed!");
+        return SOFTBUS_TRANS_PROXY_READCSTRING_FAILED;
+    }
+    if (strcmp(SHARE_PACKAGE_NAME, pkgName) != 0) {
+        COMM_LOGE(COMM_SVC, "read pkgName invalid!");
+        return SOFTBUS_INVALID_PARAM;
+    }
+    SoftbusRecordCalledApiInfo(pkgName, SERVER_CREATE_GROUP_OWNER);
+    config = reinterpret_cast<const struct GroupOwnerConfig *>(data.ReadRawData(sizeof(struct GroupOwnerConfig)));
+    if (config == nullptr) {
+        COMM_LOGE(COMM_SVC, "read config failed!");
+        return SOFTBUS_TRANS_PROXY_READCSTRING_FAILED;
+    }
+    int32_t retReply = CreateGroupOwner(pkgName, config, &result);
+    if (!reply.WriteRawData(&result, sizeof(struct GroupOwnerResult))) {
+        COMM_LOGE(COMM_SVC, "write result failed");
+        return SOFTBUS_TRANS_PROXY_WRITEINT_FAILED;
+    }
+    if (!reply.WriteInt32(retReply)) {
+        COMM_LOGE(COMM_SVC, "write result failed");
+        return SOFTBUS_TRANS_PROXY_WRITEINT_FAILED;
+    }
+    return SOFTBUS_OK;
+}
+
+int32_t SoftBusServerStub::DestroyGroupOwnerInner(MessageParcel &data, MessageParcel &reply)
+{
+    COMM_LOGD(COMM_SVC, "enter");
+    int32_t ret = PermissionVerify(SERVER_DESTROY_GROUP_OWNER);
+    if (ret != SOFTBUS_OK) {
+        COMM_LOGE(COMM_SVC, "permission verification failed");
+        return ret;
+    }
+    const char *pkgName = data.ReadCString();
+    if (pkgName == nullptr || strnlen(pkgName, PKG_NAME_SIZE_MAX) >= PKG_NAME_SIZE_MAX) {
+        COMM_LOGE(COMM_SVC, "read pkgName failed!");
+        return SOFTBUS_TRANS_PROXY_READCSTRING_FAILED;
+    }
+    if (strcmp(SHARE_PACKAGE_NAME, pkgName) != 0) {
+        COMM_LOGE(COMM_SVC, "read pkgName invalid!");
+        return SOFTBUS_INVALID_PARAM;
+    }
+    SoftbusRecordCalledApiInfo(pkgName, SERVER_DESTROY_GROUP_OWNER);
+    DestroyGroupOwner(pkgName);
+    return SOFTBUS_OK;
+}
+
 static int32_t CheckPkgName(const char *pkgName)
 {
     if (strcmp(pkgName, g_limitPkgName) != 0) {
@@ -2406,6 +2472,10 @@ static const char* LabelTransformation(uint32_t code)
         return SERVER_SYNC_TRUSTED_RELATION_NAME;
     } else if (code == SERVER_SET_DISPLAY_NAME) {
         return SERVER_SET_DISPLAY_NAME_NAME;
+    } else if (code == SERVER_CREATE_GROUP_OWNER) {
+        return SERVER_CREATE_GROUP_OWNER_NAME;
+    } else if (code == SERVER_DESTROY_GROUP_OWNER) {
+        return SERVER_DESTROY_GROUP_OWNER_NAME;
     } else if (code == SERVER_SET_DATA_LEVEL) {
         return SERVER_SET_DATA_LEVEL_NAME;
     } else if (code == SERVER_REG_DATA_LEVEL_CHANGE_CB) {

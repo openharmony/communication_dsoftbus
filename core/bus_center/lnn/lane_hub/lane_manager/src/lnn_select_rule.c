@@ -622,18 +622,18 @@ static void DecideRetryLinks(const LaneSelectParam *request,
     }
 }
 
-static bool IsExistWatchDevice(const char *networkId)
+static bool IsDeviceTypeExist(const char *networkId, int32_t deviceType)
 {
     int32_t localDevTypeId = TYPE_UNKNOW_ID;
     int32_t ret = LnnGetLocalNumInfo(NUM_KEY_DEV_TYPE_ID, &localDevTypeId);
-    if (ret == SOFTBUS_OK && localDevTypeId == TYPE_WATCH_ID) {
-        LNN_LOGI(LNN_LANE, "local is watch");
+    if (ret == SOFTBUS_OK && localDevTypeId == deviceType) {
+        LNN_LOGI(LNN_LANE, "local is matched, deviceType=%{public}d", localDevTypeId);
         return true;
     }
     int32_t remoteDevTypeId = TYPE_UNKNOW_ID;
     ret = LnnGetRemoteNumInfo(networkId, NUM_KEY_DEV_TYPE_ID, &remoteDevTypeId);
-    if (ret == SOFTBUS_OK && remoteDevTypeId == TYPE_WATCH_ID) {
-        LNN_LOGI(LNN_LANE, "remote is watch");
+    if (ret == SOFTBUS_OK && remoteDevTypeId == deviceType) {
+        LNN_LOGI(LNN_LANE, "remote is matched, deviceType=%{public}d", remoteDevTypeId);
         return true;
     }
     return false;
@@ -1053,14 +1053,17 @@ static void DecideLinksWithDevice(const char *networkId, const LaneSelectParam *
         LNN_LOGE(LNN_LANE, "invalid linksNum=%{public}u", *linksNum);
         return;
     }
-    if (!IsExistWatchDevice(networkId)) {
+    if (!request->qosRequire.continuousTask) {
+        return;
+    }
+    if (!IsDeviceTypeExist(networkId, TYPE_WATCH_ID) && !IsDeviceTypeExist(networkId, TYPE_GLASS_ID)) {
         return;
     }
     uint32_t num = 0;
     LaneLinkType tmpList[LANE_LINK_TYPE_BUTT] = {0};
     bool needFilter = false;
     for (uint32_t i = 0; i < *linksNum; i++) {
-        if (request->qosRequire.continuousTask && (linkList[i] == LANE_P2P || linkList[i] == LANE_COC_DIRECT)) {
+        if (linkList[i] == LANE_HML || linkList[i] == LANE_P2P || linkList[i] == LANE_COC_DIRECT) {
             needFilter = true;
             LNN_LOGI(LNN_LANE, "filter linkType=%{public}d", linkList[i]);
             continue;
@@ -1264,7 +1267,7 @@ int32_t DecideReuseLane(const char *networkId, const LaneSelectParam *request,
         LNN_LOGE(LNN_LANE, "invalid para");
         return SOFTBUS_INVALID_PARAM;
     }
-    if (!IsExistWatchDevice(networkId)) {
+    if (!IsDeviceTypeExist(networkId, TYPE_WATCH_ID)) {
         LNN_LOGE(LNN_LANE, "reuse best effort only support watch");
         return SOFTBUS_INVALID_PARAM;
     }

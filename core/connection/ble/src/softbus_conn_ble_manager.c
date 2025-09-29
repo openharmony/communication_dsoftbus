@@ -291,6 +291,7 @@ static int32_t ConvertCtxToDevice(ConnBleDevice **outDevice, const ConnBleConnec
         SoftBusFree(request);
         return status;
     }
+    device->connectTimeoutMs = ctx->connectTimeoutMs;
     ListAdd(&device->requests, &request->node);
     *outDevice = device;
     return SOFTBUS_OK;
@@ -318,6 +319,10 @@ static int32_t BleConvert2ConnectionInfo(ConnBleConnection *connection, Connecti
             // it will be complement later on lnn online listener
             return SOFTBUS_OK;
         }
+    }
+    if (connection->isUnknownDevice) {
+        CONN_LOGI(CONN_BLE, "is thirdParty device not exchange udid");
+        return SOFTBUS_OK;
     }
     status = SoftBusGenerateStrHash(
         (unsigned char *)connection->udid, strlen(connection->udid), (unsigned char *)info->bleInfo.deviceIdHash);
@@ -491,8 +496,9 @@ static int32_t BleConnectDeviceDirectly(ConnBleDevice *device, const char *anomi
             break;
         }
         g_bleManager.connecting = device;
+        uint32_t timeoutMs = device->connectTimeoutMs == 0 ? BLE_CONNECT_TIMEOUT_MAX_MILLIS : device->connectTimeoutMs;
         status = ConnPostMsgToLooper(&g_bleManagerSyncHandler, BLE_MGR_MSG_CONNECT_TIMEOUT,
-            connection->connectionId, 0, address, BLE_CONNECT_TIMEOUT_MILLIS);
+            connection->connectionId, 0, address, timeoutMs);
         if (status != SOFTBUS_OK) {
             CONN_LOGE(CONN_BLE, "post msg fail, requestAddress=%{public}s, udid=%{public}s, error=%{public}d",
                 anomizeAddress, anomizeUdid, status);
@@ -1770,12 +1776,21 @@ static int32_t BleConnectDevice(const ConnectOption *option, uint32_t requestId,
         ctx->psm = option->bleOption.psm;
     }
     ctx->challengeCode = option->bleOption.challengeCode;
+    uint32_t connectTimeoutMs = 0;
+    if (option->bleOption.connectTimeoutMs < BLE_CONNECT_TIMEOUT_MIN_MILLIS) {
+        connectTimeoutMs = BLE_CONNECT_TIMEOUT_MIN_MILLIS;
+    } else if (option->bleOption.connectTimeoutMs > BLE_CONNECT_TIMEOUT_MAX_MILLIS) {
+        connectTimeoutMs = BLE_CONNECT_TIMEOUT_MAX_MILLIS;
+    } else {
+        connectTimeoutMs = option->bleOption.connectTimeoutMs;
+    }
+    ctx->connectTimeoutMs = ctx->protocol == BLE_GATT ? 0 : connectTimeoutMs;
     CONN_LOGI(CONN_BLE,
         "ble connect device: receive connect request, "
         "reqId=%{public}u, addr=%{public}s, protocol=%{public}d, udid=%{public}s, "
-        "fastestConnectEnable=%{public}d, connectTraceId=%{public}u",
+        "fastestConnectEnable=%{public}d, connectTraceId=%{public}u, connectTimeoutMs=%{public}u",
         requestId, anomizeAddress, ctx->protocol, anomizeUdid, ctx->fastestConnectEnable,
-        ctx->statistics.connectTraceId);
+        ctx->statistics.connectTraceId, ctx->connectTimeoutMs);
     status = ConnPostMsgToLooper(&g_bleManagerSyncHandler, BLE_MGR_MSG_CONNECT_REQUEST, 0, 0, ctx, 0);
     if (status != SOFTBUS_OK) {
         CONN_LOGE(CONN_BLE,

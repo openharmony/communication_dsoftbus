@@ -285,10 +285,6 @@ void TransLaneMgrDeathCallback(const char *pkgName, int32_t pid)
         TRANS_LOGE(TRANS_INIT, "trans lane manager hasn't init.");
         return;
     }
-    char *anonymizePkgName = NULL;
-    Anonymize(pkgName, &anonymizePkgName);
-    TRANS_LOGW(TRANS_CTRL, "pkgName=%{public}s, pid=%{public}d", AnonymizeWrapper(anonymizePkgName), pid);
-    AnonymizeFree(anonymizePkgName);
     if (SoftBusMutexLock(&(g_channelLaneList->lock)) != SOFTBUS_OK) {
         TRANS_LOGE(TRANS_SVC, "lock failed");
         return;

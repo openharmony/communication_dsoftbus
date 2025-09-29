@@ -33,8 +33,8 @@ extern "C"{
 #define MEDIUM_NUM_MAX                   2
 
 // max broadcasting and scan limit
-#define BC_NUM_MAX                      28 // ble for 20 sle for 8
-#define SCAN_NUM_MAX                    24 // ble for 16 sle for 8
+#define BC_NUM_MAX                      29 // ble for 21 sle for 8
+#define SCAN_NUM_MAX                    25 // ble for 17 sle for 8
 
 #define BC_DATA_MAX_LEN                 24
 #define RSP_DATA_MAX_LEN                27
@@ -65,6 +65,7 @@ extern "C"{
 #define LOCAL_NAME_BC_TYPE              0x09
 #define SERVICE_BC_TYPE                 0x16
 #define MANUFACTURE_BC_TYPE             0xFF
+#define SERVICE_UUID_BC_TYPE            0x03
 
 // scan rsp head
 #define RSP_HEAD_LEN                    4

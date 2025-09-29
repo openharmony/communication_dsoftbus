@@ -94,6 +94,7 @@ typedef int32_t (*TransAddConnRefByConnIdFunc)(uint32_t connId, bool isServer);
 typedef void (*StopHmlListenerFunc)(ListenerModule module);
 typedef int32_t (*CompareStringFunc)(const char *src, const char *dest, bool regexp);
 typedef int32_t (*LoadPermissionJsonFunc)(const char *fileName);
+typedef int32_t (*TransProxyD2dGetSleMacFunc)(int32_t channelId, int32_t pid, char *sleMac, uint32_t macLen);
 
 typedef struct TagTransOpenFuncList {
     TransProxyGetAppInfoByChanIdFunc transProxyGetAppInfoByChanId;
@@ -143,6 +144,7 @@ typedef struct TagTransOpenFuncList {
     StopHmlListenerFunc stopHmlListener;
     CompareStringFunc compareString;
     LoadPermissionJsonFunc loadPermissionJson;
+    TransProxyD2dGetSleMacFunc transProxyD2dGetSleMac;
 } TransOpenFuncList;
 
 #ifdef __cplusplus

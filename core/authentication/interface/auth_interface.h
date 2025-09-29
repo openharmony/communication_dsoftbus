@@ -83,6 +83,7 @@ int32_t AuthGetAuthHandleByIndex(const AuthConnInfo *connInfo, bool isServer, in
 int32_t AuthGetNodeInfoByIndexForBle(const AuthConnInfo *connInfo, char *networkId, NodeInfo *info);
 int64_t AuthGetIdByConnInfo(const AuthConnInfo *connInfo, bool isServer, bool isMeta);
 int64_t AuthGetIdByUuid(const char *uuid, AuthLinkType type, bool isServer, bool isMeta);
+int64_t AuthGetIdByIp(const char *ip);
 
 uint32_t AuthGetEncryptSize(int64_t authId, uint32_t inLen);
 uint32_t AuthGetDecryptSize(uint32_t inLen);

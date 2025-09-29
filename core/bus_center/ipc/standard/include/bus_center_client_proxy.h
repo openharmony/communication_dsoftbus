@@ -49,6 +49,7 @@ int32_t ClientOnRefreshDeviceFound(const char *pkgName, int32_t pid, const void 
 int32_t ClientOnDataLevelChanged(const char *pkgName, int32_t pid, const char *networkId,
     const DataLevelInfo *dataLevelInfo);
 int32_t ClientOnRangeResult(const char *pkgName, int32_t pid, const RangeResultInnerInfo *rangeInfo);
+int32_t ClientOnGroupStateChange(const char *pkgName, int32_t pid, int32_t retCode);
 
 #ifdef __cplusplus
 #if __cplusplus

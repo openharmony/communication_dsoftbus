@@ -120,7 +120,7 @@ int32_t AddTcpConnInfo(TcpConnInfoNode *item)
     }
     TcpConnInfoNode *temp = NULL;
     if (SoftBusMutexLock(&g_tcpConnInfoList->lock) != 0) {
-        CONN_LOGE(CONN_COMMON, "lock failed");
+        CONN_LOGE(CONN_COMMON, "lock fail");
         return SOFTBUS_LOCK_ERR;
     }
     if ((int32_t)g_tcpConnInfoList->cnt >= g_tcpMaxConnNum) {
@@ -146,9 +146,9 @@ int32_t AddTcpConnInfo(TcpConnInfoNode *item)
 static void DelTcpConnInfo(uint32_t connectionId, ListenerModule module, int32_t fd)
 {
     CONN_CHECK_AND_RETURN_LOGE(g_tcpConnInfoList, CONN_COMMON, "global connection list is null");
-    int32_t status = SoftBusMutexLock(&g_tcpConnInfoList->lock);
-    if (status != SOFTBUS_OK) {
-        CONN_LOGE(CONN_COMMON, "lock failed, connid=%{public}u, error=%{public}d", connectionId, status);
+    int32_t ret = SoftBusMutexLock(&g_tcpConnInfoList->lock);
+    if (ret != SOFTBUS_OK) {
+        CONN_LOGE(CONN_COMMON, "lock fail, connid=%{public}u, error=%{public}d", connectionId, ret);
         return;
     }
 
@@ -162,9 +162,9 @@ static void DelTcpConnInfo(uint32_t connectionId, ListenerModule module, int32_t
     }
     if (target != NULL) {
         ListDelete(&target->node);
-        status = DelTrigger((ListenerModule)target->info.socketInfo.moduleId,
+        ret = DelTrigger((ListenerModule)target->info.socketInfo.moduleId,
             target->info.socketInfo.fd, RW_TRIGGER);
-        if (status != SOFTBUS_TCPFD_NOT_IN_TRIGGER) {
+        if (ret != SOFTBUS_TCPFD_NOT_IN_TRIGGER) {
             ConnShutdownSocket(it->info.socketInfo.fd);
         }
         g_tcpConnInfoList->cnt--;
@@ -176,7 +176,7 @@ static void DelTcpConnInfo(uint32_t connectionId, ListenerModule module, int32_t
     (void)SoftBusMutexUnlock(&g_tcpConnInfoList->lock);
 
     CONN_LOGE(CONN_COMMON,
-        "delete tcp conn failed. connId not found. connId=%{public}u, module=%{public}d, fd=%{public}d",
+        "delete tcp conn fail. connId not found. connId=%{public}u, module=%{public}d, fd=%{public}d",
         connectionId, module, fd);
     (void)DelTrigger(module, fd, RW_TRIGGER);
 }
@@ -188,7 +188,7 @@ static void DelTcpConnNode(uint32_t connectionId)
     }
     TcpConnInfoNode *item = NULL;
     if (SoftBusMutexLock(&g_tcpConnInfoList->lock) != 0) {
-        CONN_LOGE(CONN_COMMON, "lock failed");
+        CONN_LOGE(CONN_COMMON, "lock fail");
         return;
     }
     LIST_FOR_EACH_ENTRY(item, &g_tcpConnInfoList->list, TcpConnInfoNode, node) {
@@ -248,11 +248,11 @@ static int32_t TcpOnConnectEvent(ListenerModule module, int32_t cfd, const Conne
     tcpConnInfoNode->info.socketInfo.moduleId = module;
     tcpConnInfoNode->info.socketInfo.protocol = clientAddr->socketOption.protocol;
     if (AddTrigger(module, cfd, READ_TRIGGER) != SOFTBUS_OK) {
-        CONN_LOGE(CONN_COMMON, "add trigger failed, READ_TRIGGER. module=%{public}d, cfd=%{public}d", module, cfd);
+        CONN_LOGE(CONN_COMMON, "add trigger fail, READ_TRIGGER. module=%{public}d, cfd=%{public}d", module, cfd);
         goto EXIT;
     }
     if (AddTcpConnInfo(tcpConnInfoNode) != SOFTBUS_OK) {
-        CONN_LOGE(CONN_COMMON, "add tcp conninfo failed");
+        CONN_LOGE(CONN_COMMON, "add tcp conninfo fail");
         goto EXIT;
     }
     g_tcpConnCallback->OnConnected(tcpConnInfoNode->connectionId, &tcpConnInfoNode->info);
@@ -279,7 +279,7 @@ static char *RecvData(const ConnPktHead *head, int32_t fd, uint32_t len)
         return NULL;
     }
     if (memcpy_s(data, headSize, head, headSize) != EOK) {
-        CONN_LOGE(CONN_COMMON, "Tcp recv data copy head failed");
+        CONN_LOGE(CONN_COMMON, "Tcp recv data copy head fail");
         goto EXIT;
     }
     while (recvLen < len) {
@@ -302,7 +302,7 @@ static int32_t GetTcpInfoByFd(int32_t fd, TcpConnInfoNode *tcpInfo)
         return SOFTBUS_CONN_SOCKET_INTERNAL_ERR;
     }
     if (SoftBusMutexLock(&g_tcpConnInfoList->lock) != 0) {
-        CONN_LOGE(CONN_COMMON, "lock failed");
+        CONN_LOGE(CONN_COMMON, "lock fail");
         return SOFTBUS_LOCK_ERR;
     }
     TcpConnInfoNode *item = NULL;
@@ -310,7 +310,7 @@ static int32_t GetTcpInfoByFd(int32_t fd, TcpConnInfoNode *tcpInfo)
     LIST_FOR_EACH_ENTRY_SAFE(item, next, &g_tcpConnInfoList->list, TcpConnInfoNode, node) {
         if (item->info.socketInfo.fd == fd) {
             if (memcpy_s(tcpInfo, sizeof(TcpConnInfoNode), item, sizeof(TcpConnInfoNode)) != EOK) {
-                CONN_LOGE(CONN_COMMON, "memcpy_s failed");
+                CONN_LOGE(CONN_COMMON, "memcpy_s fail");
                 (void)SoftBusMutexUnlock(&g_tcpConnInfoList->lock);
                 return SOFTBUS_MEM_ERR;
             }
@@ -325,7 +325,7 @@ static int32_t GetTcpInfoByFd(int32_t fd, TcpConnInfoNode *tcpInfo)
 static int32_t TcpOnDataEventOut(ListenerModule module, int32_t fd)
 {
     CONN_CHECK_AND_RETURN_RET_LOGW(SoftBusMutexLock(&g_tcpConnInfoList->lock) == SOFTBUS_OK, SOFTBUS_LOCK_ERR,
-        CONN_COMMON, "lock failed, module=%{public}d, fd=%{public}d", module, fd);
+        CONN_COMMON, "lock fail, module=%{public}d, fd=%{public}d", module, fd);
     (void)module;
     TcpConnInfoNode tcpInfo;
     (void)memset_s(&tcpInfo, sizeof(tcpInfo), 0, sizeof(tcpInfo));
@@ -361,13 +361,13 @@ static int32_t TcpOnDataEventOut(ListenerModule module, int32_t fd)
 static int32_t TcpOnDataEventIn(ListenerModule module, int32_t fd)
 {
     CONN_CHECK_AND_RETURN_RET_LOGW(SoftBusMutexLock(&g_tcpConnInfoList->lock) == SOFTBUS_OK, SOFTBUS_LOCK_ERR,
-        CONN_COMMON, "lock failed, module=%{public}d, fd=%{public}d", module, fd);
+        CONN_COMMON, "lock fail, module=%{public}d, fd=%{public}d", module, fd);
     uint32_t connectionId = CalTcpConnectionId(fd);
     TcpConnInfoNode tcpInfo;
     (void)memset_s(&tcpInfo, sizeof(tcpInfo), 0, sizeof(tcpInfo));
     if (GetTcpInfoByFd(fd, &tcpInfo) != SOFTBUS_OK) {
         (void)SoftBusMutexUnlock(&g_tcpConnInfoList->lock);
-        CONN_LOGE(CONN_COMMON, "get tcp info failed. module=%{public}d, fd=%{public}d", module, fd);
+        CONN_LOGE(CONN_COMMON, "get tcp info fail. module=%{public}d, fd=%{public}d", module, fd);
         return SOFTBUS_NOT_FIND;
     }
     ConnPktHead head = {0};
@@ -380,7 +380,7 @@ static int32_t TcpOnDataEventIn(ListenerModule module, int32_t fd)
         DelTcpConnInfo(connectionId, module, fd);
         return SOFTBUS_OK;
     } else if (bytes != (ssize_t)headSize) {
-        CONN_LOGE(CONN_COMMON, "Recv Head failed.");
+        CONN_LOGE(CONN_COMMON, "Recv Head fail.");
         (void)SoftBusMutexUnlock(&g_tcpConnInfoList->lock);
         return SOFTBUS_CONN_SOCKET_INTERNAL_ERR;
     }
@@ -419,7 +419,7 @@ static void DelAllConnInfo(ListenerModule moduleId)
         return;
     }
     if (SoftBusMutexLock(&g_tcpConnInfoList->lock) != 0) {
-        CONN_LOGE(CONN_COMMON, "lock failed");
+        CONN_LOGE(CONN_COMMON, "lock fail");
         return;
     }
     ListNode waitDelete;
@@ -476,14 +476,14 @@ static int32_t WrapperAddTcpConnInfo(const ConnectOption *option, const ConnectR
 {
     TcpConnInfoNode *tcpConnInfoNode = (TcpConnInfoNode *)SoftBusCalloc(sizeof(TcpConnInfoNode));
     if (tcpConnInfoNode == NULL) {
-        CONN_LOGE(CONN_COMMON, "malloc failed");
+        CONN_LOGE(CONN_COMMON, "malloc fail");
         return SOFTBUS_MALLOC_ERR;
     }
 
     if (strcpy_s(tcpConnInfoNode->info.socketInfo.addr, sizeof(tcpConnInfoNode->info.socketInfo.addr),
             option->socketOption.addr) != EOK ||
         memcpy_s(&tcpConnInfoNode->result, sizeof(ConnectResult), result, sizeof(ConnectResult)) != EOK) {
-        CONN_LOGE(CONN_COMMON, "copy failed");
+        CONN_LOGE(CONN_COMMON, "copy fail");
         SoftBusFree(tcpConnInfoNode);
         return SOFTBUS_STRCPY_ERR;
     }
@@ -499,7 +499,7 @@ static int32_t WrapperAddTcpConnInfo(const ConnectOption *option, const ConnectR
     tcpConnInfoNode->info.socketInfo.moduleId = option->socketOption.moduleId;
     tcpConnInfoNode->statistics = statistics;
     if (AddTcpConnInfo(tcpConnInfoNode) != SOFTBUS_OK) {
-        CONN_LOGE(CONN_COMMON, "AddTcpConnInfo failed");
+        CONN_LOGE(CONN_COMMON, "AddTcpConnInfo fail");
         SoftBusFree(tcpConnInfoNode);
         return SOFTBUS_CONN_SOCKET_INTERNAL_ERR;
     }
@@ -515,7 +515,7 @@ static int32_t TcpOpenClientSocketErr(const ConnectOption *option, uint32_t requ
         .errcode = SOFTBUS_TCPCONNECTION_SOCKET_ERR,
     };
     CONN_ALARM(CONNECTION_FAIL_ALARM, MANAGE_ALARM_TYPE, extraAlarm);
-    CONN_LOGE(CONN_COMMON, "OpenTcpClient failed.");
+    CONN_LOGE(CONN_COMMON, "OpenTcpClient fail.");
     result->OnConnectFailed(requestId, SOFTBUS_TCPCONNECTION_SOCKET_ERR);
     statistics->reqId = requestId;
     DfxRecordTcpConnectFail(
@@ -579,7 +579,7 @@ int32_t TcpDisconnectDevice(uint32_t connectionId)
 {
     ConnectionInfo info;
     if (TcpGetConnectionInfo(connectionId, &info) != SOFTBUS_OK) {
-        CONN_LOGE(CONN_COMMON, "tcp get connection info failed");
+        CONN_LOGE(CONN_COMMON, "tcp get connection info fail");
         return SOFTBUS_CONN_SOCKET_INTERNAL_ERR;
     }
     DelTcpConnInfo(connectionId, UNUSE_BUTT, -1);
@@ -593,7 +593,7 @@ int32_t TcpDisconnectDeviceNow(const ConnectOption *option)
         return SOFTBUS_INVALID_PARAM;
     }
     if (SoftBusMutexLock(&g_tcpConnInfoList->lock) != 0) {
-        CONN_LOGE(CONN_COMMON, "lock failed");
+        CONN_LOGE(CONN_COMMON, "lock fail");
         return SOFTBUS_LOCK_ERR;
     }
     ListNode waitDelete;
@@ -641,7 +641,7 @@ int32_t TcpPostBytes(
     }
     int32_t fd = -1;
     if (SoftBusMutexLock(&g_tcpConnInfoList->lock) != 0) {
-        CONN_LOGE(CONN_COMMON, "lock failed");
+        CONN_LOGE(CONN_COMMON, "lock fail");
         SoftBusFree((void*)data);
         return SOFTBUS_LOCK_ERR;
     }
@@ -679,7 +679,7 @@ int32_t TcpGetConnectionInfo(uint32_t connectionId, ConnectionInfo *info)
     }
     TcpConnInfoNode *item = NULL;
     if (SoftBusMutexLock(&g_tcpConnInfoList->lock) != 0) {
-        CONN_LOGE(CONN_COMMON, "lock failed");
+        CONN_LOGE(CONN_COMMON, "lock fail");
         return SOFTBUS_LOCK_ERR;
     }
     LIST_FOR_EACH_ENTRY(item, &g_tcpConnInfoList->list, TcpConnInfoNode, node) {
@@ -687,7 +687,7 @@ int32_t TcpGetConnectionInfo(uint32_t connectionId, ConnectionInfo *info)
             int32_t ret = memcpy_s(info, sizeof(ConnectionInfo), &item->info, sizeof(ConnectionInfo));
             (void)SoftBusMutexUnlock(&g_tcpConnInfoList->lock);
             if (ret != EOK) {
-                CONN_LOGE(CONN_COMMON, "copy connection info failed");
+                CONN_LOGE(CONN_COMMON, "copy connection info fail");
                 return SOFTBUS_MEM_ERR;
             }
             return SOFTBUS_OK;
@@ -721,7 +721,7 @@ int32_t TcpStopListening(const LocalListenerInfo *info)
     ListenerModule moduleId = info->socketOption.moduleId;
     int32_t ret = StopBaseListener(moduleId);
     if (ret != SOFTBUS_OK) {
-        CONN_LOGE(CONN_COMMON, "stop listener failed");
+        CONN_LOGE(CONN_COMMON, "stop listener fail");
         return ret;
     }
     DelAllConnInfo(moduleId);
@@ -800,7 +800,7 @@ ConnectFuncInterface *ConnInitTcp(const ConnectCallback *callback)
     if (g_tcpConnInfoList == NULL) {
         g_tcpConnInfoList = CreateSoftBusList();
         if (g_tcpConnInfoList == NULL) {
-            CONN_LOGE(CONN_INIT, "Create tcpConnInfoList failed.");
+            CONN_LOGE(CONN_INIT, "Create tcpConnInfoList fail.");
             return NULL;
         }
         g_tcpConnInfoList->cnt = 0;
@@ -813,7 +813,7 @@ static int TcpConnectInfoDump(int fd)
 {
     char *anonyIpAddr = NULL;
     if (SoftBusMutexLock(&g_tcpConnInfoList->lock) != SOFTBUS_OK) {
-        CONN_LOGE(CONN_COMMON, "lock failed");
+        CONN_LOGE(CONN_COMMON, "lock fail");
         return SOFTBUS_LOCK_ERR;
     }
     ListNode *item = NULL;

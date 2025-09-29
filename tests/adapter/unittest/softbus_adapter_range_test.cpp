@@ -33,6 +33,7 @@ void AdapterDsoftbusRangeTest::SetUpTestCase(void) { }
 void AdapterDsoftbusRangeTest::TearDownTestCase(void) { }
 void AdapterDsoftbusRangeTest::SetUp() { }
 void AdapterDsoftbusRangeTest::TearDown() { }
+
 /*
  * @tc.name: SoftBusBleRange001
  * @tc.desc: parameters is Legal and illegal

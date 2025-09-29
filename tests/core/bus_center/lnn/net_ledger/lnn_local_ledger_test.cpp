@@ -1127,7 +1127,6 @@ HWTEST_F(LNNLedgerMockTest, LlGetSparkCheck_001, TestSize.Level1)
     unsigned char sparkCheck[SPARK_CHECK_LENGTH] = {0};
     EXPECT_EQ(SOFTBUS_INVALID_PARAM, LlGetSparkCheck(nullptr, 0));
     EXPECT_EQ(SOFTBUS_INVALID_PARAM, LlGetSparkCheck(sparkCheck, 0));
-    EXPECT_EQ(SOFTBUS_MEM_ERR, LlGetSparkCheck(sparkCheck, SPARK_CHECK_LENGTH - 1));
     EXPECT_EQ(SOFTBUS_OK, LlGetSparkCheck(sparkCheck, SPARK_CHECK_LENGTH));
 }
 
@@ -1157,5 +1156,270 @@ HWTEST_F(LNNLedgerMockTest, LnnGenSparkCheck_001, TestSize.Level1)
         .WillRepeatedly(Return(SOFTBUS_OK));
     EXPECT_EQ(SOFTBUS_ENCRYPT_ERR, LnnGenSparkCheck());
     EXPECT_EQ(SOFTBUS_ENCRYPT_ERR, LnnGenSparkCheck());
+}
+
+/*
+ * @tc.name: LNN_LOADBROAD_CAST_CIPHER_INFO_001
+ * @tc.desc: LnnLoadBroadcastCipherInfo param error
+ * @tc.type: FUNC
+ * @tc.require:
+ */
+HWTEST_F(LNNLedgerMockTest, LNN_LOADBROAD_CAST_CIPHER_INFO_001, TestSize.Level1)
+{
+    LocalLedgerDepsInterfaceMock localLedgerMock;
+    BroadcastCipherKey broadcastKey;
+    (void)memset_s(&broadcastKey, sizeof(BroadcastCipherKey), 0, sizeof(BroadcastCipherKey));
+    int32_t ret = LnnLoadBroadcastCipherInfo(nullptr);
+    EXPECT_EQ(ret, SOFTBUS_INVALID_PARAM);
+    EXPECT_CALL(localLedgerMock, LnnGetLocalBroadcastCipherKeyPacked)
+        .WillRepeatedly(Return(SOFTBUS_INVALID_PARAM));
+    ret = LnnLoadBroadcastCipherInfo(&broadcastKey);
+    EXPECT_EQ(ret, SOFTBUS_NETWORK_NODE_KEY_INFO_ERR);
+}
+
+/*
+ * @tc.name: LNN_FIRST_GET_UDID_001
+ * @tc.desc: LnnFirstGetUdid get device info error
+ * @tc.type: FUNC
+ * @tc.require:
+ */
+HWTEST_F(LNNLedgerMockTest, LNN_FIRST_GET_UDID_001, TestSize.Level1)
+{
+    LocalLedgerDepsInterfaceMock localLedgerMock;
+    EXPECT_CALL(localLedgerMock, GetCommonDevInfo).WillRepeatedly(Return(SOFTBUS_INVALID_PARAM));
+    int32_t ret = LnnFirstGetUdid();
+    EXPECT_EQ(ret, SOFTBUS_NETWORK_GET_DEVICE_INFO_ERR);
+}
+
+/*
+ * @tc.name: LNN_SET_LOCAL_INFO_BY_IFNMAEIDX_001
+ * @tc.desc: LnnSetLocalInfoByIfnameIdx param error
+ * @tc.type: FUNC
+ * @tc.require:
+ */
+HWTEST_F(LNNLedgerMockTest, LNN_SET_LOCAL_INFO_BY_IFNMAEIDX_001, TestSize.Level1)
+{
+    int32_t ret = LnnSetLocalInfoByIfnameIdx(INFO_KEY_MAX, nullptr, INFO_KEY_MAX);
+    EXPECT_EQ(ret, SOFTBUS_INVALID_PARAM);
+    ret = LnnSetLocalInfoByIfnameIdx(BYTE_KEY_BROADCAST_CIPHER_KEY, nullptr, BYTE_KEY_BROADCAST_CIPHER_KEY);
+    EXPECT_EQ(ret, SOFTBUS_NETWORK_NOT_FOUND);
+}
+
+/*
+ * @tc.name: LNN_SET_LOCAL_INFO_001
+ * @tc.desc: LnnSetLocalInfo param error
+ * @tc.type: FUNC
+ * @tc.require:
+ */
+HWTEST_F(LNNLedgerMockTest, LNN_SET_LOCAL_INFO_001, TestSize.Level1)
+{
+    int32_t ret = LnnSetLocalInfo(INFO_KEY_MAX, nullptr);
+    EXPECT_EQ(ret, SOFTBUS_INVALID_PARAM);
+}
+
+/*
+ * @tc.name: LNN_SET_LOCAL_STR_INFO_BY_IFNAMEIDX_001
+ * @tc.desc: LnnSetLocalStrInfoByIfnameIdx param error
+ * @tc.type: FUNC
+ * @tc.require:
+ */
+HWTEST_F(LNNLedgerMockTest, LNN_SET_LOCAL_STR_INFO_BY_IFNAMEIDX_001, TestSize.Level1)
+{
+    char info[] = "test";
+    int32_t ret = LnnSetLocalStrInfoByIfnameIdx(STRING_KEY_IP6_WITH_IF, nullptr, USB_IF);
+    EXPECT_EQ(ret, SOFTBUS_INVALID_PARAM);
+    ret = LnnSetLocalStrInfoByIfnameIdx(STRING_KEY_END, info, USB_IF);
+    EXPECT_EQ(ret, SOFTBUS_INVALID_PARAM);
+    ret = LnnSetLocalStrInfoByIfnameIdx(STRING_KEY_ACCOUNT_UID, info, CAPABILTY);
+    EXPECT_EQ(ret, SOFTBUS_INVALID_PARAM);
+    ret = LnnSetLocalStrInfoByIfnameIdx(STRING_KEY_IP6_WITH_IF, info, USB_IF);
+    EXPECT_EQ(ret, SOFTBUS_INVALID_PARAM);
+}
+
+/*
+ * @tc.name: LNN_GET_LOCAL_BOOL_INFO_001
+ * @tc.desc: LnnGetLocalBoolInfo param error
+ * @tc.type: FUNC
+ * @tc.require:
+ */
+HWTEST_F(LNNLedgerMockTest, LNN_GET_LOCAL_BOOL_INFO_001, TestSize.Level1)
+{
+    int32_t ret = LnnGetLocalBoolInfo(BOOL_KEY_END, nullptr, 0);
+    EXPECT_EQ(ret, SOFTBUS_INVALID_PARAM);
+    ret = LnnGetLocalBoolInfo(BOOL_KEY_SCREEN_STATUS, nullptr, 0);
+    EXPECT_EQ(ret, SOFTBUS_INVALID_PARAM);
+}
+
+/*
+ * @tc.name: LNN_GET_LOCAL_BOOL_INFO_002
+ * @tc.desc: LnnGetLocalBoolInfo not found
+ * @tc.type: FUNC
+ * @tc.require:
+ */
+HWTEST_F(LNNLedgerMockTest, LNN_GET_LOCAL_BOOL_INFO_002, TestSize.Level1)
+{
+    bool info = false;
+    int32_t ret = LnnGetLocalBoolInfo(STRING_KEY_IP, &info, 0);
+    EXPECT_EQ(ret, SOFTBUS_NETWORK_NOT_FOUND);
+}
+
+/*
+ * @tc.name: LNN_GET_LOCAL_INFO_BY_IFNAME_IDX_001
+ * @tc.desc: LnnGetLocalInfoByIfnameIdx param error
+ * @tc.type: FUNC
+ * @tc.require:
+ */
+HWTEST_F(LNNLedgerMockTest, LNN_GET_LOCAL_INFO_BY_IFNAME_IDX_001, TestSize.Level1)
+{
+    uint32_t infoSize = 0;
+    int32_t ifIdx = 0;
+    int32_t info = 0;
+    int32_t ret = LnnGetLocalInfoByIfnameIdx(STRING_KEY_IP, nullptr, infoSize, ifIdx);
+    EXPECT_EQ(ret, SOFTBUS_INVALID_PARAM);
+    ret = LnnGetLocalInfoByIfnameIdx(INFO_KEY_MAX, (void*)&info, infoSize, ifIdx);
+    EXPECT_EQ(ret, SOFTBUS_INVALID_PARAM);
+    ret = LnnGetLocalInfoByIfnameIdx(STRING_KEY_END, (void*)&info, infoSize, ifIdx);
+    EXPECT_EQ(ret, SOFTBUS_INVALID_PARAM);
+    ret = LnnGetLocalInfoByIfnameIdx(NUM_KEY_END, (void*)&info, infoSize, ifIdx);
+    EXPECT_EQ(ret, SOFTBUS_INVALID_PARAM);
+}
+
+/*
+ * @tc.name: LNN_GET_LOCAL_INFO_BY_IFNAME_IDX_002
+ * @tc.desc: LnnGetLocalInfoByIfnameIdx not found
+ * @tc.type: FUNC
+ * @tc.require:
+ */
+HWTEST_F(LNNLedgerMockTest, LNN_GET_LOCAL_INFO_BY_IFNAME_IDX_002, TestSize.Level1)
+{
+    uint32_t infoSize = 0;
+    int32_t info = 0;
+    int32_t ifIdx = 0;
+    int32_t ret = LnnGetLocalInfoByIfnameIdx(NUM_KEY_META_NODE, (void*)&info, infoSize, ifIdx);
+    EXPECT_EQ(ret, SOFTBUS_NETWORK_NOT_FOUND);
+}
+
+/*
+ * @tc.name: LNN_GET_LOCAL_INFO_001
+ * @tc.desc: LnnGetLocalInfo param error
+ * @tc.type: FUNC
+ * @tc.require:
+ */
+HWTEST_F(LNNLedgerMockTest, LNN_GET_LOCAL_INFO_001, TestSize.Level1)
+{
+    uint32_t infoSize = 0;
+    int32_t info = 0;
+    int32_t ret = LnnGetLocalInfo(INFO_KEY_MAX, (void*)&info, infoSize);
+    EXPECT_EQ(ret, SOFTBUS_INVALID_PARAM);
+    ret = LnnGetLocalInfo(STRING_KEY_END, (void*)&info, infoSize);
+    EXPECT_EQ(ret, SOFTBUS_INVALID_PARAM);
+    ret = LnnGetLocalInfo(NUM_KEY_END, (void*)&info, infoSize);
+    EXPECT_EQ(ret, SOFTBUS_INVALID_PARAM);
+}
+
+/*
+ * @tc.name: LNN_GET_LOCAL_STR_INFO_BY_IFNAME_FIX_001
+ * @tc.desc: LnnGetLocalStrInfoByIfnameIdx param error
+ * @tc.type: FUNC
+ * @tc.require:
+ */
+HWTEST_F(LNNLedgerMockTest, LNN_GET_LOCAL_STR_INFO_BY_IFNAME_FIX_001, TestSize.Level1)
+{
+    int32_t ifIdx = 0;
+    char info[MAX_ADDR_LEN] = {0};
+    int32_t ret = LnnGetLocalStrInfoByIfnameIdx(STRING_KEY_END, info, MAX_ADDR_LEN, ifIdx);
+    EXPECT_EQ(ret, SOFTBUS_INVALID_PARAM);
+    ifIdx = 2;
+    ret = LnnGetLocalStrInfoByIfnameIdx(STRING_KEY_ACCOUNT_UID, info, MAX_ADDR_LEN, ifIdx);
+    EXPECT_EQ(ret, SOFTBUS_INVALID_PARAM);
+}
+
+/*
+ * @tc.name: LNN_GET_LOCAL_STR_INFO_BY_IFNAME_FIX_002
+ * @tc.desc: LnnGetLocalStrInfoByIfnameIdx not found
+ * @tc.type: FUNC
+ * @tc.require:
+ */
+HWTEST_F(LNNLedgerMockTest, LNN_GET_LOCAL_STR_INFO_BY_IFNAME_FIX_002, TestSize.Level1)
+{
+    char info[MAX_ADDR_LEN] = {0};
+    int32_t ret = LnnGetLocalStrInfoByIfnameIdx(STRING_KEY_ACCOUNT_UID, info, MAX_ADDR_LEN, MIN_IF);
+    EXPECT_EQ(ret, SOFTBUS_NETWORK_NOT_FOUND);
+}
+
+/*
+ * @tc.name: LL_SET_LOCAL_SLE_RANGE_CAPACITY_001
+ * @tc.desc: LlSetLocalSleRangeCapacity param error
+ * @tc.type: FUNC
+ * @tc.require:
+ */
+HWTEST_F(LNNLedgerMockTest, LL_SET_LOCAL_SLE_RANGE_CAPACITY_001, TestSize.Level1)
+{
+    int32_t ret = LlSetLocalSleRangeCapacity(nullptr);
+    EXPECT_EQ(ret, SOFTBUS_INVALID_PARAM);
+}
+
+/*
+ * @tc.name: UPDATE_STATIC_NET_CAP_001
+ * @tc.desc: UpdateStaticNetCap param error
+ * @tc.type: FUNC
+ * @tc.require:
+ */
+HWTEST_F(LNNLedgerMockTest, UPDATE_STATIC_NET_CAP_001, TestSize.Level1)
+{
+    int32_t ret = UpdateStaticNetCap(nullptr);
+    EXPECT_EQ(ret, SOFTBUS_INVALID_PARAM);
+}
+
+/*
+ * @tc.name: UPDATE_LOCAL_USER_ID_001
+ * @tc.desc: UpdateLocalUserId param error
+ * @tc.type: FUNC
+ * @tc.require:
+ */
+HWTEST_F(LNNLedgerMockTest, UPDATE_LOCAL_USER_ID_001, TestSize.Level1)
+{
+    int32_t ret = UpdateLocalUserId(nullptr);
+    EXPECT_EQ(ret, SOFTBUS_INVALID_PARAM);
+}
+
+/*
+ * @tc.name: LL_GET_UDID_HASH_001
+ * @tc.desc: LlGetUdidHash param error
+ * @tc.type: FUNC
+ * @tc.require:
+ */
+HWTEST_F(LNNLedgerMockTest, LL_GET_UDID_HASH_001, TestSize.Level1)
+{
+    LocalLedgerDepsInterfaceMock localLedgerMock;
+    EXPECT_CALL(localLedgerMock, SoftBusGenerateStrHash).WillRepeatedly(Return(SOFTBUS_INVALID_PARAM));
+    uint8_t localUdidHash[UDID_HASH_LEN] = { 0 };
+    int32_t ret = LlGetUdidHash((void *)localUdidHash, UDID_HASH_LEN);
+    EXPECT_EQ(ret, SOFTBUS_NETWORK_GENERATE_STR_HASH_ERR);
+}
+
+/*
+ * @tc.name: LL_GET_USER_ID_CHECK_SUM_001
+ * @tc.desc: LlGetUserIdCheckSum get user id fail
+ * @tc.type: FUNC
+ * @tc.require:
+ */
+HWTEST_F(LNNLedgerMockTest, LL_GET_USER_ID_CHECK_SUM_001, TestSize.Level1)
+{
+    uint8_t localUdidHash[UDID_HASH_LEN - 1] = { 0 };
+    int32_t ret = LlGetUserIdCheckSum((void *)localUdidHash, UDID_HASH_LEN - 1);
+    EXPECT_EQ(ret, SOFTBUS_INVALID_PARAM);
+}
+
+/*
+ * @tc.name: LL_UPDATE_USER_ID_CHECK_SUM_001
+ * @tc.desc: LlUpdateUserIdCheckSum param error
+ * @tc.type: FUNC
+ * @tc.require:
+ */
+HWTEST_F(LNNLedgerMockTest, LL_UPDATE_USER_ID_CHECK_SUM_001, TestSize.Level1)
+{
+    int32_t ret = LlUpdateUserIdCheckSum(nullptr);
+    EXPECT_EQ(ret, SOFTBUS_INVALID_PARAM);
 }
 } // namespace OHOS

@@ -486,12 +486,12 @@ HWTEST_F(TransUkManagerTest, UkGetUserKeyIdByAclInfoTest001, TestSize.Level1)
 
     EXPECT_CALL(TransUkManagerMock, AuthFindUkIdByAclInfo).WillRepeatedly(Return(SOFTBUS_AUTH_UK_NOT_FIND));
     ret = GetUserkeyIdByAClInfo(&appInfo, 0, 0, &userKeyId, &callBack);
-    EXPECT_EQ(SOFTBUS_ALREADY_EXISTED, ret);
+    EXPECT_EQ(SOFTBUS_TRANS_GEN_USER_KEY, ret);
 
     EXPECT_CALL(TransUkManagerMock, AuthFindUkIdByAclInfo).WillRepeatedly(Return(SOFTBUS_AUTH_UK_NOT_FIND));
     EXPECT_CALL(TransUkManagerMock, AuthGenUkIdByAclInfo).WillRepeatedly(Return(SOFTBUS_OK));
     ret = GetUserkeyIdByAClInfo(&appInfo, 0, 0, &userKeyId, &callBack);
-    EXPECT_EQ(SOFTBUS_ALREADY_EXISTED, ret);
+    EXPECT_EQ(SOFTBUS_TRANS_GEN_USER_KEY, ret);
 
     EXPECT_CALL(TransUkManagerMock, AuthFindUkIdByAclInfo).WillRepeatedly(Return(SOFTBUS_OK));
     ret = GetUserkeyIdByAClInfo(&appInfo, 0, 0, &userKeyId, &callBack);

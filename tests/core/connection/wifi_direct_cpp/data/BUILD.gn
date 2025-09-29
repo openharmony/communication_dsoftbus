@@ -87,7 +87,10 @@ ohos_unittest("LinkInfoTest") {
     "$wifi_direct_cpp_path/utils/wifi_direct_utils.cpp",
     "link_info_test.cpp",
   ]
-  deps = [ "$dsoftbus_dfx_path:softbus_dfx" ]
+  deps = [
+    "$dsoftbus_dfx_path:softbus_dfx",
+    "$dsoftbus_root_path/core/common:softbus_utils",
+  ]
   external_deps = [
     "bounds_checking_function:libsec_shared",
     "cJSON:cjson",
@@ -132,7 +135,10 @@ ohos_unittest("NegotiateMessageTest") {
     "$wifi_direct_cpp_path/utils/wifi_direct_utils.cpp",
     "negotiate_message_test.cpp",
   ]
-  deps = [ "$dsoftbus_dfx_path:softbus_dfx" ]
+  deps = [
+    "$dsoftbus_dfx_path:softbus_dfx",
+    "$dsoftbus_root_path/core/common:softbus_utils",
+  ]
   external_deps = [
     "bounds_checking_function:libsec_shared",
     "cJSON:cjson",
@@ -226,6 +232,7 @@ ohos_unittest("InnerLinkTest") {
   deps = [
     "$dsoftbus_dfx_path:softbus_dfx",
     "$dsoftbus_root_path/adapter:softbus_adapter",
+    "$dsoftbus_root_path/core/common:softbus_utils",
     "$dsoftbus_root_path/core/connection/wifi_direct_cpp:wifi_direct",
   ]
   external_deps = [
@@ -264,6 +271,7 @@ ohos_unittest("LinkManagerTest") {
 
   include_dirs = [
     "$dsoftbus_dfx_path/interface/include/form",
+    "$dsoftbus_root_path/core/connection/wifi_direct_cpp/entity",
     "$dsoftbus_root_path/core/frame/common/include",
     "$dsoftbus_root_path/core/frame/init/include",
     "$dsoftbus_root_path/interfaces/inner_kits/transport",
@@ -328,6 +336,7 @@ ohos_unittest("LinkManagerTest") {
   deps = [
     "$dsoftbus_dfx_path:softbus_dfx",
     "$dsoftbus_root_path/adapter:softbus_adapter",
+    "$dsoftbus_root_path/core/common:softbus_utils",
     "$dsoftbus_root_path/core/connection/wifi_direct_cpp:wifi_direct",
   ]
   external_deps = [
@@ -389,7 +398,10 @@ ohos_unittest("InterfaceInfoTest") {
     "interface_info_test.cpp",
   ]
 
-  deps = [ "$dsoftbus_dfx_path:softbus_dfx" ]
+  deps = [
+    "$dsoftbus_dfx_path:softbus_dfx",
+    "$dsoftbus_root_path/core/common:softbus_utils",
+  ]
 
   external_deps = [
     "bounds_checking_function:libsec_shared",
@@ -440,7 +452,10 @@ ohos_unittest("InterfaceManagerTest") {
     "interface_manager_test.cpp",
   ]
 
-  deps = [ "$dsoftbus_dfx_path:softbus_dfx" ]
+  deps = [
+    "$dsoftbus_dfx_path:softbus_dfx",
+    "$dsoftbus_root_path/core/common:softbus_utils",
+  ]
 
   external_deps = [
     "bounds_checking_function:libsec_shared",
@@ -488,7 +503,10 @@ ohos_unittest("WifiConfigInfoTest") {
     "wifi_config_info_test.cpp",
   ]
 
-  deps = [ "$dsoftbus_dfx_path:softbus_dfx" ]
+  deps = [
+    "$dsoftbus_dfx_path:softbus_dfx",
+    "$dsoftbus_root_path/core/common:softbus_utils",
+  ]
 
   external_deps = [
     "bounds_checking_function:libsec_shared",

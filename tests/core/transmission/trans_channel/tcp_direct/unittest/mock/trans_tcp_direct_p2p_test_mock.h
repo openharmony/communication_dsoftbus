@@ -37,7 +37,8 @@ public:
     virtual int32_t TransProxyPipelineRegisterListener(TransProxyPipelineMsgType type,
         const ITransProxyPipelineListener *listener) = 0;
     virtual int32_t AuthPostTransData(AuthHandle authHandle, const AuthTransData *dataInfo) = 0;
-    virtual char *VerifyP2pPack(const char *myIp, int32_t myPort, const char *peerIp, ProtocolType protocol) = 0;
+    virtual char *VerifyP2pPack(
+        const char *myIp, int32_t myPort, const char *peerIp, ProtocolType protocol, int32_t myUid) = 0;
     virtual int32_t NotifyChannelOpenFailed(int32_t channelId, int32_t errCode) = 0;
     virtual int32_t AuthGetHmlConnInfo(const char *uuid, AuthConnInfo *connInfo, bool isMeta) = 0;
     virtual int32_t AuthGetP2pConnInfo(const char *uuid, AuthConnInfo *connInfo, bool isMeta) = 0;
@@ -70,7 +71,8 @@ public:
     MOCK_METHOD2(TransProxyPipelineRegisterListener, int32_t (TransProxyPipelineMsgType type,
         const ITransProxyPipelineListener *listener));
     MOCK_METHOD2(AuthPostTransData, int32_t (AuthHandle authHandle, const AuthTransData *dataInfo));
-    MOCK_METHOD4(VerifyP2pPack, char *(const char *myIp, int32_t myPort, const char *peerIp, ProtocolType protocol));
+    MOCK_METHOD5(VerifyP2pPack, char *(
+        const char *myIp, int32_t myPort, const char *peerIp, ProtocolType protocol, int32_t myUid));
     MOCK_METHOD2(NotifyChannelOpenFailed, int32_t (int32_t channelId, int32_t errCode));
     MOCK_METHOD3(AuthGetHmlConnInfo, int32_t (const char *uuid, AuthConnInfo *connInfo, bool isMeta));
     MOCK_METHOD3(AuthGetP2pConnInfo, int32_t (const char *uuid, AuthConnInfo *connInfo, bool isMeta));

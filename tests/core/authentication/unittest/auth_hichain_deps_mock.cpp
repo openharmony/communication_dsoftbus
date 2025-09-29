@@ -275,5 +275,15 @@ int32_t IdServiceGetCredTypeByCredId(int32_t userId, const char *credId, int32_t
     return GetAuthHichainMockInterface()->IdServiceGetCredTypeByCredId(userId, credId, credType);
 }
 
+int32_t LnnJudgeDeviceTypeAndGetOsAccountInfo(uint8_t *accountHash, uint32_t len)
+{
+    return GetAuthHichainMockInterface()->LnnJudgeDeviceTypeAndGetOsAccountInfo(accountHash, len);
+}
+
+int32_t JudgeDeviceTypeAndGetOsAccountIds(void)
+{
+    return GetAuthHichainMockInterface()->JudgeDeviceTypeAndGetOsAccountIds();
+}
+
 } // extern "C"
 } // namespace OHOS

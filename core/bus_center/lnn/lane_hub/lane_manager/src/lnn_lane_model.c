@@ -292,6 +292,11 @@ static void ClearProfileMap(void)
 
 void DeinitLaneModel(void)
 {
+    if (ModelLock() != SOFTBUS_OK) {
+        LNN_LOGE(LNN_LANE, "get lock fail");
+        return;
+    }
     ClearProfileMap();
+    ModelUnlock();
     (void)SoftBusMutexDestroy(&g_laneModelMutex);
 }

@@ -19,7 +19,9 @@
 #include <securec.h>
 
 #include "auth_interface.h"
+#include "bus_center_event.h"
 #include "bus_center_manager.h"
+#include "g_enhance_lnn_func_pack.h"
 #include "g_enhance_trans_func_pack.h"
 #include "legacy/softbus_adapter_hitrace.h"
 #include "lnn_bus_center_ipc.h"
@@ -36,6 +38,7 @@
 #include "softbus_proxychannel_manager.h"
 #include "softbus_proxychannel_pipeline.h"
 #include "softbus_socket.h"
+#include "trans_channel_common.h"
 #include "trans_lane_pending_ctl.h"
 #include "trans_log.h"
 #include "trans_tcp_direct_json.h"
@@ -70,6 +73,7 @@ typedef struct {
     const char *myIp;
     const char *peerIp;
     int32_t myPort;
+    int32_t myUid;
     ProtocolType protocol;
 } VerifyP2pInfo;
 
@@ -557,7 +561,7 @@ static int32_t SendAuthData(AuthHandle authHandle, int32_t module, int32_t flag,
 static int32_t VerifyP2p(AuthHandle authHandle, int64_t seq, VerifyP2pInfo *info)
 {
     TRANS_LOGI(TRANS_CTRL, "authId=%{public}" PRId64 ", port=%{public}d", authHandle.authId, info->myPort);
-    char *msg = VerifyP2pPack(info->myIp, info->myPort, info->peerIp, info->protocol);
+    char *msg = VerifyP2pPack(info->myIp, info->myPort, info->peerIp, info->protocol, info->myUid);
     if (msg == NULL) {
         TRANS_LOGE(TRANS_CTRL, "verifyp2p pack fail");
         return SOFTBUS_PARSE_JSON_ERR;
@@ -566,6 +570,26 @@ static int32_t VerifyP2p(AuthHandle authHandle, int64_t seq, VerifyP2pInfo *info
     cJSON_free(msg);
     if (ret != SOFTBUS_OK) {
         TRANS_LOGE(TRANS_CTRL, "VerifyP2p send auth data fail");
+        return ret;
+    }
+    return SOFTBUS_OK;
+}
+
+static int32_t TransGetRemoteUuidByAuthHandle(AuthHandle authHandle, char *peerUuid)
+{
+    int32_t ret = SOFTBUS_OK;
+    if (authHandle.type == AUTH_LINK_TYPE_BLE) {
+        AuthHandle authHandleTmp = { 0 };
+        ret = TransProxyGetAuthId(authHandle.authId, &authHandleTmp);
+        if (ret == SOFTBUS_TRANS_NODE_NOT_FOUND) {
+            authHandleTmp.authId = authHandle.authId;
+        }
+        ret = AuthGetDeviceUuid(authHandleTmp.authId, peerUuid, UUID_BUF_LEN);
+    } else {
+        ret = AuthGetDeviceUuid(authHandle.authId, peerUuid, UUID_BUF_LEN);
+    }
+    if (ret != SOFTBUS_OK) {
+        TRANS_LOGE(TRANS_CTRL, "fail to get device uuid by authId=%{public}" PRId64, authHandle.authId);
         return ret;
     }
     return SOFTBUS_OK;
@@ -608,8 +632,9 @@ static void OnAuthConnOpened(uint32_t requestId, AuthHandle authHandle)
     ReleaseSessionConnLock();
     info.myIp = myDataAddr;
     info.myPort = myDataPort;
-    info.peerIp = peerDataAddr;
+    info.peerIp = (conn->appInfo.osType == HA_OS_TYPE) ? NULL : peerDataAddr;
     info.protocol = conn->appInfo.fdProtocol;
+    info.myUid = conn->appInfo.myData.uid;
     if (VerifyP2p(authHandle, reqNum, &info) != SOFTBUS_OK) {
         TRANS_LOGE(TRANS_CTRL, "verify p2p fail");
         goto EXIT_ERR;
@@ -746,7 +771,7 @@ static void OutputAnonymizeIpAddress(const char *myIp, const char *peerIp)
 
 static int32_t PackAndSendVerifyP2pRsp(VerifyP2pInfo *info, int64_t seq, bool isAuthLink, AuthHandle authHandle)
 {
-    char *reply = VerifyP2pPack(info->myIp, info->myPort, NULL, info->protocol);
+    char *reply = VerifyP2pPack(info->myIp, info->myPort, NULL, info->protocol, info->myUid);
     if (reply == NULL) {
         SendVerifyP2pFailRsp(
             authHandle, seq, CODE_VERIFY_P2P, SOFTBUS_TRANS_PACK_REPLY_FAILED, "pack reply failed", isAuthLink);
@@ -760,24 +785,41 @@ static int32_t PackAndSendVerifyP2pRsp(VerifyP2pInfo *info, int64_t seq, bool is
     return SOFTBUS_OK;
 }
 
-static int32_t TransGetRemoteUuidByAuthHandle(AuthHandle authHandle, char *peerUuid)
+static int32_t TransGetLocalIp(char *myIp, const char *peerIp, const char *peerUuid)
 {
-    int32_t ret = SOFTBUS_OK;
-    if (authHandle.type == AUTH_LINK_TYPE_BLE) {
-        AuthHandle authHandleTmp = { 0 };
-        ret = TransProxyGetAuthId(authHandle.authId, &authHandleTmp);
-        if (ret == SOFTBUS_TRANS_NODE_NOT_FOUND) {
-            authHandleTmp.authId = authHandle.authId;
-        }
-        ret = AuthGetDeviceUuid(authHandleTmp.authId, peerUuid, UUID_BUF_LEN);
-    } else {
-        ret = AuthGetDeviceUuid(authHandle.authId, peerUuid, UUID_BUF_LEN);
+    if (myIp == NULL || peerIp == NULL || peerUuid == NULL) {
+        return SOFTBUS_INVALID_PARAM;
     }
-    if (ret != SOFTBUS_OK) {
-        TRANS_LOGE(TRANS_CTRL, "fail to get device uuid by authId=%{public}" PRId64, authHandle.authId);
-        return ret;
+    int32_t osType = 0;
+    GetOsTypeByNetworkId(peerUuid, &osType);
+    if (osType == HA_OS_TYPE) {
+        if (AuthMetaGetLocalIpByMetaNodeIdPacked(peerUuid, myIp, IP_LEN) != SOFTBUS_OK) {
+            TRANS_LOGE(TRANS_CTRL, "get local ip by metaNodeId failed.");
+            return SOFTBUS_LANE_GET_LEDGER_INFO_ERR;
+        }
+    } else {
+        struct WifiDirectManager *pManager = GetWifiDirectManager();
+        if (pManager == NULL || pManager->getLocalIpByRemoteIp == NULL) {
+            return SOFTBUS_WIFI_DIRECT_INIT_FAILED;
+        }
+        int32_t ret = pManager->getLocalIpByRemoteIp(peerIp, myIp, IP_LEN);
+        if (ret != SOFTBUS_OK) {
+            OutputAnonymizeIpAddress(myIp, peerIp);
+            TRANS_LOGE(TRANS_CTRL, "get Local Ip fail, ret=%{public}d", ret);
+            return SOFTBUS_TRANS_GET_P2P_INFO_FAILED;
+        }
     }
     return SOFTBUS_OK;
+}
+
+static void DeleteExternalP2pListener(const char *peerUuid)
+{
+    int32_t osType = 0;
+    GetOsTypeByNetworkId(peerUuid, &osType);
+    if (osType == HA_OS_TYPE) {
+        StopP2pListenerByRemoteUuid(peerUuid);
+    }
+    return;
 }
 
 static int32_t OnVerifyP2pRequest(AuthHandle authHandle, int64_t seq, const cJSON *json, bool isAuthLink)
@@ -788,34 +830,28 @@ static int32_t OnVerifyP2pRequest(AuthHandle authHandle, int64_t seq, const cJSO
     int32_t myPort = 0;
     char myIp[IP_LEN] = { 0 };
     ProtocolType protocol = 0;
-    int32_t ret = VerifyP2pUnPack(json, peerIp, IP_LEN, &peerPort, &protocol);
+    int32_t peerUid = 0;
+    int32_t ret = VerifyP2pUnPack(json, peerIp, &peerPort, &protocol, &peerUid);
     if (ret != SOFTBUS_OK) {
         SendVerifyP2pFailRsp(authHandle, seq, CODE_VERIFY_P2P, ret, "OnVerifyP2pRequest unpack fail", isAuthLink);
         return ret;
     }
-    struct WifiDirectManager *pManager = GetWifiDirectManager();
-    if (pManager == NULL || pManager->getLocalIpByRemoteIp == NULL) {
-        SendVerifyP2pFailRsp(authHandle, seq, CODE_VERIFY_P2P, SOFTBUS_WIFI_DIRECT_INIT_FAILED,
-            "get wifidirectmanager or localip fail", isAuthLink);
-        return SOFTBUS_WIFI_DIRECT_INIT_FAILED;
-    }
-    ret = pManager->getLocalIpByRemoteIp(peerIp, myIp, sizeof(myIp));
-    if (ret != SOFTBUS_OK) {
-        OutputAnonymizeIpAddress(myIp, peerIp);
-        TRANS_LOGE(TRANS_CTRL, "get Local Ip fail, ret=%{public}d", ret);
-        SendVerifyP2pFailRsp(authHandle, seq, CODE_VERIFY_P2P, ret, "get p2p ip fail", isAuthLink);
-        return SOFTBUS_TRANS_GET_P2P_INFO_FAILED;
-    }
-    if (protocol == LNN_PROTOCOL_HTP) {
-        ret = ServerOpenHtpChannelPacked(peerIp, seq);
-        if (ret != SOFTBUS_OK) {
-            TRANS_LOGE(TRANS_CTRL, "start vsp channel failed ret=%{public}d, degrade to tcp protocol", ret);
-            protocol = LNN_PROTOCOL_IP;
-        }
-    }
     char peerUuid[UUID_BUF_LEN] = { 0 };
     ret = TransGetRemoteUuidByAuthHandle(authHandle, peerUuid);
     TRANS_CHECK_AND_RETURN_RET_LOGE(ret == SOFTBUS_OK, ret, TRANS_CTRL, "get remote uuid failed.");
+    ret = TransGetLocalIp(myIp, peerIp, peerUuid);
+    if (ret != SOFTBUS_OK) {
+        SendVerifyP2pFailRsp(authHandle, seq, CODE_VERIFY_P2P, ret, "get local ip fail", isAuthLink);
+        TRANS_LOGE(TRANS_CTRL, "get Local Ip fail, ret=%{public}d", ret);
+        return ret;
+    }
+    if (protocol == LNN_PROTOCOL_HTP) {
+        if ((peerUid != -1 && !CheckHtpPermissionPacked(peerUid)) ||
+            ServerOpenHtpChannelPacked(peerIp, seq) != SOFTBUS_OK) {
+            TRANS_LOGE(TRANS_CTRL, "start vsp channel failed, degrade to tcp protocol");
+            protocol = LNN_PROTOCOL_IP;
+        }
+    }
     if (IsHmlIpAddr(myIp)) {
         ret = StartHmlListener(myIp, &myPort, peerUuid, protocol);
     } else {
@@ -824,6 +860,7 @@ static int32_t OnVerifyP2pRequest(AuthHandle authHandle, int64_t seq, const cJSO
     if (ret != SOFTBUS_OK) {
         OutputAnonymizeIpAddress(myIp, peerIp);
         SendVerifyP2pFailRsp(authHandle, seq, CODE_VERIFY_P2P, ret, "invalid p2p port", isAuthLink);
+        DeleteExternalP2pListener(peerUuid);
         return ret;
     }
     VerifyP2pInfo info = {
@@ -831,9 +868,14 @@ static int32_t OnVerifyP2pRequest(AuthHandle authHandle, int64_t seq, const cJSO
         .myPort = myPort,
         .peerIp = NULL,
         .protocol = protocol,
+        .myUid = 1,
     };
     ret = PackAndSendVerifyP2pRsp(&info, seq, isAuthLink, authHandle);
-    TRANS_CHECK_AND_RETURN_RET_LOGE(ret == SOFTBUS_OK, ret, TRANS_CTRL, "fail to send VerifyP2pRsp.");
+    if (ret != SOFTBUS_OK) {
+        DeleteExternalP2pListener(peerUuid);
+        TRANS_LOGE(TRANS_CTRL, "fail to send VerifyP2pRsp. ret=%{public}d.", ret);
+        return ret;
+    }
     LaneAddP2pAddressByIp(peerIp, peerPort);
     return SOFTBUS_OK;
 }
@@ -975,6 +1017,7 @@ static int32_t OnVerifyP2pReply(int64_t authId, int64_t seq, const cJSON *json)
     char peerUuid[UUID_BUF_LEN] = { 0 };
     int32_t peerPort = -1;
     ProtocolType protocol = LNN_PROTOCOL_IP;
+    int32_t peerUid = 0;
 
     if (GetSessionConnLock() != SOFTBUS_OK) {
         TRANS_LOGE(TRANS_CTRL, "getsessionconnlock fail");
@@ -988,7 +1031,7 @@ static int32_t OnVerifyP2pReply(int64_t authId, int64_t seq, const cJSON *json)
     SoftbusHitraceStart(SOFTBUS_HITRACE_ID_VALID, (uint64_t)(conn->channelId + ID_OFFSET));
     channelId = conn->channelId;
 
-    ret = VerifyP2pUnPack(json, conn->appInfo.peerData.addr, IP_LEN, &conn->appInfo.peerData.port, &protocol);
+    ret = VerifyP2pUnPack(json, conn->appInfo.peerData.addr, &conn->appInfo.peerData.port, &protocol, &peerUid);
     if (ret != SOFTBUS_OK) {
         ReleaseSessionConnLock();
         TRANS_LOGE(TRANS_CTRL, "unpack fail: ret=%{public}d", ret);
@@ -999,6 +1042,7 @@ static int32_t OnVerifyP2pReply(int64_t authId, int64_t seq, const cJSON *json)
     if (conn->appInfo.fdProtocol == LNN_PROTOCOL_HTP && protocol == LNN_PROTOCOL_IP) {
         CloseHtpChannelPacked(conn->channelId);
         conn->appInfo.fdProtocol = LNN_PROTOCOL_IP;
+        conn->appInfo.isFlashLight = false;
         (void)StartTransP2pDirectListener(CONNECT_P2P, conn, &conn->appInfo);
     }
     if (conn->appInfo.fdProtocol == LNN_PROTOCOL_HTP) {
@@ -1179,7 +1223,6 @@ static int32_t StartVerifyP2pInfo(const AppInfo *appInfo, SessionConn *conn, Con
         if (type == CONNECT_P2P_REUSE) {
             type = IsHmlIpAddr(appInfo->myData.addr) ? CONNECT_HML : CONNECT_P2P;
         }
-        TRANS_LOGD(TRANS_CTRL, "type=%{public}d", type);
         ret = OpenNewAuthConn(appInfo, conn, newChannelId, type);
     } else {
         ret = TransProxyReuseByChannelId(pipeLineChannelId);
@@ -1192,7 +1235,8 @@ static int32_t StartVerifyP2pInfo(const AppInfo *appInfo, SessionConn *conn, Con
         TRANS_CHECK_AND_RETURN_RET_LOGE(ret == SOFTBUS_OK, ret, TRANS_CTRL, "get auth id failed");
         conn->requestId = REQUEST_INVALID;
         ProtocolType protocol = conn->appInfo.fdProtocol;
-        char *msg = VerifyP2pPack(conn->appInfo.myData.addr, conn->appInfo.myData.port, NULL, protocol);
+        char *msg = VerifyP2pPack(
+            conn->appInfo.myData.addr, conn->appInfo.myData.port, NULL, protocol, conn->appInfo.myData.uid);
         if (msg == NULL) {
             TRANS_LOGE(TRANS_CTRL, "verify p2p pack failed");
             return SOFTBUS_TRANS_VERIFY_P2P_FAILED;
@@ -1321,7 +1365,11 @@ int32_t OpenP2pDirectChannel(const AppInfo *appInfo, const ConnectOption *connIn
         TRANS_LOGE(TRANS_CTRL, "start listener fail");
         return ret;
     }
-    conn->isMeta = TransGetAuthTypeByNetWorkId(appInfo->peerNetWorkId);
+    if (appInfo->osType == HA_OS_TYPE) {
+        conn->isMeta = true;
+    } else {
+        conn->isMeta = TransGetAuthTypeByNetWorkId(appInfo->peerNetWorkId);
+    }
     ret = TransTdcAddSessionConn(conn);
     if (ret != SOFTBUS_OK) {
         FreeFastTransData(&(conn->appInfo));
@@ -1337,6 +1385,16 @@ int32_t OpenP2pDirectChannel(const AppInfo *appInfo, const ConnectOption *connIn
     *channelId = conn->channelId;
     TRANS_LOGI(TRANS_CTRL, "end: channelId=%{public}d", conn->channelId);
     return ret;
+}
+
+static void TransStopP2pListenerHandle(const LnnEventBasicInfo *info)
+{
+    if (info == NULL || info->event != LNN_EVENT_HA_LEAVE_META_NODE) {
+        TRANS_LOGE(TRANS_CTRL, "invalid param.");
+        return;
+    }
+    LnnHaLeaveMetaNodeEvent *leaveInfo = (LnnHaLeaveMetaNodeEvent *)info;
+    StopP2pListenerByRemoteUuid(leaveInfo->metaNodeId);
 }
 
 int32_t P2pDirectChannelInit(void)
@@ -1358,6 +1416,9 @@ int32_t P2pDirectChannelInit(void)
 
     ret = RegAuthTransListener(MODULE_SESSION_KEY_AUTH, &p2pTransCb);
     TRANS_CHECK_AND_RETURN_RET_LOGE(ret == SOFTBUS_OK, ret, TRANS_INIT, "set sessionkey cb fail");
+
+    ret = LnnRegisterEventHandler(LNN_EVENT_HA_LEAVE_META_NODE, TransStopP2pListenerHandle);
+    TRANS_CHECK_AND_RETURN_RET_LOGE(ret == SOFTBUS_OK, ret, TRANS_INIT, "set HA leave Meta handle fail.");
 
     ITransProxyPipelineListener listener = {
         .onDataReceived = OnP2pVerifyMsgReceived,

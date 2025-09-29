@@ -405,6 +405,7 @@ static int32_t StartConnConnectDevice(const char *addr,
         .bleOption.protocol = protocol,
         .bleOption.fastestConnectEnable = true,
         .bleOption.psm = GENERAL_PSM,
+        .bleOption.connectTimeoutMs = GENERAL_CONNECT_TIMEOUT_MILLIS,
     };
     if (strcpy_s(option.bleOption.bleMac, BT_MAC_LEN, addr) != EOK) {
         CONN_LOGE(CONN_BLE, "copy mac fail");

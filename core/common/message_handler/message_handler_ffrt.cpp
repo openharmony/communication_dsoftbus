@@ -169,7 +169,7 @@ static void DumpMsgInfo(const SoftBusMessage *msg)
     if (msg->handler->name != nullptr && strcmp(msg->handler->name, QOS_PERCEPTION_HANDLER) == 0) {
         return;
     }
-    COMM_LOGI(COMM_UTILS, "handling msg, %{public}s, %{public}s, %{public}" PRId32 ", %{public}" PRIu64 ", "
+    COMM_LOGD(COMM_UTILS, "handling msg, %{public}s, %{public}s, %{public}" PRId32 ", %{public}" PRIu64 ", "
         "%{public}" PRIu64 ", %{public}" PRId64 "",
         msg->handler->looper->context->name, msg->handler->name, msg->what, msg->arg1, msg->arg2, msg->time);
 }
@@ -218,7 +218,7 @@ static int32_t GetMsgNodeFromContext(SoftBusMessageNode **msgNode,
     LIST_FOR_EACH_SAFE(item, nextItem, &(looper->context->msgHead)) {
         SoftBusMessageNode *itemNode = LIST_ENTRY(item, SoftBusMessageNode, node);
         SoftBusMessage *msg = itemNode->msg;
-        if (tmpMsg->what == msg->what && tmpMsg->arg1 == msg->arg1 && tmpMsg->arg2 == msg->arg2 &&
+        if (msg != nullptr && tmpMsg->what == msg->what && tmpMsg->arg1 == msg->arg1 && tmpMsg->arg2 == msg->arg2 &&
             tmpMsg->time == msg->time && tmpMsg->handler == msg->handler) {
             ListDelete(&itemNode->node);
             *msgNode = itemNode;
