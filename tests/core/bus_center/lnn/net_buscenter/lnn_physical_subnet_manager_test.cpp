@@ -50,6 +50,7 @@ void LNNPhysicalSubnetManagerTest::TearDown()
  * @tc.name: LNN_REGIST_PHYSICAL_SUBNET_001
  * @tc.desc: test subnet null or subnet->protocol null
  * @tc.type: FUNC
+ * @tc.level: Level1
  * @tc.require:
  */
 HWTEST_F(LNNPhysicalSubnetManagerTest, LNN_REGIST_PHYSICAL_SUBNET_001, TestSize.Level1)
@@ -70,6 +71,7 @@ HWTEST_F(LNNPhysicalSubnetManagerTest, LNN_REGIST_PHYSICAL_SUBNET_001, TestSize.
  * @tc.name: LNN_REGIST_PHYSICAL_SUBNET_002
  * @tc.desc: test subnet is full
  * @tc.type: FUNC
+ * @tc.level: Level1
  * @tc.require:
  */
 HWTEST_F(LNNPhysicalSubnetManagerTest, LNN_REGIST_PHYSICAL_SUBNET_002, TestSize.Level1)
@@ -92,6 +94,7 @@ HWTEST_F(LNNPhysicalSubnetManagerTest, LNN_REGIST_PHYSICAL_SUBNET_002, TestSize.
  * @tc.name: LNN_UNREGIST_PHYSICAL_SUBNET_BY_TYPE
  * @tc.desc: test LnnUnregistPhysicalSubnetByType
  * @tc.type: FUNC
+ * @tc.level: Level1
  * @tc.require:
  */
 HWTEST_F(LNNPhysicalSubnetManagerTest, LNN_UNREGIST_PHYSICAL_SUBNET_BY_TYPE, TestSize.Level1)
@@ -115,6 +118,7 @@ HWTEST_F(LNNPhysicalSubnetManagerTest, LNN_UNREGIST_PHYSICAL_SUBNET_BY_TYPE, Tes
  * @tc.name: LNN_VISIT_PHYSICAL_SUBNET
  * @tc.desc: test LnnVisitPhysicalSubnet
  * @tc.type: FUNC
+ * @tc.level: Level1
  * @tc.require:
  */
 HWTEST_F(LNNPhysicalSubnetManagerTest, LNN_VISIT_PHYSICAL_SUBNET, TestSize.Level1)

@@ -103,6 +103,7 @@ static ListenerModule LnnGetBtListenerModule(ListenerMode mode)
  * @tc.desc: len is not CONNECTION_ADDR_MAX return SOFTBUS_INVALID_PARAM
  * @tc.type: FUNC
  * @tc.require: I5OMIK
+ * @tc.level: Level1
  */
 HWTEST_F(LNNNetworkManagerMockTest, LNN_NETWORK_MANAGER_TEST_001, TestSize.Level1)
 {
@@ -145,6 +146,7 @@ HWTEST_F(LNNNetworkManagerMockTest, LNN_NETWORK_MANAGER_TEST_001, TestSize.Level
  * @tc.desc: len is not CONNECTION_ADDR_MAX return SOFTBUS_INVALID_PARAM
  * @tc.type: FUNC
  * @tc.require: I5OMIK
+ * @tc.level: Level1
  */
 HWTEST_F(LNNNetworkManagerMockTest, LNN_NETWORK_MANAGER_TEST_002, TestSize.Level1)
 {
@@ -178,6 +180,7 @@ HWTEST_F(LNNNetworkManagerMockTest, LNN_NETWORK_MANAGER_TEST_002, TestSize.Level
  * @tc.desc: len is not CONNECTION_ADDR_MAX return SOFTBUS_INVALID_PARAM
  * @tc.type: FUNC
  * @tc.require: I5OMIK
+ * @tc.level: Level1
  */
 HWTEST_F(LNNNetworkManagerMockTest, LNN_NETWORK_MANAGER_TEST_003, TestSize.Level1)
 {
@@ -233,6 +236,7 @@ HWTEST_F(LNNNetworkManagerMockTest, LNN_NETWORK_MANAGER_TEST_003, TestSize.Level
  * @tc.desc: len is not CONNECTION_ADDR_MAX return SOFTBUS_INVALID_PARAM
  * @tc.type: FUNC
  * @tc.require: I5OMIK
+ * @tc.level: Level1
  */
 HWTEST_F(LNNNetworkManagerMockTest, LNN_NETWORK_MANAGER_TEST_004, TestSize.Level1)
 {

@@ -96,6 +96,7 @@ static void ClearNetBuilderFsmList()
  * @tc.desc: lnn init netbuilder test
  * @tc.type: FUNC
  * @tc.require:
+ * @tc.level: Level1
  */
 HWTEST_F(LNNNetBuilderMockTest, LNN_INIT_NET_BUILDER_TEST_001, TestSize.Level1)
 {
@@ -129,6 +130,7 @@ HWTEST_F(LNNNetBuilderMockTest, LNN_INIT_NET_BUILDER_TEST_001, TestSize.Level1)
  * @tc.desc: config local ledger test
  * @tc.type: FUNC
  * @tc.require:
+ * @tc.level: Level1
  */
 HWTEST_F(LNNNetBuilderMockTest, CONFIG_LOCAL_LEDGER_TEST_001, TestSize.Level1)
 {
@@ -153,6 +155,7 @@ HWTEST_F(LNNNetBuilderMockTest, CONFIG_LOCAL_LEDGER_TEST_001, TestSize.Level1)
  * @tc.desc: lnn init netbuilder delay test
  * @tc.type: FUNC
  * @tc.require:
+ * @tc.level: Level1
  */
 HWTEST_F(LNNNetBuilderMockTest, LNN_INIT_NET_BUILDER_DELAY_TEST_001, TestSize.Level1)
 {
@@ -175,6 +178,7 @@ HWTEST_F(LNNNetBuilderMockTest, LNN_INIT_NET_BUILDER_DELAY_TEST_001, TestSize.Le
  * @tc.desc: ProcessLeaveByAddrType test
  * @tc.type: FUNC
  * @tc.require:
+ * @tc.level: Level1
  */
 HWTEST_F(LNNNetBuilderMockTest, PROCESS_LEAVE_BY_ADDR_TYPE_TEST_002, TestSize.Level1)
 {
@@ -231,6 +235,7 @@ HWTEST_F(LNNNetBuilderMockTest, PROCESS_LEAVE_BY_ADDR_TYPE_TEST_002, TestSize.Le
  * @tc.desc: lnn update node addr test
  * @tc.type: FUNC
  * @tc.require:
+ * @tc.level: Level1
  */
 HWTEST_F(LNNNetBuilderMockTest, LNN_UPDATE_NODE_ADDR_TEST_001, TestSize.Level1)
 {
@@ -255,6 +260,7 @@ HWTEST_F(LNNNetBuilderMockTest, LNN_UPDATE_NODE_ADDR_TEST_001, TestSize.Level1)
  * @tc.desc: node info sync test
  * @tc.type: FUNC
  * @tc.require:
+ * @tc.level: Level1
  */
 HWTEST_F(LNNNetBuilderMockTest, NODE_INFO_SYNC_TEST_001, TestSize.Level1)
 {
@@ -283,6 +289,7 @@ HWTEST_F(LNNNetBuilderMockTest, NODE_INFO_SYNC_TEST_001, TestSize.Level1)
  * @tc.desc: on device not trusted test
  * @tc.type: FUNC
  * @tc.require:
+ * @tc.level: Level1
  */
 HWTEST_F(LNNNetBuilderMockTest, ON_DEVICE_NOT_TRUSTED_TEST_001, TestSize.Level1)
 {
@@ -315,6 +322,7 @@ HWTEST_F(LNNNetBuilderMockTest, ON_DEVICE_NOT_TRUSTED_TEST_001, TestSize.Level1)
  * @tc.desc: on device verify pass test
  * @tc.type: FUNC
  * @tc.require:
+ * @tc.level: Level1
  */
 HWTEST_F(LNNNetBuilderMockTest, ON_DEVICE_VERIFY_PASS_TEST_001, TestSize.Level1)
 {
@@ -339,6 +347,7 @@ HWTEST_F(LNNNetBuilderMockTest, ON_DEVICE_VERIFY_PASS_TEST_001, TestSize.Level1)
  * @tc.desc: get current connect type test
  * @tc.type: FUNC
  * @tc.require:
+ * @tc.level: Level1
  */
 HWTEST_F(LNNNetBuilderMockTest, GET_CURRENT_CONNECT_TYPE_TEST_001, TestSize.Level1)
 {
@@ -359,6 +368,7 @@ HWTEST_F(LNNNetBuilderMockTest, GET_CURRENT_CONNECT_TYPE_TEST_001, TestSize.Leve
  * @tc.desc: process leave specific test
  * @tc.type: FUNC
  * @tc.require:
+ * @tc.level: Level1
  */
 HWTEST_F(LNNNetBuilderMockTest, PROCESS_LEAVE_SPECIFIC_TEST_001, TestSize.Level1)
 {
@@ -372,6 +382,7 @@ HWTEST_F(LNNNetBuilderMockTest, PROCESS_LEAVE_SPECIFIC_TEST_001, TestSize.Level1
  * @tc.desc: process leave by addr type test
  * @tc.type: FUNC
  * @tc.require:
+ * @tc.level: Level1
  */
 HWTEST_F(LNNNetBuilderMockTest, PROCESS_LEAVE_BY_ADDR_TYPE_TEST_001, TestSize.Level1)
 {
@@ -386,6 +397,7 @@ HWTEST_F(LNNNetBuilderMockTest, PROCESS_LEAVE_BY_ADDR_TYPE_TEST_001, TestSize.Le
  * @tc.desc: process elect test
  * @tc.type: FUNC
  * @tc.require:
+ * @tc.level: Level1
  */
 HWTEST_F(LNNNetBuilderMockTest, PROCESS_ELETE_TEST_001, TestSize.Level1)
 {
@@ -416,6 +428,7 @@ HWTEST_F(LNNNetBuilderMockTest, PROCESS_ELETE_TEST_001, TestSize.Level1)
  * @tc.desc: process node state changed test
  * @tc.type: FUNC
  * @tc.require:
+ * @tc.level: Level1
  */
 HWTEST_F(LNNNetBuilderMockTest, PROCESS_NODE_STATE_CHANGED_TEST_001, TestSize.Level1)
 {
@@ -431,6 +444,7 @@ HWTEST_F(LNNNetBuilderMockTest, PROCESS_NODE_STATE_CHANGED_TEST_001, TestSize.Le
  * @tc.desc: process node state changed test
  * @tc.type: FUNC
  * @tc.require:
+ * @tc.level: Level1
  */
 HWTEST_F(LNNNetBuilderMockTest, PROCESS_NODE_STATE_CHANGED_TEST_002, TestSize.Level1)
 {
@@ -469,6 +483,7 @@ HWTEST_F(LNNNetBuilderMockTest, PROCESS_NODE_STATE_CHANGED_TEST_002, TestSize.Le
  * @tc.desc: process node state changed test
  * @tc.type: FUNC
  * @tc.require:
+ * @tc.level: Level1
  */
 HWTEST_F(LNNNetBuilderMockTest, PROCESS_NODE_STATE_CHANGED_TEST_003, TestSize.Level1)
 {
@@ -503,6 +518,7 @@ HWTEST_F(LNNNetBuilderMockTest, PROCESS_NODE_STATE_CHANGED_TEST_003, TestSize.Le
  * @tc.desc: try elect node offline test
  * @tc.type: FUNC
  * @tc.require:
+ * @tc.level: Level1
  */
 HWTEST_F(LNNNetBuilderMockTest, TRY_ELECT_NODE_OFFLINE_TEST_001, TestSize.Level1)
 {
@@ -520,6 +536,7 @@ HWTEST_F(LNNNetBuilderMockTest, TRY_ELECT_NODE_OFFLINE_TEST_001, TestSize.Level1
  * @tc.desc: try elect node online test
  * @tc.type: FUNC
  * @tc.require:
+ * @tc.level: Level1
  */
 HWTEST_F(LNNNetBuilderMockTest, TRY_ELECT_NODE_ONLINE_TEST_001, TestSize.Level1)
 {
@@ -550,6 +567,7 @@ HWTEST_F(LNNNetBuilderMockTest, TRY_ELECT_NODE_ONLINE_TEST_001, TestSize.Level1)
  * @tc.desc: process leave invalid conn test
  * @tc.type: FUNC
  * @tc.require:
+ * @tc.level: Level1
  */
 HWTEST_F(LNNNetBuilderMockTest, PROCESS_LEAVE_INVALID_CONN_TEST_001, TestSize.Level1)
 {
@@ -565,6 +583,7 @@ HWTEST_F(LNNNetBuilderMockTest, PROCESS_LEAVE_INVALID_CONN_TEST_001, TestSize.Le
  * @tc.desc: is invalid connection fsm test
  * @tc.type: FUNC
  * @tc.require:
+ * @tc.level: Level1
  */
 HWTEST_F(LNNNetBuilderMockTest, IS_INVALID_CONNECTION_FSM_TEST_001, TestSize.Level1)
 {
@@ -597,6 +616,7 @@ HWTEST_F(LNNNetBuilderMockTest, IS_INVALID_CONNECTION_FSM_TEST_001, TestSize.Lev
  * @tc.desc: process sync offline finish test
  * @tc.type: FUNC
  * @tc.require:
+ * @tc.level: Level1
  */
 HWTEST_F(LNNNetBuilderMockTest, PROCESS_SYNC_OFFLINE_FINISH_TEST_001, TestSize.Level1)
 {
@@ -612,6 +632,7 @@ HWTEST_F(LNNNetBuilderMockTest, PROCESS_SYNC_OFFLINE_FINISH_TEST_001, TestSize.L
  * @tc.desc: process leave lnn request test
  * @tc.type: FUNC
  * @tc.require:
+ * @tc.level: Level1
  */
 HWTEST_F(LNNNetBuilderMockTest, PROCESS_LEAVE_LNN_REQUEST_TEST_001, TestSize.Level1)
 {
@@ -628,6 +649,7 @@ HWTEST_F(LNNNetBuilderMockTest, PROCESS_LEAVE_LNN_REQUEST_TEST_001, TestSize.Lev
  * @tc.desc: process device not trusted test
  * @tc.type: FUNC
  * @tc.require:
+ * @tc.level: Level1
  */
 HWTEST_F(LNNNetBuilderMockTest, PROCESS_DEVICE_NOT_TRUSTED_TEST_001, TestSize.Level1)
 {
@@ -645,6 +667,7 @@ HWTEST_F(LNNNetBuilderMockTest, PROCESS_DEVICE_NOT_TRUSTED_TEST_001, TestSize.Le
  * @tc.desc: process device disconnect test
  * @tc.type: FUNC
  * @tc.require:
+ * @tc.level: Level1
  */
 HWTEST_F(LNNNetBuilderMockTest, PROCESS_DEVICE_DISCONNECT_TEST_001, TestSize.Level1)
 {
@@ -660,6 +683,7 @@ HWTEST_F(LNNNetBuilderMockTest, PROCESS_DEVICE_DISCONNECT_TEST_001, TestSize.Lev
  * @tc.desc: process device verify pass test
  * @tc.type: FUNC
  * @tc.require:
+ * @tc.level: Level1
  */
 HWTEST_F(LNNNetBuilderMockTest, PROCESS_DEVICE_VERIFY_PASS_TEST_001, TestSize.Level1)
 {
@@ -678,6 +702,7 @@ HWTEST_F(LNNNetBuilderMockTest, PROCESS_DEVICE_VERIFY_PASS_TEST_001, TestSize.Le
  * @tc.desc: process verify result test
  * @tc.type: FUNC
  * @tc.require:
+ * @tc.level: Level1
  */
 HWTEST_F(LNNNetBuilderMockTest, PROCESS_VERIFY_RESULT_TEST_001, TestSize.Level1)
 {
@@ -699,6 +724,7 @@ HWTEST_F(LNNNetBuilderMockTest, PROCESS_VERIFY_RESULT_TEST_001, TestSize.Level1)
  * @tc.desc: process clean connection fsm test
  * @tc.type: FUNC
  * @tc.require:
+ * @tc.level: Level1
  */
 HWTEST_F(LNNNetBuilderMockTest, PROCESS_CLEAN_CONNECTION_FSM_TEST_001, TestSize.Level1)
 {
@@ -714,6 +740,7 @@ HWTEST_F(LNNNetBuilderMockTest, PROCESS_CLEAN_CONNECTION_FSM_TEST_001, TestSize.
  * @tc.desc: is node online test
  * @tc.type: FUNC
  * @tc.require:
+ * @tc.level: Level1
  */
 HWTEST_F(LNNNetBuilderMockTest, IS_NODE_ONLINE_TEST_001, TestSize.Level1)
 {
@@ -732,6 +759,7 @@ HWTEST_F(LNNNetBuilderMockTest, IS_NODE_ONLINE_TEST_001, TestSize.Level1)
  * @tc.desc: update local node test
  * @tc.type: FUNC
  * @tc.require:
+ * @tc.level: Level1
  */
 HWTEST_F(LNNNetBuilderMockTest, UPDATE_LOCAL_NODE_TEST_001, TestSize.Level1)
 {
@@ -757,6 +785,7 @@ HWTEST_F(LNNNetBuilderMockTest, UPDATE_LOCAL_NODE_TEST_001, TestSize.Level1)
  * @tc.desc: dup node info test
  * @tc.type: FUNC
  * @tc.require:
+ * @tc.level: Level1
  */
 HWTEST_F(LNNNetBuilderMockTest, DUP_NODE_INFO_TEST_001, TestSize.Level1)
 {
@@ -780,6 +809,7 @@ HWTEST_F(LNNNetBuilderMockTest, DUP_NODE_INFO_TEST_001, TestSize.Level1)
  * @tc.desc: net builder config init test
  * @tc.type: FUNC
  * @tc.require:
+ * @tc.level: Level1
  */
 HWTEST_F(LNNNetBuilderMockTest, FIND_CONNECTION_FSM_TEST_001, TestSize.Level1)
 {
@@ -832,6 +862,7 @@ HWTEST_F(LNNNetBuilderMockTest, FIND_CONNECTION_FSM_TEST_001, TestSize.Level1)
  * @tc.desc: send elect message to all test
  * @tc.type: FUNC
  * @tc.require:
+ * @tc.level: Level1
  */
 HWTEST_F(LNNNetBuilderMockTest, SEND_ELECT_MESSAGE_TO_ALL_TEST_001, TestSize.Level1)
 {
@@ -865,6 +896,7 @@ HWTEST_F(LNNNetBuilderMockTest, SEND_ELECT_MESSAGE_TO_ALL_TEST_001, TestSize.Lev
  * @tc.desc: send elect message to all test
  * @tc.type: FUNC
  * @tc.require:
+ * @tc.level: Level1
  */
 HWTEST_F(LNNNetBuilderMockTest, SEND_ELECT_MESSAGE_TO_ALL_TEST_002, TestSize.Level1)
 {
@@ -909,6 +941,7 @@ HWTEST_F(LNNNetBuilderMockTest, SEND_ELECT_MESSAGE_TO_ALL_TEST_002, TestSize.Lev
  * @tc.desc: initiate new network online test
  * @tc.type: FUNC
  * @tc.require:
+ * @tc.level: Level1
  */
 HWTEST_F(LNNNetBuilderMockTest, INITIATE_NEW_NETWORK_ONLINE_TEST_001, TestSize.Level1)
 {
@@ -937,6 +970,7 @@ HWTEST_F(LNNNetBuilderMockTest, INITIATE_NEW_NETWORK_ONLINE_TEST_001, TestSize.L
  * @tc.desc: tyr disconnect all connection test
  * @tc.type: FUNC
  * @tc.require:
+ * @tc.level: Level1
  */
 HWTEST_F(LNNNetBuilderMockTest, TRY_DISCONNECT_ALL_CONNECTION_TEST_001, TestSize.Level1)
 {
@@ -975,6 +1009,7 @@ HWTEST_F(LNNNetBuilderMockTest, TRY_DISCONNECT_ALL_CONNECTION_TEST_001, TestSize
  * @tc.desc: tyr disconnect all connection test
  * @tc.type: FUNC
  * @tc.require:
+ * @tc.level: Level1
  */
 HWTEST_F(LNNNetBuilderMockTest, TRY_DISCONNECT_ALL_CONNECTION_TEST_002, TestSize.Level1)
 {
@@ -1008,6 +1043,7 @@ HWTEST_F(LNNNetBuilderMockTest, TRY_DISCONNECT_ALL_CONNECTION_TEST_002, TestSize
  * @tc.desc: process verify result test
  * @tc.type: FUNC
  * @tc.require:
+ * @tc.level: Level1
  */
 HWTEST_F(LNNNetBuilderMockTest, PROCESS_VERIFY_RESULT_TEST_002, TestSize.Level1)
 {
@@ -1033,6 +1069,7 @@ HWTEST_F(LNNNetBuilderMockTest, PROCESS_VERIFY_RESULT_TEST_002, TestSize.Level1)
  * @tc.desc: process verify result test
  * @tc.type: FUNC
  * @tc.require:
+ * @tc.level: Level1
  */
 HWTEST_F(LNNNetBuilderMockTest, PROCESS_VERIFY_RESULT_TEST_003, TestSize.Level1)
 {
@@ -1060,6 +1097,7 @@ HWTEST_F(LNNNetBuilderMockTest, PROCESS_VERIFY_RESULT_TEST_003, TestSize.Level1)
  * @tc.desc: process verify result test
  * @tc.type: FUNC
  * @tc.require:
+ * @tc.level: Level1
  */
 HWTEST_F(LNNNetBuilderMockTest, PROCESS_VERIFY_RESULT_TEST_004, TestSize.Level1)
 {
@@ -1085,6 +1123,7 @@ HWTEST_F(LNNNetBuilderMockTest, PROCESS_VERIFY_RESULT_TEST_004, TestSize.Level1)
  * @tc.desc: process device verify pass test
  * @tc.type: FUNC
  * @tc.require:
+ * @tc.level: Level1
  */
 HWTEST_F(LNNNetBuilderMockTest, PROCESS_DEVICE_VERIFY_PASS_TEST_002, TestSize.Level1)
 {
@@ -1114,6 +1153,7 @@ HWTEST_F(LNNNetBuilderMockTest, PROCESS_DEVICE_VERIFY_PASS_TEST_002, TestSize.Le
  * @tc.desc: process device verify pass test
  * @tc.type: FUNC
  * @tc.require:
+ * @tc.level: Level1
  */
 HWTEST_F(LNNNetBuilderMockTest, PROCESS_DEVICE_VERIFY_PASS_TEST_003, TestSize.Level1)
 {
@@ -1144,6 +1184,7 @@ HWTEST_F(LNNNetBuilderMockTest, PROCESS_DEVICE_VERIFY_PASS_TEST_003, TestSize.Le
  * @tc.desc: process device verify pass test
  * @tc.type: FUNC
  * @tc.require:
+ * @tc.level: Level1
  */
 HWTEST_F(LNNNetBuilderMockTest, PROCESS_DEVICE_VERIFY_PASS_TEST_004, TestSize.Level1)
 {
@@ -1172,6 +1213,7 @@ HWTEST_F(LNNNetBuilderMockTest, PROCESS_DEVICE_VERIFY_PASS_TEST_004, TestSize.Le
  * @tc.desc: process device not trusted test
  * @tc.type: FUNC
  * @tc.require:
+ * @tc.level: Level1
  */
 HWTEST_F(LNNNetBuilderMockTest, PROCESS_DEVICE_NOT_TRUSTED_TEST_002, TestSize.Level1)
 {
@@ -1196,6 +1238,7 @@ HWTEST_F(LNNNetBuilderMockTest, PROCESS_DEVICE_NOT_TRUSTED_TEST_002, TestSize.Le
  * @tc.desc: process leave lnn request test
  * @tc.type: FUNC
  * @tc.require:
+ * @tc.level: Level1
  */
 HWTEST_F(LNNNetBuilderMockTest, PROCESS_LEAVE_LNN_REQUEST_TEST_002, TestSize.Level1)
 {
@@ -1220,6 +1263,7 @@ HWTEST_F(LNNNetBuilderMockTest, PROCESS_LEAVE_LNN_REQUEST_TEST_002, TestSize.Lev
  * @tc.desc: process leave lnn request test
  * @tc.type: FUNC
  * @tc.require:
+ * @tc.level: Level1
  */
 HWTEST_F(LNNNetBuilderMockTest, PROCESS_LEAVE_LNN_REQUEST_TEST_003, TestSize.Level1)
 {
@@ -1245,6 +1289,7 @@ HWTEST_F(LNNNetBuilderMockTest, PROCESS_LEAVE_LNN_REQUEST_TEST_003, TestSize.Lev
  * @tc.desc: process leave lnn request test
  * @tc.type: FUNC
  * @tc.require:
+ * @tc.level: Level1
  */
 HWTEST_F(LNNNetBuilderMockTest, PROCESS_LEAVE_LNN_REQUEST_TEST_004, TestSize.Level1)
 {
@@ -1271,6 +1316,7 @@ HWTEST_F(LNNNetBuilderMockTest, PROCESS_LEAVE_LNN_REQUEST_TEST_004, TestSize.Lev
  * @tc.desc: process sync offline finish test
  * @tc.type: FUNC
  * @tc.require:
+ * @tc.level: Level1
  */
 HWTEST_F(LNNNetBuilderMockTest, PROCESS_SYNC_OFFLINE_FINISH_TEST_002, TestSize.Level1)
 {
@@ -1293,6 +1339,7 @@ HWTEST_F(LNNNetBuilderMockTest, PROCESS_SYNC_OFFLINE_FINISH_TEST_002, TestSize.L
  * @tc.desc: process sync offline finish test
  * @tc.type: FUNC
  * @tc.require:
+ * @tc.level: Level1
  */
 HWTEST_F(LNNNetBuilderMockTest, PROCESS_SYNC_OFFLINE_FINISH_TEST_003, TestSize.Level1)
 {
@@ -1316,6 +1363,7 @@ HWTEST_F(LNNNetBuilderMockTest, PROCESS_SYNC_OFFLINE_FINISH_TEST_003, TestSize.L
  * @tc.desc: process leave specific test
  * @tc.type: FUNC
  * @tc.require:
+ * @tc.level: Level1
  */
 HWTEST_F(LNNNetBuilderMockTest, PROCESS_LEAVE_SPECIFIC_TEST_002, TestSize.Level1)
 {
@@ -1343,6 +1391,7 @@ HWTEST_F(LNNNetBuilderMockTest, PROCESS_LEAVE_SPECIFIC_TEST_002, TestSize.Level1
  * @tc.desc: process leave specific test
  * @tc.type: FUNC
  * @tc.require:
+ * @tc.level: Level1
  */
 HWTEST_F(LNNNetBuilderMockTest, PROCESS_LEAVE_SPECIFIC_TEST_003, TestSize.Level1)
 {
@@ -1367,6 +1416,7 @@ HWTEST_F(LNNNetBuilderMockTest, PROCESS_LEAVE_SPECIFIC_TEST_003, TestSize.Level1
  * @tc.desc: on lnn prodecc not trusted msg delay test
  * @tc.type: FUNC
  * @tc.require:
+ * @tc.level: Level1
  */
 HWTEST_F(LNNNetBuilderMockTest, ON_LNN_PROCESS_NOT_TRUSTED_MSG_DELAY_TEST_001, TestSize.Level1)
 {
@@ -1388,6 +1438,7 @@ HWTEST_F(LNNNetBuilderMockTest, ON_LNN_PROCESS_NOT_TRUSTED_MSG_DELAY_TEST_001, T
  * @tc.desc: process elect test
  * @tc.type: FUNC
  * @tc.require:
+ * @tc.level: Level1
  */
 HWTEST_F(LNNNetBuilderMockTest, PROCESS_ELETE_TEST_002, TestSize.Level1)
 {
@@ -1417,6 +1468,7 @@ HWTEST_F(LNNNetBuilderMockTest, PROCESS_ELETE_TEST_002, TestSize.Level1)
  * @tc.desc: try send join lnn request test
  * @tc.type: FUNC
  * @tc.require:
+ * @tc.level: Level1
  */
 HWTEST_F(LNNNetBuilderMockTest, TRY_SEND_JOIN_LNN_REQUEST_TEST_001, TestSize.Level1)
 {
@@ -1451,6 +1503,7 @@ HWTEST_F(LNNNetBuilderMockTest, TRY_SEND_JOIN_LNN_REQUEST_TEST_001, TestSize.Lev
  * @tc.desc: try send join lnn request test
  * @tc.type: FUNC
  * @tc.require:
+ * @tc.level: Level1
  */
 HWTEST_F(LNNNetBuilderMockTest, TRY_SEND_JOIN_LNN_REQUEST_TEST_002, TestSize.Level1)
 {
@@ -1483,6 +1536,7 @@ HWTEST_F(LNNNetBuilderMockTest, TRY_SEND_JOIN_LNN_REQUEST_TEST_002, TestSize.Lev
  * @tc.desc: try send join lnn request test
  * @tc.type: FUNC
  * @tc.require:
+ * @tc.level: Level1
  */
 HWTEST_F(LNNNetBuilderMockTest, TRY_SEND_JOIN_LNN_REQUEST_TEST_003, TestSize.Level1)
 {
@@ -1515,6 +1569,7 @@ HWTEST_F(LNNNetBuilderMockTest, TRY_SEND_JOIN_LNN_REQUEST_TEST_003, TestSize.Lev
  * @tc.desc: try send join lnn request test
  * @tc.type: FUNC
  * @tc.require:
+ * @tc.level: Level1
  */
 HWTEST_F(LNNNetBuilderMockTest, TRY_SEND_JOIN_LNN_REQUEST_TEST_004, TestSize.Level1)
 {
@@ -1547,6 +1602,7 @@ HWTEST_F(LNNNetBuilderMockTest, TRY_SEND_JOIN_LNN_REQUEST_TEST_004, TestSize.Lev
  * @tc.desc: lnn process complete not trusted msg test
  * @tc.type: FUNC
  * @tc.require:
+ * @tc.level: Level1
  */
 HWTEST_F(LNNNetBuilderMockTest, LNN_PROCESS_COMPLETE_NOT_TRUSTED_MSG_TEST_001, TestSize.Level1)
 {
@@ -1574,6 +1630,7 @@ HWTEST_F(LNNNetBuilderMockTest, LNN_PROCESS_COMPLETE_NOT_TRUSTED_MSG_TEST_001, T
  * @tc.desc: on re auth verify passed test
  * @tc.type: FUNC
  * @tc.require:
+ * @tc.level: Level1
  */
 HWTEST_F(LNNNetBuilderMockTest, ON_RE_AUTH_VERIFY_PASSED_TEST_001, TestSize.Level1)
 {
@@ -1595,6 +1652,7 @@ HWTEST_F(LNNNetBuilderMockTest, ON_RE_AUTH_VERIFY_PASSED_TEST_001, TestSize.Leve
  * @tc.desc: on re auth verify passed test
  * @tc.type: FUNC
  * @tc.require:
+ * @tc.level: Level1
  */
 HWTEST_F(LNNNetBuilderMockTest, ON_RE_AUTH_VERIFY_PASSED_TEST_002, TestSize.Level1)
 {
@@ -1626,6 +1684,7 @@ HWTEST_F(LNNNetBuilderMockTest, ON_RE_AUTH_VERIFY_PASSED_TEST_002, TestSize.Leve
  * @tc.desc: find node info by rquestid test
  * @tc.type: FUNC
  * @tc.require:
+ * @tc.level: Level1
  */
 HWTEST_F(LNNNetBuilderMockTest, FIND_NODE_INFO_BY_RQUESTID_TEST_001, TestSize.Level1)
 {
@@ -1660,6 +1719,7 @@ HWTEST_F(LNNNetBuilderMockTest, FIND_NODE_INFO_BY_RQUESTID_TEST_001, TestSize.Le
  * @tc.desc: on receive node addr changed msg test
  * @tc.type: FUNC
  * @tc.require:
+ * @tc.level: Level1
  */
 HWTEST_F(LNNNetBuilderMockTest, ON_RECEIVE_NODE_ADDR_CHANGED_MSG_TEST_001, TestSize.Level1)
 {
@@ -1693,6 +1753,7 @@ HWTEST_F(LNNNetBuilderMockTest, ON_RECEIVE_NODE_ADDR_CHANGED_MSG_TEST_001, TestS
  * @tc.desc: account state change handler test
  * @tc.type: FUNC
  * @tc.require:
+ * @tc.level: Level1
  */
 HWTEST_F(LNNNetBuilderMockTest, ACCOUNT_STATE_CHANGE_HANDLER_TEST_001, TestSize.Level1)
 {
@@ -1714,6 +1775,7 @@ HWTEST_F(LNNNetBuilderMockTest, ACCOUNT_STATE_CHANGE_HANDLER_TEST_001, TestSize.
  * @tc.desc: try initiate new network online test
  * @tc.type: FUNC
  * @tc.require:
+ * @tc.level: Level1
  */
 HWTEST_F(LNNNetBuilderMockTest, TRY_INITIATE_NEW_NETWORK_ONLINE_TEST_001, TestSize.Level1)
 {
@@ -1732,6 +1794,7 @@ HWTEST_F(LNNNetBuilderMockTest, TRY_INITIATE_NEW_NETWORK_ONLINE_TEST_001, TestSi
  * @tc.desc: lnn request leave all online nodes test
  * @tc.type: FUNC
  * @tc.require:
+ * @tc.level: Level1
  */
 HWTEST_F(LNNNetBuilderMockTest, LNN_REQUEST_LEAVE_ALL_ONLINE_NODES_TEST_001, TestSize.Level1)
 {
@@ -1747,6 +1810,7 @@ HWTEST_F(LNNNetBuilderMockTest, LNN_REQUEST_LEAVE_ALL_ONLINE_NODES_TEST_001, Tes
  * @tc.desc: ProcessLeaveByAuthId test
  * @tc.type: FUNC
  * @tc.require:
+ * @tc.level: Level1
  */
 HWTEST_F(LNNNetBuilderMockTest, PROCESS_LEAVE_BY_AUTH_ID_TEST_001, TestSize.Level1)
 {
@@ -1804,6 +1868,7 @@ HWTEST_F(LNNNetBuilderMockTest, PROCESS_LEAVE_BY_AUTH_ID_TEST_001, TestSize.Leve
  * @tc.desc: CreatePassiveConnectionFsm test
  * @tc.type: FUNC
  * @tc.require:
+ * @tc.level: Level1
  */
 HWTEST_F(LNNNetBuilderMockTest, CREATE_PASSIVE_CONNECTION_FSM_TEST_001, TestSize.Level1)
 {
@@ -1835,6 +1900,7 @@ HWTEST_F(LNNNetBuilderMockTest, CREATE_PASSIVE_CONNECTION_FSM_TEST_001, TestSize
  * @tc.desc: IsSamePendingRequest test
  * @tc.type: FUNC
  * @tc.require:
+ * @tc.level: Level1
  */
 HWTEST_F(LNNNetBuilderMockTest, IS_SAME_PENDING_REQUEST_TEST_001, TestSize.Level1)
 {
@@ -1869,6 +1935,7 @@ HWTEST_F(LNNNetBuilderMockTest, IS_SAME_PENDING_REQUEST_TEST_001, TestSize.Level
  * @tc.desc: IsNeedWifiReauth test
  * @tc.type: FUNC
  * @tc.require:
+ * @tc.level: Level1
  */
 HWTEST_F(LNNNetBuilderMockTest, IS_NEED_WIFI_REAUTH_TEST_001, TestSize.Level1)
 {
@@ -1905,6 +1972,7 @@ HWTEST_F(LNNNetBuilderMockTest, IS_NEED_WIFI_REAUTH_TEST_001, TestSize.Level1)
  * @tc.desc: DeletePcNodeInfo test
  * @tc.type: FUNC
  * @tc.require:
+ * @tc.level: Level1
  */
 HWTEST_F(LNNNetBuilderMockTest, DELETE_PC_NODE_INFO_TEST_001, TestSize.Level1)
 {
@@ -1961,6 +2029,7 @@ HWTEST_F(LNNNetBuilderMockTest, DELETE_PC_NODE_INFO_TEST_001, TestSize.Level1)
  * @tc.desc: LnnNotifyAuthHandleLeaveLNN test
  * @tc.type: FUNC
  * @tc.require:
+ * @tc.level: Level1
  */
 HWTEST_F(LNNNetBuilderMockTest, LNN_NOTIFY_AUTH_HANDLE_LEAVE_LNN_TEST_001, TestSize.Level1)
 {
@@ -2017,6 +2086,7 @@ static void SetNetBuilderLooper()
  * @tc.desc: LnnNotifyLeaveLnnByAuthHandle test
  * @tc.type: FUNC
  * @tc.require:
+ * @tc.level: Level1
  */
 HWTEST_F(LNNNetBuilderMockTest, LNN_NOTIFY_LEAVE_LNN_BY_AUTH_HANDLE_TEST_001, TestSize.Level1)
 {
@@ -2033,6 +2103,7 @@ HWTEST_F(LNNNetBuilderMockTest, LNN_NOTIFY_LEAVE_LNN_BY_AUTH_HANDLE_TEST_001, Te
  * @tc.desc: LnnBleReportExtraMapInit test
  * @tc.type: FUNC
  * @tc.require:
+ * @tc.level: Level1
  */
 HWTEST_F(LNNNetBuilderMockTest, LNN_BLE_REPORT_EXTRA_MAP_INIT_TEST_001, TestSize.Level1)
 {
@@ -2070,6 +2141,7 @@ HWTEST_F(LNNNetBuilderMockTest, LNN_BLE_REPORT_EXTRA_MAP_INIT_TEST_001, TestSize
  * @tc.desc: IsExistLnnDfxNodeByUdidHash test
  * @tc.type: FUNC
  * @tc.require:
+ * @tc.level: Level1
  */
 HWTEST_F(LNNNetBuilderMockTest, IS_EXIST_LNN_DFX_NODE_BY_UDID_HASH_TEST_001, TestSize.Level1)
 {
@@ -2096,6 +2168,7 @@ HWTEST_F(LNNNetBuilderMockTest, IS_EXIST_LNN_DFX_NODE_BY_UDID_HASH_TEST_001, Tes
  * @tc.desc: GetNodeFromPcRestrictMap test
  * @tc.type: FUNC
  * @tc.require:
+ * @tc.level: Level1
  */
 HWTEST_F(LNNNetBuilderMockTest, GET_NODE_FROM_PC_RESTRICT_MAP_TEST_001, TestSize.Level1)
 {
@@ -2136,6 +2209,7 @@ HWTEST_F(LNNNetBuilderMockTest, GET_NODE_FROM_PC_RESTRICT_MAP_TEST_001, TestSize
  * @tc.desc: UserSwitchedHandler test
  * @tc.type: FUNC
  * @tc.require:
+ * @tc.level: Level1
  */
 HWTEST_F(LNNNetBuilderMockTest, USER_SWITCHED_HANDLER_TEST_001, TestSize.Level1)
 {
@@ -2170,6 +2244,7 @@ HWTEST_F(LNNNetBuilderMockTest, USER_SWITCHED_HANDLER_TEST_001, TestSize.Level1)
  * @tc.desc: LnnUpdateLocalUuidAndIrk test
  * @tc.type: FUNC
  * @tc.require:
+ * @tc.level: Level1
  */
 HWTEST_F(LNNNetBuilderMockTest, LNN_UPDATE_LOCAL_UUID_AND_IRK_TEST_001, TestSize.Level1)
 {
@@ -2190,6 +2265,7 @@ HWTEST_F(LNNNetBuilderMockTest, LNN_UPDATE_LOCAL_UUID_AND_IRK_TEST_001, TestSize
  * @tc.desc: NotifyStateForSession test
  * @tc.type: FUNC
  * @tc.require:
+ * @tc.level: Level1
  */
 HWTEST_F(LNNNetBuilderMockTest, NotifyStateForSession_Test_001, TestSize.Level1)
 {
@@ -2215,6 +2291,7 @@ HWTEST_F(LNNNetBuilderMockTest, NotifyStateForSession_Test_001, TestSize.Level1)
  * @tc.desc: AccountStateChangeHandler test
  * @tc.type: FUNC
  * @tc.require:
+ * @tc.level: Level1
  */
 HWTEST_F(LNNNetBuilderMockTest, AccountStateChangeHandler_Test_001, TestSize.Level1)
 {
@@ -2236,6 +2313,7 @@ HWTEST_F(LNNNetBuilderMockTest, AccountStateChangeHandler_Test_001, TestSize.Lev
  * @tc.desc: InitSyncInfoReg test
  * @tc.type: FUNC
  * @tc.require:
+ * @tc.level: Level1
  */
 HWTEST_F(LNNNetBuilderMockTest, InitSyncInfoReg_Test_001, TestSize.Level1)
 {
@@ -2253,6 +2331,7 @@ HWTEST_F(LNNNetBuilderMockTest, InitSyncInfoReg_Test_001, TestSize.Level1)
  * @tc.desc: TryTriggerSparkGroupBuild test
  * @tc.type: FUNC
  * @tc.require:
+ * @tc.level: Level1
  */
 HWTEST_F(LNNNetBuilderMockTest, TryTriggerSparkGroupBuild_Test_001, TestSize.Level1)
 {
@@ -2270,6 +2349,7 @@ HWTEST_F(LNNNetBuilderMockTest, TryTriggerSparkGroupBuild_Test_001, TestSize.Lev
  * @tc.desc: OnReAuthVerifyPassed test
  * @tc.type: FUNC
  * @tc.require:
+ * @tc.level: Level1
  */
 HWTEST_F(LNNNetBuilderMockTest, OnReAuthVerifyPassed_Test_001, TestSize.Level1)
 {
