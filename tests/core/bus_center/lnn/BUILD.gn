@@ -3121,15 +3121,14 @@ if (!defined(ohos_lite)) {
       "$dsoftbus_root_path/core/bus_center/lnn/lane_hub/heartbeat/src/lnn_heartbeat_ctrl.c",
       "$dsoftbus_root_path/core/bus_center/lnn/lane_hub/heartbeat/src/lnn_heartbeat_fsm.c",
       "$dsoftbus_root_path/core/bus_center/lnn/lane_hub/heartbeat/src/lnn_heartbeat_strategy.c",
-      "$dsoftbus_root_path/core/bus_center/lnn/net_ledger/decision_db/src/lnn_decision_db.c",
       "$dsoftbus_root_path/core/bus_center/monitor/src/lnn_init_monitor.c",
       "$dsoftbus_root_path/core/bus_center/utils/src/lnn_state_machine.c",
       "$dsoftbus_root_path/core/connection/ble/src/softbus_conn_ble_virtual.c",
-      "$dsoftbus_root_path/core/frame/init/src/g_enhance_lnn_func.c",
       "$dsoftbus_root_path/core/frame/common/src/softbus_init_common.c",
+      "$dsoftbus_root_path/core/frame/init/src/g_enhance_lnn_func.c",
+      "$dsoftbus_root_path/core/frame/init/src/g_enhance_lnn_func_pack.c",
       "net_ledger/lnn_decision_db_deps_mock.cpp",
       "net_ledger/lnn_decision_db_test.cpp",
-      "$dsoftbus_root_path/core/frame/init/src/g_enhance_lnn_func_pack.c",
     ]
 
     include_dirs = [
@@ -3151,6 +3150,7 @@ if (!defined(ohos_lite)) {
       "$dsoftbus_root_path/core/bus_center/lnn/net_buscenter/include",
       "$dsoftbus_root_path/core/bus_center/lnn/net_ledger/common/include",
       "$dsoftbus_root_path/core/bus_center/lnn/net_ledger/decision_db/include",
+      "$dsoftbus_root_path/core/bus_center/lnn/net_ledger/decision_db/src",
       "$dsoftbus_root_path/core/bus_center/lnn/net_ledger/distributed_ledger/include",
       "$dsoftbus_root_path/core/bus_center/lnn/net_ledger/local_ledger/include",
       "$dsoftbus_root_path/core/bus_center/monitor/include",
@@ -3182,8 +3182,8 @@ if (!defined(ohos_lite)) {
 
     deps = [
       "$dsoftbus_root_path/adapter:softbus_adapter",
-      "$dsoftbus_root_path/dfx:softbus_dfx",
       "$dsoftbus_root_path/core/common:softbus_utils",
+      "$dsoftbus_root_path/dfx:softbus_dfx",
     ]
 
     if (is_standard_system) {
