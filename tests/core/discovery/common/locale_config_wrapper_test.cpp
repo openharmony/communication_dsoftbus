@@ -40,7 +40,7 @@ public:
 
 /*
  * @tc.name: IsZHLanguage001
- * @tc.desc: The language was successfully obtained for the first time.
+ * @tc.desc: The language was successfully obtained for the first time
  * @tc.type: FUNC
  * @tc.require:
  */
@@ -59,7 +59,7 @@ HWTEST_F(LocaleConfigWrapperTest, IsZHLanguage001, TestSize.Level1)
 
 /*
  * @tc.name: IsZHLanguage002
- * @tc.desc: The first attempt failed, but the second attempt was successful.
+ * @tc.desc: The first attempt failed, but the second attempt was successful
  * @tc.type: FUNC
  * @tc.require:
  */
@@ -77,7 +77,7 @@ HWTEST_F(LocaleConfigWrapperTest, IsZHLanguage002, TestSize.Level1)
 
 /*
  * @tc.name: IsZHLanguage003
- * @tc.desc: The first attempt was successful, but not Chinese.
+ * @tc.desc: The first attempt was successful, but not Chinese
  * @tc.type: FUNC
  * @tc.require:
  */
