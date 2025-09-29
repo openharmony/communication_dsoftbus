@@ -77,7 +77,7 @@ typedef struct {
 
 typedef struct {
     bool isServer;
-    int32_t connId;
+    uint32_t connId;
     uint32_t requestId;
     uint32_t applyKeyLen;
     uint8_t applyKey[D2D_APPLY_KEY_LEN];
@@ -204,7 +204,7 @@ static int32_t GetGenApplyKeyInstanceByReq(uint32_t requestId, ApplyKeyNegoInsta
     return SOFTBUS_AUTH_APPLY_KEY_INSTANCE_NOT_FOUND;
 }
 
-static int32_t GetGenApplyKeyInstanceByChannel(int32_t channelId, ApplyKeyNegoInstance *instance)
+static int32_t GetGenApplyKeyInstanceByChannel(uint32_t channelId, ApplyKeyNegoInstance *instance)
 {
     if (g_applyKeyNegoList == NULL) {
         AUTH_LOGE(AUTH_CONN, "g_applyKeyNegoList is null");
@@ -392,7 +392,6 @@ static void HandleAsyncNegoSuccess(ApplyKeyNegoInstance *instance, SyncGenApplyK
         if (GetApplyKeyByBusinessInfo(
             &instance->info, applyKey, D2D_APPLY_KEY_LEN, accountHash, SHA_256_HEX_HASH_LEN) != SOFTBUS_OK) {
             DeleteApplyKeyNegoInstance(instance->requestId);
-            SoftBusFree(res);
             AUTH_LOGE(AUTH_CONN, "get apply key by instance fail");
             return;
         }
@@ -686,11 +685,11 @@ static int32_t GenerateAccountHash(char *accountString, char *accountHashBuf, ui
     uint8_t accountHash[SHA_256_HASH_LEN] = { 0 };
     int32_t ret = SoftBusGenerateStrHash((uint8_t *)accountString, strlen(accountString), accountHash);
     if (ret != SOFTBUS_OK) {
-        AUTH_LOGE(AUTH_FSM, "accountId hash fail, ret=%{public}d", ret);
+        AUTH_LOGE(AUTH_CONN, "accountId hash fail, ret=%{public}d", ret);
         return SOFTBUS_NETWORK_GENERATE_STR_HASH_ERR;
     }
     if (ConvertBytesToHexString(accountHashBuf, bufLen, accountHash, SHA_256_HASH_LEN) != SOFTBUS_OK) {
-        AUTH_LOGE(AUTH_FSM, "convert bytes to string fail");
+        AUTH_LOGE(AUTH_CONN, "convert bytes to string fail");
         return SOFTBUS_NETWORK_BYTES_TO_HEX_STR_ERR;
     }
     return SOFTBUS_OK;
@@ -713,7 +712,7 @@ static int32_t SendApplyKeyNegoCloseAckEvent(int32_t channelId, uint32_t request
         .module = MODULE_APPLY_KEY_CONNECTION,
         .seq = requestId,
         .flag = isServer ? SERVER_SIDE_FLAG : CLIENT_SIDE_FLAG,
-        .len = strlen(msg),
+        .len = strlen(D2D_CLOSE_ACK) + 1,
     };
     if (PostApplyKeyData(channelId, false, &head, (uint8_t *)msg) != SOFTBUS_OK) {
         AUTH_LOGE(AUTH_CONN, "post apply key data fail");
@@ -939,7 +938,7 @@ static char *PackApplyKeyAclParam(RequestBusinessType type)
     char localUdidShortHash[D2D_UDID_HASH_STR_LEN] = { 0 };
     char localAccountShortHash[D2D_ACCOUNT_HASH_STR_LEN] = { 0 };
     if (GetUdidAndAccountShortHash(
-        localUdidShortHash, D2D_UDID_HASH_STR_LEN, localAccountShortHash, D2D_ACCOUNT_HASH_STR_LEN)) {
+        localUdidShortHash, D2D_UDID_HASH_STR_LEN, localAccountShortHash, D2D_ACCOUNT_HASH_STR_LEN) != SOFTBUS_OK) {
         AUTH_LOGE(AUTH_CONN, "generate short hash fail");
         return NULL;
     }

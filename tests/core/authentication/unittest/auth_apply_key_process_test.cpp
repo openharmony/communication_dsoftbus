@@ -32,6 +32,9 @@
 namespace OHOS {
 using namespace testing;
 using namespace testing::ext;
+
+#define D2D_CLOSE_ACK   "d2d_close_ack"
+
 constexpr char NODE1_ACCOUNT_HASH[D2D_ACCOUNT_HASH_STR_LEN] = "abcd";
 constexpr char NODE1_UDID_HASH[] = "123";
 constexpr char TEST_DATA[] = "testdata";
@@ -79,7 +82,7 @@ static void OnGenFailedTest(uint32_t requestId, int32_t reason)
 
 /*
  * @tc.name: REQUIRE_APPLY_KEY_NEGO_LIST_LOCK_Test_001
- * @tc.desc: RequireApplyKeyNegoListLock test2
+ * @tc.desc: require ApplyKey NegoList Lock test
  * @tc.type: FUNC
  * @tc.require:
  */
@@ -92,7 +95,7 @@ HWTEST_F(AuthApplyKeyProcessTest, REQUIRE_APPLY_KEY_NEGO_LIST_LOCK_Test_001, Tes
 
 /*
  * @tc.name: INIT_APPLY_KEY_NEGO_INSTANCE_LIST_Test_001
- * @tc.desc: InitApplyKeyNegoInstanceList test
+ * @tc.desc: Init ApplyKey NegoInstance List test
  * @tc.type: FUNC
  * @tc.require:
  */
@@ -262,11 +265,15 @@ HWTEST_F(AuthApplyKeyProcessTest, SET_APPLY_KEY_NEGO_INFO_Test_001, TestSize.Lev
     EXPECT_EQ(ret, SOFTBUS_NO_INIT);
     ret = SetNegoInfoRecvFinish(requestId, true, accountHash);
     EXPECT_EQ(ret, SOFTBUS_NO_INIT);
+    ret = SetNegoInfoRecvCloseAck(requestId, true);
+    EXPECT_EQ(ret, SOFTBUS_NO_INIT);
     ret = InitApplyKeyNegoInstanceList();
     EXPECT_EQ(ret, SOFTBUS_OK);
     ret = SetNegoInfoRecvSessionKey(requestId, true, sessionKey, D2D_APPLY_KEY_LEN);
     EXPECT_EQ(ret, SOFTBUS_LOCK_ERR);
     ret = SetNegoInfoRecvFinish(requestId, true, accountHash);
+    EXPECT_EQ(ret, SOFTBUS_LOCK_ERR);
+    ret = SetNegoInfoRecvCloseAck(requestId, true);
     EXPECT_EQ(ret, SOFTBUS_LOCK_ERR);
     ret = ApplyKeyNegoInit();
     EXPECT_EQ(ret, SOFTBUS_OK);
@@ -274,12 +281,16 @@ HWTEST_F(AuthApplyKeyProcessTest, SET_APPLY_KEY_NEGO_INFO_Test_001, TestSize.Lev
     EXPECT_EQ(ret, SOFTBUS_AUTH_APPLY_KEY_INSTANCE_NOT_FOUND);
     ret = SetNegoInfoRecvFinish(requestId, true, accountHash);
     EXPECT_EQ(ret, SOFTBUS_AUTH_APPLY_KEY_INSTANCE_NOT_FOUND);
+    ret = SetNegoInfoRecvCloseAck(requestId, true);
+    EXPECT_EQ(ret, SOFTBUS_AUTH_APPLY_KEY_INSTANCE_NOT_FOUND);
     EXPECT_CALL(authApplyKeyMock, LnnAsyncCallbackDelayHelper).WillOnce(Return(SOFTBUS_OK));
     ret = CreateApplyKeyNegoInstance(&info, requestId, channelId, true, &cb);
     EXPECT_EQ(ret, SOFTBUS_OK);
     ret = SetNegoInfoRecvSessionKey(requestId, true, sessionKey, D2D_APPLY_KEY_LEN);
     EXPECT_EQ(ret, SOFTBUS_OK);
     ret = SetNegoInfoRecvFinish(requestId, true, accountHash);
+    EXPECT_EQ(ret, SOFTBUS_OK);
+    ret = SetNegoInfoRecvCloseAck(requestId, true);
     EXPECT_EQ(ret, SOFTBUS_OK);
     ApplyKeyNegoDeinit();
 }
@@ -470,7 +481,7 @@ HWTEST_F(AuthApplyKeyProcessTest, ON_ERROR_Test_001, TestSize.Level1)
 
 /*
  * @tc.name: ON_FINISHED_Test_001
- * @tc.desc: OnFinished func test
+ * @tc.desc: On Finished func test
  * @tc.type: FUNC
  * @tc.require:
  */
@@ -501,7 +512,7 @@ HWTEST_F(AuthApplyKeyProcessTest, ON_FINISHED_Test_001, TestSize.Level1)
 
 /*
  * @tc.name: ON_SESSION_KEY_RETURNED_Test_001
- * @tc.desc: OnSessionKeyReturned func test
+ * @tc.desc: On SessionKey Returned func test
  * @tc.type: FUNC
  * @tc.require:
  */
@@ -531,7 +542,7 @@ HWTEST_F(AuthApplyKeyProcessTest, ON_SESSION_KEY_RETURNED_Test_001, TestSize.Lev
 
 /*
  * @tc.name: ON_SESSION_KEY_RETURNED_Test_001
- * @tc.desc: OnTransmitted func test
+ * @tc.desc: On Transmitted func test
  * @tc.type: FUNC
  * @tc.require:
  */
@@ -567,7 +578,7 @@ HWTEST_F(AuthApplyKeyProcessTest, ON_TRANSMITTED_Test_001, TestSize.Level1)
 
 /*
  * @tc.name: ON_GEN_FAILED_Test_001
- * @tc.desc: OnGenFailed func test
+ * @tc.desc: On GenFailed func test
  * @tc.type: FUNC
  * @tc.require:
  */
@@ -596,7 +607,7 @@ HWTEST_F(AuthApplyKeyProcessTest, ON_GEN_FAILED_Test_001, TestSize.Level1)
 
 /*
  * @tc.name: ON_GEN_SUCCESS_Test_001
- * @tc.desc: OnGenSuccess func test
+ * @tc.desc: On GenSuccess func test
  * @tc.type: FUNC
  * @tc.require:
  */
@@ -928,7 +939,7 @@ HWTEST_F(AuthApplyKeyProcessTest, CREATE_INSTANCE_STATIC_FUNC_Test_001, TestSize
     EXPECT_CALL(authApplyKeyMock, SoftBusGenerateStrHash).WillRepeatedly(Return(SOFTBUS_OK));
     EXPECT_CALL(authApplyKeyMock, LnnGetLocalByteInfo).WillRepeatedly(Return(SOFTBUS_OK));
     EXPECT_CALL(authApplyKeyMock, GetAuthDataSize).WillRepeatedly(Return(AUTH_CONN_DATA_HEAD_SIZE));
-    EXPECT_CALL(authApplyKeyMock, ConnGetHeadSize).WillRepeatedly(Return(SOFTBUS_OK));
+    EXPECT_CALL(authApplyKeyMock, ConnGetHeadSize).WillRepeatedly(Return(sizeof(ConnPktHead)));
     EXPECT_CALL(authApplyKeyMock, PackAuthData).WillRepeatedly(Return(SOFTBUS_OK));
     EXPECT_CALL(authApplyKeyMock, ConnPostBytes).WillRepeatedly(Return(SOFTBUS_OK));
     EXPECT_CALL(authApplyKeyMock, AddStringToJsonObject).WillRepeatedly(Return(true));
@@ -1000,9 +1011,66 @@ HWTEST_F(AuthApplyKeyProcessTest, SOFTBUS_GENERATE_STR_HASH_FUNC_Test_001, TestS
 HWTEST_F(AuthApplyKeyProcessTest, AUTH_IS_APPLY_KEY_EXPIRED_Test_001, TestSize.Level1)
 {
     bool ret = AuthIsApplyKeyExpired(0);
-    EXPECT_FALSE(ret);
+    EXPECT_EQ(ret, false);
     uint64_t currentTime = SoftBusGetSysTimeMs();
     ret = AuthIsApplyKeyExpired(currentTime - APPLY_KEY_DECAY_TIME + 1);
-    EXPECT_TRUE(ret);
+    EXPECT_EQ(ret, true);
+}
+
+/*
+ * @tc.name: SEND_APPLY_NEGO_CLOSE_EVENT_Test_001
+ * @tc.desc: Send ApplyKey NegoCloseAck Event test
+ * @tc.type: FUNC
+ * @tc.require:
+ */
+HWTEST_F(AuthApplyKeyProcessTest, SEND_APPLY_NEGO_CLOSE_EVENT_Test_001, TestSize.Level1)
+{
+    AuthApplyKeyProcessInterfaceMock authApplyKeyMock;
+    EXPECT_CALL(authApplyKeyMock, GetAuthDataSize).WillRepeatedly(Return(AUTH_CONN_DATA_HEAD_SIZE));
+    EXPECT_CALL(authApplyKeyMock, ConnGetHeadSize).WillRepeatedly(Return(sizeof(ConnPktHead)));
+    EXPECT_CALL(authApplyKeyMock, PackAuthData).WillRepeatedly(Return(SOFTBUS_OK));
+    EXPECT_CALL(authApplyKeyMock, ConnPostBytes).WillRepeatedly(Return(SOFTBUS_OK));
+
+    int32_t ret = SendApplyKeyNegoCloseAckEvent(0, 0, true);
+    EXPECT_EQ(ret, SOFTBUS_OK);
+}
+
+/*
+ * @tc.name: PROCESS_APPLY_KEY_CLOSE_ACK_DATA_Test_001
+ * @tc.desc: Process ApplyKey CloseAck Data test
+ * @tc.type: FUNC
+ * @tc.require:
+ */
+HWTEST_F(AuthApplyKeyProcessTest, PROCESS_APPLY_KEY_CLOSE_ACK_DATA_Test_001, TestSize.Level1)
+{
+    AuthApplyKeyProcessInterfaceMock authApplyKeyMock;
+    EXPECT_CALL(authApplyKeyMock, ConnSetConnectCallback).WillRepeatedly(Return(true));
+    EXPECT_CALL(authApplyKeyMock, LnnAsyncCallbackDelayHelper).WillRepeatedly(Return(SOFTBUS_OK));
+    EXPECT_CALL(authApplyKeyMock, LnnGetLocalStrInfo).WillRepeatedly(Return(SOFTBUS_OK));
+    EXPECT_CALL(authApplyKeyMock, SoftBusGenerateStrHash).WillRepeatedly(Return(SOFTBUS_OK));
+    EXPECT_CALL(authApplyKeyMock, LnnGetLocalByteInfo).WillRepeatedly(Return(SOFTBUS_OK));
+    EXPECT_CALL(authApplyKeyMock, GetAuthDataSize).WillRepeatedly(Return(AUTH_CONN_DATA_HEAD_SIZE));
+    EXPECT_CALL(authApplyKeyMock, ConnGetHeadSize).WillRepeatedly(Return(sizeof(ConnPktHead)));
+    EXPECT_CALL(authApplyKeyMock, PackAuthData).WillRepeatedly(Return(SOFTBUS_OK));
+    EXPECT_CALL(authApplyKeyMock, ConnPostBytes).WillRepeatedly(Return(SOFTBUS_OK));
+    EXPECT_CALL(authApplyKeyMock, AddStringToJsonObject).WillRepeatedly(Return(true));
+    EXPECT_CALL(authApplyKeyMock, AddNumberToJsonObject).WillRepeatedly(Return(true));
+    EXPECT_CALL(authApplyKeyMock, GetApplyKeyByBusinessInfo).WillRepeatedly(Return(SOFTBUS_OK));
+
+    int32_t ret = ApplyKeyNegoInit();
+    EXPECT_EQ(ret, SOFTBUS_OK);
+    uint32_t requestId = GenApplyKeySeq();
+    GenApplyKeyCallback cb = {
+        .onGenSuccess = OnGenSuccessTest,
+        .onGenFailed = OnGenFailedTest,
+    };
+    RequestBusinessInfo info;
+    info.type = (RequestBusinessType)0;
+    EXPECT_EQ(strcpy_s(info.accountHash, D2D_ACCOUNT_HASH_STR_LEN, NODE1_ACCOUNT_HASH), EOK);
+    EXPECT_EQ(strcpy_s(info.udidHash, D2D_UDID_HASH_STR_LEN, NODE1_UDID_HASH), EOK);
+    ret = AuthGenApplyKey(&info, requestId, 0, &cb);
+    EXPECT_EQ(ret, SOFTBUS_OK);
+    ret = ProcessApplyKeyCloseAckData(requestId, TEST_APPLY_KEY_DATA, sizeof(TEST_APPLY_KEY_DATA));
+    EXPECT_EQ(ret, SOFTBUS_OK);
 }
 } // namespace OHOS
