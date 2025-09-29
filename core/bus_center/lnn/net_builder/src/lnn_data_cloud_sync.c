@@ -76,6 +76,12 @@ static int32_t DBCipherInfoSyncToCache(
         LnnSetRemoteBroadcastCipherInfoPacked(value, udid);
     } else if (strcmp(fieldName, DEVICE_INFO_DISTRIBUTED_SWITCH) == 0) {
         LNN_LOGD(LNN_BUILDER, "distributed switch info no need update into nodeinfo");
+    } else if (strcmp(fieldName, DEVICE_INFO_SPARK_CHECK) == 0 && valueLength < SPARK_CHECK_STR_LEN) {
+        if (ConvertHexStringToBytes((unsigned char *)cacheInfo->sparkCheck, SPARK_CHECK_LENGTH, value,
+            valueLength) != SOFTBUS_OK) {
+            LNN_LOGE(LNN_BUILDER, "convert sparkCheck to bytes fail. sparkCheck sync to cache fail");
+            return SOFTBUS_KV_CONVERT_BYTES_FAILED;
+        }
     } else {
         char *anonyFieldName = NULL;
         Anonymize(fieldName, &anonyFieldName);
@@ -320,7 +326,8 @@ static bool JudgeFieldNameIsCipherInfo(char *fieldName)
         strcmp(fieldName, DEVICE_INFO_JSON_KEY_TOTAL_LIFE) == 0 ||
         strcmp(fieldName, DEVICE_INFO_JSON_KEY_TIMESTAMP_BEGIN) == 0 ||
         strcmp(fieldName, DEVICE_INFO_JSON_KEY_CURRENT_INDEX) == 0 ||
-        strcmp(fieldName, DEVICE_INFO_DISTRIBUTED_SWITCH) == 0) {
+        strcmp(fieldName, DEVICE_INFO_DISTRIBUTED_SWITCH) == 0 ||
+        strcmp(fieldName, DEVICE_INFO_SPARK_CHECK) == 0) {
         return true;
     }
     return false;
@@ -555,6 +562,12 @@ static int32_t SetDBDataToDistributedLedger(NodeInfo *cacheInfo, char *deviceUdi
     } else if ((ret = SetDBNameDataToDLedger(cacheInfo, deviceUdid, fieldName)) != SOFTBUS_OK) {
         LNN_LOGE(LNN_BUILDER, "set DB name data to distributedLedger fail");
         return ret;
+    } else if (strcmp(fieldName, DEVICE_INFO_SPARK_CHECK) == 0) {
+        ret = LnnSetDLDeviceSparkCheck(deviceUdid, cacheInfo->sparkCheck);
+        if (ret != SOFTBUS_OK) {
+            LNN_LOGE(LNN_BUILDER, "set device sparkChecl to distributedLedger fail");
+            return ret;
+        }
     }
     return SOFTBUS_OK;
 }

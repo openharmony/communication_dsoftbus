@@ -773,6 +773,13 @@ static int32_t UpdateFileInfo(NodeInfo *newInfo, NodeInfo *oldInfo)
             return SOFTBUS_MEM_ERR;
         }
     }
+    if (memcmp(newInfo->sparkCheck, oldInfo->sparkCheck, SPARK_CHECK_LENGTH) != 0) {
+        LNN_LOGI(LNN_LEDGER, "remote sparkCheck change");
+        if (memcpy_s(oldInfo->sparkCheck, SPARK_CHECK_LENGTH, newInfo->sparkCheck, SPARK_CHECK_LENGTH) != EOK) {
+            LNN_LOGE(LNN_LEDGER, "copy sparkCheck failed");
+            return SOFTBUS_MEM_ERR;
+        }
+    }
     LNN_LOGI(LNN_LEDGER, "update file info success");
     return SOFTBUS_OK;
 }

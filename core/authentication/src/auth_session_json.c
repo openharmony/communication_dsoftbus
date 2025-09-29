@@ -1608,6 +1608,10 @@ static int32_t FillBroadcastCipherKey(BroadcastCipherKey *broadcastKey, const No
         AUTH_LOGE(AUTH_FSM, "memcpy iv fail.");
         return SOFTBUS_MEM_ERR;
     }
+    if (memcpy_s(broadcastKey->sparkCheck, SPARK_CHECK_LENGTH, info->sparkCheck, SPARK_CHECK_LENGTH) != EOK) {
+        AUTH_LOGE(AUTH_FSM, "memcpy sparkCheck fail.");
+        return SOFTBUS_MEM_ERR;
+    }
     return SOFTBUS_OK;
 }
 
