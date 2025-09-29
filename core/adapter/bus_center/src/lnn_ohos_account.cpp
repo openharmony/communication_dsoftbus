@@ -17,6 +17,7 @@
 #include <securec.h>
 #include <string>
 
+#include "auth_hichain_adapter.h"
 #include "auth_manager.h"
 #include "bus_center_manager.h"
 #include "lnn_decision_db.h"
@@ -134,15 +135,16 @@ int32_t LnnInitOhosAccount(void)
     char accountUid[ACCOUNT_UID_STR_LEN] = {0};
     uint32_t size = 0;
 
-    if (LnnJudgeDeviceTypeAndGetOsAccountInfo(accountHash, SHA_256_HASH_LEN) != SOFTBUS_OK) {
-        if (SoftBusGenerateStrHash(reinterpret_cast<const unsigned char *>(DEFAULT_USER_ID.c_str()),
-            DEFAULT_USER_ID.length(), reinterpret_cast<unsigned char *>(accountHash)) != SOFTBUS_OK) {
-            LNN_LOGE(LNN_STATE, "InitOhosAccount generate default str hash fail");
-            return SOFTBUS_NETWORK_GENERATE_STR_HASH_ERR;
-        }
+    if (SoftBusGenerateStrHash(reinterpret_cast<const unsigned char *>(DEFAULT_USER_ID.c_str()),
+        DEFAULT_USER_ID.length(), reinterpret_cast<unsigned char *>(accountHash)) != SOFTBUS_OK) {
+        LNN_LOGE(LNN_STATE, "InitOhosAccount generate default str hash fail");
+        return SOFTBUS_NETWORK_GENERATE_STR_HASH_ERR;
     }
-    if (GetCurrentAccount(&accountId) == SOFTBUS_OK) {
-        (void)LnnSetLocalNum64Info(NUM_KEY_ACCOUNT_LONG, accountId);
+    if (IsSameAccountGroupDevice()) {
+        (void)LnnJudgeDeviceTypeAndGetOsAccountInfo(accountHash, SHA_256_HASH_LEN);
+        if (GetCurrentAccount(&accountId) == SOFTBUS_OK) {
+            (void)LnnSetLocalNum64Info(NUM_KEY_ACCOUNT_LONG, accountId);
+        }
     }
     if (GetOsAccountUid(accountUid, ACCOUNT_UID_STR_LEN, &size) == SOFTBUS_OK) {
         LnnSetLocalStrInfo(STRING_KEY_ACCOUNT_UID, accountUid);
@@ -155,21 +157,45 @@ int32_t LnnInitOhosAccount(void)
     return LnnSetLocalByteInfo(BYTE_KEY_ACCOUNT_HASH, accountHash, SHA_256_HASH_LEN);
 }
 
+static void AccountUpdateProcess(uint8_t *localAccountHash, uint8_t *accountHash, int64_t accountId,
+    UpdateAccountReason reason)
+{
+    if (localAccountHash == nullptr || accountHash == nullptr) {
+        LNN_LOGE(LNN_STATE, "invalid param");
+        return;
+    }
+
+    char accountUid[ACCOUNT_UID_STR_LEN] = {0};
+    uint32_t size = 0;
+    ClearAuthLimitMap();
+    ClearLnnBleReportExtraMap();
+    ClearPcRestrictMap();
+    LNN_LOGI(LNN_STATE,
+        "accountHash update. localAccountHash=[%{public}02X, %{public}02X], accountHash=[%{public}02X, %{public}02X]",
+        localAccountHash[0], localAccountHash[1], accountHash[0], accountHash[1]);
+    LnnSetLocalByteInfo(BYTE_KEY_ACCOUNT_HASH, accountHash, SHA_256_HASH_LEN);
+    LnnSetLocalNum64Info(NUM_KEY_ACCOUNT_LONG, accountId);
+    if (GetOsAccountUid(accountUid, ACCOUNT_UID_STR_LEN, &size) == SOFTBUS_OK) {
+        LnnSetLocalStrInfo(STRING_KEY_ACCOUNT_UID, accountUid);
+    } else {
+        LnnSetLocalStrInfo(STRING_KEY_ACCOUNT_UID, DEFAULT_ACCOUNT_UID.c_str());
+    }
+    DiscDeviceInfoChanged(TYPE_ACCOUNT);
+    LnnNotifyDeviceInfoChanged(SOFTBUS_LOCAL_DEVICE_INFO_ACOUNT_CHANGED);
+    if (reason == UPDATE_HEARTBEAT || reason == UPDATE_USER_SWITCH) {
+        LnnUpdateHeartbeatInfo(UPDATE_HB_ACCOUNT_INFO);
+        DfxRecordTriggerTime(UPDATE_ACCOUNT, EVENT_STAGE_LNN_UPDATE_ACCOUNT);
+    }
+}
+
 void LnnUpdateOhosAccount(UpdateAccountReason reason)
 {
     int64_t accountId = 0;
     uint8_t accountHash[SHA_256_HASH_LEN] = {0};
     uint8_t localAccountHash[SHA_256_HASH_LEN] = {0};
-    char accountUid[ACCOUNT_UID_STR_LEN] = {0};
-    uint32_t size = 0;
 
     if (GetCurrentAccount(&accountId) == SOFTBUS_OK) {
         (void)LnnSetLocalNum64Info(NUM_KEY_ACCOUNT_LONG, accountId);
-    }
-    if (GetOsAccountUid(accountUid, ACCOUNT_UID_STR_LEN, &size) == SOFTBUS_OK) {
-        LnnSetLocalStrInfo(STRING_KEY_ACCOUNT_UID, accountUid);
-    } else {
-        LnnSetLocalStrInfo(STRING_KEY_ACCOUNT_UID, DEFAULT_ACCOUNT_UID.c_str());
     }
     LnnAccoutIdStatusSet(accountId);
     if (LnnGetLocalByteInfo(BYTE_KEY_ACCOUNT_HASH, localAccountHash, SHA_256_HASH_LEN) != SOFTBUS_OK) {
@@ -190,20 +216,11 @@ void LnnUpdateOhosAccount(UpdateAccountReason reason)
             accountHash[0], accountHash[1]);
         return;
     }
-    ClearAuthLimitMap();
-    ClearLnnBleReportExtraMap();
-    ClearPcRestrictMap();
-    LNN_LOGI(LNN_STATE,
-        "accountHash update. localAccountHash=[%{public}02X, %{public}02X], accountHash=[%{public}02X, %{public}02X]",
-        localAccountHash[0], localAccountHash[1], accountHash[0], accountHash[1]);
-    LnnSetLocalByteInfo(BYTE_KEY_ACCOUNT_HASH, accountHash, SHA_256_HASH_LEN);
-    LnnSetLocalNum64Info(NUM_KEY_ACCOUNT_LONG, accountId);
-    DiscDeviceInfoChanged(TYPE_ACCOUNT);
-    LnnNotifyDeviceInfoChanged(SOFTBUS_LOCAL_DEVICE_INFO_ACOUNT_CHANGED);
-    if (reason == UPDATE_HEARTBEAT || reason == UPDATE_USER_SWITCH) {
-        LnnUpdateHeartbeatInfo(UPDATE_HB_ACCOUNT_INFO);
-        DfxRecordTriggerTime(UPDATE_ACCOUNT, EVENT_STAGE_LNN_UPDATE_ACCOUNT);
+    if (!IsSameAccountGroupDevice()) {
+        LNN_LOGE(LNN_STATE, "not have same account group, no need update accountId");
+        return;
     }
+    AccountUpdateProcess(localAccountHash, accountHash, accountId, reason);
 }
 
 void LnnOnOhosAccountLogout(void)

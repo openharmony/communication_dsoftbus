@@ -223,6 +223,7 @@ ohos_unittest("LNNKvStoreLaunchListenerTest") {
 ohos_unittest("LNNOhosAccountMockTest") {
   module_out_path = module_output_path
   sources = [
+    "unittest/lnn_ohos_account_adapter_mock.cpp",
     "unittest/lnn_ohos_account_mock.cpp",
     "unittest/lnn_ohos_account_mock_test.cpp",
   ]
@@ -260,6 +261,12 @@ ohos_unittest("LNNOhosAccountMockTest") {
     "googletest:gtest_main",
     "hilog:libhilog",
   ]
+  if (is_standard_system) {
+    external_deps += [
+      "os_account:libaccountkits",
+      "os_account:os_account_innerkits",
+    ]
+  }
 }
 
 ohos_unittest("LnnOhosAccountAdapterTest") {
