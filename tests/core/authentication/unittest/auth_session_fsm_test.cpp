@@ -321,7 +321,7 @@ HWTEST_F(AuthSessionFsmTest, HANDLE_CLOSE_ACK_TEST_001, TestSize.Level1)
 
 /*
  * @tc.name: IS_NEED_EXCHANGE_NETWORKID_TEST_001
- * @tc.desc:
+ * @tc.desc: IsNeedExchangeNetworkId test
  * @tc.type: FUNC
  * @tc.require:
  */
@@ -353,7 +353,7 @@ HWTEST_F(AuthSessionFsmTest, IS_NEED_EXCHANGE_NETWORKID_TEST_001, TestSize.Level
 
 /*
  * @tc.name: ADD_CONCURRENT_AUTH_REQUEST_TEST_001
- * @tc.desc:
+ * @tc.desc: AddConcurrentAuthRequest test
  * @tc.type: FUNC
  * @tc.require:
  */
@@ -373,7 +373,7 @@ HWTEST_F(AuthSessionFsmTest, ADD_CONCURRENT_AUTH_REQUEST_TEST_001, TestSize.Leve
 
 /*
  * @tc.name: RECOVERY_NORMALIZED_DEVICE_KEY_TEST_001
- * @tc.desc:
+ * @tc.desc: RecoveryNormalizedDeviceKey test
  * @tc.type: FUNC
  * @tc.require:
  */
@@ -403,7 +403,7 @@ HWTEST_F(AuthSessionFsmTest, RECOVERY_NORMALIZED_DEVICE_KEY_TEST_001, TestSize.L
 
 /*
  * @tc.name: TRY_RECOVERY_KEY_TEST_001
- * @tc.desc:
+ * @tc.desc: TryRecoveryKey test
  * @tc.type: FUNC
  * @tc.require:
  */
@@ -427,7 +427,7 @@ HWTEST_F(AuthSessionFsmTest, TRY_RECOVERY_KEY_TEST_001, TestSize.Level1)
 
 /*
  * @tc.name: PROCESS_CLIENT_AUTH_STATE_TEST_001
- * @tc.desc:
+ * @tc.desc: ProcessClientAuthState test
  * @tc.type: FUNC
  * @tc.require:
  */
@@ -452,7 +452,7 @@ HWTEST_F(AuthSessionFsmTest, PROCESS_CLIENT_AUTH_STATE_TEST_001, TestSize.Level1
 
 /*
  * @tc.name: DEVICE_AUTH_STATE_PROCESS_TEST_001
- * @tc.desc:
+ * @tc.desc: DeviceAuthStateProcess test
  * @tc.type: FUNC
  * @tc.require:
  */
@@ -489,7 +489,7 @@ HWTEST_F(AuthSessionFsmTest, DEVICE_AUTH_STATE_PROCESS_TEST_001, TestSize.Level1
 
 /*
  * @tc.name: DEVICE_AUTH_STATE_PROCESS_TEST_002
- * @tc.desc:
+ * @tc.desc: DeviceAuthStateProcess test
  * @tc.type: FUNC
  * @tc.require:
  */
@@ -628,7 +628,7 @@ HWTEST_F(AuthSessionFsmTest, AUTH_SESSION_GET_CRED_ID_TEST_001, TestSize.Level1)
 
 /*
  * @tc.name: AUTH_SESSION_GET_AUTH_VERSION_TEST_001
- * @tc.desc:
+ * @tc.desc: AuthSessionGetAuthVersion test
  * @tc.type: FUNC
  * @tc.require:
  */
@@ -644,7 +644,7 @@ HWTEST_F(AuthSessionFsmTest, AUTH_SESSION_GET_AUTH_VERSION_TEST_001, TestSize.Le
 
 /*
  * @tc.name: AUTH_SESSION_GET_IS_SAME_TEST_001
- * @tc.desc:
+ * @tc.desc: AuthSessionGetIsSameAccount test
  * @tc.type: FUNC
  * @tc.require:
  */
@@ -657,7 +657,7 @@ HWTEST_F(AuthSessionFsmTest, AUTH_SESSION_GET_IS_SAME_TEST_001, TestSize.Level1)
 
 /*
  * @tc.name: AUTH_SESSION_HANDLE_AUTH_ERROR_TEST_001
- * @tc.desc:
+ * @tc.desc: AuthSessionHandleAuthError test
  * @tc.type: FUNC
  * @tc.require:
  */
