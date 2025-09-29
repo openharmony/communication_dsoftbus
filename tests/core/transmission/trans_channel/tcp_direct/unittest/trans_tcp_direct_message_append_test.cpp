@@ -190,9 +190,9 @@ void TestTdcPacketHeadInit(TdcPacketHead *packetHead)
     packetHead->module = TEST_MODULE;
 }
 
-/**
+/*
  * @tc.name: TransSrvDataListInitTest001
- * @tc.desc: Should return SOFTBUS_OK when g_tcpSrvDataList is not nullptr.
+ * @tc.desc: Should return SOFTBUS_OK when g_tcpSrvDataList is not nullptr
  * @tc.type: FUNC
  * @tc.require:
  */
@@ -203,9 +203,9 @@ HWTEST_F(TransTcpDirectMessageAppendTest, TransSrvDataListInitTest001, TestSize.
     TransSrvDataListDeinit();
 }
 
-/**
+/*
  * @tc.name: TransSrvDataListInitTest002
- * @tc.desc: Should return SOFTBUS_OK when CreateSoftBusList return nullptr.
+ * @tc.desc: Should return SOFTBUS_OK when CreateSoftBusList return nullptr
  * @tc.type: FUNC
  * @tc.require:
  */
@@ -218,9 +218,9 @@ HWTEST_F(TransTcpDirectMessageAppendTest, TransSrvDataListInitTest002, TestSize.
     EXPECT_EQ(SOFTBUS_MALLOC_ERR, ret);
 }
 
-/**
+/*
  * @tc.name: TransSrvGetDataBufNodeById001
- * @tc.desc: Should return SOFTBUS_OK when CreateSoftBusList return nullptr.
+ * @tc.desc: Should return SOFTBUS_OK when CreateSoftBusList return nullptr
  * @tc.type: FUNC
  * @tc.require:
  */
@@ -231,9 +231,9 @@ HWTEST_F(TransTcpDirectMessageAppendTest, TransSrvGetDataBufNodeById001, TestSiz
     EXPECT_EQ(nullptr, ret);
 }
 
-/**
+/*
  * @tc.name: TransSrvAddDataBufNodeTest001
- * @tc.desc: Should return SOFTBUS_LOCK_ERR when g_tcpSrvDataList is nullptr.
+ * @tc.desc: Should return SOFTBUS_LOCK_ERR when g_tcpSrvDataList is nullptr
  * @tc.type: FUNC
  * @tc.require:
  */
@@ -245,9 +245,9 @@ HWTEST_F(TransTcpDirectMessageAppendTest, TransSrvAddDataBufNodeTest001, TestSiz
     EXPECT_EQ(SOFTBUS_LOCK_ERR, ret);
 }
 
-/**
+/*
  * @tc.name: TransTdcPostBytesTest001
- * @tc.desc: Should return SOFTBUS_INVALID_PARAM when given invalid parameters.
+ * @tc.desc: Should return SOFTBUS_INVALID_PARAM when given invalid parameters
  * @tc.type: FUNC
  * @tc.require:
  */
@@ -265,9 +265,9 @@ HWTEST_F(TransTcpDirectMessageAppendTest, TransTdcPostBytesTest001, TestSize.Lev
     EXPECT_EQ(SOFTBUS_INVALID_PARAM, ret);
 }
 
-/**
+/*
  * @tc.name: TransTdcPostBytesTest002
- * @tc.desc: Should return SOFTBUS_OK when given valid parameters.
+ * @tc.desc: Should return SOFTBUS_OK when given valid parameters
  * @tc.type: FUNC
  * @tc.require:
  */
@@ -295,9 +295,9 @@ HWTEST_F(TransTcpDirectMessageAppendTest, TransTdcPostBytesTest002, TestSize.Lev
     TransDelSessionConnById(channelId);
 }
 
-/**
+/*
  * @tc.name: TransTdcPostBytesTest003
- * @tc.desc: Should return GetErrCodeBySocketErr when ConnSendSocketData fail.
+ * @tc.desc: Should return GetErrCodeBySocketErr when ConnSendSocketData fail
  * @tc.type: FUNC
  * @tc.require:
  */
@@ -364,9 +364,9 @@ HWTEST_F(TransTcpDirectMessageAppendTest, TransTdcPostBytesTest003, TestSize.Lev
     TransDelSessionConnById(channelId);
 }
 
-/**
+/*
  * @tc.name: TransTdcPostBytesTest003_1
- * @tc.desc: Should return GetErrCodeBySocketErr when ConnSendSocketData fail.
+ * @tc.desc: Should return GetErrCodeBySocketErr when ConnSendSocketData fail
  * @tc.type: FUNC
  * @tc.require:
  */
@@ -425,9 +425,9 @@ HWTEST_F(TransTcpDirectMessageAppendTest, TransTdcPostBytesTest003_1, TestSize.L
     TransDelSessionConnById(channelId);
 }
 
-/**
+/*
  * @tc.name: TransTdcPostBytesTest003_2
- * @tc.desc: Should return GetErrCodeBySocketErr when ConnSendSocketData fail.
+ * @tc.desc: Should return GetErrCodeBySocketErr when ConnSendSocketData fail
  * @tc.type: FUNC
  * @tc.require:
  */
@@ -482,9 +482,9 @@ HWTEST_F(TransTcpDirectMessageAppendTest, TransTdcPostBytesTest003_2, TestSize.L
     TransDelSessionConnById(channelId);
 }
 
-/**
+/*
  * @tc.name: TransTdcPostBytesTest004
- * @tc.desc: Should return SOFTBUS_TRANS_GET_SESSION_CONN_FAILED when GetSessionConnById return nullptr.
+ * @tc.desc: Should return SOFTBUS_TRANS_GET_SESSION_CONN_FAILED when GetSessionConnById return nullptr
  * @tc.type: FUNC
  * @tc.require:
  */
@@ -503,9 +503,9 @@ HWTEST_F(TransTcpDirectMessageAppendTest, TransTdcPostBytesTest004, TestSize.Lev
     EXPECT_EQ(SOFTBUS_TRANS_GET_SESSION_CONN_FAILED, ret);
 }
 
-/**
+/*
  * @tc.name: TransTdcPostBytesTest005
- * @tc.desc: Should return SOFTBUS_ENCRYPT_ERR when AuthEncrypt return SOFTBUS_INVALID_PARAM.
+ * @tc.desc: Should return SOFTBUS_ENCRYPT_ERR when AuthEncrypt return SOFTBUS_INVALID_PARAM
  * @tc.type: FUNC
  * @tc.require:
  */
@@ -524,9 +524,9 @@ HWTEST_F(TransTcpDirectMessageAppendTest, TransTdcPostBytesTest005, TestSize.Lev
     EXPECT_EQ(SOFTBUS_ENCRYPT_ERR, ret);
 }
 
-/**
+/*
  * @tc.name: TransTdcPostBytesTest006
- * @tc.desc: Should return SOFTBUS_ENCRYPT_ERR when GetAuthHandleByChanId return AUTH_INVALID_ID.
+ * @tc.desc: Should return SOFTBUS_ENCRYPT_ERR when GetAuthHandleByChanId return AUTH_INVALID_ID
  * @tc.type: FUNC
  * @tc.require:
  */
@@ -542,9 +542,9 @@ HWTEST_F(TransTcpDirectMessageAppendTest, TransTdcPostBytesTest006, TestSize.Lev
     EXPECT_EQ(SOFTBUS_TRANS_TCP_GET_AUTHID_FAILED, ret);
 }
 
-/**
+/*
  * @tc.name: TransSrvAddDataBufNodeTest002
- * @tc.desc: Should return SOFTBUS_OK when given valid parameters.
+ * @tc.desc: Should return SOFTBUS_OK when given valid parameters
  * @tc.type: FUNC
  * @tc.require:
  */
@@ -568,9 +568,9 @@ HWTEST_F(TransTcpDirectMessageAppendTest, TransSrvAddDataBufNodeTest002, TestSiz
     TransSrvDataListDeinit();
 }
 
-/**
+/*
  * @tc.name: TransTdcSrvRecvDataTest001
- * @tc.desc: Should return SOFTBUS_TRANS_TCP_GET_SRV_DATA_FAILED when g_tcpSrvDataList is nullptr.
+ * @tc.desc: Should return SOFTBUS_TRANS_TCP_GET_SRV_DATA_FAILED when g_tcpSrvDataList is nullptr
  * @tc.type: FUNC
  * @tc.require:
  */
@@ -582,10 +582,10 @@ HWTEST_F(TransTcpDirectMessageAppendTest, TransTdcSrvRecvDataTest001, TestSize.L
     EXPECT_EQ(SOFTBUS_TRANS_TCP_GET_SRV_DATA_FAILED, ret);
 }
 
-/**
+/*
  * @tc.name: TransTdcSrvRecvDataTest002
  * @tc.desc: Should return SOFTBUS_TRANS_TCP_GET_SRV_DATA_FAILED
-        when can not find parameter in list.
+ *           when can not find parameter in list
  * @tc.type: FUNC
  * @tc.require:
  */
@@ -609,9 +609,9 @@ HWTEST_F(TransTcpDirectMessageAppendTest, TransTdcSrvRecvDataTest002, TestSize.L
     EXPECT_EQ(SOFTBUS_TRANS_TCP_GET_SRV_DATA_FAILED, ret);
 }
 
-/**
+/*
  * @tc.name: TransTdcSrvRecvDataTest003
- * @tc.desc: Should return SOFTBUS_TRANS_TCP_GET_SRV_DATA_FAILED  when ConnRecvSocketData return -1.
+ * @tc.desc: Should return SOFTBUS_TRANS_TCP_GET_SRV_DATA_FAILED  when ConnRecvSocketData return -1
  * @tc.type: FUNC
  * @tc.require:
  */
@@ -631,9 +631,9 @@ HWTEST_F(TransTcpDirectMessageAppendTest, TransTdcSrvRecvDataTest003, TestSize.L
     EXPECT_EQ(SOFTBUS_TRANS_TCP_GET_SRV_DATA_FAILED, ret);
 }
 
-/**
+/*
  * @tc.name: TransTdcSrvRecvDataTest004
- * @tc.desc: Should return SOFTBUS_DATA_NOT_ENOUGH  when ConnRecvSocketData return 0.
+ * @tc.desc: Should return SOFTBUS_DATA_NOT_ENOUGH  when ConnRecvSocketData return 0
  * @tc.type: FUNC
  * @tc.require:
  */
@@ -653,9 +653,9 @@ HWTEST_F(TransTcpDirectMessageAppendTest, TransTdcSrvRecvDataTest004, TestSize.L
     EXPECT_EQ(SOFTBUS_TRANS_TCP_GET_SRV_DATA_FAILED, ret);
 }
 
-/**
+/*
  * @tc.name: TransTdcSrvRecvDataTest005
- * @tc.desc: Should return SOFTBUS_DATA_NOT_ENOUGH  when ConnRecvSocketData return 1.
+ * @tc.desc: Should return SOFTBUS_DATA_NOT_ENOUGH  when ConnRecvSocketData return 1
  * @tc.type: FUNC
  * @tc.require:
  */
@@ -675,9 +675,9 @@ HWTEST_F(TransTcpDirectMessageAppendTest, TransTdcSrvRecvDataTest005, TestSize.L
     EXPECT_EQ(SOFTBUS_TRANS_TCP_GET_SRV_DATA_FAILED, ret);
 }
 
-/**
+/*
  * @tc.name: TransTdcSrvRecvDataTest006
- * @tc.desc: Should return SOFTBUS_TRANS_UNPACK_PACKAGE_HEAD_FAILED  when ConnRecvSocketData return 25.
+ * @tc.desc: Should return SOFTBUS_TRANS_UNPACK_PACKAGE_HEAD_FAILED  when ConnRecvSocketData return 25
  * @tc.type: FUNC
  * @tc.require:
  */
@@ -699,9 +699,9 @@ HWTEST_F(TransTcpDirectMessageAppendTest, TransTdcSrvRecvDataTest006, TestSize.L
     EXPECT_EQ(SOFTBUS_TRANS_UNPACK_PACKAGE_HEAD_FAILED, ret);
 }
 
-/**
+/*
  * @tc.name: NotifyChannelOpenFailedTest001
- * @tc.desc: Should return SOFTBUS_TRANS_GET_SESSION_CONN_FAILED  when GetSessionConnById return nullptr.
+ * @tc.desc: Should return SOFTBUS_TRANS_GET_SESSION_CONN_FAILED  when GetSessionConnById return nullptr
  * @tc.type: FUNC
  * @tc.require:
  */
@@ -714,9 +714,9 @@ HWTEST_F(TransTcpDirectMessageAppendTest, NotifyChannelOpenFailedTest001, TestSi
     EXPECT_EQ(ret, SOFTBUS_TRANS_GET_SESSION_CONN_FAILED);
 }
 
-/**
+/*
  * @tc.name: NotifyChannelOpenFailedTest002
- * @tc.desc: Should return SOFTBUS_MEM_ERR  when TransTdcGetPkgName return SOFTBUS_MEM_ERR.
+ * @tc.desc: Should return SOFTBUS_MEM_ERR  when TransTdcGetPkgName return SOFTBUS_MEM_ERR
  * @tc.type: FUNC
  * @tc.require:
  */
@@ -737,9 +737,9 @@ HWTEST_F(TransTcpDirectMessageAppendTest, NotifyChannelOpenFailedTest002, TestSi
     TransDelSessionConnById(channelId);
 }
 
-/**
+/*
  * @tc.name: NotifyChannelOpenFailedTest003
- * @tc.desc: Should return SOFTBUS_OK  when TransTdcGetPkgName return SOFTBUS_OK.
+ * @tc.desc: Should return SOFTBUS_OK  when TransTdcGetPkgName return SOFTBUS_OK
  * @tc.type: FUNC
  * @tc.require:
  */
@@ -760,9 +760,9 @@ HWTEST_F(TransTcpDirectMessageAppendTest, NotifyChannelOpenFailedTest003, TestSi
     TransDelSessionConnById(channelId);
 }
 
-/**
+/*
  * @tc.name: NotifyChannelOpenFailedTest004
- * @tc.desc: Should return SOFTBUS_MEM_ERR  when TransTdcOnChannelOpenFailed return SOFTBUS_MEM_ERR.
+ * @tc.desc: Should return SOFTBUS_MEM_ERR  when TransTdcOnChannelOpenFailed return SOFTBUS_MEM_ERR
  * @tc.type: FUNC
  * @tc.require:
  */
@@ -793,9 +793,9 @@ HWTEST_F(TransTcpDirectMessageAppendTest, NotifyChannelOpenFailedTest004, TestSi
     TransDelSessionConnById(channelId);
 }
 
-/**
+/*
  * @tc.name: GetServerSideIpInfoTest001
- * @tc.desc: Should return SOFTBUS_TRANS_GET_LOCAL_IP_FAILED when LnnGetLocalStrInfo return SOFTBUS_MEM_ERR.
+ * @tc.desc: Should return SOFTBUS_TRANS_GET_LOCAL_IP_FAILED when LnnGetLocalStrInfo return SOFTBUS_MEM_ERR
  * @tc.type: FUNC
  * @tc.require:
  */
@@ -818,9 +818,9 @@ HWTEST_F(TransTcpDirectMessageAppendTest, GetServerSideIpInfoTest001, TestSize.L
     ReleaseSessionConn(conn);
 }
 
-/**
+/*
  * @tc.name: GetClientSideIpInfoTest001
- * @tc.desc: Should return SOFTBUS_TRANS_GET_LOCAL_IP_FAILED when LnnGetLocalStrInfo return SOFTBUS_OK.
+ * @tc.desc: Should return SOFTBUS_TRANS_GET_LOCAL_IP_FAILED when LnnGetLocalStrInfo return SOFTBUS_OK
  * @tc.type: FUNC
  * @tc.require:
  */
@@ -852,9 +852,9 @@ HWTEST_F(TransTcpDirectMessageAppendTest, GetClientSideIpInfoTest001, TestSize.L
     ReleaseSessionConn(conn);
 }
 
-/**
+/*
  * @tc.name: TransTdcPostFisrtDataTest001
- * @tc.desc: Should return SOFTBUS_ENCRYPT_ERR when TransTdcPackFastData return nullptr.
+ * @tc.desc: Should return SOFTBUS_ENCRYPT_ERR when TransTdcPackFastData return nullptr
  * @tc.type: FUNC
  * @tc.require:
  */
@@ -875,9 +875,9 @@ HWTEST_F(TransTcpDirectMessageAppendTest, TransTdcPostFisrtDataTest001, TestSize
     ReleaseSessionConn(conn);
 }
 
-/**
+/*
  * @tc.name: OpenDataBusReplyTest001
- * @tc.desc: Should return SOFTBUS_TRANS_GET_SESSION_CONN_FAILED when GetSessionConnById return nullptr.
+ * @tc.desc: Should return SOFTBUS_TRANS_GET_SESSION_CONN_FAILED when GetSessionConnById return nullptr
  * @tc.type: FUNC
  * @tc.require:
  */
@@ -892,9 +892,9 @@ HWTEST_F(TransTcpDirectMessageAppendTest, OpenDataBusReplyTest001, TestSize.Leve
     cJSON_Delete(reply);
 }
 
-/**
+/*
  * @tc.name: OpenDataBusReplyTest002
- * @tc.desc: Should return SOFTBUS_OK when UnpackReplyErrCode return SOFTBUS_OK.
+ * @tc.desc: Should return SOFTBUS_OK when UnpackReplyErrCode return SOFTBUS_OK
  * @tc.type: FUNC
  * @tc.require:
  */
@@ -917,9 +917,9 @@ HWTEST_F(TransTcpDirectMessageAppendTest, OpenDataBusReplyTest002, TestSize.Leve
     cJSON_Delete(reply);
 }
 
-/**
+/*
  * @tc.name: OpenDataBusReplyTest003
- * @tc.desc: Should return SOFTBUS_TRANS_UNPACK_REPLY_FAILED when UnpackReply return SOFTBUS_MEM_ERR.
+ * @tc.desc: Should return SOFTBUS_TRANS_UNPACK_REPLY_FAILED when UnpackReply return SOFTBUS_MEM_ERR
  * @tc.type: FUNC
  * @tc.require:
  */
@@ -943,9 +943,9 @@ HWTEST_F(TransTcpDirectMessageAppendTest, OpenDataBusReplyTest003, TestSize.Leve
     cJSON_Delete(reply);
 }
 
-/**
+/*
  * @tc.name: OpenDataBusReplyTest004
- * @tc.desc: Should return SOFTBUS_MEM_ERR when UnpackReply return SOFTBUS_MEM_ERR.
+ * @tc.desc: Should return SOFTBUS_MEM_ERR when UnpackReply return SOFTBUS_MEM_ERR
  * @tc.type: FUNC
  * @tc.require:
  */
@@ -970,9 +970,9 @@ HWTEST_F(TransTcpDirectMessageAppendTest, OpenDataBusReplyTest004, TestSize.Leve
     cJSON_Delete(reply);
 }
 
-/**
+/*
  * @tc.name: OpenDataBusReplyTest005
- * @tc.desc: Should return SOFTBUS_MEM_ERR when SetAppInfoById return SOFTBUS_MEM_ERR.
+ * @tc.desc: Should return SOFTBUS_MEM_ERR when SetAppInfoById return SOFTBUS_MEM_ERR
  * @tc.type: FUNC
  * @tc.require:
  */
@@ -1006,9 +1006,9 @@ HWTEST_F(TransTcpDirectMessageAppendTest, OpenDataBusReplyTest005, TestSize.Leve
     cJSON_Delete(reply);
 }
 
-/**
+/*
  * @tc.name: OpenDataBusReplyTest006
- * @tc.desc: Should return SOFTBUS_MEM_ERR when SetAppInfoById return SOFTBUS_MEM_ERR.
+ * @tc.desc: Should return SOFTBUS_MEM_ERR when SetAppInfoById return SOFTBUS_MEM_ERR
  * @tc.type: FUNC
  * @tc.require:
  */
@@ -1035,9 +1035,9 @@ HWTEST_F(TransTcpDirectMessageAppendTest, OpenDataBusReplyTest006, TestSize.Leve
     cJSON_Delete(reply);
 }
 
-/**
+/*
  * @tc.name: GetUuidByChanIdTest001
- * @tc.desc: Should return SOFTBUS_OK when SetAppInfoById return SOFTBUS_OK.
+ * @tc.desc: Should return SOFTBUS_OK when SetAppInfoById return SOFTBUS_OK
  * @tc.type: FUNC
  * @tc.require:
  */
@@ -1055,9 +1055,9 @@ HWTEST_F(TransTcpDirectMessageAppendTest, GetUuidByChanIdTest001, TestSize.Level
     EXPECT_EQ(ret, SOFTBUS_OK);
 }
 
-/**
+/*
  * @tc.name: GetSessionConnFromDataBusRequestTest001
- * @tc.desc: Should return ret when UnpackRequest return SOFTBUS_OK.
+ * @tc.desc: Should return ret when UnpackRequest return SOFTBUS_OK
  * @tc.type: FUNC
  * @tc.require:
  */
@@ -1079,9 +1079,9 @@ HWTEST_F(TransTcpDirectMessageAppendTest, GetSessionConnFromDataBusRequestTest00
     cJSON_Delete(reply);
 }
 
-/**
+/*
  * @tc.name: GetSessionConnFromDataBusRequestTest002
- * @tc.desc: Should return nullptr when UnpackRequest return SOFTBUS_MEM_ERR.
+ * @tc.desc: Should return nullptr when UnpackRequest return SOFTBUS_MEM_ERR
  * @tc.type: FUNC
  * @tc.require:
  */
@@ -1103,9 +1103,9 @@ HWTEST_F(TransTcpDirectMessageAppendTest, GetSessionConnFromDataBusRequestTest00
     cJSON_Delete(reply);
 }
 
-/**
+/*
  * @tc.name: GetSessionConnFromDataBusRequestTest003
- * @tc.desc: Should return nullptr when GetSessionConnById return nullptr.
+ * @tc.desc: Should return nullptr when GetSessionConnById return nullptr
  * @tc.type: FUNC
  * @tc.require:
  */
@@ -1120,9 +1120,9 @@ HWTEST_F(TransTcpDirectMessageAppendTest, GetSessionConnFromDataBusRequestTest00
     cJSON_Delete(reply);
 }
 
-/**
+/*
  * @tc.name: OpenDataBusRequestTest001
- * @tc.desc: Should return SOFTBUS_INVALID_PARAM when GetSessionConnById return nullptr.
+ * @tc.desc: Should return SOFTBUS_INVALID_PARAM when GetSessionConnById return nullptr
  * @tc.type: FUNC
  * @tc.require:
  */
@@ -1139,9 +1139,9 @@ HWTEST_F(TransTcpDirectMessageAppendTest, OpenDataBusRequestTest001, TestSize.Le
     cJSON_Delete(reply);
 }
 
-/**
+/*
  * @tc.name: OpenDataBusRequestError001
- * @tc.desc: Should return SOFTBUS_INVALID_PARAM when GetSessionConnById return nullptr.
+ * @tc.desc: Should return SOFTBUS_INVALID_PARAM when GetSessionConnById return nullptr
  * @tc.type: FUNC
  * @tc.require:
  */
@@ -1162,9 +1162,9 @@ HWTEST_F(TransTcpDirectMessageAppendTest, OpenDataBusRequestError001, TestSize.L
     EXPECT_EQ(ret, SOFTBUS_TRANS_GET_SESSION_CONN_FAILED);
 }
 
-/**
+/*
  * @tc.name: GetAuthIdByChannelInfoTest001
- * @tc.desc: Should return TEST_AUTHID when GetAuthHandleByChanId return TEST_AUTHID.
+ * @tc.desc: Should return TEST_AUTHID when GetAuthHandleByChanId return TEST_AUTHID
  * @tc.type: FUNC
  * @tc.require:
  */
@@ -1184,9 +1184,9 @@ HWTEST_F(TransTcpDirectMessageAppendTest, GetAuthIdByChannelInfoTest001, TestSiz
     EXPECT_EQ(authHandle.authId, TEST_AUTHID);
 }
 
-/**
+/*
  * @tc.name: GetAuthIdByChannelInfoTest002
- * @tc.desc: Should return AUTH_INVALID_ID when GetAppInfoById return SOFTBUS_MEM_ERR.
+ * @tc.desc: Should return AUTH_INVALID_ID when GetAppInfoById return SOFTBUS_MEM_ERR
  * @tc.type: FUNC
  * @tc.require:
  */
@@ -1204,9 +1204,9 @@ HWTEST_F(TransTcpDirectMessageAppendTest, GetAuthIdByChannelInfoTest002, TestSiz
     EXPECT_EQ(authHandle.authId, AUTH_INVALID_ID);
 }
 
-/**
+/*
  * @tc.name: GetAuthIdByChannelInfoTest003
- * @tc.desc: Should return AUTH_INVALID_ID when GetAppInfoById return SOFTBUS_OK.
+ * @tc.desc: Should return AUTH_INVALID_ID when GetAppInfoById return SOFTBUS_OK
  * @tc.type: FUNC
  * @tc.require:
  */
@@ -1224,9 +1224,9 @@ HWTEST_F(TransTcpDirectMessageAppendTest, GetAuthIdByChannelInfoTest003, TestSiz
     EXPECT_EQ(authHandle.authId, AUTH_INVALID_ID);
 }
 
-/**
+/*
  * @tc.name: GetAuthIdByChannelInfoTest004
- * @tc.desc: Should return AUTH_INVALID_ID when GetRemoteUuidByIp return SOFTBUS_NOT_FIND.
+ * @tc.desc: Should return AUTH_INVALID_ID when GetRemoteUuidByIp return SOFTBUS_NOT_FIND
  * @tc.type: FUNC
  * @tc.require:
  */
@@ -1245,9 +1245,9 @@ HWTEST_F(TransTcpDirectMessageAppendTest, GetAuthIdByChannelInfoTest004, TestSiz
     EXPECT_EQ(authHandle.authId, AUTH_INVALID_ID);
 }
 
-/**
+/*
  * @tc.name: DecryptMessageTest001
- * @tc.desc: Should return SOFTBUS_OK when AuthDecrypt return SOFTBUS_OK.
+ * @tc.desc: Should return SOFTBUS_OK when AuthDecrypt return SOFTBUS_OK
  * @tc.type: FUNC
  * @tc.require:
  */
@@ -1269,9 +1269,9 @@ HWTEST_F(TransTcpDirectMessageAppendTest, DecryptMessageTest001, TestSize.Level1
     EXPECT_EQ(ret, SOFTBUS_OK);
 }
 
-/**
+/*
  * @tc.name: DecryptMessageTest002
- * @tc.desc: Should return SOFTBUS_DECRYPT_ERR when AuthDecrypt return SOFTBUS_NOT_FIND.
+ * @tc.desc: Should return SOFTBUS_DECRYPT_ERR when AuthDecrypt return SOFTBUS_NOT_FIND
  * @tc.type: FUNC
  * @tc.require:
  */
@@ -1293,9 +1293,9 @@ HWTEST_F(TransTcpDirectMessageAppendTest, DecryptMessageTest002, TestSize.Level1
     EXPECT_EQ(ret, SOFTBUS_DECRYPT_ERR);
 }
 
-/**
+/*
  * @tc.name: DecryptMessageTest003
- * @tc.desc: Should return SOFTBUS_NOT_FIND when SetAuthHandleByChanId return SOFTBUS_NOT_FIND.
+ * @tc.desc: Should return SOFTBUS_NOT_FIND when SetAuthHandleByChanId return SOFTBUS_NOT_FIND
  * @tc.type: FUNC
  * @tc.require:
  */
@@ -1316,9 +1316,9 @@ HWTEST_F(TransTcpDirectMessageAppendTest, DecryptMessageTest003, TestSize.Level1
     EXPECT_EQ(ret, SOFTBUS_NOT_FIND);
 }
 
-/**
+/*
  * @tc.name: DecryptMessageTest004
- * @tc.desc: Should return SOFTBUS_NOT_FIND when GetAuthHandleByChanId return SOFTBUS_NOT_FIND.
+ * @tc.desc: Should return SOFTBUS_NOT_FIND when GetAuthHandleByChanId return SOFTBUS_NOT_FIND
  * @tc.type: FUNC
  * @tc.require:
  */
@@ -1339,10 +1339,10 @@ HWTEST_F(TransTcpDirectMessageAppendTest, DecryptMessageTest004, TestSize.Level1
     EXPECT_EQ(ret, SOFTBUS_OK);
 }
 
-/**
+/*
  * @tc.name: NotifyChannelOpenedTest001
  * @tc.desc: Should return SOFTBUS_TRANS_GET_SESSION_CONN_FAILED
- *     when TransTdcGetPkgName return SOFTBUS_TRANS_GET_SESSION_CONN_FAILED.
+ *           when TransTdcGetPkgName return SOFTBUS_TRANS_GET_SESSION_CONN_FAILED
  * @tc.type: FUNC
  * @tc.require:
  */
@@ -1361,10 +1361,10 @@ HWTEST_F(TransTcpDirectMessageAppendTest, NotifyChannelOpenedTest001, TestSize.L
     TransDelSessionConnById(channelId);
 }
 
-/**
+/*
  * @tc.name: NotifyChannelOpenedTest002
  * @tc.desc: Should return SOFTBUS_TRANS_GET_SESSION_CONN_FAILED
- *     when TransTdcGetPkgName return SOFTBUS_TRANS_GET_SESSION_CONN_FAILED.
+ *           when TransTdcGetPkgName return SOFTBUS_TRANS_GET_SESSION_CONN_FAILED
  * @tc.type: FUNC
  * @tc.require:
  */
@@ -1412,9 +1412,9 @@ HWTEST_F(TransTcpDirectMessageAppendTest, NotifyChannelOpenedTest002, TestSize.L
     TransDelSessionConnById(channelId);
 }
 
-/**
+/*
  * @tc.name: NotifyChannelBindTest001
- * @tc.desc: Should return AUTH_LINK_TYPE_ENHANCED_P2P  when cipherFlag is FLAG_ENHANCE_P2P.
+ * @tc.desc: Should return AUTH_LINK_TYPE_ENHANCED_P2P  when cipherFlag is FLAG_ENHANCE_P2P
  * @tc.type: FUNC
  * @tc.require:
  */
@@ -1439,9 +1439,9 @@ HWTEST_F(TransTcpDirectMessageAppendTest, NotifyChannelBindTest001, TestSize.Lev
     TransDelSessionConnById(channelId);
 }
 
-/**
+/*
  * @tc.name: SwitchCipherTypeToAuthLinkTypeTest001
- * @tc.desc: Should return AUTH_LINK_TYPE_ENHANCED_P2P  when cipherFlag is FLAG_ENHANCE_P2P.
+ * @tc.desc: Should return AUTH_LINK_TYPE_ENHANCED_P2P  when cipherFlag is FLAG_ENHANCE_P2P
  * @tc.type: FUNC
  * @tc.require:
  */
@@ -1452,9 +1452,9 @@ HWTEST_F(TransTcpDirectMessageAppendTest, SwitchCipherTypeToAuthLinkTypeTest001,
     EXPECT_EQ(linkType, AUTH_LINK_TYPE_ENHANCED_P2P);
 }
 
-/**
+/*
  * @tc.name: PackBytesTest001
- * @tc.desc: Should return SOFTBUS_OK  when AuthEncrypt return SOFTBUS_OK.
+ * @tc.desc: Should return SOFTBUS_OK  when AuthEncrypt return SOFTBUS_OK
  * @tc.type: FUNC
  * @tc.require:
  */
@@ -1486,9 +1486,9 @@ HWTEST_F(TransTcpDirectMessageAppendTest, PackBytesTest001, TestSize.Level1)
     SoftBusFree(buffer);
 }
 
-/**
+/*
  * @tc.name: PackBytesTest002
- * @tc.desc: Should return SOFTBUS_ENCRYPT_ERR  when AuthEncrypt return SOFTBUS_MEM_ERR.
+ * @tc.desc: Should return SOFTBUS_ENCRYPT_ERR  when AuthEncrypt return SOFTBUS_MEM_ERR
  * @tc.type: FUNC
  * @tc.require:
  */
@@ -1520,9 +1520,9 @@ HWTEST_F(TransTcpDirectMessageAppendTest, PackBytesTest002, TestSize.Level1)
     SoftBusFree(buffer);
 }
 
-/**
+/*
  * @tc.name: PackBytesTest003
- * @tc.desc: Should return SOFTBUS_NOT_FIND  when AuthEncrypt return SOFTBUS_NOT_FIND.
+ * @tc.desc: Should return SOFTBUS_NOT_FIND  when AuthEncrypt return SOFTBUS_NOT_FIND
  * @tc.type: FUNC
  * @tc.require:
  */
@@ -1552,9 +1552,9 @@ HWTEST_F(TransTcpDirectMessageAppendTest, PackBytesTest003, TestSize.Level1)
     SoftBusFree(buffer);
 }
 
-/**
+/*
  * @tc.name: TransGetLocalConfigTest001
- * @tc.desc: Should return SOFTBUS_INVALID_PARAM  when channelType is invalid param.
+ * @tc.desc: Should return SOFTBUS_INVALID_PARAM  when channelType is invalid param
  * @tc.type: FUNC
  * @tc.require:
  */
@@ -1569,9 +1569,9 @@ HWTEST_F(TransTcpDirectMessageAppendTest, TransGetLocalConfigTest001, TestSize.L
     EXPECT_EQ(SOFTBUS_INVALID_PARAM, ret);
 }
 
-/**
+/*
  * @tc.name: TransGetLocalConfigTest002
- * @tc.desc: Should return SOFTBUS_GET_CONFIG_VAL_ERR  when TransGetLocalConfig return SOFTBUS_MEM_ERR.
+ * @tc.desc: Should return SOFTBUS_GET_CONFIG_VAL_ERR  when TransGetLocalConfig return SOFTBUS_MEM_ERR
  * @tc.type: FUNC
  * @tc.require:
  */
@@ -1586,9 +1586,9 @@ HWTEST_F(TransTcpDirectMessageAppendTest, TransGetLocalConfigTest002, TestSize.L
     EXPECT_EQ(SOFTBUS_GET_CONFIG_VAL_ERR, ret);
 }
 
-/**
+/*
  * @tc.name: TransTdcProcessDataConfigTest001
- * @tc.desc: Should return SOFTBUS_OK  when TransGetLocalConfig return SOFTBUS_MEM_ERR.
+ * @tc.desc: Should return SOFTBUS_OK  when TransGetLocalConfig return SOFTBUS_MEM_ERR
  * @tc.type: FUNC
  * @tc.require:
  */
@@ -1620,9 +1620,9 @@ HWTEST_F(TransTcpDirectMessageAppendTest, TransTdcProcessDataConfigTest001, Test
     SoftBusFree(appInfo);
 }
 
-/**
+/*
  * @tc.name: ProcessMessageTest001
- * @tc.desc: Should return SOFTBUS_OK  when UnpackReplyErrCode return SOFTBUS_OK.
+ * @tc.desc: Should return SOFTBUS_OK  when UnpackReplyErrCode return SOFTBUS_OK
  * @tc.type: FUNC
  * @tc.require:
  */
@@ -1644,9 +1644,9 @@ HWTEST_F(TransTcpDirectMessageAppendTest, ProcessMessageTest001, TestSize.Level1
     TransDelSessionConnById(channelId);
 }
 
-/**
+/*
  * @tc.name: ProcessMessageTest002
- * @tc.desc: Should return SOFTBUS_OK  when UnpackReplyErrCode return SOFTBUS_OK.
+ * @tc.desc: Should return SOFTBUS_OK when UnpackReplyErrCode return SOFTBUS_OK
  * @tc.type: FUNC
  * @tc.require:
  */
@@ -1662,9 +1662,9 @@ HWTEST_F(TransTcpDirectMessageAppendTest, ProcessMessageTest002, TestSize.Level1
     EXPECT_EQ(SOFTBUS_PARSE_JSON_ERR, ret);
 }
 
-/**
+/*
  * @tc.name: StartVerifySessionTest001
- * @tc.desc: Should return SOFTBUS_TRANS_PACK_REQUEST_FAILED  when PackRequest return NULL.
+ * @tc.desc: Should return SOFTBUS_TRANS_PACK_REQUEST_FAILED when PackRequest return NULL
  * @tc.type: FUNC
  * @tc.require:
  */
@@ -1679,9 +1679,9 @@ HWTEST_F(TransTcpDirectMessageAppendTest, StartVerifySessionTest001, TestSize.Le
     ReleaseSessionConn(conn);
 }
 
-/**
+/*
  * @tc.name: StartVerifySessionTest002
- * @tc.desc: Should return SOFTBUS_TRANS_PACK_REQUEST_FAILED  when PackRequest return NULL.
+ * @tc.desc: Should return SOFTBUS_TRANS_PACK_REQUEST_FAILED when PackRequest return NULL
  * @tc.type: FUNC
  * @tc.require:
  */
@@ -1699,9 +1699,9 @@ HWTEST_F(TransTcpDirectMessageAppendTest, StartVerifySessionTest002, TestSize.Le
     ReleaseSessionConn(conn);
 }
 
-/**
+/*
  * @tc.name: StartVerifySessionTest003
- * @tc.desc: Should return SOFTBUS_TRANS_PACK_REQUEST_FAILED  when PackRequest return NULL.
+ * @tc.desc: Should return SOFTBUS_TRANS_PACK_REQUEST_FAILED when PackRequest return NULL
  * @tc.type: FUNC
  * @tc.require:
  */
@@ -1731,9 +1731,9 @@ HWTEST_F(TransTcpDirectMessageAppendTest, StartVerifySessionTest003, TestSize.Le
     ReleaseSessionConn(conn);
 }
 
-/**
+/*
  * @tc.name: CreateSessionConnNode001
- * @tc.desc: Should return SOFTBUS_TRANS_PACK_REQUEST_FAILED  when PackRequest return NULL.
+ * @tc.desc: Should return SOFTBUS_TRANS_PACK_REQUEST_FAILED when PackRequest return NULL
  * @tc.type: FUNC
  * @tc.require:
  */
@@ -1752,9 +1752,9 @@ HWTEST_F(TransTcpDirectMessageAppendTest, CreateSessionConnNode001, TestSize.Lev
     SoftBusFree(clientAddr);
 }
 
-/**
+/*
  * @tc.name: CreateSessionConnNode002
- * @tc.desc: Should return SOFTBUS_TRANS_PACK_REQUEST_FAILED  when PackRequest return NULL.
+ * @tc.desc: Should return SOFTBUS_TRANS_PACK_REQUEST_FAILED when PackRequest return NULL
  * @tc.type: FUNC
  * @tc.require:
  */
@@ -1773,7 +1773,7 @@ HWTEST_F(TransTcpDirectMessageAppendTest, CreateSessionConnNode002, TestSize.Lev
     SoftBusFree(clientAddr);
 }
 
-/**
+/*
  * @tc.name: NotifyFastDataRecv001
  * @tc.desc: test NotifyFastDataRecv
  * @tc.type: FUNC
@@ -1795,9 +1795,9 @@ HWTEST_F(TransTcpDirectMessageAppendTest, NotifyFastDataRecv001, TestSize.Level1
     ReleaseSessionConn(conn);
 }
 
-/**
+/*
  * @tc.name: TransTdcFillDataConfig001
- * @tc.desc: Should return SOFTBUS_TRANS_PACK_REQUEST_FAILED  when PackRequest return NULL.
+ * @tc.desc: Should return SOFTBUS_TRANS_PACK_REQUEST_FAILED when PackRequest return NULL
  * @tc.type: FUNC
  * @tc.require:
  */
@@ -1817,9 +1817,9 @@ HWTEST_F(TransTcpDirectMessageAppendTest, TransTdcFillDataConfig001, TestSize.Le
     SoftBusFree(appInfo);
 }
 
-/**
+/*
  * @tc.name: ReportTransEventExtra001
- * @tc.desc: test ReportTransEventExtra.
+ * @tc.desc: test ReportTransEventExtra
  * @tc.type: FUNC
  * @tc.require:
  */
@@ -1844,9 +1844,9 @@ HWTEST_F(TransTcpDirectMessageAppendTest, ReportTransEventExtra001, TestSize.Lev
     ReleaseSessionConn(conn);
 }
 
-/**
+/*
  * @tc.name: TransTdcFillAppInfoAndNotifyChannel001
- * @tc.desc: Test TransTdcFillAppInfoAndNotifyChannel.
+ * @tc.desc: Test TransTdcFillAppInfoAndNotifyChannel
  * @tc.type: FUNC
  * @tc.require:
  */
@@ -1889,9 +1889,9 @@ HWTEST_F(TransTcpDirectMessageAppendTest, TransTdcFillAppInfoAndNotifyChannel001
     SoftBusFree(errDesc);
 }
 
-/**
+/*
  * @tc.name: TransTdcFillAppInfoAndNotifyChannel002
- * @tc.desc: Test TransTdcFillAppInfoAndNotifyChannel.
+ * @tc.desc: Test TransTdcFillAppInfoAndNotifyChannel
  * @tc.type: FUNC
  * @tc.require:
  */
@@ -1924,9 +1924,9 @@ HWTEST_F(TransTcpDirectMessageAppendTest, TransTdcFillAppInfoAndNotifyChannel002
     SoftBusFree(appInfo);
     SoftBusFree(errDesc);
 }
-/**
+/*
  * @tc.name: HandleDataBusReply001
- * @tc.desc: test HandleDataBusReply.
+ * @tc.desc: test HandleDataBusReply
  * @tc.type: FUNC
  * @tc.require:
  */
@@ -1949,9 +1949,9 @@ HWTEST_F(TransTcpDirectMessageAppendTest, HandleDataBusReply001, TestSize.Level1
     ReleaseSessionConn(conn);
 }
 
-/**
+/*
  * @tc.name: OpenDataBusRequestTest002
- * @tc.desc: Test GetSessionConnFromDataBusRequest.
+ * @tc.desc: Test GetSessionConnFromDataBusRequest
  * @tc.type: FUNC
  * @tc.require:
  */
@@ -1990,9 +1990,9 @@ HWTEST_F(TransTcpDirectMessageAppendTest, OpenDataBusRequestTest002, TestSize.Le
     cJSON_Delete(reply);
 }
 
-/**
+/*
  * @tc.name: GetCipherFlagByAuthIdTest0011
- * @tc.desc: GetCipherFlagByAuthId, use correct parameters.
+ * @tc.desc: GetCipherFlagByAuthId, use correct parameters
  * @tc.type: FUNC
  * @tc.require:
 */

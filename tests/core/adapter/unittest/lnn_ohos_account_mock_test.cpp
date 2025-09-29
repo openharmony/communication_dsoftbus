@@ -361,7 +361,7 @@ HWTEST_F(LNNOhosAccountMockTest, LNN_IS_DEFAULT_OHOS_ACCOUNT_002, TestSize.Level
     EXPECT_FALSE(ret);
 }
 
-/**
+/*
  * @tc.name: LNN_JUDGE_DEVICE_TYPE_AND_GET_OHOS_ACCOUNT_INFO_001
  * @tc.desc: get local num info fail
  * @tc.type: FUNC
@@ -379,7 +379,7 @@ HWTEST_F(LNNOhosAccountMockTest, LNN_JUDGE_DEVICE_TYPE_AND_GET_OHOS_ACCOUNT_INFO
     EXPECT_EQ(ret, SOFTBUS_OK);
 }
  
-/**
+/*
  * @tc.name: LNN_JUDGE_DEVICE_TYPE_AND_GET_OHOS_ACCOUNT_INFO_002
  * @tc.desc: get ohos account info fail
  * @tc.type: FUNC
