@@ -59,9 +59,9 @@ static void OnLnnServerJoinExtCb(const ConnectionAddr *addr, int32_t ret)
 
 static LnnServerJoinExtCallBack cb = { .lnnServerJoinExtCallback = OnLnnServerJoinExtCb };
 
-/**
+/*
  * @tc.name: LnnConnIdCbManagerTest001
- * @tc.desc: AddConnIdCallbackInfoItem test.
+ * @tc.desc: AddConnIdCallbackInfoItem test
  * @tc.type: FUNC
  * @tc.require:
  */
@@ -84,9 +84,9 @@ HWTEST_F(LnnConnIdCbManagerTest, LnnConnIdCbManagerTest001, TestSize.Level1)
     EXPECT_EQ(ret, SOFTBUS_INVALID_PARAM);
 }
 
-/**
+/*
  * @tc.name: LnnConnIdCbManagerTest002
- * @tc.desc: DelConnIdCallbackInfoItem test.
+ * @tc.desc: DelConnIdCallbackInfoItem test
  * @tc.type: FUNC
  * @tc.require:
  */
@@ -98,9 +98,9 @@ HWTEST_F(LnnConnIdCbManagerTest, LnnConnIdCbManagerTest002, TestSize.Level1)
     EXPECT_EQ(ret, SOFTBUS_INVALID_PARAM);
 }
 
-/**
+/*
  * @tc.name: LnnConnIdCbManagerTest003
- * @tc.desc: InvokeCallbackForJoinExt test.
+ * @tc.desc: InvokeCallbackForJoinExt test
  * @tc.type: FUNC
  * @tc.require:
  */
@@ -113,9 +113,9 @@ HWTEST_F(LnnConnIdCbManagerTest, LnnConnIdCbManagerTest003, TestSize.Level1)
     EXPECT_NO_FATAL_FAILURE(InvokeCallbackForJoinExt(nullptr, SOFTBUS_OK));
 }
 
-/**
+/*
  * @tc.name: LnnConnIdCbManagerTest004
- * @tc.desc: GetConnIdCbInfoByAddr test.
+ * @tc.desc: GetConnIdCbInfoByAddr test
  * @tc.type: FUNC
  * @tc.require:
  */

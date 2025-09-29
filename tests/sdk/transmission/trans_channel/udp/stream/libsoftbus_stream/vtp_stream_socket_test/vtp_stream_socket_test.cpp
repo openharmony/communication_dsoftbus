@@ -80,9 +80,9 @@ void VtpStreamSocketTest::SetUpTestCase(void)
 void VtpStreamSocketTest::TearDownTestCase(void)
 {}
 
-/**
+/*
  * @tc.name: CreateClient001
- * @tc.desc: CreateClient, use the wrong parameter.
+ * @tc.desc: CreateClient, use the wrong parameter
  * @tc.type: FUNC
  * @tc.require:
  */
@@ -113,9 +113,9 @@ HWTEST_F(VtpStreamSocketTest, CreateClient001, TestSize.Level1)
     }
 }
 
-/**
+/*
  * @tc.name: CreateClient002
- * @tc.desc: CreateClient002, use the wrong parameter.
+ * @tc.desc: CreateClient002, use the wrong parameter
  * @tc.type: FUNC
  * @tc.require:
  */
@@ -147,9 +147,9 @@ HWTEST_F(VtpStreamSocketTest, CreateClient002, TestSize.Level1)
     }
 }
 
-/**
+/*
  * @tc.name: CreateServer001
- * @tc.desc: CreateServer001, use the wrong parameter.
+ * @tc.desc: CreateServer001, use the wrong parameter
  * @tc.type: FUNC
  * @tc.require:
  */
@@ -193,9 +193,9 @@ HWTEST_F(VtpStreamSocketTest, CreateServer001, TestSize.Level1)
     }
 }
 
-/**
+/*
  * @tc.name: Connect001
- * @tc.desc: Connect001, use the wrong parameter.
+ * @tc.desc: Connect001, use the wrong parameter
  * @tc.type: FUNC
  * @tc.require:
  */
@@ -220,9 +220,9 @@ HWTEST_F(VtpStreamSocketTest, Connect001, TestSize.Level1)
     }
 }
 
-/**
+/*
  * @tc.name: GetOption001
- * @tc.desc: GetOption001, use the wrong parameter.
+ * @tc.desc: GetOption001, use the wrong parameter
  * @tc.type: FUNC
  * @tc.require:
  */
@@ -252,9 +252,9 @@ HWTEST_F(VtpStreamSocketTest, GetOption001, TestSize.Level1)
     }
 }
 
-/**
+/*
  * @tc.name: SetOption001
- * @tc.desc: SetOption001, use the wrong parameter.
+ * @tc.desc: SetOption001, use the wrong parameter
  * @tc.type: FUNC
  * @tc.require:
  */
@@ -299,9 +299,9 @@ HWTEST_F(VtpStreamSocketTest, SetOption001, TestSize.Level1)
     }
 }
 
-/**
+/*
  * @tc.name: GetOption002
- * @tc.desc: GetOption002, use the wrong parameter.
+ * @tc.desc: GetOption002, use the wrong parameter
  * @tc.type: FUNC
  * @tc.require:
  */
@@ -326,9 +326,9 @@ HWTEST_F(VtpStreamSocketTest, GetOption002, TestSize.Level1)
     }
 }
 
-/**
+/*
  * @tc.name: SetStreamListener001
- * @tc.desc: SetStreamListener001, use the wrong parameter.
+ * @tc.desc: SetStreamListener001, use the wrong parameter
  * @tc.type: FUNC
  * @tc.require:
  */
@@ -344,9 +344,9 @@ HWTEST_F(VtpStreamSocketTest, SetStreamListener001, TestSize.Level1)
     EXPECT_EQ(false, ret);
 }
 
-/**
+/*
  * @tc.name: GetIpType001
- * @tc.desc: GetIpType001, use the wrong parameter.
+ * @tc.desc: GetIpType001, use the wrong parameter
  * @tc.type: FUNC
  * @tc.require:
  */
@@ -370,9 +370,9 @@ HWTEST_F(VtpStreamSocketTest, GetIpType001, TestSize.Level1)
     }
 }
 
-/**
+/*
  * @tc.name: GetRemoteScopeId001
- * @tc.desc: GetRemoteScopeId001, use the wrong parameter.
+ * @tc.desc: GetRemoteScopeId001, use the wrong parameter
  * @tc.type: FUNC
  * @tc.require:
  */
@@ -399,9 +399,9 @@ HWTEST_F(VtpStreamSocketTest, GetRemoteScopeId001, TestSize.Level1)
     }
 }
 
-/**
+/*
  * @tc.name: IsServer001
- * @tc.desc: IsServer001, use the wrong parameter.
+ * @tc.desc: IsServer001, use the wrong parameter
  * @tc.type: FUNC
  * @tc.require:
  */
@@ -426,9 +426,9 @@ HWTEST_F(VtpStreamSocketTest, IsServer001, TestSize.Level1)
     }
 }
 
-/**
+/*
  * @tc.name: SetStreamScene001
- * @tc.desc: SetStreamScene001, use the wrong parameter.
+ * @tc.desc: SetStreamScene001, use the wrong parameter
  * @tc.type: FUNC
  * @tc.require:
  */
@@ -452,9 +452,9 @@ HWTEST_F(VtpStreamSocketTest, SetStreamScene001, TestSize.Level1)
     }
 }
 
-/**
+/*
  * @tc.name: SetStreamHeaderSize001
- * @tc.desc: SetStreamHeaderSize001, use the wrong parameter.
+ * @tc.desc: SetStreamHeaderSize001, use the wrong parameter
  * @tc.desc: PrintOptionInfo
  * @tc.type: FUNC
  * @tc.require:
@@ -489,10 +489,10 @@ HWTEST_F(VtpStreamSocketTest, SetStreamHeaderSize001, TestSize.Level1)
     }
 }
 
-/**
+/*
  * @tc.name: NotifyStreamListener001
- * @tc.desc: NotifyStreamListener001, use the wrong parameter.
- * @tc.desc: EnableBwEstimationAlgo001, use the wrong parameter.
+ * @tc.desc: NotifyStreamListener001, use the wrong parameter
+ * @tc.desc: EnableBwEstimationAlgo001, use the wrong parameter
  * @tc.type: FUNC
  * @tc.require:
  */
@@ -508,9 +508,9 @@ HWTEST_F(VtpStreamSocketTest, NotifyStreamListener001, TestSize.Level1)
     EXPECT_EQ(true, ret);
 }
 
-/**
+/*
  * @tc.name: EnableJitterDetectionAlgo001
- * @tc.desc: EnableJitterDetectionAlgo001, use the wrong parameter.
+ * @tc.desc: EnableJitterDetectionAlgo001, use the wrong parameter
  * @tc.type: FUNC
  * @tc.require:
  */
@@ -524,9 +524,9 @@ HWTEST_F(VtpStreamSocketTest, EnableJitterDetectionAlgo001, TestSize.Level1)
     EXPECT_EQ(true, ret);
 }
 
-/**
+/*
  * @tc.name: EnableDirectlySend001
- * @tc.desc: EnableDirectlySend001, use the wrong parameter.
+ * @tc.desc: EnableDirectlySend001, use the wrong parameter
  * @tc.type: FUNC
  * @tc.require:
  */
@@ -542,9 +542,9 @@ HWTEST_F(VtpStreamSocketTest, EnableDirectlySend001, TestSize.Level1)
     EXPECT_EQ(false, ret);
 }
 
-/**
+/*
  * @tc.name: EnableSemiReliable001
- * @tc.desc: EnableSemiReliable001, use the wrong parameter.
+ * @tc.desc: EnableSemiReliable001, use the wrong parameter
  * @tc.type: FUNC
  * @tc.require:
  */
@@ -560,11 +560,11 @@ HWTEST_F(VtpStreamSocketTest, EnableSemiReliable001, TestSize.Level1)
     EXPECT_EQ(false, ret);
 }
 
-/**
+/*
  * @tc.name: FillpStatistics001
- * @tc.desc: FillpStatistics001, use the wrong parameter.
- * @tc.desc: FillpAppStatistics, use the wrong parameter.
- * @tc.desc: FillSupportDet, use the wrong parameter.
+ * @tc.desc: FillpStatistics001, use the wrong parameter
+ * @tc.desc: FillpAppStatistics, use the wrong parameter
+ * @tc.desc: FillSupportDet, use the wrong parameter
  * @tc.type: FUNC
  * @tc.require:
  */
@@ -600,9 +600,9 @@ HWTEST_F(VtpStreamSocketTest, FillpStatistics001, TestSize.Level1)
     }
 }
 
-/**
+/*
  * @tc.name: FillpAppStatistics001
- * @tc.desc: FillpAppStatistics001.
+ * @tc.desc: FillpAppStatistics001
  * @tc.type: FUNC
  * @tc.require:
  */
@@ -615,14 +615,14 @@ HWTEST_F(VtpStreamSocketTest, FillpAppStatistics001, TestSize.Level1)
     EXPECT_NO_FATAL_FAILURE(vtpStreamSocket->FillpAppStatistics());
 }
 
-/**
+/*
  * @tc.name: RegisterMetricCallback001
- * @tc.desc: RegisterMetricCallback001, use the wrong parameter.
- * @tc.desc: AddStreamSocketLock, use the wrong parameter.
- * @tc.desc: AddStreamSocketListener, use the wrong parameter.
- * @tc.desc: RemoveStreamSocketLock, use the wrong parameter.
- * @tc.desc: RemoveStreamSocketListener, use the wrong parameter.
- * @tc.desc: HandleFillpFrameStats, use the wrong parameter.
+ * @tc.desc: RegisterMetricCallback001, use the wrong parameter
+ * @tc.desc: AddStreamSocketLock, use the wrong parameter
+ * @tc.desc: AddStreamSocketListener, use the wrong parameter
+ * @tc.desc: RemoveStreamSocketLock, use the wrong parameter
+ * @tc.desc: RemoveStreamSocketListener, use the wrong parameter
+ * @tc.desc: HandleFillpFrameStats, use the wrong parameter
  * @tc.type: FUNC
  * @tc.require:
  */
@@ -669,9 +669,9 @@ HWTEST_F(VtpStreamSocketTest, RegisterMetricCallback001, TestSize.Level1)
     }
 }
 
-/**
+/*
  * @tc.name: RegisterMetricCallback002
- * @tc.desc: RegisterMetricCallback002, use the wrong parameter.
+ * @tc.desc: RegisterMetricCallback002, use the wrong parameter
  * @tc.type: FUNC
  * @tc.require:
  */
@@ -711,9 +711,9 @@ HWTEST_F(VtpStreamSocketTest, RegisterMetricCallback002, TestSize.Level1)
     vtpStreamSocket->RemoveStreamSocketListener(fd);
 }
 
-/**
+/*
  * @tc.name: EpollTimeout001
- * @tc.desc: EpollTimeout, use the wrong parameter.
+ * @tc.desc: EpollTimeout, use the wrong parameter
  * @tc.type: FUNC
  * @tc.require:
  */
@@ -729,9 +729,9 @@ HWTEST_F(VtpStreamSocketTest, EpollTimeout001, TestSize.Level1)
     EXPECT_NE(SOFTBUS_OK, ret);
 }
 
-/**
+/*
  * @tc.name: MakeStreamData001
- * @tc.desc: MakeStreamData, use the wrong parameter.
+ * @tc.desc: MakeStreamData, use the wrong parameter
  * @tc.type: FUNC
  * @tc.require:
  */
@@ -763,10 +763,10 @@ HWTEST_F(VtpStreamSocketTest, MakeStreamData001, TestSize.Level1)
     stream = vtpStreamSocket->MakeStreamData(data, frameInfo);
 }
 
-/**
+/*
  * @tc.name: Decrypt001
- * @tc.desc: Encrypt, use the wrong parameter.
- * @tc.desc: Decrypt, use the wrong parameter.
+ * @tc.desc: Encrypt, use the wrong parameter
+ * @tc.desc: Decrypt, use the wrong parameter
  * @tc.type: FUNC
  * @tc.require:
  */
@@ -805,10 +805,9 @@ HWTEST_F(VtpStreamSocketTest, Decrypt001, TestSize.Level1)
     EXPECT_EQ(SOFTBUS_MEM_ERR, res);
 }
 
-/**
+/*
  * @tc.name: GetVtpStackConfig001
- * @tc.desc: GetVtpStackConfig, use the wrong parameter.
-
+ * @tc.desc: GetVtpStackConfig, use the wrong parameter
  * @tc.type: FUNC
  * @tc.require:
  */
@@ -826,13 +825,13 @@ HWTEST_F(VtpStreamSocketTest, GetVtpStackConfig001, TestSize.Level1)
     SoftBusFree(value);
 }
 
-/**
+/*
  * @tc.name: GetStreamType001
- * @tc.desc: SetStreamType, use the wrong parameter.
- * @tc.desc: GetStreamType, use the wrong parameter.
- * @tc.desc: GetIp, use the wrong parameter.
- * @tc.desc: GetPort, use the wrong parameter.
- * @tc.desc: GetNonBlockMode, use the wrong parameter.
+ * @tc.desc: SetStreamType, use the wrong parameter
+ * @tc.desc: GetStreamType, use the wrong parameter
+ * @tc.desc: GetIp, use the wrong parameter
+ * @tc.desc: GetPort, use the wrong parameter
+ * @tc.desc: GetNonBlockMode, use the wrong parameter
  * @tc.type: FUNC
  * @tc.require:
  */
@@ -890,19 +889,19 @@ HWTEST_F(VtpStreamSocketTest, GetStreamType001, TestSize.Level1)
     }
 }
 
-/**
+/*
  * @tc.name: DoStreamRecv001
- * @tc.desc: DoStreamRecv, use the wrong parameter.
- * @tc.desc: RecvStreamLen, use the wrong parameter.
- * @tc.desc: SetDefaultConfig, use the wrong parameter.
- * @tc.desc: SetIpTos, use the wrong parameter.
- * @tc.desc: GetIpTos, use the wrong parameter.
- * @tc.desc: GetStreamSocketFd, use the wrong parameter.
- * @tc.desc: GetListenSocketFd, use the wrong parameter.
- * @tc.desc: SetSocketBoundInner, use the wrong parameter.
- * @tc.desc: SetSocketBindToDevices, use the wrong parameter.
- * @tc.desc: SetVtpStackConfigDelayed, use the wrong parameter.
- * @tc.desc: SetVtpStackConfig, use the wrong parameter.
+ * @tc.desc: DoStreamRecv, use the wrong parameter
+ * @tc.desc: RecvStreamLen, use the wrong parameter
+ * @tc.desc: SetDefaultConfig, use the wrong parameter
+ * @tc.desc: SetIpTos, use the wrong parameter
+ * @tc.desc: GetIpTos, use the wrong parameter
+ * @tc.desc: GetStreamSocketFd, use the wrong parameter
+ * @tc.desc: GetListenSocketFd, use the wrong parameter
+ * @tc.desc: SetSocketBoundInner, use the wrong parameter
+ * @tc.desc: SetSocketBindToDevices, use the wrong parameter
+ * @tc.desc: SetVtpStackConfigDelayed, use the wrong parameter
+ * @tc.desc: SetVtpStackConfig, use the wrong parameter
  * @tc.type: FUNC
  * @tc.require:
  */
@@ -954,9 +953,9 @@ HWTEST_F(VtpStreamSocketTest, DoStreamRecv001, TestSize.Level1)
     }
 }
 
-/**
+/*
  * @tc.name: DoStreamRecv002
- * @tc.desc: DoStreamRecv
+ * @tc.desc: DoStreamRecv test
  * @tc.type: FUNC
  * @tc.require:
  */
@@ -970,10 +969,10 @@ HWTEST_F(VtpStreamSocketTest, DoStreamRecv002, TestSize.Level1)
     EXPECT_NO_FATAL_FAILURE(vtpStreamSocket->DoStreamRecv());
 }
 
-/**
+/*
  * @tc.name: HandleRipplePolicy001
- * @tc.desc: HandleRipplePolicy, use the wrong parameter.
- * @tc.desc: RecvStreamLen, use the wrong parameter.
+ * @tc.desc: HandleRipplePolicy, use the wrong parameter
+ * @tc.desc: RecvStreamLen, use the wrong parameter
  * @tc.type: FUNC
  * @tc.require:
  */
@@ -1001,10 +1000,10 @@ HWTEST_F(VtpStreamSocketTest, HandleRipplePolicy001, TestSize.Level1)
     }
 }
 
-/**
+/*
  * @tc.name: HandleFillpFrameEvt001
- * @tc.desc: HandleFillpFrameEvt, use the wrong parameter.
- * @tc.desc: RecvStreamLen, use the wrong parameter.
+ * @tc.desc: HandleFillpFrameEvt, use the wrong parameter
+ * @tc.desc: RecvStreamLen, use the wrong parameter
  * @tc.type: FUNC
  * @tc.require:
  */
@@ -1035,9 +1034,9 @@ HWTEST_F(VtpStreamSocketTest, HandleFillpFrameEvt001, TestSize.Level1)
     }
 }
 
-/**
+/*
  * @tc.name: InsertBufferLength001
- * @tc.desc: SetSocketEpollMode, use the wrong parameter.
+ * @tc.desc: SetSocketEpollMode, use the wrong parameter
  * @tc.type: FUNC
  * @tc.require:
  */
@@ -1066,11 +1065,11 @@ HWTEST_F(VtpStreamSocketTest, InsertBufferLength001, TestSize.Level1)
     vtpStreamSocket->InsertBufferLength(num, length, nullptr);
 }
 
-/**
+/*
  * @tc.name: SetSocketEpollMode001
- * @tc.desc: EpollTimeout, use the wrong parameter.
- * @tc.desc: SetSocketEpollMode, use the wrong parameter.
- * @tc.desc: InsertBufferLength, use the wrong parameter.
+ * @tc.desc: EpollTimeout, use the wrong parameter
+ * @tc.desc: SetSocketEpollMode, use the wrong parameter
+ * @tc.desc: InsertBufferLength, use the wrong parameter
  * @tc.type: FUNC
  * @tc.require:
  */
@@ -1083,9 +1082,9 @@ HWTEST_F(VtpStreamSocketTest, SetSocketEpollMode001, TestSize.Level1)
     EXPECT_EQ(-1, ret);
 }
 
-/**
+/*
  * @tc.name: ConvertStreamFrameInfo2FrameInfoTest001
- * @tc.desc: ConvertStreamFrameInfo2FrameInfo
+ * @tc.desc: ConvertStreamFrameInfo2FrameInfo test
  * @tc.type: FUNC
  * @tc.require:
  */
@@ -1106,9 +1105,9 @@ HWTEST_F(VtpStreamSocketTest, ConvertStreamFrameInfo2FrameInfoTest001, TestSize.
     EXPECT_TRUE(1);
 }
 
-/**
+/*
  * @tc.name: AddStreamSocketLockTest001
- * @tc.desc: AddStreamSocketLock
+ * @tc.desc: AddStreamSocketLock test
  * @tc.type: FUNC
  * @tc.require:
  */
@@ -1124,9 +1123,9 @@ HWTEST_F(VtpStreamSocketTest, AddStreamSocketLockTest001, TestSize.Level1)
     EXPECT_TRUE(1);
 }
 
-/**
+/*
  * @tc.name: AddStreamSocketListenerTest001
- * @tc.desc: AddStreamSocketListener
+ * @tc.desc: AddStreamSocketListener test
  * @tc.type: FUNC
  * @tc.require:
  */
@@ -1142,9 +1141,9 @@ HWTEST_F(VtpStreamSocketTest, AddStreamSocketListenerTest001, TestSize.Level1)
     EXPECT_TRUE(1);
 }
 
-/**
+/*
  * @tc.name: ProcessCommonDataStream001
- * @tc.desc: ProcessCommonDataStream
+ * @tc.desc: ProcessCommonDataStream test
  * @tc.type: FUNC
  * @tc.require:
  */
@@ -1169,9 +1168,9 @@ HWTEST_F(VtpStreamSocketTest, ProcessCommonDataStream001, TestSize.Level1)
     EXPECT_EQ(false, ret);
 }
 
-/**
+/*
  * @tc.name: Accept001
- * @tc.desc: Accept, use the wrong parameter.
+ * @tc.desc: Accept, use the wrong parameter
  * @tc.type: FUNC
  * @tc.require:
  */
@@ -1185,9 +1184,9 @@ HWTEST_F(VtpStreamSocketTest, Accept001, TestSize.Level1)
     EXPECT_FALSE(ret);
 }
 
-/**
+/*
  * @tc.name: Accept002
- * @tc.desc: Accept
+ * @tc.desc: Accept test
  * @tc.type: FUNC
  * @tc.require:
  */
@@ -1202,9 +1201,9 @@ HWTEST_F(VtpStreamSocketTest, Accept002, TestSize.Level1)
     EXPECT_EQ(false, ret);
 }
 
-/**
+/*
  * @tc.name: Accept003
- * @tc.desc: Accept
+ * @tc.desc: Accept test
  * @tc.type: FUNC
  * @tc.require:
  */
@@ -1219,9 +1218,9 @@ HWTEST_F(VtpStreamSocketTest, Accept003, TestSize.Level1)
     EXPECT_EQ(false, ret);
 }
 
-/**
+/*
  * @tc.name: Accept004
- * @tc.desc: Accept
+ * @tc.desc: Accept test
  * @tc.type: FUNC
  * @tc.require:
  */
@@ -1249,9 +1248,9 @@ HWTEST_F(VtpStreamSocketTest, Accept004, TestSize.Level1)
     EXPECT_FALSE(ret);
 }
 
-/**
+/*
  * @tc.name: Accept005
- * @tc.desc: Accept
+ * @tc.desc: Accept test
  * @tc.type: FUNC
  * @tc.require:
  */
@@ -1279,9 +1278,9 @@ HWTEST_F(VtpStreamSocketTest, Accept005, TestSize.Level1)
     EXPECT_FALSE(ret);
 }
 
-/**
+/*
  * @tc.name: FillpAppStatistics002
- * @tc.desc: FillpAppStatistics
+ * @tc.desc: FillpAppStatistics test
  * @tc.type: FUNC
  * @tc.require:
  */
@@ -1320,9 +1319,9 @@ HWTEST_F(VtpStreamSocketTest, FillpAppStatistics002, TestSize.Level1)
     EXPECT_NO_FATAL_FAILURE(vtpStreamSocket->FillpAppStatistics());
 }
 
-/**
+/*
  * @tc.name: EpollTimeout002
- * @tc.desc: EpollTimeout, use the wrong parameter.
+ * @tc.desc: EpollTimeout, use the wrong parameter
  * @tc.type: FUNC
  * @tc.require:
  */
@@ -1338,9 +1337,9 @@ HWTEST_F(VtpStreamSocketTest, EpollTimeout002, TestSize.Level1)
     EXPECT_EQ(-9, ret);
 }
 
-/**
+/*
  * @tc.name: SetVtpStackConfig001
- * @tc.desc: SetVtpStackConfig
+ * @tc.desc: SetVtpStackConfig test
  * @tc.type: FUNC
  * @tc.require:
  */
@@ -1368,9 +1367,9 @@ HWTEST_F(VtpStreamSocketTest, SetVtpStackConfig001, TestSize.Level1)
     SoftBusFree(values);
 }
 
-/**
+/*
  * @tc.name: SetDefaultConfig001
- * @tc.desc: SetDefaultConfig
+ * @tc.desc: SetDefaultConfig test
  * @tc.type: FUNC
  * @tc.require:
  */
@@ -1388,9 +1387,9 @@ HWTEST_F(VtpStreamSocketTest, SetDefaultConfig001, TestSize.Level1)
     SoftBusFree(values);
 }
 
-/**
+/*
  * @tc.name: GetVtpStackConfig002
- * @tc.desc: GetVtpStackConfig
+ * @tc.desc: GetVtpStackConfig test
  * @tc.type: FUNC
  * @tc.require:
  */
@@ -1412,9 +1411,9 @@ HWTEST_F(VtpStreamSocketTest, SetVtpStackConfig002, TestSize.Level1)
     SoftBusFree(value);
 }
 
-/**
+/*
  * @tc.name: Send001
- * @tc.desc: Send
+ * @tc.desc: Send test
  * @tc.type: FUNC
  * @tc.require:
  */
@@ -1439,9 +1438,9 @@ HWTEST_F(VtpStreamSocketTest, Send001, TestSize.Level1)
     EXPECT_EQ(true, res);
 }
 
-/**
+/*
  * @tc.name: RecvStreamLen001
- * @tc.desc: RecvStreamLen
+ * @tc.desc: RecvStreamLen test
  * @tc.type: FUNC
  * @tc.require:
  */
@@ -1456,9 +1455,9 @@ HWTEST_F(VtpStreamSocketTest, RecvStreamLen001, TestSize.Level1)
     EXPECT_EQ(-1, res);
 }
 
-/**
+/*
  * @tc.name: RecvStream001
- * @tc.desc: RecvStream
+ * @tc.desc: RecvStream test
  * @tc.type: FUNC
  * @tc.require:
  */
@@ -1472,9 +1471,9 @@ HWTEST_F(VtpStreamSocketTest, RecvStream001, TestSize.Level1)
     EXPECT_EQ(nullptr, dataBuffer);
 }
 
-/**
+/*
  * @tc.name: SetMultiLayer001
- * @tc.desc: SetMultiLayer
+ * @tc.desc: SetMultiLayer test
  * @tc.type: FUNC
  * @tc.require:
  */
@@ -1487,9 +1486,9 @@ HWTEST_F(VtpStreamSocketTest, SetMultiLayer001, TestSize.Level1)
     EXPECT_NE(SOFTBUS_OK, ret);
 }
 
-/**
+/*
  * @tc.name: CreateClientProcessThread001
- * @tc.desc: CreateClientProcessThread
+ * @tc.desc: CreateClientProcessThread test
  * @tc.type: FUNC
  * @tc.require:
  */

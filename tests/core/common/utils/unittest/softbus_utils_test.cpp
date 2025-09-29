@@ -36,9 +36,9 @@ public:
 
 void MockSoftBusTimer(void) { }
 
-/**
+/*
  * @tc.name: SoftBusUtilsTest_CreateSoftBusList_001
- * @tc.desc: Normal destroy softbus list test.
+ * @tc.desc: Normal destroy softbus list test
  * @tc.type: FUNC
  * @tc.require:
  */
@@ -49,9 +49,9 @@ HWTEST_F(SoftBusUtilsTest, SoftBusUtilsTest_DestroySoftBusList_001, TestSize.Lev
     DestroySoftBusList(list);
 }
 
-/**
+/*
  * @tc.name: SoftBusUtilsTest_CreateSoftBusList_001
- * @tc.desc: Error register timeout callback test.
+ * @tc.desc: Error register timeout callback test
  * @tc.type: FUNC
  * @tc.require:
  */
@@ -72,9 +72,9 @@ HWTEST_F(SoftBusUtilsTest, SoftBusUtilsTest_RegisterTimeoutCallback_001, TestSiz
     EXPECT_EQ(SOFTBUS_INVALID_PARAM, ret);
 }
 
-/**
+/*
  * @tc.name: SoftBusUtilsTest_RegisterTimeoutCallback_002
- * @tc.desc: Normal register timeout callback test.
+ * @tc.desc: Normal register timeout callback test
  * @tc.type: FUNC
  * @tc.require:
  */
@@ -93,9 +93,9 @@ HWTEST_F(SoftBusUtilsTest, SoftBusUtilsTest_RegisterTimeoutCallback_002, TestSiz
     EXPECT_EQ(SOFTBUS_OK, ret);
 }
 
-/**
+/*
  * @tc.name: SoftBusUtilsTest_UnRegisterTimeoutCallback
- * @tc.desc: Normal unregister timeout callback test.
+ * @tc.desc: Normal unregister timeout callback test
  * @tc.type: FUNC
  * @tc.require:
  */
@@ -114,9 +114,9 @@ HWTEST_F(SoftBusUtilsTest, SoftBusUtilsTest_UnRegisterTimeoutCallback, TestSize.
     EXPECT_EQ(SOFTBUS_OK, ret);
 }
 
-/**
+/*
  * @tc.name: SoftBusUtilsTest_SoftBusTimerInit_001
- * @tc.desc: Normal timer init.
+ * @tc.desc: Normal timer init
  * @tc.type: FUNC
  * @tc.require:
  */
@@ -129,9 +129,9 @@ HWTEST_F(SoftBusUtilsTest, SoftBusUtilsTest_SoftBusTimerInit_001, TestSize.Level
     EXPECT_EQ(SOFTBUS_OK, ret);
 }
 
-/**
+/*
  * @tc.name: SoftBusUtilsTest_SoftBusTimerDeInit_001
- * @tc.desc: Normal timer deinit.
+ * @tc.desc: Normal timer deinit
  * @tc.type: FUNC
  * @tc.require:
  */
@@ -142,9 +142,9 @@ HWTEST_F(SoftBusUtilsTest, SoftBusUtilsTest_SoftBusTimerDeInit_001, TestSize.Lev
     SoftBusTimerDeInit();
 }
 
-/**
+/*
  * @tc.name: SoftBusUtilsTest_ConvertHexStringToBytes_001
- * @tc.desc: Parameter error when convert hex string to bytes.
+ * @tc.desc: Parameter error when convert hex string to bytes
  * @tc.type: FUNC
  * @tc.require:
  */
@@ -187,9 +187,9 @@ HWTEST_F(SoftBusUtilsTest, SoftBusUtilsTest_ConvertHexStringToBytes_001, TestSiz
     EXPECT_EQ(SOFTBUS_ERR, ret);
 }
 
-/**
+/*
  * @tc.name: SoftBusUtilsTest_ConvertHexStringToBytes_002
- * @tc.desc: Normal convert hex string to bytes.
+ * @tc.desc: Normal convert hex string to bytes
  * @tc.type: FUNC
  * @tc.require:
  */
@@ -208,9 +208,9 @@ HWTEST_F(SoftBusUtilsTest, SoftBusUtilsTest_ConvertHexStringToBytes_002, TestSiz
     }
 }
 
-/**
+/*
  * @tc.name: SoftBusUtilsTest_ConvertBytesToHexString_001
- * @tc.desc: Parameter error when convert bytes to hex string.
+ * @tc.desc: Parameter error when convert bytes to hex string
  * @tc.type: FUNC
  * @tc.require:
  */
@@ -237,9 +237,9 @@ HWTEST_F(SoftBusUtilsTest, SoftBusUtilsTest_ConvertBytesToHexString_001, TestSiz
     EXPECT_EQ(SOFTBUS_ERR, ret);
 }
 
-/**
+/*
  * @tc.name: SoftBusUtilsTest_ConvertBytesToHexString_002
- * @tc.desc: Normal convert bytes to hex string.
+ * @tc.desc: Normal convert bytes to hex string
  * @tc.type: FUNC
  * @tc.require:
  */
@@ -256,9 +256,9 @@ HWTEST_F(SoftBusUtilsTest, SoftBusUtilsTest_ConvertBytesToHexString_002, TestSiz
     EXPECT_STREQ(expect, outBuf);
 }
 
-/**
+/*
  * @tc.name: SoftBusUtilsTest_GenerateRandomStr_001
- * @tc.desc: Parameter error when generate random string.
+ * @tc.desc: Parameter error when generate random string
  * @tc.type: FUNC
  * @tc.require:
  */
@@ -275,9 +275,9 @@ HWTEST_F(SoftBusUtilsTest, SoftBusUtilsTest_GenerateRandomStr_001, TestSize.Leve
     EXPECT_EQ(SOFTBUS_INVALID_PARAM, ret);
 }
 
-/**
+/*
  * @tc.name: SoftBusUtilsTest_IsValidString_001
- * @tc.desc: Check string valid.
+ * @tc.desc: Check string valid
  * @tc.type: FUNC
  * @tc.require:
  */
@@ -300,9 +300,9 @@ HWTEST_F(SoftBusUtilsTest, SoftBusUtilsTest_IsValidString_001, TestSize.Level1)
     EXPECT_TRUE(IsValidString(input, maxLen));
 }
 
-/**
+/*
  * @tc.name: SoftBusUtilsTest_ConvertBtMacToBinary_001
- * @tc.desc: Parameter error when convert bt mac to binary.
+ * @tc.desc: Parameter error when convert bt mac to binary
  * @tc.type: FUNC
  * @tc.require:
  */
@@ -316,9 +316,9 @@ HWTEST_F(SoftBusUtilsTest, SoftBusUtilsTest_ConvertBtMacToBinary_001, TestSize.L
     EXPECT_EQ(SOFTBUS_INVALID_PARAM, ret);
 }
 
-/**
+/*
  * @tc.name: SoftBusUtilsTest_ConvertBtMacToStr_001
- * @tc.desc: Parameter error when convert binary to bt mac.
+ * @tc.desc: Parameter error when convert binary to bt mac
  * @tc.type: FUNC
  * @tc.require:
  */
@@ -332,9 +332,9 @@ HWTEST_F(SoftBusUtilsTest, SoftBusUtilsTest_ConvertBtMacToStr_001, TestSize.Leve
     EXPECT_EQ(SOFTBUS_INVALID_PARAM, ret);
 }
 
-/**
+/*
  * @tc.name: SoftBusUtilsTest_ConvertBtMacToStr_002
- * @tc.desc: Normal convert binary to bt mac.
+ * @tc.desc: Normal convert binary to bt mac
  * @tc.type: FUNC
  * @tc.require:
  */
@@ -351,9 +351,9 @@ HWTEST_F(SoftBusUtilsTest, SoftBusUtilsTest_ConvertBtMacToStr_002, TestSize.Leve
     EXPECT_STREQ(expect, strMac);
 }
 
-/**
+/*
  * @tc.name: SoftBusUtilsTest_SoftbusErrorCodeStandard_001
- * @tc.desc: Test softbus event error code.
+ * @tc.desc: Test softbus event error code
  * @tc.type: FUNC
  * @tc.require:
  */
@@ -364,9 +364,9 @@ HWTEST_F(SoftBusUtilsTest, SoftBusUtilsTest_SoftbusErrorCodeStandard_001, TestSi
     EXPECT_EQ(((errorCode & ERROR_CODE_MODULE_AND) >> ERROR_CODE_MODULE_INDEX), PUBLIC_SUB_MODULE_CODE);
 }
 
-/**
+/*
  * @tc.name: SoftBusUtilsTest_SoftbusErrorCodeStandard_002
- * @tc.desc: Test disc event error code.
+ * @tc.desc: Test disc event error code
  * @tc.type: FUNC
  * @tc.require:
  */
@@ -377,9 +377,9 @@ HWTEST_F(SoftBusUtilsTest, SoftBusUtilsTest_SoftbusErrorCodeStandard_002, TestSi
     EXPECT_EQ(((errorCode & ERROR_CODE_MODULE_AND) >> ERROR_CODE_MODULE_INDEX), DISC_SUB_MODULE_CODE);
 }
 
-/**
+/*
  * @tc.name: SoftBusUtilsTest_SoftbusErrorCodeStandard_003
- * @tc.desc: Test conn event error code.
+ * @tc.desc: Test conn event error code
  * @tc.type: FUNC
  * @tc.require:
  */
@@ -390,9 +390,9 @@ HWTEST_F(SoftBusUtilsTest, SoftBusUtilsTest_SoftbusErrorCodeStandard_003, TestSi
     EXPECT_EQ(((errorCode & ERROR_CODE_MODULE_AND) >> ERROR_CODE_MODULE_INDEX), CONN_SUB_MODULE_CODE);
 }
 
-/**
+/*
  * @tc.name: SoftBusUtilsTest_SoftbusErrorCodeStandard_004
- * @tc.desc: Test auth event error code.
+ * @tc.desc: Test auth event error code
  * @tc.type: FUNC
  * @tc.require:
  */
@@ -403,9 +403,9 @@ HWTEST_F(SoftBusUtilsTest, SoftBusUtilsTest_SoftbusErrorCodeStandard_004, TestSi
     EXPECT_EQ(((errorCode & ERROR_CODE_MODULE_AND) >> ERROR_CODE_MODULE_INDEX), AUTH_SUB_MODULE_CODE);
 }
 
-/**
+/*
  * @tc.name: SoftBusUtilsTest_SoftbusErrorCodeStandard_005
- * @tc.desc: Test lnn event error code.
+ * @tc.desc: Test lnn event error code
  * @tc.type: FUNC
  * @tc.require:
  */
@@ -416,9 +416,9 @@ HWTEST_F(SoftBusUtilsTest, SoftBusUtilsTest_SoftbusErrorCodeStandard_005, TestSi
     EXPECT_EQ(((errorCode & ERROR_CODE_MODULE_AND) >> ERROR_CODE_MODULE_INDEX), LNN_SUB_MODULE_CODE);
 }
 
-/**
+/*
  * @tc.name: SoftBusUtilsTest_SoftbusErrorCodeStandard_006
- * @tc.desc: Test trans event error code.
+ * @tc.desc: Test trans event error code
  * @tc.type: FUNC
  * @tc.require:
  */
@@ -429,9 +429,9 @@ HWTEST_F(SoftBusUtilsTest, SoftBusUtilsTest_SoftbusErrorCodeStandard_006, TestSi
     EXPECT_EQ(((errorCode & ERROR_CODE_MODULE_AND) >> ERROR_CODE_MODULE_INDEX), TRANS_SUB_MODULE_CODE);
 }
 
-/**
+/*
  * @tc.name: SoftBusUtilsTest_CalculateMbsTruncateSize001
- * @tc.desc: Test CalculateMbsTruncateSize with null str.
+ * @tc.desc: Test CalculateMbsTruncateSize with null str
  * @tc.type: FUNC
  * @tc.require:
  */
@@ -449,9 +449,9 @@ HWTEST_F(SoftBusUtilsTest, SoftBusUtilsTest_SoftbusErrorCodeStandard_006, TestSi
     }
 }
 
-/**
+/*
  * @tc.name: SoftBusUtilsTest_CalculateMbsTruncateSize002
- * @tc.desc: Test CalculateMbsTruncateSize with ascii str.
+ * @tc.desc: Test CalculateMbsTruncateSize with ascii str
  * @tc.type: FUNC
  * @tc.require:
  */
@@ -471,9 +471,9 @@ HWTEST_F(SoftBusUtilsTest, SoftBusUtilsTest_SoftbusErrorCodeStandard_006, TestSi
     }
 }
 
-/**
+/*
  * @tc.name: SoftBusUtilsTest_CalculateMbsTruncateSize003
- * @tc.desc: Test CalculateMbsTruncateSize with utf-8 str.
+ * @tc.desc: Test CalculateMbsTruncateSize with utf-8 str
  * @tc.type: FUNC
  * @tc.require:
  */
@@ -494,7 +494,7 @@ HWTEST_F(SoftBusUtilsTest, SoftBusUtilsTest_SoftbusErrorCodeStandard_006, TestSi
     }
 }
 
-/**
+/*
  * @tc.name: AddNumberToSocketName001
  * @tc.desc: Test Add Number To Socket Name
  * @tc.type: FUNC
