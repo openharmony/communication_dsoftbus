@@ -43,7 +43,7 @@ void LnnSaStatusMonitorTest::SetUp() { }
 
 void LnnSaStatusMonitorTest::TearDown() { }
 
-/**
+/*
  * @tc.name: LNN_INIT_SA_STATUS_MONITOR_001
  * @tc.desc: test
  * @tc.type: FUNC
@@ -57,7 +57,7 @@ HWTEST_F(LnnSaStatusMonitorTest, LNN_INIT_SA_STATUS_MONITOR_001, TestSize.Level1
     EXPECT_NO_FATAL_FAILURE(LnnDeInitSaStatusMonitor());
 }
 
-/**
+/*
  * @tc.name: LNN_INIT_SA_STATUS_MONITOR_002
  * @tc.desc: test
  * @tc.type: FUNC

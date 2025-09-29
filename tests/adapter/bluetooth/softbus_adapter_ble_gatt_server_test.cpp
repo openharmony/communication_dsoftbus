@@ -134,7 +134,7 @@ static void MockAll(MockBluetooth &mocker)
     EXPECT_CALL(mocker, BleGattsSendIndication).WillRepeatedly(Return(OHOS_BT_STATUS_SUCCESS));
 }
 
-/**
+/*
  * @tc.name: AdapterBleGattServerTest_SoftBusRegisterGattsCallbacks001
  * @tc.desc: test register gatt server callbacks
  * @tc.type: FUNC
@@ -177,7 +177,7 @@ HWTEST_F(AdapterBleGattServerTest, SoftBusRegisterGattsCallbacks001, TestSize.Le
     SoftBusUnRegisterGattsCallbacks(service);
 }
 
-/**
+/*
  * @tc.name: AdapterBleGattServerTest_SoftBusUnRegisterGattsCallbacks001
  * @tc.desc: test unregister gatt server callbacks
  * @tc.type: FUNC
@@ -210,7 +210,7 @@ HWTEST_F(AdapterBleGattServerTest, SoftBusUnRegisterGattsCallbacks001, TestSize.
     SoftBusUnRegisterGattsCallbacks(service);
 }
 
-/**
+/*
  * @tc.name: AdapterBleGattServerTest_SoftBusGattsAddService001
  * @tc.desc: test add gatt service
  * @tc.type: FUNC
@@ -246,7 +246,7 @@ HWTEST_F(AdapterBleGattServerTest, SoftBusGattsAddService001, TestSize.Level3)
     SoftBusUnRegisterGattsCallbacks(service);
 }
 
-/**
+/*
  * @tc.name: AdapterBleGattServerTest_SoftBusGattsAddCharacteristic001
  * @tc.desc: test add gatt characteristic
  * @tc.type: FUNC
@@ -290,7 +290,7 @@ HWTEST_F(AdapterBleGattServerTest, SoftBusGattsAddCharacteristic001, TestSize.Le
     SoftBusUnRegisterGattsCallbacks(service);
 }
 
-/**
+/*
  * @tc.name: AdapterBleGattServerTest_SoftBusGattsAddDescriptor001
  * @tc.desc: test add gatt descriptor
  * @tc.type: FUNC
@@ -329,7 +329,7 @@ HWTEST_F(AdapterBleGattServerTest, SoftBusGattsAddDescriptor001, TestSize.Level3
     SoftBusUnRegisterGattsCallbacks(service);
 }
 
-/**
+/*
  * @tc.name: AdapterBleGattServerTest_SoftBusGattsStartService001
  * @tc.desc: test start gatt service
  * @tc.type: FUNC
@@ -355,7 +355,7 @@ HWTEST_F(AdapterBleGattServerTest, SoftBusGattsStartService001, TestSize.Level3)
     SoftBusUnRegisterGattsCallbacks(service);
 }
 
-/**
+/*
  * @tc.name: AdapterBleGattServerTest_SoftBusGattsStopService001
  * @tc.desc: test stop gatt service
  * @tc.type: FUNC
@@ -381,7 +381,7 @@ HWTEST_F(AdapterBleGattServerTest, SoftBusGattsStopService001, TestSize.Level3)
     SoftBusUnRegisterGattsCallbacks(service);
 }
 
-/**
+/*
  * @tc.name: AdapterBleGattServerTest_SoftBusGattsDeleteService001
  * @tc.desc: test delete gatt service
  * @tc.type: FUNC
@@ -407,7 +407,7 @@ HWTEST_F(AdapterBleGattServerTest, SoftBusGattsDeleteService001, TestSize.Level3
     SoftBusUnRegisterGattsCallbacks(service);
 }
 
- /**
+ /*
  * @tc.name: AdapterBleGattServerTest_SoftBusGattsConnect001
  * @tc.desc: test connect gatt connection
  * @tc.type: FUNC
@@ -435,7 +435,7 @@ HWTEST_F(AdapterBleGattServerTest, SoftBusGattsConnect001, TestSize.Level3)
     SoftBusUnRegisterGattsCallbacks(service);
 }
 
-/**
+/*
  * @tc.name: AdapterBleGattServerTest_SoftBusGattsDisconnect001
  * @tc.desc: test disconnect gatt connection
  * @tc.type: FUNC
@@ -465,7 +465,7 @@ HWTEST_F(AdapterBleGattServerTest, SoftBusGattsDisconnect001, TestSize.Level3)
     SoftBusUnRegisterGattsCallbacks(service);
 }
 
-/**
+/*
  * @tc.name: AdapterBleGattServerTest_SoftBusGattsSendResponse001
  * @tc.desc: test send gatt response
  * @tc.type: FUNC
@@ -493,7 +493,7 @@ HWTEST_F(AdapterBleGattServerTest, SoftBusGattsSendResponse001, TestSize.Level3)
     SoftBusUnRegisterGattsCallbacks(service);
 }
 
-/**
+/*
  * @tc.name: AdapterBleGattServerTest_SoftBusGattsSendNotify001
  * @tc.desc: test send gatt notify
  * @tc.type: FUNC
@@ -521,7 +521,7 @@ HWTEST_F(AdapterBleGattServerTest, SoftBusGattsSendNotify001, TestSize.Level3)
     SoftBusUnRegisterGattsCallbacks(service);
 }
 
-/**
+/*
  * @tc.name: AdapterBleGattServerTest_BleConnectServerCallback001
  * @tc.desc: test gatt connect server callback
  * @tc.type: FUNC
@@ -554,7 +554,7 @@ HWTEST_F(AdapterBleGattServerTest, BleConnectServerCallback001, TestSize.Level3)
     SoftBusUnRegisterGattsCallbacks(service);
 }
 
-/**
+/*
  * @tc.name: AdapterBleGattServerTest_BleDisconnectServerCallback001
  * @tc.desc: test gatt disconnect server callback
  * @tc.type: FUNC
@@ -587,7 +587,7 @@ HWTEST_F(AdapterBleGattServerTest, BleDisconnectServerCallback001, TestSize.Leve
     SoftBusUnRegisterGattsCallbacks(service);
 }
 
-/**
+/*
  * @tc.name: AdapterBleGattServerTest_BleServiceAddCallback001
  * @tc.desc: test gatt server add callback
  * @tc.type: FUNC
@@ -620,7 +620,7 @@ HWTEST_F(AdapterBleGattServerTest, BleServiceAddCallback001, TestSize.Level3)
     SoftBusUnRegisterGattsCallbacks(service);
 }
 
-/**
+/*
  * @tc.name: AdapterBleGattServerTest_BleDescriptorAddCallback001
  * @tc.desc: test descriptor add callback
  * @tc.type: FUNC
@@ -673,7 +673,7 @@ HWTEST_F(AdapterBleGattServerTest, BleDescriptorAddCallback001, TestSize.Level3)
     SoftBusUnRegisterGattsCallbacks(service);
 }
 
-/**
+/*
  * @tc.name: AdapterBleGattServerTest_BleRequestReadCallback001
  * @tc.desc: test ble request read callback
  * @tc.type: FUNC
@@ -732,7 +732,7 @@ HWTEST_F(AdapterBleGattServerTest, BleRequestReadCallback001, TestSize.Level3)
     SoftBusUnRegisterGattsCallbacks(service);
 }
 
-/**
+/*
  * @tc.name: AdapterBleGattServerTest_BleRequestWriteCallback001
  * @tc.desc: test ble request write callback
  * @tc.type: FUNC
@@ -792,7 +792,7 @@ HWTEST_F(AdapterBleGattServerTest, BleRequestWriteCallback001, TestSize.Level3)
     SoftBusUnRegisterGattsCallbacks(service);
 }
 
-/**
+/*
  * @tc.name: AdapterBleGattServerTest_GattServerLifeCycle001
  * @tc.desc: test gatt server complete life cyclel, from a real usage perspective, important
  * @tc.type: FUNC
@@ -842,7 +842,7 @@ HWTEST_F(AdapterBleGattServerTest, GattServerLifeCycle001, TestSize.Level3)
         characteristicAddCtx.Expect(MOCK_GATT_SERVICE_HANDLE, SOFTBUS_OK, MOCK_GATT_CHARA_HANDLE, &characteristic));
 }
 
-/**
+/*
  * @tc.name: AdapterBleGattServerTest_GattServerLifeCycle002
  * @tc.desc: test gatt server complete life cyclel, from a real usage perspective, important
  * @tc.type: FUNC
@@ -881,7 +881,7 @@ HWTEST_F(AdapterBleGattServerTest, GattServerLifeCycle002, TestSize.Level3)
     ASSERT_TRUE(serviceStartCtx.Expect(MOCK_GATT_SERVICE_HANDLE, SOFTBUS_OK));
 }
 
-/**
+/*
  * @tc.name: AdapterBleGattServerTest_GattServerLifeCycle003
  * @tc.desc: test gatt server complete life cyclel, from a real usage perspective, important
  * @tc.type: FUNC
@@ -938,7 +938,7 @@ HWTEST_F(AdapterBleGattServerTest, GattServerLifeCycle003, TestSize.Level3)
     ASSERT_EQ(SoftBusGattsSendResponse(&resp), SOFTBUS_OK);
 }
 
-/**
+/*
  * @tc.name: AdapterBleGattServerTest_GattServerLifeCycle004
  * @tc.desc: test gatt server complete life cyclel, from a real usage perspective, important
  * @tc.type: FUNC

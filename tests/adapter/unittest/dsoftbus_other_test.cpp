@@ -181,7 +181,7 @@ HWTEST_F(AdapterDsoftbusOtherTest, GetLinkUpStateByIfName002, TestSize.Level1)
     EXPECT_FALSE(ret);
 }
 
-/**
+/*
  * @tc.name: SoftBusAdapter_ReadFullFileTest_001
  * @tc.desc: Read File
  * @tc.type: FUNC
@@ -199,7 +199,7 @@ HWTEST_F(AdapterDsoftbusOtherTest, SoftBusReadFullFileTest001, TestSize.Level0)
     EXPECT_EQ(SOFTBUS_OK, ret);
 }
 
-/**
+/*
  * @tc.name: SoftBusAdapter_ReadFullFileTest_002
  * @tc.desc: g_FileName is null
  * @tc.type: FUNC
@@ -216,7 +216,7 @@ HWTEST_F(AdapterDsoftbusOtherTest, SoftBusReadFullFileTest002, TestSize.Level0)
     EXPECT_EQ(SOFTBUS_FILE_ERR, ret);
 }
 
-/**
+/*
  * @tc.name: SoftBusAdapter_ReadFullFileTest_003
  * @tc.desc: maxLen is ivaild param
  * @tc.type: FUNC
@@ -230,7 +230,7 @@ HWTEST_F(AdapterDsoftbusOtherTest, SoftBusReadFullFileTest003, TestSize.Level0)
     EXPECT_EQ(SOFTBUS_FILE_ERR, ret);
 }
 
-/**
+/*
  * @tc.name: SoftBusAdapter_WriterFileTest_001
  * @tc.desc: writeBuf isn't nullptr
  * @tc.type: FUNC
@@ -243,7 +243,7 @@ HWTEST_F(AdapterDsoftbusOtherTest, SoftBusWriterFileTest001, TestSize.Level0)
     EXPECT_EQ(SOFTBUS_OK, ret);
 }
 
-/**
+/*
  * @tc.name: SoftBusAdapter_WriterFileTest_002
  * @tc.desc: g_FileName and writeBuf is null
  * @tc.type: FUNC
@@ -259,7 +259,7 @@ HWTEST_F(AdapterDsoftbusOtherTest, SoftBusWriterFileTest002, TestSize.Level0)
     EXPECT_EQ(SOFTBUS_FILE_ERR, ret);
 }
 
-/**
+/*
  * @tc.name: SoftBusAdapter_WriterFileTest_003
  * @tc.desc: len is illegal
  * @tc.type: FUNC
@@ -277,7 +277,7 @@ HWTEST_F(AdapterDsoftbusOtherTest, SoftBusWriterFileTest003, TestSize.Level0)
     EXPECT_EQ(SOFTBUS_FILE_ERR, ret);
 }
 
-/**
+/*
  * @tc.name: SoftBusAdapter_MallocTest_001
  * @tc.desc: size is zero
  * @tc.type: FUNC
@@ -290,7 +290,7 @@ HWTEST_F(AdapterDsoftbusOtherTest, SoftBusMallocTest001, TestSize.Level0)
     SoftBusFree(ret);
 }
 
-/**
+/*
  * @tc.name: SoftBusAdapter_MallocTest_002
  * @tc.desc: size is MAX_MALLOC_SIZE+1
  * @tc.type: FUNC
@@ -302,7 +302,7 @@ HWTEST_F(AdapterDsoftbusOtherTest, SoftBusMallocTest002, TestSize.Level0)
     EXPECT_EQ(nullptr, ret);
 }
 
-/**
+/*
  * @tc.name: SoftBusAdapter_MallocTest_003
  * @tc.desc: size is -1
  * @tc.type: FUNC
@@ -314,7 +314,7 @@ HWTEST_F(AdapterDsoftbusOtherTest, SoftBusMallocTest003, TestSize.Level0)
     EXPECT_EQ(nullptr, ret);
 }
 
-/**
+/*
  * @tc.name: SoftBusAdapter_MallocTest_004
  * @tc.desc: size is MAX_MALLOC_SIZE
  * @tc.type: FUNC
@@ -327,7 +327,7 @@ HWTEST_F(AdapterDsoftbusOtherTest, SoftBusMallocTest004, TestSize.Level0)
     SoftBusFree(ret);
 }
 
-/**
+/*
  * @tc.name: SoftBusAdapter_FreeTest_001
  * @tc.desc: malloc size is 256
  * @tc.type: FUNC
@@ -340,7 +340,7 @@ HWTEST_F(AdapterDsoftbusOtherTest, SoftBusFreeTest001, TestSize.Level0)
     SoftBusFree(ret);
 }
 
-/**
+/*
  * @tc.name: SoftBusAdapter_CallocTest_001
  * @tc.desc: calloc size is zero
  * @tc.type: FUNC
@@ -353,7 +353,7 @@ HWTEST_F(AdapterDsoftbusOtherTest, SoftBusCallocTest001, TestSize.Level0)
     SoftBusFree(ret);
 }
 
-/**
+/*
  * @tc.name: SoftBusAdapter_CallocTest_002
  * @tc.desc: calloc size is 22
  * @tc.type: FUNC
@@ -366,7 +366,7 @@ HWTEST_F(AdapterDsoftbusOtherTest, SoftBusCallocTest002, TestSize.Level0)
     SoftBusFree(ret);
 }
 
-/**
+/*
  * @tc.name: SoftBusAdapter_CallocTest_003
  * @tc.desc: calloc size is 256
  * @tc.type: FUNC
@@ -378,7 +378,7 @@ HWTEST_F(AdapterDsoftbusOtherTest, SoftBusCallocTest003, TestSize.Level0)
     EXPECT_EQ(nullptr, ret);
 }
 
-/**
+/*
  * @tc.name: SoftBusAdapter_CallocTest_004
  * @tc.desc: calloc size is 256
  * @tc.type: FUNC
