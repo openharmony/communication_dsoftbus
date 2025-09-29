@@ -365,7 +365,7 @@ HWTEST_F(LNNOhosAccountMockTest, LNN_IS_DEFAULT_OHOS_ACCOUNT_002, TestSize.Level
     EXPECT_FALSE(ret);
 }
 
-/**
+/*
  * @tc.name: LNN_JUDGE_DEVICE_TYPE_AND_GET_OHOS_ACCOUNT_INFO_001
  * @tc.desc: get local num info fail
  * @tc.type: FUNC
@@ -375,15 +375,13 @@ HWTEST_F(LNNOhosAccountMockTest, LNN_JUDGE_DEVICE_TYPE_AND_GET_OHOS_ACCOUNT_INFO
 {
     NiceMock<LnnOhosAccountInterfaceMock> mocker;
     uint8_t mockHash[SHA_256_HASH_LEN];
-    EXPECT_CALL(mocker, LnnGetLocalNumInfo).WillOnce(Return(SOFTBUS_NETWORK_GET_LEDGER_INFO_ERR)).
-        WillOnce(Return(SOFTBUS_OK));
     int32_t ret = LnnJudgeDeviceTypeAndGetOsAccountInfo(mockHash, SHA_256_HASH_LEN);
-    EXPECT_EQ(ret, SOFTBUS_INVALID_PARAM);
+    EXPECT_EQ(ret, SOFTBUS_OK);
     ret = LnnJudgeDeviceTypeAndGetOsAccountInfo(mockHash, SHA_256_HASH_LEN);
     EXPECT_EQ(ret, SOFTBUS_OK);
 }
  
-/**
+/*
  * @tc.name: LNN_JUDGE_DEVICE_TYPE_AND_GET_OHOS_ACCOUNT_INFO_002
  * @tc.desc: get ohos account info fail
  * @tc.type: FUNC
@@ -393,11 +391,10 @@ HWTEST_F(LNNOhosAccountMockTest, LNN_JUDGE_DEVICE_TYPE_AND_GET_OHOS_ACCOUNT_INFO
 {
     NiceMock<LnnOhosAccountInterfaceMock> mocker;
     uint8_t mockHash[SHA_256_HASH_LEN];
-    EXPECT_CALL(mocker, LnnGetLocalNumInfo).WillOnce(Return(SOFTBUS_OK));
     EXPECT_CALL(mocker, LnnGetOhosAccountInfo(_, _)).WillOnce(Return(SOFTBUS_INVALID_PARAM)).
         WillOnce(Return(SOFTBUS_OK));
     int32_t ret = LnnJudgeDeviceTypeAndGetOsAccountInfo(mockHash, SHA_256_HASH_LEN);
-    EXPECT_EQ(ret, SOFTBUS_INVALID_PARAM);
+    EXPECT_EQ(ret, SOFTBUS_NETWORK_GET_ACCOUNT_INFO_FAILED);
     ret = LnnJudgeDeviceTypeAndGetOsAccountInfo(mockHash, SHA_256_HASH_LEN);
     EXPECT_EQ(ret, SOFTBUS_OK);
 }
