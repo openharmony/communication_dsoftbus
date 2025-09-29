@@ -61,7 +61,7 @@ void KVAdapterTest::TearDown()
     kvStore->DeInit();
 }
 
-/**
+/*
  * @tc.name: Init001
  * @tc.desc: Init succeed.
  * @tc.type: FUNC
@@ -73,7 +73,7 @@ HWTEST_F(KVAdapterTest, Init001, TestSize.Level1)
     EXPECT_EQ(SOFTBUS_OK, kvStore->Init());
 }
 
-/**
+/*
  * @tc.name: UnInit001
  * @tc.desc: UnInit succeed.
  * @tc.type: FUNC
@@ -84,7 +84,7 @@ HWTEST_F(KVAdapterTest, UnInit001, TestSize.Level1)
     EXPECT_EQ(SOFTBUS_OK, kvStore->DeInit());
 }
 
-/**
+/*
  * @tc.name: Put001
  * @tc.desc: Put succeed.
  * @tc.type: FUNC
@@ -95,7 +95,7 @@ HWTEST_F(KVAdapterTest, Put001, TestSize.Level1)
     EXPECT_EQ(SOFTBUS_OK, kvStore->Put("key1", "value1"));
 }
 
-/**
+/*
  * @tc.name: Put002
  * @tc.desc: Put failed, Param is invalid.
  * @tc.type: FUNC
@@ -107,7 +107,7 @@ HWTEST_F(KVAdapterTest, Put002, TestSize.Level1)
     EXPECT_EQ(SOFTBUS_INVALID_PARAM, kvStore->Put("key1", ""));
 }
 
-/**
+/*
  * @tc.name: Put003
  * @tc.desc: Put failed, kvDBPtr is null.
  * @tc.type: FUNC
@@ -119,7 +119,7 @@ HWTEST_F(KVAdapterTest, Put003, TestSize.Level1)
     EXPECT_EQ(SOFTBUS_KV_DB_PTR_NULL, kvStore->Put("key1", "value1"));
 }
 
-/**
+/*
  * @tc.name: Put004
  * @tc.desc: Put first if.
  * @tc.type: FUNC
@@ -148,7 +148,7 @@ HWTEST_F(KVAdapterTest, Put004, TestSize.Level1)
     EXPECT_EQ(SOFTBUS_INVALID_PARAM, kvStore->Put(key, value));
 }
 
-/**
+/*
  * @tc.name: PutBatch001
  * @tc.desc: PutBatch succeed.
  * @tc.type: FUNC
@@ -162,7 +162,7 @@ HWTEST_F(KVAdapterTest, PutBatch001, TestSize.Level1)
     EXPECT_EQ(SOFTBUS_OK, kvStore->PutBatch(values));
 }
 
-/**
+/*
  * @tc.name: PutBatch002
  * @tc.desc: PutBatch failed, Param is invalid.
  * @tc.type: FUNC
@@ -179,7 +179,7 @@ HWTEST_F(KVAdapterTest, PutBatch002, TestSize.Level1)
     EXPECT_EQ(SOFTBUS_INVALID_PARAM, kvStore->PutBatch(values));
 }
 
-/**
+/*
  * @tc.name: PutBatch003
  * @tc.desc: PutBatch failed, kvDBPtr is null.
  * @tc.type: FUNC
@@ -194,7 +194,7 @@ HWTEST_F(KVAdapterTest, PutBatch003, TestSize.Level1)
     EXPECT_EQ(SOFTBUS_KV_DB_PTR_NULL, kvStore->PutBatch(values));
 }
 
-/**
+/*
  * @tc.name: Delete001
  * @tc.desc: Delete succeed.
  * @tc.type: FUNC
@@ -206,7 +206,7 @@ HWTEST_F(KVAdapterTest, Delete001, TestSize.Level1)
     EXPECT_EQ(SOFTBUS_OK, kvStore->Delete("key4"));
 }
 
-/**
+/*
  * @tc.name: Delete002
  * @tc.desc: Delete failed, kvDBPtr is null.
  * @tc.type: FUNC
@@ -219,7 +219,7 @@ HWTEST_F(KVAdapterTest, Delete002, TestSize.Level1)
     EXPECT_EQ(SOFTBUS_KV_DB_PTR_NULL, kvStore->Delete("key5"));
 }
 
-/**
+/*
  * @tc.name: DeleteByPrefix001
  * @tc.desc: DeleteByPrefix succeed.
  * @tc.type: FUNC
@@ -232,7 +232,7 @@ HWTEST_F(KVAdapterTest, DeleteByPrefix001, TestSize.Level1)
     EXPECT_EQ(SOFTBUS_OK, kvStore->DeleteByPrefix("key"));
 }
 
-/**
+/*
  * @tc.name: DeleteByPrefix002
  * @tc.desc: DeleteByPrefix failed, kvDBPtr is null.
  * @tc.type: FUNC
@@ -246,7 +246,7 @@ HWTEST_F(KVAdapterTest, DeleteByPrefix002, TestSize.Level1)
     EXPECT_EQ(SOFTBUS_KV_DB_PTR_NULL, kvStore->DeleteByPrefix("key"));
 }
 
-/**
+/*
  * @tc.name: DeleteByPrefix003
  * @tc.desc: DeleteByPrefix failed, keyPrefix is empty.
  * @tc.type: FUNC
@@ -258,7 +258,7 @@ HWTEST_F(KVAdapterTest, DeleteByPrefix003, TestSize.Level1)
     EXPECT_EQ(SOFTBUS_INVALID_PARAM, kvStore->DeleteByPrefix(keyPrefix));
 }
 
-/**
+/*
  * @tc.name: DeleteByPrefix004
  * @tc.desc: DeleteByPrefix failed, keyPrefix length exceeds MAX_STRING_LEN.
  * @tc.type: FUNC
@@ -270,7 +270,7 @@ HWTEST_F(KVAdapterTest, DeleteByPrefix004, TestSize.Level1)
     EXPECT_EQ(SOFTBUS_INVALID_PARAM, kvStore->DeleteByPrefix(keyPrefix));
 }
 
-/**
+/*
  * @tc.name: Get001
  * @tc.desc: Get succeed.
  * @tc.type: FUNC
@@ -284,7 +284,7 @@ HWTEST_F(KVAdapterTest, Get001, TestSize.Level1)
     EXPECT_EQ("value10", value);
 }
 
-/**
+/*
  * @tc.name: Get002
  * @tc.desc: Get failed, kvDBPtr is null.
  * @tc.type: FUNC
@@ -298,7 +298,7 @@ HWTEST_F(KVAdapterTest, Get002, TestSize.Level1)
     EXPECT_EQ(SOFTBUS_KV_DB_PTR_NULL, kvStore->Get("key11", value));
 }
 
-/**
+/*
  * @tc.name: SetCloudAbility001
  * @tc.desc: SetCloudAbility succeed.
  * @tc.type: FUNC
@@ -309,7 +309,7 @@ HWTEST_F(KVAdapterTest, SetCloudAbility001, TestSize.Level1)
     EXPECT_EQ(SOFTBUS_OK, kvStore->SetCloudAbility(true));
 }
 
-/**
+/*
  * @tc.name: SetCloudAbility002
  * @tc.desc: SetCloudAbility failed, kvDBPtr is null.
  * @tc.type: FUNC
@@ -321,7 +321,7 @@ HWTEST_F(KVAdapterTest, SetCloudAbility002, TestSize.Level1)
     EXPECT_EQ(SOFTBUS_KV_DB_PTR_NULL, kvStore->SetCloudAbility(true));
 }
 
-/**
+/*
  * @tc.name: RegisterDataChangeListener001
  * @tc.desc: RegisterDataChangeListener failed, cloud sync disabled.
  * @tc.type: FUNC
@@ -333,7 +333,7 @@ HWTEST_F(KVAdapterTest, RegisterDataChangeListener001, TestSize.Level1)
     EXPECT_NE(SOFTBUS_OK, kvStore->RegisterDataChangeListener(kvStoreObserver));
 }
 
-/**
+/*
  * @tc.name: DeRegisterDataChangeListener001
  * @tc.desc: DeRegisterDataChangeListener failed, cloud sync disabled.
  * @tc.type: FUNC
@@ -344,7 +344,7 @@ HWTEST_F(KVAdapterTest, DeRegisterDataChangeListener001, TestSize.Level1)
     EXPECT_NE(SOFTBUS_OK, kvStore->DeRegisterDataChangeListener());
 }
 
-/**
+/*
  * @tc.name: CloudSync001
  * @tc.desc: CloudSync failed, cloud sync disabled.
  * @tc.type: FUNC
@@ -355,7 +355,7 @@ HWTEST_F(KVAdapterTest, CloudSync001, TestSize.Level1)
     EXPECT_EQ(SOFTBUS_OK, kvStore->CloudSync());
 }
 
-/**
+/*
  * @tc.name: CloudSyncCallback002
  * @tc.desc: CloudSyncCallback failed, Status code is ERROR.
  * @tc.type: FUNC
@@ -369,7 +369,7 @@ HWTEST_F(KVAdapterTest, CloudSyncCallback002, TestSize.Level1)
     EXPECT_NO_FATAL_FAILURE(kvStore->CloudSyncCallback(std::move(detail)));
 }
 
-/**
+/*
  * @tc.name: DeleteDataChangeListener001
  * @tc.desc: DeleteDataChangeListener is ok.
  * @tc.type: FUNC
@@ -385,7 +385,7 @@ HWTEST_F(KVAdapterTest, DeleteDataChangeListener001, TestSize.Level1)
     EXPECT_NO_FATAL_FAILURE(kvStore->CloudSyncCallback(std::move(detail)));
 }
 
-/**
+/*
  * @tc.name: DeleteKvStore001
  * @tc.desc: DeleteKvStore is SOFTBUS_OK.
  * @tc.type: FUNC
@@ -399,7 +399,7 @@ HWTEST_F(KVAdapterTest, DeleteKvStore001, TestSize.Level1)
     EXPECT_EQ(SOFTBUS_OK, kvStore->DeleteKvStore());
 }
 
-/**
+/*
  * @tc.name: OnChange001
  * @tc.desc: OnChange is ok.
  * @tc.type: FUNC

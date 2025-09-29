@@ -22,6 +22,7 @@
 #include "gtest/gtest.h"
 #include <gmock/gmock-actions.h>
 #include "bus_center_info_key.h"
+#include "bus_center_manager.h"
 #include "lnn_log.h"
 #include "lnn_ohos_account_adapter.h"
 #include "lnn_ohos_account_adapter_mock.h"
@@ -38,6 +39,7 @@ namespace OHOS::SoftBus {
 #define INVALID_ACCOUNT_UID (-1)
 
 constexpr char LNN_OHOS_ACCOUNT_ADAPTER_TEST_ID_LEN = 10;
+constexpr char TYPE_CAR_ID = 0x83;
 
 class LnnOhosAccountAdapterTest : public testing::Test {
 protected:
@@ -674,5 +676,42 @@ HWTEST_F(LnnOhosAccountAdapterTest, GET_OS_ACCOUNT_UID_BY_USER_ID_TEST_005, Test
     (void)memset_s(accountId, ACCOUNT_UID_LEN_MAX, 0, ACCOUNT_UID_LEN_MAX);
     int32_t ret = GetOsAccountUidByUserId(accountId, ACCOUNT_UID_LEN_MAX - 1, &size, userId);
     EXPECT_EQ(ret, SOFTBUS_INVALID_PARAM);
+}
+
+/*
+ * @tc.name: JUDGE_DEVICE_TYPE_AND_GET_OS_ACCOUNT_IDS_001
+ * @tc.desc:  JudgeDeviceTypeAndGetOsAccountIds
+ * @tc.type: FUN
+ * @tc.require: 1
+ */
+HWTEST_F(LnnOhosAccountAdapterTest, JUDGE_DEVICE_TYPE_AND_GET_OS_ACCOUNT_IDS_001, TestSize.Level1)
+{
+    EXPECT_NO_FATAL_FAILURE(JudgeDeviceTypeAndGetOsAccountIds());
+}
+
+/*
+ * @tc.name: JUDGE_DEVICE_TYPE_AND_GET_OS_ACCOUNT_IDS_002
+ * @tc.desc:  JudgeDeviceTypeAndGetOsAccountIds
+ * @tc.type: FUN
+ * @tc.require: 1
+ */
+HWTEST_F(LnnOhosAccountAdapterTest, JUDGE_DEVICE_TYPE_AND_GET_OS_ACCOUNT_IDS_002, TestSize.Level1)
+{
+    LnnSetLocalNumInfo(NUM_KEY_DEV_TYPE_ID, TYPE_CAR_ID);
+    EXPECT_NO_FATAL_FAILURE(JudgeDeviceTypeAndGetOsAccountIds());
+}
+
+/*
+ * @tc.name: JUDGE_DEVICE_TYPE_AND_GET_OS_ACCOUNT_IDS_003
+ * @tc.desc:  JudgeDeviceTypeAndGetOsAccountIds
+ * @tc.type: FUN
+ * @tc.require: 1
+ */
+HWTEST_F(LnnOhosAccountAdapterTest, JUDGE_DEVICE_TYPE_AND_GET_OS_ACCOUNT_IDS_003, TestSize.Level1)
+{
+    uint64_t displayId = 0;
+    LnnSetLocalNumInfo(NUM_KEY_DEV_TYPE_ID, TYPE_CAR_ID);
+    LnnSetLocalNumU64Info(NUM_KEY_DISPLAY_ID, displayId);
+    EXPECT_NO_FATAL_FAILURE(JudgeDeviceTypeAndGetOsAccountIds());
 }
 } // namespace OHOS::SoftBus
