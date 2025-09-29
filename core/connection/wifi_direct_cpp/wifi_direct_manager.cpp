@@ -49,7 +49,7 @@ static SyncPtkListener g_syncPtkListener;
 static PtkMismatchListener g_ptkMismatchListener;
 static HmlStateListener g_hmlStateListener;
 static FrequencyChangedListener g_frequencyChangedListener;
-static OnRefreshNfcData g_onRefreshNfcData;
+static OnRefreshNfcData g_onRefreshNfcData = nullptr;
 
 static uint32_t GetRequestId(void)
 {
