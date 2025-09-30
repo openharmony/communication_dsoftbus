@@ -43,7 +43,7 @@ public:
 void CommonCoreNetworkTest::SetUpTestCase(void) { }
 void CommonCoreNetworkTest::TearDownTestCase(void) { }
 
-/**
+/*
  * @tc.name: SoftBusChannelToFrequencyTest001
  * @tc.desc: core common network channel to frequency test
  * @tc.type: FUNC
@@ -64,7 +64,7 @@ HWTEST_F(CommonCoreNetworkTest, SoftBusChannelToFrequencyTest001, TestSize.Level
     EXPECT_NE(SOFTBUS_ERR, ret);
 }
 
-/**
+/*
  * @tc.name: SoftBusFrequencyToChannelTest001
  * @tc.desc: core common network frequency to channel test
  * @tc.type: FUNC
@@ -85,7 +85,7 @@ HWTEST_F(CommonCoreNetworkTest, SoftBusFrequencyToChannelTest001, TestSize.Level
     EXPECT_NE(SOFTBUS_ERR, ret);
 }
 
-/**
+/*
  * @tc.name: SoftBusBandCheckTest001
  * @tc.desc: core common network band check test
  * @tc.type: FUNC

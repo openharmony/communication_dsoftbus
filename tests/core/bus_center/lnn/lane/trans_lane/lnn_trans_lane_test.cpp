@@ -1167,7 +1167,7 @@ HWTEST_F(LNNTransLaneMockTest, CHECK_VIRTUAL_LINK_BY_LANE_REQ_ID_TEST_002, TestS
 
 /*
  * @tc.name: IS_DEVICE_HAS_RISK_TEST_001
- * @tc.desc: IsDeviceHasRiskFactorPacked func test.
+ * @tc.desc: IsDeviceHasRiskFactorPacked func test
  * @tc.type: FUNC
  * @tc.require:
  */
@@ -1186,7 +1186,7 @@ HWTEST_F(LNNTransLaneMockTest, IS_DEVICE_HAS_RISK_TEST_001, TestSize.Level1)
 
 /*
  * @tc.name: IS_SUPPORT_LP_SPARK_TEST_001
- * @tc.desc: LnnIsSupportLpSparkFeaturePacked func test.
+ * @tc.desc: LnnIsSupportLpSparkFeaturePacked func test
  * @tc.type: FUNC
  * @tc.require:
  */
@@ -1208,7 +1208,7 @@ HWTEST_F(LNNTransLaneMockTest, IS_SUPPORT_LP_SPARK_TEST_001, TestSize.Level1)
 
 /*
  * @tc.name: IS_FEATURE_SUPPORT_DETAIL_TEST_001
- * @tc.desc: LnnIsFeatureSupportDetailPacked func test.
+ * @tc.desc: LnnIsFeatureSupportDetailPacked func test
  * @tc.type: FUNC
  * @tc.require:
  */
@@ -1230,7 +1230,7 @@ HWTEST_F(LNNTransLaneMockTest, IS_FEATURE_SUPPORT_DETAIL_TEST_001, TestSize.Leve
 
 /*
  * @tc.name: INIT_CONTROL_PLANE_TEST_001
- * @tc.desc: InitControlPlanePacked func test.
+ * @tc.desc: InitControlPlanePacked func test
  * @tc.type: FUNC
  * @tc.require:
  */

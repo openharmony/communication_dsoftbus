@@ -149,9 +149,9 @@ static int32_t InitAndCreateSessionServer()
     return ret;
 }
 
-/**
+/*
  * @tc.name: OperateAuthChannelInfoTest001
- * @tc.desc: Transmission auth manager get channel info with invalid parameters.
+ * @tc.desc: Transmission auth manager get channel info with invalid parameters
  * @tc.type: FUNC
  * @tc.require:
  */
@@ -165,9 +165,9 @@ HWTEST_F(TransAuthChannelTest, OperateAuthChannelInfoTest001, TestSize.Level1)
     EXPECT_EQ(ret, SOFTBUS_INVALID_PARAM);
 }
 
-/**
+/*
  * @tc.name: GetAppInfoTest001
- * @tc.desc: Transmission auth manager get AppInfo.
+ * @tc.desc: Transmission auth manager get AppInfo
  * @tc.type: FUNC
  * @tc.require:
  */
@@ -195,9 +195,9 @@ HWTEST_F(TransAuthChannelTest, GetAppInfoTest001, TestSize.Level1)
     TransAuthDeinit();
 }
 
-/**
+/*
  * @tc.name: TransAuthInitTest001
- * @tc.desc: TransAuthInitTest001, use the wrong parameter.
+ * @tc.desc: TransAuthInitTest001, use the wrong parameter
  * @tc.type: FUNC
  * @tc.require:
  */
@@ -211,9 +211,9 @@ HWTEST_F(TransAuthChannelTest, TransAuthInitTest001, TestSize.Level1)
     TransAuthDeinit();
 }
 
-/**
+/*
  * @tc.name: TransOpenAuthMsgChannelTest001
- * @tc.desc: TransOpenAuthMsgChannel, use the wrong parameter.
+ * @tc.desc: TransOpenAuthMsgChannel, use the wrong parameter
  * @tc.type: FUNC
  * @tc.require:
  */
@@ -240,9 +240,9 @@ HWTEST_F(TransAuthChannelTest, TransOpenAuthMsgChannelTest001, TestSize.Level1)
     TransAuthDeinit();
 }
 
-/**
+/*
  * @tc.name: TransOpenAuthMsgChannelTest002
- * @tc.desc: TransOpenAuthMsgChannel, use the wrong parameter.
+ * @tc.desc: TransOpenAuthMsgChannel, use the wrong parameter
  * @tc.type: FUNC
  * @tc.require:
  */
@@ -268,9 +268,9 @@ HWTEST_F(TransAuthChannelTest, TransOpenAuthMsgChannelTest002, TestSize.Level1)
     TransAuthDeinit();
 }
 
-/**
+/*
  * @tc.name: TransSendAuthMsgTest001
- * @tc.desc: TransSendAuthMsgTest001, use the wrong parameter.
+ * @tc.desc: TransSendAuthMsgTest001, use the wrong parameter
  * @tc.type: FUNC
  * @tc.require:
  */
@@ -310,9 +310,9 @@ HWTEST_F(TransAuthChannelTest, TransSendAuthMsgTest001, TestSize.Level1)
     TransAuthDeinit();
 }
 
-/**
+/*
  * @tc.name: OnAuthChannelDataRecvTest001
- * @tc.desc: OnAuthChannelDataRecvTest001, use the wrong parameter.
+ * @tc.desc: OnAuthChannelDataRecvTest001, use the wrong parameter
  * @tc.type: FUNC
  * @tc.require:
  */
@@ -341,9 +341,9 @@ HWTEST_F(TransAuthChannelTest, OnAuthChannelDataRecvTest001, TestSize.Level1)
     OnAuthChannelDataRecv(authId, data);
 }
 
-/**
+/*
  * @tc.name: OnAuthMsgDataRecvTest001
- * @tc.desc: OnAuthMsgDataRecvTest001, use the wrong parameter.
+ * @tc.desc: OnAuthMsgDataRecvTest001, use the wrong parameter
  * @tc.type: FUNC
  * @tc.require:
  */
@@ -364,9 +364,9 @@ HWTEST_F(TransAuthChannelTest, OnAuthMsgDataRecvTest001, TestSize.Level1)
     TransAuthDeinit();
 }
 
-/**
+/*
  * @tc.name: TransPostAuthChannelMsgTest001
- * @tc.desc: TransPostAuthChannelMsgTest001, use the wrong parameter.
+ * @tc.desc: TransPostAuthChannelMsgTest001, use the wrong parameter
  * @tc.type: FUNC
  * @tc.require:
  */
@@ -385,9 +385,9 @@ HWTEST_F(TransAuthChannelTest, TransPostAuthChannelMsgTest001, TestSize.Level1)
     EXPECT_EQ(ret, SOFTBUS_CREATE_JSON_ERR);
 }
 
-/**
+/*
  * @tc.name: TransPostAuthChannelErrMsgTest001
- * @tc.desc: TransPostAuthChannelErrMsgTest001, use the wrong parameter.
+ * @tc.desc: TransPostAuthChannelErrMsgTest001, use the wrong parameter
  * @tc.type: FUNC
  * @tc.require:
  */
@@ -406,9 +406,9 @@ HWTEST_F(TransAuthChannelTest, TransPostAuthChannelErrMsgTest001, TestSize.Level
     TransAuthDeinit();
 }
 
-/**
+/*
  * @tc.name: OperateAuthChannelInfoTest002
- * @tc.desc: Transmission auth manager add channel info.
+ * @tc.desc: Transmission auth manager add channel info
  * @tc.type: FUNC
  * @tc.require:
  */
@@ -442,9 +442,9 @@ HWTEST_F(TransAuthChannelTest, OperateAuthChannelInfoTest002, TestSize.Level1)
     TransAuthDeinit();
 }
 
-/**
+/*
  * @tc.name: OperateAuthChannelInfoTest003
- * @tc.desc: Transmission auth manager delete channel info.
+ * @tc.desc: Transmission auth manager delete channel info
  * @tc.type: FUNC
  * @tc.require:
  */
@@ -472,9 +472,9 @@ HWTEST_F(TransAuthChannelTest, OperateAuthChannelInfoTest003, TestSize.Level1)
     TransAuthDeinit();
 }
 
-/**
+/*
  * @tc.name: OperateAuthChannelInfoTest004
- * @tc.desc: Transmission auth manager delete channel info.
+ * @tc.desc: Transmission auth manager delete channel info
  * @tc.type: FUNC
  * @tc.require:
  */
@@ -504,9 +504,9 @@ HWTEST_F(TransAuthChannelTest, OperateAuthChannelInfoTest004, TestSize.Level1)
     TransSessionMgrDeinit();
     TransAuthDeinit();
 }
-/**
+/*
  * @tc.name: NotifyOpenAuthChannelSuccessTest001
- * @tc.desc: Transmission auth manager notify open auth channel success.
+ * @tc.desc: Transmission auth manager notify open auth channel success
  * @tc.type: FUNC
  * @tc.require:
  */
@@ -524,9 +524,9 @@ HWTEST_F(TransAuthChannelTest, NotifyOpenAuthChannelSuccessTest001, TestSize.Lev
     TransAuthDeinit();
 }
 
-/**
+/*
  * @tc.name: NotifyOpenAuthChannelFailedTest001
- * @tc.desc: Transmission auth manager notify open auth channel success.
+ * @tc.desc: Transmission auth manager notify open auth channel success
  * @tc.type: FUNC
  * @tc.require:
  */
@@ -539,9 +539,9 @@ HWTEST_F(TransAuthChannelTest, NotifyOpenAuthChannelFailedTest001, TestSize.Leve
     TransAuthDeinit();
 }
 
-/**
+/*
  * @tc.name: NotifyCloseAuthChannelTest001
- * @tc.desc: Transmission auth manager notify close auth channel.
+ * @tc.desc: Transmission auth manager notify close auth channel
  * @tc.type: FUNC
  * @tc.require:
  */
@@ -554,9 +554,9 @@ HWTEST_F(TransAuthChannelTest, NotifyCloseAuthChannelTest001, TestSize.Level1)
     TransAuthDeinit();
 }
 
-/**
+/*
  * @tc.name: AuthGetUidAndPidBySessionNameTest001
- * @tc.desc: Transmission auth manager notify close auth channel.
+ * @tc.desc: Transmission auth manager notify close auth channel
  * @tc.type: FUNC
  * @tc.require:
  */
@@ -572,9 +572,9 @@ HWTEST_F(TransAuthChannelTest, AuthGetUidAndPidBySessionNameTest001, TestSize.Le
     TransSessionMgrDeinit();
 }
 
-/**
+/*
  * @tc.name: NotifyOnDataReceivedTest001
- * @tc.desc: Transmission auth manager notify on data received.
+ * @tc.desc: Transmission auth manager notify on data received
  * @tc.type: FUNC
  * @tc.require:
  */
@@ -595,9 +595,9 @@ HWTEST_F(TransAuthChannelTest, NotifyOnDataReceivedTest001, TestSize.Level1)
     TransAuthDeinit();
 }
 
-/**
+/*
  * @tc.name: CopyPeerAppInfoTest001
- * @tc.desc: Transmission auth manager copy peer app info.
+ * @tc.desc: Transmission auth manager copy peer app info
  * @tc.type: FUNC
  * @tc.require:
  */
@@ -615,9 +615,9 @@ HWTEST_F(TransAuthChannelTest, CopyPeerAppInfoTest001, TestSize.Level1)
     SoftBusFree(channelAppInfo);
 }
 
-/**
+/*
  * @tc.name: OnRequsetUpdateAuthChannelTest001
- * @tc.desc: Transmission auth manager request update auth channel.
+ * @tc.desc: Transmission auth manager request update auth channel
  * @tc.type: FUNC
  * @tc.require:
  */
@@ -665,9 +665,9 @@ HWTEST_F(TransAuthChannelTest, OnRequsetUpdateAuthChannelTest001, TestSize.Level
     TransAuthDeinit();
 }
 
-/**
+/*
  * @tc.name: OnRequsetUpdateAuthChannelTest002
- * @tc.desc: Transmission auth manager request update auth channel.
+ * @tc.desc: Transmission auth manager request update auth channel
  * @tc.type: FUNC
  * @tc.require:
  */
@@ -699,9 +699,9 @@ HWTEST_F(TransAuthChannelTest, OnRequsetUpdateAuthChannelTest002, TestSize.Level
     TransAuthDeinit();
 }
 
-/**
+/*
  * @tc.name: OnRecvAuthChannelRequestTest001
- * @tc.desc: Transmission auth manager request update auth channel with invalid parameters.
+ * @tc.desc: Transmission auth manager request update auth channel with invalid parameters
  * @tc.type: FUNC
  * @tc.require:
  */
@@ -726,9 +726,9 @@ HWTEST_F(TransAuthChannelTest, OnRecvAuthChannelRequestTest001, TestSize.Level1)
     cJSON_Delete(msg);
 }
 
-/**
+/*
  * @tc.name: OnRecvAuthChannelRequestTest002
- * @tc.desc: Transmission auth manager request update auth channel no initialization.
+ * @tc.desc: Transmission auth manager request update auth channel no initialization
  * @tc.type: FUNC
  * @tc.require:
  */
@@ -771,9 +771,9 @@ HWTEST_F(TransAuthChannelTest, OnRecvAuthChannelRequestTest002, TestSize.Level1)
     cJSON_Delete(msg);
 }
 
-/**
+/*
  * @tc.name: OnRecvAuthChannelRequestTest003
- * @tc.desc: Transmission auth manager request update auth channel.
+ * @tc.desc: Transmission auth manager request update auth channel
  * @tc.type: FUNC
  * @tc.require:
  */
@@ -821,9 +821,9 @@ HWTEST_F(TransAuthChannelTest, OnRecvAuthChannelRequestTest003, TestSize.Level1)
     TransAuthDeinit();
 }
 
-/**
+/*
  * @tc.name: OnDisconnectTest001
- * @tc.desc: Transmission auth manager on disconnect.
+ * @tc.desc: Transmission auth manager on disconnect
  * @tc.type: FUNC
  * @tc.require:
  */
@@ -847,9 +847,9 @@ HWTEST_F(TransAuthChannelTest, OnDisconnectTest001, TestSize.Level1)
     TransAuthDeinit();
 }
 
-/**
+/*
  * @tc.name: TransAuthGetNameByChanIdTest001
- * @tc.desc: Transmission auth manager on disconnect.
+ * @tc.desc: Transmission auth manager on disconnect
  * @tc.type: FUNC
  * @tc.require:
  */
@@ -887,9 +887,9 @@ HWTEST_F(TransAuthChannelTest, TransAuthGetNameByChanIdTest001, TestSize.Level1)
     TransAuthDeinit();
 }
 
-/**
+/*
  * @tc.name: TransPostAuthChannelMsgTest002
- * @tc.desc: Transmission auth manager post auth channel message.
+ * @tc.desc: Transmission auth manager post auth channel message
  * @tc.type: FUNC
  * @tc.require:
  */
@@ -906,9 +906,9 @@ HWTEST_F(TransAuthChannelTest, TransPostAuthChannelMsgTest002, TestSize.Level1)
     SoftBusFree(appInfo);
 }
 
-/**
+/*
  * @tc.name: TransSendAuthMsgTest002
- * @tc.desc: Transmission auth manager post auth channel message.
+ * @tc.desc: Transmission auth manager post auth channel message
  * @tc.type: FUNC
  * @tc.require:
  */
@@ -932,9 +932,9 @@ HWTEST_F(TransAuthChannelTest, TransSendAuthMsgTest002, TestSize.Level1)
     TransAuthDeinit();
 }
 
-/**
+/*
  * @tc.name: TransAuthGetConnOptionByChanIdTest002
- * @tc.desc: Transmission auth manager get option of connetion by channel id.
+ * @tc.desc: Transmission auth manager get option of connetion by channel id
  * @tc.type: FUNC
  * @tc.require:
  */
@@ -976,9 +976,9 @@ HWTEST_F(TransAuthChannelTest, TransAuthGetConnOptionByChanIdTest002, TestSize.L
     TransAuthDeinit();
 }
 
-/**
+/*
  * @tc.name: TransAuthGetAppInfoByChanIdTest001
- * @tc.desc: Transmission auth manager get appInfo by channel id with invalid parameters.
+ * @tc.desc: Transmission auth manager get appInfo by channel id with invalid parameters
  * @tc.type: FUNC
  * @tc.require:
  */
@@ -991,9 +991,9 @@ HWTEST_F(TransAuthChannelTest, TransAuthGetAppInfoByChanIdTest001, TestSize.Leve
     SoftBusFree(appInfo);
 }
 
-/**
+/*
  * @tc.name: TransAuthGetAppInfoByChanIdTest002
- * @tc.desc: Transmission auth manager get appInfo by channel id.
+ * @tc.desc: Transmission auth manager get appInfo by channel id
  * @tc.type: FUNC
  * @tc.require:
  */
@@ -1020,9 +1020,9 @@ HWTEST_F(TransAuthChannelTest, TransAuthGetAppInfoByChanIdTest002, TestSize.Leve
     TransAuthDeinit();
 }
 
-/**
+/*
  * @tc.name: TransNotifyAuthDataSuccessTest001
- * @tc.desc: Transmission auth manager get appInfo by channel id.
+ * @tc.desc: Transmission auth manager get appInfo by channel id
  * @tc.type: FUNC
  * @tc.require:
  */
@@ -1044,9 +1044,9 @@ HWTEST_F(TransAuthChannelTest, TransNotifyAuthDataSuccessTest001, TestSize.Level
     SoftBusFree(connOpt);
 }
 
-/**
+/*
  * @tc.name: UpdateChannelInfo001
- * @tc.desc: Transmission auth manager update channel info with different parameters.
+ * @tc.desc: Transmission auth manager update channel info with different parameters
  * @tc.type: FUNC
  * @tc.require:
  */
@@ -1076,9 +1076,9 @@ HWTEST_F(TransAuthChannelTest, UpdateChannelInfo001, TestSize.Level1)
     TransAuthDeinit();
 }
 
-/**
+/*
  * @tc.name: TransAuthGetPeerUdidByChanId001
- * @tc.desc: Transmission auth manager trans auth get peerudid by chanid with different parameters.
+ * @tc.desc: Transmission auth manager trans auth get peerudid by chanid with different parameters
  * @tc.type: FUNC
  * @tc.require:
  */
@@ -1116,9 +1116,9 @@ HWTEST_F(TransAuthChannelTest, TransAuthGetPeerUdidByChanId001, TestSize.Level1)
     TransAuthDeinit();
 }
 
-/**
+/*
  * @tc.name: LnnServerJoinExtCb001
- * @tc.desc: Transmission auth manager lnn server joinext callback with different parameters.
+ * @tc.desc: Transmission auth manager lnn server joinext callback with different parameters
  * @tc.type: FUNC
  * @tc.require:
  */
@@ -1149,9 +1149,9 @@ HWTEST_F(TransAuthChannelTest, LnnServerJoinExtCb001, TestSize.Level1)
     TransAuthDeinit();
 }
 
-/**
+/*
  * @tc.name: AdaptLnnServerJoinExt001
- * @tc.desc: Transmission auth manager adapt lnn server joinext with different parameters.
+ * @tc.desc: Transmission auth manager adapt lnn server joinext with different parameters
  * @tc.type: FUNC
  * @tc.require:
  */
@@ -1164,9 +1164,9 @@ HWTEST_F(TransAuthChannelTest, AdaptLnnServerJoinExt001, TestSize.Level1)
     ASSERT_EQ(ret, SOFTBUS_OK);
 }
 
-/**
+/*
  * @tc.name: OnRecvAuthChannelReply001
- * @tc.desc: Transmission auth manager on receive auth channel reply with different parameters.
+ * @tc.desc: Transmission auth manager on receive auth channel reply with different parameters
  * @tc.type: FUNC
  * @tc.require:
  */
@@ -1209,9 +1209,9 @@ HWTEST_F(TransAuthChannelTest, OnRecvAuthChannelReply001, TestSize.Level1)
     TransAuthDeinit();
 }
 
-/**
+/*
  * @tc.name: TransCloseAuthChannel001
- * @tc.desc: Transmission auth manager close auth channel.
+ * @tc.desc: Transmission auth manager close auth channel
  * @tc.type: FUNC
  * @tc.require:
  */
@@ -1236,9 +1236,9 @@ HWTEST_F(TransAuthChannelTest, TransCloseAuthChannel001, TestSize.Level1)
     TransAuthDeinit();
 }
 
-/**
+/*
  * @tc.name: TransAuthGetChannelInfo001
- * @tc.desc: Transmission auth manager get different info by different parameters.
+ * @tc.desc: Transmission auth manager get different info by different parameters
  * @tc.type: FUNC
  * @tc.require:
  */
@@ -1288,9 +1288,9 @@ HWTEST_F(TransAuthChannelTest, TransAuthGetChannelInfo001, TestSize.Level1)
     TransAuthDeinit();
 }
 
-/**
+/*
  * @tc.name: TransOpenAuthMsgChannelTest003
- * @tc.desc: Transmission auth manager open auth message channel.
+ * @tc.desc: Transmission auth manager open auth message channel
  * @tc.type: FUNC
  * @tc.require:
  */
@@ -1323,9 +1323,9 @@ HWTEST_F(TransAuthChannelTest, TransOpenAuthMsgChannelTest003, TestSize.Level1)
     TransAuthDeinit();
 }
 
-/**
+/*
  * @tc.name: TransAuthFillDataConfigTest001
- * @tc.desc: TransAuthFillDataConfig
+ * @tc.desc: TransAuthFillDataConfig test
  * @tc.type: FUNC
  * @tc.require:
  */
@@ -1346,9 +1346,9 @@ HWTEST_F(TransAuthChannelTest, TransAuthFillDataConfigTest001, TestSize.Level1)
     SoftBusFree(appInfo);
 }
 
-/**
+/*
  * @tc.name: TransAuthProcessDataConfigTest001
- * @tc.desc: TransAuthFillDataConfig
+ * @tc.desc: TransAuthFillDataConfig test
  * @tc.type: FUNC
  * @tc.require:
  */
@@ -1377,9 +1377,9 @@ HWTEST_F(TransAuthChannelTest, TransAuthProcessDataConfigTest001, TestSize.Level
     SoftBusFree(appInfo);
 }
 
-/**
+/*
  * @tc.name: TransFillAuthChannelInfoTest001
- * @tc.desc: TransAuthFillDataConfig
+ * @tc.desc: TransAuthFillDataConfig test
  * @tc.type: FUNC
  * @tc.require:
  */
@@ -1399,9 +1399,9 @@ HWTEST_F(TransAuthChannelTest, TransFillAuthChannelInfoTest001, TestSize.Level1)
     SoftBusFree(connInfo);
 }
 
-/**
+/*
  * @tc.name: TransOpenAuthMsgChannelWithParaTest001
- * @tc.desc: TransAuthFillDataConfig
+ * @tc.desc: TransAuthFillDataConfig test
  * @tc.type: FUNC
  * @tc.require:
  */
@@ -1421,9 +1421,9 @@ HWTEST_F(TransAuthChannelTest, TransOpenAuthMsgChannelWithParaTest001, TestSize.
     SoftBusFree(connInfo);
 }
 
-/**
+/*
  * @tc.name: TransSetAuthChannelReplyCntTest001
- * @tc.desc: TransAuthFillDataConfig
+ * @tc.desc: TransAuthFillDataConfig test
  * @tc.type: FUNC
  * @tc.require:
  */
@@ -1458,9 +1458,9 @@ HWTEST_F(TransAuthChannelTest, TransSetAuthChannelReplyCntTest001, TestSize.Leve
     TransAuthDeinit();
 }
 
-/**
+/*
  * @tc.name: TransOpenAuthMsgChannelWithParaTest002
- * @tc.desc: TransOpenAuthMsgChannelWithPara
+ * @tc.desc: TransOpenAuthMsgChannelWithPara test
  * @tc.type: FUNC
  * @tc.require:
  */
@@ -1486,9 +1486,9 @@ HWTEST_F(TransAuthChannelTest, TransOpenAuthMsgChannelWithParaTest002, TestSize.
     TransAuthDeinit();
 }
 
-/**
+/*
  * @tc.name: TransAuthGetConnIdByChanIdTest001
- * @tc.desc: TransAuthGetConnIdByChanId
+ * @tc.desc: TransAuthGetConnIdByChanId test
  * @tc.type: FUNC
  * @tc.require:
  */
@@ -1517,9 +1517,9 @@ HWTEST_F(TransAuthChannelTest, TransAuthGetConnIdByChanIdTest001, TestSize.Level
     TransAuthDeinit();
 }
 
-/**
+/*
  * @tc.name: CheckIsWifiAuthChannelTest001
- * @tc.desc: CheckIsWifiAuthChannel
+ * @tc.desc: CheckIsWifiAuthChannel test
  * @tc.type: FUNC
  * @tc.require:
  */
@@ -1554,9 +1554,9 @@ HWTEST_F(TransAuthChannelTest, CheckIsWifiAuthChannelTest001, TestSize.Level1)
     TransAuthDeinit();
 }
 
-/**
+/*
  * @tc.name: TransSetAuthChannelReplyCntTest002
- * @tc.desc: TransSetAuthChannelReplyCnt
+ * @tc.desc: TransSetAuthChannelReplyCnt test
  * @tc.type: FUNC
  * @tc.require:
  */
@@ -1583,9 +1583,9 @@ HWTEST_F(TransAuthChannelTest, TransSetAuthChannelReplyCntTest002, TestSize.Leve
     TransAuthDeinit();
 }
 
-/**
+/*
  * @tc.name: TransCheckAuthChannelOpenStatusTest001
- * @tc.desc: TransCheckAuthChannelOpenStatus
+ * @tc.desc: TransCheckAuthChannelOpenStatus test
  * @tc.type: FUNC
  * @tc.require:
  */
@@ -1613,9 +1613,9 @@ HWTEST_F(TransAuthChannelTest, TransCheckAuthChannelOpenStatusTest001, TestSize.
     TransAuthDeinit();
 }
 
-/**
+/*
  * @tc.name: TransAsyncAuthChannelTaskTest001
- * @tc.desc: TransAsyncAuthChannelTask
+ * @tc.desc: TransAsyncAuthChannelTask test
  * @tc.type: FUNC
  * @tc.require:
  */
@@ -1647,9 +1647,9 @@ HWTEST_F(TransAuthChannelTest, TransAsyncAuthChannelTaskTest001, TestSize.Level1
     TransAuthDeinit();
 }
 
-/**
+/*
  * @tc.name: TransAuthDestroyChannelListTest001
- * @tc.desc: TransAuthDestroyChannelList
+ * @tc.desc: TransAuthDestroyChannelList test
  * @tc.type: FUNC
  * @tc.require:
  */
