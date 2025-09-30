@@ -24,6 +24,7 @@
 #include "lnn_trans_lane.h"
 #include "lnn_trans_lane_deps_mock.h"
 #include "lnn_wifi_adpter_mock.h"
+#include "softbus_adapter_mem.h"
 #include "softbus_adapter_thread.h"
 #include "softbus_error_code.h"
 
@@ -1226,6 +1227,85 @@ HWTEST_F(LNNTransLaneMockTest, IS_FEATURE_SUPPORT_DETAIL_TEST_001, TestSize.Leve
     lnnEnhanceFunc.isFeatureSupportDetail = IsFeatureSupportDetail;
     ret = LnnIsFeatureSupportDetailPacked();
     EXPECT_EQ(ret, true);
+}
+
+bool IsSupportMcuFeatureTest(void)
+{
+    return true;
+}
+/*
+ * @tc.name: IS_SUPPORT_MCU_FEATURE_PACKED_TEST_001
+ * @tc.desc: IsSupportMcuFeaturePacked func test.
+ * @tc.type: FUNC
+ * @tc.require:
+ */
+HWTEST_F(LNNTransLaneMockTest, IS_SUPPORT_MCU_FEATURE_PACKED_TEST_001, TestSize.Level1)
+{
+    NiceMock<TransLaneDepsInterfaceMock> laneMock;
+    LnnEnhanceFuncList lnnEnhanceFunc = { nullptr };
+    EXPECT_CALL(laneMock, LnnEnhanceFuncListGet).WillOnce(Return(nullptr)).WillRepeatedly(Return(&lnnEnhanceFunc));
+    bool ret = IsSupportMcuFeaturePacked();
+    EXPECT_EQ(ret, false);
+
+    ret = IsSupportMcuFeaturePacked();
+    EXPECT_EQ(ret, false);
+
+    lnnEnhanceFunc.isSupportMcuFeature = IsSupportMcuFeatureTest;
+    ret = IsSupportMcuFeaturePacked();
+    EXPECT_EQ(ret, true);
+}
+
+void LnnSendDeviceStateToMcuTest(void *para)
+{
+    SoftBusFree(para);
+    return;
+}
+/*
+ * @tc.name: LNN_SEND_DEVICE_STATE_TO_MCU_PACKED_TEST_001
+ * @tc.desc: LnnSendDeviceStateToMcuPacked func test.
+ * @tc.type: FUNC
+ * @tc.require:
+ */
+HWTEST_F(LNNTransLaneMockTest, LNN_SEND_DEVICE_STATE_TO_MCU_PACKED_TEST_001, TestSize.Level1)
+{
+    NiceMock<TransLaneDepsInterfaceMock> laneMock;
+    LnnEnhanceFuncList lnnEnhanceFunc = { nullptr };
+    EXPECT_CALL(laneMock, LnnEnhanceFuncListGet).WillOnce(Return(nullptr)).WillRepeatedly(Return(&lnnEnhanceFunc));
+    LaneAllocInfo *info = (LaneAllocInfo *)SoftBusCalloc(sizeof(LaneAllocInfo));
+    LnnSendDeviceStateToMcuPacked(info);
+    info = (LaneAllocInfo *)SoftBusCalloc(sizeof(LaneAllocInfo));
+    LnnSendDeviceStateToMcuPacked(info);
+
+    info = (LaneAllocInfo *)SoftBusCalloc(sizeof(LaneAllocInfo));
+    lnnEnhanceFunc.lnnSendDeviceStateToMcu = LnnSendDeviceStateToMcuTest;
+    LnnSendDeviceStateToMcuPacked(info);
+}
+
+int32_t LnnInitMcuTest(void)
+{
+    return SOFTBUS_INVALID_PARAM;
+}
+/*
+ * @tc.name: LNN_INIT_MCU_PACKED_TEST_001
+ * @tc.desc: LnnInitMcuPacked func test.
+ * @tc.type: FUNC
+ * @tc.require:
+ */
+HWTEST_F(LNNTransLaneMockTest, LNN_INIT_MCU_PACKED_TEST_001, TestSize.Level1)
+{
+    NiceMock<TransLaneDepsInterfaceMock> laneMock;
+    LnnEnhanceFuncList lnnEnhanceFunc = { nullptr };
+    EXPECT_CALL(laneMock, LnnEnhanceFuncListGet).WillOnce(Return(nullptr)).WillRepeatedly(Return(&lnnEnhanceFunc));
+
+    int32_t ret = LnnInitMcuPacked();
+    EXPECT_EQ(ret, SOFTBUS_NOT_IMPLEMENT);
+
+    ret = LnnInitMcuPacked();
+    EXPECT_EQ(ret, SOFTBUS_OK);
+
+    lnnEnhanceFunc.lnnInitMcu = LnnInitMcuTest;
+    ret = LnnInitMcuPacked();
+    EXPECT_EQ(ret, SOFTBUS_INVALID_PARAM);
 }
 
 /*

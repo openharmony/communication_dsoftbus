@@ -81,6 +81,7 @@ static HbConditionState g_hbConditionState;
 static int64_t g_lastScreenOnTime = 0;
 static int64_t g_lastScreenOffTime = 0;
 static atomic_bool g_enableState = false;
+static atomic_bool g_enableStateMcu = false;
 static bool g_isScreenOnOnce = false;
 static atomic_bool g_isCloudSyncEnd = false;
 
@@ -143,6 +144,30 @@ bool IsHeartbeatEnable(void)
     return g_hbConditionState.heartbeatEnable && isBtOn && isScreenUnlock && !g_hbConditionState.isRequestDisable &&
         (isLogIn || g_hbConditionState.hasTrustedRelation) && !isBackground && !isNightMode && isOOBEEnd &&
         isInitCheckSuc && !isDeviceRoot;
+}
+
+bool IsHeartbeatEnableForMcu(void)
+{
+    if ((g_hbConditionState.lockState == SOFTBUS_SCREEN_LOCK_UNKNOWN) && IsActiveOsAccountUnlocked()) {
+        g_hbConditionState.lockState = SOFTBUS_SCREEN_UNLOCK;
+    }
+    bool isBtOn = ((g_hbConditionState.btState != SOFTBUS_BLE_TURN_OFF) &&
+        (g_hbConditionState.btState != SOFTBUS_BT_UNKNOWN));
+    bool isScreenUnlock = g_hbConditionState.lockState == SOFTBUS_SCREEN_UNLOCK;
+    bool isLogIn = g_hbConditionState.accountState == SOFTBUS_ACCOUNT_LOG_IN;
+    bool isOOBEEnd =
+        g_hbConditionState.OOBEState == SOFTBUS_OOBE_END || g_hbConditionState.OOBEState == SOFTBUS_FACK_OOBE_END;
+    bool isInitCheckSuc = IsLnnInitCheckSucceed(MONITOR_BLE_NET);
+    bool isDeviceRoot = g_hbConditionState.deviceRootState == SOFTBUS_DEVICE_IS_ROOT;
+
+    LNN_LOGI(LNN_HEART_BEAT,
+        "MCU HB condition state: bt=%{public}d, screenUnlock=%{public}d, account=%{public}d, "
+        "trustedRelation=%{public}d, OOBEEnd=%{public}d, heartbeatEnable=%{public}d, "
+        "init check=%{public}d, deviceRoot=%{public}d",
+        isBtOn, isScreenUnlock, isLogIn, g_hbConditionState.hasTrustedRelation, isOOBEEnd,
+        g_hbConditionState.heartbeatEnable, isInitCheckSuc, isDeviceRoot);
+    return g_hbConditionState.heartbeatEnable && isBtOn && isScreenUnlock &&
+        (isLogIn || g_hbConditionState.hasTrustedRelation) && isOOBEEnd && isInitCheckSuc && !isDeviceRoot;
 }
 
 SoftBusScreenState GetScreenState(void)
@@ -270,9 +295,19 @@ static void HbSleStateEventHandler(const LnnEventBasicInfo *info)
     }
 }
 
+static void HbUpdateEnableStatusToMcu(void)
+{
+    LNN_LOGI(LNN_HEART_BEAT, "local support mcu feature=%{public}d", LnnIsLocalSupportMcuFeature());
+    if (LnnIsLocalSupportMcuFeature() && g_enableStateMcu != IsHeartbeatEnableForMcu()) {
+        g_enableStateMcu = IsHeartbeatEnableForMcu();
+        LnnNotifyLpMcuInit(g_enableStateMcu);
+    }
+}
+
 static void HbConditionChanged(bool isOnlySetState)
 {
     HbRefreshConditionState();
+    HbUpdateEnableStatusToMcu();
     bool isEnable = IsHeartbeatEnable();
     if (g_enableState == isEnable) {
         LNN_LOGI(LNN_HEART_BEAT, "ctrl ignore same enable request, isEnable=%{public}d", isEnable);
@@ -1343,6 +1378,9 @@ void LnnUpdateHeartbeatInfo(LnnHeartbeatUpdateInfoType type)
         HbConditionChanged(false);
     }
     LnnUpdateSendInfoStrategy(type);
+    if (IsSupportMcuFeaturePacked()) {
+        LnnNotifyLpMcuUpdateHbInfo((int32_t)type);
+    }
 }
 
 static void HbDelayCheckTrustedRelation(void *para)
@@ -1367,7 +1405,7 @@ static void HbDelayCheckTrustedRelation(void *para)
 void LnnHbOnTrustedRelationIncreased(int32_t groupType)
 {
     /* If it is a peer-to-peer group or share group, delay initialization to give BR networking priority. */
-    if (groupType != AUTH_PEER_TO_PEER_GROUP || !IsHeartbeatEnable()) {
+    if ((groupType != AUTH_PEER_TO_PEER_GROUP || !IsHeartbeatEnable()) && !IsSupportMcuFeaturePacked()) {
         int32_t ret = LnnStartHeartbeat(0);
         if (ret != SOFTBUS_OK) {
             LNN_LOGE(LNN_HEART_BEAT, "account group created start heartbeat fail, ret=%{public}d", ret);

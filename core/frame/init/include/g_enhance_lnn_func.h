@@ -136,6 +136,9 @@ typedef void (*LnnDeinitMetaNodeFunc)(void);
 typedef int32_t (*LnnInitMetaNodeExtLedgerFunc)(void);
 typedef void (*LnnDeinitMetaNodeExtLedgerFunc)(void);
 typedef void (*ClearMetaNodeRequestByPidFunc)(const char *pkgName, int32_t pid);
+typedef bool (*IsSupportMcuFeatureFunc)(void);
+typedef void (*LnnSendDeviceStateToMcuFunc)(void *para);
+typedef int32_t (*LnnInitMcuFunc)(void);
 
 /* lnn_cipherkey_manager.h */
 typedef int32_t (*LnnInitCipherKeyManagerFunc)(void);
@@ -347,6 +350,9 @@ typedef struct TagLnnEnhanceFuncList {
     SetLpKeepAliveStateFunc setLpKeepAliveState;
     LnnRegistBleHeartbeatMediumMgrFunc lnnRegistBleHeartbeatMediumMgr;
     LnnRequestCheckOnlineStatusFunc lnnRequestCheckOnlineStatus;
+    IsSupportMcuFeatureFunc isSupportMcuFeature;
+    LnnSendDeviceStateToMcuFunc lnnSendDeviceStateToMcu;
+    LnnInitMcuFunc lnnInitMcu;
     // lane_manager
     EnablePowerControlFunc enablePowerControl;
     DisablePowerControlFunc disablePowerControl;

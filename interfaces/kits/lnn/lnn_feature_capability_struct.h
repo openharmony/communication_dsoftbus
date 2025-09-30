@@ -48,6 +48,7 @@ typedef enum {
     BIT_SUPPORT_VIRTUAL_LINK = 25,
     BIT_SUPPORT_OLD_LP_SPARK_CAPABILITY_V1 = 26,
     BIT_SUPPORT_LP_SPARK_CAPABILITY = 27,
+    BIT_BLE_SUPPORT_LP_MCU_CAPABILITY = 28, // support low power mcu capability
     BIT_FEATURE_COUNT,
 } FeatureCapability;
 

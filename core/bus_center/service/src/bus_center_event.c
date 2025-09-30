@@ -896,6 +896,18 @@ void LnnNotifyNetworkStateChanged(SoftBusNetworkState state)
     NotifyEvent((const LnnEventBasicInfo *)&event);
 }
 
+void LnnNotifyLpMcuInit(bool enable)
+{
+    LnnHBEnableStatusChangedEvent event = {.basic.event = LNN_EVENT_LP_MCU_ENABLE_HEARTBEAT, .enable = enable};
+    NotifyEvent((const LnnEventBasicInfo *)&event);
+}
+
+void LnnNotifyLpMcuUpdateHbInfo(int32_t type)
+{
+    LnnHBInfoUpdateChangedEvent event = {.basic.event = LNN_EVENT_LP_MCU_UPDATE_HEARTBEAT_INFO, .type = type};
+    NotifyEvent((const LnnEventBasicInfo *)&event);
+}
+
 void LnnNotifySingleOffLineEvent(const ConnectionAddr *addr, NodeBasicInfo *basicInfo)
 {
     if (addr == NULL || basicInfo == NULL) {

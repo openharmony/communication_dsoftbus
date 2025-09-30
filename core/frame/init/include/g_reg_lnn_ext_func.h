@@ -376,6 +376,8 @@ typedef int32_t (*CheckLnnPermissionFunc)(const char *interfaceName, const char 
 typedef int32_t (*HandleForceDownVirtualLinkFunc)(void);
 typedef bool (*CheckVirtualLinkOnlyFunc)(void);
 typedef int32_t (*SoftBusGetHotspotConfigFunc)(int32_t *apChannel);
+typedef bool (*IsHeartbeatEnableForMcuFunc)(void);
+typedef bool (*LnnIsLocalSupportMcuFeatureFunc)(void);
 
 #ifdef __cplusplus
 }

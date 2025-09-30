@@ -69,5 +69,10 @@ int32_t LnnClearFeatureCapability(uint64_t *feature, FeatureCapability capaBit)
 {
     return GetLnnNetLedgerInterface()->LnnClearFeatureCapability(feature, capaBit);
 }
+
+bool IsSupportMcuFeaturePacked(void)
+{
+    return false;
+}
 } // extern "C"
 } // namespace OHOS
