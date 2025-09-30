@@ -576,6 +576,20 @@ HWTEST_F(LNNDataCloudSyncMockTest, LnnDBDataAddChangeSyncToCache_Test_001, TestS
 }
 
 /*
+ * @tc.name: LnnDBDataAddChangeSyncToCache_Test_002
+ * @tc.desc: LnnDBDataAddChangeSyncToCache test execute success
+ * @tc.type: FUNC
+ * @tc.require:
+ */
+HWTEST_F(LNNDataCloudSyncMockTest, LnnDBDataAddChangeSyncToCache_Test_002, TestSize.Level1)
+{
+    const char **key = reinterpret_cast<const char **>(SoftBusCalloc(TMP_LEN * TMP_LEN));
+    const char **value = reinterpret_cast<const char **>(SoftBusCalloc(TMP_LEN * TMP_LEN));
+    int32_t keySize = KEY_SIZE1;
+    EXPECT_NE(LnnDBDataAddChangeSyncToCache(key, value, keySize), SOFTBUS_OK);
+}
+
+/*
  * @tc.name: LnnDBDataChangeSyncToCacheInner_Test_001
  * @tc.desc: LnnDBDataChangeSyncToCacheInner
  * @tc.type: FUNC
@@ -682,6 +696,32 @@ HWTEST_F(LNNDataCloudSyncMockTest, PackBroadcastCipherKeyInner_Test_001, TestSiz
     EXPECT_NE(PackBroadcastCipherKeyInner(json, &info), SOFTBUS_OK);
     EXPECT_EQ(PackBroadcastCipherKeyInner(json, &info), SOFTBUS_OK);
     cJSON_Delete(json);
+}
+
+/*
+ * @tc.name: HandleDBAddChangeInternal_Test_001
+ * @tc.desc: HandleDBAddChangeInternal
+ * @tc.type: FUNC
+ * @tc.require:
+ */
+HWTEST_F(LNNDataCloudSyncMockTest, HandleDBAddChangeInternal_Test_001, TestSize.Level1)
+{
+    NodeInfo localCaheInfo = {
+        .stateVersion = STATE_VERSION2,
+    };
+    EXPECT_EQ(EOK, strcpy_s(localCaheInfo.deviceInfo.deviceUdid, UDID_BUF_LEN, PEERUDID));
+    NiceMock<LnnDataCloudSyncInterfaceMock> DataCloudSyncMock;
+    LnnEnhanceFuncList *pfnLnnEnhanceFuncList = LnnEnhanceFuncListGet();
+    pfnLnnEnhanceFuncList->lnnGetLocalCacheNodeInfo = LnnGetLocalCacheNodeInfo;
+    EXPECT_CALL(DataCloudSyncMock, LnnGetLocalCacheNodeInfo)
+        .WillOnce(Return(SOFTBUS_INVALID_PARAM))
+        .WillRepeatedly(DoAll(SetArgPointee<0>(localCaheInfo), Return(SOFTBUS_OK)));
+    const char *key = "key1#key2#key3";
+    const char *value = "value1#value2#value3";
+    NodeInfo cacheInfo;
+    (void)memset_s(&cacheInfo, sizeof(NodeInfo), 0, sizeof(NodeInfo));
+    EXPECT_EQ(HandleDBAddChangeInternal(key, value, &cacheInfo), SOFTBUS_INVALID_PARAM);
+    EXPECT_EQ(HandleDBAddChangeInternal(key, value, &cacheInfo), SOFTBUS_INVALID_PARAM);
 }
 
 /*

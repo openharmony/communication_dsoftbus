@@ -960,4 +960,304 @@ HWTEST_F(LNNConnectionFsmTest, UPDATE_DEVICE_INFO_TO_MLPS_TEST_001, TestSize.Lev
     UpdateDeviceInfoToMlps(udid);
     UpdateDeviceInfoToMlps(udid);
 }
+
+/*
+ * @tc.name: LEAVE_SAME_IP_ONLINE_DEVICE_TEST_001
+ * @tc.desc: test LeaveSameIpOnlineDevice no have online info
+ * @tc.type: FUNC
+ * @tc.require:
+ */
+HWTEST_F(LNNConnectionFsmTest, LEAVE_SAME_IP_ONLINE_DEVICE_TEST_001, TestSize.Level0)
+{
+    NiceMock<LnnNetLedgertInterfaceMock> ledgerMock;
+    ON_CALL(ledgerMock, LnnGetAllOnlineNodeInfo).WillByDefault(LnnNetLedgertInterfaceMock::ActionOfLnnGetAllOnline);
+
+    LnnConntionInfo connInfo = {};
+    connInfo.addr.type = CONNECTION_ADDR_WLAN;
+    connInfo.addr.info.ip.port = PORT;
+
+    if (strcpy_s(connInfo.addr.info.ip.ip, IP_STR_MAX_LEN, IP) != EOK) {
+        LNN_LOGE(LNN_BUILDER, "Failed to copy IP address\n");
+        return;
+    }
+
+    LeaveSameIpOnlineDevice(&connInfo);
+    SoftBusSleepMs(FUNC_SLEEP_MS);
+}
+
+/*
+ * @tc.name: LEAVE_SAME_IP_ONLINE_DEVICE_TEST_002
+ * @tc.desc: test LeaveSameIpOnlineDevice info not omline
+ * @tc.type: FUNC
+ * @tc.require:
+ */
+HWTEST_F(LNNConnectionFsmTest, LEAVE_SAME_IP_ONLINE_DEVICE_TEST_002, TestSize.Level0)
+{
+    NiceMock<LnnNetLedgertInterfaceMock> ledgerMock;
+    ON_CALL(ledgerMock, LnnGetAllOnlineNodeInfo).WillByDefault(LnnNetLedgertInterfaceMock::ActionOfLnnGetAllOnline);
+    LnnConntionInfo connInfo = {};
+
+    LeaveSameIpOnlineDevice(&connInfo);
+    SoftBusSleepMs(FUNC_SLEEP_MS);
+}
+
+/*
+ * @tc.name: LEAVE_SAME_IP_ONLINE_DEVICE_TEST_003
+ * @tc.desc: test have same info
+ * @tc.type: FUNC
+ * @tc.require:
+ */
+HWTEST_F(LNNConnectionFsmTest, LEAVE_SAME_IP_ONLINE_DEVICE_TEST_003, TestSize.Level0)
+{
+    NiceMock<LnnNetLedgertInterfaceMock> ledgerMock;
+    ON_CALL(ledgerMock, LnnGetAllOnlineNodeInfo)
+        .WillByDefault(LnnNetLedgertInterfaceMock::ActionOfLnnGetAllOnline);
+    
+    NodeBasicInfo onlineNode;
+    (void)memset_s(&onlineNode, sizeof(NodeBasicInfo), 0, sizeof(NodeBasicInfo));
+    (void)strcpy_s(onlineNode.networkId, NETWORK_ID_BUF_LEN, "123456ABC");
+    NodeInfo nodeInfo;
+    (void)memset_s(&nodeInfo, sizeof(NodeInfo), 0, sizeof(NodeInfo));
+    (void)strcpy_s(nodeInfo.networkId, NETWORK_ID_BUF_LEN, "123456ABC");
+    (void)strcpy_s(nodeInfo.connectInfo.ifInfo[WLAN_IF].deviceIp, IP_STR_MAX_LEN, IP);
+
+    EXPECT_CALL(ledgerMock, LnnGetRemoteNodeInfoById)
+        .WillOnce(DoAll(SetArgPointee<2>(nodeInfo), Return(SOFTBUS_OK)));
+    
+    LnnConntionInfo connInfo = {};
+    connInfo.addr.type = CONNECTION_ADDR_WLAN;
+    connInfo.addr.info.ip.port = PORT;
+    (void)strcpy_s(connInfo.addr.info.ip.ip, IP_STR_MAX_LEN, IP);
+
+    LeaveSameIpOnlineDevice(&connInfo);
+    SoftBusSleepMs(FUNC_SLEEP_MS);
+}
+
+/*
+ * @tc.name: LEAVE_SAME_IP_ONLINE_DEVICE_TEST_004
+ * @tc.desc: test two device have same info online
+ * @tc.type: FUNC
+ * @tc.require:
+ */
+HWTEST_F(LNNConnectionFsmTest, LEAVE_SAME_IP_ONLINE_DEVICE_TEST_004, TestSize.Level0)
+{
+    NiceMock<LnnNetLedgertInterfaceMock> ledgerMock;
+    ON_CALL(ledgerMock, LnnGetAllOnlineNodeInfo)
+        .WillByDefault(LnnNetLedgertInterfaceMock::ActionOfLnnGetAllOnline);
+    
+    NodeBasicInfo onlineNode1;
+    (void)memset_s(&onlineNode1, sizeof(NodeBasicInfo), 0, sizeof(NodeBasicInfo));
+    (void)strcpy_s(onlineNode1.networkId, NETWORK_ID_BUF_LEN, "123456ABC");
+    NodeInfo nodeInfo1;
+    (void)memset_s(&nodeInfo1, sizeof(NodeInfo), 0, sizeof(NodeInfo));
+    (void)strcpy_s(nodeInfo1.networkId, NETWORK_ID_BUF_LEN, "123456ABC");
+    (void)strcpy_s(nodeInfo1.connectInfo.ifInfo[WLAN_IF].deviceIp, IP_STR_MAX_LEN, IP);
+
+    NodeBasicInfo onlineNode2;
+    (void)memset_s(&onlineNode2, sizeof(NodeBasicInfo), 0, sizeof(NodeBasicInfo));
+    (void)strcpy_s(onlineNode2.networkId, NETWORK_ID_BUF_LEN, "123456ABD");
+    NodeInfo nodeInfo2;
+    (void)memset_s(&nodeInfo2, sizeof(NodeInfo), 0, sizeof(NodeInfo));
+    (void)strcpy_s(nodeInfo2.networkId, NETWORK_ID_BUF_LEN, "123456ABD");
+    (void)strcpy_s(nodeInfo2.connectInfo.ifInfo[WLAN_IF].deviceIp, IP_STR_MAX_LEN, IP);
+
+    EXPECT_CALL(ledgerMock, LnnGetRemoteNodeInfoById)
+        .WillOnce(DoAll(SetArgPointee<2>(nodeInfo1), Return(SOFTBUS_OK)));
+    
+    LnnConntionInfo connInfo = {};
+    connInfo.addr.type = CONNECTION_ADDR_WLAN;
+    connInfo.addr.info.ip.port = PORT;
+    (void)strcpy_s(connInfo.addr.info.ip.ip, IP_STR_MAX_LEN, IP);
+
+    LeaveSameIpOnlineDevice(&connInfo);
+    SoftBusSleepMs(FUNC_SLEEP_MS);
+}
+
+/*
+ * @tc.name: LEAVE_SAME_IP_ONLINE_DEVICE_TEST_005
+ * @tc.desc: test connInfo is null
+ * @tc.type: FUNC
+ * @tc.require:
+ */
+HWTEST_F(LNNConnectionFsmTest, LEAVE_SAME_IP_ONLINE_DEVICE_TEST_005, TestSize.Level0)
+{
+    NiceMock<LnnNetLedgertInterfaceMock> ledgerMock;
+    ON_CALL(ledgerMock, LnnGetAllOnlineNodeInfo)
+        .WillByDefault(LnnNetLedgertInterfaceMock::ActionOfLnnGetAllOnline);
+
+    LnnConntionInfo *connInfo = nullptr;
+    LeaveSameIpOnlineDevice(connInfo);
+    SoftBusSleepMs(FUNC_SLEEP_MS);
+}
+
+/*
+ * @tc.name: LEAVE_SAME_IP_ONLINE_DEVICE_TEST_006
+ * @tc.desc: test IP of connInfo is null
+ * @tc.type: FUNC
+ * @tc.require:
+ */
+HWTEST_F(LNNConnectionFsmTest, LEAVE_SAME_IP_ONLINE_DEVICE_TEST_006, TestSize.Level0)
+{
+    NiceMock<LnnNetLedgertInterfaceMock> ledgerMock;
+    ON_CALL(ledgerMock, LnnGetAllOnlineNodeInfo)
+        .WillByDefault(LnnNetLedgertInterfaceMock::ActionOfLnnGetAllOnline);
+
+    LnnConntionInfo connInfo = {};
+    connInfo.addr.type = CONNECTION_ADDR_WLAN;
+    connInfo.addr.info.ip.port = PORT;
+    (void)memset_s(connInfo.addr.info.ip.ip, IP_STR_MAX_LEN, 0, IP_STR_MAX_LEN);
+
+    LeaveSameIpOnlineDevice(&connInfo);
+    SoftBusSleepMs(FUNC_SLEEP_MS);
+}
+
+/*
+ * @tc.name: PROCESS_BLE_ONLINE_TEST_001
+ * @tc.desc: test local authentication failed
+ * @tc.type: FUNC
+ * @tc.require:
+ */
+HWTEST_F(LNNConnectionFsmTest, PROCESS_BLE_ONLINE_TEST_001, TestSize.Level0)
+{
+    NodeInfo nodeInfo;
+    const ConnectionAddr connAddr = {
+        .type = CONNECTION_ADDR_BLE,
+    };
+
+    NiceMock<LnnNetLedgertInterfaceMock> ledgerMock;
+    EXPECT_CALL(ledgerMock, LnnGetLocalNumU32Info)
+        .WillRepeatedly(Return(SOFTBUS_NETWORK_NOT_FOUND));
+
+    int32_t ret = ProcessBleOnline(&nodeInfo, &connAddr, BIT_SUPPORT_SESSION_DUP_BLE);
+    EXPECT_EQ(ret, SOFTBUS_NETWORK_GET_NODE_INFO_ERR);
+}
+
+/*
+ * @tc.name: PROCESS_BLE_ONLINE_TEST_002
+ * @tc.desc: test nodeInfo or connAddr is null
+ * @tc.type: FUNC
+ * @tc.require:
+ */
+HWTEST_F(LNNConnectionFsmTest, PROCESS_BLE_ONLINE_TEST_002, TestSize.Level0)
+{
+    NodeInfo *nodeInfo = nullptr;
+    const ConnectionAddr *connAddr = nullptr;
+    int32_t ret = ProcessBleOnline(nodeInfo, connAddr, BIT_SUPPORT_SESSION_DUP_BLE);
+    EXPECT_EQ(ret, SOFTBUS_INVALID_PARAM);
+
+    nodeInfo = new NodeInfo();
+    ret = ProcessBleOnline(nodeInfo, connAddr, BIT_SUPPORT_SESSION_DUP_BLE);
+    EXPECT_EQ(ret, SOFTBUS_INVALID_PARAM);
+    delete nodeInfo;
+
+    connAddr = new ConnectionAddr();
+    NiceMock<LnnNetLedgertInterfaceMock> ledgerMock;
+    EXPECT_CALL(ledgerMock, LnnGetLocalNumU32Info).WillOnce(Return(SOFTBUS_OK));
+    ret = ProcessBleOnline(nodeInfo, connAddr, BIT_SUPPORT_SESSION_DUP_BLE);
+    EXPECT_EQ(ret, SOFTBUS_FUNC_NOT_SUPPORT);
+    delete connAddr;
+}
+
+/*
+ * @tc.name: PROCESS_BLE_ONLINE_TEST_003
+ * @tc.desc: test device cannot authentication
+ * @tc.type: FUNC
+ * @tc.require:
+ */
+HWTEST_F(LNNConnectionFsmTest, PROCESS_BLE_ONLINE_TEST_003, TestSize.Level0)
+{
+    NodeInfo nodeInfo;
+    nodeInfo.authCapacity = 0;
+    const ConnectionAddr connAddr = {
+        .type = CONNECTION_ADDR_BLE,
+    };
+
+    NiceMock<LnnNetLedgertInterfaceMock> ledgerMock;
+    EXPECT_CALL(ledgerMock, LnnGetLocalNumU32Info)
+        .WillOnce(Return(SOFTBUS_OK));
+    int32_t ret = ProcessBleOnline(&nodeInfo, &connAddr, BIT_SUPPORT_SESSION_DUP_BLE);
+    EXPECT_EQ(ret, SOFTBUS_FUNC_NOT_SUPPORT);
+}
+
+/*
+ * @tc.name: PROCESS_BLE_ONLINE_TEST_004
+ * @tc.desc: test remote node is online
+ * @tc.type: FUNC
+ * @tc.require:
+ */
+HWTEST_F(LNNConnectionFsmTest, PROCESS_BLE_ONLINE_TEST_004, TestSize.Level0)
+{
+    NodeInfo nodeInfo;
+    (void)memset_s(&nodeInfo, sizeof(NodeInfo), 0, sizeof(NodeInfo));
+    (void)strcpy_s(nodeInfo.deviceInfo.deviceUdid, UDID_BUF_LEN, PEERUDID);
+
+    const ConnectionAddr connAddr = {
+        .type = CONNECTION_ADDR_BLE,
+    };
+
+    NiceMock<LnnNetLedgertInterfaceMock> ledgerMock;
+    EXPECT_CALL(ledgerMock, LnnGetRemoteNodeInfoById)
+        .WillRepeatedly(DoAll(SetArgPointee<2>(nodeInfo), Return(SOFTBUS_OK)));
+    EXPECT_CALL(ledgerMock, LnnHasDiscoveryType)
+        .WillRepeatedly(Return(true));
+    EXPECT_CALL(ledgerMock, CheckRemoteBasicInfoChanged)
+        .WillRepeatedly(Return(false));
+
+    int32_t ret = ProcessBleOnline(&nodeInfo, &connAddr, BIT_SUPPORT_SESSION_DUP_BLE);
+    EXPECT_EQ(ret, SOFTBUS_FUNC_NOT_SUPPORT);
+}
+
+/*
+ * @tc.name: PROCESS_BLE_ONLINE_TEST_005
+ * @tc.desc: test remote node is not online
+ * @tc.type: FUNC
+ * @tc.require:
+ */
+HWTEST_F(LNNConnectionFsmTest, PROCESS_BLE_ONLINE_TEST_005, TestSize.Level0)
+{
+    NodeInfo nodeInfo;
+    (void)memset_s(&nodeInfo, sizeof(NodeInfo), 0, sizeof(NodeInfo));
+    (void)strcpy_s(nodeInfo.deviceInfo.deviceUdid, UDID_BUF_LEN, PEERUDID);
+
+    const ConnectionAddr connAddr = {
+        .type = CONNECTION_ADDR_BLE,
+    };
+
+    NiceMock<LnnNetLedgertInterfaceMock> ledgerMock;
+    EXPECT_CALL(ledgerMock, LnnGetRemoteNodeInfoById)
+        .WillRepeatedly(Return(SOFTBUS_ERR));
+    EXPECT_CALL(ledgerMock, FillBleAddr)
+        .WillRepeatedly(Return(SOFTBUS_OK));
+    EXPECT_CALL(ledgerMock, JoinLnnWithNodeInfo)
+        .WillRepeatedly(Return(SOFTBUS_OK));
+        
+    int32_t ret = ProcessBleOnline(&nodeInfo, &connAddr, BIT_SUPPORT_SESSION_DUP_BLE);
+    EXPECT_EQ(ret, SOFTBUS_FUNC_NOT_SUPPORT);
+}
+
+/*
+ * @tc.name: PROCESS_BLE_ONLINE_TEST_006
+ * @tc.desc: test online failed
+ * @tc.type: FUNC
+ * @tc.require:
+ */
+HWTEST_F(LNNConnectionFsmTest, PROCESS_BLE_ONLINE_TEST_006, TestSize.Level0)
+{
+    NodeInfo nodeInfo;
+    (void)memset_s(&nodeInfo, sizeof(NodeInfo), 0, sizeof(NodeInfo));
+    (void)strcpy_s(nodeInfo.deviceInfo.deviceUdid, UDID_BUF_LEN, PEERUDID);
+
+    const ConnectionAddr connAddr = {
+        .type = CONNECTION_ADDR_BLE,
+    };
+
+    NiceMock<LnnNetLedgertInterfaceMock> ledgerMock;
+    EXPECT_CALL(ledgerMock, LnnGetRemoteNodeInfoById)
+        .WillRepeatedly(Return(SOFTBUS_ERR));
+    EXPECT_CALL(ledgerMock, FillBleAddr)
+        .WillRepeatedly(Return(SOFTBUS_ERR));
+        
+    int32_t ret = ProcessBleOnline(&nodeInfo, &connAddr, BIT_SUPPORT_SESSION_DUP_BLE);
+    EXPECT_EQ(ret, SOFTBUS_FUNC_NOT_SUPPORT);
+}
 } // namespace OHOS
