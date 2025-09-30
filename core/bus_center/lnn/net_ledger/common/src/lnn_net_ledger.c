@@ -265,6 +265,12 @@ static void LnnSetLocalFeature(void)
         feature |= 1 << BIT_SUPPORT_LP_SPARK_CAPABILITY;
         (void)LnnClearFeatureCapability(&feature, BIT_SUPPORT_SPARK_GROUP_CAPABILITY);
     }
+    if (IsSupportMcuFeaturePacked()) {
+        LNN_LOGI(LNN_LEDGER, "set mcu lp capacity");
+        feature |= 1 << BIT_BLE_SUPPORT_LP_MCU_CAPABILITY;
+        (void)LnnClearFeatureCapability(&feature, BIT_BLE_SUPPORT_LP_HEARTBEAT);
+        (void)LnnClearFeatureCapability(&feature, BIT_SUPPORT_LP_SPARK_CAPABILITY);
+    }
     if (LnnSetLocalNum64Info(NUM_KEY_FEATURE_CAPA, feature) != SOFTBUS_OK) {
         LNN_LOGE(LNN_LEDGER, "set feature fail");
     }

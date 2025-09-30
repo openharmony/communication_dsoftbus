@@ -13,12 +13,11 @@
  * limitations under the License.
  */
 
-#include "lnn_lane_hub.h"
-
-#include "g_enhance_lnn_func.h"
 #include "g_enhance_lnn_func_pack.h"
+#include "g_enhance_lnn_func.h"
 #include "legacy/softbus_hidumper_buscenter.h"
 #include "lnn_heartbeat_ctrl.h"
+#include "lnn_lane_hub.h"
 #include "lnn_lane.h"
 #include "lnn_log.h"
 #include "lnn_time_sync_manager.h"
@@ -44,6 +43,9 @@ int32_t LnnInitLaneHub(void)
     if (LnnInitHeartbeat() != SOFTBUS_OK) {
         LNN_LOGE(LNN_INIT, "init heart beat fail");
         return SOFTBUS_NO_INIT;
+    }
+    if (LnnInitMcuPacked() != SOFTBUS_OK) {
+        LNN_LOGE(LNN_INIT, "init mcu heartbeat fail");
     }
     if (InitControlPlanePacked() != SOFTBUS_OK) {
         LNN_LOGE(LNN_INIT, "init spark group manage fail");

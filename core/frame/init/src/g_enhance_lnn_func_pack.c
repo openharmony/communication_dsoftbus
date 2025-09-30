@@ -1764,3 +1764,41 @@ int32_t AuthMetaGetLocalIpByMetaNodeIdPacked(const char *metaNodeId, char *local
     }
     return pfnLnnEnhanceFuncList->authMetaGetLocalIpByMetaNodeId(metaNodeId, localIp, len);
 }
+
+bool IsSupportMcuFeaturePacked(void)
+{
+    LnnEnhanceFuncList *pfnLnnEnhanceFuncList = LnnEnhanceFuncListGet();
+    if (pfnLnnEnhanceFuncList == NULL) {
+        return false;
+    }
+    if (LnnCheckFuncPointer((void *)pfnLnnEnhanceFuncList->isSupportMcuFeature) != SOFTBUS_OK) {
+        return false;
+    }
+    return pfnLnnEnhanceFuncList->isSupportMcuFeature();
+}
+
+void LnnSendDeviceStateToMcuPacked(void *para)
+{
+    LnnEnhanceFuncList *pfnLnnEnhanceFuncList = LnnEnhanceFuncListGet();
+    if (pfnLnnEnhanceFuncList == NULL) {
+        SoftBusFree(para);
+        return;
+    }
+    if (LnnCheckFuncPointer((void *)pfnLnnEnhanceFuncList->lnnSendDeviceStateToMcu) != SOFTBUS_OK) {
+        SoftBusFree(para);
+        return;
+    }
+    return pfnLnnEnhanceFuncList->lnnSendDeviceStateToMcu(para);
+}
+
+int32_t LnnInitMcuPacked(void)
+{
+    LnnEnhanceFuncList *pfnLnnEnhanceFuncList = LnnEnhanceFuncListGet();
+    if (pfnLnnEnhanceFuncList == NULL) {
+        return SOFTBUS_NOT_IMPLEMENT;
+    }
+    if (LnnCheckFuncPointer((void *)pfnLnnEnhanceFuncList->lnnInitMcu) != SOFTBUS_OK) {
+        return SOFTBUS_OK;
+    }
+    return pfnLnnEnhanceFuncList->lnnInitMcu();
+}

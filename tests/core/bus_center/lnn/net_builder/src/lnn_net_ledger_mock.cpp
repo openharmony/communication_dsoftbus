@@ -655,5 +655,10 @@ int32_t LnnSetLocalNumU32Info(InfoKey key, uint32_t info)
 {
     return GetNetLedgerInterface()->LnnSetLocalNumU32Info(key, info);
 }
+
+bool LnnIsLocalSupportMcuFeature(void)
+{
+    return GetNetLedgerInterface()->LnnIsLocalSupportMcuFeature();
+}
 }
 } // namespace OHOS

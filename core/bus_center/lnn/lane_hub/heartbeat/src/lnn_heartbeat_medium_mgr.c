@@ -212,7 +212,9 @@ static void UpdateDeviceInfoToMlps(const char *udid)
     }
     info->isOnline = true;
     SoftBusLooper *looper = GetLooper(LOOP_TYPE_DEFAULT);
-    if (LnnAsyncCallbackDelayHelper(looper, SendDeviceStateToMlpsPacked, (void *)info, 0) != SOFTBUS_OK) {
+    LnnAsyncCallbackFunc callback = LnnIsLocalSupportMcuFeature() ? LnnSendDeviceStateToMcuPacked :
+        SendDeviceStateToMlpsPacked;
+    if (LnnAsyncCallbackDelayHelper(looper, callback, (void *)info, 0) != SOFTBUS_OK) {
         LNN_LOGE(LNN_BUILDER, "async call send device info fail");
         SoftBusFree(info);
     }
