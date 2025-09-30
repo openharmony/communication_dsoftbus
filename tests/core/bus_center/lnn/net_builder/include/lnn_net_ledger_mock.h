@@ -118,6 +118,9 @@ public:
     virtual int32_t LnnGetLocalNumInfoByIfnameIdx(InfoKey key, int32_t *info, int32_t ifIdx) = 0;
     virtual int32_t LnnSetLocalStrInfoByIfnameIdx(InfoKey key, const char *info, int32_t ifIdx) = 0;
     virtual int32_t LnnSetLocalNumInfoByIfnameIdx(InfoKey key, int32_t info, int32_t ifIdx) = 0;
+    virtual bool CheckRemoteBasicInfoChanged(const NodeInfo *nodeInfo) = 0;
+    virtual int32_t FillBleAddr(ConnectionAddr *addr, const ConnectionAddr *connAddr, const NodeInfo *nodeInfo) = 0;
+    virtual int32_t JoinLnnWithNodeInfo(const ConnectionAddr *addr, const NodeInfo *nodeInfo, bool isSession) = 0;
     virtual bool LnnIsLocalSupportMcuFeature(void) = 0;
 };
 class LnnNetLedgertInterfaceMock : public LnnNetLedgerInterface {
@@ -207,6 +210,9 @@ public:
     MOCK_METHOD3(LnnGetLocalNumInfoByIfnameIdx, int32_t(InfoKey, int32_t *, int32_t));
     MOCK_METHOD3(LnnSetLocalStrInfoByIfnameIdx, int32_t(InfoKey, const char *, int32_t));
     MOCK_METHOD3(LnnSetLocalNumInfoByIfnameIdx, int32_t(InfoKey, int32_t, int32_t));
+    MOCK_METHOD1(CheckRemoteBasicInfoChanged, bool(const NodeInfo *));
+    MOCK_METHOD3(FillBleAddr, int32_t(ConnectionAddr *, const ConnectionAddr *, const NodeInfo *));
+    MOCK_METHOD3(JoinLnnWithNodeInfo, int32_t(const ConnectionAddr *, const NodeInfo *, bool));
     MOCK_METHOD0(LnnIsLocalSupportMcuFeature, bool(void));
     static int32_t ActionOfLnnGetAllOnline(NodeBasicInfo **info, int32_t *infoNum);
     static int32_t ActionOfLnnConvertDlId(
