@@ -34,6 +34,7 @@
 #include "softbus_adapter_mem.h"
 #include "softbus_init_common.h"
 #include "softbus_json_utils.h"
+#include "softbus_utils.h"
 
 #define DEFAULT_FILE_PATH "/data/service/el1/public/dsoftbus/applykey"
 #define KEY_LEN           100
@@ -43,6 +44,8 @@
 #define VALUE_USER_ID      "userId"
 #define VALUE_TIME         "time"
 #define VALUE_ACCOUNT_HASH "accountHash"
+
+#define D2D_APPLY_KEY_HEX_LEN   (D2D_APPLY_KEY_LEN * 2 + 1)
 
 typedef struct {
     uint8_t applyKey[D2D_APPLY_KEY_LEN];
@@ -213,8 +216,14 @@ static bool AuthPackApplyKey(cJSON *json, char *nodeKey, AuthApplyMapValue *valu
         AUTH_LOGE(AUTH_CONN, "invalid param");
         return false;
     }
-    if (!AddStringToJsonObject(json, MAP_KEY, nodeKey) ||
-        !AddStringToJsonObject(json, VALUE_APPLY_KEY, (char *)value->applyKey) ||
+
+    char hexApplyKey[D2D_APPLY_KEY_HEX_LEN] = { 0 };
+    if (ConvertBytesToHexString(
+        hexApplyKey, D2D_APPLY_KEY_HEX_LEN, (unsigned char *)value->applyKey, D2D_APPLY_KEY_LEN) != SOFTBUS_OK) {
+        AUTH_LOGE(AUTH_CONN, "convert bytes to string fail");
+        return false;
+    }
+    if (!AddStringToJsonObject(json, MAP_KEY, nodeKey) || !AddStringToJsonObject(json, VALUE_APPLY_KEY, hexApplyKey) ||
         !AddStringToJsonObject(json, VALUE_ACCOUNT_HASH, value->accountHash) ||
         !AddNumberToJsonObject(json, VALUE_USER_ID, value->userId) ||
         !AddNumber64ToJsonObject(json, VALUE_TIME, value->time)) {
@@ -231,15 +240,9 @@ static char *PackAllApplyKey(void)
         AUTH_LOGE(AUTH_CONN, "jsonArray is null");
         return NULL;
     }
-    if (SoftBusMutexLock(&g_authApplyMutex) != SOFTBUS_OK) {
-        AUTH_LOGE(AUTH_CONN, "SoftBusMutexLock fail");
-        cJSON_Delete(jsonArray);
-        return NULL;
-    }
     MapIterator *it = LnnMapInitIterator(&g_authApplyMap);
     if (it == NULL) {
         AUTH_LOGE(AUTH_CONN, "map is empty");
-        (void)SoftBusMutexUnlock(&g_authApplyMutex);
         cJSON_Delete(jsonArray);
         return NULL;
     }
@@ -272,14 +275,20 @@ static char *PackAllApplyKey(void)
 
 static void AuthAsyncSaveApplyMapFile(void)
 {
+    if (SoftBusMutexLock(&g_authApplyMutex) != SOFTBUS_OK) {
+        AUTH_LOGE(AUTH_CONN, "SoftBusMutexLock fail");
+        return;
+    }
     char *dataStr = PackAllApplyKey();
+    (void)SoftBusMutexUnlock(&g_authApplyMutex);
     if (dataStr == NULL) {
         AUTH_LOGE(AUTH_CONN, "PackAllApplyKey fail");
+        return;
     }
     if (LnnAsyncSaveDeviceDataPacked((const char *)dataStr, LNN_DATA_TYPE_APPLY_KEY) != SOFTBUS_OK) {
         AUTH_LOGE(AUTH_CONN, "save apply key fail");
     }
-    (void)memset_s(&dataStr, strlen(dataStr), 0, strlen(dataStr));
+    (void)memset_s(dataStr, strlen(dataStr), 0, strlen(dataStr));
     cJSON_free(dataStr);
 }
 
@@ -289,12 +298,18 @@ static bool AuthUnpackApplyKey(const cJSON *json, AuthApplyMap *node)
         AUTH_LOGE(AUTH_CONN, "invalid param");
         return false;
     }
+    char hexApplyKey[D2D_APPLY_KEY_HEX_LEN] = { 0 };
     if (!GetJsonObjectNumber64Item(json, VALUE_TIME, (int64_t *)&node->value.time) ||
         !GetJsonObjectNumberItem(json, VALUE_USER_ID, &node->value.userId) ||
         !GetJsonObjectStringItem(json, MAP_KEY, node->mapKey, KEY_LEN) ||
-        !GetJsonObjectStringItem(json, VALUE_APPLY_KEY, (char *)node->value.applyKey, D2D_APPLY_KEY_LEN) ||
+        !GetJsonObjectStringItem(json, VALUE_APPLY_KEY, hexApplyKey, D2D_APPLY_KEY_HEX_LEN) ||
         !GetJsonObjectStringItem(json, VALUE_ACCOUNT_HASH, node->value.accountHash, SHA_256_HEX_HASH_LEN)) {
         AUTH_LOGE(AUTH_CONN, "unpack apply key fail");
+        return false;
+    }
+    if (ConvertHexStringToBytes(
+        (unsigned char *)node->value.applyKey, D2D_APPLY_KEY_LEN, hexApplyKey, D2D_APPLY_KEY_HEX_LEN) != SOFTBUS_OK) {
+        AUTH_LOGE(AUTH_CONN, "convert hexApplyKey to bytes fail.");
         return false;
     }
     return true;
