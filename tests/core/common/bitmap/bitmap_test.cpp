@@ -42,7 +42,7 @@ public:
 void CommonCoreBitMapTest::SetUpTestCase(void) { }
 void CommonCoreBitMapTest::TearDownTestCase(void) { }
 
-/**
+/*
  * @tc.name: CommonBitMapTest001
  * @tc.desc: core common bit map test
  * @tc.type: FUNC

@@ -121,7 +121,7 @@ static int32_t GenerateConflictDevInfo(LinkConflictInfo *inputInfo)
 
 /*
 * @tc.name: LNN_INIT_DEINIT_LINK_CONFLICT_001
-* @tc.desc: Init&DeInit
+* @tc.desc: Init & DeInit
 * @tc.type: FUNC
 * @tc.require:
 */
@@ -168,7 +168,7 @@ HWTEST_F(LNNLaneLinkConflictTest, LNN_INIT_DEINIT_LINK_CONFLICT_001, TestSize.Le
 
 /*
 * @tc.name: LNN_ADD_DEL_CONFLICT_INFO_001
-* @tc.desc: Add&Del conflictInfo
+* @tc.desc: Add & Del conflictInfo
 * @tc.type: FUNC
 * @tc.require:
 */
@@ -198,7 +198,7 @@ HWTEST_F(LNNLaneLinkConflictTest, LNN_ADD_DEL_CONFLICT_INFO_001, TestSize.Level1
 
 /*
 * @tc.name: LNN_ADD_DEL_CONFLICT_INFO_002
-* @tc.desc: Add&Del conflictInfo for update exist node
+* @tc.desc: Add & Del conflictInfo for update exist node
 * @tc.type: FUNC
 * @tc.require:
 */
