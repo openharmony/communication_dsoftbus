@@ -1556,7 +1556,7 @@ static int32_t ProcessBleInfoManager(bool isStart, uint8_t publishFlags, uint8_t
     }
     int32_t newRangingRefCount = g_bleInfoManager[index].rangingRefCnt;
     BleEventExtraInit();
-    DISC_LOGI(DISC_BLE, "ble discovery request summary, action: isStart=%{public}d, publishFlags=%{public}d, "
+    DISC_LOGI(DISC_BLE, "isStart=%{public}d, publishFlags=%{public}d, "
         "activeFlags=%{public}d, oldCap=%{public}d, newCap=%{public}d, "
         "oldRangingRefCount=%{public}d, newRangingRefCount=%{public}d, needUpdateCap=%{public}d",
         isStart, publishFlags, activeFlags, oldCap, newCap, oldRangingRefCount, newRangingRefCount,
@@ -2345,7 +2345,7 @@ static void ProcessStopAction(SoftBusMessage *msg, bool isDisc)
 {
     DISC_CHECK_AND_RETURN_LOGE(msg != NULL, DISC_BLE, "msg is null");
     bool needStop = (bool)msg->arg1;
-    DISC_CHECK_AND_RETURN_LOGW(needStop, DISC_BLE, "no need stop action");
+    DISC_CHECK_AND_RETURN_LOGW(needStop, DISC_BLE, "ignore");
     g_needActionListen = false;
     int32_t ret = SOFTBUS_OK;
     if (isDisc) {
