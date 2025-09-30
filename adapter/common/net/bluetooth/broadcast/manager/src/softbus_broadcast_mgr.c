@@ -516,7 +516,7 @@ static void BcStopBroadcastingCallback(BroadcastProtocol protocol, int32_t adapt
                 adapterBcId, managerId);
             continue;
         }
-        DISC_LOGI(DISC_BROADCAST, "srvType=%{public}s, managerId=%{public}u, adapterBcId=%{public}d, status=%{public}d",
+        DISC_LOGI(DISC_BROADCAST, "srvType=%{public}s, mId=%{public}u, BcId=%{public}d, sta=%{public}d",
             GetSrvType(bcManager->srvType), managerId, adapterBcId, status);
         if (status == SOFTBUS_BC_STATUS_SUCCESS) {
             if (bcManager->isAdvertising) {
@@ -1830,7 +1830,7 @@ static int32_t CheckAndStopScan(BroadcastProtocol protocol, int32_t listenerId)
     int32_t ret;
     bool needUpdate = CheckNeedUpdateScan(listenerId, &liveListenerId);
     if (!needUpdate) {
-        DISC_LOGI(DISC_BROADCAST, "call stop scan, adapterId=%{public}d", g_scanManager[listenerId].adapterScanId);
+        DISC_LOGI(DISC_BROADCAST, "stop scanId=%{public}d", g_scanManager[listenerId].adapterScanId);
         ret = g_interface[protocol]->StopScan(g_scanManager[listenerId].adapterScanId);
         if (ret != SOFTBUS_OK) {
             g_scanManager[listenerId].scanCallback->OnStopScanCallback(listenerId, (int32_t)SOFTBUS_BC_STATUS_FAIL);
@@ -2345,7 +2345,7 @@ int32_t PerformSetBroadcastingParam(int32_t bcId, SoftbusBroadcastParam *softbus
 
     ret = SoftBusMutexLock(&g_bcLock);
     DISC_CHECK_AND_RETURN_RET_LOGE(ret == SOFTBUS_OK, SOFTBUS_LOCK_ERR, DISC_BROADCAST, "lock failed");
-    DISC_LOGW(DISC_BROADCAST, "wait pausecondition managerId=%{public}d, isDisableCb=%{public}d",
+    DISC_LOGW(DISC_BROADCAST, "managerId=%{public}d, isDisableCb=%{public}d",
         bcId, g_bcManager[bcId].isDisableCb);
     if (!g_bcManager[bcId].isDisableCb) {
         ret = DisableBroadcastingWaitSignal(bcId, &g_bcLock);
@@ -2600,7 +2600,7 @@ static int32_t ProcessFliterChanged(int32_t listenerId, SoftBusBcScanParams *ada
             GetSrvType(scanManager->srvType), listenerId, scanManager->adapterScanId,
             adapterParam->scanInterval, adapterParam->scanWindow);
     } else {
-        DISC_LOGI(DISC_BROADCAST, "sanId=%{public}d is scanning, add filter", scanManager->adapterScanId);
+        DISC_LOGI(DISC_BROADCAST, "sanId=%{public}d, add filter", scanManager->adapterScanId);
         ret = GetScanFiltersForOneListener(listenerId, &adapterFilter, &filterSize);
         DISC_CHECK_AND_RETURN_RET_LOGE(ret == SOFTBUS_OK, ret, DISC_BROADCAST, "get bc scan filters failed");
         ret = g_interface[protocol]->SetScanParams(scanManager->adapterScanId, adapterParam,
@@ -2664,7 +2664,7 @@ static int32_t StartScanSub(int32_t listenerId, BroadcastProtocol protocol)
     return CheckChannelScan(protocol, listenerId, &adapterParam);
 
 NORMAL_START_SCAN:
-    DISC_LOGI(DISC_BROADCAST, "not scanning just start scan. listenerId=%{public}d", listenerId);
+    DISC_LOGI(DISC_BROADCAST, "start scan lId=%{public}d", listenerId);
     // channel have stop. normal run scan
     return PerformNormalStartScan(protocol, listenerId, &adapterParam, &callCount);
 }
@@ -2913,7 +2913,7 @@ int32_t SetScanFilter(int32_t listenerId, const BcScanFilter *scanFilter, uint8_
     g_scanManager[listenerId].filterSize = filterNum;
     // Need to reset scanner when filter changed.
     g_scanManager[listenerId].isFliterChanged = true;
-    DISC_LOGI(DISC_BROADCAST, "srvType=%{public}s, listenerId=%{public}d, adapterId=%{public}d",
+    DISC_LOGI(DISC_BROADCAST, "srvType=%{public}s, lId=%{public}d, aId=%{public}d",
               GetSrvType(g_scanManager[listenerId].srvType), listenerId, g_scanManager[listenerId].adapterScanId);
     SoftBusMutexUnlock(&g_scanLock);
     return SOFTBUS_OK;
