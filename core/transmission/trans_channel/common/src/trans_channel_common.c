@@ -17,6 +17,7 @@
 
 #include <unistd.h>
 
+#include "access_control.h"
 #include "bus_center_manager.h"
 #include "g_enhance_trans_func.h"
 #include "g_enhance_trans_func_pack.h"
@@ -36,7 +37,6 @@
 #include "trans_auth_manager.h"
 #include "trans_client_proxy.h"
 #include "trans_event.h"
-#include "g_enhance_trans_func_pack.h"
 #include "trans_ipc_adapter.h"
 #include "trans_lane_manager.h"
 #include "trans_lane_pending_ctl.h"
@@ -44,6 +44,7 @@
 #include "trans_session_account_adapter.h"
 #include "trans_session_ipc_adapter.h"
 #include "trans_session_manager.h"
+#include "trans_split_serviceid.h"
 #include "trans_tcp_direct_manager.h"
 #include "trans_tcp_direct_sessionconn.h"
 #include "trans_udp_channel_manager.h"
@@ -826,5 +827,23 @@ int32_t CheckCollabRelation(const AppInfo *appInfo, int32_t channelId, int32_t c
         return ret;
     }
     TRANS_LOGI(TRANS_CTRL, "channelId=%{public}d check Collaboration relationship success.", transInfo.channelId);
+    return SOFTBUS_OK;
+}
+
+int32_t TransCheckServerPermission(const char *mySessionName, const char *peerSessionName)
+{
+    bool myHasServiceId = CheckNameContainServiceId(mySessionName);
+    bool peerHasServiceId = CheckNameContainServiceId(peerSessionName);
+    if (myHasServiceId || peerHasServiceId) {
+        if (!myHasServiceId || !peerHasServiceId) {
+            TRANS_LOGE(TRANS_CTRL, "sessionName not serviceId");
+            return SOFTBUS_PERMISSION_SERVER_DENIED;
+        }
+    } else {
+        if (CheckSecLevelPublic(mySessionName, peerSessionName) != SOFTBUS_OK) {
+            return SOFTBUS_PERMISSION_SERVER_DENIED;
+        }
+    }
+
     return SOFTBUS_OK;
 }
