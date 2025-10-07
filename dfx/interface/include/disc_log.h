@@ -46,7 +46,7 @@ static const SoftBusLogLabel DISC_LABELS[MODULE_DOMAIN_MAX_LEN] = {
     { DISC_CONTROL,     0xd0057a1,      "DiscControl"   },
     { DISC_LNN,         0xd0057a2,      "DiscLnn"       },
     { DISC_BLE,         0xd0057a3,      "DiscBle"       },
-    { DISC_BLE_ADAPTER, 0xd0057a4,      "DiscAdapter"},
+    { DISC_BLE_ADAPTER, 0xd0057a4,      "DiscAdp"},
     { DISC_COAP,        0xd0057a5,      "DiscCoap"      },
     { DISC_DFINDER,     0xd0057a6,      "DiscDfinder"   },
     { DISC_ABILITY,     0xd0057a7,      "DiscAbility"   },
