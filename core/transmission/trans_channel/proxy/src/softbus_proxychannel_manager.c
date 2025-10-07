@@ -1372,7 +1372,8 @@ static int32_t TransProxyFillChannelInfo(const ProxyMessage *msg, ProxyChannelIn
         }
     }
 
-    if (CheckSecLevelPublic(chan->appInfo.myData.sessionName, chan->appInfo.peerData.sessionName) != SOFTBUS_OK) {
+    if (TransCheckServerPermission(chan->appInfo.myData.sessionName, chan->appInfo.peerData.sessionName) !=
+        SOFTBUS_OK) {
         return SOFTBUS_PERMISSION_SERVER_DENIED;
     }
 

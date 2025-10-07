@@ -106,9 +106,9 @@ int32_t SoftBusCheckDmsServerPermission(uint64_t tokenId)
 {
     return GetSoftbusServerStubTestInterface()->SoftBusCheckDmsServerPermission(tokenId);
 }
-bool SoftBusCheckIsSystemApp(uint64_t tokenId, const char *sessionName)
+bool SoftBusCheckIsSystemApp(uint64_t tokenId, pid_t uid)
 {
-    return GetSoftbusServerStubTestInterface()->SoftBusCheckIsSystemApp(tokenId, sessionName);
+    return GetSoftbusServerStubTestInterface()->SoftBusCheckIsSystemApp(tokenId, uid);
 }
 bool SoftBusCheckIsNormalApp(uint64_t fullTokenId, const char *sessionName)
 {
