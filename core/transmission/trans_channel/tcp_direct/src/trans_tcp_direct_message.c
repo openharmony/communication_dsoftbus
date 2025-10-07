@@ -943,7 +943,7 @@ static int32_t CheckServerPermission(AppInfo *appInfo, char *ret)
         }
     }
 
-    if (CheckSecLevelPublic(appInfo->myData.sessionName, appInfo->peerData.sessionName) != SOFTBUS_OK) {
+    if (TransCheckServerPermission(appInfo->myData.sessionName, appInfo->peerData.sessionName) != SOFTBUS_OK) {
         ret = (char *)"Server check session name failed";
         return SOFTBUS_PERMISSION_SERVER_DENIED;
     }

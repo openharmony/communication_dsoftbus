@@ -116,14 +116,7 @@ bool SoftBusSaCanUseDeviceKey(uint64_t tokenId)
     return false;
 }
 
-bool SoftBusCheckIsSystemApp(uint64_t tokenId, const char *sessionName)
-{
-    (void)tokenId;
-    (void)sessionName;
-    return false;
-}
-
-bool SoftBusCheckIsSystemAppByUid(uint64_t tokenId, pid_t uid)
+bool SoftBusCheckIsSystemApp(uint64_t tokenId, pid_t uid)
 {
     (void)tokenId;
     (void)uid;
