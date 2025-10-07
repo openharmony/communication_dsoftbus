@@ -711,10 +711,8 @@ static int32_t ParseRequestAppInfo(AuthHandle authHandle, const cJSON *msg, AppI
         }
     }
 
-    if (!CheckNameContainServiceId(appInfo->myData.sessionName)) {
-        if (CheckSecLevelPublic(appInfo->myData.sessionName, appInfo->peerData.sessionName) != SOFTBUS_OK) {
-            return SOFTBUS_PERMISSION_SERVER_DENIED;
-        }
+    if (TransCheckServerPermission(appInfo->myData.sessionName, appInfo->peerData.sessionName) != SOFTBUS_OK) {
+        return SOFTBUS_PERMISSION_SERVER_DENIED;
     }
 
     if (appInfo->udpChannelOptType != TYPE_UDP_CHANNEL_OPEN) {

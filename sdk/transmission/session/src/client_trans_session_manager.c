@@ -2376,8 +2376,15 @@ int32_t ClientGetServiceSocketInfoById(int32_t socket, ServiceSocketInfo *socket
         return SOFTBUS_TRANS_SESSION_INFO_NOT_FOUND;
     }
 
-    socketInfo->serviceId = SplitToGetServiceId(serverNode->sessionName);
-    socketInfo->peerServiceId = SplitToGetServiceId(sessionNode->info.peerSessionName);
+    int64_t serviceId = 0;
+    int64_t peerServiceId = 0;
+    if (!SplitToGetServiceId(serverNode->sessionName, &serviceId) ||
+        !SplitToGetServiceId(sessionNode->info.peerSessionName, &peerServiceId)) {
+        return SOFTBUS_INVALID_PARAM;
+    }
+
+    socketInfo->serviceId = serviceId;
+    socketInfo->peerServiceId = peerServiceId;
     socketInfo->dataType = (TransDataType)sessionNode->info.flag;
     UnlockClientSessionServerList();
     return SOFTBUS_OK;

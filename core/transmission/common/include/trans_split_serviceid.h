@@ -26,7 +26,7 @@ extern "C" {
 #endif
 #endif
 
-int64_t SplitToGetServiceId(const char *str);
+bool SplitToGetServiceId(const char *str, int64_t *serviceId);
 bool CheckNameContainServiceId(const char *str);
 
 #ifdef __cplusplus

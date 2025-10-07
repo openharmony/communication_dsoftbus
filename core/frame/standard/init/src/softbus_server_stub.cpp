@@ -413,17 +413,10 @@ static int32_t GetAppId(const std::string &bundleName, std::string &appId)
     return SOFTBUS_OK;
 }
 
-static bool CheckSystemAppSessionName(const char *sessionName, pid_t callingUid, uint64_t callingFullTokenId)
-{
-    return CheckNameContainServiceId(sessionName) ? SoftBusCheckIsSystemAppByUid(callingFullTokenId, callingUid) :
-                                                    SoftBusCheckIsSystemApp(callingFullTokenId, sessionName);
-}
-
 static int32_t CheckNormalAppSessionName(
     const char *sessionName, pid_t callingUid, std::string &strName, uint64_t callingFullTokenId)
 {
-    bool ret = CheckNameContainServiceId(sessionName) ? SoftBusCheckIsNormalAppByUid(callingFullTokenId, callingUid) :
-                                                        SoftBusCheckIsNormalApp(callingFullTokenId, sessionName);
+    bool ret = SoftBusCheckIsNormalAppByUid(callingFullTokenId, callingUid);
     if (ret) {
         std::string bundleName;
         int32_t result = GetBundleName(callingUid, bundleName);
@@ -552,7 +545,7 @@ int32_t SoftBusServerStub::CreateSessionServerInner(MessageParcel &data, Message
         }
     }
 #ifdef SUPPORT_BUNDLENAME
-    if (CheckSystemAppSessionName(sessionName, callingUid, callingFullTokenId)) {
+    if (SoftBusCheckIsSystemApp(callingFullTokenId, callingUid)) {
         if (TransCheckSystemAppList(callingUid) != SOFTBUS_OK) {
             retReply = SOFTBUS_PERMISSION_DENIED;
             goto EXIT;
@@ -729,7 +722,7 @@ int32_t SoftBusServerStub::OpenSessionInner(MessageParcel &data, MessageParcel &
     if (CheckNameContainServiceId(param.sessionName)) {
         if (LnnGetNetworkIdByUuid(param.peerDeviceId, networkId, sizeof(networkId)) != SOFTBUS_OK) {
             COMM_LOGE(COMM_SVC, "get networkId by uuid fail");
-            return SOFTBUS_INVALID_PARAM;
+            retReply = SOFTBUS_INVALID_PARAM;
             goto EXIT;
         }
         param.peerDeviceId = networkId;

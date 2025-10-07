@@ -20,30 +20,32 @@
 #include "trans_split_serviceid.h"
 
 #define TARGET        "serviceId"
-#define TARGET_LENGHT 9
+#define TARGET_LENGTH 9
 #define STR_SIZE_MAX  31
+#define DEC           10
 
-int64_t SplitToGetServiceId(const char *str)
+bool SplitToGetServiceId(const char *str, int64_t *serviceId)
 {
     if (str == NULL || strlen(str) > STR_SIZE_MAX) {
-        return SOFTBUS_INVALID_PARAM;
+        return false;
     }
  
     const char *underscore = strchr(str, '_');
     if (underscore == NULL) {
-        return SOFTBUS_INVALID_PARAM;
+        return false;
     }
     const char *substring = underscore + 1;
     char *endptr;
-    int64_t value = (int64_t)strtoll(substring, &endptr, 10);
-    if ((value == INT64_MAX || value == INT64_MIN) && errno == ERANGE) {
-        return SOFTBUS_INVALID_PARAM;
+    errno = 0;
+    *serviceId = (int64_t)strtoll(substring, &endptr, DEC);
+    if ((*serviceId == INT64_MAX || *serviceId == INT64_MIN) && errno == ERANGE) {
+        return false;
     }
 
     if (endptr == substring || *endptr != '\0') {
-        return SOFTBUS_INVALID_PARAM;
+        return false;
     }
-    return value;
+    return true;
 }
 
 bool CheckNameContainServiceId(const char *str)
@@ -57,8 +59,8 @@ bool CheckNameContainServiceId(const char *str)
         return false;
     }
     size_t length = underscore - str;
-    if (length != TARGET_LENGHT) {
+    if (length != TARGET_LENGTH) {
         return false;
     }
-    return strncmp(str, TARGET, TARGET_LENGHT) == 0;
+    return strncmp(str, TARGET, TARGET_LENGTH) == 0;
 }
