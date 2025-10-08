@@ -2380,6 +2380,7 @@ int32_t ClientGetServiceSocketInfoById(int32_t socket, ServiceSocketInfo *socket
     int64_t peerServiceId = 0;
     if (!SplitToGetServiceId(serverNode->sessionName, &serviceId) ||
         !SplitToGetServiceId(sessionNode->info.peerSessionName, &peerServiceId)) {
+        UnlockClientSessionServerList();
         return SOFTBUS_INVALID_PARAM;
     }
 
