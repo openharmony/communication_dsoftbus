@@ -866,7 +866,7 @@ bool IsUnknownDevicePacked(const char *bleMacAddr)
 {
     DiscEnhanceFuncList *pfnDiscEnhanceFuncList = DiscEnhanceFuncListGet();
 
-    int32_t ret = DiscCheckFuncPointer((void *)pfnDiscEnhanceFuncList->isUnknownDevice(bleMacAddr));
+    int32_t ret = DiscCheckFuncPointer((void *)pfnDiscEnhanceFuncList->isUnknownDevice);
     DISC_CHECK_AND_RETURN_RET_LOGD(ret == SOFTBUS_OK, false, DISC_BLE, "not find isUnknownDevice");
     return pfnDiscEnhanceFuncList->isUnknownDevice(bleMacAddr);
 }
