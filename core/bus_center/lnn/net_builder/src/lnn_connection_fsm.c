@@ -466,14 +466,22 @@ static void UpdateDeviceInfoToMlps(const char *udid)
     }
 }
 
-static void TryTriggerSparkJoinAgain(const LnnConntionInfo *connInfo, bool isAccountChanged)
+static void TryTriggerSparkJoinAgain(const LnnConntionInfo *info, bool isAccountChanged)
 {
-    if (connInfo == NULL || connInfo->addr.type != CONNECTION_ADDR_WLAN || !isAccountChanged) {
-        LNN_LOGD(LNN_BUILDER, "no need handle");
+    if (info == NULL || info->addr.type != CONNECTION_ADDR_WLAN || !isAccountChanged) {
+        LNN_LOGI(LNN_BUILDER, "no need handle");
         return;
     }
-    UpdateDeviceInfoToMlps(connInfo->nodeInfo->deviceInfo.deviceUdid);
-    TriggerSparkGroupJoinAgainPacked(connInfo->nodeInfo->deviceInfo.deviceUdid, SPARK_GROUP_DELAY_TIME_MS);
+    NodeInfo oldInfo;
+    (void)memset_s(&oldInfo, sizeof(NodeInfo), 0, sizeof(NodeInfo));
+    if (LnnGetRemoteNodeInfoById(info->nodeInfo->deviceInfo.deviceUdid, CATEGORY_UDID, &oldInfo) != SOFTBUS_OK) {
+        LNN_LOGE(LNN_BUILDER, "get node info fail");
+        return;
+    }
+    if (LnnHasDiscoveryType(&oldInfo, DISCOVERY_TYPE_BLE)) {
+        UpdateDeviceInfoToMlps(info->nodeInfo->deviceInfo.deviceUdid);
+        TriggerSparkGroupJoinAgainPacked(info->nodeInfo->deviceInfo.deviceUdid, SPARK_GROUP_DELAY_TIME_MS);
+    }
 }
 
 static bool IsAccountHashChanged(const LnnConntionInfo *connInfo)
@@ -1260,7 +1268,7 @@ static int32_t LnnRecoveryBroadcastKey()
         }
         ret = LnnSetLocalByteInfo(BYTE_KEY_SPARK_CHECK, broadcastKey.sparkCheck, SPARK_CHECK_LENGTH);
         if (ret != SOFTBUS_OK) {
-            LNN_LOGE(LNN_LEDGER, "set sparkCheck fail");
+            LNN_LOGE(LNN_BUILDER, "set sparkCheck fail");
             break;
         }
         LNN_LOGI(LNN_BUILDER, "recovery broadcastKey success!");

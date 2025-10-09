@@ -3761,13 +3761,11 @@ ohos_unittest("LNNConnIdCbManagerTest") {
 ohos_unittest("LNNNetLedgerMockTest") {
   module_out_path = module_output_path
   sources = [
-    "$dsoftbus_root_path/core/bus_center/monitor/src/lnn_init_monitor.c",
-    "$dsoftbus_root_path/tests/core/bus_center/lnn/net_builder/src/lnn_data_cloud_sync_deps_mock.cpp",
-    "$dsoftbus_root_path/tests/core/bus_center/lnn/net_ledger/lnn_net_ledger_common_mock.cpp",
-    "$dsoftbus_root_path/tests/core/bus_center/lnn/net_ledger/lnn_net_ledger_mock_test.cpp",
-    "$dsoftbus_root_path/tests/core/discovery/ble/softbus_ble_mock/bus_center_mock.cpp",
-    "$dsoftbus_root_path/core/frame/init/src/g_enhance_lnn_func_pack.c",
+    "$dsoftbus_root_path/core/frame/init/src/g_enhance_auth_func.c",
+    "$dsoftbus_root_path/core/frame/init/src/g_enhance_auth_func_pack.c",
     "$dsoftbus_root_path/core/frame/init/src/g_enhance_lnn_func.c",
+    "$dsoftbus_root_path/tests/core/bus_center/lnn/net_ledger/lnn_net_ledger_deps_mock.cpp",
+    "$dsoftbus_root_path/tests/core/bus_center/lnn/net_ledger/lnn_net_ledger_mock_test.cpp",
   ]
 
   include_dirs = lnn_mock_test_include_dirs

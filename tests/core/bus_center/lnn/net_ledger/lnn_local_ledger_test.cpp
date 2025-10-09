@@ -1117,6 +1117,24 @@ HWTEST_F(LNNLedgerMockTest, LNN_GEN_BROAD_CAST_CIPHER_INFO_003, TestSize.Level1)
 }
 
 /*
+ * @tc.name: LNN_GEN_BROAD_CAST_CIPHER_INFO_004
+ * @tc.desc: LnnGenBroadcastCipherInfo test
+ * @tc.type: FUNC
+ * @tc.require:
+ */
+HWTEST_F(LNNLedgerMockTest, LNN_GEN_BROAD_CAST_CIPHER_INFO_004, TestSize.Level1)
+{
+    LocalLedgerDepsInterfaceMock localLedgerMock;
+    EXPECT_CALL(localLedgerMock, LnnLoadLocalBroadcastCipherKeyPacked).WillRepeatedly(Return(SOFTBUS_INVALID_PARAM));
+    EXPECT_CALL(localLedgerMock, SoftBusGenerateRandomArray).WillRepeatedly(Return(SOFTBUS_OK));
+    EXPECT_CALL(localLedgerMock, LnnUpdateLocalBroadcastCipherKeyPacked).WillRepeatedly(Return(SOFTBUS_INVALID_PARAM));
+    EXPECT_EQ(SOFTBUS_NETWORK_GENERATE_CIPHER_INFO_FAILED, LnnGenBroadcastCipherInfo());
+    EXPECT_CALL(localLedgerMock, SoftBusGenerateRandomArray).WillOnce(Return(SOFTBUS_OK)).WillOnce(Return(SOFTBUS_OK))
+        .WillRepeatedly(Return(SOFTBUS_OK));
+    EXPECT_EQ(SOFTBUS_NETWORK_GENERATE_CIPHER_INFO_FAILED, LnnGenBroadcastCipherInfo());
+}
+
+/*
  * @tc.name: LlGetSparkCheck_001
  * @tc.desc: LlGetSparkCheck test
  * @tc.type: FUNC
@@ -1160,12 +1178,12 @@ HWTEST_F(LNNLedgerMockTest, LnnGenSparkCheck_001, TestSize.Level1)
 }
 
 /*
- * @tc.name: LNN_LOADBROAD_CAST_CIPHER_INFO_001
+ * @tc.name: LNN_LOAD_BROADCAST_CIPHER_INFO_001
  * @tc.desc: LnnLoadBroadcastCipherInfo param error
  * @tc.type: FUNC
  * @tc.require:
  */
-HWTEST_F(LNNLedgerMockTest, LNN_LOADBROAD_CAST_CIPHER_INFO_001, TestSize.Level1)
+HWTEST_F(LNNLedgerMockTest, LNN_LOAD_BROADCAST_CIPHER_INFO_001, TestSize.Level1)
 {
     LocalLedgerDepsInterfaceMock localLedgerMock;
     BroadcastCipherKey broadcastKey;
@@ -1179,12 +1197,12 @@ HWTEST_F(LNNLedgerMockTest, LNN_LOADBROAD_CAST_CIPHER_INFO_001, TestSize.Level1)
 }
 
 /*
- * @tc.name: LNN_LOADBROAD_CAST_CIPHER_INFO_002
+ * @tc.name: LNN_LOAD_BROADCAST_CIPHER_INFO_002
  * @tc.desc: LnnLoadBroadcastCipherInfo process sparkCheck
  * @tc.type: FUNC
  * @tc.require:
  */
-HWTEST_F(LNNLedgerMockTest, LNN_LOADBROAD_CAST_CIPHER_INFO_002, TestSize.Level1)
+HWTEST_F(LNNLedgerMockTest, LNN_LOAD_BROADCAST_CIPHER_INFO_002, TestSize.Level1)
 {
     NiceMock<LocalLedgerDepsInterfaceMock> localLedgerMock;
     EXPECT_CALL(localLedgerMock, LnnGetNetCapabilty()).WillRepeatedly(Return(CAPABILTY));
