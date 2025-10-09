@@ -47,7 +47,6 @@ template<> InfoContainer<LinkInfoKey>::KeyTypeTable InfoContainer<LinkInfoKey>::
     { LinkInfoKey::ENABLE_POWER_MODE, Serializable::ValueType::INT },
     { LinkInfoKey::IS_BEING_USED_BY_REMOTE, Serializable::ValueType::BOOL },
     { LinkInfoKey::IS_DBAC, Serializable::ValueType::BOOL },
-    { LinkInfoKey::IS_NEED_DISCONNECT, Serializable::ValueType::BOOL },
 };
 
 LinkInfo::LinkInfo(const std::string &localInterface, const std::string &remoteInterface, LinkMode localMode,
@@ -428,16 +427,6 @@ void LinkInfo::SetIsDbac(bool isDbac)
 bool LinkInfo::GetIsDbac() const
 {
     return Get(LinkInfoKey::IS_DBAC, false);
-}
-
-void LinkInfo::SetNeedDisconnect(bool value)
-{
-    Set(LinkInfoKey::IS_NEED_DISCONNECT, value);
-}
-
-bool LinkInfo::NeedDisconnect() const
-{
-    return Get(LinkInfoKey::IS_NEED_DISCONNECT, false);
 }
 
 std::string LinkInfo::ToString(LinkMode mode)
