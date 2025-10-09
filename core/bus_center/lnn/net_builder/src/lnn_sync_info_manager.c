@@ -1260,7 +1260,7 @@ int32_t LnnSendP2pSyncInfoMsg(const char *networkId, uint32_t netCapability)
     if (SoftBusGenerateRandomArray((uint8_t *)&dataInfo.seq, sizeof(int64_t)) != SOFTBUS_OK) {
         LNN_LOGE(LNN_BUILDER, "generate seq fail");
         AnonymizeFree(anonyNetworkId);
-        cJSON_free(msg);
+        JSON_Free(msg);
         return SOFTBUS_GENERATE_RANDOM_ARRAY_FAIL;
     }
     if (AuthPostTransData(authHandle, &dataInfo) == SOFTBUS_OK) {
@@ -1272,7 +1272,7 @@ int32_t LnnSendP2pSyncInfoMsg(const char *networkId, uint32_t netCapability)
         LNN_LOGE(LNN_BUILDER, "post trans data fail, networkId:%{public}s", AnonymizeWrapper(anonyNetworkId));
     }
     AnonymizeFree(anonyNetworkId);
-    cJSON_free(msg);
+    JSON_Free(msg);
     return SOFTBUS_OK;
 }
 
@@ -1305,7 +1305,7 @@ int32_t LnnSendWifiOfflineInfoMsg(void)
     int32_t num = 0;
     if (GetHmlOrP2pAuthHandle(&authHandle, &num) != SOFTBUS_OK) {
         LNN_LOGE(LNN_BUILDER, "get authHandle fail");
-        cJSON_free(msg);
+        JSON_Free(msg);
         return SOFTBUS_AUTH_NOT_FOUND;
     }
     char *anonyOfflineCode = NULL;
@@ -1318,7 +1318,7 @@ int32_t LnnSendWifiOfflineInfoMsg(void)
             LNN_LOGE(LNN_BUILDER, "post trans data fail, authId:%{public}" PRId64, authHandle[i].authId);
         }
     }
-    cJSON_free(msg);
+    JSON_Free(msg);
     SoftBusFree(authHandle);
     AnonymizeFree(anonyOfflineCode);
     return SOFTBUS_OK;
