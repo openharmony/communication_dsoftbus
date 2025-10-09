@@ -377,8 +377,6 @@ int32_t ServerIpcCreateGroupOwner(const char *pkgName, const struct GroupOwnerCo
 void ServerIpcDestroyGroupOwner(const char *pkgName)
 {
     LNN_LOGI(LNN_EVENT, "enter");
-    if (CheckAndInitBusCenterServerProxyInit() != SOFTBUS_OK) {
-        LNN_LOGE(LNN_EVENT, "server not init");
-    }
+    LNN_CHECK_AND_RETURN_LOGE(CheckAndInitBusCenterServerProxyInit() == SOFTBUS_OK, LNN_EVENT, "server not init");
     g_serverProxy->DestroyGroupOwner(pkgName);
 }

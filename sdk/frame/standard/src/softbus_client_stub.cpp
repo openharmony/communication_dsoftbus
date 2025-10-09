@@ -804,7 +804,7 @@ int32_t SoftBusClientStub::OnMsdpRangeResultInner(MessageParcel &data, MessagePa
 
 int32_t SoftBusClientStub::OnGroupStateChangeInner(MessageParcel &data, MessageParcel &reply)
 {
-    int32_t retCode = 0;
+    int32_t retCode = SOFTBUS_OK;
     if (!data.ReadInt32(retCode)) {
         COMM_LOGE(COMM_SDK, "read retCode fail");
         return SOFTBUS_TRANS_PROXY_READINT_FAILED;

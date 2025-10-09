@@ -1705,7 +1705,6 @@ void LnnOnGroupStateChange(int32_t retCode)
     }
     LNN_LOGE(LNN_STATE, "no create or reuse group");
     (void)SoftBusMutexUnlock(&g_busCenterClient.lock);
-    return;
 }
 
 int32_t DiscRecoveryPublish()
