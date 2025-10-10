@@ -445,11 +445,6 @@ int32_t GetActiveOsAccountIds(void)
     return GetInterface()->GetActiveOsAccountIds();
 }
 
-bool IsSKIdInvalid(int32_t sessionKeyId, const char *accountHash, const char *udidShortHash, int32_t userId)
-{
-    return GetInterface()->IsSKIdInvalid(sessionKeyId, accountHash, udidShortHash, userId);
-}
-
 bool IsTrustedDeviceFromAccess(const char *peerAccountHash, const char *peerUdid, int32_t peerUserId)
 {
     return GetInterface()->IsTrustedDeviceFromAccess(peerAccountHash, peerUdid, peerUserId);

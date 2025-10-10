@@ -919,13 +919,6 @@ static void UnpackExternalAuthInfo(JsonObj *obj, AuthSessionInfo *info)
         AUTH_LOGE(AUTH_FSM, "account hash not found");
         return;
     }
-    if (info->deviceKeyId.hasDeviceKeyId &&
-        IsSKIdInvalid(info->deviceKeyId.localDeviceKeyId, info->accountHash, info->udidShortHash, info->userId)) {
-        info->deviceKeyId.hasDeviceKeyId = false;
-        info->deviceKeyId.localDeviceKeyId = AUTH_INVALID_DEVICEKEY_ID;
-        info->deviceKeyId.remoteDeviceKeyId = AUTH_INVALID_DEVICEKEY_ID;
-        AUTH_LOGE(AUTH_FSM, "SKId invalid, hasDeviceKeyId=false");
-    }
     NodeInfo nodeInfo;
     (void)memset_s(&nodeInfo, sizeof(NodeInfo), 0, sizeof(NodeInfo));
     int32_t ret = LnnGetLocalNodeInfoSafe(&nodeInfo);
