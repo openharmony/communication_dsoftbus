@@ -95,6 +95,7 @@ static void LocalLedgerKeyTestPackaged(void)
  * @tc.name: LOCAL_LEDGER_MOCK_Test_001
  * @tc.desc: local ledger init test
  * @tc.type: FUNC
+ * @tc.level: Level1
  * @tc.require:
  */
 HWTEST_F(LNNLedgerMockTest, LOCAL_LEDGER_MOCK_Test_001, TestSize.Level1)
@@ -111,6 +112,7 @@ HWTEST_F(LNNLedgerMockTest, LOCAL_LEDGER_MOCK_Test_001, TestSize.Level1)
  * @tc.name: LOCAL_LEDGER_MOCK_Test_002
  * @tc.desc: local ledger init and deinit test
  * @tc.type: FUNC
+ * @tc.level: Level1
  * @tc.require:
  */
 HWTEST_F(LNNLedgerMockTest, LOCAL_LEDGER_MOCK_Test_002, TestSize.Level1)
@@ -136,6 +138,7 @@ HWTEST_F(LNNLedgerMockTest, LOCAL_LEDGER_MOCK_Test_002, TestSize.Level1)
  * @tc.name: LOCAL_LEDGER_MOCK_Test_003
  * @tc.desc: local ledger delay init test
  * @tc.type: FUNC
+ * @tc.level: Level1
  * @tc.require:
  */
 HWTEST_F(LNNLedgerMockTest, LOCAL_LEDGER_MOCK_Test_003, TestSize.Level1)
@@ -151,6 +154,7 @@ HWTEST_F(LNNLedgerMockTest, LOCAL_LEDGER_MOCK_Test_003, TestSize.Level1)
  * @tc.name: LOCAL_LEDGER_MOCK_Test_004
  * @tc.desc: local ledger init test
  * @tc.type: FUNC
+ * @tc.level: Level1
  * @tc.require:
  */
 HWTEST_F(LNNLedgerMockTest, LOCAL_LEDGER_MOCK_Test_004, TestSize.Level1)
@@ -169,6 +173,7 @@ HWTEST_F(LNNLedgerMockTest, LOCAL_LEDGER_MOCK_Test_004, TestSize.Level1)
  * @tc.name: LOCAL_LEDGER_MOCK_Test_005
  * @tc.desc: local ledger init test
  * @tc.type: FUNC
+ * @tc.level: Level1
  * @tc.require:
  */
 HWTEST_F(LNNLedgerMockTest, LOCAL_LEDGER_MOCK_Test_005, TestSize.Level1)
@@ -190,6 +195,7 @@ HWTEST_F(LNNLedgerMockTest, LOCAL_LEDGER_MOCK_Test_005, TestSize.Level1)
  * @tc.name: LOCAL_LEDGER_MOCK_Test_006
  * @tc.desc: local ledger init test
  * @tc.type: FUNC
+ * @tc.level: Level1
  * @tc.require:
  */
 HWTEST_F(LNNLedgerMockTest, LOCAL_LEDGER_MOCK_Test_006, TestSize.Level1)
@@ -212,6 +218,7 @@ HWTEST_F(LNNLedgerMockTest, LOCAL_LEDGER_MOCK_Test_006, TestSize.Level1)
  * @tc.name: LOCAL_LEDGER_MOCK_Test_007
  * @tc.desc: local ledger init test
  * @tc.type: FUNC
+ * @tc.level: Level1
  * @tc.require:
  */
 HWTEST_F(LNNLedgerMockTest, LOCAL_LEDGER_MOCK_Test_007, TestSize.Level1)
@@ -235,6 +242,7 @@ HWTEST_F(LNNLedgerMockTest, LOCAL_LEDGER_MOCK_Test_007, TestSize.Level1)
  * @tc.name: LOCAL_LEDGER_MOCK_Test_008
  * @tc.desc: local ledger init test
  * @tc.type: FUNC
+ * @tc.level: Level1
  * @tc.require:
  */
 HWTEST_F(LNNLedgerMockTest, LOCAL_LEDGER_MOCK_Test_008, TestSize.Level1)
@@ -249,6 +257,7 @@ HWTEST_F(LNNLedgerMockTest, LOCAL_LEDGER_MOCK_Test_008, TestSize.Level1)
  * @tc.name: LOCAL_LEDGER_MOCK_Test_009
  * @tc.desc: local ledger init test
  * @tc.type: FUNC
+ * @tc.level: Level1
  * @tc.require:
  */
 HWTEST_F(LNNLedgerMockTest, LOCAL_LEDGER_MOCK_Test_009, TestSize.Level1)
@@ -266,6 +275,7 @@ HWTEST_F(LNNLedgerMockTest, LOCAL_LEDGER_MOCK_Test_009, TestSize.Level1)
  * @tc.name: Local_Ledger_Key_Test_001
  * @tc.desc: local ledger key test
  * @tc.type: FUNC
+ * @tc.level: Level1
  * @tc.require:
  */
 HWTEST_F(LNNLedgerMockTest, Local_Ledger_Key_Test_001, TestSize.Level1)
@@ -318,6 +328,7 @@ HWTEST_F(LNNLedgerMockTest, Local_Ledger_Key_Test_001, TestSize.Level1)
  * @tc.name: Local_Ledger_Key_Test_002
  * @tc.desc: local ledger key test
  * @tc.type: FUNC
+ * @tc.level: Level1
  * @tc.require:
  */
 HWTEST_F(LNNLedgerMockTest, Local_Ledger_Key_Test_002, TestSize.Level1)
@@ -367,6 +378,7 @@ HWTEST_F(LNNLedgerMockTest, Local_Ledger_Key_Test_002, TestSize.Level1)
  * @tc.name: Local_Ledger_Key_Test_003
  * @tc.desc: local ledger key test
  * @tc.type: FUNC
+ * @tc.level: Level1
  * @tc.require:
  */
 HWTEST_F(LNNLedgerMockTest, Local_Ledger_Key_Test_003, TestSize.Level1)
@@ -398,6 +410,7 @@ HWTEST_F(LNNLedgerMockTest, Local_Ledger_Key_Test_003, TestSize.Level1)
  * @tc.name: Local_Ledger_Key_Test_005
  * @tc.desc: local ledger key test
  * @tc.type: FUNC
+ * @tc.level: Level1
  * @tc.require:
  */
 HWTEST_F(LNNLedgerMockTest, Local_Ledger_Key_Test_005, TestSize.Level1)
@@ -435,6 +448,7 @@ HWTEST_F(LNNLedgerMockTest, Local_Ledger_Key_Test_005, TestSize.Level1)
  * @tc.name: Local_Ledger_Key_Test_006
  * @tc.desc: local ledger key test
  * @tc.type: FUNC
+ * @tc.level: Level1
  * @tc.require:
  */
 HWTEST_F(LNNLedgerMockTest, Local_Ledger_Key_Test_006, TestSize.Level1)
@@ -464,6 +478,7 @@ HWTEST_F(LNNLedgerMockTest, Local_Ledger_Key_Test_006, TestSize.Level1)
  * @tc.name: Local_Ledger_Key_Test_007
  * @tc.desc: local ledger key test
  * @tc.type: FUNC
+ * @tc.level: Level1
  * @tc.require:
  */
 HWTEST_F(LNNLedgerMockTest, Local_Ledger_Key_Test_007, TestSize.Level1)
@@ -504,6 +519,7 @@ HWTEST_F(LNNLedgerMockTest, Local_Ledger_Key_Test_007, TestSize.Level1)
  * @tc.name: Local_Ledger_Key_Test_008
  * @tc.desc: local ledger key test
  * @tc.type: FUNC
+ * @tc.level: Level1
  * @tc.require:
  */
 HWTEST_F(LNNLedgerMockTest, Local_Ledger_Key_Test_008, TestSize.Level1)
@@ -533,6 +549,7 @@ HWTEST_F(LNNLedgerMockTest, Local_Ledger_Key_Test_008, TestSize.Level1)
  * @tc.name: UPDATE_STATE_VERSION_Test_001
  * @tc.desc: UpdateStateVersion test
  * @tc.type: FUNC
+ * @tc.level: Level1
  * @tc.require:
  */
 HWTEST_F(LNNLedgerMockTest, UPDATE_STATE_VERSION_Test_001, TestSize.Level1)
@@ -560,6 +577,7 @@ HWTEST_F(LNNLedgerMockTest, UPDATE_STATE_VERSION_Test_001, TestSize.Level1)
  * @tc.name: L1_GET_CONN_SUB_FEATURE_CAPA_Test_001
  * @tc.desc: L1GetConnSubFeatureCapa test
  * @tc.type: FUNC
+ * @tc.level: Level1
  * @tc.require:
  */
 HWTEST_F(LNNLedgerMockTest, L1_GET_CONN_SUB_FEATURE_CAPA_Test_001, TestSize.Level1)
@@ -576,6 +594,7 @@ HWTEST_F(LNNLedgerMockTest, L1_GET_CONN_SUB_FEATURE_CAPA_Test_001, TestSize.Leve
  * @tc.name: L1_GET_WIFI_CFG_Test_001
  * @tc.desc: L1GetWifiCfg test
  * @tc.type: FUNC
+ * @tc.level: Level1
  * @tc.require:
  */
 HWTEST_F(LNNLedgerMockTest, L1_GET_WIFI_CFG_Test_001, TestSize.Level1)
@@ -590,6 +609,7 @@ HWTEST_F(LNNLedgerMockTest, L1_GET_WIFI_CFG_Test_001, TestSize.Level1)
  * @tc.name: L1_GET_CHAN_LIST_5G_Test_001
  * @tc.desc: L1GetChanList5g test
  * @tc.type: FUNC
+ * @tc.level: Level1
  * @tc.require:
  */
 HWTEST_F(LNNLedgerMockTest, L1_GET_CHAN_LIST_5G_Test_001, TestSize.Level1)
@@ -610,6 +630,7 @@ HWTEST_F(LNNLedgerMockTest, L1_GET_CHAN_LIST_5G_Test_001, TestSize.Level1)
  * @tc.name: L1_GET_STA_FREQUENCY_Test_001
  * @tc.desc: L1GetStaFrequency test
  * @tc.type: FUNC
+ * @tc.level: Level1
  * @tc.require:
  */
 HWTEST_F(LNNLedgerMockTest, L1_GET_STA_FREQUENCY_Test_001, TestSize.Level1)
@@ -626,6 +647,7 @@ HWTEST_F(LNNLedgerMockTest, L1_GET_STA_FREQUENCY_Test_001, TestSize.Level1)
  * @tc.name: L1_GET_NODE_DATA_CHANGE_FLAG_Test_001
  * @tc.desc: L1GetNodeDataChangeFlag test
  * @tc.type: FUNC
+ * @tc.level: Level1
  * @tc.require:
  */
 HWTEST_F(LNNLedgerMockTest, L1_GET_NODE_DATA_CHANGE_FLAG_Test_001, TestSize.Level1)
@@ -642,6 +664,7 @@ HWTEST_F(LNNLedgerMockTest, L1_GET_NODE_DATA_CHANGE_FLAG_Test_001, TestSize.Leve
  * @tc.name: L1_GET_DATA_DYNAMIC_LEVEL_Test_001
  * @tc.desc: L1GetDataDynamicLevel test
  * @tc.type: FUNC
+ * @tc.level: Level1
  * @tc.require:
  */
 HWTEST_F(LNNLedgerMockTest, L1_GET_DATA_DYNAMIC_LEVEL_Test_001, TestSize.Level1)
@@ -659,6 +682,7 @@ HWTEST_F(LNNLedgerMockTest, L1_GET_DATA_DYNAMIC_LEVEL_Test_001, TestSize.Level1)
  * @tc.name: L1_GET_DATA_STATIC_LEVEL_Test_001
  * @tc.desc: L1GetDataStaticLevel test
  * @tc.type: FUNC
+ * @tc.level: Level1
  * @tc.require:
  */
 HWTEST_F(LNNLedgerMockTest, L1_GET_DATA_STATIC_LEVEL_Test_001, TestSize.Level1)
@@ -677,6 +701,7 @@ HWTEST_F(LNNLedgerMockTest, L1_GET_DATA_STATIC_LEVEL_Test_001, TestSize.Level1)
  * @tc.name: L1_GET_DATA_SWITCH_LENGTH_Test_001
  * @tc.desc: L1GetDataSwitchLength test
  * @tc.type: FUNC
+ * @tc.level: Level1
  * @tc.require:
  */
 HWTEST_F(LNNLedgerMockTest, L1_GET_DATA_SWITCH_LENGTH_Test_001, TestSize.Level1)
@@ -694,6 +719,7 @@ HWTEST_F(LNNLedgerMockTest, L1_GET_DATA_SWITCH_LENGTH_Test_001, TestSize.Level1)
  * @tc.name: LOCAL_GET_NODE_BLE_START_TIME_Test_001
  * @tc.desc: LocalGetNodeBleStartTime test
  * @tc.type: FUNC
+ * @tc.level: Level1
  * @tc.require:
  */
 HWTEST_F(LNNLedgerMockTest, LOCAL_GET_NODE_BLE_START_TIME_Test_001, TestSize.Level1)
@@ -710,6 +736,7 @@ HWTEST_F(LNNLedgerMockTest, LOCAL_GET_NODE_BLE_START_TIME_Test_001, TestSize.Lev
  * @tc.name: LOCAL_GET_NETWORK_ID_TIME_STAMP_Test_001
  * @tc.desc: LocalGetNetworkIdTimeStamp test
  * @tc.type: FUNC
+ * @tc.level: Level1
  * @tc.require:
  */
 HWTEST_F(LNNLedgerMockTest, LOCAL_GET_NETWORK_ID_TIME_STAMP_Test_001, TestSize.Level1)
@@ -728,6 +755,7 @@ HWTEST_F(LNNLedgerMockTest, LOCAL_GET_NETWORK_ID_TIME_STAMP_Test_001, TestSize.L
  * @tc.name: UPDATE_UNIFIED_NAME_Test_001
  * @tc.desc: UpdateUnifiedName test
  * @tc.type: FUNC
+ * @tc.level: Level1
  * @tc.require:
  */
 HWTEST_F(LNNLedgerMockTest, UPDATE_UNIFIED_NAME_Test_001, TestSize.Level1)
@@ -743,6 +771,7 @@ HWTEST_F(LNNLedgerMockTest, UPDATE_UNIFIED_NAME_Test_001, TestSize.Level1)
  * @tc.name: UPDATE_UNIFIED_DEFAULT_NAME_Test_001
  * @tc.desc: UpdateUnifiedDefaultName test
  * @tc.type: FUNC
+ * @tc.level: Level1
  * @tc.require:
  */
 HWTEST_F(LNNLedgerMockTest, UPDATE_UNIFIED_DEFAULT_NAME_Test_001, TestSize.Level1)
@@ -759,6 +788,7 @@ HWTEST_F(LNNLedgerMockTest, UPDATE_UNIFIED_DEFAULT_NAME_Test_001, TestSize.Level
  * @tc.name: UPDATE_NICK_NAME_Test_001
  * @tc.desc: UpdateNickName test
  * @tc.type: FUNC
+ * @tc.level: Level1
  * @tc.require:
  */
 HWTEST_F(LNNLedgerMockTest, UPDATE_NICK_NAME_Test_001, TestSize.Level1)
@@ -774,6 +804,7 @@ HWTEST_F(LNNLedgerMockTest, UPDATE_NICK_NAME_Test_001, TestSize.Level1)
  * @tc.name: UPDATEL_1OCAL_CONN_SUB_FEATURE_CAPABILITY_Test_001
  * @tc.desc: UpdateLocalConnSubFeatureCapability test
  * @tc.type: FUNC
+ * @tc.level: Level1
  * @tc.require:
  */
 HWTEST_F(LNNLedgerMockTest, UPDATEL_1OCAL_CONN_SUB_FEATURE_CAPABILITY_Test_001, TestSize.Level1)
@@ -787,6 +818,7 @@ HWTEST_F(LNNLedgerMockTest, UPDATEL_1OCAL_CONN_SUB_FEATURE_CAPABILITY_Test_001, 
  * @tc.name: UPDATE_MASGER_NODE_WEIGHT_Test_001
  * @tc.desc: UpdateMasgerNodeWeight test
  * @tc.type: FUNC
+ * @tc.level: Level1
  * @tc.require:
  */
 HWTEST_F(LNNLedgerMockTest, UPDATE_MASGER_NODE_WEIGHT_Test_001, TestSize.Level1)
@@ -800,6 +832,7 @@ HWTEST_F(LNNLedgerMockTest, UPDATE_MASGER_NODE_WEIGHT_Test_001, TestSize.Level1)
  * @tc.name: UPDATE_P2P_ROLE_Test_001
  * @tc.desc: UpdateP2pRole test
  * @tc.type: FUNC
+ * @tc.level: Level1
  * @tc.require:
  */
 HWTEST_F(LNNLedgerMockTest, UPDATE_P2P_ROLE_Test_001, TestSize.Level1)
@@ -813,6 +846,7 @@ HWTEST_F(LNNLedgerMockTest, UPDATE_P2P_ROLE_Test_001, TestSize.Level1)
  * @tc.name: UPDATE_STA_FREQUENCY_Test_001
  * @tc.desc: UpdateStaFrequency test
  * @tc.type: FUNC
+ * @tc.level: Level1
  * @tc.require:
  */
 HWTEST_F(LNNLedgerMockTest, UPDATE_STA_FREQUENCY_Test_001, TestSize.Level1)
@@ -827,6 +861,7 @@ HWTEST_F(LNNLedgerMockTest, UPDATE_STA_FREQUENCY_Test_001, TestSize.Level1)
  * @tc.name: LL_GET_DEVICE_SECURITY_LEVEL_Test_001
  * @tc.desc: LlGetDeviceSecurityLevel test
  * @tc.type: FUNC
+ * @tc.level: Level1
  * @tc.require:
  */
 HWTEST_F(LNNLedgerMockTest, LL_GET_DEVICE_SECURITY_LEVEL_Test_001, TestSize.Level1)
@@ -843,6 +878,7 @@ HWTEST_F(LNNLedgerMockTest, LL_GET_DEVICE_SECURITY_LEVEL_Test_001, TestSize.Leve
  * @tc.name: LL_UPDATE_DEVICE_SECURITY_LEVEL_Test_001
  * @tc.desc: LlUpdateDeviceSecurityLevel test
  * @tc.type: FUNC
+ * @tc.level: Level1
  * @tc.require:
  */
 HWTEST_F(LNNLedgerMockTest, LL_UPDATE_DEVICE_SECURITY_LEVEL_Test_001, TestSize.Level1)
@@ -856,6 +892,7 @@ HWTEST_F(LNNLedgerMockTest, LL_UPDATE_DEVICE_SECURITY_LEVEL_Test_001, TestSize.L
  * @tc.name: LL_GET_USER_ID_CHECK_SUM_Test_001
  * @tc.desc: LlGetUserIdCheckSum test
  * @tc.type: FUNC
+ * @tc.level: Level1
  * @tc.require:
  */
 HWTEST_F(LNNLedgerMockTest, LL_GET_USER_ID_CHECK_SUM_Test_001, TestSize.Level1)
@@ -872,6 +909,7 @@ HWTEST_F(LNNLedgerMockTest, LL_GET_USER_ID_CHECK_SUM_Test_001, TestSize.Level1)
  * @tc.name: LL_GET_P2P_IP_Test_001
  * @tc.desc: LlGetP2pIp test
  * @tc.type: FUNC
+ * @tc.level: Level1
  * @tc.require:
  */
 HWTEST_F(LNNLedgerMockTest, LL_GET_P2P_IP_Test_001, TestSize.Level1)
@@ -891,6 +929,7 @@ HWTEST_F(LNNLedgerMockTest, LL_GET_P2P_IP_Test_001, TestSize.Level1)
  * @tc.name: LL_UPDATE_LOCAL_P2P_IP_Test_001
  * @tc.desc: LlUpdateLocalP2pIp test
  * @tc.type: FUNC
+ * @tc.level: Level1
  * @tc.require:
  */
 HWTEST_F(LNNLedgerMockTest, LL_UPDATE_LOCAL_P2P_IP_Test_001, TestSize.Level1)
@@ -904,6 +943,7 @@ HWTEST_F(LNNLedgerMockTest, LL_UPDATE_LOCAL_P2P_IP_Test_001, TestSize.Level1)
  * @tc.name: L1_GET_USER_ID_Test_001
  * @tc.desc: L1GetUserId test
  * @tc.type: FUNC
+ * @tc.level: Level1
  * @tc.require:
  */
 HWTEST_F(LNNLedgerMockTest, L1_GET_USER_ID_Test_001, TestSize.Level1)
@@ -922,6 +962,7 @@ HWTEST_F(LNNLedgerMockTest, L1_GET_USER_ID_Test_001, TestSize.Level1)
  * @tc.name: LL_SLE_CAP_Test_001
  * @tc.desc: LL_SLE_CAP_Test_001
  * @tc.type: FUNC
+ * @tc.level: Level1
  * @tc.require:
  */
 HWTEST_F(LNNLedgerMockTest, LL_SLE_CAP_Test_001, TestSize.Level1)
@@ -956,6 +997,7 @@ HWTEST_F(LNNLedgerMockTest, LL_SLE_CAP_Test_001, TestSize.Level1)
  * @tc.name: L1_GET_HUKS_KEY_TIME_Test_001
  * @tc.desc: L1 get huks key time test
  * @tc.type: FUNC
+ * @tc.level: Level1
  * @tc.require:
  */
 HWTEST_F(LNNLedgerMockTest, L1_GET_HUKS_KEY_TIME_Test_001, TestSize.Level1)
@@ -970,6 +1012,7 @@ HWTEST_F(LNNLedgerMockTest, L1_GET_HUKS_KEY_TIME_Test_001, TestSize.Level1)
  * @tc.name: HANDLE_DEVICE_INFOIF_UDID_CHANGED_001
  * @tc.desc: HandleDeviceInfoIfUdidChanged test
  * @tc.type: FUNC
+ * @tc.level: Level1
  * @tc.require:
  */
 HWTEST_F(LNNLedgerMockTest, HANDLE_DEVICE_INFOIF_UDID_CHANGED_001, TestSize.Level1)
@@ -999,6 +1042,7 @@ HWTEST_F(LNNLedgerMockTest, HANDLE_DEVICE_INFOIF_UDID_CHANGED_001, TestSize.Leve
  * @tc.name: HANDLE_DEVICE_INFOIF_UDID_CHANGED_002
  * @tc.desc: HandleDeviceInfoIfUdidChanged test
  * @tc.type: FUNC
+ * @tc.level: Level1
  * @tc.require:
  */
 HWTEST_F(LNNLedgerMockTest, HANDLE_DEVICE_INFOIF_UDID_CHANGED_002, TestSize.Level1)
@@ -1020,6 +1064,7 @@ HWTEST_F(LNNLedgerMockTest, HANDLE_DEVICE_INFOIF_UDID_CHANGED_002, TestSize.Leve
  * @tc.name: LNN_INIT_LOCAL_NODE_INFO_001
  * @tc.desc: LnnInitLocalNodeInfo test
  * @tc.type: FUNC
+ * @tc.level: Level1
  * @tc.require:
  */
 HWTEST_F(LNNLedgerMockTest, LNN_INIT_LOCAL_NODE_INFO_001, TestSize.Level1)
@@ -1053,6 +1098,7 @@ HWTEST_F(LNNLedgerMockTest, LNN_INIT_LOCAL_NODE_INFO_001, TestSize.Level1)
  * @tc.name: LNN_GET_LOCAL_HUM_U16_INFO_001
  * @tc.desc: LnnGetLocalNumU16Info test
  * @tc.type: FUNC
+ * @tc.level: Level1
  * @tc.require:
  */
 HWTEST_F(LNNLedgerMockTest, LNN_GET_LOCAL_HUM_U16_INFO_001, TestSize.Level1)
@@ -1068,6 +1114,7 @@ HWTEST_F(LNNLedgerMockTest, LNN_GET_LOCAL_HUM_U16_INFO_001, TestSize.Level1)
  * @tc.name: LNN_GEN_BROAD_CAST_CIPHER_INFO_001
  * @tc.desc: LnnGenBroadcastCipherInfo test
  * @tc.type: FUNC
+ * @tc.level: Level1
  * @tc.require:
  */
 HWTEST_F(LNNLedgerMockTest, LNN_GEN_BROAD_CAST_CIPHER_INFO_001, TestSize.Level1)
@@ -1082,6 +1129,7 @@ HWTEST_F(LNNLedgerMockTest, LNN_GEN_BROAD_CAST_CIPHER_INFO_001, TestSize.Level1)
  * @tc.name: LNN_GEN_BROAD_CAST_CIPHER_INFO_002
  * @tc.desc: LnnGenBroadcastCipherInfo test
  * @tc.type: FUNC
+ * @tc.level: Level1
  * @tc.require:
  */
 HWTEST_F(LNNLedgerMockTest, LNN_GEN_BROAD_CAST_CIPHER_INFO_002, TestSize.Level1)
@@ -1104,6 +1152,7 @@ HWTEST_F(LNNLedgerMockTest, LNN_GEN_BROAD_CAST_CIPHER_INFO_002, TestSize.Level1)
  * @tc.name: LNN_GEN_BROAD_CAST_CIPHER_INFO_003
  * @tc.desc: LnnGenBroadcastCipherInfo test
  * @tc.type: FUNC
+ * @tc.level: Level1
  * @tc.require:
  */
 HWTEST_F(LNNLedgerMockTest, LNN_GEN_BROAD_CAST_CIPHER_INFO_003, TestSize.Level1)
@@ -1120,6 +1169,7 @@ HWTEST_F(LNNLedgerMockTest, LNN_GEN_BROAD_CAST_CIPHER_INFO_003, TestSize.Level1)
  * @tc.name: LlGetSparkCheck_001
  * @tc.desc: LlGetSparkCheck test
  * @tc.type: FUNC
+ * @tc.level: Level1
  * @tc.require:
  */
 HWTEST_F(LNNLedgerMockTest, LlGetSparkCheck_001, TestSize.Level1)
@@ -1134,6 +1184,7 @@ HWTEST_F(LNNLedgerMockTest, LlGetSparkCheck_001, TestSize.Level1)
  * @tc.name: UpdateLocalSparkCheck_001
  * @tc.desc: UpdateLocalSparkCheck test
  * @tc.type: FUNC
+ * @tc.level: Level1
  * @tc.require:
  */
 HWTEST_F(LNNLedgerMockTest, UpdateLocalSparkCheck_001, TestSize.Level1)
@@ -1147,6 +1198,7 @@ HWTEST_F(LNNLedgerMockTest, UpdateLocalSparkCheck_001, TestSize.Level1)
  * @tc.name: LnnGenSparkCheck_001
  * @tc.desc: LnnGenSparkCheck test
  * @tc.type: FUNC
+ * @tc.level: Level1
  * @tc.require:
  */
 HWTEST_F(LNNLedgerMockTest, LnnGenSparkCheck_001, TestSize.Level1)
@@ -1163,6 +1215,7 @@ HWTEST_F(LNNLedgerMockTest, LnnGenSparkCheck_001, TestSize.Level1)
  * @tc.name: LNN_LOADBROAD_CAST_CIPHER_INFO_001
  * @tc.desc: LnnLoadBroadcastCipherInfo param error
  * @tc.type: FUNC
+ * @tc.level: Level1
  * @tc.require:
  */
 HWTEST_F(LNNLedgerMockTest, LNN_LOADBROAD_CAST_CIPHER_INFO_001, TestSize.Level1)
@@ -1217,6 +1270,7 @@ HWTEST_F(LNNLedgerMockTest, LNN_LOADBROAD_CAST_CIPHER_INFO_002, TestSize.Level1)
  * @tc.name: LNN_FIRST_GET_UDID_001
  * @tc.desc: LnnFirstGetUdid get device info error
  * @tc.type: FUNC
+ * @tc.level: Level1
  * @tc.require:
  */
 HWTEST_F(LNNLedgerMockTest, LNN_FIRST_GET_UDID_001, TestSize.Level1)
@@ -1231,6 +1285,7 @@ HWTEST_F(LNNLedgerMockTest, LNN_FIRST_GET_UDID_001, TestSize.Level1)
  * @tc.name: LNN_SET_LOCAL_INFO_BY_IFNMAEIDX_001
  * @tc.desc: LnnSetLocalInfoByIfnameIdx param error
  * @tc.type: FUNC
+ * @tc.level: Level1
  * @tc.require:
  */
 HWTEST_F(LNNLedgerMockTest, LNN_SET_LOCAL_INFO_BY_IFNMAEIDX_001, TestSize.Level1)
@@ -1245,6 +1300,7 @@ HWTEST_F(LNNLedgerMockTest, LNN_SET_LOCAL_INFO_BY_IFNMAEIDX_001, TestSize.Level1
  * @tc.name: LNN_SET_LOCAL_INFO_001
  * @tc.desc: LnnSetLocalInfo param error
  * @tc.type: FUNC
+ * @tc.level: Level1
  * @tc.require:
  */
 HWTEST_F(LNNLedgerMockTest, LNN_SET_LOCAL_INFO_001, TestSize.Level1)
@@ -1257,6 +1313,7 @@ HWTEST_F(LNNLedgerMockTest, LNN_SET_LOCAL_INFO_001, TestSize.Level1)
  * @tc.name: LNN_SET_LOCAL_STR_INFO_BY_IFNAMEIDX_001
  * @tc.desc: LnnSetLocalStrInfoByIfnameIdx param error
  * @tc.type: FUNC
+ * @tc.level: Level1
  * @tc.require:
  */
 HWTEST_F(LNNLedgerMockTest, LNN_SET_LOCAL_STR_INFO_BY_IFNAMEIDX_001, TestSize.Level1)
@@ -1276,6 +1333,7 @@ HWTEST_F(LNNLedgerMockTest, LNN_SET_LOCAL_STR_INFO_BY_IFNAMEIDX_001, TestSize.Le
  * @tc.name: LNN_GET_LOCAL_BOOL_INFO_001
  * @tc.desc: LnnGetLocalBoolInfo param error
  * @tc.type: FUNC
+ * @tc.level: Level1
  * @tc.require:
  */
 HWTEST_F(LNNLedgerMockTest, LNN_GET_LOCAL_BOOL_INFO_001, TestSize.Level1)
@@ -1290,6 +1348,7 @@ HWTEST_F(LNNLedgerMockTest, LNN_GET_LOCAL_BOOL_INFO_001, TestSize.Level1)
  * @tc.name: LNN_GET_LOCAL_BOOL_INFO_002
  * @tc.desc: LnnGetLocalBoolInfo not found
  * @tc.type: FUNC
+ * @tc.level: Level1
  * @tc.require:
  */
 HWTEST_F(LNNLedgerMockTest, LNN_GET_LOCAL_BOOL_INFO_002, TestSize.Level1)
@@ -1303,6 +1362,7 @@ HWTEST_F(LNNLedgerMockTest, LNN_GET_LOCAL_BOOL_INFO_002, TestSize.Level1)
  * @tc.name: LNN_GET_LOCAL_INFO_BY_IFNAME_IDX_001
  * @tc.desc: LnnGetLocalInfoByIfnameIdx param error
  * @tc.type: FUNC
+ * @tc.level: Level1
  * @tc.require:
  */
 HWTEST_F(LNNLedgerMockTest, LNN_GET_LOCAL_INFO_BY_IFNAME_IDX_001, TestSize.Level1)
@@ -1324,6 +1384,7 @@ HWTEST_F(LNNLedgerMockTest, LNN_GET_LOCAL_INFO_BY_IFNAME_IDX_001, TestSize.Level
  * @tc.name: LNN_GET_LOCAL_INFO_BY_IFNAME_IDX_002
  * @tc.desc: LnnGetLocalInfoByIfnameIdx not found
  * @tc.type: FUNC
+ * @tc.level: Level1
  * @tc.require:
  */
 HWTEST_F(LNNLedgerMockTest, LNN_GET_LOCAL_INFO_BY_IFNAME_IDX_002, TestSize.Level1)
@@ -1339,6 +1400,7 @@ HWTEST_F(LNNLedgerMockTest, LNN_GET_LOCAL_INFO_BY_IFNAME_IDX_002, TestSize.Level
  * @tc.name: LNN_GET_LOCAL_INFO_001
  * @tc.desc: LnnGetLocalInfo param error
  * @tc.type: FUNC
+ * @tc.level: Level1
  * @tc.require:
  */
 HWTEST_F(LNNLedgerMockTest, LNN_GET_LOCAL_INFO_001, TestSize.Level1)
@@ -1357,6 +1419,7 @@ HWTEST_F(LNNLedgerMockTest, LNN_GET_LOCAL_INFO_001, TestSize.Level1)
  * @tc.name: LNN_GET_LOCAL_STR_INFO_BY_IFNAME_FIX_001
  * @tc.desc: LnnGetLocalStrInfoByIfnameIdx param error
  * @tc.type: FUNC
+ * @tc.level: Level1
  * @tc.require:
  */
 HWTEST_F(LNNLedgerMockTest, LNN_GET_LOCAL_STR_INFO_BY_IFNAME_FIX_001, TestSize.Level1)
@@ -1374,6 +1437,7 @@ HWTEST_F(LNNLedgerMockTest, LNN_GET_LOCAL_STR_INFO_BY_IFNAME_FIX_001, TestSize.L
  * @tc.name: LNN_GET_LOCAL_STR_INFO_BY_IFNAME_FIX_002
  * @tc.desc: LnnGetLocalStrInfoByIfnameIdx not found
  * @tc.type: FUNC
+ * @tc.level: Level1
  * @tc.require:
  */
 HWTEST_F(LNNLedgerMockTest, LNN_GET_LOCAL_STR_INFO_BY_IFNAME_FIX_002, TestSize.Level1)
@@ -1387,6 +1451,7 @@ HWTEST_F(LNNLedgerMockTest, LNN_GET_LOCAL_STR_INFO_BY_IFNAME_FIX_002, TestSize.L
  * @tc.name: LL_SET_LOCAL_SLE_RANGE_CAPACITY_001
  * @tc.desc: LlSetLocalSleRangeCapacity param error
  * @tc.type: FUNC
+ * @tc.level: Level1
  * @tc.require:
  */
 HWTEST_F(LNNLedgerMockTest, LL_SET_LOCAL_SLE_RANGE_CAPACITY_001, TestSize.Level1)
@@ -1399,6 +1464,7 @@ HWTEST_F(LNNLedgerMockTest, LL_SET_LOCAL_SLE_RANGE_CAPACITY_001, TestSize.Level1
  * @tc.name: UPDATE_STATIC_NET_CAP_001
  * @tc.desc: UpdateStaticNetCap param error
  * @tc.type: FUNC
+ * @tc.level: Level1
  * @tc.require:
  */
 HWTEST_F(LNNLedgerMockTest, UPDATE_STATIC_NET_CAP_001, TestSize.Level1)
@@ -1411,6 +1477,7 @@ HWTEST_F(LNNLedgerMockTest, UPDATE_STATIC_NET_CAP_001, TestSize.Level1)
  * @tc.name: UPDATE_LOCAL_USER_ID_001
  * @tc.desc: UpdateLocalUserId param error
  * @tc.type: FUNC
+ * @tc.level: Level1
  * @tc.require:
  */
 HWTEST_F(LNNLedgerMockTest, UPDATE_LOCAL_USER_ID_001, TestSize.Level1)
@@ -1423,6 +1490,7 @@ HWTEST_F(LNNLedgerMockTest, UPDATE_LOCAL_USER_ID_001, TestSize.Level1)
  * @tc.name: LL_GET_UDID_HASH_001
  * @tc.desc: LlGetUdidHash param error
  * @tc.type: FUNC
+ * @tc.level: Level1
  * @tc.require:
  */
 HWTEST_F(LNNLedgerMockTest, LL_GET_UDID_HASH_001, TestSize.Level1)
@@ -1438,6 +1506,7 @@ HWTEST_F(LNNLedgerMockTest, LL_GET_UDID_HASH_001, TestSize.Level1)
  * @tc.name: LL_GET_USER_ID_CHECK_SUM_001
  * @tc.desc: LlGetUserIdCheckSum get user id fail
  * @tc.type: FUNC
+ * @tc.level: Level1
  * @tc.require:
  */
 HWTEST_F(LNNLedgerMockTest, LL_GET_USER_ID_CHECK_SUM_001, TestSize.Level1)
@@ -1451,6 +1520,7 @@ HWTEST_F(LNNLedgerMockTest, LL_GET_USER_ID_CHECK_SUM_001, TestSize.Level1)
  * @tc.name: LL_UPDATE_USER_ID_CHECK_SUM_001
  * @tc.desc: LlUpdateUserIdCheckSum param error
  * @tc.type: FUNC
+ * @tc.level: Level1
  * @tc.require:
  */
 HWTEST_F(LNNLedgerMockTest, LL_UPDATE_USER_ID_CHECK_SUM_001, TestSize.Level1)

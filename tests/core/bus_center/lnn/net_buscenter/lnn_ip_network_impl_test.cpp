@@ -67,6 +67,7 @@ void LNNIpNetworkImplMockTest::TearDown() { }
  * @tc.desc: len is not CONNECTION_ADDR_MAX return SOFTBUS_INVALID_PARAM
  * @tc.type: FUNC
  * @tc.require: I5OMIK
+ * @tc.level: Level1
  */
 HWTEST_F(LNNIpNetworkImplMockTest, LNN_IP_NETWORK_IMPL_TEST_001, TestSize.Level1)
 {
@@ -121,6 +122,7 @@ HWTEST_F(LNNIpNetworkImplMockTest, LNN_IP_NETWORK_IMPL_TEST_001, TestSize.Level1
  * @tc.desc: len is not CONNECTION_ADDR_MAX return SOFTBUS_INVALID_PARAM
  * @tc.type: FUNC
  * @tc.require: I5OMIK
+ * @tc.level: Level1
  */
 HWTEST_F(LNNIpNetworkImplMockTest, LNN_IP_NETWORK_IMPL_TEST_002, TestSize.Level1)
 {
@@ -156,6 +158,7 @@ HWTEST_F(LNNIpNetworkImplMockTest, LNN_IP_NETWORK_IMPL_TEST_002, TestSize.Level1
  * @tc.desc: len is not CONNECTION_ADDR_MAX return SOFTBUS_INVALID_PARAM
  * @tc.type: FUNC
  * @tc.require: I5OMIK
+ * @tc.level: Level1
  */
 HWTEST_F(LNNIpNetworkImplMockTest, LNN_IP_NETWORK_IMPL_TEST_003, TestSize.Level1)
 {
@@ -190,6 +193,7 @@ HWTEST_F(LNNIpNetworkImplMockTest, LNN_IP_NETWORK_IMPL_TEST_003, TestSize.Level1
  * @tc.desc: len is not CONNECTION_ADDR_MAX return SOFTBUS_INVALID_PARAM
  * @tc.type: FUNC
  * @tc.require: I5OMIK
+ * @tc.level: Level1
  */
 HWTEST_F(LNNIpNetworkImplMockTest, LNN_IP_NETWORK_IMPL_TEST_004, TestSize.Level1)
 {
@@ -246,6 +250,7 @@ HWTEST_F(LNNIpNetworkImplMockTest, LNN_IP_NETWORK_IMPL_TEST_004, TestSize.Level1
  * @tc.desc: len is not CONNECTION_ADDR_MAX return SOFTBUS_INVALID_PARAM
  * @tc.type: FUNC
  * @tc.require: I5OMIK
+ * @tc.level: Level1
  */
 HWTEST_F(LNNIpNetworkImplMockTest, LNN_IP_NETWORK_IMPL_TEST_005, TestSize.Level1)
 {
@@ -290,6 +295,7 @@ HWTEST_F(LNNIpNetworkImplMockTest, LNN_IP_NETWORK_IMPL_TEST_005, TestSize.Level1
  * @tc.desc: IsValidLocalIpTest
  * @tc.type: FUNC
  * @tc.require: I5OMIK
+ * @tc.level: Level1
  */
 HWTEST_F(LNNIpNetworkImplMockTest, LNN_IP_NETWORK_IMPL_TEST_006, TestSize.Level1)
 {
@@ -307,6 +313,7 @@ HWTEST_F(LNNIpNetworkImplMockTest, LNN_IP_NETWORK_IMPL_TEST_006, TestSize.Level1
  * @tc.desc: WifiStateChangeWifiOrApTest
  * @tc.type: FUNC
  * @tc.require: I5OMIK
+ * @tc.level: Level1
  */
 HWTEST_F(LNNIpNetworkImplMockTest, LNN_IP_NETWORK_IMPL_TEST_007, TestSize.Level1)
 {
@@ -327,6 +334,7 @@ HWTEST_F(LNNIpNetworkImplMockTest, LNN_IP_NETWORK_IMPL_TEST_007, TestSize.Level1
  * @tc.desc: GetWifiServiceIpAddrTest
  * @tc.type: FUNC
  * @tc.require: I5OMIK
+ * @tc.level: Level1
  */
 HWTEST_F(LNNIpNetworkImplMockTest, LNN_IP_NETWORK_IMPL_TEST_008, TestSize.Level1)
 {
@@ -348,6 +356,7 @@ HWTEST_F(LNNIpNetworkImplMockTest, LNN_IP_NETWORK_IMPL_TEST_008, TestSize.Level1
  * @tc.desc: OpenPortAndEnableIPTest
  * @tc.type: FUNC
  * @tc.require: I5OMIK
+ * @tc.level: Level1
  */
 HWTEST_F(LNNIpNetworkImplMockTest, LNN_IP_NETWORK_IMPL_TEST_009, TestSize.Level1)
 {
@@ -395,6 +404,7 @@ HWTEST_F(LNNIpNetworkImplMockTest, LNN_IP_NETWORK_IMPL_TEST_009, TestSize.Level1
  * @tc.desc: LocalIpInfoTest
  * @tc.type: FUNC
  * @tc.require: I5OMIK
+ * @tc.level: Level1
  */
 HWTEST_F(LNNIpNetworkImplMockTest, LNN_IP_NETWORK_IMPL_TEST_010, TestSize.Level1)
 {

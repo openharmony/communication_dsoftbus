@@ -70,6 +70,7 @@ HWTEST_F(LNNNodeWeightTest, LNN_COMPARE_NODE_WEIGHT_TEST_001, TestSize.Level1)
  * @tc.name: LNN_GET_LOCAL_WEIGHT_TEST_001
  * @tc.desc: test LnnGetLocalWeight
  * @tc.type: FUNC
+ * @tc.level: Level1
  * @tc.require:
  */
 HWTEST_F(LNNNodeWeightTest, LNN_GET_LOCAL_WEIGHT_TEST_001, TestSize.Level1)
