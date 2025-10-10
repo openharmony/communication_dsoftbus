@@ -181,7 +181,7 @@ static int DumpStatistics(char *buf, uint32_t size)
 
 int DFinderDumpIface(const struct DumpIfaceInfo *info, char *buf, int size)
 {
-    uint32_t index = 0;
+    int index = 0;
     int ret;
     if (info == NULL || info->addr == NULL) {
         DFINDER_LOGE(TAG, "info is err");
@@ -222,7 +222,7 @@ int DumpDeviceInfo(const DeviceInfo *info, char *buf, int size, uint8_t remote)
 {
     int ret;
     int i;
-    uint32_t index = 0;
+    int index = 0;
     size_t len;
     char deviceid[DFINDER_DEVICE_ID_ANONY_REMOTE_LEN + 1] = {0};
     DUMP_MSG_ADD_CHECK(ret, buf, index, size, "device name:%s"CRLF, info->deviceName);
