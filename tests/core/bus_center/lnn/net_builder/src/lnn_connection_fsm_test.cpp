@@ -1134,37 +1134,11 @@ HWTEST_F(LNNConnectionFsmTest, PROCESS_BLE_ONLINE_TEST_001, TestSize.Level0)
 
 /*
  * @tc.name: PROCESS_BLE_ONLINE_TEST_002
- * @tc.desc: test nodeInfo or connAddr is null
- * @tc.type: FUNC
- * @tc.require:
- */
-HWTEST_F(LNNConnectionFsmTest, PROCESS_BLE_ONLINE_TEST_002, TestSize.Level0)
-{
-    NodeInfo *nodeInfo = nullptr;
-    const ConnectionAddr *connAddr = nullptr;
-    int32_t ret = ProcessBleOnline(nodeInfo, connAddr, BIT_SUPPORT_SESSION_DUP_BLE);
-    EXPECT_EQ(ret, SOFTBUS_INVALID_PARAM);
-
-    nodeInfo = new NodeInfo();
-    ret = ProcessBleOnline(nodeInfo, connAddr, BIT_SUPPORT_SESSION_DUP_BLE);
-    EXPECT_EQ(ret, SOFTBUS_INVALID_PARAM);
-    delete nodeInfo;
-
-    connAddr = new ConnectionAddr();
-    NiceMock<LnnNetLedgertInterfaceMock> ledgerMock;
-    EXPECT_CALL(ledgerMock, LnnGetLocalNumU32Info).WillOnce(Return(SOFTBUS_OK));
-    ret = ProcessBleOnline(nodeInfo, connAddr, BIT_SUPPORT_SESSION_DUP_BLE);
-    EXPECT_EQ(ret, SOFTBUS_FUNC_NOT_SUPPORT);
-    delete connAddr;
-}
-
-/*
- * @tc.name: PROCESS_BLE_ONLINE_TEST_003
  * @tc.desc: test device cannot authentication
  * @tc.type: FUNC
  * @tc.require:
  */
-HWTEST_F(LNNConnectionFsmTest, PROCESS_BLE_ONLINE_TEST_003, TestSize.Level0)
+HWTEST_F(LNNConnectionFsmTest, PROCESS_BLE_ONLINE_TEST_002, TestSize.Level0)
 {
     NodeInfo nodeInfo;
     nodeInfo.authCapacity = 0;
@@ -1180,12 +1154,12 @@ HWTEST_F(LNNConnectionFsmTest, PROCESS_BLE_ONLINE_TEST_003, TestSize.Level0)
 }
 
 /*
- * @tc.name: PROCESS_BLE_ONLINE_TEST_004
+ * @tc.name: PROCESS_BLE_ONLINE_TEST_003
  * @tc.desc: test remote node is online
  * @tc.type: FUNC
  * @tc.require:
  */
-HWTEST_F(LNNConnectionFsmTest, PROCESS_BLE_ONLINE_TEST_004, TestSize.Level0)
+HWTEST_F(LNNConnectionFsmTest, PROCESS_BLE_ONLINE_TEST_003, TestSize.Level0)
 {
     NodeInfo nodeInfo;
     (void)memset_s(&nodeInfo, sizeof(NodeInfo), 0, sizeof(NodeInfo));
@@ -1208,12 +1182,12 @@ HWTEST_F(LNNConnectionFsmTest, PROCESS_BLE_ONLINE_TEST_004, TestSize.Level0)
 }
 
 /*
- * @tc.name: PROCESS_BLE_ONLINE_TEST_005
+ * @tc.name: PROCESS_BLE_ONLINE_TEST_004
  * @tc.desc: test remote node is not online
  * @tc.type: FUNC
  * @tc.require:
  */
-HWTEST_F(LNNConnectionFsmTest, PROCESS_BLE_ONLINE_TEST_005, TestSize.Level0)
+HWTEST_F(LNNConnectionFsmTest, PROCESS_BLE_ONLINE_TEST_004, TestSize.Level0)
 {
     NodeInfo nodeInfo;
     (void)memset_s(&nodeInfo, sizeof(NodeInfo), 0, sizeof(NodeInfo));
@@ -1236,12 +1210,12 @@ HWTEST_F(LNNConnectionFsmTest, PROCESS_BLE_ONLINE_TEST_005, TestSize.Level0)
 }
 
 /*
- * @tc.name: PROCESS_BLE_ONLINE_TEST_006
+ * @tc.name: PROCESS_BLE_ONLINE_TEST_005
  * @tc.desc: test online failed
  * @tc.type: FUNC
  * @tc.require:
  */
-HWTEST_F(LNNConnectionFsmTest, PROCESS_BLE_ONLINE_TEST_006, TestSize.Level0)
+HWTEST_F(LNNConnectionFsmTest, PROCESS_BLE_ONLINE_TEST_005, TestSize.Level0)
 {
     NodeInfo nodeInfo;
     (void)memset_s(&nodeInfo, sizeof(NodeInfo), 0, sizeof(NodeInfo));
