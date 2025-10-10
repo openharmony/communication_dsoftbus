@@ -698,7 +698,7 @@ int32_t SetDisplayName(const char *pkgName, const char *nameData, uint32_t len)
 int32_t CreateGroupOwner(const char *pkgName, const struct GroupOwnerConfig *config,
     struct GroupOwnerResult *result, GroupOwnerDestroyListener listener)
 {
-    if (pkgName == NULL || config == NULL || result == NULL || listener == NULL) {
+    if (!IsValidString(pkgName, PKG_NAME_SIZE_MAX - 1) || config == NULL || result == NULL || listener == NULL) {
         LNN_LOGE(LNN_EVENT, "params are null");
         return SOFTBUS_INVALID_PARAM;
     }
@@ -712,7 +712,7 @@ int32_t CreateGroupOwner(const char *pkgName, const struct GroupOwnerConfig *con
 
 void DestroyGroupOwner(const char *pkgName)
 {
-    if (pkgName == NULL) {
+    if (!IsValidString(pkgName, PKG_NAME_SIZE_MAX - 1)) {
         LNN_LOGE(LNN_EVENT, "params are null");
         return;
     }
