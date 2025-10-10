@@ -66,9 +66,34 @@ bool SoftBusCheckIsSystemService(uint64_t tokenId)
     return type == ATokenTypeEnum::TOKEN_NATIVE;
 }
 
-bool SoftBusCheckIsSystemApp(uint64_t tokenId, pid_t uid)
+bool SoftBusCheckIsSystemAppByUid(uint64_t tokenId, pid_t uid)
 {
     if (uid == SAMGR_UID || uid == DMS_UID || uid == OBJECT_STORE_UID) {
+        return false;
+    }
+    return TokenIdKit::IsSystemAppByFullTokenID(tokenId);
+}
+
+bool SoftBusCheckIsSystemApp(uint64_t tokenId, const char *sessionName)
+{
+    if (sessionName == nullptr) {
+        COMM_LOGE(COMM_PERM, "invalid param, sessionName is nullptr");
+        return false;
+    }
+    // The authorization of dbind and dtbcollab are granted through Samgr and DMS, and there is no control here
+    uint32_t dbinderPrefixLen = strlen(DBINDER_BUS_NAME_PREFIX);
+    if (strlen(sessionName) >= dbinderPrefixLen &&
+        strncmp(sessionName, DBINDER_BUS_NAME_PREFIX, dbinderPrefixLen) == 0) {
+        return false;
+    }
+    uint32_t dmsCollabPrefixLen = strlen(DMS_COLLABATION_NAME_PREFIX);
+    if (strlen(sessionName) >= dmsCollabPrefixLen &&
+        strncmp(sessionName, DMS_COLLABATION_NAME_PREFIX, dmsCollabPrefixLen) == 0) {
+        return false;
+    }
+    uint32_t objectStorePrefixLen = strlen(OBJECT_STORE_DB_NAME_PREFIX);
+    if (strlen(sessionName) >= objectStorePrefixLen &&
+        strncmp(sessionName, OBJECT_STORE_DB_NAME_PREFIX, objectStorePrefixLen) == 0) {
         return false;
     }
     return TokenIdKit::IsSystemAppByFullTokenID(tokenId);
