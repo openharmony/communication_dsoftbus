@@ -496,9 +496,8 @@ static int32_t BleConnectDeviceDirectly(ConnBleDevice *device, const char *anomi
             break;
         }
         g_bleManager.connecting = device;
-        uint32_t timeoutMs = device->connectTimeoutMs == 0 ? BLE_CONNECT_TIMEOUT_MAX_MILLIS : device->connectTimeoutMs;
         status = ConnPostMsgToLooper(&g_bleManagerSyncHandler, BLE_MGR_MSG_CONNECT_TIMEOUT,
-            connection->connectionId, 0, address, timeoutMs);
+            connection->connectionId, 0, address, device->connectTimeoutMs);
         if (status != SOFTBUS_OK) {
             CONN_LOGE(CONN_BLE, "post msg fail, requestAddress=%{public}s, udid=%{public}s, error=%{public}d",
                 anomizeAddress, anomizeUdid, status);
@@ -1784,7 +1783,7 @@ static int32_t BleConnectDevice(const ConnectOption *option, uint32_t requestId,
     } else {
         connectTimeoutMs = option->bleOption.connectTimeoutMs;
     }
-    ctx->connectTimeoutMs = ctx->protocol == BLE_GATT ? 0 : connectTimeoutMs;
+    ctx->connectTimeoutMs = ctx->protocol == BLE_GATT ? BLE_CONNECT_TIMEOUT_MAX_MILLIS : connectTimeoutMs;
     CONN_LOGI(CONN_BLE,
         "ble connect device: receive connect request, "
         "reqId=%{public}u, addr=%{public}s, protocol=%{public}d, udid=%{public}s, "
