@@ -41,9 +41,9 @@ void DataheadTransformTest::SetUpTestCase(void) {}
 
 void DataheadTransformTest::TearDownTestCase(void) {}
 
-/**
+/*
  * @tc.name: DataheadTransformTest001
- * @tc.desc: PackProxyMessageShortHead
+ * @tc.desc: PackProxyMessageShortHead test
  * @tc.type: FUNC
  * @tc.require:
  */

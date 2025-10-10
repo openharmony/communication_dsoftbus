@@ -106,7 +106,7 @@ static SessionParam *TestCreateSessionParam()
     return param;
 }
 
-/**
+/*
  * @tc.name: TransCommonGetLocalConfig001
  * @tc.desc: Should return SOFTBUS_INVALID_PARAM when len is nullptr
  * @tc.desc: Should return SOFTBUS_GET_CONFIG_VAL_ERR when SoftbusGetConfig return unequal SOFTBUS_OK
@@ -128,7 +128,7 @@ HWTEST_F(TransLaneCommonTest, TransCommonGetLocalConfig001, TestSize.Level1)
     EXPECT_EQ(SOFTBUS_GET_CONFIG_VAL_ERR, ret);
 }
 
-/**
+/*
  * @tc.name: TransGetChannelType001
  * @tc.desc: Should return different value when given different valid param
  * @tc.desc: Should return SOFTBUS_GET_CONFIG_VAL_ERR when SoftbusGetConfig return unequal SOFTBUS_OK
@@ -191,7 +191,7 @@ HWTEST_F(TransLaneCommonTest, TransGetChannelType001, TestSize.Level1)
     EXPECT_EQ(CHANNEL_TYPE_TCP_DIRECT, ret);
 }
 
-/**
+/*
  * @tc.name: TransGetChannelType002
  * @tc.desc: Should return different value when given different valid param
  * @tc.desc: Should return SOFTBUS_GET_CONFIG_VAL_ERR when SoftbusGetConfig return unequal SOFTBUS_OK
@@ -229,7 +229,7 @@ HWTEST_F(TransLaneCommonTest, TransGetChannelType002, TestSize.Level1)
     EXPECT_EQ(CHANNEL_TYPE_UDP, ret);
 }
 
-/**
+/*
  * @tc.name: FillAppInfo001
  * @tc.desc: Should return SOFTBUS_INVALID_PARAM when len is nullptr
  * @tc.desc: Should return SOFTBUS_GET_CONFIG_VAL_ERR when SoftbusGetConfig return unequal SOFTBUS_OK
@@ -273,7 +273,7 @@ HWTEST_F(TransLaneCommonTest, FillAppInfo001, TestSize.Level1)
     EXPECT_EQ(appInfo.linkType, connInfo.type);
 }
 
-/**
+/*
  * @tc.name: GetOsTypeByNetworkId001
  * @tc.desc: Test GetOsTypeByNetworkId
  * @tc.type: FUNC
@@ -292,7 +292,7 @@ HWTEST_F(TransLaneCommonTest, GetOsTypeByNetworkId001, TestSize.Level1)
     EXPECT_EQ(osType, 1);
 }
 
-/**
+/*
  * @tc.name: GetRemoteUdidWithNetworkId001
  * @tc.desc: Test GetRemoteUdidWithNetworkId
  * @tc.type: FUNC
@@ -313,7 +313,7 @@ HWTEST_F(TransLaneCommonTest, GetRemoteUdidWithNetworkId001, TestSize.Level1)
     EXPECT_EQ(strlen(udid), 0);
 }
 
-/**
+/*
  * @tc.name: TransGetRemoteDeviceVersion001
  * @tc.desc: Test TransGetRemoteDeviceVersion
  * @tc.type: FUNC
@@ -335,7 +335,7 @@ HWTEST_F(TransLaneCommonTest, TransGetRemoteDeviceVersion001, TestSize.Level1)
     EXPECT_EQ(strlen(deviceVersion), 0);
 }
 
-/**
+/*
  * @tc.name: CopyAppInfoFromSessionParam001
  * @tc.desc: Should return SOFTBUS_INVALID_PARAM when param or param->attr is nullptr
  * @tc.type: FUNC
@@ -355,7 +355,7 @@ HWTEST_F(TransLaneCommonTest, CopyAppInfoFromSessionParam001, TestSize.Level1)
     EXPECT_EQ(ret, SOFTBUS_INVALID_PARAM);
 }
 
-/**
+/*
  * @tc.name: CopyAppInfoFromSessionParam002
  * @tc.desc: Should return SOFTBUS_INVALID_PARAM when TransGetUidAndPid return SOFTBUS_INVALID_PARAM
  * @tc.type: FUNC
@@ -394,7 +394,7 @@ HWTEST_F(TransLaneCommonTest, CopyAppInfoFromSessionParam002, TestSize.Level1)
     EXPECT_EQ(ret, SOFTBUS_INVALID_PARAM);
 }
 
-/**
+/*
  * @tc.name: CopyAppInfoFromSessionParam003
  * @tc.desc: Should return SOFTBUS_TRANS_BUSINESS_TYPE_NOT_MATCH when businessType is BUSINESS_TYPE_FILE
  * @tc.desc: Should return SOFTBUS_TRANS_BUSINESS_TYPE_NOT_MATCH when businessType is BUSINESS_TYPE_STREAM
@@ -461,7 +461,7 @@ HWTEST_F(TransLaneCommonTest, CopyAppInfoFromSessionParam003, TestSize.Level1)
     SoftBusFree(param);
 }
 
-/**
+/*
  * @tc.name: TransCommonGetAppInfo001
  * @tc.desc: Should return SOFTBUS_TRANS_BAD_KEY when LnnGetLocalStrInfo return SOFTBUS_TRANS_BAD_KEY
  * @tc.type: FUNC
@@ -512,7 +512,7 @@ HWTEST_F(TransLaneCommonTest, TransCommonGetAppInfo001, TestSize.Level1)
     SoftBusFree(param);
 }
 
-/**
+/*
  * @tc.name: TransCommonGetAppInfo002
  * @tc.desc: Should return SOFTBUS_TRANS_BUSINESS_TYPE_NOT_MATCH when businessType is BUSINESS_TYPE_FILE
  * @tc.type: FUNC
@@ -550,7 +550,7 @@ HWTEST_F(TransLaneCommonTest, TransCommonGetAppInfo002, TestSize.Level1)
     SoftBusFree(param);
 }
 
-/**
+/*
  * @tc.name: TransOpenChannelSetModule001
  * @tc.desc: test TransOpenChannelSetModule
  * @tc.type: FUNC
@@ -578,7 +578,7 @@ HWTEST_F(TransLaneCommonTest, TransOpenChannelSetModule001, TestSize.Level1)
     EXPECT_EQ(connOpt.socketOption.moduleId, LANE);
 }
 
-/**
+/*
  * @tc.name: TransOpenChannelProc001
  * @tc.desc: Should return SOFTBUS_INVALID_NUM when TransOpenUdpChannel return SOFTBUS_INVALID_NUM
  * @tc.desc: Should return SOFTBUS_INVALID_NUM when TransProxyOpenProxyChannel return SOFTBUS_INVALID_NUM
@@ -621,7 +621,7 @@ HWTEST_F(TransLaneCommonTest, TransOpenChannelProc001, TestSize.Level1)
     SoftBusFree(appInfo);
 }
 
-/**
+/*
  * @tc.name: CancelWaitLaneState001
  * @tc.desc: Should return SOFTBUS_TRANS_INVALID_SESSION_ID when given invalid param
  * @tc.desc: Should return SOFTBUS_OK when given valid param
@@ -669,7 +669,7 @@ HWTEST_F(TransLaneCommonTest, CancelWaitLaneState001, TestSize.Level1)
     EXPECT_EQ(ret, SOFTBUS_OK);
 }
 
-/**
+/*
  * @tc.name: TransCommonCloseChannel001
  * @tc.desc: Should return SOFTBUS_TRANS_PROXY_INVALID_CHANNEL_ID when given invalid param
  * @tc.type: FUNC
@@ -702,7 +702,7 @@ HWTEST_F(TransLaneCommonTest, TransCommonCloseChannel001, TestSize.Level1)
     TransSocketLaneMgrDeinit();
 }
 
-/**
+/*
  * @tc.name: TransBuildTransOpenChannelStartEvent001
  * @tc.desc: test TransBuildTransOpenChannelStartEvent
  * @tc.type: FUNC
@@ -738,7 +738,7 @@ HWTEST_F(TransLaneCommonTest, TransBuildTransOpenChannelStartEvent001, TestSize.
     SoftBusFree(appInfo);
 }
 
-/**
+/*
  * @tc.name: TransBuildOpenAuthChannelStartEvent001
  * @tc.desc: test TransBuildOpenAuthChannelStartEvent
  * @tc.type: FUNC
@@ -786,7 +786,7 @@ HWTEST_F(TransLaneCommonTest, TransBuildOpenAuthChannelStartEvent001, TestSize.L
     EXPECT_EQ(extra.result, EVENT_STAGE_RESULT_OK);
 }
 
-/**
+/*
  * @tc.name: TransBuildTransOpenChannelCancelEvent001
  * @tc.desc: test TransBuildTransOpenChannelCancelEvent
  * @tc.type: FUNC
@@ -812,7 +812,7 @@ HWTEST_F(TransLaneCommonTest, TransBuildTransOpenChannelCancelEvent001, TestSize
     EXPECT_NE(extra.result, EVENT_STAGE_RESULT_OK);
 }
 
-/**
+/*
  * @tc.name: TransBuildTransOpenChannelEndEvent001
  * @tc.desc: test TransBuildTransOpenChannelEndEvent
  * @tc.type: FUNC
@@ -838,7 +838,7 @@ HWTEST_F(TransLaneCommonTest, TransBuildTransOpenChannelEndEvent001, TestSize.Le
     EXPECT_NE(extra.result, EVENT_STAGE_RESULT_OK);
 }
 
-/**
+/*
  * @tc.name: TransBuildTransAlarmEvent001
  * @tc.desc: test TransBuildTransAlarmEvent
  * @tc.type: FUNC
@@ -866,7 +866,7 @@ HWTEST_F(TransLaneCommonTest, TransBuildTransAlarmEvent001, TestSize.Level1)
     SoftBusFree(appInfo);
 }
 
-/**
+/*
  * @tc.name: TransFreeAppInfo001
  * @tc.desc: test TransFreeAppInfo
  * @tc.type: FUNC
@@ -906,7 +906,7 @@ HWTEST_F(TransLaneCommonTest, TransFreeLane001, TestSize.Level1)
     TransFreeLane(laneHandle, isQosLane, false);
 }
 
-/**
+/*
  * @tc.name: TransReportBadKeyEvent001
  * @tc.desc: test TransReportBadKeyEvent
  * @tc.type: FUNC
@@ -924,7 +924,7 @@ HWTEST_F(TransLaneCommonTest, TransReportBadKeyEvent001, TestSize.Level1)
     TransReportBadKeyEvent(errCode, connectionId, seq, len);
 }
 
-/**
+/*
  * @tc.name: CheckSourceCollabRelationTest001
  * @tc.desc: test CheckSourceCollabRelation
  * @tc.type: FUNC
@@ -936,7 +936,7 @@ HWTEST_F(TransLaneCommonTest, CheckSourceCollabRelationTest001, TestSize.Level1)
     EXPECT_EQ(ret, SOFTBUS_INVALID_PARAM);
 }
 
-/**
+/*
  * @tc.name: TransGetPeerDeviceId001
  * @tc.desc: test TransGetPeerDeviceId
  * @tc.type: FUNC

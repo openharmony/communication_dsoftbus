@@ -45,9 +45,9 @@ void TransAuthChannelMessageTest::SetUpTestCase(void)
 void TransAuthChannelMessageTest::TearDownTestCase(void)
 {}
 
-/**
+/*
  * @tc.name: PackUsbLinkTypeMsg001
- * @tc.desc: PackUsbLinkTypeMsg
+ * @tc.desc: PackUsbLinkTypeMsg test
  * @tc.type: FUNC
  * @tc.require:
  */
@@ -66,9 +66,9 @@ HWTEST_F(TransAuthChannelMessageTest, PackUsbLinkTypeMsg001, TestSize.Level1)
     SoftBusFree(appInfo);
 }
 
-/**
+/*
  * @tc.name: PackUsbLinkTypeMsg002
- * @tc.desc: PackUsbLinkTypeMsg
+ * @tc.desc: PackUsbLinkTypeMsg test
  * @tc.type: FUNC
  * @tc.require:
  */
@@ -89,9 +89,9 @@ HWTEST_F(TransAuthChannelMessageTest, PackUsbLinkTypeMsg002, TestSize.Level1)
     SoftBusFree(appInfo);
 }
 
-/**
+/*
  * @tc.name: TransAuthChannelMsgPack001
- * @tc.desc: TransAuthChannelMsgPack
+ * @tc.desc: TransAuthChannelMsgPack test
  * @tc.type: FUNC
  * @tc.require:
  */
@@ -113,9 +113,9 @@ HWTEST_F(TransAuthChannelMessageTest, TransAuthChannelMsgPack001, TestSize.Level
     SoftBusFree(appInfo);
 }
 
-/**
+/*
  * @tc.name: TransAuthChannelMsgPack002
- * @tc.desc: TransAuthChannelMsgPack
+ * @tc.desc: TransAuthChannelMsgPack test
  * @tc.type: FUNC
  * @tc.require:
  */
@@ -136,9 +136,9 @@ HWTEST_F(TransAuthChannelMessageTest, TransAuthChannelMsgPack002, TestSize.Level
     SoftBusFree(appInfo);
 }
 
-/**
+/*
  * @tc.name: TransAuthChannelMsgPack003
- * @tc.desc: TransAuthChannelMsgPack
+ * @tc.desc: TransAuthChannelMsgPack test
  * @tc.type: FUNC
  * @tc.require:
  */
@@ -175,9 +175,9 @@ HWTEST_F(TransAuthChannelMessageTest, TransAuthChannelMsgPack003, TestSize.Level
     SoftBusFree(appInfo);
 }
 
-/**
+/*
  * @tc.name: TransAuthChannelMsgPack004
- * @tc.desc: TransAuthChannelMsgPack
+ * @tc.desc: TransAuthChannelMsgPack test
  * @tc.type: FUNC
  * @tc.require:
  */
@@ -218,9 +218,9 @@ HWTEST_F(TransAuthChannelMessageTest, TransAuthChannelMsgPack004, TestSize.Level
     SoftBusFree(appInfo);
 }
 
-/**
+/*
  * @tc.name: TransAuthChannelErrorPack001
- * @tc.desc: TransAuthChannelErrorPack
+ * @tc.desc: TransAuthChannelErrorPack test
  * @tc.type: FUNC
  * @tc.require:
  */
@@ -244,9 +244,9 @@ HWTEST_F(TransAuthChannelMessageTest, TransAuthChannelErrorPack001, TestSize.Lev
     SoftBusFree(errMsg);
 }
 
-/**
+/*
  * @tc.name: TransAuthChannelErrorPack002
- * @tc.desc: TransAuthChannelErrorPack
+ * @tc.desc: TransAuthChannelErrorPack test
  * @tc.type: FUNC
  * @tc.require:
  */
@@ -275,9 +275,9 @@ HWTEST_F(TransAuthChannelMessageTest, TransAuthChannelErrorPack002, TestSize.Lev
     SoftBusFree(cJsonStr);
 }
 
-/**
+/*
  * @tc.name: TransAuthChannelErrorPack003
- * @tc.desc: TransAuthChannelErrorPack
+ * @tc.desc: TransAuthChannelErrorPack test
  * @tc.type: FUNC
  * @tc.require:
  */

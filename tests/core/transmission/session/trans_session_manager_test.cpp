@@ -91,9 +91,9 @@ static SessionServer *BuildSessionServer()
     return sessionServer;
 }
 
-/**
+/*
  * @tc.name: TransSessionManagerTest01
- * @tc.desc: Transmission session manager initialize.
+ * @tc.desc: Transmission session manager initialize
  * @tc.type: FUNC
  * @tc.require:
  */
@@ -107,9 +107,9 @@ HWTEST_F(TransSessionManagerTest, TransSessionManagerTest01, TestSize.Level1)
     TransSessionMgrDeinit();
 }
 
-/**
+/*
  * @tc.name: TransSessionManagerTest02
- * @tc.desc: Transmission session manager judge whether session exists with invalid parameters.
+ * @tc.desc: Transmission session manager judge whether session exists with invalid parameters
  * @tc.type: FUNC
  * @tc.require:
  */
@@ -121,9 +121,9 @@ HWTEST_F(TransSessionManagerTest, TransSessionManagerTest02, TestSize.Level1)
     EXPECT_FALSE(res);
 }
 
-/**
+/*
  * @tc.name: TransSessionManagerTest03
- * @tc.desc: Transmission session manager add item with invalid parameters.
+ * @tc.desc: Transmission session manager add item with invalid parameters
  * @tc.type: FUNC
  * @tc.require:
  */
@@ -138,9 +138,9 @@ HWTEST_F(TransSessionManagerTest, TransSessionManagerTest03, TestSize.Level1)
     EXPECT_EQ(ret, SOFTBUS_NO_INIT);
 }
 
-/**
+/*
  * @tc.name: TransSessionManagerTest04
- * @tc.desc: Transmission session manager del item with invalid parameters.
+ * @tc.desc: Transmission session manager del item with invalid parameters
  * @tc.type: FUNC
  * @tc.require:
  */
@@ -162,9 +162,9 @@ HWTEST_F(TransSessionManagerTest, TransSessionManagerTest04, TestSize.Level1)
     EXPECT_NE(ret, INVALID_USER_ID);
 }
 
-/**
+/*
  * @tc.name: TransSessionManagerTest05
- * @tc.desc: Transmission session manager del item with not existed item.
+ * @tc.desc: Transmission session manager del item with not existed item
  * @tc.type: FUNC
  * @tc.require:
  */
@@ -176,9 +176,9 @@ HWTEST_F(TransSessionManagerTest, TransSessionManagerTest05, TestSize.Level1)
     TransSessionMgrDeinit();
 }
 
-/**
+/*
  * @tc.name: TransSessionManagerTest06
- * @tc.desc: Transmission session manager get package name by session name with invalid parameters.
+ * @tc.desc: Transmission session manager get package name by session name with invalid parameters
  * @tc.type: FUNC
  * @tc.require:
  */
@@ -196,9 +196,9 @@ HWTEST_F(TransSessionManagerTest, TransSessionManagerTest06, TestSize.Level1)
     TransSessionMgrDeinit();
 }
 
-/**
+/*
  * @tc.name: TransSessionManagerTest07
- * @tc.desc: Transmission session manager delete item by package name with invalid parameters.
+ * @tc.desc: Transmission session manager delete item by package name with invalid parameters
  * @tc.type: FUNC
  * @tc.require:
  */
@@ -220,9 +220,9 @@ HWTEST_F(TransSessionManagerTest, TransSessionManagerTest07, TestSize.Level1)
     TransDelItemByPackageName(g_pkgName, TRANS_TEST_INVALID_PID);
 }
 
-/**
+/*
  * @tc.name: TransSessionManagerTest08
- * @tc.desc: Transmission session manager get uid and pid by session name with invalid parameters.
+ * @tc.desc: Transmission session manager get uid and pid by session name with invalid parameters
  * @tc.type: FUNC
  * @tc.require:
  */
@@ -240,9 +240,9 @@ HWTEST_F(TransSessionManagerTest, TransSessionManagerTest08, TestSize.Level1)
     EXPECT_NE(ret,  SOFTBUS_OK);
 }
 
-/**
+/*
  * @tc.name: TransSessionManagerTest09
- * @tc.desc: Transmission session manager get package name by session name.
+ * @tc.desc: Transmission session manager get package name by session name
  * @tc.type: FUNC
  * @tc.require:
  */
@@ -264,9 +264,9 @@ HWTEST_F(TransSessionManagerTest, TransSessionManagerTest09, TestSize.Level1)
     TransSessionMgrDeinit();
 }
 
-/**
+/*
  * @tc.name: TransSessionManagerTest10
- * @tc.desc: Transmission session manager delete item by package name.
+ * @tc.desc: Transmission session manager delete item by package name
  * @tc.type: FUNC
  * @tc.require:
  */
@@ -285,9 +285,9 @@ HWTEST_F(TransSessionManagerTest, TransSessionManagerTest10, TestSize.Level1)
     TransSessionMgrDeinit();
 }
 
-/**
+/*
  * @tc.name: TransSessionManagerTest11
- * @tc.desc: Transmission session manager judge whether session exists.
+ * @tc.desc: Transmission session manager judge whether session exists
  * @tc.type: FUNC
  * @tc.require:
  */
@@ -317,9 +317,9 @@ HWTEST_F(TransSessionManagerTest, TransSessionManagerTest11, TestSize.Level1)
     SoftBusFree(newSessionServer);
     TransSessionMgrDeinit();
 }
-/**
+/*
  * @tc.name: TransSessionManagerTest12
- * @tc.desc: Transmission session manager get pid and uid by session name.
+ * @tc.desc: Transmission session manager get pid and uid by session name
  * @tc.type: FUNC
  * @tc.require:
  */
@@ -343,9 +343,9 @@ HWTEST_F(TransSessionManagerTest, TransSessionManagerTest12, TestSize.Level1)
     TransSessionMgrDeinit();
 }
 
-/**
+/*
  * @tc.name: TransSessionManagerTest13
- * @tc.desc: Transmission session manager onLink down with invalid parameters.
+ * @tc.desc: Transmission session manager onLink down with invalid parameters
  * @tc.type: FUNC
  * @tc.require:
  */
@@ -358,9 +358,9 @@ HWTEST_F(TransSessionManagerTest, TransSessionManagerTest13, TestSize.Level1)
     TransOnLinkDown(g_networkid, nullptr, nullptr, nullptr, WIFI_P2P);
 }
 
-/**
+/*
  * @tc.name: TransSessionManagerTest14
- * @tc.desc: Transmission session manager onLink down with wrong parameters.
+ * @tc.desc: Transmission session manager onLink down with wrong parameters
  * @tc.type: FUNC
  * @tc.require:
  */
@@ -377,9 +377,9 @@ HWTEST_F(TransSessionManagerTest, TransSessionManagerTest14, TestSize.Level1)
     TransOnLinkDown(g_networkid, nullptr, nullptr, nullptr, WIFI_P2P);
 }
 
-/**
+/*
  * @tc.name: TransSessionManagerTest15
- * @tc.desc: Transmission session manager add item to maxmun.
+ * @tc.desc: Transmission session manager add item to maxmun
  * @tc.type: FUNC
  * @tc.require:
  */
@@ -426,9 +426,9 @@ HWTEST_F(TransSessionManagerTest, TransSessionManagerTest15, TestSize.Level1)
     TransSessionMgrDeinit();
 }
 
-/**
+/*
  * @tc.name: TransSessionManagerTest16
- * @tc.desc: Transmission session manager test .
+ * @tc.desc: Transmission session manager test
  * @tc.type: FUNC
  * @tc.require:
  */
@@ -484,9 +484,9 @@ static SessionServer *GenerateSessionServer()
     return sessionServer;
 }
 
-/**
+/*
  * @tc.name: TransSessionManagerTest17
- * @tc.desc: Transmission session manager test .
+ * @tc.desc: Transmission session manager test
  * @tc.type: FUNC
  * @tc.require:
  */
@@ -510,9 +510,9 @@ HWTEST_F(TransSessionManagerTest, TransSessionManagerTest17, TestSize.Level1)
     TransSessionMgrDeinit();
 }
 
-/**
+/*
  * @tc.name: TransSessionManagerTest20
- * @tc.desc: test AddAccessInfoBySessionName invalid value.
+ * @tc.desc: test AddAccessInfoBySessionName invalid value
  * @tc.type: FUNC
  * @tc.require:
  */
@@ -528,9 +528,9 @@ HWTEST_F(TransSessionManagerTest, TransSessionManagerTest20, TestSize.Level1)
     EXPECT_EQ(SOFTBUS_INVALID_PARAM, ret);
 }
 
-/**
+/*
  * @tc.name: TransSessionManagerTest21
- * @tc.desc: test AddAccessInfoBySessionName not init.
+ * @tc.desc: test AddAccessInfoBySessionName not init
  * @tc.type: FUNC
  * @tc.require:
  */
@@ -544,9 +544,9 @@ HWTEST_F(TransSessionManagerTest, TransSessionManagerTest21, TestSize.Level1)
     EXPECT_EQ(SOFTBUS_NO_INIT, ret);
 }
 
-/**
+/*
  * @tc.name: TransSessionManagerTest22
- * @tc.desc: test AddAccessInfoBySessionName already init.
+ * @tc.desc: test AddAccessInfoBySessionName already init
  * @tc.type: FUNC
  * @tc.require:
  */
@@ -563,9 +563,9 @@ HWTEST_F(TransSessionManagerTest, TransSessionManagerTest22, TestSize.Level1)
     TransSessionMgrDeinit();
 }
 
-/**
+/*
  * @tc.name: TransSessionManagerTest23
- * @tc.desc: test AddAccessInfoBySessionName success.
+ * @tc.desc: test AddAccessInfoBySessionName success
  * @tc.type: FUNC
  * @tc.require:
  */
@@ -613,9 +613,9 @@ HWTEST_F(TransSessionManagerTest, TransSessionManagerTest23, TestSize.Level1)
     SoftBusFree(accessInfo.extraAccessInfo);
 }
 
-/**
+/*
  * @tc.name: TransSessionManagerTest24
- * @tc.desc: test AddAccessInfoBySessionName extraAccessInfo is null.
+ * @tc.desc: test AddAccessInfoBySessionName extraAccessInfo is null
  * @tc.type: FUNC
  * @tc.require:
  */
@@ -646,9 +646,9 @@ HWTEST_F(TransSessionManagerTest, TransSessionManagerTest24, TestSize.Level1)
     TransSessionMgrDeinit();
 }
 
-/**
+/*
  * @tc.name: TransSessionManagerTest25
- * @tc.desc: test AddAccessInfoBySessionName extraAccessInfo is null.
+ * @tc.desc: test AddAccessInfoBySessionName extraAccessInfo is null
  * @tc.type: FUNC
  * @tc.require:
  */

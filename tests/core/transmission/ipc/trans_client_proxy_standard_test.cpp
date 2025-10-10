@@ -43,9 +43,9 @@ public:
 void TransClientProxyStandardTest::SetUpTestCase(void) {}
 void TransClientProxyStandardTest::TearDownTestCase(void) {}
 
-/**
+/*
  * @tc.name: InformPermissionChangeTest001
- * @tc.desc: trans client proxy standard test, use the normal parameter.
+ * @tc.desc: trans client proxy standard test, use the normal parameter
  * @tc.type: FUNC
  * @tc.require:
  */
@@ -95,9 +95,9 @@ HWTEST_F(TransClientProxyStandardTest, TransClientProxyStandardTest001, TestSize
     clientProxy->OnRefreshDeviceFound(addr, addrTypeLen);
 }
 
-/**
+/*
  * @tc.name: InformPermissionChangeTest002
- * @tc.desc: trans client proxy standard test, use the normal parameter.
+ * @tc.desc: trans client proxy standard test, use the normal parameter
  * @tc.type: FUNC
  * @tc.require:
  */
@@ -120,9 +120,9 @@ HWTEST_F(TransClientProxyStandardTest, TransClientProxyStandardTest002, TestSize
     EXPECT_EQ(SOFTBUS_OK, ret);
 }
 
-/**
+/*
  * @tc.name: OnCheckCollabRelation001
- * @tc.desc: trans client proxy standard test, use the normal parameter.
+ * @tc.desc: trans client proxy standard test, use the normal parameter
  * @tc.type: FUNC
  * @tc.require:
  */
@@ -147,9 +147,9 @@ HWTEST_F(TransClientProxyStandardTest, TransClientProxyStandardTest003, TestSize
     EXPECT_EQ(SOFTBUS_TRANS_PROXY_SEND_REQUEST_FAILED, ret);
 }
 
-/**
+/*
  * @tc.name: OnChannelOpened001
- * @tc.desc: trans client proxy standard test, use the normal parameter.
+ * @tc.desc: trans client proxy standard test, use the normal parameter
  * @tc.type: FUNC
  * @tc.require:
  */
@@ -176,9 +176,9 @@ HWTEST_F(TransClientProxyStandardTest, TransClientProxyStandardTest004, TestSize
     EXPECT_EQ(SOFTBUS_IPC_ERR, ret);
 }
 
-/**
+/*
  * @tc.name: SetChannelInfo001
- * @tc.desc: trans client proxy standard test, use the normal parameter.
+ * @tc.desc: trans client proxy standard test, use the normal parameter
  * @tc.type: FUNC
  * @tc.require:
  */
@@ -198,7 +198,7 @@ HWTEST_F(TransClientProxyStandardTest, TransClientProxyStandardTest005, TestSize
     EXPECT_EQ(SOFTBUS_INVALID_PARAM, ret);
 }
 
-/**
+/*
  * @tc.name: OnClientChannelOnQos001
  * @tc.desc: OnClientChannelOnQos test
  * @tc.type: FUNC
@@ -222,7 +222,7 @@ HWTEST_F(TransClientProxyStandardTest, TransClientProxyStandardTest006, TestSize
     EXPECT_NE(SOFTBUS_OK, ret);
 }
 
-/**
+/*
  * @tc.name: OnBrProxyOpenedQos001
  * @tc.desc: OnBrProxyOpened test
  * @tc.type: FUNC
@@ -248,7 +248,7 @@ HWTEST_F(TransClientProxyStandardTest, TransClientProxyStandardTest007, TestSize
     EXPECT_NE(SOFTBUS_INVALID_PARAM, ret);
 }
 
-/**
+/*
  * @tc.name: OnBrProxyDataRecv001
  * @tc.desc: OnBrProxyDataRecv test
  * @tc.type: FUNC
@@ -273,7 +273,7 @@ HWTEST_F(TransClientProxyStandardTest, TransClientProxyStandardTest008, TestSize
     EXPECT_NE(SOFTBUS_INVALID_PARAM, ret);
 }
 
-/**
+/*
  * @tc.name: OnBrProxyStateChanged001
  * @tc.desc: OnBrProxyStateChanged test
  * @tc.type: FUNC
@@ -294,7 +294,7 @@ HWTEST_F(TransClientProxyStandardTest, TransClientProxyStandardTest009, TestSize
     EXPECT_NE(SOFTBUS_OK, ret);
 }
 
-/**
+/*
  * @tc.name: OnBrProxyQueryPermission001
  * @tc.desc: OnBrProxyQueryPermission test
  * @tc.type: FUNC
