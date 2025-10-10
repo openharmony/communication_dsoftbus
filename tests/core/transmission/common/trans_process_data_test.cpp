@@ -44,9 +44,9 @@ void TransProcessDataTest::SetUpTestCase(void) {}
 
 void TransProcessDataTest::TearDownTestCase(void) {}
 
-/**
+/*
  * @tc.name: TransProcessDataTest001
- * @tc.desc: Transmission session manager initialize.
+ * @tc.desc: Transmission session manager initialize
  * @tc.type: FUNC
  * @tc.require:
  */
@@ -70,9 +70,9 @@ HWTEST_F(TransProcessDataTest, TransProcessDataTest001, TestSize.Level1)
     SoftBusFree(dataInfo);
 }
 
-/**
+/*
  * @tc.name: TransProcessDataTest002
- * @tc.desc: Transmission session manager initialize.
+ * @tc.desc: Transmission session manager initialize
  * @tc.type: FUNC
  * @tc.require:
  */
@@ -108,9 +108,9 @@ HWTEST_F(TransProcessDataTest, TransProcessDataTest002, TestSize.Level1)
     SoftBusFree(info);
 }
 
-/**
+/*
  * @tc.name: TransProcessDataTest003
- * @tc.desc: Transmission session manager initialize.
+ * @tc.desc: Transmission session manager initialize
  * @tc.type: FUNC
  * @tc.require:
  */
@@ -132,9 +132,9 @@ HWTEST_F(TransProcessDataTest, TransProcessDataTest003, TestSize.Level1)
     SoftBusFree(dataInfo);
 }
 
-/**
+/*
  * @tc.name: TransProcessDataTest004
- * @tc.desc: Transmission session manager initialize.
+ * @tc.desc: Transmission session manager initialize
  * @tc.type: FUNC
  * @tc.require:
  */
@@ -165,9 +165,9 @@ HWTEST_F(TransProcessDataTest, TransProcessDataTest004, TestSize.Level1)
     SoftBusFree(head);
 }
 
-/**
+/*
  * @tc.name: TransProcessDataTest005
- * @tc.desc: Transmission session manager initialize.
+ * @tc.desc: Transmission session manager initialize
  * @tc.type: FUNC
  * @tc.require:
  */
@@ -198,9 +198,9 @@ HWTEST_F(TransProcessDataTest, TransProcessDataTest005, TestSize.Level1)
     SoftBusFree(processor);
 }
 
-/**
+/*
  * @tc.name: TransProcessDataTest006
- * @tc.desc: Transmission session manager initialize.
+ * @tc.desc: Transmission session manager initialize
  * @tc.type: FUNC
  * @tc.require:
  */
@@ -222,9 +222,9 @@ HWTEST_F(TransProcessDataTest, TransProcessDataTest006, TestSize.Level1)
     SoftBusFree(dataInfo);
 }
 
-/**
+/*
  * @tc.name: TransProcessDataTest007
- * @tc.desc: Transmission session manager initialize.
+ * @tc.desc: Transmission session manager initialize
  * @tc.type: FUNC
  * @tc.require:
  */
@@ -263,9 +263,9 @@ HWTEST_F(TransProcessDataTest, TransProcessDataTest007, TestSize.Level1)
     SoftBusFree(head);
 }
 
-/**
+/*
  * @tc.name: TransProcessDataTest008
- * @tc.desc: Transmission session manager initialize.
+ * @tc.desc: Transmission session manager initialize
  * @tc.type: FUNC
  * @tc.require:
  */
@@ -301,9 +301,9 @@ HWTEST_F(TransProcessDataTest, TransProcessDataTest008, TestSize.Level1)
     SoftBusFree(head);
 }
 
-/**
+/*
  * @tc.name: TransProcessDataTest009
- * @tc.desc: Transmission session manager initialize.
+ * @tc.desc: Transmission session manager initialize
  * @tc.type: FUNC
  * @tc.require:
  */
@@ -339,9 +339,9 @@ HWTEST_F(TransProcessDataTest, TransProcessDataTest009, TestSize.Level1)
     SoftBusFree(head);
 }
 
-/**
+/*
  * @tc.name: TransProcessDataTest010
- * @tc.desc: Transmission session manager initialize.
+ * @tc.desc: Transmission session manager initialize
  * @tc.type: FUNC
  * @tc.require:
  */
@@ -355,9 +355,9 @@ HWTEST_F(TransProcessDataTest, TransProcessDataTest010, TestSize.Level1)
     EXPECT_EQ(SOFTBUS_INVALID_PARAM, ret);
 }
 
-/**
+/*
  * @tc.name: TransProcessDataTest011
- * @tc.desc: Transmission session manager initialize.
+ * @tc.desc: Transmission session manager initialize
  * @tc.type: FUNC
  * @tc.require:
  */
@@ -385,9 +385,9 @@ HWTEST_F(TransProcessDataTest, TransProcessDataTest011, TestSize.Level1)
     SoftBusFree(node);
 }
 
-/**
+/*
  * @tc.name: TransProcessDataTest012
- * @tc.desc: Transmission session manager initialize.
+ * @tc.desc: Transmission session manager initialize
  * @tc.type: FUNC
  * @tc.require:
  */
@@ -414,9 +414,9 @@ HWTEST_F(TransProcessDataTest, TransProcessDataTest012, TestSize.Level1)
     SoftBusFree(recvBuf);
 }
 
-/**
+/*
  * @tc.name: TransProcessDataTest013
- * @tc.desc: Transmission session manager initialize.
+ * @tc.desc: Transmission session manager initialize
  * @tc.type: FUNC
  * @tc.require:
  */
@@ -443,9 +443,9 @@ HWTEST_F(TransProcessDataTest, TransProcessDataTest013, TestSize.Level1)
     SoftBusFree(lenInfo);
 }
 
-/**
+/*
  * @tc.name: TransProcessDataTest014
- * @tc.desc: Transmission session manager initialize.
+ * @tc.desc: Transmission session manager initialize
  * @tc.type: FUNC
  * @tc.require:
  */
@@ -475,9 +475,9 @@ HWTEST_F(TransProcessDataTest, TransProcessDataTest014, TestSize.Level1)
     SoftBusFree(lenInfo);
 }
 
-/**
+/*
  * @tc.name: TransProcessDataTest015
- * @tc.desc: Transmission session manager initialize.
+ * @tc.desc: Transmission session manager initialize
  * @tc.type: FUNC
  * @tc.require:
  */
@@ -496,9 +496,9 @@ HWTEST_F(TransProcessDataTest, TransProcessDataTest015, TestSize.Level1)
     EXPECT_EQ(SOFTBUS_INVALID_PARAM, ret);
 }
 
-/**
+/*
  * @tc.name: TransProcessDataTest016
- * @tc.desc: Transmission session manager initialize.
+ * @tc.desc: Transmission session manager initialize
  * @tc.type: FUNC
  * @tc.require:
  */
@@ -542,9 +542,9 @@ HWTEST_F(TransProcessDataTest, TransProcessDataTest016, TestSize.Level1)
     SoftBusFree(node);
 }
 
-/**
+/*
  * @tc.name: TransProcessDataTest017
- * @tc.desc: Transmission session manager initialize.
+ * @tc.desc: Transmission session manager initialize
  * @tc.type: FUNC
  * @tc.require:
  */
@@ -561,9 +561,9 @@ HWTEST_F(TransProcessDataTest, TransProcessDataTest017, TestSize.Level1)
     SoftBusFree(head);
 }
 
-/**
+/*
  * @tc.name: TransProcessDataTest018
- * @tc.desc: Transmission session manager initialize.
+ * @tc.desc: Transmission session manager initialize
  * @tc.type: FUNC
  * @tc.require:
  */
@@ -594,9 +594,9 @@ HWTEST_F(TransProcessDataTest, TransProcessDataTest018, TestSize.Level1)
     EXPECT_EQ(SOFTBUS_INVALID_PARAM, ret);
 }
 
-/**
+/*
  * @tc.name: TransProcessDataTest019
- * @tc.desc: test trans tdc unpack data.
+ * @tc.desc: test trans tdc unpack data
  * @tc.type: FUNC
  * @tc.require:
  */
@@ -643,9 +643,9 @@ HWTEST_F(TransProcessDataTest, TransProcessDataTest019, TestSize.Level1)
     SoftBusFree(node);
 }
 
-/**
+/*
  * @tc.name: TransProxyPackD2DDataTest001
- * @tc.desc: test trans proxy pack d2d data.
+ * @tc.desc: test trans proxy pack d2d data
  * @tc.type: FUNC
  * @tc.require:
  */
@@ -674,9 +674,9 @@ HWTEST_F(TransProcessDataTest, TransProxyPackD2DDataTest001, TestSize.Level1)
     EXPECT_EQ(nullptr, ret);
 }
 
-/**
+/*
  * @tc.name: TransProxyProcessD2DDataTest001
- * @tc.desc: test trans proxy process d2d data.
+ * @tc.desc: test trans proxy process d2d data
  * @tc.type: FUNC
  * @tc.require:
  */
@@ -713,9 +713,9 @@ HWTEST_F(TransProcessDataTest, TransProxyProcessD2DDataTest001, TestSize.Level1)
     }
 }
 
-/**
+/*
  * @tc.name: TransProxyDecryptD2DDataTest001
- * @tc.desc: test trans proxy decrypt d2d data.
+ * @tc.desc: test trans proxy decrypt d2d data
  * @tc.type: FUNC
  * @tc.require:
  */
@@ -754,9 +754,9 @@ HWTEST_F(TransProcessDataTest, TransProxyDecryptD2DDataTest001, TestSize.Level1)
     EXPECT_EQ(SOFTBUS_INVALID_PARAM, ret);
 }
 
-/**
+/*
  * @tc.name: TransProxyD2DFirstSliceProcessTest001
- * @tc.desc: test trans proxy d2d first slice process.
+ * @tc.desc: test trans proxy d2d first slice process
  * @tc.type: FUNC
  * @tc.require:
  */
@@ -799,9 +799,9 @@ HWTEST_F(TransProcessDataTest, TransProxyD2DFirstSliceProcessTest001, TestSize.L
     }
 }
 
-/**
+/*
  * @tc.name: TransProxyPackD2DBytesTest001
- * @tc.desc: test trans proxy pack d2d bytes.
+ * @tc.desc: test trans proxy pack d2d bytes
  * @tc.type: FUNC
  * @tc.require:
  */
@@ -828,9 +828,9 @@ HWTEST_F(TransProcessDataTest, TransProxyPackD2DBytesTest001, TestSize.Level1)
     EXPECT_EQ(SOFTBUS_OK, ret);
 }
 
-/**
+/*
  * @tc.name: TransProxyD2dDataLenCheckTest001
- * @tc.desc: client send file crc check sum, use normal parameter.
+ * @tc.desc: client send file crc check sum, use normal parameter
  * @tc.type: FUNC
  * @tc.require:
  */
@@ -855,7 +855,7 @@ HWTEST_F(TransProcessDataTest, TransProxyD2dDataLenCheckTest001, TestSize.Level1
     EXPECT_EQ(SOFTBUS_OK, ret);
 }
 
-/**
+/*
  * @tc.name: TransProxyPackNewHeadD2DDataTest001
  * @tc.desc: trans proxy channel pack message
  * @tc.type: FUNC
@@ -879,9 +879,9 @@ HWTEST_F(TransProcessDataTest, TransProxyPackNewHeadD2DDataTest001, TestSize.Lev
     SoftBusFree(sliceData);
 }
 
-/**
+/*
  * @tc.name: TransProxyD2DFirstNewHeadSliceProcessTest001
- * @tc.desc: test trans proxy d2d first slice process.
+ * @tc.desc: test trans proxy d2d first slice process
  * @tc.type: FUNC
  * @tc.require:
  */

@@ -118,9 +118,9 @@ SessionParam* GenerateParamTest(SessionAttribute *sessionAttr)
     return sessionParam;
 }
 
-/**
+/*
  * @tc.name: TransLaneTest001
- * @tc.desc: trans lane pending init and deinit.
+ * @tc.desc: trans lane pending init and deinit
  * @tc.type: FUNC
  * @tc.require:
  */
@@ -133,9 +133,9 @@ HWTEST_F(TransLaneTest, TransLaneTest001, TestSize.Level1)
     TransReqLanePendingDeinit();
 }
 
-/**
+/*
  * @tc.name: TransLaneTest002
- * @tc.desc: add trans lane pending and delete trans lane pending.
+ * @tc.desc: add trans lane pending and delete trans lane pending
  * @tc.type: FUNC
  * @tc.require:
  */
@@ -162,9 +162,9 @@ HWTEST_F(TransLaneTest, TransLaneTest002, TestSize.Level1)
     TransReqLanePendingDeinit();
 }
 
-/**
+/*
  * @tc.name: TransLaneTest003
- * @tc.desc: trans get lane Reqitem by laneReqId.
+ * @tc.desc: trans get lane Reqitem by laneReqId
  * @tc.type: FUNC
  * @tc.require:
  */
@@ -205,9 +205,9 @@ HWTEST_F(TransLaneTest, TransLaneTest003, TestSize.Level1)
     SoftBusFree(connInfo);
 }
 
-/**
+/*
  * @tc.name: TransLaneTest004
- * @tc.desc: trans update lane connInfo by laneReqId.
+ * @tc.desc: trans update lane connInfo by laneReqId
  * @tc.type: FUNC
  * @tc.require:
  */
@@ -244,9 +244,9 @@ HWTEST_F(TransLaneTest, TransLaneTest004, TestSize.Level1)
     SoftBusFree(connInfo);
 }
 
-/**
+/*
  * @tc.name: TransLaneTest005
- * @tc.desc: trans lane request success by laneReqId.
+ * @tc.desc: trans lane request success by laneReqId
  * @tc.type: FUNC
  * @tc.require:
  */
@@ -271,9 +271,9 @@ HWTEST_F(TransLaneTest, TransLaneTest005, TestSize.Level1)
     SoftBusFree(connInfo);
 }
 
-/**
+/*
  * @tc.name: TransLaneTest006
- * @tc.desc: trans lane request fail by laneReqId.
+ * @tc.desc: trans lane request fail by laneReqId
  * @tc.type: FUNC
  * @tc.require:
  */
@@ -298,9 +298,9 @@ HWTEST_F(TransLaneTest, TransLaneTest006, TestSize.Level1)
     SoftBusFree(connInfo);
 }
 
-/**
+/*
  * @tc.name: TransLaneTest007
- * @tc.desc: trans lane state change and get stream lane type.
+ * @tc.desc: trans lane state change and get stream lane type
  * @tc.type: FUNC
  * @tc.require:
  */
@@ -319,9 +319,9 @@ HWTEST_F(TransLaneTest, TransLaneTest007, TestSize.Level1)
     EXPECT_EQ(ret, LANE_T_BUTT);
 }
 
-/**
+/*
  * @tc.name: TransLaneTest008
- * @tc.desc: trans get lane by session.
+ * @tc.desc: trans get lane by session
  * @tc.type: FUNC
  * @tc.require:
  */
@@ -362,9 +362,9 @@ HWTEST_F(TransLaneTest, TransLaneTest008, TestSize.Level1)
 }
 
 
-/**
+/*
  * @tc.name: TransLaneTest009
- * @tc.desc: trans get lane linkType by session linkType.
+ * @tc.desc: trans get lane linkType by session linkType
  * @tc.type: FUNC
  * @tc.require:
  */
@@ -387,9 +387,9 @@ HWTEST_F(TransLaneTest, TransLaneTest009, TestSize.Level1)
     EXPECT_EQ(ret, LANE_BR);
 }
 
-/**
+/*
  * @tc.name: TransLaneTest010
- * @tc.desc: transform session perferred to lane perferred.
+ * @tc.desc: transform session perferred to lane perferred
  * @tc.type: FUNC
  * @tc.require:
  */
@@ -413,9 +413,9 @@ HWTEST_F(TransLaneTest, TransLaneTest010, TestSize.Level1)
     SoftBusFree(preferred);
 }
 
-/**
+/*
  * @tc.name: TransLaneTest011
- * @tc.desc: trans softbus condwait.
+ * @tc.desc: trans softbus condwait
  * @tc.type: FUNC
  * @tc.require:
  */
@@ -432,9 +432,9 @@ HWTEST_F(TransLaneTest, TransLaneTest011, TestSize.Level1)
     EXPECT_EQ(SOFTBUS_INVALID_PARAM, ret);
 }
 
-/**
+/*
  * @tc.name: TransLaneTest012
- * @tc.desc: trans req lane pending init.
+ * @tc.desc: trans req lane pending init
  * @tc.type: FUNC
  * @tc.require:
  */
@@ -471,9 +471,9 @@ HWTEST_F(TransLaneTest, TransLaneTest012, TestSize.Level1)
     EXPECT_EQ(SOFTBUS_NO_INIT, ret);
 }
 
-/**
+/*
  * @tc.name: TransLaneTest013
- * @tc.desc: trans add laneReq to pending and waitting.
+ * @tc.desc: trans add laneReq to pending and waitting
  * @tc.type: FUNC
  * @tc.require:
  */
@@ -522,9 +522,9 @@ HWTEST_F(TransLaneTest, TransLaneTest013, TestSize.Level1)
     TransReqLanePendingDeinit();
 }
 
-/**
+/*
  * @tc.name: TransLaneTest014
- * @tc.desc: trans get lane info by option.
+ * @tc.desc: trans get lane info by option
  * @tc.type: FUNC
  * @tc.require:
  */
@@ -563,9 +563,9 @@ HWTEST_F(TransLaneTest, TransLaneTest014, TestSize.Level1)
     TransReqLanePendingDeinit();
 }
 
-/**
+/*
  * @tc.name: TransLaneTest015
- * @tc.desc: trans add session server item.
+ * @tc.desc: trans add session server item
  * @tc.type: FUNC
  * @tc.require:
  */
@@ -602,9 +602,9 @@ HWTEST_F(TransLaneTest, TransLaneTest015, TestSize.Level1)
     TransReqLanePendingDeinit();
 }
 
-/**
+/*
  * @tc.name: TransLaneTest016
- * @tc.desc: trans set wlan connect info.
+ * @tc.desc: trans set wlan connect info
  * @tc.type: FUNC
  * @tc.require:
  */
@@ -616,9 +616,9 @@ HWTEST_F(TransLaneTest, TransLaneTest016, TestSize.Level1)
     EXPECT_EQ(SOFTBUS_OK, ret);
 }
 
-/**
+/*
  * @tc.name: TransLaneTest017
- * @tc.desc: trans set br connect info.
+ * @tc.desc: trans set br connect info
  * @tc.type: FUNC
  * @tc.require:
  */
@@ -630,9 +630,9 @@ HWTEST_F(TransLaneTest, TransLaneTest017, TestSize.Level1)
     EXPECT_EQ(SOFTBUS_OK, ret);
 }
 
-/**
+/*
  * @tc.name: TransLaneTest018
- * @tc.desc: trans set ble connect info.
+ * @tc.desc: trans set ble connect info
  * @tc.type: FUNC
  * @tc.require:
  */
@@ -644,9 +644,9 @@ HWTEST_F(TransLaneTest, TransLaneTest018, TestSize.Level1)
     EXPECT_EQ(SOFTBUS_OK, ret);
 }
 
-/**
+/*
  * @tc.name: TransLaneTest019
- * @tc.desc: trans get connect opt by connect info.
+ * @tc.desc: trans get connect opt by connect info
  * @tc.type: FUNC
  * @tc.require:
  */
@@ -697,9 +697,9 @@ HWTEST_F(TransLaneTest, TransLaneTest019, TestSize.Level1)
     EXPECT_EQ(SOFTBUS_OK, ret);
 }
 
-/**
+/*
  * @tc.name: TransLaneTest020
- * @tc.desc: trans get auth type by network id.
+ * @tc.desc: trans get auth type by network id
  * @tc.type: FUNC
  * @tc.require:
  */
@@ -714,9 +714,9 @@ HWTEST_F(TransLaneTest, TransLaneTest020, TestSize.Level1)
     LnnDeinitDistributedLedger();
 }
 
-/**
+/*
  * @tc.name: TransLaneTest021
- * @tc.desc: trans check session name invalid on auth channel.
+ * @tc.desc: trans check session name invalid on auth channel
  * @tc.type: FUNC
  * @tc.require:
  */
@@ -736,9 +736,9 @@ HWTEST_F(TransLaneTest, TransLaneTest021, TestSize.Level1)
     EXPECT_NE(ret, -1);
 }
 
-/**
+/*
  * @tc.name: TransLaneTest022
- * @tc.desc: transform session perferred to lane perferred use wrong param.
+ * @tc.desc: transform session perferred to lane perferred use wrong param
  * @tc.type: FUNC
  * @tc.require:
  */
@@ -784,9 +784,9 @@ HWTEST_F(TransLaneTest, TransLaneTest022, TestSize.Level1)
     SoftBusFree(preferred2);
 }
 
-/**
+/*
  * @tc.name: TransLaneTest023
- * @tc.desc: PeerDeviceIsLegacyOs func test.
+ * @tc.desc: PeerDeviceIsLegacyOs func test
  * @tc.type: FUNC
  * @tc.require:
  */
@@ -796,9 +796,9 @@ HWTEST_F(TransLaneTest, TransLaneTest023, TestSize.Level1)
     EXPECT_FALSE(ret);
 }
 
-/**
+/*
  * @tc.name: TransLaneTest024
- * @tc.desc: PeerDeviceIsLegacyOs func test.
+ * @tc.desc: PeerDeviceIsLegacyOs func test
  * @tc.type: FUNC
  * @tc.require:
  */
@@ -816,9 +816,9 @@ HWTEST_F(TransLaneTest, TransLaneTest024, TestSize.Level1)
     SoftBusFree(connOpt);
 }
 
-/**
+/*
  * @tc.name: GetAllocInfoExtBySessionParam001
- * @tc.desc: GetAllocInfoExtBySessionParam func test.
+ * @tc.desc: GetAllocInfoExtBySessionParam func test
  * @tc.type: FUNC
  * @tc.require:
  */
@@ -834,9 +834,9 @@ HWTEST_F(TransLaneTest, GetAllocInfoExtBySessionParam001, TestSize.Level1)
     EXPECT_EQ(ret, SOFTBUS_INVALID_PARAM);
 }
 
-/**
+/*
  * @tc.name: GetAllocInfoExtBySessionParam002
- * @tc.desc: GetAllocInfoExtBySessionParam func test.
+ * @tc.desc: GetAllocInfoExtBySessionParam func test
  * @tc.type: FUNC
  * @tc.require:
  */
@@ -859,9 +859,9 @@ HWTEST_F(TransLaneTest, GetAllocInfoExtBySessionParam002, TestSize.Level1)
     EXPECT_EQ(ret, SOFTBUS_OK);
 }
 
-/**
+/*
  * @tc.name: TransAsyncGetLaneInfoByExt001
- * @tc.desc: TransAsyncGetLaneInfoByExt func test.
+ * @tc.desc: TransAsyncGetLaneInfoByExt func test
  * @tc.type: FUNC
  * @tc.require:
  */
@@ -885,9 +885,9 @@ HWTEST_F(TransLaneTest, TransAsyncGetLaneInfoByExt001, TestSize.Level1)
     EXPECT_EQ(ret, SOFTBUS_TRANS_GET_LANE_INFO_ERR);
 }
 
-/**
+/*
  * @tc.name: TransAsyncGetLaneInfoByExt002
- * @tc.desc: TransAsyncGetLaneInfoByExt func test.
+ * @tc.desc: TransAsyncGetLaneInfoByExt func test
  * @tc.type: FUNC
  * @tc.require:
  */
@@ -932,9 +932,9 @@ HWTEST_F(TransLaneTest, TransAsyncGetLaneInfoByExt002, TestSize.Level1)
     TransSocketLaneMgrDeinit();
 }
 
-/**
+/*
  * @tc.name: SetP2pExtConnInfo001
- * @tc.desc: SetP2pExtConnInfo func test.
+ * @tc.desc: SetP2pExtConnInfo func test
  * @tc.type: FUNC
  * @tc.require:
  */

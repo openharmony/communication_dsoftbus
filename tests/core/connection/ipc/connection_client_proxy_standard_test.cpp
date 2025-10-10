@@ -39,9 +39,9 @@ public:
 void ConnectionClientProxyStandardTest::SetUpTestCase(void) {}
 void ConnectionClientProxyStandardTest::TearDownTestCase(void) {}
 
-/**
+/*
  * @tc.name: ConnectionClientProxyStandardTest001
- * @tc.desc: trans client proxy standard test, use the normal parameter.
+ * @tc.desc: trans client proxy standard test, use the normal parameter
  * @tc.type: FUNC
  * @tc.require:
  */
