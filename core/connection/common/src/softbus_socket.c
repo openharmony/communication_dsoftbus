@@ -79,7 +79,7 @@ const SocketInterface *GetSocketInterface(ProtocolType protocolType)
     const SocketInterface *result = NULL;
     for (uint8_t i = 0; i < MAX_SOCKET_TYPE; i++) {
         if (g_socketInterfaces[i] != NULL && g_socketInterfaces[i]->type == protocolType) {
-            CONN_LOGI(CONN_COMMON, "protocolType=%{public}d", protocolType);
+            CONN_LOGD(CONN_COMMON, "protocolType=%{public}d", protocolType);
             result = g_socketInterfaces[i];
             break;
         }
@@ -273,7 +273,7 @@ ssize_t ConnRecvSocketData(int32_t fd, char *buf, size_t len, int32_t timeout)
 void ConnCloseSocket(int32_t fd)
 {
     if (fd >= 0) {
-        CONN_LOGI(CONN_COMMON, "close fd=%{public}d", fd);
+        CONN_LOGI(CONN_COMMON, "fd=%{public}d", fd);
         SoftBusSocketClose(fd);
     }
 }
@@ -281,7 +281,7 @@ void ConnCloseSocket(int32_t fd)
 void ConnShutdownSocket(int32_t fd)
 {
     if (fd >= 0) {
-        CONN_LOGI(CONN_COMMON, "shutdown fd=%{public}d", fd);
+        CONN_LOGI(CONN_COMMON, "fd=%{public}d", fd);
         SoftBusSocketShutDown(fd, SOFTBUS_SHUT_RDWR);
         SoftBusSocketClose(fd);
     }
