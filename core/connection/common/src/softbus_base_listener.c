@@ -611,7 +611,7 @@ int32_t StopBaseListener(ListenerModule module)
         module >= 0 && module < UNUSE_BUTT, SOFTBUS_INVALID_PARAM, CONN_COMMON,
         "invalid module, module=%{public}d", module);
 
-    CONN_LOGI(CONN_COMMON, "receive request, module=%{public}d", module);
+    CONN_LOGI(CONN_COMMON, "mod=%{public}d", module);
     SoftbusListenerNode *node = GetListenerNode(module);
     CONN_CHECK_AND_RETURN_RET_LOGW(
         node != NULL, SOFTBUS_NOT_FIND, CONN_COMMON, "listener node not exist, module=%{public}d", module);
@@ -1211,8 +1211,7 @@ static void *WatchTask(void *arg)
         }
         ListNode fdEvents;
         ListInit(&fdEvents);
-        CONN_LOGI(CONN_COMMON, "Watch start, traceId=%{public}d, wakeupId=%{public}d",
-            watchState->traceId, wakeupTraceIdGenerator);
+        CONN_LOGI(CONN_COMMON, "wait,tId=%{public}d,wId=%{public}d", watchState->traceId, wakeupTraceIdGenerator);
         int32_t nEvents = WatchEvent(g_eventWatcher, SOFTBUS_LISTENER_WATCH_TIMEOUT_MSEC, &fdEvents);
         int32_t wakeupTraceId = ++wakeupTraceIdGenerator;
         if (nEvents == 0 || nEvents == SOFTBUS_ADAPTER_SOCKET_EINTR) {
@@ -1221,8 +1220,8 @@ static void *WatchTask(void *arg)
             continue;
         }
         if (nEvents < 0) {
-            CONN_LOGE(CONN_COMMON, "unexpect wakeup, waitDelay=%{public}dms, wakeupTraceId=%{public}d, "
-                "status=%{public}d", WATCH_ABNORMAL_EVENT_RETRY_WAIT_MILLIS, wakeupTraceId, nEvents);
+            CONN_LOGE(CONN_COMMON, "rWait,delay=%{public}dms,tId=%{public}d,err=%{public}d",
+                WATCH_ABNORMAL_EVENT_RETRY_WAIT_MILLIS, wakeupTraceId, nEvents);
             ReleaseFdNode(&fdEvents);
             if (nEvents == SOFTBUS_ADAPTER_SOCKET_EBADF) {
                 RemoveBadFd();
@@ -1230,8 +1229,8 @@ static void *WatchTask(void *arg)
             SoftBusSleepMs(WATCH_ABNORMAL_EVENT_RETRY_WAIT_MILLIS);
             continue;
         }
-        CONN_LOGI(CONN_COMMON, "wakeup, traceId=%{public}d, wakeupId=%{public}d, "
-                               "events=%{public}d", watchState->traceId, wakeupTraceId, nEvents);
+        CONN_LOGI(CONN_COMMON, "in,tId=%{public}d,wId=%{public}d,evt=%{public}d", watchState->traceId, wakeupTraceId,
+            nEvents);
         ProcessEvent(&fdEvents, watchState, wakeupTraceId);
         ReleaseFdNode(&fdEvents);
     }
