@@ -48,6 +48,7 @@ void AuthUserCommonKeyTest::TearDown() { }
  * @tc.name: AUTH_USER_COMMON_KEY_Test_001
  * @tc.desc: AuthUserKey test
  * @tc.type: FUNC
+ * @tc.level: Level1
  * @tc.require:
  */
 HWTEST_F(AuthUserCommonKeyTest, AUTH_USER_COMMON_KEY_Test_001, TestSize.Level1)
@@ -73,6 +74,7 @@ HWTEST_F(AuthUserCommonKeyTest, AUTH_USER_COMMON_KEY_Test_001, TestSize.Level1)
  * @tc.name: UTH_USER_COMMON_KEY_Test_002
  * @tc.desc: AuthUserKeyInit test
  * @tc.type: FUNC
+ * @tc.level: Level1
  * @tc.require:
  */
 HWTEST_F(AuthUserCommonKeyTest, UTH_USER_COMMON_KEY_Test_002, TestSize.Level1)
@@ -86,6 +88,7 @@ HWTEST_F(AuthUserCommonKeyTest, UTH_USER_COMMON_KEY_Test_002, TestSize.Level1)
  * @tc.name: UTH_USER_COMMON_KEY_Test_003
  * @tc.desc: AuthInsertUserKey test
  * @tc.type: FUNC
+ * @tc.level: Level1
  * @tc.require:
  */
 HWTEST_F(AuthUserCommonKeyTest, UTH_USER_COMMON_KEY_Test_003, TestSize.Level1)
@@ -140,6 +143,7 @@ HWTEST_F(AuthUserCommonKeyTest, UTH_USER_COMMON_KEY_Test_003, TestSize.Level1)
  * @tc.name: GET_USERKEY_INFO_SAME_ACCOUNT_Test_001
  * @tc.desc: GetUserKeyInfoSameAccount test
  * @tc.type: FUNC
+ * @tc.level: Level1
  * @tc.require:
  */
 HWTEST_F(AuthUserCommonKeyTest, GET_USERKEY_INFO_SAME_ACCOUNT_Test_001, TestSize.Level1)
@@ -177,6 +181,7 @@ HWTEST_F(AuthUserCommonKeyTest, GET_USERKEY_INFO_SAME_ACCOUNT_Test_001, TestSize
  * @tc.name: GET_USERKEY_INFO_DIFF_ACCOUNT_Test_001
  * @tc.desc: GetUserKeyInfoDiffAccount test
  * @tc.type: FUNC
+ * @tc.level: Level1
  * @tc.require:
  */
 HWTEST_F(AuthUserCommonKeyTest, GET_USERKEY_INFO_DIFF_ACCOUNT_Test_001, TestSize.Level1)
@@ -209,6 +214,7 @@ HWTEST_F(AuthUserCommonKeyTest, GET_USERKEY_INFO_DIFF_ACCOUNT_Test_001, TestSize
  * @tc.name: GET_USERKEY_INFO_DIFF_ACCOUNT_WITH_USER_Test_001
  * @tc.desc: GetUserKeyInfoDiffAccountWithUserLevel test
  * @tc.type: FUNC
+ * @tc.level: Level1
  * @tc.require:
  */
 HWTEST_F(AuthUserCommonKeyTest, GET_USERKEY_INFO_DIFF_ACCOUNT_WITH_USER_Test_001, TestSize.Level1)
@@ -246,6 +252,7 @@ HWTEST_F(AuthUserCommonKeyTest, GET_USERKEY_INFO_DIFF_ACCOUNT_WITH_USER_Test_001
  * @tc.name: GET_USERKEY_BY_UKID_Test_001
  * @tc.desc: GetUserKeyByUkId test
  * @tc.type: FUNC
+ * @tc.level: Level1
  * @tc.require:
  */
 HWTEST_F(AuthUserCommonKeyTest, GET_USERKEY_BY_UKID_Test_001, TestSize.Level1)
@@ -269,6 +276,7 @@ HWTEST_F(AuthUserCommonKeyTest, GET_USERKEY_BY_UKID_Test_001, TestSize.Level1)
  * @tc.name: DEL_USERKEY_BY_NETWORKID_Test_001
  * @tc.desc: DelUserKeyByNetworkId test
  * @tc.type: FUNC
+ * @tc.level: Level1
  * @tc.require:
  */
 HWTEST_F(AuthUserCommonKeyTest, DEL_USERKEY_BY_NETWORKID_Test_001, TestSize.Level1)
@@ -284,6 +292,7 @@ HWTEST_F(AuthUserCommonKeyTest, DEL_USERKEY_BY_NETWORKID_Test_001, TestSize.Leve
  * @tc.name: DEINIT_USERKEY_LIST_Test_001
  * @tc.desc: DeinitUserKeyList test
  * @tc.type: FUNC
+ * @tc.level: Level1
  * @tc.require:
  */
 HWTEST_F(AuthUserCommonKeyTest, DEINIT_USERKEY_LIST_Test_001, TestSize.Level1)

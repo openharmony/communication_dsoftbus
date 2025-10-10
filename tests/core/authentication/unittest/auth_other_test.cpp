@@ -125,6 +125,7 @@ void OnGroupDeletedTest(const char *groupId)
  * @tc.name: ADD_CONN_REQUEST_TEST_001
  * @tc.desc: add conn request test
  * @tc.type: FUNC
+ * @tc.level: Level1
  * @tc.require:
  */
 HWTEST_F(AuthOtherTest, ADD_CONN_REQUEST_TEST_001, TestSize.Level1)
@@ -145,6 +146,7 @@ HWTEST_F(AuthOtherTest, ADD_CONN_REQUEST_TEST_001, TestSize.Level1)
  * @tc.name: REMOVE_FUNC_TEST_001
  * @tc.desc: remove func test
  * @tc.type: FUNC
+ * @tc.level: Level1
  * @tc.require:
  */
 HWTEST_F(AuthOtherTest, REMOVE_FUNC_TEST_001, TestSize.Level1)
@@ -164,6 +166,7 @@ HWTEST_F(AuthOtherTest, REMOVE_FUNC_TEST_001, TestSize.Level1)
  * @tc.name: CHECK_ACTIVE_AUTH_CONNECTION_TEST_001
  * @tc.desc: check active auth connection test
  * @tc.type: FUNC
+ * @tc.level: Level1
  * @tc.require:
  */
 HWTEST_F(AuthOtherTest, CHECK_ACTIVE_AUTH_CONNECTION_TEST_001, TestSize.Level1)
@@ -181,6 +184,7 @@ HWTEST_F(AuthOtherTest, CHECK_ACTIVE_AUTH_CONNECTION_TEST_001, TestSize.Level1)
  * @tc.name: AUTH_GET_META_TYPE_TEST_001
  * @tc.desc: auth get meta type test
  * @tc.type: FUNC
+ * @tc.level: Level1
  * @tc.require:
  */
 HWTEST_F(AuthOtherTest, AUTH_GET_META_TYPE_TEST_001, TestSize.Level1)
@@ -198,6 +202,7 @@ HWTEST_F(AuthOtherTest, AUTH_GET_META_TYPE_TEST_001, TestSize.Level1)
  * @tc.name: REMOVE_AUTH_MANAGER_BY_AUTH_ID_TEST_001
  * @tc.desc: remove auth manager by auth id test
  * @tc.type: FUNC
+ * @tc.level: Level1
  * @tc.require:
  */
 HWTEST_F(AuthOtherTest, REMOVE_AUTH_MANAGER_BY_AUTH_ID_TEST_001, TestSize.Level1)
@@ -239,6 +244,7 @@ HWTEST_F(AuthOtherTest, REMOVE_AUTH_MANAGER_BY_AUTH_ID_TEST_001, TestSize.Level1
  * @tc.name: NOTIFY_DEVICE_VERIFY_PASSED_TEST_001
  * @tc.desc: notify device verify passed test
  * @tc.type: FUNC
+ * @tc.level: Level1
  * @tc.require:
  */
 HWTEST_F(AuthOtherTest, NOTIFY_DEVICE_VERIFY_PASSED_TEST_001, TestSize.Level1)
@@ -267,6 +273,7 @@ HWTEST_F(AuthOtherTest, NOTIFY_DEVICE_VERIFY_PASSED_TEST_001, TestSize.Level1)
  * @tc.name: AUTH_MANAGER_SET_AUTH_PASSED_TEST_001
  * @tc.desc: auth manager set auth passed test
  * @tc.type: FUNC
+ * @tc.level: Level1
  * @tc.require:
  */
 HWTEST_F(AuthOtherTest, AUTH_MANAGER_SET_AUTH_PASSED_TEST_001, TestSize.Level1)
@@ -292,6 +299,7 @@ HWTEST_F(AuthOtherTest, AUTH_MANAGER_SET_AUTH_PASSED_TEST_001, TestSize.Level1)
  * @tc.name: HANDLE_CONNECTION_DATA_TEST_001
  * @tc.desc: handle connection data test
  * @tc.type: FUNC
+ * @tc.level: Level1
  * @tc.require:
  */
 HWTEST_F(AuthOtherTest, HANDLE_CONNECTION_DATA_TEST_001, TestSize.Level1)
@@ -334,6 +342,7 @@ static void OnConnOpenFailedTest(uint32_t requestId, int32_t reason)
  * @tc.name: AUTH_DEVICE_OPEN_CONN_TEST_001
  * @tc.desc: auth device open conn test
  * @tc.type: FUNC
+ * @tc.level: Level1
  * @tc.require:
  */
 HWTEST_F(AuthOtherTest, AUTH_DEVICE_OPEN_CONN_TEST_001, TestSize.Level1)
@@ -369,6 +378,7 @@ HWTEST_F(AuthOtherTest, AUTH_DEVICE_OPEN_CONN_TEST_001, TestSize.Level1)
  * @tc.name: UPDATE_AUTH_REQUEST_CONN_INFO_TEST_001
  * @tc.desc: update auth request conn info test
  * @tc.type: FUNC
+ * @tc.level: Level1
  * @tc.require:
  */
 HWTEST_F(AuthOtherTest, FIND_AUTH_REQUEST_BY_CONN_INFO_TEST_001, TestSize.Level1)
@@ -411,6 +421,7 @@ HWTEST_F(AuthOtherTest, FIND_AUTH_REQUEST_BY_CONN_INFO_TEST_001, TestSize.Level1
  * @tc.name: UPDATE_AUTH_REQUEST_CONN_INFO_TEST_002
  * @tc.desc: update auth request conn info test
  * @tc.type: FUNC
+ * @tc.level: Level1
  * @tc.require:
  */
 HWTEST_F(AuthOtherTest, FIND_AUTH_REQUEST_BY_CONN_INFO_TEST_002, TestSize.Level1)
@@ -446,6 +457,7 @@ HWTEST_F(AuthOtherTest, FIND_AUTH_REQUEST_BY_CONN_INFO_TEST_002, TestSize.Level1
  * @tc.name: RMOVE_UPDATE_SESSION_KEY_FUNC_TEST_001
  * @tc.desc: rmove update session key func test
  * @tc.type: FUNC
+ * @tc.level: Level1
  * @tc.require:
  */
 HWTEST_F(AuthOtherTest, RMOVE_UPDATE_SESSION_KEY_FUNC_TEST_001, TestSize.Level1)
@@ -466,6 +478,7 @@ HWTEST_F(AuthOtherTest, RMOVE_UPDATE_SESSION_KEY_FUNC_TEST_001, TestSize.Level1)
  * @tc.name: POST_CLOSE_ACK_MESSAGE_TEST_001
  * @tc.desc: post close ack message test
  * @tc.type: FUNC
+ * @tc.level: Level1
  * @tc.require:
  */
 HWTEST_F(AuthOtherTest, POST_CLOSE_ACK_MESSAGE_TEST_001, TestSize.Level1)
@@ -483,6 +496,7 @@ HWTEST_F(AuthOtherTest, POST_CLOSE_ACK_MESSAGE_TEST_001, TestSize.Level1)
  * @tc.name: PACK_AUTH_DATA_TEST_001
  * @tc.desc: pack auth data test
  * @tc.type: FUNC
+ * @tc.level: Level1
  * @tc.require:
  */
 HWTEST_F(AuthOtherTest, PACK_AUTH_DATA_TEST_001, TestSize.Level1)
@@ -501,6 +515,7 @@ HWTEST_F(AuthOtherTest, PACK_AUTH_DATA_TEST_001, TestSize.Level1)
  * @tc.name: GET_CONN_SIDE_TYPE_TEST_001
  * @tc.desc: get connside type test
  * @tc.type: FUNC
+ * @tc.level: Level1
  * @tc.require:
  */
 HWTEST_F(AuthOtherTest, GET_CONN_SIDE_TYPE_TEST_001, TestSize.Level1)
@@ -525,6 +540,7 @@ HWTEST_F(AuthOtherTest, GET_CONN_SIDE_TYPE_TEST_001, TestSize.Level1)
  * @tc.name: ON_COMM_DATA_RECEVIED_TEST_001
  * @tc.desc: on comm data received test
  * @tc.type: FUNC
+ * @tc.level: Level1
  * @tc.require:
  */
 HWTEST_F(AuthOtherTest, ON_COMM_DATA_RECEVIED_TEST_001, TestSize.Level1)
@@ -553,6 +569,7 @@ HWTEST_F(AuthOtherTest, ON_COMM_DATA_RECEVIED_TEST_001, TestSize.Level1)
  * @tc.name: IS_FLUSH_DEVICE_PACKET_TEST_001
  * @tc.desc: is flush device packet test
  * @tc.type: FUNC
+ * @tc.level: Level1
  * @tc.require:
  */
 HWTEST_F(AuthOtherTest, IS_FLUSH_DEVICE_PACKET_TEST_001, TestSize.Level1)
@@ -587,6 +604,7 @@ HWTEST_F(AuthOtherTest, IS_FLUSH_DEVICE_PACKET_TEST_001, TestSize.Level1)
  * @tc.name: FSM_MSG_TYPE_TO_STR_TEST_001
  * @tc.desc: fsm msg type to str test
  * @tc.type: FUNC
+ * @tc.level: Level1
  * @tc.require:
  */
 HWTEST_F(AuthOtherTest, FSM_MSG_TYPE_TO_STR_TEST_001, TestSize.Level1)
@@ -608,6 +626,7 @@ HWTEST_F(AuthOtherTest, FSM_MSG_TYPE_TO_STR_TEST_001, TestSize.Level1)
  * @tc.name: AUTH_MANAGER_SET_SESSION_KEY_TEST_001
  * @tc.desc: fsm msg type to str test
  * @tc.type: FUNC
+ * @tc.level: Level1
  * @tc.require:
  */
 HWTEST_F(AuthOtherTest, AUTH_MANAGER_SET_SESSION_KEY_TEST_001, TestSize.Level1)
@@ -644,6 +663,7 @@ HWTEST_F(AuthOtherTest, AUTH_MANAGER_SET_SESSION_KEY_TEST_001, TestSize.Level1)
  * @tc.name: AUTH_DEVICE_CLOSE_CONN_TEST_001
  * @tc.desc: fsm msg type to str test
  * @tc.type: FUNC
+ * @tc.level: Level1
  * @tc.require:
  */
 HWTEST_F(AuthOtherTest, AUTH_DEVICE_CLOSE_CONN_TEST_001, TestSize.Level1)
@@ -668,6 +688,7 @@ HWTEST_F(AuthOtherTest, AUTH_DEVICE_CLOSE_CONN_TEST_001, TestSize.Level1)
  * @tc.name: AUTH_DEVICE_GET_PREFER_CONN_INFO_TEST_001
  * @tc.desc: fsm msg type to str test
  * @tc.type: FUNC
+ * @tc.level: Level1
  * @tc.require:
  */
 HWTEST_F(AuthOtherTest, AUTH_DEVICE_GET_PREFER_CONN_INFO_TEST_001, TestSize.Level1)
@@ -689,6 +710,7 @@ HWTEST_F(AuthOtherTest, AUTH_DEVICE_GET_PREFER_CONN_INFO_TEST_001, TestSize.Leve
  * @tc.name: AUTH_DEVICE_CHECK_CONN_INFO_TEST_001
  * @tc.desc: fsm msg type to str test
  * @tc.type: FUNC
+ * @tc.level: Level1
  * @tc.require:
  */
 HWTEST_F(AuthOtherTest, AUTH_DEVICE_CHECK_CONN_INFO_TEST_001, TestSize.Level1)
@@ -704,6 +726,7 @@ HWTEST_F(AuthOtherTest, AUTH_DEVICE_CHECK_CONN_INFO_TEST_001, TestSize.Level1)
  * @tc.name: CONVERT_AUTH_LINK_TYPE_TO_HISYSEVENT_LINKTYPE_TEST_001
  * @tc.desc: sync deviceInfo state process test
  * @tc.type: FUNC
+ * @tc.level: Level1
  * @tc.require:
  */
 HWTEST_F(AuthOtherTest, CONVERT_AUTH_LINK_TYPE_TO_HISYSEVENT_LINKTYPE_TEST_001, TestSize.Level1)
@@ -761,6 +784,7 @@ HWTEST_F(AuthOtherTest, CONVERT_AUTH_LINK_TYPE_TO_HISYSEVENT_LINKTYPE_TEST_001, 
  * @tc.name: POST_MESSAGE_TO_AUTH_FSM_TEST_001
  * @tc.desc: post message to auth fsm test
  * @tc.type: FUNC
+ * @tc.level: Level1
  * @tc.require:
  */
 HWTEST_F(AuthOtherTest, POST_MESSAGE_TO_AUTH_FSM_TEST_001, TestSize.Level1)
@@ -781,6 +805,7 @@ HWTEST_F(AuthOtherTest, POST_MESSAGE_TO_AUTH_FSM_TEST_001, TestSize.Level1)
  * @tc.name: AUTH_FSM_TEST_001
  * @tc.desc: authSession handle device disconnected test
  * @tc.type: FUNC
+ * @tc.level: Level1
  * @tc.require:
  */
 HWTEST_F(AuthOtherTest, AUTH_FSM_TEST_001, TestSize.Level1)
@@ -797,6 +822,7 @@ HWTEST_F(AuthOtherTest, AUTH_FSM_TEST_001, TestSize.Level1)
  * @tc.name: AUTH_RESTORE_MANAGER_TEST_001
  * @tc.desc: authRestore authManager test
  * @tc.type: FUNC
+ * @tc.level: Level1
  * @tc.require:
  */
 HWTEST_F(AuthOtherTest, AUTH_RESTORE_MANAGER_TEST_001, TestSize.Level1)
@@ -835,6 +861,7 @@ HWTEST_F(AuthOtherTest, AUTH_RESTORE_MANAGER_TEST_001, TestSize.Level1)
  * @tc.name: GET_PEER_UDID_BY_NETWORK_ID_TEST_001
  * @tc.desc: get peer udid by networkId test
  * @tc.type: FUNC
+ * @tc.level: Level1
  * @tc.require:
  */
 HWTEST_F(AuthOtherTest, GET_PEER_UDID_BY_NETWORK_ID_TEST_001, TestSize.Level1)
@@ -852,6 +879,7 @@ HWTEST_F(AuthOtherTest, GET_PEER_UDID_BY_NETWORK_ID_TEST_001, TestSize.Level1)
  * @tc.name: GET_LATEST_ID_BY_CONNINFO_TEST_001
  * @tc.desc: get latest id by connInfo test
  * @tc.type: FUNC
+ * @tc.level: Level1
  * @tc.require:
  */
 HWTEST_F(AuthOtherTest, GET_LATEST_ID_BY_CONNINFO_TEST_001, TestSize.Level1)
@@ -875,6 +903,7 @@ HWTEST_F(AuthOtherTest, GET_LATEST_ID_BY_CONNINFO_TEST_001, TestSize.Level1)
  * @tc.name: START_RECONNECT_DEVICE_TEST_001
  * @tc.desc: start reconnection device test
  * @tc.type: FUNC
+ * @tc.level: Level1
  * @tc.require:
  */
 HWTEST_F(AuthOtherTest, START_RECONNECT_DEVICE_TEST_001, TestSize.Level1)
@@ -900,6 +929,7 @@ HWTEST_F(AuthOtherTest, START_RECONNECT_DEVICE_TEST_001, TestSize.Level1)
  * @tc.name: AUTH_GET_LATEST_AUTHSEQ_LIST_TEST_001
  * @tc.desc: auth get latest authsed list test
  * @tc.type: FUNC
+ * @tc.level: Level1
  * @tc.require:
  */
 HWTEST_F(AuthOtherTest, AUTH_GET_LATEST_AUTHSEQ_LIST_TEST_001, TestSize.Level1)
@@ -935,6 +965,7 @@ HWTEST_F(AuthOtherTest, AUTH_GET_LATEST_AUTHSEQ_LIST_TEST_001, TestSize.Level1)
  * @tc.name: SYNC_DEVINFO_STATE_PROCESS_TEST_001
  * @tc.desc: sync deviceInfo state process test
  * @tc.type: FUNC
+ * @tc.level: Level1
  * @tc.require:
  */
 HWTEST_F(AuthOtherTest, SYNC_DEVINFO_STATE_PROCESS_TEST_001, TestSize.Level1)
@@ -976,6 +1007,7 @@ HWTEST_F(AuthOtherTest, SYNC_DEVINFO_STATE_PROCESS_TEST_001, TestSize.Level1)
  * @tc.name: GET_AUTH_CONN_001
  * @tc.desc: get auth conn test
  * @tc.type: FUNC
+ * @tc.level: Level1
  * @tc.require:
  */
 HWTEST_F(AuthOtherTest, GET_AUTH_CONN_001, TestSize.Level1)
@@ -1016,6 +1048,7 @@ HWTEST_F(AuthOtherTest, GET_AUTH_CONN_001, TestSize.Level1)
  * @tc.name: AUTH_GET_AUTH_HANDLE_BY_INDEX_TEST_001
  * @tc.desc: AuthGetAuthHandleByIndex test
  * @tc.type: FUNC
+ * @tc.level: Level1
  * @tc.require:
  */
 HWTEST_F(AuthOtherTest, AUTH_GET_AUTH_HANDLE_BY_INDEX_TEST_001, TestSize.Level1)
@@ -1045,6 +1078,7 @@ HWTEST_F(AuthOtherTest, AUTH_GET_AUTH_HANDLE_BY_INDEX_TEST_001, TestSize.Level1)
  * @tc.name: AUTH_CHECK_SESSION_KEY_VALID_BY_CONN_INFO_TEST_001
  * @tc.desc: AuthCheckSessionKeyValidByConnInfo test
  * @tc.type: FUNC
+ * @tc.level: Level1
  * @tc.require:
  */
 HWTEST_F(AuthOtherTest, AUTH_CHECK_SESSION_KEY_VALID_BY_CONN_INFO_TEST_001, TestSize.Level1)
@@ -1087,6 +1121,7 @@ HWTEST_F(AuthOtherTest, AUTH_CHECK_SESSION_KEY_VALID_BY_CONN_INFO_TEST_001, Test
  * @tc.name: AUTH_DIRECT_ONLINE_PROCESS_SESSION_KEY_TEST_001
  * @tc.desc: AuthDirectOnlineProcessSessionKey test
  * @tc.type: FUNC
+ * @tc.level: Level1
  * @tc.require:
  */
 HWTEST_F(AuthOtherTest, AUTH_DIRECT_ONLINE_PROCESS_SESSION_KEY_TEST_001, TestSize.Level1)
@@ -1110,6 +1145,7 @@ HWTEST_F(AuthOtherTest, AUTH_DIRECT_ONLINE_PROCESS_SESSION_KEY_TEST_001, TestSiz
  * @tc.name: IS_SAME_ACCOUNT_DEVICE_TEST_001
  * @tc.desc: IsSameAccountDevice test
  * @tc.type: FUNC
+ * @tc.level: Level1
  * @tc.require:
  */
 HWTEST_F(AuthOtherTest, IS_SAME_ACCOUNT_DEVICE_TEST_001, TestSize.Level1)
@@ -1134,6 +1170,7 @@ HWTEST_F(AuthOtherTest, IS_SAME_ACCOUNT_DEVICE_TEST_001, TestSize.Level1)
  * @tc.name: FILL_AUTH_SESSION_INFO_TEST_001
  * @tc.desc: FillAuthSessionInfo test
  * @tc.type: FUNC
+ * @tc.level: Level1
  * @tc.require:
  */
 HWTEST_F(AuthOtherTest, FILL_AUTH_SESSION_INFO_TEST_001, TestSize.Level1)
@@ -1157,6 +1194,7 @@ HWTEST_F(AuthOtherTest, FILL_AUTH_SESSION_INFO_TEST_001, TestSize.Level1)
  * @tc.name: DEL_AUTH_REQ_INFO_BY_AUTH_HANDLE_TEST_001
  * @tc.desc: DelAuthReqInfoByAuthHandle test
  * @tc.type: FUNC
+ * @tc.level: Level1
  * @tc.require:
  */
 HWTEST_F(AuthOtherTest, DEL_AUTH_REQ_INFO_BY_AUTH_HANDLE_TEST_001, TestSize.Level1)
@@ -1193,6 +1231,7 @@ HWTEST_F(AuthOtherTest, DEL_AUTH_REQ_INFO_BY_AUTH_HANDLE_TEST_001, TestSize.Leve
  * @tc.name: IS_ENHANCE_P2P_MODULE_ID_TEST_001
  * @tc.desc: IsEnhanceP2pModuleId test
  * @tc.type: FUNC
+ * @tc.level: Level1
  * @tc.require:
  */
 HWTEST_F(AuthOtherTest, IS_ENHANCE_P2P_MODULE_ID_TEST_001, TestSize.Level1)
@@ -1206,6 +1245,7 @@ HWTEST_F(AuthOtherTest, IS_ENHANCE_P2P_MODULE_ID_TEST_001, TestSize.Level1)
  * @tc.name: AUTH_START_LISTENING_FOR_WIFI_DIRECT_TEST_001
  * @tc.desc: AuthStartListeningForWifiDirect test
  * @tc.type: FUNC
+ * @tc.level: Level1
  * @tc.require:
  */
 HWTEST_F(AuthOtherTest, AUTH_START_LISTENING_FOR_WIFI_DIRECT_TEST_001, TestSize.Level1)
@@ -1235,6 +1275,7 @@ HWTEST_F(AuthOtherTest, AUTH_START_LISTENING_FOR_WIFI_DIRECT_TEST_001, TestSize.
  * @tc.name: IS_AUTH_SESSION_KEY_MODULE_TEST_001
  * @tc.desc: IsAuthSessionKeyModule test
  * @tc.type: FUNC
+ * @tc.level: Level1
  * @tc.require:
  */
 HWTEST_F(AuthOtherTest, IS_AUTH_SESSION_KEY_MODULE_TEST_001, TestSize.Level1)
@@ -1263,6 +1304,7 @@ HWTEST_F(AuthOtherTest, IS_AUTH_SESSION_KEY_MODULE_TEST_001, TestSize.Level1)
  * @tc.name: ON_WIFI_CONNECTED_TEST_001
  * @tc.desc: OnWiFiConnected test
  * @tc.type: FUNC
+ * @tc.level: Level1
  * @tc.require:
  */
 HWTEST_F(AuthOtherTest, ON_WIFI_CONNECTED_TEST_001, TestSize.Level1)
@@ -1283,6 +1325,7 @@ HWTEST_F(AuthOtherTest, ON_WIFI_CONNECTED_TEST_001, TestSize.Level1)
  * @tc.name: ON_TCP_SESSION_CONNECTED_TEST_001
  * @tc.desc: OnTcpSessionConnected test
  * @tc.type: FUNC
+ * @tc.level: Level1
  * @tc.require:
  */
 HWTEST_F(AuthOtherTest, ON_TCP_SESSION_CONNECTED_TEST_001, TestSize.Level1)
@@ -1303,6 +1346,7 @@ HWTEST_F(AuthOtherTest, ON_TCP_SESSION_CONNECTED_TEST_001, TestSize.Level1)
  * @tc.name: ON_WIFI_DISCONNECTED_TEST_001
  * @tc.desc: OnWiFiDisconnected test
  * @tc.type: FUNC
+ * @tc.level: Level1
  * @tc.require:
  */
 HWTEST_F(AuthOtherTest, ON_WIFI_DISCONNECTED_TEST_001, TestSize.Level1)
