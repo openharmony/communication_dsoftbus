@@ -54,6 +54,7 @@ void AuthSessionKeyTest::TearDown() { }
  * @tc.name: SESSIONKEY_USE_TIME_TEST_001
  * @tc.desc: sessionkey item useTime test
  * @tc.type: FUNC
+ * @tc.level: Level1
  * @tc.require:
  */
 HWTEST_F(AuthSessionKeyTest, SESSIONKEY_USE_TIME_TEST_001, TestSize.Level1)
@@ -82,6 +83,7 @@ HWTEST_F(AuthSessionKeyTest, SESSIONKEY_USE_TIME_TEST_001, TestSize.Level1)
  * @tc.name: SESSIONKEY_USE_TIME_TEST_002
  * @tc.desc: GetLatestSessionKey test
  * @tc.type: FUNC
+ * @tc.level: Level1
  * @tc.require:
  */
 HWTEST_F(AuthSessionKeyTest, SESSIONKEY_USE_TIME_TEST_002, TestSize.Level1)
@@ -119,6 +121,7 @@ HWTEST_F(AuthSessionKeyTest, SESSIONKEY_USE_TIME_TEST_002, TestSize.Level1)
  * @tc.name: SESSIONKEY_USE_TIME_TEST_003
  * @tc.desc: sessionkey item useTime test
  * @tc.type: FUNC
+ * @tc.level: Level1
  * @tc.require:
  */
 HWTEST_F(AuthSessionKeyTest, SESSIONKEY_USE_TIME_TEST_003, TestSize.Level1)
@@ -160,6 +163,7 @@ HWTEST_F(AuthSessionKeyTest, SESSIONKEY_USE_TIME_TEST_003, TestSize.Level1)
  * @tc.name: UPDATE_LATEST_USE_TIME_TEST_001
  * @tc.desc: UpdateLatestUseTime test
  * @tc.type: FUNC
+ * @tc.level: Level1
  * @tc.require:
  */
 HWTEST_F(AuthSessionKeyTest, UPDATE_LATEST_USE_TIME_TEST_001, TestSize.Level1)
@@ -196,6 +200,7 @@ HWTEST_F(AuthSessionKeyTest, UPDATE_LATEST_USE_TIME_TEST_001, TestSize.Level1)
  * @tc.name: UPDATE_LATEST_USE_TIME_TEST_002
  * @tc.desc: UpdateLatestUseTime test
  * @tc.type: FUNC
+ * @tc.level: Level1
  * @tc.require:
  */
 HWTEST_F(AuthSessionKeyTest, UPDATE_LATEST_USE_TIME_TEST_002, TestSize.Level1)
@@ -232,6 +237,7 @@ HWTEST_F(AuthSessionKeyTest, UPDATE_LATEST_USE_TIME_TEST_002, TestSize.Level1)
  * @tc.name: OLD_SESSION_KEY_TEST_001
  * @tc.desc: CheckSessionKeyListHasOldKey and ClearOldKey test
  * @tc.type: FUNC
+ * @tc.level: Level1
  * @tc.require:
  */
 HWTEST_F(AuthSessionKeyTest, OLD_SESSION_KEY_TEST_001, TestSize.Level1)

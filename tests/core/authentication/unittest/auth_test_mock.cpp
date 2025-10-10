@@ -292,6 +292,7 @@ void AuthInitMock(AuthCommonInterfaceMock &connMock, LnnHichainInterfaceMock &hi
  * @tc.name: AUTH_CALLBACK_TEST_001
  * @tc.desc: auth callback test
  * @tc.type: FUNC
+ * @tc.level: Level1
  * @tc.require:
  */
 
@@ -347,6 +348,7 @@ HWTEST_F(AuthTestCallBackTest, AUTH_CALLBACK_TEST_001, TestSize.Level1)
  * @tc.name: AUTH_CALLBACK_TEST_002
  * @tc.desc: auth callback test
  * @tc.type: FUNC
+ * @tc.level: Level1
  * @tc.require:
  */
 

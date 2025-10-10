@@ -107,6 +107,7 @@ void AuthInitMock(AuthCommonInterfaceMock &connMock, LnnHichainInterfaceMock &hi
  * @tc.name: AUTH_START_LISTENING_Test_001
  * @tc.desc: auth start listening
  * @tc.type: FUNC
+ * @tc.level: Level0
  * @tc.require:
  */
 HWTEST_F(AuthEnhanceMockTest, AUTH_START_LISTENING_Test_001, TestSize.Level0)
@@ -122,6 +123,7 @@ HWTEST_F(AuthEnhanceMockTest, AUTH_START_LISTENING_Test_001, TestSize.Level0)
  * @tc.name: AUTH_HICHAIN_START_AUTH_Test_001
  * @tc.desc: hichain start auth
  * @tc.type: FUNC
+ * @tc.level: Level0
  * @tc.require:
  */
 HWTEST_F(AuthEnhanceMockTest, AUTH_HICHAIN_START_AUTH_Test_001, TestSize.Level0)
@@ -150,6 +152,7 @@ HWTEST_F(AuthEnhanceMockTest, AUTH_HICHAIN_START_AUTH_Test_001, TestSize.Level0)
  * @tc.name: AUTH_INIT_Test_001
  * @tc.desc: auth init
  * @tc.type: FUNC
+ * @tc.level: Level0
  * @tc.require:
  */
 HWTEST_F(AuthEnhanceMockTest, AUTH_INIT_Test_001, TestSize.Level0)
@@ -169,6 +172,7 @@ HWTEST_F(AuthEnhanceMockTest, AUTH_INIT_Test_001, TestSize.Level0)
  * @tc.name: AUTH_START_VERIFY_Test_001
  * @tc.desc: client auth start verify ble
  * @tc.type: FUNC
+ * @tc.level: Level1
  * @tc.require:
  */
 HWTEST_F(AuthEnhanceMockTest, CLINET_AUTH_START_VERIFY_Test_001, TestSize.Level1)
@@ -208,6 +212,7 @@ HWTEST_F(AuthEnhanceMockTest, CLINET_AUTH_START_VERIFY_Test_001, TestSize.Level1
  * @tc.name: AUTH_START_VERIFY_Test_002
  * @tc.desc: client auth start verify wifi
  * @tc.type: FUNC
+ * @tc.level: Level1
  * @tc.require:
  */
 HWTEST_F(AuthEnhanceMockTest, CLINET_AUTH_START_VERIFY_Test_002, TestSize.Level1)
@@ -248,6 +253,7 @@ HWTEST_F(AuthEnhanceMockTest, CLINET_AUTH_START_VERIFY_Test_002, TestSize.Level1
  * @tc.name: POST_DEVICEID_001
  * @tc.desc: client auth start verify failed callback
  * @tc.type: FUNC
+ * @tc.level: Level1
  * @tc.require:
  */
 HWTEST_F(AuthEnhanceMockTest, CLINET_CONN_FAILED_001, TestSize.Level1)
@@ -288,6 +294,7 @@ HWTEST_F(AuthEnhanceMockTest, CLINET_CONN_FAILED_001, TestSize.Level1)
  * @tc.name: AUTH_START_VERIFY_Test_003
  * @tc.desc: client auth start verify success callback
  * @tc.type: FUNC
+ * @tc.level: Level1
  * @tc.require:
  */
 HWTEST_F(AuthEnhanceMockTest, CLINET_AUTH_START_VERIFY_Test_003, TestSize.Level1)
@@ -330,6 +337,7 @@ HWTEST_F(AuthEnhanceMockTest, CLINET_AUTH_START_VERIFY_Test_003, TestSize.Level1
  * @tc.name: CHECK_SESSIONKEY_VALID_Test_001
  * @tc.desc: AuthCheckSessionKeyValidByConnInfo test
  * @tc.type: FUNC
+ * @tc.level: Level1
  * @tc.require:
  */
 HWTEST_F(AuthEnhanceMockTest, CHECK_SESSIONKEY_VALID_Test_001, TestSize.Level1)
@@ -351,6 +359,7 @@ HWTEST_F(AuthEnhanceMockTest, CHECK_SESSIONKEY_VALID_Test_001, TestSize.Level1)
  * @tc.name: CHECK_SESSIONKEY_VALID_Test_002
  * @tc.desc: AuthCheckSessionKeyValidByConnInfo test
  * @tc.type: FUNC
+ * @tc.level: Level1
  * @tc.require:
  */
 HWTEST_F(AuthEnhanceMockTest, CHECK_SESSIONKEY_VALID_Test_002, TestSize.Level1)
@@ -387,6 +396,7 @@ HWTEST_F(AuthEnhanceMockTest, CHECK_SESSIONKEY_VALID_Test_002, TestSize.Level1)
  * @tc.name: CHECK_SESSION_KEY_VALID_BY_AUTH_HANDLE_Test_001
  * @tc.desc: AuthCheckSessionKeyValidByAuthHandle test
  * @tc.type: FUNC
+ * @tc.level: Level1
  * @tc.require:
  */
 HWTEST_F(AuthEnhanceMockTest, CHECK_SESSION_KEY_VALID_BY_AUTH_HANDLE_Test_001, TestSize.Level1)

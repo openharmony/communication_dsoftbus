@@ -54,6 +54,7 @@ void AuthHichainMockTest::TearDown() { }
  * @tc.name: GEN_DEVICE_LEVEL_PARAM_TEST_001
  * @tc.desc: GenDeviceLevelParam test
  * @tc.type: FUNC
+ * @tc.level: Level1
  * @tc.require:
  */
 HWTEST_F(AuthHichainMockTest, GEN_DEVICE_LEVEL_PARAM_TEST_001, TestSize.Level1)
@@ -93,6 +94,7 @@ HWTEST_F(AuthHichainMockTest, GEN_DEVICE_LEVEL_PARAM_TEST_001, TestSize.Level1)
  * @tc.name: ON_TRANSMIT_TEST_001
  * @tc.desc: OnTransmit test
  * @tc.type: FUNC
+ * @tc.level: Level1
  * @tc.require:
  */
 HWTEST_F(AuthHichainMockTest, ON_TRANSMIT_TEST_001, TestSize.Level1)
@@ -114,6 +116,7 @@ HWTEST_F(AuthHichainMockTest, ON_TRANSMIT_TEST_001, TestSize.Level1)
  * @tc.name: GET_DEVICE_SIDE_FLAG_TEST_001
  * @tc.desc: GetDeviceSideFlag test
  * @tc.type: FUNC
+ * @tc.level: Level1
  * @tc.require:
  */
 HWTEST_F(AuthHichainMockTest, GET_DEVICE_SIDE_FLAG_TEST_001, TestSize.Level1)
@@ -154,6 +157,7 @@ HWTEST_F(AuthHichainMockTest, GET_DEVICE_SIDE_FLAG_TEST_001, TestSize.Level1)
  * @tc.name: CHECK_ERR_RETURN_VALIDITY_TEST_001
  * @tc.desc: CheckErrReturnValidity test
  * @tc.type: FUNC
+ * @tc.level: Level1
  * @tc.require:
  */
 HWTEST_F(AuthHichainMockTest, CHECK_ERR_RETURN_VALIDITY_TEST_001, TestSize.Level1)
@@ -179,6 +183,7 @@ HWTEST_F(AuthHichainMockTest, CHECK_ERR_RETURN_VALIDITY_TEST_001, TestSize.Level
  * @tc.name: ON_REQUEST_TEST_001
  * @tc.desc: OnRequest test
  * @tc.type: FUNC
+ * @tc.level: Level1
  * @tc.require:
  */
 HWTEST_F(AuthHichainMockTest, ON_REQUEST_TEST_001, TestSize.Level1)
@@ -230,6 +235,7 @@ HWTEST_F(AuthHichainMockTest, ON_REQUEST_TEST_001, TestSize.Level1)
  * @tc.name: ON_REQUEST_TEST_002
  * @tc.desc: OnRequest test
  * @tc.type: FUNC
+ * @tc.level: Level1
  * @tc.require:
  */
 HWTEST_F(AuthHichainMockTest, ON_REQUEST_TEST_002, TestSize.Level1)
@@ -293,6 +299,7 @@ HWTEST_F(AuthHichainMockTest, ON_REQUEST_TEST_002, TestSize.Level1)
  * @tc.name: GET_UDID_HASH_TEST_001
  * @tc.desc: GetUdidHash test
  * @tc.type: FUNC
+ * @tc.level: Level1
  * @tc.require:
  */
 HWTEST_F(AuthHichainMockTest, GET_UDID_HASH_TEST_001, TestSize.Level1)
@@ -330,6 +337,7 @@ HWTEST_F(AuthHichainMockTest, GET_UDID_HASH_TEST_001, TestSize.Level1)
  * @tc.name: HICHAIN_START_AUTH_TEST_001
  * @tc.desc: HichainStartAuth test
  * @tc.type: FUNC
+ * @tc.level: Level1
  * @tc.require:
  */
 HWTEST_F(AuthHichainMockTest, HICHAIN_START_AUTH_TEST_001, TestSize.Level1)
@@ -367,6 +375,7 @@ HWTEST_F(AuthHichainMockTest, HICHAIN_START_AUTH_TEST_001, TestSize.Level1)
  * @tc.name: PACK_EXTERNAL_AUTH_INFO_001
  * @tc.desc: PackExternalAuthInfo test
  * @tc.type: FUNC
+ * @tc.level: Level1
  * @tc.require:
  */
 HWTEST_F(AuthHichainMockTest, PACK_EXTERNAL_AUTH_INFO_001, TestSize.Level1)
@@ -419,6 +428,7 @@ HWTEST_F(AuthHichainMockTest, PACK_EXTERNAL_AUTH_INFO_001, TestSize.Level1)
  * @tc.name: UNPACK_EXTERNAL_AUTH_INFO_001
  * @tc.desc: UnpackExternalAuthInfo test
  * @tc.type: FUNC
+ * @tc.level: Level1
  * @tc.require:
  */
 HWTEST_F(AuthHichainMockTest, UNPACK_EXTERNAL_AUTH_INFO_001, TestSize.Level1)

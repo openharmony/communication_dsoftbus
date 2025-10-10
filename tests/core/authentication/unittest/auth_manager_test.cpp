@@ -118,6 +118,7 @@ static void SetAuthSessionInfo(AuthSessionInfo *info, uint64_t connId, bool isSe
  * @tc.name: NEW_AND_FIND_AUTH_MANAGER_TEST_001
  * @tc.desc: NewAndFindAuthManager test
  * @tc.type: FUNC
+ * @tc.level: Level1
  * @tc.require:
  */
 HWTEST_F(AuthManagerTest, NEW_AND_FIND_AUTH_MANAGER_TEST_001, TestSize.Level1)
@@ -177,6 +178,7 @@ static int32_t MyUpdateFuncReturnOk(AuthManager *auth1, const AuthManager *auth2
  * @tc.name: FIND_AUTH_MANAGER_TEST_001
  * @tc.desc: FindAuthManager test
  * @tc.type: FUNC
+ * @tc.level: Level1
  * @tc.require:
  */
 HWTEST_F(AuthManagerTest, FIND_AUTH_MANAGER_TEST_001, TestSize.Level1)
@@ -213,6 +215,7 @@ HWTEST_F(AuthManagerTest, FIND_AUTH_MANAGER_TEST_001, TestSize.Level1)
  * @tc.name: GET_AUTH_MANAGER_BY_CONN_INFO_TEST_001
  * @tc.desc: GetAuthManagerByConnInfo test
  * @tc.type: FUNC
+ * @tc.level: Level1
  * @tc.require:
  */
 HWTEST_F(AuthManagerTest, GET_AUTH_MANAGER_BY_CONN_INFO_TEST_001, TestSize.Level1)
@@ -243,6 +246,7 @@ HWTEST_F(AuthManagerTest, GET_AUTH_MANAGER_BY_CONN_INFO_TEST_001, TestSize.Level
  * @tc.name: AUTH_DIRECT_ONLINE_CREATE_AUTHMANAGER_TEST_001
  * @tc.desc: AuthDirectOnlineCreateAuthManager test
  * @tc.type: FUNC
+ * @tc.level: Level1
  * @tc.require:
  */
 HWTEST_F(AuthManagerTest, AUTH_DIRECT_ONLINE_CREATE_AUTHMANAGER_TEST_001, TestSize.Level1)
@@ -275,6 +279,7 @@ HWTEST_F(AuthManagerTest, AUTH_DIRECT_ONLINE_CREATE_AUTHMANAGER_TEST_001, TestSi
  * @tc.name: AUTH_DIRECT_ONLINE_CREATE_AUTHMANAGER_TEST_002
  * @tc.desc: AuthDirectOnlineCreateAuthManager test
  * @tc.type: FUNC
+ * @tc.level: Level1
  * @tc.require:
  */
 HWTEST_F(AuthManagerTest, AUTH_DIRECT_ONLINE_CREATE_AUTHMANAGER_TEST_002, TestSize.Level1)
@@ -312,6 +317,7 @@ HWTEST_F(AuthManagerTest, AUTH_DIRECT_ONLINE_CREATE_AUTHMANAGER_TEST_002, TestSi
  * @tc.name: GET_ACTIVE_AUTH_ID_BY_CONN_INFO_TEST_001
  * @tc.desc: GetActiveAuthIdByConnInfo test
  * @tc.type: FUNC
+ * @tc.level: Level1
  * @tc.require:
  */
 HWTEST_F(AuthManagerTest, GET_ACTIVE_AUTH_ID_BY_CONN_INFO_TEST_001, TestSize.Level1)
@@ -350,6 +356,7 @@ HWTEST_F(AuthManagerTest, GET_ACTIVE_AUTH_ID_BY_CONN_INFO_TEST_001, TestSize.Lev
  * @tc.name: AUTH_MANAGER_GET_SESSION_KEY_TEST_001
  * @tc.desc: AuthManagerGetSessionKey test
  * @tc.type: FUNC
+ * @tc.level: Level1
  * @tc.require:
  */
 HWTEST_F(AuthManagerTest, AUTH_MANAGER_GET_SESSION_KEY_TEST_001, TestSize.Level1)
@@ -385,6 +392,7 @@ HWTEST_F(AuthManagerTest, AUTH_MANAGER_GET_SESSION_KEY_TEST_001, TestSize.Level1
  * @tc.name: RETRY_REG_TRUST_DATA_CHANGE_LISTENER_TEST_001
  * @tc.desc: RetryRegTrustDataChangeListener test
  * @tc.type: FUNC
+ * @tc.level: Level1
  * @tc.require:
  */
 HWTEST_F(AuthManagerTest, RETRY_REG_TRUST_DATA_CHANGE_LISTENER_TEST_001, TestSize.Level1)
@@ -420,6 +428,7 @@ static void MyConnOpenFailed(uint32_t requestId, int32_t reason)
  * @tc.name: START_VERIFY_DEVICE_TEST_001
  * @tc.desc: StartVerifyDevice test
  * @tc.type: FUNC
+ * @tc.level: Level1
  * @tc.require:
  */
 HWTEST_F(AuthManagerTest, START_VERIFY_DEVICE_TEST_001, TestSize.Level1)
@@ -464,6 +473,7 @@ HWTEST_F(AuthManagerTest, START_VERIFY_DEVICE_TEST_001, TestSize.Level1)
  * @tc.name: COMPLEMENT_CONNECTION_INFO_IF_NEED_TEST_001
  * @tc.desc: ComplementConnectionInfoIfNeed test
  * @tc.type: FUNC
+ * @tc.level: Level1
  * @tc.require:
  */
 HWTEST_F(AuthManagerTest, COMPLEMENT_CONNECTION_INFO_IF_NEED_TEST_001, TestSize.Level1)
@@ -495,6 +505,7 @@ HWTEST_F(AuthManagerTest, COMPLEMENT_CONNECTION_INFO_IF_NEED_TEST_001, TestSize.
  * @tc.name: HANDLE_RECONNECT_RESULT_TEST_001
  * @tc.desc: HandleReconnectResult test
  * @tc.type: FUNC
+ * @tc.level: Level1
  * @tc.require:
  */
 HWTEST_F(AuthManagerTest, HANDLE_RECONNECT_RESULT_TEST_001, TestSize.Level1)
@@ -531,6 +542,7 @@ HWTEST_F(AuthManagerTest, HANDLE_RECONNECT_RESULT_TEST_001, TestSize.Level1)
  * @tc.name: TRY_GET_BR_CONN_INFO_TEST_001
  * @tc.desc: TryGetBrConnInfo test
  * @tc.type: FUNC
+ * @tc.level: Level1
  * @tc.require:
  */
 HWTEST_F(AuthManagerTest, TRY_GET_BR_CONN_INFO_TEST_001, TestSize.Level1)
@@ -586,6 +598,7 @@ HWTEST_F(AuthManagerTest, TRY_GET_BR_CONN_INFO_TEST_001, TestSize.Level1)
  * @tc.name: AUTH_DEVICE_GET_P2P_CONN_INFO_TEST_001
  * @tc.desc: AuthDeviceGetP2pConnInfo test
  * @tc.type: FUNC
+ * @tc.level: Level1
  * @tc.require:
  */
 HWTEST_F(AuthManagerTest, AUTH_DEVICE_GET_P2P_CONN_INFO_TEST_001, TestSize.Level1)
@@ -625,6 +638,7 @@ HWTEST_F(AuthManagerTest, AUTH_DEVICE_GET_P2P_CONN_INFO_TEST_001, TestSize.Level
  * @tc.name: AUTH_DEVICE_GET_USB_CONN_INFO_TEST_001
  * @tc.desc: AuthDeviceGetUsbConnInfo test
  * @tc.type: FUNC
+ * @tc.level: Level1
  * @tc.require:
  */
 HWTEST_F(AuthManagerTest, AUTH_DEVICE_GET_USB_CONN_INFO_TEST_001, TestSize.Level1)
@@ -640,6 +654,7 @@ HWTEST_F(AuthManagerTest, AUTH_DEVICE_GET_USB_CONN_INFO_TEST_001, TestSize.Level
  * @tc.name: AUTH_DEVICE_OPEN_CONN_TEST_001
  * @tc.desc: AuthDeviceOpenConn test
  * @tc.type: FUNC
+ * @tc.level: Level1
  * @tc.require:
  */
 HWTEST_F(AuthManagerTest, AUTH_DEVICE_OPEN_CONN_TEST_001, TestSize.Level1)
@@ -665,6 +680,7 @@ HWTEST_F(AuthManagerTest, AUTH_DEVICE_OPEN_CONN_TEST_001, TestSize.Level1)
  * @tc.name: AUTH_GET_LATEST_AUTH_SEQ_LIST_TEST_001
  * @tc.desc: AuthGetLatestAuthSeqList test
  * @tc.type: FUNC
+ * @tc.level: Level1
  * @tc.require:
  */
 HWTEST_F(AuthManagerTest, AUTH_GET_LATEST_AUTH_SEQ_LIST_TEST_001, TestSize.Level1)
@@ -684,6 +700,7 @@ HWTEST_F(AuthManagerTest, AUTH_GET_LATEST_AUTH_SEQ_LIST_TEST_001, TestSize.Level
  * @tc.name: AUTH_DEVICE_ENCRYPT_TEST_001
  * @tc.desc: AuthDeviceEncrypt test
  * @tc.type: FUNC
+ * @tc.level: Level1
  * @tc.require:
  */
 HWTEST_F(AuthManagerTest, AUTH_DEVICE_ENCRYPT_TEST_001, TestSize.Level1)
@@ -700,6 +717,7 @@ HWTEST_F(AuthManagerTest, AUTH_DEVICE_ENCRYPT_TEST_001, TestSize.Level1)
  * @tc.name: AUTH_DEVICE_GET_CONN_INFO_TEST_001
  * @tc.desc: AuthDeviceGetConnInfo test
  * @tc.type: FUNC
+ * @tc.level: Level1
  * @tc.require:
  */
 HWTEST_F(AuthManagerTest, AUTH_DEVICE_GET_CONN_INFO_TEST_001, TestSize.Level1)
@@ -716,6 +734,7 @@ HWTEST_F(AuthManagerTest, AUTH_DEVICE_GET_CONN_INFO_TEST_001, TestSize.Level1)
  * @tc.name: AUTH_DEVICE_GET_SERVER_SIDE_TEST_001
  * @tc.desc: AuthDeviceGetServerSide test
  * @tc.type: FUNC
+ * @tc.level: Level1
  * @tc.require:
  */
 HWTEST_F(AuthManagerTest, AUTH_DEVICE_GET_SERVER_SIDE_TEST_001, TestSize.Level1)
@@ -737,6 +756,7 @@ HWTEST_F(AuthManagerTest, AUTH_DEVICE_GET_SERVER_SIDE_TEST_001, TestSize.Level1)
  * @tc.name: AUTH_SET_TCP_KEEPALIVE_BY_CONNINFO_TEST_001
  * @tc.desc: AuthSetTcpKeepaliveByConnInfo test
  * @tc.type: FUNC
+ * @tc.level: Level1
  * @tc.require:
  */
 HWTEST_F(AuthManagerTest, AUTH_SET_TCP_KEEPALIVE_BY_CONNINFO_TEST_001, TestSize.Level1)
@@ -756,6 +776,7 @@ HWTEST_F(AuthManagerTest, AUTH_SET_TCP_KEEPALIVE_BY_CONNINFO_TEST_001, TestSize.
  * @tc.name: AUTH_GET_LATEST_AUTH_SEQ_LIST_BY_TYPE_TEST_001
  * @tc.desc: AuthGetLatestAuthSeqListByType test
  * @tc.type: FUNC
+ * @tc.level: Level1
  * @tc.require:
  */
 HWTEST_F(AuthManagerTest, AUTH_GET_LATEST_AUTH_SEQ_LIST_BY_TYPE_TEST_001, TestSize.Level1)
@@ -785,6 +806,7 @@ HWTEST_F(AuthManagerTest, AUTH_GET_LATEST_AUTH_SEQ_LIST_BY_TYPE_TEST_001, TestSi
  * @tc.name: PROCESS_SESSION_KEY_TEST_001
  * @tc.desc: ProcessSessionKey test
  * @tc.type: FUNC
+ * @tc.level: Level1
  * @tc.require:
  */
 HWTEST_F(AuthManagerTest, PROCESS_SESSION_KEY_TEST_001, TestSize.Level1)
@@ -819,6 +841,7 @@ HWTEST_F(AuthManagerTest, PROCESS_SESSION_KEY_TEST_001, TestSize.Level1)
  * @tc.name: GENERATE_UDID_HASH_TEST_001
  * @tc.desc: GenerateUdidHash test
  * @tc.type: FUNC
+ * @tc.level: Level1
  * @tc.require:
  */
 HWTEST_F(AuthManagerTest, GENERATE_UDID_HASH_TEST_001, TestSize.Level1)
@@ -851,6 +874,7 @@ HWTEST_F(AuthManagerTest, GENERATE_UDID_HASH_TEST_001, TestSize.Level1)
  * @tc.name: GET_ALL_HML_OR_P2P_AUTH_HANDLE_NUM_TEST_001
  * @tc.desc: GetAllHmlOrP2pAuthHandleNum test
  * @tc.type: FUNC
+ * @tc.level: Level1
  * @tc.require:
  */
 HWTEST_F(AuthManagerTest, GET_ALL_HML_OR_P2P_AUTH_HANDLE_NUM_TEST_001, TestSize.Level1)
@@ -877,6 +901,7 @@ HWTEST_F(AuthManagerTest, GET_ALL_HML_OR_P2P_AUTH_HANDLE_NUM_TEST_001, TestSize.
  * @tc.name: AUTH_DEVICE_GET_AUTH_HANDLE_BY_INDEX_TEST_001
  * @tc.desc: AuthDeviceGetAuthHandleByIndex test
  * @tc.type: FUNC
+ * @tc.level: Level1
  * @tc.require:
  */
 HWTEST_F(AuthManagerTest, AUTH_DEVICE_GET_AUTH_HANDLE_BY_INDEX_TEST_001, TestSize.Level1)
@@ -898,6 +923,7 @@ HWTEST_F(AuthManagerTest, AUTH_DEVICE_GET_AUTH_HANDLE_BY_INDEX_TEST_001, TestSiz
  * @tc.name: AUTH_MAP_INIT_TEST_001
  * @tc.desc: AuthMapInit test
  * @tc.type: FUNC
+ * @tc.level: Level1
  * @tc.require:
  */
 HWTEST_F(AuthManagerTest, AUTH_MAP_INIT_TEST_001, TestSize.Level1)
@@ -923,6 +949,7 @@ HWTEST_F(AuthManagerTest, AUTH_MAP_INIT_TEST_001, TestSize.Level1)
  * @tc.name: IS_NEED_AUTH_LIMIT_TEST_001
  * @tc.desc: IsNeedAuthLimit test
  * @tc.type: FUNC
+ * @tc.level: Level1
  * @tc.require:
  */
 HWTEST_F(AuthManagerTest, IS_NEED_AUTH_LIMIT_TEST_001, TestSize.Level1)
@@ -946,6 +973,7 @@ HWTEST_F(AuthManagerTest, IS_NEED_AUTH_LIMIT_TEST_001, TestSize.Level1)
  * @tc.name: AUTH_DEVICE_ENCRYPT_TEST_002
  * @tc.desc: AuthDeviceEncrypt test
  * @tc.type: FUNC
+ * @tc.level: Level1
  * @tc.require:
  */
 HWTEST_F(AuthManagerTest, AUTH_DEVICE_ENCRYPT_TEST_002, TestSize.Level1)
@@ -977,6 +1005,7 @@ HWTEST_F(AuthManagerTest, AUTH_DEVICE_ENCRYPT_TEST_002, TestSize.Level1)
  * @tc.name: REMOVE_AUTHSESSION_KEY_BY_INDEX_TEST_001
  * @tc.desc: RemoveAuthSessionKeyByIndex test
  * @tc.type: FUNC
+ * @tc.level: Level1
  * @tc.require:
  */
 HWTEST_F(AuthManagerTest, REMOVE_AUTHSESSION_KEY_BY_INDEX_TEST_001, TestSize.Level1)
@@ -1008,6 +1037,7 @@ static void OnConnOpenFailed(uint32_t requestId, int32_t reason)
  * @tc.name: REPORT_AUTH_REQUEST_PASSED_TEST_001
  * @tc.desc: ReportAuthRequestPassed test
  * @tc.type: FUNC
+ * @tc.level: Level1
  * @tc.require:
  */
 HWTEST_F(AuthManagerTest, REPORT_AUTH_REQUEST_PASSED_TEST_001, TestSize.Level1)
@@ -1035,6 +1065,7 @@ HWTEST_F(AuthManagerTest, REPORT_AUTH_REQUEST_PASSED_TEST_001, TestSize.Level1)
  * @tc.name: FIND_NORMALIZE_KEY_AUTH_MANAGER_BY_UDID_TEST_001
  * @tc.desc: FindNormalizedKeyAuthManagerByUdid test
  * @tc.type: FUNC
+ * @tc.level: Level1
  * @tc.require:
  */
 HWTEST_F(AuthManagerTest, FIND_NORMALIZE_KEY_AUTH_MANAGER_BY_UDID_TEST_001, TestSize.Level1)
@@ -1049,6 +1080,7 @@ HWTEST_F(AuthManagerTest, FIND_NORMALIZE_KEY_AUTH_MANAGER_BY_UDID_TEST_001, Test
  * @tc.name: IS_AUTH_NODE_DISCONNECT_TEST_001
  * @tc.desc: IsAuthNoNeedDisconnect test
  * @tc.type: FUNC
+ * @tc.level: Level1
  * @tc.require:
  */
 HWTEST_F(AuthManagerTest, IS_AUTH_NODE_DISCONNECT_TEST_001, TestSize.Level1)
@@ -1071,6 +1103,7 @@ HWTEST_F(AuthManagerTest, IS_AUTH_NODE_DISCONNECT_TEST_001, TestSize.Level1)
  * @tc.name: RAW_LINK_NEED_UPDATE_AUTH_MANAGER_TEST_001
  * @tc.desc: RawLinkNeedUpdateAuthManager test
  * @tc.type: FUNC
+ * @tc.level: Level1
  * @tc.require:
  */
 HWTEST_F(AuthManagerTest, RAW_LINK_NEED_UPDATE_AUTH_MANAGER_TEST_001, TestSize.Level1)
@@ -1103,6 +1136,7 @@ HWTEST_F(AuthManagerTest, RAW_LINK_NEED_UPDATE_AUTH_MANAGER_TEST_001, TestSize.L
  * @tc.name: AUTH_DEVICE_GET_CONN_INFO_BY_TYPE_TEST_001
  * @tc.desc: AuthDeviceGetConnInfoByType test
  * @tc.type: FUNC
+ * @tc.level: Level1
  * @tc.require:
  */
 HWTEST_F(AuthManagerTest, AUTH_DEVICE_GET_CONN_INFO_BY_TYPE_TEST_001, TestSize.Level1)

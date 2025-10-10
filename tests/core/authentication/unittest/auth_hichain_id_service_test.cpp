@@ -145,6 +145,7 @@ static int32_t TestQueryCredentialByParams(int32_t osAccountId, const char *requ
  * @tc.name: ID_SERVICE_GENERATE_QUERY_PARAM_TEST_001
  * @tc.desc: IdServiceGenerateQueryParam test
  * @tc.type: FUNC
+ * @tc.level: Level1
  * @tc.require:
  */
 HWTEST_F(AuthHichainIdServiceTest, ID_SERVICE_GENERATE_QUERY_PARAM_TEST_001, TestSize.Level1)
@@ -206,6 +207,7 @@ int32_t QueryCredentialByParamsTest(int32_t osAccountId, const char *requestPara
  * @tc.name: ID_SERVICE_QUERY_CRED_TEST_001
  * @tc.desc: IdServiceQueryCredential test
  * @tc.type: FUNC
+ * @tc.level: Level1
  * @tc.require:
  */
 HWTEST_F(AuthHichainIdServiceTest, ID_SERVICE_QUERY_CRED_TEST_001, TestSize.Level1)
@@ -266,6 +268,7 @@ HWTEST_F(AuthHichainIdServiceTest, ID_SERVICE_QUERY_CRED_TEST_001, TestSize.Leve
  * @tc.name: ID_SERVICE_GENERATE_AUTH_PARAM_001
  * @tc.desc: IdServiceGenerateAuthParam test
  * @tc.type: FUNC
+ * @tc.level: Level1
  * @tc.require:
  */
 HWTEST_F(AuthHichainIdServiceTest, ID_SERVICE_GENERATE_AUTH_PARAM_001, TestSize.Level1)
@@ -332,6 +335,7 @@ int32_t AuthCredentialTest(
  * @tc.name: ID_SERVICE_AUTH_CRED_001
  * @tc.desc: IdServiceAuthCredential test
  * @tc.type: FUNC
+ * @tc.level: Level1
  * @tc.require:
  */
 HWTEST_F(AuthHichainIdServiceTest, ID_SERVICE_AUTH_CRED_001, TestSize.Level1)
@@ -379,6 +383,7 @@ int32_t ProcessCredDataTest(
  * @tc.name: ID_SERVICE_PROCESS_CRED_DATA_001
  * @tc.desc: IdServiceProcessCredData test
  * @tc.type: FUNC
+ * @tc.level: Level1
  * @tc.require:
  */
 HWTEST_F(AuthHichainIdServiceTest, ID_SERVICE_PROCESS_CRED_DATA_001, TestSize.Level1)
@@ -419,6 +424,7 @@ void DestroyInfoTest(char **returnData)
  * @tc.name: ID_SERVICE_INIT_SERVICE_TEST_001
  * @tc.desc: init service test
  * @tc.type: FUNC
+ * @tc.level: Level1
  * @tc.require:
  */
 HWTEST_F(AuthHichainIdServiceTest, ID_SERVICE_INIT_SERVICE_TEST_001, TestSize.Level1)
@@ -466,6 +472,7 @@ HWTEST_F(AuthHichainIdServiceTest, ID_SERVICE_INIT_SERVICE_TEST_001, TestSize.Le
  * @tc.name: ID_SERVICE_INIT_SERVICE_TEST_002
  * @tc.desc: init service test
  * @tc.type: FUNC
+ * @tc.level: Level1
  * @tc.require:
  */
 HWTEST_F(AuthHichainIdServiceTest, ID_SERVICE_INIT_SERVICE_TEST_002, TestSize.Level1)
@@ -498,6 +505,7 @@ HWTEST_F(AuthHichainIdServiceTest, ID_SERVICE_INIT_SERVICE_TEST_002, TestSize.Le
  * @tc.name: ID_SERVICE_INIT_SERVICE_TEST_003
  * @tc.desc: init service test
  * @tc.type: FUNC
+ * @tc.level: Level1
  * @tc.require:
  */
 HWTEST_F(AuthHichainIdServiceTest, ID_SERVICE_INIT_SERVICE_TEST_003, TestSize.Level1)
@@ -540,6 +548,7 @@ HWTEST_F(AuthHichainIdServiceTest, ID_SERVICE_INIT_SERVICE_TEST_003, TestSize.Le
  * @tc.name: ID_SERVICE_DESTROY_CREDLIST_001
  * @tc.desc: IdServiceDestroyCredentialList test
  * @tc.type: FUNC
+ * @tc.level: Level1
  * @tc.require:
  */
 HWTEST_F(AuthHichainIdServiceTest, ID_SERVICE_DESTROY_CREDLIST_001, TestSize.Level1)
@@ -579,6 +588,7 @@ int32_t QueryCredInfoByCredId(int32_t userId, const char *credId, char **credInf
  * @tc.name: ID_SERVICE_GET_CREDID_FROM_LIST_001
  * @tc.desc: IdServiceGetCredIdFromCredList test
  * @tc.type: FUNC
+ * @tc.level: Level1
  * @tc.require:
  */
 HWTEST_F(AuthHichainIdServiceTest, ID_SERVICE_GET_CREDID_FROM_LIST_001, TestSize.Level1)
