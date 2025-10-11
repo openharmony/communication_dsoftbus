@@ -641,10 +641,6 @@ static void OnHmlServiceStart(void *state)
     }
     SoftBusHmlState *curState = (SoftBusHmlState *)state;
     if (*curState == CONN_HML_ENABLED) {
-        int32_t ret = UpdateHmlStaticCap();
-        if (ret != SOFTBUS_OK) {
-            LNN_LOGE(LNN_BUILDER, "update hml static cap failed, ret=%{public}d.", ret);
-        }
         UpdateLocalFeatureByWifiVspRes();
     }
     SoftBusFree(curState);
@@ -674,10 +670,6 @@ static void WifiServiceOnStartHandle(const LnnEventBasicInfo *info)
     if (info == NULL || info->event != LNN_EVENT_WIFI_SERVICE_START) {
         LNN_LOGE(LNN_BUILDER, "invalid param.");
         return;
-    }
-    int32_t ret = UpdateHmlStaticCap();
-    if (ret != SOFTBUS_OK) {
-        LNN_LOGE(LNN_BUILDER, "update hml static cap failed, ret=%{public}d.", ret);
     }
     UpdateLocalFeatureByWifiVspRes();
 }
@@ -763,7 +755,12 @@ int32_t LnnInitNetworkInfo(void)
 {
     InitWifiDirectCapability();
     InitWifiDirectListener();
-    int32_t ret = LnnRegisterEventHandler(LNN_EVENT_BT_STATE_CHANGED, BtStateChangeEventHandler);
+    int32_t ret = UpdateHmlStaticCap();
+    if (ret != SOFTBUS_OK) {
+        LNN_LOGW(LNN_BUILDER, "update hml static cap failed, ret=%{public}d.", ret);
+        /* some devices not supported, ignore it */
+    }
+    ret = LnnRegisterEventHandler(LNN_EVENT_BT_STATE_CHANGED, BtStateChangeEventHandler);
     if (ret != SOFTBUS_OK) {
         LNN_LOGE(LNN_BUILDER, "network info register bt state change fail, ret=%{public}d", ret);
         return ret;
