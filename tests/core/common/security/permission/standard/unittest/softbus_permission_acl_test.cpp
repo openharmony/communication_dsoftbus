@@ -51,9 +51,9 @@ public:
 void SoftbusPermissionACLTest::SetUpTestCase(void) { }
 void SoftbusPermissionACLTest::TearDownTestCase(void) { }
 
-/**
+/*
  * @tc.name: TransCheckClientAccessControl001
- * @tc.desc: test function TransCheckClientAccessControl parameters.
+ * @tc.desc: test function TransCheckClientAccessControl parameters
  * @tc.type: FUNC
  * @tc.require:
  */
@@ -63,9 +63,9 @@ HWTEST_F(SoftbusPermissionACLTest, TransCheckClientAccessControl001, TestSize.Le
     EXPECT_EQ(SOFTBUS_INVALID_PARAM, ret);
 }
 
-/**
+/*
  * @tc.name: TransCheckClientAccessControl002
- * @tc.desc: test function TransCheckClientAccessControl parameters.
+ * @tc.desc: test function TransCheckClientAccessControl parameters
  * @tc.type: FUNC
  * @tc.require:
  */
@@ -79,9 +79,9 @@ HWTEST_F(SoftbusPermissionACLTest, TransCheckClientAccessControl002, TestSize.Le
     EXPECT_EQ(SOFTBUS_OK, ret);
 }
 
-/**
+/*
  * @tc.name: TransCheckClientAccessControl003
- * @tc.desc: test function TransCheckClientAccessControl parameters.
+ * @tc.desc: test function TransCheckClientAccessControl parameters
  * @tc.type: FUNC
  * @tc.require:
  */
@@ -99,9 +99,9 @@ HWTEST_F(SoftbusPermissionACLTest, TransCheckClientAccessControl003, TestSize.Le
     EXPECT_EQ(SOFTBUS_OK, ret);
 }
 
-/**
+/*
  * @tc.name: TransCheckClientAccessControl004
- * @tc.desc: test function TransCheckClientAccessControl parameters.
+ * @tc.desc: test function TransCheckClientAccessControl parameters
  * @tc.type: FUNC
  * @tc.require:
  */
@@ -127,9 +127,9 @@ HWTEST_F(SoftbusPermissionACLTest, TransCheckClientAccessControl004, TestSize.Le
     EXPECT_EQ(SOFTBUS_INVALID_PARAM, ret);
 }
 
-/**
+/*
  * @tc.name: TransCheckClientAccessControl005
- * @tc.desc: test function TransCheckClientAccessControl parameters.
+ * @tc.desc: test function TransCheckClientAccessControl parameters
  * @tc.type: FUNC
  * @tc.require:
  */
@@ -155,9 +155,9 @@ HWTEST_F(SoftbusPermissionACLTest, TransCheckClientAccessControl005, TestSize.Le
     EXPECT_EQ(SOFTBUS_TRANS_BACKGROUND_USER_DENIED, ret);
 }
 
-/**
+/*
  * @tc.name: TransCheckClientAccessControl006
- * @tc.desc: test function TransCheckClientAccessControl parameters.
+ * @tc.desc: test function TransCheckClientAccessControl parameters
  * @tc.type: FUNC
  * @tc.require:
  */
@@ -185,9 +185,9 @@ HWTEST_F(SoftbusPermissionACLTest, TransCheckClientAccessControl006, TestSize.Le
     EXPECT_EQ(SOFTBUS_INVALID_PARAM, ret);
 }
 
-/**
+/*
  * @tc.name: TransCheckClientAccessControl007
- * @tc.desc: test function TransCheckClientAccessControl parameters.
+ * @tc.desc: test function TransCheckClientAccessControl parameters
  * @tc.type: FUNC
  * @tc.require:
  */
@@ -217,9 +217,9 @@ HWTEST_F(SoftbusPermissionACLTest, TransCheckClientAccessControl007, TestSize.Le
     EXPECT_EQ(SOFTBUS_INVALID_PARAM, ret);
 }
 
-/**
+/*
  * @tc.name: TransCheckClientAccessControl008
- * @tc.desc: test function TransCheckClientAccessControl parameters.
+ * @tc.desc: test function TransCheckClientAccessControl parameters
  * @tc.type: FUNC
  * @tc.require:
  */
@@ -250,9 +250,9 @@ HWTEST_F(SoftbusPermissionACLTest, TransCheckClientAccessControl008, TestSize.Le
     EXPECT_EQ(SOFTBUS_OK, ret);
 }
 
-/**
+/*
  * @tc.name: TransCheckServerAccessControl001
- * @tc.desc: test function TransCheckServerAccessControl parameters.
+ * @tc.desc: test function TransCheckServerAccessControl parameters
  * @tc.type: FUNC
  * @tc.require:
  */
@@ -262,9 +262,9 @@ HWTEST_F(SoftbusPermissionACLTest, TransCheckServerAccessControl001, TestSize.Le
     EXPECT_EQ(SOFTBUS_INVALID_PARAM, ret);
 }
 
-/**
+/*
  * @tc.name: TransCheckServerAccessControl002
- * @tc.desc: test function TransCheckServerAccessControl parameters.
+ * @tc.desc: test function TransCheckServerAccessControl parameters
  * @tc.type: FUNC
  * @tc.require:
  */
@@ -276,9 +276,9 @@ HWTEST_F(SoftbusPermissionACLTest, TransCheckServerAccessControl002, TestSize.Le
     EXPECT_EQ(SOFTBUS_OK, ret);
 }
 
-/**
+/*
  * @tc.name: TransCheckServerAccessControl003
- * @tc.desc: test function TransCheckServerAccessControl parameters.
+ * @tc.desc: test function TransCheckServerAccessControl parameters
  * @tc.type: FUNC
  * @tc.require:
  */
@@ -294,9 +294,9 @@ HWTEST_F(SoftbusPermissionACLTest, TransCheckServerAccessControl003, TestSize.Le
     EXPECT_EQ(SOFTBUS_INVALID_PARAM, ret);
 }
 
-/**
+/*
  * @tc.name: TransCheckServerAccessControl004
- * @tc.desc: test function TransCheckServerAccessControl parameters.
+ * @tc.desc: test function TransCheckServerAccessControl parameters
  * @tc.type: FUNC
  * @tc.require:
  */
@@ -315,9 +315,9 @@ HWTEST_F(SoftbusPermissionACLTest, TransCheckServerAccessControl004, TestSize.Le
     EXPECT_EQ(SOFTBUS_OK, ret);
 }
 
-/**
+/*
  * @tc.name: TransCheckServerAccessControl005
- * @tc.desc: test function TransCheckServerAccessControl parameters.
+ * @tc.desc: test function TransCheckServerAccessControl parameters
  * @tc.type: FUNC
  * @tc.require:
  */
@@ -336,9 +336,9 @@ HWTEST_F(SoftbusPermissionACLTest, TransCheckServerAccessControl005, TestSize.Le
     EXPECT_EQ(SOFTBUS_TRANS_CROSS_LAYER_DENIED, ret);
 }
 
-/**
+/*
  * @tc.name: TransCheckServerAccessControl006
- * @tc.desc: test function TransCheckServerAccessControl parameters.
+ * @tc.desc: test function TransCheckServerAccessControl parameters
  * @tc.type: FUNC
  * @tc.require:
  */
@@ -357,9 +357,9 @@ HWTEST_F(SoftbusPermissionACLTest, TransCheckServerAccessControl006, TestSize.Le
     EXPECT_EQ(SOFTBUS_TRANS_CROSS_LAYER_DENIED, ret);
 }
 
-/**
+/*
  * @tc.name: TransCheckServerAccessControl007
- * @tc.desc: test function TransCheckServerAccessControl parameters.
+ * @tc.desc: test function TransCheckServerAccessControl parameters
  * @tc.type: FUNC
  * @tc.require:
  */
@@ -379,9 +379,9 @@ HWTEST_F(SoftbusPermissionACLTest, TransCheckServerAccessControl007, TestSize.Le
     EXPECT_EQ(SOFTBUS_TRANS_CROSS_LAYER_DENIED, ret);
 }
 
-/**
+/*
  * @tc.name: TransCheckServerAccessControl008
- * @tc.desc: test function TransCheckServerAccessControl parameters.
+ * @tc.desc: test function TransCheckServerAccessControl parameters
  * @tc.type: FUNC
  * @tc.require:
  */
@@ -403,9 +403,9 @@ HWTEST_F(SoftbusPermissionACLTest, TransCheckServerAccessControl008, TestSize.Le
     EXPECT_EQ(SOFTBUS_INVALID_PARAM, ret);
 }
 
-/**
+/*
  * @tc.name: TransCheckServerAccessControl009
- * @tc.desc: test function TransCheckServerAccessControl parameters.
+ * @tc.desc: test function TransCheckServerAccessControl parameters
  * @tc.type: FUNC
  * @tc.require:
  */
@@ -434,9 +434,9 @@ HWTEST_F(SoftbusPermissionACLTest, TransCheckServerAccessControl009, TestSize.Le
     EXPECT_EQ(ERR_NOT_OK, ret);
 }
 
-/**
+/*
  * @tc.name: TransCheckServerAccessControl010
- * @tc.desc: test function TransCheckServerAccessControl parameters.
+ * @tc.desc: test function TransCheckServerAccessControl parameters
  * @tc.type: FUNC
  * @tc.require:
  */
@@ -464,9 +464,9 @@ HWTEST_F(SoftbusPermissionACLTest, TransCheckServerAccessControl010, TestSize.Le
     EXPECT_EQ(SOFTBUS_TRANS_BACKGROUND_USER_DENIED, ret);
 }
 
-/**
+/*
  * @tc.name: TransCheckServerAccessControl011
- * @tc.desc: test function TransCheckServerAccessControl parameters.
+ * @tc.desc: test function TransCheckServerAccessControl parameters
  * @tc.type: FUNC
  * @tc.require:
  */
@@ -496,9 +496,9 @@ HWTEST_F(SoftbusPermissionACLTest, TransCheckServerAccessControl011, TestSize.Le
     EXPECT_EQ(SOFTBUS_ERR, ret);
 }
 
-/**
+/*
  * @tc.name: TransCheckServerAccessControl012
- * @tc.desc: test function TransCheckServerAccessControl parameters.
+ * @tc.desc: test function TransCheckServerAccessControl parameters
  * @tc.type: FUNC
  * @tc.require:
  */
@@ -530,9 +530,9 @@ HWTEST_F(SoftbusPermissionACLTest, TransCheckServerAccessControl012, TestSize.Le
     EXPECT_EQ(SOFTBUS_ERR, ret);
 }
 
-/**
+/*
  * @tc.name: TransCheckServerAccessControl013
- * @tc.desc: test function TransCheckServerAccessControl parameters.
+ * @tc.desc: test function TransCheckServerAccessControl parameters
  * @tc.type: FUNC
  * @tc.require:
  */
@@ -567,9 +567,9 @@ HWTEST_F(SoftbusPermissionACLTest, TransCheckServerAccessControl013, TestSize.Le
     EXPECT_EQ(SOFTBUS_OK, ret);
 }
 
-/**
+/*
  * @tc.name: TransCheckServerAccessControl014
- * @tc.desc: test function TransCheckServerAccessControl parameters.
+ * @tc.desc: test function TransCheckServerAccessControl parameters
  * @tc.type: FUNC
  * @tc.require:
  */

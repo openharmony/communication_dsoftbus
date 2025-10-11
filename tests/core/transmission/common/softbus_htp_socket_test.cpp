@@ -37,9 +37,9 @@ void SoftBusHtpSocketTest::SetUpTestCase(void) { }
 
 void SoftBusHtpSocketTest::TearDownTestCase(void) { }
 
-/**
+/*
  * @tc.name: SoftBusHtpSocketTest001
- * @tc.desc: test GetHtpProtocol function.
+ * @tc.desc: test GetHtpProtocol function
  * @tc.type: FUNC
  * @tc.require:
  */
@@ -49,9 +49,9 @@ HWTEST_F(SoftBusHtpSocketTest, SoftBusHtpSocketTest001, TestSize.Level1)
     EXPECT_NE(interface, nullptr);
 }
 
-/**
+/*
  * @tc.name: SoftBusHtpSocketTest002
- * @tc.desc: test GetHtpSockPort function.
+ * @tc.desc: test GetHtpSockPort function
  * @tc.type: FUNC
  * @tc.require:
  */
@@ -63,9 +63,9 @@ HWTEST_F(SoftBusHtpSocketTest, SoftBusHtpSocketTest002, TestSize.Level1)
     EXPECT_EQ(ret, SOFTBUS_ADAPTER_ERR);
 }
 
-/**
+/*
  * @tc.name: SoftBusHtpSocketTest003
- * @tc.desc: test OpenHtpServerSocket function.
+ * @tc.desc: test OpenHtpServerSocket function
  * @tc.type: FUNC
  * @tc.require:
  */
@@ -94,9 +94,9 @@ HWTEST_F(SoftBusHtpSocketTest, SoftBusHtpSocketTest003, TestSize.Level1)
     SoftBusFree(option);
 }
 
-/**
+/*
  * @tc.name: SoftBusHtpSocketTest004
- * @tc.desc: test OpenHtpClientSocket function.
+ * @tc.desc: test OpenHtpClientSocket function
  * @tc.type: FUNC
  * @tc.require:
  */
@@ -134,9 +134,9 @@ HWTEST_F(SoftBusHtpSocketTest, SoftBusHtpSocketTest004, TestSize.Level1)
     SoftBusFree(option);
 }
 
-/**
+/*
  * @tc.name: SoftBusHtpSocketTest005
- * @tc.desc: test AcceptHtpClient function.
+ * @tc.desc: test AcceptHtpClient function
  * @tc.type: FUNC
  * @tc.require:
  */
@@ -158,9 +158,9 @@ HWTEST_F(SoftBusHtpSocketTest, SoftBusHtpSocketTest005, TestSize.Level1)
     SoftBusFree(clientAddr);
 }
 
-/**
+/*
  * @tc.name: SoftBusHtpSocketTest006
- * @tc.desc: test MacToHtpAddr function.
+ * @tc.desc: test MacToHtpAddr function
  * @tc.type: FUNC
  * @tc.require:
  */
@@ -182,9 +182,9 @@ HWTEST_F(SoftBusHtpSocketTest, SoftBusHtpSocketTest006, TestSize.Level1)
     SoftBusFree(addr);
 }
 
-/**
+/*
  * @tc.name: SoftBusHtpSocketTest007
- * @tc.desc: test HtpConnect function.
+ * @tc.desc: test HtpConnect function
  * @tc.type: FUNC
  * @tc.require:
  */
@@ -198,9 +198,9 @@ HWTEST_F(SoftBusHtpSocketTest, SoftBusHtpSocketTest007, TestSize.Level1)
     EXPECT_NE(ret, SOFTBUS_OK);
 }
 
-/**
+/*
  * @tc.name: SoftBusHtpSocketTest008
- * @tc.desc: test BindLocalMac function.
+ * @tc.desc: test BindLocalMac function
  * @tc.type: FUNC
  * @tc.require:
  */
@@ -214,9 +214,9 @@ HWTEST_F(SoftBusHtpSocketTest, SoftBusHtpSocketTest008, TestSize.Level1)
     EXPECT_NE(ret, SOFTBUS_OK);
 }
 
-/**
+/*
  * @tc.name: SoftBusHtpSocketTest009
- * @tc.desc: test GetHtpSockPort function.
+ * @tc.desc: test GetHtpSockPort function
  * @tc.type: FUNC
  * @tc.require:
  */

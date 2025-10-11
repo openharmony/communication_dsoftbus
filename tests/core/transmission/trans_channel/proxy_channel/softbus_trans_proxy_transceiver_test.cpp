@@ -121,9 +121,9 @@ void SoftbusProxyTransceiverTest::TearDownTestCase(void)
     TransProxyManagerDeinit();
 }
 
-/**
+/*
  * @tc.name: TransProxyOpenConnChannelTest001
- * @tc.desc: test proxy open new conn channel.
+ * @tc.desc: test proxy open new conn channel
  * @tc.type: FUNC
  * @tc.require:
  */
@@ -160,9 +160,9 @@ HWTEST_F(SoftbusProxyTransceiverTest, TransProxyOpenConnChannelTest001, TestSize
     EXPECT_NE(SOFTBUS_OK, ret);
 }
 
-/**
+/*
  * @tc.name: TransProxyOpenConnChannelTest002
- * @tc.desc: test proxy open exist channel.
+ * @tc.desc: test proxy open exist channel
  * @tc.type: FUNC
  * @tc.require:
  */
@@ -196,9 +196,9 @@ HWTEST_F(SoftbusProxyTransceiverTest, TransProxyOpenConnChannelTest002, TestSize
     sleep(1);
 }
 
-/**
+/*
  * @tc.name: TransProxyOpenConnChannelTest003
- * @tc.desc: test proxy open exist channel.
+ * @tc.desc: test proxy open exist channel
  * @tc.type: FUNC
  * @tc.require:
  */
@@ -215,9 +215,9 @@ HWTEST_F(SoftbusProxyTransceiverTest, TransProxyOpenConnChannelTest003, TestSize
     EXPECT_EQ(ret, SOFTBUS_TRANS_PROXY_CONN_REPEAT);
 }
 
-/**
+/*
  * @tc.name: TransProxyCloseConnChannelTest001
- * @tc.desc: test proxy close conn channel.
+ * @tc.desc: test proxy close conn channel
  * @tc.type: FUNC
  * @tc.require:
  */
@@ -237,9 +237,9 @@ HWTEST_F(SoftbusProxyTransceiverTest, TransProxyCloseConnChannelTest001, TestSiz
     EXPECT_EQ(SOFTBUS_OK, ret);
 }
 
-/**
+/*
  * @tc.name: TransProxyCloseConnChannelTest002
- * @tc.desc: test proxy close conn channel.
+ * @tc.desc: test proxy close conn channel
  * @tc.type: FUNC
  * @tc.require:
  */
@@ -270,9 +270,9 @@ HWTEST_F(SoftbusProxyTransceiverTest, TransProxyCloseConnChannelTest002, TestSiz
     g_proxyConnectionList = nullptr;
 }
 
-/**
+/*
  * @tc.name: TransProxyCloseConnChannelResetTest001
- * @tc.desc: test proxy dec connInfo ref count.
+ * @tc.desc: test proxy dec connInfo ref count
  * @tc.type: FUNC
  * @tc.require:
  */
@@ -291,9 +291,9 @@ HWTEST_F(SoftbusProxyTransceiverTest, TransProxyCloseConnChannelResetTest001, Te
     EXPECT_EQ(SOFTBUS_OK, ret);
 }
 
-/**
+/*
  * @tc.name: TransProxyGetConnInfoByConnIdTest001
- * @tc.desc: test proxy get conn info by conn id.
+ * @tc.desc: test proxy get conn info by conn id
  * @tc.type: FUNC
  * @tc.require:
  */
@@ -310,9 +310,9 @@ HWTEST_F(SoftbusProxyTransceiverTest, TransProxyGetConnInfoByConnIdTest001, Test
     EXPECT_NE(SOFTBUS_OK, ret);
 }
 
-/**
+/*
  * @tc.name: TransProxyTransSendMsgTest001
- * @tc.desc: test proxy send message.
+ * @tc.desc: test proxy send message
  * @tc.type: FUNC
  * @tc.require:
  */
@@ -330,9 +330,9 @@ HWTEST_F(SoftbusProxyTransceiverTest, TransProxyTransSendMsgTest001, TestSize.Le
     EXPECT_NE(SOFTBUS_OK, ret);
 }
 
-/**
+/*
  * @tc.name: CompareConnectOption001
- * @tc.desc: test CompareConnectOption.
+ * @tc.desc: test CompareConnectOption
  * @tc.type: FUNC
  * @tc.require:
  */
@@ -390,9 +390,9 @@ HWTEST_F(SoftbusProxyTransceiverTest, CompareConnectOption001, TestSize.Level1)
     EXPECT_EQ(true, ret);
 }
 
-/**
+/*
  * @tc.name: CompareConnectOptionTest002
- * @tc.desc: test CompareConnectOption.
+ * @tc.desc: test CompareConnectOption
  * @tc.type: FUNC
  * @tc.require:
  */
@@ -409,9 +409,9 @@ HWTEST_F(SoftbusProxyTransceiverTest, CompareConnectOptionTest002, TestSize.Leve
     EXPECT_EQ(ret, false);
 }
 
-/**
+/*
  * @tc.name: CompareConnectOptionTest003
- * @tc.desc: test CompareConnectOption.
+ * @tc.desc: test CompareConnectOption
  * @tc.type: FUNC
  * @tc.require:
  */
@@ -431,9 +431,9 @@ HWTEST_F(SoftbusProxyTransceiverTest, CompareConnectOptionTest003, TestSize.Leve
     EXPECT_EQ(ret, true);
 }
 
-/**
+/*
  * @tc.name: CompareConnectOptionTest004
- * @tc.desc: test CompareConnectOption.
+ * @tc.desc: test CompareConnectOption
  * @tc.type: FUNC
  * @tc.require:
  */
@@ -451,9 +451,9 @@ HWTEST_F(SoftbusProxyTransceiverTest, CompareConnectOptionTest004, TestSize.Leve
     EXPECT_EQ(ret, false);
 }
 
-/**
+/*
  * @tc.name: CompareConnectOptionTest005
- * @tc.desc: test CompareConnectOption.
+ * @tc.desc: test CompareConnectOption
  * @tc.type: FUNC
  * @tc.require:
  */
@@ -468,9 +468,9 @@ HWTEST_F(SoftbusProxyTransceiverTest, CompareConnectOptionTest005, TestSize.Leve
     EXPECT_EQ(ret, false);
 }
 
-/**
+/*
  * @tc.name: TransProxyConnExistProc001
- * @tc.desc: test TransProxyConnExistProc.
+ * @tc.desc: test TransProxyConnExistProc
  * @tc.type: FUNC
  * @tc.require:
  */
@@ -485,9 +485,9 @@ HWTEST_F(SoftbusProxyTransceiverTest, TransProxyConnExistProc001, TestSize.Level
     EXPECT_EQ(SOFTBUS_TRANS_PROXY_CONN_ADD_REF_FAILED, ret);
 }
 
-/**
+/*
  * @tc.name: TransProxyConnectDevice001
- * @tc.desc: test TransProxyConnectDevice.
+ * @tc.desc: test TransProxyConnectDevice
  * @tc.type: FUNC
  * @tc.require:
  */
@@ -504,9 +504,9 @@ HWTEST_F(SoftbusProxyTransceiverTest, TransProxyConnectDevice001, TestSize.Level
     EXPECT_NE(SOFTBUS_OK, ret);
 }
 
-/**
+/*
  * @tc.name: TransProxySendBadKeyMessagel001
- * @tc.desc: test TransProxySendBadKeyMessage.
+ * @tc.desc: test TransProxySendBadKeyMessage
  * @tc.type: FUNC
  * @tc.require:
  */
@@ -520,9 +520,9 @@ HWTEST_F(SoftbusProxyTransceiverTest, TransProxySendBadKeyMessagel001, TestSize.
     EXPECT_NE(SOFTBUS_OK, ret);
 }
 
-/**
+/*
  * @tc.name: TransProxyTransInitl001
- * @tc.desc: test TransProxyTransInit.
+ * @tc.desc: test TransProxyTransInit
  * @tc.type: FUNC
  * @tc.require:
  */
@@ -534,9 +534,9 @@ HWTEST_F(SoftbusProxyTransceiverTest, TransProxyTransInit001, TestSize.Level1)
     g_proxyConnectionList = nullptr;
 }
 
-/**
+/*
  * @tc.name: TransDelConnByReqId001
- * @tc.desc: test TransDelConnByReqId.
+ * @tc.desc: test TransDelConnByReqId
  * @tc.type: FUNC
  * @tc.require:
  */
@@ -552,9 +552,9 @@ HWTEST_F(SoftbusProxyTransceiverTest, TransDelConnByReqId001, TestSize.Level1)
     g_proxyConnectionList = nullptr;
 }
 
-/**
+/*
  * @tc.name: TransDelConnByReqId002
- * @tc.desc: test TransDelConnByReqId.
+ * @tc.desc: test TransDelConnByReqId
  * @tc.type: FUNC
  * @tc.require:
  */
@@ -578,9 +578,9 @@ HWTEST_F(SoftbusProxyTransceiverTest, TransDelConnByReqId002, TestSize.Level1)
     g_proxyConnectionList = nullptr;
 }
 
-/**
+/*
  * @tc.name: TransDelConnByConnId001
- * @tc.desc: test TransDelConnByConnId.
+ * @tc.desc: test TransDelConnByConnId
  * @tc.type: FUNC
  * @tc.require:
  */
@@ -602,9 +602,9 @@ HWTEST_F(SoftbusProxyTransceiverTest, TransDelConnByConnId001, TestSize.Level1)
     g_proxyConnectionList = nullptr;
 }
 
-/**
+/*
  * @tc.name: TransDecConnRefByConnId001
- * @tc.desc: test TransDecConnRefByConnId.
+ * @tc.desc: test TransDecConnRefByConnId
  * @tc.type: FUNC
  * @tc.require:
  */
@@ -638,9 +638,9 @@ HWTEST_F(SoftbusProxyTransceiverTest, TransDecConnRefByConnId001, TestSize.Level
     g_proxyConnectionList = nullptr;
 }
 
-/**
+/*
  * @tc.name: TransDecConnRefByConnId002
- * @tc.desc: test TransDecConnRefByConnId.
+ * @tc.desc: test TransDecConnRefByConnId
  * @tc.type: FUNC
  * @tc.require:
  */
@@ -667,9 +667,9 @@ HWTEST_F(SoftbusProxyTransceiverTest, TransDecConnRefByConnId002, TestSize.Level
     g_proxyConnectionList = nullptr;
 }
 
-/**
+/*
  * @tc.name: TransDecConnRefByConnId003
- * @tc.desc: test TransDecConnRefByConnId.
+ * @tc.desc: test TransDecConnRefByConnId
  * @tc.type: FUNC
  * @tc.require:
  */
@@ -700,9 +700,9 @@ HWTEST_F(SoftbusProxyTransceiverTest, TransDecConnRefByConnId003, TestSize.Level
     g_proxyConnectionList = nullptr;
 }
 
-/**
+/*
  * @tc.name: TransProxyPostOpenCloseMsgToLoop001
- * @tc.desc: test TransDecConnRefByConnId.
+ * @tc.desc: test TransDecConnRefByConnId
  * @tc.type: FUNC
  * @tc.require:
  */
@@ -737,9 +737,9 @@ HWTEST_F(SoftbusProxyTransceiverTest, TransProxyPostOpenCloseMsgToLoop001, TestS
     g_proxyConnectionList = nullptr;
 }
 
-/**
+/*
  * @tc.name: CheckIsProxyAuthChannel001
- * @tc.desc: test TransDecConnRefByConnId.
+ * @tc.desc: test TransDecConnRefByConnId
  * @tc.type: FUNC
  * @tc.require:
  */
@@ -754,9 +754,9 @@ HWTEST_F(SoftbusProxyTransceiverTest, CheckIsProxyAuthChannel001, TestSize.Level
     EXPECT_EQ(SOFTBUS_NO_INIT, ret);
 }
 
-/**
+/*
  * @tc.name: TransAddConnRefByConnId001
- * @tc.desc: test TransAddConnRefByConnId.
+ * @tc.desc: test TransAddConnRefByConnId
  * @tc.type: FUNC
  * @tc.require:
  */
@@ -778,9 +778,9 @@ HWTEST_F(SoftbusProxyTransceiverTest, TransAddConnRefByConnId001, TestSize.Level
     g_proxyConnectionList = nullptr;
 }
 
-/**
+/*
  * @tc.name: TransProxyOnConnectedAndDisConnect001
- * @tc.desc: test TransProxyOnConnectedAndDisConnect.
+ * @tc.desc: test TransProxyOnConnectedAndDisConnect
  * @tc.type: FUNC
  * @tc.require:
  */
@@ -792,9 +792,9 @@ HWTEST_F(SoftbusProxyTransceiverTest, TransProxyOnConnectedAndDisConnect001, Tes
     EXPECT_EQ(nullptr, g_proxyConnectionList);
 }
 
-/**
+/*
  * @tc.name: TransAddConnItem001
- * @tc.desc: test TransAddConnItem.
+ * @tc.desc: test TransAddConnItem
  * @tc.type: FUNC
  * @tc.require:
  */
@@ -819,9 +819,9 @@ HWTEST_F(SoftbusProxyTransceiverTest, TransAddConnItem001, TestSize.Level1)
     g_proxyConnectionList = nullptr;
 }
 
-/**
+/*
  * @tc.name: TransAddConnItem002
- * @tc.desc: test TransAddConnItem.
+ * @tc.desc: test TransAddConnItem
  * @tc.type: FUNC
  * @tc.require:
  */
@@ -850,7 +850,7 @@ HWTEST_F(SoftbusProxyTransceiverTest, TransAddConnItem002, TestSize.Level1)
     g_proxyConnectionList = nullptr;
 }
 
-/**
+/*
  * @tc.name: TransConnInfoToConnOpt001
  * @tc.desc: test TransConnInfoToConnOpt
  * @tc.type: FUNC
@@ -870,7 +870,7 @@ HWTEST_F(SoftbusProxyTransceiverTest, TransConnInfoToConnOpt001, TestSize.Level1
     EXPECT_EQ(nullptr, g_proxyConnectionList);
 }
 
-/**
+/*
  * @tc.name: TransConnInfoToConnOpt002
  * @tc.desc: test TransConnInfoToConnOpt
  * @tc.type: FUNC
@@ -888,7 +888,7 @@ HWTEST_F(SoftbusProxyTransceiverTest, TransConnInfoToConnOpt002, TestSize.Level1
     EXPECT_NO_FATAL_FAILURE(TransConnInfoToConnOpt(&connInfo, &connOption));
 }
 
-/**
+/*
  * @tc.name: TransCreateConnByConnId001
  * @tc.desc: test TransCreateConnByConnId
  * @tc.type: FUNC
@@ -909,7 +909,7 @@ HWTEST_F(SoftbusProxyTransceiverTest, TransCreateConnByConnId001, TestSize.Level
     g_proxyConnectionList = nullptr;
 }
 
-/**
+/*
  * @tc.name: TransGetConn001
  * @tc.desc: test TransGetConn
  * @tc.type: FUNC
@@ -944,7 +944,7 @@ HWTEST_F(SoftbusProxyTransceiverTest, TransGetConn001, TestSize.Level1)
     g_proxyConnectionList = nullptr;
 }
 
-/**
+/*
  * @tc.name: TransGetConn001
  * @tc.desc: test TransGetConn.
  * @tc.type: FUNC
@@ -973,9 +973,9 @@ HWTEST_F(SoftbusProxyTransceiverTest, TransGetConn002, TestSize.Level1)
     g_proxyConnectionList = nullptr;
 }
 
-/**
+/*
  * @tc.name: TransProxySendBadKeyMessage001
- * @tc.desc: test TransProxySendBadKeyMessage.
+ * @tc.desc: test TransProxySendBadKeyMessage
  * @tc.type: FUNC
  * @tc.require:
  */
@@ -991,9 +991,9 @@ HWTEST_F(SoftbusProxyTransceiverTest, TransProxySendBadKeyMessage001, TestSize.L
     EXPECT_EQ(SOFTBUS_CONN_MANAGER_TYPE_NOT_SUPPORT, ret);
 }
 
-/**
+/*
  * @tc.name: TransSetConnStateByReqId001
- * @tc.desc: test TransSetConnStateByReqId.
+ * @tc.desc: test TransSetConnStateByReqId
  * @tc.type: FUNC
  * @tc.require:
  */
@@ -1015,9 +1015,9 @@ HWTEST_F(SoftbusProxyTransceiverTest, TransSetConnStateByReqId001, TestSize.Leve
     g_proxyConnectionList = nullptr;
 }
 
-/**
+/*
  * @tc.name: TransOnConnectSucceedAndFailed001
- * @tc.desc: test TransOnConnectSucceedAndFailed.
+ * @tc.desc: test TransOnConnectSucceedAndFailed
  * @tc.type: FUNC
  * @tc.require:
  */
@@ -1032,9 +1032,9 @@ HWTEST_F(SoftbusProxyTransceiverTest, TransOnConnectSucceedAndFailed001, TestSiz
     EXPECT_EQ(nullptr, g_proxyConnectionList);
 }
 
-/**
+/*
  * @tc.name: TransProxyCreateLoopMsg001
- * @tc.desc: test TransProxyCreateLoopMsg.
+ * @tc.desc: test TransProxyCreateLoopMsg
  * @tc.type: FUNC
  * @tc.require:
  */
@@ -1046,9 +1046,9 @@ HWTEST_F(SoftbusProxyTransceiverTest, TransProxyCreateLoopMsg001, TestSize.Level
     EXPECT_NE(nullptr, ret);
 }
 
-/**
+/*
  * @tc.name: TransProxyPostAuthNegoMsgToLooperDelay001
- * @tc.desc: test TransProxyPostAuthNegoMsgToLooperDelay.
+ * @tc.desc: test TransProxyPostAuthNegoMsgToLooperDelay
  * @tc.type: FUNC
  * @tc.require:
  */
@@ -1061,9 +1061,9 @@ HWTEST_F(SoftbusProxyTransceiverTest, TransProxyPostAuthNegoMsgToLooperDelay001,
     EXPECT_NE(nullptr, g_transLoopHandler.looper);
 }
 
-/**
+/*
  * @tc.name: TransProxyLoopMsgHandler001
- * @tc.desc: test TransProxyLoopMsgHandler.
+ * @tc.desc: test TransProxyLoopMsgHandler
  * @tc.type: FUNC
  * @tc.require:
  */
@@ -1092,9 +1092,9 @@ HWTEST_F(SoftbusProxyTransceiverTest, TransProxyLoopMsgHandler001, TestSize.Leve
     TransProxyLoopMsgHandler(msg);
 }
 
-/**
+/*
  * @tc.name: TransProxyPostResetPeerMsgToLoopTest001
- * @tc.desc: TransProxyPostResetPeerMsgToLoop
+ * @tc.desc: TransProxyPostResetPeerMsgToLoop test
  * @tc.type: FUNC
  * @tc.require:
  */
@@ -1103,9 +1103,9 @@ HWTEST_F(SoftbusProxyTransceiverTest, TransProxyPostResetPeerMsgToLoopTest001, T
     EXPECT_NO_FATAL_FAILURE(TransProxyPostResetPeerMsgToLoop(nullptr));
 }
 
-/**
+/*
  * @tc.name: TransProxyPostDisConnectMsgToLoopTest001
- * @tc.desc: TransProxyPostDisConnectMsgToLoop
+ * @tc.desc: TransProxyPostDisConnectMsgToLoop test
  * @tc.type: FUNC
  * @tc.require:
  */
@@ -1115,9 +1115,9 @@ HWTEST_F(SoftbusProxyTransceiverTest, TransProxyPostDisConnectMsgToLoopTest001, 
     EXPECT_NO_FATAL_FAILURE(TransProxyPostDisConnectMsgToLoop(connId, true, nullptr));
 }
 
-/**
+/*
  * @tc.name: TransProxyOnDisConnectTest001
- * @tc.desc: TransProxyOnDisConnect
+ * @tc.desc: TransProxyOnDisConnect test
  * @tc.type: FUNC
  * @tc.require:
  */
@@ -1130,9 +1130,9 @@ HWTEST_F(SoftbusProxyTransceiverTest, TransProxyOnDisConnectTest001, TestSize.Le
     SoftBusFree(connInfo);
 }
 
-/**
+/*
  * @tc.name: TransReportStartConnectEventTest001
- * @tc.desc: TransReportStartConnectEvent
+ * @tc.desc: TransReportStartConnectEvent test
  * @tc.type: FUNC
  * @tc.require:
  */
@@ -1151,9 +1151,9 @@ HWTEST_F(SoftbusProxyTransceiverTest, TransReportStartConnectEventTest001, TestS
     EXPECT_NO_FATAL_FAILURE(TransReportStartConnectEvent(&appInfo, &connInfo, channelId));
 }
 
-/**
+/*
  * @tc.name: TransProxyOnDataReceivedTest001
- * @tc.desc: TransProxyOnDataReceived
+ * @tc.desc: TransProxyOnDataReceived test
  * @tc.type: FUNC
  * @tc.require:
  */
@@ -1166,9 +1166,9 @@ HWTEST_F(SoftbusProxyTransceiverTest, TransProxyOnDataReceivedTest001, TestSize.
         TransProxyOnDataReceived(connectionId, MODULE_BLUETOOTH_MANAGER, seq, nullptr, TEST_DATA_LEN));
 }
 
-/**
+/*
  * @tc.name: TransProxyOnDataReceivedTest002
- * @tc.desc: TransProxyOnDataReceived
+ * @tc.desc: TransProxyOnDataReceived test
  * @tc.type: FUNC
  * @tc.require:
  */
@@ -1182,9 +1182,9 @@ HWTEST_F(SoftbusProxyTransceiverTest, TransProxyOnDataReceivedTest002, TestSize.
         TransProxyOnDataReceived(connectionId, MODULE_BLUETOOTH_MANAGER, seq, data, TEST_DATA_LEN));
 }
 
-/**
+/*
  * @tc.name: TransProxyOnDataReceivedTest003
- * @tc.desc: TransProxyOnDataReceived
+ * @tc.desc: TransProxyOnDataReceived test
  * @tc.type: FUNC
  * @tc.require:
  */
@@ -1204,9 +1204,9 @@ HWTEST_F(SoftbusProxyTransceiverTest, TransProxyOnDataReceivedTest003, TestSize.
         TransProxyOnDataReceived(connectionId, MODULE_PROXY_CHANNEL, seq, data, TEST_DATA_LEN));
 }
 
-/**
+/*
  * @tc.name: TransProxyOnDataReceivedTest004
- * @tc.desc: TransProxyOnDataReceived
+ * @tc.desc: TransProxyOnDataReceived test
  * @tc.type: FUNC
  * @tc.require:
  */
@@ -1226,9 +1226,9 @@ HWTEST_F(SoftbusProxyTransceiverTest, TransProxyOnDataReceivedTest004, TestSize.
         TransProxyOnDataReceived(connectionId, MODULE_PROXY_CHANNEL, seq, data, TEST_DATA_LEN));
 }
 
-/**
+/*
  * @tc.name: TransProxyOnDataReceivedTest005
- * @tc.desc: TransProxyOnDataReceived
+ * @tc.desc: TransProxyOnDataReceived test
  * @tc.type: FUNC
  * @tc.require:
  */
@@ -1245,9 +1245,9 @@ HWTEST_F(SoftbusProxyTransceiverTest, TransProxyOnDataReceivedTest005, TestSize.
         TransProxyOnDataReceived(connectionId, MODULE_PROXY_CHANNEL, seq, data, TEST_DATA_LEN));
 }
 
-/**
+/*
  * @tc.name: TransProxyOnDataReceivedTest006
- * @tc.desc: TransProxyOnDataReceived
+ * @tc.desc: TransProxyOnDataReceived test
  * @tc.type: FUNC
  * @tc.require:
  */
@@ -1264,9 +1264,9 @@ HWTEST_F(SoftbusProxyTransceiverTest, TransProxyOnDataReceivedTest006, TestSize.
         TransProxyOnDataReceived(connectionId, MODULE_PROXY_CHANNEL, seq, data, TEST_DATA_LEN));
 }
 
-/**
+/*
  * @tc.name: TransProxyUdpateNewPeerUdidHashTest001
- * @tc.desc: TransProxyUdpateNewPeerUdidHash
+ * @tc.desc: TransProxyUdpateNewPeerUdidHash test
  * @tc.type: FUNC
  * @tc.require:
  */
@@ -1282,9 +1282,9 @@ HWTEST_F(SoftbusProxyTransceiverTest, TransProxyUdpateNewPeerUdidHashTest001, Te
     EXPECT_EQ(ret, SOFTBUS_ENCRYPT_ERR);
 }
 
-/**
+/*
  * @tc.name: TransProxyUdpateNewPeerUdidHashTest002
- * @tc.desc: TransProxyUdpateNewPeerUdidHash
+ * @tc.desc: TransProxyUdpateNewPeerUdidHash test
  * @tc.type: FUNC
  * @tc.require:
  */
@@ -1303,9 +1303,9 @@ HWTEST_F(SoftbusProxyTransceiverTest, TransProxyUdpateNewPeerUdidHashTest002, Te
     EXPECT_EQ(ret, SOFTBUS_OK);
 }
 
-/**
+/*
  * @tc.name: TransProxyResetAndCloseConnTest001
- * @tc.desc: TransProxyResetAndCloseConn
+ * @tc.desc: TransProxyResetAndCloseConn test
  * @tc.type: FUNC
  * @tc.require:
  */
@@ -1344,9 +1344,9 @@ HWTEST_F(SoftbusProxyTransceiverTest, TransProxyResetAndCloseConnTest001, TestSi
     EXPECT_EQ(ret, SOFTBUS_OK);
 }
 
-/**
+/*
  * @tc.name: TransProxyOnDataReceived001
- * @tc.desc: test TransProxyOnDataReceived.
+ * @tc.desc: test TransProxyOnDataReceived
  * @tc.type: FUNC
  * @tc.require:
  */

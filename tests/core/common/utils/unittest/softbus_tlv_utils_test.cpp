@@ -89,9 +89,9 @@ static void TLvFeatureTest(uint8_t tSize, uint8_t lSize, vector<TlvFrame> &testc
     SoftBusFree(output);
 }
 
-/**
+/*
  * @tc.name: TlvUtilsNormalUsage
- * @tc.desc: TlvUtilsNormalUsage
+ * @tc.desc: TlvUtilsNormalUsage test
  * @tc.type: FUNC
  * @tc.require:
  */
@@ -125,9 +125,9 @@ HWTEST_F(SoftBusTlvUtilsTest, TlvUtilsNormalUsage, TestSize.Level0)
     COMM_LOGI(COMM_UTILS, "===TlvUtilsNormalUsage end");
 }
 
-/**
+/*
  * @tc.name: TlvUtilsPackTlvTest
- * @tc.desc: TlvUtilsPackTlvTest.
+ * @tc.desc: TlvUtilsPackTlvTest
  * @tc.type: FUNC
  * @tc.require:
  */
@@ -190,7 +190,7 @@ HWTEST_F(SoftBusTlvUtilsTest, TlvUtilsPackTlvTest, TestSize.Level0)
     COMM_LOGI(COMM_UTILS, "===TlvUtilsPackTlvTest end");
 }
 
-/**
+/*
  * @tc.name: TlvUtilsUnpackTlvTest
  * @tc.desc: TlvUtilsUnpackTlvTest
  * @tc.type: FUNC
@@ -245,7 +245,7 @@ typedef struct {
     };
 } TlvNumberFrame;
 
-/**
+/*
  * @tc.name: TlvUtilsPackNumberTest
  * @tc.desc: TlvUtilsPackNumberTest
  * @tc.type: FUNC
@@ -295,7 +295,7 @@ HWTEST_F(SoftBusTlvUtilsTest, TlvUtilsPackNumberTest, TestSize.Level0)
     COMM_LOGI(COMM_UTILS, "===TlvUtilsPackNumberTest end");
 }
 
-/**
+/*
  * @tc.name: TlvUtilsUnpackNumberTest
  * @tc.desc: TlvUtilsUnpackNumberTest
  * @tc.type: FUNC
@@ -344,7 +344,7 @@ HWTEST_F(SoftBusTlvUtilsTest, TlvUtilsUnpackNumberTest, TestSize.Level0)
     COMM_LOGI(COMM_UTILS, "===TlvUtilsUnpackNumberTest end");
 }
 
-/**
+/*
  * @tc.name: GetTlvMemberWithBuffer
  * @tc.desc: GetTlvMemberWithBuffer
  * @tc.type: FUNC
@@ -394,7 +394,7 @@ HWTEST_F(SoftBusTlvUtilsTest, TlvUtilsGetTlvMemberWithBufferTest, TestSize.Level
     COMM_LOGI(COMM_UTILS, "===TlvUtilsGetTlvMemberWithBufferTest end");
 }
 
-/**
+/*
  * @tc.name: TlvUtilsExceptionDataTest
  * @tc.desc: TlvUtilsExceptionDataTest
  * @tc.type: FUNC

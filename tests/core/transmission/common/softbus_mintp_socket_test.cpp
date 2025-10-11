@@ -35,9 +35,9 @@ void SoftBusMintpSocketTest::SetUpTestCase(void) { }
 
 void SoftBusMintpSocketTest::TearDownTestCase(void) { }
 
-/**
+/*
  * @tc.name: SetMintpSocketTest001
- * @tc.desc: test setsockopt function.
+ * @tc.desc: test setsockopt function
  * @tc.type: FUNC
  * @tc.require:
  */
@@ -61,9 +61,9 @@ HWTEST_F(SoftBusMintpSocketTest, SetMintpSocketTest001, TestSize.Level1)
     SetMintpOption(-1);
 }
 
-/**
+/*
  * @tc.name:BindMintpTest002
- * @tc.desc: test BindMintp function.
+ * @tc.desc: test BindMintp function
  * @tc.type: FUNC
  * @tc.require:
  */
@@ -81,9 +81,9 @@ HWTEST_F(SoftBusMintpSocketTest, BindMintpTest002, TestSize.Level1)
     EXPECT_EQ(ret, SOFTBUS_SOCKET_ADDR_ERR);
 }
 
-/**
+/*
  * @tc.name:OpenMintpServerSocketTest003
- * @tc.desc: test OpenMintpServerSocket function.
+ * @tc.desc: test OpenMintpServerSocket function
  * @tc.type: FUNC
  * @tc.require:
  */
@@ -104,9 +104,9 @@ HWTEST_F(SoftBusMintpSocketTest, OpenMintpServerSocketTest003, TestSize.Level1)
     ret = OpenMintpServerSocket(&option);
 }
 
-/**
+/*
  * @tc.name:MintpSocketConnectTest004
- * @tc.desc: test MintpSocketConnect function.
+ * @tc.desc: test MintpSocketConnect function
  * @tc.type: FUNC
  * @tc.require:
  */
@@ -128,9 +128,9 @@ HWTEST_F(SoftBusMintpSocketTest, MintpSocketConnectTest004, TestSize.Level1)
     EXPECT_NE(ret, SOFTBUS_ADAPTER_OK);
 }
 
-/**
+/*
  * @tc.name: OpenMintpClientSocketTest005
- * @tc.desc: test OpenMintpClientSocket function.
+ * @tc.desc: test OpenMintpClientSocket function
  * @tc.type: FUNC
  * @tc.require:
  */
@@ -160,9 +160,9 @@ HWTEST_F(SoftBusMintpSocketTest, OpenMintpClientSocketTest005, TestSize.Level1)
     EXPECT_NE(ret, SOFTBUS_OK);
 }
 
-/**
+/*
  * @tc.name: GetMintpSockPortTest006
- * @tc.desc: test GetMintpSockPort function.
+ * @tc.desc: test GetMintpSockPort function
  * @tc.type: FUNC
  * @tc.require:
  */
@@ -172,9 +172,9 @@ HWTEST_F(SoftBusMintpSocketTest, GetMintpSockPortTest006, TestSize.Level1)
     EXPECT_NE(ret, SOFTBUS_OK);
 }
 
-/**
+/*
  * @tc.name: AcceptMintpClientTest007
- * @tc.desc: test AcceptMintpClient function.
+ * @tc.desc: test AcceptMintpClient function
  * @tc.type: FUNC
  * @tc.require:
  */
@@ -190,9 +190,9 @@ HWTEST_F(SoftBusMintpSocketTest, AcceptMintpClientTest007, TestSize.Level1)
     EXPECT_NE(ret, SOFTBUS_OK);
 }
 
-/**
+/*
  * @tc.name: GetMintpProtocolTest008
- * @tc.desc: test GetMintpProtocol function.
+ * @tc.desc: test GetMintpProtocol function
  * @tc.type: FUNC
  * @tc.require:
  */
