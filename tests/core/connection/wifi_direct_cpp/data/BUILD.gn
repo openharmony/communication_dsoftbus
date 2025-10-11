@@ -369,6 +369,7 @@ ohos_unittest("InterfaceInfoTest") {
   module_out_path = ut_out_path
   configs = [
     ":wifi_direct_include_dirs",
+    "//build/config/compiler:rtti",
     "//build/config/compiler:exceptions",
   ]
 
@@ -387,6 +388,7 @@ ohos_unittest("InterfaceInfoTest") {
     "$dsoftbus_root_path/core/frame/common/src/softbus_init_common.c",
     "$dsoftbus_root_path/core/frame/init/src/g_enhance_lnn_func.c",
     "$wifi_direct_cpp_path/adapter/p2p_adapter.cpp",
+    "$wifi_direct_cpp_path/channel/auth_negotiate_channel.cpp",
     "$wifi_direct_cpp_path/data/interface_info.cpp",
     "$wifi_direct_cpp_path/data/interface_manager.cpp",
     "$wifi_direct_cpp_path/data/ipv4_info.cpp",
@@ -394,20 +396,24 @@ ohos_unittest("InterfaceInfoTest") {
     "$wifi_direct_cpp_path/protocol/tlv_protocol.cpp",
     "$wifi_direct_cpp_path/utils/wifi_direct_utils.cpp",
     "$wifi_direct_cpp_path/wifi_direct_initiator.cpp",
+    "$wifi_direct_cpp_path/wifi_direct_manager.cpp",
     "$wifi_direct_cpp_unit_path/wifi_direct_mock.cpp",
     "interface_info_test.cpp",
   ]
 
   deps = [
     "$dsoftbus_dfx_path:softbus_dfx",
+    "$dsoftbus_root_path/adapter:softbus_adapter",
     "$dsoftbus_root_path/core/common:softbus_utils",
+    "$dsoftbus_root_path/core/connection/wifi_direct_cpp:wifi_direct",
   ]
 
   external_deps = [
     "bounds_checking_function:libsec_shared",
     "cJSON:cjson",
     "c_utils:utils",
-    "googletest:gmock_main",
+    "googletest:gmock_rtti",
+    "googletest:gtest_rtti",
     "hilog:libhilog",
     "init:libbegetutil",
     "ipc:ipc_single",
@@ -415,6 +421,16 @@ ohos_unittest("InterfaceInfoTest") {
     "safwk:system_ability_fwk",
     "samgr:samgr_proxy",
     "wifi:wifi_sdk",
+  ]
+
+  remove_configs = [
+    "//build/config/compiler:no_rtti",
+    "//build/config/compiler:no_exceptions",
+  ]
+
+  cflags = [
+    "-fexceptions",
+    "-frtti",
   ]
 }
 
@@ -422,6 +438,7 @@ ohos_unittest("InterfaceManagerTest") {
   module_out_path = ut_out_path
   configs = [
     ":wifi_direct_include_dirs",
+    "//build/config/compiler:rtti",
     "//build/config/compiler:exceptions",
   ]
 
@@ -440,28 +457,35 @@ ohos_unittest("InterfaceManagerTest") {
     "$dsoftbus_root_path/core/frame/common/src/softbus_init_common.c",
     "$dsoftbus_root_path/core/frame/init/src/g_enhance_lnn_func.c",
     "$wifi_direct_cpp_path/adapter/p2p_adapter.cpp",
+    "$wifi_direct_cpp_path/channel/auth_negotiate_channel.cpp",
     "$wifi_direct_cpp_path/data/interface_info.cpp",
     "$wifi_direct_cpp_path/data/interface_manager.cpp",
     "$wifi_direct_cpp_path/data/ipv4_info.cpp",
     "$wifi_direct_cpp_path/dfx/interface_snapshot.cpp",
+    "$wifi_direct_cpp_path/entity/p2p_entity.cpp",
+    "$wifi_direct_cpp_path/entity/p2p_entity_state.cpp",
     "$wifi_direct_cpp_path/protocol/tlv_protocol.cpp",
     "$wifi_direct_cpp_path/utils/wifi_direct_anonymous.cpp",
     "$wifi_direct_cpp_path/utils/wifi_direct_utils.cpp",
     "$wifi_direct_cpp_path/wifi_direct_initiator.cpp",
+    "$wifi_direct_cpp_path/wifi_direct_manager.cpp",
     "$wifi_direct_cpp_unit_path/wifi_direct_mock.cpp",
     "interface_manager_test.cpp",
   ]
 
   deps = [
     "$dsoftbus_dfx_path:softbus_dfx",
+    "$dsoftbus_root_path/adapter:softbus_adapter",
     "$dsoftbus_root_path/core/common:softbus_utils",
+    "$dsoftbus_root_path/core/connection/wifi_direct_cpp:wifi_direct",
   ]
 
   external_deps = [
     "bounds_checking_function:libsec_shared",
     "cJSON:cjson",
     "c_utils:utils",
-    "googletest:gmock_main",
+    "googletest:gmock_rtti",
+    "googletest:gtest_rtti",
     "hilog:libhilog",
     "init:libbegetutil",
     "ipc:ipc_single",
@@ -469,6 +493,16 @@ ohos_unittest("InterfaceManagerTest") {
     "safwk:system_ability_fwk",
     "samgr:samgr_proxy",
     "wifi:wifi_sdk",
+  ]
+
+  remove_configs = [
+    "//build/config/compiler:no_rtti",
+    "//build/config/compiler:no_exceptions",
+  ]
+
+  cflags = [
+    "-fexceptions",
+    "-frtti",
   ]
 }
 

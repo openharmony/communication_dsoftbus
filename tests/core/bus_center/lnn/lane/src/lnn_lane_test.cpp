@@ -977,9 +977,6 @@ HWTEST_F(LNNLaneMockTest, LANE_ALLOC_Test_014, TestSize.Level1)
     NiceMock<LaneDepsInterfaceMock> mock;
     mock.SetDefaultResult(reinterpret_cast<NodeInfo *>(&g_NodeInfo));
     mock.SetDefaultResultForAlloc(15, 15, 0x3137A, 0x3FFEA);
-    EXPECT_CALL(mock, LnnGetLocalNumInfo)
-        .WillOnce(DoAll(SetArgPointee<LANE_MOCK_PARAM2>(TYPE_WATCH_ID), Return(SOFTBUS_OK)))
-        .WillRepeatedly(DoAll(SetArgPointee<LANE_MOCK_PARAM2>(11), Return(SOFTBUS_OK)));
     EXPECT_CALL(mock, LnnGetRemoteNumInfo)
         .WillRepeatedly(DoAll(SetArgPointee<LANE_MOCK_PARAM3>(11), Return(SOFTBUS_OK)));
     EXPECT_CALL(mock, DeleteNetworkResourceByLaneId).WillRepeatedly(Return());
@@ -1017,9 +1014,6 @@ HWTEST_F(LNNLaneMockTest, LANE_ALLOC_Test_015, TestSize.Level1)
     NiceMock<LaneDepsInterfaceMock> mock;
     mock.SetDefaultResult(reinterpret_cast<NodeInfo *>(&g_NodeInfo));
     mock.SetDefaultResultForAlloc(15, 15, 0x3FFEA, 0x3137A);
-    EXPECT_CALL(mock, LnnGetLocalNumInfo)
-        .WillOnce(DoAll(SetArgPointee<LANE_MOCK_PARAM2>(TYPE_PHONE_ID), Return(SOFTBUS_OK)))
-        .WillRepeatedly(DoAll(SetArgPointee<LANE_MOCK_PARAM2>(11), Return(SOFTBUS_OK)));
     EXPECT_CALL(mock, LnnGetRemoteNumInfo)
         .WillOnce(DoAll(SetArgPointee<LANE_MOCK_PARAM3>(TYPE_WATCH_ID), Return(SOFTBUS_OK)))
         .WillRepeatedly(DoAll(SetArgPointee<LANE_MOCK_PARAM3>(11), Return(SOFTBUS_OK)));
