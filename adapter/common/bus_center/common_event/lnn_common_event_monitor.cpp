@@ -37,12 +37,19 @@ static const char *KEY_SLE_D2D_PAGING_ADV_STATE = "d2d.paging.advertise";
 static const char *KEY_SLE_D2D_GROUP_ADV_STATE = "d2d.group.advertise";
 static const char *PARAM_KEY_STATE = "state";
 
+std::map<std::string, CommonEventType> g_commonEventMap = {
+    {COMMON_EVENT_DSOFTBUS_D2D_STATE_CHANGE, D2D_STATE_UPDATE},
+    {COMMON_EVENT_NEARLINK_HOST_DATA_TRANSFER_UPDATE, SLE_DATA_TRANSFER_UPDATE},
+    {COMMON_EVENT_NEARLINK_HOST_RANGING_UPDATE, SLE_RANGING_UPDATE},
+};
+
 class CommonEventMonitor : public CommonEventSubscriber {
 public:
     explicit CommonEventMonitor(const CommonEventSubscribeInfo &subscriberInfo);
     virtual ~CommonEventMonitor() {}
     virtual void OnReceiveEvent(const CommonEventData &data);
 private:
+    CommonEventType GetEventType(std::string &event);
     void OnReceiveSleEvent(const EventFwk::Want& want);
     void OnReceiveSleBusinessEvent(const EventFwk::Want& want);
     void OnReceiveSleD2dEvent(const EventFwk::Want& want);
@@ -51,6 +58,15 @@ private:
 CommonEventMonitor::CommonEventMonitor(const CommonEventSubscribeInfo &subscriberInfo)
     :CommonEventSubscriber(subscriberInfo)
 {
+}
+
+CommonEventType CommonEventMonitor::GetEventType(std::string &event)
+{
+    auto iter = g_commonEventMap.find(event);
+    if (iter == g_commonEventMap.end()) {
+        return CommonEventType::COMMON_EVENT_UNKNOWN;
+    }
+    return iter->second;
 }
 
 void CommonEventMonitor::OnReceiveSleBusinessEvent(const EventFwk::Want& want)
@@ -74,12 +90,12 @@ void CommonEventMonitor::OnReceiveSleD2dEvent(const EventFwk::Want& want)
 void CommonEventMonitor::OnReceiveSleEvent(const EventFwk::Want& want)
 {
     std::string action = want.GetAction();
-    switch (action) {
-        case COMMON_EVENT_NEARLINK_HOST_RANGING_UPDATE:
-        case COMMON_EVENT_NEARLINK_HOST_DATA_TRANSFER_UPDATE:
+    switch (GetEventType(action)) {
+        case SLE_RANGING_UPDATE:
+        case SLE_DATA_TRANSFER_UPDATE:
             OnReceiveSleBusinessEvent(want);
             break;
-        case COMMON_EVENT_DSOFTBUS_D2D_STATE_CHANGE:
+        case D2D_STATE_UPDATE:
             OnReceiveSleD2dEvent(want);
             break;
         default:
